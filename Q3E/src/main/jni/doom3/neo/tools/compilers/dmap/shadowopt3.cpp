@@ -338,7 +338,11 @@ static void ClipOccluders(idVec4 *verts, glIndex_t *indexes, int numIndexes,
 {
 	int					numTris = numIndexes / 3;
 	int					i;
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_ALLOC_DEF(shadowTri_t, tris, numTris * sizeof(*tris));
+#else
 	shadowTri_t			*tris = (shadowTri_t *)_alloca(numTris * sizeof(*tris));
+#endif
 	shadowTri_t			*tri;
 
 	common->Printf("ClipOccluders: %i triangles\n", numTris);
@@ -405,6 +409,9 @@ static void ClipOccluders(idVec4 *verts, glIndex_t *indexes, int numIndexes,
 	common->Printf("%i triangles completely visible\n", numComplete);
 	common->Printf("%i triangles fragmented\n", numFragmented);
 	common->Printf("%i shadowing fragments before optimization\n", numOutputTris);
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_FREE(tris);
+#endif
 }
 
 //=====================================================================================
@@ -497,7 +504,11 @@ static void GenerateSilEdges(void)
 {
 	int		i, j;
 
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_ALLOC_DEF(unsigned, edges, ((numOutputTris*3+1)*sizeof(*edges)));
+#else
 	unsigned	*edges = (unsigned *)_alloca((numOutputTris*3+1)*sizeof(*edges));
+#endif
 	int		numEdges = 0;
 
 	numSilEdges = 0;
@@ -561,6 +572,9 @@ static void GenerateSilEdges(void)
 		silEdges[numSilEdges].index[1] = v2;
 		numSilEdges++;
 	}
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_FREE(tris);
+#endif
 }
 
 //==================================================================================
@@ -1221,10 +1235,18 @@ void CleanupOptimizedShadowTris(srfTriangles_t *tri)
 
 	// unique all the verts
 	maxUniqued = tri->numVerts;
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_ALLOC(idVec3, uniqued, (sizeof(*uniqued) * maxUniqued));
+#else
 	uniqued = (idVec3 *)_alloca(sizeof(*uniqued) * maxUniqued);
+#endif
 	numUniqued = 0;
 
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_ALLOC_DEF(glIndex_t, remap, (sizeof(*remap) * tri->numVerts));
+#else
 	glIndex_t	*remap = (glIndex_t *)_alloca(sizeof(*remap) * tri->numVerts);
+#endif
 
 	for (i = 0 ; i < tri->numIndexes ; i++) {
 		if (tri->indexes[i] > tri->numVerts || tri->indexes[i] < 0) {
@@ -1296,6 +1318,10 @@ void CleanupOptimizedShadowTris(srfTriangles_t *tri)
 	// remove degenerates after we have removed quads, so the double
 	// triangle pairing isn't disturbed
 	RemoveDegenerateTriangles(tri);
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_FREE(uniqued);
+    _DROID_FREE(remap);
+#endif
 }
 
 /*

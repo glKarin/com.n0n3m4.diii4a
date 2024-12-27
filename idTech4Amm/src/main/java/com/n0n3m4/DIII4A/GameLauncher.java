@@ -563,6 +563,14 @@ public class GameLauncher extends Activity
 				else
 					RemoveProp_temp("harm_r_autoAspectRatio");
 			}
+			else if (rgId == R.id.rg_depth_bits)
+			{
+				index = GetCheckboxIndex(radioGroup, id);
+				int bits = Q3EPreference.DepthBitsByIndex(index);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putInt(Q3EPreference.pref_harm_depth_bit, bits)
+						.commit();
+			}
 
 			// change game mods
 			else if (
@@ -1507,6 +1515,8 @@ public class GameLauncher extends Activity
 		V.consoleHeightFracValue.setProgress(consoleHeightFrac);
 		V.consoleHeightFracText.setText(GetConsoleHeightText(consoleHeightFrac));
 		V.consoleHeightFracValue.setOnSeekBarChangeListener(m_seekListener);
+		SelectCheckbox(V.rg_depth_bits, Q3EPreference.DepthIndexByBits(mPrefs.getInt(Q3EPreference.pref_harm_depth_bit, Q3EGlobals.DEFAULT_DEPTH_BITS)));
+		V.rg_depth_bits.setOnCheckedChangeListener(m_groupCheckChangeListener);
 
 		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView view, int id, KeyEvent ev)
@@ -2373,6 +2383,7 @@ public class GameLauncher extends Activity
 		mEdtr.putInt(Q3EPreference.pref_harm_r_maxFps, Q3EUtils.parseInt_s(V.edt_harm_r_maxFps.getText().toString(), 0));
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_useShadowMapping, GetCheckboxIndex(V.rg_harm_r_shadow) == 1);
 		mEdtr.putInt(Q3EPreference.pref_harm_opengl, GetCheckboxIndex(V.rg_opengl) == 1 ? Q3EGLConstants.OPENGLES30 : Q3EGLConstants.OPENGLES20);
+		mEdtr.putInt(Q3EPreference.pref_harm_depth_bit, Q3EPreference.DepthBitsByIndex(GetCheckboxIndex(V.rg_depth_bits)));
 
         mEdtr.putBoolean(Q3EPreference.pref_mapvol, V.mapvol.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_analog, V.smoothjoy.isChecked());
@@ -3907,6 +3918,7 @@ public class GameLauncher extends Activity
 		public CheckBox tdm_useMediumPrecision;
 		public SeekBar consoleHeightFracValue;
 		public TextView consoleHeightFracText;
+		public RadioGroup rg_depth_bits;
 
         public void Setup()
         {
@@ -4039,6 +4051,7 @@ public class GameLauncher extends Activity
 			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);
 			consoleHeightFracValue = findViewById(R.id.consoleHeightFracValue);
 			consoleHeightFracText = findViewById(R.id.consoleHeightFracText);
+			rg_depth_bits = findViewById(R.id.rg_depth_bits);
         }
     }
 }

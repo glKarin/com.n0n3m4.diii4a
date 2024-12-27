@@ -76,6 +76,8 @@ idCVar harm_r_openglVersion("harm_r_openglVersion",
 // OpenGL attributes
 // OpenGL color format
 int gl_format = GLFORMAT_RGBA8888;
+// OpenGL depth bits
+int gl_depth_bits = 24;
 // OpenGL multisamples
 int gl_msaa = 0;
 // OpenGL version
@@ -185,7 +187,7 @@ typedef struct EGLConfigInfo_s
 	EGLint sample_buffers;
 } EGLConfigInfo_t;
 
-static EGLConfigInfo_t GLimp_FormatInfo(int format)
+static EGLConfigInfo_t GLimp_FormatInfo(int gl_format, int gl_depth_bits)
 {
 	int red_bits = 8;
 	int green_bits = 8;
@@ -202,7 +204,7 @@ static EGLConfigInfo_t GLimp_FormatInfo(int format)
 			green_bits = 6;
 			blue_bits = 5;
 			alpha_bits = 0;
-			depth_bits = 16;
+			//depth_bits = 16;
 			buffer_bits = 16;
 			break;
 		case GLFORMAT_RGBA4444:
@@ -210,7 +212,7 @@ static EGLConfigInfo_t GLimp_FormatInfo(int format)
 			green_bits = 4;
 			blue_bits = 4;
 			alpha_bits = 4;
-			depth_bits = 16;
+			//depth_bits = 16;
 			buffer_bits = 16;
 			break;
 		case GLFORMAT_RGBA5551:
@@ -218,7 +220,7 @@ static EGLConfigInfo_t GLimp_FormatInfo(int format)
 			green_bits = 5;
 			blue_bits = 5;
 			alpha_bits = 1;
-			depth_bits = 16;
+			//depth_bits = 16;
 			buffer_bits = 16;
 			break;
 		case GLFORMAT_RGBA1010102:
@@ -226,7 +228,7 @@ static EGLConfigInfo_t GLimp_FormatInfo(int format)
 			green_bits = 10;
 			blue_bits = 10;
 			alpha_bits = 2;
-			depth_bits = 24;
+			//depth_bits = 24;
 			buffer_bits = 32;
 			break;
 		case GLFORMAT_RGBA8888:
@@ -235,10 +237,25 @@ static EGLConfigInfo_t GLimp_FormatInfo(int format)
 			green_bits = 8;
 			blue_bits = 8;
 			alpha_bits = 8;
-			depth_bits = 24;
+			//depth_bits = 24;
 			buffer_bits = 32;
 			break;
 	}
+
+	switch(gl_depth_bits)
+	{
+		case 16:
+			depth_bits = 16;
+			break;
+		case 32:
+			depth_bits = 32;
+			break;
+		case 24:
+		default:
+			depth_bits = 24;
+			break;
+	}
+
 	EGLConfigInfo_t info;
 	info.red = red_bits;
 	info.green = green_bits;
@@ -254,7 +271,7 @@ static int GLimp_EGLConfigCompare(const void *left, const void *right)
 {
 	const EGLConfig lhs = *(EGLConfig *)left;
 	const EGLConfig rhs = *(EGLConfig *)right;
-	EGLConfigInfo_t info = GLimp_FormatInfo(gl_format);
+	EGLConfigInfo_t info = GLimp_FormatInfo(gl_format, gl_depth_bits);
 	int r = info.red;
 	int g = info.green;
 	int b = info.blue;
@@ -269,16 +286,27 @@ static int GLimp_EGLConfigCompare(const void *left, const void *right)
 	eglGetConfigAttrib(eglDisplay, lhs, EGL_GREEN_SIZE, &lg);
 	eglGetConfigAttrib(eglDisplay, lhs, EGL_BLUE_SIZE, &lb);
 	eglGetConfigAttrib(eglDisplay, lhs, EGL_ALPHA_SIZE, &la);
-	//eglGetConfigAttrib(eglDisplay, lhs, EGL_DEPTH_SIZE, &ld);
-	//eglGetConfigAttrib(eglDisplay, lhs, EGL_STENCIL_SIZE, &ls);
+
 	eglGetConfigAttrib(eglDisplay, rhs, EGL_RED_SIZE, &rr);
 	eglGetConfigAttrib(eglDisplay, rhs, EGL_GREEN_SIZE, &rg);
 	eglGetConfigAttrib(eglDisplay, rhs, EGL_BLUE_SIZE, &rb);
 	eglGetConfigAttrib(eglDisplay, rhs, EGL_ALPHA_SIZE, &ra);
-	//eglGetConfigAttrib(eglDisplay, rhs, EGL_DEPTH_SIZE, &rd);
-	//eglGetConfigAttrib(eglDisplay, rhs, EGL_STENCIL_SIZE, &rs);
+
 	rat1 = (abs(lr - r) + abs(lg - g) + abs(lb - b));//*1000000-(ld*10000+la*100+ls);
 	rat2 = (abs(rr - r) + abs(rg - g) + abs(rb - b));//*1000000-(rd*10000+ra*100+rs);
+
+	if(rat1 == rat2)
+	{
+        eglGetConfigAttrib(eglDisplay, lhs, EGL_DEPTH_SIZE, &ld);
+        //eglGetConfigAttrib(eglDisplay, lhs, EGL_STENCIL_SIZE, &ls);
+
+        eglGetConfigAttrib(eglDisplay, rhs, EGL_DEPTH_SIZE, &rd);
+        //eglGetConfigAttrib(eglDisplay, rhs, EGL_STENCIL_SIZE, &rs);
+
+        rat1 = abs(ld - d);
+        rat2 = abs(rd - d);
+	}
+
 	return rat1 - rat2;
 }
 
@@ -539,7 +567,7 @@ GLES_Init
 static bool GLES_Init_special(const glimpParms_t &ap)
 {
 	EGLint config_count = 0;
-	EGLConfigInfo_t info = GLimp_FormatInfo(gl_format);
+	EGLConfigInfo_t info = GLimp_FormatInfo(gl_format, gl_depth_bits);
 	int stencil_bits = info.stencil;
 	int depth_bits = info.depth;
 	int red_bits = info.red;

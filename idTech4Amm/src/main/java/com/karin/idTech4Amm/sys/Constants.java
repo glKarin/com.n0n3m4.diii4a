@@ -32,6 +32,7 @@ public final class Constants
         return new String[] {
             "Support setup max game console height(0 or 100 means not limit) on launcher `General` tab.",
             "Update GZDOOM version to 4.14.0.",
+            "Add use multisamples config in game.",
         };
 	};
 

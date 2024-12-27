@@ -1115,7 +1115,6 @@ public class Q3EUtils
             for(String str : list)
             {
                 String path = KStr.AppendPath(assetFolderPath, str);
-                System.err.println(path);
                 String subPrefix = KStr.IsBlank(prefix) ? str : KStr.AppendPath(prefix, str);
                 List<String> subList = new ArrayList<>();
                 if(LsAssets_r(context, path, subPrefix, subList))

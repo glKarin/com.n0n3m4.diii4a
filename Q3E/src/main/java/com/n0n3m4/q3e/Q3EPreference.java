@@ -26,7 +26,8 @@ public final class Q3EPreference
     public static final String pref_controlprefix = "q3e_controls_";
 
     public static final String pref_harm_image_useetc2                = "q3e_image_useetc2"; //k
-    public static final String pref_harm_16bit                        = "q3e_harm_16bit"; //k
+    public static final String pref_harm_16bit                        = "q3e_harm_16bit";
+    public static final String pref_harm_depth_bit                    = "q3e_harm_depth_bit"; //k
     public static final String pref_harm_r_harmclearvertexbuffer      = "q3e_r_harmclearvertexbuffer"; //k
     public static final String pref_harm_r_specularExponent           = "q3e_harm_r_specularExponent"; //k
     public static final String pref_harm_r_specularExponentBlinnPhong = "q3e_harm_r_specularExponentBlinnPhong"; //k
@@ -96,7 +97,6 @@ public final class Q3EPreference
     public static final String pref_harm_gzdoom_user_mod       = "q3e_harm_gzdoom_user_mod"; //k
     public static final String pref_params_gzdoom              = "q3e_params_gzdoom"; //k
     public static final String pref_harm_gzdoom_command_record = "q3e_harm_gzdoom_command_record";
-    public static final String pref_harm_gzdoom_version        = "q3e_harm_gzdoom_version";
     // ETW
     public static final String pref_harm_etw_fs_game          = "q3e_harm_etw_fs_game"; //k
     public static final String pref_harm_etw_game_lib         = "q3e_harm_etw_game_lib"; //k
@@ -291,6 +291,26 @@ public final class Q3EPreference
     public static SharedPreferences.Editor SetFloatFromString(SharedPreferences.Editor editor, String name, String val, float def)
     {
         return editor.putFloat(name, Q3EUtils.parseFloat_s(val, def));
+    }
+
+    public static int DepthIndexByBits(int bits)
+    {
+        if(bits == 32)
+            return 2;
+        else if(bits == 16)
+            return 1;
+        else
+            return 0;
+    }
+
+    public static int DepthBitsByIndex(int index)
+    {
+        if(index == 2)
+            return 32;
+        else if(index == 1)
+            return 16;
+        else
+            return 24;
     }
 
     private Q3EPreference() {}

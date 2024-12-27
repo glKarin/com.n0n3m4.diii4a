@@ -237,6 +237,8 @@ volatile Q3Ebool q3e_running = Q3E_FALSE;
 
 // OpenGL color format
 int gl_format = 0x8888;
+// OpenGL depth bits
+int gl_depth_bits = 24;
 // OpenGL multisamples
 int gl_msaa = 0;
 
@@ -666,6 +668,7 @@ void Q3E_SetInitialContext(const void *context)
     const Q3E_InitialContext_t *ptr = (const Q3E_InitialContext_t *)context;
 
     gl_format = ptr->openGL_format;
+    gl_depth_bits = ptr->openGL_depth;
     gl_msaa = ptr->openGL_msaa;
 
     native_library_dir = strdup(ptr->nativeLibraryDir ? ptr->nativeLibraryDir : "");

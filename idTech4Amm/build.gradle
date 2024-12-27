@@ -12,7 +12,7 @@ android {
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
         versionCode 11059
         versionName '1.1.0harmattan59'
-        versionNameSuffix 'natasha'
+        versionNameSuffix 'caitlyn' /*'natasha'*/
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
     }

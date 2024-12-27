@@ -493,39 +493,23 @@ public class Q3EGameHelper
 
     public void ExtractGZDOOMResource()
     {
-        String versionKey = Q3EUtils.q3ei.GetGameVersionPreferenceKey();
-        String gameVersion = PreferenceManager.getDefaultSharedPreferences(m_context).getString(versionKey, "");
-
         Q3EGlobals.PatchResource gzdoomResource;
         String versionCheckFile;
-        String versionName;
-        if("4.12.2".equals(gameVersion))
-        {
-            versionName = "4.12.2";
-            versionCheckFile = "idtech4amm.4.12.2.version";
-            gzdoomResource = Q3EGlobals.PatchResource.GZDOOM_RESOURCE_4_12_2;
-        }
-        else
-        {
-            versionName = "4.14.0";
-            versionCheckFile = "idtech4amm.version";
-            gzdoomResource = Q3EGlobals.PatchResource.GZDOOM_RESOURCE;
-        }
+        //String versionName = "4.14.0";
+
+        versionCheckFile = "idtech4amm.version";
+        gzdoomResource = Q3EGlobals.PatchResource.GZDOOM_RESOURCE;
 
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", versionCheckFile);
-        final String engineVersionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.gzdoom.version");
+        //final String engineVersionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.gzdoom.version");
         final String version = Q3EGlobals.GZDOOM_VERSION;
         final String name = "GZDOOM game resource";
 
-        boolean change = CheckExtractResourceVersion(engineVersionFile, versionName, name);
-        boolean overwrite = change || CheckExtractResourceOverwrite(versionFile, version, name);
+        //boolean change = CheckExtractResourceVersion(engineVersionFile, versionName, name);
+        boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
         if(manager.Fetch(gzdoomResource, overwrite) != null)
         {
-            if (change)
-            {
-                DumpExtractResourceVersion(engineVersionFile, versionName, name);
-            }
             if (overwrite)
             {
                 DumpExtractResourceVersion(versionFile, version, name);
@@ -891,16 +875,18 @@ public class Q3EGameHelper
 
     public boolean Start(Surface surface, int surfaceWidth, int surfaceHeight)
     {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
+
         // GL
         int msaa = GetMSAA();
         int glFormat = GetGLFormat();
         int[] size = GetFrameSize(surfaceWidth, surfaceHeight);
         int width = size[0];
         int height = size[1];
+        int depthBits = preferences.getInt(Q3EPreference.pref_harm_depth_bit, Q3EGlobals.DEFAULT_DEPTH_BITS);
 
         // Args
         String cmd = Q3EUtils.q3ei.cmd;
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
         boolean redirectOutputToFile = preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true);
         //boolean noHandleSignals = preferences.getBoolean(Q3EPreference.NO_HANDLE_SIGNALS, false);
         int signalsHandler = Q3EPreference.GetIntFromString(m_context, Q3EPreference.SIGNALS_HANDLER, Q3EGlobals.SIGNALS_HANDLER_GAME);
@@ -937,6 +923,7 @@ public class Q3EGameHelper
                 cmd,
                 surface,
                 glFormat,
+                depthBits,
                 msaa, glVersion,
                 redirectOutputToFile,
                 signalsHandler, // noHandleSignals,

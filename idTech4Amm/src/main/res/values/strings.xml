@@ -438,5 +438,8 @@
     <string name="disable_android_menu_macro_harm_ui_disableandroidmacro_nshow_host_menu_for_create_game_server">Disable `ANDROID` menu macro(harm_ui_disableAndroidMacro)\nShow `HOST` menu for create game server</string>
     <string name="no_limit">No limit</string>
     <string name="max_console_height_frac">Max console height frac:</string>
+    <string name="_24bits">24Bits</string>
+    <string name="_16bits">16Bits</string>
+    <string name="minimum_depth_bits">Minimum depth bits</string>
 
 </resources>

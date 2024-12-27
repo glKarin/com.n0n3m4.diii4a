@@ -33,6 +33,7 @@ extern glconfig_t glConfig;
 #ifdef __ANDROID__ //karin: sys::local expose on Android
 
 extern int gl_format;
+extern int gl_depth_bits;
 extern int gl_msaa;
 extern int gl_version;
 extern bool USING_GLES3;

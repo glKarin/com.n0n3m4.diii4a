@@ -48,6 +48,8 @@ add_subdirectory (openssl) # openssl-cmake-1.1.1w-20231130 https://github.com/ja
 
 add_subdirectory (curl) # -8.5.0
 
+#add_subdirectory (libvpx) # -1.15.0
+
 #add_subdirectory (ktx) # KTX-Software-3.0.1
 
 #add_subdirectory (sdl2) # 2.30.2

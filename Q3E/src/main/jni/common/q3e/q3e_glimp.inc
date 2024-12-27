@@ -94,6 +94,7 @@ extern int refresh_rate;
 
 // OpenGL attributes
 extern int gl_format;
+extern int gl_depth_bits;
 extern int gl_msaa;
 static int gl_multiSamples = 0;
 static int gl_renderApi = 0;
@@ -232,7 +233,7 @@ static void Q3E_HandleEGLError(const char *func, Q3Ebool exit)
 		Q3E_PRINTF("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 }
 
-static EGLConfigInfo_t Q3E_GetFormatConfig(int gl_format)
+static EGLConfigInfo_t Q3E_GetFormatConfig(int gl_format, int gl_depth_bits)
 {
 	int red_bits = 8;
 	int green_bits = 8;
@@ -249,7 +250,7 @@ static EGLConfigInfo_t Q3E_GetFormatConfig(int gl_format)
 			green_bits = 6;
 			blue_bits = 5;
 			alpha_bits = 0;
-			depth_bits = 16;
+			//depth_bits = 16;
 			buffer_bits = 16;
 			break;
 		case GLFORMAT_RGBA4444:
@@ -257,7 +258,7 @@ static EGLConfigInfo_t Q3E_GetFormatConfig(int gl_format)
 			green_bits = 4;
 			blue_bits = 4;
 			alpha_bits = 4;
-			depth_bits = 16;
+			//depth_bits = 16;
 			buffer_bits = 16;
 			break;
 		case GLFORMAT_RGBA5551:
@@ -265,7 +266,7 @@ static EGLConfigInfo_t Q3E_GetFormatConfig(int gl_format)
 			green_bits = 5;
 			blue_bits = 5;
 			alpha_bits = 1;
-			depth_bits = 16;
+			//depth_bits = 16;
 			buffer_bits = 16;
 			break;
 		case GLFORMAT_RGBA1010102:
@@ -273,7 +274,7 @@ static EGLConfigInfo_t Q3E_GetFormatConfig(int gl_format)
 			green_bits = 10;
 			blue_bits = 10;
 			alpha_bits = 2;
-			depth_bits = 24;
+			//depth_bits = 24;
 			buffer_bits = 32;
 			break;
 		case GLFORMAT_RGBA8888:
@@ -282,10 +283,25 @@ static EGLConfigInfo_t Q3E_GetFormatConfig(int gl_format)
 			green_bits = 8;
 			blue_bits = 8;
 			alpha_bits = 8;
-			depth_bits = 24;
+			//depth_bits = 24;
 			buffer_bits = 32;
 			break;
 	}
+
+	switch(gl_depth_bits)
+	{
+		case 16:
+			depth_bits = 16;
+			break;
+		case 32:
+			depth_bits = 32;
+			break;
+		case 24:
+		default:
+			depth_bits = 24;
+			break;
+	}
+
 	EGLConfigInfo_t info;
 	info.red = red_bits;
 	info.green = green_bits;
@@ -301,7 +317,7 @@ static int Q3E_CompareEGLConfig(const void *left, const void *right)
 {
 	const EGLConfig lhs = *(EGLConfig *)left;
 	const EGLConfig rhs = *(EGLConfig *)right;
-	EGLConfigInfo_t info = Q3E_GetFormatConfig(gl_format);
+	EGLConfigInfo_t info = Q3E_GetFormatConfig(gl_format, gl_depth_bits);
 	int r = info.red;
 	int g = info.green;
 	int b = info.blue;
@@ -312,20 +328,32 @@ static int Q3E_CompareEGLConfig(const void *left, const void *right)
 	int lr, lg, lb, la, ld, ls;
 	int rr, rg, rb, ra, rd, rs;
 	int rat1, rat2;
+
 	eglGetConfigAttrib(eglDisplay, lhs, EGL_RED_SIZE, &lr);
 	eglGetConfigAttrib(eglDisplay, lhs, EGL_GREEN_SIZE, &lg);
 	eglGetConfigAttrib(eglDisplay, lhs, EGL_BLUE_SIZE, &lb);
 	eglGetConfigAttrib(eglDisplay, lhs, EGL_ALPHA_SIZE, &la);
-	//eglGetConfigAttrib(eglDisplay, lhs, EGL_DEPTH_SIZE, &ld);
-	//eglGetConfigAttrib(eglDisplay, lhs, EGL_STENCIL_SIZE, &ls);
+
 	eglGetConfigAttrib(eglDisplay, rhs, EGL_RED_SIZE, &rr);
 	eglGetConfigAttrib(eglDisplay, rhs, EGL_GREEN_SIZE, &rg);
 	eglGetConfigAttrib(eglDisplay, rhs, EGL_BLUE_SIZE, &rb);
 	eglGetConfigAttrib(eglDisplay, rhs, EGL_ALPHA_SIZE, &ra);
-	//eglGetConfigAttrib(eglDisplay, rhs, EGL_DEPTH_SIZE, &rd);
-	//eglGetConfigAttrib(eglDisplay, rhs, EGL_STENCIL_SIZE, &rs);
+
 	rat1 = (abs(lr - r) + abs(lg - g) + abs(lb - b));//*1000000-(ld*10000+la*100+ls);
 	rat2 = (abs(rr - r) + abs(rg - g) + abs(rb - b));//*1000000-(rd*10000+ra*100+rs);
+
+	if(rat1 == rat2)
+	{
+        eglGetConfigAttrib(eglDisplay, lhs, EGL_DEPTH_SIZE, &ld);
+        //eglGetConfigAttrib(eglDisplay, lhs, EGL_STENCIL_SIZE, &ls);
+
+        eglGetConfigAttrib(eglDisplay, rhs, EGL_DEPTH_SIZE, &rd);
+        //eglGetConfigAttrib(eglDisplay, rhs, EGL_STENCIL_SIZE, &rs);
+
+        rat1 = abs(ld - d);
+        rat2 = abs(rd - d);
+	}
+
 	return rat1 - rat2;
 }
 
@@ -472,7 +500,7 @@ static Q3Ebool Q3E_OpenDisplay(void)
 static bool GLES_Init_special(void)
 {
 	EGLint config_count = 0;
-	EGLConfigInfo_t info = Q3E_GetFormatConfig(gl_format);
+	EGLConfigInfo_t info = Q3E_GetFormatConfig(gl_format, gl_depth_bits);
 	int stencil_bits = info.stencil;
 	int depth_bits = info.depth;
 	int red_bits = info.red;

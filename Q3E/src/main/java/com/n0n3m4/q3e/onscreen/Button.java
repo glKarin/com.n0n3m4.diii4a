@@ -128,7 +128,7 @@ public class Button extends Paintable implements TouchListener
         else if (act == -1)
             Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, keycode, 0);
 
-        if (keycode == Q3EKeyCodes.KeyCodes.K_MOUSE1)
+        if (keycode == Q3EKeyCodes.KeyCodes.K_MOUSE1 || keycode == Q3EKeyCodes.KeyCodes.K_MOUSE2)
         {
             if (Q3EUtils.q3ei.callbackObj.notinmenu)
             {

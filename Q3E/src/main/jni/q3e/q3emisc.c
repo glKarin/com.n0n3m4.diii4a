@@ -123,6 +123,7 @@ void Q3E_PrintInitialContext(const Q3E_InitialContext_t *context)
 	LOGI("Q3E initial context");
 	LOGI("  OpenGL: ");
 	LOGI("    Format: 0x%X", context->openGL_format);
+	LOGI("    Depth bits: %d", context->openGL_depth);
 	LOGI("    MSAA: %d", context->openGL_msaa);
 	LOGI("    Version: %08x", context->openGL_version);
 	LOGI("    Screen size: %d x %d", context->width, context->height);

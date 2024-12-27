@@ -34,6 +34,7 @@ public class Q3EJNI {
             String Args, // doom3 command line arguments
             Surface view, // render surface
             int format, // OpenGL color buffer format: 0x8888, 0x4444, 0x5551, 0x565
+			int depth, // OpenGL depth buffer bits: 24 16 32
             int msaa, // MSAA: 0, 4, 16
             int glVersion, // OpenGLES verison: 0x00020000, 0x00030000
             boolean redirect_output_to_file, // save runtime log to file

@@ -276,6 +276,38 @@
                 android:text="@string/_32bits_rgba1010102" />
         </RadioGroup>
 
+        <TextView
+            android:id="@+id/launcher_depthbit_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/minimum_depth_bits" />
+
+        <RadioGroup
+            android:id="@+id/rg_depth_bits"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/depth_bits_24"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/_24bits" />
+
+            <RadioButton
+                android:id="@+id/depth_bits_16"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/_16bits" />
+
+            <RadioButton
+                android:id="@+id/depth_bits_32"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/_32bits" />
+        </RadioGroup>
+
 
         <LinearLayout
             android:id="@+id/opengl_section"

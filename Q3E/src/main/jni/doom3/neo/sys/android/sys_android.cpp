@@ -558,6 +558,7 @@ void Q3E_SetInitialContext(const void *context)
     const Q3E_InitialContext_t *ptr = (const Q3E_InitialContext_t *)context;
 
     gl_format = ptr->openGL_format;
+    gl_depth_bits = ptr->openGL_depth;
     gl_msaa = ptr->openGL_msaa;
     gl_version = ptr->openGL_version;
 #ifdef _OPENGLES3

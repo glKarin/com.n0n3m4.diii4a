@@ -434,4 +434,7 @@
     <string name="disable_android_menu_macro_harm_ui_disableandroidmacro_nshow_host_menu_for_create_game_server">禁用`ANDROID`菜单宏(harm_ui_disableAndroidMacro)\n允许显示`HOST`菜单来创建游戏服务器</string>
     <string name="no_limit">不限制</string>
     <string name="max_console_height_frac">最大控制台高度:</string>
+    <string name="_24bits">24位</string>
+    <string name="_16bits">16位</string>
+    <string name="minimum_depth_bits">最小深度位数</string>
 </resources>

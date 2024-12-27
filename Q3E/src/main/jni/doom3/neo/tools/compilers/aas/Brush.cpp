@@ -702,8 +702,13 @@ int idBrush::Split(const idPlane &plane, int planeNum, idBrush **front, idBrush 
 		return res;
 	}
 
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_ALLOC16(float, maxBackWinding, (sides.Num() * sizeof(float)));
+    _DROID_ALLOC16(float, maxFrontWinding, (sides.Num() * sizeof(float)));
+#else
 	maxBackWinding = (float *) _alloca16(sides.Num() * sizeof(float));
 	maxFrontWinding = (float *) _alloca16(sides.Num() * sizeof(float));
+#endif
 
 	maxFront = maxBack = 0.0f;
 
@@ -746,6 +751,10 @@ int idBrush::Split(const idPlane &plane, int planeNum, idBrush **front, idBrush 
 			*back = Copy();
 		}
 
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+        _DROID_FREE(maxBackWinding);
+        _DROID_FREE(maxFrontWinding);
+#endif
 		return PLANESIDE_BACK;
 	}
 
@@ -754,6 +763,10 @@ int idBrush::Split(const idPlane &plane, int planeNum, idBrush **front, idBrush 
 			*front = Copy();
 		}
 
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+        _DROID_FREE(maxBackWinding);
+        _DROID_FREE(maxFrontWinding);
+#endif
 		return PLANESIDE_FRONT;
 	}
 
@@ -784,18 +797,30 @@ int idBrush::Split(const idPlane &plane, int planeNum, idBrush **front, idBrush 
 				*front = Copy();
 			}
 
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+            _DROID_FREE(maxBackWinding);
+            _DROID_FREE(maxFrontWinding);
+#endif
 			return PLANESIDE_FRONT;
 		} else {
 			if (back) {
 				*back = Copy();
 			}
 
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+            _DROID_FREE(maxBackWinding);
+            _DROID_FREE(maxFrontWinding);
+#endif
 			return PLANESIDE_BACK;
 		}
 	}
 
 	if (!front && !back) {
 		delete mid;
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+        _DROID_FREE(maxBackWinding);
+        _DROID_FREE(maxFrontWinding);
+#endif
 		return PLANESIDE_CROSS;
 	}
 
@@ -862,6 +887,10 @@ int idBrush::Split(const idPlane &plane, int planeNum, idBrush **front, idBrush 
 	(*back)->windingsValid = true;
 	(*back)->BoundBrush(this);
 
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_FREE(maxBackWinding);
+    _DROID_FREE(maxFrontWinding);
+#endif
 	return PLANESIDE_CROSS;
 }
 

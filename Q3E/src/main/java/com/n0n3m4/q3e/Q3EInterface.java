@@ -822,22 +822,6 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_command_record;
 	}
 
-	public String GetGameVersionPreferenceKey()
-	{
-		if(Q3EUtils.q3ei.isDOOM)
-			return Q3EPreference.pref_harm_gzdoom_version;
-		else
-			return null;
-	}
-
-	public String[] GetGameVersionNameList()
-	{
-		if(Q3EUtils.q3ei.isDOOM)
-			return Q3EGlobals.GZDOOM_VERSION_NAMES;
-		else
-			return null;
-	}
-
 	public String GetGameHomeDirectoryPath()
 	{
 		if(Q3EUtils.q3ei.isD3BFG)
