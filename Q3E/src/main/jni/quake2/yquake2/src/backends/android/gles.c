@@ -9,6 +9,7 @@
 
 // OpenGL attributes
 int gl_format = 0x8888;
+int gl_depth_bits = 24;
 int gl_msaa = 0;
 int screen_width = 640;
 int screen_height = 480;
@@ -61,11 +62,12 @@ void RI_SetResolution(int aw,int ah)
 	printf("[Harmattan]: RI_SetResolution(%d, %d).\n", aw, ah);
 }
 
-void RI_SetGLParms(int f, int msaa)
+void RI_SetGLParms(int f, int msaa, int depthBits)
 {
     gl_format = f;
     gl_msaa = msaa;
-	printf( "[Harmattan]: RI_SetGLParms(0x%X, %d).\n", gl_format, msaa);
+	gl_depth_bits = depthBits;
+	printf( "[Harmattan]: RI_SetGLParms(0x%X, %d, %d).\n", gl_format, gl_msaa, gl_depth_bits);
 }
 #pragma GCC visibility pop
 
