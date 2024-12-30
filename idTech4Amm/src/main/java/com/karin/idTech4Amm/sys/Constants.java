@@ -32,6 +32,8 @@ public final class Constants
         return new String[] {
             "Support setup max game console height(0 or 100 means not limit) on launcher `General` tab.",
             "Update GZDOOM version to 4.14.0.",
+            "Update Quake 1(Darkplaces) version.",
+            "Update Quake 2(yquake2) version.",
             "Add use multisamples config in game.",
         };
 	};

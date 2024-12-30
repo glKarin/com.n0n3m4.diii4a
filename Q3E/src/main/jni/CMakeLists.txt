@@ -63,12 +63,12 @@ if(GAME_QUAKE3)
     add_subdirectory ( quake3 ) # Quake 3 Arena | Team Arena
 endif()
 
-if(GAME_QUAKE2)
+if(GAME_QUAKE2) # 8.41 QUAKE2_8_41 https://github.com/yquake2/yquake2/commit/141bf6e7ddf0ee0895783db1de90d96e6a483ab0
     message(STATUS "Build Quake 2")
     add_subdirectory ( quake2 ) # Quake 2
 endif()
 
-if(GAME_QUAKE1)
+if(GAME_QUAKE1) # https://github.com/DarkPlacesEngine/DarkPlaces/commit/dbebfea96dae5c8c75a2f8680768edc7851801c2
     message(STATUS "Build Quake 1")
     add_subdirectory ( quake1 ) # Quake 1
 endif()
