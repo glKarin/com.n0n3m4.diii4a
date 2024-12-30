@@ -48,9 +48,12 @@ void GL_Scissor(int x, int y, int width, int height);
 void GL_ScissorTest(int state);
 void GL_Clear(int mask, const float *colorvalue, float depthvalue, int stencilvalue);
 void GL_ReadPixelsBGRA(int x, int y, int width, int height, unsigned char *outpixels);
+void GL_CaptureVideo_BeginVideo(void);
+void GL_CaptureVideo_VideoFrame(int newframestepframenum);
+void GL_CaptureVideo_EndVideo(void);
 int R_Mesh_CreateFramebufferObject(rtexture_t *depthtexture, rtexture_t *colortexture, rtexture_t *colortexture2, rtexture_t *colortexture3, rtexture_t *colortexture4);
 void R_Mesh_DestroyFramebufferObject(int fbo);
-void R_Mesh_SetRenderTargets(int fbo, rtexture_t *depthtexture, rtexture_t *colortexture, rtexture_t *colortexture2, rtexture_t *colortexture3, rtexture_t *colortexture4);
+void R_Mesh_SetRenderTargets(int fbo);
 
 unsigned int GL_Backend_CompileProgram(int vertexstrings_count, const char **vertexstrings_list, int geometrystrings_count, const char **geometrystrings_list, int fragmentstrings_count, const char **fragmentstrings_list);
 void GL_Backend_FreeProgram(unsigned int prog);

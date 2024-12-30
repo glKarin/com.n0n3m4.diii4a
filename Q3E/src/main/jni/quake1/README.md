@@ -109,6 +109,29 @@ The Release build crashes. The Debug x64 build doesn't crash (but is rather slow
 To get a build suitable for playing you'll need to use MinGW GCC, or download the autobuild from Xonotic (see above).
 
 
+### Web-Assembly (Emscripten)
+
+Note that this requires a linux device or WSL2.
+
+1. Install the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended)
+1. After activating and sourcing emsdk, compile DarkPlaces for wasm using;
+   ```shell
+   make emscripten-release
+   ```
+1. Copy `darkplaces-wasm.js`, `wasm/index.html`, and `wasm/autoexec.cfg` files to your web server
+1. Copy the Quake `pak0.pak` and any other files into the same web server directory
+
+For the standalone version (single HTML file containing engine and data):
+1. Before compiling, copy game data and .cfg files to the appropriate gamedir in `wasm/preload` (for example, pak0 from Quake would be in `wasm/preload/id1/pak0.pak`)
+1. After activating and sourcing emsdk, compile DarkPlaces for wasm using;
+   ```shell
+   make emscripten-standalone
+   ```
+1. To start DP you must click somewhere in the window!
+1. If you want to upload files into the game filesystem, use `em_upload` in the darkplaces console (upload to /save if you want it to save across restarts)
+1. To save the stuff you uploaded to /save, use `em_save` (note that if you embedded the game, you won't be able to save changes to `/save/games`)
+
+
 ## Contributing
 
 [DarkPlaces Contributing Guidelines](CONTRIBUTING.md)

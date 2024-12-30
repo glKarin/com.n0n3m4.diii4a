@@ -312,7 +312,7 @@ Returns 0.25 if a key was pressed and released during the frame,
 1.0 if held for the entire time
 ===============
 */
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: analog event for movement
 extern void CL_Analog(const kbutton_t *key, float *val);
 #endif
 float CL_KeyState (kbutton_t *key)
@@ -356,7 +356,7 @@ float CL_KeyState (kbutton_t *key)
 
 	key->state &= 1;		// clear impulses
 
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: analog event for movement
 	//ANALOG
 	CL_Analog(key, &val);
 	//END
@@ -1376,7 +1376,7 @@ static void CL_ClientMovement_Physics_Walk(cl_clientmovement_state_t *s)
 			wishspeed *= 0.5;
 
 		// apply edge friction
-		speed = VectorLength2(s->velocity);
+		speed = Vector2Length(s->velocity);
 		if (speed > 0)
 		{
 			friction = cl.movevars_friction;
@@ -1786,7 +1786,7 @@ void CL_SendMove(void)
 	usercmd_t *cmd;
 	sizebuf_t buf;
 	unsigned char data[1024];
-	float packettime, sv_frametime, lag, frames_per_tic;
+	float packettime, lag;
 	qbool opportune_moment;
 	qbool quemove;
 	qbool important;
@@ -1917,53 +1917,39 @@ void CL_SendMove(void)
 	// (otherwise it is only for prediction)
 
 	// do not send 0ms packets because they mess up physics
-	if(cl.cmd.msec == 0 && cl.time > cl.oldtime && (cls.protocol == PROTOCOL_QUAKEWORLD || cls.signon == SIGNONS))
+	// DP servers discard (treat like lost) predicted moves shorter than 0.0005s
+	// the time advancing check must be unaffected by time sync as it may have caused the short move
+	if(cl.cmd.msec == 0 && cl.mtime[0] > cl.mtime[1] && (cls.protocol == PROTOCOL_QUAKEWORLD || cls.signon == SIGNONS))
 		return;
 
 	// don't send too often or else network connections can get clogged by a
 	// high renderer framerate
 	packettime = 1.0f / bound(10.0f, cl_netfps.value, 1000.0f);
 	if (cl.movevars_ticrate)
-	{
 		packettime = bound(cl.movevars_ticrate * 0.5f, packettime, cl.movevars_ticrate);
-		sv_frametime = cl.movevars_ticrate;
-	}
-	else // fallback, may be affected by server->client network problems
-		sv_frametime = (cl.mtime[0] - cl.mtime[1]) / cl.movevars_timescale;
 
 	// always send if buttons changed or an impulse is pending
 	// even if it violates the rate limit!
 	important = (cl.cmd.impulse || (cl_netimmediatebuttons.integer && cl.cmd.buttons != cl.movecmd[1].buttons));
 
+	// improve and stabilise ping by synchronising with the server
 	lag = cl.mtime[0] - cl.cmd.time;
-	frames_per_tic = sv_frametime / cl.realframetime;
-//	opportune_moment = lag <= cl.realframetime * 2; // FAIL: can miss the moment with uncapped fps
-//	opportune_moment = lag <= cl.realframetime * frames_per_tic * 0.5; // FAIL: too early at high fps, reducing multi causes misses at moderate fps
-	opportune_moment = lag <= cl.realframetime * (frames_per_tic <= 1 ? 1 : sqrt(frames_per_tic)); // perfect
-
-	// Two methods for deciding when to send
-	if (!important)
+	//    unknown ticrate    ||     PL or ping spike      || loading
+	if (!cl.movevars_ticrate || lag > cl.movevars_ticrate || lag < 0)
+		opportune_moment = false;
+	else // sync should be possible
 	{
-		// Traditional time interval, now used as fallback
-		if (sv_frametime <= 0 || lag > sv_frametime || lag < 0) // unknown ticrate || lag/PL || still connecting
+		float frames_per_tic = cl.movevars_ticrate / cl.realframetime;
+		opportune_moment = lag < 0.999f * (float)cl.realframetime * (frames_per_tic <= 1 ? 1 : sqrtf(frames_per_tic));
+			}
+
+	// don't send too often (cl_netfps)
+	if (!important && cl.timesincepacket < packettime * 0.999f
+	&& (!opportune_moment || cl.opt_inputs_since_update))
 		{
-			if (cl.timesincepacket < packettime * 0.99999f)
-			{
-//				Con_Printf("^6moveft %f realft %f lag %f tic %f inputsince %d\n", cl.cmd.frametime, cl.realframetime, lag, sv_frametime, cl.opt_inputs_since_update);
+//		Con_Printf("^1moveft %f realft %f lag %f tic %f inputsince %d opp %d\n", cl.cmd.frametime, cl.realframetime, lag, cl.movevars_ticrate, cl.opt_inputs_since_update, opportune_moment);
 				return;
 			}
-		}
-		// Server-synchronised, for better pings
-		// Sends at least once per server frame
-		else // cl.opt_inputs_since_update is usable
-		{
-			if (!opportune_moment || cl.opt_inputs_since_update >= sv_frametime / packettime)
-			{
-//				Con_Printf("^1moveft %f realft %f lag %f tic %f inputsince %d\n", cl.cmd.frametime, cl.realframetime, lag, sv_frametime, cl.opt_inputs_since_update);
-				return;
-			}
-		}
-	}
 
 	// don't choke the connection with packets (obey rate limit)
 	// it is important that this check be last, because it adds a new
@@ -1973,12 +1959,10 @@ void CL_SendMove(void)
 	if (!NetConn_CanSend(cls.netcon) && !important)
 		return;
 
-//	Con_Printf("%smoveft %f realft %f lag %f tic %f inputsince %d important %d\n", (lag < 0.0005 || !opportune_moment) ? "^3" : "^2", cl.cmd.frametime, cl.realframetime, lag, sv_frametime, cl.opt_inputs_since_update, important);
+//	Con_Printf("%smoveft %f realft %f lag %f tic %f inputsince %d opp %d import %d\n", (lag < 0.0005 || !opportune_moment) ? "^3" : "^2", cl.cmd.frametime, cl.realframetime, lag, cl.movevars_ticrate, cl.opt_inputs_since_update, opportune_moment, important);
 
-	if (opportune_moment) // this check is needed for optimal timing especially with cl_netimmediatebuttons
+	if (opportune_moment)
 		++cl.opt_inputs_since_update;
-
-	// reset the packet timing accumulator
 	cl.timesincepacket = 0;
 
 	buf.maxsize = sizeof(data);

@@ -47,12 +47,9 @@ struct cmd_state_s;
 
 typedef struct sfx_s sfx_t;
 
-extern struct cvar_s mastervolume;
-extern struct cvar_s bgmvolume;
-extern struct cvar_s volume;
-extern struct cvar_s snd_initialized;
-extern struct cvar_s snd_staticvolume;
-extern struct cvar_s snd_mutewhenidle;
+extern cvar_t bgmvolume;
+extern cvar_t volume;
+extern cvar_t snd_initialized;
 
 
 // ====================================================================
@@ -67,7 +64,6 @@ void S_Shutdown (void);
 void S_UnloadAllSounds_f(struct cmd_state_s *cmd);
 
 void S_Update(const matrix4x4_t *listenermatrix);
-void S_ExtraUpdate (void);
 
 sfx_t *S_PrecacheSound (const char *sample, qbool complain, qbool levelsound);
 float S_SoundLength(const char *name);
@@ -95,7 +91,7 @@ sfx_t *S_FindName(const char *name);
 #define CHAN_ENGINE2USER(c)    (c)
 #define CHAN_ENGINE2CVAR(c)    (abs(c))
 
-// S_StartSound returns the channel index, or -1 if an error occurred
+/// S_StartSound returns the channel index, or -1 if an error occurred
 int S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol, float attenuation);
 int S_StartSound_StartPosition_Flags (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol, float attenuation, float startposition, int flags, float fspeed);
 qbool S_LocalSoundEx (const char *s, int chan, float fvol);

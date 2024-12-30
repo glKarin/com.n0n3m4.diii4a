@@ -82,7 +82,7 @@ void CL_StopPlayback (void)
 {
 #ifdef CONFIG_VIDEO_CAPTURE
 	if (cl_capturevideo_demo_stop.integer)
-		Cvar_Set(&cvars_all, "cl_capturevideo", "0");
+		Cvar_SetQuick(&cl_capturevideo, "0");
 #endif
 
 	if (!cls.demoplayback)
@@ -520,7 +520,8 @@ static void CL_FinishTimeDemo (void)
 	fpsmax = cls.td_onesecondmaxfps;
 	// LadyHavoc: timedemo now prints out 7 digits of fraction, and min/avg/max
 	Con_Printf("%i frames %5.7f seconds %5.7f fps, one-second fps min/avg/max: %.0f %.0f %.0f (%i seconds)\n", frames, time, totalfpsavg, fpsmin, fpsavg, fpsmax, cls.td_onesecondavgcount);
-	Log_Printf("benchmark.log", "date %s | enginedate %s | demo %s | commandline %s | run %d | result %i frames %5.7f seconds %5.7f fps, one-second fps min/avg/max: %.0f %.0f %.0f (%i seconds)\n", Sys_TimeString("%Y-%m-%d %H:%M:%S"), engineversion, cls.demoname, cmdline.string, benchmark_runs + 1, frames, time, totalfpsavg, fpsmin, fpsavg, fpsmax, cls.td_onesecondavgcount);
+	Sys_TimeString(vabuf, sizeof(vabuf), "%Y-%m-%d %H:%M:%S");
+	Log_Printf("benchmark.log", "date %s | enginedate %s | demo %s | commandline %s | run %d | result %i frames %5.7f seconds %5.7f fps, one-second fps min/avg/max: %.0f %.0f %.0f (%i seconds)\n", vabuf, engineversion, cls.demoname, cmdline.string, benchmark_runs + 1, frames, time, totalfpsavg, fpsmin, fpsavg, fpsmax, cls.td_onesecondavgcount);
 	if (Sys_CheckParm("-benchmark"))
 	{
 		++benchmark_runs;
@@ -674,6 +675,16 @@ static void CL_Startdemos_f(cmd_state_t *cmd)
 
 	if (!sv.active && cls.demonum != -1 && !cls.demoplayback)
 	{
+		if (!cl_startdemos.integer)
+		{
+			cls.demonum = -1;
+#ifdef CONFIG_MENU
+			// make the menu appear after a gamedir change
+			if(MR_ToggleMenu)
+				MR_ToggleMenu(1);
+#endif
+			return;
+		}
 		cls.demonum = 0;
 		CL_NextDemo ();
 	}
@@ -737,4 +748,5 @@ void CL_Demo_Init(void)
 	Cvar_RegisterVariable (&cl_autodemo);
 	Cvar_RegisterVariable (&cl_autodemo_nameformat);
 	Cvar_RegisterVariable (&cl_autodemo_delete);
+	Cvar_RegisterVariable (&cl_startdemos);
 }

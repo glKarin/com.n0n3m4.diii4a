@@ -320,7 +320,7 @@ static void SV_UserFriction (void)
 	vec3_t start, stop;
 	trace_t trace;
 
-	speed = sqrt(PRVM_serveredictvector(host_client->edict, velocity)[0]*PRVM_serveredictvector(host_client->edict, velocity)[0]+PRVM_serveredictvector(host_client->edict, velocity)[1]*PRVM_serveredictvector(host_client->edict, velocity)[1]);
+	speed = Vector2Length(PRVM_serveredictvector(host_client->edict, velocity));
 	if (!speed)
 		return;
 

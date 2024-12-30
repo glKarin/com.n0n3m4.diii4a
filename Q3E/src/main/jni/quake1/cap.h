@@ -7,6 +7,7 @@
 #include "qdefs.h"
 #include "fs.h"
 #include "snd_main.h"
+#include "glquake.h"
 
 typedef enum capturevideoformat_e
 {
@@ -31,7 +32,6 @@ typedef struct capturevideostate_s
 	double lastfpstime;
 	int lastfpsframe;
 	int soundsampleframe;
-	unsigned char *screenbuffer;
 	unsigned char *outbuffer;
 	char basename[MAX_QPATH];
 	int width, height;
@@ -51,12 +51,19 @@ typedef struct capturevideostate_s
 	qfile_t *videofile;
 		// always use this:
 		//   cls.capturevideo.videofile = FS_OpenRealFile(va(vabuf, sizeof(vabuf), "%s.%s", cls.capturevideo.basename, cls.capturevideo.formatextension), "wb", false);
-	void (*endvideo) (void);
-	void (*videoframes) (int num);
-	void (*soundframe) (const portable_sampleframe_t *paintbuffer, size_t length);
+	void (*writeEndVideo) (void);
+	void (*writeVideoFrame) (int num, u8 *in);
+	void (*writeSoundFrame) (const portable_sampleframe_t *paintbuffer, size_t length);
 
 	// format specific data
 	void *formatspecific;
+
+	// GL backend
+#define PBO_COUNT 3 // bones_was_here: slightly faster than double buffering
+	GLuint PBOs[PBO_COUNT];
+	GLuint PBOindex;
+	GLuint FBO;
+	GLuint FBOtex;
 }
 capturevideostate_t;
 #endif

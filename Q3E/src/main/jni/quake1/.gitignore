@@ -17,6 +17,8 @@ ChangeLog
 darkplaces-agl
 darkplaces-glx
 darkplaces-sdl
+darkplaces-wasm.html
+darkplaces-wasm.js
 darkplaces-dedicated
 gmon.out
 *.ncb
@@ -41,3 +43,10 @@ Makefile.win
 *.pdb
 *.lib
 *.exp
+
+# emscripten
+build-obj/
+emsdk/
+docs/output/
+wasm/preload/*
+!wasm/preload/runhere

@@ -38,9 +38,9 @@ typedef enum gamemode_e
 	GAME_BATTLEMECH,
 	GAME_ZYMOTIC,
 	GAME_SETHERAL,
-	GAME_TENEBRAE, // full of evil hackery
+	GAME_TENEBRAE, ///< full of evil hackery
 	GAME_NEOTERIC,
-	GAME_OPENQUARTZ, //this game sucks
+	GAME_OPENQUARTZ, ///< this game sucks
 	GAME_PRYDON,
 	GAME_DELUXEQUAKE,
 	GAME_THEHUNTED,
@@ -50,16 +50,19 @@ typedef enum gamemode_e
 	GAME_EDU2P,
 	GAME_PROPHECY,
 	GAME_BLOODOMNICIDE,
-	GAME_STEELSTORM, // added by motorsep
-	GAME_STEELSTORM2, // added by motorsep
-	GAME_SSAMMO, // added by motorsep
-	GAME_STEELSTORMREVENANTS, // added by motorsep 07/19/2015
-	GAME_TOMESOFMEPHISTOPHELES, // added by motorsep
-	GAME_STRAPBOMB, // added by motorsep for Urre
+	GAME_STEELSTORM, ///< added by motorsep
+	GAME_STEELSTORM2, ///< added by motorsep
+	GAME_SSAMMO, ///< added by motorsep
+	GAME_STEELSTORMREVENANTS, ///< added by motorsep 07/19/2015
+	GAME_TOMESOFMEPHISTOPHELES, ///< added by motorsep
+	GAME_STRAPBOMB, ///< added by motorsep for Urre
 	GAME_MOONHELM,
 	GAME_VORETOURNAMENT,
-	GAME_DOOMBRINGER, // added by Cloudwalk for kristus
-	GAME_BATTLEMETAL, // added by Cloudwalk for Subject9x
+	GAME_DOOMBRINGER, ///< added by Cloudwalk for kristus
+	GAME_BATTLEMETAL, ///< added by Cloudwalk for Subject9x
+	GAME_QUAKE15, ///< added by bones_was_here as it depends on an old bug and a workaround
+	GAME_AD, ///< added by bones_was_here as it depends on old DP behaviour or csqc_lowres
+	GAME_CTSJ2, ///< added by bones_was_here as it has a race condition that requires a workaound
 	GAME_COUNT
 }
 gamemode_t;
@@ -78,7 +81,9 @@ extern const char *gamescreenshotname;
 extern const char *gameuserdirname;
 extern char com_modname[MAX_OSPATH];
 
+extern gamemode_t com_startupgamegroup;
+
 void COM_InitGameType (void);
-void COM_ChangeGameTypeForGameDirs(void);
+int COM_ChangeGameTypeForGameDirs(unsigned numgamedirs, const char *gamedirs[], qbool failmissing, qbool init);
 
 #endif

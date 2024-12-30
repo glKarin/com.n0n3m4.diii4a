@@ -330,7 +330,7 @@ typedef struct model_brush_s
 	int (*SuperContentsFromNativeContents)(int nativecontents);
 	int (*NativeContentsFromSuperContents)(int supercontents);
 	unsigned char *(*GetPVS)(struct model_s *model, const vec3_t p);
-	int (*FatPVS)(struct model_s *model, const vec3_t org, vec_t radius, unsigned char *pvsbuffer, int pvsbufferlength, qbool merge);
+	size_t (*FatPVS)(struct model_s *model, const vec3_t org, vec_t radius, unsigned char **pvsbuffer, mempool_t *pool, qbool merge);
 	int (*BoxTouchingPVS)(struct model_s *model, const unsigned char *pvs, const vec3_t mins, const vec3_t maxs);
 	int (*BoxTouchingLeafPVS)(struct model_s *model, const unsigned char *pvs, const vec3_t mins, const vec3_t maxs);
 	int (*BoxTouchingVisibleLeafs)(struct model_s *model, const unsigned char *visibleleafs, const vec3_t mins, const vec3_t maxs);

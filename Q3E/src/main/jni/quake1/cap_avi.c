@@ -370,14 +370,12 @@ static void SCR_CaptureVideo_ConvertFrame_BGRA_to_I420_flip(int width, int heigh
 	}
 }
 
-static void SCR_CaptureVideo_Avi_VideoFrames(int num)
+static void SCR_CaptureVideo_Avi_VideoFrames(int num, u8 *in)
 {
 	LOAD_FORMATSPECIFIC_AVI();
 	int x = 0, width = cls.capturevideo.width, height = cls.capturevideo.height;
-	unsigned char *in, *out;
-	// FIXME: width/height must be multiple of 2, enforce this?
-	in = cls.capturevideo.outbuffer;
-	out = cls.capturevideo.outbuffer + width*height*4;
+	unsigned char *out = cls.capturevideo.outbuffer;
+
 	SCR_CaptureVideo_ConvertFrame_BGRA_to_I420_flip(width, height, in, out);
 	x = width*height+(width/2)*(height/2)*2;
 	while(num-- > 0)
@@ -509,9 +507,15 @@ void SCR_CaptureVideo_Avi_BeginVideo(void)
 	cls.capturevideo.format = CAPTUREVIDEOFORMAT_AVI_I420;
 	cls.capturevideo.formatextension = "avi";
 	cls.capturevideo.videofile = FS_OpenRealFile(va(vabuf, sizeof(vabuf), "%s.%s", cls.capturevideo.basename, cls.capturevideo.formatextension), "wb", false);
-	cls.capturevideo.endvideo = SCR_CaptureVideo_Avi_EndVideo;
-	cls.capturevideo.videoframes = SCR_CaptureVideo_Avi_VideoFrames;
-	cls.capturevideo.soundframe = SCR_CaptureVideo_Avi_SoundFrame;
+	if (!cls.capturevideo.videofile)
+	{
+		Con_Printf(CON_ERROR "Failed to open video file \"%s\", cancelling video capture.\n", vabuf);
+		cls.capturevideo.error = true;
+		return;
+	}
+	cls.capturevideo.writeEndVideo = SCR_CaptureVideo_Avi_EndVideo;
+	cls.capturevideo.writeVideoFrame = SCR_CaptureVideo_Avi_VideoFrames;
+	cls.capturevideo.writeSoundFrame = SCR_CaptureVideo_Avi_SoundFrame;
 	cls.capturevideo.formatspecific = Mem_Alloc(tempmempool, sizeof(capturevideostate_avi_formatspecific_t));
 	{
 		LOAD_FORMATSPECIFIC_AVI();

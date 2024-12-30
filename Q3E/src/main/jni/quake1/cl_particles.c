@@ -793,7 +793,6 @@ particle_t *CL_NewParticle(
 	part->vel[0] = pvx + velocityjitter * v[0];
 	part->vel[1] = pvy + velocityjitter * v[1];
 	part->vel[2] = pvz + velocityjitter * v[2];
-	part->time2 = 0;
 	part->airfriction = pairfriction;
 	part->liquidfriction = pliquidfriction;
 	part->die = cl.time + lifetime;
@@ -831,6 +830,9 @@ particle_t *CL_NewParticle(
 			}
 		}
 	}
+	else if (part->typeindex == pt_explode || part->typeindex == pt_explode2)
+		part->time2 = rand()&3; // time2 is used to progress the colour ramp index
+
 #if 0
 	else if (part->bounce != 0 && part->gravity == 0 && part->typeindex != pt_snow)
 	{
@@ -866,6 +868,7 @@ particle_t *CL_NewParticle(
  */
 particle_t *CL_NewQuakeParticle(
 	const vec3_t origin,
+	const unsigned short ptypeindex,
 	const int color_1,
 	const int color_2,
 	const float gravity,
@@ -891,7 +894,7 @@ particle_t *CL_NewQuakeParticle(
 
 	return CL_NewParticle(
 		origin,
-		pt_alphastatic,      // type
+		ptypeindex,          // type
 		color_1,
 		color_2,
 		texture,
@@ -1043,6 +1046,7 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 					int k = particlepalette[(palettecolor & ~7) + (rand()&7)];
 					CL_NewQuakeParticle(
 						center,                                      // origin
+						pt_alphastatic,                              // type
 						k,                                           // color 1
 						k,                                           // color 2
 						0.15,                                        // gravity
@@ -1421,7 +1425,7 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 					if (cl_particles_quake.integer)
 					{
 						color = particlepalette[67 + (rand()&3)];
-						CL_NewQuakeParticle(center, color, color, 0.25, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 3, 0, 2);
+						CL_NewQuakeParticle(center, pt_alphastatic, color, color, 0.25, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 3, 0, 2);
 					}
 					else
 					{
@@ -1435,7 +1439,7 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 					{
 						dec = 6;
 						color = particlepalette[67 + (rand()&3)];
-						CL_NewQuakeParticle(center, color, color, 0.25, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 3, 0, 2);
+						CL_NewQuakeParticle(center, pt_alphastatic, color, color, 0.25, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 3, 0, 2);
 					}
 					else
 					{
@@ -1452,7 +1456,7 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 					{
 						r = rand()&3;
 						color = particlepalette[ramp3[r]];
-						CL_NewQuakeParticle(center, color, color, -0.10, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 3, 0, 0.1372549 * (6 - r));
+						CL_NewQuakeParticle(center, pt_alphastatic, color, color, -0.10, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 3, 0, 0.1372549 * (6 - r));
 					}
 					else
 					{
@@ -1466,7 +1470,7 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 					{
 						r = 2 + (rand()%4);
 						color = particlepalette[ramp3[r]];
-						CL_NewQuakeParticle(center, color, color, -0.15, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 3, 0, 0.1372549 * (6 - r));
+						CL_NewQuakeParticle(center, pt_alphastatic, color, color, -0.15, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 3, 0, 0.1372549 * (6 - r));
 					}
 					else
 					{
@@ -1479,8 +1483,8 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 					{
 						dec = 6;
 						color = particlepalette[52 + (rand()&7)];
-						CL_NewQuakeParticle(center, color, color, 0, pos[0], pos[1], pos[2], 30*dir[1], 30*-dir[0], 0, 0, 0, 0, 0, 0.5);
-						CL_NewQuakeParticle(center, color, color, 0, pos[0], pos[1], pos[2], 30*-dir[1], 30*dir[0], 0, 0, 0, 0, 0, 0.5);
+						CL_NewQuakeParticle(center, pt_alphastatic, color, color, 0, pos[0], pos[1], pos[2], 30*dir[1], 30*-dir[0], 0, 0, 0, 0, 0, 0.5);
+						CL_NewQuakeParticle(center, pt_alphastatic, color, color, 0, pos[0], pos[1], pos[2], 30*-dir[1], 30*dir[0], 0, 0, 0, 0, 0, 0.5);
 					}
 					else if (gamemode == GAME_GOODVSBAD2)
 					{
@@ -1499,8 +1503,8 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 					{
 						dec = 6;
 						color = particlepalette[230 + (rand()&7)];
-						CL_NewQuakeParticle(center, color, color, 0, pos[0], pos[1], pos[2], 30 *  dir[1], 30 * -dir[0], 0, 0, 0, 0, 0, 0.5);
-						CL_NewQuakeParticle(center, color, color, 0, pos[0], pos[1], pos[2], 30 * -dir[1], 30 *  dir[0], 0, 0, 0, 0, 0, 0.5);
+						CL_NewQuakeParticle(center, pt_alphastatic, color, color, 0, pos[0], pos[1], pos[2], 30 *  dir[1], 30 * -dir[0], 0, 0, 0, 0, 0, 0.5);
+						CL_NewQuakeParticle(center, pt_alphastatic, color, color, 0, pos[0], pos[1], pos[2], 30 * -dir[1], 30 *  dir[0], 0, 0, 0, 0, 0, 0.5);
 					}
 					else
 					{
@@ -1513,7 +1517,7 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 					if (cl_particles_quake.integer)
 					{
 						color = particlepalette[152 + (rand()&3)];
-						CL_NewQuakeParticle(center, color, color, 0, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 8, 0, 0.3);
+						CL_NewQuakeParticle(center, pt_alphastatic, color, color, 0, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 8, 0, 0.3);
 					}
 					else if (gamemode == GAME_GOODVSBAD2)
 					{
@@ -1936,7 +1940,6 @@ void CL_ParticleExplosion (const vec3_t org)
 {
 	int i;
 	trace_t trace;
-	particle_t *particle;
 
 	R_Stain(org, 96, 40, 40, 40, 64, 88, 88, 88, 64);
 	CL_SpawnDecalParticleForPoint(org, 40, 48, 255, tex_bulletdecal[rand()&7], 0xFFFFFF, 0xFFFFFF);
@@ -1952,8 +1955,9 @@ void CL_ParticleExplosion (const vec3_t org)
 			{
 				color = particlepalette[ramp1[r]];
 
-				particle = CL_NewQuakeParticle(
+				CL_NewQuakeParticle(
 					org,
+					pt_explode,
 					color, color,
 					0.05,                        // gravity
 					org[0], org[1], org[2],      // offset
@@ -1964,14 +1968,14 @@ void CL_ParticleExplosion (const vec3_t org)
 					256,                         // velocity jitter
 					5                            // lifetime
 				);
-				particle->typeindex = pt_explode;
 			}
 			else
 			{
 				color = particlepalette[ramp2[r]];
 
-				particle = CL_NewQuakeParticle(
+				CL_NewQuakeParticle(
 					org,
+					pt_explode2,
 					color, color,
 					0.05,                        // gravity
 					org[0], org[1], org[2],      // offset
@@ -1982,11 +1986,7 @@ void CL_ParticleExplosion (const vec3_t org)
 					256,                         // velocity jitter
 					5                            // lifetime
 				);
-
-				particle->typeindex = pt_explode2;
 			}
-
-			particle->time2 = r;  // time2 is used to progress the colour ramp index
 		}
 	}
 	else
@@ -2040,7 +2040,7 @@ void CL_ParticleExplosion2 (const vec3_t org, int colorStart, int colorLength)
 	{
 		k = particlepalette[colorStart + (i % colorLength)];
 		if (cl_particles_quake.integer)
-			CL_NewQuakeParticle(org, k, k, 0, org[0], org[1], org[2], 0, 0, 0, -4, -4, 16, 256, 0.3);
+			CL_NewQuakeParticle(org, pt_alphastatic, k, k, 0, org[0], org[1], org[2], 0, 0, 0, -4, -4, 16, 256, 0.3);
 		else
 			CL_NewParticle(org, pt_alphastatic, k, k, tex_particle, lhrandom(0.5, 1.5), 0, 255, 512, 0, 0, org[0], org[1], org[2], 0, 0, 0, lhrandom(1.5, 3), lhrandom(1.5, 3), 8, 192, true, 0, 1, PBLEND_ALPHA, PARTICLE_BILLBOARD, -1, -1, -1, 1, 1, 0, 0, NULL);
 	}
@@ -2921,13 +2921,13 @@ void R_DrawParticles (void)
 	frametime = bound(0, cl.time - cl.particles_updatetime, 1);
 	cl.particles_updatetime = bound(cl.time - 1, cl.particles_updatetime + frametime, cl.time + 1);
 
-	// Handling of the colour ramp for pt_explode and pt_explode2
-	pt_explode_frame_interval = frametime * 10;
-	pt_explode2_frame_interval = frametime * 15;
-
 	// LadyHavoc: early out conditions
 	if (!cl.num_particles)
 		return;
+
+	// Handling of the colour ramp for pt_explode and pt_explode2
+	pt_explode_frame_interval = frametime * 10;
+	pt_explode2_frame_interval = frametime * 15;
 
 	minparticledist_start = DotProduct(r_refdef.view.origin, r_refdef.view.forward) + r_drawparticles_nearclip_min.value;
 	gravity = frametime * cl.movevars_gravity;
@@ -3099,14 +3099,14 @@ void R_DrawParticles (void)
 					a = CL_PointSuperContents(p->org);
 					if (a & (SUPERCONTENTS_SOLID | SUPERCONTENTS_LIQUIDSMASK))
 						goto killparticle;
+					break;
 					case pt_explode:
 						// Progress the particle colour up the ramp
 						p->time2 += pt_explode_frame_interval;
 						if (p->time2 >= 8)
+						p->die = -1;
+					else
 						{
-							p->die = -1;
-						}
-						else {
 							color = particlepalette[ramp1[(int)p->time2]];
 							p->color[0] = color >> 16;
 							p->color[1] = color >>  8;
@@ -3118,10 +3118,9 @@ void R_DrawParticles (void)
 						// Progress the particle colour up the ramp
 						p->time2 += pt_explode2_frame_interval;
 						if (p->time2 >= 8)
+						p->die = -1;
+					else
 						{
-							p->die = -1;
-						}
-						else {
 							color = particlepalette[ramp2[(int)p->time2]];
 							p->color[0] = color >> 16;
 							p->color[1] = color >>  8;

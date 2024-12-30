@@ -303,7 +303,7 @@ static void Palette_Load(void)
 		memcpy(palette_rgb, palfile, 768);
 	else
 	{
-		Con_DPrint("Couldn't load gfx/palette.lmp, falling back on internal palette\n");
+		Con_DPrint(CON_WARN "Couldn't load gfx/palette.lmp, falling back on internal palette\n");
 		memcpy(palette_rgb, host_quakepal, 768);
 	}
 	if (palfile)

@@ -225,6 +225,7 @@ void _Thread_WaitBarrier(void *barrier, const char *filename, int fileline)
 }
 #endif
 
+#ifdef _NOSDL //karin: use stdc11 atom
 void _Thread_AtomicLock(Thread_SpinLock *lock, const char *filename, int fileline)
 {
 #ifdef THREADDEBUG
@@ -242,3 +243,4 @@ void _Thread_AtomicUnlock(Thread_SpinLock *lock, const char *filename, int filel
 	//SDL_AtomicUnlock(lock);
 	atomic_flag_clear(lock);
 }
+#endif

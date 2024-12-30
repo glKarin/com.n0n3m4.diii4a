@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 #include "prvm_cmds.h"
+#include "sys.h"
 
 /*
 ===============================================================================
@@ -52,7 +53,7 @@ void SV_Savegame_to(prvm_prog_t *prog, const char *name)
 	f = FS_OpenRealFile(name, "wb", false);
 	if (!f)
 	{
-		Con_Print("ERROR: couldn't open.\n");
+		Con_Print(CON_ERROR "ERROR: couldn't open.\n");
 		return;
 	}
 
@@ -173,31 +174,10 @@ void SV_Savegame_to(prvm_prog_t *prog, const char *name)
 #endif
 
 	FS_Close (f);
+#ifdef __EMSCRIPTEN__
+	js_syncFS(false);
+#endif
 	Con_Print("done.\n");
-}
-
-static qbool SV_CanSave(void)
-{
-	prvm_prog_t *prog = SVVM_prog;
-	if(SV_IsLocalServer() == 1)
-	{
-		// singleplayer checks
-		// FIXME: This only checks if the first player is dead?
-		if ((svs.clients[0].active && PRVM_serveredictfloat(svs.clients[0].edict, deadflag)))
-		{
-			Con_Print("Can't savegame with a dead player\n");
-			return false;
-		}
-
-		if(host.hook.CL_Intermission && host.hook.CL_Intermission())
-		{
-			Con_Print("Can't save in intermission.\n");
-			return false;
-		}
-	}
-	else
-		Con_Print(CON_WARN "Warning: saving a multiplayer game may have strange results when restored (to properly resume, all players must join in the same player slots and then the game can be reloaded).\n");
-	return true;
 }
 
 /*
@@ -212,12 +192,9 @@ void SV_Savegame_f(cmd_state_t *cmd)
 
 	if (!sv.active)
 	{
-		Con_Print("Can't save - no server running.\n");
+		Con_Print(CON_ERROR "Can't save - no server running.\n");
 		return;
 	}
-
-	if(!SV_CanSave())
-		return;
 
 	if (Cmd_Argc(cmd) != 2)
 	{
@@ -227,9 +204,27 @@ void SV_Savegame_f(cmd_state_t *cmd)
 
 	if (strstr(Cmd_Argv(cmd, 1), ".."))
 	{
-		Con_Print("Relative pathnames are not allowed.\n");
+		Con_Print(CON_ERROR "Relative pathnames are not allowed.\n");
 		return;
 	}
+
+	for (int i = 0; i < svs.maxclients; ++i)
+		if (svs.clients[i].active && PRVM_serveredictfloat(svs.clients[i].edict, deadflag))
+		{
+			Con_Print(CON_ERROR "Can't savegame with a dead player\n");
+			return;
+		}
+
+	// bones_was_here: intermission_running isn't declared in dpdefs, but it's used by
+	// id1 Quake, all Quake mods (afaict), Nexuiz and Xonotic.
+	if (PRVM_serverglobalfloat(intermission_running))
+	{
+		Con_Print(CON_ERROR "Can't save in intermission.\n");
+		return;
+	}
+
+	if (SV_IsLocalServer() != 1)
+		Con_Print(CON_WARN "Warning: saving a multiplayer game may have strange results when restored (to properly resume, all players must join in the same player slots and then the game can be reloaded).\n");
 
 	dp_strlcpy (name, Cmd_Argv(cmd, 1), sizeof (name));
 	FS_DefaultExtension (name, ".sav", sizeof (name));
@@ -281,7 +276,7 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 	t = text = (char *)FS_LoadFile (filename, tempmempool, false, NULL);
 	if (!text)
 	{
-		Con_Print("ERROR: couldn't open.\n");
+		Con_Print(CON_ERROR "ERROR: couldn't open.\n");
 		return;
 	}
 
@@ -294,7 +289,7 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 	if (version != SAVEGAME_VERSION)
 	{
 		Mem_Free(text);
-		Con_Printf("Savegame is version %i, not %i\n", version, SAVEGAME_VERSION);
+		Con_Printf(CON_ERROR "Savegame is version %i, not %i\n", version, SAVEGAME_VERSION);
 		return;
 	}
 
@@ -313,7 +308,7 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 	COM_ParseToken_Simple(&t, false, false, true);
 // this silliness is so we can load 1.06 save files, which have float skill values
 	current_skill = (int)(atof(com_token) + 0.5);
-	Cvar_SetValue (&cvars_all, "skill", (float)current_skill);
+	Cvar_SetValueQuick(&skill, (float)current_skill);
 
 	if(developer_entityparsing.integer)
 		Con_Printf("SV_Loadgame_f: loading mapname\n");
@@ -336,7 +331,7 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 	if (!sv.active)
 	{
 		Mem_Free(text);
-		Con_Print("Couldn't load map\n");
+		Con_Printf(CON_ERROR "Couldn't load map \"%s\"\n", mapname);
 		return;
 	}
 	sv.paused = true;		// pause until all clients connect
@@ -403,7 +398,7 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 		if (strcmp(com_token,"{"))
 		{
 			Mem_Free(text);
-			Host_Error ("First token isn't a brace");
+			Host_Error ("%s: first token isn't a brace", __func__);
 		}
 
 		if (entnum == -1)
@@ -423,7 +418,7 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 			if (entnum >= MAX_EDICTS)
 			{
 				Mem_Free(text);
-				Host_Error("Host_PerformLoadGame: too many edicts in save file (reached MAX_EDICTS %i)", MAX_EDICTS);
+				Host_Error("%s: too many edicts in save file (reached MAX_EDICTS %i)", __func__, MAX_EDICTS);
 			}
 			while (entnum >= prog->max_edicts)
 				PRVM_MEM_IncreaseEdicts(prog);
@@ -434,7 +429,7 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 			if(developer_entityparsing.integer)
 				Con_Printf("SV_Loadgame_f: loading edict %d\n", entnum);
 
-			PRVM_ED_ParseEdict (prog, start, ent);
+			PRVM_ED_ParseEdict (prog, start, ent, true);
 
 			// link it into the bsp tree
 			if (!ent->free)
@@ -483,7 +478,7 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 					if (i >= 0 && i < MAX_LIGHTSTYLES)
 						dp_strlcpy(sv.lightstyles[i], com_token, sizeof(sv.lightstyles[i]));
 					else
-						Con_Printf("unsupported lightstyle %i \"%s\"\n", i, com_token);
+						Con_Printf(CON_WARN "unsupported lightstyle %i \"%s\"\n", i, com_token);
 				}
 				else if (!strcmp(com_token, "sv.model_precache"))
 				{
@@ -496,7 +491,7 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 						sv.models[i] = Mod_ForName (sv.model_precache[i], true, false, sv.model_precache[i][0] == '*' ? sv.worldname : NULL);
 					}
 					else
-						Con_Printf("unsupported model %i \"%s\"\n", i, com_token);
+						Con_Printf(CON_WARN "unsupported model %i \"%s\"\n", i, com_token);
 				}
 				else if (!strcmp(com_token, "sv.sound_precache"))
 				{
@@ -506,7 +501,7 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 					if (i >= 0 && i < MAX_SOUNDS)
 						dp_strlcpy(sv.sound_precache[i], com_token, sizeof(sv.sound_precache[i]));
 					else
-						Con_Printf("unsupported sound %i \"%s\"\n", i, com_token);
+						Con_Printf(CON_WARN "unsupported sound %i \"%s\"\n", i, com_token);
 				}
 				else if (!strcmp(com_token, "sv.buffer"))
 				{
@@ -522,15 +517,15 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 								Con_Printf(CON_ERROR "failed to create stringbuffer %i\n", i);
 						}
 						else
-							Con_Printf("unsupported stringbuffer index %i \"%s\"\n", i, com_token);
+							Con_Printf(CON_WARN "unsupported stringbuffer index %i \"%s\"\n", i, com_token);
 					}
 					else
-						Con_Printf("unexpected end of line when parsing sv.buffer (expected buffer index)\n");
+						Con_Printf(CON_WARN "unexpected end of line when parsing sv.buffer (expected buffer index)\n");
 				}
 				else if (!strcmp(com_token, "sv.bufstr"))
 				{
 					if (!COM_ParseToken_Simple(&t, false, false, true))
-						Con_Printf("unexpected end of line when parsing sv.bufstr\n");
+						Con_Printf(CON_WARN "unexpected end of line when parsing sv.bufstr\n");
 					else
 					{
 						i = atoi(com_token);
@@ -543,10 +538,10 @@ void SV_Loadgame_f(cmd_state_t *cmd)
 								if (COM_ParseToken_Simple(&t, false, false, true))
 									BufStr_Set(prog, stringbuffer, k, com_token);
 								else
-									Con_Printf("unexpected end of line when parsing sv.bufstr (expected string)\n");
+									Con_Printf(CON_WARN "unexpected end of line when parsing sv.bufstr (expected string)\n");
 							}
 							else
-								Con_Printf("unexpected end of line when parsing sv.bufstr (expected strindex)\n");
+								Con_Printf(CON_WARN "unexpected end of line when parsing sv.bufstr (expected strindex)\n");
 						}
 						else
 							Con_Printf(CON_ERROR "failed to create stringbuffer %i \"%s\"\n", i, com_token);

@@ -92,10 +92,10 @@ static void Mod_Sprite_SharedSetup(const unsigned char *datapointer, int version
 {
 	int					i, j, groupframes, realframes, x, y, origin[2], width, height;
 	qbool			fullbright;
-	dspriteframetype_t	*pinframetype;
-	dspriteframe_t		*pinframe;
-	dspritegroup_t		*pingroup;
-	dspriteinterval_t	*pinintervals;
+	dspriteframetype_t  pinframetype;
+	dspriteframe_t      pinframe;
+	dspritegroup_t      pingroup;
+	dspriteinterval_t   pinintervals;
 	skinframe_t			*skinframe;
 	float				modelradius, interval;
 	char				name[MAX_QPATH], fogname[MAX_QPATH];
@@ -114,33 +114,34 @@ static void Mod_Sprite_SharedSetup(const unsigned char *datapointer, int version
 
 //
 // load the frames
+// bones_was_here: memcpy() used here to prevent misaligned access with struct-based parsing
 //
 	startframes = datapointer;
 	realframes = 0;
 	for (i = 0;i < loadmodel->numframes;i++)
 	{
-		pinframetype = (dspriteframetype_t *)datapointer;
+		memcpy(&pinframetype, datapointer, sizeof(dspriteframetype_t));
 		datapointer += sizeof(dspriteframetype_t);
 
-		if (LittleLong (pinframetype->type) == SPR_SINGLE)
+		if (LittleLong (pinframetype.type) == SPR_SINGLE)
 			groupframes = 1;
 		else
 		{
-			pingroup = (dspritegroup_t *)datapointer;
+			memcpy(&pingroup, datapointer, sizeof(dspritegroup_t));
 			datapointer += sizeof(dspritegroup_t);
 
-			groupframes = LittleLong(pingroup->numframes);
+			groupframes = LittleLong(pingroup.numframes);
 
 			datapointer += sizeof(dspriteinterval_t) * groupframes;
 		}
 
 		for (j = 0;j < groupframes;j++)
 		{
-			pinframe = (dspriteframe_t *)datapointer;
+			memcpy(&pinframe, datapointer, sizeof(dspriteframe_t));
 			if (version == SPRITE32_VERSION)
-				datapointer += sizeof(dspriteframe_t) + LittleLong(pinframe->width) * LittleLong(pinframe->height) * 4;
+				datapointer += sizeof(dspriteframe_t) + LittleLong(pinframe.width) * LittleLong(pinframe.height) * 4;
 			else //if (version == SPRITE_VERSION || version == SPRITEHL_VERSION)
-				datapointer += sizeof(dspriteframe_t) + LittleLong(pinframe->width) * LittleLong(pinframe->height);
+				datapointer += sizeof(dspriteframe_t) + LittleLong(pinframe.width) * LittleLong(pinframe.height);
 		}
 		realframes += groupframes;
 	}
@@ -155,25 +156,25 @@ static void Mod_Sprite_SharedSetup(const unsigned char *datapointer, int version
 	realframes = 0;
 	for (i = 0;i < loadmodel->numframes;i++)
 	{
-		pinframetype = (dspriteframetype_t *)datapointer;
+		memcpy(&pinframetype, datapointer, sizeof(dspriteframetype_t));
 		datapointer += sizeof(dspriteframetype_t);
 
-		if (LittleLong (pinframetype->type) == SPR_SINGLE)
+		if (LittleLong (pinframetype.type) == SPR_SINGLE)
 		{
 			groupframes = 1;
 			interval = 0.1f;
 		}
 		else
 		{
-			pingroup = (dspritegroup_t *)datapointer;
+			memcpy(&pingroup, datapointer, sizeof(dspritegroup_t));
 			datapointer += sizeof(dspritegroup_t);
 
-			groupframes = LittleLong(pingroup->numframes);
+			groupframes = LittleLong(pingroup.numframes);
 
-			pinintervals = (dspriteinterval_t *)datapointer;
+			memcpy(&pinintervals, datapointer, sizeof(dspriteinterval_t));
 			datapointer += sizeof(dspriteinterval_t) * groupframes;
 
-			interval = LittleFloat(pinintervals[0].interval);
+			interval = LittleFloat(pinintervals.interval);
 			if (interval < 0.01f)
 				Host_Error("Mod_Sprite_SharedSetup: invalid interval");
 		}
@@ -186,13 +187,13 @@ static void Mod_Sprite_SharedSetup(const unsigned char *datapointer, int version
 
 		for (j = 0;j < groupframes;j++)
 		{
-			pinframe = (dspriteframe_t *)datapointer;
+			memcpy(&pinframe, datapointer, sizeof(dspriteframe_t));
 			datapointer += sizeof(dspriteframe_t);
 
-			origin[0] = LittleLong (pinframe->origin[0]);
-			origin[1] = LittleLong (pinframe->origin[1]);
-			width = LittleLong (pinframe->width);
-			height = LittleLong (pinframe->height);
+			origin[0] = LittleLong (pinframe.origin[0]);
+			origin[1] = LittleLong (pinframe.origin[1]);
+			width = LittleLong (pinframe.width);
+			height = LittleLong (pinframe.height);
 
 			loadmodel->sprite.sprdata_frames[realframes].left = origin[0];
 			loadmodel->sprite.sprdata_frames[realframes].right = origin[0] + width;
@@ -298,7 +299,6 @@ void Mod_IDSP_Load(model_t *mod, void *buffer, void *bufferend)
 		unsigned char palette[256][4];
 		const unsigned char *in;
 		dspritehl_t *pinhlsprite;
-		unsigned char *aligneddata;
 
 		pinhlsprite = (dspritehl_t *)datapointer;
 		datapointer += sizeof(dspritehl_t);
@@ -362,11 +362,7 @@ void Mod_IDSP_Load(model_t *mod, void *buffer, void *bufferend)
 			return;
 		}
 
-		// the above datapointer arithmetic causes misaligned access
-		aligneddata = (unsigned char *)Mem_Alloc(tempmempool, (unsigned char *)bufferend - datapointer);
-		memcpy(aligneddata, datapointer, (unsigned char *)bufferend - datapointer);
-		Mod_Sprite_SharedSetup(aligneddata, LittleLong (pinhlsprite->version), (unsigned int *)(&palette[0][0]), rendermode == SPRHL_ADDITIVE);
-		Mem_Free(aligneddata);
+		Mod_Sprite_SharedSetup(datapointer, LittleLong (pinhlsprite->version), (unsigned int *)(&palette[0][0]), rendermode == SPRHL_ADDITIVE);
 	}
 	else
 		Host_Error("Mod_IDSP_Load: %s has wrong version number (%i). Only %i (quake), %i (HalfLife), and %i (sprite32) supported",

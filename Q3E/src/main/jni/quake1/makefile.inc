@@ -128,7 +128,7 @@ OBJ_MENU= \
 # built to give the executable a proper date string
 OBJ_SV= builddate.c sys_null.o vid_null.o thread_null.o $(OBJ_SND_NULL) $(OBJ_COMMON)
 OBJ_SDL= builddate.c sys_sdl.o vid_sdl.o thread_sdl.o $(OBJ_MENU) $(OBJ_SND_COMMON) $(OBJ_SND_XMP) snd_sdl.o $(OBJ_VIDEO_CAPTURE) $(OBJ_COMMON)
-
+OBJ_WASM= builddate.c sys_wasm.o vid_sdl.o thread_sdl.o $(OBJ_MENU) $(OBJ_SND_COMMON) $(OBJ_SND_XMP) snd_sdl.o $(OBJ_VIDEO_CAPTURE) $(OBJ_COMMON)
 
 # Compilation
 # -D_POSIX_C_SOURCE=200809L doesn't enable all of POSIX 2008, wtf?
@@ -139,7 +139,7 @@ else
 	CFLAGS_STANDARD=
 endif
 
-CFLAGS_WARNINGS=-Wall -Werror=vla -Werror=c++-compat -Wwrite-strings -Wshadow -Wold-style-definition -Wstrict-prototypes -Wsign-compare -Wdeclaration-after-statement -Wmissing-prototypes
+CFLAGS_WARNINGS=-Wall -Werror=vla -Wc++-compat -Wwrite-strings -Wshadow -Wold-style-definition -Wstrict-prototypes -Wsign-compare -Wdeclaration-after-statement -Wmissing-prototypes
 
 CFLAGS_TCC=
 ifeq ($(CC), tcc)
@@ -212,6 +212,8 @@ EXE_UNIXSV=darkplaces-dedicated
 EXE_UNIXSDL=darkplaces-sdl
 EXE_UNIXSVNEXUIZ=nexuiz-dedicated
 EXE_UNIXSDLNEXUIZ=nexuiz-sdl
+EXE_WASMJS=darkplaces-wasm.js
+EXE_WASM=darkplaces-wasm.html
 
 CMD_UNIXRM=rm -rf
 CMD_UNIXCP=cp -f
@@ -225,6 +227,47 @@ CMD_UNIXMKDIR=mkdir -p
 # with a much smaller binary than with full debug symbols
 LDFLAGS_LINUXSV=$(LDFLAGS_UNIXCOMMON) -lrt -ldl -rdynamic
 LDFLAGS_LINUXSDL=$(LDFLAGS_UNIXCOMMON) -lrt -ldl -rdynamic $(LDFLAGS_UNIXSDL)
+
+
+##### WASM specific variables #####
+
+LDFLAGS_WASMJS=$(LDFLAGS_UNIXCOMMON) -s USE_SDL=2 \
+                                   -s USE_LIBPNG=1 \
+                                   -s USE_LIBJPEG=1 \
+                                   -s USE_ZLIB=1 \
+                                   -s INITIAL_MEMORY=128mb \
+                                   -s MAXIMUM_MEMORY=2gb \
+                                   -s SINGLE_FILE \
+                                   -s FULL_ES3 \
+                                   -s MIN_WEBGL_VERSION=2 \
+                                   -s MAX_WEBGL_VERSION=2 \
+                                   -s ALLOW_MEMORY_GROWTH=1 \
+                                   -s ASSERTIONS=1 \
+                                   -s STACK_SIZE=8mb \
+                                   -DUSE_GLES2 \
+                                   -lidbfs.js \
+                                   --pre-js ../../../wasm/pre.js \
+                                   -s EXPORTED_RUNTIME_METHODS=callMain,addRunDependency,removeRunDependency
+
+LDFLAGS_WASM=$(LDFLAGS_UNIXCOMMON) -s USE_SDL=2 \
+                                   -s USE_LIBPNG=1 \
+                                   -s USE_LIBJPEG=1 \
+                                   -s USE_ZLIB=1 \
+                                   -s INITIAL_MEMORY=128mb \
+                                   -s MAXIMUM_MEMORY=2gb \
+                                   -s SINGLE_FILE \
+                                   -s FULL_ES3 \
+                                   -s MIN_WEBGL_VERSION=2 \
+                                   -s MAX_WEBGL_VERSION=2 \
+                                   -s ALLOW_MEMORY_GROWTH=1 \
+                                   -s ASSERTIONS=1 \
+                                   -s STACK_SIZE=8mb \
+                                   -DUSE_GLES2 \
+                                   -lidbfs.js \
+                                   --pre-js ../../../wasm/standaloneprejs.js \
+                                   -s EXPORTED_RUNTIME_METHODS=callMain,addRunDependency,removeRunDependency \
+								   --shell-file ../../../wasm/standalone-shell.html \
+								   --embed-file ../../../wasm/preload@/preload
 
 
 ##### Mac OS X specific variables #####
@@ -256,8 +299,8 @@ WINDRES ?= windres
 
 # Link
 # see LDFLAGS_WINCOMMON in makefile
-LDFLAGS_WINSV=$(LDFLAGS_WINCOMMON) $(LIB_CRYPTO) $(LIB_CRYPTO_RIJNDAEL) -mconsole -lwinmm -lws2_32 $(LIB_Z) $(LIB_JPEG)
-LDFLAGS_WINSDL=$(LDFLAGS_WINCOMMON) $(LIB_CRYPTO) $(LIB_CRYPTO_RIJNDAEL) $(LDFLAGS_UNIXSDL) -lwinmm -lws2_32 $(LIB_Z) $(LIB_JPEG) $(LIB_SND_XMP)
+LDFLAGS_WINSV=$(LDFLAGS_WINCOMMON) $(LIB_CRYPTO) $(LIB_CRYPTO_RIJNDAEL) -mconsole -lwinmm -lws2_32 -Wl,--stack=0x800000 $(LIB_Z) $(LIB_JPEG)
+LDFLAGS_WINSDL=$(LDFLAGS_WINCOMMON) $(LIB_CRYPTO) $(LIB_CRYPTO_RIJNDAEL) $(LDFLAGS_UNIXSDL) -lwinmm -lws2_32 -Wl,--stack=0x800000 $(LIB_Z) $(LIB_JPEG) $(LIB_SND_XMP)
 EXE_WINSV=darkplaces-dedicated.exe
 EXE_WINSDL=darkplaces-sdl.exe
 EXE_WINSVNEXUIZ=nexuiz-dedicated.exe
@@ -270,7 +313,7 @@ VPATH := ../../../
 .PHONY : clean clean-profile help \
 	 debug profile release \
 	 sv-debug sv-profile sv-release \
-	 sdl-debug sdl-profile sdl-release
+	 sdl-debug sdl-profile sdl-release emscripten-release
 
 help:
 	@echo
@@ -300,6 +343,9 @@ help:
 	@echo "* $(MAKE) sdl-release-profile  : make SDL client (release version)"
 	@echo "* $(MAKE) sdl-release          : make SDL client (release version)"
 	@echo "* $(MAKE) sdl-nexuiz           : make SDL client with nexuiz icon (release version)"
+	@echo
+	@echo "* $(MAKE) emscripten-release   : make WASM client (release version)"
+	@echo "* $(MAKE) emscripten-standalone: make standalone WASM client (release version)"
 	@echo
 
 debug :
@@ -357,6 +403,24 @@ sdl-release :
 		DP_MAKE_TARGET=$(DP_MAKE_TARGET) \
 		EXE='$(EXE_SDL)' CFLAGS_FEATURES='$(CFLAGS_CLIENT)' CFLAGS_SDL='$(SDLCONFIG_CFLAGS)' LDFLAGS_COMMON='$(LDFLAGS_SDL)' LEVEL=1
 
+emscripten-release :
+	$(MAKE) wasm-release \
+		DP_MAKE_TARGET="wasm" \
+		EXE='$(EXE_WASMJS)' \
+		CFLAGS_FEATURES='$(CFLAGS_CLIENT)' \
+		CFLAGS_SDL='$(SDLCONFIG_CFLAGS)' \
+		LDFLAGS_COMMON='$(LDFLAGS_WASMJS)' \
+		LEVEL=1
+
+emscripten-standalone :
+	$(MAKE) wasm-release \
+		DP_MAKE_TARGET="wasm" \
+		EXE='$(EXE_WASM)' \
+		CFLAGS_FEATURES='$(CFLAGS_CLIENT) -DWASM_USER_ADJUSTABLE' \
+		CFLAGS_SDL='$(SDLCONFIG_CFLAGS)' \
+		LDFLAGS_COMMON='$(LDFLAGS_WASM)' \
+		LEVEL=1
+
 sdl-release-profile :
 	$(MAKE) bin-release-profile \
 		DP_MAKE_TARGET=$(DP_MAKE_TARGET) \
@@ -408,6 +472,16 @@ bin-release-profile :
 		CFLAGS='$(CFLAGS_COMMON) $(CFLAGS_FEATURES) $(CFLAGS_EXTRA) $(CFLAGS_RELEASE_PROFILE) $(OPTIM_RELEASE)'\
 		LDFLAGS='$(LDFLAGS_RELEASE) $(LDFLAGS_COMMON)' LEVEL=2
 	$(STRIP) $(EXE)
+
+wasm-release :
+	$(CHECKLEVEL1)
+	@echo
+	@echo '========== $(EXE) (release) =========='
+	$(MAKE) prepare BUILD_DIR=build-obj/release/$(EXE)
+	$(MAKE) -C build-obj/release/$(EXE) $(EXE) \
+		DP_MAKE_TARGET=$(DP_MAKE_TARGET) \
+		CFLAGS='$(CFLAGS_COMMON) $(CFLAGS_FEATURES) $(CFLAGS_EXTRA) $(CFLAGS_RELEASE) $(OPTIM_RELEASE)'\
+		LDFLAGS='$(LDFLAGS_RELEASE) $(LDFLAGS_COMMON)' LEVEL=2
 
 prepare :
 	$(CMD_MKDIR) $(BUILD_DIR)
@@ -483,6 +557,15 @@ $(EXE_SDL): $(OBJ_SDL) $(OBJ_ICON)
 	$(CHECKLEVEL2)
 	$(DO_LD)
 
+$(EXE_WASM): $(OBJ_WASM) $(OBJ_ICON)
+	$(CHECKLEVEL2)
+	$(DO_LD)
+
+$(EXE_WASMJS): $(OBJ_WASM) $(OBJ_ICON)
+	$(CHECKLEVEL2)
+	$(DO_LD)
+
+
 $(EXE_SVNEXUIZ): $(OBJ_SV) $(OBJ_ICON_NEXUIZ)
 	$(CHECKLEVEL2)
 	$(DO_LD)
@@ -497,6 +580,8 @@ $(EXE_SDLNEXUIZ): $(OBJ_SDL) $(OBJ_ICON_NEXUIZ)
 clean:
 	-$(CMD_RM) $(EXE_SV)
 	-$(CMD_RM) $(EXE_SDL)
+	-$(CMD_RM) $(EXE_WASM)
+	-$(CMD_RM) $(EXE_WASMJS)
 	-$(CMD_RM) $(EXE_SVNEXUIZ)
 	-$(CMD_RM) $(EXE_SDLNEXUIZ)
 	-$(CMD_RM) *.o

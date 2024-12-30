@@ -548,223 +548,130 @@ static void Cmd_Exec(cmd_state_t *cmd, const char *filename)
 	if (isdefaultcfg)
 	{
 		// special defaults for specific games go here, these execute before default.cfg
-		// Nehahra pushable crates malfunction in some levels if this is on
-		// Nehahra NPC AI is confused by blowupfallenzombies
+		// and after gamegroup defaults (see below)
 		switch(gamemode)
 		{
-		case GAME_NORMAL:
-			Cbuf_InsertText(cmd, "\n"
-"sv_gameplayfix_blowupfallenzombies 0\n"
-"sv_gameplayfix_findradiusdistancetobox 0\n"
-"sv_gameplayfix_grenadebouncedownslopes 0\n"
-"sv_gameplayfix_slidemoveprojectiles 0\n"
-"sv_gameplayfix_upwardvelocityclearsongroundflag 0\n"
-"sv_gameplayfix_setmodelrealbox 0\n"
-"sv_gameplayfix_droptofloorstartsolid 0\n"
-"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 0\n"
-"sv_gameplayfix_noairborncorpse 0\n"
-"sv_gameplayfix_noairborncorpse_allowsuspendeditems 0\n"
-"sv_gameplayfix_easierwaterjump 0\n"
-"sv_gameplayfix_delayprojectiles 0\n"
-"sv_gameplayfix_multiplethinksperframe 0\n"
-"sv_gameplayfix_fixedcheckwatertransition 0\n"
-"sv_gameplayfix_q1bsptracelinereportstexture 0\n"
-"sv_gameplayfix_swiminbmodels 0\n"
-"sv_gameplayfix_downtracesupportsongroundflag 0\n"
-"sys_ticrate 0.01388889\n"
-"r_shadow_gloss 1\n"
-"r_shadow_bumpscale_basetexture 0\n"
-"csqc_polygons_defaultmaterial_nocullface 0\n"
-				);
-			break;
 		case GAME_NEHAHRA:
 			Cbuf_InsertText(cmd, "\n"
-"sv_gameplayfix_blowupfallenzombies 0\n"
-"sv_gameplayfix_findradiusdistancetobox 0\n"
-"sv_gameplayfix_grenadebouncedownslopes 0\n"
-"sv_gameplayfix_slidemoveprojectiles 0\n"
+// Nehahra pushable crates malfunction in some levels if this is on
 "sv_gameplayfix_upwardvelocityclearsongroundflag 0\n"
-"sv_gameplayfix_setmodelrealbox 0\n"
-"sv_gameplayfix_droptofloorstartsolid 0\n"
-"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 0\n"
-"sv_gameplayfix_noairborncorpse 0\n"
-"sv_gameplayfix_noairborncorpse_allowsuspendeditems 0\n"
-"sv_gameplayfix_easierwaterjump 0\n"
-"sv_gameplayfix_delayprojectiles 0\n"
-"sv_gameplayfix_multiplethinksperframe 0\n"
-"sv_gameplayfix_fixedcheckwatertransition 0\n"
-"sv_gameplayfix_q1bsptracelinereportstexture 0\n"
-"sv_gameplayfix_swiminbmodels 0\n"
-"sv_gameplayfix_downtracesupportsongroundflag 0\n"
-"sys_ticrate 0.01388889\n"
-"r_shadow_gloss 1\n"
-"r_shadow_bumpscale_basetexture 0\n"
-"csqc_polygons_defaultmaterial_nocullface 0\n"
+// Nehahra NPC AI is confused by blowupfallenzombies
+"sv_gameplayfix_blowupfallenzombies 0\n"
 				);
 			break;
-		// hipnotic mission pack has issues in their 'friendly monster' ai, which seem to attempt to attack themselves for some reason when findradius() returns non-solid entities.
-		// hipnotic mission pack has issues with bobbing water entities 'jittering' between different heights on alternate frames at the default 0.0138889 ticrate, 0.02 avoids this issue
-		// hipnotic mission pack has issues in their proximity mine sticking code, which causes them to bounce off.
 		case GAME_HIPNOTIC:
 		case GAME_QUOTH:
 			Cbuf_InsertText(cmd, "\n"
+// hipnotic mission pack has issues in their 'friendly monster' ai, which seem to attempt to attack themselves for some reason when findradius() returns non-solid entities.
 "sv_gameplayfix_blowupfallenzombies 0\n"
-"sv_gameplayfix_findradiusdistancetobox 0\n"
-"sv_gameplayfix_grenadebouncedownslopes 0\n"
-"sv_gameplayfix_slidemoveprojectiles 0\n"
-"sv_gameplayfix_upwardvelocityclearsongroundflag 0\n"
-"sv_gameplayfix_setmodelrealbox 0\n"
-"sv_gameplayfix_droptofloorstartsolid 0\n"
-"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 0\n"
-"sv_gameplayfix_noairborncorpse 0\n"
-"sv_gameplayfix_noairborncorpse_allowsuspendeditems 0\n"
-"sv_gameplayfix_easierwaterjump 0\n"
-"sv_gameplayfix_delayprojectiles 0\n"
-"sv_gameplayfix_multiplethinksperframe 0\n"
-"sv_gameplayfix_fixedcheckwatertransition 0\n"
-"sv_gameplayfix_q1bsptracelinereportstexture 0\n"
-"sv_gameplayfix_swiminbmodels 0\n"
-"sv_gameplayfix_downtracesupportsongroundflag 0\n"
+// hipnotic mission pack has issues with bobbing water entities 'jittering' between different heights on alternate frames at the default 0.0138889 ticrate, 0.02 avoids this issue
 "sys_ticrate 0.02\n"
-"r_shadow_gloss 1\n"
-"r_shadow_bumpscale_basetexture 0\n"
-"csqc_polygons_defaultmaterial_nocullface 0\n"
+// hipnotic mission pack has issues in their proximity mine sticking code, which causes them to bounce off.
+"sv_gameplayfix_slidemoveprojectiles 0\n"
 				);
 			break;
-		// rogue mission pack has a guardian boss that does not wake up if findradius returns one of the entities around its spawn area
 		case GAME_ROGUE:
 			Cbuf_InsertText(cmd, "\n"
+// rogue mission pack has a guardian boss that does not wake up if findradius returns one of the entities around its spawn area
 "sv_gameplayfix_blowupfallenzombies 0\n"
-"sv_gameplayfix_findradiusdistancetobox 0\n"
-"sv_gameplayfix_grenadebouncedownslopes 0\n"
-"sv_gameplayfix_slidemoveprojectiles 0\n"
-"sv_gameplayfix_upwardvelocityclearsongroundflag 0\n"
-"sv_gameplayfix_setmodelrealbox 0\n"
-"sv_gameplayfix_droptofloorstartsolid 0\n"
-"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 0\n"
-"sv_gameplayfix_noairborncorpse 0\n"
-"sv_gameplayfix_noairborncorpse_allowsuspendeditems 0\n"
-"sv_gameplayfix_easierwaterjump 0\n"
-"sv_gameplayfix_delayprojectiles 0\n"
-"sv_gameplayfix_multiplethinksperframe 0\n"
-"sv_gameplayfix_fixedcheckwatertransition 0\n"
-"sv_gameplayfix_q1bsptracelinereportstexture 0\n"
-"sv_gameplayfix_swiminbmodels 0\n"
-"sv_gameplayfix_downtracesupportsongroundflag 0\n"
-"sys_ticrate 0.01388889\n"
-"r_shadow_gloss 1\n"
-"r_shadow_bumpscale_basetexture 0\n"
-"csqc_polygons_defaultmaterial_nocullface 0\n"
+// On r2m3 3 of the 4 monster_lava_man are placed in solid clips so droptofloor() moves them to a lower level if tracebox can
+// move them out of solid, if it can't they're stuck (original behaviour), only proper fix is to move them with a .ent file.
+"mod_q1bsp_traceoutofsolid 0\n"
 				);
 			break;
 		case GAME_TENEBRAE:
+			if (cls.state != ca_dedicated)
 			Cbuf_InsertText(cmd, "\n"
-"sv_gameplayfix_blowupfallenzombies 0\n"
-"sv_gameplayfix_findradiusdistancetobox 0\n"
-"sv_gameplayfix_grenadebouncedownslopes 0\n"
-"sv_gameplayfix_slidemoveprojectiles 0\n"
-"sv_gameplayfix_upwardvelocityclearsongroundflag 0\n"
-"sv_gameplayfix_setmodelrealbox 0\n"
-"sv_gameplayfix_droptofloorstartsolid 0\n"
-"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 0\n"
-"sv_gameplayfix_noairborncorpse 0\n"
-"sv_gameplayfix_noairborncorpse_allowsuspendeditems 0\n"
-"sv_gameplayfix_easierwaterjump 0\n"
-"sv_gameplayfix_delayprojectiles 0\n"
-"sv_gameplayfix_multiplethinksperframe 0\n"
-"sv_gameplayfix_fixedcheckwatertransition 0\n"
-"sv_gameplayfix_q1bsptracelinereportstexture 0\n"
-"sv_gameplayfix_swiminbmodels 0\n"
-"sv_gameplayfix_downtracesupportsongroundflag 0\n"
-"sys_ticrate 0.01388889\n"
 "r_shadow_gloss 2\n"
 "r_shadow_bumpscale_basetexture 4\n"
-"csqc_polygons_defaultmaterial_nocullface 0\n"
 				);
 			break;
 		case GAME_NEXUIZ:
 			Cbuf_InsertText(cmd, "\n"
-"sv_gameplayfix_blowupfallenzombies 1\n"
-"sv_gameplayfix_findradiusdistancetobox 1\n"
-"sv_gameplayfix_grenadebouncedownslopes 1\n"
-"sv_gameplayfix_slidemoveprojectiles 1\n"
-"sv_gameplayfix_upwardvelocityclearsongroundflag 1\n"
-"sv_gameplayfix_setmodelrealbox 1\n"
-"sv_gameplayfix_droptofloorstartsolid 1\n"
-"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 1\n"
-"sv_gameplayfix_noairborncorpse 1\n"
-"sv_gameplayfix_noairborncorpse_allowsuspendeditems 1\n"
-"sv_gameplayfix_easierwaterjump 1\n"
-"sv_gameplayfix_delayprojectiles 1\n"
-"sv_gameplayfix_multiplethinksperframe 1\n"
-"sv_gameplayfix_fixedcheckwatertransition 1\n"
-"sv_gameplayfix_q1bsptracelinereportstexture 1\n"
-"sv_gameplayfix_swiminbmodels 1\n"
-"sv_gameplayfix_downtracesupportsongroundflag 1\n"
-"sys_ticrate 0.01388889\n"
 "sv_gameplayfix_q2airaccelerate 1\n"
 "sv_gameplayfix_stepmultipletimes 1\n"
+				);
+			if (cls.state != ca_dedicated)
+				Cbuf_InsertText(cmd, "\n"
 "csqc_polygons_defaultmaterial_nocullface 1\n"
 "con_chatsound_team_mask 13\n"
 				);
 			break;
 		case GAME_XONOTIC:
 		case GAME_VORETOURNAMENT:
-			// compatibility for versions prior to 2020-05-25, this can be overridden in newer versions to get the default behavior and be consistent with FTEQW engine
 			Cbuf_InsertText(cmd, "\n"
-"csqc_polygons_defaultmaterial_nocullface 1\n"
-"con_chatsound_team_mask 13\n"
+			// compatibility for versions prior to 2020-05-25, this can be overridden in newer versions to get the default behavior and be consistent with FTEQW engine
 "sv_qcstats 1\n"
 "mod_q1bsp_zero_hullsize_cutoff 8.03125\n"
 				);
-			break;
-		// Steel Storm: Burning Retribution csqc misinterprets CSQC_InputEvent if type is a value other than 0 or 1
-		case GAME_STEELSTORM:
+			if (cls.state != ca_dedicated)
 			Cbuf_InsertText(cmd, "\n"
-"sv_gameplayfix_blowupfallenzombies 1\n"
-"sv_gameplayfix_findradiusdistancetobox 1\n"
-"sv_gameplayfix_grenadebouncedownslopes 1\n"
-"sv_gameplayfix_slidemoveprojectiles 1\n"
-"sv_gameplayfix_upwardvelocityclearsongroundflag 1\n"
-"sv_gameplayfix_setmodelrealbox 1\n"
-"sv_gameplayfix_droptofloorstartsolid 1\n"
-"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 1\n"
-"sv_gameplayfix_noairborncorpse 1\n"
-"sv_gameplayfix_noairborncorpse_allowsuspendeditems 1\n"
-"sv_gameplayfix_easierwaterjump 1\n"
-"sv_gameplayfix_delayprojectiles 1\n"
-"sv_gameplayfix_multiplethinksperframe 1\n"
-"sv_gameplayfix_fixedcheckwatertransition 1\n"
-"sv_gameplayfix_q1bsptracelinereportstexture 1\n"
-"sv_gameplayfix_swiminbmodels 1\n"
-"sv_gameplayfix_downtracesupportsongroundflag 1\n"
-"sys_ticrate 0.01388889\n"
+"csqc_polygons_defaultmaterial_nocullface 1\n"
+"con_chatsound_team_mask 13\n"
+				);
+			break;
+		case GAME_STEELSTORM:
+			if (cls.state != ca_dedicated)
+			Cbuf_InsertText(cmd, "\n"
+// Steel Storm: Burning Retribution csqc misinterprets CSQC_InputEvent if type is a value other than 0 or 1
 "cl_csqc_generatemousemoveevents 0\n"
 "csqc_polygons_defaultmaterial_nocullface 1\n"
 				);
 			break;
-		default:
+		case GAME_QUAKE15:
 			Cbuf_InsertText(cmd, "\n"
-"sv_gameplayfix_blowupfallenzombies 1\n"
-"sv_gameplayfix_findradiusdistancetobox 1\n"
-"sv_gameplayfix_grenadebouncedownslopes 1\n"
-"sv_gameplayfix_slidemoveprojectiles 1\n"
-"sv_gameplayfix_upwardvelocityclearsongroundflag 1\n"
-"sv_gameplayfix_setmodelrealbox 1\n"
-"sv_gameplayfix_droptofloorstartsolid 1\n"
-"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 1\n"
-"sv_gameplayfix_noairborncorpse 1\n"
-"sv_gameplayfix_noairborncorpse_allowsuspendeditems 1\n"
-"sv_gameplayfix_easierwaterjump 1\n"
-"sv_gameplayfix_delayprojectiles 1\n"
-"sv_gameplayfix_multiplethinksperframe 1\n"
-"sv_gameplayfix_fixedcheckwatertransition 1\n"
-"sv_gameplayfix_q1bsptracelinereportstexture 1\n"
-"sv_gameplayfix_swiminbmodels 1\n"
-"sv_gameplayfix_downtracesupportsongroundflag 1\n"
-"sys_ticrate 0.01388889\n"
-"csqc_polygons_defaultmaterial_nocullface 0\n"
+// Corpses slide around without this bug from old DP versions
+"sv_gameplayfix_impactbeforeonground 1\n"
+// Reduce likelihood of incorrectly placed corpses sinking into the ground
+"sv_gameplayfix_unstickentities 1\n"
+			);
+			break;
+		case GAME_AD:
+			if (cls.state != ca_dedicated)
+				Cbuf_InsertText(cmd, "\n"
+// Arcane Dimensions V1.80 Patch 1 assumes engines that don't pass values to CSQC_Init() are DP,
+// instead of doing a workaround there we can give it what it really wants (fixes offscreen HUD).
+"csqc_lowres 1\n"
+					);
+			break;
+		case GAME_CTSJ2:
+			Cbuf_InsertText(cmd, "\n"
+// Doesn't completely initialise during worldspawn and the init frames, sometimes causing the
+// essential item on start.bsp to not spawn when the local client connects and spawns "too fast".
+"sv_init_frame_count 3\n"
+			);
+		default:
+			break;
+		}
+
+		// special defaults for game groups go here, these execute before the specific games above
+		switch (com_startupgamegroup)
+		{
+		case GAME_NORMAL: // id1 Quake and its mods
+			Cbuf_InsertText(cmd, "\n"
+"sv_gameplayfix_blowupfallenzombies 0\n"
+"sv_gameplayfix_findradiusdistancetobox 0\n"
+"sv_gameplayfix_grenadebouncedownslopes 0\n"
+"sv_gameplayfix_slidemoveprojectiles 0\n"
+"sv_gameplayfix_upwardvelocityclearsongroundflag 0\n"
+"sv_gameplayfix_setmodelrealbox 0\n"
+"sv_gameplayfix_droptofloorstartsolid 0\n"
+"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 0\n"
+"sv_gameplayfix_noairborncorpse 0\n"
+"sv_gameplayfix_noairborncorpse_allowsuspendeditems 0\n"
+"sv_gameplayfix_easierwaterjump 0\n"
+"sv_gameplayfix_delayprojectiles 0\n"
+"sv_gameplayfix_multiplethinksperframe 0\n"
+"sv_gameplayfix_fixedcheckwatertransition 0\n"
+"sv_gameplayfix_q1bsptracelinereportstexture 0\n"
+"sv_gameplayfix_swiminbmodels 0\n"
+"sv_gameplayfix_downtracesupportsongroundflag 0\n"
+// Work around low brightness and poor legibility of Quake font
+"r_textbrightness 0.25\n"
+"r_textcontrast 1.25\n"
 				);
+			break;
+		default:
 			break;
 		}
 	}

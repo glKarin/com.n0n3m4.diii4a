@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="">
+	<head>
+		<meta charset="UTF-8" />
+		<title>DarkPlaces Quake WASM</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<meta name="description" content="" />
+		<link rel="icon" href="favicon.png">
+		<style>
+			html, body {
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas" oncontextmenu="event.preventDefault()" style="width: auto; height: auto;"></canvas>
+		<script type='text/javascript'>
+			var Module = {
+				canvas: (function() { return document.getElementById('canvas'); })(),
+				files: {
+					"id1/pak0.pak": "pak0.pak",
+					"id1/pak1.pak": "pak1.pak",
+					"id1/autoexec.cfg": "autoexec.cfg"
+				},
+				arguments: ['-game', 'id1', '+crosshair', '1']  // Arguments appended to the default arguments, can be used to change the gamedir
+			};
+		</script>
+		<script type="text/javascript" src="darkplaces-wasm.js"></script>
+	</body>
+</html>

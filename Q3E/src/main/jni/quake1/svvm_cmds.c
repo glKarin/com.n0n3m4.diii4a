@@ -781,8 +781,7 @@ static void VM_SV_tracetoss(prvm_prog_t *prog)
 
 //============================================================================
 
-static int checkpvsbytes;
-static unsigned char checkpvs[MAX_MAP_LEAFS/8];
+static unsigned char *checkpvs;
 
 static int VM_SV_newcheckclient(prvm_prog_t *prog, int check)
 {
@@ -816,9 +815,10 @@ static int VM_SV_newcheckclient(prvm_prog_t *prog, int check)
 
 // get the PVS for the entity
 	VectorAdd(PRVM_serveredictvector(ent, origin), PRVM_serveredictvector(ent, view_ofs), org);
-	checkpvsbytes = 0;
 	if (sv.worldmodel && sv.worldmodel->brush.FatPVS)
-		checkpvsbytes = sv.worldmodel->brush.FatPVS(sv.worldmodel, org, 0, checkpvs, sizeof(checkpvs), false);
+		sv.worldmodel->brush.FatPVS(sv.worldmodel, org, 0, &checkpvs, sv_mempool, false);
+	else
+		checkpvs = NULL;
 
 	return i;
 }
@@ -864,7 +864,7 @@ static void VM_SV_checkclient(prvm_prog_t *prog)
 	// if current entity can't possibly see the check entity, return 0
 	self = PRVM_PROG_TO_EDICT(PRVM_serverglobaledict(self));
 	VectorAdd(PRVM_serveredictvector(self, origin), PRVM_serveredictvector(self, view_ofs), view);
-	if (sv.worldmodel && checkpvsbytes && !sv.worldmodel->brush.BoxTouchingPVS(sv.worldmodel, checkpvs, view, view))
+	if (sv.worldmodel && checkpvs && !sv.worldmodel->brush.BoxTouchingPVS(sv.worldmodel, checkpvs, view, view))
 	{
 		c_notvis++;
 		VM_RETURN_EDICT(prog->edicts);
@@ -895,8 +895,7 @@ static void VM_SV_checkpvs(prvm_prog_t *prog)
 #if 1
 	unsigned char *pvs;
 #else
-	int fatpvsbytes;
-	unsigned char fatpvs[MAX_MAP_LEAFS/8];
+	unsigned char *fatpvs = NULL;
 #endif
 
 	VM_SAFEPARMCOUNT(2, VM_SV_checkpvs);
@@ -935,8 +934,8 @@ static void VM_SV_checkpvs(prvm_prog_t *prog)
 		PRVM_G_FLOAT(OFS_RETURN) = 3;
 		return;
 	}
-	fatpvsbytes = sv.worldmodel->brush.FatPVS(sv.worldmodel, viewpos, 8, fatpvs, sizeof(fatpvs), false);
-	if(!fatpvsbytes)
+	sv.worldmodel->brush.FatPVS(sv.worldmodel, viewpos, 8, &fatpvs, sv_mempool, false);
+	if(!fatpvs)
 	{
 		// viewpos isn't in any PVS... darn
 		PRVM_G_FLOAT(OFS_RETURN) = 2;

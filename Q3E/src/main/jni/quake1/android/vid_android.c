@@ -161,31 +161,11 @@ void IN_Move( void )
 //#define DEBUGSDLEVENTS
 void Sys_SDL_HandleEvents(void)
 {
-	static qbool sound_active = true;
-
 	VID_EnableJoystick(true);
 
 	Android_PollInput();
 
 	vid_activewindow = !vid_hidden && vid_hasfocus;
-
-	// enable/disable sound on focus gain/loss
-	if (vid_activewindow || !snd_mutewhenidle.integer)
-	{
-		if (!sound_active)
-		{
-			S_UnblockSound ();
-			sound_active = true;
-		}
-	}
-	else
-	{
-		if (sound_active)
-		{
-			S_BlockSound ();
-			sound_active = false;
-		}
-	}
 
 	if (!vid_activewindow || key_consoleactive || scr_loading)
 		VID_SetMouse(false, false);

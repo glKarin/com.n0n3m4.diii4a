@@ -39,14 +39,18 @@ typedef struct bih_node_s
 	// TODO: move bounds data to parent node and remove it from leafs?
 	float mins[3];
 	float maxs[3];
+	union {
+		struct{
 	// node indexes of children (always > this node's index)
 	int front;
 	int back;
 	// interval of children
 	float frontmin; // children[0]
 	float backmax; // children[1]
+		};
 	// BIH_UNORDERED uses this for a list of leafindex (all >= 0), -1 = end of list
 	int children[BIH_MAXUNORDEREDCHILDREN];
+	};
 }
 bih_node_t;
 

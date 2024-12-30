@@ -63,11 +63,7 @@ cvar_t con_chatsound_team_file = {CF_CLIENT, "con_chatsound_team_file","sound/mi
 cvar_t con_chatsound_team_mask = {CF_CLIENT, "con_chatsound_team_mask","40","Magic ASCII code that denotes a team chat message"};
 
 cvar_t sys_specialcharactertranslation = {CF_CLIENT | CF_SERVER, "sys_specialcharactertranslation", "1", "terminal console conchars to ASCII translation (set to 0 if your conchars.tga is for an 8bit character set or if you want raw output)"};
-#ifdef WIN32
-cvar_t sys_colortranslation = {CF_CLIENT | CF_SERVER, "sys_colortranslation", "0", "terminal console color translation (supported values: 0 = strip color codes, 1 = translate to ANSI codes, 2 = no translation)"};
-#else
-cvar_t sys_colortranslation = {CF_CLIENT | CF_SERVER, "sys_colortranslation", "1", "terminal console color translation (supported values: 0 = strip color codes, 1 = translate to ANSI codes, 2 = no translation)"};
-#endif
+cvar_t sys_colortranslation = {CF_CLIENT | CF_SERVER, "sys_colortranslation", "1", "terminal console color translation (supported values: -1 = print codes without translation, 0 = strip color codes, 1 = translate to ANSI codes, 2 = translate DP RGB to 24-bit and Quake colors to ANSI, 3 = translate all colors to 24-bit RGB)"};
 
 
 cvar_t con_nickcompletion = {CF_CLIENT | CF_ARCHIVE, "con_nickcompletion", "1", "tab-complete nicks in console and message input"};
@@ -876,6 +872,15 @@ void Con_Init (void)
 
 	Cvar_RegisterVariable (&sys_colortranslation);
 	Cvar_RegisterVariable (&sys_specialcharactertranslation);
+#if defined(__linux__)
+	// Linux terminals natively support RGB 8bpc codes or convert them to a palette.
+	Cvar_SetQuick(&sys_colortranslation, "2");
+#elif defined(WIN32)
+	// Windows 10 default PowerShell and cmd.exe have no RGB or ANSI support by default.
+	// TODO: it can be enabled on current versions using a platform-specific call,
+	// issue: https://gitlab.com/xonotic/darkplaces/-/issues/426
+	Cvar_SetQuick(&sys_colortranslation, "0");
+#endif
 
 	Cvar_RegisterVariable (&log_file);
 	Cvar_RegisterVariable (&log_file_stripcolors);
@@ -1151,6 +1156,8 @@ Con_MaskPrint
 */
 extern cvar_t timestamps;
 extern cvar_t timeformat;
+extern cvar_t r_textcontrast;
+extern cvar_t r_textbrightness;
 void Con_MaskPrint(unsigned additionalmask, const char *msg)
 {
 	static unsigned mask = 0;
@@ -1166,7 +1173,6 @@ void Con_MaskPrint(unsigned additionalmask, const char *msg)
 		// if this is the beginning of a new line, print timestamp
 		if (index == 0)
 		{
-			const char *timestamp = timestamps.integer ? Sys_TimeString(timeformat.string) : "";
 			// reset the color
 			// FIXME: 1. perhaps we should use a terminal system 2. use a constant instead of 7!
 			line[index++] = STRING_COLOR_TAG;
@@ -1198,15 +1204,15 @@ void Con_MaskPrint(unsigned additionalmask, const char *msg)
 				Con_Rcon_AddChar(*msg);
 			}
 			// store timestamp
-			for (;*timestamp;index++, timestamp++)
-				if (index < (int)sizeof(line) - 2)
-					line[index] = *timestamp;
+			if (timestamps.integer)
+				index += Sys_TimeString(&line[index], sizeof(line) - index, timeformat.string);
 			// add the mask
 			mask |= additionalmask;
 		}
 		// append the character
 		line[index++] = *msg;
 		// if this is a newline character, we have a complete line to print
+		// bones_was_here: why do we only use half the line buffer?
 		if (*msg == '\n' || index >= (int)sizeof(line) / 2)
 		{
 			// terminate the line
@@ -1242,15 +1248,20 @@ void Con_MaskPrint(unsigned additionalmask, const char *msg)
 					}
 				}
 
-				if(sys_colortranslation.integer == 1) // ANSI
+				if(sys_colortranslation.integer > 0) // ANSI, RGB, or both
 				{
-					static char printline[MAX_INPUTLINE * 4 + 3];
+					// ANSI translation:
 						// 2 can become 7 bytes, rounding that up to 8, and 3 bytes are added at the end
 						// a newline can transform into four bytes, but then prevents the three extra bytes from appearing
+					// 8bpc RGB brings new worst-cases:
+						// 5 can become 21 bytes, rounding that up to * 5, plenty of space for extra bytes at the end.
+						// sys_colortranslation 3: 2 can become 21 bytes, rounding that up to * 11
+					char printline[sizeof(line) * 11];
 					int lastcolor = 0;
 					const char *in;
 					char *out;
 					int color;
+					u8 rgb[3];
 					for(in = line, out = printline; *in; ++in)
 					{
 						switch(*in)
@@ -1258,23 +1269,66 @@ void Con_MaskPrint(unsigned additionalmask, const char *msg)
 							case STRING_COLOR_TAG:
 								if( in[1] == STRING_COLOR_RGB_TAG_CHAR && isxdigit(in[2]) && isxdigit(in[3]) && isxdigit(in[4]) )
 								{
-									char r = tolower(in[2]);
-									char g = tolower(in[3]);
-									char b = tolower(in[4]);
+									VectorCopy(in + 2, rgb);
 									// it's a hex digit already, so the else part needs no check --blub
-									if(isdigit(r)) r -= '0';
-									else r -= 87;
-									if(isdigit(g)) g -= '0';
-									else g -= 87;
-									if(isdigit(b)) b -= '0';
-									else b -= 87;
+									for (int i = 0; i < 3; ++i)
+									{
+										if (isdigit(rgb[i])) rgb[i] -= '0';
+										else rgb[i] = tolower(rgb[i]) - 87;
+										rgb[i] *= 17;
+									}
+
+									if (sys_colortranslation.integer > 1) // 8bpc RGB
+									{
+										char *p;
+										float B;
+
+										in += 4;
+									rgbout:
+										color = rgb[0]<<16 | rgb[1]<<8 | rgb[2] | /* disambiguates from quake colours */ 0x40000000;
+										if (lastcolor == color)
+											break;
+										else
+											lastcolor = color;
 									
-									color = Sys_Con_NearestColor(r * 17, g * 17, b * 17);
+										B = r_textbrightness.value * 255;
+										for (int i = 0; i < 3; ++i)
+											rgb[i] = bound(0, rgb[i] * r_textcontrast.value + B, 255);
+
+										// format must be decimal 0-255, max length is 21 bytes
+										if (sys_colortranslation.integer == 2)
+											memcpy(out, "\x1B[1;38;2", 8);
+										else
+											memcpy(out, "\x1B[0;38;2", 8);
+										out += 8;
+										for (int i = 0; i < 3; ++i)
+										{
+											*out++ = ';';
+											p = out += ((rgb[i] > 99) ? 3 : (rgb[i] > 9) ? 2 : 1);
+											do { *--p = (rgb[i] % 10) + '0';
+											} while ((rgb[i] /= 10) > 0);
+										}
+										*out++ = 'm';
+
+										break;
+									}
+									
+									color = Sys_Con_NearestColor(rgb[0], rgb[1], rgb[2]);
 									in += 3; // 3 only, the switch down there does the fourth
 								}
 								else
+								{
 									color = in[1];
 								
+									if (sys_colortranslation.integer == 3 && isdigit(color)) // Quake to RGB
+									{
+										color -= '0';
+										VectorScale(string_colors[color], 255 * string_colors[color][3], rgb);
+										++in;
+										goto rgbout;
+									}
+								}
+
 								switch(color)
 								{
 									case STRING_COLOR_TAG:
@@ -1359,13 +1413,13 @@ void Con_MaskPrint(unsigned additionalmask, const char *msg)
 					*out = '\0';
 					Sys_Print(printline, out - printline);
 				}
-				else if(sys_colortranslation.integer == 2) // Quake
+				else if(sys_colortranslation.integer == -1) // print as text
 				{
 					Sys_Print(line, index);
 				}
 				else // strip
 				{
-					static char printline[MAX_INPUTLINE]; // it can only get shorter here
+					char printline[MAX_INPUTLINE]; // it can only get shorter here
 					const char *in;
 					char *out;
 					for(in = line, out = printline; *in; ++in)
@@ -1501,6 +1555,112 @@ void Con_DPrintf(const char *fmt, ...)
 
 	Con_MaskPrint(CON_MASK_DEVELOPER, msg);
 }
+
+
+/**
+ * @brief      Returns a horizontal line
+ * @details    Returns a graphical horizontal line of length len, but never wider than the
+ *             console. Includes a newline, unless len is >= to the console width
+ * @note       Authored by johnfitz
+ *
+ * @param[in]  len   Length of the horizontal line
+ *
+ * @return     A string of the line
+ */
+const char *Con_Quakebar(int len, char *bar, size_t barsize)
+{
+	assert(barsize >= 5);
+
+	len = min(len, (int)barsize - 2);
+	len = min(len, con_linewidth);
+
+	bar[0] = '\35';
+	memset(&bar[1], '\36', len - 2);
+	bar[len - 1] = '\37';
+
+	if (len < con_linewidth)
+	{
+		bar[len] = '\n';
+		bar[len + 1] = 0;
+	}
+	else
+		bar[len] = 0;
+
+	return bar;
+}
+
+/**
+ * @brief      Left-pad a string with spaces to make it appear centered
+ * @note       Authored by johnfitz
+ *
+ * @param[in]  maxLineLength  Center-align
+ * @param[in]  fmt        A printf format string
+ * @param[in]  <unnamed>  Zero or more values used by fmt
+ */
+void Con_CenterPrintf(int maxLineLength, const char *fmt, ...)
+{
+	va_list argptr;
+	char    msg[MAX_INPUTLINE];  // the original message
+	char    spaces[21];          // buffer for spaces
+	char   *msgCursor, *lineEnding;
+	int     lineLength, msgLength;
+	size_t  indentSize;
+
+	va_start(argptr, fmt);
+	msgLength = dpvsnprintf(msg, sizeof (msg), fmt, argptr);
+	va_end(argptr);
+
+	if (msgLength < 0)
+	{
+		Con_Printf(CON_WARN "The message given to Con_CenterPrintf was too long\n");
+		return;
+	}
+
+	maxLineLength = min(maxLineLength, con_linewidth);
+
+	for (msgCursor = msg; *msgCursor;)
+	{
+		lineEnding = strchr(msgCursor, '\n');
+		if (lineEnding)
+		{
+			lineLength = lineEnding - msgCursor;  // print just the line
+			lineEnding++;  // set cursor to next character after new line
+		}
+		else // last line
+		{
+			lineLength = msgLength;  // print entire message
+			lineEnding = msgCursor + lineLength;  // set next line cursor to terminator
+		}
+
+		if (lineLength < maxLineLength)
+		{
+			indentSize = min(sizeof(spaces) - 1, (size_t)(maxLineLength - lineLength) / 2);
+			memset(spaces, ' ', indentSize);
+			spaces[indentSize] = 0;
+			Con_MaskPrintf(CON_MASK_HIDENOTIFY, "%s%.*s\n", spaces, lineLength, msgCursor);
+		}
+		else
+			Con_MaskPrintf(CON_MASK_HIDENOTIFY, "%.*s\n", lineLength, msgCursor);
+		msgLength -= lineEnding - msgCursor;  // Consume all characters until end of line
+		msgCursor = lineEnding;  // Update message cursor
+	}
+}
+
+/**
+ * @brief      Prints a center-aligned message to the console
+ * @note       Authored by johnfitz
+ *
+ * @param[in]  str   A multiline string to print
+ */
+void Con_CenterPrint(const char *str)
+{
+	char bar[42];
+
+	Con_MaskPrintf(CON_MASK_HIDENOTIFY, "%s", Con_Quakebar(40, bar, sizeof(bar)));
+	Con_CenterPrintf(40, "%s\n", str);
+	Con_MaskPrintf(CON_MASK_HIDENOTIFY, "%s", bar);
+}
+
 
 
 /*
@@ -1975,7 +2135,7 @@ Draws the console with the solid background
 The typing input line at the bottom should only be drawn if typing is allowed
 ================
 */
-void Con_DrawConsole (int lines)
+void Con_DrawConsole (int lines, qbool forcedfullscreen)
 {
 	float alpha, alpha0;
 	double sx, sy;
@@ -1997,7 +2157,7 @@ void Con_DrawConsole (int lines)
 	r_draw2d_force = true;
 
 // draw the background
-	alpha0 = cls.signon == SIGNONS ? scr_conalpha.value : 1.0f; // always full alpha when not in game
+	alpha0 = forcedfullscreen ? 1.0f : scr_conalpha.value; // always full alpha when not forced fullscreen
 	if((alpha = alpha0 * scr_conalphafactor.value) > 0)
 	{
 		sx = scr_conscroll_x.value;

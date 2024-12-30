@@ -445,7 +445,7 @@ void VM_bprint(prvm_prog_t *prog)
 
 	if(!sv.active)
 	{
-		VM_Warning(prog, "VM_bprint: game is not server(%s) !\n", prog->name);
+		VM_Warning(prog, "VM_bprint: server is not active!\n");
 		return;
 	}
 
@@ -474,7 +474,7 @@ void VM_sprint(prvm_prog_t *prog)
 	clientnum = (int)PRVM_G_FLOAT(OFS_PARM0);
 	if (!sv.active  || clientnum < 0 || clientnum >= svs.maxclients || !svs.clients[clientnum].active)
 	{
-		VM_Warning(prog, "VM_sprint: %s: invalid client or server is not active !\n", prog->name);
+		VM_Warning(prog, "VM_sprint: invalid client or server is not active!\n");
 		return;
 	}
 
@@ -637,14 +637,14 @@ void VM_localsound(prvm_prog_t *prog)
 		if(!S_LocalSoundEx(s, chan, vol))
 		{
 			PRVM_G_FLOAT(OFS_RETURN) = -4;
-			VM_Warning(prog, "VM_localsound: Failed to play %s for %s !\n", s, prog->name);
+			VM_Warning(prog, "VM_localsound: Failed to play %s !\n", s);
 			return;
 		}
 	}
 	else if(!S_LocalSound (s))
 	{
 		PRVM_G_FLOAT(OFS_RETURN) = -4;
-		VM_Warning(prog, "VM_localsound: Failed to play %s for %s !\n", s, prog->name);
+		VM_Warning(prog, "VM_localsound: Failed to play %s !\n", s);
 		return;
 	}
 
@@ -1390,7 +1390,7 @@ void VM_precache_sound(prvm_prog_t *prog)
 
 	if(snd_initialized.integer && !S_PrecacheSound(s, true, true))
 	{
-		VM_Warning(prog, "VM_precache_sound: Failed to load %s for %s\n", s, prog->name);
+		VM_Warning(prog, "VM_precache_sound: Failed to load %s !\n", s);
 		return;
 	}
 }
@@ -1596,7 +1596,7 @@ void VM_changelevel(prvm_prog_t *prog)
 
 	if(!sv.active)
 	{
-		VM_Warning(prog, "VM_changelevel: game is not server (%s)\n", prog->name);
+		VM_Warning(prog, "VM_changelevel: server is not active!\n");
 		return;
 	}
 
@@ -1910,7 +1910,7 @@ void VM_fopen(prvm_prog_t *prog)
 	if (filenum >= PRVM_MAX_OPENFILES)
 	{
 		PRVM_G_FLOAT(OFS_RETURN) = -2;
-		VM_Warning(prog, "VM_fopen: %s ran out of file handles (%i)\n", prog->name, PRVM_MAX_OPENFILES);
+		VM_Warning(prog, "VM_fopen: ran out of file handles (max %i)\n", PRVM_MAX_OPENFILES);
 		return;
 	}
 	filename = PRVM_G_STRING(OFS_PARM0);
@@ -1933,7 +1933,7 @@ void VM_fopen(prvm_prog_t *prog)
 		break;
 	default:
 		PRVM_G_FLOAT(OFS_RETURN) = -3;
-		VM_Warning(prog, "VM_fopen: %s: no such mode %i (valid: 0 = read, 1 = append, 2 = write)\n", prog->name, mode);
+		VM_Warning(prog, "VM_fopen: no such mode %i (valid: 0 = read, 1 = append, 2 = write)\n", mode);
 		return;
 	}
 
@@ -1941,7 +1941,7 @@ void VM_fopen(prvm_prog_t *prog)
 	{
 		PRVM_G_FLOAT(OFS_RETURN) = -1;
 		if (developer_extra.integer)
-			VM_Warning(prog, "VM_fopen: %s: %s mode %s failed\n", prog->name, filename, modestring);
+			VM_Warning(prog, "VM_fopen: %s mode %s failed\n", filename, modestring);
 	}
 	else
 	{
@@ -1969,12 +1969,12 @@ void VM_fclose(prvm_prog_t *prog)
 	filenum = (int)PRVM_G_FLOAT(OFS_PARM0);
 	if (filenum < 0 || filenum >= PRVM_MAX_OPENFILES)
 	{
-		VM_Warning(prog, "VM_fclose: invalid file handle %i used in %s\n", filenum, prog->name);
+		VM_Warning(prog, "VM_fclose: invalid file handle %i\n", filenum);
 		return;
 	}
 	if (prog->openfiles[filenum] == NULL)
 	{
-		VM_Warning(prog, "VM_fclose: no such file handle %i (or file has been closed) in %s\n", filenum, prog->name);
+		VM_Warning(prog, "VM_fclose: no such file handle %i (or file has been closed)\n", filenum);
 		return;
 	}
 	FS_Close(prog->openfiles[filenum]);
@@ -2007,12 +2007,12 @@ void VM_fgets(prvm_prog_t *prog)
 	filenum = (int)PRVM_G_FLOAT(OFS_PARM0);
 	if (filenum < 0 || filenum >= PRVM_MAX_OPENFILES)
 	{
-		VM_Warning(prog, "VM_fgets: invalid file handle %i used in %s\n", filenum, prog->name);
+		VM_Warning(prog, "VM_fgets: invalid file handle %i\n", filenum);
 		return;
 	}
 	if (prog->openfiles[filenum] == NULL)
 	{
-		VM_Warning(prog, "VM_fgets: no such file handle %i (or file has been closed) in %s\n", filenum, prog->name);
+		VM_Warning(prog, "VM_fgets: no such file handle %i (or file has been closed)\n", filenum);
 		return;
 	}
 	end = 0;
@@ -2057,12 +2057,12 @@ void VM_fputs(prvm_prog_t *prog)
 	filenum = (int)PRVM_G_FLOAT(OFS_PARM0);
 	if (filenum < 0 || filenum >= PRVM_MAX_OPENFILES)
 	{
-		VM_Warning(prog, "VM_fputs: invalid file handle %i used in %s\n", filenum, prog->name);
+		VM_Warning(prog, "VM_fputs: invalid file handle %i\n", filenum);
 		return;
 	}
 	if (prog->openfiles[filenum] == NULL)
 	{
-		VM_Warning(prog, "VM_fputs: no such file handle %i (or file has been closed) in %s\n", filenum, prog->name);
+		VM_Warning(prog, "VM_fputs: no such file handle %i (or file has been closed)\n", filenum);
 		return;
 	}
 	stringlength = VM_VarString(prog, 1, string, sizeof(string));
@@ -2096,7 +2096,7 @@ void VM_writetofile(prvm_prog_t *prog)
 	ent = PRVM_G_EDICT(OFS_PARM1);
 	if(ent->free)
 	{
-		VM_Warning(prog, "VM_writetofile: %s: entity %i is free !\n", prog->name, PRVM_NUM_FOR_EDICT(ent));
+		VM_Warning(prog, "VM_writetofile: entity %i is free!\n", PRVM_NUM_FOR_EDICT(ent));
 		return;
 	}
 
@@ -2133,7 +2133,7 @@ void VM_entityfieldname(prvm_prog_t *prog)
 
 	if (i < 0 || i >= prog->numfielddefs)
 	{
-		VM_Warning(prog, "VM_entityfieldname: %s: field index out of bounds\n", prog->name);
+		VM_Warning(prog, "VM_entityfieldname: field index out of bounds!\n");
 		PRVM_G_INT(OFS_RETURN) = PRVM_SetTempString(prog, "", 0);
 		return;
 	}
@@ -2157,7 +2157,7 @@ void VM_entityfieldtype(prvm_prog_t *prog)
 	
 	if (i < 0 || i >= prog->numfielddefs)
 	{
-		VM_Warning(prog, "VM_entityfieldtype: %s: field index out of bounds\n", prog->name);
+		VM_Warning(prog, "VM_entityfieldtype: field index out of bounds!\n");
 		PRVM_G_FLOAT(OFS_RETURN) = -1.0;
 		return;
 	}
@@ -2186,7 +2186,7 @@ void VM_getentityfieldstring(prvm_prog_t *prog)
 	
 	if (i < 0 || i >= prog->numfielddefs)
 	{
-		VM_Warning(prog, "VM_entityfielddata: %s: field index out of bounds\n", prog->name);
+		VM_Warning(prog, "VM_entityfielddata: field index out of bounds!\n");
 		PRVM_G_INT(OFS_RETURN) = PRVM_SetTempString(prog, "", 0);
 		return;
 	}
@@ -2198,7 +2198,7 @@ void VM_getentityfieldstring(prvm_prog_t *prog)
 	if(ent->free)
 	{
 		PRVM_G_INT(OFS_RETURN) = PRVM_SetTempString(prog, "", 0);
-		VM_Warning(prog, "VM_entityfielddata: %s: entity %i is free !\n", prog->name, PRVM_NUM_FOR_EDICT(ent));
+		VM_Warning(prog, "VM_entityfielddata: entity %i is free!\n", PRVM_NUM_FOR_EDICT(ent));
 		return;
 	}
 	val = (prvm_eval_t *)(ent->fields.fp + d->ofs);
@@ -2234,7 +2234,7 @@ void VM_putentityfieldstring(prvm_prog_t *prog)
 
 	if (i < 0 || i >= prog->numfielddefs)
 	{
-        VM_Warning(prog, "VM_entityfielddata: %s: field index out of bounds\n", prog->name);
+		VM_Warning(prog, "VM_entityfielddata: field index out of bounds!\n");
 		PRVM_G_FLOAT(OFS_RETURN) = 0.0f;
 		return;
 	}
@@ -2245,7 +2245,7 @@ void VM_putentityfieldstring(prvm_prog_t *prog)
 	ent = PRVM_G_EDICT(OFS_PARM1);
 	if(ent->free)
 	{
-		VM_Warning(prog, "VM_entityfielddata: %s: entity %i is free !\n", prog->name, PRVM_NUM_FOR_EDICT(ent));
+		VM_Warning(prog, "VM_entityfielddata: entity %i is free!\n", PRVM_NUM_FOR_EDICT(ent));
 		PRVM_G_FLOAT(OFS_RETURN) = 0.0f;
 		return;
 	}
@@ -2790,8 +2790,8 @@ void VM_tokenizebyseparator (prvm_prog_t *prog)
 		tokens_endpos[num_tokens] = p0 - tokenize_string;
 		if (j >= (int)sizeof(tokentext))
 			break;
-		tokentext[j++] = '\0';
-		tokens[num_tokens++] = PRVM_SetTempString(prog, token, j - 1);
+		tokentext[j] = '\0';
+		tokens[num_tokens++] = PRVM_SetTempString(prog, token, j++ - (token - tokentext));
 		if (!*p)
 			break;
 	}
@@ -2961,7 +2961,7 @@ void VM_gettime(prvm_prog_t *prog)
 		switch(timer_index)
 		{
 			case 0: // GETTIME_FRAMESTART
-				PRVM_G_FLOAT(OFS_RETURN) = host.realtime;
+				PRVM_G_FLOAT(OFS_RETURN) = host.realtime - prog->starttime;
 				break;
 			case 1: // GETTIME_REALTIME
 				PRVM_G_FLOAT(OFS_RETURN) = Sys_DirtyTime();
@@ -2976,7 +2976,7 @@ void VM_gettime(prvm_prog_t *prog)
 				PRVM_G_FLOAT(OFS_RETURN) = CDAudio_GetPosition();
 				break;
 			default:
-				VM_Warning(prog, "VM_gettime: %s: unsupported timer specified, returning realtime\n", prog->name);
+				VM_Warning(prog, "VM_gettime: unsupported timer specified, returning realtime\n");
 				PRVM_G_FLOAT(OFS_RETURN) = host.realtime;
 				break;
 		}
@@ -3002,14 +3002,14 @@ void VM_getsoundtime (prvm_prog_t *prog)
 		entnum = MAX_EDICTS + PRVM_NUM_FOR_EDICT(PRVM_G_EDICT(OFS_PARM0));
 	else
 	{
-		VM_Warning(prog, "VM_getsoundtime: %s: not supported on this progs\n", prog->name);
+		VM_Warning(prog, "VM_getsoundtime: not supported on this progs\n");
 		PRVM_G_FLOAT(OFS_RETURN) = -1;
 		return;
 	}
 	entchannel = (int)PRVM_G_FLOAT(OFS_PARM1);
 	entchannel = CHAN_USER2ENGINE(entchannel);
 	if (!IS_CHAN(entchannel))
-		VM_Warning(prog, "VM_getsoundtime: %s: bad channel %i\n", prog->name, entchannel);
+		VM_Warning(prog, "VM_getsoundtime: bad channel %i\n", entchannel);
 	PRVM_G_FLOAT(OFS_RETURN) = (prvm_vec_t)S_GetEntChannelPosition(entnum, entchannel);
 }
 
@@ -3069,7 +3069,7 @@ void VM_parseentitydata(prvm_prog_t *prog)
 	if (!COM_ParseToken_Simple(&data, false, false, true) || com_token[0] != '{' )
 		prog->error_cmd("VM_parseentitydata: %s: Couldn't parse entity data:\n%s", prog->name, data );
 
-	PRVM_ED_ParseEdict (prog, data, ent);
+	PRVM_ED_ParseEdict(prog, data, ent, true);
 }
 
 /*
@@ -3090,7 +3090,7 @@ void VM_loadfromfile(prvm_prog_t *prog)
 	if (FS_CheckNastyPath(filename, false))
 	{
 		PRVM_G_FLOAT(OFS_RETURN) = -4;
-		VM_Warning(prog, "VM_loadfromfile: %s dangerous or non-portable filename \"%s\" not allowed. (contains : or \\ or begins with .. or /)\n", prog->name, filename);
+		VM_Warning(prog, "VM_loadfromfile: dangerous or non-portable filename \"%s\" not allowed. (contains : or \\ or begins with .. or /)\n", filename);
 		return;
 	}
 
@@ -3184,7 +3184,7 @@ void VM_search_begin(prvm_prog_t *prog)
 	if(handle >= PRVM_MAX_OPENSEARCHES)
 	{
 		PRVM_G_FLOAT(OFS_RETURN) = -2;
-		VM_Warning(prog, "VM_search_begin: %s ran out of search handles (%i)\n", prog->name, PRVM_MAX_OPENSEARCHES);
+		VM_Warning(prog, "VM_search_begin: ran out of search handles (max %i)\n", PRVM_MAX_OPENSEARCHES);
 		return;
 	}
 
@@ -3213,12 +3213,12 @@ void VM_search_end(prvm_prog_t *prog)
 
 	if(handle < 0 || handle >= PRVM_MAX_OPENSEARCHES)
 	{
-		VM_Warning(prog, "VM_search_end: invalid handle %i used in %s\n", handle, prog->name);
+		VM_Warning(prog, "VM_search_end: invalid handle %i\n", handle);
 		return;
 	}
 	if(prog->opensearches[handle] == NULL)
 	{
-		VM_Warning(prog, "VM_search_end: no such handle %i in %s\n", handle, prog->name);
+		VM_Warning(prog, "VM_search_end: no such handle %i\n", handle);
 		return;
 	}
 
@@ -3244,12 +3244,12 @@ void VM_search_getsize(prvm_prog_t *prog)
 
 	if(handle < 0 || handle >= PRVM_MAX_OPENSEARCHES)
 	{
-		VM_Warning(prog, "VM_search_getsize: invalid handle %i used in %s\n", handle, prog->name);
+		VM_Warning(prog, "VM_search_getsize: invalid handle %i\n", handle);
 		return;
 	}
 	if(prog->opensearches[handle] == NULL)
 	{
-		VM_Warning(prog, "VM_search_getsize: no such handle %i in %s\n", handle, prog->name);
+		VM_Warning(prog, "VM_search_getsize: no such handle %i\n", handle);
 		return;
 	}
 
@@ -3274,17 +3274,17 @@ void VM_search_getfilename(prvm_prog_t *prog)
 
 	if(handle < 0 || handle >= PRVM_MAX_OPENSEARCHES)
 	{
-		VM_Warning(prog, "VM_search_getfilename: invalid handle %i used in %s\n", handle, prog->name);
+		VM_Warning(prog, "VM_search_getfilename: invalid handle %i\n", handle);
 		return;
 	}
 	if(prog->opensearches[handle] == NULL)
 	{
-		VM_Warning(prog, "VM_search_getfilename: no such handle %i in %s\n", handle, prog->name);
+		VM_Warning(prog, "VM_search_getfilename: no such handle %i\n", handle);
 		return;
 	}
 	if(filenum < 0 || filenum >= prog->opensearches[handle]->numfilenames)
 	{
-		VM_Warning(prog, "VM_search_getfilename: invalid filenum %i in %s\n", filenum, prog->name);
+		VM_Warning(prog, "VM_search_getfilename: invalid filenum %i\n", filenum);
 		return;
 	}
 
@@ -4001,7 +4001,7 @@ void VM_buf_del (prvm_prog_t *prog)
 		BufStr_Del(prog, stringbuffer);
 	else
 	{
-		VM_Warning(prog, "VM_buf_del: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_buf_del: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 }
@@ -4022,7 +4022,7 @@ void VM_buf_getsize (prvm_prog_t *prog)
 	if(!stringbuffer)
 	{
 		PRVM_G_FLOAT(OFS_RETURN) = -1;
-		VM_Warning(prog, "VM_buf_getsize: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_buf_getsize: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 	else
@@ -4045,19 +4045,19 @@ void VM_buf_copy (prvm_prog_t *prog)
 	srcstringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, (int)PRVM_G_FLOAT(OFS_PARM0));
 	if(!srcstringbuffer)
 	{
-		VM_Warning(prog, "VM_buf_copy: invalid source buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_buf_copy: invalid source buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 	i = (int)PRVM_G_FLOAT(OFS_PARM1);
 	if(i == (int)PRVM_G_FLOAT(OFS_PARM0))
 	{
-		VM_Warning(prog, "VM_buf_copy: source == destination (%i) in %s\n", i, prog->name);
+		VM_Warning(prog, "VM_buf_copy: source == destination (%i)\n", i);
 		return;
 	}
 	dststringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, (int)PRVM_G_FLOAT(OFS_PARM0));
 	if(!dststringbuffer)
 	{
-		VM_Warning(prog, "VM_buf_copy: invalid destination buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM1), prog->name);
+		VM_Warning(prog, "VM_buf_copy: invalid destination buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM1));
 		return;
 	}
 
@@ -4098,12 +4098,12 @@ void VM_buf_sort (prvm_prog_t *prog)
 	stringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, (int)PRVM_G_FLOAT(OFS_PARM0));
 	if(!stringbuffer)
 	{
-		VM_Warning(prog, "VM_buf_sort: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_buf_sort: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 	if(stringbuffer->num_strings <= 0)
 	{
-		VM_Warning(prog, "VM_buf_sort: tried to sort empty buffer %i in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_buf_sort: tried to sort empty buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 	stringbuffers_sortlength = (int)PRVM_G_FLOAT(OFS_PARM1);
@@ -4140,7 +4140,7 @@ void VM_buf_implode (prvm_prog_t *prog)
 	PRVM_G_INT(OFS_RETURN) = OFS_NULL;
 	if(!stringbuffer)
 	{
-		VM_Warning(prog, "VM_buf_implode: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_buf_implode: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 	if(!stringbuffer->num_strings)
@@ -4179,13 +4179,13 @@ void VM_bufstr_get (prvm_prog_t *prog)
 	stringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, (int)PRVM_G_FLOAT(OFS_PARM0));
 	if(!stringbuffer)
 	{
-		VM_Warning(prog, "VM_bufstr_get: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_bufstr_get: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 	strindex = (int)PRVM_G_FLOAT(OFS_PARM1);
 	if (strindex < 0)
 	{
-		// VM_Warning(prog, "VM_bufstr_get: invalid string index %i used in %s\n", strindex, prog->name);
+		// VM_Warning(prog, "VM_bufstr_get: invalid string index %i\n", strindex);
 		return;
 	}
 	if (strindex < stringbuffer->num_strings && stringbuffer->strings[strindex])
@@ -4210,13 +4210,13 @@ void VM_bufstr_set (prvm_prog_t *prog)
 	stringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, (int)PRVM_G_FLOAT(OFS_PARM0));
 	if(!stringbuffer)
 	{
-		VM_Warning(prog, "VM_bufstr_set: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_bufstr_set: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 	strindex = (int)PRVM_G_FLOAT(OFS_PARM1);
 	if(strindex < 0 || strindex >= 1000000) // huge number of strings
 	{
-		VM_Warning(prog, "VM_bufstr_set: invalid string index %i used in %s\n", strindex, prog->name);
+		VM_Warning(prog, "VM_bufstr_set: invalid string index %i\n", strindex);
 		return;
 	}
 
@@ -4245,12 +4245,12 @@ void VM_bufstr_add (prvm_prog_t *prog)
 	PRVM_G_FLOAT(OFS_RETURN) = -1;
 	if(!stringbuffer)
 	{
-		VM_Warning(prog, "VM_bufstr_add: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_bufstr_add: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 	if(!PRVM_G_INT(OFS_PARM1)) // NULL string
 	{
-		VM_Warning(prog, "VM_bufstr_add: can not add an empty string to buffer %i in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_bufstr_add: can not add an empty string to buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 	string = PRVM_G_STRING(OFS_PARM1);
@@ -4288,13 +4288,13 @@ void VM_bufstr_free (prvm_prog_t *prog)
 	stringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, (int)PRVM_G_FLOAT(OFS_PARM0));
 	if(!stringbuffer)
 	{
-		VM_Warning(prog, "VM_bufstr_free: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_bufstr_free: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 	i = (int)PRVM_G_FLOAT(OFS_PARM1);
 	if(i < 0)
 	{
-		VM_Warning(prog, "VM_bufstr_free: invalid string index %i used in %s\n", i, prog->name);
+		VM_Warning(prog, "VM_bufstr_free: invalid string index %i\n", i);
 		return;
 	}
 
@@ -4335,7 +4335,7 @@ void VM_buf_loadfile(prvm_prog_t *prog)
 	if (file == NULL)
 	{
 		if (developer_extra.integer)
-			VM_Warning(prog, "VM_buf_loadfile: failed to open file %s in %s\n", filename, prog->name);
+			VM_Warning(prog, "VM_buf_loadfile: failed to open file %s\n", filename);
 		PRVM_G_FLOAT(OFS_RETURN) = 0;
 		return;
 	}
@@ -4344,7 +4344,7 @@ void VM_buf_loadfile(prvm_prog_t *prog)
 	stringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, (int)PRVM_G_FLOAT(OFS_PARM1));
 	if(!stringbuffer)
 	{
-		VM_Warning(prog, "VM_buf_loadfile: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM1), prog->name);
+		VM_Warning(prog, "VM_buf_loadfile: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM1));
 		PRVM_G_FLOAT(OFS_RETURN) = 0;
 		return;
 	}
@@ -4409,12 +4409,12 @@ void VM_buf_writefile(prvm_prog_t *prog)
 	filenum = (int)PRVM_G_FLOAT(OFS_PARM0);
 	if (filenum < 0 || filenum >= PRVM_MAX_OPENFILES)
 	{
-		VM_Warning(prog, "VM_buf_writefile: invalid file handle %i used in %s\n", filenum, prog->name);
+		VM_Warning(prog, "VM_buf_writefile: invalid file handle %i\n", filenum);
 		return;
 	}
 	if (prog->openfiles[filenum] == NULL)
 	{
-		VM_Warning(prog, "VM_buf_writefile: no such file handle %i (or file has been closed) in %s\n", filenum, prog->name);
+		VM_Warning(prog, "VM_buf_writefile: no such file handle %i (or file has been closed)\n", filenum);
 		return;
 	}
 	
@@ -4422,7 +4422,7 @@ void VM_buf_writefile(prvm_prog_t *prog)
 	stringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, (int)PRVM_G_FLOAT(OFS_PARM1));
 	if(!stringbuffer)
 	{
-		VM_Warning(prog, "VM_buf_writefile: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM1), prog->name);
+		VM_Warning(prog, "VM_buf_writefile: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM1));
 		PRVM_G_FLOAT(OFS_RETURN) = 0;
 		return;
 	}
@@ -4445,13 +4445,13 @@ void VM_buf_writefile(prvm_prog_t *prog)
 	}
 	if (strindex < 0 || strindex >= stringbuffer->num_strings)
 	{
-		VM_Warning(prog, "VM_buf_writefile: wrong start string index %i used in %s\n", strindex, prog->name);
+		VM_Warning(prog, "VM_buf_writefile: wrong start string index %i\n", strindex);
 		PRVM_G_FLOAT(OFS_RETURN) = 0;
 		return;
 	}
 	if (strnum < 0)
 	{
-		VM_Warning(prog, "VM_buf_writefile: wrong strings count %i used in %s\n", strnum, prog->name);
+		VM_Warning(prog, "VM_buf_writefile: wrong strings count %i\n", strnum);
 		PRVM_G_FLOAT(OFS_RETURN) = 0;
 		return;
 	}
@@ -4576,7 +4576,7 @@ void VM_bufstr_find(prvm_prog_t *prog)
 	stringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, (int)PRVM_G_FLOAT(OFS_PARM0));
 	if(!stringbuffer)
 	{
-		VM_Warning(prog, "VM_bufstr_find: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_bufstr_find: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 
@@ -4584,7 +4584,7 @@ void VM_bufstr_find(prvm_prog_t *prog)
 	matchrule = (int)PRVM_G_FLOAT(OFS_PARM2);
 	if (matchrule < 0 || matchrule > 5)
 	{
-		VM_Warning(prog, "VM_bufstr_find: invalid match rule %i in %s\n", matchrule, prog->name);
+		VM_Warning(prog, "VM_bufstr_find: invalid match rule %i\n", matchrule);
 		return;
 	}
 	if (matchrule)
@@ -4630,7 +4630,7 @@ void VM_matchpattern(prvm_prog_t *prog)
 	matchrule = (int)PRVM_G_FLOAT(OFS_PARM2);
 	if (matchrule < 0 || matchrule > 5)
 	{
-		VM_Warning(prog, "VM_matchpattern: invalid match rule %i in %s\n", matchrule, prog->name);
+		VM_Warning(prog, "VM_matchpattern: invalid match rule %i\n", matchrule);
 		return;
 	}
 	if (matchrule)
@@ -4670,7 +4670,7 @@ void VM_buf_cvarlist(prvm_prog_t *prog)
 	stringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, (int)PRVM_G_FLOAT(OFS_PARM0));
 	if(!stringbuffer)
 	{
-		VM_Warning(prog, "VM_bufstr_free: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+		VM_Warning(prog, "VM_bufstr_free: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 		return;
 	}
 
@@ -5474,7 +5474,7 @@ void VM_uri_get (prvm_prog_t *prog)
 			stringbuffer = (prvm_stringbuffer_t *)Mem_ExpandableArray_RecordAtIndex(&prog->stringbuffersarray, poststringbuffer);
 			if(!stringbuffer)
 			{
-				VM_Warning(prog, "uri_get: invalid buffer %i used in %s\n", (int)PRVM_G_FLOAT(OFS_PARM0), prog->name);
+				VM_Warning(prog, "uri_get: invalid buffer %i\n", (int)PRVM_G_FLOAT(OFS_PARM0));
 				return;
 			}
 			ltotal = 0;
@@ -5828,7 +5828,7 @@ void VM_sprintf(prvm_prog_t *prog)
 					width = strtol(s, &err, 10);
 					if(!err)
 					{
-						VM_Warning(prog, "VM_sprintf: invalid directive in %s: %s\n", prog->name, s0);
+						VM_Warning(prog, "VM_sprintf: invalid directive: %s\n", s0);
 						goto finished;
 					}
 					if(*err == '$')
@@ -5874,7 +5874,7 @@ noflags:
 							width = strtol(s, &err, 10);
 							if(!err || *err != '$')
 							{
-								VM_Warning(prog, "VM_sprintf: invalid directive in %s: %s\n", prog->name, s0);
+								VM_Warning(prog, "VM_sprintf: invalid directive: %s\n", s0);
 								goto finished;
 							}
 							s = err + 1;
@@ -5893,7 +5893,7 @@ noflags:
 						width = strtol(s, &err, 10);
 						if(!err)
 						{
-							VM_Warning(prog, "VM_sprintf: invalid directive in %s: %s\n", prog->name, s0);
+							VM_Warning(prog, "VM_sprintf: invalid directive: %s\n", s0);
 							goto finished;
 						}
 						s = err;
@@ -5917,7 +5917,7 @@ noflags:
 							precision = strtol(s, &err, 10);
 							if(!err || *err != '$')
 							{
-								VM_Warning(prog, "VM_sprintf: invalid directive in %s: %s\n", prog->name, s0);
+								VM_Warning(prog, "VM_sprintf: invalid directive: %s\n", s0);
 								goto finished;
 							}
 							s = err + 1;
@@ -5931,14 +5931,14 @@ noflags:
 						precision = strtol(s, &err, 10);
 						if(!err)
 						{
-							VM_Warning(prog, "VM_sprintf: invalid directive in %s: %s\n", prog->name, s0);
+							VM_Warning(prog, "VM_sprintf: invalid directive: %s\n", s0);
 							goto finished;
 						}
 						s = err;
 					}
 					else
 					{
-						VM_Warning(prog, "VM_sprintf: invalid directive in %s: %s\n", prog->name, s0);
+						VM_Warning(prog, "VM_sprintf: invalid directive: %s\n", s0);
 						goto finished;
 					}
 				}
@@ -6074,7 +6074,7 @@ nolength:
 							}
 							break;
 						default:
-							VM_Warning(prog, "VM_sprintf: invalid directive in %s: %s\n", prog->name, s0);
+							VM_Warning(prog, "VM_sprintf: invalid directive: %s\n", s0);
 							goto finished;
 					}
 				}

@@ -21,20 +21,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 #include "progsvm.h"
 
+// Should only contain the opcodes DP actually implements, so unknown opcodes
+// are more readably marked as such in disassembly. Thus, best keep this in sync
+// with the list in prvm_execprogram.h.
 static const char *prvm_opnames[] =
 {
 "^5DONE",
-
 "MUL_F",
 "MUL_V",
 "MUL_FV",
 "MUL_VF",
-
-"DIV",
-
+"DIV_F",
 "ADD_F",
 "ADD_V",
-
 "SUB_F",
 "SUB_V",
 
@@ -50,17 +49,17 @@ static const char *prvm_opnames[] =
 "^2NE_E",
 "^2NE_FNC",
 
-"^2LE",
-"^2GE",
-"^2LT",
-"^2GT",
+"^2LE_F",
+"^2GE_F",
+"^2LT_F",
+"^2GT_F",
 
-"^6FIELD_F",
-"^6FIELD_V",
-"^6FIELD_S",
-"^6FIELD_ENT",
-"^6FIELD_FLD",
-"^6FIELD_FNC",
+"^6LOAD_F",
+"^6LOAD_V",
+"^6LOAD_S",
+"^6LOAD_ENT",
+"^6LOAD_FLD",
+"^6LOAD_FNC",
 
 "^1ADDRESS",
 
@@ -79,16 +78,13 @@ static const char *prvm_opnames[] =
 "^1STOREP_FNC",
 
 "^5RETURN",
-
 "^2NOT_F",
 "^2NOT_V",
 "^2NOT_S",
 "^2NOT_ENT",
 "^2NOT_FNC",
-
 "^5IF",
 "^5IFNOT",
-
 "^3CALL0",
 "^3CALL1",
 "^3CALL2",
@@ -98,17 +94,13 @@ static const char *prvm_opnames[] =
 "^3CALL6",
 "^3CALL7",
 "^3CALL8",
-
 "^1STATE",
-
 "^5GOTO",
+"^2AND_F",
+"^2OR_F",
 
-"^2AND",
-"^2OR",
-
-"BITAND",
-"BITOR",
-
+"BITAND_F",
+"BITOR_F",
 
 
 
@@ -116,41 +108,53 @@ NULL,
 NULL,
 NULL,
 NULL,
+
+NULL,
+NULL,
+
+NULL,
+NULL,
+NULL,
+NULL,
+
+NULL,
+NULL,
+NULL,
+NULL,
+
+NULL,
+NULL,
+NULL,
+NULL,
+NULL,
+
+NULL,
+NULL,
+
+NULL,
+
+NULL,
+NULL,
+NULL,
+NULL,
+
 NULL,
 NULL,
 NULL,
 NULL,
 NULL,
 NULL,
+
 NULL,
 NULL,
 NULL,
 NULL,
 NULL,
+
 NULL,
 NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
+
+
 NULL,
 NULL,
 NULL,
@@ -161,7 +165,6 @@ NULL,
 NULL,
 
 "STORE_I",
-
 NULL,
 NULL,
 
@@ -172,15 +175,16 @@ NULL,
 "SUB_I",
 "SUB_FI",
 "SUB_IF",
-"CONV_IF",
-"CONV_FI",
+
+"CONV_ITOF",
+"CONV_FTOI",
 
 NULL,
 NULL,
 
-"LOAD_I",
-"STOREP_I",
+"^6LOAD_I",
 
+"^1STOREP_I",
 NULL,
 NULL,
 
@@ -193,6 +197,7 @@ NULL,
 "NE_I",
 
 NULL,
+
 NULL,
 
 "NOT_I",
@@ -202,26 +207,28 @@ NULL,
 NULL,
 NULL,
 NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
+
+"GLOBALADDRESS",
+"ADD_PIW",
+
+"LOADA_F",
+"LOADA_V",
+"LOADA_S",
+"LOADA_ENT",
+"LOADA_FLD",
+"LOADA_FNC",
+"LOADA_I",
 
 "STORE_P",
+"^6FIELD_P",
 
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
+"LOADP_F",
+"LOADP_V",
+"LOADP_S",
+"LOADP_ENT",
+"LOADP_FLD",
+"LOADP_FNC",
+"LOADP_I",
 
 "LE_I",
 "GE_I",
@@ -249,9 +256,7 @@ NULL,
 "MUL_IF",
 "MUL_FI",
 "MUL_VI",
-
 NULL,
-
 "DIV_IF",
 "DIV_FI",
 "BITAND_IF",
@@ -282,10 +287,12 @@ NULL,
 "GLOAD_S",
 "GLOAD_FNC",
 "BOUNDCHECK",
+
 NULL,
 NULL,
 NULL,
 NULL,
+
 "GLOAD_V",
 };
 
@@ -332,10 +339,17 @@ static void PRVM_PrintStatement(prvm_prog_t *prog, mstatement_t *s)
 	for ( ; i<10 ; i++)
 		Con_Print(" ");
 
-	if (s->operand[0] >= 0) Con_Printf(  "%s", PRVM_GlobalString(prog, s->operand[0], valuebuf, sizeof(valuebuf)));
-	if (s->operand[1] >= 0) Con_Printf(", %s", PRVM_GlobalString(prog, s->operand[1], valuebuf, sizeof(valuebuf)));
+	if (s->op == OP_GOTO) {
+		Con_Printf("statement %i", (int)(s - prog->statements) + s->operand[0]);
+	} else {
+		if (s->operand[0] >= 0) Con_Printf(  "%s", PRVM_GlobalString(prog, s->operand[0], valuebuf, sizeof(valuebuf)));
+	}
+	if (s->op == OP_IF || s->op == OP_IFNOT) {
+		Con_Printf(", statement %i", (int)(s - prog->statements) + s->operand[1]);
+	} else {
+		if (s->operand[1] >= 0) Con_Printf(", %s", PRVM_GlobalString(prog, s->operand[1], valuebuf, sizeof(valuebuf)));
+	}
 	if (s->operand[2] >= 0) Con_Printf(", %s", PRVM_GlobalString(prog, s->operand[2], valuebuf, sizeof(valuebuf)));
-	if (s->jumpabsolute >= 0) Con_Printf(", statement %i", s->jumpabsolute);
 	Con_Print("\n");
 }
 
@@ -745,8 +759,8 @@ void PRVM_Crash(void)
 	}
 
 	// dump the stack so host_error can shutdown functions
-	prog->depth = 0;
-	prog->localstack_used = 0;
+	// and free memory, unset prog->loaded, etc
+	PRVM_Prog_Reset(prog);
 }
 
 /*
@@ -853,7 +867,7 @@ static int PRVM_LeaveFunction (prvm_prog_t *prog)
 		f->tprofile_total += prog->stack[prog->depth].tprofile_acc;
 		f->builtinsprofile_total += prog->stack[prog->depth].builtinsprofile_acc;
 	}
-	
+
 	return prog->stack[prog->depth].s;
 }
 
@@ -915,6 +929,38 @@ extern cvar_t prvm_traceqc;
 extern cvar_t prvm_statementprofiling;
 extern qbool prvm_runawaycheck;
 
+#define PRVM_GLOBALSBASE 0x80000000
+
+// These do not change.
+#define CACHE_UNCHANGING() \
+	mstatement_t *cached_statements = prog->statements; \
+	qbool cached_allowworldwrites = prog->allowworldwrites; \
+	unsigned int cached_flag = prog->flag; \
+	unsigned int cached_vmglobals = prog->numglobals; \
+	unsigned int cached_vmglobals_1 = prog->numglobals - 1; \
+	unsigned int cached_vmglobals_2 = prog->numglobals - 2; \
+	unsigned int cached_vmglobals_3 = prog->numglobals - 3; \
+	unsigned int cached_vmglobal1 = PRVM_GLOBALSBASE + 1; \
+	unsigned int cached_vmentity0start = PRVM_GLOBALSBASE + prog->numglobals; \
+	unsigned int cached_vmentity1start = cached_vmentity0start + prog->entityfields; \
+	unsigned int cached_entityfields = prog->entityfields; \
+	unsigned int cached_entityfields_2 = prog->entityfields - 2; \
+	prvm_vec_t *globals = prog->globals.fp; \
+	prvm_vec_t *global1 = prog->globals.fp + 1
+
+// These may become out of date when a builtin is called, and are updated accordingly.
+#define CACHE_CHANGING(DECLARE) \
+	DECLARE(prvm_vec_t *) cached_edictsfields = prog->edictsfields.fp; \
+	DECLARE(prvm_vec_t *) cached_edictsfields_entity1 = cached_edictsfields + prog->entityfields; \
+	DECLARE(unsigned int) cached_entityfieldsarea = prog->entityfieldsarea; \
+	DECLARE(unsigned int) cached_entityfieldsarea_2 = prog->entityfieldsarea - 2; \
+	DECLARE(unsigned int) cached_entityfieldsarea_entityfields = prog->entityfieldsarea - prog->entityfields; \
+	DECLARE(unsigned int) cached_entityfieldsarea_entityfields_2 = prog->entityfieldsarea - prog->entityfields - 2; \
+	DECLARE(unsigned int) cached_max_edicts = prog->max_edicts
+
+#define DO_DECLARE(t) t
+#define NO_DECLARE(t)
+
 #ifdef PROFILING
 #ifdef CONFIG_MENU
 /*
@@ -933,21 +979,8 @@ void MVM_ExecuteProgram (prvm_prog_t *prog, func_t fnum, const char *errormessag
 	double  calltime;
 	double tm, starttm;
 	prvm_vec_t tempfloat;
-	// these may become out of date when a builtin is called, and are updated accordingly
-	prvm_vec_t *cached_edictsfields = prog->edictsfields.fp;
-	unsigned int cached_entityfields = prog->entityfields;
-	unsigned int cached_entityfields_3 = prog->entityfields - 3;
-	unsigned int cached_entityfieldsarea = prog->entityfieldsarea;
-	unsigned int cached_entityfieldsarea_entityfields = prog->entityfieldsarea - prog->entityfields;
-	unsigned int cached_entityfieldsarea_3 = prog->entityfieldsarea - 3;
-	unsigned int cached_entityfieldsarea_entityfields_3 = prog->entityfieldsarea - prog->entityfields - 3;
-	unsigned int cached_max_edicts = prog->max_edicts;
-	// these do not change
-	mstatement_t *cached_statements = prog->statements;
-	qbool cached_allowworldwrites = prog->allowworldwrites;
-	unsigned int cached_flag = prog->flag;
-
-	prvm_vec_t *globals = prog->globals.fp;
+	CACHE_UNCHANGING();
+	CACHE_CHANGING(DO_DECLARE);
 
 	calltime = Sys_DirtyTime();
 
@@ -1042,21 +1075,8 @@ void CLVM_ExecuteProgram (prvm_prog_t *prog, func_t fnum, const char *errormessa
 	double  calltime;
 	double tm, starttm;
 	prvm_vec_t tempfloat;
-	// these may become out of date when a builtin is called, and are updated accordingly
-	prvm_vec_t *cached_edictsfields = prog->edictsfields.fp;
-	unsigned int cached_entityfields = prog->entityfields;
-	unsigned int cached_entityfields_3 = prog->entityfields - 3;
-	unsigned int cached_entityfieldsarea = prog->entityfieldsarea;
-	unsigned int cached_entityfieldsarea_entityfields = prog->entityfieldsarea - prog->entityfields;
-	unsigned int cached_entityfieldsarea_3 = prog->entityfieldsarea - 3;
-	unsigned int cached_entityfieldsarea_entityfields_3 = prog->entityfieldsarea - prog->entityfields - 3;
-	unsigned int cached_max_edicts = prog->max_edicts;
-	// these do not change
-	mstatement_t *cached_statements = prog->statements;
-	qbool cached_allowworldwrites = prog->allowworldwrites;
-	unsigned int cached_flag = prog->flag;
-
-	prvm_vec_t *globals = prog->globals.fp;
+	CACHE_UNCHANGING();
+	CACHE_CHANGING(DO_DECLARE);
 
 	calltime = Sys_DirtyTime();
 
@@ -1155,21 +1175,8 @@ void PRVM_ExecuteProgram (prvm_prog_t *prog, func_t fnum, const char *errormessa
 	double  calltime;
 	double tm, starttm;
 	prvm_vec_t tempfloat;
-	// these may become out of date when a builtin is called, and are updated accordingly
-	prvm_vec_t *cached_edictsfields = prog->edictsfields.fp;
-	unsigned int cached_entityfields = prog->entityfields;
-	unsigned int cached_entityfields_3 = prog->entityfields - 3;
-	unsigned int cached_entityfieldsarea = prog->entityfieldsarea;
-	unsigned int cached_entityfieldsarea_entityfields = prog->entityfieldsarea - prog->entityfields;
-	unsigned int cached_entityfieldsarea_3 = prog->entityfieldsarea - 3;
-	unsigned int cached_entityfieldsarea_entityfields_3 = prog->entityfieldsarea - prog->entityfields - 3;
-	unsigned int cached_max_edicts = prog->max_edicts;
-	// these do not change
-	mstatement_t *cached_statements = prog->statements;
-	qbool cached_allowworldwrites = prog->allowworldwrites;
-	unsigned int cached_flag = prog->flag;
-
-	prvm_vec_t *globals = prog->globals.fp;
+	CACHE_UNCHANGING();
+	CACHE_CHANGING(DO_DECLARE);
 
 	calltime = Sys_DirtyTime();
 

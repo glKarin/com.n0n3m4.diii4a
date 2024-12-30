@@ -218,7 +218,8 @@ void Cmd_Shutdown(void);
 
 /// called by Host_Init, this marks cvars, commands and aliases with their init values
 void Cmd_SaveInitState(void);
-/// called by FS_GameDir_f, this restores cvars, commands and aliases to init values
+/// Restores cvars, commands and aliases to their init values
+/// and deletes any that were added since init.
 void Cmd_RestoreInitState(void);
 
 /// called by the init functions of other parts of the program to

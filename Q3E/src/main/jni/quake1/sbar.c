@@ -391,7 +391,7 @@ void Sbar_Init (void)
 	Cvar_RegisterVariable(&sbar_miniscoreboard_size);
 	Cvar_RegisterVariable(&sbar_info_pos);
 	Cvar_RegisterVariable(&cl_deathscoreboard);
-	// This name is used by QuakeSpasm-based engines and is read by the Alkaline 1.2 CSQC
+	// This cvar is found in Fitzquake-derived engines and FTEQW and is read by the Alkaline 1.2 and Arcane Dimensions 1.80 CSQC
 	Cvar_RegisterVirtual(&sbar_alpha_bg, "scr_sbaralpha");
 
 	Cvar_RegisterVariable(&crosshair_color_red);
@@ -1142,12 +1142,12 @@ void Sbar_ShowFPS(void)
 	}
 	if (cl_showtime.integer)
 	{
-		dp_strlcpy(timestring, Sys_TimeString(cl_showtime_format.string), sizeof(timestring));
+		Sys_TimeString(timestring, sizeof(timestring), cl_showtime_format.string);
 		fps_strings++;
 	}
 	if (cl_showdate.integer)
 	{
-		dp_strlcpy(datestring, Sys_TimeString(cl_showdate_format.string), sizeof(datestring));
+		Sys_TimeString(datestring, sizeof(datestring), cl_showdate_format.string);
 		fps_strings++;
 	}
 	if (cl_showblur.integer)

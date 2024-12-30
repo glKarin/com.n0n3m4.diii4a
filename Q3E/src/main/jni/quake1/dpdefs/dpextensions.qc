@@ -896,10 +896,10 @@ vector gettaginfo_up;
 //idea: tZork
 //darkplaces implementation: tZork, divVerent
 //constant definitions:
-float GETTIME_FRAMESTART = 0; // time of start of frame relative to an arbitrary point in time
+float GETTIME_FRAMESTART = 0; // time of start of frame relative to an arbitrary point in time (time of worldspawn)
 float GETTIME_REALTIME = 1; // current absolute time (OS specific)
-float GETTIME_HIRES = 2; // like REALTIME, but may reset between QC invocations and thus can be higher precision
-float GETTIME_UPTIME = 3; // time of start of frame since start of the engine
+float GETTIME_HIRES = 2; // like REALTIME, but relative to time at start of frame (thus can be higher precision)
+float GETTIME_UPTIME = 3; // time of start of frame relative to start of the engine
 //builtin definitions:
 float(float tmr) gettime = #519;
 //description:
@@ -2663,6 +2663,8 @@ float(entity ent) nudgeoutofsolid = #567;
 //description:
 //Attempts to move a stuck entity out of solid brushes, returning 1 if successful, 0 if it remains stuck, -1 if it wasn't stuck.
 //Note: makes only one tracebox call if the entity isn't stuck, so don't call tracebox just to see if you should call nudgeoutofsolid.
+//Uses a "smart" method considering surface properties and supporting multiple surfaces,
+//except on Q1BSP with mod_q1bsp_polygoncollisions 0 (there it falls back to the unsticking method).
 
 
 float(float dividend, float divisor) mod = #245;

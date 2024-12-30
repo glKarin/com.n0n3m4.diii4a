@@ -184,10 +184,6 @@ static void S_ConvertPaintBuffer(portable_sampleframe_t *painted_ptr, void *rb_p
 				*snd_out++ = painted_ptr->sample[0];
 			}
 		}
-
-		// noise is really really annoying
-		if (cls.timedemo)
-			memset(rb_ptr, 0, nbframes * nchannels * width);
 	}
 	else if (width == 2)  // 16bit
 	{
@@ -243,10 +239,6 @@ static void S_ConvertPaintBuffer(portable_sampleframe_t *painted_ptr, void *rb_p
 				val = (int)((painted_ptr->sample[0] + painted_ptr->sample[1]) * 16384.0f);*snd_out++ = bound(-32768, val, 32767);
 			}
 		}
-
-		// noise is really really annoying
-		if (cls.timedemo)
-			memset(rb_ptr, 0, nbframes * nchannels * width);
 	}
 	else  // 8bit
 	{
@@ -302,10 +294,6 @@ static void S_ConvertPaintBuffer(portable_sampleframe_t *painted_ptr, void *rb_p
 				val = (int)((painted_ptr->sample[0] + painted_ptr->sample[1]) * 64.0f) + 128; *snd_out++ = bound(0, val, 255);
 			}
 		}
-
-		// noise is really really annoying
-		if (cls.timedemo)
-			memset(rb_ptr, 128, nbframes * nchannels);
 	}
 }
 

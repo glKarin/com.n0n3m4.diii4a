@@ -1044,7 +1044,7 @@ void Mod_ShadowMesh_AddMesh(shadowmesh_t *mesh, const float *vertex3f, int numtr
 
 	for (i = 0;i < numtris;i++)
 	{
-		if ((mesh->numtriangles * 3 + 2) * sizeof(int) + 1 >= ((memheader_t *)((unsigned char *)mesh->element3i - sizeof(memheader_t)))->size)
+		if ((mesh->numtriangles * 3 + 2) * sizeof(int) + 1 >= Mem_Size(mesh->element3i))
 		{
 			// FIXME: we didn't allocate enough space for all the tris, see R_Mod_CompileShadowMap
 			Con_Print(CON_WARN "Mod_ShadowMesh_AddMesh: insufficient memory allocated!\n");
@@ -2976,7 +2976,7 @@ void Mod_BuildVBOs(void)
 		{
 			if (loadmodel->surfmesh.data_element3s[i] != loadmodel->surfmesh.data_element3i[i])
 			{
-				Con_Printf("Mod_BuildVBOs: element %u is incorrect (%u should be %u)\n", i, loadmodel->surfmesh.data_element3s[i], loadmodel->surfmesh.data_element3i[i]);
+				Con_Printf(CON_WARN "Mod_BuildVBOs: element %u is incorrect (%u should be %u)\n", i, loadmodel->surfmesh.data_element3s[i], loadmodel->surfmesh.data_element3i[i]);
 				loadmodel->surfmesh.data_element3s[i] = loadmodel->surfmesh.data_element3i[i];
 			}
 		}
@@ -4749,7 +4749,7 @@ void Mod_Mesh_Validate(model_t *mod)
 			if (e[j] < first || e[j] >= end)
 			{
 				if (!warned)
-					Con_DPrintf("Mod_Mesh_Validate: detected corrupt surface - debug me!\n");
+					Con_DPrintf(CON_WARN "Mod_Mesh_Validate: detected corrupt surface - debug me!\n");
 				warned = true;
 				e[j] = first;
 			}

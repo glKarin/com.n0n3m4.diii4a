@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 #ifdef USE_GLES2
-#if !defined(_NOSDL)
+#if !defined(_NOSDL) //karin: use GLES 2.0
 #include <SDL_opengles2.h>
 #else
 #include <GLES2/gl2.h>
@@ -152,6 +152,7 @@ typedef void (GLAPIENTRY *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id,
 #define GL_STACK_OVERFLOW			0x0503
 #define GL_STACK_UNDERFLOW			0x0504
 #define GL_OUT_OF_MEMORY			0x0505
+#define GL_INVALID_FRAMEBUFFER_OPERATION   0x0506
 
 #define GL_DITHER				0x0BD0
 #define GL_ALPHA				0x1906
@@ -318,6 +319,7 @@ typedef void (GLAPIENTRY *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id,
 #define GL_BUFFER_ACCESS              0x88BB
 #define GL_BUFFER_MAPPED              0x88BC
 #define GL_BUFFER_MAP_POINTER         0x88BD
+#define GL_PIXEL_PACK_BUFFER          0x88EB
 
 #define GL_FRAMEBUFFER                     0x8D40
 #define GL_READ_FRAMEBUFFER                0x8CA8
@@ -372,7 +374,6 @@ typedef void (GLAPIENTRY *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id,
 #define GL_RENDERBUFFER_BINDING            0x8CA7
 #define GL_MAX_COLOR_ATTACHMENTS           0x8CDF
 #define GL_MAX_RENDERBUFFER_SIZE           0x84E8
-#define GL_INVALID_FRAMEBUFFER_OPERATION   0x0506
 #define GL_DEPTH_STENCIL                              0x84F9
 #define GL_UNSIGNED_INT_24_8                          0x84FA
 #define GL_DEPTH24_STENCIL8                           0x88F0
@@ -800,7 +801,7 @@ extern void (GLAPIENTRY *qglVertexAttrib4uiv)(GLuint index, const GLuint *v);
 extern void (GLAPIENTRY *qglVertexAttrib4usv)(GLuint index, const GLushort *v);
 extern void (GLAPIENTRY *qglVertexAttribPointer)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
 extern void (GLAPIENTRY *qglViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
-#elif defined(_GLDL)
+#elif defined(_GLDL) //karin: dynamic load GL functions
 #if !defined(_GLDBG)
 #define QGLPROC(name, rettype, args) extern rettype (GL_APIENTRYP q##name) args;
 #else
@@ -1062,7 +1063,7 @@ void GL_PrintError(GLenum errornumber, const char *filename, unsigned int linenu
 		GLenum gl_errornumber; \
 		if (gl_printcheckerror.integer) \
 			Con_Printf("CHECKGLERROR at %s:%d\n", __FILE__, __LINE__); \
-		if (qglGetError) /* bones_was_here: is this pointer check still necessary? */ \
+		if (qglGetError) /* bones_was_here: TODO ensure this is always available, GLES does support it */ \
 			while ((gl_errornumber = qglGetError())) \
 				GL_PrintError(gl_errornumber, __FILE__, __LINE__); \
 	}}

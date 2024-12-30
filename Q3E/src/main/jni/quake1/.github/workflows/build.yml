@@ -8,8 +8,7 @@ on:
   pull_request:
 
 jobs:
-  build:
-
+  sdl-release:
     runs-on: ubuntu-latest
     container:
       image: debian:latest
@@ -26,7 +25,7 @@ jobs:
           # make `git describe` show the correct commit hash
           fetch-depth: '0'
 
-      - name: Compile DP
+      - name: Compile
         run: |
           # prevent git complaining about dubious ownership of the repo
           chown -R root:root .
@@ -43,3 +42,56 @@ jobs:
           path: |
             darkplaces-sdl
 
+  wasm-release:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install --yes build-essential python3-certifi
+
+      - name: Fetch repository
+        uses: actions/checkout@v4.1.1
+        with:
+          # make `git describe` show the correct commit hash
+          fetch-depth: '0'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3'
+
+      - name: Install emsdk
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: emscripten-core/emsdk
+          path: emsdk
+
+      - name: Compile
+        shell: bash
+        run: |
+          cd emsdk
+
+          # Download and install the latest SDK tools.
+          ./emsdk install latest
+
+          # Make the "latest" SDK "active" for the current user. (writes .emscripten file)
+          ./emsdk activate latest
+
+          # Activate PATH and other environment variables in the current terminal
+          source ./emsdk_env.sh
+
+          cd ..
+
+          # fail if there's any warnings
+          #export CC="cc"
+
+          make emscripten-release
+
+      - name: Upload WASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wasm
+          path: |
+            darkplaces-wasm.js

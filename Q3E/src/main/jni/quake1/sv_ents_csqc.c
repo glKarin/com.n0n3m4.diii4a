@@ -1,6 +1,8 @@
 #include "quakedef.h"
 #include "protocol.h"
 
+extern cvar_t sv_sendentities_csqc_randomize_order;
+
 // NOTE: this only works with DP5 protocol and upwards. For lower protocols
 // (including QUAKE), no packet loss handling for CSQC is done, which makes
 // CSQC basically useless.
@@ -162,7 +164,7 @@ static void EntityFrameCSQC_DeallocFrame(client_t *client, int framenum)
 qbool EntityFrameCSQC_WriteFrame (sizebuf_t *msg, int maxsize, int numnumbers, const unsigned short *numbers, int framenum)
 {
 	prvm_prog_t *prog = SVVM_prog;
-	int num, number, end, sendflags;
+	int num, number, end, sendflags, nonplayer_splitpoint, nonplayer_splitpoint_number, nonplayer_index;
 	qbool sectionstarted = false;
 	const unsigned short *n;
 	prvm_edict_t *ed;
@@ -216,14 +218,15 @@ qbool EntityFrameCSQC_WriteFrame (sizebuf_t *msg, int maxsize, int numnumbers, c
 	}
 
 	// now try to emit the entity updates
-	// (FIXME: prioritize by distance?)
 	end = client->csqcnumedicts;
+	// First send all removals.
+	nonplayer_index = 0;
 	for (number = 1;number < end;number++)
 	{
 		if (!(client->csqcentityscope[number] & SCOPE_WANTSEND))
 			continue;
 		if(db->num >= NUM_CSQCENTITIES_PER_FRAME)
-			break;
+			goto outofspace;
 		ed = prog->edicts + number;
 		if (client->csqcentityscope[number] & SCOPE_WANTREMOVE)  // Also implies ASSUMED_EXISTING.
 		{
@@ -247,9 +250,89 @@ qbool EntityFrameCSQC_WriteFrame (sizebuf_t *msg, int maxsize, int numnumbers, c
 				ENTITYSIZEPROFILING_END(msg, number, 0);
 			}
 			if (msg->cursize + 17 >= maxsize)
-				break;
+				goto outofspace;
 		}
 		else
+		{
+			// An update.
+			sendflags = client->csqcentitysendflags[number];
+			// Nothing to send? FINE.
+			if (!sendflags)
+				continue;
+			if (number > svs.maxclients)
+				++nonplayer_index;
+		}
+	}
+
+	// If sv_sendentities_csqc_randomize_order is false, this is always 0.
+	// As such, nonplayer_splitpoint_number will be exactly
+	// svs.maxclients + 1. Thus, the shifting below will be a NOP.
+	//
+	// Otherwise, a random subsection of the non-player entities will be
+	// sent in the first pass, and the rest in the second pass.
+	//
+	// This makes it random which entities will be sent or not in case of
+	// running out of space in the message, guaranteeing that every entity
+	// eventually gets a chance to be sent.
+	//
+	// Note that player entities are never included in this. This is to
+	// ensure they keep having priority over anything else. If even sending
+	// the player entities alone runs out of message space, the experience
+	// will be horrible anyway, not much we can do about it - except maybe
+	// better culling.
+	nonplayer_splitpoint_number = svs.maxclients + 1;
+	if (sv_sendentities_csqc_randomize_order.integer && nonplayer_index > 0)
+	{
+		nonplayer_splitpoint = rand() % nonplayer_index;
+
+		// Convert the split point to an entity number.
+		// This must use the exact same conditions as the above
+		// incrementing of nonplayer_index.
+		nonplayer_index = 0;
+		for (number = 1;number < end;number++)
+		{
+			if (!(client->csqcentityscope[number] & SCOPE_WANTSEND))
+				continue;
+			if(db->num >= NUM_CSQCENTITIES_PER_FRAME)
+				goto outofspace;
+			ed = prog->edicts + number;
+			if (!(client->csqcentityscope[number] & SCOPE_WANTREMOVE))
+			{
+				// An update.
+				sendflags = client->csqcentitysendflags[number];
+				// Nothing to send? FINE.
+				if (!sendflags)
+					continue;
+				if (number > svs.maxclients)
+				{
+					if (nonplayer_index == nonplayer_splitpoint)
+					{
+						nonplayer_splitpoint_number = number;
+				break;
+		}
+					++nonplayer_index;
+				}
+			}
+		}
+	}
+
+	for (num = 1;num < end;num++)
+	{
+		// Remap entity numbers as follows:
+		// - 1..maxclients stays as is
+		// - Otherwise, rotate so that maxclients+1 becomes nonplayer_splitpoint_number.
+		number = (num <= svs.maxclients)
+				? num
+				: (num - (svs.maxclients + 1) + nonplayer_splitpoint_number);
+		if (number >= end)
+			number -= end - (svs.maxclients + 1);
+
+		if (!(client->csqcentityscope[number] & SCOPE_WANTSEND))
+			continue;
+		if(db->num >= NUM_CSQCENTITIES_PER_FRAME)
+			goto outofspace;
+		ed = prog->edicts + number;
+		if (!(client->csqcentityscope[number] & SCOPE_WANTREMOVE))
 		{
 			// save the cursize value in case we overflow and have to rollback
 			int oldcursize = msg->cursize;
@@ -297,7 +380,7 @@ qbool EntityFrameCSQC_WriteFrame (sizebuf_t *msg, int maxsize, int numnumbers, c
 							sectionstarted = 1;
 							ENTITYSIZEPROFILING_END(msg, number, 0);
 							if (msg->cursize + 17 >= maxsize)
-								break;
+								goto outofspace;
 						}
 						else
 						{
@@ -323,7 +406,7 @@ qbool EntityFrameCSQC_WriteFrame (sizebuf_t *msg, int maxsize, int numnumbers, c
 						sectionstarted = 1;
 						ENTITYSIZEPROFILING_END(msg, number, sendflags);
 						if (msg->cursize + 17 >= maxsize)
-							break;
+							goto outofspace;
 						continue;
 					}
 				}
@@ -335,6 +418,8 @@ qbool EntityFrameCSQC_WriteFrame (sizebuf_t *msg, int maxsize, int numnumbers, c
 			msg->overflowed = false;
 		}
 	}
+
+outofspace:
 	if (sectionstarted)
 	{
 		// write index 0 to end the update (0 is never used by real entities)

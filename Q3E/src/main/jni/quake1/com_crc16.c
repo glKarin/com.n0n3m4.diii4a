@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define CRC_INIT_VALUE	0xffff
 #define CRC_XOR_VALUE	0x0000
 
-static unsigned short crctable[256] =
+static const u16 crctable[256] =
 {
 	0x0000,	0x1021,	0x2042,	0x3063,	0x4084,	0x50a5,	0x60c6,	0x70e7,
 	0x8108,	0x9129,	0xa14a,	0xb16b,	0xc18c,	0xd1ad,	0xe1ce,	0xf1ef,
@@ -89,7 +89,7 @@ unsigned short CRC_Block_CaseInsensitive(const unsigned char *data, size_t size)
 }
 
 // QuakeWorld
-static unsigned char chktbl[1024 + 4] =
+static const u8 chktbl[1024 + 4] =
 {
 	0x78,0xd2,0x94,0xe3,0x41,0xec,0xd6,0xd5,0xcb,0xfc,0xdb,0x8a,0x4b,0xcc,0x85,0x01,
 	0x23,0xd2,0xe5,0xf2,0x29,0xa7,0x45,0x94,0x4a,0x62,0xe3,0xa5,0x6f,0x3f,0xe1,0x7a,
@@ -131,7 +131,7 @@ static unsigned char chktbl[1024 + 4] =
 // QuakeWorld
 unsigned char COM_BlockSequenceCRCByteQW(unsigned char *base, int length, int sequence)
 {
-	unsigned char *p;
+	const unsigned char *p;
 	unsigned char chkb[60 + 4];
 
 	p = chktbl + (sequence % (sizeof(chktbl) - 8));

@@ -350,11 +350,11 @@ void FOG_clear(void)
 {
 	if (gamemode == GAME_NEHAHRA)
 	{
-		Cvar_Set(&cvars_all, "gl_fogenable", "0");
-		Cvar_Set(&cvars_all, "gl_fogdensity", "0.2");
-		Cvar_Set(&cvars_all, "gl_fogred", "0.3");
-		Cvar_Set(&cvars_all, "gl_foggreen", "0.3");
-		Cvar_Set(&cvars_all, "gl_fogblue", "0.3");
+		Cvar_SetQuick(&gl_fogenable, "0");
+		Cvar_SetQuick(&gl_fogdensity, "0.2");
+		Cvar_SetQuick(&gl_fogred, "0.3");
+		Cvar_SetQuick(&gl_foggreen, "0.3");
+		Cvar_SetQuick(&gl_fogblue, "0.3");
 	}
 	r_refdef.fog_density = 0;
 	r_refdef.fog_red = 0;
@@ -1076,7 +1076,7 @@ static void R_GLSL_CompilePermutation(r_glsl_permutation_t *p, unsigned int mode
 		geomstrings_list[geomstrings_count++] = "#define GLSL120\n";
 		fragstrings_list[fragstrings_count++] = "#define GLSL120\n";
 	}
-#ifdef _NOSDL
+#ifdef _NOSDL //karin: GLSL 100es header
 	else
 	{
 		vertstrings_list[vertstrings_count++] = "#version 100\n";
@@ -3022,8 +3022,6 @@ static void R_Main_FreeViewCache(void)
 static void R_Main_ResizeViewCache(void)
 {
 	int numentities = r_refdef.scene.numentities;
-	int numclusters = r_refdef.scene.worldmodel ? r_refdef.scene.worldmodel->brush.num_pvsclusters : 1;
-	int numclusterbytes = r_refdef.scene.worldmodel ? r_refdef.scene.worldmodel->brush.num_pvsclusterbytes : 1;
 	int numleafs = r_refdef.scene.worldmodel ? r_refdef.scene.worldmodel->brush.num_leafs : 1;
 	int numsurfaces = r_refdef.scene.worldmodel ? r_refdef.scene.worldmodel->num_surfaces : 1;
 	if (r_refdef.viewcache.maxentities < numentities)
@@ -3033,14 +3031,7 @@ static void R_Main_ResizeViewCache(void)
 			Mem_Free(r_refdef.viewcache.entityvisible);
 		r_refdef.viewcache.entityvisible = (unsigned char *)Mem_Alloc(r_main_mempool, r_refdef.viewcache.maxentities);
 	}
-	if (r_refdef.viewcache.world_numclusters != numclusters)
-	{
-		r_refdef.viewcache.world_numclusters = numclusters;
-		r_refdef.viewcache.world_numclusterbytes = numclusterbytes;
-		if (r_refdef.viewcache.world_pvsbits)
-			Mem_Free(r_refdef.viewcache.world_pvsbits);
-		r_refdef.viewcache.world_pvsbits = (unsigned char *)Mem_Alloc(r_main_mempool, r_refdef.viewcache.world_numclusterbytes);
-	}
+	// bones_was_here: r_refdef.viewcache.world_pvsbits was (re)allocated here, now done in Mod_BSP_FatPVS()
 	if (r_refdef.viewcache.world_numleafs != numleafs)
 	{
 		r_refdef.viewcache.world_numleafs = numleafs;
@@ -3426,7 +3417,7 @@ void GL_Main_Init(void)
 	Cvar_RegisterVariable(&r_q1bsp_lightmap_updates_combine);
 	Cvar_RegisterVariable(&r_q1bsp_lightmap_updates_hidden_surfaces);
 	if (gamemode == GAME_NEHAHRA || gamemode == GAME_TENEBRAE)
-		Cvar_SetValue(&cvars_all, "r_fullbrights", 0);
+		Cvar_SetQuick(&r_fullbrights, "0");
 #ifdef DP_MOBILETOUCH
 	// GLES devices have terrible depth precision in general, so...
 	Cvar_SetValueQuick(&r_nearclip, 4);
@@ -4027,7 +4018,7 @@ static void R_View_UpdateEntityVisible (void)
 	if (!r_drawexteriormodel.integer)
 		renderimask |= RENDER_EXTERIORMODEL;
 	memset(r_refdef.viewcache.entityvisible, 0, r_refdef.scene.numentities);
-	if (r_refdef.scene.worldmodel && r_refdef.scene.worldmodel->brush.BoxTouchingVisibleLeafs)
+	if (r_refdef.scene.worldmodel && !r_novis.integer && r_refdef.scene.worldmodel->brush.BoxTouchingVisibleLeafs)
 	{
 		// worldmodel can check visibility
 		for (i = 0;i < r_refdef.scene.numentities;i++)
@@ -4430,7 +4421,7 @@ void R_SetupView(qbool allowwaterclippingplane, int viewfbo, rtexture_t *viewdep
 		R_Viewport_InitPerspectiveInfinite(&r_refdef.view.viewport, &r_refdef.view.matrix, viewx, viewy_adjusted, viewwidth, viewheight, r_refdef.view.frustum_x, r_refdef.view.frustum_y, r_refdef.nearclip, customclipplane);
 	else
 		R_Viewport_InitPerspective(&r_refdef.view.viewport, &r_refdef.view.matrix, viewx, viewy_adjusted, viewwidth, viewheight, r_refdef.view.frustum_x, r_refdef.view.frustum_y, r_refdef.nearclip, r_refdef.farclip, customclipplane);
-	R_Mesh_SetRenderTargets(viewfbo, viewdepthtexture, viewcolortexture, NULL, NULL, NULL);
+	R_Mesh_SetRenderTargets(viewfbo);
 	R_SetViewport(&r_refdef.view.viewport);
 }
 
@@ -4468,7 +4459,7 @@ void R_ResetViewRendering2D_Common(int viewfbo, rtexture_t *viewdepthtexture, rt
 	viewy_adjusted = viewfbo ? viewy : vid.mode.height - viewheight - viewy;
 
 	R_Viewport_InitOrtho(&viewport, &identitymatrix, viewx, viewy_adjusted, viewwidth, viewheight, 0, 0, x2, y2, -10, 100, NULL);
-	R_Mesh_SetRenderTargets(viewfbo, viewdepthtexture, viewcolortexture, NULL, NULL, NULL);
+	R_Mesh_SetRenderTargets(viewfbo);
 	R_SetViewport(&viewport);
 	GL_Scissor(viewport.x, viewport.y, viewport.width, viewport.height);
 	GL_Color(1, 1, 1, 1);
@@ -4765,7 +4756,7 @@ void R_Water_AddWaterPlane(msurface_t *surface, int entno)
 		if (p->materialflags & (MATERIALFLAG_WATERSHADER | MATERIALFLAG_REFRACTION | MATERIALFLAG_REFLECTION) && r_refdef.scene.worldmodel && r_refdef.scene.worldmodel->brush.FatPVS
 		 && r_refdef.scene.worldmodel->brush.PointInLeaf && r_refdef.scene.worldmodel->brush.PointInLeaf(r_refdef.scene.worldmodel, center)->clusterindex >= 0)
 		{
-			r_refdef.scene.worldmodel->brush.FatPVS(r_refdef.scene.worldmodel, center, 2, p->pvsbits, sizeof(p->pvsbits), p->pvsvalid);
+			r_refdef.scene.worldmodel->brush.FatPVS(r_refdef.scene.worldmodel, center, 2, &p->pvsbits, r_main_mempool, p->pvsvalid);
 			p->pvsvalid = true;
 		}
 	}
@@ -4926,7 +4917,7 @@ static void R_Water_ProcessPlanes(int fbo, rtexture_t *depthtexture, rtexture_t 
 				if(r_refdef.scene.worldmodel && r_refdef.scene.worldmodel->brush.FatPVS)
 				{
 					r_refdef.view.usecustompvs = true;
-					r_refdef.scene.worldmodel->brush.FatPVS(r_refdef.scene.worldmodel, visorigin, 2, r_refdef.viewcache.world_pvsbits, (r_refdef.viewcache.world_numclusters+7)>>3, false);
+					r_refdef.scene.worldmodel->brush.FatPVS(r_refdef.scene.worldmodel, visorigin, 2, &r_refdef.viewcache.world_pvsbits, r_main_mempool, false);
 				}
 			}
 
@@ -4981,7 +4972,7 @@ static void R_Water_ProcessPlanes(int fbo, rtexture_t *depthtexture, rtexture_t 
 			if(p->camera_entity && r_refdef.scene.worldmodel && r_refdef.scene.worldmodel->brush.FatPVS)
 			{
 				r_refdef.view.usecustompvs = true;
-				r_refdef.scene.worldmodel->brush.FatPVS(r_refdef.scene.worldmodel, visorigin, 2, r_refdef.viewcache.world_pvsbits, (r_refdef.viewcache.world_numclusters+7)>>3, false);
+				r_refdef.scene.worldmodel->brush.FatPVS(r_refdef.scene.worldmodel, visorigin, 2, &r_refdef.viewcache.world_pvsbits, r_main_mempool, false);
 			}
 
 			// camera needs no clipplane
@@ -5147,7 +5138,7 @@ static void R_Bloom_MakeTexture(void)
 	CHECKGLERROR
 	prev = r_fb.rt_screen;
 	cur = R_RenderTarget_Get(r_fb.bloomwidth, r_fb.bloomheight, TEXTYPE_UNUSED, false, textype, TEXTYPE_UNUSED, TEXTYPE_UNUSED, TEXTYPE_UNUSED);
-	R_Mesh_SetRenderTargets(cur->fbo, NULL, cur->colortexture[0], NULL, NULL, NULL);
+	R_Mesh_SetRenderTargets(cur->fbo);
 	R_SetViewport(&bloomviewport);
 	GL_CullFace(GL_NONE);
 	GL_DepthTest(false);
@@ -5166,7 +5157,7 @@ static void R_Bloom_MakeTexture(void)
 	{
 		prev = cur;
 		cur = R_RenderTarget_Get(r_fb.bloomwidth, r_fb.bloomheight, TEXTYPE_UNUSED, false, textype, TEXTYPE_UNUSED, TEXTYPE_UNUSED, TEXTYPE_UNUSED);
-		R_Mesh_SetRenderTargets(cur->fbo, NULL, cur->colortexture[0], NULL, NULL, NULL);
+		R_Mesh_SetRenderTargets(cur->fbo);
 		x *= 2;
 		r = bound(0, r_bloom_colorexponent.value / x, 1); // always 0.5 to 1
 		if(x <= 2)
@@ -5190,7 +5181,7 @@ static void R_Bloom_MakeTexture(void)
 	{
 		prev = cur;
 		cur = R_RenderTarget_Get(r_fb.bloomwidth, r_fb.bloomheight, TEXTYPE_UNUSED, false, textype, TEXTYPE_UNUSED, TEXTYPE_UNUSED, TEXTYPE_UNUSED);
-		R_Mesh_SetRenderTargets(cur->fbo, NULL, cur->colortexture[0], NULL, NULL, NULL);
+		R_Mesh_SetRenderTargets(cur->fbo);
 		// blend on at multiple vertical offsets to achieve a vertical blur
 		// TODO: do offset blends using GLSL
 		// TODO instead of changing the texcoords, change the target positions to prevent artifacts at edges
@@ -5691,7 +5682,7 @@ void R_RenderView(int fbo, rtexture_t *depthtexture, rtexture_t *colortexture, i
 	if (r_refdef.view.isoverlay)
 	{
 		// TODO: FIXME: move this into its own backend function maybe? [2/5/2008 Andreas]
-		R_Mesh_SetRenderTargets(0, NULL, NULL, NULL, NULL, NULL);
+		R_Mesh_SetRenderTargets(0);
 		GL_Clear(GL_DEPTH_BUFFER_BIT, NULL, 1.0f, 0);
 		R_TimeReport("depthclear");
 
@@ -5829,10 +5820,6 @@ void R_RenderWaterPlanes(int viewfbo, rtexture_t *viewdepthtexture, rtexture_t *
 			R_TimeReport("waterworld");
 	}
 
-	// don't let sound skip if going slow
-	if (r_refdef.scene.extraupdate)
-		S_ExtraUpdate ();
-
 	R_DrawModelsAddWaterPlanes();
 	if (r_timereport_active)
 		R_TimeReport("watermodels");
@@ -5862,10 +5849,6 @@ void R_RenderScene(int viewfbo, rtexture_t *viewdepthtexture, rtexture_t *viewco
 
 	R_UpdateFog();
 
-	// don't let sound skip if going slow
-	if (r_refdef.scene.extraupdate)
-		S_ExtraUpdate ();
-
 	R_MeshQueue_BeginScene();
 
 	R_SkyStartFrame();
@@ -5877,10 +5860,6 @@ void R_RenderScene(int viewfbo, rtexture_t *viewdepthtexture, rtexture_t *viewco
 
 	if (cl.csqc_vidvars.drawworld)
 	{
-		// don't let sound skip if going slow
-		if (r_refdef.scene.extraupdate)
-			S_ExtraUpdate ();
-
 		if (r_refdef.scene.worldmodel && r_refdef.scene.worldmodel->DrawSky)
 		{
 			r_refdef.scene.worldmodel->DrawSky(r_refdef.scene.worldentity);
@@ -5950,17 +5929,9 @@ void R_RenderScene(int viewfbo, rtexture_t *viewdepthtexture, rtexture_t *viewco
 			R_TimeReport("world");
 	}
 
-	// don't let sound skip if going slow
-	if (r_refdef.scene.extraupdate)
-		S_ExtraUpdate ();
-
 	R_DrawModels();
 	if (r_timereport_active)
 		R_TimeReport("models");
-
-	// don't let sound skip if going slow
-	if (r_refdef.scene.extraupdate)
-		S_ExtraUpdate ();
 
 	if (!r_shadow_usingdeferredprepass)
 	{
@@ -5968,10 +5939,6 @@ void R_RenderScene(int viewfbo, rtexture_t *viewdepthtexture, rtexture_t *viewco
 		if (r_timereport_active)
 			R_TimeReport("rtlights");
 	}
-
-	// don't let sound skip if going slow
-	if (r_refdef.scene.extraupdate)
-		S_ExtraUpdate ();
 
 	if (cl.csqc_vidvars.drawworld)
 	{
@@ -6041,10 +6008,6 @@ void R_RenderScene(int viewfbo, rtexture_t *viewdepthtexture, rtexture_t *viewco
 		if (r_timereport_active)
 			R_TimeReport("coronas");
 	}
-
-	// don't let sound skip if going slow
-	if (r_refdef.scene.extraupdate)
-		S_ExtraUpdate ();
 }
 
 static const unsigned short bboxelements[36] =
@@ -9189,7 +9152,6 @@ void R_DecalSystem_Reset(decalsystem_t *decalsystem)
 static void R_DecalSystem_SpawnTriangle(decalsystem_t *decalsystem, const float *v0, const float *v1, const float *v2, const float *t0, const float *t1, const float *t2, const float *c0, const float *c1, const float *c2, int triangleindex, int surfaceindex, unsigned int decalsequence)
 {
 	tridecal_t *decal;
-	tridecal_t *decals;
 	int i;
 
 	// expand or initialize the system
@@ -9217,13 +9179,7 @@ static void R_DecalSystem_SpawnTriangle(decalsystem_t *decalsystem, const float 
 	}
 
 	// grab a decal and search for another free slot for the next one
-	decals = decalsystem->decals;
-	decal = decalsystem->decals + (i = decalsystem->freedecal++);
-	for (i = decalsystem->freedecal;i < decalsystem->numdecals && decals[i].color4f[0][3];i++)
-		;
-	decalsystem->freedecal = i;
-	if (decalsystem->numdecals <= i)
-		decalsystem->numdecals = i + 1;
+	decal = &decalsystem->decals[decalsystem->numdecals++];
 
 	// initialize the decal
 	decal->lived = 0;
@@ -9589,7 +9545,6 @@ static void R_DrawModelDecals_FadeEntity(entity_render_t *ent)
 {
 	int i;
 	decalsystem_t *decalsystem = &ent->decalsystem;
-	int numdecals;
 	unsigned int killsequence;
 	tridecal_t *decal;
 	float frametime;
@@ -9615,38 +9570,18 @@ static void R_DrawModelDecals_FadeEntity(entity_render_t *ent)
 	else
 		frametime = 0;
 	decalsystem->lastupdatetime = r_refdef.scene.time;
-	numdecals = decalsystem->numdecals;
 
-	for (i = 0, decal = decalsystem->decals;i < numdecals;i++, decal++)
-	{
-		if (decal->color4f[0][3])
+	for (i = 0, decal = decalsystem->decals;i < decalsystem->numdecals;i++, decal++)
 		{
 			decal->lived += frametime;
 			if (killsequence > decal->decalsequence || decal->lived >= lifetime)
 			{
-				memset(decal, 0, sizeof(*decal));
-				if (decalsystem->freedecal > i)
-					decalsystem->freedecal = i;
-			}
+			*decal = decalsystem->decals[--decalsystem->numdecals];
+			--i, --decal;  // Consider the just moved decal next.
 		}
 	}
-	decal = decalsystem->decals;
-	while (numdecals > 0 && !decal[numdecals-1].color4f[0][3])
-		numdecals--;
 
-	// collapse the array by shuffling the tail decals into the gaps
-	for (;;)
-	{
-		while (decalsystem->freedecal < numdecals && decal[decalsystem->freedecal].color4f[0][3])
-			decalsystem->freedecal++;
-		if (decalsystem->freedecal == numdecals)
-			break;
-		decal[decalsystem->freedecal] = decal[--numdecals];
-	}
-
-	decalsystem->numdecals = numdecals;
-
-	if (numdecals <= 0)
+	if (decalsystem->numdecals <= 0)
 	{
 		// if there are no decals left, reset decalsystem
 		R_DecalSystem_Reset(decalsystem);
