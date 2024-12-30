@@ -114,8 +114,8 @@ it's `+set busywait 0` (setting the `busywait` cvar) and `-portable`
 `cl_http_bw_limit_tmout` variable. Set `0` by default.
 
 * **cl_http_bw_limit_tmout**: Seconds before the download is aborted
-when the speed transfer is below the var set by `cl_http_bw_limit_rate`.
-Set `0` by default.
+  when the speed transfer is below the var set by
+  `cl_http_bw_limit_rate`.  Set `0` by default.
 
 * **cl_kickangles**: If set to `0` angle kicks (weapon recoil, damage
   hits and the like) are ignored. Cheat-protected. Defaults to `1`.
@@ -138,8 +138,22 @@ Set `0` by default.
   loading. If set to `0` pause mode is never entered, this is the
   Vanilla Quake II behaviour.
 
-* **cl_unpaused_scvis**: If set to `1` (the default) the client unpause
-  when the screen becomes visible.
+* **cl_model_preview_start**: Start frame value in multiplayer model
+  preview.  `-1` - don't show animation. Defaults to `84` for show
+  salute animation.
+
+* **cl_model_preview_end**: End frame value in multiplayer model
+  preview.  `-1` - don't show animation. Defaults to `94` for show
+  salute animation.
+
+* **cl_nodownload_list**: Whitespace separated list of substrings, files
+  having one these strings in their name are never downloaded. Empty by
+  default. Note that some substrings are always forbidden, for security
+  reasons these cannot be overridden: '.dll', '.dylib' and '.so' to
+  prevent downloading of libraries which could be injected into the
+  Yamagi Quake II process. '..' or ':' inside filenames and '/' or '.'
+  at the beginning of filenames to prevent downloading files into
+  arbitrary directories.
 
 * **cl_r1q2_lightstyle**: Since the first release Yamagi Quake II used
   the R1Q2 colors for the dynamic lights of rockets. Set to `0` to get
@@ -153,11 +167,8 @@ Set `0` by default.
   the top right corner of the screen.  Set to `2` to show only the horizontal 
   speed under the crosshair.
   
-* **cl_model_preview_start**: start frame value in multiplayer model preview.
-  `-1` - don't show animation. Defaults to `84` for show salute animation.
-
-* **cl_model_preview_end**: end frame value in multiplayer model preview.
-  `-1` - don't show animation. Defaults to `94` for show salute animation.
+* **cl_unpaused_scvis**: If set to `1` (the default) the client unpause
+  when the screen becomes visible.
 
 * **in_grab**: Defines how the mouse is grabbed by Yamagi Quake IIs
   window. If set to `0` the mouse is never grabbed and if set to `1`
@@ -235,7 +246,7 @@ Set `0` by default.
 * **g_quick_weap**: If set to `1`, both *weapprev* and *weapnext*
   commands will "count" how many times they have been called, making
   possible to skip weapons by quickly tapping one of these keys.
-  By default this cvar is set to `0`, and will only work if the
+  By default this cvar is set to `1`, and will only work if the
   game.dll implements this behaviour.
 
 * **g_swap_speed**: Sets the speed of the "changing weapon" animation.
@@ -288,6 +299,12 @@ Set `0` by default.
   system and supports surround speakers and HRTF for headphones. OpenAL
   is much more reliable than the classic sound system, especially on
   modern systems like Windows 10 or Linux with PulseAudio.
+
+* **s_sdldriver**: Can be set to the name of a SDL audio driver. If set
+  to `auto`, SDL chooses the driver. If set to anything else the given
+  driver is forced, regardless if supported by SDL or the platform or
+  not. By default set to `directsound` under Windows and `auto` on all
+  other platforms.
 
 * **s_underwater**: Dampen sounds if submerged. Enabled by default.
 
@@ -464,6 +481,11 @@ Set `0` by default.
   value, at least `1.0` - default is `2.0`. Applied when textures are
   loaded, so it needs a `vid_restart`.
 
+* **gl1_multitexture**: Enables (`1`, default) the blending of color and
+  light textures on a single drawing pass; disabling this (`0`) does one
+  pass for color and another for light. Requires a `vid_restart` when
+  changed.
+
 * **gl1_overbrightbits**: Enables overbright bits, brightness scaling of
   lightmaps and models. Higher values make shadows less dark. Possible
   values are `0` (no overbright bits), `1` (more correct lighting for
@@ -587,6 +609,10 @@ Set `0` by default.
   controller flat, like using a pointing device. `1` is "roll" (lean),
   for people who hold the controller upright, or use a device with the
   controller attached to the screen, e.g. Steam Deck.
+
+* **gyro_tightening**: Threshold of rotation in degrees per second,
+  where gyro inputs below it will be dampened. Meant to counter a
+  noisy gyro and involuntary hand movements. Default `3.5`.
 
 * **gyro_calibration_(x/y/z)**: Offset values on each axis of the gyro
   which helps it reach true "zero movement", complete stillness. These

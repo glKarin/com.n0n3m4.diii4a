@@ -59,12 +59,14 @@ typedef struct msurface_s
 	glpoly_t *polys;                /* multiple if warped */
 	struct  msurface_s *texturechain;
 	struct  msurface_s *lightmapchain;
+	int lmchain_frame;	// avoids adding this surface twice to the lightmap chain
 
 	mtexinfo_t *texinfo;
 
 	/* lighting info */
 	int dlightframe;
 	int dlightbits;
+	qboolean dirty_lightmap;	// lightmap has dynamic lights from previous frame (mtex only)
 
 	int lightmaptexturenum;
 	byte styles[MAXLIGHTMAPS];

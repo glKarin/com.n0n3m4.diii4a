@@ -6,7 +6,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 # CMake project configuration
-project(q2zaero)
+project(yquake2-zaero)
 
 # Enforce compiler flags (GCC / Clang compatible, yquake2
 # won't build with another compiler anyways)

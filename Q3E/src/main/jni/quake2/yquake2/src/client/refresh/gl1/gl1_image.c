@@ -31,7 +31,7 @@ int numgltextures;
 static int image_max = 0;
 int base_textureid; /* gltextures[i] = base_textureid+i */
 extern qboolean scrap_dirty;
-extern byte scrap_texels[MAX_SCRAPS][BLOCK_WIDTH * BLOCK_HEIGHT];
+extern byte *scrap_texels[MAX_SCRAPS];
 
 static byte intensitytable[256];
 static unsigned char gammatable[256];
@@ -44,14 +44,14 @@ qboolean R_Upload8(byte *data, int width, int height,
 		qboolean mipmap, qboolean is_sky);
 qboolean R_Upload32(unsigned *data, int width, int height, qboolean mipmap);
 
-#ifdef _GLES
+#ifdef _GLES //karin: force GL_RGBA for non-alpha texture on GLES 1.1
 int gl_solid_format = GL_RGBA;
 #else
 int gl_solid_format = GL_RGB;
 #endif
 int gl_alpha_format = GL_RGBA;
 
-#ifdef _GLES
+#ifdef _GLES //karin: force GL_RGBA for non-alpha texture on GLES 1.1
 int gl_tex_solid_format = GL_RGBA;
 #else
 int gl_tex_solid_format = GL_RGB;
@@ -87,7 +87,7 @@ typedef struct
 gltmode_t gl_alpha_modes[] = {
 	{"default", GL_RGBA},
 	{"GL_RGBA", GL_RGBA},
-#ifdef _GLES
+#ifdef _GLES //karin: not support non-GL_RGBA on GLES 1.1
 	{"GL_RGBA8", GL_RGBA},
 	{"GL_RGB5_A1", GL_RGBA},
 	{"GL_RGBA4", GL_RGBA},
@@ -103,7 +103,7 @@ gltmode_t gl_alpha_modes[] = {
 #define NUM_GL_ALPHA_MODES (sizeof(gl_alpha_modes) / sizeof(gltmode_t))
 
 gltmode_t gl_solid_modes[] = {
-#ifdef _GLES
+#ifdef _GLES //karin: not support non-GL_RGB on GLES 1.1
 	{"default", GL_RGBA},
 	{"GL_RGB", GL_RGBA},
 	{"GL_RGB8", GL_RGBA},
@@ -169,18 +169,33 @@ R_SetTexturePalette(unsigned palette[256])
 }
 
 void
+R_SelectTexture(GLenum texture)
+{
+	if (!gl_config.multitexture || gl_state.currenttarget == texture)
+	{
+		return;
+	}
+
+	gl_state.currenttmu = texture - GL_TEXTURE0;
+	gl_state.currenttarget = texture;
+
+	qglActiveTexture(texture);
+	qglClientActiveTexture(texture);
+}
+
+void
 R_TexEnv(GLenum mode)
 {
 	static int lastmodes[2] = {-1, -1};
 
 	if (mode != lastmodes[gl_state.currenttmu])
 	{
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, mode); // FIXME: shouldn't this be glTexEnvi() ?
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, mode);
 		lastmodes[gl_state.currenttmu] = mode;
 	}
 }
 
-void
+qboolean
 R_Bind(int texnum)
 {
 	extern image_t *draw_chars;
@@ -192,11 +207,66 @@ R_Bind(int texnum)
 
 	if (gl_state.currenttextures[gl_state.currenttmu] == texnum)
 	{
-		return;
+		return false;
 	}
 
 	gl_state.currenttextures[gl_state.currenttmu] = texnum;
 	glBindTexture(GL_TEXTURE_2D, texnum);
+	return true;
+}
+
+void
+R_MBind(GLenum target, int texnum)
+{
+	const int tmu = target - GL_TEXTURE0;
+
+	if (target != gl_state.currenttarget)
+	{
+		R_SelectTexture(target);
+	}
+
+	if (gl_state.currenttextures[tmu] == texnum)
+	{
+		return;
+	}
+
+	R_Bind(texnum);
+}
+
+void
+R_EnableMultitexture(qboolean enable)
+{
+	static qboolean active;
+
+	if (!gl_config.multitexture || enable == active)
+	{
+		return;	// current state is the right one
+	}
+
+	active = enable;
+	R_SelectTexture(GL_TEXTURE1);
+
+	if (active && !r_fullbright->value)
+	{
+		glEnable(GL_TEXTURE_2D);
+
+		if (gl_lightmap->value)
+		{
+			R_TexEnv(GL_REPLACE);
+		}
+		else
+		{
+			R_TexEnv(GL_MODULATE);
+		}
+	}
+	else	// disable multitexturing
+	{
+		glDisable(GL_TEXTURE_2D);
+		R_TexEnv(GL_REPLACE);
+	}
+
+	R_SelectTexture(GL_TEXTURE0);
+	R_TexEnv(GL_REPLACE);
 }
 
 void
@@ -254,7 +324,11 @@ R_TextureMode(char *string)
 			nolerp = true;
 		}
 
-		R_Bind(glt->texnum);
+		if ( !R_Bind(glt->texnum) )
+		{
+			continue;	// don't bother changing anything if texture was already set
+		}
+
 		if ((glt->type != it_pic) && (glt->type != it_sky)) /* mipmapped texture */
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
@@ -551,11 +625,6 @@ R_BuildPalettedTexture(unsigned char *paletted_texture, unsigned char *scaled,
 	}
 }
 
-// Windows headers don't define this constant.
-#ifndef GL_GENERATE_MIPMAP
-#define GL_GENERATE_MIPMAP 0x8191
-#endif
-
 qboolean
 R_Upload32Native(unsigned *data, int width, int height, qboolean mipmap)
 {
@@ -680,7 +749,7 @@ R_Upload32Soft(unsigned *data, int width, int height, qboolean mipmap)
 	{
 		if (!mipmap)
 		{
-#if !defined(_GLES)
+#if !defined(_GLES) //karin: not support color index on GLES 1.1
 			if (qglColorTableEXT && gl1_palettedtexture->value &&
 				(samples == gl_solid_format))
 			{
@@ -712,7 +781,7 @@ R_Upload32Soft(unsigned *data, int width, int height, qboolean mipmap)
 
 	R_LightScaleTexture(scaled, scaled_width, scaled_height, !mipmap);
 
-#if !defined(_GLES)
+#if !defined(_GLES) //karin: not support color index on GLES 1.1
 	if (qglColorTableEXT && gl1_palettedtexture->value &&
 		(samples == gl_solid_format))
 	{
@@ -755,7 +824,7 @@ R_Upload32Soft(unsigned *data, int width, int height, qboolean mipmap)
 
 			miplevel++;
 
-#if !defined(_GLES)
+#if !defined(_GLES) //karin: not support color index on GLES 1.1
 			if (qglColorTableEXT && gl1_palettedtexture->value &&
 				(samples == gl_solid_format))
 			{
@@ -822,7 +891,7 @@ R_Upload8(byte *data, int width, int height, qboolean mipmap, qboolean is_sky)
 {
 	int s = width * height;
 
-#if !defined(_GLES)
+#if !defined(_GLES) //karin: not support color index on GLES 1.1
 	if (gl_config.palettedtexture && is_sky)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_COLOR_INDEX8_EXT,
@@ -966,17 +1035,17 @@ R_LoadPic(const char *name, byte *pic, int width, int realwidth,
 		{
 			for (j = 0; j < image->width; j++, k++)
 			{
-				scrap_texels[texnum][(y + i) * BLOCK_WIDTH + x + j] = pic[k];
+				scrap_texels[texnum][(y + i) * gl_state.scrap_width + x + j] = pic[k];
 			}
 		}
 
 		image->texnum = TEXNUM_SCRAPS + texnum;
 		image->scrap = true;
 		image->has_alpha = true;
-		image->sl = (x + 0.01) / (float)BLOCK_WIDTH;
-		image->sh = (x + image->width - 0.01) / (float)BLOCK_WIDTH;
-		image->tl = (y + 0.01) / (float)BLOCK_WIDTH;
-		image->th = (y + image->height - 0.01) / (float)BLOCK_WIDTH;
+		image->sl = (float)x / gl_state.scrap_width;
+		image->sh = (float)(x + image->width) / gl_state.scrap_width;
+		image->tl = (float)y / gl_state.scrap_height;
+		image->th = (float)(y + image->height) / gl_state.scrap_height;
 	}
 	else
 	{

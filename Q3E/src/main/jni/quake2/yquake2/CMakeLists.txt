@@ -9,7 +9,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # CMake project configuration.
-project(quake2 C)
+project(yquake2 C)
 
 # Cmake module search path.
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/stuff/cmake/modules ${CMAKE_MODULE_PATH})
@@ -537,6 +537,7 @@ set(Server-Header
 
 set(GL1-Source
 	${REF_SRC_DIR}/gl1/qgl.c
+	${REF_SRC_DIR}/gl1/gl1_buffer.c
 	${REF_SRC_DIR}/gl1/gl1_draw.c
 	${REF_SRC_DIR}/gl1/gl1_image.c
 	${REF_SRC_DIR}/gl1/gl1_light.c

@@ -111,6 +111,7 @@ qboolean GLimp_InitGL(qboolean fullscreen)
 void
 RI_EndFrame(void)
 {
+	R_ApplyGLBuffer();	// to draw buffered 2D text
 	Q3E_SwapBuffers();
 }
 

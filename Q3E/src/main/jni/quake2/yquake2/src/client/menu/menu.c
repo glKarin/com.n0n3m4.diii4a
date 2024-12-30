@@ -59,7 +59,7 @@ static void M_Menu_JoinServer_f(void);
 static void M_Menu_AddressBook_f(void);
 static void M_Menu_StartServer_f(void);
 static void M_Menu_DMOptions_f(void);
-static void M_Menu_Video_f(void);
+void M_Menu_Video_f(void);
 static void M_Menu_Options_f(void);
 static void M_Menu_Keys_f(void);
 static void M_Menu_Joy_f(void);
@@ -71,9 +71,6 @@ void M_Menu_Credits(void);
 
 qboolean m_entersound; /* play after drawing a frame, so caching won't disrupt the sound */
 
-void (*m_drawfunc)(void);
-const char *(*m_keyfunc)(int key);
-
 /* Maximal number of submenus */
 #define MAX_MENU_DEPTH 8
 
@@ -84,6 +81,7 @@ typedef struct
 } menulayer_t;
 
 menulayer_t m_layers[MAX_MENU_DEPTH];
+menulayer_t m_active;		/* active menu layer */
 int m_menudepth;
 
 static qboolean
@@ -113,9 +111,9 @@ M_Banner(char *name)
 void
 M_ForceMenuOff(void)
 {
-    m_drawfunc = NULL;
-    m_keyfunc = NULL;
     cls.key_dest = key_game;
+    m_active.draw = NULL;
+    m_active.key  = NULL;
     m_menudepth = 0;
 	Key_MarkAllUp();
     Cvar_Set("paused", "0");
@@ -133,8 +131,8 @@ M_PopMenu(void)
 
     m_menudepth--;
 
-    m_drawfunc = m_layers[m_menudepth].draw;
-    m_keyfunc = m_layers[m_menudepth].key;
+    m_active.draw = m_layers[m_menudepth].draw;
+    m_active.key  = m_layers[m_menudepth].key;
 
     if (!m_menudepth)
     {
@@ -166,11 +164,16 @@ M_PopMenu(void)
  *    to the stack and make the requested menu the menu in
  *    flight.
  */
-static void
-M_PushMenu(void (*draw)(void), const char *(*key)(int))
+void
+M_PushMenu(menuframework_s* menu)
 {
     int i;
     int alreadyPresent = 0;
+
+    if (menu == NULL)
+    {
+	return;
+    }
 
     if ((Cvar_VariableValue("maxclients") == 1) &&
             Com_ServerState())
@@ -194,7 +197,8 @@ M_PushMenu(void (*draw)(void), const char *(*key)(int))
 
     /* if this menu is already open (and on top),
        close it => toggling behaviour */
-    if ((m_drawfunc == draw) && (m_keyfunc == key))
+    if ((m_active.draw == menu->draw) &&
+	(m_active.key  == menu->key))
     {
         M_PopMenu();
         return;
@@ -204,8 +208,8 @@ M_PushMenu(void (*draw)(void), const char *(*key)(int))
        that level to avoid stacking menus by hotkeys */
     for (i = 0; i < m_menudepth; i++)
     {
-        if ((m_layers[i].draw == draw) &&
-                (m_layers[i].key == key))
+	if ((m_layers[i].draw == menu->draw) &&
+            (m_layers[i].key  == menu->key))
         {
             alreadyPresent = 1;
             break;
@@ -224,12 +228,12 @@ M_PushMenu(void (*draw)(void), const char *(*key)(int))
         return;
     }
 
-    m_layers[m_menudepth].draw = m_drawfunc;
-    m_layers[m_menudepth].key = m_keyfunc;
+    m_layers[m_menudepth].draw = m_active.draw;
+    m_layers[m_menudepth].key  = m_active.key;
     m_menudepth++;
 
-    m_drawfunc = draw;
-    m_keyfunc = key;
+    m_active.draw = menu->draw;
+    m_active.key  = menu->key;
 
     m_entersound = true;
 
@@ -726,7 +730,7 @@ InitMainMenu(void)
 static void
 M_Main_Draw(void)
 {
-    menucommon_s * item = 0;
+    menucommon_s * item = NULL;
     int x = 0;
     int y = 0;
 
@@ -752,7 +756,7 @@ M_Main_Key(int key)
 void
 M_Menu_Main_f(void)
 {
-    menucommon_s * item = 0;
+    menucommon_s * item = NULL;
 
     InitMainMenu();
 
@@ -771,7 +775,10 @@ M_Menu_Main_f(void)
         }
     }
 
-    M_PushMenu(M_Main_Draw, M_Main_Key);
+    s_main.draw = M_Main_Draw;
+    s_main.key  = M_Main_Key;
+    
+    M_PushMenu(&s_main);
 }
 
 /*
@@ -873,7 +880,10 @@ static void
 M_Menu_Multiplayer_f(void)
 {
     Multiplayer_MenuInit();
-    M_PushMenu(Multiplayer_MenuDraw, Multiplayer_MenuKey);
+    s_multiplayer_menu.draw = Multiplayer_MenuDraw;
+    s_multiplayer_menu.key  = Multiplayer_MenuKey;
+
+    M_PushMenu(&s_multiplayer_menu);
 }
 
 /*
@@ -1140,7 +1150,10 @@ static void
 M_Menu_Keys_f(void)
 {
     Keys_MenuInit();
-    M_PushMenu(Keys_MenuDraw, Keys_MenuKey);
+    s_keys_menu.draw = Keys_MenuDraw;
+    s_keys_menu.key  = Keys_MenuKey;
+
+    M_PushMenu(&s_keys_menu);
 }
 
 /*
@@ -1290,7 +1303,10 @@ static void
 M_Menu_Multiplayer_Keys_f(void)
 {
     MultiplayerKeys_MenuInit();
-    M_PushMenu(MultiplayerKeys_MenuDraw, MultiplayerKeys_MenuKey);
+    s_multiplayer_keys_menu.draw = MultiplayerKeys_MenuDraw;
+    s_multiplayer_keys_menu.key  = MultiplayerKeys_MenuKey;
+
+    M_PushMenu(&s_multiplayer_keys_menu);
 }
 
 /*
@@ -1453,7 +1469,10 @@ static void
 M_Menu_ControllerButtons_f(void)
 {
 	ControllerButtons_MenuInit();
-	M_PushMenu(ControllerButtons_MenuDraw, ControllerButtons_MenuKey);
+	s_controller_buttons_menu.draw = ControllerButtons_MenuDraw;
+	s_controller_buttons_menu.key  = ControllerButtons_MenuKey;
+
+	M_PushMenu(&s_controller_buttons_menu);
 }
 
 /*
@@ -1617,7 +1636,10 @@ static void
 M_Menu_ControllerAltButtons_f(void)
 {
 	ControllerAltButtons_MenuInit();
-	M_PushMenu(ControllerAltButtons_MenuDraw, ControllerAltButtons_MenuKey);
+	s_controller_alt_buttons_menu.draw = ControllerAltButtons_MenuDraw;
+	s_controller_alt_buttons_menu.key  = ControllerAltButtons_MenuKey;
+
+	M_PushMenu(&s_controller_alt_buttons_menu);
 }
 
 /*
@@ -1765,7 +1787,10 @@ static void
 M_Menu_Stick_f(void)
 {
 	Stick_MenuInit();
-	M_PushMenu(Stick_MenuDraw, Stick_MenuKey);
+	s_sticks_config_menu.draw = Stick_MenuDraw;
+	s_sticks_config_menu.key  = Stick_MenuKey;
+
+	M_PushMenu(&s_sticks_config_menu);
 }
 
 /*
@@ -1780,6 +1805,7 @@ static menuslider_s s_gyro_yawsensitivity_slider;
 static menuslider_s s_gyro_pitchsensitivity_slider;
 static menulist_s s_gyro_invertyaw_box;
 static menulist_s s_gyro_invertpitch_box;
+static menuslider_s s_gyro_tightening_slider;
 static menuseparator_s s_calibrating_text[2];
 static menuaction_s s_calibrate_gyro;
 
@@ -1917,6 +1943,15 @@ Gyro_MenuInit(void)
 	s_gyro_invertpitch_box.itemnames = yesno_names;
 	s_gyro_invertpitch_box.curvalue = (Cvar_VariableValue("gyro_pitchsensitivity") < 0);
 
+	s_gyro_tightening_slider.generic.type = MTYPE_SLIDER;
+	s_gyro_tightening_slider.generic.x = 0;
+	s_gyro_tightening_slider.generic.y = (y += 20);
+	s_gyro_tightening_slider.generic.name = "tightening thresh";
+	s_gyro_tightening_slider.cvar = "gyro_tightening";
+	s_gyro_tightening_slider.minvalue = 0.0f;
+	s_gyro_tightening_slider.maxvalue = 12.0f;
+	s_gyro_tightening_slider.slidestep = 0.5f;
+
 	s_calibrating_text[0].generic.type = MTYPE_SEPARATOR;
 	s_calibrating_text[0].generic.x = 48 * scale + 32;
 	s_calibrating_text[0].generic.y = (y += 20);
@@ -1939,6 +1974,7 @@ Gyro_MenuInit(void)
 	Menu_AddItem(&s_gyro_menu, (void *)&s_gyro_pitchsensitivity_slider);
 	Menu_AddItem(&s_gyro_menu, (void *)&s_gyro_invertyaw_box);
 	Menu_AddItem(&s_gyro_menu, (void *)&s_gyro_invertpitch_box);
+	Menu_AddItem(&s_gyro_menu, (void *)&s_gyro_tightening_slider);
 	Menu_AddItem(&s_gyro_menu, (void *)&s_calibrating_text[0]);
 	Menu_AddItem(&s_gyro_menu, (void *)&s_calibrating_text[1]);
 	Menu_AddItem(&s_gyro_menu, (void *)&s_calibrate_gyro);
@@ -1969,7 +2005,10 @@ static void
 M_Menu_Gyro_f(void)
 {
 	Gyro_MenuInit();
-	M_PushMenu(Gyro_MenuDraw, Gyro_MenuKey);
+	s_gyro_menu.draw = Gyro_MenuDraw;
+	s_gyro_menu.key  = Gyro_MenuKey;
+
+	M_PushMenu(&s_gyro_menu);
 }
 
 /*
@@ -2140,7 +2179,10 @@ static void
 M_Menu_Joy_f(void)
 {
     Joy_MenuInit();
-    M_PushMenu(Joy_MenuDraw, Joy_MenuKey);
+    s_joy_menu.draw = Joy_MenuDraw;
+    s_joy_menu.key  = Joy_MenuKey;
+
+    M_PushMenu(&s_joy_menu);
 }
 
 /*
@@ -2542,23 +2584,17 @@ static void
 M_Menu_Options_f(void)
 {
     Options_MenuInit();
-    M_PushMenu(Options_MenuDraw, Options_MenuKey);
-}
+    s_options_menu.draw = Options_MenuDraw;
+    s_options_menu.key  = Options_MenuKey;
 
-/*
- * VIDEO MENU
- */
-
-static void
-M_Menu_Video_f(void)
-{
-    VID_MenuInit();
-    M_PushMenu(VID_MenuDraw, VID_MenuKey);
+    M_PushMenu(&s_options_menu);
 }
 
 /*
  * END GAME MENU
  */
+
+menuframework_s s_credits;
 
 #define CREDITS_SIZE 256
 static int credits_start_time;
@@ -2922,7 +2958,7 @@ static const char *roguecredits[] =
 };
 
 static void
-M_Credits_MenuDraw(void)
+M_Credits_Draw(void)
 {
     int i, y;
 	float scale = SCR_GetMenuScale();
@@ -2977,7 +3013,7 @@ M_Credits_MenuDraw(void)
     }
 }
 
-const char *
+static const char *
 M_Credits_Key(int key)
 {
     key = Key_GetMenuKey(key);
@@ -3065,7 +3101,11 @@ M_Menu_Credits_f(void)
     }
 
     credits_start_time = cls.realtime;
-    M_PushMenu(M_Credits_MenuDraw, M_Credits_Key);
+
+    s_credits.draw = M_Credits_Draw;
+    s_credits.key  = M_Credits_Key;
+    
+    M_PushMenu(&s_credits);
 }
 
 /*
@@ -3230,7 +3270,10 @@ static void
 M_Menu_Mods_f(void)
 {
     Mods_MenuInit();
-    M_PushMenu(Mods_MenuDraw, Mods_MenuKey);
+    s_mods_menu.draw = Mods_MenuDraw;
+    s_mods_menu.key  = Mods_MenuKey;
+
+    M_PushMenu(&s_mods_menu);
 }
 
 /*
@@ -3422,7 +3465,10 @@ static void
 M_Menu_Game_f(void)
 {
     Game_MenuInit();
-    M_PushMenu(Game_MenuDraw, Game_MenuKey);
+    s_game_menu.draw = Game_MenuDraw;
+    s_game_menu.key  = Game_MenuKey;
+
+    M_PushMenu(&s_game_menu);
     m_game_cursor = 1;
 }
 
@@ -3493,7 +3539,7 @@ ExecDeleteSaveFunc(menuframework_s *m, int menu_key)
 	menukeyitem_delete = false;
 
 	if (menu_key == K_ENTER || menu_key == 'y' || menu_key == 'Y'
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: LMB for ok
         || menu_key == K_MOUSE1
 #endif
     )
@@ -3749,7 +3795,10 @@ M_Menu_LoadGame_f(void)
 {
     LoadSave_AdjustPage(0);
     LoadGame_MenuInit();
-    M_PushMenu(LoadGame_MenuDraw, LoadGame_MenuKey);
+    s_loadgame_menu.draw = LoadGame_MenuDraw;
+    s_loadgame_menu.key  = LoadGame_MenuKey;
+
+    M_PushMenu(&s_loadgame_menu);
 }
 
 /*
@@ -3904,7 +3953,10 @@ M_Menu_SaveGame_f(void)
 
     LoadSave_AdjustPage(0);
     SaveGame_MenuInit();
-    M_PushMenu(SaveGame_MenuDraw, SaveGame_MenuKey);
+    s_savegame_menu.draw = SaveGame_MenuDraw;
+    s_savegame_menu.key  = SaveGame_MenuKey;
+
+    M_PushMenu(&s_savegame_menu);
 }
 
 /*
@@ -4105,7 +4157,10 @@ static void
 M_Menu_JoinServer_f(void)
 {
     JoinServer_MenuInit();
-    M_PushMenu(JoinServer_MenuDraw, JoinServer_MenuKey);
+    s_joinserver_menu.draw = JoinServer_MenuDraw;
+    s_joinserver_menu.key  = JoinServer_MenuKey;
+
+    M_PushMenu(&s_joinserver_menu);
 }
 
 /*
@@ -4504,7 +4559,10 @@ static void
 M_Menu_StartServer_f(void)
 {
     StartServer_MenuInit();
-    M_PushMenu(StartServer_MenuDraw, StartServer_MenuKey);
+    s_startserver_menu.draw = StartServer_MenuDraw;
+    s_startserver_menu.key  = StartServer_MenuKey;
+
+    M_PushMenu(&s_startserver_menu);
 }
 
 /*
@@ -4985,7 +5043,10 @@ static void
 M_Menu_DMOptions_f(void)
 {
     DMOptions_MenuInit();
-    M_PushMenu(DMOptions_MenuDraw, DMOptions_MenuKey);
+    s_dmoptions_menu.draw = DMOptions_MenuDraw;
+    s_dmoptions_menu.key  = DMOptions_MenuKey;
+
+    M_PushMenu(&s_dmoptions_menu);
 }
 
 /*
@@ -5150,7 +5211,10 @@ static void
 M_Menu_DownloadOptions_f(void)
 {
     DownloadOptions_MenuInit();
-    M_PushMenu(DownloadOptions_MenuDraw, DownloadOptions_MenuKey);
+    s_downloadoptions_menu.draw = DownloadOptions_MenuDraw;
+    s_downloadoptions_menu.key  = DownloadOptions_MenuKey;
+
+    M_PushMenu(&s_downloadoptions_menu);
 }
 
 /*
@@ -5226,7 +5290,10 @@ static void
 M_Menu_AddressBook_f(void)
 {
     AddressBook_MenuInit();
-    M_PushMenu(AddressBook_MenuDraw, AddressBook_MenuKey);
+    s_addressbook_menu.draw = AddressBook_MenuDraw;
+    s_addressbook_menu.key  = AddressBook_MenuKey;
+
+    M_PushMenu(&s_addressbook_menu);
 }
 
 /*
@@ -5246,7 +5313,6 @@ static menuseparator_s s_player_hand_title;
 static menuseparator_s s_player_rate_title;
 static menuaction_s s_player_download_action;
 
-#define MAX_DISPLAYNAME 16
 #define MAX_PLAYERMODELS 1024
 
 typedef struct _stringlist
@@ -5314,7 +5380,8 @@ static qboolean IconOfSkinExists(char* skin, char** pcxfiles, int npcxfiles)
 }
 
 // strip file extension
-void StripExtension(char* path)
+static void
+StripExtension(char* path)
 {
     int length;
 
@@ -5363,7 +5430,8 @@ ContainsFile(char* path, char* file)
 }
 
 // replace characters in string
-void ReplaceCharacters(char* s, char r, char c)
+static void
+ReplaceCharacters(char* s, char r, char c)
 {
     char* p = s;
 
@@ -5416,7 +5484,7 @@ dircmp_func(const void* _a, const void* _b)
 static void
 PlayerModelFree()
 {
-    char* s = 0;
+    char* s = NULL;
 
     // there should be no valid skin names if there is no valid model
     if (s_modelname.num != 0)
@@ -5494,17 +5562,18 @@ static qboolean
 PlayerDirectoryList(void)
 {
     char* findname = "players/*";
-    char** list = 0;
+    char** list = NULL;
     int num = 0;
 
     // get a list of "players" subdirectories
-    if ((list = FS_ListFiles2(findname, &num, 0, 0)) == 0)
+    if ((list = FS_ListFiles2(findname, &num, 0, 0)) == NULL)
     {
         return false;
     }
 
     if (num > MAX_PLAYERMODELS)
     {
+        Com_Printf("Too many player models (%d)!\n", num);
         num = MAX_PLAYERMODELS - 1;
     }
 
@@ -5550,10 +5619,8 @@ static qboolean
 PlayerModelList(void)
 {
     char findname[MAX_QPATH];
-    char** list = 0;
-    char** data = 0;
-    char* s = 0;
-    char* t = 0;
+    char** list = NULL;
+    char** data = NULL;
     int num = 0;
     int mdl = 0;
     qboolean result = true;
@@ -5568,6 +5635,10 @@ PlayerModelList(void)
     // verify the existence of at least one pcx skin
     for (int i = 0; i < s_directory.num; ++i)
     {
+        char* s = NULL;
+        char* t = NULL;
+        int l;
+
         if (s_directory.data[i] == 0)
         {
             continue;
@@ -5577,7 +5648,7 @@ PlayerModelList(void)
         strcat(findname, "/*.pcx");
 
         // get a list of pcx files
-        if ((list = FS_ListFiles2(findname, &num, 0, 0)) == 0)
+        if ((list = FS_ListFiles2(findname, &num, 0, 0)) == NULL)
         {
             continue;
         }
@@ -5640,13 +5711,14 @@ PlayerModelList(void)
                 {
                     ReplaceCharacters(list[k], '\\', '/');
 
-                    s = (char*)malloc(MAX_DISPLAYNAME);
                     t = strrchr(list[k], '/');
 
-                    YQ2_COM_CHECK_OOM(s, "malloc()", MAX_DISPLAYNAME * sizeof(char))
+                    l = strlen(t) + 1;
+                    s = (char*)malloc(l);
+                    YQ2_COM_CHECK_OOM(s, "malloc()", l * sizeof(char))
 
                     StripExtension(t);
-                    Q_strlcpy(s, t + 1, MAX_DISPLAYNAME);
+                    Q_strlcpy(s, t + 1, l);
 
                     data[s_skinnames[mdl].num++] = s;
                 }
@@ -5657,12 +5729,13 @@ PlayerModelList(void)
         qsort(s_skinnames[mdl].data, s_skinnames[mdl].num, sizeof(char**), Q_sort_stricmp);
 
         // at this point we have a valid player model
-        s = (char*)malloc(MAX_DISPLAYNAME);
         t = strrchr(s_directory.data[i], '/');
+        l = strlen(t) + 1;
+        s = (char*)malloc(l);
 
-        YQ2_COM_CHECK_OOM(s, "malloc()", MAX_DISPLAYNAME * sizeof(char))
+        YQ2_COM_CHECK_OOM(s, "malloc()", l * sizeof(char))
 
-        Q_strlcpy(s, t + 1, MAX_DISPLAYNAME);
+        Q_strlcpy(s, t + 1, l);
 
         s_modelname.data[s_modelname.num++] = s;
         mdl = s_modelname.num;
@@ -5726,8 +5799,8 @@ PlayerConfig_MenuInit(void)
     extern cvar_t *skin;
     cvar_t *hand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
     static const char *handedness[] = { "right", "left", "center", 0 };
-    char mdlname[MAX_DISPLAYNAME * 2];
-    char imgname[MAX_DISPLAYNAME];
+    char mdlname[MAX_QPATH];
+    char imgname[MAX_QPATH];
     int mdlindex = 0;
     int imgindex = 0;
     int i = 0;
@@ -5738,12 +5811,12 @@ PlayerConfig_MenuInit(void)
         return false;
     }
 
-    Q_strlcpy(mdlname, skin->string, MAX_DISPLAYNAME * 2);
+    Q_strlcpy(mdlname, skin->string, sizeof(mdlname));
     ReplaceCharacters(mdlname, '\\', '/' );
 
     if (strchr(mdlname, '/'))
     {
-        Q_strlcpy(imgname, strchr(mdlname, '/') + 1, MAX_DISPLAYNAME);
+        Q_strlcpy(imgname, strchr(mdlname, '/') + 1, sizeof(imgname));
         *strchr(mdlname, '/') = 0;
     }
     else
@@ -5895,9 +5968,9 @@ extern float CalcFov(float fov_x, float w, float h);
  * Model animation
  */
 static void
-PlayerConfig_AnimateModel(entity_t *entity, int curTime)
+PlayerConfig_AnimateModel(entity_t *entity, int count, int curTime)
 {
-    cvar_t *cl_start_frame, *cl_end_frame;
+	const cvar_t *cl_start_frame, *cl_end_frame;
     int startFrame, endFrame;
 
     cl_start_frame = Cvar_Get("cl_model_preview_start", "84", CVAR_ARCHIVE);
@@ -5907,8 +5980,13 @@ PlayerConfig_AnimateModel(entity_t *entity, int curTime)
 
     if (startFrame >= 0 && endFrame > startFrame)
     {
+		int i;
+
+		for (i = 0; i < count; i ++)
+		{
         /* salute male 84..94 frame */
-        entity->frame = (curTime / 100) % (endFrame - startFrame) + startFrame;
+			entity[i].frame = (curTime / 100) % (endFrame - startFrame) + startFrame;
+		}
     }
 }
 
@@ -5933,36 +6011,67 @@ PlayerConfig_MenuDraw(void)
         && (s_player_skin_box.curvalue >= 0
         && s_player_skin_box.curvalue < s_skinnames[s_player_model_box.curvalue].num))
     {
-        entity_t entity;
+		entity_t entities[2];
         char scratch[MAX_QPATH];
         char* mdlname = s_modelname.data[s_player_model_box.curvalue];
         char* imgname = s_skinnames[s_player_model_box.curvalue].data[s_player_skin_box.curvalue];
+		int i, curTime;
 
-        memset(&entity, 0, sizeof(entity));
+		memset(&entities, 0, sizeof(entities));
 
         Com_sprintf(scratch, sizeof(scratch), "players/%s/tris.md2", mdlname);
-        entity.model = R_RegisterModel(scratch);
+		entities[0].model = R_RegisterModel(scratch);
+
         Com_sprintf(scratch, sizeof(scratch), "players/%s/%s.pcx", mdlname,
             imgname);
-        entity.skin = R_RegisterSkin(scratch);
-        entity.flags = RF_FULLBRIGHT;
-        entity.origin[0] = 80;
-        entity.origin[1] = 0;
-        entity.origin[2] = 0;
-        VectorCopy(entity.origin, entity.oldorigin);
-        entity.frame = 0;
-        entity.oldframe = 0;
-        entity.backlerp = 0.0;
+		entities[0].skin = R_RegisterSkin(scratch);
 
-        int curTime = Sys_Milliseconds();
-        PlayerConfig_AnimateModel(&entity, curTime);
+		curTime = Sys_Milliseconds();
+
+		/* multiplayer weapons loaded */
+		if (num_cl_weaponmodels)
+		{
+			int weapon_id;
+
+			/* change weapon every 3 rounds */
+			weapon_id = curTime / 9000;
+
+			weapon_id = weapon_id % num_cl_weaponmodels;
+			/* show weapon also */
+			Com_sprintf(scratch, sizeof(scratch),
+				"players/%s/%s", mdlname, cl_weaponmodels[weapon_id]);
+			entities[1].model = R_RegisterModel(scratch);
+		}
+
+		/* no such weapon model */
+		if (!entities[1].model)
+		{
+			/* show weapon also */
+			Com_sprintf(scratch, sizeof(scratch),
+				"players/%s/weapon.md2", mdlname);
+			entities[1].model = R_RegisterModel(scratch);
+		}
+
+		curTime = curTime % 3000;
+		for (i = 0; i < 2; i++)
+		{
+			entities[i].flags = RF_FULLBRIGHT;
+			entities[i].origin[0] = 80;
+			entities[i].origin[1] = 0;
+			entities[i].origin[2] = 0;
+			VectorCopy(entities[i].origin, entities[i].oldorigin);
+			entities[i].frame = 0;
+			entities[i].oldframe = 0;
+			entities[i].backlerp = 0.0;
         // one full turn is 3s = 3000ms => 3000/360 deg per millisecond
-        curTime = curTime % 3000;
-        entity.angles[1] = (float)curTime/(3000.0f/360.0f);
+			entities[i].angles[1] = (float)curTime/(3000.0f/360.0f);
+		}
+
+		PlayerConfig_AnimateModel(entities, 2, curTime);
 
         refdef.areabits = 0;
-        refdef.num_entities = 1;
-        refdef.entities = &entity;
+		refdef.num_entities = (entities[1].model) ? 2 : 1;
+		refdef.entities = entities;
         refdef.lightstyles = 0;
         refdef.rdflags = RDF_NOWORLDMODEL;
 
@@ -5990,9 +6099,9 @@ PlayerConfig_MenuKey(int key)
     if (key == K_ESCAPE)
     {
         char skin[MAX_QPATH];
-        char* name = 0;
-        char* mdl = 0;
-        char* img = 0;
+        char* name = NULL;
+        char* mdl = NULL;
+        char* img = NULL;
 
         name = s_player_name_field.buffer;
         mdl = s_modelname.data[s_player_model_box.curvalue];
@@ -6020,12 +6129,17 @@ M_Menu_PlayerConfig_f(void)
     }
 
     Menu_SetStatusBar(&s_multiplayer_menu, NULL);
-    M_PushMenu(PlayerConfig_MenuDraw, PlayerConfig_MenuKey);
+    s_player_config_menu.draw = PlayerConfig_MenuDraw;
+    s_player_config_menu.key  = PlayerConfig_MenuKey;
+
+    M_PushMenu(&s_player_config_menu);
 }
 
 /*
  * QUIT MENU
  */
+
+menuframework_s s_quit_menu;
 
 static const char *
 M_Quit_Key(int key)
@@ -6042,7 +6156,7 @@ M_Quit_Key(int key)
     case K_ENTER:
     case 'Y':
     case 'y':
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: LMB for 'y'
      case K_MOUSE1:
 #endif
         cls.key_dest = key_console;
@@ -6069,7 +6183,10 @@ M_Quit_Draw(void)
 static void
 M_Menu_Quit_f(void)
 {
-    M_PushMenu(M_Quit_Draw, M_Quit_Key);
+    s_quit_menu.draw = M_Quit_Draw;
+    s_quit_menu.key  = M_Quit_Key;
+
+    M_PushMenu(&s_quit_menu);
 }
 
 void
@@ -6149,7 +6266,10 @@ M_Draw(void)
         Draw_FadeScreen();
     }
 
-    m_drawfunc();
+    if (m_active.draw)
+    {
+	m_active.draw();
+    }
 
     /* delay playing the enter sound until after the
        menu has been drawn, to avoid delay while
@@ -6164,10 +6284,10 @@ M_Draw(void)
 void
 M_Keydown(int key)
 {
-    if (m_keyfunc)
+    if (m_active.key)
     {
         const char *s;
-        if ((s = m_keyfunc(key)) != 0)
+        if ((s = m_active.key(key)) != 0)
         {
             S_StartLocalSound((char *)s);
         }

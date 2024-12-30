@@ -64,7 +64,7 @@
 {
 "classname" "trigger_relay"
 "targetname" "t11"
-"delay" "5"
+"delay" "0.3" // b#2: added this
 "killtarget" "t399"
 "target" "t11help" // b#2: added this
 "origin" "96 -480 8"
