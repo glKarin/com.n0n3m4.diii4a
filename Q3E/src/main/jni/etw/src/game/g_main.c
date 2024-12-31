@@ -139,6 +139,7 @@ vmCvar_t g_logTimestamp;
 
 vmCvar_t voteFlags;
 vmCvar_t g_complaintlimit;
+vmCvar_t g_teambleedComplaint;
 vmCvar_t g_ipcomplaintlimit;
 vmCvar_t g_filtercams;
 vmCvar_t g_maxlives;
@@ -268,6 +269,7 @@ vmCvar_t g_maxWarp;
 #ifdef FEATURE_LUA
 vmCvar_t lua_modules;
 vmCvar_t lua_allowedModules;
+vmCvar_t g_luaModuleList;
 #endif
 
 vmCvar_t g_guidCheck;
@@ -371,6 +373,9 @@ vmCvar_t g_stickyCharge;
 vmCvar_t g_xpSaver;
 
 vmCvar_t g_debugForSingleClient;
+vmCvar_t g_debugEvents;
+
+vmCvar_t g_debugAnim;
 
 vmCvar_t g_suddenDeath;
 
@@ -458,7 +463,7 @@ cvarTable_t gameCvarTable[] =
 
 	{ &g_needpass,                        "g_needpass",                        "0",                          CVAR_SERVERINFO | CVAR_ROM,                      0, qtrue,  qfalse },
 	{ &g_balancedteams,                   "g_balancedteams",                   "0",                          CVAR_SERVERINFO | CVAR_ROM,                      0, qtrue,  qfalse },
-	{ &g_forcerespawn,                    "g_forcerespawn",                    "0",                          0,                                               0, qtrue,  qfalse },
+	{ &g_forcerespawn,                    "g_forcerespawn",                    "0",                          CVAR_ARCHIVE,                                    0, qtrue,  qfalse },
 	{ &g_inactivity,                      "g_inactivity",                      "0",                          0,                                               0, qtrue,  qfalse },
 	{ &g_debugMove,                       "g_debugMove",                       "0",                          0,                                               0, qfalse, qfalse },
 	{ &g_debugDamage,                     "g_debugDamage",                     "0",                          CVAR_CHEAT,                                      0, qfalse, qfalse },
@@ -469,6 +474,7 @@ cvarTable_t gameCvarTable[] =
 	{ &voteFlags,                         "voteFlags",                         "0",                          CVAR_TEMP | CVAR_ROM | CVAR_SERVERINFO,          0, qfalse, qfalse },
 
 	{ &g_complaintlimit,                  "g_complaintlimit",                  "6",                          CVAR_ARCHIVE,                                    0, qtrue,  qfalse },
+    { &g_teambleedComplaint,              "g_teambleedComplaint",              "50",                         CVAR_ARCHIVE,                                    0, qtrue,  qfalse },
 	{ &g_ipcomplaintlimit,                "g_ipcomplaintlimit",                "3",                          CVAR_ARCHIVE,                                    0, qtrue,  qfalse },
 	{ &g_filtercams,                      "g_filtercams",                      "0",                          CVAR_ARCHIVE,                                    0, qfalse, qfalse },
 	{ &g_maxlives,                        "g_maxlives",                        "0",                          CVAR_ARCHIVE | CVAR_LATCH | CVAR_SERVERINFO,     0, qtrue,  qfalse },
@@ -597,6 +603,7 @@ cvarTable_t gameCvarTable[] =
 #ifdef FEATURE_LUA
 	{ &lua_modules,                       "lua_modules",                       "",                           0,                                               0, qfalse, qfalse },
 	{ &lua_allowedModules,                "lua_allowedModules",                "",                           0,                                               0, qfalse, qfalse },
+	{ &g_luaModuleList,                   "g_luaModuleList",                   "",                           0,                                               0, qfalse, qfalse },
 #endif
 
 	{ &g_guidCheck,                       "g_guidCheck",                       "1",                          CVAR_ARCHIVE,                                    0, qfalse, qfalse },
@@ -657,6 +664,8 @@ cvarTable_t gameCvarTable[] =
 	{ &g_debugHitboxes,                   "g_debugHitboxes",                   "0",                          CVAR_CHEAT,                                      0, qfalse, qfalse },
 	{ &g_debugPlayerHitboxes,             "g_debugPlayerHitboxes",             "0",                          0,                                               0, qfalse, qfalse },     // no need to make this CVAR_CHEAT
 	{ &g_debugForSingleClient,            "g_debugForSingleClient",            "-1",                         0,                                               0, qfalse, qfalse },     // no need to make this CVAR_CHEAT
+	{ &g_debugEvents,                     "g_debugevents",                     "0",                          0,                                               0, qfalse, qfalse },
+	{ &g_debugAnim,                       "g_debuganim",                       "0",                          CVAR_CHEAT,                                               0, qfalse, qfalse },
 
 	{ &g_corpses,                         "g_corpses",                         "0",                          CVAR_LATCH | CVAR_ARCHIVE,                       0, qfalse, qfalse },
 	{ &g_realHead,                        "g_realHead",                        "1",                          0,                                               0, qfalse, qfalse },
@@ -1096,6 +1105,15 @@ void G_CheckForCursorHints(gentity_t *ent)
 	// reset all
 	hintType = ps->serverCursorHint = HINT_NONE;
 	hintVal  = ps->serverCursorHintVal = 0;
+
+	// force showing achievement for a few time
+	if (ent->lastTaskAchievedTime + 250 > level.time)
+	{
+		ps->serverCursorHint    = HINT_COMPLETED;
+		ps->serverCursorHintVal = 255;
+
+		return;
+	}
 
 	dist = VectorDistanceSquared(offset, tr->endpos);
 
@@ -1562,6 +1580,11 @@ void G_CheckForCursorHints(gentity_t *ent)
 	{
 		ps->serverCursorHint    = hintType;
 		ps->serverCursorHintVal = hintVal;
+	}
+	else if (ent->lastTaskAchievedTime + 750 > level.time)
+	{
+		ps->serverCursorHint    = HINT_COMPLETED;
+		ps->serverCursorHintVal = 255;
 	}
 	// if hint is out of range or there is no hint then check for touchingTOI constructible hint
 	else if (ent->client->touchingTOI && ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER && hintType != HINT_CONSTRUCTIBLE)
@@ -3551,6 +3574,7 @@ void BeginIntermission(void)
 			level.mapvoteinfo[i].lastPlayed = -1;
 			level.sortedMaps[i]             = i;
 		}
+
 		for (i = level.mapVoteNumMaps; i < MAX_VOTE_MAPS; i++)
 		{
 			level.sortedMaps[i] = -1;
@@ -3567,6 +3591,7 @@ void BeginIntermission(void)
 				level.mapvoteinfo[i].lastPlayed = 0;
 				level.mapvoteinfo[i].timesPlayed++;
 			}
+
 			// played too recently?
 			if (level.mapvoteinfo[i].lastPlayed != -1 && level.mapvoteinfo[i].lastPlayed <= g_minMapAge.integer)
 			{
@@ -3606,7 +3631,10 @@ void BeginIntermission(void)
 			else
 			{
 				// not eligible for this draw after sorting
-				level.mapvoteinfo[level.sortedMaps[i]].lastPlayed++;
+				if (level.mapvoteinfo[level.sortedMaps[i]].lastPlayed != -1)
+				{
+					level.mapvoteinfo[level.sortedMaps[i]].lastPlayed++;
+				}
 			}
 		}
 	}
@@ -4558,7 +4586,7 @@ void CheckWolfMP(void)
 			    (level.numPlayingClients >= match_minplayers.integer &&
 			     level.lastRestartTime + 1000 < level.time && G_readyMatchState()))
 			{
-				int delay = (g_warmup.integer < 10) ? 11 : g_warmup.integer + 1;
+				int delay = MAX(1, g_warmup.integer + 1);
 
 				level.warmupTime = level.time + (delay * 1000);
 				trap_Cvar_Set("gamestate", va("%i", GS_WARMUP_COUNTDOWN));
@@ -4621,6 +4649,7 @@ void CheckVote(void)
 	{
 		int pcnt = vote_percent.integer;
 		int total;
+		int threshold;
 
 		if (pcnt > 99)
 		{
@@ -4660,7 +4689,7 @@ void CheckVote(void)
 			total = level.voteInfo.numVotingClients;
 		}
 
-		int threshold = pcnt * total / 100;
+		threshold = pcnt * total / 100;
 
 		if (level.voteInfo.voteYes > threshold || level.voteInfo.votePassed)
 		{
@@ -5037,7 +5066,7 @@ void G_TagLinkEntity(gentity_t *ent, int msec)
  * @brief G_DrawEntBBox
  * @param ent
  *
- * @todo TODO: make this client side one day -> a loooooot of saved entities, and less brandwith
+ * @todo TODO: make this client side one day -> a loooooot of saved entities, and less bandwidth
  */
 void G_DrawEntBBox(gentity_t *ent)
 {
@@ -5707,7 +5736,7 @@ void G_ParsePlatformManifest(void)
 	len = trap_FS_FOpenFile("platforms.manifest", &fileHandle, FS_READ);
 	if (len <= 0)
 	{
-		G_Printf(S_COLOR_RED "[G_OSS] no file found\n");
+		G_Printf(S_COLOR_RED "[G_OSS] platforms.manifest file not found\n");
 		trap_FS_FCloseFile(fileHandle);
 		return;
 	}

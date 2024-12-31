@@ -40,7 +40,7 @@
 #define CONSOLE_COLOR  COLOR_WHITE
 #define DEFAULT_CONSOLE_WIDTH   158
 
-#ifdef __ANDROID__ //karin: limit console max height
+#ifdef _DIII4A //karin: limit console max height
 extern float Android_GetConsoleMaxHeightFrac(float frac);
 #endif
 
@@ -56,14 +56,23 @@ cvar_t *con_openspeed;
 cvar_t *con_autoclear;
 cvar_t *con_background;
 cvar_t *con_defaultHeight;
+cvar_t *con_scale;
 
 vec4_t console_highlightcolor = { 0.5f, 0.5f, 0.2f, 0.45f };
 
 int Con_ConsoleFieldWidth(void)
 {
+	CL_SetConsoleScale(con_scale->value);
+
 	if (!cls.glconfig.vidWidth)
 	{
 		return DEFAULT_CONSOLE_WIDTH;
+	}
+
+	// discard version string length if we're not drawing it
+	if (versionStringLen > (cls.glconfig.vidWidth / smallCharWidth - 2) * 0.66f)
+	{
+		return (cls.glconfig.vidWidth / smallCharWidth - 3);
 	}
 
 	return (cls.glconfig.vidWidth / smallCharWidth - 2) - (versionStringLen ? versionStringLen + 3 : 0);
@@ -76,9 +85,9 @@ void Con_ToggleConsole_f(void)
 {
 	qboolean ctrl          = keys[K_LCTRL].down || keys[K_RCTRL].down;
 	qboolean alt           = keys[K_LALT].down || keys[K_RALT].down;
-	float    shortConsole  = (4.0f * smallCharHeight) / cls.glconfig.vidHeight;
-	float    normalConsole = Com_Clamp((4.0f * smallCharHeight) / cls.glconfig.vidHeight, 1.0f, con_defaultHeight->value);
-	float    fullConsole   = 1.0f;
+	float    shortConsole;
+	float    normalConsole;
+	float    fullConsole;
 
 	con.highlightOffset = 0;
 
@@ -89,6 +98,10 @@ void Con_ToggleConsole_f(void)
 	}
 
 	g_consoleField.widthInChars = Con_ConsoleFieldWidth();
+
+	shortConsole  = (4.0f * smallCharHeight) / cls.glconfig.vidHeight;
+	normalConsole = Com_Clamp((4.0f * smallCharHeight) / cls.glconfig.vidHeight, 1.0f, con_defaultHeight->value);
+	fullConsole   = 1.0f;
 
 	Con_ClearNotify();
 
@@ -106,7 +119,7 @@ void Con_ToggleConsole_f(void)
 		// short console
 		if (ctrl && con.desiredFrac != shortConsole)
 		{
-#ifdef __ANDROID__ //karin: limit console max height
+#ifdef _DIII4A //karin: limit console max height
             con.desiredFrac = Android_GetConsoleMaxHeightFrac(shortConsole);
 #else
 			con.desiredFrac = shortConsole;
@@ -130,7 +143,7 @@ void Con_ToggleConsole_f(void)
 		// short console
 		if (ctrl)
 		{
-#ifdef __ANDROID__ //karin: limit console max height
+#ifdef _DIII4A //karin: limit console max height
             con.desiredFrac = Android_GetConsoleMaxHeightFrac(shortConsole);
 #else
             con.desiredFrac = shortConsole;
@@ -144,7 +157,7 @@ void Con_ToggleConsole_f(void)
 		// normal half-screen console
 		else
 		{
-#ifdef __ANDROID__ //karin: limit console max height
+#ifdef _DIII4A //karin: limit console max height
             con.desiredFrac = Android_GetConsoleMaxHeightFrac(normalConsole);
 #else
             con.desiredFrac = normalConsole;
@@ -280,29 +293,27 @@ void Con_ClearNotify(void)
  */
 void Con_CheckResize(void)
 {
-	int  i, width;
+	int   i, width, dateLen, archLen;
 	int  tbuf[CON_TEXTSIZE];
 	byte tbuff[CON_TEXTSIZE];
+	float scale = con_scale->value;
 
-	// might happen on early init
-	if (smallCharWidth == 0)
-	{
-		smallCharWidth  = SMALLCHAR_WIDTH;
-		smallCharHeight = SMALLCHAR_HEIGHT;
-	}
+	CL_SetConsoleScale(scale);
 
-	// wasn't allowing for larger consoles
-	// width = (SCREEN_WIDTH / SMALLCHAR_WIDTH) - 2;
+	dateLen = Q_PrintStrlen(con.date) + 1;
+	archLen = Q_PrintStrlen(con.arch) + 1;
+
 	width = (cls.glconfig.vidWidth / smallCharWidth) - 2;
+	width -= dateLen >= archLen ? dateLen : archLen;
 
-	if (width == con.linewidth)
+	if (width == con.linewidth && !con_scale->modified)
 	{
 		return;
 	}
 
 	if (width < 1)            // video hasn't been initialized yet
 	{
-		con.linewidth     = DEFAULT_CONSOLE_WIDTH;
+		con.linewidth     = DEFAULT_CONSOLE_WIDTH * scale;
 		con.maxTotalLines = CON_TEXTSIZE / con.linewidth;
 		for (i = 0; i < CON_TEXTSIZE; i++)
 		{
@@ -329,6 +340,9 @@ void Con_CheckResize(void)
 
 		numchars = oldwidth;
 
+		// FIXME: this does not correctly reformat the buffer when decreasing con_scale,
+		//  only when increasing. If using != here instead to allow it to reformat on decrease,
+		//  the output is totally messed up as linebreaks seem to not retain
 		if (con.linewidth < numchars)
 		{
 			numchars = con.linewidth;
@@ -358,9 +372,11 @@ void Con_CheckResize(void)
 		Con_ClearNotify();
 	}
 
+	g_consoleField.widthInChars = Con_ConsoleFieldWidth();
 	con.current             = con.maxTotalLines - 1;
 	con.bottomDisplayedLine = con.current;
 	con.scrollIndex         = con.current;
+	con_scale->modified         = qfalse;
 }
 
 /**
@@ -512,12 +528,15 @@ void Con_Init(void)
 	int i;
 
 	con_notifytime = Cvar_Get("con_notifytime", "7", 0);    // increased per id req for obits
-	con_openspeed  = Cvar_Get("con_openspeed", "3", 0);
+	con_openspeed  = Cvar_Get("con_openspeed", "5", 0);
 	con_autoclear  = Cvar_Get("con_autoclear", "1", CVAR_ARCHIVE_ND);
 	Cvar_Get("con_fontName", "JetBrainsMono-SemiBold", CVAR_LATCH | CVAR_ARCHIVE_ND);
 
 	con_background    = Cvar_GetAndDescribe("con_background", "", CVAR_ARCHIVE, "Console background color in normalized RGBA format, eg. \"0.2 0.2 0.2 0.8\".");
 	con_defaultHeight = Cvar_GetAndDescribe("con_defaultHeight", "0.5", CVAR_ARCHIVE_ND, "Default console height without key modifiers.");
+
+	con_scale = Cvar_GetAndDescribe("con_scale", "1.0", CVAR_ARCHIVE_ND, "Scaling factor for console font size.");
+	Cvar_CheckRange(con_scale, 0.5f, 4.0f, qfalse);
 
 	Field_Clear(&g_consoleField);
 	g_consoleField.widthInChars = Con_ConsoleFieldWidth();
@@ -616,8 +635,13 @@ void CL_ConsolePrint(char *txt)
 
 	if (!con.initialized)
 	{
+		static cvar_t null_cvar = { 0 };
 		con.color[0]  = con.color[1] = con.color[2] = con.color[3] = 1.0f;
 		con.linewidth = -1;
+		con.scale           = 1.0f;
+		con_scale           = &null_cvar;
+		con_scale->value    = 1.0f;
+		con_scale->modified = qtrue;
 		Con_CheckResize();
 		con.initialized = qtrue;
 	}
@@ -717,51 +741,56 @@ void CL_ConsolePrint(char *txt)
 #endif
 
 /**
- * @brief Format console version string
- * @param out buffer for the formatted string
- * @param len buffer size
- * @return string length
- */
-static int Con_FormatVersionString(char *out, int len)
-{
-	if (!out)
-	{
-		return 0;
-	}
-
-	// draw update
-	if (com_updateavailable->integer)
-	{
-		Com_sprintf(out, len, _("%s (UPDATE AVAILABLE)"), ET_VERSION);
-	}
-	else
-	{
-		Q_strcat(out, len, ET_VERSION);
-	}
-
-	return (int)strlen(out);
-}
-
-/**
  * @brief Draw version text
  */
 void Con_DrawVersion(void)
 {
-	int  x, y, i;
-	char version[256] = { 0 };
+	int               x, y, versionLen, envoiOffset = 1;
+	static const char *devBuild = NULL;
+	Q_strncpyz(con.version, Q3_VERSION, sizeof(con.version));
+	Q_strncpyz(con.date, __DATE__, sizeof(con.date));
+	Q_strncpyz(con.arch, CPUSTRING, sizeof(con.arch));
 
-	i = Con_FormatVersionString(version, sizeof(version));
-	y = strlen(ET_VERSION);
-
-	for (x = 0; x < i; x++)
+	if (com_updateavailable->integer)
 	{
-		if (x > y)
-		{
-			re.SetColor(g_color_table[ColorIndex(COLOR_GREEN)]);
-		}
+		Q_strcat(con.version, sizeof(con.version), " ^2(UPDATE AVAILABLE)");
+	}
 
-		SCR_DrawSmallChar(cls.glconfig.vidWidth - (i - x + 1) * smallCharWidth,
-		                  con.scanLines - 1.25f * smallCharHeight, version[x]);
+	// Add DEVELOPMENTAL BUILD banner to console
+	if (devBuild == NULL && ETLEGACY_VERSION_IS_DEVELOPMENT_BUILD)
+	{
+		devBuild = "^8DEVELOPMENT BUILD";
+	}
+	if (devBuild != NULL)
+	{
+		envoiOffset = 2;
+	}
+
+#ifdef ETLEGACY_DEBUG
+	Q_strcat(con.arch, sizeof(con.arch), " ^3DEBUG");
+#endif
+
+	// poor man's widescreen correction, use % of screen width instead of absolute values
+	// to retain position with different aspect ratios
+	x = cls.glconfig.vidWidth - (cls.glconfig.vidWidth * 0.0075f);
+	y = con.scanLines;
+
+	versionLen = Q_PrintStrlen(con.version) + 1;
+
+	// if version string would take up over 2/3 of the entire line due to huge con_scale,
+	// just drop the version drawing completely so there's some space to write
+	if ((cls.glconfig.vidWidth / smallCharWidth - 2) * 0.66f > versionLen)
+	{
+		SCR_DrawSmallString(x - (versionLen * smallCharWidth), y - (1.25f * smallCharHeight * envoiOffset), con.version, colorWhite, qfalse, qfalse);
+	}
+
+	SCR_DrawSmallString(x - (ARRAY_LEN(__DATE__) * smallCharWidth), y - (1.25f * (smallCharHeight * (envoiOffset + 1))), __DATE__, colorWhite, qfalse, qfalse);
+	SCR_DrawSmallString(x - ((Q_PrintStrlen(con.arch) + 1) * smallCharWidth), y - (1.25f * (smallCharHeight * (envoiOffset + 2))), con.arch, colorWhite, qfalse, qfalse);
+
+	if (devBuild != NULL)
+	{
+		int devBuildLen = Q_PrintStrlen(devBuild) + 1;
+		SCR_DrawSmallString(x - (devBuildLen * smallCharWidth), y - (1.25f * (smallCharHeight * (1))), devBuild, colorWhite, qfalse, qfalse);
 	}
 }
 
@@ -770,7 +799,7 @@ void Con_DrawVersion(void)
  */
 void Con_DrawClock(void)
 {
-	int       x, i;
+	int       x, y;
 	char      clock[6];
 	time_t    longTime;
 	struct tm *localTime;
@@ -779,16 +808,13 @@ void Con_DrawClock(void)
 	time(&longTime);
 	localTime = localtime(&longTime);
 
+	// poor man's widescreen correction, use % of screen width instead of absolute values
+	// to retain position with different aspect ratios
+	x = cls.glconfig.vidWidth - (cls.glconfig.vidWidth * 0.0075f);
+	y = SMALLCHAR_HEIGHT / 2;
+
 	Com_sprintf(clock, sizeof(clock), "%02d%c%02d", localTime->tm_hour, localTime->tm_sec & 1 ? ':' : ' ', localTime->tm_min);
-
-	i = strlen(clock);
-
-	for (x = 0; x < i; x++)
-	{
-		re.SetColor(g_color_table[ColorIndex(COLOR_MDGREY)]);
-
-		SCR_DrawSmallChar(cls.glconfig.vidWidth - (i - x + 3) * smallCharWidth, 0.5f * smallCharHeight, clock[x]);
-	}
+	SCR_DrawSmallString(x - (ARRAY_LEN(clock) * smallCharWidth), y, clock, colorMdGrey, qfalse, qfalse);
 }
 
 /**
@@ -806,9 +832,7 @@ void Con_DrawInput(void)
 	y = con.scanLines - 1.25f * smallCharHeight;
 
 	// highlight the current autocompleted part
-	if (con.highlightOffset)
-	{
-		if (strlen(g_consoleField.buffer) > 0)
+	if (con.highlightOffset && g_consoleField.buffer[0])
 		{
 			re.SetColor(console_highlightcolor);
 			re.DrawStretchPic((2 + con.highlightOffset) * smallCharWidth,
@@ -816,7 +840,6 @@ void Con_DrawInput(void)
 			                  (strlen(g_consoleField.buffer) - con.highlightOffset) * smallCharWidth,
 			                  smallCharHeight - 2, 0, 0, 0, 0, cls.whiteShader);
 		}
-	}
 
 	re.SetColor(con.color);
 
@@ -892,7 +915,7 @@ void Con_DrawNotify(void)
 				re.SetColor(g_color_table[currentColor]);
 			}
 
-			SCR_DrawSmallChar(cl_conXOffset->integer + (x + 1) * SMALLCHAR_WIDTH, v, text[x]);
+			SCR_DrawSmallChar(cl_conXOffset->integer + (x + 1) * smallCharWidth, v, text[x]);
 		}
 
 		v += smallCharHeight;
@@ -1018,7 +1041,7 @@ void Con_DrawSolidConsole(float frac)
 	// draw the input prompt, user text, and cursor
 	Con_DrawInput();
 	// draw scrollbar
-	Con_DrawScrollbar(y - smallCharHeight, SCREEN_WIDTH - 5, 3);
+	Con_DrawScrollbar(y - 6, SCREEN_WIDTH - 5, 3);
 	// draw the version number
 	Con_DrawVersion();
 	// draw system clock
@@ -1124,12 +1147,11 @@ void Con_DrawConsole(void)
  */
 static void Con_UpdateVersionStringLen()
 {
-	int  i;
-	char version[256] = { 0 };
-	i = Con_FormatVersionString(version, sizeof(version));
-	if (i != versionStringLen)
+	const int len = Q_PrintStrlen(con.version);
+
+	if (len != versionStringLen)
 	{
-		versionStringLen            = i;
+		versionStringLen            = len;
 		g_consoleField.widthInChars = Con_ConsoleFieldWidth();
 	}
 }
@@ -1139,7 +1161,7 @@ static void Con_UpdateVersionStringLen()
  */
 void Con_RunConsole(void)
 {
-	if (com_updateavailable->modified)
+	if (com_updateavailable->modified || versionStringLen == 0)
 	{
 		com_updateavailable->modified = qfalse;
 		Con_UpdateVersionStringLen();

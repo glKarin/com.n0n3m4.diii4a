@@ -1575,6 +1575,7 @@ int Q_vsnprintf(char *str, size_t size, const char *format, va_list args)
  */
 void Q_strncpyz(char *dest, const char *src, size_t destsize)
 {
+	etl_assert(dest && src && destsize > 0 && dest != src);
 	if (!dest)
 	{
 		Com_Error(ERR_FATAL, "Q_strncpyz: NULL dest");
@@ -1759,6 +1760,7 @@ char *Q_strupr(char *s1)
 void Q_strcat(char *dest, size_t size, const char *src)
 {
 	size_t l1;
+	etl_assert(dest && src && size > 0 && dest != src);
 
 	l1 = strlen(dest);
 	if (l1 >= size)
@@ -3064,17 +3066,21 @@ float Com_RoundFloatWithNDecimal(float value, unsigned int decimalCount)
 }
 
 /**
- * @brief Shortens a values by thousands and keeping wanted decimal values (i.e  "4560000" to "4.56M")
+ * @brief Shortens a values by thousand, keeping wanted decimal values and sleepding at some
+ * @details (i.e) decimalCount = 2 splitAtIntCount = 3 : "4560000" to "4.56M"
+ * decimalCount = 1 splitAtIntCount = 4 : "7890" to "7890"
+ * decimalCount = 1 splitAtIntCount = 4 : "12340" to "12.3k"
  * @param[in] value The number to shorten
  * @param[in] decimalCount The number of decimal to be displayed
+ * @param[in] splitAtIntCount number of integer we want to start to split the value
  * @return Down scaled value string with suffixed unit
  */
-char *Com_ScaleNumberPerThousand(float value, unsigned int decimalCount)
+char *Com_ScaleNumberPerThousand(float value, unsigned int decimalCount, unsigned int splitAtIntCount)
 {
 	static const char *units[] = { "", "k", "M", "G", "T" };
 	unsigned int      i        = 0;
 
-	while (value > 1000 && i < ARRAY_LEN(units))
+	while (value > pow(10.f, splitAtIntCount) && i < ARRAY_LEN(units))
 	{
 		value /= 1000;
 		++i;
@@ -3142,4 +3148,18 @@ float Q_IntToFloat(int32_t i)
 
 	fi.i = i;
 	return fi.f;
+}
+
+/**
+ * @brief Q_ParseInt Parse string to int and check if the string was numeric
+ * @param[in] src String to parse
+ * @param[in,out] out Parsed int
+ * @return qtrue if the src string is numeric
+ */
+qboolean Q_ParseInt(const char *src, int *out)
+{
+	char *end;
+
+	*out = (int)strtol(src, &end, 10);
+	return !*end;
 }

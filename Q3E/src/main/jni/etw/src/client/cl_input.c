@@ -1242,7 +1242,7 @@ qboolean CL_ReadyToSendPacket(void)
 	}
 
 	// send every frame for LAN
-	if (Sys_IsLANAddress(clc.netchan.remoteAddress))
+	if (Sys_IsLANAddress(&clc.netchan.remoteAddress))
 	{
 		return qtrue;
 	}

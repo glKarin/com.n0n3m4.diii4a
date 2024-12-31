@@ -317,10 +317,21 @@ void Weapon_MagicAmmo_Ext(gentity_t *ent, vec3_t viewpos, vec3_t tosspos, vec3_t
 #endif
 }
 
+void ReviveEntityEvent(gentity_t *reviver, gentity_t *revivee, int invulnEndTime)
+{
+	gentity_t *te;
+
+	te = G_TempEntity(revivee->r.currentOrigin, EV_PLAYER_REVIVE);
+
+	te->s.eventParm   = revivee->s.clientNum;
+	te->s.clientNum   = reviver->s.clientNum;
+	te->s.effect3Time = invulnEndTime;
+}
+
 /**
  * @brief Took this out of Weapon_Syringe so we can use it from other places
- * @param[in] ent
- * @param[in,out] traceEnt
+ * @param[in] ent - Syringe user
+ * @param[in,out] traceEnt - PM_DEAD target
  * @return
  */
 void ReviveEntity(gentity_t *ent, gentity_t *traceEnt)
@@ -328,6 +339,7 @@ void ReviveEntity(gentity_t *ent, gentity_t *traceEnt)
 	vec3_t  org;
 	trace_t tr;
 	int     healamt, headshot, oldclasstime = 0;
+	int     invulnEndTime;
 
 	// heal the dude
 	// copy some stuff out that we'll wanna restore
@@ -347,7 +359,8 @@ void ReviveEntity(gentity_t *ent, gentity_t *traceEnt)
 	// keep class special weapon time to keep them from exploiting revives
 	oldclasstime = traceEnt->client->ps.classWeaponTime;
 
-	ClientSpawn(traceEnt, qtrue, qfalse, qtrue);
+	ClientSpawn(traceEnt, qtrue, qfalse, qtrue, qtrue);
+	invulnEndTime = traceEnt->client->ps.powerups[PW_INVULNERABLE];
 
 #ifdef FEATURE_OMNIBOT
 	Bot_Event_Revived(traceEnt - g_entities, ent);
@@ -385,20 +398,19 @@ void ReviveEntity(gentity_t *ent, gentity_t *traceEnt)
 
 	traceEnt->props_frame_state = ent->s.number;
 
-	// sound
-	G_Sound(traceEnt, GAMESOUND_MISC_REVIVE);
+	ReviveEntityEvent(ent, traceEnt, invulnEndTime);
 
 	traceEnt->client->pers.lastrevive_client = ent->s.clientNum;
 	traceEnt->client->pers.lasthealth_client = ent->s.clientNum;
 
 	if (g_fastres.integer > 0)
 	{
-		BG_AnimScriptEvent(&traceEnt->client->ps, traceEnt->client->pers.character->animModelInfo, ANIM_ET_JUMP, qfalse, qtrue);
+		BG_AnimScriptEvent(&traceEnt->client->ps, traceEnt->client->pers.character->animModelInfo, ANIM_ET_JUMP, qfalse);
 	}
 	else
 	{
 		// Play revive animation
-		BG_AnimScriptEvent(&traceEnt->client->ps, traceEnt->client->pers.character->animModelInfo, ANIM_ET_REVIVE, qfalse, qtrue);
+		BG_AnimScriptEvent(&traceEnt->client->ps, traceEnt->client->pers.character->animModelInfo, ANIM_ET_REVIVE, qfalse);
 		traceEnt->client->ps.pm_flags |= PMF_TIME_LOCKPLAYER;
 		traceEnt->client->ps.pm_time   = 2100;
 	}
@@ -1021,6 +1033,9 @@ static qboolean TryConstructing(gentity_t *ent, gentity_t *trigger)
 
 		if (constructible->s.angles2[0] >= 250)
 		{
+			// hint task completed
+			ent->lastTaskAchievedTime = level.time;
+
 			constructible->s.angles2[0] = 0;
 			HandleEntsThatBlockConstructible(ent, constructible, qtrue, qfalse);
 		}
@@ -1098,12 +1113,14 @@ static qboolean TryConstructing(gentity_t *ent, gentity_t *trigger)
 		{
 			// call script
 			G_Script_ScriptEvent(constructible, "built", "final");
+			G_LogPrintf("Repair: %d\n", (int)(ent - g_entities));
 		}
 		else
 		{
 			if (constructible->grenadeFired == constructible->count2)
 			{
 				G_Script_ScriptEvent(constructible, "built", "final");
+				G_LogPrintf("Repair: %d\n", (int)(ent - g_entities));
 			}
 			else
 			{
@@ -1613,6 +1630,9 @@ gentity_t *Weapon_Engineer(gentity_t *ent)
 
 		if (traceEnt->health >= 255)
 		{
+			// hint task completed
+			ent->lastTaskAchievedTime = level.time;
+
 			traceEnt->s.frame = 0;
 
 			if (traceEnt->mg42BaseEnt > 0)
@@ -1784,15 +1804,11 @@ weapengineergoto2:
 						return NULL;
 					}
 
+					// hint task completed
+					ent->lastTaskAchievedTime = level.time;
+
 					// crosshair mine owner id
-					if (g_misc.integer & G_MISC_CROSSHAIR_LANDMINE)
-					{
-						traceEnt->s.otherEntityNum = ent->s.number;
-					}
-					else
-					{
-						traceEnt->s.otherEntityNum = MAX_CLIENTS + 1;
-					}
+					traceEnt->s.otherEntityNum = ent->s.number;
 
 					traceEnt->r.snapshotCallback = qtrue;
 					traceEnt->r.contents         = 0; // (player can walk through)
@@ -1834,6 +1850,9 @@ weapengineergoto3:
 					if (traceEnt->health >= 250)
 					{
 						mapEntityData_t *mEnt;
+
+						// hint task completed
+						ent->lastTaskAchievedTime = level.time;
 
 						//traceEnt->health = 255;
 						//traceEnt->think = G_FreeEntity;
@@ -1882,6 +1901,9 @@ weapengineergoto3:
 
 			if (traceEnt->health >= 250)
 			{
+				// hint task completed
+				ent->lastTaskAchievedTime = level.time;
+
 				traceEnt->health    = 255;
 				traceEnt->think     = G_FreeEntity;
 				traceEnt->nextthink = level.time + FRAMETIME;
@@ -2042,6 +2064,9 @@ weapengineergoto3:
 					return NULL;
 				}
 
+				// hint task completed
+				ent->lastTaskAchievedTime = level.time;
+
 				// don't allow disarming for sec (so guy that WAS arming doesn't start disarming it!
 				traceEnt->timestamp = level.time + 1000;
 				traceEnt->health    = 5;
@@ -2050,14 +2075,7 @@ weapengineergoto3:
 				traceEnt->s.effect1Time = level.time;
 
 				// dynamite crosshair ID
-				if (g_misc.integer & G_MISC_CROSSHAIR_DYNAMITE)
-				{
-					traceEnt->s.otherEntityNum = ent->s.number;
-				}
-				else
-				{
-					traceEnt->s.otherEntityNum = MAX_CLIENTS + 1;
-				}
+				traceEnt->s.otherEntityNum = ent->s.number;
 
 				// arm it
 				traceEnt->nextthink = level.time + 30000;
@@ -2125,7 +2143,6 @@ weapengineergoto3:
 							pm->s.effect3Time = hit->s.teamNum;
 							pm->s.teamNum     = ent->client->sess.sessionTeam;
 
-							G_Script_ScriptEvent(hit, "dynamited", ent->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 
 #ifdef FEATURE_OMNIBOT
 							// notify omni-bot framework of planted dynamite
@@ -2147,6 +2164,8 @@ weapengineergoto3:
 							}
 							traceEnt->etpro_misc_1 |= 1;
 							traceEnt->etpro_misc_2  = hit->s.number;
+
+							G_Script_ScriptEvent(hit, "dynamited", ent->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 						}
 						// i = num;
 						return NULL;     // bail out here because primary obj's take precendence over constructibles
@@ -2217,7 +2236,6 @@ weapengineergoto3:
 							pm->s.effect3Time = hit->parent->s.teamNum;
 							pm->s.teamNum     = ent->client->sess.sessionTeam;
 
-							G_Script_ScriptEvent(hit, "dynamited", ent->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 
 #ifdef FEATURE_OMNIBOT
 							// notify omni-bot framework of planted dynamite
@@ -2239,6 +2257,8 @@ weapengineergoto3:
 								G_DPrintf("dyno chaining: hit: %p\n", hit);
 							}
 							traceEnt->etpro_misc_1 |= 1;
+
+							G_Script_ScriptEvent(hit, "dynamited", ent->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 						}
 						return NULL;
 					}
@@ -2279,6 +2299,9 @@ weapengineergoto3:
 					// TODO: Need some kind of event/announcement here
 
 					//Add_Ammo( ent, WP_DYNAMITE, 1, qtrue );
+
+					// hint task completed
+					ent->lastTaskAchievedTime = level.time;
 
 					traceEnt->think     = G_FreeEntity;
 					traceEnt->nextthink = level.time + FRAMETIME;
@@ -2738,7 +2761,7 @@ void G_AirStrikeThink(gentity_t *ent)
 
 			VectorCopy(ent->r.currentAngles, angle);
 
-			angle[0] = AngleSubtract(angle[0], -(10 + crandom() * 10));
+			angle[0] = AngleSubtract(angle[0], -(15 + crandom() * 5));
 			VectorCopy(angle, bomb->r.currentAngles);
 			VectorCopy(angle, bomb->s.apos.trBase);
 		}
@@ -3571,11 +3594,11 @@ void Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker, vec3_t start, 
 	}
 
 	// send bullet impact
-	tent                   = G_TempEntity(impactPos, EV_BULLET);
-	tent->s.eventParm      = traceEnt->s.number;
-	tent->s.weapon         = GetMODTableData(mod)->weaponIcon;
-	tent->s.otherEntityNum = attacker->s.number;
-	tent->s.modelindex     = hitType;   // send the hit sound info in the flesh hit event
+	tent                    = G_TempEntity(impactPos, EV_BULLET);
+	tent->s.otherEntityNum2 = traceEnt->s.number;
+	tent->s.weapon          = GetMODTableData(mod)->weaponIcon;
+	tent->s.otherEntityNum  = attacker->s.number;
+	tent->s.modelindex      = hitType;   // send the hit sound info in the flesh hit event
 
 	/*return hitClient;*/
 }
@@ -3832,13 +3855,21 @@ FLAMETHROWER
  * @param[in,out] body
  * @param[in] chunk
  */
-void G_BurnMeGood(gentity_t *self, gentity_t *body, gentity_t *chunk)
+void G_BurnMeGood(gentity_t *self, gentity_t *body, gentity_t *chunk, const qboolean directhit)
 {
 	vec3_t origin;
 
+	// normalize burn dps
+	// direct hits every 50ms, indirect (chunk damage) every 100ms
+	if (level.time < body->lastBurnedFrameTime + (directhit ? DEFAULT_SV_FRAMETIME : FRAMETIME))
+	{
+		return;
+	}
+
 	// add the new damage
-	body->flameQuota    += 5;
-	body->flameQuotaTime = level.time;
+	body->flameQuota         += 5;
+	body->flameQuotaTime      = level.time;
+	body->lastBurnedFrameTime = level.time;
 
 	// fill in our own origin if we have no flamechunk
 	if (chunk != NULL)
@@ -3850,12 +3881,7 @@ void G_BurnMeGood(gentity_t *self, gentity_t *body, gentity_t *chunk)
 		VectorCopy(self->r.currentOrigin, origin);
 	}
 
-	// yet another flamethrower damage model, trying to find a feels-good damage combo that isn't overpowered
-	if (body->lastBurnedFrameNumber != level.framenum)
-	{
-		G_Damage(body, self, self, vec3_origin, origin, GetWeaponTableData(WP_FLAMETHROWER)->damage, 0, MOD_FLAMETHROWER);
-		body->lastBurnedFrameNumber = level.framenum;
-	}
+	G_Damage(body, self, self, vec3_origin, origin, GetWeaponTableData(WP_FLAMETHROWER)->damage, 0, MOD_FLAMETHROWER);
 
 	// make em burn
 	if (body->client && (body->health <= 0 || body->flameQuota > 0)) // was > FLAME_THRESHOLD
@@ -3908,7 +3934,7 @@ gentity_t *Weapon_FlamethrowerFire(gentity_t *ent)
 			if (trace_start[0] * trace_start[0] + trace_start[1] * trace_start[1] < 441)
 			{
 				// set self in flames
-				G_BurnMeGood(ent, ent, NULL);
+				G_BurnMeGood(ent, ent, NULL, qtrue);
 			}
 		}
 	}
@@ -4213,7 +4239,7 @@ void FireWeapon(gentity_t *ent)
 		return;
 	}
 
-	// mg42
+	// stationary heavy weapon (e.g. misc_mg42, misc_aagun)
 	if (ent->client->ps.persistant[PERS_HWEAPON_USE] && ent->active)
 	{
 		return;

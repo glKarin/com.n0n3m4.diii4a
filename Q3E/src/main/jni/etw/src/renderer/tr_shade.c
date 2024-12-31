@@ -41,137 +41,6 @@
 #endif
 
 /**
- * @brief R_ArrayElementDiscrete
- * @param[in] index
- */
-static void GLAPIENTRY R_ArrayElementDiscrete(GLint index)
-{
-	glColor4ubv(tess.svars.colors[index]);
-	if (glState.currenttmu)
-	{
-		glMultiTexCoord2fARB(0, tess.svars.texcoords[0][index][0], tess.svars.texcoords[0][index][1]);
-		glMultiTexCoord2fARB(1, tess.svars.texcoords[1][index][0], tess.svars.texcoords[1][index][1]);
-	}
-	else
-	{
-		glTexCoord2fv(tess.svars.texcoords[0][index]);
-	}
-	glVertex3fv(tess.xyz[index]);
-}
-
-/**
- * @brief This is just because of the GLEW and Windows idiocy. Straight call to glArrayElement brakes the build on function type mismatch.
- * @param[in] index
- */
-static void GLAPIENTRY R_ArrayElement(GLint index)
-{
-	glArrayElement(index);
-}
-
-static int c_vertexes;          // for seeing how long our average strips are
-static int c_begins;
-
-/**
- * @brief R_DrawStripElements
- * @param[in] numIndexes
- * @param[in] indexes
- */
-static void R_DrawStripElements(int numIndexes, const glIndex_t *indexes, void(GLAPIENTRY *element)(GLint))
-{
-	int      i;
-	int      last[3] = { -1, -1, -1 };
-	qboolean even;
-
-	c_begins++;
-
-	if (numIndexes <= 0)
-	{
-		return;
-	}
-
-	glBegin(GL_TRIANGLE_STRIP);
-
-	// prime the strip
-	element(indexes[0]);
-	element(indexes[1]);
-	element(indexes[2]);
-	c_vertexes += 3;
-
-	last[0] = indexes[0];
-	last[1] = indexes[1];
-	last[2] = indexes[2];
-
-	even = qfalse;
-
-	for (i = 3; i < numIndexes; i += 3)
-	{
-		// odd numbered triangle in potential strip
-		if (!even)
-		{
-			// check previous triangle to see if we're continuing a strip
-			if ((indexes[i + 0] == last[2]) && (indexes[i + 1] == last[1]))
-			{
-				element(indexes[i + 2]);
-				c_vertexes++;
-				etl_assert(indexes[i + 2] < tess.numVertexes);
-				even = qtrue;
-			}
-			// otherwise we're done with this strip so finish it and start
-			// a new one
-			else
-			{
-				glEnd();
-
-				glBegin(GL_TRIANGLE_STRIP);
-				c_begins++;
-
-				element(indexes[i + 0]);
-				element(indexes[i + 1]);
-				element(indexes[i + 2]);
-
-				c_vertexes += 3;
-
-				even = qfalse;
-			}
-		}
-		else
-		{
-			// check previous triangle to see if we're continuing a strip
-			if ((last[2] == indexes[i + 1]) && (last[0] == indexes[i + 0]))
-			{
-				element(indexes[i + 2]);
-				c_vertexes++;
-
-				even = qfalse;
-			}
-			// otherwise we're done with this strip so finish it and start
-			// a new one
-			else
-			{
-				glEnd();
-
-				glBegin(GL_TRIANGLE_STRIP);
-				c_begins++;
-
-				element(indexes[i + 0]);
-				element(indexes[i + 1]);
-				element(indexes[i + 2]);
-				c_vertexes += 3;
-
-				even = qfalse;
-			}
-		}
-
-		// cache the last three vertices
-		last[0] = indexes[i + 0];
-		last[1] = indexes[i + 1];
-		last[2] = indexes[i + 2];
-	}
-
-	glEnd();
-}
-
-/**
  * @brief Optionally performs our own glDrawElements that looks for strip conditions
  * instead of using the single glDrawElements call that may be inefficient
  * without compiled vertex arrays.
@@ -1535,6 +1404,31 @@ void SetIteratorFog(void)
 	}
 }
 
+static qboolean DebugShaderSurfaceFlags(shaderCommands_t *input)
+{
+	// Debug draw shaders with a given Surface Flag
+	if (r_debugShaderSurfaceFlags->integer)
+	{
+		dshader_t *dsh;
+
+		dsh = R_FindBspShaderByName(input->shader->name);
+		if (dsh != NULL && dsh->surfaceFlags & strtoul(r_debugShaderSurfaceFlags->string, NULL, 0) /* XXX : needs to be parsed as unsigned */)
+		{
+			int j;
+			for (j = 0; j < input->numVertexes; j++)
+			{
+				input->svars.colors[j][0] = 0;
+				input->svars.colors[j][1] = 255;
+				input->svars.colors[j][2] = 0;
+				input->svars.colors[j][3] = 255;
+			}
+			return qtrue;
+		}
+	}
+
+	return qfalse;
+}
+
 /**
  * @brief RB_IterateStagesGeneric
  * @param[in] input
@@ -1546,6 +1440,8 @@ static void RB_IterateStagesGeneric(shaderCommands_t *input)
 
 	for (stage = 0; stage < MAX_SHADER_STAGES; stage++)
 	{
+		qboolean skipRemainingStages = qfalse;
+
 		pStage = tess.xstages[stage];
 
 		if (!pStage)
@@ -1555,6 +1451,8 @@ static void RB_IterateStagesGeneric(shaderCommands_t *input)
 
 		ComputeColors(pStage);
 		ComputeTexCoords(pStage);
+
+		skipRemainingStages = DebugShaderSurfaceFlags(input);
 
 		if (!setArraysOnce)
 		{
@@ -1653,6 +1551,11 @@ static void RB_IterateStagesGeneric(shaderCommands_t *input)
 
 		// allow skipping out to show just lightmaps during development
 		if (r_lightMap->integer && (pStage->bundle[0].isLightmap || pStage->bundle[1].isLightmap))
+		{
+			break;
+		}
+
+		if (skipRemainingStages)
 		{
 			break;
 		}
@@ -1782,7 +1685,12 @@ void RB_StageIteratorVertexLitTexture(void)
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
+	if (r_debugShaderSurfaceFlags->integer)
+	{
+		DebugShaderSurfaceFlags(input);
+	}
 	glColorPointer(4, GL_UNSIGNED_BYTE, 0, tess.svars.colors);
+
 	glTexCoordPointer(2, GL_FLOAT, 16, tess.texCoords[0][0]);
 	glVertexPointer(3, GL_FLOAT, 16, input->xyz);
 
@@ -1854,8 +1762,16 @@ void RB_StageIteratorLightmappedMultitexture(void)
 	glShadeModel(GL_FLAT);
 #else
 	glEnableClientState(GL_COLOR_ARRAY);
-	glColorPointer(4, GL_UNSIGNED_BYTE, 0, tess.constantColor255);
+	if (r_debugShaderSurfaceFlags->integer && DebugShaderSurfaceFlags(input))
+	{
+		glColorPointer(4, GL_UNSIGNED_BYTE, 0, tess.svars.colors);
+	}
+	else
+	{
+		glColorPointer(4, GL_UNSIGNED_BYTE, 0, tess.constantColor255);
+	}
 #endif
+
 
 	// select base stage
 	GL_SelectTexture(0);

@@ -170,6 +170,42 @@ vidmode_t glimp_vidModes[] =        // keep in sync with LEGACY_RESOLUTIONS
 };
 static int s_numVidModes = ARRAY_LEN(glimp_vidModes);
 
+static void GLimp_ParseConfigString(const char *glConfigString, char *type, int *major, int *minor, int *context, int *samples)
+{
+	const char *value;
+
+	// Default values
+	type[0]  = '\0';
+	*major   = 1;
+	*minor   = 0;
+	*context = 0;
+	*samples = 0;
+
+	Com_DPrintf("GLimp_ParseConfigString: %s\n", glConfigString);
+	value = Info_ValueForKey(glConfigString, "type");
+
+	if (value && *value)
+	{
+		Q_strncpyz(type, value, 32);
+	}
+	else
+	{
+		Q_strncpyz(type, "opengl", 32);
+	}
+
+	value  = Info_ValueForKey(glConfigString, "major");
+	*major = value && *value ? Q_atoi(value) : 1;
+
+	value  = Info_ValueForKey(glConfigString, "minor");
+	*minor = value && *value ? Q_atoi(value) : 0;
+
+	value    = Info_ValueForKey(glConfigString, "context");
+	*context = value && *value ? Q_atoi(value) : 0;
+
+	value    = Info_ValueForKey(glConfigString, "samples");
+	*samples = value && *value ? Q_atoi(value) : 0;
+}
+
 /**
  * @brief GLimp_MainWindow
  * @return
@@ -257,6 +293,7 @@ static char *GLimp_RatioToFraction(const double ratio, const int iterations)
 	for (i = 0; i < iterations; i++)
 	{
 		double delta = (double) numerator / (double) denominator - ratio;
+		double newDelta;
 
 		// Close enough for most resolutions
 		if (fabs(delta) < 0.002)
@@ -273,7 +310,7 @@ static char *GLimp_RatioToFraction(const double ratio, const int iterations)
 			denominator++;
 		}
 
-		double newDelta = fabs((double) numerator / (double) denominator - ratio);
+		newDelta = fabs((double) numerator / (double) denominator - ratio);
 		if (newDelta < bestDelta)
 		{
 			bestDelta       = newDelta;
@@ -364,8 +401,13 @@ void GLimp_Shutdown(void)
  * @param[in] context
  * @return
  */
-static int GLimp_SetMode(glconfig_t *glConfig, int mode, qboolean fullscreen, qboolean noborder, windowContext_t *context)
+static int GLimp_SetMode(glconfig_t *glConfig, int mode, qboolean fullscreen, qboolean noborder, const char *glConfigString)
 {
+	char            type[32];
+	int             major, minor, contextVersion, samples;
+	
+	GLimp_ParseConfigString(glConfigString, type, &major, &minor, &contextVersion, &samples);
+	
 	glConfig->vidWidth  = screen_width;
 	glConfig->vidHeight = screen_height;
 
@@ -376,7 +418,7 @@ static int GLimp_SetMode(glconfig_t *glConfig, int mode, qboolean fullscreen, qb
 
 	glConfig->isFullscreen = qtrue;
 
-    Q3E_GL_CONFIG_SET(samples, context->samples);
+    Q3E_GL_CONFIG_SET(samples, samples);
 
 	GLimp_InitGL(glConfig, glConfig->isFullscreen);
 
@@ -392,11 +434,11 @@ static int GLimp_SetMode(glconfig_t *glConfig, int mode, qboolean fullscreen, qb
  * @param[in] context
  * @return
  */
-static qboolean GLimp_StartDriverAndSetMode(glconfig_t *glConfig, int mode, qboolean fullscreen, qboolean noborder, windowContext_t *context)
+static qboolean GLimp_StartDriverAndSetMode(glconfig_t *glConfig, int mode, qboolean fullscreen, qboolean noborder, const char *glConfigString)
 {
 	rserr_t err;
 
-	err = GLimp_SetMode(glConfig, mode, fullscreen, noborder, context);
+	err = GLimp_SetMode(glConfig, mode, fullscreen, noborder, glConfigString);
 
 	return err == RSERR_OK ? qtrue : qfalse;
 }
@@ -408,7 +450,7 @@ static qboolean GLimp_StartDriverAndSetMode(glconfig_t *glConfig, int mode, qboo
  * @param[in,out] glConfig
  * @param[in] context
  */
-void GLimp_Init(glconfig_t *glConfig, windowContext_t *context)
+void GLimp_Init(glconfig_t *glConfig, const char *glConfigString)
 {
 	GLimp_InitCvars();
 
@@ -423,7 +465,7 @@ void GLimp_Init(glconfig_t *glConfig, windowContext_t *context)
 	Sys_GLimpInit();
 
 	// Create the window and set up the context
-	if (GLimp_StartDriverAndSetMode(glConfig, r_mode->integer, (qboolean) !!r_fullscreen->integer, (qboolean) !!r_noBorder->integer, context))
+	if (GLimp_StartDriverAndSetMode(glConfig, r_mode->integer, (qboolean) !!r_fullscreen->integer, (qboolean) !!r_noBorder->integer, glConfigString))
 	{
 		goto success;
 	}

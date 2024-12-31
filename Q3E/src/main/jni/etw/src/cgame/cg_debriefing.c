@@ -48,17 +48,18 @@ static panel_button_text_t debriefPlayerHeadingSmallerFont =
 	&cgs.media.limboFont2,
 };
 
-#define DB_RANK_X      213 + 4
-#define DB_NAME_X      DB_RANK_X + 28
-#define DB_TIME_X      DB_NAME_X + 150
-#define DB_KILLS_X     DB_TIME_X + 30
-#define DB_DEATHS_X    DB_KILLS_X + 24
-#define DB_GIBS_X      DB_DEATHS_X + 24
-#define DB_SELFKILLS_X DB_GIBS_X + 24
-#define DB_TEAMKILLS_X DB_SELFKILLS_X + 24
-#define DB_TEAMGIBS_X  DB_TEAMKILLS_X + 24
-#define DB_XP_X        DB_TEAMGIBS_X + 24
-#define DH_HEADING_Y   60
+#define DB_RANK_X           213 + 4
+#define DB_NAME_X           DB_RANK_X + 28
+#define DB_TIME_X           DB_NAME_X + 136
+#define DB_KILLS_X          DB_TIME_X + 30
+#define DB_KILL_ASSISTS_X   DB_KILLS_X + 24
+#define DB_DEATHS_X         DB_KILL_ASSISTS_X + 24
+#define DB_GIBS_X           DB_DEATHS_X + 24
+#define DB_SELFKILLS_X      DB_GIBS_X + 24
+#define DB_TEAMKILLS_X      DB_SELFKILLS_X + 24
+#define DB_TEAMGIBS_X       DB_TEAMKILLS_X + 24
+#define DB_XP_X             DB_TEAMGIBS_X + 24
+#define DH_HEADING_Y        60
 
 #define DB_CHAT_PANEL_X 10.f
 #define DB_CHAT_PANEL_Y (SCREEN_HEIGHT - 122.f)
@@ -406,6 +407,20 @@ static panel_button_t debriefHeadingKills =
 	0
 };
 
+static panel_button_t debriefHeadingKillsAssists =
+{
+	NULL,
+	"Ast",
+	{ DB_KILL_ASSISTS_X,       DH_HEADING_Y,                0, 0 },
+	{ 0,                       0,                           0, 0, 0, 0, 0, 0},
+	&debriefPlayerListFont,    // font
+	NULL,                      // keyDown
+	NULL,                      // keyUp
+	BG_PanelButtonsRender_Text,
+	NULL,
+	0
+};
+
 static panel_button_t debriefHeadingDeaths =
 {
 	NULL,
@@ -673,26 +688,12 @@ static panel_button_t debriefPlayerPrestigeButton =
 {
 	NULL,
 	"^3COLLECT POINT",
-	{ 110,                            216,88, 16 },
+	{ 110,                            152,88, 16 },
 	{ 0,                              0,  0,  0, 0, 0, 0, 0},
-	NULL,                             // font
+	&debriefPlayerInfoFont,           // font
 	CG_Debriefing_PrestigeButton_KeyDown,// keyDown
 	NULL,                             // keyUp
 	CG_Debriefing_PrestigeButton_Draw,
-	NULL,
-	0
-};
-
-static panel_button_t debriefPlayerPrestigeNote =
-{
-	NULL,
-	NULL,
-	{ 110,                            162,   0, 0 },
-	{ 0,                              0,     0, 0, 0, 0, 0, 0},
-	&debriefPlayerInfoFont,           // font
-	NULL,                             // keyDown
-	NULL,                             // keyUp
-	CG_Debriefing_PlayerPrestige_Note,
 	NULL,
 	0
 };
@@ -737,14 +738,16 @@ PLAYERHEADER_SKILLS(6);
 static panel_button_t *debriefPanelButtons[] =
 {
 	&debriefTitleWindow,
-	&debriefPlayerListWindow,       &debriefPlayerList,                   &debriefPlayerListScroll,
-	&debriefHeadingRank,            &debriefHeadingName,
-	&debriefHeadingTime,            &debriefHeadingXP,                    &debriefHeadingKills,                &debriefHeadingDeaths,                &debriefHeadingGibs,                  &debriefHeadingSelfKills, &debriefHeadingTeamKills, &debriefHeadingTeamGibs,
-	&debriefPlayerInfoWindow,       &debriefPlayerInfoName,               &debriefPlayerInfoRank,              &debriefPlayerInfoMedals,             &debriefPlayerInfoTime,               &debriefPlayerInfoXP,
+	&debriefPlayerListWindow,           &debriefPlayerList,                    &debriefPlayerListScroll,
+	&debriefHeadingRank,                &debriefHeadingName,
+	&debriefHeadingTime,                &debriefHeadingXP,                     &debriefHeadingKills,                &debriefHeadingKillsAssists,
+	&debriefHeadingDeaths,              &debriefHeadingGibs,                   &debriefHeadingSelfKills,            &debriefHeadingTeamKills, &debriefHeadingTeamGibs,
+	&debriefPlayerInfoWindow,           &debriefPlayerInfoName,                &debriefPlayerInfoRank,              &debriefPlayerInfoMedals,
+	&debriefPlayerInfoTime,             &debriefPlayerInfoXP,
 #ifdef FEATURE_RATING
 	&debriefPlayerInfoSR,
 #endif
-	&debriefPlayerInfoACC,          &debriefPlayerInfoHS,
+	&debriefPlayerInfoACC,              &debriefPlayerInfoHS,
 	&debriefPlayerInfoSkills0,
 	&debriefPlayerInfoSkills1,
 	&debriefPlayerInfoSkills2,
@@ -755,104 +758,21 @@ static panel_button_t *debriefPanelButtons[] =
 #ifdef FEATURE_PRESTIGE
 	&debriefPlayerInfoPrestige,
 	&debriefPlayerPrestigeButton,
-	&debriefPlayerPrestigeNote,
 #endif
 	&debriefPlayerInfoHitRegions,
-	&debriefPlayerWeaponStatsHeader,&debriefPlayerWeaponStatsNameHeader,  &debriefPlayerWeaponStatsShotsHeader,&debriefPlayerWeaponStatsHitsHeader,  &debriefPlayerWeaponStatsKillsHeader,
-	&debriefPlayerWeaponStatsList,  &debriefPlayerWeaponStatsListScroll,
+	&debriefPlayerWeaponStatsHeader,    &debriefPlayerWeaponStatsNameHeader,   &debriefPlayerWeaponStatsShotsHeader,
+	&debriefPlayerWeaponStatsHitsHeader,&debriefPlayerWeaponStatsKillsHeader,
+	&debriefPlayerWeaponStatsList,      &debriefPlayerWeaponStatsListScroll,
 
 	NULL
 };
 
-static panel_button_text_t teamDebriefTitleSmall =
-{
-	0.24f,                 0.24f,
-	{ 1.f,                 1.f,              1.f,0.8f },
-	0,                     ITEM_ALIGN_CENTER,
-	&cgs.media.limboFont2,
-};
-
-static panel_button_text_t teamDebriefTitle =
-{
-	0.28f,                 0.28f,
-	{ 1.f,                 1.f,  1.f,0.8f },
-	0,                     0,
-	&cgs.media.limboFont2,
-};
-
-#define TDB_SKILL_TITLES_XP(number, title, x)             \
-		static panel_button_t teamDebriefSkillXPText_ ## number = {          \
-			NULL,                                                   \
-			title,                                                  \
-			{ 100 + (number * 65),      304 - (x * 12),                 20, 200 },      \
-			{ 0,                        0,                              0,  0, 0, 0, 0, 0},                             \
-			&teamDebriefTitleSmall,     /* font     */              \
-			NULL,                       /* keyDown  */                      \
-			NULL,                       /* keyUp    */                  \
-			BG_PanelButtonsRender_Text,                             \
-			NULL,                                                   \
-			0,                                                   \
-		}
-
-TDB_SKILL_TITLES_XP(0, "Battle Sense", 0);
-TDB_SKILL_TITLES_XP(1, "Engineer", 1);
-TDB_SKILL_TITLES_XP(2, "Medic", 0);
-TDB_SKILL_TITLES_XP(3, "Field Ops", 1);
-TDB_SKILL_TITLES_XP(4, "Light Weapons", 0);
-TDB_SKILL_TITLES_XP(5, "Soldier", 1);
-TDB_SKILL_TITLES_XP(6, "Covert Ops", 0);
-TDB_SKILL_TITLES_XP(7, "Total", 1);
-
-#define TDB_SKILL_AXIS_XP(number)                         \
-		static panel_button_t teamDebriefSkillXPText0_ ## number = {         \
-			NULL,                                                   \
-			NULL,                                                   \
-			{ 110 + (number * 65),             320,                  470, 200 },                \
-			{ 0,                               number,               0,   0, 0, 0, 0, 0},                        \
-			&teamDebriefTitle,                 /* font     */                  \
-			NULL,                              /* keyDown  */                      \
-			NULL,                              /* keyUp    */                  \
-			CG_TeamDebriefingTeamSkillXP_Draw,                      \
-			NULL,                                                   \
-			0,                                                   \
-		}
-
-#define TDB_SKILL_ALLIES_XP(number)                       \
-		static panel_button_t teamDebriefSkillXPText1_ ## number = {         \
-			NULL,                                                   \
-			NULL,                                                   \
-			{ 110 + (number * 65),             340,                  470, 200 },                \
-			{ 1,                               number,               0,   0, 0, 0, 0, 0},                        \
-			&teamDebriefTitle,                 /* font     */                  \
-			NULL,                              /* keyDown  */                      \
-			NULL,                              /* keyUp    */                  \
-			CG_TeamDebriefingTeamSkillXP_Draw,                      \
-			NULL,                                                   \
-			0,                                                   \
-		}
-
-TDB_SKILL_AXIS_XP(0);
-TDB_SKILL_AXIS_XP(1);
-TDB_SKILL_AXIS_XP(2);
-TDB_SKILL_AXIS_XP(3);
-TDB_SKILL_AXIS_XP(4);
-TDB_SKILL_AXIS_XP(5);
-TDB_SKILL_AXIS_XP(6);
-TDB_SKILL_AXIS_XP(7);
-
-TDB_SKILL_ALLIES_XP(0);
-TDB_SKILL_ALLIES_XP(1);
-TDB_SKILL_ALLIES_XP(2);
-TDB_SKILL_ALLIES_XP(3);
-TDB_SKILL_ALLIES_XP(4);
-TDB_SKILL_ALLIES_XP(5);
-TDB_SKILL_ALLIES_XP(6);
-TDB_SKILL_ALLIES_XP(7);
 
 static panel_button_t *teamDebriefPanelButtons[] =
 {
-	&debriefTitleWindow,        &debriefMissionTitleWindow, &debriefMissionAwardsWindow, &debriefMissionImage,        &debriefMissionMaps, &debriefMissionAwardsList, &debriefMissionAwardsListScroll,
-	&debriefMissionStatsWindow, &debriefMissionStatsWinner, &debriefMissionStatsLoser,   &debriefMissionStatsHeaders,
+	&debriefTitleWindow,        &debriefMissionTitleWindow, &debriefMissionAwardsWindow,     &debriefMissionImage,
+	&debriefMissionMaps,        &debriefMissionAwardsList,  &debriefMissionAwardsListScroll,
+	&debriefMissionStatsWindow, &debriefMissionStatsWinner, &debriefMissionStatsLoser,       &debriefMissionStatsHeaders,
 	NULL
 };
 
@@ -1200,6 +1120,21 @@ void CG_MapVoteList_Draw(panel_button_t *button)
 
 		if (cgs.dbMapMinAge)
 		{
+			float  frac = cgs.dbMapsHistoryList[i + cgs.dbMapVoteListOffset] / (cgs.dbMapsHistoryCount / (float)cgs.dbMapMinAge);
+			vec4_t color;
+
+			// transition color from red (0%), yellow (50%), green (100%) depending of popularity
+			if (frac <= 0.5f)
+			{
+				// red to yellow
+				Vector4Set(color, 1.f, 1.f * (frac * 2.f), 0, 0.85f);
+			}
+			else
+			{
+				// yellow to green
+				Vector4Set(color, 1.f / ((frac - 0.5f) * 2.f), 1.f, 0, 0.85f);
+			}
+
 			if (i + cgs.dbMapVoteListOffset == cgs.dbMapLastPlayed)
 			{
 				// last played map in list
@@ -1217,9 +1152,10 @@ void CG_MapVoteList_Draw(panel_button_t *button)
 				                  0, 30, 0, button->font->font);
 			}
 
-			CG_FilledBar(DB_MAPHISTORIC_X + cgs.wideXoffset, y - 8, 60, 10, (vec4_t) { 1.f, 0, 0, 0.85f }, (vec4_t) { 0, 1.f, 0, 0.85f },
-			             NULL, NULL, cgs.dbMapsHistoryList[i + cgs.dbMapVoteListOffset] / (cgs.dbMapsHistoryCount / (float)cgs.dbMapMinAge),
-			             BAR_LERP_COLOR | BAR_BGSPACING_X0Y0, -1);
+			// display popularity bar
+			CG_FilledBar(DB_MAPHISTORIC_X + cgs.wideXoffset, y - 8, 60, 10, color, NULL,
+			             NULL, NULL, frac, 0.f,
+			             BAR_BGSPACING_X0Y0, -1);
 		}
 
 		if (cgs.dbSelectedMap == i + cgs.dbMapVoteListOffset)
@@ -1247,7 +1183,7 @@ void CG_MapVoteList_Draw(panel_button_t *button)
 			}
 
 			// display map description
-			CG_DrawVerticalScrollingString(&(rectDef_t) { x2, DB_MAPVOTE_Y2 + 12 + (177.0f / 233.0f * 190), 190, 45 },
+			CG_DrawVerticalScrollingString(&(rectDef_t) { x2 - 5, DB_MAPVOTE_Y2 + 10 + (177.0f / 233.0f * 190), 190, 40 },
 			                               *colour, button->font->scalex, 100, 1, &descriptionScroll, button->font->font);
 
 			CG_Text_Paint_Ext(x2, y2, button->font->scalex,
@@ -2017,7 +1953,7 @@ qboolean CG_Debriefing_Draw(void)
 
 	BG_PanelButtonsRender(chatPanelButtons);
 	BG_PanelButtonsRender(buttonsPanel);
-	CG_DrawPic(cgDC.cursorx, cgDC.cursory, 32, 32, cgs.media.cursorIcon);
+	CG_DrawCursor(cgDC.cursorx, cgDC.cursory);
 
 	return qtrue;
 }
@@ -2282,6 +2218,7 @@ void CG_DebriefingPlayerList_Draw(panel_button_t *button)
 		if (cgs.dbPlayerKillsDeathsReceived)
 		{
 			CG_Text_Paint_Ext(DB_KILLS_X + cgs.wideXoffset, y, button->font->scalex, button->font->scaley, button->font->colour, va("%i", ci->kills), 0, 0, 0, button->font->font);
+			CG_Text_Paint_Ext(DB_KILL_ASSISTS_X + cgs.wideXoffset, y, button->font->scalex, button->font->scaley, button->font->colour, va("%i", ci->killsAssists), 0, 0, 0, button->font->font);
 			CG_Text_Paint_Ext(DB_DEATHS_X + cgs.wideXoffset, y, button->font->scalex, button->font->scaley, button->font->colour, va("%i", ci->deaths), 0, 0, 0, button->font->font);
 			CG_Text_Paint_Ext(DB_GIBS_X + cgs.wideXoffset, y, button->font->scalex, button->font->scaley, button->font->colour, va("%i", ci->gibs), 0, 0, 0, button->font->font);
 			CG_Text_Paint_Ext(DB_SELFKILLS_X + cgs.wideXoffset, y, button->font->scalex, button->font->scaley, button->font->colour, va("%i", ci->selfKills), 0, 0, 0, button->font->font);
@@ -2291,6 +2228,7 @@ void CG_DebriefingPlayerList_Draw(panel_button_t *button)
 		else
 		{
 			CG_Text_Paint_Ext(DB_KILLS_X + cgs.wideXoffset, y, button->font->scalex, button->font->scaley, button->font->colour, "-", 0, 0, 0, button->font->font);
+			CG_Text_Paint_Ext(DB_KILL_ASSISTS_X + cgs.wideXoffset, y, button->font->scalex, button->font->scaley, button->font->colour, "-", 0, 0, 0, button->font->font);
 			CG_Text_Paint_Ext(DB_DEATHS_X + cgs.wideXoffset, y, button->font->scalex, button->font->scaley, button->font->colour, "-", 0, 0, 0, button->font->font);
 			CG_Text_Paint_Ext(DB_GIBS_X + cgs.wideXoffset, y, button->font->scalex, button->font->scaley, button->font->colour, "-", 0, 0, 0, button->font->font);
 			CG_Text_Paint_Ext(DB_SELFKILLS_X + cgs.wideXoffset, y, button->font->scalex, button->font->scaley, button->font->colour, "-", 0, 0, 0, button->font->font);
@@ -2448,12 +2386,13 @@ void CG_Debriefing_ParsePlayerKillsDeaths(qboolean secondPart)
 
 	for (j = 0; i < max; i++, j++)
 	{
-		cgs.clientinfo[i].kills     = Q_atoi(CG_Argv((j * 6) + 1));
-		cgs.clientinfo[i].deaths    = Q_atoi(CG_Argv((j * 6) + 2));
-		cgs.clientinfo[i].gibs      = Q_atoi(CG_Argv((j * 6) + 3));
-		cgs.clientinfo[i].selfKills = Q_atoi(CG_Argv((j * 6) + 4));
-		cgs.clientinfo[i].teamKills = Q_atoi(CG_Argv((j * 6) + 5));
-		cgs.clientinfo[i].teamGibs  = Q_atoi(CG_Argv((j * 6) + 6));
+		cgs.clientinfo[i].kills        = Q_atoi(CG_Argv((j * 6) + 1));
+		cgs.clientinfo[i].killsAssists = Q_atoi(CG_Argv((j * 6) + 2));
+		cgs.clientinfo[i].deaths       = Q_atoi(CG_Argv((j * 6) + 3));
+		cgs.clientinfo[i].gibs         = Q_atoi(CG_Argv((j * 6) + 4));
+		cgs.clientinfo[i].selfKills    = Q_atoi(CG_Argv((j * 6) + 5));
+		cgs.clientinfo[i].teamKills    = Q_atoi(CG_Argv((j * 6) + 6));
+		cgs.clientinfo[i].teamGibs     = Q_atoi(CG_Argv((j * 6) + 7));
 	}
 	cgs.dbPlayerKillsDeathsReceived = qtrue;
 }
@@ -2711,17 +2650,22 @@ void CG_Debriefing_ScrollGetBarRect(panel_button_t *button, rectDef_t *r)
 	r->x = button->rect.x;
 	r->w = button->rect.w;
 }
-
 /**
  * @brief CG_Debriefing_ScrollCheckOffset
  * @param[in] button
+ * @return 
  */
-void CG_Debriefing_ScrollCheckOffset(panel_button_t *button)
+static qboolean CG_Debriefing_ScrollCheckOffset(panel_button_t *button)
 {
 	int max    = CG_Debriefing_ScrollGetMax(button);
 	int cnt    = CG_Debriefing_ScrollGetCount(button);
 	int offset = CG_Debriefing_ScrollGetOffset(button);
 	int maxofs = MAX(0, cnt - max);
+
+	if (maxofs == 0)
+	{
+		return qfalse;
+	}
 
 	if (offset > maxofs)
 	{
@@ -2731,6 +2675,8 @@ void CG_Debriefing_ScrollCheckOffset(panel_button_t *button)
 	{
 		CG_Debriefing_ScrollSetOffset(button, 0);
 	}
+
+	return qtrue;
 }
 
 /**
@@ -2784,24 +2730,10 @@ void CG_Debriefing_MouseEvent(int x, int y)
 	}
 
 	cgs.cursorX += x;
-	if (cgs.cursorX < 0)
-	{
-		cgs.cursorX = 0;
-	}
-	else if (cgs.cursorX > SCREEN_WIDTH)
-	{
-		cgs.cursorX = SCREEN_WIDTH;
-	}
+	cgs.cursorX  = Com_Clamp(0, SCREEN_WIDTH_SAFE, cgs.cursorX);
 
 	cgs.cursorY += y;
-	if (cgs.cursorY < 0)
-	{
-		cgs.cursorY = 0;
-	}
-	else if (cgs.cursorY > SCREEN_HEIGHT)
-	{
-		cgs.cursorY = SCREEN_HEIGHT;
-	}
+	cgs.cursorY  = Com_Clamp(0, SCREEN_HEIGHT_SAFE, cgs.cursorY);
 }
 
 /**
@@ -2814,7 +2746,11 @@ void CG_Debriefing_Scrollbar_Draw(panel_button_t *button)
 	vec4_t    clr2 = { 0.f, 0.f, 0.f, .6f };
 	rectDef_t r;
 
-	CG_Debriefing_ScrollCheckOffset(button);
+	// don't draw the scrollbar if there not possible offset
+	if (!CG_Debriefing_ScrollCheckOffset(button))
+	{
+		return;
+	}
 
 	CG_FillRect(button->rect.x, button->rect.y, button->rect.w, button->rect.h, clr2);
 	CG_DrawRect_FixedBorder(button->rect.x, button->rect.y, button->rect.w, button->rect.h, 1, colorMdGrey);
@@ -2981,41 +2917,6 @@ void CG_Debriefing_PlayerHitRegions_Draw(panel_button_t *button)
 	float  w;
 	vec4_t colorH, colorA, colorB, colorL;
 
-#ifdef FEATURE_PRESTIGE
-	int i, j, cnt = 0, skillMax;
-
-	// hide if we need to display prestige collection note
-	if (cgs.prestige && cgs.dbSelectedClient == cg.clientNum &&
-	    cgs.gametype != GT_WOLF_STOPWATCH && cgs.gametype != GT_WOLF_LMS && cgs.gametype != GT_WOLF_CAMPAIGN)
-	{
-		// count the number of maxed out skills
-		for (i = 0; i < SK_NUM_SKILLS; i++)
-		{
-			skillMax = 0;
-
-			// check skill max level
-			for (j = NUM_SKILL_LEVELS - 1; j >= 0; j--)
-			{
-				if (GetSkillTableData(i)->skillLevels[j] >= 0)
-				{
-					skillMax = j;
-					break;
-				}
-			}
-
-			if (cgs.clientinfo[cg.clientNum].skill[i] >= skillMax)
-			{
-				cnt++;
-			}
-		}
-
-		if (cnt >= SK_NUM_SKILLS)
-		{
-			return;
-		}
-	}
-#endif
-
 	w = CG_Text_Width_Ext("Head: ", button->font->scalex, 0, button->font->font);
 
 	// register hitregions only once (when required)
@@ -3115,56 +3016,6 @@ void CG_Debriefing_PlayerPrestige_Draw(panel_button_t *button)
 	CG_Text_Paint_Ext(button->rect.x, button->rect.y, button->font->scalex, button->font->scaley, button->font->colour, va("^2%i", ci->prestige), 0, 0, ITEM_TEXTSTYLE_SHADOWED, button->font->font);
 }
 
-/**
- * @brief CG_Debriefing_PlayerPrestige_Note
- * @param[in] button
- */
-void CG_Debriefing_PlayerPrestige_Note(panel_button_t *button)
-{
-	int i, j, cnt = 0, skillMax, h;
-
-	if (!cgs.prestige || cgs.gametype == GT_WOLF_STOPWATCH || cgs.gametype == GT_WOLF_LMS || cgs.gametype == GT_WOLF_CAMPAIGN)
-	{
-		return;
-	}
-
-	if (cgs.dbSelectedClient != cg.clientNum)
-	{
-		return;
-	}
-
-	// count the number of maxed out skills
-	for (i = 0; i < SK_NUM_SKILLS; i++)
-	{
-		skillMax = 0;
-
-		// check skill max level
-		for (j = NUM_SKILL_LEVELS - 1; j >= 0; j--)
-		{
-			if (GetSkillTableData(i)->skillLevels[j] >= 0)
-			{
-				skillMax = j;
-				break;
-			}
-		}
-
-		if (cgs.clientinfo[cg.clientNum].skill[i] >= skillMax)
-		{
-			cnt++;
-		}
-	}
-
-	if (cnt < SK_NUM_SKILLS)
-	{
-		return;
-	}
-
-	h = CG_Text_Height_Ext("A", button->font->scalex, 0, button->font->font);
-
-	CG_DrawMultilineText(button->rect.x, button->rect.y, button->rect.w, button->font->scalex, button->font->scaley, button->font->colour,
-	                     CG_TranslateString("You may now collect\na prestige point.\n\nCollection resets\nskill levels."),
-	                     2 * h, 0, 0, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, button->font->font);
-}
 #endif
 
 /**
@@ -3577,6 +3428,9 @@ qboolean CG_Debriefing_NextButton_KeyDown(panel_button_t *button, int key)
 }
 
 #ifdef FEATURE_PRESTIGE
+
+static qboolean prestigeButtonConfirmation = qfalse;
+
 /**
  * @brief CG_Debriefing_PrestigeButton_KeyDown
  * @param button - unused
@@ -3620,6 +3474,14 @@ qboolean CG_Debriefing_PrestigeButton_KeyDown(panel_button_t *button, int key)
 			return qfalse;
 		}
 
+		// on first clic on the button, display confirmation message
+		// then accept collecting on second clic
+		if (!prestigeButtonConfirmation)
+		{
+			prestigeButtonConfirmation = qtrue;
+			return qfalse;
+		}
+
 		trap_SendClientCommand("imcollectpr");
 
 		// refresh data
@@ -3648,6 +3510,9 @@ qboolean CG_Debriefing_PrestigeButton_KeyDown(panel_button_t *button, int key)
  */
 void CG_Debriefing_VoteButton_Draw(panel_button_t *button)
 {
+	qboolean hilight;
+	float    w;
+
 	if (cgs.gametype != GT_WOLF_MAPVOTE)
 	{
 		return;
@@ -3664,9 +3529,9 @@ void CG_Debriefing_VoteButton_Draw(panel_button_t *button)
 		clrBck[0] = Q_fabs(sin(cg.time / (float)BLINK_DIVISOR));
 		clrBck[3] = Q_fabs(cos(cg.time / (float)BLINK_DIVISOR));
 
-		qboolean hilight = BG_CursorInRect(&button->rect);
+		hilight = BG_CursorInRect(&button->rect);
 
-		float w = CG_Text_Width_Ext(button->text, 0.2f, 0, &cgs.media.limboFont2);
+		w = CG_Text_Width_Ext(button->text, 0.2f, 0, &cgs.media.limboFont2);
 
 		CG_FillRect(button->rect.x, button->rect.y, button->rect.w, button->rect.h, hilight ? clrBck_hi : clrBck);
 		CG_DrawRect_FixedBorder(button->rect.x, button->rect.y, button->rect.w, button->rect.h, 1, clrBdr);
@@ -3739,6 +3604,45 @@ void CG_Debriefing_PrestigeButton_Draw(panel_button_t *button)
 	}
 
 	CG_PanelButtonsRender_Button(button);
+
+	// draw the note only if we focus the button
+	if (BG_CursorInRect(&button->rect))
+	{
+		float  h;
+		char   *text;
+		vec4_t *color;
+		vec4_t clrBdr = { 0.5f, 0.5f, 0.5f, 0.5f };
+		vec4_t clrBck = { 0.0f, 0.0f, 0.0f, 0.8f };
+
+		h = CG_Text_Height_Ext("A", button->font->scalex, 0, button->font->font);
+
+		// on first clic on the button, display confirmation message
+		// then accept collecting on second clic
+		if (prestigeButtonConfirmation)
+		{
+			CG_FillRect(button->rect.x + button->rect.w + 18, button->rect.y - h * 2, button->rect.w * 1.6f, h * 5, clrBck);
+			CG_DrawRect_FixedBorder(button->rect.x + button->rect.w + 18, button->rect.y - h * 2, button->rect.w * 1.6f, h * 5, 1, clrBdr);
+
+			text  = "Are you sure?\nClick again to confirm.";
+			color = &colorYellow;
+		}
+		else
+		{
+			CG_FillRect(button->rect.x + button->rect.w + 18, button->rect.y - h * 2, button->rect.w * 1.6f, h * 11, clrBck);
+			CG_DrawRect_FixedBorder(button->rect.x + button->rect.w + 18, button->rect.y - h * 2, button->rect.w * 1.6f, h * 11, 1, clrBdr);
+
+			text  = "You may now collect\na prestige point.\n\nCollection resets\nskill levels.";
+			color = &button->font->colour;
+		}
+
+		CG_DrawMultilineText(button->rect.x + button->rect.w + 20, button->rect.y, button->rect.w, button->font->scalex, button->font->scaley, *color,
+		                     CG_TranslateString(text),
+		                     2 * h, 0, 0, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, button->font->font);
+	}
+	else
+	{
+		prestigeButtonConfirmation = qfalse;
+	}
 }
 #endif
 
@@ -4077,6 +3981,7 @@ const char *awardNames[NUM_ENDGAME_AWARDS] =
 	"Highest Experience Points",
 	"Most Highly Decorated",
 	"Highest Fragger",
+	"Most Assists",
 	"Highest Battle Sense",
 	"Best Engineer",
 	"Best Medic",

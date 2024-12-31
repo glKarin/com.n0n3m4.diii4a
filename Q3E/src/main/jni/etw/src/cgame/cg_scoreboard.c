@@ -600,7 +600,7 @@ static void WM_DrawClientScore_Score(int x, int y, float scaleX, float scaleY, c
 	else
 #endif
 	{
-		CG_Text_Paint_RightAligned_Ext(x, y, scaleX, scaleY, colorWhite, Com_ScaleNumberPerThousand((float) score->score, 2), 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_TEXT);
+		CG_Text_Paint_RightAligned_Ext(x, y, scaleX, scaleY, colorWhite, Com_ScaleNumberPerThousand((float) score->score, 2, 4), 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_TEXT);
 	}
 }
 
@@ -1277,6 +1277,8 @@ qboolean CG_DrawScoreboard(void)
 	float    fontScale = cg_fontScaleSP.value;
 	int      maxrows;
 	int      absmaxrows;
+	qboolean players_with_specs_exceed_limit;
+	qboolean players_without_specs_exceed_limit;
 	qboolean use_mini_chars = qfalse;
 
 	x       += cgs.wideXoffset;
@@ -1336,11 +1338,11 @@ qboolean CG_DrawScoreboard(void)
 		absmaxrows = 30;
 	}
 
-	qboolean players_with_specs_exceed_limit = cg.teamPlayers[TEAM_SPECTATOR] > 0 && (
+	players_with_specs_exceed_limit = cg.teamPlayers[TEAM_SPECTATOR] > 0 && (
 		(cg.teamPlayers[TEAM_AXIS] + 1 + (cg.teamPlayers[TEAM_SPECTATOR] + 1) / 2) > maxrows ||
 		(cg.teamPlayers[TEAM_ALLIES] + 1 + (cg.teamPlayers[TEAM_SPECTATOR] + 1) / 2) > maxrows
 		);
-	qboolean players_without_specs_exceed_limit = cg.teamPlayers[TEAM_AXIS] > maxrows || cg.teamPlayers[TEAM_ALLIES] > maxrows;
+	players_without_specs_exceed_limit = cg.teamPlayers[TEAM_AXIS] > maxrows || cg.teamPlayers[TEAM_ALLIES] > maxrows;
 
 	if ((cg.snap->ps.pm_type != PM_INTERMISSION && players_with_specs_exceed_limit) || players_without_specs_exceed_limit)
 	{

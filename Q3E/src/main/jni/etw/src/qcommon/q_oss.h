@@ -90,7 +90,7 @@ typedef enum
 #elif defined __aarch64__
 #define OSS_CURRENT_PLATFORM OSS_ANDROID_AARCH64
 #elif defined __arm__
-#define OSS_CURRENT_PLATFORM OSS_LNX_ARMV7 //karin: android arm32???
+#define OSS_CURRENT_PLATFORM OSS_LNX_ARMV7 //karin: _DIII4A android arm32???
 #else
 #define OSS_CURRENT_PLATFORM OSS_DEFAULT
 #endif

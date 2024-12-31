@@ -35,14 +35,16 @@
 #ifndef INCLUDE_CG_PUBLIC_H
 #define INCLUDE_CG_PUBLIC_H
 
+#include "../qcommon/q_shared.h"
+
 /// Allow a lot of command backups for very fast systems
 /// multiple commands may be combined into a single packet, so this
 /// needs to be larger than PACKET_BACKUP
-#define CMD_BACKUP          128
-#define CMD_MASK            (CMD_BACKUP - 1)
+#define CMD_BACKUP_ETL          128
+#define CMD_MASK_ETL            (CMD_BACKUP_ETL - 1)
 
-#define CMD_BACKUP_VET      64
-#define CMD_MASK_VET       (CMD_BACKUP_VET - 1)
+#define CMD_BACKUP      64
+#define CMD_MASK       (CMD_BACKUP - 1)
 
 #define MAX_ENTITIES_IN_SNAPSHOT    512
 
@@ -286,6 +288,7 @@ typedef enum
 	CG_COMMAND_COMPLETE,
 
 	CG_CMDBACKUP_EXT,
+	CG_MATCHPAUSED,
 
 } cgameImport_t;
 

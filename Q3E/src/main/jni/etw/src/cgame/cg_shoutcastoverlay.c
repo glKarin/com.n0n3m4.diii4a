@@ -109,11 +109,12 @@ static void CG_DrawShoutcastPlayerOverlayAxis(hudComponent_t *comp, clientInfo_t
 	// draw HP bar
 	fraction = (float)player->health / (float)CG_GetPlayerMaxHealth(player->clientNum, player->cls, player->team);
 	CG_FilledBar(topRowX + statusWidth, y + 1, comp->location.w - statusWidth - 1, height / 2 - 1.75f, comp->colorSecondary, comp->colorSecondary,
-	             comp->colorBackground, comp->colorBackground, fraction, BAR_BGSPACING_X0Y0, -1);
+	             comp->colorBackground, comp->colorBackground, fraction, 0.f, BAR_BGSPACING_X0Y0, -1);
 
 	// draw health
 	if (player->health > 0)
 	{
+		Vector4Copy(colorWhite, hcolor);
 		CG_ColorForHealth(player->health, hcolor);
 
 		text      = va("%i", player->health);
@@ -239,13 +240,14 @@ static void CG_DrawShoutcastPlayerOverlayAllies(hudComponent_t *comp, clientInfo
 	// draw HP bar
 	fraction = (float)player->health / (float)CG_GetPlayerMaxHealth(player->clientNum, player->cls, player->team);
 	CG_FilledBar(topRowX + 1, y + 1, comp->location.w - statusWidth - 1, height / 2 - 1.5f, comp->colorSecondary, comp->colorSecondary,
-	             comp->colorBackground, comp->colorBackground, fraction, BAR_BGSPACING_X0Y0 | BAR_LEFT, -1);
+	             comp->colorBackground, comp->colorBackground, fraction, 0.f, BAR_BGSPACING_X0Y0 | BAR_LEFT, -1);
 
 	topRowX += comp->location.w;
 
 	// draw health
 	if (player->health > 0)
 	{
+		Vector4Copy(colorWhite, hcolor);
 		CG_ColorForHealth(player->health, hcolor);
 
 		text      = va("%i", player->health);
@@ -494,7 +496,7 @@ static void CG_DrawShoutcastPlayerChargebar(float x, float y, int width, int hei
 		color[3] = 0.25f + barFrac * 0.5f;
 	}
 
-	CG_FilledBar(x, y, width, height, color, NULL, bgColor, bgColor, barFrac, flags, -1);
+	CG_FilledBar(x, y, width, height, color, NULL, bgColor, bgColor, barFrac, 0.f, flags, -1);
 }
 
 /**
@@ -534,7 +536,7 @@ static void CG_DrawShoutcastPlayerStaminaBar(float x, float y, int width, int he
 		color[1] = frac;
 	}
 
-	CG_FilledBar(x, y, width, height, color, NULL, bgColor, bgColor, frac, flags, -1);
+	CG_FilledBar(x, y, width, height, color, NULL, bgColor, bgColor, frac, 0.f, flags, -1);
 }
 
 /**
@@ -589,10 +591,9 @@ static char *CG_ParseStats(char *data, int i)
  */
 void CG_DrawShoutcastPlayerStatus(hudComponent_t *comp)
 {
-	gameStats_t   *gs     = &cgs.gamestats;
-	clientInfo_t  *player = &cgs.clientinfo[cg.snap->ps.clientNum];
-	playerState_t *ps     = &cg.snap->ps;
-	vec4_t        hcolor;
+	gameStats_t   *gs            = &cgs.gamestats;
+	clientInfo_t  *player        = &cgs.clientinfo[cg.snap->ps.clientNum];
+	playerState_t *ps            = &cg.snap->ps;
 	float         nameBoxWidth   = comp->location.w / 1.5f;
 	float         nameBoxHeight  = comp->location.h / 2.25f;
 	float         nameBoxX       = comp->location.x + (comp->location.w - nameBoxWidth) * 0.5f;
@@ -732,6 +733,9 @@ void CG_DrawShoutcastPlayerStatus(hudComponent_t *comp)
 	// draw hp
 	if (cg.snap->ps.stats[STAT_HEALTH] > 0)
 	{
+		vec4_t hcolor;
+
+		Vector4Copy(colorWhite, hcolor);
 		CG_ColorForHealth(cg.snap->ps.stats[STAT_HEALTH], hcolor);
 		text       = va("%i", cg.snap->ps.stats[STAT_HEALTH]);
 		textWidth  = CG_Text_Width_Ext(text, scale, 0, FONT_TEXT);
@@ -824,7 +828,7 @@ void CG_DrawShoutcastPlayerStatus(hudComponent_t *comp)
 		textHeight = CG_Text_Height_Ext(dmgRcvd, 0.19f, 0, FONT_TEXT);
 		textWidth2 = CG_Text_Width_Ext(dmgRcvd, 0.19f, 0, FONT_TEXT);
 		CG_Text_Paint_Ext(statsBoxX + 7 + (textWidth / 2) - (textWidth2 / 2), statsBoxY + (statsBoxHeight / 2) + (textHeight / 2) + 4, scale, scale, colorRed, dmgRcvd, 0, 0, comp->styleText, FONT_TEXT);
-		statsBoxX += 5 + textWidth2;
+		//statsBoxX += 5 + textWidth2;
 	}
 }
 

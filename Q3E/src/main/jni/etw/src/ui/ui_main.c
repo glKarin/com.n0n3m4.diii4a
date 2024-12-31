@@ -95,6 +95,18 @@ void UI_MouseEvent(int dx, int dy);
 void UI_Refresh(int realtime);
 qboolean _UI_IsFullscreen(void);
 
+static uiMenuCommand_t UI_AdjustedMenuCommand(const uiMenuCommand_t menutype)
+{
+	// UIMENU_WM_AUTOUPDATE is the only menu we need to adjust,
+	// as it's used in engine. Older versions have it set to 16.
+	if (uiInfo.etLegacyClient > 282010335 || menutype != 16)
+	{
+		return menutype;
+	}
+
+	return UIMENU_WM_AUTOUPDATE;
+}
+
 /**
  * @brief vmMain
  * This is the only way control passes into the module.
@@ -1022,9 +1034,14 @@ void UI_Refresh(int realtime)
 		uiClientState_t cstate;
 
 		trap_GetClientState(&cstate);
-		if (cstate.connState <= CA_DISCONNECTED || cstate.connState >= CA_ACTIVE)
+
+		// Note: this is the only place where cursor drawing is explicitly called in UI,
+		// so it's just checking if the cursor should be visible or not.
+		// If cursor drawing is explicitly called somewhere else in UI, this should probably
+		// be refactored into a separate cursor drawing function (see CG_DrawCursor)
+		if ((cstate.connState <= CA_DISCONNECTED || cstate.connState >= CA_ACTIVE) && uiInfo.uiDC.cursorVisible)
 		{
-			UI_DrawHandlePic(uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory, 32, 32, uiInfo.uiDC.Assets.cursor);
+			UI_DrawHandlePic(uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory, CURSOR_SIZE, CURSOR_SIZE, uiInfo.uiDC.Assets.cursor);
 		}
 	}
 }
@@ -1407,6 +1424,12 @@ void UI_LoadMenus(const char *menuFile, qboolean reset)
 	{
 		trap_PC_AddGlobalDefine("ETLEGACY");
 
+		// allow detecting non release builds (snapshots etc.)
+		if (ETLEGACY_VERSION_IS_DEVELOPMENT_BUILD)
+		{
+			trap_PC_AddGlobalDefine("NON_RELEASE_BUILD");
+		}
+
 		// if the client is older than the mod, then it makes sense that there has been a new release which the user has not installed
 		if (LEGACY_PATCH_CLAMP(uiInfo.etLegacyClient) < LEGACY_PATCH_CLAMP(ETLEGACY_VERSION_INT))
 		{
@@ -1432,11 +1455,11 @@ void UI_LoadMenus(const char *menuFile, qboolean reset)
 	handle = trap_PC_LoadSource(menuFile);
 	if (!handle)
 	{
-		trap_Error(va(S_COLOR_YELLOW "menu file not found: %s, using default\n", menuFile));
-		handle = trap_PC_LoadSource("ui/menus.txt");
+		Com_Printf(S_COLOR_YELLOW "menu file not found: %s, using default\n", menuFile);
+		handle = trap_PC_LoadSource(DEFAULT_MENU_FILE);
 		if (!handle)
 		{
-			trap_Error(S_COLOR_RED "default menu file not found: ui/menus.txt, unable to continue!\n");
+			trap_Error(va(S_COLOR_RED "default menu file not found: %s, unable to continue!\n", DEFAULT_MENU_FILE));
 		}
 	}
 
@@ -1495,7 +1518,7 @@ void UI_Load(void)
 
 	if (menuSet == NULL || menuSet[0] == '\0')
 	{
-		menuSet = "ui/menus.txt";
+		menuSet = DEFAULT_MENU_FILE;
 	}
 
 	String_Init();
@@ -2928,19 +2951,21 @@ static void UI_DrawRedBlue(rectDef_t *rect, float scale, vec4_t color, int textS
  */
 static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color)
 {
-	float size = ui_cg_crosshairSize.integer;
+	float sizeX = ui_cg_crosshairSize.value * ui_cg_crosshairScaleX.value;
+	float sizeY = ui_cg_crosshairSize.value * ui_cg_crosshairScaleY.value;
 
 	if (uiInfo.currentCrosshair < 0 || uiInfo.currentCrosshair >= NUM_CROSSHAIRS)
 	{
 		uiInfo.currentCrosshair = 0;
 	}
 
-	size = (rect->w / 96.0f) * ((size > 96.0f) ? 96.0f : ((size < 24.0f) ? 24.0f : size));
+	sizeX = (rect->w / 96.0f) * ((sizeX > 96.0f) ? 96.0f : ((sizeX < 24.0f) ? 24.0f : sizeX));
+	sizeY = (rect->w / 96.0f) * ((sizeY > 96.0f) ? 96.0f : ((sizeY < 24.0f) ? 24.0f : sizeY));
 
 	trap_R_SetColor(uiInfo.xhairColor);
-	UI_DrawHandlePic(rect->x + (rect->w - size) * 0.5f, rect->y + (rect->h - size) * 0.5f, size, size, uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
+	UI_DrawHandlePic(rect->x + (rect->w - sizeX) * 0.5f, rect->y + (rect->h - sizeY) * 0.5f, sizeX, sizeY, uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
 	trap_R_SetColor(uiInfo.xhairColorAlt);
-	UI_DrawHandlePic(rect->x + (rect->w - size) * 0.5f, rect->y + (rect->h - size) * 0.5f, size, size, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
+	UI_DrawHandlePic(rect->x + (rect->w - sizeX) * 0.5f, rect->y + (rect->h - sizeY) * 0.5f, sizeX, sizeY, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
 
 	trap_R_SetColor(NULL);
 }
@@ -4536,7 +4561,7 @@ void UI_Update(const char *name)
 			break;
 		}
 	}
-	else if (Q_stricmp(name, "ui_r_lodbias") == 0)
+	else if (Q_stricmp(name, "ui_r_lodscale") == 0)
 	{
 		switch (val)
 		{
@@ -4621,7 +4646,7 @@ void UI_ParseglPreset()
 {
 	// high preset
 	if ((int)trap_Cvar_VariableValue("ui_r_subdivisions") == 4 &&
-	    (int)trap_Cvar_VariableValue("ui_r_lodbias") == 0 &&
+	    (int)trap_Cvar_VariableValue("ui_r_lodscale") == 0 &&
 	    (int)trap_Cvar_VariableValue("ui_r_colorbits") == 32 &&
 	    (int)trap_Cvar_VariableValue("ui_r_depthbits") == 24 &&
 	    (int)trap_Cvar_VariableValue("ui_r_picmip") == 0 &&
@@ -4640,7 +4665,7 @@ void UI_ParseglPreset()
 	}
 	// normal preset
 	else if ((int)trap_Cvar_VariableValue("ui_r_subdivisions") == 4 &&
-	         (int)trap_Cvar_VariableValue("ui_r_lodbias") == 0 &&
+	         (int)trap_Cvar_VariableValue("ui_r_lodscale") == 0 &&
 	         (int)trap_Cvar_VariableValue("ui_r_colorbits") == 0 &&
 	         (int)trap_Cvar_VariableValue("ui_r_depthbits") == 24 &&
 	         (int)trap_Cvar_VariableValue("ui_r_picmip") == 1 &&
@@ -4659,7 +4684,7 @@ void UI_ParseglPreset()
 	}
 	// fast preset
 	else if ((int)trap_Cvar_VariableValue("ui_r_subdivisions") == 12 &&
-	         (int)trap_Cvar_VariableValue("ui_r_lodbias") == 1 &&
+	         (int)trap_Cvar_VariableValue("ui_r_lodscale") == 1 &&
 	         (int)trap_Cvar_VariableValue("ui_r_colorbits") == 0 &&
 	         (int)trap_Cvar_VariableValue("ui_r_depthbits") == 24 &&
 	         (int)trap_Cvar_VariableValue("ui_r_picmip") == 2 &&
@@ -4678,7 +4703,7 @@ void UI_ParseglPreset()
 	}
 	// fastest preset
 	else if ((int)trap_Cvar_VariableValue("ui_r_subdivisions") == 20 &&
-	         (int)trap_Cvar_VariableValue("ui_r_lodbias") == 2 &&
+	         (int)trap_Cvar_VariableValue("ui_r_lodscale") == 2 &&
 	         (int)trap_Cvar_VariableValue("ui_r_colorbits") == 16 &&
 	         (int)trap_Cvar_VariableValue("ui_r_depthbits") == 24 &&
 	         (int)trap_Cvar_VariableValue("ui_r_picmip") == 3 &&
@@ -4868,8 +4893,6 @@ void UI_RunMenuScript(char **args)
 		}
 		else if (Q_stricmp(name, "LoadDemos") == 0)
 		{
-			// Reset the path
-			uiInfo.demos.path[0] = '\0';
 			UI_LoadDemos();
 		}
 		else if (Q_stricmp(name, "LoadMovies") == 0)
@@ -6045,7 +6068,7 @@ void UI_RunMenuScript(char **args)
 			float ui_r_intensity                      = trap_Cvar_VariableValue("r_intensity");
 			int   ui_r_mapoverbrightbits              = (int)(trap_Cvar_VariableValue("r_mapoverbrightbits"));
 			int   ui_r_overBrightBits                 = (int)(trap_Cvar_VariableValue("r_overBrightBits"));
-			int   ui_r_lodbias                        = (int)(trap_Cvar_VariableValue("r_lodbias"));
+			int   ui_r_lodscale                       = (int)(trap_Cvar_VariableValue("r_lodscale"));
 			int   ui_r_subdivisions                   = (int)(trap_Cvar_VariableValue("r_subdivisions"));
 			int   ui_r_picmip                         = (int)(trap_Cvar_VariableValue("r_picmip"));
 			int   ui_r_texturebits                    = (int)(trap_Cvar_VariableValue("r_texturebits"));
@@ -6090,7 +6113,7 @@ void UI_RunMenuScript(char **args)
 			trap_Cvar_Set("ui_r_centerwindow", va("%i", ui_r_centerwindow));
 			trap_Cvar_Set("ui_r_mapoverbrightbits", va("%i", ui_r_mapoverbrightbits));
 			trap_Cvar_Set("ui_r_overBrightBits", va("%i", ui_r_overBrightBits));
-			trap_Cvar_Set("ui_r_lodbias", va("%i", ui_r_lodbias));
+			trap_Cvar_Set("ui_r_lodscale", va("%i", ui_r_lodscale));
 			trap_Cvar_Set("ui_r_subdivisions", va("%i", ui_r_subdivisions));
 			trap_Cvar_Set("ui_r_picmip", va("%i", ui_r_picmip));
 			trap_Cvar_Set("ui_r_texturebits", va("%i", ui_r_texturebits));
@@ -6123,7 +6146,7 @@ void UI_RunMenuScript(char **args)
 			trap_Cvar_Set("ui_sensitivity", "");
 			trap_Cvar_Set("ui_r_colorbits", "");
 			trap_Cvar_Set("ui_r_fullscreen", "");
-			trap_Cvar_Set("ui_r_lodbias", "");
+			trap_Cvar_Set("ui_r_lodscale", "");
 			trap_Cvar_Set("ui_r_subdivisions", "");
 			trap_Cvar_Set("ui_r_picmip", "");
 			trap_Cvar_Set("ui_r_texturebits", "");
@@ -6160,7 +6183,7 @@ void UI_RunMenuScript(char **args)
 			float ui_r_intensity                      = trap_Cvar_VariableValue("ui_r_intensity");
 			int   ui_r_mapoverbrightbits              = (int)(trap_Cvar_VariableValue("ui_r_mapoverbrightbits"));
 			int   ui_r_overBrightBits                 = (int)(trap_Cvar_VariableValue("ui_r_overBrightBits"));
-			int   ui_r_lodbias                        = (int)(trap_Cvar_VariableValue("ui_r_lodbias"));
+			int   ui_r_lodscale                       = (int)(trap_Cvar_VariableValue("ui_r_lodscale"));
 			int   ui_r_subdivisions                   = (int)(trap_Cvar_VariableValue("ui_r_subdivisions"));
 			int   ui_r_picmip                         = (int)(trap_Cvar_VariableValue("ui_r_picmip"));
 			int   ui_r_texturebits                    = (int)(trap_Cvar_VariableValue("ui_r_texturebits"));
@@ -6212,7 +6235,7 @@ void UI_RunMenuScript(char **args)
 			trap_Cvar_Set("r_intensity", va("%f", ui_r_intensity));
 			trap_Cvar_Set("r_mapoverbrightbits", va("%i", ui_r_mapoverbrightbits));
 			trap_Cvar_Set("r_overBrightBits", va("%i", ui_r_overBrightBits));
-			trap_Cvar_Set("r_lodbias", va("%i", ui_r_lodbias));
+			trap_Cvar_Set("r_lodscale", va("%i", ui_r_lodscale));
 			trap_Cvar_Set("r_subdivisions", va("%i", ui_r_subdivisions));
 			trap_Cvar_Set("r_picmip", va("%i", ui_r_picmip));
 			trap_Cvar_Set("r_texturebits", va("%i", ui_r_texturebits));
@@ -6244,7 +6267,7 @@ void UI_RunMenuScript(char **args)
 			trap_Cvar_Set("ui_r_intensity", "");
 			trap_Cvar_Set("ui_r_mapoverbrightbits", "");
 			trap_Cvar_Set("ui_r_overBrightBits", "");
-			trap_Cvar_Set("ui_r_lodbias", "");
+			trap_Cvar_Set("ui_r_lodscale", "");
 			trap_Cvar_Set("ui_r_subdivisions", "");
 			trap_Cvar_Set("ui_r_picmip", "");
 			trap_Cvar_Set("ui_r_texturebits", "");
@@ -6480,6 +6503,7 @@ static int UI_CampaignCount(qboolean singlePlayer)
 static void UI_InsertServerIntoDisplayList(int num, int position)
 {
 	int i;
+	menuDef_t *menu;
 
 	if (position < 0 || position > uiInfo.serverStatus.numDisplayServers)
 	{
@@ -6496,9 +6520,10 @@ static void UI_InsertServerIntoDisplayList(int num, int position)
     // If we're inserting a server before the currently selected one, increment the selected item.
     // This has improved UX over changing the item out from under the user, who might want to select a server
     // and so something with it before the list finishes loading, which can take a while.
-    if (position < uiInfo.serverStatus.currentServer) {
+	if (position < uiInfo.serverStatus.currentServer)
+	{
         uiInfo.serverStatus.currentServer++;
-        menuDef_t *menu = Menus_FindByName("serverList");
+		menu = Menus_FindByName("serverList");
         Menu_SetFeederSelection(menu, FEEDER_SERVERS, uiInfo.serverStatus.currentServer, NULL);
     }
 }
@@ -8570,7 +8595,7 @@ void UI_Init(int etLegacyClient, int clientVersion)
 	UI_InitMemory();
 	trap_PC_RemoveAllGlobalDefines();
 
-	trap_Cvar_Set("ui_menuFiles", "ui/menus.txt");   // we need to hardwire for wolfMP
+	trap_Cvar_Set("ui_menuFiles", DEFAULT_MENU_FILE);   // we need to hardwire for wolfMP
 
 	// cache redundant calculations
 	trap_GetGlconfig(&uiInfo.uiDC.glconfig);
@@ -8724,7 +8749,7 @@ void UI_Init(int etLegacyClient, int clientVersion)
 
 	UI_ParseGameInfo("gameinfo.txt");
 
-	UI_LoadMenus("ui/menus.txt", qfalse);
+	UI_LoadMenus(DEFAULT_MENU_FILE, qfalse);
 
 	Menus_CloseAll();
 
@@ -8844,7 +8869,7 @@ static uiMenuCommand_t menutype = UIMENU_NONE;
  */
 uiMenuCommand_t UI_GetActiveMenu(void)
 {
-	return menutype;
+	return UI_AdjustedMenuCommand(menutype);
 }
 
 /**
@@ -8860,9 +8885,12 @@ void UI_SetActiveMenu(uiMenuCommand_t menu)
 	// enusure minumum menu data is cached
 	if (Menu_Count() > 0)
 	{
-		menutype = menu;
+		menutype = UI_AdjustedMenuCommand(menu);
 
-		switch (menu)
+		// assume we want to draw cursor
+		uiInfo.uiDC.cursorVisible = qtrue;
+
+		switch (menutype)
 		{
 		case UIMENU_NONE:
 			trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_UI);
@@ -8962,48 +8990,42 @@ void UI_SetActiveMenu(uiMenuCommand_t menu)
 			return;
 
 		case UIMENU_WM_QUICKMESSAGE:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorVisible = qfalse;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_quickmessage");
 			return;
 
 		case UIMENU_WM_QUICKMESSAGEALT:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorVisible = qfalse;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_quickmessageAlt");
 			return;
 
 		case UIMENU_WM_FTQUICKMESSAGE:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorVisible = qfalse;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_ftquickmessage");
 			return;
 
 		case UIMENU_WM_FTQUICKMESSAGEALT:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorVisible = qfalse;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_ftquickmessageAlt");
 			return;
 
 		case UIMENU_WM_TAPOUT:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorVisible = qfalse;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("tapoutmsg");
 			return;
 
 		case UIMENU_WM_TAPOUT_LMS:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorVisible = qfalse;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("tapoutmsglms");
@@ -9019,32 +9041,28 @@ void UI_SetActiveMenu(uiMenuCommand_t menu)
 			return;
 
 		case UIMENU_WM_CLASS:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorVisible = qfalse;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_class");
 			return;
 
 		case UIMENU_WM_CLASSALT:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorVisible = qfalse;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_classAlt");
 			return;
 
 		case UIMENU_WM_TEAM:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorVisible = qfalse;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_team");
 			return;
 
 		case UIMENU_WM_TEAMALT:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorVisible = qfalse;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_teamAlt");
@@ -9218,6 +9236,8 @@ vmCvar_t ui_cg_crosshairColorAlt;
 vmCvar_t ui_cg_crosshairAlpha;
 vmCvar_t ui_cg_crosshairAlphaAlt;
 vmCvar_t ui_cg_crosshairSize;
+vmCvar_t ui_cg_crosshairScaleX;
+vmCvar_t ui_cg_crosshairScaleY;
 
 vmCvar_t cl_bypassMouseInput;
 
@@ -9253,7 +9273,7 @@ static cvarTable_t cvarTable[] =
 	{ &ui_selectedPlayer,                  "cg_selectedPlayer",                   "0",                          CVAR_ARCHIVE,                   0 },
 	{ &ui_selectedPlayerName,              "cg_selectedPlayerName",               "",                           CVAR_ARCHIVE,                   0 },
 	{ &ui_netSource,                       "ui_netSource",                        "1",                          CVAR_ARCHIVE,                   0 },
-	{ &ui_menuFiles,                       "ui_menuFiles",                        "ui/menus.txt",               CVAR_ARCHIVE,                   0 },
+	{ &ui_menuFiles,                       "ui_menuFiles",                        DEFAULT_MENU_FILE,            CVAR_ARCHIVE,                   0 },
 	{ &ui_gameType,                        "ui_gametype",                         "3",                          CVAR_ARCHIVE,                   0 },
 	{ &ui_joinGameType,                    "ui_joinGametype",                     "-1",                         CVAR_ARCHIVE,                   0 },
 	{ &ui_netGameType,                     "ui_netGametype",                      "4",                          CVAR_ARCHIVE,                   0 }, // hardwired for now
@@ -9319,6 +9339,8 @@ static cvarTable_t cvarTable[] =
 	{ &ui_cg_crosshairColor,               "cg_crosshairColor",                   "White",                      CVAR_ARCHIVE,                   0 },
 	{ &ui_cg_crosshairColorAlt,            "cg_crosshairColorAlt",                "White",                      CVAR_ARCHIVE,                   0 },
 	{ &ui_cg_crosshairSize,                "cg_crosshairSize",                    "48",                         CVAR_ARCHIVE,                   0 },
+	{ &ui_cg_crosshairScaleX,              "cg_crosshairScaleX",                  "1.0",                        CVAR_ARCHIVE,                   0 },
+	{ &ui_cg_crosshairScaleY,              "cg_crosshairScaleY",                  "1.0",                        CVAR_ARCHIVE,                   0 },
 	{ NULL,                                "cg_crosshairPulse",                   "1",                          CVAR_ARCHIVE,                   0 },
 	{ NULL,                                "cg_crosshairHealth",                  "0",                          CVAR_ARCHIVE,                   0 },
 

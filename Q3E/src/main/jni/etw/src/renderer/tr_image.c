@@ -221,44 +221,39 @@ void R_ImageList_f(void)
 		texels += image->uploadWidth * image->uploadHeight;
 		Ren_Print("%4i: %4i %4i  %s   %d   ",
 		          i, image->uploadWidth, image->uploadHeight, yesno[image->mipmap], image->TMU);
+
 		switch (image->internalFormat)
 		{
-		case 1:
-			Ren_Print("I    ");
+		case GL_RGB:
+			Ren_Print("RGB   ");
 			break;
-		case 2:
-			Ren_Print("IA   ");
-			break;
-		case 3:
-			Ren_Print("RGB  ");
-			break;
-		case 4:
-			Ren_Print("RGBA ");
+		case GL_RGBA:
+			Ren_Print("RGBA  ");
 			break;
 		case GL_RGBA8:
-			Ren_Print("RGBA8");
+			Ren_Print("RGBA8 ");
 			break;
 		case GL_RGB8:
-			Ren_Print("RGB8");
+			Ren_Print("RGB8 ");
 			break;
 		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-			Ren_Print("DXT3 ");
+			Ren_Print("DXT3  ");
 			break;
 		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-			Ren_Print("DXT5 ");
+			Ren_Print("DXT5  ");
 			break;
 		case GL_RGB4_S3TC:
 		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-			Ren_Print("S3TC ");
+			Ren_Print("S3TC  ");
 			break;
 		case GL_RGBA4:
-			Ren_Print("RGBA4");
+			Ren_Print("RGBA4 ");
 			break;
 		case GL_RGB5:
-			Ren_Print("RGB5 ");
+			Ren_Print("RGB5  ");
 			break;
 		default:
-			Ren_Print("???? ");
+			Ren_Print("????  ");
 			break;
 		}
 
@@ -970,6 +965,9 @@ image_t *R_CreateImage(const char *name, const byte *pic, int width, int height,
 	else
 	{
 		image->internalFormat = GL_RGBA;
+		image->uploadWidth    = image->width;
+		image->uploadHeight   = image->height;
+
 		glTexImage2D(GL_TEXTURE_2D, 0, image->internalFormat, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
 		if (mipmap)
@@ -1161,7 +1159,7 @@ image_t *R_FindImageFile(const char *name, qboolean mipmap, qboolean allowPicmip
 		tr.allowCompress = -1;
 	}
 
-	if (!GLEW_ARB_texture_non_power_of_two && (((width - 1) & width) || ((height - 1) & height)))
+	if (!GLEW_ARB_texture_non_power_of_two && (!Com_PowerOf2(width) || !Com_PowerOf2(height)))
 	{
 		Ren_Developer("WARNING: Image not power of 2 scaled: %s (%i:%i)\n", name, width, height);
 		return NULL;
@@ -1362,7 +1360,7 @@ void R_CreateBuiltinImages(void)
  */
 void R_SetColorMappings(void)
 {
-	int   i, j;
+	int   i;
 	float g;
 	int   inf;
 	int   shift;
@@ -1430,28 +1428,15 @@ void R_SetColorMappings(void)
 		}
 		else
 		{
-			inf = 255 * pow(i / 255.0, 1.0 / g) + 0.5;
+			inf = (int)(255 * pow(i / 255.0, 1.0 / g) + 0.5);
 		}
-		inf <<= shift;
-		if (inf < 0)
-		{
-			inf = 0;
-		}
-		if (inf > 255)
-		{
-			inf = 255;
-		}
-		s_gammatable[i] = inf;
+		inf           <<= shift;
+		s_gammatable[i] = ClampByte(inf);
 	}
 
 	for (i = 0 ; i < 256 ; i++)
 	{
-		j = i * r_intensity->value;
-		if (j > 255)
-		{
-			j = 255;
-		}
-		s_intensitytable[i] = j;
+		s_intensitytable[i] = ClampByte((int)(i * r_intensity->value));
 	}
 
 	if (glConfig.deviceSupportsGamma && !tr.gammaProgramUsed)

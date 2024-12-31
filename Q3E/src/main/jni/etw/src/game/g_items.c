@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Wolfenstein: Enemy Territory GPL Source Code
  * Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
  *
@@ -136,7 +136,7 @@ int Add_Ammo(gentity_t *ent, weapon_t weapon, int count, qboolean fillClip)
 	if ((GetWeaponTableData(ammoweap)->type & WEAPON_TYPE_GRENADE) || ammoweap == WP_DYNAMITE || ammoweap == WP_SATCHEL_DET) // make sure if he picks it up that he get's the "launcher" too
 	{
 		COM_BitSet(ent->client->ps.weapons, ammoweap);
-		fillClip = qtrue;   // always filter into the "clip"
+		fillClip = qtrue;  // always filter into the "clip"
 	}
 
 	if (fillClip)
@@ -144,21 +144,27 @@ int Add_Ammo(gentity_t *ent, weapon_t weapon, int count, qboolean fillClip)
 		Fill_Clip(&ent->client->ps, weapon);
 	}
 
-	ent->client->ps.ammo[ammoweap] += count;
-
-	if (!GetWeaponTableData(ammoweap)->useClip)
-	{
-		maxammo -= ent->client->ps.ammoclip[ammoweap];
-	}
-
-	if (ent->client->ps.ammo[ammoweap] > maxammo)
-	{
-		ent->client->ps.ammo[ammoweap] = maxammo;   // - ent->client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
-	}
-
-	if (count >= 999)     // 'really, give /all/'
+	if (count >= 999)  // really, give **all** - force the count
 	{
 		ent->client->ps.ammo[ammoweap] = count;
+	}
+	else  // otherwise cap the count to maxammo / >0
+	{
+		ent->client->ps.ammo[ammoweap] += count;
+
+		if (!GetWeaponTableData(ammoweap)->useClip)
+		{
+			maxammo -= ent->client->ps.ammoclip[ammoweap];
+		}
+
+		if (ent->client->ps.ammo[ammoweap] > maxammo)
+		{
+			ent->client->ps.ammo[ammoweap] = maxammo;   // - ent->client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
+		}
+		else if (ent->client->ps.ammo[ammoweap] < 0)
+		{
+			ent->client->ps.ammo[ammoweap] = 0;
+		}
 	}
 
 	return (ent->client->ps.ammo[ammoweap] > originalCount);
@@ -600,6 +606,7 @@ int Pickup_Health(gentity_t *ent, gentity_t *other)
 	if (ent->parent && ent->parent->client && ent->parent->client != other->client && other->client->sess.sessionTeam == ent->parent->client->sess.sessionTeam)
 	{
 		G_AddSkillPoints(ent->parent, SK_FIRST_AID, 1.f, "healing");
+		G_LogPrintf("Health_Pack: %d %d\n", (int)(ent->parent - g_entities), (int)(other - g_entities));
 	}
 
 	other->health += ent->item->quantity;
@@ -733,23 +740,6 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace)
 		return;
 	}
 
-	if (g_gamestate.integer == GS_PLAYING)
-	{
-		G_LogPrintf("Item: %i %s\n", other->s.number, ent->item->classname);
-	}
-	else
-	{
-		// Don't let them pickup winning stuff in warmup
-		if (ent->item->giType != IT_WEAPON &&
-		    ent->item->giType != IT_AMMO &&
-		    ent->item->giType != IT_HEALTH)
-		{
-			return;
-		}
-	}
-
-	//G_LogPrintf( "Calling item pickup function for %s\n", ent->item->classname );
-
 	// call the item-specific pickup function
 	switch (ent->item->giType)
 	{
@@ -766,11 +756,14 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace)
 		return;
 	}
 
-	//G_LogPrintf( "Finished pickup function\n" );
-
 	if (!respawn)
 	{
 		return;
+	}
+
+	if (g_gamestate.integer == GS_PLAYING)
+	{
+		G_LogPrintf("Item: %i %s\n", other->s.number, ent->item->classname);
 	}
 
 	// play sounds
@@ -795,9 +788,7 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace)
 		te->s.eventParm = ent->s.modelindex;
 		te->r.svFlags  |= SVF_BROADCAST;
 	}
-
-	//G_LogPrintf( "Firing item targets\n" );
-
+    
 	// fire item targets
 	G_UseTargets(ent, other);
 
@@ -847,6 +838,7 @@ gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity, int ownerNu
 	dropped->s.eType           = ET_ITEM;
 	dropped->s.modelindex      = item->id ; // store item number in modelindex
 	dropped->s.otherEntityNum2 = 1; // this is taking modelindex2's place for a dropped item
+	dropped->s.groundEntityNum = ENTITYNUM_NONE;
 
 	dropped->classname = item->classname;
 	dropped->item      = item;
@@ -1273,8 +1265,8 @@ void G_RunItem(gentity_t *ent)
 	int     contents;
 	int     mask = ent->clipmask ? ent->clipmask : MASK_SOLID;
 
-	// if groundentity has been set to -1, it may have been pushed off an edge
-	if (ent->s.groundEntityNum == -1)
+	// if groundentity has been set to ENTITYNUM_NONE, it may have been pushed off an edge
+	if (ent->s.groundEntityNum == ENTITYNUM_NONE)
 	{
 		if (ent->s.pos.trType != TR_GRAVITY)
 		{
@@ -1323,7 +1315,7 @@ void G_RunItem(gentity_t *ent)
 			VectorClear(ent->s.pos.trDelta);
 			ent->s.pos.trType      = TR_GRAVITY;
 			ent->s.pos.trTime      = level.time;
-			ent->s.groundEntityNum = -1;
+			ent->s.groundEntityNum = ENTITYNUM_NONE;
 		}
 
 		G_RunThink(ent);

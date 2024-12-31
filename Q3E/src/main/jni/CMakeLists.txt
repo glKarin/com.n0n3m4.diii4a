@@ -63,7 +63,7 @@ if(GAME_QUAKE3) # https://github.com/ioquake/ioq3/commit/3fb9006e6461b877b67781c
     add_subdirectory ( quake3 ) # Quake 3 Arena | Team Arena
 endif()
 
-if(GAME_QUAKE2) # 8.41 QUAKE2_8_41 https://github.com/yquake2/yquake2/commit/141bf6e7ddf0ee0895783db1de90d96e6a483ab0
+if(GAME_QUAKE2) # 8.4 | 141bf6e7ddf0ee0895783db1de90d96e6a483ab0 | Aug 9, 2024 | Bump version number to 8.41.
     message(STATUS "Build Quake 2")
     add_subdirectory ( quake2 ) # Quake 2
 endif()
@@ -88,7 +88,7 @@ if(GAME_DNF)
     add_subdirectory ( duke4/neo ) # DNF
 endif()
 
-if(GAME_DOOM) # g4.12.2 | 71c40432e5e893c629a1c9c76a523a0ab22bd56a | Apr 28, 2024 | Reworked clientside lerping
+if(GAME_DOOM) # g4.14.0 | 71c40432e5e893c629a1c9c76a523a0ab22bd56a | Apr 28, 2024 | Reworked clientside lerping
     if(CMAKE_SIZEOF_VOID_P EQUAL 8 #[[ OR TRUE]]) # GZDOOM only support 64bits system
         message(STATUS "Build GZDOOM")
         add_subdirectory ( gzdoom ) # GZDOOM
@@ -97,7 +97,7 @@ if(GAME_DOOM) # g4.12.2 | 71c40432e5e893c629a1c9c76a523a0ab22bd56a | Apr 28, 202
     endif()
 endif()
 
-if(GAME_ETW) # v2.82.1 | 0a24c70f84cf21940277ddabd736ce83535cb794 | Apr 19, 2024 | Incrementing version number to 2.82.1
+if(GAME_ETW) # v2.83.1 | e8d0ec06800630fd458791ccd29ed488e04648d9 | Nov 12, 2024 | Incrementing version number to 2.83.1
     message(STATUS "Build Wolfenstein: Enemy Territory")
     add_subdirectory ( etw ) # ETW
 endif()

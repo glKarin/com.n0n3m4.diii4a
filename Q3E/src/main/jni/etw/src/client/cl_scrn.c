@@ -138,8 +138,12 @@ static void SRC_DrawSingleChar(int x, int y, int w, int h, int ch)
 	}
 	else
 	{
-		float       scaleX, scaleY, scale;
+		float       scaleX, scaleY, scale, renderScale;
 		glyphInfo_t *info;
+		float       xx;
+		float       yy;
+		float       ww;
+		float       hh;
 
 		if (ch < 32)
 		{
@@ -155,7 +159,8 @@ static void SRC_DrawSingleChar(int x, int y, int w, int h, int ch)
 			return;
 		}
 
-		scale = cls.consoleFont.glyphScale;
+		renderScale = (float)smallCharHeight / (float)SMALLCHAR_HEIGHT;
+		scale       = cls.consoleFont.glyphScale * renderScale;
 
 		// FIXME: fix the magic numbers at some point
 		scaleX = 0.3f; // (float)w / (float)info->imageWidth;
@@ -164,10 +169,10 @@ static void SRC_DrawSingleChar(int x, int y, int w, int h, int ch)
 		scaleX *= scale;
 		scaleY *= scale;
 
-		float xx = (float)x + ((float)info->pitch * scaleX);
-		float yy = (float)y - ((float)info->top * scaleY) + 12;
-		float ww = (float)info->imageWidth * scaleX;
-		float hh = (float)info->imageHeight * scaleY;
+		xx = (float)x + ((float)info->pitch * scaleX);
+		yy = (float)y - ((float)info->top * scaleY) + (12 * renderScale);
+		ww = (float)info->imageWidth * scaleX;
+		hh = (float)info->imageHeight * scaleY;
 
 		// Just squash the icon font to match
 		if (ch < 32)

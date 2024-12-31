@@ -6302,7 +6302,8 @@ static void ScanAndLoadGuideFiles(void)
 			Ren_Drop("Couldn't load %s (single buffer)", filename);
 		}
 	}
-	s_guideText = (char *)ri.Hunk_Alloc(sum + numGuides * 2, h_low);
+    size = sum + numGuides * 2;
+	s_guideText = (char *)ri.Hunk_Alloc(size, h_low);
 
 	// load in reverse order, so doubled templates are overriden properly
 	for (i = numGuides - 1; i >= 0; i--)
@@ -6318,7 +6319,7 @@ static void ScanAndLoadGuideFiles(void)
 
 		Q_strcat(s_guideText, s_guideText, "\n");
 		p = &s_guideText[strlen(s_guideText)];
-        Q_strcat(s_guideText, sizeof(s_guideText), buffers[i]);
+        Q_strcat(s_guideText, size - strlen(s_guideText), buffers[i]);
 		ri.FS_FreeFile(buffers[i]);
 		buffers[i] = p;
 		COM_Compress(p);
@@ -6502,6 +6503,7 @@ static int ScanAndLoadShaderFiles(void)
 {
 	char **shaderFiles;
 	char *buffers[MAX_SHADER_FILES];
+	int  bufferslen[MAX_SHADER_FILES];
 	char *p;
 	int  numShaderFiles, i;
 	char *oldp, *token, *textEnd;
@@ -6513,6 +6515,7 @@ static int ScanAndLoadShaderFiles(void)
 
 	Com_Memset(buffers, 0, sizeof(buffers));
 	Com_Memset(shaderTextHashTableSizes, 0, sizeof(shaderTextHashTableSizes));
+	Com_Memset(bufferslen, 0, MAX_SHADER_FILES);
 
 	// scan for shader files
 	shaderFiles = ri.FS_ListFiles("materials", ".shader", &numShaderFiles);
@@ -6538,6 +6541,7 @@ static int ScanAndLoadShaderFiles(void)
 
 		Ren_Developer("...loading '%s'\n", filename);
 		summand = ri.FS_ReadFile(filename, (void **)&buffers[i]);
+		bufferslen[i] = summand;
 
 		if (!buffers[i])
 		{
@@ -6599,9 +6603,11 @@ static int ScanAndLoadShaderFiles(void)
 			continue;
 		}
 
-		Q_strcat(textEnd, sum + numShaderFiles * 2, buffers[i]);
-		Q_strcat(textEnd, sum + numShaderFiles * 2, "\n");
-		textEnd += strlen(textEnd);
+		Com_Memcpy(textEnd, buffers[i], bufferslen[i]);
+		textEnd += bufferslen[i];
+		*textEnd = '\n';
+		textEnd++;
+		*textEnd = 0; // this doesn't appear to be necessary
 		ri.FS_FreeFile(buffers[i]);
 	}
 

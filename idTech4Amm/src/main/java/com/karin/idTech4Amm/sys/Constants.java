@@ -13,7 +13,7 @@ import java.util.Date;
 public final class Constants
 {
     public static final int    CONST_UPDATE_RELEASE = 60;
-    public static final String CONST_RELEASE = "2024-12-23";
+    public static final String CONST_RELEASE = "2024-12-31";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -32,6 +32,7 @@ public final class Constants
         return new String[] {
             "Support setup max game console height(0 or 100 means not limit) on launcher `General` tab.",
             "Update GZDOOM version to 4.14.0.",
+            "Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.1.",
             "Update Quake 1(Darkplaces) version.",
             "Update Quake 2(yquake2) version.",
             "Add use multisamples config in game.",
@@ -57,6 +58,6 @@ public final class Constants
     {
         return DateTimeUtility.Format(GetBuildTimestamp(), format);
     }
-    
+
 	private Constants() {}
 }

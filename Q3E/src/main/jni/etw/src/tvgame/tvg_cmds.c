@@ -334,9 +334,9 @@ int TVG_MasterClientNumberFromString(gclient_t *to, char *s)
 }
 
 /**
- * @brief G_PlaySound_Cmd
+ * @brief TVG_PlaySound_Cmd
  */
-void G_PlaySound_Cmd(void)
+void TVG_PlaySound_Cmd(void)
 {
 	char sound[MAX_QPATH], name[MAX_NAME_LENGTH], cmd[32] = { "playsound" };
 
@@ -361,7 +361,7 @@ void G_PlaySound_Cmd(void)
 	if (name[0])
 	{
 		int       cnum;
-		gentity_t *victim;
+		gclient_t *victim;
 
 		cnum = TVG_ClientNumberFromString(NULL, name);
 
@@ -370,20 +370,20 @@ void G_PlaySound_Cmd(void)
 			return;
 		}
 
-		victim = &level.gentities[cnum];
+		victim = &level.clients[cnum];
 
 		if (!Q_stricmp(cmd, "playsound_env"))
 		{
-			G_AddEvent(victim, EV_GENERAL_SOUND, G_SoundIndex(sound));
+			TVG_AddEvent(victim, EV_GENERAL_SOUND, TVG_SoundIndex(sound));
 		}
 		else
 		{
-			G_ClientSound(victim, G_SoundIndex(sound));
+			G_Printf("no sound found/played\n");
 		}
 	}
 	else
 	{
-		TVG_globalSound(sound);
+		G_Printf("no sound found/played\n");
 	}
 }
 
@@ -623,7 +623,7 @@ void TVG_statsPrint(gclient_t *client, int nType, int updateInterval)
  */
 qboolean TVG_Cmd_wStats_f(gclient_t *ent, tvcmd_reference_t *self)
 {
-	TVG_statsPrint(ent, 1, self->value);
+	TVG_statsPrint(ent, self->value, self->updateInterval);
 
 	return qtrue;
 }
@@ -635,7 +635,7 @@ qboolean TVG_Cmd_wStats_f(gclient_t *ent, tvcmd_reference_t *self)
  */
 qboolean TVG_Cmd_sgStats_f(gclient_t *client, tvcmd_reference_t *self)
 {
-	TVG_statsPrint(client, 2, self->value);
+	TVG_statsPrint(client, self->value, self->updateInterval);
 
 	return qtrue;
 }
@@ -808,41 +808,6 @@ qboolean TVG_Cmd_FollowPrevious_f(gclient_t *client, tvcmd_reference_t *self)
 }
 
 /**
- * @brief Plays a sound (wav file or sound script) on this entity
- * @param[in] ent entity to play the sound on
- * @param[in] soundId sound file name or sound script ID
- * @param[in] volume sound volume, only applies to sound file name call
- *
- * @note Unused. Keep this.
- *
- * @note Calling G_AddEvent(..., EV_GENERAL_SOUND, ...) has the danger of
- * the event never getting through to the client because the entity might not
- * be visible (unless it has the SVF_BROADCAST flag), so if you want to make sure
- * the sound is heard, call this function instead.
- */
-void G_EntitySound(gentity_t *ent, const char *soundId, int volume)
-{
-	//   for sound script, volume is currently always 127.
-	trap_SendServerCommand(-1, va("entitySound %d %s %d %i %i %i normal", ent->s.number, soundId, volume,
-	                              (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2]));
-}
-
-/**
- * @brief Similar to G_EntitySound, but do not cut this sound off
- * @param[in] ent entity to play the sound on
- * @param[in] soundId sound file name or sound script ID
- * @param[in] volume sound volume, only applies to sound file name call
- *
- * @note Unused. See G_EntitySound()
- */
-void G_EntitySoundNoCut(gentity_t *ent, const char *soundId, int volume)
-{
-	//   for sound script, volume is currently always 127.
-	trap_SendServerCommand(-1, va("entitySound %d %s %d %i %i %i noCut", ent->s.number, soundId, volume,
-	                              (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2]));
-}
-
-/**
  * @brief TVG_SayTo
  * @param[in] ent
  * @param[in] other
@@ -992,6 +957,8 @@ qboolean TVG_Cmd_SetViewpos_f(gclient_t *client, tvcmd_reference_t *self)
 	}
 	else if (trap_Argc() == 8)
 	{
+		qboolean useViewHeight;
+
 		for (i = 0; i < 3; i++)
 		{
 			trap_Argv(i + 1, buffer, sizeof(buffer));
@@ -1005,7 +972,7 @@ qboolean TVG_Cmd_SetViewpos_f(gclient_t *client, tvcmd_reference_t *self)
 		}
 
 		trap_Argv(7, buffer, sizeof(buffer));
-		qboolean useViewHeight = Q_atof(buffer);
+		useViewHeight = Q_atof(buffer);
 
 		if (useViewHeight)
 		{
@@ -1205,7 +1172,7 @@ qboolean TVG_Cmd_IntermissionPlayerKillsDeaths_f(gclient_t *client, tvcmd_refere
 	{
 		trap_SendServerCommand(client - level.clients, level.cmds.impkd[0]);
 
-		if (level.mod & LEGACY_MOD)
+		if (level.mod & LEGACY)
 		{
 			trap_SendServerCommand(client - level.clients, level.cmds.impkd[1]);
 		}
@@ -1380,6 +1347,80 @@ qboolean TVG_Cmd_UnIgnore_f(gclient_t *client, tvcmd_reference_t *self)
 	return qtrue;
 }
 
+/**
+* @brief TVG_ParseWarmup
+*/
+static void TVG_ParseWarmup(void)
+{
+	char cs[MAX_STRING_CHARS];
+
+	trap_GetConfigstring(CS_WARMUP, cs, sizeof(cs));
+
+	if (level.gamestate != GS_WARMUP || level.warmup)
+	{
+		level.warmup = Q_atoi(cs);
+	}
+}
+
+/**
+* @brief TVG_ParseWolfinfo
+*/
+void TVG_ParseWolfinfo(void)
+{
+	char        cs[MAX_STRING_CHARS];
+	gamestate_t oldGamestate = level.gamestate;
+
+	trap_GetConfigstring(CS_WOLFINFO, cs, sizeof(cs));
+
+	level.gamestate = (gamestate_t)(atoi(Info_ValueForKey(cs, "gamestate")));
+
+	if (oldGamestate != GS_WARMUP_COUNTDOWN && level.gamestate == GS_WARMUP_COUNTDOWN)
+	{
+		TVG_ParseWarmup();
+	}
+}
+
+/**
+* @brief TVG_ParseSvCvars
+*/
+void TVG_ParseSvCvars(void)
+{
+	if (!(level.mod & LEGACY))
+	{
+		return;
+	}
+
+	trap_SetConfigstring(CS_SVCVAR, "");
+}
+
+/**
+* @brief TVG_ConfigStringModified *NEVER* attempt sendig configstrings directly to client!
+*/
+static void TVG_ConfigStringModified(void)
+{
+	char cmd[MAX_TOKEN_CHARS];
+	int  num;
+
+	trap_Argv(1, cmd, sizeof(cmd));
+
+	num = Q_atoi(cmd);
+
+	switch (num)
+	{
+	case CS_SVCVAR:
+		TVG_ParseSvCvars();
+		break;
+	case CS_WARMUP:
+		TVG_ParseWarmup();
+		break;
+	case CS_WOLFINFO:
+		TVG_ParseWolfinfo();
+		break;
+	default:
+		break;
+	}
+}
+
 #define ENTNFO_HASH         78985
 #define CS_HASH             25581
 #define TINFO_HASH          65811
@@ -1452,14 +1493,14 @@ qboolean TVG_Cmd_UnIgnore_f(gclient_t *client, tvcmd_reference_t *self)
 #define HAS_TIMERUN_HASH  134442
 
 /**
-* @brief TVG_ClientCommandPassThrough This handles server commands (server responses to client commands)
-* @details ETTV Client connected to master changes messages to clientNum = -2
+* @brief TVG_MasterServerCommand This handles server commands (server responses to client commands)
+* @details TV Client connected to master changes messages to clientNum = -2
            if we detect that incoming cmd is a broadcast message we should immediately sent it (clientNum = -1).
-		   ETTV Server can send ClientCommands to master server too, for example requesting scores, stats etc.
+		   TV Server can send ClientCommands to master server too, for example requesting scores, stats etc.
 		   the response will come with clientNum -2 again
 * @param[in] cmd
 */
-static void TVG_ClientCommandPassThrough(char *cmd)
+static void TVG_MasterServerCommand(char *cmd)
 {
 	char passcmd[MAX_TOKEN_CHARS];
 	char *token;
@@ -1474,13 +1515,13 @@ static void TVG_ClientCommandPassThrough(char *cmd)
 
 	token = strtok(passcmd, " ");
 
-	switch (BG_StringHashValue(token))
+	switch (TVG_StringHashValue(token))
 	{
 	case ENTNFO_HASH:                     // "entnfo" = teammapdata
 		trap_SendServerCommand(-1, cmd);
 		return;
 	case CS_HASH:                         // "cs" = configstring - do not send
-		                                  // update will be created just before sending snapshot
+		TVG_ConfigStringModified();       // update will be created just before sending snapshot
 		return;
 	case TINFO_HASH:                      // "tinfo" = teamplayinfo
 		trap_SendServerCommand(-1, cmd);
@@ -1496,13 +1537,26 @@ static void TVG_ClientCommandPassThrough(char *cmd)
 	case WEAPONSTATS_HASH:                // "WeaponStats"
 		return;
 	case SC_HASH:                         // "sc" = /scores
-		if (level.cmds.scoresTime != level.time || level.cmds.scoresEndIndex > 99)
+	{
+		int count;
+		token = strtok(NULL, " ");
+
+		if (Q_ParseInt(token, &count))
 		{
-			level.cmds.scoresEndIndex = 0;
+			level.cmds.scoresIndex = 0;
+			level.cmds.scoresCount = count < MAX_SCORES_CMDS ? count : MAX_SCORES_CMDS;
 		}
-		Q_strncpyz(level.cmds.scores[level.cmds.scoresEndIndex++], cmd, sizeof(level.cmds.scores[0]));
-		level.cmds.scoresTime = level.time;
+
+		if (level.cmds.scoresIndex <= level.cmds.scoresCount)
+		{
+			Q_strncpyz(level.cmds.scores[level.cmds.scoresIndex++], cmd, sizeof(level.cmds.scores[0]));
+		}
+		else
+		{
+			G_DPrintf(S_COLOR_YELLOW "WARNING: Scores index overflow, dropping command\n");
+		}
 		return;
+	}
 	case CPM_HASH:                        // "cpm"
 		trap_SendServerCommand(-1, cmd);
 		return;
@@ -1638,24 +1692,6 @@ static void TVG_ClientCommandPassThrough(char *cmd)
 		level.cmds.imptValid = qtrue;
 		Q_strncpyz(level.cmds.impt, cmd, sizeof(level.cmds.impt));
 		return;
-	case IMSR_HASH:                                        // "imsr"
-		level.cmds.imsrValid = qtrue;
-		Q_strncpyz(level.cmds.imsr, cmd, sizeof(level.cmds.imsr));
-		return;
-	//case SR_HASH:                                        // "sr" - backward compatibility with 2.76 demos
-	//	return;
-	case SRA_HASH:                                         // "sra"
-		level.cmds.sraValid = qtrue;
-		Q_strncpyz(level.cmds.sra, cmd, sizeof(level.cmds.sra));
-		return;
-	case IMPR_HASH:                                        // "impr"
-		level.cmds.imprValid = qtrue;
-		Q_strncpyz(level.cmds.impr, cmd, sizeof(level.cmds.impr));
-		return;
-	case PR_HASH:                                          // "pr"
-		level.cmds.prValid = qtrue;
-		Q_strncpyz(level.cmds.pr, cmd, sizeof(level.cmds.pr));
-		return;
 	// music loops \/
 	case MU_START_HASH:                                    // "mu_start" has optional parameter for fade-up time
 		trap_SendServerCommand(-1, cmd);
@@ -1684,13 +1720,33 @@ static void TVG_ClientCommandPassThrough(char *cmd)
 		trap_SendServerCommand(-1, cmd);
 		return;
 
-	//ETJUMP
+	// Legacy
+	case IMSR_HASH:                                        // "imsr"
+		level.cmds.imsrValid = qtrue;
+		Q_strncpyz(level.cmds.imsr, cmd, sizeof(level.cmds.imsr));
+		return;
+	//case SR_HASH:                                        // "sr" - backward compatibility with 2.76 demos
+	//	return;
+	case SRA_HASH:                                         // "sra"
+		level.cmds.sraValid = qtrue;
+		Q_strncpyz(level.cmds.sra, cmd, sizeof(level.cmds.sra));
+		return;
+	case IMPR_HASH:                                        // "impr"
+		level.cmds.imprValid = qtrue;
+		Q_strncpyz(level.cmds.impr, cmd, sizeof(level.cmds.impr));
+		return;
+	case PR_HASH:                                          // "pr"
+		level.cmds.prValid = qtrue;
+		Q_strncpyz(level.cmds.pr, cmd, sizeof(level.cmds.pr));
+		return;
+
+	// ETJump
 	case GUID_REQUEST_HASH:
 	case HAS_TIMERUN_HASH:
 		return;
 
 	default:
-		G_Printf("TVGAME: Unknown client game command: %s [%lu]\n", cmd, BG_StringHashValue(token));
+		G_Printf("TVGAME: Unknown master server game command: %s [%lu]\n", cmd, TVG_StringHashValue(token));
 		break;
 	}
 }
@@ -1706,13 +1762,28 @@ void TVG_ClientCommand(int clientNum)
 
 	trap_Argv(0, cmd, sizeof(cmd));
 
+#ifdef FEATURE_LUA
+	if (TVG_LuaHook_ClientCommand(clientNum, cmd))
+	{
+		return;
+	}
+#endif
+
 	if (clientNum == -2)
 	{
-		TVG_ClientCommandPassThrough(cmd);
+		TVG_MasterServerCommand(cmd);
 		return;
 	}
 
 	client = level.clients + clientNum;
+
+#ifdef FEATURE_LUA
+	if (Q_stricmp(cmd, "lua_status") == 0)
+	{
+		TVG_LuaStatus(client);
+		return;
+	}
+#endif
 
 	if (TVG_commandCheck(client, cmd))
 	{

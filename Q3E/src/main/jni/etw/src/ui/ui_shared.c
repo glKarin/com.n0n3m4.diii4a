@@ -80,7 +80,7 @@ static int      allocPoint;
 static qboolean outOfMemory;
 
 /**
- * @brief Convert rectangle-coordinates for use with the current aspectratio.
+ * @brief Convert rectangle-coordinates for use with the current aspect ratio.
  * @param[out] rect
  */
 void Cui_WideRect(rectDef_t *rect)
@@ -98,18 +98,18 @@ void Cui_WideRect(rectDef_t *rect)
 }
 
 /**
- * @brief Convert an x-coordinate for use with the current aspectratio.
- * (if the current aspectratio is 4:3, then leave the x-coordinate unchanged)
+ * @brief Convert an x-coordinate for use with the current aspect ratio.
+ * (if the current aspect ratio is 4:3, then leave the x-coordinate unchanged)
  * @param[in] x
  * @return
  */
 float Cui_WideX(float x)
 {
-	return (DC->glconfig.windowAspect <= RATIO43) ? x : x *(DC->glconfig.windowAspect * RPRATIO43);  // aspectratio / (4/3)
+	return (DC->glconfig.windowAspect <= RATIO43) ? x : x * (DC->glconfig.windowAspect * RPRATIO43);  // aspect ratio / (4/3)
 }
 
 /**
- * @brief The horizontal center of screen pixel-difference of a 4:3 ratio vs. the current aspectratio
+ * @brief The horizontal center of screen pixel-difference of a 4:3 ratio vs. the current aspect ratio
  */
 float Cui_WideXoffset(void)
 {
@@ -236,8 +236,8 @@ const char *String_Alloc(const char *p)
 	if (len + strPoolIndex + 1 < STRING_POOL_SIZE)
 	{
 		int ph = strPoolIndex;
-        
-        Q_strncpyz(&strPool[strPoolIndex], p, sizeof(strPool) - (strPoolIndex));
+
+		Q_strncpyz(&strPool[strPoolIndex], p, sizeof(strPool) - (strPoolIndex));
 		strPoolIndex += len + 1;
 
 		str  = strHandle[hash];
@@ -641,7 +641,7 @@ qboolean Rect_ContainsPoint(rectDef_t *rect, float x, float y)
 		// correction for widescreen cursor coordinates..
 		x = Cui_WideX(x);
 
-		if (x > Cui_WideX(rect->x) && x < Cui_WideX(rect->x + rect->w) && y > rect->y && y < rect->y + rect->h)
+		if (x >= Cui_WideX(rect->x) && x < Cui_WideX(rect->x + rect->w) && y >= rect->y && y < rect->y + rect->h)
 		{
 			return qtrue;
 		}
@@ -661,7 +661,7 @@ qboolean Rect_ContainsPointN(rectDef_t *rect, float x, float y)
 {
 	if (rect)
 	{
-		if (x > rect->x && x < rect->x + rect->w + 200 && y > rect->y && y < rect->y + rect->h)
+		if (x >= rect->x && x < rect->x + rect->w + 200 && y >= rect->y && y < rect->y + rect->h)
 		{
 			return qtrue;
 		}
@@ -829,11 +829,13 @@ static bind_t g_bindings[] =
 	{ "selectbuddy 6",                             K_KP_HOME,       -1,  K_KP_HOME,       -1,  -1, -1, -1 },
 	{ "selectbuddy 7",                             K_KP_UPARROW,    -1,  K_KP_UPARROW,    -1,  -1, -1, -1 },
 	{ "selectbuddy -2",                            K_KP_MINUS,      -1,  K_KP_MINUS,      -1,  -1, -1, -1 },
+	{ "timerReset",                                -1,              -1,  -1,              -1,  -1, -1, -1 },
 	{ "sharetimer",                                -1,              -1,  -1,              -1,  -1, -1, -1 },
 	{ "sharetimer_buddy",                          -1,              -1,  -1,              -1,  -1, -1, -1 },
 	{ "cycle cg_spawntimer_set 0 2147483647 1000", -1,              -1,  -1,              -1,  -1, -1, -1 },
 	{ "cycle cg_spawntimer_set 2147483647 0 1000", -1,              -1,  -1,              -1,  -1, -1, -1 },
 	{ "+zoom;+attack;-attack;-zoom",               -1,              -1,  -1,              -1,  -1, -1, -1 },
+	{ "edithud",                                   K_F7,            -1,  -1,              -1,  -1, -1, -1 },
 };
 
 static const int g_bindCount = sizeof(g_bindings) / sizeof(bind_t);
@@ -1332,7 +1334,7 @@ panel_button_t *bg_focusButton;
  */
 qboolean BG_RectContainsPoint(float x, float y, float w, float h, float px, float py)
 {
-	if (px > x && px < x + w && py > y && py < y + h)
+	if (px >= x && px < x + w && py >= y && py < y + h)
 	{
 		return qtrue;
 	}
@@ -1493,31 +1495,31 @@ qboolean BG_PanelButton_EditClick(panel_button_t *button, int key)
 				return qtrue;
 			}
 
-            // numeric value only
+			// numeric value only
 			if (button->data[1])
 			{
-                // ensure the key is in range of numeric value (digit)
+				// ensure the key is in range of numeric value (digit)
 				if (key < '0' || key > '9')
 				{
-                    // try to put a decimal separator
-                    if (key == '.')
-                    {
-                        // decimal separator already exist, don't add twice
-                        if (strchr(s, '.'))
-                        {
-                            return qtrue;
-                        }
-                    }
-                    // don't allow negative value
-                    else if (button->data[1] == 2)
-                    {
-                        return qtrue;
-                    }
-                    // are we trying to put a negative value
-                    else if (!(len == 0 && key == '-'))
-                    {
-                        return qtrue;
-                    }
+					// try to put a decimal separator
+					if (key == '.')
+					{
+						// decimal separator already exist, don't add twice
+						if (strchr(s, '.'))
+						{
+							return qtrue;
+						}
+					}
+					// don't allow negative value
+					else if (button->data[1] == 2)
+					{
+						return qtrue;
+					}
+					// are we trying to put a negative value
+					else if (!(len == 0 && key == '-'))
+					{
+						return qtrue;
+					}
 				}
 			}
 
@@ -1866,6 +1868,7 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, size_t size, fontH
 {
 	char buffer[1024];
 	char *s, *p, *c, *ls = NULL;
+	char lastColorCode[3] = "";
 
 	Q_strncpyz(buffer, instr, 1024);
 	Com_Memset(instr, 0, size);
@@ -1875,18 +1878,29 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, size_t size, fontH
 
 	while (*p)
 	{
+		if (Q_IsColorString(p))
+		{
+			lastColorCode[0] = *p;
+			lastColorCode[1] = *(p + 1);
+			*c++             = *p++;
+			*c++             = *p++;
+			continue;
+		}
+
 		*c = *p++;
 
+		// store last space, to try not to break mid word
 		if (*c == ' ')
 		{
 			ls = c;
-		} // store last space, to try not to break mid word
+		}
 
 		c++;
 
 		if (*p == '\n')
 		{
 			s = c + 1;
+			Com_Memset(lastColorCode, 0, sizeof(lastColorCode));
 		}
 		else if (DC->textWidthExt(s, scale, 0, font) > w)
 		{
@@ -1900,6 +1914,16 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, size_t size, fontH
 				*c       = *(c - 1);
 				*(c - 1) = '\n';
 				s        = c++;
+			}
+
+			// re-apply the last color code after the forced line break,
+			// if we have a color code from previous line
+			if (lastColorCode[0] != 0)
+			{
+				memmove(s + 2, s, strlen(s) + 1);
+				*s       = lastColorCode[0];
+				*(s + 1) = lastColorCode[1];
+				c       += 2;
 			}
 
 			ls = NULL;

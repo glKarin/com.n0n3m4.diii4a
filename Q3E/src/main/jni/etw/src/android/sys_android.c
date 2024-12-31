@@ -43,6 +43,8 @@ int main(int argc, char **argv)
 	// Set the initial time base
 	Sys_Milliseconds();
 
+	// TODO : check if we shouldn't just decide to skip this call when we build
+	// the Android target
 	Sys_ParseArgs(argc, argv);
 
 	Sys_SetBinaryPath(Sys_Dirname(argv[0]));

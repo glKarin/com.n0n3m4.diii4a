@@ -38,6 +38,8 @@
 #ifndef INCLUDE_TR_TYPES_H
 #define INCLUDE_TR_TYPES_H
 
+#include "../qcommon/q_shared.h"
+
 // renderer2 BEGIN
 #define MAX_REF_LIGHTS      1024
 #define MAX_BONES           128         ///< RB: same as MDX_MAX_BONES
@@ -494,29 +496,12 @@ typedef struct
  */
 typedef enum
 {
-	GL_CONTEXT_DEFAULT,
+	GL_CONTEXT_DEFAULT = 0,
 	GL_CONTEXT_COMP,
 	GL_CONTEXT_CORE,
 	GL_CONTEXT_ES, // Only sets the ES context not the EGL flag
 	GL_CONTEXT_EGL,
 } windowContextType_t;
-
-/**
- * @struct windowContext_s
- * @typedef windowContext_t
- * @brief
- */
-typedef struct windowContext_s
-{
-	int versionMajor;
-	int versionMinor;
-	int context;
-
-	// Should the main screen buffer use sampling
-	int samples;
-	// ;)
-	qboolean vulkan;
-} windowContext_t;
 
 // =========================================
 // these MUST NOT exceed the values for SHADER_MAX_VERTEXES/SHADER_MAX_INDEXES

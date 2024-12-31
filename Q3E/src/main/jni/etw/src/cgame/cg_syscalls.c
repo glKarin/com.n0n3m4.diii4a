@@ -1962,13 +1962,24 @@ void trap_CmdBackup_Ext(void)
 {
 	if (dll_trap_CmdBackup_Ext)
 	{
-		cg.cmdBackup = CMD_BACKUP;
-		cg.cmdMask   = CMD_MASK;
+		cg.cmdBackup = CMD_BACKUP_ETL;
+		cg.cmdMask   = CMD_MASK_ETL;
 		SystemCall(dll_trap_CmdBackup_Ext);
 	}
 	else
 	{
-		cg.cmdBackup = CMD_BACKUP_VET;
-		cg.cmdMask   = CMD_MASK_VET;
+		cg.cmdBackup = CMD_BACKUP;
+		cg.cmdMask   = CMD_MASK;
+	}
+}
+
+/**
+ * @brief Extension for letting engine know if match is paused
+ */
+void trap_MatchPaused(qboolean matchPaused)
+{
+	if (dll_trap_MatchPaused)
+	{
+		SystemCall(dll_trap_MatchPaused, matchPaused);
 	}
 }

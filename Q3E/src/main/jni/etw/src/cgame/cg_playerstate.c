@@ -156,7 +156,8 @@ void CG_Respawn(qboolean revived)
 
 	// need to reset client-side weapon animations
 	cg.predictedPlayerState.weapAnim    = ((cg.predictedPlayerState.weapAnim & ANIM_TOGGLEBIT) ^ ANIM_TOGGLEBIT) | WEAP_IDLE1;      // reset weapon animations
-	cg.predictedPlayerState.weaponstate = WEAPON_READY; // hmm, set this?  what to?
+	cg.predictedPlayerState.weaponstate = WEAPON_READY;      // hmm, set this?  what to?
+	cg.predictedPlayerEntity.firedTime  = 0; // reset weapon smoke
 
 	// display weapons available
 	cg.weaponSelectTime = cg.time;
@@ -165,7 +166,8 @@ void CG_Respawn(qboolean revived)
 	cg.cursorHintTime = 0;
 
 	// select the weapon the server says we are using
-	cg.weaponSelect = cg.snap->ps.weapon;
+	cg.weaponSelect             = cg.snap->ps.weapon;
+	cg.weaponSelectDuringFiring = (cg.snap->ps.weaponstate == WEAPON_FIRING) ? cg.time : 0;
 
 	// clear even more things on respawn
 	cg.zoomedBinoc = qfalse;
@@ -175,15 +177,6 @@ void CG_Respawn(qboolean revived)
 
 	trap_SendConsoleCommand("-zoom\n");
 	cg.binocZoomTime = 0;
-
-	// ensure scoped weapons are reset after revive
-	if (revived)
-	{
-		if (GetWeaponTableData(cg.snap->ps.weapon)->type & WEAPON_TYPE_SCOPED)
-		{
-			CG_FinishWeaponChange(cg.snap->ps.weapon, GetWeaponTableData(cg.snap->ps.weapon)->weapAlts);
-		}
-	}
 
 	// clear pmext
 	Com_Memset(&cg.pmext, 0, sizeof(cg.pmext));
@@ -214,12 +207,24 @@ void CG_Respawn(qboolean revived)
 	{
 		if ((cgs.clientinfo[cg.clientNum].team == TEAM_AXIS || cgs.clientinfo[cg.clientNum].team == TEAM_ALLIES) && (cgs.clientinfo[cg.clientNum].cls != oldCls))
 		{
-			CG_execFile(va("autoexec_%s", BG_ClassnameForNumberFilename(cgs.clientinfo[cg.clientNum].cls)));
+			const char *classCfg = va("autoexec_%s", BG_ClassnameForNumberFilename(cgs.clientinfo[cg.clientNum].cls));
+
+			if (CG_ConfigFileExists(classCfg))
+			{
+				CG_execFile(classCfg);
+			}
+
 			oldCls = cgs.clientinfo[cg.clientNum].cls;
 		}
 		if (cgs.clientinfo[cg.clientNum].team != oldTeam)
 		{
-			CG_execFile(va("autoexec_%s", BG_TeamnameForNumber(cgs.clientinfo[cg.clientNum].team)));
+			const char *teamCfg = va("autoexec_%s", BG_TeamnameForNumber(cgs.clientinfo[cg.clientNum].team));
+
+			if (CG_ConfigFileExists(teamCfg))
+			{
+				CG_execFile(teamCfg);
+			}
+
 			oldTeam = cgs.clientinfo[cg.clientNum].team;
 		}
 	}
@@ -325,94 +330,6 @@ void CG_CheckLocalSounds(playerState_t *ps, playerState_t *ops)
 			cg.painTime = cg.time;
 		}
 	}
-
-	// timelimit warnings
-	if (cgs.timelimit > 0 && cgs.gamestate == GS_PLAYING)
-	{
-		int msec = cg.time - cgs.levelStartTime;
-
-		if (cgs.timelimit > 5 && !(cg.timelimitWarnings & 1) && (msec > (cgs.timelimit - 5) * 60000) &&
-		    (msec < (cgs.timelimit - 5) * 60000 + 1000)) // 60 * 1000
-		{
-			cg.timelimitWarnings |= 1;
-			if (ps->persistant[PERS_TEAM] == TEAM_AXIS)
-			{
-				if (cgs.media.fiveMinuteSound_g == -1)
-				{
-					CG_SoundPlaySoundScript(cg.fiveMinuteSound_g, NULL, -1, qtrue);
-				}
-				else if (cgs.media.fiveMinuteSound_g)
-				{
-					trap_S_StartLocalSound(cgs.media.fiveMinuteSound_g, CHAN_ANNOUNCER);
-				}
-			}
-			else if (ps->persistant[PERS_TEAM] == TEAM_ALLIES)
-			{
-				if (cgs.media.fiveMinuteSound_a == -1)
-				{
-					CG_SoundPlaySoundScript(cg.fiveMinuteSound_a, NULL, -1, qtrue);
-				}
-				else if (cgs.media.fiveMinuteSound_a)
-				{
-					trap_S_StartLocalSound(cgs.media.fiveMinuteSound_a, CHAN_ANNOUNCER);
-				}
-			}
-		}
-		if (cgs.timelimit > 2 && !(cg.timelimitWarnings & 2) && (msec > (cgs.timelimit - 2) * 60000) &&
-		    (msec < (cgs.timelimit - 2) * 60000 + 1000)) // 60 * 1000
-		{
-			cg.timelimitWarnings |= 2;
-			if (ps->persistant[PERS_TEAM] == TEAM_AXIS)
-			{
-				if (cgs.media.twoMinuteSound_g == -1)
-				{
-					CG_SoundPlaySoundScript(cg.twoMinuteSound_g, NULL, -1, qtrue);
-				}
-				else if (cgs.media.twoMinuteSound_g)
-				{
-					trap_S_StartLocalSound(cgs.media.twoMinuteSound_g, CHAN_ANNOUNCER);
-				}
-			}
-			else if (ps->persistant[PERS_TEAM] == TEAM_ALLIES)
-			{
-				if (cgs.media.twoMinuteSound_a == -1)
-				{
-					CG_SoundPlaySoundScript(cg.twoMinuteSound_a, NULL, -1, qtrue);
-				}
-				else if (cgs.media.twoMinuteSound_a)
-				{
-					trap_S_StartLocalSound(cgs.media.twoMinuteSound_a, CHAN_ANNOUNCER);
-				}
-			}
-		}
-		if (!(cg.timelimitWarnings & 4) && (msec > (cgs.timelimit) * 60000 - 30000) &&
-		    (msec < cgs.timelimit * 60000 - 29000)) // 60 * 1000
-		{
-			cg.timelimitWarnings |= 4;
-			if (ps->persistant[PERS_TEAM] == TEAM_AXIS)
-			{
-				if (cgs.media.thirtySecondSound_g == -1)
-				{
-					CG_SoundPlaySoundScript(cg.thirtySecondSound_g, NULL, -1, qtrue);
-				}
-				else if (cgs.media.thirtySecondSound_g)
-				{
-					trap_S_StartLocalSound(cgs.media.thirtySecondSound_g, CHAN_ANNOUNCER);
-				}
-			}
-			else if (ps->persistant[PERS_TEAM] == TEAM_ALLIES)
-			{
-				if (cgs.media.thirtySecondSound_a == -1)
-				{
-					CG_SoundPlaySoundScript(cg.thirtySecondSound_a, NULL, -1, qtrue);
-				}
-				else if (cgs.media.thirtySecondSound_a)
-				{
-					trap_S_StartLocalSound(cgs.media.thirtySecondSound_a, CHAN_ANNOUNCER);
-				}
-			}
-		}
-	}
 }
 
 /**
@@ -483,6 +400,12 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops)
 		cg.weaponFireTime = 0;
 	}
 
+	// changing weapon resets firedTime (stops generating smoke from one gun to the next)
+	if (ps->weapon != ops->weapon)
+	{
+		cg.predictedPlayerEntity.firedTime = 0; // reset smoke generation
+	}
+
 	// damage events (player is getting wounded)
 	if (ps->damageEvent != ops->damageEvent && ps->damageCount)
 	{
@@ -506,7 +429,8 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops)
 
 	if ((ps->pm_flags & PMF_RESPAWNED) && cg.weaponSelect != ps->weapon)
 	{
-		cg.weaponSelect = ps->weapon;
+		cg.weaponSelect             = ps->weapon;
+		cg.weaponSelectDuringFiring = (ps->weaponstate == WEAPON_FIRING) ? cg.time : 0;
 	}
 
 	if (cg.mapRestart)

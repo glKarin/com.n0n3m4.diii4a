@@ -133,13 +133,11 @@ void SV_GameSendServerCommand(int clientNum, const char *text)
 		SV_DemoWriteGameCommand(clientNum, text);
 	}
 
-#ifdef DEDICATED
 	if (clientNum == -2)
 	{
 		SV_CL_AddReliableCommand(text);
 		return;
 	}
-#endif // DEDICATED
 
 	if (clientNum == -1)
 	{
@@ -698,12 +696,8 @@ intptr_t SV_GameSystemCalls(intptr_t *args)
 	case G_MESSAGESTATUS:
 		return SV_BinaryMessageStatus(args[1]);
 
-	case G_ETLTV_GETPLAYERSTATE:
-#ifdef DEDICATED
+	case TVG_GET_PLAYERSTATE:
 		return SV_CL_GetPlayerstate(args[1], VMA(2));
-#else
-		return 0;
-#endif // DEDICATED
 
 	case G_DEMOSUPPORT:
 		SV_DemoSupport(VMA(1));
@@ -739,9 +733,7 @@ void SV_ShutdownGameProgs(void)
 	VM_Free(gvm);
 	gvm = NULL;
 
-#ifdef DEDICATED
 	svcls.isTVGame = qfalse;
-#endif // DEDICATED
 }
 
 /**
@@ -760,6 +752,19 @@ static void SV_InitGameVM(qboolean restart)
 	for (i = 0 ; i < sv_maxclients->integer ; i++)
 	{
 		svs.clients[i].gentity = NULL;
+	}
+
+	if (svcls.isTVGame && !restart)
+	{
+		for (i = 0; i < MAX_CONFIGSTRINGS; i++)
+		{
+			if (!svcl.gameState.stringOffsets[i] || i == CS_SYSTEMINFO)
+			{
+				continue;
+			}
+
+			SV_SetConfigstring(i, svcl.gameState.stringData + svcl.gameState.stringOffsets[i]);
+		}
 	}
 
 	// mark all extensions as inactive
@@ -803,7 +808,6 @@ void SV_InitGameProgs(void)
 	sv.num_tagheaders = 0;
 	sv.num_tags       = 0;
 
-#ifdef DEDICATED
 	// load the dll
 	if (svcls.state >= CA_AUTHORIZING)
 	{
@@ -811,7 +815,6 @@ void SV_InitGameProgs(void)
 		svcls.isTVGame = gvm != NULL;
 	}
 	else
-#endif // DEDICATED
 	{
 		gvm = VM_Create("qagame", qfalse, SV_GameSystemCalls, VMI_NATIVE);
 	}
@@ -873,16 +876,16 @@ qboolean SV_GetTag(int clientNum, int tagFileNumber, char *tagname, orientation_
 		}
 	}
 
-	if (clientNum < 0 || clientNum >= MAX_CLIENTS)
-	{
-		return qfalse;
-	}
-
 	// lets try and remove the inconsitancy between ded/non-ded servers...
 	// - bleh, some code in clientthink_real really relies on this working on player models...
 	// only only this code for the release builds so we can test out the hitbox code with the clients
 #if !defined(DEDICATED) && !defined(LEGACY_DEBUG)
 	if (com_dedicated->integer)
+	{
+		return qfalse;
+	}
+
+	if (clientNum < 0 || clientNum >= MAX_CLIENTS)
 	{
 		return qfalse;
 	}

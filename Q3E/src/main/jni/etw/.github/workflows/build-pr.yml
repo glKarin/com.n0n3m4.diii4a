@@ -16,9 +16,24 @@ on:
 
 jobs:
 
-# Try to figure out the build version information only once
+  # We can be picky of the code
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Check for valid formatting
+        run: |
+          sudo apt-get install -y install uncrustify
+          sh misc/check-pr.sh
+
+  # Try to figure out the build version information only once
   version:
     runs-on: ubuntu-latest
+    needs: [ formatting ]
     outputs:
       describe: ${{ steps.git.outputs.describe }}
       tag: ${{ steps.git.outputs.tag }}
@@ -27,6 +42,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+
       - name: Fetch git version information
         id: git
         run: |
@@ -37,7 +53,7 @@ jobs:
           echo "describe=$git_describe" >> "$GITHUB_OUTPUT"
           echo "tag=$git_tag" >> "$GITHUB_OUTPUT"
 
-# Run the build on all the current platforms
+  # Run the build on all the current platforms
   lnx64:
     runs-on: ubuntu-20.04
     needs: [ version ]
@@ -61,8 +77,8 @@ jobs:
       - name: Change Owner of Container Working Directory
         run: |
           action_name=$(whoami)
-          action_group=$(groups $action_name | awk '{print $3}')
-          sudo chown $action_name:$action_group -R .
+          action_group=$(groups "$action_name" | awk '{print $3}')
+          sudo chown "${action_name}:${action_group}" -R .
 
       - name: Generate packages
         uses: addnab/docker-run-action@v3
@@ -93,8 +109,8 @@ jobs:
       - name: Change Owner of Container Working Directory
         run: |
           action_name=$(whoami)
-          action_group=$(groups $action_name | awk '{print $3}')
-          sudo chown $action_name:$action_group -R .
+          action_group=$(groups "$action_name" | awk '{print $3}')
+          sudo chown "${action_name}:${action_group}" -R .
 
       - name: Generate packages
         uses: addnab/docker-run-action@v3
@@ -128,7 +144,7 @@ jobs:
         run: cpack
 
   osx:
-    runs-on: macos-12
+    runs-on: macos-13
     needs: [ version ]
     env:
       CI_ETL_DESCRIBE: ${{needs.version.outputs.describe}}
@@ -206,25 +222,31 @@ jobs:
     container:
       image: etlegacy/android-build
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Android Repo
-        uses: actions/checkout@v4
-        with:
-          submodules: true
+      - name: Build JoyStick Dependency
+        working-directory: ./app/libs/joystick
+        run: |
+          ./gradlew clean               --stacktrace --info
+          ./gradlew assembleRelease     --stacktrace --info
+          ./gradlew publishToMavenLocal --stacktrace --info
 
       - name: Build and Generate Package
         run: |
-          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           ./gradlew clean assembleDebug
           ls -R
 
       - name: Rename APK
         run: |
-          for FILE in ./app/build/outputs/apk/debug/*; do mv $FILE ${FILE%-*}.apk; done
+          for FILE in ./app/build/outputs/apk/debug/*; do mv "$FILE" "${FILE%-*}.apk"; done
           ls app/build/outputs/apk/debug
 

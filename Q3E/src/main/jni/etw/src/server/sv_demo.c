@@ -329,8 +329,6 @@ qboolean SV_CheckLastCmd(const char *cmd, qboolean onlyStore)
  */
 static qboolean SV_CheckGameCommand(const char *cmd)
 {
-	static int scores = 0;
-
 	if (!SV_CheckLastCmd(cmd, qfalse))
 	{
 		// check that the previous cmd was different from the current cmd.
@@ -899,16 +897,7 @@ static qboolean SV_DemoAutoDemoRecordCheck(void)
 	switch (sv_autoDemo->integer)
 	{
 	case 1:
-
-		if (sv.demoState == DS_NONE)
-		{
-			return qtrue;
-		}
-		else
-		{
-			return qfalse;
-		}
-
+		return sv.demoState == DS_NONE;
 	case 2:
 
 		for (i = 0, cl = svs.clients; i < sv_maxclients->integer; i++, cl++)
@@ -924,11 +913,12 @@ static qboolean SV_DemoAutoDemoRecordCheck(void)
 		{
 			return qtrue;
 		}
-		else if (!activePlayers && sv.demoState == DS_RECORDING)
+
+		if (!activePlayers && sv.demoState == DS_RECORDING)
 		{
 			SV_DemoStopAll();
 		}
-
+	// fall through
 	default:
 		return qfalse;
 	}
@@ -1169,7 +1159,7 @@ static void SV_DemoStartPlayback(void)
 		else if (!Q_stricmp(key, "sv_fps"))
 		{
 			fps = Q_atoi(value);
-			if (sv_fps->integer != fps && sv_fps > 0)
+			if (sv_fps->integer != fps && fps > 0)
 			{
 				Cvar_SetValue("sv_fps", fps);
 			}
@@ -1474,7 +1464,6 @@ static void SV_DemoReadGameCommand(msg_t *msg)
 	client_t      *client;
 	char          *cmd;
 	int           clientNum, i;
-	static int    time    = 0;
 	qboolean      canSend = qfalse;
 
 	clientNum = MSG_ReadLong(msg);
@@ -1956,6 +1945,7 @@ read_next_demo_event: // used to read next demo event
 				}
 
 			// end of a demo event (the loop will continue to real the next event)
+			// fall through
 			case demo_EOF:
 				MSG_Clear(&msg);
 				goto read_next_demo_event;

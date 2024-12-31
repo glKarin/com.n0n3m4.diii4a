@@ -193,6 +193,7 @@ or configs will never get loaded from disk!
 #define MAX_ZPATH           256
 #define MAX_SEARCH_PATHS    4096
 #define MAX_FILEHASH_SIZE   1024
+#define MAX_PACKAGE_PATHS   10
 
 /**
  * @struct fileInPack_s
@@ -260,6 +261,9 @@ static cvar_t       *fs_basepath;
 static cvar_t       *fs_basegame;
 static cvar_t       *fs_gamedirvar;
 static searchpath_t *fs_searchpaths;
+
+static char packagePaths[MAX_PACKAGE_PATHS][MAX_OSPATH];
+
 #if defined(FEATURE_PAKISOLATION) && !defined(DEDICATED)
 /**
 * @var fs_containerMount
@@ -1258,6 +1262,55 @@ fileHandle_t FS_FOpenFileAppend(const char *fileName)
 	{
 		f = 0;
 	}
+	return f;
+}
+
+fileHandle_t FS_PipeOpenWrite(const char *cmd, const char *filename)
+{
+	fileHandleData_t *fd;
+	fileHandle_t     f;
+	const char       *ospath;
+
+	if (!fs_searchpaths)
+	{
+		Com_Error(ERR_FATAL, "FS_PipeOpenWrite: Filesystem call made without initialization");
+	}
+
+	ospath = FS_BuildOSPath(fs_homepath->string, fs_gamedir, filename);
+
+	if (fs_debug->integer)
+	{
+		Com_Printf("%s: %s\n", __func__, ospath);
+	}
+
+	FS_CheckFilenameIsMutable(ospath, __func__);
+
+	f  = FS_HandleForFile();
+	fd = &fsh[f];
+
+	if (FS_CreatePath(ospath))
+	{
+		return 0;
+	}
+
+	// FIXME: validate this on other platforms, only tested on x86/64 linux/windows (macOS should be okay too)
+	// linux-aarch64 probably fine?
+	// android most likely doesn't work?
+#ifdef _WIN32
+	fd->handleFiles.file.o = _popen(cmd, "wb");
+#else
+	fd->handleFiles.file.o = popen(cmd, "w");
+#endif
+
+	if (fd->handleFiles.file.o == NULL)
+	{
+		return 0;
+	}
+
+	Q_strncpyz(fd->name, filename, sizeof(fd->name));
+	fd->handleSync = qfalse;
+	fd->zipFile    = qfalse;
+
 	return f;
 }
 
@@ -3740,6 +3793,7 @@ void FS_Which_f(void)
 
 //===========================================================================
 
+#if !defined(DEDICATED)
 /**
  * @brief FS_AddPackToPath add a single package to the search path
  * @param osPath full os path to the pk3 file
@@ -3765,6 +3819,7 @@ static void FS_AddPackToPath(const char *osPath, const char *gameName)
 	search->next   = fs_searchpaths;
 	fs_searchpaths = search;
 }
+#endif
 
 /**
  * @brief paksort
@@ -3839,7 +3894,10 @@ void FS_AddGameDirectory(const char *path, const char *dir, qboolean addBase)
 		// Get top level directories (we'll filter them later since the Sys_ListFiles filtering is terrible)
 		pakdirs = Sys_ListFiles(curpath, "/", NULL, &numdirs, qfalse);
 
-		qsort(pakdirs, numdirs, sizeof(char *), paksort);
+		if (pakdirs)
+		{
+			qsort(pakdirs, numdirs, sizeof(char *), paksort);
+		}
 	}
 
 	pakfilesi = 0;
@@ -4355,68 +4413,85 @@ static void FS_ReorderPurePaks(void)
 	}
 }
 
+#if defined(FEATURE_PAKISOLATION) && !defined(DEDICATED)
+static void FS_AddContainerDirectory(const char *subPath)
+{
+	// only support etmain & legacy for now
+	if (!fs_containerMount->integer || (Q_stricmp(subPath, BASEGAME) && Q_stricmp(subPath, DEFAULT_MODGAME)))
+	{
+		return;
+	}
+
+	/* only mount containers for certain directories and if in pure mode */
+	if (fs_numServerPaks)
+	{
+		char contPath[MAX_OSPATH];
+		Com_sprintf(contPath, sizeof(contPath), "%s%c%s", subPath, PATH_SEP, FS_CONTAINER);
+		FS_AddGameDirectory(fs_homepath->string, contPath, qfalse);
+		Q_strncpyz(fs_gamedir, subPath, sizeof(fs_gamedir));
+		return;
+	}
+
+	// We are in a non-pure server, so just try to mount the minimal required packs
+	for (int i = 0 ; i < fs_numServerReferencedPaks ; i++)
+	{
+		char *packName;
+
+		// Do we have the pack already
+		if (FS_HasPack(fs_serverReferencedPaks[i]))
+		{
+			continue;
+		}
+
+		if (!fs_serverReferencedPakNames[i] || !*fs_serverReferencedPakNames[i])
+		{
+			Com_DPrintf("Missing package name for checksum: %i\n", fs_serverReferencedPaks[i]);
+			continue;
+		}
+
+		packName = strchr(fs_serverReferencedPakNames[i], '/');
+		if (packName && *(packName + 1))
+		{
+			char       tmpPath[MAX_OSPATH] = { '\0' };
+			char const *path               = FS_BuildOSPath(fs_homepath->string, subPath, va("%s%c%s.pk3", FS_CONTAINER, PATH_SEP, packName + 1));
+			Q_strncpyz(tmpPath, path, sizeof(tmpPath));
+
+			if (FS_FileInPathExists(tmpPath) && FS_CompareZipChecksum(tmpPath, fs_serverReferencedPaks[i]))
+			{
+				Com_DPrintf("Found referenced pack in container: %s\n", fs_serverReferencedPakNames[i]);
+				FS_AddPackToPath(tmpPath, BASEGAME);
+			}
+		}
+	}
+}
+#endif
+
 /**
  * @brief FS_AddBothGameDirectories
  *
- * @param[in] subpath
+ * @param[in] subPath
  */
-static void FS_AddBothGameDirectories(const char *subpath)
+static void FS_AddBothGameDirectories(const char *subPath)
 {
-	if (fs_basepath->string[0])
+	if (!fs_basepath->string[0])
 	{
-		// fs_homepath is used for all systems
-		// NOTE: same filtering below for mods and basegame
-		FS_AddGameDirectory(fs_basepath->string, subpath, qtrue);
+		return;
+	}
 
-		if (fs_homepath->string[0] && !FS_IsSamePath(fs_homepath->string, fs_basepath->string))
-		{
-			FS_AddGameDirectory(fs_homepath->string, subpath, qtrue);
+	// fs_homepath is used for all systems
+	// NOTE: same filtering below for mods and basegame
+	FS_AddGameDirectory(fs_basepath->string, subPath, qtrue);
+
+	if (!fs_homepath->string[0] || FS_IsSamePath(fs_homepath->string, fs_basepath->string))
+	{
+		return;
+	}
+
+	FS_AddGameDirectory(fs_homepath->string, subPath, qtrue);
 
 #if defined(FEATURE_PAKISOLATION) && !defined(DEDICATED)
-			/* only mount containers for certain directories and if in pure mode */
-			if (fs_numServerPaks && (!Q_stricmp(subpath, BASEGAME) || (!Q_stricmp(subpath, DEFAULT_MODGAME) && fs_containerMount->integer)))
-			{
-				char contPath[MAX_OSPATH];
-				Com_sprintf(contPath, sizeof(contPath), "%s%c%s", subpath, PATH_SEP, FS_CONTAINER);
-				FS_AddGameDirectory(fs_homepath->string, contPath, qfalse);
-				Q_strncpyz(fs_gamedir, subpath, sizeof(fs_gamedir));
-			}
-			// We are in a non-pure server, so just try to mount the minimal required packs
-			else if (fs_numServerReferencedPaks && (!Q_stricmp(subpath, BASEGAME) || (!Q_stricmp(subpath, DEFAULT_MODGAME) && fs_containerMount->integer)))
-			{
-				int i = 0;
-				for (i = 0 ; i < fs_numServerReferencedPaks ; i++)
-				{
-					// Do we have the pack already
-					if (FS_HasPack(fs_serverReferencedPaks[i]))
-					{
-						continue;
-					}
-
-					if (!fs_serverReferencedPakNames[i] || !*fs_serverReferencedPakNames[i])
-					{
-						Com_DPrintf("Missing package name for checksum: %i\n", fs_serverReferencedPaks[i]);
-						continue;
-					}
-
-					char *packName = strchr(fs_serverReferencedPakNames[i], '/');
-					if (packName && (packName += 1))
-					{
-						char tmpPath[MAX_OSPATH] = { '\0' };
-						char *path               = FS_BuildOSPath(fs_homepath->string, subpath, va("%s%c%s.pk3", FS_CONTAINER, PATH_SEP, packName));
-						Q_strncpyz(tmpPath, path, sizeof(tmpPath));
-
-						if (FS_FileInPathExists(tmpPath) && FS_CompareZipChecksum(tmpPath, fs_serverReferencedPaks[i]))
-						{
-							Com_DPrintf("Found referenced pack in container: %s\n", fs_serverReferencedPakNames[i]);
-							FS_AddPackToPath(tmpPath, BASEGAME);
-						}
-					}
-				}
-			}
+	FS_AddContainerDirectory(subPath);
 #endif
-		}
-	}
 }
 
 /**
@@ -4426,6 +4501,7 @@ static void FS_AddBothGameDirectories(const char *subpath)
 static void FS_Startup(const char *gameName)
 {
 	const char *homePath;
+	int        i;
 
 	Com_Printf("----- Initializing Filesystem --\n");
 
@@ -4497,6 +4573,15 @@ static void FS_Startup(const char *gameName)
 		}
 #endif
 		FS_AddBothGameDirectories(fs_gamedirvar->string);
+	}
+
+	for (i = 0; i < MAX_PACKAGE_PATHS; i++)
+	{
+		if (packagePaths[i][0])
+		{
+			FS_AddGameDirectory(packagePaths[i], "", qtrue);
+			Q_strncpyz(fs_gamedir, fs_gamedirvar->string, sizeof(fs_gamedir));
+		}
 	}
 
 	// add our commands
@@ -5030,6 +5115,27 @@ static void FS_CheckRequiredFiles(int checksumFeed)
 	}
 }
 
+static qboolean FS_InitPackagePaths()
+{
+	int i, x;
+	if (Q_stricmp(Cmd_Argv(0), "addPackagePath"))
+	{
+		return qfalse;
+	}
+
+	for (i = 0, x = 1; x < Cmd_Argc() && i < MAX_PACKAGE_PATHS; i++)
+	{
+		if (!packagePaths[i][0])
+		{
+			continue;
+		}
+
+		Q_strncpyz(packagePaths[i], Cmd_Argv(x), MAX_OSPATH);
+		x++;
+	}
+	return qtrue;
+}
+
 /**
  * @brief Called only at initial startup, not when the filesystem
  * is resetting due to a game change
@@ -5038,6 +5144,8 @@ void FS_InitFilesystem(void)
 {
 	cvar_t *tmp_fs_game;
 
+	Com_Memset(packagePaths, 0, sizeof(packagePaths));
+
 	// allow command line params to override our defaults
 	// we have to specially handle this, because normal command
 	// line variable sets don't happen until after the filesystem
@@ -5045,6 +5153,8 @@ void FS_InitFilesystem(void)
 	Com_StartupVariable("fs_basepath");
 	Com_StartupVariable("fs_homepath");
 	Com_StartupVariable("fs_game");
+
+	Com_CommandLineCheck(&FS_InitPackagePaths);
 
 	// ET: Legacy start
 	// if fs_game is not specified, set 'DEFAULT_MODGAME' mod as default fs_game

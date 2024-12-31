@@ -168,7 +168,7 @@ static void CG_DemoControlButtonRender(panel_button_t *button)
 		barColor[3] = button->font->colour[3];
 
 		//borderColor
-		CG_FilledBar(button->rect.x, button->rect.y, button->rect.w, button->rect.h, barColor, NULL, color_border1, color_border1, demoStatus, BAR_BG, -1);
+		CG_FilledBar(button->rect.x, button->rect.y, button->rect.w, button->rect.h, barColor, NULL, color_border1, color_border1, demoStatus, 0.f, BAR_BG, -1);
 	}
 }
 
@@ -659,7 +659,8 @@ void CG_DemoClick(int key, qboolean down)
 				CG_ZoomOut_f();
 			}
 			return;
-		}       // Roll over into timescale changes
+		} // Roll over into timescale changes
+	// fall through
 	case K_KP_LEFTARROW:
 		if (!down && cg_timescale.value > 0.1f)
 		{
@@ -682,7 +683,8 @@ void CG_DemoClick(int key, qboolean down)
 				CG_ZoomIn_f();
 			}
 			return;
-		}       // Roll over into timescale changes
+		} // Roll over into timescale changes
+	// fall through
 	case K_KP_RIGHTARROW:
 		if (!down)
 		{
@@ -870,7 +872,7 @@ void CG_GameStatsDraw(void)
 		    2 + 2 + tSpacing + 2 +                          // Stats columns
 		    1 +                                             // Stats + extra
 		    tSpacing * ((gs->cWeapons > 0) ? gs->cWeapons : 1) +
-		    tSpacing * ((gs->fHasStats) ? 7 : 0) +
+		    tSpacing * ((gs->fHasStats) ? ARRAY_LEN(gs->strExtra) + 1 : 0) +
 		    ((cgs.gametype == GT_WOLF_LMS) ? 0 :
 			 (
 				 4 + 2 * tSpacing +                                 // Rank/XP/Skill Rating
@@ -957,7 +959,7 @@ void CG_GameStatsDraw(void)
 			if (gs->fHasStats)
 			{
 				y += tSpacing;
-				for (i = 0; i < 6; i++)
+				for (i = 0; i < ARRAY_LEN(gs->strExtra); i++)
 				{
 					y += tSpacing;
 					CG_Text_Paint_Ext(x + 4, y, tScale, tScale, tColor, gs->strExtra[i], 0.0f, 0, tStyle, tFont);
@@ -1718,7 +1720,7 @@ void CG_DrawDemoControls(int x, int y, int w, vec4_t borderColor, vec4_t bgColor
 	{
 		// render cursor
 		trap_R_SetColor(NULL);
-		CG_DrawPic(cgDC.cursorx, cgDC.cursory, 32, 32, cgs.media.cursorIcon);
+		CG_DrawCursor(cgDC.cursorx, cgDC.cursory);
 	}
 }
 
@@ -2023,16 +2025,27 @@ void CG_SpecHelpDraw(void)
 {
 	if (cg.spechelpWindow != SHOW_OFF)
 	{
-		const helpType_t help[] =
+		static const helpType_t help[] =
 		{
-			{ "+zoom",    "hold for pointer"   },
-			{ "+attack",  "window move/resize" },
-			{ "+sprint",  "hold to resize"     },
-			{ "weapnext", "window on/off"      },
-			{ "weapprev", "swap w/main view"   },
-			{ NULL,       NULL                 },
-			{ "weapalt",  "swingcam toggle"    },
-			{ "spechelp", "help on/off"        },
+			{ "+attack",      "select a client view from list to main window"        },
+			{ NULL,           NULL                                                   },
+			{ "+sprint",      "hold to resize a window on mouse movement"            },
+			{ NULL,           NULL                                                   },
+			{ "weapprev",     "make a window for the client from list"               },
+			{ "weapnext",     "delete the window for the client from list or window" },
+			{ "weapalt",      "swap a window with main view from window"             },
+			{ NULL,           NULL                                                   },
+			{ "K_ENTER",      "toggle third person view"                             },
+			{ "K_UPARROW",    "decrease third person range"                          },
+			{ "K_DOWNARROW",  "increase third person range"                          },
+			{ "K_RIGHTARROW", "increase third person angle (rotate view on right)"   },
+			{ "K_LEFTARROW",  "decrease third person angle (rotate view on left)"    },
+			{ NULL,           NULL                                                   },
+			{ "K_TAB",        "hold to show score"                                   },
+			{ "K_F11",        "screenshot"                                           },
+			{ "K_F12",        "auto screenshot"                                      },
+			{ "spechelp",     "help on/off"                                          },
+			{ "m",            "close multiview"                                      },
 		}
 		;
 

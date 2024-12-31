@@ -50,7 +50,7 @@ void GLimp_Minimize(void);
 void GLimp_FlashWindow(int);
 
 //Export to renderer
-void GLimp_Init(glconfig_t *glConfig, windowContext_t *context);
+void GLimp_Init(glconfig_t *glConfig, const char *glConfigString);
 void GLimp_Shutdown(void);
 void GLimp_EndFrame(void);
 void GLimp_SetGamma(unsigned char red[256], unsigned char green[256], unsigned char blue[256]);
@@ -76,7 +76,7 @@ void Sys_PlatformExit(int code) _attribute((noreturn));
 #define Sys_PlatformExit(x) exit(x);
 #endif
 
-void Sys_SigHandler(int signal) _attribute((noreturn));
+void Sys_SigHandler(int signal);
 void Sys_ErrorDialog(const char *error);
 void Sys_AnsiColorPrint(const char *msg);
 
