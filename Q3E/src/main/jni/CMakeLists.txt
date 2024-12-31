@@ -58,7 +58,7 @@ if(GAME_RTCW) # 438e7d413b5f7277187c35b032eb0ef9093ae778 | May 27, 2024 | All: F
     add_subdirectory ( rtcw ) # RTCW
 endif()
 
-if(GAME_QUAKE3)
+if(GAME_QUAKE3) # https://github.com/ioquake/ioq3/commit/3fb9006e6461b877b67781cd0f0d94032804a475
     message(STATUS "Build Quake 3")
     add_subdirectory ( quake3 ) # Quake 3 Arena | Team Arena
 endif()

@@ -45,7 +45,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef GL_UNSIGNED_INT
 #define GL_UNSIGNED_INT                   0x1405
 #endif
+#ifndef GL_LINE
+#define GL_LINE					0x1B01
+#endif
+#ifndef GL_FILL
+#define GL_FILL					0x1B02
+#endif
 typedef GLfloat GLdouble;
+typedef GLfloat GLclampd;
 #else
 #ifdef USE_LOCAL_HEADERS
 #	include "SDL_opengl.h"
@@ -102,11 +109,10 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 	GLE(void, TexParameterf, GLenum target, GLenum pname, GLfloat param) \
 	GLE(void, TexParameteri, GLenum target, GLenum pname, GLint param) \
 	GLE(void, TexSubImage2D, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels) \
-	GLE(void, Translatef, GLfloat x, GLfloat y, GLfloat z) \
 	GLE(void, Viewport, GLint x, GLint y, GLsizei width, GLsizei height) \
 
 // OpenGL 1.0/1.1 and OpenGL ES 1.x but not OpenGL 3.2 core profile
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: functions on GLES 1.1
 #define QGL_1_1_FIXED_FUNCTION_PROCS \
 	GLE(void, AlphaFunc, GLenum func, GLclampf ref) \
 	GLE(void, Color4f, GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) \
@@ -121,6 +127,7 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 	GLE(void, ShadeModel, GLenum mode) \
 	GLE(void, TexCoordPointer, GLint size, GLenum type, GLsizei stride, const GLvoid *ptr) \
 	GLE(void, TexEnvf, GLenum target, GLenum pname, GLfloat param) \
+	GLE(void, Translatef, GLfloat x, GLfloat y, GLfloat z) \
 	GLE(void, VertexPointer, GLint size, GLenum type, GLsizei stride, const GLvoid *ptr) \
 	GLE(void, Fogf, GLenum pname, GLfloat param) /*Added*/ \
 	GLE(void, Fogfv, GLenum pname, const GLfloat *params) /*Added*/ \
@@ -142,6 +149,7 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 	GLE(void, ShadeModel, GLenum mode) \
 	GLE(void, TexCoordPointer, GLint size, GLenum type, GLsizei stride, const GLvoid *ptr) \
 	GLE(void, TexEnvf, GLenum target, GLenum pname, GLfloat param) \
+	GLE(void, Translatef, GLfloat x, GLfloat y, GLfloat z) \
 	GLE(void, VertexPointer, GLint size, GLenum type, GLsizei stride, const GLvoid *ptr) \
 
 #endif
@@ -361,8 +369,8 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 #define GLE(ret, name, ...) typedef ret APIENTRY name##proc(__VA_ARGS__);
 QGL_1_1_PROCS;
 QGL_1_1_FIXED_FUNCTION_PROCS;
-#if !defined(USE_OPENGLES)
 QGL_DESKTOP_1_1_PROCS;
+#if !defined(USE_OPENGLES) //karin: functions on GLES 1.1
 QGL_DESKTOP_1_1_FIXED_FUNCTION_PROCS;
 #endif
 QGL_ES_1_1_PROCS;

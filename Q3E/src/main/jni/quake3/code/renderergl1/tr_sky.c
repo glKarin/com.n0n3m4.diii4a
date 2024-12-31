@@ -364,7 +364,7 @@ static float	s_skyTexCoords[SKY_SUBDIVISIONS+1][SKY_SUBDIVISIONS+1][2];
 static void DrawSkySide( struct image_s *image, const int mins[2], const int maxs[2] )
 {
 	int s, t;
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 	int size, i = 0;
 	glIndex_t *indicies;
 	size = (maxs[1] - mins[1]) * (maxs[0] - mins[0] + 1);
@@ -375,13 +375,13 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 
 	for ( t = mins[1]+HALF_SKY_SUBDIVISIONS; t < maxs[1]+HALF_SKY_SUBDIVISIONS; t++ )
 	{
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: use glDrawElements on GLES 1.1
 		qglBegin( GL_TRIANGLE_STRIP );
 #endif
 
 		for ( s = mins[0]+HALF_SKY_SUBDIVISIONS; s <= maxs[0]+HALF_SKY_SUBDIVISIONS; s++ )
 		{
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 			indicies[i++] = t * (SKY_SUBDIVISIONS + 1) + s;
 			indicies[i++] = (t + 1) * (SKY_SUBDIVISIONS + 1) + s;
 #else
@@ -393,11 +393,11 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 #endif
 		}
 
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: use glDrawElements on GLES 1.1
 		qglEnd();
 #endif
 	}
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 	qglDisableClientState(GL_COLOR_ARRAY);
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	qglTexCoordPointer(2, GL_FLOAT, 0, s_skyTexCoords);
@@ -410,11 +410,16 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 static void DrawSkyBox( shader_t *shader )
 {
 	int		i;
+	float	w_offset, w_scale;
+	float	h_offset, h_scale;
 
 	sky_min = 0;
 	sky_max = 1;
 
 	Com_Memset( s_skyTexCoords, 0, sizeof( s_skyTexCoords ) );
+
+	w_offset = h_offset = 0;
+	w_scale = h_scale = 1;
 
 	for (i=0 ; i<6 ; i++)
 	{
@@ -455,6 +460,15 @@ static void DrawSkyBox( shader_t *shader )
 		else if ( sky_maxs_subd[1] > HALF_SKY_SUBDIVISIONS ) 
 			sky_maxs_subd[1] = HALF_SKY_SUBDIVISIONS;
 
+		if ( !haveClampToEdge )
+		{
+			w_offset = 0.5f / shader->sky.outerbox[sky_texorder[i]]->width;
+			h_offset = 0.5f / shader->sky.outerbox[sky_texorder[i]]->height;
+
+			w_scale = 1.0f - w_offset * 2;
+			h_scale = 1.0f - h_offset * 2;
+		}
+
 		//
 		// iterate through the subdivisions
 		//
@@ -467,6 +481,12 @@ static void DrawSkyBox( shader_t *shader )
 							i, 
 							s_skyTexCoords[t][s], 
 							s_skyPoints[t][s] );
+
+				s_skyTexCoords[t][s][0] *= w_scale;
+				s_skyTexCoords[t][s][0] += w_offset;
+
+				s_skyTexCoords[t][s][1] *= h_scale;
+				s_skyTexCoords[t][s][1] += h_offset;
 			}
 		}
 
@@ -743,11 +763,7 @@ void RB_DrawSun( float scale, shader_t *shader ) {
 	VectorScale( vec2, size, vec2 );
 
 	// farthest depth range
-#ifdef USE_OPENGLES
-	qglDepthRangef( 1.0, 1.0 );
-#else
 	qglDepthRange( 1.0, 1.0 );
-#endif
 
 	RB_BeginSurface( shader, 0 );
 
@@ -756,11 +772,7 @@ void RB_DrawSun( float scale, shader_t *shader ) {
 	RB_EndSurface();
 
 	// back to normal depth range
-#ifdef USE_OPENGLES
-	qglDepthRangef( 0.0, 1.0 );
-#else
 	qglDepthRange( 0.0, 1.0 );
-#endif
 }
 
 
@@ -789,22 +801,14 @@ void RB_StageIteratorSky( void ) {
 	// front of everything to allow developers to see how
 	// much sky is getting sucked in
 	if ( r_showsky->integer ) {
-#ifdef USE_OPENGLES
-		qglDepthRangef( 0.0, 0.0 );
-#else
 		qglDepthRange( 0.0, 0.0 );
-#endif
 	} else {
-#ifdef USE_OPENGLES
-		qglDepthRangef( 1.0, 1.0 );
-#else
 		qglDepthRange( 1.0, 1.0 );
-#endif
 	}
 
 	// draw the outer skybox
 	if ( tess.shader->sky.outerbox[0] && tess.shader->sky.outerbox[0] != tr.defaultImage ) {
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: only glColor4f on GLES 1.1
 		qglColor4f( tr.identityLight, tr.identityLight, tr.identityLight, 1.0 );
 #else
 		qglColor3f( tr.identityLight, tr.identityLight, tr.identityLight );
@@ -830,11 +834,7 @@ void RB_StageIteratorSky( void ) {
 
 
 	// back to normal depth range
-#ifdef USE_OPENGLES
-	qglDepthRangef( 0.0, 1.0 );
-#else
 	qglDepthRange( 0.0, 1.0 );
-#endif
 
 	// note that sky was drawn so we will draw a sun later
 	backEnd.skyRenderedThisView = qtrue;

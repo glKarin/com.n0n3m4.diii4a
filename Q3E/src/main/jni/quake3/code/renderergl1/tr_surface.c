@@ -288,7 +288,7 @@ static void RB_SurfaceBeam( void )
 	int	i;
 	vec3_t perpvec;
 	vec3_t direction, normalized_direction;
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawArrays on GLES 1.1
 	vec3_t points[NUM_BEAM_SEGS * 2];
 #else
 	vec3_t	start_points[NUM_BEAM_SEGS], end_points[NUM_BEAM_SEGS];
@@ -318,7 +318,7 @@ static void RB_SurfaceBeam( void )
 
 	for ( i = 0; i < NUM_BEAM_SEGS ; i++ )
 	{
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawArrays on GLES 1.1
 		RotatePointAroundVector(points[i * 2], normalized_direction, perpvec, (360.0 / NUM_BEAM_SEGS) * i);
 		VectorAdd(points[i * 2], direction, points[i * 2 + 1]);
 #else
@@ -332,7 +332,7 @@ static void RB_SurfaceBeam( void )
 
 	GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE );
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawArrays on GLES 1.1
 	glColor4f( 1, 0, 0, 1 );
 	qglVertexPointer(3, GL_FLOAT, 0, points);
 	qglDrawArrays(GL_TRIANGLE_STRIP, 0, NUM_BEAM_SEGS * 2);
@@ -1044,7 +1044,7 @@ static void RB_SurfaceAxis( void ) {
 	GL_Bind( tr.whiteImage );
 	GL_State( GLS_DEFAULT );
 	qglLineWidth( 3 );
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 	byte colors[3][4] = {
 		{255, 0, 0, 255},
 		{0, 255, 0, 255},

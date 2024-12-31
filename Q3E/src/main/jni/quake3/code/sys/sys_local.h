@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/qcommon.h"
 
 #ifndef DEDICATED
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: using EGL on Android
 #	include <EGL/egl.h>
 #	include <GLES/gl.h>
 #else

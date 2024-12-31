@@ -310,7 +310,6 @@ void GL_State( unsigned long stateBits )
 		}
 	}
 
-#if !defined(USE_OPENGLES)
 	//
 	// fill/line mode
 	//
@@ -325,7 +324,6 @@ void GL_State( unsigned long stateBits )
 			qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		}
 	}
-#endif
 
 	//
 	// depthtest
@@ -489,7 +487,7 @@ void RB_BeginDrawingView (void) {
 		plane2[3] = DotProduct (plane, backEnd.viewParms.or.origin) - plane[3];
 
 		qglLoadMatrixf( s_flipMatrix );
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: glClipPlanef on GLES 1.1
 		qglClipPlanef (GL_CLIP_PLANE0, plane2);
 #else
 		qglClipPlane (GL_CLIP_PLANE0, plane2);
@@ -637,11 +635,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 					}
 
 					if(!oldDepthRange)
-#ifdef USE_OPENGLES
-						qglDepthRangef (0, 0.3);
-#else
 						qglDepthRange (0, 0.3);
-#endif
 				}
 				else
 				{
@@ -652,11 +646,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 						qglMatrixMode(GL_MODELVIEW);
 					}
 
-#ifdef USE_OPENGLES
-					qglDepthRangef (0, 1);
-#else
 					qglDepthRange (0, 1);
-#endif
 				}
 
 				oldDepthRange = depthRange;
@@ -680,11 +670,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	// go back to the world modelview matrix
 	qglLoadMatrixf( backEnd.viewParms.world.modelMatrix );
 	if ( depthRange ) {
-#ifdef USE_OPENGLES
-		qglDepthRangef (0, 1);
-#else
 		qglDepthRange (0, 1);
-#endif
 	}
 
 	if (r_drawSun->integer) {
@@ -721,7 +707,7 @@ void	RB_SetGL2D (void) {
 	qglScissor( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglMatrixMode(GL_PROJECTION);
     qglLoadIdentity ();
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: glOrthof on GLES 1.1
 	qglOrthof (0, glConfig.vidWidth, glConfig.vidHeight, 0, 0, 1);
 #else
 	qglOrtho (0, glConfig.vidWidth, glConfig.vidHeight, 0, 0, 1);
@@ -791,7 +777,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 
 	RB_SetGL2D();
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements
 	vec2_t texcoords[4];
 	vec2_t verts[4];
 	glIndex_t indicies[6] = { 0, 1, 2, 0, 3, 2 };
@@ -836,14 +822,14 @@ void RE_UploadCinematic (int w, int h, int cols, int rows, const byte *data, int
 	if ( cols != tr.scratchImage[client]->width || rows != tr.scratchImage[client]->height ) {
 		tr.scratchImage[client]->width = tr.scratchImage[client]->uploadWidth = cols;
 		tr.scratchImage[client]->height = tr.scratchImage[client]->uploadHeight = rows;
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: internalFormat must equals dataFormat
 		qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
 #else
 		qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGB8, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
 #endif
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: no GL_CLAMP on GLES 1.1
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 #else
@@ -991,9 +977,7 @@ const void	*RB_DrawBuffer( const void *data ) {
 
 	cmd = (const drawBufferCommand_t *)data;
 
-#if !defined(USE_OPENGLES)
 	qglDrawBuffer( cmd->buffer );
-#endif
 
 	// clear screen for debugging
 	if ( r_clear->integer ) {
@@ -1019,7 +1003,7 @@ void RB_ShowImages( void ) {
 	image_t	*image;
 	float	x, y, w, h;
 	int		start, end;
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements
 	vec2_t texcoords[4] = { {0.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 1.0f} };
 	vec2_t verts[4];
 	glIndex_t indicies[6] = { 0, 1, 2, 0, 3, 2 };
@@ -1035,7 +1019,7 @@ void RB_ShowImages( void ) {
 
 	start = ri.Milliseconds();
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 #endif
 	for ( i=0 ; i<tr.numImages ; i++ ) {
@@ -1052,7 +1036,7 @@ void RB_ShowImages( void ) {
 			h *= image->uploadHeight / 512.0f;
 		}
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements
 		verts[0][0] = x;  verts[0][1] = y;
 		verts[1][0] = x+w;  verts[1][1] = y;
 		verts[2][0] = x+w;  verts[2][1] = y+h;
@@ -1076,7 +1060,7 @@ void RB_ShowImages( void ) {
 #endif
 	}
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements
 	qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
 #endif
 	qglFinish();
@@ -1144,7 +1128,7 @@ const void	*RB_SwapBuffers( const void *data ) {
 
 	cmd = (const swapBuffersCommand_t *)data;
 
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: can not read stencil buffer pixels data on GLES 1.1
 	// we measure overdraw by reading back the stencil buffer and
 	// counting up the number of increments that have happened
 	if ( r_measureOverdraw->integer ) {

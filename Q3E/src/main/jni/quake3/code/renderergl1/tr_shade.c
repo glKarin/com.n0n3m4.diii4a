@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   This file deals with applying shaders to surface data in the tess struct.
 */
 
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support glBegin/glEnd on GLES 1.1
 /*
 ================
 R_ArrayElementDiscrete
@@ -162,7 +162,7 @@ without compiled vertex arrays.
 ==================
 */
 void R_DrawElements( int numIndexes, const glIndex_t *indexes ) {
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: use glDrawElements on GLES 1.1
 	int		primitives;
 
 	primitives = r_primitives->integer;
@@ -260,18 +260,14 @@ Draws triangle outlines for debugging
 */
 static void DrawTris (shaderCommands_t *input) {
 	GL_Bind( tr.whiteImage );
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: only glColor4f on GLES 1.1
 	qglColor4f (1,1,1,1);
 #else
 	qglColor3f (1,1,1);
 #endif
 
 	GL_State( GLS_POLYMODE_LINE | GLS_DEPTHMASK_TRUE );
-#ifdef USE_OPENGLES
-	qglDepthRangef( 0, 0 );
-#else
 	qglDepthRange( 0, 0 );
-#endif
 
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
@@ -289,11 +285,7 @@ static void DrawTris (shaderCommands_t *input) {
 		qglUnlockArraysEXT();
 		GLimp_LogComment( "glUnlockArraysEXT\n" );
 	}
-#ifdef USE_OPENGLES
-	qglDepthRangef( 0, 1 );
-#else
 	qglDepthRange( 0, 1 );
-#endif
 }
 
 
@@ -309,16 +301,15 @@ static void DrawNormals (shaderCommands_t *input) {
 	vec3_t	temp;
 
 	GL_Bind( tr.whiteImage );
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: only glColor4f on GLES 1.1
 	qglColor4f (1,1,1,1);
-	qglDepthRangef( 0, 0 );	// never occluded
 #else
 	qglColor3f (1,1,1);
-	qglDepthRange( 0, 0 );	// never occluded
 #endif
+	qglDepthRange( 0, 0 );	// never occluded
 	GL_State( GLS_POLYMODE_LINE | GLS_DEPTHMASK_TRUE );
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 	vec3_t verts[2 * SHADER_MAX_VERTEXES];
 	glIndex_t indicies[2 * SHADER_MAX_VERTEXES];
 
@@ -332,8 +323,6 @@ static void DrawNormals (shaderCommands_t *input) {
 
 	qglVertexPointer(3, GL_FLOAT, 0, verts);
 	qglDrawElements(GL_LINES, i, GL_INDEX_TYPE, indicies);
-
-	qglDepthRangef( 0, 1 );
 #else
 	qglBegin (GL_LINES);
 	for (i = 0 ; i < input->numVertexes ; i++) {
@@ -342,9 +331,9 @@ static void DrawNormals (shaderCommands_t *input) {
 		qglVertex3fv (temp);
 	}
 	qglEnd ();
+#endif
 
 	qglDepthRange( 0, 1 );
-#endif
 }
 
 /*
@@ -396,11 +385,9 @@ static void DrawMultitextured( shaderCommands_t *input, int stage ) {
 
 	// this is an ugly hack to work around a GeForce driver
 	// bug with multitexture and clip planes
-#if !defined(USE_OPENGLES)
 	if ( backEnd.viewParms.isPortal ) {
 		qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 	}
-#endif
 
 	//
 	// base
@@ -1249,7 +1236,7 @@ void RB_StageIteratorLightmappedMultitexture( void ) {
 
 #ifdef REPLACE_MODE
 	qglDisableClientState( GL_COLOR_ARRAY );
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: only glColor4f on GLES 1.1
 	qglColor4f( 1, 1, 1, 1 );
 #else
 	qglColor3f( 1, 1, 1 );

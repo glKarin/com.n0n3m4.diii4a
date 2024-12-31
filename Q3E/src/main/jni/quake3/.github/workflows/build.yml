@@ -12,7 +12,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install libsdl2-dev
     - name: Compile
-      run: make release
+      run: make release -j$(nproc)
       env:
         ARCHIVE: 1
     - uses: actions/upload-artifact@v4
@@ -27,7 +27,7 @@ jobs:
     - name: Compile
       run: |
         choco install zip
-        make release
+        make release -j $env:NUMBER_OF_PROCESSORS
       env:
         ARCHIVE: 1
     - uses: actions/upload-artifact@v4
@@ -36,14 +36,37 @@ jobs:
         path: build/*.zip
   macos:
     name: macOS
-    runs-on: macos-11
+    runs-on: macos-13
     steps:
     - uses: actions/checkout@v4
     - name: Compile
-      run: make release
+      run: make release -j$(sysctl -n hw.logicalcpu)
       env:
         ARCHIVE: 1
     - uses: actions/upload-artifact@v4
       with:
         name: macOS
+        path: build/*.zip
+  web:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      with:
+        repository: emscripten-core/emsdk
+        path: emsdk
+    - name: Install Dependencies
+      run: |
+        cd emsdk
+        ./emsdk install 3.1.58
+        ./emsdk activate 3.1.58
+    - name: Compile
+      env:
+        ARCHIVE: 1
+      run: |
+        source emsdk/emsdk_env.sh
+        emmake make release -j$(nproc)
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Web
         path: build/*.zip

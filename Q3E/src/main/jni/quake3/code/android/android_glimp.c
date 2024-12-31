@@ -120,8 +120,8 @@ void (APIENTRYP qglUnlockArraysEXT) (void);
 #define GLE(ret, name, ...) name##proc * qgl##name = NULL;
 QGL_1_1_PROCS;
 QGL_1_1_FIXED_FUNCTION_PROCS;
-#if !defined(USE_OPENGLES)
 QGL_DESKTOP_1_1_PROCS;
+#if !defined(USE_OPENGLES)
 QGL_DESKTOP_1_1_FIXED_FUNCTION_PROCS;
 #endif
 QGL_ES_1_1_PROCS;
@@ -135,6 +135,27 @@ QGL_ARB_framebuffer_object_PROCS;
 QGL_ARB_vertex_array_object_PROCS;
 QGL_EXT_direct_state_access_PROCS;
 #undef GLE
+
+/*
+===============
+OpenGL ES compatibility
+===============
+*/
+static void APIENTRY GLimp_GLES_ClearDepth( GLclampd depth ) {
+	qglClearDepthf( depth );
+}
+
+static void APIENTRY GLimp_GLES_DepthRange( GLclampd near_val, GLclampd far_val ) {
+	qglDepthRangef( near_val, far_val );
+}
+
+static void APIENTRY GLimp_GLES_DrawBuffer( GLenum mode ) {
+	// unsupported
+}
+
+static void APIENTRY GLimp_GLES_PolygonMode( GLenum face, GLenum mode ) {
+	// unsupported
+}
 
 /*
 ===============
@@ -218,6 +239,11 @@ static qboolean GLimp_GetProcAddresses( qboolean fixedFunction ) {
 #if !defined(USE_OPENGLES)
 			QGL_DESKTOP_1_1_PROCS;
 			QGL_DESKTOP_1_1_FIXED_FUNCTION_PROCS;
+#else
+			qglClearDepth = GLimp_GLES_ClearDepth;
+			qglDepthRange = GLimp_GLES_DepthRange;
+			qglDrawBuffer = GLimp_GLES_DrawBuffer;
+			qglPolygonMode = GLimp_GLES_PolygonMode;
 #endif
 		} else if ( qglesMajorVersion == 1 && qglesMinorVersion >= 1 ) {
 			// OpenGL ES 1.1 (2.0 is not backward compatible)
@@ -225,6 +251,11 @@ static qboolean GLimp_GetProcAddresses( qboolean fixedFunction ) {
 			QGL_1_1_FIXED_FUNCTION_PROCS;
 			QGL_ES_1_1_PROCS;
 			QGL_ES_1_1_FIXED_FUNCTION_PROCS;
+			
+			qglClearDepth = GLimp_GLES_ClearDepth;
+			qglDepthRange = GLimp_GLES_DepthRange;
+			qglDrawBuffer = GLimp_GLES_DrawBuffer;
+			qglPolygonMode = GLimp_GLES_PolygonMode;
 
 		} else {
 			Com_Error( ERR_FATAL, "Unsupported OpenGL Version (%s), OpenGL 1.1 is required", version );

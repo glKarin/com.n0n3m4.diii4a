@@ -163,7 +163,7 @@ void R_ImageList_f( void ) {
 
 		switch(image->internalFormat)
 		{
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support DXT compression image on GLES 1.1
 			case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
 				format = "sDXT1";
 				// 64 bits per 16 pixels, so 4 bits per pixel
@@ -178,7 +178,7 @@ void R_ImageList_f( void ) {
 				format = "sBPTC";
 				// 128 bits per 16 pixels, so 1 byte per pixel
 				break;
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support DXT compression image on GLES 1.1
 			case GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT:
 				format = "LATC ";
 				// 128 bits per 16 pixels, so 1 byte per pixel
@@ -197,7 +197,7 @@ void R_ImageList_f( void ) {
 				format = "BPTC ";
 				// 128 bits per 16 pixels, so 1 byte per pixel
 				break;
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support texture internal format on GLES 1.1
 			case GL_RGB4_S3TC:
 				format = "S3TC ";
 				// same as DXT1?
@@ -211,12 +211,14 @@ void R_ImageList_f( void ) {
 				// 4 bytes per pixel
 				estSize *= 4;
 				break;
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support texture internal format on GLES 1.1
 			case GL_LUMINANCE8:
+#endif
 			case GL_LUMINANCE:
 				format = "L    ";
 				// 1 byte per pixel?
 				break;
+#if !defined(USE_OPENGLES) //karin: not support texture internal format on GLES 1.1
 			case GL_RGB5:
 			case GL_RGB8:
 #endif
@@ -225,13 +227,15 @@ void R_ImageList_f( void ) {
 				// 3 bytes per pixel?
 				estSize *= 3;
 				break;
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support texture internal format on GLES 1.1
 			case GL_LUMINANCE8_ALPHA8:
+#endif
 			case GL_LUMINANCE_ALPHA:
 				format = "LA   ";
 				// 2 bytes per pixel?
 				estSize *= 2;
 				break;
+#if !defined(USE_OPENGLES) //karin: not support texture internal format on GLES 1.1
 			case GL_SRGB_EXT:
 			case GL_SRGB8_EXT:
 				format = "sRGB ";
@@ -658,7 +662,7 @@ static void Upload32( unsigned *data,
 		}
 	}
 
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: always use GL_RGBA on GLES 1.1
 	if(lightMap)
 	{
 		if(r_greyscale->integer)
@@ -692,7 +696,7 @@ static void Upload32( unsigned *data,
 		// select proper internal format
 		if ( samples == 3 )
 		{
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: always use GL_RGBA for solid on GLES 1.1
 			internalFormat = GL_RGBA;
 #else
 			if(r_greyscale->integer)
@@ -729,7 +733,7 @@ static void Upload32( unsigned *data,
 		}
 		else if ( samples == 4 )
 		{
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: always use GL_RGBA for alpha on GLES 1.1
 			internalFormat = GL_RGBA;
 #else
 			if(r_greyscale->integer)
@@ -824,7 +828,7 @@ done:
 
 	if (mipmap)
 	{
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support on GLES 1.1
 		if ( textureFilterAnisotropic )
 			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
 					(GLint)Com_Clamp( 1, maxAnisotropy, r_ext_max_anisotropy->integer ) );
@@ -835,7 +839,7 @@ done:
 	}
 	else
 	{
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support on GLES 1.1
 		if ( textureFilterAnisotropic )
 			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1 );
 #endif
@@ -890,7 +894,7 @@ image_t *R_CreateImage( const char *name, byte *pic, int width, int height,
 	image->width = width;
 	image->height = height;
 	if (flags & IMGFLAG_CLAMPTOEDGE)
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: not support GL_CLAMP on GLES 1.1
 		glWrapClampMode = GL_CLAMP_TO_EDGE;
 #else
 		glWrapClampMode = haveClampToEdge ? GL_CLAMP_TO_EDGE : GL_CLAMP;
