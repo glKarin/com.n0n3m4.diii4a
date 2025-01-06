@@ -84,6 +84,7 @@ int gl_msaa = 0;
 int gl_version = DEFAULT_GLES_VERSION;
 
 bool USING_GLES3 = gl_version != 0x00020000;
+bool USING_GL = false;
 #ifdef _OPENGLES3
 int GLES3_VERSION = USING_GLES3 ? 0 : -1;
 #define USING_GLES30 (GLES3_VERSION > -1)

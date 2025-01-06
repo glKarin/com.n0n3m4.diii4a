@@ -26,17 +26,21 @@
 
 static GLenum gl_RenderType;
 static GLfloat gl_TexCoord[2];
-static GLfloat gl_Color[4] = {0, 0, 0, 1};
+static GLfloat gl_Color[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 static idList<idDrawVert> gl_VertexList;
 static idList<glIndex_t> gl_IndexList;
 static GLenum gl_MatrixMode = GL_MODELVIEW;
 static GLuint gl_ClientState = CLIENT_STATE_VERTEX | 0 | CLIENT_STATE_COLOR;
 static const float	GL_IDENTITY_MATRIX[16] = {
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
 };
+static GLuint gl_drawPixelsImage = 0;
+static GLboolean gl_useTexture = GL_FALSE;
+
+extern int MakePowerOfTwo(int num);
 
 struct GLstate
 {
@@ -44,6 +48,8 @@ struct GLstate
 	GLboolean DEPTH_TEST;
 	GLboolean CULL_FACE;
 	GLboolean SCISSOR_TEST;
+	GLboolean DEPTH_WRITEMASK;
+	GLboolean BLEND;
 };
 
 template <int SIZE>
@@ -55,7 +61,7 @@ public:
 	{}
 
 	GLstate * Push(const GLstate *state = NULL) {
-		if(num >= SIZE)
+		if(num > SIZE)
 		{
 			Sys_Printf("[GLCompat]: GLstate_stack::Push over\n");
 			return NULL;
@@ -70,10 +76,10 @@ public:
 	GLstate * Pop(void) {
 		if(num <= 0)
 		{
-			Sys_Printf("[GLCompat]: GLstate_stack::Push under\n");
+			Sys_Printf("[GLCompat]: GLstate_stack::Pop under\n");
 			return NULL;
 		}
-		GLstate *ret = &stack[num--];
+		GLstate *ret = &stack[--num];
 		return ret;
 	}
 
@@ -124,7 +130,7 @@ public:
 	void Pop(void) {
 		if(num <= 0)
 		{
-			Sys_Printf("[GLCompat]: GLmatrix_stack::Push under\n");
+			Sys_Printf("[GLCompat]: GLmatrix_stack::Pop under\n");
 			return;
 		}
 		num--;
@@ -150,6 +156,18 @@ public:
 			Sys_Printf("[GLCompat]: GLmatrix_stack::Set under\n");
 	}
 
+	void Mult(const GLfloat m[16]) {
+		if(num > 0)
+		{
+			GLfloat *t = Top();
+			GLfloat b[16];
+			memcpy(b, t, sizeof(b));
+			myGlMultMatrix(m, b, t);
+		}
+		else
+			Sys_Printf("[GLCompat]: GLmatrix_stack::Mult under\n");
+	}
+
 	void Identity(void) {
 		Set(GL_IDENTITY_MATRIX);
 	}
@@ -167,6 +185,10 @@ public:
 			return stack[num - 1];
 		else
 			return m;
+	}
+
+	void Clear(void) {
+		num = 0;
 	}
 
 	GLfloat stack[16][SIZE];
@@ -192,6 +214,10 @@ static void glPushAttrib(GLint mask)
 	_GETBS(DEPTH_TEST);
 	_GETBS(CULL_FACE);
 	_GETBS(SCISSOR_TEST);
+	_GETBS(BLEND);
+#undef _GETBS
+#define _GETBS(x) qglGetBooleanv(GL_##x, &state->x);
+	_GETBS(DEPTH_WRITEMASK);
 #undef _GETBS
 }
 
@@ -205,7 +231,9 @@ static void glPopAttrib(void)
 	_SETBS(DEPTH_TEST);
 	_SETBS(CULL_FACE);
 	_SETBS(SCISSOR_TEST);
+	_SETBS(BLEND);
 #undef _SETBS
+	qglDepthMask(state->DEPTH_WRITEMASK);
 }
 
 static void glPushMatrix(void)
@@ -237,38 +265,31 @@ static void glMatrixMode(GLenum mode)
 	gl_MatrixMode = mode;
 }
 
-// must call glPushMatrix first
 static void glLoadIdentity(void)
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
 		if(gl_ProjectionMatrixStack.Empty())
-		{
-			Sys_Printf("[GLCompat]: must call glPushMatrix() first for identity projection matrix!\n");
-			return;
-		}
-		gl_ProjectionMatrixStack.Identity();
+			gl_ProjectionMatrixStack.Push(GL_IDENTITY_MATRIX);
+		else
+			gl_ProjectionMatrixStack.Identity();
 	}
 	else
 	{
 		if(gl_ModelviewMatrixStack.Empty())
-		{
-			Sys_Printf("[GLCompat]: must call glPushMatrix() first for identity modelview matrix!\n");
-			return;
-		}
-		gl_ModelviewMatrixStack.Identity();
+			gl_ModelviewMatrixStack.Push(GL_IDENTITY_MATRIX);
+		else
+			gl_ModelviewMatrixStack.Identity();
 	}
 }
 
-// must call glPushMatrix first
 static void glOrtho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat nearZ, GLfloat farZ)
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
 		if(gl_ProjectionMatrixStack.Empty())
 		{
-			Sys_Printf("[GLCompat]: must call glPushMatrix() first for ortho matrix!\n");
-			return;
+			gl_ProjectionMatrixStack.Push(BACKEND_PROJECTION_MATRIX);
 		}
 		GLfloat m[16];
 		memcpy(m, gl_ProjectionMatrix, sizeof(GLfloat) * 16);
@@ -279,8 +300,7 @@ static void glOrtho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GL
 	{
 		if(gl_ModelviewMatrixStack.Empty())
 		{
-			Sys_Printf("[GLCompat]: must call glPushMatrix() first for ortho matrix!\n");
-			return;
+			gl_ModelviewMatrixStack.Push(BACKEND_MODELVIEW_MATRIX);
 		}
 		GLfloat m[16];
 		memcpy(m, gl_ModelviewMatrix, sizeof(GLfloat) * 16);
@@ -384,26 +404,39 @@ static GLboolean glrbClientStateIsEnabled(GLenum e)
 		return GL_TRUE;
 }
 
-// must call glPushMatrix first
 static void glLoadMatrixf(const GLfloat matrix[16])
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
 		if(gl_ProjectionMatrixStack.Empty())
-		{
-			Sys_Printf("[GLCompat]: must call glPushMatrix() first for load projection matrix!\n");
-			return;
-		}
-		gl_ProjectionMatrixStack.Set(matrix);
+			gl_ProjectionMatrixStack.Push(matrix);
+		else
+			gl_ProjectionMatrixStack.Set(matrix);
 	}
 	else
 	{
 		if(gl_ModelviewMatrixStack.Empty())
-		{
-			Sys_Printf("[GLCompat]: must call glPushMatrix() first for load modelview matrix!\n");
-			return;
-		}
-		gl_ModelviewMatrixStack.Set(matrix);
+			gl_ModelviewMatrixStack.Push(matrix);
+		else
+			gl_ModelviewMatrixStack.Set(matrix);
+	}
+}
+
+static void glMultMatrixf(const GLfloat matrix[16])
+{
+	if(gl_MatrixMode == GL_PROJECTION)
+	{
+		if(gl_ProjectionMatrixStack.Empty())
+			gl_ProjectionMatrixStack.Push(matrix);
+		else
+			gl_ProjectionMatrixStack.Mult(matrix);
+	}
+	else
+	{
+		if(gl_ModelviewMatrixStack.Empty())
+			gl_ModelviewMatrixStack.Push(matrix);
+		else
+			gl_ModelviewMatrixStack.Mult(matrix);
 	}
 }
 
@@ -442,6 +475,7 @@ static void glrbEndRender(void)
 	//Sys_Printf("glrbEndRender shader program: %p\n", backEnd.glState.currentProgram);
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 	GL_UseProgram(NULL);
+	gl_useTexture = GL_FALSE;
 }
 
 // draw func
@@ -449,7 +483,7 @@ static void glEnd()
 {
 	if(gl_RenderType)
 	{
-		GLboolean usingTexCoord = glrbClientStateIsEnabled(GL_TEXTURE_COORD_ARRAY);
+		GLboolean usingTexCoord = glrbClientStateIsEnabled(GL_TEXTURE_COORD_ARRAY) || gl_useTexture;
 		int num = gl_VertexList.Num();
 		int numIndex = gl_IndexList.Num();
 
@@ -658,4 +692,106 @@ void RB_ShowImages_compat(void)
 
 	end = Sys_Milliseconds();
 	common->Printf("%i msec to draw all images\n", end - start);
+}
+
+void glRasterPos2f(GLfloat x, GLfloat y)
+{
+
+}
+
+static void glrbCreateDrawPixelsImage(GLint width, GLint height, const GLubyte *data, GLfloat *x, GLfloat *y)
+{
+    if(gl_drawPixelsImage == 0)
+    {
+        qglGenTextures(1, &gl_drawPixelsImage);
+    }
+
+    int scaled_width = MakePowerOfTwo(width);
+    int scaled_height = MakePowerOfTwo(height);
+
+    qglBindTexture(GL_TEXTURE_2D, gl_drawPixelsImage);
+    qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    if(scaled_width == width && scaled_height == height)
+    {
+        qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+        if(x)
+            *x = 1.0f;
+        if(y)
+            *y = 1.0f;
+    }
+    else
+    {
+        GLubyte *d = (GLubyte *)calloc(scaled_width * scaled_height * 4, 1);
+        for(int h = 0; h < height; h++)
+        {
+            for(int w = 0; w < width; w++)
+            {
+                GLubyte *out = d + (h * scaled_width + w) * 4;
+                const GLubyte *in_ = data + (h * width + w) * 4;
+                memcpy(out, in_, 4);
+            }
+        }
+        qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, d );
+        free(d);
+        if(x)
+            *x = (float)width / (float)scaled_width;
+        if(y)
+            *y = (float)height / (float)scaled_height;
+    }
+	//qglGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void glDrawPixels(GLint width, GLint height, GLenum format, GLenum dataType, const void *data)
+{
+    if(format != GL_RGBA)
+	{
+		Sys_Printf("Only support format = GL_RGBA\n");
+		return;
+	}
+    if(dataType != GL_UNSIGNED_BYTE)
+	{
+		Sys_Printf("Only support dataType = GL_UNSIGNED_BYTE\n");
+		return;
+	}
+
+	GLint texid;
+	qglGetIntegerv(GL_TEXTURE_BINDING_2D, &texid);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    qglDisable(GL_DEPTH_TEST);
+    qglDepthMask(GL_FALSE);
+	qglDisable(GL_BLEND);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, width, 0, height, -1, 1);
+
+    float tcw, tch;
+    glrbCreateDrawPixelsImage(width, height, (const GLubyte *)data, &tcw, &tch);
+	gl_useTexture = GL_TRUE;
+
+    glBegin(GL_TRIANGLE_STRIP);
+	{
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex2f(0.0f, 0.0f);
+
+		glTexCoord2f(tcw, 0.0f);
+		glVertex2f(width, 0.0f);
+
+		glTexCoord2f(0.0f, tch);
+		glVertex2f(0.0f, height);
+
+		glTexCoord2f(tcw, tch);
+		glVertex2f(width, height);
+	}
+    glEnd();
+
+    qglBindTexture(GL_TEXTURE_2D, texid);
+
+    glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+    glPopAttrib();
 }

@@ -200,12 +200,7 @@ class idCVar
 			internalVar = cvar;
 		}
 
-		void SetReadonly(bool on = true) {
-            if(on)
-			    internalVar->flags |= CVAR_ROM;
-            else
-                internalVar->flags &= ~CVAR_ROM;
-		}
+		void SetReadonly(bool on = true);
 
 		static void				RegisterStaticVars(void);
 

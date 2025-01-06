@@ -516,6 +516,7 @@ void idEditField::KeyDownEvent(int key)
 		ClearAutoComplete();
 	}
 
+	//karin: begin
 	// ctrl-v = paste
 	if (tolower(key) == 'v' && idKeyInput::IsDown(K_CTRL)) {
 		ClearAutoComplete();
@@ -567,6 +568,7 @@ void idEditField::KeyDownEvent(int key)
 		}
 		return;
 	}
+	//karin: end
 }
 
 /*

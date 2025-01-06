@@ -145,7 +145,7 @@ Tag with `-free` only for F-Droid update.
 
 | CVar | Type | Default | Description | Flag | Range | Scope | Remark | Platform |
 |:---|:---:|:--:|:---|:---:|:---:|:---|:---|:---:|
-| harm_r_openglVersion | String | GLES3.0 | OpenGL version | INIT | GLES2, GLES3.0 | Engine/Renderer | setup with launcher on Android | Windows, Linux |
+| harm_r_openglVersion | String | GLES3.0 | OpenGL version | INIT | GLES2, GLES3.0, OpenGL_core, OpenGL_compatibility | Engine/Renderer | OpenGL_core, OpenGL_compatibility will use OpenGL desktop version, setup with launcher on Android | Windows, Linux |
 | harm_r_multithread | Bool | 1 | Multithread backend | INIT |  | Engine/Renderer | setup with launcher on Android | Windows, Linux |
 | harm_r_clearVertexBuffer | Integer | 2 | Clear vertex buffer on every frame | ARCHIVE, FIXED | 0, 1, 2 | Engine/Renderer | 0 = not clear(original);<br/> 1 = only free VBO memory;<br/> 2 = free VBO memory and delete VBO handle(only without multi-threading, else same as 1) | All |
 | harm_r_maxAllocStackMemory | Integer | 524288 | Control allocate temporary memory when load model data | ARCHIVE |  | Engine/Renderer | For load large model, because stack memory is limited on OS.<br/> 0 = Always heap;<br/> Negative = Always stack;<br/> Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory) | All |

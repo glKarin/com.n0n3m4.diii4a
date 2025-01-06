@@ -39,7 +39,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define ALTERNATE_CURL_LIB "libcurl-3.dll"
 #elif defined(__APPLE__)
   #define DEFAULT_CURL_LIB "libcurl.dylib"
-#elif defined(__ANDROID__) //karin: curl on Q3E
+#elif defined(__ANDROID__) //karin: curl on Android
   #define DEFAULT_CURL_LIB "libcurl.so"
 #else
   #define DEFAULT_CURL_LIB "libcurl.so.4"

@@ -344,7 +344,11 @@ static void R_CheckPortableExtensions(void)
 	} else
 #endif
 	{
-		if (R_CheckExtension("GL_EXT_texture_compression_s3tc")&&r_useDXT.GetBool())
+		if (R_CheckExtension("GL_EXT_texture_compression_s3tc") && r_useDXT.GetBool()
+#if !defined(__ANDROID__)
+        && USING_GL
+#endif
+        )
 		glConfig.textureCompressionAvailable = true;
 		else
 		glConfig.textureCompressionAvailable = false;
@@ -1113,12 +1117,35 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 		return;
 	}
 
-#ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
-		common->Printf("OpenGLES 3.0\n");
-	else
+    extern int gl_version;
+    idStr glVersionName;
+    switch(gl_version)
+    {
+        case GL_VERSION_GL_ES2:
+            glVersionName = "OpenGL ES2";
+            break;
+#if !defined(__ANDROID__)
+        case GL_VERSION_GL_CORE:
+            glVersionName = "OpenGL Core";
+            break;
+        case GL_VERSION_GL_COMPATIBILITY:
+            glVersionName = "OpenGL Compatibility";
+            break;
 #endif
-		common->Printf("OpenGLES 2.0\n");
+        case GL_VERSION_GL_ES3:
+            glVersionName = "OpenGL ES3";
+            break;
+        default:
+#ifdef GL_ES_VERSION_3_0
+            if(USING_GLES3)
+                glVersionName = "OpenGL ES3";
+            else
+#endif
+                glVersionName = "OpenGL ES2";
+            break;
+    }
+
+	common->Printf("%s\n", glVersionName.c_str());
 
 	common->Printf("Renderer: %s\n", glConfig.renderer_string);
 	common->Printf("Version: %s\n", glConfig.version_string);
@@ -1182,12 +1209,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("r_usePackColorAsDepth: %d\n", r_usePackColorAsDepth);
 #endif
 
-#ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
-		common->Printf("OpenGLES 3.0\n");
-	else
-#endif
-		common->Printf("OpenGLES 2.0\n");
+	common->Printf("%s\n", glVersionName.c_str());
 }
 
 #ifdef _MULTITHREAD

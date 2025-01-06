@@ -40,6 +40,9 @@ If you have questions concerning this license or the applicable additional terms
 
 
 extern bool USING_GLES3;
+#if !defined(__ANDROID__)
+extern bool USING_GL;
+#endif
 #ifdef _OPENGLES3
 extern int GLES3_VERSION;
 #define USING_GLES30 (GLES3_VERSION > -1)
@@ -2238,5 +2241,21 @@ extern idCVar harm_r_lightingModel;
 #define HARM_INTERACTION_SHADER_AMBIENT 4
 
 extern idCVar harm_r_useHighPrecision;
+
+#define GL_VERSION_GL_ES2 0x00020000
+#define GL_VERSION_GL_ES3 0x00030000
+#define GL_VERSION_GL_ES31 0x00030001
+#define GL_VERSION_GL_ES32 0x00030002
+#if !defined(__ANDROID__)
+#define GL_VERSION_GL_CORE 0x10000000
+#define GL_VERSION_GL_COMPATIBILITY 0x20000000
+#endif
+
+#define GL_VERSION_NAME_GL_ES2 "GLES2"
+#define GL_VERSION_NAME_GL_ES3 "GLES3.0"
+#if !defined(__ANDROID__)
+#define GL_VERSION_NAME_GL_CORE "OpenGL_core"
+#define GL_VERSION_NAME_GL_COMPATIBILITY "OpenGL_compatibility"
+#endif
 
 #endif /* !__TR_LOCAL_H__ */

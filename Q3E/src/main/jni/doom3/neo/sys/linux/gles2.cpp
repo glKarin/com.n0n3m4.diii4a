@@ -47,18 +47,20 @@ idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEG
 
 #ifdef _OPENGLES3
 const char	*r_openglesArgs[]	= {
-		"GLES2",
-		"GLES3.0",
+        GL_VERSION_NAME_GL_ES2,
+        GL_VERSION_NAME_GL_ES3,
+//        GL_VERSION_NAME_GL_CORE,
+//        GL_VERSION_NAME_GL_COMPATIBILITY,
 		NULL };
 idCVar harm_r_openglVersion("harm_r_openglVersion",
                               r_openglesArgs[1]
                               , CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
 					"OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
-#define DEFAULT_GLES_VERSION 0x00030000
-#define HARM_EGL_OPENGL_ES_BIT (gl_version != 0x00020000 ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_ES2_BIT)
-#define HARM_EGL_CONTEXT_CLIENT_VERSION (gl_version != 0x00020000 ? 3 : 2)
+#define DEFAULT_GLES_VERSION GL_VERSION_GL_ES3
+#define HARM_EGL_OPENGL_ES_BIT (gl_version != GL_VERSION_GL_ES2 ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_ES2_BIT)
+#define HARM_EGL_CONTEXT_CLIENT_VERSION (gl_version != GL_VERSION_GL_ES2 ? 3 : 2)
 #else
-#define DEFAULT_GLES_VERSION 0x00020000
+#define DEFAULT_GLES_VERSION GL_VERSION_GL_ES2
 #define HARM_EGL_OPENGL_ES_BIT EGL_OPENGL_ES2_BIT
 #define HARM_EGL_CONTEXT_CLIENT_VERSION 2
 #endif
@@ -81,7 +83,8 @@ static EGLint format = 1;
 int gl_format = 0x8888;
 int gl_msaa = 1;
 int gl_version = DEFAULT_GLES_VERSION;
-bool USING_GLES3 = gl_version != 0x00020000;
+bool USING_GLES3 = gl_version != GL_VERSION_GL_ES2;
+bool USING_GL = false;
 
 static void GLimp_HandleError(const char *func, bool exit = true)
 {
@@ -784,4 +787,52 @@ int Sys_GetVideoRam(void)
 
 	run_once = 512;
 	return run_once;
+}
+
+void GLimp_Startup(void)
+{
+#ifdef _MULTITHREAD
+#if !defined(__ANDROID__) //karin: enable multithreading-rendering from command cvar
+    multithreadActive = cvarSystem->GetCVarBool("harm_r_multithread");
+    if(multithreadActive)
+        Sys_Printf("[Harmattan]: Enable multi-threading rendering\n");
+    else
+        Sys_Printf("[Harmattan]: Disable multi-threading rendering\n");
+#endif
+#endif
+#ifdef _OPENGLES3
+#if !defined(__ANDROID__) //karin: check OpenGL version from command cvar
+    const char *openglVersion = cvarSystem->GetCVarString("harm_r_openglVersion");
+    if(openglVersion && openglVersion[0])
+    {
+//        extern int gl_version;
+//        extern bool USING_GLES3;
+        Sys_Printf("[Harmattan]: harm_r_openglVersion = %s\n", openglVersion);
+        if(!idStr::Icmp(GL_VERSION_NAME_GL_ES2, openglVersion))
+        {
+            gl_version = GL_VERSION_GL_ES2;
+            USING_GLES3 = false;
+            Sys_Printf("[Harmattan]: Using OpenGL ES2\n");
+        }
+/*        else if(!idStr::Icmp(GL_VERSION_NAME_GL_CORE, openglVersion))
+        {
+            gl_version = GL_VERSION_GL_CORE;
+            USING_GLES3 = true;
+            Sys_Printf("[Harmattan]: Using OpenGL core\n");
+        }
+        else if(!idStr::Icmp(GL_VERSION_NAME_GL_COMPATIBILITY, openglVersion))
+        {
+            gl_version = GL_VERSION_GL_COMPATIBILITY;
+            USING_GLES3 = true;
+            Sys_Printf("[Harmattan]: Using OpenGL compatibility\n");
+        }*/
+        else // GL_VERSION_NAME_GL_ES3
+        {
+            gl_version = GL_VERSION_GL_ES3;
+            USING_GLES3 = true;
+            Sys_Printf("[Harmattan]: Using OpenGL ES3\n");
+        }
+    }
+#endif
+#endif
 }
