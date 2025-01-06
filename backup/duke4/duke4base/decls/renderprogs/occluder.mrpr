@@ -1,0 +1,43 @@
+renderProg occluder
+{
+	vertex
+	{
+#if 0
+		vec2 tc;
+		tc.x = dot4( attr_TexCoord0.xy, $textureMatrixX );
+		tc.y = dot4( attr_TexCoord0.xy, $textureMatrixY );
+		vertex_texcoord0.x = dot4( tc.xy, $rpdiffusematrixs );
+		vertex_texcoord0.y = dot4( tc.xy, $rpdiffusematrixt );
+#else
+		vertex_texcoord0.x = dot4( attr_TexCoord0.xy, $rpdiffusematrixs );
+		vertex_texcoord0.y = dot4( attr_TexCoord0.xy, $rpdiffusematrixt );
+#endif
+#ifdef SKINNED
+		vec3 vModelNormal = attr_Normal.xyz;
+		vec3 vModelTangent = attr_Tangent.xyz;
+		vec3 vModelBinormal = attr_Bitangent.xyz;
+
+		#include "skinning.inc"
+
+		gl_Position = TransformInputVertex(vertex_position, $mvpMatrixX, $mvpMatrixY, $mvpMatrixZ, $mvpMatrixW);
+#else	
+		gl_Position = TransformVertex($mvpMatrixX, $mvpMatrixY, $mvpMatrixZ, $mvpMatrixW);
+#endif
+	}
+
+	pixel
+	{
+		vec4 diffuseMap =	tex2D( $albedotexture, vertex_texcoord0.xy );
+
+		if(diffuseMap.w < 0.5f)
+			discard;
+		
+		finalpixel_color = vec4(0.0, 0.0, 0.0, 1.0);
+	}
+}
+
+renderProg occluder_skinned
+{
+	inherit occluder
+	define SKINNED
+}
