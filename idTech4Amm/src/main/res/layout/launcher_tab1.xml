@@ -993,7 +993,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:text="@string/patch_resource"
+                        android:text="@string/data_resource"
                         android:textAllCaps="false" />
 
                     <Button

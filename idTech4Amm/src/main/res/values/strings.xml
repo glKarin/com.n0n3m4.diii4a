@@ -441,5 +441,12 @@
     <string name="_24bits">24Bits</string>
     <string name="_16bits">16Bits</string>
     <string name="minimum_depth_bits">Minimum depth bits</string>
+    <string name="url">URL</string>
+    <string name="homepage">HomePage</string>
+    <string name="steam">Steam</string>
+    <string name="moddb">Moddb</string>
+    <string name="patch">Patch</string>
+    <string name="data_resource">Data resource</string>
+    <string name="game_data_resource">Game data resource</string>
 
 </resources>

@@ -3281,6 +3281,20 @@ public class GameLauncher extends Activity
         bundle.putString("path", V.edt_path.getText().toString());
 		bundle.putString("game", Q3EUtils.q3ei.game);
 		bundle.putBoolean("all", all);
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean userMod = preferences.getBoolean(Q3EInterface.GetEnableModPreferenceKey(Q3EUtils.q3ei.game), false);
+		String gamebase = Q3EInterface.GetGameBaseDirectory(Q3EUtils.q3ei.game);
+		String base;
+		if(userMod)
+		{
+			String mod = preferences.getString(Q3EInterface.GetGameModPreferenceKey(Q3EUtils.q3ei.game), gamebase);
+			base = mod;
+		}
+		else
+			base = GetGameModFromCommand();
+		if(KStr.IsEmpty(base))
+			base = gamebase;
+		bundle.putString("mod", base);
         m_extractPatchResourceFunc.Start(bundle);
     }
 

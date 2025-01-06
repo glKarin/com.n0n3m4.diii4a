@@ -6,6 +6,9 @@ import com.karin.idTech4Amm.R;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
 
+import java.util.ArrayList;
+import java.util.List;
+
 // game config
 /*
  * config this can change launcher's game mod list.
@@ -102,5 +105,18 @@ public enum Game
             return (String)name;
         else
             return "";
+    }
+
+    public static Game GetGameMod(String game, String mod)
+    {
+        for (Game value : values())
+        {
+            if(!value.type.equals(game))
+                continue;
+            if(!value.game.equals(mod))
+                continue;
+            return value;
+        }
+        return null;
     }
 }

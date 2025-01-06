@@ -437,4 +437,11 @@
     <string name="_24bits">24位</string>
     <string name="_16bits">16位</string>
     <string name="minimum_depth_bits">最小深度位数</string>
+    <string name="url">链接</string>
+    <string name="homepage">主页链接</string>
+    <string name="steam">Steam链接</string>
+    <string name="moddb">Moddb链接</string>
+    <string name="patch">补丁文件</string>
+    <string name="data_resource">数据资源</string>
+    <string name="game_data_resource">游戏数据资源</string>
 </resources>
