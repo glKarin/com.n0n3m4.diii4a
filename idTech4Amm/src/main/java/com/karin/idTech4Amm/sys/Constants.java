@@ -30,8 +30,8 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Support setup max game console height(0 or 100 means not limit) on launcher `General` tab.",
-            "Update GZDOOM version to 4.14.0.",
+            "Support setup max game console height percentage(0 or 100 means not limit) on launcher `General` tab.",
+            "Update GZDOOM version to 4.14.0. GZDOOM add Vulkan renderer backend.",
             "Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.1.",
             "Update Quake 1(Darkplaces) version.",
             "Update Quake 2(yquake2) version.",

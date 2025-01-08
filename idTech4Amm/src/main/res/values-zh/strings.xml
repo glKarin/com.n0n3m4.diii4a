@@ -444,4 +444,5 @@
     <string name="patch">补丁文件</string>
     <string name="data_resource">数据资源</string>
     <string name="game_data_resource">游戏数据资源</string>
+    <string name="renderer_backend_vid_preferbackend">渲染器后端(vid_preferbackend)</string>
 </resources>

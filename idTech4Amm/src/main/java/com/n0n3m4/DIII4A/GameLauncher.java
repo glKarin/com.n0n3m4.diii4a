@@ -623,6 +623,17 @@ public class GameLauncher extends Activity
 				if(Q3EUtils.q3ei.isETW)
 					SetProp("cg_shadows", index);
 			}
+
+			// GZDOOM
+			else if (rgId == R.id.gzdoom_vid_preferbackend)
+			{
+				String value2 = GetCheckboxIndex(radioGroup, id) == 1 ? "1" : "2";
+				if(Q3EUtils.q3ei.isDOOM)
+				{
+					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend");
+					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "vid_preferbackend", value2);
+				}
+			}
         }
     };
     private final View.OnClickListener m_buttonClickListener = new View.OnClickListener()
@@ -1295,8 +1306,17 @@ public class GameLauncher extends Activity
 
 	private void Updatehacktings_GZDOOM()
 	{
-		/*List<String> file = GetParamList("file");
-		V.gzdoom_load_lights_pk3.setChecked(null != file && file.contains("lights.pk3"));*/
+		String str;
+		int index;
+
+		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend");
+		index = 0;
+		if (str != null)
+		{
+			if ("1".equalsIgnoreCase(str))
+				index = 1;
+		}
+		SelectCheckbox(V.gzdoom_vid_preferbackend, index);
 	}
 
     private void ThrowException()
@@ -1854,6 +1874,9 @@ public class GameLauncher extends Activity
 		V.gzdoom_load_lights_pk3.setChecked(null != file && file.contains("lights.pk3"));*/
 
 		V.gzdoom_choose_extras_file.setOnClickListener(m_buttonClickListener);
+
+		SelectCheckbox(V.gzdoom_vid_preferbackend, "1".equals(GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend")) ? 1 : 0);
+		V.gzdoom_vid_preferbackend.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
 	private void AfterCreated()
@@ -1952,6 +1975,31 @@ public class GameLauncher extends Activity
 		return Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).IsProp(name);
         // return KidTech4Command.IsProp(GetCmdText(), name);
     }
+
+	private void SetPropPrefix(String prefix, String name, Object val)
+	{
+		if(!LockCmdUpdate())
+			return;
+		SetCmdText(new KidTechCommand(prefix, GetCmdText()).SetProp(name, val).toString());
+		UnlockCmdUpdate();
+	}
+
+	private String GetPropPrefix(String prefix, String name)
+	{
+		return new KidTechCommand(prefix, GetCmdText()).Prop(name);
+		// return KidTech4Command.GetProp(GetCmdText(), name);
+	}
+
+	private void RemovePropPrefix(String prefix, String name)
+	{
+		if(!LockCmdUpdate())
+			return;
+		String orig = GetCmdText();
+		String str = new KidTechCommand(prefix, orig).RemoveProp(name).toString();
+		if (!orig.equals(str))
+			SetCmdText(str);
+		UnlockCmdUpdate();
+	}
 
     private void EditFile(String file, boolean findInHome)
     {
@@ -2298,9 +2346,9 @@ public class GameLauncher extends Activity
 	{
 		if(":".equals(extrasFiles))
 		{
-			RemoveParam("file");
-			RemoveParam("deh");
-			RemoveParam("bex");
+			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "file");
+			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "deh");
+			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "bex");
 		}
 		else
 		{
@@ -2322,9 +2370,9 @@ public class GameLauncher extends Activity
 
 			// if(V.gzdoom_load_lights_pk3.isChecked() && !file.contains("lights.pk3")) file.add("light3.pk3");
 
-			RemoveParam("file");
-			RemoveParam("deh");
-			RemoveParam("bex");
+			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "file");
+			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "deh");
+			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "bex");
 
 			if(!file.isEmpty())
 				SetParamList("file", file);
@@ -2357,7 +2405,7 @@ public class GameLauncher extends Activity
 		bundle.putString("mod", preference.getString(preferenceKey, ""));
 		bundle.putString("path", path);
 		if(Q3EUtils.q3ei.isDOOM)
-			bundle.putString("file", GetParam("file") + " " + GetParam("deh") + " " + GetParam("bex"));
+			bundle.putString("file", GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "file") + " " + GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "deh") + " " + GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "bex"));
 		m_chooseExtrasFileFunc.Start(bundle);
 	}
 
@@ -3199,7 +3247,6 @@ public class GameLauncher extends Activity
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
 		V.skip_intro.setVisibility(skipintroVisible ? View.VISIBLE : View.GONE);
-		V.autoAspectRatio.setVisibility(Q3EUtils.q3ei.IsIdTech4() ? View.VISIBLE : View.GONE);
 
 		String subdir = Q3EUtils.q3ei.subdatadir;
 		if(null == subdir)
@@ -3338,6 +3385,23 @@ public class GameLauncher extends Activity
 	private void SetParamList(String name, List<String> parms)
 	{
 		SetParam(name, KidTechCommand.JoinValue(parms, true));
+	}
+
+	private String GetParamPrefix(String prefix, String name)
+	{
+		return new KidTechCommand(prefix, GetCmdText()).Param(name);
+		// return KidTech4Command.GetParam(GetCmdText(), name);
+	}
+
+	private void RemoveParamPrefix(String prefix, String name)
+	{
+		if(!LockCmdUpdate())
+			return;
+		String orig = GetCmdText();
+		String str = new KidTechCommand(prefix, orig).RemoveParam(name).toString();
+		if (!orig.equals(str))
+			SetCmdText(str);
+		UnlockCmdUpdate();
 	}
 
 	private String GetTempCmdText()
@@ -3548,7 +3612,7 @@ public class GameLauncher extends Activity
 		bundle.putString("mod", preference.getString(preferenceKey, ""));
 		bundle.putString("path", path);
 		if(Q3EUtils.q3ei.isDOOM)
-			bundle.putString("file", GetParam("file") + " " + GetParam("deh") + " " + GetParam("bex"));
+			bundle.putString("file", GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "file") + " " + GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "deh") + " " + GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "bex"));
 		m_chooseGameModFunc.Start(bundle);
 	}
 
@@ -3681,8 +3745,13 @@ public class GameLauncher extends Activity
 	private void SetGameModToCommand(String mod)
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isDOOM)
+		if(Q3EUtils.q3ei.isQ1)
 			SetParam(arg, mod);
+		else if(Q3EUtils.q3ei.isDOOM)
+		{
+			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
+			SetParam(arg, mod);
+		}
 		else
 			SetProp(arg, mod);
 	}
@@ -3690,8 +3759,10 @@ public class GameLauncher extends Activity
 	private String GetGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isDOOM)
+		if(Q3EUtils.q3ei.isQ1)
 			return GetParam(arg);
+		else if(Q3EUtils.q3ei.isDOOM)
+			return GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
 		else
 			return GetProp(arg);
 	}
@@ -3699,8 +3770,10 @@ public class GameLauncher extends Activity
 	private void RemoveGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isDOOM)
+		if(Q3EUtils.q3ei.isQ1)
 			RemoveParam(arg);
+		else if(Q3EUtils.q3ei.isDOOM)
+			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
 		else
 			RemoveProp(arg);
 	}
@@ -3928,6 +4001,7 @@ public class GameLauncher extends Activity
 		public CheckBox gzdoom_load_lights_pk3;
 		public CheckBox gzdoom_load_brightmaps_pk3;
 		public Button gzdoom_choose_extras_file;
+		public RadioGroup gzdoom_vid_preferbackend;
 		public LinearLayout tdm_section;
 		public CheckBox tdm_useMediumPrecision;
 		public SeekBar consoleHeightFracValue;
@@ -4061,6 +4135,7 @@ public class GameLauncher extends Activity
 			gzdoom_load_lights_pk3 = findViewById(R.id.gzdoom_load_lights_pk3);
 			gzdoom_load_brightmaps_pk3 = findViewById(R.id.gzdoom_load_brightmaps_pk3);
 			gzdoom_choose_extras_file = findViewById(R.id.gzdoom_choose_extras_file);
+			gzdoom_vid_preferbackend = findViewById(R.id.gzdoom_vid_preferbackend);
 			tdm_section = findViewById(R.id.tdm_section);
 			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);
 			consoleHeightFracValue = findViewById(R.id.consoleHeightFracValue);

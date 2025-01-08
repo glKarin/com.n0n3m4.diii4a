@@ -54,6 +54,18 @@
 #include "gles_framebuffer.h"
 #endif
 
+#ifdef HAVE_VULKAN
+#include "vulkan/system/vk_renderdevice.h"
+#include <zvulkan/vulkaninstance.h>
+#include <zvulkan/vulkansurface.h>
+#include <zvulkan/vulkandevice.h>
+#include <zvulkan/vulkanbuilders.h>
+//#define VK_USE_PLATFORM_ANDROID_KHR
+#include "../../../../../libraries/ZVulkan/include/vulkan/vulkan.h"
+#include "../../../../../src/common/rendering/vulkan/textures/vk_framebuffer.h"
+#include <zvulkan/vulkanswapchain.h>
+#endif
+
 #undef EGL_NO_DISPLAY
 #undef EGL_NO_SURFACE
 #undef EGL_NO_CONTEXT
@@ -72,25 +84,6 @@
 #define Q3E_FALSE false
 
 #include "q3e/q3e_glimp.inc"
-
-void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
-{
-	Q3E_RequireWindow(w);
-}
-
-void GLimp_AndroidInit(volatile ANativeWindow *w)
-{
-	if(Q3E_NoDisplay())
-		return;
-
-	if(Q3E_RequireWindow(w))
-		Q3E_RestoreGL();
-}
-
-void GLimp_AndroidQuit(void)
-{
-	Q3E_DestroyGL(true);
-}
 
 // MACROS ------------------------------------------------------------------
 
@@ -141,17 +134,170 @@ public:
 	~SDLVideo ();
 	
 	DFrameBuffer *CreateFrameBuffer ();
+
+private:
+#ifdef HAVE_VULKAN
+public:
+	std::shared_ptr<VulkanSurface> surface;
+	VulkanRenderDevice *_fb = nullptr; //karin: created from SDLVideo::CreateFrameBuffer
+#endif
 };
 
 // CODE --------------------------------------------------------------------
 
+#ifdef HAVE_VULKAN
+
+void I_GetVulkanDrawableSize(int *width, int *height)
+{
+	*width = screen_width;
+	*height = screen_height;
+}
+
+bool I_GetVulkanPlatformExtensions(unsigned int *count, const char **names)
+{
+	// from SDL2
+	static const char *const extensionsForAndroid[] = {
+			VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_ANDROID_SURFACE_EXTENSION_NAME
+	};
+	const int num = 2;
+
+	Printf("Require Vulkan extensions:\n");
+	unsigned int i = 0;
+	for(; i < *count; i++)
+	{
+		if(i >= num)
+			break;
+		names[i] = extensionsForAndroid[i];
+		Printf("  %2d: %s\n", i + 1, extensionsForAndroid[i]);
+	}
+
+	*count = i;
+
+	return true;
+}
+
+bool I_CreateVulkanSurface(VkInstance instance, VkSurfaceKHR *surface)
+{
+	// Create Android surface from ANativeWindow of SurfaceView
+	VkAndroidSurfaceCreateInfoKHR createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+	createInfo.pNext = nullptr;
+	createInfo.flags = 0;
+	createInfo.window = (ANativeWindow *)win; // pointer of ANativeWindow
+	VkResult result = vkCreateAndroidSurfaceKHR(instance, &createInfo, nullptr, surface);
+	Printf("Create Android Vulkan surface......%s\n", result == VK_SUCCESS ? "success" : "fail");
+	return result == VK_SUCCESS;
+}
+#endif
+
+// PRIVATE DATA DEFINITIONS ------------------------------------------------
+#ifdef HAVE_VULKAN
+namespace Priv
+{
+	bool vulkanEnabled = false;
+}
+#endif
+
+void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
+{
+	Q3E_RequireWindow(w);
+}
+
+void GLimp_AndroidInit(volatile ANativeWindow *w)
+{
+#ifdef HAVE_VULKAN
+	if (Priv::vulkanEnabled)
+	{
+	    Printf("Start Android Vulkan.\n");
+		extern IVideo *Video;
+		if(!Video)
+		{
+	        Printf("IVideo not initialized.\n");
+			return;
+		}
+		SDLVideo *sdl_video = (SDLVideo *)Video;
+
+		if(!sdl_video->_fb)
+		{
+	        Printf("SDLVideo::CreateFrameBuffer not called.\n");
+			return;
+		}
+		if(!sdl_video->_fb->device)
+		{
+	        Printf("VulkanDevice not initialized.\n");
+			return;
+		}
+		if(!sdl_video->_fb->device->Instance)
+		{
+	        Printf("VulkanInstance not initialized.\n");
+			return;
+		}
+		if(sdl_video->_fb->device->Instance->Instance == VK_NULL_HANDLE)
+		{
+	        Printf("vkCreateInstance not called.\n");
+			return;
+		}
+		auto fbm = sdl_video->_fb->GetFramebufferManager();
+		if(!fbm)
+		{
+	        Printf("VkFramebufferManager not initialized.\n");
+			return;
+		}
+
+		if(!Q3E_RequireWindow(w))
+			return;
+
+		if(fbm->SwapChain && !fbm->SwapChain->Lost())
+		{
+	        Printf("SwapChain make lost.\n");
+			fbm->SwapChain->MakeLost();
+		}
+		VkSurfaceKHR surfacehandle = nullptr;
+		if (!I_CreateVulkanSurface(sdl_video->_fb->device->Instance->Instance, &surfacehandle))
+			VulkanError("I_CreateVulkanSurface failed");
+	    Printf("Create Vulkan surface: %p.\n", surfacehandle);
+		sdl_video->surface->Surface = surfacehandle;
+		sdl_video->_fb->device->Surface = sdl_video->surface;
+	    Printf("VulkanSwapChain::AcquireImage.\n");
+		fbm->AcquireImage();
+
+		return;
+	}
+#endif
+	if(Q3E_NoDisplay())
+		return;
+
+	if(Q3E_RequireWindow(w))
+		Q3E_RestoreGL();
+}
+
+void GLimp_AndroidQuit(void)
+{
+#ifdef HAVE_VULKAN
+	if (Priv::vulkanEnabled)
+	{
+	    Printf("Stop Android Vulkan.\n");
+	    return;
+	}
+#endif
+	Q3E_DestroyGL(true);
+}
 
 SDLVideo::SDLVideo ()
 {
+#ifdef HAVE_VULKAN
+	Priv::vulkanEnabled = V_GetBackend() == 1;
+
+	if (Priv::vulkanEnabled)
+	{
+	    Printf("Enable Android Vulkan.\n");
+	}
+#endif
 }
 
 SDLVideo::~SDLVideo ()
 {
+    _fb = nullptr;
 }
 
 
@@ -159,9 +305,45 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
 {
 	SystemBaseFrameBuffer *fb = nullptr;
 
+#ifdef HAVE_VULKAN
+    if (Priv::vulkanEnabled)
+    {
+        try
+        {
+            unsigned int count = 64;
+            const char* names[64];
+            if (!I_GetVulkanPlatformExtensions(&count, names))
+                VulkanError("I_GetVulkanPlatformExtensions failed");
+
+            VulkanInstanceBuilder builder;
+            builder.DebugLayer(vk_debug);
+            for (unsigned int i = 0; i < count; i++)
+                builder.RequireExtension(names[i]);
+            auto instance = builder.Create();
+
+            VkSurfaceKHR surfacehandle = nullptr;
+            if (!I_CreateVulkanSurface(instance->Instance, &surfacehandle))
+                VulkanError("I_CreateVulkanSurface failed");
+
+            surface = std::make_shared<VulkanSurface>(instance, surfacehandle);
+
+            fb = new VulkanRenderDevice(nullptr, vid_fullscreen, surface);
+			Printf("Using Vulkan renderer.\n");
+
+			this->_fb = (VulkanRenderDevice *)fb;
+        }
+        catch (CVulkanError const &error)
+        {
+            Printf(TEXTCOLOR_RED "Initialization of Vulkan failed: %s\n", error.what());
+			Priv::vulkanEnabled = false;
+        }
+    }
+#endif
+
 	if (fb == nullptr)
 	{
 		fb = new OpenGLESRenderer::OpenGLFrameBuffer(0, vid_fullscreen);
+		Printf("Using OpenGLES renderer.\n");
 	}
 
 	return fb;
@@ -186,7 +368,7 @@ bool GLimp_InitGL(void)
 // FrameBuffer Implementation -----------------------------------------------
 
 SystemBaseFrameBuffer::SystemBaseFrameBuffer (void *, bool fullscreen)
-: DFrameBuffer (vid_defwidth, vid_defheight)
+: DFrameBuffer (screen_width, screen_height)
 {
 }
 

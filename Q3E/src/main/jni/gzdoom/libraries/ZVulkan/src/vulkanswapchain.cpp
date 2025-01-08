@@ -345,6 +345,9 @@ VulkanSurfaceCapabilities VulkanSwapChain::GetSurfaceCapabilities(bool exclusive
 		if (result != VK_SUCCESS)
 			VulkanError("vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed");
 	}
+#ifdef __ANDROID__ //karin: reset surface transform to 0 on swapchain
+	caps.Capabilites.currentTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+#endif
 
 #ifdef WIN32
 	if (exclusivefullscreen && device->SupportsExtension(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME))

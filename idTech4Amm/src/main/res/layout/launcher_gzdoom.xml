@@ -12,6 +12,38 @@
         myapp:label="@string/doom"
         myapp:lineColor="@color/launcher_divider_color" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
+        android:text="@string/renderer_backend_vid_preferbackend" />
+
+    <RadioGroup
+        android:id="@+id/gzdoom_vid_preferbackend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RadioButton
+            android:id="@+id/gzdoom_vid_preferbackend_gles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="OpenGLES" />
+        <RadioButton
+            android:id="@+id/gzdoom_vid_preferbackend_vulkan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vulkan" />
+    </RadioGroup>
+
+    <Button
+            android:id="@+id/gzdoom_choose_extras_file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/files"
+            android:textAllCaps="false" />
+
     <CheckBox
         android:id="@+id/gzdoom_load_lights_pk3"
         android:layout_width="wrap_content"
@@ -25,12 +57,5 @@
         android:layout_height="wrap_content"
         android:checked="true"
         android:text="@string/load_brightmaps_pk3" />
-
-    <Button
-        android:id="@+id/gzdoom_choose_extras_file"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/files"
-        android:textAllCaps="false" />
 
 </LinearLayout>

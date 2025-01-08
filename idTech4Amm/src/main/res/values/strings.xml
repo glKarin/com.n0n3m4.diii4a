@@ -448,5 +448,6 @@
     <string name="patch">Patch</string>
     <string name="data_resource">Data resource</string>
     <string name="game_data_resource">Game data resource</string>
+    <string name="renderer_backend_vid_preferbackend">Renderer backend(vid_preferbackend)</string>
 
 </resources>

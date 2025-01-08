@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(zvulkan)
 
-option( VULKAN_USE_XLIB "Use Vulkan xlib (X11) WSI integration" ON )
+option( VULKAN_USE_XLIB "Use Vulkan xlib (X11) WSI integration" OFF ) #k ON
 option( VULKAN_USE_WAYLAND "Use Vulkan Wayland WSI integration" OFF )
 
 if ( VULKAN_USE_XLIB )
@@ -10,6 +10,9 @@ else()
 	if (VULKAN_USE_WAYLAND)
 		add_definitions( -DVULKAN_USE_WAYLAND=1 )
 	endif()
+endif()
+if(ANDROID) #k: globals define
+	add_definitions(-DVK_USE_PLATFORM_ANDROID_KHR)
 endif()
 
 set(ZVULKAN_SOURCES
