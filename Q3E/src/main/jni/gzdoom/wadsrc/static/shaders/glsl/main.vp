@@ -151,12 +151,12 @@ void main()
 	gl_ClipDistance[4] = ClipDistance4;
 #endif
 #else
-#endif
 	gl_ClipDistance[0] = ClipDistance0;
 	gl_ClipDistance[1] = ClipDistance1;
 	gl_ClipDistance[2] = ClipDistance2;
 	gl_ClipDistance[3] = ClipDistance3;
 	gl_ClipDistance[4] = ClipDistance4;
+#endif
 #endif
 
 	gl_PointSize = 1.0;
