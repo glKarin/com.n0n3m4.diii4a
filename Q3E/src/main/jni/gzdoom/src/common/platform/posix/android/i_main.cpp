@@ -156,6 +156,8 @@ int main(int argc, char **argv)
 {
 	ZMusic_SetDLLPath(Sys_DLLDefaultPath());
 
+	extern bool no_handle_signals;
+	if(!no_handle_signals)
 	{
 		int s[4] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS };
 		cc_install_handlers(argc, argv, 4, s, GAMENAMELOWERCASE "-crash.log", GetCrashInfo);

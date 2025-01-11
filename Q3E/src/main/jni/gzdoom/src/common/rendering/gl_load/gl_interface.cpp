@@ -120,6 +120,9 @@ void gl_LoadExtensions()
 #ifdef __ANDROID__ //karin: force GL version
 	extern float GLimp_GetGLVersion(void);
 	realglversion = GLimp_GetGLVersion();
+	FString glversionStr;
+	glversionStr.AppendFormat("%f", realglversion);
+	glversion = glversionStr.GetChars();
 #endif
 
 

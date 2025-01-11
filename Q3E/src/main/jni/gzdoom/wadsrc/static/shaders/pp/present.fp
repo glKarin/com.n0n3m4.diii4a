@@ -11,7 +11,7 @@ vec4 ApplyGamma(vec4 c)
 
 	vec3 valgray;
 	if (GrayFormula == 0)
-		valgray = vec3(c.r + c.g + c.b) * (1 - Saturation) / 3 + c.rgb * Saturation;
+		valgray = vec3(c.r + c.g + c.b) * (1.0 - Saturation) / 3.0 + c.rgb * Saturation;
 	else if (GrayFormula == 2)	// new formula
 		valgray = mix(vec3(pow(dot(pow(vec3(c), vec3(2.2)), vec3(0.2126, 0.7152, 0.0722)), 1.0/2.2)), c.rgb, Saturation);
 	else

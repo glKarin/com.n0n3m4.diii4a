@@ -424,7 +424,19 @@ void FGLRenderState::Draw(int dt, int index, int count, bool apply)
 		Apply();
 	}
 	drawcalls.Clock();
+#ifdef _GLES //karin: TODO glDrawArrays crash!!!
+	int buf;
+	glGetIntegerv( GL_ELEMENT_ARRAY_BUFFER_BINDING, &buf);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	int *arr = (int*)malloc(4 * count);
+	for(int i = 0; i < count; i++)
+		arr[i] = index + i;
+	TID(glDrawElements(dt2gl[dt], count, GL_UNSIGNED_INT, arr));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf);
+	free(arr);
+#else
 	glDrawArrays(dt2gl[dt], index, count);
+#endif
 	drawcalls.Unclock();
 }
 

@@ -449,5 +449,6 @@
     <string name="data_resource">Data resource</string>
     <string name="game_data_resource">Game data resource</string>
     <string name="renderer_backend_vid_preferbackend">Renderer backend(vid_preferbackend)</string>
+    <string name="opengles_version_harm_gl_es">OpenGLES version(harm_gl_es)</string>
 
 </resources>

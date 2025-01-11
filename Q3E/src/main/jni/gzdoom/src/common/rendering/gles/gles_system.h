@@ -86,6 +86,9 @@ namespace OpenGLESRenderer
 		GLES_MODE_GLES = 0,
 		GLES_MODE_OGL2 = 1,
 		GLES_MODE_OGL3 = 2,
+#ifdef _GLES //karin: GLES3.2 + GLSL 300es shader
+		GLES_MODE_OGL32 = 4,
+#endif
 	};
 
 	struct RenderContextGLES
@@ -118,6 +121,19 @@ namespace OpenGLESRenderer
 
 #pragma warning(disable : 4018)     // signed/unsigned mismatch
 #pragma warning(disable : 4305)     // truncate from double to float
+#endif
+
+#ifdef _GLES //karin: custom GLES version
+#include "c_cvars.h"
+EXTERN_CVAR(Int, harm_gl_es);
+#define HARM_GL_ES_DEFAULT 0
+#define HARM_GL_ES_GLES2 2
+#define HARM_GL_ES_GLES3 3
+#define HARM_GL_ES_GLES32 4
+#define USING_GLES_AUTO (harm_gl_es == HARM_GL_ES_DEFAULT)
+#define USING_GLES_2 (harm_gl_es == HARM_GL_ES_GLES2)
+#define USING_GLES_3 (harm_gl_es == HARM_GL_ES_GLES3)
+#define USING_GLES_32 (harm_gl_es == HARM_GL_ES_GLES32)
 #endif
 
 #endif //__GL_PCH_H

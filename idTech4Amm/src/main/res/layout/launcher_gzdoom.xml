@@ -18,23 +18,62 @@
         android:layout_marginTop="1dp"
         android:layout_marginBottom="1dp"
         android:text="@string/renderer_backend_vid_preferbackend" />
-
     <RadioGroup
         android:id="@+id/gzdoom_vid_preferbackend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <RadioButton
-            android:id="@+id/gzdoom_vid_preferbackend_gles"
+            android:id="@+id/gzdoom_vid_preferbackend_gl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="OpenGLES" />
+            android:text="OpenGL" />
         <RadioButton
             android:id="@+id/gzdoom_vid_preferbackend_vulkan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Vulkan" />
+        <RadioButton
+            android:id="@+id/gzdoom_vid_preferbackend_gles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="OpenGL ES" />
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
+        android:text="@string/opengles_version_harm_gl_es" />
+    <RadioGroup
+        android:id="@+id/gzdoom_gl_es"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RadioButton
+            android:id="@+id/gzdoom_gl_es_0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_default" />
+        <RadioButton
+            android:id="@+id/gzdoom_gl_es_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OpenGL ES2.0" />
+        <RadioButton
+            android:id="@+id/gzdoom_gl_es_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="OpenGL ES3.0(GLSL 100)" />
+        <RadioButton
+            android:id="@+id/gzdoom_gl_es_32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="OpenGL ES3.0(GLSL 300es)" />
     </RadioGroup>
 
     <Button

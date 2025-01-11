@@ -408,8 +408,31 @@ bool FShader::Load(const char * name, const char * vert_prog_lump_, const char *
 	vp_comb << "#line 1\n";
 	fp_comb << "#line 1\n";
 
+#ifdef _GLES //karin: convert GLSL code to 320 es on OpenGLES
+	if(gles.glesMode == GLES_MODE_OGL32)
+	{
+		FString vpcode = GetStringFromLump(vp_lump);
+		FString newvpcode = RemoveLayoutLocationDecl(vpcode, "out");
+		FString vppatch300 = GenGLSL300PatchCode(0);
+		vp_comb << vppatch300;
+		FString vpcode300 = GLSL100_to_GLSL300(newvpcode, 0);
+		vp_comb << vpcode300;
+
+		FString fpcode = GetStringFromLump(fp_lump);
+		FString newfpcode = RemoveLayoutLocationDecl(fpcode, "in");
+		FString fppatch300 = GenGLSL300PatchCode(1);
+		fp_comb << fppatch300;
+		FString fpcode300 = GLSL100_to_GLSL300(newfpcode, 1);
+		fp_comb << fpcode300;
+	}
+	else
+	{
+#endif
 	vp_comb << RemoveLayoutLocationDecl(GetStringFromLump(vp_lump), "out").GetChars() << "\n";
 	fp_comb << RemoveLayoutLocationDecl(GetStringFromLump(fp_lump), "in").GetChars() << "\n";
+#ifdef _GLES //karin: convert GLSL code to 320 es on OpenGLES
+	}
+#endif
 	FString placeholder = "\n";
 
 	if (proc_prog_lump.Len())
@@ -430,12 +453,26 @@ bool FShader::Load(const char * name, const char * vert_prog_lump_, const char *
 				{
 					int pl_lump = fileSystem.CheckNumForFullName("shaders_gles/glsl/func_defaultmat2.fp", 0);
 					if (pl_lump == -1) I_Error("Unable to load '%s'", "shaders_gles/glsl/func_defaultmat2.fp");
+#ifdef _GLES //karin: convert GLSL code to 320 es on OpenGLES
+					if(gles.glesMode == GLES_MODE_OGL32)
+					{
+						fp_comb << "\n" << GLSL100_to_GLSL300(GetStringFromLump(pl_lump), 1);
+					}
+					else
+#endif
 					fp_comb << "\n" << GetStringFromLump(pl_lump);
 				}
 				else
 				{
 					int pl_lump = fileSystem.CheckNumForFullName("shaders_gles/glsl/func_defaultmat.fp", 0);
 					if (pl_lump == -1) I_Error("Unable to load '%s'", "shaders_gles/glsl/func_defaultmat.fp");
+#ifdef _GLES //karin: convert GLSL code to 320 es on OpenGLES
+					if(gles.glesMode == GLES_MODE_OGL32)
+					{
+						fp_comb << "\n" << GLSL100_to_GLSL300(GetStringFromLump(pl_lump), 1);
+					}
+					else
+#endif
 					fp_comb << "\n" << GetStringFromLump(pl_lump);
 
 					if (pp_data.IndexOf("ProcessTexel") < 0)
@@ -455,6 +492,13 @@ bool FShader::Load(const char * name, const char * vert_prog_lump_, const char *
 				}
 			}
 
+#ifdef _GLES //karin: convert GLSL code to 320 es on OpenGLES
+			if(gles.glesMode == GLES_MODE_OGL32)
+			{
+				fp_comb << GLSL100_to_GLSL300(RemoveLegacyUserUniforms(pp_data).GetChars(), 1);
+			}
+			else
+#endif
 			fp_comb << RemoveLegacyUserUniforms(pp_data).GetChars();
 			fp_comb.Substitute("gl_TexCoord[0]", "vTexCoord");	// fix old custom shaders.
 
@@ -462,6 +506,13 @@ bool FShader::Load(const char * name, const char * vert_prog_lump_, const char *
 			{
 				int pl_lump = fileSystem.CheckNumForFullName("shaders_gles/glsl/func_defaultlight.fp", 0);
 				if (pl_lump == -1) I_Error("Unable to load '%s'", "shaders_gles/glsl/func_defaultlight.fp");
+#ifdef _GLES //karin: convert GLSL code to 320 es on OpenGLES
+				if(gles.glesMode == GLES_MODE_OGL32)
+				{
+					fp_comb << "\n" << GLSL100_to_GLSL300(GetStringFromLump(pl_lump), 1);
+				}
+				else
+#endif
 				fp_comb << "\n" << GetStringFromLump(pl_lump);
 			}
 
@@ -475,9 +526,22 @@ bool FShader::Load(const char * name, const char * vert_prog_lump_, const char *
 		else
 		{
 			// Proc_prog_lump is not a lump name but the source itself (from generated shaders)
+#ifdef _GLES //karin: convert GLSL code to 320 es on OpenGLES
+			if(gles.glesMode == GLES_MODE_OGL32)
+			{
+				fp_comb << GLSL100_to_GLSL300(proc_prog_lump.GetChars() + 1, 1);
+			}
+			else
+#endif
 			fp_comb << proc_prog_lump.GetChars() + 1;
 		}
 	}
+#ifdef _GLES //karin: convert GLSL code to 320 es on OpenGLES
+	if(gles.glesMode == GLES_MODE_OGL32)
+	{
+		fp_comb << GLSL100_to_GLSL300(placeholder, 1);
+	}
+#endif
 	fp_comb.Substitute("$placeholder$", placeholder);
 
 	if (light_fragprog.Len())

@@ -247,6 +247,17 @@ FString FShaderProgram::PatchShader(ShaderType type, const FString &code, const 
 
 
 	patchedCode << "#line 1\n";
+#ifdef _GLES //karin: convert GLSL code to 320 es on OpenGLES
+	if(gles.glesMode == GLES_MODE_OGL32)
+	{
+		FString newcode = RemoveLayoutLocationDecl(code, type == Vertex ? "out" : "in");
+		FString patch300 = GenGLSL300PatchCode((int)type);
+		patchedCode << patch300;
+		FString code300 = GLSL100_to_GLSL300(newcode, (int)type);
+		patchedCode << code300;
+	}
+	else
+#endif
 	patchedCode << RemoveLayoutLocationDecl(code, type == Vertex ? "out" : "in");
 
 	if (maxGlslVersion < 420)

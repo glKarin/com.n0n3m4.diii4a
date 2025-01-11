@@ -627,11 +627,22 @@ public class GameLauncher extends Activity
 			// GZDOOM
 			else if (rgId == R.id.gzdoom_vid_preferbackend)
 			{
-				String value2 = GetCheckboxIndex(radioGroup, id) == 1 ? "1" : "2";
+				int value2 = GetCheckboxIndex(radioGroup, id);
 				if(Q3EUtils.q3ei.isDOOM)
 				{
 					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend");
 					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "vid_preferbackend", value2);
+				}
+			}
+			else if (rgId == R.id.gzdoom_gl_es)
+			{
+				int value2 = GetCheckboxIndex(radioGroup, id);
+				if(value2 > 0)
+					value2++;
+				if(Q3EUtils.q3ei.isDOOM)
+				{
+					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_es");
+					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "harm_gl_es", value2);
 				}
 			}
         }
@@ -1310,13 +1321,22 @@ public class GameLauncher extends Activity
 		int index;
 
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend");
+		index = 2;
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 2);
+		}
+		SelectCheckbox(V.gzdoom_vid_preferbackend, index);
+
+		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_es");
 		index = 0;
 		if (str != null)
 		{
-			if ("1".equalsIgnoreCase(str))
-				index = 1;
+			index = Q3EUtils.parseInt_s(str, 0);
+			if(index > 0)
+				index--;
 		}
-		SelectCheckbox(V.gzdoom_vid_preferbackend, index);
+		SelectCheckbox(V.gzdoom_gl_es, index);
 	}
 
     private void ThrowException()
@@ -1856,6 +1876,9 @@ public class GameLauncher extends Activity
 
 	private void SetupUI_GZDOOM()
 	{
+		int index;
+		String str;
+
 		SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		boolean load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, true);
@@ -1875,8 +1898,25 @@ public class GameLauncher extends Activity
 
 		V.gzdoom_choose_extras_file.setOnClickListener(m_buttonClickListener);
 
-		SelectCheckbox(V.gzdoom_vid_preferbackend, "1".equals(GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend")) ? 1 : 0);
+		index = 2;
+		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend");
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 2);
+		}
+		SelectCheckbox(V.gzdoom_vid_preferbackend, index);
 		V.gzdoom_vid_preferbackend.setOnCheckedChangeListener(m_groupCheckChangeListener);
+
+		index = 0;
+		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_es");
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 0);
+			if(index > 0)
+				index--;
+		}
+		SelectCheckbox(V.gzdoom_gl_es, index);
+		V.gzdoom_gl_es.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
 	private void AfterCreated()
@@ -4002,6 +4042,7 @@ public class GameLauncher extends Activity
 		public CheckBox gzdoom_load_brightmaps_pk3;
 		public Button gzdoom_choose_extras_file;
 		public RadioGroup gzdoom_vid_preferbackend;
+		public RadioGroup gzdoom_gl_es;
 		public LinearLayout tdm_section;
 		public CheckBox tdm_useMediumPrecision;
 		public SeekBar consoleHeightFracValue;
@@ -4136,6 +4177,7 @@ public class GameLauncher extends Activity
 			gzdoom_load_brightmaps_pk3 = findViewById(R.id.gzdoom_load_brightmaps_pk3);
 			gzdoom_choose_extras_file = findViewById(R.id.gzdoom_choose_extras_file);
 			gzdoom_vid_preferbackend = findViewById(R.id.gzdoom_vid_preferbackend);
+			gzdoom_gl_es = findViewById(R.id.gzdoom_gl_es);
 			tdm_section = findViewById(R.id.tdm_section);
 			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);
 			consoleHeightFracValue = findViewById(R.id.consoleHeightFracValue);

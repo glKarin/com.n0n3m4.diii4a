@@ -880,7 +880,7 @@ void main()
 		if ((uTextureMode & 0xffff) == 7)
 		{
 			float gray = grayscale(frag);
-			vec4 cm = (uObjectColor + gray * (uAddColor - uObjectColor)) * 2;
+			vec4 cm = (uObjectColor + gray * (uAddColor - uObjectColor)) * 2.0;
 			frag = vec4(clamp(cm.rgb, 0.0, 1.0), frag.a);
 		}
 			frag = frag * ProcessLight(material, vColor);

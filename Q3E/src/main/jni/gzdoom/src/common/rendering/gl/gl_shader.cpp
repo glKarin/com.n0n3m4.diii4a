@@ -392,8 +392,27 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 
 	if ((gl.flags & RFL_SHADER_STORAGE_BUFFER) && screen->allowSSBO())
 		vp_comb << "#version 430 core\n#define SUPPORTS_SHADOWMAPS\n";
-	else 
+	else
+#ifdef _GLES //karin: setup default precision on GLSL shader
+		vp_comb << "#version 300 es\n";
+
+	extern FString GetGLSLPrecision();
+	auto _i = i_data.IndexOf("precision highp int");
+	i_data.Substitute("std430", "std140");
+	i_data.Substitute("precision highp int;\n", "");
+	i_data.Substitute("precision highp float;\n", "");
+	i_data.Insert(_i, GetGLSLPrecision());
+	i_data.Insert(0, R"(
+#extension GL_EXT_clip_cull_distance : enable
+#if !defined(GL_EXT_clip_cull_distance)
+#define NO_CLIPDISTANCE_SUPPORT 1
+#endif
+#define _GLES //karin: GLES macro only for OpenGL, not Vulkan
+
+)");
+#else
 		vp_comb << "#version 330 core\n";
+#endif
 
 	bool lightbuffertype = screen->mLights->GetBufferType();
 	if (!lightbuffertype)
@@ -494,6 +513,10 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 		// This will cause some glitches and regressions but is the only way to avoid total display garbage.
 		vp_comb.Substitute("gl_ClipDistance", "//");
 	}
+#ifdef _GLES //karin: force std140 on GLSL shader
+	vp_comb.Substitute("std430", "std140");
+	fp_comb.Substitute("std430", "std140");
+#endif
 
 	hShader = glCreateProgram();
 	FGLDebug::LabelObject(GL_PROGRAM, hShader, name);
@@ -526,6 +549,25 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 		const char *vp_ptr = vp_comb.GetChars();
 		const char *fp_ptr = fp_comb.GetChars();
 
+#ifdef _GLESxxx //karin: output glsl shader for debug
+		auto dump_glsl_f = [](const char *name, const char *src) {
+			const char *ptr = strrchr(name, '/');
+			if(!ptr)
+				ptr = name;
+			else
+				ptr++;
+			FString path = "./glsl/";
+			path += ptr;
+
+			auto file = fopen(path.GetChars(), "w");
+			fwrite(src, strlen(src), 1, file);
+			fflush(file);
+			fclose(file);
+			printf("Dump GLSL shader: %s -> %s\n", name, path.GetChars());
+		};
+		dump_glsl_f(vert_prog_lump, vp_ptr);
+		dump_glsl_f(frag_prog_lump, fp_ptr);
+#endif
 		glShaderSource(hVertProg, 1, &vp_ptr, &vp_size);
 		glShaderSource(hFragProg, 1, &fp_ptr, &fp_size);
 

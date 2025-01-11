@@ -446,7 +446,9 @@ bool FGLRenderBuffers::CheckFrameBufferCompleteness()
 	if (result == GL_FRAMEBUFFER_COMPLETE)
 		return true;
 
+#if !defined(_GLES) //karin: always show gl error
 	if (gl_debug_level > 0)
+#endif
 	{
 		FString error = "glCheckFramebufferStatus failed: ";
 		switch (result)

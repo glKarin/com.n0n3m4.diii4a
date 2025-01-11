@@ -212,7 +212,22 @@ void OpenGLFrameBuffer::CopyScreenToBuffer(int width, int height, uint8_t* scr)
 
 	// strictly speaking not needed as the glReadPixels should block until the scene is rendered, but this is to safeguard against shitty drivers
 	glFinish();
+#ifdef _GLES //karin: glReadPixels using GL_RGBA on OpenGLES
+	uint8_t *scr4 = (uint8_t *)malloc(4 * width * height);
+	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, scr4);
+	for(int h = 0; h < height; h++)
+	{
+		for(int w = 0; w < width; w++)
+		{
+			const uint8_t *src = scr4 + (width * h + w) * 4;
+			uint8_t *dst = scr + (width * h + w) * 3;
+			memcpy(dst, src, 3);
+		}
+	}
+	free(scr4);
+#else
 	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, scr);
+#endif
 }
 
 //===========================================================================
@@ -507,7 +522,22 @@ TArray<uint8_t> OpenGLFrameBuffer::GetScreenshotBuffer(int &pitch, ESSType &colo
 	TArray<uint8_t> pixels;
 	pixels.Resize(viewport.width * viewport.height * 3);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+#ifdef _GLES //karin: glReadPixels using GL_RGBA on OpenGLES
+	uint8_t *pixels4 = (uint8_t *)malloc(4 * viewport.width * viewport.height);
+	glReadPixels(viewport.left, viewport.top, viewport.width, viewport.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels4);
+	for(int h = 0; h < viewport.height; h++)
+	{
+		for(int w = 0; w < viewport.width; w++)
+		{
+			const uint8_t *src = pixels4 + (viewport.width * h + w) * 4;
+			uint8_t *dst = (&pixels[0]) + (viewport.width * h + w) * 3;
+			memcpy(dst, src, 3);
+		}
+	}
+	free(pixels4);
+#else
 	glReadPixels(viewport.left, viewport.top, viewport.width, viewport.height, GL_RGB, GL_UNSIGNED_BYTE, &pixels[0]);
+#endif
 	glPixelStorei(GL_PACK_ALIGNMENT, 4);
 
 	// Copy to screenshot buffer:

@@ -52,6 +52,7 @@
 #include "gl_framebuffer.h"
 #ifdef HAVE_GLES2
 #include "gles_framebuffer.h"
+#include "gles_system.h"
 #endif
 
 #ifdef HAVE_VULKAN
@@ -126,6 +127,8 @@ CCMD(vid_list_sdl_render_drivers)
 CUSTOM_CVAR(Int, vid_adapter, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
 {
 }
+
+CVAR(Int, harm_gl_es, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL); // 0 = auto(GLES2.0), 2 = GLES2.0, 3 = GLES3.2(GLES 100 shader), 4 = GLES3.2(GLES 320 shader)
 
 class SDLVideo : public IVideo
 {
@@ -249,12 +252,13 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 
 		if(fbm->SwapChain && !fbm->SwapChain->Lost())
 		{
-	        Printf("SwapChain make lost.\n");
+	        Printf("VulkanSwapChain::SwapChain make lost.\n");
 			fbm->SwapChain->MakeLost();
 		}
 		VkSurfaceKHR surfacehandle = nullptr;
 		if (!I_CreateVulkanSurface(sdl_video->_fb->device->Instance->Instance, &surfacehandle))
 			VulkanError("I_CreateVulkanSurface failed");
+
 	    Printf("Create Vulkan surface: %p.\n", surfacehandle);
 		sdl_video->surface->Surface = surfacehandle;
 		sdl_video->_fb->device->Surface = sdl_video->surface;
@@ -297,7 +301,9 @@ SDLVideo::SDLVideo ()
 
 SDLVideo::~SDLVideo ()
 {
+#ifdef HAVE_VULKAN
     _fb = nullptr;
+#endif
 }
 
 
@@ -342,8 +348,18 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
 
 	if (fb == nullptr)
 	{
-		fb = new OpenGLESRenderer::OpenGLFrameBuffer(0, vid_fullscreen);
-		Printf("Using OpenGLES renderer.\n");
+#ifdef HAVE_GLES2
+        if (V_GetBackend() != 0)
+        {
+            fb = new OpenGLESRenderer::OpenGLFrameBuffer(0, vid_fullscreen);
+            Printf("Using OpenGLES renderer.\n");
+        }
+        else
+#endif
+        {
+            fb = new OpenGLRenderer::OpenGLFrameBuffer(0, vid_fullscreen);
+            Printf("Using OpenGL renderer.\n");
+        }
 	}
 
 	return fb;
@@ -358,7 +374,29 @@ IVideo *gl_CreateVideo()
 bool GLimp_InitGL(void)
 {
 	Q3E_GL_CONFIG_SET(fullscreen, 1);
-	Q3E_GL_CONFIG_ES_3_0();
+	if (V_GetBackend() == 0)
+	{
+		Q3E_GL_CONFIG_ES_3_2();
+	}
+	else
+	{
+		if(USING_GLES_2)
+		{
+			Q3E_GL_CONFIG_ES_2_0();
+		}
+		else if(USING_GLES_3)
+		{
+			Q3E_GL_CONFIG_ES_3_2();
+		}
+		else if(USING_GLES_32)
+		{
+			Q3E_GL_CONFIG_ES_3_2();
+		}
+		else
+		{
+			Q3E_GL_CONFIG_ES_3_0();
+		}
+	}
 
 	bool res = Q3E_InitGL();
 	return res;
@@ -444,10 +482,54 @@ void I_SetWindowTitle(const char* caption)
 
 float GLimp_GetGLSLVersion(void)
 {
-	return 3.00f;
+	if (V_GetBackend() == 0)
+	{
+		return 3.20f;
+	}
+	else
+	{
+		if(USING_GLES_2)
+		{
+			return 1.00f;
+		}
+		else if(USING_GLES_3)
+		{
+			return 3.00f;
+		}
+		else if(USING_GLES_32)
+		{
+			return 3.20f;
+		}
+		else
+		{
+			return 1.00f; // 3.00f
+		}
+	}
 }
 
 float GLimp_GetGLVersion(void)
 {
-	return 3.0f;
+	if (V_GetBackend() == 0)
+	{
+		return 4.2f;
+	}
+	else
+	{
+		if(USING_GLES_2)
+		{
+			return 2.0f;
+		}
+		else if(USING_GLES_3)
+		{
+			return 3.2f;
+		}
+		else if(USING_GLES_32)
+		{
+			return 3.2f;
+		}
+		else
+		{
+			return 3.0f;
+		}
+	}
 }

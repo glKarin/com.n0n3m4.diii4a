@@ -310,3 +310,38 @@ int DFrameBuffer::GetShaderCount()
 	return MAX_PASS_TYPES * (countof(defaultshaders) - 1 + usershaders.Size() + MAX_EFFECTS + SHADER_NoTexture);
 }
 
+#ifdef _GLES //karin: convert GLSL code to 300 es on OpenGLES
+FString GLSL100_to_GLSL300(FString code, int type)
+{
+	FString varying;
+	if(type == 0) // Vertex
+		varying = "out ";
+	else // Fragment
+		varying = "in ";
+
+	code.Substitute("attribute ", "in ");
+	code.Substitute("varying ", varying);
+	code.Substitute("gl_FragColor", "_gl_FragColor");
+
+	code.Substitute("texture2D", "texture");
+	code.Substitute("texture2DProj", "textureProj");
+	code.Substitute("textureCube", "texture");
+	code.Substitute("textureCubeProj", "textureProj");
+
+	return code;
+}
+
+FString GenGLSL300PatchCode(int type)
+{
+	FString code;
+
+	if(type == 0) // Vertex
+	{}
+	else // Fragment
+	{
+		code += "\nout vec4 _gl_FragColor;\n\n";
+	}
+
+	return code;
+}
+#endif
