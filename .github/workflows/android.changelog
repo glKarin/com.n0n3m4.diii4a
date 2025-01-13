@@ -1,1 +1,1 @@
-GZDOOM add OpenGL renderer backend, add OpenGLES version config.
+GZDOOM add Vulkan and OpenGL renderer backend.

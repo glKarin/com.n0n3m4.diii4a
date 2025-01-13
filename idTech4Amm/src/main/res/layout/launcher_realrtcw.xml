@@ -12,12 +12,6 @@
         myapp:label="@string/realrtcw"
         myapp:lineColor="@color/launcher_divider_color" />
 
-    <CheckBox
-        android:id="@+id/realrtcw_sv_cheats"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/allow_cheats_harm_sv_cheats" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -52,5 +46,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/render_personal_model_shadow_harm_r_stencilshadowpersonal" />
+
+    <CheckBox
+        android:id="@+id/realrtcw_sv_cheats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/allow_cheats_harm_sv_cheats" />
 
 </LinearLayout>

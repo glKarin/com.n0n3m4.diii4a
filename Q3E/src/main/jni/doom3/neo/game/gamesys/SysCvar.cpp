@@ -339,7 +339,6 @@ idCVar harm_pm_fullBodyAwarenessOffset("harm_pm_fullBodyAwarenessOffset", "0 0 0
 idCVar harm_pm_fullBodyAwarenessHeadJoint( "harm_pm_fullBodyAwarenessHeadJoint", "Head", CVAR_GAME | CVAR_ARCHIVE, "head joint when without head model in full-body awareness" );
 idCVar harm_pm_fullBodyAwarenessFixed( "harm_pm_fullBodyAwarenessFixed", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "do not attach view position to head in full-body awareness" );
 idCVar harm_pm_fullBodyAwarenessHeadVisible( "harm_pm_fullBodyAwarenessHeadVisible", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "do not suppress head in full-body awareness" );
-idCVar harm_pm_fullBodyAwarenessFirstPerson( "harm_pm_fullBodyAwarenessFirstPerson", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "enable first person view in full-body awareness" );
 #endif
 #ifdef _MOD_VIEW_BODY
 idCVar harm_ui_showViewBody( "harm_ui_showViewBody", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "show view body" );

@@ -339,10 +339,26 @@ public class Q3EUtils
         if(null != externalFilesDir)
             path = externalFilesDir.getAbsolutePath();
         else
-            path = Environment.getExternalStorageDirectory() + "/Android/data/" + Q3EGlobals.CONST_PACKAGE_NAME + "/files";
+            path = Environment.getExternalStorageDirectory() + "/" + Q3EGlobals.CONST_PACKAGE_NAME + "/files";
         if(null != filename && !filename.isEmpty())
             path += filename;
         return path;
+    }
+
+    public static String GetDefaultGameDirectory(Context context)
+    {
+        String path = null;
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P)
+        {
+            File externalFilesDir = context.getExternalFilesDir(null);
+            if(null != externalFilesDir)
+                path = externalFilesDir.getAbsolutePath();
+            else
+                path = Environment.getExternalStorageDirectory() + "/" + context.getApplicationContext().getPackageName() + "/files";
+        }
+        if(KStr.IsEmpty(path))
+            path = Environment.getExternalStorageDirectory().getAbsolutePath();
+        return path + "/diii4a";
     }
 
     public static String GetAppInternalPath(Context context, String filename)

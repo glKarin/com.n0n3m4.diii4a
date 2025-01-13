@@ -193,7 +193,7 @@
     <string name="be_available_on_reboot_the_next_time">重启或下次启动生效</string>
     <string name="game_patch_resource">游戏补丁资源</string>
     <string name="extract_all">全部提取</string>
-    <string name="can_t_s_read_write_external_storage_permission_is_not_granted">无法%s! 没有授权读写外部存储权限!</string>
+    <string name="can_t_s_read_write_external_storage_permission_is_not_granted">无法%1$s! 没有授权读写外部存储权限!</string>
     <string name="access_file">访问文件</string>
     <string name="success">成功</string>
     <string name="fail">失败</string>
@@ -302,7 +302,7 @@
     <string name="scroll">滚动</string>
     <string name="pause">暂停</string>
     <string name="joystick_visible">摇杆显示:</string>
-    <string name="suggest_game_woring_directory_tips">Android11/11+建议在`%s`下创建文件夹作为游戏数据文件夹以加快加载速度!</string>
+    <string name="suggest_game_woring_directory_tips">Android11/11+建议在`%1$s`下创建文件夹作为游戏数据文件夹以加快加载速度!</string>
     <string name="sub_directory">独立目录: </string>
     <string name="app_is_rebooting">应用重启中......</string>
     <string name="standalone_game_data_directory">游戏数据独立文件夹</string>
@@ -390,17 +390,17 @@
     <string name="load_game_library_from_getdatadir"><![CDATA[从外部`<游戏运行目录>/lib/<arm64|arm>/`加载游戏动态库]]></string> <!--到`/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`下并加载-->
     <string name="load_engine_library_from_getdatadir"><![CDATA[从外部`<游戏运行目录>/[<独立游戏文件夹>/]<游戏引擎动态库>`加载游戏引擎动态库]]></string> <!--到`/data/user/<UID>/com.karin.idTech4Amm/cache/<游戏动态库>`下并加载-->
     <string name="shortcut">快捷方式</string>
-    <string name="create_desktop_shortcut_success">创建%s %s桌面快捷方式成功.</string>
-    <string name="create_desktop_shortcut_fail">创建%s %s桌面快捷方式失败!</string>
+    <string name="create_desktop_shortcut_success">创建%1$s %2$s桌面快捷方式成功.</string>
+    <string name="create_desktop_shortcut_fail">创建%1$s %2$s桌面快捷方式失败!</string>
     <string name="create_desktop_shortcut">创建桌面快捷方式</string>
     <string name="unsupport_create_desktop_shortcut">不支持创建桌面快捷方式!</string>
     <string name="only_support_on_android_version_7_1"><![CDATA[创建桌面快捷方式仅支持Android 7.1及其以上版本]]></string>
     <string name="all">全部</string>
-    <string name="permission_not_granted">未授权 %s 权限</string>
+    <string name="permission_not_granted">未授权%1$s权限</string>
     <string name="command_shortcut">快捷方式(当前命令)</string>
     <string name="create_shortcut_with_current_command_and_game">创建桌面快捷方式(当前的命令行和游戏)</string>
     <string name="input_desktop_shortcut_name">输入桌面快捷方式名称</string>
-    <string name="game_desktop_shortcut_has_created">%s桌面快捷方式已被创建(%s).</string>
+    <string name="game_desktop_shortcut_has_created">%1$s桌面快捷方式已被创建(%2$s).</string>
     <string name="signals_handler">信号处理器</string>
     <string name="setup_signals_handler_when_game_crash">设置当前游戏崩溃时的信号处理方式</string>
     <string name="last_backtrace_info">最后回退栈信息</string>
@@ -446,4 +446,5 @@
     <string name="game_data_resource">游戏数据资源</string>
     <string name="renderer_backend_vid_preferbackend">渲染器后端(vid_preferbackend)</string>
     <string name="opengles_version_harm_gl_es">OpenGLES版本(harm_gl_es)</string>
+    <string name="choose_mod_files">选择mod文件</string>
 </resources>

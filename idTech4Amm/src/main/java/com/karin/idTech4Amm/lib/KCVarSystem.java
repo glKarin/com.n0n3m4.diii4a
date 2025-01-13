@@ -125,7 +125,6 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
                     KCVar.CreateCVar("harm_g_normalizeMovementDirection", "integer", "-1", "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree", 0)
                 );
@@ -212,6 +211,21 @@ public final class KCVarSystem
                         )
                 );
 
+        KCVar.Group GZDOOM_CVARS = new KCVar.Group("GZDOOM", true)
+                .AddCVar(
+                        KCVar.CreateCVar("harm_gl_es", "integer", "0", "OpenGLES version", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
+                                "0", "Automatic",
+                                "2", "OpenGL ES2.0",
+                                "3", "OpenGL ES3.0(GLSL shader version is 100)",
+                                "4", "OpenGL ES3.0(GLSL shader version is 300 es)"
+                        ),
+                        KCVar.CreateCVar("gl_glsl_precision", "integer", "0", "OpenGL shader default precision", KCVar.FLAG_INIT,
+                                "0", "highp",
+                                "1", "mediump",
+                                "2", "lowp"
+                        )
+                );
+
         _cvars.put("RENDERER", RENDERER_CVARS);
         _cvars.put("FRAMEWORK", FRAMEWORK_CVARS);
         _cvars.put("base", GAME_CVARS);
@@ -222,6 +236,7 @@ public final class KCVarSystem
         _cvars.put("RealRTCW", REALRTCW_CVARS);
         _cvars.put("ETW", ETW_CVARS);
         _cvars.put("TDM", TDM_CVARS);
+        _cvars.put("GZDOOM", GZDOOM_CVARS);
 
         return _cvars;
     }
@@ -248,7 +263,8 @@ public final class KCVarSystem
             res.add(_cvars.get("TDM"));
         else if(Q3EUtils.q3ei.isD3BFG)
             res.add(_cvars.get("DOOM3BFG"));
-        else if(Q3EUtils.q3ei.isDOOM) ;
+        else if(Q3EUtils.q3ei.isDOOM)
+            res.add(_cvars.get("GZDOOM"));
         else if(Q3EUtils.q3ei.isETW)
             res.add(_cvars.get("ETW"));
         else if(Q3EUtils.q3ei.isRealRTCW)

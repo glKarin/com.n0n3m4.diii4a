@@ -258,7 +258,6 @@ extern idCVar harm_pm_fullBodyAwarenessOffset;
 extern idCVar harm_pm_fullBodyAwarenessHeadJoint;
 extern idCVar harm_pm_fullBodyAwarenessFixed;
 extern idCVar harm_pm_fullBodyAwarenessHeadVisible;
-extern idCVar harm_pm_fullBodyAwarenessFirstPerson;
 #endif
 #ifdef _MOD_VIEW_BODY
 extern idCVar harm_ui_showViewBody;

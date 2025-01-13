@@ -292,7 +292,7 @@
     <string name="scroll">Прокрутка</string>
     <string name="pause">Пауза</string>
     <string name="joystick_visible">Джойстик виден:</string>
-    <string name="suggest_game_woring_directory_tips">Рекомендуется создать папку в `%s` для быстрой загрузки игры на Android 11/11+!</string>
+    <string name="suggest_game_woring_directory_tips">Рекомендуется создать папку в `%1$s` для быстрой загрузки игры на Android 11/11+!</string>
     <string name="sub_directory">Подкаталог: </string>
     <string name="app_is_rebooting">Приложение перезагружается......</string>
     <string name="standalone_game_data_directory">Автономный каталог данных игры</string>
@@ -391,17 +391,17 @@
     <string name="load_game_library_from_getdatadir"><![CDATA[Загрузите внешнюю локальную игровую библиотеку из `<рабочий каталог игры>/lib/<arm64|arm>/`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`-->
     <string name="load_engine_library_from_getdatadir"><![CDATA[Загрузите внешнюю локальную библиотеку игрового движка из `<рабочий каталог игры>/[<отдельный каталог игры>/]<библиотека игрового движка>`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/<game engine library>`-->
     <string name="shortcut">Ярлык</string>
-    <string name="create_desktop_shortcut_success">Создание ярлыка %s %s на рабочем столе завершено успешно.</string>
-    <string name="create_desktop_shortcut_fail">Создание ярлыка %s %s на рабочем столе завершилось неудачей!</string>
+    <string name="create_desktop_shortcut_success">Создание ярлыка %1$s %2$s на рабочем столе завершено успешно.</string>
+    <string name="create_desktop_shortcut_fail">Создание ярлыка %1$s %2$s на рабочем столе завершилось неудачей!</string>
     <string name="create_desktop_shortcut">Создать ярлык на рабочем столе</string>
     <string name="unsupport_create_desktop_shortcut">Отменить создание ярлыка на рабочем столе!</string>
     <string name="only_support_on_android_version_7_1"><![CDATA[Для создания ярлыка на рабочем столе требуется Андроид версии 7.1 или выше.]]></string>
     <string name="all">Всё</string>
-    <string name="permission_not_granted">Разрешение \'%s\' не предоставлено</string>
+    <string name="permission_not_granted">Разрешение \'%1$s\' не предоставлено</string>
     <string name="command_shortcut">Ярлык(Текущая команда)</string>
     <string name="create_shortcut_with_current_command_and_game">Создать ярлык(текущая команда и игра)</string>
     <string name="input_desktop_shortcut_name">Введите имя ярлыка на рабочем столе</string>
-    <string name="game_desktop_shortcut_has_created">Создан ярлык игры %s на рабочем столе(%s).</string>
+    <string name="game_desktop_shortcut_has_created">Создан ярлык игры %1$s на рабочем столе(%2$s).</string>
     <string name="signals_handler">Обработчик сигналов</string>
     <string name="setup_signals_handler_when_game_crash">Настройка обработчика сигналов при сбое игры</string>
     <string name="last_backtrace_info">Последняя информация о трассировке</string>
@@ -447,5 +447,6 @@
     <string name="game_data_resource">Game data resource</string>
     <string name="renderer_backend_vid_preferbackend">Renderer backend(vid_preferbackend)</string>
     <string name="opengles_version_harm_gl_es">OpenGLES version(harm_gl_es)</string>
+    <string name="choose_mod_files">Choose mod files</string>
 
 </resources>

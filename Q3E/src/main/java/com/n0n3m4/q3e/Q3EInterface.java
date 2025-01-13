@@ -738,6 +738,34 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_user_mod;
 	}
 
+	public String GetGameUserModPreferenceKey()
+	{
+		if(Q3EUtils.q3ei.isQ4)
+			return Q3EPreference.pref_harm_q4_game_mod;
+		else if(Q3EUtils.q3ei.isPrey)
+			return Q3EPreference.pref_harm_prey_game_mod;
+		else if(Q3EUtils.q3ei.isQ2)
+			return Q3EPreference.pref_harm_q2_game_mod;
+		else if(Q3EUtils.q3ei.isQ3)
+			return Q3EPreference.pref_harm_q3_game_mod;
+		else if(Q3EUtils.q3ei.isRTCW)
+			return Q3EPreference.pref_harm_rtcw_game_mod;
+		else if(Q3EUtils.q3ei.isTDM)
+			return Q3EPreference.pref_harm_tdm_game_mod;
+		else if(Q3EUtils.q3ei.isQ1)
+			return Q3EPreference.pref_harm_q1_game_mod;
+		else if(Q3EUtils.q3ei.isD3BFG)
+			return Q3EPreference.pref_harm_d3bfg_game_mod;
+		else if(Q3EUtils.q3ei.isDOOM)
+			return Q3EPreference.pref_harm_gzdoom_game_mod;
+		else if(Q3EUtils.q3ei.isETW)
+			return Q3EPreference.pref_harm_etw_game_mod;
+		else if(Q3EUtils.q3ei.isRealRTCW)
+			return Q3EPreference.pref_harm_realrtcw_game_mod;
+		else
+			return Q3EPreference.pref_harm_game_mod;
+	}
+
 	public String GetGameModLibPreferenceKey()
 	{
 		if(Q3EUtils.q3ei.isQ4)

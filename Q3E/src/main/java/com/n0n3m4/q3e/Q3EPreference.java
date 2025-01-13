@@ -38,77 +38,89 @@ public final class Q3EPreference
     public static final String pref_harm_game                         = "q3e_harm_game"; //k
 
     // DOOM 3
-    public static final String pref_params                     = "q3e_params";
-    public static final String pref_harm_fs_game               = "q3e_harm_fs_game"; //k
-    public static final String pref_harm_game_lib              = "q3e_harm_game_lib"; //k
-    public static final String pref_harm_user_mod              = "q3e_harm_user_mod"; //k
-    public static final String pref_harm_command_record        = "q3e_harm_command_record"; //k
+    public static final String pref_params                       = "q3e_params";
+    public static final String pref_harm_fs_game                 = "q3e_harm_fs_game"; //k
+    public static final String pref_harm_game_lib                = "q3e_harm_game_lib"; //k
+    public static final String pref_harm_user_mod                = "q3e_harm_user_mod"; //k
+    public static final String pref_harm_command_record          = "q3e_harm_command_record"; //k
+    public static final String pref_harm_game_mod                = "q3e_harm_game_mod"; //k
     // Quake 4
-    public static final String pref_harm_q4_fs_game            = "q3e_harm_q4_fs_game"; //k
-    public static final String pref_harm_q4_game_lib           = "q3e_harm_q4_game_lib"; //k
-    public static final String pref_harm_q4_user_mod           = "q3e_harm_q4_user_mod"; //k
-    public static final String pref_params_quake4              = "q3e_params_quake4"; //k
-    public static final String pref_harm_q4_command_record     = "q3e_harm_q4_command_record"; //k
+    public static final String pref_harm_q4_fs_game              = "q3e_harm_q4_fs_game"; //k
+    public static final String pref_harm_q4_game_lib             = "q3e_harm_q4_game_lib"; //k
+    public static final String pref_harm_q4_user_mod             = "q3e_harm_q4_user_mod"; //k
+    public static final String pref_params_quake4                = "q3e_params_quake4"; //k
+    public static final String pref_harm_q4_command_record       = "q3e_harm_q4_command_record"; //k
+    public static final String pref_harm_q4_game_mod             = "q3e_harm_q4_game_mod"; //k
     // Prey
-    public static final String pref_harm_prey_user_mod         = "q3e_harm_prey_user_mod"; //k
-    public static final String pref_params_prey                = "q3e_params_prey"; //k
-    public static final String pref_harm_prey_fs_game          = "q3e_harm_prey_fs_game"; //k
-    public static final String pref_harm_prey_game_lib         = "q3e_harm_prey_game_lib"; //k
-    public static final String pref_harm_prey_command_record   = "q3e_harm_prey_command_record"; //k
+    public static final String pref_harm_prey_user_mod           = "q3e_harm_prey_user_mod"; //k
+    public static final String pref_params_prey                  = "q3e_params_prey"; //k
+    public static final String pref_harm_prey_fs_game            = "q3e_harm_prey_fs_game"; //k
+    public static final String pref_harm_prey_game_lib           = "q3e_harm_prey_game_lib"; //k
+    public static final String pref_harm_prey_command_record     = "q3e_harm_prey_command_record"; //k
+    public static final String pref_harm_prey_game_mod           = "q3e_harm_prey_game_mod"; //k
     // Quake 2
-    public static final String pref_harm_q2_fs_game            = "q3e_harm_q2_fs_game"; //k
-    public static final String pref_harm_q2_game_lib           = "q3e_harm_q2_game_lib"; //k
-    public static final String pref_harm_q2_user_mod           = "q3e_harm_q2_user_mod"; //k
-    public static final String pref_params_q2                  = "q3e_params_q2"; //k
-    public static final String pref_harm_q2_command_record     = "q3e_harm_q2_command_record"; //k
+    public static final String pref_harm_q2_fs_game              = "q3e_harm_q2_fs_game"; //k
+    public static final String pref_harm_q2_game_lib             = "q3e_harm_q2_game_lib"; //k
+    public static final String pref_harm_q2_user_mod             = "q3e_harm_q2_user_mod"; //k
+    public static final String pref_params_q2                    = "q3e_params_q2"; //k
+    public static final String pref_harm_q2_command_record       = "q3e_harm_q2_command_record"; //k
+    public static final String pref_harm_q2_game_mod             = "q3e_harm_q2_game_mod"; //k
     // Quake 3
-    public static final String pref_harm_q3_fs_game            = "q3e_harm_q3_fs_game"; //k
-    public static final String pref_harm_q3_game_lib           = "q3e_harm_q3_game_lib"; //k
-    public static final String pref_harm_q3_user_mod           = "q3e_harm_q3_user_mod"; //k
-    public static final String pref_params_q3                  = "q3e_params_q3"; //k
-    public static final String pref_harm_q3_command_record     = "q3e_harm_q3_command_record";
+    public static final String pref_harm_q3_fs_game              = "q3e_harm_q3_fs_game"; //k
+    public static final String pref_harm_q3_game_lib             = "q3e_harm_q3_game_lib"; //k
+    public static final String pref_harm_q3_user_mod             = "q3e_harm_q3_user_mod"; //k
+    public static final String pref_params_q3                    = "q3e_params_q3"; //k
+    public static final String pref_harm_q3_command_record       = "q3e_harm_q3_command_record";
+    public static final String pref_harm_q3_game_mod             = "q3e_harm_q3_game_mod"; //k
     // RTCW
-    public static final String pref_harm_rtcw_fs_game          = "q3e_harm_rtcw_fs_game"; //k
-    public static final String pref_harm_rtcw_game_lib         = "q3e_harm_rtcw_game_lib"; //k
-    public static final String pref_harm_rtcw_user_mod         = "q3e_harm_rtcw_user_mod"; //k
-    public static final String pref_params_rtcw                = "q3e_params_rtcw"; //k
-    public static final String pref_harm_rtcw_command_record   = "q3e_harm_rtcw_command_record";
+    public static final String pref_harm_rtcw_fs_game            = "q3e_harm_rtcw_fs_game"; //k
+    public static final String pref_harm_rtcw_game_lib           = "q3e_harm_rtcw_game_lib"; //k
+    public static final String pref_harm_rtcw_user_mod           = "q3e_harm_rtcw_user_mod"; //k
+    public static final String pref_params_rtcw                  = "q3e_params_rtcw"; //k
+    public static final String pref_harm_rtcw_command_record     = "q3e_harm_rtcw_command_record";
+    public static final String pref_harm_rtcw_game_mod           = "q3e_harm_rtcw_game_mod"; //k
     // Quake 1
-    public static final String pref_harm_q1_fs_game            = "q3e_harm_q1_fs_game"; //k
-    public static final String pref_harm_q1_game_lib           = "q3e_harm_q1_game_lib"; //k
-    public static final String pref_harm_q1_user_mod           = "q3e_harm_q1_user_mod"; //k
-    public static final String pref_params_q1                  = "q3e_params_q1"; //k
-    public static final String pref_harm_q1_command_record     = "q3e_harm_q1_command_record";
+    public static final String pref_harm_q1_fs_game              = "q3e_harm_q1_fs_game"; //k
+    public static final String pref_harm_q1_game_lib             = "q3e_harm_q1_game_lib"; //k
+    public static final String pref_harm_q1_user_mod             = "q3e_harm_q1_user_mod"; //k
+    public static final String pref_params_q1                    = "q3e_params_q1"; //k
+    public static final String pref_harm_q1_command_record       = "q3e_harm_q1_command_record";
+    public static final String pref_harm_q1_game_mod             = "q3e_harm_q1_game_mod"; //k
     // The Dark Mod
-    public static final String pref_harm_tdm_fs_game           = "q3e_harm_tdm_fs_game"; //k
-    public static final String pref_harm_tdm_game_lib          = "q3e_harm_tdm_game_lib"; //k
-    public static final String pref_harm_tdm_user_mod          = "q3e_harm_tdm_user_mod"; //k
-    public static final String pref_params_tdm                 = "q3e_params_tdm"; //k
-    public static final String pref_harm_tdm_command_record    = "q3e_harm_tdm_command_record";
+    public static final String pref_harm_tdm_fs_game             = "q3e_harm_tdm_fs_game"; //k
+    public static final String pref_harm_tdm_game_lib            = "q3e_harm_tdm_game_lib"; //k
+    public static final String pref_harm_tdm_user_mod            = "q3e_harm_tdm_user_mod"; //k
+    public static final String pref_params_tdm                   = "q3e_params_tdm"; //k
+    public static final String pref_harm_tdm_command_record      = "q3e_harm_tdm_command_record";
+    public static final String pref_harm_tdm_game_mod            = "q3e_harm_tdm_game_mod"; //k
     // DOOM 3 BFG
-    public static final String pref_harm_d3bfg_fs_game         = "q3e_harm_d3bfg_fs_game"; //k
-    public static final String pref_harm_d3bfg_game_lib        = "q3e_harm_d3bfg_game_lib"; //k
-    public static final String pref_harm_d3bfg_user_mod        = "q3e_harm_d3bfg_user_mod"; //k
-    public static final String pref_params_d3bfg               = "q3e_params_d3bfg"; //k
-    public static final String pref_harm_d3bfg_command_record  = "q3e_harm_d3bfg_command_record";
+    public static final String pref_harm_d3bfg_fs_game           = "q3e_harm_d3bfg_fs_game"; //k
+    public static final String pref_harm_d3bfg_game_lib          = "q3e_harm_d3bfg_game_lib"; //k
+    public static final String pref_harm_d3bfg_user_mod          = "q3e_harm_d3bfg_user_mod"; //k
+    public static final String pref_params_d3bfg                 = "q3e_params_d3bfg"; //k
+    public static final String pref_harm_d3bfg_command_record    = "q3e_harm_d3bfg_command_record";
+    public static final String pref_harm_d3bfg_game_mod          = "q3e_harm_d3bfg_game_mod"; //k
     // GZDOOM
-    public static final String pref_harm_gzdoom_fs_game        = "q3e_harm_gzdoom_fs_game"; //k
-    public static final String pref_harm_gzdoom_game_lib       = "q3e_harm_gzdoom_game_lib"; //k
-    public static final String pref_harm_gzdoom_user_mod       = "q3e_harm_gzdoom_user_mod"; //k
-    public static final String pref_params_gzdoom              = "q3e_params_gzdoom"; //k
-    public static final String pref_harm_gzdoom_command_record = "q3e_harm_gzdoom_command_record";
+    public static final String pref_harm_gzdoom_fs_game          = "q3e_harm_gzdoom_fs_game"; //k
+    public static final String pref_harm_gzdoom_game_lib         = "q3e_harm_gzdoom_game_lib"; //k
+    public static final String pref_harm_gzdoom_user_mod         = "q3e_harm_gzdoom_user_mod"; //k
+    public static final String pref_params_gzdoom                = "q3e_params_gzdoom"; //k
+    public static final String pref_harm_gzdoom_command_record   = "q3e_harm_gzdoom_command_record";
+    public static final String pref_harm_gzdoom_game_mod         = "q3e_harm_gzdoom_game_mod"; //k
     // ETW
-    public static final String pref_harm_etw_fs_game          = "q3e_harm_etw_fs_game"; //k
-    public static final String pref_harm_etw_game_lib         = "q3e_harm_etw_game_lib"; //k
-    public static final String pref_harm_etw_user_mod         = "q3e_harm_etw_user_mod"; //k
-    public static final String pref_params_etw                = "q3e_params_etw"; //k
-    public static final String pref_harm_etw_command_record   = "q3e_harm_etw_command_record";
+    public static final String pref_harm_etw_fs_game             = "q3e_harm_etw_fs_game"; //k
+    public static final String pref_harm_etw_game_lib            = "q3e_harm_etw_game_lib"; //k
+    public static final String pref_harm_etw_user_mod            = "q3e_harm_etw_user_mod"; //k
+    public static final String pref_params_etw                   = "q3e_params_etw"; //k
+    public static final String pref_harm_etw_command_record      = "q3e_harm_etw_command_record";
+    public static final String pref_harm_etw_game_mod            = "q3e_harm_etw_game_mod"; //k
     // RealRTCW
-    public static final String pref_harm_realrtcw_fs_game          = "q3e_harm_realrtcw_fs_game"; //k
-    public static final String pref_harm_realrtcw_game_lib         = "q3e_harm_realrtcw_game_lib"; //k
-    public static final String pref_harm_realrtcw_user_mod         = "q3e_harm_realrtcw_user_mod"; //k
-    public static final String pref_params_realrtcw                = "q3e_params_realrtcw"; //k
-    public static final String pref_harm_realrtcw_command_record   = "q3e_harm_realrtcw_command_record";
+    public static final String pref_harm_realrtcw_fs_game        = "q3e_harm_realrtcw_fs_game"; //k
+    public static final String pref_harm_realrtcw_game_lib       = "q3e_harm_realrtcw_game_lib"; //k
+    public static final String pref_harm_realrtcw_user_mod       = "q3e_harm_realrtcw_user_mod"; //k
+    public static final String pref_params_realrtcw              = "q3e_params_realrtcw"; //k
+    public static final String pref_harm_realrtcw_command_record = "q3e_harm_realrtcw_command_record";
+    public static final String pref_harm_realrtcw_game_mod       = "q3e_harm_readrtcw_game_mod"; //k
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k

@@ -66,7 +66,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
     {
         FileBrowser fileBrowser = new FileBrowser();
         final boolean UsingFile = Q3EUtils.q3ei.isDOOM;
-        final boolean AllowExtraFiles = Q3EUtils.q3ei.isDOOM;
+        final boolean AllowExtraFiles = false; // Q3EUtils.q3ei.isDOOM;
         fileBrowser.SetFilter(FileBrowser.ID_FILTER_DIRECTORY);
         fileBrowser.SetIgnoreDotDot(true);
         fileBrowser.SetShowHidden(false);
