@@ -28,7 +28,7 @@
     <string-array name="onscreen_type_labels">
         <item>Кнопка</item>
         <item>Ползунок</item>
-        <item>Дисковая панель</item>
+        <item>Панель диска</item>
     </string-array>
 
     <string-array name="lang_labels">
