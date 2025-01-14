@@ -129,6 +129,7 @@ CUSTOM_CVAR(Int, vid_adapter, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITC
 }
 
 CVAR(Int, harm_gl_es, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL); // 0 = auto(GLES2.0), 2 = GLES2.0, 3 = GLES3.2(GLES 100 shader), 4 = GLES3.2(GLES 320 shader)
+CVAR(Int, harm_gl_version, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL); // 0 = auto(4.5), 330 = GL 3.3, 420 = GL 4.2, 430 = GL 4.3, 450 = GL 4.5
 
 class SDLVideo : public IVideo
 {
@@ -483,27 +484,17 @@ void I_SetWindowTitle(const char* caption)
 float GLimp_GetGLSLVersion(void)
 {
 	if (V_GetBackend() == 0)
-	{
 		return 3.20f;
-	}
 	else
 	{
 		if(USING_GLES_2)
-		{
 			return 1.00f;
-		}
 		else if(USING_GLES_3)
-		{
 			return 3.00f;
-		}
 		else if(USING_GLES_32)
-		{
 			return 3.20f;
-		}
 		else
-		{
 			return 1.00f; // 3.00f
-		}
 	}
 }
 
@@ -511,25 +502,29 @@ float GLimp_GetGLVersion(void)
 {
 	if (V_GetBackend() == 0)
 	{
-		return 4.2f;
+		int glVersion = harm_gl_version;
+		if (glVersion <= 0)
+			return 4.5f; // 4.2f;
+		else if(glVersion == 330)
+			return 3.3f;
+		else if(glVersion == 420)
+			return 4.2f;
+		else if(glVersion == 430)
+			return 4.3f;
+		else if(glVersion == 450)
+			return 4.5f;
+		else
+			return float(glVersion) / 100.0f;
 	}
 	else
 	{
 		if(USING_GLES_2)
-		{
 			return 2.0f;
-		}
 		else if(USING_GLES_3)
-		{
 			return 3.2f;
-		}
 		else if(USING_GLES_32)
-		{
 			return 3.2f;
-		}
 		else
-		{
 			return 3.0f;
-		}
 	}
 }

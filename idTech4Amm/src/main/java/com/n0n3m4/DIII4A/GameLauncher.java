@@ -595,54 +595,72 @@ public class GameLauncher extends Activity
 			// Quake 2
 			else if (rgId == R.id.yquake2_vid_renderer)
 			{
-				String value2 = GetRadioGroupSelectIndex(radioGroup, id) == 1 ? "gles3" : "gl1";
 				if(Q3EUtils.q3ei.isQ2)
+				{
+					String value2 = GetRadioGroupSelectIndex(radioGroup, id) == 1 ? "gles3" : "gl1";
 					SetProp("vid_renderer", value2);
+				}
 			}
 
 			// Doom 3 BFG
 			else if (rgId == R.id.doom3bfg_useCompression)
 			{
-				index = GetRadioGroupSelectIndex(radioGroup, id);
 				if(Q3EUtils.q3ei.isD3BFG)
+				{
+					index = GetRadioGroupSelectIndex(radioGroup, id);
 					SetProp("harm_image_useCompression", index);
+				}
 			}
 
 			// RealRTCW
 			else if (rgId == R.id.realrtcw_shadows)
 			{
-				index = GetRadioGroupSelectIndex(radioGroup, id);
 				if(Q3EUtils.q3ei.isRealRTCW)
+				{
+					index = GetRadioGroupSelectIndex(radioGroup, id);
 					SetProp("cg_shadows", index);
+				}
 			}
 
 			// ETW
 			else if (rgId == R.id.etw_shadows)
 			{
-				index = GetRadioGroupSelectIndex(radioGroup, id);
 				if(Q3EUtils.q3ei.isETW)
+				{
+					index = GetRadioGroupSelectIndex(radioGroup, id);
 					SetProp("cg_shadows", index);
+				}
 			}
 
 			// GZDOOM
 			else if (rgId == R.id.gzdoom_vid_preferbackend)
 			{
-				int value2 = GetRadioGroupSelectIndex(radioGroup, id);
 				if(Q3EUtils.q3ei.isDOOM)
 				{
+					int value2 = GetRadioGroupSelectIndex(radioGroup, id);
 					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend");
 					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "vid_preferbackend", value2);
 				}
 			}
 			else if (rgId == R.id.gzdoom_gl_es)
 			{
-				int value2 = GetRadioGroupSelectIndex(radioGroup, id);
-				if(value2 > 0)
-					value2++;
 				if(Q3EUtils.q3ei.isDOOM)
 				{
+					int value2 = GetRadioGroupSelectIndex(radioGroup, id);
+					if(value2 > 0)
+						value2++;
 					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_es");
 					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "harm_gl_es", value2);
+				}
+			}
+			else if (rgId == R.id.gzdoom_gl_version)
+			{
+				if(Q3EUtils.q3ei.isDOOM)
+				{
+					int value2 = GetRadioGroupSelectIndex(radioGroup, id);
+					value2 = value2 >= 0 && value2 < Q3EGlobals.GZDOOM_GL_VERSIONS.length ? Q3EGlobals.GZDOOM_GL_VERSIONS[value2] : 0;
+					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
+					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "harm_gl_version", value2);
 				}
 			}
         }
@@ -1357,6 +1375,17 @@ public class GameLauncher extends Activity
 				index--;
 		}
 		SelectRadioGroup(V.gzdoom_gl_es, index);
+
+		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
+		index = 0;
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 0);
+			index = Utility.ArrayIndexOf(Q3EGlobals.GZDOOM_GL_VERSIONS, index);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.gzdoom_gl_version, index);
 	}
 
     private void ThrowException()
@@ -1943,6 +1972,18 @@ public class GameLauncher extends Activity
 		}
 		SelectRadioGroup(V.gzdoom_gl_es, index);
 		V.gzdoom_gl_es.setOnCheckedChangeListener(m_groupCheckChangeListener);
+
+		index = 0;
+		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 0);
+			index = Utility.ArrayIndexOf(Q3EGlobals.GZDOOM_GL_VERSIONS, index);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.gzdoom_gl_version, index);
+		V.gzdoom_gl_version.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
 	private void AfterCreated()
@@ -4049,6 +4090,7 @@ public class GameLauncher extends Activity
 		public Button gzdoom_choose_extras_file;
 		public RadioGroup gzdoom_vid_preferbackend;
 		public RadioGroup gzdoom_gl_es;
+		public RadioGroup gzdoom_gl_version;
 		public LinearLayout tdm_section;
 		public CheckBox tdm_useMediumPrecision;
 		public SeekBar consoleHeightFracValue;
@@ -4184,6 +4226,7 @@ public class GameLauncher extends Activity
 			gzdoom_choose_extras_file = findViewById(R.id.gzdoom_choose_extras_file);
 			gzdoom_vid_preferbackend = findViewById(R.id.gzdoom_vid_preferbackend);
 			gzdoom_gl_es = findViewById(R.id.gzdoom_gl_es);
+			gzdoom_gl_version = findViewById(R.id.gzdoom_gl_version);
 			tdm_section = findViewById(R.id.tdm_section);
 			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);
 			consoleHeightFracValue = findViewById(R.id.consoleHeightFracValue);

@@ -37,8 +37,16 @@ CVAR(Int, gl_glsl_precision, 0, 0); // 0 = default(high), 1 = medium, 2 = low
 
 FString GetGLSLPrecision()
 {
-	FString str = "precision highp int;\n \
-			   precision highp float;\n";
+	FString str = R"(
+
+precision highp int;
+precision highp float;
+precision highp sampler2D;
+precision highp sampler2DArray;
+precision highp sampler2DMS;
+
+)"
+				  ;
 
 	if (gl_glsl_precision == 2)
 		str.Substitute("highp", "lowp");
@@ -46,6 +54,32 @@ FString GetGLSLPrecision()
 		str.Substitute("highp", "mediump");
 
 	return str;
+}
+
+CVAR(Bool, gl_glsl_dumpShader, false, 0);
+void DumpGLSLShader(const char *name, const char *src)
+{
+	if(!gl_glsl_dumpShader)
+		return;
+
+	const char *ptr = strrchr(name, '/');
+	FString path = "glsl/";
+	if(ptr && ptr != name)
+		path.AppendCStrPart(name, ptr - name);
+
+	//Printf("Dump GLSL shader path: %s\n", path.GetChars());
+	CreatePath(path.GetChars());
+
+	path = "glsl/";
+	path += name;
+	std::unique_ptr<FileWriter> fw(FileWriter::Open(path.GetChars()));
+	if (!fw)
+	{
+		Printf("Couldn't open file for write GLSL shader: %s -> %s\n", name, path.GetChars());
+		return;
+	}
+	fw->Write(src, strlen(src));
+	Printf("Dump GLSL shader: %s -> %s\n", name, path.GetChars());
 }
 #endif
 
@@ -127,6 +161,10 @@ void FShaderProgram::CompileShader(ShaderType type)
 	const FString &patchedCode = mShaderSources[type];
 	int lengths[1] = { (int)patchedCode.Len() };
 	const char *sources[1] = { patchedCode.GetChars() };
+#ifdef _GLES //karin: print glsl shader name for debug
+	Printf("FShaderProgram::CompileShader: %s (%s)\n", mShaderNames[type].GetChars(), type == Vertex ? "Vertex" : "Fragment");
+	DumpGLSLShader(mShaderNames[type].GetChars(), sources[0]);
+#endif
 	glShaderSource(handle, 1, sources, lengths);
 
 	glCompileShader(handle);
@@ -300,6 +338,11 @@ FString FShaderProgram::PatchShader(ShaderType type, const FString &code, const 
 	// these settings are actually pointless but there seem to be some old ATI drivers that fail to compile the shader without setting the precision here.
 #ifdef _GLES //karin: control GLSL default precision
 	patchedCode << GetGLSLPrecision();
+    patchedCode << R"(
+
+#define _GLES //karin: GLES macro only for OpenGL, not Vulkan
+
+)";
 #else
 	patchedCode << "precision highp int;\n";
 	patchedCode << "precision highp float;\n";

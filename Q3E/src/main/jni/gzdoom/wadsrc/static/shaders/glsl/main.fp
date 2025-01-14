@@ -481,7 +481,7 @@ float sampleShadowmap(vec3 planePoint, float v)
 
 	vec3 ray = planePoint;
 
-	vec2 isize = textureSize(ShadowMap, 0);
+	ivec2 isize = textureSize(ShadowMap, 0);
 	float scale = float(isize.x) * 0.25;
 
 	// Snap to shadow map texel grid
@@ -520,12 +520,12 @@ float sampleShadowmapPCF(vec3 planePoint, float v)
 	else
 		ray.y = ray.y / abs(ray.x);
 
-	vec2 isize = textureSize(ShadowMap, 0);
+	ivec2 isize = textureSize(ShadowMap, 0);
 	float scale = float(isize.x);
 	float texelPos = floor(shadowDirToU(ray.xz) * scale);
 
 	float sum = 0.0;
-	float step_count = uShadowmapFilter;
+	float step_count = float(uShadowmapFilter);
 
 	texelPos -= step_count + 0.5;
 	for (float x = -step_count; x <= step_count; x++)
@@ -542,7 +542,7 @@ float sampleShadowmapPCF(vec3 planePoint, float v)
 		sum += step(dist2, texture(ShadowMap, vec2(u, v)).x);
 		texelPos++;
 	}
-	return sum / (uShadowmapFilter * 2.0 + 1.0);
+	return sum / (float(uShadowmapFilter) * 2.0 + 1.0);
 }
 
 float shadowmapAttenuation(vec4 lightpos, float shadowIndex)

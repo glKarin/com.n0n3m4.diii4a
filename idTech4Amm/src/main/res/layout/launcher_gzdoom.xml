@@ -102,4 +102,44 @@
             android:text="OpenGL ES3.0(GLSL 300es)" />
     </RadioGroup>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
+        android:text="@string/opengl_emulate_version_harm_gl_version" />
+    <RadioGroup
+        android:id="@+id/gzdoom_gl_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RadioButton
+            android:id="@+id/gzdoom_gl_version_0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_default" />
+        <RadioButton
+            android:id="@+id/gzdoom_gl_version_330"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OpenGL 3.3" />
+        <RadioButton
+            android:id="@+id/gzdoom_gl_version_420"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="OpenGL 4.2" />
+        <RadioButton
+            android:id="@+id/gzdoom_gl_version_430"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="OpenGL 4.3" />
+        <RadioButton
+            android:id="@+id/gzdoom_gl_version_450"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OpenGL 4.5" />
+    </RadioGroup>
+
 </LinearLayout>

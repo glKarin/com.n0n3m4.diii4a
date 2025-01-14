@@ -70,6 +70,11 @@ public final class Utility
         return ArrayIndexOf(arr, target, cs) >= 0;
     }
 
+    public static boolean InArrayRange(Object[] arr, int index)
+    {
+        return index >= 0 && index <= arr.length;
+    }
+
     public static int IndexOf(List<String> arr, String target, boolean cs)
     {
         for(int i = 0; i < arr.size(); i++)

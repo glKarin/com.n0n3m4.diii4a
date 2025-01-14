@@ -350,10 +350,11 @@ public final class Q3EGlobals
     // extra internal game file version: <Game engine version>.<idTech4A++ patch version>
     public static final String TDM_GLSL_SHADER_VERSION        = "2.12.5"; // 5: change all shaders default precision from mediump to highp
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
-    public static final String GZDOOM_VERSION                 = "4.14.0.1"; // 1: change OpenGL shaders
+    public static final String GZDOOM_VERSION                 = "4.14.0.2"; // 2: change postprocess OpenGL shaders
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 
+    public static final int[] GZDOOM_GL_VERSIONS = { 0, 330, 420, 430, 450, };
 
     public static final int DEFAULT_DEPTH_BITS = 24; // 16 32
 

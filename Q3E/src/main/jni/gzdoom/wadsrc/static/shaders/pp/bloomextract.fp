@@ -8,5 +8,5 @@ void main()
 {
 	float exposureAdjustment = texture(ExposureTexture, vec2(0.5)).x;
 	vec4 color = texture(SceneTexture, Offset + TexCoord * Scale);
-	FragColor = max(vec4((color.rgb + vec3(0.001)) * exposureAdjustment - 1, 1), vec4(0));
+	FragColor = max(vec4((color.rgb + vec3(0.001)) * exposureAdjustment - 1.0, 1.0), vec4(0.0));
 }

@@ -448,5 +448,6 @@
     <string name="renderer_backend_vid_preferbackend">Бэкэнд рендерера(vid_preferbackend)</string>
     <string name="opengles_version_harm_gl_es">OpenGLES версия(harm_gl_es)</string>
     <string name="choose_mod_files">Выберите файлы мода</string>
+    <string name="opengl_emulate_version_harm_gl_version">Emulating OpenGL version(harm_gl_version)</string>
 
 </resources>

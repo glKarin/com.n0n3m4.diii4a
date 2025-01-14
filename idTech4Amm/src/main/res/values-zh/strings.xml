@@ -447,4 +447,5 @@
     <string name="renderer_backend_vid_preferbackend">渲染器后端(vid_preferbackend)</string>
     <string name="opengles_version_harm_gl_es">OpenGLES版本(harm_gl_es)</string>
     <string name="choose_mod_files">选择mod文件</string>
+    <string name="opengl_emulate_version_harm_gl_version">模拟OpenGL版本(harm_gl_version)</string>
 </resources>
