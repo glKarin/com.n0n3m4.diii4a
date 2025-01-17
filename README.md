@@ -6,9 +6,9 @@
 ##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan59(natasha)  
+1.1.0harmattan60(verena)  
 **Latest update:**
-2024-11-20  
+2025-01-16  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -65,8 +65,8 @@ GPLv3
 | Quake III Arena | [ioquake3](https://github.com/ioquake/ioq3) | - | 1.1 | Quake III Team Arena |
 | Quake II | [Yamagi Quake II](https://github.com/yquake2/yquake2) | - | 1.1/3.2 | ctf<br/>rogue<br/>xatrix<br/>zaero |
 | Quake I | [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces) | - | 2.0 |  |
-| GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | - | 3.2 |  |
-| Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) Omni-Bot support | 2.8.1 | 1.1 |  |
+| GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | 4.14.0 | 2.0/3.2/Vulkan |  |
+| Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) Omni-Bot support | 2.83.1 | 1.1 |  |
 | RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.0 | 1.1 |  |
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
@@ -88,15 +88,13 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Support `Omni-Bot` in Wolfenstein: Enemy Territory.
-* Fix rendering on Mali GPU in DOOM 3-BFG.
-* Fix rendering on Mali GPU in The Dark Mod.
-* Fix stencil shadow with `cg_shadows` = 2 in Wolfenstein: Enemy Territory.
-* Support choose a mod directory in GZDOOM.
-* Add some new features options on launcher in Wolfenstein: Enemy Territory, RealRTCW, DOOM3-BFG, Quake 2, GZDOOM, The Dark Mod.
-* Add use high precision float on GLSL shaders(cvar `harm_r_useHighPrecision`) in DOOM 3/Quake 4/Prey.
-* Add 5 onscreen buttons.
-* Add `Phobos(for Dhewm3)` mod of DOOM3 support, game data directory named `tfphobos`(d3xp and dhewm3 compatibility patch required). More view in [Doom 3: Phobos](https://www.moddb.com/mods/phobos) and [Doom 3: Phobos - dhewm3 compatibility patch](https://www.moddb.com/games/doom-iii/addons/doom-3-phobos-dhewm3-compatibility-patch).
+* Support setup max game console height percentage(0 or 100 means not limit) on launcher `General` tab.
+* Update GZDOOM version to 4.14.0.
+* GZDOOM add Vulkan and OpenGL renderer backend.
+* Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.1.
+* Update Quake 1(Darkplaces) version.
+* Update Quake 2(yquake2) version.
+* Add use multisamples config in game.
 
 ----------------------------------------------------------------------------------
 
@@ -192,32 +190,26 @@ Tag with `-free` only for F-Droid update.
 | harm_s_OpenSLESBufferCount | Integer | 3 | Audio buffer count for OpenSLES | ARCHIVE | &gt;= 3 | Engine/Sound | min is 3, only for if without OpenAL and use OpenSLES on Android | Android |
 | harm_s_useAmplitudeDataOpenAL | Bool | 0 | Use amplitude data on OpenAL | DISABLE, ISSUE |  | Engine/Sound | It cause large shake | All |
 | harm_in_smoothJoystick | Bool | 0 | Enable smooth joystick |  |  | Engine/Input | Automatic setup initial value by Android layer | Android |
-| harm_g_normalizeMovementDirection | Integer | -1 | Re-normalize player/walker movement direction | ARCHIVE | -1, 0, &gt; 0 | Game/DOOM3 | 0 = disable; -1 = automcatic; &gt;0 = max degree | Android |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset(&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;) | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessHeadJoint | String | Head | Set head joint when without head model in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessFixed | Bool | 0 | Do not attach view position to head in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessHeadVisible | Bool | 0 | Do not suppress head in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_ui_showViewBody | Bool | 0 | Show view body | ARCHIVE |  | Game/DOOM3 |  | All |
-| harm_pm_fullBodyAwarenessFirstPerson | Bool | 0 | Enable first person view in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_doubleJump | Bool | 0 | Enable double-jump | ARCHIVE |  | Game/DOOM3/Rivensin |  | All |
 | harm_pm_autoForceThirdPerson | Bool | 1 | Force set third person view after game level load end | ARCHIVE |  | Game/DOOM3/Rivensin |  | All |
 | harm_pm_preferCrouchViewHeight | Float | 32 | Set prefer crouch view height in Third-Person | ARCHIVE | &gt;= 0 | Game/DOOM3/Rivensin | suggest 32 - 39, less or equals 0 to disable | All |
-| harm_g_normalizeMovementDirection | Integer | -1 | Re-normalize player/walker movement direction | ARCHIVE | -1, 0, &gt; 0 | Game/Quake4 | 0 = disable; -1 = automcatic; &gt;0 = max degree | Android |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset(&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;) | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessHeadJoint | String | head_channel | Set head joint when without head model in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessFixed | Bool | 0 | Do not attach view position to head in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessHeadVisible | Bool | 0 | Do not suppress head in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
-| harm_pm_fullBodyAwarenessFirstPerson | Bool | 0 | Enable first person view in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_ui_showViewBody | Bool | 0 | Show view body | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_g_autoGenAASFileInMPGame | Bool | 1 | For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic | ARCHIVE |  | Game/Quake4 |  | All |
-| harm_g_vehicleWalkerMoveNormalize | Bool | 1 | Re-normalize vehicle walker movement | ARCHIVE |  | Game/Quake4 | Only for smooth jotstick on DIII4A | Android |
 | harm_gui_defaultFont | String | chain | Default font name | ARCHIVE | chain, lowpixel, marine, profont, r_strogg, strogg | Engine/Quake4/GUI | It will be available in next running | All |
 | harm_si_autoFillBots | Bool | 1 | Automatic fill bots after map loaded in multiplayer game | ARCHIVE | &gt;=0 | Game/Quake4 | 0 = disable; other number = bot num | All |
 | harm_si_botLevel | Integer | 0 | Bot level | ARCHIVE | [0 - 8] | Game/Quake4 | 0 = auto; 1 - 8 = difficult level | All |
 | harm_g_mutePlayerFootStep | Bool | 0 | Mute player's footstep sound | ARCHIVE |  | Game/Quake4 |  | All |
-| harm_g_normalizeMovementDirection | Integer | -1 | Re-normalize player/walker movement direction | ARCHIVE | -1, 0, &gt; 0 | Game/Prey | 0 = disable; -1 = automcatic; &gt;0 = max degree | Android |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/Prey |  | All |
 | harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset(&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;) | ARCHIVE |  | Game/Prey |  | All |
 | harm_pm_fullBodyAwarenessHeadJoint | String | neck | Set head joint when without head model in full-body awareness | ARCHIVE |  | Game/Prey |  | All |

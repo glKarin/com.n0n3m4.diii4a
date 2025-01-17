@@ -94,8 +94,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "Head", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
-                    KCVar.CreateCVar("harm_g_normalizeMovementDirection", "integer", "-1", "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree", 0)
+                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0)
                 );
         KCVar.Group RIVENSIN_CVARS = new KCVar.Group("Rivensin", false)
                 .AddCVar(
@@ -107,7 +106,6 @@ public final class KCVarSystem
         KCVar.Group QUAKE4_CVARS = new KCVar.Group("Quake4", false)
                 .AddCVar(
                     KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
-                    KCVar.CreateCVar("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movment", 0),
                     KCVar.CreateCVar("harm_gui_defaultFont", "string", "chain", "Default font name", 0,
                             "chain", "fonts/chain",
                             "lowpixel", "fonts/lowpixel",
@@ -125,8 +123,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
-                    KCVar.CreateCVar("harm_g_normalizeMovementDirection", "integer", "-1", "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree", 0)
+                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0)
                 );
 
         KCVar.Group PREY_CVARS = new KCVar.Group("Prey(2006)", false)
@@ -143,8 +140,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(forward-offset side-offset up-offset)", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "neck", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_g_normalizeMovementDirection", "integer", "-1", "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree", 0)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0)
                 );
 
         KCVar.Group DOOM3BFG_CVARS = new KCVar.Group("DOOM 3 BFG", true)

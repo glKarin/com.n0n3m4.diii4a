@@ -42,6 +42,9 @@ extern bool Sys_InRenderThread(void);
 #endif
 #endif
 #define HARM_ONLY_DETECT_SYS_MEMORY 1
+#ifdef __ANDROID__
+idCVar harm_g_normalizeMovementDirection("harm_g_normalizeMovementDirection", "0", CVAR_GAME | CVAR_BOOL, "Re-normalize player/walker movement direction");
+#endif
 
 typedef enum {
 	ERP_NONE,
@@ -3316,10 +3319,11 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 			console->LoadHistory();
 #ifdef __ANDROID__ //karin: for in smooth joystick on Android.
 		extern bool smooth_joystick;
-		idCVar *in_smoothJoystick = cvarSystem->Find("harm_in_smoothJoystick");
+		idCVar *in_smoothJoystick = cvarSystem->Find("harm_g_normalizeMovementDirection");
 		if(in_smoothJoystick)
 		{
 			in_smoothJoystick->SetBool(smooth_joystick);
+			CVAR_READONLY(*in_smoothJoystick);
 			in_smoothJoystick->ClearModified();
 		}
 #endif

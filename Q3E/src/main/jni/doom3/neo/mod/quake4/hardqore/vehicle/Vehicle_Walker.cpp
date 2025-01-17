@@ -127,41 +127,18 @@ void rvVehicleWalker::Restore ( idRestoreGame *savefile ) {
 rvVehicleWalker::UpdateState
 ================
 */
-#ifdef __ANDROID__ //karin: renormalize walker movment. only for DIII4A smooth onscreen joystick control
-idCVar harm_g_vehicleWalkerMoveNormalize( "harm_g_vehicleWalkerMoveNormalize", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Re-normalize vehicle walker movment" );
-#endif
 void rvVehicleWalker::UpdateState ( void ) {
 	rvVehiclePosition& pos = positions[0];
 	usercmd_t& cmd	= pos.mInputCmd;
 
 	vfl.driver		= pos.IsOccupied();
 #ifdef __ANDROID__ //karin: for in smooth joystick on Android
-	if(harm_g_vehicleWalkerMoveNormalize.GetBool())
+	if(harm_g_normalizeMovementDirection.GetBool())
 	{
-		if(cmd.forwardmove != 0 || cmd.rightmove != 0)
+		if(vfl.driver)
 		{
-			float a = (float)atan2(cmd.rightmove, cmd.forwardmove);
-			a = RAD2DEG(a);
-			if (a >= 360.0f || a < 0.0f) {
-				a -= floor(a / 360.0f) * 360.0f;
-				if (a >= 360.0f) {
-					a -= 360.0f;
-				}
-				else if (a < 0.0f) {
-					a += 360.0f;
-				}
-			}
-#define _AVA_DEG 60
-#define _INCR_AVA_DEG(x) ((x) + _AVA_DEG)
-#define _DECR_AVA_DEG(x) ((x) - _AVA_DEG)
-			vfl.forward		= (vfl.driver && ((a >= 0 && a <= _INCR_AVA_DEG(0)) || (a >= _DECR_AVA_DEG(360) && a <= 360)));
-			vfl.backward		= (vfl.driver && (a >= _DECR_AVA_DEG(180) && a <= _INCR_AVA_DEG(180)));
-			vfl.right		= (vfl.driver && (a > _DECR_AVA_DEG(270) && a < _INCR_AVA_DEG(270)));
-			vfl.left		= (vfl.driver && (a > _DECR_AVA_DEG(90) && a < _INCR_AVA_DEG(90)));
+			GAME_SETUPCMDDIRECTION(cmd, vfl.forward, vfl.backward, vfl.right, vfl.left);
 		}
-#undef _AVA_DEG
-#undef _INCR_AVA_DEG
-#undef _DECR_AVA_DEG
 		else
 		{
 			vfl.forward = false;
@@ -172,16 +149,13 @@ void rvVehicleWalker::UpdateState ( void ) {
 	}
 	else
 	{
-		vfl.forward		= (vfl.driver && cmd.forwardmove > 0);
-		vfl.backward	= (vfl.driver && cmd.forwardmove < 0);
-		vfl.right		= (vfl.driver && cmd.rightmove < 0);
-		vfl.left		= (vfl.driver && cmd.rightmove > 0);	
-	}
-#else
+#endif
 	vfl.forward		= (vfl.driver && cmd.forwardmove > 0);
   	vfl.backward	= (vfl.driver && cmd.forwardmove < 0);
   	vfl.right		= (vfl.driver && cmd.rightmove < 0);
-  	vfl.left		= (vfl.driver && cmd.rightmove > 0);	
+  	vfl.left		= (vfl.driver && cmd.rightmove > 0);
+#ifdef __ANDROID__ //karin: for in smooth joystick on Android
+	}
 #endif
 	vfl.strafe		= (vfl.driver && cmd.buttons & BUTTON_STRAFE );
 

@@ -485,4 +485,6 @@ ID_INLINE void idCVarHelp::RegisterStatics( void ) {
 // RAVEN END
 #endif
 
+#define CVAR_READONLY(cv) (cv).SetReadonly()
+
 #endif /* !__CVARSYSTEM_H__ */

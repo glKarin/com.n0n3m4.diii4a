@@ -656,6 +656,5 @@ idCVar harm_pm_fullBodyAwarenessHeadVisible( "harm_pm_fullBodyAwarenessHeadVisib
 idCVar harm_ui_showViewBody( "harm_ui_showViewBody", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "show view body" );
 #endif
 #ifdef __ANDROID__ //karin: re-normalize player/walker movement direction. only for DIII4A smooth onscreen joystick control
-idCVar harm_in_smoothJoystick("harm_in_smoothJoystick", "0", CVAR_SYSTEM | CVAR_BOOL, "Enable smooth joystick(Automatic setup by Android layer)"); // created on engine
-idCVar harm_g_normalizeMovementDirection("harm_g_normalizeMovementDirection", "-1", CVAR_GAME | CVAR_INTEGER | CVAR_ARCHIVE, "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree");
+idCVar harm_g_normalizeMovementDirection("harm_g_normalizeMovementDirection", "0", CVAR_GAME | CVAR_BOOL, "Re-normalize player/walker movement direction");
 #endif

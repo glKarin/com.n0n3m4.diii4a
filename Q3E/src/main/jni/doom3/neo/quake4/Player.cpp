@@ -3976,11 +3976,11 @@ void idPlayer::UpdateConditions( void ) {
 		pfl.strafeRight	= pfl.onGround && ( sidespeed < -20.01f );
  	} else if ( xyspeed > MIN_BOB_SPEED ) {
 #ifdef __ANDROID__ //karin: for in smooth joystick on Android
-		if(harm_in_smoothJoystick.GetBool() && harm_g_normalizeMovementDirection.GetBool())
+		if(harm_g_normalizeMovementDirection.GetBool())
 		{
 			if(pfl.onGround)
 			{
-				GAME_SETUPCMDDIRECTION(usercmd, harm_g_normalizeMovementDirection.GetInteger(), pfl.forward, pfl.backward, pfl.strafeLeft, pfl.strafeRight);
+				GAME_SETUPCMDDIRECTION(usercmd, pfl.forward, pfl.backward, pfl.strafeLeft, pfl.strafeRight);
 			}
 			else
 			{

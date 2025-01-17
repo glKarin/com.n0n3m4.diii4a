@@ -2921,11 +2921,11 @@ void idPlayer::ExitCinematic(void)
 }
 
 #ifdef __ANDROID__ //karin: for in smooth joystick on Android
+#define _AVA_DEG 67.5f // 60
 #define _INCR_AVA_DEG(x) ((x) + _AVA_DEG)
 #define _DECR_AVA_DEG(x) ((x) - _AVA_DEG)
-#define GAME_SETUPCMDDIRECTION(_cmd, _ava_deg, _forward, _backward, _left, _right) \
+#define GAME_SETUPCMDDIRECTION(_cmd, _forward, _backward, _left, _right) \
 { \
-	const float _AVA_DEG = _ava_deg < 0 ? 60 : _ava_deg; \
 	if(_cmd.forwardmove != 0 || _cmd.rightmove != 0) { \
 		float a = (float)atan2(_cmd.rightmove, _cmd.forwardmove); \
 		a = RAD2DEG(a); \
@@ -2980,11 +2980,11 @@ void idPlayer::UpdateConditions(void)
 		AI_STRAFE_RIGHT	= AI_ONGROUND && (sidespeed < -20.01f);
 	} else if (xyspeed > MIN_BOB_SPEED) {
 #ifdef __ANDROID__ //karin: for in smooth joystick on Android
-		if(harm_in_smoothJoystick.GetBool() && harm_g_normalizeMovementDirection.GetBool())
+		if(harm_g_normalizeMovementDirection.GetBool())
 		{
 			if(AI_ONGROUND)
 			{
-				GAME_SETUPCMDDIRECTION(usercmd, harm_g_normalizeMovementDirection.GetInteger(), AI_FORWARD, AI_BACKWARD, AI_STRAFE_LEFT, AI_STRAFE_RIGHT);
+				GAME_SETUPCMDDIRECTION(usercmd, AI_FORWARD, AI_BACKWARD, AI_STRAFE_LEFT, AI_STRAFE_RIGHT);
 			}
 			else
 			{

@@ -1410,11 +1410,11 @@ ID_INLINE idEntityPtr<type>::operator type * ( void ) const {
 #include "../raven/idlib/containers/ListGame.h"
 
 #ifdef __ANDROID__ //karin: for in smooth joystick on Android
+#define _AVA_DEG 67.5f // 60
 #define _INCR_AVA_DEG(x) ((x) + _AVA_DEG)
 #define _DECR_AVA_DEG(x) ((x) - _AVA_DEG)
-#define GAME_SETUPCMDDIRECTION(_cmd, _ava_deg, _forward, _backward, _left, _right) \
+#define GAME_SETUPCMDDIRECTION(_cmd, _forward, _backward, _left, _right) \
 { \
-	const float _AVA_DEG = _ava_deg < 0 ? 60 : _ava_deg; \
 	if(_cmd.forwardmove != 0 || _cmd.rightmove != 0) { \
 		float a = (float)atan2(_cmd.rightmove, _cmd.forwardmove); \
 		a = RAD2DEG(a); \

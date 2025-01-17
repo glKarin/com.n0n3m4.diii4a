@@ -26,8 +26,6 @@ del /S/Q %DST_PATH%\idTech4amm\src\main\assets
 xcopy /E/I/Y/Q %SRC_PATH%\Q3E\src %DST_PATH%\Q3E\src
 xcopy /Y/Q %SRC_PATH%\Q3E\build.gradle %DST_PATH%\Q3E\
 del /S/Q %DST_PATH%\Q3E\src\main\assets
-del /S/Q %DST_PATH%\Q3E\src\main\jni\duke4
-rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\duke4
 del /S/Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\def
 del /S/Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\materials
 del /S/Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\textures

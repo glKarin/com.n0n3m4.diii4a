@@ -115,7 +115,7 @@ const char	*r_openglesArgs[]	= {
         GL_VERSION_NAME_GL_COMPATIBILITY,
         NULL };
 idCVar harm_r_openglVersion("harm_r_openglVersion",
-                              r_openglesArgs[0]
+                              r_openglesArgs[2]
         , CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
                               "OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
 #define DEFAULT_GLES_VERSION GL_VERSION_GL_ES3

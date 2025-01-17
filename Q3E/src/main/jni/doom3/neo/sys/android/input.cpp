@@ -37,7 +37,6 @@ static bool mouse_active = false;
 idCVar in_mouse("in_mouse", "1", CVAR_SYSTEM | CVAR_ARCHIVE, "");
 idCVar in_dgamouse("in_dgamouse", "1", CVAR_SYSTEM | CVAR_ARCHIVE, "");
 idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "");
-idCVar harm_in_smoothJoystick("harm_in_smoothJoystick", "0", CVAR_SYSTEM | CVAR_BOOL, "Enable smooth joystick(Automatic setup by Android layer)");
 
 void IN_Clear_f(const idCmdArgs &args)
 {
@@ -62,12 +61,6 @@ void Sys_GrabMouseCursor(bool grabIt)
 void Posix_PollInput()
 {
 	Android_PollInput();
-
-	if(harm_in_smoothJoystick.IsModified())
-	{
-		Android_EnableSmoothJoystick(harm_in_smoothJoystick.GetBool());
-		harm_in_smoothJoystick.ClearModified();
-	}
 }
 
 void Sys_ShutdownInput(void)

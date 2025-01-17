@@ -133,11 +133,11 @@ void rvVehicleWalker::UpdateState ( void ) {
 
 	vfl.driver		= pos.IsOccupied();
 #ifdef __ANDROID__ //karin: for in smooth joystick on Android
-	if(harm_in_smoothJoystick.GetBool() && harm_g_normalizeMovementDirection.GetBool())
+	if(harm_g_normalizeMovementDirection.GetBool())
 	{
 		if(vfl.driver)
 		{
-			GAME_SETUPCMDDIRECTION(cmd, harm_g_normalizeMovementDirection.GetInteger(), vfl.forward, vfl.backward, vfl.right, vfl.left);
+			GAME_SETUPCMDDIRECTION(cmd, vfl.forward, vfl.backward, vfl.right, vfl.left);
 		}
 		else
 		{
