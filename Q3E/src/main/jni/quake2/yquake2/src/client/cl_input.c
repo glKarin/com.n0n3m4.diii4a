@@ -374,7 +374,7 @@ IN_Impulse(void)
  * Returns the fraction of the
  * frame that the key was down
  */
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: analog event for movement
 extern void IN_Analog(const kbutton_t *key, float *val);
 #endif
 float
@@ -406,7 +406,7 @@ CL_KeyState(kbutton_t *key)
 	{
 		val = 1;
 	}
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: analog event for movement
 	IN_Analog(key, &val);
 #endif
 

@@ -7,7 +7,8 @@
 #include "blargg_common.h"
 
 #ifdef HAVE_ZLIB_H
-#include <zlib.h>
+// [ZMusic] Use miniz.
+#include <miniz.h>
 #endif
 
 // Supports reading and finding out how many bytes are remaining

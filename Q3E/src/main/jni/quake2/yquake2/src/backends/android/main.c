@@ -46,23 +46,16 @@ qboolean IsInitialized = false;
 
 extern void Qcommon_Mainloop(void);
 
-static void * game_main(int argc, char **argv);
-
 #include "../android/sys_android.c"
 
-void GLimp_CheckGLInitialized(void)
+qboolean GLimp_CheckGLInitialized(void)
 {
-	Q3E_CheckNativeWindowChanged();
+	return Q3E_CheckNativeWindowChanged();
 }
 
-// Quake2 game main thread loop
-void * game_main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
-	attach_thread(); // attach current to JNI for call Android code
-
-	Q3E_Start();
-
-	Com_Printf("[Harmattan]: Enter quake2 main thread -> %s\n", "main");
 	// register signal handler
 	registerHandler();
 
@@ -153,32 +146,18 @@ void * game_main(int argc, char **argv)
 	// Never returns.
 	Qcommon_Init(argc, argv);
 
-	Q3E_FreeArgs();
-
 	Qcommon_Mainloop();
 
-	Q3E_End();
-	main_thread = 0;
-	IsInitialized = false;
-	Com_Printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
 	return 0;
 }
 
 void ShutdownGame(void)
 {
-	if(IsInitialized)
+	if(q3e_running && IsInitialized)
 	{
-		TRIGGER_WINDOW_CREATED; // if quake2 main thread is waiting new window
-		Q3E_ShutdownGameMainThread();
-		//common->Quit();
+		q3e_running = false;
+		NOTIFY_EXIT;
 	}
-}
-
-static void game_exit(void)
-{
-	Com_Printf("[Harmattan]: quake2 exit.\n");
-
-	Q3E_CloseRedirectOutput();
 }
 
 void Sys_SyncState(void)
@@ -195,26 +174,6 @@ void Sys_SyncState(void)
 			prev_state = state;
 		}
 	}
-}
-
-int
-main(int argc, char **argv)
-{
-	Q3E_DumpArgs(argc, argv);
-
-	Q3E_RedirectOutput();
-
-	Q3E_PrintInitialContext(argc, argv);
-
-	INIT_Q3E_THREADS;
-
-	Q3E_StartGameMainThread();
-
-	atexit(game_exit);
-
-	IsInitialized = true;
-
-	return 0;
 }
 
 

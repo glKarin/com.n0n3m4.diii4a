@@ -22,21 +22,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-cvar_t bgmvolume = {CF_ARCHIVE, "bgmvolume", "1", "volume of background music (such as CD music or replacement files such as sound/cdtracks/track002.ogg)"};
-cvar_t mastervolume = {CF_ARCHIVE, "mastervolume", "1", "master volume"};
-cvar_t volume = {CF_ARCHIVE, "volume", "0.7", "volume of sound effects"};
-cvar_t snd_staticvolume = {CF_ARCHIVE, "snd_staticvolume", "1", "volume of ambient sound effects (such as swampy sounds at the start of e1m2)"};
-cvar_t snd_initialized = { CF_READONLY, "snd_initialized", "0", "indicates the sound subsystem is active"};
-cvar_t snd_mutewhenidle = {CF_ARCHIVE, "snd_mutewhenidle", "1", "whether to disable sound output when game window is inactive"};
+cvar_t bgmvolume = {CF_CLIENT | CF_ARCHIVE, "bgmvolume", "1", "volume of background music (such as CD music or replacement files such as sound/cdtracks/track002.ogg)"};
+cvar_t snd_initialized = {CF_CLIENT | CF_READONLY, "snd_initialized", "0", "indicates the sound subsystem is active"};
 
 void S_Init (void)
 {
-	Cvar_RegisterVariable(&bgmvolume);
-	Cvar_RegisterVariable(&mastervolume);
-	Cvar_RegisterVariable(&volume);
-	Cvar_RegisterVariable(&snd_staticvolume);
-	Cvar_RegisterVariable(&snd_initialized);
-	Cvar_RegisterVariable(&snd_mutewhenidle);
 }
 
 void S_Terminate (void)
@@ -127,10 +117,6 @@ void S_StopAllSounds (void)
 {
 }
 
-void S_ExtraUpdate (void)
-{
-}
-
 qbool S_LocalSound (const char *s)
 {
 	return false;
@@ -139,14 +125,6 @@ qbool S_LocalSound (const char *s)
 qbool S_LocalSoundEx (const char *s, int chan, float fvol)
 {
 	return false;
-}
-
-void S_BlockSound (void)
-{
-}
-
-void S_UnblockSound (void)
-{
 }
 
 int S_GetSoundRate(void)

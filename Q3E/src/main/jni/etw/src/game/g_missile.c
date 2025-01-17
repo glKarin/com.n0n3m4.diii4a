@@ -75,7 +75,7 @@ void G_BounceMissile(gentity_t *ent, trace_t *trace)
 	}
 
 	// set ground entity
-	if (ent->s.groundEntityNum != -1)
+	if (ent->s.groundEntityNum != ENTITYNUM_NONE)
 	{
 		ground = &g_entities[ent->s.groundEntityNum];
 	}
@@ -425,6 +425,7 @@ void G_ExplodeMissile(gentity_t *ent)
 				{
 					if (ent->parent->client && hit->target_ent && GetMODTableData(MOD_DYNAMITE)->weaponClassForMOD >= hit->target_ent->constructibleStats.weaponclass)
 					{
+						G_LogPrintf("Objective_Destroyed: %d %s\n", (int)(ent->parent - g_entities), hit->track);
 						G_AddKillSkillPointsForDestruction(ent->parent, MOD_DYNAMITE, &hit->target_ent->constructibleStats);
 					}
 
@@ -473,7 +474,7 @@ void MissileGroundCheck(gentity_t *self)
 
 	if (tr.fraction == 1.f)
 	{
-		self->s.groundEntityNum = -1;
+		self->s.groundEntityNum = ENTITYNUM_NONE;
 	}
 }
 
@@ -493,7 +494,7 @@ void G_RunMissile(gentity_t *ent)
 	{
 		MissileGroundCheck(ent);
 
-		if (ent->s.groundEntityNum == -1)
+		if (ent->s.groundEntityNum == ENTITYNUM_NONE)
 		{
 			if (ent->s.pos.trType != TR_GRAVITY)
 			{
@@ -601,11 +602,12 @@ void G_RunMissile(gentity_t *ent)
 			}
 			return;
 		}
-		else if (!ent->count2 && BG_GetSkyHeightAtPoint(origin) - BG_GetGroundHeightAtPoint(origin) > 1024)
+
+		if (!ent->count2 && BG_GetSkyHeightAtPoint(origin) - BG_GetGroundHeightAtPoint(origin) > 1024)
 		{
 			ent->count2 = ent->r.currentOrigin[2] > origin[2];
 		}
-		else if ((ent->count2 == 1 || ent->count2 == 2) && !(ent->s.eFlags & (EF_BOUNCE | EF_BOUNCE_HALF)))
+		else if ((ent->count2 == 1 || ent->count2 == 2) && (GetWeaponTableData(ent->s.weapon)->type & WEAPON_TYPE_MORTAR || ent->s.weapon == WP_MAPMORTAR))
 		{
 			vec3_t  impactpos;
 			trace_t mortar_tr;
@@ -938,9 +940,10 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit)
 	// Non-clients that take damage get damaged here
 	if (!body->client)
 	{
-		if (body->health > 0)
+		if (body->health > 0 && level.time + DEFAULT_SV_FRAMETIME >= body->lastBurnedFrameTime)
 		{
 			G_Damage(body, self->parent, self->parent, vec3_origin, self->r.currentOrigin, 2, 0, MOD_FLAMETHROWER);
+			body->lastBurnedFrameTime = level.time;
 		}
 		return;
 	}
@@ -966,7 +969,7 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit)
 		}
 	}
 
-	G_BurnMeGood(self->parent, body, self);
+	G_BurnMeGood(self->parent, body, self, directhit);
 
 	if (self->count && self->parent->client)
 	{
@@ -1029,7 +1032,7 @@ void G_RunFlamechunk(gentity_t *ent)
 	speed = VectorNormalize(vel);
 
 	// Adust the current speed of the chunk
-	if (level.time - ent->timestamp <= 50)
+	if (level.time - ent->timestamp <= DEFAULT_SV_FRAMETIME)
 	{
 		speed = FLAME_START_SPEED;
 	}
@@ -1089,35 +1092,28 @@ void G_RunFlamechunk(gentity_t *ent)
 	}
 
 	// Do damage to nearby entities, every 100ms
+	// technically this is unnecessary as the dps is gated further down the call chain,
+	// but by keeping this here, we avoid tracing all ents in the box every frame
 	if (ent->flameQuotaTime <= level.time)
 	{
-		ent->flameQuotaTime = level.time + 100;
+		ent->flameQuotaTime = level.time + FRAMETIME;
 		G_FlameDamage(ent, ignoreent);
 	}
 
 	// Show debugging bbox
 	if (g_debugBullets.integer > 3)
 	{
-		gentity_t *bboxEnt;
-		float     size = ent->speed / 2;
-		vec3_t    b1, b2;
-		vec3_t    temp;
+		const float  size = ent->speed / 2;
+		const vec3_t mins = { -size, -size, -size };
+		const vec3_t maxs = { size, size, size };
 
-		VectorSet(temp, -size, -size, -size);
-		VectorCopy(ent->r.currentOrigin, b1);
-		VectorCopy(ent->r.currentOrigin, b2);
-		VectorAdd(b1, temp, b1);
-		VectorSet(temp, size, size, size);
-		VectorAdd(b2, temp, b2);
-		bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
-		VectorCopy(b2, bboxEnt->s.origin2);
-		bboxEnt->s.dmgFlags = 1;    // ("type")
+		G_RailBox(ent->r.currentOrigin, mins, maxs, colorRed, ent->s.number);
 	}
 
 	// Adjust the size
 	if (ent->speed < FLAME_START_MAX_SIZE)
 	{
-		ent->speed += 10.f;
+		ent->speed += (10.f * ((float)level.frameTime / DEFAULT_SV_FRAMETIME));
 
 		if (ent->speed > FLAME_START_MAX_SIZE)
 		{
@@ -1158,7 +1154,12 @@ gentity_t *fire_flamechunk(gentity_t *self, vec3_t start, vec3_t dir)
 	bolt = G_Spawn();
 	G_PreFilledMissileEntity(bolt, WP_FLAMETHROWER, self->s.weapon, self->s.number, TEAM_FREE, -1, self, start, dir);
 
-	bolt->flameQuotaTime   = level.time + 50;
+	// when holding down '+attack', flamechunks are created every 100ms
+	// however if the player is tapping '+attack', they can create flamechunks at odd intervals,
+	// which can cause the DPS to increase dramatically, especially on higher 'sv_fps' values,
+	// since each individual flamechunk has their own 100ms cycle for timestamp at which keeps track when they last dealt damage
+	// make sure the damage cooldown timestamp always aligns to 100ms intervals to keep the DPS always consistent
+	bolt->flameQuotaTime   = (level.time + FRAMETIME) - (level.time % FRAMETIME);
 	bolt->count2           = 0; // how often it bounced off of something
 	bolt->count            = 1; // this chunk can add hit
 	bolt->s.pos.trDuration = 550;
@@ -1858,6 +1859,11 @@ gentity_t *fire_missile(gentity_t *self, vec3_t start, vec3_t dir, int weapon)
 		// nope - this causes the dynamite to impact on the players bb when he throws it.
 		// will try setting it when it settles
 		//bolt->r.ownerNum            = ENTITYNUM_WORLD;  // make the world the owner of the dynamite, so the player can shoot it without modifying the bullet code to ignore players id for hits
+	}
+	else if (weapon == WP_SATCHEL)
+	{
+		// satchel crosshair ID
+		bolt->s.otherEntityNum = self->s.number;
 	}
 
 	return bolt;

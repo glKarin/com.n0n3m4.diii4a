@@ -1176,7 +1176,7 @@ unsigned char *loadimagepixelsbgra (const char *filename, qbool complain, qbool 
 
 	if (complain)
 	{
-		Con_Printf("Couldn't load %s using ", filename);
+		Con_Printf(CON_ERROR "Couldn't load %s using ", filename);
 		for (format = firstformat;format->formatstring;format++)
 		{
 			dpsnprintf (name, sizeof(name), format->formatstring, basename);

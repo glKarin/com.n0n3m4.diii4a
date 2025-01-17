@@ -115,13 +115,16 @@ void LAN_LoadCachedServers(void)
 		cJSON *serverObj = NULL;
 		cJSON_ArrayForEach(serverObj, root)
 		{
+			char *address;
+			char *name;
+
 			if (!cJSON_IsObject(serverObj))
 			{
 				continue;
 			}
 
-			char *address = Q_ReadStringValueJsonEx(serverObj, "address", "");
-			char *name    = Q_ReadStringValueJsonEx(serverObj, "name", "");
+			address = Q_ReadStringValueJsonEx(serverObj, "address", "");
+			name    = Q_ReadStringValueJsonEx(serverObj, "name", "");
 
 			if (*address && *name)
 			{
@@ -163,7 +166,7 @@ void LAN_SaveServersToFile(void)
 	for (i = 0; i < cls.numfavoriteservers; i++)
 	{
 		serverObj = cJSON_CreateObject();
-		cJSON_AddStringToObject(serverObj, "address", NET_AdrToString(cls.favoriteServers[i].adr));
+		cJSON_AddStringToObject(serverObj, "address", NET_AdrToString(&cls.favoriteServers[i].adr));
 		cJSON_AddStringToObject(serverObj, "name", cls.favoriteServers[i].hostName);
 		cJSON_AddStringToObject(serverObj, "game", cls.favoriteServers[i].game);
 
@@ -270,7 +273,7 @@ int LAN_AddServer(int source, const char *name, const char *address)
 		NET_StringToAdr(address, &adr, NA_UNSPEC);
 		for (i = 0; i < *count; i++)
 		{
-			if (NET_CompareAdr(servers[i].adr, adr))
+			if (NET_CompareAdr(&servers[i].adr, &adr))
 			{
 				break;
 			}
@@ -339,7 +342,7 @@ static void LAN_RemoveServer(int source, const char *addr)
 			NET_StringToAdr(addr, &comp, NA_UNSPEC);
 			for (i = 0; i < *count; i++)
 			{
-				if (NET_CompareAdr(comp, servers[i].adr))
+				if (NET_CompareAdr(&comp, &servers[i].adr))
 				{
 					j = i;
 
@@ -442,33 +445,26 @@ static int LAN_GetServerCount(int source)
  */
 static void LAN_GetServerAddressString(int source, int n, char *buf, size_t buflen)
 {
-#ifdef _WIN64
-	if (buflen > 1024)
-	{
-		buflen = (size_t)1024;
-	}
-#endif // WIN64
-
 	switch (source)
 	{
 	case AS_LOCAL:
 		if (n >= 0 && n < MAX_OTHER_SERVERS)
 		{
-			Q_strncpyz(buf, NET_AdrToString(cls.localServers[n].adr), buflen);
+			Q_strncpyz(buf, NET_AdrToString(&cls.localServers[n].adr), buflen);
 			return;
 		}
 		break;
 	case AS_GLOBAL:
 		if (n >= 0 && n < MAX_GLOBAL_SERVERS)
 		{
-			Q_strncpyz(buf, NET_AdrToString(cls.globalServers[n].adr), buflen);
+			Q_strncpyz(buf, NET_AdrToString(&cls.globalServers[n].adr), buflen);
 			return;
 		}
 		break;
 	case AS_FAVORITES:
 		if (n >= 0 && n < MAX_FAVOURITE_SERVERS)
 		{
-			Q_strncpyz(buf, NET_AdrToString(cls.favoriteServers[n].adr), buflen);
+			Q_strncpyz(buf, NET_AdrToString(&cls.favoriteServers[n].adr), buflen);
 			return;
 		}
 		break;
@@ -533,7 +529,7 @@ static void LAN_GetServerInfo(int source, int n, char *buf, size_t buflen)
 		Info_SetValueForKey(info, "game", server->game);
 		Info_SetValueForKey(info, "gametype", va("%i", server->gameType));
 		Info_SetValueForKey(info, "nettype", va("%i", server->netType));
-		Info_SetValueForKey(info, "addr", NET_AdrToString(server->adr));
+		Info_SetValueForKey(info, "addr", NET_AdrToString(&server->adr));
 		Info_SetValueForKey(info, "friendlyFire", va("%i", server->friendlyFire));
 		Info_SetValueForKey(info, "maxlives", va("%i", server->maxlives));
 		Info_SetValueForKey(info, "needpass", va("%i", server->needpass));
@@ -544,12 +540,6 @@ static void LAN_GetServerInfo(int source, int n, char *buf, size_t buflen)
 		Info_SetValueForKey(info, "balancedteams", va("%i", server->balancedteams));
 		Info_SetValueForKey(info, "g_oss", va("%i", server->oss));
 		Info_SetValueForKey(info, "blocked", va("%i", server->blocked));
-#ifdef _WIN64
-		if (buflen > 1024)
-		{
-			buflen = (size_t)1024;
-		}
-#endif // WIN64
 		Q_strncpyz(buf, info, buflen);
 	}
 	else
@@ -944,7 +934,7 @@ qboolean LAN_ServerIsInFavoriteList(int source, int n)
 
 	for (i = 0; i < cls.numfavoriteservers; i++)
 	{
-		if (NET_CompareAdr(cls.favoriteServers[i].adr, server->adr))
+		if (NET_CompareAdr(&cls.favoriteServers[i].adr, &server->adr))
 		{
 			return qtrue;
 		}

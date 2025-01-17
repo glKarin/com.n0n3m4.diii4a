@@ -718,38 +718,6 @@
                         android:layout_height="wrap_content"
                         android:text="@string/enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:layout_marginBottom="1dp"
-                    android:text="@string/automatic_setup_aspect_ratio_harm_r_autoaspectratio" />
-
-                <RadioGroup
-                    android:id="@+id/rg_r_autoAspectRatio"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <RadioButton
-                        android:id="@+id/rb_r_autoAspectRatio_0"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/setup_cvar_r_aspectratio_manually" />
-
-                    <RadioButton
-                        android:id="@+id/rb_r_autoAspectRatio_1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio" />
-
-                    <RadioButton
-                        android:id="@+id/rb_r_autoAspectRatio_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10" />
-                </RadioGroup>
-
                 <!-- Image -->
                 <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
@@ -850,6 +818,44 @@
                     myapp:lineColor="@color/launcher_divider_color" />
 
                 <LinearLayout
+                        android:id="@+id/autoAspectRatio"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:layout_marginBottom="1dp"
+                            android:text="@string/automatic_setup_aspect_ratio_harm_r_autoaspectratio" />
+
+                    <RadioGroup
+                            android:id="@+id/rg_r_autoAspectRatio"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+
+                        <RadioButton
+                                android:id="@+id/rb_r_autoAspectRatio_0"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/setup_cvar_r_aspectratio_manually" />
+
+                        <RadioButton
+                                android:id="@+id/rb_r_autoAspectRatio_1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio" />
+
+                        <RadioButton
+                                android:id="@+id/rb_r_autoAspectRatio_2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true"
+                                android:text="@string/automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10" />
+                    </RadioGroup>
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/dll_section"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -943,6 +949,35 @@
                 android:text="@string/load_quicksave_when_start_game" />
 
             <LinearLayout
+                android:id="@+id/console_height_frac"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/max_console_height_frac" />
+                    <TextView
+                        android:id="@+id/consoleHeightFracText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp" />
+                </LinearLayout>
+                <SeekBar
+                    android:id="@+id/consoleHeightFracValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="100"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/extras_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -958,7 +993,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:text="@string/patch_resource"
+                        android:text="@string/data_resource"
                         android:textAllCaps="false" />
 
                     <Button

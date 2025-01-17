@@ -1,7 +1,7 @@
 /*
  * Interfaces over Yamaha OPN2 (YM2612) chip emulators
  *
- * Copyright (C) 2017-2018 Vitaly Novichkov (Wohlstand)
+ * Copyright (c) 2017-2022 Vitaly Novichkov (Wohlstand)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,12 +19,21 @@
  */
 
 #include "gens_opn2.h"
+#include <cstdio>
 #include <cstring>
+#include <cassert>
+#include "gens/Ym2612.hpp"
 
-#include "gens/Ym2612_Emu.h"
+#ifndef INT16_MIN
+#define INT16_MIN   (-0x7fff - 1)
+#endif
+#ifndef INT16_MAX
+#define INT16_MAX   0x7fff
+#endif
 
-GensOPN2::GensOPN2()
-    : chip(new Ym2612_Emu())
+GensOPN2::GensOPN2(OPNFamily f)
+    : OPNChipBaseBufferedT(f),
+      chip(new LibGens::Ym2612())
 {
     setRate(m_rate, m_clock);
 }
@@ -37,8 +46,8 @@ GensOPN2::~GensOPN2()
 void GensOPN2::setRate(uint32_t rate, uint32_t clock)
 {
     OPNChipBaseBufferedT::setRate(rate, clock);
-    uint32_t chipRate = isRunningAtPcmRate() ? rate : static_cast<uint32_t>(nativeRate);
-    chip->set_rate(chipRate, clock);  // implies reset()
+    uint32_t chipRate = isRunningAtPcmRate() ? rate : nativeRate();
+    chip->reInit(clock, chipRate);  // implies reset()
 }
 
 void GensOPN2::reset()
@@ -49,13 +58,17 @@ void GensOPN2::reset()
 
 void GensOPN2::writeReg(uint32_t port, uint16_t addr, uint8_t data)
 {
+     LibGens::Ym2612 *chip = this->chip;
+
     switch (port)
     {
     case 0:
-        chip->write0(addr, data);
+        chip->write(0, addr);
+        chip->write(1, data);
         break;
     case 1:
-        chip->write1(addr, data);
+        chip->write(2, addr);
+        chip->write(3, data);
         break;
     }
 }
@@ -67,11 +80,31 @@ void GensOPN2::writePan(uint16_t chan, uint8_t data)
 
 void GensOPN2::nativeGenerateN(int16_t *output, size_t frames)
 {
-    std::memset(output, 0, frames * sizeof(int16_t) * 2);
-    chip->run((int)frames, output);
+    enum { maxFrames = 256 };
+    assert(frames <= maxFrames);
+
+    LibGens::Ym2612 *chip = this->chip;
+    int32_t bufLR[2 * maxFrames] = {};
+    int32_t *bufL = &bufLR[0];
+    int32_t *bufR = &bufLR[maxFrames];
+
+    chip->resetBufferPtrs(bufL, bufR);
+    chip->addWriteLen((int)frames);
+    chip->specialUpdate();
+
+    //TODO
+    // chip->updateDacAndTimers(bufL, bufR, frames);
+
+    for (size_t i = 0; i < 2 * frames; ++i) {
+        int32_t sample = ((i & 1) ? bufR : bufL)[i / 2];
+        sample /= 4; // has too high volume, attenuation needed
+        sample = (sample < INT16_MIN) ? INT16_MIN : sample;
+        sample = (sample > INT16_MAX) ? INT16_MAX : sample;
+        output[i] = (int16_t)sample;
+    }
 }
 
 const char *GensOPN2::emulatorName()
 {
-    return "GENS 2.10 OPN2";
+    return "GENS/GS II OPN2";
 }

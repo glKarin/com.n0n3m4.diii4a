@@ -286,5 +286,7 @@ struct Handler {
 	void Init( Bitu rate );
 };
 
+// Pre-Initialize internal tables
+void InitTables(void);
 
 }		//Namespace

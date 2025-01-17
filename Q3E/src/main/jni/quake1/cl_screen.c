@@ -16,9 +16,13 @@
 // we have to include snd_main.h here only to get access to snd_renderbuffer->format.speed when writing the AVI headers
 #include "snd_main.h"
 
+#ifdef __ANDROID__ //karin: limit console max height
+extern int Android_GetConsoleMaxHeight(int height, int maxHeight);
+#endif
+
 cvar_t scr_viewsize = {CF_CLIENT | CF_ARCHIVE, "viewsize","100", "how large the view should be, 110 disables inventory bar, 120 disables status bar"};
 cvar_t scr_fov = {CF_CLIENT | CF_ARCHIVE, "fov","90", "field of vision, 1-170 degrees, default 90, some players use 110-130"};
-cvar_t scr_conalpha = {CF_CLIENT | CF_ARCHIVE, "scr_conalpha", "1", "opacity of console background gfx/conback"};
+cvar_t scr_conalpha = {CF_CLIENT | CF_ARCHIVE, "scr_conalpha", "0.9", "opacity of console background gfx/conback (when console isn't forced fullscreen)"};
 cvar_t scr_conalphafactor = {CF_CLIENT | CF_ARCHIVE, "scr_conalphafactor", "1", "opacity of console background gfx/conback relative to scr_conalpha; when 0, gfx/conback is not drawn"};
 cvar_t scr_conalpha2factor = {CF_CLIENT | CF_ARCHIVE, "scr_conalpha2factor", "0", "opacity of console background gfx/conback2 relative to scr_conalpha; when 0, gfx/conback2 is not drawn"};
 cvar_t scr_conalpha3factor = {CF_CLIENT | CF_ARCHIVE, "scr_conalpha3factor", "0", "opacity of console background gfx/conback3 relative to scr_conalpha; when 0, gfx/conback3 is not drawn"};
@@ -51,11 +55,12 @@ cvar_t scr_loadingscreen_barcolor = {CF_CLIENT, "scr_loadingscreen_barcolor", "0
 cvar_t scr_loadingscreen_barheight = {CF_CLIENT, "scr_loadingscreen_barheight", "8", "the height of the loadingscreen progress bar"};
 cvar_t scr_loadingscreen_maxfps = {CF_CLIENT, "scr_loadingscreen_maxfps", "20", "maximum FPS for loading screen so it will not update very often (this reduces loading time with lots of models)"};
 cvar_t scr_infobar_height = {CF_CLIENT, "scr_infobar_height", "8", "the height of the infobar items"};
+cvar_t scr_sbarscale = {CF_CLIENT | CF_READONLY, "scr_sbarscale", "1", "current vid_height/vid_conheight, for compatibility with csprogs that read this cvar (found in Fitzquake-derived engines and FTEQW; despite the name it's not specific to the status bar)"};
 cvar_t vid_conwidthauto = {CF_CLIENT | CF_ARCHIVE, "vid_conwidthauto", "1", "automatically update vid_conwidth to match aspect ratio"};
 cvar_t vid_conwidth = {CF_CLIENT | CF_ARCHIVE, "vid_conwidth", "640", "virtual width of 2D graphics system (note: changes may be overwritten, see vid_conwidthauto)"};
 cvar_t vid_conheight = {CF_CLIENT | CF_ARCHIVE, "vid_conheight", "480", "virtual height of 2D graphics system"};
 cvar_t vid_pixelheight = {CF_CLIENT | CF_ARCHIVE, "vid_pixelheight", "1", "adjusts vertical field of vision to account for non-square pixels (1280x1024 on a CRT monitor for example)"};
-cvar_t scr_screenshot_jpeg = {CF_CLIENT | CF_ARCHIVE, "scr_screenshot_jpeg","1", "save jpeg instead of targa"};
+cvar_t scr_screenshot_jpeg = {CF_CLIENT | CF_ARCHIVE, "scr_screenshot_jpeg","1", "save jpeg instead of targa or PNG"};
 cvar_t scr_screenshot_jpeg_quality = {CF_CLIENT | CF_ARCHIVE, "scr_screenshot_jpeg_quality","0.9", "image quality of saved jpeg"};
 cvar_t scr_screenshot_png = {CF_CLIENT | CF_ARCHIVE, "scr_screenshot_png","0", "save png instead of targa"};
 cvar_t scr_screenshot_gammaboost = {CF_CLIENT | CF_ARCHIVE, "scr_screenshot_gammaboost","1", "gamma correction on saved screenshots and videos, 1.0 saves unmodified images"};
@@ -65,7 +70,7 @@ cvar_t scr_screenshot_timestamp = {CF_CLIENT | CF_ARCHIVE, "scr_screenshot_times
 #ifdef CONFIG_VIDEO_CAPTURE
 cvar_t cl_capturevideo = {CF_CLIENT, "cl_capturevideo", "0", "enables saving of video to a .avi file using uncompressed I420 colorspace and PCM audio, note that scr_screenshot_gammaboost affects the brightness of the output)"};
 cvar_t cl_capturevideo_demo_stop = {CF_CLIENT | CF_ARCHIVE, "cl_capturevideo_demo_stop", "1", "automatically stops video recording when demo ends"};
-cvar_t cl_capturevideo_printfps = {CF_CLIENT | CF_ARCHIVE, "cl_capturevideo_printfps", "1", "prints the frames per second captured in capturevideo (is only written to the log file, not to the console, as that would be visible on the video)"};
+cvar_t cl_capturevideo_printfps = {CF_CLIENT | CF_ARCHIVE, "cl_capturevideo_printfps", "1", "prints the frames per second captured in capturevideo (is only written to stdout and any log file, not to the console as that would be visible on the video), value is seconds of wall time between prints"};
 cvar_t cl_capturevideo_width = {CF_CLIENT | CF_ARCHIVE, "cl_capturevideo_width", "0", "scales all frames to this resolution before saving the video"};
 cvar_t cl_capturevideo_height = {CF_CLIENT | CF_ARCHIVE, "cl_capturevideo_height", "0", "scales all frames to this resolution before saving the video"};
 cvar_t cl_capturevideo_realtime = {CF_CLIENT, "cl_capturevideo_realtime", "0", "causes video saving to operate in realtime (mostly useful while playing, not while capturing demos), this can produce a much lower quality video due to poor sound/video sync and will abort saving if your machine stalls for over a minute"};
@@ -142,12 +147,20 @@ for a few moments
 */
 void SCR_CenterPrint(const char *str)
 {
-	dp_strlcpy (scr_centerstring, str, sizeof (scr_centerstring));
 	scr_centertime_off = scr_centertime.value;
 	scr_centertime_start = cl.time;
 
-// count the number of lines for centering
+	// Print the message to the console and update the scr buffer
+	// but only if it's different to the previous message
+	if (strcmp(str, scr_centerstring) == 0)
+		return;
+	dp_strlcpy(scr_centerstring, str, sizeof(scr_centerstring));
 	scr_center_lines = 1;
+	if (str[0] == '\0') // happens when stepping out of a centreprint trigger on alk1.2 start.bsp
+		return;
+	Con_CenterPrint(str);
+
+// count the number of lines for centering
 	while (*str)
 	{
 		if (*str == '\n')
@@ -167,15 +180,18 @@ static void SCR_Centerprint_f (cmd_state_t *cmd)
 {
 	char msg[MAX_INPUTLINE];
 	unsigned int i, c, p;
+
 	c = Cmd_Argc(cmd);
 	if(c >= 2)
 	{
+		// Merge all the cprint arguments into one string
 		dp_strlcpy(msg, Cmd_Argv(cmd,1), sizeof(msg));
 		for(i = 2; i < c; ++i)
 		{
 			dp_strlcat(msg, " ", sizeof(msg));
 			dp_strlcat(msg, Cmd_Argv(cmd, i), sizeof(msg));
 		}
+
 		c = (unsigned int)strlen(msg);
 		for(p = 0, i = 0; i < c; ++i)
 		{
@@ -744,10 +760,14 @@ void SCR_DrawConsole (void)
 	if (key_consoleactive & KEY_CONSOLEACTIVE_FORCED)
 	{
 		// full screen
-		Con_DrawConsole (vid_conheight.integer - scr_con_margin_bottom);
+		Con_DrawConsole (vid_conheight.integer - scr_con_margin_bottom, true);
 	}
 	else if (scr_con_current)
-		Con_DrawConsole (min(scr_con_current, vid_conheight.integer - scr_con_margin_bottom));
+#ifdef __ANDROID__ //karin: limit console max height
+		Con_DrawConsole (Android_GetConsoleMaxHeight(min(scr_con_current, vid_conheight.integer - scr_con_margin_bottom), vid_conheight.integer - scr_con_margin_bottom), false);
+#else
+		Con_DrawConsole (min(scr_con_current, vid_conheight.integer - scr_con_margin_bottom), false);
+#endif
 	else
 		con_vislines = 0;
 }
@@ -827,6 +847,7 @@ void CL_Screen_Init(void)
 	Cvar_RegisterVariable (&scr_showbrand);
 	Cvar_RegisterVariable (&scr_centertime);
 	Cvar_RegisterVariable (&scr_printspeed);
+	Cvar_RegisterVariable (&scr_sbarscale);
 	Cvar_RegisterVariable (&vid_conwidth);
 	Cvar_RegisterVariable (&vid_conheight);
 	Cvar_RegisterVariable (&vid_pixelheight);
@@ -946,10 +967,11 @@ void SCR_ScreenShot_f(cmd_state_t *cmd)
 		int shotnumber100;
 
 		// TODO maybe make capturevideo and screenshot use similar name patterns?
+		Sys_TimeString(vabuf, sizeof(vabuf), "%Y%m%d%H%M%S");
 		if (scr_screenshot_name_in_mapdir.integer && cl.worldbasename[0])
-			dpsnprintf(prefix_name, sizeof(prefix_name), "%s/%s%s", cl.worldbasename, scr_screenshot_name.string, Sys_TimeString("%Y%m%d%H%M%S"));
+			dpsnprintf(prefix_name, sizeof(prefix_name), "%s/%s%s", cl.worldbasename, scr_screenshot_name.string, vabuf);
 		else
-			dpsnprintf(prefix_name, sizeof(prefix_name), "%s%s", scr_screenshot_name.string, Sys_TimeString("%Y%m%d%H%M%S"));
+			dpsnprintf(prefix_name, sizeof(prefix_name), "%s%s", scr_screenshot_name.string, vabuf);
 
 		// find a file name to save it to
 		for (shotnumber100 = 0;shotnumber100 < 100;shotnumber100++)
@@ -968,10 +990,11 @@ void SCR_ScreenShot_f(cmd_state_t *cmd)
 	else
 	{
 		// TODO maybe make capturevideo and screenshot use similar name patterns?
+		Sys_TimeString(vabuf, sizeof(vabuf), scr_screenshot_name.string);
 		if (scr_screenshot_name_in_mapdir.integer && cl.worldbasename[0])
-			dpsnprintf(prefix_name, sizeof(prefix_name), "%s/%s", cl.worldbasename, Sys_TimeString(scr_screenshot_name.string));
+			dpsnprintf(prefix_name, sizeof(prefix_name), "%s/%s", cl.worldbasename, vabuf);
 		else
-			dpsnprintf(prefix_name, sizeof(prefix_name), "%s", Sys_TimeString(scr_screenshot_name.string));
+			dpsnprintf(prefix_name, sizeof(prefix_name), "%s", vabuf);
 
 		// if prefix changed, gamedir or map changed, reset the shotnumber so
 		// we scan again
@@ -1027,6 +1050,8 @@ static void SCR_CaptureVideo_BeginVideo(void)
 	double r, g, b;
 	unsigned int i;
 	int width = cl_capturevideo_width.integer, height = cl_capturevideo_height.integer;
+	char timestring[128];
+
 	if (cls.capturevideo.active)
 		return;
 	memset(&cls.capturevideo, 0, sizeof(cls.capturevideo));
@@ -1060,10 +1085,13 @@ static void SCR_CaptureVideo_BeginVideo(void)
 	cls.capturevideo.starttime = cls.capturevideo.lastfpstime = host.realtime;
 	cls.capturevideo.soundsampleframe = 0;
 	cls.capturevideo.realtime = cl_capturevideo_realtime.integer != 0;
-	cls.capturevideo.screenbuffer = (unsigned char *)Mem_Alloc(tempmempool, vid.mode.width * vid.mode.height * 4);
-	cls.capturevideo.outbuffer = (unsigned char *)Mem_Alloc(tempmempool, width * height * (4+4) + 18);
-	dpsnprintf(cls.capturevideo.basename, sizeof(cls.capturevideo.basename), "video/%s%03i", Sys_TimeString(cl_capturevideo_nameformat.string), cl_capturevideo_number.integer);
+	cls.capturevideo.outbuffer = (unsigned char *)Mem_Alloc(tempmempool, width * height * 4 + 18); // +18 ?
+	Sys_TimeString(timestring, sizeof(timestring), cl_capturevideo_nameformat.string);
+	dpsnprintf(cls.capturevideo.basename, sizeof(cls.capturevideo.basename), "video/%s%03i", timestring, cl_capturevideo_number.integer);
 	Cvar_SetValueQuick(&cl_capturevideo_number, cl_capturevideo_number.integer + 1);
+
+	// capture demos as fast as possible
+	host.restless = !cls.capturevideo.realtime;
 
 	/*
 	for (i = 0;i < 256;i++)
@@ -1118,6 +1146,8 @@ Cr = R *  .500 + G * -.419 + B * -.0813 + 128.;
 		cls.capturevideo.yuvnormalizetable[2][i] = 16 + i * (240-16) / 256;
 	}
 
+	GL_CaptureVideo_BeginVideo();
+
 	if (cl_capturevideo_ogg.integer)
 	{
 		if(SCR_CaptureVideo_Ogg_Available())
@@ -1137,19 +1167,14 @@ void SCR_CaptureVideo_EndVideo(void)
 	if (!cls.capturevideo.active)
 		return;
 	cls.capturevideo.active = false;
+	host.restless = false;
 
 	Con_Printf("Finishing capture of %s.%s (%d frames, %d audio frames)\n", cls.capturevideo.basename, cls.capturevideo.formatextension, cls.capturevideo.frame, cls.capturevideo.soundsampleframe);
 
-	if (cls.capturevideo.videofile)
-	{
-		cls.capturevideo.endvideo();
-	}
+	GL_CaptureVideo_EndVideo(); // must be called before writeEndVideo !
 
-	if (cls.capturevideo.screenbuffer)
-	{
-		Mem_Free (cls.capturevideo.screenbuffer);
-		cls.capturevideo.screenbuffer = NULL;
-	}
+	if (cls.capturevideo.videofile)
+		cls.capturevideo.writeEndVideo();
 
 	if (cls.capturevideo.outbuffer)
 	{
@@ -1157,101 +1182,40 @@ void SCR_CaptureVideo_EndVideo(void)
 		cls.capturevideo.outbuffer = NULL;
 	}
 
+	// If demo capture failed don't leave the demo playing.
+	// CL_StopPlayback shuts down when demo capture finishes successfully.
+	if (cls.capturevideo.error && Sys_CheckParm("-capturedemo"))
+		host.state = host_shutdown;
+
 	memset(&cls.capturevideo, 0, sizeof(cls.capturevideo));
-}
-
-static void SCR_ScaleDownBGRA(unsigned char *in, int inw, int inh, unsigned char *out, int outw, int outh)
-{
-	// TODO optimize this function
-
-	int x, y;
-	float area;
-
-	// memcpy is faster than me
-	if(inw == outw && inh == outh)
-	{
-		memcpy(out, in, 4 * inw * inh);
-		return;
-	}
-
-	// otherwise: a box filter
-	area = (float)outw * (float)outh / (float)inw / (float)inh;
-	for(y = 0; y < outh; ++y)
-	{
-		float iny0 =  y    / (float)outh * inh; int iny0_i = (int) floor(iny0);
-		float iny1 = (y+1) / (float)outh * inh; int iny1_i = (int) ceil(iny1);
-		for(x = 0; x < outw; ++x)
-		{
-			float inx0 =  x    / (float)outw * inw; int inx0_i = (int) floor(inx0);
-			float inx1 = (x+1) / (float)outw * inw; int inx1_i = (int) ceil(inx1);
-			float r = 0, g = 0, b = 0, alpha = 0;
-			int xx, yy;
-
-			for(yy = iny0_i; yy < iny1_i; ++yy)
-			{
-				float ya = min(yy+1, iny1) - max(iny0, yy);
-				for(xx = inx0_i; xx < inx1_i; ++xx)
-				{
-					float a = ya * (min(xx+1, inx1) - max(inx0, xx));
-					r += a * in[4*(xx + inw * yy)+0];
-					g += a * in[4*(xx + inw * yy)+1];
-					b += a * in[4*(xx + inw * yy)+2];
-					alpha += a * in[4*(xx + inw * yy)+3];
-				}
-			}
-
-			out[4*(x + outw * y)+0] = (unsigned char) (r * area);
-			out[4*(x + outw * y)+1] = (unsigned char) (g * area);
-			out[4*(x + outw * y)+2] = (unsigned char) (b * area);
-			out[4*(x + outw * y)+3] = (unsigned char) (alpha * area);
-		}
-	}
-}
-
-static void SCR_CaptureVideo_VideoFrame(int newframestepframenum)
-{
-	int x = 0, y = 0;
-	int width = cls.capturevideo.width, height = cls.capturevideo.height;
-
-	if(newframestepframenum == cls.capturevideo.framestepframe)
-		return;
-
-	CHECKGLERROR
-	// speed is critical here, so do saving as directly as possible
-
-	GL_ReadPixelsBGRA(x, y, vid.mode.width, vid.mode.height, cls.capturevideo.screenbuffer);
-
-	SCR_ScaleDownBGRA (cls.capturevideo.screenbuffer, vid.mode.width, vid.mode.height, cls.capturevideo.outbuffer, width, height);
-
-	cls.capturevideo.videoframes(newframestepframenum - cls.capturevideo.framestepframe);
-	cls.capturevideo.framestepframe = newframestepframenum;
-
-	if(cl_capturevideo_printfps.integer && host.realtime > cls.capturevideo.lastfpstime + 1)
-	{
-		double fps1 = (cls.capturevideo.frame - cls.capturevideo.lastfpsframe) / (host.realtime - cls.capturevideo.lastfpstime + 0.0000001);
-		double fps  = (cls.capturevideo.frame                                ) / (host.realtime - cls.capturevideo.starttime   + 0.0000001);
-		Sys_Printf("capturevideo: (%.1fs) last second %.3ffps, total %.3ffps\n", cls.capturevideo.frame / cls.capturevideo.framerate, fps1, fps);
-		cls.capturevideo.lastfpstime = host.realtime;
-		cls.capturevideo.lastfpsframe = cls.capturevideo.frame;
-	}
 }
 
 void SCR_CaptureVideo_SoundFrame(const portable_sampleframe_t *paintbuffer, size_t length)
 {
 	cls.capturevideo.soundsampleframe += (int)length;
-	cls.capturevideo.soundframe(paintbuffer, length);
+	cls.capturevideo.writeSoundFrame(paintbuffer, length);
 }
 
 static void SCR_CaptureVideo(void)
 {
 	int newframenum;
+	int newframestepframenum;
+
 	if (cl_capturevideo.integer)
 	{
 		if (!cls.capturevideo.active)
 			SCR_CaptureVideo_BeginVideo();
+		if (cls.capturevideo.error)
+		{
+			// specific error message was printed already
+			Cvar_SetValueQuick(&cl_capturevideo, 0);
+			SCR_CaptureVideo_EndVideo();
+			return;
+		}
+
 		if (cls.capturevideo.framerate != cl_capturevideo_fps.value * cl_capturevideo_framestep.integer)
 		{
-			Con_Printf("You can not change the video framerate while recording a video.\n");
+			Con_Printf(CON_WARN "You can not change the video framerate while recording a video.\n");
 			Cvar_SetValueQuick(&cl_capturevideo_fps, cls.capturevideo.framerate / (double) cl_capturevideo_framestep.integer);
 		}
 		// for AVI saving we have to make sure that sound is saved before video
@@ -1268,17 +1232,32 @@ static void SCR_CaptureVideo(void)
 		if (newframenum - cls.capturevideo.frame > 60 * (int)ceil(cls.capturevideo.framerate))
 		{
 			Cvar_SetValueQuick(&cl_capturevideo, 0);
-			Con_Printf("video saving failed on frame %i, your machine is too slow for this capture speed.\n", cls.capturevideo.frame);
+			Con_Printf(CON_ERROR "video saving failed on frame %i, your machine is too slow for this capture speed.\n", cls.capturevideo.frame);
 			SCR_CaptureVideo_EndVideo();
 			return;
 		}
 		// write frames
-		SCR_CaptureVideo_VideoFrame(newframenum / cls.capturevideo.framestep);
+		newframestepframenum = newframenum / cls.capturevideo.framestep;
+		if (newframestepframenum != cls.capturevideo.framestepframe)
+			GL_CaptureVideo_VideoFrame(newframestepframenum);
+		cls.capturevideo.framestepframe = newframestepframenum;
+		// report progress
+		if(cl_capturevideo_printfps.value && host.realtime > cls.capturevideo.lastfpstime + cl_capturevideo_printfps.value)
+		{
+			double fps1 = (cls.capturevideo.frame - cls.capturevideo.lastfpsframe) / (host.realtime - cls.capturevideo.lastfpstime + 0.0000001);
+			double fps  = (cls.capturevideo.frame                                ) / (host.realtime - cls.capturevideo.starttime   + 0.0000001);
+			Sys_Printf("captured %.1fs of video, last second %.3ffps (%.1fx), total %.3ffps (%.1fx)\n",
+					cls.capturevideo.frame / cls.capturevideo.framerate,
+					fps1, fps1 / cls.capturevideo.framerate,
+					fps, fps / cls.capturevideo.framerate);
+			cls.capturevideo.lastfpstime = host.realtime;
+			cls.capturevideo.lastfpsframe = cls.capturevideo.frame;
+		}
 		cls.capturevideo.frame = newframenum;
 		if (cls.capturevideo.error)
 		{
 			Cvar_SetValueQuick(&cl_capturevideo, 0);
-			Con_Printf("video saving failed on frame %i, out of disk space? stopping video capture.\n", cls.capturevideo.frame);
+			Con_Printf(CON_ERROR "video saving failed on frame %i, out of disk space? stopping video capture.\n", cls.capturevideo.frame);
 			SCR_CaptureVideo_EndVideo();
 		}
 	}
@@ -2112,12 +2091,15 @@ static void SCR_UpdateVars(void)
 {
 	float conwidth = bound(160, vid_conwidth.value, 32768);
 	float conheight = bound(90, vid_conheight.value, 24576);
+	float conscale = vid.mode.height / vid_conheight.value;
 	if (vid_conwidthauto.integer)
 		conwidth = floor(conheight * vid.mode.width / (vid.mode.height * vid_pixelheight.value));
 	if (vid_conwidth.value != conwidth)
 		Cvar_SetValueQuick(&vid_conwidth, conwidth);
 	if (vid_conheight.value != conheight)
 		Cvar_SetValueQuick(&vid_conheight, conheight);
+	if (scr_sbarscale.value != conscale)
+		Cvar_SetValueQuick(&scr_sbarscale, conscale);
 
 	// bound viewsize
 	if (scr_viewsize.value < 30)
@@ -2259,7 +2241,8 @@ void CL_UpdateScreen(void)
 	}
 
 #ifdef CONFIG_VIDEO_CAPTURE
-	if (vid_hidden && !cls.capturevideo.active && !cl_capturevideo.integer)
+	if (vid_hidden && !cls.capturevideo.active
+	&& !cl_capturevideo.integer) // so we can start capturing while hidden
 #else
 	if (vid_hidden)
 #endif
@@ -2274,11 +2257,10 @@ void CL_UpdateScreen(void)
 			SCR_EndLoadingPlaque();
 		else if (scr_loadingscreen_maxfps.value > 0)
 		{
-			static float lastupdate;
-			float now = Sys_DirtyTime();
-			if (now - lastupdate < min(1.0f / scr_loadingscreen_maxfps.value, 0.1))
+			static double lastupdate;
+			if (host.realtime - lastupdate < min(1.0f / scr_loadingscreen_maxfps.value, 0.1))
 				return;
-			lastupdate = now;
+			lastupdate = host.realtime;
 		}
 	}
 
@@ -2302,7 +2284,7 @@ void CL_UpdateScreen(void)
 #endif
 
 	R_Viewport_InitOrtho(&viewport, &identitymatrix, 0, 0, vid.mode.width, vid.mode.height, 0, 0, vid_conwidth.integer, vid_conheight.integer, -10, 100, NULL);
-	R_Mesh_SetRenderTargets(0, NULL, NULL, NULL, NULL, NULL);
+	R_Mesh_SetRenderTargets(0);
 	R_SetViewport(&viewport);
 	GL_ScissorTest(false);
 	GL_ColorMask(1,1,1,1);

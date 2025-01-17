@@ -1381,3 +1381,11 @@ void idCVarSystemLocal::Restart_f(const idCmdArgs &args)
 		cvar->Reset();
 	}
 }
+
+void idCVar::SetReadonly(bool on)
+{
+    if(on)
+        internalVar->flags |= CVAR_ROM;
+    else
+        internalVar->flags &= ~CVAR_ROM;
+}

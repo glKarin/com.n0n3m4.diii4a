@@ -30,6 +30,7 @@ OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
 OPTION(GAME_ETW         "Build Wolfenstein: Enemy Territory"    ON)
 OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 
+OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
 if(GAME_DOOM3)
@@ -42,12 +43,12 @@ if(NOT GAME_DOOM3)
     add_subdirectory(doom3/neo/externlibs/openal-soft)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_QUAKES)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory ( deplibs ) # common depend libraries
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_QUAKES)
     message(STATUS "Build common static libraries")
     add_subdirectory (deplibs/oboe) # 1.8.1
     add_subdirectory ( common )
@@ -58,17 +59,17 @@ if(GAME_RTCW) # 438e7d413b5f7277187c35b032eb0ef9093ae778 | May 27, 2024 | All: F
     add_subdirectory ( rtcw ) # RTCW
 endif()
 
-if(GAME_QUAKE3)
+if(GAME_QUAKE3) # https://github.com/ioquake/ioq3/commit/3fb9006e6461b877b67781cd0f0d94032804a475
     message(STATUS "Build Quake 3")
     add_subdirectory ( quake3 ) # Quake 3 Arena | Team Arena
 endif()
 
-if(GAME_QUAKE2)
+if(GAME_QUAKE2) # 8.4 | 141bf6e7ddf0ee0895783db1de90d96e6a483ab0 | Aug 9, 2024 | Bump version number to 8.41.
     message(STATUS "Build Quake 2")
     add_subdirectory ( quake2 ) # Quake 2
 endif()
 
-if(GAME_QUAKE1)
+if(GAME_QUAKE1) # https://github.com/DarkPlacesEngine/DarkPlaces/commit/dbebfea96dae5c8c75a2f8680768edc7851801c2
     message(STATUS "Build Quake 1")
     add_subdirectory ( quake1 ) # Quake 1
 endif()
@@ -88,7 +89,7 @@ if(GAME_DNF)
     add_subdirectory ( duke4/neo ) # DNF
 endif()
 
-if(GAME_DOOM) # g4.12.2 | 71c40432e5e893c629a1c9c76a523a0ab22bd56a | Apr 28, 2024 | Reworked clientside lerping
+if(GAME_DOOM) # g4.14.0 | 71c40432e5e893c629a1c9c76a523a0ab22bd56a | Apr 28, 2024 | Reworked clientside lerping
     if(CMAKE_SIZEOF_VOID_P EQUAL 8 #[[ OR TRUE]]) # GZDOOM only support 64bits system
         message(STATUS "Build GZDOOM")
         add_subdirectory ( gzdoom ) # GZDOOM
@@ -97,7 +98,7 @@ if(GAME_DOOM) # g4.12.2 | 71c40432e5e893c629a1c9c76a523a0ab22bd56a | Apr 28, 202
     endif()
 endif()
 
-if(GAME_ETW) # v2.82.1 | 0a24c70f84cf21940277ddabd736ce83535cb794 | Apr 19, 2024 | Incrementing version number to 2.82.1
+if(GAME_ETW) # v2.83.1 | e8d0ec06800630fd458791ccd29ed488e04648d9 | Nov 12, 2024 | Incrementing version number to 2.83.1
     message(STATUS "Build Wolfenstein: Enemy Territory")
     add_subdirectory ( etw ) # ETW
 endif()
@@ -105,4 +106,9 @@ endif()
 if(GAME_REALRTCW) # 5.0
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
+endif()
+
+if(GAME_QUAKES) # noire-dev/SourceTech/commit/b0a1d46740d5a76f172a2889f285214a95dd3702 noire-dev/QuakeSandbox/commit/f01cab6d123784f6e2aaa839e9ccd3ec0a6f1325
+    message(STATUS "Build Quake SandBox")
+    add_subdirectory ( quakes ) # Quake SandBox
 endif()

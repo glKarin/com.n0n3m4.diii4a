@@ -590,6 +590,7 @@ set(GL1-Source
 	${REF_SRC_DIR}/gl1/gl1_surf.c
 	${REF_SRC_DIR}/gl1/gl1_warp.c
 	${REF_SRC_DIR}/gl1/gl1_sdl.c
+	${REF_SRC_DIR}/gl1/gl1_buffer.c
 	${REF_SRC_DIR}/files/models.c
 	${REF_SRC_DIR}/files/pcx.c
 	${REF_SRC_DIR}/files/stb.c
@@ -747,7 +748,7 @@ set_target_properties(q2ded PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
 	)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	target_link_libraries(q2ded ${yquake2LinkerFlags})
+	target_link_libraries(q2ded ${yquake2LinkerFlags} ${yquake2ZLibLinkerFlags} ws2_32 winmm)
 else()
 	target_link_libraries(q2ded ${yquake2LinkerFlags} ${yquake2ServerLinkerFlags} ${yquake2ZLibLinkerFlags})
 endif()

@@ -1,3 +1,11 @@
+Ground Zero 2.11 to 2.12
+- Implement `g_quick_weap`. If set to 1, both weapprev and weapnext
+  commands will count how many times they have been called, making
+  possible to skip weapons by quickly tapping one of these keys. (by
+  protocultor)
+- Work around naggy help icons. (by BjossiAlfreds)
+- Implement `g_monsterfootsteps` (by 0lvin)
+
 Ground Zero 2.10 to 2.11
 - Relicense under GPL2.
 - Fix Entity used itself in rbase1 and other minor fixes. (by

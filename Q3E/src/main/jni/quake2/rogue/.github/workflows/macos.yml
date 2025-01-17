@@ -1,0 +1,50 @@
+name: Testbuild for MacOS
+run-name: testbuild_macos
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    types:
+      - edited
+      - opened
+      - synchronize
+concurrency:
+  # Cancel concurrent workflows for the same PR or commit hash.
+  group: ${{github.workflow}}-${{github.event_name == 'pull_request' && github.head_ref || github.sha}}
+  cancel-in-progress: true
+jobs:
+  build_macos_aarch64:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - env: macos
+    steps:
+    - name: Install build dependencies
+      run: |
+        brew update
+        brew install make
+    - name: Check out repository code
+      uses: actions/checkout@v4
+    - name: Build
+      run: |
+        # Public runners come with 3 CPUs.
+        gmake -j3
+    - name: Create testbuild package
+      run: |
+        # Create release directory tree
+        mkdir -p publish/quake2-rogue-macos-${{github.sha}}/misc/docs
+        # Copy release assets
+        cp -r release/* publish/quake2-rogue-macos-${{github.sha}}/
+        # Copy misc assets
+        cp -r stuff/mapfixes publish/quake2-rogue-macos-${{github.sha}}/misc
+        cp LICENSE publish/quake2-rogue-macos-${{github.sha}}/misc/docs/LICENSE.txt
+        cp README.md publish/quake2-rogue-macos-${{github.sha}}/misc/docs/README.txt
+    - name: Upload testbuild package
+      uses: actions/upload-artifact@v4
+      with:
+        name: quake2-rogue-macos-${{github.sha}}
+        path: publish/
+        if-no-files-found: error

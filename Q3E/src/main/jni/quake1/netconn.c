@@ -49,6 +49,10 @@ static cvar_t sv_masters [] =
 	{CF_CLIENT | CF_SERVER, "sv_masterextra3", "dpm.dpmaster.org:27777", "dpm.dpmaster.org - default master server 3 (admin: gazby/soylent_cow)"},
 };
 
+// asgaard.morphos-team.net resolves to the same ipv4 as qwmaster.fodquake.net,
+// its reverse PTR is for asgaard.morphos-team.net but qwmaster.fodquake.net seems more popular.
+// qwmaster.ocrana.de seems long dead.
+// https://www.quakeservers.net/quakeworld/master_servers/
 #ifdef CONFIG_MENU
 static cvar_t sv_qwmasters [] =
 {
@@ -56,10 +60,9 @@ static cvar_t sv_qwmasters [] =
 	{CF_CLIENT | CF_ARCHIVE, "sv_qwmaster2", "", "user-chosen qwmaster server 2"},
 	{CF_CLIENT | CF_ARCHIVE, "sv_qwmaster3", "", "user-chosen qwmaster server 3"},
 	{CF_CLIENT | CF_ARCHIVE, "sv_qwmaster4", "", "user-chosen qwmaster server 4"},
-	{CF_CLIENT, "sv_qwmasterextra1", "master.quakeservers.net:27000", "Global master server. (admin: unknown)"},
-	{CF_CLIENT, "sv_qwmasterextra2", "asgaard.morphos-team.net:27000", "Global master server. (admin: unknown)"},
-	{CF_CLIENT, "sv_qwmasterextra3", "qwmaster.ocrana.de:27000", "German master server. (admin: unknown)"},
-	{CF_CLIENT, "sv_qwmasterextra4", "qwmaster.fodquake.net:27000", "Global master server. (admin: unknown)"},
+	{CF_CLIENT, "sv_qwmasterextra1", "master.quakeservers.net:27000", "QW master in Germany, admin: unknown"},
+	{CF_CLIENT, "sv_qwmasterextra2", "qwmaster.fodquake.net:27000", "QW master in Germany, same IP as asgaard.morphos-team.net, admin: bigfoot"},
+	{CF_CLIENT, "sv_qwmasterextra3", "master.quakeworld.nu:27000", "QW master in Sweden, admin: unknown"},
 };
 #endif
 
@@ -77,6 +80,7 @@ cvar_t net_usesizelimit = {CF_SERVER, "net_usesizelimit", "2", "use packet size 
 cvar_t net_burstreserve = {CF_SERVER, "net_burstreserve", "0.3", "how much of the burst time to reserve for packet size spikes"};
 cvar_t net_messagetimeout = {CF_CLIENT | CF_SERVER, "net_messagetimeout","300", "drops players who have not sent any packets for this many seconds"};
 cvar_t net_connecttimeout = {CF_CLIENT | CF_SERVER, "net_connecttimeout","15", "after requesting a connection, the client must reply within this many seconds or be dropped (cuts down on connect floods). Must be above 10 seconds."};
+cvar_t net_connect_entnum_ofs = {CF_SERVER, "net_connect_entnum_ofs", "0", "entity number offset of human clients (for developer testing only)"};
 cvar_t net_connectfloodblockingtimeout = {CF_SERVER, "net_connectfloodblockingtimeout", "5", "when a connection packet is received, it will block all future connect packets from that IP address for this many seconds (cuts down on connect floods). Note that this does not include retries from the same IP; these are handled earlier and let in."};
 cvar_t net_challengefloodblockingtimeout = {CF_SERVER, "net_challengefloodblockingtimeout", "0.5", "when a challenge packet is received, it will block all future challenge packets from that IP address for this many seconds (cuts down on challenge floods). DarkPlaces clients retry once per second, so this should be <= 1. Failure here may lead to connect attempts failing."};
 cvar_t net_getstatusfloodblockingtimeout = {CF_SERVER, "net_getstatusfloodblockingtimeout", "1", "when a getstatus packet is received, it will block all future getstatus packets from that IP address for this many seconds (cuts down on getstatus floods). DarkPlaces retries every net_slist_timeout seconds, and qstat retries once per second, so this should be <= 1. Failure here may lead to server not showing up in the server list."};
@@ -131,9 +135,9 @@ uint8_t serverlist_querystage = 0;
 
 static uint8_t dpmasterstatus[DPMASTER_COUNT] = {0};
 static uint8_t qwmasterstatus[QWMASTER_COUNT] = {0};
-#define MASTER_TX_QUERY 1    // we sent the query
-#define MASTER_RX_RESPONSE 2 // we got at least 1 packet of the response
-#define MASTER_RX_COMPLETE 3 // we saw the EOT marker (assumes dpmaster >= 2.0, see dpmaster/doc/techinfo.txt)
+#define MASTER_TX_QUERY 1    ///< we sent the query
+#define MASTER_RX_RESPONSE 2 ///< we got at least 1 packet of the response
+#define MASTER_RX_COMPLETE 3 ///< we saw the EOT marker (assumes dpmaster >= 2.0, see dpmaster/doc/techinfo.txt)
 
 /// the hash password for timestamp verification
 char serverlist_dpserverquerykey[12]; // challenge_t uses [12]
@@ -635,11 +639,6 @@ void ServerList_QueryList(qbool resetcache, qbool querydp, qbool queryqw, qbool 
 	lhnetaddress_t broadcastaddress;
 	char dpquery[53]; // theoretical max: 14+22+16+1
 
-	if (net_slist_debug.integer)
-		Con_Printf("^2Querying master, favourite and LAN servers, reset=%u\n", resetcache);
-	serverlist_querystage = (querydp ? SLIST_QUERYSTAGE_DPMASTERS : 0) | (queryqw ? SLIST_QUERYSTAGE_QWMASTERS : 0);
-	masterquerycount = 0;
-	masterreplycount = 0;
 	if (resetcache)
 	{
 		serverquerycount = 0;
@@ -651,14 +650,25 @@ void ServerList_QueryList(qbool resetcache, qbool querydp, qbool queryqw, qbool 
 	}
 	else
 	{
+		if (serverlist_querystage)
+		{
+			if (net_slist_debug.integer)
+				Con_Printf(CON_WARN "Ignoring server list refresh request: already refreshing!\n");
+			return; // unsetting `responded` now would cause live servers to be timed out
+		}
+
 		// refresh all entries
 		for (i = 0; i < serverlist_cachecount; ++i)
-		{
-			serverlist_entry_t *entry = &serverlist_cache[i];
-			entry->responded = false;
-		}
+			serverlist_cache[i].responded = false;
 	}
+	serverlist_querystage = (querydp ? SLIST_QUERYSTAGE_DPMASTERS : 0) | (queryqw ? SLIST_QUERYSTAGE_QWMASTERS : 0);
+	masterquerycount = 0;
+	masterreplycount = 0;
 	serverlist_consoleoutput = consoleoutput;
+	if (net_slist_debug.integer)
+		Con_Printf("^2Querying %s master, favourite and LAN servers, reset=%u\n",
+				querydp && queryqw ? "DP and QW" : querydp ? "DP" : "QW",
+				resetcache);
 
 	//_ServerList_Test();
 
@@ -1710,10 +1720,10 @@ static int NetConn_ClientParsePacket_ServerList_ProcessReply(const char *address
 	if (n == serverlist_cachecount)
 	{
 		if (net_slist_debug.integer)
-			Con_Printf("^6Received LAN broadcast response from %s\n", addressstring);
+			Con_Printf("^6Received reply from unlisted %sserver %s\n", challenge ? "DarkPlaces " : "", addressstring);
 
 		// find a slot
-		if (serverlist_cachecount == SERVERLIST_TOTALSIZE)
+		if (serverlist_cachecount >= SERVERLIST_TOTALSIZE)
 			return -1;
 
 		if (serverlist_maxcachecount <= serverlist_cachecount)
@@ -1822,7 +1832,7 @@ static qbool NetConn_ClientParsePacket_ServerList_PrepareQuery(int protocol, con
 	serverlist_entry_t *entry;
 
 	// ignore the rest of the message if the serverlist is full
-	if (serverlist_cachecount == SERVERLIST_TOTALSIZE)
+	if (serverlist_cachecount >= SERVERLIST_TOTALSIZE)
 		return false;
 
 	for (n = 0; n < serverlist_cachecount; ++n)
@@ -1863,14 +1873,21 @@ static void NetConn_ClientParsePacket_ServerList_ParseDPList(lhnetaddress_t *mas
 			break;
 	if (net_sourceaddresscheck.integer && masternum >= DPMASTER_COUNT)
 	{
-		Con_Printf(CON_WARN "ignoring DarkPlaces %sserver list from unrecognised master %s\n", isextended ? "extended " : "", masteraddressstring);
+		Con_Printf(CON_WARN "ignoring DarkPlaces %sserver list from unrecognised master %s\n",
+				isextended ? "extended " : "", masteraddressstring);
 		return;
 	}
 
 	masterreplycount++;
-	dpmasterstatus[masternum] = MASTER_RX_RESPONSE;
-	if (serverlist_consoleoutput || net_slist_debug.integer)
-		Con_Printf("^5Received DarkPlaces server list %sfrom %s\n", isextended ? "(extended) " : "", sv_masters[masternum].string);
+	if (dpmasterstatus[masternum] < MASTER_RX_RESPONSE)   // Don't reduce status if it's already COMPLETE
+		dpmasterstatus[masternum] = MASTER_RX_RESPONSE; // which happens when packets are out of order.
+
+	if (dpmasterstatus[masternum] == MASTER_RX_COMPLETE)
+		Con_Printf(CON_WARN "Received out of order DarkPlaces server list %sfrom %s\n",
+				isextended ? "(extended) " : "", sv_masters[masternum].string);
+	else if (serverlist_consoleoutput || net_slist_debug.integer)
+		Con_Printf("^5Received DarkPlaces server list %sfrom %s\n",
+				isextended ? "(extended) " : "", sv_masters[masternum].string);
 
 	while (length >= 7)
 	{
@@ -1944,7 +1961,7 @@ static void NetConn_ClientParsePacket_ServerList_ParseDPList(lhnetaddress_t *mas
 	}
 
 	if (serverlist_querystage & SLIST_QUERYSTAGE_QWMASTERS)
-		return; // we must wait if we're also querying QW as it has no EOT marker
+		return; // we must wait if we're (also) querying QW as its protocol has no EOT marker
 	// begin or resume serverlist queries
 	for (masternum = 0; masternum < DPMASTER_COUNT; ++masternum)
 		if (dpmasterstatus[masternum] && dpmasterstatus[masternum] < MASTER_RX_COMPLETE)
@@ -2516,16 +2533,32 @@ void NetConn_QueryQueueFrame(void)
 	// to avoid messing up the ping times on the servers
 	if (serverlist_querystage < SLIST_QUERYSTAGE_SERVERS)
 	{
+		lhnetaddress_t masteraddress;
+
 		if (currentrealtime < masterquerytime + net_slist_timeout.value)
 			return;
 
 		// Report the masters that timed out or whose response was incomplete.
+		// Some people have IPv6 DNS but no v6 connectivity
+		// so v6 master timeouts are currently silent by default.
 		for (index = 0; index < DPMASTER_COUNT; ++index)
-			if (dpmasterstatus[index] && dpmasterstatus[index] < MASTER_RX_COMPLETE)
-				Con_Printf(CON_WARN "WARNING: dpmaster %s %s\n", sv_masters[index].string, dpmasterstatus[index] == MASTER_TX_QUERY ? "timed out" : "response incomplete");
+		{
+			if (dpmasterstatus[index] == MASTER_TX_QUERY)
+			{
+				if (net_slist_debug.integer ||
+				(LHNETADDRESS_FromString(&masteraddress, sv_masters[index].string, DPMASTER_PORT)
+				&& LHNETADDRESS_GetAddressType(&masteraddress) != LHNETADDRESSTYPE_INET6))
+					Con_Printf(CON_WARN "WARNING: dpmaster %s query timed out\n", sv_masters[index].string);
+			}
+			else if (dpmasterstatus[index] && dpmasterstatus[index] < MASTER_RX_COMPLETE)
+				Con_Printf(CON_WARN "WARNING: dpmaster %s list incomplete (packet loss)\n", sv_masters[index].string);
+		}
+
 		for (index = 0; index < QWMASTER_COUNT; ++index)
-			if (qwmasterstatus[index] && qwmasterstatus[index] < MASTER_RX_RESPONSE) // no EOT marker in QW lists
-				Con_Printf(CON_WARN "WARNING: qwmaster %s timed out\n", sv_qwmasters[index].string);
+			if (qwmasterstatus[index] && qwmasterstatus[index] < MASTER_RX_RESPONSE // no EOT marker in QW lists
+			&& LHNETADDRESS_FromString(&masteraddress, sv_qwmasters[index].string, DPMASTER_PORT)
+			&& LHNETADDRESS_GetAddressType(&masteraddress) != LHNETADDRESSTYPE_INET6) // some people have v6 DNS but no connectivity
+				Con_Printf(CON_WARN "WARNING: qwmaster %s query timed out\n", sv_qwmasters[index].string);
 
 		serverlist_querystage = SLIST_QUERYSTAGE_SERVERS;
 	}
@@ -2584,13 +2617,17 @@ void NetConn_QueryQueueFrame(void)
 			if (!entry->responded // no acceptable response during this refresh cycle
 			&& entry->info.ping) // visible in the list (has old ping from previous refresh cycle)
 			{
-				if (currentrealtime > entry->querytime + net_slist_maxping.integer/1000)
+				if (currentrealtime > entry->querytime + net_slist_maxping.value/1000.0f)
 				{
 					// you have no chance to survive make your timeout
 					serverreplycount--;
 					if(!net_slist_pause.integer)
+					{
+						if (net_slist_debug.integer)
+							Con_Printf(CON_WARN "Removing timed out server %s from viewlist\n", entry->info.cname);
 						ServerList_ViewList_Remove(entry);
-					entry->info.ping = 0; // removed later if net_slist_pause
+					}
+					entry->info.ping = 0; // removed later by ServerList_ViewList_Insert if net_slist_pause
 				}
 				else // still has time
 					return; // continue this pass at the current server on a later frame
@@ -2607,15 +2644,29 @@ void NetConn_QueryQueueFrame(void)
 	{
 		// timeout pass begins next frame
 		if (net_slist_debug.integer)
-			Con_Printf("^2Finished querying masters and servers in %f\n", currentrealtime - masterquerytime);
+		{
+			int dpmastersqueried = 0, qwmastersqueried = 0;
+
+			for (index = 0; index < DPMASTER_COUNT; ++index)
+				if (dpmasterstatus[index])
+					++dpmastersqueried;
+			for (index = 0; index < QWMASTER_COUNT; ++index)
+				if (qwmasterstatus[index])
+					++qwmastersqueried;
+			Con_Printf("^2Finished querying %i DP %i QW masters and %i servers in %f seconds\n",
+					dpmastersqueried, qwmastersqueried, serverlist_cachecount, currentrealtime - masterquerytime);
+		}
 	}
 	else if (pass > queriesperserver)
 	{
 		// Nothing else to do until the next refresh cycle.
-		if (net_slist_debug.integer)
-			Con_Printf("^4Finished checking server timeouts in %f\n", currentrealtime - serverlist_cache[serverlist_cachecount - 1].querytime);
 		serverlist_querystage = 0;
 		pass = 0;
+		if (net_slist_debug.integer && serverlist_cachecount)
+			Con_Printf("^4Finished checking server timeouts in %f\n",
+					currentrealtime - serverlist_cache[serverlist_cachecount - 1].querytime);
+		if (serverlist_cachecount >= SERVERLIST_TOTALSIZE)
+			Con_Printf(CON_ERROR "ERROR: too many servers, some will not be listed!\n");
 	}
 }
 #endif
@@ -3372,10 +3423,14 @@ static int NetConn_ServerParsePacket(lhnetsocket_t *mysocket, unsigned char *dat
 				return true;
 
 			// find an empty client slot for this new client
-			for (clientnum = 0, client = svs.clients;clientnum < svs.maxclients;clientnum++, client++)
+			for (clientnum = 0; clientnum < svs.maxclients; clientnum++)
 			{
 				netconn_t *conn;
-				if (!client->active && (conn = NetConn_Open(mysocket, peeraddress)))
+				int offset_clientnum = (net_connect_entnum_ofs.integer > 0)
+						? (clientnum + net_connect_entnum_ofs.integer) % svs.maxclients
+						: clientnum;
+
+				if (!svs.clients[offset_clientnum].active && (conn = NetConn_Open(mysocket, peeraddress)))
 				{
 					// allocated connection
 					if (developer_extra.integer)
@@ -3384,7 +3439,7 @@ static int NetConn_ServerParsePacket(lhnetsocket_t *mysocket, unsigned char *dat
 					// now set up the client
 					if(crypto && crypto->authenticated)
 						Crypto_FinishInstance(&conn->crypto, crypto);
-					SV_ConnectClient(clientnum, conn);
+					SV_ConnectClient(offset_clientnum, conn);
 					NetConn_Heartbeat(1);
 					return true;
 				}
@@ -3827,8 +3882,8 @@ void NetConn_QueryMasters(qbool querydp, qbool queryqw)
 	if (serverlist_cachecount >= SERVERLIST_TOTALSIZE)
 		return;
 
-	memset(dpmasterstatus, 0, sizeof(*dpmasterstatus));
-	memset(qwmasterstatus, 0, sizeof(*qwmasterstatus));
+	memset(dpmasterstatus, 0, sizeof(dpmasterstatus));
+	memset(qwmasterstatus, 0, sizeof(qwmasterstatus));
 
 	if (querydp)
 	{
@@ -3850,8 +3905,8 @@ void NetConn_QueryMasters(qbool querydp, qbool queryqw)
 					cmdname = "getservers";
 					extraoptions = "";
 				}
-				memcpy(request, "\377\377\377\377", 4);
-				dpsnprintf(request+4, sizeof(request)-4, "%s %s %u empty full%s", cmdname, gamenetworkfiltername, NET_PROTOCOL_VERSION, extraoptions);
+				dpsnprintf(request, sizeof(request), "\377\377\377\377%s %s %u empty full%s",
+					cmdname, gamenetworkfiltername, NET_PROTOCOL_VERSION, extraoptions);
 
 				// search internet
 				for (masternum = 0; masternum < DPMASTER_COUNT; ++masternum)
@@ -4076,6 +4131,7 @@ void NetConn_Init(void)
 #endif
 	Cvar_RegisterVariable(&net_messagetimeout);
 	Cvar_RegisterVariable(&net_connecttimeout);
+	Cvar_RegisterVariable(&net_connect_entnum_ofs);
 	Cvar_RegisterVariable(&net_connectfloodblockingtimeout);
 	Cvar_RegisterVariable(&net_challengefloodblockingtimeout);
 	Cvar_RegisterVariable(&net_getstatusfloodblockingtimeout);

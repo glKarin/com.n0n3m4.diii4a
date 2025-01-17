@@ -198,19 +198,12 @@ static void InitOpenGL(void)
 
 		Com_Memset(&glConfig, 0, sizeof(glConfig));
 
-		windowContext_t context;
-		Com_Memset(&context, 0, sizeof(windowContext_t));
-		// If we are using FBO's then disable multisampling on the main screen buffer
-		if (r_fbo->integer)
-		{
-			context.samples = 0;
-		}
-		else
-		{
-			context.samples = r_ext_multisample->integer;
-		}
+		char glConfigString[1024] = { 0 };
+		Info_SetValueForKey(glConfigString, "type", "vulkan");
+		Info_SetValueForKey(glConfigString, "major", "1");
+		Info_SetValueForKey(glConfigString, "minor", "2");
 
-		ri.GLimp_Init(&glConfig, &context);
+		ri.GLimp_Init(&glConfig, glConfigString);
 
 		Q_strncpyz(renderer_buffer, glConfig.renderer_string, renderer_buffer);
 		Q_strlwr(renderer_buffer);
@@ -225,14 +218,11 @@ static void InitOpenGL(void)
 			glConfig.maxTextureSize = 0;
 		}
 
-		ri.CL_SetScaling(1.0f);
-
 		if (r_scale->value)
 		{
-			float scale = Com_Clamp(0.2f, 4.f, r_scale->value);
+			const float scale = Com_Clamp(0.2f, 4.f, r_scale->value);
 			glConfig.vidWidth  *= scale;
 			glConfig.vidHeight *= scale;
-			ri.CL_SetScaling(scale);
 		}
 	}
 
@@ -1149,7 +1139,7 @@ void R_Register(void)
 	r_skipBackEnd = ri.Cvar_Get("r_skipBackEnd", "0", CVAR_CHEAT);
 
 	r_measureOverdraw = ri.Cvar_Get("r_measureOverdraw", "0", CVAR_CHEAT);
-	r_lodScale        = ri.Cvar_Get("r_lodscale", "5", CVAR_CHEAT);
+	r_lodScale        = ri.Cvar_Get("r_lodscale", "5", CVAR_ARCHIVE_ND | CVAR_LATCH);
 	r_noreFresh       = ri.Cvar_Get("r_norefresh", "0", CVAR_CHEAT);
 	r_drawEntities    = ri.Cvar_Get("r_drawentities", "1", CVAR_CHEAT);
 	r_ignore          = ri.Cvar_Get("r_ignore", "1", CVAR_CHEAT);

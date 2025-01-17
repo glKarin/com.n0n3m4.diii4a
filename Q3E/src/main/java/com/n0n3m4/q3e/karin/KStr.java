@@ -156,6 +156,17 @@ public final class KStr
             return str;
     }
 
+    public static String UnEscapeQuotes( String arg )
+    {
+        if(IsBlank(arg))
+            return arg;
+        arg = arg.trim();
+        if(arg.startsWith("\"") && arg.endsWith("\""))
+            return KidTechCommand.UnEscapeQuotes(arg);
+        else
+            return arg;
+    }
+
     public static String ucfirst(String str)
     {
         if(IsBlank(str))

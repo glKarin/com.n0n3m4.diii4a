@@ -105,13 +105,53 @@ short* dumb_decode_vorbis(int outlen, const void* oggstream, int sizebytes)
 	}
 
 	decoder->getInfo(&srate, &chans, &type);
-	if (chans != ChannelConfig_Mono || type != SampleType_Int16)
+	if (chans != ChannelConfig_Mono)
 	{
 		delete decoder;
 		return samples;
 	}
 
-	decoder->read((char*)samples, outlen);
+	if(type == SampleType_Int16)
+		decoder->read((char*)samples, outlen);
+	else if(type == SampleType_Float32)
+	{
+		constexpr size_t tempsize = 1024;
+		float temp[tempsize];
+		size_t spos = 0;
+
+		outlen /= sizeof(short);
+		int done = 0;
+		while(done < outlen)
+		{
+			size_t got = decoder->read((char*)temp, tempsize * sizeof(float)) / sizeof(float);
+			for(size_t i = 0;i < got;++i)
+			{
+				float s = temp[i] * 32768.0f;
+				samples[spos++] = (s > 32767.0f) ? 32767 : (s < -32768.0f) ? -32768 : (short)s;
+			}
+			if(got < tempsize)
+				break;
+			done += got;
+		}
+	}
+	else if(type == SampleType_UInt8)
+	{
+		constexpr size_t tempsize = 1024;
+		uint8_t temp[tempsize];
+		size_t spos = 0;
+
+		outlen /= sizeof(short);
+		int done = 0;
+		while(done < outlen)
+		{
+			size_t got = decoder->read((char*)temp, tempsize);
+			for(size_t i = 0;i < got;++i)
+				samples[spos++] = (short)((temp[i]-128) * 256);
+			if(got < tempsize)
+				break;
+			done += got;
+		}
+	}
 	delete decoder;
 	return samples;
 }

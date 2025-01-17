@@ -152,13 +152,17 @@ qboolean TVG_SpawnVector2DExt(const char *key, const char *defaultString, float 
 
 field_t fields[] =
 {
-	{ "classname", FOFS(classname), F_LSTRING,   0 },
-	{ "origin",    FOFS(s.origin),  F_VECTOR,    0 },
+	{ "classname",  FOFS(classname),  F_LSTRING,   0 },
+	{ "origin",     FOFS(s.origin),   F_VECTOR,    0 },
+	{ "spawnflags", FOFS(spawnflags), F_INT,       0 },
 
-	{ "angles",    FOFS(s.angles),  F_VECTOR,    0 },
-	{ "angle",     FOFS(s.angles),  F_ANGLEHACK, 0 },
+	{ "target",     FOFS(target),     F_LSTRING,   0 },
+	{ "targetname", FOFS(targetname), F_LSTRING,   0 },
 
-	{ NULL,        0,               F_IGNORE,    0 }
+	{ "angles",     FOFS(s.angles),   F_VECTOR,    0 },
+	{ "angle",      FOFS(s.angles),   F_ANGLEHACK, 0 },
+
+	{ NULL,         0,                F_IGNORE,    0 }
 };
 
 typedef struct
@@ -171,6 +175,8 @@ void SP_info_player_start(gentity_t *ent);
 void SP_info_player_checkpoint(gentity_t *ent);
 void SP_info_player_deathmatch(gentity_t *ent);
 void SP_info_player_intermission(gentity_t *ent);
+
+void SP_info_notnull(gentity_t *self);
 
 void SP_team_CTF_redspawn(gentity_t *ent);
 void SP_team_CTF_bluespawn(gentity_t *ent);
@@ -187,6 +193,8 @@ spawn_t spawns[] =
 	{ "info_player_checkpoint",   SP_info_player_checkpoint   },
 	{ "info_player_deathmatch",   SP_info_player_deathmatch   },
 	{ "info_player_intermission", SP_info_player_intermission },
+
+	{ "info_notnull",             SP_info_notnull             }, // use target_position instead
 
 	{ 0,                          0                           }
 };
@@ -335,7 +343,7 @@ gentity_t *TVG_SpawnGEntityFromSpawnVars(void)
 	gentity_t *ent;
 	char      *str;
 
-	ent = G_Spawn(); // get the next free entity
+	ent = TVG_Spawn(); // get the next free entity
 
 	for (i = 0 ; i < level.numSpawnVars ; i++)
 	{
@@ -343,17 +351,17 @@ gentity_t *TVG_SpawnGEntityFromSpawnVars(void)
 	}
 
 	// check for "notteam" / "notfree" flags
-	G_SpawnInt("notteam", "0", &i);
+	TVG_SpawnInt("notteam", "0", &i);
 	if (i)
 	{
 		G_Printf("G_SpawnGEntityFromSpawnVars Warning: Can't spawn entity in team games - returning NULL\n");
 
-		G_FreeEntity(ent);
+		TVG_FreeEntity(ent);
 		return NULL;
 	}
 
 	// allowteams handling
-	G_SpawnString("allowteams", "", &str);
+	TVG_SpawnString("allowteams", "", &str);
 	if (str[0])
 	{
 		str = Q_strlwr(str);
@@ -373,7 +381,7 @@ gentity_t *TVG_SpawnGEntityFromSpawnVars(void)
 
 	if (ent->targetname && *ent->targetname)
 	{
-		ent->targetnamehash = BG_StringHashValue(ent->targetname);
+		ent->targetnamehash = TVG_StringHashValue(ent->targetname);
 	}
 	else
 	{
@@ -387,7 +395,7 @@ gentity_t *TVG_SpawnGEntityFromSpawnVars(void)
 	// if we didn't get a classname, don't bother spawning anything
 	if (!TVG_CallSpawn(ent))
 	{
-		G_FreeEntity(ent);
+		TVG_FreeEntity(ent);
 	}
 
 	return ent;
@@ -493,22 +501,20 @@ void SP_worldspawn(void)
 {
 	char *s;
 
-	G_SpawnString("classname", "", &s);
+	TVG_SpawnString("classname", "", &s);
 	if (Q_stricmp(s, "worldspawn"))
 	{
 		G_Error("SP_worldspawn: The first entity isn't 'worldspawn'\n");
 	}
 
 	level.mapcoordsValid = qfalse;
-	if (G_SpawnVector2D("mapcoordsmins", "-128 128", level.mapcoordsMins) &&     // top left
-	    G_SpawnVector2D("mapcoordsmaxs", "128 -128", level.mapcoordsMaxs))       // bottom right
+	if (TVG_SpawnVector2D("mapcoordsmins", "-128 128", level.mapcoordsMins) &&     // top left
+	    TVG_SpawnVector2D("mapcoordsmaxs", "128 -128", level.mapcoordsMaxs))       // bottom right
 	{
 		level.mapcoordsValid = qtrue;
 	}
 
-	BG_InitLocations(level.mapcoordsMins, level.mapcoordsMaxs);
-
-	G_SpawnString("spawnflags", "0", &s);
+	TVG_SpawnString("spawnflags", "0", &s);
 	g_entities[ENTITYNUM_WORLD].spawnflags   = Q_atoi(s);
 	g_entities[ENTITYNUM_WORLD].r.worldflags = g_entities[ENTITYNUM_WORLD].spawnflags;
 
@@ -545,10 +551,6 @@ void TVG_SpawnEntitiesFromString(void)
 	{
 		TVG_SpawnGEntityFromSpawnVars();
 	}
-
-#ifdef FEATURE_LUA
-	G_LuaHook_SpawnEntitiesFromString();
-#endif
 
 	G_Printf("Disable spawning!\n");
 	level.spawning = qfalse;            // any future calls to G_Spawn*() will be errors

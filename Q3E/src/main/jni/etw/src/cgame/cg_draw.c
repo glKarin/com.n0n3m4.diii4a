@@ -1263,6 +1263,8 @@ CROSSHAIRS
 static void CG_DrawScopedReticle(void)
 {
 	int weapon;
+	int x = (cgs.glconfig.vidWidth / 2);
+	int y = (cgs.glconfig.vidHeight / 2);
 
 	// So that we will draw reticle
 	if ((cg.snap->ps.pm_flags & PMF_FOLLOW) || cg.demoPlayback)
@@ -1279,6 +1281,8 @@ static void CG_DrawScopedReticle(void)
 		return;
 	}
 
+	// TODO : add support for ultra-widescreen / remove 16:9 assumption
+
 	// sides
 	CG_FillRect(0, 0, 80 + cgs.wideXoffset, SCREEN_HEIGHT, colorBlack);
 	CG_FillRect(560 + cgs.wideXoffset, 0, 80 + cgs.wideXoffset, SCREEN_HEIGHT, colorBlack);
@@ -1292,32 +1296,70 @@ static void CG_DrawScopedReticle(void)
 	if (weapon == WP_FG42_SCOPE)
 	{
 		// hairs
-		CG_FillRect(84 + cgs.wideXoffset, 239, 150, 3, colorBlack);     // left
-		CG_FillRect(234 + cgs.wideXoffset, 240, 173, 1, colorBlack);    // horiz center
-		CG_FillRect(407 + cgs.wideXoffset, 239, 150, 3, colorBlack);    // right
+		trap_R_SetColor(colorBlack);
 
+		// inside left
+		trap_R_DrawStretchPic((x - 1) * 0.80,
+		                      y - 1,
+		                      (x - 1) * 0.20, 2, 0, 0, 0, 1, cgs.media.whiteShader);
+		// outside left
+		trap_R_DrawStretchPic(0,
+		                      y - 2,
+		                      (x - 1) * 0.80, 4, 0, 0, 0, 1, cgs.media.whiteShader);
+		// inside right
+		trap_R_DrawStretchPic(x,
+		                      y - 1,
+		                      (x - 1) * 0.80, 2, 0, 0, 0, 1, cgs.media.whiteShader);
+		// outside right
+		trap_R_DrawStretchPic(cgs.glconfig.vidWidth - (x * 0.80),
+		                      y - 2,
+		                      (x - 1) * 0.80, 4, 0, 0, 0, 1, cgs.media.whiteShader);
+		// inside top
+		trap_R_DrawStretchPic(x - 2,
+		                      0,
+		                      4, (y - 1) * 0.65, 0, 0, 0, 1, cgs.media.whiteShader);
+		// outside top
+		trap_R_DrawStretchPic(x - 1,
+		                      ((y - 1) * 0.65),
+		                      2, (y - 1) * 0.35, 0, 0, 0, 1, cgs.media.whiteShader);
+		// inside bottom
+		trap_R_DrawStretchPic(x - 1,
+		                      y + 1,
+		                      2, (y - 1) * 0.35, 0, 0, 0, 1, cgs.media.whiteShader);
+		// outside bottom
+		trap_R_DrawStretchPic(x - 2,
+		                      y + 1 + ((y - 1) * 0.35),
+		                      4, (y - 1) * 0.65, 0, 0, 0, 1, cgs.media.whiteShader);
+		// center
+		trap_R_DrawStretchPic(x - 1,
+		                      y - 1,
+		                      2, 2, 0, 0, 0, 1, cgs.media.whiteShader);
 
-		CG_FillRect(319 + cgs.wideXoffset, 2, 3, 151, colorBlack);      // top center top
-		CG_FillRect(320 + cgs.wideXoffset, 153, 1, 114, colorBlack);    // top center bot
-
-		CG_FillRect(320 + cgs.wideXoffset, 241, 1, 87, colorBlack);     // bot center top
-		CG_FillRect(319 + cgs.wideXoffset, 327, 3, 151, colorBlack);    // bot center bot
+		trap_R_SetColor(NULL);
 	}
-	else if (weapon == WP_GARAND_SCOPE)
+	else if (weapon == WP_GARAND_SCOPE || weapon == WP_K43_SCOPE)
 	{
 		// hairs
-		CG_FillRect(84 + cgs.wideXoffset, 239, 177, 2, colorBlack);     // left
-		CG_FillRect(320 + cgs.wideXoffset, 242, 1, 58, colorBlack);     // center top
-		CG_FillRect(319 + cgs.wideXoffset, 300, 2, 178, colorBlack);    // center bot
-		CG_FillRect(380 + cgs.wideXoffset, 239, 177, 2, colorBlack);    // right
-	}
-	else if (weapon == WP_K43_SCOPE)
-	{
-		// hairs
-		CG_FillRect(84 + cgs.wideXoffset, 239, 177, 2, colorBlack);     // left
-		CG_FillRect(320 + cgs.wideXoffset, 242, 1, 58, colorBlack);     // center top
-		CG_FillRect(319 + cgs.wideXoffset, 300, 2, 178, colorBlack);    // center bot
-		CG_FillRect(380 + cgs.wideXoffset, 239, 177, 2, colorBlack);    // right
+		trap_R_SetColor(colorBlack);
+
+		// left
+		trap_R_DrawStretchPic(0,
+		                      y - 2,
+		                      (x * 0.85), 4, 0, 0, 0, 1, cgs.media.whiteShader);
+		// right
+		trap_R_DrawStretchPic(cgs.glconfig.vidWidth - (x * 0.85),
+		                      y - 2,
+		                      (x * 0.85), 4, 0, 0, 0, 1, cgs.media.whiteShader);
+		// inside bottom
+		trap_R_DrawStretchPic(x - 1,
+		                      y + 1,
+		                      2, (y - 1) * 0.25, 0, 0, 0, 1, cgs.media.whiteShader);
+		// outside bottom
+		trap_R_DrawStretchPic(x - 2,
+		                      y + 1 + ((y - 1) * 0.25),
+		                      4, (y - 1) * 0.75, 0, 0, 0, 1, cgs.media.whiteShader);
+
+		trap_R_SetColor(NULL);
 	}
 }
 
@@ -1414,7 +1456,7 @@ static void CG_DrawMortarReticle(void)
 	fadeTime = 0;
 	if (CHECKBITWISE(GetWeaponTableData(cg.lastFiredWeapon)->type, WEAPON_TYPE_MORTAR | WEAPON_TYPE_SET) && cg.mortarImpactTime >= -1)
 	{
-		fadeTime = cg.time - (cg.predictedPlayerEntity.muzzleFlashTime + 5000);
+		fadeTime = cg.time - (cg.predictedPlayerEntity.firedTime + 5000);
 
 		if (fadeTime < 3000)
 		{
@@ -1665,7 +1707,7 @@ static void CG_DrawNoShootIcon(hudComponent_t *comp)
 	}
 	else if (cg.crosshairClientNoShoot)
 	{
-		float *color = CG_FadeColor(cg.crosshairClientTime, cg_drawCrosshairFade.integer);
+		float *color = CG_FadeColor(cg.crosshairEntTime, cg_drawCrosshairFade.integer);
 
 		if (!color)
 		{
@@ -1775,6 +1817,13 @@ void CG_DrawCrosshair(hudComponent_t *comp)
 		return;
 	}
 
+	if (cg_customCrosshair.integer > CUSTOMCROSSHAIR_NONE && cg_customCrosshair.integer < CUSTOMCROSSHAIR_MAX)
+	{
+		CG_DrawCustomCrosshair();
+		CG_DrawNoShootIcon(comp);
+		return;
+	}
+
 	if (comp->showBackGround)
 	{
 		CG_FillRect(comp->location.x, comp->location.y, comp->location.w, comp->location.h, comp->colorBackground);
@@ -1799,6 +1848,7 @@ void CG_DrawCrosshair(hudComponent_t *comp)
 	{
 		vec4_t hcolor;
 
+		Vector4Copy(comp->colorMain, hcolor);
 		CG_ColorForHealth(cg.snap->ps.stats[STAT_HEALTH], hcolor);
 		hcolor[3] = comp->colorMain[3];
 		trap_R_SetColor(hcolor);
@@ -1828,6 +1878,7 @@ void CG_DrawCrosshair(hudComponent_t *comp)
 		{
 			vec4_t hcolor;
 
+			Vector4Copy(comp->colorMain, hcolor);
 			CG_ColorForHealth(cg.snap->ps.stats[STAT_HEALTH], hcolor);
 			hcolor[3] = comp->colorSecondary[3];
 			trap_R_SetColor(hcolor);
@@ -1845,136 +1896,139 @@ void CG_DrawCrosshair(hudComponent_t *comp)
 }
 
 /**
- * @brief CG_ScanForCrosshairMine
- * @param[in] cent
- */
-void CG_ScanForCrosshairMine(centity_t *cent)
-{
-	trace_t trace;
-	vec3_t  start, end;
-
-	VectorCopy(cg.refdef.vieworg, start);
-	VectorMA(start, 512, cg.refdef.viewaxis[0], end);
-
-	CG_Trace(&trace, start, NULL, NULL, end, -1, MASK_SOLID);
-
-	if (Square(trace.endpos[0] - cent->currentState.pos.trBase[0]) < 256 &&
-	    Square(trace.endpos[1] - cent->currentState.pos.trBase[1]) < 256 &&
-	    Square(trace.endpos[2] - cent->currentState.pos.trBase[2]) < 256)
-	{
-		if (cent->currentState.otherEntityNum < MAX_CLIENTS)
-		{
-			cg.crosshairMine     = cent->currentState.otherEntityNum;
-			cg.crosshairMineTime = cg.time;
-		}
-	}
-}
-
-/**
- * @brief CG_ScanForCrosshairDyna
- * @details Mainly just a copy paste of CG_ScanForCrosshairMine
- * @param cent
- */
-void CG_ScanForCrosshairDyna(centity_t *cent)
-{
-	trace_t trace;
-	vec3_t  start, end;
-
-	VectorCopy(cg.refdef.vieworg, start);
-	VectorMA(start, 512, cg.refdef.viewaxis[0], end);
-
-	CG_Trace(&trace, start, NULL, NULL, end, -1, MASK_SOLID);
-
-	// pos.trBase is not the middle of the dyna, but due to different
-	// orientations relative to the map axis, this cannot be corrected in a
-	// simple way unfortunately
-	if (Square(trace.endpos[0] - cent->currentState.pos.trBase[0]) < 256 &&
-	    Square(trace.endpos[1] - cent->currentState.pos.trBase[1]) < 256 &&
-	    Square(trace.endpos[2] - cent->currentState.pos.trBase[2]) < 256)
-	{
-		if (cent->currentState.otherEntityNum < MAX_CLIENTS)
-		{
-			cg.crosshairDyna     = cent->currentState.otherEntityNum;
-			cg.crosshairDynaTime = cg.time;
-		}
-	}
-}
-
-/**
  * @brief Scan for any entities we're currently aiming at
- * @param[out] zChange
- * @param[out] hitClient
  */
-static void CG_ScanForCrosshairEntity(float *zChange, qboolean *hitClient)
+static void CG_ScanForCrosshairEntity()
 {
 	trace_t   trace;
-	vec3_t    start, end;
-	centity_t *cent;
+	vec3_t    end;
+	centity_t *cent = NULL;
 
-	// We haven't hit a client yet
-	*hitClient = qfalse;
-
-	VectorCopy(cg.refdef.vieworg, start);
-	VectorMA(start, MAX_TRACE, cg.refdef.viewaxis[0], end);
-
-	cg.crosshairClientNoShoot = qfalse;
-
-	CG_Trace(&trace, start, NULL, NULL, end, cg.snap->ps.clientNum, CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_ITEM);
-
-	// How far up or down are we looking?
-	*zChange = trace.endpos[2] - start[2];
-
-	if (trace.entityNum >= MAX_CLIENTS)
+	// no crosshair, no scan
+	if (cg_drawCrosshair.integer < 0)
 	{
-		if (cg_entities[trace.entityNum].currentState.eFlags & EF_TAGCONNECT)
+		return;
+	}
+
+	// Default: We're not looking at a client
+	cg.crosshairNotLookingAtClient = qtrue;
+	cg.crosshairClientNoShoot      = qfalse;
+
+	if (cg.renderingThirdPerson)
+	{
+		// track the medic we are locked on
+		if (cg.snap->ps.viewlocked == VIEWLOCK_MEDIC)
 		{
-			trace.entityNum = cg_entities[trace.entityNum].tagParent;
+			cg.crosshairEntNum             = cg.snap->ps.viewlocked_entNum;
+			cg.crosshairEntTime            = cg.time;
+			cg.identifyClientRequest       = cg.snap->ps.viewlocked_entNum;
+			cg.crosshairNotLookingAtClient = qfalse;
+		}
+
+		return;
+	}
+
+	if (cg.generatingNoiseHud)
+	{
+		// aim on self
+		cg.crosshairEntNum             = cg.snap->ps.clientNum;
+		cg.crosshairEntTime            = cg.time;
+		cg.identifyClientRequest       = cg.crosshairEntNum;
+		cg.crosshairNotLookingAtClient = qfalse;
+
+		return;
+	}
+
+	VectorMA(cg.refdef.vieworg, MAX_TRACE, cg.refdef.viewaxis[0], end);
+
+	CG_Trace(&trace, cg.refdef.vieworg, NULL, NULL, end, cg.snap->ps.clientNum, CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_ITEM);
+
+	if (trace.entityNum == ENTITYNUM_WORLD)
+	{
+		int i;
+		int closestDist = 256;
+
+		// find the closest entity from impact point
+		for (i = 0; i < cg.crosshairEntsToScanCount; ++i)
+		{
+			// pos.trBase is not the middle of the dyna, but due to different
+			// orientations relative to the map axis, this cannot be corrected in a
+			// simple way unfortunately
+			int dist = DistanceSquared(cg.crosshairEntsToScan[i]->currentState.pos.trBase, trace.endpos);
+
+			if (closestDist > dist)
+			{
+				closestDist = dist;
+				cent        = cg.crosshairEntsToScan[i];
+			}
+		}
+	}
+	else
+	{
+		cent = &cg_entities[trace.entityNum];
+	}
+
+	if (!cent)
+	{
+		return;
+	}
+
+	if (cent->currentState.number >= MAX_CLIENTS)
+	{
+		if (cent->currentState.eFlags & EF_TAGCONNECT)
+		{
+			cent = &cg_entities[cent->tagParent];
+
+			if (!cent)
+			{
+				return;
+			}
 		}
 
 		// is a tank with a healthbar
 		// this might have some side-effects, but none right now as the script_mover is the only one that sets effect1Time
-		if ((cg_entities[trace.entityNum].currentState.eType == ET_MOVER && cg_entities[trace.entityNum].currentState.effect1Time) ||
-		    cg_entities[trace.entityNum].currentState.eType == ET_CONSTRUCTIBLE_MARKER)
+		if ((cent->currentState.eType == ET_MOVER && cent->currentState.effect1Time) ||
+		    cent->currentState.eType == ET_CONSTRUCTIBLE_MARKER)
 		{
 			// update the fade timer
-			cg.crosshairClientNum    = trace.entityNum;
-			cg.crosshairClientTime   = cg.time;
-			cg.identifyClientRequest = cg.crosshairClientNum;
+			cg.crosshairEntNum       = cent->currentState.number;
+			cg.crosshairEntTime      = cg.time;
+			cg.identifyClientRequest = cg.crosshairEntNum;
 		}
 
-		// Default: We're not looking at a client
-		cg.crosshairNotLookingAtClient = qtrue;
+		// is a dynamite or landmine and server allow displaying owner name (g_misc cvar)
+		if ((cent->currentState.weapon == WP_DYNAMITE || cent->currentState.weapon == WP_LANDMINE || cent->currentState.weapon == WP_SATCHEL)
+		    && cgs.clientinfo[cg.snap->ps.clientNum].team == cent->currentState.teamNum
+		    && cent->currentState.otherEntityNum < MAX_CLIENTS)
+		{
+			// update the fade timer
+			cg.crosshairEntNum       = cent->currentState.number;
+			cg.crosshairEntTime      = cg.time;
+			cg.identifyClientRequest = cg.crosshairEntNum;
+		}
 
 		return;
 	}
 
-	cent = &cg_entities[trace.entityNum];
-
-	if (!cent || !cent->currentValid)
+	if (!cent->currentValid)
 	{
 		return;
 	}
-
-	// Reset the draw time for the SP crosshair
-	cg.crosshairSPClientTime = cg.time;
 
 	// Default: We're not looking at a client
 	cg.crosshairNotLookingAtClient = qfalse;
 
-	// We hit a client
-	*hitClient = qtrue;
-
 	// update the fade timer
-	cg.crosshairClientNum  = trace.entityNum;
-	cg.crosshairClientTime = cg.time;
-	if (cg.crosshairClientNum != cg.snap->ps.identifyClient && cg.crosshairClientNum != ENTITYNUM_WORLD)
+	cg.crosshairEntNum  = trace.entityNum;
+	cg.crosshairEntTime = cg.time;
+	if (cg.crosshairEntNum != cg.snap->ps.identifyClient)
 	{
-		cg.identifyClientRequest = cg.crosshairClientNum;
+		cg.identifyClientRequest = cg.crosshairEntNum;
 	}
 
 	if (cent->currentState.powerups & (1 << PW_OPS_DISGUISED))
 	{
-		if (cgs.clientinfo[cg.crosshairClientNum].team == cgs.clientinfo[cg.clientNum].team)
+		if (cgs.clientinfo[cg.crosshairEntNum].team == cgs.clientinfo[cg.clientNum].team)
 		{
 			cg.crosshairClientNoShoot = qtrue;
 		}
@@ -1985,7 +2039,7 @@ static void CG_ScanForCrosshairEntity(float *zChange, qboolean *hitClient)
  * @brief CG_CheckForCursorHints
  * @note Concept in progress...
  */
-void CG_CheckForCursorHints(void)
+static void CG_CheckForCursorHints()
 {
 	trace_t   trace;
 	vec3_t    start, end;
@@ -1997,10 +2051,20 @@ void CG_CheckForCursorHints(void)
 		return;
 	}
 
+	if (cg.generatingNoiseHud)
+	{
+		// simulate cursor hint
+		cg.cursorHintTime  = cg.time;
+		cg.cursorHintFade  = cg_drawHintFade.integer;
+		cg.cursorHintIcon  = HINT_BREAKABLE;
+		cg.cursorHintValue = 128.f;
+		return;
+	}
+
 	if (cg.snap->ps.serverCursorHint)      // server is dictating a cursor hint, use it.
 	{
 		cg.cursorHintTime  = cg.time;
-		cg.cursorHintFade  = 500;   // fade out time
+		cg.cursorHintFade  = cg_drawHintFade.integer;   // fade out time
 		cg.cursorHintIcon  = cg.snap->ps.serverCursorHint;
 		cg.cursorHintValue = cg.snap->ps.serverCursorHintVal;
 		return;
@@ -2027,7 +2091,7 @@ void CG_CheckForCursorHints(void)
 			{
 				cg.cursorHintIcon  = HINT_WATER;
 				cg.cursorHintTime  = cg.time;
-				cg.cursorHintFade  = 500;
+				cg.cursorHintFade  = cg_drawHintFade.integer;
 				cg.cursorHintValue = 0;
 			}
 		}
@@ -2052,7 +2116,7 @@ void CG_CheckForCursorHints(void)
 			{
 				cg.cursorHintIcon  = HINT_LADDER;
 				cg.cursorHintTime  = cg.time;
-				cg.cursorHintFade  = 500;
+				cg.cursorHintFade  = cg_drawHintFade.integer;
 				cg.cursorHintValue = 0;
 			}
 		}
@@ -2093,103 +2157,57 @@ void CG_CheckForCursorHints(void)
  */
 void CG_DrawCrosshairHealthBar(hudComponent_t *comp)
 {
-	float    *fadeColor;
-	vec4_t   bgcolor, bdcolor;
-	vec4_t   c, c2;
-	int      health, maxHealth;
-	float    zChange;
-	qboolean hitClient;
-	int      clientNum, class;
-	float    x = comp->location.x, w = comp->location.w;
-	int      style;
+	float  *fadeColor;
+	vec4_t bgcolor, bdcolor;
+	vec4_t c, c2;
+	int    health, maxHealth;
+	int    clientNum, class;
+	float  x = comp->location.x, w = comp->location.w;
+	int    style;
 
-	if (cg_drawCrosshair.integer < 0)
+	// world-entity or no-entity
+	if (cg.crosshairEntNum >= ENTITYNUM_WORLD)
 	{
 		return;
-	}
-
-	if (cg.renderingThirdPerson)
-	{
-		return;
-	}
-
-	if (cg.crosshairDyna > -1 || cg.crosshairMine > -1)
-	{
-		if (CG_FadeColor(cg.crosshairDynaTime, cg_drawCrosshairFade.integer))
-		{
-			return;
-		}
-
-		cg.crosshairDyna = -1;
-	}
-
-	if (cg.crosshairMine > -1)
-	{
-		if (CG_FadeColor(cg.crosshairMineTime, cg_drawCrosshairFade.integer))
-		{
-			return;
-		}
-
-		cg.crosshairMine = -1;
-	}
-
-	if (cg.generatingNoiseHud)
-	{
-		// aim on self
-		cg.crosshairClientNum    = cg.snap->ps.clientNum;
-		cg.crosshairClientTime   = cg.time;
-		cg.identifyClientRequest = cg.crosshairClientNum;
-		hitClient                = qtrue;
-	}
-	else
-	{
-		// scan the known entities to see if the crosshair is sighted on one
-		CG_ScanForCrosshairEntity(&zChange, &hitClient);
-
-		// world-entity or no-entity
-		if (cg.crosshairClientNum < 0)
-		{
-			return;
-		}
 	}
 
 	// don't draw crosshair names in shoutcast mode
 	// shoutcasters can see tank and truck health
 	if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR && cgs.clientinfo[cg.clientNum].shoutcaster &&
-	    cg_entities[cg.crosshairClientNum].currentState.eType != ET_MOVER)
+	    cg_entities[cg.crosshairEntNum].currentState.eType != ET_MOVER)
 	{
 		return;
 	}
 
 	// draw the name of the player being looked at
-	fadeColor = CG_FadeColor(cg.crosshairClientTime, cg_drawCrosshairFade.integer);
+	fadeColor = CG_FadeColor(cg.crosshairEntTime, cg_drawCrosshairFade.integer);
 
 	if (!fadeColor)
 	{
 		return;
 	}
 
-	if (cg.crosshairClientNum >= MAX_CLIENTS)
+	if (cg.crosshairNotLookingAtClient)
 	{
 		if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && !cgs.clientinfo[cg.clientNum].shoutcaster)
 		{
 			return;
 		}
 
-		if (cg_entities[cg.crosshairClientNum].currentState.eType != ET_MOVER || !cg_entities[cg.crosshairClientNum].currentState.effect1Time)
+		if (cg_entities[cg.crosshairEntNum].currentState.eType != ET_MOVER || !cg_entities[cg.crosshairEntNum].currentState.effect1Time)
 		{
 			return;
 		}
 
-		health    = cg_entities[cg.crosshairClientNum].currentState.dl_intensity;
+		health    = cg_entities[cg.crosshairEntNum].currentState.dl_intensity;
 		maxHealth = 255;
 	}
 	else
 	{
 		// crosshair for disguised enemy
-		if (cgs.clientinfo[cg.crosshairClientNum].team != cgs.clientinfo[cg.snap->ps.clientNum].team)
+		if (cgs.clientinfo[cg.crosshairEntNum].team != cgs.clientinfo[cg.snap->ps.clientNum].team)
 		{
-			if (!(cg_entities[cg.crosshairClientNum].currentState.powerups & (1 << PW_OPS_DISGUISED)) ||
+			if (!(cg_entities[cg.crosshairEntNum].currentState.powerups & (1 << PW_OPS_DISGUISED)) ||
 			    cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR)
 			{
 				return;
@@ -2200,14 +2218,14 @@ void CG_DrawCrosshairHealthBar(hudComponent_t *comp)
 				return;
 			}
 
-			clientNum = cgs.clientinfo[cg.crosshairClientNum].disguiseClientNum;
-			class     = (cg_entities[cg.crosshairClientNum].currentState.powerups >> PW_OPS_CLASS_1) & 7;
+			clientNum = cgs.clientinfo[cg.crosshairEntNum].disguiseClientNum;
+			class     = (cg_entities[cg.crosshairEntNum].currentState.powerups >> PW_OPS_CLASS_1) & 7;
 		}
 		// we only want to see players on our team
-		else if (!(cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR && cgs.clientinfo[cg.crosshairClientNum].team != cgs.clientinfo[cg.snap->ps.clientNum].team))
+		else if (!(cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR && cgs.clientinfo[cg.crosshairEntNum].team != cgs.clientinfo[cg.snap->ps.clientNum].team))
 		{
-			clientNum = cg.crosshairClientNum;
-			class     = cgs.clientinfo[cg.crosshairClientNum].cls;
+			clientNum = cg.crosshairEntNum;
+			class     = cgs.clientinfo[cg.crosshairEntNum].cls;
 		}
 		else
 		{
@@ -2245,7 +2263,7 @@ void CG_DrawCrosshairHealthBar(hudComponent_t *comp)
 		}
 
 		// set the health
-		if (cg.crosshairClientNum == cg.snap->ps.identifyClient)
+		if (cg.crosshairEntNum == cg.snap->ps.identifyClient)
 		{
 			health = cg.snap->ps.identifyClientHealth;
 
@@ -2261,10 +2279,10 @@ void CG_DrawCrosshairHealthBar(hudComponent_t *comp)
 		{
 			// only team mate health is transmit in clientinfo, this cause a slight refresh delay for disguised ennemy
 			// until they are identified through crosshair check on game side, which is connection depend
-			health = cgs.clientinfo[cg.crosshairClientNum].health;
+			health = cgs.clientinfo[cg.crosshairEntNum].health;
 		}
 
-		maxHealth = CG_GetPlayerMaxHealth(cg.crosshairClientNum, cgs.clientinfo[cg.crosshairClientNum].cls, cgs.clientinfo[cg.crosshairClientNum].team);
+		maxHealth = CG_GetPlayerMaxHealth(cg.crosshairEntNum, cgs.clientinfo[cg.crosshairEntNum].cls, cgs.clientinfo[cg.crosshairEntNum].team);
 	}
 
 	// remove unecessary style for bar customization
@@ -2272,6 +2290,7 @@ void CG_DrawCrosshairHealthBar(hudComponent_t *comp)
 
 	if (style & (BAR_ICON << 1))
 	{
+		Vector4Copy(comp->colorMain, c);
 		CG_ColorForHealth(health, c);
 		c[3] = comp->colorMain[3] * fadeColor[3];
 
@@ -2301,7 +2320,7 @@ void CG_DrawCrosshairHealthBar(hudComponent_t *comp)
 	}
 
 	CG_FilledBar(x, comp->location.y, w, comp->location.h, (style & BAR_LERP_COLOR) ? c2 : c, (style & BAR_LERP_COLOR) ? c : NULL, bgcolor, bdcolor,
-	             Com_Clamp(0, 1.f, health / (float)maxHealth), style, -1);
+	             Com_Clamp(0, 1.f, health / (float)maxHealth), 0.f, style, -1);
 
 	trap_R_SetColor(NULL);
 }
@@ -2316,6 +2335,12 @@ static const char *CG_GetCrosshairNameString(hudComponent_t *comp, int clientNum
 {
 	char colorized[MAX_NAME_LENGTH + 2] = { 0 };
 
+	// ensure the client is valid
+	if (!cgs.clientinfo[clientNum].infoValid)
+	{
+		return va("unknown");
+	}
+
 	if (comp->style & 1)
 	{
 		// Draw them with full colors
@@ -2324,6 +2349,7 @@ static const char *CG_GetCrosshairNameString(hudComponent_t *comp, int clientNum
 
 	// Draw them with a single color
 	Q_ColorizeString('*', cgs.clientinfo[clientNum].cleanname, colorized, MAX_NAME_LENGTH + 2);
+
 	return va("%s", colorized);
 }
 
@@ -2335,9 +2361,7 @@ void CG_DrawCrosshairNames(hudComponent_t *comp)
 {
 	float      *color;
 	vec4_t     textColor;
-	const char *s = NULL;
-	float      zChange;
-	qboolean   hitClient;
+	const char *s        = NULL;
 	int        clientNum = -1;
 
 	if (cg_drawCrosshair.integer < 0)
@@ -2345,101 +2369,76 @@ void CG_DrawCrosshairNames(hudComponent_t *comp)
 		return;
 	}
 
-	if (cg.renderingThirdPerson)
+	// world-entity or no-entity
+	if (cg.crosshairEntNum >= ENTITYNUM_WORLD)
 	{
 		return;
 	}
 
 	Vector4Copy(comp->colorMain, textColor);
+	color = CG_FadeColor_Ext(cg.crosshairEntTime, cg_drawCrosshairFade.integer, textColor[3]);
 
-	// dyna > mine
-	if (cg.crosshairDyna > -1)
+	if (!color)
 	{
-		color = CG_FadeColor_Ext(cg.crosshairDynaTime, cg_drawCrosshairFade.integer, textColor[3]);
-
-		if (color)
-		{
-			textColor[3] = color[3];
-
-			s = va(CG_TranslateString("%s^*\'s dynamite"), CG_GetCrosshairNameString(comp, cg.crosshairDyna));
-
-			CG_DrawCompText(comp, s, textColor, comp->styleText, &cgs.media.limboFont2);
-
-			return;
-		}
-
-		cg.crosshairDyna = -1;
-	}
-
-	// mine id's
-	if (cg.crosshairMine > -1)
-	{
-		color = CG_FadeColor_Ext(cg.crosshairMineTime, cg_drawCrosshairFade.integer, textColor[3]);
-
-		if (color)
-		{
-			textColor[3] = color[3];
-
-			s = va(CG_TranslateString("%s^*\'s mine"), CG_GetCrosshairNameString(comp, cg.crosshairMine));
-			CG_DrawCompText(comp, s, textColor, comp->styleText, &cgs.media.limboFont2);
-		}
-
-		cg.crosshairMine = -1;
 		return;
-	}
-
-	if (cg.generatingNoiseHud)
-	{
-		// aim on self
-		cg.crosshairClientNum    = cg.snap->ps.clientNum;
-		cg.crosshairClientTime   = cg.time;
-		cg.identifyClientRequest = cg.crosshairClientNum;
-		hitClient                = qtrue;
-	}
-	else
-	{
-		// scan the known entities to see if the crosshair is sighted on one
-		CG_ScanForCrosshairEntity(&zChange, &hitClient);
-
-		// world-entity or no-entity
-		if (cg.crosshairClientNum < 0)
-		{
-			return;
-		}
 	}
 
 	// don't draw crosshair names in shoutcast mode
 	// shoutcasters can see tank and truck health
 	if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR && cgs.clientinfo[cg.clientNum].shoutcaster &&
-	    cg_entities[cg.crosshairClientNum].currentState.eType != ET_MOVER)
+	    cg_entities[cg.crosshairEntNum].currentState.eType != ET_MOVER)
 	{
 		return;
 	}
 
-	if (cg.crosshairClientNum >= MAX_CLIENTS)
+	if (cg.crosshairNotLookingAtClient)
 	{
-		color = CG_FadeColor_Ext(cg.crosshairClientTime, cg_drawCrosshairFade.integer, textColor[3]);
-
-		if (!color)
-		{
-			return;
-		}
-
-		textColor[3] = color[3];
-
 		if (cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR || cgs.clientinfo[cg.clientNum].shoutcaster)
 		{
-			if (cg_entities[cg.crosshairClientNum].currentState.eType == ET_MOVER && cg_entities[cg.crosshairClientNum].currentState.effect1Time)
+			entityState_t *es = &cg_entities[cg.crosshairEntNum].currentState;
+
+			switch (es->eType)
 			{
-				s = Info_ValueForKey(CG_ConfigString(CS_SCRIPT_MOVER_NAMES), va("%i", cg.crosshairClientNum));
-			}
-			else if (cg_entities[cg.crosshairClientNum].currentState.eType == ET_CONSTRUCTIBLE_MARKER)
-			{
-				s = Info_ValueForKey(CG_ConfigString(CS_CONSTRUCTION_NAMES), va("%i", cg.crosshairClientNum));
+			case ET_MOVER:
+				if (es->effect1Time)
+				{
+					s = Info_ValueForKey(CG_ConfigString(CS_SCRIPT_MOVER_NAMES), va("%i", cg.crosshairEntNum));
+				}
+				break;
+			case ET_CONSTRUCTIBLE_MARKER:
+				s = Info_ValueForKey(CG_ConfigString(CS_CONSTRUCTION_NAMES), va("%i", cg.crosshairEntNum));
+				break;
+			case ET_MISSILE:
+				if (comp->style & 2 && VectorDistance(cg.refdef_current->vieworg, es->origin) < 512)
+				{
+					const char *weaponText;
+
+					switch (es->weapon)
+					{
+					case WP_DYNAMITE:
+						weaponText = "Dynamite";
+						break;
+					case WP_LANDMINE:
+						weaponText = "Landmine";
+						break;
+					case WP_SATCHEL:
+						weaponText = "Satchel Charge";
+						break;
+					default:
+						weaponText = "Unknown weapon";
+						break;
+					}
+
+					s = va(CG_TranslateString("%s^*\'s %s"), CG_GetCrosshairNameString(comp, es->otherEntityNum), weaponText);
+				}
+				break;
+			default:
+				break;
 			}
 
 			if (s && *s)
 			{
+				textColor[3] = color[3];
 				CG_DrawCompText(comp, s, textColor, comp->styleText, &cgs.media.limboFont2);
 			}
 		}
@@ -2447,9 +2446,9 @@ void CG_DrawCrosshairNames(hudComponent_t *comp)
 	}
 
 	// crosshair for disguised enemy
-	if (cgs.clientinfo[cg.crosshairClientNum].team != cgs.clientinfo[cg.snap->ps.clientNum].team)
+	if (cgs.clientinfo[cg.crosshairEntNum].team != cgs.clientinfo[cg.snap->ps.clientNum].team)
 	{
-		if (!(cg_entities[cg.crosshairClientNum].currentState.powerups & (1 << PW_OPS_DISGUISED)) ||
+		if (!(cg_entities[cg.crosshairEntNum].currentState.powerups & (1 << PW_OPS_DISGUISED)) ||
 		    cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR)
 		{
 			return;
@@ -2457,7 +2456,7 @@ void CG_DrawCrosshairNames(hudComponent_t *comp)
 
 		if (BG_IsSkillAvailable(cgs.clientinfo[cg.snap->ps.clientNum].skill, SK_SIGNALS, SK_FIELDOPS_ENEMY_RECOGNITION) && cgs.clientinfo[cg.snap->ps.clientNum].cls == PC_FIELDOPS)
 		{
-			color = CG_FadeColor_Ext(cg.crosshairClientTime, cg_drawCrosshairFade.integer, textColor[3]);
+			color = CG_FadeColor_Ext(cg.crosshairEntTime, cg_drawCrosshairFade.integer, textColor[3]);
 
 			if (!color)
 			{
@@ -2471,28 +2470,62 @@ void CG_DrawCrosshairNames(hudComponent_t *comp)
 			return;
 		}
 
-		clientNum = cgs.clientinfo[cg.crosshairClientNum].disguiseClientNum;
+		clientNum = cgs.clientinfo[cg.crosshairEntNum].disguiseClientNum;
 	}
 	// we only want to see players on our team
-	else if (!(cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR && cgs.clientinfo[cg.crosshairClientNum].team != cgs.clientinfo[cg.snap->ps.clientNum].team))
+	else if (!(cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR && cgs.clientinfo[cg.crosshairEntNum].team != cgs.clientinfo[cg.snap->ps.clientNum].team))
 	{
-		clientNum = cg.crosshairClientNum;
+		clientNum = cg.crosshairEntNum;
 	}
 
 	// draw the name of the player being looked at
 	if (clientNum != -1)
 	{
-		color = CG_FadeColor_Ext(cg.crosshairClientTime, cg_drawCrosshairFade.integer, textColor[3]);
-
-		if (!color)
-		{
-			return;
-		}
-
 		textColor[3] = color[3];
 
 		s = CG_GetCrosshairNameString(comp, clientNum);
 		CG_DrawCompText(comp, s, textColor, comp->styleText, &cgs.media.limboFont2);
+	}
+}
+
+/**
+ * @brief
+ * Draw a sprite for where playerstate looks showing if artillery can be called
+ * in at the spot or not.
+ */
+void CG_DrawDebugArtillery(centity_t *cent)
+{
+	trace_t tr;
+	vec3_t  viewOrigin, viewTarget, skyTarget;
+	vec3_t  forward = { 0 };
+
+	AngleVectors(cg.predictedPlayerState.viewangles, forward, NULL, NULL);
+
+	VectorCopy(cg.predictedPlayerState.origin, viewOrigin);
+	viewOrigin[2] += cg.predictedPlayerState.viewheight;
+
+	VectorMA(viewOrigin, MAX_TRACE, forward, viewTarget);
+
+	CG_Trace(&tr, viewOrigin, NULL, NULL, viewTarget, cent->currentState.number, MASK_SHOT);
+	if (tr.surfaceFlags & SURF_NOIMPACT)
+	{
+		return;
+	}
+
+	VectorCopy(tr.endpos, viewTarget);
+	VectorCopy(tr.endpos, skyTarget);
+
+	skyTarget[2] = BG_GetSkyHeightAtPoint(viewTarget);
+
+	CG_Trace(&tr, tr.endpos, NULL, NULL, skyTarget, cent->currentState.number, MASK_SHOT);
+	if (tr.fraction < 1.0f && !(tr.surfaceFlags & SURF_NOIMPACT)) // was not SURF_SKY
+	{
+		CG_DrawSprite(tr.endpos, 6.66f, cgs.media.escortShader, (byte[]) { 255, 0, 0, 255 });
+		CG_DrawSprite(viewTarget, 6.66f, cgs.media.escortShader, (byte[]) { 255, 0, 0, 255 });
+	}
+	else
+	{
+		CG_DrawSprite(viewTarget, 6.66f, cgs.media.escortShader, NULL);
 	}
 }
 
@@ -2552,7 +2585,9 @@ void CG_DrawVote(hudComponent_t *comp)
 		CG_GetBindingKeyForVote(str1, str2);
 
 		str = va("%s\n%s",
-		         va(CG_TranslateString("File complaint against ^7%s^* for team-killing?"), cgs.clientinfo[cgs.complaintClient].name),
+		         va(CG_TranslateString("File complaint against ^7%s^* for %s?"),
+		            cgs.clientinfo[cgs.complaintClient].name,
+		            (cgs.complaintClient == CG_LastAttacker()) ? "team-killing" : "team-bleeding"),
 		         va(CG_TranslateString("Press '%s' for YES, or '%s' for NO"), str1, str2));
 
 		CG_DrawCompMultilineText(comp, str, comp->colorMain, comp->alignText, comp->styleText, &cgs.media.limboFont2);
@@ -2729,8 +2764,8 @@ void CG_DrawVote(hudComponent_t *comp)
 		case -1: str = CG_TranslateString("Your complaint has been filed"); break;
 		case -2: str = CG_TranslateString("Complaint dismissed"); break;
 		case -3: str = CG_TranslateString("Server Host cannot be complained against"); break;
-		case -4: str = CG_TranslateString("You were team-killed by the Server Host"); break;
-		case -5: str = CG_TranslateString("You were team-killed by a bot."); break;
+		case -4: str = CG_TranslateString(va("You were %s by the Server Host", (cgs.complaintClient == CG_LastAttacker()) ? "team-killed" : "team-bled")); break;
+		case -5: str = CG_TranslateString(va("You were %s by a bot.", (cgs.complaintClient == CG_LastAttacker()) ? "team-killed" : "team-bled")); break;
 		default: break;
 
 		}
@@ -2910,7 +2945,7 @@ void CG_DrawSpectatorMessage(hudComponent_t *comp)
 #endif
 		         ,
 		         va(CG_TranslateString("Press %s to open Limbo Menu"), !Q_stricmp(strKey, "(openlimbomenu)") ? "ESCAPE" : strKey),
-		         va(CG_TranslateString("Press %s to follow %s"), Binding_FromName("+attack"), cgs.clientinfo[cg.crosshairClientNum].name),
+		         va(CG_TranslateString("Press %s to follow %s"), Binding_FromName("+attack"), cgs.clientinfo[cg.crosshairEntNum].name),
 		         va(CG_TranslateString("^*Press %s to follow previous player"), Binding_FromName("weapalt"))
 #ifdef FEATURE_MULTIVIEW
 		         , strMV ? strMV : ""
@@ -3123,7 +3158,7 @@ void CG_DrawFollow(hudComponent_t *comp)
 			CG_DrawRect_FixedBorder(comp->location.x, comp->location.y, comp->location.w, comp->location.h, 1, comp->colorBorder);
 		}
 
-		if (cgs.gametype != GT_WOLF_LMS)
+		if (cgs.gametype != GT_WOLF_LMS && !(comp->style & FOLLOW_NO_COUNTDOWN))
 		{
 			if (cg.snap->ps.persistant[PERS_RESPAWNS_LEFT] == 0)
 			{
@@ -3220,8 +3255,7 @@ void CG_DrawFollow(hudComponent_t *comp)
  */
 void CG_DrawWarmupTitle(hudComponent_t *comp)
 {
-	static qboolean announced = qfalse;
-	const char      *s;
+	const char *s;
 
 	if (cg.serverRespawning)
 	{
@@ -3255,28 +3289,6 @@ void CG_DrawWarmupTitle(hudComponent_t *comp)
 		else
 		{
 			s = va("%s %s%i", CG_TranslateString("^3WARMUP:^* Match begins in"), sec  < 4 ? "^1" : "^2", sec);
-		}
-
-		// pre start actions
-		if (sec == 10 && !announced)
-		{
-			if (cg_announcer.integer)
-			{
-				trap_S_StartLocalSound(cgs.media.countPrepare, CHAN_ANNOUNCER);
-			}
-
-			CPri(CG_TranslateString("^3PREPARE TO FIGHT!\n"));
-
-			if (!cg.demoPlayback && (cg_autoAction.integer & AA_DEMORECORD))
-			{
-				CG_autoRecord_f();
-			}
-
-			announced = qtrue;
-		}
-		else if (sec != 10)
-		{
-			announced = qfalse;
 		}
 	}
 
@@ -4009,7 +4021,7 @@ void CG_DrawOnScreenBars(void)
 		}
 
 		CG_FilledBar(specBar->x, specBar->y, specBar->w, specBar->h, specBar->colorStart, specBar->colorEnd,
-		             specBar->colorBack, specBar->colorBack, specBar->fraction, BAR_BG, -1);
+		             specBar->colorBack, specBar->colorBack, specBar->fraction, 0.f, BAR_BG, -1);
 
 		// expect update next frame again
 		specBar->visible = qfalse;
@@ -4248,6 +4260,10 @@ static void CG_Draw2D(void)
 		if (!cgs.demoCamera.renderingFreeCam && !cgs.demoCamera.renderingWeaponCam)
 #endif
 		{
+			// scan the known entities to see if the crosshair is sighted on one
+			CG_ScanForCrosshairEntity();
+			CG_CheckForCursorHints();
+
 			CG_DrawActiveHud();
 		}
 	}
@@ -4255,7 +4271,7 @@ static void CG_Draw2D(void)
 	{
 		// draw cursor
 		trap_R_SetColor(NULL);
-		CG_DrawPic(cgDC.cursorx - 14, cgDC.cursory - 14, 32, 32, cgs.media.cursorIcon);
+		CG_DrawCursor(cgDC.cursorx - 14, cgDC.cursory - 14);
 	}
 
 	if (cg.showFireteamMenu)
@@ -4499,6 +4515,48 @@ void CG_DrawMoveGizmo(const vec3_t origin, float radius, int activeAxis)
 }
 
 /**
+ * @brief Draw a sprite at a target location.
+ */
+void CG_DrawSprite(const vec3_t origin, float radius, qhandle_t shader, byte color[4])
+{
+	refEntity_t ent;
+	Com_Memset(&ent, 0, sizeof(ent));
+
+	ent.reType = RT_SPRITE;
+	if (shader != 0)
+	{
+		ent.customShader = shader;
+	}
+	else
+	{
+		ent.customShader = cgs.media.escortShader;
+	}
+
+	ent.radius    = radius;
+	ent.renderfx  = 0;
+	ent.origin[0] = origin[0];
+	ent.origin[1] = origin[1];
+	ent.origin[2] = origin[2];
+
+	if (color != NULL && !(color[0] == 0 && color[1] == 0 && color[2] == 0 && color[3] == 0))
+	{
+		ent.shaderRGBA[0] = color[0];
+		ent.shaderRGBA[1] = color[1];
+		ent.shaderRGBA[2] = color[2];
+		ent.shaderRGBA[3] = color[3];
+	}
+	else
+	{
+		ent.shaderRGBA[0] = 255;
+		ent.shaderRGBA[1] = 255;
+		ent.shaderRGBA[2] = 255;
+		ent.shaderRGBA[3] = 255;
+	}
+
+	trap_R_AddRefEntityToScene(&ent);
+}
+
+/**
  * @brief CG_Coronas
  */
 void CG_Coronas(void)
@@ -4513,6 +4571,7 @@ void CG_Coronas(void)
 		trace_t  tr;
 		float    dist;
 		vec3_t   dir;
+		float    fov;
 		qboolean visible, behind, toofar;
 
 		for (i = 0 ; i < cg.numCoronas ; ++i)
@@ -4533,7 +4592,7 @@ void CG_Coronas(void)
 				toofar = qtrue;
 			}
 			// dot = DotProduct(dir, cg.refdef_current->viewaxis[0]);
-			const float fov = cosf((cg.refdef_current->fov_x / 2) * (float)(M_PI / 180));
+			fov = cosf((cg.refdef_current->fov_x / 2) * (float)(M_PI / 180));
 			if (DotProduct(dir, cg.refdef_current->viewaxis[0]) >= -fov)
 			{
 				behind = qtrue;
@@ -4591,17 +4650,32 @@ static void CG_NoiseGenerator()
 	CG_AddPMItemBig(PM_DEBUG, va(CG_TranslateString("Promoted to rank %s!"), GetRankTableData(cgs.clientinfo[cg.clientNum].team, cgs.clientinfo[cg.clientNum].rank)->names), rankicons[cgs.clientinfo[cg.clientNum].rank][cgs.clientinfo[cg.clientNum].team == TEAM_AXIS ? 1 : 0][0].shader);
 
 	// small popup message
-	if (!(cg.time % 507))
 	{
-		CG_AddPMItem(PM_MESSAGE, "Neque atque quid praeter sed.", " ", cgs.media.pmImages[PM_MESSAGE], 0, 0, colorWhite);
-	}
-	if (!(cg.time % 509))
-	{
-		CG_AddPMItem(PM_DEATH, "Sed ut tum ad senem senex de senectute", " ", cgs.media.pmImages[PM_DEATH], 0, 0, colorWhite);
-	}
-	if (!(cg.time % 513))
-	{
-		CG_AddPMItem(PM_OBJECTIVE, "Nunc vero inanes flatus quorundam vile esse", " ", cgs.media.pmImages[PM_TEAM], 0, 0, colorWhite);
+		static int noiseTime = 0;
+		static int noiseTick = 0;
+
+		noiseTime += cg.frametime;
+		while (noiseTime > 100)
+		{
+			noiseTick++;
+			if (noiseTick == 1)
+			{
+				CG_AddPMItem(PM_MESSAGE, "Neque atque quid praeter sed.", " ", cgs.media.pmImages[PM_MESSAGE], 0, 0, colorWhite);
+			}
+			else if (noiseTick == 2)
+			{
+				CG_AddPMItem(PM_DEATH, "Sed ut tum ad senem senex de senectute", " ", cgs.media.pmImages[PM_DEATH], 0, 0, colorWhite);
+			}
+			else if (noiseTick == 3)
+			{
+				CG_AddPMItem(PM_OBJECTIVE, "Nunc vero inanes flatus quorundam vile esse", " ", cgs.media.pmImages[PM_TEAM], 0, 0, colorWhite);
+			}
+			else if (noiseTick > 4)
+			{
+				noiseTick = 0;
+			}
+			noiseTime -= 100;
+		}
 	}
 
 	// objective indicator simulation
@@ -4716,7 +4790,7 @@ void CG_DrawMissileCamera(hudComponent_t *comp)
 		CG_AddPacketEntities();
 		CG_AddMarks();
 		CG_AddParticles();
-		CG_AddLocalEntities();
+		CG_AddLocalEntities(qfalse);
 		CG_AddSmokeSprites();
 		CG_AddAtmosphericEffects();
 		CG_AddFlameChunks();

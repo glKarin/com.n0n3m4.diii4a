@@ -98,9 +98,9 @@ void G_ResetRemappedShaders(void)
 	// we don't actually have to do this but it's clean ...
 	for (i = 0; i < MAX_SHADER_REMAPS; i++)
 	{
-		remappedShaders[i].newShader[0]  = '\0';
-		remappedShaders[i].oldShader[0]  = '\0';
-		remappedShaders[i].timeOffset = 0;
+		remappedShaders[i].newShader[0] = '\0';
+		remappedShaders[i].oldShader[0] = '\0';
+		remappedShaders[i].timeOffset   = 0;
 	}
 }
 
@@ -317,7 +317,7 @@ void G_TeamCommand(team_t team, const char *cmd)
  * @param[in] match
  * @return
  */
-gentity_t *G_Find(gentity_t *from, int fieldofs, const char *match)
+gentity_t *G_Find(gentity_t *from, size_t fieldofs, const char *match)
 {
 	char      *s;
 	gentity_t *max = &g_entities[level.num_entities];
@@ -651,6 +651,11 @@ void G_UseEntity(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		return;
 	}
 
+	if (other && other->client)
+	{
+		BG_AnimScriptEvent(&other->client->ps, other->client->pers.character->animModelInfo, ANIM_ET_ACTIVATE, qfalse);
+	}
+
 	// Woop we got through, let's use the entity
 	ent->use(ent, other, activator);
 }
@@ -784,6 +789,7 @@ void G_InitGentity(gentity_t *e)
 	e->r.ownerNum = ENTITYNUM_NONE;
 	e->nextthink  = 0;
 	e->free       = NULL;
+	e->s.solid    = 0;
 
 	// init scripting
 	e->scriptStatus.scriptEventIndex = -1;
@@ -1035,6 +1041,27 @@ gentity_t *G_PopupMessage(popupMessageType_t type)
 
 //==============================================================================
 
+static void G_debugPrintEvent(gentity_t *ent, int event, int eventParm)
+{
+	// try to warn when an event got dropped
+	// TODO : add 'ent->s.oldEventSequence' so we can do the same for 'ent->s' ?
+	if (ent->client && (ent->client->ps.eventSequence >= (ent->client->ps.oldEventSequence + 3)))
+	{
+		Com_Printf("SEV: ^1DROP ^7time:%7i ent:%15p\n", level.time, ent);
+	}
+
+	Com_Printf("SEV: ADD  time:%7i ent:%15p event:%3i eventParm:%3i ", level.time, ent, event, eventParm);
+
+	if (event < EV_NONE || event >= EV_MAX_EVENTS)
+	{
+		Com_Printf("UNKNOWN\n");
+	}
+	else
+	{
+		Com_Printf("%s C(%d)\n", eventnames[event], (!ent->client) ? -1 : ent->client->ps.clientNum);
+	}
+}
+
 /**
  * @brief Use for non-pmove events that would also be predicted on the
  * client side: jumppads and item pickups
@@ -1049,6 +1076,10 @@ void G_AddPredictableEvent(gentity_t *ent, int event, int eventParm)
 	if (!ent->client)
 	{
 		return;
+	}
+	if (g_debugEvents.integer > 0)
+	{
+		G_debugPrintEvent(ent, event, eventParm);
 	}
 	BG_AddPredictableEventToPlayerstate(event, eventParm, &ent->client->ps);
 }
@@ -1067,6 +1098,10 @@ void G_AddEvent(gentity_t *ent, int event, int eventParm)
 		return;
 	}
 
+	if (g_debugEvents.integer > 0)
+	{
+		G_debugPrintEvent(ent, event, eventParm);
+	}
 	// use the sequential event list
 	if (ent->client)
 	{

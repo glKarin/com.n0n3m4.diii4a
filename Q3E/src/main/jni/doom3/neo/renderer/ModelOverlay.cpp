@@ -137,14 +137,8 @@ void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPla
 
 	// make temporary buffers for the building process
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	overlayVertex_t	*overlayVerts;
-	glIndex_t *overlayIndexes;
-
-	const int overlayVerts_size = maxVerts * sizeof(*overlayVerts);
-	const int overlayIndexes_size = maxIndexes * sizeof(*overlayIndexes);
-
-	_DROID_ALLOC(overlayVertex_t, overlayVerts_size, overlayVerts, 0);
-	_DROID_ALLOC16(glIndex_t, overlayIndexes_size, overlayIndexes, 1);
+	_DROID_ALLOC_DEF(overlayVertex_t, overlayVerts, (maxVerts * sizeof(*overlayVerts)));
+	_DROID_ALLOC16_DEF(glIndex_t, overlayIndexes, (maxIndexes * sizeof(*overlayIndexes)));
 #else
 	overlayVertex_t	*overlayVerts = (overlayVertex_t *)_alloca(maxVerts * sizeof(*overlayVerts));
 	glIndex_t *overlayIndexes = (glIndex_t *)_alloca16(maxIndexes * sizeof(*overlayIndexes));
@@ -265,8 +259,8 @@ void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPla
 		}
 	}
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	_DROID_FREE(overlayVerts, 0)
-	_DROID_FREE(overlayIndexes, 1)
+	_DROID_FREE(overlayVerts);
+	_DROID_FREE(overlayIndexes);
 #endif
 }
 

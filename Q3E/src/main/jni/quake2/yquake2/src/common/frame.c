@@ -92,7 +92,7 @@ static YQ2_ATTR_INLINE void Sys_CpuPause(void)
 #if (__i386 || __x86_64__)
 	asm volatile("pause");
 #elif defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 7) || defined(__ARM_ARCH_6K__)
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: yield on arm
 	#ifdef __arm__
 		sched_yield();
         #warning "Processor yield not supported on armv7."
@@ -169,9 +169,9 @@ Qcommon_Buildstring(void)
 	printf("Architecture: %s\n", YQ2ARCH);
 }
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: mian loop on Android
 extern volatile qboolean q3e_running;
-extern void Q3E_CheckNativeWindowChanged(void);
+extern qboolean GLimp_CheckGLInitialized(void);
 #else
 static
 #endif
@@ -184,7 +184,7 @@ Qcommon_Mainloop(void)
 	/* The mainloop. The legend. */
 	while (1)
 	{
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: mian loop on Android
 		if(!q3e_running) // exit
 			break;
 #endif
@@ -225,8 +225,9 @@ Qcommon_Mainloop(void)
 		// Save global time for network- und input code.
 		curtime = (int)(newtime / 1000ll);
 
-#ifdef __ANDROID__
-		Q3E_CheckNativeWindowChanged();
+#ifdef __ANDROID__ // check GL context
+		if(!GLimp_CheckGLInitialized())
+			break;
 #endif
 		Qcommon_Frame(newtime - oldtime);
 		oldtime = newtime;
@@ -443,7 +444,7 @@ Qcommon_Init(int argc, char **argv)
 	Com_Printf("==== Yamagi Quake II Initialized ====\n\n");
 	Com_Printf("*************************************\n\n");
 
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) //karin: move to main()
 	// Call the main loop
 	Qcommon_Mainloop();
 #endif

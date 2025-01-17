@@ -34,8 +34,9 @@
 
 // HEADER FILES ------------------------------------------------------------
 
-#include <string>
 #include <algorithm>
+#include <stdexcept>
+#include <string>
 #include <assert.h>
 #include "zmusic/zmusic_internal.h"
 #include "zmusic/musinfo.h"
@@ -87,7 +88,7 @@ public:
 	int ServiceEvent();
 	void SetMIDISource(MIDISource* _source);
 	bool ServiceStream(void* buff, int len) override;
-	SoundStreamInfo GetStreamInfo() const override;
+	SoundStreamInfoEx GetStreamInfoEx() const override;
 
 	int GetDeviceType() const override;
 
@@ -260,7 +261,6 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype, int samplerate)
 	while (dev == nullptr)
 	{
 		selectedDevice = devtype;
-		printf("Test midi device: %d\n", devtype);
 		try
 		{
 			switch (devtype)
@@ -290,6 +290,14 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype, int samplerate)
 				// Intentional fall-through for systems without standard midi support
 
 			case MDEV_FLUIDSYNTH:
+				dev = CreateFluidSynthMIDIDevice(samplerate, Args.c_str());
+				break;
+
+			case MDEV_OPL:
+				dev = CreateOplMIDIDevice(Args.c_str());
+				break;
+
+			case MDEV_TIMIDITY:
 #ifdef __ANDROID__ //karin: set default patches
 				{
 					std::string patchStr = Args;
@@ -298,17 +306,9 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype, int samplerate)
 						patchStr = "soundfonts/gzdoom.sf2";
 					dev = CreateFluidSynthMIDIDevice(samplerate, patchStr.c_str());
 				}
-#elif
-					dev = CreateFluidSynthMIDIDevice(samplerate, Args.c_str());
-#endif
-				break;
-
-			case MDEV_OPL:
-				dev = CreateOplMIDIDevice(Args.c_str());
-				break;
-
-			case MDEV_TIMIDITY:
+#else
 				dev = CreateTimidityPPMIDIDevice(Args.c_str(), samplerate);
+#endif
 				break;
 
 			case MDEV_WILDMIDI:
@@ -321,7 +321,6 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype, int samplerate)
 		}
 		catch (std::runtime_error &err)
 		{
-			fprintf(stderr, "Create midi device: %s\n", err.what());
 			//DPrintf(DMSG_WARNING, "%s\n", err.what());
 			checked[devtype] = true;
 			devtype = MDEV_DEFAULT;
@@ -336,17 +335,14 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype, int samplerate)
 			else if (!checked[MDEV_ADL]) devtype = MDEV_ADL;
 			else if (!checked[MDEV_OPN]) devtype = MDEV_OPN;
 			else if (!checked[MDEV_OPL]) devtype = MDEV_OPL;
-			printf("Try midi device: %d\n", devtype);
 
 			if (devtype == MDEV_DEFAULT)
 			{
-				//printf("exit %d\n", devtype);
 				std::string message = std::string(err.what()) + "\n\nFailed to play music: Unable to open any MIDI Device.";
 				throw std::runtime_error(message);
 			}
 		}
 	}
-	printf("Using midi device: %d\n", devtype);
 	if (selectedDevice != requestedDevice && (selectedDevice != lastSelectedDevice || requestedDevice != lastRequestedDevice))
 	{
 		static const char *devnames[] = {
@@ -461,10 +457,10 @@ bool MIDIStreamer::InitPlayback()
 	}
 }
 
-SoundStreamInfo MIDIStreamer::GetStreamInfo() const
+SoundStreamInfoEx MIDIStreamer::GetStreamInfoEx() const
 {
-	if (MIDI) return MIDI->GetStreamInfo();
-	else return { 0, 0, 0 };
+	if (MIDI) return MIDI->GetStreamInfoEx();
+	else return {};
 }
 
 //==========================================================================
@@ -829,13 +825,22 @@ int MIDIStreamer::FillBuffer(int buffer_num, int max_events, uint32_t max_time)
 	if (InitialPlayback)
 	{
 		InitialPlayback = false;
-		// Send the GS System Reset SysEx message.
+		// Send the GM System Enable SysEx message.
 		events[0] = 0;								// dwDeltaTime
 		events[1] = 0;								// dwStreamID
 		events[2] = (MEVENT_LONGMSG << 24) | 6;		// dwEvent
 		events[3] = MAKE_ID(0xf0, 0x7e, 0x7f, 0x09);	// dwParms[0]
 		events[4] = MAKE_ID(0x01, 0xf7, 0x00, 0x00);	// dwParms[1]
 		events += 5;
+
+		// Send the GS DT1 MODE SET GS Reset SysEx message.
+		events[0] = 0;									// dwDeltaTime
+		events[1] = 0;									// dwStreamID
+		events[2] = (MEVENT_LONGMSG << 24) | 11;		// dwEvent
+		events[3] = MAKE_ID(0xf0, 0x41, 0x7f, 0x42);	// dwParms[0]
+		events[4] = MAKE_ID(0x12, 0x40, 0x00, 0x7f);	// dwParms[1]
+		events[5] = MAKE_ID(0x00, 0x41, 0xf7, 0x00);	// dwParms[2]
+		events += 6;
 
 		// Send the full master volume SysEx message.
 		events[0] = 0;								// dwDeltaTime
@@ -1036,7 +1041,7 @@ DLL_EXPORT zmusic_bool ZMusic_MIDIDumpWave(ZMusic_MidiSource source, EMidiDevice
 {
 	try
 	{
-		MIDIStreamer me(devtype, devarg);
+		MIDIStreamer me(devtype, devarg ? devarg : "");
 		me.SetMIDISource(source);
 		me.DumpWave(outname, subsong, samplerate);
 		return true;

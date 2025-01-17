@@ -40,6 +40,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #define	COMMAND_HISTORY			64
 
+#ifdef __ANDROID__ //karin: limit console max height
+extern float Android_GetConsoleMaxHeightFrac(float frac);
+#endif
+
 struct overlayText_t
 {
 	idStr			text;
@@ -620,7 +624,11 @@ void	idConsoleLocal::Open()
 	consoleField.ClearAutoComplete();
 	consoleField.Clear();
 	keyCatching = true;
+#ifdef __ANDROID__ //karin: limit console max height
+	SetDisplayFraction(Android_GetConsoleMaxHeightFrac(0.5f));
+#else
 	SetDisplayFraction( 0.5f );
+#endif
 }
 
 /*
@@ -1043,11 +1051,19 @@ bool	idConsoleLocal::ProcessEvent( const sysEvent_t* event, bool forceAccept )
 			if( idKeyInput::IsDown( K_LSHIFT ) || idKeyInput::IsDown( K_RSHIFT ) )
 			{
 				// if the shift key is down, don't open the console as much
+#ifdef __ANDROID__ //karin: limit console max height
+				SetDisplayFraction(Android_GetConsoleMaxHeightFrac(0.2f));
+#else
 				SetDisplayFraction( 0.2f );
+#endif
 			}
 			else
 			{
+#ifdef __ANDROID__ //karin: limit console max height
+				SetDisplayFraction(Android_GetConsoleMaxHeightFrac(0.5f));
+#else
 				SetDisplayFraction( 0.5f );
+#endif
 			}
 		}
 		return true;

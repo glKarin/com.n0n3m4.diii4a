@@ -98,7 +98,7 @@ void P_DamageFeedback(gentity_t *player)
 	{
 		player->pain_debounce_time = level.time + 700;
 		G_AddEvent(player, EV_PAIN, player->health);
-		//BG_AnimScriptEvent(&client->ps, client->pers.character->animModelInfo, ANIM_ET_PAIN, qfalse, qtrue);
+		//BG_AnimScriptEvent(&client->ps, client->pers.character->animModelInfo, ANIM_ET_PAIN, qfalse);
 	}
 
 	client->ps.damageEvent++;   // always increment this since we do multiple view damage anims
@@ -475,9 +475,19 @@ void G_TouchTriggers(gentity_t *ent)
 		// so you don't have to actually contact its bounding box
 		if (hit->s.eType == ET_ITEM)
 		{
-			if (!BG_PlayerTouchesItem(&ent->client->ps, &hit->s, level.time))
+			if (hit->item && hit->item->giType == IT_TEAM)  // is a CTF flag / objective
 			{
-				continue;
+				if (!BG_PlayerTouchesObjective(&ent->client->ps, &hit->s, level.time))
+				{
+					continue;
+				}
+			}
+			else
+			{
+				if (!BG_PlayerTouchesItem(&ent->client->ps, &hit->s, level.time))
+				{
+					continue;
+				}
 			}
 		}
 		else
@@ -506,32 +516,54 @@ void G_TouchTriggers(gentity_t *ent)
  */
 qboolean G_SpectatorAttackFollow(gentity_t *ent)
 {
-	trace_t       tr;
-	vec3_t        forward, right, up;
-	vec3_t        start, end;
-	vec3_t        mins, maxs;
-	static vec3_t enlargeMins = { -64.0f, -64.0f, -48.0f };
-	static vec3_t enlargeMaxs = { 64.0f, 64.0f, 0.0f };
+	int     i;
+	trace_t tr;
+	vec3_t  forward;
+	vec3_t  mins, maxs;
+	vec3_t  start, end;
+
+	static float enlargeMins[3] = { -4.0f, -4.0f, -3.0f };
+	static float enlargeMaxs[3] = { 4.0f, 4.0f, 0.0f };
 
 	if (!ent->client)
 	{
 		return qfalse;
 	}
 
-	AngleVectors(ent->client->ps.viewangles, forward, right, up);
+	AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
+
 	VectorCopy(ent->client->ps.origin, start);
 	VectorMA(start, MAX_TRACE, forward, end);
 
-	// enlarge the hitboxes, so spectators can easily click on them..
-	VectorCopy(ent->r.mins, mins);
-	VectorCopy(ent->r.maxs, maxs);
-	VectorAdd(mins, enlargeMins, mins);
-	VectorAdd(maxs, enlargeMaxs, maxs);
 	// also put the start-point a bit forward, so we don't start the trace in solid..
 	VectorMA(start, 75.0f, forward, start);
 
-	// trap_Trace(&tr, start, mins, maxs, end, ent->client->ps.clientNum, CONTENTS_BODY | CONTENTS_CORPSE);
-	G_HistoricalTrace(ent, &tr, start, mins, maxs, end, ent->s.number, CONTENTS_BODY | CONTENTS_CORPSE);
+	// let's do 4 traces with increasing "beam width" to prioritize the player
+	// we are directly looking at, but also allow some more fuzzy angles with
+	// decreasing priority
+	for (i = 0; i < 4; ++i)
+	{
+		if (i == 0)
+		{
+			G_HistoricalTrace(ent, &tr, start,
+			                  NULL, NULL,
+			                  end, ent->s.number, CONTENTS_BODY);
+		}
+		else
+		{
+			VectorMA(ent->r.mins, pow(4, i), enlargeMins, mins);
+			VectorMA(ent->r.maxs, pow(4, i), enlargeMaxs, maxs);
+
+			G_HistoricalTrace(ent, &tr, start,
+			                  mins, maxs,
+			                  end, ent->s.number, CONTENTS_BODY);
+		}
+
+		if ((&g_entities[tr.entityNum])->client != NULL)
+		{
+			break;
+		}
+	}
 
 	if ((&g_entities[tr.entityNum])->client)
 	{
@@ -639,7 +671,9 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 	    client->sess.spectatorState != SPECTATOR_FOLLOW &&
 	    client->sess.sessionTeam == TEAM_SPECTATOR)        // don't do it if on a team
 	{
-		if (G_SpectatorAttackFollow(ent))
+		// if we are currently looking at a target, or we hold down the sprint
+		// key: don't cycle through next players
+		if (G_SpectatorAttackFollow(ent) || (ent->client->buttons & BUTTON_SPRINT))
 		{
 			return;
 		}
@@ -647,7 +681,7 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 		{
 			// not clicked on a player?.. then follow next,
 			// to prevent constant traces done by server.
-			if (client->buttons & BUTTON_SPRINT)
+			if (client->buttons & BUTTON_WALKING)
 			{
 				Cmd_FollowCycle_f(ent, 1, qtrue);
 			}
@@ -657,13 +691,13 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 				Cmd_FollowCycle_f(ent, 1, qfalse);
 			}
 		}
-		// attack + sprint button cycles through non-bot/human players
+		// attack + walk button cycles through non-bot/human players
 		// attack button cycles through all players
 	}
 	else if ((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK) &&
 	         !(client->buttons & BUTTON_ACTIVATE))
 	{
-		Cmd_FollowCycle_f(ent, 1, (client->buttons & BUTTON_SPRINT));
+		Cmd_FollowCycle_f(ent, 1, (client->buttons & BUTTON_WALKING));
 	}
 #ifdef ETLEGACY_DEBUG
 #ifdef FEATURE_OMNIBOT
@@ -837,6 +871,17 @@ qboolean ClientInactivityTimer(gclient_t *client)
 void ClientTimerActions(gentity_t *ent, int msec)
 {
 	gclient_t *client = ent->client;
+
+	// reset and pause client timer when we've reached maxhealth, such that once
+	// we take damage again, it will take a full second every time to re-heal
+	if (ent->health == client->ps.stats[STAT_MAX_HEALTH])
+	{
+		if (client->timeResidual != 0)
+		{
+			client->timeResidual = 0;
+		}
+		return;
+	}
 
 	client->timeResidual += msec;
 
@@ -1230,6 +1275,8 @@ void ClientThink_real(gentity_t *ent)
 		ucmd->serverTime = ((ucmd->serverTime + client->pers.pmoveMsec - 1) /
 		                    client->pers.pmoveMsec) * client->pers.pmoveMsec;
 	}
+
+	G_SendMatchInfo(ent);
 
 	if (client->wantsscore)
 	{
@@ -1737,11 +1784,25 @@ void SpectatorClientEndFrame(gentity_t *ent)
 		gclient_t *cl;
 		qboolean  do_respawn = qfalse;
 
-		// Players can respawn quickly in warmup
-		if (g_gamestate.integer != GS_PLAYING && ent->client->respawnTime <= level.timeCurrent &&
-		    ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+		if (
+			// Players can instantly respawn when 'g_forcerespawn == -1'
+			(g_forcerespawn.integer == -1 && ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+			// Players can instantly respawn in warmup
+			|| (g_gamestate.integer != GS_PLAYING && ent->client->respawnTime <= level.timeCurrent &&
+			    ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+			)
 		{
-			do_respawn = qtrue;
+			// XXX : delay respawn onto the next frame - this circumvents
+			// specific issues that currently occur when player die and respawn
+			// on the same server frame
+			if (ent->client->instantRespawnDelayTime == 0)
+			{
+				ent->client->instantRespawnDelayTime = level.time;
+			}
+			else if (level.time > ent->client->instantRespawnDelayTime)
+			{
+				do_respawn = qtrue;
+			}
 		}
 		else if (ent->client->sess.sessionTeam == TEAM_AXIS)
 		{
@@ -1948,6 +2009,13 @@ void WolfRevivePushEnt(gentity_t *self, gentity_t *other)
 {
 	vec3_t dir, push;
 
+	// apply push effect only every 50ms to match sv_fps 20 behavior
+	// scaling the speed to match higher framerates results in smaller push overall as friction has more effect on lower speeds
+	if ((self->client && self->client->lastRevivePushTime + 50 > level.time) || other->client->lastRevivePushTime + 50 > level.time)
+	{
+		return;
+	}
+
 	VectorSubtract(self->r.currentOrigin, other->r.currentOrigin, dir);
 	dir[2] = 0;
 	VectorNormalizeFast(dir);
@@ -1958,6 +2026,7 @@ void WolfRevivePushEnt(gentity_t *self, gentity_t *other)
 	{
 		VectorAdd(self->s.pos.trDelta, push, self->s.pos.trDelta);
 		VectorAdd(self->client->ps.velocity, push, self->client->ps.velocity);
+		self->client->lastRevivePushTime = level.time - (level.time % 50);
 	}
 
 	VectorScale(dir, -WR_PUSHAMOUNT, push);
@@ -1965,6 +2034,7 @@ void WolfRevivePushEnt(gentity_t *self, gentity_t *other)
 
 	VectorAdd(other->s.pos.trDelta, push, other->s.pos.trDelta);
 	VectorAdd(other->client->ps.velocity, push, other->client->ps.velocity);
+	other->client->lastRevivePushTime = level.time - (level.time % 50);
 }
 
 /**

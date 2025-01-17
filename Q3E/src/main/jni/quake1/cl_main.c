@@ -37,6 +37,7 @@ cvar_t csqc_progcrc = {CF_CLIENT | CF_READONLY, "csqc_progcrc","-1","CRC of cspr
 cvar_t csqc_progsize = {CF_CLIENT | CF_READONLY, "csqc_progsize","-1","file size of csprogs.dat file to load (-1 is none), only used during level changes and then reset to -1"};
 cvar_t csqc_usedemoprogs = {CF_CLIENT, "csqc_usedemoprogs","1","use csprogs stored in demos"};
 cvar_t csqc_polygons_defaultmaterial_nocullface = {CF_CLIENT, "csqc_polygons_defaultmaterial_nocullface", "0", "use 'cull none' behavior in the default shader for rendering R_PolygonBegin - warning: enabling this is not consistent with FTEQW behavior on this feature"};
+cvar_t csqc_lowres = {CF_CLIENT, "csqc_lowres", "0", "make EXT_CSQC functions CSQC_UpdateView(), setproperty(), getproperty() use the virtual 2D resolution (FTEQW/QSS behaviour) instead of the real resolution (DP behaviour); this mode is always used for the CSQC_SIMPLE (aka hud-only) CSQC_DrawHud() parameters; see cvars vid_conheight and vid_conwidth"};
 
 cvar_t cl_shownet = {CF_CLIENT, "cl_shownet","0","1 = print packet size, 2 = print packet message list"};
 cvar_t cl_nolerp = {CF_CLIENT, "cl_nolerp", "0","network update smoothing"};
@@ -60,7 +61,8 @@ cvar_t freelook = {CF_CLIENT | CF_ARCHIVE, "freelook", "1","mouse controls pitch
 
 cvar_t cl_autodemo = {CF_CLIENT | CF_ARCHIVE, "cl_autodemo", "0", "records every game played, using the date/time and map name to name the demo file" };
 cvar_t cl_autodemo_nameformat = {CF_CLIENT | CF_ARCHIVE, "cl_autodemo_nameformat", "autodemos/%Y-%m-%d_%H-%M", "The format of the cl_autodemo filename, followed by the map name (the date is encoded using strftime escapes)" };
-cvar_t cl_autodemo_delete = {CF_CLIENT, "cl_autodemo_delete", "0", "Delete demos after recording.  This is a bitmask, bit 1 gives the default, bit 0 the value for the current demo.  Thus, the values are: 0 = disabled; 1 = delete current demo only; 2 = delete all demos except the current demo; 3 = delete all demos from now on" };
+cvar_t cl_autodemo_delete = {CF_CLIENT, "cl_autodemo_delete", "0", "3: automatically delete every newly recorded demo unless this cvar is set to 2 during a game, in case something interesting happened (cvar will be automatically set back to 3);  0: keep every newly recorded demo unless this cvar is set to 1 during a game, in case nothing interesting happened (cvar will be automatically set back to 0).  Technically speaking, the value is a bitmask: bit 1 defines behaviour for all demos, bit 0 overrides behaviour for the demo currently being recorded" };
+cvar_t cl_startdemos = {CF_CLIENT | CF_ARCHIVE, "cl_startdemos", "1", "1 enables the `startdemos` loop used in Quake and some mods, 0 goes straight to the menu"};
 
 cvar_t r_draweffects = {CF_CLIENT, "r_draweffects", "1","renders temporary sprite effects"};
 
@@ -618,10 +620,6 @@ static void CL_EstablishConnection_Local(void)
 		CL_EstablishConnection("local:1", -2);
 }
 
-static qbool CL_Intermission(void)
-{
-	return cl.intermission;
-}
 
 /*
 ==============
@@ -2053,7 +2051,6 @@ Update client game world for a new frame
 */
 void CL_UpdateWorld(void)
 {
-	r_refdef.scene.extraupdate = !r_speeds.integer;
 	r_refdef.scene.numentities = 0;
 	r_refdef.scene.numlights = 0;
 	r_refdef.view.matrix = identitymatrix;
@@ -2175,8 +2172,6 @@ static void CL_TimeRefresh_f(cmd_state_t *cmd)
 {
 	int i;
 	double timestart, timedelta;
-
-	r_refdef.scene.extraupdate = false;
 
 	timestart = Sys_DirtyTime();
 	for (i = 0;i < 128;i++)
@@ -2308,6 +2303,8 @@ static void CL_Locs_Save_f(cmd_state_t *cmd)
 	cl_locnode_t *loc;
 	qfile_t *outfile;
 	char locfilename[MAX_QPATH];
+	char timestring[128];
+
 	if (!cl.locnodes)
 	{
 		Con_Printf("No loc points/boxes exist!\n");
@@ -2330,7 +2327,8 @@ static void CL_Locs_Save_f(cmd_state_t *cmd)
 			break;
 	if (loc)
 	{
-		FS_Printf(outfile, "// %s %s saved by %s\n// x,y,z,x,y,z,\"name\"\n\n", locfilename, Sys_TimeString("%Y-%m-%d"), engineversion);
+		Sys_TimeString(timestring, sizeof(timestring), "%Y-%m-%d");
+		FS_Printf(outfile, "// %s %s saved by %s\n// x,y,z,x,y,z,\"name\"\n\n", locfilename, timestring, engineversion);
 		for (loc = cl.locnodes;loc;loc = loc->next)
 			if (VectorCompare(loc->mins, loc->maxs))
 				break;
@@ -2800,7 +2798,7 @@ void CL_StartVideo(void)
 
 extern cvar_t host_framerate;
 extern cvar_t host_speeds;
-extern qbool serverlist_querystage;
+extern uint8_t serverlist_querystage;
 double CL_Frame (double time)
 {
 	static double clframetime;
@@ -2816,18 +2814,15 @@ double CL_Frame (double time)
 	 * run the frame. Everything that happens before this
 	 * point will happen even if we're sleeping this frame.
 	 */
-	if((cl_timer += time) < 0)
-		return cl_timer;
 
 	// limit the frametime steps to no more than 100ms each
-	if (cl_timer > 0.1)
-		cl_timer = 0.1;
+	cl_timer = min(cl_timer + time, 0.1);
 
 	// Run at full speed when querying servers, compared to waking up early to parse
 	// this is simpler and gives pings more representative of what can be expected when playing.
 	maxfps = (vid_activewindow || serverlist_querystage ? cl_maxfps : cl_maxidlefps).value;
 
-	if (cls.state != ca_dedicated && (cl_timer > 0 || cls.timedemo || maxfps <= 0))
+	if (cls.state != ca_dedicated && (cl_timer > 0 || host.restless || maxfps <= 0))
 	{
 		R_TimeReport("---");
 		Collision_Cache_NewFrame();
@@ -2877,9 +2872,6 @@ double CL_Frame (double time)
 			if (cl.paused || host.paused)
 				clframetime = 0;
 		}
-
-		if (cls.timedemo)
-			clframetime = cl.realframetime = cl_timer;
 
 		// deduct the frame time from the accumulator
 		cl_timer -= cl.realframetime;
@@ -3117,6 +3109,7 @@ void CL_Init (void)
 		Cmd_AddCommand(CF_CLIENT, "locs_save", CL_Locs_Save_f, "save .loc file for this map containing currently defined points and boxes");
 
 		Cvar_RegisterVariable(&csqc_polygons_defaultmaterial_nocullface);
+		Cvar_RegisterVariable(&csqc_lowres);
 
 		Cvar_RegisterVariable (&cl_minfps);
 		Cvar_RegisterVariable (&cl_minfps_fade);
@@ -3143,7 +3136,6 @@ void CL_Init (void)
 
 		host.hook.ConnectLocal = CL_EstablishConnection_Local;
 		host.hook.Disconnect = CL_DisconnectEx;
-		host.hook.CL_Intermission = CL_Intermission;
 		host.hook.ToggleMenu = CL_ToggleMenu_Hook;
 	}
 }

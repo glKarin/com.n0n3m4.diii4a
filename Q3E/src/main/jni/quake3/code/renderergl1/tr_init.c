@@ -832,11 +832,7 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 */
 void GL_SetDefaultState( void )
 {
-#ifdef USE_OPENGLES
-	qglClearDepthf( 1.0f );
-#else
 	qglClearDepth( 1.0f );
-#endif
 
 	qglCullFace(GL_FRONT);
 
@@ -868,9 +864,7 @@ void GL_SetDefaultState( void )
 	//
 	glState.glStateBits = GLS_DEPTHTEST_DISABLE | GLS_DEPTHMASK_TRUE;
 
-#if !defined(USE_OPENGLES)
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-#endif
 	qglDepthMask( GL_TRUE );
 	qglDisable( GL_DEPTH_TEST );
 	qglEnable( GL_SCISSOR_TEST );
@@ -923,7 +917,7 @@ void GfxInfo_f( void )
 	ri.Printf( PRINT_ALL, "GL_VERSION: %s\n", glConfig.version_string );
 	ri.Printf( PRINT_ALL, "GL_EXTENSIONS: " );
 	// glConfig.extensions_string is a limited length so get the full list directly
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support qglGetStringi so print raw GL_EXTENSIONS
 	if ( qglGetStringi )
 	{
 		GLint numExtensions;

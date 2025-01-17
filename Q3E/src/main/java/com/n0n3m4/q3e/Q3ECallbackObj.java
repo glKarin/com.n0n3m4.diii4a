@@ -315,6 +315,7 @@ public class Q3ECallbackObj
     {
         if(null == Q3E.activity || Q3E.activity.isFinishing())
             return;
+        Q3E.running = false;
         Q3E.activity.runOnUiThread(new Runnable() {
             @Override
             public void run()

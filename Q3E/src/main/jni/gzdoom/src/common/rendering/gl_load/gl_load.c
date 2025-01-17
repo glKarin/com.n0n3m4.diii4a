@@ -76,7 +76,7 @@ static void CheckOpenGL(void)
 {
     if (opengl32dll == 0)
     {
-        opengl32dll = LoadLibrary(L"OpenGL32.DLL");
+        opengl32dll = LoadLibraryA("OpenGL32.DLL");
 		if (opengl32dll != 0)
 		{
 			createcontext = (HGLRC(WINAPI*)(HDC)) GetProcAddress(opengl32dll, "wglCreateContext");
@@ -137,7 +137,23 @@ static PROC WinGetProcAddress(const char *name)
 		#if defined(__sgi) || defined(__sun) || defined(__unix__)
 #ifdef __ANDROID__ //karin: using EGL on Android
 			#include <EGL/egl.h>
-			#define IntGetProcAddress(name) eglGetProcAddress((const char *)name)
+static intptr_t glesFunctionStub()
+{
+	printf("call OpenGL stub function!\n");
+	fprintf(stderr, "call OpenGL stub function!\n");
+	return 0;
+}
+static void *dbgeglGetProcAddress(const char *name)
+{
+	void *ptr = eglGetProcAddress(name);
+	if(!ptr)
+	{
+		printf("%s -> missing\n", name);
+		ptr = &glesFunctionStub;
+	}
+	return ptr;
+}
+			#define IntGetProcAddress(name) dbgeglGetProcAddress((const char *)name)
 #else
 			void* SDL_GL_GetProcAddress(const char* proc);
 			#define IntGetProcAddress(name) SDL_GL_GetProcAddress((const char*)name)

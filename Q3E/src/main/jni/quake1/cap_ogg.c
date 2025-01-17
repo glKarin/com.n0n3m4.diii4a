@@ -805,7 +805,7 @@ static void SCR_CaptureVideo_Ogg_EndVideo(void)
 	cls.capturevideo.videofile = NULL;
 }
 
-static void SCR_CaptureVideo_Ogg_ConvertFrame_BGRA_to_YUV(void)
+static void SCR_CaptureVideo_Ogg_ConvertFrame_BGRA_to_YUV(u8 *in)
 {
 	LOAD_FORMATSPECIFIC_OGG();
 	yuv_buffer *yuv;
@@ -820,7 +820,7 @@ static void SCR_CaptureVideo_Ogg_ConvertFrame_BGRA_to_YUV(void)
 
 	for(y = 0; y < h; ++y)
 	{
-		for(b = cls.capturevideo.outbuffer + (h-1-y)*w*4, x = 0; x < w; ++x)
+		for(b = in + (h-1-y)*w*4, x = 0; x < w; ++x)
 		{
 			blockr = b[2];
 			blockg = b[1];
@@ -832,7 +832,7 @@ static void SCR_CaptureVideo_Ogg_ConvertFrame_BGRA_to_YUV(void)
 
 		if ((y & 1) == 0 && y/2 < h/2) // if h is odd, this skips the last row
 		{
-			for(b = cls.capturevideo.outbuffer + (h-2-y)*w*4, x = 0; x < w/2; ++x)
+			for(b = in + (h-2-y)*w*4, x = 0; x < w/2; ++x)
 			{
 				blockr = (b[2] + b[6] + b[inpitch+2] + b[inpitch+6]) >> 2;
 				blockg = (b[1] + b[5] + b[inpitch+1] + b[inpitch+5]) >> 2;
@@ -847,7 +847,7 @@ static void SCR_CaptureVideo_Ogg_ConvertFrame_BGRA_to_YUV(void)
 	}
 }
 
-static void SCR_CaptureVideo_Ogg_VideoFrames(int num)
+static void SCR_CaptureVideo_Ogg_VideoFrames(int num, u8 *in)
 {
 	LOAD_FORMATSPECIFIC_OGG();
 	ogg_packet pt;
@@ -869,7 +869,7 @@ static void SCR_CaptureVideo_Ogg_VideoFrames(int num)
 	}
 
 	format->yuvi = (format->yuvi + 1) % 2;
-	SCR_CaptureVideo_Ogg_ConvertFrame_BGRA_to_YUV();
+	SCR_CaptureVideo_Ogg_ConvertFrame_BGRA_to_YUV(in);
 	format->lastnum = num;
 
 	// TODO maybe send num-1 frames from here already
@@ -924,9 +924,15 @@ void SCR_CaptureVideo_Ogg_BeginVideo(void)
 	cls.capturevideo.format = CAPTUREVIDEOFORMAT_OGG_VORBIS_THEORA;
 	cls.capturevideo.formatextension = "ogv";
 	cls.capturevideo.videofile = FS_OpenRealFile(va(vabuf, sizeof(vabuf), "%s.%s", cls.capturevideo.basename, cls.capturevideo.formatextension), "wb", false);
-	cls.capturevideo.endvideo = SCR_CaptureVideo_Ogg_EndVideo;
-	cls.capturevideo.videoframes = SCR_CaptureVideo_Ogg_VideoFrames;
-	cls.capturevideo.soundframe = SCR_CaptureVideo_Ogg_SoundFrame;
+	if (!cls.capturevideo.videofile)
+	{
+		Con_Printf(CON_ERROR "Failed to open video file \"%s\", cancelling video capture.\n", vabuf);
+		cls.capturevideo.error = true;
+		return;
+	}
+	cls.capturevideo.writeEndVideo = SCR_CaptureVideo_Ogg_EndVideo;
+	cls.capturevideo.writeVideoFrame = SCR_CaptureVideo_Ogg_VideoFrames;
+	cls.capturevideo.writeSoundFrame = SCR_CaptureVideo_Ogg_SoundFrame;
 	cls.capturevideo.formatspecific = Mem_Alloc(tempmempool, sizeof(capturevideostate_ogg_formatspecific_t));
 	{
 		LOAD_FORMATSPECIFIC_OGG();

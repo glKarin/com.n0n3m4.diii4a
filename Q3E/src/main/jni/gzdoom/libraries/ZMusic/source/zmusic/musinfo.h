@@ -31,7 +31,7 @@ public:
 	virtual void ChangeSettingNum(const char* setting, double value) {}		// "
 	virtual void ChangeSettingString(const char* setting, const char* value) {}	// "
 	virtual bool ServiceStream(void *buff, int len) { return false;  }
-	virtual SoundStreamInfo GetStreamInfo() const { return { 0,0,0 }; }
+	virtual SoundStreamInfoEx GetStreamInfoEx() const = 0;
 
 	enum EState
 	{

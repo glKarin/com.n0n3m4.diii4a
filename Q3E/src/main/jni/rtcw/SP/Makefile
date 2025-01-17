@@ -796,6 +796,8 @@ else # ifdef MINGW
 #############################################################################
 
 ifeq ($(PLATFORM),freebsd)
+  # Use the default C compiler
+  TOOLS_CC=cc
 
   # flags
   BASE_CFLAGS = \

@@ -42,6 +42,9 @@ extern bool Sys_InRenderThread(void);
 #endif
 #endif
 #define HARM_ONLY_DETECT_SYS_MEMORY 1
+#ifdef __ANDROID__
+idCVar harm_g_normalizeMovementDirection("harm_g_normalizeMovementDirection", "0", CVAR_GAME | CVAR_BOOL, "Re-normalize player/walker movement direction");
+#endif
 
 typedef enum {
 	ERP_NONE,
@@ -3263,36 +3266,10 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 
 		// override cvars from command line
 		StartupVariable(NULL, false);
-#ifdef _MULTITHREAD
-#if !defined(__ANDROID__) //karin: enable multithreading-rendering from command cvar
-		multithreadActive = cvarSystem->GetCVarBool("harm_r_multithread");
-		if(multithreadActive)
-			Sys_Printf("[Harmattan]: Enable multi-threading rendering\n");
-		else
-			Sys_Printf("[Harmattan]: Disable multi-threading rendering\n");
-#endif
-#endif
-#ifdef _OPENGLES3
+
 #if !defined(__ANDROID__) //karin: check OpenGL version from command cvar
-		const char *openglVersion = cvarSystem->GetCVarString("harm_r_openglVersion");
-		if(openglVersion && openglVersion[0])
-		{
-			extern int gl_version;
-		    extern bool USING_GLES3;
-			Sys_Printf("[Harmattan]: harm_r_openglVersion = %s\n", openglVersion);
-			if(!idStr::Icmp("GLES2", openglVersion))
-			{
-				gl_version = 0x00020000;
-				Sys_Printf("[Harmattan]: Using OpenGLES2\n");
-			}
-			else
-			{
-				gl_version = 0x00030000;
-				Sys_Printf("[Harmattan]: Using OpenGLES3\n");
-			}
-			USING_GLES3 = gl_version != 0x00020000;
-		}
-#endif
+        extern void GLimp_Startup(void);
+        GLimp_Startup();
 #endif
 
 		if (!idAsyncNetwork::serverDedicated.GetInteger() && Sys_AlreadyRunning()) {
@@ -3342,10 +3319,11 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 			console->LoadHistory();
 #ifdef __ANDROID__ //karin: for in smooth joystick on Android.
 		extern bool smooth_joystick;
-		idCVar *in_smoothJoystick = cvarSystem->Find("harm_in_smoothJoystick");
+		idCVar *in_smoothJoystick = cvarSystem->Find("harm_g_normalizeMovementDirection");
 		if(in_smoothJoystick)
 		{
 			in_smoothJoystick->SetBool(smooth_joystick);
+			CVAR_READONLY(*in_smoothJoystick);
 			in_smoothJoystick->ClearModified();
 		}
 #endif
@@ -3606,4 +3584,10 @@ void idCommonLocal::ShutdownGame(bool reloading)
 	// shut down the file system
 	fileSystem->Shutdown(reloading);
 }
+
+//k: temp memory allocate in stack / heap control on Android
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+// #warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
+/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "524288", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `524288` bytes(Because stack memory is limited on OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).");
+#endif
 

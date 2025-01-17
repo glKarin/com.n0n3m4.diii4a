@@ -36,7 +36,7 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
-#include <zlib.h>
+#include <miniz.h>
 #include "m_swap.h"
 #include "zmusic_internal.h"
 #include "midiconfig.h"
@@ -257,9 +257,27 @@ static  MusInfo *ZMusic_OpenSongInternal (MusicIO::FileInterface *reader, EMidiD
 				streamsource = GME_OpenSong(reader, fmt, miscConfig.snd_outputrate);
 			}
 			// Check for module formats
-			else
+			else if ((id[0] == MAKE_ID('R', 'I', 'F', 'F') && id[2] == MAKE_ID('D', 'S', 'M', 'F')))
 			{
 				streamsource = MOD_OpenSong(reader, miscConfig.snd_outputrate);
+			}
+			else
+			{
+				// give the calling app an option to select between XMP and DUMB.
+				if (dumbConfig.mod_preferred_player != 0)
+				{
+					streamsource = MOD_OpenSong(reader, miscConfig.snd_outputrate);
+				}
+				if (!streamsource)
+				{
+					reader->seek(0, SEEK_SET);
+					streamsource = XMP_OpenSong(reader, miscConfig.snd_outputrate);
+					if (!streamsource && dumbConfig.mod_preferred_player == 0)
+					{
+						reader->seek(0, SEEK_SET);
+						streamsource = MOD_OpenSong(reader, miscConfig.snd_outputrate);
+					}
+				}
 			}
 			if (streamsource == nullptr)
 			{
@@ -440,6 +458,12 @@ DLL_EXPORT zmusic_bool ZMusic_IsLooping(MusInfo *song)
 	return song->m_Looping;
 }
 
+DLL_EXPORT int ZMusic_GetDeviceType(MusInfo* song)
+{
+	if (!song) return false;
+	return song->GetDeviceType();
+}
+
 DLL_EXPORT zmusic_bool ZMusic_IsMIDI(MusInfo *song)
 {
 	if (!song) return false;
@@ -449,9 +473,32 @@ DLL_EXPORT zmusic_bool ZMusic_IsMIDI(MusInfo *song)
 DLL_EXPORT void ZMusic_GetStreamInfo(MusInfo *song, SoundStreamInfo *fmt)
 {
 	if (!fmt) return;
+	*fmt = {};
+
+	if (!song)
+		return;
+
+	SoundStreamInfoEx fmtex;
+	{
+		std::lock_guard<FCriticalSection> lock(song->CritSec);
+		fmtex = song->GetStreamInfoEx();
+	}
+	if (fmtex.mSampleRate > 0)
+	{
+		fmt->mBufferSize = fmtex.mBufferSize;
+		fmt->mSampleRate = fmtex.mSampleRate;
+		fmt->mNumChannels = ZMusic_ChannelCount(fmtex.mChannelConfig);
+		if (fmtex.mSampleType == SampleType_Int16)
+			fmt->mNumChannels *= -1;
+	}
+}
+
+DLL_EXPORT void ZMusic_GetStreamInfoEx(MusInfo *song, SoundStreamInfoEx *fmt)
+{
+	if (!fmt) return;
 	if (!song) *fmt = {};
 	std::lock_guard<FCriticalSection> lock(song->CritSec);
-	*fmt = song->GetStreamInfo();
+	*fmt = song->GetStreamInfoEx();
 }
 
 DLL_EXPORT void ZMusic_Close(MusInfo *song)
@@ -497,6 +544,6 @@ DLL_EXPORT zmusic_bool ZMusic_WriteSMF(MIDISource* source, const char *fn, int l
 	auto f = MusicIO::utf8_fopen(fn, "wt");
 	if (f == nullptr) return false;
 	success = (fwrite(&midi[0], 1, midi.size(), f) == midi.size());
-	delete f;
+	fclose(f);
 	return success;
 }

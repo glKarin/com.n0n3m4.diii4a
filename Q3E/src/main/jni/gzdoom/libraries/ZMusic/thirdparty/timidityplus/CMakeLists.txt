@@ -1,18 +1,4 @@
-cmake_minimum_required( VERSION 2.8.7 )
-
-use_fast_math()
-
-if( ZD_CMAKE_COMPILER_IS_GNUC_COMPATIBLE )
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
-endif()
-
-include_directories( timiditypp )
-
-file( GLOB HEADER_FILES
-	timiditypp/*.h
-	)
-add_library( timidityplus STATIC
-	${HEADER_FILES}
+add_library(timidityplus OBJECT
 	fft4g.cpp
 	reverb.cpp
 	common.cpp
@@ -34,5 +20,17 @@ add_library( timidityplus STATIC
 	smplfile.cpp
 	sndfont.cpp
 	tables.cpp
-	)
-target_link_libraries( timidityplus )
+)
+
+target_include_directories(timidityplus INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE timiditypp)
+
+set_target_properties(timidityplus
+PROPERTIES
+	CXX_STANDARD 11
+	CXX_STANDARD_REQUIRED ON
+)
+
+file(GLOB HEADER_FILES timiditypp/*.h)
+target_sources(timidityplus PRIVATE ${HEADER_FILES})
+
+use_fast_math(timidityplus)

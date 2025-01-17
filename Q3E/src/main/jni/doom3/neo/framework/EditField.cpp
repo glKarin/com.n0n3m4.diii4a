@@ -515,6 +515,60 @@ void idEditField::KeyDownEvent(int key)
 	if (key != K_CAPSLOCK && key != K_ALT && key != K_CTRL && key != K_SHIFT) {
 		ClearAutoComplete();
 	}
+
+	//karin: begin
+	// ctrl-v = paste
+	if (tolower(key) == 'v' && idKeyInput::IsDown(K_CTRL)) {
+		ClearAutoComplete();
+		Paste();
+		return;
+	}
+
+	// ctrl-c = copy
+	if (tolower(key) == 'c' && idKeyInput::IsDown(K_CTRL)) {
+		if(buffer[0])
+			Sys_SetClipboardData(buffer);
+		return;
+	}
+
+	// ctrl-u = clear line
+	if (tolower(key) == 'u' && idKeyInput::IsDown(K_CTRL)) {
+		ClearAutoComplete();
+		Clear();
+		return;
+	}
+
+	// ctrl-w = clear a word
+	if (tolower(key) == 'w' && idKeyInput::IsDown(K_CTRL)) {
+		if(cursor > 0)
+		{
+			int lastCursor = cursor;
+			// skip to previous word
+			while ((cursor > 0) && (buffer[ cursor - 1 ] == ' ')) {
+				cursor--;
+			}
+
+			while ((cursor > 0) && (buffer[ cursor - 1 ] != ' ')) {
+				cursor--;
+			}
+
+			if (cursor < 0) {
+				cursor = 0;
+			}
+
+			if (cursor < scroll) {
+				scroll = cursor;
+			}
+
+			if (autoComplete.length) {
+				autoComplete.length = cursor;
+			}
+			buffer[cursor] = '\0';
+			strcat(buffer, buffer + lastCursor);
+		}
+		return;
+	}
+	//karin: end
 }
 
 /*

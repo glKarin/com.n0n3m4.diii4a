@@ -1069,7 +1069,7 @@ static int CG_CalcFov(void)
 #endif
 	    )
 	{
-		// mg42 zoom
+		// stationary heavy weapon (e.g. misc_mg42, misc_aagun) zoom
 		if (cg.snap->ps.persistant[PERS_HWEAPON_USE])
 		{
 			fov_x = 55;
@@ -1374,12 +1374,12 @@ int CG_CalcViewValues(void)
 					cg.refdefViewAngles[0] += (crandom() * 0.25f) * (ps->weaponTime / (float)GetWeaponTableData(ps->weapon)->nextShotTime);
 					cg.refdefViewAngles[1] += (crandom() * 0.25f) * (ps->weaponTime / (float)GetWeaponTableData(ps->weapon)->nextShotTime);
 				}
-				else if (GetWeaponTableData(ps->weapon)->type & WEAPON_TYPE_MG)
+				else if (GetWeaponTableData(ps->weapon)->type & WEAPON_TYPE_MG || cg.snap->ps.eFlags & EF_MOUNTEDTANK)
 				{
 					cg.refdefViewAngles[0] += crandom() * 0.5f;
 					cg.refdefViewAngles[1] += crandom() * 0.5f;
 				}
-				else
+				else    // nested MG
 				{
 					cg.refdefViewAngles[0] += crandom();
 					cg.refdefViewAngles[1] += crandom();
@@ -1983,7 +1983,7 @@ static void CG_DemoRewindFixEffects(void)
 {
 	int i;
 
-	trap_GetGameState(&cgs.gameState);
+	trap_GetGameState(&cgs.currentGameState);
 
 	CG_ParseSysteminfo();
 	CG_ParseServerinfo();
@@ -2163,6 +2163,138 @@ static void CG_DrawSpawnpoints(void)
 }
 
 /**
+ * @brief CG_PlayAnnouncement
+ */
+static void CG_PlayAnnouncement()
+{
+	static gamestate_t oldGamestate = -1;
+	qboolean announceAtWarmupStart  = qfalse;
+
+	if (cgs.gamestate != oldGamestate)
+	{
+		if (cgs.gamestate == GS_WARMUP_COUNTDOWN && oldGamestate == GS_WARMUP)
+		{
+			announceAtWarmupStart = qtrue;
+		}
+		oldGamestate = cgs.gamestate;
+	}
+
+	// warmup annoucement
+	if (cg.warmup > 0)
+	{
+		static int processedWarmupCount = -1;
+		int sec                         = (cg.warmup - cg.time) / 1000;
+		int warmupAnnounceSec           = announceAtWarmupStart ? sec : 10;
+
+		// process warmup actions
+		if (sec <= warmupAnnounceSec && processedWarmupCount != cg.warmupCount)
+		{
+			if (cg_announcer.integer)
+			{
+				trap_S_StartLocalSound(cgs.media.countPrepare, CHAN_ANNOUNCER);
+			}
+
+			CPri(CG_TranslateString("^3PREPARE TO FIGHT!\n"));
+
+			if (!cg.demoPlayback && (cg_autoAction.integer & AA_DEMORECORD))
+			{
+				CG_autoRecord_f();
+			}
+
+			processedWarmupCount = cg.warmupCount;
+		}
+	}
+
+	// timelimit warnings
+	if (cgs.timelimit > 0 && cgs.gamestate == GS_PLAYING && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR)
+	{
+		int msec = cg.time - cgs.levelStartTime;
+
+		if (cgs.timelimit > 5 && !(cg.timelimitWarnings & 1) && (msec > (cgs.timelimit - 5) * 60000) &&
+		    (msec < (cgs.timelimit - 5) * 60000 + 1000)) // 60 * 1000
+		{
+			cg.timelimitWarnings |= 1;
+			if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_AXIS)
+			{
+				if (cgs.media.fiveMinuteSound_g == -1)
+				{
+					CG_SoundPlaySoundScript(cg.fiveMinuteSound_g, NULL, -1, qtrue);
+				}
+				else if (cgs.media.fiveMinuteSound_g)
+				{
+					trap_S_StartLocalSound(cgs.media.fiveMinuteSound_g, CHAN_ANNOUNCER);
+				}
+			}
+			else if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_ALLIES)
+			{
+				if (cgs.media.fiveMinuteSound_a == -1)
+				{
+					CG_SoundPlaySoundScript(cg.fiveMinuteSound_a, NULL, -1, qtrue);
+				}
+				else if (cgs.media.fiveMinuteSound_a)
+				{
+					trap_S_StartLocalSound(cgs.media.fiveMinuteSound_a, CHAN_ANNOUNCER);
+				}
+			}
+		}
+		if (cgs.timelimit > 2 && !(cg.timelimitWarnings & 2) && (msec > (cgs.timelimit - 2) * 60000) &&
+		    (msec < (cgs.timelimit - 2) * 60000 + 1000)) // 60 * 1000
+		{
+			cg.timelimitWarnings |= 2;
+			if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_AXIS)
+			{
+				if (cgs.media.twoMinuteSound_g == -1)
+				{
+					CG_SoundPlaySoundScript(cg.twoMinuteSound_g, NULL, -1, qtrue);
+				}
+				else if (cgs.media.twoMinuteSound_g)
+				{
+					trap_S_StartLocalSound(cgs.media.twoMinuteSound_g, CHAN_ANNOUNCER);
+				}
+			}
+			else if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_ALLIES)
+			{
+				if (cgs.media.twoMinuteSound_a == -1)
+				{
+					CG_SoundPlaySoundScript(cg.twoMinuteSound_a, NULL, -1, qtrue);
+				}
+				else if (cgs.media.twoMinuteSound_a)
+				{
+					trap_S_StartLocalSound(cgs.media.twoMinuteSound_a, CHAN_ANNOUNCER);
+				}
+			}
+		}
+		if (!(cg.timelimitWarnings & 4) && (msec > (cgs.timelimit) * 60000 - 30000) &&
+		    (msec < cgs.timelimit * 60000 - 29000)) // 60 * 1000
+		{
+			cg.timelimitWarnings |= 4;
+			if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_AXIS)
+			{
+				if (cgs.media.thirtySecondSound_g == -1)
+				{
+					CG_SoundPlaySoundScript(cg.thirtySecondSound_g, NULL, -1, qtrue);
+				}
+				else if (cgs.media.thirtySecondSound_g)
+				{
+					trap_S_StartLocalSound(cgs.media.thirtySecondSound_g, CHAN_ANNOUNCER);
+				}
+			}
+			else if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_ALLIES)
+			{
+				if (cgs.media.thirtySecondSound_a == -1)
+				{
+					CG_SoundPlaySoundScript(cg.thirtySecondSound_a, NULL, -1, qtrue);
+				}
+				else if (cgs.media.thirtySecondSound_a)
+				{
+					trap_S_StartLocalSound(cgs.media.thirtySecondSound_a, CHAN_ANNOUNCER);
+				}
+			}
+		}
+	}
+}
+
+/**
  * @brief Generates and draws a game scene and status information at the given time.
  * @param[in] serverTime
  * @param[in] demoPlayback
@@ -2174,11 +2306,12 @@ void CG_DrawActiveFrame(int serverTime, qboolean demoPlayback)
 	int dbgCnt = 0;
 #endif
 
-	cg.oldTime      = cg.time;
-	cg.time         = serverTime;
-	cgDC.realTime   = cg.time;
-	cg.demoPlayback = demoPlayback;
-	cg.frametime    = cg.time - cg.oldTime;
+	cg.oldTime                  = cg.time;
+	cg.time                     = serverTime;
+	cgDC.realTime               = cg.time;
+	cg.demoPlayback             = demoPlayback;
+	cg.frametime                = cg.time - cg.oldTime;
+	cg.crosshairEntsToScanCount = 0;
 
 	if (cg.frametime < 0)
 	{
@@ -2248,8 +2381,9 @@ void CG_DrawActiveFrame(int serverTime, qboolean demoPlayback)
 	// do the trick)
 	if (!cg.weaponSelect && cg.snap->ps.weapon)
 	{
-		cg.weaponSelect     = cg.snap->ps.weapon;
-		cg.weaponSelectTime = cg.time;
+		cg.weaponSelect             = cg.snap->ps.weapon;
+		cg.weaponSelectTime         = cg.time;
+		cg.weaponSelectDuringFiring = (cg.snap->ps.weaponstate == WEAPON_FIRING) ? cg.time : 0;
 	}
 
 	// The very first frame
@@ -2288,6 +2422,10 @@ void CG_DrawActiveFrame(int serverTime, qboolean demoPlayback)
 
 	// update cg.predictedPlayerState
 	CG_PredictPlayerState();
+
+	DEBUGTIME
+
+	CG_PlayAnnouncement();
 
 	DEBUGTIME
 
@@ -2404,7 +2542,7 @@ void CG_DrawActiveFrame(int serverTime, qboolean demoPlayback)
 
 			DEBUGTIME
 
-			CG_AddLocalEntities();
+			CG_AddLocalEntities(qtrue);
 
 			DEBUGTIME
 
@@ -2415,9 +2553,9 @@ void CG_DrawActiveFrame(int serverTime, qboolean demoPlayback)
 			CG_AddAtmosphericEffects();
 		}
 
-		// mg42
 		if (!cg.showGameView && !cgs.dbShowing)
 		{
+			// stationary heavy weapon (e.g. misc_mg42, misc_aagun)
 			if (!cg.snap->ps.persistant[PERS_HWEAPON_USE])
 			{
 				CG_AddViewWeapon(&cg.predictedPlayerState);
@@ -2498,4 +2636,12 @@ void CG_DrawActiveFrame(int serverTime, qboolean demoPlayback)
 
 	// let the client system know what our weapon, holdable item and zoom settings are
 	trap_SetUserCmdValue(cg.weaponSelect, cg.showGameView ? 0x01 : 0x00, cg.zoomSensitivity, cg.identifyClientRequest);
+
+	// execute 'cg_autoCmd'
+	if (cg_autoCmd.string[0] != '\0' && !cg.autoCmdExecuted)
+	{
+		Com_Printf("Executing cg_autoCmd: %s\n", cg_autoCmd.string);
+		trap_SendConsoleCommand(cg_autoCmd.string);
+		cg.autoCmdExecuted = qtrue;
+	}
 }

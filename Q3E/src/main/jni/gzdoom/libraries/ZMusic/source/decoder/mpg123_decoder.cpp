@@ -47,12 +47,10 @@ FModule MPG123Module{"MPG123"};
 #define MPG123LIB "libmpg123-0.dll"
 #elif defined(__APPLE__)
 #define MPG123LIB "libmpg123.0.dylib"
-#else
-#ifdef __ANDROID__ //karin: libmpg123 on Android
+#elif defined(__ANDROID__) //karin: libmpg123 on Android
 #define MPG123LIB "libmpg123.so"
 #else
 #define MPG123LIB "libmpg123.so.0"
-#endif
 #endif
 
 bool IsMPG123Present()

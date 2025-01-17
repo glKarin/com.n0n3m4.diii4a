@@ -1,6 +1,8 @@
 package com.n0n3m4.q3e;
 
-import com.n0n3m4.q3e.karin.KOnceRunnable;
+import com.n0n3m4.q3e.event.Q3EAnalogEvent;
+import com.n0n3m4.q3e.event.Q3EKeyEvent;
+import com.n0n3m4.q3e.event.Q3EMotionEvent;
 
 public interface Q3EEventEngine
 {
@@ -43,7 +45,7 @@ class Q3EEventEngineJava implements Q3EEventEngine
                 Q3EJNI.sendKeyEvent(down ? 1 : 0, keycode, charcode);
             }
         });*/
-		Q3EUtils.q3ei.callbackObj.PushEvent(new KeyEventRunnable(down, keycode, charcode));
+		Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EKeyEvent(down, keycode, charcode));
 	}
 
 	@Override
@@ -57,7 +59,7 @@ class Q3EEventEngineJava implements Q3EEventEngine
                 Q3EJNI.sendMotionEvent(deltax, deltay);
             }
         });*/
-		Q3EUtils.q3ei.callbackObj.PushEvent(new MotionEventRunnable(deltax, deltay));
+		Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EMotionEvent(deltax, deltay));
 	}
 
 	@Override
@@ -71,64 +73,6 @@ class Q3EEventEngineJava implements Q3EEventEngine
                 Q3EJNI.sendAnalog(down ? 1 : 0, x, y);
             }
         });*/
-		Q3EUtils.q3ei.callbackObj.PushEvent(new AnalogEventRunnable(down, x, y));
-	}
-
-	private static class KeyEventRunnable extends KOnceRunnable
-	{
-		public final boolean down;
-		public final int     keycode;
-		public final int     charcode;
-
-		public KeyEventRunnable(boolean down, int keycode, int charcode)
-		{
-			this.down = down;
-			this.keycode = keycode;
-			this.charcode = charcode;
-		}
-
-		@Override
-		protected void Run()
-		{
-			Q3EJNI.sendKeyEvent(down ? 1 : 0, keycode, charcode);
-		}
-	}
-
-	private static class MotionEventRunnable extends KOnceRunnable
-	{
-		public final float deltax;
-		public final float deltay;
-
-		public MotionEventRunnable(float deltax, float deltay)
-		{
-			this.deltax = deltax;
-			this.deltay = deltay;
-		}
-
-		@Override
-		protected void Run()
-		{
-			Q3EJNI.sendMotionEvent(deltax, deltay);
-		}
-	}
-
-	private static class AnalogEventRunnable extends KOnceRunnable
-	{
-		public final boolean down;
-		public final float   x;
-		public final float   y;
-
-		public AnalogEventRunnable(boolean down, float x, float y)
-		{
-			this.down = down;
-			this.x = x;
-			this.y = y;
-		}
-
-		@Override
-		protected void Run()
-		{
-			Q3EJNI.sendAnalog(down ? 1 : 0, x, y);
-		}
+		Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EAnalogEvent(down, x, y));
 	}
 }

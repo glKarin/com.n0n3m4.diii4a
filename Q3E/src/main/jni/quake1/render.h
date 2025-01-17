@@ -326,8 +326,6 @@ typedef struct r_refdef_viewcache_s
 {
 	// updated by gl_main_newmap()
 	int maxentities;
-	int world_numclusters;
-	int world_numclusterbytes;
 	int world_numleafs;
 	int world_numsurfaces;
 
@@ -350,9 +348,6 @@ r_refdef_viewcache_t;
 // TODO: really think about which fields should go into scene and which one should stay in refdef [1/7/2008 Black]
 // maybe also refactor some of the functions to support different setting sources (ie. fogenabled, etc.) for different scenes
 typedef struct r_refdef_scene_s {
-	/// whether to call S_ExtraUpdate during render to reduce sound chop
-	qbool extraupdate;
-
 	/// (client gameworld) time for rendering time based effects
 	double time;
 
@@ -856,7 +851,7 @@ typedef struct r_waterstate_waterplane_s
 	r_rendertarget_t *rt_camera; // MATERIALFLAG_CAMERA
 	mplane_t plane;
 	int materialflags; // combined flags of all water surfaces on this plane
-	unsigned char pvsbits[(MAX_MAP_LEAFS+7)>>3]; // FIXME: buffer overflow on huge maps
+	unsigned char *pvsbits;
 	qbool pvsvalid;
 	int camera_entity;
 	vec3_t mins, maxs;

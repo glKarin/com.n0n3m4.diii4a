@@ -15,27 +15,29 @@ enum ESoundFlags
 	// modifier flags
 	CHAN_LISTENERZ = 8,
 	CHAN_MAYBE_LOCAL = 16,
-	CHAN_UI = 32,
-	CHAN_NOPAUSE = 64,
+	CHAN_UI = 32,								// Do not record sound in savegames.
+	CHAN_NOPAUSE = 64,							// Do not pause this sound in menus.
 	CHAN_LOOP = 256,
 	CHAN_PICKUP = (CHAN_ITEM|CHAN_MAYBE_LOCAL), // Do not use this with A_StartSound! It would not do what is expected.
-	CHAN_NOSTOP = 4096,
-	CHAN_OVERLAP = 8192,
+	CHAN_NOSTOP = 4096,							// only for A_PlaySound. Does not start if channel is playing something.
+	CHAN_OVERLAP = 8192,						// [MK] Does not stop any sounds in the channel and instead plays over them.
 
 	// Same as above, with an F appended to allow better distinction of channel and channel flags.
-	CHANF_DEFAULT = 0,	// just to make the code look better and avoid literal 0's.
+	CHANF_DEFAULT = 0,			// just to make the code look better and avoid literal 0's.
 	CHANF_LISTENERZ = 8,
 	CHANF_MAYBE_LOCAL = 16,
-	CHANF_UI = 32,
-	CHANF_NOPAUSE = 64,
+	CHANF_UI = 32,				// Do not record sound in savegames.
+	CHANF_NOPAUSE = 64,			// Do not pause this sound in menus.
 	CHANF_LOOP = 256,
-	CHANF_NOSTOP = 4096,
-	CHANF_OVERLAP = 8192,
-	CHANF_LOCAL = 16384,
+	CHANF_NOSTOP = 4096,		// only for A_PlaySound. Does not start if channel is playing something.
+	CHANF_OVERLAP = 8192,		// [MK] Does not stop any sounds in the channel and instead plays over them.
+	CHANF_LOCAL = 16384,		// only plays locally for the calling actor
+	CHANF_TRANSIENT = 32768,    // Do not record in savegames - used for sounds that get restarted outside the sound system (e.g. ambients in SW and Blood)
+	CHANF_FORCE = 65536,		// Start, even if sound is paused.
+	CHANF_SINGULAR = 0x20000,	// Only start if no sound of this name is already playing.
 
 
 	CHANF_LOOPING = CHANF_LOOP | CHANF_NOSTOP, // convenience value for replicating the old 'looping' boolean.
-
 };
 
 // sound attenuation values
@@ -141,6 +143,15 @@ enum EPrintLevel
 	PRINT_TYPES = 1023,		// Bitmask.
 	PRINT_NONOTIFY = 1024,	// Flag - do not add to notify buffer
 	PRINT_NOLOG = 2048,		// Flag - do not print to log file
+};
+
+enum EDebugLevel
+{
+	DMSG_OFF,		// no developer messages.
+	DMSG_ERROR,		// general notification messages
+	DMSG_WARNING,	// warnings
+	DMSG_NOTIFY,	// general notification messages
+	DMSG_SPAMMY,	// for those who want to see everything, regardless of its usefulness.
 };
 
 enum EConsoleState
@@ -657,6 +668,7 @@ struct Font native
 	native BrokenLines BreakLines(String text, int maxlen);
 	native int GetGlyphHeight(int code);
 	native int GetDefaultKerning();
+	native TextureID, int GetChar(int c);
 }
 
 struct Console native
@@ -664,6 +676,7 @@ struct Console native
 	native static void HideConsole();
 	native static vararg void Printf(string fmt, ...);
 	native static vararg void PrintfEx(int printlevel, string fmt, ...);
+	native static vararg void DebugPrintf(int debuglevel, string fmt, ...);
 }
 
 struct CVar native
@@ -678,6 +691,7 @@ struct CVar native
 	};
 
 	native static CVar FindCVar(Name name);
+	native static bool SaveConfig();
 	bool GetBool() { return GetInt(); }
 	native int GetInt();
 	native double GetFloat();
@@ -749,6 +763,8 @@ class Object native
 	private native static Class<Object> BuiltinNameToClass(Name nm, Class<Object> filter);
 	private native static Object BuiltinClassCast(Object inptr, Class<Object> test);
 	private native static Function<void> BuiltinFunctionPtrCast(Function<void> inptr, voidptr newtype);
+	private native static void HandleDeprecatedFlags(Object obj, bool set, int index);
+	private native static bool CheckDeprecatedFlags(Object obj, int index);
 	
 	native static uint MSTime();
 	native static double MSTimeF();
@@ -772,7 +788,9 @@ class Object native
 	//
 	// Intrinsic random number generation functions. Note that the square
 	// bracket syntax for specifying an RNG ID is only available for these
-	// functions.
+	// functions. If the function is prefixed with a C, this is a client-side RNG
+	// call that isn't backed up while predicting and has a unique name space from
+	// regular RNG calls. This should be used for things like HUD elements.
 	// clearscope void SetRandomSeed[Name rngId = 'None'](int seed); // Set the seed for the given RNG.
 	// clearscope int Random[Name rngId = 'None'](int min, int max); // Use the given RNG to generate a random integer number in the range (min, max) inclusive.
 	// clearscope int Random2[Name rngId = 'None'](int mask); // Use the given RNG to generate a random integer number, and do a "union" (bitwise AND, AKA &) operation with the bits in the mask integer.

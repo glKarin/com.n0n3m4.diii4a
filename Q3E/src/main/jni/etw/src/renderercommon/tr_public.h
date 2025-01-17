@@ -244,7 +244,6 @@ typedef struct
 	/// avi output stuff
 	qboolean (*CL_VideoRecording)(void);
 	void (*CL_WriteAVIVideoFrame)(const byte *buffer, int size);
-	void (*CL_SetScaling)(float scale);
 
 #ifdef FEATURE_PNG
 	int (*zlib_compress)(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen);
@@ -260,7 +259,7 @@ typedef struct
 	void (*IN_Shutdown)(void);
 	void (*IN_Restart)(void);
 
-	void (*GLimp_Init)(glconfig_t *glConfig, windowContext_t *context);
+	void (*GLimp_Init)(glconfig_t *glConfig, const char *glConfigString);
 	void (*GLimp_Shutdown)(void);
 	void (*GLimp_SwapFrame)(void);
 	void (*GLimp_SetGamma)(unsigned char red[256], unsigned char green[256], unsigned char blue[256]);

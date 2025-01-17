@@ -29,6 +29,8 @@
 #ifndef INCLUDE_G_MDX_H
 #define INCLUDE_G_MDX_H
 
+#include "../qcommon/q_shared.h"
+
 //TODO: enable this later on when fixed (&& figured out how the fuck it works)
 /*
 #ifdef ETLEGACY_DEBUG

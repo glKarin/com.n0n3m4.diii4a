@@ -139,20 +139,35 @@ unsigned int FHardwareTexture::CreateTexture(unsigned char * buffer, int w, int 
 	{
 		if (glTextureBytes < 4) glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		static const int ITypes[] = { GL_R8, GL_RG8, GL_RGB8, GL_RGBA8 };
+#ifdef _GLES //karin: internal format must same as data format on OpenGLES
+		static const int STypes[] = { GL_RED, GL_RG, GL_RGB, GL_RGBA };
+#else
 		static const int STypes[] = { GL_RED, GL_RG, GL_BGR, GL_BGRA };
+#endif
 
 		texformat = ITypes[glTextureBytes - 1];
 		sourcetype = STypes[glTextureBytes - 1];
 	}
 	else
 	{
+#ifdef _GLES //karin: internal format must same as data format on OpenGLES
+		sourcetype = GL_RGBA;
+#else
 		sourcetype = GL_BGRA;
+#endif
 	}
 
 	if (!firstCall && glBufferID > 0)
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, rw, rh, sourcetype, GL_UNSIGNED_BYTE, buffer);
 	else
 		glTexImage2D(GL_TEXTURE_2D, 0, texformat, rw, rh, 0, sourcetype, GL_UNSIGNED_BYTE, buffer);
+#ifdef _GLES //karin: swap R and B on OpenGLES
+	if(sourcetype == GL_RGB || sourcetype == GL_RGBA)
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+	}
+#endif
 
 	if (deletebuffer && buffer) free(buffer);
 	else if (glBufferID)

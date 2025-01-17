@@ -267,7 +267,7 @@ FLARE BACK END
 ===============================================================================
 */
 
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support read depth buffer on GLES 1.1
 /*
 ==================
 RB_TestFlare
@@ -457,7 +457,7 @@ extend past the portal edge will be overwritten.
 ==================
 */
 void RB_RenderFlares (void) {
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support read depth buffer on GLES 1.1
 	flare_t		*f;
 	flare_t		**prev;
 	qboolean	draw;

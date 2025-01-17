@@ -282,8 +282,13 @@ void idAASBuild::GravSubdivLeafNode(idBrushBSPNode *node)
 		return;
 	}
 
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_ALLOC(int, splitterOrder, (planeList.Num() * sizeof(int)));
+    _DROID_ALLOC(int, bestNumSplits, (planeList.Num() * sizeof(int)));
+#else
 	splitterOrder = (int *) _alloca(planeList.Num() * sizeof(int));
 	bestNumSplits = (int *) _alloca(planeList.Num() * sizeof(int));
+#endif
 	numSplitters = 0;
 
 	// test all possible seperators and sort them from best to worst
@@ -328,6 +333,10 @@ void idAASBuild::GravSubdivLeafNode(idBrushBSPNode *node)
 	}
 
 	if (i >= numSplitters) {
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+        _DROID_FREE(splitterOrder);
+        _DROID_FREE(bestNumSplits);
+#endif
 		return;
 	}
 
@@ -336,6 +345,10 @@ void idAASBuild::GravSubdivLeafNode(idBrushBSPNode *node)
 	// test children for further splits
 	GravSubdivLeafNode(node->GetChild(0));
 	GravSubdivLeafNode(node->GetChild(1));
+#if 0 // def _DYNAMIC_ALLOC_STACK_OR_HEAPxxx
+    _DROID_FREE(splitterOrder);
+    _DROID_FREE(bestNumSplits);
+#endif
 }
 
 /*

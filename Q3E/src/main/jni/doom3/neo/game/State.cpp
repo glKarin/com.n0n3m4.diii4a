@@ -352,7 +352,11 @@ stateResult_t rvStateThread::Execute ( void ) {
 			fileSystem->CloseFile( file );	
 		}
 
+#if 1
+		gameLocal.Warning ( "rvStateThread: run away state loop '%s'", name.c_str() );
+#else
 		gameLocal.Error ( "rvStateThread: run away state loop '%s'", name.c_str() );
+#endif
 	}
 
 	insertAfter  = NULL;

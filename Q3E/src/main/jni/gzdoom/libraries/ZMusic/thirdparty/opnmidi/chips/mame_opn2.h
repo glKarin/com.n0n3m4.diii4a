@@ -1,7 +1,7 @@
 /*
  * Interfaces over Yamaha OPN2 (YM2612) chip emulators
  *
- * Copyright (C) 2017-2018 Vitaly Novichkov (Wohlstand)
+ * Copyright (c) 2017-2022 Vitaly Novichkov (Wohlstand)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@ class MameOPN2 final : public OPNChipBaseT<MameOPN2>
 {
     void *chip;
 public:
-    MameOPN2();
+    explicit MameOPN2(OPNFamily f);
     ~MameOPN2() override;
 
     bool canRunAtPcmRate() const override { return true; }

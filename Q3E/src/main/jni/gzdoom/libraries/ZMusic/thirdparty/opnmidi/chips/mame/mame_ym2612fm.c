@@ -133,6 +133,9 @@
 /*    YM2610B : PSG:3ch FM:6ch ADPCM(18.5KHz):6ch DeltaT ADPCM:1ch      */
 /************************************************************************/
 
+#define RSM_ENABLE 0
+#define RSM_FRAC 10
+
 #include <stdlib.h>
 #include <string.h>	/* for memset */
 #include <stddef.h>	/* for NULL */
@@ -146,9 +149,6 @@ static stream_sample_t *DUMMYBUF = NULL;
 /* shared function building option */
 #define BUILD_OPN (BUILD_YM2203||BUILD_YM2608||BUILD_YM2610||BUILD_YM2610B||BUILD_YM2612||BUILD_YM3438)
 #define BUILD_OPN_PRESCALER (BUILD_YM2203||BUILD_YM2608)
-
-#define RSM_ENABLE 0
-#define RSM_FRAC 10
 
 /* globals */
 #define TYPE_SSG    0x01    /* SSG support          */
@@ -2043,7 +2043,7 @@ static void OPNWriteReg(FM_OPN *OPN, int r, int v)
 		case 1:		/* 0xa4-0xa6 : FNUM2,BLK */
 			OPN->ST.fn_h = v&0x3f;
 #ifdef USE_VGM_INIT_SWITCH
-			if (IsVGMInit)	// workaround for stupid Kega Fusion init block
+			if (IsVGMInit)	/* workaround for stupid Kega Fusion init block */
 				CH->block_fnum = (OPN->ST.fn_h << 8) | (CH->block_fnum & 0xFF);
 #endif
 			break;

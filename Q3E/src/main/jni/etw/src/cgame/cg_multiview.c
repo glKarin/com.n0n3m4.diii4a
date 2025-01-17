@@ -505,6 +505,7 @@ void CG_mvTransitionPlayerState(playerState_t *ps)
 	ps->clientNum                         = pID;
 	ps->weapon                            = cent->currentState.weapon;
 	cg.weaponSelect                       = ps->weapon;
+	cg.weaponSelectDuringFiring           = (ps->weaponstate == WEAPON_FIRING) ? cg.time : 0;
 
 	cent->currentState.eType       = ET_PLAYER;
 	ps->eFlags                     = cent->currentState.eFlags;
@@ -574,6 +575,7 @@ void CG_mvDraw(cg_window_t *sw)
 	float     b_x, b_y, b_w, b_h;
 	float     s     = 1.0f;
 	centity_t *cent = &cg_entities[pID];
+	float     zoomBinoc;
 
 	Com_Memset(&refdef, 0, sizeof(refdef_t));
 	Com_Memcpy(refdef.areamask, cg.snap->areamask, sizeof(refdef.areamask));
@@ -675,9 +677,9 @@ void CG_mvDraw(cg_window_t *sw)
 	refdef.y      = rd_y;
 	refdef.width  = rd_w;
 	refdef.height = rd_h;
-	float zoomBinoc = Com_Clamp(GetWeaponTableData(WP_BINOCULARS)->zoomIn,
-	                            GetWeaponTableData(WP_BINOCULARS)->zoomOut,
-	                            cg_zoomDefaultSniper.value);
+	zoomBinoc     = Com_Clamp(GetWeaponTableData(WP_BINOCULARS)->zoomIn,
+	                          GetWeaponTableData(WP_BINOCULARS)->zoomOut,
+	                          cg_zoomDefaultSniper.value);
 
 	refdef.fov_x = (cgs.clientinfo[pID].health > 0 &&
 					(/*cent->currentState.weapon == WP_SNIPERRIFLE ||*/   // WARNING: WARNOUT: this needs updating?
@@ -707,7 +709,7 @@ void CG_mvDraw(cg_window_t *sw)
 
 	trap_R_ClearScene();
 
-	if (sw == cg.mvCurrentMainview && cg.renderingThirdPerson)
+	if (sw == cg.mvCurrentMainview && cg_thirdPerson.integer)
 	{
 		cg.renderingThirdPerson = qtrue;
 		//VectorCopy(cent->lerpOrigin, refdef.vieworg);
@@ -728,7 +730,7 @@ void CG_mvDraw(cg_window_t *sw)
 		CG_AddPacketEntities();
 		CG_AddMarks();
 		CG_AddParticles();
-		CG_AddLocalEntities();
+		CG_AddLocalEntities(qfalse);
 
 		CG_AddSmokeSprites();
 		CG_AddAtmosphericEffects();
@@ -1181,36 +1183,28 @@ void CG_mv_KeyHandling(int key, qboolean down)
 	switch (key)
 	{
 	case K_TAB:
-		if (down)
-		{
-			CG_ScoresDown_f();
-		}
-		else
-		{
-			CG_ScoresUp_f();
-		}
-		return;
+        down ? CG_ScoresDown_f() : CG_ScoresUp_f();
+        break;
 	// Help info
 	case K_BACKSPACE:
 		if (!down)
 		{
-			// Dushan - fixed comiler warning
 			CG_toggleSpecHelp_f();
 		}
-		return;
+		break;
 	// Screenshot keys
 	case K_F11:
 		if (!down)
 		{
 			trap_SendConsoleCommand("screenshot");
 		}
-		return;
+		break;
 	case K_F12:
 		if (!down)
 		{
 			CG_autoScreenShot_f();
 		}
-		return;
+		break;
 	// Window controls
 	//case K_SHIFT:
 	case K_LCTRL:
@@ -1220,16 +1214,16 @@ void CG_mv_KeyHandling(int key, qboolean down)
 	//case K_CTRL:
 	case K_MOUSE4:
 		cgs.fResize = down;
-		return;
+		break;
 	case K_MOUSE1:
 		cgs.fSelect = down;
-		return;
+		break;
 	case K_MOUSE2:
 		if (!down)
 		{
 			CG_mvSwapViews_f(); // Swap the window with the main view
 		}
-		return;
+		break;
 	case K_INS:
 	case K_KP_PGUP:
 	case K_MWHEELDOWN:
@@ -1237,7 +1231,7 @@ void CG_mv_KeyHandling(int key, qboolean down)
 		{
 			CG_mvShowView_f();  // Make a window for the client
 		}
-		return;
+		break;
 	case K_DEL:
 	case K_KP_PGDN:
 	case K_MWHEELUP:
@@ -1245,31 +1239,31 @@ void CG_mv_KeyHandling(int key, qboolean down)
 		{
 			CG_mvHideView_f();  // Delete the window for the client
 		}
-		return;
+		break;
 	case K_MOUSE3:
 		if (!down)
 		{
 			CG_mvToggleView_f();    // Toggle a window for the client
 		}
-		return;
+		break;
 	case 'm':
 	case 'M':
 		if (!down)
 		{
 			CG_mvToggleAll_f();
 		}
-		return;
+		break;
 	case K_ESCAPE: // K_ESCAPE only fires on Key Up
 	case K_ESCAPE | K_CHAR_FLAG:
 		CG_mvToggleAll_f();
-		return;
+		break;
 	// Third-person controls
 	case K_ENTER:
 		if (!down)
 		{
 			trap_Cvar_Set("cg_thirdperson", ((cg_thirdPerson.integer == 0) ? "1" : "0"));
 		}
-		return;
+		break;
 	case K_UPARROW:
 		if (milli > cgs.thirdpersonUpdate)
 		{
@@ -1279,7 +1273,7 @@ void CG_mv_KeyHandling(int key, qboolean down)
 			range                -= ((range >= 4 * DEMO_RANGEDELTA) ? DEMO_RANGEDELTA : (range - DEMO_RANGEDELTA));
 			trap_Cvar_Set("cg_thirdPersonRange", va("%f", range));
 		}
-		return;
+		break;
 	case K_DOWNARROW:
 		if (milli > cgs.thirdpersonUpdate)
 		{
@@ -1289,7 +1283,7 @@ void CG_mv_KeyHandling(int key, qboolean down)
 			range                += ((range >= 120 * DEMO_RANGEDELTA) ? 0 : DEMO_RANGEDELTA);
 			trap_Cvar_Set("cg_thirdPersonRange", va("%f", range));
 		}
-		return;
+		break;
 	case K_RIGHTARROW:
 		if (milli > cgs.thirdpersonUpdate)
 		{
@@ -1302,7 +1296,7 @@ void CG_mv_KeyHandling(int key, qboolean down)
 			}
 			trap_Cvar_Set("cg_thirdPersonAngle", va("%f", angle));
 		}
-		return;
+		break;
 	case K_LEFTARROW:
 		if (milli > cgs.thirdpersonUpdate)
 		{
@@ -1315,7 +1309,7 @@ void CG_mv_KeyHandling(int key, qboolean down)
 			}
 			trap_Cvar_Set("cg_thirdPersonAngle", va("%f", angle));
 		}
-		return;
+		break;
 	}
 }
 

@@ -128,6 +128,7 @@ float CG_ClientHitboxMaxZ(entityState_t *hitEnt, float def)
 {
 	centity_t *cent;
 	vec3_t    origin;
+	float     maxs;
 
 	if (!hitEnt)
 	{
@@ -153,16 +154,21 @@ float CG_ClientHitboxMaxZ(entityState_t *hitEnt, float def)
 		VectorMA(origin, 6.5f, cent->pe.headRefEnt.axis[2], origin); // up
 		VectorMA(origin, 0.5f, cent->pe.headRefEnt.axis[0], origin); // forward
 
-		float maxs = origin[2] - cent->lerpOrigin[2] - 6;
+		maxs = origin[2] - cent->lerpOrigin[2] - 6;
 		return (maxs < PRONE_BODYHEIGHT) ? PRONE_BODYHEIGHT : maxs;
 	}
-	else if (hitEnt->eFlags & EF_CROUCHING)
+	else if (
+		// crouching on the ground
+		(hitEnt->eFlags & EF_CROUCHING && hitEnt->groundEntityNum != ENTITYNUM_NONE)
+		// or is swimming
+		|| (cgs.clientinfo[hitEnt->clientNum].character->animModelInfo->animations[hitEnt->legsAnim & ~ANIM_TOGGLEBIT]->movetype & ((1 << ANIM_MT_SWIM) | (1 << ANIM_MT_SWIMBK)))
+		)
 	{
 		VectorCopy(cent->pe.headRefEnt.origin, origin);
 		VectorMA(origin, 6.5f, cent->pe.headRefEnt.axis[2], origin); // up
 		VectorMA(origin, 0.5f, cent->pe.headRefEnt.axis[0], origin); // forward
 
-		float maxs = origin[2] - cent->lerpOrigin[2] - 6;
+		maxs = origin[2] - cent->lerpOrigin[2] - 6;
 		return (maxs < CROUCH_IDLE_BODYHEIGHT) ? CROUCH_IDLE_BODYHEIGHT : maxs;
 	}
 	else
@@ -215,7 +221,10 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins, const v
 		}
 		else
 		{
-			if (ent->eFlags & EF_FAKEBMODEL)
+			// dmgFlags are set to r.contents if the fakebrush is playerclip,
+			// so only grab mins/maxs if we're doing a player trace (capsule), or if dmgFlags are not set (regular CONTENTS_SOLID),
+			// otherwise stuff like bullets and flame particles appear to collide with playerclip fakebrushes
+			if (ent->eFlags & EF_FAKEBMODEL && (capsule || !ent->dmgFlags))
 			{
 				// repurposed origin2 and angles2 to receive mins and maxs of func_fakebrush
 				VectorCopy(ent->origin2, bmins);
@@ -594,6 +603,8 @@ static void CG_InterpolatePlayerState(qboolean grabAngles)
 		out->velocity[i] = prev->ps.velocity[i] +
 		                   f * (next->ps.velocity[i] - prev->ps.velocity[i]);
 	}
+
+	out->leanf = prev->ps.leanf + f * (next->ps.leanf - prev->ps.leanf);
 }
 
 /**
@@ -929,7 +940,7 @@ int CG_PredictionOk(playerState_t *ps1, playerState_t *ps2)
  * appear to be set for prediction runs where they previously weren't
  * is a Bad Thing. This is my bugfix for #166.
  */
-pmoveExt_t oldpmext[CMD_BACKUP];
+pmoveExt_t oldpmext[CMD_BACKUP_ETL];
 
 const char *predictionStrings[] =
 {
@@ -1145,8 +1156,6 @@ void CG_PredictPlayerState(void)
 		cg.predictedPlayerState = cg.nextSnap->ps;
 		cg.physicsTime          = cg.nextSnap->serverTime;
 	}
-	else
-	{
 #endif
 	cg.predictedPlayerState = cg.snap->ps;
 	cg.physicsTime          = cg.snap->serverTime;
@@ -1319,13 +1328,7 @@ void CG_PredictPlayerState(void)
 				vec3_t adjusted;
 				float  len;
 
-				CG_AdjustPositionForMover(cg.predictedPlayerState.origin, cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, deltaAngles);
-				// add the deltaAngles (fixes jittery view while riding trains)
-				// only do this if player is prone or using set mortar
-				if ((cg.predictedPlayerState.eFlags & EF_PRONE) || CHECKBITWISE(GetWeaponTableData(cg.weaponSelect)->type, WEAPON_TYPE_MORTAR | WEAPON_TYPE_SET))
-				{
-					cg.predictedPlayerState.delta_angles[YAW] += ANGLE2SHORT(deltaAngles[YAW]);
-				}
+				CG_AdjustPositionForMover(cg.predictedPlayerState.origin, cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, NULL);
 
 				if (cg_showmiss.integer)
 				{
@@ -1512,6 +1515,13 @@ void CG_PredictPlayerState(void)
 	{
 		// adjust for the movement of the groundentity
 		CG_AdjustPositionForMover(cg.predictedPlayerState.origin, cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.time, cg.predictedPlayerState.origin, deltaAngles);
+
+		if (deltaAngles[YAW])
+		{
+			cg.predictedPlayerState.delta_angles[YAW] += ANGLE2SHORT(deltaAngles[YAW]);
+
+			PM_UpdateViewAngles(&cg.predictedPlayerState, &cg.pmext, &cg_pmove.cmd, cg_pmove.trace, cg_pmove.tracemask);
+		}
 	}
 
 	// fire events and other transition triggered things

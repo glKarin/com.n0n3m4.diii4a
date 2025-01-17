@@ -1063,6 +1063,7 @@ set (PCH_SOURCES
 	common/textures/multipatchtexturebuilder.cpp
 	common/textures/skyboxtexture.cpp
 	common/textures/animtexture.cpp
+	common/textures/firetexture.cpp
 	common/textures/v_collection.cpp
 	common/textures/formats/automaptexture.cpp
 	common/textures/formats/brightmaptexture.cpp
@@ -1410,6 +1411,13 @@ else()
 endif()
 
 if( MSVC )
+	option ( CONSOLE_MODE "Compile as a console application" OFF )
+	if ( CONSOLE_MODE )
+		set ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:CONSOLE /ENTRY:wmainCRTStartup" )
+	else()
+		set ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:wWinMainCRTStartup" )
+	endif()
+
 	option( ZDOOM_GENERATE_MAPFILE "Generate .map file for debugging." OFF )
 	set( LINKERSTUFF "/MANIFEST:NO" )
 

@@ -45,7 +45,7 @@ class HereticStatusBar : BaseStatusBar
 		// wiggle the chain if it moves
 		if (Level.time & 1)
 		{
-			wiggle = (mHealthInterpolator.GetValue() != CPlayer.health) && Random[ChainWiggle](0, 1);
+			wiggle = (mHealthInterpolator.GetValue() != CPlayer.health) && CRandom[ChainWiggle](0, 1);
 		}
 	}
 
@@ -148,7 +148,7 @@ class HereticStatusBar : BaseStatusBar
 		DrawString(mBigFont, FormatNumber(mHealthInterpolator.GetValue()), (41, -21), DI_TEXT_ALIGN_RIGHT);
 
 		//armor
-		let armor = CPlayer.mo.FindInventory("BasicArmor");
+		let armor = CPlayer.mo.FindInventory("BasicArmor", true);
 		if (armor != null && armor.Amount > 0)
 		{
 			DrawInventoryIcon(armor, (58, -24));

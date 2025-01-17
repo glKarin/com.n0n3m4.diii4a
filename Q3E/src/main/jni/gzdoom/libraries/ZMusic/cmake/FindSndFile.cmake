@@ -13,17 +13,30 @@
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
-find_path(SNDFILE_INCLUDE_DIR NAMES sndfile.h)
+if(NOT SNDFILE_INCLUDE_DIR)
+	find_path(SNDFILE_INCLUDE_DIR NAMES sndfile.h)
+endif()
 
-find_library(SNDFILE_LIBRARY NAMES sndfile sndfile-1)
+if(NOT SNDFILE_LIBRARY)
+	find_library(SNDFILE_LIBRARY NAMES sndfile sndfile-1)
+endif()
 
-set(SNDFILE_INCLUDE_DIRS ${SNDFILE_INCLUDE_DIR})
-set(SNDFILE_LIBRARIES ${SNDFILE_LIBRARY})
-
-INCLUDE(FindPackageHandleStandardArgs)
+include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set SNDFILE_FOUND to TRUE if
 # all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(SndFile DEFAULT_MSG SNDFILE_LIBRARY SNDFILE_INCLUDE_DIR)
+find_package_handle_standard_args(SndFile DEFAULT_MSG SNDFILE_LIBRARY SNDFILE_INCLUDE_DIR)
 
-# show the SNDFILE_INCLUDE_DIRS and SNDFILE_LIBRARIES variables only in the advanced view
-mark_as_advanced(SNDFILE_INCLUDE_DIRS SNDFILE_LIBRARIES)
+if(SNDFILE_FOUND)
+	add_library(sndfile UNKNOWN IMPORTED GLOBAL)
+	set_target_properties(sndfile
+	PROPERTIES
+		IMPORTED_LOCATION "${SNDFILE_LIBRARY}"
+		INTERFACE_INCLUDE_DIRECTORIES "${SNDFILE_INCLUDE_DIR}"
+	)
+
+	add_library(SndFile::sndfile ALIAS sndfile)
+
+	# Legacy variables
+	set(SNDFILE_INCLUDE_DIRS "${SNDFILE_INCLUDE_DIR}")
+	set(SNDFILE_LIBRARIES "${SNDFILE_LIBRARY}")
+endif()

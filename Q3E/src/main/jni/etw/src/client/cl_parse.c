@@ -581,6 +581,8 @@ void CL_ParseSnapshot(msg_t *msg)
 	}
 
 	cl.newSnapshots = qtrue;
+
+	CL_SetSnapshotLerp();
 }
 
 //=====================================================================
@@ -680,12 +682,10 @@ void CL_SystemInfoChanged(void)
 		else
 		{
 			// If this cvar may not be modified by a server discard the value.
-			// "shared" is for ETJump compatibility, information shared between server & client
-			// TODO: see why CVAR_SERVER_CREATED flag gets dropped here
 			if (!(cvar_flags & (CVAR_SYSTEMINFO | CVAR_SERVER_CREATED | CVAR_USER_CREATED)))
 			{
 				if (Q_stricmp(key, "g_synchronousClients") && Q_stricmp(key, "pmove_fixed") &&
-				    Q_stricmp(key, "pmove_msec") && Q_stricmp(key, "shared"))
+				    Q_stricmp(key, "pmove_msec"))
 				{
 					Com_DPrintf(S_COLOR_YELLOW "WARNING: server is not allowed to set %s=%s\n", key, value);
 					continue;

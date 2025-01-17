@@ -67,7 +67,7 @@ bool AlsaSequencer::Open() {
 	if(error) {
 		return false;
 	}
-	error = snd_seq_set_client_name(handle, "GZDoom");
+	error = snd_seq_set_client_name(handle, "ZMusic Program");
 	if(error) {
 		snd_seq_close(handle);
 		handle = nullptr;
@@ -131,11 +131,7 @@ int AlsaSequencer::EnumerateDevices() {
 	while (snd_seq_query_next_client(handle, cinfo) >= 0) {
 		snd_seq_port_info_set_client(pinfo, snd_seq_client_info_get_client(cinfo));
 
-		// Ignore 'ALSA oddities' that we don't want to use
 		int clientID = snd_seq_client_info_get_client(cinfo);
-		if(clientID < 16) {
-			continue;
-		}
 
 		snd_seq_port_info_set_port(pinfo, -1);
 		// enumerate ports

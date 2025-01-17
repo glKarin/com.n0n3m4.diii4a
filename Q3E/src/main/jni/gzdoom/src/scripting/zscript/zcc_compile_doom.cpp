@@ -161,17 +161,14 @@ bool ZCCDoomCompiler::CompileProperties(PClass *type, TArray<ZCC_Property *> &Pr
 
 bool ZCCDoomCompiler::CompileFlagDefs(PClass *type, TArray<ZCC_FlagDef *> &Properties, FName prefix)
 {
-	if (!type->IsDescendantOf(RUNTIME_CLASS(AActor)))
-	{
-		Error(Properties[0], "Flags can only be defined for actors");
-		return false;
-	}
+	//[RL0] allow property-less flagdefs for non-actors
+	bool isActor = type->IsDescendantOf(RUNTIME_CLASS(AActor));
 	for (auto p : Properties)
 	{
 		PField *field;
 		FName referenced = FName(p->RefName);
 
-		if (FName(p->NodeName) == FName("prefix") && fileSystem.GetFileContainer(Lump) == 0)
+		if (isActor && FName(p->NodeName) == FName("prefix") && fileSystem.GetFileContainer(Lump) == 0)
 		{
 			// only for internal definitions: Allow setting a prefix. This is only for compatiblity with the old DECORATE property parser, but not for general use.
 			prefix = referenced;
@@ -192,11 +189,14 @@ bool ZCCDoomCompiler::CompileFlagDefs(PClass *type, TArray<ZCC_FlagDef *> &Prope
 			}
 			else field = nullptr;
 
+			FName name = FName(p->NodeName);
 
+			if(isActor)
+			{
 			FString qualifiedname;
 			// Store the full qualified name and prepend some 'garbage' to the name so that no conflicts with other symbol types can happen.
 			// All these will be removed from the symbol table after the compiler finishes to free up the allocated space.
-			FName name = FName(p->NodeName);
+				
 			for (int i = 0; i < 2; i++)
 			{
 				if (i == 0) qualifiedname.Format("@flagdef@%s", name.GetChars());
@@ -210,6 +210,7 @@ bool ZCCDoomCompiler::CompileFlagDefs(PClass *type, TArray<ZCC_FlagDef *> &Prope
 				{
 					Error(p, "Unable to add flag definition %s to class %s", FName(p->NodeName).GetChars(), type->TypeName.GetChars());
 				}
+			}
 			}
 
 			if (field != nullptr)
@@ -724,8 +725,15 @@ void ZCCDoomCompiler::ProcessDefaultProperty(PClassActor *cls, ZCC_PropertyStmt 
 	}
 	else if (namenode->SiblingNext->SiblingNext == namenode)
 	{
+		FName name(namenode->Id);
+
+		if(name == NAME_self)
+		{
+			name = cls->TypeName;
+		}
+
 		// a two-name property
-		propname << FName(namenode->Id).GetChars() << "." << FName(static_cast<ZCC_Identifier *>(namenode->SiblingNext)->Id).GetChars();
+		propname << name.GetChars() << "." << FName(static_cast<ZCC_Identifier *>(namenode->SiblingNext)->Id).GetChars();
 	}
 	else
 	{
@@ -784,6 +792,13 @@ void ZCCDoomCompiler::ProcessDefaultFlag(PClassActor *cls, ZCC_FlagStmt *flg)
 	else if (namenode->SiblingNext->SiblingNext == namenode)
 	{
 		// a two-name flag
+
+		if(namenode->Id == NAME_self)
+		{
+			n1 = cls->TypeName.GetChars();
+		}
+
+
 		n2 = FName(static_cast<ZCC_Identifier *>(namenode->SiblingNext)->Id).GetChars();
 	}
 	else
@@ -795,13 +810,14 @@ void ZCCDoomCompiler::ProcessDefaultFlag(PClassActor *cls, ZCC_FlagStmt *flg)
 	auto fd = FindFlag(cls, n1, n2, true);
 	if (fd != nullptr)
 	{
-		if (fd->varflags & VARF_Deprecated)
+		if ((fd->varflags & VARF_Deprecated) && fd->deprecationVersion <= this->mVersion)
 		{
-			Warn(flg, "Deprecated flag '%s%s%s' used", n1, n2 ? "." : "", n2 ? n2 : "");
+			Warn(flg, "Deprecated flag '%s%s%s' used, deprecated since %d.%d.%d", n1, n2 ? "." : "", n2 ? n2 : "", 
+				fd->deprecationVersion.major, fd->deprecationVersion.minor, fd->deprecationVersion.revision);
 		}
 		if (fd->structoffset == -1)
 		{
-			HandleDeprecatedFlags((AActor*)cls->Defaults, cls, flg->set, fd->flagbit);
+			HandleDeprecatedFlags((AActor*)cls->Defaults, flg->set, fd->flagbit);
 		}
 		else
 		{

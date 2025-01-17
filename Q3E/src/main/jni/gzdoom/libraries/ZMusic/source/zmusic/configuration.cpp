@@ -37,16 +37,21 @@
 #include <mmsystem.h>
 #endif
 #include <algorithm>
-#include "timidity/timidity.h"
-#include "timiditypp/timidity.h"
-#include "oplsynth/oplio.h"
 #include "critsec.h"
-#include "../../thirdparty/dumb/include/dumb.h"
+#include "dumb.h"
 
 #include "zmusic_internal.h"
 #include "musinfo.h"
 #include "midiconfig.h"
 #include "mididevices/music_alsa_state.h"
+
+#ifdef HAVE_TIMIDITY
+#include "timidity/timidity.h"
+#include "timiditypp/timidity.h"
+#endif
+#ifdef HAVE_OPL
+#include "oplsynth/oplio.h"
+#endif
 
 struct Dummy
 {
@@ -192,9 +197,9 @@ struct MidiDeviceList
 #ifdef HAVE_WILDMIDI
 		devices.push_back({ strdup("WildMidi"), -6, MIDIDEV_SWSYNTH });
 #endif
-#ifdef HAVE_FLUIDSYNTH
+		// this will always exist.
 		devices.push_back({ strdup("FluidSynth"), -5, MIDIDEV_SWSYNTH });
-#endif
+
 #ifdef HAVE_GUS
 		devices.push_back({ strdup("GUS Emulation"), -4, MIDIDEV_SWSYNTH });
 #endif
@@ -498,7 +503,7 @@ DLL_EXPORT zmusic_bool ChangeMusicSettingInt(EIntConfigKey key, MusInfo *currSon
 		
 		case zmusic_gus_memsize:
 			ChangeAndReturn(gusConfig.gus_memsize, value, pRealValue);
-			return devType() == MDEV_GUS && gusConfig.gus_dmxgus;
+			return devType() == MDEV_GUS;
 #endif
 #ifdef HAVE_TIMIDITY
 		case zmusic_timidity_modulation_wheel:
@@ -513,15 +518,15 @@ DLL_EXPORT zmusic_bool ChangeMusicSettingInt(EIntConfigKey key, MusInfo *currSon
 
 		case zmusic_timidity_reverb:
 			if (value < 0 || value > 4) value = 0;
-			else TimidityPlus_SetReverb();
 			local_timidity_reverb = value;
+			TimidityPlus_SetReverb();
 			if (pRealValue) *pRealValue = value;
 			return false;
 
 		case zmusic_timidity_reverb_level:
 			if (value < 0 || value > 127) value = 0;
-			else TimidityPlus_SetReverb();
 			local_timidity_reverb_level = value;
+			TimidityPlus_SetReverb();
 			if (pRealValue) *pRealValue = value;
 			return false;
 
@@ -647,6 +652,10 @@ DLL_EXPORT zmusic_bool ChangeMusicSettingInt(EIntConfigKey key, MusInfo *currSon
 			miscConfig.snd_outputrate = value;
 			return false;
 
+		case zmusic_mod_preferredplayer:
+			dumbConfig.mod_preferred_player = value;
+			return false;
+
 	}
 	return false;
 }
@@ -673,8 +682,8 @@ DLL_EXPORT zmusic_bool ChangeMusicSettingFloat(EFloatConfigKey key, MusInfo* cur
 		case zmusic_fluid_reverb_roomsize:
 			if (value < 0)
 				value = 0;
-			else if (value > 1.2f)
-				value = 1.2f;
+			else if (value > 1.0f)
+				value = 1.0f;
 
 			if (currSong != NULL)
 				currSong->ChangeSettingNum("fluidsynth.z.reverb", value);
@@ -731,8 +740,8 @@ DLL_EXPORT zmusic_bool ChangeMusicSettingFloat(EFloatConfigKey key, MusInfo* cur
 			return false;
 
 		case zmusic_fluid_chorus_speed:
-			if (value < 0.29f)
-				value = 0.29f;
+			if (value < 0.1f)
+				value = 0.1f;
 			else if (value > 5)
 				value = 5;
 
@@ -746,8 +755,8 @@ DLL_EXPORT zmusic_bool ChangeMusicSettingFloat(EFloatConfigKey key, MusInfo* cur
 		case zmusic_fluid_chorus_depth:
 			if (value < 0)
 				value = 0;
-			else if (value > 21)
-				value = 21;
+			else if (value > 256)
+				value = 256;
 
 			if (currSong != NULL)
 				currSong->ChangeSettingNum("fluidsynth.z.chorus", value);
@@ -851,7 +860,7 @@ DLL_EXPORT zmusic_bool ChangeMusicSettingString(EStringConfigKey key, MusInfo* c
 #ifdef HAVE_WILDMIDI
 		case zmusic_wildmidi_config:
 			wildMidiConfig.config = value;
-			return devType() == MDEV_TIMIDITY;
+			return devType() == MDEV_WILDMIDI;
 #endif
 	}
 	return false;
@@ -937,6 +946,7 @@ static ZMusicConfigurationSetting config[] = {
 	{"zmusic_mod_autochip_size_force", zmusic_mod_autochip_size_force, ZMUSIC_VAR_INT, 100},
 	{"zmusic_mod_autochip_size_scan", zmusic_mod_autochip_size_scan, ZMUSIC_VAR_INT, 500},
 	{"zmusic_mod_autochip_scan_threshold", zmusic_mod_autochip_scan_threshold, ZMUSIC_VAR_INT, 12},
+	{"zmusic_mod_preferred_player", zmusic_mod_preferredplayer, ZMUSIC_VAR_INT, 0},
 	{"zmusic_mod_dumb_mastervolume", zmusic_mod_dumb_mastervolume, ZMUSIC_VAR_FLOAT, 1},
 
 	{"zmusic_gme_stereodepth", zmusic_gme_stereodepth, ZMUSIC_VAR_FLOAT, 0},

@@ -577,7 +577,7 @@ static qbool SV_PrepareEntityForSending (prvm_edict_t *ent, entity_state_t *cs, 
 	if (f)
 		cs->effects |= ((unsigned int)f & 0xff) << 24;
 
-	if (PRVM_serveredictfloat(ent, movetype) == MOVETYPE_STEP)
+	if (PRVM_serveredictfloat(ent, movetype) == MOVETYPE_STEP || ((int)PRVM_serveredictfloat(ent, flags) & FL_MONSTER))
 		cs->flags |= RENDER_STEP;
 	if (cs->number != sv.writeentitiestoclient_cliententitynumber && (cs->effects & EF_LOWPRECISION) && cs->origin[0] >= -32768 && cs->origin[1] >= -32768 && cs->origin[2] >= -32768 && cs->origin[0] <= 32767 && cs->origin[1] <= 32767 && cs->origin[2] <= 32767)
 		cs->flags |= RENDER_LOWPRECISION;
@@ -920,7 +920,7 @@ void SV_MarkWriteEntityStateToClient(entity_state_t *s, client_t *client)
 			ed = PRVM_EDICT_NUM(s->number);
 
 			// if not touching a visible leaf
-			if (sv_cullentities_pvs.integer && !r_novis.integer && !r_trippy.integer && sv.writeentitiestoclient_pvsbytes)
+			if (sv_cullentities_pvs.integer && !r_novis.integer && !r_trippy.integer && sv.writeentitiestoclient_pvs)
 			{
 				if (ed->priv.server->pvs_numclusters < 0)
 				{
@@ -1145,7 +1145,9 @@ void SV_WriteClientdataToMessage (client_t *client, prvm_edict_t *ent, sizebuf_t
 	// the runes are in serverflags, pack them into the items value, also pack
 	// in the items2 value for mission pack huds
 	// (used only in the mission packs, which do not use serverflags)
-	items = (int)PRVM_serveredictfloat(ent, items) | ((int)PRVM_serveredictfloat(ent, items2) << 23) | ((int)PRVM_serverglobalfloat(serverflags) << 28);
+	items = (int)PRVM_serveredictfloat(ent, items)
+		| (((int)PRVM_serveredictfloat(ent, items2) & ((1<<9)-1)) << 23)
+		| (((int)PRVM_serverglobalfloat(serverflags) & ((1<<4)-1)) << 28);
 
 	VectorCopy(PRVM_serveredictvector(ent, punchvector), punchvector);
 

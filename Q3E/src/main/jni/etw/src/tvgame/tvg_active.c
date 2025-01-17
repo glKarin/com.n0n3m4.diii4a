@@ -35,18 +35,18 @@
 #include "tvg_local.h"
 
 /**
- * @brief G_SpectatorAttackFollow
+ * @brief TVG_SpectatorAttackFollow
  * @param client
  * @return true if a player was found to follow, otherwise false
  */
-qboolean G_SpectatorAttackFollow(gclient_t *client)
+qboolean TVG_SpectatorAttackFollow(gclient_t *client)
 {
 	trace_t       tr;
 	vec3_t        forward, right, up;
 	vec3_t        start, end;
 	vec3_t        mins, maxs;
-	static vec3_t enlargeMins = { -64.0f, -64.0f, -48.0f };
-	static vec3_t enlargeMaxs = { 64.0f, 64.0f, 0.0f };
+	static vec3_t enlargeMins = { -12.0f, -12.0f, -12.0f };
+	static vec3_t enlargeMaxs = { 12.0f, 12.0f, 0.0f };
 
 	AngleVectors(client->ps.viewangles, forward, right, up);
 	VectorCopy(client->ps.origin, start);
@@ -60,7 +60,7 @@ qboolean G_SpectatorAttackFollow(gclient_t *client)
 	// also put the start-point a bit forward, so we don't start the trace in solid..
 	VectorMA(start, 75.0f, forward, start);
 
-	trap_Trace(&tr, start, mins, maxs, end, client - level.clients, CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE);
+	trap_Trace(&tr, start, mins, maxs, end, ENTITYNUM_NONE, CONTENTS_BODY);
 
 	if (tr.entityNum < MAX_CLIENTS && level.ettvMasterClients[tr.entityNum].valid)
 	{
@@ -120,7 +120,7 @@ void TVG_SpectatorThink(gclient_t *client, usercmd_t *ucmd)
 		pm.pointcontents = trap_PointContents;
 		pm.activateLean  = client->pers.activateLean;
 
-		Pmove(&pm);
+		TVG_Pmove(&pm);
 
 		// Activate - made it a latched event (occurs on keydown only)
 		//if (client->latched_buttons & BUTTON_ACTIVATE)
@@ -142,11 +142,11 @@ void TVG_SpectatorThink(gclient_t *client, usercmd_t *ucmd)
 	    client->sess.spectatorState != SPECTATOR_FOLLOW &&
 	    client->sess.sessionTeam == TEAM_SPECTATOR)        // don't do it if on a team
 	{
-		/*if (G_SpectatorAttackFollow(client))
+		if (TVG_SpectatorAttackFollow(client))
 		{
 			return;
 		}
-		else*/
+		else
 		{
 			// not clicked on a player?.. then follow next,
 			// to prevent constant traces done by server.
@@ -224,6 +224,8 @@ qboolean TVG_ClientInactivityTimer(gclient_t *client)
 	// start countdown
 	if (!client->inactivityWarning)
 	{
+		int secondsLeft;
+
 		if (level.time > client->inactivityTime - inactivity)
 		{
 			client->inactivityWarning     = qtrue;
@@ -231,7 +233,7 @@ qboolean TVG_ClientInactivityTimer(gclient_t *client)
 			client->inactivitySecondsLeft = inactivity;
 		}
 
-		int secondsLeft = (client->inactivityTime + inactivity - level.time) / 1000;
+		secondsLeft = (client->inactivityTime + inactivity - level.time) / 1000;
 
 		// countdown expired..
 		if (secondsLeft <= 0)
@@ -311,6 +313,8 @@ void TVG_ClientThink_real(gclient_t *client)
 		return;
 	}
 
+	TVG_SendMatchInfo(client);
+
 	// check for inactivity timer, but never drop the local client of a non-dedicated server
 	// moved here to allow for spec inactivity checks as well
 	if (!TVG_ClientInactivityTimer(client))
@@ -370,7 +374,7 @@ void TVG_ClientThink(int clientNum)
  */
 void TVG_SpectatorClientEndFrame(gclient_t *client)
 {
-	if (level.intermission)
+	if (level.intermission && client->ps.pm_type != PM_INTERMISSION)
 	{
 		// take out of follow mode if needed
 		if (client->sess.spectatorState == SPECTATOR_FOLLOW)
@@ -379,8 +383,8 @@ void TVG_SpectatorClientEndFrame(gclient_t *client)
 		}
 
 		client->ps.pm_type = PM_INTERMISSION;
-		VectorCopy(level.ettvMasterPs.origin, client->ps.origin);
-		VectorCopy(level.ettvMasterPs.viewangles, client->ps.viewangles);
+		VectorCopy(level.intermission_origin, client->ps.origin);
+		VectorCopy(level.intermission_angle, client->ps.viewangles);
 	}
 
 	// if we are doing a chase cam or a remote view, grab the latest info
@@ -426,7 +430,7 @@ void TVG_ClientEndFrame(gclient_t *client)
 		client->sess.nextCommandDecreaseTime = level.time + 1000;
 	}
 
-	if ((client->sess.sessionTeam == TEAM_SPECTATOR))
+	if (client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
 		TVG_SpectatorClientEndFrame(client);
 	}

@@ -73,6 +73,7 @@ SET(SDL2_SEARCH_PATHS
 	/usr/local
 	/usr
 	/sw # Fink
+	/opt/homebrew # Homebrew
 	/opt/local # DarwinPorts
 	/opt/csw # Blastwave
 	/opt

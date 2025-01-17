@@ -107,7 +107,7 @@ void R_RenderShadowEdges( void ) {
 	int		i2;
 	int		c_edges, c_rejected;
 	int		hit[2];
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 	idx = 0;
 #endif
 
@@ -139,7 +139,7 @@ void R_RenderShadowEdges( void ) {
 			// if it doesn't share the edge with another front facing
 			// triangle, it is a sil edge
 			if ( hit[ 1 ] == 0 ) {
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 				// A single drawing call is better than many. So I prefer a singe TRIANGLES call than many TRAINGLE_STRIP call
 				// even if it seems less efficiant, it's faster on the PANDORA
 				indexes[idx++] = i;
@@ -163,7 +163,7 @@ void R_RenderShadowEdges( void ) {
 		}
 	}
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 	qglDrawElements(GL_TRIANGLES, idx, GL_INDEX_TYPE, indexes);
 #endif
 
@@ -249,7 +249,7 @@ void RB_ShadowTessEnd( void ) {
 
 	GL_Bind( tr.whiteImage );
 	GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO );
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: only glColor4f on GLES 1.1
 	qglColor4f( 0.2f, 0.2f, 0.2f, 1.0f );
 #else
 	qglColor3f( 0.2f, 0.2f, 0.2f );
@@ -262,7 +262,7 @@ void RB_ShadowTessEnd( void ) {
 	qglEnable( GL_STENCIL_TEST );
 	qglStencilFunc( GL_ALWAYS, 1, 255 );
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 #ifdef USE_SHADOW_XYZ
 	qglVertexPointer (3, GL_FLOAT, 0, shadowXyz);
 #else
@@ -284,13 +284,13 @@ void RB_ShadowTessEnd( void ) {
 	GL_Cull( CT_FRONT_SIDED );
 	qglStencilOp( GL_KEEP, GL_KEEP, GL_DECR );
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 	qglDrawElements(GL_TRIANGLES, idx, GL_INDEX_TYPE, indexes);
 #else
 	R_RenderShadowEdges();
 #endif
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 	if (text)
 		qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 	if (glcol)
@@ -328,7 +328,7 @@ void RB_ShadowFinish( void ) {
 
     qglLoadIdentity ();
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: only glColor4f on GLES 1.1
 	qglColor4f( 0.6f, 0.6f, 0.6f, 1.0f );
 #else
 	qglColor3f( 0.6f, 0.6f, 0.6f );
@@ -338,7 +338,7 @@ void RB_ShadowFinish( void ) {
 //	qglColor3f( 1, 0, 0 );
 //	GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO );
 
-#ifdef USE_OPENGLES
+#ifdef USE_OPENGLES //karin: use glDrawArrays on GLES 1.1
 	GLboolean text = glIsEnabled(GL_TEXTURE_COORD_ARRAY);
 	GLboolean glcol = glIsEnabled(GL_COLOR_ARRAY);
 	if (text)

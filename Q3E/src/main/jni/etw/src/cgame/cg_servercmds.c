@@ -193,6 +193,66 @@ static void CG_ParseTeamInfo(void)
 }
 
 /**
+ * @brief CG_FillVersionInfo
+ * @param[int,out] version
+ * @param[in] versionStr
+ * @param[in] delimiter
+ */
+static void CG_FillVersionInfo(version_t *version, char *versionStr, const char *delimiter)
+{
+	Com_Printf("Demo Version: %s\n", versionStr);
+	version->major = Q_atoi(strtok(versionStr, delimiter));
+	version->minor = Q_atoi(strtok(NULL, delimiter));
+	version->patch = Q_atoi(strtok(NULL, delimiter));
+}
+
+static void CG_ParseDemoVersion(void)
+{
+	const char *serverInfoCS = CG_ConfigString(CS_SERVERINFO);
+	char       *versionStr   = Info_ValueForKey(serverInfoCS, "mod_version");
+
+	// check if mod_version is present
+	// if not present, look for sv_referencedPakNames as a fallback
+	if (!versionStr || !*versionStr)
+	{
+		const char *sysInfoCS = CG_ConfigString(CS_SYSTEMINFO);
+		char       *pakNames  = Info_ValueForKey(sysInfoCS, "sv_referencedPakNames");
+
+		// sanity check, shouldn't happen
+		if (!pakNames)
+		{
+			return;
+		}
+
+		versionStr = strchr(pakNames, '/');
+
+		// should not happen
+		if (!versionStr)
+		{
+			return;
+		}
+	}
+
+	while (*versionStr)
+	{
+		if (Q_isnumeric(*versionStr))
+		{
+			break;
+		}
+
+		++versionStr;
+	}
+
+	// parsing failed, bail
+	if (!versionStr || !*versionStr)
+	{
+		return;
+	}
+
+	CG_FillVersionInfo(&cg.demoVersion, versionStr, ".");
+}
+
+/**
  * @brief This is called explicitly when the gamestate is first received,
  * and whenever the server updates any serverinfo flagged cvars
  */
@@ -229,6 +289,11 @@ void CG_ParseServerinfo(void)
 
 	// make this available for ingame_callvote
 	trap_Cvar_Set("cg_ui_voteFlags", ((authLevel.integer == RL_NONE) ? Info_ValueForKey(info, "voteFlags") : "0"));
+
+	if (cg.demoPlayback)
+	{
+		CG_ParseDemoVersion();
+	}
 }
 
 /**
@@ -301,26 +366,15 @@ void CG_ParseSysteminfo(void)
 
 	info = CG_ConfigString(CS_SYSTEMINFO);
 
-/*
-    cgs.pmove_fixed = (atoi(Info_ValueForKey(info, "pmove_fixed"))) ? qtrue : qfalse;
-    cgs.pmove_msec  = Q_atoi(Info_ValueForKey(info, "pmove_msec"));
-    if (cgs.pmove_msec < 8)
-    {
-        cgs.pmove_msec = 8;
-    }
-    else if ( cgs.pmove_msec > 33)
-    {
-        cgs.pmove_msec = 33;
-    }
-*/
 	cgs.sv_fps = Q_atoi(Info_ValueForKey(info, "sv_fps"));
 
+	if (!cgs.sv_fps)
+	{
+		// no way to know for sure, assume default
+		cgs.sv_fps = 20;
+	}
+
 	cgs.sv_cheats = (atoi(Info_ValueForKey(info, "sv_cheats"))) ? qtrue : qfalse;
-
-/*
-
-    bg_evaluategravity = atof(Info_ValueForKey(info, "g_gravity"));
-*/
 }
 
 
@@ -518,7 +572,19 @@ void CG_ParseWolfinfo(void)
 	{
 		if (cg_announcer.integer)
 		{
-			trap_S_StartLocalSound(cgs.media.countFight, CHAN_ANNOUNCER);
+			// FIXME : Workaround
+			// As upon a warmup end, 'trap_S_Respatialize' seems to be called
+			// only _after_ calling this place here (which would make
+			// 'trap_S_StartLocalSound' work correctly) - we add this edge case
+			// to play the 'FIGHT' announcer voice line on the spectator itself.
+			if (cg.snap->ps.pm_flags & PMF_FOLLOW)
+			{
+				trap_S_StartSound(NULL, cg.clientNum, CHAN_ANNOUNCER, cgs.media.countFight);
+			}
+			else
+			{
+				trap_S_StartLocalSound(cgs.media.countFight, CHAN_ANNOUNCER);
+			}
 		}
 
 		Pri("^1FIGHT!\n");
@@ -548,6 +614,8 @@ void CG_ParseServerToggles(void)
 	value = Q_atoi(info);
 
 	cgs.matchPaused = (value & CV_SVS_PAUSE) ? qtrue : qfalse;
+
+	trap_MatchPaused(cgs.matchPaused);
 }
 
 /**
@@ -933,7 +1001,7 @@ static void CG_ConfigStringModified(void)
 
 	// get the gamestate from the client system, which will have the
 	// new configstring already integrated
-	trap_GetGameState(&cgs.gameState);
+	trap_GetGameState(&cgs.currentGameState);
 
 	// do something with it if necessary
 	switch (num)
@@ -1339,6 +1407,7 @@ static void CG_MapRestart(void)
 
 	Com_Memset(&cg.lastWeapSelInBank[0], 0, MAX_WEAP_BANKS_MP * sizeof(int)); // clear weapon bank selections
 
+	cg.autoCmdExecuted         = qfalse;
 	cg.numbufferedSoundScripts = 0;
 
 	cg.centerPrintTime = 0; // reset centerprint counter so previous messages don't re-appear
@@ -1348,9 +1417,8 @@ static void CG_MapRestart(void)
 	cgs.complaintClient  = -1;
 	cgs.complaintEndTime = 0;
 
-	// init crosshairMine + Dyna
-	cg.crosshairMine = -1;
-	cg.crosshairDyna = -1;
+	// init crosshair scan list
+	cg.crosshairEntsToScanCount = 0;
 
 	// init objective indicator
 	cg.flagIndicator   = 0;
@@ -1514,7 +1582,7 @@ int CG_ParseVoiceChats(const char *filename, voiceChatList_t *voiceChatList, int
 		compress = qfalse;
 	}
 
-	len = trap_FS_FOpenFile(filename, &f, FS_READ);
+	len = CG_FOpenCompatFile(filename, &f, FS_READ);
 	if (!f)
 	{
 		trap_Print(va(S_COLOR_RED "voice chat file not found: %s\n", filename));
@@ -2285,6 +2353,7 @@ void CG_parseWeaponStatsGS_cmd(void)
 			int   team_dmg_given;
 			int   team_dmg_rcvd;
 			int   gibs;
+			int   assists;
 			int   selfKills;
 			int   teamKills;
 			int   teamGibs;
@@ -2297,6 +2366,7 @@ void CG_parseWeaponStatsGS_cmd(void)
 			team_dmg_given = Q_atoi(CG_Argv(iArg++));
 			team_dmg_rcvd  = Q_atoi(CG_Argv(iArg++));
 			gibs           = Q_atoi(CG_Argv(iArg++));
+			assists        = Q_atoi(CG_Argv(iArg++));
 			selfKills      = Q_atoi(CG_Argv(iArg++));
 			teamKills      = Q_atoi(CG_Argv(iArg++));
 			teamGibs       = Q_atoi(CG_Argv(iArg++));
@@ -2311,6 +2381,7 @@ void CG_parseWeaponStatsGS_cmd(void)
 			Q_strncpyz(gs->strExtra[3], va(CG_TranslateString("Kills:  %3d    Team Kills: %3d    Accuracy:  %5.1f%%"), totKills, teamKills, (double)htRatio), sizeof(gs->strExtra[0]));
 			Q_strncpyz(gs->strExtra[4], va(CG_TranslateString("Deaths: %3d    Self Kills: %3d    Headshots: %5.1f%%"), totDeaths, selfKills, (double)hsRatio), sizeof(gs->strExtra[0]));
 			Q_strncpyz(gs->strExtra[5], va(CG_TranslateString("Gibs:   %3d    Team Gibs:  %3d    Playtime:  %5.1f%%"), gibs, teamGibs, (double)ptRatio), sizeof(gs->strExtra[0]));
+			Q_strncpyz(gs->strExtra[6], va(CG_TranslateString("               Assists:    %3d                      "), assists), sizeof(gs->strExtra[0]));
 		}
 	}
 
@@ -2491,6 +2562,7 @@ void CG_parseWeaponStats_cmd(void(txt_dump) (const char *))
 		int   team_dmg_given;
 		int   team_dmg_rcvd;
 		int   gibs;
+		int   assists;
 		int   selfKills;
 		int   teamKills;
 		int   teamGibs;
@@ -2559,6 +2631,7 @@ void CG_parseWeaponStats_cmd(void(txt_dump) (const char *))
 			team_dmg_given = Q_atoi(CG_Argv(iArg++));
 			team_dmg_rcvd  = Q_atoi(CG_Argv(iArg++));
 			gibs           = Q_atoi(CG_Argv(iArg++));
+			assists        = Q_atoi(CG_Argv(iArg++));
 			selfKills      = Q_atoi(CG_Argv(iArg++));
 			teamKills      = Q_atoi(CG_Argv(iArg++));
 			teamGibs       = Q_atoi(CG_Argv(iArg++));
@@ -2582,6 +2655,7 @@ void CG_parseWeaponStats_cmd(void(txt_dump) (const char *))
 			txt_dump(va("^3Kills:  ^7%3d   ^3Team Kills: ^7%3d   ^3Accuracy:  ^7 %5.1f%%\n", totKills, teamKills, htRatio));
 			txt_dump(va("^3Deaths: ^7%3d   ^3Self Kills: ^7%3d   ^3Headshots: ^7 %5.1f%%\n", totDeaths, selfKills, hsRatio));
 			txt_dump(va("^3Gibs:   ^7%3d   ^3Team Gibs:  ^7%3d   ^3Playtime:  ^7 %5.1f%%\n", gibs, teamGibs, ptRatio));
+			txt_dump(va("                  ^3Assists:    ^7%3d                          \n", assists));
 		}
 	}
 
@@ -2841,37 +2915,63 @@ static void CG_parseTopShotsStats_cmd(qboolean doTop, void(txt_dump) (const char
 static void CG_scores_cmd(void)
 {
 	const char *str;
+	int        i;
 
 	str = CG_Argv(1);
 
-	CG_Printf("[skipnotify]%s", str);
-	if (cgs.dumpStatsFile > 0)
+	// if this is start of cmd reset the counter
+	// in case a player requested scores again before receiving end marker
+	if (Q_ParseInt(str, &i))
 	{
-		char s[MAX_STRING_CHARS];
-
-		CG_cleanName(str, s, sizeof(s), qtrue);
-		trap_FS_Write(s, strlen(s), cgs.dumpStatsFile);
+		cgs.scoresCount = 0;
+		return;
 	}
 
-	if (trap_Argc() > 2)
+	if (cgs.scoresCount < MAX_SCORES_CMDS)
 	{
+		Q_strncpyz(cgs.scores[cgs.scoresCount++], str, sizeof(cgs.scores[0]));
+	}
+	else
+	{
+		CG_Printf(S_COLOR_YELLOW "WARNING: Scores index overflow, dropping command\n");
+	}
+
+	if (trap_Argc() <= 2)
+	{
+		return;
+	}
+
+	for (i = 0; i < cgs.scoresCount; i++)
+	{
+		CG_Printf("[skipnotify]%s", cgs.scores[i]);
+
 		if (cgs.dumpStatsFile > 0)
 		{
-			qtime_t ct;
+			char s[MAX_STRING_CHARS];
 
-			trap_RealTime(&ct);
-			str = va("\nStats recorded: %02d:%02d:%02d (%02d %s %d)\n\n\n",
-			         ct.tm_hour, ct.tm_min, ct.tm_sec,
-			         ct.tm_mday, aMonths[ct.tm_mon], 1900 + ct.tm_year);
-
-			trap_FS_Write(str, strlen(str), cgs.dumpStatsFile);
-
-			CG_Printf("[cgnotify]\n^3>>> Stats recorded to: ^7%s\n\n", cgs.dumpStatsFileName);
-			trap_FS_FCloseFile(cgs.dumpStatsFile);
-			cgs.dumpStatsFile = 0;
+			CG_cleanName(cgs.scores[i], s, sizeof(s), qtrue);
+			trap_FS_Write(s, strlen(s), cgs.dumpStatsFile);
 		}
-		cgs.dumpStatsTime = 0;
 	}
+
+	if (cgs.dumpStatsFile > 0)
+	{
+		qtime_t ct;
+
+		trap_RealTime(&ct);
+		str = va("\nStats recorded: %02d:%02d:%02d (%02d %s %d)\n\n\n",
+		         ct.tm_hour, ct.tm_min, ct.tm_sec,
+		         ct.tm_mday, aMonths[ct.tm_mon], 1900 + ct.tm_year);
+
+		trap_FS_Write(str, strlen(str), cgs.dumpStatsFile);
+
+		CG_Printf("[cgnotify]\n^3>>> Stats recorded to: ^7%s\n\n", cgs.dumpStatsFileName);
+		trap_FS_FCloseFile(cgs.dumpStatsFile);
+		cgs.dumpStatsFile = 0;
+	}
+
+	cgs.dumpStatsTime = 0;
+	cgs.scoresCount   = 0;
 }
 
 /**

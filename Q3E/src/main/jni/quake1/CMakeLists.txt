@@ -14,7 +14,7 @@ set(q1libs ${q1libs} vorbisfile vorbisenc vorbis png jpeg ogg freetype oboeaudio
 #set(q1libs ${q1libs} curl)
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
-set(CFLAGS_WARNINGS "-Wall -Werror=vla -Werror=c++-compat -Wwrite-strings -Wshadow -Wold-style-definition -Wstrict-prototypes -Wsign-compare -Wdeclaration-after-statement -Wmissing-prototypes")
+set(CFLAGS_WARNINGS "-Wall -Werror=vla -Wc++-compat -Wwrite-strings -Wshadow -Wold-style-definition -Wstrict-prototypes -Wsign-compare -Wdeclaration-after-statement -Wmissing-prototypes")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CFLAGS_WARNINGS} -O3 -fno-math-errno -fno-trapping-math -Winline")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")

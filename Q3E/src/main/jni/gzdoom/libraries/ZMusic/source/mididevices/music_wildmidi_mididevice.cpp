@@ -34,6 +34,7 @@
 
 // HEADER FILES ------------------------------------------------------------
 
+#include <stdexcept>
 #include "mididevice.h"
 #include "zmusic/zmusic_internal.h"
 
@@ -87,15 +88,7 @@ void WildMIDIDevice::LoadInstruments()
 	{
 		wildMidiConfig.loadedConfig = wildMidiConfig.readerName;
 		wildMidiConfig.instruments.reset(new WildMidi::Instruments(wildMidiConfig.reader, SampleRate));
-		bool success = wildMidiConfig.instruments->LoadConfig(wildMidiConfig.readerName.c_str());
 		wildMidiConfig.reader = nullptr;
-
-		if (!success)
-		{
-			wildMidiConfig.instruments.reset();
-			wildMidiConfig.loadedConfig = "";
-			throw std::runtime_error("Unable to initialize instruments for WildMidi device");
-		}
 	}
 	else if (wildMidiConfig.instruments == nullptr)
 	{
@@ -104,7 +97,9 @@ void WildMIDIDevice::LoadInstruments()
 	instruments = wildMidiConfig.instruments;
 	if (instruments->LoadConfig(nullptr) < 0)
 	{
-		throw std::runtime_error("Unable to load instruments set for WildMidi device");
+		wildMidiConfig.instruments.reset();
+		wildMidiConfig.loadedConfig = "";
+		throw std::runtime_error("Unable to initialize instruments for WildMidi device");
 	}
 }
 

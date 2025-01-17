@@ -43,7 +43,7 @@ extern char fs_basedir [MAX_OSPATH];
 extern char fs_userdir [MAX_OSPATH];
 
 // list of active game directories (empty if not running a mod)
-#define MAX_GAMEDIRS 16
+#define MAX_GAMEDIRS 17 // 16 + gamedirname1
 extern int fs_numgamedirs;
 extern char fs_gamedirs[MAX_GAMEDIRS][MAX_QPATH];
 
@@ -99,7 +99,13 @@ gamedir_t;
 extern gamedir_t *fs_all_gamedirs; // terminated by entry with empty name
 extern int fs_all_gamedirs_count;
 
-qbool FS_ChangeGameDirs(int numgamedirs, char gamedirs[][MAX_QPATH], qbool complain, qbool failmissing);
+typedef enum addgamedirs_e {
+	GAMEDIRS_ALLGOOD = -1,
+	GAMEDIRS_FAILURE = 0,
+	GAMEDIRS_SUCCESS = 1
+} addgamedirs_t;
+addgamedirs_t FS_SetGameDirs(int numgamedirs, const char *gamedirs[], qbool failmissing, qbool abortonfail);
+qbool FS_ChangeGameDirs(int numgamedirs, const char *gamedirs[], qbool failmissing);
 qbool FS_IsRegisteredQuakePack(const char *name);
 int FS_CRCFile(const char *filename, size_t *filesizepointer);
 void FS_UnloadPacks_dlcache(void);

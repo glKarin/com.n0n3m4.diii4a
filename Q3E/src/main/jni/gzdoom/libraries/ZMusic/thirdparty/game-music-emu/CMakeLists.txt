@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 2.8...3.19)
+
 # CMake project definition file.
 project(libgme)
 
@@ -6,36 +8,24 @@ include (CheckCXXCompilerFlag)
 # When version is changed, also change the one in gme/gme.h to match
 set(GME_VERSION 0.6.2 CACHE INTERNAL "libgme Version")
 
-# 2.6+ always assumes FATAL_ERROR, but 2.4 and below don't.
-# Of course, 2.4 might work, in which case you're welcome to drop
-# down the requirement, but I can't test that.
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-
-# I don't plan on debugging this, so make it a release build.
-if( NOT CMAKE_BUILD_TYPE MATCHES "Release" )
-    set( CMAKE_BUILD_TYPE "RelWithDebInfo" )
-endif()
-
-if( ZD_CMAKE_COMPILER_IS_GNUCXX_COMPATIBLE )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra" )
-    if( NOT PROFILE )
-        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fomit-frame-pointer" )
+if(COMPILER_IS_GNUCXX_COMPATIBLE)
+    add_compile_options(-Wall -Wextra)
+    if(NOT PROFILE)
+        add_compile_options(-fomit-frame-pointer)
     endif()
-    check_cxx_compiler_flag( -Wno-array-bounds HAVE_NO_ARRAY_BOUNDS )
-    if( HAVE_NO_ARRAY_BOUNDS )
-        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-array-bounds" )
+    check_cxx_compiler_flag(-Wno-array-bounds HAVE_NO_ARRAY_BOUNDS)
+    if(HAVE_NO_ARRAY_BOUNDS)
+        add_compile_options(-Wno-array-bounds)
     endif()
 endif()
 
-#[ZDoom] Disable most of bogus and annoying MSVC warnings
-if( MSVC )
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4101 /wd4800 /wd4702 /wd4706 /wd4805 /wd4310 /wd4244 /wd4456 /wd4459 /wd4146 /wd4127 /wd4458 /wd4267 /wd4804")
+#[ZMusic] Disable most of bogus and annoying MSVC warnings
+if(MSVC)
+    add_compile_options(/wd4101 /wd4800 /wd4702 /wd4706 /wd4805 /wd4310 /wd4244 /wd4456 /wd4459 /wd4146 /wd4127 /wd4458 /wd4267 /wd4804)
 endif()
-
-use_fast_math()
 
 # Default emulators to build (all of them! ;)
-# [ZDoom] No options, enable all of them by default.
+# [ZMusic] No options, enable all of them by default.
 
 #if (NOT DEFINED USE_GME_AY)
     SET(USE_GME_AY 1 CACHE BOOL "Enable support for Spectrum ZX music emulation")
@@ -89,9 +79,7 @@ use_fast_math()
 set(ENABLE_UBSAN  OFF)
 
 # Check for GCC/Clang "visibility" support.
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
-    OR
-    CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if (COMPILER_IS_GNUCXX_COMPATIBLE)
 
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -W -Wextra")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -136,8 +124,10 @@ endif()
 add_subdirectory(gme)
 
 # EXCLUDE_FROM_ALL adds build rules but keeps it out of default build
-# [ZDoom] Not needed.
+# [ZMusic] Not needed.
 if( FALSE )
 add_subdirectory(player EXCLUDE_FROM_ALL)
 add_subdirectory(demo EXCLUDE_FROM_ALL)
 endif()
+
+use_fast_math( gme )

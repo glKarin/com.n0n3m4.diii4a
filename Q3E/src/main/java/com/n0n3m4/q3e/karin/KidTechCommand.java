@@ -17,9 +17,15 @@ public class KidTechCommand
 {
     public static final String ARG_PREFIX_IDTECH = "+";
     public static final String ARG_PREFIX_QUAKETECH = "-";
+    public static final String ARG_PREFIX_ALL = ARG_PREFIX_IDTECH + ARG_PREFIX_QUAKETECH;
 
     private String m_cmd = Q3EGlobals.GAME_EXECUABLE;
-    private String argPrefix = ARG_PREFIX_IDTECH + ARG_PREFIX_QUAKETECH;
+    private String argPrefix;
+
+    public KidTechCommand(String str)
+    {
+        this(ARG_PREFIX_IDTECH + ARG_PREFIX_QUAKETECH, str);
+    }
 
     public KidTechCommand(String PLUS, String str)
     {

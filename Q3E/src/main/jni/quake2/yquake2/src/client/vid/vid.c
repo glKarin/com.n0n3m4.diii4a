@@ -318,7 +318,7 @@ const char* lib_ext = "so";
 static void
 VID_GetRendererLibPath(const char *renderer, char *path, size_t len)
 {
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: add `lib` prefix on library name
 	snprintf(path, len, "%slibref_%s.%s", Sys_GetBinaryDir(), renderer, lib_ext);
 #else
 	snprintf(path, len, "%sref_%s.%s", Sys_GetBinaryDir(), renderer, lib_ext);
@@ -417,7 +417,7 @@ VID_LoadRenderer(void)
 	}
 
 	// Mkay, let's load the requested renderer.
-	GetRefAPI = Sys_LoadLibrary(reflib_path, "GetRefAPI", &reflib_handle);
+	GetRefAPI = (GetRefAPI_t)Sys_LoadLibrary(reflib_path, "GetRefAPI", &reflib_handle);
 
 	// Okay, we couldn't load it. It's up to the
 	// caller to recover from this.
@@ -427,7 +427,7 @@ VID_LoadRenderer(void)
 
 		return false;
 	}
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: import extras interface function
 	extern void GLimp_SetRef(void *init, void *quit, void *setGLParms, void *setResolution);
 	GLimp_SetRef(
 			Sys_GetProcAddress(reflib_handle, "GLimp_AndroidInit"),

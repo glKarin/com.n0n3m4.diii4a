@@ -251,6 +251,56 @@ void body_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int da
 }
 
 /**
+ * @brief G_CheckComplaint
+ * @param[in] self
+ * @param[in] inflictor
+ * @param[in] attacker
+ * @param[in] meansOfDeath
+ */
+qboolean G_CheckComplaint(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, meansOfDeath_t meansOfDeath)
+{
+	// Complaint logging
+	if (attacker != self && level.warmupTime <= 0 && g_gamestate.integer == GS_PLAYING)
+	{
+		if (attacker->client->pers.localClient)
+		{
+			if (attacker->r.svFlags & SVF_BOT)
+			{
+				trap_SendServerCommand(self - g_entities, "complaint -5");
+			}
+			else
+			{
+				trap_SendServerCommand(self - g_entities, "complaint -4");
+			}
+		}
+		else
+		{
+			if (meansOfDeath != MOD_CRUSH_CONSTRUCTION && meansOfDeath != MOD_CRUSH_CONSTRUCTIONDEATH && meansOfDeath != MOD_CRUSH_CONSTRUCTIONDEATH_NOATTACKER)
+			{
+				if (g_complaintlimit.integer)
+				{
+					if (!(meansOfDeath == MOD_LANDMINE && (g_disableComplaints.integer & TKFL_MINES)) &&
+					    !((meansOfDeath == MOD_ARTY || meansOfDeath == MOD_AIRSTRIKE) && (g_disableComplaints.integer & TKFL_AIRSTRIKE)) &&
+					    !((meansOfDeath == MOD_MORTAR || meansOfDeath == MOD_MORTAR2) && (g_disableComplaints.integer & TKFL_MORTAR)))
+					{
+						trap_SendServerCommand(self - g_entities, va("complaint %i", attacker->s.number));
+						if (meansOfDeath != MOD_DYNAMITE || !(inflictor->etpro_misc_1 & 1))   // do not allow complain when tked / tbed by dynamite on objective
+						{
+							self->client->pers.complaintClient  = attacker->s.clientNum;
+							self->client->pers.complaintEndTime = level.time + 20500;
+
+							return qtrue;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return qfalse;
+}
+
+/**
  * @brief player_die
  * @param[in,out] self
  * @param[in] inflictor
@@ -544,41 +594,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 
 		if (attacker == self || dieFromSameTeam)
 		{
-			// Complaint lodging
-			if (attacker != self && level.warmupTime <= 0 && g_gamestate.integer == GS_PLAYING)
-			{
-				if (attacker->client->pers.localClient)
-				{
-					if (attacker->r.svFlags & SVF_BOT)
-					{
-						trap_SendServerCommand(self - g_entities, "complaint -5");
-					}
-					else
-					{
-						trap_SendServerCommand(self - g_entities, "complaint -4");
-					}
-				}
-				else
-				{
-					if (meansOfDeath != MOD_CRUSH_CONSTRUCTION && meansOfDeath != MOD_CRUSH_CONSTRUCTIONDEATH && meansOfDeath != MOD_CRUSH_CONSTRUCTIONDEATH_NOATTACKER)
-					{
-						if (g_complaintlimit.integer)
-						{
-							if (!(meansOfDeath == MOD_LANDMINE && (g_disableComplaints.integer & TKFL_MINES)) &&
-							    !((meansOfDeath == MOD_ARTY || meansOfDeath == MOD_AIRSTRIKE) && (g_disableComplaints.integer & TKFL_AIRSTRIKE)) &&
-							    !((meansOfDeath == MOD_MORTAR || meansOfDeath == MOD_MORTAR2) && (g_disableComplaints.integer & TKFL_MORTAR)))
-							{
-								trap_SendServerCommand(self - g_entities, va("complaint %i", attacker->s.number));
-								if (meansOfDeath != MOD_DYNAMITE || !(inflictor->etpro_misc_1 & 1))   // do not allow complain when tked by dynamite on objective
-								{
-									self->client->pers.complaintClient  = attacker->s.clientNum;
-									self->client->pers.complaintEndTime = level.time + 20500;
-								}
-							}
-						}
-					}
-				}
-			}
+			G_CheckComplaint(self, inflictor, attacker, meansOfDeath);
 
 			// high penalty to offset medic heal
 			if (g_gametype.integer == GT_WOLF_LMS)
@@ -726,7 +742,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 			BG_UpdateConditionValue(self->s.number, ANIM_COND_ENEMY_POSITION, POSITION_BEHIND, qtrue);
 		}
 
-		self->client->ps.pm_time = BG_AnimScriptEvent(&self->client->ps, self->client->pers.character->animModelInfo, ANIM_ET_DEATH, qfalse, qtrue);
+		self->client->ps.pm_time = BG_AnimScriptEvent(&self->client->ps, self->client->pers.character->animModelInfo, ANIM_ET_DEATH, qfalse);
 
 		// record the death animation to be used later on by the corpse
 		self->client->torsoDeathAnim = self->client->ps.torsoAnim;
@@ -976,12 +992,18 @@ gentity_t *G_BuildLeg(gentity_t *ent, grefEntity_t *refent, qboolean newRefent)
  * @param[in] newRefent
  * @return
  */
-qboolean IsHeadShot(gentity_t *targ, vec3_t dir, vec3_t point, meansOfDeath_t mod, grefEntity_t *refent, qboolean newRefent)
+qboolean IsHeadShot(gentity_t *targ, const vec3_t dir, const vec3_t point, meansOfDeath_t mod, grefEntity_t *refent, qboolean newRefent)
 {
 	gentity_t *head;
 	trace_t   tr;
 	vec3_t    start, end;
 	gentity_t *traceEnt;
+
+	// can happen if et.G_Damage lua is called with a MOD that is an actual weapon
+	if (!point || !dir)
+	{
+		return qfalse;
+	}
 
 	// not a player or critter so bail
 	if (!(targ->client))
@@ -1052,9 +1074,15 @@ qboolean IsHeadShot(gentity_t *targ, vec3_t dir, vec3_t point, meansOfDeath_t mo
  * @param[in] newRefent
  * @return
  */
-qboolean IsLegShot(gentity_t *targ, vec3_t dir, vec3_t point, meansOfDeath_t mod, grefEntity_t *refent, qboolean newRefent)
+qboolean IsLegShot(gentity_t *targ, const vec3_t dir, const vec3_t point, meansOfDeath_t mod, grefEntity_t *refent, qboolean newRefent)
 {
 	gentity_t *leg;
+
+	// can happen if et.G_Damage lua is called with a MOD that is an actual weapon
+	if (!point || !dir)
+	{
+		return qfalse;
+	}
 
 	if (!(targ->client))
 	{
@@ -1141,10 +1169,16 @@ qboolean IsLegShot(gentity_t *targ, vec3_t dir, vec3_t point, meansOfDeath_t mod
  * @param[in] mod
  * @return
  */
-qboolean IsArmShot(gentity_t *targ, gentity_t *ent, vec3_t point, meansOfDeath_t mod)
+qboolean IsArmShot(gentity_t *targ, gentity_t *ent, const vec3_t point, meansOfDeath_t mod)
 {
 	vec3_t path, view;
 	vec_t  dot;
+
+	// can happen if et.G_Damage lua is called with a MOD that is an actual weapon
+	if (!point)
+	{
+		return qfalse;
+	}
 
 	if (!(targ->client))
 	{
@@ -1469,11 +1503,33 @@ void G_DamageExt(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec
 		BG_UpdateConditionValue(targ->client->ps.clientNum, ANIM_COND_ENEMY_WEAPON, attacker->client->ps.weapon, qtrue);
 	}
 
-	if (damage < 0)
+	take = MAX(damage, 0);
+
+	if (dflags & DAMAGE_DISTANCEFALLOFF)
 	{
-		damage = 0;
+		take *= G_DamageFalloff(VectorDistance(point, muzzleTrace), 0.5f);
 	}
-	take = damage;
+
+	if ((targ->flags & FL_NO_KNOCKBACK) || (dflags & DAMAGE_NO_KNOCKBACK) ||
+	    (targ->client && g_friendlyFire.integer && (onSameTeam || (attacker->client && targ->client->sess.sessionTeam == G_GetTeamFromEntity(inflictor)))))
+	{
+		knockback = 0;
+	}
+	else
+	{
+		knockback = MIN(take, 200);
+
+		if (dflags & DAMAGE_HALF_KNOCKBACK)
+		{
+			knockback *= 0.5;
+		}
+
+		// set weapons means less knockback
+		if (targ->client && (GetWeaponTableData(targ->client->ps.weapon)->type & WEAPON_TYPE_SET))
+		{
+			knockback *= 0.5;
+		}
+	}
 
 	// adrenaline junkie!
 	if (targ->client && targ->client->ps.powerups[PW_ADRENALINE])
@@ -1538,15 +1594,10 @@ void G_DamageExt(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec
 		hr = HR_HEAD;
 
 		//BG_UpdateConditionValue(targ->client->ps.clientNum, ANIM_COND_IMPACT_POINT, IMPACTPOINT_HEAD, qtrue);
-		//BG_AnimScriptEvent(&targ->client->ps, targ->client->pers.character->animModelInfo, ANIM_ET_PAIN, qfalse, qtrue);
+		//BG_AnimScriptEvent(&targ->client->ps, targ->client->pers.character->animModelInfo, ANIM_ET_PAIN, qfalse);
 	}
 	else
 	{
-		if (dflags & DAMAGE_DISTANCEFALLOFF)
-		{
-			take *= G_DamageFalloff(VectorDistance(point, muzzleTrace), 0.5f);
-		}
-
 		if (IsLegShot(targ, dir, point, mod, &refent, qfalse))
 		{
 			G_LogRegionHit(attacker, HR_LEGS);
@@ -1557,7 +1608,7 @@ void G_DamageExt(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec
 			}
 
 			//BG_UpdateConditionValue(targ->client->ps.clientNum, ANIM_COND_IMPACT_POINT, (rand() + 1) ? IMPACTPOINT_KNEE_RIGHT : IMPACTPOINT_KNEE_LEFT, qtrue);
-			//BG_AnimScriptEvent(&targ->client->ps, targ->client->pers.character->animModelInfo, ANIM_ET_PAIN, qfalse, qtrue);
+			//BG_AnimScriptEvent(&targ->client->ps, targ->client->pers.character->animModelInfo, ANIM_ET_PAIN, qfalse);
 		}
 		else if (IsArmShot(targ, attacker, point, mod))
 		{
@@ -1569,7 +1620,7 @@ void G_DamageExt(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec
 			}
 
 			//BG_UpdateConditionValue(targ->client->ps.clientNum, ANIM_COND_IMPACT_POINT, (rand() + 1) ? IMPACTPOINT_SHOULDER_RIGHT : IMPACTPOINT_SHOULDER_LEFT, qtrue);
-			//BG_AnimScriptEvent(&targ->client->ps, targ->client->pers.character->animModelInfo, ANIM_ET_PAIN, qfalse, qtrue);
+			//BG_AnimScriptEvent(&targ->client->ps, targ->client->pers.character->animModelInfo, ANIM_ET_PAIN, qfalse);
 		}
 		else if (targ->client && targ->health > 0)
 		{
@@ -1587,7 +1638,7 @@ void G_DamageExt(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec
 				//BG_UpdateConditionValue(targ->client->ps.clientNum, ANIM_COND_STUNNED, 1, qtrue);
 			}
 
-			//BG_AnimScriptEvent(&targ->client->ps, targ->client->pers.character->animModelInfo, ANIM_ET_PAIN, qfalse, qtrue);
+			//BG_AnimScriptEvent(&targ->client->ps, targ->client->pers.character->animModelInfo, ANIM_ET_PAIN, qfalse);
 		}
 	}
 
@@ -1596,27 +1647,6 @@ void G_DamageExt(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec
 		// re-adjust now because we are changing eFlags and pm_flags
 		// and doing it later would overwrite them
 		G_ReAdjustSingleClientPosition(targ);
-	}
-
-	if ((targ->flags & FL_NO_KNOCKBACK) || (dflags & DAMAGE_NO_KNOCKBACK) ||
-	    (targ->client && g_friendlyFire.integer && (onSameTeam || (attacker->client && targ->client->sess.sessionTeam == G_GetTeamFromEntity(inflictor)))))
-	{
-		knockback = 0;
-	}
-	else
-	{
-		knockback = (damage > 200) ? 200 : damage;
-
-		if (dflags & DAMAGE_HALF_KNOCKBACK)
-		{
-			knockback *= 0.5;
-		}
-
-		// set weapons means less knockback
-		if (targ->client && (GetWeaponTableData(targ->client->ps.weapon)->type & WEAPON_TYPE_SET))
-		{
-			knockback *= 0.5;
-		}
 	}
 
 	// figure momentum add, even if the damage won't be taken
@@ -1652,17 +1682,7 @@ void G_DamageExt(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec
 		// out the movement immediately
 		if (!targ->client->ps.pm_time)
 		{
-			int t = knockback * 2;
-
-			if (t < 50)
-			{
-				t = 50;
-			}
-			if (t > 200)
-			{
-				t = 200;
-			}
-			targ->client->ps.pm_time   = t;
+			targ->client->ps.pm_time   = Com_Clamp(50, 200, knockback * 2);
 			targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 		}
 	}
@@ -1701,6 +1721,13 @@ void G_DamageExt(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec
 		if (attacker)
 		{
 			targ->client->ps.persistant[PERS_ATTACKER] = attacker->s.number;
+
+			if (attacker->client)
+			{
+				targ->client->dmgReceivedSts[attacker->s.number].damageReceived += take;
+				targ->client->dmgReceivedSts[attacker->s.number].mods            = mod;
+				targ->client->dmgReceivedSts[attacker->s.number].lastHitTime     = level.time;
+			}
 		}
 		else
 		{
@@ -1797,6 +1824,8 @@ void G_DamageExt(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec
 					{
 						G_AddKillSkillPoints(attacker, mod, hr, (dflags & DAMAGE_RADIUS));
 					}
+
+					G_AddKillAssistPoints(targ, attacker);
 				}
 
 				if (targ->health < -999)
@@ -1906,7 +1935,7 @@ void G_RailTrail(vec_t *start, vec_t *end, vec_t *color)
  * @param[in] color
  * @param[in] index
  */
-void G_RailBox(vec_t *origin, vec_t *mins, vec_t *maxs, vec_t *color, int index)
+void G_RailBox(const vec_t *origin, const vec_t *mins, const vec_t *maxs, const vec_t *color, int index)
 {
 	vec3_t    b1;
 	vec3_t    b2;

@@ -25,6 +25,10 @@ void SCR_DrawTextRightAlign( int &y, const char *text, ... ) id_attribute((forma
 #define CONSOLE_FIRSTREPEAT		200 // delay before initial key repeat
 #define CONSOLE_REPEAT			100 // delay between repeats - i.e typematic rate
 
+#ifdef __ANDROID__ //karin: limit console max height
+extern float Android_GetConsoleMaxHeightFrac(float frac);
+#endif
+
 idCVarBool con_legacyFont( "con_legacyFont", "0", CVAR_SYSTEM | CVAR_ARCHIVE, "0 - new 2.08 font, 1 - old D3 font" ); // grayman - add archive
 idCVar con_fontSize( "con_fontSize", "8", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "font width in screen units (640x480)", 3.0f, 30.0f );
 idCVar con_fontColor( "con_fontColor", "5", CVAR_SYSTEM | CVAR_ARCHIVE, "console color, 5 = cyan, 7 = white, 'r g b' = custom" );
@@ -436,7 +440,11 @@ idConsoleLocal::Open
 void idConsoleLocal::Open(const float frac) {
 	consoleField.Clear();
 	keyCatching = true;
-	SetDisplayFraction( frac );
+#ifdef __ANDROID__ //karin: limit console max height
+    SetDisplayFraction(frac < 1.0f ? Android_GetConsoleMaxHeightFrac(frac) : frac);
+#else
+    SetDisplayFraction( frac );
+#endif
 	displayFrac = frac;	// don't scroll to that point, go immediately
 }
 
@@ -795,13 +803,25 @@ bool idConsoleLocal::ProcessEvent( const sysEvent_t *event, bool forceAccept ) {
 			consoleField.Clear();
 			keyCatching = true;
 			if ( idKeyInput::IsDown( K_SHIFT ) ) {
-				if ( idKeyInput::IsDown( K_CTRL ) ) 
-					SetDisplayFraction( 0.8f );
+				if ( idKeyInput::IsDown( K_CTRL ) )
+#ifdef __ANDROID__ //karin: limit console max height
+                    SetDisplayFraction(Android_GetConsoleMaxHeightFrac(0.8f));
+#else
+                    SetDisplayFraction( 0.8f );
+#endif
 				else
 					// if the shift key is down, don't open the console as much
-					SetDisplayFraction( 0.2f );
+#ifdef __ANDROID__ //karin: limit console max height
+                    SetDisplayFraction(Android_GetConsoleMaxHeightFrac(0.2f));
+#else
+                    SetDisplayFraction( 0.2f );
+#endif
 			} else {
-				SetDisplayFraction( 0.5f );
+#ifdef __ANDROID__ //karin: limit console max height
+                SetDisplayFraction(Android_GetConsoleMaxHeightFrac(0.5f));
+#else
+                SetDisplayFraction( 0.5f );
+#endif
 			}
 			cvarSystem->SetCVarBool( "ui_chat", true );
 		}

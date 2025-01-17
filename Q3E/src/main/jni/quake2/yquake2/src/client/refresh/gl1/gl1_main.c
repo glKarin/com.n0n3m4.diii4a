@@ -90,6 +90,7 @@ cvar_t *gl1_particle_square;
 
 cvar_t *gl1_palettedtexture;
 cvar_t *gl1_pointparameters;
+cvar_t *gl1_multitexture;
 
 cvar_t *gl_drawbuffer;
 cvar_t *gl_lightmap;
@@ -143,6 +144,10 @@ cvar_t *gl1_stereo_convergence;
 
 refimport_t ri;
 
+void LM_FreeLightmapBuffers(void);
+void Scrap_Free(void);
+void Scrap_Init(void);
+
 void
 R_RotateForEntity(entity_t *e)
 {
@@ -163,6 +168,7 @@ R_DrawSpriteModel(entity_t *currententity, const model_t *currentmodel)
 	dsprite_t *psprite;
 	image_t *skin;
 
+	R_EnableMultitexture(false);
 	/* don't even bother culling, because it's just
 	   a single polygon without a surface cache */
 	psprite = (dsprite_t *)currentmodel->extradata;
@@ -259,6 +265,7 @@ R_DrawNullModel(entity_t *currententity)
 		R_LightPoint(currententity, currententity->origin, shadelight);
 	}
 
+	R_EnableMultitexture(false);
 	glPushMatrix();
 	R_RotateForEntity(currententity);
 
@@ -357,7 +364,7 @@ R_DrawEntitiesOnList(void)
 	/* draw transparent entities
 	   we could sort these if it ever
 	   becomes a problem... */
-	glDepthMask(0);
+	glDepthMask(GL_FALSE);
 
 	for (i = 0; i < r_newrefdef.num_entities; i++)
 	{
@@ -400,7 +407,8 @@ R_DrawEntitiesOnList(void)
 		}
 	}
 
-	glDepthMask(1); /* back to writing */
+	glDepthMask(GL_TRUE); /* back to writing */
+	R_EnableMultitexture(false);
 }
 
 void
@@ -496,7 +504,7 @@ R_DrawParticles2(int num_particles, const particle_t particles[],
 
 	glDisable(GL_BLEND);
 	glColor4f(1, 1, 1, 1);
-	glDepthMask(1); /* back to normal Z buffering */
+	glDepthMask(GL_TRUE); /* back to normal Z buffering */
 	R_TexEnv(GL_REPLACE);
 
 	YQ2_VLAFREE(vtx);
@@ -800,7 +808,7 @@ R_Clear(void)
 	// Check whether the stencil buffer needs clearing, and do so if need be.
 	GLbitfield stencilFlags = 0;
 	if (gl_state.stereo_mode >= STEREO_MODE_ROW_INTERLEAVED && gl_state.stereo_mode <= STEREO_MODE_PIXEL_INTERLEAVED) {
-		glClearStencil(0);
+		glClearStencil(GL_FALSE);
 		stencilFlags |= GL_STENCIL_BUFFER_BIT;
 	}
 
@@ -861,7 +869,7 @@ R_Clear(void)
 	/* stencilbuffer shadows */
 	if (gl_shadows->value && gl_state.stencil && gl1_stencilshadow->value)
 	{
-		glClearStencil(1);
+		glClearStencil(GL_TRUE);
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 }
@@ -961,7 +969,7 @@ R_RenderView(refdef_t *fd)
 			case STEREO_MODE_COLUMN_INTERLEAVED:
 			case STEREO_MODE_PIXEL_INTERLEAVED:
 				{
-#if !defined(_GLES)
+#if !defined(_GLES) //karin: TODO: glBegin/glEnd
 					qboolean flip_eyes = true;
 					int client_x, client_y;
 
@@ -1155,6 +1163,7 @@ R_SetLightLevel(entity_t *currententity)
 static void
 RI_RenderFrame(refdef_t *fd)
 {
+	R_ApplyGLBuffer();	// menu rendering when needed
 	R_RenderView(fd);
 	R_SetLightLevel (NULL);
 	R_SetGL2D();
@@ -1213,6 +1222,11 @@ R_Register(void)
 
 	gl1_palettedtexture = ri.Cvar_Get("r_palettedtextures", "0", CVAR_ARCHIVE);
 	gl1_pointparameters = ri.Cvar_Get("gl1_pointparameters", "1", CVAR_ARCHIVE);
+#ifdef _GLES //karin: disable it
+	gl1_multitexture = ri.Cvar_Get("gl1_multitexture", "0", CVAR_ARCHIVE);
+#else
+	gl1_multitexture = ri.Cvar_Get("gl1_multitexture", "1", CVAR_ARCHIVE);
+#endif
 
 	gl_drawbuffer = ri.Cvar_Get("gl_drawbuffer", "GL_BACK", 0);
 	r_vsync = ri.Cvar_Get("r_vsync", "1", CVAR_ARCHIVE);
@@ -1334,7 +1348,7 @@ R_SetMode(void)
 	rserr_t err;
 	int fullscreen;
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: force screen size and mode
 	extern int screen_width;
 	extern int screen_height;
 	vid_fullscreen->value = 1;
@@ -1483,17 +1497,31 @@ RI_Init(void)
 	/* Point parameters */
 	R_Printf(PRINT_ALL, " - Point parameters: ");
 
-	if (strstr(gl_config.extensions_string, "GL_ARB_point_parameters"))
+#if !defined(_GLES) //karin: support point parameter on GLES 1.1
+	if ( strstr(gl_config.extensions_string, "GL_ARB_point_parameters") ||
+		strstr(gl_config.extensions_string, "GL_EXT_point_parameters") )	// should exist for all OGL 1.4 hw...
+#endif
 	{
-			qglPointParameterfARB = (void (APIENTRY *)(GLenum, GLfloat))RI_GetProcAddress ( "glPointParameterfARB" );
-			qglPointParameterfvARB = (void (APIENTRY *)(GLenum, const GLfloat *))RI_GetProcAddress ( "glPointParameterfvARB" );
+		qglPointParameterf = (void (APIENTRY *)(GLenum, GLfloat))RI_GetProcAddress ( "glPointParameterf" );
+		qglPointParameterfv = (void (APIENTRY *)(GLenum, const GLfloat *))RI_GetProcAddress ( "glPointParameterfv" );
+
+		if (!qglPointParameterf || !qglPointParameterfv)
+		{
+			qglPointParameterf = (void (APIENTRY *)(GLenum, GLfloat))RI_GetProcAddress ( "glPointParameterfARB" );
+			qglPointParameterfv = (void (APIENTRY *)(GLenum, const GLfloat *))RI_GetProcAddress ( "glPointParameterfvARB" );
+		}
+		if (!qglPointParameterf || !qglPointParameterfv)
+		{
+			qglPointParameterf = (void (APIENTRY *)(GLenum, GLfloat))RI_GetProcAddress ( "glPointParameterfEXT" );
+			qglPointParameterfv = (void (APIENTRY *)(GLenum, const GLfloat *))RI_GetProcAddress ( "glPointParameterfvEXT" );
+		}
 	}
 
 	gl_config.pointparameters = false;
 
 	if (gl1_pointparameters->value)
 	{
-		if (qglPointParameterfARB && qglPointParameterfvARB)
+		if (qglPointParameterf && qglPointParameterfv)
 		{
 			gl_config.pointparameters = true;
 			R_Printf(PRINT_ALL, "Okay\n");
@@ -1564,7 +1592,11 @@ RI_Init(void)
 	/* Non power of two textures */
 	R_Printf(PRINT_ALL, " - Non power of two textures: ");
 
+#ifdef _GLES //karin: npot texture extension name on GLES 1.1
+	if (strstr(gl_config.extensions_string, "GL_OES_texture_npot"))
+#else
 	if (strstr(gl_config.extensions_string, "GL_ARB_texture_non_power_of_two"))
+#endif
 	{
 		gl_config.npottextures = true;
 		R_Printf(PRINT_ALL, "Okay\n");
@@ -1577,8 +1609,61 @@ RI_Init(void)
 
 	// ----
 
+	/* Multitexturing */
+	gl_config.multitexture = false;
+
+	R_Printf(PRINT_ALL, " - Multitexturing: ");
+
+#if !defined(_GLES) //karin: support multi texture on GLES 1.1
+	if (strstr(gl_config.extensions_string, "GL_ARB_multitexture"))
+#endif
+	{
+		qglActiveTexture = (void (APIENTRY *)(GLenum))RI_GetProcAddress ("glActiveTexture");
+		qglClientActiveTexture = (void (APIENTRY *)(GLenum))RI_GetProcAddress ("glClientActiveTexture");
+
+		if (!qglActiveTexture || !qglClientActiveTexture)
+		{
+			qglActiveTexture = (void (APIENTRY *)(GLenum))RI_GetProcAddress ("glActiveTextureARB");
+			qglClientActiveTexture = (void (APIENTRY *)(GLenum))RI_GetProcAddress ("glClientActiveTextureARB");
+		}
+	}
+
+	if (gl1_multitexture->value)
+	{
+		if (qglActiveTexture && qglClientActiveTexture)
+		{
+			gl_config.multitexture = true;
+			R_Printf(PRINT_ALL, "Okay\n");
+		}
+		else
+		{
+			R_Printf(PRINT_ALL, "Failed\n");
+		}
+	}
+	else
+	{
+		R_Printf(PRINT_ALL, "Disabled\n");
+	}
+
+	// ----
+
+	/* Big lightmaps: this used to be fast, but after the implementation of the "GL Buffer", it
+	 * became too evident that the bigger the texture, the slower the call to glTexSubImage2D() is.
+	 * Original logic remains, but it's preferable not to make it visible to the user.
+	 * Let's see if something changes in the future.
+	 */
+
+	gl_state.block_width = BLOCK_WIDTH;
+	gl_state.block_height = BLOCK_HEIGHT;
+	gl_state.max_lightmaps = MAX_LIGHTMAPS;
+	gl_state.scrap_width = BLOCK_WIDTH * 2;
+	gl_state.scrap_height = BLOCK_HEIGHT * 2;
+
+	// ----
+
 	R_SetDefaultState();
 
+	Scrap_Init();
 	R_InitImages();
 	Mod_Init();
 	R_InitParticleTexture();
@@ -1595,6 +1680,8 @@ RI_Shutdown(void)
 	ri.Cmd_RemoveCommand("imagelist");
 	ri.Cmd_RemoveCommand("gl_strings");
 
+	LM_FreeLightmapBuffers();
+	Scrap_Free();
 	Mod_FreeAll();
 
 	R_ShutdownImages();
@@ -1722,7 +1809,7 @@ RI_BeginFrame(float camera_separation)
 	{
 		gl_drawbuffer->modified = false;
 
-#if !defined(_GLES)
+#if !defined(_GLES) //karin: not support stereo frame buffer on GLES 1.1
 		if ((gl_state.camera_separation == 0) || gl_state.stereo_mode != STEREO_MODE_OPENGL)
 		{
 			if (Q_stricmp(gl_drawbuffer->string, "GL_FRONT") == 0)
@@ -1852,6 +1939,7 @@ R_DrawBeam(entity_t *e)
 		VectorAdd(start_points[i], direction, end_points[i]);
 	}
 
+	R_EnableMultitexture(false);
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);

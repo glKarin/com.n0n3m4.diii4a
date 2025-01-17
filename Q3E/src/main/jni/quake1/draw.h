@@ -159,6 +159,7 @@ void DrawQ_Pic(float x, float y, cachepic_t *pic, float width, float height, flo
 void DrawQ_RotPic(float x, float y, cachepic_t *pic, float width, float height, float org_x, float org_y, float angle, float red, float green, float blue, float alpha, int flags);
 // draw a filled rectangle (slightly faster than DrawQ_Pic with pic = NULL)
 void DrawQ_Fill(float x, float y, float width, float height, float red, float green, float blue, float alpha, int flags);
+
 // draw a text string,
 // with optional color tag support,
 // returns final unclipped x coordinate
@@ -166,12 +167,14 @@ void DrawQ_Fill(float x, float y, float width, float height, float red, float gr
 // the color is tinted by the provided base color
 // if r_textshadow is not zero, an additional instance of the text is drawn first at an offset with an inverted shade of gray (black text produces a white shadow, brightly colored text produces a black shadow)
 extern float DrawQ_Color[4];
+extern const vec4_t string_colors[];
 float DrawQ_String(float x, float y, const char *text, size_t maxlen, float scalex, float scaley, float basered, float basegreen, float baseblue, float basealpha, int flags, int *outcolor, qbool ignorecolorcodes, const dp_font_t *fnt);
 float DrawQ_String_Scale(float x, float y, const char *text, size_t maxlen, float sizex, float sizey, float scalex, float scaley, float basered, float basegreen, float baseblue, float basealpha, int flags, int *outcolor, qbool ignorecolorcodes, const dp_font_t *fnt);
 float DrawQ_TextWidth(const char *text, size_t maxlen, float w, float h, qbool ignorecolorcodes, const dp_font_t *fnt);
 float DrawQ_TextWidth_UntilWidth(const char *text, size_t *maxlen, float w, float h, qbool ignorecolorcodes, const dp_font_t *fnt, float maxWidth);
 float DrawQ_TextWidth_UntilWidth_TrackColors(const char *text, size_t *maxlen, float w, float h, int *outcolor, qbool ignorecolorcodes, const dp_font_t *fnt, float maxwidth);
 float DrawQ_TextWidth_UntilWidth_TrackColors_Scale(const char *text, size_t *maxlen, float w, float h, float sw, float sh, int *outcolor, qbool ignorecolorcodes, const dp_font_t *fnt, float maxwidth);
+
 // draw a very fancy pic (per corner texcoord/color control), the order is tl, tr, bl, br
 void DrawQ_SuperPic(float x, float y, cachepic_t *pic, float width, float height, float s1, float t1, float r1, float g1, float b1, float a1, float s2, float t2, float r2, float g2, float b2, float a2, float s3, float t3, float r3, float g3, float b3, float a3, float s4, float t4, float r4, float g4, float b4, float a4, int flags);
 // set the clipping area

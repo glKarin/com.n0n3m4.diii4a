@@ -1,0 +1,45 @@
+name: Testbuild for Linux
+run-name: testbuild_linux
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    types:
+      - edited
+      - opened
+      - synchronize
+concurrency:
+  # Cancel concurrent workflows for the same PR or commit hash.
+  group: ${{github.workflow}}-${{github.event_name == 'pull_request' && github.head_ref || github.sha}}
+  cancel-in-progress: true
+jobs:
+  build_ubuntu_x64_64:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - env: ubuntu
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+    - name: Build
+      run: |
+        # Public runners come with 2 CPUs.
+        make -j2
+    - name: Create testbuild package
+      run: |
+        # Create release directory tree
+        mkdir -p publish/quake2-ctf-linux-${{github.sha}}/misc/docs
+        # Copy release assets
+        cp -r release/* publish/quake2-ctf-linux-${{github.sha}}/
+        # Copy misc assets
+        cp LICENSE publish/quake2-ctf-linux-${{github.sha}}/misc/docs/LICENSE.txt
+        cp README.md publish/quake2-ctf-linux-${{github.sha}}/misc/docs/README.txt
+    - name: Upload testbuild package
+      uses: actions/upload-artifact@v4
+      with:
+        name: quake2-ctf-linux-${{github.sha}}
+        path: publish/
+        if-no-files-found: error

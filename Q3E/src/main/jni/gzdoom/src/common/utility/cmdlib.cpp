@@ -593,6 +593,26 @@ void CreatePath(const char *fn)
 }
 #endif
 
+void RemoveFile(const char* file)
+{
+#ifndef _WIN32
+	remove(file);
+#else
+	auto wpath = WideString(file);
+	_wremove(wpath.c_str());
+#endif
+}
+
+int RemoveDir(const char* file)
+{
+#ifndef _WIN32
+	return rmdir(file);
+#else
+	auto wpath = WideString(file);
+	return _wrmdir(wpath.c_str());
+#endif
+}
+
 //==========================================================================
 //
 // strbin	-- In-place version
@@ -898,9 +918,7 @@ FString NicePath(const char *path)
 	}
 	if (*path != '~')
 	{
-		FString str = ExpandEnvVars(path);
-		// printf("NicePath1: %s -> %s\n", path, str.GetChars());
-		return str; // ExpandEnvVars(path);
+		return ExpandEnvVars(path);
 	}
 
 	passwd *pwstruct;
@@ -923,16 +941,13 @@ FString NicePath(const char *path)
 	}
 	if (pwstruct == NULL)
 	{
-		FString str = ExpandEnvVars(path);
-		// printf("NicePath2: %s -> %s\n", path, str.GetChars());
-		return str; // ExpandEnvVars(path);
+		return ExpandEnvVars(path);
 	}
 	FString where(pwstruct->pw_dir);
 	if (*slash != '\0')
 	{
 		where += ExpandEnvVars(slash);
 	}
-	// printf("NicePath: %s -> %s\n", path, where.GetChars());
 	return where;
 #endif
 }

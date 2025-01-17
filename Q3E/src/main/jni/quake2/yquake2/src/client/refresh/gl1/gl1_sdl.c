@@ -33,12 +33,6 @@
 #include <SDL2/SDL.h>
 #endif
 
-#if defined(__APPLE__)
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
-
 static SDL_Window* window = NULL;
 static SDL_GLContext context = NULL;
 qboolean IsHighDPIaware = false;
@@ -52,6 +46,7 @@ static qboolean vsyncActive = false;
 void
 RI_EndFrame(void)
 {
+	R_ApplyGLBuffer();	// to draw buffered 2D text
 	SDL_GL_SwapWindow(window);
 }
 

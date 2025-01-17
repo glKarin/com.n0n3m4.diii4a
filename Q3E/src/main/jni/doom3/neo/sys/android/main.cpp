@@ -661,54 +661,30 @@ void abrt_func(mcheck_status status)
 
 #include "sys_android.h"
 
-// command line arguments
-static int q3e_argc = 0;
-static char **q3e_argv = NULL;
-
 // game main thread
 static pthread_t				main_thread;
 
 // app exit
 volatile bool q3e_running = false;
 
-void GLimp_CheckGLInitialized(void)
+bool GLimp_CheckGLInitialized(void)
 {
-	Q3E_CheckNativeWindowChanged();
+	return Q3E_CheckNativeWindowChanged();
 }
 
-static void Q3E_DumpArgs(int argc, char **argv)
-{
-	::q3e_argc = argc;
-	::q3e_argv = (char **) malloc(sizeof(char *) * argc);
-	for (int i = 0; i < argc; i++)
-	{
-		::q3e_argv[i] = strdup(argv[i]);
-	}
-}
-
-static void Q3E_FreeArgs(void)
-{
-	for(int i = 0; i < q3e_argc; i++)
-	{
-		free(q3e_argv[i]);
-	}
-	free(q3e_argv);
-}
-
-// idTech4 game main thread loop
-static void * doom3_main(int argc, char **argv)
-{
-	attach_thread(); // attach current to JNI for call Android code
-
+/*
+===============
+main
+===============
+*/
+int main(int argc, const char **argv) {
 #ifdef ID_MCHECK
 	// must have -lmcheck linkage
 	mcheck(abrt_func);
 	Sys_Printf("memory consistency checking enabled\n");
 #endif
-	Q3E_Start();
 
 	Posix_EarlyInit();
-	Sys_Printf("[Harmattan]: Enter idTech4 main thread -> %s\n", Sys_GetThreadName());
 
 	if (argc > 1) {
 		common->Init(argc-1, (const char **)&argv[1], NULL);
@@ -718,8 +694,6 @@ static void * doom3_main(int argc, char **argv)
 
 	Posix_LateInit();
 
-	Q3E_FreeArgs();
-
 	while (1) {
 		if(!q3e_running) // exit
 			break;
@@ -727,139 +701,27 @@ static void * doom3_main(int argc, char **argv)
 	}
 
 	common->Quit();
-	Q3E_End();
-	main_thread = 0;
-	Sys_Printf("[Harmattan]: Leave idTech4 main thread.\n");
+
 	return 0;
 }
 
-static void * Q3E_MainLoop(void *data)
-{
-	return doom3_main(q3e_argc, q3e_argv);
-}
 
-// start game main thread from Android Surface thread
-static void Q3E_StartGameMainThread(void)
-{
-	if(main_thread)
-		return;
+extern void ShutdownGame(void);
 
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-
-	if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) != 0) {
-		Sys_Printf("[Harmattan]: ERROR: pthread_attr_setdetachstate idTech4 main thread failed\n");
-		exit(1);
-	}
-
-	if (pthread_create((pthread_t *)&main_thread, &attr, Q3E_MainLoop, NULL) != 0) {
-		Sys_Printf("[Harmattan]: ERROR: pthread_create idTech4 main thread failed\n");
-		exit(1);
-	}
-
-	pthread_attr_destroy(&attr);
-
-	q3e_running = true;
-	Sys_Printf("[Harmattan]: idTech4 main thread start.\n");
-}
-
-// shutdown game main thread
-static void Q3E_ShutdownGameMainThread(void)
-{
-	if(!main_thread)
-		return;
-
-	q3e_running = false;
-	if (pthread_join(main_thread, NULL) != 0) {
-		Sys_Printf("[Harmattan]: ERROR: pthread_join idTech4 main thread failed\n");
-	}
-	main_thread = 0;
-	Sys_Printf("[Harmattan]: idTech4 main thread quit.\n");
-}
+#include "sys_android.cpp"
 
 void ShutdownGame(void)
 {
-    if(common->IsInitialized())
+	// if idTech4 main thread is waiting new window
+    if(q3e_running && common->IsInitialized())
     {
-        Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_CREATED); // if idTech4 main thread is waiting new window
-        Q3E_ShutdownGameMainThread();
         common->Quit();
+		Q3E_WindowChanged(NULL, WINDOW_CHANGE_THREAD_MAIN);
+		q3e_running = false;
     }
-}
-
-static void doom3_exit(void)
-{
-	printf("[Harmattan]: idTech4 exit.\n");
-
-	Q3E_CloseRedirectOutput();
-}
-
-int main(int argc, char **argv)
-{
-	Q3E_DumpArgs(argc, argv);
-
-	Q3E_RedirectOutput();
-
-	Q3E_PrintInitialContext(argc, argv);
-
-	Q3E_StartGameMainThread();
-
-	atexit(doom3_exit);
-
-	return 0;
 }
 
 intptr_t Sys_GetMainThread(void)
 {
 	return main_thread;
 }
-
-void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED)
-{
-	if (analogenabled)
-	{
-		side = (int)(KEY_MOVESPEED * analogx);
-		forward = (int)(KEY_MOVESPEED * analogy);
-	}
-}
-
-void Sys_ForceResolution(void)
-{
-    cvarSystem->SetCVarBool("r_fullscreen",  true);
-    cvarSystem->SetCVarInteger("r_mode", -1);
-
-    cvarSystem->SetCVarInteger("r_customWidth", screen_width);
-    cvarSystem->SetCVarInteger("r_customHeight", screen_height);
-
-	int autoAspectRatio = cvarSystem->GetCVarInteger("harm_r_autoAspectRatio");
-	if(autoAspectRatio > 0)
-	{
-        float r = (float) screen_width / (float) screen_height;
-
-		if(autoAspectRatio == 2)
-		{
-            idStr aspectRatio;
-			if (r > 1.7f) {
-				cvarSystem->SetCVarInteger("r_aspectRatio", 1);    // 16:9
-                aspectRatio = "16:9";
-			} else if (r > 1.55f) {
-				cvarSystem->SetCVarInteger("r_aspectRatio", 2);    // 16:10
-                aspectRatio = "16:10";
-			} else {
-				cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
-                aspectRatio = "4:3";
-			}
-
-			Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i), r_aspectRatio(%i) = %s\n",
-					   -1, screen_width, screen_height, cvarSystem->GetCVarInteger("r_aspectRatio"), aspectRatio.c_str());
-		}
-		else
-		{
-			cvarSystem->SetCVarInteger("r_aspectRatio", -1);
-            Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i), r_aspectRatio(%i) = %f\n",
-                       -1, screen_width, screen_height, cvarSystem->GetCVarInteger("r_aspectRatio"), r);
-		}
-	}
-}
-
-#include "sys_android.cpp"

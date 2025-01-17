@@ -1677,7 +1677,7 @@ CL_ParseServerInfo
 */
 static void CL_ParseServerInfo (void)
 {
-	char *str;
+	const char *str;
 	int i;
 	protocolversion_t protocol;
 	int nummodels, numsounds;
@@ -1730,16 +1730,13 @@ static void CL_ParseServerInfo (void)
 
 	if (protocol == PROTOCOL_QUAKEWORLD)
 	{
-		char gamedir[1][MAX_QPATH];
-
 		cl.qw_servercount = MSG_ReadLong(&cl_message);
 
 		str = MSG_ReadString(&cl_message, cl_readstring, sizeof(cl_readstring));
 		Con_Printf("server gamedir is %s\n", str);
-		dp_strlcpy(gamedir[0], str, sizeof(gamedir[0]));
 
 		// change gamedir if needed
-		if (!FS_ChangeGameDirs(1, gamedir, true, false))
+		if (!FS_ChangeGameDirs(1, &str, false))
 			Host_Error("CL_ParseServerInfo: unable to switch to server specified gamedir");
 
 		cl.gametype = GAME_DEATHMATCH;
@@ -1933,7 +1930,8 @@ static void CL_ParseServerInfo (void)
 			}
 
 			// start a new demo file
-			dpsnprintf (demofile, sizeof(demofile), "%s_%s.dem", Sys_TimeString (cl_autodemo_nameformat.string), cl.worldbasename);
+			Sys_TimeString(vabuf, sizeof(vabuf), cl_autodemo_nameformat.string);
+			dpsnprintf (demofile, sizeof(demofile), "%s_%s.dem", vabuf, cl.worldbasename);
 
 			Con_Printf ("Auto-recording to %s.\n", demofile);
 

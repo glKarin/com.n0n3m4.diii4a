@@ -1409,7 +1409,7 @@ void R_Shadow_RenderMode_ActiveLight(const rtlight_t *rtlight)
 void R_Shadow_RenderMode_Reset(void)
 {
 	R_Mesh_ResetTextureState();
-	R_Mesh_SetRenderTargets(r_shadow_viewfbo, r_shadow_viewdepthtexture, r_shadow_viewcolortexture, NULL, NULL, NULL);
+	R_Mesh_SetRenderTargets(r_shadow_viewfbo);
 	R_SetViewport(&r_refdef.view.viewport);
 	GL_Scissor(r_shadow_lightscissor[0], r_shadow_lightscissor[1], r_shadow_lightscissor[2], r_shadow_lightscissor[3]);
 	GL_DepthRange(0, 1);
@@ -1494,9 +1494,9 @@ void R_Shadow_ClearShadowMapTexture(void)
 	R_Mesh_ResetTextureState();
 	R_Shadow_RenderMode_Reset();
 	if (r_shadow_shadowmap2ddepthbuffer)
-		R_Mesh_SetRenderTargets(r_shadow_fbo2d, r_shadow_shadowmap2ddepthbuffer, r_shadow_shadowmap2ddepthtexture, NULL, NULL, NULL);
+		R_Mesh_SetRenderTargets(r_shadow_fbo2d);
 	else
-		R_Mesh_SetRenderTargets(r_shadow_fbo2d, r_shadow_shadowmap2ddepthtexture, NULL, NULL, NULL, NULL);
+		R_Mesh_SetRenderTargets(r_shadow_fbo2d);
 	R_SetupShader_DepthOrShadow(true, r_shadow_shadowmap2ddepthbuffer != NULL, false); // FIXME test if we have a skeletal model?
 	GL_PolygonOffset(r_shadow_shadowmapping_polygonfactor.value, r_shadow_shadowmapping_polygonoffset.value);
 	GL_DepthMask(true);
@@ -1559,9 +1559,9 @@ static void R_Shadow_RenderMode_ShadowMap(int side, int size, int x, int y)
 		R_Mesh_ResetTextureState();
 		R_Shadow_RenderMode_Reset();
 		if (r_shadow_shadowmap2ddepthbuffer)
-			R_Mesh_SetRenderTargets(r_shadow_fbo2d, r_shadow_shadowmap2ddepthbuffer, r_shadow_shadowmap2ddepthtexture, NULL, NULL, NULL);
+			R_Mesh_SetRenderTargets(r_shadow_fbo2d);
 		else
-			R_Mesh_SetRenderTargets(r_shadow_fbo2d, r_shadow_shadowmap2ddepthtexture, NULL, NULL, NULL, NULL);
+			R_Mesh_SetRenderTargets(r_shadow_fbo2d);
 		R_SetupShader_DepthOrShadow(true, r_shadow_shadowmap2ddepthbuffer != NULL, false); // FIXME test if we have a skeletal model?
 		GL_PolygonOffset(r_shadow_shadowmapping_polygonfactor.value, r_shadow_shadowmapping_polygonoffset.value);
 		GL_DepthMask(true);
@@ -1650,9 +1650,9 @@ void R_Shadow_RenderMode_DrawDeferredLight(qbool shadowmapping)
 	R_EntityMatrix(&identitymatrix);
 	GL_BlendFunc(GL_SRC_ALPHA, GL_ONE);
 	if (rsurface.rtlight->specularscale > 0 && r_shadow_gloss.integer > 0)
-		R_Mesh_SetRenderTargets(r_shadow_prepasslightingdiffusespecularfbo, r_shadow_prepassgeometrydepthbuffer, r_shadow_prepasslightingdiffusetexture, r_shadow_prepasslightingspeculartexture, NULL, NULL);
+		R_Mesh_SetRenderTargets(r_shadow_prepasslightingdiffusespecularfbo);
 	else
-		R_Mesh_SetRenderTargets(r_shadow_prepasslightingdiffusefbo, r_shadow_prepassgeometrydepthbuffer, r_shadow_prepasslightingdiffusetexture, NULL, NULL, NULL);
+		R_Mesh_SetRenderTargets(r_shadow_prepasslightingdiffusefbo);
 
 	r_shadow_usingshadowmap2d = shadowmapping;
 
@@ -3735,10 +3735,6 @@ static void R_Shadow_DrawLightShadowMaps(rtlight_t *rtlight)
 	if (R_Shadow_ScissorForBBox(rtlight->cached_cullmins, rtlight->cached_cullmaxs))
 		return;
 
-	// don't let sound skip if going slow
-	if (r_refdef.scene.extraupdate)
-		S_ExtraUpdate();
-
 	numlightentities = rtlight->cached_numlightentities;
 	numlightentities_noselfshadow = rtlight->cached_numlightentities_noselfshadow;
 	numshadowentities = rtlight->cached_numshadowentities;
@@ -3859,10 +3855,6 @@ static void R_Shadow_DrawLight(rtlight_t *rtlight)
 	if (R_Shadow_ScissorForBBox(rtlight->cached_cullmins, rtlight->cached_cullmaxs))
 		return;
 
-	// don't let sound skip if going slow
-	if (r_refdef.scene.extraupdate)
-		S_ExtraUpdate();
-
 	numlightentities = rtlight->cached_numlightentities;
 	numlightentities_noselfshadow = rtlight->cached_numlightentities_noselfshadow;
 	numsurfaces = rtlight->cached_numsurfaces;
@@ -3976,7 +3968,7 @@ void R_Shadow_DrawPrepass(void)
 	GL_BlendFunc(GL_ONE, GL_ZERO);
 	GL_Color(1,1,1,1);
 	GL_DepthTest(true);
-	R_Mesh_SetRenderTargets(r_shadow_prepassgeometryfbo, r_shadow_prepassgeometrydepthbuffer, r_shadow_prepassgeometrynormalmaptexture, NULL, NULL, NULL);
+	R_Mesh_SetRenderTargets(r_shadow_prepassgeometryfbo);
 	Vector4Set(clearcolor, 0.5f,0.5f,0.5f,1.0f);
 	GL_Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, clearcolor, 1.0f, 0);
 	if (r_timereport_active)
@@ -4003,7 +3995,7 @@ void R_Shadow_DrawPrepass(void)
 	GL_ColorMask(1,1,1,1);
 	GL_Color(1,1,1,1);
 	GL_DepthTest(true);
-	R_Mesh_SetRenderTargets(r_shadow_prepasslightingdiffusespecularfbo, r_shadow_prepassgeometrydepthbuffer, r_shadow_prepasslightingdiffusetexture, r_shadow_prepasslightingspeculartexture, NULL, NULL);
+	R_Mesh_SetRenderTargets(r_shadow_prepasslightingdiffusespecularfbo);
 	Vector4Set(clearcolor, 0, 0, 0, 0);
 	GL_Clear(GL_COLOR_BUFFER_BIT, clearcolor, 1.0f, 0);
 	if (r_timereport_active)
@@ -4090,19 +4082,19 @@ void R_Shadow_PrepareLights(void)
 
 			// set up the geometry pass fbo (depth + normalmap)
 			r_shadow_prepassgeometryfbo = R_Mesh_CreateFramebufferObject(r_shadow_prepassgeometrydepthbuffer, r_shadow_prepassgeometrynormalmaptexture, NULL, NULL, NULL);
-			R_Mesh_SetRenderTargets(r_shadow_prepassgeometryfbo, r_shadow_prepassgeometrydepthbuffer, r_shadow_prepassgeometrynormalmaptexture, NULL, NULL, NULL);
+			R_Mesh_SetRenderTargets(r_shadow_prepassgeometryfbo);
 			// render depth into a renderbuffer and other important properties into the normalmap texture
 
 			// set up the lighting pass fbo (diffuse + specular)
 			r_shadow_prepasslightingdiffusespecularfbo = R_Mesh_CreateFramebufferObject(r_shadow_prepassgeometrydepthbuffer, r_shadow_prepasslightingdiffusetexture, r_shadow_prepasslightingspeculartexture, NULL, NULL);
-			R_Mesh_SetRenderTargets(r_shadow_prepasslightingdiffusespecularfbo, r_shadow_prepassgeometrydepthbuffer, r_shadow_prepasslightingdiffusetexture, r_shadow_prepasslightingspeculartexture, NULL, NULL);
+			R_Mesh_SetRenderTargets(r_shadow_prepasslightingdiffusespecularfbo);
 			// render diffuse into one texture and specular into another,
 			// with depth and normalmap bound as textures,
 			// with depth bound as attachment as well
 
 			// set up the lighting pass fbo (diffuse)
 			r_shadow_prepasslightingdiffusefbo = R_Mesh_CreateFramebufferObject(r_shadow_prepassgeometrydepthbuffer, r_shadow_prepasslightingdiffusetexture, NULL, NULL, NULL);
-			R_Mesh_SetRenderTargets(r_shadow_prepasslightingdiffusefbo, r_shadow_prepassgeometrydepthbuffer, r_shadow_prepasslightingdiffusetexture, NULL, NULL, NULL);
+			R_Mesh_SetRenderTargets(r_shadow_prepasslightingdiffusefbo);
 			// render diffuse into one texture,
 			// with depth and normalmap bound as textures,
 			// with depth bound as attachment as well
@@ -4219,12 +4211,7 @@ void R_Shadow_DrawShadowMaps(void)
 
 	// render model shadowmaps (r_shadows 2) if desired which will be sampled in the forward pass
 	if (r_shadow_shadowmapatlas_modelshadows_size)
-	{
 		R_Shadow_DrawModelShadowMaps();
-		// don't let sound skip if going slow
-		if (r_refdef.scene.extraupdate)
-			S_ExtraUpdate();
-	}
 
 	if (R_Shadow_ShadowMappingEnabled())
 	{

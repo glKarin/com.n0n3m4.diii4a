@@ -1,15 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11059"
-    android:versionName="1.1.0harmattan59"
+    android:versionCode="11060"
+    android:versionName="1.1.0harmattan60"
     android:installLocation="preferExternal"
     >
 
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
-    <uses-feature android:glEsVersion="0x00030000" />
-    <uses-feature android:glEsVersion="0x00030001" />
-    <uses-feature android:glEsVersion="0x00030002" />
+    <uses-feature android:glEsVersion="0x00030000" android:required="false" />
+    <uses-feature android:glEsVersion="0x00030001" android:required="false" />
+    <uses-feature android:glEsVersion="0x00030002" android:required="false" />
+    <uses-feature android:name="android.hardware.vulkan.version" android:required="false" />
+
     <uses-sdk
         android:targetSdkVersion="30"
         tools:ignore="GradleOverrides" />

@@ -14,7 +14,7 @@ typedef void (*curl_callback_t) (int status, size_t length_received, unsigned ch
 // code is one of the CURLCBSTATUS constants, or the HTTP error code (when > 0).
 
 void Curl_Frame(void);
-int Curl_Select(int timeout_ms);
+bool Curl_Select(int timeout_ms);
 qbool Curl_Running(void);
 qbool Curl_Begin_ToFile(const char *URL, double maxspeed, const char *name, int loadtype, qbool forthismap);
 

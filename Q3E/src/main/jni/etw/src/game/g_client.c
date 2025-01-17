@@ -956,7 +956,7 @@ void respawn(gentity_t *ent)
 
 	G_DPrintf("Respawning %s, %i lives left\n", ent->client->pers.netname, ent->client->ps.persistant[PERS_RESPAWNS_LEFT]);
 
-	ClientSpawn(ent, qfalse, qfalse, qtrue);
+	ClientSpawn(ent, qfalse, qfalse, qtrue, qtrue);
 }
 
 /**
@@ -1088,18 +1088,6 @@ static void AddExtraSpawnAmmo(gclient_t *client, weapon_t weaponNum)
  */
 void AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo, int ammoclip, qboolean setcurrent)
 {
-	if (team_riflegrenades.integer == 0)
-	{
-		switch (weapon)
-		{
-		case WP_GPG40:
-		case WP_M7:
-			return;
-		default:
-			break;
-		}
-	}
-
 	COM_BitSet(client->ps.weapons, weapon);
 	client->ps.ammoclip[GetWeaponTableData(weapon)->clipIndex] = ammoclip;
 	client->ps.ammo[GetWeaponTableData(weapon)->ammoIndex]    += ammo;
@@ -1122,6 +1110,10 @@ void AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo, int ammocli
 	// skill handling
 	AddExtraSpawnAmmo(client, weapon);
 
+#ifdef FEATURE_OMNIBOT
+	Bot_Event_AddWeapon(client->ps.clientNum, Bot_WeaponGameToBot(weapon));
+#endif
+
 	// add alternative weapon if exist for primary weapon
 	if (GetWeaponTableData(weapon)->weapAlts)
 	{
@@ -1142,10 +1134,6 @@ void AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo, int ammocli
 		Bot_Event_AddWeapon(client->ps.clientNum, Bot_WeaponGameToBot(GetWeaponTableData(weapon)->weapAlts));
 #endif
 	}
-
-#ifdef FEATURE_OMNIBOT
-	Bot_Event_AddWeapon(client->ps.clientNum, Bot_WeaponGameToBot(weapon));
-#endif
 }
 
 /**
@@ -1271,6 +1259,13 @@ void SetWolfSpawnWeapons(gclient_t *client)
 			// special check for riflenade, we need the launcher to use it
 			if (GetWeaponTableData(weaponClassInfo->weapon)->type & WEAPON_TYPE_RIFLENADE)
 			{
+				// rifle nade is disable
+				if (!team_riflegrenades.integer)
+				{
+					continue;
+				}
+
+				// ensure we have the rifle
 				if (!COM_BitCheck(client->ps.weapons, GetWeaponTableData(weaponClassInfo->weapon)->weapAlts))
 				{
 					continue;
@@ -1334,7 +1329,7 @@ int G_CountTeamMedics(team_t team, qboolean alivecheck)
 void AddMedicTeamBonus(gclient_t *client)
 {
 	// compute health mod
-	client->pers.maxHealth = 100 + 10 * G_CountTeamMedics(client->sess.sessionTeam, qfalse);
+	client->pers.maxHealth = DEFAULT_HEALTH + 10 * G_CountTeamMedics(client->sess.sessionTeam, qfalse);
 
 	if (client->pers.maxHealth > 125)
 	{
@@ -2647,7 +2642,7 @@ void ClientBegin(int clientNum)
 		G_clientFlagIndicator(ent);
 	}
 
-	ClientSpawn(ent, qfalse, qtrue, qtrue);
+	ClientSpawn(ent, qfalse, qtrue, qtrue, qfalse);
 
 	if (client->sess.sessionTeam == TEAM_AXIS || client->sess.sessionTeam == TEAM_ALLIES)
 	{
@@ -2900,7 +2895,7 @@ static qboolean isMortalSelfDamage(gentity_t *ent)
  * @param[in] teamChange
  * @param[in] restoreHealth
  */
-void ClientSpawn(gentity_t *ent, qboolean revived, qboolean teamChange, qboolean restoreHealth)
+void ClientSpawn(gentity_t *ent, qboolean revived, qboolean teamChange, qboolean restoreHealth, qboolean toggleTeleport)
 {
 	int                index = ent - g_entities;
 	vec3_t             spawn_origin, spawn_angles;
@@ -2914,7 +2909,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived, qboolean teamChange, qboolean
 	int                savedPing;
 	int                savedTeam;
 	int                savedDeathTime;
-	int                oldWeapon, oldNextWeapon, oldWeaponstate, oldSilencedSideArm;
+	int                oldWeapon, oldNextWeapon, oldSilencedSideArm;
 	int                oldAmmo[MAX_WEAPONS];                          // total amount of ammo
 	int                oldAmmoclip[MAX_WEAPONS];                      // ammo in clip
 	int                oldWeapons[MAX_WEAPONS / (sizeof(int) * 8)];   // 64 bits for weapons held
@@ -2964,9 +2959,13 @@ void ClientSpawn(gentity_t *ent, qboolean revived, qboolean teamChange, qboolean
 
 	client->pers.teamState.state = TEAM_ACTIVE;
 
-	// toggle the teleport bit so the client knows to not lerp
-	flags  = ent->client->ps.eFlags & EF_TELEPORT_BIT;
-	flags ^= EF_TELEPORT_BIT;
+	flags = ent->client->ps.eFlags & EF_TELEPORT_BIT;
+
+	if (toggleTeleport)
+	{
+		// toggle the teleport bit so the client knows to not lerp
+		flags ^= EF_TELEPORT_BIT;
+	}
 
 	// unlagged reset history markers
 	G_ResetMarkers(ent);
@@ -2993,7 +2992,6 @@ void ClientSpawn(gentity_t *ent, qboolean revived, qboolean teamChange, qboolean
 	{
 		oldWeapon          = client->ps.weapon;
 		oldNextWeapon      = client->ps.nextWeapon;
-		oldWeaponstate     = client->ps.weaponstate;
 		oldSilencedSideArm = client->pmext.silencedSideArm;
 
 		Com_Memcpy(oldAmmo, client->ps.ammo, sizeof(int) * MAX_WEAPONS);
@@ -3231,7 +3229,12 @@ void ClientSpawn(gentity_t *ent, qboolean revived, qboolean teamChange, qboolean
 		}
 		else
 		{
-			if (COM_BitCheck(client->ps.weapons, oldWeapon))
+			// unset some alt weapons
+			if (GetWeaponTableData(oldWeapon)->weapAlts && GetWeaponTableData(oldWeapon)->type & (WEAPON_TYPE_SET | WEAPON_TYPE_SCOPED))
+			{
+				client->ps.weapon = GetWeaponTableData(oldWeapon)->weapAlts;
+			}
+			else if (COM_BitCheck(client->ps.weapons, oldWeapon))
 			{
 				client->ps.weapon = oldWeapon;
 			}
@@ -3244,16 +3247,6 @@ void ClientSpawn(gentity_t *ent, qboolean revived, qboolean teamChange, qboolean
 			}
 
 			client->pmext.silencedSideArm = oldSilencedSideArm;
-		}
-
-		// cgame's prevent the flying nade effect (best visible with M7 when swapping while raising)
-		if (BG_simpleWeaponState(oldWeaponstate) == WSTATE_SWITCH)
-		{
-			client->ps.nextWeapon = client->ps.weapon;
-		}
-		else
-		{
-			client->ps.nextWeapon = oldNextWeapon;
 		}
 	}
 
@@ -3526,7 +3519,7 @@ void ClientDisconnect(int clientNum)
 
 	// send effect if they were completely connected
 	if (ent->client->pers.connected == CON_CONNECTED
-		&& ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+	    && ent->client->sess.sessionTeam != TEAM_SPECTATOR)
 	{
 		if (!(ent->client->ps.pm_flags & PMF_LIMBO))
 		{
@@ -3656,7 +3649,12 @@ float ClientHitboxMaxZ(gentity_t *hitEnt)
 
 		return PRONE_BODYHEIGHT;
 	}
-	else if (hitEnt->client->ps.eFlags & EF_CROUCHING)
+	else if (
+		// crouching on the ground
+		(hitEnt->client->ps.eFlags & EF_CROUCHING && hitEnt->client->ps.groundEntityNum != ENTITYNUM_NONE)
+		// or is swimming
+		|| (hitEnt->legsFrame.animation->movetype & ((1 << ANIM_MT_SWIM) | (1 << ANIM_MT_SWIMBK)))
+		)
 	{
 		// Crouched hitbox height is calculated with head computed from G_BuildHead to stay right under head
 		if (hitEnt->client->tempHead)

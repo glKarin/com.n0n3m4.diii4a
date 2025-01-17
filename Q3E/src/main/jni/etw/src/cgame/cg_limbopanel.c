@@ -82,13 +82,13 @@ static panel_button_text_t titleLimboFont =
 //	&cgs.media.limboFont1,
 //};
 
-static panel_button_text_t titleLimboFontBigCenter =
-{
-	0.3f,                  0.3f,
-	{ 1.f,                 1.f,              1.f,  0.6f },
-	0,                     ITEM_ALIGN_CENTER,
-	&cgs.media.limboFont1,
-};
+// static panel_button_text_t titleLimboFontBigCenter =
+// {
+// 	0.3f,                  0.3f,
+// 	{ 1.f,                 1.f,              1.f,  0.6f },
+// 	0,                     ITEM_ALIGN_CENTER,
+// 	&cgs.media.limboFont1,
+// };
 
 static panel_button_text_t spawnLimboFont =
 {
@@ -167,18 +167,18 @@ static panel_button_t rightLimboPannel =
 #define MEDAL_PIC_X     450.f
 #define MEDAL_PIC_SIZE  (630.f - MEDAL_PIC_X)
 #define MEDAL_PIC(number)                \
-	static panel_button_t medalPic ## number = {         \
-		NULL,                                   \
-		NULL,                                   \
-		{ MEDAL_PIC_X + MEDAL_PIC_GAP + ((number) * (MEDAL_PIC_GAP + MEDAL_PIC_WIDTH)),119,                                                                           MEDAL_PIC_WIDTH, 26 }, \
-		{ number,                  0,                                                                             0,               0, 0, 0, 0, 0},        \
-		NULL,                      /* font       */              \
-		NULL,                      /* keyDown    */                  \
-		NULL,                      /* keyUp  */                  \
-		CG_LimboPanel_RenderMedal,              \
-		NULL,                                   \
-		0,                                   \
-	}
+		static panel_button_t medalPic ## number = {         \
+			NULL,                                   \
+			NULL,                                   \
+			{ MEDAL_PIC_X + MEDAL_PIC_GAP + ((number) * (MEDAL_PIC_GAP + MEDAL_PIC_WIDTH)),119,                                                                           MEDAL_PIC_WIDTH, 26 }, \
+			{ number,                  0,                                                                             0,               0, 0, 0, 0, 0},        \
+			NULL,                      /* font       */              \
+			NULL,                      /* keyDown    */                  \
+			NULL,                      /* keyUp  */                  \
+			CG_LimboPanel_RenderMedal,              \
+			NULL,                                   \
+			0,                                   \
+		}
 
 MEDAL_PIC(0);
 MEDAL_PIC(1);
@@ -195,18 +195,18 @@ MEDAL_PIC(6);
 #define SKILL_PIC_X     450.f
 #define SKILL_PIC_SIZE  (630.f - SKILL_PIC_X)
 #define SKILL_PIC(number)                \
-	static panel_button_t skillPic ## number = {         \
-		NULL,                                   \
-		NULL,                                   \
-		{ SKILL_PIC_X + SKILL_PIC_GAP + ((number) * (SKILL_PIC_GAP + SKILL_PIC_WIDTH)),119,                                                                           SKILL_PIC_WIDTH, 26 }, \
-		{ number,                     0,                                                                             0,               0, 0, 0, 0, 0}, \
-		NULL,                         /* font       */              \
-		NULL,                         /* keyDown    */              \
-		NULL,                         /* keyUp  */                  \
-		CG_LimboPanel_RenderPrestige,        \
-		NULL,                                \
-		0,                                   \
-	}
+		static panel_button_t skillPic ## number = {         \
+			NULL,                                   \
+			NULL,                                   \
+			{ SKILL_PIC_X + SKILL_PIC_GAP + ((number) * (SKILL_PIC_GAP + SKILL_PIC_WIDTH)),119,                                                                           SKILL_PIC_WIDTH, 26 }, \
+			{ number,                     0,                                                                             0,               0, 0, 0, 0, 0}, \
+			NULL,                         /* font       */              \
+			NULL,                         /* keyDown    */              \
+			NULL,                         /* keyUp  */                  \
+			CG_LimboPanel_RenderPrestige,        \
+			NULL,                                \
+			0,                                   \
+		}
 
 SKILL_PIC(0);
 SKILL_PIC(1);
@@ -226,45 +226,45 @@ SKILL_PIC(6);
 #define TEAM_COUNTER_SPACING    4.f
 
 #define TEAM_COUNTER(number)             \
-	static panel_button_t teamCounter ## number = {      \
-		NULL,                                   \
-		NULL,                                   \
-		{ TEAM_COUNTER_X + TEAM_COUNTER_GAP + ((number) * (TEAM_COUNTER_GAP + TEAM_COUNTER_WIDTH)),236,                                                                                       TEAM_COUNTER_WIDTH, 14 },  \
-		{ 1,                         number,                                                                                    0,                  0, 0, 0, 0, 0},        \
-		NULL,                        /* font       */              \
-		NULL,                        /* keyDown    */                  \
-		NULL,                        /* keyUp  */                  \
-		CG_LimboPanel_RenderCounter,            \
-		NULL,                                   \
-		0,                                   \
-	};                                          \
-	static panel_button_t teamCounterLight ## number = { \
-		NULL,                                   \
-		NULL,                                   \
-		{ TEAM_COUNTER_X + TEAM_COUNTER_GAP + ((number) * (TEAM_COUNTER_GAP + TEAM_COUNTER_WIDTH)) - 20,236,                                                                                            16, 16 }, \
-		{ 1,                       number,                                                                                         0,  0, 0, 0, 0, 0},        \
-		NULL,                      /* font       */              \
-		NULL,                      /* keyDown    */                  \
-		NULL,                      /* keyUp  */                  \
-		CG_LimboPanel_RenderLight,              \
-		NULL,                                   \
-		0,                                   \
-	};                                          \
-	static panel_button_t teamButton ## number = {       \
-		NULL,                                   \
-		NULL,                                   \
-		{ TEAM_COUNTER_X + TEAM_COUNTER_GAP + ((number) * (TEAM_COUNTER_GAP + TEAM_COUNTER_WIDTH) + (TEAM_COUNTER_BUTTON_DIFF / 2.f)) - 17 + TEAM_COUNTER_SPACING, \
-		  188 + TEAM_COUNTER_SPACING, \
-		  TEAM_COUNTER_WIDTH - TEAM_COUNTER_BUTTON_DIFF + 20 - 2 * TEAM_COUNTER_SPACING, \
-		  44 - 2 * TEAM_COUNTER_SPACING },  \
-		{ number,                                                                        0,0, 0, 0, 0, 0, 0 },        \
-		NULL,                                                                            /* font       */              \
-		CG_LimboPanel_TeamButton_KeyDown,                                                /* keyDown    */ \
-		NULL,                                                                            /* keyUp  */                  \
-		CG_LimboPanel_RenderTeamButton,         \
-		NULL,                                   \
-		0,                                   \
-	}
+		static panel_button_t teamCounter ## number = {      \
+			NULL,                                   \
+			NULL,                                   \
+			{ TEAM_COUNTER_X + TEAM_COUNTER_GAP + ((number) * (TEAM_COUNTER_GAP + TEAM_COUNTER_WIDTH)),236,                                                                                       TEAM_COUNTER_WIDTH, 14 },  \
+			{ 1,                         number,                                                                                    0,                  0, 0, 0, 0, 0},        \
+			NULL,                        /* font       */              \
+			NULL,                        /* keyDown    */                  \
+			NULL,                        /* keyUp  */                  \
+			CG_LimboPanel_RenderCounter,            \
+			NULL,                                   \
+			0,                                   \
+		};                                          \
+		static panel_button_t teamCounterLight ## number = { \
+			NULL,                                   \
+			NULL,                                   \
+			{ TEAM_COUNTER_X + TEAM_COUNTER_GAP + ((number) * (TEAM_COUNTER_GAP + TEAM_COUNTER_WIDTH)) - 20,236,                                                                                            16, 16 }, \
+			{ 1,                       number,                                                                                         0,  0, 0, 0, 0, 0},        \
+			NULL,                      /* font       */              \
+			NULL,                      /* keyDown    */                  \
+			NULL,                      /* keyUp  */                  \
+			CG_LimboPanel_RenderLight,              \
+			NULL,                                   \
+			0,                                   \
+		};                                          \
+		static panel_button_t teamButton ##       number = {       \
+			NULL,                                   \
+			NULL,                                   \
+			{ TEAM_COUNTER_X + TEAM_COUNTER_GAP + ((number) * (TEAM_COUNTER_GAP + TEAM_COUNTER_WIDTH) + (TEAM_COUNTER_BUTTON_DIFF / 2.f)) - 17 + TEAM_COUNTER_SPACING, \
+			  188 + TEAM_COUNTER_SPACING, \
+			  TEAM_COUNTER_WIDTH - TEAM_COUNTER_BUTTON_DIFF + 20 - 2 * TEAM_COUNTER_SPACING, \
+			  44 - 2 * TEAM_COUNTER_SPACING },  \
+			{ number,                                                                        0,0, 0, 0, 0, 0, 0 },        \
+			NULL,                                                                            /* font       */              \
+			CG_LimboPanel_TeamButton_KeyDown,                                                /* keyDown    */ \
+			NULL,                                                                            /* keyUp  */                  \
+			CG_LimboPanel_RenderTeamButton,         \
+			NULL,                                   \
+			0,                                   \
+		}
 
 TEAM_COUNTER(0);
 TEAM_COUNTER(1);
@@ -278,30 +278,30 @@ TEAM_COUNTER(2);
 //#define CLASS_COUNTER_LIGHT_DIFF 4.f
 #define CLASS_COUNTER_BUTTON_DIFF (-18.f)
 #define CLASS_COUNTER(number)            \
-	static panel_button_t classCounter ## number = {     \
-		NULL,                                   \
-		NULL,                                   \
-		{ CLASS_COUNTER_X + CLASS_COUNTER_GAP + ((number) * (CLASS_COUNTER_GAP + CLASS_COUNTER_WIDTH)),302,                                                                                           CLASS_COUNTER_WIDTH, 14 }, \
-		{ 0,                         number,                                                                                        0,                   0, 0, 0, 0, 0},        \
-		NULL,                        /* font       */              \
-		NULL,                        /* keyDown    */                  \
-		NULL,                        /* keyUp  */                  \
-		CG_LimboPanel_RenderCounter,            \
-		NULL,                                   \
-		0,                                      \
-	};                                          \
-	static panel_button_t classButton ## number = {      \
-		NULL,                                   \
-		NULL,                                   \
-		{ CLASS_COUNTER_X + CLASS_COUNTER_GAP + ((number) * (CLASS_COUNTER_GAP + CLASS_COUNTER_WIDTH)) + (CLASS_COUNTER_BUTTON_DIFF / 2.f),266,                                                                                                                               CLASS_COUNTER_WIDTH - CLASS_COUNTER_BUTTON_DIFF, 34 },   \
-		{ 0,                             number,                                                                                                                            0,                                               0, 0, 0, 0, 0},        \
-		NULL,                            /* font       */              \
-		CG_LimboPanel_ClassButton_KeyDown,/* keyDown   */  \
-		NULL,                            /* keyUp  */                  \
-		CG_LimboPanel_RenderClassButton,        \
-		NULL,                                   \
-		0,                                      \
-	}
+		static panel_button_t classCounter ## number = {     \
+			NULL,                                   \
+			NULL,                                   \
+			{ CLASS_COUNTER_X + CLASS_COUNTER_GAP + ((number) * (CLASS_COUNTER_GAP + CLASS_COUNTER_WIDTH)),302,                                                                                           CLASS_COUNTER_WIDTH, 14 }, \
+			{ 0,                         number,                                                                                        0,                   0, 0, 0, 0, 0},        \
+			NULL,                        /* font       */              \
+			NULL,                        /* keyDown    */                  \
+			NULL,                        /* keyUp  */                  \
+			CG_LimboPanel_RenderCounter,            \
+			NULL,                                   \
+			0,                                      \
+		};                                          \
+		static panel_button_t classButton ## number = {      \
+			NULL,                                   \
+			NULL,                                   \
+			{ CLASS_COUNTER_X + CLASS_COUNTER_GAP + ((number) * (CLASS_COUNTER_GAP + CLASS_COUNTER_WIDTH)) + (CLASS_COUNTER_BUTTON_DIFF / 2.f),266,                                                                                                                               CLASS_COUNTER_WIDTH - CLASS_COUNTER_BUTTON_DIFF, 34 },   \
+			{ 0,                             number,                                                                                                                            0,                                               0, 0, 0, 0, 0},        \
+			NULL,                            /* font       */              \
+			CG_LimboPanel_ClassButton_KeyDown,/* keyDown   */  \
+			NULL,                            /* keyUp  */                  \
+			CG_LimboPanel_RenderClassButton,        \
+			NULL,                                   \
+			0,                                      \
+		}
 
 static panel_button_t classBar =
 {
@@ -338,18 +338,18 @@ CLASS_COUNTER(3);
 CLASS_COUNTER(4);
 
 #define FILTER_BUTTON(number) \
-	static panel_button_t filterButton ## number = { \
-		NULL,                               \
-		NULL,                               \
-		{ 14,                      50 + ((number) * 30), 26, 26 },     \
-		{ number,                  0,                    0,  0, 0, 0, 0, 0},    \
-		NULL,                      /* font       */          \
-		CG_LimboPanel_Filter_KeyDown,/* keyDown    */              \
-		NULL,                      /* keyUp  */              \
-		CG_LimboPanel_Filter_Draw,          \
-		NULL,                               \
-		0,                                  \
-	}
+		static panel_button_t filterButton ## number = { \
+			NULL,                               \
+			NULL,                               \
+			{ 14,                      50 + ((number) * 30), 26, 26 },     \
+			{ number,                  0,                    0,  0, 0, 0, 0, 0},    \
+			NULL,                      /* font       */          \
+			CG_LimboPanel_Filter_KeyDown,/* keyDown    */              \
+			NULL,                      /* keyUp  */              \
+			CG_LimboPanel_Filter_Draw,          \
+			NULL,                               \
+			0,                                  \
+		}
 
 FILTER_BUTTON(0);
 FILTER_BUTTON(1);
@@ -376,18 +376,18 @@ static panel_button_t filterTitleText =
 };
 
 #define LEFT_FRAME(shader, number, x, y, w, h) \
-	static panel_button_t leftFrame0 ## number = {   \
-		shader,                             \
-		NULL,                               \
-		{ x,                       y, w, h },                     \
-		{ 0,                       0, 0, 0, 0, 0, 0, 0},         \
-		NULL,                      /* font       */          \
-		NULL,                      /* keyDown    */              \
-		NULL,                      /* keyUp  */              \
-		BG_PanelButtonsRender_Img,          \
-		NULL,                               \
-		0,                                  \
-	}
+		static panel_button_t leftFrame0 ## number = {   \
+			shader,                             \
+			NULL,                               \
+			{ x,                       y, w, h },                     \
+			{ 0,                       0, 0, 0, 0, 0, 0, 0},         \
+			NULL,                      /* font       */          \
+			NULL,                      /* keyDown    */              \
+			NULL,                      /* keyUp  */              \
+			BG_PanelButtonsRender_Img,          \
+			NULL,                               \
+			0,                                  \
+		}
 
 #define LF_X1 64
 #define LF_X2 416
@@ -578,7 +578,7 @@ static panel_button_t playerPrestigeIcon =
 static panel_button_t spawnPointText =
 {
 	NULL,
-	"AUTOSPAWN",
+	"AUTO SPAWNPOINT",
 	{ 150,                     392,0, 0 },
 	{ 0,                       0,  0, 0, 0, 0, 0, 0},
 	&spawnLimboFont,           /* font        */
@@ -1066,61 +1066,61 @@ static panel_button_t nameEdit =
 	0
 };
 
-static panel_button_t plusButton =
-{
-	NULL,
-	NULL,
-	{ 18,                     325,  18, 12 },
-	{ 12,                     0,    0,  0, 0, 0, 0, 0},
-	NULL,                     // font
-	CG_LimboPanel_PlusButton_KeyDown,// keyDown
-	NULL,                     // keyUp
-	CG_LimboPanel_Border_Draw,
-	NULL,
-	0
-};
+// static panel_button_t plusButton =
+// {
+// 	NULL,
+// 	NULL,
+// 	{ 18,                     325,  18, 12 },
+// 	{ 12,                     0,    0,  0, 0, 0, 0, 0},
+// 	NULL,                     // font
+// 	CG_LimboPanel_PlusButton_KeyDown,// keyDown
+// 	NULL,                     // keyUp
+// 	CG_LimboPanel_Border_Draw,
+// 	NULL,
+// 	0
+// };
 
-static panel_button_t plusButtonText =
-{
-	NULL,
-	"+",
-	{ 18,                      323,  18, 12 },
-	{ 12,                      0,    0,  0, 0, 0, 0, 0},
-	&titleLimboFontBigCenter,  // font
-	NULL,                      // keyDown
-	NULL,                      // keyUp
-	BG_PanelButtonsRender_Text,
-	NULL,
-	0
-};
+// static panel_button_t plusButtonText =
+// {
+// 	NULL,
+// 	"+",
+// 	{ 18,                      323,  18, 12 },
+// 	{ 12,                      0,    0,  0, 0, 0, 0, 0},
+// 	&titleLimboFontBigCenter,  // font
+// 	NULL,                      // keyDown
+// 	NULL,                      // keyUp
+// 	BG_PanelButtonsRender_Text,
+// 	NULL,
+// 	0
+// };
 
-static panel_button_t minusButton =
-{
-	NULL,
-	NULL,
-	{ 18,                     348,  18, 12 },
-	{ 12,                     0,    0,  0, 0, 0, 0, 0},
-	NULL,                     // font
-	CG_LimboPanel_MinusButton_KeyDown,// keyDown
-	NULL,                     // keyUp
-	CG_LimboPanel_Border_Draw,
-	NULL,
-	0
-};
+// static panel_button_t minusButton =
+// {
+// 	NULL,
+// 	NULL,
+// 	{ 18,                     348,  18, 12 },
+// 	{ 12,                     0,    0,  0, 0, 0, 0, 0},
+// 	NULL,                     // font
+// 	CG_LimboPanel_MinusButton_KeyDown,// keyDown
+// 	NULL,                     // keyUp
+// 	CG_LimboPanel_Border_Draw,
+// 	NULL,
+// 	0
+// };
 
-static panel_button_t minusButtonText =
-{
-	NULL,
-	"-",
-	{ 18,                      346,  18, 12 },
-	{ 12,                      0,    0,  0, 0, 0, 0, 0},
-	&titleLimboFontBigCenter,  // font
-	NULL,                      // keyDown
-	NULL,                      // keyUp
-	BG_PanelButtonsRender_Text,
-	NULL,
-	0
-};
+// static panel_button_t minusButtonText =
+// {
+// 	NULL,
+// 	"-",
+// 	{ 18,                      346,  18, 12 },
+// 	{ 12,                      0,    0,  0, 0, 0, 0, 0},
+// 	&titleLimboFontBigCenter,  // font
+// 	NULL,                      // keyDown
+// 	NULL,                      // keyUp
+// 	BG_PanelButtonsRender_Text,
+// 	NULL,
+// 	0
+// };
 
 static panel_button_t *limboPanelButtons[] =
 {
@@ -1184,8 +1184,12 @@ static panel_button_t *limboPanelButtons[] =
 
 	&briefingButton,
 
-	&plusButton,              &plusButtonText,
-	&minusButton,             &minusButtonText,
+	// NOTE : these have been taken out, as they are messing up the minimap
+	//		  icons as well and serve little to not purpose in the command map
+	//		  to begin with - instead the icon default size should simply work
+	//		  out of the box
+	// &plusButton,              &plusButtonText,
+	// &minusButton,             &minusButtonText,
 
 	NULL,
 };
@@ -1391,6 +1395,21 @@ void CG_LimboPanel_SendSetupMsg(qboolean forceteam)
 		team = cgs.clientinfo[cg.clientNum].team;
 	}
 
+	// if the secondary weapon wasn't manually set, we set the default weapon
+	// for it once again - this is specifically for the edge case that a soldier
+	// with the smg soldier skill switches to a heavywep - for that case, once
+	// the class switch happens, where SetDefaultWeapon is called first, the
+	// default primary slot is the SMG itself, that thus won't also be selected
+	// as the secondary weapon - doing it again here shortly before sending the
+	// team command however, makes sure that when a user never even switched to
+	// the secondary weapon slot, we SetDefaultWeapon again and as e.g. the
+	// heavywep would be already set in primary and the call successfully would
+	// return the SMG et voila
+	if (!cgs.ccManuallySetSecondaryWeapon)
+	{
+		CG_LimboPanel_SetDefaultWeapon(SECONDARY_SLOT);
+	}
+
 	if (team == TEAM_SPECTATOR)
 	{
 		if (forceteam)
@@ -1554,6 +1573,7 @@ qboolean CG_LimboPanel_TeamButton_KeyDown(panel_button_t *button, int key)
 
 			CG_LimboPanel_RequestWeaponStats();
 
+			cgs.ccManuallySetSecondaryWeapon = qfalse;
 			cgs.limboLoadoutModified = qtrue;
 		}
 
@@ -1667,7 +1687,18 @@ qboolean CG_LimboPanel_ClassButton_KeyDown(panel_button_t *button, int key)
 
 			CG_LimboPanel_RequestWeaponStats();
 
-			CG_LimboPanel_SendSetupMsg(qfalse);
+			// NOTE : It used to be the case that by default selecting a class
+			// automatically makes it take effect - this however means that you
+			// can't look up via limbo menu e.g. if a Soldier weapon is
+			// currently available without also switching to the Soldier class.
+			//
+			// This is by default now taken out, but can be re-enabled via
+			// 'cg_limboClassClickConfirm'.
+			if (cg_limboClassClickConfirm.integer)
+			{
+				cgs.ccManuallySetSecondaryWeapon = qfalse;
+				CG_LimboPanel_SendSetupMsg(qfalse);
+			}
 		}
 
 		return qtrue;
@@ -2483,6 +2514,11 @@ qboolean CG_LimboPanel_WeaponLights_KeyDown(panel_button_t *button, int key)
 		SOUND_SELECT;
 
 		cgs.ccSelectedWeaponSlot = button->data[0];
+
+		if (cgs.ccSelectedWeaponSlot == 0) {
+			cgs.ccManuallySetSecondaryWeapon = qtrue;
+		}
+
 		CG_LimboPanel_RequestWeaponStats();
 		return qtrue;
 	}
@@ -2533,6 +2569,24 @@ qboolean CG_LimboPanel_WeaponPanel_KeyDown(panel_button_t *button, int key)
 }
 
 /**
+ * @brief Select 'weaponIndex'th weapon button when weapon panel is being shown.
+ * @param[in] button
+ * @param[in] weaponIndex
+ */
+static void CG_LimboPanel_WeaponPanel_SelectButton(panel_button_t *button, int weaponIndex)
+{
+
+	CG_LimboPanel_SetSelectedWeaponNum(cgs.ccSelectedWeaponSlot, (weapon_t)button->data[weaponIndex]);
+
+	if (!CG_LimboPanel_IsValidSelectedWeapon(SECONDARY_SLOT))
+	{
+		CG_LimboPanel_SetDefaultWeapon(SECONDARY_SLOT);
+	}
+
+	CG_LimboPanel_RequestWeaponStats();
+}
+
+/**
  * @brief CG_LimboPanel_WeaponPanel_KeyUp
  * @param[in] button
  * @param[in] key
@@ -2562,14 +2616,7 @@ qboolean CG_LimboPanel_WeaponPanel_KeyUp(panel_button_t *button, int key)
 					continue;
 				}
 
-				CG_LimboPanel_SetSelectedWeaponNum(cgs.ccSelectedWeaponSlot, (weapon_t)button->data[cnt]);
-
-				if (!CG_LimboPanel_IsValidSelectedWeapon(SECONDARY_SLOT))
-				{
-					CG_LimboPanel_SetDefaultWeapon(SECONDARY_SLOT);
-				}
-
-				CG_LimboPanel_RequestWeaponStats();
+				CG_LimboPanel_WeaponPanel_SelectButton(button, cnt);
 
 				break;
 			}
@@ -2709,6 +2756,42 @@ static vec4_t clrWeaponPanel  = { 0.f, 0.f, 0.f, 0.4f };
 static vec4_t clrWeaponPanel2 = { 1.f, 1.f, 1.f, 0.4f };
 
 /**
+ * @brief For a given weapon, return with it's weapon_t if it's a selectable
+ * weapon option in the weapon panel, otherwise WP_NONE.
+ * @param[in] classInfo
+ * @param[in] weapon
+ */
+static weapon_t CG_LimboPanel_WeaponPanel_GetSelectableWeaponOption(bg_playerclass_t *classInfo, int weapon)
+{
+	if (cgs.ccSelectedWeaponSlot == PRIMARY_SLOT)
+	{
+		// is player had the minimum level required to use this weapon
+		if (!BG_IsSkillAvailable(cgs.clientinfo[cg.clientNum].skill, classInfo->classPrimaryWeapons[weapon].skill, classInfo->classPrimaryWeapons[weapon].minSkillLevel))
+		{
+			return WP_NONE;
+		}
+
+		return classInfo->classPrimaryWeapons[weapon].weapon;
+	}
+	else
+	{
+		// is player had the minimum level required to use this weapon
+		if (!BG_IsSkillAvailable(cgs.clientinfo[cg.clientNum].skill, classInfo->classSecondaryWeapons[weapon].skill, classInfo->classSecondaryWeapons[weapon].minSkillLevel))
+		{
+			return WP_NONE;
+		}
+
+		// if player handling a similar weapon in primary slot, don't show it
+		if (classInfo->classSecondaryWeapons[weapon].weapon == cgs.ccSelectedPrimaryWeapon)
+		{
+			return WP_NONE;
+		}
+
+		return classInfo->classSecondaryWeapons[weapon].weapon;
+	}
+}
+
+/**
  * @brief CG_LimboPanel_WeaponPanel
  * @param[in] button
  */
@@ -2748,36 +2831,8 @@ void CG_LimboPanel_WeaponPanel(panel_button_t *button)
 
 	for (i = 0, x = 1; i < MAX_WEAPS_PER_CLASS; i++)
 	{
-		weapon_t cycleWeap;
-
-		if (cgs.ccSelectedWeaponSlot == PRIMARY_SLOT)
-		{
-			// is player had the minimum level required to use this weapon
-			if (!BG_IsSkillAvailable(cgs.clientinfo[cg.clientNum].skill, classInfo->classPrimaryWeapons[i].skill, classInfo->classPrimaryWeapons[i].minSkillLevel))
-			{
-				continue;
-			}
-
-			cycleWeap = classInfo->classPrimaryWeapons[i].weapon;
-		}
-		else
-		{
-			// is player had the minimum level required to use this weapon
-			if (!BG_IsSkillAvailable(cgs.clientinfo[cg.clientNum].skill, classInfo->classSecondaryWeapons[i].skill, classInfo->classSecondaryWeapons[i].minSkillLevel))
-			{
-				continue;
-			}
-
-			// if player handling a similar weapon in primary slot, don't show it
-			if (classInfo->classSecondaryWeapons[i].weapon == cgs.ccSelectedPrimaryWeapon)
-			{
-				continue;
-			}
-
-			cycleWeap = classInfo->classSecondaryWeapons[i].weapon;
-		}
-
-		if (cycleWeap)
+		weapon_t cycleWeap = CG_LimboPanel_WeaponPanel_GetSelectableWeaponOption(classInfo, i);
+		if (cycleWeap != WP_NONE)
 		{
 			++cnt;
 
@@ -2976,22 +3031,29 @@ int CG_LimboPanel_RenderCounter_ValueForButton(panel_button_t *button)
 /**
  * @brief CG_LimboPanel_RenderCounter_RollTimeForButton
  * @param[in] button
+ * @param[in] value
  * @return
  */
-static float CG_LimboPanel_RenderCounter_RollTimeForButton(panel_button_t *button)
+static float CG_LimboPanel_RenderCounter_RollTimeForButton(panel_button_t *button, int value)
 {
 	switch (button->data[0])
 	{
 	case 0:     // class counts
 	case 1:     // team counts
+	case 2:     // xp
+	{
+		const float diff = abs(button->data[3] - value);
+		if (diff > 0)
+		{
+			return 100.f / (diff / 1.5);
+		}
 		return 100.f;
-
+	}
 	case 4:     // skills
 		return 1000.f;
-
 	case 6:     // stats
 	{
-		const int diff = abs(button->data[3] - CG_LimboPanel_RenderCounter_ValueForButton(button));
+		const int diff = abs(button->data[3] - value);
 		if (diff < 5)
 		{
 			return (diff == 0 ? 1000.f : 200.f / diff);
@@ -2999,9 +3061,8 @@ static float CG_LimboPanel_RenderCounter_RollTimeForButton(panel_button_t *butto
 
 		return 50.f;
 	}
-	case 5:     // clock
 	case 3:     // respawn time
-	case 2:     // xp
+	case 5:     // clock
 		return 50.f;
 	default:
 		break;
@@ -3316,9 +3377,9 @@ void CG_LimboPanel_RenderCounter(panel_button_t *button)
 	float     counter_rolltime;
 	int       num, value;
 
-	counter_rolltime = CG_LimboPanel_RenderCounter_RollTimeForButton(button);
-	num              = CG_LimboPanel_RenderCounter_NumRollers(button);
 	value            = CG_LimboPanel_RenderCounter_ValueForButton(button);
+	counter_rolltime = CG_LimboPanel_RenderCounter_RollTimeForButton(button, value);
+	num              = CG_LimboPanel_RenderCounter_NumRollers(button);
 
 	if (num > MAX_ROLLERS)
 	{
@@ -3483,6 +3544,13 @@ void CG_LimboPanel_Setup(void)
 		cgs.ccSelectedLayer = CG_CurLayerForZ((int)cg.predictedPlayerEntity.lerpOrigin[2]);
 	}
 
+	// clear focus button in case limbo was abruptly closed via K_ESCAPE,
+	// otherwise breaks key handling
+	if (BG_PanelButtons_GetFocusButton() != NULL)
+	{
+		BG_PanelButtons_SetFocusButton(NULL);
+	}
+
 	for ( ; *buttons; buttons++)
 	{
 		button = (*buttons);
@@ -3568,7 +3636,7 @@ qboolean CG_LimboPanel_Draw(void)
 	BG_PanelButtonsRender(limboPanelButtons);
 
 	trap_R_SetColor(NULL);
-	CG_DrawPic(cgDC.cursorx, cgDC.cursory, 32, 32, cgs.media.cursorIcon);
+	CG_DrawCursor(cgDC.cursorx, cgDC.cursory);
 
 	if (cgs.ccRequestedObjective != -1)
 	{
@@ -3613,13 +3681,180 @@ void CG_LimboPanel_KeyHandling(int key, qboolean down)
 
 	if (down)
 	{
+		// close limbo menu if 'openlimbomenu' key is pressed again
 		cgDC.getKeysForBinding("openlimbomenu", &b1, &b2);
 		if ((b1 != -1 && b1 == key) || (b2 != -1 && b2 == key))
 		{
 			CG_EventHandling(CGAME_EVENT_NONE, qfalse);
 			return;
 		}
+
+		// accelerator keys when the weapon panel is open
+		if (BG_PanelButtons_GetFocusButton() == &weaponPanel)
+		{
+			int selectedWeapon = 0;
+
+			switch (key)
+			{
+			// 1-9 keys select the weapon indexed counting downwards from
+			// the top
+			case '1':
+				selectedWeapon = 1;
+				break;
+			case '2':
+				selectedWeapon = 2;
+				break;
+			case '3':
+				selectedWeapon = 3;
+				break;
+			case '4':
+				selectedWeapon = 4;
+				break;
+			case '5':
+				selectedWeapon = 5;
+				break;
+			case '6':
+				selectedWeapon = 6;
+				break;
+			case '7':
+				selectedWeapon = 7;
+				break;
+			case '8':
+				selectedWeapon = 8;
+				break;
+			case '9':
+				selectedWeapon = 9;
+				break;
+			case '0':
+				selectedWeapon = 10;
+				break;
+			// space cancels the weapon panel without selecting any weapon
+			case K_SPACE:
+				BG_PanelButtons_SetFocusButton(NULL);
+				return;
+				break;
+			}
+
+			if (selectedWeapon != 0)
+			{
+				bg_playerclass_t *classInfo;
+				int              i, cnt = 0;
+
+				classInfo = CG_LimboPanel_GetPlayerClass();
+				if (!classInfo)
+				{
+					return;
+				}
+
+				for (i = 0; i < MAX_WEAPS_PER_CLASS; i++)
+				{
+					weapon_t weap = CG_LimboPanel_WeaponPanel_GetSelectableWeaponOption(classInfo, i);
+					if (weap != WP_NONE)
+					{
+						++cnt;
+
+						if (cnt == selectedWeapon)
+						{
+							for (i = 0; i < 8; ++i)
+							{
+								if (weaponPanel.data[i] == weap)
+								{
+									CG_LimboPanel_WeaponPanel_SelectButton(&weaponPanel, i);
+									BG_PanelButtons_SetFocusButton(NULL);
+								}
+							}
+						}
+					}
+
+				}
+			}
+
+			return;
+		}
+
+		// remaining accelerator keys
+		switch (key)
+		{
+		// select teams
+		case '1':
+			CG_LimboPanel_TeamButton_KeyDown(&teamButton0, K_MOUSE1);
+			break;
+		case '2':
+			CG_LimboPanel_TeamButton_KeyDown(&teamButton1, K_MOUSE1);
+			break;
+		case '3':
+			CG_LimboPanel_TeamButton_KeyDown(&teamButton2, K_MOUSE1);
+			break;
+		// select class
+		case 'e':  // engineer
+			CG_LimboPanel_ClassButton_KeyDown(&classButton2, K_MOUSE1);
+			break;
+		case 'c':  // covops
+			CG_LimboPanel_ClassButton_KeyDown(&classButton4, K_MOUSE1);
+			break;
+		case 'f':  // fieldops
+			CG_LimboPanel_ClassButton_KeyDown(&classButton3, K_MOUSE1);
+			break;
+		case 'm':  // medic
+			CG_LimboPanel_ClassButton_KeyDown(&classButton1, K_MOUSE1);
+			break;
+		case 's':  // soldier
+			CG_LimboPanel_ClassButton_KeyDown(&classButton0, K_MOUSE1);
+			break;
+		// toggle between primary and secondary weaponpanel view
+		case K_TAB:
+			if (cgs.ccSelectedWeaponSlot == 0)
+			{
+				CG_LimboPanel_WeaponLights_KeyDown(&weaponLight2, K_MOUSE1);
+			}
+			else
+			{
+				CG_LimboPanel_WeaponLights_KeyDown(&weaponLight1, K_MOUSE1);
+			}
+			break;
+		// open the weapon panel if there is a selection to be made
+		case K_SPACE:
+		{
+			bg_playerclass_t *classInfo;
+			int              i;
+			qboolean         foundWeaponOption = qfalse;
+			weapon_t         weapInfo;
+			weapon_t         selectedWeapon;
+			classInfo = CG_LimboPanel_GetPlayerClass();
+
+			if (classInfo)
+			{
+				// find a selectable weapon option before actually opening up weapon
+				// panel
+				selectedWeapon = CG_LimboPanel_GetSelectedWeapon(cgs.ccSelectedWeaponSlot);
+				for (i = 0; i < MAX_WEAPS_PER_CLASS; i++)
+				{
+					weapInfo = CG_LimboPanel_WeaponPanel_GetSelectableWeaponOption(classInfo, i);
+					if (weapInfo != WP_NONE && weapInfo != selectedWeapon)
+					{
+						foundWeaponOption = qtrue;
+						break;
+					}
+				}
+
+				if (foundWeaponOption)
+				{
+					CG_LimboPanel_WeaponPanel_KeyDown(&weaponPanel, K_MOUSE1);
+				}
+			}
+		}
+		break;
+		// confirm the current limbo selection
+		case K_ENTER:
+		case 'y':
+		case 'z':
+			CG_LimboPanel_OkButton_KeyDown(&okButton, K_MOUSE1);
+			break;
+		default:
+			break;
+		}
 	}
+
 
 	if (down && key)
 	{
@@ -3831,7 +4066,7 @@ void CG_LimboPanel_SetDefaultWeapon(int slot)
 	}
 	else
 	{
-        cgs.ccSelectedSecondaryWeapon = BG_GetBestSecondaryWeapon(CG_LimboPanel_GetClass(), CG_LimboPanel_GetTeam(), cgs.ccSelectedPrimaryWeapon, cgs.clientinfo[cg.clientNum].skill);
+		cgs.ccSelectedSecondaryWeapon = BG_GetBestSecondaryWeapon(CG_LimboPanel_GetClass(), CG_LimboPanel_GetTeam(), cgs.ccSelectedPrimaryWeapon, cgs.clientinfo[cg.clientNum].skill);
 	}
 }
 

@@ -469,22 +469,22 @@ void abrt_func( mcheck_status status ) {
 
 /* Android */
 
-static void * game_main(int argc, char **argv);
-
 #include "sys_android.cpp"
 
 extern void Sys_SetArgs(int argc, const char** argv);
 
-void GLimp_CheckGLInitialized(void)
+bool GLimp_CheckGLInitialized(void)
 {
-    Q3E_CheckNativeWindowChanged();
+    return Q3E_CheckNativeWindowChanged();
 }
 
-// TDM game main thread loop
-void * game_main(int argc, char **argv)
+/*
+===============
+main
+===============
+*/
+int main( int argc, /*const */char** argv )
 {
-    attach_thread(); // attach current to JNI for call Android code
-
     // DG: needed for Sys_ReLaunch()
     Sys_SetArgs(argc, (const char **)(argv));
     // DG end
@@ -493,7 +493,6 @@ void * game_main(int argc, char **argv)
 	mcheck(abrt_func);
 	Sys_Printf("memory consistency checking enabled\n");
 #endif
-    Q3E_Start();
 
     Posix_EarlyInit();
     Sys_Printf("[Harmattan]: Enter doom3 main thread -> %s\n", "main");
@@ -513,42 +512,16 @@ void * game_main(int argc, char **argv)
     }
 
     common->Quit();
-    Q3E_End();
-    main_thread = 0;
-    Sys_Printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
+
     return 0;
 }
 
 void ShutdownGame(void)
 {
-    if(common->IsInitialized())
+    if(q3e_running && common->IsInitialized())
     {
-        Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_CREATED); // if doom3 main thread is waiting new window
-        Q3E_ShutdownGameMainThread();
         common->Quit();
+        NOTIFY_EXIT;
+        q3e_running = false;
     }
-}
-
-static void doom3_exit(void)
-{
-    Sys_Printf("[Harmattan]: doom3 exit.\n");
-
-    Q3E_FreeArgs();
-
-    Q3E_CloseRedirectOutput();
-}
-
-int main(int argc, char **argv)
-{
-    Q3E_DumpArgs(argc, argv);
-
-    Q3E_RedirectOutput();
-
-    Q3E_PrintInitialContext(argc, argv);
-
-    Q3E_StartGameMainThread();
-
-    atexit(doom3_exit);
-
-    return 0;
 }

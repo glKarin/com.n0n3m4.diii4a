@@ -29,3 +29,7 @@ struct FEffectShader
 extern const FDefaultShader defaultshaders[];
 extern const FEffectShader effectshaders[];
 
+#ifdef _GLES //karin: convert GLSL code to 300 es on OpenGLES
+FString GLSL100_to_GLSL300(FString code, int type);
+FString GenGLSL300PatchCode(int type);
+#endif

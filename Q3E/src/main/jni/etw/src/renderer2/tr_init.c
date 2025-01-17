@@ -319,12 +319,17 @@ static qboolean InitOpenGL(void)
 
 	if (glConfig.vidWidth == 0)
 	{
-		char            renderer_buffer[1024];
-		windowContext_t windowContext = { 3, 3, GL_CONTEXT_CORE };
-		GLint           temp;
+		char  renderer_buffer[1024];
+		GLint temp;
+
+		char glConfigString[1024] = { 0 };
+		Info_SetValueForKey(glConfigString, "type", "opengl");
+		Info_SetValueForKey(glConfigString, "major", "3");
+		Info_SetValueForKey(glConfigString, "minor", "3");
+		Info_SetValueForKey(glConfigString, "context", va("%i", GL_CONTEXT_CORE));
 
 		Com_Memset(&glConfig, 0, sizeof(glConfig));
-		ri.GLimp_Init(&glConfig, &windowContext);
+		ri.GLimp_Init(&glConfig, glConfigString);
 
 		GL_CheckErrors();
 
@@ -1494,7 +1499,7 @@ void R_Register(void)
 	r_skipLightBuffer = ri.Cvar_Get("r_skipLightBuffer", "0", CVAR_CHEAT);
 
 	r_measureOverdraw = ri.Cvar_Get("r_measureOverdraw", "0", CVAR_CHEAT);
-	r_lodScale        = ri.Cvar_Get("r_lodScale", "5", CVAR_CHEAT);
+	r_lodScale        = ri.Cvar_Get("r_lodScale", "5", CVAR_ARCHIVE_ND | CVAR_LATCH);
 	r_lodTest         = ri.Cvar_Get("r_lodTest", "0.5", CVAR_CHEAT);
 	r_noreFresh       = ri.Cvar_Get("r_norefresh", "0", CVAR_CHEAT);
 	r_drawEntities    = ri.Cvar_Get("r_drawentities", "1", CVAR_CHEAT);

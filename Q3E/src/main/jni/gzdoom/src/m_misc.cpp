@@ -66,6 +66,7 @@
 
 #include "gameconfigfile.h"
 #include "gstrings.h"
+#include "vm.h"
 
 FGameConfigFile *GameConfig;
 
@@ -519,7 +520,7 @@ void WritePNGfile (FileWriter *file, const uint8_t *buffer, const PalEntry *pale
 		!M_AppendPNGText (file, "Software", software) ||
 		!M_FinishPNG (file))
 	{
-		Printf ("%s\n", GStrings("TXT_SCREENSHOTERR"));
+		Printf ("%s\n", GStrings.GetString("TXT_SCREENSHOTERR"));
 	}
 }
 
@@ -689,5 +690,16 @@ CCMD(openscreenshots)
 	CreatePath(autoname.GetChars());
 
 	I_OpenShellFolder(autoname.GetChars());
+}
+
+static int SaveConfig()
+{
+	return M_SaveDefaults(nullptr);
+}
+
+DEFINE_ACTION_FUNCTION_NATIVE(_CVar, SaveConfig, SaveConfig)
+{
+	PARAM_PROLOGUE;
+	ACTION_RETURN_INT(M_SaveDefaults(nullptr));
 }
 

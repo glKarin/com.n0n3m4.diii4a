@@ -15,6 +15,7 @@ import com.karin.idTech4Amm.misc.FileBrowser;
 import com.karin.idTech4Amm.ui.FileBrowserDialog;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3ELang;
+import com.n0n3m4.q3e.karin.KLog;
 
 import java.io.File;
 
@@ -83,6 +84,7 @@ public final class ChooseGameFolderFunc extends GameLauncherFunc
                 break;
         }
 
+        KLog.i("Launcher", "Default data directory: " + GameLauncher.default_gamedata);
         dialog.SetPath(gamePath);
         dialog.setButton(AlertDialog.BUTTON_NEGATIVE, Tr(R.string.cancel), new AlertDialog.OnClickListener() {
             @Override
@@ -107,7 +109,7 @@ public final class ChooseGameFolderFunc extends GameLauncherFunc
             dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    dialog.SetPath(m_gameLauncher.GetDefaultGameDirectory());
+                    dialog.SetPath(GameLauncher.default_gamedata);
                 }
             });
         }
@@ -116,7 +118,7 @@ public final class ChooseGameFolderFunc extends GameLauncherFunc
             dialog.setButton(AlertDialog.BUTTON_NEUTRAL, Tr(R.string.reset), new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    SetResult(m_gameLauncher.GetDefaultGameDirectory());
+                    SetResult(GameLauncher.default_gamedata);
                     dialog.dismiss();
                     Callback();
                 }

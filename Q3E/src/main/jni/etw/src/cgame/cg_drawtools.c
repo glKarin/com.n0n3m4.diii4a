@@ -88,7 +88,7 @@ qboolean Ccg_Is43Screen(void)
  */
 float Ccg_WideX(float x)
 {
-	return (Ccg_Is43Screen()) ? x : x *cgs.adr43;  // * (aspectratio / (4/3))
+	return (Ccg_Is43Screen()) ? x : x * cgs.adr43;  // * (aspectratio / (4/3))
 }
 
 /**
@@ -185,10 +185,10 @@ void CG_SetChargebarIconColor(void)
  * @param[in] flags
  */
 void CG_FilledBar(float x, float y, float w, float h, float *startColor, float *endColor,
-                  const float *bgColor, const float *bdColor, float frac, int flags, qhandle_t icon)
+                  const float *bgColor, const float *bdColor, float frac, float needleFrac, int flags, qhandle_t icon)
 {
 	vec4_t backgroundcolor = { 1, 1, 1, 0.25f }, colorAtPos;  // colorAtPos is the lerped color if necessary
-	float  x2 = x, y2 = y, w2 = w, h2 = h;
+	float  x2 = x, x3 = x, y2 = y, y3 = y, w2 = w, h2 = h;
 	float  iconW, iconH;
 
 	if (frac > 1)
@@ -272,6 +272,18 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor, float *
 		h -= (2 * indent);
 	}
 
+	x3 = x;
+	y3 = y;
+
+	// backgroundcolor is reused for the needle from here, inverted in case we
+	// draw it on the background itself
+	if ((!(flags & BAR_BG) && endColor) || ((flags & BAR_BG) && !endColor))
+	{
+		backgroundcolor[0] = 255 - backgroundcolor[0];
+		backgroundcolor[1] = 255 - backgroundcolor[1];
+		backgroundcolor[2] = 255 - backgroundcolor[2];
+	}
+
 	// adjust for horiz/vertical and draw the fractional box
 	if (flags & BAR_VERT)
 	{
@@ -296,6 +308,11 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor, float *
 			CG_FillRect(x, y, w, h * frac, startColor);
 		}
 
+		if (needleFrac > 0.f && flags & BAR_NEEDLE)
+		{
+			CG_FillRect(x3, y3 + (h * (1 - needleFrac)) + 0.0, w, 1.0, backgroundcolor);
+		}
+
 		if (flags & BAR_DECOR)
 		{
 			CG_DrawPic(x2, y2, w2, h2, cgs.media.hudSprintBar);
@@ -307,6 +324,7 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor, float *
 			if (icon == cgs.media.hudPowerIcon)
 			{
 				iconW *= .5f;
+				x3     = x2;
 				x2    += iconW * .5f;
 
 				if (cg.snap->ps.stats[STAT_PLAYER_CLASS] == PC_FIELDOPS)
@@ -348,6 +366,11 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor, float *
 			CG_FillRect(x, y, w * frac, h, startColor);
 		}
 
+		if (needleFrac > 0.f && flags & BAR_NEEDLE)
+		{
+			CG_FillRect(x3 + (w * (1 - needleFrac)) - 0.0, y3, 1.0, h, backgroundcolor);
+		}
+
 		if (flags & BAR_DECOR)
 		{
 			CG_DrawPic(x2, y2, w2, h2, cgs.media.hudSprintBarHorizontal);
@@ -376,24 +399,6 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor, float *
 			}
 		}
 	}
-}
-
-/**
- * @brief Generic routine for pretty much all status indicators that show a fractional
- * value to the player by virtue of how full a drawn box is.
- * @param[in] x
- * @param[in] y
- * @param[in] width
- * @param[in] height
- * @param[in] percent
- *
- * @note Unused
- */
-void CG_HorizontalPercentBar(float x, float y, float width, float height, float percent)
-{
-	vec4_t bgcolor = { 0.5f, 0.5f, 0.5f, 0.3f },
-	       color   = { 1.0f, 1.0f, 1.0f, 0.3f };
-	CG_FilledBar(x, y, width, height, color, NULL, bgcolor, bgcolor, percent, BAR_BG | BAR_NOHUDALPHA, -1);
 }
 
 /**
@@ -796,9 +801,15 @@ float *CG_TeamColor(int team)
 }
 
 /**
- * @brief CG_ColorForHealth
+ * @brief Set the color depending of the current health.
+ * Color follow the below logic and lerp the color under 100 HP
+ *  - >= 100   : default color (set outside the function)
+ *  - 66 - 100 : Default color to Yellow
+ *  - 33 - 66  : Yellow To Red
+ *  - < 33     : Red
+ *  - 0        : Black
  * @param[in] health
- * @param[in] hcolor
+ * @param[in,out] hcolor
  */
 void CG_ColorForHealth(int health, vec4_t hcolor)
 {
@@ -807,37 +818,42 @@ void CG_ColorForHealth(int health, vec4_t hcolor)
 	if (health <= 0)
 	{
 		VectorClear(hcolor);    // black
-		hcolor[3] = 1;
+		hcolor[3] = 1.f;
+		return;
+	}
+
+	// enough health, keep default value
+	if (health >= 100)
+	{
 		return;
 	}
 
 	// set the color based on health
-	hcolor[0] = 1.0;
-	hcolor[3] = 1.0;
-	if (health >= 100)
+	if (health <= 66)
 	{
-		hcolor[2] = 1.0;
-	}
-	else if (health <= 66)
-	{
+		hcolor[0] = 1.f;
+		hcolor[1] = 1.f;
 		hcolor[2] = 0;
 	}
 	else
 	{
-		hcolor[2] = (health - 66.f) / 33.0f;
+		hcolor[0] += (1 - hcolor[0]) * (1 - (health - 66.f) / 33.f);
+		hcolor[1] += (1 - hcolor[1]) * (1 - (health - 66.f) / 33.f);
+		hcolor[2] *= (health - 66.f) / 33.f;
 	}
 
 	if (health > 66)
 	{
-		hcolor[1] = 1.0;
+		return;
 	}
-	else if (health <= 33)
+
+	if (health <= 33)
 	{
 		hcolor[1] = 0;
 	}
 	else
 	{
-		hcolor[1] = (health - 33.f) / 33.0f;
+		hcolor[1] = (health - 33.f) / 33.f;
 	}
 }
 
@@ -1553,6 +1569,7 @@ void CG_DrawHelpWindow(float x, float y, int *status, const char *title, const h
                        const vec4_t backgroundColor, const vec4_t borderColor, const vec4_t backgroundColorTitle, const vec4_t borderColorTitle,
                        panel_button_text_t *fontHeader, panel_button_text_t *fontText)
 {
+	float        diff;
 	unsigned int i;
 	int          len, maxlen = 0;
 	int          w, h;
@@ -1573,7 +1590,7 @@ void CG_DrawHelpWindow(float x, float y, int *status, const char *title, const h
 	Vector4Copy(fontHeader->colour, hdrColor);
 	Vector4Copy(fontText->colour, tColor);
 
-	float diff = cg.fadeTime - trap_Milliseconds();
+	diff = cg.fadeTime - trap_Milliseconds();
 
 	// FIXME: Should compute all this stuff beforehand
 	// Compute required width
@@ -1674,4 +1691,14 @@ float CG_ComputeScale(hudComponent_t *comp /*, float height, float scale, fontHe
 {
 	return comp->hardScale * (comp->scale / 100.f);
 	//return (height / (Q_UTF8_GlyphScale(font) * Q_UTF8_GetGlyph(font, "A")->height)) * (scale / 100.f);
+}
+
+void CG_DrawCursor(float x, float y)
+{
+	if (!cgDC.cursorVisible)
+	{
+		return;
+	}
+
+	CG_DrawPic(x, y, CURSOR_SIZE, CURSOR_SIZE, cgs.media.cursorIcon);
 }

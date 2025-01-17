@@ -119,7 +119,7 @@ void CG_GetObituaryIcon(meansOfDeath_t mod, weapon_t weapon, qhandle_t *weaponSh
 
 /**
  * @brief CG_ColorCharFromFloat Just squashes the float value into a char into the range of '0' to '9'
- * @param val float color channel value between 0.0 and 1.0
+ * @param[in] val float color channel value between 0.0 and 1.0
  * @return char color value between '0' and '9'
  */
 static ID_INLINE char CG_ColorCharFromFloat(float val)
@@ -127,6 +127,14 @@ static ID_INLINE char CG_ColorCharFromFloat(float val)
 	return MIN(MAX('0' + (int)(val * 255.0f), '0'), '9');
 }
 
+/**
+ * @brief CG_ColorObituaryEntName
+ * @param[in] ci
+ * @param[in] color As spectator : 1st index is axis color, 2nd index is team kill color, 3rd is allies colors.
+ *                  As player    : 1st index is enemy color, 2nd index is team kill color, 3rd is team mate color.
+ * @param[in,out] name player name to be colored
+ * @param[in] same_team is team kill
+ */
 static ID_INLINE void CG_ColorObituaryEntName(clientInfo_t *ci, vec4_t color, char *name, qboolean same_team)
 {
 	clientInfo_t *self = &cgs.clientinfo[cg.clientNum];
@@ -191,6 +199,9 @@ static void CG_Obituary(entityState_t *ent)
 		CG_Error("CG_Obituary: target out of range\n");
 	}
 
+	// this happens alongside 'EV_STOPSTREAMINGSOUND', as it sometimes doesn't seem to get emitted
+	trap_S_StartSoundEx(NULL, target, CHAN_WEAPON, 0, SND_CUTOFF_ALL);  // kill weapon sound (could be reloading)
+
 	// no obituary message if changing teams
 	if (mod == MOD_SWITCHTEAM)
 	{
@@ -198,6 +209,8 @@ static void CG_Obituary(entityState_t *ent)
 	}
 
 	ci = &cgs.clientinfo[target];
+
+	ci->mod = mod;
 
 	if (attacker < 0 || attacker >= MAX_CLIENTS)
 	{
@@ -277,7 +290,7 @@ static void CG_Obituary(entityState_t *ent)
 		Q_strncpyz(targetName, ci->name, sizeof(targetName) - 2);
 		if (pmComp->style & POPUP_FORCE_COLORS)
 		{
-			CG_ColorObituaryEntName(ci, pmComp->colorMain, targetName, ca && ca->team == ci->team);
+			CG_ColorObituaryEntName(ci, pmComp->colorMain, targetName, ca && ca != ci && ca->team == ci->team);
 		}
 		Q_strcat(targetName, MAX_NAME_LENGTH, S_COLOR_WHITE);
 
@@ -356,7 +369,7 @@ static void CG_Obituary(entityState_t *ent)
 				}
 				else
 				{
-					if (ci->team == ca->team)
+					if (ci->team == ca->team && !(pmComp->style & POPUP_FORCE_COLORS))
 					{
 						CG_AddPMItemEx(PM_DEATH, va("%s^1 %s^7 ", targetName, CG_TranslateString(message)), va("%s^1%s", attackerName, CG_TranslateString(message2)), shader, 0, 0, colorRed, i);
 					}
@@ -448,7 +461,8 @@ static void CG_ItemPickup(int itemNum)
 		// we just drop current weapon
 		if (!COM_BitCheck(cg.snap->ps.weapons, cg.weaponSelect))
 		{
-			cg.weaponSelect = WP_NONE;
+			cg.weaponSelect             = WP_NONE;
+			cg.weaponSelectDuringFiring = (cg.snap->ps.weaponstate == WEAPON_FIRING) ? cg.time : 0;
 		}
 
 		if (cg_autoswitch.integer && cg.predictedPlayerState.weaponstate != WEAPON_RELOADING)
@@ -466,14 +480,16 @@ static void CG_ItemPickup(int itemNum)
 				// no weap currently selected, always just select the new one
 				if (!cg.weaponSelect)
 				{
-					cg.weaponSelectTime = cg.time;
-					cg.weaponSelect     = itemid;
+					cg.weaponSelectTime         = cg.time;
+					cg.weaponSelect             = itemid;
+					cg.weaponSelectDuringFiring = (cg.predictedPlayerState.weaponstate == WEAPON_FIRING) ? cg.time : 0;
 				}
 				// 1 - always switch to new weap
 				else if (cg_autoswitch.integer == 1)
 				{
-					cg.weaponSelectTime = cg.time;
-					cg.weaponSelect     = itemid;
+					cg.weaponSelectTime         = cg.time;
+					cg.weaponSelect             = itemid;
+					cg.weaponSelectDuringFiring = (cg.predictedPlayerState.weaponstate == WEAPON_FIRING) ? cg.time : 0;
 				}
 				else
 				{
@@ -486,8 +502,9 @@ static void CG_ItemPickup(int itemNum)
 					{
 						if (!COM_BitCheck(cg.snap->ps.weapons, itemid))
 						{
-							cg.weaponSelectTime = cg.time;
-							cg.weaponSelect     = itemid;
+							cg.weaponSelectTime         = cg.time;
+							cg.weaponSelect             = itemid;
+							cg.weaponSelectDuringFiring = (cg.predictedPlayerState.weaponstate == WEAPON_FIRING) ? cg.time : 0;
 						}
 					}
 
@@ -502,8 +519,9 @@ static void CG_ItemPickup(int itemNum)
 							{
 								if (wpbank_pickup > wpbank_cur)
 								{
-									cg.weaponSelectTime = cg.time;
-									cg.weaponSelect     = itemid;
+									cg.weaponSelectTime         = cg.time;
+									cg.weaponSelect             = itemid;
+									cg.weaponSelectDuringFiring = (cg.predictedPlayerState.weaponstate == WEAPON_FIRING) ? cg.time : 0;
 								}
 							}
 						}
@@ -2007,7 +2025,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 	if (cg_debugEvents.integer)
 	{
-		CG_Printf("time:%i ent:%3i  event:%3i ", cg.time, es->number, event);
+		CG_Printf("CEV: RECV time:%7i ent:%15i event:%3i eventParm:%3i ", cg.time, es->number, event, es->eventParm);
 
 		if (event < EV_NONE || event >= EV_MAX_EVENTS)
 		{
@@ -2015,7 +2033,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		}
 		else
 		{
-			CG_Printf("%s\n", eventnames[event]);
+			Com_Printf("%s C(%d)\n", eventnames[event], (es->clientNum < 0 || es->clientNum >= MAX_CLIENTS) ? -1 : es->clientNum);
 		}
 	}
 
@@ -2260,11 +2278,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		// IS_VALID_WEAPON(es->weapon) ?
 		if (BG_IsSkillAvailable(cgs.clientinfo[clientNum].skill, SK_LIGHT_WEAPONS, SK_LIGHT_WEAPONS_FASTER_RELOAD) && (GetWeaponTableData(es->weapon)->attributes & WEAPON_ATTRIBUT_FAST_RELOAD) && cg_weapons[es->weapon].reloadFastSound)
 		{
-			trap_S_StartSound(NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFastSound);
+			trap_S_StartSoundEx(NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFastSound, SND_PAUSABLE);
 		}
 		else if (cg_weapons[es->weapon].reloadSound)
 		{
-			trap_S_StartSound(NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSound);     // following sherman's SP fix, should allow killing reload sound when player dies
+			trap_S_StartSoundEx(NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSound, SND_PAUSABLE);     // following sherman's SP fix, should allow killing reload sound when player dies
 		}
 		break;
 	case EV_MG42_FIXED:
@@ -2279,7 +2297,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 		if (es->number == cg.snap->ps.clientNum)
 		{
-			if ((cg_noAmmoAutoSwitch.integer > 0 && !CG_WeaponSelectable(cg.weaponSelect))
+			if ((cg_noAmmoAutoSwitch.integer > 0 && !CG_WeaponSelectable(cg.weaponSelect, qfalse))
 			    || (GetWeaponTableData(es->weapon)->firingMode & (WEAPON_FIRING_MODE_ONE_SHOT | WEAPON_FIRING_MODE_THROWABLE)))
 			{
 				CG_OutOfAmmoChange(event == EV_NOAMMO);
@@ -2451,7 +2469,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		break;
 	case EV_BULLET:
 		CG_PlayHitSound(es->otherEntityNum, es->modelindex);
-		CG_Bullet(es->weapon, es->pos.trBase, es->otherEntityNum, es->modelindex, es->eventParm);
+		CG_Bullet(es->weapon, es->pos.trBase, es->otherEntityNum, es->otherEntityNum2);
 		break;
 	case EV_GENERAL_SOUND:
 	{
@@ -2927,6 +2945,25 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	case EV_PLAYER_HIT:
 		CG_PlayHitSound(es->clientNum, es->eventParm);
 		break;
+	case EV_PLAYER_REVIVE:
+	{
+		int reviver = es->clientNum;
+		// int revivee = es->eventParm;
+		// int invulnEndTime = invulnEndTime;
+
+		if (reviver == cg.clientNum)
+		{
+			cg.lastReviveTime = cg.time;
+		}
+
+		// play sound
+		sfxHandle_t sound = CG_GetGameSound(GAMESOUND_MISC_REVIVE);
+		if (sound)
+		{
+			trap_S_StartSoundVControl(es->origin, es->number, CHAN_VOICE, sound, 255);
+		}
+	}
+	break;
 	default:
 		if (cg.demoPlayback)
 		{

@@ -148,6 +148,7 @@ class Actor : Thinker native
 	native Actor Target;
 	native Actor Master;
 	native Actor Tracer;
+	native readonly Actor DamageSource;
 	native Actor LastHeard;
 	native Actor LastEnemy;
 	native Actor LastLookActor;
@@ -178,6 +179,7 @@ class Actor : Thinker native
 	native name DamageTypeReceived;
 	native uint8 FloatBobPhase;
 	native double FloatBobStrength;
+	native double FloatBobFactor;
 	native int RipperLevel;
 	native int RipLevelMin;
 	native int RipLevelMax;
@@ -185,6 +187,7 @@ class Actor : Thinker native
 	native Actor Alternative;
 	native Actor goal;
 	native uint8 MinMissileChance;
+	native double MissileChanceMult;
 	native int8 LastLookPlayerNumber;
 	native uint SpawnFlags;
 	native double meleethreshold;
@@ -337,6 +340,7 @@ class Actor : Thinker native
 	property WeaveIndexXY: WeaveIndexXY;
 	property WeaveIndexZ: WeaveIndexZ;
 	property MinMissileChance: MinMissileChance;
+	property MissileChanceMult: MissileChanceMult;
 	property MaxStepHeight: MaxStepHeight;
 	property MaxDropoffHeight: MaxDropoffHeight;
 	property MaxSlopeSteepness: MaxSlopeSteepness;
@@ -403,6 +407,7 @@ class Actor : Thinker native
 		RenderStyle 'Normal';
 		Alpha 1;
 		MinMissileChance 200;
+		MissileChanceMult 1.0;
 		MeleeRange 64 - MELEEDELTA;
 		MaxDropoffHeight 24;
 		MaxStepHeight 24;
@@ -413,6 +418,7 @@ class Actor : Thinker native
 		FloatSpeed 4;
 		FloatBobPhase -1;	// randomly initialize by default
 		FloatBobStrength 1.0;
+		FloatBobFactor 1.0;
 		Gravity 1;
 		Friction 1;
 		DamageFactor 1.0;		// damage multiplier as target of damage.
@@ -534,7 +540,9 @@ class Actor : Thinker native
 	// [AA] Called by inventory items at the end of CallTryPickup to let actors
 	// do something with the items they've received. 'Item' might be null for
 	// items that disappear on pickup.
-	virtual void HasReceived(Inventory item) {}
+	// 'itemcls' is passed unconditionally, so it can still be read even if
+	// 'item' is null due to being destroyed with GoAwayAndDie() on pickup.
+	virtual void HasReceived(Inventory item, class<Inventory> itemcls = null) {}
 
   // Called in TryMove if the mover ran into another Actor. This isn't called on players
 	// if they're currently predicting. Guarantees collisions unlike CanCollideWith.
@@ -705,7 +713,7 @@ class Actor : Thinker native
 	native void SoundAlert(Actor target, bool splash = false, double maxdist = 0);
 	native void ClearBounce();
 	native TerrainDef GetFloorTerrain();
-	native bool CheckLocalView(int consoleplayer = -1 /* parameter is not used anymore but needed for backward compatibilityö. */);
+	native bool CheckLocalView(int consoleplayer = -1 /* parameter is not used anymore but needed for backward compatibility. */);
 	native bool CheckNoDelay();
 	native bool UpdateWaterLevel (bool splash = true);
 	native bool IsZeroDamage();
@@ -713,6 +721,7 @@ class Actor : Thinker native
 	native void ClearFOVInterpolation();
 	native clearscope Vector3 PosRelative(sector sec) const;
 	native void RailAttack(FRailParams p);
+	native clearscope Name GetDecalName() const;
 		
 	native void HandleSpawnFlags();
 	native void ExplodeMissile(line lin = null, Actor target = null, bool onsky = false);
@@ -764,7 +773,7 @@ class Actor : Thinker native
 	native Actor SpawnPuff(class<Actor> pufftype, vector3 pos, double hitdir, double particledir, int updown, int flags = 0, Actor victim = null);
 	native void SpawnBlood (Vector3 pos1, double dir, int damage);
 	native void BloodSplatter (Vector3 pos, double hitangle, bool axe = false);
-	native bool HitWater (sector sec, Vector3 pos, bool checkabove = false, bool alert = true, bool force = false);
+	native bool HitWater (sector sec, Vector3 pos, bool checkabove = false, bool alert = true, bool force = false, int flags = 0);
 	native void PlaySpawnSound(Actor missile);
 	native clearscope bool CountsAsKill() const;
 	
@@ -835,6 +844,7 @@ class Actor : Thinker native
 	native void Thrust(double speed = 1e37, double angle = 1e37);
 	native clearscope bool isFriend(Actor other) const;
 	native clearscope bool isHostile(Actor other) const;
+	native clearscope bool ShouldPassThroughPlayer(Actor other) const;
 	native void AdjustFloorClip();
 	native clearscope DropItem GetDropItems() const;
 	native void CopyFriendliness (Actor other, bool changeTarget, bool resetHealth = true);
@@ -842,6 +852,7 @@ class Actor : Thinker native
 	native bool LookForTid(bool allaround, LookExParams params = null);
 	native bool LookForEnemies(bool allaround, LookExParams params = null);
 	native bool LookForPlayers(bool allaround, LookExParams params = null);
+	native int LookForEnemiesEx(out Array<Actor> targets, double range = -1, bool noPlayers = true, bool allaround = false, LookExParams params = null);
 	native bool TeleportMove(Vector3 pos, bool telefrag, bool modifyactor = true);
 	native clearscope double DistanceBySpeed(Actor other, double speed) const;
 	native name GetSpecies();
@@ -855,7 +866,7 @@ class Actor : Thinker native
 	native void PlayPushSound();
 	native bool BounceActor(Actor blocking, bool onTop);
 	native bool BounceWall(Line l = null);
-	native bool BouncePlane(readonly<SecPlane> plane);
+	native bool BouncePlane(readonly<SecPlane> plane, bool is3DFloor = false);
 	native void PlayBounceSound(bool onFloor);
 	native bool ReflectOffActor(Actor blocking);
 
@@ -1310,7 +1321,7 @@ class Actor : Thinker native
 	native bool A_AttachLight(Name lightid, int type, Color lightcolor, int radius1, int radius2, int flags = 0, Vector3 ofs = (0,0,0), double param = 0, double spoti = 10, double spoto = 25, double spotp = 0);
 	native bool A_RemoveLight(Name lightid);
 
-	native version("4.12") void SetAnimation(Name animName, double framerate = -1, int startFrame = -1, int loopFrame= -1, int endFrame = -1, int interpolateTics = -1, int flags = 0);
+	native version("4.12") void SetAnimation(Name animName, double framerate = -1, int startFrame = -1, int loopFrame = -1, int endFrame = -1, int interpolateTics = -1, int flags = 0);
 	native version("4.12") ui void SetAnimationUI(Name animName, double framerate = -1, int startFrame = -1, int loopFrame = -1, int endFrame = -1, int interpolateTics = -1, int flags = 0);
 
 	native version("4.12") void SetAnimationFrameRate(double framerate);
@@ -1321,9 +1332,9 @@ class Actor : Thinker native
 	native version("4.12") void ResetModelFlags();
     
     
-	action version("4.12") void A_SetAnimation(Name animName, double framerate = -1, int startFrame = -1, int loopFrame= -1, int interpolateTics = -1, int flags = 0)
+	action version("4.12") void A_SetAnimation(Name animName, double framerate = -1, int startFrame = -1, int loopFrame = -1, int endFrame = -1, int interpolateTics = -1, int flags = 0)
 	{
-		invoker.SetAnimation(animName, framerate, startFrame, loopFrame, interpolateTics, flags);
+		invoker.SetAnimation(animName, framerate, startFrame, loopFrame, endFrame, interpolateTics, flags);
 	}
 
 	action version("4.12") void A_SetAnimationFrameRate(double framerate)
@@ -1436,6 +1447,36 @@ class Actor : Thinker native
 					A_StartSoundIfNotSame("*land", "*grunt", CHAN_AUTO);
 				}
 			}
+		}
+	}
+
+	virtual void PlayerSquatView(Actor onmobj)
+	{
+		if (!self.player)
+			return;
+
+		if (self.player.mo == self)
+		{
+			self.player.deltaviewheight = self.Vel.Z / 8.;
+		}
+	}
+
+	virtual void PlayDiveOrSurfaceSounds(int oldlevel)
+	{
+		if (oldlevel < 3 && WaterLevel == 3)
+		{
+			// Our head just went under.
+			A_StartSound("*dive", CHAN_VOICE, attenuation: ATTN_NORM);
+		}
+		else if (oldlevel == 3 && WaterLevel < 3)
+		{
+			// Our head just came up.
+			if (player.air_finished > Level.maptime)
+			{
+				// We hadn't run out of air yet.
+				A_StartSound("*surface", CHAN_VOICE, attenuation: ATTN_NORM);
+			}
+			// If we were running out of air, then ResetAirSupply() will play *gasp.
 		}
 	}
 

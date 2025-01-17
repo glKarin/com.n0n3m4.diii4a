@@ -94,8 +94,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "Head", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
-                    KCVar.CreateCVar("harm_g_normalizeMovementDirection", "integer", "-1", "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree", 0)
+                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0)
                 );
         KCVar.Group RIVENSIN_CVARS = new KCVar.Group("Rivensin", false)
                 .AddCVar(
@@ -107,7 +106,6 @@ public final class KCVarSystem
         KCVar.Group QUAKE4_CVARS = new KCVar.Group("Quake4", false)
                 .AddCVar(
                     KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
-                    KCVar.CreateCVar("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movment", 0),
                     KCVar.CreateCVar("harm_gui_defaultFont", "string", "chain", "Default font name", 0,
                             "chain", "fonts/chain",
                             "lowpixel", "fonts/lowpixel",
@@ -125,9 +123,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
-                    KCVar.CreateCVar("harm_g_normalizeMovementDirection", "integer", "-1", "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree", 0)
+                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0)
                 );
 
         KCVar.Group PREY_CVARS = new KCVar.Group("Prey(2006)", false)
@@ -144,8 +140,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(forward-offset side-offset up-offset)", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "neck", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_g_normalizeMovementDirection", "integer", "-1", "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree", 0)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0)
                 );
 
         KCVar.Group DOOM3BFG_CVARS = new KCVar.Group("DOOM 3 BFG", true)
@@ -207,6 +202,23 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_stencilShadowInfinite", "float", "0", "Stencil shadow volume far is infinite(absolute value as volume's length; 0=512. negative value is infinite, personal shadow is always infinite)", 0
                                 ),
                         KCVar.CreateCVar("harm_r_stencilShadowMask", "bool", "0", "Render stencil shadow mask(0=render mask after all shadows; 1=render mask every shadow volume)", 0
+                        ),
+                        KCVar.CreateCVar("harm_ui_disableAndroidMacro", "bool", "0", "Disable `ANDROID` menu macro, show `HOST` menu for create game server", KCVar.FLAG_LAUNCHER
+                        )
+                );
+
+        KCVar.Group GZDOOM_CVARS = new KCVar.Group("GZDOOM", true)
+                .AddCVar(
+                        KCVar.CreateCVar("harm_gl_es", "integer", "0", "OpenGLES version", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
+                                "0", "Automatic",
+                                "2", "OpenGL ES2.0",
+                                "3", "OpenGL ES3.0(GLSL shader version is 100)",
+                                "4", "OpenGL ES3.0(GLSL shader version is 300 es)"
+                        ),
+                        KCVar.CreateCVar("gl_glsl_precision", "integer", "0", "OpenGL shader default precision", KCVar.FLAG_INIT,
+                                "0", "highp",
+                                "1", "mediump",
+                                "2", "lowp"
                         )
                 );
 
@@ -220,6 +232,7 @@ public final class KCVarSystem
         _cvars.put("RealRTCW", REALRTCW_CVARS);
         _cvars.put("ETW", ETW_CVARS);
         _cvars.put("TDM", TDM_CVARS);
+        _cvars.put("GZDOOM", GZDOOM_CVARS);
 
         return _cvars;
     }
@@ -246,7 +259,8 @@ public final class KCVarSystem
             res.add(_cvars.get("TDM"));
         else if(Q3EUtils.q3ei.isD3BFG)
             res.add(_cvars.get("DOOM3BFG"));
-        else if(Q3EUtils.q3ei.isDOOM) ;
+        else if(Q3EUtils.q3ei.isDOOM)
+            res.add(_cvars.get("GZDOOM"));
         else if(Q3EUtils.q3ei.isETW)
             res.add(_cvars.get("ETW"));
         else if(Q3EUtils.q3ei.isRealRTCW)

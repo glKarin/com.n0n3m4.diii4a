@@ -70,7 +70,7 @@ void main()
 		pixelpos.xyz = worldcoord.xyz;
 		pixelpos.w = -eyeCoordPos.z/eyeCoordPos.w;
 
-		if (uGlowTopColor.a > 0 || uGlowBottomColor.a > 0)
+		if (uGlowTopColor.a > 0.0 || uGlowBottomColor.a > 0.0)
 		{
 			float topatpoint = (uGlowTopPlane.w + uGlowTopPlane.x * worldcoord.x + uGlowTopPlane.y * worldcoord.z) * uGlowTopPlane.z;
 			float bottomatpoint = (uGlowBottomPlane.w + uGlowBottomPlane.x * worldcoord.x + uGlowBottomPlane.y * worldcoord.z) * uGlowBottomPlane.z;
@@ -79,7 +79,7 @@ void main()
 			glowdist.z = clamp(glowdist.x / (topatpoint - bottomatpoint), 0.0, 1.0);
 		}
 
-		if (uObjectColor2.a != 0)
+		if (uObjectColor2.a != 0.0)
 		{
 			float topatpoint = (uGradientTopPlane.w + uGradientTopPlane.x * worldcoord.x + uGradientTopPlane.y * worldcoord.z) * uGradientTopPlane.z;
 			float bottomatpoint = (uGradientBottomPlane.w + uGradientBottomPlane.x * worldcoord.x + uGradientBottomPlane.y * worldcoord.z) * uGradientBottomPlane.z;
@@ -125,7 +125,7 @@ void main()
 	}
 	else
 	{
-		ClipDistance0 = 1;
+		ClipDistance0 = 1.0;
 	}
 
 	// clip planes used for translucency splitting
@@ -142,11 +142,21 @@ void main()
 	ClipDistanceA = vec4(ClipDistance0, ClipDistance1, ClipDistance2, ClipDistance3);
 	ClipDistanceB = vec4(ClipDistance4, 0.0, 0.0, 0.0);
 #else
+#ifdef _GLES //karin: GLES3 extension
+#ifdef GL_EXT_clip_cull_distance
 	gl_ClipDistance[0] = ClipDistance0;
 	gl_ClipDistance[1] = ClipDistance1;
 	gl_ClipDistance[2] = ClipDistance2;
 	gl_ClipDistance[3] = ClipDistance3;
 	gl_ClipDistance[4] = ClipDistance4;
+#endif
+#else
+	gl_ClipDistance[0] = ClipDistance0;
+	gl_ClipDistance[1] = ClipDistance1;
+	gl_ClipDistance[2] = ClipDistance2;
+	gl_ClipDistance[3] = ClipDistance3;
+	gl_ClipDistance[4] = ClipDistance4;
+#endif
 #endif
 
 	gl_PointSize = 1.0;

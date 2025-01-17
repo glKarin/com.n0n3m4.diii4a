@@ -10,9 +10,13 @@ android {
         applicationId "com.karin.idTech4Amm"
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
-        versionCode 11059
-        versionName '1.1.0harmattan59'
-        versionNameSuffix 'natasha'
+        versionCode 11060
+        versionName '1.1.0harmattan60'
+         /*
+            natasha: A CSOL CT character, for my Quake II for MeeGo Harmattan port version 5 at 2018
+            verena: GC singer, for my first YouKu 3rd client for MeeGo Harmattan at 2015
+         */
+        versionNameSuffix 'verena'
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
     }
@@ -74,8 +78,8 @@ android {
         // exclude "lib/arm64-v8a/**"
 
 		// keep debug info
-//        doNotStrip "*/armeabi-v7a/*.so"
-//        doNotStrip "*/arm64-v8a/*.so"
+        // doNotStrip "*/armeabi-v7a/*.so"
+        // doNotStrip "*/arm64-v8a/*.so"
     }
 }
 

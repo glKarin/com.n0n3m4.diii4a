@@ -309,23 +309,11 @@ void CG_DrawCursorhint(hudComponent_t *comp)
 		return;
 	}
 
-	if (cg.generatingNoiseHud)
-	{
-		// simulate cursor hint
-		cg.cursorHintTime  = cg.time;
-		cg.cursorHintFade  = 500;
-		cg.cursorHintIcon  = HINT_BREAKABLE;
-		cg.cursorHintValue = 128.f;
-	}
-	else
-	{
-		CG_CheckForCursorHints();
-	}
-
 	switch (cg.cursorHintIcon)
 	{
 	case HINT_NONE:
 	case HINT_FORCENONE:
+	case HINT_COMPLETED:
 		icon = 0;
 		break;
 	case HINT_DOOR:
@@ -458,18 +446,99 @@ void CG_DrawCursorhint(hudComponent_t *comp)
 	CG_DrawPic(comp->location.x - halfscale, comp->location.y - halfscale, comp->location.w + scale, comp->location.h + scale, icon);
 
 	trap_R_SetColor(NULL);
+}
 
-	// draw status bar under the cursor hint
-	if (cg.cursorHintValue)
+/**
+ * @brief CG_DrawCursorHintBar
+ * @param[in] comp
+ */
+void CG_DrawCursorHintBar(hudComponent_t *comp)
+{
+	float  *color;
+	vec4_t textColor;
+	float  curValue;
+
+	if (cgs.clientinfo[cg.clientNum].shoutcaster)
 	{
-		float curValue = (float)cg.cursorHintValue / 255.0f;
-
-		if (curValue > 0.01f)
-		{
-			CG_FilledBar(comp->location.x, comp->location.y + comp->location.h + 4, comp->location.w, 8, colorRed, colorGreen,
-			             comp->colorBackground, comp->colorBorder, curValue, BAR_BORDER_SMALL | BAR_LERP_COLOR, -1);
-		}
+		return;
 	}
+
+	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
+	{
+		return;
+	}
+
+	if (cg.snap->ps.stats[STAT_HEALTH] <= 0)
+	{
+		return;
+	}
+
+	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
+	{
+		return;
+	}
+
+	// color
+	Vector4Copy(comp->colorMain, textColor);
+	color = CG_FadeColor_Ext(cg.cursorHintTime, cg.cursorHintFade, textColor[3]);
+	if (!color)
+	{
+		trap_R_SetColor(NULL);
+		return;
+	}
+
+	curValue = (float)cg.cursorHintValue / 255.0f;
+
+	if (curValue > 0.01f)
+	{
+		CG_FilledBar(comp->location.x, comp->location.y + comp->location.h, comp->location.w, comp->location.h, colorRed, colorGreen,
+		             comp->colorBackground, comp->colorBorder, curValue, 0.f, comp->style, -1);
+	}
+}
+
+/**
+ * @brief CG_DrawCursorHintText
+ * @param[in] comp
+ */
+void CG_DrawCursorHintText(hudComponent_t *comp)
+{
+	float      *color;
+	vec4_t     textColor;
+	const char *str;
+
+	if (cgs.clientinfo[cg.clientNum].shoutcaster)
+	{
+		return;
+	}
+
+	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
+	{
+		return;
+	}
+
+	if (cg.snap->ps.stats[STAT_HEALTH] <= 0)
+	{
+		return;
+	}
+
+	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
+	{
+		return;
+	}
+
+	// color
+	Vector4Copy(comp->colorMain, textColor);
+	color = CG_FadeColor_Ext(cg.cursorHintTime, cg.cursorHintFade, textColor[3]);
+	if (!color)
+	{
+		trap_R_SetColor(NULL);
+		return;
+	}
+
+	str = va("%.0f%s", MIN((cg.cursorHintValue / 255.f) * 100, 100), (comp->style & 1) ? " %" : "");
+
+	textColor[3] = color[3];
+	CG_DrawCompText(comp, str, textColor, comp->styleText, &cgs.media.limboFont1);
 }
 
 /**
@@ -533,17 +602,19 @@ void CG_DrawWeapStability(hudComponent_t *comp)
 	}
 
 	CG_FilledBar(comp->location.x, comp->location.y, comp->location.w, comp->location.h, goodColor, badColor,
-	             comp->colorBackground, comp->colorBorder, (float)cg.snap->ps.aimSpreadScale / 255.0f, comp->style >> 1, -1);
+	             comp->colorBackground, comp->colorBorder, (float)cg.snap->ps.aimSpreadScale / 255.0f, 0.f, comp->style >> 1, -1);
 }
 
 /**
  * @brief CG_DrawWeapHeat
  * @param[in] rect
  * @param[in] align
+ * @param[in] dynamicColor
  */
-void CG_DrawWeapHeat(rectDef_t *rect, int align)
+void CG_DrawWeapHeat(rectDef_t *rect, int align, qboolean dynamicColor)
 {
 	static vec4_t color = { 1, 0, 0, 0.2f }, color2 = { 1, 0, 0, 0.5f };
+	static vec4_t dynColor = { 1, 1, 0, 0.3f }, dynColor2 = { 1, 0, 0, 0.7f };
 	int           flags = 0;
 
 	if (!(cg.snap->ps.curWeapHeat))
@@ -562,7 +633,14 @@ void CG_DrawWeapHeat(rectDef_t *rect, int align)
 
 	flags |= BAR_LERP_COLOR;
 
-	CG_FilledBar(rect->x, rect->y, rect->w, rect->h, color, color2, NULL, NULL, (float)cg.snap->ps.curWeapHeat / 255.0f, flags, -1);
+	if (dynamicColor)
+	{
+		CG_FilledBar(rect->x, rect->y, rect->w, rect->h, dynColor, dynColor2, NULL, NULL, (float)cg.snap->ps.curWeapHeat / 255.0f, 0.f, flags, -1);
+	}
+	else
+	{
+		CG_FilledBar(rect->x, rect->y, rect->w, rect->h, color, color2, NULL, NULL, (float)cg.snap->ps.curWeapHeat / 255.0f, 0.f, flags, -1);
+	}
 }
 
 #ifdef FEATURE_EDV
@@ -597,8 +675,8 @@ void CG_MouseEvent(int x, int y)
 		if (!cgs.demoCamera.renderingFreeCam)
 		{
 #endif
-		int hudEditorSafeX = SCREEN_WIDTH_SAFE * 1.28f;
-		int hudEditorSafeY = SCREEN_HEIGHT_SAFE * 1.28f;
+		int hudEditorSafeX = SCREEN_WIDTH_SAFE * HUD_EDITOR_SIZE_COEFF;
+		int hudEditorSafeY = SCREEN_HEIGHT_SAFE * HUD_EDITOR_SIZE_COEFF;
 
 		cgs.cursorX += x;
 		if (cg.editingHud && !cg.fullScreenHudEditor)
@@ -725,12 +803,12 @@ void CG_HudEditor_Cleanup(void)
 	int i;
 
 	CG_InitPM();
-	cg.bannerPrintTime     = 0;
-	cg.centerPrintTime     = 0;
-	cgs.voteTime           = 0;
-	cg.cursorHintTime      = 0;
-	cg.crosshairClientTime = 0;
-	cg.oidPrintTime        = 0;
+	cg.bannerPrintTime  = 0;
+	cg.centerPrintTime  = 0;
+	cgs.voteTime        = 0;
+	cg.cursorHintTime   = 0;
+	cg.crosshairEntTime = 0;
+	cg.oidPrintTime     = 0;
 
 	for (i = 0; i < cg_teamChatHeight.integer; i++)
 	{
@@ -755,6 +833,9 @@ void CG_EventHandling(int type, qboolean fForced)
 		trap_Cvar_Set("cl_bypassMouseInput", "0");
 	}
 
+	// assume we want to draw cursor
+	cgDC.cursorVisible = qtrue;
+
 	switch (type)
 	{
 	// Demo support
@@ -764,6 +845,7 @@ void CG_EventHandling(int type, qboolean fForced)
 		cgs.cursorUpdate    = cg.time + 10000;
 		cgs.timescaleUpdate = cg.time + 4000;
 		CG_ScoresUp_f();
+		CG_HudEditorReset();
 		break;
 
 	case CGAME_EVENT_SPEAKEREDITOR:
@@ -833,14 +915,7 @@ void CG_EventHandling(int type, qboolean fForced)
 		}
 		else if (cgs.eventHandling == CGAME_EVENT_HUDEDITOR)
 		{
-			if (cg.generatingNoiseHud)
-			{
-				CG_HudEditor_Cleanup();
-				cg.generatingNoiseHud = qfalse;
-			}
-
-			cg.editingHud          = qfalse;
-			cg.fullScreenHudEditor = qfalse;
+			CG_HudEditorReset();
 		}
 		else if (cgs.eventHandling == CGAME_EVENT_CAMPAIGNBREIFING)
 		{
@@ -899,17 +974,20 @@ void CG_EventHandling(int type, qboolean fForced)
 		cgs.ftMenuPos       = -1;
 		cgs.ftMenuMode      = 0;
 		cg.showFireteamMenu = qtrue;
+		cgDC.cursorVisible  = qfalse;
 		trap_Cvar_Set("cl_bypassmouseinput", "1");
 		trap_Key_SetCatcher(KEYCATCH_CGAME);
 	}
 	else if (type == CGAME_EVENT_SHOUTCAST)
 	{
+		cgDC.cursorVisible = qfalse;
 		trap_Cvar_Set("cl_bypassmouseinput", "1");
 		trap_Key_SetCatcher(KEYCATCH_CGAME);
 	}
 	else if (type == CGAME_EVENT_SPAWNPOINTMSG)
 	{
 		cg.showSpawnpointsMenu = qtrue;
+		cgDC.cursorVisible     = qfalse;
 		trap_Cvar_Set("cl_bypassmouseinput", "1");
 		trap_Key_SetCatcher(KEYCATCH_CGAME);
 	}

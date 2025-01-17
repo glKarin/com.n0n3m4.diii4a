@@ -254,7 +254,7 @@ if( ${TARGET_ARCHITECTURE} MATCHES "x86_64" )
 	set( HAVE_VM_JIT ON )
 endif()
 
-option (HAVE_VULKAN "Enable Vulkan support" OFF) #k ON
+option (HAVE_VULKAN "Enable Vulkan support" ON) #k ON
 option (HAVE_GLES2 "Enable GLES2 support" ON)
 
 # no, we're not using external asmjit for now, we made too many modifications to our's.
@@ -309,6 +309,9 @@ else()
 
 	if ( HAVE_VULKAN )
 		set( ALL_C_FLAGS "${ALL_C_FLAGS} -DHAVE_VULKAN" )
+		if(ANDROID) #k: globals define
+			add_definitions(-DVK_USE_PLATFORM_ANDROID_KHR)
+		endif()
 	endif()
 
 	if ( HAVE_GLES2 )

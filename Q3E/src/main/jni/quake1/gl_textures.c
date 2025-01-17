@@ -1565,7 +1565,7 @@ int R_SaveTextureDDSFile(rtexture_t *rt, const char *filename, qbool skipuncompr
 #endif
 }
 
-#if !defined(_NOKTX)
+#if !defined(_NOKTX) //karin: KTX not support yet
 #ifdef __ANDROID__
 // ELUAN: FIXME: separate this code
 #include "ktx10/include/ktx.h"

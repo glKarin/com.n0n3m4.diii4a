@@ -1,19 +1,4 @@
-cmake_minimum_required( VERSION 2.8.7 )
-
-use_fast_math()
-require_stricmp()
-
-if( ZD_CMAKE_COMPILER_IS_GNUC_COMPATIBLE )
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-unused-function -Wno-unused-variable" )
-endif()
-
-include_directories( timidity )
-
-file( GLOB HEADER_FILES
-	timidity/*.h
-	)
-add_library( timidity STATIC
-	${HEADER_FILES}
+add_library(timidity OBJECT
 	common.cpp
 	instrum.cpp
 	instrum_dls.cpp
@@ -23,5 +8,25 @@ add_library( timidity STATIC
 	playmidi.cpp
 	resample.cpp
 	timidity.cpp
+)
+
+file(GLOB HEADER_FILES timidity/*.h)
+target_sources(timidity PRIVATE ${HEADER_FILES})
+
+target_include_directories(timidity INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE timidity)
+
+set_target_properties(timidity
+PROPERTIES
+	CXX_STANDARD 11
+	CXX_STANDARD_REQUIRED ON
+)
+
+use_fast_math(timidity)
+require_stricmp(timidity PRIVATE)
+
+if(COMPILER_IS_GNUC_COMPATIBLE)
+	target_compile_options(timidity
+	PRIVATE
+		"-Wno-unused-function" "-Wno-unused-variable"
 	)
-target_link_libraries( timidity )
+endif()

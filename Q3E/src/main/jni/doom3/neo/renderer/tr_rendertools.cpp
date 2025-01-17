@@ -360,7 +360,10 @@ Debugging tool to see what values are in the stencil buffer
 */
 void RB_ScanStencilBuffer(void)
 {
-#if !defined(GL_ES_VERSION_2_0) // qglReadPixels(GL_STENCIL_INDEX)
+//#if !defined(GL_ES_VERSION_2_0) // qglReadPixels(GL_STENCIL_INDEX)
+#if !defined(__ANDROID__)
+    if(!USING_GL)
+        return;
 	int		counts[256];
 	int		i;
 	byte	*stencilReadback;
@@ -385,6 +388,7 @@ void RB_ScanStencilBuffer(void)
 		}
 	}
 #endif
+//#endif
 }
 
 
@@ -397,7 +401,10 @@ Print an overdraw count based on stencil index values
 */
 void RB_CountStencilBuffer(void)
 {
-#if !defined(GL_ES_VERSION_2_0) // qglReadPixels(GL_STENCIL_INDEX)
+//#if !defined(GL_ES_VERSION_2_0) // qglReadPixels(GL_STENCIL_INDEX)
+#if !defined(__ANDROID__)
+    if(!USING_GL)
+        return;
 	int		count;
 	int		i;
 	byte	*stencilReadback;
@@ -417,6 +424,7 @@ void RB_CountStencilBuffer(void)
 	// print some stats (not supposed to do from back end in SMP...)
 	common->Printf("overdraw: %5.1f\n", (float)count/(glConfig.vidWidth * glConfig.vidHeight));
 #endif
+//#endif
 }
 
 /*
@@ -470,7 +478,7 @@ RB_ShowOverdraw
 */
 void RB_ShowOverdraw(void)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	const idMaterial 	*material;
 	int					i;
 	drawSurf_t * *		drawSurfs;
@@ -544,7 +552,7 @@ void RB_ShowOverdraw(void)
 			const_cast<viewDef_t *>(backEnd.viewDef)->numDrawSurfs += interactions;
 			break;
 	}
-#endif
+//#endif
 }
 
 /*
@@ -558,7 +566,7 @@ the resulting color shading from red at 0 to green at 128 to blue at 255
 */
 void RB_ShowIntensity(void)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	byte	*colorReadback;
 	int		i, j, c;
 
@@ -609,7 +617,7 @@ void RB_ShowIntensity(void)
 	glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, colorReadback);
 
 	R_StaticFree(colorReadback);
-#endif
+//#endif
 }
 
 
@@ -622,7 +630,10 @@ Draw the depth buffer as colors
 */
 void RB_ShowDepthBuffer(void)
 {
-#if !defined(GL_ES_VERSION_2_0) // qglReadPixels(GL_DEPTH_COMPONENT)
+//#if !defined(GL_ES_VERSION_2_0) // qglReadPixels(GL_DEPTH_COMPONENT)
+#if !defined(__ANDROID__)
+    if(!USING_GL)
+        return;
 	void	*depthReadback;
 
 	if (!r_showDepth.GetBool()) {
@@ -651,7 +662,7 @@ void RB_ShowDepthBuffer(void)
 
 #if 0
 
-	for (i = 0 ; i < glConfig.vidWidth * glConfig.vidHeight ; i++) {
+	for (int i = 0 ; i < glConfig.vidWidth * glConfig.vidHeight ; i++) {
 		((byte *)depthReadback)[i*4] =
 		        ((byte *)depthReadback)[i*4+1] =
 		                ((byte *)depthReadback)[i*4+2] = 255 * ((float *)depthReadback)[i];
@@ -663,6 +674,7 @@ void RB_ShowDepthBuffer(void)
 	glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, depthReadback);
 	R_StaticFree(depthReadback);
 #endif
+//#endif
 }
 
 /*
@@ -686,9 +698,6 @@ void RB_ShowLightCount(void)
 
 	GL_State(GLS_DEPTHFUNC_EQUAL);
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	RB_SimpleWorldSetup();
 	qglClearStencil(0);
 	qglClear(GL_STENCIL_BUFFER_BIT);
@@ -729,9 +738,6 @@ void RB_ShowLightCount(void)
 			}
 		}
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	// display the results
 	R_ColorByStencilBuffer();
@@ -790,9 +796,6 @@ void RB_ShowSilhouette(void)
 	//
 	// now blend in edges that cast silhouettes
 	//
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	RB_SimpleWorldSetup();
 	glColor3f(0.5, 0, 0);
 	GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE);
@@ -835,9 +838,6 @@ void RB_ShowSilhouette(void)
 			}
 		}
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	qglEnable(GL_DEPTH_TEST);
 
@@ -884,9 +884,6 @@ static void RB_ShowShadowCount(void)
 	// draw both sides
 	GL_Cull(CT_TWO_SIDED);
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	for (vLight = backEnd.viewDef->viewLights ; vLight ; vLight = vLight->next) {
 		for (i = 0 ; i < 2 ; i++) {
 			for (surf = i ? vLight->localShadows : vLight->globalShadows
@@ -924,9 +921,6 @@ static void RB_ShowShadowCount(void)
 			}
 		}
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	// display the results
 	R_ColorByStencilBuffer();
@@ -1168,9 +1162,6 @@ static void RB_ShowViewEntitys(viewEntity_t *vModels)
 	qglDisable(GL_DEPTH_TEST);
 	qglDisable(GL_SCISSOR_TEST);
 
-#ifdef GL_ES_VERSION_2_0
-    glPushMatrix();
-#endif
 	for (; vModels ; vModels = vModels->next) {
 		idBounds	b;
 
@@ -1197,9 +1188,6 @@ static void RB_ShowViewEntitys(viewEntity_t *vModels)
 		b = model->Bounds(&vModels->entityDef->parms);
 		RB_DrawBounds(b);
 	}
-#ifdef GL_ES_VERSION_2_0
-    glPopMatrix();
-#endif
 
 	qglEnable(GL_DEPTH_TEST);
 #if !defined(GL_ES_VERSION_2_0)
@@ -1238,9 +1226,6 @@ static void RB_ShowTexturePolarity(drawSurf_t **drawSurfs, int numDrawSurfs)
 	GL_State(GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA);
 
 	glColor3f(1, 1, 1);
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
@@ -1287,9 +1272,6 @@ static void RB_ShowTexturePolarity(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 		glEnd();
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	GL_State(GLS_DEFAULT);
 //#endif
@@ -1321,9 +1303,6 @@ static void RB_ShowUnsmoothedTangents(drawSurf_t **drawSurfs, int numDrawSurfs)
 	GL_State(GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA);
 
 	glColor4f(0, 1, 0, 0.5);
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
@@ -1351,9 +1330,6 @@ static void RB_ShowUnsmoothedTangents(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 		glEnd();
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	GL_State(GLS_DEFAULT);
 //#endif
@@ -1386,9 +1362,6 @@ static void RB_ShowTangentSpace(drawSurf_t **drawSurfs, int numDrawSurfs)
 	qglDisable(GL_STENCIL_TEST);
 
 	GL_State(GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA);
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
@@ -1424,9 +1397,6 @@ static void RB_ShowTangentSpace(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 		glEnd();
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	GL_State(GLS_DEFAULT);
 //#endif
@@ -1455,9 +1425,6 @@ static void RB_ShowVertexColor(drawSurf_t **drawSurfs, int numDrawSurfs)
 	qglDisable(GL_STENCIL_TEST);
 
 	GL_State(GLS_DEPTHFUNC_LESS);
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
@@ -1482,9 +1449,6 @@ static void RB_ShowVertexColor(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 		glEnd();
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	GL_State(GLS_DEFAULT);
 //#endif
@@ -1534,9 +1498,6 @@ static void RB_ShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 		showNumbers = false;
 	}
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
 
@@ -1569,14 +1530,8 @@ static void RB_ShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 		glEnd();
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	if (showNumbers) {
-#ifdef GL_ES_VERSION_2_0
-		glPushMatrix();
-#endif
 		RB_SimpleWorldSetup();
 
 		for (i = 0 ; i < numDrawSurfs ; i++) {
@@ -1597,9 +1552,6 @@ static void RB_ShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 				RB_DrawText(va("%d", j / 3), pos, 0.01f, colorCyan, backEnd.viewDef->renderView.viewaxis, 1);
 			}
 		}
-#ifdef GL_ES_VERSION_2_0
-		glPopMatrix();
-#endif
 	}
 
 	qglEnable(GL_STENCIL_TEST);
@@ -1633,9 +1585,6 @@ static void RB_AltShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 	qglDisable(GL_STENCIL_TEST);
 	qglDisable(GL_DEPTH_TEST);
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
 
@@ -1684,9 +1633,6 @@ static void RB_AltShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 		glEnd();
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	qglEnable(GL_DEPTH_TEST);
 	qglEnable(GL_STENCIL_TEST);
@@ -1718,9 +1664,6 @@ static void RB_ShowTextureVectors(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	globalImages->BindNull();
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
 
@@ -1798,9 +1741,6 @@ static void RB_ShowTextureVectors(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 		glEnd();
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 //#endif
 }
 
@@ -1832,9 +1772,6 @@ static void RB_ShowDominantTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	globalImages->BindNull();
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
 
@@ -1872,9 +1809,6 @@ static void RB_ShowDominantTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 		glEnd();
 	}
 
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 #if !defined(GL_ES_VERSION_2_0)
 	qglDisable(GL_POLYGON_OFFSET_LINE);
 #endif
@@ -1907,9 +1841,6 @@ static void RB_ShowEdges(drawSurf_t **drawSurfs, int numDrawSurfs)
 	globalImages->BindNull();
 	qglDisable(GL_DEPTH_TEST);
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
 
@@ -1986,9 +1917,6 @@ static void RB_ShowEdges(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 		glEnd();
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	qglEnable(GL_DEPTH_TEST);
 //#endif
@@ -2016,9 +1944,6 @@ void RB_ShowLights(void)
 		return;
 	}
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	// all volumes are expressed in world coordinates
 	RB_SimpleWorldSetup();
 
@@ -2080,9 +2005,6 @@ void RB_ShowLights(void)
 			common->Printf("%i ", index);
 		}
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	qglEnable(GL_DEPTH_TEST);
 #if !defined(GL_ES_VERSION_2_0)
@@ -2157,9 +2079,6 @@ void RB_ShowPortals(void)
 		return;
 	}
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	// all portals are expressed in world coordinates
 	RB_SimpleWorldSetup();
 
@@ -2172,9 +2091,6 @@ void RB_ShowPortals(void)
 	((idRenderWorldLocal *)backEnd.viewDef->renderWorld)->ShowPortals();
 #else
 	idRenderWorldLocal__ShowPortals();
-#endif
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
 #endif
 
 	qglEnable(GL_DEPTH_TEST);
@@ -2411,9 +2327,6 @@ void RB_ShowDebugText(void)
 		return;
 	}
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	// all lines are expressed in world coordinates
 	RB_SimpleWorldSetup();
 
@@ -2454,9 +2367,6 @@ void RB_ShowDebugText(void)
 			RB_DrawText(text->text, text->origin, text->scale, text->color, text->viewAxis, text->align);
 		}
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	qglLineWidth(1);
 	GL_State(GLS_DEFAULT);
@@ -2542,9 +2452,6 @@ void RB_ShowDebugLines(void)
 		return;
 	}
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	// all lines are expressed in world coordinates
 	RB_SimpleWorldSetup();
 
@@ -2597,9 +2504,6 @@ void RB_ShowDebugLines(void)
 	}
 
 	glEnd();
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	qglLineWidth(1);
 	GL_State(GLS_DEFAULT);
@@ -2684,9 +2588,6 @@ void RB_ShowDebugPolygons(void)
 		return;
 	}
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	// all lines are expressed in world coordinates
 	RB_SimpleWorldSetup();
 
@@ -2735,9 +2636,6 @@ void RB_ShowDebugPolygons(void)
 		qglDisable(GL_POLYGON_OFFSET_LINE);
 #endif
 	}
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 
 	glDepthRange(0, 1);
 	GL_State(GLS_DEFAULT);
@@ -2950,9 +2848,6 @@ void RB_TestImage(void)
 		w *= (float)glConfig.vidHeight / glConfig.vidWidth;
 	}
 
-#ifdef GL_ES_VERSION_2_0
-	glPushMatrix();
-#endif
 	glLoadIdentity();
 
 	glMatrixMode(GL_PROJECTION);
@@ -2997,9 +2892,6 @@ void RB_TestImage(void)
 
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
-#ifdef GL_ES_VERSION_2_0
-	glPopMatrix();
-#endif
 //#endif
 }
 

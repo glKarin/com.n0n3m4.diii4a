@@ -476,6 +476,12 @@ int Pickup_Team(gentity_t *ent, gentity_t *other)
 	int       team;
 	gclient_t *cl = other->client;
 
+	// Don't let them pickup winning stuff in warmup
+	if (g_gamestate.integer != GS_PLAYING)
+	{
+		return 0;
+	}
+
 	// figure out what team this flag is
 	if (strcmp(ent->classname, "team_CTF_redflag") == 0)
 	{
@@ -2373,11 +2379,13 @@ void G_UpdateSpawnPointStatePlayerCounts()
 void G_UpdateSpawnPointState(gentity_t *ent)
 {
 	static char cs[MAX_STRING_CHARS];
+	spawnPointState_t *spawnPointState;
+
 	if (ent == NULL || !ent->count)
 	{
 		return;
 	}
-	spawnPointState_t *spawnPointState = &level.spawnPointStates[ent->count - CS_MULTI_SPAWNTARGETS];
+	spawnPointState = &level.spawnPointStates[ent->count - CS_MULTI_SPAWNTARGETS];
 	// update state
 	VectorCopy(ent->s.origin, spawnPointState->origin);
 	spawnPointState->team = (team_t)(ent->count2 & 0xF);

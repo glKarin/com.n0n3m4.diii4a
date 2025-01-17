@@ -396,7 +396,7 @@ void idGLSLShaderManager::Shutdown(void)
     }
     queueCurrentIndex = 0;
     customShaders.Clear();
-    printf("[Harmattan]: GLSL shader manager shotdown\n");
+    printf("[Harmattan]: GLSL shader manager shutdown\n");
 }
 
 idGLSLShaderManager idGLSLShaderManager::_shaderManager;
@@ -916,7 +916,7 @@ static bool RB_GLSL_InitShaders(void)
 			{
 				r_useShadowMapping.SetBool(false);
 			}
-			r_useShadowMapping.SetReadonly();
+			CVAR_READONLY(r_useShadowMapping);
 			break;
 		}
 		shaderManager->Add(prop->program);
@@ -938,12 +938,12 @@ static bool RB_GLSL_InitShaders(void)
 			{
 				harm_r_stencilShadowTranslucent.SetBool(false);
 			}
-            harm_r_stencilShadowTranslucent.SetReadonly();
+			CVAR_READONLY(harm_r_stencilShadowTranslucent);
             if(harm_r_stencilShadowSoft.GetBool())
             {
                 harm_r_stencilShadowSoft.SetBool(false);
             }
-            harm_r_stencilShadowSoft.SetReadonly();
+			CVAR_READONLY(harm_r_stencilShadowSoft);
 			break;
 		}
 		shaderManager->Add(prop->program);

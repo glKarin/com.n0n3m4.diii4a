@@ -87,6 +87,9 @@ extern void (*MR_Shutdown) (void);
 extern void (*MR_NewMap) (void);
 extern int (*MR_GetServerListEntryCategory) (const struct serverlist_entry_s *entry);
 
+// menu QC error handling
+extern jmp_buf mp_abort;
+
 typedef struct video_resolution_s
 {
 	const char *type;

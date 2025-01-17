@@ -25,6 +25,7 @@
 #pragma once
 #include <stdio.h>
 #include <string.h>
+#include <cstdint>
 #include <vector>
 #include <string>
 
@@ -220,6 +221,9 @@ struct VectorReader : public MemoryReader
 	{
 		mVector.resize(size);
 		memcpy(mVector.data(), data, size);
+		mData = mVector.data();
+		mLength = (long)size;
+		mPos = 0;
 	}
 };
 
@@ -320,7 +324,7 @@ public:
 		std::string fullname;
 		if (!fn) 
 		{
-			f = utf8_fopen(mBaseFile.c_str(), "rt");
+			f = utf8_fopen(mBaseFile.c_str(), "rb");
 			fullname = mBaseFile;
 		}
 		else
@@ -330,11 +334,11 @@ public:
 				for(int i = (int)mPaths.size()-1; i>=0; i--)
 				{
 					fullname = mPaths[i] + fn;
-					f = utf8_fopen(fullname.c_str(), "rt");
-					break;
+					f = utf8_fopen(fullname.c_str(), "rb");
+					if (f) break;
 				}
 			}
-			if (!f) f = fopen(fn, "rt");
+			if (!f) f = fopen(fn, "rb");
 		}
 		if (!f) return nullptr;
 		auto tf = new StdioFileReader;

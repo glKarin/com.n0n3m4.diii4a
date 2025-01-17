@@ -550,11 +550,6 @@ enum {
 	TRIGGER_EVENT_ONE,
 	TRIGGER_EVENT_TWO,
 	TRIGGER_EVENT_THREE
-#ifdef __ANDROID__ //karin: Surface change lock
-,
-    TRIGGER_EVENT_WINDOW_CREATED, // Android SurfaceView thread -> doom3/renderer thread: notify native window is set
-    TRIGGER_EVENT_WINDOW_DESTROYED, // doom3 thread/render thread -> Android SurfaceView thread: notify released OpenGL context
-#endif
 };
 
 void				Sys_WaitForEvent( int index = TRIGGER_EVENT_ZERO );

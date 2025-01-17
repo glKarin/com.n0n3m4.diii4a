@@ -444,7 +444,7 @@ struct gentity_s
 
 	qboolean active;
 
-	// mg42
+	// stationary heavy weapon aiming (e.g. misc_mg42, misc_aagun)
 	float harc;
 	float varc;
 
@@ -486,9 +486,10 @@ struct gentity_s
 	gentity_t *tankLink;
 
 	int lastHintCheckTime;
+	int lastTaskAchievedTime;
 	int voiceChatSquelch;
 	int voiceChatPreviousTime;
-	int lastBurnedFrameNumber;          ///< to fix FT instant-kill exploit
+	int lastBurnedFrameTime;          ///< last burn damage timestamp
 
 	entState_t entstate;
 	char *constages;
@@ -657,6 +658,7 @@ typedef struct
 	int spec_invite;
 	int spec_team;
 	int kills;
+	int kill_assists;
 	int deaths;
 	int gibs;
 	int self_kills;
@@ -853,7 +855,7 @@ typedef struct
 
 /**
  * @struct clientMarker_t
- * @brief
+ * @brief Contains all the variables that are tracked in historical markers for antilag functionality.
  */
 typedef struct
 {
@@ -868,6 +870,8 @@ typedef struct
 	int pm_flags;           ///< ps for both
 	vec3_t viewangles;      ///< s.apos.trBase to ps.viewangles
 
+	int groundEntityNum;
+
 	int time;
 
 	// torso markers
@@ -881,6 +885,7 @@ typedef struct
 	float torsoPitchAngle;
 	int torsoYawing;
 	int torsoPitching;
+	int torsoAnimationMovetype;
 
 	// leg markers
 	qhandle_t legsOldFrameModel;
@@ -893,9 +898,10 @@ typedef struct
 	float legsPitchAngle;
 	int legsYawing;
 	qboolean legsPitching;
+	int legsAnimationMovetype;
 } clientMarker_t;
 
-#define MAX_CLIENT_MARKERS 17
+#define MAX_CLIENT_MARKERS 40
 
 #define FIELDOPS_SPECIAL_PICKUP_MOD 3   ///< Number of times (minus one for modulo) field ops must drop ammo before scoring a point
 #define MEDIC_SPECIAL_PICKUP_MOD    4   ///< Same thing for medic
@@ -915,6 +921,18 @@ typedef struct debrisChunk_s
 } debrisChunk_t;
 
 #define MAX_DEBRISCHUNKS        256
+
+/**
+ * @struct damageReceivedStats_s
+ * @typedef damageReceivedStats_t
+ * @brief Hold damage received by other players
+ */
+typedef struct damageReceivedStats_s
+{
+	int damageReceived;
+	int mods;
+	int lastHitTime;
+} damageReceivedStats_t;
 
 // ===================
 
@@ -962,6 +980,7 @@ struct gclient_s
 	int lasthurt_time;                      ///< level.time of last damage
 
 	// timers
+	int instantRespawnDelayTime;            ///< used to prevent dying and respawning all within the same server frame
 	int respawnTime;                        ///< can respawn when time > this, force after g_forcerespwan
 	int inactivityTime;                     ///< kick players when time > this
 	qboolean inactivityWarning;             ///< qtrue if the five seoond warning has been given
@@ -972,7 +991,7 @@ struct gclient_s
 	int lastKillTime;                       ///< for multiple kill rewards FIXME: implement this/make available to Lua
 
 	// timeResidual is used to handle events that happen every second
-	// like health / armor countdowns and regeneration
+	// like health countdowns and regeneration
 	int timeResidual;
 
 	float currentAimSpreadScale;
@@ -995,6 +1014,7 @@ struct gclient_s
 
 	unsigned int combatState;
 
+	// antilag
 	int topMarker;
 	clientMarker_t clientMarkers[MAX_CLIENT_MARKERS];
 	clientMarker_t backupMarker;
@@ -1045,6 +1065,14 @@ struct gclient_s
 	int constructSoundTime;                 ///< construction sound time
 
 	qboolean activateHeld;                  ///< client is holding down +activate
+
+	int lastRevivePushTime;
+
+	int scoresIndex;
+	int scoresCount;
+	char scores[MAX_SCORES_CMDS][MAX_STRING_CHARS];
+
+	damageReceivedStats_t dmgReceivedSts[MAX_CLIENTS];
 };
 
 /**
@@ -1504,7 +1532,7 @@ void G_UseEntity(gentity_t *ent, gentity_t *other, gentity_t *activator);
 qboolean G_IsWeaponDisabled(gentity_t *ent, weapon_t weapon);
 void G_TeamCommand(team_t team, const char *cmd);
 
-gentity_t *G_Find(gentity_t *from, int fieldofs, const char *match);
+gentity_t *G_Find(gentity_t *from, size_t fieldofs, const char *match);
 gentity_t *G_FindInt(gentity_t *from, int fieldofs, int match);
 gentity_t *G_FindFloat(gentity_t *from, int fieldofs, float match);
 gentity_t *G_FindVector(gentity_t *from, int fieldofs, const vec3_t match);
@@ -1612,6 +1640,7 @@ void body_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int da
 void TossWeapons(gentity_t *self);
 gentity_t *G_BuildHead(gentity_t *ent, grefEntity_t *refent, qboolean newRefent);
 gentity_t *G_BuildLeg(gentity_t *ent, grefEntity_t *refent, qboolean newRefent);
+qboolean G_CheckComplaint(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, meansOfDeath_t meansOfDeath);
 
 // damage flags
 #define DAMAGE_RADIUS               0x00000001  ///< damage was indirect
@@ -1695,7 +1724,7 @@ gentity_t *SelectSpawnPoint(vec3_t avoidPoint, vec3_t origin, vec3_t angles);
 void respawn(gentity_t *ent);
 void BeginIntermission(void);
 void InitBodyQue(void);
-void ClientSpawn(gentity_t *ent, qboolean revived, qboolean teamChange, qboolean restoreHealth);
+void ClientSpawn(gentity_t *ent, qboolean revived, qboolean teamChange, qboolean restoreHealth, qboolean toggleTeleport);
 void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, meansOfDeath_t meansOfDeath);
 void AddKillScore(gentity_t *ent, int score);
 void CalculateRanks(void);
@@ -1733,7 +1762,7 @@ void Svcmd_ShuffleTeamsSR_f(qboolean restart);
 
 // g_weapon.c
 void FireWeapon(gentity_t *ent);
-void G_BurnMeGood(gentity_t *self, gentity_t *body, gentity_t *chunk);
+void G_BurnMeGood(gentity_t *self, gentity_t *body, gentity_t *chunk, qboolean directhit);
 
 void MoveClientToIntermission(gentity_t *ent, qboolean hasVoted);
 void G_SendScore(gentity_t *ent);
@@ -1933,7 +1962,7 @@ extern level_locals_t   level;
 extern gentity_t        g_entities[];   ///< was explicitly set to MAX_ENTITIES
 extern g_campaignInfo_t g_campaigns[];
 
-#define FOFS(x) ((size_t)&(((gentity_t *)0)->x))
+#define FOFS(x) (offsetof(gentity_t, x))
 
 #ifdef FEATURE_OMNIBOT
 extern vmCvar_t g_OmniBotPath;
@@ -1978,6 +2007,7 @@ extern vmCvar_t g_warmup;
 extern vmCvar_t voteFlags;
 
 extern vmCvar_t g_complaintlimit;           ///< number of complaints allowed before kick/ban
+extern vmCvar_t g_teambleedComplaint;       ///< max health minimum percentage required to consider damage as wanted team bleed (negative value = disable)
 extern vmCvar_t g_ipcomplaintlimit;
 extern vmCvar_t g_filtercams;
 extern vmCvar_t g_maxlives;                 ///< number of respawns allowed (0==infinite)
@@ -2113,6 +2143,7 @@ extern vmCvar_t g_maxWarp;
 #ifdef FEATURE_LUA
 extern vmCvar_t lua_modules;
 extern vmCvar_t lua_allowedModules;
+extern vmCvar_t g_luaModuleList;
 #endif
 
 extern vmCvar_t g_guidCheck;
@@ -2208,6 +2239,7 @@ extern vmCvar_t g_stickyCharge;
 extern vmCvar_t g_xpSaver;
 
 extern vmCvar_t g_debugForSingleClient;
+extern vmCvar_t g_debugEvents;
 
 #define G_InactivityValue (g_inactivity.integer ? g_inactivity.integer : 60)
 #define G_SpectatorInactivityValue (g_spectatorInactivity.integer ? g_spectatorInactivity.integer : 60)
@@ -2394,7 +2426,8 @@ void G_AddSkillPoints(gentity_t *ent, skillType_t skill, float points, const cha
 void G_LoseSkillPoints(gentity_t *ent, skillType_t skill, float points, const char *reason);
 void G_AddKillSkillPoints(gentity_t *attacker, meansOfDeath_t mod, hitRegion_t hr, qboolean splash);
 void G_AddKillSkillPointsForDestruction(gentity_t *attacker, meansOfDeath_t mod, g_constructible_stats_t *constructibleStats);
-void G_LoseKillSkillPoints(gentity_t *tker, meansOfDeath_t mod, hitRegion_t hr, qboolean splash);
+void G_AddKillAssistPoints(gentity_t *target, gentity_t *attacker);
+void G_LoseKillSkillPoints(gentity_t *tker, gentity_t *victim);
 
 void G_DebugOpenSkillLog(void);
 void G_DebugCloseSkillLog(void);
@@ -2522,6 +2555,7 @@ void G_initMatch(void);
 void G_loadMatchGame(void);
 void G_matchInfoDump(unsigned int dwDumpType);
 void G_printMatchInfo(gentity_t *ent);
+void G_SendMatchInfo(gentity_t *ent);
 void G_parseStatsJson(void *object);
 void G_printFull(const char *str, gentity_t *ent);
 void G_resetModeState(void);
@@ -2888,7 +2922,7 @@ typedef enum
 typedef struct
 {
 	char *name;
-	int ofs;
+	size_t ofs;
 	fieldtype_t type;
 	int flags;
 } field_t;
@@ -2907,11 +2941,7 @@ void G_MapVoteInfoWrite(void);
 void G_MapVoteInfoRead(void);
 
 // g_misc flags
-#define G_MISC_SHOVE_Z                 BIT(0)
-// BIT(1) unused
-// BIT(2) unused
-#define G_MISC_CROSSHAIR_DYNAMITE      BIT(3)
-#define G_MISC_CROSSHAIR_LANDMINE      BIT(4)
+#define G_MISC_SHOVE_Z  BIT(0)
 
 // g_voting flags
 #define VOTEF_USE_TOTAL_VOTERS      1   ///< use total voters instead of total players to decide if a vote passes
@@ -2919,7 +2949,7 @@ void G_MapVoteInfoRead(void);
 #define VOTEF_DISP_CALLER           4   ///< append "(called by name)" in vote string
 
 void G_RailTrail(vec_t *start, vec_t *end, vec_t *color);
-void G_RailBox(vec_t *origin, vec_t *mins, vec_t *maxs, vec_t *color, int index);
+void G_RailBox(const vec_t *origin, const vec_t *mins, const vec_t *maxs, const vec_t *color, int index);
 
 /**
  * @struct weapFireTable_s

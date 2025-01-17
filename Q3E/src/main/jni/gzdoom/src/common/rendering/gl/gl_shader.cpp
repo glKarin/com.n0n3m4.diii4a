@@ -390,10 +390,33 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 	assert(screen->mBones != NULL);
 
 
+#ifdef _GLES //karin: setup default precision on GLSL shader
+	if ((gl.flags & RFL_SHADER_STORAGE_BUFFER) && screen->allowSSBO())
+		vp_comb << "#version 300 es\n#define SUPPORTS_SHADOWMAPS\n";
+	else
+		vp_comb << "#version 300 es\n";
+
+	extern FString GetGLSLPrecision();
+	auto _i = i_data.IndexOf("precision highp int");
+	//i_data.Substitute("std430", "std140");
+	i_data.Substitute("precision highp int;\n", "");
+	i_data.Substitute("precision highp float;\n", "");
+	i_data.Insert(_i, GetGLSLPrecision());
+	i_data.Insert(0, R"(
+
+#extension GL_EXT_clip_cull_distance : enable
+#if !defined(GL_EXT_clip_cull_distance)
+#define NO_CLIPDISTANCE_SUPPORT 1
+#endif
+#define _GLES //karin: GLES macro only for OpenGL, not Vulkan
+
+)");
+#else
 	if ((gl.flags & RFL_SHADER_STORAGE_BUFFER) && screen->allowSSBO())
 		vp_comb << "#version 430 core\n#define SUPPORTS_SHADOWMAPS\n";
-	else 
+	else
 		vp_comb << "#version 330 core\n";
+#endif
 
 	bool lightbuffertype = screen->mLights->GetBufferType();
 	if (!lightbuffertype)
@@ -494,6 +517,10 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 		// This will cause some glitches and regressions but is the only way to avoid total display garbage.
 		vp_comb.Substitute("gl_ClipDistance", "//");
 	}
+#ifdef _GLESxxx //karin: force std140 on GLSL shader
+	vp_comb.Substitute("std430", "std140");
+	fp_comb.Substitute("std430", "std140");
+#endif
 
 	hShader = glCreateProgram();
 	FGLDebug::LabelObject(GL_PROGRAM, hShader, name);
@@ -526,6 +553,12 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 		const char *vp_ptr = vp_comb.GetChars();
 		const char *fp_ptr = fp_comb.GetChars();
 
+#ifdef _GLES //karin: print glsl shader name for debug
+        Printf("FShader::Load: Vertex=%s Fragment=%s\n", vert_prog_lump, frag_prog_lump);
+		extern void DumpGLSLShader(const char *name, const char *src);
+		DumpGLSLShader(vert_prog_lump, vp_ptr);
+		DumpGLSLShader(frag_prog_lump, fp_ptr);
+#endif
 		glShaderSource(hVertProg, 1, &vp_ptr, &vp_size);
 		glShaderSource(hFragProg, 1, &fp_ptr, &fp_size);
 

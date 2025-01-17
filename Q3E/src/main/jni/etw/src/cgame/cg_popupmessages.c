@@ -36,14 +36,14 @@
 
 #define NUM_PM_STACK           3
 #define NUM_PM_STACK_ITEMS     32
-#define NUM_PM_STACK_ITEMS_BIG 8 // we shouldn't need many of these
+#define NUM_PM_STACK_ITEMS_BIG 3 // we shouldn't need many of these
 #define NUM_PM_STACK_ITEMS_XP  32
 
 typedef struct pmStackItem_s pmListItem_t;
 
 struct pmStackItem_s
 {
-	popupMessageType_t type;
+	int type;
 	qboolean inuse;
 	int time;
 	char message[128];
@@ -53,6 +53,7 @@ struct pmStackItem_s
 	int scaleShader;
 
 	vec3_t color;
+	int count;
 
 	pmListItem_t *next;
 	pmListItem_t *prev;
@@ -587,6 +588,7 @@ void CG_AddPMItemXP(popupMessageXPGainType_t type, const char *message, const ch
 {
 	pmListItem_t *listItem = NULL;
 	char         *end;
+	qboolean     forceStackingXp;
 
 	if (!message || !*message)
 	{
@@ -599,26 +601,43 @@ void CG_AddPMItemXP(popupMessageXPGainType_t type, const char *message, const ch
 		return;
 	}
 
-	if (cg_pmOldListXP)
-	{
-		listItem = cg_pmOldListXP;
-	}
-	else if (cg_pmWaitingListXP)
-	{
-		listItem = cg_pmWaitingListXP;
-	}
+	// force stacking XP message values for certain XP gain
+	forceStackingXp = !Q_stricmp(message2, "constructing") || !Q_stricmp(message2, "repairing");
 
-	// reason are similar, use previous message
-	if (listItem)
+	// force stacking XP only if we are repairing or constructing something
+	if (!(CG_GetActiveHUD()->xpgain.style & POPUP_XPGAIN_NO_STACK)
+	    || forceStackingXp)
 	{
-		if (!Q_stricmp(listItem->message2, message2))
+		if (cg_pmWaitingListXP)
 		{
-			Q_strncpyz(listItem->message, va("%f", Q_atof(listItem->message) + Q_atof(message)), sizeof(cg_pmStackXP[0].message));
-			Q_strncpyz(listItem->message2, message2, sizeof(cg_pmStackXP[0].message2));
+			listItem = cg_pmWaitingListXP;
+		}
+		else if (cg_pmOldListXP)
+		{
+			listItem = cg_pmOldListXP;
+		}
 
-			listItem->time = cg.time;
+		// reason are similar, use previous message
+		if (listItem)
+		{
+			if (strstr(listItem->message2, message2))
+			{
+				// if the XP amount is different, stack it up (mainly kill assist)
+				if (!(CG_GetActiveHUD()->xpgain.style & POPUP_XPGAIN_NO_XP_ADD_UP) || forceStackingXp || Q_stricmp(listItem->message, message))
+				{
+					Q_strncpyz(listItem->message, va("%f", Q_atof(listItem->message) + Q_atof(message)), sizeof(cg_pmStackXP[0].message));
+				}
 
-			return;
+				// don't display multiplicator for repairing or constructing
+				if (!forceStackingXp)
+				{
+					Q_strncpyz(listItem->message2, va("%s (x%d)", message2, ++listItem->count), sizeof(cg_pmStackXP[0].message2));
+				}
+
+				listItem->time = cg.time;
+
+				return;
+			}
 		}
 	}
 
@@ -640,7 +659,6 @@ void CG_AddPMItemXP(popupMessageXPGainType_t type, const char *message, const ch
 
 	listItem->inuse = qtrue;
 	listItem->type  = type;
-	VectorCopy(colorWhite, listItem->color);
 	Q_strncpyz(listItem->message, message, sizeof(cg_pmStackXP[0].message));
 
 	// print and THEN chop off the newline, as the console deals with newlines perfectly
@@ -660,6 +678,8 @@ void CG_AddPMItemXP(popupMessageXPGainType_t type, const char *message, const ch
 	{
 		return;
 	}
+
+	listItem->count = 1;
 
 	if (message2 && !(CG_GetActiveHUD()->xpgain.style & POPUP_XPGAIN_NO_REASON))
 	{
@@ -819,7 +839,8 @@ static qboolean CG_DrawPMItems(hudComponent_t *comp, pmListItem_t *listItem, flo
 		// keep in buffer text until icon insertion
 		if (spacingStart && spacingStart != buffer)
 		{
-			Q_strncpyz(buffer, buffer, spacingStart - buffer);
+			etl_assert(spacingStart - buffer + 1 < sizeof(buffer) && spacingStart - buffer + 1 >= 0);
+			buffer[spacingStart - buffer + 1] = '\0';
 
 			// determine on which line the icon should appear
 			for (i = 0; buffer[i]; ++i)
@@ -971,18 +992,31 @@ static qboolean CG_DrawPMXPItems(hudComponent_t *comp, pmListItem_t *listItem, f
 	float  x = (comp->alignText == ITEM_ALIGN_RIGHT) ? comp->location.x + comp->location.w : comp->location.x;
 	char   buffer[256];
 	int    lineNumber = 1;
+	float  XPGained;
 	char   *XPGainNumber;
+	float  remainder;
 
 	if (!listItem)
 	{
 		return qfalse;
 	}
 
-	XPGainNumber = va(" %2.0fXP ", Q_atof(listItem->message));
-
 	Vector4Copy(comp->colorMain, colorText);
 	Vector4Copy(comp->colorSecondary, colorText2);
 	scale = CG_ComputeScale(comp /*lineHeight, comp->scale, &cgs.media.limboFont2*/);
+
+	XPGained  = Q_atof(listItem->message);
+	remainder = fmodf(XPGained, 1);
+
+	// there are digits after decimal point, draw decimal
+	if (remainder)
+	{
+		XPGainNumber = va(" %2.1f XP ", XPGained);
+	}
+	else
+	{
+		XPGainNumber = va(" %2.0f XP ", XPGained);
+	}
 
 	// fadein
 //	t = listItem->time + time + fadeTime;
@@ -1033,7 +1067,6 @@ static qboolean CG_DrawPMXPItems(hudComponent_t *comp, pmListItem_t *listItem, f
 	if (listItem->shader > 0)
 	{
 		// colorize
-		VectorCopy(listItem->color, colorText);
 		trap_R_SetColor(colorText);
 
 		if (comp->alignText == ITEM_ALIGN_RIGHT)
@@ -1048,20 +1081,35 @@ static qboolean CG_DrawPMXPItems(hudComponent_t *comp, pmListItem_t *listItem, f
 		}
 
 		// decolorize
-		VectorCopy(colorWhite, colorText);
 		trap_R_SetColor(NULL);
 	}
 
 	if (comp->alignText == ITEM_ALIGN_RIGHT)
 	{
-		w  = CG_Text_Line_Width_Ext_Float(buffer, scale, &cgs.media.limboFont2);
+		w  = CG_Text_Line_Width_Ext_Float(XPGainNumber, scale, &cgs.media.limboFont1);
+		w += CG_Text_Line_Width_Ext_Float(listItem->message2, scale * 0.75f, &cgs.media.limboFont2);
 		x -= w;
 	}
 
-	CG_Text_Paint_Ext(x, *y - lineHeight * 0.25, scale, scale, colorText, XPGainNumber, 0, 0, comp->styleText, &cgs.media.limboFont1);
+	// fix miss alignment due to shorter . width
+	if (remainder)
+	{
+		if (comp->alignText == ITEM_ALIGN_RIGHT)
+		{
+			x += CG_Text_Line_Width_Ext_Float(".", scale, &cgs.media.limboFont1);
+			x -= CG_Text_Line_Width_Ext_Float("1", scale, &cgs.media.limboFont1);
+		}
+		else
+		{
+			x -= CG_Text_Line_Width_Ext_Float(".", scale, &cgs.media.limboFont1);
+			x += CG_Text_Line_Width_Ext_Float("1", scale, &cgs.media.limboFont1);
+		}
+	}
+
+	CG_Text_Paint_Ext(x, *y - lineHeight * 0.25f, scale, scale, colorText, XPGainNumber, 0, 0, comp->styleText, &cgs.media.limboFont1);
 	CG_Text_Paint_Ext(x + (lineNumber > 1 ? 0 : CG_Text_Width_Ext(XPGainNumber, scale, 0, &cgs.media.limboFont1)),
-	                  *y - lineHeight * 0.375 + (lineNumber == 1 ? 0 : lineHeight),
-	                  scale * 0.75, scale * 0.75, colorText2, listItem->message2, 0, 0, comp->styleText, &cgs.media.limboFont2);
+	                  *y - lineHeight * 0.375f + (lineNumber == 1 ? 0 : lineHeight),
+	                  scale * 0.75f, scale * 0.75f, colorText2, listItem->message2, 0, 0, comp->styleText, &cgs.media.limboFont2);
 
 	// next line
 	*y += scrollDown ? lineHeight * (lineNumber - 1) + lineHeight * 0.25f : -(lineHeight + lineHeight * 0.25f);

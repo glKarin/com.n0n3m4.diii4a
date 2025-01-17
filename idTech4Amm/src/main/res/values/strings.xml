@@ -195,7 +195,7 @@
     <string name="be_available_on_reboot_the_next_time">Be available on reboot the next time</string>
     <string name="game_patch_resource">Game patch resource</string>
     <string name="extract_all">Extract all</string>
-    <string name="can_t_s_read_write_external_storage_permission_is_not_granted">Can\'t %s! Read/Write external storage permission is not granted!</string>
+    <string name="can_t_s_read_write_external_storage_permission_is_not_granted">Can\'t %1$s! Read/Write external storage permission is not granted!</string>
     <string name="access_file">access file</string>
     <string name="success">success</string>
     <string name="fail">fail</string>
@@ -306,7 +306,7 @@
     <string name="scroll">Scroll</string>
     <string name="pause">Pause</string>
     <string name="joystick_visible">Joystick visible:</string>
-    <string name="suggest_game_woring_directory_tips">Suggest create folder in `%s` as game working directory for loading faster on Android 11/11+!</string>
+    <string name="suggest_game_woring_directory_tips">Suggest create folder in `%1$s` as game working directory for loading faster on Android 11/11+!</string>
     <string name="sub_directory">Sub directory: </string>
     <string name="app_is_rebooting">App is rebooting......</string>
     <string name="standalone_game_data_directory">Standalone game data directory</string>
@@ -394,17 +394,17 @@
     <string name="load_game_library_from_getdatadir"><![CDATA[Load external local game libraries from `<game working directory>/lib/<arm64|arm>/`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`-->
     <string name="load_engine_library_from_getdatadir"><![CDATA[Load external local game engine library from `<game working directory>/[<Game standalone directory>/]<game engine library>`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/<game engine library>`-->
     <string name="shortcut">Shortcut</string>
-    <string name="create_desktop_shortcut_success">Create %s %s desktop shortcut success.</string>
-    <string name="create_desktop_shortcut_fail">Create %s %s desktop shortcut fail!</string>
+    <string name="create_desktop_shortcut_success">Create %1$s %2$s desktop shortcut success.</string>
+    <string name="create_desktop_shortcut_fail">Create %1$s %2$s desktop shortcut fail!</string>
     <string name="create_desktop_shortcut">Create desktop shortcut</string>
     <string name="unsupport_create_desktop_shortcut">Unsupport create desktop shortcut!</string>
     <string name="only_support_on_android_version_7_1"><![CDATA[Only support on Android version >= 7.1 for create desktop shortcut.]]></string>
     <string name="all">All</string>
-    <string name="permission_not_granted">Permission \'%s\' not granted</string>
+    <string name="permission_not_granted">Permission \'%1$s\' not granted</string>
     <string name="command_shortcut">Shortcut(Current command)</string>
     <string name="create_shortcut_with_current_command_and_game">Create shortcut(current command and game)</string>
     <string name="input_desktop_shortcut_name">Input desktop shortcut name</string>
-    <string name="game_desktop_shortcut_has_created">Game %s desktop shortcut has created(%s).</string>
+    <string name="game_desktop_shortcut_has_created">Game %1$s desktop shortcut has created(%2$s).</string>
     <string name="signals_handler">Signals handler</string>
     <string name="setup_signals_handler_when_game_crash">Setup signals handler when game crash</string>
     <string name="last_backtrace_info">Last backtrace info</string>
@@ -418,7 +418,6 @@
     <string name="commandshortcut">Command shortcut</string>
     <string name="patch_resource">Patch resource</string>
     <string name="load_lights_pk3">Load lights.pk3</string>
-    <string name="load_game_support_pk3">Load game_support.pk3</string>
     <string name="load_brightmaps_pk3">Load brightmaps.pk3</string>
     <string name="disc_panel">Disc panel</string>
     <string name="disc_panel_type">Disc panel type</string>
@@ -431,5 +430,27 @@
     <string name="release_">Release:</string>
     <string name="build_">Build:</string>
     <string name="dev_">Dev:</string>
+    <string name="game_thread">Game thread</string>
+    <string name="choose_game_thread_create_scheme">Choose game thread create scheme</string>
+    <string name="_2x">2x</string>
+    <string name="_8x">8x</string>
+    <string name="use_game_setting">Use game setting</string>
+    <string name="disable_android_menu_macro_harm_ui_disableandroidmacro_nshow_host_menu_for_create_game_server">Disable `ANDROID` menu macro(harm_ui_disableAndroidMacro)\nShow `HOST` menu for create game server</string>
+    <string name="no_limit">No limit</string>
+    <string name="max_console_height_frac">Max console height frac:</string>
+    <string name="_24bits">24Bits</string>
+    <string name="_16bits">16Bits</string>
+    <string name="minimum_depth_bits">Minimum depth bits</string>
+    <string name="url">URL</string>
+    <string name="homepage">HomePage</string>
+    <string name="steam">Steam</string>
+    <string name="moddb">Moddb</string>
+    <string name="patch">Patch</string>
+    <string name="data_resource">Data resource</string>
+    <string name="game_data_resource">Game data resource</string>
+    <string name="renderer_backend_vid_preferbackend">Renderer backend(vid_preferbackend)</string>
+    <string name="opengles_version_harm_gl_es">OpenGLES version(harm_gl_es)</string>
+    <string name="choose_mod_files">Choose mod files</string>
+    <string name="opengl_emulate_version_harm_gl_version">Emulating OpenGL version(harm_gl_version)</string>
 
 </resources>

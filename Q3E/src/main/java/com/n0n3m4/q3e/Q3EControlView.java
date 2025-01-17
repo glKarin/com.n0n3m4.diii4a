@@ -633,8 +633,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 public void onClick(DialogInterface dialog, int v)
                 {
                     dialog.dismiss();
-                    //m_renderView.Shutdown();
-                    Q3E.Finish();
+                    Q3E.Shutdown();
                 }
             });
             builder.setNegativeButton(R.string.cancel, null);

@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "tr_local.h"
 
-//#if !defined(__ANDROID__)
 void QDECL Com_Printf( const char *msg, ... )
 {
 	va_list         argptr;
@@ -47,4 +46,3 @@ void QDECL Com_Error( int level, const char *error, ... )
 
 	ri.Error(level, "%s", text);
 }
-//#endif

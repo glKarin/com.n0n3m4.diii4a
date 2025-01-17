@@ -146,7 +146,7 @@ cvar_t vid_touchscreen_density = {CF_CLIENT, "vid_touchscreen_density", "2.0", "
 cvar_t vid_touchscreen_xdpi = {CF_CLIENT, "vid_touchscreen_xdpi", "300", "Horizontal DPI of the screen (only valid on Android currently)"};
 cvar_t vid_touchscreen_ydpi = {CF_CLIENT, "vid_touchscreen_ydpi", "300", "Vertical DPI of the screen (only valid on Android currently)"};
 
-cvar_t vid_vsync = {CF_CLIENT | CF_ARCHIVE, "vid_vsync", "0", "sync to vertical blank, prevents 'tearing' (seeing part of one frame and part of another on the screen at the same time) at the cost of latency, 1 always syncs and -1 is adaptive (stops syncing if the framerate drops, unsupported by some platforms), automatically disabled when doing timedemo benchmarks"};
+cvar_t vid_vsync = {CF_CLIENT | CF_ARCHIVE, "vid_vsync", "0", "sync to vertical blank, prevents 'tearing' (seeing part of one frame and part of another on the screen at the same time) at the cost of latency, >= 1 always syncs and <= -1 is adaptive (stops syncing if the framerate drops, unsupported by some platforms), automatically disabled when doing timedemo benchmarks"};
 cvar_t vid_mouse = {CF_CLIENT | CF_ARCHIVE, "vid_mouse", "1", "whether to use the mouse in windowed mode (fullscreen always does)"};
 cvar_t vid_mouse_clickthrough = {CF_CLIENT | CF_ARCHIVE, "vid_mouse_clickthrough", "0", "mouse behavior in windowed mode: 0 = click to focus, 1 = allow interaction even if the window is not focused (click-through behaviour, can be useful when using third-party game overlays)"};
 cvar_t vid_minimize_on_focus_loss = {CF_CLIENT | CF_ARCHIVE, "vid_minimize_on_focus_loss", "0", "whether to minimize the fullscreen window if it loses focus (such as by alt+tab)"};
@@ -402,7 +402,7 @@ void (GLAPIENTRY *qglVertexAttrib4usv)(GLuint index, const GLushort *v);
 void (GLAPIENTRY *qglVertexAttribPointer)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
 void (GLAPIENTRY *qglViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
 #endif
-#ifdef _GLDL
+#ifdef _GLDL //karin: dynamic load GL functions
 #if !defined(_GLDBG)
 #define QGLPROC(name, rettype, args) rettype (GL_APIENTRYP q##name) args;
 #include "android/qgl_proc.h"
@@ -639,7 +639,7 @@ static glfunction_t openglfuncs[] =
 	{NULL, NULL, NULL}
 };
 #endif
-#ifdef _GLDL
+#ifdef _GLDL //karin: dynamic load GL functions
 #if !defined(_GLDBG)
 #define QGLPROC(name, rettype, args) { "core", #name, (void **)&q##name },
 #else
@@ -709,7 +709,7 @@ void VID_ClearExtensions(void)
 
 void GL_InitFunctions(void)
 {
-#ifdef _GLDL
+#ifdef _GLDL //karin: dynamic load GL functions
 	const glfunction_t *func;
 
 	// first fetch the function pointers for everything - after this we can begin making GL calls.
@@ -786,7 +786,7 @@ void GL_Setup(void)
 		vid.support.glshaderversion = (int)(atof(s) * 100.0f + 0.5f);
 	if (vid.support.glshaderversion < 100)
 		vid.support.glshaderversion = 100;
-#ifdef _NOSDL
+#ifdef _NOSDL //karin: force GLSL shader version to 100es
 	vid.support.glshaderversion = 100;
 #endif
 	Con_Printf("Detected GLSL version %i\n", vid.support.glshaderversion);
@@ -819,7 +819,7 @@ void GL_Setup(void)
 	// gl_texturecompression_color is somehow broken on AMD's Windows driver,
 	// see: https://gitlab.com/xonotic/darkplaces/-/issues/228
 	// HACK: force it off (less bad than adding hacky checks to the renderer)
-	if (strncmp(gl_renderer, "AMD Radeon(TM)", 14) == 0)
+	if (strncmp(gl_renderer, "AMD Radeon", 10) == 0)
 	{
 		Cvar_SetQuick(&gl_texturecompression_color, "0");
 		gl_texturecompression_color.flags |= CF_READONLY;
@@ -1438,17 +1438,19 @@ static int VID_Mode(viddef_mode_t *mode)
 		mode->bitsperpixel      = vid_bitsperpixel.integer;
 		mode->refreshrate       = max(0, vid_refreshrate.integer);
 		mode->stereobuffer      = vid_stereobuffer.integer != 0;
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: force screen size and mode
 		extern int screen_width;
 		extern int screen_height;
+		extern int refresh_rate;
 		mode->display           = 0;
 		mode->fullscreen        = true;
 		mode->desktopfullscreen = true;
 		mode->width             = screen_width;
 		mode->height            = screen_height;
 		mode->bitsperpixel      = 32;
-		mode->refreshrate       = 60;
+		mode->refreshrate       = refresh_rate;
 		mode->stereobuffer      = 0;
+		mode->samples      		= vid_samples.integer;
 #endif
 	}
 	cl_ignoremousemoves = 2;
@@ -1539,6 +1541,10 @@ void VID_Restart_f(cmd_state_t *cmd)
 
 	SCR_DeferLoadingPlaque(false);
 	R_Modules_Shutdown();
+#ifdef _DIII4A //karin: mark shutdown reason is for vid restart
+	extern qbool vid_restart;
+	vid_restart = true;
+#endif
 	VID_Shutdown();
 	if (!VID_Mode(NULL))
 	{

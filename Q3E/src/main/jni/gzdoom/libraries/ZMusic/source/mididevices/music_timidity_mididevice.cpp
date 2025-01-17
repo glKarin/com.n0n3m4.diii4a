@@ -34,6 +34,7 @@
 
 // HEADER FILES ------------------------------------------------------------
 
+#include <stdexcept>
 #include <stdlib.h>
 #include "mididevice.h"
 #include "zmusic/zmusic_internal.h"
@@ -94,49 +95,44 @@ protected:
 
 void TimidityMIDIDevice::LoadInstruments()
 {
-	if (gusConfig.dmxgus.size())
+	if (gusConfig.reader)
 	{
 		// Check if we got some GUS data before using it.
-#ifdef __ANDROID__ //karin: ULTRADIR is null
-		std::string ultradir = "";
-		const char *ULTRADIR = getenv("ULTRADIR");
-		if(ULTRADIR && ULTRADIR[0])
-			ultradir = ULTRADIR;
-#else
-		std::string ultradir = getenv("ULTRADIR");
-#endif
-		if (ultradir.length() || gusConfig.gus_patchdir.length() != 0)
+		std::string ultradir;
+		const char *ret = getenv("ULTRADIR");
+		if (ret) ultradir = std::string(ret);
+		// The GUS put its patches in %ULTRADIR%/MIDI so we can try that
+		if (ultradir.length())
 		{
-			auto psreader = new MusicIO::FileSystemSoundFontReader("");
-
-			// The GUS put its patches in %ULTRADIR%/MIDI so we can try that
-			if (ultradir.length())
-			{
-				ultradir += "/midi";
-				psreader->add_search_path(ultradir.c_str());
-			}
-			// Load DMXGUS lump and patches from gus_patchdir
-			if (gusConfig.gus_patchdir.length() != 0) psreader->add_search_path(gusConfig.gus_patchdir.c_str());
-
-			gusConfig.instruments.reset(new Timidity::Instruments(psreader));
-			bool success = gusConfig.instruments->LoadDMXGUS(gusConfig.gus_memsize, (const char*)gusConfig.dmxgus.data(), gusConfig.dmxgus.size()) >= 0;
-			
-			gusConfig.dmxgus.clear();
-
-			if (success)
-			{
-				gusConfig.loadedConfig = "DMXGUS";
-				return;
-			}
+			ultradir += "/midi";
+			gusConfig.reader->add_search_path(ultradir.c_str());
 		}
-		gusConfig.loadedConfig = "";
-		gusConfig.instruments.reset();
-		throw std::runtime_error("Unable to initialize DMXGUS for GUS MIDI device");
-	}
-	else if (gusConfig.reader)
-	{
-		gusConfig.loadedConfig = gusConfig.readerName;
+		// Load DMXGUS lump and patches from gus_patchdir
+		if (gusConfig.gus_patchdir.length() != 0) gusConfig.reader->add_search_path(gusConfig.gus_patchdir.c_str());
+		
 		gusConfig.instruments.reset(new Timidity::Instruments(gusConfig.reader));
+		gusConfig.loadedConfig = gusConfig.readerName;
+	}
+
+	if (gusConfig.instruments == nullptr)
+	{
+		throw std::runtime_error("No instruments set for GUS device");
+	}
+
+	if (gusConfig.gus_dmxgus && gusConfig.dmxgus.size())
+	{
+		bool success = gusConfig.instruments->LoadDMXGUS(gusConfig.gus_memsize, (const char*)gusConfig.dmxgus.data(), gusConfig.dmxgus.size()) >= 0;
+		gusConfig.reader = nullptr;
+
+		if (!success)
+		{
+			gusConfig.instruments.reset();
+			gusConfig.loadedConfig = "";
+			throw std::runtime_error("Unable to initialize DMXGUS for GUS MIDI device");
+		}
+	}
+	else
+	{
 		bool err = gusConfig.instruments->LoadConfig() < 0;
 		gusConfig.reader = nullptr;
 		
@@ -146,10 +142,6 @@ void TimidityMIDIDevice::LoadInstruments()
 			gusConfig.loadedConfig = "";
 			throw std::runtime_error("Unable to initialize instruments for GUS MIDI device");
 		}
-	}
-	else if (gusConfig.instruments == nullptr)
-	{
-		throw std::runtime_error("No instruments set for GUS device");
 	}
 }
 
@@ -264,20 +256,11 @@ void TimidityMIDIDevice::ComputeOutput(float *buffer, int len)
 
 bool GUS_SetupConfig(const char* args)
 {
-	gusConfig.reader = nullptr;
-	if ((gusConfig.gus_dmxgus && *args == 0) || !stricmp(args, "DMXGUS"))
-	{
-		if (stricmp(gusConfig.loadedConfig.c_str(), "DMXGUS") == 0) return false; // aleady loaded
-		if (gusConfig.dmxgus.size() > 0)
-		{
-			gusConfig.readerName = "DMXGUS";
-			return true;
-		}
-	}
 	if (*args == 0) args = gusConfig.gus_config.c_str();
-	if (stricmp(gusConfig.loadedConfig.c_str(), args) == 0) return false; // aleady loaded
+	if (gusConfig.gus_dmxgus && *args == 0) args = "DMXGUS";
+	//if (stricmp(gusConfig.loadedConfig.c_str(), args) == 0) return false; // aleady loaded
 
-	MusicIO::SoundFontReaderInterface* reader = MusicIO::ClientOpenSoundFont(args, SF_GUS | SF_SF2);
+	MusicIO::SoundFontReaderInterface* reader = MusicIO::ClientOpenSoundFont(args, SF_GUS);
 	if (!reader && MusicIO::fileExists(args))
 	{
 		auto f = MusicIO::utf8_fopen(args, "rb");
@@ -291,6 +274,11 @@ bool GUS_SetupConfig(const char* args)
 				reader = new MusicIO::SF2Reader(args);
 		}
 		if (!reader) reader = new MusicIO::FileSystemSoundFontReader(args, true);
+	}
+
+	if (!reader && gusConfig.gus_dmxgus)
+	{
+		reader = new MusicIO::FileSystemSoundFontReader(args, true);
 	}
 
 	if (reader == nullptr)

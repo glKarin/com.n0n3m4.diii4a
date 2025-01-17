@@ -155,7 +155,11 @@ unsigned int FHardwareTexture::CreateTexture(unsigned char * buffer, int w, int 
 		else
 		{
 			sourcetype = GL_BGRA;
+#ifdef _GLES //karin: These two must be the same on OpenGLES
+			texformat = GL_BGRA;
+#else
 			texformat = GL_RGBA;
+#endif
 		}
 	}
 
@@ -168,8 +172,22 @@ unsigned int FHardwareTexture::CreateTexture(unsigned char * buffer, int w, int 
 		if (glTextureBytes == 1)
 		{
 			GLint swizzleMask[] = { GL_ZERO, GL_ZERO, GL_ZERO, GL_RED };
+#ifdef _GLES //karin: no GL_TEXTURE_SWIZZLE_RGBA on OpenGLES
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, swizzleMask[0]);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, swizzleMask[1]);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, swizzleMask[2]);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, swizzleMask[3]);
+#else
 			glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+#endif
 		}
+#ifdef _GLESxxx //karin: swap R and B as GL_BGRA on OpenGLES
+		else
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+		}
+#endif
 	}
 
 	if (deletebuffer && buffer) free(buffer);

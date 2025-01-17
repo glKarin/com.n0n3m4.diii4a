@@ -77,13 +77,14 @@ enum ETerrainKeywords
 	TR_DAMAGETIMEMASK,
 	TR_FOOTCLIP,
 	TR_STEPVOLUME,
-	TR_WALKINGSTEPTIME,
-	TR_RUNNINGSTEPTIME,
+	TR_WALKSTEPTICS,
+	TR_RUNSTEPTICS,
 	TR_LEFTSTEPSOUNDS,
 	TR_RIGHTSTEPSOUNDS,
 	TR_LIQUID,
 	TR_FRICTION,
-	TR_ALLOWPROTECTION
+	TR_ALLOWPROTECTION,
+	TR_STEPSOUNDS
 };
 
 enum EGenericType
@@ -95,7 +96,6 @@ enum EGenericType
 	GEN_Splash,
 	GEN_Float,
 	GEN_Double,
-	GEN_Time,
 	GEN_Bool,
 	GEN_Int,
 	GEN_Custom,
@@ -179,14 +179,17 @@ static const char *TerrainKeywords[] =
 	"damagetimemask",
 	"footclip",
 	"stepvolume",
-	"walkingsteptime",
-	"runningsteptime",
+	"walksteptics",
+	"runsteptics",
 	"leftstepsounds",
 	"rightstepsounds",
 	"liquid",
 	"friction",
 	"allowprotection",
 	"damageonland",
+	"stepsounds",
+	"stepdistance",
+	"stepdistanceminvel",
 	NULL
 };
 
@@ -215,14 +218,17 @@ static FGenericParse TerrainParser[] =
 	{ GEN_Int,    {myoffsetof(FTerrainDef, DamageTimeMask)} },
 	{ GEN_Double, {myoffsetof(FTerrainDef, FootClip)} },
 	{ GEN_Float,  {myoffsetof(FTerrainDef, StepVolume)} },
-	{ GEN_Time,   {myoffsetof(FTerrainDef, WalkStepTics)} },
-	{ GEN_Time,   {myoffsetof(FTerrainDef, RunStepTics)} },
+	{ GEN_Int,   {myoffsetof(FTerrainDef, WalkStepTics)} },
+	{ GEN_Int,   {myoffsetof(FTerrainDef, RunStepTics)} },
 	{ GEN_Sound,  {myoffsetof(FTerrainDef, LeftStepSound)} },
 	{ GEN_Sound,  {myoffsetof(FTerrainDef, RightStepSound)} },
 	{ GEN_Bool,   {myoffsetof(FTerrainDef, IsLiquid)} },
 	{ GEN_Custom, {(size_t)ParseFriction} },
 	{ GEN_Bool,   {myoffsetof(FTerrainDef, AllowProtection)} },
 	{ GEN_Bool,   {myoffsetof(FTerrainDef, DamageOnLand)} },
+	{ GEN_Sound,  {myoffsetof(FTerrainDef, StepSound)} },
+	{ GEN_Double,  {myoffsetof(FTerrainDef, StepDistance)} },
+	{ GEN_Double,  {myoffsetof(FTerrainDef, StepDistanceMinVel)} },
 };
 
 
@@ -597,11 +603,6 @@ static void GenericParse (FScanner &sc, FGenericParse *parser, const char **keyw
 			SET_FIELD(double, sc.Float);
 			break;
 
-		case GEN_Time:
-			sc.MustGetFloat ();
-			SET_FIELD (int, (int)(sc.Float * TICRATE));
-			break;
-
 		case GEN_Bool:
 			SET_FIELD (bool, true);
 			break;
@@ -747,3 +748,6 @@ DEFINE_FIELD(FTerrainDef, AllowProtection)
 DEFINE_FIELD(FTerrainDef, DamageOnLand)
 DEFINE_FIELD(FTerrainDef, Friction)
 DEFINE_FIELD(FTerrainDef, MoveFactor)
+DEFINE_FIELD(FTerrainDef, StepSound)
+DEFINE_FIELD(FTerrainDef, StepDistance)
+DEFINE_FIELD(FTerrainDef, StepDistanceMinVel)

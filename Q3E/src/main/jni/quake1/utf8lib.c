@@ -912,7 +912,7 @@ size_t u8_strpad_colorcodes(char *out, size_t outsize, const char *in, qbool lef
 /**
  * Convert Windows "wide" characters to WTF-8 for internal manipulation
  */
-int towtf8(const wchar *wstr, int wlen, char *cstr, int maxclen)
+int towtf8(const wchar *wstr, int wlen, char *str, int maxlen)
 {
 	int p = 0;
 	int i;
@@ -921,24 +921,24 @@ int towtf8(const wchar *wstr, int wlen, char *cstr, int maxclen)
 		wchar point = wstr[i];
 		if (point < 0x80)
 		{
-			if (p + 1 >= maxclen) break;
-			cstr[p++] = point;
+			if (p + 1 > maxlen) break;
+			str[p++] = point;
 		}
 		else if (point < 0x800)
 		{
-			if (p + 2 >= maxclen) break;
-			cstr[p++] = (0xc0 | ((point >>  6) & 0x1f));
-			cstr[p++] = (0x80 | ((point >>  0) & 0x3f));
+			if (p + 2 > maxlen) break;
+			str[p++] = (0xc0 | ((point >>  6) & 0x1f));
+			str[p++] = (0x80 | ((point >>  0) & 0x3f));
 		}
 		else
 		#if WTF8U32
 		if (point < 0x10000)
 		#endif
 		{
-			if (p + 3 >= maxclen) break;
-			cstr[p++] = (0xe0 | ((point >> 12) & 0x0f));
-			cstr[p++] = (0x80 | ((point >>  6) & 0x3f));
-			cstr[p++] = (0x80 | ((point >>  0) & 0x3f));
+			if (p + 3 > maxlen) break;
+			str[p++] = (0xe0 | ((point >> 12) & 0x0f));
+			str[p++] = (0x80 | ((point >>  6) & 0x3f));
+			str[p++] = (0x80 | ((point >>  0) & 0x3f));
 		}
 		#if WTF8U32
 		else
@@ -946,31 +946,31 @@ int towtf8(const wchar *wstr, int wlen, char *cstr, int maxclen)
 		if (point < 0x110000)
 		#endif
 		{
-			if (p + 4 >= maxclen) break;
-			cstr[p++] = (0xf0 | ((point >> 18) & 0x07));
-			cstr[p++] = (0x80 | ((point >> 12) & 0x3f));
-			cstr[p++] = (0x80 | ((point >>  6) & 0x3f));
-			cstr[p++] = (0x80 | ((point >>  0) & 0x3f));
+			if (p + 4 > maxlen) break;
+			str[p++] = (0xf0 | ((point >> 18) & 0x07));
+			str[p++] = (0x80 | ((point >> 12) & 0x3f));
+			str[p++] = (0x80 | ((point >>  6) & 0x3f));
+			str[p++] = (0x80 | ((point >>  0) & 0x3f));
 		}
 		#endif
 	}
-	cstr[p] = 0x00;
+	str[p] = 0x00;
 	return p;
 }
 
 /**
  * Convert WTF-8 string to "wide" characters used by Windows
  */
-int fromwtf8(const char *cstr, int clen, wchar *wstr, int maxwlen)
+int fromwtf8(const char *str, int len, wchar *wstr, int maxwlen)
 {
 	int p = 0;
 	int i;
-	for (i = 0; i < clen;)
+	for (i = 0; i < len;)
 	{
-		char byte = cstr[i++];
+		char byte = str[i++];
 		wchar point = byte;
 		int length = 1;
-		if (p + 1 >= maxwlen) break;
+		if (p + 1 > maxwlen) break;
 		#if WTF8CHECKS
 		if ((byte & 0xf8) == 0xf8)
 			return -1;
@@ -1001,7 +1001,7 @@ int fromwtf8(const char *cstr, int clen, wchar *wstr, int maxwlen)
 		#endif
 		while (--length)
 		{
-			byte = cstr[i++];
+			byte = str[i++];
 			#if WTF8CHECKS
 			if (byte == -1) return -1;
 			else if ((byte & 0xc0) != 0x80) return -1;
@@ -1012,6 +1012,14 @@ int fromwtf8(const char *cstr, int clen, wchar *wstr, int maxwlen)
 	}
 	wstr[p] = 0x00;
 	return p;
+}
+
+int wstrlen(const wchar *wstr)
+{
+	int i;
+	for (i = 0; wstr[i] != 0; ++i)
+		;
+	return i;
 }
 
 #endif // WIN32

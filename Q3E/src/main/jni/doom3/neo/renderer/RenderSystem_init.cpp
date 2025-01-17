@@ -228,11 +228,6 @@ idCVar r_debugRenderToTexture("r_debugRenderToTexture", "0", CVAR_RENDERER | CVA
 idCVar harm_r_maxFps( "r_maxFps", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Limit maximum FPS. 0 = unlimited" );
 idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Stencil shadow using Carmack-Inverse.");
 idCVar r_scaleMenusTo43( "r_scaleMenusTo43", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio" );
-//k: temp memory allocate in stack / heap control on Android
-#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-// #warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
-/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "524288", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `524288` bytes(Because stack memory is limited on OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).");
-#endif
 idCVar harm_r_useHighPrecision("harm_r_useHighPrecision",
 #ifdef __ANDROID__
                                "0"
@@ -349,7 +344,11 @@ static void R_CheckPortableExtensions(void)
 	} else
 #endif
 	{
-		if (R_CheckExtension("GL_EXT_texture_compression_s3tc")&&r_useDXT.GetBool())
+		if (R_CheckExtension("GL_EXT_texture_compression_s3tc") && r_useDXT.GetBool()
+#if !defined(__ANDROID__)
+        && USING_GL
+#endif
+        )
 		glConfig.textureCompressionAvailable = true;
 		else
 		glConfig.textureCompressionAvailable = false;
@@ -1118,12 +1117,35 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 		return;
 	}
 
-#ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
-		common->Printf("OpenGLES 3.0\n");
-	else
+    extern int gl_version;
+    idStr glVersionName;
+    switch(gl_version)
+    {
+        case GL_VERSION_GL_ES2:
+            glVersionName = "OpenGL ES2";
+            break;
+#if !defined(__ANDROID__)
+        case GL_VERSION_GL_CORE:
+            glVersionName = "OpenGL Core";
+            break;
+        case GL_VERSION_GL_COMPATIBILITY:
+            glVersionName = "OpenGL Compatibility";
+            break;
 #endif
-		common->Printf("OpenGLES 2.0\n");
+        case GL_VERSION_GL_ES3:
+            glVersionName = "OpenGL ES3";
+            break;
+        default:
+#ifdef GL_ES_VERSION_3_0
+            if(USING_GLES3)
+                glVersionName = "OpenGL ES3";
+            else
+#endif
+                glVersionName = "OpenGL ES2";
+            break;
+    }
+
+	common->Printf("%s\n", glVersionName.c_str());
 
 	common->Printf("Renderer: %s\n", glConfig.renderer_string);
 	common->Printf("Version: %s\n", glConfig.version_string);
@@ -1177,6 +1199,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("depthTextureCubeMapAvailable: %d\n", glConfig.depthTextureCubeMapAvailable);
 	common->Printf("depth24Available: %d\n", glConfig.depth24Available);
 	common->Printf("gl_FragDepthAvailable: %d\n", glConfig.gl_FragDepthAvailable);
+	common->Printf("multiSamples: %d\n", glConfig.multiSamples);
 #ifdef _SHADOW_MAPPING
 	extern bool r_useDepthTexture;
 	extern bool r_useCubeDepthTexture;
@@ -1186,12 +1209,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("r_usePackColorAsDepth: %d\n", r_usePackColorAsDepth);
 #endif
 
-#ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
-		common->Printf("OpenGLES 3.0\n");
-	else
-#endif
-		common->Printf("OpenGLES 2.0\n");
+	common->Printf("%s\n", glVersionName.c_str());
 }
 
 #ifdef _MULTITHREAD

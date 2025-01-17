@@ -70,6 +70,10 @@
 #define RIGHTMARGIN 8
 #define BOTTOMARGIN 12
 
+#ifdef __ANDROID__ //karin: limit console max height
+extern int Android_GetConsoleMaxHeight(int height, int maxHeight);
+#endif
+
 extern bool AppActive;
 
 CUSTOM_CVAR(Int, con_buffersize, -1, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
@@ -507,8 +511,17 @@ void C_AdjustBottom ()
 {
 	if (gamestate == GS_FULLCONSOLE || gamestate == GS_STARTUP)
 		ConBottom = twod->GetHeight();
+#ifdef __ANDROID__ //karin: limit console max height
+	else
+	{
+		int conMaxHeight = Android_GetConsoleMaxHeight(twod->GetHeight() / 2, twod->GetHeight());
+		if (ConBottom > conMaxHeight || ConsoleState == c_down)
+			ConBottom = conMaxHeight;
+	}
+#else
 	else if (ConBottom > twod->GetHeight() / 2 || ConsoleState == c_down)
 		ConBottom = twod->GetHeight() / 2;
+#endif
 }
 
 void C_NewModeAdjust ()
@@ -537,11 +550,20 @@ void C_Ticker()
 		if (ConsoleState == c_falling)
 		{
 			ConBottom += (consoletic - lasttic) * (twod->GetHeight() * 2 / 25);
-			if (ConBottom >= twod->GetHeight() / 2)
+#ifdef __ANDROID__ //karin: limit console max height
+            int conMaxHeight = Android_GetConsoleMaxHeight(twod->GetHeight() / 2, twod->GetHeight());
+			if (ConBottom >= conMaxHeight)
 			{
-				ConBottom = twod->GetHeight() / 2;
+				ConBottom = conMaxHeight;
 				ConsoleState = c_down;
 			}
+#else
+            if (ConBottom >= twod->GetHeight() / 2)
+            {
+                ConBottom = twod->GetHeight() / 2;
+                ConsoleState = c_down;
+            }
+#endif
 		}
 		else if (ConsoleState == c_rising)
 		{

@@ -366,6 +366,21 @@ static void CG_EntityEffects(centity_t *cent)
 }
 
 /**
+ * @brief CG_AddEntToCrosshairScanList
+ * @param[in] cent
+ */
+static void CG_AddEntToCrosshairScanList(centity_t *cent)
+{
+	if (cg.crosshairEntsToScanCount > MAX_ENTITIES_IN_SNAPSHOT - 1)
+	{
+		CG_Printf(S_COLOR_YELLOW "%s: max crosshair entities reached!\n", __FUNCTION__);
+		return;
+	}
+
+	cg.crosshairEntsToScan[cg.crosshairEntsToScanCount++] = cent;
+}
+
+/**
  * @brief CG_General
  * @param[in,out] cent
  */
@@ -642,6 +657,15 @@ static int CG_PlayerCanPickupWeapon(int clientNum, weapon_t weapon)
 }
 
 /**
+ * @brief Heavily reduce chance of z-fighting by offsetting the z-pos by a
+ * minute amount.
+ */
+static inline void CG_ReduceEntityZFight(refEntity_t *ent, int entityNum)
+{
+	ent->origin[2] += ((entityNum % 100) * 0.001f);
+}
+
+/**
  * @brief CG_Item
  * @param[in] cent
  */
@@ -812,7 +836,7 @@ static void CG_Item(centity_t *cent)
 
 			if (es->eFlags & EF_SPINNING)
 			{
-				if (es->groundEntityNum == -1 || !es->groundEntityNum)     // spinning with a stand will spin the stand and the attached weap (only when in the air)
+				if (es->groundEntityNum == ENTITYNUM_NONE)     // spinning with a stand will spin the stand and the attached weap (only when in the air)
 				{
 					VectorCopy(cg.autoAnglesSlow, cent->lerpAngles);
 					VectorCopy(cg.autoAnglesSlow, cent->lastLerpAngles);
@@ -863,7 +887,7 @@ static void CG_Item(centity_t *cent)
 
 			if (es->eFlags & EF_SPINNING)      // spinning will override the angles set by a stand
 			{
-				if (es->groundEntityNum == -1 || !es->groundEntityNum)     // spinning with a stand will spin the stand and the attached weap (only when in the air)
+				if (es->groundEntityNum == ENTITYNUM_NONE)     // spinning with a stand will spin the stand and the attached weap (only when in the air)
 				{
 					VectorCopy(cg.autoAnglesSlow, cent->lerpAngles);
 					VectorCopy(cg.autoAnglesSlow, cent->lastLerpAngles);
@@ -984,6 +1008,11 @@ static void CG_Item(centity_t *cent)
 		{
 			ent.hilightIntensity = 1.0;
 		}
+	}
+
+	if (es->groundEntityNum != ENTITYNUM_NONE /*is on the ground*/ && (item->giType == IT_HEALTH || item->giWeapon == WP_AMMO))
+	{
+		CG_ReduceEntityZFight(&ent, es->number);
 	}
 
 	// add to refresh list
@@ -1111,10 +1140,6 @@ static void CG_DrawMineMarkerFlag(centity_t *cent, refEntity_t *ent, const weapo
 	ent->backlerp = cent->lerpFrame.backlerp;
 }
 
-extern void CG_RocketTrail(centity_t *ent, const weaponInfo_t *wi);
-extern void CG_ScanForCrosshairMine(centity_t *cent);
-extern void CG_ScanForCrosshairDyna(centity_t *cent);
-
 /**
  * @brief CG_PlayerFloatText
  * @param[in] cent
@@ -1157,6 +1182,8 @@ static void CG_Missile(centity_t *cent)
 	{
 		// use snap client number so that the detonator works right when spectating (#218)
 		cg.satchelCharge = cent;
+
+		CG_AddEntToCrosshairScanList(cent);
 	}
 	else if (s1->weapon == WP_ARTY && s1->otherEntityNum2 && s1->teamNum == cgs.clientinfo[cg.clientNum].team)
 	{
@@ -1167,11 +1194,11 @@ static void CG_Missile(centity_t *cent)
 	// add trails
 	if (cent->currentState.eType == ET_RAMJET)
 	{
-		CG_RocketTrail(cent, NULL);
+		CG_RocketTrail(cent);
 	}
 	else if (weapon->missileTrailFunc)
 	{
-		weapon->missileTrailFunc(cent, weapon);
+		weapon->missileTrailFunc(cent);
 	}
 
 	// add dynamic light
@@ -1223,10 +1250,7 @@ static void CG_Missile(centity_t *cent)
 			BG_EvaluateTrajectoryDelta(&cent->currentState.pos, cg.time, velocity, qfalse, -1);
 			trap_S_AddLoopingSound(cent->lerpOrigin, velocity, weapon->spindownSound, 255, 0);
 
-			if (cgs.clientinfo[cg.snap->ps.clientNum].team == cent->currentState.teamNum)
-			{
-				CG_ScanForCrosshairDyna(cent);
-			}
+			CG_AddEntToCrosshairScanList(cent);
 
 			// add dynamite counter to floating string list
 			if (cgs.clientinfo[cg.clientNum].shoutcaster)
@@ -1333,16 +1357,8 @@ static void CG_Missile(centity_t *cent)
 			}
 			else
 			{
-				if (cgs.clientinfo[cg.clientNum].shoutcaster)
-				{
-					// shoutcasters can see team landmines
-					CG_DrawMineMarkerFlag(cent, &ent, weapon);
-				}
-				else
-				{
-					CG_DrawMineMarkerFlag(cent, &ent, weapon);
-					CG_ScanForCrosshairMine(cent);
-				}
+				CG_DrawMineMarkerFlag(cent, &ent, weapon);
+				CG_AddEntToCrosshairScanList(cent);
 			}
 		}
 
@@ -1350,6 +1366,11 @@ static void CG_Missile(centity_t *cent)
 		{
 			ent.origin[2]    -= 8;
 			ent.oldorigin[2] -= 8;
+		}
+
+		if (cent->currentState.groundEntityNum != ENTITYNUM_NONE)  /*is on the ground*/
+		{
+			CG_ReduceEntityZFight(&ent, cent->currentState.number);
 		}
 	}
 
@@ -1411,7 +1432,7 @@ static void CG_Missile(centity_t *cent)
 		}
 	}
 
-	if (cgs.sv_cheats && cent->currentState.clientNum == cg.predictedPlayerState.clientNum)
+	if ((cgs.sv_cheats || cg.demoPlayback) && cent->currentState.clientNum == cg.predictedPlayerState.clientNum)
 	{
 		if (cent->currentState.pos.trType != TR_STATIONARY)
 		{
@@ -1822,7 +1843,7 @@ void CG_MovePlane(centity_t *cent)
 	refEntity_t ent;
 
 	// allow the airstrike plane to be completely removed
-	if (!cg_visualEffects.integer || cent->currentState.time < 0)
+	if (!cg_drawAirstrikePlanes.integer || cent->currentState.time < 0)
 	{
 		return;
 	}
@@ -1873,15 +1894,21 @@ void CG_MovePlane(centity_t *cent)
 
 	ent.backlerp = cent->lerpFrame.backlerp;
 
+	// TODO : reenable the fade effect, the issue we have is that we failed to
+	// have solid airplanes that become transparent only after a certain time -
+	// either they would always be transparent and we could fade them more - or
+	// they were always solid - we chose the latter for now, but you could
+	// probably have both at a later point
+	//
 	// fade effect
-	if (cent->currentState.time)
-	{
-		ent.shaderRGBA[3] = (byte)(255.f * (float)(cent->currentState.time2 - cg.time) / (float)(cent->currentState.time2 - cent->currentState.time));
-	}
-	else
-	{
-		ent.shaderRGBA[3] = 255;
-	}
+	// if (cent->currentState.time)
+	// {
+	// 	ent.shaderRGBA[3] = (byte)(255.f * (float)(cent->currentState.time2 - cg.time) / (float)(cent->currentState.time2 - cent->currentState.time));
+	// }
+	// else
+	// {
+	// 	ent.shaderRGBA[3] = 255;
+	// }
 
 	if (cent->currentState.teamNum == TEAM_AXIS)
 	{

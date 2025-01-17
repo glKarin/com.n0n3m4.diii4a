@@ -172,11 +172,11 @@ std::string MIDIDevice::GetStats()
 
 //==========================================================================
 //
-// MIDIDevice :: GetStreamInfo
+// MIDIDevice :: GetStreamInfoEx
 //
 //==========================================================================
 
-SoundStreamInfo MIDIDevice::GetStreamInfo() const
+SoundStreamInfoEx MIDIDevice::GetStreamInfoEx() const
 {
-	return { 0, 0, 0 };	// i.e. do not use streaming.
+	return {};	// i.e. do not use streaming.
 }

@@ -1,13 +1,13 @@
 #pragma once
 #define ZMUSIC_INTERNAL
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(ZMUSIC_STATIC)
 #define DLL_EXPORT __declspec(dllexport)
 #define DLL_IMPORT __declspec(dllexport)	// without this the compiler complains.
-#else // !_MSC_VER
+#else
 #define DLL_EXPORT
 #define DLL_IMPORT
-#endif // _MSC_VER
+#endif
 
 typedef class MIDISource *ZMusic_MidiSource;
 typedef class MusInfo *ZMusic_MusicStream;
@@ -49,3 +49,34 @@ struct CustomFileReader : public MusicIO::FileInterface
 
 
 void ZMusic_Printf(int type, const char* msg, ...);
+
+inline uint8_t ZMusic_SampleTypeSize(SampleType stype)
+{
+    switch(stype)
+    {
+    case SampleType_UInt8: return sizeof(uint8_t);
+    case SampleType_Int16: return sizeof(int16_t);
+    case SampleType_Float32: return sizeof(float);
+    }
+    return 0;
+}
+
+inline uint8_t ZMusic_ChannelCount(ChannelConfig chans)
+{
+    switch(chans)
+    {
+    case ChannelConfig_Mono: return 1;
+    case ChannelConfig_Stereo: return 2;
+    }
+    return 0;
+}
+
+inline const char *ZMusic_ChannelConfigName(ChannelConfig chans)
+{
+    switch(chans)
+    {
+    case ChannelConfig_Mono: return "Mono";
+    case ChannelConfig_Stereo: return "Stereo";
+    }
+    return "(unknown)";
+}

@@ -43,14 +43,16 @@
 // added because I need to check single/multiplayer instances and branch accordingly
 #ifdef CGAMEDLL
 extern vmCvar_t cg_gameType;
+extern vmCvar_t cg_debugAnim;
+#define DBGANIMS cg_debugAnim.integer
+#define DBGANIMS_PREF " [cg] "
 #endif
 #ifdef GAMEDLL
 extern vmCvar_t g_gametype;
+extern vmCvar_t g_debugAnim;
+#define DBGANIMS g_debugAnim.integer
+#define DBGANIMS_PREF " [sv] "
 #endif
-
-// debug defines, to prevent doing costly string cvar lookups
-//#define   DBGANIMS
-//#define   DBGANIMEVENTS
 
 // this is used globally within this file to reduce redundant params
 static animScriptData_t *globalScriptData = NULL;
@@ -112,6 +114,10 @@ static animStringItem_t animMoveTypesStr[] =
 
 	{ "DEAD",         -1 },
 
+	{ "JUMP",         -1 },
+	{ "JUMPFORWARD",  -1 },
+	{ "MIDAIR",       -1 },
+
 	{ NULL,           -1 },
 };
 
@@ -139,6 +145,7 @@ animStringItem_t animEventTypesStr[] =
 	{ "RAISEWEAPONPRONE",           -1 },
 	{ "RELOADPRONE",                -1 },
 	{ "NOPOWER",                    -1 },
+	{ "ACTIVATE",                   -1 },
 
 	{ NULL,                         -1 },
 };
@@ -195,13 +202,14 @@ static animStringItem_t animConditionImpactPointsStr[] =
 	{ "SHOULDER_LEFT",  -1 },
 	{ "KNEE_RIGHT",     -1 },
 	{ "KNEE_LEFT",      -1 },
+	{ "LEGS",           -1 },
 
 	{ NULL,             -1 },
 };
 
 static animStringItem_t animEnemyTeamsStr[] =
 {
-	{ "NAZI",    -1 },
+	{ "AXIS",    -1 },
 	{ "ALLIES",  -1 },
 	{ "MONSTER", -1 },
 	{ "SPARE1",  -1 },
@@ -281,6 +289,8 @@ static animStringItem_t animConditionsStr[NUM_ANIM_CONDITIONS + 1] =
 	{ "GEN_BITFLAG",    -1 },
 	{ "AISTATE",        -1 },
 	{ "SUICIDE",        -1 },
+	{ "FAST_RELOAD",    -1 },
+	{ "LADDER_PEEK",    -1 },
 
 	{ NULL,             -1 },
 };
@@ -308,6 +318,8 @@ static animConditionTable_t animConditionsTable[NUM_ANIM_CONDITIONS] =
 	{ ANIM_CONDTYPE_VALUE,    animFlailTypeStr             },
 	{ ANIM_CONDTYPE_BITFLAGS, animGenBitFlagStr            },
 	{ ANIM_CONDTYPE_VALUE,    animAIStateStr               },
+	{ ANIM_CONDTYPE_VALUE,    NULL                         },
+	{ ANIM_CONDTYPE_VALUE,    NULL                         },
 	{ ANIM_CONDTYPE_VALUE,    NULL                         },
 };
 
@@ -807,6 +819,12 @@ static void BG_ParseCommands(char **input, animScriptItem_t *scriptItem, animMod
 			}
 			command = &scriptItem->commands[scriptItem->numCommands++];
 			Com_Memset(command, 0, sizeof(*command));
+		}
+
+		// skip adding NOOP commands altogether
+		if (!Q_stricmp(token, "NOOP"))
+		{
+			continue;
 		}
 
 		command->bodyPart[partIndex] = BG_IndexForString(token, animBodyPartsStr, qtrue);
@@ -1365,13 +1383,13 @@ void BG_ClearAnimTimer(playerState_t *ps, animBodyPart_t bodyPart)
  * @param[in] forceDuration
  * @param[in] setTimer
  * @param[in] isContinue
- * @param[in] force
  * @return
  */
-int BG_PlayAnim(playerState_t *ps, animModelInfo_t *animModelInfo, int animNum, animBodyPart_t bodyPart, int forceDuration, qboolean setTimer, qboolean isContinue, qboolean force)
+int BG_PlayAnim(playerState_t *ps, animModelInfo_t *animModelInfo, int animNum, animBodyPart_t bodyPart, int forceDuration, qboolean setTimer, qboolean isContinue)
 {
 	int      duration;
 	qboolean wasSet = qfalse;
+	int      currentPriority;
 
 	if (forceDuration)
 	{
@@ -1386,7 +1404,10 @@ int BG_PlayAnim(playerState_t *ps, animModelInfo_t *animModelInfo, int animNum, 
 	{
 	case ANIM_BP_BOTH:
 	case ANIM_BP_LEGS:
-		if ((ps->legsTimer < 50) || force)
+		currentPriority = animModelInfo->animations[(ps->legsAnim & ~ANIM_TOGGLEBIT)]->priority;
+
+		if ((ps->legsTimer < 50)
+		    || (animModelInfo->animations[animNum]->priority >= currentPriority))
 		{
 			if (!isContinue || !((ps->legsAnim & ~ANIM_TOGGLEBIT) == animNum))
 			{
@@ -1407,9 +1428,22 @@ int BG_PlayAnim(playerState_t *ps, animModelInfo_t *animModelInfo, int animNum, 
 		{
 			break;
 		}
-	// fall through for ANIM_BP_BOTH
+	// for ANIM_BP_BOTH
+	// fall through
 	case ANIM_BP_TORSO:
-		if ((ps->torsoTimer < 50) || force)
+		currentPriority = animModelInfo->animations[(ps->torsoAnim & ~ANIM_TOGGLEBIT)]->priority;
+
+		// XXX : Stop pliers firing animation if you stop holding attack - would
+		//		 otherwise continue, despite the player not actually using them.
+		if (
+			animModelInfo->animations[(ps->torsoAnim & ~ANIM_TOGGLEBIT)]->loopFrames == -1
+			&& ps->weaponstate != WEAPON_FIRING)
+		{
+			currentPriority = -1;
+		}
+
+		if ((ps->torsoTimer < 50)
+		    || (animModelInfo->animations[animNum]->priority >= currentPriority))
 		{
 			if (!isContinue || !((ps->torsoAnim & ~ANIM_TOGGLEBIT) == animNum))
 			{
@@ -1464,10 +1498,9 @@ int BG_PlayAnimName(playerState_t *ps, animModelInfo_t *animModelInfo, char *ani
  * @param[in] scriptCommand
  * @param[in] setTimer
  * @param[in] isContinue
- * @param[in] force
  * @return The duration of the animation, -1 if no anim was set
  */
-int BG_ExecuteCommand(playerState_t *ps, animModelInfo_t *animModelInfo, animScriptCommand_t *scriptCommand, qboolean setTimer, qboolean isContinue, qboolean force)
+int BG_ExecuteCommand(playerState_t *ps, animModelInfo_t *animModelInfo, animScriptCommand_t *scriptCommand, qboolean setTimer, qboolean isContinue)
 {
 	int      duration       = -1;
 	qboolean playedLegsAnim = qfalse;
@@ -1478,11 +1511,11 @@ int BG_ExecuteCommand(playerState_t *ps, animModelInfo_t *animModelInfo, animScr
 		// FIXME: how to sync torso/legs anims accounting for transition blends, etc
 		if (scriptCommand->bodyPart[0] == ANIM_BP_BOTH || scriptCommand->bodyPart[0] == ANIM_BP_LEGS)
 		{
-			playedLegsAnim = (qboolean)(BG_PlayAnim(ps, animModelInfo, scriptCommand->animIndex[0], (animBodyPart_t)scriptCommand->bodyPart[0], duration, setTimer, isContinue, force) > -1);
+			playedLegsAnim = (qboolean)(BG_PlayAnim(ps, animModelInfo, scriptCommand->animIndex[0], (animBodyPart_t)scriptCommand->bodyPart[0], duration, setTimer, isContinue) > -1);
 		}
 		else
 		{
-			BG_PlayAnim(ps, animModelInfo, scriptCommand->animIndex[0], (animBodyPart_t)scriptCommand->bodyPart[0], duration, setTimer, isContinue, force);
+			BG_PlayAnim(ps, animModelInfo, scriptCommand->animIndex[0], (animBodyPart_t)scriptCommand->bodyPart[0], duration, setTimer, isContinue);
 		}
 	}
 	if (scriptCommand->bodyPart[1])
@@ -1492,11 +1525,11 @@ int BG_ExecuteCommand(playerState_t *ps, animModelInfo_t *animModelInfo, animScr
 		// just play the animation for the torso
 		if (scriptCommand->bodyPart[1] == ANIM_BP_BOTH || scriptCommand->bodyPart[1] == ANIM_BP_LEGS)
 		{
-			playedLegsAnim = (qboolean)(BG_PlayAnim(ps, animModelInfo, scriptCommand->animIndex[1], (animBodyPart_t)scriptCommand->bodyPart[1], duration, setTimer, isContinue, force) > -1);
+			playedLegsAnim = (qboolean)(BG_PlayAnim(ps, animModelInfo, scriptCommand->animIndex[1], (animBodyPart_t)scriptCommand->bodyPart[1], duration, setTimer, isContinue) > -1);
 		}
 		else
 		{
-			BG_PlayAnim(ps, animModelInfo, scriptCommand->animIndex[1], (animBodyPart_t)scriptCommand->bodyPart[1], duration, setTimer, isContinue, force);
+			BG_PlayAnim(ps, animModelInfo, scriptCommand->animIndex[1], (animBodyPart_t)scriptCommand->bodyPart[1], duration, setTimer, isContinue);
 		}
 	}
 
@@ -1534,9 +1567,10 @@ int BG_AnimScriptAnimation(playerState_t *ps, animModelInfo_t *animModelInfo, sc
 		return -1;
 	}
 
-#ifdef DBGANIMS
-	Com_Printf("script anim: cl %i, mt %s, ", ps->clientNum, animMoveTypesStr[movetype]);
-#endif
+	if (DBGANIMS == 3 || DBGANIMS == 5)
+	{
+		Com_Printf("anim-anims : "DBGANIMS_PREF " cl %i, mt %s, ", ps->clientNum, animMoveTypesStr[movetype].string);
+	}
 
 	// try finding a match in all states ABOVE the given state
 	while (!scriptItem && state < MAX_AISTATES)
@@ -1558,9 +1592,10 @@ int BG_AnimScriptAnimation(playerState_t *ps, animModelInfo_t *animModelInfo, sc
 
 	if (!scriptItem)
 	{
-#ifdef DBGANIMS
-		Com_Printf("no valid conditions\n");
-#endif
+		if (DBGANIMS == 3 || DBGANIMS == 5)
+		{
+			Com_Printf("no valid conditions\n");
+		}
 		return -1;
 	}
 	// save this as our current movetype
@@ -1568,20 +1603,21 @@ int BG_AnimScriptAnimation(playerState_t *ps, animModelInfo_t *animModelInfo, sc
 	// pick the correct animation for this character (animations must be constant for each character, otherwise they'll constantly change)
 	scriptCommand = &scriptItem->commands[ps->clientNum % scriptItem->numCommands];
 
-#ifdef DBGANIMS
-	if (scriptCommand->bodyPart[0])
+	if (DBGANIMS == 3 || DBGANIMS == 5)
 	{
-		Com_Printf("anim0 (%s): %s", animBodyPartsStr[scriptCommand->bodyPart[0]].string, animModelInfo->animations[scriptCommand->animIndex[0]]->name);
+		if (scriptCommand->bodyPart[0])
+		{
+			Com_Printf("anim0 (%s): %s", animBodyPartsStr[scriptCommand->bodyPart[0]].string, animModelInfo->animations[scriptCommand->animIndex[0]]->name);
+		}
+		if (scriptCommand->bodyPart[1])
+		{
+			Com_Printf("anim1 (%s): %s", animBodyPartsStr[scriptCommand->bodyPart[1]].string, animModelInfo->animations[scriptCommand->animIndex[1]]->name);
+		}
+		Com_Printf("\n");
 	}
-	if (scriptCommand->bodyPart[1])
-	{
-		Com_Printf("anim1 (%s): %s", animBodyPartsStr[scriptCommand->bodyPart[1]].string, animModelInfo->animations[scriptCommand->animIndex[1]]->name);
-	}
-	Com_Printf("\n");
-#endif
 
 	// run it
-	return (BG_ExecuteCommand(ps, animModelInfo, scriptCommand, qfalse, isContinue, qfalse) != -1);
+	return (BG_ExecuteCommand(ps, animModelInfo, scriptCommand, qfalse, isContinue) != -1);
 }
 
 /*
@@ -1633,10 +1669,9 @@ int BG_AnimScriptCannedAnimation(playerState_t *ps, animModelInfo_t *animModelIn
  * @param[in] animModelInfo
  * @param[in] event
  * @param[in] isContinue
- * @param[in] force
  * @return The duration in milliseconds that this model should be paused. -1 if no event found
  */
-int BG_AnimScriptEvent(playerState_t *ps, animModelInfo_t *animModelInfo, scriptAnimEventTypes_t event, qboolean isContinue, qboolean force)
+int BG_AnimScriptEvent(playerState_t *ps, animModelInfo_t *animModelInfo, scriptAnimEventTypes_t event, qboolean isContinue)
 {
 	animScript_t        *script;
 	animScriptItem_t    *scriptItem;
@@ -1653,44 +1688,48 @@ int BG_AnimScriptEvent(playerState_t *ps, animModelInfo_t *animModelInfo, script
 		return -1;
 	}
 
-#ifdef DBGANIMEVENTS
-	Com_Printf("script event: cl %i, ev %s, ", ps->clientNum, animEventTypesStr[event]);
-#endif
+	if (DBGANIMS >= 4)
+	{
+		Com_Printf("anim-event :" DBGANIMS_PREF " cl %i, ev %s, ", ps->clientNum, animEventTypesStr[event].string);
+	}
 
 	script = &animModelInfo->scriptEvents[event];
 	if (!script->numItems)
 	{
-#ifdef DBGANIMEVENTS
-		Com_Printf("no entry\n");
-#endif
+		if (DBGANIMS >= 4)
+		{
+			Com_Printf("no entry\n");
+		}
 		return -1;
 	}
 	// find the first script item, that passes all the conditions for this event
 	scriptItem = BG_FirstValidItem(ps->clientNum, script);
 	if (!scriptItem)
 	{
-#ifdef DBGANIMEVENTS
-		Com_Printf("no valid conditions\n");
-#endif
+		if (DBGANIMS >= 4)
+		{
+			Com_Printf("no valid conditions\n");
+		}
 		return -1;
 	}
 	// pick a random command
 	scriptCommand = &scriptItem->commands[rand() % scriptItem->numCommands];
 
-#ifdef DBGANIMEVENTS
-	if (scriptCommand->bodyPart[0])
+	if (DBGANIMS >= 4)
 	{
-		Com_Printf("anim0 (%s): %s", animBodyPartsStr[scriptCommand->bodyPart[0]].string, animModelInfo->animations[scriptCommand->animIndex[0]]->name);
+		if (scriptCommand->bodyPart[0])
+		{
+			Com_Printf("anim0 (%s): %s", animBodyPartsStr[scriptCommand->bodyPart[0]].string, animModelInfo->animations[scriptCommand->animIndex[0]]->name);
+		}
+		if (scriptCommand->bodyPart[1])
+		{
+			Com_Printf("anim1 (%s): %s", animBodyPartsStr[scriptCommand->bodyPart[1]].string, animModelInfo->animations[scriptCommand->animIndex[1]]->name);
+		}
+		Com_Printf("\n");
 	}
-	if (scriptCommand->bodyPart[1])
-	{
-		Com_Printf("anim1 (%s): %s", animBodyPartsStr[scriptCommand->bodyPart[1]].string, animModelInfo->animations[scriptCommand->animIndex[1]]->name);
-	}
-	Com_Printf("\n");
-#endif
 
 	// run it
-	return BG_ExecuteCommand(ps, animModelInfo, scriptCommand, qtrue, isContinue, force);
+	return BG_ExecuteCommand(ps, animModelInfo, scriptCommand, qtrue, isContinue);
 }
 
 /**
@@ -1972,14 +2011,8 @@ void BG_AnimUpdatePlayerStateConditions(pmove_t *pmove)
 		ps->eFlags &= ~EF_CROUCHING;
 	}
 
-	if (pmove->cmd.buttons & BUTTON_ATTACK)
-	{
-		BG_UpdateConditionValue(ps->clientNum, ANIM_COND_FIRING, qtrue, qtrue);
-	}
-	else
-	{
-		BG_UpdateConditionValue(ps->clientNum, ANIM_COND_FIRING, qfalse, qtrue);
-	}
+	BG_UpdateConditionValue(ps->clientNum, ANIM_COND_FIRING, (pmove->cmd.buttons & BUTTON_ATTACK), qtrue);
+	BG_UpdateConditionValue(ps->clientNum, ANIM_COND_FAST_RELOAD, (BG_IsSkillAvailable(pmove->skill, SK_LIGHT_WEAPONS, SK_LIGHT_WEAPONS_FASTER_RELOAD) && GetWeaponTableData(pmove->ps->weapon)->attributes & WEAPON_ATTRIBUT_FAST_RELOAD), qtrue);
 
 	if (ps->pm_flags & PMF_FLAILING)
 	{

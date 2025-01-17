@@ -50,7 +50,6 @@ cvar_t pausable = {CF_SERVER, "pausable","1", "allow players to pause or not (ot
 cvar_t pr_checkextension = {CF_SERVER | CF_READONLY, "pr_checkextension", "1", "indicates to QuakeC that the standard quakec extensions system is available (if 0, quakec should not attempt to use extensions)"};
 cvar_t samelevel = {CF_SERVER | CF_NOTIFY, "samelevel","0", "repeats same level if level ends (due to timelimit or someone hitting an exit)"};
 cvar_t skill = {CF_SERVER, "skill","1", "difficulty level of game, affects monster layouts in levels, 0 = easy, 1 = normal, 2 = hard, 3 = nightmare (same layout as hard but monsters fire twice)"};
-cvar_t campaign = {CF_SERVER, "campaign", "0", "singleplayer mode"};
 cvar_t host_timescale = {CF_CLIENT | CF_SERVER, "host_timescale", "1.0", "controls game speed, 0.5 is half speed, 2 is double speed"};
 
 cvar_t sv_accelerate = {CF_SERVER, "sv_accelerate", "10", "rate at which a player accelerates to sv_maxspeed"};
@@ -96,6 +95,7 @@ cvar_t sv_cullentities_trace_samples_extra = {CF_SERVER, "sv_cullentities_trace_
 cvar_t sv_cullentities_trace_samples_players = {CF_SERVER, "sv_cullentities_trace_samples_players", "8", "number of samples to test for entity culling when the entity is a player entity"};
 cvar_t sv_cullentities_trace_spectators = {CF_SERVER, "sv_cullentities_trace_spectators", "0", "enables trace entity culling for clients that are spectating"};
 cvar_t sv_debugmove = {CF_SERVER | CF_NOTIFY, "sv_debugmove", "0", "disables collision detection optimizations for debugging purposes"};
+cvar_t sv_dedicated = {CF_SERVER | CF_READONLY, "sv_dedicated", "0", "for scripts and SVQC to detect when they're running on a dedicated server"};
 cvar_t sv_echobprint = {CF_SERVER | CF_ARCHIVE, "sv_echobprint", "1", "prints gamecode bprint() calls to server console"};
 cvar_t sv_edgefriction = {CF_SERVER, "edgefriction", "1", "how much you slow down when nearing a ledge you might fall off, multiplier of sv_friction (Quake used 2, QuakeWorld used 1 due to a bug in physics code)"};
 cvar_t sv_entpatch = {CF_SERVER, "sv_entpatch", "1", "enables loading of .ent files to override entities in the bsp (for example Threewave CTF server pack contains .ent patch files enabling play of CTF on id1 maps)"};
@@ -110,10 +110,11 @@ cvar_t sv_gameplayfix_easierwaterjump = {CF_SERVER, "sv_gameplayfix_easierwaterj
 cvar_t sv_gameplayfix_findradiusdistancetobox = {CF_SERVER, "sv_gameplayfix_findradiusdistancetobox", "1", "causes findradius to check the distance to the corner of a box rather than the center of the box, makes findradius detect bmodels such as very large doors that would otherwise be unaffected by splash damage"};
 cvar_t sv_gameplayfix_gravityunaffectedbyticrate = {CF_SERVER, "sv_gameplayfix_gravityunaffectedbyticrate", "0", "fix some ticrate issues in physics."};
 cvar_t sv_gameplayfix_grenadebouncedownslopes = {CF_SERVER, "sv_gameplayfix_grenadebouncedownslopes", "1", "prevents MOVETYPE_BOUNCE (grenades) from getting stuck when fired down a downward sloping surface"};
+cvar_t sv_gameplayfix_impactbeforeonground = {CF_SERVER, "sv_gameplayfix_impactbeforeonground", "0", "enables a bug from old DP versions in which entity .touch functions are called before FL_ONGROUND is set when a collision is detected in SV_FlyMove() (used by MOVETYPE_WALK and MOVETYPE_STEP), Quake 1.5 and Combat+ mods require this, it breaks id1 fiends"};
 cvar_t sv_gameplayfix_multiplethinksperframe = {CF_SERVER, "sv_gameplayfix_multiplethinksperframe", "1", "allows entities to think more often than the server framerate, primarily useful for very high fire rate weapons"};
 cvar_t sv_gameplayfix_noairborncorpse = {CF_SERVER, "sv_gameplayfix_noairborncorpse", "1", "causes entities (corpses, items, etc) sitting ontop of moving entities (players) to fall when the moving entity (player) is no longer supporting them"};
 cvar_t sv_gameplayfix_noairborncorpse_allowsuspendeditems = {CF_SERVER, "sv_gameplayfix_noairborncorpse_allowsuspendeditems", "1", "causes entities sitting ontop of objects that are instantaneously remove to float in midair (special hack to allow a common level design trick for floating items)"};
-cvar_t sv_gameplayfix_nudgeoutofsolid = {CF_SERVER, "sv_gameplayfix_nudgeoutofsolid", "1", "attempts to fix physics errors where an object ended up in solid for some reason, supersedes sv_gameplayfix_unstickentities"};
+cvar_t sv_gameplayfix_nudgeoutofsolid = {CF_SERVER, "sv_gameplayfix_nudgeoutofsolid", "0", "attempts to fix physics errors where an object ended up in solid for some reason, smarter than sv_gameplayfix_unstick* except on Q1BSP with mod_q1bsp_polygoncollisions disabled (there it falls back to the unsticking method)"};
 cvar_t sv_gameplayfix_nudgeoutofsolid_separation = {CF_SERVER, "sv_gameplayfix_nudgeoutofsolid_separation", "0.03125", "keep objects this distance apart to prevent collision issues on seams"};
 cvar_t sv_gameplayfix_q2airaccelerate = {CF_SERVER, "sv_gameplayfix_q2airaccelerate", "0", "Quake2-style air acceleration"};
 cvar_t sv_gameplayfix_nogravityonground = {CF_SERVER, "sv_gameplayfix_nogravityonground", "0", "turn off gravity when on ground (to get rid of sliding)"};
@@ -126,9 +127,10 @@ cvar_t sv_gameplayfix_swiminbmodels = {CF_SERVER, "sv_gameplayfix_swiminbmodels"
 cvar_t sv_gameplayfix_upwardvelocityclearsongroundflag = {CF_SERVER, "sv_gameplayfix_upwardvelocityclearsongroundflag", "1", "prevents monsters, items, and most other objects from being stuck to the floor when pushed around by damage, and other situations in mods"};
 cvar_t sv_gameplayfix_downtracesupportsongroundflag = {CF_SERVER, "sv_gameplayfix_downtracesupportsongroundflag", "1", "prevents very short moves from clearing onground (which may make the player stick to the floor at high netfps), fixes groundentity not being set when walking onto a mover with sv_gameplayfix_nogravityonground"};
 cvar_t sv_gameplayfix_q1bsptracelinereportstexture = {CF_SERVER, "sv_gameplayfix_q1bsptracelinereportstexture", "1", "enables mods to get accurate trace_texture results on q1bsp by using a surface-hitting traceline implementation rather than the standard solidbsp method, q3bsp always reports texture accurately"};
-cvar_t sv_gameplayfix_unstickplayers = {CF_SERVER, "sv_gameplayfix_unstickplayers", "0", "big hack to try and fix the rare case of MOVETYPE_WALK entities getting stuck in the world clipping hull."};
-cvar_t sv_gameplayfix_unstickentities = {CF_SERVER, "sv_gameplayfix_unstickentities", "1", "hack to check if entities are crossing world collision hull and try to move them to the right position, superseded by sv_gameplayfix_nudgeoutofsolid"};
+cvar_t sv_gameplayfix_unstickplayers = {CF_SERVER, "sv_gameplayfix_unstickplayers", "1", "big hack to try and fix the rare case of MOVETYPE_WALK entities getting stuck in the world clipping hull. Quake did something similar."};
+cvar_t sv_gameplayfix_unstickentities = {CF_SERVER, "sv_gameplayfix_unstickentities", "0", "hack to check if entities are crossing world collision hull and try to move them to the right position. Quake didn't do this so maps shouldn't depend on it."};
 cvar_t sv_gameplayfix_fixedcheckwatertransition = {CF_SERVER, "sv_gameplayfix_fixedcheckwatertransition", "1", "fix two very stupid bugs in SV_CheckWaterTransition when watertype is CONTENTS_EMPTY (the bugs causes waterlevel to be 1 on first frame, -1 on second frame - the fix makes it 0 on both frames)"};
+cvar_t sv_gameplayfix_nosquashentities = {CF_SERVER, "sv_gameplayfix_nosquashentities", "0", "Entity hitboxes will not be resized or disabled when they are crushed by movers, and will continue to be affected by movers."};
 cvar_t sv_gravity = {CF_SERVER | CF_NOTIFY, "sv_gravity","800", "how fast you fall (512 = roughly earth gravity)"};
 cvar_t sv_init_frame_count = {CF_SERVER, "sv_init_frame_count", "2", "number of frames to run to allow everything to settle before letting clients connect"};
 cvar_t sv_idealpitchscale = {CF_SERVER, "sv_idealpitchscale","0.8", "how much to look up/down slopes and stairs when not using freelook"};
@@ -161,9 +163,9 @@ cvar_t sv_warsowbunny_backtosideratio = {CF_SERVER, "sv_warsowbunny_backtosidera
 cvar_t sv_onlycsqcnetworking = {CF_SERVER, "sv_onlycsqcnetworking", "0", "disables legacy entity networking code for higher performance (except on clients, which can still be legacy)"};
 cvar_t sv_areadebug = {CF_SERVER, "sv_areadebug", "0", "disables physics culling for debugging purposes (only for development)"};
 
-cvar_t sys_ticrate = {CF_SERVER | CF_ARCHIVE, "sys_ticrate","0.0138889", "how long a server frame is in seconds, 0.05 is 20fps server rate, 0.1 is 10fps (can not be set higher than 0.1), 0 runs as many server frames as possible (makes games against bots a little smoother, overwhelms network players), 0.0138889 matches QuakeWorld physics"};
+cvar_t sys_ticrate = {CF_SERVER | CF_ARCHIVE, "sys_ticrate","0.01388889", "how long a server frame is in seconds, 0.05 is 20fps server rate, 0.1 is 10fps (can not be set higher than 0.1), 0 runs as many server frames as possible (makes games against bots a little smoother, overwhelms network players), 1/72 matches QuakeWorld physics"};
 cvar_t sv_maxphysicsframesperserverframe = {CF_SERVER, "sv_maxphysicsframesperserverframe","10", "maximum number of physics frames per server frame"};
-cvar_t sv_lagreporting_always = {CF_SERVER, "sv_lagreporting_always", "0", "report lag even in singleplayer, listen, or an empty dedicated server"};
+cvar_t sv_lagreporting_always = {CF_SERVER, "sv_lagreporting_always", "0", "report lag even in singleplayer, listen, an empty dedicated server, or during intermission"};
 cvar_t sv_lagreporting_strict = {CF_SERVER, "sv_lagreporting_strict", "0", "log any extra frames run to catch up after a holdup (only applies when sv_maxphysicsframesperserverframe > 1)"};
 cvar_t sv_threaded = {CF_SERVER, "sv_threaded", "0", "enables a separate thread for server code, improving performance, especially when hosting a game while playing, EXPERIMENTAL, may be crashy"};
 
@@ -215,6 +217,8 @@ cvar_t sv_mapformat_is_quake2 = {CF_SERVER, "sv_mapformat_is_quake2", "0", "indi
 cvar_t sv_mapformat_is_quake3 = {CF_SERVER, "sv_mapformat_is_quake3", "0", "indicates the current map is q3bsp format (useful to know because of different entity behaviors)"};
 
 cvar_t sv_writepicture_quality = {CF_SERVER | CF_ARCHIVE, "sv_writepicture_quality", "10", "WritePicture quality offset (higher means better quality, but slower)"};
+
+cvar_t sv_sendentities_csqc_randomize_order = {CF_SERVER, "sv_sendentities_csqc_randomize_order", "1", "Randomize the order of sending CSQC entities (should behave better when packet size or bandwidth limits are exceeded)."};
 
 server_t sv;
 server_static_t svs;
@@ -462,7 +466,8 @@ static void SV_ServerOptions (void)
 		if (Sys_CheckParm ("-listen"))
 			Con_Printf ("Only one of -dedicated or -listen can be specified\n");
 		// default sv_public on for dedicated servers (often hosted by serious administrators), off for listen servers (often hosted by clueless users)
-		Cvar_SetValue(&cvars_all, "sv_public", 1);
+		Cvar_SetQuick(&sv_public, "1");
+		Cvar_SetQuick(&sv_dedicated, "1");
 	}
 	else if (cl_available)
 	{
@@ -531,7 +536,6 @@ void SV_Init (void)
 	Cvar_RegisterVariable (&pr_checkextension);
 	Cvar_RegisterVariable (&samelevel);
 	Cvar_RegisterVariable (&skill);
-	Cvar_RegisterVariable (&campaign);
 	Cvar_RegisterVariable (&host_timescale);
 	Cvar_RegisterCallback (&host_timescale, Host_Timescale_c);
 	Cvar_RegisterVirtual (&host_timescale, "slowmo");
@@ -579,6 +583,7 @@ void SV_Init (void)
 	Cvar_RegisterVariable (&sv_cullentities_trace_samples_players);
 	Cvar_RegisterVariable (&sv_cullentities_trace_spectators);
 	Cvar_RegisterVariable (&sv_debugmove);
+	Cvar_RegisterVariable (&sv_dedicated);
 	Cvar_RegisterVariable (&sv_echobprint);
 	Cvar_RegisterVariable (&sv_edgefriction);
 	Cvar_RegisterVariable (&sv_entpatch);
@@ -593,6 +598,7 @@ void SV_Init (void)
 	Cvar_RegisterVariable (&sv_gameplayfix_findradiusdistancetobox);
 	Cvar_RegisterVariable (&sv_gameplayfix_gravityunaffectedbyticrate);
 	Cvar_RegisterVariable (&sv_gameplayfix_grenadebouncedownslopes);
+	Cvar_RegisterVariable (&sv_gameplayfix_impactbeforeonground);
 	Cvar_RegisterVariable (&sv_gameplayfix_multiplethinksperframe);
 	Cvar_RegisterVariable (&sv_gameplayfix_noairborncorpse);
 	Cvar_RegisterVariable (&sv_gameplayfix_noairborncorpse_allowsuspendeditems);
@@ -612,6 +618,7 @@ void SV_Init (void)
 	Cvar_RegisterVariable (&sv_gameplayfix_unstickplayers);
 	Cvar_RegisterVariable (&sv_gameplayfix_unstickentities);
 	Cvar_RegisterVariable (&sv_gameplayfix_fixedcheckwatertransition);
+	Cvar_RegisterVariable (&sv_gameplayfix_nosquashentities);
 	Cvar_RegisterVariable (&sv_qcstats);
 	Cvar_RegisterVariable (&sv_gravity);
 	Cvar_RegisterVariable (&sv_init_frame_count);
@@ -700,6 +707,8 @@ void SV_Init (void)
 	Cvar_RegisterVariable (&sv_mapformat_is_quake3);
 
 	Cvar_RegisterVariable (&sv_writepicture_quality);
+
+	Cvar_RegisterVariable (&sv_sendentities_csqc_randomize_order);
 
 	SV_InitOperatorCommands();
 	host.hook.SV_Shutdown = SV_Shutdown;
@@ -803,6 +812,7 @@ void SV_SendServerinfo (client_t *client)
 	{
 		char demofile[MAX_OSPATH];
 		char ipaddress[MAX_QPATH];
+		char timestring[128];
 		size_t j;
 
 		// start a new demo file
@@ -810,7 +820,9 @@ void SV_SendServerinfo (client_t *client)
 		for(j = 0; ipaddress[j]; ++j)
 			if(!isalnum(ipaddress[j]))
 				ipaddress[j] = '-';
-		dpsnprintf (demofile, sizeof(demofile), "%s_%s_%d_%s.dem", Sys_TimeString (sv_autodemo_perclient_nameformat.string), sv.worldbasename, PRVM_NUM_FOR_EDICT(client->edict), ipaddress);
+		Sys_TimeString(timestring, sizeof(timestring), sv_autodemo_perclient_nameformat.string);
+		dpsnprintf(demofile, sizeof(demofile), "%s_%s_%d_%s.dem", timestring,
+				sv.worldbasename, PRVM_NUM_FOR_EDICT(client->edict), ipaddress);
 
 		SV_StartDemoRecording(client, demofile, -1);
 	}
@@ -1076,11 +1088,12 @@ void SV_DropClient(qbool leaving, const char *fmt, ... )
 		// break the net connection
 		NetConn_Close(host_client->netconnection);
 		host_client->netconnection = NULL;
+
+		if(fmt)
+			SV_BroadcastPrintf("\003^3%s left the game (%s)\n", host_client->name, reason);
+		else
+			SV_BroadcastPrintf("\003^3%s left the game\n", host_client->name);
 	}
-	if(fmt)
-		SV_BroadcastPrintf("\003^3%s left the game (%s)\n", host_client->name, reason);
-	else
-		SV_BroadcastPrintf("\003^3%s left the game\n", host_client->name);
 
 	// if a download is active, close it
 	if (host_client->download_file)
@@ -1182,7 +1195,7 @@ static void Download_CheckExtensions(cmd_state_t *cmd)
 
 	// first reset them all
 	host_client->download_deflate = false;
-	
+
 	for(i = 2; i < argc; ++i)
 	{
 		if(!strcmp(Cmd_Argv(cmd, i), "deflate"))
@@ -1226,7 +1239,7 @@ static void SV_Download_f(cmd_state_t *cmd)
 	}
 
 	is_csqc = (sv.csqc_progname[0] && strcmp(Cmd_Argv(cmd, 1), sv.csqc_progname) == 0);
-	
+
 	if (!sv_allowdownloads.integer && !is_csqc)
 	{
 		SV_ClientPrintf("Downloads are disabled on this server\n");
@@ -1247,17 +1260,17 @@ static void SV_Download_f(cmd_state_t *cmd)
 	{
 		char extensions[MAX_QPATH]; // make sure this can hold all extensions
 		extensions[0] = '\0';
-		
+
 		if(host_client->download_deflate)
 			dp_strlcat(extensions, " deflate", sizeof(extensions));
-		
+
 		Con_DPrintf("Downloading %s to %s\n", host_client->download_name, host_client->name);
 
 		if(host_client->download_deflate && svs.csqc_progdata_deflated)
 			host_client->download_file = FS_FileFromData(svs.csqc_progdata_deflated, svs.csqc_progsize_deflated, true);
 		else
 			host_client->download_file = FS_FileFromData(svs.csqc_progdata, sv.csqc_progsize, true);
-		
+
 		// no, no space is needed between %s and %s :P
 		SV_ClientCommands("\ncl_downloadbegin %i %s%s\n", (int)FS_FileSize(host_client->download_file), host_client->download_name, extensions);
 
@@ -1360,7 +1373,7 @@ static void SV_Download_f(cmd_state_t *cmd)
 	{
 		char extensions[MAX_QPATH]; // make sure this can hold all extensions
 		extensions[0] = '\0';
-		
+
 		if(host_client->download_deflate)
 			strlcat(extensions, " deflate", sizeof(extensions));
 
@@ -1710,7 +1723,7 @@ static void SV_Prepare_CSQC(void)
 
 	svs.csqc_progdata = NULL;
 	svs.csqc_progdata_deflated = NULL;
-	
+
 	sv.csqc_progname[0] = 0;
 	svs.csqc_progdata = FS_LoadFile(csqc_progname.string, sv_mempool, false, &progsize);
 
@@ -1890,16 +1903,8 @@ void SV_SpawnServer (const char *map)
 //
 // make cvars consistant
 //
-
 	if (coop.integer)
-	{
 		Cvar_SetValueQuick(&deathmatch, 0);
-		Cvar_SetValueQuick(&campaign, 0);
-	}
-	else if(!deathmatch.integer)
-		Cvar_SetValueQuick(&campaign, 1);
-	else
-		Cvar_SetValueQuick(&campaign, 0);
 	// LadyHavoc: it can be useful to have skills outside the range 0-3...
 	//current_skill = bound(0, (int)(skill.value + 0.5), 3);
 	//Cvar_SetValue ("skill", (float)current_skill);
@@ -2532,12 +2537,16 @@ double SV_Frame(double time)
 
 	if (!svs.threaded)
 	{
+		prvm_prog_t *prog = SVVM_prog;
+
 		sv.perf_acc_sleeptime += host.sleeptime;
 		sv.perf_acc_realtime += time;
 
 		if (sv_lagreporting_always.integer)
 			reporting = true;
-		else if (cls.state == ca_dedicated)
+		// bones_was_here: intermission_running isn't declared in dpdefs, but it's used by
+		// id1 Quake, all Quake mods (afaict), Nexuiz and Xonotic.
+		else if (cls.state == ca_dedicated && !PRVM_serverglobalfloat(intermission_running))
 		{
 			// Report lag if there's players, so they know it wasn't the network or their machine
 			for (i = 0; i < svs.maxclients; ++i)
@@ -2564,7 +2573,7 @@ double SV_Frame(double time)
 			}
 
 			if (sv.perf_lost > 0 && reporting)
-				SV_BroadcastPrintf("\003" CON_WARN "Server lag report: %s\n", SV_TimingReport(vabuf, sizeof(vabuf)));
+				SV_BroadcastPrintf(CON_WARN "Server lag report: %s\n", SV_TimingReport(vabuf, sizeof(vabuf)));
 
 			sv.perf_acc_realtime = sv.perf_acc_sleeptime =
 			sv.perf_acc_lost = sv.perf_acc_offset =
@@ -2642,7 +2651,7 @@ double SV_Frame(double time)
 			++sv.perf_acc_offset_samples;
 			sv.perf_acc_offset += offset;
 			sv.perf_acc_offset_squared += offset * offset;
-			
+
 			if(sv.perf_acc_offset_max < offset)
 				sv.perf_acc_offset_max = offset;
 		}

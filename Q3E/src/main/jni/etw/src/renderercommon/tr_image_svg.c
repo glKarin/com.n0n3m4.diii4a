@@ -115,7 +115,8 @@ qboolean R_LoadSVG(imageData_t *data, byte **pic, int *width, int *height, byte 
 	columns = (int)(image->width * scale);
 	rows    = (int)(image->height * scale);
 
-	if (!Com_PowerOf2(columns) || !Com_PowerOf2(rows))
+//#ifdef GL_ARB_texture_non_power_of_two //karin: _DIII4A npot
+	if (/*!GLEW_ARB_texture_non_power_of_two && */(!Com_PowerOf2(columns) || !Com_PowerOf2(rows)))
 	{
 		columns = (int)Com_ClosestPowerOf2(columns);
 		scale   = (float)columns / image->width;
@@ -128,6 +129,7 @@ qboolean R_LoadSVG(imageData_t *data, byte **pic, int *width, int *height, byte 
 			rows    = (int)image->height * scale;
 		}
 	}
+//#endif
 
 	// force higher svg resolution (0: x1, 1: x2, 2: x4)
 	if (r_scalesvg->integer)
@@ -138,16 +140,26 @@ qboolean R_LoadSVG(imageData_t *data, byte **pic, int *width, int *height, byte 
 		scale   = (float)columns / image->width;
 	}
 
-	// this prevent ResampleTexture to it the 2048 limit (2K)
-	// but the image can be cropped due to reaching the limit
-	// also, it prevent chewing too much memory which could
-	// increase loading time
-	if (columns > 2048)
+	// cap to max texture size to avoid ResampleTexture errors, and keep memory usage sane
+	if (columns > 2048 || rows > 2048)
+	{
+		float ratio = (float)image->width / image->height;
+
+		if (columns > rows)
 	{
 		columns = 2048;
+			rows    = (int)(2048 / ratio);
+		}
+		else
+		{
+			rows    = 2048;
+			columns = (int)(2048 * ratio);
+		}
+
 		scale   = (float)columns / image->width;
 	}
 
+	columns = MIN(columns, 2048);
 	rows = MIN(rows, 2048);
 
 	numPixels = columns * rows * 4;

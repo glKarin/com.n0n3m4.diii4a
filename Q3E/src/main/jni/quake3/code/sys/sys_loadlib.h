@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #		define Sys_LibraryError() dlerror()
 #	endif
 #else
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: dl on Android
 #	include <EGL/egl.h>
 #	include <GLES/gl.h>
 #	include <dlfcn.h>

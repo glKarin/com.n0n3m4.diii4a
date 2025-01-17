@@ -57,7 +57,6 @@ typedef struct decalsystem_s
 	model_t *model;
 	double lastupdatetime;
 	int maxdecals;
-	int freedecal;
 	int numdecals;
 	tridecal_t *decals;
 	float *vertex3f;
@@ -1189,6 +1188,7 @@ extern cvar_t m_side;
 extern cvar_t cl_autodemo;
 extern cvar_t cl_autodemo_nameformat;
 extern cvar_t cl_autodemo_delete;
+extern cvar_t cl_startdemos;
 
 extern cvar_t r_draweffects;
 

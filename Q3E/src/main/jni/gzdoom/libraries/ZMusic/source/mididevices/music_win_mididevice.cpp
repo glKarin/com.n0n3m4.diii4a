@@ -39,6 +39,7 @@
 #include <mmsystem.h>
 #include <algorithm>
 #include <mutex>
+#include <stdexcept>
 #include <assert.h>
 
 // HEADER FILES ------------------------------------------------------------

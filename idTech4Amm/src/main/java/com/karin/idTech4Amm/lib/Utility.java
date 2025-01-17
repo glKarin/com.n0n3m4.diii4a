@@ -3,6 +3,7 @@ package com.karin.idTech4Amm.lib;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  * Common utility
@@ -67,6 +68,34 @@ public final class Utility
     public static boolean ArrayContains(String[] arr, String target, boolean cs)
     {
         return ArrayIndexOf(arr, target, cs) >= 0;
+    }
+
+    public static boolean InArrayRange(Object[] arr, int index)
+    {
+        return index >= 0 && index <= arr.length;
+    }
+
+    public static int IndexOf(List<String> arr, String target, boolean cs)
+    {
+        for(int i = 0; i < arr.size(); i++)
+        {
+            if(cs)
+            {
+                if(target.equals(arr.get(i)))
+                    return i;
+            }
+            else
+            {
+                if(target.equalsIgnoreCase(arr.get(i)))
+                    return i;
+            }
+        }
+        return -1;
+    }
+
+    public static boolean Contains(List<String> arr, String target, boolean cs)
+    {
+        return IndexOf(arr, target, cs) >= 0;
     }
 
     public static int Step(int a, int step)

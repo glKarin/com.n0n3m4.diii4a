@@ -32,6 +32,56 @@
 
 namespace OpenGLRenderer
 {
+#ifdef _GLES //karin: control GLSL default precision
+CVAR(Int, gl_glsl_precision, 0, 0); // 0 = default(high), 1 = medium, 2 = low
+
+FString GetGLSLPrecision()
+{
+	FString str = R"(
+
+precision highp int;
+precision highp float;
+precision highp sampler2D;
+precision highp sampler2DArray;
+precision highp sampler2DMS;
+
+)"
+				  ;
+
+	if (gl_glsl_precision == 2)
+		str.Substitute("highp", "lowp");
+	else if (gl_glsl_precision == 1)
+		str.Substitute("highp", "mediump");
+
+	return str;
+}
+
+CVAR(Bool, gl_glsl_dumpShader, false, 0);
+void DumpGLSLShader(const char *name, const char *src)
+{
+	if(!gl_glsl_dumpShader)
+		return;
+
+	const char *ptr = strrchr(name, '/');
+	FString path = "glsl/";
+	if(ptr && ptr != name)
+		path.AppendCStrPart(name, ptr - name);
+
+	//Printf("Dump GLSL shader path: %s\n", path.GetChars());
+	CreatePath(path.GetChars());
+
+	path = "glsl/";
+	path += name;
+	std::unique_ptr<FileWriter> fw(FileWriter::Open(path.GetChars()));
+	if (!fw)
+	{
+		Printf("Couldn't open file for write GLSL shader: %s -> %s\n", name, path.GetChars());
+		return;
+	}
+	fw->Write(src, strlen(src));
+	Printf("Dump GLSL shader: %s -> %s\n", name, path.GetChars());
+}
+#endif
 
 bool IsShaderCacheActive();
 TArray<uint8_t> LoadCachedProgramBinary(const FString &vertex, const FString &fragment, uint32_t &binaryFormat);
@@ -111,6 +161,10 @@ void FShaderProgram::CompileShader(ShaderType type)
 	const FString &patchedCode = mShaderSources[type];
 	int lengths[1] = { (int)patchedCode.Len() };
 	const char *sources[1] = { patchedCode.GetChars() };
+#ifdef _GLES //karin: print glsl shader name for debug
+	Printf("FShaderProgram::CompileShader: %s (%s)\n", mShaderNames[type].GetChars(), type == Vertex ? "Vertex" : "Fragment");
+	DumpGLSLShader(mShaderNames[type].GetChars(), sources[0]);
+#endif
 	glShaderSource(handle, 1, sources, lengths);
 
 	glCompileShader(handle);
@@ -220,7 +274,7 @@ void FShaderProgram::SetUniformBufferLocation(int index, const char *name)
 
 void FShaderProgram::Bind()
 {
-	printf("BBB %s %s %d\n", mShaderNames[0].GetChars(), mShaderNames[1].GetChars(), mProgram);
+	//printf("Bind shader: %s %s %d\n", mShaderNames[0].GetChars(), mShaderNames[1].GetChars(), mProgram);
 	glUseProgram(mProgram);
 }
 
@@ -267,7 +321,11 @@ FString FShaderProgram::PatchShader(ShaderType type, const FString &code, const 
 	// If we have 4.2, always use it because it adds important new syntax.
 	if (maxGlslVersion < 420 && gl.glslversion >= 4.2f) maxGlslVersion = 420;
 	int shaderVersion = min((int)round(gl.glslversion * 10) * 10, maxGlslVersion);
+#ifdef _GLES //karin: using #version 320 es on OpenGLES
+	patchedCode.AppendFormat("#version 300 es\n");
+#else
 	patchedCode.AppendFormat("#version %d\n", shaderVersion);
+#endif
 
 	// TODO: Find some way to add extension requirements to the patching
 	//
@@ -278,8 +336,17 @@ FString FShaderProgram::PatchShader(ShaderType type, const FString &code, const 
 		patchedCode << defines;
 
 	// these settings are actually pointless but there seem to be some old ATI drivers that fail to compile the shader without setting the precision here.
+#ifdef _GLES //karin: control GLSL default precision
+	patchedCode << GetGLSLPrecision();
+    patchedCode << R"(
+
+#define _GLES //karin: GLES macro only for OpenGL, not Vulkan
+
+)";
+#else
 	patchedCode << "precision highp int;\n";
 	patchedCode << "precision highp float;\n";
+#endif
 
 	patchedCode << "#line 1\n";
 	patchedCode << RemoveLayoutLocationDecl(code, type == Vertex ? "out" : "in");

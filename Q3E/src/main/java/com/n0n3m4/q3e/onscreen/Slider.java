@@ -35,7 +35,7 @@ public class Slider extends Paintable implements TouchListener
     private int tex_ind;
     private final int lkey, ckey, rkey;
     private int startx, starty;
-    private final int SLIDE_DIST;
+    private int SLIDE_DIST;
     private final int style;
     private int m_lastKey;
     private int[] tex_inds;
@@ -317,5 +317,71 @@ public class Slider extends Paintable implements TouchListener
     {
         cx = x;
         cy = y;
+    }
+
+    // run on GL thread
+    public void Resize(int w, int h)
+    {
+        width = w;
+        height = h;
+        SLIDE_DIST = w / 3;
+        float[] verts = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
+        for (int i = 0; i < verts.length; i += 2)
+        {
+            verts[i] = verts[i] * width;
+            verts[i + 1] = verts[i + 1] * height;
+        }
+        verts_p.put(verts);
+        verts_p.position(0);
+
+        if(null != tex_inds)
+        {
+            verts = new float[]{-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
+
+            if(style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT || style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT_SPLIT_CLICK)
+            {
+                for (int i = 0; i < verts.length; i += 2)
+                {
+                    verts[i] = verts[i] * width / 2;
+                    verts[i + 1] = verts[i + 1] * height / 2;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < verts.length; i += 2)
+                {
+                    verts[i] = verts[i] * width / 3;
+                    verts[i + 1] = verts[i + 1] * height;
+                }
+            }
+
+            verts_p.put(verts);
+            verts_p.position(0);
+        }
+    }
+
+    public int Style()
+    {
+        return style;
+    }
+
+    public static int HeightForWidth(int width, int type)
+    {
+        int sh = width;
+        if (type == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT || type == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK)
+            sh = width / 2;
+        /*else if (Q3EUtils.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT)
+            sh = size;*/
+        return sh;
+    }
+
+    // height / width
+    public static float CalcAspect(int type)
+    {
+        if (type == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT || type == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK)
+            return 0.5f;
+        /*else if (Q3EUtils.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT)
+            sh = size;*/
+        return 1.0f;
     }
 }

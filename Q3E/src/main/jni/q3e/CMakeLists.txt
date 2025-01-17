@@ -26,8 +26,11 @@ project(q3e_jni)
 
 set(q3e_src
         q3e.c
-        eventqueue.cpp
-        bt.c
+        q3eeventqueue.cpp
+        q3ebt.c
+        q3ethread.c
+        q3emisc.c
+        q3eutility.c
         )
 
 set(q3e_lib

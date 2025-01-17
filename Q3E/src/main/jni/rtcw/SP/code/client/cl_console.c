@@ -33,6 +33,10 @@ If you have questions concerning this license or the applicable additional terms
 
 int g_console_field_width = 78;
 
+#ifdef __ANDROID__ //karin: limit console max height
+extern float Android_GetConsoleMaxHeightFrac(float frac);
+#endif
+
 #define COLNSOLE_COLOR  COLOR_WHITE //COLOR_BLACK
 
 #define NUM_CON_TIMES 4
@@ -832,7 +836,11 @@ Scroll it up or down
 void Con_RunConsole( void ) {
 	// decide on the destination height of the console
 	if ( Key_GetCatcher( ) & KEYCATCH_CONSOLE ) {
+#ifdef __ANDROID__ //karin: limit console max height
+		con.finalFrac = Android_GetConsoleMaxHeightFrac(0.5f);		// half screen
+#else
 		con.finalFrac = 0.5;        // half screen
+#endif
 	} else {
 		con.finalFrac = 0;              // none visible
 

@@ -101,20 +101,31 @@
 		if (boo)  AHH("!!!\n");
 		```
 
-4. DarkPlaces is written in a special subset of C and C++ that sits in the
-   center of the Venn diagram of compatibility between the two languages.
-   While there is no practical reason for keeping it this way (yet), it is
-   generally preferred that all code submitted at least compiles under gcc and
-   g++ and clang(++). This could be done by setting the CC environment
-   variable to g++ or clang++ on the command-line before building.
+4. DarkPlaces is written in the common subset of C and C++. This means it is
+   (usually) both valid C and C++. We historically wanted to keep it that way,
+   but don't worry about it unless you care enough and/or are a maintainer.
 
-   Most of the differences are enforced by a compile warning set to be an
-   error (`-Werror=c++-compat`) but some are subtle and would cause behavior
-   differences between the two compilers, or are not caught by that warning.
-   The things to look out for are:
+   Most of the differences are caught by `-Wc++-compat` but some are subtle
+   and would cause behavior differences between the two compilers, or are not
+   caught by that warning. The things to look out for are:
 
 	1. Character constants are `int`-sized in C but `char`-sized in C++. This
        means `sizeof('a')` will be 4 in C, but 1 in C++.
 
 	2. `goto label;` cannot jump over a variable initialization. This will
        cause a compiler error as C++ but is not caught by `-Wc++-compat`.
+	   This is nevertheless bad code, so avoid this anyway.
+
+   If, for some reason, you care enough, compatibility can always be tested
+   affirmatively by setting CC=g++. CC=clang++ may not work in the future, if
+   it didn't already stop working in current versions of LLVM, as it otherwise
+   spams deprecation warnings for using a C file as input to a C++ compiler.
+
+> [!NOTE]
+> We do not officially support building C code with a C++ compiler and may not
+> address issue reports for buggy behavior that does not occur when compiled
+> with a C compiler. That said, there have been fleeting ideas for converting
+> either the entire engine or parts of it to C++, which is what `-Wc++-compat`
+> would make a little easier. So, we at least *do not discourage* such issue
+> reports, especially for things the warning doesn't catch. They will be noted
+> as they would become relevant in the event we do decide to convert to C++.

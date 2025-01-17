@@ -33,7 +33,7 @@
 #endif
 
 /************ Begin %include sections from the grammar ************************/
-#line 40 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 40 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 
 // Allocates a new AST node off the parse state's arena.
 #define NEW_AST_NODE(type,name,tok) \
@@ -108,7 +108,7 @@ static void SetNodeLine(ZCC_TreeNode *name, int line)
 		int FuncFlags;
 		int SourceLoc;
 	};
-#line 112 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 112 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 /**************** End of %include directives **********************************/
 /* These constants specify the various numeric values for terminal symbols
 ** in a format understandable to "makeheaders".  This section is blank unless
@@ -2140,9 +2140,9 @@ static void yy_destructor(
     case 159: /* SWITCH */
     case 160: /* CASE */
 {
-#line 118 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 118 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 
-#line 2146 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2146 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
       break;
 /********* End destructor definitions *****************************************/
@@ -2855,96 +2855,96 @@ static void yy_reduce(
 /********** Begin reduce actions **********************************************/
         YYMINORTYPE yylhsminor;
       case 0: /* main ::= translation_unit */
-#line 174 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 174 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { stat->TopNode = yymsp[0].minor.yy128; DPrintf(DMSG_SPAMMY, "Parse complete\n"); }
-#line 2861 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2861 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 1: /* translation_unit ::= */
       case 33: /*class_innards ::= */ yytestcase(yyruleno==33);
       case 59: /*opt_struct_body ::= */ yytestcase(yyruleno==59);
       case 78: /*mixin_class_body ::= */ yytestcase(yyruleno==78);
-#line 177 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 177 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy128 = NULL; }
-#line 2869 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2869 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 2: /* translation_unit ::= translation_unit external_declaration */
       case 34: /*class_innards ::= class_innards class_member */ yytestcase(yyruleno==34);
       case 79: /*mixin_class_body ::= mixin_class_body mixin_class_member */ yytestcase(yyruleno==79);
-#line 178 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 178 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { SAFE_APPEND(yymsp[-1].minor.yy128,yymsp[0].minor.yy128); }
-#line 2876 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2876 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 3: /* translation_unit ::= error */
       case 60: /*opt_struct_body ::= error */ yytestcase(yyruleno==60);
-#line 180 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 180 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = NULL; }
-#line 2882 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2882 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 4: /* external_declaration ::= mixin_definition */
-#line 183 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 183 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy498; /*X-overwrites-A*/ }
-#line 2887 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2887 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 5: /* external_declaration ::= class_definition */
-#line 184 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 184 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy392; /*X-overwrites-A*/ }
-#line 2892 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2892 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 6: /* external_declaration ::= struct_def */
       case 38: /*class_member ::= struct_def */ yytestcase(yyruleno==38);
       case 82: /*mixin_class_member ::= struct_def */ yytestcase(yyruleno==82);
-#line 185 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 185 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy211; /*X-overwrites-A*/ }
-#line 2899 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2899 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 7: /* external_declaration ::= enum_def */
       case 37: /*class_member ::= enum_def */ yytestcase(yyruleno==37);
       case 63: /*struct_member ::= enum_def */ yytestcase(yyruleno==63);
       case 81: /*mixin_class_member ::= enum_def */ yytestcase(yyruleno==81);
-#line 186 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 186 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy239; /*X-overwrites-A*/ }
-#line 2907 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2907 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 8: /* external_declaration ::= const_def */
       case 41: /*class_member ::= const_def */ yytestcase(yyruleno==41);
       case 64: /*struct_member ::= const_def */ yytestcase(yyruleno==64);
       case 85: /*mixin_class_member ::= const_def */ yytestcase(yyruleno==85);
-#line 187 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 187 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy139; /*X-overwrites-A*/ }
-#line 2915 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2915 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 9: /* external_declaration ::= include_def */
-#line 188 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 188 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = nullptr; }
-#line 2920 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2920 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 10: /* opt_expr ::= */
-#line 199 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 199 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yymsp[1].minor.yy282 = NULL;
 }
-#line 2927 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2927 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 11: /* include_def ::= INCLUDE string_constant */
 {  yy_destructor(yypParser,51,&yymsp[-1].minor);
-#line 206 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 206 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	AddInclude(yymsp[0].minor.yy423);
 }
-#line 2935 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2935 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 12: /* class_definition ::= class_head class_body */
-#line 220 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 220 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yymsp[-1].minor.yy392->Body = yymsp[0].minor.yy128;
 	yymsp[-1].minor.yy392 = yymsp[-1].minor.yy392; /*X-overwrites-A*/
 }
-#line 2944 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2944 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 13: /* class_head ::= EXTEND CLASS IDENTIFIER */
 {  yy_destructor(yypParser,52,&yymsp[-2].minor);
-#line 226 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 226 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Class,head,yymsp[-1].minor.yy0);
 	head->NodeName = yymsp[0].minor.yy0.Name();
@@ -2956,11 +2956,11 @@ static void yy_reduce(
 	head->Symbol = nullptr;
 	yymsp[-2].minor.yy392 = head;
 }
-#line 2960 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2960 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 14: /* class_head ::= CLASS IDENTIFIER class_ancestry class_flags */
-#line 240 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 240 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Class,head,yymsp[-3].minor.yy0);
 	head->NodeName = yymsp[-2].minor.yy0.Name();
@@ -2973,82 +2973,82 @@ static void yy_reduce(
 	head->Symbol = nullptr;
 	yylhsminor.yy392 = head;
 }
-#line 2977 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2977 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-3].minor.yy392 = yylhsminor.yy392;
         break;
       case 15: /* class_ancestry ::= */
       case 180: /*class_restrictor ::= */ yytestcase(yyruleno==180);
-#line 254 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 254 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy493 = NULL; }
-#line 2984 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2984 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 16: /* class_ancestry ::= COLON dottable_id */
 {  yy_destructor(yypParser,14,&yymsp[-1].minor);
-#line 255 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 255 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy493 = yymsp[0].minor.yy493; /*yymsp[-1].minor.yy493-overwrites-yymsp[0].minor.yy493*/ }
-#line 2990 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2990 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 17: /* class_flags ::= */
-#line 258 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 258 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy515.Flags = 0; yymsp[1].minor.yy515.Replaces = NULL; yymsp[1].minor.yy515.Version = {0,0}; yymsp[1].minor.yy515.Sealed = NULL; }
-#line 2996 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 2996 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 18: /* class_flags ::= class_flags ABSTRACT */
-#line 259 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 259 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-1].minor.yy515.Flags | ZCC_Abstract; yylhsminor.yy515.Replaces = yymsp[-1].minor.yy515.Replaces; yylhsminor.yy515.Version = yymsp[-1].minor.yy515.Version; yylhsminor.yy515.Sealed = yymsp[-1].minor.yy515.Sealed; }
-#line 3001 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3001 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,55,&yymsp[0].minor);
   yymsp[-1].minor.yy515 = yylhsminor.yy515;
         break;
       case 19: /* class_flags ::= class_flags FINAL */
-#line 260 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 260 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-1].minor.yy515.Flags | ZCC_Final; yylhsminor.yy515.Replaces = yymsp[-1].minor.yy515.Replaces; yylhsminor.yy515.Version = yymsp[-1].minor.yy515.Version; yylhsminor.yy515.Sealed =  yymsp[-1].minor.yy515.Sealed;}
-#line 3008 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3008 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,56,&yymsp[0].minor);
   yymsp[-1].minor.yy515 = yylhsminor.yy515;
         break;
       case 20: /* class_flags ::= class_flags NATIVE */
-#line 261 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 261 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-1].minor.yy515.Flags | ZCC_Native; yylhsminor.yy515.Replaces = yymsp[-1].minor.yy515.Replaces; yylhsminor.yy515.Version = yymsp[-1].minor.yy515.Version; yylhsminor.yy515.Sealed =  yymsp[-1].minor.yy515.Sealed; }
-#line 3015 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3015 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,57,&yymsp[0].minor);
   yymsp[-1].minor.yy515 = yylhsminor.yy515;
         break;
       case 21: /* class_flags ::= class_flags UI */
-#line 262 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 262 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-1].minor.yy515.Flags | ZCC_UIFlag; yylhsminor.yy515.Replaces = yymsp[-1].minor.yy515.Replaces; yylhsminor.yy515.Version = yymsp[-1].minor.yy515.Version; yylhsminor.yy515.Sealed =  yymsp[-1].minor.yy515.Sealed; }
-#line 3022 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3022 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,58,&yymsp[0].minor);
   yymsp[-1].minor.yy515 = yylhsminor.yy515;
         break;
       case 22: /* class_flags ::= class_flags PLAY */
-#line 263 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 263 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-1].minor.yy515.Flags | ZCC_Play; yylhsminor.yy515.Replaces = yymsp[-1].minor.yy515.Replaces; yylhsminor.yy515.Version = yymsp[-1].minor.yy515.Version; yylhsminor.yy515.Sealed =  yymsp[-1].minor.yy515.Sealed; }
-#line 3029 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3029 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,59,&yymsp[0].minor);
   yymsp[-1].minor.yy515 = yylhsminor.yy515;
         break;
       case 23: /* class_flags ::= class_flags REPLACES dottable_id */
-#line 264 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 264 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-2].minor.yy515.Flags; yylhsminor.yy515.Replaces = yymsp[0].minor.yy493; yylhsminor.yy515.Version = yymsp[-2].minor.yy515.Version; yylhsminor.yy515.Sealed = yymsp[-2].minor.yy515.Sealed; }
-#line 3036 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3036 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,60,&yymsp[-1].minor);
   yymsp[-2].minor.yy515 = yylhsminor.yy515;
         break;
       case 24: /* class_flags ::= class_flags VERSION LPAREN STRCONST RPAREN */
-#line 265 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 265 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-4].minor.yy515.Flags | ZCC_Version; yylhsminor.yy515.Replaces = yymsp[-4].minor.yy515.Replaces; yylhsminor.yy515.Version = yymsp[-1].minor.yy0.String->GetChars(); yylhsminor.yy515.Sealed =  yymsp[-4].minor.yy515.Sealed; }
-#line 3043 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3043 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,61,&yymsp[-3].minor);
   yy_destructor(yypParser,45,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
   yymsp[-4].minor.yy515 = yylhsminor.yy515;
         break;
       case 25: /* class_flags ::= class_flags SEALED LPAREN states_opt RPAREN */
-#line 266 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 266 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-4].minor.yy515.Flags | ZCC_Sealed; yylhsminor.yy515.Replaces = yymsp[-4].minor.yy515.Replaces; yylhsminor.yy515.Version = yymsp[-4].minor.yy515.Version; yylhsminor.yy515.Sealed = yymsp[-1].minor.yy493; }
-#line 3052 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3052 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,64,&yymsp[-3].minor);
   yy_destructor(yypParser,45,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
@@ -3057,146 +3057,146 @@ static void yy_reduce(
       case 26: /* dottable_id ::= IDENTIFIER */
       case 49: /*identifier_list ::= IDENTIFIER */ yytestcase(yyruleno==49);
       case 92: /*states_opt ::= IDENTIFIER */ yytestcase(yyruleno==92);
-#line 274 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 274 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Identifier,id,yymsp[0].minor.yy0);
 	id->Id = yymsp[0].minor.yy0.Name();
 	yylhsminor.yy493 = id;
 }
-#line 3067 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3067 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy493 = yylhsminor.yy493;
         break;
       case 27: /* dottable_id ::= ACTION */
-#line 281 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 281 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Identifier,id,yymsp[0].minor.yy0);
 	id->Id = NAME_Action;
 	yylhsminor.yy493 = id;
 }
-#line 3077 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3077 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy493 = yylhsminor.yy493;
         break;
       case 28: /* dottable_id ::= dottable_id DOT IDENTIFIER */
-#line 287 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 287 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Identifier,id2,yymsp[-2].minor.yy493);
 	id2->Id = yymsp[0].minor.yy0.Name();
 	AppendTreeNodeSibling(yymsp[-2].minor.yy493, id2);
 	yymsp[-2].minor.yy493 = yymsp[-2].minor.yy493; /*X-overwrites-A*/
 }
-#line 3088 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3088 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,44,&yymsp[-1].minor);
         break;
       case 29: /* dottable_id ::= dottable_id DOT DEFAULT */
-#line 294 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 294 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Identifier,id2,yymsp[-2].minor.yy493);
 	id2->Id = NAME_Default;
 	AppendTreeNodeSibling(yymsp[-2].minor.yy493, id2);
 	yymsp[-2].minor.yy493 = yymsp[-2].minor.yy493; /*X-overwrites-A*/
 }
-#line 3099 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3099 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,44,&yymsp[-1].minor);
   yy_destructor(yypParser,66,&yymsp[0].minor);
         break;
       case 30: /* dottable_id ::= dottable_id DOT COLOR */
-#line 305 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 305 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Identifier,id2,yymsp[-2].minor.yy493);
 	id2->Id = NAME_Color;
 	AppendTreeNodeSibling(yymsp[-2].minor.yy493, id2);
 	yymsp[-2].minor.yy493 = yymsp[-2].minor.yy493; /*X-overwrites-A*/
 }
-#line 3111 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3111 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,44,&yymsp[-1].minor);
   yy_destructor(yypParser,67,&yymsp[0].minor);
         break;
       case 31: /* class_body ::= SEMICOLON class_innards EOF */
 {  yy_destructor(yypParser,49,&yymsp[-2].minor);
-#line 322 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 322 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy128 = yymsp[-1].minor.yy128; /*yymsp[-2].minor.yy128-overwrites-yymsp[-1].minor.yy128*/ }
-#line 3119 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3119 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,48,&yymsp[0].minor);
 }
         break;
       case 32: /* class_body ::= LBRACE class_innards RBRACE */
 {  yy_destructor(yypParser,68,&yymsp[-2].minor);
-#line 323 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 323 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy128 = yymsp[-1].minor.yy128; /*yymsp[-2].minor.yy128-overwrites-yymsp[-1].minor.yy128*/ }
-#line 3127 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3127 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,69,&yymsp[0].minor);
 }
         break;
       case 35: /* class_member ::= declarator */
       case 62: /*struct_member ::= declarator */ yytestcase(yyruleno==62);
       case 80: /*mixin_class_member ::= declarator */ yytestcase(yyruleno==80);
-#line 336 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 336 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy327; /*X-overwrites-A*/ }
-#line 3136 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3136 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 36: /* class_member ::= mixin_statement */
-#line 337 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 337 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy351; /*X-overwrites-A*/ }
-#line 3141 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3141 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 39: /* class_member ::= states_def */
       case 83: /*mixin_class_member ::= states_def */ yytestcase(yyruleno==83);
-#line 340 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 340 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy82; /*X-overwrites-A*/ }
-#line 3147 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3147 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 40: /* class_member ::= default_def */
       case 84: /*mixin_class_member ::= default_def */ yytestcase(yyruleno==84);
-#line 341 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 341 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy251; /*X-overwrites-A*/ }
-#line 3153 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3153 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 42: /* class_member ::= property_def */
       case 86: /*mixin_class_member ::= property_def */ yytestcase(yyruleno==86);
-#line 343 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 343 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy240; /*X-overwrites-A*/ }
-#line 3159 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3159 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 43: /* class_member ::= flag_def */
       case 66: /*struct_member ::= flag_def */ yytestcase(yyruleno==66);
       case 87: /*mixin_class_member ::= flag_def */ yytestcase(yyruleno==87);
-#line 344 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 344 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy343; /*X-overwrites-A*/ }
-#line 3166 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3166 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 44: /* class_member ::= staticarray_statement */
       case 65: /*struct_member ::= staticarray_statement */ yytestcase(yyruleno==65);
       case 88: /*mixin_class_member ::= staticarray_statement */ yytestcase(yyruleno==88);
-#line 345 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 345 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy128 = yymsp[0].minor.yy286; /*X-overwrites-A*/ }
-#line 3173 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3173 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 45: /* mixin_statement ::= MIXIN IDENTIFIER SEMICOLON */
-#line 350 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 350 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(MixinStmt,stmt,yymsp[-2].minor.yy0);
 	stmt->MixinName = yymsp[-1].minor.yy0.Name();
 	yylhsminor.yy351 = stmt;
 }
-#line 3182 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3182 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-2].minor.yy351 = yylhsminor.yy351;
         break;
       case 46: /* property_def ::= PROPERTY IDENTIFIER COLON identifier_list SEMICOLON */
-#line 365 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 365 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Property,def,yymsp[-4].minor.yy0);
 	def->NodeName = yymsp[-3].minor.yy0.Name();
 	def->Body = yymsp[-1].minor.yy493;
 	yylhsminor.yy240 = def;
 }
-#line 3194 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3194 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,14,&yymsp[-2].minor);
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-4].minor.yy240 = yylhsminor.yy240;
         break;
       case 47: /* flag_def ::= FLAGDEF IDENTIFIER COLON IDENTIFIER COMMA INTCONST SEMICOLON */
-#line 373 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 373 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FlagDef,def,yymsp[-6].minor.yy0);
 	def->NodeName = yymsp[-5].minor.yy0.Name();
@@ -3204,14 +3204,14 @@ static void yy_reduce(
 	def->BitValue = yymsp[-1].minor.yy0.Int;
 	yylhsminor.yy343 = def;
 }
-#line 3208 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3208 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,14,&yymsp[-4].minor);
   yy_destructor(yypParser,50,&yymsp[-2].minor);
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-6].minor.yy343 = yylhsminor.yy343;
         break;
       case 48: /* flag_def ::= FLAGDEF INTERNAL IDENTIFIER COLON IDENTIFIER COMMA INTCONST SEMICOLON */
-#line 382 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 382 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FlagDef,def,yymsp[-7].minor.yy0);
 	def->NodeName = yymsp[-5].minor.yy0.Name();
@@ -3219,7 +3219,7 @@ static void yy_reduce(
 	def->BitValue = yymsp[-1].minor.yy0.Int | 0x10000;
 	yylhsminor.yy343 = def;
 }
-#line 3223 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3223 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,74,&yymsp[-6].minor);
   yy_destructor(yypParser,14,&yymsp[-4].minor);
   yy_destructor(yypParser,50,&yymsp[-2].minor);
@@ -3228,18 +3228,18 @@ static void yy_reduce(
         break;
       case 50: /* identifier_list ::= states_opt COMMA IDENTIFIER */
       case 93: /*states_opt ::= states_opt COMMA IDENTIFIER */ yytestcase(yyruleno==93);
-#line 399 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 399 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Identifier,id,yymsp[0].minor.yy0);
 	id->Id = yymsp[0].minor.yy0.Name();
 	yymsp[-2].minor.yy493 = yymsp[-2].minor.yy493; /*X-overwrites-A*/
 	AppendTreeNodeSibling(yymsp[-2].minor.yy493, id);
 }
-#line 3239 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3239 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
         break;
       case 51: /* struct_def ::= STRUCT IDENTIFIER struct_flags LBRACE opt_struct_body RBRACE opt_semicolon */
-#line 407 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 407 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Struct,def,yymsp[-6].minor.yy0);
 	def->NodeName = yymsp[-5].minor.yy0.Name();
@@ -3250,14 +3250,14 @@ static void yy_reduce(
 	def->Flags = yymsp[-4].minor.yy515.Flags;
 	yylhsminor.yy211 = def;
 }
-#line 3254 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3254 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,68,&yymsp[-3].minor);
   yy_destructor(yypParser,69,&yymsp[-1].minor);
   yymsp[-6].minor.yy211 = yylhsminor.yy211;
         break;
       case 52: /* struct_def ::= EXTEND STRUCT IDENTIFIER LBRACE opt_struct_body RBRACE opt_semicolon */
 {  yy_destructor(yypParser,52,&yymsp[-6].minor);
-#line 419 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 419 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Struct,def,yymsp[-5].minor.yy0);
 	def->NodeName = yymsp[-4].minor.yy0.Name();
@@ -3267,60 +3267,60 @@ static void yy_reduce(
 	def->Flags = ZCC_Extension;
 	yymsp[-6].minor.yy211 = def;
 }
-#line 3271 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3271 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,68,&yymsp[-3].minor);
   yy_destructor(yypParser,69,&yymsp[-1].minor);
 }
         break;
       case 53: /* struct_flags ::= */
-#line 430 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 430 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy515.Flags = 0; yymsp[1].minor.yy515.Version = {0, 0}; }
-#line 3279 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3279 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 54: /* struct_flags ::= struct_flags UI */
-#line 431 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 431 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-1].minor.yy515.Flags | ZCC_UIFlag; }
-#line 3284 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3284 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,58,&yymsp[0].minor);
   yymsp[-1].minor.yy515 = yylhsminor.yy515;
         break;
       case 55: /* struct_flags ::= struct_flags PLAY */
-#line 432 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 432 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-1].minor.yy515.Flags | ZCC_Play; }
-#line 3291 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3291 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,59,&yymsp[0].minor);
   yymsp[-1].minor.yy515 = yylhsminor.yy515;
         break;
       case 56: /* struct_flags ::= struct_flags CLEARSCOPE */
-#line 433 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 433 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-1].minor.yy515.Flags | ZCC_ClearScope; }
-#line 3298 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3298 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,76,&yymsp[0].minor);
   yymsp[-1].minor.yy515 = yylhsminor.yy515;
         break;
       case 57: /* struct_flags ::= struct_flags NATIVE */
-#line 434 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 434 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-1].minor.yy515.Flags | ZCC_Native; }
-#line 3305 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3305 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,57,&yymsp[0].minor);
   yymsp[-1].minor.yy515 = yylhsminor.yy515;
         break;
       case 58: /* struct_flags ::= struct_flags VERSION LPAREN STRCONST RPAREN */
-#line 435 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 435 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy515.Flags = yymsp[-4].minor.yy515.Flags | ZCC_Version; yylhsminor.yy515.Version = yymsp[-1].minor.yy0.String->GetChars(); }
-#line 3312 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3312 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,61,&yymsp[-3].minor);
   yy_destructor(yypParser,45,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
   yymsp[-4].minor.yy515 = yylhsminor.yy515;
         break;
       case 61: /* struct_body ::= struct_body struct_member */
-#line 443 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 443 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy128 = yymsp[-1].minor.yy128; /*X-overwrites-A*/ AppendTreeNodeSibling(yymsp[-1].minor.yy128, yymsp[0].minor.yy128); }
-#line 3321 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3321 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 67: /* const_def ::= CONST IDENTIFIER EQ expr SEMICOLON */
-#line 454 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 454 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ConstantDef,def,yymsp[-4].minor.yy0);
 	def->NodeName = yymsp[-3].minor.yy0.Name();
@@ -3328,13 +3328,13 @@ static void yy_reduce(
 	def->Symbol = NULL;
 	yylhsminor.yy139 = def;
 }
-#line 3332 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3332 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,1,&yymsp[-2].minor);
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-4].minor.yy139 = yylhsminor.yy139;
         break;
       case 68: /* enum_def ::= ENUM IDENTIFIER enum_type LBRACE opt_enum_list RBRACE opt_semicolon */
-#line 471 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 471 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Enum,def,yymsp[-6].minor.yy0);
 	def->NodeName = yymsp[-5].minor.yy0.Name();
@@ -3393,40 +3393,40 @@ static void yy_reduce(
 	}
 	yylhsminor.yy239 = def;
 }
-#line 3397 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3397 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,68,&yymsp[-3].minor);
   yymsp[-6].minor.yy239 = yylhsminor.yy239;
         break;
       case 69: /* enum_type ::= */
-#line 530 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 530 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy0.Int = ZCC_IntAuto; yymsp[1].minor.yy0.SourceLoc = stat->sc->GetMessageLine(); }
-#line 3404 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3404 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 70: /* enum_type ::= COLON int_type */
 {  yy_destructor(yypParser,14,&yymsp[-1].minor);
-#line 531 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 531 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy0 = yymsp[0].minor.yy0; /*yymsp[-1].minor.yy0-overwrites-yymsp[0].minor.yy0*/ }
-#line 3410 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3410 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 71: /* enum_list ::= error */
-#line 533 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 533 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy139 = NULL; }
-#line 3416 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3416 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 72: /* enum_list ::= enum_list COMMA enumerator */
-#line 535 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 535 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy139 = yymsp[-2].minor.yy139; /*X-overwrites-A*/ AppendTreeNodeSibling(yymsp[-2].minor.yy139, yymsp[0].minor.yy139); }
-#line 3421 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3421 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
         break;
       case 73: /* opt_enum_list ::= */
-#line 537 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 537 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy139 = NULL; }
-#line 3427 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3427 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 74: /* enumerator ::= IDENTIFIER */
-#line 541 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 541 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ConstantDef,node,yymsp[0].minor.yy0);
 	node->NodeName = yymsp[0].minor.yy0.Name();
@@ -3434,11 +3434,11 @@ static void yy_reduce(
 	node->Symbol = NULL;
 	yylhsminor.yy139 = node;
 }
-#line 3438 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3438 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy139 = yylhsminor.yy139;
         break;
       case 75: /* enumerator ::= IDENTIFIER EQ expr */
-#line 549 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 549 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ConstantDef,node,yymsp[-2].minor.yy0);
 	node->NodeName = yymsp[-2].minor.yy0.Name();
@@ -3446,17 +3446,17 @@ static void yy_reduce(
 	node->Symbol = NULL;
 	yylhsminor.yy139 = node;
 }
-#line 3450 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3450 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,1,&yymsp[-1].minor);
   yymsp[-2].minor.yy139 = yylhsminor.yy139;
         break;
       case 76: /* mixin_definition ::= mixin_class_definition */
-#line 563 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 563 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy498 = yymsp[0].minor.yy498; /*X-overwrites-A*/ }
-#line 3457 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3457 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 77: /* mixin_class_definition ::= MIXIN CLASS IDENTIFIER LBRACE mixin_class_body RBRACE */
-#line 570 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 570 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(MixinDef,def,yymsp[-5].minor.yy0);
 	def->Body = yymsp[-1].minor.yy128;
@@ -3465,97 +3465,97 @@ static void yy_reduce(
 	def->Symbol = nullptr;
 	yylhsminor.yy498 = def;
 }
-#line 3469 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3469 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,53,&yymsp[-4].minor);
   yy_destructor(yypParser,68,&yymsp[-2].minor);
   yy_destructor(yypParser,69,&yymsp[0].minor);
   yymsp[-5].minor.yy498 = yylhsminor.yy498;
         break;
       case 89: /* states_def ::= STATES states_opts scanner_mode LBRACE states_body RBRACE */
-#line 619 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 619 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(States,def,yymsp[-5].minor.yy0);
 	def->Flags = yymsp[-4].minor.yy493;
 	def->Body = yymsp[-1].minor.yy74;
 	yylhsminor.yy82 = def;
 }
-#line 3483 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3483 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,68,&yymsp[-2].minor);
   yy_destructor(yypParser,69,&yymsp[0].minor);
   yymsp[-5].minor.yy82 = yylhsminor.yy82;
         break;
       case 90: /* states_opts ::= */
-#line 626 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 626 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy493 = nullptr; }
-#line 3491 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3491 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 91: /* states_opts ::= LPAREN states_opt RPAREN */
 {  yy_destructor(yypParser,45,&yymsp[-2].minor);
-#line 627 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 627 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy493 = yymsp[-1].minor.yy493; /*yymsp[-2].minor.yy493-overwrites-yymsp[-1].minor.yy493*/ }
-#line 3497 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3497 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,63,&yymsp[0].minor);
 }
         break;
       case 94: /* scanner_mode ::= */
-#line 656 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 656 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { stat->sc->SetStateMode(true); }
-#line 3504 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3504 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 95: /* states_body ::= */
-#line 658 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 658 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy74 = NULL; }
-#line 3509 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3509 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 96: /* states_body ::= error */
-#line 659 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 659 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy74 = NULL; }
-#line 3514 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3514 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 97: /* states_body ::= states_body state_line */
       case 98: /*states_body ::= states_body state_label */ yytestcase(yyruleno==98);
       case 99: /*states_body ::= states_body state_flow */ yytestcase(yyruleno==99);
-#line 660 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 660 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { SAFE_APPEND(yymsp[-1].minor.yy74,yymsp[0].minor.yy74); }
-#line 3521 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3521 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 100: /* state_label ::= NWS COLON */
-#line 665 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 665 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(StateLabel, label, yymsp[-1].minor.yy0);
 	label->Label = yymsp[-1].minor.yy0.Name();
 	yylhsminor.yy74 = label;
 }
-#line 3530 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3530 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,14,&yymsp[0].minor);
   yymsp[-1].minor.yy74 = yylhsminor.yy74;
         break;
       case 101: /* state_flow_type ::= STOP */
-#line 673 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 673 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { NEW_AST_NODE(StateStop, flow, yymsp[0].minor.yy0); yylhsminor.yy74 = flow; }
-#line 3537 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3537 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy74 = yylhsminor.yy74;
         break;
       case 102: /* state_flow_type ::= WAIT */
-#line 674 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 674 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { NEW_AST_NODE(StateWait, flow, yymsp[0].minor.yy0); yylhsminor.yy74 = flow; }
-#line 3543 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3543 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy74 = yylhsminor.yy74;
         break;
       case 103: /* state_flow_type ::= FAIL */
-#line 675 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 675 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { NEW_AST_NODE(StateFail, flow, yymsp[0].minor.yy0); yylhsminor.yy74 = flow; }
-#line 3549 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3549 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy74 = yylhsminor.yy74;
         break;
       case 104: /* state_flow_type ::= LOOP */
-#line 676 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 676 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { NEW_AST_NODE(StateLoop, flow, yymsp[0].minor.yy0); yylhsminor.yy74 = flow; }
-#line 3555 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3555 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy74 = yylhsminor.yy74;
         break;
       case 105: /* state_flow_type ::= GOTO dottable_id state_goto_offset */
-#line 678 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 678 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(StateGoto, flow, yymsp[-2].minor.yy0);
 	flow->Label = yymsp[-1].minor.yy493;
@@ -3563,11 +3563,11 @@ static void yy_reduce(
 	flow->Qualifier = nullptr;
 	yylhsminor.yy74 = flow;
 }
-#line 3567 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3567 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-2].minor.yy74 = yylhsminor.yy74;
         break;
       case 106: /* state_flow_type ::= GOTO IDENTIFIER SCOPE dottable_id state_goto_offset */
-#line 687 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 687 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(StateGoto, flow, yymsp[-4].minor.yy0);
 	flow->Label = yymsp[-1].minor.yy493;
@@ -3578,12 +3578,12 @@ static void yy_reduce(
 	flow->Qualifier =id;
 	yylhsminor.yy74 = flow;
 }
-#line 3582 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3582 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,47,&yymsp[-2].minor);
   yymsp[-4].minor.yy74 = yylhsminor.yy74;
         break;
       case 107: /* state_flow_type ::= GOTO SUPER SCOPE dottable_id state_goto_offset */
-#line 699 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 699 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(StateGoto, flow, yymsp[-4].minor.yy0);
 	flow->Label = yymsp[-1].minor.yy493;
@@ -3594,24 +3594,24 @@ static void yy_reduce(
 	flow->Qualifier =id;
 	yylhsminor.yy74 = flow;
 }
-#line 3598 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3598 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,47,&yymsp[-2].minor);
   yymsp[-4].minor.yy74 = yylhsminor.yy74;
         break;
       case 108: /* state_goto_offset ::= */
-#line 710 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 710 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy282 = NULL; }
-#line 3605 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3605 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 109: /* state_goto_offset ::= ADD expr */
 {  yy_destructor(yypParser,34,&yymsp[-1].minor);
-#line 711 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 711 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy282 = yymsp[0].minor.yy282; /*yymsp[-1].minor.yy282-overwrites-yymsp[0].minor.yy282*/ }
-#line 3611 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3611 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 110: /* state_line ::= NWS NWS expr state_opts state_action */
-#line 714 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 714 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(StateLine, line, yymsp[-4].minor.yy0);
 	line->Sprite = stat->Strings.Alloc(FName(yymsp[-4].minor.yy0.Name()).GetChars());
@@ -3627,64 +3627,64 @@ static void yy_reduce(
 	line->Action = yymsp[0].minor.yy128;
 	yylhsminor.yy74 = line;
 }
-#line 3631 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3631 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-4].minor.yy74 = yylhsminor.yy74;
         break;
       case 111: /* state_opts ::= */
-#line 730 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 730 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { StateOpts opts; opts.Zero(); yymsp[1].minor.yy360 = opts; }
-#line 3637 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3637 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 112: /* state_opts ::= state_opts BRIGHT */
-#line 731 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 731 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy360.Bright = true; yymsp[-1].minor.yy360 = yymsp[-1].minor.yy360; /*X-overwrites-A*/ }
-#line 3642 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3642 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,87,&yymsp[0].minor);
         break;
       case 113: /* state_opts ::= state_opts FAST */
-#line 732 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 732 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy360.Fast = true; yymsp[-1].minor.yy360 = yymsp[-1].minor.yy360; /*X-overwrites-A*/ }
-#line 3648 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3648 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,88,&yymsp[0].minor);
         break;
       case 114: /* state_opts ::= state_opts SLOW */
-#line 733 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 733 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy360.Slow = true; yymsp[-1].minor.yy360 = yymsp[-1].minor.yy360; /*X-overwrites-A*/ }
-#line 3654 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3654 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,89,&yymsp[0].minor);
         break;
       case 115: /* state_opts ::= state_opts NODELAY */
-#line 734 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 734 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy360.NoDelay = true; yymsp[-1].minor.yy360 = yymsp[-1].minor.yy360; /*X-overwrites-A*/ }
-#line 3660 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3660 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,90,&yymsp[0].minor);
         break;
       case 116: /* state_opts ::= state_opts CANRAISE */
-#line 735 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 735 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy360.CanRaise = true; yymsp[-1].minor.yy360 = yymsp[-1].minor.yy360; /*X-overwrites-A*/ }
-#line 3666 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3666 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,91,&yymsp[0].minor);
         break;
       case 117: /* state_opts ::= state_opts OFFSET LPAREN expr COMMA expr RPAREN */
-#line 736 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 736 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-6].minor.yy360.Offset = yymsp[-3].minor.yy282; AppendTreeNodeSibling(yymsp[-3].minor.yy282, yymsp[-1].minor.yy282); yymsp[-6].minor.yy360 = yymsp[-6].minor.yy360; /*X-overwrites-A*/ }
-#line 3672 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3672 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,92,&yymsp[-5].minor);
   yy_destructor(yypParser,45,&yymsp[-4].minor);
   yy_destructor(yypParser,50,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
         break;
       case 118: /* state_opts ::= state_opts LIGHT LPAREN light_list RPAREN */
-#line 737 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 737 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-4].minor.yy360 = yymsp[-4].minor.yy360; /*X-overwrites-A*/ yymsp[-4].minor.yy360.Lights = yymsp[-1].minor.yy423; }
-#line 3681 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3681 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,93,&yymsp[-3].minor);
   yy_destructor(yypParser,45,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
         break;
       case 119: /* light_list ::= STRCONST */
       case 303: /*string_constant ::= STRCONST */ yytestcase(yyruleno==303);
-#line 742 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 742 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprConstant, strconst, yymsp[0].minor.yy0);
 	strconst->Operation = PEX_ConstValue;
@@ -3692,11 +3692,11 @@ static void yy_reduce(
 	strconst->StringVal = yymsp[0].minor.yy0.String;
 	yylhsminor.yy423 = strconst;
 }
-#line 3696 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3696 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy423 = yylhsminor.yy423;
         break;
       case 120: /* light_list ::= light_list COMMA STRCONST */
-#line 751 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 751 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprConstant, strconst, yymsp[0].minor.yy0);
 	strconst->Operation = PEX_ConstValue;
@@ -3705,51 +3705,51 @@ static void yy_reduce(
 	AppendTreeNodeSibling(yymsp[-2].minor.yy423, strconst); 
 	yymsp[-2].minor.yy423 = yymsp[-2].minor.yy423; /*X-overwrites-A*/
 }
-#line 3709 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3709 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
         break;
       case 121: /* state_action ::= LBRACE statement_list scanner_mode RBRACE */
-#line 762 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 762 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(CompoundStmt,stmt,yymsp[-3].minor.yy0);
 	stmt->Content = yymsp[-2].minor.yy3;
 	yylhsminor.yy128 = stmt;
 }
-#line 3719 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3719 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,69,&yymsp[0].minor);
   yymsp[-3].minor.yy128 = yylhsminor.yy128;
         break;
       case 122: /* state_action ::= LBRACE scanner_mode RBRACE */
 {  yy_destructor(yypParser,68,&yymsp[-2].minor);
-#line 768 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 768 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yymsp[-2].minor.yy128 = NULL;
 }
-#line 3729 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3729 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,69,&yymsp[0].minor);
 }
         break;
       case 123: /* state_action ::= LBRACE error scanner_mode RBRACE */
 {  yy_destructor(yypParser,68,&yymsp[-3].minor);
-#line 771 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 771 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-3].minor.yy128 = NULL; }
-#line 3737 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3737 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,69,&yymsp[0].minor);
 }
         break;
       case 124: /* state_action ::= state_call scanner_mode SEMICOLON */
-#line 772 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 772 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy128 = yymsp[-2].minor.yy221; /*X-overwrites-A*/ }
-#line 3744 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3744 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
         break;
       case 125: /* state_call ::= */
-#line 774 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 774 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy221 = NULL; }
-#line 3750 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3750 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 126: /* state_call ::= IDENTIFIER state_call_params */
-#line 776 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 776 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprFuncCall, expr, yymsp[-1].minor.yy0);
 	NEW_AST_NODE(ExprID, func, yymsp[-1].minor.yy0);
@@ -3761,251 +3761,251 @@ static void yy_reduce(
 	expr->Parameters = yymsp[0].minor.yy478;
 	yylhsminor.yy221 = expr;
 }
-#line 3765 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3765 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy221 = yylhsminor.yy221;
         break;
       case 127: /* state_call_params ::= */
-#line 788 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 788 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy478 = NULL; }
-#line 3771 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3771 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 128: /* state_call_params ::= LPAREN func_expr_list RPAREN */
 {  yy_destructor(yypParser,45,&yymsp[-2].minor);
-#line 789 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 789 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy478 = yymsp[-1].minor.yy478; /*yymsp[-2].minor.yy478-overwrites-yymsp[-1].minor.yy478*/ }
-#line 3777 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3777 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,63,&yymsp[0].minor);
 }
         break;
       case 129: /* default_def ::= DEFAULT LBRACE RBRACE */
 {  yy_destructor(yypParser,66,&yymsp[-2].minor);
-#line 797 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 797 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Default,stmt,yymsp[-1].minor.yy0);
 	stmt->Content = NULL;
 	yymsp[-2].minor.yy251 = stmt;
 }
-#line 3789 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3789 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,69,&yymsp[0].minor);
 }
         break;
       case 130: /* default_def ::= DEFAULT LBRACE default_statement_list RBRACE */
 {  yy_destructor(yypParser,66,&yymsp[-3].minor);
-#line 803 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 803 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Default,stmt,yymsp[-2].minor.yy0);
 	stmt->Content = yymsp[-1].minor.yy3;
 	yymsp[-3].minor.yy251 = stmt;
 }
-#line 3801 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3801 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,69,&yymsp[0].minor);
 }
         break;
       case 131: /* default_def ::= DEFAULT LBRACE error RBRACE */
 {  yy_destructor(yypParser,66,&yymsp[-3].minor);
-#line 809 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 809 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Default,stmt,yymsp[-2].minor.yy0);
 	stmt->Content = NULL;
 	yymsp[-3].minor.yy251 = stmt;
 }
-#line 3813 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3813 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,69,&yymsp[0].minor);
 }
         break;
       case 132: /* default_statement_list ::= default_statement */
       case 330: /*statement_list ::= statement */ yytestcase(yyruleno==330);
-#line 816 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 816 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yymsp[0].minor.yy3 = yymsp[0].minor.yy3; /*X-overwrites-A*/
 }
-#line 3823 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3823 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 133: /* default_statement_list ::= default_statement_list default_statement */
       case 331: /*statement_list ::= statement_list statement */ yytestcase(yyruleno==331);
-#line 820 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 820 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	SAFE_APPEND(yymsp[-1].minor.yy3,yymsp[0].minor.yy3);
 }
-#line 3831 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3831 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 134: /* default_statement ::= SEMICOLON */
       case 312: /*statement ::= SEMICOLON */ yytestcase(yyruleno==312);
 {  yy_destructor(yypParser,49,&yymsp[0].minor);
-#line 825 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 825 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy3 = NULL; }
-#line 3838 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3838 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 135: /* default_statement ::= error SEMICOLON */
       case 319: /*statement ::= error SEMICOLON */ yytestcase(yyruleno==319);
-#line 826 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 826 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy3 = NULL; }
-#line 3845 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3845 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
         break;
       case 136: /* default_statement ::= property_statement */
-#line 828 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 828 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy3 = yymsp[0].minor.yy283; /*X-overwrites-A*/ }
-#line 3851 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3851 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 137: /* default_statement ::= flag_statement */
-#line 829 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 829 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy3 = yymsp[0].minor.yy500; /*X-overwrites-A*/ }
-#line 3856 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3856 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 138: /* flag_statement ::= ADD dottable_id */
 {  yy_destructor(yypParser,34,&yymsp[-1].minor);
-#line 834 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 834 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FlagStmt, type, yymsp[0].minor.yy493);
 	type->set = true;
 	type->name = yymsp[0].minor.yy493;
 	yymsp[-1].minor.yy500 = type;
 }
-#line 3867 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3867 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 139: /* flag_statement ::= SUB dottable_id */
 {  yy_destructor(yypParser,33,&yymsp[-1].minor);
-#line 841 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 841 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FlagStmt, type, yymsp[0].minor.yy493);
 	type->set = false;
 	type->name = yymsp[0].minor.yy493;
 	yymsp[-1].minor.yy500 = type;
 }
-#line 3879 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3879 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 140: /* property_statement ::= dottable_id expr_list SEMICOLON */
-#line 851 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 851 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(PropertyStmt,stmt,yymsp[-2].minor.yy493);
 	stmt->Prop = yymsp[-2].minor.yy493;
 	stmt->Values = yymsp[-1].minor.yy282;
 	yylhsminor.yy283 = stmt;
 }
-#line 3890 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3890 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-2].minor.yy283 = yylhsminor.yy283;
         break;
       case 141: /* property_statement ::= dottable_id SEMICOLON */
-#line 859 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 859 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(PropertyStmt,stmt,yymsp[-1].minor.yy493);
 	stmt->Prop = yymsp[-1].minor.yy493;
 	stmt->Values = nullptr;
 	yylhsminor.yy283 = stmt;
 }
-#line 3902 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3902 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-1].minor.yy283 = yylhsminor.yy283;
         break;
       case 142: /* int_type ::= SBYTE */
-#line 871 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 871 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_SInt8; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3909 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3909 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 143: /* int_type ::= BYTE */
-#line 872 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 872 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_UInt8; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3915 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3915 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 144: /* int_type ::= SHORT */
-#line 873 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 873 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_SInt16; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3921 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3921 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 145: /* int_type ::= USHORT */
-#line 874 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 874 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_UInt16; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3927 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3927 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 146: /* int_type ::= INT */
-#line 875 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 875 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_SInt32; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3933 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3933 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 147: /* int_type ::= UINT */
-#line 876 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 876 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_UInt32; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3939 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3939 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 148: /* type_name1 ::= BOOL */
-#line 878 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 878 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Bool; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3945 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3945 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 149: /* type_name1 ::= FLOAT */
-#line 880 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 880 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_FloatAuto; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3951 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3951 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 150: /* type_name1 ::= DOUBLE */
-#line 881 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 881 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Float64; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3957 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3957 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 151: /* type_name1 ::= VECTOR2 */
-#line 883 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 883 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Vector2; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3963 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3963 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 152: /* type_name1 ::= VECTOR3 */
-#line 884 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 884 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Vector3; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3969 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3969 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 153: /* type_name1 ::= VECTOR4 */
-#line 885 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 885 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Vector4; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3975 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3975 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 154: /* type_name1 ::= NAME */
-#line 886 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 886 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Name; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3981 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3981 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 155: /* type_name1 ::= SOUND */
-#line 887 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 887 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Sound; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3987 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3987 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 156: /* type_name1 ::= STATE */
-#line 888 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 888 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_State; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3993 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3993 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 157: /* type_name1 ::= COLOR */
-#line 889 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 889 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Color; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 3999 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 3999 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 158: /* type_name1 ::= LET */
-#line 890 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 890 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Let; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 4005 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4005 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 159: /* type_name ::= type_name1 */
-#line 893 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 893 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(BasicType, type, yymsp[0].minor.yy0);
 	type->Type = (EZCCBuiltinType)yymsp[0].minor.yy0.Int;
@@ -4013,11 +4013,11 @@ static void yy_reduce(
 	type->isconst = false;
 	yylhsminor.yy430 = type;
 }
-#line 4017 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4017 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy430 = yylhsminor.yy430;
         break;
       case 160: /* type_name ::= IDENTIFIER */
-#line 901 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 901 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(BasicType, type, yymsp[0].minor.yy0);
 	NEW_AST_NODE(Identifier, id, yymsp[0].minor.yy0);
@@ -4027,12 +4027,12 @@ static void yy_reduce(
 	id->Id = yymsp[0].minor.yy0.Name();
 	yylhsminor.yy430 = type;
 }
-#line 4031 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4031 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy430 = yylhsminor.yy430;
         break;
       case 161: /* type_name ::= ATSIGN IDENTIFIER */
 {  yy_destructor(yypParser,110,&yymsp[-1].minor);
-#line 912 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 912 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(BasicType, type, yymsp[0].minor.yy0);
 	NEW_AST_NODE(Identifier, id, yymsp[0].minor.yy0);
@@ -4042,12 +4042,12 @@ static void yy_reduce(
 	id->Id = yymsp[0].minor.yy0.Name();
 	yymsp[-1].minor.yy430 = type;
 }
-#line 4046 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4046 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 162: /* type_name ::= READONLY LT IDENTIFIER GT */
 {  yy_destructor(yypParser,111,&yymsp[-3].minor);
-#line 923 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 923 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(BasicType, type, yymsp[-1].minor.yy0);
 	NEW_AST_NODE(Identifier, id, yymsp[-1].minor.yy0);
@@ -4057,14 +4057,14 @@ static void yy_reduce(
 	id->Id = yymsp[-1].minor.yy0.Name();
 	yymsp[-3].minor.yy430 = type;
 }
-#line 4061 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4061 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,20,&yymsp[-2].minor);
   yy_destructor(yypParser,21,&yymsp[0].minor);
 }
         break;
       case 163: /* type_name ::= READONLY LT ATSIGN IDENTIFIER GT */
 {  yy_destructor(yypParser,111,&yymsp[-4].minor);
-#line 934 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 934 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(BasicType, type, yymsp[-1].minor.yy0);
 	NEW_AST_NODE(Identifier, id, yymsp[-1].minor.yy0);
@@ -4074,7 +4074,7 @@ static void yy_reduce(
 	id->Id = yymsp[-1].minor.yy0.Name();
 	yymsp[-4].minor.yy430 = type;
 }
-#line 4078 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4078 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,20,&yymsp[-3].minor);
   yy_destructor(yypParser,110,&yymsp[-2].minor);
   yy_destructor(yypParser,21,&yymsp[0].minor);
@@ -4082,7 +4082,7 @@ static void yy_reduce(
         break;
       case 164: /* type_name ::= DOT dottable_id */
 {  yy_destructor(yypParser,44,&yymsp[-1].minor);
-#line 945 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 945 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(BasicType, type, yymsp[0].minor.yy493);
 	type->Type = ZCC_UserType;
@@ -4090,77 +4090,77 @@ static void yy_reduce(
 	type->isconst = false;
 	yymsp[-1].minor.yy430 = type;
 }
-#line 4094 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4094 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 165: /* aggregate_type ::= MAP LT type_or_array COMMA type_or_array GT */
-#line 969 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 969 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(MapType,map,yymsp[-5].minor.yy0);
 	map->KeyType = yymsp[-3].minor.yy196;
 	map->ValueType = yymsp[-1].minor.yy196;
 	yylhsminor.yy196 = map;
 }
-#line 4105 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4105 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,20,&yymsp[-4].minor);
   yy_destructor(yypParser,50,&yymsp[-2].minor);
   yy_destructor(yypParser,21,&yymsp[0].minor);
   yymsp[-5].minor.yy196 = yylhsminor.yy196;
         break;
       case 166: /* aggregate_type ::= MAPITERATOR LT type_or_array COMMA type_or_array GT */
-#line 977 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 977 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(MapIteratorType,map_it,yymsp[-5].minor.yy0);
 	map_it->KeyType = yymsp[-3].minor.yy196;
 	map_it->ValueType = yymsp[-1].minor.yy196;
 	yylhsminor.yy196 = map_it;
 }
-#line 4119 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4119 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,20,&yymsp[-4].minor);
   yy_destructor(yypParser,50,&yymsp[-2].minor);
   yy_destructor(yypParser,21,&yymsp[0].minor);
   yymsp[-5].minor.yy196 = yylhsminor.yy196;
         break;
       case 167: /* aggregate_type ::= ARRAY LT type_or_array GT */
-#line 985 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 985 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(DynArrayType,arr,yymsp[-3].minor.yy0);
 	arr->ElementType = yymsp[-1].minor.yy196;
 	yylhsminor.yy196 = arr;
 }
-#line 4132 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4132 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,20,&yymsp[-2].minor);
   yy_destructor(yypParser,21,&yymsp[0].minor);
   yymsp[-3].minor.yy196 = yylhsminor.yy196;
         break;
       case 168: /* aggregate_type ::= func_ptr_type */
-#line 991 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 991 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy196 = yymsp[0].minor.yy418; /*X-overwrites-A*/ }
-#line 4140 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4140 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 169: /* fn_ptr_flag ::= UI */
 {  yy_destructor(yypParser,58,&yymsp[0].minor);
-#line 999 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 999 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy0.Int = ZCC_UIFlag; }
-#line 4146 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4146 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 170: /* fn_ptr_flag ::= PLAY */
 {  yy_destructor(yypParser,59,&yymsp[0].minor);
-#line 1000 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1000 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy0.Int = ZCC_Play; }
-#line 4153 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4153 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 171: /* fn_ptr_flag ::= CLEARSCOPE */
 {  yy_destructor(yypParser,76,&yymsp[0].minor);
-#line 1001 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1001 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy0.Int = ZCC_ClearScope; }
-#line 4160 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4160 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 172: /* func_ptr_type ::= FNTYPE LT fn_ptr_flag type_list_or_void LPAREN func_ptr_params RPAREN GT */
-#line 1006 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1006 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncPtrType,fn_ptr,yymsp[-7].minor.yy0);
 	fn_ptr->RetType = yymsp[-4].minor.yy196;
@@ -4168,7 +4168,7 @@ static void yy_reduce(
 	fn_ptr->Scope = yymsp[-5].minor.yy0.Int;
 	yylhsminor.yy418 = fn_ptr;
 }
-#line 4172 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4172 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,20,&yymsp[-6].minor);
   yy_destructor(yypParser,45,&yymsp[-3].minor);
   yy_destructor(yypParser,63,&yymsp[-1].minor);
@@ -4176,7 +4176,7 @@ static void yy_reduce(
   yymsp[-7].minor.yy418 = yylhsminor.yy418;
         break;
       case 173: /* func_ptr_type ::= FNTYPE LT VOID GT */
-#line 1015 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1015 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncPtrType,fn_ptr,yymsp[-3].minor.yy0);
 	fn_ptr->RetType = nullptr;
@@ -4184,101 +4184,101 @@ static void yy_reduce(
 	fn_ptr->Scope = -1;
 	yylhsminor.yy418 = fn_ptr;
 }
-#line 4188 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4188 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,20,&yymsp[-2].minor);
   yy_destructor(yypParser,116,&yymsp[-1].minor);
   yy_destructor(yypParser,21,&yymsp[0].minor);
   yymsp[-3].minor.yy418 = yylhsminor.yy418;
         break;
       case 174: /* func_ptr_params ::= */
-#line 1023 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1023 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy513 = NULL; }
-#line 4197 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4197 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 175: /* func_ptr_params ::= VOID */
 {  yy_destructor(yypParser,116,&yymsp[0].minor);
-#line 1024 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1024 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy513 = NULL; }
-#line 4203 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4203 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 176: /* func_ptr_param_list ::= func_ptr_param_list COMMA func_ptr_param */
-#line 1038 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1038 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy513 = yymsp[-2].minor.yy513; /*X-overwrites-A*/ AppendTreeNodeSibling(yymsp[-2].minor.yy513, yymsp[0].minor.yy513); }
-#line 4209 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4209 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
         break;
       case 177: /* func_ptr_param ::= func_param_flags type */
-#line 1041 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1041 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncPtrParamDecl,parm,yymsp[-1].minor.yy0.SourceLoc ? yymsp[-1].minor.yy0.SourceLoc : yymsp[0].minor.yy196->SourceLoc);
 	parm->Type = yymsp[0].minor.yy196;
 	parm->Flags = yymsp[-1].minor.yy0.Int;
 	yylhsminor.yy513 = parm;
 }
-#line 4220 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4220 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy513 = yylhsminor.yy513;
         break;
       case 178: /* func_ptr_param ::= func_param_flags type AND */
-#line 1049 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1049 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncPtrParamDecl,parm,yymsp[-2].minor.yy0.SourceLoc ? yymsp[-2].minor.yy0.SourceLoc : yymsp[-1].minor.yy196->SourceLoc);
 	parm->Type = yymsp[-1].minor.yy196;
 	parm->Flags = yymsp[-2].minor.yy0.Int | ZCC_Out;
 	yylhsminor.yy513 = parm;
 }
-#line 4231 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4231 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,29,&yymsp[0].minor);
   yymsp[-2].minor.yy513 = yylhsminor.yy513;
         break;
       case 179: /* aggregate_type ::= CLASS class_restrictor */
-#line 1057 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1057 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ClassType,cls,yymsp[-1].minor.yy0);
 	cls->Restriction = yymsp[0].minor.yy493;
 	yylhsminor.yy196 = cls;
 }
-#line 4242 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4242 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy196 = yylhsminor.yy196;
         break;
       case 181: /* class_restrictor ::= LT dottable_id GT */
 {  yy_destructor(yypParser,20,&yymsp[-2].minor);
-#line 1063 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1063 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy493 = yymsp[-1].minor.yy493; /*yymsp[-2].minor.yy493-overwrites-yymsp[-1].minor.yy493*/ }
-#line 4249 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4249 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,21,&yymsp[0].minor);
 }
         break;
       case 182: /* type ::= type_name */
-#line 1065 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1065 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy196 = yymsp[0].minor.yy430; /*X-overwrites-A*/ yymsp[0].minor.yy196->ArraySize = NULL; }
-#line 4256 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4256 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 183: /* type ::= aggregate_type */
-#line 1066 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1066 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy196 = yymsp[0].minor.yy196; /*X-overwrites-A*/ yymsp[0].minor.yy196->ArraySize = NULL; }
-#line 4261 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4261 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 184: /* type_or_array ::= type array_size */
-#line 1069 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1069 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy196 = yymsp[-1].minor.yy196; /*X-overwrites-A*/ yymsp[-1].minor.yy196->ArraySize = yymsp[0].minor.yy282; }
-#line 4266 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4266 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 185: /* type_list ::= type_list COMMA type_or_array */
-#line 1072 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1072 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy196 = yymsp[-2].minor.yy196; /*X-overwrites-A*/ AppendTreeNodeSibling(yymsp[-2].minor.yy196, yymsp[0].minor.yy196); }
-#line 4271 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4271 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
         break;
       case 186: /* type_list_or_void ::= VOID */
 {  yy_destructor(yypParser,116,&yymsp[0].minor);
-#line 1074 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1074 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy196 = NULL; }
-#line 4278 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4278 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 187: /* array_size_expr ::= LBRACKET opt_expr RBRACKET */
-#line 1078 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1078 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	if (yymsp[-1].minor.yy282 == NULL)
 	{
@@ -4292,20 +4292,20 @@ static void yy_reduce(
 		yylhsminor.yy282 = yymsp[-1].minor.yy282;
 	}
 }
-#line 4296 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4296 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,122,&yymsp[0].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 188: /* array_size ::= array_size array_size_expr */
-#line 1093 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1093 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	AppendTreeNodeSibling(yymsp[-1].minor.yy282, yymsp[0].minor.yy282);
 	yymsp[-1].minor.yy282 = yymsp[-1].minor.yy282; /*X-overwrites-A*/
 }
-#line 4306 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4306 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 189: /* declarator ::= decl_flags type_list_or_void variables_or_function */
-#line 1102 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1102 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	if (yymsp[0].minor.yy364.FuncName == NAME_None && yymsp[0].minor.yy364.VarNames == NULL)
 	{ // An error. yymsp[-2].minor.yy415 message was already printed.
@@ -4358,11 +4358,11 @@ static void yy_reduce(
 		yylhsminor.yy327 = NULL;
 	}
 }
-#line 4362 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4362 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-2].minor.yy327 = yylhsminor.yy327;
         break;
       case 190: /* variables_or_function ::= IDENTIFIER LPAREN func_params RPAREN func_const opt_func_body */
-#line 1157 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1157 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	VarOrFun fun;
 
@@ -4374,13 +4374,13 @@ static void yy_reduce(
 	fun.SourceLoc = yymsp[-5].minor.yy0.SourceLoc;
 	yylhsminor.yy364 = fun;
 }
-#line 4378 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4378 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-4].minor);
   yy_destructor(yypParser,63,&yymsp[-2].minor);
   yymsp[-5].minor.yy364 = yylhsminor.yy364;
         break;
       case 191: /* variables_or_function ::= variable_list SEMICOLON */
-#line 1169 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1169 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	VarOrFun var;
 
@@ -4392,12 +4392,12 @@ static void yy_reduce(
 	var.SourceLoc = yymsp[-1].minor.yy492->SourceLoc;
 	yylhsminor.yy364 = var;
 }
-#line 4396 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4396 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-1].minor.yy364 = yylhsminor.yy364;
         break;
       case 192: /* variables_or_function ::= error SEMICOLON */
-#line 1181 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1181 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	VarOrFun bad;
 	bad.VarNames = NULL;
@@ -4408,46 +4408,46 @@ static void yy_reduce(
 	bad.SourceLoc = yymsp[0].minor.yy0.SourceLoc;
 	yymsp[-1].minor.yy364 = bad;
 }
-#line 4412 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4412 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 193: /* variable_name ::= IDENTIFIER */
-#line 1198 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1198 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(VarName,var,yymsp[0].minor.yy0);
 	var->Name = ENamedName(yymsp[0].minor.yy0.Int);
 	var->ArraySize = NULL;
 	yylhsminor.yy492 = var;
 }
-#line 4422 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4422 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy492 = yylhsminor.yy492;
         break;
       case 194: /* variable_name ::= IDENTIFIER array_size */
-#line 1205 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1205 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(VarName,var,yymsp[-1].minor.yy0);
 	var->Name = ENamedName(yymsp[-1].minor.yy0.Int);
 	var->ArraySize = yymsp[0].minor.yy282;
 	yylhsminor.yy492 = var;
 }
-#line 4433 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4433 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy492 = yylhsminor.yy492;
         break;
       case 195: /* variable_list ::= variable_list COMMA variable_name */
-#line 1214 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1214 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	AppendTreeNodeSibling(yymsp[-2].minor.yy492, yymsp[0].minor.yy492);
 	yymsp[-2].minor.yy492 = yymsp[-2].minor.yy492; /*X-overwrites-A*/
 }
-#line 4442 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4442 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
         break;
       case 196: /* decl_flags ::= */
-#line 1220 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1220 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy415 = NULL; }
-#line 4448 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4448 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 197: /* decl_flags ::= decl_flags decl_flag */
-#line 1222 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1222 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	if (yymsp[-1].minor.yy415 == nullptr)
 	{
@@ -4464,11 +4464,11 @@ static void yy_reduce(
 		yylhsminor.yy415->Flags |= yymsp[0].minor.yy0.Int;
 	}
 }
-#line 4468 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4468 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy415 = yylhsminor.yy415;
         break;
       case 198: /* decl_flags ::= decl_flags ACTION states_opts */
-#line 1241 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1241 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	if (yymsp[-2].minor.yy415 == nullptr)
 	{
@@ -4486,23 +4486,23 @@ static void yy_reduce(
 	}
 	yylhsminor.yy415->Id = yymsp[0].minor.yy493;
 }
-#line 4490 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4490 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-2].minor.yy415 = yylhsminor.yy415;
         break;
       case 199: /* opt_deprecation_message ::= */
-#line 1259 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1259 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy0.String = nullptr; yymsp[1].minor.yy0.SourceLoc = stat->sc->GetMessageLine(); }
-#line 4496 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4496 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 200: /* opt_deprecation_message ::= COMMA STRCONST */
 {  yy_destructor(yypParser,50,&yymsp[-1].minor);
-#line 1260 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1260 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy0 = yymsp[0].minor.yy0; }
-#line 4502 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4502 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 201: /* decl_flags ::= decl_flags DEPRECATED LPAREN STRCONST opt_deprecation_message RPAREN */
-#line 1263 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1263 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	if (yymsp[-5].minor.yy415 == nullptr)
 	{
@@ -4520,13 +4520,13 @@ static void yy_reduce(
 	yylhsminor.yy415->Version = yymsp[-2].minor.yy0.String->GetChars();
 	yylhsminor.yy415->DeprecationMessage = yymsp[-1].minor.yy0.String;
 }
-#line 4524 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4524 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-3].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
   yymsp[-5].minor.yy415 = yylhsminor.yy415;
         break;
       case 202: /* decl_flags ::= decl_flags VERSION LPAREN STRCONST RPAREN */
-#line 1282 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1282 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { 
 	if (yymsp[-4].minor.yy415 == nullptr)
 	{
@@ -4544,151 +4544,151 @@ static void yy_reduce(
 	}
 	yylhsminor.yy415->Version = yymsp[-1].minor.yy0.String->GetChars();
 }
-#line 4548 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4548 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
   yymsp[-4].minor.yy415 = yylhsminor.yy415;
         break;
       case 203: /* decl_flag ::= NATIVE */
-#line 1300 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1300 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Native; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4556 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4556 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 204: /* decl_flag ::= STATIC */
-#line 1301 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1301 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Static; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4562 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4562 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 205: /* decl_flag ::= PRIVATE */
-#line 1302 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1302 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Private; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4568 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4568 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 206: /* decl_flag ::= PROTECTED */
-#line 1303 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1303 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Protected; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4574 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4574 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 207: /* decl_flag ::= LATENT */
-#line 1304 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1304 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Latent; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4580 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4580 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 208: /* decl_flag ::= FINAL */
-#line 1305 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1305 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Final; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4586 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4586 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 209: /* decl_flag ::= META */
-#line 1306 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1306 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Meta; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4592 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4592 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 210: /* decl_flag ::= TRANSIENT */
-#line 1307 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1307 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Transient; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4598 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4598 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 211: /* decl_flag ::= READONLY */
-#line 1308 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1308 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_ReadOnly; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4604 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4604 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 212: /* decl_flag ::= INTERNAL */
-#line 1309 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1309 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Internal; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4610 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4610 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 213: /* decl_flag ::= VIRTUAL */
-#line 1310 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1310 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Virtual; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4616 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4616 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 214: /* decl_flag ::= OVERRIDE */
-#line 1311 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1311 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Override; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4622 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4622 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 215: /* decl_flag ::= ABSTRACT */
-#line 1312 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1312 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Abstract; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4628 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4628 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 216: /* decl_flag ::= VARARG */
-#line 1313 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1313 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_VarArg; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 4634 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4634 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 217: /* decl_flag ::= UI */
-#line 1314 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1314 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_UIFlag; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 4640 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4640 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 218: /* decl_flag ::= PLAY */
-#line 1315 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1315 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_Play; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 4646 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4646 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 219: /* decl_flag ::= CLEARSCOPE */
-#line 1316 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1316 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_ClearScope; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 4652 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4652 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 220: /* decl_flag ::= VIRTUALSCOPE */
-#line 1317 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1317 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_VirtualScope; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 4658 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4658 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 221: /* func_const ::= */
-#line 1319 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1319 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy0.Int = 0; yymsp[1].minor.yy0.SourceLoc = stat->sc->GetMessageLine(); }
-#line 4664 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4664 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 222: /* func_const ::= CONST */
-#line 1320 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1320 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = ZCC_FuncConst; yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc; }
-#line 4669 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4669 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 223: /* opt_func_body ::= SEMICOLON */
 {  yy_destructor(yypParser,49,&yymsp[0].minor);
-#line 1322 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1322 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy475 = NULL; }
-#line 4676 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4676 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 224: /* func_params ::= */
-#line 1329 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1329 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy439 = NULL; }
-#line 4682 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4682 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 225: /* func_params ::= VOID */
 {  yy_destructor(yypParser,116,&yymsp[0].minor);
-#line 1330 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1330 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy439 = NULL; }
-#line 4688 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4688 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 226: /* func_params ::= func_param_list COMMA ELLIPSIS */
-#line 1334 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1334 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncParamDecl,parm,stat->sc->GetMessageLine());
 	parm->Type = nullptr;
@@ -4698,18 +4698,18 @@ static void yy_reduce(
 	yymsp[-2].minor.yy439 = yymsp[-2].minor.yy439; /*X-overwrites-A*/ 
 	AppendTreeNodeSibling(yymsp[-2].minor.yy439, parm);
 }
-#line 4702 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4702 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
   yy_destructor(yypParser,134,&yymsp[0].minor);
         break;
       case 227: /* func_param_list ::= func_param_list COMMA func_param */
-#line 1345 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1345 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy439 = yymsp[-2].minor.yy439; /*X-overwrites-A*/ AppendTreeNodeSibling(yymsp[-2].minor.yy439, yymsp[0].minor.yy439); }
-#line 4709 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4709 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
         break;
       case 228: /* func_param ::= func_param_flags type IDENTIFIER */
-#line 1348 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1348 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncParamDecl,parm,yymsp[-2].minor.yy0.SourceLoc ? yymsp[-2].minor.yy0.SourceLoc : yymsp[-1].minor.yy196->SourceLoc);
 	parm->Type = yymsp[-1].minor.yy196;
@@ -4718,11 +4718,11 @@ static void yy_reduce(
 	parm->Default = nullptr;
 	yylhsminor.yy439 = parm;
 }
-#line 4722 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4722 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-2].minor.yy439 = yylhsminor.yy439;
         break;
       case 229: /* func_param ::= func_param_flags type IDENTIFIER EQ expr */
-#line 1358 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1358 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncParamDecl,parm,yymsp[-4].minor.yy0.SourceLoc ? yymsp[-4].minor.yy0.SourceLoc : yymsp[-3].minor.yy196->SourceLoc);
 	parm->Type = yymsp[-3].minor.yy196;
@@ -4731,12 +4731,12 @@ static void yy_reduce(
 	parm->Default = yymsp[0].minor.yy282;
 	yylhsminor.yy439 = parm;
 }
-#line 4735 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4735 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,1,&yymsp[-1].minor);
   yymsp[-4].minor.yy439 = yylhsminor.yy439;
         break;
       case 230: /* func_param ::= func_param_flags type AND IDENTIFIER */
-#line 1368 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1368 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncParamDecl,parm,yymsp[-3].minor.yy0.SourceLoc ? yymsp[-3].minor.yy0.SourceLoc : yymsp[-2].minor.yy196->SourceLoc);
 	parm->Type = yymsp[-2].minor.yy196;
@@ -4745,12 +4745,12 @@ static void yy_reduce(
 	parm->Default = nullptr;
 	yylhsminor.yy439 = parm;
 }
-#line 4749 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4749 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,29,&yymsp[-1].minor);
   yymsp[-3].minor.yy439 = yylhsminor.yy439;
         break;
       case 231: /* func_param ::= func_param_flags type AND IDENTIFIER EQ expr */
-#line 1378 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1378 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncParamDecl,parm,yymsp[-5].minor.yy0.SourceLoc ? yymsp[-5].minor.yy0.SourceLoc : yymsp[-4].minor.yy196->SourceLoc);
 	parm->Type = yymsp[-4].minor.yy196;
@@ -4759,36 +4759,36 @@ static void yy_reduce(
 	parm->Default = yymsp[0].minor.yy282;
 	yylhsminor.yy439 = parm;
 }
-#line 4763 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4763 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,29,&yymsp[-3].minor);
   yy_destructor(yypParser,1,&yymsp[-1].minor);
   yymsp[-5].minor.yy439 = yylhsminor.yy439;
         break;
       case 232: /* func_param_flags ::= */
-#line 1387 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1387 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy0.Int = 0; yymsp[1].minor.yy0.SourceLoc = 0; }
-#line 4771 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4771 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 233: /* func_param_flags ::= func_param_flags IN */
-#line 1388 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1388 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = yymsp[-1].minor.yy0.Int | ZCC_In; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4776 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4776 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy0 = yylhsminor.yy0;
         break;
       case 234: /* func_param_flags ::= func_param_flags OUT */
-#line 1389 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1389 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = yymsp[-1].minor.yy0.Int | ZCC_Out; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4782 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4782 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy0 = yylhsminor.yy0;
         break;
       case 235: /* func_param_flags ::= func_param_flags OPTIONAL */
-#line 1390 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1390 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yylhsminor.yy0.Int = yymsp[-1].minor.yy0.Int | ZCC_Optional; yylhsminor.yy0.SourceLoc =  yymsp[0].minor.yy0.SourceLoc; }
-#line 4788 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4788 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy0 = yylhsminor.yy0;
         break;
       case 236: /* primary ::= IDENTIFIER */
-#line 1406 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1406 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprID, expr, yymsp[0].minor.yy0);
 	expr->Operation = PEX_ID;
@@ -4796,28 +4796,28 @@ static void yy_reduce(
 	expr->Type = NULL;
 	yylhsminor.yy282 = expr;
 }
-#line 4800 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4800 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy282 = yylhsminor.yy282;
         break;
       case 237: /* primary ::= SUPER */
-#line 1414 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1414 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(Expression, expr, yymsp[0].minor.yy0);
 	expr->Operation = PEX_Super;
 	expr->Type = NULL;
 	yylhsminor.yy282 = expr;
 }
-#line 4811 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4811 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy282 = yylhsminor.yy282;
         break;
       case 238: /* primary ::= constant */
-#line 1420 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1420 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy282 = yymsp[0].minor.yy423; /*X-overwrites-A*/ }
-#line 4817 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4817 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 239: /* primary ::= LPAREN expr COMMA expr COMMA expr COMMA expr RPAREN */
 {  yy_destructor(yypParser,45,&yymsp[-8].minor);
-#line 1422 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1422 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(VectorValue, expr, yymsp[-7].minor.yy282);
 	expr->Operation = PEX_Vector;
@@ -4828,7 +4828,7 @@ static void yy_reduce(
 	expr->W = yymsp[-1].minor.yy282;
 	yymsp[-8].minor.yy282 = expr;
 }
-#line 4832 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4832 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-6].minor);
   yy_destructor(yypParser,50,&yymsp[-4].minor);
   yy_destructor(yypParser,50,&yymsp[-2].minor);
@@ -4837,7 +4837,7 @@ static void yy_reduce(
         break;
       case 240: /* primary ::= LPAREN expr COMMA expr COMMA expr RPAREN */
 {  yy_destructor(yypParser,45,&yymsp[-6].minor);
-#line 1433 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1433 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(VectorValue, expr, yymsp[-5].minor.yy282);
 	expr->Operation = PEX_Vector;
@@ -4848,7 +4848,7 @@ static void yy_reduce(
 	expr->W = nullptr;
 	yymsp[-6].minor.yy282 = expr;
 }
-#line 4852 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4852 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-4].minor);
   yy_destructor(yypParser,50,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
@@ -4856,7 +4856,7 @@ static void yy_reduce(
         break;
       case 241: /* primary ::= LPAREN expr COMMA expr RPAREN */
 {  yy_destructor(yypParser,45,&yymsp[-4].minor);
-#line 1444 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1444 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(VectorValue, expr, yymsp[-3].minor.yy282);
 	expr->Operation = PEX_Vector;
@@ -4867,23 +4867,23 @@ static void yy_reduce(
 	expr->W = nullptr;
 	yymsp[-4].minor.yy282 = expr;
 }
-#line 4871 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4871 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
 }
         break;
       case 242: /* primary ::= LPAREN expr RPAREN */
 {  yy_destructor(yypParser,45,&yymsp[-2].minor);
-#line 1455 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1455 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yymsp[-2].minor.yy282 = yymsp[-1].minor.yy282; /*yymsp[-2].minor.yy282-overwrites-yymsp[-1].minor.yy282*/
 }
-#line 4882 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4882 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,63,&yymsp[0].minor);
 }
         break;
       case 243: /* primary ::= primary LPAREN func_expr_list RPAREN */
-#line 1460 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1460 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprFuncCall, expr, yymsp[-3].minor.yy282);
 	expr->Operation = PEX_FuncCall;
@@ -4892,14 +4892,14 @@ static void yy_reduce(
 	expr->Parameters = yymsp[-1].minor.yy478;
 	yylhsminor.yy282 = expr;
 }
-#line 4896 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4896 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
   yymsp[-3].minor.yy282 = yylhsminor.yy282;
         break;
       case 244: /* primary ::= LPAREN CLASS LT IDENTIFIER GT RPAREN LPAREN func_expr_list RPAREN */
 {  yy_destructor(yypParser,45,&yymsp[-8].minor);
-#line 1469 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1469 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ClassCast, expr, yymsp[-5].minor.yy0);
 	expr->Operation = PEX_ClassCast;
@@ -4907,7 +4907,7 @@ static void yy_reduce(
 	expr->Parameters = yymsp[-1].minor.yy478;
 	yymsp[-8].minor.yy282 = expr;
 }
-#line 4911 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4911 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,53,&yymsp[-7].minor);
   yy_destructor(yypParser,20,&yymsp[-6].minor);
   yy_destructor(yypParser,21,&yymsp[-4].minor);
@@ -4918,7 +4918,7 @@ static void yy_reduce(
         break;
       case 245: /* primary ::= LPAREN func_ptr_type RPAREN LPAREN expr RPAREN */
 {  yy_destructor(yypParser,45,&yymsp[-5].minor);
-#line 1478 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1478 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FunctionPtrCast, expr, yymsp[-4].minor.yy418);
 	expr->Operation = PEX_FunctionPtrCast;
@@ -4927,14 +4927,14 @@ static void yy_reduce(
 	expr->Expr = yymsp[-1].minor.yy282;
 	yymsp[-5].minor.yy282 = expr;
 }
-#line 4931 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4931 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,63,&yymsp[-3].minor);
   yy_destructor(yypParser,45,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
 }
         break;
       case 246: /* primary ::= primary LBRACKET expr RBRACKET */
-#line 1488 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1488 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprBinary, expr, yymsp[-1].minor.yy282);
 	expr->Operation = PEX_ArrayAccess;
@@ -4943,13 +4943,13 @@ static void yy_reduce(
 	expr->Right = yymsp[-1].minor.yy282;
 	yylhsminor.yy282 = expr;
 }
-#line 4947 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4947 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,46,&yymsp[-2].minor);
   yy_destructor(yypParser,122,&yymsp[0].minor);
   yymsp[-3].minor.yy282 = yylhsminor.yy282;
         break;
       case 247: /* primary ::= primary DOT IDENTIFIER */
-#line 1498 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1498 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprMemberAccess, expr, yymsp[0].minor.yy0);
 	expr->Operation = PEX_MemberAccess;
@@ -4958,33 +4958,33 @@ static void yy_reduce(
 	expr->Right = ENamedName(yymsp[0].minor.yy0.Int);
 	yylhsminor.yy282 = expr;
 }
-#line 4962 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4962 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,44,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 248: /* primary ::= primary ADDADD */
-#line 1507 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1507 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	UNARY_EXPR(yymsp[-1].minor.yy282,PEX_PostInc);
 	yylhsminor.yy282 = expr1;
 }
-#line 4972 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4972 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,42,&yymsp[0].minor);
   yymsp[-1].minor.yy282 = yylhsminor.yy282;
         break;
       case 249: /* primary ::= primary SUBSUB */
-#line 1512 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1512 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	UNARY_EXPR(yymsp[-1].minor.yy282,PEX_PostDec);
 	yylhsminor.yy282 = expr1;
 }
-#line 4982 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 4982 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,43,&yymsp[0].minor);
   yymsp[-1].minor.yy282 = yylhsminor.yy282;
         break;
       case 250: /* unary_expr ::= SUB unary_expr */
 {  yy_destructor(yypParser,33,&yymsp[-1].minor);
-#line 1528 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1528 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	ZCC_ExprConstant *con = static_cast<ZCC_ExprConstant *>(yymsp[0].minor.yy282);
 	if (yymsp[0].minor.yy282->Operation == PEX_ConstValue && (con->Type->isInt() || con->Type->isFloat()))
@@ -5005,12 +5005,12 @@ static void yy_reduce(
 		yymsp[-1].minor.yy282 = expr1;
 	}
 }
-#line 5009 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5009 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 251: /* unary_expr ::= ADD unary_expr */
 {  yy_destructor(yypParser,34,&yymsp[-1].minor);
-#line 1549 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1549 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	// Even though this is really a no-op, we still need to make a node for
 	// it so we can type check that it is being applied to something numeric.
@@ -5026,461 +5026,461 @@ static void yy_reduce(
 		yymsp[-1].minor.yy282 = yymsp[0].minor.yy282;
 	}
 }
-#line 5030 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5030 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 252: /* unary_expr ::= SUBSUB unary_expr */
 {  yy_destructor(yypParser,43,&yymsp[-1].minor);
-#line 1565 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1565 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	UNARY_EXPR(yymsp[0].minor.yy282,PEX_PreDec);
 	yymsp[-1].minor.yy282 = expr1;
 }
-#line 5040 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5040 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 253: /* unary_expr ::= ADDADD unary_expr */
 {  yy_destructor(yypParser,42,&yymsp[-1].minor);
-#line 1570 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1570 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	UNARY_EXPR(yymsp[0].minor.yy282,PEX_PreInc);
 	yymsp[-1].minor.yy282 = expr1;
 }
-#line 5050 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5050 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 254: /* unary_expr ::= TILDE unary_expr */
 {  yy_destructor(yypParser,138,&yymsp[-1].minor);
-#line 1575 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1575 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	UNARY_EXPR(yymsp[0].minor.yy282,PEX_BitNot);
 	yymsp[-1].minor.yy282 = expr1;
 }
-#line 5060 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5060 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 255: /* unary_expr ::= BANG unary_expr */
 {  yy_destructor(yypParser,139,&yymsp[-1].minor);
-#line 1580 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1580 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	UNARY_EXPR(yymsp[0].minor.yy282,PEX_BoolNot);
 	yymsp[-1].minor.yy282 = expr1;
 }
-#line 5070 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5070 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 256: /* unary_expr ::= SIZEOF unary_expr */
 {  yy_destructor(yypParser,140,&yymsp[-1].minor);
-#line 1585 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1585 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	UNARY_EXPR(yymsp[0].minor.yy282,PEX_SizeOf);
 	yymsp[-1].minor.yy282 = expr1;
 }
-#line 5080 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5080 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 257: /* unary_expr ::= ALIGNOF unary_expr */
 {  yy_destructor(yypParser,141,&yymsp[-1].minor);
-#line 1590 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1590 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	UNARY_EXPR(yymsp[0].minor.yy282,PEX_AlignOf);
 	yymsp[-1].minor.yy282 = expr1;
 }
-#line 5090 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5090 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 258: /* expr ::= expr ADD expr */
-#line 1603 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1603 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_Add);
 	yylhsminor.yy282 = expr2;
 }
-#line 5099 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5099 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,34,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 259: /* expr ::= expr SUB expr */
-#line 1608 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1608 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_Sub);
 	yylhsminor.yy282 = expr2;
 }
-#line 5109 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5109 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,33,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 260: /* expr ::= expr MUL expr */
-#line 1613 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1613 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_Mul);
 	yylhsminor.yy282 = expr2;
 }
-#line 5119 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5119 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,35,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 261: /* expr ::= expr DIV expr */
-#line 1618 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1618 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_Div);
 	yylhsminor.yy282 = expr2;
 }
-#line 5129 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5129 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,36,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 262: /* expr ::= expr MOD expr */
-#line 1623 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1623 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_Mod);
 	yylhsminor.yy282 = expr2;
 }
-#line 5139 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5139 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,37,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 263: /* expr ::= expr POW expr */
-#line 1628 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1628 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_Pow);
 	yylhsminor.yy282 = expr2;
 }
-#line 5149 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5149 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,40,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 264: /* expr ::= expr CROSSPROD expr */
-#line 1633 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1633 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_CrossProduct);
 	yylhsminor.yy282 = expr2;
 }
-#line 5159 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5159 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,38,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 265: /* expr ::= expr DOTPROD expr */
-#line 1638 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1638 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_DotProduct);
 	yylhsminor.yy282 = expr2;
 }
-#line 5169 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5169 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,39,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 266: /* expr ::= expr LSH expr */
-#line 1643 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1643 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_LeftShift);
 	yylhsminor.yy282 = expr2;
 }
-#line 5179 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5179 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,30,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 267: /* expr ::= expr RSH expr */
-#line 1648 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1648 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_RightShift);
 	yylhsminor.yy282 = expr2;
 }
-#line 5189 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5189 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,31,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 268: /* expr ::= expr URSH expr */
-#line 1653 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1653 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_URightShift);
 	yylhsminor.yy282 = expr2;
 }
-#line 5199 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5199 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,32,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 269: /* expr ::= expr DOTDOT expr */
-#line 1658 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1658 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_Concat);
 	yylhsminor.yy282 = expr2;
 }
-#line 5209 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5209 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,26,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 270: /* expr ::= expr LT expr */
-#line 1664 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1664 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_LT);
 	yylhsminor.yy282 = expr2;
 }
-#line 5219 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5219 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,20,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 271: /* expr ::= expr GT expr */
-#line 1669 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1669 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_GT);
 	yylhsminor.yy282 = expr2;
 }
-#line 5229 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5229 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,21,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 272: /* expr ::= expr LTEQ expr */
-#line 1674 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1674 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_LTEQ);
 	yylhsminor.yy282 = expr2;
 }
-#line 5239 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5239 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,22,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 273: /* expr ::= expr GTEQ expr */
-#line 1679 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1679 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_GTEQ);
 	yylhsminor.yy282 = expr2;
 }
-#line 5249 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5249 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,23,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 274: /* expr ::= expr LTGTEQ expr */
-#line 1684 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1684 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_LTGTEQ);
 	yylhsminor.yy282 = expr2;
 }
-#line 5259 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5259 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,24,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 275: /* expr ::= expr IS expr */
-#line 1689 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1689 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_Is);
 	yylhsminor.yy282 = expr2;
 }
-#line 5269 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5269 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,25,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 276: /* expr ::= expr EQEQ expr */
-#line 1695 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1695 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_EQEQ);
 	yylhsminor.yy282 = expr2;
 }
-#line 5279 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5279 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,17,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 277: /* expr ::= expr NEQ expr */
-#line 1700 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1700 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_NEQ);
 	yylhsminor.yy282 = expr2;
 }
-#line 5289 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5289 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,18,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 278: /* expr ::= expr APPROXEQ expr */
-#line 1705 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1705 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_APREQ);
 	yylhsminor.yy282 = expr2;
 }
-#line 5299 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5299 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,19,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 279: /* expr ::= expr AND expr */
-#line 1711 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1711 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_BitAnd);
 	yylhsminor.yy282 = expr2;
 }
-#line 5309 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5309 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,29,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 280: /* expr ::= expr XOR expr */
-#line 1716 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1716 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_BitXor);
 	yylhsminor.yy282 = expr2;
 }
-#line 5319 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5319 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,28,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 281: /* expr ::= expr OR expr */
-#line 1721 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1721 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_BitOr);
 	yylhsminor.yy282 = expr2;
 }
-#line 5329 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5329 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,27,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 282: /* expr ::= expr ANDAND expr */
-#line 1726 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1726 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_BoolAnd);
 	yylhsminor.yy282 = expr2;
 }
-#line 5339 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5339 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,16,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 283: /* expr ::= expr OROR expr */
-#line 1731 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1731 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_BoolOr);
 	yylhsminor.yy282 = expr2;
 }
-#line 5349 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5349 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,15,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 284: /* expr ::= expr EQ expr */
-#line 1736 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1736 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_Assign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5359 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5359 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,1,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 285: /* expr ::= expr ADDEQ expr */
-#line 1741 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1741 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_AddAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5369 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5369 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,5,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 286: /* expr ::= expr SUBEQ expr */
-#line 1746 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1746 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_SubAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5379 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5379 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,6,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 287: /* expr ::= expr MULEQ expr */
-#line 1751 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1751 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_MulAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5389 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5389 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,2,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 288: /* expr ::= expr DIVEQ expr */
-#line 1756 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1756 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_DivAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5399 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5399 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,3,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 289: /* expr ::= expr MODEQ expr */
-#line 1761 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1761 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_ModAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5409 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5409 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,4,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 290: /* expr ::= expr LSHEQ expr */
-#line 1766 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1766 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_LshAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5419 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5419 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,7,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 291: /* expr ::= expr RSHEQ expr */
-#line 1771 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1771 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_RshAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5429 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5429 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,8,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 292: /* expr ::= expr URSHEQ expr */
-#line 1776 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1776 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_URshAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5439 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5439 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,12,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 293: /* expr ::= expr ANDEQ expr */
-#line 1781 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1781 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_AndAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5449 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5449 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,9,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 294: /* expr ::= expr OREQ expr */
-#line 1786 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1786 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_OrAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5459 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5459 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,10,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 295: /* expr ::= expr XOREQ expr */
-#line 1791 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1791 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_XorAssign);
 	yylhsminor.yy282 = expr2;
 }
-#line 5469 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5469 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,11,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 296: /* expr ::= expr SCOPE expr */
-#line 1798 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1798 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	BINARY_EXPR(yymsp[-2].minor.yy282,yymsp[0].minor.yy282,PEX_Scope);
 	yylhsminor.yy282 = expr2;
 }
-#line 5479 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5479 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,47,&yymsp[-1].minor);
   yymsp[-2].minor.yy282 = yylhsminor.yy282;
         break;
       case 297: /* expr ::= expr QUESTION expr COLON expr */
-#line 1806 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1806 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprTrinary, expr, yymsp[-4].minor.yy282);
 	expr->Operation = PEX_Trinary;
@@ -5490,22 +5490,22 @@ static void yy_reduce(
 	expr->Right = yymsp[0].minor.yy282;
 	yylhsminor.yy282 = expr;
 }
-#line 5494 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5494 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,13,&yymsp[-3].minor);
   yy_destructor(yypParser,14,&yymsp[-1].minor);
   yymsp[-4].minor.yy282 = yylhsminor.yy282;
         break;
       case 298: /* expr_list ::= expr_list COMMA expr */
-#line 1822 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1822 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yymsp[-2].minor.yy282 = yymsp[-2].minor.yy282;	/*X-overwrites-A*/
 	AppendTreeNodeSibling(yymsp[-2].minor.yy282, yymsp[0].minor.yy282);
 }
-#line 5505 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5505 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
         break;
       case 299: /* func_expr_list ::= func_expr_list COMMA func_expr_item */
-#line 1838 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1838 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	// Omitted parameters still need to appear as nodes in the list.
 	if (yymsp[-2].minor.yy478 == NULL)
@@ -5525,40 +5525,40 @@ static void yy_reduce(
 	yymsp[-2].minor.yy478 = yymsp[-2].minor.yy478;	/*X-overwrites-A*/
 	AppendTreeNodeSibling(yymsp[-2].minor.yy478, yymsp[0].minor.yy478);
 }
-#line 5529 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5529 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 300: /* func_expr_item ::= */
-#line 1859 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1859 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yymsp[1].minor.yy478 = NULL;
 }
-#line 5536 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5536 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 301: /* named_expr ::= IDENTIFIER COLON expr */
-#line 1865 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1865 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncParm, parm, yymsp[-2].minor.yy0);
 	parm->Value = yymsp[0].minor.yy282;
 	parm->Label = ENamedName(yymsp[-2].minor.yy0.Int);
 	yylhsminor.yy478 = parm;
 }
-#line 5546 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5546 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,14,&yymsp[-1].minor);
   yymsp[-2].minor.yy478 = yylhsminor.yy478;
         break;
       case 302: /* named_expr ::= expr */
-#line 1872 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1872 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(FuncParm, parm, yymsp[0].minor.yy282);
 	parm->Value = yymsp[0].minor.yy282;
 	parm->Label = NAME_None;
 	yylhsminor.yy478 = parm;
 }
-#line 5558 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5558 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy478 = yylhsminor.yy478;
         break;
       case 304: /* string_constant ::= string_constant STRCONST */
-#line 1893 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1893 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprConstant, strconst, yymsp[-1].minor.yy423);
 	strconst->Operation = PEX_ConstValue;
@@ -5566,29 +5566,29 @@ static void yy_reduce(
 	strconst->StringVal = stat->Strings.Alloc(*(yymsp[-1].minor.yy423->StringVal) + *(yymsp[0].minor.yy0.String));
 	yylhsminor.yy423 = strconst;
 }
-#line 5570 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5570 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy423 = yylhsminor.yy423;
         break;
       case 305: /* constant ::= INTCONST */
-#line 1903 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1903 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_INTCONST_NODE(intconst, TypeSInt32, yymsp[0].minor.yy0.Int, yymsp[0].minor.yy0);
 	yylhsminor.yy423 = intconst;
 }
-#line 5579 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5579 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy423 = yylhsminor.yy423;
         break;
       case 306: /* constant ::= UINTCONST */
-#line 1908 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1908 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_INTCONST_NODE(intconst, TypeUInt32, yymsp[0].minor.yy0.Int, yymsp[0].minor.yy0);
 	yylhsminor.yy423 = intconst;
 }
-#line 5588 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5588 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy423 = yylhsminor.yy423;
         break;
       case 307: /* constant ::= FLOATCONST */
-#line 1913 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1913 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprConstant, floatconst, yymsp[0].minor.yy0);
 	floatconst->Operation = PEX_ConstValue;
@@ -5596,11 +5596,11 @@ static void yy_reduce(
 	floatconst->DoubleVal = yymsp[0].minor.yy0.Float;
 	yylhsminor.yy423 = floatconst;
 }
-#line 5600 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5600 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy423 = yylhsminor.yy423;
         break;
       case 308: /* constant ::= NAMECONST */
-#line 1921 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1921 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprConstant, floatconst, yymsp[0].minor.yy0);
 	floatconst->Operation = PEX_ConstValue;
@@ -5608,29 +5608,29 @@ static void yy_reduce(
 	floatconst->IntVal = yymsp[0].minor.yy0.Int;
 	yylhsminor.yy423 = floatconst;
 }
-#line 5612 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5612 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy423 = yylhsminor.yy423;
         break;
       case 309: /* constant ::= FALSE */
-#line 1929 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1929 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_INTCONST_NODE(boolconst, TypeBool, false, yymsp[0].minor.yy0);
 	yylhsminor.yy423 = boolconst;
 }
-#line 5621 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5621 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy423 = yylhsminor.yy423;
         break;
       case 310: /* constant ::= TRUE */
-#line 1934 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1934 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_INTCONST_NODE(boolconst, TypeBool, true, yymsp[0].minor.yy0);
 	yylhsminor.yy423 = boolconst;
 }
-#line 5630 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5630 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy423 = yylhsminor.yy423;
         break;
       case 311: /* constant ::= NULLPTR */
-#line 1939 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1939 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExprConstant, nullptrconst, yymsp[0].minor.yy0);
 	nullptrconst->Operation = PEX_ConstValue;
@@ -5638,51 +5638,51 @@ static void yy_reduce(
 	nullptrconst->StringVal = nullptr;
 	yylhsminor.yy423 = nullptrconst;
 }
-#line 5642 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5642 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy423 = yylhsminor.yy423;
         break;
       case 313: /* statement ::= labeled_statement */
-#line 1953 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1953 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy3 = yymsp[0].minor.yy254; /*X-overwrites-A*/ }
-#line 5648 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5648 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 314: /* statement ::= compound_statement */
-#line 1954 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1954 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy3 = yymsp[0].minor.yy475; /*X-overwrites-A*/ }
-#line 5653 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5653 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 315: /* statement ::= expression_statement SEMICOLON */
-#line 1955 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1955 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy3 = yymsp[-1].minor.yy330; /*X-overwrites-A*/ }
-#line 5658 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5658 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
         break;
       case 316: /* statement ::= assign_statement SEMICOLON */
-#line 1963 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1963 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy3 = yymsp[-1].minor.yy284; /*X-overwrites-A*/ }
-#line 5664 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5664 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
         break;
       case 317: /* statement ::= assign_decl_statement SEMICOLON */
-#line 1964 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1964 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy3 = yymsp[-1].minor.yy7; /*X-overwrites-A*/ }
-#line 5670 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5670 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
         break;
       case 318: /* statement ::= local_var SEMICOLON */
-#line 1965 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1965 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-1].minor.yy3 = yymsp[-1].minor.yy454; /*X-overwrites-A*/ }
-#line 5676 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5676 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
         break;
       case 320: /* statement ::= staticarray_statement */
-#line 1967 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1967 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy3 = yymsp[0].minor.yy286; /*X-overwrites-A*/ }
-#line 5682 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5682 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 321: /* staticarray_statement ::= STATICCONST type IDENTIFIER LBRACKET RBRACKET EQ LBRACE expr_list RBRACE SEMICOLON */
 {  yy_destructor(yypParser,148,&yymsp[-9].minor);
-#line 1974 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1974 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(StaticArrayStatement, stmt, yymsp[-8].minor.yy196);
 	stmt->Type = yymsp[-8].minor.yy196;
@@ -5690,7 +5690,7 @@ static void yy_reduce(
 	stmt->Values = yymsp[-2].minor.yy282;
 	yymsp[-9].minor.yy286 = stmt;
 }
-#line 5694 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5694 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,46,&yymsp[-6].minor);
   yy_destructor(yypParser,122,&yymsp[-5].minor);
   yy_destructor(yypParser,1,&yymsp[-4].minor);
@@ -5701,7 +5701,7 @@ static void yy_reduce(
         break;
       case 322: /* staticarray_statement ::= STATICCONST type LBRACKET RBRACKET IDENTIFIER EQ LBRACE expr_list RBRACE SEMICOLON */
 {  yy_destructor(yypParser,148,&yymsp[-9].minor);
-#line 1983 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1983 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(StaticArrayStatement, stmt, yymsp[-8].minor.yy196);
 	stmt->Type = yymsp[-8].minor.yy196;
@@ -5709,7 +5709,7 @@ static void yy_reduce(
 	stmt->Values = yymsp[-2].minor.yy282;
 	yymsp[-9].minor.yy286 = stmt;
 }
-#line 5713 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5713 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,46,&yymsp[-7].minor);
   yy_destructor(yypParser,122,&yymsp[-6].minor);
   yy_destructor(yypParser,1,&yymsp[-4].minor);
@@ -5719,92 +5719,92 @@ static void yy_reduce(
 }
         break;
       case 323: /* jump_statement ::= CONTINUE SEMICOLON */
-#line 1996 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1996 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ContinueStmt, stmt, yymsp[-1].minor.yy0);
 	yylhsminor.yy3 = stmt;
 }
-#line 5728 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5728 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-1].minor.yy3 = yylhsminor.yy3;
         break;
       case 324: /* jump_statement ::= BREAK SEMICOLON */
-#line 2001 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2001 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(BreakStmt, stmt, yymsp[-1].minor.yy0);
 	yylhsminor.yy3 = stmt;
 }
-#line 5738 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5738 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-1].minor.yy3 = yylhsminor.yy3;
         break;
       case 325: /* jump_statement ::= RETURN SEMICOLON */
-#line 2006 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2006 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ReturnStmt, stmt, yymsp[-1].minor.yy0);
 	stmt->Values = NULL;
 	yylhsminor.yy3 = stmt;
 }
-#line 5749 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5749 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-1].minor.yy3 = yylhsminor.yy3;
         break;
       case 326: /* jump_statement ::= RETURN expr_list SEMICOLON */
-#line 2012 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2012 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ReturnStmt, stmt, yymsp[-2].minor.yy0);
 	stmt->Values = yymsp[-1].minor.yy282;
 	yylhsminor.yy3 = stmt;
 }
-#line 5760 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5760 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
   yymsp[-2].minor.yy3 = yylhsminor.yy3;
         break;
       case 327: /* compound_statement ::= LBRACE RBRACE */
-#line 2024 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2024 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(CompoundStmt,stmt,yymsp[-1].minor.yy0);
 	stmt->Content = NULL;
 	yylhsminor.yy475 = stmt;
 }
-#line 5771 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5771 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,69,&yymsp[0].minor);
   yymsp[-1].minor.yy475 = yylhsminor.yy475;
         break;
       case 328: /* compound_statement ::= LBRACE statement_list RBRACE */
-#line 2030 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2030 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(CompoundStmt,stmt,yymsp[-2].minor.yy0);
 	stmt->Content = yymsp[-1].minor.yy3;
 	yylhsminor.yy475 = stmt;
 }
-#line 5782 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5782 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,69,&yymsp[0].minor);
   yymsp[-2].minor.yy475 = yylhsminor.yy475;
         break;
       case 329: /* compound_statement ::= LBRACE error RBRACE */
-#line 2036 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2036 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(CompoundStmt,stmt,yymsp[-2].minor.yy0);
 	stmt->Content = NULL;
 	yylhsminor.yy475 = stmt;
 }
-#line 5793 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5793 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,69,&yymsp[0].minor);
   yymsp[-2].minor.yy475 = yylhsminor.yy475;
         break;
       case 332: /* expression_statement ::= expr */
-#line 2056 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2056 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ExpressionStmt, stmt, yymsp[0].minor.yy282);
 	stmt->Expression = yymsp[0].minor.yy282;
 	yylhsminor.yy330 = stmt;
 }
-#line 5804 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5804 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy330 = yylhsminor.yy330;
         break;
       case 333: /* iteration_statement ::= while_or_until LPAREN expr RPAREN statement */
-#line 2068 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2068 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(IterationStmt, iter, yymsp[-4].minor.yy0);
 	if (yymsp[-4].minor.yy0.Int == ZCC_UNTIL)
@@ -5821,13 +5821,13 @@ static void yy_reduce(
 	iter->CheckAt = ZCC_IterationStmt::Start;
 	yylhsminor.yy3 = iter;
 }
-#line 5825 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5825 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-3].minor);
   yy_destructor(yypParser,63,&yymsp[-1].minor);
   yymsp[-4].minor.yy3 = yylhsminor.yy3;
         break;
       case 334: /* iteration_statement ::= DO statement while_or_until LPAREN expr RPAREN */
-#line 2086 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2086 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(IterationStmt, iter, yymsp[-5].minor.yy0);
 	if (yymsp[-3].minor.yy0.Int == ZCC_UNTIL)
@@ -5844,13 +5844,13 @@ static void yy_reduce(
 	iter->CheckAt = ZCC_IterationStmt::End;
 	yylhsminor.yy3 = iter;
 }
-#line 5848 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5848 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-2].minor);
   yy_destructor(yypParser,63,&yymsp[0].minor);
   yymsp[-5].minor.yy3 = yylhsminor.yy3;
         break;
       case 335: /* iteration_statement ::= FOR LPAREN for_init SEMICOLON opt_expr SEMICOLON for_bump RPAREN statement */
-#line 2104 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2104 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(IterationStmt, iter, yymsp[-8].minor.yy0);
 	iter->LoopCondition = yymsp[-4].minor.yy282;
@@ -5866,7 +5866,7 @@ static void yy_reduce(
 	wrap->Content = yymsp[-6].minor.yy3;
 	yylhsminor.yy3 = wrap;
 }
-#line 5870 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5870 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-7].minor);
   yy_destructor(yypParser,49,&yymsp[-5].minor);
   yy_destructor(yypParser,49,&yymsp[-3].minor);
@@ -5874,7 +5874,7 @@ static void yy_reduce(
   yymsp[-8].minor.yy3 = yylhsminor.yy3;
         break;
       case 336: /* array_iteration_statement ::= FOREACH LPAREN variable_name COLON expr RPAREN statement */
-#line 2123 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2123 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ArrayIterationStmt, iter, yymsp[-6].minor.yy0);
 	iter->ItName = yymsp[-4].minor.yy492;
@@ -5882,14 +5882,14 @@ static void yy_reduce(
 	iter->LoopStatement = yymsp[0].minor.yy3;
 	yylhsminor.yy3 = iter;
 }
-#line 5886 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5886 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-5].minor);
   yy_destructor(yypParser,14,&yymsp[-3].minor);
   yy_destructor(yypParser,63,&yymsp[-1].minor);
   yymsp[-6].minor.yy3 = yylhsminor.yy3;
         break;
       case 337: /* two_arg_iteration_statement ::= FOREACH LPAREN variable_name COMMA variable_name COLON expr RPAREN statement */
-#line 2134 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2134 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(TwoArgIterationStmt, iter, yymsp[-8].minor.yy0);
 	iter->ItKey = yymsp[-6].minor.yy492;
@@ -5898,7 +5898,7 @@ static void yy_reduce(
 	iter->LoopStatement = yymsp[0].minor.yy3;
 	yylhsminor.yy3 = iter;
 }
-#line 5902 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5902 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-7].minor);
   yy_destructor(yypParser,50,&yymsp[-5].minor);
   yy_destructor(yypParser,14,&yymsp[-3].minor);
@@ -5906,7 +5906,7 @@ static void yy_reduce(
   yymsp[-8].minor.yy3 = yylhsminor.yy3;
         break;
       case 338: /* three_arg_iteration_statement ::= FOREACH LPAREN variable_name COMMA variable_name COMMA variable_name COLON expr RPAREN statement */
-#line 2146 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2146 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(ThreeArgIterationStmt, iter, yymsp[-10].minor.yy0);
 	iter->ItVar = yymsp[-8].minor.yy492;
@@ -5916,7 +5916,7 @@ static void yy_reduce(
 	iter->LoopStatement = yymsp[0].minor.yy3;
 	yylhsminor.yy3 = iter;
 }
-#line 5920 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5920 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-9].minor);
   yy_destructor(yypParser,50,&yymsp[-7].minor);
   yy_destructor(yypParser,50,&yymsp[-5].minor);
@@ -5925,7 +5925,7 @@ static void yy_reduce(
   yymsp[-10].minor.yy3 = yylhsminor.yy3;
         break;
       case 339: /* typed_iteration_statement ::= FOREACH LPAREN variable_name variable_name COLON expr RPAREN statement */
-#line 2159 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2159 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(TypedIterationStmt, iter, yymsp[-7].minor.yy0);
 	iter->ItType = yymsp[-5].minor.yy492;
@@ -5934,74 +5934,74 @@ static void yy_reduce(
 	iter->LoopStatement = yymsp[0].minor.yy3;
 	yylhsminor.yy3 = iter;
 }
-#line 5938 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5938 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-6].minor);
   yy_destructor(yypParser,14,&yymsp[-3].minor);
   yy_destructor(yypParser,63,&yymsp[-1].minor);
   yymsp[-7].minor.yy3 = yylhsminor.yy3;
         break;
       case 340: /* while_or_until ::= WHILE */
-#line 2169 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2169 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yylhsminor.yy0.Int = ZCC_WHILE;
 	yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc;
 }
-#line 5950 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5950 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 341: /* while_or_until ::= UNTIL */
-#line 2174 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2174 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yylhsminor.yy0.Int = ZCC_UNTIL;
 	yylhsminor.yy0.SourceLoc = yymsp[0].minor.yy0.SourceLoc;
 }
-#line 5959 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5959 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy0 = yylhsminor.yy0;
         break;
       case 342: /* for_init ::= local_var */
-#line 2180 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2180 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy3 = yymsp[0].minor.yy454 /*X-overwrites-A*/; }
-#line 5965 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5965 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 343: /* for_init ::= for_bump */
-#line 2181 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2181 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy3 = yymsp[0].minor.yy3 /*X-overwrites-A*/; }
-#line 5970 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5970 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 344: /* for_bump ::= */
-#line 2184 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2184 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[1].minor.yy3 = NULL; }
-#line 5975 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5975 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 345: /* for_bump ::= expression_statement */
-#line 2185 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2185 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[0].minor.yy3 = yymsp[0].minor.yy330; /*X-overwrites-A*/ }
-#line 5980 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5980 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 346: /* for_bump ::= for_bump COMMA expression_statement */
-#line 2186 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2186 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { yymsp[-2].minor.yy3 = yymsp[-2].minor.yy3; /*X-overwrites-A*/ AppendTreeNodeSibling(yymsp[-2].minor.yy3, yymsp[0].minor.yy330); }
-#line 5985 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5985 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
         break;
       case 347: /* selection_statement ::= if_front */
-#line 2200 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2200 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yymsp[0].minor.yy3 = yymsp[0].minor.yy45; /*X-overwrites-A*/
 }
-#line 5993 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 5993 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
         break;
       case 348: /* selection_statement ::= if_front ELSE statement */
-#line 2204 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2204 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	yymsp[-2].minor.yy45->FalsePath = yymsp[0].minor.yy3;
 	yymsp[-2].minor.yy3 = yymsp[-2].minor.yy45; /*X-overwrites-A*/
 }
-#line 6001 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6001 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,158,&yymsp[-1].minor);
         break;
       case 349: /* if_front ::= IF LPAREN expr RPAREN statement */
-#line 2210 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2210 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(IfStmt,stmt,yymsp[-4].minor.yy0);
 	stmt->Condition = yymsp[-2].minor.yy282;
@@ -6009,49 +6009,49 @@ static void yy_reduce(
 	stmt->FalsePath = NULL;
 	yylhsminor.yy45 = stmt;
 }
-#line 6013 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6013 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-3].minor);
   yy_destructor(yypParser,63,&yymsp[-1].minor);
   yymsp[-4].minor.yy45 = yylhsminor.yy45;
         break;
       case 350: /* selection_statement ::= SWITCH LPAREN expr RPAREN statement */
-#line 2221 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2221 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(SwitchStmt,stmt,yymsp[-4].minor.yy0);
 	stmt->Condition = yymsp[-2].minor.yy282;
 	stmt->Content = yymsp[0].minor.yy3;
 	yylhsminor.yy3 = stmt;
 }
-#line 6026 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6026 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,45,&yymsp[-3].minor);
   yy_destructor(yypParser,63,&yymsp[-1].minor);
   yymsp[-4].minor.yy3 = yylhsminor.yy3;
         break;
       case 351: /* labeled_statement ::= CASE expr COLON */
-#line 2233 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2233 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(CaseStmt,stmt,yymsp[-2].minor.yy0);
 	stmt->Condition = yymsp[-1].minor.yy282;
 	yylhsminor.yy254 = stmt;
 }
-#line 6038 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6038 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,14,&yymsp[0].minor);
   yymsp[-2].minor.yy254 = yylhsminor.yy254;
         break;
       case 352: /* labeled_statement ::= DEFAULT COLON */
-#line 2239 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2239 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(CaseStmt,stmt,yymsp[-1].minor.yy0);
 	stmt->Condition = NULL;
 	yylhsminor.yy254 = stmt;
 }
-#line 6049 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6049 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,14,&yymsp[0].minor);
   yymsp[-1].minor.yy254 = yylhsminor.yy254;
         break;
       case 353: /* assign_statement ::= LBRACKET expr_list RBRACKET EQ expr */
 {  yy_destructor(yypParser,46,&yymsp[-4].minor);
-#line 2252 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2252 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(AssignStmt,stmt,yymsp[-3].minor.yy282);
 	stmt->AssignOp = ZCC_EQ;
@@ -6059,14 +6059,14 @@ static void yy_reduce(
 	stmt->Sources = yymsp[0].minor.yy282;
 	yymsp[-4].minor.yy284 = stmt;
 }
-#line 6063 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6063 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,122,&yymsp[-2].minor);
   yy_destructor(yypParser,1,&yymsp[-1].minor);
 }
         break;
       case 354: /* assign_decl_statement ::= LET LBRACKET identifier_list RBRACKET EQ expr */
 {  yy_destructor(yypParser,109,&yymsp[-5].minor);
-#line 2263 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2263 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(AssignDeclStmt,stmt,yymsp[-3].minor.yy493);
 	stmt->AssignOp = ZCC_EQ;
@@ -6074,25 +6074,25 @@ static void yy_reduce(
 	stmt->Sources = yymsp[0].minor.yy282;
 	yymsp[-5].minor.yy7 = stmt;
 }
-#line 6078 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6078 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,46,&yymsp[-4].minor);
   yy_destructor(yypParser,122,&yymsp[-2].minor);
   yy_destructor(yypParser,1,&yymsp[-1].minor);
 }
         break;
       case 355: /* local_var ::= type variable_list_with_init */
-#line 2276 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2276 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(LocalVarStmt,vardef,yymsp[-1].minor.yy196);
 	vardef->Type = yymsp[-1].minor.yy196;
 	vardef->Vars = yymsp[0].minor.yy55;
 	yylhsminor.yy454 = vardef;
 }
-#line 6092 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6092 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy454 = yylhsminor.yy454;
         break;
       case 356: /* var_init ::= IDENTIFIER */
-#line 2285 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2285 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { 
 	NEW_AST_NODE(VarInit,var,yymsp[0].minor.yy0);
 	var->Name = ENamedName(yymsp[0].minor.yy0.Int);
@@ -6101,11 +6101,11 @@ static void yy_reduce(
 	var->InitIsArray = false;
 	yylhsminor.yy55 = var;
 }
-#line 6105 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6105 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[0].minor.yy55 = yylhsminor.yy55;
         break;
       case 357: /* var_init ::= IDENTIFIER array_size */
-#line 2295 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2295 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	NEW_AST_NODE(VarInit,var,yymsp[-1].minor.yy0);
 	var->Name = ENamedName(yymsp[-1].minor.yy0.Int);
@@ -6114,11 +6114,11 @@ static void yy_reduce(
 	var->InitIsArray = false;
 	yylhsminor.yy55 = var;
 }
-#line 6118 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6118 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yymsp[-1].minor.yy55 = yylhsminor.yy55;
         break;
       case 358: /* var_init ::= IDENTIFIER EQ expr */
-#line 2305 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2305 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { 
 	NEW_AST_NODE(VarInit,var,yymsp[-2].minor.yy0);
 	var->Name = ENamedName(yymsp[-2].minor.yy0.Int);
@@ -6127,12 +6127,12 @@ static void yy_reduce(
 	var->InitIsArray = false;
 	yylhsminor.yy55 = var;
 }
-#line 6131 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6131 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,1,&yymsp[-1].minor);
   yymsp[-2].minor.yy55 = yylhsminor.yy55;
         break;
       case 359: /* var_init ::= IDENTIFIER EQ LBRACE expr_list RBRACE */
-#line 2315 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2315 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { 
 	NEW_AST_NODE(VarInit,var,yymsp[-4].minor.yy0);
 	var->Name = ENamedName(yymsp[-4].minor.yy0.Int);
@@ -6141,14 +6141,14 @@ static void yy_reduce(
 	var->InitIsArray = true;
 	yylhsminor.yy55 = var;
 }
-#line 6145 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6145 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,1,&yymsp[-3].minor);
   yy_destructor(yypParser,68,&yymsp[-2].minor);
   yy_destructor(yypParser,69,&yymsp[0].minor);
   yymsp[-4].minor.yy55 = yylhsminor.yy55;
         break;
       case 360: /* var_init ::= IDENTIFIER array_size EQ LBRACE expr_list RBRACE */
-#line 2325 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2325 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { 
 	NEW_AST_NODE(VarInit,var,yymsp[-5].minor.yy0);
 	var->Name = ENamedName(yymsp[-5].minor.yy0.Int);
@@ -6157,7 +6157,7 @@ static void yy_reduce(
 	var->InitIsArray = true;
 	yylhsminor.yy55 = var;
 }
-#line 6161 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6161 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,1,&yymsp[-3].minor);
   yy_destructor(yypParser,68,&yymsp[-2].minor);
   yy_destructor(yypParser,69,&yymsp[0].minor);
@@ -6165,61 +6165,61 @@ static void yy_reduce(
         break;
       case 361: /* var_init ::= IDENTIFIER EQ LBRACE error RBRACE */
 {  yy_destructor(yypParser,54,&yymsp[-4].minor);
-#line 2335 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2335 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 { 
 	yymsp[-4].minor.yy55 = NULL;
 }
-#line 6173 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6173 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,1,&yymsp[-3].minor);
   yy_destructor(yypParser,68,&yymsp[-2].minor);
   yy_destructor(yypParser,69,&yymsp[0].minor);
 }
         break;
       case 362: /* variable_list_with_init ::= variable_list_with_init COMMA var_init */
-#line 2343 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 2343 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 	AppendTreeNodeSibling(yymsp[-2].minor.yy55, yymsp[0].minor.yy55);
 	yymsp[-2].minor.yy55 = yymsp[-2].minor.yy55; /*X-overwrites-A*/
 }
-#line 6185 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6185 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,50,&yymsp[-1].minor);
         break;
       case 363: /* translation_unit ::= translation_unit EOF */
-#line 179 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 179 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 }
-#line 6192 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6192 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,48,&yymsp[0].minor);
         break;
       case 365: /* opt_semicolon ::= SEMICOLON */
 {  yy_destructor(yypParser,49,&yymsp[0].minor);
-#line 192 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 192 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 }
-#line 6200 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6200 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 367: /* opt_comma ::= COMMA */
 {  yy_destructor(yypParser,50,&yymsp[0].minor);
-#line 195 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 195 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 }
-#line 6208 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6208 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 }
         break;
       case 373: /* state_flow ::= state_flow_type scanner_mode SEMICOLON */
-#line 671 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 671 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 }
-#line 6215 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6215 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,49,&yymsp[0].minor);
         break;
       case 385: /* primary ::= LPAREN error RPAREN */
 {  yy_destructor(yypParser,45,&yymsp[-2].minor);
-#line 1458 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 1458 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 {
 }
-#line 6223 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6223 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
   yy_destructor(yypParser,63,&yymsp[0].minor);
 }
         break;
@@ -6298,9 +6298,9 @@ static void yy_parse_failed(
   /* Here code is inserted which will be executed whenever the
   ** parser fails */
 /************ Begin %parse_failure code ***************************************/
-#line 149 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 149 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
  /**failed = true;*/ 
-#line 6304 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6304 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 /************ End %parse_failure code *****************************************/
   ZCCParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
@@ -6317,7 +6317,7 @@ static void yy_syntax_error(
   ZCCParseARG_FETCH;
 #define TOKEN yyminor
 /************ Begin %syntax_error code ****************************************/
-#line 122 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 122 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
 
 	FString unexpected, expecting;
 
@@ -6343,7 +6343,7 @@ static void yy_syntax_error(
 	}
 	stat->sc->ScriptMessage("%s\n%s\n", unexpected.GetChars(), expecting.GetChars());
 	FScriptPosition::ErrorCounter++;
-#line 6347 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6347 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 /************ End %syntax_error code ******************************************/
   ZCCParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
@@ -6372,9 +6372,9 @@ static void yy_accept(
   /* Here code is inserted which will be executed whenever the
   ** parser accepts */
 /*********** Begin %parse_accept code *****************************************/
-#line 148 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/common/scripting/frontend/zcc-parse.lemon"
+#line 148 "F:/download/browser/gzdoom-g4.14.0_origin/src/common/scripting/frontend/zcc-parse.lemon"
  DPrintf(DMSG_SPAMMY, "Input accepted\n"); 
-#line 6378 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/zcc-parse.c"
+#line 6378 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/zcc-parse.c"
 /*********** End %parse_accept code *******************************************/
   ZCCParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }

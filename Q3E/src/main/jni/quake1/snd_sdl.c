@@ -29,7 +29,8 @@ static unsigned int sdlaudiotime = 0;
 static int audio_device = 0;
 
 
-// Note: SDL calls SDL_LockAudio() right before this function, so no need to lock the audio data here
+// This function is called when the audio device needs more data.
+// Note: SDL obtains the device lock before calling this function, no need to lock it here.
 static void Buffer_Callback (void *userdata, Uint8 *stream, int len)
 {
 	unsigned int factor, RequestedFrames, MaxFrames, FrameCount;
@@ -41,14 +42,11 @@ static void Buffer_Callback (void *userdata, Uint8 *stream, int len)
 
 	RequestedFrames = (unsigned int)len / factor;
 
-	if (SndSys_LockRenderBuffer())
-	{
 		if (snd_usethreadedmixing)
 		{
 			S_MixToBuffer(stream, RequestedFrames);
 			if (snd_blocked)
 				memset(stream, snd_renderbuffer->format.width == 1 ? 0x80 : 0, len);
-			SndSys_UnlockRenderBuffer();
 			return;
 		}
 
@@ -60,7 +58,9 @@ static void Buffer_Callback (void *userdata, Uint8 *stream, int len)
 			FrameCount = MaxFrames;
 		StartOffset = snd_renderbuffer->startframe % snd_renderbuffer->maxframes;
 		EndOffset = (snd_renderbuffer->startframe + FrameCount) % snd_renderbuffer->maxframes;
-		if (StartOffset > EndOffset)  // if the buffer wraps
+	if (snd_blocked)
+		memset(stream, snd_renderbuffer->format.width == 1 ? 0x80 : 0, len);
+	else if (StartOffset > EndOffset)  // if the buffer wraps
 		{
 			unsigned int PartialLength1, PartialLength2;
 
@@ -89,9 +89,6 @@ static void Buffer_Callback (void *userdata, Uint8 *stream, int len)
 			Con_DPrintf("SDL sound: %u sample frames missing\n", RequestedFrames - FrameCount);
 
 		sdlaudiotime += RequestedFrames;
-
-		SndSys_UnlockRenderBuffer();
-	}
 }
 
 
@@ -119,7 +116,8 @@ qbool SndSys_Init (snd_format_t* fmt)
 		return false;
 	}
 
-	buffersize = (unsigned int)ceil((double)fmt->speed / 25.0); // 2048 bytes on 24kHz to 48kHz
+	// SDL2 wiki recommends this range
+	buffersize = bound(512, ceil((double)fmt->speed * snd_bufferlength.value / 1000.0), 8192);
 
 	// Init the SDL Audio subsystem
 	memset(&wantspec, 0, sizeof(wantspec));

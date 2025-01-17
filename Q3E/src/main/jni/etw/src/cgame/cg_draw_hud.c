@@ -37,6 +37,7 @@
 #include "cg_local.h"
 
 hudData_t hudData;
+hudComponent_t *showOnlyHudComponent = NULL;
 
 static lagometer_t lagometer;
 
@@ -50,13 +51,13 @@ const hudComponentFields_t hudComponentFields[] =
 	{ HUDF(compass),            CG_DrawNewCompass,                0.19f,  { "Square",        "Draw Item",    "Draw Sec Obj",   "Draw Prim Obj", "Decor", "Direction", "Cardinal Pts", "Always Draw"} },
 	{ HUDF(staminabar),         CG_DrawStaminaBar,                0.19f,  { "Left",          "Center",       "Vertical",       "No Alpha", "Bar Bckgrnd", "X0 Y5", "X0 Y0", "Lerp Color", "Bar Border", "Border Tiny", "Decor", "Icon"} },
 	{ HUDF(breathbar),          CG_DrawBreathBar,                 0.19f,  { "Left",          "Center",       "Vertical",       "No Alpha", "Bar Bckgrnd", "X0 Y5", "X0 Y0", "Lerp Color", "Bar Border", "Border Tiny", "Decor", "Icon"} },
-	{ HUDF(healthbar),          CG_DrawPlayerHealthBar,           0.19f,  { "Left",          "Center",       "Vertical",       "No Alpha", "Bar Bckgrnd", "X0 Y5", "X0 Y0", "Lerp Color", "Bar Border", "Border Tiny", "Decor", "Icon", "Dynamic Color"} },
-	{ HUDF(weaponchargebar),    CG_DrawWeapRecharge,              0.19f,  { "Left",          "Center",       "Vertical",       "No Alpha", "Bar Bckgrnd", "X0 Y5", "X0 Y0", "Lerp Color", "Bar Border", "Border Tiny", "Decor", "Icon"} },
+	{ HUDF(healthbar),          CG_DrawPlayerHealthBar,           0.19f,  { "Left",          "Center",       "Vertical",       "No Alpha", "Bar Bckgrnd", "X0 Y5", "X0 Y0", "Lerp Color", "Bar Border", "Border Tiny", "Decor", "Icon", "Needle", "Dynamic Color"} },
+	{ HUDF(weaponchargebar),    CG_DrawWeapRecharge,              0.19f,  { "Left",          "Center",       "Vertical",       "No Alpha", "Bar Bckgrnd", "X0 Y5", "X0 Y0", "Lerp Color", "Bar Border", "Border Tiny", "Decor", "Icon", "Needle"} },
 	{ HUDF(healthtext),         CG_DrawPlayerHealth,              0.25f,  { "Dynamic Color", "Draw Suffix" } },
 	{ HUDF(xptext),             CG_DrawXP,                        0.25f,  { "Draw Suffix" } },
 	{ HUDF(ranktext),           CG_DrawRank,                      0.20f,  { 0 } },
 	{ HUDF(statsdisplay),       CG_DrawSkills,                    0.25f,  { "Column" } },
-	{ HUDF(weaponicon),         CG_DrawGunIcon,                   0.19f,  { "Icon Flash" } },
+	{ HUDF(weaponicon),         CG_DrawGunIcon,                   0.19f,  { "Icon Flash",    "Dynamic Heat Color" } },
 	{ HUDF(weaponammo),         CG_DrawAmmoCount,                 0.25f,  { "Dynamic Color" } },
 	{ HUDF(fireteam),           CG_DrawFireTeamOverlay,           0.20f,  { "Latched Class", "No Header",    "Colorless Name", "Status Color Name", "Status Color Row"} },// FIXME: outside cg_draw_hud
 	{ HUDF(popupmessages),      CG_DrawPM,                        0.22f,  { "No Connect",    "No TeamJoin",  "No Mission",     "No Pickup", "No Death", "Weapon Icon", "Alt Weap Icons", "Swap V<->K", "Force Colors", "Scroll Down"} }, // FIXME: outside cg_draw_hud
@@ -66,6 +67,8 @@ const hudComponentFields_t hudComponentFields[] =
 	{ HUDF(objectives),         CG_DrawObjectiveStatus,           0.19f,  { 0 } },
 	{ HUDF(hudhead),            CG_DrawPlayerStatusHead,          0.19f,  { 0 } },
 	{ HUDF(cursorhints),        CG_DrawCursorhint,                0.19f,  { "Size Pulse",    "Strobe Pulse", "Alpha Pulse" } },// FIXME: outside cg_draw_hud
+	{ HUDF(cursorhintsbar),     CG_DrawCursorHintBar,             0.19f,  { "Left",          "Center",       "Vertical",       "No Alpha", "Bar Bckgrnd", "X0 Y5", "X0 Y0", "Lerp Color", "Bar Border", "Border Tiny", "Decor", "Icon"} },  // FIXME: outside cg_draw_hud
+	{ HUDF(cursorhintstext),    CG_DrawCursorHintText,            0.19f,  { "Draw Suffix" } },// FIXME: outside cg_draw_hud
 	{ HUDF(weaponstability),    CG_DrawWeapStability,             0.19f,  { "Always",        "Left",         "Center",         "Vertical", "No Alpha", "Bar Bckgrnd", "X0 Y5", "X0 Y0", "Lerp Color", "Bar Border", "Border Tiny", "Decor", "Icon"} }, // FIXME: outside cg_draw_hud
 	{ HUDF(livesleft),          CG_DrawLivesLeft,                 0.19f,  { 0 } },
 	{ HUDF(roundtimer),         CG_DrawRoundTimer,                0.19f,  { "Simple" } },
@@ -75,7 +78,7 @@ const hudComponentFields_t hudComponentFields[] =
 	{ HUDF(votetext),           CG_DrawVote,                      0.22f,  { "Complaint" } }, // FIXME: outside cg_draw_hud
 	{ HUDF(spectatortext),      CG_DrawSpectatorMessage,          0.22f,  { 0 } },           // FIXME: outside cg_draw_hud
 	{ HUDF(limbotext),          CG_DrawLimboMessage,              0.22f,  { "No Wounded Msg" } },// FIXME: outside cg_draw_hud
-	{ HUDF(followtext),         CG_DrawFollow,                    0.22f,  { 0 } },           // FIXME: outside cg_draw_hud
+	{ HUDF(followtext),         CG_DrawFollow,                    0.22f,  { "No Countdown" } },// FIXME: outside cg_draw_hud
 	{ HUDF(demotext),           CG_DrawDemoMessage,               0.22f,  { "Details" } },
 	{ HUDF(missilecamera),      CG_DrawMissileCamera,             0.22f,  { 0 } },           // FIXME: outside cg_draw_hud
 	{ HUDF(sprinttext),         CG_DrawPlayerSprint,              0.25f,  { "Draw Suffix" } },
@@ -95,10 +98,10 @@ const hudComponentFields_t hudComponentFields[] =
 	{ HUDF(objectivetext),      CG_DrawObjectiveInfo,             0.22f,  { 0 } },           // FIXME: outside cg_draw_hud
 	{ HUDF(centerprint),        CG_DrawCenterString,              0.22f,  { 0 } },           // FIXME: outside cg_draw_hud
 	{ HUDF(banner),             CG_DrawBannerPrint,               0.23f,  { 0 } },           // FIXME: outside cg_draw_hud
-	{ HUDF(crosshairtext),      CG_DrawCrosshairNames,            0.25f,  { "Full Color" } },// FIXME: outside cg_draw_hud
+	{ HUDF(crosshairtext),      CG_DrawCrosshairNames,            0.25f,  { "Full Color",    "Explosive Owner" } },// FIXME: outside cg_draw_hud
 	{ HUDF(crosshairbar),       CG_DrawCrosshairHealthBar,        0.25f,  { "Class",         "Rank",         "Prestige",       "Left", "Center", "Vertical", "No Alpha", "Bar Bckgrnd", "X0 Y5", "X0 Y0", "Lerp Color", "Bar Border", "Border Tiny", "Decor", "Icon", "Dynamic Color"} }, // FIXME: outside cg_draw_hud
 	{ HUDF(stats),              CG_DrawShoutcastPlayerStatus,     0.19f,  { 0 } },           // FIXME: outside cg_draw_hud
-	{ HUDF(xpgain),             CG_DrawPMItemsXPGain,             0.22f,  { "Scroll Down",   "No Reason" } },// FIXME: outside cg_draw_hud
+	{ HUDF(xpgain),             CG_DrawPMItemsXPGain,             0.22f,  { "Scroll Down",   "No Reason",    "No Stack", "No XP Add up" } },   // FIXME: outside cg_draw_hud
 	{ HUDF(scPlayerListAxis),   CG_DrawShoutcastPlayerListAxis,   0.16f,  { 0 } },           // FIXME: outside cg_draw_hud
 	{ HUDF(scPlayerListAllies), CG_DrawShoutcastPlayerListAllies, 0.16f,  { 0 } },           // FIXME: outside cg_draw_hud
 	{ HUDF(scTeamNamesAxis),    CG_DrawShoutcastTeamNameAxis,     0.3f,   { 0 } },           // FIXME: outside cg_draw_hud
@@ -182,22 +185,24 @@ void CG_setDefaultHudValues(hudStucture_t *hud)
 	hud->compass            = CG_getComponent(SCREEN_WIDTH - 136, 0, 132, 132, qtrue, COMPASS_ITEM | COMPASS_SECONDARY_OBJECTIVES | COMPASS_PRIMARY_OBJECTIVES | COMPASS_DECOR | COMPASS_CARDINAL_POINTS, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawNewCompass);
 	hud->staminabar         = CG_getComponent(4, SCREEN_HEIGHT - 92, 12, 72, qtrue, BAR_LEFT | BAR_VERT | BAR_BG | BAR_BGSPACING_X0Y0 | BAR_LERP_COLOR | BAR_DECOR | BAR_ICON, 100.f, (vec4_t) { 0, 1.0f, 0.1f, 0.5f }, (vec4_t) { 1.0f, 0, 0.1f, 0.5f }, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawStaminaBar);
 	hud->breathbar          = CG_getComponent(4, SCREEN_HEIGHT - 92, 12, 72, qtrue, BAR_LEFT | BAR_VERT | BAR_BG | BAR_BGSPACING_X0Y0 | BAR_LERP_COLOR | BAR_DECOR | BAR_ICON, 100.f, (vec4_t) { 0, 0.1f, 1.0f, 0.5f }, (vec4_t) { 1.0f, 0.1f, 0, 0.5f }, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawBreathBar);
-	hud->healthbar          = CG_getComponent(24, SCREEN_HEIGHT - 92, 12, 72, qtrue, BAR_LEFT | BAR_VERT | BAR_BG | BAR_BGSPACING_X0Y0 | BAR_DECOR | BAR_ICON | (BAR_ICON << 1), 100.f, (vec4_t) { 1.f, 1.f, 1.f, 0.75f }, (vec4_t) { 1.f, 0, 0, 0.25f }, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawPlayerHealthBar);
-	hud->weaponchargebar    = CG_getComponent(SCREEN_WIDTH - 16, SCREEN_HEIGHT - 92, 12, 72, qtrue, BAR_LEFT | BAR_VERT | BAR_BG | BAR_LERP_COLOR | BAR_DECOR | BAR_ICON, 100.f, (vec4_t) { 1.0, 1.0f, 1.0f, 0.75f }, (vec4_t) { 1.0, 1.0f, 0.1f, 0.25f }, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawWeapRecharge);
+	hud->healthbar          = CG_getComponent(24, SCREEN_HEIGHT - 92, 12, 72, qtrue, BAR_LEFT | BAR_VERT | BAR_BG | BAR_BGSPACING_X0Y0 | BAR_DECOR | BAR_ICON | BAR_NEEDLE | (BAR_NEEDLE << 1), 100.f, (vec4_t) { 1.f, 1.f, 1.f, 0.75f }, (vec4_t) { 1.f, 0, 0, 0.25f }, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawPlayerHealthBar);
+	hud->weaponchargebar    = CG_getComponent(SCREEN_WIDTH - 16, SCREEN_HEIGHT - 92, 12, 72, qtrue, BAR_LEFT | BAR_VERT | BAR_BG | BAR_LERP_COLOR | BAR_DECOR | BAR_ICON | BAR_NEEDLE, 100.f, (vec4_t) { 1.0, 1.0f, 1.0f, 0.75f }, (vec4_t) { 1.0, 1.0f, 0.1f, 0.25f }, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawWeapRecharge);
 	hud->healthtext         = CG_getComponent(47, 465, 57, 14, qtrue, 2, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.25f, CG_DrawPlayerHealth);
 	hud->xptext             = CG_getComponent(108, 465, 57, 14, qtrue, 1, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.25f, CG_DrawXP);
 	hud->ranktext           = CG_getComponent(167, 465, 57, 14, qfalse, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.20f, CG_DrawRank);    // disable
 	hud->statsdisplay       = CG_getComponent(116, 394, 42, 70, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.25f, CG_DrawSkills);
-	hud->weaponicon         = CG_getComponent(SCREEN_WIDTH - 88, SCREEN_HEIGHT - 52, 60, 32, qtrue, 1, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawGunIcon);
+	hud->weaponicon         = CG_getComponent(SCREEN_WIDTH - 88, SCREEN_HEIGHT - 52, 60, 32, qtrue, 1 | 2, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawGunIcon);
 	hud->weaponammo         = CG_getComponent(SCREEN_WIDTH - 82, 458, 57, 14, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_RIGHT, qfalse, 0.25f, CG_DrawAmmoCount);
 	hud->fireteam           = CG_getComponent(10, 10, 350, 100, qtrue, 1, 100.f, colorWhite, HUD_Background, qtrue, HUD_BackgroundAlt, qtrue, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.20f, CG_DrawFireTeamOverlay);
-	hud->popupmessages      = CG_getComponent(4, 245, 422, 96, qtrue, 64, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawPM);
-	hud->popupmessages2     = CG_getComponent(4, 245, 422, 96, qfalse, 64, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawPM);
-	hud->popupmessages3     = CG_getComponent(4, 245, 422, 96, qfalse, 64, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawPM);
+	hud->popupmessages      = CG_getComponent(4, 245, 422, 96, qtrue, 64, 89.7f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawPM);
+	hud->popupmessages2     = CG_getComponent(4, 245, 422, 96, qfalse, 64, 89.7f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawPM);
+	hud->popupmessages3     = CG_getComponent(4, 245, 422, 96, qfalse, 64, 89.7f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawPM);
 	hud->powerups           = CG_getComponent(SCREEN_WIDTH  - 40, SCREEN_HEIGHT - 136, 36, 36, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawPowerUps);
 	hud->objectives         = CG_getComponent(4, SCREEN_HEIGHT - 136, 36, 36, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawObjectiveStatus);
-	hud->hudhead            = CG_getComponent(44, SCREEN_HEIGHT - 92, 62, 80, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawPlayerStatusHead);
+	hud->hudhead            = CG_getComponent(44, SCREEN_HEIGHT - 96, 62, 80, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawPlayerStatusHead);
 	hud->cursorhints        = CG_getComponent(SCREEN_WIDTH * .5f - 24, 260, 48, 48, qtrue, 1, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawCursorhint);
+	hud->cursorhintsbar     = CG_getComponent(SCREEN_WIDTH * .5f - 24, 308, 48, 8, qtrue, BAR_BORDER_SMALL | BAR_LERP_COLOR, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawCursorHintBar);
+	hud->cursorhintstext    = CG_getComponent(SCREEN_WIDTH * .5f + 24, 294, 57, 14, qfalse, 1, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.25f, CG_DrawCursorHintText);
 	hud->weaponstability    = CG_getComponent(50, 208, 10, 64, qtrue, (BAR_CENTER | BAR_VERT | BAR_LERP_COLOR) << 1, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawWeapStability);
 	hud->livesleft          = CG_getComponent(4, 360, 48, 24, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawLivesLeft);
 	hud->roundtimer         = CG_getComponent(SCREEN_WIDTH - 60, 152, 57, 14, qtrue, 0, 100.f, colorWhite, colorWhite, qtrue, HUD_Background, qtrue, HUD_Border, ITEM_TEXTSTYLE_NORMAL, ITEM_ALIGN_CENTER, qfalse, 0.19f, CG_DrawRoundTimer);
@@ -208,7 +213,7 @@ void CG_setDefaultHudValues(hudStucture_t *hud)
 	hud->spectatortext      = CG_getComponent(4, 160, 278, 38, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawSpectatorMessage);
 	hud->limbotext          = CG_getComponent(4, 124, 278, 38, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawLimboMessage);
 	hud->followtext         = CG_getComponent(4, 124, 278, 24, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawFollow);
-	hud->demotext           = CG_getComponent(10, 0, 57, 10, qtrue, 0, 100.f, colorRed, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawDemoMessage);
+	hud->demotext           = CG_getComponent(10, 0, 57, 10, qtrue, 0, 100.f, (vec4_t){ 1, 0, 0, 0.5 }, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawDemoMessage);
 	hud->missilecamera      = CG_getComponent(4, 120, 160, 120, qtrue, 0, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.22f, CG_DrawMissileCamera);
 	hud->sprinttext         = CG_getComponent(20, SCREEN_HEIGHT - 96, 57, 14, qfalse, 1, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.25f, CG_DrawPlayerSprint);
 	hud->breathtext         = CG_getComponent(20, SCREEN_HEIGHT - 96, 57, 14, qfalse, 1, 100.f, colorWhite, colorWhite, qfalse, HUD_Background, qfalse, HUD_Border, ITEM_TEXTSTYLE_SHADOWED, ITEM_ALIGN_LEFT, qfalse, 0.25f, CG_DrawPlayerBreath);
@@ -316,9 +321,12 @@ void CG_UpdateParentHUD(const char *oldParent, const char *newParent, int newPar
  */
 static void CG_DrawPicShadowed(float x, float y, float w, float h, qhandle_t icon)
 {
+	float ofsX;
+	float ofsY;
+
 	trap_R_SetColor(colorBlack);
-	float ofsX = (w * 1.07f) - w;
-	float ofsY = (h * 1.07f) - h;
+	ofsX = (w * 1.07f) - w;
+	ofsY = (h * 1.07f) - h;
 	CG_DrawPic(x + ofsX, y + ofsY, w, h, icon);
 	trap_R_SetColor(NULL);
 	CG_DrawPic(x, y, w, h, icon);
@@ -834,6 +842,7 @@ void CG_DrawPlayerHealthBar(hudComponent_t *comp)
 {
 	vec4_t color;
 	int    style = comp->style;
+	float  frac  = 0.f;
 
 	if (cgs.clientinfo[cg.clientNum].shoutcaster)
 	{
@@ -860,8 +869,34 @@ void CG_DrawPlayerHealthBar(hudComponent_t *comp)
 		CG_DrawRect_FixedBorder(comp->location.x, comp->location.y, comp->location.w, comp->location.h, 1, comp->colorBorder);
 	}
 
-	if (comp->style & (BAR_ICON << 1))
+	// show extra bonus HP from medics in team
+	if (comp->style & (BAR_NEEDLE))
 	{
+		// compute max health with medics team bonus only
+		float maxHealth = cg.snap->ps.stats[STAT_MAX_HEALTH];
+
+		// remove medic class health bonus
+		if (cgs.clientinfo[cg.snap->ps.clientNum].cls == PC_MEDIC)
+		{
+			maxHealth /= 1.12f;
+		}
+
+		// remove battle sense skill health bonus
+		if (BG_IsSkillAvailable(cgs.clientinfo[cg.clientNum].skill, SK_BATTLE_SENSE, SK_BATTLE_SENSE_HEALTH))
+		{
+			maxHealth -= 15;
+		}
+
+		// no team medics health bonus, the needle is not displayed
+		if (maxHealth - DEFAULT_HEALTH > 0)
+		{
+			frac = (cg.snap->ps.stats[STAT_MAX_HEALTH] - (maxHealth - DEFAULT_HEALTH)) / cg.snap->ps.stats[STAT_MAX_HEALTH];
+		}
+	}
+
+	if (comp->style & (BAR_NEEDLE << 1))
+	{
+		Vector4Copy(comp->colorMain, color);
 		CG_ColorForHealth(cg.snap->ps.stats[STAT_HEALTH], color);
 		color[3] = comp->colorMain[3];
 
@@ -874,7 +909,7 @@ void CG_DrawPlayerHealthBar(hudComponent_t *comp)
 
 	CG_FilledBar(comp->location.x, comp->location.y, comp->location.w, comp->location.h,
 	             (style & BAR_LERP_COLOR) ? comp->colorSecondary : color, (style & BAR_LERP_COLOR) ? color : NULL,
-	             comp->colorBackground, comp->colorBorder, cg.snap->ps.stats[STAT_HEALTH] / (float) cg.snap->ps.stats[STAT_MAX_HEALTH],
+	             comp->colorBackground, comp->colorBorder, cg.snap->ps.stats[STAT_HEALTH] / (float) cg.snap->ps.stats[STAT_MAX_HEALTH], frac,
 	             style, cgs.media.hudHealthIcon);
 
 	trap_R_SetColor(NULL);
@@ -939,7 +974,7 @@ void CG_DrawStaminaBar(hudComponent_t *comp)
 
 	CG_FilledBar(comp->location.x, comp->location.y, comp->location.w, comp->location.h,
 	             (comp->style & BAR_LERP_COLOR) ? comp->colorSecondary : color, (comp->style & BAR_LERP_COLOR) ? color : NULL,
-	             comp->colorBackground, comp->colorBorder, cg.snap->ps.stats[STAT_SPRINTTIME] / SPRINTTIME, comp->style, cgs.media.hudSprintIcon);
+	             comp->colorBackground, comp->colorBorder, cg.snap->ps.stats[STAT_SPRINTTIME] / SPRINTTIME, 0.f, comp->style, cgs.media.hudSprintIcon);
 
 	trap_R_SetColor(NULL);
 }
@@ -982,9 +1017,31 @@ void CG_DrawBreathBar(hudComponent_t *comp)
 
 	CG_FilledBar(comp->location.x, comp->location.y, comp->location.w, comp->location.h,
 	             (comp->style & BAR_LERP_COLOR) ? comp->colorSecondary : comp->colorMain, (comp->style & BAR_LERP_COLOR) ? comp->colorMain : NULL,
-	             comp->colorBackground, comp->colorBorder, cg.snap->ps.stats[STAT_AIRLEFT] / HOLDBREATHTIME, comp->style, cgs.media.waterHintShader);
+	             comp->colorBackground, comp->colorBorder, cg.snap->ps.stats[STAT_AIRLEFT] / HOLDBREATHTIME, 0.f, comp->style, cgs.media.waterHintShader);
 
 	trap_R_SetColor(NULL);
+}
+
+/**
+ * @param[in]  weapon
+ * @param[in]  chargeTime
+ * @param[out] needleFrac
+ * @param[out] charge
+ */
+static void CG_CalcPowerState(const int weapon, const float chargeTime, float *needleFrac, qboolean *charge)
+{
+
+	int index = BG_IsSkillAvailable(cgs.clientinfo[cg.clientNum].skill,
+	                                GetWeaponTableData(weapon)->skillBased,
+	                                GetWeaponTableData(weapon)->chargeTimeSkill);
+
+	float coeff = GetWeaponTableData(weapon)->chargeTimeCoeff[index];
+	*needleFrac = coeff;
+
+	if (cg.time - cg.snap->ps.classWeaponTime < chargeTime * coeff)
+	{
+		*charge = qfalse;
+	}
 }
 
 /**
@@ -993,7 +1050,7 @@ void CG_DrawBreathBar(hudComponent_t *comp)
  */
 void CG_DrawWeapRecharge(hudComponent_t *comp)
 {
-	float    barFrac, chargeTime;
+	float    barFrac, needleFrac = 0.f, chargeTime;
 	qboolean charge = qtrue;
 	vec4_t   color;
 	int      style = comp->style;
@@ -1033,35 +1090,70 @@ void CG_DrawWeapRecharge(hudComponent_t *comp)
 		break;
 	}
 
-	// display colored charge bar if charge bar isn't full enough
+	// Calculate power state
 	if (GetWeaponTableData(cg.predictedPlayerState.weapon)->attributes & WEAPON_ATTRIBUT_CHARGE_TIME)
 	{
-		int index = BG_IsSkillAvailable(cgs.clientinfo[cg.clientNum].skill,
-		                                GetWeaponTableData(cg.predictedPlayerState.weapon)->skillBased,
-		                                GetWeaponTableData(cg.predictedPlayerState.weapon)->chargeTimeSkill);
-
-		float coeff = GetWeaponTableData(cg.predictedPlayerState.weapon)->chargeTimeCoeff[index];
-
-		if (cg.time - cg.snap->ps.classWeaponTime < chargeTime * coeff)
-		{
-			charge = qfalse;
-		}
+		CG_CalcPowerState(cg.predictedPlayerState.weapon, chargeTime, &needleFrac, &charge);
 	}
 	else if ((cg.predictedPlayerState.eFlags & EF_ZOOMING || cg.predictedPlayerState.weapon == WP_BINOCULARS)
 	         && cgs.clientinfo[cg.snap->ps.clientNum].cls == PC_FIELDOPS)
 	{
-		int index = BG_IsSkillAvailable(cgs.clientinfo[cg.clientNum].skill,
-		                                GetWeaponTableData(WP_ARTY)->skillBased,
-		                                GetWeaponTableData(WP_ARTY)->chargeTimeSkill);
-
-		float coeff = GetWeaponTableData(WP_ARTY)->chargeTimeCoeff[index];
-
-		if (cg.time - cg.snap->ps.classWeaponTime < chargeTime * coeff)
+		CG_CalcPowerState(WP_ARTY, chargeTime, &needleFrac, &charge);
+	}
+	else
+	{
+		switch (cgs.clientinfo[cg.snap->ps.clientNum].cls)
 		{
-			charge = qfalse;
+		case PC_SOLDIER:
+		{
+			if (COM_BitCheck(cg.snap->ps.weapons, WP_PANZERFAUST))
+			{
+				CG_CalcPowerState(WP_PANZERFAUST, chargeTime, &needleFrac, &charge);
+			}
+			else if (COM_BitCheck(cg.snap->ps.weapons, WP_BAZOOKA))
+			{
+				CG_CalcPowerState(WP_BAZOOKA, chargeTime, &needleFrac, &charge);
+			}
+			else if (COM_BitCheck(cg.snap->ps.weapons, WP_MORTAR2))
+			{
+				CG_CalcPowerState(WP_MORTAR_SET, chargeTime, &needleFrac, &charge);
+			}
+			else if (COM_BitCheck(cg.snap->ps.weapons, WP_MORTAR))
+			{
+				CG_CalcPowerState(WP_MORTAR2_SET, chargeTime, &needleFrac, &charge);
+			}
+		}
+		break;
+		case PC_MEDIC:
+			CG_CalcPowerState(WP_MEDKIT, chargeTime, &needleFrac, &charge);
+			break;
+		case PC_FIELDOPS:
+			CG_CalcPowerState(WP_ARTY, chargeTime, &needleFrac, &charge);
+			break;
+		case PC_COVERTOPS:
+			CG_CalcPowerState(WP_SATCHEL, chargeTime, &needleFrac, &charge);
+			break;
+		case PC_ENGINEER:
+			switch (cg.predictedPlayerState.weapon)
+			{
+			case WP_CARBINE:
+			case WP_KAR98:
+				CG_CalcPowerState(WP_GPG40, chargeTime, &needleFrac, &charge);
+				break;
+			case WP_COLT:
+			case WP_LUGER:
+			case WP_AKIMBO_COLT:
+			case WP_AKIMBO_LUGER:
+				if (COM_BitCheck(cg.snap->ps.weapons, WP_GPG40) || COM_BitCheck(cg.snap->ps.weapons, WP_M7))
+				{
+					CG_CalcPowerState(WP_GPG40, chargeTime, &needleFrac, &charge);
+				}
+				break;
+			}
 		}
 	}
 
+	// display colored charge bar if charge bar isn't full enough
 	barFrac = (cg.time - cg.snap->ps.classWeaponTime) / chargeTime; // FIXME: potential DIV 0 when charge times are set to 0!
 
 	if (barFrac > 1.0f)
@@ -1094,7 +1186,7 @@ void CG_DrawWeapRecharge(hudComponent_t *comp)
 
 	CG_FilledBar(comp->location.x, comp->location.y, comp->location.w, comp->location.h,
 	             (style & BAR_LERP_COLOR) ? comp->colorSecondary : color, (style & BAR_LERP_COLOR) ? color : NULL,
-	             comp->colorBackground, comp->colorBorder, barFrac, style, cgs.media.hudPowerIcon);
+	             comp->colorBackground, comp->colorBorder, barFrac, needleFrac, style, cgs.media.hudPowerIcon);
 
 	trap_R_SetColor(NULL);
 }
@@ -1133,7 +1225,7 @@ void CG_DrawGunIcon(hudComponent_t *comp)
 	}
 
 	// Draw weapon icon and overheat bar
-	CG_DrawWeapHeat(&comp->location, HUD_HORIZONTAL);
+	CG_DrawWeapHeat(&comp->location, HUD_HORIZONTAL, (comp->style & 2));
 
 	// weapon flash color
 	if (comp->style & 1)
@@ -1200,7 +1292,7 @@ void CG_DrawAmmoCount(hudComponent_t *comp)
 	// .25f
 	if (value3 >= 0)
 	{
-		Com_sprintf(buffer, sizeof(buffer), "%i|%i/%i", value3, value, value2);
+		Com_sprintf(buffer, sizeof(buffer), "%i:%i/%i", value3, value, value2);
 	}
 	else if (value2 >= 0)
 	{
@@ -1321,6 +1413,7 @@ void CG_DrawPlayerHealth(hudComponent_t *comp)
 	// dynamic color
 	if (comp->style & 1)
 	{
+		Vector4Copy(comp->colorMain, color);
 		CG_ColorForHealth(cg.snap->ps.stats[STAT_HEALTH], color);
 		color[3] = comp->colorMain[3];
 	}
@@ -1581,7 +1674,7 @@ void CG_DrawXP(hudComponent_t *comp)
 		clr = comp->colorMain;
 	}
 
-	str = va("%s%s", Com_ScaleNumberPerThousand((float) cg.snap->ps.stats[STAT_XP], 2), (comp->style & 1) ? " XP" : "");
+	str = va("%s%s", Com_ScaleNumberPerThousand((float) cg.snap->ps.stats[STAT_XP], 2, 4), (comp->style & 1) ? " XP" : "");
 
 	CG_DrawCompText(comp, str, clr, comp->styleText, &cgs.media.limboFont1);
 }
@@ -2468,9 +2561,12 @@ static void CG_CompasMoveLocation(float *basex, float *basey, float basew, qbool
  */
 void CG_DrawNewCompass(hudComponent_t *comp)
 {
-	float      basex = comp->location.x, basey = comp->location.y, basew = comp->location.w, baseh = comp->location.h;
+	float      basex           = comp->location.x;
+	float      basey           = comp->location.y;
+	float      basew           = comp->location.w;
+	float      baseh           = comp->location.h;
+	float      expandedMapFrac = cg_commandMapTime.value / 250.f;
 	snapshot_t *snap;
-	float      expandedMapFrac;
 
 	if (cg.nextSnap && !cg.nextFrameTeleport && !cg.thisFrameTeleport)
 	{
@@ -2481,7 +2577,7 @@ void CG_DrawNewCompass(hudComponent_t *comp)
 		snap = cg.snap;
 	}
 
-	if ((snap->ps.pm_flags & PMF_LIMBO && !cgs.clientinfo[cg.clientNum].shoutcaster)
+	if (((snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || snap->ps.stats[STAT_HEALTH] <= 0) && !cgs.clientinfo[cg.clientNum].shoutcaster)
 #ifdef FEATURE_MULTIVIEW
 	    || cg.mvTotalClients > 0
 #endif
@@ -2490,8 +2586,6 @@ void CG_DrawNewCompass(hudComponent_t *comp)
 		CG_DrawExpandedAutoMap();
 		return;
 	}
-
-	expandedMapFrac = cg_commandMapTime.value / 250.f;
 
 	if (cgs.autoMapExpanded)
 	{
@@ -2516,8 +2610,8 @@ void CG_DrawNewCompass(hudComponent_t *comp)
 	else
 	{
 		if (cg.time - cgs.autoMapExpandTime <= 150.f * expandedMapFrac
-		    || cg.time - cgs.autoMapExpandTime <= 250.f * expandedMapFrac
-		    && cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR)
+		    || (cg.time - cgs.autoMapExpandTime <= 250.f * expandedMapFrac
+		        && cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR))
 		{
 			CG_DrawExpandedAutoMap();
 
@@ -2533,11 +2627,6 @@ void CG_DrawNewCompass(hudComponent_t *comp)
 				CG_CompasMoveLocation(&basex, &basey, basew, qfalse);
 			}
 		}
-	}
-
-	if ((snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR && !cgs.clientinfo[cg.clientNum].shoutcaster))
-	{
-		return;
 	}
 
 	if (comp->showBackGround)
@@ -2858,6 +2947,8 @@ static qboolean CG_SpawnTimersText(char **s, char **rt)
 static char *CG_RoundTimerText()
 {
 	qtime_t qt;
+	char    *seconds;
+	char    *minutes;
 
 	if (cgs.gamestate != GS_PLAYING)
 	{
@@ -2869,8 +2960,8 @@ static char *CG_RoundTimerText()
 		return "0:00"; // round ended
 	}
 
-	char *seconds = qt.tm_sec > 9 ? va("%i", qt.tm_sec) : va("0%i", qt.tm_sec);
-	char *minutes = qt.tm_min > 9 ? va("%i", qt.tm_min) : va("0%i", qt.tm_min);
+	seconds = qt.tm_sec > 9 ? va("%i", qt.tm_sec) : va("0%i", qt.tm_sec);
+	minutes = qt.tm_min > 9 ? va("%i", qt.tm_min) : va("0%i", qt.tm_min);
 
 	return va("%s:%s", minutes, seconds);
 }
@@ -3797,6 +3888,7 @@ static anchorPoints_t CG_FindClosestAnchors(hudStucture_t *hud, hudComponent_t *
 qboolean CG_ComputeComponentPosition(hudComponent_t *comp, int depth)
 {
 	rectDef_t parentLoc, tmpLoc;
+	float     xAbs;
 
 	// force quit this insanity
 	if (depth > 10 || depth < 0)
@@ -3843,7 +3935,7 @@ qboolean CG_ComputeComponentPosition(hudComponent_t *comp, int depth)
 	}
 
 	// final location
-	float xAbs = Q_fabs(comp->internalLocation.x);
+	xAbs = Q_fabs(comp->internalLocation.x);
 
 	if (xAbs)
 	{
@@ -4128,7 +4220,7 @@ void CG_DrawActiveHud(void)
 	{
 		comp = hudData.active->components[i];
 
-		if (comp && comp->visible && comp->draw)
+		if ((comp && comp->visible && comp->draw) && !(showOnlyHudComponent != NULL && showOnlyHudComponent != comp))
 		{
 			comp->draw(comp);
 		}

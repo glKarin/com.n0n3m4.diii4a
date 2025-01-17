@@ -41,8 +41,8 @@ renderpath_t;
 
 typedef struct viddef_support_s
 {
-	int glversion; // this is at least 32
-	int glshaderversion; // this is at least 150 (GL 3.2)
+	int glversion; ///< this is at least 32
+	int glshaderversion; ///< this is at least 150 (GL 3.2)
 	qbool amd_texture_texture4;
 	qbool arb_texture_gather;
 	qbool ext_texture_compression_s3tc;
@@ -72,13 +72,13 @@ typedef struct viddef_s
 	// used in many locations in the renderer
 	viddef_mode_t mode; ///< currently active video mode
 	qbool stencil;
-	qbool sRGB2D; // whether 2D rendering is sRGB corrected (based on sRGBcapable2D)
-	qbool sRGB3D; // whether 3D rendering is sRGB corrected (based on sRGBcapable3D)
-	qbool sRGBcapable2D; // whether 2D rendering can be sRGB corrected (renderpath)
-	qbool sRGBcapable3D; // whether 3D rendering can be sRGB corrected (renderpath)
+	qbool sRGB2D; ///< whether 2D rendering is sRGB corrected (based on sRGBcapable2D)
+	qbool sRGB3D; ///< whether 3D rendering is sRGB corrected (based on sRGBcapable3D)
+	qbool sRGBcapable2D; ///< whether 2D rendering can be sRGB corrected (renderpath)
+	qbool sRGBcapable3D; ///< whether 3D rendering can be sRGB corrected (renderpath)
 
 	renderpath_t renderpath;
-	qbool allowalphatocoverage; // indicates the GL_AlphaToCoverage function works on this renderpath and framebuffer
+	qbool allowalphatocoverage; ///< indicates the GL_AlphaToCoverage function works on this renderpath and framebuffer
 
 	unsigned int maxtexturesize_2d;
 	unsigned int maxtexturesize_3d;
@@ -88,12 +88,12 @@ typedef struct viddef_s
 
 	viddef_support_t support;
 
-	int forcetextype; // always use GL_BGRA for D3D, always use GL_RGBA for GLES, etc
+	int forcetextype; ///< always use GL_BGRA for D3D, always use GL_RGBA for GLES, etc
 
-	int xPos, yPos; // current virtual position of the top left corner of the SDL window
+	int xPos, yPos; ///< current virtual position of the top left corner of the SDL window
 } viddef_t;
 
-// global video state
+/// global video state
 extern viddef_t vid;
 
 #define MAXJOYAXIS 16
@@ -101,9 +101,9 @@ extern viddef_t vid;
 #define MAXJOYBUTTON 36
 typedef struct vid_joystate_s
 {
-	float axis[MAXJOYAXIS]; // -1 to +1
-	unsigned char button[MAXJOYBUTTON]; // 0 or 1
-	qbool is360; // indicates this joystick is a Microsoft Xbox 360 Controller For Windows
+	float axis[MAXJOYAXIS]; ///< -1 to +1
+	unsigned char button[MAXJOYBUTTON]; ///< 0 or 1
+	qbool is360; ///< indicates this joystick is a Microsoft Xbox 360 Controller For Windows
 }
 vid_joystate_t;
 
@@ -183,11 +183,11 @@ extern cvar_t gl_info_version;
 extern cvar_t gl_info_extensions;
 extern cvar_t gl_info_driver;
 
-// brand of graphics chip
+/// brand of graphics chip
 extern const char *gl_vendor;
-// graphics chip model and other information
+/// graphics chip model and other information
 extern const char *gl_renderer;
-// begins with 1.0.0, 1.1.0, 1.2.0, 1.2.1, 1.3.0, 1.3.1, or 1.4.0
+/// begins with 1.0.0, 1.1.0, 1.2.0, 1.2.1, 1.3.0, 1.3.1, or 1.4.0
 extern const char *gl_version;
 
 
@@ -202,22 +202,22 @@ void GL_Setup(void);
 
 void VID_ClearExtensions(void);
 
+/// Called at startup
 void VID_Init (void);
-// Called at startup
 
+/// Called at shutdown
 void VID_Shutdown (void);
-// Called at shutdown
 
+/// sets the mode; only used by the Quake engine for resetting to mode 0 (the
+/// base mode) on memory allocation failures
 int VID_SetMode (int modenum);
-// sets the mode; only used by the Quake engine for resetting to mode 0 (the
-// base mode) on memory allocation failures
 
+/// allocates and opens an appropriate OpenGL context (and its window)
 qbool VID_InitMode(const viddef_mode_t *mode);
-// allocates and opens an appropriate OpenGL context (and its window)
 
 
-// updates cachegamma variables and bumps vid_gammatables_serial if anything changed
-// (ONLY to be called from VID_Finish!)
+/// updates cachegamma variables and bumps vid_gammatables_serial if anything changed
+/// (ONLY to be called from VID_Finish!)
 void VID_UpdateGamma(void);
 
 qbool VID_HasScreenKeyboardSupport(void);
@@ -231,10 +231,12 @@ void VID_Restart_f(struct cmd_state_s *cmd);
 void VID_Start(void);
 void VID_Stop(void);
 
-extern unsigned int vid_gammatables_serial; // so other subsystems can poll if gamma parameters have changed; this starts with 0 and gets increased by 1 each time the gamma parameters get changed and VID_BuildGammaTables should be called again
-extern qbool vid_gammatables_trivial; // this is set to true if all color control values are at default setting, and it therefore would make no sense to use the gamma table
-void VID_BuildGammaTables(unsigned short *ramps, int rampsize); // builds the current gamma tables into an array (needs 3*rampsize items)
-void VID_ApplyGammaToColor(const float *rgb, float *out); // applies current gamma settings to a color (0-1 range)
+extern unsigned int vid_gammatables_serial; ///< so other subsystems can poll if gamma parameters have changed; this starts with 0 and gets increased by 1 each time the gamma parameters get changed and VID_BuildGammaTables should be called again
+extern qbool vid_gammatables_trivial; ///< this is set to true if all color control values are at default setting, and it therefore would make no sense to use the gamma table
+/// builds the current gamma tables into an array (needs 3*rampsize items)
+void VID_BuildGammaTables(unsigned short *ramps, int rampsize);
+/// applies current gamma settings to a color (0-1 range)
+void VID_ApplyGammaToColor(const float *rgb, float *out);
 
 typedef struct
 {

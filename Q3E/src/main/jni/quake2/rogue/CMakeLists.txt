@@ -9,7 +9,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 # CMake project configuration
-project(q2rogue)
+project(yquake2-rogue)
 
 # Enforce compiler flags (GCC / Clang compatible, yquake2
 # won't build with another compiler anyways)

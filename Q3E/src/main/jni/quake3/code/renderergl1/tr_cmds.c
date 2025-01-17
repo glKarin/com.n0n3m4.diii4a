@@ -364,7 +364,7 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 			ri.Error(ERR_FATAL, "RE_BeginFrame() - glGetError() failed (0x%x)!", err);
 	}
 
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support stereo frame buffer
 	if (glConfig.stereoEnabled) {
 		if( !(cmd = R_GetCommandBuffer(sizeof(*cmd))) )
 			return;
@@ -390,7 +390,7 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 				qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 				qglClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 				
-#if !defined(USE_OPENGLES)
+#if !defined(USE_OPENGLES) //karin: not support glDrawBuffer on GLES 1.1
 				qglDrawBuffer(GL_FRONT);
 				qglClear(GL_COLOR_BUFFER_BIT);
 				qglDrawBuffer(GL_BACK);

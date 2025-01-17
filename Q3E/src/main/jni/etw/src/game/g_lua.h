@@ -32,7 +32,7 @@
 #    include <lualib.h>
 #endif
 
-#define LUA_NUM_VM 18
+#define LUA_NUM_VM 64
 #define LUA_MAX_FSIZE 1024 * 1024 ///< 1MB
 
 #define FIELD_INT           0
@@ -100,7 +100,7 @@ typedef struct
 {
 	const char *name;
 	int type;
-	unsigned long mapping;
+	uintptr_t mapping;
 	int flags;
 } gentity_field_t;
 
@@ -167,6 +167,7 @@ qboolean G_LuaHook_WeaponFire(int clientNum, weapon_t weapon, gentity_t **pFired
 qboolean G_LuaHook_FixedMGFire(int clientNum);
 qboolean G_LuaHook_MountedMGFire(int clientNum);
 qboolean G_LuaHook_AAGunFire(int clientNum);
+const char *G_LuaHook_Chat(int sender, int receiver, const char *message, char *buffer, size_t bufsize);
 
 #endif // #ifndef INCLUDE_G_LUA_H
 

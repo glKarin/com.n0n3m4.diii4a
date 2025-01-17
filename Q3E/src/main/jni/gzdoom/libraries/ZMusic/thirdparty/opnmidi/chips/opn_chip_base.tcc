@@ -1,5 +1,6 @@
 #include "opn_chip_base.h"
 #include <cmath>
+#include <cstdio>
 
 #if defined(OPNMIDI_ENABLE_HQ_RESAMPLER)
 #include <zita-resampler/vresampler.h>
@@ -18,11 +19,11 @@
 #endif
 
 /* OPNChipBase */
-
-inline OPNChipBase::OPNChipBase() :
+inline OPNChipBase::OPNChipBase(OPNFamily f) :
     m_id(0),
     m_rate(44100),
-    m_clock(7670454)
+    m_clock(7670454),
+    m_family(f)
 {
 }
 
@@ -30,11 +31,16 @@ inline OPNChipBase::~OPNChipBase()
 {
 }
 
+inline uint32_t OPNChipBase::clockRate() const
+{
+    return m_clock;
+}
+
 /* OPNChipBaseT */
 
 template <class T>
-OPNChipBaseT<T>::OPNChipBaseT()
-    : OPNChipBase(),
+OPNChipBaseT<T>::OPNChipBaseT(OPNFamily f)
+    : OPNChipBase(f),
       m_runningAtPcmRate(false)
 #if defined(OPNMIDI_AUDIO_TICK_HANDLER)
     ,
@@ -53,6 +59,18 @@ OPNChipBaseT<T>::~OPNChipBaseT()
 #if defined(OPNMIDI_ENABLE_HQ_RESAMPLER)
     delete m_resampler;
 #endif
+}
+
+template <class T>
+OPNFamily OPNChipBaseT<T>::family() const
+{
+    return m_family;
+}
+
+template <class T>
+uint32_t OPNChipBaseT<T>::nativeClockRate() const
+{
+    return opn2_getNativeClockRate(m_family);
 }
 
 template <class T>
@@ -86,9 +104,10 @@ template <class T>
 void OPNChipBaseT<T>::setRate(uint32_t rate, uint32_t clock)
 {
     uint32_t oldRate = m_rate;
+    uint32_t oldClock = m_clock;
     m_rate = rate;
     m_clock = clock;
-    if(rate != oldRate)
+    if(rate != oldRate || clock != oldClock)
         setupResampler(rate);
     else
         resetResampler();
@@ -97,7 +116,13 @@ void OPNChipBaseT<T>::setRate(uint32_t rate, uint32_t clock)
 template <class T>
 uint32_t OPNChipBaseT<T>::effectiveRate() const
 {
-    return m_runningAtPcmRate ? m_rate : (uint32_t)nativeRate;
+    return m_runningAtPcmRate ? m_rate : opn2_getNativeRate(m_family);
+}
+
+template <class T>
+uint32_t OPNChipBaseT<T>::nativeRate() const
+{
+    return opn2_getNativeRate(m_family);
 }
 
 template <class T>
@@ -184,7 +209,8 @@ template <class T>
 void OPNChipBaseT<T>::setupResampler(uint32_t rate)
 {
 #if defined(OPNMIDI_ENABLE_HQ_RESAMPLER)
-    m_resampler->setup(rate * (1.0 / 53267), 2, 48);
+    double ratio = rate * (1.0 / opn2_getNativeRate(m_family));
+    m_resampler->setup(ratio, 2, 48);
 #else
     m_oldsamples[0] = m_oldsamples[1] = 0;
     m_samples[0] = m_samples[1] = 0;
@@ -238,8 +264,8 @@ void OPNChipBaseT<T>::resampledGenerate(int32_t *output)
         rsm->out_count = 1;
         rsm->out_data = f_out;
     }
-    output[0] = static_cast<int32_t>(std::lround(f_out[0]));
-    output[1] = static_cast<int32_t>(std::lround(f_out[1]));
+    output[0] = static_cast<int32_t>(lround(f_out[0]));
+    output[1] = static_cast<int32_t>(lround(f_out[1]));
 }
 #else
 template <class T>

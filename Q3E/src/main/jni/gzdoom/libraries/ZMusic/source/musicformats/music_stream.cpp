@@ -54,7 +54,7 @@ public:
 	void ChangeSettingNum(const char *name, double value) override { if (m_Source) m_Source->ChangeSettingNum(name, value); }
 	void ChangeSettingString(const char *name, const char *value) override { if(m_Source) m_Source->ChangeSettingString(name, value); }
 	bool ServiceStream(void* buff, int len) override;
-	SoundStreamInfo GetStreamInfo() const override { return m_Source->GetFormat(); }
+	SoundStreamInfoEx GetStreamInfoEx() const override { return m_Source->GetFormatEx(); }
 
 	
 protected:

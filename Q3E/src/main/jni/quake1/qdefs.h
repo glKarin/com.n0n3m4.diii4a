@@ -70,7 +70,7 @@
 #define	MAX_PARTICLETEXTURES	256
 #define	MAXCLVIDEOS				1
 #define	MAX_DYNAMIC_TEXTURE_COUNT	2
-#define	MAX_MAP_LEAFS			8192
+//#define	MAX_MAP_LEAFS			8192
 
 #define	MAXTRACKS				256
 #define	MAX_DYNAMIC_CHANNELS	64
@@ -116,7 +116,7 @@
 #define	CVAR_HASHSIZE			65536 ///< number of hash buckets for accelerating cvar name lookups
 #define	M_MAX_EDICTS			32768 ///< max objects in menu vm
 #define	MAX_DEMOS				8 ///< max demos provided to demos command
-#define	MAX_DEMONAME			16 ///< max demo name length for demos command
+#define	MAX_DEMONAME			32 ///< max demo name length for demos command
 #define	MAX_SAVEGAMES			12 ///< max savegames listed in savegame menu
 #define	SAVEGAME_COMMENT_LENGTH	39 ///< max comment length of savegame in menu
 #define	MAX_CLIENTNETWORKEYES	16 ///< max number of locations that can be added to pvs when culling network entities (must be at least 2 for prediction)
@@ -137,7 +137,7 @@
 #define	MAX_PARTICLETEXTURES	256 ///< maximum number of unique particle textures in the particle font
 #define	MAXCLVIDEOS				65 ///< maximum number of video streams being played back at once (1 is reserved for the playvideo command)
 #define	MAX_DYNAMIC_TEXTURE_COUNT	64 ///< maximum number of dynamic textures (web browsers, playvideo, etc)
-#define	MAX_MAP_LEAFS			65536 ///< maximum number of BSP leafs in world (8192 in Quake)
+//#define	MAX_MAP_LEAFS			65536 ///< maximum number of BSP leafs in world (8192 in Quake), now dynamically allocated
 
 #define	MAXTRACKS				256 ///< max CD track index
 // 0 to NUM_AMBIENTS - 1 = water, etc

@@ -35,8 +35,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GLE(ret, name, ...) extern name##proc * qgl##name;
 QGL_1_1_PROCS;
 QGL_1_1_FIXED_FUNCTION_PROCS;
-#if !defined(USE_OPENGLES)
 QGL_DESKTOP_1_1_PROCS;
+#if !defined(USE_OPENGLES) //karin: use GLES 1.1
 QGL_DESKTOP_1_1_FIXED_FUNCTION_PROCS;
 #else
 QGL_ES_1_1_PROCS;

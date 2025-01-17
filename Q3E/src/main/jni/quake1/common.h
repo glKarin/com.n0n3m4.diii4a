@@ -221,7 +221,12 @@ void COM_Shutdown (void);
 char *va(char *buf, size_t buflen, const char *format, ...) DP_FUNC_PRINTF(3);
 // does a varargs printf into provided buffer, returns buffer (so it can be called in-line unlike dpsnprintf)
 
-// GCC with -Werror=c++-compat will error out if static_assert is used even though the macro is valid C11...
+/* Some versions of GCC with -Wc++-compat will complain if static_assert
+ * is used even though the macro is valid C11, so make it happy anyway
+ * because having build logs without any purple text is pretty satisfying.
+ * TODO: Disable the flag by default in makefile, with an optional variable
+ * to reenable it.
+ */
 #ifndef __cplusplus
 #define DP_STATIC_ASSERT(expr, str) _Static_assert(expr, str)
 #else

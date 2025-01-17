@@ -668,9 +668,9 @@ static void yy_destructor(
     case 38: /* RSHASSIGN */
     case 39: /* LINEFLAG */
 {
-#line 37 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 37 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 
-#line 674 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 674 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
       break;
 /********* End destructor definitions *****************************************/
@@ -1060,223 +1060,223 @@ static void yy_reduce(
 /********** Begin reduce actions **********************************************/
         YYMINORTYPE yylhsminor;
       case 0: /* expr ::= NUM */
-#line 67 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 67 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yylhsminor.yy32 = yymsp[0].minor.yy0.val; }
-#line 1066 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1066 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yymsp[0].minor.yy32 = yylhsminor.yy32;
         break;
       case 1: /* expr ::= expr PLUS expr */
-#line 68 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 68 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yylhsminor.yy32 = yymsp[-2].minor.yy32 + yymsp[0].minor.yy32; }
-#line 1072 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1072 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,6,&yymsp[-1].minor);
   yymsp[-2].minor.yy32 = yylhsminor.yy32;
         break;
       case 2: /* expr ::= expr MINUS expr */
-#line 69 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 69 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yylhsminor.yy32 = yymsp[-2].minor.yy32 - yymsp[0].minor.yy32; }
-#line 1079 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1079 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,5,&yymsp[-1].minor);
   yymsp[-2].minor.yy32 = yylhsminor.yy32;
         break;
       case 3: /* expr ::= expr MULTIPLY expr */
-#line 70 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 70 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yylhsminor.yy32 = yymsp[-2].minor.yy32 * yymsp[0].minor.yy32; }
-#line 1086 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1086 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,7,&yymsp[-1].minor);
   yymsp[-2].minor.yy32 = yylhsminor.yy32;
         break;
       case 4: /* expr ::= expr DIVIDE expr */
-#line 71 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 71 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { if (yymsp[0].minor.yy32 != 0) yylhsminor.yy32 = yymsp[-2].minor.yy32 / yymsp[0].minor.yy32; else context->PrintError("Division by zero"); }
-#line 1093 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1093 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,8,&yymsp[-1].minor);
   yymsp[-2].minor.yy32 = yylhsminor.yy32;
         break;
       case 5: /* expr ::= expr MODULUS expr */
-#line 72 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 72 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { if (yymsp[0].minor.yy32 != 0) yylhsminor.yy32 = yymsp[-2].minor.yy32 % yymsp[0].minor.yy32; else context->PrintError("Division by zero"); }
-#line 1100 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1100 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,9,&yymsp[-1].minor);
   yymsp[-2].minor.yy32 = yylhsminor.yy32;
         break;
       case 6: /* expr ::= expr OR expr */
-#line 73 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 73 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yylhsminor.yy32 = yymsp[-2].minor.yy32 | yymsp[0].minor.yy32; }
-#line 1107 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1107 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,2,&yymsp[-1].minor);
   yymsp[-2].minor.yy32 = yylhsminor.yy32;
         break;
       case 7: /* expr ::= expr AND expr */
-#line 74 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 74 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yylhsminor.yy32 = yymsp[-2].minor.yy32 & yymsp[0].minor.yy32; }
-#line 1114 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1114 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,4,&yymsp[-1].minor);
   yymsp[-2].minor.yy32 = yylhsminor.yy32;
         break;
       case 8: /* expr ::= expr XOR expr */
-#line 75 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 75 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yylhsminor.yy32 = yymsp[-2].minor.yy32 ^ yymsp[0].minor.yy32; }
-#line 1121 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1121 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,3,&yymsp[-1].minor);
   yymsp[-2].minor.yy32 = yylhsminor.yy32;
         break;
       case 9: /* expr ::= MINUS expr */
 {  yy_destructor(yypParser,5,&yymsp[-1].minor);
-#line 76 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 76 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-1].minor.yy32 = -yymsp[0].minor.yy32; }
-#line 1129 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1129 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 10: /* expr ::= LPAREN expr RPAREN */
       case 29: /*exp_with_tag ::= LPAREN exp_with_tag RPAREN */ yytestcase(yyruleno==29);
 {  yy_destructor(yypParser,12,&yymsp[-2].minor);
-#line 77 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 77 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-2].minor.yy32 = yymsp[-1].minor.yy32; }
-#line 1137 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1137 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,13,&yymsp[0].minor);
 }
         break;
       case 11: /* define_statement ::= DEFINE SYM LPAREN expr RPAREN */
 {  yy_destructor(yypParser,14,&yymsp[-4].minor);
-#line 87 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 87 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	context->AddSym (yymsp[-3].minor.yy0.sym, yymsp[-1].minor.yy32);
 }
-#line 1147 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1147 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,12,&yymsp[-2].minor);
   yy_destructor(yypParser,13,&yymsp[0].minor);
 }
         break;
       case 12: /* enum_open ::= ENUM LBRACE */
 {  yy_destructor(yypParser,17,&yymsp[-1].minor);
-#line 100 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 100 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	context->EnumVal = 0;
 }
-#line 1158 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1158 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,18,&yymsp[0].minor);
 }
         break;
       case 13: /* single_enum ::= SYM */
-#line 109 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 109 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	context->AddSym (yymsp[0].minor.yy0.sym, context->EnumVal++);
 }
-#line 1167 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1167 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
         break;
       case 14: /* single_enum ::= SYM EQUALS expr */
-#line 114 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 114 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	context->AddSym (yymsp[-2].minor.yy0.sym, yymsp[0].minor.yy32);
 	context->EnumVal = yymsp[0].minor.yy32+1;
 }
-#line 1175 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1175 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,20,&yymsp[-1].minor);
         break;
       case 15: /* linetype_exp ::= expr */
-#line 127 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 127 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yylhsminor.yy32 = static_cast<XlatParseContext *>(context)->DefiningLineType = yymsp[0].minor.yy32;
 }
-#line 1183 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1183 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yymsp[0].minor.yy32 = yylhsminor.yy32;
         break;
       case 16: /* linetype_declaration ::= linetype_exp EQUALS expr COMMA expr LPAREN special_args RPAREN */
-#line 132 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 132 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	static_cast<XlatParseContext *>(context)->Translator->SimpleLineTranslations.SetVal(yymsp[-7].minor.yy32, 
 		FLineTrans(yymsp[-3].minor.yy32&0xffff, yymsp[-5].minor.yy32+yymsp[-1].minor.yy7.addflags, yymsp[-1].minor.yy7.args[0], yymsp[-1].minor.yy7.args[1], yymsp[-1].minor.yy7.args[2], yymsp[-1].minor.yy7.args[3], yymsp[-1].minor.yy7.args[4]));
 	static_cast<XlatParseContext *>(context)->DefiningLineType = -1;
 }
-#line 1193 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1193 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,20,&yymsp[-6].minor);
   yy_destructor(yypParser,19,&yymsp[-4].minor);
   yy_destructor(yypParser,12,&yymsp[-2].minor);
   yy_destructor(yypParser,13,&yymsp[0].minor);
         break;
       case 17: /* linetype_declaration ::= linetype_exp EQUALS expr COMMA SYM LPAREN special_args RPAREN */
-#line 139 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 139 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	Printf ("%s, line %d: %s is undefined\n", context->SourceFile, context->SourceLine, yymsp[-3].minor.yy0.sym);
 	static_cast<XlatParseContext *>(context)->DefiningLineType = -1;
 }
-#line 1205 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1205 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,20,&yymsp[-6].minor);
   yy_destructor(yypParser,19,&yymsp[-4].minor);
   yy_destructor(yypParser,12,&yymsp[-2].minor);
   yy_destructor(yypParser,13,&yymsp[0].minor);
         break;
       case 18: /* exp_with_tag ::= NUM */
-#line 145 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 145 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(yymsp[0].minor.yy0.val); yylhsminor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_Const); }
-#line 1214 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1214 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yymsp[0].minor.yy32 = yylhsminor.yy32;
         break;
       case 19: /* exp_with_tag ::= TAG */
 {  yy_destructor(yypParser,21,&yymsp[0].minor);
-#line 146 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 146 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[0].minor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_Tag); }
-#line 1221 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1221 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 20: /* exp_with_tag ::= exp_with_tag PLUS exp_with_tag */
-#line 147 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 147 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-2].minor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_Add); }
-#line 1227 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1227 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,6,&yymsp[-1].minor);
         break;
       case 21: /* exp_with_tag ::= exp_with_tag MINUS exp_with_tag */
-#line 148 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 148 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-2].minor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_Sub); }
-#line 1233 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1233 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,5,&yymsp[-1].minor);
         break;
       case 22: /* exp_with_tag ::= exp_with_tag MULTIPLY exp_with_tag */
-#line 149 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 149 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-2].minor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_Mul); }
-#line 1239 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1239 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,7,&yymsp[-1].minor);
         break;
       case 23: /* exp_with_tag ::= exp_with_tag DIVIDE exp_with_tag */
-#line 150 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 150 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-2].minor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_Div); }
-#line 1245 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1245 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,8,&yymsp[-1].minor);
         break;
       case 24: /* exp_with_tag ::= exp_with_tag MODULUS exp_with_tag */
-#line 151 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 151 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-2].minor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_Mod); }
-#line 1251 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1251 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,9,&yymsp[-1].minor);
         break;
       case 25: /* exp_with_tag ::= exp_with_tag OR exp_with_tag */
-#line 152 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 152 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-2].minor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_Or);  }
-#line 1257 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1257 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,2,&yymsp[-1].minor);
         break;
       case 26: /* exp_with_tag ::= exp_with_tag AND exp_with_tag */
-#line 153 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 153 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-2].minor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_And); }
-#line 1263 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1263 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,4,&yymsp[-1].minor);
         break;
       case 27: /* exp_with_tag ::= exp_with_tag XOR exp_with_tag */
-#line 154 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 154 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-2].minor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_Xor); }
-#line 1269 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1269 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,3,&yymsp[-1].minor);
         break;
       case 28: /* exp_with_tag ::= MINUS exp_with_tag */
 {  yy_destructor(yypParser,5,&yymsp[-1].minor);
-#line 155 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 155 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[-1].minor.yy32 = static_cast<XlatParseContext *>(context)->Translator->XlatExpressions.Push(XEXP_Neg); }
-#line 1276 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1276 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 30: /* special_arg ::= exp_with_tag */
-#line 162 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 162 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	if (static_cast<XlatParseContext *>(context)->Translator->XlatExpressions[yymsp[0].minor.yy32] == XEXP_Tag)
 	{ // Store tags directly
@@ -1313,11 +1313,11 @@ static void yy_reduce(
 		}
 	}
 }
-#line 1317 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1317 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yymsp[0].minor.yy120 = yylhsminor.yy120;
         break;
       case 31: /* multi_special_arg ::= special_arg */
-#line 202 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 202 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yylhsminor.yy7.addflags = yymsp[0].minor.yy120.argop << LINETRANS_TAGSHIFT;
 	yylhsminor.yy7.argcount = 1;
@@ -1327,11 +1327,11 @@ static void yy_reduce(
 	yylhsminor.yy7.args[3] = 0;
 	yylhsminor.yy7.args[4] = 0;
 }
-#line 1331 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1331 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yymsp[0].minor.yy7 = yylhsminor.yy7;
         break;
       case 32: /* multi_special_arg ::= multi_special_arg COMMA special_arg */
-#line 212 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 212 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yylhsminor.yy7 = yymsp[-2].minor.yy7;
 	if (yylhsminor.yy7.argcount < LINETRANS_MAXARGS)
@@ -1345,12 +1345,12 @@ static void yy_reduce(
 		context->PrintError("Line special has too many arguments\n");
 	}
 }
-#line 1349 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1349 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,19,&yymsp[-1].minor);
   yymsp[-2].minor.yy7 = yylhsminor.yy7;
         break;
       case 33: /* special_args ::= */
-#line 229 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 229 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yymsp[1].minor.yy7.addflags = 0;
 	yymsp[1].minor.yy7.argcount = 0;
@@ -1360,11 +1360,11 @@ static void yy_reduce(
 	yymsp[1].minor.yy7.args[3] = 0;
 	yymsp[1].minor.yy7.args[4] = 0;
 }
-#line 1364 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1364 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
         break;
       case 34: /* boom_declaration ::= LBRACKET expr RBRACKET LPAREN expr COMMA expr RPAREN LBRACE boom_body RBRACE */
 {  yy_destructor(yypParser,22,&yymsp[-10].minor);
-#line 256 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 256 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	int i;
 	MoreLines *probe;
@@ -1397,7 +1397,7 @@ static void yy_reduce(
 		static_cast<XlatParseContext *>(context)->Translator->NumBoomish++;
 	}
 }
-#line 1401 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1401 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,23,&yymsp[-8].minor);
   yy_destructor(yypParser,12,&yymsp[-7].minor);
   yy_destructor(yypParser,19,&yymsp[-5].minor);
@@ -1407,24 +1407,24 @@ static void yy_reduce(
 }
         break;
       case 35: /* boom_body ::= */
-#line 290 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 290 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yymsp[1].minor.yy129 = NULL;
 }
-#line 1415 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1415 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
         break;
       case 36: /* boom_body ::= boom_line boom_body */
-#line 294 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 294 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yylhsminor.yy129 = new MoreLines;
 	yylhsminor.yy129->next = yymsp[0].minor.yy129;
 	yylhsminor.yy129->arg = yymsp[-1].minor.yy130;
 }
-#line 1424 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1424 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yymsp[-1].minor.yy129 = yylhsminor.yy129;
         break;
       case 37: /* boom_line ::= boom_selector boom_op boom_args */
-#line 301 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 301 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yylhsminor.yy130.bOrExisting = (yymsp[-1].minor.yy32 == OR_EQUAL);
 	yylhsminor.yy130.bUseConstant = (yymsp[0].minor.yy63.filters == NULL);
@@ -1456,153 +1456,153 @@ static void yy_reduce(
 		yylhsminor.yy130.ListSize = i > 15 ? 15 : i;
 	}
 }
-#line 1460 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1460 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yymsp[-2].minor.yy130 = yylhsminor.yy130;
         break;
       case 38: /* boom_selector ::= FLAGS */
 {  yy_destructor(yypParser,24,&yymsp[0].minor);
-#line 333 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 333 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[0].minor.yy32 = 4; }
-#line 1467 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1467 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 39: /* boom_selector ::= ARG2 */
 {  yy_destructor(yypParser,25,&yymsp[0].minor);
-#line 334 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 334 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[0].minor.yy32 = 0; }
-#line 1474 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1474 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 40: /* boom_selector ::= ARG3 */
 {  yy_destructor(yypParser,26,&yymsp[0].minor);
-#line 335 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 335 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[0].minor.yy32 = 1; }
-#line 1481 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1481 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 41: /* boom_selector ::= ARG4 */
 {  yy_destructor(yypParser,27,&yymsp[0].minor);
-#line 336 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 336 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[0].minor.yy32 = 2; }
-#line 1488 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1488 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 42: /* boom_selector ::= ARG5 */
 {  yy_destructor(yypParser,28,&yymsp[0].minor);
-#line 337 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 337 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[0].minor.yy32 = 3; }
-#line 1495 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1495 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 43: /* boom_op ::= EQUALS */
 {  yy_destructor(yypParser,20,&yymsp[0].minor);
-#line 339 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 339 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[0].minor.yy32 = '='; }
-#line 1502 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1502 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 44: /* boom_op ::= OR_EQUAL */
 {  yy_destructor(yypParser,29,&yymsp[0].minor);
-#line 340 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 340 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[0].minor.yy32 = OR_EQUAL; }
-#line 1509 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1509 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 45: /* boom_args ::= expr */
-#line 343 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 343 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yylhsminor.yy63.constant = yymsp[0].minor.yy32;
 	yylhsminor.yy63.filters = NULL;
 }
-#line 1518 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1518 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yymsp[0].minor.yy63 = yylhsminor.yy63;
         break;
       case 46: /* boom_args ::= expr LBRACKET arg_list RBRACKET */
-#line 348 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 348 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yylhsminor.yy63.mask = yymsp[-3].minor.yy32;
 	yylhsminor.yy63.filters = yymsp[-1].minor.yy8;
 }
-#line 1527 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1527 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,22,&yymsp[-2].minor);
   yy_destructor(yypParser,23,&yymsp[0].minor);
   yymsp[-3].minor.yy63 = yylhsminor.yy63;
         break;
       case 47: /* arg_list ::= list_val */
-#line 354 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 354 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yylhsminor.yy8 = new MoreFilters;
 	yylhsminor.yy8->next = NULL;
 	yylhsminor.yy8->filter = yymsp[0].minor.yy83;
 }
-#line 1539 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1539 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yymsp[0].minor.yy8 = yylhsminor.yy8;
         break;
       case 48: /* arg_list ::= list_val COMMA arg_list */
-#line 360 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 360 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yylhsminor.yy8 = new MoreFilters;
 	yylhsminor.yy8->next = yymsp[0].minor.yy8;
 	yylhsminor.yy8->filter = yymsp[-2].minor.yy83;
 }
-#line 1549 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1549 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,19,&yymsp[-1].minor);
   yymsp[-2].minor.yy8 = yylhsminor.yy8;
         break;
       case 49: /* list_val ::= expr COLON expr */
-#line 367 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 367 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	yylhsminor.yy83.filter = yymsp[-2].minor.yy32;
 	yylhsminor.yy83.value = yymsp[0].minor.yy32;
 }
-#line 1559 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1559 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,30,&yymsp[-1].minor);
   yymsp[-2].minor.yy83 = yylhsminor.yy83;
         break;
       case 50: /* maxlinespecial_def ::= MAXLINESPECIAL EQUALS expr SEMICOLON */
 {  yy_destructor(yypParser,31,&yymsp[-3].minor);
-#line 379 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 379 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	// Just kill all specials higher than the max.
 	// If the translator wants to redefine some later, just let it.
 	static_cast<XlatParseContext *>(context)->Translator->SimpleLineTranslations.Resize(yymsp[-1].minor.yy32+1);
 }
-#line 1571 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1571 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,20,&yymsp[-2].minor);
   yy_destructor(yypParser,32,&yymsp[0].minor);
 }
         break;
       case 51: /* sector_declaration ::= SECTOR expr EQUALS expr SEMICOLON */
 {  yy_destructor(yypParser,33,&yymsp[-4].minor);
-#line 394 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 394 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	FSectorTrans tr(yymsp[-1].minor.yy32, true);
 	static_cast<XlatParseContext *>(context)->Translator->SectorTranslations.SetVal(yymsp[-3].minor.yy32, tr);
 }
-#line 1583 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1583 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,20,&yymsp[-2].minor);
   yy_destructor(yypParser,32,&yymsp[0].minor);
 }
         break;
       case 52: /* sector_declaration ::= SECTOR expr EQUALS SYM SEMICOLON */
 {  yy_destructor(yypParser,33,&yymsp[-4].minor);
-#line 400 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 400 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	Printf("Unknown constant '%s'\n", yymsp[-1].minor.yy0.sym);
 }
-#line 1594 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1594 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,20,&yymsp[-2].minor);
   yy_destructor(yypParser,32,&yymsp[0].minor);
 }
         break;
       case 53: /* sector_declaration ::= SECTOR expr EQUALS expr NOBITMASK SEMICOLON */
 {  yy_destructor(yypParser,33,&yymsp[-5].minor);
-#line 405 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 405 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	FSectorTrans tr(yymsp[-2].minor.yy32, false);
 	static_cast<XlatParseContext *>(context)->Translator->SectorTranslations.SetVal(yymsp[-4].minor.yy32, tr);
 }
-#line 1606 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1606 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,20,&yymsp[-3].minor);
   yy_destructor(yypParser,34,&yymsp[-1].minor);
   yy_destructor(yypParser,32,&yymsp[0].minor);
@@ -1610,36 +1610,36 @@ static void yy_reduce(
         break;
       case 54: /* sector_bitmask ::= SECTOR BITMASK expr sector_op expr SEMICOLON */
 {  yy_destructor(yypParser,33,&yymsp[-5].minor);
-#line 411 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 411 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	FSectorMask sm = { yymsp[-3].minor.yy32, yymsp[-2].minor.yy32, yymsp[-1].minor.yy32};
 	static_cast<XlatParseContext *>(context)->Translator->SectorMasks.Push(sm);
 }
-#line 1619 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1619 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,35,&yymsp[-4].minor);
   yy_destructor(yypParser,32,&yymsp[0].minor);
 }
         break;
       case 55: /* sector_bitmask ::= SECTOR BITMASK expr SEMICOLON */
 {  yy_destructor(yypParser,33,&yymsp[-3].minor);
-#line 417 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 417 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	FSectorMask sm = { yymsp[-1].minor.yy32, 0, 0};
 	static_cast<XlatParseContext *>(context)->Translator->SectorMasks.Push(sm);
 }
-#line 1631 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1631 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,35,&yymsp[-2].minor);
   yy_destructor(yypParser,32,&yymsp[0].minor);
 }
         break;
       case 56: /* sector_bitmask ::= SECTOR BITMASK expr CLEAR SEMICOLON */
 {  yy_destructor(yypParser,33,&yymsp[-4].minor);
-#line 423 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 423 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	FSectorMask sm = { yymsp[-2].minor.yy32, 0, 1};
 	static_cast<XlatParseContext *>(context)->Translator->SectorMasks.Push(sm);
 }
-#line 1643 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1643 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,35,&yymsp[-3].minor);
   yy_destructor(yypParser,36,&yymsp[-1].minor);
   yy_destructor(yypParser,32,&yymsp[0].minor);
@@ -1647,21 +1647,21 @@ static void yy_reduce(
         break;
       case 57: /* sector_op ::= LSHASSIGN */
 {  yy_destructor(yypParser,37,&yymsp[0].minor);
-#line 428 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 428 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[0].minor.yy32 = 1; }
-#line 1653 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1653 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 58: /* sector_op ::= RSHASSIGN */
 {  yy_destructor(yypParser,38,&yymsp[0].minor);
-#line 429 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 429 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 { yymsp[0].minor.yy32 = -1; }
-#line 1660 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1660 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 59: /* lineflag_declaration ::= LINEFLAG expr EQUALS expr SEMICOLON */
 {  yy_destructor(yypParser,39,&yymsp[-4].minor);
-#line 434 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 434 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	if (yymsp[-3].minor.yy32 >= 0 && yymsp[-3].minor.yy32 < 16)
 	{
@@ -1669,14 +1669,14 @@ static void yy_reduce(
 		static_cast<XlatParseContext *>(context)->Translator->LineFlagTranslations[yymsp[-3].minor.yy32].ismask = false;
 	}
 }
-#line 1673 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1673 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,20,&yymsp[-2].minor);
   yy_destructor(yypParser,32,&yymsp[0].minor);
 }
         break;
       case 60: /* lineflag_declaration ::= LINEFLAG expr AND expr SEMICOLON */
 {  yy_destructor(yypParser,39,&yymsp[-4].minor);
-#line 443 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 443 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 	if (yymsp[-3].minor.yy32 >= 0 && yymsp[-3].minor.yy32 < 16)
 	{
@@ -1684,31 +1684,31 @@ static void yy_reduce(
 		static_cast<XlatParseContext *>(context)->Translator->LineFlagTranslations[yymsp[-3].minor.yy32].ismask = true;
 	}
 }
-#line 1688 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1688 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,4,&yymsp[-2].minor);
   yy_destructor(yypParser,32,&yymsp[0].minor);
 }
         break;
       case 72: /* external_declaration ::= NOP */
 {  yy_destructor(yypParser,1,&yymsp[0].minor);
-#line 56 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 56 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 }
-#line 1698 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1698 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 }
         break;
       case 73: /* enum_statement ::= enum_open enum_list RBRACE */
-#line 97 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 97 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 }
-#line 1705 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1705 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,16,&yymsp[0].minor);
         break;
       case 76: /* enum_list ::= enum_list COMMA single_enum */
-#line 106 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 106 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
 {
 }
-#line 1712 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1712 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
   yy_destructor(yypParser,19,&yymsp[-1].minor);
         break;
       default:
@@ -1783,9 +1783,9 @@ static void yy_syntax_error(
   XlatParseARG_FETCH;
 #define TOKEN yyminor
 /************ Begin %syntax_error code ****************************************/
-#line 40 "F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/src/gamedata/xlat/xlat_parser.y"
+#line 40 "F:/download/browser/gzdoom-g4.14.0_origin/src/gamedata/xlat/xlat_parser.y"
  context->PrintError("syntax error");
-#line 1789 "F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoom/src/xlat_parser.c"
+#line 1789 "F:/download/browser/gzdoom-g4.14.0_origin/win_x64/src/xlat_parser.c"
 /************ End %syntax_error code ******************************************/
   XlatParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }

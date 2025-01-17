@@ -879,12 +879,14 @@ static int _et_GetCurrentWeapon(lua_State *L)
 	if (clientNum < 0 || clientNum >= MAX_CLIENTS)
 	{
 		luaL_error(L, "\"clientNum\" is out of bounds: %d", clientNum);
+		return 0;
 	}
 
 	ent = g_entities + clientNum;
 	if (!ent->client)
 	{
 		luaL_error(L, "\"clientNum\" \"%d\" is not a client entity", clientNum);
+		return 0;
 	}
 
 	client   = ent->client;
@@ -1032,6 +1034,11 @@ static const gentity_field_t gclient_fields[] =
 	_et_gclient_addfield(sess.prestige,                     FIELD_INT,                 FIELD_FLAG_READONLY),
 #endif
 	_et_gclient_addfield(sess.uci,                          FIELD_INT,                 0),
+
+#ifdef LEGACY_AUTH
+	_et_gclient_addfield(sess.authName,                     FIELD_STRING,              FIELD_FLAG_READONLY),
+	_et_gclient_addfield(sess.authId,                       FIELD_INT,                 FIELD_FLAG_READONLY),
+#endif
 
 	_et_gclient_addfield(sess.aWeaponStats,                 FIELD_WEAPONSTAT,          FIELD_FLAG_READONLY),
 
@@ -1296,10 +1303,9 @@ static void _et_gentity_getweaponstat(lua_State *L, weapon_stat_t *ws)
 
 gentity_t *G_Lua_CreateEntity(char *params)
 {
-	gentity_t *create;
-	char      *token;
-	char      *p = params;
-	char      key[MAX_TOKEN_CHARS], value[MAX_TOKEN_CHARS];
+	char *token;
+	char *p = params;
+	char key[MAX_TOKEN_CHARS], value[MAX_TOKEN_CHARS];
 
 	level.numSpawnVars     = 0;
 	level.numSpawnVarChars = 0;
@@ -1342,17 +1348,8 @@ gentity_t *G_Lua_CreateEntity(char *params)
 
 		level.numSpawnVars++;
 	}
-	create = G_SpawnGEntityFromSpawnVars();
 
-	//create->classname = "lua_spawn"; // make additional param?
-
-	if (!create)  // don't link NULL ents
-	{
-		return NULL;
-	}
-
-	trap_LinkEntity(create);
-	return create;
+	return G_SpawnGEntityFromSpawnVars();
 }
 
 // entnum = _et_G_Lua_CreateEntity( params )
@@ -1708,13 +1705,13 @@ static int et_gentity_get(lua_State *L)
 	return 0;
 }
 
-// et.gentity_set( entnum, fieldname, arrayindex, value )
-static int _et_gentity_set(lua_State *L)
+// et.gentity_set( entnum, fieldname, array_index, value )
+static int et_gentity_set(lua_State *L)
 {
 	gentity_t       *ent       = g_entities + (int)luaL_checkinteger(L, 1);
 	const char      *fieldname = luaL_checkstring(L, 2);
 	gentity_field_t *field     = _et_gentity_getfield(ent, (char *)fieldname);
-	unsigned long   addr;
+	uintptr_t       addr;
 	const char      *buffer;
 
 	// break on invalid gentity field
@@ -1733,11 +1730,11 @@ static int _et_gentity_set(lua_State *L)
 
 	if (field->flags & FIELD_FLAG_GENTITY)
 	{
-		addr = (unsigned long)ent;
+		addr = (uintptr_t )ent;
 	}
 	else
 	{
-		addr = (unsigned long)ent->client;
+		addr = (uintptr_t)ent->client;
 	}
 
 	// for NULL entities, return nil (prevents server crashes!)
@@ -2066,7 +2063,7 @@ static const luaL_Reg etlib[] =
 	{ "G_GetSpawnVar",           _et_G_GetSpawnVar           },
 	{ "G_SetSpawnVar",           _et_G_SetSpawnVar           },
 	{ "gentity_get",             et_gentity_get              },
-	{ "gentity_set",             _et_gentity_set             },
+	{ "gentity_set",             et_gentity_set              },
 	{ "G_AddEvent",              _et_G_AddEvent              },
 	// Shaders
 	{ "G_ShaderRemap",           _et_G_ShaderRemap           },
@@ -2193,15 +2190,59 @@ qboolean G_LuaRunIsolated(const char *modName)
  */
 qboolean G_LuaInit(void)
 {
-	int  i, num_vm = 0, len;
-	char buff[MAX_CVAR_VALUE_STRING], *crt;
+	int          i, num_vm = 0, len;
+	char         buff[MAX_CVAR_VALUE_STRING], *crt, *list, *pList;
+	fileHandle_t f;
 
 	for (i = 0; i < LUA_NUM_VM; i++)
 	{
 		lVM[i] = NULL;
 	}
 
-	if (lua_modules.string[0])
+	if (g_luaModuleList.string[0])
+	{
+		if (lua_modules.string[0])
+		{
+			G_Printf("%s API: %slua_modules cvar will be ignored since g_luaModuleList is set\n", LUA_VERSION, S_COLOR_BLUE);
+		}
+
+		len = trap_FS_FOpenFile(g_luaModuleList.string, &f, FS_READ);
+		if (len < 0)
+		{
+			G_Printf("%s API: %scan not open file '%s'\n", LUA_VERSION, S_COLOR_BLUE, g_luaModuleList.string);
+			return qfalse;
+		}
+
+		list = Com_Allocate(len + 1);
+
+		if (list == NULL)
+		{
+			G_Error("%s API: %smemory allocation error for '%s' data\n", LUA_VERSION, S_COLOR_BLUE, g_luaModuleList.string);
+			return qfalse;
+		}
+
+		trap_FS_Read(list, len, f);
+		*(list + len) = '\0';
+		trap_FS_FCloseFile(f);
+
+		pList = list;
+		while ((crt = COM_Parse(&pList)) && *crt)
+		{
+			if (num_vm >= LUA_NUM_VM)
+			{
+				G_Printf("%s API: %stoo many lua files specified, only the first %d have been loaded\n", LUA_VERSION, S_COLOR_BLUE, LUA_NUM_VM);
+				break;
+			}
+
+			if (G_LuaRunIsolated(crt))
+			{
+				num_vm++;
+			}
+		}
+
+		Com_Dealloc(list);
+	}
+	else if (lua_modules.string[0])
 	{
 		Q_strncpyz(buff, lua_modules.string, sizeof(buff));
 		len = strlen(buff);
@@ -2669,7 +2710,6 @@ static void registerSurfaceConstants(lua_vm_t *vm)
 	lua_regconstinteger(vm->L, SURF_NODLIGHT);
 	lua_regconstinteger(vm->L, SURF_WOOD);
 	lua_regconstinteger(vm->L, SURF_GRASS);
-	lua_regconstinteger(vm->L, SURF_CERAMIC);
 	lua_regconstinteger(vm->L, SURF_GRAVEL);
 	lua_regconstinteger(vm->L, SURF_GLASS);
 	lua_regconstinteger(vm->L, SURF_SNOW);
@@ -3836,6 +3876,55 @@ void G_LuaHook_SpawnEntitiesFromString()
 			}
 		}
 	}
+}
+
+/*
+ * G_LuaHook_Chat
+ * et_Chat( sender, receiver, text ) callback
+ */
+const char *G_LuaHook_Chat(int sender, int receiver, const char *message, char *buffer, size_t bufsize)
+{
+	int        i;
+	lua_vm_t   *vm;
+	const char *result, *newMessage;
+
+	newMessage = message;
+	for (i = 0; i < LUA_NUM_VM; i++)
+	{
+		vm = lVM[i];
+		if (vm)
+		{
+			if (vm->id < 0) //|| vm->err)
+			{
+				continue;
+			}
+			if (!G_LuaGetNamedFunction(vm, "et_Chat"))
+			{
+				continue;
+			}
+			// Arguments
+			lua_pushinteger(vm->L, sender);
+			lua_pushinteger(vm->L, receiver);
+			lua_pushstring(vm->L, newMessage);
+			// Call
+			if (!G_LuaCall(vm, "et_Chat", 3, 2))
+			{
+				//G_LuaStopVM(vm);
+				continue;
+			}
+			// Return values
+			if (lua_isinteger(vm->L, -2) &&
+			    lua_tointeger(vm->L, -2) != qfalse &&
+			    lua_isstring(vm->L, -1))
+			{
+				result = luaL_checkstring(vm->L, -1);
+				Q_strncpyz(buffer, result, bufsize);
+				newMessage = buffer;
+			}
+			lua_pop(vm->L, 2);
+		}
+	}
+	return newMessage;
 }
 
 /** @} */ // doxygen addtogroup lua_etevents

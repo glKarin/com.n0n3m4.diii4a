@@ -63,8 +63,8 @@ static void CG_ResetEntity(centity_t *cent)
 	}
 
 	// reset a bunch of extra stuff
-	cent->muzzleFlashTime = 0;
-	cent->overheatTime    = 0;
+	cent->firedTime    = 0;
+	cent->overheatTime = 0;
 
 	cent->miscTime  = 0;
 	cent->soundTime = 0;
@@ -78,6 +78,8 @@ static void CG_ResetEntity(centity_t *cent)
 
 	cent->moving     = qfalse;
 	cent->akimboFire = qfalse;
+
+	cent->miscInt = 0;
 }
 
 /**
@@ -246,9 +248,11 @@ void CG_SetInitialSnapshot(snapshot_t *snap)
  */
 static void CG_TransitionSnapshot(void)
 {
-	centity_t  *cent;
-	snapshot_t *oldFrame;
-	int        i, id;
+	centity_t     *cent;
+	snapshot_t    *oldFrame;
+	int           i, id;
+	playerState_t *ops;
+	playerState_t *ps;
 
 	if (!cg.snap)
 	{
@@ -278,6 +282,10 @@ static void CG_TransitionSnapshot(void)
 		oldValid[cg.snap->entities[i].number] = qtrue;
 	}
 
+	// move nextSnap to snap and do the transitions
+	oldFrame = cg.snap;
+	cg.snap  = cg.nextSnap;
+
 	// check for MV updates from new snapshot info
 #ifdef FEATURE_MULTIVIEW
 	if (cg.snap->ps.powerups[PW_MVCLIENTLIST] != cg.mvClientList)
@@ -285,10 +293,6 @@ static void CG_TransitionSnapshot(void)
 		CG_mvProcessClientList();
 	}
 #endif
-
-	// move nextSnap to snap and do the transitions
-	oldFrame = cg.snap;
-	cg.snap  = cg.nextSnap;
 
 	if (cg.snap->ps.clientNum == cg.clientNum)
 	{
@@ -338,8 +342,8 @@ static void CG_TransitionSnapshot(void)
 			}
 		}
 
-		playerState_t *ops = &oldFrame->ps;
-		playerState_t *ps  = &cg.snap->ps;
+		ops = &oldFrame->ps;
+		ps  = &cg.snap->ps;
 
 		// teleporting checks are irrespective of prediction
 		if ((ps->eFlags ^ ops->eFlags) & EF_TELEPORT_BIT)

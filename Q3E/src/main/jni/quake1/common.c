@@ -29,8 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 #include "utf8lib.h"
 
-cvar_t registered = {CF_CLIENT | CF_SERVER, "registered","0", "indicates if this is running registered quake (whether gfx/pop.lmp was found)"};
-cvar_t cmdline = {CF_CLIENT | CF_SERVER, "cmdline","0", "contains commandline the engine was launched with"};
+cvar_t registered = {CF_CLIENT | CF_SERVER | CF_READONLY, "registered","0", "indicates if this is running registered quake (whether gfx/pop.lmp was found)"};
+cvar_t cmdline = {CF_CLIENT | CF_SERVER | CF_READONLY, "cmdline","0", "contains commandline the engine was launched with"};
 
 // FIXME: Find a better place for these.
 cvar_t cl_playermodel = {CF_CLIENT | CF_SERVER | CF_USERINFO | CF_ARCHIVE, "playermodel", "", "current player model in Nexuiz/Xonotic"};
@@ -1018,12 +1018,27 @@ int dpvsnprintf (char *buffer, size_t buffersize, const char *format, va_list ar
 #endif
 	if (result < 0 || (size_t)result >= buffersize)
 	{
-		buffer[buffersize - 1] = '\0';
-		// we could be inside Con_Printf
+		// _vsnprintf_s returns -1 on error and on truncation (indistinguishable),
+		// vsnprintf returns negative on error and the desired strlen on truncation.
+		buffer[buffersize - 1] = '\0'; // should be unnecessary, but just in case
+		// Basic stdout only: we could be inside Con_Printf, Sys_Printf calls dpvsnprintf,
+		// Windows console doesn't support colours.
 		if (result < 0)
-			Sys_Printf("dpvsnprintf: output error, buffer size %lu\n", (unsigned long)buffersize);
+			Sys_Print("dpvsnprintf: output error!\n", 27);
 		else
-			Sys_Printf("dpvsnprintf: truncated to %lu bytes: \"%s\"\n", (unsigned long)buffersize - 1, buffer);
+		{
+			char msg[MAX_INPUTLINE];
+#if _MSC_VER >= 1400
+			result = _snprintf_s(msg, sizeof(msg), _TRUNCATE, "dpvsnprintf: truncated to %lu bytes: \"%s\"\n", (unsigned long)buffersize - 1, buffer);
+#else
+			result = snprintf(msg, sizeof(msg), "dpvsnprintf: truncated to %lu bytes: \"%s\"\n", (unsigned long)buffersize - 1, buffer);
+#endif
+			if (result > 0)
+			{
+				msg[sizeof(msg) - 1] = '\n'; // may have been lost in truncation
+				Sys_Print(msg, min((size_t)result, sizeof(msg) - 1));
+			}
+		}
 		return -1;
 	}
 

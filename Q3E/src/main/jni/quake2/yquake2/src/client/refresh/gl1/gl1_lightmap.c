@@ -32,25 +32,62 @@ void R_SetCacheState(msurface_t *surf);
 void R_BuildLightMap(msurface_t *surf, byte *dest, int stride);
 
 void
-LM_InitBlock(void)
+LM_FreeLightmapBuffers(void)
 {
-	memset(gl_lms.allocated, 0, sizeof(gl_lms.allocated));
+	for (int i=0; i<MAX_LIGHTMAPS; i++)
+	{
+		if (gl_lms.lightmap_buffer[i])
+		{
+			free(gl_lms.lightmap_buffer[i]);
+		}
+		gl_lms.lightmap_buffer[i] = NULL;
+	}
+
+	if (gl_lms.allocated)
+	{
+		free(gl_lms.allocated);
+		gl_lms.allocated = NULL;
+	}
+}
+
+static void
+LM_AllocLightmapBuffer(int buffer, qboolean clean)
+{
+	const unsigned int lightmap_size =
+		gl_state.block_width * gl_state.block_height * LIGHTMAP_BYTES;
+
+	if (!gl_lms.lightmap_buffer[buffer])
+	{
+		gl_lms.lightmap_buffer[buffer] = malloc (lightmap_size);
+	}
+	if (!gl_lms.lightmap_buffer[buffer])
+	{
+		ri.Sys_Error(ERR_FATAL, "Could not allocate lightmap buffer %d\n",
+			buffer);
+	}
+	if (clean)
+{
+		memset (gl_lms.lightmap_buffer[buffer], 0, lightmap_size);
+	}
 }
 
 void
-LM_UploadBlock(qboolean dynamic)
+LM_InitBlock(void)
 {
-	int texture;
-	int height = 0;
+	memset(gl_lms.allocated, 0, gl_state.block_width * sizeof(int));
 
-	if (dynamic)
+	if (gl_config.multitexture)
 	{
-		texture = 0;
+		LM_AllocLightmapBuffer(gl_lms.current_lightmap_texture, false);
 	}
-	else
+	}
+
+void
+LM_UploadBlock(qboolean dynamic)
 	{
-		texture = gl_lms.current_lightmap_texture;
-	}
+	const int texture = (dynamic)? 0 : gl_lms.current_lightmap_texture;
+	const int buffer = (gl_config.multitexture)? gl_lms.current_lightmap_texture : 0;
+	int height = 0;
 
 	R_Bind(gl_state.lightmap_textures + texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -60,7 +97,7 @@ LM_UploadBlock(qboolean dynamic)
 	{
 		int i;
 
-		for (i = 0; i < BLOCK_WIDTH; i++)
+		for (i = 0; i < gl_state.block_width; i++)
 		{
 			if (gl_lms.allocated[i] > height)
 			{
@@ -68,18 +105,19 @@ LM_UploadBlock(qboolean dynamic)
 			}
 		}
 
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, BLOCK_WIDTH,
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, gl_state.block_width,
 				height, GL_LIGHTMAP_FORMAT, GL_UNSIGNED_BYTE,
-				gl_lms.lightmap_buffer);
+				gl_lms.lightmap_buffer[buffer]);
 	}
 	else
 	{
 		gl_lms.internal_format = GL_LIGHTMAP_FORMAT;
 		glTexImage2D(GL_TEXTURE_2D, 0, gl_lms.internal_format,
-				BLOCK_WIDTH, BLOCK_HEIGHT, 0, GL_LIGHTMAP_FORMAT,
-				GL_UNSIGNED_BYTE, gl_lms.lightmap_buffer);
+				gl_state.block_width, gl_state.block_height,
+				0, GL_LIGHTMAP_FORMAT, GL_UNSIGNED_BYTE,
+				gl_lms.lightmap_buffer[buffer]);
 
-		if (++gl_lms.current_lightmap_texture == MAX_LIGHTMAPS)
+		if (++gl_lms.current_lightmap_texture == gl_state.max_lightmaps)
 		{
 			ri.Sys_Error(ERR_DROP,
 					"LM_UploadBlock() - MAX_LIGHTMAPS exceeded\n");
@@ -96,9 +134,9 @@ LM_AllocBlock(int w, int h, int *x, int *y)
 	int i, j;
 	int best, best2;
 
-	best = BLOCK_HEIGHT;
+	best = gl_state.block_height;
 
-	for (i = 0; i < BLOCK_WIDTH - w; i++)
+	for (i = 0; i < gl_state.block_width - w; i++)
 	{
 		best2 = 0;
 
@@ -123,7 +161,7 @@ LM_AllocBlock(int w, int h, int *x, int *y)
 		}
 	}
 
-	if (best + h > BLOCK_HEIGHT)
+	if (best + h > gl_state.block_height)
 	{
 		return false;
 	}
@@ -191,13 +229,13 @@ LM_BuildPolygonFromSurface(model_t *currentmodel, msurface_t *fa)
 		s -= fa->texturemins[0];
 		s += fa->light_s * 16;
 		s += 8;
-		s /= BLOCK_WIDTH * 16; /* fa->texinfo->texture->width; */
+		s /= gl_state.block_width * 16; /* fa->texinfo->texture->width; */
 
 		t = DotProduct(vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
 		t -= fa->texturemins[1];
 		t += fa->light_t * 16;
 		t += 8;
-		t /= BLOCK_HEIGHT * 16; /* fa->texinfo->texture->height; */
+		t /= gl_state.block_height * 16; /* fa->texinfo->texture->height; */
 
 		poly->verts[i][5] = s;
 		poly->verts[i][6] = t;
@@ -207,7 +245,7 @@ LM_BuildPolygonFromSurface(model_t *currentmodel, msurface_t *fa)
 void
 LM_CreateSurfaceLightmap(msurface_t *surf)
 {
-	int smax, tmax;
+	int smax, tmax, buffer;
 	byte *base;
 
 	if (surf->flags & (SURF_DRAWSKY | SURF_DRAWTURB))
@@ -231,12 +269,13 @@ LM_CreateSurfaceLightmap(msurface_t *surf)
 	}
 
 	surf->lightmaptexturenum = gl_lms.current_lightmap_texture;
+	buffer = (gl_config.multitexture)? surf->lightmaptexturenum : 0;
 
-	base = gl_lms.lightmap_buffer;
-	base += (surf->light_t * BLOCK_WIDTH + surf->light_s) * LIGHTMAP_BYTES;
+	base = gl_lms.lightmap_buffer[buffer];
+	base += (surf->light_t * gl_state.block_width + surf->light_s) * LIGHTMAP_BYTES;
 
 	R_SetCacheState(surf);
-	R_BuildLightMap(surf, base, BLOCK_WIDTH * LIGHTMAP_BYTES);
+	R_BuildLightMap(surf, base, gl_state.block_width * LIGHTMAP_BYTES);
 }
 
 void
@@ -244,9 +283,14 @@ LM_BeginBuildingLightmaps(model_t *m)
 {
 	static lightstyle_t lightstyles[MAX_LIGHTSTYLES];
 	int i;
-	unsigned dummy[128 * 128] = {0};
 
-	memset(gl_lms.allocated, 0, sizeof(gl_lms.allocated));
+	LM_FreeLightmapBuffers();
+	gl_lms.allocated = (int*)malloc(gl_state.block_width * sizeof(int));
+	if (!gl_lms.allocated)
+	{
+		ri.Sys_Error(ERR_FATAL, "Could not create lightmap allocator\n");
+	}
+	memset(gl_lms.allocated, 0, gl_state.block_width * sizeof(int));
 
 	r_framecount = 1; /* no dlightcache */
 
@@ -271,13 +315,23 @@ LM_BeginBuildingLightmaps(model_t *m)
 	gl_lms.current_lightmap_texture = 1;
 	gl_lms.internal_format = GL_LIGHTMAP_FORMAT;
 
+	if (gl_config.multitexture)
+	{
+		LM_AllocLightmapBuffer(gl_lms.current_lightmap_texture, false);
+		return;
+	}
+
+	// dynamic lightmap for classic rendering path (no multitexture)
+	LM_AllocLightmapBuffer(0, true);
+
 	/* initialize the dynamic lightmap texture */
 	R_Bind(gl_state.lightmap_textures + 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, gl_lms.internal_format,
-			BLOCK_WIDTH, BLOCK_HEIGHT, 0, GL_LIGHTMAP_FORMAT,
-			GL_UNSIGNED_BYTE, dummy);
+			gl_state.block_width, gl_state.block_height,
+			0, GL_LIGHTMAP_FORMAT, GL_UNSIGNED_BYTE,
+			gl_lms.lightmap_buffer[0]);
 }
 
 void

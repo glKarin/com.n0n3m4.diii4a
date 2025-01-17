@@ -36,7 +36,8 @@
 #ifndef INCLUDE_Q_MATH_H
 #define INCLUDE_Q_MATH_H
 
-#include "q_shared.h"
+#include "q_primitives.h"
+#include "q_platform.h"
 
 typedef float vec_t;
 typedef vec_t vec2_t[2];
@@ -260,6 +261,13 @@ static ID_INLINE float vec2_length(const vec2_t v)
 // Subtract
 #define vec2_sub(a, b, c)      ((c)[0] = (a)[0] - (b)[0], (c)[1] = (a)[1] - (b)[1])
 #define vec2_snap(v) { v[0] = ((int)(v[0])); v[1] = ((int)(v[1])); }
+static ID_INLINE float vec2_dist(vec2_t v1, vec2_t v2)
+{
+	vec3_t dir;
+
+	vec2_sub(v2, v1, dir);
+	return vec2_length(dir);
+}
 
 /************************************************************************/
 /* Vector 3                                                             */
@@ -294,6 +302,7 @@ void vec3_inv(vec3_t v);
 void vec3_rotate(const vec3_t in, vec3_t matrix[3], vec3_t out);
 void vec3_rotate2(const vec3_t in, vec3_t matrix[3], vec3_t out);
 qboolean vec3_compare(const vec3_t v1, const vec3_t v2);
+qboolean vec4_compare(const vec4_t v1, const vec4_t v2);
 
 //FIXME: duplicate functions :D::D:D:D:D:
 float vec3_dist(vec3_t v1, vec3_t v2);
@@ -449,9 +458,18 @@ void BoundsAdd(vec3_t mins, vec3_t maxs, const vec3_t mins2, const vec3_t maxs2)
 
 float Q_acos(float c);
 
-int Q_rand(int *seed);
-float Q_random(int *seed);
-float Q_crandom(int *seed);
+/**
+ * @brief LCG
+ * @param x
+ * @return
+ */
+static inline int Q_LCG(int x)
+{
+	return (int)((69069U * x + 1U) & 0x7FFFFFFF);
+}
+
+int Q_RandomInt(int *seed);
+float Q_RandomFloat(int *seed);
 
 #define random()    ((rand() & 0x7fff) / ((float)0x7fff))
 #define crandom()   (2.0f * (random() - 0.5f))
@@ -554,6 +572,7 @@ void _MatrixMultiply(float in1[3][3], float in2[3][3], float out[3][3]);
 #define Vector4Scale vec4_scale
 #define VectorRotate vec3_rotate
 #define VectorCompare vec3_compare
+#define Vector4Compare vec4_compare
 
 static ID_INLINE int VectorCompareEpsilon(const vec3_t v1, const vec3_t v2, float epsilon)
 {

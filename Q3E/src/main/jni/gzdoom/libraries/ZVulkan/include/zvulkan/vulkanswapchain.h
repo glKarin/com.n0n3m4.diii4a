@@ -28,6 +28,10 @@ public:
 	void Create(int width, int height, int imageCount, bool vsync, bool hdr, bool exclusivefullscreen);
 	bool Lost() const { return lost; }
 
+#ifdef __ANDROID__ //karin: allow make invalid amnually when surface changed on Android
+	void MakeLost() { lost = true; }
+#endif
+
 	int Width() const { return actualExtent.width; }
 	int Height() const { return actualExtent.height; }
 	VkSurfaceFormatKHR Format() const { return format; }

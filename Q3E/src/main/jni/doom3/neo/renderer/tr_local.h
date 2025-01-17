@@ -40,6 +40,9 @@ If you have questions concerning this license or the applicable additional terms
 
 
 extern bool USING_GLES3;
+#if !defined(__ANDROID__)
+extern bool USING_GL;
+#endif
 #ifdef _OPENGLES3
 extern int GLES3_VERSION;
 #define USING_GLES30 (GLES3_VERSION > -1)
@@ -2110,118 +2113,13 @@ idScreenRect R_CalcIntersectionScissor(const idRenderLightLocal *lightDef,
 #include "GuiModel.h"
 #include "VertexCache.h"
 
-//k for Android large stack memory allocate limit
-#define _DYNAMIC_ALLOC_STACK_OR_HEAP
-
-#if 0
-#define _ALLOC_DEBUG(x) x
-#else
-#define _ALLOC_DEBUG(x)
-#endif
-
-#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-#if 1
-extern idCVar harm_r_maxAllocStackMemory;
-	#define HARM_MAX_STACK_ALLOC_SIZE (harm_r_maxAllocStackMemory.GetInteger())
-#else
-	#define HARM_MAX_STACK_ALLOC_SIZE (1024 * 512)
-#endif
-
-struct idAllocAutoHeap {
-	public:
-
-		idAllocAutoHeap() 
-			: data(NULL)
-		{ }
-
-		~idAllocAutoHeap() {
-			Free();
-		}
-
-		void * Alloc(size_t size) {
-			Free();
-			data = calloc(size, 1);
-			_ALLOC_DEBUG(common->Printf("[Harmattan]: %p alloca on heap memory %p(%zu bytes)\n", this, data, size));
-			return data;
-		}
-
-		void * Alloc16(size_t size) {
-			Free();
-			data = calloc(size + 15, 1);
-			void *ptr = ((void *)(((intptr_t)data + 15) & ~15));
-			_ALLOC_DEBUG(common->Printf("[Harmattan]: %p alloca16 on heap memory %p(%zu bytes) <- %p(%zu bytes)\n", this, ptr, size, data, size + 15));
-			return ptr;
-		}
-
-		bool IsAlloc(void) const {
-			return data != NULL;
-		}
-
-	private:
-		void *data;
-
-		void Free(void) {
-			if(data) {
-				_ALLOC_DEBUG(common->Printf("[Harmattan]: %p free alloca16 heap memory %p\n", this, data));
-				free(data);
-				data = NULL;
-			}
-		}
-		void * operator new(size_t);
-		void * operator new[](size_t);
-		void operator delete(void *);
-		void operator delete[](void *);
-		idAllocAutoHeap(const idAllocAutoHeap &);
-		idAllocAutoHeap & operator=(const idAllocAutoHeap &);
-};
-
-// alloc in heap memory
-#define _alloca16_heap( x )					((void *)((((intptr_t)calloc( (x)+15 ,1 )) + 15) & ~15))
-
-// Using heap memory. Also reset RLIMIT_STACK by call `setrlimit`.
-#define _DROID_ALLOC16_DEF(T, alloc_size, varname, x) \
-	idAllocAutoHeap _allocAutoHeap##x; \
-	T *varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc16(alloc_size) : _alloca16(alloc_size)); \
-	if(_allocAutoHeap##x.IsAlloc()) { \
-		_ALLOC_DEBUG(common->Printf("[Harmattan]: Alloca16 on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size)); \
-	}
-
-#define _DROID_ALLOC16(T, alloc_size, varname, x) \
-	idAllocAutoHeap _allocAutoHeap##x; \
-	varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc16(alloc_size) : _alloca16(alloc_size)); \
-	if(_allocAutoHeap##x.IsAlloc()) { \
-		_ALLOC_DEBUG(common->Printf("[Harmattan]: Alloca16 on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size)); \
-	}
-
-#define _DROID_ALLOC_DEF(T, alloc_size, varname, x) \
-	idAllocAutoHeap _allocAutoHeap##x; \
-	T *varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc(alloc_size) : _alloca(alloc_size)); \
-	if(_allocAutoHeap##x.IsAlloc()) { \
-		_ALLOC_DEBUG(common->Printf("[Harmattan]: Alloca on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size)); \
-	}
-
-#define _DROID_ALLOC(T, alloc_size, varname, x) \
-	idAllocAutoHeap _allocAutoHeap##x; \
-	varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc(alloc_size) : _alloca(alloc_size)); \
-	if(_allocAutoHeap##x.IsAlloc()) { \
-		_ALLOC_DEBUG(common->Printf("[Harmattan]: Alloca on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size)); \
-	}
-
-	// free memory when not call alloca()
-#define _DROID_FREE(varname, x) \
-	{ \
-		_ALLOC_DEBUG(common->Printf("[Harmattan]: Free alloca heap memory %p\n", varname)); \
-	}
-
-#endif
-
 #ifdef _RAVEN //k: macros for renderEffect_s::suppressSurfaceMask
 #define SUPPRESS_SURFACE_MASK(x) (1 << (x))
 #define SUPPRESS_SURFACE_MASK_CHECK(t, x) ((t) & SUPPRESS_SURFACE_MASK(x))
 #include "../raven/renderer/NewShaderStage.h"
 #endif
 
-extern void GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android
+extern bool GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android
 //extern volatile bool has_gl_context;
 extern unsigned int lastRenderTime;
 extern int r_maxFps;
@@ -2343,5 +2241,21 @@ extern idCVar harm_r_lightingModel;
 #define HARM_INTERACTION_SHADER_AMBIENT 4
 
 extern idCVar harm_r_useHighPrecision;
+
+#define GL_VERSION_GL_ES2 0x00020000
+#define GL_VERSION_GL_ES3 0x00030000
+#define GL_VERSION_GL_ES31 0x00030001
+#define GL_VERSION_GL_ES32 0x00030002
+#if !defined(__ANDROID__)
+#define GL_VERSION_GL_CORE 0x10000000
+#define GL_VERSION_GL_COMPATIBILITY 0x20000000
+#endif
+
+#define GL_VERSION_NAME_GL_ES2 "GLES2"
+#define GL_VERSION_NAME_GL_ES3 "GLES3.0"
+#if !defined(__ANDROID__)
+#define GL_VERSION_NAME_GL_CORE "OpenGL_core"
+#define GL_VERSION_NAME_GL_COMPATIBILITY "OpenGL_compatibility"
+#endif
 
 #endif /* !__TR_LOCAL_H__ */

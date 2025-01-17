@@ -2,53 +2,49 @@
 
 extern qboolean com_fullyInitialized;
 
-static void * game_main(int argc, char **argv);
-
 #include "q3e/q3e_android.h"
 
 #define Q3E_GAME_NAME "ETW"
 #define Q3E_IS_INITIALIZED (com_fullyInitialized)
 #define Q3E_PRINTF Com_Printf
-#define Q3E_WID_RESTART CL_Vid_Restart_f()
-#define Q3E_DRAW_FRAME { \
-            Com_Frame( ); \
-        }
 #define Q3E_SHUTDOWN_GAME ShutdownGame()
 #define Q3Ebool qboolean
 #define Q3E_TRUE qtrue
 #define Q3E_FALSE qfalse
 #define Q3E_REQUIRE_THREAD
-#define Q3E_THREAD_MAIN game_main
-#define Q3E_INIT_WINDOW GLimp_AndroidInit
+#define Q3E_INIT_WINDOW GLimp_AndroidOpenWindow
 #define Q3E_QUIT_WINDOW GLimp_AndroidQuit
 #define Q3E_CHANGE_WINDOW GLimp_AndroidInit
 
+extern void GLimp_AndroidOpenWindow(volatile ANativeWindow *win);
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit(void);
 extern void ShutdownGame(void);
 
-extern void CL_Vid_Restart_f(void);
-
 #include "q3e/q3e_android.inc"
 
-void GLimp_CheckGLInitialized(void)
+qboolean GLimp_CheckGLInitialized(void)
 {
-	Q3E_CheckNativeWindowChanged();
+	return Q3E_CheckNativeWindowChanged();
 }
 
-// RTCW game main thread loop
-void * game_main(int argc, char **argv)
+/**
+ * @brief SDL_main
+ * @param[in] argc
+ * @param[in] argv
+ * @return
+ */
+int main(int argc, char **argv)
 {
 	char commandLine[MAX_STRING_CHARS] = { 0 };
-
-	attach_thread(); // attach current to JNI for call Android code
-	Q3E_Start();
 
 	Sys_PlatformInit();
 
 	// Set the initial time base
 	Sys_Milliseconds();
 
+	// TODO : check if we shouldn't just decide to skip this call when we build
+	// the Android target
 	Sys_ParseArgs(argc, argv);
 
 	Sys_SetBinaryPath(Sys_Dirname(argv[0]));
@@ -70,30 +66,16 @@ void * game_main(int argc, char **argv)
 
 	Sys_GameLoop();
 
-	Q3E_FreeArgs();
-
-	Q3E_End();
-	main_thread = 0;
-	//IsInitialized = false;
-	Com_Printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
 	return 0;
 }
 
 void ShutdownGame(void)
 {
-	if(com_fullyInitialized)
+	if(q3e_running && com_fullyInitialized)
 	{
-		TRIGGER_WINDOW_CREATED; // if RTCW main thread is waiting new window
-		Q3E_ShutdownGameMainThread();
-		//common->Quit();
+        q3e_running = false;
+        NOTIFY_EXIT;
 	}
-}
-
-static void game_exit(void)
-{
-	Com_Printf("[Harmattan]: " Q3E_GAME_NAME " exit.\n");
-
-	Q3E_CloseRedirectOutput();
 }
 
 /*
@@ -146,27 +128,6 @@ void Sys_SyncState(void)
 			prev_state = state;
 		}
 	}
-}
-
-/*
-=================
-main
-=================
-*/
-int main( int argc, char* argv[] ) {
-	Q3E_DumpArgs(argc, argv);
-
-	Q3E_RedirectOutput();
-
-	Q3E_PrintInitialContext(argc, argv);
-
-	INIT_Q3E_THREADS;
-
-	Q3E_StartGameMainThread();
-
-	atexit(game_exit);
-
-	return 0;
 }
 
 

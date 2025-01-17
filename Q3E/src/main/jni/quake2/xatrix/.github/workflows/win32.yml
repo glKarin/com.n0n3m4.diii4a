@@ -1,0 +1,57 @@
+name: Testbuild for Win32
+run-name: testbuild_win32
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    types:
+      - edited
+      - opened
+      - synchronize
+concurrency:
+  # Cancel concurrent workflows for the same PR or commit hash.
+  group: ${{github.workflow}}-${{github.event_name == 'pull_request' && github.head_ref || github.sha}}
+  cancel-in-progress: true
+jobs:
+  build_mingw_x86_32:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { sys: mingw32, env: i686 }
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{matrix.sys}}
+        update: true
+        install: >-
+          git
+          make
+          mingw-w64-${{matrix.env}}-gcc
+          mingw-w64-${{matrix.env}}-make
+    - name: Check out repository code
+      uses: actions/checkout@v4
+    - name: Build
+      shell: msys2 {0}
+      run: |
+        # Public runners come with 2 CPUs.
+        make -j2
+    - name: Create testbuild package
+      shell: msys2 {0}
+      run: |
+        # Create release directory tree
+        mkdir -p publish/quake2-xatrix-win32-${{github.sha}}/misc/docs
+        # Copy release assets
+        cp -r release/* publish/quake2-xatrix-win32-${{github.sha}}/
+        # Copy misc assets
+        cp -r stuff/mapfixes publish/quake2-xatrix-win32-${{github.sha}}/misc
+        cp LICENSE publish/quake2-xatrix-win32-${{github.sha}}/misc/docs/LICENSE.txt
+        cp README.md publish/quake2-xatrix-win32-${{github.sha}}/misc/docs/README.txt
+    - name: Upload testbuild package
+      uses: actions/upload-artifact@v4
+      with:
+        name: quake2-xatrix-win32-${{github.sha}}
+        path: publish/
+        if-no-files-found: error

@@ -2,22 +2,37 @@
 # Find the native fluidsynth includes and library
 #
 #  FLUIDSYNTH_INCLUDE_DIR - where to find fluidsynth.h
-#  FLUIDSYNTH_LIBRARIES   - List of libraries when using fluidsynth.
+#  FLUIDSYNTH_LIBRARY     - Path to fluidsynth library.
 #  FLUIDSYNTH_FOUND       - True if fluidsynth found.
 
 
-IF (FLUIDSYNTH_INCLUDE_DIR AND FLUIDSYNTH_LIBRARIES)
+if(FLUIDSYNTH_INCLUDE_DIR AND FLUIDSYNTH_LIBRARY)
   # Already in cache, be silent
-  SET(FluidSynth_FIND_QUIETLY TRUE)
-ENDIF (FLUIDSYNTH_INCLUDE_DIR AND FLUIDSYNTH_LIBRARIES)
+  set(FluidSynth_FIND_QUIETLY TRUE)
+endif()
 
-FIND_PATH(FLUIDSYNTH_INCLUDE_DIR fluidsynth.h)
+if(NOT FLUIDSYNTH_INCLUDE_DIR)
+	find_path(FLUIDSYNTH_INCLUDE_DIR fluidsynth.h)
+endif()
 
-FIND_LIBRARY(FLUIDSYNTH_LIBRARIES NAMES fluidsynth )
-MARK_AS_ADVANCED( FLUIDSYNTH_LIBRARIES FLUIDSYNTH_INCLUDE_DIR )
+if(NOT FLUIDSYNTH_LIBRARY)
+	find_library(FLUIDSYNTH_LIBRARY NAMES fluidsynth)
+endif()
 
 # handle the QUIETLY and REQUIRED arguments and set FLUIDSYNTH_FOUND to TRUE if 
 # all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(FluidSynth DEFAULT_MSG FLUIDSYNTH_LIBRARIES FLUIDSYNTH_INCLUDE_DIR)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(FluidSynth DEFAULT_MSG FLUIDSYNTH_LIBRARY FLUIDSYNTH_INCLUDE_DIR)
 
+if(FLUIDSYNTH_FOUND)
+	add_library(libfluidsynth UNKNOWN IMPORTED)
+	set_target_properties(libfluidsynth
+	PROPERTIES
+		IMPORTED_LOCATION "${FLUIDSYNTH_LIBRARY}"
+		INTERFACE_INCLUDE_DIRECTORIES "${FLUIDSYNTH_INCLUDE_DIR}"
+	)
+
+	# Legacy variables
+	set(FLUIDSYNTH_INCLUDE_DIRS ${FLUIDSYNTH_INCLUDE_DIR})
+	set(FLUIDSYNTH_LIBRARIES ${FLUIDSYNTH_LIBRARY})
+endif()

@@ -1,8 +1,8 @@
 /*
- * libADLMIDI is a free MIDI to WAV conversion library with OPL3 emulation
+ * libADLMIDI is a free Software MIDI synthesizer library with OPL3 emulation
  *
  * Original ADLMIDI code: Copyright (c) 2010-2014 Joel Yliluoma <bisqwit@iki.fi>
- * ADLMIDI Library API:   Copyright (c) 2015-2018 Vitaly Novichkov <admin@wohlnet.ru>
+ * ADLMIDI Library API:   Copyright (c) 2015-2022 Vitaly Novichkov <admin@wohlnet.ru>
  *
  * Library is based on the ADLMIDI, a MIDI player for Linux and Windows with OPL3 emulation:
  * http://iki.fi/bisqwit/source/adlmidi.html
@@ -29,8 +29,8 @@ extern "C" {
 #endif
 
 #define ADLMIDI_VERSION_MAJOR       1
-#define ADLMIDI_VERSION_MINOR       4
-#define ADLMIDI_VERSION_PATCHLEVEL  0
+#define ADLMIDI_VERSION_MINOR       5
+#define ADLMIDI_VERSION_PATCHLEVEL  1
 
 #define ADLMIDI_TOSTR_I(s) #s
 #define ADLMIDI_TOSTR(s) ADLMIDI_TOSTR_I(s)
@@ -39,6 +39,7 @@ extern "C" {
         ADLMIDI_TOSTR(ADLMIDI_VERSION_MINOR) "." \
         ADLMIDI_TOSTR(ADLMIDI_VERSION_PATCHLEVEL)
 
+#define ADL_CHIP_SAMPLE_RATE        49716
 
 #include <stddef.h>
 
@@ -111,8 +112,39 @@ enum ADLMIDI_VolumeModels
     ADLMIDI_VolumeModel_DMX = 3,
     /*! Logarithmic volume scale, used in Apogee Sound System. */
     ADLMIDI_VolumeModel_APOGEE = 4,
-    /*! Aproximated and shorted volume map table. Similar to general, but has less granularity. */
-    ADLMIDI_VolumeModel_9X = 5
+    /*! Aproximated and shorted volume map table (SB16 driver). Similar to general, but has less granularity. */
+    ADLMIDI_VolumeModel_9X = 5,
+    /*! DMX model with a fixed bug of AM voices */
+    ADLMIDI_VolumeModel_DMX_Fixed = 6,
+    /*! Apogee model with a fixed bug of AM voices*/
+    ADLMIDI_VolumeModel_APOGEE_Fixed = 7,
+    /*! Audio Interface Library volume scaling model */
+    ADLMIDI_VolumeModel_AIL = 8,
+    /*! Aproximated and shorted volume map table (Generic FM driver). Similar to general, but has less granularity. */
+    ADLMIDI_VolumeModel_9X_GENERIC_FM = 9,
+    /*! HMI Sound Operating System volume scaling model */
+    ADLMIDI_VolumeModel_HMI = 10,
+    /*! HMI Sound Operating System volume scaling model, older variant with bugs */
+    ADLMIDI_VolumeModel_HMI_OLD = 11,
+    /*! Count of available volume model modes */
+    ADLMIDI_VolumeModel_Count
+};
+
+/*!
+ * \brief Algorithms of channel allocation for new notes
+ */
+enum ADLMIDI_ChannelAlloc
+{
+    /*! Automatical choise of the method according to the volume model and internal preferrences */
+    ADLMIDI_ChanAlloc_AUTO = -1,
+    /*! Take only channels that has expired sounding delay */
+    ADLMIDI_ChanAlloc_OffDelay,
+    /*! Take any first released channel with the same instrument */
+    ADLMIDI_ChanAlloc_SameInst,
+    /*! Take any first released channel */
+    ADLMIDI_ChanAlloc_AnyReleased,
+    /*! Count of available channel allocation modes */
+    ADLMIDI_ChanAlloc_Count
 };
 
 /**
@@ -246,7 +278,125 @@ enum ADL_BankAccessFlags
     ADLMIDI_Bank_CreateRt = 1|2
 };
 
-typedef struct ADL_Instrument ADL_Instrument;
+
+/* ======== Instrument structures ======== */
+
+/**
+ * @brief Version of the instrument data format
+ */
+enum
+{
+    ADLMIDI_InstrumentVersion = 0
+};
+
+/**
+ * @brief Instrument flags
+ */
+typedef enum ADL_InstrumentFlags
+{
+    /*! Is two-operator single-voice instrument (no flags) */
+    ADLMIDI_Ins_2op        = 0x00,
+    /*! Is true four-operator instrument */
+    ADLMIDI_Ins_4op        = 0x01,
+    /*! Is pseudo four-operator (two 2-operator voices) instrument */
+    ADLMIDI_Ins_Pseudo4op  = 0x02,
+    /*! Is a blank instrument entry */
+    ADLMIDI_Ins_IsBlank    = 0x04,
+
+    /*! RythmMode flags mask */
+    ADLMIDI_Ins_RhythmModeMask = 0x38,
+
+    /*! Mask of the flags range */
+    ADLMIDI_Ins_ALL_MASK   = 0x07
+} ADL_InstrumentFlags;
+
+/**
+ * @brief Rhythm-mode drum type
+ */
+typedef enum ADL_RhythmMode
+{
+    /*! RythmMode: BassDrum */
+    ADLMIDI_RM_BassDrum  = 0x08,
+    /*! RythmMode: Snare */
+    ADLMIDI_RM_Snare     = 0x10,
+    /*! RythmMode: TomTom */
+    ADLMIDI_RM_TomTom    = 0x18,
+    /*! RythmMode: Cymbal */
+    ADLMIDI_RM_Cymbal    = 0x20,
+    /*! RythmMode: HiHat */
+    ADLMIDI_RM_HiHat     = 0x28
+} ADL_RhythmMode;
+
+
+/**
+ * @brief Operator structure, part of Instrument structure
+ */
+typedef struct ADL_Operator
+{
+    /*! AM/Vib/Env/Ksr/FMult characteristics */
+    ADL_UInt8 avekf_20;
+    /*! Key Scale Level / Total level register data */
+    ADL_UInt8 ksl_l_40;
+    /*! Attack / Decay */
+    ADL_UInt8 atdec_60;
+    /*! Systain and Release register data */
+    ADL_UInt8 susrel_80;
+    /*! Wave form */
+    ADL_UInt8 waveform_E0;
+} ADL_Operator;
+
+/**
+ * @brief Instrument structure
+ */
+typedef struct ADL_Instrument
+{
+    /*! Version of the instrument object */
+    int version;
+    /*! MIDI note key (half-tone) offset for an instrument (or a first voice in pseudo-4-op mode) */
+    ADL_SInt16 note_offset1;
+    /*! MIDI note key (half-tone) offset for a second voice in pseudo-4-op mode */
+    ADL_SInt16 note_offset2;
+    /*! MIDI note velocity offset (taken from Apogee TMB format) */
+    ADL_SInt8  midi_velocity_offset;
+    /*! Second voice detune level (taken from DMX OP2) */
+    ADL_SInt8  second_voice_detune;
+    /*! Percussion MIDI base tone number at which this drum will be played */
+    ADL_UInt8 percussion_key_number;
+    /**
+     * @var inst_flags
+     * @brief Instrument flags
+     *
+     * Enums: #ADL_InstrumentFlags and #ADL_RhythmMode
+     *
+     * Bitwise flags bit map:
+     * ```
+     * [0EEEDCBA]
+     *  A) 0x00 - 2-operator mode
+     *  B) 0x01 - 4-operator mode
+     *  C) 0x02 - pseudo-4-operator (two 2-operator voices) mode
+     *  D) 0x04 - is 'blank' instrument (instrument which has no sound)
+     *  E) 0x38 - Reserved for rhythm-mode percussion type number (three bits number)
+     *     -> 0x00 - Melodic or Generic drum (rhythm-mode is disabled)
+     *     -> 0x08 - is Bass drum
+     *     -> 0x10 - is Snare
+     *     -> 0x18 - is Tom-tom
+     *     -> 0x20 - is Cymbal
+     *     -> 0x28 - is Hi-hat
+     *  0) Reserved / Unused
+     * ```
+     */
+    ADL_UInt8 inst_flags;
+    /*! Feedback&Connection register for first and second operators */
+    ADL_UInt8 fb_conn1_C0;
+    /*! Feedback&Connection register for third and fourth operators */
+    ADL_UInt8 fb_conn2_C0;
+    /*! Operators register data */
+    ADL_Operator operators[4];
+    /*! Millisecond delay of sounding while key is on */
+    ADL_UInt16 delay_on_ms;
+    /*! Millisecond delay of sounding after key off */
+    ADL_UInt16 delay_off_ms;
+} ADL_Instrument;
 
 
 
@@ -361,11 +511,14 @@ extern ADLMIDI_DECLSPEC int adl_getNumFourOpsChnObtained(struct ADL_MIDIPlayer *
 /**
  * @brief Override Enable(1) or Disable(0) AdLib percussion mode. -1 - use bank default AdLib percussion mode
  *
+ * [DEPRECATED] This function is no more useful and now it makes nothing. Kept for ABI compatibility. Rhythm mode can be set by the bank data only.
+ *
  * This function forces rhythm-mode on any bank. The result will work glitchy.
  *
  * @param device Instance of the library
  * @param percmod 0 - disabled, 1 - enabled
  */
+ADLMIDI_DEPRECATED("This function is no more useful and now it makes nothing. Kept for ABI compatibility. Rhythm mode can be set by the bank data only.")
 extern ADLMIDI_DECLSPEC void adl_setPercMode(struct ADL_MIDIPlayer *device, int percmod);
 
 /**
@@ -415,11 +568,43 @@ extern ADLMIDI_DECLSPEC void adl_setScaleModulators(struct ADL_MIDIPlayer *devic
 extern ADLMIDI_DECLSPEC void adl_setFullRangeBrightness(struct ADL_MIDIPlayer *device, int fr_brightness);
 
 /**
+ * @brief Enable(1) or Disable(0) the automatical arpeggio system
+  *
+ * @param device Instance of the library
+ * @param aaEn 0 - disabled, 1 - enabled
+ */
+extern ADLMIDI_DECLSPEC void adl_setAutoArpeggio(struct ADL_MIDIPlayer *device, int aaEn);
+
+/**
+ * @brief Get the state of the automatical arpeggio system enable state
+ * @param device Instalce of the library
+ * @return 0 - disabled, 1 - enabled
+ */
+extern ADLMIDI_DECLSPEC int adl_getAutoArpeggio(struct ADL_MIDIPlayer *device);
+
+/**
  * @brief Enable or disable built-in loop (built-in loop supports 'loopStart' and 'loopEnd' tags to loop specific part)
  * @param device Instance of the library
  * @param loopEn 0 - disabled, 1 - enabled
  */
 extern ADLMIDI_DECLSPEC void adl_setLoopEnabled(struct ADL_MIDIPlayer *device, int loopEn);
+
+/**
+ * @brief Set how many times loop will be played
+ *
+ * Note: The song will be played once if loop has been disabled with no matter which value of loop count was set
+ *
+ * @param device Instance of the library
+ * @param loopCount Number of loops or -1 to loop infinitely
+ */
+extern ADLMIDI_DECLSPEC void adl_setLoopCount(struct ADL_MIDIPlayer *device, int loopCount);
+
+/**
+ * @brief Make song immediately stop on reaching a loop end point
+ * @param device Instance of the library
+ * @param loopHooksOnly 0 - disabled, 1 - enabled
+ */
+extern ADLMIDI_DECLSPEC void adl_setLoopHooksOnly(struct ADL_MIDIPlayer *device, int loopHooksOnly);
 
 /**
  * @brief Enable or disable soft panning with chip emulators
@@ -449,6 +634,20 @@ extern ADLMIDI_DECLSPEC void adl_setVolumeRangeModel(struct ADL_MIDIPlayer *devi
  * @return volume model on success, <0 when any error has occurred
  */
 extern ADLMIDI_DECLSPEC int adl_getVolumeRangeModel(struct ADL_MIDIPlayer *device);
+
+/**
+ * @brief Set the channel allocation mode
+ * @param device Instance of the library
+ * @param chanalloc Channel allocation mode (#ADLMIDI_ChannelAlloc)
+ */
+extern ADLMIDI_DECLSPEC void adl_setChannelAllocMode(struct ADL_MIDIPlayer *device, int chanalloc);
+
+/**
+ * @brief Get the current channel allocation mode
+ * @param device Instance of the library
+ * @return Channel allocation mode (#ADLMIDI_ChannelAlloc)
+ */
+extern ADLMIDI_DECLSPEC int adl_getChannelAllocMode(struct ADL_MIDIPlayer *device);
 
 /**
  * @brief Load WOPL bank file from File System
@@ -502,6 +701,10 @@ enum ADL_Emulator
     ADLMIDI_EMU_NUKED_174,
     /*! DosBox */
     ADLMIDI_EMU_DOSBOX,
+    /*! Opal */
+    ADLMIDI_EMU_OPAL,
+    /*! Java */
+    ADLMIDI_EMU_JAVA,
     /*! Count instrument on the level */
     ADLMIDI_EMU_end
 };
@@ -588,6 +791,7 @@ extern ADLMIDI_DECLSPEC const char *adl_errorInfo(struct ADL_MIDIPlayer *device)
  * Tip 1: You can initialize multiple instances and run them in parallel
  * Tip 2: Library is NOT thread-safe, therefore don't use same instance in different threads or use mutexes
  * Tip 3: Changing of sample rate on the fly is not supported. Re-create the instance again.
+ * Top 4: To generate output in OPL chip native sample rate, please initialize it with sample rate value as `ADL_CHIP_SAMPLE_RATE`
  *
  * @param sample_rate Output sample rate
  * @return Instance of the library. If NULL was returned, check the `adl_errorString` message for more info.
@@ -626,6 +830,27 @@ extern ADLMIDI_DECLSPEC int adl_openFile(struct ADL_MIDIPlayer *device, const ch
  * @return 0 on success, <0 when any error has occurred
  */
 extern ADLMIDI_DECLSPEC int adl_openData(struct ADL_MIDIPlayer *device, const void *mem, unsigned long size);
+
+/**
+ * @brief Switch another song if multi-song file is playing (for example, XMI)
+ *
+ * Note: to set the initial song to load, you should call this function
+ * BBEFORE calling `adl_openFile` or `adl_openData`.  When loaded file has more than
+ * one built-in songs (Usually XMIformat), it will be started from the selected number.
+ * You may call this function to switch another song.
+ *
+ * @param device Instance of the library
+ * @param songNumber Identifier of the track to load (or -1 to mix all tracks as one song)
+ * @return
+ */
+extern ADLMIDI_DECLSPEC void adl_selectSongNum(struct ADL_MIDIPlayer *device, int songNumber);
+
+/**
+ * @brief Retrive the number of songs in a currently opened file
+ * @param device Instance of the library
+ * @return Number of songs in the file. If 1 or less, means, the file has only one song inside.
+ */
+extern ADLMIDI_DECLSPEC int adl_getSongsCount(struct ADL_MIDIPlayer *device);
 
 /**
  * @brief Resets MIDI player (per-channel setup) into initial state
@@ -736,6 +961,15 @@ enum ADLMIDI_TrackOptions
  * @return 0 on success, <0 when any error has occurred
  */
 extern ADLMIDI_DECLSPEC int adl_setTrackOptions(struct ADL_MIDIPlayer *device, size_t trackNumber, unsigned trackOptions);
+
+/**
+ * @brief Sets the channel of the current sequence enable state
+ * @param device Instance of the library
+ * @param channelNumber Number of the channel (from 0 to 15)
+ * @param enabled 1 to enable and 0 to disable
+ * @return 0 on success, <0 when any error has occurred
+ */
+extern ADLMIDI_DECLSPEC int adl_setChannelEnabled(struct ADL_MIDIPlayer *device, size_t channelNumber, int enabled);
 
 /**
  * @brief Handler of callback trigger events
@@ -1072,7 +1306,18 @@ typedef void (*ADL_NoteHook)(void *userdata, int adlchn, int note, int ins, int 
 typedef void (*ADL_DebugMessageHook)(void *userdata, const char *fmt, ...);
 
 /**
+ * @brief Loop start/end point reach hook
+ * @param userdata Pointer to user data (usually, context of someting)
+ */
+typedef void (*ADL_LoopPointHook)(void *userdata);
+
+/**
  * @brief Set raw MIDI event hook
+ *
+ * CAUTION: Don't call any libADLMIDI API functions from off this hook directly!
+ * Suggestion: Use boolean variables to mark the fact this hook got been called, and then,
+ * apply your action outside of this hook, for example, in the next after audio output call.
+ *
  * @param device Instance of the library
  * @param rawEventHook Pointer to the callback function which will be called on every MIDI event
  * @param userData Pointer to user data which will be passed through the callback.
@@ -1081,6 +1326,11 @@ extern ADLMIDI_DECLSPEC void adl_setRawEventHook(struct ADL_MIDIPlayer *device, 
 
 /**
  * @brief Set note hook
+ *
+ * CAUTION: Don't call any libADLMIDI API functions from off this hook directly!
+ * Suggestion: Use boolean variables to mark the fact this hook got been called, and then,
+ * apply your action outside of this hook, for example, in the next after audio output call.
+ *
  * @param device Instance of the library
  * @param noteHook Pointer to the callback function which will be called on every noteOn MIDI event
  * @param userData Pointer to user data which will be passed through the callback.
@@ -1089,11 +1339,45 @@ extern ADLMIDI_DECLSPEC void adl_setNoteHook(struct ADL_MIDIPlayer *device, ADL_
 
 /**
  * @brief Set debug message hook
+ *
+ * CAUTION: Don't call any libADLMIDI API functions from off this hook directly!
+ * Suggestion: Use boolean variables to mark the fact this hook got been called, and then,
+ * apply your action outside of this hook, for example, in the next after audio output call.
+ *
  * @param device Instance of the library
  * @param debugMessageHook Pointer to the callback function which will be called on every debug message
  * @param userData Pointer to user data which will be passed through the callback.
  */
 extern ADLMIDI_DECLSPEC void adl_setDebugMessageHook(struct ADL_MIDIPlayer *device, ADL_DebugMessageHook debugMessageHook, void *userData);
+
+/**
+ * @brief Set the look start point hook
+ *
+ * CAUTION: Don't call any libADLMIDI API functions from off this hook directly!
+ * Suggestion: Use boolean variables to mark the fact this hook got been called, and then,
+ * apply your action outside of this hook, for example, in the next after audio output call.
+ *
+ * @param device Instance of the library
+ * @param loopStartHook Pointer to the callback function which will be called on every loop start point passing
+ * @param userData Pointer to user data which will be passed through the callback.
+ */
+extern ADLMIDI_DECLSPEC void adl_setLoopStartHook(struct ADL_MIDIPlayer *device, ADL_LoopPointHook loopStartHook, void *userData);
+
+/**
+ * @brief Set the look start point hook
+ *
+ * CAUTION: Don't call any libADLMIDI API functions from off this hook directly!
+ * Suggestion: Use boolean variables to mark the fact this hook got been called, and then,
+ * apply your action outside of this hook, for example, in the next after audio output call.
+ *
+ * If you want to switch the song after calling this hook, suggested to call the function
+ * adl_setLoopHooksOnly(device, 1) to immediately stop the song on reaching the loop point
+ *
+ * @param device Instance of the library
+ * @param loopStartHook Pointer to the callback function which will be called on every loop start point passing
+ * @param userData Pointer to user data which will be passed through the callback.
+ */
+extern ADLMIDI_DECLSPEC void adl_setLoopEndHook(struct ADL_MIDIPlayer *device, ADL_LoopPointHook loopEndHook, void *userData);
 
 /**
  * @brief Get a textual description of the channel state. For display only.
@@ -1116,128 +1400,6 @@ extern ADLMIDI_DECLSPEC void adl_setDebugMessageHook(struct ADL_MIDIPlayer *devi
  * To get the valid MIDI channel you will need to apply the & 0x0F mask to every value.
  */
 extern ADLMIDI_DECLSPEC int adl_describeChannels(struct ADL_MIDIPlayer *device, char *text, char *attr, size_t size);
-
-
-
-
-/* ======== Instrument structures ======== */
-
-/**
- * @brief Version of the instrument data format
- */
-enum
-{
-    ADLMIDI_InstrumentVersion = 0
-};
-
-/**
- * @brief Instrument flags
- */
-typedef enum ADL_InstrumentFlags
-{
-    /*! Is two-operator single-voice instrument (no flags) */
-    ADLMIDI_Ins_2op        = 0x00,
-    /*! Is true four-operator instrument */
-    ADLMIDI_Ins_4op        = 0x01,
-    /*! Is pseudo four-operator (two 2-operator voices) instrument */
-    ADLMIDI_Ins_Pseudo4op  = 0x02,
-    /*! Is a blank instrument entry */
-    ADLMIDI_Ins_IsBlank    = 0x04,
-
-    /*! RythmMode flags mask */
-    ADLMIDI_Ins_RhythmModeMask = 0x38,
-
-    /*! Mask of the flags range */
-    ADLMIDI_Ins_ALL_MASK   = 0x07
-} ADL_InstrumentFlags;
-
-/**
- * @brief Rhythm-mode drum type
- */
-typedef enum ADL_RhythmMode
-{
-    /*! RythmMode: BassDrum */
-    ADLMIDI_RM_BassDrum  = 0x08,
-    /*! RythmMode: Snare */
-    ADLMIDI_RM_Snare     = 0x10,
-    /*! RythmMode: TomTom */
-    ADLMIDI_RM_TomTom    = 0x18,
-    /*! RythmMode: Cymbal */
-    ADLMIDI_RM_Cymbal    = 0x20,
-    /*! RythmMode: HiHat */
-    ADLMIDI_RM_HiHat     = 0x28
-} ADL_RhythmMode;
-
-
-/**
- * @brief Operator structure, part of Instrument structure
- */
-typedef struct ADL_Operator
-{
-    /*! AM/Vib/Env/Ksr/FMult characteristics */
-    ADL_UInt8 avekf_20;
-    /*! Key Scale Level / Total level register data */
-    ADL_UInt8 ksl_l_40;
-    /*! Attack / Decay */
-    ADL_UInt8 atdec_60;
-    /*! Systain and Release register data */
-    ADL_UInt8 susrel_80;
-    /*! Wave form */
-    ADL_UInt8 waveform_E0;
-} ADL_Operator;
-
-/**
- * @brief Instrument structure
- */
-typedef struct ADL_Instrument
-{
-    /*! Version of the instrument object */
-    int version;
-    /*! MIDI note key (half-tone) offset for an instrument (or a first voice in pseudo-4-op mode) */
-    ADL_SInt16 note_offset1;
-    /*! MIDI note key (half-tone) offset for a second voice in pseudo-4-op mode */
-    ADL_SInt16 note_offset2;
-    /*! MIDI note velocity offset (taken from Apogee TMB format) */
-    ADL_SInt8  midi_velocity_offset;
-    /*! Second voice detune level (taken from DMX OP2) */
-    ADL_SInt8  second_voice_detune;
-    /*! Percussion MIDI base tone number at which this drum will be played */
-    ADL_UInt8 percussion_key_number;
-    /**
-     * @var inst_flags
-     * @brief Instrument flags
-     *
-     * Enums: #ADL_InstrumentFlags and #ADL_RhythmMode
-     *
-     * Bitwise flags bit map:
-     * ```
-     * [0EEEDCBA]
-     *  A) 0x00 - 2-operator mode
-     *  B) 0x01 - 4-operator mode
-     *  C) 0x02 - pseudo-4-operator (two 2-operator voices) mode
-     *  D) 0x04 - is 'blank' instrument (instrument which has no sound)
-     *  E) 0x38 - Reserved for rhythm-mode percussion type number (three bits number)
-     *     -> 0x00 - Melodic or Generic drum (rhythm-mode is disabled)
-     *     -> 0x08 - is Bass drum
-     *     -> 0x10 - is Snare
-     *     -> 0x18 - is Tom-tom
-     *     -> 0x20 - is Cymbal
-     *     -> 0x28 - is Hi-hat
-     *  0) Reserved / Unused
-     * ```
-     */
-    ADL_UInt8 inst_flags;
-    /*! Feedback&Connection register for first and second operators */
-    ADL_UInt8 fb_conn1_C0;
-    /*! Feedback&Connection register for third and fourth operators */
-    ADL_UInt8 fb_conn2_C0;
-    /*! Operators register data */
-    ADL_Operator operators[4];
-    /*! Millisecond delay of sounding while key is on */
-    ADL_UInt16 delay_on_ms;
-    /*! Millisecond delay of sounding after key off */
-    ADL_UInt16 delay_off_ms;
-} ADL_Instrument;
 
 #ifdef __cplusplus
 }

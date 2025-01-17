@@ -117,6 +117,13 @@ qbool Mem_IsAllocated(mempool_t *pool, const void *data);
 
 char *_Mem_strdup(mempool_t *pool, const char *s, const char *filename, int fileline);
 
+/// Returns the current size of an allocation
+// not a macro so that it doesn't allow the size to be changed.
+static inline size_t Mem_Size(void *data)
+{
+	return ((memheader_t *)((unsigned char *)data - sizeof(memheader_t)))->size;
+}
+
 typedef struct memexpandablearray_array_s
 {
 	unsigned char *data;

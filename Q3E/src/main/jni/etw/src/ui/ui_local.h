@@ -98,6 +98,8 @@ extern vmCvar_t ui_cg_crosshairColorAlt;
 extern vmCvar_t ui_cg_crosshairAlpha;
 extern vmCvar_t ui_cg_crosshairAlphaAlt;
 extern vmCvar_t ui_cg_crosshairSize;
+extern vmCvar_t ui_cg_crosshairScaleX;
+extern vmCvar_t ui_cg_crosshairScaleY;
 
 extern vmCvar_t cl_bypassMouseInput;
 
@@ -299,6 +301,8 @@ extern vec4_t listbar_color2;
 extern vec4_t text_color_disabled;
 extern vec4_t text_color_normal;
 extern vec4_t text_color_highlight;
+
+#define DEFAULT_MENU_FILE "ui/menus.txt"
 
 extern menuDef_t Menus[MAX_MENUS];      ///< defined menus
 extern int       menuCount;             ///< how many menus

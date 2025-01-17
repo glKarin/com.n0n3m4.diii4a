@@ -436,7 +436,7 @@ GL3_SetMode(void)
 	int err;
 	int fullscreen;
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: force screen size and mode
 	extern int screen_width;
 	extern int screen_height;
 	vid_fullscreen->value = 1;
@@ -1144,7 +1144,7 @@ GL3_DrawEntitiesOnList(void)
 	/* draw transparent entities
 	   we could sort these if it ever
 	   becomes a problem... */
-	glDepthMask(0);
+	glDepthMask(GL_FALSE);
 
 	for (i = 0; i < gl3_newrefdef.num_entities; i++)
 	{
@@ -1189,7 +1189,7 @@ GL3_DrawEntitiesOnList(void)
 
 	GL3_DrawAliasShadows();
 
-	glDepthMask(1); /* back to writing */
+	glDepthMask(GL_TRUE); /* back to writing */
 
 }
 

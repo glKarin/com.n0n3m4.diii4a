@@ -4,20 +4,18 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
-import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.FileBrowser;
 import com.karin.idTech4Amm.misc.Function;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3EGlobals;
-import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KStr;
+import com.n0n3m4.q3e.karin.KidTech4Command;
 import com.n0n3m4.q3e.karin.KidTechCommand;
 
 import java.io.File;
@@ -28,12 +26,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 public final class ChooseGameModFunc extends GameLauncherFunc
 {
-    public static final String FILE_SEP = " /// ";
-
     private final int m_code;
     private String m_path;
     private String m_mod;
@@ -71,7 +66,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
     {
         FileBrowser fileBrowser = new FileBrowser();
         final boolean UsingFile = Q3EUtils.q3ei.isDOOM;
-        final boolean AllowExtraFiles = Q3EUtils.q3ei.isDOOM;
+        final boolean AllowExtraFiles = false; // Q3EUtils.q3ei.isDOOM;
         fileBrowser.SetFilter(FileBrowser.ID_FILTER_DIRECTORY);
         fileBrowser.SetIgnoreDotDot(true);
         fileBrowser.SetShowHidden(false);
@@ -347,8 +342,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         }
 
         int selected = -1;
-        String mod = null != m_mod ? KidTechCommand.UnEscapeQuotes(m_mod) : null;
-        if(null != mod && !mod.isEmpty())
+        String mod = null != m_mod ? KStr.UnEscapeQuotes(m_mod) : null;
+        if(KStr.NotEmpty(mod))
         {
             for (int i = 0; i < values.size(); i++)
             {
@@ -367,7 +362,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             {
                 FileBrowser.FileModel file = values.get(p);
                 List<String> efiles = new ArrayList<>();
-                String[] lib = SelectMod(file, efiles);
+                String lib = SelectMod(file, efiles);
+                Callback(lib);
                 dialog.dismiss();
                 if(AllowExtraFiles)
                 {
@@ -428,12 +424,12 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         }));
     }
 
-    private String[] SelectMod(FileBrowser.FileModel file, List<String> efiles)
+    private String SelectMod(FileBrowser.FileModel file, List<String> efiles)
     {
-        String[] lib;
+        String lib;
         if(Q3EUtils.q3ei.isDOOM && file.type == FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY)
         {
-            List<FileBrowser.FileModel> fileModels = ListGZDOOMFiles(file.path);
+            List<FileBrowser.FileModel> fileModels = ChooseExtrasFileFunc.ListGZDOOMFiles(file.path);
             List<String> wads = new ArrayList<>();
 
             for(FileBrowser.FileModel fileModel : fileModels)
@@ -446,72 +442,28 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                     efiles.add(relativePath);
             }
 
-            lib = wads.toArray(new String[0]);
-
-            wads.clear();
-            for(String wad : lib)
-            {
-                wads.add(KStr.CmdStr(wad));
-            }
-            Callback(String.join(" ", wads));
+            lib = KidTech4Command.JoinValue(wads, true);
         }
         else
         {
             //String relativePath = FileUtility.RelativePath(file.path, m_path);
-            lib = new String[] {
-                file.name
-            };
-            Callback(KStr.CmdStr(lib[0]));
+            lib = KStr.CmdStr(file.name);
         }
 
         return lib;
     }
 
-    private List<FileBrowser.FileModel> ListGZDOOMFiles(String path)
+    private void ChooseExtraFiles(List<String> selectFiles, String mod)
     {
-        FileBrowser fileBrowser = new FileBrowser();
-        fileBrowser.SetExtension(".wad", ".pk3", ".ipk3", ".deh", ".bex");
-        fileBrowser.SetFilter(FileBrowser.ID_FILTER_FILE);
-
-        fileBrowser.SetIgnoreDotDot(true);
-        fileBrowser.SetDirNameWithSeparator(false);
-        fileBrowser.SetShowHidden(true);
-        fileBrowser.SetCurrentPath(null != path ? path : m_path);
-        return fileBrowser.ListAllFiles();
-    }
-
-    private void ChooseExtraFiles(List<String> selectFiles, String...excludes)
-    {
-        List<FileBrowser.FileModel> fileModels = ListGZDOOMFiles(null);
-
-        final List<CharSequence> items = new ArrayList<>();
+        ChooseExtrasFileFunc m_chooseExtrasFileFunc = new ChooseExtrasFileFunc(m_gameLauncher, m_code);
         final List<String> files = new ArrayList<>();
-        int m = 0;
 
-        // 1. remove -iwad file
-        if(null != excludes && excludes.length > 0)
-        {
-            while (m < fileModels.size())
-            {
-                if(Utility.ArrayContains(excludes, fileModels.get(m).name, false))
-                    fileModels.remove(m);
-                else
-                    m++;
-            }
-        }
-
-        // 2. setup multi choice items
-        for (FileBrowser.FileModel fileModel : fileModels)
-        {
-            items.add(fileModel.name);
-        }
-
-        // 3. load selected from command line
         if(KStr.NotBlank(m_file))
         {
             List<String> strings = KidTechCommand.SplitValue(m_file, true);
             files.addAll(strings);
         }
+        int m = 0;
         if(null != selectFiles)
         {
             for(String selectFile : selectFiles)
@@ -521,62 +473,19 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             }
         }
 
-        // 4. remove not exists files from command line
-        m = 0;
-        while (m < files.size())
-        {
-            if(!items.contains(files.get(m)))
-                files.remove(m);
-            else
-                m++;
-        }
-
-        // 5. setup selected items
-        final boolean[] selected = new boolean[fileModels.size()];
-        for (int i = 0; i < fileModels.size(); i++)
-        {
-            FileBrowser.FileModel fileModel = fileModels.get(i);
-            selected[i] = files.contains(fileModel.name);
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
-        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Tr(R.string.mod) + ": " + Tr(R.string._files));
-        builder.setMultiChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnMultiChoiceClickListener(){
+        m_chooseExtrasFileFunc.SetCallback(new Runnable() {
             @Override
-            public void onClick(DialogInterface dialog, int which, boolean isChecked)
+            public void run()
             {
-                String lib = items.get(which).toString();
-                if(isChecked)
-                {
-                    if(!files.contains(lib))
-                        files.add(lib);
-                }
-                else
-                    files.remove(lib);
+                ChooseGameModFunc.this.Callback(m_chooseExtrasFileFunc.<String>GetResult());
             }
         });
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int p)
-            {
-                String join = KStr.Join(files, FILE_SEP);
-                Callback(":" + join);
-                dialog.dismiss();
-            }
-        });
-        builder.setNeutralButton(R.string.unset, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int p)
-            {
-                Callback(":");
-                dialog.dismiss();
-            }
-        });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int p)
-            {
-                dialog.dismiss();
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+
+        Bundle bundle = new Bundle();
+        bundle.putString("mod", mod);
+        bundle.putString("path", m_path);
+        if(Q3EUtils.q3ei.isDOOM)
+            bundle.putString("file", KidTechCommand.JoinValue(files, true));
+        m_chooseExtrasFileFunc.Start(bundle);
     }
 }

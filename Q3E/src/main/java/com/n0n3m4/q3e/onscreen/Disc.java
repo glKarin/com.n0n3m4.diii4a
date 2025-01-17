@@ -49,9 +49,9 @@ public class Disc extends Paintable implements TouchListener
     private final String      m_label;
     private final int         m_style;
     public        int         size; // inner size = inner radius * 2
-    private final int         m_size_2; // inner size ^ 2
-    private final int         outside_size; // outsize size = outer radius x 2
-    private final int         m_outside_size_2; // outsize size ^ 2
+    private int         m_size_2; // inner size ^ 2
+    private int         outside_size; // outsize size = outer radius x 2
+    private int         m_outside_size_2; // outsize size ^ 2
 
     private int dotx, doty;
     private boolean dotjoyenabled = false;
@@ -432,5 +432,31 @@ public class Disc extends Paintable implements TouchListener
     {
         cx = x;
         cy = y;
+    }
+
+    // run on GL thread
+    public void Resize(int inner_radius)
+    {
+        size = inner_radius * 2;
+        outside_size = size * 3;
+        m_outside_size_2 = outside_size * outside_size;
+        m_size_2 = size * size;
+        float[] verts_back = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
+        float[] tmp = new float[verts_back.length];
+        for (int i = 0; i < verts_back.length; i += 2)
+        {
+            tmp[i] = verts_back[i] * size;
+            tmp[i + 1] = verts_back[i + 1] * size;
+        }
+        verts_p.put(tmp);
+        verts_p.position(0);
+        float[] tmp2 = new float[verts_back.length];
+        for (int i = 0; i < verts_back.length; i += 2)
+        {
+            tmp2[i] = verts_back[i] * outside_size;
+            tmp2[i + 1] = verts_back[i + 1] * outside_size;
+        }
+        m_fanVertexArray.put(tmp2);
+        m_fanVertexArray.position(0);
     }
 }

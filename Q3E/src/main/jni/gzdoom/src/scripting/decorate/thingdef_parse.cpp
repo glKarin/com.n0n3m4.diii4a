@@ -49,9 +49,6 @@
 #include "v_text.h"
 #include "m_argv.h"
 #include "v_video.h"
-#ifndef _MSC_VER
-#include "i_system.h"  // for strlwr()
-#endif // !_MSC_VER
 
 void ParseOldDecoration(FScanner &sc, EDefinitionType def, PNamespace *ns);
 EXTERN_CVAR(Bool, strictdecorate);
@@ -475,7 +472,7 @@ void HandleActorFlag(FScanner &sc, Baggage &bag, const char *part1, const char *
 		AActor *defaults = (AActor*)bag.Info->Defaults;
 		if (fd->structoffset == -1)	// this is a deprecated flag that has been changed into a real property
 		{
-			HandleDeprecatedFlags(defaults, bag.Info, mod=='+', fd->flagbit);
+			HandleDeprecatedFlags(defaults, mod=='+', fd->flagbit);
 		}
 		else
 		{
@@ -945,15 +942,12 @@ static void ParseActorProperty(FScanner &sc, Baggage &bag)
 		"Spawn", "See", "Melee", "Missile", "Pain", "Death", "XDeath", "Burn", 
 		"Ice", "Raise", "Crash", "Crush", "Wound", "Disintegrate", "Heal", NULL };
 
-	strlwr (sc.String);
-
 	FString propname = sc.String;
 
 	if (sc.CheckString ("."))
 	{
 		sc.MustGetString ();
 		propname += '.';
-		strlwr (sc.String);
 		propname += sc.String;
 	}
 	else

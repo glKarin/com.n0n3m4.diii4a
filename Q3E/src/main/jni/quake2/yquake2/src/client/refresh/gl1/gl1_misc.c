@@ -183,7 +183,7 @@ R_SetDefaultState(void)
 
 	glColor4f(1, 1, 1, 1);
 
-#if !defined(_GLES)
+#if !defined(_GLES) //karin: not support glPolygonMode on GLES1.1
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 #endif
 	glShadeModel(GL_FLAT);
@@ -210,9 +210,9 @@ R_SetDefaultState(void)
 		attenuations[1] = gl1_particle_att_b->value;
 		attenuations[2] = gl1_particle_att_c->value;
 
-		qglPointParameterfARB(GL_POINT_SIZE_MIN_EXT, gl1_particle_min_size->value);
-		qglPointParameterfARB(GL_POINT_SIZE_MAX_EXT, gl1_particle_max_size->value);
-		qglPointParameterfvARB(GL_DISTANCE_ATTENUATION_EXT, attenuations);
+		qglPointParameterf(GL_POINT_SIZE_MIN, gl1_particle_min_size->value);
+		qglPointParameterf(GL_POINT_SIZE_MAX, gl1_particle_max_size->value);
+		qglPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, attenuations);
 
 		/* GL_POINT_SMOOTH is not implemented by some OpenGL
 		   drivers, especially the crappy Mesa3D backends like

@@ -5,18 +5,16 @@
 #define Q3E_GAME_NAME "GZDOOM"
 #define Q3E_IS_INITIALIZED (gzdoomIsInitialized)
 #define Q3E_PRINTF printf
-#define Q3E_WID_RESTART
-#define Q3E_DRAW_FRAME { /*GameMain*/ }
 #define Q3E_SHUTDOWN_GAME ShutdownGame()
 #define Q3Ebool bool
 #define Q3E_TRUE true
 #define Q3E_FALSE false
-#define Q3E_THREAD_MAIN game_main
-#define Q3E_INIT_WINDOW GLimp_AndroidInit
+#define Q3E_INIT_WINDOW GLimp_AndroidOpenWindow
 #define Q3E_QUIT_WINDOW GLimp_AndroidQuit
 #define Q3E_CHANGE_WINDOW GLimp_AndroidInit
 #define Q3E_REQUIRE_THREAD
 
+extern void GLimp_AndroidOpenWindow(volatile ANativeWindow *win);
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit(void);
 extern void ShutdownGame(void);

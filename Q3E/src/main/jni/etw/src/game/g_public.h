@@ -36,6 +36,8 @@
 #ifndef INCLUDE_G_PUBLIC_H
 #define INCLUDE_G_PUBLIC_H
 
+#include "../qcommon/q_shared.h"
+
 #define GAME_API_VERSION    8
 
 //===============================================================
@@ -221,7 +223,7 @@ typedef enum
 	G_SENDMESSAGE = 585,
 	G_MESSAGESTATUS,
 
-	G_ETLTV_GETPLAYERSTATE = 600,
+	TVG_GET_PLAYERSTATE = 600,
 
 	///< engine extensions padding
 	G_TRAP_GETVALUE = COM_TRAP_GETVALUE,

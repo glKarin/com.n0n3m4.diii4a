@@ -35,6 +35,8 @@
 #ifndef INCLUDE_SND_PUBLIC_H
 #define INCLUDE_SND_PUBLIC_H
 
+#include "../qcommon/q_shared.h"
+
 // background track queuing
 #define QUEUED_PLAY_ONCE    -1
 #define QUEUED_PLAY_LOOPED  -2
@@ -97,6 +99,8 @@ int S_GetVoiceAmplitude(int entNum);
 
 int S_GetSoundLength(sfxHandle_t sfxHandle);
 int S_GetCurrentSoundTime(void);
+
+void S_PauseSounds(qboolean pause);
 
 #ifdef USE_VOIP
 void S_StartCapture(void);

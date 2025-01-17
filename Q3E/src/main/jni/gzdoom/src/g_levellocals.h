@@ -56,6 +56,7 @@
 #include "r_data/r_interpolate.h"
 #include "doom_aabbtree.h"
 #include "doom_levelmesh.h"
+#include "p_visualthinker.h"
 
 //============================================================================
 //
@@ -149,6 +150,7 @@ struct FLevelLocals
 	int GetCompatibility2(int mask);
 	void ApplyCompatibility();
 	void ApplyCompatibility2();
+	AActor* SelectActorFromTID(int tid, size_t index, AActor* defactor);
 
 	void Init();
 
@@ -166,8 +168,8 @@ private:
 
 	void SerializePlayers(FSerializer &arc, bool skipload);
 	void CopyPlayer(player_t *dst, player_t *src, const char *name);
-	void ReadOnePlayer(FSerializer &arc, bool skipload);
-	void ReadMultiplePlayers(FSerializer &arc, int numPlayers, int numPlayersNow, bool skipload);
+	void ReadOnePlayer(FSerializer &arc, bool fromHub);
+	void ReadMultiplePlayers(FSerializer &arc, int numPlayers, bool fromHub);
 	void SerializeSounds(FSerializer &arc);
 	void PlayerSpawnPickClass (int playernum);
 
@@ -198,7 +200,7 @@ public:
 	void ClearDynamic3DFloorData();
 	void WorldDone(void);
 	void AirControlChanged();
-	AActor *SelectTeleDest(int tid, int tag, bool norandom);
+	AActor *SelectTeleDest(int tid, int tag, bool norandom, bool isPlayer);
 	bool AlignFlat(int linenum, int side, int fc);
 	void ReplaceTextures(const char *fromname, const char *toname, int flags);
 
@@ -425,10 +427,13 @@ public:
 	DThinker *CreateThinker(PClass *cls, int statnum = STAT_DEFAULT)
 	{
 		DThinker *thinker = static_cast<DThinker*>(cls->CreateNew());
+		if (statnum && thinker->IsKindOf(RUNTIME_CLASS(DVisualThinker)))
+		{
+			statnum = STAT_VISUALTHINKER;
+		}
+
 		assert(thinker->IsKindOf(RUNTIME_CLASS(DThinker)));
 		thinker->ObjectFlags |= OF_JustSpawned;
-		if (thinker->IsKindOf(RUNTIME_CLASS(DVisualThinker))) // [MC] This absolutely must happen for this class!
-			statnum = STAT_VISUALTHINKER;
 		Thinkers.Link(thinker, statnum);
 		thinker->Level = this;
 		return thinker;

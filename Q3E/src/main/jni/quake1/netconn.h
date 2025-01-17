@@ -276,7 +276,7 @@ typedef struct serverlist_info_s
 	char cname[128];
 	unsigned cname_len;
 	/// ping time for sorting servers, in milliseconds, 0 means no data
-	unsigned ping;
+	int ping;
 	/// name of the game
 	char game[32];
 	unsigned game_len;

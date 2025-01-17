@@ -18,11 +18,11 @@
 #define LOGE(fmt, args...) { printf("[" LOG_TAG " error]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##args); }
 
 #ifdef Q_XUNWIND_STRICT
-#define Q_XUNWIND_CHECK_INIT(x) if(!handle) { LOGE("q_xunwind is not initialized!\n"); abort(); };
-#define Q_XUNWIND_CALL(name, args, def) if(name##_fptr) { return name##_fptr args; } else { LOGE(#name " missing!\n"); abort(); return def; }
+#define Q_XUNWIND_CHECK_INIT(x) if(!handle) { LOGE("q_xunwind is not initialized!"); abort(); };
+#define Q_XUNWIND_CALL(name, args, def) if(name##_fptr) { return name##_fptr args; } else { LOGE(#name " missing!"); abort(); return def; }
 #else
-#define Q_XUNWIND_CHECK_INIT(x) if(!handle) { LOGW(" q_xunwind is not initialized!\n"); return x; };
-#define Q_XUNWIND_CALL(name, args, def) if(name##_fptr) { return name##_fptr args; } else { LOGW(#name " missing!\n"); return def; }
+#define Q_XUNWIND_CHECK_INIT(x) if(!handle) { LOGW(" q_xunwind is not initialized!"); return x; };
+#define Q_XUNWIND_CALL(name, args, def) if(name##_fptr) { return name##_fptr args; } else { LOGW(#name " missing!"); return def; }
 #endif
 
 #define XUNWIND_LIBRARY "libxunwind.so"
@@ -37,7 +37,7 @@ int q_xunwind_init(void)
 {
     if(handle)
     {
-        LOGE("q_xunwind has initialized!\n");
+        LOGE("q_xunwind has initialized!");
         return 1;
     }
 
@@ -46,18 +46,18 @@ int q_xunwind_init(void)
     handle = dlopen(XUNWIND_LIBRARY, RTLD_NOW | RTLD_GLOBAL);
     if(!handle)
     {
-        LOGE("q_xunwind load '" XUNWIND_LIBRARY "' fail -> %s!\n", dlerror());
+        LOGE("q_xunwind load '" XUNWIND_LIBRARY "' fail -> %s!", dlerror());
         return 0;
     }
 
 #define Q_XUNWIND_PROC(name, ret, args) \
     name##_fptr = (ret (*) args) dlsym(handle, #name);       \
     if(!name##_fptr) {                                        \
-        LOGE("q_xunwind missing '" #name "' function!\n"); \
+        LOGE("q_xunwind missing '" #name "' function!"); \
     } else num++;
 #include "q_xunwind_proc.h"
 
-    LOGI("q_xunwind initialized(%d functions)!\n", num);
+    LOGI("q_xunwind initialized(%d functions)!", num);
 
     return 1;
 }
@@ -66,7 +66,7 @@ void q_xunwind_shutdown(void)
 {
     if(!handle)
     {
-        LOGE("q_xunwind is not initialized!\n");
+        LOGE("q_xunwind is not initialized!");
         return;
     }
 #define Q_XUNWIND_PROC(name, ret, args) name##_fptr = NULL;
@@ -75,7 +75,7 @@ void q_xunwind_shutdown(void)
     dlclose(handle);
     handle = NULL;
 
-    LOGI("q_xunwind shutdown!\n");
+    LOGI("q_xunwind shutdown!");
 }
 
 int q_xunwind_is_initialized(void)

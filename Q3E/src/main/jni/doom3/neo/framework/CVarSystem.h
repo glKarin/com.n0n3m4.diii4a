@@ -200,12 +200,7 @@ class idCVar
 			internalVar = cvar;
 		}
 
-		void SetReadonly(bool on = true) {
-            if(on)
-			    internalVar->flags |= CVAR_ROM;
-            else
-                internalVar->flags &= ~CVAR_ROM;
-		}
+		void SetReadonly(bool on = true);
 
 		static void				RegisterStaticVars(void);
 
@@ -489,5 +484,7 @@ ID_INLINE void idCVarHelp::RegisterStatics( void ) {
 }
 // RAVEN END
 #endif
+
+#define CVAR_READONLY(cv) (cv).SetReadonly()
 
 #endif /* !__CVARSYSTEM_H__ */

@@ -319,7 +319,7 @@ static void M_Demo_Key (cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		S_LocalSound ("sound/misc/menu2.wav");
@@ -424,6 +424,7 @@ void M_Menu_Main_f(cmd_state_t *cmd)
 }
 
 
+static bool mp_failed;
 static void M_Main_Draw (void)
 {
 	int		f;
@@ -436,11 +437,20 @@ static void M_Main_Draw (void)
 		const char *s;
 		M_Background(640, 480); //fall back is always to 640x480, this makes it most readable at that.
 		y = 480/3-16;
-		s = "You have reached this menu due to missing or unlocatable content/data";M_PrintRed ((640-strlen(s)*8)*0.5, (480/3)-16, s);y+=8;
+		if (mp_failed)
+		{
+			s = "The menu QC program has failed.";M_PrintRed ((640-strlen(s)*8)*0.5, y, s);y+=8;
+			y+=8;
+			s = "You should find the specific error(s) in the console.";M_Print ((640-strlen(s)*8)*0.5, y, s);y+=8;
+		}
+		else
+		{
+			s = "The required files were not found.";M_PrintRed ((640-strlen(s)*8)*0.5, y, s);y+=8;
 		y+=8;
 		s = "You may consider adding";M_Print ((640-strlen(s)*8)*0.5, y, s);y+=8;
 		s = "-basedir /path/to/game";M_Print ((640-strlen(s)*8)*0.5, y, s);y+=8;
-		s = "to your launch commandline";M_Print ((640-strlen(s)*8)*0.5, y, s);y+=8;
+			s = "to your launch commandline.";M_Print ((640-strlen(s)*8)*0.5, y, s);y+=8;
+		}
 		M_Print (640/2 - 48, 480/2, "Open Console"); //The console usually better shows errors (failures)
 		M_Print (640/2 - 48, 480/2 + 8, "Quit");
 		M_DrawCharacter(640/2 - 56, 480/2 + (8 * m_main_cursor), 12+((int)(host.realtime*4)&1));
@@ -500,6 +510,8 @@ static void M_Main_Key(cmd_state_t *cmd, int key, int ascii)
 		key_dest = key_game;
 		m_state = m_none;
 		//cls.demonum = m_save_demonum;
+		//if(!cl_startdemos.integer)
+		//	break;
 		//if (cls.demonum != -1 && !cls.demoplayback && cls.state != ca_connected)
 		//	CL_NextDemo ();
 		break;
@@ -517,7 +529,7 @@ static void M_Main_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		m_entersound = true;
@@ -782,7 +794,7 @@ static void M_SinglePlayer_Key(cmd_state_t *cmd, int key, int ascii)
 	if (gamemode == GAME_GOODVSBAD2 || gamemode == GAME_BATTLEMECH)
 	{
 		if (key == K_ESCAPE || key == K_ENTER
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 			|| key == K_MOUSE1
 #endif
 				)
@@ -809,7 +821,7 @@ static void M_SinglePlayer_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		m_entersound = true;
@@ -969,7 +981,7 @@ static void M_Load_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		S_LocalSound ("sound/misc/menu2.wav");
@@ -1014,7 +1026,7 @@ static void M_Save_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		m_state = m_none;
@@ -1092,7 +1104,7 @@ static void M_Transfusion_Episode_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		Cbuf_AddText(cmd, "deathmatch 0\n");
@@ -1154,7 +1166,7 @@ static void M_Transfusion_Skill_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		m_entersound = true;
@@ -1270,7 +1282,7 @@ static void M_MultiPlayer_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		m_entersound = true;
@@ -1509,7 +1521,7 @@ forward:
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		if (setup_cursor == 0)
@@ -1748,7 +1760,7 @@ static void M_Options_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		m_entersound = true;
@@ -1966,7 +1978,7 @@ static void M_Options_Effects_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		M_Menu_Options_Effects_AdjustSliders (1);
@@ -2099,7 +2111,7 @@ static void M_Options_Graphics_Key (cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		M_Menu_Options_Graphics_AdjustSliders (cmd, 1);
@@ -2330,7 +2342,7 @@ static void M_Options_ColorControl_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		m_entersound = true;
@@ -2754,7 +2766,7 @@ static void M_Keys_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:		// go into bind mode
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		Key_FindKeysForCommand (bindnames[keys_cursor][0], keys, NUMKEYS, 0);
@@ -2786,7 +2798,7 @@ static void M_Reset_Key(cmd_state_t *cmd, int key, int ascii)
 	{
 	case 'Y':
 	case 'y':
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as 'y'
 	case K_MOUSE1:
 #endif
 		Cbuf_AddText(cmd, "cvar_resettodefaults_all;exec default.cfg\n");
@@ -3094,7 +3106,7 @@ static void M_Video_Key(cmd_state_t *cmd, int key, int ascii)
 			break;
 
 		case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 		case K_MOUSE1:
 #endif
 			m_entersound = true;
@@ -3339,7 +3351,7 @@ static void M_Quit_Key(cmd_state_t *cmd, int key, int ascii)
 
 	case 'Y':
 	case 'y':
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as 'y'
 	case K_MOUSE1:
 #endif
 		host.state = host_shutdown;
@@ -3489,7 +3501,7 @@ static void M_LanConfig_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		if (lanConfig_cursor == 0)
@@ -3499,7 +3511,7 @@ static void M_LanConfig_Key(cmd_state_t *cmd, int key, int ascii)
 
 		Cbuf_AddText(cmd, "stopdemo\n");
 
-		Cvar_SetValue(&cvars_all, "port", lanConfig_port);
+		Cvar_SetValueQuick(&sv_netport, lanConfig_port);
 
 		if (lanConfig_cursor == 1 || lanConfig_cursor == 2)
 		{
@@ -4056,7 +4068,7 @@ void M_GameOptions_Draw (void)
 		if (gamemode == GAME_TRANSFUSION)
 		{
 			if (!coop.integer && !deathmatch.integer)
-				Cvar_SetValue(&cvars_all, "deathmatch", 1);
+				Cvar_SetQuick(&deathmatch, "1");
 			if (deathmatch.integer == 0)
 				M_Print(160, 64, "Cooperative");
 			else if (deathmatch.integer == 2)
@@ -4067,7 +4079,7 @@ void M_GameOptions_Draw (void)
 		else if (gamemode == GAME_BATTLEMECH)
 		{
 			if (!deathmatch.integer)
-				Cvar_SetValue(&cvars_all, "deathmatch", 1);
+				Cvar_SetQuick(&deathmatch, "1");
 			if (deathmatch.integer == 2)
 				M_Print(160, 64, "Rambo Match");
 			else
@@ -4076,7 +4088,7 @@ void M_GameOptions_Draw (void)
 		else
 		{
 			if (!coop.integer && !deathmatch.integer)
-				Cvar_SetValue(&cvars_all, "deathmatch", 1);
+				Cvar_SetQuick(&deathmatch, "1");
 			if (coop.integer)
 				M_Print(160, 64, "Cooperative");
 			else
@@ -4395,7 +4407,7 @@ static void M_GameOptions_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		S_LocalSound ("sound/misc/menu2.wav");
@@ -4421,7 +4433,7 @@ static void M_GameOptions_Key(cmd_state_t *cmd, int key, int ascii)
 				l = min(l - 1, 37);
 				memcpy(hostnamebuf, hostname.string, l);
 				hostnamebuf[l] = 0;
-				Cvar_Set(&cvars_all, "hostname", hostnamebuf);
+				Cvar_SetQuick(&hostname, hostnamebuf);
 			}
 		}
 		break;
@@ -4437,7 +4449,7 @@ static void M_GameOptions_Key(cmd_state_t *cmd, int key, int ascii)
 				memcpy(hostnamebuf, hostname.string, l);
 				hostnamebuf[l] = ascii;
 				hostnamebuf[l+1] = 0;
-				Cvar_Set(&cvars_all, "hostname", hostnamebuf);
+				Cvar_SetQuick(&hostname, hostnamebuf);
 			}
 		}
 	}
@@ -4562,7 +4574,7 @@ static void M_ServerList_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		S_LocalSound ("sound/misc/menu2.wav");
@@ -4578,15 +4590,13 @@ static void M_ServerList_Key(cmd_state_t *cmd, int k, int ascii)
 
 //=============================================================================
 /* MODLIST MENU */
-// same limit of mod dirs as in fs.c
-#define MODLIST_MAXDIRS 16
-static int modlist_enabled [MODLIST_MAXDIRS];	//array of indexs to modlist
+// same limit of mod dirs as in fs.c (allowing that one is used by gamedirname1)
+#define MODLIST_MAXDIRS MAX_GAMEDIRS - 1
 static int modlist_numenabled;			//number of enabled (or in process to be..) mods
 
 typedef struct modlist_entry_s
 {
 	qbool loaded;	// used to determine whether this entry is loaded and running
-	int enabled;		// index to array of modlist_enabled
 
 	// name of the modification, this is displayed on the menu entry
 	char name[128];
@@ -4605,16 +4615,15 @@ static void ModList_RebuildList(void)
 	int i,j;
 	stringlist_t list;
 	const char *description;
+	int desc_len;
 
 	stringlistinit(&list);
 	listdirectory(&list, fs_basedir, "");
 	stringlistsort(&list, true);
 	modlist_count = 0;
-	modlist_numenabled = fs_numgamedirs;
+	modlist_numenabled = 0;
 	for (i = 0;i < list.numstrings && modlist_count < MODLIST_TOTALSIZE;i++)
 	{
-		int desc_len;
-
 		// reject any dirs that are part of the base game
 		if (gamedirname1 && !strcasecmp(gamedirname1, list.strings[i])) continue;
 		//if (gamedirname2 && !strcasecmp(gamedirname2, list.strings[i])) continue;
@@ -4634,17 +4643,17 @@ static void ModList_RebuildList(void)
 			}
 
 		dp_strlcpy (modlist[modlist_count].dir, list.strings[i], sizeof(modlist[modlist_count].dir));
-		//check currently loaded mods
+
+		// check if this mod is currently loaded
 		modlist[modlist_count].loaded = false;
-		if (fs_numgamedirs)
 			for (j = 0; j < fs_numgamedirs; j++)
 				if (!strcasecmp(fs_gamedirs[j], modlist[modlist_count].dir))
 				{
 					modlist[modlist_count].loaded = true;
-					modlist[modlist_count].enabled = j;
-					modlist_enabled[j] = modlist_count;
+				modlist_numenabled++;
 					break;
 				}
+
 		modlist_count ++;
 	}
 	stringlistfreecontents(&list);
@@ -4654,22 +4663,7 @@ static void ModList_Enable (void)
 {
 	int i;
 	int numgamedirs;
-	char gamedirs[MODLIST_MAXDIRS][MAX_QPATH];
-
-	// copy our mod list into an array for FS_ChangeGameDirs
-	numgamedirs = modlist_numenabled;
-	for (i = 0; i < modlist_numenabled; i++)
-		dp_strlcpy (gamedirs[i], modlist[modlist_enabled[i]].dir,sizeof (gamedirs[i]));
-
-	// this code snippet is from FS_ChangeGameDirs
-	if (fs_numgamedirs == numgamedirs)
-	{
-		for (i = 0;i < numgamedirs;i++)
-			if (strcasecmp(fs_gamedirs[i], gamedirs[i]))
-				break;
-		if (i == numgamedirs)
-			return; // already using this set of gamedirs, do nothing
-	}
+	const char *gamedirs[MODLIST_MAXDIRS];
 
 	// this part is basically the same as the FS_GameDir_f function
 	if ((cls.state == ca_connected && !cls.demoplayback) || sv.active)
@@ -4679,7 +4673,18 @@ static void ModList_Enable (void)
 		return;
 	}
 
-	FS_ChangeGameDirs (modlist_numenabled, gamedirs, true, true);
+	// copy our mod list into an array for FS_ChangeGameDirs
+	for (i = 0, numgamedirs = 0; i < modlist_count && numgamedirs < MODLIST_MAXDIRS; i++)
+		if (modlist[i].loaded)
+			gamedirs[numgamedirs++] = modlist[i].dir;
+	// allow disabling all active mods using the menu
+	if (numgamedirs == 0)
+	{
+		numgamedirs = 1;
+		gamedirs[0] = gamedirname1;
+	}
+
+	FS_ChangeGameDirs(numgamedirs, gamedirs, true);
 }
 
 void M_Menu_ModList_f(cmd_state_t *cmd)
@@ -4694,28 +4699,13 @@ void M_Menu_ModList_f(cmd_state_t *cmd)
 
 static void M_Menu_ModList_AdjustSliders (int dir)
 {
-	int i;
 	S_LocalSound ("sound/misc/menu3.wav");
 
 	// stop adding mods, we reach the limit
 	if (!modlist[modlist_cursor].loaded && (modlist_numenabled == MODLIST_MAXDIRS)) return;
+
 	modlist[modlist_cursor].loaded = !modlist[modlist_cursor].loaded;
-	if (modlist[modlist_cursor].loaded)
-	{
-		modlist[modlist_cursor].enabled = modlist_numenabled;
-		//push the value on the enabled list
-		modlist_enabled[modlist_numenabled++] = modlist_cursor;
-	}
-	else
-	{
-		//eliminate the value from the enabled list
-		for (i = modlist[modlist_cursor].enabled; i < modlist_numenabled; i++)
-		{
-			modlist_enabled[i] = modlist_enabled[i+1];
-			modlist[modlist_enabled[i]].enabled--;
-		}
-		modlist_numenabled--;
-	}
+	modlist_numenabled += modlist[modlist_cursor].loaded ? 1 : -1;
 }
 
 static void M_ModList_Draw (void)
@@ -4735,8 +4725,12 @@ static void M_ModList_Draw (void)
 	M_PrintRed(432, 32, s_enabled);
 	// Draw a list box with all enabled mods
 	DrawQ_Pic(menu_x + 432, menu_y + 48, NULL, 172, 8 * modlist_numenabled, 0, 0, 0, 0.5, 0);
-	for (y = 0; y < modlist_numenabled; y++)
-		M_PrintRed(432, 48 + y * 8, modlist[modlist_enabled[y]].dir);
+	for (n = 0, y = 48; n < modlist_count; n++)
+		if (modlist[n].loaded)
+		{
+			M_PrintRed(432, y, modlist[n].dir);
+			y += 8;
+		}
 
 	if (*cl_connect_status)
 		M_Print(16, menu_height - 8, cl_connect_status);
@@ -4803,7 +4797,7 @@ static void M_ModList_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: LMB as Enter key
 	case K_MOUSE1:
 #endif
 		S_LocalSound ("sound/misc/menu2.wav");
@@ -4994,8 +4988,6 @@ void M_Draw (void)
 		S_LocalSound ("sound/misc/menu2.wav");
 		m_entersound = false;
 	}
-
-	S_ExtraUpdate ();
 }
 
 
@@ -5299,8 +5291,9 @@ static int m_numrequiredglobals = sizeof(m_required_globals) / sizeof(m_required
 
 void MR_SetRouting (qbool forceold);
 
-void MVM_error_cmd(const char *format, ...) DP_FUNC_PRINTF(1);
-void MVM_error_cmd(const char *format, ...)
+jmp_buf mp_abort;
+static void MVM_error_cmd(const char *format, ...) DP_FUNC_PRINTF(1) DP_FUNC_NORETURN;
+static void MVM_error_cmd(const char *format, ...)
 {
 	static qbool processingError = false;
 	char errorstring[MAX_INPUTLINE];
@@ -5313,9 +5306,6 @@ void MVM_error_cmd(const char *format, ...)
 	va_start (argptr, format);
 	dpvsnprintf (errorstring, sizeof(errorstring), format, argptr);
 	va_end (argptr);
-
-	if (host.framecount < 3)
-		Sys_Error("Menu_Error: %s", errorstring);
 
 	Con_Printf(CON_ERROR "Menu_Error: %s\n", errorstring);
 
@@ -5331,6 +5321,9 @@ void MVM_error_cmd(const char *format, ...)
 	Con_Print("Falling back to engine menu\n");
 	key_dest = key_game;
 	MR_SetRouting (true);
+	mp_failed = true;
+	if (cls.state != ca_connected || key_dest != key_game) // if not disrupting a game
+		MR_ToggleMenu(1); // ensure error screen appears, eg for: menu_progs ""; menu_restart
 
 	// reset the active scene, too (to be on the safe side ;))
 	R_SelectScene( RST_CLIENT );
@@ -5341,8 +5334,8 @@ void MVM_error_cmd(const char *format, ...)
 	// restore configured outfd
 	sys.outfd = outfd;
 
-	// Let video start at least
-	Host_AbortCurrentFrame();
+	// no frame abort: menu failure shouldn't interfere with more important VMs
+	longjmp(mp_abort, 1);
 }
 
 static void MVM_begin_increase_edicts(prvm_prog_t *prog)
@@ -5389,6 +5382,9 @@ static void MP_KeyEvent (int key, int ascii, qbool downevent)
 {
 	prvm_prog_t *prog = MVM_prog;
 
+	if (setjmp(mp_abort))
+		return;
+
 	// pass key
 	prog->globals.fp[OFS_PARM0] = (prvm_vec_t) key;
 	prog->globals.fp[OFS_PARM1] = (prvm_vec_t) ascii;
@@ -5405,6 +5401,9 @@ static void MP_Draw (void)
 
 	// don't crash if we draw a frame between prog shutdown and restart, see Host_LoadConfig_f
 	if (!prog->loaded)
+		return;
+
+	if (setjmp(mp_abort))
 		return;
 
 	R_SelectScene( RST_MENU );
@@ -5437,6 +5436,9 @@ static void MP_ToggleMenu(int mode)
 {
 	prvm_prog_t *prog = MVM_prog;
 
+	if (setjmp(mp_abort))
+		return;
+
 	prog->globals.fp[OFS_PARM0] = (prvm_vec_t) mode;
 	prog->ExecuteProgram(prog, PRVM_menufunction(m_toggle),"m_toggle(float mode) required");
 }
@@ -5444,6 +5446,10 @@ static void MP_ToggleMenu(int mode)
 static void MP_NewMap(void)
 {
 	prvm_prog_t *prog = MVM_prog;
+
+	if (setjmp(mp_abort))
+		return;
+
 	if (PRVM_menufunction(m_newmap))
 		prog->ExecuteProgram(prog, PRVM_menufunction(m_newmap),"m_newmap() required");
 }
@@ -5452,6 +5458,10 @@ const serverlist_entry_t *serverlist_callbackentry = NULL;
 static int MP_GetServerListEntryCategory(const serverlist_entry_t *entry)
 {
 	prvm_prog_t *prog = MVM_prog;
+
+	if (setjmp(mp_abort))
+		return 0;
+
 	serverlist_callbackentry = entry;
 	if (PRVM_menufunction(m_gethostcachecategory))
 	{
@@ -5469,6 +5479,10 @@ static int MP_GetServerListEntryCategory(const serverlist_entry_t *entry)
 static void MP_Shutdown (void)
 {
 	prvm_prog_t *prog = MVM_prog;
+
+	if (setjmp(mp_abort))
+		return;
+
 	if (prog->loaded)
 		prog->ExecuteProgram(prog, PRVM_menufunction(m_shutdown),"m_shutdown() required");
 
@@ -5482,6 +5496,10 @@ static void MP_Shutdown (void)
 static void MP_Init (void)
 {
 	prvm_prog_t *prog = MVM_prog;
+
+	if (setjmp(mp_abort))
+		return;
+
 	PRVM_Prog_Init(prog, cmd_local);
 
 	prog->edictprivate_size = 0; // no private struct used
@@ -5562,7 +5580,7 @@ void MR_Restart(void)
 {
 	if(MR_Shutdown)
 		MR_Shutdown ();
-	MR_SetRouting (false);
+	MR_Init();
 }
 
 static void MR_Restart_f(cmd_state_t *cmd)

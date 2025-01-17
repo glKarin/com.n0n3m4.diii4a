@@ -52,6 +52,7 @@ public:
 	void Resume();
 	void Stop();
 	bool IsPlaying();
+	SoundStreamInfoEx GetStreamInfoEx() const override { return {}; }
 	bool IsValid() const { return m_Inited; }
 
 protected:

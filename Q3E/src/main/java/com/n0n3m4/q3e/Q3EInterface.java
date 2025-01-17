@@ -738,6 +738,34 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_user_mod;
 	}
 
+	public String GetGameUserModPreferenceKey()
+	{
+		if(Q3EUtils.q3ei.isQ4)
+			return Q3EPreference.pref_harm_q4_game_mod;
+		else if(Q3EUtils.q3ei.isPrey)
+			return Q3EPreference.pref_harm_prey_game_mod;
+		else if(Q3EUtils.q3ei.isQ2)
+			return Q3EPreference.pref_harm_q2_game_mod;
+		else if(Q3EUtils.q3ei.isQ3)
+			return Q3EPreference.pref_harm_q3_game_mod;
+		else if(Q3EUtils.q3ei.isRTCW)
+			return Q3EPreference.pref_harm_rtcw_game_mod;
+		else if(Q3EUtils.q3ei.isTDM)
+			return Q3EPreference.pref_harm_tdm_game_mod;
+		else if(Q3EUtils.q3ei.isQ1)
+			return Q3EPreference.pref_harm_q1_game_mod;
+		else if(Q3EUtils.q3ei.isD3BFG)
+			return Q3EPreference.pref_harm_d3bfg_game_mod;
+		else if(Q3EUtils.q3ei.isDOOM)
+			return Q3EPreference.pref_harm_gzdoom_game_mod;
+		else if(Q3EUtils.q3ei.isETW)
+			return Q3EPreference.pref_harm_etw_game_mod;
+		else if(Q3EUtils.q3ei.isRealRTCW)
+			return Q3EPreference.pref_harm_realrtcw_game_mod;
+		else
+			return Q3EPreference.pref_harm_game_mod;
+	}
+
 	public String GetGameModLibPreferenceKey()
 	{
 		if(Q3EUtils.q3ei.isQ4)
@@ -935,16 +963,22 @@ public class Q3EInterface
 	{
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 		String extraCommand = "";
+		if (Q3EUtils.q3ei.IsIdTech4())
+		{
+			int autoAspectRatio = preferences.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1);
+			if(autoAspectRatio > 0)
+				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).SetProp("harm_r_autoAspectRatio", autoAspectRatio).toString();
+		}
+
 		if ((Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()) && preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
-			extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).SetCommand("disconnect", true).toString();
+			extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).SetCommand("disconnect", false).toString();
 		if ((Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW || Q3EUtils.q3ei.isRealRTCW) && preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
 			extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).SetParam("loadGame", "QuickSave").toString();
+
 		if (Q3EUtils.q3ei.isDOOM)
 		{
 			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, true))
 				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).AddParam("file", "lights.pk3").toString();
-//			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, true))
-//				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).AddParam("file", "game_support.pk3").toString();
 			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, true))
 				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).AddParam("file", "brightmaps.pk3").toString();
 		}

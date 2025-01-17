@@ -127,6 +127,7 @@ typedef struct
 	                                        ///< to disconnect, preventing debugging breaks from
 	                                        ///< causing immediate disconnects on continue
 	clSnapshot_t snap;                      ///< latest received from server
+	clSnapshot_t snapLerp;                  ///< snap interpolated from
 
 	int serverTime;                         ///< may be paused during play
 	int oldServerTime;                      ///< to prevent time from flowing bakcwards
@@ -156,7 +157,7 @@ typedef struct
 
 	/// cmds[cmdNumber] is the predicted command, [cmdNumber-1] is the last
 	/// properly generated command
-	usercmd_t cmds[CMD_BACKUP];             ///< each mesage will send several old cmds
+	usercmd_t cmds[CMD_BACKUP_ETL];         ///< each mesage will send several old cmds
 	int cmdNumber;                          ///< incremented each frame, because multiple
 	                                        ///< frames may need to be packed into a single packet
 	int cmdBackup;                          ///< CMD_BACKUP
@@ -197,6 +198,20 @@ extern clientActive_t cl;
 
 //==================================================================
 
+#define MAX_TIMEDEMO_FRAMES 262140
+
+/**
+ * @struct timedemo_t
+ * @brief Timedemo information
+ */
+typedef struct
+{
+	uint16_t frametime[MAX_TIMEDEMO_FRAMES];   ///< integer since frametimes aren't fractional
+	int timeFrames;                            ///< counter of rendered frames
+	int timeStart;                             ///< cls.realtime before first frame
+	int timeBaseTime;                          ///< each frame will be at this time + frameNum * 50
+} timedemo_t;
+
 /**
  * @struct demo_t
  * @brief Client demo information
@@ -211,9 +226,7 @@ typedef struct
 	qboolean firstFrameSkipped;
 	fileHandle_t file;
 
-	int timeFrames;                         ///< counter of rendered frames
-	int timeStart;                          ///< cls.realtime before first frame
-	int timeBaseTime;                       ///< each frame will be at this time + frameNum * 50
+	timedemo_t timedemo;
 } demo_t;
 
 /**
@@ -424,6 +437,9 @@ typedef struct
 	clipboardCapture_t clipboard;
 
 	int cinematicHandle;
+
+	qboolean benchmarking;
+	qboolean resetTimedemoCvar;
 } clientStatic_t;
 
 extern clientStatic_t cls;
@@ -470,6 +486,9 @@ extern cvar_t *cl_showMouseRate;
 
 extern cvar_t *cl_avidemo;
 extern cvar_t *cl_aviMotionJpeg;
+extern cvar_t *cl_aviFrameRate;
+extern cvar_t *cl_aviPipeFormat;
+extern cvar_t *cl_aviPipeExtension;
 
 extern cvar_t *m_pitch;
 extern cvar_t *m_yaw;
@@ -503,9 +522,17 @@ extern cvar_t *cl_defaultProfile;
 
 extern cvar_t *cl_consoleKeys;
 
+extern cvar_t *cl_interpolation;
+
+extern cvar_t *con_scale;
+
 //=================================================
 
 // cl_main
+
+// video recording - are we using "video" or "video-pipe"?
+extern qboolean videoPipe;
+
 void CL_WriteWaveOpen(void);
 void CL_WriteWaveClose(void);
 void CL_Init(void);
@@ -546,9 +573,12 @@ void CL_OpenURL(const char *url);
 
 void CL_Record(const char *name);
 
+void CL_RegisterConsoleFont(void);
+void CL_SetConsoleScale(float factor);
+
 // cl_avi
 
-qboolean CL_OpenAVIForWriting(const char *fileName);
+qboolean CL_OpenAVIForWriting(const char *fileName, qboolean pipe);
 void CL_TakeVideoFrame(void);
 void CL_WriteAVIVideoFrame(const byte *imageBuffer, int size);
 void CL_WriteAVIAudioFrame(const byte *pcmBuffer, int size);
@@ -657,8 +687,8 @@ void CL_ParseServerMessage(msg_t *msg);
 
 //====================================================================
 
-void CL_ServerInfoPacket(netadr_t from, msg_t *msg);
-void CL_ServerInfoPacketCheck(netadr_t from, msg_t *msg);
+void CL_ServerInfoPacket(const netadr_t *from, msg_t *msg);
+void CL_ServerInfoPacketCheck(const netadr_t *from, msg_t *msg);
 void CL_LocalServers_f(void);
 void CL_GlobalServers_f(void);
 void CL_GlobalBlockedServers_f(void);
@@ -670,8 +700,8 @@ qboolean CL_UpdateVisiblePings_f(int source);
 
 #define CON_TEXTSIZE    131072
 
-extern int smallCharWidth;      ///< SMALLCHAR_WIDTH with renderer scale accounted for
-extern int smallCharHeight;     ///< SMALLCHAR_HEIGHT with renderer scale accounted for
+extern int smallCharWidth;      ///< SMALLCHAR_WIDTH with renderer + console scale accounted for
+extern int smallCharHeight;     ///< SMALLCHAR_HEIGHT with renderer + console scale accounted for
 
 /**
  * @struct console_t
@@ -704,6 +734,12 @@ typedef struct
 	vec4_t color;                       ///< for transparent lines
 
 	int highlightOffset;                ///< highligting start offset (if == 0) then no hightlight
+
+	float scale;                        ///< current console scale
+
+	char version[256];
+	char date[16];
+	char arch[64];
 } console_t;
 
 extern console_t con;
@@ -753,7 +789,6 @@ void SCR_DrawChar(int x, int y, float w, float h, int ch, qboolean nativeResolut
 void SCR_DrawStringExt(int x, int y, float w, float h, const char *string, float *setColor, qboolean forceColor, qboolean noColorEscape, qboolean dropShadow, qboolean nativeResolution);
 
 #define SCR_DrawSmallChar(x, y, ch) SCR_DrawChar(x, y, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, ch, qtrue)
-// ignores embedded color control characters
 #define SCR_DrawSmallString(x, y, string, setColor, forceColor, noColorEscape) SCR_DrawStringExt(x, y, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, string, setColor, forceColor, noColorEscape, qfalse, qtrue)
 
 // cl_cin.c
@@ -853,6 +888,7 @@ qboolean CL_GetSnapshot(int snapshotNumber, snapshot_t *snapshot);
 qboolean CL_GetServerCommand(int serverCommandNumber);
 int CL_FindIncrementThreshold(void);
 void CL_AdjustTimeDelta(void);
+void CL_SetSnapshotLerp(void);
 
 // cl_ui.c
 
@@ -875,7 +911,7 @@ void DB_DeleteFavorite(const char *profile, const char *address);
 void DB_UpdateFavorite(const char *profile, const char *address);
 void DB_LoadFavorites(const char *profile);
 
-void CL_InitServerInfo(serverInfo_t *server, netadr_t *address);
+void CL_InitServerInfo(serverInfo_t *server, const netadr_t *address);
 #endif
 
 #endif // #ifndef INCLUDE_CLIENT_H

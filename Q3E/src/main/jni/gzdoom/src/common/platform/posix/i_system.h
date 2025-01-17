@@ -38,7 +38,7 @@ void I_PrintStr (const char *str);
 void I_SetIWADInfo ();
 
 // Pick from multiple IWADs to use
-int I_PickIWad (WadStuff *wads, int numwads, bool queryiwad, int defaultiwad, int&);
+int I_PickIWad (WadStuff *wads, int numwads, bool queryiwad, int defaultiwad, int&, FString &);
 
 // [RH] Checks the registry for Steam's install path, so we can scan its
 // directories for IWADs if the user purchased any through Steam.
@@ -53,17 +53,6 @@ bool I_WriteIniFailed (const char* filename);
 
 class FGameTexture;
 bool I_SetCursor(FGameTexture *);
-
-static inline char *strlwr(char *str)
-{
-	char *ptr = str;
-	while(*ptr)
-	{
-		*ptr = tolower(*ptr);
-		++ptr;
-	}
-	return str;
-}
 
 inline int I_GetNumaNodeCount() { return 1; }
 inline int I_GetNumaNodeThreadCount(int numaNode) { return std::max<int>(std::thread::hardware_concurrency(), 1); }

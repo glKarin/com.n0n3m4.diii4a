@@ -141,14 +141,40 @@ CCMD (spray)
 
 CCMD (mapchecksum)
 {
-	MapData *map;
-	uint8_t cksum[16];
-	
-	if (argv.argc() < 2)
+	if (argv.argc() == 1)
+	{  //current map
+		const char *wadname = fileSystem.GetResourceFileName(fileSystem.GetFileContainer(level.lumpnum));
+
+		for (size_t i = 0; i < 16; ++i)
+		{
+			Printf("%02X", level.md5[i]);
+		}
+
+		Printf(" // %s %s\n", wadname, level.MapName.GetChars());
+	}
+	else if (argv.argc() < 2)
 	{
 		Printf("Usage: mapchecksum <map> ...\n");
 	}
-	for (int i = 1; i < argv.argc(); ++i)
+	else
+	{
+	MapData *map;
+	uint8_t cksum[16];
+	
+		for (int i = 1; i < argv.argc(); ++i)
+	{
+			if(!strcmp(argv[i], "*"))
+			{
+				const char *wadname = fileSystem.GetResourceFileName(fileSystem.GetFileContainer(level.lumpnum));
+
+				for (size_t i = 0; i < 16; ++i)
+				{
+					Printf("%02X", level.md5[i]);
+				}
+
+				Printf(" // %s %s\n", wadname, level.MapName.GetChars());
+	}
+			else
 	{
 		map = P_OpenMapData(argv[i], true);
 		if (map == NULL)
@@ -166,6 +192,8 @@ CCMD (mapchecksum)
 			}
 			Printf(" // %s %s\n", wadname, argv[i]);
 		}
+	}
+}
 	}
 }
 
@@ -417,7 +445,7 @@ CCMD(listsnapshots)
 		FCompressedBuffer *snapshot = &wadlevelinfos[i].Snapshot;
 		if (snapshot->mBuffer != nullptr)
 		{
-			Printf("%s (%zu -> %zu bytes)\n", wadlevelinfos[i].MapName.GetChars(), snapshot->mCompressedSize, snapshot->mSize);
+			Printf("%s (%u -> %u bytes)\n", wadlevelinfos[i].MapName.GetChars(), snapshot->mCompressedSize, snapshot->mSize);
 		}
 	}
 }

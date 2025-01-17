@@ -47,9 +47,11 @@ static volatile int current_frame = 0;
 #define dynamicHeaders dynamicHeaderss[current_frame]
 #define dynamicAllocThisFrame dynamicAllocThisFrames[current_frame]
 
+// vertex buffer
 #define _freeStaticHeaders freeStaticHeaderss[0]
-#define _freeStaticIndexHeaders freeStaticHeaderss[1]
 #define _staticHeaders staticHeaderss[0]
+// index buffer
+#define _freeStaticIndexHeaders freeStaticHeaderss[1]
 #define _staticIndexHeaders staticHeaderss[1]
 
 #define BI(x) ((x) ? 1 : 0)

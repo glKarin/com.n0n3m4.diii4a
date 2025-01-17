@@ -392,7 +392,7 @@ public class Q3EGameHelper
                     version = version.trim();
                 if(!apkVersion.equalsIgnoreCase(version))
                 {
-                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, String.format(name + " file version is mismatch: %s != %s.", version, Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION));
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, String.format(name + " file version is mismatch: %s != %s.", version, apkVersion));
                     overwrite = true;
                 }
             }
@@ -407,6 +407,42 @@ public class Q3EGameHelper
             Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Check " + name + "(" + systemVersionPath + ") version file error.");
         }
         return overwrite;
+    }
+
+    private boolean CheckExtractResourceVersion(String systemVersionPath, String apkVersion, String name)
+    {
+        boolean change = false;
+
+        try
+        {
+            File versionFile = new File(systemVersionPath);
+            if(!versionFile.isFile() || !versionFile.canRead())
+            {
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, name + " file engine version not exists.");
+                change = true;
+            }
+            else
+            {
+                String version = Q3EUtils.file_get_contents(versionFile);
+                if(null != version)
+                    version = version.trim();
+                if(!apkVersion.equalsIgnoreCase(version))
+                {
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, String.format(name + " file engine version is mismatch: %s != %s.", version, apkVersion));
+                    change = true;
+                }
+            }
+            if(change)
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, name + " engine file will be change.");
+            else
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, name + " engine file will keep exists version.");
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Check " + name + "(" + systemVersionPath + ") engine version file error.");
+        }
+        return change;
     }
 
     private void DumpExtractResourceVersion(String systemVersionPath, String apkVersion, String name)
@@ -457,14 +493,22 @@ public class Q3EGameHelper
 
     public void ExtractGZDOOMResource()
     {
+        Q3EGlobals.PatchResource gzdoomResource;
+        String versionCheckFile;
+        //String versionName = "4.14.0";
+
+        versionCheckFile = "idtech4amm.version";
+        gzdoomResource = Q3EGlobals.PatchResource.GZDOOM_RESOURCE;
+
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
-        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.version");
+        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", versionCheckFile);
+        //final String engineVersionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.gzdoom.version");
         final String version = Q3EGlobals.GZDOOM_VERSION;
         final String name = "GZDOOM game resource";
 
+        //boolean change = CheckExtractResourceVersion(engineVersionFile, versionName, name);
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
-
-        if(manager.Fetch(Q3EGlobals.PatchResource.GZDOOM_RESOURCE, overwrite) != null)
+        if(manager.Fetch(gzdoomResource, overwrite) != null)
         {
             if (overwrite)
             {
@@ -493,6 +537,9 @@ public class Q3EGameHelper
             case 0: msaa = 0;break;
             case 1: msaa = 4;break;
             case 2: msaa = 16;break;
+            case 3: msaa = 2; break;
+            case 4: msaa = 8; break;
+            case 5: msaa = -1; break;
         }
         return msaa;
     }
@@ -828,16 +875,18 @@ public class Q3EGameHelper
 
     public boolean Start(Surface surface, int surfaceWidth, int surfaceHeight)
     {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
+
         // GL
         int msaa = GetMSAA();
         int glFormat = GetGLFormat();
         int[] size = GetFrameSize(surfaceWidth, surfaceHeight);
         int width = size[0];
         int height = size[1];
+        int depthBits = preferences.getInt(Q3EPreference.pref_harm_depth_bit, Q3EGlobals.DEFAULT_DEPTH_BITS);
 
         // Args
         String cmd = Q3EUtils.q3ei.cmd;
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
         boolean redirectOutputToFile = preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true);
         //boolean noHandleSignals = preferences.getBoolean(Q3EPreference.NO_HANDLE_SIGNALS, false);
         int signalsHandler = Q3EPreference.GetIntFromString(m_context, Q3EPreference.SIGNALS_HANDLER, Q3EGlobals.SIGNALS_HANDLER_GAME);
@@ -846,6 +895,7 @@ public class Q3EGameHelper
         int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
         boolean useExternalLibPath = preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false);
+        int consoleMaxHeightFrac = preferences.getInt(Q3EPreference.pref_harm_max_console_height_frac, 0);
 
         String subdatadir = Q3EUtils.q3ei.subdatadir;
         // if(Q3EUtils.q3ei.isTDM) subdatadir = "dnf"; // Test a new game using TDM
@@ -855,7 +905,8 @@ public class Q3EGameHelper
 		appHome = KStr.AppendPath(appHome, subdatadir);
 
         int eventQueue = Q3EPreference.GetIntFromString(preferences, Q3EPreference.EVENT_QUEUE, 0);
-        Q3EJNI.PreInit(eventQueue);
+        int gameThread = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD, 0);
+        Q3EJNI.PreInit(eventQueue, gameThread);
 
         String libpath = CopyLocalLibraries();
         String engineLib = GetEngineLib();
@@ -872,6 +923,7 @@ public class Q3EGameHelper
                 cmd,
                 surface,
                 glFormat,
+                depthBits,
                 msaa, glVersion,
                 redirectOutputToFile,
                 signalsHandler, // noHandleSignals,
@@ -880,9 +932,12 @@ public class Q3EGameHelper
                 refreshRate,
                 appHome,
                 Q3EUtils.q3ei.joystick_smooth,
+                consoleMaxHeightFrac,
                 runBackground > 0
         );
-        if(!res)
+        if(res)
+            Q3E.Start();
+        else
         {
             if(m_context instanceof Activity)
             {
@@ -897,6 +952,7 @@ public class Q3EGameHelper
                 });
             }
         }
+
         return res;
     }
 

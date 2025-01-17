@@ -1340,7 +1340,7 @@ static void Svcmd_PlayerAnimEvent(void)
 			{
 				continue;
 			}
-			BG_AnimScriptEvent(&vic->client->ps, vic->client->pers.character->animModelInfo, (scriptAnimEventTypes_t)(atoi(anim)), qfalse, qtrue);
+			BG_AnimScriptEvent(&vic->client->ps, vic->client->pers.character->animModelInfo, (scriptAnimEventTypes_t)(atoi(anim)), qfalse);
 			count++;
 		}
 
@@ -1372,7 +1372,7 @@ static void Svcmd_PlayerAnimEvent(void)
 		return;
 	}
 
-	BG_AnimScriptEvent(&vic->client->ps, vic->client->pers.character->animModelInfo, (scriptAnimEventTypes_t)(atoi(anim)), qfalse, qtrue);
+	BG_AnimScriptEvent(&vic->client->ps, vic->client->pers.character->animModelInfo, (scriptAnimEventTypes_t)(atoi(anim)), qfalse);
 
 	CPx(-1, (va("cp \"^7%s^7 anim event %s.\"", vic->client->pers.netname, animEventTypesStr[atoi(anim)].string)));
 
@@ -1576,6 +1576,7 @@ static void Svcmd_Burn(void)
 
 	trap_Argv(1, name, sizeof(name));
 
+	// for all players
 	if (!Q_stricmp(name, "-1") || doAll)
 	{
 		int it, count = 0;
@@ -1589,9 +1590,8 @@ static void Svcmd_Burn(void)
 				continue;
 			}
 
-			vic->client->ps.eFlags |= EF_SMOKING;
 			// FIXME: add mod param? mod_unknown instead of flamer
-			G_BurnMeGood(vic, vic, NULL);
+			G_BurnMeGood(vic, vic, NULL, qtrue);
 			count++;
 		}
 
@@ -1607,6 +1607,7 @@ static void Svcmd_Burn(void)
 		return;
 	}
 
+	// for a specific player
 	cnum = G_ClientNumberFromString(NULL, name);
 
 	if (cnum == -1)
@@ -1622,12 +1623,10 @@ static void Svcmd_Burn(void)
 		return;
 	}
 
-	vic->client->ps.eFlags |= EF_SMOKINGBLACK;
 	// FIXME: add mod param? mod_unknown instead of flamer
-	G_BurnMeGood(vic, vic, NULL);
+	G_BurnMeGood(vic, vic, NULL, qtrue);
 
 	CPx(-1, va("cp \"^7%s^7 is burned.\"", vic->client->pers.netname));
-	return;
 }
 
 /**

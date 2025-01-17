@@ -41,6 +41,7 @@ public class FileBrowser
     private boolean m_showHidden = true;
     private boolean m_ignoreDotDot = false;
     private boolean m_dirNameWithSeparator = true;
+    private boolean m_followSymbol = false;
     private Listener m_callback = null;
 
     public interface Listener
@@ -82,6 +83,8 @@ public class FileBrowser
 
         if (path == null || path.isEmpty())
             return false;
+
+        path = RealPath(path);
 
         dir = new File(path);
         if (!dir.isDirectory())
@@ -194,7 +197,8 @@ public class FileBrowser
                         {
                             DocumentFile parentDocumentFile = DocumentFile.fromTreeUri(m_context, uri);
                             String parentPath = FileUtility.GetPathFromUri(uri);
-                            String subPath = FileUtility.GetRelativePath(path, parentPath);
+                            String normalizePath = FileUtility.NormalizeSDCardPath(path);
+                            String subPath = FileUtility.GetRelativePath(normalizePath, parentPath);
                             res = ListDocumentFiles(path, parentDocumentFile, subPath);
                         }
                         else
@@ -343,6 +347,8 @@ public class FileBrowser
         if (path == null || path.isEmpty())
             return false;
 
+        path = RealPath(path);
+
         if (files == null)
         {
             if (!path.equals(m_currentPath))
@@ -409,6 +415,8 @@ public class FileBrowser
 
         if (path == null || path.isEmpty())
             return false;
+
+        path = RealPath(path);
 
         dir = new File(path);
         if (!dir.isDirectory())
@@ -489,6 +497,8 @@ public class FileBrowser
         if (path == null || path.isEmpty())
             return false;
 
+        path = RealPath(path);
+
         if (dir == null)
         {
             if (!path.equals(m_currentPath))
@@ -562,6 +572,8 @@ public class FileBrowser
 
         if (path == null || path.isEmpty())
             return false;
+
+        path = RealPath(path);
 
         String[] parts = FileUtility.SplitPathParts(subPath);
         if(null == parts || parts.length == 0)
@@ -658,6 +670,13 @@ public class FileBrowser
         }
     }
 
+    private String RealPath(String path)
+    {
+        if(m_followSymbol)
+            return FileUtility.GetRealPath(path);
+        return path;
+    }
+
     public boolean IsDirectory(String path)
     {
         return GetFileType(path) == FileModel.ID_FILE_TYPE_DIRECTORY;
@@ -698,7 +717,8 @@ public class FileBrowser
                 {
                     DocumentFile parentDocumentFile = DocumentFile.fromTreeUri(m_context, uri);
                     String parentPath = FileUtility.GetPathFromUri(uri);
-                    String subPath = FileUtility.GetRelativePath(path, parentPath);
+                    String normalizePath = FileUtility.NormalizeSDCardPath(path);
+                    String subPath = FileUtility.GetRelativePath(normalizePath, parentPath);
 
                     String[] parts = FileUtility.SplitPathParts(subPath);
                     DocumentFile dir = parentDocumentFile;

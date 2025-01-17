@@ -846,7 +846,7 @@ void S_PaintChannels(int endtime)
 		ch = s_channels;
 		for (i = 0; i < MAX_CHANNELS ; i++, ch++)
 		{
-			if (!ch->thesfx || (!ch->leftvol && !ch->rightvol))
+			if (!ch->thesfx || (!ch->leftvol && !ch->rightvol) || ch->paused)
 			{
 				continue;
 			}

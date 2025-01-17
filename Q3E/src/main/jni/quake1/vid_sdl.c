@@ -1042,7 +1042,6 @@ static keynum_t buttonremap[] =
 //#define DEBUGSDLEVENTS
 void Sys_SDL_HandleEvents(void)
 {
-	static qbool sound_active = true;
 	int keycode;
 	int i;
 	const char *chp;
@@ -1330,24 +1329,6 @@ void Sys_SDL_HandleEvents(void)
 
 	vid_activewindow = !vid_hidden && vid_hasfocus;
 
-	// enable/disable sound on focus gain/loss
-	if (vid_activewindow || !snd_mutewhenidle.integer)
-	{
-		if (!sound_active)
-		{
-			S_UnblockSound ();
-			sound_active = true;
-		}
-	}
-	else
-	{
-		if (sound_active)
-		{
-			S_BlockSound ();
-			sound_active = false;
-		}
-	}
-
 	if (!vid_activewindow || key_consoleactive || scr_loading)
 		VID_SetMouse(false, false);
 	else if (key_dest == key_menu || key_dest == key_menu_grabbed)
@@ -1526,7 +1507,7 @@ static void VID_ApplyDisplayMode_c(cvar_t *var)
 
 static void VID_SetVsync_c(cvar_t *var)
 {
-	signed char vsyncwanted = cls.timedemo ? 0 : bound(-1, vid_vsync.integer, 1);
+	int vsyncwanted = cls.timedemo ? 0 : vid_vsync.integer;
 
 	if (!context)
 		return;
@@ -1537,6 +1518,7 @@ On Xorg it returns the correct value.
 		return;
 */
 
+	// __EMSCRIPTEN__ SDL_GL_SetSwapInterval() calls emscripten_set_main_loop_timing()
 	if (SDL_GL_SetSwapInterval(vsyncwanted) >= 0)
 		Con_DPrintf("Vsync %s\n", vsyncwanted ? "activated" : "deactivated");
 	else
@@ -1711,10 +1693,8 @@ static qbool VID_InitModeGL(const viddef_mode_t *mode)
 {
 	int windowflags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
 	int i;
-#ifndef USE_GLES2
 	// SDL usually knows best
 	const char *drivername = NULL;
-#endif
 
 	// video display selection (multi-monitor)
 	Cvar_SetValueQuick(&vid_info_displaycount, SDL_GetNumVideoDisplays());

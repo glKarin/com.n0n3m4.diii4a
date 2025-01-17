@@ -9,7 +9,7 @@
 // use recursive mutex (non-posix) extensions in thread_pthread
 #define THREADRECURSIVE
 
-#ifdef _NOSDL
+#ifdef _NOSDL //karin: use stdc11 atom
 #include <stdatomic.h>
 typedef atomic_flag Thread_SpinLock;
 #else

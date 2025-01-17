@@ -120,6 +120,10 @@ void gl_LoadExtensions()
 #ifdef __ANDROID__ //karin: force GL version
 	extern float GLimp_GetGLVersion(void);
 	realglversion = GLimp_GetGLVersion();
+	FString glversionStr;
+	glversionStr.AppendFormat("%f", realglversion);
+	glversion = glversionStr.GetChars();
+	Printf("Android emulating OpenGL version: %s\n", glversion);
 #endif
 
 
@@ -175,7 +179,11 @@ void gl_LoadExtensions()
 	else if (gl_version >= 4.5f)
 	{
 		// Assume that everything works without problems on GL 4.5 drivers where these things are core features.
+#ifdef _GLES //karin: not support glBufferStorage on OpenGLES
+		gl.flags |= RFL_SHADER_STORAGE_BUFFER;
+#else
 		gl.flags |= RFL_SHADER_STORAGE_BUFFER | RFL_BUFFER_STORAGE;
+#endif
 
 		// Mesa implements shader storage only for fragment shaders.
 		// Just disable the feature there. The light buffer may just use a uniform buffer without any adverse effects.
@@ -184,6 +192,10 @@ void gl_LoadExtensions()
 			gl.flags &= ~RFL_SHADER_STORAGE_BUFFER;
 	}
 
+#ifdef _GLES //karin: check cull distance extension on OpenGLES
+	if(!CheckExtension("GL_EXT_clip_cull_distance"))
+		gl.flags |= RFL_NO_CLIP_PLANES;
+#endif
 
 
 	if (gl_version >= 4.3f || CheckExtension("GL_ARB_invalidate_subdata")) gl.flags |= RFL_INVALIDATE_BUFFER;

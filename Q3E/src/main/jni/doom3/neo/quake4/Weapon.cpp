@@ -993,7 +993,7 @@ void rvWeapon::Think ( void ) {
 #ifdef _MOD_FULL_BODY_AWARENESS
 	renderEntity_t* worldModelRenderEntity = worldModel.GetEntity()->GetRenderEntity();
 	bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->IsInVehicle() || owner->IsZoomed() || owner->focusUI;
-	if(not_pm_fullBodyAwareness || harm_pm_fullBodyAwarenessFirstPerson.GetBool())
+	if(not_pm_fullBodyAwareness)
 		worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber + 1;
 	else
 		worldModelRenderEntity->suppressSurfaceInViewID = 0;

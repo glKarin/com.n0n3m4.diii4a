@@ -116,6 +116,8 @@ cvar_t *com_timescale;
 cvar_t *com_fixedtime;
 cvar_t *com_journal;
 cvar_t *com_maxfps;
+cvar_t *com_maxfpsUnfocused;
+cvar_t *com_maxfpsMinimized;
 cvar_t *com_timedemo;
 cvar_t *com_sv_running;
 cvar_t *com_cl_running;
@@ -222,7 +224,7 @@ void Com_EndRedirect(void)
 }
 
 /**
- * @brief Both client and server can use this, and it will output to the apropriate place.
+ * @brief Both client and server can use this, and it will output to the appropriate place.
  *
  * A raw string should NEVER be passed as fmt, because of "%f" type crashers.
  *
@@ -247,7 +249,7 @@ void QDECL Com_Printf(const char *fmt, ...)
 	msg = buffer + Com_sprintf(buffer, sizeof(buffer), "%8i ", timestamp);
 
 	va_start(argptr, fmt);
-	bufferEnd = msg + Q_vsnprintf(msg, sizeof(buffer), fmt, argptr);
+	bufferEnd = msg + Q_vsnprintf(msg, sizeof(buffer) - (msg - buffer), fmt, argptr);
 	va_end(argptr);
 
 	if (rd_buffer)
@@ -518,7 +520,7 @@ void Com_ParseCommandLine(char *commandLine)
 			inq = !inq;
 		}
 		// look for a + separating character
-		// if commandLine came from a file, we might have real line seperators
+		// if commandLine came from a file, we might have real line separators
 		if (*commandLine == '+' || *commandLine == '\n' || *commandLine == '\r')
 		{
 			if (com_numConsoleLines == MAX_CONSOLE_LINES)
@@ -619,6 +621,21 @@ void Com_StartupVariable(const char *match)
 				Cvar_Set2(s, Cmd_ArgsFrom(2), qfalse);
 			}
 		}
+	}
+}
+
+void Com_CommandLineCheck(qboolean (*clb)())
+{
+	int i;
+
+	for (i = 0 ; i < com_numConsoleLines ; i++)
+	{
+		Cmd_TokenizeString(com_consoleLines[i]);
+		if (!(*clb)())
+		{
+			continue;
+		}
+		com_consoleLines[i][0] = 0;
 	}
 }
 
@@ -2467,7 +2484,7 @@ sysEvent_t Com_GetEvent(void)
  * @param[in] evFrom
  * @param[in] buf
  */
-void Com_RunAndTimeServerPacket(netadr_t *evFrom, msg_t *buf)
+void Com_RunAndTimeServerPacket(const netadr_t *evFrom, msg_t *buf)
 {
 	int t1 = 0;
 
@@ -2476,7 +2493,7 @@ void Com_RunAndTimeServerPacket(netadr_t *evFrom, msg_t *buf)
 		t1 = Sys_Milliseconds();
 	}
 
-	SV_PacketEvent(*evFrom, buf);
+	SV_PacketEvent(evFrom, buf);
 
 	if (com_speeds->integer)
 	{
@@ -2516,7 +2533,7 @@ int Com_EventLoop(void)
 			// manually send packet events for the loopback channel
 			while (NET_GetLoopPacket(NS_CLIENT, &evFrom, &buf))
 			{
-				CL_PacketEvent(evFrom, &buf);
+				CL_PacketEvent(&evFrom, &buf);
 			}
 
 			while (NET_GetLoopPacket(NS_SERVER, &evFrom, &buf))
@@ -2953,6 +2970,12 @@ void Com_Init(char *commandLine)
 	com_maxfps = Cvar_Get("com_maxfps", "125", CVAR_ARCHIVE /*|CVAR_LATCH*/);
 	Cvar_CheckRange(com_maxfps, 20, 500, qtrue);
 
+	com_maxfpsUnfocused = Cvar_Get("com_maxfpsUnfocused", "-1", CVAR_ARCHIVE);
+	Cvar_CheckRange(com_maxfpsUnfocused, -1, 500, qtrue);
+
+	com_maxfpsMinimized = Cvar_Get("com_maxfpsMinimized", "-1", CVAR_ARCHIVE);
+	Cvar_CheckRange(com_maxfpsMinimized, -1, 500, qtrue);
+
 	com_developer = Cvar_Get("developer", "0", CVAR_TEMP);
 	com_logfile   = Cvar_Get("logfile", "0", CVAR_TEMP);
 
@@ -3348,7 +3371,7 @@ int Com_TimeVal(int minMsec)
  */
 void Com_Frame(void)
 {
-	int        msec, minMsec;
+	int        msec, minMsec = 0;
 	int        timeVal, timeValSV;
 	static int lastTime = 0, bias = 0;
 	int        timeBeforeFirstEvents;
@@ -3373,6 +3396,17 @@ void Com_Frame(void)
 	// write config file if anything changed
 	Com_WriteConfiguration();
 
+	// if "viewlog" has been modified, show or hide the log console
+	if (com_viewlog->modified)
+	{
+		if (!com_dedicated->integer)
+		{
+			Win_ShowConsole(com_viewlog->integer, qfalse);
+		}
+
+		com_viewlog->modified = qfalse;
+	}
+
 	// main event loop
 	if (com_speeds->integer)
 	{
@@ -3389,23 +3423,45 @@ void Com_Frame(void)
 		}
 		else
 		{
-			if (com_minimized->integer && !Cvar_VariableString("cl_downloadName")[0] // don't set different minMsec while downloading
-			    && Cvar_VariableIntegerValue("cl_demorecording") == 0) // don't set different minMsec while recording
+			if (
+				com_minimized->integer
+				&& !Cvar_VariableString("cl_downloadName")[0]          // don't set different minMsec while downloading
+				&& Cvar_VariableIntegerValue("cl_demorecording") == 0  // don't set different minMsec while recording
+				)
+			{
+				if (com_maxfpsMinimized->integer < 0)  // default
 			{
 				minMsec = 100; // = 1000/10;
 			}
-			else if (com_unfocused->integer && com_maxfps->integer > 1 && !Cvar_VariableString("cl_downloadName")[0]  // don't set different minMsec while downloading
-			         && Cvar_VariableIntegerValue("cl_demorecording") == 0) // don't set different minMsec while recording
+				else if (com_maxfpsMinimized->integer > 0)
+				{
+					minMsec = 1000 / com_maxfpsMinimized->integer;
+				}
+			}
+			else if (
+				com_unfocused->integer
+				&& !Cvar_VariableString("cl_downloadName")[0]          // don't set different minMsec while downloading
+				&& Cvar_VariableIntegerValue("cl_demorecording") == 0  // don't set different minMsec while recording
+				)
+			{
+				if (com_maxfpsUnfocused->integer < 0)  // default
 			{
 				minMsec = 1000 / (com_maxfps->integer / 2);
 			}
-			else if (com_maxfps->integer > 0)
+				else if (com_maxfpsUnfocused->integer > 0)
 			{
-				minMsec = 1000 / com_maxfps->integer;
+					minMsec = 1000 / com_maxfpsUnfocused->integer;
+				}
 			}
-			else
+			else if (com_maxfps->integer < 0)
 			{
 				minMsec = 1;
+			}
+
+			// fallback to com_maxfps
+			if (minMsec == 0)
+			{
+				minMsec = 1000 / com_maxfps->integer;
 			}
 
 			timeVal = com_frameTime - lastTime;

@@ -56,33 +56,29 @@ extern int screen_height;
 
 extern int gl_format;
 extern int gl_msaa;
+extern int gl_depth_bits;
 
 extern volatile ANativeWindow * Android_GetWindow(void);
 
 void (* GLref_AndroidInit)(volatile ANativeWindow *w);
 void (* GLref_AndroidQuit)(void);
-typedef void (*RI_SetGLParms)(int f, int msaa);
+typedef void (*RI_SetGLParms)(int f, int msaa, int depthBits);
 typedef void (*RI_SetResolution)(int aw,int ah);
 
 void GLimp_SetRef(void *init, void *quit, void *setGLParms, void *setResolution)
 {
     GLref_AndroidInit = init;
 	GLref_AndroidQuit = quit;
-    ((RI_SetGLParms)setGLParms)(gl_format, gl_msaa);
+    ((RI_SetGLParms)setGLParms)(gl_format, gl_msaa, gl_depth_bits);
 	((RI_SetResolution)setResolution)(screen_width, screen_height);
 }
 
-void GLimp_AndroidInit(volatile ANativeWindow *w)
+void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
 {
 	if(!w)
 		return;
-	if(!window_seted)
-	{
-		win = w;
-		ANativeWindow_acquire((ANativeWindow *)win);
-		window_seted = true;
-		return;
-	}
+	win = w;
+	ANativeWindow_acquire((ANativeWindow *)win);
 }
 
 void GLimp_AndroidQuit(void)
@@ -92,7 +88,7 @@ void GLimp_AndroidQuit(void)
 		GLref_AndroidQuit();
 }
 
-void GLimp_WindowChanged(volatile ANativeWindow *w)
+void GLimp_AndroidInit(volatile ANativeWindow *w)
 {
 	win = w;
     if(GLref_AndroidInit)

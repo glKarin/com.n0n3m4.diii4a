@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Alexey Khokholov (Nuke.YKT)
+ * Copyright (C) 2017-2018 Alexey Khokholov (Nuke.YKT)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
  *      OPLx decapsulated(Matthew Gambrell, Olli Niemitalo):
  *          OPL2 ROMs.
  *
- * version: 1.0.7
+ * version: 1.0.9
  */
 
 #include <string.h>
@@ -242,7 +242,7 @@ static const Bit16u panlawtable[] =
     4858, 4050, 3240, 2431, 1620, 810, 0
 };
 
-static Bit32u chip_type = ym3438_type_discrete;
+static Bit32u chip_type = ym3438_mode_readmode;
 
 void OPN2_DoIO(ym3438_t *chip)
 {
@@ -388,7 +388,7 @@ void OPN2_DoRegWrite(ym3438_t *chip)
         /* Data */
         if (chip->write_d_en && (chip->write_data & 0x100) == 0)
         {
-            switch (chip->address)
+            switch (chip->write_fm_mode_a)
             {
             case 0x21: /* LSI test 1 */
                 for (i = 0; i < 8; i++)
@@ -467,7 +467,7 @@ void OPN2_DoRegWrite(ym3438_t *chip)
         /* Address */
         if (chip->write_a_en)
         {
-            chip->write_fm_mode_a = chip->write_data & 0xff;
+            chip->write_fm_mode_a = chip->write_data & 0x1ff;
         }
     }
 
@@ -1007,7 +1007,7 @@ void OPN2_ChOutput(ym3438_t *chip)
     chip->mol = 0;
     chip->mor = 0;
 
-    if (chip_type == ym3438_type_ym2612)
+    if (chip_type & ym3438_mode_ym2612)
     {
         out_en = ((cycles & 3) == 3) || test_dac;
         /* YM2612 DAC emulation(not verified) */
@@ -1040,11 +1040,6 @@ void OPN2_ChOutput(ym3438_t *chip)
     else
     {
         out_en = ((cycles & 3) != 0) || test_dac;
-        /* Discrete YM3438 seems has the ladder effect too */
-        if (out >= 0 && chip_type == ym3438_type_discrete)
-        {
-            out++;
-        }
         if (chip->ch_lock_l && out_en)
         {
             chip->mol = out;
@@ -1381,6 +1376,9 @@ void OPN2_Clock(ym3438_t *chip, Bit16s *buffer)
 
     buffer[0] = chip->mol;
     buffer[1] = chip->mor;
+
+    if (chip->status_time)
+        chip->status_time--;
 }
 
 void OPN2_Write(ym3438_t *chip, Bit32u port, Bit8u data)
@@ -1420,7 +1418,7 @@ Bit32u OPN2_ReadIRQPin(ym3438_t *chip)
 
 Bit8u OPN2_Read(ym3438_t *chip, Bit32u port)
 {
-    if ((port & 3) == 0 || chip_type == ym3438_type_asic)
+    if ((port & 3) == 0 || (chip_type & ym3438_mode_readmode))
     {
         if (chip->mode_test_21[6])
         {
@@ -1438,22 +1436,33 @@ Bit8u OPN2_Read(ym3438_t *chip, Bit32u port)
             }
             if (chip->mode_test_21[7])
             {
-                return testdata & 0xff;
+                chip->status = testdata & 0xff;
             }
             else
             {
-                return testdata >> 8;
+                chip->status = testdata >> 8;
             }
         }
         else
         {
-            return (Bit8u)(chip->busy << 7) | (Bit8u)(chip->timer_b_overflow_flag << 1)
-                    | (Bit8u)chip->timer_a_overflow_flag;
+            chip->status = (chip->busy << 7) | (chip->timer_b_overflow_flag << 1)
+                 | chip->timer_a_overflow_flag;
         }
+        if (chip_type & ym3438_mode_ym2612)
+        {
+            chip->status_time = 300000;
+        }
+        else
+        {
+            chip->status_time = 40000000;
+        }
+    }
+    if (chip->status_time)
+    {
+        return chip->status;
     }
     return 0;
 }
-
 
 void OPN2_WritePan(ym3438_t *chip, Bit32u channel, Bit8u data)
 {
@@ -1608,24 +1617,6 @@ void OPN2_GenerateStreamMix(ym3438_t *chip, Bit16s *output, Bit32u numsamples)
         OPN2_GenerateResampled(chip, buffer);
         *output++ += buffer[0];
         *output++ += buffer[1];
-    }
-}
-
-
-void OPN2_SetOptions(Bit8u flags)
-{
-    switch ((flags >> 3) & 0x03)
-    {
-    case 0x00: /* YM2612 */
-    default:
-        OPN2_SetChipType(ym3438_type_ym2612);
-        break;
-    case 0x01: /* ASIC YM3438 */
-        OPN2_SetChipType(ym3438_type_asic);
-        break;
-    case 0x02: /* Discrete YM3438 */
-        OPN2_SetChipType(ym3438_type_discrete);
-        break;
     }
 }
 

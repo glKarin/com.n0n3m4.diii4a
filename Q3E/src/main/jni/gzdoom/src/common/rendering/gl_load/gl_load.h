@@ -1,5 +1,19 @@
 #ifndef POINTER_C_GENERATED_HEADER_OPENGL_H
 #define POINTER_C_GENERATED_HEADER_OPENGL_H
+#if 0
+#undef TID
+#define TID(x) do {\
+	while(glGetError() != GL_NO_ERROR); \
+	x;               \
+    auto _____ = glGetError();              \
+    if(_____ != GL_NO_ERROR)              \
+	printf("%s -> ERR=%x\n", #x, _____);    \
+	else             \
+	printf("%s;\n", #x); \
+	} while(0)
+#else
+#define TID(x) x
+#endif
 
 #if defined(__glew_h__) || defined(__GLEW_H__)
 #error Attempt to include auto-generated header after including glew.h
@@ -2071,7 +2085,11 @@ extern int ogl_ext_ARB_invalidate_subdata;
 #ifndef GL_ARB_buffer_storage
 #define GL_ARB_buffer_storage 1
 extern void (CODEGEN_FUNCPTR *_ptrc_glBufferStorage)(GLenum target, GLsizeiptr size, const void * data, GLbitfield flags);
+#ifdef _GLES //karin: glBufferStorage on OpenGLES
+#define glBufferStorage glesBufferStorage
+#else
 #define glBufferStorage _ptrc_glBufferStorage
+#endif
 #endif /*GL_ARB_buffer_storage*/ 
 
 #ifndef GL_ARB_shader_storage_buffer_object
@@ -2203,7 +2221,11 @@ extern void (CODEGEN_FUNCPTR *_ptrc_glClearAccum)(GLfloat red, GLfloat green, GL
 extern void (CODEGEN_FUNCPTR *_ptrc_glClearColor)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
 #define glClearColor _ptrc_glClearColor
 extern void (CODEGEN_FUNCPTR *_ptrc_glClearDepth)(GLdouble depth);
+#ifdef _GLES //karin: glClearDepthf on OpenGLES
+#define glClearDepth _ptrc_glClearDepthf
+#else
 #define glClearDepth _ptrc_glClearDepth
+#endif
 extern void (CODEGEN_FUNCPTR *_ptrc_glClearIndex)(GLfloat c);
 #define glClearIndex _ptrc_glClearIndex
 extern void (CODEGEN_FUNCPTR *_ptrc_glClearStencil)(GLint s);
@@ -2289,7 +2311,11 @@ extern void (CODEGEN_FUNCPTR *_ptrc_glDepthFunc)(GLenum func);
 extern void (CODEGEN_FUNCPTR *_ptrc_glDepthMask)(GLboolean flag);
 #define glDepthMask _ptrc_glDepthMask
 extern void (CODEGEN_FUNCPTR *_ptrc_glDepthRange)(GLdouble ren_near, GLdouble ren_far);
+#ifdef _GLES //karin: glDepthRangef on OpenGLES
+#define glDepthRange _ptrc_glDepthRangef
+#else
 #define glDepthRange _ptrc_glDepthRange
+#endif
 extern void (CODEGEN_FUNCPTR *_ptrc_glDisable)(GLenum cap);
 #define glDisable _ptrc_glDisable
 extern void (CODEGEN_FUNCPTR *_ptrc_glDrawBuffer)(GLenum buf);
@@ -2355,11 +2381,22 @@ extern void (CODEGEN_FUNCPTR *_ptrc_glGetBooleanv)(GLenum pname, GLboolean * dat
 extern void (CODEGEN_FUNCPTR *_ptrc_glGetClipPlane)(GLenum plane, GLdouble * equation);
 #define glGetClipPlane _ptrc_glGetClipPlane
 extern void (CODEGEN_FUNCPTR *_ptrc_glGetDoublev)(GLenum pname, GLdouble * data);
+#if !defined(_GLES) //karin: glGetDoublev on OpenGLES
 #define glGetDoublev _ptrc_glGetDoublev
+#endif
 extern GLenum (CODEGEN_FUNCPTR *_ptrc_glGetError)(void);
 #define glGetError _ptrc_glGetError
 extern void (CODEGEN_FUNCPTR *_ptrc_glGetFloatv)(GLenum pname, GLfloat * data);
 #define glGetFloatv _ptrc_glGetFloatv
+#ifdef _GLES //karin: glGetDoublev on OpenGLES
+inline void glesGetDoublev(GLenum pname, GLdouble *data)
+{
+	GLfloat f;
+	glGetFloatv(pname, &f);
+	*data = f;
+}
+#define glGetDoublev glesGetDoublev
+#endif
 extern void (CODEGEN_FUNCPTR *_ptrc_glGetIntegerv)(GLenum pname, GLint * data);
 #define glGetIntegerv _ptrc_glGetIntegerv
 extern void (CODEGEN_FUNCPTR *_ptrc_glGetLightfv)(GLenum light, GLenum pname, GLfloat * params);
@@ -3088,7 +3125,9 @@ extern GLboolean (CODEGEN_FUNCPTR *_ptrc_glIsBuffer)(GLuint buffer);
 extern GLboolean (CODEGEN_FUNCPTR *_ptrc_glIsQuery)(GLuint id);
 #define glIsQuery _ptrc_glIsQuery
 extern void * (CODEGEN_FUNCPTR *_ptrc_glMapBuffer)(GLenum target, GLenum access);
+#if !defined(_GLES) //karin: glMapBuffer on OpenGLES
 #define glMapBuffer _ptrc_glMapBuffer
+#endif
 extern GLboolean (CODEGEN_FUNCPTR *_ptrc_glUnmapBuffer)(GLenum target);
 #define glUnmapBuffer _ptrc_glUnmapBuffer
 
@@ -3392,6 +3431,21 @@ extern GLboolean (CODEGEN_FUNCPTR *_ptrc_glIsVertexArray)(GLuint ren_array);
 #define glIsVertexArray _ptrc_glIsVertexArray
 extern void * (CODEGEN_FUNCPTR *_ptrc_glMapBufferRange)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
 #define glMapBufferRange _ptrc_glMapBufferRange
+#ifdef _GLES //karin: glMapBuffer on OpenGLES
+inline void * glesMapBuffer(GLenum target, GLenum access)
+{
+	GLenum bits = 0;
+	if(access & GL_READ_ONLY)
+		bits |= GL_MAP_READ_BIT;
+	else if(access & GL_WRITE_ONLY)
+		bits |= GL_MAP_WRITE_BIT;
+
+	GLint buffer_size = 0;
+	glGetBufferParameteriv(target, GL_BUFFER_SIZE, &buffer_size);
+	return glMapBufferRange(target, 0, buffer_size, bits);
+}
+#define glMapBuffer glesMapBuffer
+#endif
 extern void (CODEGEN_FUNCPTR *_ptrc_glRenderbufferStorage)(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
 #define glRenderbufferStorage _ptrc_glRenderbufferStorage
 extern void (CODEGEN_FUNCPTR *_ptrc_glRenderbufferStorageMultisample)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
@@ -3977,7 +4031,15 @@ extern void (CODEGEN_FUNCPTR *_ptrc_glBindTextures)(GLuint first, GLsizei count,
 extern void (CODEGEN_FUNCPTR *_ptrc_glBindVertexBuffers)(GLuint first, GLsizei count, const GLuint * buffers, const GLintptr * offsets, const GLsizei * strides);
 #define glBindVertexBuffers _ptrc_glBindVertexBuffers
 extern void (CODEGEN_FUNCPTR *_ptrc_glBufferStorage)(GLenum target, GLsizeiptr size, const void * data, GLbitfield flags);
+#ifdef _GLES //karin: glBufferStorage on OpenGLES
+inline void glesBufferStorage(GLenum target, GLsizeiptr size, const void * data, GLbitfield flags)
+{
+	glBufferData(target, size, data, GL_STREAM_DRAW);
+}
+#define glBufferStorage glesBufferStorage
+#else
 #define glBufferStorage _ptrc_glBufferStorage
+#endif
 extern void (CODEGEN_FUNCPTR *_ptrc_glClearTexImage)(GLuint texture, GLint level, GLenum format, GLenum type, const void * data);
 #define glClearTexImage _ptrc_glClearTexImage
 extern void (CODEGEN_FUNCPTR *_ptrc_glClearTexSubImage)(GLuint texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void * data);

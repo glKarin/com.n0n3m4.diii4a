@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1996-1997 Id Software, Inc.
+Copyright (C) 2020-2024 DarkPlaces Contributors
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -870,7 +871,7 @@ void SV_Name(int clientnum)
 	PRVM_serveredictstring(host_client->edict, netname) = PRVM_SetEngineString(prog, host_client->name);
 	if (strcmp(host_client->old_name, host_client->name))
 	{
-		if (host_client->begun)
+		if (host_client->begun && host_client->netconnection)
 			SV_BroadcastPrintf("\003%s ^7changed name to ^3%s\n", host_client->old_name, host_client->name);
 		dp_strlcpy(host_client->old_name, host_client->name, sizeof(host_client->old_name));
 		// send notification to all clients
@@ -1152,9 +1153,9 @@ static void SV_MaxPlayers_f(cmd_state_t *cmd)
 
 	svs.maxclients_next = n;
 	if (n == 1)
-		Cvar_Set (&cvars_all, "deathmatch", "0");
+		Cvar_SetQuick(&deathmatch, "0");
 	else
-		Cvar_Set (&cvars_all, "deathmatch", "1");
+		Cvar_SetQuick(&deathmatch, "1");
 }
 
 /*
@@ -1450,8 +1451,11 @@ static void SV_Ent_Create_f(cmd_state_t *cmd)
 
 	void (*print)(const char *, ...) = (cmd->source == src_client ? SV_ClientPrintf : Con_Printf);
 
-	if(!Cmd_Argc(cmd))
+	if(Cmd_Argc(cmd) == 1)
+	{
+		print("Usage: ent_create <classname> [<key> <value> ... ]\n\nIf executing as a player, an entity of classname will spawn where you're aiming.\nOptional key-value pairs can be provided. If origin is provided, it will spawn the entity at that coordinate.\nHowever, an origin is required if the command is executed from a dedicated server console.\n");
 		return;
+	}
 
 	ed = PRVM_ED_Alloc(SVVM_prog);
 
@@ -1480,10 +1484,7 @@ static void SV_Ent_Create_f(cmd_state_t *cmd)
 	}
 	// Or spawn at a specified origin.
 	else
-	{
-		print = Con_Printf;
 		haveorigin = false;
-	}
 
 	// Allow more than one key/value pair by cycling between expecting either one.
 	for(i = 2; i < Cmd_Argc(cmd); i += 2)
@@ -1655,8 +1656,8 @@ void SV_InitOperatorCommands(void)
 	Cmd_AddCommand(CF_SERVER | CF_SERVER_FROM_CLIENT, "pause", SV_Pause_f, "pause the game (if the server allows pausing)");
 	Cmd_AddCommand(CF_SHARED, "kick", SV_Kick_f, "kick a player off the server by number or name");
 	Cmd_AddCommand(CF_SHARED | CF_SERVER_FROM_CLIENT, "ping", SV_Ping_f, "print ping times of all players on the server");
-	Cmd_AddCommand(CF_SHARED, "load", SV_Loadgame_f, "load a saved game file");
-	Cmd_AddCommand(CF_SHARED, "save", SV_Savegame_f, "save the game to a file");
+	Cmd_AddCommand(CF_SERVER, "load", SV_Loadgame_f, "load a saved game file");
+	Cmd_AddCommand(CF_SERVER, "save", SV_Savegame_f, "save the game to a file");
 	Cmd_AddCommand(CF_SHARED, "viewmodel", SV_Viewmodel_f, "change model of viewthing entity in current level");
 	Cmd_AddCommand(CF_SHARED, "viewframe", SV_Viewframe_f, "change animation frame of viewthing entity in current level");
 	Cmd_AddCommand(CF_SHARED, "viewnext", SV_Viewnext_f, "change to next animation frame of viewthing entity in current level");

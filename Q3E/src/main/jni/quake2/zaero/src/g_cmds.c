@@ -738,28 +738,49 @@ void Cmd_WeapPrev_f (edict_t *ent)
 
 	cl = ent->client;
 
-	if (!cl->pers.weapon)
+	if (g_quick_weap->value && cl->newweapon)
+	{
+		it = cl->newweapon;
+	}
+	else if (cl->pers.weapon)
+	{
+		it = cl->pers.weapon;
+	}
+	else
+	{
 		return;
+	}
 
-	selected_weapon = ITEM_INDEX(cl->pers.weapon);
+	selected_weapon = ITEM_INDEX(it);
 
 	// scan  for the next valid one
 	for (i=1 ; i<=MAX_ITEMS ; i++)
 	{
 		index = (selected_weapon + MAX_ITEMS - i)%MAX_ITEMS;
 		if (!cl->pers.inventory[index])
+		{
 			continue;
+		}
+
 		it = &itemlist[index];
-		if (it->hideFlags & HIDE_FROM_SELECTION)
+		if ( (it->hideFlags & HIDE_FROM_SELECTION)
+			|| !it->use || !(it->flags & IT_WEAPON) )
+		{
 			continue;
-		if (!it->use)
-			continue;
-		if (! (it->flags & IT_WEAPON) )
-			continue;
+		}
+
 		it->use (ent, it);
 		if (cl->newweapon == it)
+		{
+			if (g_quick_weap->value)
+			{
+				cl->ps.stats[STAT_PICKUP_ICON] = gi.imageindex(it->icon);
+				cl->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS + ITEM_INDEX(it);
+				cl->pickup_msg_time = level.time + 0.9f;
+			}
 			return;	// successful
 	}
+}
 }
 
 /*
@@ -781,28 +802,49 @@ void Cmd_WeapNext_f (edict_t *ent)
 
 	cl = ent->client;
 
-	if (!cl->pers.weapon)
+	if (g_quick_weap->value && cl->newweapon)
+	{
+		it = cl->newweapon;
+	}
+	else if (cl->pers.weapon)
+	{
+		it = cl->pers.weapon;
+	}
+	else
+	{
 		return;
+	}
 
-	selected_weapon = ITEM_INDEX(cl->pers.weapon);
+	selected_weapon = ITEM_INDEX(it);
 
 	// scan  for the next valid one
 	for (i=1 ; i<=MAX_ITEMS ; i++)
 	{
 		index = (selected_weapon + i)%MAX_ITEMS;
 		if (!cl->pers.inventory[index])
+		{
 			continue;
+		}
+
 		it = &itemlist[index];
-		if (it->hideFlags & HIDE_FROM_SELECTION)
+		if ( (it->hideFlags & HIDE_FROM_SELECTION)
+			|| !it->use || !(it->flags & IT_WEAPON) )
+		{
 			continue;
-		if (!it->use)
-			continue;
-		if (! (it->flags & IT_WEAPON) )
-			continue;
+		}
+
 		it->use (ent, it);
 		if (cl->newweapon == it)
+		{
+			if (g_quick_weap->value)
+			{
+				cl->ps.stats[STAT_PICKUP_ICON] = gi.imageindex(it->icon);
+				cl->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS + ITEM_INDEX(it);
+				cl->pickup_msg_time = level.time + 0.9f;
+			}
 			return;	// successful
 	}
+}
 }
 
 /*
@@ -1230,29 +1272,37 @@ static void
 Cmd_CycleWeap_f(edict_t *ent)
 {
 	gitem_t *weap;
+	gclient_t *cl;
+	int num_weaps;
 
 	if (!ent)
 	{
 		return;
 	}
 
-	if (gi.argc() <= 1)
+	num_weaps = gi.argc();
+	if (num_weaps <= 1)
 	{
 		gi.cprintf(ent, PRINT_HIGH, "Usage: cycleweap classname1 classname2 .. classnameN\n");
 		return;
 	}
 
 	weap = cycle_weapon(ent);
-	if (weap)
-	{
-		if (ent->client->pers.inventory[ITEM_INDEX(weap)] <= 0)
+	if (!weap) return;
+
+	cl = ent->client;
+	if (cl->pers.inventory[ITEM_INDEX(weap)] <= 0)
 		{
 			gi.cprintf(ent, PRINT_HIGH, "Out of item: %s\n", weap->pickup_name);
+		return;
 		}
-		else
+
+	weap->use(ent, weap);
+	if (num_weaps > 3 && cl->newweapon == weap)
 		{
-			weap->use(ent, weap);
-		}
+		cl->ps.stats[STAT_PICKUP_ICON] = gi.imageindex(weap->icon);
+		cl->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS + ITEM_INDEX(weap);
+		cl->pickup_msg_time = level.time + 0.7f;
 	}
 }
 

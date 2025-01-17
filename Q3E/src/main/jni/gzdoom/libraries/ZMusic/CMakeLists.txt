@@ -1,247 +1,192 @@
-cmake_minimum_required( VERSION 2.8.7 )
-project(ZMusic)
+cmake_minimum_required(VERSION 3.13...3.19)
 
-set(ZMUSIC_VERSION_MAJOR 1)
-set(ZMUSIC_VERSION_MINOR 1)
-set(ZMUSIC_VERSION_PATCH 0)
-set(ZMUSIC_VERSION "${ZMUSIC_VERSION_MAJOR}.${ZMUSIC_VERSION_MINOR}.${ZMUSIC_VERSION_PATCH}")
+if (VCPKG_LIBSNDFILE)
+	list(APPEND VCPKG_MANIFEST_FEATURES "vcpkg-libsndfile")
+endif()
 
-if( COMMAND cmake_policy )
-	if( POLICY CMP0011 )
-		cmake_policy( SET CMP0011 NEW )
+project(ZMusic
+	VERSION 1.1.14
+	LANGUAGES C CXX
+)
+
+if (VCPKG_TOOLCHAIN)
+	if(VCPKG_TARGET_TRIPLET MATCHES "-static$")
+ 		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+ 	endif()
+
+	option(VCPKG_LIBSNDFILE "Import libsndfile from vcpkg" OFF)
+else()
+	set(VCPKG_MANIFEST_FEATURES)
+endif()
+
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+include(ZUtility)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+	# This project is being built standalone
+
+	# Give user option to build shared or static
+	option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+
+	# Enable install rules
+	set(ZMUSIC_INSTALL ON)
+else()
+	# This project is being vendored by another project, set option default if
+	# the parent project doesn't provide them.
+
+	if(NOT DEFINED BUILD_SHARED_LIBS)
+		set(BUILD_SHARED_LIBS ON)
 	endif()
-	if( POLICY CMP0054 )
-		cmake_policy( SET CMP0054 NEW )
+
+	# Although install rules can be avoided with EXCLUDE_FROM_ALL on
+	# add_subdirectory, the EXPORT rules may place certain usage requirements on
+	# targets shared between the two projects.
+	if(NOT DEFINED ZMUSIC_INSTALL)
+		set(ZMUSIC_INSTALL OFF)
 	endif()
 endif()
 
-list( APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake )
-include( FindPackageHandleStandardArgs )
-
-# Support cross compiling
-option( FORCE_CROSSCOMPILE "Turn on cross compiling." NO )
-if( FORCE_CROSSCOMPILE )
-	set( CMAKE_CROSSCOMPILING TRUE )
-endif()
-
-if(CMAKE_CROSSCOMPILING)
-	set(IMPORT_EXECUTABLES "IMPORTFILE-NOTFOUND" CACHE FILEPATH "Export file from native build.")
-	if(NOT ANDROID)
-	include(${IMPORT_EXECUTABLES})
-	endif()
-endif()
-
-
-# Macro for building libraries without debugging information
-macro( make_release_only )
-	set( CMAKE_C_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_RELEASE} )
-	set( CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELEASE} )
-	string( REPLACE "/MT " "/MTd " CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_RELEASE} )
-	set( CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_CXX_FLAGS_RELEASE} )
-	set( CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELEASE} )
-	string( REPLACE "/MT " "/MTd " CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_RELEASE} )
-endmacro()
-
-IF( NOT CMAKE_BUILD_TYPE )
-	SET( CMAKE_BUILD_TYPE Debug CACHE STRING
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE Debug CACHE STRING
 		"Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
-		FORCE )
-ENDIF()
-
-# Replacement variables for a possible long list of C/C++ compilers compatible with GCC
-if( "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" )
-	set( ZD_CMAKE_COMPILER_IS_GNUC_COMPATIBLE TRUE )
-else()
-	set( ZD_CMAKE_COMPILER_IS_GNUC_COMPATIBLE FALSE )
+		FORCE)
 endif()
 
-if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-	set( ZD_CMAKE_COMPILER_IS_GNUCXX_COMPATIBLE TRUE )
-else()
-	set( ZD_CMAKE_COMPILER_IS_GNUCXX_COMPATIBLE FALSE )
+if(MSVC AND CMAKE_VERSION VERSION_LESS 3.15)
+	message(WARNING "Some things may be misconfigured. Please update to CMake >= 3.15 with Visual Studio.")
+endif()
+if(NOT CMAKE_MSVC_RUNTIME_LIBRARY)
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
-if( ZD_CMAKE_COMPILER_IS_GNUCXX_COMPATIBLE )
-	set( PROFILE 0 CACHE BOOL "Enable profiling with gprof for Debug and RelWithDebInfo build types." )
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+	set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Install path prefix" FORCE)
 endif()
 
-# Fast math flags, required by some subprojects
-set( ZD_FASTMATH_FLAG "" )
-if( ZD_CMAKE_COMPILER_IS_GNUCXX_COMPATIBLE )
-	set( ZD_FASTMATH_FLAG "-ffast-math -ffp-contract=fast" )
-elseif( MSVC )
-	set( ZD_FASTMATH_FLAG "/fp:fast" )
-endif()
-
-macro( use_fast_math )
-	set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ZD_FASTMATH_FLAG}" )
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ZD_FASTMATH_FLAG}" )
-endmacro()
-
-include( CheckFunctionExists )
-
-macro( require_stricmp )
-	CHECK_FUNCTION_EXISTS( stricmp STRICMP_EXISTS )
-	if( NOT STRICMP_EXISTS )
-		add_definitions( -Dstricmp=strcasecmp )
-	endif()
-endmacro()
-
-macro( require_strnicmp )
-	CHECK_FUNCTION_EXISTS( strnicmp STRNICMP_EXISTS )
-	if( NOT STRNICMP_EXISTS )
-		add_definitions( -Dstrnicmp=strncasecmp )
-	endif()
-endmacro()
-
-find_package( ZLIB )
-
-
-if( MSVC )
-	# Eliminate unreferenced functions and data
-	# Perform identical COMDAT folding
-	set( REL_LINKER_FLAGS "/opt:ref /opt:icf /nodefaultlib:msvcrt /TSAWARE /LARGEADDRESSAWARE" )
-
-	# String pooling
-	# Function-level linking
-	# Disable run-time type information
-	set( ALL_C_FLAGS "/GF /Gy /GR- /permissive-" )
-
-	# Avoid CRT DLL dependancies in release builds, optionally generate assembly output for checking crash locations.
-	option( ZDOOM_GENERATE_ASM "Generate assembly output." OFF )
-	if( ZDOOM_GENERATE_ASM )
-		set( REL_C_FLAGS "/MT /Oy /Oi /FAcs /GS-" )
-	else()
-		set( REL_C_FLAGS "/MT /Oy /Oi /GS-" )
+if(MSVC)
+	#  optionally generate assembly output for checking crash locations.
+	option(ZMUSIC_GENERATE_ASM "Generate assembly output." OFF)
+	if(ZMUSIC_GENERATE_ASM)
+		add_compile_options("/FAcs")
 	endif()
 
+	add_compile_options(
+		"/GF" # String pooling
+		"/Gy" # Function-level linking
+		"/GR-" # Disable run-time type information
+		"/permissive-"
+		"/Oy" "/Oi" "/GS-"
 
-	# Debug allocations in debug builds
-	set( DEB_C_FLAGS "/D _CRTDBG_MAP_ALLOC /MTd" )
+		# Disable warnings for unsecure CRT functions from VC8+
+		"/wd4996"
+	)
 
-	# Disable warnings for unsecure CRT functions from VC8+
-	set( ALL_C_FLAGS "${ALL_C_FLAGS} /wd4996 /DUNICODE /D_UNICODE /D_WIN32_WINNT=0x0600" )
+	add_compile_definitions(
+		"UNICODE"
+		"_UNICODE"
+		"_WIN32_WINNT=0x0600"
+		# Debug allocations in debug builds
+		$<$<CONFIG:DEBUG>:_CRTDBG_MAP_ALLOC>
+	)
 
-	# The CMake configurations set /GR and /MD by default, which conflict with our settings.
-	string(REPLACE "/MD " " " CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} )
-	string(REPLACE "/MD " " " CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_CXX_FLAGS_MINSIZEREL} )
-	string(REPLACE "/MD " " " CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} )
+	add_link_options(
+		"/opt:ref" # Eliminate unreferenced functions and data
+		"/opt:icf" # Perform identical COMDAT folding
+		"/nodefaultlib:msvcrt"
+		$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:/TSAWARE>
+		"/LARGEADDRESSAWARE"
+	)
+
+	# RelWithDebInfo uses /Ob1 by default instead of Ob2 like Release
 	string(REPLACE "/Ob1 " "/Ob2 " CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} )
-	string(REPLACE "/MDd " " " CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} )
-	string(REPLACE "/MD " " " CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE} )
-	string(REPLACE "/MD " " " CMAKE_C_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL} )
-	string(REPLACE "/MD " " " CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO} )
-	string(REPLACE "/MDd " " " CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG} )
+
+	# The CMake configurations set /GR by default, which conflict with our settings.
+	# CMake 3.20 fixes the need to do this
 	string(REPLACE " /GR" " " CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
 else()
-	set( REL_LINKER_FLAGS "" )
-	set( ALL_C_FLAGS "-ffp-contract=off" )
+	add_compile_options("-ffp-contract=off")
 
-	if ( UNIX )
-		include(CheckSymbolExists)
-		check_symbol_exists( "fts_set" "fts.h" HAVE_FTS )
-		if ( NOT HAVE_FTS )
-			include ( FindPkgConfig )
-			pkg_check_modules( MUSL_FTS musl-fts )
-			if ( MUSL_FTS_FOUND )
-				set ( ALL_C_FLAGS "${ALL_C_FLAGS} ${MUSL_FTS_LDFLAGS}" )
-			else ( MUSL_FTS_FOUND )
-				message (ERROR "fts_* functions not found in the system" )
-			endif ( MUSL_FTS_FOUND )
-		endif ( NOT HAVE_FTS )
-	endif ( UNIX )
-
-	set( REL_C_FLAGS "" )
-	set( DEB_C_FLAGS "" )
-
-
-	if( APPLE )
-		set( CMAKE_OSX_DEPLOYMENT_TARGET "10.9" )
-		if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
+	if(APPLE)
+		set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
+		if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 			# With standard Apple tools -stdlib=libc++ needs to be specified in order to get
 			# C++11 support using SDKs 10.7 and 10.8.
-			set( CMAKE_CXX_FLAGS "-stdlib=libc++ ${CMAKE_CXX_FLAGS}" )
-			set( CMAKE_EXE_LINKER_FLAGS "-stdlib=libc++ ${CMAKE_EXE_LINKER_FLAGS}" )
-		elseif( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
+			add_compile_options("-stdlib=libc++")
+			add_link_options("-stdlib=libc++")
+		elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 			# If we're compiling with a custom GCC on the Mac (which we know since g++-4.2 doesn't support C++11) statically link libgcc.
-			set( ALL_C_FLAGS "-static-libgcc" )
+			add_compile_options("-static-libgcc")
 		endif()
-	elseif( NOT MINGW )
-		# Generic GCC/Clang requires position independent code to be enabled explicitly
-		set( ALL_C_FLAGS "${ALL_C_FLAGS} -fPIC" )
-	endif( APPLE )
-endif()
-
-set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${REL_LINKER_FLAGS}" )
-set( CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL} ${REL_LINKER_FLAGS}" )
-set( CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} ${REL_LINKER_FLAGS}" )
-
-set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ALL_C_FLAGS}" )
-set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${REL_C_FLAGS}" )
-set( CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} ${REL_C_FLAGS}" )
-set( CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${REL_C_FLAGS}" )
-set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${DEB_C_FLAGS} -D_DEBUG" )
-
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ALL_C_FLAGS}" )
-set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${REL_C_FLAGS}" )
-set( CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} ${REL_C_FLAGS}" )
-set( CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${REL_C_FLAGS}" )
-set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${DEB_C_FLAGS} -D_DEBUG" )
-
-option(FORCE_INTERNAL_ZLIB "Use internal zlib")
-option(FORCE_INTERNAL_GME "Use internal gme" ON)
-mark_as_advanced( FORCE_INTERNAL_GME )
-
-if( ZLIB_FOUND AND NOT FORCE_INTERNAL_ZLIB )
-	message( STATUS "Using system zlib, includes found at ${ZLIB_INCLUDE_DIR}" )
-else()
-	message( STATUS "Using internal zlib" )
-	set( SKIP_INSTALL_ALL TRUE ) # Avoid installing zlib alongside zdoom
-	add_subdirectory( thirdparty/zlib )
-	set( ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zlib )
-	set( ZLIB_LIBRARIES z )
-	set( ZLIB_LIBRARY z )
-endif()
-
-
-if( GME_FOUND AND NOT FORCE_INTERNAL_GME )
-	message( STATUS "Using system gme library, includes found at ${GME_INCLUDE_DIR}" )
-else()
-	message( STATUS "Using internal gme library" )
-	# Use MAME as it's a balanced emulator: well-accurate, but doesn't eats lot of CPU
-	# Nuked OPN2 is very accurate emulator, but it eats too much CPU for the workflow
-	set( GME_YM2612_EMU "MAME" )
-	add_subdirectory( thirdparty/game-music-emu )
-	set( GME_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/game-music-emu" )
-	set( GME_LIBRARIES gme )
-endif()
-
-set( ADL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/adlmidi" )
-set( OPN_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/opnmidi" )
-set( TIMIDITYPP_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/timidityplus" )
-set( TIMIDITY_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/timidity" )
-set( WILDMIDI_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/wildmidi" )
-set( OPLSYNTH_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/oplsynth" )
-
-if( NOT CMAKE_CROSSCOMPILING )
-	if( NOT CROSS_EXPORTS )
-		set( CROSS_EXPORTS "" )
 	endif()
 endif()
 
-option( DYN_FLUIDSYNTH "Dynamically load fluidsynth" ON )
-option( DYN_SNDFILE "Dynamically load libsndfile" ON )
-option( DYN_MPG123 "Dynamically load libmpg123" ON )
+# Initialize our list of find_package dependencies for configure_package_config_file
+set(ZMUSIC_PACKAGE_DEPENDENCIES "" CACHE INTERNAL "")
 
-add_subdirectory( thirdparty/dumb )
-add_subdirectory( thirdparty/adlmidi )
-add_subdirectory( thirdparty/opnmidi )
-add_subdirectory( thirdparty/timidity )
-add_subdirectory( thirdparty/timidityplus )
-add_subdirectory( thirdparty/wildmidi )
-add_subdirectory( thirdparty/oplsynth )
-add_subdirectory( source )
+if (WIN32 AND MINGW)
+	add_compile_definitions(-D_UNICODE -DUNICODE)
+	add_compile_definitions(-D__USE_MINGW_ANSI_STDIO=1)
+endif()
 
-if( NOT CMAKE_CROSSCOMPILING )
-	export(TARGETS ${CROSS_EXPORTS} FILE "${CMAKE_BINARY_DIR}/ImportExecutables.cmake" )
+add_subdirectory(thirdparty)
+add_subdirectory(source)
+
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/ZMusicConfigVersion.cmake
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY SameMajorVersion
+)
+configure_package_config_file(
+	cmake/ZMusicConfig.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/ZMusicConfig.cmake
+	INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake
+)
+if(ZMUSIC_INSTALL)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ZMusicConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/ZMusicConfigVersion.cmake
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ZMusic
+		COMPONENT devel
+	)
+endif()
+
+if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+	set(CPACK_PACKAGE_CONTACT "First Last <example@example.com>" CACHE STRING "Contact info for archive maintainer.")
+	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GZDoom's music system as a standalone library")
+	string(TOLOWER "${PROJECT_NAME}" CPACK_PACKAGE_NAME)
+	set(CPACK_PACKAGE_NAME "lib${CPACK_PACKAGE_NAME}")
+	# Use same prefix for packaging for consistency
+	set(CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+	set(CPACK_STRIP_FILES ON)
+	set(CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+	set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
+	set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
+	set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH})
+
+	set(CPACK_COMPONENT_DEVEL_DEPENDS Full Lite)
+
+	if(WIN32)
+		set(CPACK_GENERATOR "ZIP")
+	else()
+		set(CPACK_GENERATOR "DEB")
+		set(CPACK_DEB_COMPONENT_INSTALL ON)
+		set(CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS ON)
+		set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
+		set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://zdoom.org")
+		set(CPACK_DEBIAN_PACKAGE_SECTION "libs")
+		set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+		set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION ON)
+		set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
+
+		set(CPACK_DEBIAN_FULL_PACKAGE_NAME "${CPACK_PACKAGE_NAME}${PROJECT_VERSION_MAJOR}")
+		set(CPACK_DEBIAN_LITE_PACKAGE_NAME "${CPACK_PACKAGE_NAME}lite${PROJECT_VERSION_MAJOR}")
+
+		set(CPACK_DEBIAN_DEVEL_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-dev")
+		set(CPACK_DEBIAN_DEVEL_PACKAGE_SECTION "libdevel")
+	endif()
+
+	include(CPack)
 endif()

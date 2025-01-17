@@ -133,7 +133,7 @@ localEntity_t *CG_SmokePuff(const vec3_t p, const vec3_t vel,
 	le->radius  = radius;
 
 	re             = &le->refEntity;
-	re->rotation   = Q_random(&seed) * 360;
+	re->rotation   = Q_RandomFloat(&seed) * 360;
 	re->radius     = radius;
 	re->shaderTime = startTime / 1000.0f;
 
@@ -889,8 +889,8 @@ typedef struct smokesprite_s
 	vec3_t pos;
 	vec4_t colour;
 
-	vec3_t dir;
-	float dist;
+	vec3_t dir;  // direction
+	float dist;  // distance
 	float size;
 
 	centity_t *smokebomb;
@@ -1050,7 +1050,7 @@ qboolean CG_SpawnSmokeSprite(centity_t *cent, float dist)
 		//VectorCopy( cent->lerpOrigin, smokesprite->pos );
 		//smokesprite->pos[2] += 32;
 		VectorCopy(cent->origin2, smokesprite->pos);
-		VectorCopy(bytedirs[rand() % NUMVERTEXNORMALS], smokesprite->dir);
+		VectorCopy(bytedirs[Q_LCG(cent->currentState.time + cent->miscInt /*sprite number*/) % NUMVERTEXNORMALS], smokesprite->dir);
 		smokesprite->dir[2]   *= .5f;
 		smokesprite->size      = 16.f;
 		smokesprite->colour[0] = .35f; // + crandom() * .1f;
@@ -1070,6 +1070,9 @@ qboolean CG_SpawnSmokeSprite(centity_t *cent, float dist)
 		}
 	}
 
+	// advance smoke sprite number
+	cent->miscInt++;
+
 	return qtrue;
 }
 
@@ -1087,7 +1090,7 @@ void CG_RenderSmokeGrenadeSmoke(centity_t *cent, const weaponInfo_t *weapon)
 	{
 		cent->miscTime          = 0;
 		cent->lastFuseSparkTime = 0;    // last spawn time
-		cent->muzzleFlashTime   = 0;    // delta time
+		cent->firedTime         = 0; // delta time
 		cent->dl_atten          = 0;
 		return;
 	}
@@ -1138,9 +1141,9 @@ void CG_RenderSmokeGrenadeSmoke(centity_t *cent, const weaponInfo_t *weapon)
 
 		if (cg.oldTime && cent->lastFuseSparkTime != cg.time)
 		{
-			cent->muzzleFlashTime  += cg.frametime;
-			spritesNeeded           = cent->muzzleFlashTime / (int)spawnrate;
-			cent->muzzleFlashTime  -= (spawnrate * spritesNeeded);
+			cent->firedTime        += cg.frametime;
+			spritesNeeded           = cent->firedTime / (int)spawnrate;
+			cent->firedTime        -= (spawnrate * spritesNeeded);
 			cent->lastFuseSparkTime = cg.time;
 		}
 
@@ -1282,7 +1285,7 @@ void CG_AddSmokeSprites(void)
 		// fadeout
 		if (smokesprite->dist > (radius * .5f * .8f))
 		{
-			color[3] = (byte)(smokesprite->colour[3] - smokesprite->colour[3] * ((smokesprite->dist - (radius * .5f * .8f)) / ((radius * .5f) - (radius * .5f * .8f)))) * 0xff;
+			color[3] = (byte)((smokesprite->colour[3] - smokesprite->colour[3] * ((smokesprite->dist - (radius * .5f * .8f)) / ((radius * .5f) - (radius * .5f * .8f)))) * 0xff);
 		}
 		else
 		{

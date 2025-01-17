@@ -36,6 +36,8 @@
 #ifndef INCLUDE_G_PUBLIC_H
 #define INCLUDE_G_PUBLIC_H
 
+#include "../qcommon/q_shared.h"
+
 #define GAME_API_VERSION    8
 
 //===============================================================
@@ -219,13 +221,10 @@ typedef enum
 	G_SENDMESSAGE = 585,
 	G_MESSAGESTATUS,
 
-	G_ETTV_GetPlayerstate = 600,
+	TVG_GET_PLAYERSTATE = 600,
 
 	///< engine extensions padding
-	G_TRAP_GETVALUE = COM_TRAP_GETVALUE,
-
-	G_DEMOSUPPORT
-
+	G_TRAP_GETVALUE = COM_TRAP_GETVALUE
 } gameImport_t;
 
 
@@ -273,9 +272,7 @@ typedef enum
 
 	GAME_MESSAGERECEIVED = 14,      ///< ( int cno, const char *buf, int buflen, int commandTime );
 
-	GAME_DEMOSTATECHANGED,          ///< (demoState_t demoState, int demoClientsNum) // server demo playback
-
-	GAME_ETTV = 1000,
+	GAME_ETTV = 1000,               ///< ETTV backward compatibility
 
 } gameExport_t;
 

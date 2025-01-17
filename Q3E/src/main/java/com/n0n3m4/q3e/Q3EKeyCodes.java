@@ -33,44 +33,46 @@ public class Q3EKeyCodes
 
     public static final int K_VKBD = 9000;
 
+    // code/client/keycodes.h <- RTCW
+    // src/ui/keycodes.h <- ETW
     public static class KeyCodesRTCW
     {
-        public static final int K_TAB = 9;
-        public static final int K_ENTER = 13;
+        public static final int K_TAB    = 9;
+        public static final int K_ENTER  = 13;
         public static final int K_ESCAPE = 27;
-        public static final int K_SPACE = 32;
+        public static final int K_SPACE  = 32;
 
         public static final int K_BACKSPACE = 127;
 
-        public static final int K_COMMAND = 128;
+        public static final int K_COMMAND  = 128;
         public static final int K_CAPSLOCK = 129;
-        public static final int K_POWER = 130;
-        public static final int K_PAUSE = 131;
+        public static final int K_POWER    = 130;
+        public static final int K_PAUSE    = 131;
 
-        public static final int K_UPARROW = 132;
-        public static final int K_DOWNARROW = 133;
-        public static final int K_LEFTARROW = 134;
+        public static final int K_UPARROW    = 132;
+        public static final int K_DOWNARROW  = 133;
+        public static final int K_LEFTARROW  = 134;
         public static final int K_RIGHTARROW = 135;
 
-        public static final int K_ALT = 136;
-        public static final int K_CTRL = 137;
+        public static final int K_ALT   = 136;
+        public static final int K_CTRL  = 137;
         public static final int K_SHIFT = 138;
-        public static final int K_INS = 139;
-        public static final int K_DEL = 140;
-        public static final int K_PGDN = 141;
-        public static final int K_PGUP = 142;
-        public static final int K_HOME = 143;
-        public static final int K_END = 144;
+        public static final int K_INS   = 139;
+        public static final int K_DEL   = 140;
+        public static final int K_PGDN  = 141;
+        public static final int K_PGUP  = 142;
+        public static final int K_HOME  = 143;
+        public static final int K_END   = 144;
 
-        public static final int K_F1 = 145;
-        public static final int K_F2 = 146;
-        public static final int K_F3 = 147;
-        public static final int K_F4 = 148;
-        public static final int K_F5 = 149;
-        public static final int K_F6 = 150;
-        public static final int K_F7 = 151;
-        public static final int K_F8 = 152;
-        public static final int K_F9 = 153;
+        public static final int K_F1  = 145;
+        public static final int K_F2  = 146;
+        public static final int K_F3  = 147;
+        public static final int K_F4  = 148;
+        public static final int K_F5  = 149;
+        public static final int K_F6  = 150;
+        public static final int K_F7  = 151;
+        public static final int K_F8  = 152;
+        public static final int K_F9  = 153;
         public static final int K_F10 = 154;
         public static final int K_F11 = 155;
         public static final int K_F12 = 156;
@@ -78,24 +80,24 @@ public class Q3EKeyCodes
         public static final int K_F14 = 158;
         public static final int K_F15 = 159;
 
-        public static final int K_KP_HOME = 160;
-        public static final int K_KP_UPARROW = 161;
-        public static final int K_KP_PGUP = 162;
-        public static final int K_KP_LEFTARROW = 163;
-        public static final int K_KP_5 = 164;
+        public static final int K_KP_HOME       = 160;
+        public static final int K_KP_UPARROW    = 161;
+        public static final int K_KP_PGUP       = 162;
+        public static final int K_KP_LEFTARROW  = 163;
+        public static final int K_KP_5          = 164;
         public static final int K_KP_RIGHTARROW = 165;
-        public static final int K_KP_END = 166;
-        public static final int K_KP_DOWNARROW = 167;
-        public static final int K_KP_PGDN = 168;
-        public static final int K_KP_ENTER = 169;
-        public static final int K_KP_INS = 170;
-        public static final int K_KP_DEL = 171;
-        public static final int K_KP_SLASH = 172;
-        public static final int K_KP_MINUS = 173;
-        public static final int K_KP_PLUS = 174;
-        public static final int K_KP_NUMLOCK = 175;
-        public static final int K_KP_STAR = 176;
-        public static final int K_KP_EQUALS = 177;
+        public static final int K_KP_END        = 166;
+        public static final int K_KP_DOWNARROW  = 167;
+        public static final int K_KP_PGDN       = 168;
+        public static final int K_KP_ENTER      = 169;
+        public static final int K_KP_INS        = 170;
+        public static final int K_KP_DEL        = 171;
+        public static final int K_KP_SLASH      = 172;
+        public static final int K_KP_MINUS      = 173;
+        public static final int K_KP_PLUS       = 174;
+        public static final int K_KP_NUMLOCK    = 175;
+        public static final int K_KP_STAR       = 176;
+        public static final int K_KP_EQUALS     = 177;
 
         public static final int K_MOUSE1 = 178;
         public static final int K_MOUSE2 = 179;
@@ -104,54 +106,64 @@ public class Q3EKeyCodes
         public static final int K_MOUSE5 = 182;
 
         public static final int K_MWHEELDOWN = 183;
-        public static final int K_MWHEELUP = 184;
+        public static final int K_MWHEELUP   = 184;
 
-        public static final int J_LEFT = 'a';
+        public static final int J_LEFT  = 'a';
         public static final int J_RIGHT = 'd';
-        public static final int J_UP = K_UPARROW;
-        public static final int J_DOWN = K_DOWNARROW;
+        public static final int J_UP    = K_UPARROW;
+        public static final int J_DOWN  = K_DOWNARROW;
+
+        public static final int K_KP_1 = K_KP_END;
+        public static final int K_KP_2 = K_KP_DOWNARROW;
+        public static final int K_KP_3 = K_KP_PGDN;
+        public static final int K_KP_4 = K_KP_LEFTARROW;
+        public static final int K_KP_6 = K_KP_RIGHTARROW;
+        public static final int K_KP_7 = K_KP_HOME;
+        public static final int K_KP_8 = K_KP_UPARROW;
+        public static final int K_KP_9 = K_KP_PGUP;
+        public static final int K_KP_0 = K_KP_INS;
     }
 
-    ;
-
+    // code/client/keycodes.h <- Q3
+    // client/header/keyboard.h <- Q2
     public static class KeyCodesQ3
     {
-        public static final int K_TAB = 9;
-        public static final int K_ENTER = 13;
+        public static final int K_TAB    = 9;
+        public static final int K_ENTER  = 13;
         public static final int K_ESCAPE = 27;
-        public static final int K_SPACE = 32;
+        public static final int K_SPACE  = 32;
 
         public static final int K_BACKSPACE = 127;
 
-        public static final int K_COMMAND = 128;
+        public static final int K_COMMAND  = 128;
         public static final int K_CAPSLOCK = 129;
-        public static final int K_POWER = 130;
-        public static final int K_PAUSE = 131;
+        public static final int K_POWER    = 130;
+        public static final int K_PAUSE    = 131;
 
-        public static final int K_UPARROW = 132;
-        public static final int K_DOWNARROW = 133;
-        public static final int K_LEFTARROW = 134;
+        public static final int K_UPARROW    = 132;
+        public static final int K_DOWNARROW  = 133;
+        public static final int K_LEFTARROW  = 134;
         public static final int K_RIGHTARROW = 135;
 
-        public static final int K_ALT = 136;
-        public static final int K_CTRL = 137;
+        public static final int K_ALT   = 136;
+        public static final int K_CTRL  = 137;
         public static final int K_SHIFT = 138;
-        public static final int K_INS = 139;
-        public static final int K_DEL = 140;
-        public static final int K_PGDN = 141;
-        public static final int K_PGUP = 142;
-        public static final int K_HOME = 143;
-        public static final int K_END = 144;
+        public static final int K_INS   = 139;
+        public static final int K_DEL   = 140;
+        public static final int K_PGDN  = 141;
+        public static final int K_PGUP  = 142;
+        public static final int K_HOME  = 143;
+        public static final int K_END   = 144;
 
-        public static final int K_F1 = 145;
-        public static final int K_F2 = 146;
-        public static final int K_F3 = 147;
-        public static final int K_F4 = 148;
-        public static final int K_F5 = 149;
-        public static final int K_F6 = 150;
-        public static final int K_F7 = 151;
-        public static final int K_F8 = 152;
-        public static final int K_F9 = 153;
+        public static final int K_F1  = 145;
+        public static final int K_F2  = 146;
+        public static final int K_F3  = 147;
+        public static final int K_F4  = 148;
+        public static final int K_F5  = 149;
+        public static final int K_F6  = 150;
+        public static final int K_F7  = 151;
+        public static final int K_F8  = 152;
+        public static final int K_F9  = 153;
         public static final int K_F10 = 154;
         public static final int K_F11 = 155;
         public static final int K_F12 = 156;
@@ -159,24 +171,24 @@ public class Q3EKeyCodes
         public static final int K_F14 = 158;
         public static final int K_F15 = 159;
 
-        public static final int K_KP_HOME = 160;
-        public static final int K_KP_UPARROW = 161;
-        public static final int K_KP_PGUP = 162;
-        public static final int K_KP_LEFTARROW = 163;
-        public static final int K_KP_5 = 164;
+        public static final int K_KP_HOME       = 160;
+        public static final int K_KP_UPARROW    = 161;
+        public static final int K_KP_PGUP       = 162;
+        public static final int K_KP_LEFTARROW  = 163;
+        public static final int K_KP_5          = 164;
         public static final int K_KP_RIGHTARROW = 165;
-        public static final int K_KP_END = 166;
-        public static final int K_KP_DOWNARROW = 167;
-        public static final int K_KP_PGDN = 168;
-        public static final int K_KP_ENTER = 169;
-        public static final int K_KP_INS = 170;
-        public static final int K_KP_DEL = 171;
-        public static final int K_KP_SLASH = 172;
-        public static final int K_KP_MINUS = 173;
-        public static final int K_KP_PLUS = 174;
-        public static final int K_KP_NUMLOCK = 175;
-        public static final int K_KP_STAR = 176;
-        public static final int K_KP_EQUALS = 177;
+        public static final int K_KP_END        = 166;
+        public static final int K_KP_DOWNARROW  = 167;
+        public static final int K_KP_PGDN       = 168;
+        public static final int K_KP_ENTER      = 169;
+        public static final int K_KP_INS        = 170;
+        public static final int K_KP_DEL        = 171;
+        public static final int K_KP_SLASH      = 172;
+        public static final int K_KP_MINUS      = 173;
+        public static final int K_KP_PLUS       = 174;
+        public static final int K_KP_NUMLOCK    = 175;
+        public static final int K_KP_STAR       = 176;
+        public static final int K_KP_EQUALS     = 177;
 
         public static final int K_MOUSE1 = 178;
         public static final int K_MOUSE2 = 179;
@@ -185,275 +197,368 @@ public class Q3EKeyCodes
         public static final int K_MOUSE5 = 182;
 
         public static final int K_MWHEELDOWN = 183;
-        public static final int K_MWHEELUP = 184;
+        public static final int K_MWHEELUP   = 184;
 
-        public static final int J_LEFT = 'a';
+        public static final int J_LEFT  = 'a';
         public static final int J_RIGHT = 'd';
-        public static final int J_UP = K_UPARROW;
-        public static final int J_DOWN = K_DOWNARROW;
+        public static final int J_UP    = K_UPARROW;
+        public static final int J_DOWN  = K_DOWNARROW;
+
+        public static final int K_KP_1 = K_KP_END;
+        public static final int K_KP_2 = K_KP_DOWNARROW;
+        public static final int K_KP_3 = K_KP_PGDN;
+        public static final int K_KP_4 = K_KP_LEFTARROW;
+        public static final int K_KP_6 = K_KP_RIGHTARROW;
+        public static final int K_KP_7 = K_KP_HOME;
+        public static final int K_KP_8 = K_KP_UPARROW;
+        public static final int K_KP_9 = K_KP_PGUP;
+        public static final int K_KP_0 = K_KP_INS;
     }
 
-    ;
-
+    // neo/framework/KeyInput.h
     public static class KeyCodesD3
     {
-        public static final int K_TAB = 9;
-        public static final int K_ENTER = 13;
+        public static final int K_TAB    = 9;
+        public static final int K_ENTER  = 13;
         public static final int K_ESCAPE = 27;
-        public static final int K_SPACE = 32;
+        public static final int K_SPACE  = 32;
+
         public static final int K_BACKSPACE = 127;
-        public static final int K_COMMAND = 128;
+
+        public static final int K_COMMAND  = 128;
         public static final int K_CAPSLOCK = 129;
-        public static final int K_SCROLL = 130;
-        public static final int K_POWER = 131;
-        public static final int K_PAUSE = 132;
-        public static final int K_UPARROW = 133;
-        public static final int K_DOWNARROW = 134;
-        public static final int K_LEFTARROW = 135;
+        public static final int K_SCROLL   = 130;
+        public static final int K_POWER    = 131;
+        public static final int K_PAUSE    = 132;
+
+        public static final int K_UPARROW    = 133;
+        public static final int K_DOWNARROW  = 134;
+        public static final int K_LEFTARROW  = 135;
         public static final int K_RIGHTARROW = 136;
+
+        // The 3 windows keys
         public static final int K_LWIN = 137;
         public static final int K_RWIN = 138;
         public static final int K_MENU = 139;
-        public static final int K_ALT = 140;
-        public static final int K_CTRL = 141;
-        public static final int K_SHIFT = 142;
-        public static final int K_INS = 143;
-        public static final int K_DEL = 144;
-        public static final int K_PGDN = 145;
-        public static final int K_PGUP = 146;
-        public static final int K_HOME = 147;
-        public static final int K_END = 148;
-        public static final int K_F1 = 149;
-        public static final int K_F2 = 150;
-        public static final int K_F3 = 151;
-        public static final int K_F4 = 152;
-        public static final int K_F5 = 153;
-        public static final int K_F6 = 154;
-        public static final int K_F7 = 155;
-        public static final int K_F8 = 156;
-        public static final int K_F9 = 157;
-        public static final int K_F10 = 158;
-        public static final int K_F11 = 159;
-        public static final int K_F12 = 160;
-        public static final int K_INVERTED_EXCLAMATION = 161;
-        public static final int K_F13 = 162;
-        public static final int K_F14 = 163;
-        public static final int K_F15 = 164;
-        public static final int K_MOUSE1 = 187;
-        public static final int K_MOUSE2 = 188;
-        public static final int K_MOUSE3 = 189;
-        public static final int K_MOUSE4 = 190;
-        public static final int K_MOUSE5 = 191;
-        public static final int K_MWHEELDOWN = 195;
-        public static final int K_MWHEELUP = 196;
 
-        public static final int J_LEFT = 'a';
+        public static final int K_ALT   = 140;
+        public static final int K_CTRL  = 141;
+        public static final int K_SHIFT = 142;
+        public static final int K_INS   = 143;
+        public static final int K_DEL   = 144;
+        public static final int K_PGDN  = 145;
+        public static final int K_PGUP  = 146;
+        public static final int K_HOME  = 147;
+        public static final int K_END   = 148;
+
+        public static final int K_F1                   = 149;
+        public static final int K_F2                   = 150;
+        public static final int K_F3                   = 151;
+        public static final int K_F4                   = 152;
+        public static final int K_F5                   = 153;
+        public static final int K_F6                   = 154;
+        public static final int K_F7                   = 155;
+        public static final int K_F8                   = 156;
+        public static final int K_F9                   = 157;
+        public static final int K_F10                  = 158;
+        public static final int K_F11                  = 159;
+        public static final int K_F12                  = 160;
+        public static final int K_INVERTED_EXCLAMATION = 161;    // upside down !
+        public static final int K_F13                  = 162;
+        public static final int K_F14                  = 163;
+        public static final int K_F15                  = 164;
+
+        public static final int K_KP_HOME         = 165;
+        public static final int K_KP_UPARROW      = 166;
+        public static final int K_KP_PGUP         = 167;
+        public static final int K_KP_LEFTARROW    = 168;
+        public static final int K_KP_5            = 169;
+        public static final int K_KP_RIGHTARROW   = 170;
+        public static final int K_KP_END          = 171;
+        public static final int K_KP_DOWNARROW    = 172;
+        public static final int K_KP_PGDN         = 173;
+        public static final int K_KP_ENTER        = 174;
+        public static final int K_KP_INS          = 175;
+        public static final int K_KP_DEL          = 176;
+        public static final int K_KP_SLASH        = 177;
+        public static final int K_SUPERSCRIPT_TWO = 178;        // superscript 2
+        public static final int K_KP_MINUS        = 179;
+        public static final int K_ACUTE_ACCENT    = 180;            // accute accent
+        public static final int K_KP_PLUS         = 181;
+        public static final int K_KP_NUMLOCK      = 182;
+        public static final int K_KP_STAR         = 183;
+        public static final int K_KP_EQUALS       = 184;
+
+        public static final int K_MASCULINE_ORDINATOR = 186;
+        // K_MOUSE enums must be contiguous (no char codes in the middle)
+        public static final int K_MOUSE1              = 187;
+        public static final int K_MOUSE2              = 188;
+        public static final int K_MOUSE3              = 189;
+        public static final int K_MOUSE4              = 190;
+        public static final int K_MOUSE5              = 191;
+        public static final int K_MOUSE6              = 192;
+        public static final int K_MOUSE7              = 193;
+        public static final int K_MOUSE8              = 194;
+
+        public static final int K_MWHEELDOWN = 195;
+        public static final int K_MWHEELUP   = 196;
+
+        public static final int J_LEFT  = 'a';
         public static final int J_RIGHT = 'd';
-        public static final int J_UP = K_UPARROW;
-        public static final int J_DOWN = K_DOWNARROW;
+        public static final int J_UP    = K_UPARROW;
+        public static final int J_DOWN  = K_DOWNARROW;
+
+        public static final int K_KP_1 = K_KP_END;
+        public static final int K_KP_2 = K_KP_DOWNARROW;
+        public static final int K_KP_3 = K_KP_PGDN;
+        public static final int K_KP_4 = K_KP_LEFTARROW;
+        public static final int K_KP_6 = K_KP_RIGHTARROW;
+        public static final int K_KP_7 = K_KP_HOME;
+        public static final int K_KP_8 = K_KP_UPARROW;
+        public static final int K_KP_9 = K_KP_PGUP;
+        public static final int K_KP_0 = K_KP_INS;
     }
 
-    ;
-
+    // neo/sys/sys_public.h
     public static class KeyCodesD3BFG
     {
-        public static final int K_NONE = 0;
-        public static final int K_ESCAPE = 1;
-        public static final int K_1 = 2;
-        public static final int K_2 = 3;
-        public static final int K_3 = 4;
-        public static final int K_4 = 5;
-        public static final int K_5 = 6;
-        public static final int K_6 = 7;
-        public static final int K_7 = 8;
-        public static final int K_8 = 9;
-        public static final int K_9 = 10;
-        public static final int K_0 = 11;
-        public static final int K_MINUS = 12;
-        public static final int K_EQUALS = 13;
-        public static final int K_BACKSPACE = 14;
-        public static final int K_TAB = 15;
-        public static final int K_Q = 16;
-        public static final int K_W = 17;
-        public static final int K_E = 18;
-        public static final int K_R = 19;
-        public static final int K_T = 20;
-        public static final int K_Y = 21;
-        public static final int K_U = 22;
-        public static final int K_I = 23;
-        public static final int K_O = 24;
-        public static final int K_P = 25;
-        public static final int K_LBRACKET = 26;
-        public static final int K_RBRACKET = 27;
-        public static final int K_ENTER = 28;
-        public static final int K_CTRL = 29;
-        public static final int K_A = 30;
-        public static final int K_S = 31;
-        public static final int K_D = 32;
-        public static final int K_F = 33;
-        public static final int K_G = 34;
-        public static final int K_H = 35;
-        public static final int K_J = 36;
-        public static final int K_K = 37;
-        public static final int K_L = 38;
-        public static final int K_SEMICOLON = 39;
-        public static final int K_APOSTROPHE = 40;
-        public static final int K_GRAVE = 41;
-        public static final int K_SHIFT = 42;
-        public static final int K_BACKSLASH = 43;
-        public static final int K_Z = 44;
-        public static final int K_X = 45;
-        public static final int K_C = 46;
-        public static final int K_V = 47;
-        public static final int K_B = 48;
-        public static final int K_N = 49;
-        public static final int K_M = 50;
-        public static final int K_COMMA = 51;
-        public static final int K_PERIOD = 52;
-        public static final int K_SLASH = 53;
-        public static final int K_RSHIFT = 54;
-        public static final int K_KP_STAR = 55;
-        public static final int K_ALT = 56;
-        public static final int K_SPACE = 57;
-        public static final int K_CAPSLOCK = 58;
-        public static final int K_F1 = 59;
-        public static final int K_F2 = 60;
-        public static final int K_F3 = 61;
-        public static final int K_F4 = 62;
-        public static final int K_F5 = 63;
-        public static final int K_F6 = 64;
-        public static final int K_F7 = 65;
-        public static final int K_F8 = 66;
-        public static final int K_F9 = 67;
-        public static final int K_F10 = 68;
-        public static final int K_NUMLOCK = 69;
-        public static final int K_SCROLL = 70;
-        public static final int K_KP_7 = 71;
-        public static final int K_KP_8 = 72;
-        public static final int K_KP_9 = 73;
-        public static final int K_KP_MINUS = 74;
-        public static final int K_KP_4 = 75;
-        public static final int K_KP_5 = 76;
-        public static final int K_KP_6 = 77;
-        public static final int K_KP_PLUS = 78;
-        public static final int K_KP_1 = 79;
-        public static final int K_KP_2 = 80;
-        public static final int K_KP_3 = 81;
-        public static final int K_KP_0 = 82;
-        public static final int K_KP_DOT = 83;
-        public static final int K_F11 = 0x57;
-        public static final int K_F12 = 0x58;
-        public static final int K_F13 = 0x64;
-        public static final int K_F14 = 0x65;
-        public static final int K_F15 = 0x66;
-        public static final int K_KANA = 0x70;
-        public static final int K_CONVERT = 0x79;
-        public static final int K_NOCONVERT = 0x7B;
-        public static final int K_YEN = 0x7D;
-        public static final int K_KP_EQUALS = 0x8D;
-        public static final int K_CIRCUMFLEX = 0x90;
-        public static final int K_AT = 0x91;
-        public static final int K_COLON = 0x92;
-        public static final int K_UNDERLINE = 0x93;
-        public static final int K_KANJI = 0x94;
-        public static final int K_STOP = 0x95;
-        public static final int K_AX = 0x96;
-        public static final int K_UNLABELED = 0x97;
-        public static final int K_KP_ENTER = 0x9C;
-        public static final int K_RCTRL = 0x9D;
-        public static final int K_KP_COMMA = 0xB3;
-        public static final int K_KP_SLASH = 0xB5;
+        public static final int K_NONE        = 0;
+
+        public static final int K_ESCAPE      = 1;
+        public static final int K_1           = 2;
+        public static final int K_2           = 3;
+        public static final int K_3           = 4;
+        public static final int K_4           = 5;
+        public static final int K_5           = 6;
+        public static final int K_6           = 7;
+        public static final int K_7           = 8;
+        public static final int K_8           = 9;
+        public static final int K_9           = 10;
+        public static final int K_0           = 11;
+        public static final int K_MINUS       = 12;
+        public static final int K_EQUALS      = 13;
+        public static final int K_BACKSPACE   = 14;
+        public static final int K_TAB         = 15;
+        public static final int K_Q           = 16;
+        public static final int K_W           = 17;
+        public static final int K_E           = 18;
+        public static final int K_R           = 19;
+        public static final int K_T           = 20;
+        public static final int K_Y           = 21;
+        public static final int K_U           = 22;
+        public static final int K_I           = 23;
+        public static final int K_O           = 24;
+        public static final int K_P           = 25;
+        public static final int K_LBRACKET    = 26;
+        public static final int K_RBRACKET    = 27;
+        public static final int K_ENTER       = 28;
+        public static final int K_CTRL        = 29;
+        public static final int K_A           = 30;
+        public static final int K_S           = 31;
+        public static final int K_D           = 32;
+        public static final int K_F           = 33;
+        public static final int K_G           = 34;
+        public static final int K_H           = 35;
+        public static final int K_J           = 36;
+        public static final int K_K           = 37;
+        public static final int K_L           = 38;
+        public static final int K_SEMICOLON   = 39;
+        public static final int K_APOSTROPHE  = 40;
+        public static final int K_GRAVE       = 41;
+        public static final int K_SHIFT       = 42;
+        public static final int K_BACKSLASH   = 43;
+        public static final int K_Z           = 44;
+        public static final int K_X           = 45;
+        public static final int K_C           = 46;
+        public static final int K_V           = 47;
+        public static final int K_B           = 48;
+        public static final int K_N           = 49;
+        public static final int K_M           = 50;
+        public static final int K_COMMA       = 51;
+        public static final int K_PERIOD      = 52;
+        public static final int K_SLASH       = 53;
+        public static final int K_RSHIFT      = 54;
+        public static final int K_KP_STAR     = 55;
+        public static final int K_ALT         = 56;
+        public static final int K_SPACE       = 57;
+        public static final int K_CAPSLOCK    = 58;
+        public static final int K_F1          = 59;
+        public static final int K_F2          = 60;
+        public static final int K_F3          = 61;
+        public static final int K_F4          = 62;
+        public static final int K_F5          = 63;
+        public static final int K_F6          = 64;
+        public static final int K_F7          = 65;
+        public static final int K_F8          = 66;
+        public static final int K_F9          = 67;
+        public static final int K_F10         = 68;
+        public static final int K_NUMLOCK     = 69;
+        public static final int K_SCROLL      = 70;
+        public static final int K_KP_7        = 71;
+        public static final int K_KP_8        = 72;
+        public static final int K_KP_9        = 73;
+        public static final int K_KP_MINUS    = 74;
+        public static final int K_KP_4        = 75;
+        public static final int K_KP_5        = 76;
+        public static final int K_KP_6        = 77;
+        public static final int K_KP_PLUS     = 78;
+        public static final int K_KP_1        = 79;
+        public static final int K_KP_2        = 80;
+        public static final int K_KP_3        = 81;
+        public static final int K_KP_0        = 82;
+        public static final int K_KP_DOT      = 83;
+        public static final int K_F11         = 0x57;
+        public static final int K_F12         = 0x58;
+        public static final int K_F13         = 0x64;
+        public static final int K_F14         = 0x65;
+        public static final int K_F15         = 0x66;
+        public static final int K_KANA        = 0x70;
+        public static final int K_CONVERT     = 0x79;
+        public static final int K_NOCONVERT   = 0x7B;
+        public static final int K_YEN         = 0x7D;
+        public static final int K_KP_EQUALS   = 0x8D;
+        public static final int K_CIRCUMFLEX  = 0x90;
+        public static final int K_AT          = 0x91;
+        public static final int K_COLON       = 0x92;
+        public static final int K_UNDERLINE   = 0x93;
+        public static final int K_KANJI       = 0x94;
+        public static final int K_STOP        = 0x95;
+        public static final int K_AX          = 0x96;
+        public static final int K_UNLABELED   = 0x97;
+        public static final int K_KP_ENTER    = 0x9C;
+        public static final int K_RCTRL       = 0x9D;
+        public static final int K_KP_COMMA    = 0xB3;
+        public static final int K_KP_SLASH    = 0xB5;
         public static final int K_PRINTSCREEN = 0xB7;
-        public static final int K_RALT = 0xB8;
-        public static final int K_PAUSE = 0xC5;
-        public static final int K_HOME = 0xC7;
-        public static final int K_UPARROW = 0xC8;
-        public static final int K_PGUP = 0xC9;
-        public static final int K_LEFTARROW = 0xCB;
-        public static final int K_RIGHTARROW = 0xCD;
-        public static final int K_END = 0xCF;
-        public static final int K_DOWNARROW = 0xD0;
-        public static final int K_PGDN = 0xD1;
-        public static final int K_INS = 0xD2;
-        public static final int K_DEL = 0xD3;
-        public static final int K_LWIN = 0xDB;
-        public static final int K_RWIN = 0xDC;
-        public static final int K_APPS = 0xDD;
-        public static final int K_POWER = 0xDE;
-        public static final int K_SLEEP = 0xDF;
-        public static final int K_MOUSE1 = 286;
-        public static final int K_MOUSE2 = 287;
-        public static final int K_MOUSE3 = 288;
-        public static final int K_MOUSE4 = 289;
-        public static final int K_MOUSE5 = 290;
-        public static final int K_MOUSE6 = 291;
-        public static final int K_MOUSE7 = 292;
-        public static final int K_MOUSE8 = 293;
-        public static final int K_MWHEELDOWN = 294;
-        public static final int K_MWHEELUP = 295;
+        public static final int K_RALT        = 0xB8;
+        public static final int K_PAUSE       = 0xC5;
+        public static final int K_HOME        = 0xC7;
+        public static final int K_UPARROW     = 0xC8;
+        public static final int K_PGUP        = 0xC9;
+        public static final int K_LEFTARROW   = 0xCB;
+        public static final int K_RIGHTARROW  = 0xCD;
+        public static final int K_END         = 0xCF;
+        public static final int K_DOWNARROW   = 0xD0;
+        public static final int K_PGDN        = 0xD1;
+        public static final int K_INS         = 0xD2;
+        public static final int K_DEL         = 0xD3;
+        public static final int K_LWIN        = 0xDB;
+        public static final int K_RWIN        = 0xDC;
+        public static final int K_APPS        = 0xDD;
+        public static final int K_POWER       = 0xDE;
+        public static final int K_SLEEP       = 0xDF;
+        public static final int K_MOUSE1      = 286;
+        public static final int K_MOUSE2      = 287;
+        public static final int K_MOUSE3      = 288;
+        public static final int K_MOUSE4      = 289;
+        public static final int K_MOUSE5      = 290;
+        public static final int K_MOUSE6      = 291;
+        public static final int K_MOUSE7      = 292;
+        public static final int K_MOUSE8      = 293;
+        public static final int K_MWHEELDOWN  = 302; // 294;
+        public static final int K_MWHEELUP    = 303; // 295;
 
         //karin: change to a/d
 //        public static final int J_LEFT = K_LEFTARROW;
 //        public static final int J_RIGHT = K_RIGHTARROW;
-        public static final int J_LEFT = K_A;
+        public static final int J_LEFT  = K_A;
         public static final int J_RIGHT = K_D;
-        public static final int J_UP = K_UPARROW;
-        public static final int J_DOWN = K_DOWNARROW;
+        public static final int J_UP    = K_UPARROW;
+        public static final int J_DOWN  = K_DOWNARROW;
     }
 
-    ;
-
+    // keys.h
     public static class KeyCodesQ1
     {
-        public static final int K_TAB = 9;
-        public static final int K_ENTER = 13;
+        public static final int K_TEXT   = 1;
+        public static final int K_TAB    = 9;
+        public static final int K_ENTER  = 13;
         public static final int K_ESCAPE = 27;
-        public static final int K_SPACE = 32;
-        public static final int K_BACKSPACE = 127;
-        public static final int K_UPARROW = 128;
-        public static final int K_DOWNARROW = 129;
-        public static final int K_LEFTARROW = 130;
+        public static final int K_SPACE  = 32;
+
+        // normal keys should be passed as lowercased ascii
+        public static final int K_BACKSPACE  = 127;
+        public static final int K_UPARROW    = 128;
+        public static final int K_DOWNARROW  = 129;
+        public static final int K_LEFTARROW  = 130;
         public static final int K_RIGHTARROW = 131;
-        public static final int K_ALT = 132;
-        public static final int K_CTRL = 133;
+
+        public static final int K_ALT   = 132;
+        public static final int K_CTRL  = 133;
         public static final int K_SHIFT = 134;
-        public static final int K_F1 = 135;
-        public static final int K_F2 = 136;
-        public static final int K_F3 = 137;
-        public static final int K_F4 = 138;
-        public static final int K_F5 = 139;
-        public static final int K_F6 = 140;
-        public static final int K_F7 = 141;
-        public static final int K_F8 = 142;
-        public static final int K_F9 = 143;
+
+        public static final int K_F1  = 135;
+        public static final int K_F2  = 136;
+        public static final int K_F3  = 137;
+        public static final int K_F4  = 138;
+        public static final int K_F5  = 139;
+        public static final int K_F6  = 140;
+        public static final int K_F7  = 141;
+        public static final int K_F8  = 142;
+        public static final int K_F9  = 143;
         public static final int K_F10 = 144;
         public static final int K_F11 = 145;
         public static final int K_F12 = 146;
-        public static final int K_INS = 147;
-        public static final int K_DEL = 148;
+
+        public static final int K_INS  = 147;
+        public static final int K_DEL  = 148;
         public static final int K_PGDN = 149;
         public static final int K_PGUP = 150;
         public static final int K_HOME = 151;
-        public static final int K_END = 152;
+        public static final int K_END  = 152;
+
         public static final int K_PAUSE = 153;
-        public static final int K_NUMLOCK = 154;
-        public static final int K_CAPSLOCK = 155;
+
+        public static final int K_NUMLOCK   = 154;
+        public static final int K_CAPSLOCK  = 155;
         public static final int K_SCROLLOCK = 156;
-        public static final int K_MOUSE1 = 512;
-        public static final int K_MOUSE2 = 513;
-        public static final int K_MOUSE3 = 514;
-        public static final int K_MWHEELUP = 515;
+
+        public static final int K_KP_0          = 157;
+        public static final int K_KP_INS        = K_KP_0;
+        public static final int K_KP_1          = 158;
+        public static final int K_KP_END        = K_KP_1;
+        public static final int K_KP_2          = 159;
+        public static final int K_KP_DOWNARROW  = K_KP_2;
+        public static final int K_KP_3          = 160;
+        public static final int K_KP_PGDN       = K_KP_3;
+        public static final int K_KP_4          = 161;
+        public static final int K_KP_LEFTARROW  = K_KP_4;
+        public static final int K_KP_5          = 162;
+        public static final int K_KP_6          = 163;
+        public static final int K_KP_RIGHTARROW = K_KP_6;
+        public static final int K_KP_7          = 164;
+        public static final int K_KP_HOME       = K_KP_7;
+        public static final int K_KP_8          = 165;
+        public static final int K_KP_UPARROW    = K_KP_8;
+        public static final int K_KP_9          = 166;
+        public static final int K_KP_PGUP       = K_KP_9;
+        public static final int K_KP_PERIOD     = 167;
+        public static final int K_KP_DEL        = K_KP_PERIOD;
+        public static final int K_KP_DIVIDE     = 168;
+        public static final int K_KP_SLASH      = K_KP_DIVIDE;
+        public static final int K_KP_MULTIPLY   = 169;
+        public static final int K_KP_MINUS      = 170;
+        public static final int K_KP_PLUS       = 171;
+        public static final int K_KP_ENTER      = 172;
+        public static final int K_KP_EQUALS     = 173;
+
+        // mouse buttons generate virtual keys
+        public static final int K_MOUSE1     = 512;
+        public static final int K_MOUSE2     = 513;
+        public static final int K_MOUSE3     = 514;
+        public static final int K_MWHEELUP   = 515;
         public static final int K_MWHEELDOWN = 516;
-        public static final int K_MOUSE4 = 517;
-        public static final int K_MOUSE5 = 518;
+        public static final int K_MOUSE4     = 517;
+        public static final int K_MOUSE5     = 518;
+        public static final int K_MOUSE6     = 519;
+        public static final int K_MOUSE7     = 520;
+        public static final int K_MOUSE8     = 521;
 
-        public static final int J_LEFT = 'a';
+        public static final int J_LEFT  = 'a';
         public static final int J_RIGHT = 'd';
-        public static final int J_UP = K_UPARROW;
-        public static final int J_DOWN = K_DOWNARROW;
+        public static final int J_UP    = K_UPARROW;
+        public static final int J_DOWN  = K_DOWNARROW;
     }
-
-    ;
 
     private static final int SDLK_SCANCODE_MASK = (1<<30);
     private static int SDL_SCANCODE_TO_KEYCODE(int X) { return (X | SDLK_SCANCODE_MASK); }
@@ -1739,12 +1844,12 @@ public class Q3EKeyCodes
      */
     public static class KeyCodesGeneric
     {
-        public static final int K_MOUSE1 = 187;
-        public static final int K_MOUSE2 = 188;
-        public static final int K_MOUSE3 = 189;
-        public static final int K_MOUSE4 = 190;
-        public static final int K_MOUSE5 = 191;
-        public static final int K_MWHEELUP = 195;
+        public static final int K_MOUSE1     = 187;
+        public static final int K_MOUSE2     = 188;
+        public static final int K_MOUSE3     = 189;
+        public static final int K_MOUSE4     = 190;
+        public static final int K_MOUSE5     = 191;
+        public static final int K_MWHEELUP   = 195;
         public static final int K_MWHEELDOWN = 196;
 
         public static final int K_A = 97;
@@ -1785,66 +1890,93 @@ public class Q3EKeyCodes
         public static final int K_8 = 56;
         public static final int K_9 = 57;
 
-        public static final int K_F1 = 149;
-        public static final int K_F2 = 150;
-        public static final int K_F3 = 151;
-        public static final int K_F4 = 152;
-        public static final int K_F5 = 153;
-        public static final int K_F6 = 154;
-        public static final int K_F7 = 155;
-        public static final int K_F8 = 156;
-        public static final int K_F9 = 157;
+        public static final int K_F1  = 149;
+        public static final int K_F2  = 150;
+        public static final int K_F3  = 151;
+        public static final int K_F4  = 152;
+        public static final int K_F5  = 153;
+        public static final int K_F6  = 154;
+        public static final int K_F7  = 155;
+        public static final int K_F8  = 156;
+        public static final int K_F9  = 157;
         public static final int K_F10 = 158;
         public static final int K_F11 = 159;
         public static final int K_F12 = 160;
 
-        public static final int K_BACKSPACE = 127;
-        public static final int K_TAB = 9;
-        public static final int K_ENTER = 13;
-        public static final int K_SHIFT = 142;
-        public static final int K_CTRL = 141;
-        public static final int K_ALT = 140;
-        public static final int K_CAPSLOCK = 129;
-        public static final int K_ESCAPE = 27;
-        public static final int K_SPACE = 32;
-        public static final int K_PGUP = 146;
-        public static final int K_PGDN = 145;
-        public static final int K_END = 148;
-        public static final int K_HOME = 147;
-        public static final int K_LEFTARROW = 135;
-        public static final int K_UPARROW = 133;
+        public static final int K_BACKSPACE  = 127;
+        public static final int K_TAB        = 9;
+        public static final int K_ENTER      = 13;
+        public static final int K_SHIFT      = 142;
+        public static final int K_CTRL       = 141;
+        public static final int K_ALT        = 140;
+        public static final int K_CAPSLOCK   = 129;
+        public static final int K_ESCAPE     = 27;
+        public static final int K_SPACE      = 32;
+        public static final int K_PGUP       = 146;
+        public static final int K_PGDN       = 145;
+        public static final int K_END        = 148;
+        public static final int K_HOME       = 147;
+        public static final int K_LEFTARROW  = 135;
+        public static final int K_UPARROW    = 133;
         public static final int K_RIGHTARROW = 136;
-        public static final int K_DOWNARROW = 134;
-        public static final int K_INS = 143;
-        public static final int K_DEL = 144;
+        public static final int K_DOWNARROW  = 134;
+        public static final int K_INS        = 143;
+        public static final int K_DEL        = 144;
 
-        public static final int K_SEMICOLON = 59;
-        public static final int K_EQUALS = 61;
-        public static final int K_COMMA = 44;
-        public static final int K_MINUS = 45;
-        public static final int K_PERIOD = 46;
-        public static final int K_SLASH = 47;
-        public static final int K_GRAVE = 96; // 192
-        public static final int K_LBRACKET = 91;
-        public static final int K_BACKSLASH = 92;
-        public static final int K_RBRACKET = 93;
+        public static final int K_SEMICOLON  = 59;
+        public static final int K_EQUALS     = 61;
+        public static final int K_COMMA      = 44;
+        public static final int K_MINUS      = 45;
+        public static final int K_PERIOD     = 46;
+        public static final int K_SLASH      = 47;
+        public static final int K_GRAVE      = 96; // 192
+        public static final int K_LBRACKET   = 91;
+        public static final int K_BACKSLASH  = 92;
+        public static final int K_RBRACKET   = 93;
         public static final int K_APOSTROPHE = 39;
 
-        public static final int J_LEFT = -'a';
+        public static final int J_LEFT  = -'a';
         public static final int J_RIGHT = -'d';
-        public static final int J_UP = -K_UPARROW;
-        public static final int J_DOWN = -K_DOWNARROW;
+        public static final int J_UP    = -K_UPARROW;
+        public static final int J_DOWN  = -K_DOWNARROW;
 
-        public static final int K_KP_1 = 1;
-        public static final int K_KP_2 = 2;
-        public static final int K_KP_3 = 3;
-        public static final int K_KP_4 = 4;
-        public static final int K_KP_5 = 5;
-        public static final int K_KP_6 = 6;
-        public static final int K_KP_7 = 7;
-        public static final int K_KP_8 = 8;
-        public static final int K_KP_9 = 9;
-        public static final int K_KP_0 = 10;
+        public static final int K_KP_1 = 171;
+        public static final int K_KP_2 = 172;
+        public static final int K_KP_3 = 173;
+        public static final int K_KP_4 = 168;
+        public static final int K_KP_5 = 169;
+        public static final int K_KP_6 = 170;
+        public static final int K_KP_7 = 171;
+        public static final int K_KP_8 = 166;
+        public static final int K_KP_9 = 167;
+        public static final int K_KP_0 = 175;
+    }
+
+    public static int GetKeycodeByName(String name)
+    {
+        Field field;
+        try
+        {
+            field = KeyCodes.class.getField(name);
+            return (int)field.get(null);
+        }
+        catch(NoSuchFieldException e)
+        {
+            try
+            {
+                field = KeyCodesGeneric.class.getField(name);
+                return (int)field.get(null);
+            }
+            catch(Exception ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        catch(IllegalAccessException e)
+        {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public static final int ONSCRREN_DISC_KEYS_WEAPON = 1;
@@ -1857,6 +1989,6 @@ public class Q3EKeyCodes
     };
     public static final int[][] ONSCRREN_DISC_KEYS_KEYCODES = new int[][] {
             null,
-            {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+            {KeyCodesGeneric.K_KP_1, KeyCodesGeneric.K_KP_2, KeyCodesGeneric.K_KP_3, KeyCodesGeneric.K_KP_4, KeyCodesGeneric.K_KP_5, KeyCodesGeneric.K_KP_6, KeyCodesGeneric.K_KP_7, KeyCodesGeneric.K_KP_8, KeyCodesGeneric.K_KP_9, KeyCodesGeneric.K_KP_0},
     };
 }

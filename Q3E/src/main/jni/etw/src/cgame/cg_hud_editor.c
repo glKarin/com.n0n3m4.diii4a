@@ -59,8 +59,8 @@
 
 #define HUDEDITOR_HUD_NAME_Y (HUDEDITOR_SELECTHUD_Y + HUDEDITOR_TITLE_SPACER_Y + (BUTTON_HEIGHT * 2) + (HUDEDITOR_CONTROLS_SPACER_XY * 2))
 
-#define HUDEDITOR_SIZEPOS_Y (HUDEDITOR_SELECTHUD_Y + BUTTON_HEIGHT + HUDEDITOR_TITLE_SPACER_Y + (BUTTON_HEIGHT * 3) + \
-							 HUDEDITOR_CONTROLS_SPACER_XY + HUDEDITOR_CATEGORY_SPACER_Y)
+#define HUDEDITOR_SIZEPOS_Y (HUDEDITOR_SELECTHUD_Y + BUTTON_HEIGHT + HUDEDITOR_TITLE_SPACER_Y + (BUTTON_HEIGHT * 4) + \
+							 HUDEDITOR_CONTROLS_SPACER_XY * 2 + HUDEDITOR_CATEGORY_SPACER_Y)
 
 #define HUDEDITOR_TEXT_Y (HUDEDITOR_SIZEPOS_Y + HUDEDITOR_TITLE_SPACER_Y + HUDEDITOR_CATEGORY_SPACER_Y + \
 						  (INPUT_HEIGHT * 2) + HUDEDITOR_CONTROLS_SPACER_XY)
@@ -68,6 +68,8 @@
 
 #define HUDEDITOR_COLORSSTYLE_Y (HUDEDITOR_TEXT_Y + HUDEDITOR_TITLE_SPACER_Y + HUDEDITOR_CATEGORY_SPACER_Y + \
 								 (INPUT_HEIGHT * 3) + HUDEDITOR_CONTROLS_SPACER_XY)
+
+#define HUDEDITOR_BOTTOM_Y (SCREEN_HEIGHT * HUD_EDITOR_SIZE_COEFF) - BUTTON_HEIGHT
 
 enum
 {
@@ -127,6 +129,8 @@ static void CG_HudEditor_SetupTitleText(panel_button_t *button);
 static qboolean CG_HudEditor_EditKeyDown(panel_button_t *button, int key);
 static qboolean CG_HudEditorPanel_EditKeyUp(panel_button_t *button, int key);
 static qboolean CG_HudEditorPanel_KeyUp(panel_button_t *button, int key);
+static qboolean CG_HudEditor_ParentDropdown_KeyUp(panel_button_t *button, int key);
+static void CG_HudEditor_ParentRenderDropdown(panel_button_t *button);
 static void CG_HudEditor_RenderEditName(panel_button_t *button);
 static void CG_HudEditorName_Finish(panel_button_t *button);
 static void CG_HudEditor_RenderEdit(panel_button_t *button);
@@ -137,6 +141,7 @@ static void CG_HudEditorHeight_Finish(panel_button_t *button);
 static void CG_HudEditorScale_Finish(panel_button_t *button);
 static qboolean CG_HudEditoColorSelection_KeyDown(panel_button_t *button, int key);
 static void CG_HudEditorRender_Button(panel_button_t *button);
+static void CG_HudEditorRender_HelpButton(panel_button_t *button);
 static qboolean CG_HudEditorVisible_CheckboxKeyDown(panel_button_t *button, int key);
 static void CG_HudEditor_RenderCheckbox(panel_button_t *button);
 static qboolean CG_HudEditorStyle_CheckboxKeyDown(panel_button_t *button, int key);
@@ -145,6 +150,7 @@ static qboolean CG_HudEditorShowBorder_CheckboxKeyDown(panel_button_t *button, i
 static qboolean CG_HudEditorAutoAdjust_CheckboxKeyDown(panel_button_t *button, int key);
 static qboolean CG_HudEditorButton_KeyDown(panel_button_t *button, int key);
 static qboolean CG_HudEditorButton_KeyUp(panel_button_t *button, int key);
+static qboolean CG_HudEditorHelpButton_KeyDown(panel_button_t *button, int key);
 static void CG_DrawHudEditor_ComponentLists(panel_button_t *button);
 static qboolean CG_HudEditor_ComponentLists_KeyDown(panel_button_t *button, int key);
 static qboolean CG_HudEditor_ComponentLists_KeyUp(panel_button_t *button, int key);
@@ -230,6 +236,20 @@ static panel_button_t hudEditorHudName =
 	CG_HudEditorPanel_EditKeyUp,// keyUp
 	CG_HudEditor_RenderEditName,
 	CG_HudEditorName_Finish,
+	0,
+};
+
+static panel_button_t hudEditorHudParent =
+{
+	NULL,
+	"hudeditor_parent",
+	{ 0,                              HUDEDITOR_HUD_NAME_Y + INPUT_HEIGHT + HUDEDITOR_CONTROLS_SPACER_XY,INPUT_WIDTH * 2.2f, INPUT_HEIGHT },
+	{ 0,                              0,                                                    0,                  0, 0, 0, 0, 1},
+	&hudEditorFont_Dropdown,          // font
+	CG_HudEditor_Dropdown_KeyDown,    // keyDown
+	CG_HudEditor_ParentDropdown_KeyUp,// keyUp
+	CG_HudEditor_ParentRenderDropdown,
+	NULL,
 	0,
 };
 
@@ -684,6 +704,20 @@ static panel_button_t hudEditorResetComp =
 	0
 };
 
+static panel_button_t hudEditorHelp =
+{
+	NULL,
+	"Toggle Help",
+	{ 0,                          HUDEDITOR_BOTTOM_Y,(BUTTON_WIDTH * 3) + (HUDEDITOR_CONTROLS_SPACER_XY * 4) - 1, BUTTON_HEIGHT },
+	{ 0,                          0,         0,                                                           1, 0, 0, 0, 1 },
+	&hudEditorTextFont,           // font
+	CG_HudEditorHelpButton_KeyDown,// keyDown
+	NULL,                         // keyUp
+	CG_HudEditorRender_HelpButton,
+	NULL,
+	0
+};
+
 static panel_button_t hudEditorWarningLabel =
 {
 	NULL,
@@ -724,9 +758,10 @@ static panel_button_t *hudEditor[] =
 	&hudEditorTextTitle,
 	&hudEditorSave,               &hudEditorClone,                   &hudEditorDelete,              &hudEditorResetComp,                &hudEditorWarningLabel,
 	&hudEditorComponentsList,     &hudEditorHudName,
+	&hudEditorHelp,
 
 	// Below here all components that should draw on top
-	&hudEditorAlignText,          &hudEditorStyleText,               &hudEditorHudDropdown,
+	&hudEditorAlignText,          &hudEditorStyleText,               &hudEditorHudParent,           &hudEditorHudDropdown,
 	NULL,
 };
 
@@ -747,6 +782,7 @@ qboolean CG_HudSave(int HUDToDuplicate, int HUDToDelete)
 
 	if (HUDToDuplicate >= 0)
 	{
+		int attemptedSpot;
 		int hudNumber;
 
 		if (hudData.count == MAXHUDS)
@@ -761,7 +797,39 @@ qboolean CG_HudSave(int HUDToDuplicate, int HUDToDelete)
 
 		CG_CloneHud(hud2, hud);
 
-		Q_strncpyz(hud2->name, va("%s_copy", hud->name), sizeof(hud2->name));
+		// determine a new name
+		for (attemptedSpot = 1; attemptedSpot < MAXHUDS; attemptedSpot++)
+		{
+			int      i;
+			qboolean collision = qfalse;
+
+			Q_strncpyz(hud2->name,
+			           (attemptedSpot == 1) ? va("%s_copy", hud->name) : va("%s_copy%d", hud->name, attemptedSpot),
+			           sizeof(hud2->name));
+
+			for (i = 0; i < hudData.count; i++)
+			{
+				hudStucture_t *otherHud = hudData.list[i];
+
+				if (!Q_stricmp(otherHud->name, hud2->name))
+				{
+					CG_Printf("Hud name clone collision with '%s', trying higher suffixes...\n", otherHud->name);
+					collision = qtrue;
+				}
+
+			}
+
+			if (!collision)
+			{
+				goto successfully_determined_new_name;
+			}
+		}
+
+		CG_Printf(S_COLOR_RED "ERROR CG_HudSave: tried to create a new duplicate, but found no free spot\n");
+		return qfalse;
+
+successfully_determined_new_name:
+
 		Q_strncpyz(hud2->parent, hud->name, sizeof(hud2->parent));
 		hud2->parentNumber = hud->hudnumber;
 		hud2->hudnumber    = hudNumber;
@@ -780,8 +848,6 @@ qboolean CG_HudSave(int HUDToDuplicate, int HUDToDelete)
 	{
 		while ((hud = CG_GetHudByNumber(HUDToDelete)))
 		{
-			int i;
-
 			// ensure to update parent as well
 			CG_UpdateParentHUD(hud->name, hud->parent, hud->hudnumber);
 
@@ -1349,6 +1415,60 @@ static void CG_HudEditor_HudRenderDropdown(panel_button_t *button)
 	}
 }
 
+/**
+* @brief CG_HudEditor_ParentRenderDropdown
+* @param[in] button
+*/
+static void CG_HudEditor_ParentRenderDropdown(panel_button_t *button)
+{
+	const char *labelText  = "Parent: ";
+	float      textWidth   = CG_Text_Width_Ext(labelText, 0.3f, 0, button->font->font);
+	float      textHeight  = CG_Text_Height_Ext(labelText, 0.3f, 0, button->font->font);
+	float      totalWidth  = textWidth + button->rect.w;
+	float      textOffsetY = (BUTTON_HEIGHT - textHeight) * 0.5f;
+
+	button->rect.x = HUDEditorCenterX - (totalWidth * 0.5f);
+	CG_Text_Paint_Ext(button->rect.x, button->rect.y + textHeight + textOffsetY, 0.3f, 0.3f,
+	                  colorWhite, labelText, 0, 0, button->font->style, button->font->font);
+
+	button->rect.x += textWidth;
+	CG_DropdownMainBox(button->rect.x, button->rect.y, button->rect.w, button->rect.h,
+	                   button->font->scalex, button->font->scaley, colorBlack, hudData.active->parentNumber >= 0 ? hudData.list[hudData.active->parentNumber]->name : "No Parent",
+	                   button == BG_PanelButtons_GetFocusButton(), button->font->colour, button->font->style, button->font->font);
+
+	if (button == BG_PanelButtons_GetFocusButton())
+	{
+		float  y = button->rect.y;
+		vec4_t colour;
+		int    i;
+
+		if (hudData.active->parentNumber != -1)
+		{
+			y = CG_DropdownBox(button->rect.x, y, button->rect.w, button->rect.h,
+			                   button->font->scalex, button->font->scaley, colorBlack, "No Parent", button == BG_PanelButtons_GetFocusButton(),
+			                   button->font->colour, button->font->style, button->font->font);
+		}
+
+		for (i = 0; i < hudData.count; i++)
+		{
+			hudStucture_t *hud = hudData.list[i];
+
+			if (hud->hudnumber == hudData.active->hudnumber)
+			{
+				continue;
+			}
+
+			y = CG_DropdownBox(button->rect.x, y, button->rect.w, button->rect.h,
+			                   button->font->scalex, button->font->scaley, colorBlack, hud->name, button == BG_PanelButtons_GetFocusButton(),
+			                   button->font->colour, button->font->style, button->font->font);
+		}
+
+		VectorCopy(colorBlack, colour);
+		colour[3] = 0.3f;
+		CG_DrawRect(button->rect.x, button->rect.y + button->rect.h, button->rect.w, y - button->rect.y, 1.0f, colour);
+	}
+}
+
 static const char *styleTextString[] =
 {
 	"NORMAL",
@@ -1518,9 +1638,200 @@ static qboolean CG_HudEditor_HudDropdown_KeyUp(panel_button_t *button, int key)
 
 				if (BG_CursorInRect(&rect))
 				{
-					trap_Cvar_Set("cg_altHud", hud->name);
+					trap_Cvar_Set(cgs.clientinfo[cg.clientNum].shoutcaster ? "cg_shoutcasterHud" : "cg_altHud", hud->name);
 					//cg_altHud.integer = hud->hudnumber;
 					CG_SetHud();
+
+					if (lastFocusComponent)
+					{
+						CG_HudEditorUpdateFields(lastFocusComponent);
+					}
+
+					break;
+				}
+			}
+
+			BG_PanelButtons_SetFocusButton(NULL);
+
+			return qtrue;
+		}
+	}
+
+	return qfalse;
+}
+
+/**
+ * @brief CG_HudEditor_ReplaceDefaultParent
+ * @param[in] newParentNumber
+ */
+static void CG_HudEditor_ReplaceDefaultParent(int newParentNumber)
+{
+	int           i;
+	hudStucture_t *parenthud    = CG_GetHudByNumber(hudData.active->parentNumber);
+	hudStucture_t *newParenthud = CG_GetHudByNumber(newParentNumber);
+
+	for (i = 0; hudComponentFields[i].name; i++)
+	{
+		int            locationChanged = qfalse;
+		hudComponent_t *comp           = (hudComponent_t *) ((char *) hudData.active + hudComponentFields[i].offset);
+		hudComponent_t *parentComp     = (hudComponent_t *) ((char *) parenthud + hudComponentFields[i].offset);
+		hudComponent_t *newParentComp  = (hudComponent_t *) ((char *) newParenthud + hudComponentFields[i].offset);
+
+		if (hudComponentFields[i].isAlias)
+		{
+			continue;
+		}
+
+		if (comp->location.x == parentComp->location.x)
+		{
+			comp->location.x = newParentComp->location.x;
+			locationChanged  = qtrue;
+		}
+
+		if (comp->location.y == parentComp->location.y)
+		{
+			comp->location.y = newParentComp->location.y;
+			locationChanged  = qtrue;
+		}
+
+		if (comp->location.h == parentComp->location.h)
+		{
+			comp->location.h = newParentComp->location.h;
+			locationChanged  = qtrue;
+		}
+
+		if (comp->location.w == parentComp->location.w)
+		{
+			comp->location.w = newParentComp->location.w;
+			locationChanged  = qtrue;
+		}
+
+		if (comp->visible == parentComp->visible)
+		{
+			comp->visible = newParentComp->visible;
+		}
+
+		if (comp->style == parentComp->style)
+		{
+			comp->style = newParentComp->style;
+		}
+
+		if (comp->scale == parentComp->scale)
+		{
+			comp->scale = newParentComp->scale;
+		}
+
+		if (Vector4Compare(comp->colorMain, parentComp->colorMain))
+		{
+			Vector4Copy(newParentComp->colorMain, comp->colorMain);
+		}
+
+		if (Vector4Compare(comp->colorSecondary, parentComp->colorSecondary))
+		{
+			Vector4Copy(newParentComp->colorSecondary, comp->colorSecondary);
+		}
+
+		if (comp->showBackGround == parentComp->showBackGround)
+		{
+			comp->showBackGround = newParentComp->showBackGround;
+		}
+
+		if (Vector4Compare(comp->colorBackground, parentComp->colorBackground))
+		{
+			Vector4Copy(newParentComp->colorBackground, comp->colorBackground);
+		}
+
+		if (comp->showBorder == parentComp->showBorder)
+		{
+			comp->showBorder = newParentComp->showBorder;
+		}
+
+		if (Vector4Compare(comp->colorBorder, parentComp->colorBorder))
+		{
+			Vector4Copy(newParentComp->colorBorder, comp->colorBorder);
+		}
+
+		if (comp->styleText == parentComp->styleText)
+		{
+			comp->styleText = newParentComp->styleText;
+		}
+
+		if (comp->alignText == parentComp->alignText)
+		{
+			comp->alignText = newParentComp->alignText;
+		}
+
+		if (comp->autoAdjust == parentComp->autoAdjust)
+		{
+			comp->autoAdjust = newParentComp->autoAdjust;
+		}
+
+		if (locationChanged)
+		{
+			comp->anchorPoint        = newParentComp->anchorPoint;
+			comp->parentAnchor.point = newParentComp->parentAnchor.point;
+		}
+	}
+}
+
+/**
+* @brief CG_HudEditor_ParentDropdown_KeyUp
+* @param[in] button
+* @param[in] key
+* @return
+*/
+static qboolean CG_HudEditor_ParentDropdown_KeyUp(panel_button_t *button, int key)
+{
+	if (key == K_MOUSE1)
+	{
+		if (button == BG_PanelButtons_GetFocusButton())
+		{
+			rectDef_t rect;
+			int       i;
+
+			Com_Memcpy(&rect, &button->rect, sizeof(rect));
+
+			// Handle no parent case first
+			if (hudData.active->parentNumber != -1)
+			{
+				rect.y += button->rect.h;
+
+				if (BG_CursorInRect(&rect))
+				{
+					hudData.active->parentNumber = -1;
+					Com_Memset(hudData.active->parent, 0, sizeof(hudData.active->parent));
+
+					if (lastFocusComponent)
+					{
+						CG_HudEditorUpdateFields(lastFocusComponent);
+					}
+
+					BG_PanelButtons_SetFocusButton(NULL);
+
+					return qtrue;
+				}
+			}
+
+			for (i = 0; i < hudData.count; i++)
+			{
+				hudStucture_t *hud = hudData.list[i];
+
+				// ignore self hud
+				if (hud->hudnumber == hudData.active->hudnumber)
+				{
+					continue;
+				}
+
+				rect.y += button->rect.h;
+
+				if (BG_CursorInRect(&rect))
+				{
+					if (hudData.active->parentNumber != -1)
+					{
+						CG_HudEditor_ReplaceDefaultParent(hud->hudnumber);
+					}
+					hudData.active->parentNumber = hud->hudnumber;
+					Q_strncpyz(hudData.active->parent, hud->name, sizeof(hudData.active->parent));
 
 					if (lastFocusComponent)
 					{
@@ -1781,6 +2092,44 @@ static float CG_HudEditor_SetupButtonPosition(panel_button_t *button, float butt
 	return 0;
 }
 
+static void CG_HudEditorRender_HelpButton(panel_button_t *button)
+{
+	vec4_t clrBdr = { 0.1f, 0.1f, 0.1f, 0.5f };
+	vec4_t clrBck = { 0.45f, 0.34f, 0.53f, 0.4f };
+
+	vec4_t clrBck_hi = { 0.45f, 0.34f, 0.53f, 0.6f };
+	vec4_t clrTxt_hi = { 0.9f, 0.9f, 0.9f, 1.f };
+
+	rectDef_t *r;
+	qboolean  hilight;
+
+	// if default HUD, don't draw some component
+	if (!hudData.active->isEditable)
+	{
+		if (button == &hudEditorSave || button == &hudEditorDelete || button == &hudEditorResetComp)
+		{
+			return;
+		}
+	}
+
+	r       = &button->rect;
+	hilight = BG_CursorInRect(r);
+
+	CG_FillRect(r->x, r->y, r->w, r->h, hilight ? clrBck_hi : clrBck);
+	CG_DrawRect_FixedBorder(r->x, r->y, r->w, r->h, 1, clrBdr);
+
+	if (button->text)
+	{
+		float w;
+
+		w = CG_Text_Width_Ext(button->text, button->font->scalex, 0, button->font->font);
+
+		CG_Text_Paint_Ext(r->x + ((r->w + 2) - w) * 0.5f, r->y + r->h / 1.5, button->font->scalex, button->font->scaley, hilight ? clrTxt_hi : button->font->colour, button->text, button->font->align, 0, button->font->style, button->font->font);
+	}
+
+	trap_R_SetColor(NULL);
+}
+
 #define TIMER_KEYDOWN 500.f
 
 /**
@@ -1810,7 +2159,7 @@ static void CG_HudEditorRender_Button(panel_button_t *button)
 		if (button->data[3])
 		{
 			vec4_t backG = { 1, 1, 1, 0.3f };
-			CG_FilledBar(button->rect.x, button->rect.y, button->rect.w, button->rect.h, colorRed, colorGreen, backG, backG, curValue, BAR_LERP_COLOR, -1);
+			CG_FilledBar(button->rect.x, button->rect.y, button->rect.w, button->rect.h, colorRed, colorGreen, backG, backG, curValue, 0.f, BAR_LERP_COLOR, -1);
 		}
 		else
 		{
@@ -2025,7 +2374,7 @@ static qboolean CG_HudEditor_KeyDown(panel_button_t *button, int key)
 
 			return qtrue;
 		}
-		else if (comp->visible)
+		else if (comp->visible || showLayout == HUD_SHOW_LAYOUT_ALL)
 		{
 			CG_HudEditorUpdateFields(button);
 			BG_PanelButtons_SetFocusButton(button);
@@ -2057,7 +2406,7 @@ static qboolean CG_HudEditor_KeyUp(panel_button_t *button, int key)
 
 			return qtrue;
 		}
-		else if (comp->visible)
+		else if (comp->visible || showLayout == HUD_SHOW_LAYOUT_ALL)
 		{
 			lastFocusComponent = button;
 			CG_HudEditorUpdateFields(lastFocusComponent);
@@ -2161,7 +2510,7 @@ static void CG_HudEditorColor_Render(panel_button_t *button)
 
 	button->rect.x = HUDEditorCenterX - (Ccg_WideX(BUTTON_WIDTH) * 0.5f) + HUDEDITOR_CONTROLS_SPACER_XY * 2;
 
-	CG_FilledBar(button->rect.x, button->rect.y, button->rect.w, button->rect.h, colorBlack, *color, backG, backG, offset, BAR_BORDER | BAR_LERP_COLOR, -1);
+	CG_FilledBar(button->rect.x, button->rect.y, button->rect.w, button->rect.h, colorBlack, *color, backG, backG, offset, 0.f, BAR_BORDER | BAR_LERP_COLOR, -1);
 }
 
 static void CG_HudEditor_Slider_Render(panel_button_t *button)
@@ -2187,7 +2536,7 @@ static void CG_HudEditor_Slider_Render(panel_button_t *button)
 
 	button->rect.x = HUDEditorCenterX - (Ccg_WideX(BUTTON_WIDTH) * 0.5f) + HUDEDITOR_CONTROLS_SPACER_XY * 2;
 
-	CG_FilledBar(button->rect.x, button->rect.y, button->rect.w, button->rect.h, sliderColor, sliderColor, backG, backG, offset, BAR_BORDER, -1);
+	CG_FilledBar(button->rect.x, button->rect.y, button->rect.w, button->rect.h, sliderColor, sliderColor, backG, backG, offset, 0.f, BAR_BORDER, -1);
 }
 
 static int QDECL CG_SortComponentByName(const void *a, const void *b)
@@ -2214,7 +2563,7 @@ void CG_HudEditorSetup(void)
 
 	// setup some useful coordinates for the side panel
 	HUDEditorX       = SCREEN_WIDTH_SAFE;
-	HUDEditorWidth   = (HUDEditorX * 1.28f) - HUDEditorX;
+	HUDEditorWidth   = (HUDEditorX * HUD_EDITOR_SIZE_COEFF) - HUDEditorX;
 	HUDEditorCenterX = HUDEditorX + (HUDEditorWidth * 0.5f);
 
 	for (i = 0, j = 0; hudComponentFields[i].name; i++, j++)
@@ -2423,7 +2772,7 @@ static void CG_DrawHudEditor_ToolTip(panel_button_t *button)
  * @var helpStatus
  * @details
  */
-static int helpStatus = SHOW_ON;
+static int helpStatus = SHOW_OFF;
 
 /**
  * @brief CG_HudEditor_ToggleShowLayout
@@ -2480,38 +2829,41 @@ static void CG_HudEditor_HelpDraw(void)
 	{
 		static const helpType_t help[] =
 		{
-			{ "K_DOWN",              "move down by 1px"                  },
-			{ "K_LEFT",              "move left by 1px"                  },
-			{ "K_UP",                "move down by 1px"                  },
-			{ "K_RIGHT",             "move right by 1px"                 },
-			{ NULL,                  NULL                                },
-			{ "K_MWHEELDOWN",        "enlarge by 1px"                    },
-			{ "K_MWHEELUP",          "shrink by 1px"                     },
-			{ NULL,                  NULL                                },
-			{ "K_RCTRL / K_LCTRL",   "hold to move by 0.1px"             },
-			{ "K_RSHIFT / K_LSHIFT", "hold to move by 5px"               },
-			{ NULL,                  NULL                                },
+			{ "K_DOWN",              "move down by 1px"                      },
+			{ "K_LEFT",              "move left by 1px"                      },
+			{ "K_UP",                "move down by 1px"                      },
+			{ "K_RIGHT",             "move right by 1px"                     },
+			{ NULL,                  NULL                                    },
+			{ "K_MWHEELDOWN",        "enlarge by 1px"                        },
+			{ "K_MWHEELUP",          "shrink by 1px"                         },
+			{ NULL,                  NULL                                    },
+			{ "K_RCTRL / K_LCTRL",   "hold to move by 0.1px"                 },
+			{ "K_RSHIFT / K_LSHIFT", "hold to move by 5px"                   },
+			{ NULL,                  NULL                                    },
 #ifdef __APPLE__
-			{ "K_COMMAND",           "hold to resize"                    },
+			{ "K_COMMAND",           "hold to key resize / mwheel scale"     },
 #else
-			{ "K_RALT / K_LALT",     "hold to resize"                    },
+			{ "K_RALT / K_LALT",     "hold to key resize / mwheel scale"     },
 #endif
-			{ NULL,                  NULL                                },
-			{ "K_INS",               "move to center"                    },
-			{ "K_PGUP",              "move from bottom -> middle -> top" },
-			{ "K_PGDN",              "move from top -> middle -> bottom" },
-			{ "K_HOME",              "move from left -> middle -> right" },
-			{ "K_END",               "move from right -> middle -> left" },
-			{ NULL,                  NULL                                },
-			{ "l",                   "show layout visible -> all -> off" },
-			{ "h",                   "help on/off"                       },
-			{ "n",                   "noise generator on/off"            },
-			{ "f",                   "full screen on/off"                },
-			{ "a",                   "force grid alignment on/off"       },
-			{ NULL,                  NULL                                },
-			{ "o",                   "show micro grid on/off"            },
-			{ "c",                   "show grid OCD lvl 1/2/3"           },
-			{ "d",                   "scale grid .25/.125/.1"            },
+			{ NULL,                  NULL                                    },
+			{ "K_INS",               "move to center"                        },
+			{ "K_PGUP",              "move from bottom -> middle -> top"     },
+			{ "K_PGDN",              "move from top -> middle -> bottom"     },
+			{ "K_HOME",              "move from left -> middle -> right"     },
+			{ "K_END",               "move from right -> middle -> left"     },
+			{ NULL,                  NULL                                    },
+			{ "l",                   "show layout visible -> all -> off"     },
+			{ "h",                   "help on/off"                           },
+			{ "n",                   "noise generator on/off"                },
+			{ "f",                   "full screen on/off"                    },
+			{ "a",                   "force grid alignment on/off"           },
+			{ "t",                   "toggle showing only active component"  },
+			{ "v",                   "toggle visibility of active component" },
+			{ "SHIFT + CTRL + v",    "set all components visible"            },
+			{ NULL,                  NULL                                    },
+			{ "o",                   "show micro grid on/off"                },
+			{ "c",                   "show grid OCD lvl 1/2/3"               },
+			{ "d",                   "scale grid .25/.125/.1"                },
 		};
 
 		vec4_t bgColor;
@@ -2519,10 +2871,89 @@ static void CG_HudEditor_HelpDraw(void)
 		VectorCopy(colorDkGrey, bgColor);
 		bgColor[3] = .90f;
 
-		CG_DrawHelpWindow(Ccg_WideX(SCREEN_WIDTH) * 0.2f, SCREEN_HEIGHT * 0.4f, &helpStatus, "HUD EDITOR CONTROLS", help, sizeof(help) / sizeof(helpType_t),
+		CG_DrawHelpWindow(Ccg_WideX(SCREEN_WIDTH) * 0.2f, SCREEN_HEIGHT * 0.15f, &helpStatus, "HUD EDITOR CONTROLS", help, sizeof(help) / sizeof(helpType_t),
 		                  bgColor, colorBlack, colorDkGrey, colorBlack,
 		                  &hudEditorHeaderFont, &hudEditorTextFont);
 	}
+}
+
+static qboolean CG_HudEditorHelpButton_KeyDown(panel_button_t *button, int key)
+{
+	if (key == K_MOUSE1)
+	{
+		SOUND_SELECT;
+
+		CG_HudEditor_ToggleHelp();
+
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+static void CG_HudEditor_IncreaseSize(hudComponent_t *comp, float offset, qboolean changeSize)
+{
+	if (!changeSize)   // increase component
+	{
+		comp->location.x -= offset * .5f;
+		comp->location.y -= offset * .5f;
+		comp->location.w += offset;
+		comp->location.h += offset;
+	}
+	else     // increase text size
+	{
+		comp->scale += offset;
+	}
+}
+
+static void CG_HudEditor_DecreaseSize(hudComponent_t *comp, float offset, qboolean changeSize)
+{
+	if (!changeSize)   // decrease component
+	{
+		comp->location.x += offset * .5f;
+		comp->location.y += offset * .5f;
+		comp->location.w -= offset;
+		comp->location.h -= offset;
+	}
+	else     // decrease text size
+	{
+		comp->scale -= offset;
+	}
+}
+
+static void CG_HudEditor_ToggleFilterActiveComponent()
+{
+	if (lastFocusComponent != NULL)
+	{
+		hudComponent_t *comp = (hudComponent_t *)((byte *)hudData.active + hudComponentFields[lastFocusComponent->data[0]].offset);
+		showOnlyHudComponent = (showOnlyHudComponent == NULL) ? comp : NULL;
+	}
+}
+
+static void CG_HudEditor_ToggleVisibility(void)
+{
+	hudComponent_t *comp;
+	// holding CTRL & SHIFT makes all component visible
+	if ((trap_Key_IsDown(K_RCTRL) || trap_Key_IsDown(K_LCTRL))
+	    && (trap_Key_IsDown(K_RSHIFT) || trap_Key_IsDown(K_LSHIFT)))
+	{
+		int i;
+		for (i = 0; i < HUD_COMPONENTS_NUM; i++)
+		{
+			comp          = hudData.active->components[i];
+			comp->visible = qtrue;
+		}
+	}
+	// otherwise toggle visibility of focused component
+	else
+	{
+		if (lastFocusComponent != NULL)
+		{
+			comp          = (hudComponent_t *)((byte *)hudData.active + hudComponentFields[lastFocusComponent->data[0]].offset);
+			comp->visible = comp->visible ? qfalse : qtrue;
+		}
+	}
+
 }
 
 /**
@@ -2567,6 +2998,10 @@ static void CG_HudEditor_ToggleGridScale(void)
 	}
 }
 
+/**
+ * @brief CG_HudEditor_GetGridScale
+ * @return
+ */
 static ID_INLINE float CG_HudEditor_GetGridScale(void)
 {
 	switch (gridScale)
@@ -2578,6 +3013,11 @@ static ID_INLINE float CG_HudEditor_GetGridScale(void)
 	}
 }
 
+/**
+ * @brief CG_HUDEditor_GridDrawSection2
+ * @param[in] step
+ * @param[in] size
+ */
 static void CG_HUDEditor_GridDrawSection2(float step, float size)
 {
 	float i, j;
@@ -2590,21 +3030,29 @@ static void CG_HUDEditor_GridDrawSection2(float step, float size)
 	}
 }
 
+/**
+ * @brief CG_HUDEditor_GridDrawSection
+ * @param[in] step
+ * @param[in] size
+ */
 static void CG_HUDEditor_GridDrawSection(float step, float size)
 {
-	float i;
+	float i = SCREEN_WIDTH_SAFE * step;
+	float j = SCREEN_HEIGHT_SAFE * step;
 
-	for (i = SCREEN_WIDTH_SAFE * step; i < SCREEN_WIDTH_SAFE; i += SCREEN_WIDTH_SAFE * step)
+	while (i < SCREEN_WIDTH_SAFE && j < SCREEN_HEIGHT_SAFE)
 	{
 		CG_FillRect(i, 0, size, SCREEN_HEIGHT_SAFE, (vec4_t) { 1, 1, 1, .5f });
-	}
+		CG_FillRect(0, j, SCREEN_WIDTH_SAFE, size, (vec4_t) { 1, 1, 1, .5f });
 
-	for (i = SCREEN_HEIGHT_SAFE * step; i < SCREEN_HEIGHT_SAFE; i += SCREEN_HEIGHT_SAFE * step)
-	{
-		CG_FillRect(0, i, SCREEN_WIDTH_SAFE, size, (vec4_t) { 1, 1, 1, .5f });
+		i += SCREEN_WIDTH_SAFE * step;
+		j += SCREEN_HEIGHT_SAFE * step;
 	}
 }
 
+/**
+ * @brief CG_HudEditor_GridDraw
+ */
 static void CG_HudEditor_GridDraw(void)
 {
 	float step = CG_HudEditor_GetGridScale();
@@ -2634,6 +3082,7 @@ static void CG_HudEditor_GridDraw(void)
 void CG_DrawHudEditor(void)
 {
 	static int altHud = -1;
+	qboolean   skip;
 
 	panel_button_t **buttons = hudComponentsPanel;
 	panel_button_t *button;
@@ -2652,10 +3101,10 @@ void CG_DrawHudEditor(void)
 	CG_HudEditor_HelpDraw();
 
 	trap_R_SetColor(NULL);
-	CG_DrawPic(cgDC.cursorx, cgDC.cursory, 32, 32, cgs.media.cursorIcon);
+	CG_DrawCursor(cgDC.cursorx, cgDC.cursory);
 
 	// start parsing hud components from the last focused button
-	qboolean skip = qtrue;
+	skip = qtrue;
 	for ( ; *buttons; buttons++)
 	{
 		button = (*buttons);
@@ -2672,7 +3121,7 @@ void CG_DrawHudEditor(void)
 			skip = qfalse;
 		}
 
-		if (comp->visible && BG_CursorInRect(&button->rect))
+		if ((comp->visible || showLayout == HUD_SHOW_LAYOUT_ALL) && BG_CursorInRect(&button->rect))
 		{
 			CG_DrawHudEditor_ToolTip(button);
 			return;
@@ -2694,12 +3143,24 @@ void CG_DrawHudEditor(void)
 			break;
 		}
 
-		if (comp->visible && BG_CursorInRect(&button->rect))
+		if ((comp->visible || showLayout == HUD_SHOW_LAYOUT_ALL) && BG_CursorInRect(&button->rect))
 		{
 			CG_DrawHudEditor_ToolTip(button);
 			break;
 		}
 	}
+}
+
+void CG_HudEditorReset()
+{
+	if (cg.generatingNoiseHud)
+	{
+		CG_HudEditor_Cleanup();
+		cg.generatingNoiseHud = qfalse;
+	}
+
+	cg.editingHud          = qfalse;
+	cg.fullScreenHudEditor = qfalse;
 }
 
 /**
@@ -2709,6 +3170,18 @@ void CG_DrawHudEditor(void)
 */
 void CG_HudEditor_KeyHandling(int key, qboolean down)
 {
+	// close hud editor menu if any 'edithud' key binding is pressed again
+	if (down)
+	{
+		int b1, b2;
+		cgDC.getKeysForBinding("edithud", &b1, &b2);
+		if ((b1 != -1 && b1 == key) || (b2 != -1 && b2 == key))
+		{
+			CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+			return;
+		}
+	}
+
 	if (BG_PanelButtonsKeyEvent(key, down, hudEditor))
 	{
 		return;
@@ -2745,6 +3218,8 @@ void CG_HudEditor_KeyHandling(int key, qboolean down)
 		case 'c': CG_HudEditor_ToggleGrid();               return;
 		case 'd': CG_HudEditor_ToggleGridScale();          return;
 		case 'a': CG_HudEditor_ToggleForceGridAlignment(); return;
+		case 't': CG_HudEditor_ToggleFilterActiveComponent(); return;
+		case 'v': CG_HudEditor_ToggleVisibility(); return;
 		default: break;
 		}
 	}
@@ -2797,7 +3272,17 @@ void CG_HudEditor_KeyHandling(int key, qboolean down)
 		if (gridAlign)
 		{
 			float multiple = CG_HudEditor_GetGridScale();
-			float side     = (key == K_LEFTARROW || key == K_RIGHTARROW) ? SCREEN_WIDTH_SAFE : SCREEN_HEIGHT_SAFE;
+			float side;
+
+			if (key == K_LEFTARROW || key == K_RIGHTARROW)
+			{
+				// use 4:3 aspect ratio in case the size is changed
+				side = changeSize ? SCREEN_HEIGHT_SAFE : SCREEN_WIDTH_SAFE;
+			}
+			else
+			{
+				side = SCREEN_HEIGHT_SAFE;
+			}
 
 			offset = side * (multiple / (1 / multiple));
 		}
@@ -2857,9 +3342,9 @@ void CG_HudEditor_KeyHandling(int key, qboolean down)
 			                                   0 : (Ccg_WideX(SCREEN_WIDTH) - comp->location.w) * .5f); break;
 		case K_END:        comp->location.x = ((comp->location.x < (Ccg_WideX(SCREEN_WIDTH) - comp->location.w) * .5f) ?
 			                                   (Ccg_WideX(SCREEN_WIDTH) - comp->location.w) * .5f: Ccg_WideX(SCREEN_WIDTH) - comp->location.w); break;
-		case K_INS:        comp->location.x  = (Ccg_WideX(SCREEN_WIDTH) - comp->location.w) * .5f; comp->location.y = (SCREEN_HEIGHT - comp->location.h) * .5f; break;
-		case K_MWHEELDOWN: comp->location.x -= offset * .5f; comp->location.y -= offset * .5f; comp->location.w += offset; comp->location.h += offset; break;
-		case K_MWHEELUP:   comp->location.x += offset * .5f; comp->location.y += offset * .5f; comp->location.w -= offset; comp->location.h -= offset; break;
+		case K_INS:        comp->location.x = (Ccg_WideX(SCREEN_WIDTH) - comp->location.w) * .5f; comp->location.y = (SCREEN_HEIGHT - comp->location.h) * .5f; break;
+		case K_MWHEELDOWN: CG_HudEditor_DecreaseSize(comp, offset, changeSize); break;
+		case K_MWHEELUP: CG_HudEditor_IncreaseSize(comp, offset, changeSize); break;
 		default: return;
 		}
 
@@ -2876,14 +3361,14 @@ void CG_HudEditor_KeyHandling(int key, qboolean down)
 */
 void CG_HudEditorMouseMove_Handling(int x, int y)
 {
+	panel_button_t *button = lastFocusComponent;
+	static float   offsetX = 0;
+	static float   offsetY = 0;
+
 	if (!cg.editingHud)
 	{
 		return;
 	}
-
-	panel_button_t *button = lastFocusComponent;
-	static float   offsetX = 0;
-	static float   offsetY = 0;
 
 	if (button && !button->data[7])
 	{

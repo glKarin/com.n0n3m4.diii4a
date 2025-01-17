@@ -82,34 +82,34 @@ typedef struct particle_s
 	// for faster batch rendering, particles are rendered in groups by effect (resulting in less perfect sorting but far less state changes)
 
 	// fields used by rendering: (48 bytes)
-	vec3_t          sortorigin; // sort by this group origin, not particle org
+	vec3_t          sortorigin; ///< sort by this group origin, not particle org
 	vec3_t          org;
-	vec3_t          vel; // velocity of particle, or orientation of decal, or end point of beam
+	vec3_t          vel;        ///< velocity of particle, or orientation of decal, or end point of beam
 	float           size;
-	float           alpha; // 0-255
-	float           stretch; // only for sparks
+	float           alpha;      ///< 0-255
+	float           stretch;    ///< only for sparks
 
 	// fields not used by rendering:  (44 bytes)
 	float           stainsize;
 	float           stainalpha;
-	float           sizeincrease; // rate of size change per second
-	float           alphafade; // how much alpha reduces per second
-	float           time2; // used for snow fluttering and decal fade
-	float           bounce; // how much bounce-back from a surface the particle hits (0 = no physics, 1 = stop and slide, 2 = keep bouncing forever, 1.5 is typical)
-	float           gravity; // how much gravity affects this particle (1.0 = normal gravity, 0.0 = none)
-	float           airfriction; // how much air friction affects this object (objects with a low mass/size ratio tend to get more air friction)
-	float           liquidfriction; // how much liquid friction affects this object (objects with a low mass/size ratio tend to get more liquid friction)
-//	float           delayedcollisions; // time that p->bounce becomes active
-	float           delayedspawn; // time that particle appears and begins moving
-	float           die; // time when this particle should be removed, regardless of alpha
+	float           sizeincrease;   ///< rate of size change per second
+	float           alphafade;      ///< how much alpha reduces per second
+	float           time2;          ///< used for snow fluttering, decal fade, explosion colour ramp
+	float           bounce;         ///< how much bounce-back from a surface the particle hits (0 = no physics, 1 = stop and slide, 2 = keep bouncing forever, 1.5 is typical)
+	float           gravity;        ///< how much gravity affects this particle (1.0 = normal gravity, 0.0 = none)
+	float           airfriction;    ///< how much air friction affects this object (objects with a low mass/size ratio tend to get more air friction)
+	float           liquidfriction; ///< how much liquid friction affects this object (objects with a low mass/size ratio tend to get more liquid friction)
+//	float           delayedcollisions; ///< time that p->bounce becomes active
+	float           delayedspawn;   ///< time that particle appears and begins moving
+	float           die;            ///< time when this particle should be removed, regardless of alpha
 
 	// short variables grouped to save memory (4 bytes)
-	short			angle; // base rotation of particle
-	short			spin; // geometry rotation speed around the particle center normal
+	short           angle; ///< base rotation of particle
+	short           spin;  ///< geometry rotation speed around the particle center normal
 
 	// byte variables grouped to save memory (12 bytes)
 	unsigned char   color[3];
-	unsigned char   qualityreduction; // enables skipping of this particle according to r_refdef.view.qualityreduction
+	unsigned char   qualityreduction; ///< enables skipping of this particle according to r_refdef.view.qualityreduction
 	unsigned char   typeindex;
 	unsigned char   blendmode;
 	unsigned char   orientation;
@@ -123,7 +123,7 @@ void CL_Particles_Clear(void);
 void CL_Particles_Init(void);
 void CL_Particles_Shutdown(void);
 particle_t *CL_NewParticle(const vec3_t sortorigin, unsigned short ptypeindex, int pcolor1, int pcolor2, int ptex, float psize, float psizeincrease, float palpha, float palphafade, float pgravity, float pbounce, float px, float py, float pz, float pvx, float pvy, float pvz, float pairfriction, float pliquidfriction, float originjitter, float velocityjitter, qbool pqualityreduction, float lifetime, float stretch, pblend_t blendmode, porientation_t orientation, int staincolor1, int staincolor2, int staintex, float stainalpha, float stainsize, float angle, float spin, float tint[4]);
-particle_t *CL_NewQuakeParticle(const vec3_t origin, const int color_1, const int color_2, const float gravity, const float offset_x, const float offset_y, const float offset_z, const float velocity_offset_x, const float velocity_offset_y, const float velocity_offset_z, const float air_friction, const float liquid_friction, const float origin_jitter, const float velocity_jitter, const float lifetime);
+particle_t *CL_NewQuakeParticle(const vec3_t origin, const unsigned short ptypeindex, const int color_1, const int color_2, const float gravity, const float offset_x, const float offset_y, const float offset_z, const float velocity_offset_x, const float velocity_offset_y, const float velocity_offset_z, const float air_friction, const float liquid_friction, const float origin_jitter, const float velocity_jitter, const float lifetime);
 
 typedef enum effectnameindex_s
 {

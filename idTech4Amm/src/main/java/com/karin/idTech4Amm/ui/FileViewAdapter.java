@@ -25,8 +25,7 @@ public class FileViewAdapter extends ArrayAdapter_base<FileBrowser.FileModel>
     {
         super(context, android.R.layout.select_dialog_item);
         m_fileBrowser = new FileBrowser(context);
-        m_fileBrowser.SetListener(new FileBrowser.Listener()
-        {
+        m_fileBrowser.SetListener(new FileBrowser.Listener() {
             @Override
             public void OnPathCannotAccess(String path)
             {

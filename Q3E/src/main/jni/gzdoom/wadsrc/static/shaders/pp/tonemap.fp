@@ -29,7 +29,7 @@ vec3 Tonemap(vec3 color)
 
 vec3 Tonemap(vec3 color)
 {
-	color = color / (1 + color);
+	color = color / (1.0 + color);
 	return sRGB(color);
 }
 

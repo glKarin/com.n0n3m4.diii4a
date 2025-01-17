@@ -290,6 +290,8 @@ static qboolean RB_UpdateSunFlareVis(void)
 		ri.Printf(PRINT_DEVELOPER, "Waited %d iterations\n", iter);
 	}
 	
+	// Note: On desktop OpenGL this is a sample count (glRefConfig.occlusionQueryTarget == GL_SAMPLES_PASSED)
+	// but on OpenGL ES this is a boolean (glRefConfig.occlusionQueryTarget == GL_ANY_SAMPLES_PASSED)
 	qglGetQueryObjectuiv(tr.sunFlareQuery[tr.sunFlareQueryIndex], GL_QUERY_RESULT, &sampleCount);
 	return sampleCount > 0;
 }

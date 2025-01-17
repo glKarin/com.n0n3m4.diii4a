@@ -39,12 +39,16 @@
 #ifndef INCLUDE_BG_PUBLIC_H
 #define INCLUDE_BG_PUBLIC_H
 
+#include "../qcommon/q_shared.h"
+
 #define GAME_VERSION        "Enemy Territory"
 #define GAME_VERSION_DATED  (GAME_VERSION ", ET 2.60b")
 
 #if defined(CGAMEDLL) || defined(FEATURE_SERVERMDX)
 #define USE_MDXFILE
 #endif
+
+#define DEFAULT_HEALTH 100
 
 #define SPRINTTIME 20000.0f
 
@@ -103,6 +107,8 @@ extern vec3_t playerHeadProneMins;
 extern vec3_t playerHeadProneMaxs;
 
 #define MAX_COMMANDMAP_LAYERS   16
+
+#define MAX_SCORES_CMDS 96
 
 // on fire effects
 #define FIRE_FLASH_TIME         2000
@@ -171,6 +177,9 @@ extern vec3_t playerHeadProneMaxs;
 #define SVF_IGNOREBMODELEXTENTS     0x00004000  ///< just use origin for in pvs check for snapshots, ignore the bmodel extents
 #define SVF_SELF_PORTAL             0x00008000  ///< use self->origin2 as portal
 #define SVF_SELF_PORTAL_EXCLUSIVE   0x00010000  ///< use self->origin2 as portal and DONT add self->origin PVS ents
+
+// default server frametime at sv_fps 20, for framerate independent timings
+#define DEFAULT_SV_FRAMETIME 50
 
 /**
  * @struct svCvar_s
@@ -553,7 +562,7 @@ typedef struct pmoveExt_s
 	int silencedSideArm;           ///< Keep track of whether the luger/colt is silenced "in holster", prolly want to do this for the kar98 etc too
 	float sprintTime;
 
-	// MG42 aiming
+	// stationary heavy weapon (e.g. misc_mg42, misc_aagun) aiming
 	float varc, harc;
 	vec3_t centerangles;
 
@@ -586,6 +595,7 @@ typedef struct pmoveExt_s
 	qboolean deadInSolid;          ///< true if legs or head start in solid when we die
 
 	int airTime;
+	int switchToScopeTime;
 
 } pmoveExt_t;  ///< data used both in client and server - store it here
 ///< instead of playerstate to prevent different engine versions of playerstate between XP and MP
@@ -691,25 +701,26 @@ typedef enum
  */
 typedef enum
 {
-	PERS_SCORE = 0,                ///< !!! MUST NOT CHANGE, SERVER AND GAME BOTH REFERENCE !!!
-	PERS_HITS,                     ///< Deprecated. Remove?
+	/// !!! MUST NOT CHANGE, SERVER AND GAME BOTH REFERENCE !!!
+	PERS_SCORE = 0,
+	PERS_UNUSED_01,                ///< previously PERS_HITS
 	PERS_RANK,
 	PERS_TEAM,
 	PERS_SPAWN_COUNT,              ///< incremented every respawn
 	PERS_ATTACKER,                 ///< clientnum of last damage inflicter
 	PERS_KILLED,                   ///< count of the number of times you died
-	// these were added for single player awards tracking
+	// { these were added for single player awards tracking
 	PERS_RESPAWNS_LEFT,            ///< number of remaining respawns
 	PERS_RESPAWNS_PENALTY,         ///< how many respawns you have to sit through before respawning again
-
+	// }
 	PERS_REVIVE_COUNT,
-	PERS_HEADSHOTS,                ///< Deprecated. Remove?
-	PERS_BLEH_3,
-
-	// mg42                        ///< TODO: I don't understand these here. Can someone explain?
-	PERS_HWEAPON_USE,              ///< enum 12 - don't change
-	// wolfkick
-	PERS_WOLFKICK
+	PERS_UNUSED_10,                ///< previously PERS_HEADSHOTS
+	PERS_UNUSED_11,                ///< previously PERS_BLEH_3
+	PERS_HWEAPON_USE,              ///< non-zero when using a stationary hweapon (mg42=1, aagun=2)
+	PERS_UNUSED_13,                ///< previously PERS_WOLFKICK
+	PERS_UNUSED_14,
+	PERS_UNUSED_15,
+	// MAX_PERSISTANT
 } persEnum_t;
 
 // entityState_t->eFlags
@@ -758,7 +769,7 @@ typedef enum
 #define EF_MOVER_STOP       0x10000000                         ///< will push otherwise	///< moved down to make space for one more client flag
 #define EF_MOVER_BLOCKED    0x20000000                         ///< mover was blocked dont lerp on the client///< moved down to make space for client flag
 
-#define BG_PlayerMounted(eFlags) ((eFlags & EF_MG42_ACTIVE) || (eFlags & EF_MOUNTEDTANK) || (eFlags & EF_AAGUN_ACTIVE))
+#define BG_PlayerMounted(eFlags) ((eFlags &EF_MG42_ACTIVE) || (eFlags &EF_MOUNTEDTANK) || (eFlags &EF_AAGUN_ACTIVE))
 #define BG_IsSkillAvailable(skill, skillType, requiredlvl) (GetSkillTableData(skillType)->skillLevels[requiredlvl] > -1 && skill[skillType] >= requiredlvl)
 
 /**
@@ -1335,6 +1346,7 @@ typedef struct modtable_s
 	float hitRegionKillPoints[HR_NUM_HITREGIONS];   ///< g
 	qboolean hasHitRegion;                          ///< g
 	const char *debugReasonMsg;                     ///< g
+	unsigned int damagedState;                      ///< cg
 	unsigned int indexWeaponStat;                   ///< g
 
 } modTable_t;
@@ -1499,6 +1511,7 @@ typedef enum
 	EV_FLAG_INDICATOR, ///< 129 - objective indicator
 	EV_MISSILE_FALLING,///< 130
 	EV_PLAYER_HIT,     ///< 131 - hitsound event
+	EV_PLAYER_REVIVE,  ///< 132
 	EV_MAX_EVENTS      ///< 132 - just added as an 'endcap'
 } entity_event_t;
 
@@ -1744,6 +1757,7 @@ typedef struct animation_s
 	int initialLerp;               ///< msec to get to first frame
 	int moveSpeed;
 	int animBlend;                 ///< take this long to blend to next anim
+	int priority;
 
 	// derived
 	int duration;
@@ -2106,8 +2120,9 @@ typedef enum
 	HINT_RESTRICTED = 48,       ///< invisible user with no target
 
 	HINT_BAD_USER,              ///< invisible user with no target
+	HINT_COMPLETED,
 
-	HINT_NUM_HINTS = 50,
+	HINT_NUM_HINTS = 51,
 } hintType_t;
 
 void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qboolean isAngle, int splinePath);
@@ -2118,6 +2133,7 @@ void BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm, playerStat
 
 void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s, int time, qboolean snap);
 
+qboolean BG_PlayerTouchesObjective(playerState_t *ps, entityState_t *item, int atTime);
 qboolean BG_PlayerTouchesItem(playerState_t *ps, entityState_t *item, int atTime);
 qboolean BG_PlayerSeesItem(playerState_t *ps, entityState_t *item, int atTime);
 qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, team_t teamNum, int numOfClips);
@@ -2231,6 +2247,10 @@ typedef enum
 
 	ANIM_MT_DEAD,
 
+	ANIM_MT_JUMP,
+	ANIM_MT_JUMPFORWARD,
+	ANIM_MT_MIDAIR,
+
 	NUM_ANIM_MOVETYPES
 } scriptAnimMoveTypes_t;
 
@@ -2262,6 +2282,7 @@ typedef enum
 	ANIM_ET_RAISEWEAPONPRONE,
 	ANIM_ET_RELOADPRONE,
 	ANIM_ET_NOPOWER,
+	ANIM_ET_ACTIVATE,
 
 	NUM_ANIM_EVENTTYPES
 } scriptAnimEventTypes_t;
@@ -2308,6 +2329,8 @@ typedef enum
 	ANIM_COND_GEN_BITFLAG,     ///< general bit flags (to save some space)
 	ANIM_COND_AISTATE,         ///< our current ai state (sometimes more convenient than creating a separate section)
 	ANIM_COND_SUICIDE,
+	ANIM_COND_FAST_RELOAD,
+	ANIM_COND_LADDER_PEEK,
 
 	NUM_ANIM_CONDITIONS
 } scriptAnimConditions_t;
@@ -2475,6 +2498,7 @@ typedef enum
 	IMPACTPOINT_SHOULDER_LEFT,
 	IMPACTPOINT_KNEE_RIGHT,
 	IMPACTPOINT_KNEE_LEFT,
+	IMPACTPOINT_LEGS,
 
 	NUM_ANIM_COND_IMPACTPOINT
 } animScriptImpactPoint_t;
@@ -2606,7 +2630,7 @@ void BG_InitWeaponStrings(void);
 void BG_AnimParseAnimScript(animModelInfo_t *animModelInfo, animScriptData_t *scriptData, const char *filename, char *input);
 int BG_AnimScriptAnimation(playerState_t *ps, animModelInfo_t *animModelInfo, scriptAnimMoveTypes_t movetype, qboolean isContinue);
 int BG_AnimScriptCannedAnimation(playerState_t *ps, animModelInfo_t *modelInfo);
-int BG_AnimScriptEvent(playerState_t *ps, animModelInfo_t *animModelInfo, scriptAnimEventTypes_t event, qboolean isContinue, qboolean force);
+int BG_AnimScriptEvent(playerState_t *ps, animModelInfo_t *animModelInfo, scriptAnimEventTypes_t event, qboolean isContinue);
 int BG_IndexForString(char *token, animStringItem_t *strings, qboolean allowFail);
 int BG_PlayAnimName(playerState_t *ps, animModelInfo_t *animModelInfo, char *animName, animBodyPart_t bodyPart, qboolean setTimer, qboolean isContinue, qboolean force);
 void BG_ClearAnimTimer(playerState_t *ps, animBodyPart_t bodyPart);
@@ -2759,7 +2783,7 @@ extern const char *bg_fireteamNamesAxis[MAX_FIRETEAMS / 2];
 typedef struct
 {
 	int ident;
-	signed /*//karin: char is unsigned on arm char, or compile with -fsigned-char arguments */ joinOrder[MAX_CLIENTS];    ///< order in which clients joined the fire team (server), client uses to store if a client is on this fireteam
+	char joinOrder[MAX_CLIENTS];    ///< order in which clients joined the fire team (server), client uses to store if a client is on this fireteam
 	int leader;                     ///< leader = joinOrder[0] on server, stored here on client
 	qboolean inuse;
 	qboolean priv;
@@ -2795,6 +2819,7 @@ qboolean PC_Color_Parse(int handle, vec4_t *c);
 qboolean PC_Vec_Parse(int handle, vec3_t *c);
 qboolean PC_Float_Parse(int handle, float *f);
 qboolean PC_Point_Parse(int handle, vec2_t *c);
+qboolean PC_PseudDec_Parse(int handle, long *l);
 
 /**
  * @enum uiMenuCommand_t
@@ -2817,22 +2842,22 @@ typedef enum
 	UIMENU_WM_FTQUICKMESSAGE,
 	UIMENU_WM_FTQUICKMESSAGEALT,
 
-	UIMENU_WM_QUICKSPAWNPOINT,
-	UIMENU_WM_QUICKSPAWNPOINTALT,
-
 	UIMENU_WM_TAPOUT,
 	UIMENU_WM_TAPOUT_LMS,
 
 	UIMENU_WM_AUTOUPDATE,
+
+	// say, team say, etc
+	UIMENU_INGAME_MESSAGEMODE,
+
+	UIMENU_WM_QUICKSPAWNPOINT,
+	UIMENU_WM_QUICKSPAWNPOINTALT,
 
 	UIMENU_WM_CLASS,
 	UIMENU_WM_CLASSALT,
 
 	UIMENU_WM_TEAM,
 	UIMENU_WM_TEAMALT,
-
-	// say, team say, etc
-	UIMENU_INGAME_MESSAGEMODE,
 } uiMenuCommand_t;
 
 void BG_AdjustAAGunMuzzleForBarrel(vec_t *origin, vec_t *forward, vec_t *right, vec_t *up, int barrel);
@@ -3041,9 +3066,9 @@ typedef enum popupMessageBigType_e
  */
 typedef enum popupMessageXPGainType_e
 {
-    PM_GAIN = 0,
-    PM_LOSE,
-    PM_XPGAIN_NUM_TYPES
+	PM_GAIN = 0,
+	PM_LOSE,
+	PM_XPGAIN_NUM_TYPES
 } popupMessageXPGainType_t;
 
 #define HITBOXBIT_HEAD   1024

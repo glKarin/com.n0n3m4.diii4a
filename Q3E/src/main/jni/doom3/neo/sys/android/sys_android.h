@@ -1,6 +1,7 @@
 #ifndef _KARIN_SYS_ANDROID_H
 #define _KARIN_SYS_ANDROID_H
 
+#include <stdio.h>
 #include <android/native_window.h>
 
 // DOOM3 call Android::JNI, all in DOOM3 main thread
@@ -39,8 +40,9 @@ typedef struct
 {
     // OpenGL
     int openGL_format; // 0x8888 0x565 0x4444 0x5551 0xaaa2
-    int openGL_msaa; // 0 1 2 4
-    int openGL_version; // 0x2000 0x3000
+    int openGL_depth; // 24 16 32
+    int openGL_msaa; // 0 1 2 4 8 16
+    int openGL_version; // 0x2000 0x3000 0x3010 0x3020
 
     // Other
     const char *nativeLibraryDir; // game library directory after apk installed
@@ -53,6 +55,11 @@ typedef struct
     const char *appHomeDir; // application home directory
     int refreshRate; // screen refresh rate
     int smoothJoystick; // smooth joystick
+    int consoleMaxHeightFrac; // max console height frac(0 - 100)
+
+    ANativeWindow *window;
+    int width;
+    int height;
 } Q3E_InitialContext_t;
 
 // Android::JNI call DOOM3 after main()
@@ -62,7 +69,6 @@ typedef struct
     int  (*main)(int argc, char **argv); // call main(int, const char **)
     void (*setCallbacks)(const void *func);
     void (*setInitialContext)(const void *context);
-    void (*setResolution)(int width, int height);
 
     // any thread(Java): after idCommon Initialized
     void (*pause)(void); // pause
@@ -71,10 +77,7 @@ typedef struct
 
     // SurfaceView thread(Java)
     void (*setGLContext)(ANativeWindow *window); // set OpenGL surface view window
-
-    // GLSurfaceView render thread(Java)
-    void (*frame)(void); // call common->Frame()
-    void (*vidRestart)(void); // UNUSED
+    void (*requestThreadQuit)(void); // request main thread quit
 
     // DOOM3 main thread(C/C++)
     void (*keyEvent)(int state, int key, int chr); // mouse-click/keyboard event

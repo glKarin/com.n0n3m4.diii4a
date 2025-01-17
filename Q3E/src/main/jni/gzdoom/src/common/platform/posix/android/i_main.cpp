@@ -60,15 +60,13 @@
 
 extern "C" int cc_install_handlers(int, char**, int, int*, const char*, int(*)(char*, char*));
 
-static void * game_main(int argc, char **argv);
-
 #include "sys_android.inc"
 
 extern void Sys_SetArgs(int argc, const char** argv);
 
-void GLimp_CheckGLInitialized(void)
+bool GLimp_CheckGLInitialized(void)
 {
-	Q3E_CheckNativeWindowChanged();
+	return Q3E_CheckNativeWindowChanged();
 }
 
 #ifdef __linux__
@@ -154,12 +152,12 @@ void I_StartupJoysticks();
 extern void ZMusic_SetDLLPath(const char *path);
 
 // GZDOOM game main thread loop
-void * game_main(int argc, char **argv)
+int main(int argc, char **argv)
 {
-	attach_thread(); // attach current to JNI for call Android code
-	Q3E_Start();
 	ZMusic_SetDLLPath(Sys_DLLDefaultPath());
 
+	extern bool no_handle_signals;
+	if(!no_handle_signals)
 	{
 		int s[4] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS };
 		cc_install_handlers(argc, argv, 4, s, GAMENAMELOWERCASE "-crash.log", GetCrashInfo);
@@ -203,44 +201,16 @@ void * game_main(int argc, char **argv)
 
 	const int result = GameMain();
 
-	//common->Quit();
-	Q3E_End();
-	main_thread = 0;
-	printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
-
-	return (void *)(intptr_t)result;
+	return result;
 }
 
 void ShutdownGame(void)
 {
-    //if(common->IsInitialized())
+    if(q3e_running && gzdoomIsInitialized)
     {
-        TRIGGER_WINDOW_CREATED; // if doom3 main thread is waiting new window
-        Q3E_ShutdownGameMainThread();
-        //common->Quit();
+		extern void D_DoomShutdown(void);
+		D_DoomShutdown();
+		NOTIFY_EXIT;
+		q3e_running = false;
     }
-}
-
-static void doom3_exit(void)
-{
-    printf("[Harmattan]: GZDOOM exit.\n");
-
-    Q3E_FreeArgs();
-
-    Q3E_CloseRedirectOutput();
-}
-
-int main(int argc, char **argv)
-{
-    Q3E_DumpArgs(argc, argv);
-
-    Q3E_RedirectOutput();
-
-    Q3E_PrintInitialContext(argc, argv);
-
-    Q3E_StartGameMainThread();
-
-    atexit(doom3_exit);
-
-    return 0;
 }

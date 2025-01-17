@@ -321,7 +321,7 @@ void SV_ListMaps_f(void)
 
 	Com_Printf("\n");
 
-	if ((userMapNames = FS_ListFiles2("maps/*.bsp", &nUserMaps, 0, 0)) != 0)
+	if ((userMapNames = FS_ListFiles2("maps/*.bsp", &nUserMaps, 0, 0)) != NULL)
 	{
 		for (i = 0; i < nUserMaps - 1; i++)
 		{

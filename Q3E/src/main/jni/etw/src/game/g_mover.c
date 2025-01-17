@@ -93,6 +93,7 @@ const char *hintStrings[HINT_NUM_HINTS] =
 	"HINT_RESTRICTED",
 
 	"HINT_BAD_USER",
+	"HINT_COMPLETED",
 };
 
 /*
@@ -364,7 +365,7 @@ qboolean G_TryPushingEntity(gentity_t *check, gentity_t *pusher, vec3_t move, ve
 	// may have pushed them off an edge
 	if (check->s.groundEntityNum != pusher->s.number)
 	{
-		check->s.groundEntityNum = -1;
+		check->s.groundEntityNum = ENTITYNUM_NONE;
 	}
 
 	block = G_TestEntityPosition(check);
@@ -472,7 +473,7 @@ qboolean G_TryPushingEntity(gentity_t *check, gentity_t *pusher, vec3_t move, ve
 	block = G_TestEntityPosition(check);
 	if (!block)
 	{
-		check->s.groundEntityNum = -1;
+		check->s.groundEntityNum = ENTITYNUM_NONE;
 		pushed_p--;
 		return qtrue;
 	}
@@ -1603,6 +1604,8 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		isblocked = IsBinaryMoverBlocked(ent, other, activator);
 	}
 
+	BG_AnimScriptEvent(&other->client->ps, other->client->pers.character->animModelInfo, ANIM_ET_ACTIVATE, qfalse);
+
 	if (isblocked)
 	{
 		// start moving 50 msec later, becase if this was player
@@ -2121,7 +2124,7 @@ void Touch_DoorTrigger(gentity_t *ent, gentity_t *other, trace_t *trace)
 /**
  * @brief All of the parts of a door have been spawned, so create
  * a trigger that encloses all of them
- * @param ent
+ * @param[in] ent
  */
 void Think_SpawnNewDoorTrigger(gentity_t *ent)
 {
@@ -2129,11 +2132,8 @@ void Think_SpawnNewDoorTrigger(gentity_t *ent)
 	vec3_t    mins, maxs;
 	int       i, best = 0;
 
-	// set all of the slaves as shootable
-	for (other = ent ; other ; other = other->teamchain)
-	{
-		other->takedamage = qtrue;
-	}
+	// FIXME: isn't already set to true if "health" key is set ?
+	ent->takedamage = qtrue;
 
 	// find the bounds of everything on the team
 	VectorCopy(ent->r.absmin, mins);
@@ -2143,6 +2143,9 @@ void Think_SpawnNewDoorTrigger(gentity_t *ent)
 	{
 		AddPointToBounds(other->r.absmin, mins, maxs);
 		AddPointToBounds(other->r.absmax, mins, maxs);
+
+		// set all of the slaves as shootable
+		other->takedamage = qtrue;
 	}
 
 	// find the thinnest axis, which will be the one we expand
