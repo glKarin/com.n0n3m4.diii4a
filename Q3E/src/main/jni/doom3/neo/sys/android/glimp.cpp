@@ -611,8 +611,8 @@ static bool GLES_Init_special(const glimpParms_t &ap)
 			if(multisamples > 1) {
 				multisamples = (multisamples <= 2) ? 0 : (multisamples/2);
 
-				attrib[7 + 1] = multisamples > 1 ? 1 : 0;
-				attrib[8 + 1] = multisamples;
+				attrib[7 * 2 + 1] = multisamples > 1 ? 1 : 0;
+				attrib[8 * 2 + 1] = multisamples;
 				continue;
 			}
 			else
@@ -745,8 +745,8 @@ static bool GLES_Init_prefer(const glimpParms_t &ap)
 				if(multisamples > 1) {
 					multisamples = (multisamples <= 2) ? 0 : (multisamples/2);
 
-					attrib[7 + 1] = multisamples > 1 ? 1 : 0;
-					attrib[8 + 1] = multisamples;
+					attrib[7 * 2 + 1] = multisamples > 1 ? 1 : 0;
+					attrib[8 * 2 + 1] = multisamples;
 					continue;
 				}
 				else
