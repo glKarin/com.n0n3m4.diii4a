@@ -278,7 +278,7 @@ static int GLimp_EGLConfigCompare(const void *left, const void *right)
 	int b = info.blue;
 	int a = info.alpha;
 	int d = info.depth;
-	int s = info.stencil;
+	int s = info.samples;
 
 	int lr, lg, lb, la, ld, ls;
 	int rr, rg, rb, ra, rd, rs;
@@ -307,6 +307,16 @@ static int GLimp_EGLConfigCompare(const void *left, const void *right)
         rat1 = abs(ld - d);
         rat2 = abs(rd - d);
 	}
+
+    if(rat1 == rat2)
+    {
+        eglGetConfigAttrib(eglDisplay, lhs, EGL_SAMPLES, &ls);
+
+        eglGetConfigAttrib(eglDisplay, rhs, EGL_SAMPLES, &rs);
+
+        rat1 = /*abs*/(ls - s);
+        rat2 = /*abs*/(rs - s);
+    }
 
 	return rat1 - rat2;
 }
@@ -639,6 +649,16 @@ static bool GLES_Init_special(const glimpParms_t &ap)
 		break;
 	}
 	configs[0] = GLimp_ChooseConfig(eglConfigs, config_count);
+
+    EGLConfigInfo_t cinfo = GLimp_GetConfigInfo(configs[0]);
+    common->Printf("Choose EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
+                   cinfo.red, cinfo.green,
+                   cinfo.blue, cinfo.alpha,
+                   cinfo.depth,
+                   cinfo.stencil
+            , cinfo.samples, cinfo.sample_buffers
+    );
+
 	return true;
 }
 

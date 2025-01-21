@@ -282,6 +282,24 @@ void GLimp_AndroidQuit(void)
 	if (Priv::vulkanEnabled)
 	{
 	    Printf("Stop Android Vulkan.\n");
+		extern IVideo *Video;
+		if(!Video)
+		{
+			Printf("IVideo not initialized.\n");
+			return;
+		}
+		SDLVideo *sdl_video = (SDLVideo *)Video;
+		if(!sdl_video->_fb->device)
+		{
+			Printf("VulkanDevice not initialized.\n");
+			return;
+		}
+		if(sdl_video->_fb->device->device)
+		{
+			Printf("vkDeviceWaitIdle......\n");
+			vkDeviceWaitIdle(sdl_video->_fb->device->device);
+			Printf("vkDeviceWaitIdle done.\n");
+		}
 	    return;
 	}
 #endif

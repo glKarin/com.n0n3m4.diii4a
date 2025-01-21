@@ -88,7 +88,7 @@ void GLES_PostInit(void)
 qboolean GLimp_InitGL(qboolean fullscreen)
 {
 	Q3E_GL_CONFIG_SET(fullscreen, 1);
-	Q3E_GL_CONFIG_SET(debug_output, 1);
+	Q3E_GL_CONFIG_SET(debug_output, 0); // 1
 	Q3E_GL_CONFIG_ES_3_2();
 
 	int multiSamples = gl_msaa_samples->value;
