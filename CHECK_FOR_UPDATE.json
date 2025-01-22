@@ -1,7 +1,7 @@
 {
-    "release":59,
-    "update":"2024-11-20",
-    "version":"1.1.0harmattan59",
-    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan59/idTech4A++_1.1.0harmattan59.apk",
-    "changes":"  * Support `Omni-Bot` in Wolfenstein: Enemy Territory.\n  * Fix rendering on Mali GPU in DOOM 3-BFG.\n  * Fix rendering on Mali GPU in The Dark Mod.\n  * Fix stencil shadow with `cg_shadows` = 2 in Wolfenstein: Enemy Territory.\n  * Support choose a mod directory in GZDOOM.\n  * Add some new features options on launcher in Wolfenstein: Enemy Territory, RealRTCW, DOOM3-BFG, Quake 2, GZDOOM, The Dark Mod.\n  * Add use high precision float on GLSL shaders(cvar `harm_r_useHighPrecision`) in DOOM 3/Quake 4/Prey."
+    "release":60,
+    "update":"2025-01-16",
+    "version":"1.1.0harmattan60",
+    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan60/idTech4A++_1.1.0harmattan60-3.apk",
+    "changes":"  * Support setup max game console height percentage(0 or 100 means not limit) on launcher `General` tab.\n  * Update GZDOOM version to 4.14.0.\n  * GZDOOM add Vulkan and OpenGL renderer backend.\n  * Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.1.\n  * Update Quake 1(Darkplaces) version.\n  * Update Quake 2(yquake2) version.\n  * Add use multisamples config in game."
 }
