@@ -323,7 +323,7 @@ static int Q3E_CompareEGLConfig(const void *left, const void *right)
 	int b = info.blue;
 	int a = info.alpha;
 	int d = info.depth;
-	int s = info.stencil;
+	int s = info.samples;
 
 	int lr, lg, lb, la, ld, ls;
 	int rr, rg, rb, ra, rd, rs;
@@ -352,6 +352,16 @@ static int Q3E_CompareEGLConfig(const void *left, const void *right)
 
         rat1 = abs(ld - d);
         rat2 = abs(rd - d);
+	}
+
+	if(rat1 == rat2)
+	{
+        eglGetConfigAttrib(eglDisplay, lhs, EGL_SAMPLES, &ls);
+
+        eglGetConfigAttrib(eglDisplay, rhs, EGL_SAMPLES, &rs);
+
+        rat1 = abs(ls - s);
+        rat2 = abs(rs - s);
 	}
 
 	return rat1 - rat2;
@@ -543,8 +553,8 @@ static bool GLES_Init_special(void)
 			if(multisamples > 1) {
 				multisamples = (multisamples <= 2) ? 0 : (multisamples/2);
 
-				attrib[7 + 1] = multisamples > 1 ? 1 : 0;
-				attrib[8 + 1] = multisamples;
+				attrib[7 * 2 + 1] = multisamples > 1 ? 1 : 0;
+				attrib[8 * 2 + 1] = multisamples;
 				continue;
 			}
 			else
@@ -571,6 +581,16 @@ static bool GLES_Init_special(void)
 		break;
 	}
 	configs[0] = Q3E_ChooseEGLConfig(eglConfigs, config_count);
+
+    EGLConfigInfo_t cinfo = Q3E_GetConfigInfo(configs[0]);
+    Q3E_PRINTF("Choose EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
+                   cinfo.red, cinfo.green,
+                   cinfo.blue, cinfo.alpha,
+                   cinfo.depth,
+                   cinfo.stencil
+            , cinfo.samples, cinfo.sample_buffers
+    );
+
 	return Q3E_TRUE;
 }
 
@@ -677,8 +697,8 @@ static bool GLES_Init_prefer(void)
 				if(multisamples > 1) {
 					multisamples = (multisamples <= 2) ? 0 : (multisamples/2);
 
-					attrib[7 + 1] = multisamples > 1 ? 1 : 0;
-					attrib[8 + 1] = multisamples;
+					attrib[7 * 2 + 1] = multisamples > 1 ? 1 : 0;
+					attrib[8 * 2 + 1] = multisamples;
 					continue;
 				}
 				else
@@ -752,6 +772,8 @@ Q3Ebool GLES_Init(void) {
 //#endif
                 EGL_NONE
         };
+        if(!gl_debugOutput)
+            ctxAttrib[4] = EGL_NONE;
         eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib);
     }
     else
@@ -763,6 +785,8 @@ Q3Ebool GLES_Init(void) {
 //#endif
                 EGL_NONE
         };
+        if(!gl_debugOutput)
+            ctxAttrib[2] = EGL_NONE;
         eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib);
     }
     if (eglContext == EGL_NO_CONTEXT)
