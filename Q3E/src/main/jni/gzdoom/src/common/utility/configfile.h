@@ -78,8 +78,7 @@ public:
 	bool WriteConfigFile () const;
 #ifdef __ANDROID__ //karin: setup config if key and value not exists
 	void SetValueForKeyIfNotExists(const char *key, const char *value);
-	void SetValueForKeyIfNotExists(const char* key, const FString& value)
-	{
+	void SetValueForKeyIfNotExists(const char* key, const FString& value) {
 		SetValueForKeyIfNotExists(key, value.GetChars());
 	}
 #endif
