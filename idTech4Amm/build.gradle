@@ -65,6 +65,7 @@ android {
         exclude "lib/x86_64/**"
         // remove all mobileffmpeg libraries
         exclude "lib/*/libmobileffmpeg*.so"
+        exclude "lib/*/libffmpegkit*.so"
         // remove all armv7 neon libraries
         exclude "lib/armeabi-v7a/*_neon.so"
 
