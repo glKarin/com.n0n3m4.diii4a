@@ -78,8 +78,8 @@ dependencies {
     implementation files('libs/ouya-sdk.jar')
     implementation files('libs/RootTools-2.4.jar')
     // Using LTS version for lower min SDK version
-    //implementation('com.arthenica:mobile-ffmpeg-min-gpl:4.4.LTS')
-    implementation('com.arthenica:ffmpeg-kit-min:4.4.LTS')
+    //implementation('com.arthenica:mobile-ffmpeg-min:4.4.LTS')
+    implementation('com.arthenica:ffmpeg-kit-min-gpl:6.0.LTS')
     //implementation 'com.arthenica:mobile-ffmpeg-full:4.4.LTS'
     //implementation 'com.arthenica:mobile-ffmpeg-video:4.4.LTS'
     implementation 'io.github.hexhacking:xunwind:2.0.0'
