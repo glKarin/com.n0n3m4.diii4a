@@ -499,7 +499,7 @@ public class Q3EGameHelper
         //String versionName = "4.14.0";
 
         versionCheckFile = "idtech4amm.version";
-        gzdoomResource = Q3EGlobals.IS_64 ? Q3EGlobals.PatchResource.GZDOOM_RESOURCE : Q3EGlobals.PatchResource.GZDOOM_RESOURCE_32;
+        gzdoomResource = Q3EGlobals.PatchResource.GZDOOM_RESOURCE;
 
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", versionCheckFile);
