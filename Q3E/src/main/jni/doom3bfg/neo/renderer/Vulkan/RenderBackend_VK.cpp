@@ -98,23 +98,7 @@ static const char* g_validationLayers[ g_numValidationLayers ] =
 
 #define ID_VK_ERROR_STRING( x ) case static_cast< int >( x ): return #x
 
-#ifdef __ANDROID__ //karin: Vulkan extras functions
-extern void SDL_Vulkan_GetDrawableSize( void *sdlWindow, int *width, int *height );
-static void VK_SetupNativeScreenSize( const VkSurfaceCapabilitiesKHR& caps )
-{
-	return;
-	int width, height;
-	SDL_Vulkan_GetDrawableSize(vkcontext.sdlWindow, &width, &height);
-	if(caps.currentExtent.width > 1)
-		glConfig.nativeScreenWidth = caps.currentExtent.width - 1;
-	else
-		glConfig.nativeScreenWidth = width;
-	if(caps.currentExtent.height > 1)
-		glConfig.nativeScreenHeight = caps.currentExtent.height - 1;
-	else
-		glConfig.nativeScreenHeight = height;
-}
-
+#ifdef VK_USE_PLATFORM_ANDROID_KHR //karin: Vulkan extras functions
 void VK_CreateSurface( void )
 {
 	VkAndroidSurfaceCreateInfoKHR createInfo = {};
@@ -457,9 +441,6 @@ static void EnumeratePhysicalDevices()
 
 		// grab surface specific information
 		ID_VK_CHECK( vkGetPhysicalDeviceSurfaceCapabilitiesKHR( gpu.device, vkcontext.surface, &gpu.surfaceCaps ) );
-#ifdef __ANDROID__ //karin: reset up screen size
-		VK_SetupNativeScreenSize( gpu.surfaceCaps );
-#endif
 
 		{
 			uint32 numFormats;
@@ -620,7 +601,6 @@ CheckDeviceExtensionSupport
 */
 static bool CheckDeviceExtensionSupport( const idList< VkExtensionProperties >& extensionProps, const idList< const char* >& requiredExt )
 {
-	//return true; //TODO
 	int required = requiredExt.Num();
 	int available = 0;
 
@@ -1191,6 +1171,11 @@ static VkExtent2D ChooseSurfaceExtent( VkSurfaceCapabilitiesKHR& caps )
 	width = idMath::ClampInt( caps.minImageExtent.width, caps.maxImageExtent.width, width );
 	height = idMath::ClampInt( caps.minImageExtent.height, caps.maxImageExtent.height, height );
 #endif
+#ifdef __ANDROID__ //karin: TODO: -1, cause flush if width == tr.GetWidth() && height == tr.GetHeight()
+    //extern void SDL_Vulkan_GetDrawableSize( void *sdlWindow, int *width, int *height );
+    width = idMath::ClampInt( caps.minImageExtent.width, caps.maxImageExtent.width, width - 1 );
+    height = idMath::ClampInt( caps.minImageExtent.height, caps.maxImageExtent.height, height - 1 );
+#endif
 
 	if( caps.currentExtent.width == -1 )
 	{
@@ -1199,7 +1184,12 @@ static VkExtent2D ChooseSurfaceExtent( VkSurfaceCapabilitiesKHR& caps )
 	}
 	else
 	{
+#ifdef __ANDROID__ //karin: using config screen size
+		extent.width = width;
+		extent.height = height;
+#else
 		extent = caps.currentExtent;
+#endif
 	}
 
 	return extent;
@@ -2070,9 +2060,6 @@ void idRenderBackend::ResizeImages()
 
 	// Refresh Surface Capabilities
 	ID_VK_CHECK( vkGetPhysicalDeviceSurfaceCapabilitiesKHR( vkcontext.physicalDevice, vkcontext.surface, &vkcontext.gpu->surfaceCaps ) );
-#ifdef __ANDROID__ //karin: reset up screen size
-	VK_SetupNativeScreenSize( vkcontext.gpu->surfaceCaps );
-#endif
 
 #if 0 //karin: not check this
 	// Recheck presentation support
