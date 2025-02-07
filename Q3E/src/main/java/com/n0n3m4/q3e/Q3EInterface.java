@@ -63,6 +63,8 @@ public class Q3EInterface
 	public boolean isETW = false;
 	public boolean isRealRTCW = false;
 
+	public boolean isD3BFG_Vulkan = false;
+
 	public String default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
 	public String libname;
@@ -115,7 +117,12 @@ public class Q3EInterface
 		else if(isQ1)
 			return Q3EGlobals.LIB_ENGINE1_QUAKE;
 		else if(isD3BFG)
-			return Q3EGlobals.LIB_ENGINE4_D3BFG;
+		{
+			if(isD3BFG_Vulkan)
+				return Q3EGlobals.LIB_ENGINE4_D3BFG_VULKAN;
+			else
+				return Q3EGlobals.LIB_ENGINE4_D3BFG;
+		}
 		else if(isDOOM)
 			return Q3EGlobals.LIB_ENGINE1_DOOM;
 		else if(isETW)

@@ -14,5 +14,9 @@ allprojects {
         mavenCentral()
         jcenter()
         google()
+
+        flatDir {
+            dirs project(':Q3E').file('libs')
+        }
     }
 }

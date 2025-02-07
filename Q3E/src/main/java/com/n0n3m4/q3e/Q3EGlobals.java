@@ -133,18 +133,19 @@ public final class Q3EGlobals
     public static final int SIGNALS_HANDLER_BACKTRACE = 2;
 
     // game engine library
-    public static final String LIB_ENGINE_ID        = "libidtech4.so"; // DOOM3
-    public static final String LIB_ENGINE_RAVEN     = "libidtech4_raven.so"; // Quake 4
-    public static final String LIB_ENGINE_HUMANHEAD = "libidtech4_humanhead.so"; // Prey 2006
-    public static final String LIB_ENGINE2_ID       = "libyquake2.so"; // Quake 2
-    public static final String LIB_ENGINE3_ID       = "libioquake3.so"; // Quake 3
-    public static final String LIB_ENGINE3_RTCW     = "libiowolfsp.so"; // RTCW
-    public static final String LIB_ENGINE4_TDM      = "libTheDarkMod.so"; // TDM
-    public static final String LIB_ENGINE1_QUAKE    = "libdarkplaces.so"; // Quake 1
-    public static final String LIB_ENGINE4_D3BFG    = "libRBDoom3BFG.so"; // Doom3-BFG
-    public static final String LIB_ENGINE1_DOOM     = "libgzdoom.so"; // GZDOOM
-    public static final String LIB_ENGINE3_ETW      = "libetl.so"; // ETW
-    public static final String LIB_ENGINE3_REALRTCW = "libRealRTCW.so"; // RealRTCW
+    public static final String LIB_ENGINE_ID            = "libidtech4.so"; // DOOM3
+    public static final String LIB_ENGINE_RAVEN         = "libidtech4_raven.so"; // Quake 4
+    public static final String LIB_ENGINE_HUMANHEAD     = "libidtech4_humanhead.so"; // Prey 2006
+    public static final String LIB_ENGINE2_ID           = "libyquake2.so"; // Quake 2
+    public static final String LIB_ENGINE3_ID           = "libioquake3.so"; // Quake 3
+    public static final String LIB_ENGINE3_RTCW         = "libiowolfsp.so"; // RTCW
+    public static final String LIB_ENGINE4_TDM          = "libTheDarkMod.so"; // TDM
+    public static final String LIB_ENGINE1_QUAKE        = "libdarkplaces.so"; // Quake 1
+    public static final String LIB_ENGINE4_D3BFG        = "libRBDoom3BFG.so"; // Doom3-BFG
+    public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
+    public static final String LIB_ENGINE1_DOOM         = "libgzdoom.so"; // GZDOOM
+    public static final String LIB_ENGINE3_ETW          = "libetl.so"; // ETW
+    public static final String LIB_ENGINE3_REALRTCW     = "libRealRTCW.so"; // RealRTCW
 
     // game config file
     public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg"; // DOOM3

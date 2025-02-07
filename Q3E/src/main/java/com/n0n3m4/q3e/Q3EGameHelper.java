@@ -94,6 +94,7 @@ public class Q3EGameHelper
         else
             Q3EUtils.q3ei.ResetGameState();
 
+        Q3EUtils.q3ei.isD3BFG_Vulkan = "Vulkan".equalsIgnoreCase(preferences.getString(Q3EPreference.pref_harm_d3bfg_rendererBackend, "OpenGL"));
         if (!Q3EUtils.q3ei.IsInitGame()) // not from GameLauncher::startActivity
         {
             Q3EUtils.q3ei.standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
@@ -498,13 +499,15 @@ public class Q3EGameHelper
         //String versionName = "4.14.0";
 
         versionCheckFile = "idtech4amm.version";
-        gzdoomResource = Q3EGlobals.PatchResource.GZDOOM_RESOURCE;
+        gzdoomResource = Q3EGlobals.IS_64 ? Q3EGlobals.PatchResource.GZDOOM_RESOURCE : Q3EGlobals.PatchResource.GZDOOM_RESOURCE_32;
 
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", versionCheckFile);
         //final String engineVersionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.gzdoom.version");
         final String version = Q3EGlobals.GZDOOM_VERSION;
-        final String name = "GZDOOM game resource";
+        String name = "GZDOOM game resource";
+        if(!Q3EGlobals.IS_64)
+            name += "(32bits)";
 
         //boolean change = CheckExtractResourceVersion(engineVersionFile, versionName, name);
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);

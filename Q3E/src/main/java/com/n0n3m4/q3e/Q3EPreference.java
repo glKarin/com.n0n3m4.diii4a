@@ -36,6 +36,7 @@ public final class Q3EPreference
     public static final String pref_harm_r_ambientLightingBrightness        = "q3e_harm_r_ambientLightingBrightness"; //k
     public static final String pref_harm_mapBack                      = "q3e_harm_map_back"; //k
     public static final String pref_harm_game                         = "q3e_harm_game"; //k
+    public static final String pref_harm_d3bfg_rendererBackend        = "q3e_harm_d3bfg_rendererBackend"; //k
 
     // DOOM 3
     public static final String pref_params                       = "q3e_params";

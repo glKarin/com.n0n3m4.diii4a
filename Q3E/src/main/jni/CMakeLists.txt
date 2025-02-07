@@ -81,7 +81,7 @@ endif()
 
 if(GAME_DOOM3BFG) # 1.4.0 | f81a8c1dd9b762774a233ba071837b2c7a374751 | Mar 6, 2022 | Updated release notes
     message(STATUS "Build DOOM 3 BFG")
-    add_subdirectory ( doom3bfg/neo ) # RBDOOM3-BFG
+    add_subdirectory ( doom3bfg ) # RBDOOM3-BFG
 endif()
 
 if(GAME_DNF)

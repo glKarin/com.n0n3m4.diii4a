@@ -137,6 +137,8 @@ struct vulkanContext_t
 // SRS - Generalized Vulkan SDL platform
 #if defined(VULKAN_USE_PLATFORM_SDL)
 	SDL_Window*						sdlWindow = nullptr;
+#elif defined(__ANDROID__) //karin: ANativeWindow on Android
+	void *sdlWindow;
 #endif
 	uint64							frameCounter;
 	uint32							frameParity;
@@ -215,6 +217,9 @@ struct vulkanContext_t
 	idArray< idArray< uint32, MRB_TOTAL_QUERIES >, NUM_FRAME_DATA >		queryAssignedIndex;
 	idArray< idArray< uint64, NUM_TIMESTAMP_QUERIES >, NUM_FRAME_DATA >	queryResults;
 	idArray< VkQueryPool, NUM_FRAME_DATA >		queryPools;
+#ifdef __ANDROID__ //karin: extras configs on Android
+	bool							presentFamilyAvailable;
+#endif
 };
 
 extern vulkanContext_t vkcontext;

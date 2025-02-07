@@ -30,7 +30,11 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "../../idlib/precompiled.h"
+#if !defined(USE_VULKAN)
 #include <GL/glew.h>
+#else
+#include <GLES3/gl3.h>
+#endif
 
 #define Q3E_PRINTF common->Printf
 #define Q3E_ERRORF common->Error
@@ -54,6 +58,11 @@ extern void GLES_PostInit(void);
 #include "renderer/RenderCommon.h"
 #include "android_local.h"
 
+#ifdef USE_VULKAN
+extern void VKimp_RecreateSurfaceAndSwapchain(void);
+extern void VKimp_WaitForStop(void);
+#endif
+
 idCVar in_nograb( "in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "prevents input grabbing" );
 // Linux open source drivers suck
 idCVar r_useOpenGL32( "r_useOpenGL32", "0", CVAR_INTEGER, "0 = OpenGL ES 3.0, 1 = OpenGL ES 3.1, 2 = OpenGL ES 3.2", 0, 2 );
@@ -64,12 +73,18 @@ static bool grabbed = false;
 extern void Android_GrabMouseCursor(bool grabIt);
 extern void Sys_ForceResolution(void);
 
+ANativeWindow * Android_GetVulkanWindow( void )
+{
+	return (ANativeWindow *)win;
+}
+
 /*
 ===============
 GLES_Init
 ===============
 */
 
+#if !defined(USE_VULKAN)
 void GLimp_ActivateContext() {
 	Q3E_ActivateContext();
 }
@@ -77,6 +92,7 @@ void GLimp_ActivateContext() {
 void GLimp_DeactivateContext() {
 	Q3E_DeactivateContext();
 }
+#endif
 
 void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
 {
@@ -85,20 +101,30 @@ void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
 
 void GLimp_AndroidInit(volatile ANativeWindow *w)
 {
+#if !defined(USE_VULKAN)
 	if(Q3E_NoDisplay())
 		return;
 
 	if(Q3E_RequireWindow(w))
 		Q3E_RestoreGL();
+#else
+	if(Q3E_RequireWindow(w))
+		VKimp_RecreateSurfaceAndSwapchain();
+#endif
 }
 
 void GLimp_AndroidQuit(void)
 {
+#if !defined(USE_VULKAN)
 	Q3E_DestroyGL(true);
+#else
+	VKimp_WaitForStop();
+#endif
 }
 
 bool GLimp_OpenDisplay(void)
 {
+#if !defined(USE_VULKAN)
 	if(Q3E_HasDisplay()) {
 		return true;
 	}
@@ -109,6 +135,9 @@ bool GLimp_OpenDisplay(void)
 	}
 
 	return Q3E_OpenDisplay();
+#else
+	return true;
+#endif
 }
 
 void GLES_PostInit(void) {
@@ -151,7 +180,7 @@ bool GLimp_Init( glimpParms_t parms )
 {
 #ifdef USE_VULKAN
 	return true;
-#endif
+#else
 
 	common->Printf( "Initializing OpenGL subsystem\n" );
 
@@ -195,6 +224,7 @@ bool GLimp_Init( glimpParms_t parms )
 	}
 
 	return true;
+#endif
 }
 /*
 ===================
@@ -233,12 +263,11 @@ void GLimp_Shutdown()
 {
 #ifdef USE_VULKAN
 	common->Printf( "Shutting down Vulkan subsystem\n" );
-	return;
 #else
 	common->Printf( "Shutting down OpenGL subsystem\n" );
-#endif
 
 	Q3E_ShutdownGL();
+#endif
 }
 
 /*
