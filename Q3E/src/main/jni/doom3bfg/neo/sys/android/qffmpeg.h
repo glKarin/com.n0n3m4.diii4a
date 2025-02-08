@@ -31,12 +31,18 @@ QFFMPEGPROC(av_samples_alloc, int, (uint8_t **audio_data, int *linesize, int nb_
 #endif
 
 #ifdef QFFMPEG_AVFORMAT
+#if !defined(ff_const59)
+#define ff_const59 const
+#endif
 QFFMPEGPROC(avformat_open_input, int, (AVFormatContext **ps, const char *url, ff_const59 AVInputFormat *fmt, AVDictionary **options))
 QFFMPEGPROC(avformat_find_stream_info, int, (AVFormatContext *ic, AVDictionary **options))
 QFFMPEGPROC(av_find_best_stream, int, (AVFormatContext *ic,
                         enum AVMediaType type,
                         int wanted_stream_nb,
                         int related_stream,
+#if LIBAVCODEC_VERSION_MAJOR > 58
+                        const
+#endif
                         AVCodec **decoder_ret,
                         int flags))
 QFFMPEGPROC(av_seek_frame, int, (AVFormatContext *s, int stream_index, int64_t timestamp,

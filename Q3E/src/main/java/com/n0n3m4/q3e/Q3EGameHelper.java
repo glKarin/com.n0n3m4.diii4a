@@ -506,8 +506,6 @@ public class Q3EGameHelper
         //final String engineVersionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.gzdoom.version");
         final String version = Q3EGlobals.GZDOOM_VERSION;
         String name = "GZDOOM game resource";
-        if(!Q3EGlobals.IS_64)
-            name += "(32bits)";
 
         //boolean change = CheckExtractResourceVersion(engineVersionFile, versionName, name);
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);

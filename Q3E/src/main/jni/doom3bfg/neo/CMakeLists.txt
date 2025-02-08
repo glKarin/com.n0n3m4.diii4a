@@ -10,6 +10,7 @@ if(ANDROID)
 	add_definitions(-D_DIII4A) # for DIII4A touchscreen
 	add_compile_options(-Wno-non-c-typedef-for-linkage)
 	add_definitions(-DGLEW_EGL) # Using OpenGLES3.2
+    option(FFMPEG_VERSION_60 "FFMpeg version greater than 60" ON)
 endif()
 add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
 add_definitions(-D_GLES) # Using OpenGLES3.2
@@ -17,6 +18,13 @@ option(DEPTH_COMPONENTS_32 "Use 32 depth components depth texture(default 24)" O
 if(DEPTH_COMPONENTS_32)
 	add_definitions(-D_DEPTH_COMPONENTS_32) # Using 32 depth components depth texture
 endif()
+
+if(CMAKE_CXX_BYTE_ORDER EQUAL BIG_ENDIAN)
+	set(big_endian 1)
+else()
+	set(big_endian 0)
+endif()
+add_definitions(-DBUILD_IS_BIG_ENDIAN=${big_endian})
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -1736,7 +1744,11 @@ else()
 	if(UNIX)
 		if(FFMPEG)
 			if(ANDROID)
-				include_directories(libs/ffmpeg/include)
+			    if(FFMPEG_VERSION_60)
+				    include_directories(libs/ffmpeg60/include) # repository
+			    else()
+				    include_directories(libs/ffmpeg/include) # local
+			    endif()
 				add_definitions(-DUSE_FFMPEG)
 				if(1)
 					add_definitions(-D_DL_FFMPEG) # using dlopen ffmpeg
