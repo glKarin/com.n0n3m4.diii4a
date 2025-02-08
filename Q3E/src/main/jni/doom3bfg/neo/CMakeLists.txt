@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 
-project(RBDoom3BFG)
+project(RBDoom3BFG${RBDOOM3BFG_BACKEND})
 
 # build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -10,6 +10,7 @@ if(ANDROID)
 	add_definitions(-D_DIII4A) # for DIII4A touchscreen
 	add_compile_options(-Wno-non-c-typedef-for-linkage)
 	add_definitions(-DGLEW_EGL) # Using OpenGLES3.2
+    option(FFMPEG_VERSION_60 "FFMpeg version greater than 60" ON)
 endif()
 add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
 add_definitions(-D_GLES) # Using OpenGLES3.2
@@ -17,6 +18,13 @@ option(DEPTH_COMPONENTS_32 "Use 32 depth components depth texture(default 24)" O
 if(DEPTH_COMPONENTS_32)
 	add_definitions(-D_DEPTH_COMPONENTS_32) # Using 32 depth components depth texture
 endif()
+
+if(CMAKE_CXX_BYTE_ORDER EQUAL BIG_ENDIAN)
+	set(big_endian 1)
+else()
+	set(big_endian 0)
+endif()
+add_definitions(-DBUILD_IS_BIG_ENDIAN=${big_endian})
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -54,9 +62,17 @@ option(FFMPEG
 
 option(BINKDEC
 		"Use included libbinkdec to render Bink videos" OFF)
-		
+
+if(ANDROID)
+	if(RBDOOM3BFG_BACKEND STREQUAL "Vulkan")
+		set(USE_VULKAN TRUE)
+	else()
+		set(USE_VULKAN FALSE)
+	endif()
+else()
 option(USE_VULKAN
-		"Use Vulkan instead of OpenGL" OFF)
+		"Use Vulkan instead of OpenGL" ON)
+endif()
 
 option(SPIRV_SHADERC
 		"Compile SPIR-V shader byte code using shaderc instead of using Glslang directly" OFF)
@@ -407,7 +423,7 @@ if(USE_VULKAN)
 		SET_OPTION(ENABLE_SPVREMAPPER ON)
 		SET_OPTION(ENABLE_GLSLANG_BINARIES OFF)
 		SET_OPTION(ENABLE_HLSL OFF)
-		SET_OPTION(ENABLE_OPT ON)
+		SET_OPTION(ENABLE_OPT OFF) #k: ON TODO
 		SET_OPTION(SPIRV_SKIP_EXECUTABLES ON)
 		
 		# options required by July 2020 release
@@ -427,9 +443,15 @@ if(USE_VULKAN)
 	endif()
 
 	# Use FindVulkan module added with CMAKE 3.7
+	if(ANDROID)
+		set(Vulkan_FOUND TRUE)
+		set(Vulkan_LIBRARY "")
+		include_directories(../../depincs/vulkan)
+	else()
 	if(NOT CMAKE_VERSION VERSION_LESS 3.7.0)
 		message( STATUS "Using module to find Vulkan" )
 		find_package(Vulkan)
+	endif()
 	endif()
 
 	if(NOT Vulkan_FOUND)
@@ -454,7 +476,11 @@ if(USE_VULKAN)
 	# Eric: For use with SDL2/Vulkan
 	if(UNIX)
         # SRS - For UNIX-like target OSs use the generic SDL Vulkan platform
+		if(ANDROID) #k: Android Vulkan
+        add_definitions(-DVK_USE_PLATFORM_ANDROID_KHR)
+		else()
         add_definitions(-DVULKAN_USE_PLATFORM_SDL)
+		endif()
 	elseif(WIN32)
 		add_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
 	endif()
@@ -1718,7 +1744,11 @@ else()
 	if(UNIX)
 		if(FFMPEG)
 			if(ANDROID)
-				include_directories(libs/ffmpeg/include)
+			    if(FFMPEG_VERSION_60)
+				    include_directories(libs/ffmpeg60/include) # repository
+			    else()
+				    include_directories(libs/ffmpeg/include) # local
+			    endif()
 				add_definitions(-DUSE_FFMPEG)
 				if(1)
 					add_definitions(-D_DL_FFMPEG) # using dlopen ffmpeg
@@ -1896,14 +1926,14 @@ else()
 	endif()
 
 	if(ANDROID)
-		add_library(RBDoom3BFG SHARED ${RBDOOM3_SOURCES})
+		add_library(RBDoom3BFG${RBDOOM3BFG_BACKEND} SHARED ${RBDOOM3_SOURCES})
 	else()
 	add_executable(RBDoom3BFG WIN32 ${RBDOOM3_SOURCES})
 	endif()
 
 	if (USE_PRECOMPILED_HEADERS)
 		# make sure precompiled header is created before executable is compiled
-		add_dependencies(RBDoom3BFG precomp_header_rbdoom3bfg)
+		add_dependencies(RBDoom3BFG${RBDOOM3BFG_BACKEND} precomp_header_rbdoom3bfg)
 		
 		# make sure precompiled header is deleted after executable is compiled
 		add_dependencies(rm_precomp_header RBDoom3BFG)
@@ -1912,8 +1942,12 @@ else()
 	if(NOT WIN32)
 		set(RBDoom3BFG_sys_libs)
 		if(ANDROID)
-			target_include_directories(RBDoom3BFG PRIVATE ../../common)
-			set(OPENGL_LIBRARIES GLESv3 EGL)
+			target_include_directories(RBDoom3BFG${RBDOOM3BFG_BACKEND} PRIVATE ../../common)
+			if(USE_VULKAN)
+			    set(OPENGL_LIBRARIES EGL)
+			else()
+			    set(OPENGL_LIBRARIES GLESv3 EGL)
+			endif()
 			set(RBDoom3BFG_sys_libs openal android z log) #  ${FFmpeg_LIBRARIES}
 		else()
 			if(NOT "${CMAKE_SYSTEM}" MATCHES "Darwin")
@@ -1922,8 +1956,8 @@ else()
 			set(RBDoom3BFG_sys_libs pthread)
 		endif()
 
-		target_link_libraries(RBDoom3BFG
-				RBDoom3BFG_idlib
+		target_link_libraries(RBDoom3BFG${RBDOOM3BFG_BACKEND}
+				RBDoom3BFG_idlib${RBDOOM3BFG_BACKEND}
 			${Vulkan_LIBRARIES}
 			${OPENGL_LIBRARIES}
 			${RBDoom3BFG_sys_libs} # pthread

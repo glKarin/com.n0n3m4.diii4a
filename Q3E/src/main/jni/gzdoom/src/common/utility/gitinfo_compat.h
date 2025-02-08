@@ -5,8 +5,8 @@
 #include "gitinfo.h"
 #else
 #define GIT_DESCRIPTION "GZDoom is a feature centric port for all Doom engine games, based on ZDoom, adding an OpenGL renderer and powerful scripting capabilities"
-#define GIT_HASH "71c40432e5e893c629a1c9c76a523a0ab22bd56a"
-#define GIT_TIME "Apr 28, 2024"
+#define GIT_HASH "25ec8a689d5654a7f57869e09c0ce0d0892ba6a4"
+#define GIT_TIME "Dec 18, 2024"
 #endif
 
 #endif

@@ -137,7 +137,7 @@ else()
 	                  )
 	endif()
 	
-	add_library(RBDoom3BFG_idlib STATIC ${ID_SOURCES_ALL} ${ID_INCLUDES_ALL})
+	add_library(RBDoom3BFG_idlib${RBDOOM3BFG_BACKEND} STATIC ${ID_SOURCES_ALL} ${ID_INCLUDES_ALL})
 	if (USE_PRECOMPILED_HEADERS)
 	add_dependencies(RBDoom3BFG_idlib precomp_header_idlib)
 	endif()

@@ -1293,7 +1293,7 @@ struct glimpParms_t
 
 // Eric: If on Linux using Vulkan use the sdl_vkimp.cpp methods
 // SRS - Generalized Vulkan SDL platform
-#if defined(VULKAN_USE_PLATFORM_SDL)
+#if defined(VULKAN_USE_PLATFORM_SDL) || defined(VK_USE_PLATFORM_ANDROID_KHR) //karin: Android Vulkan
 #include <vector>
 
 #define CLAMP(x, lo, hi)    ((x) < (lo) ? (lo) : (x) > (hi) ? (hi) : (x))

@@ -94,6 +94,7 @@ public class Q3EGameHelper
         else
             Q3EUtils.q3ei.ResetGameState();
 
+        Q3EUtils.q3ei.isD3BFG_Vulkan = "Vulkan".equalsIgnoreCase(preferences.getString(Q3EPreference.pref_harm_d3bfg_rendererBackend, "OpenGL"));
         if (!Q3EUtils.q3ei.IsInitGame()) // not from GameLauncher::startActivity
         {
             Q3EUtils.q3ei.standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);

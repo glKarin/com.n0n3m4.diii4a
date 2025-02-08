@@ -14,5 +14,10 @@ allprojects {
         mavenCentral()
         jcenter()
         google()
+
+        /* // for import local aar
+        flatDir {
+            dirs project(':Q3E').file('libs')
+        } */
     }
 }

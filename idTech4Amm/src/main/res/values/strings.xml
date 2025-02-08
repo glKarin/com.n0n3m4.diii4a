@@ -452,5 +452,6 @@
     <string name="opengles_version_harm_gl_es">OpenGLES version(harm_gl_es)</string>
     <string name="choose_mod_files">Choose mod files</string>
     <string name="opengl_emulate_version_harm_gl_version">Emulating OpenGL version(harm_gl_version)</string>
+    <string name="renderer_backend">Renderer backend</string>
 
 </resources>

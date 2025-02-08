@@ -159,6 +159,9 @@ Vulkan, as well as used by the library itself to make any CPU-side allocations.
 */
 
 #include <vulkan/vulkan.h>
+#ifdef __ANDROID__ //karin: vulkan function macros
+#include "vk.h"
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /** \defgroup general General
@@ -824,6 +827,8 @@ void* _aligned_alloc( size_t alignment, size_t size )
 		#define VMA_SYSTEM_ALIGNED_MALLOC(size, alignment)   (_aligned_malloc((size), (alignment)))
 	#elif defined(__APPLE__)
 		#define VMA_SYSTEM_ALIGNED_MALLOC(size, alignment)   (_aligned_alloc((alignment), (size) ))
+	#elif defined(__ANDROID__)
+		#define VMA_SYSTEM_ALIGNED_MALLOC(size, alignment) vma_aligned_alloc((alignment), (size))
 	#else
 		#define VMA_SYSTEM_ALIGNED_MALLOC(size, alignment)   (aligned_alloc((alignment), (size) ))
 	#endif
@@ -1180,6 +1185,19 @@ static IterT VmaBinaryFindFirstNotLess( IterT beg, IterT end, const KeyT& key, C
 
 ////////////////////////////////////////////////////////////////////////////////
 // Memory allocation
+#ifdef __ANDROID__
+#include <cstdlib>
+void* vma_aligned_alloc(size_t alignment, size_t size)
+{
+    // alignment must be >= sizeof(void*)
+    if(alignment < sizeof(void*))
+    {
+        alignment = sizeof(void*);
+    }
+
+    return memalign(alignment, size);
+}
+#endif
 
 static void* VmaMalloc( const VkAllocationCallbacks* pAllocationCallbacks, size_t size, size_t alignment )
 {

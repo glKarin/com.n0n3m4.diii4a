@@ -455,7 +455,7 @@ void R_SetNewMode( const bool fullInit )
 		{
 			// create the context as well as setting up the window
 // SRS - Generalized Vulkan SDL platform
-#if defined(VULKAN_USE_PLATFORM_SDL)
+#if defined(VULKAN_USE_PLATFORM_SDL) || defined(VK_USE_PLATFORM_ANDROID_KHR) //karin: Android Vulkan
 			if( VKimp_Init( parms ) )
 #else
 			if( GLimp_Init( parms ) )
@@ -473,7 +473,7 @@ void R_SetNewMode( const bool fullInit )
 		{
 			// just rebuild the window
 // SRS - Generalized Vulkan SDL platform
-#if defined(VULKAN_USE_PLATFORM_SDL)
+#if defined(VULKAN_USE_PLATFORM_SDL) || defined(VK_USE_PLATFORM_ANDROID_KHR) //karin: Android Vulkan
 			if( VKimp_SetScreenParms( parms ) )
 #else
 			if( GLimp_SetScreenParms( parms ) )
@@ -1495,7 +1495,7 @@ void R_SetColorMappings()
 		tr.gammaTable[i] = idMath::ClampInt( 0, 0xFFFF, inf );
 	}
 // SRS - Generalized Vulkan SDL platform
-#if defined(VULKAN_USE_PLATFORM_SDL)
+#if defined(VULKAN_USE_PLATFORM_SDL) || defined(VK_USE_PLATFORM_ANDROID_KHR) //karin: Android Vulkan
 	VKimp_SetGamma( tr.gammaTable, tr.gammaTable, tr.gammaTable );
 #else
 	GLimp_SetGamma( tr.gammaTable, tr.gammaTable, tr.gammaTable );

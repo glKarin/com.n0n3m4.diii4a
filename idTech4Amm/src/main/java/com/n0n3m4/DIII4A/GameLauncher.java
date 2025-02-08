@@ -611,6 +611,17 @@ public class GameLauncher extends Activity
 					SetProp("harm_image_useCompression", index);
 				}
 			}
+			else if (rgId == R.id.doom3bfg_rendererBackend)
+			{
+				if(Q3EUtils.q3ei.isD3BFG)
+				{
+					index = GetRadioGroupSelectIndex(radioGroup, id);
+					String rb = index == 1 ? "Vulkan" : "OpenGL";
+					PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+							.putString(Q3EPreference.pref_harm_d3bfg_rendererBackend, rb)
+							.commit();
+				}
+			}
 
 			// RealRTCW
 			else if (rgId == R.id.realrtcw_shadows)
@@ -1302,6 +1313,10 @@ public class GameLauncher extends Activity
 
 		V.doom3bfg_useMediumPrecision.setChecked(getProp("harm_r_useMediumPrecision", false));
 		if (!IsProp("harm_r_useMediumPrecision")) setProp("harm_r_useMediumPrecision", false);
+
+		str = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).getString(Q3EPreference.pref_harm_d3bfg_rendererBackend, "OpenGL");
+		index = "Vulkan".equalsIgnoreCase(str) ? 1 : 0;
+		SelectRadioGroup(V.doom3bfg_rendererBackend, index);
 	}
 
 	private void Updatehacktings_TDM()
@@ -1879,6 +1894,11 @@ public class GameLauncher extends Activity
 
 		V.doom3bfg_useMediumPrecision.setChecked(getProp("harm_r_useMediumPrecision", false));
 		V.doom3bfg_useMediumPrecision.setOnCheckedChangeListener(m_checkboxChangeListener);
+
+		str = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).getString(Q3EPreference.pref_harm_d3bfg_rendererBackend, "OpenGL");
+		index = "Vulkan".equalsIgnoreCase(str) ? 1 : 0;
+		SelectRadioGroup(V.doom3bfg_rendererBackend, index);
+		V.doom3bfg_rendererBackend.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
 	private void SetupUI_TDM()
@@ -2579,6 +2599,12 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, V.gzdoom_load_brightmaps_pk3.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_max_console_height_frac, V.consoleHeightFracValue.getProgress());
 		mEdtr.putString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), V.edt_fs_game.getText().toString());
+		if(Q3EUtils.q3ei.isD3BFG)
+		{
+			index = GetRadioGroupSelectIndex(V.doom3bfg_rendererBackend);
+			String rb = index == 1 ? "Vulkan" : "OpenGL";
+			mEdtr.putString(Q3EPreference.pref_harm_d3bfg_rendererBackend, rb);
+		}
         mEdtr.commit();
     }
 
@@ -4075,6 +4101,7 @@ public class GameLauncher extends Activity
 		public RadioGroup doom3bfg_useCompression;
 		public CheckBox doom3bfg_useCompressionCache;
 		public CheckBox doom3bfg_useMediumPrecision;
+		public RadioGroup doom3bfg_rendererBackend;
 		public LinearLayout realrtcw_section;
 		public CheckBox realrtcw_sv_cheats;
 		public RadioGroup realrtcw_shadows;
@@ -4209,6 +4236,7 @@ public class GameLauncher extends Activity
 			yquake2_vid_renderer = findViewById(R.id.yquake2_vid_renderer);
 			doom3bfg_section = findViewById(R.id.doom3bfg_section);
 			doom3bfg_useCompression = findViewById(R.id.doom3bfg_useCompression);
+			doom3bfg_rendererBackend = findViewById(R.id.doom3bfg_rendererBackend);
 			doom3bfg_useCompressionCache = findViewById(R.id.doom3bfg_useCompressionCache);
 			doom3bfg_useMediumPrecision = findViewById(R.id.doom3bfg_useMediumPrecision);
 			realrtcw_section = findViewById(R.id.realrtcw_section);

@@ -79,6 +79,9 @@ extern PFN_vkCmdBeginDebugUtilsLabelEXT		qvkCmdBeginDebugUtilsLabelEXT;
 extern PFN_vkCmdEndDebugUtilsLabelEXT		qvkCmdEndDebugUtilsLabelEXT;
 extern PFN_vkCmdInsertDebugUtilsLabelEXT	qvkCmdInsertDebugUtilsLabelEXT;
 
+#ifdef __ANDROID__ //karin: Vulkan function macros
+#include "vk.h"
+#endif
 #endif
 
 #endif

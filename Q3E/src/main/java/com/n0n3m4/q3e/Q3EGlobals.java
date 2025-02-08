@@ -142,6 +142,7 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE4_TDM      = "libTheDarkMod.so"; // TDM
     public static final String LIB_ENGINE1_QUAKE    = "libdarkplaces.so"; // Quake 1
     public static final String LIB_ENGINE4_D3BFG    = "libRBDoom3BFG.so"; // Doom3-BFG
+    public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
     public static final String LIB_ENGINE1_DOOM     = "libgzdoom.so"; // GZDOOM
     public static final String LIB_ENGINE3_ETW      = "libetl.so"; // ETW
     public static final String LIB_ENGINE3_REALRTCW = "libRealRTCW.so"; // RealRTCW
@@ -350,7 +351,7 @@ public final class Q3EGlobals
     // extra internal game file version: <Game engine version>.<idTech4A++ patch version>
     public static final String TDM_GLSL_SHADER_VERSION        = "2.12.5"; // 5: change all shaders default precision from mediump to highp
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
-    public static final String GZDOOM_VERSION                 = "4.14.0.2"; // 2: change postprocess OpenGL shaders
+    public static final String GZDOOM_VERSION                 = "4.14.0.3"; // 2: change postprocess OpenGL shaders
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 
