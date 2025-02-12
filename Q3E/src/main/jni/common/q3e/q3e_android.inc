@@ -138,7 +138,7 @@ extern void Q3E_MotionEvent(float dx, float dy);
 // Android files default path
 //#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
 #define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
-#define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib"
+#define _ANDROID_DLL_PATH ""
 #define _ANDROID_GAME_DATA_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME
 #define _ANDROID_APP_HOME_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME "/files"
 
@@ -584,6 +584,32 @@ const char * Sys_GameDataDefaultPath(void)
 const char * Sys_ApplicationHomePath(void)
 {
     return app_home_dir ? app_home_dir : _ANDROID_APP_HOME_PATH;
+}
+
+char * Sys_MakeDLLPath(const char *libname, char path[], int max_length)
+{
+#undef snprintf
+#define HARM_MAX_OSPATH 1024
+	char dllName[HARM_MAX_OSPATH];
+	memset(dllName, 0, HARM_MAX_OSPATH);
+	size_t libnameLength = strlen(libname);
+	
+	if(libnameLength >= 3 && (libname[0] != 'l' || libname[1] != 'i' || libname[2] != 'b'))
+		snprintf(dllName, HARM_MAX_OSPATH - 1, "lib");
+	snprintf(dllName + strlen(dllName), HARM_MAX_OSPATH - 1 - strlen(dllName), "%s", libname);
+
+	if(libnameLength >= 3 && (libname[libnameLength - 3] != '.' || libname[libnameLength - 2] != 's' || libname[libnameLength - 1] != 'o'))
+		snprintf(dllName + strlen(dllName), HARM_MAX_OSPATH - 1 - strlen(dllName), ".so");
+	
+	memset(path, 0, max_length);
+	const char * dllDefaultPath = Sys_DLLDefaultPath();
+	if(dllDefaultPath && dllDefaultPath[0])
+		snprintf(path, max_length - 1, "%s/%s", dllDefaultPath, dllName);
+	else
+		snprintf(path, max_length - 1, "%s", dllName);
+	Q3E_PRINTF("[Harmattan]: Make library path -> %s\n", path);
+	return path;
+#undef HARM_MAX_OSPATH
 }
 
 

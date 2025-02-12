@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="1dp"
-            android:text="Renderer backend" />
+            android:text="@string/renderer_backend" />
     <RadioGroup
             android:id="@+id/doom3bfg_rendererBackend"
             android:layout_width="wrap_content"

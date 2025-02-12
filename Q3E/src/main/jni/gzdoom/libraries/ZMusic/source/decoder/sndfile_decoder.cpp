@@ -64,9 +64,13 @@ extern "C" int IsSndFilePresent()
 	{
 		done = true;
 #ifdef __ANDROID__ //karin: libsndfile on Android
-        extern std::string DLL_Path;
-		auto abspath = DLL_Path + "/" SNDFILELIB;
-		cached_result = SndFileModule.Load({abspath.c_str()});
+        /* extern std::string DLL_Path;
+		std::string abspath = DLL_Path;
+		if(!abspath.empty())
+			abspath.append("/");
+		abspath.append(SNDFILELIB);
+		printf("ZMusic load %s\n", abspath.c_str()); */
+		cached_result = SndFileModule.Load({SNDFILELIB});
 #else
 		auto abspath = FModule_GetProgDir() + "/" SNDFILELIB;
 		cached_result = SndFileModule.Load({abspath.c_str(), SNDFILELIB});

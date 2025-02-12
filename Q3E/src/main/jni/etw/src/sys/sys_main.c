@@ -832,9 +832,11 @@ static void *Sys_TryLibraryLoad(const char *base, const char *gamedir, const cha
 #define Sys_GetDLLName_DIII4A(x) "libetw" x DLL_EXT
 	if(_load_dll_name)
 	{
-		const char * Sys_DLLDefaultPath(void);
+		char dllName[MAX_OSPATH];
+		Com_sprintf(dllName, sizeof(dllName), Sys_GetDLLName_DIII4A("%s"), _load_dll_name);
 		char realLibName[MAX_OSPATH];
-		Com_sprintf(realLibName, sizeof(realLibName), "%s/" Sys_GetDLLName_DIII4A("%s"), Sys_DLLDefaultPath(), _load_dll_name);
+		extern char * Sys_MakeDLLPath(const char *libname, char path[], int max_length);
+		Sys_MakeDLLPath(dllName, realLibName, MAX_OSPATH);
 		Com_Printf("[Harmattan]: Load library '%s' in '%s'\n", _load_dll_name, realLibName);
 		libHandle = Sys_LoadLibrary(realLibName);
 		_load_dll_name = NULL;

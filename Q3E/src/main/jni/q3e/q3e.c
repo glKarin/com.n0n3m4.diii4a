@@ -465,9 +465,9 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	const char *engineLibPath = (*env)->GetStringUTFChars(env, LibPath, &iscopy);
 	LOGI("idTech4a++ engine native library file: %s", engineLibPath);
 	int res = loadLib(engineLibPath);
-	(*env)->ReleaseStringUTFChars(env, LibPath, engineLibPath);
 	if(res != 0)
 	{
+		(*env)->ReleaseStringUTFChars(env, LibPath, engineLibPath);
 		return JNI_FALSE; // init fail
 	}
 
@@ -491,6 +491,9 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	if(redirectOutputToFile)
 		Q3E_RedirectOutput();
 
+	LOGI("Load library: %s", engineLibPath);
+	(*env)->ReleaseStringUTFChars(env, LibPath, engineLibPath);
+	
 	LOGI("idTech4A++ game data directory: %s", game_data_dir);
 
 	const char *arg = (*env)->GetStringUTFChars(env, Cmdline, &iscopy);

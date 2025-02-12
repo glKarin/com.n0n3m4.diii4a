@@ -1468,15 +1468,12 @@ int FS_FindVM(void **startSearch, char *found, int foundlen, const char *name, i
 			if(!strcmp(_fs_game, "missionpack")) // Team Arena
 				lib_suffix = "_mp";
 		}
-		const char * Sys_DLLDefaultPath(void);
-		char path[MAX_OSPATH];
-		memset(path, 0, MAX_OSPATH);
 		Com_sprintf(dllName, sizeof(dllName), "%s%s" DLL_EXT, name, lib_suffix);
-		snprintf(path, MAX_OSPATH - 1, "%s/lib%s", Sys_DLLDefaultPath(), dllName);
-		netpath = path;
-		Com_Printf("[Harmattan]: FS_FindVM: %s\n", netpath);
+		char path[MAX_OSPATH];
+		extern char * Sys_MakeDLLPath(const char *libname, char path[], int max_length);
+		netpath = Sys_MakeDLLPath(dllName, path, MAX_OSPATH);
 
-		if(FS_FileInPathExists(netpath))
+		if(netpath[0] != '/' || FS_FileInPathExists(netpath))
 		{
 			Q_strncpyz(found, netpath, foundlen);
 			*startSearch = NULL;
