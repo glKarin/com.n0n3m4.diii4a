@@ -178,12 +178,21 @@ void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPla
 			continue;
 		}
 
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP //karin: for Fracture Strogg mod
+		_DROID_ALLOC16_DEF(byte, cullBits, (stri->numVerts * sizeof(cullBits[0])));
+		_DROID_ALLOC16_DEF(idVec2, texCoords, (stri->numVerts * sizeof(texCoords[0])));
+#else
 		byte *cullBits = (byte *)_alloca16(stri->numVerts * sizeof(cullBits[0]));
 		idVec2 *texCoords = (idVec2 *)_alloca16(stri->numVerts * sizeof(texCoords[0]));
+#endif
 
 		SIMDProcessor->OverlayPointCull(cullBits, texCoords, localTextureAxis, stri->verts, stri->numVerts);
 
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP //karin: for Fracture Strogg mod
+		_DROID_ALLOC16_DEF(glIndex_t, vertexRemap, (sizeof(vertexRemap[0]) * stri->numVerts));
+#else
 		glIndex_t *vertexRemap = (glIndex_t *)_alloca16(sizeof(vertexRemap[0]) * stri->numVerts);
+#endif
 		SIMDProcessor->Memset(vertexRemap, -1,  sizeof(vertexRemap[0]) * stri->numVerts);
 
 		// find triangles that need the overlay
@@ -261,6 +270,9 @@ void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPla
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	_DROID_FREE(overlayVerts);
 	_DROID_FREE(overlayIndexes);
+	_DROID_FREE(cullBits);
+	_DROID_FREE(texCoords);
+	_DROID_FREE(vertexRemap);
 #endif
 }
 
