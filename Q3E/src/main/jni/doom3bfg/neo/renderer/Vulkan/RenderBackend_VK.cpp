@@ -278,7 +278,18 @@ static void CreateVulkanInstance()
 	appInfo.applicationVersion = 1;
 	appInfo.pEngineName = "idTech 4.5x";
 	appInfo.engineVersion = 1;
+#ifdef __ANDROID__ //karin: test apiVersion
+    uint32_t apiVersion;
+    uint32_t minorVersion = 0;
+    if(vkEnumerateInstanceVersion(&apiVersion) == VK_SUCCESS)
+    {
+        if(VK_VERSION_MINOR(apiVersion) >= 1)
+            minorVersion = 1;
+    }
+	appInfo.apiVersion = VK_MAKE_VERSION( 1, minorVersion, VK_HEADER_VERSION );
+#else
 	appInfo.apiVersion = VK_MAKE_VERSION( 1, 0, VK_HEADER_VERSION );
+#endif
 
 	VkInstanceCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -967,6 +978,7 @@ static void CreateLogicalDeviceAndQueues()
 	idList< int > uniqueIdx;
 	uniqueIdx.AddUnique( vkcontext.graphicsFamilyIdx );
 #ifdef __ANDROID__ //karin: check if present family not supported
+    idLib::Printf( "Vulkan support present family queue: %d\n", vkcontext.presentFamilyAvailable );
 	if(vkcontext.presentFamilyAvailable)
 #endif
 	uniqueIdx.AddUnique( vkcontext.presentFamilyIdx );
@@ -1173,8 +1185,8 @@ static VkExtent2D ChooseSurfaceExtent( VkSurfaceCapabilitiesKHR& caps )
 #endif
 #ifdef __ANDROID__ //karin: TODO: -1, cause flush if width == tr.GetWidth() && height == tr.GetHeight()
     //extern void SDL_Vulkan_GetDrawableSize( void *sdlWindow, int *width, int *height );
-    width = idMath::ClampInt( caps.minImageExtent.width, caps.maxImageExtent.width, width - 1 );
-    height = idMath::ClampInt( caps.minImageExtent.height, caps.maxImageExtent.height, height - 1 );
+    width = idMath::ClampInt( caps.minImageExtent.width, caps.maxImageExtent.width, width );
+    height = idMath::ClampInt( caps.minImageExtent.height, caps.maxImageExtent.height, height );
 #endif
 
 	if( caps.currentExtent.width == -1 )
@@ -1235,7 +1247,14 @@ static void CreateSwapChain()
 	}
 
 	info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+#ifdef __ANDROID__ //karin: test compositeAlpha
+	if(gpu.surfaceCaps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
+	    info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	else
+	    info.compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
+#else
 	info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+#endif
 	info.presentMode = presentMode;
 	info.clipped = VK_TRUE;
 
@@ -1249,11 +1268,22 @@ static void CreateSwapChain()
 	uint32 numImages = 0;
 	ID_VK_CHECK( vkGetSwapchainImagesKHR( vkcontext.device, vkcontext.swapchain, &numImages, NULL ) );
 	ID_VK_VALIDATE( numImages > 0, "vkGetSwapchainImagesKHR returned a zero image count." );
+#ifdef __ANDROID__ //karin: dynamic size
+	vkcontext.numSwapImages = numImages;
+#endif
 
+#ifdef __ANDROID__ //karin: dynamic size
+	vkcontext.swapchainImages.Resize(numImages);
+#endif
 	ID_VK_CHECK( vkGetSwapchainImagesKHR( vkcontext.device, vkcontext.swapchain, &numImages, vkcontext.swapchainImages.Ptr() ) );
 	ID_VK_VALIDATE( numImages > 0, "vkGetSwapchainImagesKHR returned a zero image count." );
 
+#ifdef __ANDROID__ //karin: dynamic size
+	vkcontext.swapchainViews.Resize(numImages);
+	for( uint32 i = 0; i < vkcontext.numSwapImages; ++i )
+#else
 	for( uint32 i = 0; i < NUM_FRAME_DATA; ++i )
+#endif
 	{
 		VkImageViewCreateInfo imageViewCreateInfo = {};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1283,12 +1313,21 @@ DestroySwapChain
 static void DestroySwapChain()
 {
 
+#ifdef __ANDROID__ //karin: dynamic size
+	for( uint32 i = 0; i < vkcontext.swapchainViews.Num(); ++i )
+#else
 	for( uint32 i = 0; i < NUM_FRAME_DATA; ++i )
+#endif
 	{
 		vkDestroyImageView( vkcontext.device, vkcontext.swapchainViews[ i ], NULL );
 	}
+#ifdef __ANDROID__ //karin: dynamic size
+	vkcontext.swapchainImages.Resize(0);
+	vkcontext.swapchainViews.Resize(0);
+#else
 	vkcontext.swapchainImages.Zero();
 	vkcontext.swapchainViews.Zero();
+#endif
 
 	vkDestroySwapchainKHR( vkcontext.device, vkcontext.swapchain, NULL );
 }
@@ -1685,7 +1724,12 @@ static void CreateFrameBuffers()
 	frameBufferCreateInfo.height = renderSystem->GetHeight();
 	frameBufferCreateInfo.layers = 1;
 
+#ifdef __ANDROID__ //karin: dynamic size
+	vkcontext.frameBuffers.Resize(vkcontext.numSwapImages);
+	for( int i = 0; i < vkcontext.numSwapImages; ++i )
+#else
 	for( int i = 0; i < NUM_FRAME_DATA; ++i )
+#endif
 	{
 		attachments[ 0 ] = vkcontext.swapchainViews[ i ];
 		ID_VK_CHECK( vkCreateFramebuffer( vkcontext.device, &frameBufferCreateInfo, NULL, &vkcontext.frameBuffers[ i ] ) );
@@ -1699,11 +1743,19 @@ DestroyFrameBuffers
 */
 static void DestroyFrameBuffers()
 {
+#ifdef __ANDROID__ //karin: dynamic size
+	for( int i = 0; i < vkcontext.frameBuffers.Num(); ++i )
+#else
 	for( int i = 0; i < NUM_FRAME_DATA; ++i )
+#endif
 	{
 		vkDestroyFramebuffer( vkcontext.device, vkcontext.frameBuffers[ i ], NULL );
 	}
+#ifdef __ANDROID__ //karin: dynamic size
+	vkcontext.frameBuffers.Resize(0);
+#else
 	vkcontext.frameBuffers.Zero();
+#endif
 }
 
 /*
@@ -1761,9 +1813,15 @@ static void ClearContext()
 #else
 	vkcontext.msaaAllocation = vulkanAllocation_t();
 #endif
+#ifdef __ANDROID__ //karin: dynamic size
+	vkcontext.swapchainImages.Resize(0);
+	vkcontext.swapchainViews.Resize(0);
+	vkcontext.frameBuffers.Resize(0);
+#else
 	vkcontext.swapchainImages.Zero();
 	vkcontext.swapchainViews.Zero();
 	vkcontext.frameBuffers.Zero();
+#endif
 	vkcontext.acquireSemaphores.Zero();
 	vkcontext.renderCompleteSemaphores.Zero();
 
@@ -1779,6 +1837,7 @@ static void ClearContext()
 	vkcontext.queryPools.Zero();
 #ifdef __ANDROID__ //karin: check if present family not supported
 	vkcontext.presentFamilyAvailable = false;
+	vkcontext.numSwapImages = NUM_FRAME_DATA;
 #endif
 }
 
@@ -2280,8 +2339,15 @@ void idRenderBackend::GL_StartFrame()
 		case VK_SUBOPTIMAL_KHR:
 			break;
 		case VK_ERROR_OUT_OF_DATE_KHR:
+#ifdef __ANDROID__ //karin: recreate framebuffers when recreate swapchain
+			vkDeviceWaitIdle( vkcontext.device );
+			DestroyFrameBuffers();
+#endif
 			DestroySwapChain();
 			CreateSwapChain();
+#ifdef __ANDROID__ //karin: recreate framebuffers when recreate swapchain
+			CreateFrameBuffers();
+#endif
 			return;
 			// return on_window_size_changed();
 			break;
@@ -2510,11 +2576,24 @@ void idRenderBackend::GL_BlockingSwapBuffers()
 	{
 		case VK_SUCCESS:
 			break;
-		case VK_ERROR_OUT_OF_DATE_KHR:
+#ifdef __ANDROID__ //karin: VK_SUBOPTIMAL_KHR as success
 		case VK_SUBOPTIMAL_KHR:
+			break;
+#endif
+		case VK_ERROR_OUT_OF_DATE_KHR:
+#if !defined(__ANDROID__) //karin: VK_SUBOPTIMAL_KHR as success
+		case VK_SUBOPTIMAL_KHR:
+#endif
 			// return on_window_size_changed(); Eric: Handle resizing the window.
+#ifdef __ANDROID__ //karin: recreate framebuffers when recreate swapchain
+			vkDeviceWaitIdle( vkcontext.device );
+			DestroyFrameBuffers();
+#endif
 			DestroySwapChain();
 			CreateSwapChain();
+#ifdef __ANDROID__ //karin: recreate framebuffers when recreate swapchain
+			CreateFrameBuffers();
+#endif
 			return;
 			break;
 		default:
@@ -3206,9 +3285,14 @@ void idRenderBackend::ImGui_RenderDrawLists( ImDrawData* draw_data )
 #ifdef __ANDROID__ //karin: export create/destory swapchain functions
 void VK_RecreateSwapchain( void )
 {
-	printf("Destory Vulkan swapchian......\n");
+	printf("Recreate swapchain......\n");
+	printf(" 1. Wait device idle\n");
+	vkDeviceWaitIdle( vkcontext.device );
+	printf(" 2. Destroy old framebuffers\n");
+	DestroyFrameBuffers();
+	printf(" 3. Destory old Vulkan swapchian\n");
 	DestroySwapChain();
-	printf("Create Vulkan swapchian......\n");
+	printf(" 4. Create new Vulkan swapchian\n");
 	CreateSwapChain();
 	printf("Recreate Vulkan swapchian done.\n");
 }

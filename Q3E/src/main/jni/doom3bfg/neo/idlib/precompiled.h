@@ -90,6 +90,8 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 #if defined(__APPLE__) && defined(USE_VULKAN)
 	// SRS - macOS MoltenVK/Metal needs triple buffering for full screen to work properly
 	const uint32 NUM_FRAME_DATA	= 3;
+/*#elif defined(__ANDROID__) && defined(USE_VULKAN)
+	const uint32 NUM_FRAME_DATA	= 3;*/
 #else
 	const uint32 NUM_FRAME_DATA = 2;
 #endif
