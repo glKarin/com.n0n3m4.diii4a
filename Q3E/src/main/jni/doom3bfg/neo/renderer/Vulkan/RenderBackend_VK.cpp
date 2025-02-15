@@ -3294,6 +3294,8 @@ void VK_RecreateSwapchain( void )
 	DestroySwapChain();
 	printf(" 4. Create new Vulkan swapchian\n");
 	CreateSwapChain();
+	printf(" 5. Ccreate new Vulkan framebuffers.\n");
+	CreateFrameBuffers();
 	printf("Recreate Vulkan swapchian done.\n");
 }
 #endif
