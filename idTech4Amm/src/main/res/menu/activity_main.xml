@@ -72,6 +72,11 @@
                 android:showAsAction="never|withText"/>
         </menu>
     </item>
+
+    <item
+        android:id="@+id/main_menu_change_game"
+        android:title="@string/change_game"
+        android:showAsAction="never"/>
     
     <item
         android:id="@+id/main_menu_settings"

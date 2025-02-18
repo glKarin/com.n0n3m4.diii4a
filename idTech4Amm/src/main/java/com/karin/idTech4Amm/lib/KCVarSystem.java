@@ -22,7 +22,7 @@ public final class KCVarSystem
                                 "1", "Only free memory",
                                 "2", "Free memory and delete VBO handle(only without multi-threading, else same as 1)"
                         ),
-                        KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "524288", "Control allocate temporary memory when load model data. 0 = Always heap; Negative = Always stack; Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)", 0),
+                        KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "262144", "Control allocate temporary memory when load model data. 0 = Always heap; Negative = Always stack; Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)", 0),
                         KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external OpenGLES2.0 GLSL shader program directory path", 0),
                         KCVar.CreateCVar("harm_r_shaderProgramES3Dir", "string", "glsl3progs", "Special external OpenGLES3.0 GLSL shader program directory path", 0),
 

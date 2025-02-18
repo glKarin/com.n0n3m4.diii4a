@@ -96,6 +96,7 @@ import com.n0n3m4.DIII4A.launcher.EditConfigFileFunc;
 import com.n0n3m4.DIII4A.launcher.EditExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractPatchResourceFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractSourceFunc;
+import com.n0n3m4.DIII4A.launcher.GameChooserFunc;
 import com.n0n3m4.DIII4A.launcher.OpenSourceLicenseFunc;
 import com.n0n3m4.DIII4A.launcher.RestorePreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.SetupControlsThemeFunc;
@@ -2278,6 +2279,11 @@ public class GameLauncher extends Activity
 			OpenShortcutCreator();
 			return true;
 		}
+		else if (itemId == R.id.main_menu_change_game)
+		{
+			OpenGameList();
+			return true;
+		}
 /*		else if (itemId == R.id.main_menu_shortcut_command)
 		{
 			OpenShortcutWithCommandCreator();
@@ -3982,6 +3988,21 @@ public class GameLauncher extends Activity
 			return Q3ELang.tr(this, R.string.no_limit);
 		else
 			return progress + "%";
+	}
+
+	private void OpenGameList()
+	{
+		GameChooserFunc gameChooserFunc = new GameChooserFunc(this);
+		Bundle bundle = new Bundle();
+		bundle.putString("game", Q3EUtils.q3ei.game);
+		gameChooserFunc.SetCallback(new Runnable() {
+			@Override
+			public void run()
+			{
+				ChangeGame((String)gameChooserFunc.GetResult());
+			}
+		});
+		gameChooserFunc.Start(bundle);
 	}
 
 

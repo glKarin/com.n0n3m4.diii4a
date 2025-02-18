@@ -70,6 +70,16 @@ public class ChangeLog
         final ChangeLog[] CHANGES = {
                 ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2025-01-16", 60,
+                        "Support setup max game console height percentage(0 or 100 means not limit) on launcher `General` tab.",
+                        "Update GZDOOM version to 4.14.0.",
+                        "GZDOOM add Vulkan and OpenGL renderer backend.",
+                        "Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.1.",
+                        "Update Quake 1(Darkplaces) version.",
+                        "Update Quake 2(yquake2) version.",
+                        "Add use multisamples config in game."
+                ),
+
                 ChangeLog.Create("2024-11-20", 59,
                         "Support `Omni-Bot` in Wolfenstein: Enemy Territory.",
                         "Fix rendering on Mali GPU in DOOM 3-BFG.",

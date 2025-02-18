@@ -450,5 +450,6 @@
     <string name="choose_mod_files">Выберите файлы мода</string>
     <string name="opengl_emulate_version_harm_gl_version">Emulating OpenGL version(harm_gl_version)</string>
     <string name="renderer_backend">Бэкэнд рендерера</string>
+    <string name="change_game">Change game</string>
 
 </resources>

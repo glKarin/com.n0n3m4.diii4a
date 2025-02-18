@@ -1223,7 +1223,12 @@ static void CreateSwapChain()
 	VkSwapchainCreateInfoKHR info = {};
 	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 	info.surface = vkcontext.surface;
+#ifdef __ANDROID__xxx //karin: test minImageCount
+    int maxImageCount = gpu.surfaceCaps.maxImageCount > 0 ? gpu.surfaceCaps.maxImageCount : gpu.surfaceCaps.minImageCount;
+	info.minImageCount = idMath::ClampInt( gpu.surfaceCaps.minImageCount, maxImageCount, NUM_FRAME_DATA );
+#else
 	info.minImageCount = NUM_FRAME_DATA;
+#endif
 	info.imageFormat = surfaceFormat.format;
 	info.imageColorSpace = surfaceFormat.colorSpace;
 	info.imageExtent = extent;
@@ -1269,6 +1274,7 @@ static void CreateSwapChain()
 	ID_VK_CHECK( vkGetSwapchainImagesKHR( vkcontext.device, vkcontext.swapchain, &numImages, NULL ) );
 	ID_VK_VALIDATE( numImages > 0, "vkGetSwapchainImagesKHR returned a zero image count." );
 #ifdef __ANDROID__ //karin: dynamic size
+	printf("Vulkan get swapchain images: %d\n", numImages);
 	vkcontext.numSwapImages = numImages;
 #endif
 
@@ -2340,6 +2346,7 @@ void idRenderBackend::GL_StartFrame()
 			break;
 		case VK_ERROR_OUT_OF_DATE_KHR:
 #ifdef __ANDROID__ //karin: recreate framebuffers when recreate swapchain
+			printf("Vulkan swapchain out of date on GL_StartFrame.\n");
 			vkDeviceWaitIdle( vkcontext.device );
 			DestroyFrameBuffers();
 #endif
@@ -2586,6 +2593,7 @@ void idRenderBackend::GL_BlockingSwapBuffers()
 #endif
 			// return on_window_size_changed(); Eric: Handle resizing the window.
 #ifdef __ANDROID__ //karin: recreate framebuffers when recreate swapchain
+			printf("Vulkan swapchain out of date on GL_BlockingSwapBuffers.\n");
 			vkDeviceWaitIdle( vkcontext.device );
 			DestroyFrameBuffers();
 #endif
