@@ -200,10 +200,17 @@ struct vulkanContext_t
 #else
 	vulkanAllocation_t				msaaAllocation;
 #endif
+#ifdef __ANDROID__ //karin: dynamic size
+	idList< VkImage >			swapchainImages;
+	idList< VkImageView >		swapchainViews;
+
+	idList< VkFramebuffer >	frameBuffers;
+#else
 	idArray< VkImage, NUM_FRAME_DATA >			swapchainImages;
 	idArray< VkImageView, NUM_FRAME_DATA >		swapchainViews;
 
 	idArray< VkFramebuffer, NUM_FRAME_DATA >	frameBuffers;
+#endif
 	idArray< VkSemaphore, NUM_FRAME_DATA >		acquireSemaphores;
 	idArray< VkSemaphore, NUM_FRAME_DATA >		renderCompleteSemaphores;
 
@@ -219,6 +226,7 @@ struct vulkanContext_t
 	idArray< VkQueryPool, NUM_FRAME_DATA >		queryPools;
 #ifdef __ANDROID__ //karin: extras configs on Android
 	bool							presentFamilyAvailable;
+	uint32 numSwapImages;
 #endif
 };
 

@@ -46,7 +46,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #define ID_VK_CHECK( x ) { \
 	VkResult ret = x; \
-	if ( ret != VK_SUCCESS ) idLib::FatalError( "VK: %s - %s", VK_ErrorToString( ret ), #x ); \
+	if ( ret != VK_SUCCESS ) idLib::FatalError( "VK: %s - %s %d", VK_ErrorToString( ret ), #x, ret ); \
 }
 
 #define ID_VK_VALIDATE( x, msg ) { \
