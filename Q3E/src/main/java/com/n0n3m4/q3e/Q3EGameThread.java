@@ -85,7 +85,6 @@ class Q3EGameThreadJava extends Thread implements Q3EGameThread
         return isAlive()
                 //&& !isInterrupted()
                 ;
-
     }
 }
 

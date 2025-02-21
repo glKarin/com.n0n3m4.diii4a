@@ -1,0 +1,15 @@
+FTE supports ttf fonts on the console.
+Note that they are only supported in gl-only builds, for the moment.
+Uses freetype2, dynamically linked.
+
+Notes:
+Use gl_font to specify the font file name to load. Does not yet go through the FTE filesystem, so cannot be in any pak files, and gamedirs are ignored. c:/windows/fonts/cour.ttf gives courier.
+Most fonts seem to use 12 pixels as a minimum height for readability. FTE allows smaller, but you probably want vid_conautoscale to 1.5 (12/8 = 1.5), or greater, or vid_conheight set to some equivelent value.
+Variable width fonts are supported, the width of the font ignores vid_conwidth.
+^UXXXX can be used to print a unicode character on the console (capital U, lowercase is not recognised). U is hex between 0000 and ffff
+If com_parseutf8 is set to 1, any text printed onto the console will be read as utf8 text. If there are any errors, parsing will be disabled until the next string.
+in_builtincharmap can be set to 0 in order to get FTE to enter characters according to their system keyboard map (only required in windows).
+The quake charset is mapped to ^Ue000 through ^Ue0ff.
+^Ue100 upwards displays some hud images. This mechanism will likely change some time.
+Links dynamically to FreeType. You can get a compatible version from http://gnuwin32.sourceforge.net/downlinks/freetype-bin-zip.php (freetype6.dll is the only file needed).
+If you're compiling yourself and you have issues with FreeType2 dependancies, it can be disabled by tweeking bothdefs.h or by doing eg: 'make CFLAGS=-DNO_FREETYPE gl-rel'.

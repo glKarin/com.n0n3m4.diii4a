@@ -88,6 +88,7 @@
     <string name="rtcw">重返德军总部</string>
     <string name="etw">德军总部: 深入敌后</string>
     <string name="realrtcw">真·重返德军总部</string>
+    <string name="fteqw">FTEQW</string>
     <string name="tdm">Dark mod</string>
     <string name="doom">毁灭战士</string>
     <string name="prey_2006">掠食(2006)</string>
@@ -289,6 +290,8 @@
     <string name="quake_2_zaero">雷神之锤2:zaero</string>
     <string name="rtcw_base">重返德军总部</string>
     <string name="realrtcw_base">真·重返德军总部</string>
+    <string name="fteqw_base">FTEQW</string>
+    <string name="hexen_2_base">毁灭巫师2</string>
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">毁灭战士3 BFG</string>
     <string name="doom_base">毁灭战士</string>

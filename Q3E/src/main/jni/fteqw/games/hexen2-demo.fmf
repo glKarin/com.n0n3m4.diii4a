@@ -1,0 +1,7 @@
+//Note - the hexen2 demo is an unmaintained variation of an earlier build, incompatible with the later game. Any basedirs must be entirely separate.
+
+game hexen2
+name "Hexen2 Demo"
+
+package "data/pak0.pak" crc 0x3bbcb56c mirror "unzip:H2Demo/Install/Hexen2/data1/pak0.pak,https://www.quaddicted.com/files/idgames2/idstuff/hexen2/H2Demo.exe"
+

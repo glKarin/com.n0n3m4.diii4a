@@ -146,6 +146,7 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE1_DOOM         = "libgzdoom.so"; // GZDOOM
     public static final String LIB_ENGINE3_ETW          = "libetl.so"; // ETW
     public static final String LIB_ENGINE3_REALRTCW     = "libRealRTCW.so"; // RealRTCW
+    public static final String LIB_ENGINE_FTEQW         = "libfteqw.so"; // FTEQW
 
     // game config file
     public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg"; // DOOM3
@@ -160,6 +161,7 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_GZDOOM   = "gzdoom.ini"; // GZDOOM
     public static final String CONFIG_FILE_ETW      = "etconfig.cfg"; // ETW
     public static final String CONFIG_FILE_REALRTCW = "realrtcwconfig.cfg"; // RealRTCW
+    public static final String CONFIG_FILE_FTEQW    = ""; // FTEQW
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -174,6 +176,7 @@ public final class Q3EGlobals
     public static final String GAME_GZDOOM   = "gzdoom";
     public static final String GAME_ETW      = "etw";
     public static final String GAME_REALRTCW = "realrtcw";
+    public static final String GAME_FTEQW    = "fteqw";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -188,6 +191,7 @@ public final class Q3EGlobals
     public static final String GAME_NAME_GZDOOM   = "GZDOOM";
     public static final String GAME_NAME_ETW      = "ETW"; // "Wolfenstein: Enemy Territory";
     public static final String GAME_NAME_REALRTCW = "RealRTCW";
+    public static final String GAME_NAME_FTEQW    = "FTEQW";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -204,6 +208,7 @@ public final class Q3EGlobals
     public static final String GAME_BASE_GZDOOM     = ""; // GZDOOM is standalone
     public static final String GAME_BASE_ETW        = "etmain";
     public static final String GAME_BASE_REALRTCW   = "Main";
+    public static final String GAME_BASE_FTEQW      = "";
 
     // game sub directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
@@ -218,6 +223,7 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_GZDOOM   = "gzdoom";
     public static final String GAME_SUBDIR_ETW      = "etw";
     public static final String GAME_SUBDIR_REALRTCW = "realrtcw";
+    public static final String GAME_SUBDIR_FTEQW    = "fteqw";
 
     public enum PatchResource
     {

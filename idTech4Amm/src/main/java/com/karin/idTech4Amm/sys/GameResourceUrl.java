@@ -63,6 +63,9 @@ public enum GameResourceUrl
 
     // RealRTCW
     REALRTCW_BASE(Q3EGlobals.GAME_REALRTCW, "Main", "", "https://www.moddb.com/mods/realrtcw-realism-mod", 3),
+
+    // FTEQW
+    FTEQW_BASE(Q3EGlobals.GAME_FTEQW, "", "", "https://www.fteqw.org", 1),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

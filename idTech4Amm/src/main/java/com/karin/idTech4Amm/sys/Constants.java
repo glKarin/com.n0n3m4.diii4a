@@ -2,6 +2,7 @@ package com.karin.idTech4Amm.sys;
 
 import com.karin.idTech4Amm.BuildConfig;
 import com.karin.idTech4Amm.lib.DateTimeUtility;
+import com.karin.idTech4Amm.misc.TextHelper;
 
 /**
  * Constants define
@@ -27,6 +28,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
+            "Add `FTEQW` support, game standalone directory named `fteqw`. More view in `" + TextHelper.GenLinkText("https://www.fteqw.org", "FTEQW") + "`.",
             "DOOM 3 BFG add Vulkan renderer backend.",
         };
 	};

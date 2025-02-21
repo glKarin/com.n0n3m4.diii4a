@@ -76,6 +76,12 @@ public enum Game
 
     // RealRTCW
     REALRTCW_BASE(Q3EGlobals.GAME_REALRTCW, "Main", "", "realrtcwgame", "", false, R.string.realrtcw_base),
+
+    // FTEQW
+    FTEQW_Q1(Q3EGlobals.GAME_FTEQW, "quake1", "quake1", "fteqw", "", true, R.string.quake_1_base),
+    FTEQW_Q2(Q3EGlobals.GAME_FTEQW, "quake2", "quake2", "fteqw", "", true, R.string.quake_2_base),
+    FTEQW_Q3(Q3EGlobals.GAME_FTEQW, "quake3", "quake3", "fteqw", "", true, R.string.quake_3_base),
+    FTEQW_H2(Q3EGlobals.GAME_FTEQW, "hexen2", "hexen2", "fteqw", "data1", true, R.string.hexen_2_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

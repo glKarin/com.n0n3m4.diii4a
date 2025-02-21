@@ -293,6 +293,8 @@
     <string name="etw_base">Wolfenstein: Enemy Territory</string>
     <string name="tdm_base">The Dark Mod</string>
     <string name="realrtcw_base">RealRTCW</string>
+    <string name="fteqw_base">FTEQW</string>
+    <string name="hexen_2_base">Hexen II</string>
 
     <string name="d3bfg_base">DOOM 3 BFG</string>
     <string name="doom_base">DOOM</string>
@@ -383,6 +385,7 @@
     <string name="you_can_view_all_support_games_data_directory_path_by_tips_button_above_chooser_button_in_launcher">You can view all support games data directory path by `Tips` button above `Chooser` button in launcher.</string>
     <string name="you_can_also_change_it_manually_on_launcher_settings">You can also change it manually on launcher settings.</string>
     <string name="realrtcw">RealRTCW</string>
+    <string name="fteqw">FTEQW</string>
     <string name="input_event_queue">Input event queue</string>
     <string name="choose_input_event_queue_scheme">Choose input event queue scheme</string>
     <string name="filter">Filter</string>

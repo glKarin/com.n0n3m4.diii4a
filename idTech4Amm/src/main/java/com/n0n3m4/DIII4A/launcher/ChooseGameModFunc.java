@@ -159,6 +159,13 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             else
                 blackList.remove(Q3EGlobals.GAME_BASE_REALRTCW);
         }
+        else if(Q3EUtils.q3ei.isFTEQW)
+        {
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_FTEQW);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_FTEQW);
+        }
 /*        else if(Q3EUtils.q3ei.isTDM)
         {
             blackList.remove(Q3EGlobals.GAME_BASE_TDM);
@@ -246,6 +253,11 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 if(Q3EGlobals.GAME_BASE_REALRTCW.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_REALRTCW;
             }
+            else if(Q3EUtils.q3ei.isFTEQW)
+            {
+                if(Q3EGlobals.GAME_BASE_FTEQW.equals(fileModel.name))
+                    name = Q3EGlobals.GAME_NAME_FTEQW;
+            }
 /*            else if(Q3EUtils.q3ei.isTDM)
             {
                 if(Q3EGlobals.GAME_BASE_TDM.equals(fileModel.name))
@@ -300,6 +312,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGlobals.GAME_REALRTCW:
                         if(!Q3EUtils.q3ei.isRealRTCW)
+                            continue;
+                        break;
+                    case Q3EGlobals.GAME_FTEQW:
+                        if(!Q3EUtils.q3ei.isFTEQW)
                             continue;
                         break;
                     case Q3EGlobals.GAME_DOOM3:

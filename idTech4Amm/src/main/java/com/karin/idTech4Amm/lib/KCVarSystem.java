@@ -265,6 +265,7 @@ public final class KCVarSystem
             res.add(_cvars.get("ETW"));
         else if(Q3EUtils.q3ei.isRealRTCW)
             res.add(_cvars.get("RealRTCW"));
+        else if(Q3EUtils.q3ei.isFTEQW) ;
         else
         {
             res.add(_cvars.get("RENDERER"));

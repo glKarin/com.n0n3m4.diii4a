@@ -12,6 +12,7 @@
     <color name="theme_gzdoom_main_color">#FF0C377A</color>
     <color name="theme_etw_main_color">#FFA7605A</color>
     <color name="theme_realrtcw_main_color">#FFF20000</color>
+    <color name="theme_fteqw_main_color">#FFB7A0FF</color>
     <color name="launcher_divider_color">#FFCCCCCC</color>
     <color name="pie_color">#FF4585E1</color>
 </resources>

@@ -1,0 +1,79 @@
+WARNING: this mode is not currently compiled in by default, in order to avoid potential unexpected resource usage.
+you will need to enable it by enabling the SUBSERVERS preprocessor define at compile time.
+
+
+
+
+
+random useful commands (bash or console):
+make sv-rel CFLAGS=-DSUBSERVERS
+mapcluster <enablelogins>
+ssv 1 quit
+ssv * say The Admin Is Awesome
+sv_serverip 127.0.0.1
+
+the mapcluster command provides support for a single host running multiple maps as a single server cluster.
+this is achieved by running multiple instances of the server in multiple processes, each with their own port numbers.
+the initial server acts as a login server, which communicates with the various nodes.
+ssqc is able to transfer clients from one node to another within the cluster, or send messages to the node hosting clients (or, if the node's id is explicitly known, can be used to directly communicate with other nodes).
+
+
+
+node naming rules:
+a node name takes the form of id:name
+if the id is empty, then it is considered unspecified, and the message/transfer will id used will be updated to any existing node with the same name (:e1m1 will pick ANY e1m1).
+if the id is 0, then it will NEVER use an existing node.
+if the id is invalid/0/empty, and the name is not blank, and the node is named via a transfer request, a new node will be started using that name as the new node's initial map.
+note that "0:start$\\foo\\bar" can be used, in which case you will ALWAYS get a new instance, using maps/start.bsp and that infoget(startspot, "foo") will return "bar".
+
+event destinations:
+event destinations logically use player names. However, if the name takes the form "\\5" for example, then the message will be sent to the node with id 5, rather than to the node of a name player. You can use this to directly communicate server-to-server. If the node id does not exist, the event will be returned to the sender as an error - no new node will be created with this (fixme: it probably should be, but blurgh).
+
+
+ssqc builtins:
+forceinfokey(player, "*transfer", ":e1m1");
+  initiates a transfer request. the infokey will be cleared out upon failure, and the client will drop on success.
+  their parms will be transfered immediately, and will be available to the new server once the transfer completes.
+  WARNING: it is the QC's responsibility to terminate servers {localcmd("quit\n");} - the engine will not automatically do this.
+  If you are implementing an mmo-like game, you would presumably do this when there are no players and all monsters were respawned (such that restarting will not be noticed). Otherwise you may choose to terminate the node instantly or after some delay after the last player has left. If you only have limited maps, you might opt to never terminate any nodes - lucky you.
+
+void(string dest, string from, string cmd, string info) clusterevent = #;
+  sends a message to the destination.
+  if dest is blank, the event will be broadcast to EVERY node.
+  if the destination is prefixed with a \ char, (eg: "\\1"), then the message is sent to node id 1.
+  if the destination is a player name, will send to whichever node that player is currently on. the receiving server is expected to handle the event on behalf of the player (perhaps by forwarding to csqc, or just doing a sprint or something).
+  if the destination appears invalid (and cmd is not prefixed with 'error:'), the cmd will be prefixed with error:, the dest+from args swapped, and the event will be sent back to the receiver.
+  info and cmd have meaning to the engine only if the receiver's ssqc does not handle the event.
+
+float serverid
+  this float contains the node's unique id. no two active nodes will use the same id, and can be used in replies to identify the node as the receipient of a transfer.
+
+float(string dest, string from, string cmd, string info) SV_ParseClusterEvent = {};
+  this function is called by the engine in response to a clusterevent call. the arguments match those of the prior call.
+  if you return false, the engine will attempt to handle it the best it can. which is limited and probably not ideal. any other result will cause the node to carry out no further action (meaning the from+cmd+info args are completely free-form if you do so).
+  the dest argument follows the restrictions/expectations specified for clusterevent.
+  this is handled by the receipient server, and as such the qc is expected to find the named player (if not direct-to-server) and handle the event itself.
+  the senders and receivers of these messages are all part of the same cluster, and so should all be considered trustworthy - unless you permit direct message injection. for this reason, you should *probably* ALWAYS use constants for the cmd argument, and thereby avoid surprises. this allows you to make assumptions about the dest+from+info fields more easily, simplifying your parsing.
+  it is possible for a client to have transfered off the server (or be in the process of transfering and thus ownership of the player's properties uncertain). in such cases, you are recommended to mimic the error: behaviour so that the sender can handle things in a consistent way.
+
+
+debug/cheat commands (mods are expected to provide their own functionality for these things, and thus these are considered cheats to limit their use):
+cmd ssvtransfer :e1m1
+  transfers the player to the named node (see node naming rules), just like forceinfokey would.
+
+cmd ssvsay hello world
+  broadcasts the message to every single player on every single node (instead of merely the node the player is on).
+  (this does: clusterevent("", self.netname, "say", args())  )
+
+cmd ssvjoin playername
+  attempts to teleport the player to the named player's server.
+  if the named player is already on the same node, teleports the player on top of the named player.
+  (this does: clusterevent(player, self.netname, "join", ""), the default join handler will reply with joinnode, and the handler of that will initiate a transfer request to the node specified by the joinnode's info string)
+
+
+gotchas:
+in order to invite another player, you will likely need to implement some sort of timeout serverside, in order to avoid issues with people's UIs ignoring the request (or not receiving it due to a player transfering at the time).
+you probably shouldn't allow people to join others without mutual consent, to reduce trolling. probably you'll want the server of the person being joined in ultimate control of the join, if only because its nice and easy to pull another player to your node on account of the puller already knowing the destination's serverid.
+
+due to players disconnecting or randomly transfering before your messages get to them, all of these messages should be considered unreliable.
+if you block transfers of one player, you can hopefully get away with a race condition between the reply and a timeout. for non-parm based things, you can use sql transaction support to ensure atomicity.

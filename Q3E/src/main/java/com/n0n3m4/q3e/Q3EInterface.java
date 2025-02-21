@@ -62,6 +62,7 @@ public class Q3EInterface
 	public boolean isDOOM = false;
 	public boolean isETW = false;
 	public boolean isRealRTCW = false;
+	public boolean isFTEQW = false;
 
 	public boolean isD3BFG_Vulkan = false;
 
@@ -129,6 +130,8 @@ public class Q3EInterface
 			return Q3EGlobals.LIB_ENGINE3_ETW;
 		else if(isRealRTCW)
 			return Q3EGlobals.LIB_ENGINE3_REALRTCW;
+		else if(isFTEQW)
+			return Q3EGlobals.LIB_ENGINE_FTEQW;
 		else
 			return Q3EGlobals.LIB_ENGINE_ID;
 	}
@@ -157,6 +160,8 @@ public class Q3EInterface
 			return Q3EGlobals.CONFIG_FILE_ETW;
 		else if(isRealRTCW)
 			return Q3EGlobals.CONFIG_FILE_REALRTCW;
+		else if(isFTEQW)
+			return Q3EGlobals.CONFIG_FILE_FTEQW;
 		else
 			return Q3EGlobals.CONFIG_FILE_DOOM3;
 	}
@@ -185,6 +190,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_NAME_ETW;
 		else if(isRealRTCW)
 			return Q3EGlobals.GAME_NAME_REALRTCW;
+		else if(isFTEQW)
+			return Q3EGlobals.GAME_NAME_FTEQW;
 		else
 			return Q3EGlobals.GAME_NAME_DOOM3;
 	}
@@ -213,6 +220,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_ETW;
 		else if(isRealRTCW)
 			return Q3EGlobals.GAME_REALRTCW;
+		else if(isFTEQW)
+			return Q3EGlobals.GAME_FTEQW;
 		else
 			return Q3EGlobals.GAME_DOOM3;
 	}
@@ -241,6 +250,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_BASE_ETW;
 		else if(isRealRTCW)
 			return Q3EGlobals.GAME_BASE_REALRTCW;
+		else if(isFTEQW)
+			return Q3EGlobals.GAME_BASE_FTEQW;
 		else
 			return Q3EGlobals.GAME_BASE_DOOM3;
 	}
@@ -269,6 +280,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_SUBDIR_ETW;
 		else if(isRealRTCW)
 			return Q3EGlobals.GAME_SUBDIR_REALRTCW;
+		else if(isFTEQW)
+			return Q3EGlobals.GAME_SUBDIR_FTEQW;
 		else
 			return Q3EGlobals.GAME_SUBDIR_DOOM3;
 	}
@@ -302,6 +315,8 @@ public class Q3EInterface
 			Q3EKeyCodes.InitQ3Keycodes();
 		else if(isRealRTCW)
 			Q3EKeyCodes.InitRTCWKeycodes();
+		else if(isFTEQW)
+			Q3EKeyCodes.InitQ3Keycodes();
 		else
 			Q3EKeyCodes.InitD3Keycodes();
 	}
@@ -319,6 +334,7 @@ public class Q3EInterface
 		else if(Q3EGlobals.GAME_TDM.equals(game)
 				|| Q3EGlobals.GAME_DOOM3BFG.equals(game)
 				|| Q3EGlobals.GAME_GZDOOM.equals(game)
+				|| Q3EGlobals.GAME_FTEQW.equals(game)
 		)
 			return subdir;
 		else
@@ -336,7 +352,8 @@ public class Q3EInterface
 			subdatadir = subdir;
 		else if(isDOOM)
 			subdatadir = subdir;
-			// else if(IS_D3()) return null;
+		else if(isFTEQW)
+			subdatadir = subdir;
 		else
 			subdatadir = null;
 	}
@@ -373,6 +390,8 @@ public class Q3EInterface
 			SetupETW();
 		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
 			SetupRealRTCW();
+		else if(Q3EGlobals.GAME_FTEQW.equalsIgnoreCase(name))
+			SetupFTEQW();
 		else
 			SetupDOOM3();
 	}
@@ -400,6 +419,7 @@ public class Q3EInterface
 		isDOOM = false;
 		isETW = false;
 		isRealRTCW = false;
+		isFTEQW = false;
 	}
 
 	public void SetupDOOM3()
@@ -488,6 +508,13 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public void SetupFTEQW()
+	{
+		ResetGameState();
+		isFTEQW = true;
+		SetupGameConfig();
+	}
+
 	public boolean IsTDMTech()
 	{
 		return isTDM;
@@ -547,13 +574,15 @@ public class Q3EInterface
 			return "fs_game";
 		else if(isRealRTCW)
 			return "fs_game";
+		else if(isFTEQW)
+			return ""; // game
 		else
 			return "fs_game";
 	}
 
 	public String GetGameCommandPrefix()
 	{
-		if(isQ1)
+		if(isQ1 || isFTEQW)
 			return KidTechCommand.ARG_PREFIX_QUAKETECH;
 		if(isDOOM)
 			return KidTechCommand.ARG_PREFIX_QUAKETECH + KidTechCommand.ARG_PREFIX_IDTECH;
@@ -653,12 +682,12 @@ public class Q3EInterface
 
     public boolean IsInitGame()
 	{
-		return isD3 || isD3BFG || isQ2 || isQ1 || isQ3 || isRTCW || isTDM || isDOOM || isETW || isRealRTCW;
+		return isD3 || isD3BFG || isQ2 || isQ1 || isQ3 || isRTCW || isTDM || isDOOM || isETW || isRealRTCW || isFTEQW;
 	}
 
 	public boolean IsStandaloneGame()
 	{
-		return isTDM || isDOOM;
+		return isTDM || isD3BFG || isDOOM || isFTEQW;
 	}
 
 	public static String GetGameStandaloneDirectory(String name)
@@ -685,6 +714,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_SUBDIR_ETW;
 		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
 			return Q3EGlobals.GAME_SUBDIR_REALRTCW;
+		else if(Q3EGlobals.GAME_FTEQW.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_SUBDIR_FTEQW;
 		else
 			return Q3EGlobals.GAME_SUBDIR_DOOM3;
 	}
@@ -713,6 +744,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_etw_fs_game;
 		else if(Q3EUtils.q3ei.isRealRTCW)
 			return Q3EPreference.pref_harm_realrtcw_fs_game;
+		else if(Q3EUtils.q3ei.isFTEQW)
+			return Q3EPreference.pref_harm_fteqw_fs_game;
 		else
 			return Q3EPreference.pref_harm_fs_game;
 	}
@@ -741,6 +774,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_etw_user_mod;
 		else if(Q3EUtils.q3ei.isRealRTCW)
 			return Q3EPreference.pref_harm_realrtcw_user_mod;
+		else if(Q3EUtils.q3ei.isFTEQW)
+			return Q3EPreference.pref_harm_fteqw_user_mod;
 		else
 			return Q3EPreference.pref_harm_user_mod;
 	}
@@ -769,6 +804,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_etw_game_mod;
 		else if(Q3EUtils.q3ei.isRealRTCW)
 			return Q3EPreference.pref_harm_realrtcw_game_mod;
+		else if(Q3EUtils.q3ei.isFTEQW)
+			return Q3EPreference.pref_harm_fteqw_game_mod;
 		else
 			return Q3EPreference.pref_harm_game_mod;
 	}
@@ -797,6 +834,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_etw_game_lib;
 		else if(Q3EUtils.q3ei.isRealRTCW)
 			return Q3EPreference.pref_harm_realrtcw_game_lib;
+		else if(Q3EUtils.q3ei.isFTEQW)
+			return Q3EPreference.pref_harm_fteqw_game_lib;
 		else
 			return Q3EPreference.pref_harm_game_lib;
 	}
@@ -825,6 +864,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_params_etw;
 		else if(Q3EUtils.q3ei.isRealRTCW)
 			return Q3EPreference.pref_params_realrtcw;
+		else if(Q3EUtils.q3ei.isFTEQW)
+			return Q3EPreference.pref_params_fteqw;
 		else
 			return Q3EPreference.pref_params;
 	}
@@ -853,6 +894,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_etw_command_record;
 		else if(Q3EUtils.q3ei.isRealRTCW)
 			return Q3EPreference.pref_harm_realrtcw_command_record;
+		else if(Q3EUtils.q3ei.isFTEQW)
+			return Q3EPreference.pref_harm_fteqw_command_record;
 		else
 			return Q3EPreference.pref_harm_command_record;
 	}
@@ -901,6 +944,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_etw_fs_game;
 		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
 			return Q3EPreference.pref_harm_realrtcw_fs_game;
+		else if(Q3EGlobals.GAME_FTEQW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_fteqw_fs_game;
 		else
 			return Q3EPreference.pref_harm_fs_game;
 	}
@@ -929,6 +974,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_etw_user_mod;
 		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
 			return Q3EPreference.pref_harm_realrtcw_user_mod;
+		else if(Q3EGlobals.GAME_FTEQW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_fteqw_user_mod;
 		else
 			return Q3EPreference.pref_harm_user_mod;
 	}
@@ -957,6 +1004,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_BASE_ETW;
 		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
 			return Q3EGlobals.GAME_BASE_REALRTCW;
+		else if(Q3EGlobals.GAME_FTEQW.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_FTEQW;
 		else
 			return Q3EGlobals.GAME_BASE_DOOM3;
 	}

@@ -1,0 +1,42 @@
+#misc build artifacts
+*.o
+*.o.d
+engine/debug/
+engine/release/
+engine/libs-*/
+engine/*.tar.gz
+engine/shaders/generatebuiltinsl
+engine/shaders/makevulkanblob
+engine/shaders/vulkanblobs/
+plugins/cef/cef_linux64/
+plugins/cef/cef_windows64/
+
+#quakec build artifacts...
+quakec/csaddon/csaddon.dat
+quakec/csaddon/csaddon.lno
+quakec/csqctest/csprogs.dat
+quakec/csqctest/csprogs.lno
+quakec/csqctest/progs.dat
+quakec/csqctest/progs.lno
+quakec/menu.dat
+quakec/menu.lno
+
+# clangd artifacts
+compile_commands.json
+.cache/
+
+#for qtcreator users.
+CMakeLists.txt.user
+
+# android target has a load of debris
+engine/droid/bin/
+engine/droid/gen/
+engine/droid/libs/
+engine/droid/default.properties
+engine/droid/local.properties
+engine/droid/proguard.cfg
+engine/droid/build.xml
+engine/droid/ftekeystore
+engine/droid/proguard-project.txt
+engine/droid/project.properties
+

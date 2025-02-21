@@ -15,6 +15,7 @@ android {
          /*
             natasha: A CSOL CT character, for my Quake II for MeeGo Harmattan port version 5 at 2018
             verena: GC singer, for my first YouKu 3rd client for MeeGo Harmattan at 2015
+            caitlyn: the Sheriff of Piltover on LOL, for  at 2017
          */
         versionNameSuffix 'caitlyn'
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"

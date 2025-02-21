@@ -91,10 +91,10 @@ if(LINUX AND NOT ANDROID)
 endif()
 
 # For dev: Quick build
-option(BUILD_D3								"Build DOOM 3"																ON)
+option(BUILD_D3								"Build DOOM 3"																OFF)
 option(BUILD_Q4								"Build Quake 4"																ON)
-option(BUILD_PREY							"Build Prey"																ON)
-option(BUILD_D3_MOD							"Build all DOOM3 mods"														ON)
+option(BUILD_PREY							"Build Prey"																OFF)
+option(BUILD_D3_MOD							"Build all DOOM3 mods"														OFF)
 option(BUILD_Q4_MOD							"Build all Quake4 mods"														ON)
 
 # Extras engine extensions
