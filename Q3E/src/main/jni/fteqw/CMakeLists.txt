@@ -18,6 +18,7 @@ add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
 if(ANDROID)
 set(FTEQW_DEPLIBS_NAME deplibs)
 set(FTEQW_DEPLIBS ${CMAKE_CURRENT_SOURCE_DIR}/../${FTEQW_DEPLIBS_NAME})
+set(FTEQW_DEPINCS ${CMAKE_CURRENT_SOURCE_DIR}/../depincs)
 endif()
 
 INCLUDE_DIRECTORIES(
@@ -394,7 +395,11 @@ endif()
 
 FUNCTION(EMBED_PLUGIN_META PLUGNAME PLUGTITLE PLUGDESC)
 	SET_TARGET_PROPERTIES(plug_${PLUGNAME} PROPERTIES OUTPUT_NAME "${PLUGNAME}")
-	SET_TARGET_PROPERTIES(plug_${PLUGNAME} PROPERTIES PREFIX "fteplug_")
+	if(ANDROID) #k add lib prefix
+		SET_TARGET_PROPERTIES(plug_${PLUGNAME} PROPERTIES PREFIX "libfteplug_")
+	else()
+		SET_TARGET_PROPERTIES(plug_${PLUGNAME} PROPERTIES PREFIX "fteplug_")
+	endif()
 	SET_TARGET_PROPERTIES(plug_${PLUGNAME} PROPERTIES LINK_FLAGS "-Wl,--no-undefined")
 	SET(INSTALLTARGS ${INSTALLTARGS} "plug_${PLUGNAME}" PARENT_SCOPE)
 	#sadly we need to use a temp zip file, because otherwise zip insists on using zip64 extensions which breaks zip -A (as well as any attempts to read any files).
@@ -1152,6 +1157,22 @@ IF(ANDROID)
 		TARGET_LINK_LIBRARIES(${FTE_ENGINE} ${FTE_LIBS} )
 		SET(INSTALLTARGS ${INSTALLTARGS} ${FTE_ENGINE})
 	ENDIF()
+
+	ADD_LIBRARY(fteqcc SHARED
+			engine/qclib/qcctui.c
+			engine/qclib/comprout.c
+			engine/qclib/hash.c
+			engine/qclib/qcc_cmdlib.c
+			engine/qclib/qcc_pr_comp.c
+			engine/qclib/qcc_pr_lex.c
+			engine/qclib/qccmain.c
+			engine/qclib/qcd_main.c
+			engine/qclib/decomp.c
+			engine/qclib/packager.c
+		)
+		SET_TARGET_PROPERTIES(fteqcc PROPERTIES COMPILE_DEFINITIONS "${FTE_LIB_DEFINES};${FTE_REVISON}")
+		TARGET_LINK_LIBRARIES(fteqcc ${FTEQCC_LIBS} ${SYS_LIBS})
+		SET(INSTALLTARGS ${INSTALLTARGS} fteqcc)
 ELSE()
 	#systems that actually have executables...
 	SET(FTE_ENGINE true CACHE BOOL "Compile fteqw engine binary.")
@@ -1641,15 +1662,25 @@ ENDIF()
 #ffmpeg client plugin. no proper way to detect dependancies right now, so I've gotta try the manual way.
 SET(FTE_PLUG_FFMPEG true CACHE BOOL "Compile ffmpeg media plugin.")
 IF(FTE_PLUG_FFMPEG)
+	if(ANDROID) #karin: dl
+		set(FTEQW_FFMPEG_INC_DIR ${FTEQW_DEPINCS}/ffmpeg/ffmpeg60/include)
+	set(AVCODEC_INCLUDE_DIR "${FTEQW_FFMPEG_INC_DIR}/libavcodec/avcodec.h")
+	set(AVFORMAT_INCLUDE_DIR "${FTEQW_FFMPEG_INC_DIR}/libavformat/avformat.h")
+	set(AVUTIL_INCLUDE_DIR "${FTEQW_FFMPEG_INC_DIR}/libavutil/avutil.h")
+	set(AVSWSCALE_INCLUDE_DIR "${FTEQW_FFMPEG_INC_DIR}/libswscale/swscale.h")
+	else()
 	FIND_PATH(AVCODEC_INCLUDE_DIR libavcodec/avcodec.h)
 	FIND_PATH(AVFORMAT_INCLUDE_DIR libavformat/avformat.h)
 	FIND_PATH(AVUTIL_INCLUDE_DIR libavutil/avutil.h)
 	FIND_PATH(AVSWSCALE_INCLUDE_DIR libswscale/swscale.h)
+	endif()
 	IF((AVFORMAT_INCLUDE_DIR) AND (AVSWSCALE_INCLUDE_DIR))
+		if(NOT ANDROID)
 		FIND_LIBRARY(AVCODEC_LIBRARY avcodec)
 		FIND_LIBRARY(AVFORMAT_LIBRARY avformat)
 		FIND_LIBRARY(AVUTIL_LIBRARY avutil)
 		FIND_LIBRARY(AVSWSCALE_LIBRARY swscale)
+		endif()
 
 		ADD_LIBRARY(plug_ffmpeg MODULE
 			plugins/plugin.c
@@ -1657,7 +1688,11 @@ IF(FTE_PLUG_FFMPEG)
 			plugins/avplug/avdecode.c
 			plugins/avplug/avencode.c
 		)
+		if(ANDROID)
+		TARGET_INCLUDE_DIRECTORIES(plug_ffmpeg PUBLIC ${FTEQW_FFMPEG_INC_DIR})
+		else()
 		TARGET_INCLUDE_DIRECTORIES(plug_ffmpeg PUBLIC ${AVCODEC_INCLUDE_DIR} ${AVFORMAT_INCLUDE_DIR} ${AVUTIL_INCLUDE_DIR} ${AVSWSCALE_INCLUDE_DIR})
+		endif()
 		TARGET_LINK_LIBRARIES(plug_ffmpeg ${SYS_LIBS} ${AVFORMAT_LIBRARY} ${AVCODEC_LIBRARY} ${AVUTIL_LIBRARY} ${AVSWSCALE_LIBRARY})
 		SET_TARGET_PROPERTIES(plug_ffmpeg PROPERTIES COMPILE_DEFINITIONS "FTEPLUGIN;${FTE_LIB_DEFINES}")
 

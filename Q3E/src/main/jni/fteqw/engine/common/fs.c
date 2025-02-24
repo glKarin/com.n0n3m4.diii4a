@@ -2779,10 +2779,18 @@ static qboolean FS_NativePath(const char *fname, enum fs_relative relativeto, ch
 		}
 		//fallthrough
 	case FS_GAMEONLY:
+#ifdef _DIII4A //karin: fteqw game home path
+#define HARM_FTE_HOME ".fte/"
+		if (com_homepathenabled)
+			nlen = Q_snprintfz(out, outlen, "%s" HARM_FTE_HOME "%s/%s", fordisplay?"$homedir/":com_homepath, gamedirfile, fname);
+		else
+			nlen = Q_snprintfz(out, outlen, "%s" HARM_FTE_HOME "%s/%s", fordisplay?"$basedir/":com_gamepath, gamedirfile, fname);
+#else
 		if (com_homepathenabled)
 			nlen = Q_snprintfz(out, outlen, "%s%s/%s", fordisplay?"$homedir/":com_homepath, gamedirfile, fname);
 		else
 			nlen = Q_snprintfz(out, outlen, "%s%s/%s", fordisplay?"$basedir/":com_gamepath, gamedirfile, fname);
+#endif
 		break;
 	case FS_LIBRARYPATH:
 #ifdef FTE_LIBRARY_PATH
@@ -2790,6 +2798,14 @@ static qboolean FS_NativePath(const char *fname, enum fs_relative relativeto, ch
 			nlen = Q_snprintfz(out, outlen, "$libdir/%s", fname);
 		else
 			nlen = Q_snprintfz(out, outlen, STRINGIFY(FTE_LIBRARY_PATH)"/%s", fname);
+		break;
+#elif defined(_DIII4A) //karin: load library path
+		{
+			extern char *Sys_MakeDLLPath(const char *libname, char path[], int max_length);
+			char dllName[MAX_OSPATH];
+			Sys_MakeDLLPath(fname, dllName, MAX_OSPATH);
+			nlen = Q_snprintfz(out, outlen, "%s", dllName);
+		}
 		break;
 #else
 		return false;

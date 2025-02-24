@@ -148,6 +148,29 @@ void VID_Register(void);
 #define LOGE(...) ((void)ANDROID_LOG_PRINT(ANDROID_LOG_ERROR, DISTRIBUTION"Droid", __VA_ARGS__))
 #endif
 
+qboolean mouseactive;
+extern void Android_GrabMouseCursor(qboolean grabIt);
+void IN_ActivateMouse(void)
+{
+	if (mouseactive)
+		return;
+
+	mouseactive = true;
+
+	Android_GrabMouseCursor( 1 );
+}
+
+void IN_DeactivateMouse(void)
+{
+	if (!mouseactive)
+		return;
+
+	mouseactive = false;
+	Android_GrabMouseCursor( 0 );
+}
+
+
+
 void INS_Move(void)
 {
 }
@@ -159,12 +182,14 @@ void INS_EnumerateDevices(void *ctx, void(*callback)(void *ctx, const char *type
 }
 void INS_Init(void)
 {
+	IN_ActivateMouse();
 }
 void INS_ReInit(void)
 {
 }
 void INS_Shutdown(void)
 {
+	IN_DeactivateMouse();
 }
 enum controllertype_e INS_GetControllerType(int id)
 {
@@ -387,7 +412,7 @@ void Sys_Quit(void)
 	SV_Shutdown();
 #endif
 
-	LOGI("%s", "quitting");
+	LOGI("%s\n", "quitting");
 	showMessageAndQuit("");
 
 	longjmp(host_abort, 1);
@@ -405,7 +430,7 @@ void Sys_Error (const char *error, ...)
 	if (!*string)
 		strcpy(string, "no error");
 
-	LOGE("e: %s", string);
+	LOGE("e: %s\n", string);
 	showMessageAndQuit(string);
 
 	host_initialized = false;	//don't keep calling Host_Frame, because it'll screw stuff up more. Can't trust Host_Shutdown either. :(
@@ -436,7 +461,7 @@ void Sys_Printf (char *fmt, ...)
 	while ((e = strchr(linebuf, '\n')))
 	{
 		*e = 0;
-		LOGI("%s", linebuf);
+		LOGI("%s\n", linebuf);
 		memmove(linebuf, e+1, endbuf-(e+1));
 		linebuf[endbuf-(e+1)] = 0;
 		endbuf -= (e+1)-linebuf;
@@ -453,7 +478,7 @@ void Sys_Warn (char *fmt, ...)
 	vsnprintf (string,sizeof(string)-1, fmt,argptr);
 	va_end (argptr);
 
-	LOGW("w: %s", string);
+	LOGW("w: %s\n", string);
 }
 
 void Sys_CloseLibrary(dllhandle_t *lib)
@@ -469,15 +494,29 @@ dllhandle_t *Sys_LoadLibrary(const char *name, dllfunction_t *funcs)
 {
 	size_t i;
 	dllhandle_t *h;
-	h = dlopen(va("%s.so", name), RTLD_LAZY|RTLD_LOCAL);
-	if (!h)
-		h = dlopen(name, RTLD_LAZY|RTLD_LOCAL);
+	char libname[MAX_OSPATH] = { 0 };
+	snprintf(libname, sizeof(libname) - 1, "%s.so", name);
+	h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
 	if (!h)
 	{
-		Con_DLPrintf(2,"%s\n", dlerror());
+		//Sys_Printf("try 1 dlopen('%s') error -> %s\n", libname, dlerror());
+		snprintf(libname, sizeof(libname) - 1, "%s", name);
+		h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
+	}
+	if (!h)
+	{
+		//Sys_Printf("try 2 dlopen('%s') error -> %s\n", libname, dlerror());
+		snprintf(libname, sizeof(libname) - 1, "lib%s.so", name);
+		h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
+	}
+	if (!h)
+	{
+		//Sys_Printf("try 3 dlopen('%s') error -> %s\n", libname, dlerror());
+		Sys_Printf("dlopen('%s') error -> %s\n", name, dlerror());
 		return NULL;
 	}
 
+	Sys_Printf("dlopen('%s'): %s\n", libname, name);
 	if (h && funcs)
 	{
 		for (i = 0; funcs[i].name; i++)

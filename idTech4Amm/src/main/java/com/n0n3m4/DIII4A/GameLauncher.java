@@ -3975,7 +3975,10 @@ public class GameLauncher extends Activity
 		{
 			List<String> list = new KidTechCommand(KidTechCommand.ARG_PREFIX_ALL, GetCmdText()).GetAllParamNames();
 			if(!list.isEmpty())
-				return list.get(0);
+			{
+				String parm = list.get(0);
+				return KStr.TrimLeft(parm, '-');
+			}
 			else
 				return "";
 		}

@@ -9,6 +9,10 @@ static plugaudiofuncs_t *audiofuncs;
 #include "libswscale/swscale.h"
 #include "libavutil/imgutils.h"
 
+#ifdef _DIII4A //karin: dynamic load ffmpeg
+#include "qffmpeg_inc.h"
+#endif
+
 #define TARGET_FFMPEG (LIBAVFORMAT_VERSION_MICRO >= 100)
 #define HAVE_DECOUPLED_API (LIBAVCODEC_VERSION_MAJOR>57 || (LIBAVCODEC_VERSION_MAJOR==57&&LIBAVCODEC_VERSION_MINOR>=36))
 

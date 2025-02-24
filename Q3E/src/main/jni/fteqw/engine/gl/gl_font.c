@@ -1885,6 +1885,8 @@ qboolean Font_LoadFreeTypeFont(struct font_s *f, int height, const char *fontfil
 		fontmodule = Sys_LoadLibrary("libfreetype-6", ft2funcs);
 		if (!fontmodule)
 			fontmodule = Sys_LoadLibrary("freetype6", ft2funcs);
+#elif defined(__ANDROID__) //karin: libfreetype.so
+		fontmodule = Sys_LoadLibrary("libfreetype.so", ft2funcs);
 #else
 		fontmodule = Sys_LoadLibrary("libfreetype.so.6", ft2funcs);
 #endif

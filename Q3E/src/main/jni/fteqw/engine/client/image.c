@@ -1517,6 +1517,8 @@ qboolean LibPNG_Init(void)
 			{
 			#ifdef _WIN32
 				"libpng" STRINGIFY(PNG_LIBPNG_VER_DLLNUM)
+#elif defined(__ABDROID__) //karin: libpng.so
+				"libpng",
 			#else
 				//linux...
 				//lsb uses 'libpng12.so' specifically, so make sure that works.

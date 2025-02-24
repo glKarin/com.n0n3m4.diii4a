@@ -200,6 +200,7 @@ Sys_Printf("GLVID_Initing...\n");
 	if (!GL_Init(info, GLES_GetSymbol))
 		return false;
 #ifdef VKQUAKE
+	Sys_Printf("Using OpenGL backend.\n");
 	using_vulkan = false;
 #endif
 	Sys_Printf("GLVID_Inited...\n");
@@ -320,7 +321,10 @@ static qboolean VKVID_Init (rendererstate_t *info, unsigned char *palette)
 	qboolean res = VK_Init(info, extnames, VKVID_CreateSurface, NULL);
 #ifdef VKQUAKE
 	if(res)
+	{
+		Sys_Printf("Using Vulkan backend.\n");
 		using_vulkan = true;
+	}
 #endif
 	return res;
 }

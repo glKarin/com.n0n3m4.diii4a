@@ -185,7 +185,9 @@ static plugin_t *Plug_Load(const char *file)
 {
 	static enum fs_relative prefixes[] =
 	{
+#if !defined(_DIII4A) //karin: only find on library path on Android
 		FS_BINARYPATH,
+#endif
 		FS_LIBRARYPATH,
 #ifndef ANDROID
 		FS_ROOT,
@@ -193,8 +195,12 @@ static plugin_t *Plug_Load(const char *file)
 	};
 	static char *postfixes[] =
 	{
+#if !defined(_DIII4A) //karin: library name no suffix on Android
 		"_" ARCH_CPU_POSTFIX ARCH_DL_POSTFIX,
 #ifndef ANDROID
+		ARCH_DL_POSTFIX,
+#endif
+#else
 		ARCH_DL_POSTFIX,
 #endif
 	};

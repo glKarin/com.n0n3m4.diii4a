@@ -9,6 +9,10 @@
 #include "libavutil/opt.h"
 #include "libavutil/channel_layout.h"
 
+#ifdef _DIII4A //karin: dynamic load ffmpeg
+#include "qffmpeg_inc.h"
+#endif
+
 #define TARGET_FFMPEG (LIBAVFORMAT_VERSION_MICRO >= 100)
 
 #if TARGET_FFMPEG

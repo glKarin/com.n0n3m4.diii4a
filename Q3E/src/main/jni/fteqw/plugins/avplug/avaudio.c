@@ -9,6 +9,203 @@ static cvar_t *ffmpeg_audiodecoder, *pdeveloper;
 
 #define HAVE_DECOUPLED_API (LIBAVCODEC_VERSION_MAJOR>57 || (LIBAVCODEC_VERSION_MAJOR==57&&LIBAVCODEC_VERSION_MINOR>=36))
 
+#ifdef _DIII4A //karin: dynamic load ffmpeg
+#include <dlfcn.h>
+#include "qffmpeg_inc.h"
+
+#if 0
+#define FFMPEGDBG(x) x
+#else
+#define FFMPEGDBG(x)
+#endif
+
+#define QFFMPEGPROC(name, rettype, args) rettype (* q##name) args;
+#include "qffmpeg.h"
+
+int av_strerror(int errnum, char *errbuf, size_t errbuf_size)
+{
+	if(qav_strerror)
+		return qav_strerror(errnum, errbuf, errbuf_size);
+	else
+		return 0;
+}
+
+typedef void * lib_handle_t;
+#define lib_open(x) dlopen(x, RTLD_LAZY|RTLD_LOCAL)
+#define lib_close(x) dlclose(x)
+#define lib_get(x, n) dlsym(x, n)
+
+static lib_handle_t avcodec = 0;
+static lib_handle_t avformat = 0;
+static lib_handle_t swresample = 0;
+static lib_handle_t swrscale = 0;
+static lib_handle_t avutil = 0;
+qboolean ffmpeg_available = false;
+
+static lib_handle_t FFmpeg_LoadLibrary(const char *so)
+{
+    lib_handle_t handle = lib_open(so);
+    printf("Load FFmpeg library(%s) -> %p\n", so, (void *) handle);
+    return handle;
+}
+
+static void FFmpeg_UnloadLibrary(lib_handle_t *handle)
+{
+    if(handle)
+    {
+        printf("Unload FFmpeg library(%p)\n", (void *) *handle);
+        lib_close(*handle);
+        *handle = 0;
+    }
+}
+
+void FFmpeg_Shutdown(void)
+{
+    printf("----- FFmpeg shutdown -----\n");
+    ffmpeg_available = 0;
+
+#define QFFMPEG_MODULE avcodec
+#define QFFMPEGPROC(name, rettype, args) q##name = NULL;
+#define QFFMPEG_AVCODEC
+#include "qffmpeg.h"
+
+#define QFFMPEG_MODULE avformat
+#define QFFMPEGPROC(name, rettype, args) q##name = NULL;
+#define QFFMPEG_AVFORMAT
+#include "qffmpeg.h"
+
+#define QFFMPEG_MODULE swresample
+#define QFFMPEGPROC(name, rettype, args) q##name = NULL;
+#define QFFMPEG_SWRESAMPLE
+#include "qffmpeg.h"
+
+#define QFFMPEG_MODULE swrscale
+#define QFFMPEGPROC(name, rettype, args) q##name = NULL;
+#define QFFMPEG_SWRSCALE
+#include "qffmpeg.h"
+
+#define QFFMPEG_MODULE avutil
+#define QFFMPEGPROC(name, rettype, args) q##name = NULL;
+#define QFFMPEG_AVUTIL
+#include "qffmpeg.h"
+
+    FFmpeg_UnloadLibrary(&avcodec);
+    FFmpeg_UnloadLibrary(&avformat);
+    FFmpeg_UnloadLibrary(&swresample);
+    FFmpeg_UnloadLibrary(&swrscale);
+    FFmpeg_UnloadLibrary(&avutil);
+}
+
+static qboolean FFmpeg_LoadSymbols(void)
+{
+#define QFFMPEG_MODULE avcodec
+#define QFFMPEGPROC(name, rettype, args) { \
+    q##name = (rettype (*) args)lib_get((void *)QFFMPEG_MODULE, #name); \
+    FFMPEGDBG(printf("dlsym(%p, %s) -> %p\n", QFFMPEG_MODULE, #name, q##name)); \
+    if(! q##name) {                            \
+        return false; \
+    }                                           \
+}
+#define QFFMPEG_AVCODEC
+#include "qffmpeg.h"
+
+#define QFFMPEG_MODULE avformat
+#define QFFMPEGPROC(name, rettype, args) { \
+    q##name = (rettype (*) args)lib_get((void *)QFFMPEG_MODULE, #name); \
+    FFMPEGDBG(printf("dlsym(%p, %s) -> %p\n", QFFMPEG_MODULE, #name, q##name)); \
+    if(! q##name) {                            \
+        return false; \
+    }                                           \
+}
+#define QFFMPEG_AVFORMAT
+#include "qffmpeg.h"
+
+#define QFFMPEG_MODULE swresample
+#define QFFMPEGPROC(name, rettype, args) { \
+    q##name = (rettype (*) args)lib_get((void *)QFFMPEG_MODULE, #name); \
+    FFMPEGDBG(printf("dlsym(%p, %s) -> %p\n", QFFMPEG_MODULE, #name, q##name)); \
+    if(! q##name) {                            \
+        return false; \
+    }                                           \
+}
+#define QFFMPEG_SWRESAMPLE
+#include "qffmpeg.h"
+
+#define QFFMPEG_MODULE swrscale
+#define QFFMPEGPROC(name, rettype, args) { \
+    q##name = (rettype (*) args)lib_get((void *)QFFMPEG_MODULE, #name); \
+    FFMPEGDBG(printf("dlsym(%p, %s) -> %p\n", QFFMPEG_MODULE, #name, q##name)); \
+    if(! q##name) {                            \
+        return false; \
+    }                                           \
+}
+#define QFFMPEG_SWRSCALE
+#include "qffmpeg.h"
+
+#define QFFMPEG_MODULE avutil
+#define QFFMPEGPROC(name, rettype, args) { \
+    q##name = (rettype (*) args)lib_get((void *)QFFMPEG_MODULE, #name); \
+    FFMPEGDBG(printf("dlsym(%p, %s) -> %p\n", QFFMPEG_MODULE, #name, q##name)); \
+    if(! q##name) {                            \
+        return false; \
+    }                                           \
+}
+#define QFFMPEG_AVUTIL
+#include "qffmpeg.h"
+
+    return true;
+}
+
+qboolean FFmpeg_Init(void)
+{
+    printf("----- FFmpeg initialization -----\n");
+    avcodec = FFmpeg_LoadLibrary("libavcodec.so");
+    if(!avcodec)
+    {
+        FFmpeg_Shutdown();
+        return false;
+    }
+
+    avformat = FFmpeg_LoadLibrary("libavformat.so");
+    if(!avformat)
+    {
+        FFmpeg_Shutdown();
+        return false;
+    }
+
+    swresample = FFmpeg_LoadLibrary("libswresample.so");
+    if(!swresample)
+    {
+        FFmpeg_Shutdown();
+        return false;
+    }
+
+    swrscale = FFmpeg_LoadLibrary("libswscale.so");
+    if(!swrscale)
+    {
+        FFmpeg_Shutdown();
+        return false;
+    }
+
+    avutil = FFmpeg_LoadLibrary("libavutil.so");
+    if(!avutil)
+    {
+        FFmpeg_Shutdown();
+        return false;
+    }
+
+    if(!FFmpeg_LoadSymbols())
+    {
+        FFmpeg_Shutdown();
+        return false;
+    }
+
+    ffmpeg_available = true;
+    return true;
+}
+
+#endif
+
 struct avaudioctx
 {
 	//raw file
@@ -545,6 +742,10 @@ qboolean AVEnc_Init(void);
 qboolean AVDec_Init(void);
 qboolean Plug_Init(void)
 {
+#ifdef _DIII4A //karin: dynamic load ffmpeg
+	if(!FFmpeg_Init())
+		return false;
+#endif
 	qboolean okay = false;
 
 	okay |= AVAudio_Init();
@@ -561,6 +762,10 @@ qboolean Plug_Init(void)
 		av_log_set_level(AV_LOG_WARNING);
 		av_log_set_callback(AVLogCallback);
 	}
+#ifdef _DIII4A //karin: dynamic load ffmpeg
+	else
+		FFmpeg_Shutdown();
+#endif
 	return okay;
 }
 

@@ -4021,7 +4021,9 @@ static void QCC_PR_CRCMessages(unsigned short crc)
 		QCC_PR_Warning(WARN_SYSTEMCRC, NULL, 0, "please update your tenebrae system defs.");
 		break;
 	default:
+#if 0 //karin
 		QCC_PR_Warning(WARN_SYSTEMCRC, NULL, 0, "system defs not recognised from quake nor clones, probably buggy (sys)defs.qc");
+#endif
 		break;
 	}
 }
