@@ -1254,10 +1254,10 @@ public class GameLauncher extends Activity
 
 		// game mods for every games
 		str = GetGameModFromCommand();
-        if (str != null)
-        {
-            if (!V.fs_game_user.isChecked())
-            {
+		if (!V.fs_game_user.isChecked()) // internal game
+		{
+			if (str != null)
+			{
 				GameManager.GameProp prop = m_gameManager.ChangeGameMod(str, false);
 				if(prop.IsValid())
 				{
@@ -1268,27 +1268,33 @@ public class GameLauncher extends Activity
 					RemoveGameModFromCommand();
 					RemoveProp("fs_game_base");
 				}*/
-            }
-            else // user mod
-            {
-                String cur = V.edt_fs_game.getText().toString();
-                if (!str.equals(cur))
-                    V.edt_fs_game.setText(str);
-            }
-        }
-        else
-        {
-			if (!V.fs_game_user.isChecked())
+			}
+			else
 			{
 				SelectRadioGroup(GetGameModRadioGroup(), -1);
 			}
-			else // user mod
+		}
+		else // user mod
+		{
+			if (str != null)
 			{
-				String cur = V.edt_fs_game.getText().toString();
-				if (!"".equals(cur))
-					V.edt_fs_game.setText("");
+				GameManager.GameProp prop = m_gameManager.ChangeGameMod(str, false);
+				if(!prop.IsValid())
+				{
+					String cur = V.edt_fs_game.getText().toString();
+					if (!str.equals(cur))
+						V.edt_fs_game.setText(str);
+				}
 			}
-        }
+			else
+			{
+				{
+					String cur = V.edt_fs_game.getText().toString();
+					if (!"".equals(cur))
+						V.edt_fs_game.setText("");
+				}
+			}
+		}
 
 		// graphics
 		int checkedRadioButtonId = V.rg_scrres.getCheckedRadioButtonId();
@@ -1717,7 +1723,7 @@ public class GameLauncher extends Activity
 			{
 				SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
 				editor.putString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), s.toString());
-				if (!V.fs_game_user.isChecked())
+				if (V.fs_game_user.isChecked())
 					editor.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), s.toString());
 				editor.commit();
 			}
@@ -3488,7 +3494,11 @@ public class GameLauncher extends Activity
 		String userModName = preference.getString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), "");
 		String cur = V.edt_fs_game.getText().toString();
 		if (!userModName.equals(cur))
+		{
 			V.edt_fs_game.setText(userModName);
+		}
+		if(userMod)
+			game = userModName;
 
 		GameManager.GameProp prop = m_gameManager.ChangeGameMod(game, userMod);
 		HandleGameProp(prop);
@@ -3846,6 +3856,8 @@ public class GameLauncher extends Activity
 
 	private void HandleGameProp(GameManager.GameProp prop)
 	{
+		boolean b = m_commandTextWatcher.IsEnabled();
+		m_commandTextWatcher.Uninstall();
 		if(prop.is_user)
 		{
 			if (!prop.fs_game.isEmpty())
@@ -3867,6 +3879,7 @@ public class GameLauncher extends Activity
 				SetProp("fs_game_base", prop.fs_game_base);
 			RemoveProp("harm_fs_gameLibPath");
 		}
+		m_commandTextWatcher.Install(b);
 	}
 
 	public GameManager GetGameManager()

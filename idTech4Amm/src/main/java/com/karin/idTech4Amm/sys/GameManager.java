@@ -1,5 +1,7 @@
 package com.karin.idTech4Amm.sys;
 
+import android.support.annotation.NonNull;
+
 import com.karin.idTech4Amm.R;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -68,6 +70,19 @@ public final class GameManager
         public boolean IsValid()
         {
             return index >= 0 && !game.isEmpty();
+        }
+
+        @Override
+        public String toString()
+        {
+            return "GameProp{" +
+                    "index=" + index +
+                    ", game='" + game + '\'' +
+                    ", fs_game='" + fs_game + '\'' +
+                    ", fs_game_base='" + fs_game_base + '\'' +
+                    ", is_user=" + is_user +
+                    ", lib='" + lib + '\'' +
+                    '}';
         }
     }
 
