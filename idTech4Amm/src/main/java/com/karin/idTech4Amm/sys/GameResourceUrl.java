@@ -66,6 +66,8 @@ public enum GameResourceUrl
 
     // FTEQW
     FTEQW_BASE(Q3EGlobals.GAME_FTEQW, "", "", "https://www.fteqw.org", 1),
+    FTEQW_H2(Q3EGlobals.GAME_FTEQW, "hexen2", "", "https://store.steampowered.com/app/9060/HeXen_II/", 2),
+    FTEQW_FREEHL(Q3EGlobals.GAME_FTEQW, "halflife", "", "https://github.com/eukara/freehl", 1),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

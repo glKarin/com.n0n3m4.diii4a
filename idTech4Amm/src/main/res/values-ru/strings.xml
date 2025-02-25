@@ -454,5 +454,6 @@
     <string name="renderer_backend">Бэкэнд рендерера</string>
     <string name="change_game">Change game</string>
     <string name="hexen_2_base">Hexen II</string>
+    <string name="halflife_base">Half-Life</string>
 
 </resources>

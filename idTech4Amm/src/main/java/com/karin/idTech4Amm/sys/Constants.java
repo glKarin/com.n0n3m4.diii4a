@@ -24,7 +24,7 @@ public final class Constants
     public static final String CONST_FDROID = "https://f-droid.org/packages/com.karin.idTech4Amm/";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
-    public static final String CONST_CODE_ALIAS = "caitlyn"; // natasha verena
+    public static final String CONST_CODE_ALIAS = "lindaiyu"; // natasha verena caitlyn
 	public static String[] CONST_CHANGES()
     {
         return new String[] {

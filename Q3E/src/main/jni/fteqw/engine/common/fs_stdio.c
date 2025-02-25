@@ -146,6 +146,12 @@ vfsfile_t *FSSTDIO_OpenTemp(void)
 	f = tmpfile64();
 #else
 	f = tmpfile();
+#ifdef _DIII4A //karin: tmpfile always return NULL on Android
+	if(!f) {
+		extern FILE * Sys_tmpfile(void);
+		f = Sys_tmpfile();
+	}
+#endif
 #endif
 	if (!f)
 		return NULL;

@@ -2073,6 +2073,9 @@ static qboolean FSZIP_EnumerateCentralDirectory(zipfile_t *zip, struct zipinfo *
 				{	//already utf-8 encoding, still need to work around windows though.
 					if (entry.fname_len > sizeof(f->name)-1)
 						entry.fname_len = sizeof(f->name)-1;
+#if 1 //karin: _DIII4A ???
+					int i;
+#endif
 					for (i = 0; i < entry.fname_len; i++)
 						f->name[i] = (entry.fname[i]=='\\')?'/':entry.fname[i];
 					memcpy(f->name, entry.fname, entry.fname_len);
