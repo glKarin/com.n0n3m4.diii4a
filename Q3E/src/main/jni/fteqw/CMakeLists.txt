@@ -1660,7 +1660,8 @@ IF(FTE_PLUG_X11SV)
 ENDIF()
 
 #ffmpeg client plugin. no proper way to detect dependancies right now, so I've gotta try the manual way.
-SET(FTE_PLUG_FFMPEG true CACHE BOOL "Compile ffmpeg media plugin.")
+#k SET(FTE_PLUG_FFMPEG true CACHE BOOL "Compile ffmpeg media plugin.")
+SET(FTE_PLUG_FFMPEG false)
 IF(FTE_PLUG_FFMPEG)
 	if(ANDROID) #karin: dl
 		set(FTEQW_FFMPEG_INC_DIR ${FTEQW_DEPINCS}/ffmpeg/ffmpeg60/include)
