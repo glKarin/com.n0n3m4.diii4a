@@ -45,8 +45,9 @@ public final class GameManager
         public final String  fs_game_base;
         public final boolean is_user;
         public final String  lib;
+        public final String  file;
 
-        public GameProp(int index, String game, String fs_game, String fs_game_base, boolean is_user, String lib)
+        public GameProp(int index, String game, String fs_game, String fs_game_base, boolean is_user, String lib, String file)
         {
             this.index = index;
             this.game = game;
@@ -54,6 +55,10 @@ public final class GameManager
             this.fs_game_base = fs_game_base;
             this.is_user = is_user;
             this.lib = lib;
+            if(null == file)
+                this.file = fs_game;
+            else
+                this.file = file;
         }
 
         public boolean IsGame(String game)
@@ -71,19 +76,6 @@ public final class GameManager
         {
             return index >= 0 && !game.isEmpty();
         }
-
-        @Override
-        public String toString()
-        {
-            return "GameProp{" +
-                    "index=" + index +
-                    ", game='" + game + '\'' +
-                    ", fs_game='" + fs_game + '\'' +
-                    ", fs_game_base='" + fs_game_base + '\'' +
-                    ", is_user=" + is_user +
-                    ", lib='" + lib + '\'' +
-                    '}';
-        }
     }
 
     private void InitGameProps()
@@ -98,7 +90,7 @@ public final class GameManager
         for (Game value : values)
         {
             props = GameProps.get(value.type);
-            prop = new GameProp(props.size(), value.game, value.fs_game, value.fs_game_base, false, value.lib);
+            prop = new GameProp(props.size(), value.game, value.fs_game, value.fs_game_base, false, value.lib, value.file);
             props.add(prop);
         }
     }
@@ -172,7 +164,7 @@ public final class GameManager
             }
         }
         if(null == res)
-            res = new GameProp(0, "", game, "", userMod, "");
+            res = new GameProp(0, "", game, "", userMod, "", null);
         return res;
     }
 

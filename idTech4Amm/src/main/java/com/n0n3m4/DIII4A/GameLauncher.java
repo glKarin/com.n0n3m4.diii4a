@@ -3930,7 +3930,17 @@ public class GameLauncher extends Activity
 				name = (String)value.name;
 			else
 				name = "";
-			name += "(" + /*subdir +*/ value.game + ")";
+			if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(value.type))
+			{
+				name += " (" + /*subdir +*/ value.file + ")";
+			}
+			else
+			{
+				if(KStr.NotEmpty(value.fs_game))
+					name += " [" + value.fs_game + "]";
+				if(KStr.NotEmpty(value.file))
+					name += " (" + /*subdir +*/ value.file + "/)";
+			}
 			radio.setText(name);
 			radio.setTag(value.game);
 			group.addView(radio, layoutParams);
