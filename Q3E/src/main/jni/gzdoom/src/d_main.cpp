@@ -1255,6 +1255,7 @@ void D_DoomLoop ()
 #endif
 
 			GStrings.SetDefaultGender(players[consoleplayer].userinfo.GetGender()); // cannot be done when the CVAR changes because we don't know if it's for the consoleplayer.
+
 			// frame syncronous IO operations
 			if (gametic > lasttic)
 			{

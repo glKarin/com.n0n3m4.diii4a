@@ -95,11 +95,7 @@ bool IsOpenALPresent()
 	{
 		done = true;
 #ifdef __ANDROID__ //karin: OpenAL library path
-		extern const char * Sys_DLLDefaultPath(void);
-		FString openalsoft = Sys_DLLDefaultPath();
-		openalsoft += "/";
-		openalsoft += OPENALLIB;
-		cached_result = OpenALModule.Load({openalsoft.GetChars()});
+		cached_result = OpenALModule.Load({OPENALLIB});
 #else
 		cached_result = OpenALModule.Load({OPENALLIB1, OPENALLIB2});
 #endif

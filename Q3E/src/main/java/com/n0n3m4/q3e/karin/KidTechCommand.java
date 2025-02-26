@@ -912,4 +912,68 @@ public class KidTechCommand
         }
         return sb.toString();
     }
+
+    public KidTechCommand RemoveAllParams()
+    {
+        int i = 0;
+        while(!IsEnd(i = FindNext(i, CMD_PART_PARAM)))
+        {
+            int start = i;
+            CmdPart part = cmdParts.get(i);
+            i++;
+
+            int blank1I = i;
+            int valueI = blank1I + 1;
+            int blank2I = valueI + 1;
+            boolean blank1 = RequireType(blank1I, CMD_PART_BLANK);
+            boolean value = RequireType(valueI, CMD_PART_VALUE);
+            boolean blank2 = RequireType(blank2I, CMD_PART_BLANK);
+
+            int end = start;
+            if(blank1)
+            {
+                end = blank1I;
+                if(value)
+                {
+                    end = valueI;
+                    if(blank2)
+                    {
+                        end = blank2I;
+                    }
+                }
+            }
+
+            RemoveParts(start, end + 1);
+            return this;
+        }
+
+        return this;
+    }
+
+    public List<String> GetAllParamNames()
+    {
+        int i = 0;
+        List<String> list = new ArrayList<>();
+        while(!IsEnd(i = FindNext(i, CMD_PART_PARAM)))
+        {
+            CmdPart part = cmdParts.get(i);
+
+            i++;
+
+            list.add(part.str);
+
+            int blank1I = i;
+            if(!RequireType(blank1I, CMD_PART_BLANK))
+                continue;
+
+            i++;
+            int valueI = blank1I + 1;
+            if(!RequireType(valueI, CMD_PART_VALUE))
+                continue;
+
+            i++;
+        }
+
+        return list;
+    }
 }

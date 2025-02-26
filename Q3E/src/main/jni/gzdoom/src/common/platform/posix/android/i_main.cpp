@@ -149,12 +149,12 @@ void I_DetectOS()
 }
 
 void I_StartupJoysticks();
-extern void ZMusic_SetDLLPath(const char *path);
+//extern void ZMusic_SetDLLPath(const char *path);
 
 // GZDOOM game main thread loop
 int main(int argc, char **argv)
 {
-	ZMusic_SetDLLPath(Sys_DLLDefaultPath());
+	//ZMusic_SetDLLPath(Sys_DLLDefaultPath());
 
 	extern bool no_handle_signals;
 	if(!no_handle_signals)

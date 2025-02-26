@@ -48,6 +48,7 @@ public class Q3EMain extends Activity
 {
     private       Q3ECallbackObj mAudio;
     private       Q3EView        mGLSurfaceView;
+    private       RelativeLayout mainLayout;
     // k
     private       boolean        m_hideNav         = true;
     private       int            m_runBackground   = 1;
@@ -290,7 +291,7 @@ public class Q3EMain extends Activity
         if (Q3EUtils.q3ei.view_motion_control_gyro && (gyroXSens != 0.0f || gyroYSens != 0.0f))
             mControlGLSurfaceView.SetGyroscopeSens(gyroXSens, gyroYSens);
         mControlGLSurfaceView.RenderView(mGLSurfaceView);
-        RelativeLayout mainLayout = new RelativeLayout(this);
+        mainLayout = new RelativeLayout(this);
         RelativeLayout.LayoutParams params;
 
         params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);

@@ -133,19 +133,20 @@ public final class Q3EGlobals
     public static final int SIGNALS_HANDLER_BACKTRACE = 2;
 
     // game engine library
-    public static final String LIB_ENGINE_ID        = "libidtech4.so"; // DOOM3
-    public static final String LIB_ENGINE_RAVEN     = "libidtech4_raven.so"; // Quake 4
-    public static final String LIB_ENGINE_HUMANHEAD = "libidtech4_humanhead.so"; // Prey 2006
-    public static final String LIB_ENGINE2_ID       = "libyquake2.so"; // Quake 2
-    public static final String LIB_ENGINE3_ID       = "libioquake3.so"; // Quake 3
-    public static final String LIB_ENGINE3_RTCW     = "libiowolfsp.so"; // RTCW
-    public static final String LIB_ENGINE4_TDM      = "libTheDarkMod.so"; // TDM
-    public static final String LIB_ENGINE1_QUAKE    = "libdarkplaces.so"; // Quake 1
-    public static final String LIB_ENGINE4_D3BFG    = "libRBDoom3BFG.so"; // Doom3-BFG
+    public static final String LIB_ENGINE_ID            = "libidtech4.so"; // DOOM3
+    public static final String LIB_ENGINE_RAVEN         = "libidtech4_raven.so"; // Quake 4
+    public static final String LIB_ENGINE_HUMANHEAD     = "libidtech4_humanhead.so"; // Prey 2006
+    public static final String LIB_ENGINE2_ID           = "libyquake2.so"; // Quake 2
+    public static final String LIB_ENGINE3_ID           = "libioquake3.so"; // Quake 3
+    public static final String LIB_ENGINE3_RTCW         = "libiowolfsp.so"; // RTCW
+    public static final String LIB_ENGINE4_TDM          = "libTheDarkMod.so"; // TDM
+    public static final String LIB_ENGINE1_QUAKE        = "libdarkplaces.so"; // Quake 1
+    public static final String LIB_ENGINE4_D3BFG        = "libRBDoom3BFG.so"; // Doom3-BFG
     public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
-    public static final String LIB_ENGINE1_DOOM     = "libgzdoom.so"; // GZDOOM
-    public static final String LIB_ENGINE3_ETW      = "libetl.so"; // ETW
-    public static final String LIB_ENGINE3_REALRTCW = "libRealRTCW.so"; // RealRTCW
+    public static final String LIB_ENGINE1_DOOM         = "libgzdoom.so"; // GZDOOM
+    public static final String LIB_ENGINE3_ETW          = "libetl.so"; // ETW
+    public static final String LIB_ENGINE3_REALRTCW     = "libRealRTCW.so"; // RealRTCW
+    public static final String LIB_ENGINE_FTEQW         = "libfteqw.so"; // FTEQW
 
     // game config file
     public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg"; // DOOM3
@@ -160,6 +161,7 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_GZDOOM   = "gzdoom.ini"; // GZDOOM
     public static final String CONFIG_FILE_ETW      = "etconfig.cfg"; // ETW
     public static final String CONFIG_FILE_REALRTCW = "realrtcwconfig.cfg"; // RealRTCW
+    public static final String CONFIG_FILE_FTEQW    = "fte.cfg"; // FTEQW
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -174,6 +176,7 @@ public final class Q3EGlobals
     public static final String GAME_GZDOOM   = "gzdoom";
     public static final String GAME_ETW      = "etw";
     public static final String GAME_REALRTCW = "realrtcw";
+    public static final String GAME_FTEQW    = "fteqw";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -188,6 +191,7 @@ public final class Q3EGlobals
     public static final String GAME_NAME_GZDOOM   = "GZDOOM";
     public static final String GAME_NAME_ETW      = "ETW"; // "Wolfenstein: Enemy Territory";
     public static final String GAME_NAME_REALRTCW = "RealRTCW";
+    public static final String GAME_NAME_FTEQW    = "FTEQW";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -204,6 +208,7 @@ public final class Q3EGlobals
     public static final String GAME_BASE_GZDOOM     = ""; // GZDOOM is standalone
     public static final String GAME_BASE_ETW        = "etmain";
     public static final String GAME_BASE_REALRTCW   = "Main";
+    public static final String GAME_BASE_FTEQW      = "";
 
     // game sub directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
@@ -218,6 +223,7 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_GZDOOM   = "gzdoom";
     public static final String GAME_SUBDIR_ETW      = "etw";
     public static final String GAME_SUBDIR_REALRTCW = "realrtcw";
+    public static final String GAME_SUBDIR_FTEQW    = "fteqw";
 
     public enum PatchResource
     {
@@ -351,7 +357,7 @@ public final class Q3EGlobals
     // extra internal game file version: <Game engine version>.<idTech4A++ patch version>
     public static final String TDM_GLSL_SHADER_VERSION        = "2.12.5"; // 5: change all shaders default precision from mediump to highp
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
-    public static final String GZDOOM_VERSION                 = "4.14.0.3"; // 2: change postprocess OpenGL shaders
+    public static final String GZDOOM_VERSION                 = "4.14.0.3"; // 3: change postprocess OpenGL shaders
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 

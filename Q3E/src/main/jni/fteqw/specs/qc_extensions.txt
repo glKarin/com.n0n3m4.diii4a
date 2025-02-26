@@ -1,0 +1,326 @@
+//default to ssqc, as that's the most common sort of mod in use.
+#ifndef CSQC
+#ifndef MENU
+#ifndef SSQC
+#define SSQC
+#endif
+#endif
+#endif
+
+//EXT_BITSHIFT
+//if quantity is negative, value is shifted right.
+//if quantity is positive, value is shifted left.
+//be warned that floats are not ideal for precision...
+float(float number, float quantity) bitshift = #218;
+
+//EXT_DIMENSION_VISIBILITY
+//if (player.dimension_see && other.dimension_seen) then allow entity to be visible to client. This affects which entities are visible to each other.
+//dimension_send is equivelent to seen, but applies to multicasts instead of entities.
+//suggestion: this extension can be used to filter ents based on csqc support or not.
+#ifdef SSQC
+.float dimension_see;
+.float dimension_seen;
+float dimension_send;
+#endif
+
+//EXT_DIMENSION_GHOST
+//if self.dimension_ghost specifies a bit which is not in dimension_seen, then the entity can still be seen but its alpha value will be multiplied by ghost_alpha (or 0.5 if that's set to 0).
+#ifdef SSQC
+.float dimension_ghost;
+.float dimension_ghost_alpha;
+#endif
+
+//EXT_DIMENSION_PHYSICS
+//provides two (float) bitfields that control whether two entities are allowed to collide, and in which direction.
+//logically: if (self.dimention_hit & other.dimension_solid) self.touch();
+//note that if one ent is solid one way, and not the other, one may move through while the other cannot (unless its already inside).
+.float dimension_solid;
+.float dimension_hit;
+
+
+
+//FTE_CALLTIMEOFDAY
+//originally an mvdsv extension, but in a builtin number that wasn't compatible (was 102).
+//calltimeofday invokes a timeofday function with arguments containing the time of day, oddly enough.
+void() calltimeofday = #231;
+//In order to make it more useful, this header includes a timeofday function which just grabs the values for you to use in your qc code straight after calling calltimeofday.
+float tod_sec, tod_min, tod_hour, tod_day, tod_mon, tod_year;
+string tod_string;
+//This function is to facilitate use, and need not be modified.
+void(float s, float mi, float h, float d, float mo, float y, string tmp_timeofday) timeofday =
+{ tod_sec = s; tod_min = mi; tod_hour = h; tod_day = d; tod_mon = mo; tod_year = y; strunzone(tod_string); tod_string = strzone(tmp_timeofday);};
+
+//FTE_CSQC_HALFLIFE_MODELS
+//engine supports halflife models.
+#ifdef CSQC
+.float bonecontrol1;
+.float bonecontrol2;
+.float bonecontrol3;
+.float bonecontrol4;
+.float bonecontrol5; /*aka mouth*/
+.float subblendfrac;
+.float basesubblendfrac; /*depends upon FTE_CSQC_BASEFRAME*/
+#endif
+
+//FTE_CSQC_BASEFRAME
+#ifdef CSQC
+.float baseframe;
+.float baseframe2;
+.float baselerpfrac;
+.float baseframe1time;
+.float baseframe2time;
+.float basebone;
+#endif
+
+//FTE_CSQC_SKELETONOBJECTS
+//idea: Spike, LordHavoc
+//builtin definitions:
+#ifdef CSQC
+float(float modlindex) skel_create = #263; // create a skeleton (be sure to assign the value to .skeletonindex for use), returns skeleton index (1 or higher) on success, returns 0 on failure  (for example if the modelindex is not skeletal)
+float(float skel, entity ent, float modlindex, float retainfrac, float firstbone, float lastbone) skel_build = #264; // blend in a percentage of standard animation, 0 replaces entirely, 1 does nothing, 0.5 blends half, etc, and this only alters the bones in the specified range for which out of bounds values like 0,100000 are safe (uses .frame, .frame2, .lerpfrac, .frame1time, .frame2time, FTE_CSQC_BASEFRAME fields), returns skel on success, 0 on failure
+float(float skel) skel_get_numbones = #265; // returns how many bones exist in the created skeleton
+string(float skel, float bonenum) skel_get_bonename = #266; // returns name of bone (as a tempstring)
+float(float skel, float bonenum) skel_get_boneparent = #267; // returns parent num for supplied bonenum, -1 if bonenum has no parent or bone does not exist (returned value is always less than bonenum, you can loop on this)
+float(float skel, string tagname) skel_find_bone = #268; // get number of bone with specified name, 0 on failure, tagindex (bonenum+1) on success, same as using gettagindex on the modelindex
+vector(float skel, float bonenum) skel_get_bonerel = #269; // get matrix of bone in skeleton relative to its parent - sets v_forward, v_right, v_up, returns origin (relative to parent bone)
+vector(float skel, float bonenum) skel_get_boneabs = #270; // get matrix of bone in skeleton in model space - sets v_forward, v_right, v_up, returns origin (relative to entity)
+void(float skel, float bonenum, vector org) skel_set_bone = #271; // set matrix of bone relative to its parent, reads v_forward, v_right, v_up, takes origin as parameter (relative to parent bone)
+void(float skel, float bonenum, vector org) skel_mul_bone = #272; // transform bone matrix (relative to its parent) by the supplied matrix in v_forward, v_right, v_up, takes origin as parameter (relative to parent bone)
+void(float skel, float startbone, float endbone, vector org) skel_mul_bones = #273; // transform bone matrices (relative to their parents) by the supplied matrix in v_forward, v_right, v_up, takes origin as parameter (relative to parent bones)
+void(float skeldst, float skelsrc, float startbone, float endbone) skel_copybones = #274; // copy bone matrices (relative to their parents) from one skeleton to another, useful for copying a skeleton to a corpse
+void(float skel) skel_delete = #275; // deletes skeleton at the beginning of the next frame (you can add the entity, delete the skeleton, renderscene, and it will still work)
+float(float modlindex, string framename) frameforname = #276; // finds number of a specified frame in the animation, returns -1 if no match found
+float(float modlindex, float framenum) frameduration = #277; // returns the intended play time (in seconds) of the specified framegroup, if it does not exist the result is 0, if it is a single frame it may be a small value around 0.1 or 0.
+//fields:
+.float skeletonindex; // active skeleton overriding standard animation on model
+.float frame; // primary framegroup animation (strength = 1 - lerpfrac)
+.float frame2; // secondary framegroup animation (strength = lerpfrac)
+.float lerpfrac; // strength of framegroup blend
+.float frame1time; // start time of framegroup animation
+.float frame2time; // start time of framegroup animation
+#endif
+//description:
+//this extension provides a way to do complex skeletal animation on an entity.
+//
+//see also DP_SKELETONOBJECTS (this extension implemented on server as well as client)
+//
+//notes:
+//each model contains its own skeleton, reusing a skeleton with incompatible models will yield garbage (or not render).
+//each model contains its own animation data, you can use animations from other model files (for example saving out all character animations as separate model files).
+//if an engine supports loading an animation-only file format such as .md5anim in FTEQW, it can be used to animate any model with a compatible skeleton.
+//proper use of this extension may require understanding matrix transforms (v_forward, v_right, v_up, origin), and you must keep in mind that v_right is negative for this purpose.
+//
+//features include:
+//multiple animations blended together.
+//animating a model with animations from another model with a compatible skeleton.
+//restricting animation blends to certain bones of a model - for example independent animation of legs, torso, head.
+//custom bone controllers - for example making eyes track a target location.
+
+
+//FTE_ENT_UNIQUESPAWNID
+//Provides a field that is incremented each time an entity is spawn()ed. Always changes so no two spawn()s have the same value.
+.float uniquespawnid;
+
+//FTE_EXTENDEDTEXTCODES
+
+
+//FTE_FORCEINFOKEY
+forceinfokey
+
+//FTE_GFX_QUAKE3SHADERS
+//The engine supports Q3-compatible shaders, to the best of its ability. Specifically on models.
+#ifdef CSQC
+//returns a skin value that can be used on entities with the given modelindex for the given .skin file name.
+float(float modelindex, string skinname) skinforname = #237;
+//returns a shader id which can be passed back into the engine.
+float(string shadername) shaderforname = #238;
+//if set on an entity, forces all surfaces of the entity to use that shader.
+.float forceshader;
+#endif
+
+//FTE_ISBACKBUFFERED
+//idea: Spike
+//Adds a builtin that allows you to see if data sent to a player will likely just be buffered.
+//This permits ensuring that it does not overflow and get kicked, nor block other data for long periods, if you wish to generate/send a lot of data at once.
+float(entity playerent) isbackbuffered = #233;
+
+
+//FTE_MEDIA_AVI
+//specifies that the playfilm command and associated functionality accepts .avi format files.
+
+//FTE_MEDIA_CIN
+//specifies that the playfilm command and associated functionality accepts .cin format (q2) files.
+
+//FTE_MEDIA_ROQ
+//specifies that the playfilm command and associated functionality accepts RoQ format (q3) files.
+
+//FTE_MULTIPROGS
+//multiprogs: aka mutators or addons.
+//Even if you do not use addons, you are able to use this extension to query globals and stuff by name within the current progs.
+//The actual form of these builtins:
+//__variant(float progsnum, string funcname, ...) externcall = #201; /*calls a function by name in another progs. Accepts up to 6 additional arguments to pass through.*/
+//__variant(float progsnum, string varname) externvalue = #203;	/*retrieves a value from another progs by name*/
+//Convienience:
+float(float progsnum, string funcname, ...) externcall_f = #201;
+float(float progsnum, string varname) externvalue_f = #203;
+vector(float progsnum, string funcname, ...) externcall_v = #201; /*calls a function, expects a vector response*/
+vector(float progsnum, string varname) externvalue_v = #203;
+//other funcs
+void(float progsnum, string varname, ...) externset = #204;	/*sets a global/function/field-index in a given progs. Argument is passed in the ... bit (variant, will expect a vector only if the changed var type is a vector)*/
+float(string fname) addprogs = #202; /*not always valid after initents has been called*/
+float thisprogs;
+//engine-callable functions
+//void() init; /*called as soon as the progs is loaded - warning don't call spawn(). Hook your parent's functions here.*/
+//void() initents; /*called once addons are already loaded. Init the rest of your code here.*/
+//void(string pname) AddAddonProgs; /*engine asks main progs to add an addon*/
+
+
+
+//FTE_MULTITHREADED
+//FTE provides a pseudo-threading mechanism (cooperative execution threads).
+//Such threads preserve their entire QC stack, but not the engine stack beforehand.
+//The only globals that are thread-local are self and other. All others might be changed by any other task between scheduling.
+//As threads are cooperative, so there is no dire need for mutexes so long as you make no assumptions over sleeps/forks.
+//Note that fork forks the thread, so you can return twice from the same function. Use abort to prevent such unexpected situations.
+//The engine requires that the thread return to it. Thus sleep conceptually acts as an if(!fork())abort(0); pair in situations where the engine depends upon return values.
+//Expected usage is to fork on an event, invoke sleep with periodic intervals triggering sub-events, and eventually calling abort on the forked thread.
+//A forked or sleeped thread should not return twice through engine code.
+//Be aware that entities can be freed while your thread is sleeping. Use the wasfreed builtin or uniquespawnid field to detect this situation.
+
+void(float secs) sleep = #212;	/*Causes the current QC execution thread to stop and sleep for X secs. If the engine expected a return value from the current thread, then 0 is forcibly returned - consider: if (!fork())abort(5); if you need a different return value.*/
+float() fork = #210; /*called once, returns twice, with two different return values. If the engine expects a return value from the current thread, then it is the instance that returned 0 from fork that must still prove that return value.*/
+void(...) abort = #211; /*Kills the current thread, returning to the engine. If the engine expected you to return a value, you can pass one to the abort call.*/
+
+
+//FTE_MVD_PLAYBACK
+//no longer supported.
+
+//FTE_NPCCHAT
+//builtin chat
+//not documented.
+
+//FTE_QC_CHECKPVS
+//idea: Spike, Urre
+//builtin definitions:
+float checkpvs(vector viewpos, entity viewee) = #240;
+//description:
+//returns true if viewee can be seen from viewpos according to PVS data
+//note that viewpos is cached, and you'll get better results if you keep that argument the same when calling multiple times.
+
+//FTE_QC_MATCHCLIENTNAME
+//Given a rough client name, attempts to find a client with the matching name.
+//Can find multiple (if * is used, for example).
+//match is the name to match against
+//if matchnum is specified, 0 is the first, 1 is the second.
+//if matchnum is not present (only 1 arg) then only one client will be returned, and it'll fail if there were more matches.
+entity(string match, float matchnum) matchclients = #241;
+entity(string match) matchclient = #241;
+
+//FTE_QC_PAUSED
+//deprecated, use ZQ_QC_PAUSED instead.
+
+//FTE_QC_SENDPACKET
+//document me!
+/*
+sendpacket
+*/
+
+//FTE_QC_TRACETRIGGER
+//idea: often
+//Adds two new sorts of traces
+//.flags flags:
+float FL_FINDABLE_NONSOLID	= 16384;	//Affects findradius. SOLID_NOT entities may be returned if this is set in QW mods.
+//'nomonsters' flags for traceline:
+float MOVE_TRIGGERS	= 16;	//also hits triggers with the FL_FINDABLE_NONSOLID flag. Still hits everything else.
+float MOVE_EVERYTHING	= 32;	//hits SOLID_NOT entites and SOLID_TRIGGER, so long as they have FL_FINDABLE_NONSOLID set. Still hits everything else.
+
+//FTE_SOLID_LADDER
+//acts like SOLID_TRIGGER, except that players within the trigger will have their movement changed so they act as if on a ladder. Gravity is removed.
+float SOLID_LADDER = 20;
+
+//FTE_SQL
+//document me!
+/*
+sqlconnect
+sqldisconnect
+sqlopenquery
+sqlclosequery
+sqlreadfield
+sqlerror
+sqlescape
+sqlversion
+sqlreadfloat
+*/
+
+//FTE_STRINGS
+//idea: many
+//darkplaces implementation: KrimZon
+//builtin definitions:
+float(string str, string sub, float startpos) strstrofs = #221; // returns the offset into a string of the matching text, or -1 if not found, case sensitive
+float(string str, float ofs) str2chr = #222; // returns the character at the specified offset as an integer, or 0 if an invalid index, or byte value - 256 if the engine supports UTF8 and the byte is part of an extended character
+string(float c, ...) chr2str = #223; // returns a string representing the character given, if the engine supports UTF8 this may be a multi-byte sequence (length may be more than 1) for characters over 127.
+string(float ccase, float calpha, float cnum, string s, ...) strconv = #224; // reformat a string with special color characters in the font, DO NOT USE THIS ON UTF8 ENGINES (if you are lucky they will emit ^4 and such color codes instead), the parameter values are 0=same/1=lower/2=upper for ccase, 0=same/1=white/2=red/5=alternate/6=alternate-alternate for redalpha, 0=same/1=white/2=red/3=redspecial/4=whitespecial/5=alternate/6=alternate-alternate for rednum.
+string(float chars, string s, ...) strpad = #225; // pad string with spaces to a specified length, < 0 = left padding, > 0 = right padding
+string(string info, string key, string value, ...) infoadd = #226; // sets or adds a key/value pair to an infostring - note: forbidden characters are \ and "
+string(string info, string key) infoget = #227; // gets a key/value pair in an infostring, returns value or null if not found
+float(string s1, string s2, float len) strncmp = #228; // compare two strings up to the specified number of characters, if their length differs and is within the specified limit the result will be negative, otherwise it is the difference in value of their first non-matching character.
+float(string s1, string s2) strcasecmp = #229; // compare two strings with case-insensitive matching, characters a-z are considered equivalent to the matching A-Z character, no other differences, and this does not consider special characters equal even if they look similar
+float(string s1, string s2, float len) strncasecmp = #230; // same as strcasecmp but with a length limit, see strncmp
+//string(string s, float start, float length) substring = #116; // see note below
+//description:
+//various string manipulation functions
+//note: substring also exists in FRIK_FILE but this extension adds negative start and length as valid cases (see note above), substring is consistent with the php 5.2.0 substr function (not 5.2.3 behavior)
+//substring returns a section of a string as a tempstring, if given negative
+// start the start is measured back from the end of the string, if given a
+// negative length the length is the offset back from the end of the string to
+// stop at, rather than being relative to start, if start is negative and
+// larger than length it is treated as 0.
+// examples of substring:
+// substring("blah", -3, 3) returns "lah"
+// substring("blah", 3, 3) returns "h"
+// substring("blah", -10, 3) returns "bla"
+// substring("blah", -10, -3) returns "b"
+
+
+//FTE_SV_REENTER
+//If ClientReEnter is defined, it will be called instead of the ClientConnect/PutClientInServer pair at map start.
+#ifdef CSQC
+//void() ClientReEnter;
+//self is defined to be the player entity with a copy of all saved fields from the previous map. This does not affect initial spawning.
+#endif
+
+
+
+//FTE_TE_STANDARDEFFECTBUILTINS
+//equivelent to DP_TE_STANDARDEFFECTBUILTINS, but applicable to QuakeWorld instead.
+//document me!
+/*
+te_gunshot
+te_spike
+te_superspike
+te_explosion
+te_tarexplosion
+te_wizspike
+te_knightspike
+te_lavasplash
+te_teleport
+te_lightning1
+te_lightning2
+te_lightning3
+te_lightningblood
+te_bloodqw
+*/
+void(vector org) te_gunshot = #418;
+void(vector org) te_spike = #419;
+void(vector org) te_superspike = #420;
+void(vector org) te_explosion = #421;
+void(vector org) te_tarexplosion = #420;
+void(vector org) te_wizspike = #423;
+void(vector org) te_knightspike = #424;
+void(vector org) te_lavasplash = #425;
+void(vector org) te_teleport = #426;
+void(entity own, vector start, vector end) te_lightning1 = #428;
+void(entity own, vector start, vector end) te_lightning2 = #429;
+void(entity own, vector start, vector end) te_lightning3 = #430;
+void(vector org, float count) te_bloodqw = #239;
+void(vector org) te_lightningblood = #219;

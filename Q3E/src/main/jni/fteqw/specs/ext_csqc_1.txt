@@ -1,0 +1,637 @@
+This specification is subject to change. Engines should not yet advertise or detect the extension key in public releases.
+
+CSQC - or as engine modders call it: a good way to get other people to stop other people asking for new features - is a highly adaptable extension.
+
+Feel free to place random comments all over the place. This isn't in use yet, so it's quite easy to change all this babble.
+
+Major features:
+
+   * Able to draw custom status bar.
+   * Able to adjust models and stuff on models.
+   * Prediction.
+   * Able to change fov/pov/picture-in-picture.
+   * Able to launch sounds localy
+   * A brilliant starting point for umpteen extra extensions.
+
+CSQC progs should be compiled into a csprogs.dat by default, but there's no reason why an engine can't provide cvars to use a different name. This must match the one present on the server to be considered valid. It doesn't have to of course, but it should do.
+
+CSQC is intended to replace as much of the fixed-function client code as possible, without requiring in-depth knoledge of the engine's network protocol. Networking will be discussed later in the document. As far as drawing anything game related is concerned, the CSQC orders it all. Views, scoreboards and huds included. If the csqc were to simply return, you'd have nothing drawn. Areas that the CSQC fails to draw over will contain undefined pixels.
+
+In order to draw the screen, the CSQC code must export a CSQC_UpdateView function. Here's an example:
+
+void(float width, float height, float menushown) CSQC_UpdateView =
+{
+	clearscene();       //wipe the scene, and apply the default rendering values.
+
+	setviewprop(VF_MIN_X, 0);	//set the left of the view
+	setviewprop(VF_MIN_Y, 0);	//set the top of the view
+	setviewprop(VF_SIZE_X, width);	//set how wide the view is (full width)
+	setviewprop(VF_SIZE_Y, height); //set how high the view is (full height)
+//     	setviewprop(VF_FOV, cvar("fov"));	//this is entirely optional	FIXME: fov is x,y
+
+	//if you use prediction, you'll need the following four lines
+//	setviewprop(VF_ORIGIN, myvieworg);	//change where the view is drawn
+//	setviewprop(VF_ANGLES, myviewang);	//change the angle the view is drawn at
+//	makevectors(myviewang);			//calc the listener directions
+//	setlistener(myvieworg, v_forward, v_right, v_up);	//change where sounds come from
+
+	addentities(MASK_NORMAL|MASK_ENGINE|MASK_ENGINEVIEWMODEL);    //Add all the known ents.
+
+	renderscene();
+	mydrawsbar(width, height);
+};
+
+As you can see, that's a basic example used by a mod which just wants to adapt it's status bar (actual sbar drawing code shown later). The structure allows csqc to draw it's own subwindows, secondary views and whatnot. The view is fully customisable, and the engine is free to add new view properties as it needs (eg: seperate fov_x/fov_y keys). The engine sets it's defaults inside the builtin clearscene.
+
+(VERY)Simple sbar code:
+
+void(float width, float height) mydrawsbar =
+{
+	local vector barpos;
+	barpos_x = 0;
+	barpos_y = 480 - 64;
+	health = getstatf(STAT_HEALTH);
+	if (health < 20)
+		drawpic(barpos, "sbar/lowhealth.tga");
+	else if (health > 80)
+		drawpic(barpos, "sbar/highhealth.tga");
+	else
+		drawpic(barpos, "sbar/midhealth.tga");
+};
+
+Note: stats MUST match across engines, even if in an emulated sense. stats 0-31 are for engine maintaners to standardize. stats 32-128 are for QC modders to do as they choose on a per-mod basis. Refer to the 'clientstat' server builtin for how a server mod sends a custom stat.
+
+
+csqc builtins:
+
+For the most part, the csqc vm should provide the same builtins as the ssqc. There are exceptions though, where ssqc builtins don't make sence. This is the list of the builtins specifically removed:
+
+   * checkclient
+   * stuffcmd
+   * bprint
+   * sprint (use 'print' instead)
+   * aim
+   * writebyte
+   * writechar
+   * wruteshort
+   * writelong
+   * writecoord
+   * writeangle
+   * writestring
+   * writeentity
+   * precache_file
+   * changelevel
+   * logfrag (qw)
+   * infokey (qw)
+   * multicast (qw)
+
+3d scene management:
+
+void() clearscene = #300;
+	Clear the scene, reset the view values to default.
+
+void(float mask) addentities = #301;
+	Add all entities according to a drawmask (added if they match).
+	Acts as if R_AddEntity was called for each one of them.
+	For each entity added, the predraw of that entity function will be called before being any fields are read.
+	The mask parameter is a bitfield parameter, with the following bits having special meanings:
+	MASK_ENGINE=1: add standard entities that were sent via the non-csqc protocol, including temp entities. (also triggers delta updates if registered)
+	MASK_ENGINEVIEWMODEL=2: add the normal viewmodel (potentially multiple if ssqc .viewmodelforclient is supported).
+	The bits with value of 4 through 256 is guarenteed to never be used by the engine for anything special.
+
+void(entity e) addentity = #302;
+	Add a single entity to the scene. It's fields are copied out immediatly. This allows for repeated calling.
+	Does NOT call the predraw function. This is useful for adding the entity within a predraw function from addentitymask without recursion. (think Quad shells).
+
+float(float propertyindex, ...) setviewprop = #303;
+	Change a property of the 3d view.
+	Returns 0 if the property id wasn't recognised or was invalid, and returns non-zero if it was applied.
+	EngineHackers: Extension property indexes can be added using the same ranges as for builtins (IE: DP should add at 400+).
+	Valid parameters in any compliant engine:
+	VF_MIN = 1 (vector) (top left of the screen)
+	VF_MIN_X = 2 (float)
+	VF_MIN_Y = 3 (float)
+	VF_SIZE = 4 (vector) (game view width/height)
+	VF_SIZE_X = 5 (float)
+	VF_SIZE_Y = 6 (float)
+	VF_VIEWPORT = 7 (vector, vector)
+	VF_FOV = 8 (vector) (changes both fovx and fovy)
+	VF_FOVX = 9 (float) (changes the horizontal fov. be careful with this)
+	VF_FOVY = 10 (float)
+	VF_ORIGIN = 11 (vector)	(current view origin. default is player' origin + STAT_VIEWHEIGHT)
+	VF_ORIGIN_X = 12 (float)
+	VF_ORIGIN_Y = 13 (float)
+	VF_ORIGIN_Z = 14 (float)
+	VF_ANGLES = 15 (vector) (the angles that entity is looking on, acording to the wow resource.
+	VF_ANGLES_X = 16 (float)
+	VF_ANGLES_Y = 17 (float)
+	VF_ANGLES_Z = 18 (float)
+	VF_DRAWWORLD = 19 (float) (defaults to enabled. if set to 0 disables particles.)
+	VF_DRAWENGINESBAR = 20 (float)
+	VF_DRAWCROSSHAIR = 21 (float)
+
+float(float propertyindex) getviewpropf = #309;
+vector(float propertyindex) getviewpropv = #309;
+	propertyindex is as described above in setviewprop.
+	Return type is dictated by propertyindex. Ensure you use the correct form.
+	Paranoid engines are fully within their rights to return '0 0 0' for VF_ORIGIN (and sub componants). 
+
+void(vector org, float radius, vector rgb) adddynamiclight = #305;
+	Adds a light to the scene with the specified properties.
+	Engines without coloured lighting can average out the light colours.
+
+void() renderscene = #304;
+	Invokes the renderer to actually draw the scene inside the call.
+	Does not clear the display lists.
+
+float(string s) precache_model = #20;
+	Precaches a model for clientside usage. If the server qc already precached it, reuse that instead.
+	Some protocols allow precaching mid-level. This may require two lists of model indexes. The indexes from the server *must* match the server at all times. It is possible that a model can end up on both lists if the server precaches mid-level. This builtin must favour the server's index over any local index.
+	This can be called at any time.
+	The return value is the modelindex of the specified model.
+	Note that this is the same builtin as the server, but the return value is different, in order to be more useful.
+	If the model does not exist, an engine may trigger a download request and load the model when it arrives (with a valid index returned), or may return 0.
+
+vector (vector v) unproject            = #310;
+	Converts from 2d-space to 3d-space. Uses the currently set viewport, origin, angles, and projection info from the current view properties (setviewprop).
+	Note that 2d space contains depth info, in the range of 0 to 1.
+
+vector (vector v) project              = #311;
+	Converts from 3d-space to 2d space. Uses the currently set viewport, origin, angles, and projection info from the current view properties (setviewprop).
+	Note that 2d space contains depth info, in the range of 0 to 1.
+
+
+
+2d display:
+
+2d display Note that the vectors only use the first two componants, the third is ignored. With texture names, should the csqc leave off the filename extension, The engine should scan through all the extensions that it supports. The engine must support lmp files, and 32bit bottom up tgas should be supported, pngs and jpegs are just bonuses.
+Images without paths may be obtained from the gfx.wad.
+
+void(vector pos, vector size, float paletteindex) drawfillpal = #314;
+	Draws a single block of colour.
+	Obtains the pixel colour from the palette. If no palette could be loaded, use an r3g3b2 palette (FIXME: sane?).
+
+float(string name) is_cached_pic = #316;
+	Returns true only if an image is already cached.
+	An engine which doesn't support unloading may attempt to cache the image before checking.
+	To see if a picture is valid, drawgetimagesize instead.
+
+void(string name) precache_pic = #317;
+	Attempts to precache an image without drawing it.
+
+vector(string picname) drawgetimagesize = #318;
+	Retrieves the size of an image that the engine believes it to be.
+	Note that image replacement on hud elements may do inaccurate things to image scale. If a replacement image is used, it is unspecified whether the size comes from a lmp or a replacement png.
+	Returns '0 0 0' if the image failed to load (FIXME: DP replaces with a replacement image, with size 64*64, this is incompatible with that).
+
+void(string name) free_pic = #319;
+	Un-caches an image.
+	An engine is not required to implement this - can be a no-op.
+
+void(vector pos, float char, vector size, vector rgb, float alpha) drawcharacter = #320;
+	Draws a quake character using the quake font.
+	A software rendering engine is not required to honour the size, rgb, or alpha parameters, size may be forced to '8 8 0'.
+
+void(vector pos, string text, vector size, vector rgb, float alpha) drawrawstring = #321;
+	Draws a text string using the quake font. Size is per-characture.
+	A software rendering engine is not required to honour the size, rgb, or alpha parameters, size may be forced to '8 8 0'.
+	No markup is used. No wrapping is performed. The entire string is printed as-is, up to the end of the string.
+
+void(vector pos, string picname, vector size, vector rgb, float alpha) drawpic = #322;
+	Draws an image.
+	A software rendering engine is permitted to ignore size, rgb, and alpha parameters.
+	Alpha testing or blending from transparencies in lmp files must be supported.
+
+void(vector pos, vector size, vector rgb, float alpha) drawfillrgb = #323;
+	Draws a single block of colour.
+	A software renderer is not required to implement this function.
+
+void(vector pos, string text, vector scale, float alpha) drawcolorcodedstring = #326;
+	Draws a given text string at the given location.
+	This builtin is not required to use the same font as the console, but any markup supported by the console must be supported by this builtin. This includes the \1 prefix on chat messages.
+	The used font may be variable-width. The y scale states the pixel height of the line. The glyph width will be aproximatly scaled as: newwidth=glyphwidth * (x/glyphheight); (the expectation is that mods use 8*8).
+
+
+
+
+
+void(entity e, float modelindex) setmodelindex = #333;
+	Sets an entity's model according to a modelindex.
+	This is useful when transfering modelindexes across the network but otherwise should not be used.
+
+string(float modelindex) modelnameforindex = #334;
+	Retrieves the modelname from an assosiated modelindex, as a tempstring.
+
+void(float scale) setsensitivityscaler = #346;
+	Scales the user's sensitivity by the parameter.
+	Useful for sniper zoom.
+	There is no way to retrieve the value currently set.
+	It is not reset by the engine until the csprogs is closed.
+	The default is 1.
+
+void(string s, ...) cprint = #338;
+	Directs the engine to draw centered text over the screen using it's regular code as if responding to the server.
+	This is a convienience function. Does not trigger CSQC_Parse_CenterPrint.
+	FIXME: under which conditions is centerprint text shown? Part of hud, or world, or a new viewprop?
+
+void(string s, ...) print = #339;
+	print text on the console and notifiction lines. Like dprint, but doesn't need developer set.
+
+void(float effectnum, vector org, vector vel, float countmultiplier) pointparticles = #337;
+	Spawns particles in the style of an ef_efname effect.
+	Doesn't play sound. Doesn't spawn a dynamic light.
+	The normal 'particle' builtin also works, and should be used in that event.
+
+void(float effectnum, entity ent, vector start, vector end) trailparticles = #336;
+	Spawns particles in the style of an ef_efname effect.
+	Doesn't play sound. Doesn't spawn a dynamic light.
+	The normal 'particle' builtin also works, and should be used in that event.
+	The ent parameter is used to track trail states (eg: sparse trails and high framerates). You can use 'world' if you want an independant non-progressive beam.
+
+float(string efname) particleeffectnum = #335;
+	Returns an effect number which can be passed into one of the particle effect spawn functions.
+	Returns 0 if the effect name was not recognised (or was not loaded/supported).
+	Do not assume all engines will return the same values. Engines with fully scriptable effects will not do so, do not assume that the same engine will always return the same indexes either.
+	These are the non-extended names that should be supported:
+               te_explosion (rockets), te_tarexplosion (tarbaby), te_gunshot, te_wizspike, te_knightspike, te_spike, te_superspike, te_teleport, te_lavasplash
+
+float(float framenum) getinputstate = #345;
+	Reads view-angles and other properties into csqc's input_* globals.
+	Returns false if the framenum is out-of-date (failure).
+	This forms part of the prediction support.
+	The servercommandframe global contains the last input frame acknowledged by the server, while clientcommandframe contains the most recent frame generated by the client.
+	Thus frames (servercommandframe+1) to (clientcommandframe-1), inclusive, must be applied to the player's entity state in order for prediction to work.
+
+
+void(entity ent) runplayerphysics = #347;
+	Runs the engine's standard prediction algorithms.
+	Can do nothing if the engine doesn't want to provide one (but must be present).
+	Exact physics behaviour is up to the implementation. Behaviour should be consistant between alternate implementations of the same network protocol.
+	Reads input_* globals.
+	Changes origin, velocity, pmove_flags. Triggers touch functions.
+
+float() isdemo = #349;
+	Returns non-zero if playing a demo.
+
+float() isserver = #350;
+	Returns true if the mod can communicate with the server via cvars and console commands and things (eg: map).
+	This is intended for admin/single-player purposes. A mod with full voting will not want to use this.
+
+
+string(float keynum) keynumtostring = #340;
+	Retrieves the name of a key (as used by the bind console command)
+
+float(string keyname) stringtokeynum = #341;
+	Finds the key number of the named keyboard/mouse/joystick button/key.
+
+string(float keynum) getkeybind = #342;
+	Obtains the full command that a button is bound to.
+	To set the key binding, use localcmd with the bind console command, preferably do not force it.
+
+void(vector origin, vector forward, vector right, vector up) setlistener = #351;
+	Updates the sound listener origin and orientation.
+	Should be done once per frame. Failure to do so will revert to the engine's default, which will be inaccurate if you're using player prediction.
+
+void(string model, void(float isnew) updatefunc, float flags) deltalisten = #371;
+	Registers a function to be called whenever a delta entity with a model matching the given name would be linked.
+	This gives a way to expose delta entities to the csqc filtered by name.
+	If model is "*", this registers all models (can be overwrite previous registrations. Use a null updatefunc to unregister.).
+	Flags must be one of:
+		RSES_NOLERP=1	disables origin/angles lerping of the entity. This is vital for player entities which will be predicted.
+		RSES_NOROTATE=2 disables auto-rotate based on effects. FIXME: do rotate as part of addentity instead?
+		RSES_NOTRAILS=4	disables the addition of rocket trails. FIXME: part of addentity instead?
+		RSES_NOLIGHTS=8 disables dlights. FIXME: part of addentity instead?
+	Fields set each frame before the registered updatefunc is called are:
+		modelindex
+		origin
+		angles
+		velocity (if known, unchanged if not)
+		skin
+		effects
+		colormap
+		frame
+		frame2
+		lerpfrac
+		frame1time
+		frame2time
+	Warning: Additional fields may be set depending on network protocol.
+	Warning: If this builtin is used, entities can be spawned and removed as part of addentities.
+	Warning: If the modelindex changed, the ent may have lingering (custom) fields from the previous ent type.
+
+float() readbyte = #360;
+float() readchar = #361;
+float() readshort = #362;
+float() readlong = #363;
+float() readcoord = #364;
+float() readangle = #365;
+string() readstring = #366;
+float() readfloat = #367;
+float() readentitynum = #368;
+	Reads a part of a network message.	Note that these builtins are only valid when the engine directs the csqc to start reading. Valid only during that call.
+	In the case of readstring, it is returned within a temporary string.
+	It is up to the engine exactly how big coords and angles are, so the csqc must ensure correct matching.
+	For entities, readentitynum reads only an entity number. This must be matched to an entity with a matching .entnum field. The given entity may not always be known, so matching up in the parse function may not be advantageous.
+
+float(float statnum) getstatf = #330;
+	Returns the floating point value of a client stat.
+	It is not recommended to use this builtin for STAT_ITEMS due to overflowing floats, but is fine for any of the other standard stats.
+
+float(float statnum) getstati = #331;
+float(float statnum, float first, float count) getstati_bits = #331;
+	Returns the client stat value rounded to an integer. This may give additional precision.
+	If first and count are used, retrieves only the bits specified and shifts down (this is used for sigils in the STAT_ITEMS stat)
+	FIXME: Is it sane that this returns a float when its obtaining an int?
+
+string(float statnum) getstats = #332;
+	Returns a client stat string. String stats have independant stat indexes from numerical stats.
+	This will return a temp string.
+
+string(float playernum, string keyname) getplayerkey = #348;
+	Obtains various player specific things. Items that must be supported are:
+	name, frags, bottomcolor, topcolor.
+	This info is required for scoreboards.	Negative player indexes are interpreted as frag-sorted. -1 is the leading player, -2 is the second best player. There is no explicit teamplay support.
+	This is akin to quakeworld's infokey builtin with a player number.
+	Note: QuakeWorld engines normally provide a team field. NQ engines typically use bottomcolor.
+
+string(string key) serverkey = #354;
+	Obtains various server related things. Items that must be supported are:
+	ip. Retrieves the hostname or ip that was used to connect to the server. Optionally includes a port number.
+	This is akin to quakeworld's infokey builtin with serverinfo.
+
+string() getentitytoken = #355;
+	This builtin is valid only inside CSQC_WorldLoaded.
+	It returns the next token from the bsp.
+	Entities take the form { key value }
+	Each return is a tempstring, of which there will be at least two alternating tempstrings.
+	Returns the null string when there are no more tokens. This is distinct from an empty string.
+	Tokenizing rules match the server loading.
+
+void(string str) registercommand = #352;
+	Registers a console command. Any commands that are registered will cause CSQC_ConsoleCommand to be called any time the user tries using the command. The command should have top-most priority, above even aliases.
+
+float() wasfreed = #353;
+	Returns true if the entity was recently freed with the remove builtin, and hasn't been reused yet. Note that at the start of a map this builtin can be unreliable. Otherwise it should have 2 seconds to be reliable (before the entity is reused). This makes the physics code with touch/think functions easier.
+	Avoid using this builtin unless you know the entity was valid before a function was called.
+
+void(vector org, vector forward, vector right, vector up) setlistener = #351;
+	This builtin allows the csqc to position the 'listener'. This will affect the volume of sounds playing nearby. The directions are required for correct audio spacialisation (just use makevectors).
+
+void(string evname, string evargs, ...) sendevent = #359;
+	When called, sends an event to the server gamecode.
+	On the server, a function named Cmd_evname_EVARGS will be called with the args passed in.
+	evargs specifies the types of the additional arguments.
+	Only f: float, e: entity, v: vector, and s: string are supported.
+	If e is used, the entity's entnum field is used instead for sending. If anything is invalid or freed, the server qc will receive 'world' instead.
+	If s is used, the server will receive a tempstring.
+	This function is limited to 6 custom arguments.
+	There is nothing stopping you from packing multiple floats into a vector if you need more arguments.
+
+
+
+
+
+
+
+
+Network Protocol: 
+The way csqc networking is designed, is to have the csqc entities seperate from the engine's entities. The entities are considered individual packets, thier length known only to the csqc. It is recommended that engines have a cvar for forcing packet size to be written, but this is not required except as a handy debugging tool.
+If the entity has a 'SendEntity' field set on the server, it is to be sent via the csqc transport, otherwise it goes over whatever transport the engine already has in place and is then never known to the csqc.
+The csqc entity protocol is based upon entity flags set in 'SendFlags'. The server gamecode will never clear the SendFlags field, and will only ever set it.
+New entity packets are only ever sent when SendFlags is non-zero. The server will clear out the SendFlags periodically to allow them to be resent.
+Conceptually the csqc transport is a versioned one. New packets are typically only sent when the version on the server changes. However, due to packetloss, there are other times when a packet might be sent. The engine must ensure that a version of the entity arries at some point, either by sending reliably, spamming packets until one is acknoledged, or retransmitting only on a lost packet. The server and client qc MUST expect multiple read/write requests from the engine.
+
+Server changes: The server's qc is mostly the same, though there are a few extensions as follows:
+
+void(float index, float type, .void field) clientstat = #232;
+	Set up an auto-sent player stat. Client's get thier own fields sent to them.
+	This affects all clients.
+	There are two stat namespaces. Strings and numbers. Strings use independant indexes from numbers. Eg, stat 64 can hold "hello world" and the number 53.6 at the same time, depending on which you query.
+	Index should not be less than 32. An engine is not required to support more than 128.
+	Sending a float is more efficient if it is rounded in advance. However, if it is not rounded, the stat will be sent with full precision.
+	Type is a value equating to the ev_ values found in qcc to dictate types. Valid ones are:
+		1: string
+		2: float (if rounded between 0 and 255, this is sent compacted)
+		3: vector (actually registers 3 consecutive floats. Note rounding efficiencies.)
+		4: entity (actually the server's entity number, to match .entnum on the client, clients should read this as a whole number).
+		8: integer (applicable only if your qcc and qcvm support integer types).
+	Certain other type values have meaning, but are not practical and thus are not valid arguments.
+
+void(float index, float type, string globalname) globalstat = #233;
+	Sets up a stat based upon a global.
+	Works the same way as clientstat, except that the global is passed by way of the name of the global, so beware of typos.
+	All clients will receive the same stat value.
+
+.float(entity viewer, float sendflags) SendEntity;
+	Field used to store which function is responsible for sending the current (self) entity data.
+	If it returns false, the entity is not sent to that player. Removing it if the client already has a version.
+	In certain cases, viewer may be set to world. It is not recommended that you use viewer for anything.
+	sendflags contains the send flags mask that have been changed since the client last received a packet.
+	It is valid to set additional SendFlags inside this function.
+
+.float SendFlags;
+	This field contains a bitmask to state which fields have been changed. The ssqc must add additional bits to this field when some transmitted field is changed.
+	As this is a float, the limit is 24 bits/6 nibbles/0xffffff. Values higher than that are unreliable and are not supported. The engine makes no assumptions other than this.
+	Update this field each time you update the entity, by using the | operator to add bits. Do not use straight assignments (except for 0xffffff). Do not read this field other than to add additional bits to its value.
+	The server periodically resets this field to empty (after copying off the bits).
+
+FIXME: should pvsflags not be core?
+.float pvsflags;
+	One of:
+		PVSF_NORMALPVS=0	This gives standard behaviour for the engine.
+		PVSF_NOTRACECHECK=1	This gives standard behaviour even if the engine supports traceline cull checking.
+		PVSF_USEPHS=2		This states that the entity should be sent if you're in an area that could possibly hear sounds that the entity makes. An expanded PVS. Not mandatory.
+		PVSF_IGNOREPVS=3	This states that the entity.
+	Optional:
+		PVSF_NOREMOVE=128	This states that once known, an entity should not be removed when it becomes obscured. It is still removed when the ent is removed. This is only for entities sent via SendEntity.
+
+legacy:
+.float Version;
+	This field may be supported purely for legacy mods. Server engines may choose to not implement this.
+	When bumped, counts as SendFlags=0xffffff instead.
+	Will be phased out hopefully.
+	While logically simple, it has potential uptime issues.
+	Engines are discouraged from implementing this field.
+	
+
+The SendEntity function should issue writebytes and stuff to send the entity data to the client. This includes origin, angle and stuff. You can send whatever you wish in there, encoded however you see fit. It will be called by the server each time the Version value changes and is visible to the player.
+
+Prediction, how it works: The client maintains a number of movement packets. Coceptually, it bounces them off the server. The echo it recieves is it's entity with the movement command applied to it. It also needs a sequence bounced too, which is performed by the engine (the ssqc never knows the sequence numbers), and the server only bounces it. So the client knows the last input state applied, and is able to reapply all the additional input to the servers state. This happens inside the csqc by the csqc requesting inputs and working on globals to figure out where the ent should be. Prediction errors are still likly so the csqc should apply some sort of iterpolation to slide the view to it's corrected position rather than snapping it. Input packets contain fixed info in the base specification where the csqc is expected to use clientcommands for anything more complex. Note that the sequence numbers could potentially be based on time rather than framerate
+
+Differences between Quake and QuakeWorld: The csqc favours the Quake builtin behaviour. It does not use message levels in the engine, nor does it unconditionally print in the dprint builtin. It does use the QuakeWorld player physics model
+
+CSQC entry points:
+
+void() CSQC_Init;
+	This QC function is called by the engine when the csqc is first loaded.
+
+void() CSQC_Shutdown;
+	Called when the csqc is shutting down cleanly (not called if there was some sort of error).
+
+void() CSQC_WorldLoaded;
+	Called when the client has loaded a new world model.
+	Use getentitytoken to read in the entities from the bsp in order to spawn client-only entities (like teleporters).
+
+void(float width, float height, float menushown) CSQC_UpdateView;
+	Called when the engine wants the csqc to update the player's view.
+	This is called once a frame, and must update the entire screen.
+	If menushown is false, it must also draw huds and scoreboards as required (menushown is provided so that you do not end up with two layers of userinterface obscuring each other).
+
+void(string cmd) CSQC_Parse_StuffCmd;
+	Called whenever the engine receives an svc_stuffcmd. Instead of executing it immediatly on the console, it is instead passed to the csqc for correct handling. This could be passed on to localcmd, for example (the string includes a new line, and could be multiple lines).
+
+void(string text) CSQC_Parse_CenterPrint;
+	Called when the client receives an svc_centerprint. The csqc either draws it's own menu in response, or passes it on to the cprint builtin.
+
+void(string text, float msgtype) CSQC_Parse_Print;
+	Called when the client receives a complete console print line.
+	The csqc either draws it's own menu in response, or passes it on to the print builtin.
+	NOTE: The engine will collect multiple individual prints into a single combined line.
+	msgtype is a hint. Regular prints will have a lower value. This matches QW print levels.
+	An NQ engine will use only 2 or 3, based on the leading character. QW engines can use 0-3 via the print level. 3 is chat.
+	This string may contain additional markup, so long as the string can be printed correctly via print, centerprint, or drawstring.
+
+float(float event, float parama, float paramb) CSQC_InputEvent;
+	event is one of: 0:key pressed, 1:key released, 2:mouse move.
+	This is called if setwantskeys was last called with the parameter true.
+	This func returns a value. "false" signalize that engine *should* take care of the keypress or mouse move, a return value of true will make the engine otherwise ignore the event ever happened. This helps to use only keys that are really needed.
+	With keyboard events, parama is set to the keycode. The key values are as in the menu.dat (and DarkPlaces), and consistant between engines.
+	With mouse movement events, parama contains the X motion of the mouse, while paramb contains the Y motion of the mouse.
+	To implement a mouse cursor, update your internal mouse cursor pos based on the params, and return true (to stop it from looking around). Remember to draw the mouse cursor, and clip it to the screen.
+
+float(string cmd) CSQC_ConsoleCommand;
+	This qc function is called when a command registered with the registercommand builtin is used.
+
+void(float isnew) CSQC_Ent_Update;
+	Called when an entity is recieved from the server. isnew is set if the engine spawned a new entity. The engine is responsible for assigning spawning entities, and must call with the same one, of course. The entnum field will be set before this is called for matching with the writeentity builtin on the server.
+	The entity reference is passed to the csqc in the traditional 'self' builtin.
+
+float(float entnum, float channel, string soundname, float volume, float attenuation) CSQC_Event_Sound;
+	Called when a sound event is received from the server.
+	Self is set to the entity that the sound was centered upon if known. World if not (latency/packetloss/pvs culling).
+
+void() CSQC_Remove;
+	Called when an entity was removed/hidden on the server. The self global refers to the csqc's engine allocated entity (even if you removed it from the csqc already - be warned). The csqc is assumed to call the remove builtin inside this function (you should either remove it, or clear the entnum feld). If you want to leave gibs around, you're free to do so. Just fade them out inside the csqc please, or people will complain that it's too messy.
+
+Note: All global functions are entirely optional. Even CSQC_UpdateView.
+There is absolutely no provision for csqc-parsing of temp entities. Please use entities as events.
+
+
+
+
+CSQC global variables: 
+This is more QC style than real documentation. These all do the same thing as on the server where names match. New globals are commented.
+This list is available in easy QC form here: http://fteqw.svn.sourceforge.net/viewvc/fteqw/trunk/quakec/csqctest/src/cs/system.qc (requires FTEQCC or FrikQCC to compile due to #ifdef)
+
+entity		self;
+entity		other;
+entity		world;		//the null entity
+
+float		time;		//predicted interpolated time, kept in sync with the server
+float		cltime;		//local time, increases independantly of the game in progress.
+float		frametime;      //time since last CSQC_UpdateView;
+
+float		player_localentnum;     //the entnum (can change when svc_setview is received. 0 is unknown)
+float		player_localnum;        //the playernum (0 to maxclients-1)
+float		maxclients;     //a constant filled in by the engine. gah, portability eh?
+
+float		clientcommandframe;     //player movement (getinputstate(clientcommandframe-1) is the most recent available full frame)
+float		servercommandframe;     //clientframe echoed off the server. By the time the client receives this, the command has been applied. Thus the first frame that needs predicting is servercommandframe+1. If this is 0, then prediction is not supported in the current network protocol (demos, legacy server - depends how csqc is authorised).
+
+string		mapname;        //the map as found in the map command. Will not contain non-filename charactures. (expected to be used with fopen type things). Contains no directory or extension information.
+
+float		intermission;	//set on receipt of an svc_intermission
+
+vector		v_forward, v_up, v_right;
+vector		view_angles;	//set at the start of each frame to state the current view angles.
+
+// set by traceline / tracebox
+
+float		trace_allsolid;
+float		trace_startsolid;
+float		trace_fraction;
+vector		trace_endpos;
+vector		trace_plane_normal;
+float		trace_plane_dist;
+entity		trace_ent;
+float		trace_inopen;
+float		trace_inwater;
+
+//retrieved from the current movement commands (read by player physics), set via getinputstate
+
+float		input_timelength;
+vector		input_angles;
+vector		input_movevalues;       //forwards, right, up.
+float		input_buttons;          //attack, use, jump (default physics only uses jump)
+float		input_impulse;
+
+CSQC Field Variables:
+
+//
+// system fields (*** = do not set in prog code, maintained by C code)
+//
+.float		modelindex; 	// *** model index in the precached list
+.vector		absmin, absmax;	// *** origin + mins / maxs
+
+.float		entnum;	// *** the ent number as on the server
+.float		drawmask;
+.void()		predraw;
+
+.float		movetype;	//FIXME: should this be implemented?
+.float		solid;
+
+.vector		origin;		// *** use setorigin to change this.
+.vector		oldorigin;
+.vector		velocity;
+.vector		angles;
+.vector		avelocity;
+.float		pmove_flags;	//used for prediction. Its contents must be preserved between calls. And reset whenever prediction is reverted.
+
+.string		classname;	// for debugging engines. not really required.
+.float		renderflags; //See RF constants
+.string		model;
+.float		frame;
+.float		frame1time;
+.float		frame2;
+.float		frame2time;
+.float		lerpfrac;	//this is how much of frame2 should be used.
+.float		skin;
+
+.float		effects;	//set via delta updates
+
+.vector		mins, maxs; // bounding box extents reletive to origin
+.vector		size; // maxs - mins
+
+.void()		touch;
+.void()		think;
+.void()		blocked;	// for doors or plats, called when can't push other
+
+.float		nextthink;
+
+.entity		chain;
+
+.entity		enemy;
+
+.float		flags;
+
+.float		colormap;
+
+.entity		owner; // who launched a missile
+
+CSQC Constants:
+
+renderflags field uses these:
+float RF_VIEWMODEL = 1;
+	The entity is never drawn in mirrors. In engines with realtime lighting, it casts no shadows.
+	It is drawn on the screen in the center, where the weapon would normally be.
+	View model bobbing is applied to this entity.
+
+float RF_EXTERNALMODEL = 2;
+	The entity is appears in mirrors but not in the normal view. It does still cast shadows in engines with realtime lighting.
+
+float RF_DEPTHHACK = 4;
+	The entity appears closer to the view than normal, either by scaling it wierdly or by just using a depthrange. This will usually be found in conjunction with RF_VIEWMODEL
+
+float RF_USEAXIS = 16;
+	When set, the entity will use the v_forward, v_right and v_up globals instead of it's angles field for orientation. Angles will be ignored compleatly.
+	Note that to use this properly, you'll need to use the predraw function to set the globals, or to add the models individually.
+	An engine only needs to implement this if tags are supported.

@@ -1,0 +1,156 @@
+name: main
+
+on: [ push, pull_request, workflow_dispatch ]
+
+jobs:
+  cmake:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        profile: [ "Debug", "Release" ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v2
+        id: cpu-cores
+
+      - uses: actions/checkout@v4
+
+      - name: "Install Dependencies"
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install --no-install-recommends              \
+            gettext                                                     \
+            libasound2-dev                                              \
+            libbullet-dev                                               \
+            libgnutls28-dev                                             \
+            libopenxr-dev                                               \
+            libqscintilla2-qt5-dev                                      \
+            libsdl2-dev                                                 \
+            libvorbis-dev                                               \
+            libvulkan-dev                                               \
+            libwayland-dev                                              \
+            libxcursor-dev                                              \
+            libxkbcommon-dev                                            \
+            libxrandr-dev                                               \
+            qtbase5-dev
+
+            # Disabled due to warnings that break the debug build with -Werror
+            # libode-dev
+            # libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
+
+      - name: "Configure: ${{ matrix.profile }}"
+        run: |
+          cmake -B build_${{ matrix.profile }} -DCMAKE_BUILD_TYPE=${{ matrix.profile }}
+
+      - name: "Build: ${{ matrix.profile }}"
+        run: |
+          cmake --build build_${{ matrix.profile }} --parallel ${{ steps.cpu-cores.outputs.count }}
+
+  make:
+    strategy:
+      matrix:
+        include:
+          - name: web
+            fte_target: web
+            make_targets: "gl-rel"
+            os: ubuntu-latest
+          - name: linux64
+            fte_target: linux64
+            make_targets: "m-rel sv-rel qtv-rel qcc-rel"
+            os: ubuntu-latest
+            packages: "libasound2-dev libgl-dev libegl1-mesa-dev libwayland-dev libxcursor-dev libxi-dev libxkbcommon-dev libxrandr-dev libxss-dev"
+          - name: win32
+            fte_target: win32
+            make_targets: "m-rel sv-rel qcc-rel"
+            os: ubuntu-latest
+            packages: "binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686"
+          - name: win64
+            fte_target: win64
+            make_targets: "m-rel sv-rel qcc-rel"
+            os: ubuntu-latest
+            packages: "binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64"
+          - name: macos-arm64
+            fte_target: SDL2
+            make_targets: "gl-rel sv-rel qcc-rel"
+            args: "ARCH=arm STRIPFLAGS="
+            packages: "sdl2"
+            os: macos-latest
+
+    name: make-${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+
+    steps:
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v2
+        id: cpu-cores
+
+      - uses: actions/checkout@v4
+
+      - name: Extract versions
+        run: grep 'VER=' engine/Makefile | tee makelibs_versions
+
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: engine/libs-*
+          key: ${{ runner.os }}-${{ matrix.fte_target }}-${{ hashFiles('makelibs_versions') }}
+
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: "2.0.12"
+          actions-cache-folder: "emsdk-cache-2.0.12"
+          cache-key: "emsdk-2.0.12"
+        if: matrix.fte_target == 'web'
+
+      - name: Verify emscripten
+        run: emcc -v
+        if: matrix.fte_target == 'web'
+
+      - name: Install dependencies (linux)
+        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends ${{ matrix.packages }}
+        if: matrix.packages != '' && matrix.os == 'ubuntu-latest'
+
+      - name: Install dependencies (macos)
+        run: brew install ${{ matrix.packages }}
+        if: matrix.packages != '' && matrix.os == 'macos-latest'
+
+      - name: Build dependencies
+        working-directory: engine
+        run: make FTE_TARGET=${{ matrix.fte_target }} makelibs ${{ matrix.args }}
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - uses: ammaraskar/gcc-problem-matcher@0.3.0
+
+      - name: Build ${{ matrix.name }}
+        working-directory: engine
+        run: |
+          make -j ${{ steps.cpu-cores.outputs.count }} FTE_TARGET=${{ matrix.fte_target }} ${{ matrix.make_targets }} ${{ matrix.args }} LINK_EZHUD=1 LINK_OPENSSL=1
+
+      - name: Attach macOS docs
+        run: |
+          cat <<EOF > engine/release/fte_macos.txt
+          To allow executables to run issue for example:
+          chmod +x fteqw-glsdl2
+          xattr -d com.apple.quarantine fteqw-glsdl2
+          
+          If you don't have SDL2 installed, run:
+          brew install sdl2
+          EOF
+        if: matrix.os == 'macos-latest'
+
+      - name: Get version
+        id: version
+        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fteqw-${{ matrix.name }}-${{ steps.version.outputs.short_sha }}
+          path: |
+            engine/release/fte*
+            !engine/release/*.db
+          compression-level: 9

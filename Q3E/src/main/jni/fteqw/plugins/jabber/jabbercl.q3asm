@@ -1,0 +1,5 @@
+-o "jabbercl"
+plugin
+jabberclient
+qvm_api
+memory

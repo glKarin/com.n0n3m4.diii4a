@@ -256,11 +256,11 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 	        Printf("VulkanSwapChain::SwapChain make lost.\n");
 			fbm->SwapChain->MakeLost();
 		}
-		VkSurfaceKHR surfacehandle = nullptr;
+		VkSurfaceKHR surfacehandle = VK_NULL_HANDLE;
 		if (!I_CreateVulkanSurface(sdl_video->_fb->device->Instance->Instance, &surfacehandle))
 			VulkanError("I_CreateVulkanSurface failed");
 
-	    Printf("Create Vulkan surface: %p.\n", surfacehandle);
+	    Printf("Create Vulkan surface: %zu.\n", surfacehandle);
 		sdl_video->surface->Surface = surfacehandle;
 		sdl_video->_fb->device->Surface = sdl_video->surface;
 	    Printf("VulkanSwapChain::AcquireImage.\n");
@@ -346,7 +346,7 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
                 builder.RequireExtension(names[i]);
             auto instance = builder.Create();
 
-            VkSurfaceKHR surfacehandle = nullptr;
+            VkSurfaceKHR surfacehandle = VK_NULL_HANDLE;
             if (!I_CreateVulkanSurface(instance->Instance, &surfacehandle))
                 VulkanError("I_CreateVulkanSurface failed");
 

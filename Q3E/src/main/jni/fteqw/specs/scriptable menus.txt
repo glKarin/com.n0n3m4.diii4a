@@ -1,0 +1,134 @@
+Scriptable Menus
+
+Scriptable menus have a few uses.
+1: Large teamplay mods might wish to provide key bindings and customisable settings, like abreviated player name, possibly sensitivity, etc.
+2: Adding new menus for stuff that the FTE team might have neglected to add to the menus for one reason or annother.
+3: Modders might wish to use them to provide easy configuration options to the user. Key bindings, for instance. Mods could also involve server admin componants via the use of KRIMZON_SV_PARSECLIENTCOMMAND (or equivelents).
+4: To show off your l33tness.
+
+
+
+This means that the client supports a few additional console commands and supplementry extensions.
+The system revolves around using aliases and conditional commands within configs.
+Most of the commands affect only cvars, but the menutext commands can be used to run aliases. This allows for scripts to read the values of the other items via the cvars that they control.
+
+It is highly recommended that use of this extension be assisted with multiline aliases.
+An example of a multiline alias is:
+
+alias somealias
+{
+ line1
+ line2
+ line3
+}
+
+Multiline aliases can be nested inside each other.
+The main reason for aliases to be used is for convienience, although execs could be used instead.
+FTE's if command allows a similar syntax:
+if condition
+{
+  stuff to do if true
+}
+else
+{
+  stuff to do if false
+}
+
+These are also nestable.
+
+
+Here's an example menu script that was made for testing.
+alias MenuScriptTest
+{
+	alias menucallback
+	{
+		echo callback $option
+		if (($option == "cancel") or ($option == "7"))
+		{
+			menuclear
+		}
+	}
+	conmenu menucallback
+
+	menutext 0 0 "Cool test menu"
+	menucheck 0 8 "Bouncy sparks!" "r_bouncy_sparks"
+	menuslider 0 16 "Forward speed" "cl_forwardspeed" 20 1000
+	menuedit 0 30 "name" "name"
+	menubind 0 48 "+use" "use"
+	menubind 0 64 "impulse 10" "change weapon"
+
+	menutext 0 128 "7... Cancel"		"cancel"
+}
+
+
+
+
+
+
+
+
+conmenu [aliasname]
+
+This command tells the engine to create a new menu. This is mandatory at the start of a script.
+The aliasname parameter names an alias which will be called when certain events happen, with the $option containing the name of the event
+The current events are:
+escape is pressed, $option contains 'cancel'
+buttons 1 to 9 are pressed, $option contains the number pressed
+button 0 is pressed, $option contains '10'
+A menutext option is clicked, $option contains the menutext's command.
+ 
+
+
+menuclear
+
+This command clears the currently shown menu, closing it.
+
+
+
+menubox <x> <y> <width> <height>
+
+This command creates a box background. Like the quit message in normal quake.
+This is intended for text, but doesn't actually do anything text based itself. Use with menutext.
+
+
+
+menuedit <x> <y> <text> <cvar>
+
+This command creates an editable text box. The text box is attached to the named cvar. If the cvar doesn't exist, it'll be created with an empty value. This is usually best used in conjunction with menutexts with scripts to use when clicked.
+The text box size is 8 'pixels' high, with typically 4 pixels each side. But this additional height is dependant on the user's custom images, and could be up to 8 pixels high.
+
+
+
+menutext <x> <y> <text> [command]
+menutextbig <x> <y> <text> [command]
+
+Places a regular piece of text on the menu. If command is specified then the item will be clickable. When clicked, the option cvar will be filled with the option's command string, and the menu's callback will be executed. If there is no callback, the option will be executed directly.
+menutextbig uses the fte-only large font, and can be used to construct control menus.
+
+
+
+menupic <x> <y> <imgname>
+
+Places an image (typically a lmp) at the specified point on the screen. The position specified is the top left of the image.
+If x is a "-", and not an actual number, the x coord will be replaced in order to center the image hoizontally.
+
+
+
+menucheck <x> <y> <text> <cvarname> [bitmask]
+
+A clickable cvar toggle.
+If bitmask is set, the option will apply a bitmask to the cvar, affecting only that bit. (of course, they're not technically bits).
+If the bitmask is not provided (or is 0 / empty), then the option will switch between 0 and 'true' (true being anything that's not 0/empty, but usually 1).
+
+
+
+menuslider <x> <y> <text> <cvar> <min> <max>
+
+Creates a slider option (like sensitivity) attached to a cvar.
+The ammount scrolled is chosen based on the values of min and max.
+
+
+
+menubind <x> <y> <text> <command>
+
+Creates a menu option which can be used to change key bindings. This is one of the few options that doesn't affect any cvars.

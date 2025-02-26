@@ -1,0 +1,4 @@
+-o "namemaker"
+plugin
+namemaker
+qvm_api

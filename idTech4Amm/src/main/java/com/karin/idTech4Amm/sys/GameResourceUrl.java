@@ -34,7 +34,7 @@ public enum GameResourceUrl
     // Prey(2006)
 
     // Quake 1
-    QUAKE1_BASE(Q3EGlobals.GAME_QUAKE1, "darkplaces/id1", "", "https://store.steampowered.com/app/2310/Quake/", 2),
+    QUAKE1_BASE(Q3EGlobals.GAME_QUAKE1, "id1", "", "https://store.steampowered.com/app/2310/Quake/", 2),
 
     // Quake 2
     QUAKE2_BASE(Q3EGlobals.GAME_QUAKE2, "baseq2", "", "https://store.steampowered.com/app/2320/Quake_II/", 2),
@@ -54,8 +54,8 @@ public enum GameResourceUrl
     D3BFG_RB(Q3EGlobals.GAME_DOOM3BFG, "base", "", "https://www.moddb.com/mods/rbdoom-3-bfg", 3),
 
     // GZDOOM
-    GZDOOM_DOOM1(Q3EGlobals.GAME_GZDOOM, "DOOM.WAD", "", "https://store.steampowered.com/app/2280/DOOM__DOOM_II", 2),
-    GZDOOM_DOOM2(Q3EGlobals.GAME_GZDOOM, "DOOM2.WAD", "", "https://store.steampowered.com/app/2280/DOOM__DOOM_II", 2),
+    GZDOOM_DOOM1(Q3EGlobals.GAME_GZDOOM, "doom", "", "https://store.steampowered.com/app/2280/DOOM__DOOM_II", 2),
+    GZDOOM_DOOM2(Q3EGlobals.GAME_GZDOOM, "doom2", "", "https://store.steampowered.com/app/2280/DOOM__DOOM_II", 2),
 
     // Wolfenstein: Enemy Territory
     ETW_BASE(Q3EGlobals.GAME_ETW, "etmain", "ET: LEGACY", "https://www.etlegacy.com", 1),
@@ -63,6 +63,15 @@ public enum GameResourceUrl
 
     // RealRTCW
     REALRTCW_BASE(Q3EGlobals.GAME_REALRTCW, "Main", "", "https://www.moddb.com/mods/realrtcw-realism-mod", 3),
+
+    // FTEQW
+    FTEQW_BASE(Q3EGlobals.GAME_FTEQW, "", "", "https://www.fteqw.org", 1),
+    FTEQW_Q1(Q3EGlobals.GAME_FTEQW, "quake1", "", "https://store.steampowered.com/app/2310/Quake/", 2),
+    FTEQW_Q2(Q3EGlobals.GAME_FTEQW, "quake2", "", "https://store.steampowered.com/app/2320/Quake_II/", 2),
+    FTEQW_Q3(Q3EGlobals.GAME_FTEQW, "quake3", "", "https://store.steampowered.com/app/2200/Quake_III_Arena/", 2),
+    FTEQW_H2(Q3EGlobals.GAME_FTEQW, "hexen2", "", "https://store.steampowered.com/app/9060/HeXen_II/", 2),
+    FTEQW_FREEHL(Q3EGlobals.GAME_FTEQW, "halflife", "FreeHL", "https://github.com/eukara/freehl", 1),
+    FTEQW_CS1_5(Q3EGlobals.GAME_FTEQW, "cstrike_1_5", "FreeCS", "https://github.com/eukara/freecs", 1),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

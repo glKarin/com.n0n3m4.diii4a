@@ -861,6 +861,23 @@ void Q3E_ReleaseWindow(volatile ANativeWindow *w)
     win = NULL;
 }
 
+void Q3E_SwapInterval(int interval)
+{
+    if(eglDisplay != EGL_NO_DISPLAY)
+        eglSwapInterval(eglDisplay, interval);
+}
+
+Q3Ebool Q3E_QuerySurfaceSize(int *width, int *height)
+{
+    if(eglDisplay != EGL_NO_DISPLAY && eglSurface != EGL_NO_SURFACE)
+    {
+        eglQuerySurface(eglDisplay, eglSurface, EGL_WIDTH, width);
+        eglQuerySurface(eglDisplay, eglSurface, EGL_HEIGHT, height);
+        return Q3E_TRUE;
+    }
+    return Q3E_FALSE;
+}
+
 void Q3E_RestoreGL(void)
 {
 	if(eglDisplay == EGL_NO_DISPLAY)

@@ -6,9 +6,9 @@
 ##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan60(verena)  
+1.1.0harmattan61(caitlyn)  
 **Latest update:**
-2025-01-16  
+2025-02-27  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -59,7 +59,7 @@ GPLv3
 | DOOM III | n0n3m4's dante | - | 2.0/3.0 | [Resurrection of Evil]()<br/>[The Lost Mission](https://www.moddb.com/mods/the-lost-mission)<br/>[Classic DOOM3](https://www.moddb.com/mods/classic-doom-3)<br/>[Rivensin](https://www.moddb.com/mods/ruiner)<br/>[HardCorps](https://www.moddb.com/mods/hardcorps)<br/>[Overthinked Doom^3](https://www.moddb.com/mods/overthinked-doom3)<br/>[Sabot(a7x)](https://www.moddb.com/games/doom-3-resurrection-of-evil/downloads/sabot-alpha-7x)<br/>[HeXen:Edge of Chaos](https://www.moddb.com/mods/hexen-edge-of-chaos)<br/>[Fragging Free](https://www.moddb.com/mods/fragging-free)<br/>[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[LibreCoop D3XP](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500)<br/>[Perfected Doom 3:RoE](https://www.moddb.com/mods/perfected-doom-3-version-500)<br/>[Doom 3: Phobos](https://www.moddb.com/mods/phobos)([Dhewm3 compatibility patch](https://www.moddb.com/games/doom-iii/addons/doom-3-phobos-dhewm3-compatibility-patch)) |
 | Quake IV | n0n3m4's dante | - | 2.0/3.0 | [Hardqore](https://www.moddb.com/mods/quake-4-hardqore) |
 | Prey(2006) | n0n3m4's dante | - | 2.0/3.0 |  |
-| DOOM 3 BFG(Classic DOOM 1&2) | [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) | 1.4.0<br/>(The last OpenGL renderer version) | 3.0 |  |
+| DOOM 3 BFG(Classic DOOM 1&2) | [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) | 1.4.0<br/>(The last OpenGL renderer version) | 3.0/Vulkan1.1 |  |
 | The Dark Mod | [Dark Mod](https://www.thedarkmod.com) | 2.12 | 3.2<br/>(require geometry shader support) |  |
 | Return to Castle Wolfenstein | [iortcw](https://github.com/iortcw/iortcw) | - | 1.1 |  |
 | Quake III Arena | [ioquake3](https://github.com/ioquake/ioq3) | - | 1.1 | Quake III Team Arena |
@@ -68,6 +68,7 @@ GPLv3
 | GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | 4.14.0 | 2.0/3.2/Vulkan |  |
 | Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) Omni-Bot support | 2.83.1 | 1.1 |  |
 | RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.0 | 1.1 |  |
+| FTEQW | [FTEQW](https://www.fteqw.org) |  | 3.2/Vulkan |  |
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -88,23 +89,15 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Support setup max game console height percentage(0 or 100 means not limit) on launcher `General` tab.
-* Update GZDOOM version to 4.14.0.
-* GZDOOM add Vulkan and OpenGL renderer backend.
-* Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.1.
-* Update Quake 1(Darkplaces) version.
-* Update Quake 2(yquake2) version.
-* Add use multisamples config in game.
+* Add `FTEQW` support, game standalone directory named `fteqw`, support HeXen II, Half-Life [FreeHL](https://github.com/eukara/freehl), Counter Striker 1.5 [FreeCS](https://github.com/eukara/freecs). More view in [FTEQW](https://www.fteqw.org).
+* DOOM 3 BFG add Vulkan renderer backend.
+* Don't package source code to apk since version 61.
 
 ----------------------------------------------------------------------------------
 
-* 支持设置最大游戏控制台高度百分比(0或100为不限制)在启动器`通用`选项卡.
-* GZDOOM更新到4.14.0版本.
-* GZDOOM新增Vulkan和OpenGL渲染器后端支持.
-* 德军总部: 深入敌后(ET: Legacy)更新到2.83.1版本.
-* 雷神之锤1(Darkplaces)更新到新版本.
-* 雷神之锤2(yquake2)更新到新版本.
-* 支持游戏中设置的多重采样设置.
+* 新增`FTEQW`支持, 游戏独立文件夹命名为`fteqw`, 支持巫师2, 半衰期[FreeHL](https://github.com/eukara/freehl), 反恐精英1.5[FreeCS](https://github.com/eukara/freecs). 详情[FTEQW](https://www.fteqw.org).
+* 毁灭战士3-BFG渲染器支持Vulkan后端.
+* 由于导致apk文件过大, 61版本后不再打包源码到apk中.
 
 ----------------------------------------------------------------------------------
 ### Standalone game directory
@@ -127,6 +120,7 @@ Tag with `-free` only for F-Droid update.
 > Games of always force `Standalone game directory`:
 * **The Dark Mod**: darkmod/
 * **GZDOOM**: gzdoom/
+* **FTEQW**: fteqw/
 
 ----------------------------------------------------------------------------------
 
@@ -145,7 +139,7 @@ Tag with `-free` only for F-Droid update.
 | harm_r_openglVersion | String | GLES3.0 | OpenGL version | INIT | GLES2, GLES3.0, OpenGL_core, OpenGL_compatibility | Engine/Renderer | OpenGL_core, OpenGL_compatibility will use OpenGL desktop version, setup with launcher on Android | Windows, Linux |
 | harm_r_multithread | Bool | 1 | Multithread backend | INIT |  | Engine/Renderer | setup with launcher on Android | Windows, Linux |
 | harm_r_clearVertexBuffer | Integer | 2 | Clear vertex buffer on every frame | ARCHIVE, FIXED | 0, 1, 2 | Engine/Renderer | 0 = not clear(original);<br/> 1 = only free VBO memory;<br/> 2 = free VBO memory and delete VBO handle(only without multi-threading, else same as 1) | All |
-| harm_r_maxAllocStackMemory | Integer | 524288 | Control allocate temporary memory when load model data | ARCHIVE |  | Engine/Renderer | For load large model, because stack memory is limited on OS.<br/> 0 = Always heap;<br/> Negative = Always stack;<br/> Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory) | All |
+| harm_r_maxAllocStackMemory | Integer | 262144 | Control allocate temporary memory when load model data | ARCHIVE |  | Engine/Renderer | For load large model, because stack memory is limited on OS.<br/> 0 = Always heap;<br/> Negative = Always stack;<br/> Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory) | All |
 | harm_r_shaderProgramDir | String |  | Setup external OpenGLES2 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glslprogs(default) | All |
 | harm_r_shaderProgramES3Dir | String |  | Setup external OpenGLES3 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glsl3progs(default) | All |
 | harm_r_shadowCarmackInverse | Bool | 0 | Stencil shadow using Carmack-Inverse | ARCHIVE |  | Engine/Renderer |  | All |
@@ -497,6 +491,7 @@ model player_model_torso_and_lower_body {
 * GZDOOM
 * ETLegacy
 * RealRTCW
+* FTEQW
 > Library(Source)
 * cJSON 
 * curl: The curl license
@@ -526,6 +521,7 @@ model player_model_torso_and_lower_body {
 * soil
 * sqlite
 * stb
+* bzip2
 > Library(Binary)
-* ffmpeg-mobile
+* ffmpeg-kit
 ----------------------------------------------------------------------------------

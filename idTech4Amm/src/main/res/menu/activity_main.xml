@@ -70,8 +70,18 @@
                 android:title="@string/realrtcw"
                 android:icon="@drawable/realrtcw_icon"
                 android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_fteqw"
+                android:title="FTEQW"
+                android:icon="@drawable/fteqw_icon"
+                android:showAsAction="never|withText"/>
         </menu>
     </item>
+
+    <item
+        android:id="@+id/main_menu_change_game"
+        android:title="@string/change_game"
+        android:showAsAction="never"/>
     
     <item
         android:id="@+id/main_menu_settings"

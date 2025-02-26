@@ -4,16 +4,13 @@ import com.karin.idTech4Amm.BuildConfig;
 import com.karin.idTech4Amm.lib.DateTimeUtility;
 import com.karin.idTech4Amm.misc.TextHelper;
 
-import java.util.Arrays;
-import java.util.Date;
-
 /**
  * Constants define
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 60;
-    public static final String CONST_RELEASE = "2025-01-16";
+    public static final int    CONST_UPDATE_RELEASE = 61;
+    public static final String CONST_RELEASE = "2025-02-27";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -27,16 +24,13 @@ public final class Constants
     public static final String CONST_FDROID = "https://f-droid.org/packages/com.karin.idTech4Amm/";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
+    public static final String CONST_CODE_ALIAS = "caitlyn"; // natasha verena caitlyn
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Support setup max game console height percentage(0 or 100 means not limit) on launcher `General` tab.",
-            "Update GZDOOM version to 4.14.0.",
-            "GZDOOM add Vulkan and OpenGL renderer backend.",
-            "Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.1.",
-            "Update Quake 1(Darkplaces) version.",
-            "Update Quake 2(yquake2) version.",
-            "Add use multisamples config in game.",
+            "Add `FTEQW` support, game standalone directory named `fteqw`, support `" + TextHelper.GenLinkText("https://store.steampowered.com/app/9060/HeXen_II/", "HeXen II") + "`, `Half-Life` " + TextHelper.GenLinkText("https://github.com/eukara/freehl", "FreeHL") + ", `Counter Striker 1.5` " + TextHelper.GenLinkText("https://github.com/eukara/freecs", "FreeCS") + ". More view in `" + TextHelper.GenLinkText("https://www.fteqw.org", "FTEQW") + "`.",
+            "DOOM 3 BFG add Vulkan renderer backend.",
+            "Don't package source code to apk since version 61.",
         };
 	};
 

@@ -523,10 +523,10 @@ MIDIDevice *CreateFluidSynthMIDIDevice(int samplerate, const char *Args)
 	return new FluidSynthMIDIDevice(samplerate, fluid_patchset);
 }
 
-#ifdef __ANDROID__ //karin: set native library path
+/* #ifdef __ANDROID__ //karin: set native library path
 std::string DLL_Path = "";
 void ZMusic_SetDLLPath(const char *path)
 {
 	DLL_Path = path;
 }
-#endif
+#endif */

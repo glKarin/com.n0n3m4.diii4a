@@ -80,15 +80,16 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
                 String subdir = GetSubDir(value.type, Standalone);
                 String name = value.GetName(m_gameLauncher);
                 sb.append(" ").append(String.format("%2d", i)).append(". ").append(name).append(" -> ").append(endl);
-                String path = KStr.AppendPath(DataDir, subdir, value.game);
+                String gameDataDir = value.file;
+                String path = KStr.AppendPath(DataDir, subdir, gameDataDir);
 
                 String pathText = TextHelper.GenLinkText("file://" + path, path);
                 sb.append(" * ").append(pathText).append(endl);
 
-                if(!game.equals(Q3EGlobals.GAME_QUAKE1))
+                if(!game.equals(Q3EGlobals.GAME_QUAKE1) && !game.equals(Q3EGlobals.GAME_FTEQW))
                 {
                     String appHome = Q3EUtils.GetAppInternalSearchPath(m_gameLauncher, null);
-                    String path2 = KStr.AppendPath(appHome, subdir, value.game);
+                    String path2 = KStr.AppendPath(appHome, subdir, gameDataDir);
 
                     if(!path2.equals(path))
                     {

@@ -1,0 +1,69 @@
+FTE's splitscreen is supported for Quake, Hexen2, or Quake2. It is not supported in Quake3.
+
+
+Usage:
+Set cl_splitscreen to the number of additional clients you wish to use. This can be changed mid-game, thereby adding or removing clients as needed.
+0: disabled
+1: 2-way
+2: 3-way
+4: 4-way
+other values: not supported.
+For convenience, if cl_splitscreen is enabled then servers will enable coop instead of running singleplayer.
+Also note the input support section.
+
+To enable splitscreen on a server, you need to set allow_splitscreen 1 on that public server. Note that this is not normally needed unless you're using a separate/dedicated server.
+
+Additionally, protocol extensions must be enabled. cl_nopext 0 will reenable them (this is the default setting, so you won't need to worry too much).
+
+
+Mod support:
+Not all mods will work perfectly with it, an example being (especially q2) gamecode that handles the 'say' command which is not splitscreen-aware will end up sending multiple prints for each other player. This is not too much of an issue in private games, but can be annoying on public servers.
+Other mods that specially craft sound events or other such things for clients may similarly have issues.
+
+The QC features viewmodelforclient and exteriormodelforclient are not supported in conjunction with splitscreen. These will be be checked against only the first player, but will apply to all players.
+
+Mods that use CSQC will typically only see the first player unless the csqc code explicitly supports splitscreen.
+
+
+
+UserInfo and Names:
+You can change the second / 3rd / 4th player's name or other settings with:
+p2 setinfo name Foo
+
+
+
+Input support:
+There are multiple ways to deal with input, and multiple gotchas.
+The engine generates a device-id per input device of each type. This device id is used to decide which player (aka seat) that input device controls.
+These device ids typically depend upon the order that they are enumerated in, and can thus be renumbered between restarts or reboots, depending upon the operating system and device types.
+
+in_xinput cvar:
+on windows, the xinput api provides support for up to 4 game controllers (so long as they're just clones of microsoft's console controllers...). Windows is responsible for deciding which controller is assigned to each seat, so don't blame me if they get reassigned randomly.
+These controllers may optionally have headsets attached to them. If they do, each headset will automatically receive its own player-specific audio stream.
+If this cvar is changed, you will need to use in_restart in order to apply that change.
+
+in_rawinput cvar:
+Rawinput provides a way to determine which mouse generated which input events. It also disables mouse acceleration, which is generally a good thing.
+If this cvar is changed, you will need to use in_restart in order to apply that change.
+
+in_rawinput_keyboard:
+Rawinput also supports keyboards, along with actual device ids, thereby allowing each player to have their own keyboard, if your computer is set up weirdly like that.
+If this cvar is changed, you will need to use in_restart in order to apply that change.
+
+in_dinput cvar:
+DirectInput supports reporting device ids, however microsoft broke this with Vista where mice are concerned. Use rawinput instead. FTE only supports directinput for mice anyway.
+
+in_deviceids command:
+in_deviceids with no arguments can be used to list the device types, mappings, and names.
+You can reassign device ids with eg: in_deviceids mouse 1 "whateverwaslistedhere"
+Note that device ids themselves are 0-based, so the previous line will remap the named mouse to player 1.
+
+in_forceseat cvar:
+if set, the device id mechanism is ignored, and all input explicitly controls the specified seat. This is primarily only useful to developers that want to test multiplayer mods. However, it can also be set from the binds menu (where it configures which player's keys are being explicitly controlled).
+
+p2 / +p2 / p3 / etc commands:
+When playing with only a single keyboard, individual keys can be bound to eg 'p2 impulse 4' or '+p2 attack'. By doing so, those keys will select player 2's nailgun, or move player 2 forward despite other keys controlling player 1 by default.
+This can be configured via the binds menu (when splitscreen is enabled), but be sure to turn 'force client' back off.
+
+csqc:
+csqc receives all input events before any in_forceseat modifiers or binds etc. This includes which device generated the event. This allows csqc mods to provide their own interpretation of any key events etc that it wants.

@@ -1,5 +1,7 @@
 /* Thread functions */
 
+#include <assert.h>
+
 #ifdef Q3E_THREAD_INC
 #error "q3e_thread.inc included many times!"
 #endif

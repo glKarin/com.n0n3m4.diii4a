@@ -380,6 +380,8 @@
     <string name="you_can_also_change_it_manually_on_launcher_settings">Вы также можете изменить его вручную в настройках лаунчера.</string>
     <string name="realrtcw">RealRTCW</string>
     <string name="realrtcw_base">RealRTCW</string>
+    <string name="fteqw_base">FTEQW</string>
+    <string name="fteqw">FTEQW</string>
     <string name="input_event_queue">Входная очередь событий</string>
     <string name="choose_input_event_queue_scheme">Выберите схему очереди входных событий</string>
     <string name="filter">Фильтр</string>
@@ -450,5 +452,10 @@
     <string name="choose_mod_files">Выберите файлы мода</string>
     <string name="opengl_emulate_version_harm_gl_version">Emulating OpenGL version(harm_gl_version)</string>
     <string name="renderer_backend">Бэкэнд рендерера</string>
+    <string name="renderer_backend_vid_renderer">Бэкэнд рендерера(vid_renderer)</string>
+    <string name="change_game">Change game</string>
+    <string name="hexen_2_base">HeXen II</string>
+    <string name="halflife_base">Half-Life</string>
+    <string name="cs_1_5_base">Counter Strike(1.5)</string>
 
 </resources>

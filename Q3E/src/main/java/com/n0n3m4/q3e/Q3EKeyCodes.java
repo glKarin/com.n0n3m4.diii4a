@@ -1637,15 +1637,43 @@ public class Q3EKeyCodes
     {
         InitKeycodes(KeyCodesRTCW.class);
     }
+    public static void InitRealRTCWKeycodes()
+    {
+        InitRTCWKeycodes();
+    }
 
     public static void InitQ3Keycodes()
     {
         InitKeycodes(KeyCodesQ3.class);
     }
+    public static void InitQ2Keycodes()
+    {
+        InitQ3Keycodes();
+    }
+    public static void InitETWKeycodes()
+    {
+        InitQ3Keycodes();
+    }
+    public static void InitFTEQWKeycodes()
+    {
+        InitQ3Keycodes();
+    }
 
     public static void InitD3Keycodes()
     {
         InitKeycodes(KeyCodesD3.class);
+    }
+    public static void InitQ4Keycodes()
+    {
+        InitD3Keycodes();
+    }
+    public static void InitPreyKeycodes()
+    {
+        InitD3Keycodes();
+    }
+    public static void InitTDMKeycodes()
+    {
+        InitD3Keycodes();
     }
 
     public static void InitD3BFGKeycodes()

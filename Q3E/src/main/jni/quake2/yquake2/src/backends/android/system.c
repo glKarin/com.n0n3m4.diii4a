@@ -445,9 +445,9 @@ Sys_GetGameAPI(void *parms)
 	{
 		FILE *fp;
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: load game library
 		extern const char * Sys_DLLDefaultPath(void);
-		path = (char *)Sys_DLLDefaultPath();//FS_NextPath(path);
+		path = (char *)Sys_DLLDefaultPath();
 #else
 		path = FS_NextPath(path);
 #endif
@@ -457,12 +457,18 @@ Sys_GetGameAPI(void *parms)
 			return NULL;     /* couldn't find one anywhere */
 		}
 
-#ifdef __ANDROID__
-		snprintf(name, MAX_OSPATH, "%s/lib%s", path, gamename);
+#ifdef __ANDROID__ //karin: load game library
+		if(path && path[0])
+			snprintf(name, MAX_OSPATH, "%s/lib%s", path, gamename);
+		else
+			snprintf(name, MAX_OSPATH, "lib%s", gamename);
 #else
 		snprintf(name, MAX_OSPATH, "%s/%s", path, gamename);
 #endif
 
+#ifdef __ANDROID__ //karin: load game library
+		if(name[0] == '/') {
+#endif
 		/* skip it if it just doesn't exist */
 		fp = fopen(name, "rb");
 
@@ -472,6 +478,9 @@ Sys_GetGameAPI(void *parms)
 		}
 
 		fclose(fp);
+#ifdef __ANDROID__ //karin: load game library
+		}
+#endif
 
 #ifdef USE_SANITIZER
 		game_library = dlopen(name, RTLD_NOW | RTLD_NODELETE);
@@ -563,14 +572,14 @@ Sys_IsFile(const char *path)
 	return false;
 }
 
-extern char *game_data_dir;
+extern const char * Sys_GameDataDefaultPath(void);
 char *
 Sys_GetHomeDir(void)
 {
 	static char gdir[MAX_OSPATH];
 	char *home;
 
-	home = game_data_dir;
+	home = (char *)Sys_GameDataDefaultPath();
 
 #ifndef __HAIKU__
 	snprintf(gdir, sizeof(gdir), "%s/%s/", home, cfgdir);

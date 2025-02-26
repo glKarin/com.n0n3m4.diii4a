@@ -152,8 +152,7 @@ const char *Sys_GetBinaryDir(void)
 	if(exeDir[0] != '\0') {
 		return exeDir;
 	}
-	extern const char * Sys_DLLDefaultPath(void);
-	snprintf(exeDir, sizeof(exeDir), "%s/", Sys_DLLDefaultPath());
+	snprintf(exeDir, sizeof(exeDir), "./");
 	return exeDir;
 #else
 

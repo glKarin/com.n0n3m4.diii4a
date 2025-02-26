@@ -505,7 +505,7 @@ public class Q3EGameHelper
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", versionCheckFile);
         //final String engineVersionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.gzdoom.version");
         final String version = Q3EGlobals.GZDOOM_VERSION;
-        final String name = "GZDOOM game resource";
+        String name = "GZDOOM game resource";
 
         //boolean change = CheckExtractResourceVersion(engineVersionFile, versionName, name);
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
@@ -752,7 +752,7 @@ public class Q3EGameHelper
     {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
         if(!preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false))
-            return Q3EUtils.GetGameLibDir(m_context);
+            return ""; // Q3EUtils.GetGameLibDir(m_context);
 
         String targetPath = GetExternalLibPath();
 
@@ -834,7 +834,7 @@ public class Q3EGameHelper
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
         String libname = Q3EUtils.q3ei.libname;
         // if(Q3EUtils.q3ei.isTDM) libname = "libDukeNukemForever.so"; // Test a new game using TDM
-        String libPath = Q3EUtils.GetGameLibDir(m_context) + "/" + libname; // Q3EUtils.q3ei.libname;
+        String libPath = /*Q3EUtils.GetGameLibDir(m_context) + "/" +*/ libname; // Q3EUtils.q3ei.libname;
         //if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = "dnf"; // Test a new game using TDM
         if(preferences.getBoolean(Q3EPreference.LOAD_LOCAL_ENGINE_LIB, false))
         {

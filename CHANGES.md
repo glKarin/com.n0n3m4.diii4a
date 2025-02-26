@@ -2,6 +2,14 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan61 (2025-02-27)
+
+* Add `FTEQW` support, game standalone directory named `fteqw`, support HeXen II, Half-Life [FreeHL](https://github.com/eukara/freehl), Counter Striker 1.5 [FreeCS](https://github.com/eukara/freecs). More view in [FTEQW](https://www.fteqw.org).
+* DOOM 3 BFG add Vulkan renderer backend.
+* Don't package source code to apk since version 61.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan60 (2025-01-16)
 
 * Support setup max game console height percentage(0 or 100 means not limit) on launcher `General` tab.

@@ -121,7 +121,14 @@ public final class Q3EPreference
     public static final String pref_harm_realrtcw_user_mod       = "q3e_harm_realrtcw_user_mod"; //k
     public static final String pref_params_realrtcw              = "q3e_params_realrtcw"; //k
     public static final String pref_harm_realrtcw_command_record = "q3e_harm_realrtcw_command_record";
-    public static final String pref_harm_realrtcw_game_mod       = "q3e_harm_readrtcw_game_mod"; //k
+    public static final String pref_harm_realrtcw_game_mod       = "q3e_harm_realrtcw_game_mod"; //k
+    // FTEQW
+    public static final String pref_harm_fteqw_fs_game        = "q3e_harm_fteqw_fs_game"; //k
+    public static final String pref_harm_fteqw_game_lib       = "q3e_harm_fteqw_game_lib"; //k
+    public static final String pref_harm_fteqw_user_mod       = "q3e_harm_fteqw_user_mod"; //k
+    public static final String pref_params_fteqw              = "q3e_params_fteqw"; //k
+    public static final String pref_harm_fteqw_command_record = "q3e_harm_fteqw_command_record";
+    public static final String pref_harm_fteqw_game_mod       = "q3e_harm_fteqw_game_mod"; //k
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k

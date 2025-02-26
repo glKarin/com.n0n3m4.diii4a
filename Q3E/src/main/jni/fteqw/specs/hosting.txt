@@ -1,0 +1,189 @@
+TL;DR:
+	Server: set `sv_public 1` for a public server. Otherwise don't. Make sure deathmatch or coop are set before switching to a suitable map. Or use the menus...
+	Client: Use the menus to find+connect...
+	If stuff fails, try and set net_mtu to 1200 or so.
+	The rest of this file is only interesting if you're doing weird extra stuff involving other clients, particuarly QE.
+	
+	
+sv_port [IP:]UDPPORT:
+	Sets the udp port number(s) a server listens on, space-separated list if you want to specify multiple. Explicit IPs can be used for systems that need separate sockets for each interface to work around routing issues. Where possible these should be configured to accept inbound connections (see the ICE/RTC stuff)...
+	See also: net_enable_dtls
+
+sv_port_tcp [IP:]TCPPROT:
+	Like sv_port, but for tcp connections.
+	Sets the tcp port number(s)
+	This is used for all tcp connections - be they tcp/tls, ws(s), http(s), qtv, etc.
+	See also: net_enable_tls
+
+sv_port_rtp /serverid:
+	Specifies a name for the server to be advertised under.
+	(This activates an outbound TCP connection)
+	Your clients can 'connect /serverid' to join your server via ICE/holepunching, if you're too lazy.
+	Must also have a udp port open.
+
+sv_public:
+	-1: don't accept new clients, don't respond to queries (but don't harm anyone already connected).
+	0: don't send heartbeats, can be discovered/queried just fine for lan games.
+	1: send heartbeats to the configured masters.
+	2: use rtp with an auto-generated name instead of sending heartbeats (if the master's servers are unusable anyway, why heartbeat).
+	
+setmaster:
+	This is deprecated in favour of net_[qw]master[extra]# cvars.
+	Its use will disable the built-in masters.
+	
+com_protocolname:
+	This cvar should be set via your mod's fmf file. It must match between client+server or the servers will be filtered out or otherwise warn/error about it.
+
+sv_playerslots:
+	Defaults to 32 in deathmatch or coop, or 1 otherwise (disabling networking in singleplayer), but can potentially be set all the way up to 255. Requires a map change to update (which may kick people)
+maxclients:
+	Prevents more than this many active players on the server. Can be changed mid-game.
+	
+	
+QW:
+	Regular quakeworld clients just need an open udp port to connect to. make sure your router has the port open.
+	quakeworld traditionally uses port 27500 but most hosts run multiple such servers so port numbers are basically always given anyway.
+	sv_listen:
+		0: ignore qw client connection requests (without preventing nq/dp/qe requests)
+		1: accept qw clients.
+	
+NQ:
+	NQ defaults to udp port 26000 instead of QW's port 27500.
+	sv_listen_nq:
+		0: doesn't accept nq clients
+		1: favour compat. blocks protocol extensions.
+		2: prevent possible denial of service attacks, but may misleadingly fail due to packetloss (just reconnect if it happens).
+		
+QE:
+	`connectqe IP:UDPPORT` can be used to connect a native fte client to a QE server. QE clients can also connect to FTE servers via its connect command (specify one of the udp ports, obviously).
+	For this to work properly, you MUST have a working dtls provider (read: windows users will need to find+enable the openssl plugin). Additionally you need to set up some PSK cvars correctly.
+	Required cvars:
+		set `dtls_psk_hint id-quake-ex-dtls`
+		set `dtls_psk_user id-quake-ex-dtls`
+		set `dtls_psk_key 7a55b980c49b9ae4d4ffdb3513c2e471d94b14c22077ed86`
+
+	Serverside:
+		set `net_enable_dtls 2` //or 3, if you want to force encryption on all connections.
+		the behaviour of `sv_listen_nq 2` is not required, as the client will have already passed dtls's challenge check so there's no need for a second.
+		
+	Clientside:
+		QE will not handle `connect dns:port` properly (ignoring the port bit). `connect ip:port` DOES work though.
+		Connecting an FTE server to a QE server can be done with FTE's `connectqe ip:port` command, which makes assumptions to match QE.
+		QE clients will generally block stuffcmds, so there may be some issues.
+		
+	Note that the playfab stuff does NOT work - although you can use FTE's RTC stuff as an equivelent, just that they're not mutually compatible.
+	(Use of QE's playfab auth keys results in charges to id for each usage and are thus all hidden and secret and C&D/DMCA-ey. while it would theoretically be possible to intercept these messages to determine the keys and then use FTE's webrtc support with the appropriate handshakes, its best not to go there)
+	
+DP:
+	Defaults to port 26000, same as regular NQ.
+	Serverside:
+		DP's protocols requires `sv_listen_dp 1` to be set on the fte server, otherwise it'll fall back to acting as a qw or nq client.
+		sv_bigcoords is required for dpp7, but note that doing so breaks compat with many other engines. Not using it will generally fall back to the bjp3 protocol when using sv_listen_dp.
+		packetloss may result dp clients randomly getting stuck with vanilla NQ protocols. You may wish to set sv_listen_nq to 0 to prevent this, again beware of triggering other compat issues.
+	Clientside:
+		Just use the connect command as normal.
+		
+Browser port:
+	The browser port can connect to servers hosting via ws:// and wss:// schemes. Be sure to specify port numbers when connecting (the TCP ones set via the server's sv_port_tcp).
+	Alternatively, the browser port is able to use webrtc via a broker (net_ice_broker). This allows the browser port to even host games, while also using udp instead of tcp; resulting in fewer stalls.
+	When told to connect to a plain IP :PORT address, the web port will convert that into a webrtc connection via the default broker (`/udp/ip:port`) - if the broker knows the server then it will relay your packets to the udp server in question so it doesn't need to open+forward any extra ports.
+	You will not be able to determine ping times before connecting, and dns lookups will not be performed, but the user's experience should otherwise be equivelent for public FTE servers. There's no relaying for servers (unless you want to provide TURN auth details), so it'll be as low latency as regular udp connections but will not work on legacy servers that lack support for the extra signalling.
+	
+	Browser Serverside:
+		You can host games via webrtc, compatible with both other browsers and native FTE clients. Other engines will not be able to connect.
+	Native Serverside:
+		If using ws:// then browsers will block connectivity when your site is hosted from an https:// scheme.
+		If using wss:// then your server MUST be using a certificate that the user's browser will accept. The browser does not inform about why the connection failed if its wrong. You may want to proxy ws(s)->ws via nginx/apache or whatever, but note that until X-Forwarded-For is supported this will mean you have to apply any IP-based bans in your wss proxy instead of in the game server.
+		WebRTC/broker stuff can work with self-signed certificates, but may have more MTU isues. You should not need to worry about proxying, just make sure that inbound udp will work properly and the webrtc stuff will also work.
+		Hosting on windows will require reliable (d)tls support (read: openssl plugin).
+
+Hexen2:
+	FTE is *NOT* network-compatible with any other hexen2 engines. Follow the QW guidelines when running a hexen2 server, as FTE just treats it as a glorified mod.
+	
+Q2:
+	Q2 clients are only supported when running Q2 gamecode. Connectivity cvars then use the same cvars for QW.
+	
+Q2E(playfab):
+	playfab is not supported. too many private crypto keys and ids with third-party charges for infrastructure upkeep.
+Q2E('lan'):
+	Unlike QE, dtls is not required.
+	Q2E defaults to udp port 5069
+	FTE does not implement a lobby system - only to a level as required for Q2E compat.
+	
+	Serverside, ensure udp port 5069 is open, and set net_enable_q2e:
+		0: q2e clients will be ignored.
+		1: q2e clients will be able to send requests to the udp port.
+
+	Clientside, use `connectq2e IP:PORT` to connect (assumes port 5069). They will not show in the server browser.
+
+Q3:
+	Q3 clients are only supported when running Q3 gamecode. Connectivity cvars then use the same cvars for QW.
+	Clientside, just use the connect command as normal (or the q3 ui's server browser stuff).
+
+Qizmo(tcp):
+	To connect to a qizmo or compatibleish quakeworld server over tcp instead of udp (eg because someone blocked UDP), use one of the following:
+		connecttcp ip:port
+		connect tcp://ip:port
+
+	Servers will need sv_port_tcp set, as well as net_enable_qizmo (which defaults to enabled anyway).
+
+(D)TLS:
+	net_enable_dtls:
+		0: don't allow it.
+		1: be prepared to use it when required for connectivity instead of failing outright.
+		2: use dtls whenever the peer is believed to support it. Due to the abundance of other quake engines that lack dtls, this is probably the mode you should be using.
+		3: use dtls. block connections that do not support it. The recommended setting, except for compatibility. Also blocks non-tls clients.
+	net_enable_tls:
+		0: drop inboumd connections that look like tls (blocking wss too).
+		1: allow tls.
+		
+	Windows warning:
+		On windows FTE uses microsoft's schannel tls+dtls system library. This library has numerous issues and even worse documentation.
+		Users should instead enable the openssh plugin. This will ensure tls+dtls actually work properly instead of being stuck with outdated cyphers and protocols that eg QE or the browser port will reject.
+
+	To connect to a server with a known fingerprint (eg to bypass other certificate checks, you can:
+		connect dtls://HOST:PORT/?fp=CERTIFICATEFINGERPRINT
+	The fingerprint can be obtained from serverinfo queries.
+	
+	Note: With dtls, the client provides security via certificate pinning rather than certificate signing (cert authorities tend not to sign certs for plain IPs, and we don't really have domain names for servers listed in server browsers).
+	You can add an ?fp=BASE64 after your server's port number to avoid fingerprint issues with your first-connection - or when sharing addresses (eg with qw:// uris).
+
+WS(S):
+	To connect to a websocket server, use a scheme like the following:
+		connect ws://HOST:PORT/
+		connect wss://HOST:PORT/
+	Omitting the port number is not recommended
+
+	Servers will need sv_port_tcp set. net_enable_websockets should also be set, but at least it defaults to on.
+	For wss support, the server will additionally need net_enable_tls with a suitable certificate.
+
+WebRTC / ICE:
+	ftemaster can act as a broker, set net_ice_broker to a different one if frag-net ever goes down.
+	The broker relays basic metadata between the client+server allowing them to punch a hole.
+	FTE's native implementation does not leak private IP addresses by default (nor will modern browsers).
+	If you wish to also hide your public address from the peer, set `net_ice_relayonly 1` and enable a TURN server.
+
+	TURN:
+		Used as part of ICE/webrtc, This is used as a fallback when direct connections fail.
+		FTE does not act as a TURN server at all, but does support TURN as a client via webrtc.
+		set `net_ice_servers` to something like `turn:yourhost:port?user=key?auth=value` (your ip will still be visible to both the broker+relay, but not to the server/client you're connecting with). Ideally use a turn server near you to keep latency down because this will normally harm your latency.
+		
+	ICE+WebRTC names are used somewhat interchangably in FTE. ICE is the part that establishes a connection while WebRTC says that its used in a way that web browsers find tollerable, so really the difference is that ICE has no sctp nor dtls requirement.
+
+QTV:
+	Clientside:
+		Use the qtvplay commands to connect from a client to a qtv server (the qtvlist command can be used to list streams available on a server).
+	
+	Serverside:
+		Set net_enable_qtv and sv_port_tcp.
+		You will likely want to set qtv_password to prevent people from connecting to the server itself.
+		You will also need to set qtv_maxstreams to something other than 0.
+		A server with these set will then allow qtv proxies (or unfortunately qtv clients) to connect directly to the server in order to stream to other clients.
+		FIXME: make this more intuitive.
+
+HTTP:
+	FTE servers can act as regular web servers. This is very basic compared to other servers, but can be used for downloads of mvds or other files.
+	You will need to set net_enable_http to use this, as well as a tcp port too obviously.
+	For https support, also set net_enable_tls.
+	Gamecode may generate pages/resources by implementing the HTTP_GeneratePage entrypoint in ssqc.
+	You can use the /demolist resource to view+download demos, otherwise resources effectively match those available

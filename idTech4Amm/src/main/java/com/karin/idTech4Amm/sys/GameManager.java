@@ -1,5 +1,7 @@
 package com.karin.idTech4Amm.sys;
 
+import android.support.annotation.NonNull;
+
 import com.karin.idTech4Amm.R;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -27,6 +29,7 @@ public final class GameManager
             Q3EGlobals.GAME_GZDOOM,
             Q3EGlobals.GAME_ETW,
             Q3EGlobals.GAME_REALRTCW,
+            Q3EGlobals.GAME_FTEQW,
     };
 
     public GameManager()
@@ -42,8 +45,9 @@ public final class GameManager
         public final String  fs_game_base;
         public final boolean is_user;
         public final String  lib;
+        public final String  file;
 
-        public GameProp(int index, String game, String fs_game, String fs_game_base, boolean is_user, String lib)
+        public GameProp(int index, String game, String fs_game, String fs_game_base, boolean is_user, String lib, String file)
         {
             this.index = index;
             this.game = game;
@@ -51,6 +55,10 @@ public final class GameManager
             this.fs_game_base = fs_game_base;
             this.is_user = is_user;
             this.lib = lib;
+            if(null == file)
+                this.file = fs_game;
+            else
+                this.file = file;
         }
 
         public boolean IsGame(String game)
@@ -82,7 +90,7 @@ public final class GameManager
         for (Game value : values)
         {
             props = GameProps.get(value.type);
-            prop = new GameProp(props.size(), value.game, value.fs_game, value.fs_game_base, false, value.lib);
+            prop = new GameProp(props.size(), value.game, value.fs_game, value.fs_game_base, false, value.lib, value.file);
             props.add(prop);
         }
     }
@@ -137,6 +145,10 @@ public final class GameManager
         {
             list = GameProps.get(Q3EGlobals.GAME_REALRTCW);
         }
+        else if (Q3EUtils.q3ei.isFTEQW)
+        {
+            list = GameProps.get(Q3EGlobals.GAME_FTEQW);
+        }
         else
         {
             list = GameProps.get(Q3EGlobals.GAME_DOOM3);
@@ -152,7 +164,7 @@ public final class GameManager
             }
         }
         if(null == res)
-            res = new GameProp(0, "", game, "", userMod, "");
+            res = new GameProp(0, "", game, "", userMod, "", null);
         return res;
     }
 
@@ -165,6 +177,22 @@ public final class GameManager
             {
                 if(prop.game.equals(game))
                     return key;
+            }
+        }
+        return null;
+    }
+
+    public String GetGameFileOfMod(String game)
+    {
+        if(null == game)
+            game = "";
+        for (String key : GameProps.keySet())
+        {
+            List<GameProp> props = GameProps.get(key);
+            for (GameProp prop : props)
+            {
+                if(prop.fs_game.equals(game))
+                    return prop.file;
             }
         }
         return null;
@@ -199,6 +227,8 @@ public final class GameManager
             return R.drawable.etw_icon;
         else if (Q3EUtils.q3ei.isRealRTCW)
             return R.drawable.realrtcw_icon;
+        else if (Q3EUtils.q3ei.isFTEQW)
+            return R.drawable.fteqw_icon;
         else
             return R.drawable.d3_icon;
     }
@@ -227,6 +257,8 @@ public final class GameManager
             return R.drawable.etw_icon;
         else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
             return R.drawable.realrtcw_icon;
+        else if(Q3EGlobals.GAME_FTEQW.equalsIgnoreCase(name))
+            return R.drawable.fteqw_icon;
         else
             return R.drawable.d3_icon;
     }
@@ -255,6 +287,8 @@ public final class GameManager
             return R.string.etw_base;
         else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
             return R.string.realrtcw_base;
+        else if(Q3EGlobals.GAME_FTEQW.equalsIgnoreCase(name))
+            return R.string.fteqw_base;
         else
             return R.string.doom_iii;
     }
@@ -283,6 +317,8 @@ public final class GameManager
             return R.string.etw_base;
         else if (Q3EUtils.q3ei.isRealRTCW)
             return R.string.realrtcw_base;
+        else if (Q3EUtils.q3ei.isFTEQW)
+            return R.string.fteqw_base;
         else
             return R.string.doom_iii;
     }
@@ -311,6 +347,8 @@ public final class GameManager
             return R.color.theme_etw_main_color;
         else if (Q3EUtils.q3ei.isRealRTCW)
             return R.color.theme_realrtcw_main_color;
+        else if (Q3EUtils.q3ei.isFTEQW)
+            return R.color.theme_fteqw_main_color;
         else
             return R.color.theme_doom3_main_color;
     }
@@ -339,6 +377,8 @@ public final class GameManager
             return R.string.etw;
         else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
             return R.string.realrtcw;
+        else if(Q3EGlobals.GAME_FTEQW.equalsIgnoreCase(name))
+            return R.string.fteqw;
         else
             return R.string.doom_3;
     }

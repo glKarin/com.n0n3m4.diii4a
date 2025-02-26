@@ -96,6 +96,7 @@ import com.n0n3m4.DIII4A.launcher.EditConfigFileFunc;
 import com.n0n3m4.DIII4A.launcher.EditExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractPatchResourceFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractSourceFunc;
+import com.n0n3m4.DIII4A.launcher.GameChooserFunc;
 import com.n0n3m4.DIII4A.launcher.OpenSourceLicenseFunc;
 import com.n0n3m4.DIII4A.launcher.RestorePreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.SetupControlsThemeFunc;
@@ -586,6 +587,7 @@ public class GameLauncher extends Activity
 					|| rgId == R.id.rg_fs_doomgame
 					|| rgId == R.id.rg_fs_etwgame
 					|| rgId == R.id.rg_fs_realrtcwgame
+					|| rgId == R.id.rg_fs_fteqwgame
 			)
 			{
 				RadioButton checked = radioGroup.findViewById(id);
@@ -672,6 +674,17 @@ public class GameLauncher extends Activity
 					value2 = value2 >= 0 && value2 < Q3EGlobals.GZDOOM_GL_VERSIONS.length ? Q3EGlobals.GZDOOM_GL_VERSIONS[value2] : 0;
 					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
 					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "harm_gl_version", value2);
+				}
+			}
+
+			// FTEQW
+			else if (rgId == R.id.fteqw_vid_renderer)
+			{
+				if(Q3EUtils.q3ei.isFTEQW)
+				{
+					int value2 = GetRadioGroupSelectIndex(radioGroup, id);
+					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_renderer");
+					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "vid_renderer", value2 == 0 ? "vk" : "gl");
 				}
 			}
         }
@@ -1234,13 +1247,17 @@ public class GameLauncher extends Activity
 		{
 			Updatehacktings_TDM();
 		}
+		else if(Q3EUtils.q3ei.isFTEQW)
+		{
+			Updatehacktings_FTEQW();
+		}
 
 		// game mods for every games
 		str = GetGameModFromCommand();
-        if (str != null)
-        {
-            if (!V.fs_game_user.isChecked())
-            {
+		if (!V.fs_game_user.isChecked()) // internal game
+		{
+			if (str != null)
+			{
 				GameManager.GameProp prop = m_gameManager.ChangeGameMod(str, false);
 				if(prop.IsValid())
 				{
@@ -1251,27 +1268,33 @@ public class GameLauncher extends Activity
 					RemoveGameModFromCommand();
 					RemoveProp("fs_game_base");
 				}*/
-            }
-            else // user mod
-            {
-                String cur = V.edt_fs_game.getText().toString();
-                if (!str.equals(cur))
-                    V.edt_fs_game.setText(str);
-            }
-        }
-        else
-        {
-			if (!V.fs_game_user.isChecked())
+			}
+			else
 			{
 				SelectRadioGroup(GetGameModRadioGroup(), -1);
 			}
-			else // user mod
+		}
+		else // user mod
+		{
+			if (str != null)
 			{
-				String cur = V.edt_fs_game.getText().toString();
-				if (!"".equals(cur))
-					V.edt_fs_game.setText("");
+				GameManager.GameProp prop = m_gameManager.ChangeGameMod(str, false);
+				if(!prop.IsValid())
+				{
+					String cur = V.edt_fs_game.getText().toString();
+					if (!str.equals(cur))
+						V.edt_fs_game.setText(str);
+				}
 			}
-        }
+			else
+			{
+				{
+					String cur = V.edt_fs_game.getText().toString();
+					if (!"".equals(cur))
+						V.edt_fs_game.setText("");
+				}
+			}
+		}
 
 		// graphics
 		int checkedRadioButtonId = V.rg_scrres.getCheckedRadioButtonId();
@@ -1401,6 +1424,20 @@ public class GameLauncher extends Activity
 				index = 0;
 		}
 		SelectRadioGroup(V.gzdoom_gl_version, index);
+	}
+
+	private void Updatehacktings_FTEQW()
+	{
+		String str;
+		int index;
+
+		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_renderer");
+		index = 1;
+		if (str != null)
+		{
+			index = "vk".equalsIgnoreCase(str) ? 0 : 1;
+		}
+		SelectRadioGroup(V.fteqw_vid_renderer, index);
 	}
 
     private void ThrowException()
@@ -1686,7 +1723,7 @@ public class GameLauncher extends Activity
 			{
 				SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
 				editor.putString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), s.toString());
-				if (!V.fs_game_user.isChecked())
+				if (V.fs_game_user.isChecked())
 					editor.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), s.toString());
 				editor.commit();
 			}
@@ -1730,6 +1767,9 @@ public class GameLauncher extends Activity
 
 		// The Dark Mod
 		SetupUI_TDM();
+
+		// FTEQW
+		SetupUI_FTEQW();
 
 		//DIII4A-specific
 		SetupCommandTextWatcher(true);
@@ -2006,6 +2046,23 @@ public class GameLauncher extends Activity
 		V.gzdoom_gl_version.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
+	private void SetupUI_FTEQW()
+	{
+		int index;
+		String str;
+
+		SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+		index = 1;
+		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_renderer");
+		if (str != null)
+		{
+			index = "vk".equalsIgnoreCase(str) ? 0 : 1;
+		}
+		SelectRadioGroup(V.fteqw_vid_renderer, index);
+		V.fteqw_vid_renderer.setOnCheckedChangeListener(m_groupCheckChangeListener);
+	}
+
 	private void AfterCreated()
 	{
 		try
@@ -2137,6 +2194,12 @@ public class GameLauncher extends Activity
         String game = GetGameModFromCommand();
         if (game == null || game.isEmpty())
             game = Q3EUtils.q3ei.game_base;
+		else
+		{
+			String str = m_gameManager.GetGameFileOfMod(game);
+			if(null != str)
+				game = str;
+		}
 		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.subdatadir);
 		if(findInHome)
 			path = KStr.AppendPath(path, Q3EUtils.q3ei.GetGameHomeDirectoryPath());
@@ -2278,6 +2341,11 @@ public class GameLauncher extends Activity
 			OpenShortcutCreator();
 			return true;
 		}
+		else if (itemId == R.id.main_menu_change_game)
+		{
+			OpenGameList();
+			return true;
+		}
 /*		else if (itemId == R.id.main_menu_shortcut_command)
 		{
 			OpenShortcutWithCommandCreator();
@@ -2342,6 +2410,11 @@ public class GameLauncher extends Activity
 		else if (itemId == R.id.main_menu_game_realrtcw)
 		{
 			ChangeGame(Q3EGlobals.GAME_REALRTCW);
+			return true;
+		}
+		else if (itemId == R.id.main_menu_game_fteqw)
+		{
+			ChangeGame(Q3EGlobals.GAME_FTEQW);
 			return true;
 		}
 		else if (itemId == android.R.id.home)
@@ -3259,6 +3332,7 @@ public class GameLauncher extends Activity
 		boolean doomVisible = false;
 		boolean etwVisible = false;
 		boolean realrtcwVisible = false;
+		boolean fetqwVisible = false;
 
 		boolean openglVisible = true;
 		boolean quickloadVisible = true;
@@ -3329,6 +3403,13 @@ public class GameLauncher extends Activity
 			realrtcwVisible = true;
 			openglVisible = false;
 		}
+		else if (Q3EUtils.q3ei.isFTEQW)
+		{
+			fetqwVisible = true;
+			openglVisible = false;
+			quickloadVisible = false;
+			skipintroVisible = false;
+		}
         else
         {
             d3Visible = true;
@@ -3353,6 +3434,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_doomgame.setVisibility(doomVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_etwgame.setVisibility(etwVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_realrtcwgame.setVisibility(realrtcwVisible ? View.VISIBLE : View.GONE);
+		V.rg_fs_fteqwgame.setVisibility(fetqwVisible ? View.VISIBLE : View.GONE);
 
 		V.idtech4_section.setVisibility(Q3EUtils.q3ei.IsIdTech4() ? View.VISIBLE : View.GONE);
 		V.yquake2_section.setVisibility(Q3EUtils.q3ei.isQ2 ? View.VISIBLE : View.GONE);
@@ -3361,6 +3443,7 @@ public class GameLauncher extends Activity
 		V.etw_section.setVisibility(Q3EUtils.q3ei.isETW ? View.VISIBLE : View.GONE);
 		V.gzdoom_section.setVisibility(Q3EUtils.q3ei.isDOOM ? View.VISIBLE : View.GONE);
 		V.tdm_section.setVisibility(Q3EUtils.q3ei.isTDM ? View.VISIBLE : View.GONE);
+		V.fteqw_section.setVisibility(Q3EUtils.q3ei.isFTEQW ? View.VISIBLE : View.GONE);
 
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
@@ -3371,7 +3454,8 @@ public class GameLauncher extends Activity
 			subdir = "";
 		else
 			subdir += "/";
-		V.launcher_fs_game_cvar.setText("(" + Q3EUtils.q3ei.GetGameCommandParm() + ")");
+		String gameCommandParm = Q3EUtils.q3ei.GetGameCommandParm();
+		V.launcher_fs_game_cvar.setText(KStr.NotEmpty(gameCommandParm) ? "(" + gameCommandParm + ")" : "");
 		V.launcher_fs_game_subdir.setText(Q3ELang.tr(this, R.string.sub_directory) + subdir);
 		V.launcher_fs_game_subdir.setVisibility(subdir.isEmpty() ? View.GONE : View.VISIBLE);
 
@@ -3417,7 +3501,11 @@ public class GameLauncher extends Activity
 		String userModName = preference.getString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), "");
 		String cur = V.edt_fs_game.getText().toString();
 		if (!userModName.equals(cur))
+		{
 			V.edt_fs_game.setText(userModName);
+		}
+		if(userMod)
+			game = userModName;
 
 		GameManager.GameProp prop = m_gameManager.ChangeGameMod(game, userMod);
 		HandleGameProp(prop);
@@ -3505,6 +3593,22 @@ public class GameLauncher extends Activity
 	private void SetParamList(String name, List<String> parms)
 	{
 		SetParam(name, KidTechCommand.JoinValue(parms, true));
+	}
+
+    private void SetParamPrefix(String prefix, String name, Object val)
+    {
+		if(!LockCmdUpdate())
+			return;
+		SetCmdText(new KidTechCommand(prefix, GetCmdText()).SetParam(name, val).toString());
+        UnlockCmdUpdate();
+    }
+
+	private void RemoveAllParamsPrefix(String prefix)
+	{
+		if(!LockCmdUpdate())
+			return;
+		SetCmdText(new KidTechCommand(prefix, GetCmdText()).RemoveAllParams().toString());
+		UnlockCmdUpdate();
 	}
 
 	private String GetParamPrefix(String prefix, String name)
@@ -3641,6 +3745,8 @@ public class GameLauncher extends Activity
 			return V.rg_fs_etwgame;
 		else if(Q3EUtils.q3ei.isRealRTCW)
 			return V.rg_fs_realrtcwgame;
+		else if(Q3EUtils.q3ei.isFTEQW)
+			return V.rg_fs_fteqwgame;
 		else
         	return V.rg_fs_game;
     }
@@ -3757,13 +3863,15 @@ public class GameLauncher extends Activity
 
 	private void HandleGameProp(GameManager.GameProp prop)
 	{
+		boolean b = m_commandTextWatcher.IsEnabled();
+		m_commandTextWatcher.Uninstall();
 		if(prop.is_user)
 		{
 			if (!prop.fs_game.isEmpty())
 				SetGameModToCommand(prop.fs_game);
 			else
 				RemoveGameModFromCommand();
-			RemoveProp("fs_game_base");
+			RemoveSecondaryGameModFromCommand();
 			RemoveProp("harm_fs_gameLibPath");
 		}
 		else
@@ -3773,11 +3881,12 @@ public class GameLauncher extends Activity
 			else
 				SetGameModToCommand(prop.fs_game);
 			if(null == prop.fs_game_base || prop.fs_game_base.isEmpty() || !prop.IsValid())
-				RemoveProp("fs_game_base");
-			else
-				SetProp("fs_game_base", prop.fs_game_base);
+				RemoveSecondaryGameModFromCommand();
+			else if(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isD3BFG || Q3EUtils.q3ei.isTDM || Q3EUtils.q3ei.isFTEQW)
+				SetSecondaryGameModToCommand(prop.fs_game_base);
 			RemoveProp("harm_fs_gameLibPath");
 		}
+		m_commandTextWatcher.Install(b);
 	}
 
 	public GameManager GetGameManager()
@@ -3804,6 +3913,7 @@ public class GameLauncher extends Activity
 		groupRadios.put(Q3EGlobals.GAME_GZDOOM, V.rg_fs_doomgame);
 		groupRadios.put(Q3EGlobals.GAME_ETW, V.rg_fs_etwgame);
 		groupRadios.put(Q3EGlobals.GAME_REALRTCW, V.rg_fs_realrtcwgame);
+		groupRadios.put(Q3EGlobals.GAME_FTEQW, V.rg_fs_fteqwgame);
 		Game[] values = Game.values();
 
 		for (Game value : values)
@@ -3827,7 +3937,17 @@ public class GameLauncher extends Activity
 				name = (String)value.name;
 			else
 				name = "";
-			name += "(" + /*subdir +*/ value.game + ")";
+			if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(value.type))
+			{
+				name += " (" + /*subdir +*/ value.file + ")";
+			}
+			else
+			{
+				if(KStr.NotEmpty(value.fs_game))
+					name += " [" + value.fs_game + "]";
+				if(KStr.NotEmpty(value.file))
+					name += " (" + /*subdir +*/ value.file + "/)";
+			}
 			radio.setText(name);
 			radio.setTag(value.game);
 			group.addView(radio, layoutParams);
@@ -3865,6 +3985,11 @@ public class GameLauncher extends Activity
 			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
 			SetParam(arg, mod);
 		}
+		else if(Q3EUtils.q3ei.isFTEQW)
+		{
+			RemoveAllParamsPrefix(KidTechCommand.ARG_PREFIX_QUAKETECH);
+			SetParamPrefix(KidTechCommand.ARG_PREFIX_QUAKETECH, mod, "");
+		}
 		else
 			SetProp(arg, mod);
 	}
@@ -3876,6 +4001,17 @@ public class GameLauncher extends Activity
 			return GetParam(arg);
 		else if(Q3EUtils.q3ei.isDOOM)
 			return GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
+		else if(Q3EUtils.q3ei.isFTEQW)
+		{
+			List<String> list = new KidTechCommand(KidTechCommand.ARG_PREFIX_ALL, GetCmdText()).GetAllParamNames();
+			if(!list.isEmpty())
+			{
+				String parm = list.get(0);
+				return KStr.TrimLeft(parm, '-');
+			}
+			else
+				return "";
+		}
 		else
 			return GetProp(arg);
 	}
@@ -3887,6 +4023,28 @@ public class GameLauncher extends Activity
 			RemoveParam(arg);
 		else if(Q3EUtils.q3ei.isDOOM)
 			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
+		else if(Q3EUtils.q3ei.isFTEQW)
+			RemoveAllParamsPrefix(KidTechCommand.ARG_PREFIX_QUAKETECH);
+		else
+			RemoveProp(arg);
+	}
+
+	private void SetSecondaryGameModToCommand(String mod)
+	{
+		String arg = Q3EUtils.q3ei.GetSecondaryGameCommandParm();
+		if(Q3EUtils.q3ei.isFTEQW)
+		{
+			SetParamPrefix(KidTechCommand.ARG_PREFIX_QUAKETECH, arg, mod);
+		}
+		else
+			SetProp(arg, mod);
+	}
+
+	private void RemoveSecondaryGameModFromCommand()
+	{
+		String arg = Q3EUtils.q3ei.GetSecondaryGameCommandParm();
+		if(Q3EUtils.q3ei.isFTEQW)
+			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_QUAKETECH, arg);
 		else
 			RemoveProp(arg);
 	}
@@ -3984,6 +4142,21 @@ public class GameLauncher extends Activity
 			return progress + "%";
 	}
 
+	private void OpenGameList()
+	{
+		GameChooserFunc gameChooserFunc = new GameChooserFunc(this);
+		Bundle bundle = new Bundle();
+		bundle.putString("game", Q3EUtils.q3ei.game);
+		gameChooserFunc.SetCallback(new Runnable() {
+			@Override
+			public void run()
+			{
+				ChangeGame((String)gameChooserFunc.GetResult());
+			}
+		});
+		gameChooserFunc.Start(bundle);
+	}
+
 
 
     private class ViewHolder
@@ -4071,6 +4244,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_doomgame;
 		public RadioGroup rg_fs_etwgame;
 		public RadioGroup rg_fs_realrtcwgame;
+		public RadioGroup rg_fs_fteqwgame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -4120,6 +4294,8 @@ public class GameLauncher extends Activity
 		public RadioGroup gzdoom_gl_version;
 		public LinearLayout tdm_section;
 		public CheckBox tdm_useMediumPrecision;
+		public LinearLayout fteqw_section;
+		public RadioGroup fteqw_vid_renderer;
 		public SeekBar consoleHeightFracValue;
 		public TextView consoleHeightFracText;
 		public RadioGroup rg_depth_bits;
@@ -4232,6 +4408,7 @@ public class GameLauncher extends Activity
 			edt_harm_r_ambientLightingBrightness = findViewById(R.id.edt_harm_r_ambientLightingBrightness);
 			rg_fs_etwgame = findViewById(R.id.rg_fs_etwgame);
 			rg_fs_realrtcwgame = findViewById(R.id.rg_fs_realrtcwgame);
+			rg_fs_fteqwgame = findViewById(R.id.rg_fs_fteqwgame);
 			yquake2_section = findViewById(R.id.yquake2_section);
 			yquake2_vid_renderer = findViewById(R.id.yquake2_vid_renderer);
 			doom3bfg_section = findViewById(R.id.doom3bfg_section);
@@ -4257,6 +4434,8 @@ public class GameLauncher extends Activity
 			gzdoom_gl_version = findViewById(R.id.gzdoom_gl_version);
 			tdm_section = findViewById(R.id.tdm_section);
 			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);
+			fteqw_section = findViewById(R.id.fteqw_section);
+			fteqw_vid_renderer = findViewById(R.id.fteqw_vid_renderer);
 			consoleHeightFracValue = findViewById(R.id.consoleHeightFracValue);
 			consoleHeightFracText = findViewById(R.id.consoleHeightFracText);
 			rg_depth_bits = findViewById(R.id.rg_depth_bits);
