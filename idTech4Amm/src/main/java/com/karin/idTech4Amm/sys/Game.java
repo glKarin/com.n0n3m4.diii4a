@@ -78,11 +78,12 @@ public enum Game
     REALRTCW_BASE(Q3EGlobals.GAME_REALRTCW, "Main", "", "realrtcwgame", "", "Main", false, R.string.realrtcw_base),
 
     // FTEQW
-    FTEQW_Q1(Q3EGlobals.GAME_FTEQW, "quake1", "quake1", "fteqw", "", "quake1", true, R.string.quake_1_base),
-    FTEQW_Q2(Q3EGlobals.GAME_FTEQW, "quake2", "quake2", "fteqw", "", "quake2", true, R.string.quake_2_base),
-    FTEQW_Q3(Q3EGlobals.GAME_FTEQW, "quake3", "quake3", "fteqw", "", "quake3", true, R.string.quake_3_base),
+    FTEQW_Q1(Q3EGlobals.GAME_FTEQW, "quake1", "quake1", "fteqw", "", "id1", true, R.string.quake_1_base),
+    FTEQW_Q2(Q3EGlobals.GAME_FTEQW, "quake2", "quake2", "fteqw", "", "baseq2", true, R.string.quake_2_base),
+    FTEQW_Q3(Q3EGlobals.GAME_FTEQW, "quake3", "quake3", "fteqw", "", "baseq3", true, R.string.quake_3_base),
     FTEQW_H2(Q3EGlobals.GAME_FTEQW, "hexen2", "hexen2", "fteqw", "", "data1", true, R.string.hexen_2_base),
     FTEQW_HL(Q3EGlobals.GAME_FTEQW, "halflife", "halflife", "fteqw", "", "valve", true, R.string.halflife_base),
+    FTEQW_CS1_5(Q3EGlobals.GAME_FTEQW, "cstrike_1_5", "halflife", "fteqw", "cstrike", "cstrike", true, R.string.cs_1_5_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

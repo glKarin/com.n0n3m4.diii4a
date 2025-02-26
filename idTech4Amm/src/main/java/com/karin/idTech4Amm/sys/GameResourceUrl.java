@@ -66,8 +66,12 @@ public enum GameResourceUrl
 
     // FTEQW
     FTEQW_BASE(Q3EGlobals.GAME_FTEQW, "", "", "https://www.fteqw.org", 1),
+    FTEQW_Q1(Q3EGlobals.GAME_FTEQW, "quake1", "", "https://store.steampowered.com/app/2310/Quake/", 2),
+    FTEQW_Q2(Q3EGlobals.GAME_FTEQW, "quake2", "", "https://store.steampowered.com/app/2320/Quake_II/", 2),
+    FTEQW_Q3(Q3EGlobals.GAME_FTEQW, "quake3", "", "https://store.steampowered.com/app/2200/Quake_III_Arena/", 2),
     FTEQW_H2(Q3EGlobals.GAME_FTEQW, "hexen2", "", "https://store.steampowered.com/app/9060/HeXen_II/", 2),
-    FTEQW_FREEHL(Q3EGlobals.GAME_FTEQW, "halflife", "", "https://github.com/eukara/freehl", 1),
+    FTEQW_FREEHL(Q3EGlobals.GAME_FTEQW, "halflife", "FreeHL", "https://github.com/eukara/freehl", 1),
+    FTEQW_CS1_5(Q3EGlobals.GAME_FTEQW, "cstrike_1_5", "FreeCS", "https://github.com/eukara/freecs", 1),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

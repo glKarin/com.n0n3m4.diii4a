@@ -455,5 +455,6 @@
     <string name="change_game">Change game</string>
     <string name="hexen_2_base">Hexen II</string>
     <string name="halflife_base">Half-Life</string>
+    <string name="cs_1_5_base">Counter Strike(1.5)</string>
 
 </resources>

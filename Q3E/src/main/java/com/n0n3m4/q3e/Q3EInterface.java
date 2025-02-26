@@ -580,6 +580,18 @@ public class Q3EInterface
 			return "fs_game";
 	}
 
+	public String GetSecondaryGameCommandParm()
+	{
+		if(isPrey)
+			return "fs_game_base";
+		else if(isQ4)
+			return "fs_game_base";
+		else if(isFTEQW)
+			return "game";
+		else
+			return "fs_game_base";
+	}
+
 	public String GetGameCommandPrefix()
 	{
 		if(isQ1 || isFTEQW)
