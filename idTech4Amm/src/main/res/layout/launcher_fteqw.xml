@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="1dp"
-            android:text="@string/renderer_backend" />
+            android:text="@string/renderer_backend_vid_renderer" />
     <RadioGroup
             android:id="@+id/fteqw_vid_renderer"
             android:layout_width="wrap_content"

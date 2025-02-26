@@ -452,8 +452,9 @@
     <string name="choose_mod_files">Выберите файлы мода</string>
     <string name="opengl_emulate_version_harm_gl_version">Emulating OpenGL version(harm_gl_version)</string>
     <string name="renderer_backend">Бэкэнд рендерера</string>
+    <string name="renderer_backend_vid_renderer">Бэкэнд рендерера(vid_renderer)</string>
     <string name="change_game">Change game</string>
-    <string name="hexen_2_base">Hexen II</string>
+    <string name="hexen_2_base">HeXen II</string>
     <string name="halflife_base">Half-Life</string>
     <string name="cs_1_5_base">Counter Strike(1.5)</string>
 

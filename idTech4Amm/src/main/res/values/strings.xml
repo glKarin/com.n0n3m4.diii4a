@@ -294,7 +294,7 @@
     <string name="tdm_base">The Dark Mod</string>
     <string name="realrtcw_base">RealRTCW</string>
     <string name="fteqw_base">FTEQW</string>
-    <string name="hexen_2_base">Hexen II</string>
+    <string name="hexen_2_base">HeXen II</string>
     <string name="halflife_base">Half-Life</string>
     <string name="cs_1_5_base">Counter Strike(1.5)</string>
 
@@ -459,5 +459,6 @@
     <string name="opengl_emulate_version_harm_gl_version">Emulating OpenGL version(harm_gl_version)</string>
     <string name="renderer_backend">Renderer backend</string>
     <string name="change_game">Change game</string>
+    <string name="renderer_backend_vid_renderer">Renderer backend(vid_renderer)</string>
 
 </resources>
