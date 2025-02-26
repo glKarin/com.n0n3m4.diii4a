@@ -294,17 +294,17 @@ public class Q3EInterface
 	public void SetupKeycodes()
 	{
 		if(isPrey)
-			Q3EKeyCodes.InitD3Keycodes();
+			Q3EKeyCodes.InitPreyKeycodes();
 		else if(isQ4)
-			Q3EKeyCodes.InitD3Keycodes();
+			Q3EKeyCodes.InitQ4Keycodes();
 		else if(isQ2)
-			Q3EKeyCodes.InitQ3Keycodes();
+			Q3EKeyCodes.InitQ2Keycodes();
 		else if(isQ3)
 			Q3EKeyCodes.InitQ3Keycodes();
 		else if(isRTCW)
 			Q3EKeyCodes.InitRTCWKeycodes();
 		else if(isTDM)
-			Q3EKeyCodes.InitD3Keycodes();
+			Q3EKeyCodes.InitTDMKeycodes();
 		else if(isQ1)
 			Q3EKeyCodes.InitQ1Keycodes();
 		else if(isD3BFG)
@@ -312,11 +312,11 @@ public class Q3EInterface
 		else if(isDOOM)
 			Q3EKeyCodes.InitSDLKeycodes();
 		else if(isETW)
-			Q3EKeyCodes.InitQ3Keycodes();
+			Q3EKeyCodes.InitETWKeycodes();
 		else if(isRealRTCW)
-			Q3EKeyCodes.InitRTCWKeycodes();
+			Q3EKeyCodes.InitRealRTCWKeycodes();
 		else if(isFTEQW)
-			Q3EKeyCodes.InitQ3Keycodes();
+			Q3EKeyCodes.InitFTEQWKeycodes();
 		else
 			Q3EKeyCodes.InitD3Keycodes();
 	}

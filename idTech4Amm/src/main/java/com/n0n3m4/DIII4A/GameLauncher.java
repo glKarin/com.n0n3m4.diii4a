@@ -2194,6 +2194,12 @@ public class GameLauncher extends Activity
         String game = GetGameModFromCommand();
         if (game == null || game.isEmpty())
             game = Q3EUtils.q3ei.game_base;
+		else
+		{
+			String str = m_gameManager.GetGameFileOfMod(game);
+			if(null != str)
+				game = str;
+		}
 		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.subdatadir);
 		if(findInHome)
 			path = KStr.AppendPath(path, Q3EUtils.q3ei.GetGameHomeDirectoryPath());
@@ -3402,6 +3408,7 @@ public class GameLauncher extends Activity
 			fetqwVisible = true;
 			openglVisible = false;
 			quickloadVisible = false;
+			skipintroVisible = false;
 		}
         else
         {

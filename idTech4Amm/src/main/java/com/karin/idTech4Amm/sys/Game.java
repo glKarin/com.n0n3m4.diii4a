@@ -66,10 +66,10 @@ public enum Game
 
     // GZDOOM
     //GZDOOM_BASE(Q3EGlobals.GAME_GZDOOM, "", "", "", false, R.string.doom_base),
-    GZDOOM_DOOM1(Q3EGlobals.GAME_GZDOOM, "doom", "DOOM.WAD", "gzdoom", "", "DOOM.WAD", true, R.string.doom1_base),
-    GZDOOM_DOOM2(Q3EGlobals.GAME_GZDOOM, "doom2", "DOOM2.WAD", "gzdoom", "", "DOOM2.WAD", true, R.string.doom2_base),
-    GZDOOM_FREEDOOM1(Q3EGlobals.GAME_GZDOOM, "freedoom1", "freedoom1.wad", "gzdoom", "", "freedoom1.wad", true, R.string.freedoom1_base),
-    GZDOOM_FREEDOOM2(Q3EGlobals.GAME_GZDOOM, "freedoom2", "freedoom2.wad", "gzdoom", "", "freedoom2.wad", true, R.string.freedoom2_base),
+    GZDOOM_DOOM1(Q3EGlobals.GAME_GZDOOM, "DOOM.WAD", "DOOM.WAD", "gzdoom", "", "DOOM.WAD", true, R.string.doom1_base),
+    GZDOOM_DOOM2(Q3EGlobals.GAME_GZDOOM, "DOOM2.WAD", "DOOM2.WAD", "gzdoom", "", "DOOM2.WAD", true, R.string.doom2_base),
+    GZDOOM_FREEDOOM1(Q3EGlobals.GAME_GZDOOM, "freedoom1.wad", "freedoom1.wad", "gzdoom", "", "freedoom1.wad", true, R.string.freedoom1_base),
+    GZDOOM_FREEDOOM2(Q3EGlobals.GAME_GZDOOM, "freedoom2.wad", "freedoom2.wad", "gzdoom", "", "freedoom2.wad", true, R.string.freedoom2_base),
 
     // Wolfenstein: Enemy Territory
     ETW_BASE(Q3EGlobals.GAME_ETW, "etmain", "", "etwgame", "", "etmain", false, R.string.etw_base),

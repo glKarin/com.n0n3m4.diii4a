@@ -503,6 +503,8 @@ FILE * Sys_tmpfile(void)
 
 void Android_SetClipboardData(const char *text)
 {
+    if(!text)
+        return;
     //if(copy_to_clipboard)
         copy_to_clipboard(text);
 }

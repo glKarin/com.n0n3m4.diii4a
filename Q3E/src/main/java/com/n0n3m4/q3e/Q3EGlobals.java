@@ -161,7 +161,7 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_GZDOOM   = "gzdoom.ini"; // GZDOOM
     public static final String CONFIG_FILE_ETW      = "etconfig.cfg"; // ETW
     public static final String CONFIG_FILE_REALRTCW = "realrtcwconfig.cfg"; // RealRTCW
-    public static final String CONFIG_FILE_FTEQW    = ""; // FTEQW
+    public static final String CONFIG_FILE_FTEQW    = "fte.cfg"; // FTEQW
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -357,7 +357,7 @@ public final class Q3EGlobals
     // extra internal game file version: <Game engine version>.<idTech4A++ patch version>
     public static final String TDM_GLSL_SHADER_VERSION        = "2.12.5"; // 5: change all shaders default precision from mediump to highp
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
-    public static final String GZDOOM_VERSION                 = "4.14.0.3"; // 2: change postprocess OpenGL shaders
+    public static final String GZDOOM_VERSION                 = "4.14.0.3"; // 3: change postprocess OpenGL shaders
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 

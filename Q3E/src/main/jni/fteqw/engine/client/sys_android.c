@@ -186,6 +186,8 @@ void INS_Init(void)
 }
 void INS_ReInit(void)
 {
+	mouseactive = false;
+	IN_ActivateMouse();
 }
 void INS_Shutdown(void)
 {
@@ -647,11 +649,25 @@ void Sys_CloseTerminal(void)
 static char clipboard_buffer[SYS_CLIPBOARD_SIZE] = {0};
 void Sys_Clipboard_PasteText(clipboardtype_t cbt, void (*callback)(void *cb, const char *utf8), void *ctx)
 {
+	char *text = Android_GetClipboardData();
+	if(!text)
+		clipboard_buffer[0] = '\0';
+	else
+	{
+		Q_strncpyz(clipboard_buffer, text, SYS_CLIPBOARD_SIZE);
+		free(text);
+	}
 	callback(ctx, clipboard_buffer);
 }
 void Sys_SaveClipboard(clipboardtype_t cbt, const char *text)
 {
+	if(!text)
+	{
+		clipboard_buffer[0] = '\0';
+		return;
+	}
  	Q_strncpyz(clipboard_buffer, text, SYS_CLIPBOARD_SIZE);
+	Android_SetClipboardData(text);
 }
 
 int Sys_EnumerateFiles (const char *gpath, const char *match, int (*func)(const char *, qofs_t, time_t mtime, void *, searchpathfuncs_t *), void *parm, searchpathfuncs_t *spath)

@@ -182,6 +182,22 @@ public final class GameManager
         return null;
     }
 
+    public String GetGameFileOfMod(String game)
+    {
+        if(null == game)
+            game = "";
+        for (String key : GameProps.keySet())
+        {
+            List<GameProp> props = GameProps.get(key);
+            for (GameProp prop : props)
+            {
+                if(prop.fs_game.equals(game))
+                    return prop.file;
+            }
+        }
+        return null;
+    }
+
     public List<GameProp> GetGame(String game)
     {
         return GameProps.get(game);
