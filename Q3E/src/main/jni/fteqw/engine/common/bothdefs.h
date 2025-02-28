@@ -634,6 +634,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	#define ARCH_DL_POSTFIX ".so"
 #endif
 
+#ifdef _DIII4A //karin: remove library name tail
+#define ARCH_CPU_POSTFIX ""
+#endif
 #ifndef ARCH_CPU_POSTFIX
 	#if defined(_M_AMD64) || defined(__amd64__) || defined(__x86_64__)
 		#ifdef __ILP32__

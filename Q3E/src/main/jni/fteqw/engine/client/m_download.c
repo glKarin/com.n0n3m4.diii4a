@@ -589,6 +589,12 @@ static void PM_ValidatePackage(package_t *p)
 					fl = DPF_CACHED;
 					//fixme: skip any archive checks
 				}
+#ifdef _DIII4A //karin: lib*.so on other path
+				if (!pf && (p->flags & DPF_PLUGIN))
+				{
+					pf = FS_OpenVFS(dep->name, "rb", FS_LIBRARYPATH);
+				}
+#endif
 			}
 			else if (dep->dtype == DEP_CACHEFILE)
 			{
@@ -1732,6 +1738,13 @@ void PM_EnumeratePlugins(void (*callback)(const char *name, qboolean blocked))
 
 	for (p = availablepackages; p; p = p->next)
 	{
+#ifdef _DIII4A //karin: TODO: enabled default
+		if(fs_manifest && fs_manifest->installupd)
+		{
+			if(strcmp(p->name, fs_manifest->installupd) == 0)
+				p->flags |= DPF_ENABLED;
+		}
+#endif
 		if ((p->flags & DPF_ENABLED) && (p->flags & DPF_PLUGIN))
 		{
 			for (d = p->deps; d; d = d->next)

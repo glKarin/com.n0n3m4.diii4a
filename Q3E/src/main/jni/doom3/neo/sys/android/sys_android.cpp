@@ -129,6 +129,9 @@ char *app_home_dir = NULL;
 // Enable redirect stdout/stderr to file
 static bool redirect_output_to_file = true;
 
+// Using external libraries
+bool using_external_libs = false;
+
 // Continue when missing OpenGL context
 volatile bool continue_when_no_gl_context = false;
 
@@ -411,6 +414,8 @@ float Android_GetConsoleMaxHeightFrac(float frac)
 
 const char * Sys_DLLDefaultPath(void)
 {
+    if(!using_external_libs)
+        return "";
     return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
 }
 
@@ -579,8 +584,8 @@ void Q3E_SetInitialContext(const void *context)
     mouse_available = ptr->mouseAvailable ? true : false;
     refresh_rate = ptr->refreshRate <= 0 ? 60 : ptr->refreshRate;
     smooth_joystick = ptr->smoothJoystick ? true : false;
-    if(ptr->consoleMaxHeightFrac > 0 && ptr->consoleMaxHeightFrac < 100)
     console_max_height_frac = ptr->consoleMaxHeightFrac > 0 && ptr->consoleMaxHeightFrac < 100 ? (float)ptr->consoleMaxHeightFrac / 100.0f : -1.0f;
+    using_external_libs = ptr->usingExternalLibs ? true : false;
 
     window = ptr->window;
     screen_width = ptr->width;
