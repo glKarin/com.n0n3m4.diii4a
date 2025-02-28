@@ -93,6 +93,12 @@ qboolean QVM_LoadDLL(vm_t *vm, const char *name, qboolean binroot, void **vmMain
 	hVM=NULL;
 	*fname = 0;
 
+#ifdef _DIII4A //karin: load libq3*.so
+	if (!hVM && FS_SystemPath(va("%s" ARCH_DL_POSTFIX, name), FS_LIBRARYPATH, fname, sizeof(fname)))
+	{
+		hVM = Sys_LoadLibrary(name, funcs);
+	}
+#endif
 	if (binroot)
 	{
 		//load eg: basedir/module_gamedir_arch.ext

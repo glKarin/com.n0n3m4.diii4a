@@ -497,20 +497,33 @@ dllhandle_t *Sys_LoadLibrary(const char *name, dllfunction_t *funcs)
 	size_t i;
 	dllhandle_t *h;
 	char libname[MAX_OSPATH] = { 0 };
-	snprintf(libname, sizeof(libname) - 1, "%s.so", name);
+
+	const char *lastSep = strrchr(name, '/');
+	const char *filename = lastSep ? lastSep + 1 : name;
+
+	if(lastSep && using_external_libs)
+	{
+		Sys_MakeDLLPath(filename, libname, MAX_OSPATH);
+		h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
+	}
+	else
+	{
+	snprintf(libname, sizeof(libname) - 1, "%s.so", filename);
 	h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
 	if (!h)
 	{
 		//Sys_Printf("try 1 dlopen('%s') error -> %s\n", libname, dlerror());
-		snprintf(libname, sizeof(libname) - 1, "%s", name);
+		snprintf(libname, sizeof(libname) - 1, "%s", filename);
 		h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
 	}
 	if (!h)
 	{
 		//Sys_Printf("try 2 dlopen('%s') error -> %s\n", libname, dlerror());
-		snprintf(libname, sizeof(libname) - 1, "lib%s.so", name);
+		snprintf(libname, sizeof(libname) - 1, "lib%s.so", filename);
 		h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
 	}
+	}
+
 	if (!h)
 	{
 		//Sys_Printf("try 3 dlopen('%s') error -> %s\n", libname, dlerror());

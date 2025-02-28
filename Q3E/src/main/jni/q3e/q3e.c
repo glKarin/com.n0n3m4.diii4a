@@ -451,7 +451,7 @@ static void setup_Q3E_callback(void)
 	setCallbacks(&callback);
 }
 
-JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint depthBits, jint msaa, jint glVersion, jboolean redirectOutputToFile, jint signalsHandler, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jint consoleMaxHeightFrac, jboolean bContinueNoGLContext)
+JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint depthBits, jint msaa, jint glVersion, jboolean redirectOutputToFile, jint signalsHandler, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jint consoleMaxHeightFrac, jboolean usingExternalLibs, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc;
@@ -537,6 +537,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	context.refreshRate = refreshRate;
 	context.smoothJoystick = smoothJoystick ? 1 : 0;
 	context.consoleMaxHeightFrac = consoleMaxHeightFrac;
+	context.usingExternalLibs = usingExternalLibs;
 
 	window = ANativeWindow_fromSurface(env, view);
 	// set_gl_context(window);

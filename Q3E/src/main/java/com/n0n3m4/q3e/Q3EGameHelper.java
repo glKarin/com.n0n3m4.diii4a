@@ -752,7 +752,7 @@ public class Q3EGameHelper
     {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
         if(!preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false))
-            return ""; // Q3EUtils.GetGameLibDir(m_context);
+            return Q3EUtils.GetGameLibDir(m_context);
 
         String targetPath = GetExternalLibPath();
 
@@ -934,6 +934,7 @@ public class Q3EGameHelper
                 appHome,
                 Q3EUtils.q3ei.joystick_smooth,
                 consoleMaxHeightFrac,
+                useExternalLibPath,
                 runBackground > 0
         );
         if(res)

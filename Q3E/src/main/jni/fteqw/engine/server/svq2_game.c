@@ -48,7 +48,11 @@ void *SVQ2_GetGameAPI (void *parms)
 #ifdef ARCH_ALTCPU_POSTFIX
 		"game" ARCH_ALTCPU_POSTFIX ARCH_DL_POSTFIX,
 #endif
+#ifdef _DIII4A //karin: q2game in DIII4A
+		"q2game",
+#else
 		"game" ARCH_DL_POSTFIX,
+#endif
 #if defined(__linux__)	//FTE doesn't provide gamecode. Borrow someone else's. Lets just hope that its installed.
 //		"/usr/lib/yamagi-quake2/%s/game.so",
 #endif
@@ -91,6 +95,12 @@ void *SVQ2_GetGameAPI (void *parms)
 					continue;
 				Q_snprintfz(name, sizeof(name), "%slibgame_%s"ARCH_DL_POSTFIX, host_parms.binarydir, gamepath);
 			}
+#ifdef _DIII4A //karin: load q2game
+			else if (o == 5)
+			{
+				Q_snprintfz(name, sizeof(name), "%s", gamename[o]);
+			}
+#endif
 			else if (*gamename[o] == '/')
 			{	//system path. o.O
 				if (!com_gamedirnativecode.ival)	//just in case they match.

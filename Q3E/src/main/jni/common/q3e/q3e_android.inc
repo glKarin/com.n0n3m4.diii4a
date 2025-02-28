@@ -222,6 +222,9 @@ char *app_home_dir = NULL;
 // Enable redirect stdout/stderr to file
 static Q3Ebool redirect_output_to_file = Q3E_TRUE;
 
+// Using external libraries
+Q3Ebool using_external_libs = Q3E_FALSE;
+
 // Continue when missing OpenGL context
 volatile Q3Ebool continue_when_no_gl_context = Q3E_FALSE;
 
@@ -573,9 +576,16 @@ int Android_GetConsoleMaxHeight(int height, int maxHeight)
     return h < height ? h : height;
 }
 
-const char * Sys_DLLDefaultPath(void)
+const char * Sys_DLLInternalPath(void)
 {
     return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
+}
+
+const char * Sys_DLLDefaultPath(void)
+{
+    if(!using_external_libs)
+        return "";
+    return Sys_DLLInternalPath();
 }
 
 const char * Sys_GameDataDefaultPath(void)
@@ -709,6 +719,7 @@ void Q3E_SetInitialContext(const void *context)
     refresh_rate = ptr->refreshRate <= 0 ? 60 : ptr->refreshRate;
     smooth_joystick = ptr->smoothJoystick ? Q3E_TRUE : Q3E_FALSE;
     console_max_height_frac = ptr->consoleMaxHeightFrac > 0 && ptr->consoleMaxHeightFrac < 100 ? (float)ptr->consoleMaxHeightFrac / 100.0f : -1.0f;
+    using_external_libs = ptr->usingExternalLibs ? Q3E_TRUE : Q3E_FALSE;
 
     window = ptr->window;
     screen_width = ptr->width;

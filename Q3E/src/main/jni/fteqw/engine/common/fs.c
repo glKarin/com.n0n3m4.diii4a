@@ -70,7 +70,11 @@ static char *vidfilenames[] =	//list of filenames to check to see if graphics st
 	"set r_replacemodels " IFMINIMAL("","md3 md5mesh")"\n"	\
 	"set r_glsl_emissive 0\n" /*work around the _glow textures not being meant to glow*/
 /*Q3's ui doesn't like empty model/headmodel/handicap cvars, even if the gamecode copes*/
+#ifdef _DIII4A //karin: error if load *.so, so using *.qvm
+#define Q3CFG "//schemes quake3\n" "set v_gammainverted 0\nset snd_ignorecueloops 1\nsetfl g_gametype 0 s\nset gl_clear 1\nset r_clearcolour 0 0 0\nset com_parseutf8 0\ngl_overbright "FORWEB("0","2")"\nseta model sarge\nseta headmodel sarge\nseta handicap 100\ncom_gamedirnativecode 0\nsv_port "STRINGIFY(PORT_Q3SERVER)"\ncl_defaultport "STRINGIFY(PORT_Q3SERVER)"\ncom_protocolversion 68\n"
+#else
 #define Q3CFG "//schemes quake3\n" "set v_gammainverted 0\nset snd_ignorecueloops 1\nsetfl g_gametype 0 s\nset gl_clear 1\nset r_clearcolour 0 0 0\nset com_parseutf8 0\ngl_overbright "FORWEB("0","2")"\nseta model sarge\nseta headmodel sarge\nseta handicap 100\ncom_gamedirnativecode 1\nsv_port "STRINGIFY(PORT_Q3SERVER)"\ncl_defaultport "STRINGIFY(PORT_Q3SERVER)"\ncom_protocolversion 68\n"
+#endif
 //#define RMQCFG "sv_bigcoords 1\n"
 
 #define HLCFG "plug_load ffmpeg"
@@ -2801,10 +2805,9 @@ static qboolean FS_NativePath(const char *fname, enum fs_relative relativeto, ch
 		break;
 #elif defined(_DIII4A) //karin: load library path
 		{
-			extern char *Sys_MakeDLLPath(const char *libname, char path[], int max_length);
-			char dllName[MAX_OSPATH];
-			Sys_MakeDLLPath(fname, dllName, MAX_OSPATH);
-			nlen = Q_snprintfz(out, outlen, "%s", dllName);
+			extern const char * Sys_DLLInternalPath(void);
+			const char *dllPath = Sys_DLLInternalPath();
+			nlen = Q_snprintfz(out, outlen, "%s/%s", dllPath, fname);
 		}
 		break;
 #else

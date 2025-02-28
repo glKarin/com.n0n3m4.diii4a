@@ -139,6 +139,7 @@ void Q3E_PrintInitialContext(const Q3E_InitialContext_t *context)
 	LOGI("    Refresh rate: %d", context->refreshRate);
 	LOGI("    Smooth joystick: %d", context->smoothJoystick);
 	LOGI("    Max console height frac: %d", context->consoleMaxHeightFrac);
+	LOGI("    Using external libraries: %d", context->usingExternalLibs);
 	LOGI("    Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
 
 	LOGI("<---------");

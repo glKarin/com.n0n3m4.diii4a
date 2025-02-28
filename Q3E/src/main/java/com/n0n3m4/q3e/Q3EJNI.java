@@ -45,6 +45,7 @@ public class Q3EJNI {
 			String appHome, // app home path
 			boolean smoothJoystick, // is smooth joystick
 			int consoleMaxHeightFrac, // max console height frac(0 - 100)
+			boolean usingExternalLibs, // using extern libraries
             boolean continueNoGLContext
     );
 	public static native void sendKeyEvent(int state,int key,int character);

@@ -1,7 +1,7 @@
 {
-    "release":60,
-    "update":"2025-01-16",
-    "version":"1.1.0harmattan60",
-    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan60/idTech4A++_1.1.0harmattan60-3.apk",
-    "changes":"  * Support setup max game console height percentage(0 or 100 means not limit) on launcher `General` tab.\n  * Update GZDOOM version to 4.14.0.\n  * GZDOOM add Vulkan and OpenGL renderer backend.\n  * Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.1.\n  * Update Quake 1(Darkplaces) version.\n  * Update Quake 2(yquake2) version.\n  * Add use multisamples config in game."
+    "release":61,
+    "update":"2025-02-27",
+    "version":"1.1.0harmattan61",
+    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan61/idTech4A++_1.1.0harmattan61-2.apk",
+    "changes":"  * Add `FTEQW` support, game standalone directory named `fteqw`, support HeXen II, Half-Life [FreeHL], Counter Striker 1.5 [FreeCS].\n  * DOOM 3 BFG add Vulkan renderer backend."
 }
