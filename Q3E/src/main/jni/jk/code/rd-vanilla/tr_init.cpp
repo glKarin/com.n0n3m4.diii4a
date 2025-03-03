@@ -427,6 +427,12 @@ static void GLW_InitTextureCompression( void )
 	}
 }
 
+#ifdef _GLES //karin: glMultiTexCoord2fARB
+void glMultiTexCoord2fARB( GLenum texture, GLfloat s, GLfloat t )
+{
+	glMultiTexCoord4f(texture, s, t, 0, 1);
+}
+#endif
 /*
 ===============
 GLimp_InitExtensions
@@ -503,6 +509,44 @@ static void GLimp_InitExtensions( void )
 	qglMultiTexCoord2fARB = NULL;
 	qglActiveTextureARB = NULL;
 	qglClientActiveTextureARB = NULL;
+#ifdef _GLES //karin: multitexture
+    GLint numTextureUnits;
+    qglGetIntegerv( GL_MAX_TEXTURE_UNITS, &numTextureUnits );
+	if ( numTextureUnits > 1 )
+	{
+		if ( r_ext_multitexture->integer )
+		{
+			qglMultiTexCoord2fARB = glMultiTexCoord2fARB;
+			qglActiveTextureARB = glActiveTexture;
+			qglClientActiveTextureARB = glClientActiveTexture;
+
+			if ( qglActiveTextureARB )
+			{
+				qglGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, &glConfig.maxActiveTextures );
+
+				if ( glConfig.maxActiveTextures > 1 )
+				{
+					Com_Printf ("...using GL_ARB_multitexture\n" );
+				}
+				else
+				{
+					qglMultiTexCoord2fARB = NULL;
+					qglActiveTextureARB = NULL;
+					qglClientActiveTextureARB = NULL;
+					Com_Printf ("...not using GL_ARB_multitexture, < 2 texture units\n" );
+				}
+			}
+		}
+		else
+		{
+			Com_Printf ("...ignoring GL_ARB_multitexture\n" );
+		}
+	}
+	else
+	{
+		Com_Printf ("...GL_ARB_multitexture not found\n" );
+	}
+#else
 	if ( ri.GL_ExtensionSupported( "GL_ARB_multitexture" ) )
 	{
 		if ( r_ext_multitexture->integer )
@@ -537,6 +581,7 @@ static void GLimp_InitExtensions( void )
 	{
 		Com_Printf ("...GL_ARB_multitexture not found\n" );
 	}
+#endif
 
 	// GL_EXT_compiled_vertex_array
 	qglLockArraysEXT = NULL;

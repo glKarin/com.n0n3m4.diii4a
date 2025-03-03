@@ -1,7 +1,7 @@
-name: Create new issue
-description: Create new issue(bugs)
+name: Create new bug
+description: Create new bug(bugs)
 title: '* '
-labels: 'issue'
+labels: 'bug'
 
 body:
   - type: input

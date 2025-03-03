@@ -8,6 +8,13 @@
 #include <mutex>
 #include <memory>
 
+#define Q3E_OBOE_DEFAULT_SAMPLE_RATE 44100
+#define Q3E_OBOE_DEFAULT_CHANNEL Q3E_OBOE_CHANNEL_STEREO
+#define Q3E_OBOE_DEFAULT_FORMAT AudioFormat::I16
+#define Q3E_OBOE_DEFAULT_WIDTH 2 * 2 // numChannels * numWidth(Stereo)
+
+#define Q3E_OBOE_FORMAT_CAST(x) static_cast<AudioFormat>(x)
+
 #define LOCK_AUDIO() std::lock_guard<std::mutex> guard(mutex);
 
 using namespace oboe;
@@ -54,10 +61,11 @@ private:
     std::shared_ptr<AudioStream> mStream;
     std::mutex mutex;
 
-    int sampleRate = 44100;
-    int channelCount = 2; // oboe::ChannelCount::Stereo
-    AudioFormat format = AudioFormat::I16;
+    int sampleRate = Q3E_OBOE_DEFAULT_SAMPLE_RATE;
+    int channelCount = Q3E_OBOE_DEFAULT_CHANNEL; // oboe::ChannelCount::Stereo
+    AudioFormat format = Q3E_OBOE_DEFAULT_FORMAT;
     Q3E_write_audio_data_f func = nullptr;
+    unsigned int width = Q3E_OBOE_DEFAULT_WIDTH;
 };
 
 static Q3EOboeAudio audio;
@@ -79,10 +87,31 @@ void Q3EOboeAudio::Init(int sampleRate, int channel, int format)
 
     if(sampleRate > 0)
         this->sampleRate = sampleRate;
-    if(channelCount > 0)
+    if(channelCount > 0 && channelCount <= Q3E_OBOE_CHANNEL_STEREO)
         this->channelCount = channel;
-    if(format >= 0)
-        this->format = static_cast<AudioFormat>(format);
+    if(format >= 0 && format <= Q3E_OBOE_FORMAT_FLOAT)
+        this->format = Q3E_OBOE_FORMAT_CAST(format);
+
+    unsigned int bytes_per_frame;
+    switch(this->format)
+    {
+        case oboe::AudioFormat::I16:
+            bytes_per_frame = 2;
+            break;
+        case oboe::AudioFormat::Float:
+            bytes_per_frame = 4;
+            break;
+        case oboe::AudioFormat::I24:
+            bytes_per_frame = 3;
+            break;
+        case oboe::AudioFormat::I32:
+            bytes_per_frame = 4;
+            break;
+        default:
+            bytes_per_frame = 0;
+            break;
+    }
+    this->width = bytes_per_frame * this->channelCount;
 
     InitStream();
 }
@@ -93,7 +122,7 @@ void Q3EOboeAudio::Init()
 
     if(IsInited())
     {
-        fprintf(stderr, "Q3EOboeAudio has inited\n");
+        fprintf(stderr, "Q3EOboeAudio has initialized\n");
         return;
     }
 
@@ -105,7 +134,9 @@ void Q3EOboeAudio::InitStream()
     AudioStreamBuilder builder;
     // The builder set methods can be chained for convenience.
     Result result = builder.setSharingMode(SharingMode::Exclusive)
+            ->setDirection(oboe::Direction::Output)
             ->setPerformanceMode(PerformanceMode::LowLatency)
+            ->setUsage(oboe::Usage::Game)
             ->setChannelCount(channelCount)
             ->setSampleRate(sampleRate)
             ->setSampleRateConversionQuality(SampleRateConversionQuality::Medium)
@@ -139,7 +170,7 @@ void Q3EOboeAudio::Start() {
 
     if(!IsInited())
     {
-        fprintf(stderr, "Q3EOboeAudio not init\n");
+        fprintf(stderr, "Q3EOboeAudio not initialized\n");
         return;
     }
 
@@ -157,7 +188,7 @@ void Q3EOboeAudio::Stop() {
 
     if(!IsInited())
     {
-        fprintf(stderr, "Q3EOboeAudio not init\n");
+        fprintf(stderr, "Q3EOboeAudio not initialized\n");
         return;
     }
 
@@ -166,20 +197,23 @@ void Q3EOboeAudio::Stop() {
 
 DataCallbackResult Q3EOboeAudio::onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numFrames)
 {
+#if 0
     if(func)
+#endif
     {
         unsigned char *stream = (unsigned char *) audioData;
-        func(stream, numFrames * channelCount * 2); // numFrames * numChannels * numWidth(Stereo)
+        func(stream, numFrames * width); // numFrames * numChannels * numWidth(Stereo)
         return DataCallbackResult::Continue;
     }
     return DataCallbackResult::Stop; // no register callback
 }
 
+// C-style interface
 void Q3E_Oboe_Init(int sampleRate, int channel, int format, Q3E_write_audio_data_f func)
 {
     if(audio.IsInited())
     {
-        fprintf(stderr, "Q3EOboeAudio has inited\n");
+        fprintf(stderr, "Q3EOboeAudio has initialized\n");
         return;
     }
     audio.Init(sampleRate, channel, format);

@@ -53,7 +53,9 @@ typedef GLclampf GLclampd;
 #	include <gl.h>
 #endif
 
+#if !defined(_GLES) //karin: unuse glext.h
 #include "glext.h"
+#endif
 
 #define qglAccum glAccum
 #define qglAlphaFunc glAlphaFunc
@@ -403,6 +405,9 @@ typedef GLclampf GLclampd;
 #define qglDepthRange glDepthRangef
 #define qglClipPlane glClipPlanef
 
+#define glActiveTextureARB glActiveTexture
+#define glClientActiveTextureARB glClientActiveTexture
+
 #undef qglColor3f
 #define qglColor3f(r, g, b) glColor4f(r, g, b, 1.0f)
 
@@ -413,6 +418,98 @@ inline void glColor4ubv(GLubyte arr[])
 {
 	glColor4f((float)arr[0] / 255.0f, (float)arr[1] / 255.0f, (float)arr[2] / 255.0f, (float)arr[3] / 255.0f);
 }
+
+#ifndef APIENTRYP
+#define APIENTRYP *
+#endif
+
+#define GL_INCR_WRAP                      0x8507
+#define GL_DECR_WRAP                      0x8508
+
+#define GL_TEXTURE0_ARB                   0x84C0
+#define GL_TEXTURE1_ARB                   0x84C1
+#define GL_TEXTURE2_ARB                   0x84C2
+#define GL_TEXTURE3_ARB                   0x84C3
+#define GL_TEXTURE4_ARB                   0x84C4
+#define GL_TEXTURE5_ARB                   0x84C5
+#define GL_TEXTURE6_ARB                   0x84C6
+#define GL_TEXTURE7_ARB                   0x84C7
+#define GL_TEXTURE8_ARB                   0x84C8
+#define GL_TEXTURE9_ARB                   0x84C9
+#define GL_TEXTURE10_ARB                  0x84CA
+#define GL_TEXTURE11_ARB                  0x84CB
+#define GL_TEXTURE12_ARB                  0x84CC
+#define GL_TEXTURE13_ARB                  0x84CD
+#define GL_TEXTURE14_ARB                  0x84CE
+#define GL_TEXTURE15_ARB                  0x84CF
+#define GL_TEXTURE16_ARB                  0x84D0
+#define GL_TEXTURE17_ARB                  0x84D1
+#define GL_TEXTURE18_ARB                  0x84D2
+#define GL_TEXTURE19_ARB                  0x84D3
+#define GL_TEXTURE20_ARB                  0x84D4
+#define GL_TEXTURE21_ARB                  0x84D5
+#define GL_TEXTURE22_ARB                  0x84D6
+#define GL_TEXTURE23_ARB                  0x84D7
+#define GL_TEXTURE24_ARB                  0x84D8
+#define GL_TEXTURE25_ARB                  0x84D9
+#define GL_TEXTURE26_ARB                  0x84DA
+#define GL_TEXTURE27_ARB                  0x84DB
+#define GL_TEXTURE28_ARB                  0x84DC
+#define GL_TEXTURE29_ARB                  0x84DD
+#define GL_TEXTURE30_ARB                  0x84DE
+#define GL_TEXTURE31_ARB                  0x84DF
+#define GL_ACTIVE_TEXTURE_ARB             0x84E0
+#define GL_CLIENT_ACTIVE_TEXTURE_ARB      0x84E1
+#define GL_MAX_TEXTURE_UNITS_ARB          0x84E2
+
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT     0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+
+#define GL_TEXTURE_RECTANGLE_ARB          0x84F5
+
+typedef void (APIENTRYP PFNGLSTENCILOPSEPARATEPROC) (GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass);
+
+typedef void (APIENTRYP PFNGLACTIVETEXTUREARBPROC) (GLenum texture);
+typedef void (APIENTRYP PFNGLCLIENTACTIVETEXTUREARBPROC) (GLenum texture);
+typedef void (APIENTRYP PFNGLMULTITEXCOORD2FARBPROC) (GLenum target, GLfloat s, GLfloat t);
+
+typedef void (APIENTRYP PFNGLCOMBINERPARAMETERFVNVPROC) (GLenum pname, const GLfloat *params);
+typedef void (APIENTRYP PFNGLCOMBINERPARAMETERIVNVPROC) (GLenum pname, const GLint *params);
+typedef void (APIENTRYP PFNGLCOMBINERPARAMETERFNVPROC) (GLenum pname, GLfloat param);
+typedef void (APIENTRYP PFNGLCOMBINERPARAMETERINVPROC) (GLenum pname, GLint param);
+typedef void (APIENTRYP PFNGLCOMBINERINPUTNVPROC) (GLenum stage, GLenum portion, GLenum variable, GLenum input, GLenum mapping, GLenum componentUsage);
+typedef void (APIENTRYP PFNGLCOMBINEROUTPUTNVPROC) (GLenum stage, GLenum portion, GLenum abOutput, GLenum cdOutput, GLenum sumOutput, GLenum scale, GLenum bias, GLboolean abDotProduct, GLboolean cdDotProduct, GLboolean muxSum);
+
+typedef void (APIENTRYP PFNGLFINALCOMBINERINPUTNVPROC) (GLenum variable, GLenum input, GLenum mapping, GLenum componentUsage);
+typedef void (APIENTRYP PFNGLGETCOMBINERINPUTPARAMETERFVNVPROC) (GLenum stage, GLenum portion, GLenum variable, GLenum pname, GLfloat *params);
+typedef void (APIENTRYP PFNGLGETCOMBINERINPUTPARAMETERIVNVPROC) (GLenum stage, GLenum portion, GLenum variable, GLenum pname, GLint *params);
+typedef void (APIENTRYP PFNGLGETCOMBINEROUTPUTPARAMETERFVNVPROC) (GLenum stage, GLenum portion, GLenum pname, GLfloat *params);
+typedef void (APIENTRYP PFNGLGETCOMBINEROUTPUTPARAMETERIVNVPROC) (GLenum stage, GLenum portion, GLenum pname, GLint *params);
+typedef void (APIENTRYP PFNGLGETFINALCOMBINERINPUTPARAMETERFVNVPROC) (GLenum variable, GLenum pname, GLfloat *params);
+typedef void (APIENTRYP PFNGLGETFINALCOMBINERINPUTPARAMETERIVNVPROC) (GLenum variable, GLenum pname, GLint *params);
+
+typedef void (APIENTRYP PFNGLPROGRAMSTRINGARBPROC) (GLenum target, GLenum format, GLsizei len, const void *string);
+typedef void (APIENTRYP PFNGLBINDPROGRAMARBPROC) (GLenum target, GLuint program);
+typedef void (APIENTRYP PFNGLDELETEPROGRAMSARBPROC) (GLsizei n, const GLuint *programs);
+typedef void (APIENTRYP PFNGLGENPROGRAMSARBPROC) (GLsizei n, GLuint *programs);
+typedef void (APIENTRYP PFNGLPROGRAMENVPARAMETER4DARBPROC) (GLenum target, GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w);
+typedef void (APIENTRYP PFNGLPROGRAMENVPARAMETER4DVARBPROC) (GLenum target, GLuint index, const GLdouble *params);
+typedef void (APIENTRYP PFNGLPROGRAMENVPARAMETER4FARBPROC) (GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+typedef void (APIENTRYP PFNGLPROGRAMENVPARAMETER4FVARBPROC) (GLenum target, GLuint index, const GLfloat *params);
+typedef void (APIENTRYP PFNGLPROGRAMLOCALPARAMETER4DARBPROC) (GLenum target, GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w);
+typedef void (APIENTRYP PFNGLPROGRAMLOCALPARAMETER4DVARBPROC) (GLenum target, GLuint index, const GLdouble *params);
+typedef void (APIENTRYP PFNGLPROGRAMLOCALPARAMETER4FARBPROC) (GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+typedef void (APIENTRYP PFNGLPROGRAMLOCALPARAMETER4FVARBPROC) (GLenum target, GLuint index, const GLfloat *params);
+typedef void (APIENTRYP PFNGLGETPROGRAMENVPARAMETERDVARBPROC) (GLenum target, GLuint index, GLdouble *params);
+typedef void (APIENTRYP PFNGLGETPROGRAMENVPARAMETERFVARBPROC) (GLenum target, GLuint index, GLfloat *params);
+typedef void (APIENTRYP PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC) (GLenum target, GLuint index, GLdouble *params);
+typedef void (APIENTRYP PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC) (GLenum target, GLuint index, GLfloat *params);
+typedef void (APIENTRYP PFNGLGETPROGRAMIVARBPROC) (GLenum target, GLenum pname, GLint *params);
+typedef void (APIENTRYP PFNGLGETPROGRAMSTRINGARBPROC) (GLenum target, GLenum pname, void *string);
+typedef GLboolean (APIENTRYP PFNGLISPROGRAMARBPROC) (GLuint program);
+
+typedef void (APIENTRYP PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
+typedef void (APIENTRYP PFNGLUNLOCKARRAYSEXTPROC) (void);
 #endif
 
 #if !defined(__APPLE__)

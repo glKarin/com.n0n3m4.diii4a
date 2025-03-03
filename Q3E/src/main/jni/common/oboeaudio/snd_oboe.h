@@ -1,6 +1,16 @@
 #ifndef _Q3E_SND_OBOE_H
 #define _Q3E_SND_OBOE_H
 
+// channel
+#define Q3E_OBOE_CHANNEL_MONO 1
+#define Q3E_OBOE_CHANNEL_STEREO 2
+
+// format
+#define Q3E_OBOE_FORMAT_SINT16 1
+#define Q3E_OBOE_FORMAT_FLOAT 2
+#define Q3E_OBOE_FORMAT_SINT24 3 // API 31
+#define Q3E_OBOE_FORMAT_SINT32 4 // API 31
+
 #ifdef __cplusplus
 extern "C" {
 #endif

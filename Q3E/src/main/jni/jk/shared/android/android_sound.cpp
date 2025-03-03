@@ -99,9 +99,30 @@ qboolean SNDDMA_Init(int sampleFrequencyInKHz)
 	// 32768 is what the OSS driver filled in here on my system. I don't
 	//  know if it's a good value overall, but at least we know it's
 	//  reasonable...this is why I let the user override.
+	int freq;
+	switch (sampleFrequencyInKHz)
+	{
+		default:
+		case 44: freq = 44100; break;
+		case 22: freq = 22050; break;
+		case 11: freq = 11025; break;
+	}
 
-	int tmp = 1024 * 2 * 10;
+	int samples;
+    // just pick a sane default.
+    if (freq <= 11025)
+        samples = 256;
+    else if (freq <= 22050)
+        samples = 512;
+    else if (freq <= 44100)
+        samples = 1024;
+    else
+        samples = 2048;  // (*shrug*)
 
+    int channels = 2;
+    int bits = 16; // 2 * 8
+
+	int tmp = samples * channels * 10;
 	if (tmp & (tmp - 1))  // not a power of two? Seems to confuse something.
 	{
 		int val = 1;
@@ -112,11 +133,11 @@ qboolean SNDDMA_Init(int sampleFrequencyInKHz)
 	}
 
 	dmapos = 0;
-	dma.samplebits = 16;  // first byte of format is bits.
-	dma.channels = 2;
+	dma.samplebits = bits;  // first byte of format is bits.
+	dma.channels = channels;
 	dma.samples = tmp;
 	dma.submission_chunk = 1;
-	dma.speed = 44100;
+	dma.speed = freq;
 	dmasize = (dma.samples * (dma.samplebits/8));
 	dma.buffer = (byte *)calloc(1, dmasize);
 
