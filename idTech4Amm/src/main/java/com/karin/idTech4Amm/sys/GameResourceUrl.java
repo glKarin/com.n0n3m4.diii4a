@@ -72,6 +72,10 @@ public enum GameResourceUrl
     FTEQW_H2(Q3EGlobals.GAME_FTEQW, "hexen2", "", "https://store.steampowered.com/app/9060/HeXen_II/", 2),
     FTEQW_FREEHL(Q3EGlobals.GAME_FTEQW, "halflife", "FreeHL", "https://github.com/eukara/freehl", 1),
     FTEQW_CS1_5(Q3EGlobals.GAME_FTEQW, "cstrike_1_5", "FreeCS", "https://github.com/eukara/freecs", 1),
+
+
+    JA_BASE(Q3EGlobals.GAME_JA, "base", "", "https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/", 2),
+    JO_BASE(Q3EGlobals.GAME_JO, "base", "", "https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/", 2),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

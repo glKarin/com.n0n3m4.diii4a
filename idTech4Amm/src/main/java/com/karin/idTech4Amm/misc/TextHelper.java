@@ -138,6 +138,9 @@ public final class TextHelper
                 " " + GenLinkText("https://github.com/ZDoom/gzdoom", "GZDOOM: gzdoom"),
                 " " + GenLinkText("https://www.etlegacy.com", "ET-Legacy: etmain legacy"),
                 " " + GenLinkText("https://github.com/wolfetplayer/RealRTCW", "RealRTCW: main"),
+                " " + GenLinkText("https://www.fteqw.org", "FTEQW: fteqw"),
+                " " + GenLinkText("https://github.com/JACoders/OpenJK", "OpenJA: openja/base"),
+                " " + GenLinkText("https://github.com/JACoders/OpenJK", "OpenJO: openjo/base"),
                 null,
             "For playing Prey(2006)(Based on `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
@@ -196,10 +199,12 @@ public final class TextHelper
         final String Release_ = Q3ELang.tr(context, R.string.release_);
         final String Build_ = Q3ELang.tr(context, R.string.build_);
         final String Dev_ = Q3ELang.tr(context, R.string.dev_);
+        final String Code_ = Q3ELang.tr(context, R.string.code_);
         StringBuilder sb = new StringBuilder();
         final String[] ABOUTS = {
             Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")",
             Constants.CONST_NAME,
+            Code_ + " " + Constants.CONST_CODE_ALIAS,
             Dev_ + " " + GenLinkText(Constants.CONST_DEVELOPER, Constants.CONST_DEV)
             + "&lt;" + GenLinkText("mailto:" + Constants.CONST_EMAIL, Constants.CONST_EMAIL) + "&gt;",
             Update_ + " " + ContextUtility.GetAppVersion(context) + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
@@ -210,7 +215,7 @@ public final class TextHelper
             "idTech4 engine's games support on Android.",
             " e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, `Prey(2006)`, `The Dark Mod`, `DOOM 3 BFG`, and some mods(e.g. `The Lost Mission`).",
             "And other idTech engine's games runtime environment.",
-            " e.g. `Return to Castle Wolfenstein`, `Quake III`, `Quake II`, `Quake`, `GZDOOM`, `Wolfenstein: Enemy Territory`, `RealRTCW`.",
+            " e.g. `Return to Castle Wolfenstein`, `Quake III`, `Quake II`, `Quake`, `GZDOOM`, `Wolfenstein: Enemy Territory`, `RealRTCW`, `FTEQW`, `OpenJK`.",
             null,
             "Source url in `assets/source` folder in APK file.",
             " `DIII4A.source.tgz.url`: launcher frontend source and game source, game source and OpenGLES2.0/3.0 shader source in `/Q3E/src/main/jni/doom3` of archive package.",

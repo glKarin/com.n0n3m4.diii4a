@@ -70,6 +70,12 @@ public class ChangeLog
         final ChangeLog[] CHANGES = {
                 ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2025-02-27", 61,
+                        "Add `FTEQW` support, game standalone directory named `fteqw`, support `" + TextHelper.GenLinkText("https://store.steampowered.com/app/9060/HeXen_II/", "HeXen II") + "`, `Half-Life` " + TextHelper.GenLinkText("https://github.com/eukara/freehl", "FreeHL") + ", `Counter Striker 1.5` " + TextHelper.GenLinkText("https://github.com/eukara/freecs", "FreeCS") + ". More view in `" + TextHelper.GenLinkText("https://www.fteqw.org", "FTEQW") + "`.",
+                        "DOOM 3 BFG add Vulkan renderer backend.",
+                        "Don't package source code to apk since version 61."
+                ),
+
                 ChangeLog.Create("2025-01-16", 60,
                         "Support setup max game console height percentage(0 or 100 means not limit) on launcher `General` tab.",
                         "Update GZDOOM version to 4.14.0.",

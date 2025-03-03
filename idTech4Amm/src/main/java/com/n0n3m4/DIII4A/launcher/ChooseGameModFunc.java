@@ -166,6 +166,20 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             else
                 blackList.remove(Q3EGlobals.GAME_BASE_FTEQW);
         }
+        else if(Q3EUtils.q3ei.isJA)
+        {
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_JA);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_JA);
+        }
+        else if(Q3EUtils.q3ei.isJO)
+        {
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_JO);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_JO);
+        }
 /*        else if(Q3EUtils.q3ei.isTDM)
         {
             blackList.remove(Q3EGlobals.GAME_BASE_TDM);
@@ -258,6 +272,16 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 if(Q3EGlobals.GAME_BASE_FTEQW.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_FTEQW;
             }
+            else if(Q3EUtils.q3ei.isJA)
+            {
+                if(Q3EGlobals.GAME_BASE_JA.equals(fileModel.name))
+                    name = Q3EGlobals.GAME_NAME_JA;
+            }
+            else if(Q3EUtils.q3ei.isJO)
+            {
+                if(Q3EGlobals.GAME_BASE_JO.equals(fileModel.name))
+                    name = Q3EGlobals.GAME_NAME_JO;
+            }
 /*            else if(Q3EUtils.q3ei.isTDM)
             {
                 if(Q3EGlobals.GAME_BASE_TDM.equals(fileModel.name))
@@ -316,6 +340,14 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGlobals.GAME_FTEQW:
                         if(!Q3EUtils.q3ei.isFTEQW)
+                            continue;
+                        break;
+                    case Q3EGlobals.GAME_JA:
+                        if(!Q3EUtils.q3ei.isJA)
+                            continue;
+                        break;
+                    case Q3EGlobals.GAME_JO:
+                        if(!Q3EUtils.q3ei.isJO)
                             continue;
                         break;
                     case Q3EGlobals.GAME_DOOM3:

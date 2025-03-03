@@ -1,0 +1,57 @@
+name: Create new request
+description: Create new request(request)
+title: '* '
+labels: 'request'
+
+body:
+  - type: dropdown
+    id: gameid
+    attributes:
+      label: Which game type?
+      multiple: true
+      options:
+        - DOOM 3
+        - Quake 4
+        - Prey(2006)
+        - Quake II
+        - Quake III
+        - Return to Castle Wolfenstein
+        - Quake I
+        - The Dark Mod
+        - DOOM 3 BFG
+        - GZDOOM
+        - Wolfenstein - Enemy Territory
+        - RealRTCW
+        - Jedi Academy
+        - Jedi Outcast
+        - Other game/New game
+    validations:
+      required: true
+  - type: input
+    id: mod
+    attributes:
+      label: What game mod?
+      placeholder: "e.g. "
+    validations:
+      required: false
+  - type: input
+    id: source_code
+    attributes:
+      label: Source code link url
+      placeholder: "e.g. github"
+    validations:
+      required: true
+  - type: textarea
+    id: video_link
+    attributes:
+      label: Video link url
+      placeholder: "e.g. youtube"
+    validations:
+      required: true
+  - type: textarea
+    id: image_link
+    attributes:
+      label: Image link url
+      placeholder: "Game playing pictures"
+    validations:
+      required: true

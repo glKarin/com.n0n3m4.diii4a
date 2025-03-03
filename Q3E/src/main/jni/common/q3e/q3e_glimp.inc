@@ -975,7 +975,7 @@ Q3Ebool Q3E_GL_ExtensionSupported(const char *name)
     new_name[name_size - 2] = ' ';
     new_name[name_size - 1] = '\0';
 
-    Q3Ebool has = strstr(new_exts, new_name) != NULL;
+    Q3Ebool has = strstr(new_exts, new_name) != NULL ? Q3E_TRUE : Q3E_FALSE;
 	Q3E_PRINTF("[Harmattan]: OpenGL extension '%s' -> %s\n", name, has ? "support" : "missing");
     free(new_exts);
     free(new_name);

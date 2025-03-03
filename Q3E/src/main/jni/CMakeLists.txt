@@ -32,6 +32,7 @@ OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
+OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
 if(GAME_DOOM3)
@@ -44,12 +45,12 @@ if(NOT GAME_DOOM3)
     add_subdirectory(doom3/neo/externlibs/openal-soft)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory ( deplibs ) # common depend libraries
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK)
     message(STATUS "Build common static libraries")
     add_subdirectory (deplibs/oboe) # 1.8.1
     add_subdirectory ( common )
@@ -112,6 +113,11 @@ endif()
 if(GAME_FTEQW) # 5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 | engine/common/fs.c: Update game definitions
     message(STATUS "Build FTEQW")
     add_subdirectory ( fteqw ) # FTEQW
+endif()
+
+if(GAME_JK) # 199ddc7642d0ed0e2bf007fe63d0dce3a4bb4908 | Nov 13, 2024 | Merge pull request #1246 from taysta/ojk-macos
+    message(STATUS "Build OpenJK")
+    add_subdirectory ( jk ) # Jedi Knight
 endif()
 
 if(GAME_QUAKES) # noire-dev/SourceTech/commit/b0a1d46740d5a76f172a2889f285214a95dd3702 noire-dev/QuakeSandbox/commit/f01cab6d123784f6e2aaa839e9ccd3ec0a6f1325

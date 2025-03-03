@@ -63,7 +63,7 @@ public final class EditConfigFileFunc extends GameLauncherFunc
         }
         else
         {
-            if(Q3EUtils.q3ei.isFTEQW)
+            if(Q3EUtils.q3ei.isFTEQW || Q3EUtils.q3ei.isJA || Q3EUtils.q3ei.isJO)
                 basePath = KStr.AppendPath(basePath, m_game);
         }
         basePath = KStr.AppendPath(basePath, m_file);

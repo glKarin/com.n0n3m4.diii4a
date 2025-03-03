@@ -1,5 +1,5 @@
 name: Create new issue
-description: Create new issue(bugs | request)
+description: Create new issue(bugs)
 title: '* '
 labels: 'issue'
 
@@ -10,7 +10,7 @@ body:
       label: Version
       description: |
         Version name or [release name](https://github.com/glKarin/com.n0n3m4.diii4a/releases) or [tag name](https://github.com/glKarin/com.n0n3m4.diii4a/tags).
-      placeholder: "e.g. `1.1.0harmattan50` or `since 1.1.0harmattan50` or `testing version` or `all version`"
+      placeholder: "e.g. `1.1.0harmattan62` or `since 1.1.0harmattan62` or `testing version` or `all version`"
     validations:
       required: true
   - type: dropdown
@@ -31,7 +31,10 @@ body:
         - GZDOOM
         - Wolfenstein - Enemy Territory
         - RealRTCW
-        - Other game/New game
+        - FTEQW
+        - Jedi Academy
+        - Jedi Outcast
+        - Other game
     validations:
       required: true
   - type: dropdown
@@ -84,14 +87,14 @@ body:
   - type: textarea
     id: stdout_log
     attributes:
-      label: stdout.txt
+      label: stdout.txt (It's very helpful)
       placeholder: "Copy and paste / upload `stdout.txt` file contents"
     validations:
       required: false
   - type: textarea
     id: stderr_log
     attributes:
-      label: stderr.txt
+      label: stderr.txt (It's very helpful)
       placeholder: "Copy and paste / upload `stderr.txt` file contents"
     validations:
       required: false

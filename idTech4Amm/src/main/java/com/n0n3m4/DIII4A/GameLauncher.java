@@ -588,6 +588,8 @@ public class GameLauncher extends Activity
 					|| rgId == R.id.rg_fs_etwgame
 					|| rgId == R.id.rg_fs_realrtcwgame
 					|| rgId == R.id.rg_fs_fteqwgame
+					|| rgId == R.id.rg_fs_jagame
+					|| rgId == R.id.rg_fs_jogame
 			)
 			{
 				RadioButton checked = radioGroup.findViewById(id);
@@ -2417,6 +2419,16 @@ public class GameLauncher extends Activity
 			ChangeGame(Q3EGlobals.GAME_FTEQW);
 			return true;
 		}
+		else if (itemId == R.id.main_menu_game_ja)
+		{
+			ChangeGame(Q3EGlobals.GAME_JA);
+			return true;
+		}
+		else if (itemId == R.id.main_menu_game_jo)
+		{
+			ChangeGame(Q3EGlobals.GAME_JO);
+			return true;
+		}
 		else if (itemId == android.R.id.home)
 		{
 			ChangeGame();
@@ -3333,6 +3345,8 @@ public class GameLauncher extends Activity
 		boolean etwVisible = false;
 		boolean realrtcwVisible = false;
 		boolean fetqwVisible = false;
+		boolean jaVisible = false;
+		boolean joVisible = false;
 
 		boolean openglVisible = true;
 		boolean quickloadVisible = true;
@@ -3410,6 +3424,18 @@ public class GameLauncher extends Activity
 			quickloadVisible = false;
 			skipintroVisible = false;
 		}
+		else if (Q3EUtils.q3ei.isJA)
+		{
+			jaVisible = true;
+			openglVisible = false;
+			quickloadVisible = false;
+		}
+		else if (Q3EUtils.q3ei.isJO)
+		{
+			joVisible = true;
+			openglVisible = false;
+			quickloadVisible = false;
+		}
         else
         {
             d3Visible = true;
@@ -3435,6 +3461,8 @@ public class GameLauncher extends Activity
 		V.rg_fs_etwgame.setVisibility(etwVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_realrtcwgame.setVisibility(realrtcwVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_fteqwgame.setVisibility(fetqwVisible ? View.VISIBLE : View.GONE);
+		V.rg_fs_jagame.setVisibility(jaVisible ? View.VISIBLE : View.GONE);
+		V.rg_fs_jogame.setVisibility(joVisible ? View.VISIBLE : View.GONE);
 
 		V.idtech4_section.setVisibility(Q3EUtils.q3ei.IsIdTech4() ? View.VISIBLE : View.GONE);
 		V.yquake2_section.setVisibility(Q3EUtils.q3ei.isQ2 ? View.VISIBLE : View.GONE);
@@ -3723,32 +3751,23 @@ public class GameLauncher extends Activity
 
     private RadioGroup GetGameModRadioGroup()
     {
-		if(Q3EUtils.q3ei.isQ4)
-			return V.rg_fs_q4game;
-		else if(Q3EUtils.q3ei.isPrey)
-			return V.rg_fs_preygame;
-		else if(Q3EUtils.q3ei.isQ1)
-			return V.rg_fs_q1game;
-		else if(Q3EUtils.q3ei.isQ2)
-			return V.rg_fs_q2game;
-		else if(Q3EUtils.q3ei.isQ3)
-			return V.rg_fs_q3game;
-		else if(Q3EUtils.q3ei.isRTCW)
-			return V.rg_fs_rtcwgame;
-		else if(Q3EUtils.q3ei.isTDM)
-			return V.rg_fs_tdmgame;
-		else if(Q3EUtils.q3ei.isD3BFG)
-			return V.rg_fs_d3bfggame;
-		else if(Q3EUtils.q3ei.isDOOM)
-			return V.rg_fs_doomgame;
-		else if(Q3EUtils.q3ei.isETW)
-			return V.rg_fs_etwgame;
-		else if(Q3EUtils.q3ei.isRealRTCW)
-			return V.rg_fs_realrtcwgame;
-		else if(Q3EUtils.q3ei.isFTEQW)
-			return V.rg_fs_fteqwgame;
-		else
-        	return V.rg_fs_game;
+		return new RadioGroup[]{
+				V.rg_fs_game,
+				V.rg_fs_q4game,
+				V.rg_fs_preygame,
+				V.rg_fs_rtcwgame,
+				V.rg_fs_q3game,
+				V.rg_fs_q2game,
+				V.rg_fs_q1game,
+				V.rg_fs_d3bfggame,
+				V.rg_fs_tdmgame,
+				V.rg_fs_doomgame,
+				V.rg_fs_etwgame,
+				V.rg_fs_realrtcwgame,
+				V.rg_fs_fteqwgame,
+				V.rg_fs_jagame,
+				V.rg_fs_jogame,
+		}[Q3EUtils.q3ei.game_id];
     }
 
     private void RequestBackupPreferences()
@@ -3914,6 +3933,8 @@ public class GameLauncher extends Activity
 		groupRadios.put(Q3EGlobals.GAME_ETW, V.rg_fs_etwgame);
 		groupRadios.put(Q3EGlobals.GAME_REALRTCW, V.rg_fs_realrtcwgame);
 		groupRadios.put(Q3EGlobals.GAME_FTEQW, V.rg_fs_fteqwgame);
+		groupRadios.put(Q3EGlobals.GAME_JA, V.rg_fs_jagame);
+		groupRadios.put(Q3EGlobals.GAME_JO, V.rg_fs_jogame);
 		Game[] values = Game.values();
 
 		for (Game value : values)
@@ -4245,6 +4266,8 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_etwgame;
 		public RadioGroup rg_fs_realrtcwgame;
 		public RadioGroup rg_fs_fteqwgame;
+		public RadioGroup rg_fs_jagame;
+		public RadioGroup rg_fs_jogame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -4409,6 +4432,8 @@ public class GameLauncher extends Activity
 			rg_fs_etwgame = findViewById(R.id.rg_fs_etwgame);
 			rg_fs_realrtcwgame = findViewById(R.id.rg_fs_realrtcwgame);
 			rg_fs_fteqwgame = findViewById(R.id.rg_fs_fteqwgame);
+			rg_fs_jagame = findViewById(R.id.rg_fs_jagame);
+			rg_fs_jogame = findViewById(R.id.rg_fs_jogame);
 			yquake2_section = findViewById(R.id.yquake2_section);
 			yquake2_vid_renderer = findViewById(R.id.yquake2_vid_renderer);
 			doom3bfg_section = findViewById(R.id.doom3bfg_section);

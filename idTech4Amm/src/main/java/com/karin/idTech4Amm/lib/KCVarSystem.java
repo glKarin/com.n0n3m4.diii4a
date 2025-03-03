@@ -251,10 +251,6 @@ public final class KCVarSystem
             res.add(_cvars.get("RENDERER"));
             res.add(_cvars.get("FRAMEWORK"));
         }
-        else if(Q3EUtils.q3ei.isQ1) ;
-        else if(Q3EUtils.q3ei.isQ2) ;
-        else if(Q3EUtils.q3ei.isQ3) ;
-        else if(Q3EUtils.q3ei.isRTCW) ;
         else if(Q3EUtils.q3ei.isTDM)
             res.add(_cvars.get("TDM"));
         else if(Q3EUtils.q3ei.isD3BFG)
@@ -265,7 +261,13 @@ public final class KCVarSystem
             res.add(_cvars.get("ETW"));
         else if(Q3EUtils.q3ei.isRealRTCW)
             res.add(_cvars.get("RealRTCW"));
+        else if(Q3EUtils.q3ei.isQ1) ;
+        else if(Q3EUtils.q3ei.isQ2) ;
+        else if(Q3EUtils.q3ei.isQ3) ;
+        else if(Q3EUtils.q3ei.isRTCW) ;
         else if(Q3EUtils.q3ei.isFTEQW) ;
+        else if(Q3EUtils.q3ei.isJA) ;
+        else if(Q3EUtils.q3ei.isJO) ;
         else
         {
             res.add(_cvars.get("RENDERER"));

@@ -72,8 +72,18 @@
                 android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_fteqw"
-                android:title="FTEQW"
+                android:title="@string/fteqw"
                 android:icon="@drawable/fteqw_icon"
+                android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_ja"
+                android:title="@string/openja"
+                android:icon="@drawable/ja_icon"
+                android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_jo"
+                android:title="@string/openjo"
+                android:icon="@drawable/jo_icon"
                 android:showAsAction="never|withText"/>
         </menu>
     </item>

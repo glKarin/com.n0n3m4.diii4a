@@ -1533,6 +1533,92 @@ public class Q3EKeyCodes
 
     ;
 
+    // code/client/keycodes.h <- OpenJK
+    public static class KeyCodesJK
+    {
+        public static final int K_TAB    = 9;
+        public static final int K_ENTER  = 13;
+        public static final int K_ESCAPE = 27;
+        public static final int K_SPACE  = 32;
+
+        public static final int K_BACKSPACE = 8;
+
+        public static final int K_CAPSLOCK = 4;
+        public static final int K_PAUSE    = 7;
+
+        public static final int K_UPARROW    = 170;
+        public static final int K_DOWNARROW  = 171;
+        public static final int K_LEFTARROW  = 172;
+        public static final int K_RIGHTARROW = 173;
+
+        public static final int K_ALT   = 3;
+        public static final int K_CTRL  = 2;
+        public static final int K_SHIFT = 1;
+        public static final int K_INS   = 143;
+        public static final int K_DEL   = 127;
+        public static final int K_PGDN  = 158;
+        public static final int K_PGUP  = 145;
+        public static final int K_HOME  = 144;
+        public static final int K_END   = 157;
+
+        public static final int K_F1  = 28;
+        public static final int K_F2  = 29;
+        public static final int K_F3  = 30;
+        public static final int K_F4  = 31;
+        public static final int K_F5  = 132;
+        public static final int K_F6  = 133;
+        public static final int K_F7  = 134;
+        public static final int K_F8  = 135;
+        public static final int K_F9  = 149;
+        public static final int K_F10 = 150;
+        public static final int K_F11 = 151;
+        public static final int K_F12 = 152;
+
+        public static final int K_KP_HOME       = 23;
+        public static final int K_KP_UPARROW    = 24;
+        public static final int K_KP_PGUP       = 25;
+        public static final int K_KP_LEFTARROW  = 20;
+        public static final int K_KP_5          = 21;
+        public static final int K_KP_RIGHTARROW = 22;
+        public static final int K_KP_END        = 17;
+        public static final int K_KP_DOWNARROW  = 18;
+        public static final int K_KP_PGDN       = 19;
+        public static final int K_KP_ENTER      = 13;
+        public static final int K_KP_INS        = 16;
+        public static final int K_KP_DEL        = 14; // A_PEROID
+        public static final int K_KP_SLASH      = 47;
+        public static final int K_KP_MINUS      = 12;
+        public static final int K_KP_PLUS       = 11;
+        public static final int K_KP_NUMLOCK    = 5;
+        public static final int K_KP_STAR       = 42; // A_STAR
+        public static final int K_KP_EQUALS     = 61;
+
+        public static final int K_MOUSE1 = 141;
+        public static final int K_MOUSE2 = 142;
+        public static final int K_MOUSE3 = 166;
+        public static final int K_MOUSE4 = 167;
+        public static final int K_MOUSE5 = 168;
+
+        public static final int K_MWHEELDOWN = 139;
+        public static final int K_MWHEELUP   = 137;
+
+        public static final int J_LEFT  = 'a';
+        public static final int J_RIGHT = 'd';
+        public static final int J_UP    = K_UPARROW;
+        public static final int J_DOWN  = K_DOWNARROW;
+
+        public static final int K_KP_1 = K_KP_END;
+        public static final int K_KP_2 = K_KP_DOWNARROW;
+        public static final int K_KP_3 = K_KP_PGDN;
+        public static final int K_KP_4 = K_KP_LEFTARROW;
+        public static final int K_KP_6 = K_KP_RIGHTARROW;
+        public static final int K_KP_7 = K_KP_HOME;
+        public static final int K_KP_8 = K_KP_UPARROW;
+        public static final int K_KP_9 = K_KP_PGUP;
+        public static final int K_KP_0 = K_KP_INS;
+    }
+    ;
+
 
     public static class KeyCodes
     {
@@ -1689,6 +1775,11 @@ public class Q3EKeyCodes
     public static void InitSDLKeycodes()
     {
         InitKeycodes(KeyCodesSDL.class);
+    }
+
+    public static void InitJKKeycodes()
+    {
+        InitKeycodes(KeyCodesJK.class);
     }
 
     public static void InitKeycodes(Class<?> clazz)

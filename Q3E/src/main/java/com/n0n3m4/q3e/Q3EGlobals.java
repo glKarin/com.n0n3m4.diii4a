@@ -147,21 +147,25 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE3_ETW          = "libetl.so"; // ETW
     public static final String LIB_ENGINE3_REALRTCW     = "libRealRTCW.so"; // RealRTCW
     public static final String LIB_ENGINE_FTEQW         = "libfteqw.so"; // FTEQW
+    public static final String LIB_ENGINE_JA            = "libopenjk_sp.so"; // Jedi Academy
+    public static final String LIB_ENGINE_JO            = "libopenjo_sp.so"; // Jedi Outcast
 
     // game config file
-    public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg"; // DOOM3
-    public static final String CONFIG_FILE_QUAKE4   = "Quake4Config.cfg"; // Quake 4
-    public static final String CONFIG_FILE_PREY     = "preyconfig.cfg"; // Prey 2006
-    public static final String CONFIG_FILE_QUAKE2   = "config.cfg"; // Quake 2
-    public static final String CONFIG_FILE_QUAKE3   = "q3config.cfg"; // Quake 3
-    public static final String CONFIG_FILE_RTCW     = "wolfconfig.cfg"; // RTCW
-    public static final String CONFIG_FILE_TDM      = "Darkmod.cfg"; // TDM
-    public static final String CONFIG_FILE_QUAKE1   = "config.cfg"; // Quake 1
-    public static final String CONFIG_FILE_DOOM3BFG = "D3BFGConfig.cfg"; // DOOM3-BFG
-    public static final String CONFIG_FILE_GZDOOM   = "gzdoom.ini"; // GZDOOM
-    public static final String CONFIG_FILE_ETW      = "etconfig.cfg"; // ETW
-    public static final String CONFIG_FILE_REALRTCW = "realrtcwconfig.cfg"; // RealRTCW
-    public static final String CONFIG_FILE_FTEQW    = "fte.cfg"; // FTEQW
+    public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg";
+    public static final String CONFIG_FILE_QUAKE4   = "Quake4Config.cfg";
+    public static final String CONFIG_FILE_PREY     = "preyconfig.cfg";
+    public static final String CONFIG_FILE_QUAKE2   = "config.cfg";
+    public static final String CONFIG_FILE_QUAKE3   = "q3config.cfg";
+    public static final String CONFIG_FILE_RTCW     = "wolfconfig.cfg";
+    public static final String CONFIG_FILE_TDM      = "Darkmod.cfg";
+    public static final String CONFIG_FILE_QUAKE1   = "config.cfg";
+    public static final String CONFIG_FILE_DOOM3BFG = "D3BFGConfig.cfg";
+    public static final String CONFIG_FILE_GZDOOM   = "gzdoom.ini";
+    public static final String CONFIG_FILE_ETW      = "etconfig.cfg";
+    public static final String CONFIG_FILE_REALRTCW = "realrtcwconfig.cfg";
+    public static final String CONFIG_FILE_FTEQW    = "fte.cfg";
+    public static final String CONFIG_FILE_JA       = "openjk_sp.cfg";
+    public static final String CONFIG_FILE_JO       = "openjo_sp.cfg";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -177,6 +181,8 @@ public final class Q3EGlobals
     public static final String GAME_ETW      = "etw";
     public static final String GAME_REALRTCW = "realrtcw";
     public static final String GAME_FTEQW    = "fteqw";
+    public static final String GAME_JA       = "openja";
+    public static final String GAME_JO       = "openjo";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -192,6 +198,8 @@ public final class Q3EGlobals
     public static final String GAME_NAME_ETW      = "ETW"; // "Wolfenstein: Enemy Territory";
     public static final String GAME_NAME_REALRTCW = "RealRTCW";
     public static final String GAME_NAME_FTEQW    = "FTEQW";
+    public static final String GAME_NAME_JA       = "Jedi Academy";
+    public static final String GAME_NAME_JO       = "Jedi Outcast";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -209,6 +217,8 @@ public final class Q3EGlobals
     public static final String GAME_BASE_ETW        = "etmain";
     public static final String GAME_BASE_REALRTCW   = "Main";
     public static final String GAME_BASE_FTEQW      = "";
+    public static final String GAME_BASE_JA         = "base";
+    public static final String GAME_BASE_JO         = "base";
 
     // game sub directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
@@ -224,6 +234,25 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_ETW      = "etw";
     public static final String GAME_SUBDIR_REALRTCW = "realrtcw";
     public static final String GAME_SUBDIR_FTEQW    = "fteqw";
+    public static final String GAME_SUBDIR_JA       = "openja";
+    public static final String GAME_SUBDIR_JO       = "openjo";
+
+    // game type index(ID)
+    public static final int GAME_ID_DOOM3    = 0;
+    public static final int GAME_ID_QUAKE4   = 1;
+    public static final int GAME_ID_PREY     = 2;
+    public static final int GAME_ID_RTCW     = 3;
+    public static final int GAME_ID_QUAKE3   = 4;
+    public static final int GAME_ID_QUAKE2   = 5;
+    public static final int GAME_ID_QUAKE1   = 6;
+    public static final int GAME_ID_DOOM3BFG = 7;
+    public static final int GAME_ID_TDM      = 8;
+    public static final int GAME_ID_GZDOOM   = 9;
+    public static final int GAME_ID_ETW      = 10;
+    public static final int GAME_ID_REALRTCW = 11;
+    public static final int GAME_ID_FTEQW    = 12;
+    public static final int GAME_ID_JA       = 13;
+    public static final int GAME_ID_JO       = 14;
 
     public enum PatchResource
     {
@@ -361,7 +390,7 @@ public final class Q3EGlobals
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 
-    public static final int[] GZDOOM_GL_VERSIONS = { 0, 330, 420, 430, 450, };
+    public static final int[] GZDOOM_GL_VERSIONS = {0, 330, 420, 430, 450,};
 
     public static final int DEFAULT_DEPTH_BITS = 24; // 16 32
 
