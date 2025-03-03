@@ -31,6 +31,9 @@ if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)
 
+
+add_definitions(-DPNG_ARM_NEON_OPT=0)
+
 add_library(bundled_libpng STATIC include/png.h
                                   include/pngconf.h
                                   include/pnglibconf.h
