@@ -1,1 +1,1 @@
-OpenJK: fix compile on arm32
+OpenJK: optmize stencil shadow with GLES

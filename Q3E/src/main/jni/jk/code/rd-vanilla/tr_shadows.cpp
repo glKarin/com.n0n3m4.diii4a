@@ -36,6 +36,10 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#ifdef _GLES //karin: optmize shadow volume render
+#define _STENCIL_SHADOW_OPT
+#endif
+
 #define _STENCIL_REVERSE
 
 typedef struct {
@@ -48,7 +52,22 @@ typedef struct {
 static	edgeDef_t	edgeDefs[SHADER_MAX_VERTEXES][MAX_EDGE_DEFS];
 static	int			numEdgeDefs[SHADER_MAX_VERTEXES];
 static	int			facing[SHADER_MAX_INDEXES/3];
+#ifdef _STENCIL_SHADOW_OPT //karin: use more memory for shadow volume and using index by glDrawElements
+// sil edge triangles indexes
+static glIndex_t indexes[6*MAX_EDGE_DEFS*SHADER_MAX_VERTEXES];
+// num of sil edge triangles indexes
+static int idx = 0;
+// front and far cap triangles indexes
+static glIndex_t cap_indexes[SHADER_MAX_INDEXES * 2];
+// num of front and far triangles indexes
+static int cap_idx = 0;
+// shadow volume indexes generated
+static qboolean shadow_volume_generated = qfalse;
+// shadow vertexes(front and far, not use tess object)
+static	vec3_t		shadowXyz[SHADER_MAX_VERTEXES * 2];
+#else
 static	vec3_t		shadowXyz[SHADER_MAX_VERTEXES];
+#endif
 
 
 void R_AddEdgeDef( int i1, int i2, int facing ) {
@@ -64,6 +83,39 @@ void R_AddEdgeDef( int i1, int i2, int facing ) {
 	numEdgeDefs[ i1 ]++;
 }
 
+#ifdef _STENCIL_SHADOW_OPT //karin: render shadow volume's sil edge and front/far caps
+static void R_RenderShadowVolume( void )
+{
+	if(idx > 0)
+	{
+		GLboolean glva = qglIsEnabled(GL_VERTEX_ARRAY);
+		GLboolean gltca = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
+		GLboolean glca = qglIsEnabled(GL_VERTEX_ARRAY);
+
+		if (!glva)
+			qglEnableClientState( GL_VERTEX_ARRAY );
+		if (gltca)
+			qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+		if (glca)
+			qglDisableClientState( GL_COLOR_ARRAY );
+
+		qglVertexPointer(3, GL_FLOAT, 0, shadowXyz);
+		qglDrawElements(GL_TRIANGLES, idx, GL_INDEX_TYPE, indexes);
+		if(cap_idx > 0)
+		{
+			qglDrawElements(GL_TRIANGLES, cap_idx, GL_INDEX_TYPE, cap_indexes);
+		}
+		if (!glva)
+			qglDisableClientState( GL_VERTEX_ARRAY );
+		if (gltca)
+			qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+		if (glca)
+			qglEnableClientState( GL_COLOR_ARRAY );
+
+	}
+}
+#endif
+
 void R_RenderShadowEdges( void ) {
 	int		i;
 	int		c;
@@ -77,6 +129,15 @@ void R_RenderShadowEdges( void ) {
 #ifdef _STENCIL_REVERSE
 	int		numTris;
 	int		o1, o2, o3;
+#endif
+#ifdef _STENCIL_SHADOW_OPT //karin: if shadow volume generated, only draw it; else regenerate
+	if(shadow_volume_generated)
+	{
+		R_RenderShadowVolume();
+		return;
+	}
+	idx = 0;
+	cap_idx = 0;
 #endif
 
 	// an edge is NOT a silhouette edge if its face doesn't face the light,
@@ -101,34 +162,43 @@ void R_RenderShadowEdges( void ) {
 #if 1
 			i2 = edgeDefs[ i ][ j ].i2;
 #ifdef _GLES //karin: glBegin/glEnd
-	{
-		GLboolean glva = qglIsEnabled(GL_VERTEX_ARRAY);
-		GLboolean gltca = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
-		GLboolean glca = qglIsEnabled(GL_VERTEX_ARRAY);
+#ifdef _STENCIL_SHADOW_OPT //karin: only record GL_TRIANGLES indexes of sil edge
+			indexes[idx++] = i;
+			indexes[idx++] = i + SHADER_MAX_VERTEXES;
+			indexes[idx++] = i2;
+			indexes[idx++] = i2;
+			indexes[idx++] = i + SHADER_MAX_VERTEXES;
+			indexes[idx++] = i2 + SHADER_MAX_VERTEXES;
+#else
+            {
+                GLboolean glva = qglIsEnabled(GL_VERTEX_ARRAY);
+                GLboolean gltca = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
+                GLboolean glca = qglIsEnabled(GL_VERTEX_ARRAY);
 
-		if (!glva)
-			qglEnableClientState( GL_VERTEX_ARRAY );
-		if (gltca)
-			qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
-		if (glca)
-			qglDisableClientState( GL_COLOR_ARRAY );
+                if (!glva)
+                    qglEnableClientState( GL_VERTEX_ARRAY );
+                if (gltca)
+                    qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+                if (glca)
+                    qglDisableClientState( GL_COLOR_ARRAY );
 
-		GLfloat vs[] = {
-			tess.xyz[ i ][0],tess.xyz[ i ][1],tess.xyz[ i ][2],
-			shadowXyz[ i ][0],shadowXyz[ i ][1],shadowXyz[ i ][2],
-			tess.xyz[ i2 ][0],tess.xyz[ i2 ][1],tess.xyz[ i2 ][2],
-			shadowXyz[ i2 ][0],shadowXyz[ i2 ][1],shadowXyz[ i2 ][2],
-		};
-		qglVertexPointer(3, GL_FLOAT, 0, vs);
-		qglDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+                GLfloat vs[] = {
+                    tess.xyz[ i ][0],tess.xyz[ i ][1],tess.xyz[ i ][2],
+                    shadowXyz[ i ][0],shadowXyz[ i ][1],shadowXyz[ i ][2],
+                    tess.xyz[ i2 ][0],tess.xyz[ i2 ][1],tess.xyz[ i2 ][2],
+                    shadowXyz[ i2 ][0],shadowXyz[ i2 ][1],shadowXyz[ i2 ][2],
+                };
+                qglVertexPointer(3, GL_FLOAT, 0, vs);
+                qglDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		if (!glva)
-			qglDisableClientState( GL_VERTEX_ARRAY );
-		if (gltca)
-			qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
-		if (glca)
-			qglEnableClientState( GL_COLOR_ARRAY );
-	}
+                if (!glva)
+                    qglDisableClientState( GL_VERTEX_ARRAY );
+                if (gltca)
+                    qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+                if (glca)
+                    qglEnableClientState( GL_COLOR_ARRAY );
+            }
+#endif
 #else
 			qglBegin( GL_TRIANGLE_STRIP );
 				qglVertex3fv( tess.xyz[ i ] );
@@ -183,36 +253,45 @@ void R_RenderShadowEdges( void ) {
 		o3 = tess.indexes[ i*3 + 2 ];
 
 #ifdef _GLES //karin: glBegin/glEnd
-	{
-		GLboolean glva = qglIsEnabled(GL_VERTEX_ARRAY);
-		GLboolean gltca = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
-		GLboolean glca = qglIsEnabled(GL_VERTEX_ARRAY);
+#ifdef _STENCIL_SHADOW_OPT //karin: only record GL_TRIANGLES indexes of front and far caps
+		cap_indexes[cap_idx++] = o1;
+		cap_indexes[cap_idx++] = o2;
+		cap_indexes[cap_idx++] = o3;
+		cap_indexes[cap_idx++] = o3 + SHADER_MAX_VERTEXES;
+		cap_indexes[cap_idx++] = o2 + SHADER_MAX_VERTEXES;
+		cap_indexes[cap_idx++] = o1 + SHADER_MAX_VERTEXES;
+#else
+		{
+			GLboolean glva = qglIsEnabled(GL_VERTEX_ARRAY);
+			GLboolean gltca = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
+			GLboolean glca = qglIsEnabled(GL_VERTEX_ARRAY);
 
-		if (!glva)
-			qglEnableClientState( GL_VERTEX_ARRAY );
-		if (gltca)
-			qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
-		if (glca)
-			qglDisableClientState( GL_COLOR_ARRAY );
+			if (!glva)
+				qglEnableClientState( GL_VERTEX_ARRAY );
+			if (gltca)
+				qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+			if (glca)
+				qglDisableClientState( GL_COLOR_ARRAY );
 
-		glIndex_t is[] = {
-			(glIndex_t)o1, (glIndex_t)o2, (glIndex_t)o3,
-		};
-		qglVertexPointer(3, GL_FLOAT, 0, &tess.xyz[0]);
-		qglDrawElements(GL_TRIANGLES, 3, GL_INDEX_TYPE, is);
+			glIndex_t is[] = {
+				(glIndex_t)o1, (glIndex_t)o2, (glIndex_t)o3,
+			};
+			qglVertexPointer(3, GL_FLOAT, 0, &tess.xyz[0]);
+			qglDrawElements(GL_TRIANGLES, 3, GL_INDEX_TYPE, is);
 
-		glIndex_t sis[] = {
-			(glIndex_t)o3, (glIndex_t)o2, (glIndex_t)o1,
-		};
-		qglVertexPointer(3, GL_FLOAT, 0, shadowXyz);
-		qglDrawElements(GL_TRIANGLES, 3, GL_INDEX_TYPE, sis);
-		if (!glva)
-			qglDisableClientState( GL_VERTEX_ARRAY );
-		if (gltca)
-			qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
-		if (glca)
-			qglEnableClientState( GL_COLOR_ARRAY );
-	}
+			glIndex_t sis[] = {
+				(glIndex_t)o3, (glIndex_t)o2, (glIndex_t)o1,
+			};
+			qglVertexPointer(3, GL_FLOAT, 0, shadowXyz);
+			qglDrawElements(GL_TRIANGLES, 3, GL_INDEX_TYPE, sis);
+			if (!glva)
+				qglDisableClientState( GL_VERTEX_ARRAY );
+			if (gltca)
+				qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+			if (glca)
+				qglEnableClientState( GL_COLOR_ARRAY );
+		}
+#endif
 #else
 		qglBegin(GL_TRIANGLES);
 			qglVertex3fv(tess.xyz[o1]);
@@ -226,6 +305,11 @@ void R_RenderShadowEdges( void ) {
 		qglEnd();
 #endif
 	}
+
+#ifdef _STENCIL_SHADOW_OPT //karin: first draw it and mark shadow volume generated
+	R_RenderShadowVolume();
+	shadow_volume_generated = qtrue;
+#endif
 #endif
 }
 
@@ -316,7 +400,12 @@ void RB_DoShadowTessEnd( vec3_t lightPos )
 		VectorAdd(tess.xyz[i], backEnd.ori.origin, worldxyz);
 		groundDist = worldxyz[2] - backEnd.currentEntity->e.shadowPlane;
 		groundDist += 16.0f; //fudge factor
+#ifdef _STENCIL_SHADOW_OPT //karin: all vertexes save to shadowXyz, not use tess object
+		memcpy(shadowXyz[i], tess.xyz[i], sizeof(vec3_t));
+		VectorMA( tess.xyz[i], -groundDist, lightDir, shadowXyz[SHADER_MAX_VERTEXES + i] );
+#else
 		VectorMA( tess.xyz[i], -groundDist, lightDir, shadowXyz[i] );
+#endif
 	}
 #else
 	if (lightPos)
@@ -411,6 +500,9 @@ void RB_DoShadowTessEnd( vec3_t lightPos )
 #endif
 
 #ifdef _STENCIL_REVERSE
+#ifdef _STENCIL_SHADOW_OPT //karin: request regenerate shadow volume
+	shadow_volume_generated = qfalse;
+#endif
 	qglDepthFunc(GL_LESS);
 
 	//now using the Carmack Reverse<tm> -rww
