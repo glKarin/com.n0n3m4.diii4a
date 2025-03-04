@@ -30,17 +30,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 qboolean snd_inited = qfalse;
 
+cvar_t *s_bits;     // before rc2 -> *s_sdlBits;
+cvar_t *s_khz;      // before rc2 -> *s_sdlSpeed
+cvar_t *s_sdlChannels; // external s_channels (GPL: cvar_t s_numchannels )
+
 /* The audio callback. All the magic happens here. */
-static int dmapos = 0;
-static int dmasize = 0;
-
-
-/* The audio callback. All the magic happens here. */
-#define BUFFER_SIZE 4096
-
-static int buf_size=0;
-static int bytes_per_sample=0;
-static int chunkSizeBytes=0;
+static int               dmapos    = 0;
+static int               dmasize   = 0;
 
 
 /*
@@ -99,41 +95,82 @@ SNDDMA_Init
 qboolean SNDDMA_Init(void)
 {
 	if (snd_inited)
+	{
 		return qtrue;
+	}
 
-	Com_Printf("Initializing Android Sound subsystem\n");
+	s_bits        = Cvar_Get("s_bits", "16", CVAR_LATCH | CVAR_ARCHIVE_ND);
+	s_khz         = Cvar_Get("s_khz", "44", CVAR_LATCH | CVAR_ARCHIVE_ND);
+	s_sdlChannels = Cvar_Get("s_channels", "2", CVAR_LATCH | CVAR_ARCHIVE_ND);
 
-	/* For now hardcode this all :) */
-	dma.channels = 2;
-	dma.samplebits = 16;
+	Com_Printf("Initializing Oboe Sound subsystem\n");
 
-	dma.submission_chunk = 4096; /* This is in single samples, so this would equal 2048 frames (assuming stereo) in Android terminology */
-	dma.speed = 44100; /* This is the native sample frequency of the Milestone */
+	int freq;
+	switch (s_khz->integer)
+	{
+		default:
+		case 44: freq = 44100; break;
+		case 22: freq = 22050; break;
+		case 11: freq = 11025; break;
+		case 48: freq = 48000; break;
+	}
 
-	bytes_per_sample = dma.samplebits/8;
-#if 0
-	dma.samples = 32768;
+	int samples;
+	switch (freq)
+	{
+	case 11025:
+		samples = 256;
+		break;
+	case 22050:
+		samples = 512;
+		break;
+	case 48000:
+		samples = 2048;
+		break;
+	case 44100:
+	default:
+		samples = 1024;
+		break;
+	}
 
-    dma.submission_chunk = BUFFER_SIZE; /* This is in single samples, so this would equal 2048 frames (assuming stereo) in Android terminology */
+    int channels = (int) s_sdlChannels->value;
+    int bits = (int) s_bits->value;
+    if(bits == 8)
+    	bits = 16;
+	else if ((bits != 16) && (bits != 8))
+	{
+		bits = 16;
+	}
 
-    buf_size = dma.samples * bytes_per_sample;
-    dma.buffer = calloc(1, buf_size);
-#else
-	buf_size = BUFFER_SIZE;
-	dma.samples = BUFFER_SIZE / bytes_per_sample;
+	int tmp = samples * channels * 10;
+	if (tmp & (tmp - 1))  // not a power of two? Seems to confuse something.
+	{
+		int val = 1;
+		while (val < tmp)
+			val <<= 1;
+
+		tmp = val;
+	}
+
+	dmapos               = 0;
+	dma.samplebits 	     = bits;
+	dma.channels         = channels;
+	dma.samples          = tmp;
 	dma.submission_chunk = 1;
-	dma.buffer = calloc(1, buf_size);
-#endif
-
-	dmasize = (dma.samples * (dma.samplebits/8));
-	chunkSizeBytes = dma.submission_chunk * bytes_per_sample;
-	dmapos = 0;
+	dma.speed            = freq;
+	dmasize              = (dma.samples * (dma.samplebits/8));
+	dma.buffer           = (byte *)calloc(1, dmasize);
+	if (!dma.buffer)
+	{
+		Com_Printf("Unable to allocate dma buffer\n");
+		return qfalse;
+	}
 
 	Com_Printf("Q3E Oboe audio initialized.\n");
 	Q3E_Oboe_Init(dma.speed, dma.channels, -1, SNDDMA_AudioCallback);
 	Q3E_Oboe_Start();
-	snd_inited = qtrue;
 
+	snd_inited = qtrue;
 	Com_Printf("Starting Q3E Oboe audio callback...\n");
 	return qtrue;
 }
@@ -155,12 +192,13 @@ SNDDMA_Shutdown
 */
 void SNDDMA_Shutdown(void)
 {
+	Com_Printf("Closing SDL audio device...\n");
 	Q3E_Oboe_Shutdown();
 	free(dma.buffer);
 	dma.buffer = NULL;
 	dmapos = dmasize = 0;
 	snd_inited = qfalse;
-	Com_Printf("Q3E Oboe audio shut down.\n");
+	Com_Printf("Q3E Oboe audio shutdown.\n");
 }
 
 /*
