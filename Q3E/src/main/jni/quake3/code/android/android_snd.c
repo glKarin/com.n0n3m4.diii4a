@@ -36,14 +36,6 @@ static int dmapos = 0;
 static int dmasize = 0;
 
 
-/* The audio callback. All the magic happens here. */
-#define BUFFER_SIZE 4096
-
-static int buf_size=0;
-static int bytes_per_sample=0;
-static int chunkSizeBytes=0;
-
-
 /*
 ===============
 SNDDMA_AudioCallback
@@ -97,39 +89,57 @@ qboolean SNDDMA_Init(void)
 
 	Com_Printf("Initializing Android Sound subsystem\n");
 
-	/* For now hardcode this all :) */
-	dma.channels = 2;
-	dma.samplebits = 16;
+    int sampleFrequencyInKHz = 44;
+	int freq;
+	switch (sampleFrequencyInKHz)
+	{
+		default:
+		case 44: freq = 44100; break;
+		case 22: freq = 22050; break;
+		case 11: freq = 11025; break;
+	}
 
-	dma.submission_chunk = 4096; /* This is in single samples, so this would equal 2048 frames (assuming stereo) in Android terminology */
-	dma.speed = 44100; /* This is the native sample frequency of the Milestone */
+	int samples;
+    // just pick a sane default.
+    if (freq <= 11025)
+        samples = 256;
+    else if (freq <= 22050)
+        samples = 512;
+    else if (freq <= 44100)
+        samples = 1024;
+    else
+        samples = 2048;  // (*shrug*)
 
-	bytes_per_sample = dma.samplebits/8;
-#if 0
-	dma.samples = 32768;
+    int channels = 2;
+    int bits = 16; // 2 * 8
 
-    dma.submission_chunk = BUFFER_SIZE; /* This is in single samples, so this would equal 2048 frames (assuming stereo) in Android terminology */
+	int tmp = samples * channels * 10;
+	if (tmp & (tmp - 1))  // not a power of two? Seems to confuse something.
+	{
+		int val = 1;
+		while (val < tmp)
+			val <<= 1;
 
-    buf_size = dma.samples * bytes_per_sample;
-    dma.buffer = calloc(1, buf_size);
-#else
-	buf_size = BUFFER_SIZE;
-	dma.samples = BUFFER_SIZE / bytes_per_sample;
-	dma.submission_chunk = 1;
-	dma.buffer = calloc(1, buf_size);
-#endif
+		tmp = val;
+	}
 
-	dmasize = (dma.samples * (dma.samplebits/8));
-	chunkSizeBytes = dma.submission_chunk * bytes_per_sample;
 	dmapos = 0;
+	dma.samplebits = bits;  // first byte of format is bits.
+	dma.channels = channels;
+	dma.samples = tmp;
+	dma.submission_chunk = 1;
+	dma.speed = freq;
+	dmasize = (dma.samples * (dma.samplebits/8));
+	dma.buffer = (byte *)calloc(1, dmasize);
+
 	dma.fullsamples = dma.samples / dma.channels;
 	dma.isfloat = 0;
 
 	Com_Printf("Q3E Oboe audio initialized.\n");
 	Q3E_Oboe_Init(dma.speed, dma.channels, -1, SNDDMA_AudioCallback);
 	Q3E_Oboe_Start();
-	snd_inited = qtrue;
 
+	snd_inited = qtrue;
 	Com_Printf("Starting Q3E Oboe audio callback...\n");
 	return qtrue;
 }
@@ -151,12 +161,13 @@ SNDDMA_Shutdown
 */
 void SNDDMA_Shutdown(void)
 {
+	Com_Printf("Closing Q3E audio audio device...\n");
 	Q3E_Oboe_Shutdown();
 	free(dma.buffer);
 	dma.buffer = NULL;
 	dmapos = dmasize = 0;
 	snd_inited = qfalse;
-	Com_Printf("Q3E Oboe audio shut down.\n");
+	Com_Printf("Q3E Oboe audio shutdown.\n");
 }
 
 /*
