@@ -173,7 +173,7 @@ void SNDDMA_Shutdown(void)
 	dma.buffer = NULL;
 	dmapos = dmasize = 0;
 	snd_inited = qfalse;
-	Com_Printf("Q3E audio device shut down.\n");
+	Com_Printf("Q3E audio device shutdown.\n");
 }
 
 /*

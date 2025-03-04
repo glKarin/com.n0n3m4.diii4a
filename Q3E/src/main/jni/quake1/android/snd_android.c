@@ -28,9 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //karin: using oboe as callback audio, not use Q3E AudioTrack
 
 static unsigned int sdlaudiotime = 0;
-static int audio_device = 0;
-static unsigned int audiopos = 0;
-static unsigned int buffersize;
 
 static void Buffer_Callback (unsigned char*stream, int len)
 {
@@ -90,13 +87,11 @@ static void Buffer_Callback (unsigned char*stream, int len)
 		if (FrameCount < RequestedFrames && developer_insane.integer && vid_activewindow)
 			Con_DPrintf("SDL sound: %u sample frames missing\n", RequestedFrames - FrameCount);
 
-		audiopos += RequestedFrames;
+		sdlaudiotime += RequestedFrames;
 
 		SndSys_UnlockRenderBuffer();
 	}
 }
-
-#define SAMPLES 0 // 16384
 
 /*
 ====================
@@ -108,63 +103,40 @@ May return a suggested format if the requested format isn't available
 */
 qbool SndSys_Init (snd_format_t* fmt)
 {
+	unsigned int buffersize;
 	snd_threaded = false;
 
-	Con_DPrint ("SndSys_Init: using the ANDROID module\n");
+	Con_DPrint ("SndSys_Init: using the Oboe module\n");
 
-	int wantspecfreq = fmt->speed;
-	int wantspecformat = (fmt->width);
-	int wantspecchannels = fmt->channels;
+	buffersize = bound(512, ceil((double)fmt->speed * snd_bufferlength.value / 1000.0), 8192);
 
-	Con_Printf("Wanted audio Specification:\n"
-			   "\tChannels  : %i\n"
-			   "\tFormat    : 0x%X\n"
-			   "\tFrequency : %i\n",
-			   wantspecchannels, wantspecformat, wantspecfreq);
+	int freq = fmt->speed;
+	if(fmt->width == 1)
+	    fmt->width = 2;
+	int format = fmt->width == 2 ? Q3E_OBOE_FORMAT_SINT16 : Q3E_OBOE_FORMAT_FLOAT;
+	int channels = fmt->channels;
+	int samples = CeilPowerOf2(buffersize);  // needs to be a power of 2 on some platforms.
 
-	int obtainspecchannels=2;
-	int obtainspecfreq=44100;
-	int obtainspecformat=2;
-    fmt->speed = obtainspecfreq;
-    fmt->width = obtainspecformat;
-    fmt->channels = obtainspecchannels;
+	Con_Printf("Audio Specification:\n"
+				"    Channels  : %i\n"
+				"    Format    : 0x%X\n"
+				"    Frequency : %i\n"
+				"    Samples   : %i\n",
+				channels, format, freq, samples);
 
-	Con_Printf("Obtained audio specification:\n"
-			   "\tChannels  : %i\n"
-			   "\tFormat    : 0x%X\n"
-			   "\tFrequency : %i\n",
-			   obtainspecchannels, obtainspecformat, obtainspecfreq);
+    fmt->speed = freq;
+    fmt->channels = channels;
 
-	// If we haven't obtained what we wanted
-/*	if (wantspecfreq != obtainspecfreq ||
-		wantspecformat != obtainspecformat ||
-		wantspecchannels != obtainspecchannels)
-	{
-		// Pass the obtained format as a suggested format
-		if (suggested != NULL)
-		{
-			suggested->speed = obtainspecfreq;
-			suggested->width = obtainspecformat;
-			suggested->channels = obtainspecchannels;
-		}
+	snd_renderbuffer = Snd_CreateRingBuffer(fmt, 0, NULL);
+	Q3E_Oboe_Init(freq, channels, format, Buffer_Callback);
+	Q3E_Oboe_Start();
 
-		return false;
-	}*/
+	snd_threaded = true;
 
-	snd_threaded = false;
-//TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	snd_renderbuffer = Snd_CreateRingBuffer(fmt, SAMPLES, 0);
 	if (snd_channellayout.integer == SND_CHANNELLAYOUT_AUTO)
 		Cvar_SetValueQuick (&snd_channellayout, SND_CHANNELLAYOUT_STANDARD);
 
-	audiopos = 0;
-	buffersize=snd_renderbuffer->maxframes*2*2;
-	//initAudio(snd_renderbuffer->ring, buffersize);
-
-	snd_threaded = true;
-	Q3E_Oboe_Init(fmt->speed, fmt->channels, -1, Buffer_Callback);
-	Q3E_Oboe_Start();
+	sdlaudiotime = 0;
 
 	return true;
 }
@@ -188,7 +160,6 @@ void SndSys_Shutdown(void)
 	}
 }
 
-#if 1
 /*
 ====================
 SndSys_Submit
@@ -200,129 +171,6 @@ void SndSys_Submit (void)
 {
 	// Nothing to do here (this sound module is callback-based)
 }
-#else
-/*
-====================
-SndSys_Write
-====================
-*/
-static int SndSys_Write (unsigned int buffer, unsigned int nb_bytes)
-{
-    int written;
-    unsigned int factor;
-
-	if(nb_bytes == 0)
-		return 0;
-
-    written = writeAudio (buffer, nb_bytes);
-
-    factor = snd_renderbuffer->format.width * snd_renderbuffer->format.channels;
-    if (written % factor != 0)
-        Sys_Error ("SndSys_Write: nb of bytes written (%d) isn't aligned to a frame sample!\n",
-                   written);
-
-    snd_renderbuffer->startframe += written / factor;
-
-    if ((unsigned int)written < nb_bytes)
-    {
-        Con_DPrintf("SndSys_Submit: audio can't keep up! (%u < %u)\n",
-                    written, nb_bytes);
-    }
-
-    return written;
-}
-/*
-====================
-SndSys_Submit
-
-Submit the contents of "snd_renderbuffer" to the sound card
-====================
-*/
-void SndSys_Submit (void)
-{
-	// Nothing to do here (this sound module is callback-based)
-/*	int offset = (audiopos*4) & (buffersize - 1);
-	if (snd_renderbuffer!=NULL)
-		writeAudio(offset, 2048*4);
-	audiopos+=2048;*/
-
-#if 0
-    unsigned int startoffset, factor, limit, nbframes;
-    int written;
-
-    if (snd_renderbuffer->startframe == snd_renderbuffer->endframe)
-        return;
-
-    startoffset = snd_renderbuffer->startframe % snd_renderbuffer->maxframes;
-    factor = snd_renderbuffer->format.width * snd_renderbuffer->format.channels;
-    limit = snd_renderbuffer->maxframes - startoffset;
-    nbframes = snd_renderbuffer->endframe - snd_renderbuffer->startframe;
-    if (nbframes > limit)
-    {
-        written = SndSys_Write (startoffset * factor, limit * factor);
-        if (written < 0 || (unsigned int)written < limit * factor)
-            return;
-
-        nbframes -= limit;
-		audiopos += limit;
-        startoffset = 0;
-    }
-
-    SndSys_Write (startoffset * factor, nbframes * factor);
-	audiopos += nbframes;
-#endif
-
-#if 1
-	unsigned int factor, MaxFrames, FrameCount;
-	unsigned int StartOffset, EndOffset;
-
-	factor = snd_renderbuffer->format.channels * snd_renderbuffer->format.width;
-	MaxFrames = snd_renderbuffer->endframe - snd_renderbuffer->startframe;
-	unsigned int RequestedFrames = MaxFrames;
-	if (MaxFrames > RequestedFrames)
-		FrameCount = RequestedFrames;
-	else
-		FrameCount = MaxFrames;
-	StartOffset = snd_renderbuffer->startframe % snd_renderbuffer->maxframes;
-	EndOffset = (snd_renderbuffer->startframe + FrameCount) % snd_renderbuffer->maxframes;
-
-	if (StartOffset > EndOffset)  // if the buffer wraps
-	{
-		unsigned int PartialLength1, PartialLength2;
-		unsigned int ui = snd_renderbuffer->maxframes - StartOffset;
-
-		PartialLength1 = ui * factor;
-		int r = writeAudio(StartOffset * factor, PartialLength1);
-        printf("AAA %d %d = %d %d\n", StartOffset * factor, PartialLength1, ui, (int)(r / factor));
-		r = (int)(r / factor);
-		snd_renderbuffer->startframe += r;
-		audiopos += ui;
-
-		PartialLength2 = FrameCount * factor - PartialLength1;
-		if(PartialLength2 > 0)
-		{
-			ui = FrameCount - ui;
-            r = writeAudio(0, PartialLength2);
-            printf("BBB %d %d = %d %d\n", 0, PartialLength2, ui, (int)(r / factor));
-			r = (int)(r / factor);
-			snd_renderbuffer->startframe += r;
-			audiopos += ui;
-		}
-	}
-	else
-	{
-        int r = writeAudio(StartOffset * factor, FrameCount * factor);
-		printf("CCC %d %d = %d %d\n", StartOffset * factor, FrameCount * factor, FrameCount, (int)(r / factor));
-		r = (int)(r / factor);
-		snd_renderbuffer->startframe += r;
-		audiopos += FrameCount;
-	}
-	//snd_renderbuffer->startframe += FrameCount;
-	//audiopos += RequestedFrames;
-    // else the buffer is empty
-#endif
-}
-#endif
 
 
 /*
@@ -334,7 +182,7 @@ Returns the number of sample frames consumed since the sound started
 */
 unsigned int SndSys_GetSoundTime (void)
 {
-	return audiopos;
+	return sdlaudiotime;
 }
 
 
