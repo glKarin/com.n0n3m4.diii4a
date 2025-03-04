@@ -852,13 +852,22 @@ Q3Ebool Q3E_RequireWindow(volatile ANativeWindow *w)
 	return Q3E_TRUE;
 }
 
-void Q3E_ReleaseWindow(volatile ANativeWindow *w)
+void Q3E_RequireCurrentWindow(void)
+{
+	if(!win)
+		return;
+
+	ANativeWindow_acquire((ANativeWindow *)win);
+}
+
+void Q3E_ReleaseWindow(Q3Ebool reset)
 {
 	if(!win)
 		return;
 
     ANativeWindow_release((ANativeWindow *)win);
-    win = NULL;
+    if(reset)
+        win = NULL;
 }
 
 void Q3E_SwapInterval(int interval)

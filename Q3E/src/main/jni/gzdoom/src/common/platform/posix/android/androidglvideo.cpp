@@ -333,6 +333,8 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
 #ifdef HAVE_VULKAN
     if (Priv::vulkanEnabled)
     {
+        VkSurfaceKHR surfacehandle = VK_NULL_HANDLE;
+        VkInstance vulkankInstance = VK_NULL_HANDLE;
         try
         {
             unsigned int count = 64;
@@ -345,8 +347,8 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
             for (unsigned int i = 0; i < count; i++)
                 builder.RequireExtension(names[i]);
             auto instance = builder.Create();
+            vulkankInstance = instance->Instance;
 
-            VkSurfaceKHR surfacehandle = VK_NULL_HANDLE;
             if (!I_CreateVulkanSurface(instance->Instance, &surfacehandle))
                 VulkanError("I_CreateVulkanSurface failed");
 
@@ -361,6 +363,22 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
         {
             Printf(TEXTCOLOR_RED "Initialization of Vulkan failed: %s\n", error.what());
 			Priv::vulkanEnabled = false;
+
+			Printf("Destroy Vulkan......\n");
+			if(vulkankInstance != VK_NULL_HANDLE)
+			{
+                if(surfacehandle != VK_NULL_HANDLE)
+                {
+			        Printf("Destroy Vulkan surface.\n");
+                    vkDestroySurfaceKHR(vulkankInstance, surfacehandle, NULL);
+                }
+			    //Printf("Destroy Vulkan instance.\n");
+                //vkDestroyInstance(vulkankInstance, NULL);
+			}
+
+            //Q3E_ReleaseWindow(false);
+	        //Q3E_RequireCurrentWindow();
+			Printf("Try OpenGL renderer......\n");
         }
     }
 #endif
