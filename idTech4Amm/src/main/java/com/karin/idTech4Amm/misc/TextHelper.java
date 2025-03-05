@@ -79,7 +79,7 @@ public final class TextHelper
             Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")",
             // Constants.CONST_NAME,
             Update_ + " " + ContextUtility.GetAppVersion(context) + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
-            Release_ + " " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + ")",
+            Release_ + " " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + " - " + Constants.CONST_CODE_ALIAS + ")",
             Build_ + " " + Constants.GetBuildTime("yyyy-MM-dd HH:mm:ss.SSS") + ("(API " + Constants.GetBuildSDKVersion() + ")"),
             Dev_ + " " + GenLinkText("mailto:" + Constants.CONST_EMAIL, Constants.CONST_DEV),
             Changes_ + " ",
@@ -199,16 +199,14 @@ public final class TextHelper
         final String Release_ = Q3ELang.tr(context, R.string.release_);
         final String Build_ = Q3ELang.tr(context, R.string.build_);
         final String Dev_ = Q3ELang.tr(context, R.string.dev_);
-        final String Code_ = Q3ELang.tr(context, R.string.code_);
         StringBuilder sb = new StringBuilder();
         final String[] ABOUTS = {
             Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")",
             Constants.CONST_NAME,
-            Code_ + " " + Constants.CONST_CODE_ALIAS,
             Dev_ + " " + GenLinkText(Constants.CONST_DEVELOPER, Constants.CONST_DEV)
             + "&lt;" + GenLinkText("mailto:" + Constants.CONST_EMAIL, Constants.CONST_EMAIL) + "&gt;",
             Update_ + " " + ContextUtility.GetAppVersion(context) + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
-            Release_ + " " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + ")",
+            Release_ + " " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + " - " + Constants.CONST_CODE_ALIAS + ")",
             Build_ + " " + Constants.GetBuildTime("yyyy-MM-dd HH:mm:ss.SSS") + ("(API " + Constants.GetBuildSDKVersion() + ")"),
             null,
             "Rename from `DIII4A++`, base on original `n0n3m4`'s `DIII4A`.",
