@@ -87,7 +87,9 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 Q3EGlobals.GAME_BASE_TDM,
                 Q3EGlobals.GAME_BASE_GZDOOM,
                 Q3EGlobals.GAME_BASE_ETW,
-                Q3EGlobals.GAME_BASE_REALRTCW
+                Q3EGlobals.GAME_BASE_REALRTCW,
+                Q3EGlobals.GAME_BASE_JA,
+                Q3EGlobals.GAME_BASE_JO
         ));
         List<String> blackList = new ArrayList<>();
         boolean standalone = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
@@ -106,7 +108,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                     Q3EGlobals.GAME_SUBDIR_TDM,
                     Q3EGlobals.GAME_SUBDIR_GZDOOM,
                     Q3EGlobals.GAME_SUBDIR_ETW,
-                    Q3EGlobals.GAME_SUBDIR_REALRTCW
+                    Q3EGlobals.GAME_SUBDIR_REALRTCW,
+                    Q3EGlobals.GAME_SUBDIR_FTEQW,
+                    Q3EGlobals.GAME_SUBDIR_JA,
+                    Q3EGlobals.GAME_SUBDIR_JO
             ));
         }
 

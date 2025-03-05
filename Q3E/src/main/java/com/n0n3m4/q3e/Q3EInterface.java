@@ -396,13 +396,7 @@ public class Q3EInterface
 		String subdir = GetGameStandaloneDirectory(game);
 		if(standalone)
 			return subdir;
-		else if(Q3EGlobals.GAME_TDM.equals(game)
-				|| Q3EGlobals.GAME_DOOM3BFG.equals(game)
-				|| Q3EGlobals.GAME_GZDOOM.equals(game)
-				|| Q3EGlobals.GAME_FTEQW.equals(game)
-				|| Q3EGlobals.GAME_JA.equals(game)
-				|| Q3EGlobals.GAME_JO.equals(game)
-		)
+		else if(IsStandaloneGame(game))
 			return subdir;
 		else
 			return null;
@@ -414,11 +408,8 @@ public class Q3EInterface
 		if(standalone)
 			subdatadir = subdir;
 		else if(isTDM
-				|| isD3BFG
 				|| isDOOM
-				|| isFTEQW
-				|| isJA
-				|| isJO)
+				|| isFTEQW)
 			subdatadir = subdir;
 		else
 			subdatadir = null;
@@ -790,7 +781,15 @@ public class Q3EInterface
 
 	public boolean IsStandaloneGame()
 	{
-		return isTDM || isD3BFG || isDOOM || isFTEQW || isJA || isJO;
+		return isTDM || isDOOM || isFTEQW;
+	}
+
+	public static boolean IsStandaloneGame(String game)
+	{
+		return Q3EGlobals.GAME_TDM.equalsIgnoreCase(game)
+				|| Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(game)
+				|| Q3EGlobals.GAME_FTEQW.equalsIgnoreCase(game)
+				;
 	}
 
 	public static String GetGameStandaloneDirectory(String name)
