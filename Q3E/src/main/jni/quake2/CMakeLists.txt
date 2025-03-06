@@ -5,6 +5,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+OPTION(YQUAKE2_BUILD_VULKAN_BACKEND "Build ref_vk.so" ON)
+
 add_subdirectory (yquake2) # quake2 main and game
 
 # mods
@@ -12,3 +14,7 @@ add_subdirectory (ctf) # https://github.com/yquake2/ctf/commit/6a2d5125f6ef4f2bd
 add_subdirectory (rogue) # https://github.com/yquake2/rogue/commit/830ad45774336194ae77351865f9d5b991be2979
 add_subdirectory (xatrix) # https://github.com/yquake2/xatrix/commit/d215802d1642d1a2a4850896f70d37cf94f81a9c
 add_subdirectory (zaero) # https://github.com/yquake2/zaero/commit/c3322bec3fb9760fcdc615615a8dcab6d59b6bed
+
+if(YQUAKE2_BUILD_VULKAN_BACKEND)
+add_subdirectory (ref_vk) # -1.0.8
+endif()

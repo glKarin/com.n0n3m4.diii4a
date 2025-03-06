@@ -601,7 +601,10 @@ public class GameLauncher extends Activity
 			{
 				if(Q3EUtils.q3ei.isQ2)
 				{
-					String value2 = GetRadioGroupSelectIndex(radioGroup, id) == 1 ? "gles3" : "gl1";
+					index = GetRadioGroupSelectIndex(radioGroup, id);
+					if(index < 0 || index >= Q3EGlobals.QUAKE2_RENDERER_BACKENDS.length)
+						index = 0;
+					String value2 = Q3EGlobals.QUAKE2_RENDERER_BACKENDS[index];
 					SetProp("vid_renderer", value2);
 				}
 			}
@@ -1314,8 +1317,9 @@ public class GameLauncher extends Activity
 		index = 0;
 		if (str != null)
 		{
-			if ("gles3".equalsIgnoreCase(str))
-				index = 1;
+			index = Utility.ArrayIndexOf(Q3EGlobals.QUAKE2_RENDERER_BACKENDS, str);
+			if(index < 0)
+				index = 0;
 		}
 		SelectRadioGroup(V.yquake2_vid_renderer, index);
 	}
@@ -1916,7 +1920,15 @@ public class GameLauncher extends Activity
 
 	private void SetupUI_Quake2()
 	{
-		SelectRadioGroup(V.yquake2_vid_renderer, "gles3".equals(GetProp("vid_renderer")) ? 1 : 0);
+		String str = GetProp("vid_renderer");
+		int index = 0;
+		if(null != str)
+		{
+			index = Utility.ArrayIndexOf(Q3EGlobals.QUAKE2_RENDERER_BACKENDS, str);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.yquake2_vid_renderer, index);
 		V.yquake2_vid_renderer.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 

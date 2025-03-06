@@ -34,6 +34,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="OpenGL ES3" />
+        <RadioButton
+            android:id="@+id/yquake2_vid_renderer_vk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vulkan" />
     </RadioGroup>
 
 

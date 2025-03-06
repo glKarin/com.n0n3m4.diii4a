@@ -65,6 +65,8 @@
 #include "../../../../../libraries/ZVulkan/include/vulkan/vulkan.h"
 #include "../../../../../src/common/rendering/vulkan/textures/vk_framebuffer.h"
 #include <zvulkan/vulkanswapchain.h>
+
+EXTERN_CVAR (Int, vid_preferbackend)
 #endif
 
 #undef EGL_NO_DISPLAY
@@ -388,12 +390,14 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
 #ifdef HAVE_GLES2
         if (V_GetBackend() != 0)
         {
+			vid_preferbackend = 2;
             fb = new OpenGLESRenderer::OpenGLFrameBuffer(0, vid_fullscreen);
             Printf("Using OpenGLES renderer.\n");
         }
         else
 #endif
         {
+			vid_preferbackend = 0;
             fb = new OpenGLRenderer::OpenGLFrameBuffer(0, vid_fullscreen);
             Printf("Using OpenGL renderer.\n");
         }

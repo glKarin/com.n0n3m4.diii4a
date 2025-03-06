@@ -390,7 +390,8 @@ public final class Q3EGlobals
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 
-    public static final int[] GZDOOM_GL_VERSIONS = {0, 330, 420, 430, 450,};
+    public static final int[] GZDOOM_GL_VERSIONS = { 0, 330, 420, 430, 450, };
+    public static final String[] QUAKE2_RENDERER_BACKENDS = { "gl1", "gles3", "vk", };
 
     public static final int DEFAULT_DEPTH_BITS = 24; // 16 32
 
