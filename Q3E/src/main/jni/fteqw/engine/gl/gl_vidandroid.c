@@ -28,6 +28,8 @@ extern cvar_t vid_multisample;
 static dllhandle_t *sys_gl_module = NULL;
 static rendererinfo_t gles1rendererinfo;
 
+extern qboolean vid_isfullscreen;
+
 #ifdef VKQUAKE
 #include "../vk/vkrenderer.h"
 static qboolean using_vulkan = false;
@@ -59,9 +61,22 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 			if(vk.device != VK_NULL_HANDLE)
 			{
 				vkDeviceWaitIdle(vk.device);
+                if (vk.surface)
+                {
+                    printf("Destroy old Vulkan surface.\n");
+                    vkDestroySurfaceKHR(vk.instance, vk.surface, vkallocationcb);
+                    vk.surface = VK_NULL_HANDLE;
+                }
 				if(VKVID_CreateSurface())
 				{
 					printf("Vulkan request recreate swapchain......\n");
+					// TODO: crash if destroy swapchain in VK_DestroySwapChain
+                    if (vk.swapchain)
+                    {
+                        printf("Destroy old Vulkan swapchain.\n");
+                        vkDestroySwapchainKHR(vk.device, vk.swapchain, vkallocationcb);
+                        vk.swapchain = VK_NULL_HANDLE;
+                    }
 					vk.neednewswapchain = true;
 				}
 				else
@@ -93,6 +108,7 @@ void GLimp_AndroidQuit(void)
 			vkDeviceWaitIdle(vk.device);
 			printf("vkDeviceWaitIdle done.\n");
 		}
+		Q3E_ReleaseWindow(true);
 		return;
 	}
 #endif
@@ -127,7 +143,8 @@ Sys_Printf("GLVID_DeInited\n");
 
 qboolean GLVID_Init (rendererstate_t *info, unsigned char *palette)
 {
-Sys_Printf("GLVID_Initing...\n");
+    Sys_Printf("GLVID_Initing...\n");
+    vid_isfullscreen = true;
 //	vid.pixelwidth = ANativeWindow_getWidth(sys_window);
 //	vid.pixelheight = ANativeWindow_getHeight(sys_window);
 
@@ -295,10 +312,11 @@ qboolean VKVID_CreateSurface(void)
 
 static qboolean VKVID_Init (rendererstate_t *info, unsigned char *palette)
 {
+	Sys_Printf("initialising vulkan...\n");
+    vid_isfullscreen = true;
 	//this is simpler than most platforms, as the window itself is handled by java code, and we can't create/destroy it here
 	//(android surfaces can be resized/resampled separately from their window, and are always 'fullscreen' anyway, so this isn't actually an issue for once)
 	const char *extnames[] = {VK_KHR_ANDROID_SURFACE_EXTENSION_NAME, NULL};
-	Sys_Printf("initialising vulkan...\n");
 	if (!win)
 	{
 		Sys_Printf("VKVID_Init failed: no window known yet\n");

@@ -258,6 +258,14 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 	        Printf("VulkanSwapChain::SwapChain make lost.\n");
 			fbm->SwapChain->MakeLost();
 		}
+
+		if(sdl_video->surface && sdl_video->surface->Surface != VK_NULL_HANDLE)
+		{
+			Printf("Destroy old Vulkan surface.\n");
+			vkDestroySurfaceKHR(sdl_video->_fb->device->Instance->Instance, sdl_video->surface->Surface, NULL);
+			sdl_video->surface->Surface = VK_NULL_HANDLE;
+		}
+
 		VkSurfaceKHR surfacehandle = VK_NULL_HANDLE;
 		if (!I_CreateVulkanSurface(sdl_video->_fb->device->Instance->Instance, &surfacehandle))
 			VulkanError("I_CreateVulkanSurface failed");

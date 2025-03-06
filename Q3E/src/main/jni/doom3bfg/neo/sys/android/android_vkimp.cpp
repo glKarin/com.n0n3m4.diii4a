@@ -412,6 +412,13 @@ void VKimp_RecreateSurfaceAndSwapchain(void)
 		return;
 	}
 
+    if(vkcontext.surface != VK_NULL_HANDLE)
+    {
+        printf("Destroy old Vulkan surface.\n");
+        vkDestroySurfaceKHR( vkcontext.instance, vkcontext.surface, NULL );
+        vkcontext.surface = VK_NULL_HANDLE;
+    }
+
 	vkcontext.sdlWindow = Android_GetVulkanWindow();
 	vkcontext.surface = VK_NULL_HANDLE;
 	VK_CreateSurface();

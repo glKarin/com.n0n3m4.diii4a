@@ -146,6 +146,13 @@ bool VulkanSwapChain::CreateSwapchain(int width, int height, int imageCount, boo
 		lost = true;
 		return false;
 	}
+#ifdef __ANDROID__ //karin: destroy old swapchain manually
+    if (swapchain)
+    {
+        vkDestroySwapchainKHR(device->device, swapchain, nullptr);
+        swapchain = VK_NULL_HANDLE;
+    }
+#endif
 
 	if (caps.Capabilites.maxImageCount != 0)
 		imageCount = std::min(caps.Capabilites.maxImageCount, (uint32_t)imageCount);
