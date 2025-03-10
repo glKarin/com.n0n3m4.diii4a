@@ -1334,6 +1334,8 @@ infoParm_t infoParms[] = {
 	{"donotenterlarge", 1, 0,    CONTENTS_DONOTENTER_LARGE }, // for larger bots
 
 	{"fog",          1,  0,  CONTENTS_FOG},          // carves surfaces entering
+	{"playerclip2",   1,  0,  CONTENTS_PLAYERCLIP2 },
+	
 	{"sky",          0,  SURF_SKY,       0 },        // emit light from an environment map
 	{"lightfilter",  0,  SURF_LIGHTFILTER, 0 },      // filter light going through it
 	{"alphashadow",  0,  SURF_ALPHASHADOW, 0 },      // test light on a per-pixel basis

@@ -26,6 +26,7 @@
   // Linux needs this to support file operation on files larger then 4+GB
   // But might need better if/def to select just the platforms that needs them.
 
+#if !defined(__ANDROID__) || __ANDROID_API__ >= 24
         #ifndef __USE_FILE_OFFSET64
                 #define __USE_FILE_OFFSET64
         #endif
@@ -38,7 +39,12 @@
         #ifndef _FILE_OFFSET_BIT
                 #define _FILE_OFFSET_BIT 64
         #endif
+#endif
 
+#endif
+
+#if defined(__ANDROID__) && __ANDROID_API__ < 24
+#define USE_FILE32API
 #endif
 
 #include <stdio.h>
@@ -69,11 +75,6 @@
   #define ftello64 ftell
   #define fseeko64 fseek
  #endif
-#endif
-#ifdef __ANDROID__ //karin: using stdio on Android
-#define fopen64 fopen
-#define ftello64 ftell
-#define fseeko64 fseek
 #endif
 #endif
 

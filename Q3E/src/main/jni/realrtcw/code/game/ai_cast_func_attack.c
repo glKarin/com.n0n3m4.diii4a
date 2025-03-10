@@ -726,7 +726,7 @@ char* AIFunc_DogBark(cast_state_t* cs) {
 		}
 
 		// if our enemy isn't using a dangerous weapon
-		if (enemy->client->ps.weapon < WP_LUGER) {
+		if (enemy->client->ps.weapon < WP_MP40) {
 			ent->flags &= ~FL_DOG_BARK;
 			ent->client->ps.torsoTimer = 0;
 			ent->client->ps.legsTimer = 0;
@@ -786,7 +786,7 @@ char* AIFunc_DogBarkStart(cast_state_t* cs) {
 	enemy = &g_entities[cs->enemyNum];
 
 	// if our enemy isn't using a dangerous weapon
-	if (enemy->client->ps.weapon < WP_LUGER) {
+	if (enemy->client->ps.weapon < WP_MP40) {
 		return NULL;
 	}
 
@@ -1214,7 +1214,7 @@ char *AIFunc_WarriorZombieDefense( cast_state_t *cs ) {
 		}
 
 		// if our enemy isn't using a dangerous weapon
-		if ( enemy->client->ps.weapon < WP_LUGER ) {
+		if ( enemy->client->ps.weapon < WP_MP40 ) {
 			ent->flags &= ~FL_DEFENSE_GUARD;
 			ent->client->ps.torsoTimer = 0;
 			ent->client->ps.legsTimer = 0;
@@ -1273,7 +1273,7 @@ char *AIFunc_WarriorZombieDefenseStart( cast_state_t *cs ) {
 	enemy = &g_entities[cs->enemyNum];
 
 	// if our enemy isn't using a dangerous weapon
-	if ( enemy->client->ps.weapon < WP_LUGER ) {
+	if ( enemy->client->ps.weapon < WP_MP40 ) {
 		return NULL;
 	}
 

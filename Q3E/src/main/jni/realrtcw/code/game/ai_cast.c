@@ -60,6 +60,8 @@ use the AAS for navigation, we want to avoid having to re-write the movement
 routines which are heavily associated with the AAS information.
 */
 
+svParams_t svParams;
+
 //cast states (allocated at run-time)
 cast_state_t    *caststates;
 //number of characters
@@ -432,8 +434,13 @@ gentity_t *AICast_CreateCharacter( gentity_t *ent, float *attributes, cast_weapo
 	} else {
 		newent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = cs->attributes[STARTING_HEALTH];
 	}
-
-	cs->respawnsleft = g_airespawn.integer;
+    
+	// Unlimited respawn in Survival mode
+	if ( g_gametype.integer == GT_SURVIVAL )  {
+	    cs->respawnsleft = -1;
+	} else {
+		cs->respawnsleft = g_airespawn.integer;
+	}
 	//
 	cs->weaponInfo = weaponInfo;
 	//
@@ -482,6 +489,23 @@ void AICast_Init( void ) {
 	numSpawningCast = 0;
 	saveGamePending = qtrue;
 
+    // Initial count of AIs for survival mode
+    if ( g_gametype.integer == GT_SURVIVAL )  {
+		svParams.killCountRequirement = svParams.initialKillCountRequirement;
+		svParams.waveCount = 1;
+
+		svParams.maxActiveAI[AICHAR_SOLDIER] = svParams.initialSoldiersCount;
+	    svParams.maxActiveAI[AICHAR_ZOMBIE_SURV] = svParams.initialZombiesCount;
+	    svParams.maxActiveAI[AICHAR_ZOMBIE_GHOST] = svParams.initialGhostsCount;
+	    svParams.maxActiveAI[AICHAR_WARZOMBIE] = svParams.initialWarriorsCount;
+	    svParams.maxActiveAI[AICHAR_PROTOSOLDIER] = svParams.initialProtosCount;
+	    svParams.maxActiveAI[AICHAR_PARTISAN] = svParams.initialPartisansCount;
+	    svParams.maxActiveAI[AICHAR_PRIEST] = svParams.initialPriestsCount;
+	    svParams.maxActiveAI[AICHAR_ELITEGUARD] = svParams.initialEliteGuardsCount;
+		svParams.maxActiveAI[AICHAR_BLACKGUARD] = svParams.initialBlackGuardsCount;
+		svParams.maxActiveAI[AICHAR_VENOM] = svParams.initialVenomsCount;
+	}
+
 	trap_Cvar_Register( &aicast_debug, "aicast_debug", "0", 0 );
 	trap_Cvar_Register( &aicast_debugname, "aicast_debugname", "", 0 );
 	trap_Cvar_Register( &aicast_scripts, "aicast_scripts", "1", 0 );
@@ -500,7 +524,7 @@ void AICast_Init( void ) {
 
 	aicast_maxclients = trap_Cvar_VariableIntegerValue( "sv_maxclients" );
 
-	aicast_skillscale = (float)trap_Cvar_VariableIntegerValue( "g_gameSkill" ) / (float)GSKILL_REALISM;
+	aicast_skillscale = (float)trap_Cvar_VariableIntegerValue( "g_gameSkill" ) / (float)GSKILL_SURVIVAL;
 
 	caststates = G_Alloc( aicast_maxclients * sizeof( cast_state_t ) );
 	memset( caststates, 0, sizeof( *caststates ) );
@@ -588,6 +612,9 @@ void AIChar_AIScript_AlertEntity( gentity_t *ent ) {
 	vec3_t mins, maxs;
 	int numTouch, touch[10], i;
 	cast_state_t    *cs;
+	vec3_t spawn_origin, spawn_angles;
+
+	gentity_t *player = AICast_FindEntityForName( "player" );
 
 	if ( !ent->aiInactive ) {
 		return;
@@ -622,6 +649,23 @@ void AIChar_AIScript_AlertEntity( gentity_t *ent ) {
 		return;
 	}
 
+    if ( g_gametype.integer == GT_SURVIVAL )  {
+	   if ( svParams.activeAI[ent->aiCharacter] >= svParams.maxActiveAI[ent->aiCharacter])  { 
+		cs->aiFlags |= AIFL_WAITINGTOSPAWN;
+		return;
+	   }
+	}
+
+	// Selecting the spawn point for the AI
+    if ( g_gametype.integer == GT_SURVIVAL )  {
+				SelectSpawnPoint_AI( player, ent, spawn_origin, spawn_angles );
+				G_SetOrigin( ent, spawn_origin );
+				VectorCopy( spawn_origin, ent->client->ps.origin );
+				SetClientViewAngle( ent, spawn_angles );
+				// Increment the counter for active AI characters
+                svParams.activeAI[ent->aiCharacter]++;
+	}
+
 	// RF, has to disable this so I could test some maps which have erroneously placed alertentity calls
 	//ent->AIScript_AlertEntity = NULL;
 	cs->aiFlags &= ~AIFL_WAITINGTOSPAWN;
@@ -629,7 +673,11 @@ void AIChar_AIScript_AlertEntity( gentity_t *ent ) {
 	trap_LinkEntity( ent );
 
 	// trigger a spawn script event
-	AICast_ScriptEvent( AICast_GetCastState( ent->s.number ), "spawn", "" );
+	if ( g_gametype.integer == GT_SURVIVAL )  {
+	   AICast_ScriptEvent( AICast_GetCastState( ent->s.number ), "respawn", "" );
+	} else {
+	   AICast_ScriptEvent( AICast_GetCastState( ent->s.number ), "spawn", "" );
+	}
 	// make it think so we update animations/angles
 	AICast_Think( ent->s.number, (float)FRAMETIME / 1000 );
 	cs->lastThink = level.time;

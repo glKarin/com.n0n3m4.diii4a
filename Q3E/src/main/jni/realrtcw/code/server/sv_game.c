@@ -290,6 +290,38 @@ static int  FloatAsInt( float f ) {
 	return fi.i;
 }
 
+#ifdef __ANDROID__ //karin: static memory allocation for game
+static char *g_memoryPool = NULL;
+static void G_FreeMemoryPool( void )
+{
+	if(!g_memoryPool)
+	{
+		Com_Printf( "G_AllocMemoryPool: memory pool heap not allocated!\n" );
+		return;
+	}
+	free(g_memoryPool);
+	g_memoryPool = NULL;
+	Com_Printf( "G_FreeMemoryPool: memory pool heap freed.\n" );
+}
+
+static char * G_AllocMemoryPool( size_t size )
+{
+	if(g_memoryPool)
+	{
+		//Com_Error( ERR_FATAL, "G_AllocMemoryPool: memory pool heap has allocated!" );
+		return g_memoryPool;
+	}
+	g_memoryPool = calloc(size, 1);
+	if(!g_memoryPool)
+		Com_Error( ERR_FATAL, "G_AllocMemoryPool: memory pool heap allocation fail!" );
+
+	atexit(G_FreeMemoryPool);
+	Com_Printf( "G_AllocMemoryPool: memory pool heap allocation success: %zd bytes.\n", size );
+
+	return g_memoryPool;
+}
+#endif
+
 /*
 ====================
 SV_GameSystemCalls
@@ -885,6 +917,10 @@ intptr_t SV_GameSystemCalls( intptr_t *args ) {
 	// New in IORTCW
 	case G_ALLOC:
 		return VM_Alloc( args[1] );
+#ifdef __ANDROID__ //karin: static memory allocation for game
+	case G_REQUIRE_MEMORY_POOL:
+		return (intptr_t)G_AllocMemoryPool( (size_t)args[1] );
+#endif
 
 
 	default:
@@ -914,6 +950,7 @@ void SV_ShutdownGameProgs( void ) {
 /*
 ==================
 SV_InitGameVM
+
 
 Called for both a full init and a restart
 ==================
@@ -981,7 +1018,7 @@ void SV_InitGameProgs( void ) {
 
 	// load the dll or bytecode
 #ifdef __ANDROID__ //karin: qagame rename on Android
-	gvm = VM_Create( "realrtcwqagame", SV_GameSystemCalls, Cvar_VariableValue( "vm_game" ) );
+	gvm = VM_Create( "realrtcw" _HARM_REALRTCW_DLL_VER "qagame", SV_GameSystemCalls, Cvar_VariableValue( "vm_game" ) );
 #else
 	gvm = VM_Create( "qagame", SV_GameSystemCalls, Cvar_VariableValue( "vm_game" ) );
 #endif

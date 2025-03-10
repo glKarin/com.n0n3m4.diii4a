@@ -148,10 +148,6 @@ weapIconDrawSize
 */
 static int weapIconDrawSize( int weap ) {
 	switch ( weap ) {
-
-	// weapons to not draw
-	case WP_DAGGER:
-	    return 0;
 	// weapons with 'wide' icons
 	case WP_THOMPSON:
 	case WP_MP40:
@@ -182,8 +178,8 @@ static int weapIconDrawSize( int weap ) {
 	case WP_AUTO5:
 	case WP_BROWNING:
 	case WP_M7:
-	case WP_M30:
 	case WP_M1941:
+	case WP_HDM:
 		return 2;
 	case WP_KNIFE:
 	     return 1;
@@ -531,7 +527,7 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 
 	switch ( weap ) {      // some weapons don't draw ammo count text
 	case WP_AIRSTRIKE:
-	case WP_DAGGER:
+	case WP_POISONGAS_MEDIC:
 		return;
 
 	case WP_AKIMBO:
@@ -566,7 +562,6 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 			if ( ammoTable[weap].weapAlts ) {
 				value = ps->ammoclip[ammoTable[weap].weapAlts];
 			}
-//				value2 = ps->ammoclip[weapAlts[weap]];
 		}
 	}
 
@@ -822,6 +817,38 @@ static void CG_DrawPlayerScore( rectDef_t *rect, int font, float scale, vec4_t c
 }
 
 
+
+static void CG_DrawPlayerKills( rectDef_t *rect, int font, float scale, vec4_t color, qhandle_t shader, int textStyle ) {
+	char num[16];
+	int value = cg.snap->ps.persistant[PERS_KILLS];
+
+	if ( shader ) {
+		trap_R_SetColor( color );
+		CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
+		trap_R_SetColor( NULL );
+	} else {
+		Com_sprintf( num, sizeof( num ), "%i", value );
+		value = CG_Text_Width( num, font, scale, 0 );
+		CG_Text_Paint( rect->x + ( rect->w - value ) / 2, rect->y + rect->h, font, scale, color, num, 0, 0, textStyle );
+	}
+}
+
+
+static void CG_DrawPlayerWaves( rectDef_t *rect, int font, float scale, vec4_t color, qhandle_t shader, int textStyle ) {
+	char num[16];
+	int value = cg.snap->ps.persistant[PERS_WAVES];
+
+	if ( shader ) {
+		trap_R_SetColor( color );
+		CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
+		trap_R_SetColor( NULL );
+	} else {
+		Com_sprintf( num, sizeof( num ), "%i", value );
+		value = CG_Text_Width( num, font, scale, 0 );
+		CG_Text_Paint( rect->x + ( rect->w - value ) / 2, rect->y + rect->h, font, scale, color, num, 0, 0, textStyle );
+	}
+}
+
 static void CG_DrawHoldableItem( rectDef_t *rect, int font, float scale, qboolean draw2D ) {
 	int	value;
 	gitem_t	*item;
@@ -850,6 +877,38 @@ static void CG_DrawHoldableItem( rectDef_t *rect, int font, float scale, qboolea
 			CG_DrawPic( rect->x, rect->y, rect->w, rect->h, cg_items[item - bg_itemlist].icons[0] );
 		}
 	}
+}
+
+static void CG_DrawPerks( rectDef_t *rect, int font, float scale, qboolean draw2D ) {
+    int i, numPerks = 0;
+    gitem_t *item;
+    float x, y = 20; // Top part of the screen
+
+    // Count the number of active perks
+    for ( i = 0; i < MAX_PERKS; i++ ) {
+        if ( cg.snap->ps.perks[i] > 0 || (cg.snap->ps.stats[STAT_PERK] & (1 << i)) ) {
+            numPerks++;
+        }
+    }
+
+    // Calculate the starting x position to center the perks
+    x = 220 - (numPerks * (rect->w + 5) - 5) / 2;
+
+    if ( cg_fixedAspect.integer == 2 ) {
+        CG_SetScreenPlacement(PLACE_RIGHT, PLACE_CENTER);
+    }
+
+    for ( i = 0; i < MAX_PERKS; i++ ) {
+        if ( cg.snap->ps.perks[i] > 0 || (cg.snap->ps.stats[STAT_PERK] & (1 << i)) ) {
+            item = BG_FindItemForPerk( i );
+
+            if ( item ) {
+                CG_RegisterItemVisuals( item - bg_itemlist );
+                CG_DrawPic( x, y, rect->w, rect->h, cg_items[item - bg_itemlist].icons[0] );
+                x += rect->w + 5; // 5 is the space between icons
+            }
+        }
+    }
 }
 
 void flubfoo( void ) {
@@ -1368,6 +1427,12 @@ float CG_GetValue( int ownerDraw, int type ) {
 		break;
 	case CG_PLAYER_SCORE:
 		return cg.snap->ps.persistant[PERS_SCORE];
+		break;
+	case CG_PLAYER_KILLS:
+		return cg.snap->ps.persistant[PERS_KILLS];
+		break;
+	case CG_PLAYER_WAVES:
+		return cg.snap->ps.persistant[PERS_WAVES];
 		break;
 	case CG_PLAYER_HEALTH:
 		return ps->stats[STAT_HEALTH];
@@ -2004,7 +2069,7 @@ static void CG_DrawWeapRecharge( rectDef_t *rect, vec4_t color, int align ) {
 		weap = cg.snap->ps.weapon;
 
 		if ( !( cg.snap->ps.eFlags & EF_ZOOMING ) ) {
-			if ( weap != WP_AIRSTRIKE ) {
+			if ( weap != WP_AIRSTRIKE && weap !=WP_POISONGAS_MEDIC ) {
 				//fade = qtrue;
 				return;
 			}
@@ -2139,11 +2204,20 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x, float text_
 	case CG_PLAYER_HOLDABLE:
 		CG_DrawHoldableItem( &rect, font, scale, ownerDrawFlags & CG_SHOW_2DONLY );
 		break;
+	case CG_PLAYER_PERKS:
+		CG_DrawPerks( &rect, font, scale, ownerDrawFlags & CG_SHOW_2DONLY );
+		break;
 	case CG_PLAYER_ITEM:
 		CG_DrawPlayerItem( &rect, font, scale, ownerDrawFlags & CG_SHOW_2DONLY );
 		break;
 	case CG_PLAYER_SCORE:
 		CG_DrawPlayerScore( &rect, font, scale, color, shader, textStyle );
+		break;
+	case CG_PLAYER_KILLS:
+		CG_DrawPlayerKills( &rect, font, scale, color, shader, textStyle );
+		break;
+	case CG_PLAYER_WAVES:
+		CG_DrawPlayerWaves( &rect, font, scale, color, shader, textStyle );
 		break;
 	case CG_PLAYER_HEALTH:
 		CG_DrawPlayerHealth( &rect, font, scale, color, shader, textStyle );

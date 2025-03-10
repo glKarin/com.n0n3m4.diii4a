@@ -94,7 +94,6 @@ public class Q3EGameHelper
         else
             Q3EUtils.q3ei.ResetGameState();
 
-        Q3EUtils.q3ei.isD3BFG_Vulkan = "Vulkan".equalsIgnoreCase(preferences.getString(Q3EPreference.pref_harm_d3bfg_rendererBackend, "OpenGL"));
         if (!Q3EUtils.q3ei.IsInitGame()) // not from GameLauncher::startActivity
         {
             Q3EUtils.q3ei.standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
@@ -113,6 +112,8 @@ public class Q3EGameHelper
 
             Q3EUtils.q3ei.start_temporary_extra_command = Q3EUtils.q3ei.MakeTempBaseCommand(m_context);
         }
+        Q3EUtils.q3ei.SetupGameVersion(m_context);
+
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Run " + Q3EUtils.q3ei.game_name);
 
         Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
@@ -158,7 +159,7 @@ public class Q3EGameHelper
         if(useUserCommand)
             cmd = gameCommand;
         else
-            cmd = preferences.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EUtils.q3ei.libname);
+            cmd = preferences.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGlobals.GAME_EXECUABLE);
         if(null == cmd)
             cmd = Q3EGlobals.GAME_EXECUABLE;
 
@@ -832,14 +833,11 @@ public class Q3EGameHelper
     public String GetEngineLib()
     {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
-        String libname = Q3EUtils.q3ei.libname;
-        // if(Q3EUtils.q3ei.isTDM) libname = "libDukeNukemForever.so"; // Test a new game using TDM
-        String libPath = /*Q3EUtils.GetGameLibDir(m_context) + "/" +*/ libname; // Q3EUtils.q3ei.libname;
-        //if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = "dnf"; // Test a new game using TDM
+        String libname = Q3EUtils.q3ei.GetEngineLibName();
+        String libPath = /*Q3EUtils.GetGameLibDir(m_context) + "/" +*/ libname; // Q3EUtils.q3ei.GetEngineLibName();
         if(preferences.getBoolean(Q3EPreference.LOAD_LOCAL_ENGINE_LIB, false))
         {
             String localLibPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(libname);
-            // if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = Q3EGlobals.GAME_SUBDIR_TDM; // Test a new game using TDM
             File file = new File(localLibPath);
             if(!file.isFile() || !file.canRead())
             {
@@ -899,7 +897,6 @@ public class Q3EGameHelper
         int consoleMaxHeightFrac = preferences.getInt(Q3EPreference.pref_harm_max_console_height_frac, 0);
 
         String subdatadir = Q3EUtils.q3ei.subdatadir;
-        // if(Q3EUtils.q3ei.isTDM) subdatadir = "dnf"; // Test a new game using TDM
 
         int refreshRate = (int)Q3EUtils.GetRefreshRate(m_context);
         String appHome = Q3EUtils.GetAppInternalSearchPath(m_context, null);

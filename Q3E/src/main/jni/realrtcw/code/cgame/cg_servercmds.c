@@ -615,6 +615,8 @@ static void CG_MapRestart( void ) {
 	memset( &cg.lastWeapSelInBank[0], 0, MAX_WEAP_BANKS * sizeof( int ) );  // clear weapon bank selections
 
 	cg.centerPrintTime = 0; // reset centerprint counter so previous messages don't re-appear
+	cg.buyPrintTime = 0; // reset centerprint counter so previous messages don't re-appear
+	cg.egPrintTime = 0; // reset centerprint counter so previous messages don't re-appear
 	cg.subtitlePrintTime = 0; // reset subtitleprint counter so previous messages don't re-appear
 	cg.itemPickupTime = 0;  // reset item pickup counter so previous messages don't re-appear
 	cg.cursorHintFade = 0;  // reset cursor hint timer
@@ -820,6 +822,16 @@ static void CG_ServerCommand( void ) {
 
 	if ( !strcmp( cmd, "cp" ) ) {
 		CG_CenterPrint( CG_Argv( 1 ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
+		return;
+	}
+
+	if ( !strcmp( cmd, "egp" ) ) {
+		CG_EndGamePrint( CG_Argv( 1 ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
+		return;
+	}
+
+	if ( !strcmp( cmd, "cpbuy" ) ) {
+		CG_BuyPrint( CG_Argv( 1 ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
 		return;
 	}
 

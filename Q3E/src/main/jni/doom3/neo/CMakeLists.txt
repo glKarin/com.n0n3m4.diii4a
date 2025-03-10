@@ -29,7 +29,7 @@ endif()
 add_definitions(-D_K_CLANG) # TODO
 add_definitions(-DID_ENABLE_CURL=${COMPILE_CURL})
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # set(CMAKE_BUILD_TYPE "Debug")
 # TODO
@@ -112,8 +112,8 @@ option(NO_LIGHT								"r_noLight support" 														ON)
 option(STENCIL_SHADOW_IMPROVE				"Improve stencil shadow(translucent, soft(Only OpenGLES3.1+))" 				ON)
 option(EXTRAS_TOOLS							"Add extras commands" 														OFF)
 option(MODEL_VIEWER							"Add model viewer in engine" 												OFF)
-option(USE_MINIZ							"use miniz and minizip" 													OFF)
-option(USE_STB_OGG							"use stb_vorbis" 															OFF)
+option(USE_MINIZ							"use miniz and minizip" 													ON)
+option(USE_STB_OGG							"use stb_vorbis" 															ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -191,8 +191,10 @@ if(MODEL_VIEWER)
 endif()
 
 # ETC2 support: but using C++11, so build a static library
+if(CORE OR RAVEN OR HUMANHEAD)
 add_subdirectory(renderer/etc/EtcLib)
 set(local_libs "static_EtcLib")
+endif()
 
 # Using traditional C++98
 set(CMAKE_CXX_STANDARD "98")
@@ -294,7 +296,7 @@ endif()
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
-#set(CMAKE_BUILD_TYPE "ReleaseWithDebInfo")
+#set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 # precompiled libraries from the dhewm3-libs repo
 #[[if(DHEWM3LIBS)
@@ -695,6 +697,7 @@ if(OPENAL)
 	message(STATUS "Build OpenAL(soft) support")
 endif()
 
+if(NOT USE_STB_IMAGE)
 #//k jpeg
 set(src_jpeg
 		externlibs/jpeg-8d/jaricom.c
@@ -744,12 +747,11 @@ set(src_jpeg
 		externlibs/jpeg-8d/jquant2.c
 		externlibs/jpeg-8d/jutils.c
 		)
-
 add_globbed_headers(src_jpeg "externlibs/jpeg-8d")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs/jpeg-8d")
 add_library(static_jpeg STATIC ${src_jpeg})
-
 set(local_libs ${local_libs} static_jpeg)
+endif() # jpeg
 
 set(src_renderer
 	renderer/Cinematic.cpp
@@ -1192,6 +1194,8 @@ set(PREY_MOD_DIR "${MOD_DIR}/prey")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs")
 
+if(CORE OR RAVEN OR HUMANHEAD)
+
 if(NOT WIN32)
 	if(COMPILE_CURL STREQUAL "1")
 		#//k curl
@@ -1258,6 +1262,8 @@ if(NOT WIN32)
 	endif()
 endif()
 
+
+if(NOT USE_STB_OGG)
 # Build internal ogg/vorbis
 set(src_ogg
 	externlibs/libogg/src/bitwise.c
@@ -1300,6 +1306,9 @@ target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/exter
 target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/include/vorbis")
 target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/lib")
 set(local_libs ${local_libs} static_ogg)
+endif() # ogg
+
+endif() # build engine
 
 set(src_core
 	${src_renderer}
@@ -1408,7 +1417,7 @@ endif()
 
 endif()
 
-include_directories(${CMAKE_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Build idlib static

@@ -723,7 +723,7 @@ static void CG_DrawStatusBar( void ) {
 		inclip = ps->ammoclip[BG_FindClipForWeapon( cent->currentState.weapon )];
 
 		if ( value > -1 ) {
-			if ( cg.predictedPlayerState.weapon == WP_KNIFE || cg.predictedPlayerState.weapon == WP_DAGGER ) {
+			if ( cg.predictedPlayerState.weapon == WP_KNIFE ) {
 				color = 3; 
 			} else if ( ( cg.predictedPlayerState.weaponstate == WEAPON_FIRING || cg.predictedPlayerState.weaponstate == WEAPON_FIRINGALT )
 					&& cg.predictedPlayerState.weaponTime > 100 ) {
@@ -787,8 +787,7 @@ static void CG_DrawStatusBar( void ) {
 				break;
 			}
 
-			// don't draw ammo value for knife
-			if ( cg.predictedPlayerState.weapon != WP_DAGGER ) {
+
 				if ( cgs.dmflags & DF_NO_WEAPRELOAD ) {
 					CG_DrawBigString2( ( 580 - 23 + 35 ) + wideOffset, STATUSBARHEIGHT, va( "%d.", value ), cg_hudAlpha.value );
 				} else if ( value ) {
@@ -796,7 +795,6 @@ static void CG_DrawStatusBar( void ) {
 				} else {
 					CG_DrawBigString2( ( 580 - 23 + 35 ) + wideOffset, STATUSBARHEIGHT, va( "%d", inclip ), cg_hudAlpha.value );
 				}
-			}
             
 			icon = cg_weapons[ cg.predictedPlayerState.weapon ].weaponIcon[0];
 			if ( icon ) {
@@ -1062,8 +1060,9 @@ static void CG_DrawUpperRight(stereoFrame_t stereoFrame) {
 	if (cg_drawFPS.integer && (stereoFrame == STEREO_CENTER || stereoFrame == STEREO_RIGHT)) {
 		y = CG_DrawFPS( y );
 	}
-	if ( cg_drawTimer.integer ) {
-		y = CG_DrawTimer( y );
+	if (cg_drawTimer.integer)
+	{
+		y = CG_DrawTimer(y);
 	}
 // (SA) disabling drawattacker for the time being
 	if ( cg_oldWolfUI.integer ) {
@@ -1750,6 +1749,122 @@ void CG_CenterPrint( const char *str, int y, int charWidth ) {
 	}
 }
 
+
+/*
+==============
+CG_BuyPrint
+
+Called for important messages that should stay in the center of the screen
+for a few moments
+==============
+*/
+void CG_BuyPrint( const char *str, int y, int charWidth ) {
+	char   *s, *p, *c = cg.buyPrint;
+	char   token[64];
+	const char *trToken;
+	int    lenTrToken;
+	int    destSizeBuyPrint = sizeof( cg.buyPrint );
+
+	s = p = str;
+	while ( 1 ) {
+		if ( Q_isalphanumeric( *s ) ) {
+			if ( !Q_isforfilename( *p ) || *p == '\r' || *p == '\n' || *p == '\0' ) {
+				// copy translation key
+				Q_strncpyz( token, s, p - s + 1 );
+
+				// get translation
+				trToken = CG_translateString( token );
+
+				if ( Q_strncmp( trToken, token, 999999 ) == 0 ) {
+					trToken = CG_translateTextString( token );
+				}
+
+				lenTrToken = strlen( trToken );
+
+				// append translation
+				Q_strncpyz( c, trToken, destSizeBuyPrint );
+				destSizeBuyPrint -= lenTrToken;
+				c += lenTrToken;
+
+				// copy separator
+				Q_strncpyz( token, p, 2 );
+
+				// append separator
+				Q_strncpyz( c, token, destSizeBuyPrint );
+				destSizeBuyPrint -= 1;
+				c += 1;
+
+				s = p + 1;
+			}
+		} else {
+			s = p;
+		}
+
+		if ( !( *p++ ) ) {
+			break;
+		}
+	}
+
+//----(SA)	added translation lookup
+	//Q_strncpyz( cg.buyPrint, CG_translateString( (char*)str ), sizeof( cg.buyPrint ) );
+//----(SA)	end
+
+
+	cg.buyPrintTime = cg.time;
+	cg.buyPrintY = y;
+	cg.buyPrintCharWidth = charWidth;
+
+	// count the number of lines for centering
+	cg.buyPrintLines = 1;
+	s = cg.buyPrint;
+	while ( *s ) {
+		if ( *s == '\n' ) {
+			cg.buyPrintLines++;
+		}
+		if ( !Q_strncmp( s, "\\n", 1 ) ) {
+			cg.buyPrintLines++;
+			s++;
+		}
+		s++;
+	}
+}
+
+/*
+==============
+CG_EndGamePrint
+
+Called for important messages that should stay in the center of the screen
+for a few moments
+==============
+*/
+void CG_EndGamePrint( const char *str, int y, int charWidth ) {
+	char   *s;
+
+//----(SA)	added translation lookup
+	Q_strncpyz( cg.egPrint, CG_translateString( (char*)str ), sizeof( cg.egPrint ) );
+//----(SA)	end
+
+
+	cg.egPrintTime = cg.time;
+	cg.egPrintY = y;
+	cg.egPrintCharWidth = charWidth;
+
+	// count the number of lines for centering
+	cg.egPrintLines = 1;
+	s = cg.egPrint;
+	while ( *s ) {
+		if ( *s == '\n' ) {
+			cg.egPrintLines++;
+		}
+		if ( !Q_strncmp( s, "\\n", 1 ) ) {
+			cg.egPrintLines++;
+			s++;
+		}
+		s++;
+	}
+}
+
+
 /*
 ==============
 CG_BonusCenterPrint
@@ -1894,6 +2009,137 @@ static void CG_DrawCenterString( void ) {
 		CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.centerPrintCharWidth, (int)( cg.centerPrintCharWidth * 1.5 ), 0 );
 
 		y += cg.centerPrintCharWidth * 2;
+
+		while ( *start && ( *start != '\n' ) ) {
+			if ( !Q_strncmp( start, "\\n", 1 ) ) {
+				start++;
+				break;
+			}
+			start++;
+		}
+		if ( !*start ) {
+			break;
+		}
+		start++;
+	}
+
+	trap_R_SetColor( NULL );
+}
+
+/*
+===================
+CG_DrawBuyString
+===================
+*/
+static void CG_DrawBuyString( void ) {
+	char    *start;
+	int l;
+	int x, y, w;
+	float   *color;
+
+	if ( !cg.buyPrintTime ) {
+		return;
+	}
+
+	color = CG_FadeColor( cg.buyPrintTime, 1000 * cg_buyprinttime.value );
+	if ( !color ) {
+		return;
+	}
+
+	if ( cg_fixedAspect.integer ) {
+		CG_SetScreenPlacement(PLACE_CENTER, PLACE_CENTER);
+	}
+
+	trap_R_SetColor( color );
+
+	start = cg.buyPrint;
+
+	y = cg.buyPrintY - cg.buyPrintLines * BIGCHAR_HEIGHT / 2;
+
+	while ( 1 ) {
+		char linebuffer[1024];
+
+		for ( l = 0; l < 50; l++ ) {
+			if ( !start[l] || start[l] == '\n' || !Q_strncmp( &start[l], "\\n", 1 ) ) {
+				break;
+			}
+			linebuffer[l] = start[l];
+		}
+		linebuffer[l] = 0;
+
+		w = cg.buyPrintCharWidth * CG_DrawStrlen( linebuffer );
+
+		x = ( SCREEN_WIDTH - w ) / 2;
+
+		CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.buyPrintCharWidth, (int)( cg.buyPrintCharWidth * 1.5 ), 0 );
+
+		y += cg.buyPrintCharWidth * 2;
+
+		while ( *start && ( *start != '\n' ) ) {
+			if ( !Q_strncmp( start, "\\n", 1 ) ) {
+				start++;
+				break;
+			}
+			start++;
+		}
+		if ( !*start ) {
+			break;
+		}
+		start++;
+	}
+
+	trap_R_SetColor( NULL );
+}
+
+
+/*
+===================
+CG_DrawEgString
+===================
+*/
+static void CG_DrawEgString( void ) {
+	char    *start;
+	int l;
+	int x, y, w;
+	float   *color;
+
+	if ( !cg.egPrintTime ) {
+		return;
+	}
+
+	color = CG_FadeColor( cg.egPrintTime, 1000 * cg_egprinttime.value );
+	if ( !color ) {
+		return;
+	}
+
+	if ( cg_fixedAspect.integer ) {
+		CG_SetScreenPlacement(PLACE_CENTER, PLACE_CENTER);
+	}
+
+	trap_R_SetColor( color );
+
+	start = cg.egPrint;
+
+	y = cg.egPrintY - cg.egPrintLines * BIGCHAR_HEIGHT / 2;
+
+	while ( 1 ) {
+		char linebuffer[1024];
+
+		for ( l = 0; l < 50; l++ ) {
+			if ( !start[l] || start[l] == '\n' || !Q_strncmp( &start[l], "\\n", 1 ) ) {
+				break;
+			}
+			linebuffer[l] = start[l];
+		}
+		linebuffer[l] = 0;
+
+		w = cg.egPrintCharWidth * CG_DrawStrlen( linebuffer );
+
+		x = ( SCREEN_WIDTH - w ) / 2;
+
+		CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.egPrintCharWidth, (int)( cg.egPrintCharWidth * 1.5 ), 0 );
+
+		y += cg.egPrintCharWidth * 2;
 
 		while ( *start && ( *start != '\n' ) ) {
 			if ( !Q_strncmp( start, "\\n", 1 ) ) {
@@ -2477,7 +2723,6 @@ static void CG_DrawCrosshair( void ) {
 
 		// special reticle for weapon
 	case WP_KNIFE:
-	case WP_DAGGER:
 		if ( cg.zoomedBinoc ) {
 			CG_DrawBinocReticle();
 			return;
@@ -2675,7 +2920,6 @@ static void CG_DrawCrosshair3D( void ) {
 		break;
 		// special reticle for weapon
 	case WP_KNIFE:
-	case WP_DAGGER:
 		if ( cg.zoomedBinoc ) {
 			CG_DrawBinocReticle();
 			return;
@@ -3026,6 +3270,8 @@ CG_DrawIntermission
 static void CG_DrawIntermission( void ) {
 
 	CG_DrawCenterString();
+	CG_DrawBuyString();
+	CG_DrawEgString();
 	CG_DrawSubtitleString();
 	return;
 
@@ -3776,6 +4022,8 @@ if ( !cg_oldWolfUI.integer ) {
 	// don't draw center string if scoreboard is up
 	if ( !CG_DrawScoreboard() ) {
 		CG_DrawCenterString();
+		CG_DrawBuyString();
+		CG_DrawEgString();
 		CG_DrawSubtitleString();
 		CG_DrawObjectiveInfo();     // NERVE - SMF
 	}

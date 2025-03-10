@@ -142,13 +142,24 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE4_TDM          = "libTheDarkMod.so"; // TDM
     public static final String LIB_ENGINE1_QUAKE        = "libdarkplaces.so"; // Quake 1
     public static final String LIB_ENGINE4_D3BFG        = "libRBDoom3BFG.so"; // Doom3-BFG
-    public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
     public static final String LIB_ENGINE1_DOOM         = "libgzdoom.so"; // GZDOOM
     public static final String LIB_ENGINE3_ETW          = "libetl.so"; // ETW
     public static final String LIB_ENGINE3_REALRTCW     = "libRealRTCW.so"; // RealRTCW
     public static final String LIB_ENGINE_FTEQW         = "libfteqw.so"; // FTEQW
     public static final String LIB_ENGINE_JA            = "libopenjk_sp.so"; // Jedi Academy
     public static final String LIB_ENGINE_JO            = "libopenjo_sp.so"; // Jedi Outcast
+
+    public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
+    public static final String LIB_ENGINE3_REALRTCW_5_0     = "libRealRTCW_5_0.so"; // RealRTCW(5.0)
+
+
+    // game engine version
+    public static final String GAME_VERSION_CURRENT = null; // default current
+
+    public static final String GAME_VERSION_D3BFG_OPENGL = "OpenGL"; // Doom3-BFG(OpenGL)
+    public static final String GAME_VERSION_D3BFG_VULKAN = "Vulkan"; // Doom3-BFG(Vulkan)
+
+    public static final String GAME_VERSION_REALRTCW_5_0     = "5.0"; // RealRTCW 5.0
 
     // game config file
     public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg";

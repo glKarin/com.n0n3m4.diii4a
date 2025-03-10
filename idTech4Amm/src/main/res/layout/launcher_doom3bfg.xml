@@ -58,28 +58,4 @@
         android:layout_height="wrap_content"
         android:text="@string/cache_compression_texture_harm_image_usecompressioncache" />
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:layout_marginBottom="1dp"
-            android:text="@string/renderer_backend" />
-    <RadioGroup
-            android:id="@+id/doom3bfg_rendererBackend"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-        <RadioButton
-                android:id="@+id/doom3bfg_rendererBackend_opengles"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="OpenGL ES" />
-        <RadioButton
-                android:id="@+id/doom3bfg_rendererBackend_vulkan"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Vulkan" />
-    </RadioGroup>
-
 </LinearLayout>

@@ -37,7 +37,7 @@ static char g_botInfos[MAX_BOTS][MAX_INFO_STRING];
 
 
 int g_numArenas;
-static char g_arenaInfos[MAX_ARENAS][MAX_INFO_STRING];
+static char *g_arenaInfos[MAX_ARENAS];
 
 
 #define BOT_BEGIN_DELAY_BASE        2000
@@ -59,54 +59,137 @@ extern gentity_t    *podium1;
 extern gentity_t    *podium2;
 extern gentity_t    *podium3;
 
+
+/*
+===============
+G_ParseInfos
+===============
+*/
+static int G_ParseInfos( char *buf, int max, char *infos[] ) {  
+    char    *token;
+    int count;
+    char key[MAX_TOKEN_CHARS];
+    char info[MAX_INFO_STRING];
+
+    count = 0; 
+
+    while ( 1 ) {  
+        token = COM_Parse( &buf );
+        if ( !token[0] ) {  
+            break;
+        }    
+        if ( strcmp( token, "{" ) ) {  
+            Com_Printf( "Missing { in info file\n" );
+            break;
+        }    
+
+        if ( count == max ) {  
+            Com_Printf( "Max infos exceeded\n" );
+            break;
+        }    
+
+        info[0] = '\0';
+        while ( 1 ) {  
+            token = COM_ParseExt( &buf, qtrue );
+            if ( !token[0] ) {  
+                Com_Printf( "Unexpected end of info file\n" );
+                break;
+            }    
+            if ( !strcmp( token, "}" ) ) {  
+                break;
+            }    
+            Q_strncpyz( key, token, sizeof( key ) ); 
+
+            token = COM_ParseExt( &buf, qfalse );
+            if ( !token[0] ) {
+                strcpy( token, "<NULL>" );
+            }
+            Info_SetValueForKey( info, key, token );
+        }
+        //NOTE: extra space for arena number
+        infos[count] = G_Alloc( strlen( info ) + strlen( "\\num\\" ) + strlen( va( "%d", MAX_ARENAS ) ) + 1 );
+        if ( infos[count] ) {
+            strcpy( infos[count], info );
+            count++;
+        }
+    }
+    return count;
+}
+
+/*
+===============
+G_LoadArenasFromFile
+===============
+*/
+static void G_LoadArenasFromFile( char *filename ) { 
+    int len;
+    fileHandle_t f;
+    char buf[MAX_ARENAS_TEXT];
+
+    len = trap_FS_FOpenFile( filename, &f, FS_READ );
+    if ( !f ) { 
+        trap_Print( va( S_COLOR_RED "file not found: %s\n", filename ) );
+        return;
+    }   
+    if ( len >= MAX_ARENAS_TEXT ) { 
+        trap_Print( va( S_COLOR_RED "file too large: %s is %i, max allowed is %i\n", filename, len, MAX_ARENAS_TEXT ) );
+        trap_FS_FCloseFile( f );
+        return;
+    }   
+
+    trap_FS_Read( buf, len, f );
+    buf[len] = 0;
+    trap_FS_FCloseFile( f );
+
+    g_numArenas += G_ParseInfos( buf, MAX_ARENAS - g_numArenas, &g_arenaInfos[g_numArenas] );
+}
+
 /*
 ===============
 G_LoadArenas
 ===============
 */
-/*
-static void G_LoadArenas( void ) {
-#ifdef QUAKESTUFF
-	int			len;
-	char		*filename;
-	vmCvar_t	arenasFile;
-	fileHandle_t	f;
-	int			n;
-	char		buf[MAX_ARENAS_TEXT];
+void G_LoadArenas( void ) { 
+    int numdirs;
+    vmCvar_t arenasFile;
+    char filename[128];
+    char dirlist[1024];
+    char*       dirptr;
+    int i, n;
+    int dirlen;
+    char        *type;
 
-	trap_Cvar_Register( &arenasFile, "g_arenasFile", "", CVAR_INIT|CVAR_ROM );
-	if( *arenasFile.string ) {
-		filename = arenasFile.string;
-	}
-	else {
-		filename = "scripts/arenas.txt";
-	}
+    trap_Cvar_Register( &arenasFile, "g_arenasFile", "", CVAR_INIT | CVAR_ROM );
+    if ( *arenasFile.string ) { 
+        G_LoadArenasFromFile( arenasFile.string );
+    } else {
+        G_LoadArenasFromFile( "scripts/arenas.txt" );
+    }   
 
-	len = trap_FS_FOpenFile( filename, &f, FS_READ );
-	if ( !f ) {
-		trap_Print( va( S_COLOR_RED "file not found: %s\n", filename ) );
-		return;
-	}
-	if ( len >= MAX_ARENAS_TEXT ) {
-		trap_Print( va( S_COLOR_RED "file too large: %s is %i, max allowed is %i", filename, len, MAX_ARENAS_TEXT ) );
-		trap_FS_FCloseFile( f );
-		return;
-	}
+    // get all arenas from .arena files
+    numdirs = trap_FS_GetFileList( "scripts", ".arena", dirlist, 1024 );
+    dirptr  = dirlist;
+    for ( i = 0; i < numdirs; i++, dirptr += dirlen + 1 ) { 
+        dirlen = strlen( dirptr );
+        strcpy( filename, "scripts/" );
+        strcat( filename, dirptr );
+        G_LoadArenasFromFile( filename );
+    }   
+    G_DPrintf( "%i arenas parsed\n", g_numArenas );
 
-	trap_FS_Read( buf, len, f );
-	buf[len] = 0;
-	trap_FS_FCloseFile( f );
+	i = 0;
+    for ( n = 0; n < g_numArenas; n++ ) { 
 
-	g_numArenas = COM_ParseInfos( buf, MAX_ARENAS, g_arenaInfos );
-	trap_Print( va( "%i arenas parsed\n", g_numArenas ) );
-
-	for( n = 0; n < g_numArenas; n++ ) {
-		Info_SetValueForKey( g_arenaInfos[n], "num", va( "%i", n ) );
-	}
-#endif
+        type = Info_ValueForKey( g_arenaInfos[n], "type" );
+        if ( *type ) { 
+            if ( strstr( type, "sv_normal" ) && i < MAX_MAPS ) { 
+				char *map = Info_ValueForKey( g_arenaInfos[n], "map" );
+				level.maplist[i] = G_Alloc(strlen(map));
+				strcpy(level.maplist[i++], map);
+            }   
+        }   
+    }   
 }
-*/
-
 
 /*
 ===============

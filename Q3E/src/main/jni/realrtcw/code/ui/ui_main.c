@@ -1259,8 +1259,8 @@ void UI_Load( void ) {
 	UI_LoadTranslationStrings();
 	UI_LoadbonusStrings();
 
-//	UI_ParseGameInfo("gameinfo.txt");
-//	UI_LoadArenas();
+	UI_ParseGameInfo("gameinfo.txt");
+	UI_LoadArenas();
 
 	UI_LoadMenus( menuSet, qtrue );
 	Menus_CloseAll();
@@ -1976,6 +1976,24 @@ static void UI_DrawNetMapPreview( rectDef_t *rect, float scale, vec4_t color ) {
 
 	if ( uiInfo.serverStatus.currentServerPreview > 0 ) {
 		UI_DrawHandlePic( rect->x, rect->y, rect->w, rect->h, uiInfo.serverStatus.currentServerPreview );
+	} else {
+		UI_DrawHandlePic( rect->x, rect->y, rect->w, rect->h, trap_R_RegisterShaderNoMip( "menu/art/unknownmap" ) );
+	}
+}
+
+static void UI_DrawSmallCreateMapPreview( rectDef_t *rect, float scale, vec4_t color, int number ) {
+
+	if ( uiInfo.mapList[ui_currentNetMap.integer].mapLoadName ) {
+		UI_DrawHandlePic( rect->x, rect->y, rect->w, rect->h, trap_R_RegisterShaderNoMip( va( "levelshots/ui_%s_s%d", uiInfo.mapList[ui_currentNetMap.integer].mapLoadName, number ) ) );
+	} else {
+		UI_DrawHandlePic( rect->x, rect->y, rect->w, rect->h, trap_R_RegisterShaderNoMip( "menu/art/unknownmap" ) );
+	}
+}
+
+static void UI_DrawCreateMapPreview( rectDef_t *rect, float scale, vec4_t color ) {
+
+	if ( uiInfo.mapList[ui_currentNetMap.integer].mapLoadName ) {
+		UI_DrawHandlePic( rect->x, rect->y, rect->w, rect->h, trap_R_RegisterShaderNoMip( va( "levelshots/ui_%s", uiInfo.mapList[ui_currentNetMap.integer].mapLoadName ) ) );
 	} else {
 		UI_DrawHandlePic( rect->x, rect->y, rect->w, rect->h, trap_R_RegisterShaderNoMip( "menu/art/unknownmap" ) );
 	}
@@ -2790,6 +2808,15 @@ static void UI_OwnerDraw( float x, float y, float w, float h, float text_x, floa
 	case UI_NETMAPPREVIEW:
 		UI_DrawNetMapPreview( &rect, scale, color );
 		break;
+	case UI_CREATEMAPPREVIEW:
+		UI_DrawCreateMapPreview( &rect, scale, color );
+		break;
+	case UI_CREATEMAPPREVIEW_SMALL1:
+		UI_DrawSmallCreateMapPreview( &rect, scale, color, 1 );
+		break;
+	case UI_CREATEMAPPREVIEW_SMALL2:
+		UI_DrawSmallCreateMapPreview( &rect, scale, color, 2 );
+		break;
 	case UI_NETMAPCINEMATIC:
 		UI_DrawNetMapCinematic( &rect, scale, color );
 		break;
@@ -3073,14 +3100,82 @@ static qboolean UI_ClanName_HandleKey(int flags, float *special, int key) {
 }
 
 static qboolean UI_GameType_HandleKey(int flags, float *special, int key, qboolean resetMap) {
+//#ifdef MISSIONPACK
+	int select = UI_SelectForKey(key);
+	if (select != 0) {
+		int oldCount = UI_MapCountByGameType(qtrue);
+
+		// hard coded mess here
+		if (select < 0) {
+			ui_gameType.integer--;
+			if (ui_gameType.integer == 2) {
+				ui_gameType.integer = 1;
+			} else if (ui_gameType.integer < 2) {
+				ui_gameType.integer = uiInfo.numGameTypes - 1;
+			}
+		} else {
+			ui_gameType.integer++;
+			if (ui_gameType.integer >= uiInfo.numGameTypes) {
+				ui_gameType.integer = 1;
+			} else if (ui_gameType.integer == 2) {
+				ui_gameType.integer = 3;
+			}
+		}
+
+		trap_Cvar_SetValue("ui_gameType", ui_gameType.integer);
+		UI_SetCapFragLimits(qtrue);
+		UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName, uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+		if (resetMap && oldCount != UI_MapCountByGameType(qtrue)) {
+			trap_Cvar_SetValue( "ui_currentMap", 0);
+			Menu_SetFeederSelection(NULL, FEEDER_MAPS, 0, NULL);
+		}
+		return qtrue;
+	}
+//#endif	// #ifdef MISSIONPACK
 	return qfalse;
 }
 
 static qboolean UI_NetGameType_HandleKey(int flags, float *special, int key) {
+
+		int select = UI_SelectForKey(key);
+
+		if ( select != 0 ) {
+		ui_netGameType.integer += select;
+
+		if ( ui_netGameType.integer < 0 ) {
+			ui_netGameType.integer = uiInfo.numGameTypes - 1;
+		} else if ( ui_netGameType.integer >= uiInfo.numGameTypes ) {
+			ui_netGameType.integer = 0;
+		}
+
+		trap_Cvar_SetValue( "ui_netGameType", ui_netGameType.integer );
+		trap_Cvar_SetValue( "ui_actualnetGameType", uiInfo.gameTypes[ui_netGameType.integer].gtEnum );
+		trap_Cvar_SetValue( "ui_currentNetMap", 0 );
+		UI_MapCountByGameType( qfalse );
+		Menu_SetFeederSelection( NULL, FEEDER_ALLMAPS, 0, NULL );
+		return qtrue;
+	}
+
 	return qfalse;
 }
 
 static qboolean UI_JoinGameType_HandleKey(int flags, float *special, int key) {
+//#ifdef MISSIONPACK
+	int select = UI_SelectForKey(key);
+	if (select != 0) {
+		ui_joinGameType.integer += select;
+
+		if (ui_joinGameType.integer < 0) {
+			ui_joinGameType.integer = uiInfo.numJoinGameTypes - 1;
+		} else if (ui_joinGameType.integer >= uiInfo.numJoinGameTypes) {
+			ui_joinGameType.integer = 0;
+		}
+
+		trap_Cvar_SetValue( "ui_joinGameType", ui_joinGameType.integer);
+		UI_BuildServerDisplayList(qtrue);
+		return qtrue;
+	}
+//#endif	// #ifdef MISSIONPACK
 	return qfalse;
 }
 
@@ -4538,6 +4633,12 @@ static void UI_RunMenuScript( char **args ) {
 			Menu_SetFeederSelection( NULL, FEEDER_MAPS, ui_mapIndex.integer, "skirmish" );
 			UI_GameType_HandleKey( 0, NULL, K_MOUSE1, qfalse );
 			UI_GameType_HandleKey( 0, NULL, K_MOUSE2, qfalse );
+		} else if ( Q_stricmp( name, "StartSurvival" ) == 0 ) {
+			trap_Cvar_Set( "cg_thirdPerson", "0" );
+			trap_Cvar_Set( "cg_cameraOrbit", "0" );
+			trap_Cvar_SetValue( "g_gametype", 3 );
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "wait ; wait ; map %s\n", uiInfo.mapList[ui_currentNetMap.integer].mapLoadName ) );
+
 		} else if (Q_stricmp( name, "validate_openURL" ) == 0 ) 
 		{
 			if (String_Parse(args, &name2))
@@ -4602,19 +4703,18 @@ static void UI_RunMenuScript( char **args ) {
 			} else {
 				trap_Cvar_Set( "ui_cdkeyvalid", "CD Key does not appear to be valid." );
 			}
-			//#ifdef MISSIONPACK			// NERVE - SMF - enabled for multiplayer
 		} else if ( Q_stricmp( name, "loadArenas" ) == 0 ) {
 			UI_LoadArenasIntoMapList();
 			UI_MapCountByGameType( qfalse );
-			Menu_SetFeederSelection( NULL, FEEDER_ALLMAPS, 0, "createserver" );
-			//#endif	// #ifdef MISSIONPACK
+			Menu_SetFeederSelection( NULL, FEEDER_ALLMAPS, 0, "survival_menu" );
 		} else if ( Q_stricmp( name, "saveControls" ) == 0 ) {
 			Controls_SetConfig( qtrue );
 		} else if ( Q_stricmp( name, "loadControls" ) == 0 ) {
 			Controls_GetConfig();
 		} else if ( Q_stricmp( name, "clearError" ) == 0 ) {
 			trap_Cvar_Set( "com_errorMessage", "" );
-			//#ifdef MISSIONPACK			// NERVE - SMF - enabled for multiplayer
+		} else if ( Q_stricmp( name, "skill_surv" ) == 0 ) {
+			trap_Cvar_Set( "g_gameskill", "5" );
 		} else if ( Q_stricmp( name, "loadGameInfo" ) == 0 ) {
 			UI_ParseGameInfo( "gameinfo.txt" );
 			UI_LoadBestScores( uiInfo.mapList[ui_currentMap.integer].mapLoadName, uiInfo.gameTypes[ui_gameType.integer].gtEnum );
@@ -5037,14 +5137,17 @@ static int UI_MapCountByGameType( qboolean singlePlayer ) {
 	int i, c, game;
 	c = 0;
 	game = singlePlayer ? uiInfo.gameTypes[ui_gameType.integer].gtEnum : uiInfo.gameTypes[ui_netGameType.integer].gtEnum;
-
+	/*
+	if ( game == GT_SINGLE_PLAYER ) {
 	game++;
+	}
+	*/
 
 	for ( i = 0; i < uiInfo.mapCount; i++ ) {
 		uiInfo.mapList[i].active = qfalse;
 		if ( uiInfo.mapList[i].typeBits & ( 1 << game ) ) {
 			if ( singlePlayer ) {
-				if ( !( uiInfo.mapList[i].typeBits ) ) {
+				if ( !( uiInfo.mapList[i].typeBits & ( 1 << GT_SINGLE_PLAYER ) ) ) {
 					continue;
 				}
 			}
@@ -6747,8 +6850,8 @@ void _UI_Init( qboolean inGameLoad ) {
 
 //	UI_ParseTeamInfo("teaminfo.txt");
 //	UI_LoadTeams();
-//	UI_ParseGameInfo("gameinfo.txt");
-//	UI_LoadArenas();
+	UI_ParseGameInfo("gameinfo.txt");
+	UI_LoadArenas();
 
 	menuSet = UI_Cvar_VariableString( "ui_menuFiles" );
 	if ( menuSet == NULL || menuSet[0] == '\0' ) {

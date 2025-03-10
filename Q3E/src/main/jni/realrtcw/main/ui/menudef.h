@@ -257,6 +257,7 @@ If you have questions concerning this license or the applicable additional terms
 #define CG_PLAYER_ARMOR_VALUE_BAR   85
 #define CG_PLAYER_PERKS             86
 #define CG_PLAYER_KILLS             87
+#define CG_PLAYER_WAVES             88
 
 #define UI_OWNERDRAW_BASE           200
 #define UI_HANDICAP                 200
@@ -328,6 +329,11 @@ If you have questions concerning this license or the applicable additional terms
 #define UI_LOADSTATUSBAR            261
 #define UI_SAVEGAMENAME             262
 #define UI_SAVEGAMEINFO             263
+
+#define UI_CREATEMAPPREVIEW         264
+#define UI_CREATEMAPPREVIEW_SMALL1  265
+#define UI_CREATEMAPPREVIEW_SMALL2  266
+
 
 #define VOICECHAT_GETFLAG           "getflag"                // command someone to get the flag
 #define VOICECHAT_OFFENSE           "offense"                // command someone to go on offense

@@ -54,19 +54,18 @@ int CG_WeaponIndex( int weapnum, int *bank, int *cycle );
 static qboolean CG_WeaponHasAmmo( int i );
 static int maxWeapBanks = MAX_WEAP_BANKS, maxWeapsInBank = MAX_WEAPS_IN_BANK; // JPW NERVE
 
-
 int weapBanks[MAX_WEAP_BANKS][MAX_WEAPS_IN_BANK] = {
-	{0,                     0,                      0,            0,               0,            0            },  //	0 (empty)
-	{WP_KNIFE,              WP_DAGGER,              WP_HOLYCROSS, 0,               0,            0            },  //	1
-	{WP_LUGER,              WP_COLT,                WP_TT33,      WP_REVOLVER,     WP_HDM,    WP_P38       },  //	2
-	{WP_MP40,               WP_MP34,                WP_STEN,      WP_THOMPSON,     WP_PPSH,      0            },  //	3
-	{WP_MAUSER,             WP_GARAND,              WP_MOSIN,     WP_DELISLE,      0,            0            },  //	4
-    {WP_G43,                WP_M1GARAND,            WP_M1941,     0,               0,            0            },  //	5
-	{WP_FG42,               WP_MP44,                WP_BAR,       0,               0,            0            },  //	6
-	{WP_M97,                WP_M30,                 WP_AUTO5,     0,               0,            0            },  //	7
-	{WP_GRENADE_LAUNCHER,   WP_GRENADE_PINEAPPLE,   WP_DYNAMITE,  WP_AIRSTRIKE,    WP_POISONGAS, 0            },  //	8
-	{WP_PANZERFAUST,        WP_FLAMETHROWER,        WP_MG42M,     WP_BROWNING,     0,            0            },  //	9
-	{WP_VENOM,              WP_TESLA,               0,            0,               0,            0            }  //	10
+	{0, 0, 0, 0, 0, 0},																						  //	0 (empty)
+	{WP_KNIFE, WP_HOLYCROSS, 0, 0, 0},															  //	1
+	{WP_LUGER, WP_SILENCER, WP_COLT, WP_AKIMBO, WP_TT33, WP_DUAL_TT33, WP_REVOLVER, WP_HDM},				  //	2
+	{WP_MP40, WP_MP34, WP_STEN, WP_THOMPSON, WP_PPSH, 0},													  //	3
+	{WP_MAUSER, WP_GARAND, WP_MOSIN, WP_DELISLE, 0, 0},														  //	4
+	{WP_G43, WP_M1GARAND, WP_M1941, 0, 0, 0},																  //	5
+	{WP_FG42, WP_MP44, WP_BAR, 0, 0, 0},																	  //	6
+	{WP_M97, WP_AUTO5, 0, 0, 0},																	  //	7
+	{WP_GRENADE_LAUNCHER, WP_GRENADE_PINEAPPLE, WP_DYNAMITE, WP_AIRSTRIKE, WP_POISONGAS, WP_POISONGAS_MEDIC}, //	8
+	{WP_PANZERFAUST, WP_FLAMETHROWER, WP_MG42M, WP_BROWNING, 0, 0},											  //	9
+	{WP_VENOM, WP_TESLA, 0, 0, 0, 0}																		  //	10
 };
 
 // JPW NERVE -- in mutiplayer, characters get knife/special on button 1, pistols on 2, 2-handed on 3
@@ -267,9 +266,9 @@ static void CG_MachineGunEjectBrass( centity_t *cent ) {
 	le->leMarkType = LEMT_NONE;
 }
 
-/*static void CG_MachineGunEjectBrassDelay( centity_t *cent, int delay ) {
+static void CG_MachineGunEjectBrassDelay( centity_t *cent, int delay ) {
 	CG_AllocDelayedBrass( cent, cg.time + delay, CG_MachineGunEjectBrass );
-}*/
+}
 
 /*
 ==============
@@ -456,9 +455,9 @@ static void CG_ShotgunEjectBrass( centity_t *cent ) {
 	le->leMarkType = LEMT_NONE;
 }
 
-/*static void  CG_ShotgunEjectBrassDelay( centity_t *cent, int delay ) {
+static void  CG_ShotgunEjectBrassDelay( centity_t *cent, int delay ) {
 	CG_AllocDelayedBrass( cent, cg.time + delay, CG_ShotgunEjectBrass );
-}*/
+}
 
 /*
 ==============
@@ -645,9 +644,9 @@ static void CG_PistolEjectBrass( centity_t *cent ) {
 	le->leMarkType = LEMT_NONE;
 }
 
-/*static void CG_PistolEjectBrassDelay( centity_t *cent, int delay ) {
+static void CG_PistolEjectBrassDelay( centity_t *cent, int delay ) {
 	CG_AllocDelayedBrass( cent, cg.time + delay, CG_PistolEjectBrass );
-}*/
+}
 
 //----(SA)	added
 /*
@@ -741,9 +740,9 @@ static void CG_PanzerFaustEjectBrass( centity_t *cent ) {
 	le->leMarkType = LEMT_NONE;
 }
 
-/*static void CG_PanzerFaustEjectBrassDelay( centity_t *cent, int delay ) {
+static void CG_PanzerFaustEjectBrassDelay( centity_t *cent, int delay ) {
 	CG_AllocDelayedBrass( cent, cg.time + delay, CG_PanzerFaustEjectBrass );
-}*/
+}
 
 /*
 ==============
@@ -1468,6 +1467,8 @@ static qboolean CG_RW_ParseClient( int handle, weaponInfo_t *weaponInfo, int wea
 	int i = 0;
 
 	weaponInfo->reloadFullSound = 0;
+	weaponInfo->reloadFullSoundFast = 0;
+	weaponInfo->reloadSoundFast = 0;
 	weaponInfo->reloadSoundAi = 0;
 	weaponInfo->flashSoundAi[i] = 0;
 
@@ -1603,11 +1604,23 @@ static qboolean CG_RW_ParseClient( int handle, weaponInfo_t *weaponInfo, int wea
 			} else {
 				weaponInfo->reloadSound = trap_S_RegisterSound( filename );
 			}
+		} else if ( !Q_stricmp( token.string, "reloadSoundFast" ) ) {
+			if ( !PC_String_ParseNoAlloc( handle, filename, sizeof( filename ) ) ) {
+				return CG_RW_ParseError( handle, "expected reloadSound filename" );
+			} else {
+				weaponInfo->reloadSoundFast = trap_S_RegisterSound( filename );
+			}
 		} else if ( !Q_stricmp( token.string, "reloadFullSound" ) ) {
 			if ( !PC_String_ParseNoAlloc( handle, filename, sizeof( filename ) ) ) {
 				return CG_RW_ParseError( handle, "expected reloadFullSound filename" );
 			} else {
 				weaponInfo->reloadFullSound = trap_S_RegisterSound( filename );
+			}
+		} else if ( !Q_stricmp( token.string, "reloadFullSoundFast" ) ) {
+			if ( !PC_String_ParseNoAlloc( handle, filename, sizeof( filename ) ) ) {
+				return CG_RW_ParseError( handle, "expected reloadFullSound filename" );
+			} else {
+				weaponInfo->reloadFullSoundFast = trap_S_RegisterSound( filename );
 			}
 		} else if ( !Q_stricmp( token.string, "reloadSoundAi" ) ) {
 			if ( !PC_String_ParseNoAlloc( handle, filename, sizeof( filename ) ) ) {
@@ -1686,6 +1699,14 @@ static qboolean CG_RW_ParseClient( int handle, weaponInfo_t *weaponInfo, int wea
 			if ( !PC_Float_Parse( handle, &weaponInfo->missileDlight ) ) {
 				return CG_RW_ParseError( handle, "expected missileDlight value" );
 			}
+		} else if ( !Q_stricmp( token.string, "wiTrailTime" ) ) {
+			if ( !PC_Int_Parse( handle, &weaponInfo->wiTrailTime ) ) {
+				return CG_RW_ParseError( handle, "expected wiTrailTime value" );
+			}
+		} else if ( !Q_stricmp( token.string, "trailRadius" ) ) {
+			if ( !PC_Int_Parse( handle, &weaponInfo->trailRadius ) ) {
+				return CG_RW_ParseError( handle, "expected trailRadius value" );
+			}
 		} else if ( !Q_stricmp( token.string, "missileDlightColor" ) ) {
 			if ( !PC_Vec_Parse( handle, &weaponInfo->missileDlightColor ) ) {
 				return CG_RW_ParseError( handle, "expected missileDlightColor as r g b" );
@@ -1707,13 +1728,13 @@ static qboolean CG_RW_ParseClient( int handle, weaponInfo_t *weaponInfo, int wea
 				return CG_RW_ParseError( handle, "expected ejectBrassFunc" );
 			} else {
 				if ( !Q_stricmp( filename, "MachineGunEjectBrass" ) ) {
-					weaponInfo->ejectBrassFunc = CG_MachineGunEjectBrass;
+					weaponInfo->ejectBrassFunc = CG_MachineGunEjectBrassDelay;
 				} else if ( !Q_stricmp( filename, "PanzerFaustEjectBrass" ) ) {
-					weaponInfo->ejectBrassFunc = CG_PanzerFaustEjectBrass;
+					weaponInfo->ejectBrassFunc = CG_PanzerFaustEjectBrassDelay;
 				} else if ( !Q_stricmp( filename, "PistolEjectBrass" ) ) {
-					weaponInfo->ejectBrassFunc = CG_PistolEjectBrass;
+					weaponInfo->ejectBrassFunc = CG_PistolEjectBrassDelay;
 				} else if ( !Q_stricmp( filename, "ShotgunEjectBrass" ) ) {
-					weaponInfo->ejectBrassFunc = CG_ShotgunEjectBrass;
+					weaponInfo->ejectBrassFunc = CG_ShotgunEjectBrassDelay;
 				}
 			}
 		} else if ( !Q_stricmp( token.string, "modModel" ) ) {
@@ -1736,6 +1757,15 @@ static qboolean CG_RW_ParseClient( int handle, weaponInfo_t *weaponInfo, int wea
     // If reloadFullSound is not set, use reloadSound
     if (weaponInfo->reloadFullSound == 0) {
         weaponInfo->reloadFullSound = weaponInfo->reloadSound;
+    }
+
+
+	if (weaponInfo->reloadFullSoundFast == 0) {
+        weaponInfo->reloadFullSoundFast = weaponInfo->reloadSoundFast;
+    }
+
+	if (weaponInfo->reloadSoundFast == 0) {
+        weaponInfo->reloadSoundFast = weaponInfo->reloadSound;
     }
 
 	if (weaponInfo->reloadSoundAi == 0) {
@@ -2144,9 +2174,8 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles ) {
 			leanscale = 2.0f;
 			break;
 
-			// never adjust
+		// never adjust
 		case WP_KNIFE:
-		case WP_DAGGER:
 		case WP_GRENADE_LAUNCHER:
 		case WP_GRENADE_PINEAPPLE:
 			break;
@@ -2358,6 +2387,8 @@ qboolean CG_DrawRealWeapons( centity_t *cent ) {
 	case AICHAR_SUPERSOLDIER_LAB:   
 	case AICHAR_PROTOSOLDIER:
 	case AICHAR_ZOMBIE:
+	case AICHAR_ZOMBIE_SURV:
+	case AICHAR_ZOMBIE_GHOST:
 	case AICHAR_HELGA:      //----(SA)	added	// boss1 is now helga-blob
 	case AICHAR_WARZOMBIE:
 	case AICHAR_DOG:
@@ -2384,12 +2415,16 @@ static void CG_AddWeaponWithPowerups( refEntity_t *gun, int powerups, playerStat
 	} else {
 		trap_R_AddRefEntityToScene( gun );
 
-		/*if ( powerups & ( 1 << PW_BATTLESUIT ) ) {
+		if ( powerups & ( 1 << PW_BATTLESUIT_SURV ) ) {
 			gun->customShader = cgs.media.battleWeaponShader;
 			trap_R_AddRefEntityToScene( gun );
-		}*/
+		}
 		if ( powerups & ( 1 << PW_QUAD ) ) {
 			gun->customShader = cgs.media.quadWeaponShader;
+			trap_R_AddRefEntityToScene( gun );
+		}
+		if ( powerups & ( 1 << PW_VAMPIRE ) ) {
+			gun->customShader = cgs.media.redQuadShader;
 			trap_R_AddRefEntityToScene( gun );
 		}
 	}
@@ -3162,7 +3197,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		CG_AddWeaponWithPowerups( &gun, cent->currentState.powerups, ps, cent );
 	}
 
-	if ( isPlayer ) {
+	if ( isPlayer && ps != NULL ) {
 		refEntity_t brass;
 
 		// opposite tag in akimbo, since at this point the weapon
@@ -3435,8 +3470,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		 weaponNum == WP_GRENADE_PINEAPPLE ||
 		 weaponNum == WP_KNIFE ||
 		 weaponNum == WP_DYNAMITE ||
-		 weaponNum == WP_M7 ||
-		 weaponNum == WP_DAGGER ) {
+		 weaponNum == WP_M7 ) {
 		return;
 	}
 
@@ -3789,7 +3823,6 @@ void CG_DrawWeaponSelect( void ) {
 		case WP_M97:
 		case WP_AUTO5:
 		case WP_BROWNING:
-		case WP_M30:
 		case WP_STEN:
 		case WP_MAUSER:
 		case WP_DELISLE:
@@ -3973,7 +4006,8 @@ static qboolean CG_WeaponSelectable( int i ) {
 		return qfalse;
 	}
 
-	if ( !CG_WeaponHasAmmo( i ) ) {
+	if (!CG_WeaponHasAmmo(i) && (cg_newinventory.integer <= 0 && cg_gameType.integer != GT_SURVIVAL))
+	{
 		return qfalse;
 	}
 
@@ -4318,10 +4352,6 @@ void CG_PlaySwitchSound( int lastweap, int newweap ) {
 
 	if ( getAltWeapon( lastweap ) == newweap ) { // alt switch
 		switch ( newweap ) {
-		case WP_SILENCER:
-		case WP_LUGER:
-			switchsound = cg_weapons[newweap].switchSound[0];
-			break;
 		case WP_M7:
 			switchsound = cg_weapons[newweap].switchSound[0];
 			break;
@@ -4430,41 +4460,8 @@ void CG_AltWeapon_f( void ) {
 	num = getAltWeapon( original );
 
 	if ( CG_WeaponSelectable( num ) ) {   // new weapon is valid
-
-//----(SA)	testing mod functionality for the silencer on the luger
-		// (SA) this way, if you switch away from the silenced luger,
-		//		the silencer will still be attached when you switch back
-		//		(until you remove it)
-		// TODO: will need to make sure the table gets initialized properly on restart/death/whatever.
-		//		 I still think I'm going to make the weapon banks stored in the config, so this will
-		//		just be a matter of resetting the banks to what's in the config.
 		
 		switch ( original ) {
-		case WP_LUGER:
-			if ( cg.snap->ps.eFlags & EF_MELEE_ACTIVE ) {   // if you're holding a chair, you can't screw on the silencer
-				return;
-			}
-			weapBanks[2][0] = WP_SILENCER;
-			break;
-		case WP_SILENCER:
-			if ( cg.snap->ps.eFlags & EF_MELEE_ACTIVE ) {   // if you're holding a chair, you can't remove the silencer
-				return;
-			}
-			weapBanks[2][0] = WP_LUGER;
-			break;
-
-		case WP_AKIMBO:
-			weapBanks[2][1] = WP_COLT;
-			break;
-		case WP_COLT:
-			weapBanks[2][1] = WP_AKIMBO;
-			break;
-		case WP_DUAL_TT33:
-			weapBanks[2][2] = WP_TT33;
-			break;
-		case WP_TT33:
-			weapBanks[2][2] = WP_DUAL_TT33;
-			break;
 		case WP_MAUSER:
 		case WP_GARAND:
 		case WP_FG42:
@@ -4484,8 +4481,7 @@ void CG_AltWeapon_f( void ) {
 
 		// Arnout: don't allow another weapon switch when we're still swapping the gpg40, to prevent animation breaking
 	if ( ( cg.snap->ps.weaponstate == WEAPON_RAISING || cg.snap->ps.weaponstate == WEAPON_DROPPING ) &&
-		 ( ( original == WP_M7 || num == WP_M7 ) ||
-		   ( original == WP_SILENCER || num == WP_SILENCER  ) ) ) {
+		 ( ( original == WP_M7 || num == WP_M7 ) ) ) {
 		return;
 	}
 }
@@ -4507,9 +4503,6 @@ void CG_NextWeap( qboolean switchBanks ) {
 	CG_WeaponIndex( curweap, &bank, &cycle );     // get bank/cycle of current weapon
 
 	switch ( num ) {
-	case WP_SILENCER:
-		curweap = num = WP_LUGER;
-		break;
 	case WP_M7:
 		curweap = num = WP_M1GARAND;
 		break;
@@ -4521,12 +4514,6 @@ void CG_NextWeap( qboolean switchBanks ) {
 		break;
 	case WP_SNOOPERSCOPE:
 		curweap = num = WP_GARAND;
-		break;
-	case WP_AKIMBO:
-		curweap = num = WP_COLT;
-		break;
-	case WP_DUAL_TT33:
-		curweap = num = WP_TT33;
 		break;
 	}
 
@@ -4653,9 +4640,6 @@ void CG_PrevWeap( qboolean switchBanks ) {
 	num = curweap = cg.weaponSelect;
 
 	switch ( num ) {
-	case WP_SILENCER:
-		curweap = num = WP_LUGER;
-		break;
 	case WP_M7:
 		curweap = num = WP_M1GARAND;
 		break;
@@ -4668,24 +4652,13 @@ void CG_PrevWeap( qboolean switchBanks ) {
 	case WP_SNOOPERSCOPE:
 		curweap = num = WP_GARAND;
 		break;
-	case WP_AKIMBO:
-		curweap = num = WP_COLT;
-		break;
-	case WP_DUAL_TT33:
-		curweap = num = WP_TT33;
-		break;
 	}
 
 	CG_WeaponIndex( curweap, &bank, &cycle );     // get bank/cycle of current weapon
 
-	// initially, just try to find a lower weapon in the current bank
-//	if ( cg_cycleAllWeaps.integer || !switchBanks ) {
 	if ( 1 ) {
-//		if(cycle == 0) {		// already at bottom of list
-//			prevbank = qtrue;
-//		} else {
+
 		for ( i = cycle; i >= 0; i-- ) {
-//				num = getPrevWeapInBank(bank, i);
 			num = getPrevWeapInBankBynum( num );
 			CG_WeaponIndex( num, NULL, &newcycle );         // get cycle of new weapon.  if it's greater than the original, then it cycled around
 			if ( switchBanks ) {
@@ -4719,10 +4692,6 @@ void CG_PrevWeap( qboolean switchBanks ) {
 	} else {
 		prevbank = qtrue;
 	}
-	// cycle to previous bank.
-	//	if cycleAllWeaps: find highest weapon in bank
-	//		else: try to find weap in bank that matches cycle position
-	//			else: use base weap in bank
 
 	if ( prevbank ) {
 		for ( i = 0; i < MAX_WEAP_BANKS; i++ ) {
@@ -5110,7 +5079,7 @@ void CG_OutOfAmmoChange( void ) {
 
 	// if you're using an alt mode weapon, try switching back to the parent
 	// otherwise, switch to the equivalent if you've got it
-	if ( cg.weaponSelect >= WP_SILENCER && cg.weaponSelect <= WP_DELISLESCOPE ) {
+	if ( cg.weaponSelect >= WP_SNIPERRIFLE && cg.weaponSelect <= WP_M7 ) {
 		cg.weaponSelect = equiv = getAltWeapon( cg.weaponSelect );    // base any further changes on the parent
 		if ( CG_WeaponSelectable( equiv ) ) {    // the parent was selectable, drop back to that
 			CG_FinishWeaponChange( cg.predictedPlayerState.weapon, cg.weaponSelect ); //----(SA)
@@ -5286,7 +5255,6 @@ void CG_WeaponFireRecoil( int weapon ) {
 	case WP_TT33:
 	case WP_AKIMBO:
 	case WP_DUAL_TT33:
-	case WP_P38: 
 	   yawRandom = 0.5;
 	   pitchRecoilAdd = 2;
 	   pitchAdd = 1;
@@ -5334,7 +5302,6 @@ void CG_WeaponFireRecoil( int weapon ) {
 	break;
 	case WP_M97:
 	case WP_AUTO5:
-	case WP_M30:
 		pitchRecoilAdd = 1;
 		pitchAdd = 8 + rand() % 3;
 		yawRandom = 2;
@@ -5443,7 +5410,8 @@ void CG_FireWeapon( centity_t *cent, int event ) {
 				  ent->weapon == WP_GRENADE_PINEAPPLE ||
 				  ent->weapon == WP_DYNAMITE ||
 				  ent->weapon == WP_AIRSTRIKE ||
-				  ent->weapon == WP_POISONGAS ) { 
+				  ent->weapon == WP_POISONGAS || 
+				  ent->weapon == WP_POISONGAS_MEDIC ) { 
 		if ( ent->apos.trBase[0] > 0 ) { // underhand
 			return;
 		}
@@ -5520,23 +5488,18 @@ void CG_FireWeapon( centity_t *cent, int event ) {
 		}
 	}
 
-		if ( weap->ejectBrassFunc && cg_brassTime.integer > 0 ) {
-		weap->ejectBrassFunc( cent );
+	if (cent->currentState.aiChar) {
+		return;
 	}
 
-	//if (cent->currentState.aiChar) {
-		//return;
-//	}
-
-
 	// do brass ejection with special delays for some weapons
-	/*if ( weap->ejectBrassFunc && cg_brassTime.integer > 0 ) {
+	if ( weap->ejectBrassFunc && cg_brassTime.integer > 0 ) {
 		   if (cg.predictedPlayerState.ammoclip[cent->currentState.weapon] == 0) {
 			   weap->ejectBrassFunc( cent, ammoTable[cent->currentState.weapon].brassDelayEmpty );
 		   } else {
 			   weap->ejectBrassFunc( cent, ammoTable[cent->currentState.weapon].brassDelay );
 		   }
-	    }*/
+	    }
 }
 
 
@@ -5803,7 +5766,6 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, in
 
 	switch ( weapon ) {
 	case WP_KNIFE:
-	case WP_DAGGER:
 		sfx     = cgs.media.sfx_knifehit[4];    // different values for different types (stone/metal/wood/etc.)
 		mark    = cgs.media.bulletMarkShader;
 		radius  = 1 + rand() % 2;
@@ -5829,7 +5791,6 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, in
 	case WP_MP40:
 	case WP_MP34:
 	case WP_TT33:
-	case WP_P38:
 	case WP_HDM:
 	case WP_PPSH:
 	case WP_MOSIN:
@@ -5841,7 +5802,6 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, in
 	case WP_BROWNING:
 	case WP_M97:
 	case WP_AUTO5:
-	case WP_M30:
 	case WP_REVOLVER:
 	case WP_FG42:
 	case WP_FG42SCOPE:
@@ -6120,6 +6080,7 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, in
 	case VERYBIGEXPLOSION:
 	case WP_PANZERFAUST:
     case WP_AIRSTRIKE:
+	case WP_ARTY:
 		sfx = cgs.media.sfx_rockexp;
 		sfx2 = cgs.media.sfx_rockexpDist;
 		sfx2range = 800;
@@ -6319,7 +6280,6 @@ void CG_MissileHitPlayer( centity_t *cent, int weapon, vec3_t origin, vec3_t dir
 	switch ( weapon ) {
 		// knives just make the flesh hit sound.  no other effects
 	case WP_KNIFE:
-	case WP_DAGGER:
 		i = rand() % 4;
 		if ( cgs.media.sfx_knifehit[i] ) {
 			trap_S_StartSound( origin, cent->currentState.number, CHAN_WEAPON, cgs.media.sfx_knifehit[i] );

@@ -238,8 +238,6 @@ void Cmd_Fogswitch_f( void ) {
 	G_setfog( ConcatArgs( 1 ) );
 }
 
-//----(SA)	end
-
 /*
 ==================
 Cmd_Give_f
@@ -291,23 +289,11 @@ void Cmd_Give_f( gentity_t *ent ) {
 	}
 
 	if ( give_all || Q_stricmp( name, "weapons" ) == 0 ) {
-		//ent->client->ps.weapons[0] = (1 << (WP_MONSTER_ATTACK1)) - 1 - (1<<WP_NONE);	//----(SA)	gives the cross now as well
 
 		//(SA) we really don't want to give anything beyond WP_HOLYCROSS
-		for ( i = 0; i <= WP_HOLYCROSS; i++ )
+		for ( i = 0; i <= WP_M7; i++ )
 			COM_BitSet( ent->client->ps.weapons, i );
 
-//		for (i=0; i<WP_NUM_WEAPONS; i++) {
-//			switch (i) {
-//			case WP_MONSTER_ATTACK1:
-//			case WP_MONSTER_ATTACK2:
-//			case WP_MONSTER_ATTACK3:
-//			case WP_NONE:
-//				break;
-//			default:
-//				COM_BitSet( ent->client->ps.weapons, i );
-//			}
-//		}
 		if ( !give_all ) {
 			return;
 		}
@@ -1748,7 +1734,7 @@ void ClientDamage( gentity_t *clent, int entnum, int enemynum, int id ) {
 		G_Damage( ent, enemy, enemy, vec3_origin, vec3_origin, 3 + rand() % 3, DAMAGE_NO_KNOCKBACK, MOD_EXPLOSIVE );
 		break;
 	case CLDMG_SPIRIT:
-			if ( enemy->aiCharacter == AICHAR_ZOMBIE ) {
+			if ( enemy->aiCharacter == AICHAR_ZOMBIE || enemy->aiCharacter == AICHAR_ZOMBIE_SURV || enemy->aiCharacter == AICHAR_ZOMBIE_GHOST ) {
 				G_Damage( ent, enemy, enemy, vec3_origin, vec3_origin, 6, DAMAGE_NO_KNOCKBACK, MOD_ZOMBIESPIRIT );
 			} else {
 				G_Damage( ent, enemy, enemy, vec3_origin, vec3_origin, 8 + rand() % 4, DAMAGE_NO_KNOCKBACK, MOD_ZOMBIESPIRIT );

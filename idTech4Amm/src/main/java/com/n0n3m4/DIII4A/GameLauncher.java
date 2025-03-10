@@ -127,6 +127,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -151,6 +152,7 @@ public class GameLauncher extends Activity
 
 	private final GameManager m_gameManager = new GameManager();
 	private final Map<String, RadioGroup> groupRadios = new HashMap<>();
+	private final Map<String, RadioGroup> versionGroupRadios = new HashMap<>();
     // GameLauncher function
 	private ExtractPatchResourceFunc  m_extractPatchResourceFunc;
 	private CheckForUpdateFunc        m_checkForUpdateFunc;
@@ -596,6 +598,16 @@ public class GameLauncher extends Activity
 				SetGameInternalMod((String)checked.getTag());
 			}
 
+			// change game version
+			else if (
+					rgId == R.id.rg_version_realrtcw
+							|| rgId == R.id.rg_version_d3bfg
+			)
+			{
+				RadioButton checked = radioGroup.findViewById(id);
+				SetGameVersion((String)checked.getTag());
+			}
+
 			// Quake 2
 			else if (rgId == R.id.yquake2_vid_renderer)
 			{
@@ -616,17 +628,6 @@ public class GameLauncher extends Activity
 				{
 					index = GetRadioGroupSelectIndex(radioGroup, id);
 					SetProp("harm_image_useCompression", index);
-				}
-			}
-			else if (rgId == R.id.doom3bfg_rendererBackend)
-			{
-				if(Q3EUtils.q3ei.isD3BFG)
-				{
-					index = GetRadioGroupSelectIndex(radioGroup, id);
-					String rb = index == 1 ? "Vulkan" : "OpenGL";
-					PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-							.putString(Q3EPreference.pref_harm_d3bfg_rendererBackend, rb)
-							.commit();
 				}
 			}
 
@@ -973,7 +974,10 @@ public class GameLauncher extends Activity
 		q3ei.LoadTypeAndArgTablePreference(this);
 
 		if(null != game && !game.isEmpty())
+		{
 			q3ei.SetupGame(game);
+			q3ei.SetupGameVersion(this);
+		}
 
         Q3EUtils.q3ei = q3ei;
 
@@ -1342,10 +1346,6 @@ public class GameLauncher extends Activity
 
 		V.doom3bfg_useMediumPrecision.setChecked(getProp("harm_r_useMediumPrecision", false));
 		if (!IsProp("harm_r_useMediumPrecision")) setProp("harm_r_useMediumPrecision", false);
-
-		str = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).getString(Q3EPreference.pref_harm_d3bfg_rendererBackend, "OpenGL");
-		index = "Vulkan".equalsIgnoreCase(str) ? 1 : 0;
-		SelectRadioGroup(V.doom3bfg_rendererBackend, index);
 	}
 
 	private void Updatehacktings_TDM()
@@ -1545,6 +1545,8 @@ public class GameLauncher extends Activity
 
 		InitGameList();
 
+		InitGameVersionList();
+
 		SetupUI();
 
         updatehacktings();
@@ -1711,6 +1713,12 @@ public class GameLauncher extends Activity
 		V.edt_fs_game.setText(mPrefs.getString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), ""));
 		V.fs_game_user.setOnCheckedChangeListener(m_checkboxChangeListener);
 		for(RadioGroup rg : groupRadios.values())
+		{
+			rg.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		}
+
+		SelectGameVersion();
+		for(RadioGroup rg : versionGroupRadios.values())
 		{
 			rg.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		}
@@ -1948,11 +1956,6 @@ public class GameLauncher extends Activity
 
 		V.doom3bfg_useMediumPrecision.setChecked(getProp("harm_r_useMediumPrecision", false));
 		V.doom3bfg_useMediumPrecision.setOnCheckedChangeListener(m_checkboxChangeListener);
-
-		str = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).getString(Q3EPreference.pref_harm_d3bfg_rendererBackend, "OpenGL");
-		index = "Vulkan".equalsIgnoreCase(str) ? 1 : 0;
-		SelectRadioGroup(V.doom3bfg_rendererBackend, index);
-		V.doom3bfg_rendererBackend.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
 	private void SetupUI_TDM()
@@ -2696,12 +2699,7 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, V.gzdoom_load_brightmaps_pk3.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_max_console_height_frac, V.consoleHeightFracValue.getProgress());
 		mEdtr.putString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), V.edt_fs_game.getText().toString());
-		if(Q3EUtils.q3ei.isD3BFG)
-		{
-			index = GetRadioGroupSelectIndex(V.doom3bfg_rendererBackend);
-			String rb = index == 1 ? "Vulkan" : "OpenGL";
-			mEdtr.putString(Q3EPreference.pref_harm_d3bfg_rendererBackend, rb);
-		}
+
         mEdtr.commit();
     }
 
@@ -3105,6 +3103,19 @@ public class GameLauncher extends Activity
         preference.edit().putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), game).commit();
     }
 
+	private void SetGameVersion(String val)
+	{
+		String key = Q3EUtils.q3ei.GetGameVersionPreferenceKey();
+		if(null != key)
+		{
+			SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
+			preference.edit().putString(key, val).commit();
+			Q3EUtils.q3ei.SetupGameVersion(val);
+		}
+		else
+			Q3EUtils.q3ei.SetupGameVersion((String)null);
+	}
+
     private boolean LockCmdUpdate()
     {
     	if(m_cmdUpdateLock)
@@ -3336,6 +3347,8 @@ public class GameLauncher extends Activity
     private void SetGame(String game)
     {
         Q3EUtils.q3ei.SetupGame(game);
+		Q3EUtils.q3ei.SetupGameVersion(this);
+
         V.launcher_tab1_edit_doomconfig.setText(getString(R.string.edit_) + Q3EUtils.q3ei.config_name);
         if (null != V.main_menu_game)
             V.main_menu_game.setTitle(Q3EUtils.q3ei.game_name);
@@ -3363,6 +3376,7 @@ public class GameLauncher extends Activity
 		boolean openglVisible = true;
 		boolean quickloadVisible = true;
 		boolean skipintroVisible = true;
+		boolean versionVisible = false;
 
         if (Q3EUtils.q3ei.isPrey)
         {
@@ -3410,6 +3424,7 @@ public class GameLauncher extends Activity
 			openglVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
+			versionVisible = true;
 		}
 		else if (Q3EUtils.q3ei.isDOOM)
 		{
@@ -3428,6 +3443,7 @@ public class GameLauncher extends Activity
 		{
 			realrtcwVisible = true;
 			openglVisible = false;
+			versionVisible = true;
 		}
 		else if (Q3EUtils.q3ei.isFTEQW)
 		{
@@ -3476,6 +3492,10 @@ public class GameLauncher extends Activity
 		V.rg_fs_jagame.setVisibility(jaVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_jogame.setVisibility(joVisible ? View.VISIBLE : View.GONE);
 
+		V.rg_version_d3bfg.setVisibility(d3bfgVisible ? View.VISIBLE : View.GONE);
+		V.rg_version_realrtcw.setVisibility(realrtcwVisible ? View.VISIBLE : View.GONE);
+		V.gameversion_section.setVisibility(versionVisible ? View.VISIBLE : View.GONE);
+
 		V.idtech4_section.setVisibility(Q3EUtils.q3ei.IsIdTech4() ? View.VISIBLE : View.GONE);
 		V.yquake2_section.setVisibility(Q3EUtils.q3ei.isQ2 ? View.VISIBLE : View.GONE);
 		V.doom3bfg_section.setVisibility(Q3EUtils.q3ei.isD3BFG ? View.VISIBLE : View.GONE);
@@ -3500,7 +3520,45 @@ public class GameLauncher extends Activity
 		V.launcher_fs_game_subdir.setVisibility(subdir.isEmpty() ? View.GONE : View.VISIBLE);
 
 		CollapseMods(V.collapse_mods.isChecked());
+
+		SelectGameVersion();
     }
+
+	private void SelectGameVersion()
+	{
+		String[] versions = Q3EInterface.GetGameVersions(Q3EUtils.q3ei.game);
+		if(null == versions)
+			return;
+		String key = Q3EUtils.q3ei.GetGameVersionPreferenceKey();
+		if(null == key)
+			return;
+		RadioGroup radioGroup = GetGameVersionRadioGroup();
+		if(null == radioGroup)
+			return;
+
+		String cur = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).getString(key, Q3EGlobals.GAME_VERSION_CURRENT);
+		int index = 0;
+		for(int i = 0; i < versions.length; i++)
+		{
+			String version = versions[i];
+			if(null == cur && null == version)
+			{
+				index = i;
+				break;
+			}
+			else if(null != cur && cur.equalsIgnoreCase(version))
+			{
+				index = i;
+				break;
+			}
+			else if(null != version && version.equalsIgnoreCase(cur))
+			{
+				index = i;
+				break;
+			}
+		}
+		SelectRadioGroup(radioGroup, index);
+	}
 
     private void ChangeGame(String... games)
     {
@@ -3782,6 +3840,27 @@ public class GameLauncher extends Activity
 		}[Q3EUtils.q3ei.game_id];
     }
 
+	private RadioGroup GetGameVersionRadioGroup()
+	{
+		return new RadioGroup[]{
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				V.rg_version_d3bfg,
+				null,
+				null,
+				null,
+				V.rg_version_realrtcw,
+				null,
+				null,
+				null,
+		}[Q3EUtils.q3ei.game_id];
+	}
+
     private void RequestBackupPreferences()
     {
         if (null == m_backupPreferenceFunc)
@@ -3923,6 +4002,53 @@ public class GameLauncher extends Activity
 	public GameManager GetGameManager()
 	{
 		return m_gameManager;
+	}
+
+	private void InitGameVersionList()
+	{
+		versionGroupRadios.clear();
+		RadioButton radio;
+		RadioGroup group;
+		RadioGroup.LayoutParams layoutParams;
+
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+		versionGroupRadios.put(Q3EGlobals.GAME_DOOM3BFG, V.rg_version_d3bfg);
+		versionGroupRadios.put(Q3EGlobals.GAME_REALRTCW, V.rg_version_realrtcw);
+
+		for (String type : GameManager.Games)
+		{
+			group = versionGroupRadios.get(type);
+			if(null == group)
+				continue;
+			String[] versions = Q3EInterface.GetGameVersions(type);
+			if(null == versions)
+				continue;
+			String key = Q3EInterface.GetGameVersionPreferenceKey(type);
+			if(null == key)
+				continue;
+			layoutParams = new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
+			String cur = preferences.getString(key, Q3EGlobals.GAME_VERSION_CURRENT);
+
+			for(String version : versions)
+			{
+				radio = new RadioButton(group.getContext());
+				String name;
+				if(KStr.IsEmpty(version))
+					name = Q3ELang.tr(this, R.string._default);
+				else
+					name = version;
+				radio.setText(name);
+				radio.setTag(version);
+				group.addView(radio, layoutParams);
+				if(null == cur && null == version)
+					radio.setChecked(true);
+				else if(null != cur)
+					radio.setChecked(cur.equalsIgnoreCase(version));
+				else if(null != version)
+					radio.setChecked(version.equalsIgnoreCase(cur));
+			}
+		}
 	}
 
 	private void InitGameList()
@@ -4310,7 +4436,6 @@ public class GameLauncher extends Activity
 		public RadioGroup doom3bfg_useCompression;
 		public CheckBox doom3bfg_useCompressionCache;
 		public CheckBox doom3bfg_useMediumPrecision;
-		public RadioGroup doom3bfg_rendererBackend;
 		public LinearLayout realrtcw_section;
 		public CheckBox realrtcw_sv_cheats;
 		public RadioGroup realrtcw_shadows;
@@ -4334,6 +4459,9 @@ public class GameLauncher extends Activity
 		public SeekBar consoleHeightFracValue;
 		public TextView consoleHeightFracText;
 		public RadioGroup rg_depth_bits;
+		public RadioGroup rg_version_realrtcw;
+		public RadioGroup rg_version_d3bfg;
+		public LinearLayout gameversion_section;
 
         public void Setup()
         {
@@ -4450,7 +4578,6 @@ public class GameLauncher extends Activity
 			yquake2_vid_renderer = findViewById(R.id.yquake2_vid_renderer);
 			doom3bfg_section = findViewById(R.id.doom3bfg_section);
 			doom3bfg_useCompression = findViewById(R.id.doom3bfg_useCompression);
-			doom3bfg_rendererBackend = findViewById(R.id.doom3bfg_rendererBackend);
 			doom3bfg_useCompressionCache = findViewById(R.id.doom3bfg_useCompressionCache);
 			doom3bfg_useMediumPrecision = findViewById(R.id.doom3bfg_useMediumPrecision);
 			realrtcw_section = findViewById(R.id.realrtcw_section);
@@ -4476,6 +4603,9 @@ public class GameLauncher extends Activity
 			consoleHeightFracValue = findViewById(R.id.consoleHeightFracValue);
 			consoleHeightFracText = findViewById(R.id.consoleHeightFracText);
 			rg_depth_bits = findViewById(R.id.rg_depth_bits);
+			rg_version_realrtcw = findViewById(R.id.rg_version_realrtcw);
+			rg_version_d3bfg = findViewById(R.id.rg_version_d3bfg);
+			gameversion_section = findViewById(R.id.gameversion_section);
         }
     }
 }

@@ -462,5 +462,6 @@
     <string name="openja_base">STAR WARS™ Jedi Knight-Jedi Academy™</string>
     <string name="openjo_base">STAR WARS™ Jedi Knight II-Jedi Outcast™</string>
     <string name="code_">Code:</string>
+    <string name="version">Version</string>
 
 </resources>
