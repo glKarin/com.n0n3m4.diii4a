@@ -31,6 +31,7 @@ public final class Constants
             "Add `OpenJK` support, `" + TextHelper.GenLinkText("https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/", "STAR WARS™ Jedi Knight - Jedi Academy™") + "` game standalone directory named `openja`, `" + TextHelper.GenLinkText("https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/", "STAR WARS™ Jedi Knight II - Jedi Outcast™") + "` game standalone directory named `openjo`. More view in `" + TextHelper.GenLinkText("https://github.com/JACoders/OpenJK", "OpenJK") + "`.",
             "Fix audio playing when disable OpenAL on Quake3/ETW/RTCW/RealRTCW.",
             "Add Vulkan renderer backend on Quake2.",
+            "Fix create render context on GZDOOM, it will use OpenGL if Vulkan initialization fail.",
         };
 	};
 

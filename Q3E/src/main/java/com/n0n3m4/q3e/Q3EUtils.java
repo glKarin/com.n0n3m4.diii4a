@@ -348,7 +348,7 @@ public class Q3EUtils
     public static String GetDefaultGameDirectory(Context context)
     {
         String path = null;
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P)
+/*        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P)
         {
             File externalFilesDir = context.getExternalFilesDir(null);
             if(null != externalFilesDir)
@@ -356,7 +356,7 @@ public class Q3EUtils
             else
                 path = Environment.getExternalStorageDirectory() + "/" + context.getApplicationContext().getPackageName() + "/files";
         }
-        if(KStr.IsEmpty(path))
+        if(KStr.IsEmpty(path))*/
             path = Environment.getExternalStorageDirectory().getAbsolutePath();
         return path + "/diii4a";
     }

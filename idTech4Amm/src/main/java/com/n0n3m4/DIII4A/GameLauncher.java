@@ -3979,7 +3979,7 @@ public class GameLauncher extends Activity
 				if(KStr.NotEmpty(value.fs_game))
 					name += " [" + value.fs_game + "]";
 				if(KStr.NotEmpty(value.file))
-					name += " (" + /*subdir +*/ value.file + "/)";
+					name += "(" + /*subdir +*/ value.file + "/)";
 			}
 			radio.setText(name);
 			radio.setTag(value.game);
@@ -4000,11 +4000,11 @@ public class GameLauncher extends Activity
 
 	public void OpenSuggestGameWorkingDirectory(String curPath)
 	{
-		if(ContextUtility.InScopedStorage() && !ContextUtility.IsInAppPrivateDirectory(GameLauncher.this, curPath))
+/*		if(ContextUtility.InScopedStorage() && !ContextUtility.IsInAppPrivateDirectory(GameLauncher.this, curPath))
 		{
 			String path = Q3EUtils.GetAppStoragePath(GameLauncher.this);
 			Toast.makeText(GameLauncher.this, Q3ELang.tr(this, R.string.suggest_game_woring_directory_tips, path), Toast.LENGTH_LONG).show();
-		}
+		}*/
 		m_edtPathFocused = curPath;
 	}
 
