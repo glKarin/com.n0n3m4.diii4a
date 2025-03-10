@@ -31,10 +31,12 @@ If you have questions concerning this license or the applicable additional terms
 #include "gdefs.h"
 #include "roqParam.h"
 #include "quaddefs.h"
+#if 0 // !defined(_USING_STB)
 extern "C" {
 #include <jerror.h>
 #include <jpeglib.h>
 }
+#endif
 #pragma once
 
 class codec;
