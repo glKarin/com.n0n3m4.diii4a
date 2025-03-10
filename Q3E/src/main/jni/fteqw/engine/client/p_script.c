@@ -2487,7 +2487,7 @@ qboolean PScript_Query(int typenum, int body, char *outstr, int outstrlen)
 			Q_strncatz(outstr, va("scalefactor %g\n", ptype->looks.scalefactor), outstrlen);
 		if (ptype->scaledelta || all)
 			Q_strncatz(outstr, va("scaledelta %g\n", ptype->scaledelta), outstrlen);
-		if (ptype->looks.stretch!=0.05 || ptype->looks.minstretch || all)
+		if (ptype->looks.stretch!=0.05f || ptype->looks.minstretch || all)
 		{
 			if (ptype->looks.type != PT_TEXTUREDSPARK)
 				Q_strncatz(outstr, "//", outstrlen);
@@ -2499,7 +2499,7 @@ qboolean PScript_Query(int typenum, int body, char *outstr, int outstrlen)
 
 		if (ptype->cliptype != P_INVALID && ptype->cliptype != typenum)
 			Q_strncatz(outstr, va("cliptype \"%s.%s\"\n", part_type[ptype->cliptype].config, part_type[ptype->cliptype].name), outstrlen);
-		if (ptype->clipbounce != 0.8)
+		if (ptype->clipbounce != 0.8f)
 			Q_strncatz(outstr, va("clipbounce %g\n", ptype->clipbounce), outstrlen);
 		if (ptype->clipcount > 1)
 			Q_strncatz(outstr, va("clipcount %g\n", ptype->clipcount), outstrlen);

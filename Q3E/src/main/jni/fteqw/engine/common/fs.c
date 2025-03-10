@@ -12,6 +12,7 @@
 #include "winquake.h"
 #endif
 
+#define HARM_FTE_HOME ".fte/"
 
 
 #ifdef FTE_TARGET_WEB	//for stuff that doesn't work right...
@@ -2784,7 +2785,6 @@ static qboolean FS_NativePath(const char *fname, enum fs_relative relativeto, ch
 		//fallthrough
 	case FS_GAMEONLY:
 #ifdef _DIII4A //karin: fteqw game home path
-#define HARM_FTE_HOME ".fte/"
 		if (com_homepathenabled)
 			nlen = Q_snprintfz(out, outlen, "%s" HARM_FTE_HOME "%s/%s", fordisplay?"$homedir/":com_homepath, gamedirfile, fname);
 		else
@@ -3049,6 +3049,14 @@ vfsfile_t *QDECL FS_OpenVFS(const char *filename, const char *mode, enum fs_rela
 		//FIXME: go via a searchpath, because then the fscache can be selectively updated
 		if (com_homepathenabled)
 		{
+#ifdef _DIII4A //karin: using <cwd>/.fte
+				if (!try_snprintf(fullname, sizeof(fullname), "%s%s%s/%s", com_homepath, HARM_FTE_HOME, gamedirfile, filename))
+					return NULL;
+				printf("fffff %s\n", fullname);
+				if (*mode == 'w')
+					COM_CreatePath(fullname);
+				vfs = VFSOS_Open(fullname, mode);
+#else
 			if (gameonly_homedir)
 			{
 				if ((*mode == 'w' && gameonly_gamedir->handle->CreateFile)
@@ -3066,6 +3074,7 @@ vfsfile_t *QDECL FS_OpenVFS(const char *filename, const char *mode, enum fs_rela
 					COM_CreatePath(fullname);
 				vfs = VFSOS_Open(fullname, mode);
 			}
+#endif
 		}
 		if (!vfs && *gamedirfile)
 		{
@@ -8243,7 +8252,12 @@ static qboolean FS_GetBestHomeDir(ftemanifest_t *man)
 	//but if it doesn't exist then we use $XDG_DATA_HOME/.fte instead
 	//we used to use $HOME/.#HOMESUBDIR/ but this is now only used if it actually exists AND the new path doesn't.
 	//new installs use $XDG_DATA_HOME/#HOMESUBDIR/ instead
+#ifdef _DIII4A //karin: using current work directory
+	char cwd[MAX_OSPATH];
+	char *ev = getcwd(cwd, MAX_OSPATH);
+#else
 	char *ev = getenv("FTEHOME");
+#endif
 	if (ev && *ev)
 	{
 		if (ev[strlen(ev)-1] == '/')
