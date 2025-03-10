@@ -32,6 +32,10 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 int g_console_field_width = 78;
 
+#ifdef __ANDROID__ //karin: limit console max height
+extern float Android_GetConsoleMaxHeightFrac(float frac);
+#endif
+
 console_t	con;
 
 cvar_t		*con_conspeed;
@@ -873,7 +877,11 @@ Scroll it up or down
 void Con_RunConsole (void) {
 	// decide on the destination height of the console
 	if ( Key_GetCatcher( ) & KEYCATCH_CONSOLE )
+#ifdef __ANDROID__ //karin: limit console max height
+		con.finalFrac = Android_GetConsoleMaxHeightFrac(con_height->value);
+#else
 		con.finalFrac = con_height->value;
+#endif
 	else
 		con.finalFrac = 0;				// none visible
 
