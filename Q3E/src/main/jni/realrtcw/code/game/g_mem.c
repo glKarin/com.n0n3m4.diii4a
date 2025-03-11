@@ -74,7 +74,13 @@ void G_InitMemory( void ) {
 #ifdef __ANDROID__ //karin: static memory allocation from client
 	extern char * trap_RequireMemoryPool( int size );
 	memoryPool = trap_RequireMemoryPool(POOLSIZE);
-	G_Printf("Game require %d bytes memory pool: %p.\n", POOLSIZE, memoryPool);
+	if(memoryPool)
+		G_Printf("G_InitMemory: Game require %d bytes memory pool: %p.\n", POOLSIZE, memoryPool);
+	else
+	{
+		G_Error("G_InitMemory: Game require %d bytes memory pool fail!", POOLSIZE);
+		return;
+	}
 #endif
 	allocPoint = 0;
 }

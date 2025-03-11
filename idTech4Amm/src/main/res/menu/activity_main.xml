@@ -7,7 +7,7 @@
 
     <item
         android:id="@+id/main_menu_game"
-        android:title=""
+        android:title="@string/game"
         android:showAsAction="always">
         <menu>
             <item

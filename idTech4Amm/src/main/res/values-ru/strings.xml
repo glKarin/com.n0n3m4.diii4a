@@ -463,5 +463,6 @@
     <string name="openjo_base">STAR WARS™ Jedi Knight II-Jedi Outcast™</string>
     <string name="code_">Код:</string>
     <string name="version">Версия</string>
+    <string name="open_menu">Open menu</string>
 
 </resources>

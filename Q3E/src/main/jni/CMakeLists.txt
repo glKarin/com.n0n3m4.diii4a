@@ -7,6 +7,11 @@ cmake_minimum_required(VERSION 3.4.1)
 
 project(idtech4amm)
 
+# build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 add_definitions(-D__ANDROID__)
 option(ANDROID "Android build" ON)
 option(BUILD_TESTING "Build tests" OFF)
@@ -19,6 +24,7 @@ add_subdirectory( q3e )
 
 
 
+# Supported
 OPTION(GAME_DOOM3       "Build DOOM 3/Quake 4/Prey(2006)"       ON)
 OPTION(GAME_RTCW        "Build Return to Castle Wolfenstein"    ON)
 OPTION(GAME_QUAKE3      "Build Quake 3"                         ON)
@@ -30,9 +36,10 @@ OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
 OPTION(GAME_ETW         "Build Wolfenstein: Enemy Territory"    ON)
 OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
-
-OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
+
+# Experimental
+OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
 if(GAME_DOOM3)

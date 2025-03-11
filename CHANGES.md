@@ -2,6 +2,17 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan62 (2025-03-11)
+
+* Add `OpenJK` support, [STAR WARS™ Jedi Knight - Jedi Academy™](https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/) game standalone directory named `openja`, [STAR WARS™ Jedi Knight II - Jedi Outcast™](https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/) game standalone directory named `openjo`. More view in [OpenJK](https://github.com/JACoders/OpenJK).
+* Update version to 5.1 on RealRTCW, support Survival mode. And version 5.0 is keeping until version 5.1 is stable.
+* Fix audio playing when disable OpenAL on Quake3/ETW/RTCW/RealRTCW.
+* Add Vulkan renderer backend on Quake2.
+* Fix create render context on GZDOOM, it will use OpenGL ES if Vulkan initialization fail.
+* Add `Open menu` button at end of `General` tab on launcher.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan61 (2025-02-27)
 
 * Add `FTEQW` support, game standalone directory named `fteqw`, support HeXen II, Half-Life [FreeHL](https://github.com/eukara/freehl), Counter Striker 1.5 [FreeCS](https://github.com/eukara/freecs). More view in [FTEQW](https://www.fteqw.org).

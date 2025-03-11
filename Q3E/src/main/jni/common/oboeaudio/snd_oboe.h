@@ -24,6 +24,15 @@ void Q3E_Oboe_Shutdown(void);
 void Q3E_Oboe_Lock(void);
 void Q3E_Oboe_Unlock(void);
 
+typedef void * Q3E_AudioDevice;
+Q3E_AudioDevice Q3E_Audio_Create(int sampleRate, int channel, int format, Q3E_write_audio_data_f func);
+void Q3E_Audio_Destroy(Q3E_AudioDevice device);
+void Q3E_Audio_Start(Q3E_AudioDevice device);
+void Q3E_Audio_Stop(Q3E_AudioDevice device);
+void Q3E_Audio_Shutdown(Q3E_AudioDevice device);
+void Q3E_Audio_Lock(Q3E_AudioDevice device);
+void Q3E_Audio_Unlock(Q3E_AudioDevice device);
+
 #ifdef __cplusplus
 };
 #endif

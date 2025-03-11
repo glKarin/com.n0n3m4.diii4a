@@ -1,7 +1,7 @@
 {
-    "release":61,
-    "update":"2025-02-27",
-    "version":"1.1.0harmattan61",
-    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan61/idTech4A++_1.1.0harmattan61-2.apk",
-    "changes":"  * Add `FTEQW` support, game standalone directory named `fteqw`, support HeXen II, Half-Life [FreeHL], Counter Striker 1.5 [FreeCS].\n  * DOOM 3 BFG add Vulkan renderer backend."
+    "release":62,
+    "update":"2025-03-11",
+    "version":"1.1.0harmattan62",
+    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan62/idTech4A++_1.1.0harmattan62.apk",
+    "changes":"  * Add `OpenJK` support, `STAR WARS™ Jedi Knight - Jedi Academy™` game standalone directory named `openja`, `STAR WARS™ Jedi Knight II - Jedi Outcast™` game standalone directory named `openjo`.\n  * Update version to 5.1 on RealRTCW, support Survival mode. And version 5.0 is keeping until version 5.1 is stable.\n  * Fix audio playing when disable OpenAL on Quake3/ETW/RTCW/RealRTCW.\n  * Add Vulkan renderer backend on Quake2.\n  * Fix create render context on GZDOOM, it will use OpenGL ES if Vulkan initialization fail.\n  * Add `Open menu` button at end of `General` tab on launcher."
 }

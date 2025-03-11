@@ -41,6 +41,7 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -751,6 +752,14 @@ public class GameLauncher extends Activity
 			else if (id == R.id.gzdoom_choose_extras_file)
 			{
 				OpenExtrasFileChooser();
+			}
+			else if (id == R.id.launcher_tab1_change_game)
+			{
+				OpenGameList();
+			}
+			else if (id == R.id.launcher_tab1_open_menu)
+			{
+				OpenMenu();
 			}
         }
     };
@@ -1701,6 +1710,9 @@ public class GameLauncher extends Activity
 		V.launcher_tab1_create_shortcut.setOnClickListener(m_buttonClickListener);
 		V.show_directory_helper.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_patch_resource.setOnClickListener(m_buttonClickListener);
+		V.launcher_tab1_change_game.setOnClickListener(m_buttonClickListener);
+		registerForContextMenu(V.launcher_tab1_open_menu);
+		V.launcher_tab1_open_menu.setOnClickListener(m_buttonClickListener);
 
 		boolean userMod = mPrefs.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
 		V.fs_game_user.setChecked(userMod);
@@ -2256,6 +2268,30 @@ public class GameLauncher extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
+		boolean res = SelectMenuItem(item);
+		if(res)
+			return true;
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
+	{
+		MenuInflater inflater = new MenuInflater(this);
+		inflater.inflate(R.menu.activity_main, menu);
+		super.onCreateContextMenu(menu, v, menuInfo);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		boolean res = SelectMenuItem(item);
+		if(res)
+			return true;
+		return super.onContextItemSelected(item);
+	}
+
+	public boolean SelectMenuItem(MenuItem item)
+	{
 		int itemId = item.getItemId();
 		if (itemId == R.id.main_menu_support_developer)
 		{
@@ -2454,7 +2490,7 @@ public class GameLauncher extends Activity
 			MoveGameDataToAppPrivateDirectory();
 			return true;
 		}*/
-		return super.onOptionsItemSelected(item);
+		return false;
 	}
 
     private void OpenChanges()
@@ -4316,6 +4352,11 @@ public class GameLauncher extends Activity
 		gameChooserFunc.Start(bundle);
 	}
 
+	private void OpenMenu()
+	{
+		openContextMenu(V.launcher_tab1_open_menu);
+	}
+
 
 
     private class ViewHolder
@@ -4462,6 +4503,8 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_version_realrtcw;
 		public RadioGroup rg_version_d3bfg;
 		public LinearLayout gameversion_section;
+		public Button launcher_tab1_change_game;
+		public Button launcher_tab1_open_menu;
 
         public void Setup()
         {
@@ -4606,6 +4649,8 @@ public class GameLauncher extends Activity
 			rg_version_realrtcw = findViewById(R.id.rg_version_realrtcw);
 			rg_version_d3bfg = findViewById(R.id.rg_version_d3bfg);
 			gameversion_section = findViewById(R.id.gameversion_section);
+			launcher_tab1_change_game = findViewById(R.id.launcher_tab1_change_game);
+			launcher_tab1_open_menu = findViewById(R.id.launcher_tab1_open_menu);
         }
     }
 }

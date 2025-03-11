@@ -32,7 +32,8 @@ public final class Constants
             "Update version to 5.1 on RealRTCW, support Survival mode. And version 5.0 is keeping until version 5.1 is stable.",
             "Fix audio playing when disable OpenAL on Quake3/ETW/RTCW/RealRTCW.",
             "Add Vulkan renderer backend on Quake2.",
-            "Fix create render context on GZDOOM, it will use OpenGL if Vulkan initialization fail.",
+            "Fix create render context on GZDOOM, it will use OpenGL ES if Vulkan initialization fail.",
+            "Add `Open menu` button at end of `General` tab on launcher.",
         };
 	};
 

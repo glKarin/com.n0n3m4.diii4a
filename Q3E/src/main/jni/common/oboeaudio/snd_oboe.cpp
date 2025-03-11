@@ -208,6 +208,59 @@ DataCallbackResult Q3EOboeAudio::onAudioReady(AudioStream *oboeStream, void *aud
     return DataCallbackResult::Stop; // no register callback
 }
 
+Q3E_AudioDevice Q3E_Audio_Create(int sampleRate, int channel, int format, Q3E_write_audio_data_f func)
+{
+    Q3EOboeAudio *device = new Q3EOboeAudio;
+    device->Init(sampleRate, channel, format);
+    device->SetCallback(func);
+    return device;
+}
+
+#if 0
+#define Q3E_AUDIO_CHECK_DEVICE(x) if(!x) return;
+#else
+#define Q3E_AUDIO_CHECK_DEVICE(x)
+#endif
+#define Q3E_AUDIO_DEVICE_CAST(x) ((Q3EOboeAudio *)x)
+void Q3E_Audio_Destroy(Q3E_AudioDevice device)
+{
+    Q3E_AUDIO_CHECK_DEVICE(device);
+    auto ptr = Q3E_AUDIO_DEVICE_CAST(device);
+    delete ptr;
+}
+
+void Q3E_Audio_Start(Q3E_AudioDevice device)
+{
+    Q3E_AUDIO_CHECK_DEVICE(device);
+    Q3E_AUDIO_DEVICE_CAST(device)->Start();
+}
+
+void Q3E_Audio_Stop(Q3E_AudioDevice device)
+{
+    Q3E_AUDIO_CHECK_DEVICE(device);
+    Q3E_AUDIO_DEVICE_CAST(device)->Stop();
+}
+
+void Q3E_Audio_Shutdown(Q3E_AudioDevice device)
+{
+    Q3E_AUDIO_CHECK_DEVICE(device);
+    Q3E_AUDIO_DEVICE_CAST(device)->Shutdown();
+}
+
+void Q3E_Audio_Lock(Q3E_AudioDevice device)
+{
+    Q3E_AUDIO_CHECK_DEVICE(device);
+    Q3E_AUDIO_DEVICE_CAST(device)->Lock();
+}
+
+void Q3E_Audio_Unlock(Q3E_AudioDevice device)
+{
+    Q3E_AUDIO_CHECK_DEVICE(device);
+    Q3E_AUDIO_DEVICE_CAST(device)->Unlock();
+}
+
+
+
 // C-style interface
 void Q3E_Oboe_Init(int sampleRate, int channel, int format, Q3E_write_audio_data_f func)
 {

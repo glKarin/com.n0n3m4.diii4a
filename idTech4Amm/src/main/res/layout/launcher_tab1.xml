@@ -1100,6 +1100,28 @@
                         android:textAllCaps="false" />
                 </LinearLayout>
 
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/launcher_tab1_change_game"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/change_game"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/launcher_tab1_open_menu"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/open_menu"
+                        android:textAllCaps="false" />
+                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout> <!-- end general section -->
