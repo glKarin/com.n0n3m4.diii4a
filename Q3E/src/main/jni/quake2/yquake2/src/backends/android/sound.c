@@ -74,11 +74,6 @@ static const float lpf_default_gain_hf = 0.25F;
 static LpfContext lpf_context;
 static qboolean lpf_is_enabled;
 
-static int freq;
-static int format;
-static int samples;
-static int _channels;
-
 static void
 lpf_initialize(LpfContext* lpf_context, float gain_hf, int target_frequency)
 {
@@ -1329,31 +1324,62 @@ SDL_BackendInit(void)
 	snprintf(reqdriver, sizeof(reqdriver), "%s=%s", "SDL_AUDIODRIVER", s_sdldriver->string);
 	putenv(reqdriver);
 
-	Com_Printf("Starting SDL audio callback.\n");
+	Com_Printf("Starting Oboe audio callback.\n");
 
 	const char* drivername = "oboe";
-
 	Com_Printf("SDL audio driver is \"%s\".\n", drivername);
 
-	/* Users are stupid */
-	sndbits = 16;
+	int freq = 44100;
+	if ((sndbits != 16) && (sndbits != 8))
+	{
+		sndbits = 16;
+	}
 
-	freq = 44100;
+	if (sndfreq == 48)
+	{
+		freq = 48000;
+	}
+	else if (sndfreq == 44)
+	{
+		freq = 44100;
+	}
+	else if (sndfreq == 22)
+	{
+		freq = 22050;
+	}
+	else if (sndfreq == 11)
+	{
+		freq = 11025;
+	}
 
-	format = -1;
+	int samples;
+	if (freq <= 11025)
+	{
+		samples = 256;
+	}
+	else if (freq <= 22050)
+	{
+		samples = 512;
+	}
+	else if (freq <= 44100)
+	{
+		samples = 1024;
+	}
+	else
+	{
+		samples = 2048;
+	}
 
-	samples = 2048;
-
-	_channels = sndchans;
+    int channels = sndchans;
 
 	/* This points to the frontend */
 	backend = &sound;
 
 	playpos = 0;
 	backend->samplebits = sndbits;
-	backend->channels = _channels;
+	backend->channels = channels;
 
-	tmp = (samples * _channels) * 10;
+	tmp = (samples * channels) * 10;
 
 	if (tmp & (tmp - 1))
 	{	/* make it a power of two */
@@ -1379,7 +1405,7 @@ SDL_BackendInit(void)
 	Q3E_Oboe_Init(backend->speed, backend->channels, -1, SDL_Callback);
 	Q3E_Oboe_Start();
 
-	Com_Printf("SDL audio initialized.\n");
+	Com_Printf("Q3E Oboe audio initialized.\n");
 
 	soundtime = 0;
 	snd_inited = 1;

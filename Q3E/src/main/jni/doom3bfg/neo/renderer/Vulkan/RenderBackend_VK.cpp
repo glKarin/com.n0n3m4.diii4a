@@ -1183,7 +1183,7 @@ static VkExtent2D ChooseSurfaceExtent( VkSurfaceCapabilitiesKHR& caps )
 	width = idMath::ClampInt( caps.minImageExtent.width, caps.maxImageExtent.width, width );
 	height = idMath::ClampInt( caps.minImageExtent.height, caps.maxImageExtent.height, height );
 #endif
-#ifdef __ANDROID__ //karin: TODO: -1, cause flush if width == tr.GetWidth() && height == tr.GetHeight()
+#ifdef __ANDROID__ //karin: using config size
     //extern void SDL_Vulkan_GetDrawableSize( void *sdlWindow, int *width, int *height );
     width = idMath::ClampInt( caps.minImageExtent.width, caps.maxImageExtent.width, width );
     height = idMath::ClampInt( caps.minImageExtent.height, caps.maxImageExtent.height, height );

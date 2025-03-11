@@ -122,6 +122,7 @@ public final class Q3EPreference
     public static final String pref_params_realrtcw              = "q3e_params_realrtcw"; //k
     public static final String pref_harm_realrtcw_command_record = "q3e_harm_realrtcw_command_record";
     public static final String pref_harm_realrtcw_game_mod       = "q3e_harm_realrtcw_game_mod"; //k
+    public static final String pref_harm_realrtcw_version        = "q3e_harm_realrtcw_version"; //k
     // FTEQW
     public static final String pref_harm_fteqw_fs_game        = "q3e_harm_fteqw_fs_game"; //k
     public static final String pref_harm_fteqw_game_lib       = "q3e_harm_fteqw_game_lib"; //k
@@ -129,6 +130,20 @@ public final class Q3EPreference
     public static final String pref_params_fteqw              = "q3e_params_fteqw"; //k
     public static final String pref_harm_fteqw_command_record = "q3e_harm_fteqw_command_record";
     public static final String pref_harm_fteqw_game_mod       = "q3e_harm_fteqw_game_mod"; //k
+    // OpenJA
+    public static final String pref_harm_ja_fs_game        = "q3e_harm_ja_fs_game"; //k
+    public static final String pref_harm_ja_game_lib       = "q3e_harm_ja_game_lib"; //k
+    public static final String pref_harm_ja_user_mod       = "q3e_harm_ja_user_mod"; //k
+    public static final String pref_params_ja              = "q3e_params_ja"; //k
+    public static final String pref_harm_ja_command_record = "q3e_harm_ja_command_record";
+    public static final String pref_harm_ja_game_mod       = "q3e_harm_ja_game_mod"; //k
+    // FTEQW
+    public static final String pref_harm_jo_fs_game        = "q3e_harm_jo_fs_game"; //k
+    public static final String pref_harm_jo_game_lib       = "q3e_harm_jo_game_lib"; //k
+    public static final String pref_harm_jo_user_mod       = "q3e_harm_jo_user_mod"; //k
+    public static final String pref_params_jo              = "q3e_params_jo"; //k
+    public static final String pref_harm_jo_command_record = "q3e_harm_jo_command_record";
+    public static final String pref_harm_jo_game_mod       = "q3e_harm_jo_game_mod"; //k
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k

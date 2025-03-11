@@ -65,6 +65,8 @@
 #include "../../../../../libraries/ZVulkan/include/vulkan/vulkan.h"
 #include "../../../../../src/common/rendering/vulkan/textures/vk_framebuffer.h"
 #include <zvulkan/vulkanswapchain.h>
+
+EXTERN_CVAR (Int, vid_preferbackend)
 #endif
 
 #undef EGL_NO_DISPLAY
@@ -256,6 +258,14 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 	        Printf("VulkanSwapChain::SwapChain make lost.\n");
 			fbm->SwapChain->MakeLost();
 		}
+
+		if(sdl_video->surface && sdl_video->surface->Surface != VK_NULL_HANDLE)
+		{
+			Printf("Destroy old Vulkan surface.\n");
+			vkDestroySurfaceKHR(sdl_video->_fb->device->Instance->Instance, sdl_video->surface->Surface, NULL);
+			sdl_video->surface->Surface = VK_NULL_HANDLE;
+		}
+
 		VkSurfaceKHR surfacehandle = VK_NULL_HANDLE;
 		if (!I_CreateVulkanSurface(sdl_video->_fb->device->Instance->Instance, &surfacehandle))
 			VulkanError("I_CreateVulkanSurface failed");
@@ -333,6 +343,8 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
 #ifdef HAVE_VULKAN
     if (Priv::vulkanEnabled)
     {
+        VkSurfaceKHR surfacehandle = VK_NULL_HANDLE;
+        VkInstance vulkankInstance = VK_NULL_HANDLE;
         try
         {
             unsigned int count = 64;
@@ -345,8 +357,8 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
             for (unsigned int i = 0; i < count; i++)
                 builder.RequireExtension(names[i]);
             auto instance = builder.Create();
+            vulkankInstance = instance->Instance;
 
-            VkSurfaceKHR surfacehandle = VK_NULL_HANDLE;
             if (!I_CreateVulkanSurface(instance->Instance, &surfacehandle))
                 VulkanError("I_CreateVulkanSurface failed");
 
@@ -361,6 +373,22 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
         {
             Printf(TEXTCOLOR_RED "Initialization of Vulkan failed: %s\n", error.what());
 			Priv::vulkanEnabled = false;
+
+			Printf("Destroy Vulkan......\n");
+			if(vulkankInstance != VK_NULL_HANDLE)
+			{
+                if(surfacehandle != VK_NULL_HANDLE)
+                {
+			        Printf("Destroy Vulkan surface.\n");
+                    vkDestroySurfaceKHR(vulkankInstance, surfacehandle, NULL);
+                }
+			    //Printf("Destroy Vulkan instance.\n");
+                //vkDestroyInstance(vulkankInstance, NULL);
+			}
+
+            //Q3E_ReleaseWindow(false);
+	        //Q3E_RequireCurrentWindow();
+			Printf("Try OpenGL renderer......\n");
         }
     }
 #endif
@@ -370,12 +398,14 @@ DFrameBuffer *SDLVideo::CreateFrameBuffer ()
 #ifdef HAVE_GLES2
         if (V_GetBackend() != 0)
         {
+			vid_preferbackend = 2;
             fb = new OpenGLESRenderer::OpenGLFrameBuffer(0, vid_fullscreen);
             Printf("Using OpenGLES renderer.\n");
         }
         else
 #endif
         {
+			vid_preferbackend = 0;
             fb = new OpenGLRenderer::OpenGLFrameBuffer(0, vid_fullscreen);
             Printf("Using OpenGL renderer.\n");
         }

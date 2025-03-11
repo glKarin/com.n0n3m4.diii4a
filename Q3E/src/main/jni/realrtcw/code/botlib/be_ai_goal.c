@@ -102,6 +102,7 @@ typedef enum {
 	GSKILL_HARD, // normal default level
 	GSKILL_MAX,
 	GSKILL_REALISM,
+	GSKILL_SURVIVAL,
 } gameskill_t;
 
 typedef struct levelitem_s

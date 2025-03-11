@@ -262,6 +262,16 @@
                         android:id="@+id/rg_fs_fteqwgame"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_jagame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_jogame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
                 </LinearLayout>
             </android.support.v4.widget.NestedScrollView>
 
@@ -310,6 +320,37 @@
             </LinearLayout>
 
         </LinearLayout> <!-- end game mod section -->
+
+        <LinearLayout
+            android:id="@+id/gameversion_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.karin.idTech4Amm.widget.Divider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                myapp:label="@string/version"
+                myapp:lineColor="@color/launcher_divider_color" />
+
+            <LinearLayout
+                android:id="@+id/versions_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioGroup
+                    android:id="@+id/rg_version_d3bfg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"></RadioGroup>
+
+                <RadioGroup
+                    android:id="@+id/rg_version_realrtcw"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"></RadioGroup>
+            </LinearLayout>
+
+        </LinearLayout> <!-- end game version section -->
 
         <LinearLayout
             android:id="@+id/idtech4_section"
@@ -1059,6 +1100,28 @@
                         android:textAllCaps="false" />
                 </LinearLayout>
 
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/launcher_tab1_change_game"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/change_game"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/launcher_tab1_open_menu"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/open_menu"
+                        android:textAllCaps="false" />
+                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout> <!-- end general section -->

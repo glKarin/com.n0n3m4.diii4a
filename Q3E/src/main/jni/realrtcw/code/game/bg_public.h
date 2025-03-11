@@ -203,7 +203,8 @@ typedef enum {
 	GSKILL_MEDIUM,
 	GSKILL_HARD,
 	GSKILL_MAX,
-	GSKILL_REALISM,     // RealRTCW. Must always be last.
+	GSKILL_REALISM,
+	GSKILL_SURVIVAL,     // RealRTCW. Must always be last.
 	GSKILL_NUM_SKILLS
 } gameskill_t;
 
@@ -314,6 +315,11 @@ typedef struct {
 	int pmove_msec;
 
 	int ltChargeTime;
+	int soldierChargeTime;
+	int engineerChargeTime;
+	int medicChargeTime;
+
+	int gametype;
 
 	// callbacks to test the world
 	// these will be different functions during game and cgame
@@ -326,11 +332,11 @@ void PM_UpdateViewAngles( playerState_t * ps, usercmd_t * cmd, void( trace ) ( t
 int Pmove( pmove_t *pmove );
 
 //===================================================================================
-
-#define PC_SOLDIER              0   
-#define PC_MEDIC                1   
-#define PC_ENGINEER             2   
-#define PC_LT                   3   
+#define PC_NONE                 0
+#define PC_SOLDIER              1   
+#define PC_MEDIC                2   
+#define PC_ENGINEER             3   
+#define PC_LT                   4   
 #define PC_MEDIC_CHARGETIME     30000 
 
 
@@ -343,7 +349,8 @@ typedef enum {
 	STAT_DEAD_YAW,                  // look this direction when dead (FIXME: get rid of?)
 	STAT_CLIENTS_READY,             // bit mask of clients wishing to exit the intermission (FIXME: configstring?)
 	STAT_MAX_HEALTH,                // health / armor limit, changable by handicap
-	STAT_PLAYER_CLASS               // DHM - Nerve :: player class in multiplayer
+	STAT_PLAYER_CLASS,               // DHM - Nerve :: player class in multiplayer
+	STAT_PERK
 } statIndex_t;
 
 
@@ -367,8 +374,9 @@ typedef enum {
 	PERS_ACCURACY_SHOTS,
 	PERS_ACCURACY_HITS,
 	PERS_HWEAPON_USE, // Rafael - mg42
-	PERS_WOLFKICK // Rafael wolfkick
-
+	PERS_WOLFKICK, // Rafael wolfkick
+	PERS_KILLS,
+	PERS_WAVES
 } persEnum_t;
 
 // entityState_t->eFlags
@@ -419,7 +427,9 @@ typedef enum {
 	PW_NONE,
 	PW_QUAD,
 	PW_BATTLESUIT,
+	PW_BATTLESUIT_SURV,
 	PW_HASTE,
+	PW_HASTE_SURV,
 	PW_INVIS,
 	PW_REGEN,
 	PW_FLIGHT,
@@ -428,6 +438,8 @@ typedef enum {
 	PW_REDFLAG,
 	PW_BLUEFLAG,
 	PW_BALL,
+	PW_VAMPIRE,
+	PW_AMMO,
 	PW_NUM_POWERUPS
 } powerup_t;
 
@@ -458,6 +470,17 @@ typedef enum {
 	HI_NUM_HOLDABLE
 } holdable_t;
 
+typedef enum {
+	PERK_NONE,
+	PERK_RESILIENCE,
+	PERK_SCAVENGER,
+	PERK_RUNNER,
+	PERK_WEAPONHANDLING,
+	PERK_RIFLING,
+	PERK_SECONDCHANCE,
+	NUM_PERKS
+} perk_t;
+
 typedef enum
 {
 	AICHAR_NONE,
@@ -480,6 +503,8 @@ typedef enum
 	AICHAR_PRIEST,
 	AICHAR_XSHEPHERD,
 	AICHAR_SUPERSOLDIER_LAB,
+	AICHAR_ZOMBIE_SURV,
+	AICHAR_ZOMBIE_GHOST,
 	NUM_CHARACTERS
 } AICharacters_t;
 
@@ -488,14 +513,16 @@ typedef enum
 typedef enum {
 	WP_NONE,                
 	// Melee Weapons
-	WP_KNIFE,               
-	WP_DAGGER,              
-	// One handed pistols
+	WP_KNIFE,          
+	// Pistols
 	WP_LUGER,              
 	WP_SILENCER,           
     WP_COLT,               
 	WP_TT33,               
-	WP_REVOLVER,           
+	WP_REVOLVER,
+	WP_HDM,
+	WP_AKIMBO,
+	WP_DUAL_TT33,           
 	// SMGs
 	WP_MP40,             
 	WP_THOMPSON,         
@@ -503,11 +530,10 @@ typedef enum {
 	WP_PPSH,             
 	WP_MP34,             
 	// Rifles
-	WP_MAUSER,              
-	WP_SNIPERRIFLE,        
+	WP_MAUSER,                    
 	WP_GARAND,            
-	WP_SNOOPERSCOPE,
 	WP_MOSIN,
+	WP_DELISLE,
 	// Semi auto rifles
 	WP_M1GARAND,
 	WP_G43,
@@ -531,21 +557,19 @@ typedef enum {
 	WP_GRENADE_LAUNCHER,
     WP_GRENADE_PINEAPPLE,
 	WP_DYNAMITE,
-	WP_AIRSTRIKE,          
+	WP_AIRSTRIKE,
+	WP_ARTY,
 	WP_POISONGAS,
-	// Misc Alt modes
-	WP_FG42SCOPE,   
-	WP_AKIMBO,
-	WP_DUAL_TT33,     
+	WP_POISONGAS_MEDIC,
+	WP_SMOKETRAIL,          
+	WP_HOLYCROSS,
+	// Alt Modes
+	WP_SNIPERRIFLE, 
+    WP_SNOOPERSCOPE,
+	WP_DELISLESCOPE,
+    WP_M1941SCOPE,
+	WP_FG42SCOPE,
 	WP_M7,
-	WP_M1941SCOPE,
-
-	WP_P38,                 
-	WP_M30,                
-	WP_DELISLE,            
-	WP_DELISLESCOPE, 	   
-	WP_HDM,             	
-	WP_HOLYCROSS,           
     // Misc stuff, not actual weapons
 	WP_DUMMY_MG42,
 	WP_MONSTER_ATTACK1,     	
@@ -608,8 +632,6 @@ typedef struct ammoskill_s {
 	int maxclip;
 } ammoskill_t;
 
-//extern int weapAlts[]; 
-
 extern ammoTable_t ammoTable[WP_NUM_WEAPONS];
 extern ammoskill_t ammoSkill[GSKILL_NUM_SKILLS][WP_NUM_WEAPONS];
 #define GetWeaponTableData(weaponIndex) ((ammoTable_t *)(&ammoTable[weaponIndex]))
@@ -625,8 +647,10 @@ static const int autoReloadWeapons[] = {
 	WP_FLAMETHROWER,
 	WP_POISONGAS,
 	WP_AIRSTRIKE,
+	WP_POISONGAS_MEDIC,
 	WP_KNIFE,
 	WP_M7,
+	WP_ARTY,
 };
 
  // entityState_t->event values
@@ -755,8 +779,9 @@ typedef enum {
 	EV_RAILTRAIL,
 	EV_VENOM,
 	EV_VENOMFULL,
-	EV_BULLET,              // otherEntity is the shooter
+	EV_HITSOUNDS,              // otherEntity is the shooter
 	EV_LOSE_HAT,            
+	EV_REATTACH_HAT,
 	EV_GIB_HEAD,            // only blow off the head
 	EV_PAIN,
 	EV_CROUCH_PAIN,
@@ -767,6 +792,7 @@ typedef enum {
 	EV_OBITUARY,
 	EV_POWERUP_QUAD,
 	EV_POWERUP_BATTLESUIT,
+	EV_POWERUP_BATTLESUIT_SURV,
 	EV_POWERUP_REGEN,
 	EV_GIB_PLAYER,          // gib a previously living player
 	EV_GIB_VAMPIRISM,
@@ -828,6 +854,7 @@ typedef enum {
 	EV_THROWKNIFE,
 	EV_COUGH,
 	EV_QUICKGRENS,
+	EV_PLAYER_HIT,  // hitsound event
 	EV_MAX_EVENTS   // just added as an 'endcap'
 } entity_event_t;
 
@@ -995,6 +1022,13 @@ typedef enum {
 extern char *animStrings[];     // defined in bg_misc.c
 extern char *animStringsOld[];      // defined in bg_misc.c
 
+typedef enum
+{
+	HIT_NONE = 0,
+	HIT_TEAMSHOT,
+	HIT_HEADSHOT,
+	HIT_BODYSHOT
+} hitEvent_t;
 
 typedef enum {
 	WEAP_IDLE1,
@@ -1012,6 +1046,9 @@ typedef enum {
 	WEAP_DROP2,
 	WEAP_SPRINTIN,
 	WEAP_SPRINTOUT,
+	WEAP_RELOAD1_FAST,
+	WEAP_RELOAD2_FAST,
+	WEAP_RELOAD3_FAST,
 	MAX_WP_ANIMATIONS
 } weapAnimNumber_t;
 
@@ -1101,8 +1138,6 @@ typedef enum {
 	MOD_BFG_SPLASH,
 	MOD_KNIFE,
 	MOD_THROWKNIFE,
-	MOD_DAGGER,
-	MOD_DAGGER_STEALTH,	
 	MOD_KNIFE2,
 	MOD_KNIFE_STEALTH,
 	MOD_LUGER,
@@ -1131,7 +1166,6 @@ typedef enum {
 	MOD_HOLYCROSS,
 	MOD_MP34,
 	MOD_TT33,
-	MOD_P38,
 	MOD_PPSH,
 	MOD_MOSIN,
 	MOD_G43,
@@ -1145,7 +1179,6 @@ typedef enum {
 	MOD_BROWNING,
 	MOD_M97,
 	MOD_AUTO5,
-	MOD_M30,
 	MOD_HDM,
 	MOD_REVOLVER,
 	MOD_GRENADE_PINEAPPLE,
@@ -1157,6 +1190,7 @@ typedef enum {
 	MOD_DYNAMITE,
 	MOD_DYNAMITE_SPLASH,
 	MOD_AIRSTRIKE,
+	MOD_ARTY,
 	MOD_WATER,
 	MOD_SLIME,
 	MOD_LAVA,
@@ -1186,23 +1220,22 @@ typedef enum {
 
 typedef enum
 {
-	WEAPON_CLASS_NONE,
-	WEAPON_CLASS_MELEE,
-	WEAPON_CLASS_PISTOL,
-	WEAPON_CLASS_SMG,
-	WEAPON_CLASS_RIFLE,
-	WEAPON_CLASS_ASSAULT_RIFLE,
-	WEAPON_CLASS_SHOTGUN,
-	WEAPON_CLASS_GRENADE,
-	WEAPON_CLASS_RIFLENADE,
-	WEAPON_CLASS_MG,
-	WEAPON_CLASS_LAUNCHER,
-	WEAPON_CLASS_BEAM,
-	WEAPON_CLASS_SCOPED,
-	WEAPON_CLASS_SCOPABLE,
-	WEAPON_CLASS_AKIMBO,
-	WEAPON_CLASS_UNUSED
-
+	WEAPON_CLASS_NONE  =         0b0000000000000000,
+	WEAPON_CLASS_MELEE =         0b0000000000000001,
+	WEAPON_CLASS_PISTOL =        0b0000000000000010,
+	WEAPON_CLASS_SMG =           0b0000000000000100,
+	WEAPON_CLASS_RIFLE =         0b0000000000001000,
+	WEAPON_CLASS_ASSAULT_RIFLE = 0b0000000000010000,
+	WEAPON_CLASS_SHOTGUN =       0b0000000000100000,
+	WEAPON_CLASS_GRENADE =       0b0000000001000000,
+	WEAPON_CLASS_RIFLENADE =     0b0000000010000000,
+	WEAPON_CLASS_MG =            0b0000000100000000,
+	WEAPON_CLASS_LAUNCHER =      0b0000001000000000,
+	WEAPON_CLASS_BEAM =          0b0000010000000000,
+	WEAPON_CLASS_SCOPED =        0b0000100000000000,
+	WEAPON_CLASS_SCOPABLE =      0b0001000000000000,
+	WEAPON_CLASS_AKIMBO =        0b0010000000000000,
+	WEAPON_CLASS_UNUSED =        0b0100000000000000,
 } weaponClass_t;
 
 typedef enum
@@ -1233,7 +1266,8 @@ typedef enum {
 	IT_KEY,
 	IT_TREASURE,            // gold bars, etc.  things that can be picked up and counted for a tally at end-level
 	IT_CLIPBOARD,           // 'clipboard' used as a general term for 'popup' items where you pick up the item and it pauses and opens a menu
-	IT_TEAM
+	IT_TEAM,
+	IT_PERK
 } itemType_t;
 
 #define MAX_ITEM_MODELS 3
@@ -1260,7 +1294,7 @@ typedef struct gitem_s {
 	char        *precaches;     // string of all models and images this item will use
 	char        *sounds;        // string of all sounds this item will use
 
-	int gameskillnumber[5];
+	int gameskillnumber[6];
 } gitem_t;
 
 // included in both the game dll and the client
@@ -1277,9 +1311,11 @@ gitem_t *BG_FindItemForAmmo( int ammo );
 gitem_t *BG_FindItemForKey( wkey_t k, int *index );
 weapon_t BG_FindAmmoForWeapon( weapon_t weapon );
 weapon_t BG_FindClipForWeapon( weapon_t weapon );
+gitem_t *BG_FindItemForPerk( perk_t perk );
 
 qboolean BG_AkimboFireSequence( int weapon, int akimboClip, int coltClip );
 
+#define IS_VALID_WEAPON(w) ((w) > WP_NONE && (w) < WP_NUM_WEAPONS)
 #define ITEM_INDEX( x ) ( ( x ) - bg_itemlist )
 
 qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *ps );

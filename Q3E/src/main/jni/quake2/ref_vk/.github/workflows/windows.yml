@@ -1,0 +1,45 @@
+name: Build windows application
+run-name: windows
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { sys: mingw32, env: i686 }
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{matrix.sys}}
+        update: true
+        install: >-
+          git
+          make
+          zip
+          mingw-w64-${{matrix.env}}-curl
+          mingw-w64-${{matrix.env}}-ffmpeg
+          mingw-w64-${{matrix.env}}-gcc
+          mingw-w64-${{matrix.env}}-make
+          mingw-w64-${{matrix.env}}-openal
+          mingw-w64-${{matrix.env}}-SDL2
+          mingw-w64-${{matrix.env}}-vulkan-headers
+    - name: Check out repository code
+      uses: actions/checkout@v4
+    - name: Build Release code
+      shell: msys2 {0}
+      run: |
+        make
+        mkdir ref_vk-${{matrix.env}}-${{github.ref_name}}
+        cp -rv LICENSE README.md ref_vk-${{matrix.env}}-${{github.ref_name}}
+        cp -rv release/* ref_vk-${{matrix.env}}-${{github.ref_name}}
+        zip -9r ref_vk-${{matrix.env}}-${{github.ref_name}}.zip ref_vk-${{matrix.env}}-${{github.ref_name}}
+    - name: Upload Release Asset
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ref_vk-${{matrix.env}}-${{github.ref_name}}.zip

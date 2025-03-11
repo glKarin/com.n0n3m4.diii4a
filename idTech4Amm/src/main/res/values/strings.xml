@@ -460,5 +460,12 @@
     <string name="renderer_backend">Renderer backend</string>
     <string name="change_game">Change game</string>
     <string name="renderer_backend_vid_renderer">Renderer backend(vid_renderer)</string>
+    <string name="openja">OpenJA</string>
+    <string name="openjo">OpenJO</string>
+    <string name="openja_base">STAR WARS™ Jedi Knight-Jedi Academy™</string>
+    <string name="openjo_base">STAR WARS™ Jedi Knight II-Jedi Outcast™</string>
+    <string name="code_">Code:</string>
+    <string name="version">Version</string>
+    <string name="open_menu">Open menu</string>
 
 </resources>

@@ -341,7 +341,7 @@ VID_HasRenderer(const char *renderer)
 	VID_GetRendererLibPath(renderer, reflib_path, sizeof(reflib_path));
 
 #ifdef __ANDROID__ //karin: add `lib` prefix on library name
-	if ( ( reflib_path[0] != '/' && ( strcmp(renderer, "gl1") == 0 || strcmp(renderer, "gles3") == 0 ) ) || Sys_IsFile(reflib_path))
+	if ( ( reflib_path[0] != '/' && ( strcmp(renderer, "gl1") == 0 || strcmp(renderer, "gles3") == 0 || strcmp(renderer, "vk") == 0 ) ) || Sys_IsFile(reflib_path))
 #else
 	if (Sys_IsFile(reflib_path))
 #endif

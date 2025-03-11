@@ -456,4 +456,11 @@
     <string name="renderer_backend">渲染器后端</string>
     <string name="change_game">切换游戏</string>
     <string name="renderer_backend_vid_renderer">渲染器后端(vid_renderer)</string>
+    <string name="openja">OpenJA</string>
+    <string name="openjo">OpenJO</string>
+    <string name="openja_base">星球大战：绝地武士-绝地学院</string>
+    <string name="openjo_base">星球大战：绝地武士2-绝地放逐者</string>
+    <string name="code_">Code:</string>
+    <string name="version">版本</string>
+    <string name="open_menu">打开菜单</string>
 </resources>

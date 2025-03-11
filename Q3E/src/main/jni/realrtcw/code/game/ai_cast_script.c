@@ -70,7 +70,9 @@ qboolean AICast_ScriptAction_ClearAnim( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_SetAmmo( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_SetClip( cast_state_t *cs, char *params );			//----(SA)	added
 qboolean AICast_ScriptAction_SelectWeapon( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_SetMoveSpeed( cast_state_t *cs, char *params );		
+qboolean AICast_ScriptAction_SetMoveSpeed( cast_state_t *cs, char *params );
+qboolean AICast_ScriptAction_GiveScore( cast_state_t *cs, char *params );		//----(SA)	added		
+qboolean AICast_ScriptAction_SetWave ( cast_state_t *cs, char *params );		//----(SA)	added	
 qboolean AICast_ScriptAction_GiveArmor( cast_state_t *cs, char *params );		//----(SA)	added
 qboolean AICast_ScriptAction_SetArmor( cast_state_t *cs, char *params );		//----(SA)	added
 qboolean AICast_ScriptAction_GiveAmmo( cast_state_t *cs, char *params );		//----(SA)	added
@@ -79,6 +81,7 @@ qboolean AICast_ScriptAction_SuggestWeapon( cast_state_t *cs, char *params );	//
 qboolean AICast_ScriptAction_GiveWeapon( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_GiveInventory( cast_state_t *cs, char *params );
+qboolean AICast_ScriptAction_GivePerk( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_TakeWeapon( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_NoRespawn( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_RandomRespawn( cast_state_t *cs, char *params );
@@ -243,9 +246,19 @@ qboolean AICast_ScriptAction_Achievement_MALTA_BARTENDER( cast_state_t *cs, char
 qboolean AICast_ScriptAction_Achievement_MALTA_BETRAYER( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_Achievement_MALTA_AGENT2( cast_state_t *cs, char *params );
 
+//Ice
+qboolean AICast_ScriptAction_Achievement_ICE_BEAT( cast_state_t *cs, char *params ) ;
+qboolean AICast_ScriptAction_Achievement_ICE_DH( cast_state_t *cs, char *params ) ;
+qboolean AICast_ScriptAction_Achievement_ICE_STEALTH( cast_state_t *cs, char *params ) ;
+qboolean AICast_ScriptAction_Achievement_ICE_SECRET( cast_state_t *cs, char *params ) ;
+qboolean AICast_ScriptAction_Achievement_ICE_DEFENSE ( cast_state_t *cs, char *params ) ;
+qboolean AICast_ScriptAction_Achievement_ICE_EE( cast_state_t *cs, char *params ) ;
+
+qboolean AICast_ScriptAction_Achievement_6PERKS( cast_state_t *cs, char *params ) ;
 
 
 qboolean AICast_ScriptAction_EndGame( cast_state_t *cs, char *params );			//----(SA)	added
+qboolean AICast_ScriptAction_Announce( cast_state_t *cs, char *params );		
 qboolean AICast_ScriptAction_Teleport( cast_state_t *cs, char *params );		//----(SA)	added
 qboolean AICast_ScriptAction_FoundSecret( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_NoSight( cast_state_t *cs, char *params );
@@ -330,6 +343,7 @@ cast_script_stack_action_t scriptActions[] =
 	{"giveammo",        AICast_ScriptAction_GiveAmmo},			
 	{"givehealth",        AICast_ScriptAction_GiveHealth},			
 	{"giveinventory",    AICast_ScriptAction_GiveInventory},
+	{"giveperk",    AICast_ScriptAction_GivePerk},
 	{"giveweapon",       AICast_ScriptAction_GiveWeapon},
 	{"giveweaponfull",   AICast_ScriptAction_GiveWeaponFull},
 	{"takeweapon",       AICast_ScriptAction_TakeWeapon},
@@ -488,8 +502,18 @@ cast_script_stack_action_t scriptActions[] =
 	{"achievement_malta_bartender",       AICast_ScriptAction_Achievement_MALTA_BARTENDER},
 	{"achievement_malta_betrayer",       AICast_ScriptAction_Achievement_MALTA_BETRAYER},
 	{"achievement_malta_agent2",       AICast_ScriptAction_Achievement_MALTA_AGENT2},
+	//Ice
+	{"achievement_map_ice",       AICast_ScriptAction_Achievement_ICE_BEAT},
+	{"achievement_dhIce",       AICast_ScriptAction_Achievement_ICE_DH},
+	{"achievement_stealthIce",       AICast_ScriptAction_Achievement_ICE_STEALTH},
+	{"achievement_secretIce",       AICast_ScriptAction_Achievement_ICE_SECRET},
+	{"achievement_defenseIce",       AICast_ScriptAction_Achievement_ICE_DEFENSE},
+	{"achievement_easterIce",       AICast_ScriptAction_Achievement_ICE_EE},
+	
+	{"achievement_6perks",       AICast_ScriptAction_Achievement_6PERKS},
      // achievements end
 	{"endgame",          AICast_ScriptAction_EndGame},				//----(SA)	added
+	{"announce",     AICast_ScriptAction_Announce},
 	{"teleport",     AICast_ScriptAction_Teleport},					//----(SA)	added
 	{"foundsecret",      AICast_ScriptAction_FoundSecret},
 	{"nosight",          AICast_ScriptAction_NoSight},
@@ -531,6 +555,8 @@ cast_script_stack_action_t scriptActions[] =
 	{"anim_condition",   AICast_ScriptAction_AnimCondition},
 	{"pushaway",     AICast_ScriptAction_PushAway},
 	{"catchfire",        AICast_ScriptAction_CatchFire},
+	{"givescore",        AICast_ScriptAction_GiveScore},		
+	{"setwave",        AICast_ScriptAction_SetWave},		
 
 	{NULL,              0}
 };
@@ -567,6 +593,7 @@ cast_script_event_define_t scriptEvents[] =
 	{"inspectfriendlycombatstart", 0},
 	{"painenemy",        AICast_EventMatch_StringEqual},
 	{"forced_mg42_unmount",  0},
+	{"respawn",          0},
 
 	{NULL,              0}
 };

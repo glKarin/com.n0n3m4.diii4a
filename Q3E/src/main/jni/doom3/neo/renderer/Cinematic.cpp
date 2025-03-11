@@ -29,9 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
+#if !defined(_USING_STB)
 extern "C" {
 #include <jpeglib.h>
 }
+#endif
 
 #include "tr_local.h"
 
@@ -1443,6 +1445,7 @@ void idCinematicLocal::RoQReset()
 }
 
 
+#if !defined(_USING_STB)
 typedef struct {
 	struct jpeg_source_mgr pub;	/* public fields */
 
@@ -1744,6 +1747,16 @@ int JPEGBlit(byte *wStatus, byte *data, int datasize)
 	/* And we're done! */
 	return 1;
 }
+#else
+int JPEGBlit(byte *wStatus, byte *data, int datasize)
+{
+	// I don't think this code is actually used, because
+	// * the jpeg encoder parts in the roq encoder are disabled with #if 0
+	// * ffmpeg doesn't support ROQ_QUAD_JPEG and can decode all doom3 roqs anyway
+	common->Warning("Contrary to Daniel's assumption, JPEGBlit() is actually called! Please report that as a dhewm3 bug!\n");
+	return 0;
+}
+#endif
 
 /*
 ==============

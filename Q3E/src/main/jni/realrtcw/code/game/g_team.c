@@ -96,9 +96,15 @@ OnSameTeam
 ==============
 */
 qboolean OnSameTeam( gentity_t *ent1, gentity_t *ent2 ) {
-	
-	return qfalse;
+	if ( !ent1 || !ent1->client || !ent2 || !ent2->client ) {
+		return qfalse;
+	}
 
+	if ( ent1->aiTeam == ent2->aiTeam ) {
+		return qtrue;
+	}
+
+	return qfalse;
 }
 
 

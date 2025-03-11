@@ -852,13 +852,22 @@ Q3Ebool Q3E_RequireWindow(volatile ANativeWindow *w)
 	return Q3E_TRUE;
 }
 
-void Q3E_ReleaseWindow(volatile ANativeWindow *w)
+void Q3E_RequireCurrentWindow(void)
+{
+	if(!win)
+		return;
+
+	ANativeWindow_acquire((ANativeWindow *)win);
+}
+
+void Q3E_ReleaseWindow(Q3Ebool reset)
 {
 	if(!win)
 		return;
 
     ANativeWindow_release((ANativeWindow *)win);
-    win = NULL;
+    if(reset)
+        win = NULL;
 }
 
 void Q3E_SwapInterval(int interval)
@@ -975,7 +984,7 @@ Q3Ebool Q3E_GL_ExtensionSupported(const char *name)
     new_name[name_size - 2] = ' ';
     new_name[name_size - 1] = '\0';
 
-    Q3Ebool has = strstr(new_exts, new_name) != NULL;
+    Q3Ebool has = strstr(new_exts, new_name) != NULL ? Q3E_TRUE : Q3E_FALSE;
 	Q3E_PRINTF("[Harmattan]: OpenGL extension '%s' -> %s\n", name, has ? "support" : "missing");
     free(new_exts);
     free(new_name);

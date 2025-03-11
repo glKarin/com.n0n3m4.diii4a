@@ -13,6 +13,8 @@
     <color name="theme_etw_main_color">#FFA7605A</color>
     <color name="theme_realrtcw_main_color">#FFF20000</color>
     <color name="theme_fteqw_main_color">#FF8A74EB</color>
+    <color name="theme_ja_main_color">#FF8ED4FF</color>
+    <color name="theme_jo_main_color">#FF8EABFF</color>
     <color name="launcher_divider_color">#FFCCCCCC</color>
     <color name="pie_color">#FF4585E1</color>
 </resources>

@@ -1,4 +1,4 @@
-#include "../../idlib/precompiled.h"
+#include "../idlib/precompiled.h"
 #pragma hdrstop
 
 #include "Game_local.h"

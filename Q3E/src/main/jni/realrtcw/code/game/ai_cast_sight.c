@@ -115,7 +115,16 @@ qboolean AICast_VisibleFromPos( vec3_t srcpos, int srcnum,
 	vec3_t right, vec;
 	qboolean inPVS;
 
-	if ( g_entities[destnum].flags & FL_NOTARGET ) {
+	if (g_gametype.integer == GT_SURVIVAL)
+	{
+		if (!(g_entities[destnum].flags & FL_NOTARGET))
+		{
+			return qtrue;
+		}
+	}
+
+	if (g_entities[destnum].flags & FL_NOTARGET)
+	{
 		return qfalse;
 	}
 
@@ -230,9 +239,15 @@ qboolean AICast_CheckVisibility( gentity_t *srcent, gentity_t *destent ) {
 	cast_visibility_t   *vis;
 	orientation_t       or;
 
-	if ( destent->flags & FL_NOTARGET ) {
-		return qfalse;
-	}
+    if (g_gametype.integer == GT_SURVIVAL) {
+        if (!(destent->flags & FL_NOTARGET)) {
+            return qtrue;
+        }
+    }
+
+    if (destent->flags & FL_NOTARGET) {
+        return qfalse;
+    }
 	//
 	viewer = srcent->s.number;
 	ent = destent->s.number;

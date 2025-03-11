@@ -1,14 +1,14 @@
 ## idTech4A++ (Harmattan Edition)  
 **idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
 #### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
-##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW OpenGLES on Android  
+##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW/FTEQW/STAR WARS™ Jedi Knight OpenGLES on Android  
 #### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版  
-##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部 安卓OpenGLES移植版  
+##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部/FTEQW/星球大战:绝地武士 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan61(caitlyn)  
+1.1.0harmattan62(lindaiyu)  
 **Latest update:**
-2025-02-27  
+2025-03-11  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -54,7 +54,7 @@ GPLv3
 
 > **Support games**
 
-| Game | Engine | Version | OpenGL ES version | Mods |
+| Game | Engine | Version | OpenGL ES/Vulkan version | Mods |
 |:-----|:-----:|:-----:|:-----:|:-----:|
 | DOOM III | n0n3m4's dante | - | 2.0/3.0 | [Resurrection of Evil]()<br/>[The Lost Mission](https://www.moddb.com/mods/the-lost-mission)<br/>[Classic DOOM3](https://www.moddb.com/mods/classic-doom-3)<br/>[Rivensin](https://www.moddb.com/mods/ruiner)<br/>[HardCorps](https://www.moddb.com/mods/hardcorps)<br/>[Overthinked Doom^3](https://www.moddb.com/mods/overthinked-doom3)<br/>[Sabot(a7x)](https://www.moddb.com/games/doom-3-resurrection-of-evil/downloads/sabot-alpha-7x)<br/>[HeXen:Edge of Chaos](https://www.moddb.com/mods/hexen-edge-of-chaos)<br/>[Fragging Free](https://www.moddb.com/mods/fragging-free)<br/>[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[LibreCoop D3XP](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500)<br/>[Perfected Doom 3:RoE](https://www.moddb.com/mods/perfected-doom-3-version-500)<br/>[Doom 3: Phobos](https://www.moddb.com/mods/phobos)([Dhewm3 compatibility patch](https://www.moddb.com/games/doom-iii/addons/doom-3-phobos-dhewm3-compatibility-patch)) |
 | Quake IV | n0n3m4's dante | - | 2.0/3.0 | [Hardqore](https://www.moddb.com/mods/quake-4-hardqore) |
@@ -63,12 +63,14 @@ GPLv3
 | The Dark Mod | [Dark Mod](https://www.thedarkmod.com) | 2.12 | 3.2<br/>(require geometry shader support) |  |
 | Return to Castle Wolfenstein | [iortcw](https://github.com/iortcw/iortcw) | - | 1.1 |  |
 | Quake III Arena | [ioquake3](https://github.com/ioquake/ioq3) | - | 1.1 | Quake III Team Arena |
-| Quake II | [Yamagi Quake II](https://github.com/yquake2/yquake2) | - | 1.1/3.2 | ctf<br/>rogue<br/>xatrix<br/>zaero |
+| Quake II | [Yamagi Quake II](https://github.com/yquake2/yquake2) | - | 1.1/3.2/Vulkan | ctf<br/>rogue<br/>xatrix<br/>zaero |
 | Quake I | [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces) | - | 2.0 |  |
 | GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | 4.14.0 | 2.0/3.2/Vulkan |  |
 | Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) Omni-Bot support | 2.83.1 | 1.1 |  |
-| RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.0 | 1.1 |  |
+| RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.0/5.1 | 1.1 |  |
 | FTEQW | [FTEQW](https://www.fteqw.org) |  | 3.2/Vulkan |  |
+| STAR WARS™ Jedi Knight - Jedi Academy™ | [OpenJK](https://github.com/JACoders/OpenJK) |  | 1.1 |  |
+| STAR WARS™ Jedi Knight II - Jedi Outcast™ | [OpenJK](https://github.com/JACoders/OpenJK) |  | 1.1 |  |
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -77,10 +79,10 @@ GPLv3
 Or download the latest APK from the [Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest).
 Tag with `-free` only for F-Droid update.
 
-| Feature            | Github | F-Droid  |
-|:-------------------|:------:|:--------:|
-| Ouya TV            |   Yes  |    No    |
-| Source code in apk |   Yes  |    No    |
+| Feature                         | Github | F-Droid  |
+|:--------------------------------|:------:|:--------:|
+| Ouya TV                         |   Yes  |    No    |
+| Khronos Vulkan validation layer |   Yes  |    No    |
 
 > Testing version(Non-release. Automatic CI building By Github actions when pushing commits)
 * idTech4A++ for Android: [Android testing](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/android_testing).
@@ -89,15 +91,21 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Add `FTEQW` support, game standalone directory named `fteqw`, support HeXen II, Half-Life [FreeHL](https://github.com/eukara/freehl), Counter Striker 1.5 [FreeCS](https://github.com/eukara/freecs). More view in [FTEQW](https://www.fteqw.org).
-* DOOM 3 BFG add Vulkan renderer backend.
-* Don't package source code to apk since version 61.
+* Add `OpenJK` support, [STAR WARS™ Jedi Knight - Jedi Academy™](https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/) game standalone directory named `openja`, [STAR WARS™ Jedi Knight II - Jedi Outcast™](https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/) game standalone directory named `openjo`. More view in [OpenJK](https://github.com/JACoders/OpenJK).
+* Update version to 5.1 on RealRTCW, support Survival mode. And version 5.0 is keeping until version 5.1 is stable.
+* Fix audio playing when disable OpenAL on Quake3/ETW/RTCW/RealRTCW.
+* Add Vulkan renderer backend on Quake2.
+* Fix create render context on GZDOOM, it will use OpenGL ES if Vulkan initialization fail.
+* Add `Open menu` button at end of `General` tab on launcher.
 
 ----------------------------------------------------------------------------------
 
-* 新增`FTEQW`支持, 游戏独立文件夹命名为`fteqw`, 支持巫师2, 半衰期[FreeHL](https://github.com/eukara/freehl), 反恐精英1.5[FreeCS](https://github.com/eukara/freecs). 详情[FTEQW](https://www.fteqw.org).
-* 毁灭战士3-BFG渲染器支持Vulkan后端.
-* 由于导致apk文件过大, 61版本后不再打包源码到apk中.
+* 新增`OpenJK`支持, [星球大战: 绝地武士-绝地学院](https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/)游戏独立文件夹命名为`openja`, [星球大战：绝地武士 - 绝地放逐者](https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/)游戏独立文件夹命名为`openjo` 详情[OpenJK](https://github.com/JACoders/OpenJK).
+* 真·重返德军总部更新至5.1版本, 支持幸存者模式. 保留5.0版本直到5.1版本稳定.
+* 修复雷神之锤3/德军总部-深入敌后/重返德军总部/真·重返德军总部禁用OpenAL时的音频播放.
+* 雷神之锤2新增Vulkan渲染器后端.
+* 修复GZDOOM渲染环境创建, 如果Vulkan实例创建失败将使用OpenGL ES渲染.
+* 启动器`通用`选项卡底部新增`打开菜单`按钮.
 
 ----------------------------------------------------------------------------------
 ### Standalone game directory
@@ -116,6 +124,8 @@ Tag with `-free` only for F-Droid update.
 * **DOOM 3 BFG**: doom3bfg/
 * **Wolfenstein - Enemy Territory**: etw/
 * **RealRTCW**: realrtcw/
+* **STAR WARS™ Jedi Knight - Jedi Academy™**: openja/
+* **STAR WARS™ Jedi Knight II - Jedi Outcast™**: openjo/
   
 > Games of always force `Standalone game directory`:
 * **The Dark Mod**: darkmod/
@@ -287,8 +297,8 @@ Tag with `-free` only for F-Droid update.
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_return_to_castle_wolfenstein.jpg" width="50%" alt="Return to Castle Wolfenstein"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_the_dark_mod.jpg" width="50%" alt="The Dark Mod">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake2.jpg" width="50%" alt="Quake II"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake1.jpg" width="50%" alt="Quake I">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom1.jpg" width="33%" alt="DOOM 3 BFG: DOOM I"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom3.jpg" width="34%" alt="DOOM 3 BFG: DOOM III"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom2.jpg" width="33%" alt="DOOM 3 BFG: DOOM II">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_wolfenstein_enemy_territory.jpg" width="50%" alt="Wolfenstein: Enemy Territory">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_realrtcw.jpg" width="50%" alt="RealRTCW">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_wolfenstein_enemy_territory.jpg" width="50%" alt="Wolfenstein: Enemy Territory"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_realrtcw.jpg" width="50%" alt="RealRTCW">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_openja.jpg" width="50%" alt="STAR WARS™ Jedi Knight - Jedi Academy™"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_openjo.jpg" width="50%" alt="STAR WARS™ Jedi Knight II - Jedi Outcast™">
 
 ----------------------------------------------------------------------------------
 
@@ -314,8 +324,8 @@ Tag with `-free` only for F-Droid update.
 > 9. _NO_LIGHT: Add no lighting support.
 > 10. _STENCIL_SHADOW_IMPROVE: Add stencil shadow improve support(translucent shadow, force combine global shadow and self local shadow).
 > 11. _SOFT_STENCIL_SHADOW: soft shadow(OpenGLES3.1+), must defined `_STENCIL_SHADOW_IMPROVE` first.
-> 12. _MINIZ: Using miniz instead of zlib, using minizip instead of DOOM3's UnZip(Disabled).
-> 13. _USING_STB_OGG: Using stb_vorbis instead of libogg and libvorbis(Disabled).
+> 12. _MINIZ: Using miniz instead of zlib, using minizip instead of DOOM3's UnZip.
+> 13. _USING_STB_OGG: Using stb_vorbis instead of libogg and libvorbis.
 
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGLES, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
@@ -492,6 +502,7 @@ model player_model_torso_and_lower_body {
 * ETLegacy
 * RealRTCW
 * FTEQW
+* OpenJK
 > Library(Source)
 * cJSON 
 * curl: The curl license

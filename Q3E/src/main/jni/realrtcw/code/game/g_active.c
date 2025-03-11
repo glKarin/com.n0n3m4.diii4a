@@ -502,7 +502,7 @@ void ClientTimerActions( gentity_t *ent, int msec ) {
 			}
 
 		// regenerate health only if cvar is turned on
-     if (g_regen.integer == 1 && level.time >= client->healthRegenStartTime) {
+if ((g_regen.integer == 1 || g_gametype.integer == GT_SURVIVAL) && level.time >= client->healthRegenStartTime ) {
 
 		    if (ent->health < client->ps.stats[STAT_MAX_HEALTH])
 		    {
@@ -620,47 +620,73 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 
 			stunTime = 0;   //----(SA)	added
 
-//----(SA)	FIXME: TODO:  hmm, going through here adding surfaceparms it seems that the value for ent->client->ps.pm_time was weird.  (1000 for all but dmg_25 which has 250?)
-			if ( event == EV_FALL_NDIE ) {
+			if (event == EV_FALL_NDIE)
+			{
 				damage = 9999;
-			} else if ( event == EV_FALL_DMG_50 ) {
-			if ( client->ps.powerups[PW_FLIGHT] ) 
-			    {
-				damage = 25;
-				stunTime = 500;
-			    } else {
-				damage = 50;
-				stunTime = 1000;
+			}
+			else if (client->ps.perks[PERK_RUNNER] > 0)
+			{
+				damage = 0;
+				stunTime = 0;
+			}
+			else
+			{
+				if (event == EV_FALL_DMG_50)
+				{
+					if (client->ps.powerups[PW_FLIGHT])
+					{
+						damage = 25;
+						stunTime = 500;
+					}
+					else
+					{
+						damage = 50;
+						stunTime = 1000;
+					}
 				}
-			} else if ( event == EV_FALL_DMG_25 ) {
-			if ( client->ps.powerups[PW_FLIGHT] ) 
-			    {
-				damage = 12;
-				stunTime = 125;
-			    } else {
-				damage = 25;
-				stunTime = 250;
+				else if (event == EV_FALL_DMG_25)
+				{
+					if (client->ps.powerups[PW_FLIGHT])
+					{
+						damage = 12;
+						stunTime = 125;
+					}
+					else
+					{
+						damage = 25;
+						stunTime = 250;
+					}
 				}
-			} else if ( event == EV_FALL_DMG_15 ) {
-			if ( client->ps.powerups[PW_FLIGHT] ) 
-			    {
-				damage = 7;
-				stunTime = 500;
-			    } else {
-				damage = 15;
-				stunTime = 1000;
+				else if (event == EV_FALL_DMG_15)
+				{
+					if (client->ps.powerups[PW_FLIGHT])
+					{
+						damage = 7;
+						stunTime = 500;
+					}
+					else
+					{
+						damage = 15;
+						stunTime = 1000;
+					}
 				}
-			} else if ( event == EV_FALL_DMG_10 ) {
-			if ( client->ps.powerups[PW_FLIGHT] ) 
-			    {
-				damage = 5;
-				stunTime = 500;
-			    } else {
-				damage = 10;
-				stunTime = 1000;
+				else if (event == EV_FALL_DMG_10)
+				{
+					if (client->ps.powerups[PW_FLIGHT])
+					{
+						damage = 5;
+						stunTime = 500;
+					}
+					else
+					{
+						damage = 10;
+						stunTime = 1000;
+					}
 				}
-			} else {
-				damage = 5; // never used
+				else
+				{
+					damage = 5; // never used
+				}
 			}
 
 			fallSoundMul *= 2;  // double range for falls greater than FALL_SHORT
@@ -1000,11 +1026,11 @@ void ClientThink_real( gentity_t *ent ) {
 	                }
 		break;
 	}
-	if ( client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC ) {
-		if ( level.time > client->ps.powerups[PW_REGEN] + 5000 ) {
-			client->ps.powerups[PW_REGEN] = level.time;
-		}
-	}
+	//if ( client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC ) {
+		//if ( level.time > client->ps.powerups[PW_REGEN] + 5000 ) {
+		//	client->ps.powerups[PW_REGEN] = level.time;
+		//}
+	//}
 
 	// check for inactivity timer, but never drop the local client of a non-dedicated server
 	if ( !ClientInactivityTimer( client ) ) {
@@ -1083,6 +1109,10 @@ void ClientThink_real( gentity_t *ent ) {
 		client->ps.speed *= 1.2;
 	}
 
+	if ( client->ps.powerups[PW_HASTE_SURV] ) {
+		client->ps.speed *= 2.0;
+	}
+
 	// set up for pmove
 	oldEventSequence = client->ps.eventSequence;
 
@@ -1124,6 +1154,10 @@ void ClientThink_real( gentity_t *ent ) {
 	VectorCopy( client->ps.origin, client->oldOrigin );
 
 	pm.ltChargeTime = g_LTChargeTime.integer;
+	pm.soldierChargeTime = g_soldierChargeTime.integer;
+	pm.engineerChargeTime = g_engineerChargeTime.integer;
+	pm.medicChargeTime = g_medicChargeTime.integer;
+	pm.gametype = g_gametype.integer;
 
 	// perform a pmove
 #ifdef MISSIONPACK
@@ -1702,12 +1736,12 @@ void ClientEndFrame( gentity_t *ent ) {
 			AICast_CheckDangerousEntity( ent, DANGER_CLIENTAIM, HOLYCROSS_RANGE + 150, 0.5, 0.6, ( ent->client->buttons & BUTTON_ATTACK ? qtrue : qfalse ) );
 			break;
 		case WP_MONSTER_ATTACK1:
-			if ( ent->aiCharacter == AICHAR_ZOMBIE ) {
+			if ( ent->aiCharacter == AICHAR_ZOMBIE || ent->aiCharacter == AICHAR_ZOMBIE_SURV || ent->aiCharacter == AICHAR_ZOMBIE_GHOST ) {
 				AICast_CheckDangerousEntity( ent, DANGER_CLIENTAIM | DANGER_FLAMES, FLAMETHROWER_RANGE + 150, 0.5, 0.8, qtrue );
 			}
 			break;
 		case WP_MONSTER_ATTACK2:
-			if ( ent->aiCharacter == AICHAR_ZOMBIE ) {
+			if ( ent->aiCharacter == AICHAR_ZOMBIE || ent->aiCharacter == AICHAR_ZOMBIE_SURV || ent->aiCharacter == AICHAR_ZOMBIE_GHOST  ) {
 				if ( ent->client->ps.eFlags & EF_MONSTER_EFFECT ) {
 					AICast_CheckDangerousEntity( ent, 0, 4000, 0.5, 0.8, qtrue );
 				}
@@ -1730,6 +1764,7 @@ void ClientEndFrame( gentity_t *ent ) {
 		case WP_GRENADE_PINEAPPLE:
 		case WP_GRENADE_LAUNCHER:   // if they are wearing down a grenade fuse, we should be very afraid
 		case WP_POISONGAS:
+		case WP_POISONGAS_MEDIC:
 			if ( ent->client->ps.grenadeTimeLeft && ent->client->ps.grenadeTimeLeft < 3000 ) {
 				AICast_CheckDangerousEntity( ent, DANGER_CLIENTAIM, 1000, 0.5, 0.9, qtrue );
 			}

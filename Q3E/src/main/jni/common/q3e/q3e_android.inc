@@ -229,7 +229,7 @@ Q3Ebool using_external_libs = Q3E_FALSE;
 volatile Q3Ebool continue_when_no_gl_context = Q3E_FALSE;
 
 // Surface window
-volatile ANativeWindow *window = NULL;
+volatile ANativeWindow *native_window = NULL;
 static volatile Q3Ebool window_changed = Q3E_FALSE;
 
 // App paused
@@ -293,15 +293,15 @@ static Q3Ebool Q3E_WindowChanged(ANativeWindow *w, int fromNative)
 {
 	ENTER_WINDOW_CHANGED_CRITICAL_SECTION;
 
-	bool res = Q3E_FALSE;
+	Q3Ebool res = Q3E_FALSE;
 	if(fromNative == WINDOW_CHANGE_THREAD_GAME) // native
 	{
 		if(window_changed)
 		{
-			Q3E_PRINTF("[Native]: ANativeWindow changed: %p.\n", window);
-			if(window)
+			Q3E_PRINTF("[Native]: ANativeWindow changed: %p.\n", native_window);
+			if(native_window)
 			{
-				Q3E_CHANGE_WINDOW(window);
+				Q3E_CHANGE_WINDOW(native_window);
 				Q3E_PRINTF("[Native]: Notify GL context created.\n");
 				window_changed = Q3E_FALSE;
 				TRIGGER_CONTEXT_CREATED;
@@ -326,9 +326,9 @@ static Q3Ebool Q3E_WindowChanged(ANativeWindow *w, int fromNative)
 	}
 	else if(fromNative == WINDOW_CHANGE_THREAD_SURFACE_VIEW) // jni/java surface view
 	{
-		window = w;
+		native_window = w;
 		window_changed = Q3E_TRUE;
-		if(window)
+		if(native_window)
 		{
 			Q3E_PRINTF("[Java/JNI]: Notify ANativeWindow created.\n");
             TRIGGER_WINDOW_CREATED;
@@ -338,7 +338,7 @@ static Q3Ebool Q3E_WindowChanged(ANativeWindow *w, int fromNative)
 	else // jni/java main
 	{
 		Q3E_PRINTF("[Java/JNI]: Notify application destroyed.\n");
-		window = NULL;
+		native_window = NULL;
 		window_changed = Q3E_TRUE;
 		TRIGGER_WINDOW_CREATED;
 		res = Q3E_TRUE;
@@ -370,7 +370,7 @@ Q3Ebool Q3E_CheckNativeWindowChanged(void)
             }
             Q3E_WindowChanged(NULL, WINDOW_CHANGE_THREAD_GAME);
         }
-        return window != NULL;
+        return native_window != NULL ? Q3E_TRUE : Q3E_FALSE;
 	}
 	else
         return Q3E_TRUE;
@@ -405,7 +405,7 @@ void Q3E_SetGLContext(ANativeWindow *w)
         }
     }
     else
-        window = w;
+        native_window = w;
 }
 
 // JNI request thread quit
@@ -418,7 +418,7 @@ void Q3E_RequestThreadQuit(void)
 
 volatile ANativeWindow * Android_GetWindow(void)
 {
-    return window;
+    return native_window;
 }
 
 // start/end in main function
@@ -437,21 +437,21 @@ void Q3E_Start(void)
 
     Q3E_PRE_START;
     main_thread = pthread_self();
-    q3e_running = true;
+    q3e_running = Q3E_TRUE;
 
-    Q3E_INIT_WINDOW(window);
+    Q3E_INIT_WINDOW(native_window);
 
     Q3E_POST_START;
 }
 
 void Q3E_End(void)
 {
-    q3e_running = false;
+    q3e_running = Q3E_FALSE;
 
     Q3E_PRE_END;
 
     Q3E_QUIT_WINDOW();
-    window = NULL;
+    native_window = NULL;
     main_thread = 0;
     
     Q3E_POST_END;
@@ -506,8 +506,7 @@ FILE * Sys_tmpfile(void)
 
 void Android_SetClipboardData(const char *text)
 {
-    if(!text)
-        return;
+    if(text)
     //if(copy_to_clipboard)
         copy_to_clipboard(text);
 }
@@ -653,8 +652,8 @@ void Q3E_exit(void)
 {
     q3e_running = Q3E_FALSE;
     Q3E_SHUTDOWN_GAME;
-    if(window)
-        window = NULL;
+    if(native_window)
+        native_window = NULL;
     Q3E_QUIT_WINDOW();
     main_thread = 0;
     Q3E_PRINTF("[Harmattan]: " Q3E_GAME_NAME " exit.\n");
@@ -721,7 +720,7 @@ void Q3E_SetInitialContext(const void *context)
     console_max_height_frac = ptr->consoleMaxHeightFrac > 0 && ptr->consoleMaxHeightFrac < 100 ? (float)ptr->consoleMaxHeightFrac / 100.0f : -1.0f;
     using_external_libs = ptr->usingExternalLibs ? Q3E_TRUE : Q3E_FALSE;
 
-    window = ptr->window;
+    native_window = ptr->window;
     screen_width = ptr->width;
     screen_height = ptr->height;
 }

@@ -38,7 +38,11 @@ If you have questions concerning this license or the applicable additional terms
 //#define POOLSIZE	(2048 * 1024)
 #define POOLSIZE    ( 8192 * 1024 )   //----(SA)	upped to try to get assault_34 going // RealRTCW was 4096
 
+#ifdef __ANDROID__ //karin: static memory allocation from client: too large
+static char *memoryPool = NULL;
+#else
 static char memoryPool[POOLSIZE];
+#endif
 static int allocPoint;
 
 void *G_Alloc( int size ) {
@@ -52,6 +56,12 @@ void *G_Alloc( int size ) {
 		G_Error( "G_Alloc: failed on allocation of %i bytes", size );
 		return NULL;
 	}
+#ifdef __ANDROID__ //karin: static memory allocation from client
+	if ( !memoryPool ) {
+		G_Error( "G_Alloc: failed on allocation because NULL memory" );
+		return NULL;
+	}
+#endif
 
 	p = &memoryPool[allocPoint];
 
@@ -61,6 +71,17 @@ void *G_Alloc( int size ) {
 }
 
 void G_InitMemory( void ) {
+#ifdef __ANDROID__ //karin: static memory allocation from client
+	extern char * trap_RequireMemoryPool( int size );
+	memoryPool = trap_RequireMemoryPool(POOLSIZE);
+	if(memoryPool)
+		G_Printf("G_InitMemory: Game require %d bytes memory pool: %p.\n", POOLSIZE, memoryPool);
+	else
+	{
+		G_Error("G_InitMemory: Game require %d bytes memory pool fail!", POOLSIZE);
+		return;
+	}
+#endif
 	allocPoint = 0;
 }
 

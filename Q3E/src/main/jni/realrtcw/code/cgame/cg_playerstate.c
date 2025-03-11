@@ -88,7 +88,6 @@ void CG_CheckAmmo( void ) {
 		case WP_MP34:
 		case WP_PPSH:
 		case WP_TT33:
-		case WP_P38:
 		case WP_HDM:
 		case WP_MOSIN:
 		case WP_G43:
@@ -100,7 +99,6 @@ void CG_CheckAmmo( void ) {
 		case WP_AUTO5:
 		case WP_REVOLVER:
 		case WP_BROWNING:
-		case WP_M30:
 		case WP_HOLYCROSS:
 		case WP_DELISLE:
 		case WP_M1941:

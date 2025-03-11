@@ -61,6 +61,8 @@ extern int bg_pmove_gameskill_integer;
 
 vmCvar_t g_gametype;
 
+vmCvar_t g_newinventory;
+
 // Rafael gameskill
 vmCvar_t g_gameskill;
 // done
@@ -175,6 +177,8 @@ vmCvar_t g_dlc1;
 vmCvar_t g_class;
 vmCvar_t g_noobTube;
 
+vmCvar_t g_playerSurvivalClass;
+
 vmCvar_t g_mapname;
 
 cvarTable_t gameCvarTable[] = {
@@ -188,6 +192,8 @@ cvarTable_t gameCvarTable[] = {
 
 	// latched vars
 	{ &g_gametype, "g_gametype", "0", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse  },
+
+	{ &g_newinventory, "g_newinventory", "0", CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse  },
 
 	// Rafael gameskill
 	{ &g_gameskill, "g_gameskill", "2", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse  },   // (SA) new default '2' (was '1')
@@ -209,6 +215,8 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dlc1, "g_dlc1", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_class, "g_class", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_noobTube, "g_noobTube", "0", CVAR_ARCHIVE, 0, qfalse },
+
+	{ &g_playerSurvivalClass, "g_playersurvivalclass", "0", CVAR_ARCHIVE | CVAR_LATCH , 0, qfalse },
 
 	{ &g_reloading, "g_reloading", "0", CVAR_ROM },   //----(SA)	added
 
@@ -591,7 +599,7 @@ void G_CheckForCursorHints( gentity_t *ent ) {
 	//
 	else if ( tr->entityNum < MAX_CLIENTS ) {
 
-		if ( ent->s.weapon == WP_KNIFE || ent->s.weapon == WP_DAGGER ) {
+		if ( ent->s.weapon == WP_KNIFE ) {
 			vec3_t pforward, eforward;
 			qboolean canKnife = qfalse;
 
@@ -827,7 +835,7 @@ void G_CheckForCursorHints( gentity_t *ent ) {
 			// set up any forced max distances for specified hints
 			switch ( hintType ) {
 			case HINT_KNIFE:
-				if ( ent->s.weapon == WP_KNIFE || ent->s.weapon == WP_DAGGER ) {
+				if ( ent->s.weapon == WP_KNIFE ) {
 					hintDist = CH_KNIFE_DIST;
 				} else {
 					hintType = 0;       // no knife, clear it
@@ -1035,7 +1043,7 @@ void G_RegisterCvars( void ) {
 	}
 
 	// Rafael gameskill
-	if ( g_gameskill.integer < GSKILL_EASY || g_gameskill.integer > GSKILL_REALISM ) {
+	if ( g_gameskill.integer < GSKILL_EASY || g_gameskill.integer > GSKILL_SURVIVAL ) {
 		G_Printf( "g_gameskill %i is out of range, default to medium\n", g_gameskill.integer );
 		trap_Cvar_Set( "g_gameskill", va( "%d", GSKILL_MEDIUM ) ); // default to medium
 	}
@@ -1217,13 +1225,14 @@ int G_SendMissionStats( void ) {
 	return canExit;
 }
 
-inline const char* G_GameSkillIntToStr( int skill ) {
+static inline const char* G_GameSkillIntToStr( int skill ) {
 	switch ( skill ) {
 		case GSKILL_EASY:		return "easy";
 		case GSKILL_MEDIUM:		return "medium";
 		case GSKILL_HARD:		return "hard";
 		case GSKILL_MAX:		return "max";
 		case GSKILL_REALISM:	return "realism";
+		case GSKILL_SURVIVAL:	return "survival";
 		default:				return "";
 	}
 }
@@ -1304,6 +1313,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 		char s[10];
 		// Ridah, initialize cast AI system
 		// DHM - Nerve :: Moved this down so that it only happens in SinglePlayer games
+
+		// Load survival parameters
+		if (g_gametype.integer == GT_SURVIVAL)
+		{
+			AI_LoadSurvivalTable(g_mapname.string);
+		}
+
 		AICast_Init();
 		// done.
 
@@ -1364,6 +1380,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	}
 
 	trap_SetConfigstring( CS_INTERMISSION, "" );
+
+	// fretn
+	G_LoadArenas();
 
 	steamSetRichPresence( "Mapname", g_mapname.string );
 	steamSetRichPresence( "Skill", G_GameSkillIntToStr( g_gameskill.integer ) ) ;
@@ -2113,12 +2132,12 @@ void CheckExitRules( void ) {
 				continue;
 			}
 
-			if ( cl->ps.persistant[PERS_SCORE] >= g_fraglimit.integer ) {
+			/*if ( cl->ps.persistant[PERS_SCORE] >= g_fraglimit.integer ) {
 				LogExit( "Fraglimit hit." );
 				trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " hit the fraglimit.\n\"",
 												cl->pers.netname ) );
 				return;
-			}
+			}*/
 		}
 	}
 

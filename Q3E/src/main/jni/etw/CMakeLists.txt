@@ -10,13 +10,13 @@ cmake_minimum_required(VERSION 3.10.3 FATAL_ERROR)
 project(ETLEGACY C CXX)
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.21")
-    cmake_policy(SET CMP0121 NEW)
+    # cmake_policy(SET CMP0121 NEW) # NEW OLD
 endif()
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.22")
-	cmake_policy(SET CMP0127 NEW)
+	# cmake_policy(SET CMP0127 NEW)
 endif()
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
-	cmake_policy(SET CMP0135 NEW)
+    # cmake_policy(SET CMP0135 NEW)
 endif()
 
 if(ANDROID)

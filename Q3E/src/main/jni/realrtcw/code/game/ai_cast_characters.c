@@ -45,6 +45,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "ai_cast.h"
 
+extern svParams_t svParams;
+
 // Skill-based behavior parameters
 behaviorskill_t behaviorSkill[GSKILL_NUM_SKILLS][NUM_CHARACTERS];
 
@@ -587,6 +589,63 @@ AICharacterDefaults_t aiDefaults[NUM_CHARACTERS] = {
 		NULL,
 		AISTATE_ALERT
 	},
+
+	//AICHAR_ZOMBIE_SURV
+	{
+		"Zombie Surv",
+		{ // Default
+			0
+		},
+		{
+			"zombieSightPlayer",
+			"zombieAttackPlayer",
+			"zombieOrders",
+			"zombieDeath",
+			"zombieSilentDeath",				//----(SA)	added
+			"zombieFlameDeath",					//----(SA)	added
+			"zombiePain",
+			"sound/weapons/melee/fstatck.wav",	// stay - you're told to stay put
+			"sound/weapons/melee/fstmiss.wav",	// follow - go with ordering player ("i'm with you" rather than "yes sir!")
+			"zombieOrdersDeny",					// deny - refuse orders (doing something else)
+		},
+		AITEAM_MONSTER,
+		"zombie/default",
+		{ WP_MONSTER_ATTACK2, WP_MONSTER_ATTACK3},
+		BBOX_SMALL, {32,48},
+		/*AIFL_NOPAIN|AIFL_WALKFORWARD|*/ AIFL_NO_RELOAD,
+		AIFunc_ZombieFlameAttackStart, AIFunc_ZombieAttack2Start, AIFunc_ZombieMeleeStart,
+		NULL,
+		AISTATE_ALERT
+	},
+
+	//AICHAR_ZOMBIE_GHOST
+	{
+		"Zombie Ghost",
+		{ // Default
+			0
+		},
+		{
+			"zombieSightPlayer",
+			"zombieAttackPlayer",
+			"zombieOrders",
+			"zombieDeath",
+			"zombieSilentDeath",				//----(SA)	added
+			"zombieFlameDeath",					//----(SA)	added
+			"zombiePain",
+			"sound/weapons/melee/fstatck.wav",	// stay - you're told to stay put
+			"sound/weapons/melee/fstmiss.wav",	// follow - go with ordering player ("i'm with you" rather than "yes sir!")
+			"zombieOrdersDeny",					// deny - refuse orders (doing something else)
+		},
+		AITEAM_MONSTER,
+		"zombie/ghost",
+		{ WP_MONSTER_ATTACK2, WP_MONSTER_ATTACK3},
+		BBOX_SMALL, {32,48},
+		/*AIFL_NOPAIN|AIFL_WALKFORWARD|*/ AIFL_NO_RELOAD,
+		AIFunc_ZombieFlameAttackStart, AIFunc_ZombieAttack2Start, AIFunc_ZombieMeleeStart,
+		NULL,
+		AISTATE_ALERT
+	},
+
 };
 //---------------------------------------------------------------------------
 
@@ -699,11 +758,13 @@ void AIChar_Death( gentity_t *ent, gentity_t *attacker, int damage, int mod ) { 
 	// need this check otherwise sound will overwrite gib message
 	if ( ent->health > GIB_HEALTH  ) {
 		if ( ent->client->ps.eFlags & EF_HEADSHOT ) {
+        if ( g_gametype.integer == GT_SURVIVAL && attacker && ( attacker->aiTeam != ent->aiTeam ) ) {
+			    attacker->client->ps.persistant[PERS_SCORE] += svParams.scoreHeadshotKill;
+			}
 			G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[QUIETDEATHSOUNDSCRIPT] ) );
 		} else {
 			switch ( mod ) {               //----(SA)	modified to add 'quiet' deaths
 			case MOD_KNIFE_STEALTH:
-			case MOD_DAGGER_STEALTH:
 			case MOD_SNIPERRIFLE:
 			case MOD_SNOOPERSCOPE:
 				G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[QUIETDEATHSOUNDSCRIPT] ) );
@@ -830,7 +891,7 @@ void AIChar_Pain( gentity_t *ent, gentity_t *attacker, int damage, vec3_t point 
 	// now check the damageQuota to see if we should play a pain animation
 	// first reduce the current damageQuota with time
 	if ( cs->damageQuotaTime && cs->damageQuota > 0 ) {
-		cs->damageQuota -= (int)( ( 1.0 + ( g_gameskill.value / GSKILL_REALISM ) ) * ( (float)( level.time - cs->damageQuotaTime ) / 1000 ) * ( 7.5 + cs->attributes[ATTACK_SKILL] * 10.0 ) );
+		cs->damageQuota -= (int)( ( 1.0 + ( g_gameskill.value / GSKILL_SURVIVAL ) ) * ( (float)( level.time - cs->damageQuotaTime ) / 1000 ) * ( 7.5 + cs->attributes[ATTACK_SKILL] * 10.0 ) );
 		if ( cs->damageQuota < 0 ) {
 			cs->damageQuota = 0;
 		}
@@ -843,13 +904,13 @@ void AIChar_Pain( gentity_t *ent, gentity_t *attacker, int damage, vec3_t point 
 		if ( scale > 4.0 ) {
 			scale = 4.0;
 		}
-		damage = (int)( (float)damage * ( 1.0 + ( scale * ( 1.0 - 0.5 * g_gameskill.value / GSKILL_REALISM ) ) ) );
+		damage = (int)( (float)damage * ( 1.0 + ( scale * ( 1.0 - 0.5 * g_gameskill.value / GSKILL_SURVIVAL ) ) ) );
 	}
 
 	// adjust the new damage with distance, if they are really close, scale it down, to make it
 	// harder to get through the game by continually rushing the enemies
 	if ( ( attacker->s.weapon != WP_TESLA  && attacker->s.weapon != WP_HOLYCROSS ) && ( ( dist = VectorDistance( ent->r.currentOrigin, attacker->r.currentAngles ) ) < 384 ) ) {
-		damage -= (int)( (float)damage * ( 1.0 - ( dist / 384.0 ) ) * ( 0.5 + 0.5 * g_gameskill.value / GSKILL_REALISM ) );
+		damage -= (int)( (float)damage * ( 1.0 - ( dist / 384.0 ) ) * ( 0.5 + 0.5 * g_gameskill.value / GSKILL_SURVIVAL ) );
 	}
 
 	// add the new damage
@@ -914,7 +975,7 @@ void AIChar_Pain( gentity_t *ent, gentity_t *attacker, int damage, vec3_t point 
 		cs->damageQuota = 0;
 		cs->damageQuotaTime = 0;
 		//
-		cs->painSoundTime = cs->pauseTime + (int)( 1000 * ( g_gameskill.value / GSKILL_REALISM ) );     // add a bit more of a buffer before the next one
+		cs->painSoundTime = cs->pauseTime + (int)( 1000 * ( g_gameskill.value / GSKILL_SURVIVAL ) );     // add a bit more of a buffer before the next one
 	}
 
 }
@@ -1540,6 +1601,27 @@ void SP_ai_blackguard( gentity_t *ent ) {
 	AICast_DelayedSpawnCast( ent, AICHAR_BLACKGUARD );
 }
 
+/*
+============
+SP_ai_zombie_surv
+============
+*/
+void SP_ai_zombie_surv( gentity_t *ent ) {
+	ent->r.svFlags |= SVF_NOFOOTSTEPS;
+	AICast_DelayedSpawnCast( ent, AICHAR_ZOMBIE_SURV );
+}
+
+
+/*
+============
+SP_ai_zombie_ghost
+============
+*/
+void SP_ai_zombie_ghost( gentity_t *ent ) {
+	ent->r.svFlags |= SVF_NOFOOTSTEPS;
+	AICast_DelayedSpawnCast( ent, AICHAR_ZOMBIE_GHOST );
+}
+
 // Load behavior parameters from .aidefaults file
 void AI_LoadBehaviorTable( AICharacters_t characterNum )
 {
@@ -1580,6 +1662,8 @@ char *BG_GetCharacterFilename( AICharacters_t characterNum )
 		case AICHAR_SOLDIER:           return "soldier.aidefaults";
 		case AICHAR_AMERICAN:          return "american.aidefaults";
 		case AICHAR_ZOMBIE:            return "zombie.aidefaults";
+		case AICHAR_ZOMBIE_SURV:       return "zombie_surv.aidefaults";
+		case AICHAR_ZOMBIE_GHOST:      return "zombie_ghost.aidefaults";
 		case AICHAR_WARZOMBIE:         return "warzombie.aidefaults";
 		case AICHAR_VENOM:             return "venom.aidefaults";
 		case AICHAR_LOPER:             return "loper.aidefaults";

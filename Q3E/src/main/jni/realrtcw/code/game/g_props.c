@@ -4176,20 +4176,17 @@ void props_flamethrower_think( gentity_t *ent ) {
 		}
 
 		if ( !target ) {
-//			VectorSet (ent->r.currentAngles, 0, 0, 1);	// (SA) wasn't working
 			VectorSet( ent->s.apos.trBase, 0, 0, 1 );
 		} else
 		{
 			VectorSubtract( target->s.origin, ent->s.origin, vec );
 			VectorNormalize( vec );
 			vectoangles( vec, angles );
-//			VectorCopy (angles, ent->r.currentAngles);	// (SA) wasn't working
 			VectorCopy( angles, ent->s.apos.trBase );
 		}
 	}
 
-	if ( ( ent->timestamp + ent->duration ) > level.time ) {
-		//G_AddEvent (ent, EV_FLAMETHROWER_EFFECT, 0);
+	/*if ( ( ent->timestamp + ent->duration ) > level.time ) {
 		ent->s.eFlags |= EF_FIRING;
 
 		ent->nextthink = level.time + 50;
@@ -4210,6 +4207,18 @@ void props_flamethrower_think( gentity_t *ent ) {
 		}
 	} else {
 		ent->s.eFlags &= ~EF_FIRING;
+	}*/
+
+
+	if ( level.time > ent->duration + ent->timestamp ) {
+		ent->nextthink = 0;
+		ent->s.eFlags &= ~EF_FIRING;
+
+		// Allow re-activation by clearing the “in use” flag
+		ent->spawnflags &= ~2;
+	} else {
+		ent->nextthink = level.time + 50;
+		ent->s.eFlags |= EF_FIRING;
 	}
 
 }
@@ -4253,14 +4262,12 @@ void props_flamethrower_init( gentity_t *ent ) {
 	}
 
 	if ( !target ) {
-//		VectorSet (ent->r.currentAngles, 0, 0, 1);	//----(SA)
 		VectorSet( ent->s.apos.trBase, 0, 0, 1 );
 	} else
 	{
 		VectorSubtract( target->s.origin, ent->s.origin, vec );
 		VectorNormalize( vec );
 		vectoangles( vec, angles );
-//		VectorCopy (angles, ent->r.currentAngles);	//----(SA)
 		VectorCopy( angles, ent->s.apos.trBase );
 		VectorCopy( angles, ent->s.angles ); // RF, added to fix wierd release build issues
 	}
@@ -4276,6 +4283,7 @@ void SP_props_flamethrower( gentity_t *ent ) {
 	ent->think = props_flamethrower_init;
 	ent->nextthink = level.time + 50;
 	ent->use = props_flamethrower_use;
+	ent->methodOfDeath = MOD_FLAMETHROWER;
 
 	G_SetOrigin( ent, ent->s.origin );
 

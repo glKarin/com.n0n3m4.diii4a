@@ -100,6 +100,8 @@ itemInfo_t cg_items[MAX_ITEMS];
 vmCvar_t cg_bobbing;
 vmCvar_t cg_railTrailTime;
 vmCvar_t cg_centertime;
+vmCvar_t cg_buyprinttime;
+vmCvar_t cg_egprinttime;
 vmCvar_t cg_runpitch;
 vmCvar_t cg_runroll;
 vmCvar_t cg_bobup;
@@ -184,6 +186,8 @@ vmCvar_t cg_zoomStepBinoc;
 vmCvar_t cg_zoomStepSniper;
 vmCvar_t cg_zoomStepSnooper;
 vmCvar_t cg_zoomStepFG;         //----(SA)	added
+vmCvar_t cg_zoomSensitivity;
+vmCvar_t cg_zoomSensitivityFovScaled;
 vmCvar_t cg_zoomDefaultBinoc;
 vmCvar_t cg_zoomDefaultSniper;
 vmCvar_t cg_zoomDefaultSnooper;
@@ -226,6 +230,7 @@ vmCvar_t cg_wolfparticles;
 
 // Ridah
 vmCvar_t cg_gameType;
+vmCvar_t cg_newinventory;
 vmCvar_t cg_bloodTime;
 vmCvar_t cg_norender;
 vmCvar_t cg_skybox;
@@ -233,6 +238,8 @@ vmCvar_t cg_skybox;
 // Rafael
 vmCvar_t cg_gameSkill;
 // done
+
+vmCvar_t cg_hitSounds;
 
 vmCvar_t cg_reloading;      //----(SA)	added
 
@@ -328,6 +335,8 @@ cvarTable_t cvarTable[] = {
 	{ &cg_zoomDefaultSniper, "cg_zoomDefaultSniper", "15", CVAR_ARCHIVE },
 	{ &cg_zoomDefaultSnooper, "cg_zoomDefaultSnooper", "40", CVAR_ARCHIVE },
 	{ &cg_zoomDefaultFG, "cg_zoomDefaultFG", "55", CVAR_ARCHIVE },                //----(SA)	added
+	{ &cg_zoomSensitivityFovScaled, "cg_zoomSensitivityFovScaled", "1", CVAR_ARCHIVE },
+	{ &cg_zoomSensitivity, "cg_zoomSensitivity", "1", CVAR_ARCHIVE },
 	{ &cg_zoomStepBinoc, "cg_zoomStepBinoc", "3", CVAR_ARCHIVE },
 	{ &cg_zoomStepSniper, "cg_zoomStepSniper", "2", CVAR_ARCHIVE },
 	{ &cg_zoomStepSnooper, "cg_zoomStepSnooper", "5", CVAR_ARCHIVE },
@@ -387,6 +396,8 @@ cvarTable_t cvarTable[] = {
 	{ &cg_gun_y, "cg_gunY", "0", CVAR_CHEAT  },
 	{ &cg_gun_z, "cg_gunZ", "0", CVAR_CHEAT  },
 	{ &cg_centertime, "cg_centertime", "3", CVAR_CHEAT },
+	{ &cg_buyprinttime, "cg_buyprinttime", "1", CVAR_CHEAT },
+	{ &cg_egprinttime, "cg_egprinttime", "7", CVAR_CHEAT },
 	{ &cg_runpitch, "cg_runpitch", "0.002", CVAR_ARCHIVE},
 	{ &cg_runroll, "cg_runroll", "0.005", CVAR_ARCHIVE },
 	{ &cg_bobup, "cg_bobup", "0.005", CVAR_ARCHIVE },
@@ -488,9 +499,12 @@ cvarTable_t cvarTable[] = {
 
 	// Ridah
 	{ &cg_gameType, "g_gametype", "0", 0 }, // communicated by systeminfo
+	{ &cg_newinventory, "g_newinventory", "0", CVAR_ARCHIVE }, // communicated by systeminfo
 	{ &cg_norender, "cg_norender", "0", 0 },  // only used during single player, to suppress rendering until the server is ready
 
 	{ &cg_gameSkill, "g_gameskill", "2", 0 }, // communicated by systeminfo	// (SA) new default '2' (was '1')
+
+	{ &cg_hitSounds, "cg_hitSounds", "0", CVAR_ARCHIVE },
 
 	{ &cg_ironChallenge, "g_ironchallenge", "0", CVAR_SERVERINFO | CVAR_ROM }, 
 	{ &cg_nohudChallenge, "g_nohudchallenge", "0", CVAR_SERVERINFO | CVAR_ROM }, 
@@ -505,7 +519,7 @@ cvarTable_t cvarTable[] = {
 	
 
 	// JPW NERVE
-	{ &cg_medicChargeTime,  "g_medicChargeTime", "10000", 0 }, // communicated by systeminfo
+	{ &cg_medicChargeTime,  "g_medicChargeTime", "20000", 0 }, // communicated by systeminfo
 	{ &cg_LTChargeTime, "g_LTChargeTime", "35000", 0 }, // communicated by systeminfo
 	{ &cg_engineerChargeTime,   "g_engineerChargeTime", "30000", 0 }, // communicated by systeminfo
 	{ &cg_soldierChargeTime,    "g_soldierChargeTime", "20000", 0 }, // communicated by systeminfo
@@ -1162,6 +1176,10 @@ static void CG_RegisterSounds( void ) {
 	cgs.media.gibBounce2Sound = trap_S_RegisterSound( "sound/player/gibimp2.wav" );
 	cgs.media.gibBounce3Sound = trap_S_RegisterSound( "sound/player/gibimp3.wav" );
 
+	cgs.media.headShot = trap_S_RegisterSound( "sound/hitsounds/hithead.wav" );
+	cgs.media.bodyShot = trap_S_RegisterSound( "sound/hitsounds/hit.wav" );
+	cgs.media.teamShot = trap_S_RegisterSound( "sound/hitsounds/hitteam.wav" );
+
 	cgs.media.grenadebounce[GRENBOUNCE_DEFAULT][0]  = trap_S_RegisterSound( "sound/weapons/grenade/hgrenb1a.wav" );
 	cgs.media.grenadebounce[GRENBOUNCE_DEFAULT][1]  = trap_S_RegisterSound( "sound/weapons/grenade/hgrenb2a.wav" );
 	cgs.media.grenadebounce[GRENBOUNCE_DIRT][0]     = trap_S_RegisterSound( "sound/weapons/grenade/hg_dirt1a.wav" );
@@ -1509,6 +1527,7 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.invisShader = trap_R_RegisterShader("powerups/invisibility" );
 //	cgs.media.regenShader = trap_R_RegisterShader("powerups/regen" );
 	cgs.media.hastePuffShader = trap_R_RegisterShader("hasteSmokePuff" );
+	cgs.media.redQuadShader = trap_R_RegisterShader("powerups/vampire" );
 
 	CG_LoadingString( " - models" );
 
@@ -1642,7 +1661,7 @@ static void CG_RegisterGraphics( void ) {
 
 // code is almost complete for doing this correctly.  will remove when that is complete.
 	CG_LoadingString( " - weapons" );
-	for ( i = WP_KNIFE; i < WP_MONSTER_ATTACK3; i++ ) {
+	for ( i = WP_KNIFE; i < WP_DUMMY_MG42; i++ ) {
 			CG_RegisterWeapon( i, qfalse );
 	}
 

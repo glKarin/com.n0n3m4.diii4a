@@ -42,7 +42,7 @@ localEntity_t cg_localEntities[MAX_LOCAL_ENTITIES];
 localEntity_t cg_activeLocalEntities;       // double linked list
 localEntity_t   *cg_freeLocalEntities;      // single linked list
 
-//delayedBrass_t  *cg_delayedBrasses = NULL;
+delayedBrass_t  *cg_delayedBrasses = NULL;
 
 // Ridah, debugging
 int localEntCount = 0;
@@ -134,7 +134,6 @@ localEntity_t   *CG_AllocLocalEntity( void ) {
 CG_FreeDelayedBrass
 ==================
 */
-/*
 void CG_FreeDelayedBrass( delayedBrass_t * delayedBrass ) {
 	if ( !delayedBrass ) {
 		CG_Error( "CG_FreeDelayedBrass: delayedBrass is NULL" );
@@ -153,15 +152,15 @@ void CG_FreeDelayedBrass( delayedBrass_t * delayedBrass ) {
 	}
 
 	free( delayedBrass );
+	delayedBrass = NULL;
 }
 
-*/
+
 /*
 ===================
 CG_AllocDelayedBrass
 ===================
 */
-/*
 void CG_AllocDelayedBrass( centity_t * cent, int time, void ( *ejectBrassFunc )( centity_t * ) ) {
 
 	delayedBrass_t *delayedBrasses = ( delayedBrass_t* )malloc( sizeof( delayedBrass_t ) );
@@ -178,7 +177,7 @@ void CG_AllocDelayedBrass( centity_t * cent, int time, void ( *ejectBrassFunc )(
 		cg_delayedBrasses = delayedBrasses;
 	}
 }
-*/
+
 /*
 ====================================================================================
 
@@ -224,9 +223,9 @@ void CG_BloodTrail( localEntity_t *le ) {
 	step = ( 1000 * 3 ) / VectorLength( le->pos.trDelta );
 #endif
 
-	if ( cent && cent->currentState.aiChar == AICHAR_ZOMBIE ) {
-		step = 30;
-	}
+  if ( cent && (cent->currentState.aiChar == AICHAR_ZOMBIE || cent->currentState.aiChar == AICHAR_ZOMBIE_SURV || cent->currentState.aiChar == AICHAR_ZOMBIE_GHOST) ) {
+    step = 30;
+  }
 
 	t = step * ( ( cg.time - cg.frametime + step ) / step );
 	t2 = step * ( cg.time / step );
@@ -239,7 +238,7 @@ void CG_BloodTrail( localEntity_t *le ) {
 #else
 
 
-		if ( cent && cent->currentState.aiChar == AICHAR_ZOMBIE ) {
+   if ( cent && (cent->currentState.aiChar == AICHAR_ZOMBIE || cent->currentState.aiChar == AICHAR_ZOMBIE_SURV || cent->currentState.aiChar == AICHAR_ZOMBIE_GHOST) ) {
 			CG_Particle_Bleed( cgs.media.smokePuffShader, newOrigin, vec3_origin, 1, 500 + rand() % 200 );
 		} else {
 			// Ridah, blood trail using trail code (should be faster since we don't have to spawn as many)
@@ -1720,19 +1719,26 @@ CG_AddLocalEntities
 */
 void CG_AddLocalEntities( void ) {
 	localEntity_t   *le, *next;
-	//delayedBrass_t *dlBrass;
+	delayedBrass_t *dlBrass, *nextDlBrass;
 
 	cg.viewFade = 0.0;
 
-	/*dlBrass = cg_delayedBrasses;
-	for ( ; dlBrass != NULL ; dlBrass = dlBrass->next ) {
+	dlBrass = cg_delayedBrasses;
+	while ( dlBrass != NULL ) {
 		if ( cg.time < dlBrass->time ) {
-			continue;
+			return;
 		}
 
 		dlBrass->ejectBrassFunc(dlBrass->centity);
+		dlBrass = dlBrass->next;
+	}
+
+	dlBrass = cg_delayedBrasses;
+	while ( dlBrass != NULL ) {
+		nextDlBrass = dlBrass->next;
 		CG_FreeDelayedBrass( dlBrass );
-	}*/
+		dlBrass = nextDlBrass;
+	}
 
 	// walk the list backwards, so any new local entities generated
 	// (trails, marks, etc) will be present this frame

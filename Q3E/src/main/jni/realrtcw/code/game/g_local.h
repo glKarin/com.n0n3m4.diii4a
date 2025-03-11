@@ -80,6 +80,8 @@ If you have questions concerning this license or the applicable additional terms
 #define FL_NODRAW               0x01000000
 #define FL_DOORNOISE            0x02000000  //----(SA)	added
 
+#define ANNOUNCE_SOUNDS_COUNT 32
+
 // movers are things like doors, plats, buttons, etc
 typedef enum {
 	MOVER_POS1,
@@ -99,10 +101,132 @@ typedef enum {
 	MOVER_2TO1ROTATE
 } moverState_t;
 
+typedef struct svParams_s
+{
+	// not loaded
+	int activeAI[NUM_CHARACTERS];
+	int survivalKillCount;
+	int maxActiveAI[NUM_CHARACTERS];
+	int waveCount;
+	int waveKillCount;
+	int killCountRequirement;
+
+
+	// loaded from .surv file
+	int initialKillCountRequirement;
+
+	int initialSoldiersCount;
+	int initialEliteGuardsCount;
+	int initialBlackGuardsCount;
+	int initialVenomsCount;
+
+	int initialZombiesCount;
+	int initialWarriorsCount;
+	int initialProtosCount;
+	int initialGhostsCount;
+	int initialPriestsCount;
+	int initialPartisansCount;
+
+	float healthIncreaseMultiplier;
+	float speedIncreaseDivider;
+
+	float spawnTimeDecreaseDivider;
+	int   minSpawnTime;
+	int   startingSpawnTime;
+    int   friendlySpawnTime;
+
+	int soldiersIncrease;
+	int eliteGuardsIncrease;
+	int blackGuardsIncrease;
+	int venomsIncrease;
+	int zombiesIncrease;
+	int warriorsIncrease;
+	int protosIncrease;
+	int partisansIncrease;
+	int ghostsIncrease;
+	int priestsIncrease;
+
+	int maxSoldiers;
+	int maxEliteGuards;
+	int maxBlackGuards;
+	int maxVenoms;
+
+	int maxZombies;
+	int maxWarriors;
+	int maxProtos;
+	int maxGhosts;
+	int maxPriests;
+	int maxPartisans;
+
+	int waveEg;
+	int waveBg;
+	int waveV;
+
+	int waveWarz;
+	int waveProtos;
+	int waveGhosts;
+	int wavePriests;
+
+	int wavePartisans;
+
+	int zombieHealthCap;
+	int warriorHealthCap;
+	int protosHealthCap;
+	int ghostHealthCap;
+	int priestHealthCap;
+
+	int partisansHealthCap;
+
+	int soldierHealthCap;	
+	int eliteGuardHealthCap;
+	int blackGuardHealthCap;
+	int venomHealthCap;
+
+	int soldierBaseHealth;
+	int eliteGuardBaseHealth;
+	int blackGuardBaseHealth;
+	int venomBaseHealth;
+
+	int partisansBaseHealth;
+
+	int zombieBaseHealth;
+	int warriorBaseHealth;
+	int protosBaseHealth;
+	int ghostBaseHealth;
+	int priestBaseHealth;
+
+	int powerupDropChance;
+	int powerupDropChanceScavengerIncrease;
+
+	int treasureDropChance;
+	int treasureDropChanceScavengerIncrease;
+
+	int ammoStandPrice;
+	int healthStandPrice;
+
+	int scoreHeadshotKill;
+	int scoreHit;
+	int scoreBaseKill;
+	int scoreSoldierBonus;
+	int scoreZombieBonus;
+	int scoreEliteBonus;
+	int scoreWarzBonus;
+	int scoreProtosBonus;
+	int scoreBlackBonus;
+	int scoreVenomBonus;
+	int scorePriestBonus;
+	int scoreGhostBonus;
+	int scoreKnifeBonus;
+
+	char announcerSound[ANNOUNCE_SOUNDS_COUNT][MAX_QPATH];
+
+} svParams_t;
+
 typedef enum {
     RADIUS_SCOPE_ANY,
     RADIUS_SCOPE_CLIENTS,
     RADIUS_SCOPE_NOCLIENTS,
+	RADIUS_SCOPE_AI,
 } RadiusScope;
 
 // door AI sound ranges
@@ -441,6 +565,10 @@ struct gentity_s {
 	// if working on a post release patch, new variables should ONLY be inserted after this point
 
 	int canSpeak;               // can this entity speak?
+	int price;                 // item price, survival mode
+    char  *buy_item;
+	int isWeapon;    
+	int wave;				   // wave number, survival mode           
 };
 
 // Ridah
@@ -493,6 +621,8 @@ typedef struct {
 	spectatorState_t spectatorState;
 	int spectatorClient;            // for chasecam and follow mode
 	int wins, losses;               // tournament stats
+	int playerType;                
+
 } clientSession_t;
 
 //
@@ -617,6 +747,7 @@ struct gclient_s {
 	gentity_t   *cameraPortal;              // grapple hook if out
 	vec3_t cameraOrigin;
 
+	int dropWeaponTime;         // JPW NERVE last time a weapon was dropped
 	int limboDropWeapon;         // JPW NERVE weapon to drop in limbo
 	int deployQueueNumber;         // JPW NERVE player order in reinforcement FIFO queue
 	int sniperRifleFiredTime;         // JPW NERVE last time a sniper rifle was fired (for muzzle flip effects)
@@ -628,6 +759,8 @@ struct gclient_s {
 	pmoveExt_t pmext;
 
 	int healthRegenStartTime;
+
+	qboolean hasPurchased;
 };
 
 
@@ -762,6 +895,9 @@ typedef struct {
 	// RF, record last time we loaded, so we can hack around sighting issues on reload
 	int lastLoadTime;
 
+	// fretn - maybe not the best place to add this
+	char *maplist[MAX_MAPS];
+
 } level_locals_t;
 
 //extern    qboolean	reloading;				// loading up a savegame
@@ -808,6 +944,11 @@ void Fill_Clip( playerState_t *ps, int weapon );
 void    Add_Ammo( gentity_t *ent, int weapon, int count, qboolean fillClip );
 void Touch_Item( gentity_t *ent, gentity_t *other, trace_t *trace );
 qboolean AddMagicAmmo( gentity_t *receiver, int numOfClips );
+
+int G_FindWeaponSlot( gentity_t *other, weapon_t weapon );
+int G_GetFreeWeaponSlot( gentity_t *other );
+void G_DropWeapon( gentity_t *ent, weapon_t weapon );
+qboolean Give_Weapon_New_Inventory( gentity_t *other, weapon_t weapon, qboolean needThrowItem );
 
 // Touch_Item_Auto is bound by the rules of autoactivation (if cg_autoactivate is 0, only touch on "activate")
 void Touch_Item_Auto( gentity_t *ent, gentity_t *other, trace_t *trace );
@@ -866,10 +1007,13 @@ void G_ProcessTagConnect( gentity_t *ent, qboolean clearAngles );
 void G_AdjustedDamageVec( gentity_t *ent, vec3_t origin, vec3_t vec );
 qboolean CanDamage( gentity_t *targ, vec3_t origin );
 void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir, vec3_t point, int damage, int dflags, int mod );
+void G_DamageExt( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir, vec3_t point, int damage, int dflags, int mod, int *hitEventType );
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod );
 qboolean G_RadiusDamage2( vec3_t origin, gentity_t *inflictor, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod, RadiusScope scope );
 void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
-void TossClientItems( gentity_t *self );
+void TossClientWeapons( gentity_t *self );
+void TossClientItems( gentity_t *self, gentity_t *attacker );
+void TossClientPowerups( gentity_t *self, gentity_t *attacker );
 
 // damage flags
 #define DAMAGE_RADIUS               0x00000001  // damage was indirect
@@ -955,11 +1099,13 @@ int TeamCount( int ignoreClientNum, team_t team );
 team_t PickTeam( int ignoreClientNum );
 void SetClientViewAngle( gentity_t *ent, vec3_t angle );
 gentity_t *SelectSpawnPoint( vec3_t avoidPoint, vec3_t origin, vec3_t angles );
+gentity_t *SelectSpawnPoint_AI ( gentity_t *player, gentity_t *ent, vec3_t origin, vec3_t angles ) ;
 void ClientRespawn(gentity_t *ent);
 void BeginIntermission( void );
 void InitBodyQue( void );
 void ClientSpawn( gentity_t *ent );
 void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
+void player_die_secondchance( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
 void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
@@ -1053,8 +1199,14 @@ void G_QueueBotBegin( int clientNum );
 qboolean G_BotConnect( int clientNum, qboolean restart );
 void Svcmd_AddBot_f( void );
 
+void G_LoadArenas( void );
+
 // ai_cast_characters.c
 void AI_LoadBehaviorTable( AICharacters_t characterNum );
+
+// ai_cast_funcs.c
+void AI_LoadSurvivalTable( const char* mapname );
+qboolean BG_ParseSurvivalTable( int handle );
 
 // ai_main.c
 #define MAX_FILEPATH            144
@@ -1109,6 +1261,8 @@ extern gentity_t       *g_camEnt;
 
 extern vmCvar_t g_gametype;
 
+extern vmCvar_t g_newinventory;
+
 // Rafael gameskill
 extern vmCvar_t g_gameskill;
 // done
@@ -1126,6 +1280,8 @@ extern vmCvar_t g_midgame;
 extern vmCvar_t g_dlc1;
 extern vmCvar_t g_class;
 extern vmCvar_t g_noobTube;
+
+extern vmCvar_t g_playerSurvivalClass;
 
 extern vmCvar_t g_reloading;        //----(SA)	added
 
@@ -1443,6 +1599,7 @@ void	*trap_Alloc( int size );
 
 gentity_t* G_FindSmokeBomb( gentity_t* start );
 void G_PoisonGasExplode  ( gentity_t* );
+void G_PoisonGas2Explode  ( gentity_t* );
 
 void G_SetTargetName( gentity_t* ent, char* targetname );
 

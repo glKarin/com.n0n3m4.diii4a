@@ -1351,22 +1351,23 @@ R_SetMode(void)
 #ifdef __ANDROID__ //karin: force screen size and mode
 	extern int screen_width;
 	extern int screen_height;
-	vid_fullscreen->value = 1;
-	fullscreen = 1;
-
-	/* a bit hackish approach to enable custom resolutions:
-	   Glimp_SetMode needs these values set for mode -1 */
-	vid.width = screen_width;
-	vid.height = screen_height;
-	r_mode->value = -1;
-#else
+	ri.Cvar_Set("vid_fullscreen", "1");
+	vid_fullscreen->modified = false;
+	ri.Cvar_Set("r_mode", "-2");
+	r_mode->modified = false;
+	int width, height;
+	RI_GetDrawableSize(&width, &height);
+	ri.Cvar_SetValue("r_customwidth", width);
+	ri.Cvar_SetValue("r_customheight", height);
+	r_customwidth->modified = false;
+	r_customheight->modified = false;
+#endif
 	fullscreen = (int)vid_fullscreen->value;
 
 	/* a bit hackish approach to enable custom resolutions:
 	   Glimp_SetMode needs these values set for mode -1 */
 	vid.width = r_customwidth->value;
 	vid.height = r_customheight->value;
-#endif
 
 	if ((err = SetMode_impl(&vid.width, &vid.height, r_mode->value,
 					 fullscreen)) == rserr_ok)

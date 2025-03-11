@@ -1537,7 +1537,7 @@ void G_LoadGame( char *filename ) {
 			// set the skill level
 			trap_Cvar_Set( "g_gameskill", va( "%i",i ) );
 			// update this
-			aicast_skillscale = (float)i / (float)GSKILL_REALISM;
+			aicast_skillscale = (float)i / (float)GSKILL_SURVIVAL;
 		}
 
 		if ( ver > 13 ) {
@@ -1689,7 +1689,7 @@ void G_LoadGame( char *filename ) {
 			// set the skill level
 			trap_Cvar_Set( "g_gameskill", va( "%i",i ) );
 			// update this
-			aicast_skillscale = (float)i / (float)GSKILL_REALISM;
+			aicast_skillscale = (float)i / (float)GSKILL_SURVIVAL;
 		}
 
 		if ( ver > 13 ) {

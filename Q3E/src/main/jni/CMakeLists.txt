@@ -7,6 +7,11 @@ cmake_minimum_required(VERSION 3.4.1)
 
 project(idtech4amm)
 
+# build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 add_definitions(-D__ANDROID__)
 option(ANDROID "Android build" ON)
 option(BUILD_TESTING "Build tests" OFF)
@@ -19,6 +24,7 @@ add_subdirectory( q3e )
 
 
 
+# Supported
 OPTION(GAME_DOOM3       "Build DOOM 3/Quake 4/Prey(2006)"       ON)
 OPTION(GAME_RTCW        "Build Return to Castle Wolfenstein"    ON)
 OPTION(GAME_QUAKE3      "Build Quake 3"                         ON)
@@ -30,7 +36,9 @@ OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
 OPTION(GAME_ETW         "Build Wolfenstein: Enemy Territory"    ON)
 OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
+OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 
+# Experimental
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
@@ -44,12 +52,12 @@ if(NOT GAME_DOOM3)
     add_subdirectory(doom3/neo/externlibs/openal-soft)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory ( deplibs ) # common depend libraries
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK)
     message(STATUS "Build common static libraries")
     add_subdirectory (deplibs/oboe) # 1.8.1
     add_subdirectory ( common )
@@ -85,11 +93,6 @@ if(GAME_DOOM3BFG) # 1.4.0 | f81a8c1dd9b762774a233ba071837b2c7a374751 | Mar 6, 20
     add_subdirectory ( doom3bfg ) # RBDOOM3-BFG
 endif()
 
-if(GAME_DNF)
-    message(STATUS "Build Duke Nukem Forever")
-    add_subdirectory ( duke4/neo ) # DNF
-endif()
-
 if(GAME_DOOM) # g4.14.0 | 71c40432e5e893c629a1c9c76a523a0ab22bd56a | Apr 28, 2024 | Reworked clientside lerping
     if(CMAKE_SIZEOF_VOID_P EQUAL 8 #[[ OR TRUE]]) # GZDOOM only support 64bits system
         message(STATUS "Build GZDOOM")
@@ -104,14 +107,28 @@ if(GAME_ETW) # v2.83.1 | e8d0ec06800630fd458791ccd29ed488e04648d9 | Nov 12, 2024
     add_subdirectory ( etw ) # ETW
 endif()
 
-if(GAME_REALRTCW) # 5.0
+if(GAME_REALRTCW) # 5.1 | a6e94b82bd11c41f62ffc969e27b0e63f267ef8e | Version is upped to 5.1
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
+    # It will remove when newest version is stable
+    add_subdirectory ( realrtcw/realrtcw_5_0 "realrtcw_5_0" ) # RealRTCW 5.0 # 5.0 | on Jul 2, 2024 | 49ebd2964f7d15be3ca2723401ef3ea07bfbf586 | Disable eject brass delay, it crashes the game
 endif()
 
 if(GAME_FTEQW) # 5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 | engine/common/fs.c: Update game definitions
     message(STATUS "Build FTEQW")
     add_subdirectory ( fteqw ) # FTEQW
+endif()
+
+if(GAME_JK) # 199ddc7642d0ed0e2bf007fe63d0dce3a4bb4908 | Nov 13, 2024 | Merge pull request #1246 from taysta/ojk-macos
+    message(STATUS "Build OpenJK")
+    add_subdirectory ( jk ) # Jedi Knight
+endif()
+
+
+
+if(GAME_DNF)
+    message(STATUS "Build Duke Nukem Forever")
+    add_subdirectory ( duke4/neo ) # DNF
 endif()
 
 if(GAME_QUAKES) # noire-dev/SourceTech/commit/b0a1d46740d5a76f172a2889f285214a95dd3702 noire-dev/QuakeSandbox/commit/f01cab6d123784f6e2aaa839e9ccd3ec0a6f1325

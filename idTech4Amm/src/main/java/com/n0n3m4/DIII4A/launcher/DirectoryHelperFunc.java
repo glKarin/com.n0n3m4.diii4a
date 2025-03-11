@@ -108,12 +108,7 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
 
     private String GetSubDir(String game, boolean standalone)
     {
-        final String[] AlwaysStandalone = {
-                Q3EGlobals.GAME_TDM,
-                Q3EGlobals.GAME_SUBDIR_DOOMBFG,
-                Q3EGlobals.GAME_GZDOOM,
-        };
-        if(standalone || Utility.ArrayContains(AlwaysStandalone, game))
+        if(standalone || Q3EInterface.IsStandaloneGame(game))
             return Q3EInterface.GetGameStandaloneDirectory(game);
         else
             return null;

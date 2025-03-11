@@ -932,24 +932,24 @@ static int CG_CalcFov( void ) {
 	cg.refdef.fov_x = fov_x;
 	cg.refdef.fov_y = fov_y;
 
-	if ( !cg.zoomedBinoc ) {
-		// NERVE - SMF - fix for zoomed in/out movement bug
-		if ( cg.zoomval ) {
-			if ( cg.snap->ps.weapon == WP_SNOOPERSCOPE ) {
-				cg.zoomSensitivity = 0.3f * ( cg.zoomval / 90.f );  // NERVE - SMF - changed to get less sensitive as you zoom in;
-			}
-//				cg.zoomSensitivity = 0.2;
-			else {
-				cg.zoomSensitivity = 0.6 * ( cg.zoomval / 90.f );   // NERVE - SMF - changed to get less sensitive as you zoom in
-			}
-//				cg.zoomSensitivity = 0.1;
-		} else {
-			cg.zoomSensitivity = 1;
+	// RealRTCW - sensitivity multiplier and scaling by fov
+	float zoomSensFovScale = 1;
+	if( cg_zoomSensitivityFovScaled.integer ) {
+		if( cg.zoomedBinoc ) {
+			zoomSensFovScale = cg.refdef.fov_y / 75.0;
 		}
-		// -NERVE - SMF
-	} else {
-		cg.zoomSensitivity = cg.refdef.fov_y / 75.0;
+		else if ( cg.zoomval ) {
+			if ( cg.snap->ps.weapon == WP_SNOOPERSCOPE ) {
+				zoomSensFovScale = 0.3f * ( cg.zoomval / 90.f );
+			}
+			else {
+				zoomSensFovScale = 0.6 * ( cg.zoomval / 90.f );
+			}
+		}
 	}
+	float zoomSensMultiplier = ( cg.zoomedBinoc || cg.zoomval ) ? cg_zoomSensitivity.value : 1;
+	
+	cg.zoomSensitivity = zoomSensFovScale * zoomSensMultiplier;
 
 	return inwater;
 }

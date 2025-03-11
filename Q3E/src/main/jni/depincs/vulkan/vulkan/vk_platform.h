@@ -42,7 +42,10 @@ extern "C"
     #define VKAPI_CALL __stdcall
     #define VKAPI_PTR  VKAPI_CALL
 #elif defined(__ANDROID__) && defined(__ARM_ARCH) && __ARM_ARCH < 7
-    #error "Vulkan is not supported for the 'armeabi' NDK ABI"
+    //karin #error "Vulkan is not supported for the 'armeabi' NDK ABI"
+    #define VKAPI_ATTR __attribute__((pcs("aapcs-vfp")))
+    #define VKAPI_CALL
+    #define VKAPI_PTR  VKAPI_ATTR
 #elif defined(__ANDROID__) && defined(__ARM_ARCH) && __ARM_ARCH >= 7 && defined(__ARM_32BIT_STATE)
     // On Android 32-bit ARM targets, Vulkan functions use the "hardfloat"
     // calling convention, i.e. float parameters are passed in registers. This

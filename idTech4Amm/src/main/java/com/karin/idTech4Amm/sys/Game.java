@@ -84,6 +84,12 @@ public enum Game
     FTEQW_H2(Q3EGlobals.GAME_FTEQW, "hexen2", "hexen2", "fteqw", "", "data1", true, R.string.hexen_2_base),
     FTEQW_HL(Q3EGlobals.GAME_FTEQW, "halflife", "halflife", "fteqw", "", "valve", true, R.string.halflife_base),
     FTEQW_CS1_5(Q3EGlobals.GAME_FTEQW, "cstrike_1_5", "halflife", "fteqw", "cstrike", "cstrike", true, R.string.cs_1_5_base),
+
+    // OpenJA
+    JA_BASE(Q3EGlobals.GAME_JA, "base", "", "jagame", "", "base", false, R.string.openja_base),
+
+    // OpenJO
+    JO_BASE(Q3EGlobals.GAME_JO, "base", "", "jospgame", "", "base", false, R.string.openjo_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......
