@@ -308,10 +308,10 @@ static char * G_AllocMemoryPool( size_t size )
 {
 	if(g_memoryPool)
 	{
-		//Com_Error( ERR_FATAL, "G_AllocMemoryPool: memory pool heap has allocated!" );
+		memset(g_memoryPool, 0, size);
 		return g_memoryPool;
 	}
-	g_memoryPool = calloc(size, 1);
+	g_memoryPool = (char *)calloc(size, 1);
 	if(!g_memoryPool)
 		Com_Error( ERR_FATAL, "G_AllocMemoryPool: memory pool heap allocation fail!" );
 
