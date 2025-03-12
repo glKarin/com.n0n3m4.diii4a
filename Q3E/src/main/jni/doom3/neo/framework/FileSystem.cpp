@@ -3566,7 +3566,7 @@ idFile_InZip *idFileSystemLocal::ReadFileFromZip(pack_t *pak, fileInPack_t *pakF
     d3_unz_file_info	file_info;
     int err = d3_unzGetCurrentFileInfo( uf, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0 );
     if ( err != UNZ_OK ) {
-        common->FatalError( "Couldn't get file info for %s in %s, pos %llu", relativePath, pak->pakFilename.c_str(), pakFile->pos );
+        common->FatalError( "Couldn't get file info for %s in %s, pos %lu", relativePath, pak->pakFilename.c_str(), pakFile->pos );
     }
 
     // create idFile_InZip and set fields accordingly
