@@ -1562,6 +1562,11 @@ qhandle_t idRenderWorldLocal::FindGamePortal(const char *name)
 	return 0;
 }
 
+typedef struct gamePortalSource_s
+{
+    gamePortalInfo_t info;
+    idVec3 points[4];
+} gamePortalSource_t;
 //karin: add game portals into doublePortals
 void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 {
@@ -1578,11 +1583,6 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 	idMapEntity *targetEntity;
 	const char *name;
 	int numGamePortals = 0;
-	typedef struct gamePortalSource_s
-	{
-		gamePortalInfo_t info;
-        idVec3 points[4];
-	} gamePortalSource_t;
 	idList<gamePortalSource_t> sources;
 
 	gamePortalInfos.Clear();
