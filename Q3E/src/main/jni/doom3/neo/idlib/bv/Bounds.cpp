@@ -455,6 +455,26 @@ void idBounds::FromBoundsRotation(const idBounds &bounds, const idVec3 &origin, 
 /*
 ============
 idBounds::ToPoints
+Bounds -1 -20 -300, 1 20 300
+P0: -1 -20 -300 Left-Forward-Bottom
+P1: 1 -20 -300 Right-Forward-Bottom
+P2: 1 20 -300 Right-Backward-Bottom
+P3: -1 20 -300 Left-Backward-Bottom
+P4: -1 -20 300 Left-Forward-Top
+P5: 1 -20 300 Right-Forward-Top
+P6: 1 20 300 Right-Backward-Top
+P7: -1 20 300 Left-Backward-Top
+
+             P7 ---------- P6  maxs
+            /|            / |
+          /  |          /   |
+         P4 -+-------- P5   |
+         |   |         |    |
+         |   P3--------+----P2
+         |  /          |   /
+         |/            | /
+   mins  P0 ---------- P1
+   
 ============
 */
 void idBounds::ToPoints(idVec3 points[8]) const

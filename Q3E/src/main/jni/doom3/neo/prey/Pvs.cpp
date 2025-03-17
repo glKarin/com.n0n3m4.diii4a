@@ -142,10 +142,10 @@ void idPVS::CreatePVSData( void ) {
 			p = &pvsPortals[cp++];
 			
 			//HUMANHEAD rww - check to see if this is a game portal
-#if 1
-			p->gamePortal = false;
-#else
+#if GAMEPORTAL_PVS
 			p->gamePortal = gameRenderWorld->IsGamePortal(portal.portalHandle);
+#else
+			p->gamePortal = false;
 #endif
 			p->mightSeeGamePortal = p->gamePortal;
 

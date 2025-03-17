@@ -706,6 +706,29 @@ class idRenderWorld
 	virtual void			DemoSmokeEvent(const idDeclParticle *smoke, const int systemTimeOffset, const float diversity, const idVec3 &origin, const idMat3 &axis) = 0;
 #endif
 	//HUMANHEAD END
+	// HUMANHEAD pdm: game portal support
+#if GAMEPORTAL_PVS
+	virtual qhandle_t		FindGamePortal(const char *name) = 0;
+	virtual void			RegisterGamePortals(idMapFile *mapFile) = 0;
+	virtual void			DrawGamePortals(int mode, const idMat3 &viewAxis) = 0;
+	virtual bool			IsGamePortal( qhandle_t handle ) = 0;
+	virtual idVec3			GetGamePortalSrc( qhandle_t handle ) = 0;
+	virtual idVec3			GetGamePortalDst( qhandle_t handle ) = 0;
+#endif
+#if GAMEPORTAL_SOUND
+	virtual int				NumSoundPortalsInArea( int areaNum ) = 0;
+	virtual int				NumGamePortalsInArea( int areaNum ) = 0;
+	virtual exitPortal_t	GetSoundPortal( int areaNum, int portalNum ) = 0;
+	virtual void			LevelInitSoundAreas() = 0;
+	virtual void			LevelShutdownSoundAreas() = 0;
+	virtual void			PrecalculateValidSoundAreas(const idVec3 listenerPosition, const int listenerArea) = 0;
+	virtual bool			ValidSoundArea(const int area) = 0;
+	virtual float			DistanceToSoundArea(const int area) = 0;
+	virtual float			MaxSoundAreaExtents(const int area) = 0;
+
+	virtual void			DrawValidSoundAreas(const idVec3 &source, const idMat3 &viewAxis) = 0;
+#endif
+// HUMANHEAD END
 #endif
 };
 #endif /* !__RENDERWORLD_H__ */

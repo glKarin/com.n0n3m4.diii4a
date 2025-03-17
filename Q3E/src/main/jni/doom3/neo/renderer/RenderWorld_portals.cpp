@@ -1547,3 +1547,293 @@ void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, c
 	}
 }
 #endif
+
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+qhandle_t idRenderWorldLocal::FindGamePortal(const char *name)
+{
+	for(int i = 0; i < gamePortalInfos.Num(); i++)
+	{
+		if(!idStr::Icmp(gamePortalInfos[i].name, name))
+		{
+			return i + numMapInterAreaPortals + 1;
+		}
+	}
+	return 0;
+}
+
+//karin: add game portals into doublePortals
+void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
+{
+	idMapEntity *entity;
+	int numEntities;
+	int a1, a2;
+	idWinding	*w;
+	portal_t	*p;
+	portalArea_t *area;
+	const char *classname;
+	const char *spawnclass;
+	const idDeclEntityDef *decl;
+	const char *cameraTarget;
+	idMapEntity *targetEntity;
+	const char *name;
+	int numGamePortals = 0;
+	typedef struct gamePortalSource_s
+	{
+		gamePortalInfo_t info;
+        idVec3 points[4];
+	} gamePortalSource_t;
+	idList<gamePortalSource_t> sources;
+
+	gamePortalInfos.Clear();
+	numEntities = mapFile->GetNumEntities();
+
+	// filter all map entities
+	for(int i = 0; i < numEntities; i++)
+	{
+		entity = mapFile->GetEntity(i);
+		// get `.def` decl
+		classname = entity->epairs.GetString("classname");
+		decl = (idDeclEntityDef *)declManager->FindType(DECL_ENTITYDEF, classname, false);
+		if(!decl)
+			continue;
+		// get `spawnclass` name
+		spawnclass = decl->dict.GetString("spawnclass");
+		if(!spawnclass || !spawnclass[0])
+			continue;
+		// only handle `hhPortal` class
+		if(idStr::Icmp("hhPortal", spawnclass) != 0)
+			continue;
+		// get `cameraTarget` object
+		cameraTarget = entity->epairs.GetString("cameraTarget");
+		if(!cameraTarget || !cameraTarget[0])
+			continue;
+		targetEntity = mapFile->FindEntity(cameraTarget);
+		if(!targetEntity)
+			continue;
+		// get source origin position
+		idVec3 origin = entity->epairs.GetVector("origin", "0 0 0");
+		idVec3 src = origin;
+
+		// get target origin position
+		idVec3 targetOrigin = targetEntity->epairs.GetVector("origin", "0 0 0");
+		idVec3 dst = targetOrigin;
+
+		// get area num with origin and target origin
+		int srcArea = PointInArea(src);
+		if(srcArea < 0) 
+			continue;
+		int dstArea = PointInArea(dst);
+		if(dstArea < 0)
+			continue;
+
+        name = entity->epairs.GetString("name");
+
+        // get entity bounds with `mins` and `maxs` or `size`
+        idVec3 size(0.0f, 0.0f, 0.0f);
+        idBounds bounds;
+        bounds.Clear();
+        if ( decl->dict.GetVector( "mins", NULL, bounds[0] ) &&
+                decl->dict.GetVector( "maxs", NULL, bounds[1] ) ) {
+            if ( bounds[0][0] > bounds[1][0] || bounds[0][1] > bounds[1][1] || bounds[0][2] > bounds[1][2] ) {
+                common->Printf( "Invalid bounds '%s'-'%s' on entity '%s'\n", bounds[0].ToString(), bounds[1].ToString(), name );
+                continue;
+            }
+        } else if ( decl->dict.GetVector( "size", NULL, size ) ) {
+            if ( ( size.x < 0.0f ) || ( size.y < 0.0f ) || ( size.z < 0.0f ) ) {
+                common->Printf( "Invalid size '%s' on entity '%s'\n", size.ToString(), name );
+            }
+            bounds[0].Set( size.x * -0.5f, size.y * -0.5f, 0.0f );
+            bounds[1].Set( size.x * 0.5f, size.y * 0.5f, size.z );
+        }
+
+        // get entity rotation with `rotation` or `angle`
+        idMat3 rotation;
+        rotation.Identity();
+        if ( !entity->epairs.GetMatrix( "rotation", "1 0 0 0 1 0 0 0 1", rotation ) ) {
+            idAngles angles( ang_zero );
+            float angle = entity->epairs.GetFloat( "angle" );
+            if( angle == -1 ) {
+                angles[ 0 ] = -90.0f;
+            }
+            else if( angle == -2 ) {
+                angles[ 0 ] = 90.0f;
+            }
+            else {
+                angles[ 0 ] = entity->epairs.GetFloat( "pitch" );
+                angles[ 1 ] = angle;
+                angles[ 2 ] = entity->epairs.GetFloat( "roll" );
+            }
+            rotation = angles.ToMat3();
+        }
+
+        // X-axis is side, so using center of X-axis
+        idVec3 &mins = bounds[0];
+        idVec3 &maxs = bounds[1];
+        float centerX = (mins[0] + maxs[0]) * 0.5f;
+        mins.x = centerX;
+        maxs.x = centerX;
+
+        // get 8 points from bounds
+        idVec3 points[8];
+        bounds.ToPoints(points);
+
+        gamePortalSource_t gps;
+
+        // transform new bounds, and using bounds as idWinding's points
+        // CCW: 0 3 7 4
+        float mat4[16];
+        R_AxisToModelMatrix(rotation, origin, mat4);
+        R_LocalPointToGlobal(mat4, points[0], gps.points[0]);
+        R_LocalPointToGlobal(mat4, points[3], gps.points[1]);
+        R_LocalPointToGlobal(mat4, points[7], gps.points[2]);
+        R_LocalPointToGlobal(mat4, points[4], gps.points[3]);
+
+		// save it
+		gps.info.name = name;
+		gps.info.srcArea = srcArea;
+		gps.info.dstArea = dstArea;
+		gps.info.srcPosition = src;
+		gps.info.dstPosition = dst;
+		sources.Append(gps);
+		numGamePortals++;
+	}
+
+	common->Printf("[Harmattan]: Find %d game portals.\n", numGamePortals);
+
+	// if no game portals
+	if(numGamePortals == 0)
+		return;
+
+	// create new doublePortals that include map portals and game portals
+	doublePortal_t *gameDoublePortals = (doublePortal_t *)R_ClearedStaticAlloc((numInterAreaPortals + numGamePortals) * sizeof(gameDoublePortals[0]));
+	int start = numInterAreaPortals;
+	if(numInterAreaPortals > 0)
+	{
+		// copy old doublePortals to new doublePortals
+		memcpy(gameDoublePortals, doublePortals, numInterAreaPortals * sizeof(doublePortals[0]));
+
+		// reference to new doublePortal_t pointer
+		for (int i = 0; i < numPortalAreas; i++) {
+			area = &portalAreas[i];
+			p = area->portals;
+			while(p)
+			{
+				for(int j = 0; j < numInterAreaPortals; j++)
+				{
+					if(p->doublePortal == &doublePortals[j])
+					{
+						p->doublePortal = &gameDoublePortals[j];
+						break;
+					}
+				}
+				p = p->next;
+			}
+		}
+
+		// sum game portals to total portals
+		numInterAreaPortals += numGamePortals;
+		// free old doublePortals
+		R_StaticFree(doublePortals);
+	}
+	// using new doublePortals
+	doublePortals = gameDoublePortals;
+
+	// fill new doublePortals and append new portal_t to link list
+	for(int i = 0; i < numGamePortals; i++)
+	{
+		const gamePortalSource_t &gps = sources[i];
+		int index = start + i;
+
+		w = new idWinding(4);
+		w->SetNumPoints(4);
+		idVec3 points[8];
+		idStr pointsStr("(");
+		for (int j = 0 ; j < 4 ; j++) {
+			const idVec3 &point = gps.points[j];
+			(*w)[j][0] = point[0];
+			(*w)[j][1] = point[1];
+			(*w)[j][2] = point[2];
+			pointsStr.Append(point.ToString());
+			if(j < 3)
+				pointsStr.Append(", ");
+			// no texture coordinates
+			(*w)[j][3] = 0;
+			(*w)[j][4] = 0;
+		}
+		pointsStr.Append(")");
+
+		a1 = gps.info.srcArea;
+		a2 = gps.info.dstArea;
+
+		// same as RenderWorld_load.cpp::ParseInterAreaPortals
+		p = (portal_t *)R_ClearedStaticAlloc(sizeof(*p));
+		p->intoArea = a2;
+		p->doublePortal = &doublePortals[index];
+		p->w = w;
+		p->w->GetPlane(p->plane);
+
+		p->next = portalAreas[a1].portals;
+		portalAreas[a1].portals = p;
+
+		doublePortals[index].portals[0] = p;
+
+		// reverse it for a2
+		p = (portal_t *)R_ClearedStaticAlloc(sizeof(*p));
+		p->intoArea = a1;
+		p->doublePortal = &doublePortals[index];
+		p->w = w->Reverse();
+		p->w->GetPlane(p->plane);
+
+		p->next = portalAreas[a2].portals;
+		portalAreas[a2].portals = p;
+
+		doublePortals[index].portals[1] = p;
+
+		gamePortalInfos.Append(gps.info);
+		common->Printf("[Harmattan]: Append game portal %d: index=%d, area1=%d, area2=%d, winding=%s\n", i, index, a1, a2, pointsStr.c_str());
+	}
+}
+
+void idRenderWorldLocal::DrawGamePortals(int mode, const idMat3 &viewAxis)
+{
+    // it will be called every frame
+	(void)mode;
+	(void)viewAxis;
+	extern void RB_DebugGamePortals(void);
+	RB_DebugGamePortals();
+}
+
+bool idRenderWorldLocal::IsGamePortal( qhandle_t handle )
+{
+	int index = handle - 1;
+	//common->Printf("IsGamePortal: %d -> %d\n", handle,index >= numAppendPortalAreas && index < numInterAreaPortals);
+	return index >= numAppendPortalAreas && index < numInterAreaPortals;
+}
+
+idVec3 idRenderWorldLocal::GetGamePortalSrc( qhandle_t handle )
+{
+	int index = handle - 1;
+	if(index < numMapInterAreaPortals || index >= numInterAreaPortals)
+	{
+		common->Error("GetGamePortalSrc handle out of range: handle=%d, portals: map=%d, game=%d, all=%d\n", handle, numMapInterAreaPortals, gamePortalInfos.Num(), numInterAreaPortals);
+		return idVec3();
+	}
+	else
+		return gamePortalInfos[index - numMapInterAreaPortals].srcPosition;
+}
+
+idVec3 idRenderWorldLocal::GetGamePortalDst( qhandle_t handle )
+{
+	int index = handle - 1;
+	if(index < numMapInterAreaPortals || index >= numInterAreaPortals)
+	{
+		common->Error("GetGamePortalDst handle out of range: handle=%d, portals: map=%d, game=%d, all=%d\n", handle, numMapInterAreaPortals, gamePortalInfos.Num(), numInterAreaPortals);
+		return idVec3();
+	}
+	else
+		return gamePortalInfos[index - numMapInterAreaPortals].dstPosition;
+}
+
+#endif
+#endif

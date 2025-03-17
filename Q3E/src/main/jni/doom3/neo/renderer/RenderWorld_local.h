@@ -79,6 +79,19 @@ typedef struct {
 } areaNode_t;
 
 
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+typedef struct gamePortalInfo_s
+{
+	idStr name; // entity name
+	int srcArea; // a1, portal in area num
+	int dstArea; // a2, cameraTarget in area num
+	idVec3 srcPosition; // portal position
+	idVec3 dstPosition; // cameraTarget position
+} gamePortalInfo_t;
+#endif
+#endif
+
 class idRenderWorldLocal : public idRenderWorld
 {
 	public:
@@ -311,6 +324,19 @@ class idRenderWorldLocal : public idRenderWorld
 			(void)interactiveMask;
 			return GuiTrace(entityHandle, start, end);
 		}
+#endif
+
+#if GAMEPORTAL_PVS
+		virtual qhandle_t		FindGamePortal(const char *name);
+		virtual void			RegisterGamePortals(idMapFile *mapFile);
+		virtual void			DrawGamePortals(int mode, const idMat3 &viewAxis);
+		virtual bool			IsGamePortal( qhandle_t handle );
+		virtual idVec3			GetGamePortalSrc( qhandle_t handle );
+		virtual idVec3			GetGamePortalDst( qhandle_t handle );
+
+		//karin: numMapInterAreaPortals + gamePortalInfos.Num() == numInterAreaPortals
+		idList<gamePortalInfo_t> gamePortalInfos;
+		int numMapInterAreaPortals; //karin: raw numInterAreaPortals
 #endif
 
 #if DEATHWALK_AUTOLOAD

@@ -2895,6 +2895,91 @@ void RB_TestImage(void)
 //#endif
 }
 
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+static volatile bool _showGamePortals = false;
+void RB_DebugGamePortals(void)
+{
+	if(_showGamePortals)
+		return;
+	_showGamePortals = true;
+}
+
+void RB_ShowGamePortals(void)
+{
+	if(!_showGamePortals)
+		return;
+
+	// all portals are expressed in world coordinates
+	RB_SimpleWorldSetup();
+
+	globalImages->BindNull();
+	qglDisable(GL_DEPTH_TEST);
+
+	GL_State(GLS_DEFAULT);
+
+	int			i, j;
+	portalArea_t	*area;
+	portal_t	*p;
+	idWinding	*w;
+	idRenderWorldLocal *renderWorld = (idRenderWorldLocal *)backEnd.viewDef->renderWorld;
+	portalArea_t 			*portalAreas = renderWorld->portalAreas;
+	int						numPortalAreas = renderWorld->numPortalAreas;
+
+	// flood out through portals, setting area viewCount
+	for (i = 0 ; i < numPortalAreas ; i++) {
+		area = &portalAreas[i];
+
+		if (area->viewCount != tr.viewCount) {
+			continue;
+		}
+
+		for (p = area->portals ; p ; p = p->next) {
+			w = p->w;
+
+			if (!w) {
+				continue;
+			}
+
+            // check is game portal
+			bool isGamePortal = false;
+			for(int m = renderWorld->numMapInterAreaPortals; m < renderWorld->NumPortals(); m++)
+			{
+				const doublePortal_t *dp = &renderWorld->doublePortals[m];
+				if(p->doublePortal == dp)
+				{
+					isGamePortal = true;
+					break;
+				}
+			}
+			if(!isGamePortal)
+				continue;
+
+			if (portalAreas[ p->intoArea ].viewCount != tr.viewCount) {
+				// red = can't see
+				glColor3f(1, 0, 0);
+			} else {
+				// green = see through
+				glColor3f(0, 1, 0);
+			}
+
+			glBegin(GL_LINE_LOOP);
+
+			for (j = 0 ; j < w->GetNumPoints() ; j++) {
+				glVertex3fv((*w)[j].ToFloatPtr());
+			}
+
+			glEnd();
+		}
+	}
+
+	qglEnable(GL_DEPTH_TEST);
+
+	_showGamePortals = false;
+}
+#endif
+#endif
+
 /*
 =================
 RB_RenderDebugTools
@@ -2952,6 +3037,11 @@ void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 	RB_ShowDebugText();
 	RB_ShowDebugPolygons();
 	RB_ShowTrace(drawSurfs, numDrawSurfs);
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+	RB_ShowGamePortals();
+#endif
+#endif
 #ifdef GL_ES_VERSION_2_0
 	DEBUG_RENDER_COMPAT
 #endif
