@@ -2039,7 +2039,11 @@ void RB_SetDefaultGLState(void);
 void RB_SetGL2D(void);
 
 // write a comment to the r_logFile if it is enabled
+#ifdef _RENDERER_LOG_COMMENT
 void RB_LogComment(const char *comment, ...) id_attribute((format(printf,1,2)));
+#else
+#define RB_LogComment(...)
+#endif
 
 void RB_ShowImages(void);
 

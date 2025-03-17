@@ -1254,7 +1254,7 @@ static void R_PrintGLSLShaderSource(const idStr &source)
     while(i < source.Length())
     {
         idStr str = source.Mid(i, 1024);
-	    common->Printf(str.c_str());
+	    common->Printf("%s", str.c_str());
 	    i += str.Length();
 	}
 }

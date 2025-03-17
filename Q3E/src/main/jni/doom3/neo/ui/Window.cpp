@@ -423,7 +423,13 @@ void idWindow::CleanUp()
 	definedVars.DeleteContents(true);
 	timeLineEvents.DeleteContents(true);
 
-#ifdef _RAVEN
+    //k: 2025
+    // Cleanup the operations and update vars
+    // (if it is not fixed, orphane register references are possible)
+    ops.Clear();
+    updateVars.Clear();
+
+#if 0 //def _RAVEN
 // jmarshall
     updateVars.Clear();
 // jmarshall end
@@ -1536,7 +1542,7 @@ void idWindow::Redraw(float x, float y)
 		// only scale desktop windows (will automatically scale its sub-windows)
 		// that EITHER have the scaleto43 flag set OR are fullscreen menus and r_scaleMenusTo43 is 1
 		if( /*(flags & WIN_SCALETO43) ||*/
-			((flags & WIN_MENUGUI) && r_scaleMenusTo43.GetBool()) )
+			r_scaleMenusTo43.GetInteger() < 0 || ((flags & WIN_MENUGUI) && r_scaleMenusTo43.GetBool() ) )
 		{
 			fixupFor43 = true;
 			dc->SetMenuScaleFix(true);

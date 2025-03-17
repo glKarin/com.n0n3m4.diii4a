@@ -227,7 +227,7 @@ idCVar r_debugRenderToTexture("r_debugRenderToTexture", "0", CVAR_RENDERER | CVA
 
 idCVar harm_r_maxFps( "r_maxFps", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Limit maximum FPS. 0 = unlimited" );
 idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Stencil shadow using Carmack-Inverse.");
-idCVar r_scaleMenusTo43( "r_scaleMenusTo43", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio" );
+idCVar r_scaleMenusTo43( "r_scaleMenusTo43", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio" );
 idCVar harm_r_useHighPrecision("harm_r_useHighPrecision",
 #ifdef __ANDROID__
                                "0"
@@ -367,6 +367,7 @@ static void R_CheckPortableExtensions(void)
 	// GL_EXT_texture_lod_bias
 	// The actual extension is broken as specificed, storing the state in the texture unit instead
 	// of the texture object.  The behavior in GL 1.4 is the behavior we use.
+#if !defined(GL_ES_VERSION_2_0)
 	if (glConfig.glVersion >= 1.4 || R_CheckExtension("GL_EXT_texture_lod")) {
 		common->Printf("...using %s\n", "GL_1.4_texture_lod_bias");
 		glConfig.textureLODBiasAvailable = true;
@@ -374,6 +375,9 @@ static void R_CheckPortableExtensions(void)
 		common->Printf("X..%s not found\n", "GL_1.4_texture_lod_bias");
 		glConfig.textureLODBiasAvailable = false;
 	}
+#else
+	glConfig.textureLODBiasAvailable = false;
+#endif
 
 	// GL_EXT_shared_texture_palette
 	glConfig.sharedTexturePaletteAvailable = false; // R_CheckExtension("GL_EXT_shared_texture_palette");
@@ -503,6 +507,17 @@ vidmode_t r_vidModes[] = {
     { "Mode 21: 4096x2304",		4096,   2304 },
     { "Mode 22: 2880x1800",		2880,   1800 },
     { "Mode 23: 2560x1440",		2560,   1440 },
+    { "Mode 24: 1440x1080",		1440,   1080 },
+    { "Mode 25: 1280x800",		1280,	800 },
+        // 21:9 resolutions
+    { "Mode 26: 2560x1080",		2560,   1080 },
+    { "Mode 27: 3440x1440",		3440,   1440 },
+    { "Mode 28: 3840x1600",		3840,   1600 },
+    { "Mode 29: 5120x2160",		5120,   2160 },
+        // 32:9 resolutions
+    { "Mode 30: 3840x1080",		3840,   1080 },
+    { "Mode 31: 5120x1440",		5120,   1440 },
+    { "Mode 32: 7680x2160",		7680,   2160 },
 };
 static int	s_numVidModes = (sizeof(r_vidModes) / sizeof(r_vidModes[0]));
 

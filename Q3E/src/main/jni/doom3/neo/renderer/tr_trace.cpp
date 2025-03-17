@@ -30,6 +30,9 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "tr_local.h"
+#ifdef GL_ES_VERSION_2_0
+#include "glsl/gles2_compat.h"
+#endif
 
 //#define TEST_TRACE
 
@@ -307,7 +310,7 @@ RB_DrawExpandedTriangles
 */
 void RB_DrawExpandedTriangles(const srfTriangles_t *tri, const float radius, const idVec3 &vieworg)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int i, j, k;
 	idVec3 dir[6], normal, point;
 
@@ -365,7 +368,7 @@ void RB_DrawExpandedTriangles(const srfTriangles_t *tri, const float radius, con
 
 		glEnd();
 	}
-#endif
+//#endif
 }
 
 /*
@@ -377,8 +380,8 @@ Debug visualization
 */
 void RB_ShowTrace(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
-#if 0	/* RB_DrawElementsImmediate() */
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
+
 	int						i;
 	const srfTriangles_t	*tri;
 	const drawSurf_t		*surf;
@@ -402,8 +405,10 @@ void RB_ShowTrace(drawSurf_t **drawSurfs, int numDrawSurfs)
 	end = start + 4000 * backEnd.viewDef->renderView.viewaxis[0];
 
 	// check and draw the surfaces
-	qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#if !defined(GL_ES_VERSION_2_0)
 	GL_TexEnv(GL_MODULATE);
+#endif
 
 	globalImages->whiteImage->Bind();
 
@@ -453,6 +458,5 @@ void RB_ShowTrace(drawSurf_t **drawSurfs, int numDrawSurfs)
 			RB_DrawBounds(idBounds(hit.point).Expand(1));
 		}
 	}
-#endif
-#endif
+//#endif
 }

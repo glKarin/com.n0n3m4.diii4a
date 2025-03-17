@@ -9,7 +9,7 @@
 #define SDL_BIG_ENDIAN  4321
 #endif
 
-#if BUILD_IS_BIG_ENDIAN // this is from config.h, set by cmake
+#if D3_IS_BIG_ENDIAN // this is from config.h, set by cmake
 #define SDL_BYTEORDER SDL_BIG_ENDIAN
 #else
 #define SDL_BYTEORDER SDL_LIL_ENDIAN

@@ -611,6 +611,11 @@ ID_INLINE char &idStr::operator[](int index)
 
 ID_INLINE void idStr::operator=(const idStr &text)
 {
+    if (&text == this)
+    {
+        return;
+    }
+
 	int l;
 
 	l = text.Length();

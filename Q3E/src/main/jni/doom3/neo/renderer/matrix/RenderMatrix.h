@@ -31,6 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #define ALIGNTYPE16
 
+#define idRenderMatrix_cast(x) (*(idRenderMatrix *)x)
+#define ID_RENDER_MATRIX *(idRenderMatrix *)
+
 typedef uint64_t uint64;
 
 static const int NUM_FRUSTUM_CORNERS	= 8;

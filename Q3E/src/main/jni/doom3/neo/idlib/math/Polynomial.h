@@ -48,6 +48,11 @@ class idPolynomial
 		explicit idPolynomial(float a, float b, float c, float d);
 		explicit idPolynomial(float a, float b, float c, float d, float e);
 
+        ~idPolynomial() // DG: don't leak coefficient's memory!
+        {
+            Mem_Free16( coefficient );
+        }
+
 		float			operator[](int index) const;
 		float 			&operator[](int index);
 

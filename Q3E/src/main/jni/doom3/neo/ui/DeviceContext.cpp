@@ -84,6 +84,7 @@ int idDeviceContext::FindFont(const char *name)
 	fileName.Replace("fonts", va("fonts/%s", fontLang.c_str()));
 
 	fontInfoEx_t fontInfo;
+    memset(&fontInfo, 0, sizeof(fontInfoEx_t)); // DG: initialize this //k 2025
 	int index = fonts.Append(fontInfo);
 
 	if (renderSystem->RegisterFont(fileName, fonts[index])) {

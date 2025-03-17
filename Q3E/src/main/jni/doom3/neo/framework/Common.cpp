@@ -2742,7 +2742,7 @@ void idCommonLocal::Frame(void)
 
 		// the FPU stack better be empty at this point or some bad code or compiler bug left values on the stack
 		if (!Sys_FPU_StackIsEmpty()) {
-			Printf(Sys_FPU_GetState());
+			Printf("%s", Sys_FPU_GetState());
 			FatalError("idCommon::Frame: the FPU stack is not empty at the end of the frame\n");
 		}
 	}
@@ -3587,7 +3587,12 @@ void idCommonLocal::ShutdownGame(bool reloading)
 
 //k: temp memory allocate in stack / heap control on Android
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+#ifdef __ANDROID__
+#define _DYNAMIC_ALLOC_MAX_STACK "262144" // 256k
+#else
+#define _DYNAMIC_ALLOC_MAX_STACK "524288" // 512k
+#endif
 // #warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
-/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "262144", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `262144` bytes(Because stack memory is limited on OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory))."); // 524288 262144
+/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", _DYNAMIC_ALLOC_MAX_STACK, CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `" _DYNAMIC_ALLOC_MAX_STACK "` bytes(Because stack memory is limited on OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).");
 #endif
 

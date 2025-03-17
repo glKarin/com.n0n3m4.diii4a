@@ -72,9 +72,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef GL_DEPTH_COMPONENT24
 #define GL_DEPTH_COMPONENT24  GL_DEPTH_COMPONENT24_OES
 #endif
-
 #ifndef GL_DEPTH_COMPONENT32F
 #define GL_DEPTH_COMPONENT32F GL_DEPTH_COMPONENT24_OES
+#endif
+#ifndef GL_TEXTURE_MAX_ANISOTROPY_EXT
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT     0x84FE
 #endif
 
 //#if defined(GL_ES_VERSION_2_0)
@@ -96,6 +98,19 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
 #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83f3
 #endif
+#ifndef GL_COMPRESSED_RGB_ARB
+#define GL_COMPRESSED_RGB_ARB             0x84ED
+#endif
+#ifndef GL_COMPRESSED_RGBA_ARB
+#define GL_COMPRESSED_RGBA_ARB            0x84EE
+#endif
+
+#ifndef GL_LUMINANCE8 //karin: !!Only for OpenGLES2.0 compat, it not same value if in OpenGL!!
+#define GL_LUMINANCE8	GL_LUMINANCE
+#endif
+#ifndef GL_LUMINANCE8_ALPHA8 //karin: !!Only for OpenGLES2.0 compat, it not same value if in OpenGL!!
+#define GL_LUMINANCE8_ALPHA8	GL_LUMINANCE_ALPHA
+#endif
 //#endif
 
 // GLES3.1
@@ -114,7 +129,6 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef GL_DEBUG_TYPE_ERROR
 #define GL_DEBUG_TYPE_ERROR               0x824C
 #endif
-
 #ifndef GL_TEXTURE_WIDTH
 #define GL_TEXTURE_WIDTH                  0x1000
 #endif

@@ -1,17 +1,6 @@
+#include "gles2_compat.h"
+
 #define glDepthRange(a, b) qglDepthRangef(a, b)
-
-#define GL_COLOR_ARRAY				0x8076
-#define GL_TEXTURE_COORD_ARRAY			0x8078
-
-#define GL_POLYGON GL_TRIANGLE_FAN // GL_LINE_LOOP
-#define GL_QUADS GL_TRIANGLE_FAN
-// #define GL_POLYGON				0x0009
-#define GL_ALL_ATTRIB_BITS			0xFFFFFFFF
-
-/* Matrix Mode */
-#define GL_MODELVIEW				0x1700
-#define GL_PROJECTION				0x1701
-
 
 #define countof(x) (sizeof(x) / sizeof(x[0]))
 #define SIZEOF_MATRIX (sizeof(GLfloat) * 16)
@@ -318,7 +307,7 @@ static void glrbFillVertex(idDrawVert &drawVert)
 	drawVert.st.Set(gl_TexCoord[0], gl_TexCoord[1]);
 }
 
-static void glVertex3f(GLfloat x, GLfloat y, GLfloat z)
+void glVertex3f(GLfloat x, GLfloat y, GLfloat z)
 {
 	idDrawVert drawVert;
 	drawVert.xyz.Set(x, y, z);
@@ -342,7 +331,13 @@ static void glTexCoord2f(GLfloat s, GLfloat t)
 	gl_TexCoord[1] = t;
 }
 
-static void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
+static void glTexCoord2fv(const GLfloat st[2])
+{
+	gl_TexCoord[0] = st[0];
+	gl_TexCoord[1] = st[1];
+}
+
+void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 {
 	gl_Color[0] = r;
 	gl_Color[1] = g;
@@ -375,7 +370,7 @@ static void glArrayElement(glIndex_t index)
 	gl_IndexList.Append(index);
 }
 
-static void glDisableClientState(GLenum e)
+void glDisableClientState(GLenum e)
 {
 	// `default` glsl shader must attr_Color is all [255, 255, 255, 255]
 	if(e == GL_TEXTURE_COORD_ARRAY)
@@ -404,7 +399,7 @@ static GLboolean glrbClientStateIsEnabled(GLenum e)
 		return GL_TRUE;
 }
 
-static void glLoadMatrixf(const GLfloat matrix[16])
+void glLoadMatrixf(const GLfloat matrix[16])
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
@@ -446,7 +441,7 @@ static void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoi
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), size, type, false, stride, pointer);
 }
 
-static void glBegin(GLenum t)
+void glBegin(GLenum t)
 {
 	gl_RenderType = t;
 }
@@ -479,7 +474,7 @@ static void glrbEndRender(void)
 }
 
 // draw func
-static void glEnd()
+void glEnd(void)
 {
 	if(gl_RenderType)
 	{

@@ -716,6 +716,7 @@ static	void RemoveIfColinear(optVertex_t *ov, optIsland_t *island)
 		v1 = e1->v1;
 	} else {
 		common->Error("RemoveIfColinear: mislinked edge");
+        return;
 	}
 
 	if (e2->v1 == v2) {
@@ -724,10 +725,12 @@ static	void RemoveIfColinear(optVertex_t *ov, optIsland_t *island)
 		v3 = e2->v1;
 	} else {
 		common->Error("RemoveIfColinear: mislinked edge");
+        return;
 	}
 
 	if (v1 == v3) {
 		common->Error("RemoveIfColinear: mislinked edge");
+        return;
 	}
 
 	// they must point in opposite directions
@@ -774,6 +777,7 @@ static	void RemoveIfColinear(optVertex_t *ov, optIsland_t *island)
 	// v2 should have no edges now
 	if (v2->edges) {
 		common->Error("RemoveIfColinear: didn't remove properly");
+        return;
 	}
 
 
@@ -1032,6 +1036,7 @@ static void CreateOptTri(optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optIs
 		second = e1->v1;
 	} else {
 		common->Error("CreateOptTri: mislinked edge");
+        return;
 	}
 
 	if (e2->v1 == first) {
@@ -1040,10 +1045,12 @@ static void CreateOptTri(optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optIs
 		third = e2->v1;
 	} else {
 		common->Error("CreateOptTri: mislinked edge");
+        return;
 	}
 
 	if (!IsTriangleValid(first, second, third)) {
 		common->Error("CreateOptTri: invalid");
+        return;
 	}
 
 //DrawEdges( island );
@@ -1077,6 +1084,7 @@ static void CreateOptTri(optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optIs
 			opposite = opposite->v2link;
 		} else {
 			common->Error("BuildOptTriangles: mislinked edge");
+            return;
 		}
 	}
 
@@ -1192,8 +1200,8 @@ Generate a new list of triangles from the optEdeges
 */
 static void BuildOptTriangles(optIsland_t *island)
 {
-	optVertex_t		*ov, *second, *third, *middle;
-	optEdge_t		*e1, *e1Next, *e2, *e2Next, *check, *checkNext;
+	optVertex_t		*ov, *second = NULL, *third = NULL, *middle = NULL;
+	optEdge_t		*e1, *e1Next = NULL, *e2, *e2Next = NULL, *check, *checkNext = NULL;
 
 	// free them
 	FreeOptTriangles(island);

@@ -85,7 +85,7 @@ idBrushBSPPortal::AddToNodes
 void idBrushBSPPortal::AddToNodes(idBrushBSPNode *front, idBrushBSPNode *back)
 {
 	if (nodes[0] || nodes[1]) {
-		common->Error("AddToNode: allready included");
+		common->Error("AddToNode: already included");
 	}
 
 	assert(front && back);
@@ -938,7 +938,7 @@ idBrushBSPNode *idBrushBSP::ProcessGridCell(idBrushBSPNode *node, int skipConten
 
 	BuildBrushBSP_r(node, planeList, testedPlanes, skipContents);
 
-	delete testedPlanes;
+	delete[] testedPlanes;
 
 #ifdef OUPUT_BSP_STATS_PER_GRID_CELL
 	common->Printf("\r%6d splits\n", numGridCellSplits);
@@ -1185,7 +1185,7 @@ void idBrushBSP::MakeNodePortal(idBrushBSPNode *node)
 {
 	idBrushBSPPortal *newPortal, *p;
 	idWinding *w;
-	int side;
+	int side = 0;
 
 	w = BaseWindingForNode(node);
 
@@ -1199,6 +1199,7 @@ void idBrushBSP::MakeNodePortal(idBrushBSPNode *node)
 			w = w->Clip(-p->plane, 0.1f);
 		} else {
 			common->Error("MakeNodePortal: mislinked portal");
+            return;
 		}
 	}
 
@@ -1438,8 +1439,8 @@ void idBrushBSP::LeakFile(const idStr &fileName)
 	int count, next, s;
 	idVec3 mid;
 	idFile *lineFile;
-	idBrushBSPNode *node, *nextNode;
-	idBrushBSPPortal *p, *nextPortal;
+	idBrushBSPNode *node, *nextNode = NULL;
+	idBrushBSPPortal *p, *nextPortal = NULL;
 	idStr qpath, name;
 
 	if (!outside->occupied) {
@@ -1633,8 +1634,9 @@ bool idBrushBSP::FloodFromEntities(const idMapFile *mapFile, int contents, const
 
 #ifdef _RAVEN //k: make sure gen aas file for mp game map
 	return true;
-#endif
+#else
 	return (inside && !outside->occupied);
+#endif
 }
 
 /*

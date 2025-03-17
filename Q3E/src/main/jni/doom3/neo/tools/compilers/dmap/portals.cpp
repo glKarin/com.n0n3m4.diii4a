@@ -109,7 +109,7 @@ AddPortalToNodes
 void AddPortalToNodes(uPortal_t  *p, node_t *front, node_t *back)
 {
 	if (p->nodes[0] || p->nodes[1]) {
-		common->Error("AddPortalToNode: allready included");
+		common->Error("AddPortalToNode: already included");
 	}
 
 	p->nodes[0] = front;

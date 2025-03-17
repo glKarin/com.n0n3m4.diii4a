@@ -1084,7 +1084,7 @@ void idSessionLocal::StopPlayingRenderDemo()
 		float	demoFPS = numDemoFrames / demoSeconds;
 		idStr	message = va("%i frames rendered in %3.1f seconds = %3.1f fps\n", numDemoFrames, demoSeconds, demoFPS);
 
-		common->Printf(message);
+		common->Printf("%s", message.c_str());
 
 		if (timeDemo == TD_YES_THEN_QUIT) {
 			cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "quit\n");
@@ -1745,7 +1745,7 @@ void idSessionLocal::LoadLoadingGui(const char *mapName)
 	stripped.StripPath();
 
 	char guiMap[ MAX_STRING_CHARS ];
-	strncpy(guiMap, va("guis/map/%s.gui", stripped.c_str()), MAX_STRING_CHARS);
+    idStr::Copynz(guiMap, va("guis/map/%s.gui", stripped.c_str()), MAX_STRING_CHARS);
 	// give the gamecode a chance to override
 #if !defined(_RAVEN) && !defined(_HUMANHEAD) // k: quake4 and prey loading gui is generic
 	game->GetMapLoadingGUI(guiMap);

@@ -884,8 +884,13 @@ bool idRenderModelStatic::ConvertASEToModelSurfaces(const struct aseModel_s *ase
 	for (objectNum = 0 ; objectNum < ase->objects.Num() ; objectNum++) {
 		object = ase->objects[objectNum];
 		mesh = &object->mesh;
+#if 1 //k 2025
+        material = (object->materialRef < ase->materials.Num()) ? ase->materials[object->materialRef] : NULL;
+        im1 = declManager->FindMaterial( material ? material->name : NULL );
+#else
 		material = ase->materials[object->materialRef];
 		im1 = declManager->FindMaterial(material->name);
+#endif
 
 		bool normalsParsed = mesh->normalsParsed;
 

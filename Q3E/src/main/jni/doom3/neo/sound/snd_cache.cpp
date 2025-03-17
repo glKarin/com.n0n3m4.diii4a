@@ -556,7 +556,7 @@ void idSoundSample::Load(void)
 					common->Error("idSoundCache: error loading data into OpenAL hardware buffer");
 #endif
 				} else {
-#ifdef _OPENAL_SOFT //k: 2024 for large shake in idSoundWorld::CurrentShakeAmplitudeForPosition, using non-OpenAL compute amplitude
+#ifdef _OPENAL_SOFT //k: for large shake in idSoundWorld::CurrentShakeAmplitudeForPosition, using non-OpenAL compute amplitude
 					if(harm_s_useAmplitudeDataOpenAL.GetBool()) {
 #endif
 					// Compute amplitude block size
@@ -582,7 +582,7 @@ void idSoundSample::Load(void)
 						((short *)amplitudeData)[(i / blockSize) * 2     ] = min;
 						((short *)amplitudeData)[(i / blockSize) * 2 + 1 ] = max;
 					}
-#ifdef _OPENAL_SOFT //k: 2024 for large shake in idSoundWorld::CurrentShakeAmplitudeForPosition, using non-OpenAL compute amplitude
+#ifdef _OPENAL_SOFT //k: for large shake in idSoundWorld::CurrentShakeAmplitudeForPosition, using non-OpenAL compute amplitude
 					}
 #endif
 
@@ -657,7 +657,7 @@ void idSoundSample::Load(void)
 						common->Error("idSoundCache: error loading data into OpenAL hardware buffer");
 #endif
 					else {
-#ifdef _OPENAL_SOFT //k: 2024 for large shake in idSoundWorld::CurrentShakeAmplitudeForPosition, using non-OpenAL compute amplitude
+#ifdef _OPENAL_SOFT //k: for large shake in idSoundWorld::CurrentShakeAmplitudeForPosition, using non-OpenAL compute amplitude
 						if(harm_s_useAmplitudeDataOpenAL.GetBool()) {
 #endif
 						// Compute amplitude block size
@@ -683,7 +683,7 @@ void idSoundSample::Load(void)
 							((short *)amplitudeData)[(i / blockSize) * 2     ] = min;
 							((short *)amplitudeData)[(i / blockSize) * 2 + 1 ] = max;
 						}
-#ifdef _OPENAL_SOFT //k: 2024 for large shake in idSoundWorld::CurrentShakeAmplitudeForPosition, using non-OpenAL compute amplitude
+#ifdef _OPENAL_SOFT //k: for large shake in idSoundWorld::CurrentShakeAmplitudeForPosition, using non-OpenAL compute amplitude
 						}
 #endif
 
@@ -697,7 +697,7 @@ void idSoundSample::Load(void)
 		}
 
 		// Free memory if sample was loaded into hardware
-#ifdef _OPENAL_SOFT //k: 2024 for large shake in idSoundWorld::CurrentShakeAmplitudeForPosition, using non-OpenAL compute amplitude
+#ifdef _OPENAL_SOFT //k: for large shake in idSoundWorld::CurrentShakeAmplitudeForPosition, using non-OpenAL compute amplitude
 		if(harm_s_useAmplitudeDataOpenAL.GetBool())
 #endif
 		if (hardwareBuffer) {

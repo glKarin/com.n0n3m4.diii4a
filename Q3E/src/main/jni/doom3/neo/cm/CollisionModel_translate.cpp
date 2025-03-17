@@ -342,6 +342,12 @@ void idCollisionModelManagerLocal::TranslateTrmEdgeThroughPolygon(cm_traceWork_t
 			dist = normal * trmEdge->start;
 			d1 = normal * start - dist;
 			d2 = normal * end - dist;
+#if 1 //k: 2025
+            float d1d2diff = d1 - d2;
+            // DG: d1 - d2 was 0 in some weird case, which caused f1 to be INF,
+            //     which caused NaN mayhem all over the place
+            f1 = ( fabsf(d1d2diff) > idMath::FLT_EPSILON ) ? d1 / d1d2diff : 0.0f;
+#else
 #ifdef _HUMANHEAD
 			if (d1 == d2) { //HUMANHEAD rww - CUFPF
 				f1 = 0.0f;
@@ -349,6 +355,7 @@ void idCollisionModelManagerLocal::TranslateTrmEdgeThroughPolygon(cm_traceWork_t
 			else
 #endif
 			f1 = d1 / ( d1 - d2 );
+#endif
 			//assert( f1 >= 0.0f && f1 <= 1.0f );
 			tw->trace.c.point = start + f1 * (end - start);
 

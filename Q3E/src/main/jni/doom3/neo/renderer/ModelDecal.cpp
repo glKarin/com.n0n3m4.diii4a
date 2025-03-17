@@ -381,7 +381,7 @@ void idRenderModelDecal::CreateDecal(const idRenderModel *model, const decalProj
 			} else {
 				for (int j = 0; j < 3; j++) {
 					idVec3 dir;
-					float scale;
+					float scale = 0.0f;
 
 					fw[j] = stri->verts[stri->indexes[index+j]].xyz;
 					dir = fw[j].ToVec3() - localInfo.projectionOrigin;

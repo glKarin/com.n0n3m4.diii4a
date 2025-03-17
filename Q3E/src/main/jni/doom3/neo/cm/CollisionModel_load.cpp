@@ -2387,7 +2387,7 @@ static int CM_FindSplitter(const cm_node_t *node, const idBounds &bounds, int *p
 					}
 
 					// find the most centered splitter
-					t = abs((bounds[1][type] - dist) - (dist - bounds[0][type]));
+					t = idMath::Fabs((bounds[1][type] - dist) - (dist - bounds[0][type])); //k: 2025 abs
 
 					if (t < bestt) {
 						bestt = t;
@@ -2411,7 +2411,7 @@ static int CM_FindSplitter(const cm_node_t *node, const idBounds &bounds, int *p
 					}
 
 					// find the most centered splitter
-					t = abs((bounds[1][type] - dist) - (dist - bounds[0][type]));
+					t = idMath::Fabs((bounds[1][type] - dist) - (dist - bounds[0][type])); //k: 2025 abs
 
 					if (t < bestt) {
 						bestt = t;
@@ -2544,8 +2544,8 @@ idCollisionModelManagerLocal::R_CreateAxialBSPTree
 */
 cm_node_t *idCollisionModelManagerLocal::R_CreateAxialBSPTree(cm_model_t *model, cm_node_t *node, const idBounds &bounds)
 {
-	int planeType;
-	float planeDist;
+	int planeType = 0;
+	float planeDist = 0.0f;
 	cm_polygonRef_t *pref, *nextpref, *prevpref;
 	cm_brushRef_t *bref, *nextbref, *prevbref;
 	cm_node_t *frontNode, *backNode, *n;

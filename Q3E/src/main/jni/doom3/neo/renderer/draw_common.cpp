@@ -1190,40 +1190,40 @@ static void RB_T_Shadow(const drawSurf_t *surf)
 
 		if (r_showShadows.GetInteger() == 3) {
 			if (external) {
-				color[0] = 0.1;
+				color[0] = 0.1f;
 				color[1] = 1;
-				color[2] = 0.1;
+				color[2] = 0.1f;
 			} else {
 				// these are the surfaces that require the reverse
 				color[0] = 1;
-				color[1] = 0.1;
-				color[2] = 0.1;
+				color[1] = 0.1f;
+				color[2] = 0.1f;
 			}
 		} else {
 			// draw different color for turboshadows
 			if (surf->geo->shadowCapPlaneBits & SHADOW_CAP_INFINITE) {
 				if (numIndexes == tri->numIndexes) {
 					color[0] = 1;
-					color[1] = 0.1;
-					color[2] = 0.1;
+					color[1] = 0.1f;
+					color[2] = 0.1f;
 				} else {
 					color[0] = 1;
-					color[1] = 0.4;
-					color[2] = 0.1;
+					color[1] = 0.4f;
+					color[2] = 0.1f;
 				}
 			} else {
 				if (numIndexes == tri->numIndexes) {
-					color[0] = 0.1;
+					color[0] = 0.1f;
 					color[1] = 1;
-					color[2] = 0.1;
+					color[2] = 0.1f;
 				} else if (numIndexes == tri->numShadowIndexesNoFrontCaps) {
-					color[0] = 0.1;
+					color[0] = 0.1f;
 					color[1] = 1;
-					color[2] = 0.6;
+					color[2] = 0.6f;
 				} else {
-					color[0] = 0.6;
+					color[0] = 0.6f;
 					color[1] = 1;
-					color[2] = 0.1;
+					color[2] = 0.1f;
 				}
 			}
 		}

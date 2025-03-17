@@ -2236,7 +2236,7 @@ void idFileSystemLocal::Path_f(const idCmdArgs &args)
 					status += ")\n";
 				}
 
-				common->Printf(status.c_str());
+				common->Printf("%s", status.c_str());
 			} else {
 				common->Printf("%s (%i files)\n", sp->pack->pakFilename.c_str(), sp->pack->numfiles);
 			}
@@ -4516,7 +4516,7 @@ void idFileSystemLocal::FindDLL(const char *name, char _dllPath[ MAX_OSPATH ], b
 		dllPath = "";
 	}
 
-	idStr::snPrintf(_dllPath, MAX_OSPATH, dllPath.c_str());
+	idStr::snPrintf(_dllPath, MAX_OSPATH, "%s", dllPath.c_str());
 }
 
 /*

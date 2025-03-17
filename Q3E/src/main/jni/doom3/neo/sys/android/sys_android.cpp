@@ -364,7 +364,7 @@ char * Android_GetClipboardData(void)
     if(!text)
         return NULL;
     size_t len = strlen(text);
-    char *ptr = (char *)malloc(len + 1);
+    char *ptr = (char *)Mem_Alloc(len + 1);
     strncpy(ptr, text, len);
     ptr[len] = '\0';
     free(text);

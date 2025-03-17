@@ -214,7 +214,7 @@ const char *idLexer::GetPunctuationFromId(int id)
 		}
 	}
 
-	return "unkown punctuation";
+	return "unknown punctuation";
 }
 
 /*
@@ -318,7 +318,7 @@ int idLexer::ReadWhiteSpace(void)
 {
 	while (1) {
 		// skip white space
-#if defined(__arm__) || defined(__aarch64__) //karin: char is unsigned on arm. Or compile with -fsigned-char option
+#if D3_CHAR_IS_UNSIGNED //karin: char is unsigned on arm. Or compile with -fsigned-char option
 		while (*(signed char *)idLexer::script_p <= ' ') {
 #else
 		while (*idLexer::script_p <= ' ') {
@@ -1393,7 +1393,7 @@ const char	*idLexer::ReadRestOfLine(idStr &out)
 			break;
 		}
 
-#if defined(__arm__) || defined(__aarch64__) //karin: char is unsigned on arm. Or compile with -fsigned-char option
+#if D3_CHAR_IS_UNSIGNED //karin: char is unsigned on arm. Or compile with -fsigned-char option
 		if (*(signed char *)idLexer::script_p <= ' ') {
 #else
 		if (*idLexer::script_p <= ' ') {

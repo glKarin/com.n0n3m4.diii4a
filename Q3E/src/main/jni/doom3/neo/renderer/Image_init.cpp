@@ -1155,11 +1155,11 @@ void idImageManager::ChangeTextureFilter(void)
 			qglTexParameterf(texEnum, GL_TEXTURE_MAG_FILTER, globalImages->textureMaxFilter);
 		}
 
-#ifndef GL_ES_VERSION_3_0
+//#if !defined(GL_ES_VERSION_2_0)
 		if (glConfig.anisotropicAvailable) {
 			qglTexParameterf(texEnum, GL_TEXTURE_MAX_ANISOTROPY_EXT, globalImages->textureAnisotropy);
 		}
-#endif
+//#endif
 
 #if !defined(GL_ES_VERSION_2_0)
 		if (glConfig.textureLODBiasAvailable) {

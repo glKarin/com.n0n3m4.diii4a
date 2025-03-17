@@ -139,8 +139,8 @@ void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLigh
         // Calculate the matrix that projects the zero-to-one cube to exactly cover the
         // light frustum in clip space.
         idRenderMatrix invProjectMVPMatrix;
-        idRenderMatrix::Multiply(*(idRenderMatrix *) tr.viewDef->worldSpace.mvp,
-                                 *(idRenderMatrix *) light->inverseBaseLightProject,
+        idRenderMatrix::Multiply(ID_RENDER_MATRIX tr.viewDef->worldSpace.mvp,
+                                 ID_RENDER_MATRIX light->inverseBaseLightProject,
                                  invProjectMVPMatrix);
 
         // Calculate the projected bounds, either not clipped at all, near clipped, or fully clipped.
@@ -284,15 +284,15 @@ void R_SetupShadowMappingProjectionMatrix(idRenderLightLocal *light)
         //else inverseLightMatrix.Identity();
 
         // 'baseLightProject' goes from global space -> light local space -> light projective space
-        idRenderMatrix::Multiply( localProject, inverseLightMatrix, *(idRenderMatrix *)light->baseLightProject );
+        idRenderMatrix::Multiply( localProject, inverseLightMatrix, ID_RENDER_MATRIX light->baseLightProject );
 
         // Invert the light projection so we can deform zero-to-one cubes into
         // the light model and calculate global bounds.
-        if( !idRenderMatrix::Inverse( *(idRenderMatrix *)light->baseLightProject, *(idRenderMatrix *)light->inverseBaseLightProject ) )
+        if( !idRenderMatrix::Inverse( ID_RENDER_MATRIX light->baseLightProject, ID_RENDER_MATRIX light->inverseBaseLightProject ) )
         {
             idLib::Warning( "baseLightProject invert failed" );
         }
-        //else (*(idRenderMatrix *)light->inverseBaseLightProject).Identity();
+        //else (ID_RENDER_MATRIX light->inverseBaseLightProject).Identity();
 
         // calculate the global light bounds by inverse projecting the zero to one cube with the 'inverseBaseLightProject'
         //idRenderMatrix::ProjectedBounds( light->globalLightBounds, light->inverseBaseLightProject, bounds_zeroOneCube, false );
@@ -312,9 +312,9 @@ void R_SetupFrontEndViewDefMVP(void)
     {
         // setup render matrices for faster culling
         idRenderMatrix		projectionRenderMatrix;	// tech5 version of projectionMatrix
-        idRenderMatrix::Transpose( *( idRenderMatrix* )tr.viewDef->projectionMatrix, /*tr.viewDef->*/projectionRenderMatrix );
+        idRenderMatrix::Transpose( ID_RENDER_MATRIX tr.viewDef->projectionMatrix, /*tr.viewDef->*/projectionRenderMatrix );
         idRenderMatrix viewRenderMatrix;
-        idRenderMatrix::Transpose( *( idRenderMatrix* )tr.viewDef->worldSpace.modelViewMatrix, viewRenderMatrix );
-        idRenderMatrix::Multiply( /*tr.viewDef->*/projectionRenderMatrix, viewRenderMatrix, *( idRenderMatrix* )tr.viewDef->worldSpace.mvp );
+        idRenderMatrix::Transpose( ID_RENDER_MATRIX tr.viewDef->worldSpace.modelViewMatrix, viewRenderMatrix );
+        idRenderMatrix::Multiply( /*tr.viewDef->*/projectionRenderMatrix, viewRenderMatrix, ID_RENDER_MATRIX tr.viewDef->worldSpace.mvp );
     }
 }

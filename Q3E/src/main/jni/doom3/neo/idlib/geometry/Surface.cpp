@@ -835,7 +835,7 @@ idSurface::RayIntersection
 bool idSurface::RayIntersection(const idVec3 &start, const idVec3 &dir, float &scale, bool backFaceCull) const
 {
 	int i, i0, i1, i2, s0, s1, s2;
-	float d, s;
+	float d, s = 0.0f;
 	byte *sidedness;
 	idPluecker rayPl, pl;
 	idPlane plane;

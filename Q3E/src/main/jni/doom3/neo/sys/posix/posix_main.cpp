@@ -515,6 +515,8 @@ char *Sys_GetClipboardData(void)
 #ifdef __ANDROID__ //karin: from JNI
 	extern char * Android_GetClipboardData(void);
 	return Android_GetClipboardData();
+#else
+    return NULL;
 #endif
 }
 

@@ -1039,6 +1039,7 @@ bool R_IssueEntityDefCallback(idRenderEntityLocal *def)
 
 	if (!def->parms.hModel) {
 		common->Error("R_IssueEntityDefCallback: dynamic entity callback didn't set model");
+        return false;
 	}
 
 	if (r_checkBounds.GetBool()) {
@@ -1232,8 +1233,8 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 			shaderParms = renderEntity->shaderParms;
 		}
 
-		float oldFloatTime;
-		int oldTime;
+		float oldFloatTime = 0.0f;
+		int oldTime = 0.0f;
 
 		
 		if (space->entityDef && space->entityDef->parms.timeGroup) {
@@ -1500,8 +1501,8 @@ void R_AddModelSurfaces(void)
 			}
 		}
 
-		float oldFloatTime;
-		int oldTime;
+		float oldFloatTime = 0.0f;
+		int oldTime = 0.0f;
 
 #if !defined(_RAVEN)
 		game->SelectTimeGroup(vEntity->entityDef->parms.timeGroup);
