@@ -126,6 +126,8 @@ endif()
 
 # DOOM3 mods
 if(BUILD_D3_MOD)
+include_directories("mod/doom3")
+
 option(D3XP									"Build the d3xp game code" 													ON)
 
 option(D3LE									"Build the d3le game code" 													ON)
@@ -154,6 +156,8 @@ endif()
 
 # Quake4 mods
 if(BUILD_Q4_MOD)
+include_directories("mod/quake4")
+
 option(HARDQORE								"Build the hardqore game code" 												ON)
 endif()
 
