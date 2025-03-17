@@ -2555,3 +2555,102 @@ bool idRenderWorldLocal::EffectDefHasSound(const renderEffect_s* reffect) {
 }
 
 #endif
+
+#ifdef _D3BFG_CULLING
+/*
+==================
+idRenderWorldLocal::PushFrustumIntoTree_r
+
+Used for both light volumes and model volumes.
+
+This does not clip the points by the planes, so some slop
+occurs.
+
+tr.viewCount should be bumped before calling, allowing it
+to prevent double checking areas.
+
+We might alternatively choose to do this with an area flow.
+==================
+*/
+void idRenderWorldLocal::PushFrustumIntoTree_r( idRenderEntityLocal* def, idRenderLightLocal* light,
+                                                const frustumCorners_t& corners, int nodeNum )
+{
+    if( nodeNum < 0 )
+    {
+        int areaNum = -1 - nodeNum;
+        portalArea_t* area = &portalAreas[ areaNum ];
+        if( area->viewCount == tr.viewCount )
+        {
+            return;	// already added a reference here
+        }
+        area->viewCount = tr.viewCount;
+
+        if( def != NULL )
+        {
+            AddEntityRefToArea( def, area );
+        }
+        if( light != NULL )
+        {
+            AddLightRefToArea( light, area );
+        }
+
+        return;
+    }
+
+    areaNode_t* node = areaNodes + nodeNum;
+
+    // if we know that all possible children nodes only touch an area
+    // we have already marked, we can early out
+    if( node->commonChildrenArea != CHILDREN_HAVE_MULTIPLE_AREAS && r_useNodeCommonChildren.GetBool() )
+    {
+        // note that we do NOT try to set a reference in this area
+        // yet, because the test volume may yet wind up being in the
+        // solid part, which would cause bounds slightly poked into
+        // a wall to show up in the next room
+        if( portalAreas[ node->commonChildrenArea ].viewCount == tr.viewCount )
+        {
+            return;
+        }
+    }
+
+    // exact check all the corners against the node plane
+    frustumCull_t cull = idRenderMatrix::CullFrustumCornersToPlane( corners, node->plane );
+
+    if( cull != FRUSTUM_CULL_BACK )
+    {
+        nodeNum = node->children[0];
+        if( nodeNum != 0 )  	// 0 = solid
+        {
+            PushFrustumIntoTree_r( def, light, corners, nodeNum );
+        }
+    }
+
+    if( cull != FRUSTUM_CULL_FRONT )
+    {
+        nodeNum = node->children[1];
+        if( nodeNum != 0 )  	// 0 = solid
+        {
+            PushFrustumIntoTree_r( def, light, corners, nodeNum );
+        }
+    }
+}
+
+/*
+==============
+idRenderWorldLocal::PushFrustumIntoTree
+==============
+*/
+void idRenderWorldLocal::PushFrustumIntoTree( idRenderEntityLocal* def, idRenderLightLocal* light, const idRenderMatrix& frustumTransform, const idBounds& frustumBounds )
+{
+    if( areaNodes == NULL )
+    {
+        return;
+    }
+
+    // calculate the corners of the frustum in word space
+    ALIGNTYPE16 frustumCorners_t corners;
+    idRenderMatrix::GetFrustumCorners( corners, frustumTransform, frustumBounds );
+
+    PushFrustumIntoTree_r( def, light, corners, 0 );
+}
+#endif

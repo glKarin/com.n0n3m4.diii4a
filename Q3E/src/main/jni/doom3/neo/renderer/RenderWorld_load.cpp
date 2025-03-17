@@ -986,11 +986,19 @@ void idRenderWorldLocal::AddWorldModelEntities()
 		}
 
 		def->referenceBounds = def->parms.hModel->Bounds();
+#ifdef _D3BFG_CULLING
+        // the local and global reference bounds are the same for area models
+        if(harm_r_occlusionCulling.GetBool())
+        def->globalReferenceBounds = def->parms.hModel->Bounds();
+#endif
 
 		def->parms.axis[0][0] = 1;
 		def->parms.axis[1][1] = 1;
 		def->parms.axis[2][2] = 1;
 
+#ifdef _D3BFG_CULLING
+        //if(!harm_r_occlusionCulling.GetBool())
+#endif
 		R_AxisToModelMatrix(def->parms.axis, def->parms.origin, def->modelMatrix);
 
 		// in case an explicit shader is used on the world, we don't
@@ -1000,6 +1008,10 @@ void idRenderWorldLocal::AddWorldModelEntities()
 		                def->parms.shaderParms[2] =
 		                        def->parms.shaderParms[3] = 1;
 
+#ifdef _D3BFG_CULLING
+        if(harm_r_occlusionCulling.GetBool())
+        R_DeriveEntityData(def);
+#endif
 		AddEntityRefToArea(def, &portalAreas[i]);
 	}
 }

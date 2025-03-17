@@ -53,6 +53,9 @@ idRenderEntityLocal::idRenderEntityLocal()
 	firstInteraction		= NULL;
 	lastInteraction			= NULL;
 	needsPortalSky			= false;
+#ifdef _D3BFG_CULLING
+    globalReferenceBounds	= bounds_zero;
+#endif
 }
 
 void idRenderEntityLocal::FreeRenderEntity()
@@ -111,6 +114,16 @@ idRenderLightLocal::idRenderLightLocal()
 	foggedPortals			= NULL;
 	firstInteraction		= NULL;
 	lastInteraction			= NULL;
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
+    ID_RENDER_MATRIX_CAST(baseLightProject).Identity();
+    ID_RENDER_MATRIX_CAST(inverseBaseLightProject).Identity();
+#endif
+#ifdef _D3BFG_CULLING
+    globalLightBounds.Zero();
+    //anon begin
+    ID_RENDER_MATRIX_CAST(inverseBaseLightProject).Zero();
+    //anon end
+#endif
 }
 
 void idRenderLightLocal::FreeRenderLight()

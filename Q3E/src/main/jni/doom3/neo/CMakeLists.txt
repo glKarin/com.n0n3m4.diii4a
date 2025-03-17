@@ -114,6 +114,7 @@ option(EXTRAS_TOOLS							"Add extras commands" 														OFF)
 option(MODEL_VIEWER							"Add model viewer in engine" 												OFF)
 option(USE_MINIZ							"use miniz and minizip" 													ON)
 option(USE_STB_OGG							"use stb_vorbis" 															ON)
+option(D3BFG_OCCLUSION_CULLING				"DOOM3-BFG occlusion culling support" 										ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -732,6 +733,10 @@ if(STENCIL_SHADOW_IMPROVE)
 endif()
 if(USE_MINIZ)
 	message(STATUS "Using minizip and miniz instead of zlib")
+endif()
+if(D3BFG_OCCLUSION_CULLING)
+	set(CORE_DEFINES "${CORE_DEFINES};_D3BFG_CULLING")
+	message(STATUS "Add DOOM3-BFG occlusion culling support")
 endif()
 
 if(OPENAL)

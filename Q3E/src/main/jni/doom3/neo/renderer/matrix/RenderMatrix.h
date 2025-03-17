@@ -29,10 +29,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __RENDERMATRIX_H__
 #define __RENDERMATRIX_H__
 
+#if defined(WIN32) || defined(_WIN32)
+#define ALIGNTYPE16						__declspec(align(16))
+#elif defined(__linux__)
+#define ALIGNTYPE16						__attribute__ ((aligned (16)))
+#else
 #define ALIGNTYPE16
-
-#define idRenderMatrix_cast(x) (*(idRenderMatrix *)x)
-#define ID_RENDER_MATRIX *(idRenderMatrix *)
+#endif
 
 typedef uint64_t uint64;
 
@@ -180,18 +183,45 @@ public:
     friend void operator>>(const idRenderMatrix &matrix, float to[16]) {
         memcpy(to, matrix.m, sizeof(matrix.m));
     }
-    friend void operator>>(float from[16], idRenderMatrix &matrix) {
+    friend void operator>>(const float from[16], idRenderMatrix &matrix) {
         memcpy(matrix.m, from, sizeof(matrix.m));
     }
+    friend void operator>>(const idRenderMatrix &matrix, idRenderMatrix &to) {
+        //memcpy(to.m, matrix.m, sizeof(matrix.m));
+		to = matrix;
+    }
+
     friend void operator<<(idRenderMatrix &matrix, const float from[16]) {
         memcpy(matrix.m, from, sizeof(matrix.m));
     }
     friend void operator<<(float to[16], const idRenderMatrix &matrix) {
         memcpy(to, matrix.m, sizeof(matrix.m));
     }
+    friend void operator<<(idRenderMatrix &matrix, const idRenderMatrix &from) {
+        //memcpy(matrix.m, from.m, sizeof(matrix.m));
+		matrix = from;
+    }
+
+	static void Copy(const float from[16], float to[16]) {
+        memcpy(to, from, sizeof(float) * 16);
+	}
 public:
 	float					m[16];
 };
+
+#if 0
+typedef float RenderMatrix[16];
+#define ID_RENDER_MATRIX_CAST(x) (*(idRenderMatrix *)x)
+#define ID_RENDER_MATRIX *(idRenderMatrix *)
+#define ID_RENDER_MATRIX_ASSIGN(a, b) memcpy(a, b, sizeof(RenderMatrix))
+#else
+typedef idRenderMatrix RenderMatrix;
+#define ID_RENDER_MATRIX_CAST(x) x
+#define ID_RENDER_MATRIX
+#define ID_RENDER_MATRIX_ASSIGN(a, b) a = b
+#endif
+#define ID_TO_RENDER_MATRIX *(idRenderMatrix *)
+#define idRenderMatrix_cast(x) (*(idRenderMatrix *)x)
 
 extern const idRenderMatrix renderMatrix_identity;
 extern const idRenderMatrix renderMatrix_flipToOpenGL;

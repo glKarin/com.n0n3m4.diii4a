@@ -242,6 +242,14 @@ idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CV
 idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9)", 0, 9, idCmdSystem::ArgCompletion_Integer<0, 9>);
 #endif
 
+#ifdef _D3BFG_CULLING
+idCVar harm_r_occlusionCulling( "harm_r_occlusionCulling", "0", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_INTEGER, "enable DOOM3-BFG occlusion culling" );
+idCVar r_useLightPortalCulling( "r_useLightPortalCulling", "1", CVAR_RENDERER | CVAR_INTEGER, "0 = none, 1 = cull frustum corners to plane, 2 = exact clip the frustum faces", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+idCVar r_useLightAreaCulling( "r_useLightAreaCulling", "1", CVAR_RENDERER | CVAR_BOOL, "0 = off, 1 = on" );
+idCVar r_useEntityPortalCulling( "r_useEntityPortalCulling", "1", CVAR_RENDERER | CVAR_INTEGER, "0 = none, 1 = cull frustum corners to plane, 2 = exact clip the frustum faces", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+#endif
+
+
 #ifdef _RAVEN
 idCVar r_skipSky("r_skipSky", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Dark sky");
 idCVar r_aspectRatio("r_aspectRatio",			"-1",			CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "aspect ratio of view:\n0 = 4:3\n1 = 16:9\n2 = 16:10\n-1 = auto (guess from resolution)", -1, 2);
@@ -2639,6 +2647,10 @@ bool GL_CheckErrors(const char *name)
 #include "rb/StencilTexture.cpp"
 #include "matrix/RenderMatrix.cpp"
 #include "matrix/GLMatrix.cpp"
+
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
+#include "tr/tr_lightmatrix.cpp"
+#endif
 
 #ifdef _SHADOW_MAPPING
 // RB: shadow mapping parameters

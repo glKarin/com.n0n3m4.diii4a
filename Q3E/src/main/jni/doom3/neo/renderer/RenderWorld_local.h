@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __RENDERWORLDLOCAL_H__
 #define __RENDERWORLDLOCAL_H__
 
+#ifdef _D3BFG_CULLING
+#include "matrix/RenderMatrix.h"
+#endif
+
 // assume any lightDef or entityDef index above this is an internal error
 const int LUDICROUS_INDEX	= 10000;
 
@@ -168,6 +172,11 @@ class idRenderWorldLocal : public idRenderWorld
 // jmarshall: BSE
 	idList<rvRenderEffectLocal*>	effectsDef;
 // jmarshll end
+#endif
+
+#ifdef _D3BFG_CULLING
+        void					PushFrustumIntoTree_r( idRenderEntityLocal* def, idRenderLightLocal* light, const frustumCorners_t& corners, int nodeNum );
+        void					PushFrustumIntoTree( idRenderEntityLocal* def, idRenderLightLocal* light, const idRenderMatrix& frustumTransform, const idBounds& frustumBounds );
 #endif
 
 		idStr					mapName;				// ie: maps/tim_dm2.proc, written to demoFile
