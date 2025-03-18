@@ -1625,6 +1625,8 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 	int numGamePortals = 0;
 	idList<gamePortalSource_t> sources;
 
+    common->Printf("[Harmattan]: Add game portal from map file\n");
+
 	ClearGamePortalInfos();
 	numEntities = mapFile->GetNumEntities();
 
@@ -1740,10 +1742,15 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 		gps.srcPosition = src;
 		gps.dstPosition = dst;
 		sources.Append(gps);
+
+        idStr point0 = gps.srcPosition.ToString(6);
+        idStr point1 = gps.dstPosition.ToString(6);
+        common->Printf("[Harmattan]: Read %d game portal: entity '%s', source area %d(%s) -> target area %d(%s).\n", numGamePortals, name, gps.srcArea, point0.c_str(), gps.dstArea, point1.c_str());
+
 		numGamePortals++;
 	}
 
-	common->Printf("[Harmattan]: Find %d game portals.\n", numGamePortals);
+	common->Printf("[Harmattan]: %d game portals found.\n", numGamePortals);
 
 	// if no game portals
 	if(numGamePortals == 0)
@@ -1794,20 +1801,15 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 		w = new idWinding(4);
 		w->SetNumPoints(4);
 		idVec3 points[8];
-		idStr pointsStr("(");
 		for (int j = 0 ; j < 4 ; j++) {
 			const idVec3 &point = gps.points[j];
 			(*w)[j][0] = point[0];
 			(*w)[j][1] = point[1];
 			(*w)[j][2] = point[2];
-			pointsStr.Append(point.ToString());
-			if(j < 3)
-				pointsStr.Append(", ");
 			// no texture coordinates
 			(*w)[j][3] = 0;
 			(*w)[j][4] = 0;
 		}
-		pointsStr.Append(")");
 
 		a1 = gps.srcArea;
 		a2 = gps.dstArea;
@@ -1833,8 +1835,13 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
         gpInfo.srcPosition = gps.srcPosition;
         gpInfo.dstPosition = gps.dstPosition;
 
-		common->Printf("[Harmattan]: Append game portal %d: index=%d, area1=%d, area2=%d, winding=%s\n", i, index, a1, a2, pointsStr.c_str());
+        idStr point0 = gps.points[0].ToString(6);
+        idStr point1 = gps.points[1].ToString(6);
+        idStr point2 = gps.points[2].ToString(6);
+        idStr point3 = gps.points[3].ToString(6);
+		common->Printf("[Harmattan]: Add game portal: /* iap %d */ %d %d %d ( %s ) ( %s ) ( %s ) ( %s ) \n", i + numMapInterAreaPortals, 4, a1, a2, point0.c_str(), point1.c_str(), point2.c_str(), point3.c_str());
 	}
+    common->Printf("[Harmattan]: Add game portal finish\n");
 }
 
 void idRenderWorldLocal::DrawGamePortals(int mode, const idMat3 &viewAxis)
