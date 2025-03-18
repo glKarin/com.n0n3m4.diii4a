@@ -43,6 +43,11 @@ typedef struct portal_s {
 	idPlane					plane;			// view must be on the positive side of the plane to cross
 	struct portal_s 		*next;			// next portal of the area
 	struct doublePortal_s 	*doublePortal;
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+    bool                    isGamePortal;
+#endif
+#endif
 } portal_t;
 
 
@@ -88,7 +93,6 @@ typedef struct gamePortalInfo_s
 	int dstArea; // a2, cameraTarget in area num
 	idVec3 srcPosition; // portal position
 	idVec3 dstPosition; // cameraTarget position
-    portal_t _portals_1; // a placeholder memory to &doublePortal_t::portals[1]. Because game portal is not double side, doublePortal_t::portals[1] should not be linked to area portals list.
 } gamePortalInfo_t;
 #endif
 #endif

@@ -185,6 +185,12 @@ void idRenderWorldLocal::FloodViewThroughArea_r(const idVec3 origin, int areaNum
 
 	// go through all the portals
 	for (p = area->portals; p; p = p->next) {
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+        if(p->isGamePortal) //karin: game portals not handle like original DOOM3
+            continue;
+#endif
+#endif
 		// an enclosing door may have sealed the portal off
 		if (p->doublePortal->blockingBits & PS_BLOCK_VIEW) {
 			continue;
@@ -365,6 +371,12 @@ void idRenderWorldLocal::FloodLightThroughArea_r(idRenderLightLocal *light, int 
 
 	// go through all the portals
 	for (p = area->portals; p; p = p->next) {
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+        if(p->isGamePortal) //karin: game portals not handle like original DOOM3
+            continue;
+#endif
+#endif
 		// make sure this portal is facing away from the view
 		d = p->plane.Distance(light->globalLightOrigin);
 
@@ -545,6 +557,12 @@ areaNumRef_t *idRenderWorldLocal::FloodFrustumAreas_r(const idFrustum &frustum, 
 
 	// go through all the portals
 	for (p = portalArea->portals; p; p = p->next) {
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+        if(p->isGamePortal) //karin: game portals not handle like original DOOM3
+            continue;
+#endif
+#endif
 
 		// check if we already visited the area the portal leads to
 		for (a = areas; a; a = a->next) {
@@ -1087,6 +1105,12 @@ void idRenderWorldLocal::BuildConnectedAreas_r(int areaNum)
 	area = &portalAreas[ areaNum ];
 
 	for (portal = area->portals ; portal ; portal = portal->next) {
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+        if(portal->isGamePortal) //karin: game portals not handle like original DOOM3
+            continue;
+#endif
+#endif
 		if (!(portal->doublePortal->blockingBits & PS_BLOCK_VIEW)) {
 			BuildConnectedAreas_r(portal->intoArea);
 		}
@@ -1242,6 +1266,12 @@ void	idRenderWorldLocal::FloodConnectedAreas(portalArea_t *area, int portalAttri
 	area->connectedAreaNum[portalAttributeIndex] = connectedAreaNum;
 
 	for (portal_t *p = area->portals ; p ; p = p->next) {
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+        if(p->isGamePortal) //karin: game portals not handle like original DOOM3
+            continue;
+#endif
+#endif
 		if (!(p->doublePortal->blockingBits & (1<<portalAttributeIndex))) {
 			FloodConnectedAreas(&portalAreas[p->intoArea], portalAttributeIndex);
 		}
@@ -1308,6 +1338,11 @@ void		idRenderWorldLocal::SetPortalState(qhandle_t portal, int blockTypes)
 
 	// leave the connectedAreaGroup the same on one side,
 	// then flood fill from the other side with a new number for each changed attribute
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+    if(doublePortals[portal-1].portals[1]) //karin: it is area portal if portals[1] not null, else is game portal
+#endif
+#endif
 	for (int i = 0 ; i < NUM_PORTAL_ATTRIBUTES ; i++) {
 		if ((old ^ blockTypes) & (1 << i)) {
 			connectedAreaNum++;
@@ -1787,20 +1822,10 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 		p->next = portalAreas[a1].portals;
 		portalAreas[a1].portals = p;
 
+        p->isGamePortal = true;
 		doublePortals[index].portals[0] = p;
 
-		// reverse it for a2
-		p = &gpInfo._portals_1; // the other side portal not be linked to area portals, but doublePortal_t::portals[1]->intoArea be used
-		p->intoArea = a1;
-		p->doublePortal = &doublePortals[index];
-		p->w = w->Reverse();
-		p->w->GetPlane(p->plane);
-
-        // do not link to area portals, because `p->w` still in area `a1` not in area `a2`.
-//		p->next = portalAreas[a2].portals;
-//		portalAreas[a2].portals = p;
-
-		doublePortals[index].portals[1] = p;
+        doublePortals[index].portals[1] = NULL;
 
         gpInfo.name = gps.name;
         gpInfo.srcArea = gps.srcArea;
@@ -1854,10 +1879,6 @@ idVec3 idRenderWorldLocal::GetGamePortalDst( qhandle_t handle )
 
 void idRenderWorldLocal::ClearGamePortalInfos(void)
 {
-    for(int i = 0; i < gamePortalInfos.Num(); i++)
-    {
-        delete gamePortalInfos[i]._portals_1.w;
-    }
 	gamePortalInfos.Clear();
 }
 #endif
