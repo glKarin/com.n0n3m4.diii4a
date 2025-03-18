@@ -465,16 +465,17 @@ P5: 1 -20 300 Right-Forward-Top
 P6: 1 20 300 Right-Backward-Top
 P7: -1 20 300 Left-Backward-Top
 
-             P7 ---------- P6  maxs
+                              maxs
+             P7 ---------- P6
             /|            / |
           /  |          /   |
-         P4 -+-------- P5   |
+         P4 --+------- P5   |
          |   |         |    |
-         |   P3--------+----P2
+         |   P3 -------+--- P2
          |  /          |   /
          |/            | /
-   mins  P0 ---------- P1
-   
+         P0 ---------- P1
+    mins
 ============
 */
 void idBounds::ToPoints(idVec3 points[8]) const

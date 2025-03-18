@@ -88,6 +88,7 @@ typedef struct gamePortalInfo_s
 	int dstArea; // a2, cameraTarget in area num
 	idVec3 srcPosition; // portal position
 	idVec3 dstPosition; // cameraTarget position
+    portal_t _portals_1; // a placeholder memory to &doublePortal_t::portals[1]. Because game portal is not double side, doublePortal_t::portals[1] should not be linked to area portals list.
 } gamePortalInfo_t;
 #endif
 #endif
@@ -326,6 +327,10 @@ class idRenderWorldLocal : public idRenderWorld
 		}
 #endif
 
+#if DEATHWALK_AUTOLOAD
+		int numAppendPortalAreas;
+#endif
+
 #if GAMEPORTAL_PVS
 		virtual qhandle_t		FindGamePortal(const char *name);
 		virtual void			RegisterGamePortals(idMapFile *mapFile);
@@ -337,10 +342,7 @@ class idRenderWorldLocal : public idRenderWorld
 		//karin: numMapInterAreaPortals + gamePortalInfos.Num() == numInterAreaPortals
 		idList<gamePortalInfo_t> gamePortalInfos;
 		int numMapInterAreaPortals; //karin: raw numInterAreaPortals
-#endif
-
-#if DEATHWALK_AUTOLOAD
-		int numAppendPortalAreas;
+    void ClearGamePortalInfos(void);
 #endif
 #endif
 };

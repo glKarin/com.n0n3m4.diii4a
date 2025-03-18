@@ -1564,9 +1564,14 @@ qhandle_t idRenderWorldLocal::FindGamePortal(const char *name)
 
 typedef struct gamePortalSource_s
 {
-    gamePortalInfo_t info;
-    idVec3 points[4];
+    idStr name; // entity name
+    int srcArea; // a1, portal in area num
+    int dstArea; // a2, cameraTarget in area num
+    idVec3 srcPosition; // portal position
+    idVec3 dstPosition; // cameraTarget position
+    idVec3 points[4]; // 4 points of winding
 } gamePortalSource_t;
+
 //karin: add game portals into doublePortals
 void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 {
@@ -1585,7 +1590,7 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 	int numGamePortals = 0;
 	idList<gamePortalSource_t> sources;
 
-	gamePortalInfos.Clear();
+	ClearGamePortalInfos();
 	numEntities = mapFile->GetNumEntities();
 
 	// filter all map entities
@@ -1670,9 +1675,13 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
         // X-axis is side, so using center of X-axis
         idVec3 &mins = bounds[0];
         idVec3 &maxs = bounds[1];
+#if 0 // using middle of X-axis length
         float centerX = (mins[0] + maxs[0]) * 0.5f;
         mins.x = centerX;
         maxs.x = centerX;
+#else // using middle of X-axis min
+        maxs.x = mins.x;
+#endif
 
         // get 8 points from bounds
         idVec3 points[8];
@@ -1690,11 +1699,11 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
         R_LocalPointToGlobal(mat4, points[4], gps.points[3]);
 
 		// save it
-		gps.info.name = name;
-		gps.info.srcArea = srcArea;
-		gps.info.dstArea = dstArea;
-		gps.info.srcPosition = src;
-		gps.info.dstPosition = dst;
+		gps.name = name;
+		gps.srcArea = srcArea;
+		gps.dstArea = dstArea;
+		gps.srcPosition = src;
+		gps.dstPosition = dst;
 		sources.Append(gps);
 		numGamePortals++;
 	}
@@ -1739,10 +1748,12 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 	// using new doublePortals
 	doublePortals = gameDoublePortals;
 
+    gamePortalInfos.Resize(numGamePortals); // alloc them here
 	// fill new doublePortals and append new portal_t to link list
 	for(int i = 0; i < numGamePortals; i++)
 	{
 		const gamePortalSource_t &gps = sources[i];
+        gamePortalInfo_t &gpInfo = gamePortalInfos[i];
 		int index = start + i;
 
 		w = new idWinding(4);
@@ -1763,8 +1774,8 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 		}
 		pointsStr.Append(")");
 
-		a1 = gps.info.srcArea;
-		a2 = gps.info.dstArea;
+		a1 = gps.srcArea;
+		a2 = gps.dstArea;
 
 		// same as RenderWorld_load.cpp::ParseInterAreaPortals
 		p = (portal_t *)R_ClearedStaticAlloc(sizeof(*p));
@@ -1779,18 +1790,24 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 		doublePortals[index].portals[0] = p;
 
 		// reverse it for a2
-		p = (portal_t *)R_ClearedStaticAlloc(sizeof(*p));
+		p = &gpInfo._portals_1; // the other side portal not be linked to area portals, but doublePortal_t::portals[1]->intoArea be used
 		p->intoArea = a1;
 		p->doublePortal = &doublePortals[index];
 		p->w = w->Reverse();
 		p->w->GetPlane(p->plane);
 
-		p->next = portalAreas[a2].portals;
-		portalAreas[a2].portals = p;
+        // do not link to area portals, because `p->w` still in area `a1` not in area `a2`.
+//		p->next = portalAreas[a2].portals;
+//		portalAreas[a2].portals = p;
 
 		doublePortals[index].portals[1] = p;
 
-		gamePortalInfos.Append(gps.info);
+        gpInfo.name = gps.name;
+        gpInfo.srcArea = gps.srcArea;
+        gpInfo.dstArea = gps.dstArea;
+        gpInfo.srcPosition = gps.srcPosition;
+        gpInfo.dstPosition = gps.dstPosition;
+
 		common->Printf("[Harmattan]: Append game portal %d: index=%d, area1=%d, area2=%d, winding=%s\n", i, index, a1, a2, pointsStr.c_str());
 	}
 }
@@ -1835,5 +1852,13 @@ idVec3 idRenderWorldLocal::GetGamePortalDst( qhandle_t handle )
 		return gamePortalInfos[index - numMapInterAreaPortals].dstPosition;
 }
 
+void idRenderWorldLocal::ClearGamePortalInfos(void)
+{
+    for(int i = 0; i < gamePortalInfos.Num(); i++)
+    {
+        delete gamePortalInfos[i]._portals_1.w;
+    }
+	gamePortalInfos.Clear();
+}
 #endif
 #endif

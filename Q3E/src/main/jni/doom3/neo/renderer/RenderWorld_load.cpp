@@ -85,7 +85,7 @@ void idRenderWorldLocal::FreeWorld()
 	}
 #ifdef _HUMANHEAD
 #if GAMEPORTAL_PVS
-	gamePortalInfos.Clear();
+	ClearGamePortalInfos();
 	numMapInterAreaPortals = 0;
 #endif
 #endif
@@ -376,7 +376,7 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 #ifdef _HUMANHEAD
 #if GAMEPORTAL_PVS
 	numMapInterAreaPortals = numInterAreaPortals;
-	gamePortalInfos.Clear();
+	ClearGamePortalInfos();
 #endif
 #endif
 
