@@ -1840,10 +1840,94 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 void idRenderWorldLocal::DrawGamePortals(int mode, const idMat3 &viewAxis)
 {
     // it will be called every frame
-	(void)mode;
-	(void)viewAxis;
-	extern void RB_DebugGamePortals(void);
-	RB_DebugGamePortals();
+    if(mode == 0)
+        return;
+
+    int			i, j;
+    portalArea_t	*area;
+    portal_t	*p;
+    idWinding	*w;
+    idVec4 color;
+
+    // flood out through portals, setting area viewCount
+    for (i = 0 ; i < numPortalAreas ; i++) {
+        area = &portalAreas[i];
+
+        if (area->viewCount != tr.viewCount) {
+            continue;
+        }
+
+        for (p = area->portals ; p ; p = p->next) {
+            w = p->w;
+
+            if (!w) {
+                continue;
+            }
+
+            if(!p->isGamePortal)
+                continue;
+
+            int m;
+            for(m = numMapInterAreaPortals; m < numInterAreaPortals; m++)
+            {
+                const doublePortal_t *dp = &doublePortals[m];
+                if(p->doublePortal == dp)
+                {
+                    break;
+                }
+            }
+            if(m >= numInterAreaPortals)
+                continue;
+
+            if(mode > 0 && (mode - 1) != m)
+                continue;
+
+            const gamePortalInfo_t *gpInfo = &gamePortalInfos[m - numMapInterAreaPortals];
+            if (portalAreas[ p->intoArea ].viewCount != tr.viewCount) {
+                // red = can't see
+                color.Set(1, 0, 0, 1);
+
+            } else {
+                // green = see through
+                color.Set(0, 1, 0, 1);
+            }
+
+            // draw portal border
+            int numPoints = w->GetNumPoints();
+            for (j = 0 ; j < numPoints ; j++) {
+                const idVec5 &pointA = (*w)[j];
+                const idVec5 &pointB = (*w)[(j + 1) % numPoints];
+                DebugLine(color, pointA.ToVec3(), pointB.ToVec3());
+            }
+
+            // draw arrow of portal to remote target
+            DebugArrow(color, gpInfo->srcPosition, gpInfo->dstPosition, 10);
+
+            // draw blockbits
+            // get top-center position
+            idBounds bounds;
+            w->GetBounds(bounds);
+            idVec3 pos = w->GetCenter();
+            pos[2] = bounds[1][2];
+            // offset it
+            pos += tr.primaryView->renderView.viewaxis[2] * 6;
+
+            idStr bitsStr;
+            if(p->doublePortal->blockingBits & PS_BLOCK_VIEW)
+                bitsStr.Append("PS_BLOCK_VIEW ");
+            if(p->doublePortal->blockingBits & PS_BLOCK_LOCATION)
+                bitsStr.Append("PS_BLOCK_LOCATION ");
+            if(p->doublePortal->blockingBits & PS_BLOCK_AIR)
+                bitsStr.Append("PS_BLOCK_AIR ");
+            if(p->doublePortal->blockingBits & PS_BLOCK_SOUND)
+                bitsStr.Append("PS_BLOCK_SOUND ");
+            if(bitsStr.IsEmpty())
+                bitsStr.Append("PS_BLOCK_NONE");
+            else
+                bitsStr.StripTrailingWhitespace();
+            DrawText(bitsStr.c_str(), pos, 0.25f, color, viewAxis);
+        }
+    }
 }
 
 bool idRenderWorldLocal::IsGamePortal( qhandle_t handle )
