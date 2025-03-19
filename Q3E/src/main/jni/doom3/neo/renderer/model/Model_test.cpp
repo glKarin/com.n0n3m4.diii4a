@@ -604,12 +604,12 @@ namespace modeltest
         {
             idStr extension;
             modelName.ExtractFileExtension(extension);
-            if ((extension.Icmp("ase") != 0) && (extension.Icmp("lwo") != 0) && (extension.Icmp("ma") != 0)
+            if ((extension.Icmp("ase") == 0) || (extension.Icmp("lwo") == 0) || (extension.Icmp("ma") == 0)
 #ifdef _MODEL_OBJ
-                && (extension.Icmp("obj") != 0)
+                                                                                || (extension.Icmp("obj") == 0)
 #endif
 #ifdef _MODEL_DAE
-                && (extension.Icmp("dae") != 0)
+                                                                                   || (extension.Icmp("dae") == 0)
 #endif
                     )
                 animClass = "func_static";

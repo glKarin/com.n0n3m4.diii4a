@@ -110,6 +110,8 @@ idCVar	idSessionLocal::com_aviDemoHeight("com_aviDemoHeight", "256", CVAR_SYSTEM
 idCVar	idSessionLocal::com_aviDemoTics("com_aviDemoTics", "2", CVAR_SYSTEM | CVAR_INTEGER, "", 1, 60);
 idCVar	idSessionLocal::com_wipeSeconds("com_wipeSeconds", "1", CVAR_SYSTEM, "");
 idCVar	idSessionLocal::com_guid("com_guid", "", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "");
+idCVar	idSessionLocal::com_disableAutoSaves( "com_disableAutoSaves", "0", CVAR_SYSTEM|CVAR_ARCHIVE|CVAR_BOOL,
+                                                "Don't create Autosaves when entering a new map" );
 
 #ifdef _HUMANHEAD //k: play level music when map loading
 static idCVar g_levelloadmusic("g_levelloadmusic", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "play music during level loads");
@@ -1511,8 +1513,18 @@ void idSessionLocal::MoveToNewMap(const char *mapName)
     {
 #endif
     if (!mapSpawnData.serverInfo.GetBool("devmap")) {
-        // Autosave at the beginning of the level
-        SaveGame(GetAutoSaveName(mapName), true);
+        if ( !com_disableAutoSaves.GetBool() )
+        {
+            // DG: set an explicit savename to avoid problems with autosave names
+            //     (they were translated which caused problems like all alpha labs parts
+            //      getting the same filename in spanish, probably because the strings contained
+            //      dots and everything behind them was cut off as "file extension".. see #305)
+
+	        // Autosave at the beginning of the level
+	        SaveGame(GetAutoSaveName(mapName), true);
+	    }
+        else
+            common->Printf("Autosave at the beginning of the level disabled with `com_disableAutoSaves` = 1");
     }
 
     SetGUI(NULL, NULL);

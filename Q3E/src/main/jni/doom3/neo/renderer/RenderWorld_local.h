@@ -332,21 +332,21 @@ class idRenderWorldLocal : public idRenderWorld
 #endif
 
 #if DEATHWALK_AUTOLOAD
-		int numAppendPortalAreas;
+		int                     numAppendPortalAreas; //karin: num deathwalk areas, should be 1 or 0
 #endif
 
 #if GAMEPORTAL_PVS
-		virtual qhandle_t		FindGamePortal(const char *name);
-		virtual void			RegisterGamePortals(idMapFile *mapFile);
-		virtual void			DrawGamePortals(int mode, const idMat3 &viewAxis);
-		virtual bool			IsGamePortal( qhandle_t handle );
-		virtual idVec3			GetGamePortalSrc( qhandle_t handle );
-		virtual idVec3			GetGamePortalDst( qhandle_t handle );
+        virtual qhandle_t		FindGamePortal(const char *name);
+        virtual void			RegisterGamePortals(idMapFile *mapFile);
+        virtual void			DrawGamePortals(int mode, const idMat3 &viewAxis);
+        virtual bool			IsGamePortal( qhandle_t handle );
+        virtual idVec3			GetGamePortalSrc( qhandle_t handle );
+        virtual idVec3			GetGamePortalDst( qhandle_t handle );
 
-		//karin: numMapInterAreaPortals + gamePortalInfos.Num() == numInterAreaPortals
-		idList<gamePortalInfo_t> gamePortalInfos;
-		int numMapInterAreaPortals; //karin: raw numInterAreaPortals
-    void ClearGamePortalInfos(void);
+        //karin: numMapInterAreaPortals + gamePortalInfos.Num() == numInterAreaPortals
+        idList<gamePortalInfo_t> gamePortalInfos;
+        int                     numMapInterAreaPortals; //karin: raw numInterAreaPortals
+        void                    ClearGamePortalInfos(void);
 #endif
 #endif
 };
