@@ -4124,7 +4124,7 @@ void idSessionLocal::ShowSubtitle(const idStrList &strList)
 				float f = textScale > 0.0f ? textScale : subtitlesTextScale[index]; \
 				if(f > 0.0f) \
 				{ \
-					sprintf(text, /*sizeof(text), */"%f", f); \
+					idStr::snPrintf(text, sizeof(text), "%f", f); \
 					desktop->SetChildWinVarVal(name, "textScale", text); \
 				} \
 			}
@@ -4143,14 +4143,14 @@ void idSessionLocal::ShowSubtitle(const idStrList &strList)
 		index = num - 1 - i;
 		if(index >= 0)
 		{
-			sprintf(text, /*sizeof(text), */"subtitleText%d", 3 - i);
+			idStr::snPrintf(text, sizeof(text), "subtitleText%d", 3 - i);
 			guiSubtitles->SetStateString(text, strList[index].c_str());
-			sprintf(text, /*sizeof(text), */"subtitleAlpha%d", 3 - i);
+            idStr::snPrintf(text, sizeof(text), "subtitleAlpha%d", 3 - i);
 			guiSubtitles->SetStateFloat(text, 1);
 		}
 		else
 		{
-			sprintf(text, /*sizeof(text), */"subtitleAlpha%d", 3 - i);
+            idStr::snPrintf(text, sizeof(text), "subtitleAlpha%d", 3 - i);
 			guiSubtitles->SetStateFloat(text, 0);
 		}
 	}
