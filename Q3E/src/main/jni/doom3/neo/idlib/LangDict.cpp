@@ -94,34 +94,29 @@ bool idLangDict::Load(const char *fileName, bool clear /* _D3XP */)
     idStr::IsValidUTF8( buffer, len, encoding );
     if( encoding == UTF8_INVALID )
     {
-        idLib::Error( "Language file %s is not valid UTF-8 or plain ASCII.", fileName );
+        idLib::Warning( "Language file %s is not valid UTF-8 or plain ASCII.", fileName );
     }
     else if( encoding == UTF8_INVALID_BOM )
     {
-        idLib::Error( "Language file %s is marked as UTF-8 but has invalid encoding.", fileName );
+        idLib::Warning( "Language file %s is marked as UTF-8 but has invalid encoding.", fileName );
     }
     else if( encoding == UTF8_ENCODED_NO_BOM )
     {
-        idLib::Error( "Language file %s has no byte order marker. Fix this or roll back to a version that has the marker.", fileName );
+        idLib::Warning( "Language file %s has no byte order marker. Fix this or roll back to a version that has the marker.", fileName );
     }
     else if( encoding != UTF8_ENCODED_BOM && encoding != UTF8_PURE_ASCII )
     {
-        idLib::Error( "Language file %s has unknown utf8Encoding_t.", fileName );
+        idLib::Warning( "Language file %s has unknown utf8Encoding_t.", fileName );
     }
 
     if( encoding == UTF8_ENCODED_BOM )
     {
         utf8 = true;
     }
-    else if( encoding == UTF8_PURE_ASCII )
+/*    else if( encoding == UTF8_PURE_ASCII )
     {
         utf8 = false;
-    }
-    else
-    {
-        assert( false );	// this should have been handled in VerifyUTF8 with a FatalError
-        return false;
-    }
+    }*/
 
     if( utf8 )
     {
