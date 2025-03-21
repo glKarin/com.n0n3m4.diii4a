@@ -2325,6 +2325,10 @@ void R_InitCommands(void)
 #ifdef _ENGINE_MODEL_VIEWER
 	ModelTest_AddCommand();
 #endif
+#ifdef _NEW_FONT_TOOLS
+    extern void Font_AddCommand(void);
+    Font_AddCommand();
+#endif
 }
 
 /*

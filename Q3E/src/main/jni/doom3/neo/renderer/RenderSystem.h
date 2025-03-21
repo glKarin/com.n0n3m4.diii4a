@@ -124,6 +124,13 @@ typedef struct {
 	glyphInfo_t			glyphs [GLYPHS_PER_FONT];
 	float				glyphScale;
 	char				name[64];
+
+#ifdef _WCHAR_LANG
+    int                 numIndexes;
+    int					*indexes;
+    int                 numGlyphs;
+    glyphInfo_t			*glyphsTable;
+#endif
 } fontInfo_t;
 
 typedef struct {
@@ -140,6 +147,17 @@ typedef struct {
 	int					maxWidthLarge;
 	char				name[64];
 } fontInfoEx_t;
+
+#ifdef _WCHAR_LANG
+#define HARM_NEW_FONT_MAGIC ((unsigned)((unsigned)'i' << (unsigned)24 | (unsigned)'d' << (unsigned)16 | (unsigned)'t' << (unsigned)8 | (unsigned)'f'))
+#define HARM_NEW_FONT_VERSION 0x00010001
+
+const glyphInfo_t * R_Font_GetGlyphInfo(const fontInfo_t *info, uint32_t charIndex);
+float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale = 1.0f);
+
+void R_Font_FreeFontInfo(fontInfo_t *info);
+void R_Font_FreeFontInfoEx(fontInfoEx_t *ex);
+#endif
 
 const int SMALLCHAR_WIDTH		= 8;
 const int SMALLCHAR_HEIGHT		= 16;

@@ -26,6 +26,8 @@ else()
 	# apt-get install libgles-dev # GLES2/GLES3/EGL headers
 endif()
 
+set(COMPILE_FREETYPE "0")
+
 add_definitions(-D_K_CLANG) # TODO
 add_definitions(-DID_ENABLE_CURL=${COMPILE_CURL})
 
@@ -115,6 +117,7 @@ option(MODEL_VIEWER							"Add model viewer in engine" 												OFF)
 option(USE_MINIZ							"use miniz and minizip" 													ON)
 option(USE_STB_OGG							"use stb_vorbis" 															ON)
 option(D3BFG_OCCLUSION_CULLING				"DOOM3-BFG occlusion culling support" 										ON)
+option(WIDE_CHARACTER_LANGUAGE				"Wide character language support" 											ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -742,6 +745,12 @@ if(D3BFG_OCCLUSION_CULLING)
 	set(CORE_DEFINES "${CORE_DEFINES};_D3BFG_CULLING")
 	message(STATUS "Add DOOM3-BFG occlusion culling support")
 endif()
+if(WIDE_CHARACTER_LANGUAGE)
+	add_definitions(-D_WCHAR_LANG)
+	set(CORE_DEFINES "${CORE_DEFINES};_NEW_FONT_TOOLS")
+	set(COMPILE_FREETYPE "1")
+	message(STATUS "Add wide character language support")
+endif()
 
 if(OPENAL)
 	if(ANDROID)
@@ -1362,6 +1371,59 @@ target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/exter
 target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/lib")
 set(local_libs ${local_libs} static_ogg)
 endif() # ogg
+
+if(COMPILE_FREETYPE STREQUAL "1")
+	set(src_freetype # -2.9
+			externlibs/freetype/src/base/ftsystem.c
+			externlibs/freetype/src/base/ftdebug.c
+			externlibs/freetype/src/base/ftinit.c
+			externlibs/freetype/src/base/ftbase.c
+			externlibs/freetype/src/base/ftbbox.c
+			externlibs/freetype/src/base/ftbdf.c
+			externlibs/freetype/src/base/ftbitmap.c
+			externlibs/freetype/src/base/ftcid.c
+			externlibs/freetype/src/base/ftfntfmt.c
+			externlibs/freetype/src/base/ftfstype.c
+			externlibs/freetype/src/base/ftgasp.c
+			externlibs/freetype/src/base/ftglyph.c
+			externlibs/freetype/src/base/ftgxval.c
+			externlibs/freetype/src/base/ftlcdfil.c
+			externlibs/freetype/src/base/ftmm.c
+			externlibs/freetype/src/base/ftotval.c
+			externlibs/freetype/src/base/ftpatent.c
+			externlibs/freetype/src/base/ftpfr.c
+			externlibs/freetype/src/base/ftstroke.c
+			externlibs/freetype/src/base/ftsynth.c
+			externlibs/freetype/src/base/fttype1.c
+			externlibs/freetype/src/base/ftwinfnt.c
+			externlibs/freetype/src/truetype/truetype.c
+			externlibs/freetype/src/type1/type1.c
+			externlibs/freetype/src/cff/cff.c
+			externlibs/freetype/src/cid/type1cid.c
+			externlibs/freetype/src/pfr/pfr.c
+			externlibs/freetype/src/type42/type42.c
+			externlibs/freetype/src/winfonts/winfnt.c
+			externlibs/freetype/src/pcf/pcf.c
+			externlibs/freetype/src/bdf/bdf.c
+			externlibs/freetype/src/sfnt/sfnt.c
+			externlibs/freetype/src/autofit/autofit.c
+			externlibs/freetype/src/pshinter/pshinter.c
+			externlibs/freetype/src/raster/raster.c
+			externlibs/freetype/src/smooth/smooth.c
+			externlibs/freetype/src/cache/ftcache.c
+			externlibs/freetype/src/gzip/ftgzip.c
+			externlibs/freetype/src/lzw/ftlzw.c
+			externlibs/freetype/src/bzip2/ftbzip2.c
+			externlibs/freetype/src/psaux/psaux.c
+			externlibs/freetype/src/psnames/psnames.c
+			)
+
+	add_globbed_headers(src_freetype "externlibs/freetype/include")
+	include_directories("externlibs/freetype/include")
+	add_definitions(-DFT2_BUILD_LIBRARY)
+	add_library(static_freetype STATIC ${src_freetype})
+	set(local_libs ${local_libs} static_freetype)
+endif()
 
 endif() # build engine
 

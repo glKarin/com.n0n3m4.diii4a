@@ -1937,6 +1937,243 @@ idStr idStr::FormatNumber(int number)
 	return string;
 }
 
+#ifdef _WCHAR_LANG
+/*
+========================
+idStr::IsValidUTF8
+========================
+*/
+bool idStr::IsValidUTF8( const uint8_t* s, const int maxLen, utf8Encoding_t& encoding )
+{
+    struct local_t
+    {
+        static int GetNumEncodedUTF8Bytes( const uint8_t c )
+        {
+            if( c < 0x80 )
+            {
+                return 1;
+            }
+            else if( ( c >> 5 ) == 0x06 )
+            {
+                // 2 byte encoding - the next byte must begin with
+                return 2;
+            }
+            else if( ( c >> 4 ) == 0x0E )
+            {
+                // 3 byte encoding
+                return 3;
+            }
+            else if( ( c >> 5 ) == 0x1E )
+            {
+                // 4 byte encoding
+                return 4;
+            }
+            // this isnt' a valid UTF-8 precursor character
+            return 0;
+        }
+        static bool RemainingCharsAreUTF8FollowingBytes( const uint8_t* s, const int curChar, const int maxLen, const int num )
+        {
+            if( maxLen - curChar < num )
+            {
+                return false;
+            }
+            for( int i = curChar + 1; i <= curChar + num; i++ )
+            {
+                if( s[ i ] == '\0' )
+                {
+                    return false;
+                }
+                if( ( s[ i ] >> 6 ) != 0x02 )
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    };
+
+    // check for byte-order-marker
+    encoding = UTF8_PURE_ASCII;
+    utf8Encoding_t utf8Type = UTF8_ENCODED_NO_BOM;
+    if( maxLen > 3 && s[ 0 ] == 0xEF && s[ 1 ] == 0xBB && s[ 2 ] == 0xBF )
+    {
+        utf8Type = UTF8_ENCODED_BOM;
+    }
+
+    for( int i = 0; s[ i ] != '\0' && i < maxLen; i++ )
+    {
+        int numBytes = local_t::GetNumEncodedUTF8Bytes( s[ i ] );
+        if( numBytes == 1 )
+        {
+            continue;	// just low ASCII
+        }
+        else if( numBytes == 2 )
+        {
+            // 2 byte encoding - the next byte must begin with bit pattern 10
+            if( !local_t::RemainingCharsAreUTF8FollowingBytes( s, i, maxLen, 1 ) )
+            {
+                return false;
+            }
+            // skip over UTF-8 character
+            i += 1;
+            encoding = utf8Type;
+        }
+        else if( numBytes == 3 )
+        {
+            // 3 byte encoding - the next 2 bytes must begin with bit pattern 10
+            if( !local_t::RemainingCharsAreUTF8FollowingBytes( s, i, maxLen, 2 ) )
+            {
+                return false;
+            }
+            // skip over UTF-8 character
+            i += 2;
+            encoding = utf8Type;
+        }
+        else if( numBytes == 4 )
+        {
+            // 4 byte encoding - the next 3 bytes must begin with bit pattern 10
+            if( !local_t::RemainingCharsAreUTF8FollowingBytes( s, i, maxLen, 3 ) )
+            {
+                return false;
+            }
+            // skip over UTF-8 character
+            i += 3;
+            encoding = utf8Type;
+        }
+        else
+        {
+            // this isnt' a valid UTF-8 character
+            if( utf8Type == UTF8_ENCODED_BOM )
+            {
+                encoding = UTF8_INVALID_BOM;
+            }
+            else
+            {
+                encoding = UTF8_INVALID;
+            }
+            return false;
+        }
+    }
+    return true;
+}
+
+/*
+========================
+idStr::UTF8Length
+========================
+*/
+int idStr::UTF8Length( const byte* s )
+{
+    int mbLen = 0;
+    int charLen = 0;
+    while( s[ mbLen ] != '\0' )
+    {
+        uint32_t cindex;
+        cindex = s[ mbLen ];
+        if( cindex < 0x80 )
+        {
+            mbLen++;
+        }
+        else
+        {
+            int trailing = 0;
+            if( cindex >= 0xc0 )
+            {
+                static const byte trailingBytes[ 64 ] =
+                        {
+                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5
+                        };
+                trailing = trailingBytes[ cindex - 0xc0 ];
+            }
+            mbLen += trailing + 1;
+        }
+        charLen++;
+    }
+    return charLen;
+}
+
+
+/*
+========================
+idStr::AppendUTF8Char
+========================
+*/
+void idStr::AppendUTF8Char( uint32_t c )
+{
+    if( c < 0x80 )
+    {
+        Append( ( char )c );
+    }
+    else if( c < 0x800 )      // 11 bits
+    {
+        Append( ( char )( 0xC0 | ( c >> 6 ) ) );
+        Append( ( char )( 0x80 | ( c & 0x3F ) ) );
+    }
+    else if( c < 0x10000 )      // 16 bits
+    {
+        Append( ( char )( 0xE0 | ( c >> 12 ) ) );
+        Append( ( char )( 0x80 | ( ( c >> 6 ) & 0x3F ) ) );
+        Append( ( char )( 0x80 | ( c & 0x3F ) ) );
+    }
+    else if( c < 0x200000 )  	// 21 bits
+    {
+        Append( ( char )( 0xF0 | ( c >> 18 ) ) );
+        Append( ( char )( 0x80 | ( ( c >> 12 ) & 0x3F ) ) );
+        Append( ( char )( 0x80 | ( ( c >> 6 ) & 0x3F ) ) );
+        Append( ( char )( 0x80 | ( c & 0x3F ) ) );
+    }
+    else
+    {
+        // UTF-8 can encode up to 6 bytes. Why don't we support that?
+        // This is an invalid Unicode character
+        Append( '?' );
+    }
+}
+
+/*
+========================
+idStr::UTF8Char
+========================
+*/
+uint32_t idStr::UTF8Char( const byte* s, int& idx )
+{
+    if( idx >= 0 )
+    {
+        while( s[ idx ] != '\0' )
+        {
+            uint32_t cindex = s[ idx ];
+            if( cindex < 0x80 )
+            {
+                idx++;
+                return cindex;
+            }
+            int trailing = 0;
+            if( cindex >= 0xc0 )
+            {
+                static const byte trailingBytes[ 64 ] =
+                        {
+                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5
+                        };
+                trailing = trailingBytes[ cindex - 0xc0 ];
+            }
+            static const uint32_t trailingMask[ 6 ] = { 0x0000007f, 0x0000001f, 0x0000000f, 0x00000007, 0x00000003, 0x00000001 };
+            cindex &= trailingMask[ trailing  ];
+            while( trailing-- > 0 )
+            {
+                cindex <<= 6;
+                cindex += s[ ++idx ] & 0x0000003f;
+            }
+            idx++;
+            return cindex;
+        }
+    }
+    idx++;
+    return 0;	// return a null terminator if out of range
+}
+#endif
+
 #ifdef _RAVEN
 // RAVEN BEGIN
 // abahr

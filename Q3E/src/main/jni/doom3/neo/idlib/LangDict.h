@@ -76,6 +76,9 @@ class idLangDict
 		int						GetHashKey(const char *str) const;
 
 		int						baseID;
+#ifdef _WCHAR_LANG
+        bool					LoadUTF8(const byte* buffer, const int bufferLen, const char* name);
+#endif
 };
 
 #endif /* !__LANGDICT_H__ */

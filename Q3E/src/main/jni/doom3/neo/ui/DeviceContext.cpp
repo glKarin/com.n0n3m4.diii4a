@@ -44,6 +44,10 @@ idVec4 idDeviceContext::colorNone;
 
 idCVar gui_smallFontLimit("gui_smallFontLimit", "0.30", CVAR_GUI | CVAR_ARCHIVE, "");
 idCVar gui_mediumFontLimit("gui_mediumFontLimit", "0.60", CVAR_GUI | CVAR_ARCHIVE, "");
+#ifdef _WCHAR_LANG
+idCVar harm_gui_wideCharLang("harm_gui_wideCharLang", "1", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "enable wide character language support");
+#define AsWideCharLang(text_, len_) ( harm_gui_wideCharLang.GetBool() && idStr::IsNonASCII(text_, len_) )
+#endif
 
 
 idList<fontInfoEx_t> idDeviceContext::fonts;
@@ -199,6 +203,13 @@ void idDeviceContext::Shutdown()
 {
 	fontName.Clear();
 	clipRects.Clear();
+#ifdef _WCHAR_LANG
+	for(int i = 0; i < fonts.Num(); i++)
+	{
+		printf("Free font '%s'.\n", fonts[i].name);
+		R_Font_FreeFontInfoEx(&fonts[i]);
+	}
+#endif
 	fonts.Clear();
 	Clear();
 }
@@ -813,6 +824,54 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 			len = limit;
 		}
 
+#ifdef _WCHAR_LANG
+        if(AsWideCharLang(text, (int)len))
+        {
+            idStr drawText = text;
+            int charIndex = 0;
+
+            while( charIndex < len ) {
+                uint32_t textChar = drawText.UTF8Char( charIndex );
+
+                glyph = R_Font_GetGlyphInfo(useFont, textChar);
+                if (!glyph) {
+                    continue;
+                }
+
+                if( idStr::IsColor( drawText.c_str() + charIndex ) ) {
+                    if( drawText[ charIndex++ ] == C_COLOR_DEFAULT ) {
+                        newColor = color;
+                    } else {
+                        newColor = idStr::ColorForIndex( charIndex );
+                        newColor[3] = color[3];
+                    }
+                    if( cursor == charIndex - 1 || cursor == charIndex ) {
+                        float partialSkip = ((glyph->xSkip * useScale) + adjust) / 5.0f;
+
+                        if (cursor == count) {
+                            partialSkip *= 2.0f;
+                        } else {
+                            renderSystem->SetColor(newColor);
+                        }
+
+                        DrawEditCursor(x - partialSkip, y, scale);
+                    }
+                    renderSystem->SetColor( newColor );
+                    continue;
+                } else {
+                    float yadj = useScale * glyph->top;
+                    PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+
+                    if( cursor == charIndex - 1 ) {
+                        DrawEditCursor( x, y, scale );
+                    }
+
+                    x += (glyph->xSkip * useScale) + adjust;
+                }
+            }
+        }
+        else
+#endif
 		while (s && *s && count < len) {
 			if (*s < GLYPH_START || *s > GLYPH_END) {
 				s++;
@@ -909,6 +968,41 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 
 	width = 0;
 
+#ifdef _WCHAR_LANG
+    int len = (int)strlen(text);
+    if(AsWideCharLang(text, len))
+    {
+        idStr drawText = text;
+        int charIndex = 0;
+		float f = 0.0f;
+
+        if (limit > 0) {
+            while( charIndex < len ) {
+                if(charIndex >= limit)
+                    break;
+
+                if( idStr::IsColor( drawText.c_str() + charIndex ) ) {
+                    charIndex++;
+                } else {
+                    uint32_t textChar = drawText.UTF8Char( charIndex );
+                    f += R_Font_GetCharWidth(useFont, textChar, scale);
+                }
+            }
+        } else {
+            while( charIndex < len ) {
+                if( idStr::IsColor( drawText.c_str() + charIndex ) ) {
+                    charIndex++;
+                } else {
+                    uint32_t textChar = drawText.UTF8Char( charIndex );
+                    f += R_Font_GetCharWidth(useFont, textChar, scale);
+                }
+            }
+        }
+		return idMath::FtoiFast(f);
+    }
+    else
+    {
+#endif
 	if (limit > 0) {
 		for (i = 0; text[i] != '\0' && i < limit; i++) {
 			if (idStr::IsColor(text + i)) {
@@ -928,6 +1022,9 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 	}
 
 	return idMath::FtoiFast(scale * useFont->glyphScale * width);
+#ifdef _WCHAR_LANG
+    }
+#endif
 }
 
 int idDeviceContext::TextHeight(const char *text, float scale, int limit)
@@ -1127,6 +1224,139 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 	lineBreak = false;
 	wordBreak = false;
 
+#ifdef _WCHAR_LANG
+    if(AsWideCharLang(text, (int)strlen(text)))
+    {
+        idStr drawText = text;
+        int			charIndex = 0;
+        idStr textBuffer;
+        int			lastBreak = 0;
+        float		textWidthAtLastBreak = 0.0f;
+
+        while( charIndex < drawText.Length() ) {
+            uint32_t textChar = drawText.UTF8Char( charIndex );
+
+            // See if we need to start a new line.
+            if( textChar == '\n' || textChar == '\r' || charIndex == drawText.Length() ) {
+                lineBreak = true;
+                if( charIndex < drawText.Length() ) {
+                    // New line character and we still have more text to read.
+                    char nextChar = drawText[ charIndex + 1 ];
+                    if( ( textChar == '\n' && nextChar == '\r' ) || ( textChar == '\r' && nextChar == '\n' ) ) {
+                        // Just absorb extra newlines.
+                        textChar = drawText.UTF8Char( charIndex );
+                    }
+                }
+            }
+
+            // Check for escape colors if not then simply get the glyph width.
+            if( textChar == C_COLOR_ESCAPE && charIndex < drawText.Length() ) {
+                textBuffer.AppendUTF8Char( textChar );
+                textChar = drawText.UTF8Char( charIndex );
+            }
+
+            // If the character isn't a new line then add it to the text buffer.
+            if( textChar != '\n' && textChar != '\r' ) {
+                textWidth += R_Font_GetCharWidth( useFont, textChar, textScale );
+                textBuffer.AppendUTF8Char( textChar );
+            }
+
+            if( !lineBreak && ( textWidth > rectDraw.w ) ) {
+                // The next character will cause us to overflow, if we haven't yet found a suitable
+                // break spot, set it to be this character
+                if( textBuffer.Length() > 0 && lastBreak == 0 ) {
+                    lastBreak = textBuffer.Length();
+                    textWidthAtLastBreak = textWidth;
+                }
+                wordBreak = true;
+            } else if( lineBreak || ( wrap && ( textChar == ' ' || textChar == '\t' ) ) ) {
+                // The next character is in view, so if we are a break character, store our position
+                lastBreak = textBuffer.Length();
+                textWidthAtLastBreak = textWidth;
+            }
+
+            // We need to go to a new line
+            if( lineBreak || wordBreak ) {
+                float x = rectDraw.x;
+
+                if( textWidthAtLastBreak > 0 ) {
+                    textWidth = textWidthAtLastBreak;
+                }
+
+                // Align text if needed
+                if( textAlign == ALIGN_RIGHT ) {
+                    x = rectDraw.x + rectDraw.w - textWidth;
+                } else if( textAlign == ALIGN_CENTER ) {
+                    x = rectDraw.x + ( rectDraw.w - textWidth ) / 2;
+                }
+
+                if( wrap || lastBreak > 0 ) {
+                    // This is a special case to handle breaking in the middle of a word.
+                    // if we didn't do this, the cursor would appear on the end of this line
+                    // and the beginning of the next.
+                    if( wordBreak && cursor >= lastBreak && lastBreak == textBuffer.Length() ) {
+                        cursor++;
+                    }
+                }
+
+                // Draw what's in the current text buffer.
+                if( !calcOnly ) {
+                    if( lastBreak > 0 ) {
+                        count += DrawText( x, y, textScale, color, textBuffer.Left( lastBreak ).c_str(), 0, 0, 0, cursor );
+                        textBuffer = textBuffer.Right( textBuffer.Length() - lastBreak );
+                    } else {
+                        count += DrawText( x, y, textScale, color, textBuffer.c_str(), 0, 0, 0, cursor );
+                        textBuffer.Clear();
+                    }
+                }
+
+                if( cursor < lastBreak ) {
+                    cursor = -1;
+                } else if( cursor >= 0 ) {
+                    cursor -= ( lastBreak + 1 );
+                }
+
+                // If wrap is disabled return at this point.
+                if( !wrap ) {
+                    return lastBreak;
+                }
+
+                // If we've hit the allowed character limit then break.
+                if( limit && count > limit ) {
+                    break;
+                }
+
+                y += lineSkip + 5;
+
+                if( !calcOnly && y > rectDraw.Bottom() ) {
+                    break;
+                }
+
+                // If breaks were requested then make a note of this one.
+                if( breaks ) {
+                    breaks->Append( drawText.Length() - charIndex );
+                }
+
+                // Reset necessary parms for next line.
+                lastBreak = 0;
+                textWidth = 0;
+                textWidthAtLastBreak = 0;
+                lineBreak = false;
+                wordBreak = false;
+
+                // Reassess the remaining width
+                for( int i = 0; i < textBuffer.Length(); ) {
+                    if( textChar != C_COLOR_ESCAPE ) {
+                        textWidth += R_Font_GetCharWidth( useFont, textBuffer.UTF8Char( i ), textScale );
+                    }
+                }
+
+                continue;
+            }
+        }
+    }
+    else
+#endif
 	while (p) {
 
 		if (*p == '\n' || *p == '\r' || *p == '\0') {

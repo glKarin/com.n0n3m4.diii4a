@@ -1132,7 +1132,7 @@ namespace md5anim
     {
         if(args.Argc() < 5)
         {
-            common->Printf("[Useage]: %s <output animation file path> <input animation file> <start frame> <end frame>", args.Argv(0));
+            common->Printf("[Usage]: %s <output animation file path> <input animation file> <start frame> <end frame>", args.Argv(0));
             return;
         }
         idStr cmd;
@@ -1154,7 +1154,7 @@ namespace md5anim
     {
         if(args.Argc() < 3)
         {
-            common->Printf("[Useage]: %s <output animation file path> <input animation file> [<start frame> [<end frame>]]", args.Argv(0));
+            common->Printf("[Usage]: %s <output animation file path> <input animation file> [<start frame> [<end frame>]]", args.Argv(0));
             return;
         }
         idStr cmd;
@@ -1176,7 +1176,7 @@ namespace md5anim
     {
         if(args.Argc() < 3)
         {
-            common->Printf("[Useage]: %s <output animation file path> <input animation file> [<start frame> [<end frame>]]", args.Argv(0));
+            common->Printf("[Usage]: %s <output animation file path> <input animation file> [<start frame> [<end frame>]]", args.Argv(0));
             return;
         }
         idStr cmd;
@@ -1198,7 +1198,7 @@ namespace md5anim
     {
         if(args.Argc() < 4)
         {
-            common->Printf("[Useage]: %s <output animation file path> <input animation file> <append animation file> [<start frame> [<end frame>]]", args.Argv(0));
+            common->Printf("[Usage]: %s <output animation file path> <input animation file> <append animation file> [<start frame> [<end frame>]]", args.Argv(0));
             return;
         }
         idStr cmd;
