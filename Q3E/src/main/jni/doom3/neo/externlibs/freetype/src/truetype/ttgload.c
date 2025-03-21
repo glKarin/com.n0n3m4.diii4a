@@ -27,6 +27,8 @@
 #include FT_DRIVER_H
 #include FT_LIST_H
 
+#include <stdint.h>
+
 #include "ttgload.h"
 #include "ttpload.h"
 
