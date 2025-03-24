@@ -552,13 +552,14 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 #endif
 
 #ifdef _WCHAR_LANG
+#define HARM_NEW_FONT_REQUIRE_BYTES (4 * 5)
         fdOffset += sizeof(outFont->name);
 
         outFont->numIndexes = 0;
         outFont->indexes = NULL;
         outFont->numGlyphs = 0;
         outFont->glyphsTable = NULL;
-        if(fdOffset + 4 * 5 < len)
+        if(fdOffset + HARM_NEW_FONT_REQUIRE_BYTES < len)
         {
             common->Printf("Font '%s' is new format.\n", fontName);
             R_Font_ParseWideFont(outFont);

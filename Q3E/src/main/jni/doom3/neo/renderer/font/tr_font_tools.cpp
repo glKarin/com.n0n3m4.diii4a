@@ -9,8 +9,6 @@
 #include FT_OUTLINE_H
 #include FT_GLYPH_H
 
-#define OUT_BASE_PATH "./fonts"
-
 #define _FLOOR(x)  ((x) & -64)
 #define _CEIL(x)   (((x)+63) & -64)
 #define _TRUNC(x)  ((x) >> 6)
@@ -554,7 +552,7 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
     common->Printf("Export font: export font data file to '%s'\n", filePath);
 
     fontInfoExport_t *oldInfo = &font->base;
-    idFile *datFile = fileSystem->OpenFileWrite(filePath, OUT_BASE_PATH);
+    idFile *datFile = fileSystem->OpenFileWrite(filePath);
 
     datFile->Write(oldInfo, sizeof(fontInfoExport_t));
 

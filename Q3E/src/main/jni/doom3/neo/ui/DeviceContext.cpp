@@ -46,7 +46,8 @@ idCVar gui_smallFontLimit("gui_smallFontLimit", "0.30", CVAR_GUI | CVAR_ARCHIVE,
 idCVar gui_mediumFontLimit("gui_mediumFontLimit", "0.60", CVAR_GUI | CVAR_ARCHIVE, "");
 #ifdef _WCHAR_LANG
 idCVar harm_gui_wideCharLang("harm_gui_wideCharLang", "1", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "enable wide character language support");
-#define AsWideCharLang(text_, len_) ( harm_gui_wideCharLang.GetBool() && idStr::IsNonASCII(text_, len_) )
+static bool _hasWideCharFont = false;
+#define AsWideCharLang(text_, len_) ( _hasWideCharFont && harm_gui_wideCharLang.GetBool() && idStr::IsNonASCII(text_, len_) )
 #endif
 
 
@@ -93,6 +94,14 @@ int idDeviceContext::FindFont(const char *name)
 
 	if (renderSystem->RegisterFont(fileName, fonts[index])) {
 		idStr::Copynz(fonts[index].name, name, sizeof(fonts[index].name));
+#ifdef _WCHAR_LANG
+		if(!_hasWideCharFont)
+		{
+			const fontInfoEx_t *f = &fonts[index];
+			if(f->fontInfoSmall.numIndexes > 0 || f->fontInfoMedium.numIndexes > 0 || f->fontInfoLarge.numIndexes > 0)
+				_hasWideCharFont = true;
+		}
+#endif
 		return index;
 	} else {
 		common->Printf("Could not register font %s [%s]\n", name, fileName.c_str());

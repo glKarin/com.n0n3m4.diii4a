@@ -646,6 +646,7 @@ void R_InitOpenGL(void)
 	if (glConfig.maxTextureSize <= 0) {
 		glConfig.maxTextureSize = 256;
 	}
+    //common->Printf("maxTextureSize: %d\n", glConfig.maxTextureSize);
 
 	glConfig.isInitialized = true;
 

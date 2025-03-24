@@ -2940,6 +2940,9 @@ void idSessionLocal::Draw()
 		// NOTE that you can't use this for aviGame recording, it will tick at real com_frameTime between screenshots..
 		renderSystem->SetColor(colorBlack);
 		renderSystem->DrawStretchPic(0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial("_white"));
+#if 0 //karin: make active first?
+		guiTest->Activate(true, com_frameTime);
+#endif
 		guiTest->Redraw(com_frameTime);
 	} else if (guiActive && !guiActive->State().GetBool("gameDraw")) {
 

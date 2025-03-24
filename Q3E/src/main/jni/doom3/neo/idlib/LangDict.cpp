@@ -113,10 +113,17 @@ bool idLangDict::Load(const char *fileName, bool clear /* _D3XP */)
     {
         utf8 = true;
     }
-/*    else if( encoding == UTF8_PURE_ASCII )
+#if 0 // else always as ascii text
+    else if( encoding == UTF8_PURE_ASCII )
     {
         utf8 = false;
-    }*/
+    }
+    else
+    {
+        assert( false );	// this should have been handled in VerifyUTF8 with a FatalError
+        return false;
+    }
+#endif
 
     if( utf8 )
     {
