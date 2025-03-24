@@ -1709,15 +1709,12 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
             rotation = angles.ToMat3();
         }
 
-        // X-axis is side, so using center of X-axis
+        // X-axis is side
+#if 1 // using middle of X-axis length; 0=using mins
         idVec3 &mins = bounds[0];
         idVec3 &maxs = bounds[1];
-#if 0 // using middle of X-axis length
         float centerX = (mins[0] + maxs[0]) * 0.5f;
         mins.x = centerX;
-        maxs.x = centerX;
-#else // using middle of X-axis min
-        maxs.x = mins.x;
 #endif
 
         // get 8 points from bounds
@@ -1846,7 +1843,7 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 
 void idRenderWorldLocal::DrawGamePortals(int mode, const idMat3 &viewAxis)
 {
-    // it will be called every frame
+    // it will be called every frame if g_showGamePortals not 0
     if(mode == 0)
         return;
 
@@ -1940,8 +1937,8 @@ void idRenderWorldLocal::DrawGamePortals(int mode, const idMat3 &viewAxis)
 bool idRenderWorldLocal::IsGamePortal( qhandle_t handle )
 {
 	int index = handle - 1;
-	//common->Printf("IsGamePortal: %d -> %d\n", handle,index >= numAppendPortalAreas && index < numInterAreaPortals);
-	return index >= numAppendPortalAreas && index < numInterAreaPortals;
+	//common->Printf("IsGamePortal: %d -> %d\n", handle,index >= numMapInterAreaPortals && index < numInterAreaPortals);
+	return index >= numMapInterAreaPortals && index < numInterAreaPortals;
 }
 
 idVec3 idRenderWorldLocal::GetGamePortalSrc( qhandle_t handle )
