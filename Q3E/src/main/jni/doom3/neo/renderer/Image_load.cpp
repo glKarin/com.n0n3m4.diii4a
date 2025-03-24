@@ -1574,6 +1574,9 @@ int idImage::GenerateImageETC(int width, int height,
 	bool	preserveBorder;
 	int	scaled_width, scaled_height;
 
+    if(!r_useETC1.GetBool())
+        return 0;
+
 	{
 		char filename[MAX_IMAGE_NAME];
 		char *fptr = &filename[0];
