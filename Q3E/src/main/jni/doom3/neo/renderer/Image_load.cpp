@@ -1727,13 +1727,13 @@ void	idImage::ActuallyLoadImage(bool checkForPrecompressed, bool fromBackEnd)
 	{
 		if(pending)
 		{
-			globalImages->AddAllocList(this, checkForPrecompressed, fromBackEnd);
+			renderThread->AddAllocList( this, checkForPrecompressed, fromBackEnd );
 			return;
 		}
 		if(fromBackEnd)
 		{
 			//LOGI("ERROR!! CAN NOT LOAD IMAGE FROM BIND");
-			globalImages->AddAllocList( this, checkForPrecompressed, fromBackEnd );
+            renderThread->AddAllocList( this, checkForPrecompressed, fromBackEnd );
 			return;
 		}
 
@@ -1875,7 +1875,7 @@ void idImage::PurgeImage()
 #ifdef _MULTITHREAD
 	if(multithreadActive && pending)
 	{
-		globalImages->AddPurgeList(this);
+		renderThread->AddPurgeList(this);
 		return;
 	}
 #endif

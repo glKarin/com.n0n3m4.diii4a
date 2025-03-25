@@ -1,11 +1,30 @@
 #ifndef _RENDERTHREAD_H
 #define _RENDERTHREAD_H
 
+#include "QueueList.h"
+
 #define NUM_FRAME_DATA 2
 
 #define RENDER_THREAD_NAME "render_thread"
 
 extern bool multithreadActive;
+
+typedef struct ActuallyLoadImage_data_s
+{
+    idImage *image;
+    bool checkForPrecompressed;
+    bool fromBackEnd;
+    ActuallyLoadImage_data_s( idImage *image, bool checkForPrecompressed, bool fromBackEnd )
+            : image( image ),
+              checkForPrecompressed( checkForPrecompressed ),
+              fromBackEnd( fromBackEnd )
+    {}
+    ActuallyLoadImage_data_s()
+            : image( NULL ),
+              checkForPrecompressed( false ),
+              fromBackEnd( false )
+    {}
+} ActuallyLoadImage_data_t;
 
 class idRenderThread {
 public:
@@ -26,6 +45,19 @@ public:
     void                    BackendThreadWait(void);
     void                    BackendThreadTask(void);
     bool                    IsActive(void) const;
+
+// images queue
+    void				    AddAllocList( idImage * image, bool checkForPrecompressed, bool fromBackEnd );
+    void				    AddPurgeList( idImage * image );
+
+    bool				    GetNextAllocImage( ActuallyLoadImage_data_t &ret );
+    idImage *			    GetNextPurgeImage();
+    void                    HandlePendingImage( void );
+    void                    ClearImages( void );
+
+private:
+    idQueueList<ActuallyLoadImage_data_t>	imagesAlloc; //List for the backend thread
+    idQueueList<idImage *>	imagesPurge; //List for the backend thread
 
 private:
     idRenderThread(const idRenderThread &);

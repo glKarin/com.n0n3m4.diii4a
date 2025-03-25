@@ -36,7 +36,7 @@ static void * BackendThread(void *data)
     Sys_Printf("[Harmattan]: Leave doom3 render thread -> %s\n", RENDER_THREAD_NAME);
     renderThreadInstance.render_thread_finished = true;
     Sys_TriggerEvent(TRIGGER_EVENT_RENDER_THREAD_FINISHED);
-    return 0;
+    return NULL;
 }
 
 idRenderThread::idRenderThread()
@@ -49,6 +49,8 @@ idRenderThread::idRenderThread()
   pixels(NULL)
 {
     memset(&render_thread, 0, sizeof(render_thread));
+//    imagesAlloc.Resize( 1024, 1024 );
+//    imagesPurge.Resize( 1024, 1024 );
 }
 
 void idRenderThread::BackendThreadExecute(void)
@@ -84,7 +86,7 @@ void idRenderThread::BackendThreadTask(void) // BackendThread ->
     // waiting start
     Sys_WaitForEvent(TRIGGER_EVENT_RUN_BACKEND);
     // Purge all images,  Load all images
-    globalImages->HandlePendingImage();
+    this->HandlePendingImage();
     // Load custom GLSL shader or reload GLSL shaders
     RB_GLSL_HandleShaders();
     // debug tools
@@ -124,6 +126,113 @@ void idRenderThread::BackendThreadWait(void)
 bool idRenderThread::IsActive(void) const
 {
     return multithreadActive && Sys_ThreadIsRunning(&render_thread);
+}
+
+#if 1
+#define HARM_MT_IMAGES_DEBUG(...)
+#else
+#define HARM_MT_IMAGES_DEBUG(...) printf("[MT]: " __VA_ARGS__)
+#endif
+void idRenderThread::AddAllocList( idImage * image, bool checkForPrecompressed, bool fromBackEnd )
+{
+    // Front and backend threads can add images, protect this
+    Sys_EnterCriticalSection( CRITICAL_SECTION_TWO );
+
+    if(image)
+    {
+        HARM_MT_IMAGES_DEBUG("AddAllocList::before num = %d\n", imagesAlloc.Num());
+        imagesAlloc.Append( ActuallyLoadImage_data_t( image, checkForPrecompressed, fromBackEnd ) );
+        HARM_MT_IMAGES_DEBUG("AddAllocList::after num = %d\n", imagesAlloc.Num());
+    }
+
+    Sys_LeaveCriticalSection( CRITICAL_SECTION_TWO );
+}
+
+void idRenderThread::AddPurgeList( idImage * image )
+{
+    if(image)
+    {
+        HARM_MT_IMAGES_DEBUG("AddPurgeList::before num = %d\n", imagesPurge.Num());
+        imagesPurge.Append( image );
+        HARM_MT_IMAGES_DEBUG("AddPurgeList::after num = %d\n", imagesPurge.Num());
+        image->purgePending = true;
+    }
+}
+
+bool idRenderThread::GetNextAllocImage( ActuallyLoadImage_data_t &img )
+{
+    HARM_MT_IMAGES_DEBUG("GetNextAllocImage::not empty = %d\n", imagesAlloc.NotEmpty());
+    if(imagesAlloc.NotEmpty())
+    {
+        HARM_MT_IMAGES_DEBUG("GetNextAllocImage::before remove num = %d\n", imagesAlloc.Num());
+        const ActuallyLoadImage_data_t &ref = imagesAlloc.Get();
+        img.image = ref.image;
+        img.checkForPrecompressed = ref.checkForPrecompressed;
+        img.fromBackEnd = ref.fromBackEnd;
+        imagesAlloc.Remove();
+        HARM_MT_IMAGES_DEBUG("GetNextAllocImage::after remove num = %d\n", imagesAlloc.Num());
+        return true;
+    }
+
+    return false;
+}
+
+idImage * idRenderThread::GetNextPurgeImage( void )
+{
+    idImage * img = NULL;
+
+    HARM_MT_IMAGES_DEBUG("GetNextPurgeImage::not empty = %d\n", imagesPurge.NotEmpty());
+    if(imagesPurge.NotEmpty())
+    {
+        HARM_MT_IMAGES_DEBUG("GetNextPurgeImage::before remove num = %d\n", imagesPurge.Num());
+        img = imagesPurge.Get();
+        imagesPurge.Remove();
+        img->purgePending = false;
+        HARM_MT_IMAGES_DEBUG("GetNextPurgeImage::after remove num = %d\n", imagesPurge.Num());
+    }
+
+    return img;
+}
+
+void idRenderThread::HandlePendingImage( void )
+{
+    // Purge all images
+    idImage * img;
+    while( (img = GetNextPurgeImage()) != NULL )
+    {
+        img->PurgeImage();
+    }
+
+    // Load all images
+    ActuallyLoadImage_data_t imgData;
+    while(GetNextAllocImage(imgData))
+    {
+        imgData.image->ActuallyLoadImage( imgData.checkForPrecompressed, false ); // false
+    }
+}
+
+void idRenderThread::ClearImages( void )
+{
+#if 0
+    imagesAlloc.Clear();
+    imagesPurge.Clear();
+#else
+    HARM_MT_IMAGES_DEBUG("ClearImages::alloc list not empty = %d\n", imagesAlloc.NotEmpty());
+    while(imagesAlloc.NotEmpty())
+    {
+        HARM_MT_IMAGES_DEBUG("ClearImages::alloc list before remove num = %d\n", imagesAlloc.Num());
+        imagesAlloc.Remove();
+        HARM_MT_IMAGES_DEBUG("ClearImages::alloc list after remove num = %d\n", imagesAlloc.Num());
+    }
+
+    HARM_MT_IMAGES_DEBUG("ClearImages::purge list not empty = %d\n", imagesPurge.NotEmpty());
+    while(imagesPurge.NotEmpty())
+    {
+        HARM_MT_IMAGES_DEBUG("ClearImages::purge list before remove num = %d\n", imagesPurge.Num());
+        imagesPurge.Remove();
+        HARM_MT_IMAGES_DEBUG("ClearImages::purge list after remove num = %d\n", imagesPurge.Num());
+    }
+#endif
 }
 
 bool Sys_InRenderThread(void)

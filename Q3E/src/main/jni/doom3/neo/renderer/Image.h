@@ -180,7 +180,7 @@ class idImage
 		// May perform file loading if the image was not preloaded.
 		// May start a background image read.
 #ifdef _MULTITHREAD
-		void		Bind(bool *res = 0);
+		void		Bind(bool *res = NULL);
 #else
 		void		Bind();
 #endif
@@ -367,24 +367,6 @@ void	R_WritePalTGA(const char *filename, const byte *data, const byte *palette, 
 // data is in top-to-bottom raster order unless flipVertical is set
 
 
-#ifdef _MULTITHREAD
-typedef struct ActuallyLoadImage_data_s
-{
-	idImage *image;
-	bool checkForPrecompressed;
-	bool fromBackEnd;
-	ActuallyLoadImage_data_s(idImage *image, bool checkForPrecompressed, bool fromBackEnd)
-		: image(image),
-		checkForPrecompressed(checkForPrecompressed),
-		fromBackEnd(fromBackEnd)
-	{}
-	ActuallyLoadImage_data_s() 
-		: image(0),
-		checkForPrecompressed(false),
-		fromBackEnd(false)
-	{}
-} ActuallyLoadImage_data_t;
-#endif
 class idImageManager
 {
 	public:
@@ -531,17 +513,6 @@ class idImageManager
 		int	numActiveBackgroundImageLoads;
 		const static int MAX_BACKGROUND_IMAGE_LOADS = 8;
 
-#ifdef _MULTITHREAD
-	    idList<ActuallyLoadImage_data_t>	imagesAlloc; //List for the backend thread
-	    idList<idImage*>	imagesPurge; //List for the backend thread
-
-	    void				AddAllocList(idImage * image, bool checkForPrecompressed, bool fromBackEnd);
-	    void				AddPurgeList(idImage * image);
-
-	    bool				GetNextAllocImage(ActuallyLoadImage_data_t &ret);
-	    idImage *			GetNextPurgeImage();
-	    void                HandlePendingImage(void);
-#endif
 #ifdef _SHADOW_MAPPING
 	    // RB begin
 	    idImage*			shadowImage_2DRGBA[MAX_SHADOWMAP_RESOLUTIONS];

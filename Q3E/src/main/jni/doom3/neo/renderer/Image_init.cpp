@@ -2251,10 +2251,6 @@ void idImageManager::Init()
 	memset(imageHashTable, 0, sizeof(imageHashTable));
 
 	images.Resize(1024, 1024);
-#ifdef _MULTITHREAD
-	imagesAlloc.Resize( 1024, 1024 );
-	imagesPurge.Resize( 1024, 1024 );
-#endif
 
 	// clear the cached LRU
 	cacheLRU.cacheUsageNext = &cacheLRU;
@@ -2333,15 +2329,7 @@ void idImageManager::Shutdown()
 #endif
 	images.DeleteContents(true);
 #ifdef _MULTITHREAD
-	while(imagesAlloc.Num() > 0)
-	{
-		imagesAlloc.RemoveIndex( 0 );
-	}
-
-	while(imagesPurge.Num() > 0)
-	{
-		imagesPurge.RemoveIndex( 0 );
-	}
+	renderThread->ClearImages();
 #endif
 }
 
@@ -2608,72 +2596,4 @@ void idImageManager::PrintMemInfo(MemInfo_t *mi)
 }
 
 #ifdef _MULTITHREAD
-void idImageManager::AddAllocList( idImage * image, bool checkForPrecompressed, bool fromBackEnd )
-{
-	// Front and backend threads can add images, protect this
-	Sys_EnterCriticalSection( CRITICAL_SECTION_TWO );
-
-	if(image)
-	{
-		imagesAlloc.Append( ActuallyLoadImage_data_t(image, checkForPrecompressed, fromBackEnd) );
-	}
-
-	Sys_LeaveCriticalSection( CRITICAL_SECTION_TWO );
-}
-
-
-void idImageManager::AddPurgeList( idImage * image )
-{
-	if(image)
-	{
-		imagesPurge.Append( image );
-		image->purgePending = true;
-	}
-}
-
-bool idImageManager::GetNextAllocImage(ActuallyLoadImage_data_t &img)
-{
-	if(imagesAlloc.Num() > 0)
-	{
-		const ActuallyLoadImage_data_t &ref = imagesAlloc[0];
-		img.image = ref.image;
-		img.checkForPrecompressed = ref.checkForPrecompressed;
-		img.fromBackEnd = ref.fromBackEnd;
-		imagesAlloc.RemoveIndex(0);
-		return true;
-	}
-
-	return false;
-}
-
-idImage * idImageManager::GetNextPurgeImage()
-{
-	idImage * img = NULL;
-
-	if(imagesPurge.Num() > 0)
-	{
-		img = imagesPurge[0];
-		imagesPurge.Remove( img );
-		img->purgePending = false;
-	}
-
-	return img;
-}
-
-void idImageManager::HandlePendingImage(void)
-{
-	// Purge all images
-	idImage * img;
-	while( (img = GetNextPurgeImage()) != NULL )
-	{
-		img->PurgeImage();
-	}
-
-	// Load all images
-	ActuallyLoadImage_data_t imgData;
-	while(GetNextAllocImage(imgData))
-	{
-		imgData.image->ActuallyLoadImage( imgData.checkForPrecompressed, false ); // false
-	}
-}
 #endif
