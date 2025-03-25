@@ -190,9 +190,27 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 
 		for (j = 0 ; j < tri->numVerts ; j++) {
 #ifdef _RAVEN // quake4 proc file
+#if 1
+            float	vec[12] = { 255.0f };
+            int numFloat = src->Parse1DMatrixOpenEnded( 12, vec );
+
+			tri->verts[j].xyz[0] = vec[0];
+			tri->verts[j].xyz[1] = vec[1];
+			tri->verts[j].xyz[2] = vec[2];
+			tri->verts[j].st[0] = vec[3];
+			tri->verts[j].st[1] = vec[4];
+			tri->verts[j].normal[0] = vec[5];
+			tri->verts[j].normal[1] = vec[6];
+			tri->verts[j].normal[2] = vec[7];
+			if(numFloat == 12) //karin: color???
+			{
+				tri->verts[j].color[0] = (byte)vec[8];
+				tri->verts[j].color[1] = (byte)vec[9];
+				tri->verts[j].color[2] = (byte)vec[10];
+				tri->verts[j].color[3] = (byte)vec[11];
+			}
+#else
 // jmarshall - quake 4 proc format
-            //float	vec[8];
-            //src->Parse1DMatrix( 8, vec );
 
             src->ExpectTokenString("(");
 
@@ -219,6 +237,7 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
                 src->ExpectTokenString(")");
             }
 // jmarshall end
+#endif
 #else
 			float	vec[8];
 

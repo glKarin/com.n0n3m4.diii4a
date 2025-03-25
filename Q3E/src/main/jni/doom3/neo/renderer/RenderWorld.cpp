@@ -1888,6 +1888,9 @@ void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRender
 
 #else
 
+#ifdef _RAVEN //karin: restore points num on plane. fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+	int pointsInPlane = 0;
+#endif
 	for (i = 0 ; i < numPoints ; i++) {
 		float d;
 
@@ -1898,6 +1901,10 @@ void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRender
 		} else if (d <= 0.0f) {
 			back = true;
 		}
+#ifdef _RAVEN //karin: fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+		if(d == 0.0f)
+			pointsInPlane++;
+#endif
 
 		if (back && front) {
 			break;
@@ -1906,6 +1913,10 @@ void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRender
 
 #endif
 
+#ifdef _RAVEN //karin: if all points on plane, find front and back. fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+	if(/*(front || back) && */front != back && pointsInPlane == numPoints)
+		front = back = true;
+#endif
 	if (front) {
 		nodeNum = node->children[0];
 
@@ -2559,6 +2570,9 @@ bool idRenderWorldLocal::EffectDefHasSound(const renderEffect_s* reffect) {
 #endif
 
 #ifdef _D3BFG_CULLING
+#ifdef _RAVEN
+int R_CullFrustumCornersToPlane( const frustumCorners_t& corners, const idPlane& plane );
+#endif
 /*
 ==================
 idRenderWorldLocal::PushFrustumIntoTree_r
@@ -2616,7 +2630,12 @@ void idRenderWorldLocal::PushFrustumIntoTree_r( idRenderEntityLocal* def, idRend
     }
 
     // exact check all the corners against the node plane
+#ifdef _RAVEN
+    //karin: fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+    int cull = R_CullFrustumCornersToPlane( corners, node->plane );
+#else
     frustumCull_t cull = idRenderMatrix::CullFrustumCornersToPlane( corners, node->plane );
+#endif
 
     if( cull != FRUSTUM_CULL_BACK )
     {
