@@ -56,7 +56,14 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
 
     public void run()
     {
-        ContextUtility.OpenMessageDialog(m_gameLauncher, Tr(R.string.current_game_data_path), GetHelperText());
+        AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(m_gameLauncher, Tr(R.string.current_game_data_path), GetHelperText());
+        builder.setNeutralButton(R.string.create_folders, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Callback();
+            }
+        });
+        builder.create().show();
     }
 
     public CharSequence GetHelperText()
@@ -86,7 +93,7 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
                 String pathText = TextHelper.GenLinkText("file://" + path, path);
                 sb.append(" * ").append(pathText).append(endl);
 
-                if(!game.equals(Q3EGlobals.GAME_QUAKE1) && !game.equals(Q3EGlobals.GAME_FTEQW))
+                if(!Q3EGlobals.GAME_QUAKE1.equals(game) && !Q3EGlobals.GAME_FTEQW.equals(game))
                 {
                     String appHome = Q3EUtils.GetAppInternalSearchPath(m_gameLauncher, null);
                     String path2 = KStr.AppendPath(appHome, subdir, gameDataDir);

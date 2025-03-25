@@ -101,7 +101,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginRight="10dp"
-                    android:text="@string/tips"
+                    android:text="@string/game_path_tips"
                     android:textColor="#FFF56C6C"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
             </LinearLayout>
@@ -672,6 +672,42 @@
                     android:layout_height="wrap_content"
                     android:text="@string/use_high_precision_float_on_glsl_shader_harm_r_usehighprecision" />
 
+                <LinearLayout
+                    android:id="@+id/launcher_layout_max_fps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/maximum_fps_limit_0_unlimited" />
+
+                    <EditText
+                        android:id="@+id/edt_harm_r_maxFps"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/limit_maximum_fps_default_is_0"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="number|textNoSuggestions"
+                        android:text="0" />
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/cb_renderToolsMultithread"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread" />
+
+                <CheckBox
+                    android:id="@+id/cb_r_occlusionCulling"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_doom3bfg_occlusion_culling_harm_r_occlusionCulling" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -733,36 +769,6 @@
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:textSize="12sp" />
                 </RadioGroup>
-
-                <LinearLayout
-                    android:id="@+id/launcher_layout_max_fps"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/maximum_fps_limit_0_unlimited" />
-
-                    <EditText
-                        android:id="@+id/edt_harm_r_maxFps"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="@string/limit_maximum_fps_default_is_0"
-                        android:imeOptions="flagNoExtractUi"
-                        android:inputType="number|textNoSuggestions"
-                        android:text="0" />
-                </LinearLayout>
-
-                <CheckBox
-                        android:id="@+id/cb_renderToolsMultithread"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread" />
 
                 <!-- Image -->
                 <com.karin.idTech4Amm.widget.Divider
@@ -863,7 +869,12 @@
                     myapp:label="@string/other"
                     myapp:lineColor="@color/launcher_divider_color" />
 
-                <LinearLayout
+                <CheckBox
+                    android:id="@+id/cb_r_autoAspectRatio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/automatic_setup_aspect_ratio_harm_r_autoaspectratio" />
+                <!--<LinearLayout
                         android:id="@+id/autoAspectRatio"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -899,7 +910,7 @@
                                 android:checked="true"
                                 android:text="@string/automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10" />
                     </RadioGroup>
-                </LinearLayout>
+                </LinearLayout>-->
 
                 <LinearLayout
                     android:id="@+id/dll_section"

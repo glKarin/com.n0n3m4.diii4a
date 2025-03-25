@@ -28,12 +28,11 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add `OpenJK` support, `" + TextHelper.GenLinkText("https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/", "STAR WARS™ Jedi Knight - Jedi Academy™") + "` game standalone directory named `openja`, `" + TextHelper.GenLinkText("https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/", "STAR WARS™ Jedi Knight II - Jedi Outcast™") + "` game standalone directory named `openjo`. More view in `" + TextHelper.GenLinkText("https://github.com/JACoders/OpenJK", "OpenJK") + "`.",
-            "Update version to 5.1 on RealRTCW, support Survival mode. And version 5.0 is keeping until version 5.1 is stable.",
-            "Fix audio playing when disable OpenAL on Quake3/ETW/RTCW/RealRTCW.",
-            "Add Vulkan renderer backend on Quake2.",
-            "Fix create render context on GZDOOM, it will use OpenGL ES if Vulkan initialization fail.",
-            "Add `Open menu` button at end of `General` tab on launcher.",
+            "Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).",
+            "Fix some lights missing on ceil in map game/airdefense1 on Quake 4.",
+            "Add game portal support on Prey(2006).",
+            "Fix wrong resurrection position from deathwalk state when load game after restart application on Prey(2006).",
+            "Support game data folder creation with `Game path tips` button on launcher `General` tab.",
         };
 	};
 

@@ -463,4 +463,11 @@
     <string name="code_">Code:</string>
     <string name="version">版本</string>
     <string name="open_menu">打开菜单</string>
+    <string name="create_folders">创建目录</string>
+    <string name="enable_doom3bfg_occlusion_culling_harm_r_occlusionCulling">启用DOOM3-BFG遮挡剔除(harm_r_occlusionCulling)</string>
+    <string name="game_path_tips">游戏路径提示</string>
+    <string name="create_game_folders">创建游戏目录</string>
+    <string name="create_game_folders_successful">创建游戏目录结构成功!</string>
+    <string name="put_game_files_here">此处放%1$s数据文件</string>
+    <string name="please_put_game_data_files_into_this_folder">请将%1$s游戏数据文件放到此目录下!</string>
 </resources>

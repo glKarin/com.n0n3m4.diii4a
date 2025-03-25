@@ -33,7 +33,7 @@ public final class Q3EPreference
     public static final String pref_harm_r_specularExponentBlinnPhong = "q3e_harm_r_specularExponentBlinnPhong"; //k
     public static final String pref_harm_r_specularExponentPBR        = "q3e_harm_r_specularExponentPBR"; //k
     public static final String pref_harm_r_lightingModel              = "q3e_harm_r_lightingModel"; //k
-    public static final String pref_harm_r_ambientLightingBrightness        = "q3e_harm_r_ambientLightingBrightness"; //k
+    public static final String pref_harm_r_ambientLightingBrightness  = "q3e_harm_r_ambientLightingBrightness"; //k
     public static final String pref_harm_mapBack                      = "q3e_harm_map_back"; //k
     public static final String pref_harm_game                         = "q3e_harm_game"; //k
     public static final String pref_harm_d3bfg_rendererBackend        = "q3e_harm_d3bfg_rendererBackend"; //k
@@ -124,26 +124,26 @@ public final class Q3EPreference
     public static final String pref_harm_realrtcw_game_mod       = "q3e_harm_realrtcw_game_mod"; //k
     public static final String pref_harm_realrtcw_version        = "q3e_harm_realrtcw_version"; //k
     // FTEQW
-    public static final String pref_harm_fteqw_fs_game        = "q3e_harm_fteqw_fs_game"; //k
-    public static final String pref_harm_fteqw_game_lib       = "q3e_harm_fteqw_game_lib"; //k
-    public static final String pref_harm_fteqw_user_mod       = "q3e_harm_fteqw_user_mod"; //k
-    public static final String pref_params_fteqw              = "q3e_params_fteqw"; //k
-    public static final String pref_harm_fteqw_command_record = "q3e_harm_fteqw_command_record";
-    public static final String pref_harm_fteqw_game_mod       = "q3e_harm_fteqw_game_mod"; //k
+    public static final String pref_harm_fteqw_fs_game           = "q3e_harm_fteqw_fs_game"; //k
+    public static final String pref_harm_fteqw_game_lib          = "q3e_harm_fteqw_game_lib"; //k
+    public static final String pref_harm_fteqw_user_mod          = "q3e_harm_fteqw_user_mod"; //k
+    public static final String pref_params_fteqw                 = "q3e_params_fteqw"; //k
+    public static final String pref_harm_fteqw_command_record    = "q3e_harm_fteqw_command_record";
+    public static final String pref_harm_fteqw_game_mod          = "q3e_harm_fteqw_game_mod"; //k
     // OpenJA
-    public static final String pref_harm_ja_fs_game        = "q3e_harm_ja_fs_game"; //k
-    public static final String pref_harm_ja_game_lib       = "q3e_harm_ja_game_lib"; //k
-    public static final String pref_harm_ja_user_mod       = "q3e_harm_ja_user_mod"; //k
-    public static final String pref_params_ja              = "q3e_params_ja"; //k
-    public static final String pref_harm_ja_command_record = "q3e_harm_ja_command_record";
-    public static final String pref_harm_ja_game_mod       = "q3e_harm_ja_game_mod"; //k
+    public static final String pref_harm_ja_fs_game              = "q3e_harm_ja_fs_game"; //k
+    public static final String pref_harm_ja_game_lib             = "q3e_harm_ja_game_lib"; //k
+    public static final String pref_harm_ja_user_mod             = "q3e_harm_ja_user_mod"; //k
+    public static final String pref_params_ja                    = "q3e_params_ja"; //k
+    public static final String pref_harm_ja_command_record       = "q3e_harm_ja_command_record";
+    public static final String pref_harm_ja_game_mod             = "q3e_harm_ja_game_mod"; //k
     // FTEQW
-    public static final String pref_harm_jo_fs_game        = "q3e_harm_jo_fs_game"; //k
-    public static final String pref_harm_jo_game_lib       = "q3e_harm_jo_game_lib"; //k
-    public static final String pref_harm_jo_user_mod       = "q3e_harm_jo_user_mod"; //k
-    public static final String pref_params_jo              = "q3e_params_jo"; //k
-    public static final String pref_harm_jo_command_record = "q3e_harm_jo_command_record";
-    public static final String pref_harm_jo_game_mod       = "q3e_harm_jo_game_mod"; //k
+    public static final String pref_harm_jo_fs_game              = "q3e_harm_jo_fs_game"; //k
+    public static final String pref_harm_jo_game_lib             = "q3e_harm_jo_game_lib"; //k
+    public static final String pref_harm_jo_user_mod             = "q3e_harm_jo_user_mod"; //k
+    public static final String pref_params_jo                    = "q3e_params_jo"; //k
+    public static final String pref_harm_jo_command_record       = "q3e_harm_jo_command_record";
+    public static final String pref_harm_jo_game_mod             = "q3e_harm_jo_game_mod"; //k
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k
@@ -180,6 +180,7 @@ public final class Q3EPreference
     public static final String pref_harm_gzdoom_load_lights_pk3       = "harm_gzdoom_load_lights_pk3";
     public static final String pref_harm_gzdoom_load_brightmaps_pk3   = "harm_gzdoom_load_brightmaps_pk3";
     public static final String pref_harm_max_console_height_frac      = "q3e_harm_max_console_height_frac"; //k
+    public static final String pref_harm_r_occlusionCulling           = "q3e_harm_r_occlusionCulling"; //k
 
     public static final String RUN_BACKGROUND                = "harm_run_background";
     public static final String RENDER_MEM_STATUS             = "harm_render_mem_status";
@@ -220,7 +221,7 @@ public final class Q3EPreference
         {
             return Float.parseFloat(str);
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
             return defVal;
@@ -241,7 +242,7 @@ public final class Q3EPreference
         {
             return Integer.parseInt(str);
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
             return defVal;
@@ -348,5 +349,7 @@ public final class Q3EPreference
             return 24;
     }
 
-    private Q3EPreference() {}
+    private Q3EPreference()
+    {
+    }
 }

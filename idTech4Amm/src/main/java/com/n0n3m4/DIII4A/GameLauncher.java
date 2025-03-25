@@ -77,7 +77,6 @@ import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.karin.idTech4Amm.sys.Theme;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.ExperimentalDialog;
-import com.karin.idTech4Amm.ui.FileTreeView;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
 import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.BackupPreferenceFunc;
@@ -89,6 +88,7 @@ import com.n0n3m4.DIII4A.launcher.ChooseGameFolderFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameLibFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameModFunc;
 import com.n0n3m4.DIII4A.launcher.CreateCommandShortcutFunc;
+import com.n0n3m4.DIII4A.launcher.CreateGameFolderFunc;
 import com.n0n3m4.DIII4A.launcher.CreateShortcutFunc;
 import com.n0n3m4.DIII4A.launcher.DebugPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.DebugTextHistoryFunc;
@@ -149,7 +149,8 @@ public class GameLauncher extends Activity
 	private static final int CONST_RESULT_CODE_ACCESS_ANDROID_DATA                              = 12;
 	private static final int CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT                          = 13;
 	private static final int CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT_WITH_COMMAND             = 14;
-	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_EXTRAS_FILE       = 15;
+	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_EXTRAS_FILE  = 15;
+	private static final int CONST_RESULT_CODE_REQUEST_CREATE_GAME_FOLDER                       = 16;
 
 	private final GameManager m_gameManager = new GameManager();
 	private final Map<String, RadioGroup> groupRadios = new HashMap<>();
@@ -171,6 +172,7 @@ public class GameLauncher extends Activity
 	private CreateShortcutFunc        m_createShortcutFunc;
 	private CreateCommandShortcutFunc m_createCommandShortcutFunc;
 	private ChooseExtrasFileFunc      m_chooseExtrasFileFunc;
+	private CreateGameFolderFunc      m_createGameFolderFunc;
 
     public static String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
@@ -305,12 +307,6 @@ public class GameLauncher extends Activity
 				else
 					RemoveCommand_temp("disconnect");
 			}
-/*			else if (id == R.id.scale_by_screen_area)
-			{
-				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, isChecked)
-						.commit();
-			}*/
 			else if (id == R.id.cb_s_useOpenAL)
 			{
 				if(Q3EUtils.q3ei.IsIdTech4())
@@ -408,6 +404,28 @@ public class GameLauncher extends Activity
 					setProp("harm_r_renderToolsMultithread", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_r_renderToolsMultithread, isChecked)
+						.commit();
+			}
+			else if (id == R.id.cb_r_autoAspectRatio)
+			{
+				int value = isChecked ? 1 : 0;
+				if(Q3EUtils.q3ei.IsIdTech4())
+				{
+					if(isChecked)
+						SetProp_temp("harm_r_autoAspectRatio", value);
+					else
+						RemoveProp_temp("harm_r_autoAspectRatio");
+				}
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, value)
+						.commit();
+			}
+			else if (id == R.id.cb_r_occlusionCulling)
+			{
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("harm_r_occlusionCulling", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_r_occlusionCulling, isChecked)
 						.commit();
 			}
 
@@ -556,7 +574,7 @@ public class GameLauncher extends Activity
 						.putInt(Q3EPreference.pref_harm_opengl, glVersion)
 						.commit();
 			}
-			else if (rgId == R.id.rg_r_autoAspectRatio)
+/*			else if (rgId == R.id.rg_r_autoAspectRatio)
 			{
 				index = GetRadioGroupSelectIndex(radioGroup, id);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
@@ -566,7 +584,7 @@ public class GameLauncher extends Activity
 					SetProp_temp("harm_r_autoAspectRatio", index);
 				else
 					RemoveProp_temp("harm_r_autoAspectRatio");
-			}
+			}*/
 			else if (rgId == R.id.rg_depth_bits)
 			{
 				index = GetRadioGroupSelectIndex(radioGroup, id);
@@ -1240,6 +1258,9 @@ public class GameLauncher extends Activity
 
 			V.cb_renderToolsMultithread.setChecked(getProp("harm_r_renderToolsMultithread", false));
 			if (!IsProp("harm_r_renderToolsMultithread")) setProp("harm_r_renderToolsMultithread", false);
+
+			V.cb_r_occlusionCulling.setChecked(getProp("harm_r_occlusionCulling", false));
+			if (!IsProp("harm_r_occlusionCulling")) setProp("harm_r_occlusionCulling", false);
 		}
 		else if(Q3EUtils.q3ei.isQ2)
 		{
@@ -1668,7 +1689,9 @@ public class GameLauncher extends Activity
 		int autoAspectRatio = mPrefs.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1);
 		if(autoAspectRatio > 0 && Q3EUtils.q3ei.IsIdTech4())
 			SetProp_temp("harm_r_autoAspectRatio", autoAspectRatio);
-		SelectRadioGroup(V.rg_r_autoAspectRatio, mPrefs.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1));
+//		SelectRadioGroup(V.rg_r_autoAspectRatio, mPrefs.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1));
+		V.cb_r_autoAspectRatio.setChecked(autoAspectRatio > 0);
+		V.cb_r_autoAspectRatio.setOnCheckedChangeListener(m_checkboxChangeListener);
 		boolean skipIntro = mPrefs.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
 		V.skip_intro.setChecked(skipIntro);
 		if (skipIntro && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
@@ -1679,7 +1702,7 @@ public class GameLauncher extends Activity
 			SetParam_temp("loadGame", "QuickSave");
 		boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
 		V.multithreading.setChecked(multithreading);
-		V.rg_r_autoAspectRatio.setOnCheckedChangeListener(m_groupCheckChangeListener);
+//		V.rg_r_autoAspectRatio.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		int consoleHeightFrac = mPrefs.getInt(Q3EPreference.pref_harm_max_console_height_frac, 0);
 		V.consoleHeightFracValue.setProgress(consoleHeightFrac);
 		V.consoleHeightFracText.setText(GetConsoleHeightText(consoleHeightFrac));
@@ -1881,8 +1904,6 @@ public class GameLauncher extends Activity
 		V.skip_intro.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.multithreading.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.find_dll.setOnCheckedChangeListener(m_checkboxChangeListener);
-//		V.scale_by_screen_area.setOnCheckedChangeListener(m_checkboxChangeListener);
-//		V.scale_by_screen_area.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_scale_by_screen_area, false));
 		boolean useOpenAL = mPrefs.getBoolean(Q3EPreference.pref_harm_s_useOpenAL, true);
 		V.cb_s_useOpenAL.setChecked(useOpenAL);
 		V.cb_s_useEAXReverb.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_s_useEAXReverb, true));
@@ -1914,6 +1935,8 @@ public class GameLauncher extends Activity
 		V.cb_useHighPrecision.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_renderToolsMultithread.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_renderToolsMultithread, false));
 		V.cb_renderToolsMultithread.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.cb_r_occlusionCulling.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_occlusionCulling, false));
+		V.cb_r_occlusionCulling.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		boolean collapseMods = mPrefs.getBoolean(PreferenceKey.COLLAPSE_MODS, false);
 		V.collapse_mods.setChecked(collapseMods);
@@ -2485,11 +2508,6 @@ public class GameLauncher extends Activity
 			ChangeGame();
 			return true;
 		}
-		/*else if (itemId == R.id.main_menu_move_game_data)
-		{
-			MoveGameDataToAppPrivateDirectory();
-			return true;
-		}*/
 		return false;
 	}
 
@@ -2716,7 +2734,6 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_joystick_visible, getResources().getIntArray(R.array.joystick_visible_mode_values)[V.launcher_tab2_joystick_visible.getSelectedItemPosition()]);
         mEdtr.putBoolean(Q3EPreference.pref_harm_find_dll, V.find_dll.isChecked());
-//		mEdtr.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, V.scale_by_screen_area.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, V.cb_s_useOpenAL.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, V.cb_s_useEAXReverb.isChecked());
 		mEdtr.putBoolean(PreferenceKey.READONLY_COMMAND, !V.readonly_command.isChecked());
@@ -2728,7 +2745,9 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_shadowMapPerforatedShadow, V.cb_perforatedShadow.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_useHighPrecision, V.cb_useHighPrecision.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_renderToolsMultithread, V.cb_renderToolsMultithread.isChecked());
-		mEdtr.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, GetRadioGroupSelectIndex(V.rg_r_autoAspectRatio));
+		mEdtr.putBoolean(Q3EPreference.pref_harm_r_occlusionCulling, V.cb_r_occlusionCulling.isChecked());
+//		mEdtr.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, GetRadioGroupSelectIndex(V.rg_r_autoAspectRatio));
+		mEdtr.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, V.cb_r_autoAspectRatio.isChecked() ? 1 : 0);
 		mEdtr.putBoolean(PreferenceKey.COLLAPSE_MODS, V.collapse_mods.isChecked());
 
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, V.gzdoom_load_lights_pk3.isChecked());
@@ -3032,6 +3051,12 @@ public class GameLauncher extends Activity
 	private void OpenDirectoryHelper()
 	{
 		DirectoryHelperFunc m_directoryHelperFunc = new DirectoryHelperFunc(this);
+		m_directoryHelperFunc.SetCallback(new Runnable() {
+			@Override
+			public void run() {
+				CreateGameFolders();
+			}
+		});
 		Bundle bundle = new Bundle();
 		m_directoryHelperFunc.Start(bundle);
 	}
@@ -3305,6 +3330,10 @@ public class GameLauncher extends Activity
 				case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_EXTRAS_FILE:
 					if (null != m_chooseExtrasFileFunc)
 						m_chooseExtrasFileFunc.run();
+					break;
+				case CONST_RESULT_CODE_REQUEST_CREATE_GAME_FOLDER:
+					if (null != m_createGameFolderFunc)
+						m_createGameFolderFunc.run();
 					break;
                 default:
                     break;
@@ -3988,18 +4017,6 @@ public class GameLauncher extends Activity
 		m_chooseGameModFunc.Start(bundle);
 	}
 
-/*
-	private void UpdateResolutionScaleScheme(int checkedId)
-	{
-		boolean usingPercent = checkedId == R.id.res_05x
-				|| checkedId == R.id.res_2x
-				|| checkedId == R.id.res_1p3x
-				|| checkedId == R.id.res_1p4x
-				;
-		V.scale_by_screen_area.setEnabled(usingPercent);
-	}
-*/
-
 	private void UpdateResolutionScaleSchemeBar(boolean on)
 	{
 		V.res_scale.setEnabled(on);
@@ -4357,6 +4374,13 @@ public class GameLauncher extends Activity
 		openContextMenu(V.launcher_tab1_open_menu);
 	}
 
+	private void CreateGameFolders()
+	{
+		if (null == m_createGameFolderFunc)
+			m_createGameFolderFunc = new CreateGameFolderFunc(this, CONST_RESULT_CODE_REQUEST_CREATE_GAME_FOLDER);
+		m_createGameFolderFunc.Start(new Bundle());
+	}
+
 
 
     private class ViewHolder
@@ -4404,7 +4428,7 @@ public class GameLauncher extends Activity
         public EditText launcher_tab2_gyro_x_axis_sens;
         public EditText launcher_tab2_gyro_y_axis_sens;
         public CheckBox auto_quick_load;
-		public LinearLayout autoAspectRatio;
+		public CheckBox cb_r_autoAspectRatio;
         public RadioGroup rg_fs_preygame;
         public CheckBox multithreading;
         public RadioGroup rg_s_driver;
@@ -4420,7 +4444,6 @@ public class GameLauncher extends Activity
 		public EditText edt_cmdline_temp;
 		public CheckBox skip_intro;
 		public Button launcher_tab1_game_mod_button;
-//		public CheckBox scale_by_screen_area;
 		public RadioGroup rg_harm_r_shadow;
 		public RadioGroup rg_opengl;
 		public CheckBox cb_s_useOpenAL;
@@ -4451,7 +4474,7 @@ public class GameLauncher extends Activity
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
 		public EditText edt_harm_r_stencilShadowAlpha;
-		public RadioGroup rg_r_autoAspectRatio;
+		//public RadioGroup rg_r_autoAspectRatio;
 		public CheckBox cb_stencilShadowCombine;
 		public EditText edt_harm_r_shadowMapAlpha;
 		public TextView launcher_fs_game_cvar;
@@ -4505,6 +4528,7 @@ public class GameLauncher extends Activity
 		public LinearLayout gameversion_section;
 		public Button launcher_tab1_change_game;
 		public Button launcher_tab1_open_menu;
+		public CheckBox cb_r_occlusionCulling;
 
         public void Setup()
         {
@@ -4550,7 +4574,6 @@ public class GameLauncher extends Activity
             launcher_tab2_gyro_x_axis_sens = findViewById(R.id.launcher_tab2_gyro_x_axis_sens);
             launcher_tab2_gyro_y_axis_sens = findViewById(R.id.launcher_tab2_gyro_y_axis_sens);
             auto_quick_load = findViewById(R.id.auto_quick_load);
-			autoAspectRatio = findViewById(R.id.autoAspectRatio);
             rg_fs_preygame = findViewById(R.id.rg_fs_preygame);
             multithreading = findViewById(R.id.multithreading);
             rg_s_driver = findViewById(R.id.rg_s_driver);
@@ -4566,7 +4589,6 @@ public class GameLauncher extends Activity
 			edt_cmdline_temp = findViewById(R.id.edt_cmdline_temp);
 			skip_intro = findViewById(R.id.skip_intro);
 			launcher_tab1_game_mod_button = findViewById(R.id.launcher_tab1_game_mod_button);
-//			scale_by_screen_area = findViewById(R.id.scale_by_screen_area);
 			rg_harm_r_shadow = findViewById(R.id.rg_harm_r_shadow);
 			rg_opengl = findViewById(R.id.rg_opengl);
 			cb_s_useOpenAL = findViewById(R.id.cb_s_useOpenAL);
@@ -4592,7 +4614,8 @@ public class GameLauncher extends Activity
 			launcher_fs_game_subdir = findViewById(R.id.launcher_fs_game_subdir);
 			cb_stencilShadowSoft = findViewById(R.id.cb_stencilShadowSoft);
 			edt_harm_r_stencilShadowAlpha = findViewById(R.id.edt_harm_r_stencilShadowAlpha);
-			rg_r_autoAspectRatio = findViewById(R.id.rg_r_autoAspectRatio);
+			//rg_r_autoAspectRatio = findViewById(R.id.rg_r_autoAspectRatio);
+			cb_r_autoAspectRatio = findViewById(R.id.cb_r_autoAspectRatio);
 			cb_stencilShadowCombine = findViewById(R.id.cb_stencilShadowCombine);
 			edt_harm_r_shadowMapAlpha = findViewById(R.id.edt_harm_r_shadowMapAlpha);
 			launcher_fs_game_cvar = findViewById(R.id.launcher_fs_game_cvar);
@@ -4651,6 +4674,7 @@ public class GameLauncher extends Activity
 			gameversion_section = findViewById(R.id.gameversion_section);
 			launcher_tab1_change_game = findViewById(R.id.launcher_tab1_change_game);
 			launcher_tab1_open_menu = findViewById(R.id.launcher_tab1_open_menu);
+			cb_r_occlusionCulling = findViewById(R.id.cb_r_occlusionCulling);
         }
     }
 }

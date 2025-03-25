@@ -60,7 +60,7 @@ public final class KCVarSystem
                                 "1", "prelight shadow using shadow mapping, others using stencil shadow",
                                 "2", "non-prelight shadow using shadow mapping, others using stencil shadow"
                         ),*/
-                        KCVar.CreateCVar("r_forceShadowMapsOnAlphaTestedSurfaces", "bool", "0", "render perforated surface to shadow map", KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("r_forceShadowMapsOnAlphaTestedSurfaces", "bool", "0", "render perforated surface to shadow map(DOOM 3 default is 1)", KCVar.FLAG_LAUNCHER),
 
                         KCVar.CreateCVar("harm_r_stencilShadowTranslucent", "bool", "0", "enable translucent shadow in stencil shadow", KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "1.0", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
@@ -73,7 +73,8 @@ public final class KCVarSystem
                                 "1", "Force setup r_aspectRatio to -1 (default)",
                                 "2", "Automatic setup r_aspectRatio to 0,1,2 by screen size"),
                         KCVar.CreateCVar("harm_r_renderToolsMultithread", "bool", "0", "Enable render tools debug with GLES in multi-threading", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_useHighPrecision", "bool", "0", "Use high precision float on GLSL shader", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT)
+                        KCVar.CreateCVar("harm_r_useHighPrecision", "bool", "0", "Use high precision float on GLSL shader", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT),
+                        KCVar.CreateCVar("harm_r_occlusionCulling", "bool", "0", "Enable DOOM3-BFG occlusion culling", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(
