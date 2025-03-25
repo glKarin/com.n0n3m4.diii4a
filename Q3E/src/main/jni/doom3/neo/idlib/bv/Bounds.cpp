@@ -369,7 +369,6 @@ idBounds BoundsForPointRotation(const idVec3 &start, const idRotation &rotation)
 				bounds[1][i] = origin[i] + idMath::Sqrt(radiusSqr * (1.0f - axis[i] * axis[i]));
 #endif
 			} else {
-				bounds[0][i] = origin[i] - idMath::Sqrt(radiusSqr * (1.0f - axis[i] * axis[i]));
 #ifdef _RAVEN // rvlib
 // RAVEN BEGIN
                 bounds[0][i] = origin[i];
@@ -379,8 +378,9 @@ idBounds BoundsForPointRotation(const idVec3 &start, const idRotation &rotation)
                 }
 // RAVEN END
 #else
-				bounds[1][i] = Max(start[i], end[i]);
+				bounds[0][i] = origin[i] - idMath::Sqrt(radiusSqr * (1.0f - axis[i] * axis[i]));
 #endif
+				bounds[1][i] = Max(start[i], end[i]);
 			}
 		} else if (start[i] > end[i]) {
 			bounds[0][i] = end[i];
@@ -467,13 +467,13 @@ P7: -1 20 300 Left-Backward-Top
 
                               maxs
              P7 ---------- P6
-            /|            / |
-          /  |          /   |
+            / |           / |
+          /   |         /   |
          P4 --+------- P5   |
-         |   |         |    |
+         |    |        |    |
          |   P3 -------+--- P2
          |  /          |   /
-         |/            | /
+         | /           | /
          P0 ---------- P1
     mins
 ============
