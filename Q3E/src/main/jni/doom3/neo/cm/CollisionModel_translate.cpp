@@ -943,7 +943,7 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 #ifdef _RAVEN // quake4 trace
 	tw.trace.c.id = 0; // jmarshall: fix so we don't get garbage values.
 // jmarshall - quake 4
-	tw.trace.c.materialType = 0;
+	tw.trace.c.materialType = NULL;
 // jmarshall end
 	tw.trace.c.material = NULL; //kc
 #endif

@@ -1222,7 +1222,7 @@ bool idRenderWorldLocal::ModelTrace(modelTrace_t &trace, qhandle_t entityHandle,
 
 	trace.fraction = 1.0f;
 #ifdef _RAVEN // quake4 trace
-	trace.materialType = 0;
+	trace.materialType = NULL;
 	trace.material = NULL;
 #endif
 

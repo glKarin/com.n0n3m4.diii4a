@@ -3708,6 +3708,10 @@ idEntity::AddDamageEffect
 */
 void idEntity::AddDamageEffect( const trace_t &collision, const idVec3 &velocity, const char *damageDefName, idEntity* inflictor ) {
 	const char *sound, *decal, *key;
+#ifdef _QUAKE4 //karin: model == NULL 2025
+    if( !collision.c.material )
+        return;
+#endif
 
 	const idDeclEntityDef *def = gameLocal.FindEntityDef( damageDefName, false );
 // RAVEN BEGIN
@@ -6516,6 +6520,10 @@ void idAnimatedEntity::AddDamageEffect( const trace_t &collision, const idVec3 &
 	const char *splat, *decal, *key;
 	idVec3 dir;
 
+#ifdef _QUAKE4 //karin: model == NULL 2025
+    if( !collision.c.material )
+        return;
+#endif
 	const idDeclEntityDef *def = gameLocal.FindEntityDef( damageDefName, false );
 	if ( def == NULL || !def->dict.GetBool ( "bleed" ) ) {
 		return;
