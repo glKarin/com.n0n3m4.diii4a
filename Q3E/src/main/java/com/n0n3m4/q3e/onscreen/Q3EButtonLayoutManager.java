@@ -132,7 +132,7 @@ public class Q3EButtonLayoutManager
         final int Vertical_Space = Dip2px_s(5); //k 2
         final int Attack_right_Margin = Dip2px_s(40); //k 20
         final int Attack_Bottom_Margin = Dip2px_s(40); //k 20
-        final int JoyStick_Left_Margin = Dip2px_s(40); //k 30
+        final int JoyStick_Left_Margin = Dip2px_s(35); //k 30
         final int JoyStick_Bottom_Margin = Dip2px_s(40); //k 30
         final int Alpha = m_opacity;
 
