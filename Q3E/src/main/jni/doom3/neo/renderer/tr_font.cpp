@@ -32,8 +32,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+
+#ifdef _RAVEN //karin: quake4 fontdat file size
+#define FILESIZE_fontInfo_t (9236)
+#else
 //k 64 sizeof // because fontInfo_t::glyph is pointer, but is always 4 bytes on font file
 #define FILESIZE_fontInfo_t (20548)
+#endif
 
 #ifdef BUILD_FREETYPE
 #include "../ft2/fterrors.h"
@@ -387,6 +392,22 @@ bool R_Font_ParseWideFont(fontInfo_t *outFont)
             for(i = 0; i < outFont->numGlyphs; i++)
             {
                 glyphInfo_t *info = &outFont->glyphsTable[i];
+#ifdef _RAVEN //k: quake4 font: 9 float32 per char
+                info->imageWidth	= (int)readFloat();
+                info->imageHeight	= (int)readFloat();
+                info->xSkip		    = (int)readFloat();
+                info->pitch		    = (int)readFloat();
+                info->top			= (int)readFloat();
+                info->height		= info->top;
+                info->bottom		= 0;
+                info->s			    = readFloat();
+                info->t			    = readFloat();
+                info->s2			= readFloat();
+                info->t2			= readFloat();
+                //FIXME: the +6, -6 skips the embedded fonts/
+                memcpy(info->shaderName, &fdFile[fdOffset], 32);
+                fdOffset += 32;
+#else
                 info->height		= readInt();
                 info->top			= readInt();
                 info->bottom		= readInt();
@@ -402,6 +423,7 @@ bool R_Font_ParseWideFont(fontInfo_t *outFont)
                 //FIXME: the +6, -6 skips the embedded fonts/
                 memcpy(info->shaderName, &fdFile[fdOffset + 6], 32 - 6);
                 fdOffset += 32;
+#endif
             }
             return true;
         }
@@ -506,11 +528,11 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 
 		for (i = 0; i < GLYPHS_PER_FONT; i++) {
 #ifdef _RAVEN //k: quake4 font: 9 float32 per char
-			outFont->glyphs[i].imageWidth	= readFloat();
-			outFont->glyphs[i].imageHeight	= readFloat();
-			outFont->glyphs[i].xSkip		= readFloat();
-			outFont->glyphs[i].pitch		= readFloat();
-			outFont->glyphs[i].top			= readFloat();
+			outFont->glyphs[i].imageWidth	= (int)readFloat();
+			outFont->glyphs[i].imageHeight	= (int)readFloat();
+			outFont->glyphs[i].xSkip		= (int)readFloat();
+			outFont->glyphs[i].pitch		= (int)readFloat();
+			outFont->glyphs[i].top			= (int)readFloat();
 			outFont->glyphs[i].height		= outFont->glyphs[i].top;
 			outFont->glyphs[i].bottom		= 0;
 			outFont->glyphs[i].s			= readFloat();
@@ -539,10 +561,10 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 
 #ifdef _RAVEN //k: quake4 font remain 5 float32
 		readFloat(); //k: 12 / 24 / 48
-		int mw = readFloat(); //k: max height?
-		int mh = readFloat(); //k: max width?
+		int mw = (int)readFloat(); //k: max height?
+		int mh = (int)readFloat(); //k: max width?
 		readFloat(); //k: max width - max height
-		// readFloat(); //k: 0
+		// readFloat(); //k: 0 last float number
 		outFont->glyphScale = glyphScale;
 #else
 		outFont->glyphScale = readFloat();
@@ -553,7 +575,11 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 
 #ifdef _WCHAR_LANG
 #define HARM_NEW_FONT_REQUIRE_BYTES (4 * 5)
+#ifdef _RAVEN
+        fdOffset += 4;
+#else
         fdOffset += sizeof(outFont->name);
+#endif
 
         outFont->numIndexes = 0;
         outFont->indexes = NULL;
@@ -562,12 +588,25 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
         if(fdOffset + HARM_NEW_FONT_REQUIRE_BYTES < len)
         {
             common->Printf("Font '%s' is new format.\n", fontName);
-            R_Font_ParseWideFont(outFont);
+            if(R_Font_ParseWideFont(outFont))
+            {
+#ifdef _RAVEN //k: fix old ascii glyph font texture file name
+                for(i = 0; i < GLYPHS_PER_FONT; i++)
+                {
+                    if(i >= outFont->numIndexes)
+                        continue;
+                    int index = outFont->indexes[i];
+                    if(index < 0 || index >= outFont->numGlyphs)
+                        continue;
+                    idStr::snPrintf(outFont->glyphs[i].shaderName, sizeof(outFont->glyphs[i].shaderName), "%s_%s", fontName, outFont->glyphsTable[index].shaderName);
+                }
+#endif
+            }
         }
         else
             common->Printf("Font '%s' is old format.\n", fontName);
 
-        if(outFont->numIndexes)
+        if(outFont->numIndexes > 0)
         {
             for (i = 0; i < outFont->numIndexes; i++) {
                 int index = outFont->indexes[i];
@@ -575,7 +614,7 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
                     continue;
                 glyphInfo_t *gi = &outFont->glyphsTable[index];
 #ifdef _RAVEN //k: quake4 font material
-                idStr::snPrintf(name, sizeof(name), "%s", gi->shaderName);
+                idStr::snPrintf(name, sizeof(name), "%s_%s", fontName, gi->shaderName);
 #else
                 idStr::snPrintf(name, sizeof(name), "%s/%s", fontName, gi->shaderName);
 #endif

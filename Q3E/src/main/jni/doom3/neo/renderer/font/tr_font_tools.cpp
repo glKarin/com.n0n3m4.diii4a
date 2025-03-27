@@ -54,6 +54,68 @@ typedef struct {
     glyphInfoExport_t	*glyphsTable;
 } wfontInfo_t;
 
+#ifdef _RAVEN //k: quake4 font
+#pragma pack( push, 1 )
+typedef struct {
+    float				imageWidth;		// width of actual image
+    float				imageHeight;	// height of actual image
+    float				xSkip;			// x adjustment
+    float				pitch;			// width for copying
+    float				top;			// top of glyph in buffer
+    float				s;				// x offset in image where glyph starts
+    float				t;				// y offset in image where glyph starts
+    float				s2;
+    float				t2;
+} q4_glyphInfoExport_t;
+
+typedef struct { // sizeof == 9236, non-align
+    q4_glyphInfoExport_t	glyphs[GLYPHS_PER_FONT];
+    float                   pointSize;
+    float                   maxWidth;
+    float                   maxHeight;
+    float                   placeholder1; // unknown
+    float                   placeholder2; // unknown
+} q4_fontInfoExport_t;
+#pragma pack( pop )
+
+static void R_Font_ConvertToQ4Glyph(const glyphInfoExport_t &d3, q4_glyphInfoExport_t &q4)
+{
+    q4.imageWidth = (float)d3.imageWidth;
+    q4.imageHeight = (float)d3.imageHeight;
+    q4.xSkip = (float)d3.xSkip;
+    q4.pitch = (float)d3.pitch;
+    q4.top = (float)d3.top;
+    q4.s = (float)d3.s;
+    q4.t = (float)d3.t;
+    q4.s2 = (float)d3.s2;
+    q4.t2 = (float)d3.t2;
+}
+
+static void R_Font_ConvertToQ4Info(const fontInfoExport_t &d3, q4_fontInfoExport_t &q4)
+{
+    int i;
+    int mw = 0;
+    int mh = 0;
+
+    for(i = 0; i < GLYPHS_PER_FONT; i++)
+        R_Font_ConvertToQ4Glyph(d3.glyphs[i], q4.glyphs[i]);
+    q4.pointSize = 0.0f;
+    for (i = GLYPH_START; i < GLYPH_END; i++) {
+        if (mh < d3.glyphs[i].height) {
+            mh = d3.glyphs[i].height;
+        }
+
+        if (mw < d3.glyphs[i].xSkip) {
+            mw = d3.glyphs[i].xSkip;
+        }
+    }
+    q4.maxWidth = (float)mw;
+    q4.maxHeight = (float)mh;
+    q4.placeholder1 = 0.0f;
+    q4.placeholder2 = 0.0f;
+}
+#endif
+
 typedef struct ftGlobalVars_s
 {
     FT_Library ftLibrary;
@@ -494,11 +556,19 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
 				}
 
 				imageNumber++;
+#ifdef _RAVEN //k: quake4 font texture file
+                idStr::snPrintf(name, sizeof(name), "%s_%i_%i.tga", saveDir, imageNumber, pointSize);
+#else
                 idStr::snPrintf(name, sizeof(name), "%s/fontImage_%i_%i.tga", saveDir, imageNumber, pointSize);
+#endif
                 common->Printf("Export font: export %d font texture file to '%s'\n", imageNumber, name);
                 R_WriteTGA(name, imageBuff, 256, 256);
 
+#ifdef _RAVEN //k: quake4 font texture file
+                idStr::snPrintf(name, sizeof(name), "%i_%i.tga", imageNumber, pointSize);
+#else
                 idStr::snPrintf(name, sizeof(name), "fonts/fontImage_%i_%i.tga", imageNumber, pointSize);
+#endif
 				for (j = lastStart; j < num; j++) {
 					glyphData[j].glyph = j;
                     memset(glyphData[j].shaderName, 0, sizeof(glyphData[j].shaderName));
@@ -548,13 +618,25 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
     font->base.glyphScale = glyphScale;
 
     char filePath[1024] = { 0 };
+#ifdef _RAVEN //k: quake4 font data file
+    idStr::snPrintf(filePath, sizeof(filePath), "%s_%i.fontdat", saveDir, pointSize);
+#else
     idStr::snPrintf(filePath, sizeof(filePath), "%s/fontImage_%i.dat", saveDir, pointSize);
+#endif
     common->Printf("Export font: export font data file to '%s'\n", filePath);
 
     fontInfoExport_t *oldInfo = &font->base;
     idFile *datFile = fileSystem->OpenFileWrite(filePath);
 
+#ifdef _RAVEN //karin: export quake4 fontdat format
+    q4_fontInfoExport_t q4Info;
+    R_Font_ConvertToQ4Info(font->base, q4Info);
+    q4Info.pointSize = (float)pointSize;
+    datFile->Write(&q4Info, sizeof(q4_fontInfoExport_t));
+#else
     datFile->Write(oldInfo, sizeof(fontInfoExport_t));
+#endif
+    common->Printf("Export font: base -> bytes=%d, target=%d\n", datFile->Length(), FILESIZE_fontInfo_t);
 
     font->magic = HARM_NEW_FONT_MAGIC;
     font->version = HARM_NEW_FONT_VERSION;
@@ -570,7 +652,19 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
     datFile->Write(&font->numIndexes, sizeof(font->numIndexes));
     datFile->Write(&font->indexes[0], font->numIndexes * sizeof(font->indexes[0]));
     datFile->Write(&font->numGlyphs, sizeof(font->numGlyphs));
+#ifdef _RAVEN //k: quake4 font data file
+    q4_glyphInfoExport_t q4Glyph;
+    for(i = 0; i < font->numGlyphs; i++)
+    {
+        R_Font_ConvertToQ4Glyph(font->glyphsTable[i], q4Glyph);
+        datFile->Write(&q4Glyph, sizeof(q4_glyphInfoExport_t));
+        // write font texture file name
+        datFile->Write(&font->glyphsTable[i].shaderName[0], sizeof(font->glyphsTable[i].shaderName));
+    }
+#else
     datFile->Write(&font->glyphsTable[0], font->numGlyphs * sizeof(font->glyphsTable[0]));
+#endif
+    common->Printf("Export font: bytes=%d\n", datFile->Length());
 
     fileSystem->CloseFile(datFile);
 
@@ -584,11 +678,19 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
 
     static void R_ExportFont_f(const idCmdArgs &args)
     {
+#ifdef _RAVEN //k: quake4 font: require font type
+        if(args.Argc() < 3)
+        {
+            common->Printf("[Usage]: %s <font file: *.ttf, *.ttc> <output font type name. e.g. 'fonts/XXX'> [<language, default using cvar `sys_lang`>]\n", args.Argv(0));
+            return;
+        }
+#else
         if(args.Argc() < 2)
         {
             common->Printf("[Usage]: %s <font file: *.ttf, *.ttc> [<output font folder name. e.g. 'fonts/XXX', default to 'fonts/'> <language, default using cvar `sys_lang`>]\n", args.Argv(0));
             return;
         }
+#endif
 
         const char *fontPath = args.Argv(1);
         const char *fontType = args.Argc() > 2 ? args.Argv(2) : NULL;
