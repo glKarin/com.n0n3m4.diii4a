@@ -511,10 +511,10 @@ int idViewBody::GetBodyAnim( const char *animname ) {
 
 /*
 =====================
-idViewBody::UpdateWeapon
+idViewBody::UpdateBody
 =====================
 */
-void idViewBody::UpdateWeapon(void)
+void idViewBody::UpdateBody(void)
 {
 	if ( owner->IsLegsIdle ( false ) )
 		SetState ( "Legs_Idle", 0 );

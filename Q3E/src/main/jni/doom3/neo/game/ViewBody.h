@@ -88,7 +88,7 @@ public:
     virtual void			GetPosition					( idVec3& origin, idMat3& axis ) const;
     void				    Init						( idPlayer* _owner, bool setstate );
     idPlayer *              GetOwner                    ( void );
-	void					UpdateWeapon				(void);
+	void					UpdateBody				    (void);
 	void					EnterCinematic(void);
 	void					ExitCinematic(void);
 

@@ -211,6 +211,9 @@ void idViewBody::Restore( idRestoreGame *savefile ) {
 	savefile->ReadBool( allChannel );
 
 	animChannel = allChannel ? ANIMCHANNEL_ALL : ANIMCHANNEL_LEGS;
+
+    //2025: make visible when load game
+    UpdateBody();
 }
 
 /*
@@ -473,10 +476,10 @@ int idViewBody::GetBodyAnim( const char *animname ) {
 
 /*
 =====================
-idViewBody::UpdateWeapon
+idViewBody::UpdateBody
 =====================
 */
-void idViewBody::UpdateWeapon(void)
+void idViewBody::UpdateBody(void)
 {
 	if ( IsLegsIdle ( false ) )
 		SetState ( "Legs_Idle", 0 );

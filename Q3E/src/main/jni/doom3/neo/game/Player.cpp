@@ -4271,7 +4271,7 @@ void idPlayer::Weapon_Combat(void)
 			weaponCatchup = false;
 #ifdef _MOD_VIEW_BODY
 			if(viewBody.GetEntity()) {
-				viewBody.GetEntity()->UpdateWeapon();
+				viewBody.GetEntity()->UpdateBody();
 			}
 #endif
 		} else {
@@ -4296,7 +4296,7 @@ void idPlayer::Weapon_Combat(void)
 				weapon.GetEntity()->Raise();
 #ifdef _MOD_VIEW_BODY
 				if(viewBody.GetEntity()) {
-					viewBody.GetEntity()->UpdateWeapon();
+					viewBody.GetEntity()->UpdateBody();
 				}
 #endif
 			}
@@ -4487,7 +4487,7 @@ void idPlayer::UpdateWeapon(void)
 			assert(weapon.GetEntity()->IsLinked());
 #ifdef _MOD_VIEW_BODY
 			if(viewBody.GetEntity()) {
-				viewBody.GetEntity()->UpdateWeapon();
+				viewBody.GetEntity()->UpdateBody();
 			}
 #endif
 		} else {

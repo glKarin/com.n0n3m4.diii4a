@@ -93,7 +93,7 @@ public:
     // Debugging
     virtual void			GetDebugInfo				( debugInfoProc_t proc, void* userData );
     idPlayer *              GetOwner                    ( void );
-	void					UpdateWeapon				(void);
+	void					UpdateBody				    (void);
 
 protected:
     void				PlayAnim					( int channel, const char *animname, int blendFrames );
