@@ -189,16 +189,15 @@ void idRenderWindow::Draw(int time, float x, float y)
 	refdef.shaderParms[2] = 1;
 	refdef.shaderParms[3] = 1;
 
-	if(r_scaleMenusTo43.GetBool())
+	if(dc->IsMenuScaleFixActive())
 	{
 		// DG: for scaling menus to 4:3 (like that spinning mars globe in the main menu)
 		float x = drawRect.x;
 		float y = drawRect.y;
 		float w = drawRect.w;
 		float h = drawRect.h;
-		if(dc->IsMenuScaleFixActive()) {
-			dc->AdjustCoords(&x, &y, &w, &h);
-		}
+		
+		dc->AdjustCoords(&x, &y, &w, &h);
 
 		refdef.x = x;
 		refdef.y = y;

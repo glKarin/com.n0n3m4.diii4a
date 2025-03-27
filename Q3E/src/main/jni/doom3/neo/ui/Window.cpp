@@ -60,7 +60,6 @@ bool idWindow::registerIsTemporary[MAX_EXPRESSION_REGISTERS];		// statics to ass
 
 idCVar idWindow::gui_debug("gui_debug", "0", CVAR_GUI | CVAR_BOOL, "");
 idCVar idWindow::gui_edit("gui_edit", "0", CVAR_GUI | CVAR_BOOL, "");
-extern idCVar r_scaleMenusTo43;
 
 #ifdef _RAVEN //k: for main menu gui
 idCVar net_menulanserver("net_menuLANServer", "0", CVAR_SYSTEM | CVAR_ARCHIVE, "menu cvar for config of lan servers");
@@ -1541,7 +1540,7 @@ void idWindow::Redraw(float x, float y)
 	if ( flags & WIN_DESKTOP ) {
 		// only scale desktop windows (will automatically scale its sub-windows)
 		// that EITHER have the scaleto43 flag set OR are fullscreen menus and r_scaleMenusTo43 is 1
-		if( /*(flags & WIN_SCALETO43) ||*/
+		if( (flags & WIN_SCALETO43) ||
 			r_scaleMenusTo43.GetInteger() < 0 || ((flags & WIN_MENUGUI) && r_scaleMenusTo43.GetBool() ) )
 		{
 			fixupFor43 = true;
@@ -2576,6 +2575,17 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 
 		return true;
 	}
+    // DG: added this window flag for Windows that should be scaled to 4:3
+    //     (with "empty" bars left/right or above/below)
+    if (idStr::Icmp(_name, "scaleto43") == 0)
+    {
+        if ( src->ParseBool() )
+        {
+            flags |= WIN_SCALETO43;
+        }
+        return true;
+    }
+    // DG end
 
 	if (idStr::Icmp(_name, "forceaspectwidth") == 0) {
 		forceAspectWidth = src->ParseFloat();

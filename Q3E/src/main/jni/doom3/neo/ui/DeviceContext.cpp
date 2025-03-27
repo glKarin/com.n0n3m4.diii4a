@@ -206,6 +206,7 @@ void idDeviceContext::Init()
 	// DG: this is used for the "make sure menus are rendered as 4:3" hack
 	fixScaleForMenu.Set(1, 1);
 	fixOffsetForMenu.Set(0, 0);
+    scaleMenusTo43 = false;
 }
 
 void idDeviceContext::Shutdown()
@@ -349,7 +350,7 @@ void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h)
 {
 	if (x) {
 		*x *= xScale;
-		if(r_scaleMenusTo43.GetBool())
+		if(scaleMenusTo43)
 		{
 			*x *= fixScaleForMenu.x; // DG: for "render menus as 4:3" hack
 			*x += fixOffsetForMenu.x;
@@ -358,7 +359,7 @@ void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h)
 
 	if (y) {
 		*y *= yScale;
-		if(r_scaleMenusTo43.GetBool())
+		if(scaleMenusTo43)
 		{
 			*y *= fixScaleForMenu.y; // DG: for "render menus as 4:3" hack
 			*y += fixOffsetForMenu.y;
@@ -367,7 +368,7 @@ void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h)
 
 	if (w) {
 		*w *= xScale;
-		if(r_scaleMenusTo43.GetBool())
+		if(scaleMenusTo43)
 		{
 			*w *= fixScaleForMenu.x; // DG: for "render menus as 4:3" hack
 		}
@@ -375,7 +376,7 @@ void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h)
 
 	if (h) {
 		*h *= yScale;
-		if(r_scaleMenusTo43.GetBool())
+		if(scaleMenusTo43)
 		{
 			*h *= fixScaleForMenu.y; // DG: for "render menus as 4:3" hack
 		}
@@ -759,7 +760,7 @@ void idDeviceContext::DrawCursor(float *x, float *y, float size)
 	}
 
 	renderSystem->SetColor(colorWhite);
-	if(r_scaleMenusTo43.GetBool())
+	if(scaleMenusTo43)
 	{
 		// DG: I use this instead of plain AdjustCursorCoords and the following lines
 		//     to scale menus and other fullscreen GUIs to 4:3 aspect ratio
@@ -1492,6 +1493,8 @@ char *idRectangle::String(void) const
 
 // DG: this is used for the "make sure menus are rendered as 4:3" hack
 void idDeviceContext::SetMenuScaleFix(bool enable) {
+    scaleMenusTo43 = enable;
+    
 	if(enable) {
 		float w = renderSystem->GetScreenWidth();
 		float h = renderSystem->GetScreenHeight();
