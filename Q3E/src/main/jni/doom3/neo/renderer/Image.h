@@ -579,7 +579,6 @@ IMAGEPROGRAM
 void R_LoadImageProgram(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, textureDepth_t *depth = NULL);
 const char *R_ParsePastImageProgram(idLexer &src);
 
-#ifdef _USING_STB
 void LoadJPG_stb(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
@@ -590,4 +589,3 @@ void R_WriteBMP(const char *filename, const byte *data, int width, int height, i
 void R_WriteDDS(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath = NULL);
 
 void R_WriteScreenshotImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
-#endif

@@ -143,7 +143,7 @@ static void R_Font_GetGlyphInfo(FT_GlyphSlot glyph, int *left, int *right, int *
     *pitch  = (true ? (*width+3) & -4 : (*width+7) >> 3);
 }
 
-static FT_Bitmap *R_Font_RenderGlyph(FT_Library ftLibrary, FT_GlyphSlot glyph, glyphInfoExport_t *glyphOut)
+static FT_Bitmap *R_Font_RenderGlyph(FT_Library ftLibrary, FT_GlyphSlot glyph, glyphInfoExport_t *glyphOut, int width256)
 {
     FT_Bitmap  *bit2;
     int left, right, width, top, bottom, height, pitch, size;
@@ -212,20 +212,21 @@ static FT_Bitmap *R_Font_RenderGlyph(FT_Library ftLibrary, FT_GlyphSlot glyph, g
 RE_ConstructGlyphInfo
 ============
 */
-static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsigned char *imageOut, int *xOut, int *yOut, int *maxHeight, FT_Face face, const fontChar_t c, bool calcHeight)
+static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsigned char *imageOut, int *xOut, int *yOut, int *maxHeight, FT_Face face, const fontChar_t c, bool calcHeight, int width256)
 {
     int i;
     static glyphInfoExport_t glyph;
     unsigned char *src, *dst;
     float scaled_width, scaled_height;
     FT_Bitmap *bitmap = NULL;
+	int width255 = width256 - 1;
 
     memset(&glyph, 0, sizeof(glyphInfoExport_t));
 
     // make sure everything is here
     if (face != NULL) {
         FT_Load_Glyph(face, FT_Get_Char_Index(face, c), FT_LOAD_DEFAULT);
-        bitmap = R_Font_RenderGlyph(ftLibrary, face->glyph, &glyph);
+        bitmap = R_Font_RenderGlyph(ftLibrary, face->glyph, &glyph, width256);
 
         if (bitmap) {
             glyph.xSkip = (face->glyph->metrics.horiAdvance >> 6) + 1;
@@ -256,8 +257,8 @@ static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsign
         scaled_height = (float)glyph.height;
 
         // we need to make sure we fit
-        if (*xOut + scaled_width + 1 >= 255) {
-            if (*yOut + *maxHeight + 1 >= 255) {
+        if (*xOut + scaled_width + 1 >= width255) {
+            if (*yOut + *maxHeight + 1 >= width255) {
                 *yOut = -1;
                 *xOut = -1;
                 Mem_Free(bitmap->buffer);
@@ -267,7 +268,7 @@ static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsign
                 *xOut = 0;
                 *yOut += *maxHeight + 1;
             }
-        } /*else*/ if (*yOut + *maxHeight + 1 >= 255) {
+        } /*else*/ if (*yOut + *maxHeight + 1 >= width255) {
             *yOut = -1;
             *xOut = -1;
             Mem_Free(bitmap->buffer);
@@ -277,7 +278,7 @@ static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsign
         //wprintf(L"%lc ", (wchar_t )c);
 
         src = bitmap->buffer;
-        dst = imageOut + (*yOut * 256) + *xOut;
+        dst = imageOut + (*yOut * width256) + *xOut;
 
         if (bitmap->pixel_mode == ft_pixel_mode_mono) {
             for (i = 0; i < glyph.height; i++) {
@@ -311,14 +312,14 @@ static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsign
                 }
 
                 src += glyph.pitch;
-                dst += 256;
+                dst += width256;
 
             }
         } else {
             for (i = 0; i < glyph.height; i++) {
                 memcpy(dst, src, glyph.pitch);
                 src += glyph.pitch;
-                dst += 256;
+                dst += width256;
             }
         }
 
@@ -327,10 +328,10 @@ static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsign
 
         glyph.imageHeight = scaled_height;
         glyph.imageWidth = scaled_width;
-        glyph.s = (float)*xOut / 256;
-        glyph.t = (float)*yOut / 256;
-        glyph.s2 = glyph.s + (float)scaled_width / 256;
-        glyph.t2 = glyph.t + (float)scaled_height / 256;
+        glyph.s = (float)*xOut / width256;
+        glyph.t = (float)*yOut / width256;
+        glyph.s2 = glyph.s + (float)scaled_width / width256;
+        glyph.t2 = glyph.t + (float)scaled_height / width256;
 
         *xOut += scaled_width + 1;
     }
@@ -383,7 +384,7 @@ static void R_Font_UnloadFont(ftGlobalVars_t *exporter)
     }
 }
 
-static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *font, const char *language = "english", const char *fontType = NULL)
+static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *font, const char *language = "english", const char *fontType = NULL, int width256 = 256)
 {
     FT_Face face;
     int j, k, xOut, yOut, lastStart, imageNumber;
@@ -401,6 +402,7 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
     FT_UInt gindex;
     void *faceData = exporter->faceData;
     FT_Library ftLibrary = exporter->ftLibrary;
+	int width1024 = width256 * 4;
 
     if (ftLibrary == NULL) {
         common->Warning("Export font: FreeType not initialized.");
@@ -449,7 +451,7 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
         if(charcode > maxCharcode)
             maxCharcode = charcode;
         numCharcode++;
-        glyph = R_Font_ConstructGlyphInfo(ftLibrary, out, &xOut, &yOut, &maxHeight, face, gindex, true);
+        glyph = R_Font_ConstructGlyphInfo(ftLibrary, out, &xOut, &yOut, &maxHeight, face, gindex, true, width256);
         charcode = FT_Get_Next_Char(face, charcode, &gindex);
     }
 
@@ -491,9 +493,9 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
 
     // make a 256x256 image buffer, once it is full, register it, clean it and keep going
     // until all glyphs are rendered
-    out = (unsigned char *)Mem_Alloc(1024*1024);
+    out = (unsigned char *)Mem_Alloc(width1024*width1024);
 
-    memset(out, 0, 1024*1024);
+    memset(out, 0, width1024*width1024);
 
     xOut = 0;
     yOut = 0;
@@ -514,7 +516,7 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
 		indexData[j] = -1;
     int num = 0;
 
-    scaledSize = 256*256;
+    scaledSize = width256*width256;
     newSize = scaledSize * 4;
     imageBuff = (unsigned char *)Mem_Alloc(newSize);
 
@@ -523,7 +525,7 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
     {
         charcode = charcodes[i];
         glyphInfoExport_t *glyphPtr = &glyphData[num];
-        glyph = R_Font_ConstructGlyphInfo(ftLibrary, out, &xOut, &yOut, &maxHeight, face, charcode, false);
+        glyph = R_Font_ConstructGlyphInfo(ftLibrary, out, &xOut, &yOut, &maxHeight, face, charcode, false, width256);
 
         if(glyph)
 		{
@@ -562,7 +564,7 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
                 idStr::snPrintf(name, sizeof(name), "%s/fontImage_%i_%i.tga", saveDir, imageNumber, pointSize);
 #endif
                 common->Printf("Export font: export %d font texture file to '%s'\n", imageNumber, name);
-                R_WriteTGA(name, imageBuff, 256, 256);
+                R_WriteTGA(name, imageBuff, width256, width256);
 
 #ifdef _RAVEN //k: quake4 font texture file
                 idStr::snPrintf(name, sizeof(name), "%i_%i.tga", imageNumber, pointSize);
@@ -576,7 +578,7 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
 				}
 
 				lastStart = num;
-				memset(out, 0, 1024*1024);
+				memset(out, 0, width1024*width1024);
 				xOut = 0;
 				yOut = 0;
 
@@ -641,8 +643,8 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
     font->magic = HARM_NEW_FONT_MAGIC;
     font->version = HARM_NEW_FONT_VERSION;
     font->numFiles = imageNumber;
-    font->width = 256;
-    font->height = 256;
+    font->width = width256;
+    font->height = width256;
     datFile->Write(&font->magic, sizeof(font->magic));
     datFile->Write(&font->version, sizeof(font->version));
     datFile->Write(&font->numFiles, sizeof(font->numFiles));
@@ -681,13 +683,13 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
 #ifdef _RAVEN //k: quake4 font: require font type
         if(args.Argc() < 3)
         {
-            common->Printf("[Usage]: %s <font file: *.ttf, *.ttc> <output font type name. e.g. 'fonts/XXX'> [<language, default using cvar `sys_lang`>]\n", args.Argv(0));
+            common->Printf("[Usage]: %s <font file: *.ttf, *.ttc> <output font type name> [<language: default using cvar `sys_lang`> <texture width(power of two): default 256, e.g. 256, 512, 1024, 2048, 4096...>]\n", args.Argv(0));
             return;
         }
 #else
         if(args.Argc() < 2)
         {
-            common->Printf("[Usage]: %s <font file: *.ttf, *.ttc> [<output font folder name. e.g. 'fonts/XXX', default to 'fonts/'> <language, default using cvar `sys_lang`>]\n", args.Argv(0));
+            common->Printf("[Usage]: %s <font file: *.ttf, *.ttc> [<output font folder name: e.g. XXX will export to 'fonts/XXX/', empty to 'fonts/'> <language: default using cvar `sys_lang`> <texture width(power of two): default 256, e.g. 256, 512, 1024, 2048, 4096...]\n", args.Argv(0));
             return;
         }
 #endif
@@ -695,13 +697,33 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
         const char *fontPath = args.Argv(1);
         const char *fontType = args.Argc() > 2 ? args.Argv(2) : NULL;
         const char *language = args.Argc() > 3 ? args.Argv(3) : cvarSystem->GetCVarString("sys_lang");
+        const char *textureWidth = args.Argc() > 4 ? args.Argv(4) : "256";
 
         if(fontType && fontType[0] == '\0')
             fontType = NULL;
         if(!language || !language[0])
             language = "english";
+        if(!textureWidth || !textureWidth[0])
+            textureWidth = "256";
 
-        common->Printf("Export font file(font=%s, type=%s, language=%s)......\n", fontPath, fontType ? fontType : "", language);
+        common->Printf("Export font file(font=%s, type=%s, language=%s, texture width=%s)......\n", fontPath, fontType ? fontType : "", language, textureWidth);
+
+		int width = atoi(textureWidth);
+		if(width < 256)
+		{
+			common->Warning("Export font width must >= 256!");
+			return;
+		}
+		for(int i = 0, w = width; w > 1; i++)
+		{
+			int d = w % 2;
+			if(d != 0)
+			{
+				common->Warning("Export font width must power of two!");
+				return;
+			}
+			w >>= 2;
+		}
 
         ftGlobalVars_t exporter;
         R_Font_InitExporter(&exporter);
@@ -714,12 +736,12 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
         {
             common->Printf("Export point size %d......\n", pointSizes[i]);
             wfontInfo_t font;
-            R_Font_Export(&exporter, pointSizes[i], &font, language, fontType);
+            R_Font_Export(&exporter, pointSizes[i], &font, language, fontType, width);
         }
 
         R_Font_UnloadFont(&exporter);
 
-        common->Printf("Export font file done(font=%s, type=%s, language=%s).\n", fontPath, fontType ? fontType : "", language);
+        common->Printf("Export font file done(font=%s, type=%s, language=%s, texture width=%d).\n", fontPath, fontType ? fontType : "", language, width);
     }
 }
 

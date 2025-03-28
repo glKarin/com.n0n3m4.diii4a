@@ -236,11 +236,9 @@ idCVar harm_r_useHighPrecision("harm_r_useHighPrecision",
 #endif
                                , CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "Use high precision float on GLSL shader");
 
-#ifdef _USING_STB
 idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG, 4 = DDS", 0, 4, idCmdSystem::ArgCompletion_Integer<0, 4>);
 idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (0-100)", 0, 100, idCmdSystem::ArgCompletion_Integer<0, 100>);
 idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9)", 0, 9, idCmdSystem::ArgCompletion_Integer<0, 9>);
-#endif
 
 #ifdef _D3BFG_CULLING
 idCVar harm_r_occlusionCulling( "harm_r_occlusionCulling", "0", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_INTEGER, "enable DOOM3-BFG occlusion culling" );
@@ -1411,7 +1409,6 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 		r_jitter.SetBool(false);
 	}
 
-#ifdef _USING_STB
 	switch(r_screenshotFormat.GetInteger())
 	{
 		case 1: {// bmp
@@ -1444,35 +1441,32 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 			break;
 		case 0: // tga
 		default:
-#endif
 
-	// fill in the header (this is vertically flipped, which glReadPixels emits)
-	buffer[2] = 2;		// uncompressed type
-	buffer[12] = width & 255;
-	buffer[13] = width >> 8;
-	buffer[14] = height & 255;
-	buffer[15] = height >> 8;
-	buffer[16] = 32;	// pixel size
+			// fill in the header (this is vertically flipped, which glReadPixels emits)
+			buffer[2] = 2;		// uncompressed type
+			buffer[12] = width & 255;
+			buffer[13] = width >> 8;
+			buffer[14] = height & 255;
+			buffer[15] = height >> 8;
+			buffer[16] = 32;	// pixel size
 
-	// swap rgb to bgr
-	c = 18 + width * height * 4;
+			// swap rgb to bgr
+			c = 18 + width * height * 4;
 
-	for (i=18 ; i<c ; i+=4) {
-		temp = buffer[i];
-		buffer[i] = buffer[i+2];
-		buffer[i+2] = temp;
-	}
+			for (i=18 ; i<c ; i+=4) {
+				temp = buffer[i];
+				buffer[i] = buffer[i+2];
+				buffer[i+2] = temp;
+			}
 
-	// _D3XP adds viewnote screenie save to cdpath
-	if (strstr(fileName, "viewnote")) {
-		fileSystem->WriteFile(fileName, buffer, c, "fs_cdpath");
-	} else {
-		fileSystem->WriteFile(fileName, buffer, c);
-	}
-#ifdef _USING_STB
+			// _D3XP adds viewnote screenie save to cdpath
+			if (strstr(fileName, "viewnote")) {
+				fileSystem->WriteFile(fileName, buffer, c, "fs_cdpath");
+			} else {
+				fileSystem->WriteFile(fileName, buffer, c);
+			}
 			break;
 	}
-#endif
 
 	R_StaticFree(buffer);
 
@@ -2309,10 +2303,8 @@ void R_InitCommands(void)
 	extern void R_DumpShadowMap_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("harm_dumpShadowMap", R_DumpShadowMap_f, CMD_FL_RENDERER, "dump shadow map to file in next frame");
 #endif
-#ifdef _USING_STB
 	extern void R_ConvertImage_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("convertImage", R_ConvertImage_f, CMD_FL_RENDERER, "convert image format", idCmdSystem::ArgCompletion_ImageName);
-#endif
 	extern void R_ExportGLSLShaderSource_f(const idCmdArgs &args);
 	extern void R_PrintGLSLShaderSource_f(const idCmdArgs &args);
 	extern void R_ExportDevShaderSource_f(const idCmdArgs &args);

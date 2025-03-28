@@ -513,11 +513,8 @@ void R_SaveColorBuffer(const char *name)
 	qglReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	//GL_CheckErrors("glReadPixels");
 
-#ifdef _USING_STB
     R_WriteScreenshotImage(name, data, width, height, 4, true);
-#else
-	R_WriteTGA(name, data, width, height, false);
-#endif
+	//R_WriteTGA(name, data, width, height, false);
 	free(data);
 	//free(ddata);
 }

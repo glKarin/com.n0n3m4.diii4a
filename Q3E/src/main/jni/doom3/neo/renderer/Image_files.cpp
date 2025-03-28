@@ -1061,7 +1061,6 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 			name.StripFileExtension();
 			name.DefaultFileExtension(".jpg");
 			LoadJPG(name.c_str(), pic, width, height, timestamp);
-#ifdef _USING_STB
 			if ((pic && *pic == 0) || (timestamp && *timestamp == -1)) {
 				name.StripFileExtension();
 				name.DefaultFileExtension(".png");
@@ -1073,7 +1072,6 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 					LoadDDS(name.c_str(), pic, width, height, timestamp);
 				}
 			}
-#endif
 		}
 	} else if (ext == "pcx") {
 		LoadPCX32(name.c_str(), pic, width, height, timestamp);
@@ -1082,14 +1080,12 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 	} else if (ext == "jpg") {
 		LoadJPG(name.c_str(), pic, width, height, timestamp);
 	}
-#ifdef _USING_STB
 	else if (ext == "png") {
 		LoadPNG(name.c_str(), pic, width, height, timestamp);
 	}
 	else if (ext == "dds") {
 		LoadDDS(name.c_str(), pic, width, height, timestamp);
 	}
-#endif
 
 	if ((width && *width < 1) || (height && *height < 1)) {
 		if (pic && *pic) {
@@ -1250,6 +1246,5 @@ bool R_LoadCubeImages(const char *imgName, cubeFiles_t extensions, byte *pics[6]
 	return true;
 }
 
-#ifdef _USING_STB
 #include "image/Image_files_ext.cpp"
-#endif
+

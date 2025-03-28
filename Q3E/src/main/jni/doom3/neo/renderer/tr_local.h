@@ -1171,11 +1171,9 @@ extern idCVar r_debugRenderToTexture;
 extern idCVar harm_r_maxFps;
 extern idCVar harm_r_shadowCarmackInverse;
 
-#ifdef _USING_STB
 extern idCVar r_screenshotFormat;
 extern idCVar r_screenshotJpgQuality;
 extern idCVar r_screenshotPngCompression;
-#endif
 
 #ifdef _D3BFG_CULLING
 extern idCVar harm_r_occlusionCulling;
