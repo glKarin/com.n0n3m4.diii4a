@@ -2840,6 +2840,7 @@ void RB_TestImage(void)
 		w = 0.25;
 		h = 0.25;
 	} else {
+		// common->Printf("testImage::image size %d x %d\n", image->uploadWidth,image->uploadHeight);
 		max = image->uploadWidth > image->uploadHeight ? image->uploadWidth : image->uploadHeight;
 
 		w = 0.25 * image->uploadWidth / max;

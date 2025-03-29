@@ -2322,6 +2322,8 @@ void R_InitCommands(void)
     extern void Font_AddCommand(void);
     Font_AddCommand();
 #endif
+    extern void R_ExtractBImage_f(const idCmdArgs &args);
+    cmdSystem->AddCommand("extractBimage", R_ExtractBImage_f, CMD_FL_RENDERER, "extract bimage images");
 }
 
 /*

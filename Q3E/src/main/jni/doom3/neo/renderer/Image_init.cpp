@@ -1805,6 +1805,11 @@ idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter
 	if (name.Find("fontImage_") >= 0) {
 		allowDownSize = false;
 	}
+#ifdef _D3BFG_FONT
+	else if (name.Find("newfonts/") == 0) {
+		allowDownSize = false;
+	}
+#endif
 
 	image->allowDownSize = allowDownSize;
 	image->repeat = repeat;

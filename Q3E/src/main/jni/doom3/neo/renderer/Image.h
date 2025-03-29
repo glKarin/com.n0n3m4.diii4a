@@ -564,7 +564,7 @@ IMAGEFILES
 ====================================================================
 */
 
-void R_LoadImage(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2);
+void R_LoadImage(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2, bool disableDownSize = false);
 // pic is in top to bottom raster format
 bool R_LoadCubeImages(const char *cname, cubeFiles_t extensions, byte *pic[6], int *size, ID_TIME_T *timestamp);
 
@@ -579,13 +579,3 @@ IMAGEPROGRAM
 void R_LoadImageProgram(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, textureDepth_t *depth = NULL);
 const char *R_ParsePastImageProgram(idLexer &src);
 
-void LoadJPG_stb(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp);
-void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
-void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
-
-void R_WritePNG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, int quality = 100, const char *basePath = NULL);
-void R_WriteJPG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, int compression = 0, const char *basePath = NULL);
-void R_WriteBMP(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
-void R_WriteDDS(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath = NULL);
-
-void R_WriteScreenshotImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);

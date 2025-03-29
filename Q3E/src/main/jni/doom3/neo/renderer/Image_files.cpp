@@ -1024,7 +1024,7 @@ If pic is NULL, the image won't actually be loaded, it will just find the
 timestamp.
 =================
 */
-void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2)
+void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2, bool disableRoundDown)
 {
 	idStr name = cname;
 
@@ -1070,6 +1070,12 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 					name.StripFileExtension();
 					name.DefaultFileExtension(".dds");
 					LoadDDS(name.c_str(), pic, width, height, timestamp);
+					
+					if ((pic && *pic == 0) || (timestamp && *timestamp == -1)) {
+						name.StripFileExtension();
+						name.DefaultFileExtension(".bimage");
+						LoadBimage(name.c_str(), pic, width, height, timestamp);
+					}
 				}
 			}
 		}
@@ -1079,12 +1085,12 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 		LoadBMP(name.c_str(), pic, width, height, timestamp);
 	} else if (ext == "jpg") {
 		LoadJPG(name.c_str(), pic, width, height, timestamp);
-	}
-	else if (ext == "png") {
+	} else if (ext == "png") {
 		LoadPNG(name.c_str(), pic, width, height, timestamp);
-	}
-	else if (ext == "dds") {
+	} else if (ext == "dds") {
 		LoadDDS(name.c_str(), pic, width, height, timestamp);
+	} else if (ext == "bimage") {
+		LoadBimage(name.c_str(), pic, width, height, timestamp);
 	}
 
 	if ((width && *width < 1) || (height && *height < 1)) {
@@ -1112,6 +1118,8 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 			;
 
 		if (scaled_width != w || scaled_height != h) {
+		if(!disableRoundDown)
+		{
 			if (globalImages->image_roundDown.GetBool() && scaled_width > w) {
 				scaled_width >>= 1;
 			}
@@ -1119,6 +1127,7 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 			if (globalImages->image_roundDown.GetBool() && scaled_height > h) {
 				scaled_height >>= 1;
 			}
+		}
 
 			resampledBuffer = R_ResampleTexture(*pic, w, h, scaled_width, scaled_height);
 			R_StaticFree(*pic);
@@ -1247,4 +1256,7 @@ bool R_LoadCubeImages(const char *imgName, cubeFiles_t extensions, byte *pics[6]
 }
 
 #include "image/Image_files_ext.cpp"
+#include "image/Image_bimage.cpp"
 
+#include "DXT/DXTEncoder.cpp"
+#include "DXT/DXTDecoder.cpp"

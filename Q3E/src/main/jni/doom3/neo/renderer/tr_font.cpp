@@ -32,6 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef _D3BFG_FONT
+#include "font/tr_font_bfg.cpp"
+#endif
 
 #ifdef _RAVEN //karin: quake4 fontdat file size
 #define FILESIZE_fontInfo_t (9236)
@@ -447,6 +450,12 @@ Loads 3 point sizes, 12, 24, and 48
 */
 bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 {
+#ifdef _D3BFG_FONT
+	if(idStr(fontName).Find("newfonts/") == 0)
+	{
+		return R_Font_LoadD3BFGFont(fontName, font);
+	}
+#endif
 #ifdef BUILD_FREETYPE
 	FT_Face face;
 	int j, k, xOut, yOut, lastStart, imageNumber;

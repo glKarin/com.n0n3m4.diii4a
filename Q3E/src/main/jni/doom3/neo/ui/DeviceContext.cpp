@@ -49,6 +49,9 @@ idCVar harm_gui_wideCharLang("harm_gui_wideCharLang", "1", CVAR_GUI | CVAR_BOOL 
 static bool _hasWideCharFont = false;
 #define AsWideCharLang(text_, len_) ( _hasWideCharFont && harm_gui_wideCharLang.GetBool() && idStr::IsNonASCII(text_, len_) )
 #endif
+#ifdef _D3BFG_FONT
+idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_ARCHIVE, "using DOOM3-BFG font");
+#endif
 
 
 idList<fontInfoEx_t> idDeviceContext::fonts;
@@ -92,7 +95,30 @@ int idDeviceContext::FindFont(const char *name)
     memset(&fontInfo, 0, sizeof(fontInfoEx_t)); // DG: initialize this //k 2025
 	int index = fonts.Append(fontInfo);
 
-	if (renderSystem->RegisterFont(fileName, fonts[index])) {
+	bool fontLoaded = false;
+#ifdef _D3BFG_FONT
+	const char *d3bfgFontName = harm_gui_useD3BFGFont.GetString();
+	if(d3bfgFontName && d3bfgFontName[0] && idStr::Cmp(d3bfgFontName, "0") != 0)
+	{
+		idStr newFileName = fileName;
+		newFileName.Replace(va("fonts/%s", fontLang.c_str()), "newfonts/");
+		newFileName.StripFilename();
+		newFileName.AppendPath(d3bfgFontName);
+		if (renderSystem->RegisterFont(newFileName, fonts[index]))
+		{
+			common->Printf("Font '%s' using DOOM3-BFG new font '%s'.\n", name, newFileName.c_str());
+			fontLoaded = true;
+		}
+		else // load default if fail
+		{
+			common->Printf("Font '%s' load DOOM3-BFG new font '%s' fail, try using default font.\n", name, newFileName.c_str());
+			fontLoaded = renderSystem->RegisterFont(fileName, fonts[index]);
+		}
+	}
+	else
+#endif
+	fontLoaded = renderSystem->RegisterFont(fileName, fonts[index]);
+	if (fontLoaded) {
 		idStr::Copynz(fonts[index].name, name, sizeof(fonts[index].name));
 #ifdef _WCHAR_LANG
 		if(!_hasWideCharFont)
