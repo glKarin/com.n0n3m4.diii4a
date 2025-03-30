@@ -106,6 +106,21 @@ enum textureFormat_t
 #endif
 };
 
+enum textureColor_t
+{
+	CFM_DEFAULT,			// RGBA
+	CFM_NORMAL_DXT5,		// XY format and use the fast DXT5 compressor
+	CFM_YCOCG_DXT5,			// convert RGBA to CoCg_Y format
+	CFM_GREEN_ALPHA,		// Copy the alpha channel to green
+
+#if 0
+	// RB: don't change above for legacy .bimage compatibility
+	CFM_YCOCG_RGBA8,
+	// RB end
+#endif
+};
+
+
 #pragma pack( push, 1 )
 struct bimageImage_t
 {

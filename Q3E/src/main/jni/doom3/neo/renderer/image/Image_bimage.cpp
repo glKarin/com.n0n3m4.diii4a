@@ -379,13 +379,6 @@ void LoadBimage(const char *filename, byte **pic, int *width, int *height, ID_TI
 			byte* decodedImageData = (byte *)calloc(size, 1);
 			decoder.DecompressImageDXT1(img.data, decodedImageData, img.width, img.height);
 			free(img.data);
-#if 1 //karin: make pure black's alpha to 0
-			for(int m = 0; m < size; m += 4)
-			{
-				if(decodedImageData[m] == 0 && decodedImageData[m + 1] == 0 && decodedImageData[m + 2] == 0)
-					decodedImageData[m + 3] = 0;
-			}
-#endif
 			img.data = decodedImageData;
 		}
 		else if( ( textureFormat_t )fileData.format == FMT_DXT5 )
@@ -403,6 +396,19 @@ void LoadBimage(const char *filename, byte **pic, int *width, int *height, ID_TI
 		}
 
 		int size = img.width * img.height * 4;
+
+		if(fileData.colorFormat == CFM_GREEN_ALPHA ) // e.g. newfonts file
+		{
+			// copy green component to alpha component
+			for(int m = 0; m < size; m += 4)
+			{
+				img.data[m + 3] = img.data[m + 1];
+				img.data[m] = 255;
+				img.data[m + 1] = 255;
+				img.data[m + 2] = 255;
+			}
+		}
+
 		*pic = (byte *)R_StaticAlloc( size );
 		memcpy( *pic, img.data, size );
 		*width = img.width;
