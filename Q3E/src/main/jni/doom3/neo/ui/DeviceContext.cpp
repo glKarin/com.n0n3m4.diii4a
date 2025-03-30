@@ -50,7 +50,23 @@ static bool _hasWideCharFont = false;
 #define AsWideCharLang(text_, len_) ( _hasWideCharFont && harm_gui_wideCharLang.GetBool() && idStr::IsNonASCII(text_, len_) )
 #endif
 #ifdef _D3BFG_FONT
-idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_ARCHIVE, "using DOOM3-BFG font");
+idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_ARCHIVE, "using DOOM3-BFG font.\n"
+		"    0 or \"\": disable\n"
+		"    1: make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic(Only for DOOM3, Quake4 and Prey not support). e.g. \n"
+		"        'fonts/fontImage_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
+		"        'fonts/an/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
+		"        'fonts/arial/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
+		"        'fonts/bank/fontImage_**.dat' -> 'newfonts/BankGothic_Md_BT/48.dat'\n"
+		"        'fonts/micro/fontImage_**.dat' -> 'newfonts/microgrammadbolext/48.dat'\n"
+		"    Otherwise you can setup DOOM3-BFG newfonts name to override all DOOM 3/Quake 4/Prey old fonts. e.g. \n"
+		"        Chainlink_Semi_Bold\n"
+		"        Arial_Narrow\n"
+		"        Arial_Narrow\n"
+		"        BankGothic_Md_BT\n"
+		"        microgrammadbolext\n"
+		"        DFPHeiseiGothicW7\n"
+		"        Sarasori_Rg\n"
+		);
 #endif
 
 
@@ -103,6 +119,21 @@ int idDeviceContext::FindFont(const char *name)
 		idStr newFileName = fileName;
 		newFileName.Replace(va("fonts/%s", fontLang.c_str()), "newfonts/");
 		newFileName.StripFilename();
+		if(idStr::Cmp(d3bfgFontName, "1") == 0)
+		{
+			idStr fname(name);
+			fname.StripPath();
+			if(!idStr::Icmp("an", fname))
+				d3bfgFontName = "Arial_Narrow";
+			else if(!idStr::Icmp("arial", fname))
+				d3bfgFontName = "Arial_Narrow";
+			else if(!idStr::Icmp("bank", fname))
+				d3bfgFontName = "BankGothic_Md_BT";
+			else if(!idStr::Icmp("micro", fname))
+				d3bfgFontName = "microgrammadbolext";
+			else
+				d3bfgFontName = "Chainlink_Semi_Bold";
+		}
 		newFileName.AppendPath(d3bfgFontName);
 		if (renderSystem->RegisterFont(newFileName, fonts[index]))
 		{
