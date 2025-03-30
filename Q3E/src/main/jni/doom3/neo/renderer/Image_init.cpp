@@ -1808,6 +1808,7 @@ idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter
 #ifdef _D3BFG_FONT
 	else if (name.Find("newfonts/") == 0) {
 		allowDownSize = false;
+		filter = TF_LINEAR;
 	}
 #endif
 
