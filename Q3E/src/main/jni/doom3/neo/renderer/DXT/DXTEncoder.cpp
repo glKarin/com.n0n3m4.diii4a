@@ -46,7 +46,7 @@ typedef uint32	dword;
 
 // LordHavoc: macros required by gimp-dds code:
 #ifndef MIN
-	#ifdef __GNUC__
+	#if 0 // def __GNUC__
 		#define MIN(a, b)  ({decltype(a) _a=(a); decltype(b) _b=(b); _a < _b ? _a : _b;})
 	#else
 		#define MIN(a, b)  ((a) < (b) ? (a) : (b))

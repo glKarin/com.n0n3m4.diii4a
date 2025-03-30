@@ -398,8 +398,8 @@ class idStr
 		static idStr		FormatNumber(int number);
 
 #ifdef _WCHAR_LANG
-        ID_INLINE int			UTF8Length();
-        ID_INLINE uint32_t		UTF8Char( int& idx );
+        ID_INLINE int			UTF8Length() const;
+        ID_INLINE uint32_t		UTF8Char( int& idx ) const;
         static int				UTF8Length( const byte* s );
         static ID_INLINE uint32_t UTF8Char( const char* s, int& idx );
         static uint32_t			UTF8Char( const byte* s, int& idx );
@@ -1336,7 +1336,7 @@ ID_INLINE int idStr::DynamicMemoryUsed() const
 idStr::UTF8Length
 ========================
 */
-ID_INLINE int idStr::UTF8Length()
+ID_INLINE int idStr::UTF8Length() const
 {
     return UTF8Length( ( byte* )data );
 }
@@ -1346,9 +1346,9 @@ ID_INLINE int idStr::UTF8Length()
 idStr::UTF8Char
 ========================
 */
-ID_INLINE uint32_t idStr::UTF8Char( int& idx )
+ID_INLINE uint32_t idStr::UTF8Char( int& idx ) const
 {
-    return UTF8Char( ( byte* )data, idx );
+    return UTF8Char( ( const byte* )data, idx );
 }
 
 /*

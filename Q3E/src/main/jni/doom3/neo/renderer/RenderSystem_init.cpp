@@ -234,7 +234,7 @@ idCVar harm_r_useHighPrecision("harm_r_useHighPrecision",
 #else
                                "1"
 #endif
-                               , CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "Use high precision float on GLSL shader");
+                               , CVAR_RENDERER | CVAR_INTEGER | CVAR_INIT, "Use high precision float on GLSL shader");
 
 idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG, 4 = DDS", 0, 4, idCmdSystem::ArgCompletion_Integer<0, 4>);
 idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (0-100)", 0, 100, idCmdSystem::ArgCompletion_Integer<0, 100>);
@@ -355,9 +355,9 @@ static void R_CheckPortableExtensions(void)
         && USING_GL
 #endif
         )
-		glConfig.textureCompressionAvailable = true;
+		    glConfig.textureCompressionAvailable = true;
 		else
-		glConfig.textureCompressionAvailable = false;
+		    glConfig.textureCompressionAvailable = false;
 	}
 
 	// GL_EXT_texture_filter_anisotropic
@@ -1159,9 +1159,9 @@ void R_ShowglConfig_f(const idCmdArgs &args)
             break;
         default:
 #ifdef GL_ES_VERSION_3_0
-            if(USING_GLES3)
+	if(USING_GLES3)
                 glVersionName = "OpenGL ES3";
-            else
+	else
 #endif
                 glVersionName = "OpenGL ES2";
             break;
@@ -2316,7 +2316,7 @@ void R_InitCommands(void)
 	MD5Anim_AddCommand();
 #endif
 #ifdef _ENGINE_MODEL_VIEWER
-	ModelTest_AddCommand();
+    ModelTest_AddCommand();
 #endif
 #ifdef _NEW_FONT_TOOLS
     extern void Font_AddCommand(void);
