@@ -138,8 +138,6 @@ static void R_Font_ConvertD3BFGGlyph(const d3bfg_fontInfo_t &fontInfo, const d3b
 
     float invMaterialWidth = 1.0f / (float)imageWidth; //fontInfo.material->GetImageWidth();
     float invMaterialHeight = 1.0f / (float)imageHeight; //fontInfo.material->GetImageHeight();
-//    glyph->left = d3bfg_glyph->left;
-//    glyph->width = d3bfg_glyph->width;
     glyph->s = ( (float)d3bfg_glyph->s - 0.5f ) * invMaterialWidth;
     glyph->t = ( (float)d3bfg_glyph->t - 0.5f ) * invMaterialHeight;
     glyph->s2 = ( (float)d3bfg_glyph->s + (float)d3bfg_glyph->width + 0.5f ) * invMaterialWidth;
@@ -164,7 +162,7 @@ static void R_Font_ConvertD3BFGFont(const d3bfg_fontInfo_t &fontInfo, fontInfoEx
     font.maxWidthLarge = fontInfo.oldInfo[2].maxWidth;
     font.maxHeightLarge = fontInfo.oldInfo[2].maxHeight;
 
-	int scales[] = { 4, 2, 1 };
+	const int scales[] = { 4, 2, 1 };
 	fontInfo_t *infos[] = { &font.fontInfoSmall, &font.fontInfoMedium, &font.fontInfoLarge };
 	for(f = 0; f < 3; f++)
 	{

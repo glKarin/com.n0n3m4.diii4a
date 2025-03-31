@@ -45,7 +45,7 @@ idVec4 idDeviceContext::colorNone;
 idCVar gui_smallFontLimit("gui_smallFontLimit", "0.30", CVAR_GUI | CVAR_ARCHIVE, "");
 idCVar gui_mediumFontLimit("gui_mediumFontLimit", "0.60", CVAR_GUI | CVAR_ARCHIVE, "");
 #ifdef _WCHAR_LANG
-idCVar harm_gui_wideCharLang("harm_gui_wideCharLang", "1", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "enable wide character language support");
+idCVar harm_gui_wideCharLang("harm_gui_wideCharLang", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "enable wide character language support");
 static bool _hasWideCharFont = false;
 #define AsWideCharLang(text_, len_) ( _hasWideCharFont && harm_gui_wideCharLang.GetBool() && idStr::IsNonASCII(text_, len_) )
 #endif
@@ -896,8 +896,10 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
         {
             idStr drawText = text;
             int charIndex = 0;
+            int lastCharIndex = 0;
 
             while( charIndex < len ) {
+				lastCharIndex = charIndex;
                 uint32_t textChar = drawText.UTF8Char( charIndex );
 
                 glyph = R_Font_GetGlyphInfo(useFont, textChar);
@@ -905,11 +907,13 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
                     continue;
                 }
 
-                if( idStr::IsColor( drawText.c_str() + charIndex ) ) {
-                    if( drawText[ charIndex++ ] == C_COLOR_DEFAULT ) {
+				//karin: charIndex will increment when read UTF8 character, so use last charIndex
+                if( textChar == C_COLOR_ESCAPE && idStr::IsColor( drawText.c_str() + lastCharIndex ) ) {
+					// textChar == '^' and charIndex is color value current
+                    if( drawText[ charIndex ] == C_COLOR_DEFAULT ) {
                         newColor = color;
                     } else {
-                        newColor = idStr::ColorForIndex( charIndex );
+                        newColor = idStr::ColorForIndex( drawText[ charIndex ] );
                         newColor[3] = color[3];
                     }
                     if( cursor == charIndex - 1 || cursor == charIndex ) {
@@ -924,6 +928,7 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
                         DrawEditCursor(x - partialSkip, y, scale);
                     }
                     renderSystem->SetColor( newColor );
+					charIndex++; //karin: skip color value character
                     continue;
                 } else {
                     float yadj = useScale * glyph->top;
