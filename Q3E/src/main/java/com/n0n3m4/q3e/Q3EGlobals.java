@@ -278,6 +278,7 @@ public final class Q3EGlobals
         TDM_GLSL_SHADER,
         GZDOOM_RESOURCE,
         TDM_2_12_GLSL_SHADER,
+        DOOM3_BFG_CHINESE_TRANSLATION,
     }
 
 /*

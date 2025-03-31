@@ -29,6 +29,8 @@ public final class Constants
     {
         return new String[] {
             "The Dark Mod update to version 2.13. More view in `" + TextHelper.GenLinkText("https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/", "The Dark Mod(2.13)") + "`",
+            "Add DOOM3-BFG new fonts and wide-character language support. Only support UTF-8(BOM) encoding translation file.",
+            "Add Chinese translation patch on DOOM3. First extract `DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)`, then add ` +set sys_lang chinese` to command line.",
             "Fix some The Dark Mod(ver 2.12) error.",
             "Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).",
             "Fix some lights missing on ceil in map game/airdefense1 on Quake 4.",

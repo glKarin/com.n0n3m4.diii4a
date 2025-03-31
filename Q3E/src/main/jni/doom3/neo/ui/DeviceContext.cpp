@@ -50,7 +50,7 @@ static bool _hasWideCharFont = false;
 #define AsWideCharLang(text_, len_) ( _hasWideCharFont && harm_gui_wideCharLang.GetBool() && idStr::IsNonASCII(text_, len_) )
 #endif
 #ifdef _D3BFG_FONT
-idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_ARCHIVE, "using DOOM3-BFG font.\n"
+idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_INIT | CVAR_ARCHIVE, "use DOOM3-BFG fonts instead of old fonts\n"
 		"    0 or \"\": disable\n"
 		"    1: make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic(Only for DOOM3, Quake4 and Prey not support). e.g. \n"
 		"        'fonts/fontImage_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
@@ -60,7 +60,6 @@ idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_ARCHIV
 		"        'fonts/micro/fontImage_**.dat' -> 'newfonts/microgrammadbolext/48.dat'\n"
 		"    Otherwise you can setup DOOM3-BFG newfonts name to override all DOOM 3/Quake 4/Prey old fonts. e.g. \n"
 		"        Chainlink_Semi_Bold\n"
-		"        Arial_Narrow\n"
 		"        Arial_Narrow\n"
 		"        BankGothic_Md_BT\n"
 		"        microgrammadbolext\n"

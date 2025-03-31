@@ -319,7 +319,7 @@ int idLexer::ReadWhiteSpace(void)
 	while (1) {
 		// skip white space
 #if D3_CHAR_IS_UNSIGNED //karin: char is unsigned on arm. Or compile with -fsigned-char option
-		while (*(signed char *)idLexer::script_p <= ' ') {
+		while (*(const signed char *)idLexer::script_p <= ' ') {
 #else
 		while (*idLexer::script_p <= ' ') {
 #endif
@@ -1394,7 +1394,7 @@ const char	*idLexer::ReadRestOfLine(idStr &out)
 		}
 
 #if D3_CHAR_IS_UNSIGNED //karin: char is unsigned on arm. Or compile with -fsigned-char option
-		if (*(signed char *)idLexer::script_p <= ' ') {
+		if (*(const signed char *)idLexer::script_p <= ' ') {
 #else
 		if (*idLexer::script_p <= ' ') {
 #endif

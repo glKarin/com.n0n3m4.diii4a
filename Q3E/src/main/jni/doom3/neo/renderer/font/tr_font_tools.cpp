@@ -748,5 +748,5 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
 void Font_AddCommand(void)
 {
     using namespace font;
-    cmdSystem->AddCommand("exportFont", R_ExportFont_f, CMD_FL_RENDERER, "Export font file from ttf/ttc");
+    cmdSystem->AddCommand("exportFont", R_ExportFont_f, CMD_FL_RENDERER, "Convert ttf/ttc font file to DOOM3 wide character font file");
 }

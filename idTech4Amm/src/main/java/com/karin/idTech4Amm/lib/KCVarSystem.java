@@ -71,9 +71,14 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_autoAspectRatio", "integer", "1", "automatic setup aspect ratio of view", KCVar.FLAG_LAUNCHER,
                                 "0", "Manual",
                                 "1", "Force setup r_aspectRatio to -1 (default)",
-                                "2", "Automatic setup r_aspectRatio to 0,1,2 by screen size"),
+                                "2", "Automatic setup r_aspectRatio to 0,1,2 by screen size"
+                        ),
                         KCVar.CreateCVar("harm_r_renderToolsMultithread", "bool", "0", "Enable render tools debug with GLES in multi-threading", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_useHighPrecision", "bool", "0", "Use high precision float on GLSL shader", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT),
+                        KCVar.CreateCVar("harm_r_useHighPrecision", "integer", "0", "Use high precision float on GLSL shader", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
+                                "0", "use default precision(interaction/depth shaders use high precision, otherwise use medium precision)",
+                                "1", "all shaders use high precision as default precision exclude special variables",
+                                "2", "all shaders use high precision as default precision and special variables also use high precision"
+                        ),
                         KCVar.CreateCVar("harm_r_occlusionCulling", "bool", "0", "Enable DOOM3-BFG occlusion culling", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
@@ -85,8 +90,33 @@ public final class KCVarSystem
                             "1", "loading in engine initialization, and saving in engine shutdown",
                             "2", "loading in engine initialization, and saving in every e executing"
                     ),
-                    KCVar.CreateCVar("r_scaleMenusTo43", "bool", "0", "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio", 0),
-                    KCVar.CreateCVar("harm_in_smoothJoystick", "bool", "0", "Enable smooth joystick(Automatic setup by Android layer)", KCVar.FLAG_AUTO)
+                    KCVar.CreateCVar("r_scaleMenusTo43", "integer", "0", "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio", 0,
+                            "0", "disable",
+                            "1", "only scale menu type GUI as 4:3 aspect ratio",
+                            "-1", "scale all GUI as 4:3 aspect ratio"
+                    ),
+                    KCVar.CreateCVar("harm_in_smoothJoystick", "bool", "0", "Enable smooth joystick(Automatic setup by Android layer)", KCVar.FLAG_AUTO),
+                    KCVar.CreateCVar("com_disableAutoSaves", "bool", "0", "Don't create Autosaves when entering a new map", 0),
+                    KCVar.CreateCVar("harm_gui_wideCharLang", "bool", "0", "enable wide character language support", 0),
+                    KCVar.CreateCVar("harm_gui_useD3BFGFont", "bool", "0", "use DOOM3-BFG fonts instead of old fonts", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
+                            "0", "disable",
+                            "\"\"", "disable",
+                            "1", "make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic(Only for DOOM3, Quake4 and Prey not support). e.g. "
+                            + " 'fonts/fontImage_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
+                                    + " 'fonts/an/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat' "
+                                    + " 'fonts/arial/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat' "
+                                    + " 'fonts/bank/fontImage_**.dat' -> 'newfonts/BankGothic_Md_BT/48.dat' "
+                                    + " 'fonts/micro/fontImage_**.dat' -> 'newfonts/microgrammadbolext/48.dat' ",
+                            "<DOOM3-BFG font name>", "use a DOOM3-BFG new font by name override all DOOM 3/Quake 4/Prey old fonts. e.g. "
+                            + " Chainlink_Semi_Bold "
+                                    + " Arial_Narrow "
+                                    + " BankGothic_Md_BT "
+                                    + " microgrammadbolext "
+                                    + " DFPHeiseiGothicW7 "
+                                    + " Sarasori_Rg "
+                            ),
+                        KCVar.CreateCommand("exportFont", "string", "Convert ttf/ttc font file to DOOM3 wide character font file", 0),
+                        KCVar.CreateCommand("extractBimage", "string", "extract DOOM3-BFG's bimage image to rga RGBA image files", 0)
                 );
         KCVar.Group GAME_CVARS = new KCVar.Group("DOOM3", false)
                 .AddCVar(

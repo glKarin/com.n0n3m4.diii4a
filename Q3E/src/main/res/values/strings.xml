@@ -60,4 +60,6 @@
     <string name="open">Open</string>
     <string name="exit_game">Exit game</string>
     <string name="are_you_sure_exit_game">Are you sure exit game?</string>
+    <string name="doom3_chinese_translation_doom3bfg">DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)</string>
+    <string name="use_doom3bfg_fonts_instead_of_old_fonts_and_enable_wide_character_language_support">Use DOOM3-BFG fonts instead of old fonts and enable wide-character language support</string>
 </resources>

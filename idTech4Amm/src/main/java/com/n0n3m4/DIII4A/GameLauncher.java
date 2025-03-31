@@ -428,6 +428,17 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_r_occlusionCulling, isChecked)
 						.commit();
 			}
+			else if (id == R.id.cb_gui_useD3BFGFont)
+			{
+				if(Q3EUtils.q3ei.IsIdTech4())
+				{
+					setProp("harm_gui_useD3BFGFont", isChecked);
+					setProp("harm_gui_wideCharLang", isChecked);
+				}
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_gui_useD3BFGFont, isChecked)
+						.commit();
+			}
 
 			// Doom 3 BFG
 			else if (id == R.id.doom3bfg_useCompressionCache)
@@ -1262,6 +1273,17 @@ public class GameLauncher extends Activity
 
 			V.cb_r_occlusionCulling.setChecked(getProp("harm_r_occlusionCulling", false));
 			if (!IsProp("harm_r_occlusionCulling")) setProp("harm_r_occlusionCulling", false);
+
+			V.cb_gui_useD3BFGFont.setChecked(getProp("harm_gui_useD3BFGFont", false));
+			if (!IsProp("harm_gui_useD3BFGFont"))
+			{
+				setProp("harm_gui_useD3BFGFont", false);
+				setProp("harm_gui_wideCharLang", false);
+			}
+			else
+			{
+				if (!IsProp("harm_gui_wideCharLang")) setProp("harm_gui_wideCharLang", true);
+			}
 		}
 		else if(Q3EUtils.q3ei.isQ2)
 		{
@@ -1938,6 +1960,9 @@ public class GameLauncher extends Activity
 		V.cb_renderToolsMultithread.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_r_occlusionCulling.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_occlusionCulling, false));
 		V.cb_r_occlusionCulling.setOnCheckedChangeListener(m_checkboxChangeListener);
+
+		V.cb_gui_useD3BFGFont.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_gui_useD3BFGFont, false));
+		V.cb_gui_useD3BFGFont.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		boolean collapseMods = mPrefs.getBoolean(PreferenceKey.COLLAPSE_MODS, false);
 		V.collapse_mods.setChecked(collapseMods);
@@ -2755,6 +2780,7 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, V.gzdoom_load_brightmaps_pk3.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_max_console_height_frac, V.consoleHeightFracValue.getProgress());
 		mEdtr.putString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), V.edt_fs_game.getText().toString());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_gui_useD3BFGFont, V.cb_gui_useD3BFGFont.isChecked());
 
         mEdtr.commit();
     }
@@ -4534,6 +4560,7 @@ public class GameLauncher extends Activity
 		public Button launcher_tab1_open_menu;
 		public CheckBox cb_r_occlusionCulling;
 		public RadioGroup rg_version_tdm;
+		public CheckBox cb_gui_useD3BFGFont;
 
         public void Setup()
         {
@@ -4681,6 +4708,7 @@ public class GameLauncher extends Activity
 			launcher_tab1_open_menu = findViewById(R.id.launcher_tab1_open_menu);
 			cb_r_occlusionCulling = findViewById(R.id.cb_r_occlusionCulling);
 			rg_version_tdm = findViewById(R.id.rg_version_tdm);
+			cb_gui_useD3BFGFont = findViewById(R.id.cb_gui_useD3BFGFont);
         }
     }
 }

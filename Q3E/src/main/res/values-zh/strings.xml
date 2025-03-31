@@ -59,4 +59,6 @@
     <string name="open">打开</string>
     <string name="exit_game">退出游戏</string>
     <string name="are_you_sure_exit_game">确认退出当前游戏?</string>
+    <string name="doom3_chinese_translation_doom3bfg">毁灭战士3中文本地化(by 3DM毁灭战士3-BFG汉化版)</string>
+    <string name="use_doom3bfg_fonts_instead_of_old_fonts_and_enable_wide_character_language_support">使用毁灭战士3-BFG字体并且启用宽字符字体支持</string>
 </resources>
