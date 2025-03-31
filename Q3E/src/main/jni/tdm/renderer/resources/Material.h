@@ -75,7 +75,7 @@ typedef enum {
 	DI_XRAY_RENDER,
 	DI_REMOTE_RENDER,
 	DI_PORTAL_RENDER
-} dynamicidImage_t;
+} dynamicImage_t;
 
 // note: keep opNames[] in sync with changes
 typedef enum {
@@ -153,9 +153,8 @@ typedef struct {
 	int					matrix[2][3];	// subset of the full projection matrix (row-major)
 
 	// dynamic image variables
-	dynamicidImage_t	dynamic;
+	dynamicImage_t		dynamic;
 	int					width, height;
-	int					dynamicFrameCount;
 } textureStage_t;
 
 // the order BUMP / DIFFUSE / SPECULAR is necessary for interactions to draw correctly on low end cards
@@ -163,7 +162,10 @@ typedef enum {
 	SL_AMBIENT,						// execute after lighting
 	SL_BUMP,
 	SL_DIFFUSE,
-	SL_SPECULAR
+	SL_SPECULAR,
+	SL_PARALLAX,					// #6571 parallax effect info
+
+	SL_COUNT
 } stageLighting_t;
 
 // cross-blended terrain textures need to modulate the color by
@@ -189,6 +191,26 @@ typedef struct {
 	GLSLProgram			*glslProgram;
 } newShaderStage_t;
 
+// stgatilov #6571: special settings for parallax stage
+typedef struct parallaxStage_s {
+												// min/max displacement relative to texture tile size (positive means along normal)
+	float				heightMin = -0.1f;		// displacement for value = 0 texels
+	float				heightMax = 0.0f;		// displacement for value = 1 texels
+	int					heightMinReg = -1;
+	int					heightMaxReg = -1;
+
+	float				grazingAngle = 0.3f;	// heightmap is flattened at lower view angles
+	int					linearSteps = 20;		// #(samples) in linear search (affects reliability)
+	int					refineSteps = 5;		// #(samples) during refinement (affects precision)
+	int					shadowSteps = 20;		// #(samples) for self-shadows (affects shadow reliability)
+
+	float				shadowSoftness;			// height displacement into obstacle required for full shadow
+	int					shadowSoftnessReg = -1;	// note: default value is computed on the fly
+
+	bool				offsetExternalShadows = false;	// shadows of other objects fall onto relief instead of mesh
+												// note: global shadows cast by this mesh onto others is suppressed
+} parallaxStage_t;
+
 typedef struct {
 	int					conditionRegister;	// if registers[conditionRegister] == 0, skip stage
 	stageLighting_t		lighting;			// determines which passes interact with lights
@@ -200,9 +222,10 @@ typedef struct {
 	stageVertexColor_t	vertexColor;
 	bool				ignoreAlphaTest;	// this stage should act as translucent, even
 											// if the surface is alpha tested
-	float				privatePolygonOffset;	// a per-stage polygon offset
 
 	newShaderStage_t	*newStage;			// vertex / fragment program based stage
+	parallaxStage_t		*parallax;			// stgatilov: parallax-specific settings (only SL_PARALLAX)
+
 } shaderStage_t;
 
 typedef enum {
@@ -363,9 +386,13 @@ public:
 						// get a specific stage
 	const shaderStage_t *GetStage( const int index ) const { assert(index >= 0 && index < numStages); return &stages[index]; }
 
-						// get the first bump map stage, or NULL if not present.
-						// used for bumpy-specular
-	const shaderStage_t *GetBumpStage( void ) const;
+	int					GetNumInteractionGroups( void ) const { return numInteractionGroups; }
+	int					GetInteractionGroupStart( int group ) const { return interactionGroupStarts[group + 0]; }
+	int					GetInteractionGroupEnd( int group ) const { return interactionGroupStarts[group + 1]; }
+
+						// get the first stage of given kind, or NULL if not present.
+	const shaderStage_t *FindStageOfType( stageLighting_t type ) const;
+	const shaderStage_t *GetParallaxStage( void ) const { return FindStageOfType( SL_PARALLAX ); }
 
 						// returns true if the material will draw anything at all.  Triggers, portals,
 						// etc, will not have anything to draw.  A not drawn surface can still castShadow,
@@ -636,8 +663,9 @@ private:
 	void				MultiplyTextureMatrix( textureStage_t *ts, int registers[2][3] );	// FIXME: for some reason the const is bad for gcc and Mac
 	void				SortInteractionStages();
 	void				AddImplicitStages( const textureRepeat_t trpDefault = TR_REPEAT );
+	void				DetectInteractionGroups();
 	void				CheckForConstantRegisters();
-	bool				IsFrobStage(int stageIdx, bool *isStandard = nullptr) const;
+	bool				IsFrobStage(const shaderStage_t *stage, bool *isStandard = nullptr) const;
 	void				AddFrobStages(const idVec3 &rgbAdd, const char *imageName, const idVec3 &rgbMult, const textureRepeat_t trpDefault = TR_REPEAT);
 	void				CheckAlphaColorDependencies() const;
 
@@ -699,6 +727,10 @@ private:
 	int					numAmbientStages;
 																										
 	shaderStage_t *		stages;
+
+	// stgatilov: which subsegments of stages comprise interaction groups
+	int					numInteractionGroups;
+	int *				interactionGroupStarts;
 
 	struct mtrParsingData_s	*pd;			// only used during parsing
 

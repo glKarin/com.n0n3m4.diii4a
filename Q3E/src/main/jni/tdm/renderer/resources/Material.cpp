@@ -58,6 +58,9 @@ typedef struct mtrParsingData_s {
 	bool			registersAreConstant;
 	bool			forceOverlays;
 	bool			usesFrobParm;	// stgatilov #5427: is parm11 referenced in current stage?
+
+	idList<int>		interactionSeparators;
+
 } mtrParsingData_t;
 
 
@@ -84,6 +87,8 @@ void idMaterial::CommonInit() {
 	numStages = 0;
 	numAmbientStages = 0;
 	stages = NULL;
+	numInteractionGroups = 0;
+	interactionGroupStarts = NULL;
 	editorImage = NULL;
 	lightFalloffImage = NULL;
 	lightAmbientDiffuse = NULL;
@@ -160,9 +165,15 @@ void idMaterial::FreeData() {
 				Mem_Free( stages[i].newStage );
 				stages[i].newStage = NULL;
 			}
+			if ( stages[i].parallax != NULL ) {
+				Mem_Free( stages[i].parallax );
+				stages[i].parallax = NULL;
+			}
 		}
 		R_StaticFree( stages );
 		stages = NULL;
+		R_StaticFree( interactionGroupStarts );
+		interactionGroupStarts = NULL;
 	}
 	if ( expressionRegisters != NULL ) {
 		R_StaticFree( expressionRegisters );
@@ -892,6 +903,10 @@ void idMaterial::ParseBlend( idLexer &src, shaderStage_t *stage ) {
 		stage->lighting = SL_SPECULAR;
 		return;
 	}
+	else if ( !token.Icmp( "parallaxmap" ) ) {
+		stage->lighting = SL_PARALLAX;
+		return;
+	}
 
 	srcBlend = NameToSrcBlendMode( token );
 
@@ -1155,6 +1170,7 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 	imageName[0] = 0;
 
 	memset( &newStage, 0, sizeof( newStage ) );
+	parallaxStage_t parallax;	// default-contructed
 
 	ss = &pd->parseStages[numStages];
 	ts = &ss->texture;
@@ -1219,8 +1235,6 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 
 		else if (  !token.Icmp( "xrayRenderMap" ) ) {
 			ts->dynamic = DI_XRAY_RENDER;
-			//ts->width = src.ParseInt();
-			//ts->height = src.ParseInt();
 			ts->width = 0;
 			if ( src.ReadTokenOnLine( &token ) ) {
 				if ( !token.Icmp( "inclusive" ) ) {
@@ -1341,18 +1355,6 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 		}
 		else if ( !token.Icmp( "inverseVertexColor" ) ) {
 			ss->vertexColor = SVC_INVERSE_MODULATE;
-			continue;
-		}
-
-		// privatePolygonOffset
-		else if ( !token.Icmp( "privatePolygonOffset" ) ) {
-			if ( !src.ReadTokenOnLine( &token ) ) {
-				ss->privatePolygonOffset = 1.0f;
-				continue;
-			}
-			// explict larger (or negative) offset
-			src.UnreadToken( &token );
-			ss->privatePolygonOffset = src.ParseFloat();
 			continue;
 		}
 
@@ -1603,7 +1605,35 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 		else if (  !token.Icmp( "fragmentMap" ) ) {	
 			ParseFragmentMap( src, &newStage );
 			continue;
-		} else {
+		}
+
+		else if ( ss->lighting == SL_PARALLAX && !token.Icmp( "min" )  ) {
+			parallax.heightMinReg = ParseExpression( src );
+			continue;
+		} else if ( ss->lighting == SL_PARALLAX && !token.Icmp( "max" )  ) {
+			parallax.heightMaxReg = ParseExpression( src );
+			continue;
+		} else if ( ss->lighting == SL_PARALLAX && !token.Icmp( "grazingAngle" )  ) {
+			parallax.grazingAngle = src.ParseFloat();
+			continue;
+		} else if ( ss->lighting == SL_PARALLAX && !token.Icmp( "linearSteps" )  ) {
+			parallax.linearSteps = src.ParseInt();
+			continue;
+		} else if ( ss->lighting == SL_PARALLAX && !token.Icmp( "refineSteps" )  ) {
+			parallax.refineSteps = src.ParseInt();
+			continue;
+		} else if ( ss->lighting == SL_PARALLAX && !token.Icmp( "shadowSoftness" )  ) {
+			parallax.shadowSoftnessReg = ParseExpression( src );
+			continue;
+		} else if ( ss->lighting == SL_PARALLAX && !token.Icmp( "shadowSteps" )  ) {
+			parallax.shadowSteps = src.ParseInt();
+			continue;
+		} else if ( ss->lighting == SL_PARALLAX && !token.Icmp( "offsetExternalShadows" )  ) {
+			parallax.offsetExternalShadows = src.ParseInt() > 0;
+			continue;
+		}
+
+		else {
 			common->Warning( "unknown token '%s' in material '%s'", token.c_str(), GetName() );
 			SetMaterialFlag( MF_DEFAULTED );
 			return;
@@ -1615,10 +1645,14 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 		ss->newStage = (newShaderStage_t *)Mem_Alloc( sizeof( newStage ) );
 		*(ss->newStage) = newStage;
 	}
+	if ( ss->lighting == SL_PARALLAX ) {
+		ss->parallax = (parallaxStage_t *)Mem_Alloc( sizeof( parallax ) );
+		*(ss->parallax) = parallax;
+	}
 
 	if ( pd->usesFrobParm ) {
 		// stgatilov #5427: using parm11 outside "frob stage" is wrong
-		if ( !IsFrobStage( numStages ) )
+		if ( !IsFrobStage( ss ) )
 			common->Warning( "Material '%s' stage %d uses parm11 without frobstage condition", GetName(), numStages );
 	}
 
@@ -1636,6 +1670,9 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 			break;
 		case SL_SPECULAR:
 			td = TD_SPECULAR;
+			break;
+		case SL_PARALLAX:
+			td = TD_HIGH_QUALITY;
 			break;
 		default:
 			break;
@@ -1788,13 +1825,16 @@ void idMaterial::AddImplicitStages( const textureRepeat_t trpDefault /* = TR_REP
 		if ( pd->parseStages[i].texture.texgen == TG_REFLECT_CUBE ) {
 			hasReflection = true;
 		}
-		if ( IsFrobStage( i, &isFrobStandard) ) {
+		if ( IsFrobStage( &pd->parseStages[i], &isFrobStandard) ) {
 			// stgatilov #5427: warn about nonstandard frobstage condition
 			if ( !isFrobStandard )
 				common->Warning( "Material '%s' frobstage %d: bad condition, should be 'if (parm11 > 0)'", GetName(), i );
 			hasFrobStage = true;
 		}
 	}
+
+	// TODO: check that bumpmap is set if parallax map is
+	// check that there is no multi-interaction with parallax map
 
 	if ( hasBump || hasDiffuse || hasSpecular ) {
 		// if it has any interaction, then it should have bumpmap
@@ -1851,17 +1891,115 @@ void idMaterial::SortInteractionStages() {
 			}
 		}
 
-		// bubble sort everything bump / diffuse / specular
-		for ( int l = 1 ; l < j-i ; l++ ) {
-			for ( int k = i ; k < j-l ; k++ ) {
-				if ( pd->parseStages[k].lighting > pd->parseStages[k+1].lighting ) {
-					shaderStage_t	temp;
-
-					temp = pd->parseStages[k];
-					pd->parseStages[k] = pd->parseStages[k+1];
-					pd->parseStages[k+1] = temp;
+		// sort the interaction block in order: bump / diffuse / specular
+		// stgatilov #5718: replaced hand-written bubble sort
+		std::stable_sort( pd->parseStages + i, pd->parseStages + j, [](const shaderStage_t &a, const shaderStage_t &b) {
+			return a.lighting < b.lighting;
+		});
 				}
 			}
+
+idCVar r_materialNewParse("r_materialNewParse", "1", CVAR_BOOL, "Better implementation of material stages parsing for 2.13");
+
+/*
+===============
+idMaterial::DetectInteractionGroups
+===============
+*/
+void idMaterial::DetectInteractionGroups() {
+
+	idList<shaderStage_t> ambientStages;
+	idList<idList<shaderStage_t>> interactionGroups;
+	int stageCountPerType[SL_COUNT] = {0};
+	bool explicitSeparators = ( pd->interactionSeparators.Num() > 0 );
+
+	interactionGroups.AddGrow( {} );	// first group (will be removed if remains empty)
+
+	// split stages into interaction groups and ambient stages
+	for ( int i = 0; i < numStages; i++ ) {
+		shaderStage_t stage = pd->parseStages[i];
+
+		// if at least one interaction separator is present,
+		// then interaction groups are determined explicitly according to the markings
+		if ( explicitSeparators && pd->interactionSeparators.Find( i ) )
+			interactionGroups.AddGrow( {} );
+
+		if ( stage.lighting == SL_AMBIENT ) {
+			ambientStages.AddGrow( stage );
+			continue;
+		}
+
+		if ( !explicitSeparators ) {
+			// interaction group cannot have two stages of same kind
+			// so we stop expanding current group when we meet stage of a kind that we already got
+			if ( stageCountPerType[stage.lighting] > 0 ) {
+				interactionGroups.AddGrow( {} );
+				memset( stageCountPerType, 0, sizeof(stageCountPerType) );
+			}
+
+			stageCountPerType[stage.lighting]++;
+		}
+
+		interactionGroups.Last().AddGrow( stage );
+	}
+
+	// drop empty interaction groups (easier than to avoid adding them)
+	for ( int i = interactionGroups.Num() - 1; i >= 0; i-- )
+		if ( interactionGroups[i].Num() == 0 )
+			interactionGroups.RemoveIndex( i );
+
+	// make stages in a group go in fixed order for simplicity
+	for ( idList<shaderStage_t> &group : interactionGroups ) {
+		std::stable_sort( group.begin(), group.end(), []( const shaderStage_t &a, const shaderStage_t &b ) {
+			return a.lighting < b.lighting;
+		});
+	}
+
+	// allocate memory for interaction groups
+	numInteractionGroups = interactionGroups.Num();
+	interactionGroupStarts = (int*)Mem_Alloc( (numInteractionGroups + 1) * sizeof(int) );
+
+	// put stages back into global list
+	int pos = 0;
+	interactionGroupStarts[0] = pos;
+	for ( int g = 0; g < interactionGroups.Num(); g++ ) {
+		interactionGroupStarts[g + 0] = pos;
+		for ( const shaderStage_t &stage : interactionGroups[g] )
+			pd->parseStages[pos++] = stage;
+		interactionGroupStarts[g + 1] = pos;
+	}
+	for ( const shaderStage_t &stage : ambientStages ) {
+		pd->parseStages[pos++] = stage;
+	}
+	assert( pos == numStages );
+
+	// add implicit frob stages if necessary
+	if ( r_frobDefaultEnable.GetBool() && interactionGroups.Num() > 0 ) {
+		bool hasFrobStage = false;
+		bool isFrobStandard = false;
+		for ( const shaderStage_t &stage : ambientStages ) {
+			if ( IsFrobStage( &stage, &isFrobStandard ) ) {
+				// stgatilov #5427: warn about nonstandard frobstage condition
+				if ( !isFrobStandard )
+					common->Warning( "Material '%s' frobstage: bad condition, should be 'if (parm11 > 0)'", GetName() );
+				hasFrobStage = true;
+			}
+		}
+
+		idImage *diffuseTex = nullptr;
+		for ( int i = 0; i < numStages; i++ ) {
+			if ( pd->parseStages[i].lighting == SL_DIFFUSE )
+				diffuseTex = pd->parseStages[i].texture.image;
+		}
+
+		// stgatilov #5427: no frobstage found -> add default stages implicitly
+		if ( !hasFrobStage && r_frobDefaultEnable.GetBool() ) {
+			AddFrobStages(
+				idVec3( r_frobDefaultAdd.GetFloat() ),
+				diffuseTex ? diffuseTex->imgName.c_str() : nullptr,
+				idVec3( r_frobDefaultMult.GetFloat() ),
+				TR_REPEAT
+			);
 		}
 	}
 }
@@ -2136,7 +2274,7 @@ void idMaterial::ParseMaterial( idLexer &src ) {
 		else if ( !token.Icmp( "lightFalloffImage" ) ) {
 			str = R_ParsePastImageProgram( src );
 			idStr copy = str;	// so other things don't step on it
-			lightFalloffImage = globalImages->ImageFromFile( copy, TF_DEFAULT, false, TR_CLAMP /* TR_CLAMP_TO_ZERO */, TD_DEFAULT );
+			lightFalloffImage = globalImages->ImageFromFile( copy, TF_DEFAULT, false, TR_CLAMP /* TR_CLAMP_TO_ZERO */, TD_HIGH_QUALITY );
 			continue;
 		}
 		// lightAmbientDiffuse <imageprogram>
@@ -2145,7 +2283,7 @@ void idMaterial::ParseMaterial( idLexer &src ) {
 		else if ( !token.Icmp( "lightAmbientDiffuse" ) ) {
 			str = R_ParsePastImageProgramCubeMap( src );
 			idStr copy = str;	// so other things don't step on it
-			lightAmbientDiffuse = globalImages->ImageFromFile( copy, TF_DEFAULT, false, TR_CLAMP /* TR_CLAMP_TO_ZERO */, TD_DEFAULT, CF_NATIVE );
+			lightAmbientDiffuse = globalImages->ImageFromFile( copy, TF_DEFAULT, false, TR_CLAMP /* TR_CLAMP_TO_ZERO */, TD_HIGH_QUALITY, CF_NATIVE );
 			continue;
 		}
 		// lightAmbientSpecular <imageprogram>
@@ -2154,7 +2292,7 @@ void idMaterial::ParseMaterial( idLexer &src ) {
 		else if ( !token.Icmp( "lightAmbientSpecular" ) ) {
 			str = R_ParsePastImageProgramCubeMap( src );
 			idStr copy = str;	// so other things don't step on it
-			lightAmbientSpecular = globalImages->ImageFromFile( copy, TF_DEFAULT, false, TR_CLAMP /* TR_CLAMP_TO_ZERO */, TD_DEFAULT, CF_NATIVE );
+			lightAmbientSpecular = globalImages->ImageFromFile( copy, TF_DEFAULT, false, TR_CLAMP /* TR_CLAMP_TO_ZERO */, TD_HIGH_QUALITY, CF_NATIVE );
 			continue;
 		}
 		// guisurf <guifile> | guisurf entity
@@ -2224,6 +2362,16 @@ void idMaterial::ParseMaterial( idLexer &src ) {
 			str = R_ParsePastImageProgram( src );
 			idStr::snPrintf( buffer, sizeof( buffer ), "blend bumpmap\nmap %s\n}\n", str );
             newSrc.LoadMemory(buffer, static_cast<int>(strlen(buffer)), "bumpmap");
+			newSrc.SetFlags( LEXFL_NOFATALERRORS | LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES );
+			ParseStage( newSrc, trpDefault );
+			newSrc.FreeSource();
+			continue;
+		}
+		// parallaxmap for stage shortcut
+		else if ( !token.Icmp( "parallaxmap" ) ) {
+			str = R_ParsePastImageProgram( src );
+			idStr::snPrintf( buffer, sizeof( buffer ), "blend parallaxmap\nmap %s\n}\n", str );
+			newSrc.LoadMemory(buffer, static_cast<int>(strlen(buffer)), "parallaxmap");
 			newSrc.SetFlags( LEXFL_NOFATALERRORS | LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES );
 			ParseStage( newSrc, trpDefault );
 			newSrc.FreeSource();
@@ -2313,6 +2461,10 @@ void idMaterial::ParseMaterial( idLexer &src ) {
 			coverage = MC_TRANSLUCENT;							// translucent
 			continue;
 		}
+		else if ( !token.Icmp( "interactionSeparator" ) ) {
+			pd->interactionSeparators.AddGrow( numStages );
+			continue;
+		}
 		else if ( token == "{" ) {
 			// create the new stage
 			ParseStage( src, trpDefault );
@@ -2325,11 +2477,17 @@ void idMaterial::ParseMaterial( idLexer &src ) {
 		}
 	}
 
+
+	if ( r_materialNewParse.GetBool() ) {
+		DetectInteractionGroups();
+	}
+	else {
 	// add _flat or _white stages if needed
 	AddImplicitStages();
 
 	// order the diffuse / bump / specular stages properly
 	SortInteractionStages();
+	}
 
 	// stgatilov #6340: warn if output color might depend on input alpha
 	CheckAlphaColorDependencies();
@@ -2985,9 +3143,9 @@ const char *idMaterial::DefaultDefinition() const {
 idMaterial::GetBumpStage
 ===================
 */
-const shaderStage_t *idMaterial::GetBumpStage( void ) const {
+const shaderStage_t *idMaterial::FindStageOfType( stageLighting_t type ) const {
 	for ( int i = 0 ; i < numStages ; i++ ) {
-		if ( stages[i].lighting == SL_BUMP ) {
+		if ( stages[i].lighting == type ) {
 			return &stages[i];
 		}
 	}
@@ -3026,7 +3184,7 @@ bool idMaterial::HasMirrorLikeStage() const {
 	if (!HasSubview())
 		return false;
 	for (int i = 0; i < numStages; i++) {
-		dynamicidImage_t dyn = stages[i].texture.dynamic;
+		dynamicImage_t dyn = stages[i].texture.dynamic;
 		if (dyn == DI_MIRROR_RENDER || dyn == DI_XRAY_RENDER || dyn == DI_REMOTE_RENDER)
 			return true;
 	}
@@ -3038,9 +3196,7 @@ bool idMaterial::HasMirrorLikeStage() const {
 idMaterial::IsFrobStage
 ===================
 */
-bool idMaterial::IsFrobStage(int stageIdx, bool *isStandard) const {
-	const shaderStage_t *stage = &pd->parseStages[stageIdx];
-
+bool idMaterial::IsFrobStage(const shaderStage_t *stage, bool *isStandard) const {
 	// expression operations are executed sequentally
 	// so we need to trace operations backwards to see which of them write to "active" register we are interested in
 	// this way we can walk through the whole dependency subgraph of an "if" statement

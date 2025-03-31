@@ -90,7 +90,9 @@ const char *idWindow::ScriptNames[] = {
 	"onTrigger",
 	"onActionRelease",
 	"onEnter",
-	"onEnterRelease"
+	"onEnterRelease",
+	"onFocus",
+	"onFocusRelease"
 };
 
 idTimeLineEvent::idTimeLineEvent() {
@@ -1602,11 +1604,15 @@ idWindow *idWindow::SetFocus(idWindow *w, bool scripts) {
 
 		//  call on lose focus
 		if ( scripts && lastFocus ) {
+			lastFocus->RunScript(ON_FOCUSRELEASE);
+
 			// calling this broke all sorts of guis
 			// lastFocus->RunScript(ON_MOUSEEXIT);
 		}
 		//  call on gain focus
 		if ( scripts && w ) {
+			w->RunScript(ON_FOCUS);
+
 			// calling this broke all sorts of guis
 			// w->RunScript(ON_MOUSEENTER);
 		}

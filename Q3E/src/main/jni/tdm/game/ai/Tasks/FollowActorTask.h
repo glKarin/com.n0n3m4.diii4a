@@ -34,6 +34,13 @@ private:
 	// The actor we're following
 	idEntityPtr<idActor> _actor;
 
+	// The distance between actor and follower
+	float distanceFollowerReached;
+	float distanceFollowerCatchupDistance;
+
+	// Makes the AI stop running when it gets close enough.
+	float distanceFollowerStopRunning;
+
 	FollowActorTask();
 
 public:

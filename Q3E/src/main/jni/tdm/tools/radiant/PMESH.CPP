@@ -2289,13 +2289,13 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 				v2 = v1 + 1;
 				if ( bShade ) {
 					f = ShadeForNormal((*cp)[v2].normal);
-					GL_FloatColor(f, f, f);
+					qglColor3f(f, f, f);
 				}
 				qglTexCoord2fv((*cp)[v2].st.ToFloatPtr());
 				qglVertex3fv((*cp)[v2].xyz.ToFloatPtr());
 				if ( bShade ) {
 					f = ShadeForNormal((*cp)[v1].normal);
-					GL_FloatColor(f, f, f);
+					qglColor3f(f, f, f);
 				}
 				qglTexCoord2fv((*cp)[v1].st.ToFloatPtr());
 				qglVertex3fv((*cp)[v1].xyz.ToFloatPtr());
@@ -2306,7 +2306,7 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 
 		if ( list == &pm->nListSelected ) {
 			qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			GL_FloatColor(1.0f, 1.0f, 1.0f);
+			qglColor3f(1.0f, 1.0f, 1.0f);
 			for ( i = 0 ; i < width - 1; i++ ) {
 				qglBegin(GL_QUAD_STRIP);
 				for ( j = 0 ; j < height; j++ ) {
@@ -2340,7 +2340,7 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 		if ( g_bPatchBendMode || g_bPatchInsertMode ) {
 			qglPointSize(6);
 			if ( g_bPatchAxisOnRow ) {
-				GL_FloatColor(1, 0, 1);
+				qglColor3f(1, 0, 1);
 				qglBegin(GL_POINTS);
 				for ( i = 0; i < pm->width; i++ ) {
 					qglVertex3fv(reinterpret_cast< float(*)>(&pm->ctrl(i, g_nPatchAxisIndex).xyz));
@@ -2349,7 +2349,7 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 
 				// could do all of this in one loop but it was pretty messy
 				if ( g_bPatchInsertMode ) {
-					GL_FloatColor(0, 0, 1);
+					qglColor3f(0, 0, 1);
 					qglBegin(GL_POINTS);
 					for ( i = 0; i < pm->width; i++ ) {
 						qglVertex3fv(reinterpret_cast< float(*)>(&pm->ctrl(i, g_nPatchAxisIndex).xyz));
@@ -2358,7 +2358,7 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 					qglEnd();
 				} else {
 					if ( g_nPatchBendState == BEND_SELECT_EDGE || g_nPatchBendState == BEND_BENDIT || g_nPatchBendState == BEND_SELECT_ORIGIN ) {
-						GL_FloatColor(0, 0, 1);
+						qglColor3f(0, 0, 1);
 						qglBegin(GL_POINTS);
 						if ( g_nPatchBendState == BEND_SELECT_ORIGIN ) {
 							qglVertex3fv(g_vBendOrigin.ToFloatPtr());
@@ -2379,7 +2379,7 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 					}
 				}
 			} else {
-				GL_FloatColor(1, 0, 1);
+				qglColor3f(1, 0, 1);
 				qglBegin(GL_POINTS);
 				for ( i = 0; i < pm->height; i++ ) {
 					qglVertex3fv(reinterpret_cast< float(*)>(&pm->ctrl(g_nPatchAxisIndex, i).xyz));
@@ -2388,7 +2388,7 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 
 				// could do all of this in one loop but it was pretty messy
 				if ( g_bPatchInsertMode ) {
-					GL_FloatColor(0, 0, 1);
+					qglColor3f(0, 0, 1);
 					qglBegin(GL_POINTS);
 					for ( i = 0; i < pm->height; i++ ) {
 						qglVertex3fv(reinterpret_cast< float(*)>(&pm->ctrl(g_nPatchAxisIndex, i).xyz));
@@ -2397,7 +2397,7 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 					qglEnd();
 				} else {
 					if ( g_nPatchBendState == BEND_SELECT_EDGE || g_nPatchBendState == BEND_BENDIT || g_nPatchBendState == BEND_SELECT_ORIGIN ) {
-						GL_FloatColor(0, 0, 1);
+						qglColor3f(0, 0, 1);
 						qglBegin(GL_POINTS);
 						for ( i = 0; i < pm->height; i++ ) {
 							if ( g_nPatchBendState == BEND_SELECT_ORIGIN ) {
@@ -2430,9 +2430,9 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 					}
 
 					if ( i & 0x01 || j & 0x01 ) {
-						GL_FloatColor(1, 0, 1);
+						qglColor3f(1, 0, 1);
 					} else {
-						GL_FloatColor(0, 1, 0);
+						qglColor3f(0, 1, 0);
 					}
 					qglVertex3fv(pm->ctrl(i, j).xyz.ToFloatPtr());
 					qglEnd();
@@ -2442,7 +2442,7 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 
 		if ( nIndex > 0 ) {
 			qglBegin(GL_POINTS);
-			GL_FloatColor(0, 0, 1);
+			qglColor3f(0, 0, 1);
 			while ( nIndex-- > 0 ) {
 				qglVertex3fv((*pSelectedPoints[nIndex]).ToFloatPtr());
 			}
@@ -2451,14 +2451,14 @@ void DrawPatchMesh( patchMesh_t *pm,bool bPoints,int *list,bool bShade = false )
 	}
 	if ( bOverlay ) {
 		qglPointSize(6);
-		GL_FloatColor(0.5, 0.5, 0.5);
+		qglColor3f(0.5, 0.5, 0.5);
 		for ( i = 0 ; i < pm->width ; i++ ) {
 			qglBegin(GL_POINTS);
 			for ( j = 0 ; j < pm->height ; j++ ) {
 				if ( i & 0x01 || j & 0x01 ) {
-					GL_FloatColor(0.5, 0, 0.5);
+					qglColor3f(0.5, 0, 0.5);
 				} else {
-					GL_FloatColor(0, 0.5, 0);
+					qglColor3f(0, 0.5, 0);
 				}
 				qglVertex3fv(pm->ctrl(i, j).xyz.ToFloatPtr());
 			}
@@ -2500,7 +2500,7 @@ void Patch_DrawCam( patchMesh_t *pm,bool selected ) {
 	int nDrawMode = g_pParentWnd->GetCamera()->Camera().draw_mode;
 
 	if ( !selected ) {
-		GL_FloatColor(1, 1, 1);
+		qglColor3f(1, 1, 1);
 	}
 
 	if ( g_bPatchWireFrame || nDrawMode == cd_wire ) {
@@ -2543,7 +2543,7 @@ void Patch_DrawCam( patchMesh_t *pm,bool selected ) {
 
 #if 0 // this paints normal indicators on the ctrl points
 		//--qglDisable (GL_DEPTH_TEST);
-	GL_FloatColor (1,1,1);
+	qglColor3f (1,1,1);
 	for (int i = 0; i < pm->width; i++) {
 		for (int j = 0; j < pm->height; j++) {
 			idVec3 temp;

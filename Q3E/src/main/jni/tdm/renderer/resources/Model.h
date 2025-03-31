@@ -179,6 +179,23 @@ public:
 };
 
 
+typedef struct modelSamplingParameters_s {
+	float areaPerSample;		// number of samples on surface ~= surface area / this value
+	int minSamplesPerSurface;	// ... but no less than this number
+	int maxSamplesTotal;		// total number of samples should not exceed this (as long as min per surface is satisfied)
+	bool poisson;				// true => try to maximize distance between samples (slower)
+} modelSamplingParameters_t;
+
+// model sampling: persistent information about point
+// does not change between frames (unless model is reloaded)
+typedef struct samplePointOnModel_s {
+	int surfaceIndex;		// index in idRenderModelStatic::surfaces / idRenderModelMD5::meshes
+	idVec3 staticPosition;	// fixed position (in T-pose if model is MD5)
+	int triangleIndex;		// index of triangle point lies on
+	idVec3 baryCoords;		// barycentric coords of point on triangle
+} samplePointOnModel_t;
+
+
 // the init methods may be called again on an already created model when
 // a reloadModels is issued
 
@@ -248,6 +265,10 @@ public:
 
 	// for reloadModels
 	virtual ID_TIME_T				Timestamp() const = 0;
+
+	// stgatilov: load version is incremented every time LoadModel is called
+	// this allows game code to learn if the model has been reloaded in "pull fashion"
+	virtual int					GetLoadVersion() const = 0;
 
 	// returns the number of surfaces
 	virtual int					NumSurfaces() const = 0;
@@ -327,6 +348,12 @@ public:
 	// Writing to and reading from a demo file.
 	virtual void				ReadFromDemoFile( class idDemoFile *f ) = 0;
 	virtual void				WriteToDemoFile( class idDemoFile *f ) = 0;
+
+	// stgatilov #6546: generating sample points on the model
+	virtual void				GenerateSamples( idList<samplePointOnModel_t> &samples, const modelSamplingParameters_t &params, idRandom &rnd ) const = 0;
+	virtual idVec3				GetSamplePosition( const struct renderEntity_s *ent, const samplePointOnModel_t &sample ) const = 0;
+	virtual const idMaterial *	GetSampleMaterial( const struct renderEntity_s *ent, const samplePointOnModel_t &sample ) const = 0;
+
 };
 
 #endif /* !__MODEL_H__ */

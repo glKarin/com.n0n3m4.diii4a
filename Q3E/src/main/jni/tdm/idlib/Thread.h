@@ -46,7 +46,9 @@ and unlocks it when it goes out of scope.
 class idScopedCriticalSection {
 public:
 	idScopedCriticalSection( idSysMutex & m ) : mutex(&m) { mutex->Lock(); }
-	~idScopedCriticalSection() { mutex->Unlock(); }
+	idScopedCriticalSection() : mutex(nullptr) { }
+	void Lock( idSysMutex & m ) { assert(!mutex); mutex = &m; mutex->Lock(); }
+	~idScopedCriticalSection() { if (mutex) mutex->Unlock(); }
 
 private:
 	idSysMutex *	mutex;	// NOTE: making this a reference causes a TypeInfo crash

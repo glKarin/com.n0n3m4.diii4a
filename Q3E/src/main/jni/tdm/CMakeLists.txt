@@ -13,8 +13,8 @@ endif()
 
 if (ANDROID)
     # we want debug symbols even with Release builds
-    string(APPEND CMAKE_CXX_FLAGS_RELEASE_INIT "-ffast-math")
-    string(APPEND CMAKE_C_FLAGS_RELEASE_INIT "-ffast-math")
+    string(APPEND CMAKE_CXX_FLAGS_RELEASE_INIT "-ffast-math") #[[ -fsigned-char]]
+    string(APPEND CMAKE_C_FLAGS_RELEASE_INIT "-ffast-math") #[[ -fsigned-char]]
 #[[    string(REPLACE "-O2" "-O1" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
     string(REPLACE "-O2" "-O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")]]
 elseif (UNIX)

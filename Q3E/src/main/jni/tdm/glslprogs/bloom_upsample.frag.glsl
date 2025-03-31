@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 /**
  * This is the upsampling portion of the "dual filtering" blur as suggested in the Siggraph 2015 talk
@@ -29,7 +30,7 @@ in vec2 var_TexCoord;
 out vec4 FragColor;
 
 // sample at half-pixel offsets in the lower mipmap level
-vec2 offset = vec2(0.5, 0.5) / textureSize(u_blurredTexture, 0);
+vec2 offset = vec2(0.5, 0.5) / vec2(textureSize(u_blurredTexture, 0));
 
 vec4 sampleBlurred(vec2 offset) {
 	return texture(u_blurredTexture, var_TexCoord + offset);
@@ -40,15 +41,15 @@ vec4 sampleDetail() {
 }
 
 void main() {
-	vec4 sum = sampleBlurred(vec2(-offset.x * 2, 0));
-	sum += sampleBlurred(vec2(-offset.x, offset.y)) * 2;
-	sum += sampleBlurred(vec2(0, offset.y * 2));
-	sum += sampleBlurred(vec2(offset.x, offset.y)) * 2;
-	sum += sampleBlurred(vec2(offset.x * 2, 0));
-	sum += sampleBlurred(vec2(offset.x, -offset.y)) * 2;
-	sum += sampleBlurred(vec2(0, -offset.y * 2));
-	sum += sampleBlurred(vec2(-offset.x, -offset.y)) * 2;
-	vec4 upsampled = sum / 12;
+	vec4 sum = sampleBlurred(vec2(-offset.x * 2.0, 0.0));
+	sum += sampleBlurred(vec2(-offset.x, offset.y)) * 2.0;
+	sum += sampleBlurred(vec2(0.0, offset.y * 2.0));
+	sum += sampleBlurred(vec2(offset.x, offset.y)) * 2.0;
+	sum += sampleBlurred(vec2(offset.x * 2.0, 0.0));
+	sum += sampleBlurred(vec2(offset.x, -offset.y)) * 2.0;
+	sum += sampleBlurred(vec2(0.0, -offset.y * 2.0));
+	sum += sampleBlurred(vec2(-offset.x, -offset.y)) * 2.0;
+	vec4 upsampled = sum / 12.0;
 
 	vec4 detail = sampleDetail();
 

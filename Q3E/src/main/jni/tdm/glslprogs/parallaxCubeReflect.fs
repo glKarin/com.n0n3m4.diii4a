@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 // per-pixel cubic parallax-corrected reflection map calculation
 
@@ -51,11 +52,11 @@ void main() {
 	vec2 rimStrength = vec2(3.0, 0.4);
 	
     vec3 globalNormal = var_tbn[2];
-    if (var_normalWeight > 0) {
+    if (var_normalWeight > 0.0) {
         // load the filtered normal map, then normalize to full scale
 	    vec3 localNormal;
-        localNormal.xy = 2 * texture(u_texture1, var_uvNormal).xy - 1;
-        localNormal.z = sqrt(max(0, 1 - localNormal.x*localNormal.x - localNormal.y*localNormal.y));
+        localNormal.xy = 2.0 * texture(u_texture1, var_uvNormal).xy - 1.0;
+        localNormal.z = sqrt(max(0.0, 1.0 - localNormal.x*localNormal.x - localNormal.y*localNormal.y));
         localNormal = normalize(localNormal);
         
 	    // transform the surface normal by the local tangent space
@@ -68,9 +69,9 @@ void main() {
 	vec3 globalEye = normalize(var_globalEye);
 	// calculate reflection vector
     float reflectCoeff = dot(globalEye, globalNormal);
-    vec3 reflected = reflectCoeff * globalNormal * 2 - globalEye;
+    vec3 reflected = reflectCoeff * globalNormal * 2.0 - globalEye;
 	// Calculate fresnel reflectance.
-    float fresnel = pow(1 - reflectCoeff, 3) * rimStrength.x + rimStrength.y;
+    float fresnel = pow(1.0 - reflectCoeff, 3.0) * rimStrength.x + rimStrength.y;
 
     // parallax-correct the reflection vector
     vec3 parallaxCorrected = parallaxCorrect(reflected);

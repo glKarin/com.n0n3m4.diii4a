@@ -47,7 +47,7 @@ public:
 	//stgatilov #4957: single place which finds and loads collisionStatic images
 	static const char *		GetCollisionStaticDirectory();
 	static idStr			GetCollisionStaticImagePath(const idPartSysEmitterSignature &signature);
-	static idImageAsset *	LoadCutoffTimeMap(const char *imagePath);
+	static idImageAsset *	LoadCutoffTimeMap(const char *imagePath, bool defer);
 
 	//------------------------------
 

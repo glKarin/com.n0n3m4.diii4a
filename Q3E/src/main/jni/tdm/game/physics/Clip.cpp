@@ -766,7 +766,7 @@ int idClip::ClipModelsTouchingMovingBounds(
 
 			// if moving bounds intersect with entity bounds
 			float range[2] = {0.0f, 1.0f};
-			if ( !MovingBoundsIntersectBounds(start, queryInvDir, queryExtent, absBounds, range) ) {
+			if ( !MovingBoundsIntersectBounds(queryStart, queryInvDir, queryExtent, absBounds, range) ) {
 				continue;
 			}
 

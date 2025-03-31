@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 // !!ARBvp1.0
 
 #pragma tdm_include "tdm_transform.glsl"
@@ -35,7 +36,7 @@ void main() {
 	R2 = vec4(1.0 / sqrt(R2.x));                                                                        //RSQ R2, R2.x;
 	R1 = (R1) * (R2.xxxx);                                                                              //MUL R1, R1, R2.x;
 	
-	R2 = vec4(dot(R1.xyz, vec4(attr_Normal, 1).xyz));                                                   //DP3 R2, R1, vertex.normal;
+	R2 = vec4(dot(R1.xyz, vec4(attr_Normal, 1.0).xyz));                                                   //DP3 R2, R1, vertex.normal;
 	
 	R3 = (vec4(1.0)) - (R2);                                                                            //SUB R3, 1.0, R2;
 	

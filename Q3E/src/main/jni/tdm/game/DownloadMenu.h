@@ -17,16 +17,15 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #define	_DOWNLOAD_MENU_H_
 
 #include <map>
+#include "Missions/MissionManager.h"
 
 // Handles mainmenu that displays list of downloadable mods/PK4 files
 class CDownloadMenu
 {
 private:
-	// The index of the first displayed mod
-	int _availListTop;
-	int _selectedListTop;
-
-	idList<int> _selectedMods;
+	idList<DownloadableMod*> _downloadableModList;
+	idList<DownloadableMod*> _downloadSelectedList;
+	DownloadableMod* _selectedMod;
 
 	/**
 	 * greebo: Since mission l10n packs are stored separately, a mission
@@ -48,8 +47,8 @@ private:
 		{}
 	};
 
-	// A mapping "selected mod id" => download info
-	typedef std::map<int, MissionDownload> ActiveDownloads;
+	// A mapping "selected mod" => download info
+	typedef std::map<DownloadableMod*, MissionDownload> ActiveDownloads;
 	ActiveDownloads _downloads;
 
 public:
@@ -59,22 +58,29 @@ public:
 
 	// updates the GUI variables
 	void UpdateGUI(idUserInterface* gui);
+	void UpdateDownloadableGUI(idUserInterface* gui, bool redraw = true);
+	void UpdateSelectedGUI(idUserInterface* gui, bool redraw = true);
 
 private:
-	void StartDownload(idUserInterface* gui);
+	void ResetDownloadableList();
 
-	void UpdateDownloadProgress(idUserInterface* gui);
+	void SortDownloadableMods();
 
-	void ShowDownloadResult(idUserInterface* gui);
+	void Search(idUserInterface* gui);
 
-	void UpdateModDetails(idUserInterface* gui);
+	void UpdateScreenshotItemVisibility(idUserInterface* gui);
+	void UpdateNextScreenshotData(idUserInterface* gui, int nextScreenshotNum);
 
 	void PerformScreenshotStep(idUserInterface* gui, int step);
 
-	void UpdateNextScreenshotData(idUserInterface* gui, int nextScreenshotNum);
-	void UpdateScreenshotItemVisibility(idUserInterface* gui);
+	void StartDownload(idUserInterface* gui);
 
-	idStr GetMissionDownloadProgressString(int modIndex);
+	void SetMissionDetailsVisibility(idUserInterface* gui, int index);
+	void UpdateModDetails(idUserInterface* gui);
+
+	void UpdateDownloadProgress(idUserInterface* gui);
+	idStr GetMissionDownloadProgressString(DownloadableMod* mod);
+	void ShowDownloadResult(idUserInterface* gui);
 };
 typedef std::shared_ptr<CDownloadMenu> CDownloadMenuPtr;
 

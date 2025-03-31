@@ -348,6 +348,10 @@ void			Sys_FPU_SetExceptions(bool enable);
 // returns amount of drive space in path
 int				Sys_GetDriveFreeSpace( const char *path );
 
+// stgatilov #6503: if the file located on HDD?
+// (or other device with slow seeking)
+bool			Sys_IsFileOnHdd( const char *path );
+
 // lock and unlock memory
 bool			Sys_LockMemory( void *ptr, int bytes );
 bool			Sys_UnlockMemory( void *ptr, int bytes );

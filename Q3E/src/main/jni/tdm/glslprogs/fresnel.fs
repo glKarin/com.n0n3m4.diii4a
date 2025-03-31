@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 // !!ARBfp1.0
 
 in vec4 var_tc2;

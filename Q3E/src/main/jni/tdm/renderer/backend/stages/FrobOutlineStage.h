@@ -28,6 +28,7 @@ private:
 	GLSLProgram *highlightShader = nullptr;
 	GLSLProgram *extrudeShader = nullptr;
 	GLSLProgram *applyShader = nullptr;
+	GLSLProgram *gaussianBlurShader = nullptr;
 
 	idImageScratch *colorTex[2] = { nullptr };
 	idImageScratch *depthTex = nullptr;

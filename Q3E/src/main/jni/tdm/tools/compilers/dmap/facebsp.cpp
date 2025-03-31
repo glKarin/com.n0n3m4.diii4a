@@ -341,6 +341,9 @@ void	BuildFaceTree_r( node_t *node, bspface_t *list ) {
 
 	// split the bounds if we have a nice axial plane
 	for ( i = 0 ; i < 3 ; i++ ) {
+		// stgatilov: these bounds are only used in this function
+		// they are overwritten in CalcNodeBounds later
+		// so it is OK that they are not precise
 		if ( idMath::Fabs( plane[i] - 1.0 ) < 0.001 ) {
 			node->children[0]->bounds[0][i] = plane.Dist();
 			node->children[1]->bounds[1][i] = plane.Dist();

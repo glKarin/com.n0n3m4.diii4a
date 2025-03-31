@@ -75,7 +75,9 @@ extern idCVarBool r_fboSRGB;
 extern idCVar r_fboDepthBits;
 extern idCVarInt r_shadowMapSize;
 extern idCVar r_fboResolution;
-extern idCVarBool r_tonemap;
+extern idCVar r_tonemap;
+extern idCVar r_tonemapInternal;
+extern idCVar r_tonemapOnlyGame3d;
 
 void FB_DebugShowContents();
 void FB_ApplyViewport();

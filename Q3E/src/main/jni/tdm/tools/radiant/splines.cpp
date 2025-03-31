@@ -82,7 +82,7 @@ void glBox(idVec4 &color, idVec3 &point, float size) {
 	qglVertex3f(maxs[0],maxs[1],mins[2]);
 	qglEnd();
 
-	GL_FloatColor(saveColor.ToFloatPtr());
+	qglColor4fv(saveColor.ToFloatPtr());
 
 }
 

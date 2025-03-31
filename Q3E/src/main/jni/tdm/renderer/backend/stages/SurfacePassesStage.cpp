@@ -28,6 +28,13 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "glprogs/stages/surface_passes/texgen_shared.glsl"
 #endif
 
+idCVar r_envmapBumpyBehavior(
+	"r_envmapBumpyBehavior", "1", CVAR_RENDERER | CVAR_BOOL,
+	"Selects visual behavior of environment mapping on bumpmapped surfaces:\n"
+	"  0 --- old TDM: envmap looks very different if bumpmap is set\n"
+	"  1 --- new TDM: uniform envmap behavior regardless of bumpmap existance"
+);
+
 struct SimpleTextureUniforms : GLSLUniformGroup {
 	UNIFORM_GROUP_DEF( SimpleTextureUniforms )
 
@@ -51,6 +58,7 @@ struct EnvironmentUniforms : GLSLUniformGroup {
 	DEFINE_UNIFORM( mat4, modelMatrix )
 	DEFINE_UNIFORM( sampler, environmentMap )
 	DEFINE_UNIFORM( sampler, normalMap )
+	DEFINE_UNIFORM( mat4, bumpMatrix )
 	DEFINE_UNIFORM( int, RGTC )
 	DEFINE_UNIFORM( vec4, constant )
 	DEFINE_UNIFORM( vec4, fresnel )
@@ -243,28 +251,6 @@ bool SurfacePassesStage::ShouldDrawStage( const drawSurf_t *drawSurf, const shad
 		}
 	}
 
-	/*
-	 * TODO: does it even make sense?!
-	 * zero register color does not always mean zero output color...
-	StageType type = ChooseType(drawSurf, pStage);
-	if ( type == ST_SIMPLE_TEXTURE || type == ST_ENVIRONMENT ) {
-		// set the color
-		float color[4];
-		for ( int c = 0; c < 4; c++ )
-			color[c] = regs[pStage->color.registers[c]];
-
-		// skip the entire stage if an add would be black
-		if ( ( pStage->drawStateBits & ( GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS ) ) == ( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE ) && color[0] <= 0 && color[1] <= 0 && color[2] <= 0 ) {
-			return false;
-		}
-
-		// skip the entire stage if a blend would be completely transparent
-		if ( ( pStage->drawStateBits & ( GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS ) ) == ( GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA ) && color[3] <= 0 ) {
-			return false;
-		}
-	}
-	*/
-
 	return true;
 }
 
@@ -338,7 +324,7 @@ void SurfacePassesStage::DrawSimpleTexture( const drawSurf_t *drawSurf, const sh
 
 	// bind texture (either 2D texture or cubemap is used)
 	GL_SelectTexture( 0 );
-	BindVariableStageImage( &pStage->texture, regs );
+	BindVariableStageImage( drawSurf, &pStage->texture, regs );
 	if ( texgen == TEXGEN_CUBEMAP ) {
 		uniforms->cubemap.Set( 0 );
 		uniforms->texture.Set( 1 );
@@ -380,12 +366,25 @@ void SurfacePassesStage::DrawEnvironment( const drawSurf_t *drawSurf, const shad
 	uniforms->globalViewOrigin.Set( viewDef->renderView.vieworg );
 
 	// see if there is also a bump map specified
-	const shaderStage_t *bumpStage = drawSurf->material->GetBumpStage();
+	const shaderStage_t *bumpStage = nullptr;
+	for ( int i = 0; i < drawSurf->material->GetNumStages(); i++ ) {
+		const shaderStage_t *stage = drawSurf->material->GetStage( i );
+		if ( stage->lighting != SL_BUMP )
+			continue;
+		if ( !drawSurf->IsStageEnabled( stage ) )
+			continue;
+		// note: only one bump stage can be enabled at once
+		bumpStage = stage;
+		break;
+	}
 	idImage *bumpMap = nullptr;
+	idMat4 bumpMatrix;
 	if ( bumpStage ) {
 		bumpMap = bumpStage->texture.image;
+		bumpMatrix = drawSurf->GetTextureMatrix( bumpStage );
 	} else {
 		bumpMap = globalImages->flatNormalMap;
+		bumpMatrix = mat4_identity;
 	}
 
 	// set textures
@@ -393,6 +392,7 @@ void SurfacePassesStage::DrawEnvironment( const drawSurf_t *drawSurf, const shad
 	GL_SelectTexture( 0 );
 	bumpMap->Bind();
 	uniforms->RGTC.Set( bumpMap->internalFormat == GL_COMPRESSED_RG_RGTC2 );
+	uniforms->bumpMatrix.Set( bumpMatrix );
 
 	uniforms->environmentMap.Set( 1 );
 	GL_SelectTexture( 1 );
@@ -402,8 +402,8 @@ void SurfacePassesStage::DrawEnvironment( const drawSurf_t *drawSurf, const shad
 	idVec4 regColor = drawSurf->GetStageColor( pStage );
 
 	// set settings which different in bumpmapped case
-	// TODO: why do they differ?
-	if ( bumpStage ) {
+	// #6453: now we always use the same behavior (supposedly coming from Doom 3)
+	if ( bumpStage && !r_envmapBumpyBehavior.GetBool() ) {
 		uniforms->constant.Set( idVec4(0.4f) );
 		uniforms->fresnel.Set( idVec4(3.0f) );
 		uniforms->tonemapOutputColor.Set( true );
@@ -541,9 +541,23 @@ void SurfacePassesStage::DrawCustomShader( const drawSurf_t *drawSurf, const sha
 	// setting textures
 	// note: the textures are also bound to TUs at this moment
 	for ( int i = 0; i < newStage->numFragmentProgramImages; i++ ) {
-		if ( newStage->fragmentProgramImages[i] ) {
+		if ( idImage *image = newStage->fragmentProgramImages[i] ) {
+			// #6434: X-ray subview-generated images are used in heatHaze stages
+			// same happens in 3D rendering, e.g. mirroring water with heat-haze effect
+			if ( pStage->texture.dynamic ) {
+				if ( idImageScratch *scratch = image->AsScratch() ) {
+					if ( scratch->isDynamicImagePlaceholder ) {
+						if ( drawSurf->dynamicImageOverride ) {
+							image = drawSurf->dynamicImageOverride;
+						} else {
+							image = globalImages->blackImage;
+						}
+					}
+				}
+			}
+
 			GL_SelectTexture( i );
-			newStage->fragmentProgramImages[i]->Bind();
+			image->Bind();
 			uniforms->textures[ i ]->Set( i );
 		}
 	}
@@ -553,7 +567,7 @@ void SurfacePassesStage::DrawCustomShader( const drawSurf_t *drawSurf, const sha
 	RB_DrawElementsWithCounters( drawSurf, DCK_SURFACE_PASS );
 }
 
-void SurfacePassesStage::BindVariableStageImage( const textureStage_t *texture, const float *regs ) {
+void SurfacePassesStage::BindVariableStageImage( const drawSurf_t *drawSurf, const textureStage_t *texture, const float *regs ) {
 	if ( texture->cinematic ) {
 		if ( r_skipDynamicTextures.GetBool() ) {
 			globalImages->defaultImage->Bind();
@@ -568,6 +582,15 @@ void SurfacePassesStage::BindVariableStageImage( const textureStage_t *texture, 
 		if ( cin.image ) {
 			globalImages->cinematicImage->UploadScratch( cin.image, cin.imageWidth, cin.imageHeight );
 		} else {
+			globalImages->blackImage->Bind();
+		}
+	} else if ( texture->dynamic ) {
+		// stgatilov #6434: image generated by subview
+		if ( drawSurf->dynamicImageOverride ) {
+			drawSurf->dynamicImageOverride->Bind();
+		} else {
+			// no image generated by subview
+			// e.g. no camera for remote screen, or depth limit exceeded
 			globalImages->blackImage->Bind();
 		}
 	} else if ( texture->image ) {

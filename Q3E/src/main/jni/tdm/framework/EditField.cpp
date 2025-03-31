@@ -83,7 +83,13 @@ PrintCvarMatches
 */
 static void PrintCvarMatches( const char *s ) {
     if (idStr::Icmpn(s, globalAutoComplete.currentMatch, static_cast<int>(strlen(globalAutoComplete.currentMatch))) == 0) {
-		common->Printf( "    %s" S_COLOR_WHITE " = \"%s\"\n", s, cvarSystem->GetCVarString( s ) );
+		const char *value = cvarSystem->GetCVarString( s );
+		common->Printf( "    %s", s);
+		if ( cvarSystem->GetCVarMissionString( s ) ) {
+			common->Printf( S_COLOR_MAGENTA " = \"%s\"\n", value );
+		} else {
+			common->Printf( S_COLOR_WHITE " = \"%s\"\n", value );
+		}
 	}
 }
 

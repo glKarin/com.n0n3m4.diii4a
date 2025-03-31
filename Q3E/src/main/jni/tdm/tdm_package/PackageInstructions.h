@@ -37,7 +37,7 @@ struct PackageInstruction
 	{
 		Exclude,	// EXCLUDE
 		Include,	// INCLUDE
-		Mission,	// FM
+		Chdir,		// CHDIR
 		Ignore,		// everything else
 	};
 
@@ -48,6 +48,9 @@ struct PackageInstruction
 
 	// The pre-compiled regex
 	std::regex regex;
+
+	// Only filled for CHDIR
+	std::string second;
 
 	// Default constructor
 	PackageInstruction() :
@@ -71,30 +74,67 @@ struct PackageInstruction
  * # Comment
  * INCLUDE <regexp>
  * EXCLUDE <regexp>
- * FM <mapfile> - ignored for now
- * ordinary lines (e.g. "training_mission.map" or "prefabs/ \.pfb\z") - ignored for now
+ * CHDIR <srcpath>/ => <dstpath>/
  */
 class PackageInstructions :
 	public std::list<PackageInstruction>
 {
 public:
-	// Returns true if the file given by the path (relative to repository root) is excluded
-	bool IsExcluded(const std::string& relativePath) const
+	// Returns true if the file given by the path (relative to repository root) is included
+	bool IsIncluded(const std::string& relativePath) const
+	{
+		bool state = false;
+		for (const_iterator i = begin(); i != end(); ++i)
+		{
+			if (i->type == PackageInstruction::Include)
+			{
+				if (std::regex_search(relativePath, i->regex))
+				{
+					TraceLog::WriteLine(LOG_VERBOSE, 
+						stdext::format("[PackageInstructions]: Relative path %s included by regex %s", relativePath, i->value));
+					state = true;
+				}
+			}
+			if (i->type == PackageInstruction::Exclude)
+			{
+				if (std::regex_search(relativePath, i->regex))
+				{
+					TraceLog::WriteLine(LOG_VERBOSE, 
+						stdext::format("[PackageInstructions]: Relative path %s excluded by regex %s", relativePath, i->value));
+					state = false;
+				}
+			}
+		}
+
+		return state;
+	}
+
+	// Returns true if the file path has to be changed during packaging (due to CHDIR)
+	bool IsRenamed(const std::string& relativePath, std::string& renamedPath) const
 	{
 		for (const_iterator i = begin(); i != end(); ++i)
 		{
-			if (i->type != PackageInstruction::Exclude) continue;
+			if (i->type != PackageInstruction::Chdir) continue;
 
-			// Found an exclusion instruction, check the regexp
-			if (std::regex_search(relativePath, i->regex))
+			// Found an chdir instruction, check the path prefix
+			if (stdext::starts_with(relativePath, i->value))
 			{
+				renamedPath = i->second + relativePath.substr(i->value.size());
+
+				// collapse double-slashes
+				renamedPath = stdext::replace_all_copy(renamedPath, "//", "/");
+				// don't start path with slash
+				if (stdext::starts_with(renamedPath, "/"))
+					renamedPath = renamedPath.substr(1);
+
 				TraceLog::WriteLine(LOG_VERBOSE, 
-					stdext::format("[PackageInstructions]: Relative path %s excluded by regex %s", relativePath, i->value));
+					stdext::format("[PackageInstructions]: Relative path %s renamed to %s", relativePath, renamedPath));
 				return true;
 			}
 		}
 
-		return false; // not excluded
+		renamedPath = relativePath;
+		return false; // not renamed
 	}
 
 	void LoadFromFile(const fs::path& file)
@@ -119,6 +159,7 @@ public:
 
 		std::size_t includeStatements = 0;
 		std::size_t excludeStatements = 0;
+		std::size_t chdirStatements = 0;
 		std::size_t ignoredLines = 0;
 
 		while (std::getline(stream, line, '\n'))
@@ -149,6 +190,29 @@ public:
 
 				excludeStatements++;
 			}
+			else if (stdext::starts_with(line, "CHDIR"))
+			{
+				std::string value = line.substr(6);
+				stdext::trim(value, " \t");
+
+				size_t pos = value.find("=>");
+				if (pos == std::string::npos)
+				{
+					TraceLog::WriteLine(LOG_ERROR, "[PackageInstructions]: CHDIR bad format " + value);
+					continue;
+				}
+				std::string before = value.substr(0, pos);
+				std::string after = value.substr(pos + 2);
+				stdext::trim(before, " \t");
+				stdext::trim(after, " \t");
+
+				PackageInstruction instruction(PackageInstruction::Chdir, before);
+				instruction.second = after;
+
+				push_back(instruction);
+
+				chdirStatements++;
+			}
 			else
 			{
 				// Just ignore this line
@@ -156,7 +220,7 @@ public:
 			}
 		}
 
-		TraceLog::WriteLine(LOG_STANDARD, stdext::format("Parsed %d INCLUDEs, %d EXCLUDEs and ignored %d lines.", includeStatements, excludeStatements, ignoredLines));
+		TraceLog::WriteLine(LOG_STANDARD, stdext::format("Parsed %d INCLUDEs, %d EXCLUDEs, %d CHDIRs, and ignored %d lines.", includeStatements, excludeStatements, chdirStatements, ignoredLines));
 	}
 
 	void LoadFromString(const std::string& str)

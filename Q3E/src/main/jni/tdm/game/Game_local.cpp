@@ -48,6 +48,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "StdString.h"
 #include "framework/Session_local.h"
 #include "framework/Common.h"
+#include "LightEstimateSystem.h"
 
 #include <chrono>
 #include <iostream>
@@ -214,8 +215,6 @@ void TestGameAPI( void ) {
 	testExport = *GetGameAPI( &testImport );
 }
 
-#define LOAD_KEY_ENTITY_GRANULARITY 10 // grayman #3763
-
 /*
 ===========
 idGameLocal::idGameLocal
@@ -276,8 +275,6 @@ void idGameLocal::Clear( void )
 
 	m_TriggerFinalSave = false;
 
-	m_StartPosition = ""; // grayman #2933
-
 	m_GUICommandStack.Clear();
 	m_GUICommandArgs = 0;
 
@@ -331,6 +328,7 @@ void idGameLocal::Clear( void )
 	spawnedAI.Clear();
 	numEntitiesToDeactivate = 0;
 	persistentLevelInfo.Clear();
+	persistentLevelInfoLocation = PERSISTENT_LOCATION_NOWHERE;
 	persistentPlayerInventory.reset();
 	campaignInfoEntities.Clear();
 
@@ -556,6 +554,8 @@ void idGameLocal::Init( void ) {
 	m_LightController = CLightControllerPtr(new CLightController);
 	m_LightController->Init();
 
+	m_LightEstimateSystem = new LightEstimateSystem();
+
 	// greebo: Create the persistent inventory - will be handled by game state changing code
 	persistentPlayerInventory.reset(new CInventory);
 
@@ -702,6 +702,9 @@ void idGameLocal::Shutdown( void ) {
 	// Destroy the light controller
 	m_LightController.reset();
 
+	delete m_LightEstimateSystem;
+	m_LightEstimateSystem = nullptr;
+
 	// Clear http connection
 	m_HttpConnection.reset();
 	m_GuiMessages.ClearFree();
@@ -784,6 +787,10 @@ void idGameLocal::SaveGame( idFile *f ) {
 	}
 
 	savegame.WriteHeader();
+
+	// #5453: save mission overrides of all cvars
+	idDict cvarOverrides = cvarSystem->GetMissionOverrides();
+	savegame.WriteDict( &cvarOverrides );
 
 	// go through all entities and threads and add them to the object list
 	for (i = 0; i < MAX_GENTITIES; i++)
@@ -884,6 +891,8 @@ void idGameLocal::SaveGame( idFile *f ) {
 	activeEntities.Save( savegame );
 
 	lodSystem.Save( savegame );
+
+	m_LightEstimateSystem->Save(&savegame);
 
 	// tels: save the list of music speakers
 	savegame.WriteInt( musicSpeakers.Num() );
@@ -1103,7 +1112,7 @@ const idDict &idGameLocal::GetPersistentPlayerInfo( int clientNum ) {
 	persistentPlayerInfo.Clear();
 	ent = entities[ clientNum ];
 	if ( ent && ent->IsType( idPlayer::Type ) ) {
-		static_cast<idPlayer *>(ent)->SavePersistantInfo();
+		static_cast<idPlayer *>(ent)->SavePersistentInfo();
 	}
 
 	return persistentPlayerInfo;
@@ -1191,7 +1200,7 @@ void idGameLocal::DPrintf( const char *fmt, ... ) const {
 	va_list		argptr;
 	char		text[MAX_STRING_CHARS];
 
-	if ( !developer.GetBool() ) {
+	if ( !com_developer.GetBool() ) {
 		return;
 	}
 
@@ -1234,7 +1243,7 @@ void idGameLocal::DWarning( const char *fmt, ... ) const {
 	char		text[MAX_STRING_CHARS];
 	idThread *	thread;
 
-	if ( !developer.GetBool() ) {
+	if ( !com_developer.GetBool() ) {
 		return;
 	}
 
@@ -1409,8 +1418,6 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 
 	session->ResetMainMenu();
 
-	common->PacifierUpdate(LOAD_KEY_START,0); // grayman #3763
-
 	// clear the sound system
 	gameSoundWorld->ClearAllSoundEmitters();
 
@@ -1424,12 +1431,14 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 		if ( mapFile ) {
 			delete mapFile;
 		}
+		session->UpdateLoadingProgressBar( PROGRESS_STAGE_MAPFILE, 0.0f );
 		mapFile = new idMapFile;
 		if ( !mapFile->Parse( idStr( mapName ) + ".map" ) ) {
 			delete mapFile;
 			mapFile = NULL;
 			Error( "Couldn't load %s", mapName );
 		}
+		session->UpdateLoadingProgressBar( PROGRESS_STAGE_MAPFILE, 1.0f );
 	}
 	mapFileName = mapFile->GetName();
 
@@ -1833,7 +1842,7 @@ void idGameLocal::MapRestart( ) {
 	const idKeyValue *keyval, *keyval2;
 
 	{
-		newInfo = *cvarSystem->MoveCVarsToDict( CVAR_SERVERINFO );
+		newInfo = cvarSystem->MoveCVarsToDict( CVAR_SERVERINFO );
 		for ( i = 0; i < newInfo.GetNumKeyVals(); i++ ) {
 			keyval = newInfo.GetKeyVal( i );
 			keyval2 = serverInfo.FindKey( keyval->GetKey() );
@@ -1913,15 +1922,12 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 	// greebo: Clear the mission data, it might have been filled during the objectives screen display
 	m_MissionData->Clear();
 
-	// Clear the persistent data if starting a new campaign
-	if (m_MissionManager->CurrentModIsCampaign() && m_MissionManager->GetCurrentMissionIndex() == 0)
-	{
-		ClearPersistentInfo();
-	}
-
 	Printf( "----------- Game Map Init ------------\n" );
 
 	gamestate = GAMESTATE_STARTUP;
+
+	// #5453: reset all mission overrides
+	cvarSystem->SetMissionOverrides();
 
 	gameRenderWorld = renderWorld;
 	gameSoundWorld = soundWorld;
@@ -2014,8 +2020,13 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 // 		return false;
 // 	}
 
-	// Read and initialize  cache from file
+	// Read and initialize cache from file
 	savegame.InitializeCache();
+
+	// #5453: restore mission overrides of all cvars
+	idDict cvarOverrides;
+	savegame.ReadDict( &cvarOverrides );
+	cvarSystem->SetMissionOverrides( cvarOverrides );
 
 	// Create the list of all objects in the game
 	savegame.CreateObjects();
@@ -2076,6 +2087,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	m_lightGem.SpawnLightGemEntity( mapFile );
 
 	// precache any media specified in the map
+	session->UpdateLoadingProgressBar( PROGRESS_STAGE_ENTITIES, 0.0f );
 	for ( i = 0; i < mapFile->GetNumEntities(); i++ ) {
 		idMapEntity *mapEnt = mapFile->GetEntity( i );
 		const char *entName = mapEnt->epairs.GetString("name");
@@ -2090,15 +2102,18 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 			}
 			declManager->EndEntityLoad(mapEnt);
 		}
+
+		session->UpdateLoadingProgressBar( PROGRESS_STAGE_ENTITIES, float(i + 1) / mapFile->GetNumEntities() );
 	}
+	session->UpdateLoadingProgressBar( PROGRESS_STAGE_ENTITIES, 1.0f );
 
 	savegame.ReadDict( &si );
 	SetServerInfo( si );
 
 	savegame.ReadInt( numClients );
-		savegame.ReadDict( &userInfo );
-		savegame.ReadUsercmd( usercmds );
-		savegame.ReadDict( &persistentPlayerInfo );
+	savegame.ReadDict( &userInfo );
+	savegame.ReadUsercmd( usercmds );
+	savegame.ReadDict( &persistentPlayerInfo );
 
 	for( i = 0; i < MAX_GENTITIES; i++ ) {
 		savegame.ReadObject( reinterpret_cast<idClass *&>( entities[ i ] ) );
@@ -2129,6 +2144,8 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	activeEntities.Restore( savegame );
 
 	lodSystem.Restore( savegame );
+
+	m_LightEstimateSystem->Restore(&savegame);
 
 	// tels: restore the list of music speakers
 	savegame.ReadInt( num );
@@ -2177,6 +2194,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	savegame.ReadInt( numEntitiesToDeactivate );
 	savegame.ReadDict( &persistentLevelInfo );
+	persistentLevelInfoLocation = PERSISTENT_LOCATION_GAME;
 
 	persistentPlayerInventory->Restore(&savegame);
 
@@ -2480,6 +2498,11 @@ void idGameLocal::MapShutdown( void ) {
 	*/
 	LAS.shutDown();
 
+	if (m_LightEstimateSystem)
+	{
+		m_LightEstimateSystem->Clear();
+	}
+
 	pvs.Shutdown();
 
 	// Remove the grabber entity itself (note that it's safe to pass NULL pointers to delete)
@@ -2519,6 +2542,9 @@ void idGameLocal::MapShutdown( void ) {
 
 	gameRenderWorld = NULL;
 	gameSoundWorld = NULL;
+
+	// #5453: reset all mission overrides
+	cvarSystem->SetMissionOverrides();
 
 	gamestate = GAMESTATE_NOMAP;
 
@@ -3413,6 +3439,11 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds, int timestepMs,
 			// free the player pvs
 			FreePlayerPVS();
 
+			// stgatilov #6546: work on light queries from game
+			m_LightEstimateSystem->Think();
+			if ( idMath::Abs( g_showLightQuotient.GetInteger() ) == 3 )
+				m_LightEstimateSystem->DebugVisualize();
+
 			if ( cv_music_volume.IsModified() ) {  //SnoopJeDi, fade that sound!
 				float music_vol = cv_music_volume.GetFloat();
 				for ( int i = 0; i < musicSpeakers.Num(); i++ ) {
@@ -4063,6 +4094,18 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 		// Handle downloads in progress
 		m_DownloadManager->ProcessDownloads();
 
+		// Propagate the mission list CVARs to the GUI
+		if (cvarSystem->GetCVarInteger("tdm_mission_list_sort_direction") == 0) {
+			gui->SetStateString("mission_list_direction", "guis/assets/mainmenu/sort_down");
+		} else {
+			gui->SetStateString("mission_list_direction", "guis/assets/mainmenu/sort_up");
+		}
+		if (cvarSystem->GetCVarInteger("tdm_download_list_sort_direction") == 0) {
+			gui->SetStateString("download_list_direction", "guis/assets/mainmenu/sort_down");
+		} else {
+			gui->SetStateString("download_list_direction", "guis/assets/mainmenu/sort_up");
+		}
+
 		// Propagate the video CVARs to the GUI
 		gui->SetStateInt("video_aspectratio", cvarSystem->GetCVarInteger("r_aspectRatio"));
 		gui->SetStateBool("confirmQuit", cv_mainmenu_confirmquit.GetBool());
@@ -4117,6 +4160,7 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 			{"SETTINGS", "SettingsMenuState", "MAINMENU_%INGAME%", "Music%INGAME%"},
 			{"SELECT_LANGUAGE", "SelectLanguageState", "MAINMENU_%INGAME%", "Music%INGAME%"},
 			{"DOWNLOAD", "DownloadMissionsMenuState", "EXTRAMENU_NOTINGAME", "Music%INGAME%"},
+			{"DEBRIEFING", "DebriefingState", "DEBRIEFING", "MusicDebriefing"},
 			{"DEBRIEFING_VIDEO", "DebriefingVidState", "", "MusicDebriefingVideo"},
 			{"GUISIZE", "SettingsGuiSizeState", "", "Music%INGAME%"},
 			{"MOD_SELECT", "NewGameMenuState", "EXTRAMENU_NOTINGAME", "Music%INGAME%"},
@@ -4131,7 +4175,8 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 			{"SHOP", "FORWARD", "START_GAME"},
 			//standard FM-customized sequence: game finished successfully
 			{"FINISHED", "FORWARD", "DEBRIEFING_VIDEO"},
-			{"DEBRIEFING_VIDEO", "FORWARD", "SUCCESS"},		{"SUCCESS", "BACKWARD", "DEBRIEFING_VIDEO"},
+			{"DEBRIEFING_VIDEO", "FORWARD", "DEBRIEFING"},		{"DEBRIEFING", "BACKWARD", "DEBRIEFING_VIDEO"},
+			{"DEBRIEFING", "FORWARD", "SUCCESS"},				{"SUCCESS", "BACKWARD", "DEBRIEFING"},
 			{"SUCCESS", "FORWARD", "MAINMENU"},
 		};
 
@@ -4220,8 +4265,17 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 		if (targetState != modeState) {
 			if (targetState->name == "START_GAME") {
 				DM_LOG(LC_MAINMENU, LT_INFO)LOGSTRING("Starting game");
-				idStr mapname = m_MissionManager->GetCurrentStartingMap();
-				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, va("map %s\n", mapname.c_str()) );
+				//stgatilov #6509: transfer persistent info early, so that we can read map name from it now
+				SyncPersistentInfoFromGui(gui, true);
+				//select which map to load
+				idStr customMapName = persistentLevelInfo.GetString("builtin_startMap");
+				idStr mapName;
+				if (customMapName[0]) {
+					mapName = customMapName;
+				} else {
+					mapName = m_MissionManager->GetCurrentStartingMap();
+				}
+				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, va("map %s\n", mapName.c_str()) );
 				//note: it seems that target state does not matter
 				//map start resets "mode" to NONE anyway (see ClearMainMenuMode)
 			}
@@ -4743,7 +4797,7 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 	}
 	else if (cmd == "mainmenu_init")
 	{
-		gui->SetStateString("tdmversiontext", va("TDM %d.%02d/%zu", TDM_VERSION_MAJOR, TDM_VERSION_MINOR, sizeof(void*) * 8)); // BluePill #4539 - show whether this is a 32-bit or 64-bit binary 
+		gui->SetStateString("tdmversiontext", va("%s #%d", ENGINE_VERSION, RevisionTracker::Instance().GetHighestRevision()));
 		UpdateGUIScaling(gui);
 		gui->SetStateString( "tdm_lang", common->GetI18N()->GetCurrentLanguage().c_str() );
 		idStr gui_lang = "lang_";
@@ -4772,6 +4826,7 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 	}
 	else if (cmd == "mainmenuingame_init") // grayman #3733
 	{
+		gui->SetStateString("tdmversiontext", va("%s #%d", ENGINE_VERSION, RevisionTracker::Instance().GetHighestRevision()));
 		idStr modName = m_MissionManager->GetCurrentModName();
 		CModInfoPtr info = m_MissionManager->GetModInfo(modName);
 
@@ -4863,7 +4918,10 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 		idStr mapToStart = m_MissionManager->GetCurrentStartingMap();
 		gui->SetStateString("mapStartCmd", va("exec 'map %s'", mapToStart.c_str()));
 
+		// stgatilov #6509: set persistent info to empty when starting mission or campaign from scratch
 		ClearPersistentInfo();
+		ClearPersistentInfoInGui(gui);
+		gameLocal.persistentLevelInfoLocation = PERSISTENT_LOCATION_MAINMENU;
 	}
 	else if (cmd == "setlang")
 	{
@@ -5251,6 +5309,46 @@ void idGameLocal::RunDebugInfo( void ) {
 		}
 	}
 
+	if ( g_showLightQuotient.GetInteger() != 0 ) {
+		idBounds viewBounds( origin );
+		viewBounds.ExpandSelf( 256.0f );
+		idMat3 axis = player->viewAngles.ToMat3();
+
+		for( ent = spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next() ) {
+			if ( m_LightEstimateSystem->DebugIgnorePlayer(ent) )
+				continue;
+			if ( ent->GetModelDefHandle() < 0 )
+				continue;	// no visual representation
+
+			const idBounds &entBounds = ent->GetPhysics()->GetAbsBounds();
+			if ( !viewBounds.IntersectsBounds( entBounds ) )
+				continue;	// too far away
+
+			bool tracked;
+			float value;
+			if ( g_showLightQuotient.GetInteger() < 0 ) {
+				tracked = ent->DebugGetLightQuotient( value );
+			} else {
+				tracked = true;
+				value = ent->GetLightQuotient();
+			}
+			if (!tracked)
+				continue;
+
+			idStr text = va("%0.3f", value);
+
+			int mode = idMath::Abs( g_showLightQuotient.GetInteger() );
+			if ( mode != 3 ) {
+				gameRenderWorld->DebugBounds( colorCyan, entBounds );
+			}
+			if ( mode == 2 ) {
+				gameRenderWorld->DebugText( va( "%s:\n%s", ent->name.c_str(), text.c_str() ), entBounds.GetCenter(), 0.1f, colorWhite, axis, 1 );
+			} else {
+				gameRenderWorld->DebugText( va( "%s", text.c_str() ), entBounds.GetCenter(), 0.1f, colorWhite, axis, 1 );
+			}
+		}
+	}
+
 	// collision map debug output
 	collisionModelManager->DebugOutput( player->GetEyePosition() );
 }
@@ -5407,7 +5505,7 @@ void idGameLocal::SetupEAS()
 		}
 	}
 
-	common->PacifierUpdate(LOAD_KEY_ROUTING_START,clusterCount); // grayman #3763
+	session->UpdateLoadingProgressBar(PROGRESS_STAGE_ROUTING, 0.0f);
 
 	for (int aasNum = 0; aasNum < NumAAS(); aasNum++)
 	{
@@ -5418,7 +5516,7 @@ void idGameLocal::SetupEAS()
 		}
 	}
 
-	common->PacifierUpdate(LOAD_KEY_ROUTING_DONE,0); // grayman #3763
+	session->UpdateLoadingProgressBar(PROGRESS_STAGE_ROUTING, 1.0f);
 }
 
 
@@ -5438,7 +5536,7 @@ idGameLocal::CheatsOk
 bool idGameLocal::CheatsOk( bool requirePlayer ) {
 	idPlayer *player;
 
-	if ( developer.GetBool() ) {
+	if ( com_developer.GetBool() ) {
 		return true;
 	}
 
@@ -5774,8 +5872,7 @@ void idGameLocal::SpawnMapEntities( void )
 	// Clear out the campaign info cache
 	campaignInfoEntities.Clear();
 
-	common->PacifierUpdate(LOAD_KEY_SPAWN_ENTITIES_START,numEntities/LOAD_KEY_ENTITY_GRANULARITY); // grayman #3763
-
+	session->UpdateLoadingProgressBar(PROGRESS_STAGE_ENTITIES, 0.0f);
 	for ( i = 1 ; i < numEntities ; i++ )
 	{
 		mapEnt = mapFile->GetEntity( i );
@@ -5816,12 +5913,9 @@ void idGameLocal::SpawnMapEntities( void )
 			inhibit++;
 		}
 
-		// grayman #3763 - update the loading bar every LOAD_KEY_ENTITY_GRANULARITY spawned entities
-		if ( (i % LOAD_KEY_ENTITY_GRANULARITY) == 0)
-		{
-			common->PacifierUpdate(LOAD_KEY_SPAWN_ENTITIES_INTERIM,i);
-		}
+		session->UpdateLoadingProgressBar(PROGRESS_STAGE_ENTITIES, float(i + 1) / numEntities);
 	}
+	session->UpdateLoadingProgressBar(PROGRESS_STAGE_ENTITIES, 1.0f);
 
 	m_lightGem.InitializeLightGemEntity();
 
@@ -6875,12 +6969,15 @@ idEntity *idGameLocal::SelectInitialSpawnPoint( idPlayer *player ) {
 
 	// grayman #2933 - Did the player specify
 	// a starting point in the briefing?
+	// stgatilov #6509: now passed via persistent data
 
 	bool foundSpot = false;
 	spot.ent = NULL;
-	if ( m_StartPosition[0] != '\0' )
+
+	const char *startEntityName = persistentLevelInfo.GetString("builtin_playerStartEntity");
+	if ( startEntityName[0] != '\0' )
 	{
-		spot.ent = FindEntity( m_StartPosition );
+		spot.ent = FindEntity( startEntityName );
 		if ( spot.ent != NULL )
 		{
 			foundSpot = true;
@@ -7026,7 +7123,7 @@ bool idGameLocal::NeedRestart() {
 	idDict		newInfo;
 	const idKeyValue *keyval, *keyval2;
 
-	newInfo = *cvarSystem->MoveCVarsToDict( CVAR_SERVERINFO );
+	newInfo = cvarSystem->MoveCVarsToDict( CVAR_SERVERINFO );
 
 	for ( int i = 0; i < newInfo.GetNumKeyVals(); i++ ) {
 		keyval = newInfo.GetKeyVal( i );
@@ -7954,10 +8051,58 @@ idLight* idGameLocal::FindMainAmbientLight( bool a_bCreateNewIfNotFound /*= fals
 
 void idGameLocal::ClearPersistentInfo()
 {
-	persistentPlayerInventory->Clear();
-	persistentLevelInfo.Clear();
 	m_CampaignStats.reset(new CampaignStats);
 	m_InterMissionTriggers.Clear();
+	persistentPlayerInventory->Clear();
+
+	persistentLevelInfo.Clear();
+	if (persistentLevelInfoLocation == PERSISTENT_LOCATION_GAME)
+		persistentLevelInfoLocation = PERSISTENT_LOCATION_NOWHERE;
+}
+
+void idGameLocal::ClearPersistentInfoInGui(idUserInterface *gui)
+{
+	const idDict &allGuiVars = gui->State();
+	idStrList keys;
+	for (const idKeyValue *kv = allGuiVars.MatchPrefix("persistent_"); kv; kv = allGuiVars.MatchPrefix("persistent_", kv))
+		keys.Append(kv->GetKey());
+
+	for (idStr key : keys)
+		gui->DeleteStateVar(key);
+
+	if (persistentLevelInfoLocation == PERSISTENT_LOCATION_MAINMENU)
+		persistentLevelInfoLocation = PERSISTENT_LOCATION_NOWHERE;
+}
+
+void idGameLocal::SyncPersistentInfoToGui(idUserInterface *gui, bool moveOwnership)
+{
+	assert(persistentLevelInfoLocation == PERSISTENT_LOCATION_GAME);
+	ClearPersistentInfoInGui(gui);
+
+	for (const idKeyValue *kv = persistentLevelInfo.MatchPrefix(""); kv; kv = persistentLevelInfo.MatchPrefix("", kv)) {
+		idStr key = "persistent_" + kv->GetKey();
+		gui->SetStateString(key, kv->GetValue());
+	}
+
+	// mark main menu GUI vars as the source of truth from now on
+	if (moveOwnership)
+		persistentLevelInfoLocation = PERSISTENT_LOCATION_MAINMENU;
+}
+
+void idGameLocal::SyncPersistentInfoFromGui(const idUserInterface *gui, bool moveOwnership)
+{
+	assert(persistentLevelInfoLocation == PERSISTENT_LOCATION_MAINMENU);
+	persistentLevelInfo.Clear();
+
+	const idDict &allGuiVars = gui->State();
+	for (const idKeyValue *kv = allGuiVars.MatchPrefix("persistent_"); kv; kv = allGuiVars.MatchPrefix("persistent_", kv)) {
+		idStr key = kv->GetKey().c_str() + strlen("persistent_");
+		persistentLevelInfo.Set(key, kv->GetValue());
+	}
+
+	// mark game as the source of truth from now on
+	if (moveOwnership)
+		persistentLevelInfoLocation = PERSISTENT_LOCATION_GAME;
 }
 
 void idGameLocal::ProcessInterMissionTriggers()

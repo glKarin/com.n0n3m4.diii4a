@@ -74,6 +74,7 @@ private:
 	void						Event_Trigger( idEntity *ent );
 	void						Event_SetCvar( const char *name, const char *value ) const;
 	void						Event_GetCvar( const char *name ) const;
+	void						Event_GetCvarF( const char *name ) const;
 	void						Event_Random( float range ) const;
 	void						Event_GetTime( void );
 	void						Event_KillThread( const char *name );
@@ -84,11 +85,11 @@ private:
 	void						Event_SpawnString( const char *key, const char *defaultvalue );
 	void						Event_SpawnFloat( const char *key, float defaultvalue );
 	void						Event_SpawnVector( const char *key, idVec3 &defaultvalue );
-	void						Event_ClearPersistantArgs( void );
-	void 						Event_SetPersistantArg( const char *key, const char *value );
-	void 						Event_GetPersistantString( const char *key );
-	void 						Event_GetPersistantFloat( const char *key );
-	void 						Event_GetPersistantVector( const char *key );
+	void						Event_ClearPersistentArgs( void );
+	void 						Event_SetPersistentArg( const char *key, const char *value );
+	void 						Event_GetPersistentString( const char *key );
+	void 						Event_GetPersistentFloat( const char *key );
+	void 						Event_GetPersistentVector( const char *key );
 
 	void						Event_GetCurrentMissionNum();
 	void						Event_GetTDMVersion() const;
@@ -107,6 +108,8 @@ private:
 	void						Event_GetCeil( const float x );
 	// smallest integer (-1.5 => -2, 1.5 => 1, 1.3 => 1)
 	void						Event_GetFloor( const float x );
+	void						Event_GetMin( const float x, const float y );
+	void						Event_GetMax( const float x, const float y );
 	void						Event_GetSquareRoot( float theSquare );
 	void						Event_VecNormalize( idVec3 &vec );
 	void						Event_VecLength( idVec3 &vec );

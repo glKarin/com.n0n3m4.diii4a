@@ -65,9 +65,10 @@ private:
 	bool				readonly;
 	bool				numeric;
 	idStr				sourceFile;
+	idStr				placeholder;
+	idVec4				placeholderColor;
 	idSliderWindow *	scroller;
 	idList<int>			breaks;
-	float				sizeBias;
 	int					textIndex;
 	int					lastTextLength;
 	bool				forceScroll;	

@@ -400,7 +400,7 @@ void idLight::Restore( idRestoreGame *savefile ) {
 	renderLight.prelightModel = renderModelManager->CheckModel( va( "_prelight_%s", name.c_str() ) );
 	if ( ( renderLight.prelightModel == NULL ) && hadPrelightModel ) {
 		assert( 0 );
-		if ( developer.GetBool() ) {
+		if ( com_developer.GetBool() ) {
 			// we really want to know if this happens
 			gameLocal.Error( "idLight::Restore: prelightModel '_prelight_%s' not found", name.c_str() );
 		} else {

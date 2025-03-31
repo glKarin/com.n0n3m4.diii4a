@@ -106,24 +106,6 @@ struct MemInfo_t {
 	int64			soundAssetsTotal;
 };
 
-// grayman #3763 - loading bar progress at key points,
-// used by both the engine and the dll
-
-typedef enum
-{
-	LOAD_KEY_START = 1,
-	LOAD_KEY_COLLISION_START,
-	LOAD_KEY_COLLISION_DONE,
-	LOAD_KEY_SPAWN_ENTITIES_START,
-	LOAD_KEY_SPAWN_ENTITIES_INTERIM,
-	LOAD_KEY_ROUTING_START,
-	LOAD_KEY_ROUTING_INTERIM,
-	LOAD_KEY_ROUTING_DONE,
-	LOAD_KEY_IMAGES_START,
-	LOAD_KEY_IMAGES_INTERIM,
-	LOAD_KEY_DONE
-}loadkey_t;
-
 class I18N;
 
 class idCommon {
@@ -177,10 +159,8 @@ public:
 								// Writes the user's configuration to a file
 								// greebo: Added the basePath option to allow for more control
 								// STiFU #4797: Added the enum to allow exporting cvars and keybinds separately
-    virtual void				WriteConfigToFile( const char *filename, const char* basePath = "fs_savepath", const eConfigExport configexport = eConfigExport_all) = 0;
-
-								// Writes cvars with the given flags to a file.
-	virtual void				WriteFlaggedCVarsToFile( const char *filename, int flags, const char *setCmd ) = 0;
+								// stgatilov: does not do anything if nothing was modified (except for "all" mode)
+	virtual void				WriteConfigToFile( const char *filename, eConfigExport configexport, const char *basePath = "fs_savepath") = 0;
 
 								// Begins redirection of console output to the given buffer.
 	virtual void				BeginRedirect( char *buffer, int buffersize, void (*flush)( const char * ) ) = 0;
@@ -215,8 +195,6 @@ public:
 
 								// Removes all queued warnings.
 	virtual void				ClearWarnings( const char *reason ) = 0;
-
-	virtual void				PacifierUpdate(loadkey_t key, int count) = 0; // grayman #3763
 
 								// Issues a C++ throw. Normal errors just abort to the game loop,
 								// which is appropriate for media or dynamic logic errors.

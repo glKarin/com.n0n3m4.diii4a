@@ -89,7 +89,10 @@ public:
 	float			Cross( const idVec2 &v2 ) const {
 		return x * v2.y - y * v2.x;
 	}
-	void			MulCW( const idVec2& a );									// multiply on vector component-wise
+	idVec2 &		MulCW( const idVec2 &a );									// multiply on vector component-wise
+	idVec2 &		DivCW( const idVec2 &a );									// divide on vector component-wise
+	idVec2 &		MinCW( const idVec2 &a );									// component-wise minimum
+	idVec2 &		MaxCW( const idVec2 &a );									// component-wise maximum
 };
 
 extern idVec2 vec2_origin;
@@ -301,6 +304,29 @@ ID_FORCE_INLINE float *idVec2::ToFloatPtr( void ) {
 	return &x;
 }
 
+ID_FORCE_INLINE idVec2 &idVec2::MulCW( const idVec2 &a ) {
+	x *= a.x;
+	y *= a.y;
+	return *this;
+}
+
+ID_FORCE_INLINE idVec2 &idVec2::DivCW( const idVec2 &a ) {
+	x /= a.x;
+	y /= a.y;
+	return *this;
+}
+
+ID_FORCE_INLINE idVec2 &idVec2::MinCW( const idVec2 &a ) {
+	x = idMath::Fmin(x, a.x);
+	y = idMath::Fmin(y, a.y);
+	return *this;
+}
+
+ID_FORCE_INLINE idVec2 &idVec2::MaxCW( const idVec2 &a ) {
+	x = idMath::Fmax(x, a.x);
+	y = idMath::Fmax(y, a.y);
+	return *this;
+}
 
 //===============================================================
 //
@@ -340,6 +366,8 @@ public:
 	idVec3 &		operator*=( const float a );
 	idVec3 &		MulCW( const idVec3 &a );									// multiply on vector component-wise
 	idVec3 &		DivCW( const idVec3 &a );									// divide on vector component-wise
+	idVec3 &		MinCW( const idVec3 &a );									// component-wise minimum
+	idVec3 &		MaxCW( const idVec3 &a );									// component-wise maximum
 
 	friend idVec3	operator*( const float a, const idVec3 b );
 
@@ -501,7 +529,6 @@ ID_FORCE_INLINE idVec3 &idVec3::MulCW( const idVec3 &a ) {
 	x *= a.x;
 	y *= a.y;
 	z *= a.z;
-
 	return *this;
 }
 
@@ -509,7 +536,20 @@ ID_FORCE_INLINE idVec3 &idVec3::DivCW( const idVec3 &a ) {
 	x /= a.x;
 	y /= a.y;
 	z /= a.z;
+	return *this;
+}
 
+ID_FORCE_INLINE idVec3 &idVec3::MinCW( const idVec3 &a ) {
+	x = idMath::Fmin(x, a.x);
+	y = idMath::Fmin(y, a.y);
+	z = idMath::Fmin(z, a.z);
+	return *this;
+}
+
+ID_FORCE_INLINE idVec3 &idVec3::MaxCW( const idVec3 &a ) {
+	x = idMath::Fmax(x, a.x);
+	y = idMath::Fmax(y, a.y);
+	z = idMath::Fmax(z, a.z);
 	return *this;
 }
 

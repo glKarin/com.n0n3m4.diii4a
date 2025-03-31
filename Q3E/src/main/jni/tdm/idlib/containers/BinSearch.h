@@ -128,4 +128,15 @@ ID_INLINE int idBinSearch_GreaterEqual( const type *array, const int arraySize, 
 	return offset+res;
 }
 
+typedef struct exponentialSearchParams_s {
+	float initValue;
+	float minValue, maxValue;
+	float relativePrecision, absolutePrecision;
+} exponentialSearchParams_t;
+
+// stgatilov: finds maximum positive value where condition is still true
+// it is assumed that condition is monotonic: first true, then false
+// returns maxValue if condition is true everywhere, minValue - eps if condition is false everywhere
+float idExponentialSearch_MaxTrue( bool (*condition)(void*, float), void *context, const exponentialSearchParams_t &params );
+
 #endif /* !__BINSEARCH_H__ */

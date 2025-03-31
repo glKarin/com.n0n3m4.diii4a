@@ -45,7 +45,7 @@ Posix_AddKeyboardPollEvent
 */
 bool Posix_AddKeyboardPollEvent(int key, bool state) {
 	if (poll_keyboard_event_count >= MAX_POLL_EVENTS + POLL_EVENTS_HEADROOM) {
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: only show warning
         common->Warning("poll_keyboard_event_count exceeded MAX_POLL_EVENT + POLL_EVENTS_HEADROOM\n");
         return false;
 #else
@@ -72,7 +72,7 @@ Posix_AddMousePollEvent
 */
 bool Posix_AddMousePollEvent(int action, int value) {
 	if (poll_mouse_event_count >= MAX_POLL_EVENTS + POLL_EVENTS_HEADROOM) {
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: only show warning
         common->Warning("poll_mouse_event_count exceeded MAX_POLL_EVENT + POLL_EVENTS_HEADROOM\n");
         return false;
 #else

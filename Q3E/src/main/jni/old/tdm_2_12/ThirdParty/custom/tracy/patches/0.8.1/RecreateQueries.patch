@@ -1,0 +1,14 @@
+--- TracyOpenGL.hpp
++++ TracyOpenGL.hpp
+@@ -124,6 +124,11 @@
+         TracyLfqCommit;
+     }
+ 
++    void RecreateQueries()
++    {
++        glGenQueries( QueryCount, m_query );
++    }
++
+     void Name( const char* name, uint16_t len )
+     {
+         auto ptr = (char*)tracy_malloc( len );

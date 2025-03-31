@@ -19,11 +19,18 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/tr_local.h"
 #include "game/Grabber.h"
 
+
+idCVar r_subviewMaxDepth(
+	"r_subviewMaxDepth", "4", CVAR_RENDERER | CVAR_INTEGER,
+	"How many nested subviews to generate at most (#6434).\n"
+	"For instance: value = 1 means that direct mirrors and remotes are rendered, but all subviews nested inside them are black."
+);
+
+
 typedef struct {
 	idVec3		origin;
 	idMat3		axis;
 } orientation_t;
-
 
 /*
 =================
@@ -208,9 +215,13 @@ static viewDef_t *R_MirrorViewBySurface( drawSurf_t *drawSurf ) {
 	parms = (viewDef_t *)R_FrameAlloc( sizeof( *parms ) );
 	*parms = *tr.viewDef;
 	parms->renderView.viewID = VID_SUBVIEW;	// clear to allow player bodies to show up, and suppress view weapons
+	parms->unlockedRenderView = nullptr;
 
 	parms->isSubview = true;
 	parms->isMirror = true;
+	parms->isPortalSky = false;
+	parms->isXray = false;
+	parms->xrayEntityMask = XR_IGNORE;
 
 	// create plane axis for the portal we are seeing
 	R_PlaneForSurface( drawSurf->frontendGeo, originalPlane );
@@ -240,11 +251,9 @@ static viewDef_t *R_MirrorViewBySurface( drawSurf_t *drawSurf ) {
 	R_LocalPointToGlobal( drawSurf->space->modelMatrix, viewOrigin, parms->initialViewAreaOrigin );
 
 	// set the mirror clip plane
-	parms->clipPlane = (idPlane*)R_FrameAlloc( sizeof( idPlane) );;
-	parms->clipPlane->Normal() = -camera.axis[0];
+	parms->numClipPlanes = 1;
+	parms->clipPlane[0] = plane;
 
-	parms->clipPlane->ToVec4()[3] = -( camera.origin * parms->clipPlane->Normal() );
-	
 	return parms;
 }
 
@@ -253,16 +262,20 @@ static viewDef_t *R_MirrorViewBySurface( drawSurf_t *drawSurf ) {
 R_XrayViewBySurface
 ========================
 */
-static viewDef_t *R_XrayViewBySurface( drawSurf_t *drawSurf ) {
+static viewDef_t *R_XrayView() {
 	viewDef_t		*parms;
 
 	// copy the viewport size from the original
 	parms = (viewDef_t *)R_FrameAlloc( sizeof( *parms ) );
 	*parms = *tr.viewDef;
 	parms->renderView.viewID = VID_PLAYER_VIEW;	// clear to allow player bodies to show up, and suppress view weapons
+	parms->unlockedRenderView = nullptr;
 
+	parms->isXray = true;
 	parms->isSubview = true;
+	parms->isPortalSky = false;
 	parms->xrayEntityMask = XR_ONLY;
+
 
 	return parms;
 }
@@ -274,10 +287,6 @@ R_RemoteRender
 */
 static void R_RemoteRender( drawSurf_t *surf, textureStage_t *stage ) {
 
-	// remote views can be reused in a single frame
-	if ( stage->dynamicFrameCount == tr.frameCount ) 
-		return;
-
 	// if the entity doesn't have a remoteRenderView, do nothing
 	if ( !surf->space->entityDef->parms.remoteRenderView ) 
 		return;
@@ -285,9 +294,15 @@ static void R_RemoteRender( drawSurf_t *surf, textureStage_t *stage ) {
 	// copy the viewport size from the original
 	viewDef_t* parms = (viewDef_t *)R_FrameAlloc( sizeof( *parms ) );
 	*parms = *tr.viewDef;
+	parms->unlockedRenderView = nullptr;
 
 	parms->isSubview = true;
 	parms->isMirror = false;
+	parms->isPortalSky = false;
+	parms->isXray = false;
+		// if we see remote screen in mirror, drop mirror's clip plane
+	parms->numClipPlanes = 0;
+	parms->xrayEntityMask = XR_IGNORE;
 
 	parms->renderView = *surf->space->entityDef->parms.remoteRenderView;
 	parms->renderView.viewID = VID_SUBVIEW;	// clear to allow player bodies to show up, and suppress view weapons
@@ -314,11 +329,11 @@ static void R_RemoteRender( drawSurf_t *surf, textureStage_t *stage ) {
 	R_RenderView(*parms);
 
 	// copy this rendering to the image
-	stage->dynamicFrameCount = tr.frameCount;
-	if ( !stage->image )
-		stage->image = globalImages->scratchImage;
+	stage->image = nullptr;
+	idImageScratch *outputTexture = tr.CreateImageForSubview();
+	tr.CaptureRenderToImage( *outputTexture );
+	surf->dynamicImageOverride = outputTexture;
 
-	tr.CaptureRenderToImage( *stage->image->AsScratch() );
 	tr.UnCrop();
 }
 
@@ -328,18 +343,8 @@ R_MirrorRender
 =================
 */
 void R_MirrorRender( drawSurf_t *surf, textureStage_t *stage, idScreenRect& scissor ) {
-	viewDef_t		*parms;
-
-	if ( tr.viewDef->superView && tr.viewDef->superView->isSubview ) // #4615 HOM effect - only draw mirrors from player's view and top-level subviews
-		return;
-
-	// remote views can be reused in a single frame
-	if ( stage->dynamicFrameCount == tr.frameCount ) {
-		return;
-	}
-
 	// issue a new view command
-	parms = R_MirrorViewBySurface( surf );
+	viewDef_t *parms = R_MirrorViewBySurface( surf );
 	if ( !parms ) {
 		return;
 	}
@@ -365,28 +370,30 @@ void R_MirrorRender( drawSurf_t *surf, textureStage_t *stage, idScreenRect& scis
 	R_RenderView( *parms );
 
 	// copy this rendering to the image
-	stage->dynamicFrameCount = tr.frameCount;
-	if ( !stage->image )
-		stage->image = globalImages->scratchImage;
+	stage->image = nullptr;
+	idImageScratch *outputTexture = tr.CreateImageForSubview();
+	tr.CaptureRenderToImage( *outputTexture );
+	surf->dynamicImageOverride = outputTexture;
 
-	tr.CaptureRenderToImage( *stage->image->AsScratch() );
 	//tr.UnCrop();
 }
 
 /*
 =================
 R_PortalRender
-duzenko: copy pasted from idPlayerView::SingleView
 =================
 */
-void R_PortalRender( textureStage_t *stage, idScreenRect& scissor ) {
+void R_PortalRender() {
 	viewDef_t		*parms;
 	parms = (viewDef_t *)R_FrameAlloc( sizeof( *parms ) );
-	*parms = *tr.primaryView;
+	*parms = *tr.viewDef;
 	parms->renderView.viewID = VID_SUBVIEW;
-	parms->clipPlane = nullptr;
+	parms->unlockedRenderView = nullptr;
+
+	parms->numClipPlanes = 0;
 	parms->superView = tr.viewDef;
 	parms->subviewSurface = nullptr;
+	parms->isPortalSky = true;
 
 	parms->renderView.viewaxis = parms->renderView.viewaxis * gameLocal.GetLocalPlayer()->playerView.ShakeAxis();
 
@@ -471,19 +478,11 @@ void R_PortalRender( textureStage_t *stage, idScreenRect& scissor ) {
 R_XrayRender
 =================
 */
-void R_XrayRender( drawSurf_t *surf, textureStage_t *stage, idScreenRect &scissor ) {
-	viewDef_t		*parms;
-
-	// remote views can be reused in a single frame
-	if ( stage->dynamicFrameCount == tr.frameCount ) {
-		return;
-	}
-
+void R_XrayRender( drawSurf_t *surf, textureStage_t *stage, idImageScratch **imageOverride ) {
 	// issue a new view command
-	parms = R_XrayViewBySurface( surf );
-	if ( !parms ) {
-		return;
-	}
+	viewDef_t *parms = R_XrayView();
+	assert( parms );
+
 
 	if ( stage->width ) { // FIXME wrong field use?
 		parms->xrayEntityMask = XR_SUBSTITUTE;
@@ -509,15 +508,19 @@ void R_XrayRender( drawSurf_t *surf, textureStage_t *stage, idScreenRect &scisso
 	// triangle culling order changes with mirroring
 	parms->isMirror = ( ( (int)parms->isMirror ^ (int)tr.viewDef->isMirror ) != 0 );
 
+
 	// generate render commands for it
 	R_RenderView( *parms );
 
-	// copy this rendering to the image
-	stage->dynamicFrameCount = tr.frameCount;
-	stage->image = globalImages->xrayImage;
+	stage->image = nullptr;
+	idImageScratch *outputTexture = tr.CreateImageForSubview();
+	tr.CaptureRenderToImage( *outputTexture );
+	if ( surf )
+		surf->dynamicImageOverride = outputTexture;
+	if ( imageOverride )
+		*imageOverride = outputTexture;
 
-	tr.CaptureRenderToImage( *globalImages->xrayImage );
-	tr.viewDef->hasXraySubview = true;
+	//tr.UnCrop();
 }
 
 /*
@@ -531,6 +534,7 @@ bool R_Lightgem_Render() {
 	// copy the viewport size from the original
 	auto &parms = *(viewDef_t *)R_FrameAlloc( sizeof( viewDef_t ) );
 	parms = *tr.viewDef;
+	parms.unlockedRenderView = nullptr;
 	parms.isSubview = true;
 
 	// Get position for lg
@@ -564,6 +568,8 @@ bool R_Lightgem_Render() {
 
 	gameRenderWorld->UpdateEntityDef( lg->GetModelDefHandle(), lgent ); // Make sure the lg is in the updated position
 	auto &lightgemRv = parms.renderView;
+	// Tinkerton lightgem fix
+	lightgemRv.vieworg = lg->GetPhysics()->GetOrigin();
 	lightgemRv.width = SCREEN_WIDTH;
 	lightgemRv.height = SCREEN_HEIGHT;
 	lightgemRv.fov_x = lightgemRv.fov_y = DARKMOD_LG_RENDER_FOV;	// square, TODO: investigate lowering the value to increase performance on tall maps
@@ -678,7 +684,6 @@ R_GenerateSurfaceSubview
 */
 bool	R_GenerateSurfaceSubview( drawSurf_t *drawSurf ) {
 	idBounds		ndcBounds;
-	viewDef_t		*parms;
 	const idMaterial		*shader;
 
 	// for testing the performance hit
@@ -689,18 +694,6 @@ bool	R_GenerateSurfaceSubview( drawSurf_t *drawSurf ) {
 		return false;
 
 	shader = drawSurf->material;
-
-	// never recurse through a subview surface that we are
-	// already seeing through
-	for ( parms = tr.viewDef ; parms ; parms = parms->superView ) {
-		if ( parms->subviewSurface
-			&& parms->subviewSurface->frontendGeo == drawSurf->frontendGeo
-			&& parms->subviewSurface->space->entityDef == drawSurf->space->entityDef ) {
-			break;
-		}
-	}
-	if ( parms ) 
-		return false;
 
 	// crop the scissor bounds based on the precise cull
 	idScreenRect	scissor;
@@ -731,10 +724,11 @@ bool	R_GenerateSurfaceSubview( drawSurf_t *drawSurf ) {
 				R_MirrorRender( drawSurf, const_cast<textureStage_t *>(&stage->texture), scissor );
 				break;
 			case DI_XRAY_RENDER:
-				R_XrayRender( drawSurf, const_cast<textureStage_t *>(&stage->texture), scissor );
+				R_XrayRender( drawSurf, const_cast<textureStage_t *>(&stage->texture), nullptr );
 				break;
 			case DI_PORTAL_RENDER:
-				// R_PortalRender( drawSurf, const_cast<textureStage_t *>(&stage->texture), scissor );
+				common->Error("Portal subview error");	// never happens, see R_GenerateSubViews
+				R_PortalRender();
 				break;
 			}
 		}
@@ -757,11 +751,6 @@ would change tr.viewCount.
 bool R_GenerateSubViews( void ) {
 	TRACE_CPU_SCOPE( "R_GenerateSubViews" )
 
-	drawSurf_t *drawSurf;
-	int				i;
-	bool			subviews;
-	const idMaterial		*shader;
-
 	// for testing the performance hit
 	if ( r_skipSubviews || tr.viewDef->areaNum < 0 ) 
 		return false;
@@ -770,7 +759,12 @@ bool R_GenerateSubViews( void ) {
 	if ( tr.viewDef->IsLightGem() )
 		return false;
 
-	subviews = false;
+	// nbohr1more: fix compass render error with Xray
+	if (tr.viewDef->renderWorld->mapName.IsEmpty()) {
+	    return false;
+	}
+
+	bool subviews = false;
 
 	extern idCVar cv_lg_interleave;								// FIXME a better way to check for RenderWindow views? (compass, etc)
 	if ( !tr.viewDef->isSubview && cv_lg_interleave.GetBool() && !tr.viewDef->renderWorld->mapName.IsEmpty() ) {
@@ -778,39 +772,54 @@ bool R_GenerateSubViews( void ) {
 		subviews = true;
 	}
 
+	int depth = 0;
+	bool isInsidePortalSky = false;
+	for ( viewDef_s *view = tr.viewDef; view; view = view->superView ) {
+		depth++;
+		if ( view->isPortalSky )
+			isInsidePortalSky = true;
+	}
+	if ( depth > r_subviewMaxDepth.GetInteger() )
+		return false;
+
 	// scan the surfaces until we either find a subview, or determine
 	// there are no more subview surfaces.
-	for ( i = 0; i < tr.viewDef->numDrawSurfs; i++ ) {
-		drawSurf = tr.viewDef->drawSurfs[i];
-		shader = drawSurf->material;
+	for ( int i = 0; i < tr.viewDef->numDrawSurfs; i++ ) {
+		drawSurf_t *drawSurf = tr.viewDef->drawSurfs[i];
+		const idMaterial *shader = drawSurf->material;
 
 		if ( !shader || !shader->HasSubview() )
 			continue;
 
-		if ( shader->GetSort() != SS_PORTAL_SKY ) // portal sky needs to be the last one, and only once
-			if ( R_GenerateSurfaceSubview( drawSurf ) ) {
-				subviews = true;
-			}
+		if ( shader->GetSort() == SS_PORTAL_SKY ) {
+			// portal sky needs to be the last one and only once
+			continue;
+		}
+
+		if ( R_GenerateSurfaceSubview( drawSurf ) ) {
+			subviews = true;
+		} else {
+			// #6434: probably blocked due to limits: render as black image
+			drawSurf->dynamicImageOverride = nullptr;
+		}
 	}
 
-	static bool dontReenter = false;
-	if ( !dontReenter ) {
-		dontReenter = true;
-		idScreenRect sc;
-
-		if ( tr.guiModel->hasXrayStage && !tr.viewDef->isSubview ) {
-			R_XrayRender( NULL, (textureStage_t*) tr.guiModel->hasXrayStage, sc );
+	if ( !tr.viewDef->isSubview ) {
+		// generate subviews for GUI overlays (from main view only)
+		if ( const textureStage_t *textureStage = tr.guiModel->NeedXraySubview() ) {
+			idImageScratch *imageOverride;
+			R_XrayRender( nullptr, const_cast<textureStage_t *>(textureStage), &imageOverride );
+			tr.guiModel->SetXrayImageOverride( imageOverride );
 			subviews = true;
 		}
+	}
 
-		if ( gameLocal.portalSkyEnt.GetEntity() && ( gameLocal.IsPortalSkyActive() || g_stopTime.GetBool() ) && g_enablePortalSky.GetBool()
-			&& !tr.viewDef->renderWorld->mapName.IsEmpty()  // FIXME a better way to check for RenderWindow views? (compass, etc)
-		) {
-			R_PortalRender( NULL, sc );
+	// generate portalsky only in main 3D view (not in compass), and never nest portalsky subviews in each other
+	if ( !isInsidePortalSky && tr.viewDef->renderWorld == gameRenderWorld ) {
+		if ( gameLocal.portalSkyEnt.GetEntity() && ( gameLocal.IsPortalSkyActive() || g_stopTime.GetBool() ) && g_enablePortalSky.GetBool() ) {
+			R_PortalRender();
 			subviews = true;
 		}
-
-		dontReenter = false;
 	}
 
 	return subviews;

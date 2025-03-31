@@ -54,5 +54,5 @@ private:
 	void DrawSoftParticle( const drawSurf_t *drawSurf, const shaderStage_t *pStage );
 	void DrawCustomShader( const drawSurf_t *drawSurf, const shaderStage_t *pStage );
 
-	void BindVariableStageImage( const textureStage_t *texture, const float *regs );
+	void BindVariableStageImage( const drawSurf_t *drawSurf, const textureStage_t *texture, const float *regs );
 };

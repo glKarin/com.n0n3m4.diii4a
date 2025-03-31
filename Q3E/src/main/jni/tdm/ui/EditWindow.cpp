@@ -24,6 +24,8 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "SliderWindow.h"
 #include "EditWindow.h"
 
+// Scrollbar width or height: hardcoded so that higher resolution images can be used
+static const float scrollbarSize = 16.0f;
 
 bool idEditWindow::ParseInternalVar( const char *_name, idParser *src ) {
 	if ( idStr::Icmp( _name, "maxchars" ) == 0) {
@@ -48,6 +50,15 @@ bool idEditWindow::ParseInternalVar( const char *_name, idParser *src ) {
 	}
 	if ( idStr::Icmp( _name, "source" ) == 0) {
 		ParseString( src, sourceFile );
+		return true;
+	}
+	if ( idStr::Icmp( _name, "placeholder" ) == 0) {
+		ParseString( src, placeholder );
+		placeholder = common->Translate( placeholder );
+		return true;
+	}
+	if ( idStr::Icmp( _name, "placeholderColor" ) == 0) {
+		ParseVec4( src, placeholderColor );
 		return true;
 	}
 	if ( idStr::Icmp( _name, "password" ) == 0 ) { 
@@ -87,8 +98,9 @@ void idEditWindow::CommonInit() {
 	cvarMax = 0;
 	wrap = false;
 	sourceFile = "";
+	placeholder = "";
+	placeholderColor = idVec4(1, 1, 1, 1);
 	scroller = NULL;
-	sizeBias = 0;
 	lastTextLength = 0;
 	forceScroll = false;
 	password = false;
@@ -132,6 +144,7 @@ void idEditWindow::Draw( int time, float x, float y ) {
 		lastTextLength = len;
 	}
 	float scale = textScale;
+	bool usePlaceholder = !len && !placeholder.IsEmpty();
 
 	idStr		pass;
 	const char* buffer;
@@ -141,6 +154,8 @@ void idEditWindow::Draw( int time, float x, float y ) {
 			pass += "*";
 		}
 		buffer = pass;
+	} else if ( usePlaceholder ) {
+		buffer = placeholder;
 	} else {
 		buffer = text;
 	}
@@ -157,7 +172,7 @@ void idEditWindow::Draw( int time, float x, float y ) {
 	if ( wrap && scroller->GetHigh() > 0.0f ) {
 		float lineHeight = GetMaxCharHeight( ) + 5;
 		rect.y -= scroller->GetValue() * lineHeight;
-		rect.w -= sizeBias;
+		rect.w -= scrollbarSize;
 		rect.h = ( breaks.Num() + 1 ) * lineHeight;
 	}
 
@@ -168,6 +183,9 @@ void idEditWindow::Draw( int time, float x, float y ) {
 	}
 	if ( flags & WIN_FOCUS ) {
 		color = hoverColor;
+	}
+	if ( usePlaceholder ) {
+		color = placeholderColor;
 	}
 
 	dc->DrawText( buffer, scale, 0, color, rect, wrap, (flags & WIN_FOCUS) ? cursorPos : -1);
@@ -239,6 +257,7 @@ const char *idEditWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 				text = buffer;
 				UpdateCvar( false );
 				RunScript( ON_ACTION );
+				return cmd;
 			}
 
 			return "";
@@ -279,7 +298,7 @@ const char *idEditWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 			cursorPos++;
 		}
 		EnsureCursorVisible();
-
+		return cmd;
 	} else if ( event->evType == SE_KEY && event->evValue2 ) {
 
 		if ( updateVisuals ) {
@@ -295,6 +314,7 @@ const char *idEditWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 				text = buffer;
 				UpdateCvar( false );
 				RunScript( ON_ACTION );
+				return cmd;
 			}
 			return ret;
 		}
@@ -368,6 +388,12 @@ const char *idEditWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 				dc->SetOverStrike( !dc->GetOverStrike() );
 			}
 			return ret;
+		}
+
+		if ( key == K_MWHEELUP ) {
+			scroller->SetValue( scroller->GetValue() - 1.0f );
+		} else if ( key == K_MWHEELDOWN ) {
+			scroller->SetValue( scroller->GetValue() + 1.0f );
 		}
 
 		if ( key == K_DOWNARROW ) {
@@ -448,6 +474,7 @@ This is the same as in idListWindow
 void idEditWindow::InitScroller( bool horizontal )
 {
 	const char *thumbImage = "guis/assets/scrollbar_thumb.tga";
+	const idMaterial *thumbMat = declManager->FindMaterial(thumbImage);
 	const char *barImage = "guis/assets/scrollbarv.tga";
 	const char *scrollerName = "_scrollerWinV";
 
@@ -458,23 +485,25 @@ void idEditWindow::InitScroller( bool horizontal )
 
 	const idMaterial *mat = declManager->FindMaterial( barImage );
 	mat->SetSort( SS_GUI );
-	sizeBias = mat->GetImageWidth();
 
 	idRectangle scrollRect;
 	if (horizontal) {
-		sizeBias = mat->GetImageHeight();
 		scrollRect.x = 0;
-		scrollRect.y = (clientRect.h - sizeBias);
+		scrollRect.y = (clientRect.h - scrollbarSize);
 		scrollRect.w = clientRect.w;
-		scrollRect.h = sizeBias;
+		scrollRect.h = scrollbarSize;
 	} else {
-		scrollRect.x = (clientRect.w - sizeBias);
+		scrollRect.x = (clientRect.w - scrollbarSize);
 		scrollRect.y = 0;
-		scrollRect.w = sizeBias;
+		scrollRect.w = scrollbarSize;
 		scrollRect.h = clientRect.h;
 	}
 
 	scroller->InitWithDefaults(scrollerName, scrollRect, foreColor, matColor, mat->GetName(), thumbImage, !horizontal, true);
+
+	// Scale scrollbar thumb
+	scroller->SetThumbSize(scrollbarSize, scrollbarSize);
+
 	InsertChild(scroller, NULL);
 	scroller->SetBuddy(this);
 }
@@ -531,7 +560,7 @@ void idEditWindow::EnsureCursorVisible()
 
 		breaks.Clear();
 		idRectangle rect = textRect;
-		rect.w -= sizeBias;
+		rect.w -= scrollbarSize;
 		dc->DrawText(text, textScale, textAlign, colorWhite, rect, true, (flags & WIN_FOCUS) ? cursorPos : -1, true, &breaks );
 
 		int fit = textRect.h / (GetMaxCharHeight() + 5);

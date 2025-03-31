@@ -158,6 +158,13 @@ public class Q3EInterface
 			else
 				return Q3EGlobals.LIB_ENGINE3_REALRTCW;
 		}
+		else if(isTDM)
+		{
+			if(Q3EGlobals.GAME_VERSION_TDM_2_12.equalsIgnoreCase(game_version))
+				return Q3EGlobals.LIB_ENGINE4_TDM_2_12;
+			else
+				return Q3EGlobals.LIB_ENGINE4_TDM;
+		}
 		else
 			return EngineLibName();
 	}
@@ -1082,6 +1089,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_d3bfg_rendererBackend;
 		else if(isRealRTCW)
 			return Q3EPreference.pref_harm_realrtcw_version;
+		else if(isTDM)
+			return Q3EPreference.pref_harm_tdm_version;
 		else
 			return null;
 	}
@@ -1149,8 +1158,13 @@ public class Q3EInterface
 			};
 		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
 			return new String[] {
-					Q3EGlobals.GAME_VERSION_CURRENT,
+					Q3EGlobals.GAME_VERSION_REALRTCW,
 					Q3EGlobals.GAME_VERSION_REALRTCW_5_0,
+			};
+		else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+			return new String[] {
+					Q3EGlobals.GAME_VERSION_TDM,
+					Q3EGlobals.GAME_VERSION_TDM_2_12,
 			};
 		else
 			return null;
@@ -1196,6 +1210,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_d3bfg_rendererBackend;
 		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
 			return Q3EPreference.pref_harm_realrtcw_version;
+		else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_tdm_version;
 		else
 			return null;
 	}

@@ -20,6 +20,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #include "renderer/tr_local.h"
 #include "math/Line.h"
+#include "LightQuerySystem.h"
 
 idCVarInt r_useAreaLocks( "r_useAreaLocks", "3", CVAR_RENDERER, "1 - suppress multiple entity/area refs, 2 - lights, 3 - both" );
 
@@ -266,6 +267,9 @@ idRenderWorldLocal::idRenderWorldLocal() {
 	//numInterAreaPortals = 0;
 
 	interactionTable.Init();
+
+	lightQuerySystem = new LightQuerySystem();
+	lightQuerySystem->Init( this );
 }
 
 /*
@@ -281,6 +285,8 @@ idRenderWorldLocal::~idRenderWorldLocal() {
 	R_ClearDebugPolygons( 0 );
 	R_ClearDebugLines( 0 );
 	R_ClearDebugText( 0 );
+
+	delete lightQuerySystem;
 }
 
 /*
@@ -792,13 +798,9 @@ to handle mirrors,
 ====================
 */
 void idRenderWorldLocal::RenderScene( const renderView_t &renderView ) {
-	//renderView_t	copy;
-
 	if ( !glConfig.isInitialized ) {
 		return;
 	}
-
-	//copy = *renderView;
 
 	// skip front end rendering work, which will result
 	// in only gui drawing
@@ -821,6 +823,8 @@ void idRenderWorldLocal::RenderScene( const renderView_t &renderView ) {
 	viewDef_t		*parms = (viewDef_t *)R_ClearedFrameAlloc( sizeof( *parms ) );
 	parms->renderView = renderView;
 
+	R_LockView_FrontendStart( *parms );
+
 	if ( tr.takingScreenshot ) {
 		parms->renderView.forceUpdate = true;
 	}
@@ -838,7 +842,7 @@ void idRenderWorldLocal::RenderScene( const renderView_t &renderView ) {
 
 
 	parms->isSubview = false;
-	parms->initialViewAreaOrigin = renderView.vieworg;
+	parms->initialViewAreaOrigin = parms->renderView.vieworg;
 	parms->floatTime = parms->renderView.time * 0.001f;
 	parms->renderWorld = this;
 
@@ -867,9 +871,14 @@ void idRenderWorldLocal::RenderScene( const renderView_t &renderView ) {
 		r_useInteractionTable.ClearModified();
 	}
 
+	// stgatilov #6546: process light queries from game on CPU
+	if ( lightQuerySystem ) {
+		lightQuerySystem->Think( parms );
+	}
+
 	// save this world for use by some console commands
 	tr.primaryWorld = this;
-	tr.primaryRenderView = renderView;
+	tr.primaryRenderView = parms->renderView;
 	tr.primaryView = parms;
 
 	// rendering this view may cause other views to be rendered
@@ -881,7 +890,7 @@ void idRenderWorldLocal::RenderScene( const renderView_t &renderView ) {
 	// now write delete commands for any modified-but-not-visible entities, and
 	// add the renderView command to the demo
 	if ( session->writeDemo ) {
-		WriteRenderView( renderView );
+		WriteRenderView( parms->renderView );
 	}
 
 	int endTime = Sys_Milliseconds();
@@ -1459,6 +1468,9 @@ bool idRenderWorldLocal::TraceAll( modelTrace_t &trace, const idVec3 &start, con
 	trace.point = end;
 	idVec3 radiusVec(radius, radius, radius);
 
+	if ((end - start).LengthSqr() <= 1e-10f)
+		return false;	// guard against division by zero in GetInverseMovementVelocity
+
 	// stgatilov: this is almost the same algorithm that I put into idClip
 
 	// bounds for the whole trace
@@ -1508,7 +1520,14 @@ bool idRenderWorldLocal::TraceAll( modelTrace_t &trace, const idVec3 &start, con
 				continue;
 
 			// filter 1: by entity
-			if ( filterCallback && !filterCallback(context, &def->parms, nullptr, nullptr) )
+			if ( filterCallback && !filterCallback(context, &entityIdx, &def->parms, nullptr, nullptr) )
+				continue;
+
+			// note: def->referenceBounds is set in UpdateEntityDef -> R_CreateEntityDefs + R_DeriveEntityData
+			// we should use these conservative bounds to avoid generating MD5 models without need
+			const idBounds &entityBounds = def->globalReferenceBounds;
+			// if the model bounds do not overlap with the trace bounds
+			if ( !traceBounds.IntersectsBounds( entityBounds ) || !entityBounds.LineIntersection( start, trace.point )  )
 				continue;
 
 			model = R_EntityDefDynamicModel( def );
@@ -1516,13 +1535,7 @@ bool idRenderWorldLocal::TraceAll( modelTrace_t &trace, const idVec3 &start, con
 				continue;
 
 			// filter 2: by entity & model
-			if ( filterCallback && !filterCallback(context, &def->parms, model, nullptr) )
-				continue;
-
-			idBounds entityBounds;
-			entityBounds.FromTransformedBounds( model->Bounds( &def->parms ), def->parms.origin, def->parms.axis );
-			// if the model bounds do not overlap with the trace bounds
-			if ( !traceBounds.IntersectsBounds( entityBounds ) || !entityBounds.LineIntersection( start, trace.point )  )
+			if ( filterCallback && !filterCallback(context, &entityIdx, &def->parms, model, nullptr) )
 				continue;
 
 			for ( int s = 0; s < model->NumSurfaces(); s++ ) {
@@ -1545,7 +1558,7 @@ bool idRenderWorldLocal::TraceAll( modelTrace_t &trace, const idVec3 &start, con
 					continue;	// no intersection
 
 				// filter 3: by entity & model & material
-				if ( filterCallback && !filterCallback( context, &def->parms, model, material ) )
+				if ( filterCallback && !filterCallback( context, &entityIdx, &def->parms, model, material ) )
 					continue;
 
 				bool duplicate = false;
@@ -1628,7 +1641,7 @@ const char* playerMaterialExcludeList[] = {
 };
 
 bool idRenderWorldLocal::Trace( modelTrace_t &trace, const idVec3 &start, const idVec3 &end, const float radius, bool skipDynamic, bool skipPlayer /*_D3XP*/ ) const {
-	auto filter = [&](const renderEntity_t *renderEntity, const idRenderModel *renderModel, const idMaterial *material) -> bool {
+	auto filter = [&](const qhandle_t *handle, const renderEntity_t *renderEntity, const idRenderModel *renderModel, const idMaterial *material) -> bool {
 		if (material) {
 			/* _D3XP addition. */
 			if ( skipPlayer ) {
@@ -1740,6 +1753,19 @@ bool idRenderWorldLocal::FastWorldTrace( modelTrace_t &results, const idVec3 &st
 		return ( results.fraction < 1.0f );
 	}
 	return false;
+}
+
+idRenderWorld::lightQuery_t idRenderWorldLocal::LightAtPointQuery_AddQuery( qhandle_t onEntityId, const samplePointOnModel_t &point, const idList<qhandle_t> &ignoredEntities ) {
+	const idRenderEntityLocal *onEntity = entityDefs[onEntityId];
+	return lightQuerySystem->AddQuery(onEntity, point, ignoredEntities );
+}
+
+bool idRenderWorldLocal::LightAtPointQuery_CheckResult( lightQuery_t query, idVec3 &outputValue, idVec3& outputPosition ) const {
+	return lightQuerySystem->CheckResult( query, outputValue, outputPosition );
+}
+
+void idRenderWorldLocal::LightAtPointQuery_Forget( lightQuery_t query ) {
+	lightQuerySystem->Forget( query );
 }
 
 /*
@@ -2429,19 +2455,17 @@ idRenderWorldLocal::DebugBounds
 ====================
 */
 void idRenderWorldLocal::DebugBounds( const idVec4 &color, const idBounds &bounds, const idVec3 &org, const int lifetime ) {
-	int i;
-	idVec3 v[8];
-
 	if ( bounds.IsCleared() ) {
 		return;
 	}
 
-	for ( i = 0; i < 8; i++ ) {
+	idVec3 v[8];
+	for ( int i = 0; i < 8; i++ ) {
 		v[i][0] = org[0] + bounds[(i^(i>>1))&1][0];
 		v[i][1] = org[1] + bounds[(i>>1)&1][1];
 		v[i][2] = org[2] + bounds[(i>>2)&1][2];
 	}
-	for ( i = 0; i < 4; i++ ) {
+	for ( int i = 0; i < 4; i++ ) {
 		DebugLine( color, v[i], v[(i+1)&3], lifetime );
 		DebugLine( color, v[4+i], v[4+((i+1)&3)], lifetime );
 		DebugLine( color, v[i], v[4+i], lifetime );
@@ -2454,14 +2478,43 @@ idRenderWorldLocal::DebugBox
 ====================
 */
 void idRenderWorldLocal::DebugBox( const idVec4 &color, const idBox &box, const int lifetime ) {
-	int i;
 	idVec3 v[8];
-
 	box.ToPoints( v );
-	for ( i = 0; i < 4; i++ ) {
+	for ( int i = 0; i < 4; i++ ) {
 		DebugLine( color, v[i], v[(i+1)&3], lifetime );
 		DebugLine( color, v[4+i], v[4+((i+1)&3)], lifetime );
 		DebugLine( color, v[i], v[4+i], lifetime );
+	}
+}
+
+/*
+====================
+idRenderWorldLocal::DebugFilledBox
+====================
+*/
+void idRenderWorldLocal::DebugFilledBox( const idVec4 &color, const idBox &box, const int lifetime, const bool depthTest ) {
+	// get box vertexes in order of binary encoding
+	idVec3 v[8];
+	box.ToPoints( v );
+	idSwap(v[2], v[3]);
+	idSwap(v[6], v[7]);
+
+	idWinding w;
+	w.SetNumPoints( 4 );
+	for ( int i : { 0, 7 } ) {
+		for ( int j = 0; j < 3; j++ ) {
+			int a = 1 << j;
+			int b = 1 << ((j + 1) % 3);
+			int quad[4] = { i, i ^ a, i ^ a ^ b, i ^ b };
+			if ( i ) {
+				idSwap( quad[0], quad[3] );
+				idSwap( quad[1], quad[2] );
+			}
+			for ( int k = 0; k < 4; k++ ) {
+				w[k] = v[quad[k]];
+			}
+			DebugPolygon( color, w, lifetime, depthTest );
+		}
 	}
 }
 

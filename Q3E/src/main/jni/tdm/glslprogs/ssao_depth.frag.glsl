@@ -1,6 +1,7 @@
 #version 320 es
 
 precision highp float;
+precision highp int;
 
 out float ViewSpaceZ;
 
@@ -14,5 +15,5 @@ float nearZ = -0.5 * u_projectionMatrix[3][2];
 
 void main() {
 	float depth = texelFetch(u_depthTexture, ivec2(gl_FragCoord.xy), 0).r;
-	ViewSpaceZ = nearZ / (depth + 0.5 * (u_projectionMatrix[2][2] - 1));
+	ViewSpaceZ = nearZ / (depth + 0.5 * (u_projectionMatrix[2][2] - 1.0));
 }

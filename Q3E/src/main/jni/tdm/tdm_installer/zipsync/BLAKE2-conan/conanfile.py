@@ -1,43 +1,52 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools import files
+from os import path
 
 class Blake2Conan(ConanFile):
-	name = "BLAKE2"
-	version = "master"
-	license = "CC0 1.0 Universal"
-	url = "https://github.com/Enhex/conan-BLAKE2"
-	description = "BLAKE2 cryptographic hash function."
-	settings = "os", "compiler", "build_type", "arch"
-	options = {
-		"shared": [True, False],
-		"SSE": ["None", "SSE2", "SSE3", "SSE4_1", "AVX", "XOP"]
-	}
-	default_options = (
-		"shared=False",
-		"SSE=None"
-	)
-	generators = "cmake"
-	exports_sources = "CMakeLists.txt"
+    name = "blake2"
+    license = "CC0 1.0 Universal"
+    url = "https://github.com/Enhex/conan-BLAKE2"
+    description = "BLAKE2 cryptographic hash function."
+    settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "SSE": ["None", "SSE2"]
+    }
+    default_options = {
+        "SSE": "None"
+    }
+    exports_sources = "src/CMakeLists.txt"
 
-	def source(self):
-		self.run("git clone --depth 1 https://github.com/BLAKE2/BLAKE2.git")
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-	def build(self):
-		cmake = CMake(self)
-		cmake.definitions["SSE"] = self.options.SSE
-		cmake.configure(source_folder=self.source_folder)
-		cmake.build()
+    def source(self):
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-	def package(self):
-		if self.options.SSE == "None":
-			self.copy("blake2*.h", dst="include", src="BLAKE2/ref")
-		else:
-			self.copy("blake2*.h", dst="include", src="BLAKE2/sse")
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["SSE"] = str(self.options.SSE)
+        tc.generate()
 
-		self.copy("*.lib", dst="lib", keep_path=False)
-		self.copy("*.dll", dst="bin", keep_path=False)
-		self.copy("*.so", dst="lib", keep_path=False)
-		self.copy("*.dylib", dst="lib", keep_path=False)
-		self.copy("*.a", dst="lib", keep_path=False)
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
-	def package_info(self):
-		self.cpp_info.libs = ["BLAKE2"]
+    def package(self):
+        if self.options.SSE == "None":
+            subdir = "ref"
+        else:
+            subdir = "sse"
+        files.copy(self, "BLAKE2*.h", src=path.join(self.source_folder, subdir), dst=path.join(self.package_folder, "include"))
+
+        files.copy(self, "*.lib", src=self.build_folder, dst=path.join(self.package_folder, "lib"), keep_path=False)
+        files.copy(self, "*.dll", src=self.build_folder, dst=path.join(self.package_folder, "bin"), keep_path=False)
+        files.copy(self, "*.so", src=self.build_folder, dst=path.join(self.package_folder, "lib"), keep_path=False)
+        files.copy(self, "*.dylib", src=self.build_folder, dst=path.join(self.package_folder, "lib"), keep_path=False)
+        files.copy(self, "*.a", src=self.build_folder, dst=path.join(self.package_folder, "lib"), keep_path=False)
+
+        files.copy(self, "COPYING", src=self.source_folder, dst=path.join(self.package_folder, "licenses"), keep_path=False)
+
+    def package_info(self):
+        self.cpp_info.libs = ["blake2"]

@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 in vec4 attr_Position;
 in vec2 attr_TexCoord;

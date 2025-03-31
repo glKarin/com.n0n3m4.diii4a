@@ -744,6 +744,30 @@ idCVar tdm_subtitles_debug(
 	"tdm_subtitles_debug", "0", CVAR_BOOL | CVAR_SOUND | CVAR_ARCHIVE,
 	"If set to 1, then internal debug information is displayed for subtitles."
 );
+idCVar tdm_subtitles_volumeMin(
+	"tdm_subtitles_volumeMin", "0.003", CVAR_FLOAT | CVAR_SOUND | CVAR_ARCHIVE,
+	"Sound of this volume have ring alpha = 0, quieter sounds are not displayed",
+	1e-9f, 1.0f
+);
+idCVar tdm_subtitles_volumeMax(
+	"tdm_subtitles_volumeMax", "0.1", CVAR_FLOAT | CVAR_SOUND | CVAR_ARCHIVE,
+	"Sound of this volume have ring alpha = 1, louder sounds look the same",
+	1e-9f, 1.0f
+);
+idCVar tdm_subtitles_volumeMinDisappear(
+	"tdm_subtitles_volumeMinDisappear", "0.001", CVAR_FLOAT | CVAR_SOUND | CVAR_ARCHIVE,
+	"Sounds with less volume get hidden even if they are displayed right now",
+	1e-9f, 1.0f
+);
+
+// stgatilov #6491
+static float ComputeSubtitleAlphaForVolume( float volume ) {
+	float vmin = tdm_subtitles_volumeMin.GetFloat();
+	float vmax = tdm_subtitles_volumeMax.GetFloat();
+	volume = idMath::ClampFloat( vmin, vmax, volume );
+	float alpha = idMath::Log( volume / vmin ) / idMath::Log( vmax / vmin );
+	return alpha;
+}
 
 /*
 ==============
@@ -764,6 +788,24 @@ void idUserInterfaceLocal::UpdateSubtitles() {
 			soundWorld->GetSubtitles( matches );
 		}
 	}
+
+	// #6491: drop sounds which are too quiet
+	int k = 0;
+	for ( int i = 0; i < matches.Num(); i++ ) {
+		// sounds which are playing have lower threshold to be hidden
+		// this is done to reduce subtitles blinking near the threshold
+		bool displayedNow = false;
+		for ( int j = 0; j < subtitleSlots.Num(); j++ )
+			if ( subtitleSlots[j].sample == matches[i].sample )
+				displayedNow = true;
+
+		float threshold = ( displayedNow ? tdm_subtitles_volumeMinDisappear : tdm_subtitles_volumeMin ).GetFloat();
+		if ( matches[i].volume < threshold )
+			continue;
+
+		matches[k++] = matches[i];
+	}
+	matches.SetNum( k, false );
 
 	// clear all statuses to start fresh assignment
 	enum status {
@@ -837,7 +879,8 @@ void idUserInterfaceLocal::UpdateSubtitles() {
 		SetStateInt( verbosityVar, int( m.verbosity ) );
 
 		// update alpha according to volume
-		SetStateFloat( alphaVar, m.volume );
+		float alpha = ComputeSubtitleAlphaForVolume( m.volume );
+		SetStateFloat( alphaVar, alpha );
 
 		// update direction cue
 		idVec2 normalizedLocation = idVec2( m.spatializedDirection.x, m.spatializedDirection.y ) / tdm_subtitles_ringRadius.GetFloat();

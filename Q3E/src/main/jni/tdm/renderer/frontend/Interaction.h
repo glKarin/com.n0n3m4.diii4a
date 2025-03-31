@@ -66,6 +66,10 @@ typedef struct {
 	const idMaterial *		shader;
 
 	srfCullInfo_t			cullInfo;
+
+	// stgatilov #6571: used in parallax mapping to see if self-shadows should be rendered
+	// this is not used in normal cases, all noshadows keywords just cause shadow geometry to be NULL
+	bool					blockSelfShadows;
 } surfaceInteraction_t;
 
 
@@ -177,7 +181,7 @@ private:
 	drawSurf_s *			surfsToLink[MAX_LOCATIONS] = { nullptr };
 
 	void PrepareLightSurf( linkLocation_t link, const srfTriangles_t *tri, const viewEntity_s *space,
-		const idMaterial *material, const idScreenRect &scissor, bool viewInsideShadow );
+		const idMaterial *material, const idScreenRect &scissor, bool viewInsideShadow, bool blockSelfShadow );
 };
 
 

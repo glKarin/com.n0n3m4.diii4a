@@ -417,7 +417,7 @@ int idCinematicFFMpeg::OpenBestStreamOfType(AVMediaType type, AVCodecContext* &c
 	LogPrintf("Stream %d is encoded with codec %d: %s", streamIndex, codecId, ExtLibs::avcodec_get_name(codecId));
 	// find decoder for the stream
 	TIMER_START(findDecoder);
-	AVCodec* dec = ExtLibs::avcodec_find_decoder(codecId);
+	const AVCodec* dec = ExtLibs::avcodec_find_decoder(codecId);
 	if (!dec) {
 		common->Warning("Failed to find %s:%s decoder\n", ExtLibs::av_get_media_type_string(type), ExtLibs::avcodec_get_name(codecId));
 		return AVERROR(EINVAL);

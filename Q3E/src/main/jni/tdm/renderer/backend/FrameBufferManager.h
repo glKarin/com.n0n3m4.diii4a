@@ -83,7 +83,6 @@ public:
 	FrameBuffer *shadowStencilFbo = nullptr;
 	FrameBuffer *shadowMapFbo = nullptr;
 
-// public: // debug
 	FrameBuffer *currentRenderFbo = nullptr;
 
 	FrameBuffer *activeFbo = nullptr;

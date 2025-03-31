@@ -26,8 +26,6 @@ typedef struct {
 
 class idGuiModel {
 public:
-	const textureStage_t* hasXrayStage;
-		
 	idGuiModel();
 
 	void	Clear();
@@ -46,6 +44,11 @@ public:
 									float s1, float t1, float s2, float t2, const idMaterial *hShader);
 	void	DrawStretchTri ( idVec2 p1, idVec2 p2, idVec2 p3, idVec2 t1, idVec2 t2, idVec2 t3, const idMaterial *material );
 
+	// stgatilov #6434: X-ray in GUI overlay
+	void	ProcessOverlaySubviews(drawSurf_t *drawSurf);
+	const textureStage_t *NeedXraySubview() const;
+	void	SetXrayImageOverride(idImageScratch *image);
+
 	//---------------------------
 private:
 	void	AdvanceSurf();
@@ -56,5 +59,9 @@ private:
 	idList<guiModelSurface_t>	surfaces;
 	idList<glIndex_t>		indexes;
 	idList<idDrawVert>	verts;
+
+	// stgatilov #6434: X-ray in GUI overlay
+	const textureStage_t *needXraySubview;
+	idImageScratch *xrayImageOverride;
 };
 

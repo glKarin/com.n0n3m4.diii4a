@@ -1,0 +1,737 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <Type Name="idScreenRect">
+    <DisplayString>[{x1}..{x2}] x [{y1}..{y2}] x [{zmin}..{zmax}]</DisplayString>
+  </Type>
+
+  <Type Name="CRawVector">
+    <DisplayString>[{m_Size} / {m_Capacity}]</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>m_Size</Size>
+        <ValuePointer>m_Pointer</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="idEntityPtr&lt;*&gt;">
+    <DisplayString Condition="spawnId == 0">Eptr (empty)</DisplayString>
+    <DisplayString Condition="spawnId != 0">Eptr (num = {entityId}, spId = {spawnId})</DisplayString>
+    <Expand>
+      <Synthetic Name="[WRONG]" Condition="spawnId != 0 &amp;&amp; gameLocal.spawnIds[entityId] != spawnId">
+        <DisplayString>set = {spawnId} != {gameLocal.spawnIds[entityId]} = stored</DisplayString>
+      </Synthetic>
+      <Item Name="[entity]" Condition="spawnId != 0">
+        gameLocal.entities[entityId]
+      </Item>
+    </Expand>
+  </Type>
+
+  <Type Name="idForceApplicationId">
+    <DisplayString Condition="type == 0">(none)</DisplayString>
+    <DisplayString Condition="type == 1">(force {ptr})</DisplayString>
+    <DisplayString Condition="type == 2">(weight {ptr})</DisplayString>
+  </Type>
+
+  <Type Name="idEntity">
+    <DisplayString IncludeView="simple">Entity[{entityNumber}]={name}</DisplayString>
+    <DisplayString>Entity {name}: num={entityNumber} def={entityDefNumber}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[Team]">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>teamMaster</HeadPointer>
+            <NextPointer>teamChain</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <Type Name="idCVar">
+    <DisplayString Condition="internalVar != 0">CVar {((idInternalCVar*)internalVar)->nameString} is: {((idInternalCVar*)internalVar)->valueString}  (default:{((idInternalCVar*)internalVar)->resetString})</DisplayString>
+    <DisplayString Condition="internalVar == 0">CVar {name,na} is: {value,na}</DisplayString>
+  </Type>
+  
+  <Type Name="idDeclLocal">
+    <DisplayString>Decl {name} from {sourceFile->fileName}</DisplayString>
+  </Type>
+  <Type Name="idDecl" Inheritable="true">
+    <DisplayString>{*base}</DisplayString>
+  </Type>
+  <Type Name="idDeclFile">
+    <DisplayString>DeclFile {fileName}  ({numLines} lines)</DisplayString>
+    <Expand>
+      <Synthetic Name="[All Decls]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>decls</HeadPointer>
+            <NextPointer>nextInFile</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="Note:">
+        <DisplayString>expand [Raw View] to see members</DisplayString>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <Type Name="idEvent">
+    <DisplayString Condition="eventdef==&amp;EV_Thread_Execute">idThread::Execute ({time}): {((idThread*)object)->threadName}</DisplayString>
+    <DisplayString>{typeinfo->classname,s}::{eventdef->name,s} ({time}): {*object}</DisplayString>
+    <Expand HideRawView="true">
+      <ExpandedItem>this,!</ExpandedItem>
+      <Item Name="[Full Data]">data,[eventdef->argsize]</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="idVarDef">
+    <DisplayString>VarDef {name->name}: {typeDef->type}</DisplayString>
+    <Expand>
+      <Item Name="[type]">*typeDef</Item>
+      <Synthetic Name="[value]">
+        <DisplayString Condition="typeDef->type == ev_void">void</DisplayString>
+        <DisplayString Condition="typeDef->type == ev_namespace">namespace</DisplayString>
+        <DisplayString Condition="initialized == stackVariable">stack[{value.stackOffset}]</DisplayString>
+        <!-- Note: showing value is currently impossible for stack variables -->
+        <DisplayString Condition="typeDef->type == ev_boolean">{value.intPtr[0] != 0}</DisplayString>
+        <DisplayString Condition="typeDef->type == ev_float">{value.floatPtr[0]}</DisplayString>
+        <DisplayString Condition="typeDef->type == ev_vector">{value.vectorPtr[0]}</DisplayString>
+        <DisplayString Condition="typeDef->type == ev_string">{value.stringPtr,s}</DisplayString>
+        <DisplayString Condition="typeDef->type == ev_function">{value.functionPtr[0]}</DisplayString>
+        <DisplayString Condition="typeDef->type == ev_virtualfunction">{value.virtualFunction}</DisplayString>
+        <DisplayString Condition="typeDef->type == ev_jumpoffset">{value.jumpOffset}</DisplayString>
+        <DisplayString Condition="typeDef->type == ev_argsize">{value.argSize}</DisplayString>
+        <DisplayString Condition="typeDef->type == ev_field">{value.ptrOffset}</DisplayString>
+        <!-- Note: never saw ev_object, ev_entity, ev_scriptevent being non-local -->
+        <Expand>
+          <ExpandedItem>value</ExpandedItem>
+        </Expand>
+      </Synthetic>
+      <Item Name="initialized">initialized</Item>
+      <Synthetic Name="[name]">
+        <DisplayString>{name->name}</DisplayString>
+        <Expand>
+          <ExpandedItem>name</ExpandedItem>
+        </Expand>
+      </Synthetic>
+      <Item Name="scope">scope</Item>
+      <Synthetic Name="Note:">
+        <DisplayString>expand [Raw View] to see members</DisplayString>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <Type Name="idTypeDef">
+    <DisplayString>{type} {name}</DisplayString>
+  </Type>
+
+  <Type Name="statement_s">
+    <Expand>
+      <Synthetic Name="[op]">
+        <DisplayString>{op}:{idCompiler::opcodes[op].opname,sb}</DisplayString>
+        <Expand>
+          <ExpandedItem>idCompiler::opcodes[op]</ExpandedItem>
+        </Expand>
+      </Synthetic>
+      <Item Name="[a]">*a</Item>
+      <Item Name="[b]">*b</Item>
+      <Item Name="[c]">*c</Item>
+      <Synthetic Name="[file]">
+        <DisplayString>{file}:{gameLocal.program.fileList.list[file],s}</DisplayString>
+      </Synthetic>
+      <Item Name="linenumber">linenumber</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="emptyCommand_t" Inheritable="false">
+    <DisplayString></DisplayString>
+    <Expand>
+      <LinkedListItems>
+        <HeadPointer>this</HeadPointer>
+        <NextPointer>(emptyCommand_t*)next</NextPointer>
+        <ValueNode>(baseCommand_t*)this</ValueNode>
+      </LinkedListItems>
+    </Expand>
+  </Type>
+  <Type Name="baseCommand_t" Inheritable="false">
+    <DisplayString>{commandId}</DisplayString>
+    <Expand>
+      <ExpandedItem Condition="commandId==1">*(drawSurfsCommand_t*)this</ExpandedItem>
+      <ExpandedItem Condition="commandId==2">*(setBufferCommand_t*)this</ExpandedItem>
+      <ExpandedItem Condition="commandId==3">*(copyRenderCommand_t*)this</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="CInventory">
+    <DisplayString>Inventory: {m_Category}</DisplayString>
+  </Type>
+  <Type Name="CInventoryCategory">
+    <DisplayString>InvCat {m_Name}</DisplayString>
+  </Type>
+  <Type Name="CInventoryCursor">
+    <DisplayString>InvCur {m_CursorId}: {m_CurrentCategory}\{m_CurrentItem}</DisplayString>
+  </Type>
+  <Type Name="CInventoryItem">
+    <DisplayString>InvItem {m_Name} | {m_Item}</DisplayString>
+  </Type>
+
+  <Type Name="idRenderModelStatic">
+    <DisplayString IncludeView="simple">rModel {name.data,na}</DisplayString>
+    <DisplayString>rModel {name.data,na} {bounds}</DisplayString>
+  </Type>
+  <Type Name="idImage">
+    <DisplayString IncludeView="simple">image {imgName.data,na}</DisplayString>
+    <DisplayString>image {imgName.data,na} gl:{texnum} {uploadWidth}x{uploadHeight} {depth} {type} {filter}</DisplayString>
+  </Type>
+  <Type Name="idMaterial">
+    <DisplayString>{*base}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[stages]">
+        <Expand>
+          <ArrayItems>
+            <Size>numStages</Size>
+            <ValuePointer>stages</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <!-- this is a bit hacky, but allows to inspect game entity of a render entity
+       without having to enumerate all fields of idRenderEntityLocal -->
+  <Type Name="renderEntity_s">
+    <!-- note: entityNum == 0 means no game entity, i.e. world area or smoke -->
+    <DisplayString Condition="entityNum != 0" IncludeView="simple">{*gameLocal.entities[entityNum],view(simple)}</DisplayString>
+    <DisplayString Condition="entityNum == 0" IncludeView="simple">{*hModel,view(simple)}</DisplayString>
+    <DisplayString Condition="entityNum != 0">renderEntity: {gameLocal.entities[entityNum],view(simple)}</DisplayString>
+    <DisplayString Condition="entityNum == 0">renderEntity: {*hModel,view(simple)}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Item Name="[entity]">gameLocal.entities[entityNum]</Item>
+    </Expand>
+  </Type>
+  <Type Name="renderLight_s">
+    <DisplayString IncludeView="simple">{*gameLocal.entities[entityNum],view(simple)}</DisplayString>
+    <DisplayString>renderLight: {gameLocal.entities[entityNum],view(simple)}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Item Name="[entity]">gameLocal.entities[entityNum]</Item>
+    </Expand>
+  </Type>
+  <Type Name="idRenderEntityLocal">
+    <DisplayString IncludeView="simple">{parms,view(simple)}</DisplayString>
+    <DisplayString>idRenderEntity: {parms,view(simple)}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All refAreas]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>entityRefs</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>((idRenderWorldLocal*)gameRenderWorld)->portalAreas[areaIdx]</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All interactions]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>firstInteraction</HeadPointer>
+            <NextPointer>entityNext</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Item Condition="parms.entityNum==0" Name="[world area]" ExcludeView="raw">world->portalAreas[index]</Item>
+    </Expand>
+  </Type>
+  <Type Name="idRenderLightLocal">
+    <DisplayString IncludeView="simple">{parms,view(simple)}</DisplayString>
+    <DisplayString>idRenderLight: {parms,view(simple)}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All refAreas]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>references</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>((idRenderWorldLocal*)gameRenderWorld)->portalAreas[areaIdx]</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All interactions]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>firstInteraction</HeadPointer>
+            <NextPointer>lightNext</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="viewEntity_s">
+    <DisplayString>viewEntity: {entityDef->parms,view(simple)}</DisplayString>
+  </Type>
+  <Type Name="viewLight_s">
+    <DisplayString>viewLight: {lightDef->parms,view(simple)}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All global interactions]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>globalInteractions</HeadPointer>
+            <NextPointer>nextOnLight</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All local interactions]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>localInteractions</HeadPointer>
+            <NextPointer>nextOnLight</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All translucent interactions]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>translucentInteractions</HeadPointer>
+            <NextPointer>nextOnLight</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All global shadows]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>globalShadows</HeadPointer>
+            <NextPointer>nextOnLight</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All local shadows]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>localShadows</HeadPointer>
+            <NextPointer>nextOnLight</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="drawSurf_s">
+    <DisplayString>drawSurf: {space->entityDef->parms,view(simple)}</DisplayString>
+  </Type>
+
+  <Type Name="idInteraction">
+    <DisplayString>interaction({numSurfaces}): {*lightDef,view(simple)} &amp; {*entityDef,view(simple)}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All surfaces]" ExcludeView="raw">
+        <Expand>
+          <ArrayItems>
+            <Size>numSurfaces</Size>
+            <ValuePointer>surfaces</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="portalArea_s">
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All entityRefs]" ExcludeView="raw">
+        <Expand>
+          <IndexListItems>
+            <Size>entityRefs.num</Size>
+            <ValueNode>((idRenderWorldLocal*)gameRenderWorld)->entityDefs[entityRefs.list[$i]]</ValueNode>
+          </IndexListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All lightRefs]" ExcludeView="raw">
+        <Expand>
+          <IndexListItems>
+            <Size>lightRefs.num</Size>
+            <ValueNode>((idRenderWorldLocal*)gameRenderWorld)->lightDefs[lightRefs.list[$i]]</ValueNode>
+          </IndexListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="doublePortal_s">
+    <DisplayString>dblPortal: {portals[0].intoArea} | {portals[1].intoArea}  block={blockingBits}</DisplayString>
+  </Type>
+
+  <Type Name="srfTriangles_s">
+    <DisplayString>srfTriangles V{numVerts} I{numIndexes}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All verts]" ExcludeView="raw">
+        <Expand>
+          <ArrayItems>
+            <Size>numVerts</Size>
+            <ValuePointer>verts</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All indexes]" ExcludeView="raw">
+        <Expand>
+          <ArrayItems>
+            <Size>numIndexes</Size>
+            <ValuePointer>indexes</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All silEdges]" ExcludeView="raw">
+        <Expand>
+          <ArrayItems>
+            <Size>numSilEdges</Size>
+            <ValuePointer>silEdges</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Condition="facePlanesCalculated" Name="[All planes]" ExcludeView="raw">
+        <Expand>
+          <ArrayItems>
+            <Size>numIndexes/3</Size>
+            <ValuePointer>facePlanes</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="silEdge_s">
+    <DisplayString>V: {v1} -> {v2}    P: {p1} | {p2}</DisplayString>
+  </Type>
+
+  <Type Name="viewDef_s">
+    <DisplayString>{renderView}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All viewLights]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>viewLights</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All viewEntitys]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>viewEntitys</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All drawSurfs]" ExcludeView="raw">
+        <Expand>
+          <ArrayItems>
+            <Size>numDrawSurfs</Size>
+            <ValuePointer>drawSurfs</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <Type Name="cm_node_s">
+    <DisplayString>cmNode: [{planeType}] = {planeDist}  (P{polygons?1:0} B{brushes?1:0})</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All brushes]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>brushes</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>b</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All polygons]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>polygons</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>p</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <Type Name="idClipModel">
+    <DisplayString>cm {entity,na}</DisplayString>
+  </Type>
+  
+  <Type Name="idBoxOctree">
+    <DisplayString>octree #nodes={nodes.num} #chunks={allocator.active}</DisplayString>
+  </Type>
+  <Type Name="idBoxOctree::OctreeNode">
+    <DisplayString Condition="!links">node{firstSonIdx &lt; 0 ? 0 : 8} D{depth} sm{numSmall} empty</DisplayString>
+    <DisplayString Condition="links &amp;&amp; !links-&gt;next">node{firstSonIdx &lt; 0 ? 0 : 8} D{depth} sm{numSmall} chunk{links->num}</DisplayString>
+    <DisplayString Condition="links &amp;&amp; links-&gt;next">node{firstSonIdx &lt; 0 ? 0 : 8} D{depth} sm{numSmall} chunk{links->num} chunk{links->next->num}...</DisplayString>
+  </Type>
+  <Type Name="idBoxOctree::Link">
+    <DisplayString>link to {*(idClipModel*)object}</DisplayString>
+    <Expand>
+      <ExpandedItem>*(idClipModel*)object</ExpandedItem>
+    </Expand>
+  </Type>
+
+    <Type Name="idWindow">
+    <DisplayString>guiwin: {name}</DisplayString>
+  </Type>
+  <Type Name="idGuiScript">
+    <DisplayString>guiscr: {handler} {parms}</DisplayString>
+  </Type>
+
+  <Type Name="idSoundChannel">
+    <DisplayString>sndChan: {soundShader,na}</DisplayString>
+  </Type>
+  <Type Name="idSoundEmitterLocal">
+    <DisplayString Condition="removeStatus == 0 || removeStatus == 1">sndEmit: {channels[0].soundShader,na}</DisplayString>
+    <DisplayString Condition="removeStatus == 2">sndEmit: [finished]</DisplayString>
+    <DisplayString>sndEmit: {channels[0].soundShader,na}</DisplayString>
+  </Type>
+
+  <!-- dmap data structures -->
+  <Type Name="mapTri_s">
+    <DisplayString>{v[0].xyz} {v[1].xyz} {v[2].xyz}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All tris]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>this</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="primitive_s">
+    <DisplayString Condition="brush">Br {*brush}</DisplayString>
+    <DisplayString>Tri {*tris}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All prims]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>this</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="bspbrush_s">
+    <DisplayString>{brushnum}: {bounds}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All brushes]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>this</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="side_s">
+    <DisplayString>side: {planenum} {((idDeclLocal*)material->base)->name} {dmapGlobals.mapPlanes[planenum]}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Item Name="[plane]" ExcludeView="raw">dmapGlobals.mapPlanes[planenum]</Item>
+    </Expand>
+  </Type>
+  <Type Name="bspface_s">
+    <DisplayString>{planenum}: {w}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All faces]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>this</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <Type Name="tree_s">
+    <DisplayString>tree: {bounds}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All nodes]" ExcludeView="raw">
+        <Expand>
+          <TreeItems>
+            <Size>nodeCnt</Size>
+            <HeadPointer>headnode</HeadPointer>
+            <LeftPointer>children[0]</LeftPointer>
+            <RightPointer>children[1]</RightPointer>
+            <ValueNode>this</ValueNode>
+          </TreeItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="node_s">
+    <DisplayString>node[{nodeNumber}]: {planenum} {bounds}</DisplayString>
+    <Expand>
+      <Item Name="[plane]" Condition="planenum != -1">dmapGlobals.mapPlanes[planenum]</Item>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All portals]" ExcludeView="raw">
+        <Expand>
+          <CustomListItems MaxItemsPerView="1000">
+            <Variable Name="node" InitialValue="this"/>
+            <Variable Name="ptr" InitialValue="portals"/>
+            <Loop>
+              <Break Condition="!ptr"/>
+              <Item>*ptr</Item>
+              <Exec>ptr = ptr->next[ptr->nodes[1] == node]</Exec>
+            </Loop>
+          </CustomListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All split planes]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>parent</HeadPointer>
+            <NextPointer>parent</NextPointer>
+            <ValueNode>dmapGlobals.mapPlanes[planenum]</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="uPortal_s">
+    <DisplayString>portal: {plane} #pts={winding->numPoints}</DisplayString>
+  </Type>
+  <Type Name="optimizeGroup_s">
+    <DisplayString>Grp {bounds}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All groups]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>this</HeadPointer>
+            <NextPointer>nextGroup</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="optIsland_t">
+    <DisplayString>OptIsland {group}</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All verts]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>verts</HeadPointer>
+            <NextPointer>islandLink</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All edges]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>edges</HeadPointer>
+            <NextPointer>islandLink</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[All tris]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>tris</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="optVertex_s">
+    <DisplayString>(x={pv.x} y={pv.y})</DisplayString>
+  </Type>
+  <Type Name="optEdge_s">
+    <DisplayString>{*v1} -> {*v2}</DisplayString>
+  </Type>
+
+  <Type Name="PlanarGraph">
+    <Expand HideRawView="true">
+      <ExpandedItem>*this,!</ExpandedItem>
+      <Synthetic Name="[outgoing]">
+        <Expand>
+          <IndexListItems>
+            <Size>outgoing.num</Size>
+            <ValueNode>coedges[outgoing[$i]]</ValueNode>
+          </IndexListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[facetCoedges]">
+        <Expand>
+          <IndexListItems>
+            <Size>facetCoedges.num</Size>
+            <ValueNode>coedges[facetCoedges[$i]]</ValueNode>
+          </IndexListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="PlanarGraph::Vertex">
+    <DisplayString>{pos} CC{inComp} #O{outEnd-outBeg}: [{outBeg}..{outEnd})</DisplayString>
+  </Type>
+  <Type Name="PlanarGraph::Coedge">
+    <DisplayString>V{v[0]}->V{v[1]} i{outIdx}  F{inFacet}  {vec}</DisplayString>
+  </Type>
+  <Type Name="PlanarGraph::Facet">
+    <DisplayString>ori{clockwise?-1:1} RM{rightmost} #CE{fcEnd-fcBeg} [{bounds[0].x}..{bounds[1].x}] x [{bounds[0].y}..{bounds[1].y}] ({area})  CC{inComp} H{holeEnd-holeBeg} par{parent} </DisplayString>
+  </Type>
+
+  <Type Name="idBrushList">
+    <DisplayString>brushlist[{numBrushes}]({numBrushSides})</DisplayString>
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All brushes]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>head</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="idBrush">
+    <DisplayString>brush[{sides.num}] E{entityNum} P{primitiveNum} fl{flags} {bounds}</DisplayString>
+  </Type>
+  <Type Name="idBrushSide">
+    <DisplayString Condition="winding">brside[{winding->numPoints}] pl{planeNum} fl{flags} {plane}</DisplayString>
+    <DisplayString>brside pl{planeNum} fl{flags} {plane}</DisplayString>
+  </Type>
+</AutoVisualizer>

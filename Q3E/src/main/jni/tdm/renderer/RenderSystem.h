@@ -64,9 +64,9 @@ typedef struct glconfig_s {
 	int					maxSamples;
 } glconfig_t;
 
-extern idCVar con_fontSize;
-#define SMALLCHAR_WIDTH		(con_fontSize.GetInteger())
-#define SMALLCHAR_HEIGHT	(2 * con_fontSize.GetInteger())
+int GetConsoleFontSize();
+#define SMALLCHAR_WIDTH		(GetConsoleFontSize())
+#define SMALLCHAR_HEIGHT	(2 * GetConsoleFontSize())
 #define BIGCHAR_WIDTH		16
 #define BIGCHAR_HEIGHT		16
 

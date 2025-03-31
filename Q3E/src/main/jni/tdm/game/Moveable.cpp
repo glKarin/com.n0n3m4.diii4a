@@ -446,7 +446,7 @@ bool idMoveable::Collide( const trace_t &collision, const idVec3 &velocity )
 					PropSoundS( NULL, sndPropName, f, 0 ); // grayman #3355
 				}
 			
-				SetSoundVolume(0.0f);
+				SetSoundVolume();
 
 				nextSoundTime = gameLocal.time + 500;
 			}

@@ -724,7 +724,7 @@ void idInterpreter::CallEvent( const function_t *func, int argsize ) {
 	eventEntity = GetEntity( *var.entityNumberPtr );
 
 	if ( !eventEntity || !eventEntity->RespondsTo( *evdef ) ) {
-		if ( eventEntity && developer.GetBool() ) {
+		if ( eventEntity && com_developer.GetBool() ) {
 			// give a warning in developer mode
 			Warning( "Function '%s' not supported on entity '%s'", evdef->GetName(), eventEntity->name.c_str() );
 		}

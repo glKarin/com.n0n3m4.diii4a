@@ -924,6 +924,8 @@ public:
 	void					Event_SetHealth( float newHealth );
 	void					Event_GetHealth( void );
 
+	void					Event_SetMaxHealth( float newMaxHealth );
+
 	/**
 	* Attaches the entity and gives it the given attachment name
 	**/

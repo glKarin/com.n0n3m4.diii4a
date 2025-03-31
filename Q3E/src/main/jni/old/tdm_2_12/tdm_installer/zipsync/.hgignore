@@ -1,0 +1,9 @@
+syntax: glob
+*.asm
+*.obj
+*.exe
+*.pk4*
+.mypy_cache
+
+syntax: regexp
+^build\/

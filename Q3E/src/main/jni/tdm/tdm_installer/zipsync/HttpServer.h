@@ -5,6 +5,7 @@
 
 struct MHD_Daemon;
 struct MHD_Connection;
+enum MHD_Result;
 
 //workaround for ssize_t-included errors on MSVC
 #ifdef _MSC_VER
@@ -13,7 +14,6 @@ struct MHD_Connection;
 #endif
 
 namespace ZipSync {
-
 
 /**
  * Simple embedded HTTP server.
@@ -26,6 +26,9 @@ public:
         uint64_t bytesBetweenPauses = UINT64_MAX;
         //pause lasts for T seconds
         int pauseSeconds = 0;
+
+        PauseModel();
+        PauseModel(uint64_t bbp, int ps);
     };
 
 private:
@@ -61,7 +64,7 @@ private:
     class FileDownload;
     class MultipartDownload;
 
-    static int MhdFunction(
+    static MHD_Result MhdFunction(
         void *cls,
         MHD_Connection *connection,
         const char *url,
@@ -71,7 +74,7 @@ private:
         size_t *upload_data_size,
         void **ptr
     );
-    int AcceptCallback(
+    MHD_Result AcceptCallback(
         MHD_Connection *connection,
         const char *url,
         const char *method,

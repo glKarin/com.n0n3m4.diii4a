@@ -26,6 +26,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 // DG: needed for Sys_ReLaunch()
 #include <dirent.h>
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"  // readdir_r is deprecated
 
 static const char** cmdargv = NULL;
 static int cmdargc = 0;

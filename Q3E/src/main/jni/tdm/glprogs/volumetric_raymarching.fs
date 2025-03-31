@@ -18,6 +18,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #pragma tdm_include "tdm_transform.glsl"
 #pragma tdm_include "tdm_lightproject.glsl"
 #pragma tdm_include "tdm_shadowmaps.glsl"
+#pragma tdm_include "tdm_dither.glsl"
 
 uniform sampler2D u_lightProjectionTexture;
 uniform sampler2D u_lightFalloffTexture;
@@ -43,30 +44,13 @@ in vec4 worldPosition;
 
 out vec4 fragColor;
 
-// 8x8 Bayer matrix
-float DITHER_MATRIX[64] = float[](
-	0, 32, 8, 40, 2, 34, 10, 42,
-	48, 16, 56, 24, 50, 18, 58, 26,
-	12, 44, 4, 36, 14, 46, 6, 38,
-	60, 28, 52, 20, 62, 30, 54, 22,
-	3, 35, 11, 43, 1, 33, 9, 41,
-	51, 19, 59, 27, 49, 17, 57, 25,
-	15, 47, 7, 39, 13, 45, 5, 37,
-	63, 31, 55, 23, 61, 29, 53, 21
-);
-
-float ditherFraction() {
-	int x = int(gl_FragCoord.x), y = int(gl_FragCoord.y);
-	return DITHER_MATRIX[8 * (x&7) + (y&7)] / 64.0;
-}
-
 // get N samples from the fragment-view ray inside the frustum
 vec3 calcWithSampling(vec3 rayStart, vec3 rayVec, float minParam, float maxParam, int samplesNum) {
 	vec3 color = vec3(0.0);
 	for (int i = 0; i < samplesNum; i++) { 
 		float frac = 0.5;
 		if (u_randomize != 0)
-			frac = ditherFraction();
+			frac = ditherFractionBayer8();
 		float ratio = (i + frac) / samplesNum;
 		vec3 samplePos = rayStart + rayVec * mix(minParam, maxParam, ratio);
 		// shadow test
@@ -143,7 +127,7 @@ void main() {
 		float alpha = mix(exponential, 1, transition);
 		//add a bit of unscientific dithering to smoothen out color banding
 		if (u_randomize != 0)
-			alpha = min(alpha + 1e-2 * ditherFraction(), 1.0);
+			alpha = min(alpha + 1e-2 * ditherFractionBayer8(), 1.0);
 		fragColor.a = alpha;
 	}
 }

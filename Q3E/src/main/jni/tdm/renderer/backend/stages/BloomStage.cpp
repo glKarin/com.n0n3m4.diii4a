@@ -132,6 +132,7 @@ void BloomStage::Init() {
 	downsampleWithBrightPassShader = programManager->LoadFromGenerator("bloom_downsample_brightpass", LoadBloomDownsampleWithBrightPassShader);
 	upsampleShader = programManager->LoadFromGenerator("bloom_upsample", LoadBloomUpsampleShader);
 	applyShader = programManager->LoadFromGenerator("bloom_apply", LoadBloomApplyShader);
+	gaussianBlurShader = programManager->LoadFromFiles( "gaussian_blur", "fullscreen_tri.vert.glsl", "gaussian_blur.frag.glsl" );
 }
 
 void BloomStage::Shutdown() {
@@ -238,8 +239,8 @@ void BloomStage::Blur() {
 	TRACE_GL_SCOPE("BloomBlur")
 
 	int step = numDownsamplingSteps - 1;
-	programManager->gaussianBlurShader->Activate();
-	BloomBlurUniforms *uniforms = programManager->gaussianBlurShader->GetUniformGroup<BloomBlurUniforms>();
+	gaussianBlurShader->Activate();
+	BloomBlurUniforms *uniforms = gaussianBlurShader->GetUniformGroup<BloomBlurUniforms>();
 
 	// first horizontal Gaussian blur goes from downsampler[lowestMip] to upsampler[lowestMip]
 	GL_SelectTexture( 0 );

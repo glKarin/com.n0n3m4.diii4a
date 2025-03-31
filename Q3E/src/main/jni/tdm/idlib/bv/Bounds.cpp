@@ -72,13 +72,10 @@ idBounds::PlaneDistance
 ================
 */
 float idBounds::PlaneDistance( const idPlane &plane ) const {
-	idVec3 center;
-	float d1, d2;
+	idVec3 center = ( b[0] + b[1] ) * 0.5f;
 
-	center = ( b[0] + b[1] ) * 0.5f;
-
-	d1 = plane.Distance( center );
-	d2 = (
+	float d1 = plane.Distance( center );
+	float d2 = (
 		idMath::Fabs( ( b[1].x - center.x ) * plane.Normal().x ) +
 		idMath::Fabs( ( b[1].y - center.y ) * plane.Normal().y ) +
 		idMath::Fabs( ( b[1].z - center.z ) * plane.Normal().z )
@@ -99,13 +96,10 @@ idBounds::PlaneSide
 ================
 */
 int idBounds::PlaneSide( const idPlane &plane, const float epsilon ) const {
-	idVec3 center;
-	float d1, d2;
+	idVec3 center = ( b[0] + b[1] ) * 0.5f;
 
-	center = ( b[0] + b[1] ) * 0.5f;
-
-	d1 = plane.Distance( center );
-	d2 = (
+	float d1 = plane.Distance( center );
+	float d2 = (
 		idMath::Fabs( ( b[1].x - center.x ) * plane.Normal().x ) +
 		idMath::Fabs( ( b[1].y - center.y ) * plane.Normal().y ) +
 		idMath::Fabs( ( b[1].z - center.z ) * plane.Normal().z )

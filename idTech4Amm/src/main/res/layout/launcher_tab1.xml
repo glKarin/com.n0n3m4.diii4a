@@ -348,6 +348,11 @@
                     android:id="@+id/rg_version_realrtcw"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"></RadioGroup>
+
+                <RadioGroup
+                    android:id="@+id/rg_version_tdm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"></RadioGroup>
             </LinearLayout>
 
         </LinearLayout> <!-- end game version section -->

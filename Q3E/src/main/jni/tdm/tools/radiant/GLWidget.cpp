@@ -257,15 +257,15 @@ void idGLDrawable::draw(int x, int y, int w, int h) {
 	qglClear(GL_COLOR_BUFFER_BIT);
 	qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	qglLineWidth(0.5);
-	GL_FloatColor(1, 1, 1);
+	qglColor3f(1, 1, 1);
 	qglBegin(GL_LINE_LOOP);
-	GL_FloatColor(1, 0, 0);
+	qglColor3f(1, 0, 0);
 	qglVertex2f(x + 3, y + 3);
-	GL_FloatColor(0, 1, 0);
+	qglColor3f(0, 1, 0);
 	qglVertex2f(x + 3, h - 3);
-	GL_FloatColor(0, 0, 1);
+	qglColor3f(0, 0, 1);
 	qglVertex2f(w - 3, h - 3);
-	GL_FloatColor(1, 1, 1);
+	qglColor3f(1, 1, 1);
 	qglVertex2f(w - 3, y + 3);
 	qglEnd();
 

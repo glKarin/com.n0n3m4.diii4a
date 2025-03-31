@@ -495,6 +495,7 @@ public:
                 if (copiedFiles.empty()) {
                     //empty reduced zip -> remove it
                     RemoveFile(zip._zipPathReduced);
+                    PruneDirectoriesAfterFileRemoval(zip._zipPathReduced, _owner._rootDir);
                 }
                 else {
                     //analyze reduced zip, add all files to manifest
@@ -516,6 +517,7 @@ public:
 
                 //remove the old file
                 RemoveFile(zip._zipPath);
+                PruneDirectoriesAfterFileRemoval(zip._zipPath, _owner._rootDir);
                 //nullify all provided files from the removed zip
                 for (ManifestIter pf : zip._provided) {
                     pf->Nullify();
@@ -537,6 +539,7 @@ public:
             if (zip._matchIds.empty()) {
                 //we don't create empty zips (minizip support issue)
                 RemoveFile(zip._zipPathRepacked);
+                PruneDirectoriesAfterFileRemoval(zip._zipPathRepacked, _owner._rootDir);
             }
             else {
                 ZipSyncAssertF(!IfFileExists(zip._zipPath), "Zip %s exists immediately before renaming repacked file", zip._zipPath.c_str());

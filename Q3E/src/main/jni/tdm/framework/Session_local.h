@@ -94,7 +94,7 @@ public:
 
 	virtual void		UpdateScreen( bool outOfSequence = true ) override;
 
-	virtual void		PacifierUpdate(loadkey_t key, int count) override; // grayman #3763
+	virtual void		UpdateLoadingProgressBar( progressStage_t key, float ratio ) override;
 
 	virtual void		Frame() override;
 
@@ -207,14 +207,12 @@ public:
 
 	bool				insideExecuteMapChange;	// draw loading screen and update
 												// screen on prints
-	//int				bytesNeededForMapLoad;	// grayman #3763 - no longer used
-
-	float				pct;					// grayman #3763 - used by PacifierUpdate()
-	float				pct_delta;				// grayman #3763 - used by PacifierUpdate()
 
 	// we don't want to redraw the loading screen for every single
 	// console print that happens
-	int					lastPacifierTime;
+	int					lastUpdateProgressBarTime;
+	progressStage_t		lastUpdateProgressBarStage;
+	float				lastUpdateProgressBarRatio;
 
 	// this is the information required to be set before ExecuteMapChange() is called,
 	// which can be saved off at any time with the following commands so it can all be played back
@@ -294,12 +292,14 @@ public:
 	std::condition_variable signalFrontendThread;
 	std::condition_variable signalMainThread;
 	std::mutex			signalMutex;
-	volatile bool		frontendActive;
+	volatile bool		frontendShouldBeActive;
+	volatile bool		frontendActiveNow;
 	volatile bool		shutdownFrontend;
 	std::shared_ptr<ErrorReportedException> frontendException;
 
 	void				FrontendThreadFunction();
 	virtual bool		IsFrontend() const override;
+	virtual bool		IsFrontendThreadUsed() const override;
 
 	//=====================================
 	void				Clear();
@@ -334,9 +334,6 @@ public:
 	void				DemoShot( const char *name );
 
 	void				TestGUI( const char *name );
-
-//	int					GetBytesNeededForMapLoad( const char *mapName ); // #3763 debug - no longer used
-	void				SetBytesNeededForMapLoad( const char *mapName, int bytesNeeded );
 
 	bool				ExecuteMapChange( idFile* savegameFile = NULL, bool noFadeWipe = false );
 	void				UnloadMap();

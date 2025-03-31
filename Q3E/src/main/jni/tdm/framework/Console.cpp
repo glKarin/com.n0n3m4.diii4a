@@ -30,8 +30,29 @@ extern float Android_GetConsoleMaxHeightFrac(float frac);
 #endif
 
 idCVarBool con_legacyFont( "con_legacyFont", "0", CVAR_SYSTEM | CVAR_ARCHIVE, "0 - new 2.08 font, 1 - old D3 font" ); // grayman - add archive
-idCVar con_fontSize( "con_fontSize", "8", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "font width in screen units (640x480)", 3.0f, 30.0f );
+idCVar con_fontSize( "con_fontSize", "5", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "font width in screen units (640x480)", 3.0f, 30.0f );
 idCVar con_fontColor( "con_fontColor", "5", CVAR_SYSTEM | CVAR_ARCHIVE, "console color, 5 = cyan, 7 = white, 'r g b' = custom" );
+
+int GetConsoleFontSize() {
+	int lowestAllowed;
+
+	// don't allow to set low font size under low resolution
+	// we want to make sure that it player accidentally runs TDM in bad resolution,
+	// he is still able to see console perfectly
+	int w = renderSystem->GetScreenWidth();
+	int h = renderSystem->GetScreenHeight();
+	if ( w <= 800 || h <= 500 ) {
+		lowestAllowed = 6;
+	} else if ( w <= 1024 || h <= 640 ) {
+		lowestAllowed = 5;
+	} else if ( w <= 1360 || h <= 850 ) {
+		lowestAllowed = 4;
+	} else {
+		lowestAllowed = 3;
+	}
+
+	return idMath::Imax( con_fontSize.GetInteger(), lowestAllowed );
+}
 
 struct idConsoleLine : idStr {
 	idStr colorCodes;
@@ -1124,7 +1145,7 @@ void idConsoleLocal::DrawSolidConsole( float frac ) {
 	}
 
 	SetColor( idStr::ColorIndex( C_COLOR_DEFAULT ) );
-	renderSystem->DrawStretchPic( 0, y, SCREEN_WIDTH, 0.25f * con_fontSize.GetInteger(), 0, 0, 0, 0, whiteShader );
+	renderSystem->DrawStretchPic( 0, y, SCREEN_WIDTH, 0.25f * GetConsoleFontSize(), 0, 0, 0, 0, whiteShader );
 
 	// draw the version number
 	{

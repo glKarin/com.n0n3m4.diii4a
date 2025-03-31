@@ -94,6 +94,7 @@ public final class Q3EPreference
     public static final String pref_params_tdm                   = "q3e_params_tdm"; //k
     public static final String pref_harm_tdm_command_record      = "q3e_harm_tdm_command_record";
     public static final String pref_harm_tdm_game_mod            = "q3e_harm_tdm_game_mod"; //k
+    public static final String pref_harm_tdm_version             = "q3e_harm_tdm_version"; //k
     // DOOM 3 BFG
     public static final String pref_harm_d3bfg_fs_game           = "q3e_harm_d3bfg_fs_game"; //k
     public static final String pref_harm_d3bfg_game_lib          = "q3e_harm_d3bfg_game_lib"; //k

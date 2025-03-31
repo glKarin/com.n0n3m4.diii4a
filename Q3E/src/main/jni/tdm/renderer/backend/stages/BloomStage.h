@@ -40,6 +40,7 @@ private:
 	GLSLProgram *downsampleWithBrightPassShader = nullptr;
 	GLSLProgram *upsampleShader = nullptr;
 	GLSLProgram *applyShader = nullptr;
+	GLSLProgram *gaussianBlurShader = nullptr;
 	int numDownsamplingSteps = 0;
 
 	void Downsample();

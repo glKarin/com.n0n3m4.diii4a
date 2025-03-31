@@ -1,6 +1,7 @@
 #version 320 es
 
 precision highp float;
+precision highp int;
 
 /**
  Based on the SAO algorithm by Morgan McGuire and Michael Mara, NVIDIA Research
@@ -77,7 +78,7 @@ void main() {
 
 			float tapZ = unpackZ(temp.gb);
 			// range domain (the "bilateral" weight). As depth difference increases, decrease weight.
-		  	weight *= max(0.0, 1.0 - 2000 * u_edgeSharpness * abs(tapZ - z));
+		  	weight *= max(0.0, 1.0 - 2000.0 * u_edgeSharpness * abs(tapZ - z));
 
 			sum += value * weight;
 			totalWeight += weight;

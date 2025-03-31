@@ -39,6 +39,8 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #include "CollisionModel_local.h"
 
+idCVar cm_allocator("cm_allocator", "1", CVAR_BOOL, "Enable custom allocator for collision models?");
+
 
 idCollisionModelManagerLocal	collisionModelManagerLocal;
 idCollisionModelManager *		collisionModelManager = &collisionModelManagerLocal;
@@ -256,6 +258,9 @@ idCollisionModelManagerLocal::FreeNode
 void idCollisionModelManagerLocal::FreeNode( cm_node_t *node ) {
 	// don't free the node here
 	// the nodes are allocated in blocks which are freed when the model is freed
+	if ( !cm_allocator.GetBool() ) {
+		Mem_Free( node );
+	}
 }
 
 /*
@@ -266,6 +271,9 @@ idCollisionModelManagerLocal::FreePolygonReference
 void idCollisionModelManagerLocal::FreePolygonReference( cm_polygonRef_t *pref ) {
 	// don't free the polygon reference here
 	// the polygon references are allocated in blocks which are freed when the model is freed
+	if ( !cm_allocator.GetBool() ) {
+		Mem_Free( pref );
+	}
 }
 
 /*
@@ -276,6 +284,9 @@ idCollisionModelManagerLocal::FreeBrushReference
 void idCollisionModelManagerLocal::FreeBrushReference( cm_brushRef_t *bref ) {
 	// don't free the brush reference here
 	// the brush references are allocated in blocks which are freed when the model is freed
+	if ( !cm_allocator.GetBool() ) {
+		Mem_Free( bref );
+	}
 }
 
 /*
@@ -286,7 +297,7 @@ idCollisionModelManagerLocal::FreePolygon
 void idCollisionModelManagerLocal::FreePolygon( cm_model_t *model, cm_polygon_t *poly ) {
 	model->numPolygons--;
 	model->polygonMemory -= sizeof( cm_polygon_t ) + ( poly->numEdges - 1 ) * sizeof( poly->edges[0] );
-	if ( model->polygonBlock == NULL ) {
+	if ( model->polygonBlock == NULL || !cm_allocator.GetBool() ) {
 		Mem_Free( poly );
 	}
 }
@@ -299,7 +310,7 @@ idCollisionModelManagerLocal::FreeBrush
 void idCollisionModelManagerLocal::FreeBrush( cm_model_t *model, cm_brush_t *brush ) {
 	model->numBrushes--;
 	model->brushMemory -= sizeof( cm_brush_t ) + ( brush->numPlanes - 1 ) * sizeof( brush->planes[0] );
-	if ( model->brushBlock == NULL ) {
+	if ( model->brushBlock == NULL || !cm_allocator.GetBool()) {
 		Mem_Free( brush );
 	}
 }
@@ -563,6 +574,10 @@ cm_node_t *idCollisionModelManagerLocal::AllocNode( cm_model_t *model, int block
 	cm_node_t *node;
 	cm_nodeBlock_t *nodeBlock;
 
+	if ( !cm_allocator.GetBool() ) {
+		return (cm_node_t *)Mem_ClearedAlloc( sizeof(cm_node_t) );
+	}
+
 	if ( !model->nodeBlocks || !model->nodeBlocks->nextNode ) {
 		nodeBlock = (cm_nodeBlock_t *) Mem_ClearedAlloc( sizeof( cm_nodeBlock_t ) + blockSize * sizeof(cm_node_t) );
 		nodeBlock->nextNode = (cm_node_t *) ( ( (byte *) nodeBlock ) + sizeof( cm_nodeBlock_t ) );
@@ -593,6 +608,10 @@ cm_polygonRef_t *idCollisionModelManagerLocal::AllocPolygonReference( cm_model_t
 	cm_polygonRef_t *pref;
 	cm_polygonRefBlock_t *prefBlock;
 
+	if ( !cm_allocator.GetBool() ) {
+		return (cm_polygonRef_t *)Mem_Alloc( sizeof(cm_polygonRef_t) );
+	}
+
 	if ( !model->polygonRefBlocks || !model->polygonRefBlocks->nextRef ) {
 		prefBlock = (cm_polygonRefBlock_t *) Mem_Alloc( sizeof( cm_polygonRefBlock_t ) + blockSize * sizeof(cm_polygonRef_t) );
 		prefBlock->nextRef = (cm_polygonRef_t *) ( ( (byte *) prefBlock ) + sizeof( cm_polygonRefBlock_t ) );
@@ -621,6 +640,10 @@ cm_brushRef_t *idCollisionModelManagerLocal::AllocBrushReference( cm_model_t *mo
 	int i;
 	cm_brushRef_t *bref;
 	cm_brushRefBlock_t *brefBlock;
+
+	if ( !cm_allocator.GetBool() ) {
+		return (cm_brushRef_t *)Mem_Alloc( sizeof(cm_brushRef_t) );
+	}
 
 	if ( !model->brushRefBlocks || !model->brushRefBlocks->nextRef ) {
 		brefBlock = (cm_brushRefBlock_t *) Mem_Alloc( sizeof(cm_brushRefBlock_t) + blockSize * sizeof(cm_brushRef_t) );
@@ -653,7 +676,7 @@ cm_polygon_t *idCollisionModelManagerLocal::AllocPolygon( cm_model_t *model, int
 	size = sizeof( cm_polygon_t ) + ( numEdges - 1 ) * sizeof( poly->edges[0] );
 	model->numPolygons++;
 	model->polygonMemory += size;
-	if ( model->polygonBlock && model->polygonBlock->bytesRemaining >= size ) {
+	if ( cm_allocator.GetBool() && model->polygonBlock && model->polygonBlock->bytesRemaining >= size ) {
 		poly = (cm_polygon_t *) model->polygonBlock->next;
 		model->polygonBlock->next += size;
 		model->polygonBlock->bytesRemaining -= size;
@@ -675,7 +698,7 @@ cm_brush_t *idCollisionModelManagerLocal::AllocBrush( cm_model_t *model, int num
 	size = sizeof( cm_brush_t ) + ( numPlanes - 1 ) * sizeof( brush->planes[0] );
 	model->numBrushes++;
 	model->brushMemory += size;
-	if ( model->brushBlock && model->brushBlock->bytesRemaining >= size ) {
+	if ( cm_allocator.GetBool() && model->brushBlock && model->brushBlock->bytesRemaining >= size ) {
 		brush = (cm_brush_t *) model->brushBlock->next;
 		model->brushBlock->next += size;
 		model->brushBlock->bytesRemaining -= size;
@@ -1291,7 +1314,7 @@ idCollisionModelManagerLocal::TryMergePolygons
 cm_polygon_t *idCollisionModelManagerLocal::TryMergePolygons( cm_model_t *model, cm_polygon_t *p1, cm_polygon_t *p2 ) {
 	int i, j, nexti, prevj;
 	int p1BeforeShare, p1AfterShare, p2BeforeShare, p2AfterShare;
-	int newEdges[CM_MAX_POLYGON_EDGES], newNumEdges;
+	idFlexList<int, 128> newEdges;
 	int edgeNum, edgeNum1, edgeNum2, newEdgeNum1, newEdgeNum2;
 	cm_edge_t *edge;
 	cm_polygon_t *newp;
@@ -1408,44 +1431,47 @@ cm_polygon_t *idCollisionModelManagerLocal::TryMergePolygons( cm_model_t *model,
 		}
 	}
 	// set edges for new polygon
-	newNumEdges = 0;
+	newEdges.Clear();
 	if ( !keep2 ) {
-		newEdges[newNumEdges++] = newEdgeNum2;
+		newEdges.AddGrow( newEdgeNum2 );
 	}
 	if ( p1AfterShare < p1BeforeShare ) {
 		for ( i = p1AfterShare + (!keep2); i <= p1BeforeShare - (!keep1); i++ ) {
-			newEdges[newNumEdges++] = p1->edges[i];
+			newEdges.AddGrow( p1->edges[i] );
 		}
 	}
 	else {
 		for ( i = p1AfterShare + (!keep2); i < p1->numEdges; i++ ) {
-			newEdges[newNumEdges++] = p1->edges[i];
+			newEdges.AddGrow( p1->edges[i] );
 		}
 		for ( i = 0; i <= p1BeforeShare - (!keep1); i++ ) {
-			newEdges[newNumEdges++] = p1->edges[i];
+			newEdges.AddGrow( p1->edges[i] );
 		}
 	}
 	if ( !keep1 ) {
-		newEdges[newNumEdges++] = newEdgeNum1;
+		newEdges.AddGrow( newEdgeNum1 );
 	}
 	if ( p2AfterShare < p2BeforeShare ) {
 		for ( i = p2AfterShare + (!keep1); i <= p2BeforeShare - (!keep2); i++ ) {
-			newEdges[newNumEdges++] = p2->edges[i];
+			newEdges.AddGrow( p2->edges[i] );
 		}
 	}
 	else {
 		for ( i = p2AfterShare + (!keep1); i < p2->numEdges; i++ ) {
-			newEdges[newNumEdges++] = p2->edges[i];
+			newEdges.AddGrow( p2->edges[i] );
 		}
 		for ( i = 0; i <= p2BeforeShare - (!keep2); i++ ) {
-			newEdges[newNumEdges++] = p2->edges[i];
+			newEdges.AddGrow( p2->edges[i] );
 		}
 	}
+	// stgatilov: protect against stack overflow?
+	if ( newEdges.Num() > CM_MAX_POLYGON_EDGES )
+		return NULL;
 
-	newp = AllocPolygon( model, newNumEdges );
+	newp = AllocPolygon( model, newEdges.Num() );
 	memcpy( newp, p1, sizeof(cm_polygon_t) );
-	memcpy( newp->edges, newEdges, newNumEdges * sizeof(int) );
-	newp->numEdges = newNumEdges;
+	memcpy( newp->edges, newEdges.Ptr(), newEdges.Num() * sizeof(int) );
+	newp->numEdges = newEdges.Num();
 	newp->checkcount = 0;
 	// increase usage count for the edges of this polygon
 	for ( i = 0; i < newp->numEdges; i++ ) {
@@ -3398,7 +3424,7 @@ void idCollisionModelManagerLocal::BuildModels( const idMapFile *mapFile ) {
 	common->Printf( "%6i models\n", numModels );
 	PrintModelInfo( &model );
 	common->Printf( "%.0f msec to load collision data.\n", timer.Milliseconds() );
-	common->PacifierUpdate(LOAD_KEY_COLLISION_DONE,0); // grayman #3763
+	session->UpdateLoadingProgressBar(PROGRESS_STAGE_COLLISION, 1.0f);
 }
 
 
@@ -3413,7 +3439,7 @@ void idCollisionModelManagerLocal::LoadMap( const idMapFile *mapFile ) {
 		common->Error( "idCollisionModelManagerLocal::LoadMap: NULL mapFile" );
 	}
 
-	common->PacifierUpdate(LOAD_KEY_COLLISION_START,0); // grayman #3763
+	session->UpdateLoadingProgressBar(PROGRESS_STAGE_COLLISION, 0.0f);
 
 	// check whether we can keep the current collision map based on the mapName and mapFileTime
 	if ( loaded ) {

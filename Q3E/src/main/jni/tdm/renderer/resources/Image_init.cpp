@@ -19,6 +19,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/tr_local.h"
 #include "framework/LoadStack.h"
 #include "renderer/backend/FrameBufferManager.h"
+#include "containers/ProducerConsumerQueue.h"
 
 #define	DEFAULT_SIZE		16
 #define	NORMAL_MAP_SIZE		32
@@ -28,8 +29,6 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #define QUADRATIC_WIDTH		32
 #define QUADRATIC_HEIGHT	4
 //#define BORDER_CLAMP_SIZE	32
-
-#define LOAD_KEY_IMAGE_GRANULARITY 10 // grayman #3763
 
 const char *imageFilter[] = {
 	"GL_LINEAR_MIPMAP_NEAREST",
@@ -45,6 +44,7 @@ idCVar idImageManager::image_filter( "image_filter", imageFilter[1], CVAR_RENDER
 idCVar idImageManager::image_anisotropy( "image_anisotropy", "1", CVAR_RENDERER | CVAR_ARCHIVE, "set the maximum texture anisotropy if available" );
 idCVar idImageManager::image_lodbias( "image_lodbias", "0", CVAR_RENDERER | CVAR_ARCHIVE, "change lod bias on mipmapped images" );
 idCVar idImageManager::image_downSize( "image_downSize", "0", CVAR_RENDERER | CVAR_ARCHIVE, "controls texture downsampling" );
+idCVar idImageManager::image_downSizeAll( "image_downSizeAll", "0", CVAR_RENDERER | CVAR_ARCHIVE, "Force all image types to use the same size limit" );
 idCVar idImageManager::image_forceDownSize( "image_forceDownSize", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "" );
 idCVar idImageManager::image_colorMipLevels( "image_colorMipLevels", "0", CVAR_RENDERER | CVAR_BOOL, "development aid to see texture mip usage" );
 idCVar idImageManager::image_preload( "image_preload", "1", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "if 0, dynamically load all images" );
@@ -281,7 +281,7 @@ idVec4 imageBlock_s::Sample(float s, float t, textureFilter_t filter, textureRep
 		int it = int(t) - (t < 0.0f);	//
 		return GetPixelRepeat(is, it);
 	}
-	else if (filter == TF_LINEAR) {
+	else if (filter == TF_LINEAR || filter == TF_DEFAULT) {
 		s += 0.5f;
 		t += 0.5f;
 		int is = int(s) - (s < 0.0f);	// fast floor
@@ -379,6 +379,11 @@ idVec4 idImageAsset::Sample(float s, float t) const {
 	assert(!cpuData.IsCubemap());
 	return cpuData.Sample(s, t, filter, repeat, 0);
 }
+idVec4 idImageAsset::Sample(float x, float y, float z) const {
+	assert(residency & IR_CPU);
+	assert(cpuData.IsCubemap());
+	return cpuData.SampleCube(idVec3(x, y, z), filter);
+}
 
 idImage::idImage() {
 	texnum = static_cast< GLuint >( TEXTURE_NOT_LOADED );
@@ -410,6 +415,9 @@ idImageAsset::idImageAsset() {
 	loadStack = nullptr;
 }
 
+idImageScratch::idImageScratch() {
+	isDynamicImagePlaceholder = false;
+}
 
 /*
 ==================
@@ -464,7 +472,7 @@ void idImageAsset::MakeDefault() {
 	PurgeImage();
 	defaulted = true;
 	cpuData = R_DefaultImage();
-	GenerateImage( cpuData.pic[0], cpuData.width, cpuData.height, filter, allowDownSize, repeat, depth, residency );
+	GenerateImage( cpuData.pic[0], cpuData.width, cpuData.height, filter, allowDownSize, repeat, depth, IR_BOTH );
 }
 
 static imageBlock_t R_WhiteImage() {
@@ -476,7 +484,7 @@ static imageBlock_t R_WhiteImage() {
 
 static imageBlock_t R_BlackImage() {
 	imageBlock_t res = imageBlock_t::Alloc2D( DEFAULT_SIZE, DEFAULT_SIZE );
-	// solid white texture
+	// transparent black texture
 	memset( res.pic[0], 0, res.GetSizeInBytes() );
 	return res;
 }
@@ -1554,6 +1562,45 @@ void idImageManager::ReloadAllImages() {
 
 /*
 ===============
+EnsureImageCpuResident
+===============
+*/
+void idImageManager::EnsureImageCpuResident( idImageAsset *image ) {
+	if ( image->residency & IR_CPU )
+		return;	// cpuData is either valid or will be valid next frame
+
+	image->residency = imageResidency_t( image->residency | IR_CPU );
+	image->Reload( false, true );
+	assert( image->cpuData.IsValid() );
+}
+
+/*
+===============
+ExecuteWhenSingleThreaded
+===============
+*/
+void idImageManager::ExecuteWhenSingleThreaded( std::function<void(void)> callback ) {
+	idScopedCriticalSection lock( delayedFunctionsMutex );
+	delayedFunctionsQueue.Append( callback );
+}
+
+/*
+===============
+UpdateSingleThreaded
+===============
+*/
+void idImageManager::UpdateSingleThreaded() {
+	// note: taking lock is excessive: no other thread must be active!
+	idScopedCriticalSection lock( delayedFunctionsMutex );
+	assert( !session->IsFrontend() );
+
+	for ( auto func : delayedFunctionsQueue )
+		func();
+	delayedFunctionsQueue.Clear();
+}
+
+/*
+===============
 R_CombineCubeImages_f
 
 Used to combine animations of six separate tga files into
@@ -1710,19 +1757,23 @@ void idImageManager::Init() {
 	ImageFromFunction( "_ambientWorldDiffuseCubeMap", R_AmbientWorldDiffuseCubeMap, TF_LINEAR, false, TR_REPEAT, TD_HIGH_QUALITY );
 	ImageFromFunction( "_ambientWorldSpecularCubeMap", R_AmbientWorldSpecularCubeMap, TF_LINEAR, false, TR_REPEAT, TD_HIGH_QUALITY );
 
-	// cinematicImage is used for cinematic drawing
-	// scratchImage is used for screen wipes/doublevision etc..
+	// used for cinematic drawing
 	cinematicImage = ImageScratch( "_cinematic" );
+	// generic dynamic texture, used as reference to image provided by subview rendering
+	ImageScratch("_dynamic")->isDynamicImagePlaceholder = true;
+	// used for screen wipes/doublevision/etc., also used as dynamic texture
 	scratchImage = ImageScratch( "_scratch" );
-	scratchImage2 = ImageScratch( "_scratch2" );
-	// cameraN is used in security camera (see materials/tdm_camera.mtr)
-	memset(cameraImages, 0, sizeof(cameraImages));
+	scratchImage->isDynamicImagePlaceholder = true;
+	// were used as dynamic textures, since #6434 they are interchangeable with _dynamic image
+	ImageScratch( "_scratch2" )->isDynamicImagePlaceholder = true;
 	for (int k = 1; k <= 9; k++)
-		cameraImages[k] = ImageScratch( ("_camera" + idStr(k)).c_str() );
-	xrayImage = ImageScratch( "_xray" );
+		ImageScratch( ("_camera" + idStr(k)).c_str() )->isDynamicImagePlaceholder = true;
+	ImageScratch( "_xray" )->isDynamicImagePlaceholder = true;
+	// post-processing shaders use these textures prepared by engine (e.g. heatHaze)
 	currentRenderImage = ImageScratch( "_currentRender" );
-	guiRenderImage = ImageScratch( "_guiRender" );
 	currentDepthImage = ImageScratch( "_currentDepth" ); // #3877. Allow shaders to access scene depth
+	// engine-internal images (should not be referenced in materials)
+	guiRenderImage = ImageScratch( "_guiRender" );
 	shadowDepthFbo = ImageScratch( "_shadowDepthFbo" );
 	shadowAtlas = ImageScratch( "_shadowAtlas" );
 	currentStencilFbo = ImageScratch( "_currentStencilFbo" );
@@ -1782,12 +1833,14 @@ preload low mip levels, background load remainder on demand
 ====================
 */
 
-static void R_LoadSingleImage( idImageAsset *image ) {
-	R_LoadImageData( *image );
-}
-REGISTER_PARALLEL_JOB( R_LoadSingleImage, "R_LoadSingleImage" );
-
-idCVar image_levelLoadParallel( "image_levelLoadParallel", "1", CVAR_BOOL|CVAR_ARCHIVE, "Parallelize texture creation during level load by fetching images from disk in the background" );
+idCVar image_levelLoadParallel(
+	"image_levelLoadParallel", "1", CVAR_BOOL,
+	"Parallelize texture creation during level load by fetching images from disk in the background"
+);
+idCVar image_levelLoadParallelMemory(
+	"image_levelLoadParallelMemory", "300", CVAR_INTEGER,
+	"Limit on amount of RAM that can be used during parallel image loading (in MB)"
+);
 
 void idImageManager::EndLevelLoad() {
 	const int start = Sys_Milliseconds();
@@ -1813,7 +1866,8 @@ void idImageManager::EndLevelLoad() {
 			keepCount++;
 		}
 	}
-	common->PacifierUpdate( LOAD_KEY_IMAGES_START, images.Num() / LOAD_KEY_IMAGE_GRANULARITY ); // grayman #3763
+
+	session->UpdateLoadingProgressBar( PROGRESS_STAGE_IMAGES, 0.0f );
 
 	// load the ones we do need, if we are preloading
 	idList<idImageAsset*> imagesToLoad;
@@ -1826,49 +1880,60 @@ void idImageManager::EndLevelLoad() {
 		}
 	}
 
-	// Process images in batches. If parallel load is enabled, we give the upcoming batch to the job queue so that the image
-	// data is loaded and prepared in the background while we simultaneously upload the current batch to GPU memory.
-	// Background loading is restricted to 2 threads. On SSDs and during hot loads, this has a considerable advantage over just
-	// a single background thread, since decompression and calculation of image functions do take some of the time. SSDs do see
-	// slight improvements with additional threads, but the difference is small. On HDDs, the additional thread does not offer
-	// any advantages, but it should also not overload the disk, so that 2 threads is an acceptable compromise for all disk types.
-	const int BATCH_SIZE = 16;
-	idParallelJobList *imageLoadJobs = parallelJobManager->AllocJobList( JOBLIST_UTILITY, JOBLIST_PRIORITY_MEDIUM, BATCH_SIZE, 0, nullptr );
+	if ( image_levelLoadParallel.GetBool() ) {
+		static idProducerConsumerQueue<idImageAsset**> queue;
+		queue.ClearFree();
+		// images are quite large, we don't want to keep them all in RAM
+		// without buffer limit, this could happen if loading jobs are faster than uploading
+		queue.SetBufferSize( image_levelLoadParallelMemory.GetInteger() << 20 );
 
-	for ( int curBatch = -BATCH_SIZE; curBatch < imagesToLoad.Num(); curBatch += BATCH_SIZE ) {
-		for ( int i = curBatch + BATCH_SIZE; i < imagesToLoad.Num() && i < curBatch + 2 * BATCH_SIZE; ++i ) {
-			idImageAsset *image = imagesToLoad[i];
-			imageLoadJobs->AddJob((jobRun_t)R_LoadSingleImage, image);
+		auto LoadImageJobFunc = []( void *param ) {
+			idImageAsset **ppImage = (idImageAsset **)param;
+			R_LoadImageData( **ppImage );
+			queue.Append( ppImage, (*ppImage)->SizeOfCpuData() );
+		};
+		RegisterJob( LoadImageJobFunc, "loadImage" );
+
+		int n = imagesToLoad.Num();
+		idParallelJobList *joblist = parallelJobManager->AllocJobList( JOBLIST_UTILITY, JOBLIST_PRIORITY_MEDIUM, n, 0, nullptr );
+		for ( int i = 0; i < n; i++ ) {
+			joblist->AddJob( LoadImageJobFunc, &imagesToLoad[i] );
+		}
+		joblist->Submit( nullptr, JOBLIST_PARALLELISM_NONINTERACTIVE | JOBLIST_PARALLELISM_FLAG_DISK );
+
+		int finishedCount = 0;
+		while ( finishedCount < n ) {
+			idImageAsset **ppImage = queue.Pop();
+			R_UploadImageData( **ppImage );
+			finishedCount++;
+			session->UpdateLoadingProgressBar( PROGRESS_STAGE_IMAGES, float(finishedCount) / n );
 		}
 
-		int parallelism = 2;
-		if ( !image_levelLoadParallel.GetBool() ) {
-			parallelism = 0;
-		}
-		imageLoadJobs->Submit( nullptr, parallelism );
-
-		for ( int i = idMath::Imax(curBatch, 0); i < imagesToLoad.Num() && i < curBatch + BATCH_SIZE; ++i ) {
+		parallelJobManager->FreeJobList( joblist );
+		queue.ClearFree();
+	}
+	else {
+		for ( int i = 0; i < imagesToLoad.Num(); i++ ) {
 			idImageAsset *image = imagesToLoad[i];
+
+			R_LoadImageData( *image );
+
 			R_UploadImageData( *image );
-
-			// grayman #3763 - update the loading bar every LOAD_KEY_IMAGE_GRANULARITY images
-			if ( ( i % LOAD_KEY_IMAGE_GRANULARITY ) == 0 ) {
-				common->PacifierUpdate( LOAD_KEY_IMAGES_INTERIM, i );
+			session->UpdateLoadingProgressBar( PROGRESS_STAGE_IMAGES, float(i) / imagesToLoad.Num() );
 			}
 		}
 
-		imageLoadJobs->Wait();
-	}
 
-	parallelJobManager->FreeJobList( imageLoadJobs );
+	imagesToLoad.ClearFree();
 
 	const int end = Sys_Milliseconds();
 	common->Printf( "%5i purged from previous\n", purgeCount );
 	common->Printf( "%5i kept from previous\n", keepCount );
 	common->Printf( "%5i new loaded\n", loadCount );
 	common->Printf( "all images loaded in %5.1f seconds\n", ( end - start ) * 0.001f );
-	common->PacifierUpdate( LOAD_KEY_DONE, 0 ); // grayman #3763
 	common->Printf( "----------------------------------------\n" );
+
+	session->UpdateLoadingProgressBar( PROGRESS_STAGE_IMAGES, 1.0f );
 }
 
 /*

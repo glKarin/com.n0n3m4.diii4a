@@ -37,7 +37,7 @@ extern unzFile unzReOpen (const char* path, unzFile file)
 						ZLIB_FILEFUNC_MODE_READ | ZLIB_FILEFUNC_MODE_EXISTING);
 
 	if( fin == NULL ) {
-		TRYFREE(s);
+		free(s);
 		return NULL;
 	}
 

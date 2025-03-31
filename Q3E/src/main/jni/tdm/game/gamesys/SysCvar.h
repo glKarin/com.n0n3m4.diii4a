@@ -340,6 +340,7 @@ extern idCVar cv_tdm_rope_pull_force_factor;
 extern idCVar cv_tdm_obj_gui_file;
 extern idCVar cv_tdm_waituntilready_gui_file;
 extern idCVar cv_tdm_invgrid_gui_file;	// #4286
+extern idCVar cv_tdm_invgrid_sortstyle; // #6592
 extern idCVar cv_tdm_subtitles_gui_file;
 
 extern idCVar cv_tdm_hud_opacity;
@@ -398,6 +399,7 @@ extern idCVar cv_lg_screen_height;
 extern idCVar cv_lg_velocity_mod_min_velocity;
 extern idCVar cv_lg_velocity_mod_max_velocity;
 extern idCVar cv_lg_velocity_mod_amount;
+extern idCVar g_lightQuotientAlgo;
 
 extern idCVar cv_lg_fade_delay;						// Added by  J.C.Denton
 
@@ -474,7 +476,7 @@ extern idCVar	cv_gui_CenterY;
 * End DarkMod cvars
 **/
 
-extern idCVar	developer;
+extern idCVar	com_developer;
 
 extern idCVar	g_cinematic;
 extern idCVar	g_cinematicMaxSkipTime;
@@ -509,7 +511,7 @@ extern idCVar	g_showTriggers;
 extern idCVar	g_showCollisionWorld;
 extern idCVar	g_showCollisionModels;
 extern idCVar	g_showCollisionTraces;
-extern idCVar g_showCollisionAlongView;
+extern idCVar	g_showCollisionAlongView;
 extern idCVar	g_maxShowDistance;
 extern idCVar	g_showEntityInfo;
 extern idCVar	g_showviewpos;
@@ -517,6 +519,7 @@ extern idCVar	g_showcamerainfo;
 extern idCVar	g_showTestModelFrame;
 extern idCVar	g_showActiveEntities;
 extern idCVar	g_showEnemies;
+extern idCVar	g_showLightQuotient;
 
 extern idCVar	g_frametime;
 extern idCVar	g_timeentities;

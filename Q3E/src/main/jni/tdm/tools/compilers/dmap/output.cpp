@@ -26,6 +26,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #if 0
 
 should we try and snap values very close to 0.5, 0.25, 0.125, etc?
+stgatilov #6480: please no!
 
   do we write out normals, or just a "smooth shade" flag?
 resolved: normals.  otherwise adjacent facet shaded surfaces get their
@@ -77,9 +78,15 @@ int	PruneNodes_r( node_t *node ) {
 	return a1;
 }
 
+idCVar dmap_outputNoSnap(
+	"dmap_outputNoSnap", "1", CVAR_BOOL | CVAR_SYSTEM,
+	"Disables weird snapping of all floats to integers in output. "
+	"This is stability fix for TDM 2.13 (#6480)."
+);
+
 static void WriteFloat( idFile *f, float v )
 {
-	if ( idMath::Fabs(v - idMath::Round(v)) < 0.001 ) {
+	if ( dmap_outputNoSnap.GetBool() ? v == idMath::Round(v) : idMath::Fabs(v - idMath::Round(v)) < 0.001 ) {
 		f->WriteFloatString( "%i ", (int)idMath::Round(v) );
 	}
 	else {
@@ -353,7 +360,9 @@ static void WriteShadowTriangles( const srfTriangles_t *tri ) {
 	// verts
 	col = 0;
 	for ( i = 0 ; i < tri->numVerts ; i++ ) {
-		Write1DMatrix( procFile, 3, &tri->shadowVertexes[i].xyz[0] );
+		idVec4 pos = tri->shadowVertexes[i].xyz;
+		assert( pos.w == 1.0f );
+		Write1DMatrix( procFile, 3, &pos[0] );
 
 		if ( ++col == 5 ) {
 			col = 0;

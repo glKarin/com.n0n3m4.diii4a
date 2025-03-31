@@ -431,7 +431,7 @@ void CPrefsDlg::SavePrefs() {
 	SetCvarString( MAPS_KEY, m_strMaps );
 	SetCvarString( MODELS_KEY, m_strModels );
 	SetCvarInt( NEWMAPFORMAT_KEY, m_bNewMapFormat );
-	common->WriteFlaggedCVarsToFile( "editor.cfg", CVAR_TOOL, "sett" );
+	//common->WriteFlaggedCVarsToFile( "editor.cfg", CVAR_TOOL, "sett" );
 }
 
 void CPrefsDlg::SetGamePrefs() {

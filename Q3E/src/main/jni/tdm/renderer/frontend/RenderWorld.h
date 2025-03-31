@@ -438,7 +438,7 @@ public:
 
 	virtual bool			MaterialTrace( const idVec3 &p, const idMaterial *mat, idStr &matName ) const = 0;
 
-	typedef bool (*TraceFilterFunc)(void *context, const renderEntity_t *, const idRenderModel *, const idMaterial *);
+	typedef bool (*TraceFilterFunc)(void *context, const qhandle_t *, const renderEntity_t *, const idRenderModel *, const idMaterial *);
 	// stgatilov: traces the whole rendered world with flexible filtering
 	// if fastWorld is true, then:
 	//    1) filter is not called for world-area models (defaults to true)
@@ -451,7 +451,11 @@ public:
 		TraceFilterFunc filterCallback = nullptr, void *context = nullptr
 	) const = 0;
 
-
+	// stgatilov #6546: querying light value at various points in space
+	typedef int lightQuery_t;
+	virtual lightQuery_t	LightAtPointQuery_AddQuery( qhandle_t onEntity, const samplePointOnModel_t &point, const idList<qhandle_t> &ignoredEntities ) = 0;
+	virtual bool			LightAtPointQuery_CheckResult( lightQuery_t query, idVec3 &outputValue, idVec3& outputPosition ) const = 0;
+	virtual void			LightAtPointQuery_Forget( lightQuery_t query ) = 0;
 
 	//-------------- Demo Control  -----------------
 
@@ -483,6 +487,7 @@ public:
 	virtual void			DebugSphere( const idVec4 &color, const idSphere &sphere, const int lifetime = 0, bool depthTest = false ) = 0;
 	virtual void			DebugBounds( const idVec4 &color, const idBounds &bounds, const idVec3 &org = vec3_origin, const int lifetime = 0 ) = 0;
 	virtual void			DebugBox( const idVec4 &color, const idBox &box, const int lifetime = 0 ) = 0;
+	virtual void			DebugFilledBox( const idVec4 &color, const idBox &box, const int lifetime = 0, const bool depthTest = false ) = 0;
 	virtual void			DebugFrustum( const idVec4 &color, const idFrustum &frustum, const bool showFromOrigin = false, const int lifetime = 0 ) = 0;
 	virtual void			DebugCone( const idVec4 &color, const idVec3 &apex, const idVec3 &dir, float radius1, float radius2, const int lifetime = 0 ) = 0;
 	virtual void			DebugAxis( const idVec3 &origin, const idMat3 &axis ) = 0;

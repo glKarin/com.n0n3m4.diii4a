@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 #pragma tdm_include "tdm_utils.glsl"
 
@@ -32,6 +33,6 @@ out float var_fragHeight;
 void main() {
 	gl_Position = objectPosToClip(attr_Position, u_modelViewMatrix, u_projectionMatrix);
 	var_eyeDistance = -(u_modelViewMatrix * attr_Position).z;
-	var_eyeHeight = dot(u_fogPlane, vec4(u_viewOrigin, 1));
+	var_eyeHeight = dot(u_fogPlane, vec4(u_viewOrigin, 1.0));
 	var_fragHeight = dot(u_fogPlane, attr_Position);
 }

@@ -91,6 +91,7 @@ public:
 	size_t			Allocated( void ) const;							// returns total size of allocated memory
 	size_t			Size( void ) const;									// returns total size of allocated memory including size of list type
 	size_t			MemoryUsed( void ) const;							// returns size of the used elements in the list
+	void			FillZero( void );									// memset elements with 0
 
 	idList<type> &	operator=( const idList<type> &other );
 	const type &	operator[]( int index ) const;
@@ -281,6 +282,16 @@ idList<type>::MemoryUsed
 template< class type >
 ID_INLINE size_t idList<type>::MemoryUsed( void ) const {
 	return num * sizeof( *list );
+}
+
+/*
+================
+idList<type>::FillZero
+================
+*/
+template< class type >
+ID_INLINE void idList<type>::FillZero( void ) {
+	memset( list, 0, num * sizeof(type) );
 }
 
 /*
@@ -577,7 +588,8 @@ Copies the contents and size attributes of another list.
 */
 template< class type >
 ID_INLINE idList<type> &idList<type>::operator=( const idList<type> &other ) {
-	int	i;
+	if ( this == &other)
+		return *this;
 
 	ClearFree();
 
@@ -587,7 +599,7 @@ ID_INLINE idList<type> &idList<type>::operator=( const idList<type> &other ) {
 
 	if ( size ) {
 		list = new type[ size ];
-		for( i = 0; i < num; i++ ) {
+		for( int i = 0; i < num; i++ ) {
 			list[ i ] = other.list[ i ];
 		}
 	}

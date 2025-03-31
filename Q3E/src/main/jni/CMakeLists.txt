@@ -83,9 +83,10 @@ if(GAME_QUAKE1) # https://github.com/DarkPlacesEngine/DarkPlaces/commit/dbebfea9
     add_subdirectory ( quake1 ) # Quake 1
 endif()
 
-if(GAME_TDM) # 2.12 | 5f4793f69bc0b61cbf2f921496455fb9e9296bcd | Feb 24, 2024 | Merged some changes from trunk.
+if(GAME_TDM) # 2.12 | 2da36cc9e83046160b91bca91c116dc642740b78 | Mar 8, 2025 | Merge one commit from trunk.
     message(STATUS "Build The Dark Mod")
     add_subdirectory ( tdm ) # The Dark Mod
+    add_subdirectory ( old/tdm_2_12 "tdm_2_12" ) # The Dark Mod 2.12 # 5f4793f69bc0b61cbf2f921496455fb9e9296bcd | Feb 24, 2024 | Merged some changes from trunk.
 endif()
 
 if(GAME_DOOM3BFG) # 1.4.0 | f81a8c1dd9b762774a233ba071837b2c7a374751 | Mar 6, 2022 | Updated release notes
@@ -111,7 +112,7 @@ if(GAME_REALRTCW) # 5.1 | a6e94b82bd11c41f62ffc969e27b0e63f267ef8e | Version is 
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
     # It will remove when newest version is stable
-    add_subdirectory ( realrtcw/realrtcw_5_0 "realrtcw_5_0" ) # RealRTCW 5.0 # 5.0 | on Jul 2, 2024 | 49ebd2964f7d15be3ca2723401ef3ea07bfbf586 | Disable eject brass delay, it crashes the game
+    add_subdirectory ( old/realrtcw_5_0 "realrtcw_5_0" ) # RealRTCW 5.0 # 5.0 | on Jul 2, 2024 | 49ebd2964f7d15be3ca2723401ef3ea07bfbf586 | Disable eject brass delay, it crashes the game
 endif()
 
 if(GAME_FTEQW) # 5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 | engine/common/fs.c: Update game definitions

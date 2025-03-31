@@ -33,6 +33,8 @@ public:
 	void				SetValue(float _value);
 	float				GetValue() { return value; }
 
+	void				SetThumbSize(float _thumbWidth, float _thumbHeight);
+
 	virtual size_t		Allocated() override{ return idWindow::Allocated(); }
 	virtual idWinVar *	GetThisWinVarByName(const char *varname) override;
 	virtual const char *HandleEvent(const sysEvent_t *event, bool *updateVisuals) override;

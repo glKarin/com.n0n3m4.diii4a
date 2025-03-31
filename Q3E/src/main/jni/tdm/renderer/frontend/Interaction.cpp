@@ -38,9 +38,9 @@ idCVar r_useInteractionTriCulling(
 idCVarInt r_singleShadowEntity( "r_singleShadowEntity", "-1", CVAR_RENDERER, "suppress all but one shadowing entity" );
 
 void idInteraction::PrepareLightSurf( linkLocation_t link, const srfTriangles_t *tri, const viewEntity_s *space,
-		const idMaterial *material, const idScreenRect &scissor, bool viewInsideShadow ) {
+		const idMaterial *material, const idScreenRect &scissor, bool viewInsideShadow, bool blockSelfShadows ) {
 
-	drawSurf_t *drawSurf = R_PrepareLightSurf( tri, space, material, scissor, viewInsideShadow );
+	drawSurf_t *drawSurf = R_PrepareLightSurf( tri, space, material, scissor, viewInsideShadow, blockSelfShadows );
 	drawSurf->nextOnLight = surfsToLink[link];
 	surfsToLink[link] = drawSurf;
 }
@@ -1144,6 +1144,9 @@ void idInteraction::CreateInteraction( const idRenderModel *model ) {
 		// if the interaction has shadows and this surface casts a shadow
 		bool genShadows = HasShadows() && shader->SurfaceCastsShadow();
 
+		// #6571: save for parallax mapping self-shadows
+		sint->blockSelfShadows = !genShadows;
+
 		// generate a lighted surface and add it
 		if ( genLightTris ) {
 			if ( tri->ambientViewCount == tr.viewCount ) {
@@ -1513,17 +1516,17 @@ void idInteraction::AddActiveInteraction( void ) {
 					if ( sint->shader->Coverage() == MC_TRANSLUCENT && sint->shader->ReceivesLighting() ) {
 						PrepareLightSurf(
 							INTERACTION_TRANSLUCENT, lightTris,
-							vEntity, shader, lightScissor, false
+							vEntity, shader, lightScissor, false, sint->blockSelfShadows
 						);
 					} else if ( !lightDef->parms.noShadows && sint->shader->TestMaterialFlag( MF_NOSELFSHADOW ) ) {
 						PrepareLightSurf(
 							INTERACTION_LOCAL, lightTris,
-							vEntity, shader, lightScissor, false
+							vEntity, shader, lightScissor, false, true
 						);
 					} else {
 						PrepareLightSurf(
 							INTERACTION_GLOBAL, lightTris,
-							vEntity, shader, lightScissor, false
+							vEntity, shader, lightScissor, false, sint->blockSelfShadows
 						);
 					}
 				}
@@ -1603,12 +1606,12 @@ void idInteraction::AddActiveInteraction( void ) {
 			if ( sint->shader->TestMaterialFlag( MF_NOSELFSHADOW ) ) {
 				PrepareLightSurf(
 					SHADOW_LOCAL, shadowTris,
-					vEntity, NULL, shadowScissorLightDepthBounds, inside
+					vEntity, NULL, shadowScissorLightDepthBounds, inside, false
 				);
 			} else {
 				PrepareLightSurf(
 					SHADOW_GLOBAL, shadowTris,
-					vEntity, NULL, shadowScissorLightDepthBounds, inside
+					vEntity, NULL, shadowScissorLightDepthBounds, inside, false
 				);
 			}
 		}
@@ -1644,12 +1647,12 @@ void idInteraction::AddActiveInteraction( void ) {
 			if ( sint->shader->TestMaterialFlag( MF_NOSELFSHADOW ) ) {
 				PrepareLightSurf(
 					SHADOW_LOCAL, shadowTris,
-					vEntity, shader, shadowScissor, false
+					vEntity, shader, shadowScissor, false, false
 				);
 			} else {
 				PrepareLightSurf(
 					SHADOW_GLOBAL, shadowTris,
-					vEntity, shader, shadowScissor, false
+					vEntity, shader, shadowScissor, false, false
 				);
 			}
 		}

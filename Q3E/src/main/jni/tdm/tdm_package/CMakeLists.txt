@@ -5,12 +5,13 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
-set(THIRDPARTY_PLATFORM_OVERRIDE "" CACHE STRING "If you build conan dependencies yourself with custom platform_name, pass platform_name string here")
+option(TDM_THIRDPARTY_ARTEFACTS "Use prebuilt artefacts at ThirdParty/artefacts?" ON)
 
-# TDM: use prebuilt artefacts for third-party libraries
-list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/cmake_find_package")
+if(TDM_THIRDPARTY_ARTEFACTS)
+    include(../ThirdParty/use_artefacts.cmake)
+endif()
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;RelWithDebInfo" CACHE STRING "" FORCE) 
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE) 
 
 
 set(sources
@@ -43,18 +44,16 @@ set(sources
 
 if(MSVC)
     add_compile_options("/W2")
-    add_compile_options("$<$<CONFIG:RelWithDebInfo>:/Ob2>")
-    string(APPEND CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO " /INCREMENTAL:NO /OPT:REF")
+    add_compile_options("$<$<CONFIG:Release>:/Zi>")
+    string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /OPT:REF /DEBUG")
 elseif(UNIX)
-    string(APPEND CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -no-pie")
+    string(APPEND CMAKE_EXE_LINKER_FLAGS " -no-pie")
 endif()
 
-find_package(zlib REQUIRED)
-find_package(minizip REQUIRED)
-find_package(tinyformat REQUIRED)
+find_package(minizip REQUIRED CONFIG)
+find_package(tinyformat REQUIRED CONFIG)
 add_executable(tdm_package ${sources})
-target_include_directories(tdm_package PRIVATE ${tinyformat_INCLUDE_DIRS} ${minizip_INCLUDE_DIRS} ${zlib_INCLUDE_DIRS})
-target_link_libraries(tdm_package PRIVATE ${tinyformat_LIBRARIES} ${minizip_LIBRARIES} ${zlib_LIBRARIES})
+target_link_libraries(tdm_package PRIVATE tinyformat::tinyformat minizip::minizip)
 
 if(UNIX)
     target_link_libraries(tdm_package PRIVATE stdc++fs pthread)
@@ -63,13 +62,7 @@ elseif(MSVC)
     target_compile_definitions(tdm_package PRIVATE _CRT_SECURE_NO_DEPRECATE)
 endif()
 
-if(THIRDPARTY_PLATFORM_OVERRIDE)
-    if(UNIX)
-        set_target_properties(tdm_package PROPERTIES OUTPUT_NAME "tdm_package.custom")
-    elseif(MSVC)
-        set_target_properties(tdm_package PROPERTIES OUTPUT_NAME "tdm_package_custom.exe")
-    endif()
-elseif(UNIX)
+if(UNIX)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set_target_properties(tdm_package PROPERTIES OUTPUT_NAME "tdm_package.linux64")
     else()

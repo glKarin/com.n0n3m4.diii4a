@@ -83,11 +83,17 @@ struct idHashFunctionStrI {
 template<class Key, class = void> struct idHashDefaultEmpty {
 	static Key Get() { return Key(); }
 };
-//minimum value (signed bit set) is default "empty" value in idHashMap for signed integers
+//minimum value (signed bit set) is default "empty" value in idHashMap for signed integers (and enums)
 template<class Key> struct idHashDefaultEmpty<Key, std::enable_if_t<
 	std::is_integral<Key>::value && std::is_signed<Key>::value
 >> {
 	static Key Get() { return Key(-1) << (8 * sizeof(Key) - 1); }
+};
+template<class Key> struct idHashDefaultEmpty<Key, std::enable_if_t<
+	std::is_enum<Key>::value
+>> {
+	typedef typename std::underlying_type<Key>::type Integer;
+	static Key Get() { return Key(idHashDefaultEmpty<Integer>::Get()); }
 };
 //-1 (all bits set) is default "empty" value in idHashMap for unsigned integers (and pointers)
 template<class Key> struct idHashDefaultEmpty<Key, std::enable_if_t<

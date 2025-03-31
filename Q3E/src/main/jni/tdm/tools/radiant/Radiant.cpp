@@ -387,7 +387,7 @@ REGISTRY INFO
 bool SaveRegistryInfo(const char *pszName, void *pvBuf, long lSize)
 {
 	SetCvarBinary(pszName, pvBuf, lSize);
-	common->WriteFlaggedCVarsToFile( "editor.cfg", CVAR_TOOL, "sett" );
+	//common->WriteFlaggedCVarsToFile( "editor.cfg", CVAR_TOOL, "sett" );
 	return true;
 }
 

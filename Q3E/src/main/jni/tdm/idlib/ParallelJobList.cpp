@@ -25,7 +25,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 const char * jobNames[] = {
 	ASSERT_ENUM_STRING( JOBLIST_RENDERER_FRONTEND,	0 ),
-	ASSERT_ENUM_STRING( JOBLIST_RENDERER_BACKEND,	1 ),
+//	ASSERT_ENUM_STRING( JOBLIST_RENDERER_BACKEND,	1 ),
 	ASSERT_ENUM_STRING( JOBLIST_UTILITY,			9 ),
 };
 
@@ -1102,7 +1102,27 @@ extern void Sys_CPUCount( int & logicalNum, int & coreNum, int & packageNum );
 								CORE_ANY, CORE_ANY, CORE_ANY, CORE_ANY }
 
 
-idCVar jobs_numThreads( "jobs_numThreads", "2", CVAR_INTEGER | CVAR_NOCHEAT | CVAR_ARCHIVE, "number of threads used to crunch through jobs", 0, MAX_JOB_THREADS );
+idCVar jobs_numThreadsRealtime(
+	"jobs_numThreadsRealtime", "-1", CVAR_INTEGER | CVAR_NOCHEAT | CVAR_ARCHIVE,
+	"Number of threads used by job system during gameplay (REALTIME joblists). "
+	"-1 means it is determined automatically.",
+-1, MAX_JOB_THREADS );
+idCVar jobs_offsetThreadsRealtime(
+	"jobs_offsetThreadsRealtime", "0", CVAR_INTEGER | CVAR_NOCHEAT | CVAR_ARCHIVE,
+	"Added to automatically computed number of threads for jobs system during gameplay. "
+	"Only takes effect if jobs_numThreadsRealtime is set to auto. "
+	"For instance: set -1 if you want to leave one free thread for graphics driver.",
+-MAX_JOB_THREADS, MAX_JOB_THREADS );
+idCVar jobs_numThreadsNonInteractive(
+	"jobs_numThreadsNonInteractive", "-1", CVAR_INTEGER | CVAR_NOCHEAT | CVAR_ARCHIVE,
+	"Number of threads used by job system for non-interactive tasks (NONINTERACTIVE joblists). "
+	"-1 means it is determined automatically.",
+-1, MAX_JOB_THREADS );
+idCVar jobs_maxHddThreads(
+	"jobs_maxHddThreads", "1", CVAR_INTEGER | CVAR_NOCHEAT | CVAR_ARCHIVE,
+	"Maximum number of threads used for jobs that read from disk if game is on Hard Disk Drive. "
+	"HDDs are slow-seeking devices, parallel reads to them makes things slower, not faster.",
+0, MAX_JOB_THREADS );
 
 class idParallelJobManagerLocal : public idParallelJobManager {
 public:
@@ -1126,14 +1146,16 @@ public:
 
 private:
 	idJobThread						threads[MAX_JOB_THREADS];
-	int								currentActiveThreads;
-	int								maxThreads;
+	int								maxThreads;					// how many OS threads are spawned currently
+	idStaticList< idParallelJobList *, MAX_JOBLISTS >	jobLists;
+
+	// information about hardware:
 	int								numPhysicalCpuCores;
 	int								numLogicalCpuCores;
 	int								numCpuPackages;
-	idStaticList< idParallelJobList *, MAX_JOBLISTS >	jobLists;
+	bool							isRunningOnHdd;
 
-	void							RescaleThreadList();
+	void							ChangePhysicalThreadsCount(int wantPhysicalThreads);
 };
 
 idParallelJobManagerLocal parallelJobManagerLocal;
@@ -1148,16 +1170,16 @@ void SubmitJobList( idParallelJobList_Threads * jobList, int parallelism ) {
 	parallelJobManagerLocal.Submit( jobList, parallelism );
 }
 
-void idParallelJobManagerLocal::RescaleThreadList() {
+void idParallelJobManagerLocal::ChangePhysicalThreadsCount(int wantPhysicalThreads) {
 	// on consoles this will have specific cores for the threads, but on PC they will all be CORE_ANY
 	core_t cores[] = JOB_THREAD_CORES;
-	maxThreads = idMath::ClampInt( 0, MAX_JOB_THREADS, jobs_numThreads.GetInteger() );
-	while (currentActiveThreads < maxThreads) {
-		int idx = currentActiveThreads++;
+	wantPhysicalThreads = idMath::ClampInt( 0, MAX_JOB_THREADS, wantPhysicalThreads );
+	while (maxThreads < wantPhysicalThreads) {
+		int idx = maxThreads++;
 		threads[idx].Start( cores[idx], idx );
 	}
-	while (currentActiveThreads > maxThreads) {
-		int idx = --currentActiveThreads;
+	while (maxThreads > wantPhysicalThreads) {
+		int idx = --maxThreads;
 		threads[idx].StopThread( false );
 	}
 }
@@ -1168,10 +1190,21 @@ idParallelJobManagerLocal::Init
 ========================
 */
 void idParallelJobManagerLocal::Init() {
-	currentActiveThreads = 0;
-	RescaleThreadList();
-	Sys_CPUCount( numPhysicalCpuCores, numLogicalCpuCores, numCpuPackages );
+	Sys_CPUCount( numLogicalCpuCores, numPhysicalCpuCores, numCpuPackages );
+	idLib::Printf("CPU core count: %d physical, %d logical\n", numPhysicalCpuCores, numLogicalCpuCores);
+
+	isRunningOnHdd = Sys_IsFileOnHdd( Sys_EXEPath() );
+	if (isRunningOnHdd) {
+		idLib::Printf("HDD detected: number of loading threads limited\n");
+	} else {
+		idLib::Printf("HDD not detected: loading threads unlimited\n");
+	}
+
+	maxThreads = 0;
 	assert(numLogicalCpuCores >= 0);
+	// note: some of these threads can run idle, not consuming CPU resources
+	// idParallelJobManagerLocal::Submit runs joblist onto first K threads, where K is configured
+	ChangePhysicalThreadsCount(numLogicalCpuCores);
 }
 
 /*
@@ -1180,10 +1213,10 @@ idParallelJobManagerLocal::Shutdown
 ========================
 */
 void idParallelJobManagerLocal::Shutdown() {
-	for ( int i = 0; i < currentActiveThreads; i++ ) {
+	for ( int i = 0; i < maxThreads; i++ ) {
 		threads[i].StopThread();
 	}
-	currentActiveThreads = 0;
+	maxThreads = 0;
 }
 
 /*
@@ -1195,6 +1228,9 @@ idParallelJobList * idParallelJobManagerLocal::AllocJobList( jobListId_t id, job
 	for ( int i = 0; i < jobLists.Num(); i++ ) {
 		if ( jobLists[i]->GetId() == id ) {
 			// idStudio may cause job lists to be allocated multiple times
+			assert( false );
+			// stgatilov: renderer joblists are persistent
+			// utility joblists are not, but we should finish old one beforehand
 		}
 	}
 	idParallelJobList * jobList = new idParallelJobList( id, priority, maxJobs, maxSyncs, color );
@@ -1276,23 +1312,48 @@ idParallelJobManagerLocal::Submit
 ========================
 */
 void idParallelJobManagerLocal::Submit( idParallelJobList_Threads * jobList, int parallelism ) {
-	if ( jobs_numThreads.IsModified() ) {
-		RescaleThreadList();
+	/*if ( jobs_numThreads.IsModified() ) {
+		ChangePhysicalThreadsCount();
 		jobs_numThreads.ClearModified();
-	}
+	}*/
+
+	bool disk = (parallelism & JOBLIST_PARALLELISM_FLAG_DISK) != 0;
+	parallelism &= ~JOBLIST_PARALLELISM_FLAG_DISK;
 
 	// determine the number of threads to use
 	int numThreads;
-	if ( parallelism == JOBLIST_PARALLELISM_DEFAULT ) {
-		numThreads = jobs_numThreads.GetInteger();
-	} else if ( parallelism == JOBLIST_PARALLELISM_MAX_CORES ) {
+	if ( parallelism == JOBLIST_PARALLELISM_REALTIME ) {
+		// usually we have frontend and backend on dedicated threads (depending on com_smp)
+		int dedicatedOccupiedThreads = 1 + session->IsFrontendThreadUsed();
+		// we assume that calling thread will wait immediately and free its core for one of the worker threads
+		numThreads = numPhysicalCpuCores - dedicatedOccupiedThreads + 1;
+		// leave a few cores for OS background tasks, and maybe for OpenGL driver since they often do work in separate thread
+		numThreads += jobs_offsetThreadsRealtime.GetInteger();
+
+		if ( jobs_numThreadsRealtime.GetInteger() >= 0 )
+			numThreads = jobs_numThreadsRealtime.GetInteger();
+	}
+	else if ( parallelism == JOBLIST_PARALLELISM_NONINTERACTIVE ) {
 		numThreads = numLogicalCpuCores;
-	} else if ( parallelism == JOBLIST_PARALLELISM_MAX_THREADS ) {
-		numThreads = MAX_THREADS;
-	} else {
+
+		if ( jobs_numThreadsNonInteractive.GetInteger() >= 0 )
+			numThreads = jobs_numThreadsNonInteractive.GetInteger();
+	}
+	else if ( parallelism == JOBLIST_PARALLELISM_NONE ) {
+		numThreads = 0;
+	}
+	else {
+		idLib::Warning("Explicit number of threads %d used for testing", parallelism);
 		numThreads = parallelism;
 	}
+
+	// can't run more threads than we physically have
+	// note: we should have spawned enough threads at game start
 	numThreads = idMath::Imin(numThreads, maxThreads);
+
+	if (disk && isRunningOnHdd) {
+		numThreads = idMath::Imin(numThreads, jobs_maxHddThreads.GetInteger());
+	}
 
 	if ( numThreads <= 0 ) {
 		threadJobListState_t state( jobList->GetVersion() );

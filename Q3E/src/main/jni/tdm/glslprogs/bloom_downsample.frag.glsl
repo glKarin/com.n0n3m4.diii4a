@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 #pragma tdm_define "BLOOM_BRIGHTPASS"
 
 /**
@@ -34,7 +35,7 @@ uniform float u_thresholdFalloff;
 
 float brightpass(vec3 color) {
 	float brightness = dot(color.rgb, toGrayscale);
-	return clamp(pow(brightness / u_brightnessThreshold, u_thresholdFalloff), 0, 1);
+	return clamp(pow(brightness / u_brightnessThreshold, u_thresholdFalloff), 0.0, 1.0);
 }
 #endif
 
@@ -44,13 +45,13 @@ vec4 sampleTexture(vec2 offset) {
 
 void main() {
 	// query previous mipmap level by a full-pixel offset (corresponds to half-pixel in our output framebuffer)
-	vec2 offset = vec2(1, 1) / textureSize(u_sourceTexture, 0);
-	vec4 sum = sampleTexture(vec2(0, 0)) * 4;
+	vec2 offset = vec2(1.0, 1.0) / vec2(textureSize(u_sourceTexture, 0));
+	vec4 sum = sampleTexture(vec2(0.0, 0.0)) * 4.0;
 	sum += sampleTexture(-offset);
 	sum += sampleTexture(offset);
 	sum += sampleTexture(vec2(offset.x, -offset.y));
 	sum += sampleTexture(vec2(-offset.x, offset.y));
-	FragColor = sum / 8;
+	FragColor = sum / 8.0;
 #ifdef BLOOM_BRIGHTPASS
 	FragColor.rgb *= brightpass(FragColor.rgb);
 #endif

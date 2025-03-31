@@ -6,16 +6,28 @@
     <OutDir>$(SolutionDir)..\darkmod\</OutDir>
     <TargetName>$(TdmExecutableName)</TargetName>
   </PropertyGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_pugixml.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_openal.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_vorbis.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_ffmpeg.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_glfw.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_libcurl.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_libjpeg.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_libpng.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_minizip.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_tracy.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_doctest.props" />
+  </ImportGroup>
   <ItemGroup>
   </ItemGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>__DOOM__;CURL_STATICLIB;AL_LIBTYPE_STATIC;IL_STATIC_LIB;LIBJPEG_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>glfw3.lib;xinput9_1_0.lib;pugixml.lib;zlib.lib;minizip.lib;libcurl.lib;OpenAL32.lib;ogg.lib;vorbis.lib;vorbisfile.lib;libjpeg.lib;libpng16.lib;mbedtls.lib;mbedcrypto.lib;mbedx509.lib;avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;bcrypt.lib;Shell32.lib;Gdi32.lib;Advapi32.lib;dbghelp.lib;dinput8.lib;iphlpapi.lib;odbc32.lib;odbccp32.lib;winmm.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>xinput9_1_0.lib;bcrypt.lib;Shell32.lib;Gdi32.lib;Advapi32.lib;dbghelp.lib;dinput8.lib;iphlpapi.lib;odbc32.lib;odbccp32.lib;winmm.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <StackReserveSize>16777216</StackReserveSize>
       <StackCommitSize>16777216</StackCommitSize>

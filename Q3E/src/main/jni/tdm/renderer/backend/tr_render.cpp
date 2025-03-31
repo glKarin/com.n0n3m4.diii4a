@@ -17,9 +17,11 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #pragma hdrstop
 
 #include "renderer/tr_local.h"
-#include "renderer/backend/glsl.h"
+#include "renderer/backend/VertexArrayState.h"
 #include "renderer/backend/FrameBuffer.h"
 #include "renderer/backend/GLSLProgramManager.h"
+#include "renderer/backend/GLSLProgram.h"
+#include "renderer/backend/GLSLUniforms.h"
 #include "renderer/backend/RenderBackend.h"
 
 /*
@@ -197,7 +199,7 @@ void RB_EnterWeaponDepthHack() {
 	// FIXME: this part is broken since storing projection matrix in uniform block
 	auto prog = GLSLProgram::GetCurrentProgram();
 	if ( prog ) {
-		Uniforms::Global* transformUniforms = prog->GetUniformGroup<Uniforms::Global>();
+		TransformUniforms* transformUniforms = prog->GetUniformGroup<TransformUniforms>();
 		//transformUniforms->projectionMatrix.Set( matrix );
 	}
 }
@@ -224,7 +226,7 @@ void RB_EnterModelDepthHack( float depth ) {
 
 	auto prog = GLSLProgram::GetCurrentProgram();
 	if ( prog ) {
-		Uniforms::Global* transformUniforms = prog->GetUniformGroup<Uniforms::Global>();
+		TransformUniforms* transformUniforms = prog->GetUniformGroup<TransformUniforms>();
 		//transformUniforms->projectionMatrix.Set( matrix );
 	}
 }
@@ -242,7 +244,7 @@ void RB_LeaveDepthHack() {
 #endif
 
 	if ( auto prog = GLSLProgram::GetCurrentProgram() ) {
-		Uniforms::Global* transformUniforms = prog->GetUniformGroup<Uniforms::Global>();
+		TransformUniforms* transformUniforms = prog->GetUniformGroup<TransformUniforms>();
 		//transformUniforms->projectionMatrix.Set( backEnd.viewDef->projectionMatrix );
 	}
 }
@@ -251,7 +253,7 @@ void RB_LeaveDepthHack() {
 static void RB_RenderDrawSurfWithFunction( const drawSurf_t *drawSurf, void ( *triFunc_ )( const drawSurf_t * ) ) {
 	if ( drawSurf->space != backEnd.currentSpace ) {
 		if( GLSLProgram::GetCurrentProgram() != nullptr ) {
-			Uniforms::Global *transformUniforms = GLSLProgram::GetCurrentProgram()->GetUniformGroup<Uniforms::Global>();
+			TransformUniforms *transformUniforms = GLSLProgram::GetCurrentProgram()->GetUniformGroup<TransformUniforms>();
 			transformUniforms->Set( drawSurf->space );
 		}
 		GL_CheckErrors();
@@ -348,61 +350,6 @@ void RB_GetShaderTextureMatrix( const float *shaderRegisters, const textureStage
 }
 
 /*
-======================
-RB_LoadShaderTextureMatrix
-======================
-*/
-void RB_LoadShaderTextureMatrix( const float *shaderRegisters, const shaderStage_t* pStage ) {
-	const auto *texture = &pStage->texture;
-	if ( !texture->hasMatrix )
-		return;
-
-	auto prog = GLSLProgram::GetCurrentProgram();
-	if ( !prog )
-		return;
-
-	if ( shaderRegisters ) {
-		float	matrix[16];
-		RB_GetShaderTextureMatrix( shaderRegisters, texture, matrix );
-		prog->GetUniformGroup<Uniforms::Global>()->textureMatrix.Set( matrix );
-	} else 
-		prog->GetUniformGroup<Uniforms::Global>()->textureMatrix.Set( mat4_identity );
-
-	/*qglMatrixMode( GL_TEXTURE );
-	qglLoadMatrixf( matrix );
-	qglMatrixMode( GL_MODELVIEW );*/
-}
-
-/*
-======================
-RB_BindVariableStageImage
-
-Handles generating a cinematic frame if needed
-======================
-*/
-void RB_BindVariableStageImage( const textureStage_t *texture, const float *shaderRegisters ) {
-	if ( texture->cinematic ) {
-		if ( r_skipDynamicTextures.GetBool() ) {
-			globalImages->defaultImage->Bind();
-			return;
-		}
-
-		// offset time by shaderParm[7] (FIXME: make the time offset a parameter of the shader?)
-		// We make no attempt to optimize for multiple identical cinematics being in view, or
-		// for cinematics going at a lower framerate than the renderer.
-		const cinData_t cin = texture->cinematic->ImageForTime( ( int )( 1000 * ( backEnd.viewDef->floatTime + backEnd.viewDef->renderView.shaderParms[11] ) ) );
-
-		if ( cin.image ) {
-			globalImages->cinematicImage->UploadScratch( cin.image, cin.imageWidth, cin.imageHeight );
-		} else {
-			globalImages->blackImage->Bind();
-		}
-	} else if ( texture->image ) {
-		texture->image->Bind();
-	}
-}
-
-/*
 =================
 RB_BeginDrawingView
 
@@ -423,6 +370,7 @@ void RB_BeginDrawingView( bool colorIsBackground ) {
 
 	// ensures that depth writes are enabled for the depth clear
 	GL_State( GLS_DEFAULT );
+	vaState.SetDefaultState();
 
 	// we don't have to clear the depth / stencil buffer for 2D rendering
 	if ( backEnd.viewDef->viewEntitys ) {
@@ -469,38 +417,42 @@ R_SetDrawInteractions
 */
 void R_SetDrawInteraction( const shaderStage_t *surfaceStage, const float *surfaceRegs,
                            idImage **image, idVec4 matrix[2], float color[4] ) {
+	if ( image ) {
 	*image = surfaceStage->texture.image;
+	}
 
-	if ( surfaceStage->texture.hasMatrix ) {
-		matrix[0][0] = surfaceRegs[surfaceStage->texture.matrix[0][0]];
-		matrix[0][1] = surfaceRegs[surfaceStage->texture.matrix[0][1]];
-		matrix[0][2] = 0;
-		matrix[0][3] = surfaceRegs[surfaceStage->texture.matrix[0][2]];
-
-		matrix[1][0] = surfaceRegs[surfaceStage->texture.matrix[1][0]];
-		matrix[1][1] = surfaceRegs[surfaceStage->texture.matrix[1][1]];
-		matrix[1][2] = 0;
-		matrix[1][3] = surfaceRegs[surfaceStage->texture.matrix[1][2]];
-
-		// we attempt to keep scrolls from generating incredibly large texture values, but
-		// center rotations and center scales can still generate offsets that need to be > 1
-		if ( matrix[0][3] < -40.0f || matrix[0][3] > 40.0f ) {
-			matrix[0][3] -= ( int )matrix[0][3];
+	if ( matrix ) {
+		if ( surfaceStage->texture.hasMatrix ) {
+			matrix[0][0] = surfaceRegs[surfaceStage->texture.matrix[0][0]];
+			matrix[0][1] = surfaceRegs[surfaceStage->texture.matrix[0][1]];
+			matrix[0][2] = 0;
+			matrix[0][3] = surfaceRegs[surfaceStage->texture.matrix[0][2]];
+	
+			matrix[1][0] = surfaceRegs[surfaceStage->texture.matrix[1][0]];
+			matrix[1][1] = surfaceRegs[surfaceStage->texture.matrix[1][1]];
+			matrix[1][2] = 0;
+			matrix[1][3] = surfaceRegs[surfaceStage->texture.matrix[1][2]];
+	
+			// we attempt to keep scrolls from generating incredibly large texture values, but
+			// center rotations and center scales can still generate offsets that need to be > 1
+			if ( matrix[0][3] < -40.0f || matrix[0][3] > 40.0f ) {
+				matrix[0][3] -= ( int )matrix[0][3];
+			}
+	
+			if ( matrix[1][3] < -40.0f || matrix[1][3] > 40.0f ) {
+				matrix[1][3] -= ( int )matrix[1][3];
+			}
+		} else {
+			matrix[0][0] = 1;
+			matrix[0][1] = 0;
+			matrix[0][2] = 0;
+			matrix[0][3] = 0;
+	
+			matrix[1][0] = 0;
+			matrix[1][1] = 1;
+			matrix[1][2] = 0;
+			matrix[1][3] = 0;
 		}
-
-		if ( matrix[1][3] < -40.0f || matrix[1][3] > 40.0f ) {
-			matrix[1][3] -= ( int )matrix[1][3];
-		}
-	} else {
-		matrix[0][0] = 1;
-		matrix[0][1] = 0;
-		matrix[0][2] = 0;
-		matrix[0][3] = 0;
-
-		matrix[1][0] = 0;
-		matrix[1][1] = 1;
-		matrix[1][2] = 0;
-		matrix[1][3] = 0;
 	}
 
 	if ( color ) {

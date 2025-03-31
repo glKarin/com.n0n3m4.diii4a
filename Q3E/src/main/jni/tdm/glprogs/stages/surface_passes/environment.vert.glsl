@@ -20,6 +20,7 @@ uniform mat4 u_modelViewMatrix;
 uniform mat4 u_projectionMatrix;
 uniform vec3 u_globalViewOrigin;
 uniform mat4 u_modelMatrix;
+uniform mat4 u_bumpMatrix;
 
 in vec4 attr_Position;
 in vec2 attr_TexCoord;
@@ -43,5 +44,5 @@ void main() {
 	);
 	var_TangentToWorldMatrix = mat3(u_modelMatrix) * tangentToLocalMatrix;
 
-	var_TexCoord = attr_TexCoord;
+	var_TexCoord = (u_bumpMatrix * vec4(attr_TexCoord, 0, 1)).xy;
 }

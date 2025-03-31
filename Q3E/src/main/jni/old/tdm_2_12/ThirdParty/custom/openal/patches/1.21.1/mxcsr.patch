@@ -1,0 +1,20 @@
+--- core/fpu_ctrl.cpp
++++ core/fpu_ctrl.cpp
+@@ -24,7 +24,7 @@ void FPUCtl::enter() noexcept
+     sseState |= 0x0040; /* set denormals-are-zero */
+     _mm_setcsr(sseState);
+ 
+-#elif defined(__GNUC__) && defined(HAVE_SSE)
++#elif defined(__GNUC__) && defined(HAVE_SSE) && (defined(__i386__) || defined(__x86_64__))
+ 
+     if((CPUCapFlags&CPU_CAP_SSE))
+     {
+@@ -47,7 +47,7 @@ void FPUCtl::leave() noexcept
+ #if defined(HAVE_SSE_INTRINSICS)
+     _mm_setcsr(this->sse_state);
+ 
+-#elif defined(__GNUC__) && defined(HAVE_SSE)
++#elif defined(__GNUC__) && defined(HAVE_SSE) && (defined(__i386__) || defined(__x86_64__))
+ 
+     if((CPUCapFlags&CPU_CAP_SSE))
+         __asm__ __volatile__("ldmxcsr %0" : : "m" (*&this->sse_state));

@@ -915,7 +915,7 @@ static void RenderBumpTriangles( srfTriangles_t *lowMesh, renderBump_t *rb ) {
 
 	qglDisable( GL_CULL_FACE );
 
-	GL_FloatColor( 1, 1, 1 );
+	qglColor3f( 1, 1, 1 );
 
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadIdentity();
@@ -929,7 +929,7 @@ static void RenderBumpTriangles( srfTriangles_t *lowMesh, renderBump_t *rb ) {
 	qglClearColor(1,0,0,1);
 	qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-	GL_FloatColor( 1, 1, 1 );
+	qglColor3f( 1, 1, 1 );
 
 	// create smoothed normals for the surface, which might be
 	// different than the normals at the vertexes if the
@@ -1417,7 +1417,7 @@ void RenderBumpFlat_f( const idCmdArgs &args ) {
 	qglDepthMask( GL_TRUE );
 	qglDepthFunc( GL_LEQUAL );
 
-	GL_FloatColor( 1, 1, 1 );
+	qglColor3f( 1, 1, 1 );
 
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadIdentity();
@@ -1470,7 +1470,7 @@ void RenderBumpFlat_f( const idCmdArgs &args ) {
 							float	*a;
 
 							v = mesh->indexes[j+k];
-							GL_ByteColor( mesh->verts[v].color );
+							qglColor4ubv( mesh->verts[v].color );
 							a = mesh->verts[v].xyz.ToFloatPtr();
 							qglVertex3f( a[0] + xOff, a[2] + yOff, a[1] );
 						}
@@ -1498,9 +1498,9 @@ void RenderBumpFlat_f( const idCmdArgs &args ) {
 							// NULLNORMAL is used by the artists to force an area to reflect no
 							// light at all
 							if ( surf->material->GetSurfaceFlags() & SURF_NULLNORMAL ) {
-								GL_FloatColor( 0.5, 0.5, 0.5 );
+								qglColor3f( 0.5, 0.5, 0.5 );
 							} else {
-								GL_FloatColor( 0.5 + 0.5*plane[0], 0.5 - 0.5*plane[2], 0.5 - 0.5*plane[1] );
+								qglColor3f( 0.5 + 0.5*plane[0], 0.5 - 0.5*plane[2], 0.5 - 0.5*plane[1] );
 							}
 
 							qglVertex3f( (*a)[0] + xOff, (*a)[2] + yOff, (*a)[1] );
@@ -1518,10 +1518,10 @@ void RenderBumpFlat_f( const idCmdArgs &args ) {
 								// NULLNORMAL is used by the artists to force an area to reflect no
 								// light at all
 								if ( surf->material->GetSurfaceFlags() & SURF_NULLNORMAL ) {
-									GL_FloatColor( 0.5, 0.5, 0.5 );
+									qglColor3f( 0.5, 0.5, 0.5 );
 								} else {
 								// we are going to flip the normal Z direction
-									GL_FloatColor( 0.5 + 0.5*n[0], 0.5 - 0.5*n[2], 0.5 - 0.5*n[1] );
+									qglColor3f( 0.5 + 0.5*n[0], 0.5 - 0.5*n[2], 0.5 - 0.5*n[1] );
 								}
 
 								a = mesh->verts[v].xyz.ToFloatPtr();

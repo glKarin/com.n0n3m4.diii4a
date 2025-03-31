@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 /**
  * This is a 9-tap Gaussian blur accelerated by making use of the GPU filtering hardware
@@ -34,7 +35,7 @@ uniform vec2 u_axis;
 
 
 void main() {
-	vec2 invImageSize = vec2(1) / vec2(textureSize(u_source, 0));
+	vec2 invImageSize = vec2(1.0) / vec2(textureSize(u_source, 0));
 
     vec2 fragCoord = gl_FragCoord.xy;
     FragColor = texture(u_source, fragCoord * invImageSize) * weight[0];

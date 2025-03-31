@@ -24,13 +24,13 @@ uniform mat4 u_projectionMatrix;
 
 uniform mat4 u_textureMatrix;
 uniform vec4 u_clipPlane;
-uniform mat4 u_inverseView;
+uniform mat4 u_modelMatrix;
 
 out float clipPlaneDist; 
 out vec4 var_TexCoord0;
 
 void main() {
 	var_TexCoord0 = u_textureMatrix * vec4(attr_TexCoord, 0, 1);
-	clipPlaneDist = dot(u_inverseView * u_modelViewMatrix * attr_Position, u_clipPlane);
+	clipPlaneDist = dot(u_modelMatrix * attr_Position, u_clipPlane);
 	gl_Position = objectPosToClip(attr_Position, u_modelViewMatrix, u_projectionMatrix);
 }

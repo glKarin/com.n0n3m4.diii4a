@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 #pragma tdm_include "tdm_utils.glsl"
 #pragma tdm_include "tdm_transform.glsl"
@@ -41,8 +42,8 @@ void main() {
 
 	if (u_upsampling) {
 		// depth-aware upsampling
-		invSrcResolution = vec2(1) / vec2(textureSize(u_resultTexture, 0));
-		vec2 factor = textureSize(u_resultTexture, 0) * u_invDestResolution;
+		invSrcResolution = vec2(1.0) / vec2(textureSize(u_resultTexture, 0));
+		vec2 factor = vec2(textureSize(u_resultTexture, 0)) * u_invDestResolution;
 
 		// canonical view Z we'll compare with
 		vec2 distDerivs;
@@ -71,9 +72,9 @@ void main() {
 		float dist10 = depthToZ(u_projectionMatrix, texture(u_depthTexture, tc10 + u_subpixelShift).r);
 		float dist00 = depthToZ(u_projectionMatrix, texture(u_depthTexture, tc00 + u_subpixelShift).r);
 		float weight11 =   rightWeight.x   * rightWeight.y   *   depthDifferenceWeight(thisDist, dist11, thisTC, tc11, distDerivs, exitDist, exitDerivs);
-		float weight01 = (1-rightWeight.x) * rightWeight.y   *   depthDifferenceWeight(thisDist, dist01, thisTC, tc01, distDerivs, exitDist, exitDerivs);
-		float weight10 =   rightWeight.x   * (1-rightWeight.y) * depthDifferenceWeight(thisDist, dist10, thisTC, tc10, distDerivs, exitDist, exitDerivs);
-		float weight00 = (1-rightWeight.x) * (1-rightWeight.y) * depthDifferenceWeight(thisDist, dist00, thisTC, tc00, distDerivs, exitDist, exitDerivs);
+		float weight01 = (1.0-rightWeight.x) * rightWeight.y   *   depthDifferenceWeight(thisDist, dist01, thisTC, tc01, distDerivs, exitDist, exitDerivs);
+		float weight10 =   rightWeight.x   * (1.0-rightWeight.y) * depthDifferenceWeight(thisDist, dist10, thisTC, tc10, distDerivs, exitDist, exitDerivs);
+		float weight00 = (1.0-rightWeight.x) * (1.0-rightWeight.y) * depthDifferenceWeight(thisDist, dist00, thisTC, tc00, distDerivs, exitDist, exitDerivs);
 
 		// compute weighted sum (depth-aware bilinear filtering)
 		float weightSum = weight00 + weight01 + weight10 + weight11;

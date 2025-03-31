@@ -38,6 +38,11 @@ darkModLAS LAS;
 
 //----------------------------------------------------------------------------
 
+bool darkModLAS::Disabled() const
+{
+	return g_lightQuotientAlgo.GetInteger() == 2;
+}
+
 /*!
 * Constructor
 */
@@ -61,6 +66,9 @@ darkModLAS::~darkModLAS()
 
 void darkModLAS::Save(idSaveGame *savefile ) const 
 {
+	if (Disabled())	// stgatilov #6546: completely disable LAS
+		return;
+
 	DM_LOG(LC_LIGHT, LT_DEBUG)LOGSTRING("Saving LAS.\r");
 
 	savefile->WriteUnsignedInt(m_updateFrameIndex);
@@ -106,6 +114,12 @@ void darkModLAS::Save(idSaveGame *savefile ) const
 
 void darkModLAS::Restore(idRestoreGame *savefile)
 {
+	if (Disabled())	// stgatilov #6546: completely disable LAS
+	{
+		shutDown();
+		return;
+	}
+
 	// angua: initialize is called on reloading before Restore()
 	// num areas already initialised
 	// m_pp_areaLightLists already created and empty
@@ -161,10 +175,9 @@ void darkModLAS::Restore(idRestoreGame *savefile)
 	}
 }
 
-
 //----------------------------------------------------------------------------
 
-__inline bool darkModLAS::moveLightBetweenAreas (darkModLightRecord_t* p_LASLight, int oldAreaNum, int newAreaNum )
+inline bool darkModLAS::moveLightBetweenAreas (darkModLightRecord_t* p_LASLight, int oldAreaNum, int newAreaNum )
 {
 	assert(oldAreaNum >= 0 && oldAreaNum < m_numAreas + 1);
 	assert(newAreaNum >= 0 && newAreaNum < m_numAreas + 1);
@@ -1190,6 +1203,9 @@ void darkModLAS::initialize()
 {	
 	CREATE_TIMER(queryLightingAlongLineTimer, "LAS", "Lighting");
 
+	if (Disabled())	// stgatilov #6546: completely disable LAS
+		return;
+
 	DM_LOG(LC_LIGHT, LT_DEBUG)LOGSTRING("Initializing Light Awareness System (LAS)\r");
 
 	// Dispose of any previous information
@@ -1251,6 +1267,9 @@ void darkModLAS::initialize()
 
 void darkModLAS::addLight (idLight* p_idLight)
 {
+	if (Disabled())	// stgatilov #6546: completely disable LAS
+		return;
+
 	// grayman #3843 - you can't use the light's origin by itself
 	// if there's a meaningful light_center
 
@@ -1320,6 +1339,9 @@ void darkModLAS::addLight (idLight* p_idLight)
 
 void darkModLAS::removeLight (idLight* p_idLight)
 {
+	if (Disabled())	// stgatilov #6546: completely disable LAS
+		return;
+
 	// Test parameters
 	assert (p_idLight != NULL);
 	
@@ -1472,6 +1494,9 @@ void darkModLAS::shutDown()
 
 void darkModLAS::updateLASState()
 {
+	if (Disabled())	// stgatilov #6546: completely disable LAS
+		return;
+
 	// Doing a new update frame
 	m_updateFrameIndex ++;
 
@@ -1559,6 +1584,12 @@ float darkModLAS::queryLightingAlongLine
 		bool b_useShadows
 )
 {
+	if (Disabled())	// stgatilov #6546: completely disable LAS
+	{
+		common->Warning("darkModLAS::queryLightingAlongLine disabled!");
+		return 0.0f;
+	}
+
 	START_SCOPED_TIMING(queryLightingAlongLineTimer, scopedQueryLightingAlongLineTimer);
 
 	if (p_ignoreEntity != NULL)
@@ -1698,6 +1729,12 @@ float darkModLAS::queryLightingAlongBestLine
 		bool b_useShadows
 )
 {
+	if (Disabled())	// stgatilov #6546: completely disable LAS
+	{
+		common->Warning("darkModLAS::queryLightingAlongBestLine disabled!");
+		return 0.0f;
+	}
+
 	START_SCOPED_TIMING(queryLightingAlongLineTimer, scopedQueryLightingAlongLineTimer);
 
 	if (p_ignoreEntity != NULL)

@@ -621,6 +621,7 @@ public class GameLauncher extends Activity
 			else if (
 					rgId == R.id.rg_version_realrtcw
 							|| rgId == R.id.rg_version_d3bfg
+							|| rgId == R.id.rg_version_tdm
 			)
 			{
 				RadioButton checked = radioGroup.findViewById(id);
@@ -3482,6 +3483,7 @@ public class GameLauncher extends Activity
 			openglVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
+			versionVisible = true;
 		}
 		else if (Q3EUtils.q3ei.isD3BFG)
 		{
@@ -3559,6 +3561,7 @@ public class GameLauncher extends Activity
 
 		V.rg_version_d3bfg.setVisibility(d3bfgVisible ? View.VISIBLE : View.GONE);
 		V.rg_version_realrtcw.setVisibility(realrtcwVisible ? View.VISIBLE : View.GONE);
+		V.rg_version_tdm.setVisibility(tdmVisible ? View.VISIBLE : View.GONE);
 		V.gameversion_section.setVisibility(versionVisible ? View.VISIBLE : View.GONE);
 
 		V.idtech4_section.setVisibility(Q3EUtils.q3ei.IsIdTech4() ? View.VISIBLE : View.GONE);
@@ -3916,7 +3919,7 @@ public class GameLauncher extends Activity
 				null,
 				null,
 				V.rg_version_d3bfg,
-				null,
+				V.rg_version_tdm,
 				null,
 				null,
 				V.rg_version_realrtcw,
@@ -4068,6 +4071,7 @@ public class GameLauncher extends Activity
 
 		versionGroupRadios.put(Q3EGlobals.GAME_DOOM3BFG, V.rg_version_d3bfg);
 		versionGroupRadios.put(Q3EGlobals.GAME_REALRTCW, V.rg_version_realrtcw);
+		versionGroupRadios.put(Q3EGlobals.GAME_TDM, V.rg_version_tdm);
 
 		for (String type : GameManager.Games)
 		{
@@ -4529,6 +4533,7 @@ public class GameLauncher extends Activity
 		public Button launcher_tab1_change_game;
 		public Button launcher_tab1_open_menu;
 		public CheckBox cb_r_occlusionCulling;
+		public RadioGroup rg_version_tdm;
 
         public void Setup()
         {
@@ -4675,6 +4680,7 @@ public class GameLauncher extends Activity
 			launcher_tab1_change_game = findViewById(R.id.launcher_tab1_change_game);
 			launcher_tab1_open_menu = findViewById(R.id.launcher_tab1_open_menu);
 			cb_r_occlusionCulling = findViewById(R.id.cb_r_occlusionCulling);
+			rg_version_tdm = findViewById(R.id.rg_version_tdm);
         }
     }
 }

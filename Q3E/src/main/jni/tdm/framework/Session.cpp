@@ -26,7 +26,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 idCVar	idSessionLocal::com_showAngles( "com_showAngles", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar	idSessionLocal::com_minTics( "com_minTics", "0", CVAR_SYSTEM, "" );
 idCVar	idSessionLocal::com_showTics( "com_showTics", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
-idCVar	idSessionLocal::com_fixedTic("com_fixedTic", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
+idCVar	idSessionLocal::com_fixedTic("com_fixedTic", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
 	" 0 -- game tics have fixed duration of 16 ms (stable physics but 60 FPS limit)\n"
 	" 1 -- game tics can have shorter duration (removes 60 FPS limit)",
 0, 1);
@@ -43,7 +43,7 @@ idCVar	idSessionLocal::com_useMinorTics("com_useMinorTics", "1", CVAR_SYSTEM | C
 	"If several game tics are modelled in one frame, all tics except the first one are declared \"minor\". "
 	"Minor tics can enable various optimizations, f.i. alive AIs don't think in minor tics.",
 1, 1000);
-idCVar	idSessionLocal::com_maxFPS( "com_maxFPS", "300", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "define the maximum FPS cap", 2, 1000 );
+idCVar	idSessionLocal::com_maxFPS( "com_maxFPS", "300", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_FLOAT, "define the maximum FPS cap", 2, 1000 );
 idCVar	idSessionLocal::com_showDemo("com_showDemo", "0", CVAR_SYSTEM | CVAR_BOOL, "");
 idCVar	idSessionLocal::com_skipGameDraw( "com_skipGameDraw", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar	idSessionLocal::com_aviDemoSamples( "com_aviDemoSamples", "16", CVAR_SYSTEM, "" );
@@ -76,15 +76,6 @@ const int PREVIEW_HEIGHT = 298;
 
 // grayman #3763 - loading bar progress at key points
 
-const float LOAD_KEY_START_PROGRESS = 0.02f;
-const float LOAD_KEY_COLLISION_START_PROGRESS = 0.03f;
-const float LOAD_KEY_COLLISION_DONE_PROGRESS = 0.04f;
-const float LOAD_KEY_SPAWN_ENTITIES_START_PROGRESS = 0.05f;
-const float LOAD_KEY_ROUTING_START_PROGRESS = 0.36f;
-const float LOAD_KEY_ROUTING_DONE_PROGRESS = 0.43f;
-const float LOAD_KEY_IMAGES_START_PROGRESS = 0.45f;
-const float LOAD_KEY_DONE_PROGRESS = 1.00f;
-
 void RandomizeStack( void ) {
 	// attempt to force uninitialized stack memory bugs
 	int		bytes = 4000000;
@@ -102,7 +93,7 @@ Session_RescanSI_f
 =================
 */
 void Session_RescanSI_f( const idCmdArgs &args ) {
-	sessLocal.mapSpawnData.serverInfo = *cvarSystem->MoveCVarsToDict( CVAR_SERVERINFO );
+	sessLocal.mapSpawnData.serverInfo = cvarSystem->MoveCVarsToDict( CVAR_SERVERINFO );
 }
 
 /*
@@ -295,14 +286,14 @@ void idSessionLocal::Clear() {
 	aviCaptureMode = false;
 	timeDemo = TD_NO;
 	waitingOnBind = false;
-	lastPacifierTime = 0;
+	lastUpdateProgressBarTime = 0;
+	lastUpdateProgressBarStage = PROGRESS_STAGE_COUNT;	// different from any valid
+	lastUpdateProgressBarRatio = 0.0f;
 	
 	msgRunning = false;
 	guiMsgRestore = NULL;
 	msgIgnoreButtons = false;
 	no_smp = false;
-
-	//bytesNeededForMapLoad = 0; // grayman #3763 - no longer used
 
 #if ID_CONSOLE_LOCK
 	emptyDrawCount = 0;
@@ -348,8 +339,6 @@ void idSessionLocal::Stop() {
 
 	// clear mapSpawned and demo playing flags
 	UnloadMap();
-	// stgatilov: reset to default playerstart when "Quit Mission" is used (but not on restart)
-	gameLocal.m_StartPosition = "";
 
 	if ( sw ) {
 		sw->StopAllSounds();
@@ -1121,10 +1110,10 @@ void idSessionLocal::StartNewGame( const char *mapName, bool devmap ) {
 	// clear the userInfo so the player starts out with the defaults
 	mapSpawnData.userInfo[0].Clear();
 	mapSpawnData.persistentPlayerInfo[0].Clear();
-	mapSpawnData.userInfo[0] = *cvarSystem->MoveCVarsToDict( CVAR_USERINFO );
+	mapSpawnData.userInfo[0] = cvarSystem->MoveCVarsToDict( CVAR_USERINFO );
 
 	mapSpawnData.serverInfo.Clear();
-	mapSpawnData.serverInfo = *cvarSystem->MoveCVarsToDict( CVAR_SERVERINFO );
+	mapSpawnData.serverInfo = cvarSystem->MoveCVarsToDict( CVAR_SERVERINFO );
 	mapSpawnData.serverInfo.Set( "si_gameType", "singleplayer" );
 
 	// set the devmap key so any play testing items will be given at
@@ -1134,7 +1123,7 @@ void idSessionLocal::StartNewGame( const char *mapName, bool devmap ) {
 	}
 
 	mapSpawnData.syncedCVars.Clear();
-	mapSpawnData.syncedCVars = *cvarSystem->MoveCVarsToDict( CVAR_NETWORKSYNC );
+	mapSpawnData.syncedCVars = cvarSystem->MoveCVarsToDict( CVAR_NETWORKSYNC );
 
 	MoveToNewMap( mapName );
 }
@@ -1423,35 +1412,6 @@ void idSessionLocal::LoadLoadingGui( const char *mapName ) {
 
 /*
 ===============
-idSessionLocal::SetBytesNeededForMapLoad
-===============
-*/
-void idSessionLocal::SetBytesNeededForMapLoad( const char *mapName, int bytesNeeded ) {
-	idDecl *mapDecl = const_cast<idDecl *>(declManager->FindType( DECL_MAPDEF, mapName, false ));
-	idDeclEntityDef *mapDef = static_cast<idDeclEntityDef *>( mapDecl );
-
-	if ( com_updateLoadSize.GetBool() && mapDef ) {
-		// we assume that if com_updateLoadSize is true then the file is writable
-
-		mapDef->dict.SetInt( "size0", bytesNeeded );
-
-		idStr declText = "\nmapDef ";
-		declText += mapDef->GetName();
-		declText += " {\n";
-		for (int i=0; i<mapDef->dict.GetNumKeyVals(); i++) {
-			const idKeyValue *kv = mapDef->dict.GetKeyVal( i );
-			if ( kv && (kv->GetKey().Cmp("classname") != 0 ) ) {
-				declText += "\t\"" + kv->GetKey() + "\"\t\t\"" + kv->GetValue() + "\"\n";
-			}
-		}
-		declText += "}";
-		mapDef->SetText( declText );
-		mapDef->ReplaceSourceFileText();
-	}
-}
-
-/*
-===============
 idSessionLocal::ExecuteMapChange
 
 Performs the initialization of a game based on mapSpawnData, used for both single
@@ -1533,17 +1493,6 @@ bool idSessionLocal::ExecuteMapChange(idFile* savegameFile, bool noFadeWipe ) {
 	// and draw the loading gui instead of game draws
 	insideExecuteMapChange = true;
 
-	/* grayman #3763 - no longer used
-	// if this works out we will probably want all the sizes in a def file although this solution will 
-	// work for new maps etc. after the first load. we can also drop the sizes into the default.cfg
-	fileSystem->ResetReadCount();
-	if ( !reloadingSameMap  ) {
-		bytesNeededForMapLoad = GetBytesNeededForMapLoad( mapString.c_str() );
-	} else {
-		bytesNeededForMapLoad = 30 * 1024 * 1024;
-	}
-	*/
-
 	ClearWipe();
 
 	// let the loading gui spin for 1 second to animate out
@@ -1566,9 +1515,11 @@ bool idSessionLocal::ExecuteMapChange(idFile* savegameFile, bool noFadeWipe ) {
 	common->Printf( "Map: %s\n", mapString.c_str() );
 
 	// let the renderSystem load all the geometry
+	session->UpdateLoadingProgressBar( PROGRESS_STAGE_PROCFILE, 0.0f );
 	if ( !rw->InitFromMap( fullMapName ) ) {
 		common->Error( "Couldn't load %s", fullMapName.c_str() );
 	}
+	session->UpdateLoadingProgressBar( PROGRESS_STAGE_PROCFILE, 1.0f );
 
 	// for the synchronous networking we needed to roll the angles over from
 	// level to level, but now we can just clear everything
@@ -1589,10 +1540,6 @@ bool idSessionLocal::ExecuteMapChange(idFile* savegameFile, bool noFadeWipe ) {
 			// STiFU #4531: We used to do an initialized load of the map at this point. 
 			// This is now controlled from the outside, however.
 			return false;
-			
-			/*		
-			game->SetServerInfo( mapSpawnData.serverInfo );
-			game->InitFromNewMap( fullMapName + ".map", rw, sw, false, false, Sys_Milliseconds() );*/
 		}
 	} else {
 		game->SetServerInfo( mapSpawnData.serverInfo );
@@ -1611,7 +1558,6 @@ bool idSessionLocal::ExecuteMapChange(idFile* savegameFile, bool noFadeWipe ) {
 		renderSystem->EndLevelLoad();
 		soundSystem->EndLevelLoad( mapString.c_str() );
 		declManager->EndLevelLoad();
-		SetBytesNeededForMapLoad( mapString.c_str(), fileSystem->GetReadCount() );
 	}
 	uiManager->EndLevelLoad();
 
@@ -1632,7 +1578,7 @@ bool idSessionLocal::ExecuteMapChange(idFile* savegameFile, bool noFadeWipe ) {
 
 	common->PrintWarnings();
 
-	if ( guiLoading /*&& bytesNeededForMapLoad*/ ) {
+	if ( guiLoading ) {
 		float pct = guiLoading->State().GetFloat( "map_loading" );
 		if ( pct < 0.0f ) {
 			pct = 0.0f;
@@ -1838,6 +1784,45 @@ void SimulateEscape_f( const idCmdArgs & ) {
 }
 
 /*
+====================
+Session_PrintPersistentInfo_f
+====================
+*/
+void Session_PrintPersistentInfo_f( const idCmdArgs & ) {
+	auto PrintDict = []( const idDict &dict ) {
+		int n = dict.GetNumKeyVals();
+		common->Printf( " (%d entries):\n",  n );
+		for ( int i = 0; i < n; i++ ) {
+			const idKeyValue *kv = dict.GetKeyVal( i );
+			common->Printf( "  \"%s\" = \"%s\"\n", kv->GetKey().c_str(), kv->GetValue().c_str() );
+		}
+	};
+
+	const idDict &playerInfoGame = game->GetPersistentPlayerInfo( 0 );
+	const idDict &playerInfoSession = sessLocal.mapSpawnData.persistentPlayerInfo[0];	// perhaps not interesting...
+	const idDict &levelInfoGame = gameLocal.persistentLevelInfo;
+
+	idDict levelInfoMenu;
+	if ( sessLocal.guiMainMenu ) {
+		const idDict &allGuiVars = sessLocal.guiMainMenu->State();
+		for (const idKeyValue *kv = allGuiVars.MatchPrefix("persistent_"); kv; kv = allGuiVars.MatchPrefix("persistent_", kv)) {
+			idStr key = kv->GetKey().c_str() + strlen("persistent_");
+			levelInfoMenu.Set(key, kv->GetValue());
+		}
+	} else {
+		levelInfoMenu.Set( "<<<menu is dead>>>", "<<<menu is dead>>>" );
+	}
+
+	common->Printf( "Doom 3 'player info'" );
+	PrintDict( playerInfoGame );
+
+	common->Printf( "TDM 'level info' game%s", gameLocal.persistentLevelInfoLocation == PERSISTENT_LOCATION_GAME ? " (*)" : "" );
+	PrintDict( levelInfoGame );
+	common->Printf( "TDM 'level info' menu%s", gameLocal.persistentLevelInfoLocation == PERSISTENT_LOCATION_MAINMENU ? " (*)" : "" );
+	PrintDict( levelInfoMenu );
+}
+
+/*
 ===============
 idSessionLocal::ScrubSaveGameFileName
 
@@ -1960,7 +1945,7 @@ bool idSessionLocal::SaveGame( const char *saveName, bool autosave, bool skipChe
 	}
 
 	// Write SaveGame Header: 
-	// Game Name / Version / Map Name / Persistant Player Info
+	// Game Name / Version / Map Name / Persistent Player Info
 
 	// game
 	const char *gamename = GAME_NAME;
@@ -2079,7 +2064,8 @@ bool idSessionLocal::SaveGame( const char *saveName, bool autosave, bool skipChe
 	}
 
 	syncNextGameFrame = true;
-	qglFinish();
+	// remove #4967 hack fix. It is now causing autosave crashes. Bug is also still present whether the hack is present or not.
+	// qglFinish();
 
 
 	return true;
@@ -2219,13 +2205,13 @@ bool idSessionLocal::DoLoadGame( const char *saveName, const bool initializedLoa
 	// Start loading map
 	mapSpawnData.serverInfo.Clear();
 
-	mapSpawnData.serverInfo = *cvarSystem->MoveCVarsToDict( CVAR_SERVERINFO );
+	mapSpawnData.serverInfo = cvarSystem->MoveCVarsToDict( CVAR_SERVERINFO );
 	mapSpawnData.serverInfo.Set( "si_gameType", "singleplayer" );
 
 	mapSpawnData.serverInfo.Set( "si_map", saveMap );
 
 	mapSpawnData.syncedCVars.Clear();
-	mapSpawnData.syncedCVars = *cvarSystem->MoveCVarsToDict( CVAR_NETWORKSYNC );
+	mapSpawnData.syncedCVars = cvarSystem->MoveCVarsToDict( CVAR_NETWORKSYNC );
 
 	mapSpawnData.mapSpawnUsercmd[0] = usercmdGen->TicCmd( latchedTicNumber );
 	// make sure no buttons are pressed
@@ -2309,7 +2295,7 @@ bool idSessionLocal::ParseSavegamePreamble(const char * saveName, idFile** saveg
 	}
 
 	// Read in save game header
-	// Game Name / Version / Map Name / Persistant Player Info
+	// Game Name / Version / Map Name / Persistent Player Info
 
 	// game
 	(*savegameFile)->ReadString(gamename);
@@ -2516,22 +2502,11 @@ void idSessionLocal::DrawCmdGraph() {
 
 /*
 ===============
-idSessionLocal::PacifierUpdate
+idSessionLocal::UpdateLoadingProgressBar
 ===============
 */
-void idSessionLocal::PacifierUpdate(loadkey_t key, int count) // grayman #3763
+void idSessionLocal::UpdateLoadingProgressBar( progressStage_t stage, float ratio )
 {
-	/* 'count' is used as follows:
-	  
-	   - for key points, it is either '0' (not used), or the
-	     total number of expected interim 'sub-key' points, which
-	     is used to determine the incremental amount to be added to
-	     the loading percentage as each 'sub-key' point is reported.
-	  
-	   - for 'sub-key' points, it is the number of objects processed,
-	     but it's not used
-	*/
-
 	if ( !insideExecuteMapChange )
 	{
 		return;
@@ -2544,106 +2519,59 @@ void idSessionLocal::PacifierUpdate(loadkey_t key, int count) // grayman #3763
 		return;
 	}
 
-	if ( guiLoading /*&& bytesNeededForMapLoad*/ )
+	static float StageWeights[PROGRESS_STAGE_COUNT]; // which factor of global progress bar each stage takes
+	static bool WeightInitialized = false;
+	if ( !WeightInitialized ) {
+		WeightInitialized = true;
+
+		memset( StageWeights, -1, sizeof(StageWeights) );
+		StageWeights[PROGRESS_STAGE_PROCFILE]	= 0.03f;
+		StageWeights[PROGRESS_STAGE_MAPFILE]	= 0.02f;
+		StageWeights[PROGRESS_STAGE_COLLISION]	= 0.03f;
+		StageWeights[PROGRESS_STAGE_ENTITIES]	= 0.45f;
+		StageWeights[PROGRESS_STAGE_ROUTING]	= 0.02f;
+		StageWeights[PROGRESS_STAGE_IMAGES]		= 0.25f;
+		StageWeights[PROGRESS_STAGE_SOUNDS]		= 0.20f;
+
+		// make sure sum of weights is unit
+		float weightSum = 0.0f;
+		for ( int s = 0; s < PROGRESS_STAGE_COUNT; s++ )
+			weightSum += StageWeights[s];
+		assert( idMath::Fabs(weightSum - 1.0f) <= 1e-3f );
+	}
+
+	if ( guiLoading )
 	{
 		// grayman #3763 - new way
-		// 'bytesNeededForMapLoad' is a constant,
-		// so it can't reflect the varying amounts of data needed
-		// to load a map. Small maps will be more accurate, and
-		// large maps will be way off the mark, relegating most of
-		// the map load to the time after map_loading == 100%. The
-		// only accurate way to display the loading bar is to know
-		// ahead of time how many bytes will need to be read, but
-		// we can't know that until after the first time the map is loaded.
-		//
 		// Replaced with a method that determines average "% complete"
 		// settings at key loading points, and
 		// bump the loading bar to those settings as the load progresses.
-		//
-		// Leave a short time (~5s) after 100% is reached so that the loading
-		// messages that replace the bar can be displayed for a short time.
-		// This is done by reducing the number of textures that need to be
-		// loaded, which increases the amount of progress shown as each is
-		// loaded. Once pct reaches 1.00, the loading bar shows 100% and
-		// switches what's painted based on what the map author has the
-		// gui doing. Meanwhile, the extra textures continue to load in the
-		// background until all are loaded. At that point, it's only a few
-		// ms before the "Mission Loaded / Press Attack" screen is painted
-		// and the player can start the mission.
 
+		float globalRatio = 0.0f;
+		for ( int s = 0; s < stage; s++ )
+			globalRatio += StageWeights[s];
+		globalRatio += StageWeights[stage] * ratio;
+
+		TRACE_PLOT_SMOOTH_FRACTION( "LoadingProgressBar", globalRatio );
+
+		if ( stage == lastUpdateProgressBarStage && ratio == lastUpdateProgressBarRatio )
+			return;	// exactly same as previous update
+		assert( stage >= 0 && stage < PROGRESS_STAGE_COUNT );
+		assert( ratio >= 0.0f && ratio <= 1.0f );
+		assert( stage != lastUpdateProgressBarStage || ratio > lastUpdateProgressBarRatio );	// monotonic
+
+		// don't waste time redrawing screen on every progress report
+		// only redraw when a) stage is exactly at start/end, b) predefined time has passed
 		int	time = eventLoop->Milliseconds();
-
-		switch (key)
-		{
-		case LOAD_KEY_START: // Start loading map
-			pct = LOAD_KEY_START_PROGRESS;
-			break;
-		case LOAD_KEY_COLLISION_START: // Start loading collision data
-			pct = LOAD_KEY_COLLISION_START_PROGRESS;
-			break;
-		case LOAD_KEY_COLLISION_DONE: // Collision data loaded, start spawning player
-			pct = LOAD_KEY_COLLISION_DONE_PROGRESS;
-			break;
-		case LOAD_KEY_SPAWN_ENTITIES_START: // Player spawned, start spawning entities
-			pct = LOAD_KEY_SPAWN_ENTITIES_START_PROGRESS;
-			pct_delta = (LOAD_KEY_ROUTING_START_PROGRESS - LOAD_KEY_SPAWN_ENTITIES_START_PROGRESS) / idMath::Fmax(count, 1.0f);
-			break;
-		case LOAD_KEY_SPAWN_ENTITIES_INTERIM: // spawning entities (finer granularity)
-			pct += pct_delta;
-			if ( time - lastPacifierTime < 500 )
-			{
+		if ( ratio > 0.0f && ratio < 1.0f && time - lastUpdateProgressBarTime < 200 )
 				return;
-			}
-			break;
-		case LOAD_KEY_ROUTING_START: // entities spawned, start compiling routing data
-			pct = LOAD_KEY_ROUTING_START_PROGRESS;
-			pct_delta = (LOAD_KEY_ROUTING_DONE_PROGRESS - LOAD_KEY_ROUTING_START_PROGRESS) / idMath::Fmax(count, 1.0f);
-			break;
-		case LOAD_KEY_ROUTING_INTERIM: // compiling routing data (finer granularity)
-			pct += pct_delta;
-			if ( time - lastPacifierTime < 500 )
-			{
-				return;
-			}
-			break;
-		case LOAD_KEY_ROUTING_DONE: // routing data compiled, spawn player
-			pct = LOAD_KEY_ROUTING_DONE_PROGRESS;
-			break;
-		case LOAD_KEY_IMAGES_START: // player spawned, start loading textures
-			pct = LOAD_KEY_IMAGES_START_PROGRESS;
-			
-			// the -35 below guarantees there will be
-			// some time between the loading bar
-			// hitting 100% and the "Mission Loaded / Press Attack" screen
-			pct_delta = (LOAD_KEY_DONE_PROGRESS - LOAD_KEY_IMAGES_START_PROGRESS) / idMath::Fmax(idMath::Fmax(count - 35, count/2.0f), 1.0f);
-			break;
-		case LOAD_KEY_IMAGES_INTERIM: // loading textures (finer granularity)
-			pct += pct_delta;
-			if ( time - lastPacifierTime < 500 )
-			{
-				return;
-			}
-			break;
-		case LOAD_KEY_DONE: // textures loaded, mission done loading
-			// send the loading gui the final pct
-			break;
-		default:
-			break;
-		}
 
-		lastPacifierTime = time;
+		lastUpdateProgressBarTime = time;
+		lastUpdateProgressBarStage = stage;
+		lastUpdateProgressBarRatio = ratio;
 
-		guiLoading->SetStateFloat( "map_loading", pct );
+		guiLoading->SetStateFloat( "map_loading", globalRatio );
 		guiLoading->StateChanged( com_frameTime );
-		// end of new way
-
-		/* grayman #3763 - old way
-		float n = fileSystem->GetReadCount();
-		float pct = ( n / bytesNeededForMapLoad );
-		guiLoading->SetStateFloat( "map_loading", pct );
-		guiLoading->StateChanged( com_frameTime );
-		// end of old way
-		*/
 	}
 
 	Sys_GenerateEvents();
@@ -2658,8 +2586,13 @@ idSessionLocal::Draw
 */
 void idSessionLocal::Draw() {
 	bool fullConsole = false;
+	// disable when 3D game is not rendered (main menu, loading, etc.)
+	r_tonemapInternal.SetBool( r_tonemap.GetBool() && !r_tonemapOnlyGame3d.GetBool() );
 
 	if ( insideExecuteMapChange ) {
+		renderSystem->SetColor( colorBlack );
+		renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
+
 		if ( guiLoading ) {
 			guiLoading->Redraw( com_frameTime );
 		}
@@ -2674,6 +2607,8 @@ void idSessionLocal::Draw() {
 		renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
 		guiTest->Redraw( com_frameTime );
 	} else if ( guiActive && !guiActive->State().GetBool( "gameDraw" ) ) {
+		renderSystem->SetColor( colorBlack );
+		renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
 		
 		// draw the frozen gui in the background
 		if ( guiActive == guiMsg && guiMsgRestore ) {
@@ -2686,6 +2621,7 @@ void idSessionLocal::Draw() {
 		rw->RenderScene( currentDemoRenderView );
 		renderSystem->DrawDemoPics();
 	} else if ( mapSpawned ) {
+		r_tonemapInternal.SetBool( r_tonemap.GetBool() );
 		bool gameDraw = false;
 		// normal drawing for both single and multi player
 		if ( !com_skipGameDraw.GetBool() && GetLocalClientNum() >= 0 ) {
@@ -2928,12 +2864,12 @@ void idSessionLocal::Frame() {
 		return;
 	}
 
-	// check for user info changes
+	/*// check for user info changes
 	if ( cvarSystem->GetModifiedFlags() & CVAR_USERINFO ) {
 		mapSpawnData.userInfo[0] = *cvarSystem->MoveCVarsToDict( CVAR_USERINFO );
 		game->SetUserInfo( 0, mapSpawnData.userInfo[0], false, false );
 		cvarSystem->ClearModifiedFlags( CVAR_USERINFO );
-	}
+	}*/
 
 	// see how many usercmds we are going to run
 	int	numCmdsToRun = latchedTicNumber - lastGameTic;
@@ -3156,7 +3092,7 @@ void idSessionLocal::FrontendThreadFunction() {
 			TRACE_CPU_SCOPE_COLOR( "Frontend::Wait", TRACE_COLOR_IDLE )
 			std::unique_lock< std::mutex > lock( signalMutex );
 			// wait for render thread
-			while( !frontendActive && !shutdownFrontend ) {
+			while( !frontendActiveNow && !shutdownFrontend ) {
 				signalFrontendThread.wait( lock );
 			}
 			if( shutdownFrontend ) {
@@ -3172,7 +3108,7 @@ void idSessionLocal::FrontendThreadFunction() {
 		
 		{ // lock scope - signal render thread
 			std::unique_lock< std::mutex > lock( signalMutex );
-			frontendActive = false;
+			frontendActiveNow = false;
 			signalMainThread.notify_one();
 		}
 	}
@@ -3190,6 +3126,10 @@ bool idSessionLocal::IsFrontend() const {
 #endif
 }
 
+bool idSessionLocal::IsFrontendThreadUsed() const {
+	return frontendShouldBeActive;
+}
+
 /*
 ===============
 idSessionLocal::ActivateFrontend
@@ -3199,9 +3139,11 @@ Activates game tic and frontend rendering on a separate thread.
 ===============
 */
 void idSessionLocal::ActivateFrontend() {
-	if( com_smp.GetBool() && !guiActive && !no_smp ) {
+	frontendShouldBeActive = ( com_smp.GetBool() && !guiActive && !no_smp );
+
+	if ( frontendShouldBeActive ) {
 		std::unique_lock<std::mutex> lock( signalMutex );
-		frontendActive = true;
+		frontendActiveNow = true;
 		signalFrontendThread.notify_one();
 	} else {
 		// run game tics and frontend drawing serially
@@ -3223,8 +3165,8 @@ void idSessionLocal::WaitForFrontendCompletion() {
 		TRACE_CPU_SCOPE_COLOR( "WaitForFrontend", TRACE_COLOR_IDLE );
 		std::unique_lock<std::mutex> lock( signalMutex );
 		if( r_showSmp.GetBool() )
-			backEnd.pc.waitedFor = frontendActive ? 'F' : '.';
-		while( frontendActive ) {
+			backEnd.pc.waitedFor = frontendActiveNow ? 'F' : '.';
+		while( frontendActiveNow ) {
 			signalMainThread.wait( lock );
 		}
 
@@ -3237,7 +3179,7 @@ void idSessionLocal::WaitForFrontendCompletion() {
 }
 
 void idSessionLocal::StartFrontendThread() {
-	frontendActive = shutdownFrontend = false;
+	frontendActiveNow = shutdownFrontend = false;
 	auto func = []( void *x ) -> unsigned int {
 		idSessionLocal* s = (idSessionLocal*)x;
 		s->FrontendThreadFunction();
@@ -3352,6 +3294,11 @@ void idSessionLocal::Init() {
 	cmdSystem->AddCommand( "hitch", Session_Hitch_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "hitches the game" );
 
 	cmdSystem->AddCommand( "escape", SimulateEscape_f, CMD_FL_GAME, "simulate a press of the ESC key" );
+
+	cmdSystem->AddCommand(
+		"printPersistentInfo", Session_PrintPersistentInfo_f, CMD_FL_GAME,
+		"Prints all persistent info.\nIt is used to pass data between missions in campaign, and between briefing/debriefing and game."
+	);
 
 	// the same idRenderWorld will be used for all games
 	// and demos, insuring that level specific models

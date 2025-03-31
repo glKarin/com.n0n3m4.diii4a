@@ -104,10 +104,6 @@ public:
 	}
 
 	int GetBaseVertex() {
-		if ( currentVertexBuffer == 0 ) {
-			common->Printf( "GetBaseVertex called, but no vertex buffer is bound. Vertex cache resize?\n" );
-			//return;
-		}
 		return basePointer;
 	}
 
@@ -130,7 +126,6 @@ private:
 	GLuint			staticIndexBuffer;
 	GLuint			staticShadowBuffer;
 
-	GLuint			currentVertexBuffer;
 	GLuint			currentIndexBuffer;
 
 	int				indexAllocCount, vertexAllocCount;

@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 // !!ARBvp1.0 OPTION ARB_position_invariant ;
 
 #pragma tdm_include "tdm_transform.glsl"
@@ -95,9 +96,9 @@ void main() {
 	var_tc4.y = dot(attr_Bitangent.xyz, u_modelMatrixRow2.xyz);                                         //DP3	result.texcoord[4].y, vertex.attrib[10], program.env[8];
 	
 	// texture 4 gets the transformed tangent
-	var_tc2.z = dot(vec4(attr_Normal, 1).xyz, u_modelMatrixRow0.xyz);                                   //DP3	result.texcoord[2].z, vertex.attrib[2], program.env[6];
-	var_tc3.z = dot(vec4(attr_Normal, 1).xyz, u_modelMatrixRow1.xyz);                                   //DP3	result.texcoord[3].z, vertex.attrib[2], program.env[7];
-	var_tc4.z = dot(vec4(attr_Normal, 1).xyz, u_modelMatrixRow2.xyz);                                   //DP3	result.texcoord[4].z, vertex.attrib[2], program.env[8];
+	var_tc2.z = dot(vec4(attr_Normal, 1.0).xyz, u_modelMatrixRow0.xyz);                                   //DP3	result.texcoord[2].z, vertex.attrib[2], program.env[6];
+	var_tc3.z = dot(vec4(attr_Normal, 1.0).xyz, u_modelMatrixRow1.xyz);                                   //DP3	result.texcoord[3].z, vertex.attrib[2], program.env[7];
+	var_tc4.z = dot(vec4(attr_Normal, 1.0).xyz, u_modelMatrixRow2.xyz);                                   //DP3	result.texcoord[4].z, vertex.attrib[2], program.env[8];
 	
 	//Send vertex color down to fragment pass - unused?
 	//MAD	result.color, vertex.color, program.env[16], program.env[17];

@@ -17,6 +17,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #extension GL_EXT_clip_cull_distance : enable
 
 precision highp float;
+precision highp int;
 
 uniform mat4 u_modelMatrix;
 uniform vec4 u_lightOrigin;

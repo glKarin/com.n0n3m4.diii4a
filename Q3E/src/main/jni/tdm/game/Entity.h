@@ -83,10 +83,13 @@ extern const idEventDef EV_SetAngles;
 extern const idEventDef EV_ApplyImpulse;
 extern const idEventDef EV_SetLinearVelocity;
 extern const idEventDef EV_SetAngularVelocity;
+extern const idEventDef EV_SetGravity;
 extern const idEventDef EV_SetSkin;
 extern const idEventDef EV_ReskinCollisionModel; // #4232
 extern const idEventDef EV_StartSoundShader;
 extern const idEventDef EV_StopSound;
+extern const idEventDef EV_SetFrobActionScript;
+extern const idEventDef EV_SetUsedBy;
 extern const idEventDef EV_CacheSoundShader;
 extern const idEventDef EV_ExtinguishLights;
 extern const idEventDef EV_TeleportTo;
@@ -564,6 +567,7 @@ public:
 	 * is cached, to save it from being recalculated for multiple AI each frame.
 	 */
 	float					GetLightQuotient();
+	bool					DebugGetLightQuotient(float &result) const;
 
 	// TDM: SZ: January 9, 2006 Made virtual to handle unique behavior in descendents
 	virtual void			UpdateVisuals( void );
@@ -588,7 +592,8 @@ public:
 	bool					StartSound( const char *soundName, const s_channelType channel, int soundShaderFlags, bool broadcast, int *length, float propVolMod = 0, int msgTag = 0); // grayman #3355
 	bool					StartSoundShader( const idSoundShader *shader, const s_channelType channel, int soundShaderFlags, bool broadcast, int *length);
 	void					StopSound( const s_channelType channel, bool broadcast );	// pass SND_CHANNEL_ANY to stop all sounds
-	void					SetSoundVolume( float volume );
+	void					SetSoundVolume( float volume );	// stgatilov #6346: set and enable override
+	void					SetSoundVolume( void );			// stgatilov #6346: disable override
 	void					UpdateSound( void ); // grayman #4337
 	int						GetListenerId( void ) const;
 	idSoundEmitter *		GetSoundEmitter( void ) const;
@@ -1592,9 +1597,13 @@ public:			// Events should be public, so they can be used from other places as w
 	void					Event_GetColor( void );
 	void					Event_SetHealth( float newHealth );
 	void					Event_GetHealth( void );
+	void					Event_SetMaxHealth( float newMaxHealth );
+	void					Event_GetMaxHealth( void );
 	void					Event_IsHidden( void );
 	void					Event_Hide( void );
 	void					Event_Show( void );
+	void					Event_SetFrobActionScript( const char *frobActionScript );
+	void					Event_SetUsedBy( idEntity *useEnt, bool canUse );
 	void					Event_CacheSoundShader( const char *soundName );
 	void					Event_StartSoundShader( const char *soundName, int channel );
 	void					Event_StopSound( int channel, int netSync );
@@ -1612,6 +1621,7 @@ public:			// Events should be public, so they can be used from other places as w
 	void					Event_GetLinearVelocity( void );
 	void					Event_SetAngularVelocity( const idVec3 &velocity );
 	void					Event_GetAngularVelocity( void );
+	void					Event_SetGravity( const idVec3 &newGravity );
 	void					Event_ApplyImpulse( idEntity *ent, const int id, const idVec3 &point, const idVec3 &impulse );
 
 	void					Event_SetContents(const int contents);

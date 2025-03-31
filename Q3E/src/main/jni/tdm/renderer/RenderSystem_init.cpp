@@ -24,6 +24,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/backend/stages/BloomStage.h"
 #include "renderer/backend/stages/VolumetricStage.h"
 #include "renderer/backend/FrameBufferManager.h"
+#include "renderer/backend/VertexArrayState.h"
 #include "sys/sys_padinput.h"
 
 // Vista OpenGL wrapper check
@@ -78,7 +79,13 @@ idCVar r_ignoreGLErrors( "r_ignoreGLErrors",
 #endif
 	, CVAR_RENDERER | CVAR_BOOL, "ignore GL errors" );
 idCVar r_finish( "r_finish", "0", CVAR_RENDERER | CVAR_BOOL, "force a call to glFinish() every frame" );
-idCVarInt r_swapInterval( "r_swapInterval", "0", CVAR_RENDERER | CVAR_ARCHIVE, "changes wglSwapIntarval" );
+idCVar r_swapInterval(
+	"r_swapInterval", "1", CVAR_RENDERER | CVAR_ARCHIVE,
+	"Sets Vsync control mode (if supported):\n"
+	"  0 --- disable Vsync\n"
+	"  1 --- enable Vsync\n"
+	" -1 --- enable adaptive Vsync"
+);
 
 idCVar r_ambientMinLevel( "r_ambientMinLevel", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "specifies minimal level of ambient light brightness, making linear change in ambient color", 0.0f, 1.0f);
 idCVar r_ambientGamma( "r_ambientGamma", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "specifies power of gamma correction applied solely to ambient light", 0.1f, 3.0f);
@@ -105,10 +112,20 @@ idCVar r_skipUpdates( "r_skipUpdates", "0", CVAR_RENDERER | CVAR_BOOL, "1 = don'
 idCVar r_skipOverlays( "r_skipOverlays", "0", CVAR_RENDERER | CVAR_BOOL, "skip overlay surfaces" );
 idCVar r_skipSpecular( "r_skipSpecular", "0", CVAR_RENDERER | CVAR_BOOL, "use black for specular1" );
 idCVar r_skipBump( "r_skipBump", "0", CVAR_RENDERER | CVAR_BOOL, "uses a flat surface instead of the bump map" );
+idCVar r_skipParallax( "r_skipParallax", "0", CVAR_RENDERER | CVAR_BOOL, "ignore parallax mapping" );
 idCVar r_skipDiffuse( "r_skipDiffuse", "0", CVAR_RENDERER | CVAR_BOOL, "use black for diffuse" );
 idCVar r_skipROQ( "r_skipROQ", "0", CVAR_RENDERER | CVAR_BOOL, "skip ROQ decoding" );
 idCVar r_skipDepthCapture( "r_skipDepthCapture", "0", CVAR_RENDERER | CVAR_BOOL, "skip depth capture" ); // #3877 #4418
 idCVar r_useSoftParticles( "r_useSoftParticles", "1", CVAR_RENDERER | CVAR_BOOL, "soften particle transitions when player walks through them or they cross solid geometry" ); // #3878 #4418
+idCVar r_lockView(
+	"r_lockView", "0", CVAR_RENDERER | CVAR_INTEGER,
+	"Always run frontend for the player view frozen since this cvar was set. "
+	"This is very useful to inspect culling, since you can fly around and see what gets rendered.\n"
+	"  1 --- lock frontend view but allow moving camera around\n"
+	"  2 --- lock frontend view and forbid moving away from it\n"
+	"  0 --- unlock view and forget it\n"
+	" -1 --- unlock view but remember it (set to 1 to restore lock)"
+);
 
 idCVar r_ignore( "r_ignore", "0", CVAR_RENDERER, "used for random debugging without defining new vars" );
 idCVar r_ignore2( "r_ignore2", "0", CVAR_RENDERER, "used for random debugging without defining new vars" );
@@ -150,7 +167,11 @@ idCVar r_flareSize( "r_flareSize", "1", CVAR_RENDERER | CVAR_FLOAT, "scale the f
 
 idCVar r_useExternalShadows( "r_useExternalShadows", "1", CVAR_RENDERER | CVAR_INTEGER, "1 = skip drawing caps when outside the light volume", 0, 1, idCmdSystem::ArgCompletion_Integer<0, 1> );
 idCVar r_useOptimizedShadows( "r_useOptimizedShadows", "1", CVAR_RENDERER | CVAR_BOOL, "use the dmap generated static shadow volumes" );
-idCVar r_useScissor( "r_useScissor", "1", CVAR_RENDERER | CVAR_BOOL, "scissor clip as portals and lights are processed" );
+idCVar r_useScissor(
+	"r_useScissor", "1", CVAR_RENDERER | CVAR_BOOL,
+	"Apply view-dependent scissors in backend for optimization purposes. "
+	"Scissoring which is required for correctness is applied regardless of this value. "
+);
 idCVar r_useDepthBoundsTest( "r_useDepthBoundsTest", "1", CVAR_RENDERER | CVAR_BOOL, "use depth bounds test to reduce shadow fill" );
 
 idCVar r_screenFraction( "r_screenFraction", "100", CVAR_RENDERER | CVAR_INTEGER, "for testing fill rate, the resolution of the entire screen can be changed" );
@@ -206,7 +227,7 @@ idCVar r_showAlloc( "r_showAlloc", "0", CVAR_RENDERER | CVAR_BOOL, "report alloc
 idCVar r_showTextureVectors( "r_showTextureVectors", "0", CVAR_RENDERER | CVAR_FLOAT, " if > 0 draw each triangles texture (tangent) vectors" );
 idCVar r_showOverDraw( "r_showOverDraw", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = geometry overdraw, 2 = light interaction overdraw, 3 = geometry and light interaction overdraw", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 
-idCVar r_lockSurfaces( "r_lockSurfaces", "0", CVAR_RENDERER | CVAR_BOOL, "allow moving the view point without changing the composition of the scene, including culling" );
+idCVar r_lockSurfaces( "r_lockSurfaces", "0", CVAR_RENDERER | CVAR_BOOL, "allow moving the view point without changing the composition of the scene, including culling\nstgatilov: does not work, use r_lockView instead." );
 idCVar r_useEntityCallbacks( "r_useEntityCallbacks", "1", CVAR_RENDERER | CVAR_BOOL, "if 0, issue the callback immediately at update time, rather than defering" );
 
 idCVar r_showSkel( "r_showSkel", "0", CVAR_RENDERER | CVAR_INTEGER, "draw the skeleton when model animates, 1 = draw model with skeleton, 2 = draw skeleton only", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
@@ -422,6 +443,8 @@ void R_InitOpenGL( void ) {
 	}
 
 	cmdSystem->AddCommand( "reloadGLSLprograms", R_ReloadGLSLPrograms_f, CMD_FL_RENDERER, "reloads GLSL programs" );
+
+	vaState.Init();
 
 	R_ReloadGLSLPrograms_f( idCmdArgs() );
 
@@ -1527,7 +1550,7 @@ static void GfxInfo_f( const idCmdArgs &args ) {
 	}
 
 #ifdef _WIN32
-	if ( r_swapInterval && qwglSwapIntervalEXT ) {
+	if ( r_swapInterval.GetInteger() && qwglSwapIntervalEXT ) {
 		common->Printf( "swapInterval forced (%i)\n", r_swapInterval.GetInteger() );
 	} else {
 		common->Printf( "swapInterval not forced\n" );
@@ -1608,6 +1631,7 @@ void R_VidRestart_f( const idCmdArgs &args ) {
 		// free the context and close the window
 		session->TerminateFrontendThread();
 		vertexCache.Shutdown();
+		vaState.Shutdown();
 		renderBackend->Shutdown();
 		GLimp_Shutdown();
 		glConfig.isInitialized = false;
@@ -1799,6 +1823,8 @@ void idRenderSystemLocal::Clear( void ) {
 	memset( gammaTable, 0, sizeof( gammaTable ) );
 	takingScreenshot = false;
 	frontEndJobList = NULL;
+	// make sure we don't try to reuse dead subview images after engine restart
+	subviewImages.Clear();
 }
 
 /*
@@ -1837,6 +1863,8 @@ void idRenderSystemLocal::Init( void ) {
 	frameBuffers->Init();
 	programManager->Init();
 
+	RB_InitDebugTools();
+
 	idCinematic::InitCinematic( );
 
 	// build brightness translation tables
@@ -1874,6 +1902,8 @@ void idRenderSystemLocal::Shutdown( void ) {
 
 	idCinematic::ShutdownCinematic( );
 
+	RB_ShutdownDebugTools();
+
 	frameBuffers->Shutdown();
 	globalImages->Shutdown();
 	programManager->Shutdown();
@@ -1891,9 +1921,9 @@ void idRenderSystemLocal::Shutdown( void ) {
 	// free the vertex cache, which should have nothing allocated now
 	vertexCache.Shutdown();
 
-	R_ShutdownTriSurfData();
+	vaState.Shutdown();
 
-	RB_ShutdownDebugTools();
+	R_ShutdownTriSurfData();
 
 	delete guiModel;
 	delete demoGuiModel;

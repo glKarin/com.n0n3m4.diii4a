@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 // !!ARBfp1.0
 
 in vec4 var_tc0;
@@ -32,16 +33,16 @@ void main() {
 	
 	vec4 R0, R1, R2, R3, R4, R5, R6, XEdge, YEdge, sobel;                                               //TEMP	R0,R1,R2,R3,R4,R5,R6, XEdge,YEdge,sobel;
 	
-	vec4 off00 = vec4(-0.5, -0.5, 0, 0);                                                                //PARAM off00 = {-0.5, -0.5, 0, 0 };
-	vec4 off01 = vec4(-0.5, 0.0, 0, 0);                                                                 //PARAM off01 = {-0.5,  0.0, 0, 0 };
-	vec4 off02 = vec4(-0.5, 0.5, 0, 0);                                                                 //PARAM off02 = {-0.5,  0.5, 0, 0 };
-	vec4 off03 = vec4(0.5, -0.5, 0, 0);                                                                 //PARAM off03 = { 0.5, -0.5, 0, 0 };
-	vec4 off04 = vec4(0.5, 0.0, 0, 0);                                                                  //PARAM off04 = { 0.5,  0.0, 0, 0 };
-	vec4 off05 = vec4(0.5, 0.5, 0, 0);                                                                  //PARAM off05 = { 0.5,  0.5, 0, 0 };
-	vec4 off06 = vec4(0.0, -0.5, 0, 0);                                                                 //PARAM off06 = { 0.0, -0.5, 0, 0 };
-	vec4 off07 = vec4(0.0, 0.5, 0, 0);                                                                  //PARAM off07 = { 0.0,  0.5, 0, 0 };
+	vec4 off00 = vec4(-0.5, -0.5, 0.0, 0.0);                                                                //PARAM off00 = {-0.5, -0.5, 0, 0 };
+	vec4 off01 = vec4(-0.5, 0.0, 0.0, 0.0);                                                                 //PARAM off01 = {-0.5,  0.0, 0, 0 };
+	vec4 off02 = vec4(-0.5, 0.5, 0.0, 0.0);                                                                 //PARAM off02 = {-0.5,  0.5, 0, 0 };
+	vec4 off03 = vec4(0.5, -0.5, 0.0, 0.0);                                                                 //PARAM off03 = { 0.5, -0.5, 0, 0 };
+	vec4 off04 = vec4(0.5, 0.0, 0.0, 0.0);                                                                  //PARAM off04 = { 0.5,  0.0, 0, 0 };
+	vec4 off05 = vec4(0.5, 0.5, 0.0, 0.0);                                                                  //PARAM off05 = { 0.5,  0.5, 0, 0 };
+	vec4 off06 = vec4(0.0, -0.5, 0.0, 0.0);                                                                 //PARAM off06 = { 0.0, -0.5, 0, 0 };
+	vec4 off07 = vec4(0.0, 0.5, 0.0, 0.0);                                                                  //PARAM off07 = { 0.0,  0.5, 0, 0 };
 	
-	vec4 specExp = vec4(0.5, 0, 0, 0);                                                                  //PARAM specExp = { 0.5, 0, 0, 0 };
+	vec4 specExp = vec4(0.5, 0.0, 0.0, 0.0);                                                                  //PARAM specExp = { 0.5, 0, 0, 0 };
 	
 	// calculate the screen texcoord in the 0.0 to 1.0 range
 	R0 = (gl_FragCoord) * (u_scaleWindowToUnit);                                                        //MUL		R0, fragment.position, program.env[1];
@@ -152,7 +153,7 @@ void main() {
 	
 	//blend white into edge artifacts (occuring in bright areas)
 	//find pixels with intensity>2
-	sobel.y = float((huetemp.x) >= (2));                                                                //SGE sobel.y, huetemp.x, 2;
+	sobel.y = float((huetemp.x) >= (2.0));                                                                //SGE sobel.y, huetemp.x, 2;
 	//set the edge mask to 1 in such areas
 	sobel.x = max(sobel.x, sobel.y);                                                                    //MAX sobel.x, sobel.x, sobel.y;
 	

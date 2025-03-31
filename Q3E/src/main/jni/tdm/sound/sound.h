@@ -45,6 +45,15 @@ static const int	SSF_NO_FLICKER =		BIT(8);	// always return 1.0 for volume queri
 static const int	SSF_NO_DUPS =			BIT(9);	// try not to play the same sound twice in a row
 static const int	SSF_NO_EFX =			BIT(10);// do not apply EFX effect to the sound
 
+// stgatilov #6346: override mode for emitter/channel params
+static const int	SSOM_MIN_DISTANCE_OVERRIDE =	BIT(0);	// override corresponding parameter?
+static const int	SSOM_MAX_DISTANCE_OVERRIDE =	BIT(1);	// (if flag is missing, then new parameter is ignored)
+static const int	SSOM_VOLUME_OVERRIDE =			BIT(2);	// ...
+static const int	SSOM_SHAKES_OVERRIDE =			BIT(3);	// ...
+static const int	SSOM_SOUND_CLASS_OVERRIDE =		BIT(4);	// ...
+static const int	SSOM_FLAGS_OVERRIDE =			BIT(5);	// override soundShaderFlags with new ones?
+static const int	SSOM_FLAGS_OR =					BIT(6); // OR base and new parameters together?
+
 //stgatilov #2454: verbosity level of subtitles
 enum SubtitleLevel {
 	SUBL_IGNORE		= 0,		// auxilliary value for tdm_subtitles: don't show any subtitles regardless of level
@@ -62,6 +71,7 @@ typedef struct {
 	float					shakes;
 	int						soundShaderFlags;		// SSF_* bit flags
 	int						soundClass;				// for global fading of sounds
+	int						overrideMode;			// stgatilov #6346: SSOM_* flags define how to override with these params
 } soundShaderParms_t;
 
 
@@ -113,7 +123,6 @@ private:
 	// options from sound shader text
 	soundShaderParms_t		parms;						// can be overriden on a per-channel basis
 
-	bool					onDemand;					// only load when played, and free when finished
 	int						speakerMask;
 	const idSoundShader *	altSound;
 	idStr					desc;						// description
@@ -213,7 +222,7 @@ public:
 	// listenerId allows listener-private and antiPrivate sounds to be filtered
 	// gameTime is in msec, and is used to time sound queries and removals so that they are independent
 	// of any race conditions with the async update
-	virtual	void			PlaceListener( const idVec3 &origin, const idMat3 &axis, const int listenerId, const int gameTime, const idStr& areaName ) = 0;
+	virtual	void			PlaceListener( const idVec3 &origin, const idMat3 &axis, const int listenerId, const int gameTime, const idStr& areaName, const idStr& efxPreset ) = 0;
 
 	// fade all sounds in the world with a given shader soundClass
 	// to is in Db (sigh), over is in seconds

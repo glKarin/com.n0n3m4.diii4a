@@ -3526,6 +3526,7 @@ void Cmd_BatchConvertMaterials_f( const idCmdArgs& args )
 		std::vector<char> arrCharNewAmbientBlock;
 
 		//CreateNewAmbientBlock( arrDiffusemapInfo, arrBumpMapInfo, arrSpecularmapInfo, arrCharNewAmbientBlock );
+		arrCharNewAmbientBlock.push_back(0);	// this code is dead, but try to silence GCC warning (char* = NULL)
 
 		strMatTextWithNewBlock.Insert( &arrCharNewAmbientBlock[0], uiOffset );
 

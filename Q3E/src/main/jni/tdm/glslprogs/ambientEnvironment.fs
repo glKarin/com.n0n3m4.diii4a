@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 // !!ARBfp1.0 
 
 in vec4 var_tc0;
@@ -47,14 +48,14 @@ void main() {
 	vec4 globalEye, localNormal, globalNormal, R0, R1, R2, ambientContrib;                              //TEMP	globalEye, localNormal, globalNormal, R0, R1, R2, ambientContrib;
 	vec4 colDiffuse, colSpecular, fresnelFactor, globalSkyDir1, globalSkyDir2;                          //TEMP	colDiffuse, colSpecular, fresnelFactor, globalSkyDir1, globalSkyDir2;
 	
-	vec4 subOne = vec4(-1.4, -1.4, -1, -1);                                                             //PARAM	subOne				= { -1.4, -1.4, -1, -1 };
-	vec4 scaleTwo = vec4(2.8, 2.8, 2, 2);                                                               //PARAM	scaleTwo			= { 2.8, 2.8, 2, 2 };
+	vec4 subOne = vec4(-1.4, -1.4, -1.0, -1.0);                                                             //PARAM	subOne				= { -1.4, -1.4, -1, -1 };
+	vec4 scaleTwo = vec4(2.8, 2.8, 2.0, 2.0);                                                               //PARAM	scaleTwo			= { 2.8, 2.8, 2, 2 };
 	
 	// Respectively : Ambient Rim Scale, Ambient constant Reflection Factor, Ambient Rim Reflection Scale; 
 	vec4 rimStrength = vec4(1.0, .1, 2.0, 1.0);                                                         //PARAM	rimStrength		= {1.0, .1, 2.0 };	
 	
 	//  Respectively : unused, Ambient Reflection Scale
-	vec4 ambientParms = vec4(0., 55, 0.0, 1.0);                                                         //PARAM	ambientParms	= {0., 55, 0.0 };
+	vec4 ambientParms = vec4(0.0, 55, 0.0, 1.0);                                                         //PARAM	ambientParms	= {0., 55, 0.0 };
 	
 	vec4 texCoord = vec4(.1, .1, 0.0, 0.0);                                                             //PARAM	texCoord	= {.1, .1, 0.0, 0.0 };
 	
@@ -78,7 +79,7 @@ void main() {
 	
 	// Load Specular map
 	colSpecular = texture(u_texture3, var_tc7.xy);                                                      //TEX		colSpecular, fragment.texcoord[7].xyxx, texture[3], 2D;
-	R1 = (vec4(1)) - (colDiffuse);                                                                      //SUB		R1, 1, colDiffuse;
+	R1 = (vec4(1.0)) - (colDiffuse);                                                                      //SUB		R1, 1, colDiffuse;
 	colSpecular = (R1) * (vec4(0.17)) + (colSpecular);                                                  //MAD		colSpecular, R1, 0.17, colSpecular;			
 	
 	

@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 #pragma tdm_include "tdm_utils.glsl"
 #pragma tdm_include "tdm_transform.glsl"
@@ -35,9 +36,9 @@ void main() {
 	vec2 delta = u_invDestResolution;
 	// one-dimensional blur: vertical / horizontal depending on uniform
 	if (u_vertical)
-		delta.x = 0;
+		delta.x = 0.0;
 	else
-		delta.y = 0;
+		delta.y = 0.0;
 
 	// save view Z of central sample
 	vec2 distDerivs;
@@ -46,8 +47,8 @@ void main() {
 	float exitDist = depthToZ(u_projectionMatrix, gl_FragCoord.z);
 	vec2 exitDerivs = vec2(dFdx(exitDist), dFdy(exitDist));
 
-	float sumWeight = 0;
-	vec4 sumColor = vec4(0);
+	float sumWeight = 0.0;
+	vec4 sumColor = vec4(0.0);
 
 	int radius = int(u_blurSigma * 2.0 + 0.5);
 	for (int i = -radius; i <= radius; i++) {

@@ -224,7 +224,7 @@ private:
 			// Cut off the repository path to receive a relative path (cut off the trailing slash too)
 			std::string relativePath = inclusionPath.string().substr(repositoryRoot.string().length() + 1);
 
-			if (!instructions.IsExcluded(relativePath))
+			if (instructions.IsIncluded(relativePath))
 			{
 				TraceLog::WriteLine(LOG_VERBOSE, "Adding file: " + relativePath);
 				push_back(ManifestFile(relativePath));
@@ -277,12 +277,16 @@ private:
 			std::string relativePath = file.string().substr(repositoryRoot.string().length() + 1);
 
 			// Consider the exclusion list
-			if (instructions.IsExcluded(relativePath))
+			if (!instructions.IsIncluded(relativePath))
 			{
 				TraceLog::WriteLine(LOG_VERBOSE, "Item is excluded: " + relativePath);
 				continue;
 			}
-			
+
+			// Check if we need to rename/chdir the file
+			std::string renamedPath;
+			bool renamed = instructions.IsRenamed(relativePath, renamedPath);
+
 			if (fs::is_directory(file))
 			{
 				// Versioned folder, enter recursion
@@ -291,7 +295,7 @@ private:
 				if (folderItems > 0)
 				{
 					// Add an entry for this folder itself, it's not empty
-					push_back(ManifestFile(relativePath));
+					push_back(ManifestFile(relativePath, renamedPath));
 				}
 
 				itemsAdded += folderItems;
@@ -299,8 +303,12 @@ private:
 			else
 			{
 				// Versioned file, add it
-				TraceLog::WriteLine(LOG_VERBOSE, "Adding file: " + relativePath);
-				push_back(ManifestFile(relativePath));
+				if (renamed)
+					TraceLog::WriteLine(LOG_VERBOSE, "Adding file: " + relativePath + " to " + renamedPath);
+				else
+					TraceLog::WriteLine(LOG_VERBOSE, "Adding file: " + relativePath);
+
+				push_back(ManifestFile(relativePath, renamedPath));
 
 				itemsAdded++;
 			}

@@ -20,6 +20,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/backend/ImmediateRendering.h"
 #include "renderer/backend/GLSLProgramManager.h"
 #include "renderer/backend/GLSLProgram.h"
+#include "renderer/backend/VertexArrayState.h"
 #include "renderer/tr_local.h"
 
 
@@ -57,9 +58,6 @@ ImmediateRendering::ImmediateRendering() {
 	vertexList.Swap(globals.vertexBuffers[0]);
 	tempList.Swap(globals.vertexBuffers[1]);
 	drawList.Swap(globals.drawBuffers);
-
-	qglGetIntegerv(GL_VERTEX_ARRAY_BINDING, &restore_vao);
-	qglGetIntegerv(GL_ARRAY_BUFFER_BINDING, &restore_vbo);
 }
 
 ImmediateRendering::~ImmediateRendering() {
@@ -67,9 +65,6 @@ ImmediateRendering::~ImmediateRendering() {
 		return;
 
 	FlushInternal();
-
-	qglBindVertexArray(restore_vao);
-	qglBindBuffer(GL_ARRAY_BUFFER, restore_vbo);
 
 	vertexList.SetNum(0, false);
 	tempList.SetNum(0, false);
@@ -88,20 +83,10 @@ void ImmediateRendering::FlushInternal() {
 
 	if (vertexList.Num() > 0) {
 		GLuint vbo = 0;
-		GLuint vao = 0;
 		qglGenBuffers(1, &vbo);
-		qglGenVertexArrays(1, &vao);
 
-		qglBindBuffer(GL_ARRAY_BUFFER, vbo);
+		vaState.BindVertexBufferAndSetVertexFormat(vbo, VF_IMMEDIATE);
 		qglBufferData(GL_ARRAY_BUFFER, vertexList.Num() * sizeof(VertexData), vertexList.Ptr(), GL_STREAM_DRAW);
-
-		qglBindVertexArray(vao);
-		qglEnableVertexAttribArray(0);
-		qglEnableVertexAttribArray(3);
-		qglEnableVertexAttribArray(8);
-		qglVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, vertex));
-		qglVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(VertexData), (void*)offsetof(VertexData, color));
-		qglVertexAttribPointer(8, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, texCoord));
 
 		for (int i = 0; i < drawList.Num(); i++) {
 			auto draw = drawList[i];
@@ -110,7 +95,7 @@ void ImmediateRendering::FlushInternal() {
 			qglDrawArrays(draw.mode, draw.viBegin, draw.viEnd - draw.viBegin);
 		}
 
-		qglDeleteVertexArrays(1, &vao);
+		vaState.BindVertexBuffer();
 		qglDeleteBuffers(1, &vbo);
 	}
 

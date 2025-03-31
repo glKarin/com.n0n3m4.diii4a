@@ -203,6 +203,8 @@ public:
 	static const char *	BindingFromKey( const char *key );
 	static bool			KeyIsBoundTo( int keyNum, const char *binding );
 	static void			WriteBindings( idFile *f );
+
+	static bool wasModifiedAfterLastWrite;
 };
 
 #endif /* !__KEYINPUT_H__ */

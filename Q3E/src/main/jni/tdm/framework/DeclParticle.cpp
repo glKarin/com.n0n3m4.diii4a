@@ -344,7 +344,7 @@ idParticleStage *idDeclParticle::ParseParticleStage( idLexer &src ) {
 		}
 		if ( !token.Icmp( "cutoffTimeMap" ) ) {
 			src.ReadToken( &token );
-			stage->cutoffTimeMap = idParticleStage::LoadCutoffTimeMap( token.c_str() );
+			stage->cutoffTimeMap = idParticleStage::LoadCutoffTimeMap( token.c_str(), false );
 			stage->useCutoffTimeMap = true;
 			continue;
 		}
@@ -876,7 +876,24 @@ idStr idParticleStage::GetCollisionStaticImagePath(const idPartSysEmitterSignatu
 	);
 	return imageName;
 }
-idImageAsset *idParticleStage::LoadCutoffTimeMap(const char *imagePath) {
+idImageAsset *idParticleStage::LoadCutoffTimeMap(const char *imagePath, bool defer) {
+	// check if image is already loaded and CPU data is present
+	if ( idImage *baseImg = globalImages->GetImage( imagePath ) ) {
+		if ( idImageAsset *image = baseImg->AsAsset() )
+			if ( ( image->residency & IR_CPU ) && image->cpuData.IsValid() )
+				return image;
+	}
+
+	if ( defer ) {
+		// make sure string is copied
+		idStr pathStr = imagePath;
+
+		globalImages->ExecuteWhenSingleThreaded( [pathStr]() {
+			idImageAsset *image = globalImages->ImageFromFile( pathStr, TF_NEAREST, false, TR_CLAMP, TD_HIGH_QUALITY, CF_2D, IR_CPU );
+		} );
+		return nullptr;	// not loaded yet, wait until next frame
+	} 
+
 	idImageAsset *image = globalImages->ImageFromFile( imagePath, TF_NEAREST, false, TR_CLAMP, TD_HIGH_QUALITY, CF_2D, IR_CPU );
 	return image;
 }

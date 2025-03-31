@@ -331,7 +331,7 @@ void idSoundWorldLocal::ProcessDemoCommand( idDemoFile *readDemo ) {
 			readDemo->ReadInt( listenerId );
 			readDemo->ReadInt( gameTime );
 			
-			PlaceListener( origin, axis, listenerId, gameTime, "" );
+			PlaceListener( origin, axis, listenerId, gameTime, "", "");
 		};
 		break;
 	case SCMD_ALLOC_EMITTER:
@@ -374,6 +374,7 @@ void idSoundWorldLocal::ProcessDemoCommand( idDemoFile *readDemo ) {
 			readDemo->ReadFloat( parms.shakes );
 			readDemo->ReadInt( parms.soundShaderFlags );
 			readDemo->ReadInt( parms.soundClass );
+			readDemo->ReadInt( parms.overrideMode );
 			EmitterForIndex( index )->UpdateEmitter( origin, listenerId, &parms );
 		}
 		break;
@@ -405,6 +406,7 @@ void idSoundWorldLocal::ProcessDemoCommand( idDemoFile *readDemo ) {
 			readDemo->ReadFloat( parms.shakes );
 			readDemo->ReadInt( parms.soundShaderFlags );
 			readDemo->ReadInt( parms.soundClass );
+			readDemo->ReadInt( parms.overrideMode );
 			EmitterForIndex( index )->ModifySound( (s_channelType)channel, &parms );
 		}
 		break;
@@ -513,10 +515,20 @@ void idSoundWorldLocal::MixLoopInternal( int current44kHz, int numSpeakers, floa
 			soundSystemLocal.alAuxiliaryEffectSlotf(listenerSlot, AL_EFFECTSLOT_GAIN, gain);
 		}
 
+		// Look for effect based on area index (1, 2, etc.). Does anyone actually do this?
 		bool found = soundSystemLocal.EFXDatabase.FindEffect(s, &effect);
+
+		// Look for effect based on area (location) name
 		if (!found) {
 			s = listenerAreaName;
-			found = soundSystemLocal.EFXDatabase.FindEffect(s, &effect);
+
+			if (!listenerAreaEfxPreset.IsEmpty()) {
+				found = soundSystemLocal.EFXDatabase.AddOrUpdatePreset(s, listenerAreaEfxPreset, &effect);
+			}
+			else {
+				found = soundSystemLocal.EFXDatabase.FindEffect(s, &effect);
+			}
+
 		}
 		if (!found) {
 			s = "default";
@@ -524,6 +536,7 @@ void idSoundWorldLocal::MixLoopInternal( int current44kHz, int numSpeakers, floa
 		}
 
 		bool justReloaded = soundSystemLocal.EFXDatabase.IsAfterReload();
+
 		// only update if change in settings
 		if (listenerEffect != effect || justReloaded) {
 			common->Printf("Switching to EFX '%s' (#%u)\n", s.c_str(), effect);
@@ -1150,7 +1163,7 @@ idSoundWorldLocal::PlaceListener
 ===================
 */
 void idSoundWorldLocal::PlaceListener( const idVec3& origin, const idMat3& axis, 
-									const int listenerId, const int gameTime, const idStr& areaName  ) {
+									const int listenerId, const int gameTime, const idStr& areaName, const idStr& efxPreset) {
 
 	int current44kHzTime;
 
@@ -1197,6 +1210,7 @@ void idSoundWorldLocal::PlaceListener( const idVec3& origin, const idMat3& axis,
 	listenerPos = origin * DOOM_TO_METERS;			// meters
 	listenerAxis = axis;
 	listenerAreaName = areaName;
+	listenerAreaEfxPreset = efxPreset;
 
 	if ( rw ) {
 		listenerArea = rw->GetAreaAtPoint( listenerQU );	// where are we?
@@ -1511,6 +1525,7 @@ void idSoundWorldLocal::WriteToSaveGameSoundShaderParams( idFile *saveGame, soun
 	saveGame->WriteFloat(params->shakes);
 	saveGame->WriteInt(params->soundShaderFlags);
 	saveGame->WriteInt(params->soundClass);
+	saveGame->WriteInt(params->overrideMode);
 }
 
 /*
@@ -1570,7 +1585,7 @@ void idSoundWorldLocal::ReadFromSaveGame( idFile *savefile ) {
 	pause44kHz = currentSoundTime;
 
 	// place listener
-	PlaceListener( origin, axis, listenerId, gameTime, "Undefined" );
+	PlaceListener( origin, axis, listenerId, gameTime, "Undefined", "");
 
 	// make sure there are enough
 	// slots to read the saveGame in.  We don't shrink the list
@@ -1635,7 +1650,7 @@ void idSoundWorldLocal::ReadFromSaveGame( idFile *savefile ) {
 			savefile->ReadString( soundShader );
 			// load savegames with s_noSound 1
 			if ( soundSystemLocal.soundCache ) {
-				chan->leadinSample = soundSystemLocal.soundCache->FindSound( soundShader, false );
+				chan->leadinSample = soundSystemLocal.soundCache->FindSound( soundShader );
 			} else {
 				chan->leadinSample = NULL;
 			}
@@ -1681,6 +1696,7 @@ void idSoundWorldLocal::ReadFromSaveGameSoundShaderParams( idFile *saveGame, sou
 	saveGame->ReadFloat(params->shakes);
 	saveGame->ReadInt(params->soundShaderFlags);
 	saveGame->ReadInt(params->soundClass);
+	saveGame->ReadInt(params->overrideMode);
 }
 
 /*
@@ -2129,8 +2145,9 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 			destSubtitles[i].spatializedDirection.Zero();
 			if ( !(global || omni) )
 				destSubtitles[i].spatializedDirection = ( listenerAxis.Transpose() * ( spatializedOriginInMeters - listenerPos ) ).Normalized() * totalSoundDistance;
-			// TODO: formula, lower limit, dependency on sample amplitude?
-			destSubtitles[i].volume = idMath::ClampFloat( 0.1f, 1.0f, volume / 0.1f );
+			float unitSampleVolume = ( chan->currentSampleVolume / 32768.0f );
+			assert( unitSampleVolume <= 1.01f );
+			destSubtitles[i].volume = volume * unitSampleVolume;
 		}
 
 		if ( !alIsSource( chan->openalSource ) ) {
@@ -2217,11 +2234,15 @@ void idSoundWorldLocal::AddChannelContribution( idSoundEmitterLocal *sound, idSo
 
 				for ( j = 0; j < finishedbuffers; j++ ) {
 					chan->GatherChannelSamples( chan->openalStreamingOffset * sample->objectInfo.nChannels, MIXBUFFER_SAMPLES * sample->objectInfo.nChannels, inputSamplesFloat );
+					float maxValue = 0.0f;
 					for ( int i = 0; i < ( MIXBUFFER_SAMPLES * sample->objectInfo.nChannels ); i++ ) {
 						inputSamplesShort[i] = idMath::FtoiRound( idMath::ClampFloat( -32768.0f, 32767.0f, inputSamplesFloat[i] ) );
+						maxValue = idMath::Fmax( maxValue, idMath::Fabs(inputSamplesFloat[i]) );
 					}
 					alBufferData( buffers[j], chan->leadinSample->objectInfo.nChannels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, inputSamplesShort, MIXBUFFER_SAMPLES * sample->objectInfo.nChannels * sizeof( short ), 44100 );
 					chan->openalStreamingOffset += MIXBUFFER_SAMPLES;
+					// stgatilov #6491: update current sample volume for subtitles
+					chan->currentSampleVolume = chan->currentSampleVolume * 0.85f + maxValue * 0.15f;	// fades to 20% after second
 				}
 
 				if ( finishedbuffers ) {

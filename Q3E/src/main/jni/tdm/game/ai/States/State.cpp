@@ -2434,10 +2434,24 @@ idStr State::GetGreetingSound(idActor* owner, idActor* otherActor) // grayman #3
 	idStr ownPersonType(owner->spawnArgs.GetString(PERSONTYPE_KEY));
 	idStr otherPersonType(otherActor->spawnArgs.GetString(PERSONTYPE_KEY));
 
+	// Get the states of drunk for the two persons.
+	bool ownPersonTypeDrunk(owner->spawnArgs.GetBool("drunk"));
+	bool otherPersonTypeDrunk(otherActor->spawnArgs.GetBool("drunk"));
+
 	// Get the other person's gender in case it's needed.
 	idStr otherPersonGender = otherActor->spawnArgs.GetString(PERSONGENDER_KEY);
 
 	// Start with barks to specific character types, used regardless of who it comes from.
+
+
+	// Amadeus #6507 - drunk greetings
+	if (ownPersonTypeDrunk)
+	{
+		if (owner->spawnArgs.FindKey("snd_greeting_generic_drunk") != NULL)
+		{
+			soundName = "snd_greeting_generic_drunk";
+		}
+	}
 	
 	// grayman #4473 - specific greeting from whore to male
 	if (ownPersonType == PERSONTYPE_WHORE)

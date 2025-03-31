@@ -15,9 +15,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "precompiled.h"
 #include "renderer/backend/stages/FrobOutlineStage.h"
 
-#include "renderer/backend/glsl.h"
 #include "renderer/backend/GLSLProgram.h"
 #include "renderer/backend/GLSLProgramManager.h"
+#include "renderer/backend/GLSLUniforms.h"
 #include "renderer/tr_local.h"
 #include "renderer/backend/FrameBuffer.h"
 #include "renderer/backend/FrameBufferManager.h"
@@ -60,8 +60,8 @@ namespace {
 		DEFINE_UNIFORM( float, alphaTest )
 	};
 
-	struct BlurUniforms : GLSLUniformGroup {
-		UNIFORM_GROUP_DEF( BlurUniforms )
+	struct FrobBlurUniforms : GLSLUniformGroup {
+		UNIFORM_GROUP_DEF( FrobBlurUniforms )
 
 		DEFINE_UNIFORM( sampler, source )
 		DEFINE_UNIFORM( vec2, axis )
@@ -145,6 +145,8 @@ void FrobOutlineStage::Init() {
 	highlightShader = programManager->LoadFromFiles( "frob_highlight", "stages/frob/frob.vert.glsl", "stages/frob/frob_highlight.frag.glsl" );
     extrudeShader = programManager->LoadFromFiles( "frob_extrude", "stages/frob/frob.vert.glsl", "stages/frob/frob_modalpha.frag.glsl", "stages/frob/frob_extrude.geom.glsl" );
 	applyShader = programManager->LoadFromFiles( "frob_apply", "fullscreen_tri.vert.glsl", "stages/frob/frob_apply.frag.glsl" );
+	gaussianBlurShader = programManager->LoadFromFiles( "gaussian_blur", "fullscreen_tri.vert.glsl", "gaussian_blur.frag.glsl" );
+
 	colorTex[0] = globalImages->ImageScratch( "frob_color_0" );
 	colorTex[1] = globalImages->ImageScratch( "frob_color_1" );
 	depthTex = globalImages->ImageScratch( "frob_depth" );
@@ -389,7 +391,7 @@ void FrobOutlineStage::DrawElements( idList<drawSurf_t *> &surfs, GLSLProgram  *
 
 	for ( drawSurf_t *surf : surfs ) {
 		GL_Cull( surf->material->GetCullType() );
-		shader->GetUniformGroup<Uniforms::Global>()->Set( surf->space );
+		shader->GetUniformGroup<TransformUniforms>()->Set( surf->space );
 		vertexCache.VertexPosition( surf->ambientCache );
 
 		//stgatilov: some transparent objects have no diffuse map
@@ -416,8 +418,8 @@ void FrobOutlineStage::DrawElements( idList<drawSurf_t *> &surfs, GLSLProgram  *
 }
 
 void FrobOutlineStage::ApplyBlur() {
-	programManager->gaussianBlurShader->Activate();
-	BlurUniforms *uniforms = programManager->gaussianBlurShader->GetUniformGroup<BlurUniforms>();
+	gaussianBlurShader->Activate();
+	FrobBlurUniforms *uniforms = gaussianBlurShader->GetUniformGroup<FrobBlurUniforms>();
 	uniforms->source.Set( 0 );
 
 	GL_State( GLS_DEPTHFUNC_ALWAYS | GLS_DEPTHMASK | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO );

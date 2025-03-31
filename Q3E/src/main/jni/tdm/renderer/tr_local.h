@@ -140,6 +140,7 @@ idMat4 RB_GetShaderTextureMatrix( const float *shaderRegisters, const textureSta
 
 static const int DSF_VIEW_INSIDE_SHADOW	= 1;
 static const int DSF_SOFT_PARTICLE = 2; // #3878
+static const int DSF_BLOCK_SELF_SHADOWS = 4; // #6571: used when light interaction and self-shadows are computed in one draw call
 
 struct viewLight_s;
 
@@ -153,14 +154,13 @@ typedef struct drawSurf_s {
 
 	const struct viewEntity_s *space;
 	const idMaterial		*material;			// may be NULL for shadow volumes
+	idImage					*dynamicImageOverride;	// stgatilov #6434: if not NULL, then texture of material should be replaced with this one (for subviews)
 	float					sort;				// material->sort, modified by gui / entity sort offsets
 	const float				*shaderRegisters;	// evaluated and adjusted for referenceShaders
 	/*const*/ struct drawSurf_s	*nextOnLight;	// viewLight chains
 
 	idScreenRect			scissorRect;		// for scissor clipping, local inside renderView viewport
 	int						dsFlags;			// DSF_VIEW_INSIDE_SHADOW, etc
-	//vertCacheHandle_t		dynamicTexCoords;	// float * in vertex cache memory // duzenko: disabled in 2.08, to be removed in 2.09
-	// specular directions for non vertex program cards, skybox texcoords, etc
 	float					particle_radius;	// The radius of individual quads for soft particles #3878
 
 	void CopyGeo( const srfTriangles_t *tri ) {
@@ -496,7 +496,8 @@ typedef struct viewDef_s {
 	renderView_t		renderView;
 
 	float				projectionMatrix[16];
-	idRenderMatrix		projectionRenderMatrix;	// tech5 version of projectionMatrix
+	idRenderMatrix		projectionRenderMatrix;
+	idRenderMatrix		viewRenderMatrix;
 
 	viewEntity_t		worldSpace;
 
@@ -516,8 +517,9 @@ typedef struct viewDef_s {
 
 	bool				isSubview;				// true if this view is not the main view
 	bool				isMirror;				// the portal is a mirror, invert the face culling
+	bool				isPortalSky;			// true if view is generated for portalSky
+	bool				isXray;					// true if view is generated for xray
 	xrayEntityMask_t	xrayEntityMask;
-	bool				hasXraySubview;
 
 	// stgatilov: the color output of this view should become background for the next view rendering
 	// for this reason, do NOT clear color buffer at the beginning of the NEXT view render
@@ -526,7 +528,8 @@ typedef struct viewDef_s {
 
 	bool				isEditor;
 
-	idPlane				*clipPlane;			// in world space, the positive side, mirrors will often use a single clip plane
+	int					numClipPlanes;
+	idPlane				clipPlane[1];	// in world space, the positive side, K nested mirrors use K planes
 	// of the plane is the visible side
 	idScreenRect		viewport;				// in real pixels and proper Y flip
 
@@ -567,6 +570,8 @@ typedef struct viewDef_s {
 	// tools
 	char				*portalStates;
 
+	renderView_t 		*unlockedRenderView;	// NULL except when r_lockView is active
+
 	bool				IsLightGem() const {
 		return renderView.viewID < 0;
 	}
@@ -583,11 +588,13 @@ typedef struct {
 	idImage 			*bumpImage;
 	idImage 			*diffuseImage;
 	idImage 			*specularImage;
+	idImage				*parallaxImage;
 
 	idVec4				diffuseColor;	// may have a light color baked into it, will be < tr.backEndRendererMaxLight
 	idVec4				specularColor;	// may have a light color baked into it, will be < tr.backEndRendererMaxLight
 	stageVertexColor_t	vertexColor;	// applies to both diffuse and specular
 
+	idVec4				lightColor;
 	int					ambientLight;	// use tr.ambientNormalMap instead of normalization cube map
 										// (not a bool just to avoid an uninitialized memory check of the pad region by valgrind)
 	int					cubicLight;		// nbohr1more #3881: dedicated cubemap light // probably not needed
@@ -595,8 +602,10 @@ typedef struct {
 	idVec4				lightProjection[4];		// transforms object coords into light-volume coords
 	idVec4				lightTextureMatrix[2];	// transforms light-volume coords into lightImage texcoords
 	idVec4				bumpMatrix[2];
+	idVec4				parallaxMatrix[2];
 	idVec4				diffuseMatrix[2];
 	idVec4				specularMatrix[2];
+	parallaxStage_t		parallax;
 } drawInteraction_t;
 
 
@@ -699,6 +708,9 @@ extern	frameData_t		*backendFrameData;
 void R_LockSurfaceScene( viewDef_t &parms );
 void R_ClearCommandChain( frameData_t *frameData );
 void R_AddDrawViewCmd( viewDef_t &parms );
+
+void R_LockView_FrontendStart( viewDef_t &parms );
+void R_LockView_BackendTransfer( viewDef_t &parms );
 
 void R_ReloadGuis_f( const idCmdArgs &args );
 void R_ListGuis_f( const idCmdArgs &args );
@@ -819,6 +831,13 @@ const int MAX_GUI_SURFACES	= 1024;		// default size of the drawSurfs list for gu
 
 static const int	MAX_RENDER_CROPS = 8;
 
+struct ImageForSubview {
+	bool purged = false;
+	int width = -1, height = -1;
+	idImageScratch *image = nullptr;
+	int lastUsedFrameCount = INT_MIN;
+};
+
 /*
 ** Most renderer globals are defined here.
 ** backend functions should never modify any of these fields,
@@ -877,6 +896,9 @@ public:
 	void					Clear( void );
 	void					RenderViewToViewport( const renderView_t &renderView, idScreenRect &viewport );
 
+	idImageScratch *		CreateImageForSubview();	// create or reuse intermediate texture for currently set render crop
+	void					PurgeOldSubviewImages();	// free intermediate textures not used for some time, but keep images alive
+
 public:
 	// renderer globals
 	bool					takingScreenshot;
@@ -931,6 +953,12 @@ public:
 
 	unsigned short			gammaTable[256];	// brightness / gamma modify this
 	idParallelJobList*		frontEndJobList;
+
+	bool					lockedViewAvailable = false;	// debug only: for r_lockView 
+	int						lockedViewSinceFrame = -1;		// ...
+	renderView_t			lockedViewData;					// ...
+
+	idList<ImageForSubview> subviewImages;
 };
 
 extern backEndState_t		backEnd;
@@ -957,7 +985,7 @@ extern idCVar r_znear;					// near Z clip plane
 
 extern idCVar r_finish;					// force a call to glFinish() every frame
 extern idCVar r_frontBuffer;			// draw to front buffer for debugging
-extern idCVarInt r_swapInterval;			// changes wglSwapIntarval
+extern idCVar r_swapInterval;			// changes Vsync (wglSwapInterval)
 extern idCVar r_offsetFactor;			// polygon offset parameter
 extern idCVar r_offsetUnits;			// polygon offset parameter
 extern idCVar r_singleTriangle;			// only draw a single triangle per primitive
@@ -1028,10 +1056,13 @@ extern idCVar r_skipDynamicTextures;	// don't dynamically create textures
 extern idCVar r_skipBump;				// uses a flat surface instead of the bump map
 extern idCVar r_skipSpecular;			// use black for specular
 extern idCVar r_skipDiffuse;			// use black for diffuse
+extern idCVar r_skipParallax;
+
 extern idCVar r_skipOverlays;			// skip overlay surfaces
 extern idCVar r_skipROQ;
 extern idCVar r_skipDepthCapture;		// skip capture of early depth pass. revelator + SteveL #3877
 extern idCVar r_useSoftParticles;		// SteveL #3878
+extern idCVar r_lockView;
 
 extern idCVar r_ignoreGLErrors;
 
@@ -1181,33 +1212,6 @@ public:
 	void Update( const idScreenRect &scissorRect );
 	~DepthBoundsTest();
 };
-
-// overloaded color functions vector first
-struct GLColorOverride {
-	bool enabled = false;
-
-	GLColorOverride() {} // conditional override
-	//GL_FloatColor( const idVec3& color );
-	GLColorOverride( const idVec4& color );
-
-	// float type
-	GLColorOverride( const float* color );
-	GLColorOverride( float r, float g, float b );
-	GLColorOverride( float r, float g, float b, float a );
-
-	void Enable( const float* color );
-	
-	~GLColorOverride();
-};
-
-#define MERGE_(a,b)  a##b
-#define LABEL_(a) MERGE_(colorOverride_, a)
-#define GL_FloatColor GLColorOverride LABEL_(__LINE__)
-
-// byte type
-void	GL_ByteColor( const byte* color );
-void	GL_ByteColor( byte r, byte g, byte b );
-void	GL_ByteColor( byte r, byte g, byte b, byte a );
 
 const int GLS_SRCBLEND_ONE						= 0x0;
 const int GLS_SRCBLEND_ZERO						= 0x00000001;
@@ -1376,6 +1380,8 @@ void R_TransformClipToDevice( const idPlane &clip, const viewDef_t *view, idVec3
 void R_TransposeGLMatrix( const float in[16], float out[16] );
 
 void R_SetViewMatrix( viewDef_t &viewDef );
+void R_SetupViewFrustum( viewDef_t &viewDef );
+void R_SetupProjection( viewDef_t &viewDef );
 
 // corrected this one.
 // note: "out" transform is equivalent to first applying transform "a", then transform "b"
@@ -1404,7 +1410,7 @@ void R_AddDrawSurf( const srfTriangles_t *tri, const viewEntity_t *space, const 
 					const idMaterial *shader, const idScreenRect &scissor, const float soft_particle_radius = -1.0f, bool deferred = false ); // soft particles in #3878
 
 drawSurf_t *R_PrepareLightSurf( const srfTriangles_t *tri, const viewEntity_t *space,
-					const idMaterial *shader, const idScreenRect &scissor, bool viewInsideShadow );
+					const idMaterial *shader, const idScreenRect &scissor, bool viewInsideShadow, bool blockSelfShadows );
 
 bool R_CreateAmbientCache( srfTriangles_t *tri, bool needsLighting );
 void R_CreatePrivateShadowCache( srfTriangles_t *tri );
@@ -1746,6 +1752,7 @@ void RB_ShowDestinationAlpha( void );
 void RB_ShowOverdraw( void );
 void R_Tools();
 void RB_RenderDebugTools( drawSurf_t **drawSurfs, int numDrawSurfs );
+void RB_InitDebugTools( void );
 void RB_ShutdownDebugTools( void );
 void RB_CopyDebugPrimitivesToBackend( void );
 

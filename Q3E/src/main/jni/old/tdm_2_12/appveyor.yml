@@ -1,0 +1,57 @@
+version: 2.09.{build}
+
+image:
+- Visual Studio 2019
+- Ubuntu1804
+
+configuration:
+- Release
+- Debug
+platform:
+- x64
+shallow_clone: true
+
+test: false
+
+for:
+- matrix:
+    except:
+    - image: Ubuntu1804
+  build:
+    project: TheDarkMod.sln
+    parallel: true
+    verbosity: minimal
+  after_build:
+  - cmd: |
+      7z a -t7z TheDarkMod.7z ..\darkmod\*.exe
+      7z a -t7z TheDarkMod.7z ..\darkmod\*.dll
+      7z a -t7z TheDarkMod.7z ..\darkmod\glprogs
+
+  artifacts:
+  - path: TheDarkMod.7z
+    name: TheDarkMod
+
+- matrix:
+    only:
+    - image: Ubuntu1804
+
+  install:
+  - sh: |
+      sudo apt-get update && sudo apt-get -y install mesa-common-dev libxxf86vm-dev libxext-dev
+
+  build_script:
+  - sh: |
+      mkdir build
+      cd build
+      cmake .. -DCMAKE_BUILD_TYPE="${CONFIGURATION}" -DCOPY_EXE=OFF
+      make -j6
+
+  after_build:
+  - sh: |
+      EXECUTABLE="thedarkmod.x64"
+      tar -cSvf thedarkmod.tar "${EXECUTABLE}" "../glprogs"
+      bzip2 thedarkmod.tar
+
+  artifacts:
+  - path: build/thedarkmod.tar.bz2
+    name: TheDarkModLinux

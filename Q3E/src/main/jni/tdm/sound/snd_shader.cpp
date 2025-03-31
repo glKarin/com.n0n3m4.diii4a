@@ -29,7 +29,6 @@ idSoundShader::Init
 void idSoundShader::Init( void ) {
 	desc = "<no description>";
 	errorDuringParse = false;
-	onDemand = false;
 	numEntries = 0;
 	numLeadins = 0;
 	leadinVolume = 0;
@@ -158,6 +157,7 @@ bool idSoundShader::ParseShader( idLexer &src ) {
 	//this will results in missing sounds later, when soundCache is finally available
 	assert( soundSystemLocal.soundCache || soundSystemLocal.s_noSound.GetBool() );
 
+	memset( &parms, 0, sizeof(parms) );
 	parms.minDistance = 1;
 	parms.maxDistance = 10;
 	parms.volume = 1;
@@ -330,11 +330,6 @@ bool idSoundShader::ParseShader( idLexer &src ) {
 		else if ( !token.Icmp( "omnidirectional" ) ) {
 			parms.soundShaderFlags |= SSF_OMNIDIRECTIONAL;
 		}
-		// onDemand can't be a parms, because we must track all references and overrides would confuse it
-		else if ( !token.Icmp( "onDemand" ) ) {
-			// no longer loading sounds on demand
-			//onDemand = true;
-		}
 
 		// the wave files
 		else if ( !token.Icmp( "leadin" ) ) {
@@ -344,7 +339,7 @@ bool idSoundShader::ParseShader( idLexer &src ) {
 				return false;
 			}
 			if ( soundSystemLocal.soundCache && numLeadins < maxSamples ) {
-				leadins[ numLeadins ] = soundSystemLocal.soundCache->FindSound( token.c_str(), onDemand );
+				leadins[ numLeadins ] = soundSystemLocal.soundCache->FindSound( token.c_str() );
 				numLeadins++;
 			}
 		} else if ( !token.Icmp( "fromVideo" ) ) {
@@ -359,7 +354,7 @@ bool idSoundShader::ParseShader( idLexer &src ) {
 			token.BackSlashesToSlashes();
 			if ( soundSystemLocal.soundCache ) {
 				idStr soundName = "fromVideo " + token;
-				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound( soundName.c_str(), onDemand );
+				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound( soundName.c_str() );
 				numEntries++;
 			}
 		} else if ( token.Find( ".wav", false ) != -1 || token.Find( ".ogg", false ) != -1 ) {
@@ -382,7 +377,7 @@ bool idSoundShader::ParseShader( idLexer &src ) {
 						}
 					}
 				} 					
-				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound( token.c_str(), onDemand );
+				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound( token.c_str() );
 				numEntries++;
 			}
 		} else {

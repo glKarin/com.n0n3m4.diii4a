@@ -173,6 +173,17 @@ bool ProcessModels( void ) {
 #endif
 	}
 
+	// stgatilov: dmap assumes that worldspawn comes first
+	// make sure mapper knows if this is violated
+	bool worldspawnCorrect = false;
+	if ( dmapGlobals.num_entities > 0 ) {
+		const idDict &spawnargs = dmapGlobals.uEntities[0].mapEntity->epairs;
+		if ( idStr::Icmp( spawnargs.GetString( "classname" ), "worldspawn" ) == 0 )
+			worldspawnCorrect = true;
+	}
+	if ( !worldspawnCorrect )
+		common->Error( "Worldspawn entity must be the first one in .map file" );
+
 	oldVerbose = dmapGlobals.verbose;
 
 	for ( dmapGlobals.entityNum = 0 ; dmapGlobals.entityNum < dmapGlobals.num_entities ; dmapGlobals.entityNum++ ) {
@@ -285,7 +296,7 @@ Dmap
 void Dmap( const idCmdArgs &args ) {
 	int			i;
 	int			start, end;
-	char		path[1024];
+	char		path[1034];
 	idStr		passedName;
 	bool		leaked = false;
 	bool		noCM = false;
@@ -320,6 +331,8 @@ void Dmap( const idCmdArgs &args ) {
 		extern idCVar dmap_tjunctionsAlgorithm;
 		dmap_aasExpandBrushUseEdgesOnce.SetBool(version >= 211);
 		dmap_tjunctionsAlgorithm.SetBool(version >= 211);
+		//new in 2.13
+		dmap_outputNoSnap.SetBool(version >= 213);
 	}
 
 	if ( args.Argc() < 2 ) {

@@ -54,8 +54,12 @@ public:
 	bool Reload();
 	bool IsAfterReload();
 
+	bool AddOrUpdatePreset(idStr areaName, idStr efxPreset, ALuint* effect);	// #6273
+
 private:
 	bool ReadEffectLegacy(idLexer &lexer, idSoundEffect *effect);
+	bool AddPreset(idStr token, idSoundEffect *effect, ALenum err);
+	bool GetEffect(idStr& name, idSoundEffect * soundEffect);
 	bool ReadEffectOpenAL(idLexer &lexer, idSoundEffect *effect);
 
 	//filename initially passed to LoadFile (or empty if LoadFile never called)

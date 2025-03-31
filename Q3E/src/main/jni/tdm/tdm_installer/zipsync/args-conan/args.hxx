@@ -33,10 +33,10 @@
 #ifndef ARGS_HXX
 #define ARGS_HXX
 
-#define ARGS_VERSION "6.3.0"
+#define ARGS_VERSION "6.4.6"
 #define ARGS_VERSION_MAJOR 6
-#define ARGS_VERSION_MINOR 3
-#define ARGS_VERSION_PATCH 0
+#define ARGS_VERSION_MINOR 4
+#define ARGS_VERSION_PATCH 6
 
 #include <algorithm>
 #include <iterator>
@@ -922,7 +922,7 @@ namespace args
             }
 
             /// Only for ARGS_NOEXCEPT
-            std::string GetErrorMsg() const
+            virtual std::string GetErrorMsg() const
             {
                 return errorMsg;
             }
@@ -1622,6 +1622,24 @@ namespace args
                     return (*it)->GetError();
                 }
             }
+
+            /// Only for ARGS_NOEXCEPT
+            virtual std::string GetErrorMsg() const override
+            {
+                if (error != Error::None)
+                {
+                    return errorMsg;
+                }
+
+                auto it = std::find_if(Children().begin(), Children().end(), [](const Base *child){return child->GetError() != Error::None;});
+                if (it == Children().end())
+                {
+                    return "";
+                } else
+                {
+                    return (*it)->GetErrorMsg();
+                }
+            }
 #endif
 
     };
@@ -1996,7 +2014,16 @@ namespace args
             {
                 UpdateSubparserHelp(params);
 
-                auto res = Group::GetProgramLine(params);
+                std::vector<std::string> res;
+
+                if ((subparserHasFlag || Group::HasFlag()) && params.showProglineOptions && !params.proglineShowFlags)
+                {
+                    res.push_back(params.proglineOptions);
+                }
+
+                auto group_res = Group::GetProgramLine(params);
+                std::move(std::move(group_res).begin(), std::move(group_res).end(), std::back_inserter(res));
+
                 res.insert(res.end(), subparserProgramLine.begin(), subparserProgramLine.end());
 
                 if (!params.proglineCommand.empty() && (Group::HasCommand() || subparserHasCommand))
@@ -2007,11 +2034,6 @@ namespace args
                 if (!Name().empty())
                 {
                     res.insert(res.begin(), Name());
-                }
-
-                if ((subparserHasFlag || Group::HasFlag()) && params.showProglineOptions && !params.proglineShowFlags)
-                {
-                    res.push_back(params.proglineOptions);
                 }
 
                 if (!ProglinePostfix().empty())

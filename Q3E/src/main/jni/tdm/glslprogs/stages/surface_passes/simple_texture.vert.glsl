@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 #pragma tdm_include "tdm_utils.glsl"
 #pragma tdm_include "stages/surface_passes/texgen_shared.glsl"

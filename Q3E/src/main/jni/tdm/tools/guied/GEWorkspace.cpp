@@ -208,7 +208,7 @@ void rvGEWorkspace::RenderGrid ( void )
 	qglEnable(GL_BLEND);
 	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	GL_FloatColor ( color[0], color[1], color[2], 0.5f );
+	qglColor4f ( color[0], color[1], color[2], 0.5f );
 		
 	qglBegin ( GL_LINES );
 	step = mApplication->GetOptions().GetGridWidth ( ) * g_ZoomScales[mZoom];
@@ -226,7 +226,7 @@ void rvGEWorkspace::RenderGrid ( void )
 	qglEnd ( );
 
 	qglDisable(GL_BLEND);
-	GL_FloatColor ( color[0], color[1], color[2] );
+	qglColor3f ( color[0], color[1], color[2] );
 		
 	qglBegin ( GL_LINES );
 	step = mApplication->GetOptions().GetGridWidth ( ) * g_ZoomScales[mZoom];
@@ -284,7 +284,7 @@ void rvGEWorkspace::Render ( HDC hdc )
 	qglMatrixMode(GL_MODELVIEW);
 	qglLoadIdentity();
 
-	GL_FloatColor ( mApplication->GetOptions().GetWorkspaceColor()[0], mApplication->GetOptions().GetWorkspaceColor()[1], mApplication->GetOptions().GetWorkspaceColor()[2] );	
+	qglColor3f ( mApplication->GetOptions().GetWorkspaceColor()[0], mApplication->GetOptions().GetWorkspaceColor()[1], mApplication->GetOptions().GetWorkspaceColor()[2] );	
 
 	qglBegin ( GL_QUADS );
 	qglVertex2f ( mRect.x, mRect.y );

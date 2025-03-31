@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 #pragma tdm_include "stages/interaction/interaction.common.vs.glsl"
 

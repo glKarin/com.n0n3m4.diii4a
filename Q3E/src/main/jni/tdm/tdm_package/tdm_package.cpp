@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 	// Start logging
 	RegisterLogWriters();
 
-	TraceLog::WriteLine(LOG_STANDARD, "TDM Packager v2.00 (c) 2016-2022 by greebo & Tels & stgatilov.");
+	TraceLog::WriteLine(LOG_STANDARD, "TDM Packager v2.01 (c) 2016-2022 by greebo & Tels & stgatilov.");
 	TraceLog::WriteLine(LOG_STANDARD, "Part of The Dark Mod (http://www.thedarkmod.com).");
 	TraceLog::WriteLine(LOG_STANDARD, "");
 

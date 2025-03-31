@@ -15,10 +15,12 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 #extension GL_ARB_texture_gather: enable
+#extension GL_ARB_texture_query_lod: enable
 
 #define STGATILOV_USEGATHER 1
 
 precision highp float;
+precision highp int;
 
 out vec4 FragColor;
 
@@ -26,22 +28,29 @@ out vec4 FragColor;
 #define TDM_allow_ARB_texture_gather STGATILOV_USEGATHER
 #pragma tdm_include "tdm_shadowmaps.glsl"
 
-uniform bool 	u_shadowMapCullFront;
 uniform vec4	u_shadowRect;
 uniform sampler2D u_shadowMap;
-in vec3 var_WorldLightDir;
+
+in vec3 var_LightDirWorld;
 
 void main() {
 	InteractionGeometry props;
-	FragColor.rgb = computeInteraction(props);
+	vec3 worldParallax;
+	FragColor.rgb = computeInteraction(props, worldParallax);
 
-	vec3 worldNormal = mat3(u_modelMatrix) * (var_TangentBitangentNormalMatrix * props.localN);
+	vec3 worldNormal = mat3(u_modelMatrix) * var_TangentBitangentNormalMatrix[2];
+	if (props.localN.z < 0.0)	// #5862: reverse-sided material with Z < 0 normalmap
+		worldNormal = -worldNormal;
 
-	if (u_shadows) {
+	if (checkFlag(u_flags, SFL_INTERACTION_SHADOWS)) {
+		vec3 dirToLight = -var_LightDirWorld;
+		if (checkFlag(u_flags, SFL_INTERACTION_PARALLAX_OFFSET_EXTERNAL_SHADOWS))
+			dirToLight += worldParallax;
 		float shadowsCoeff = computeShadowMapCoefficient(
-			var_WorldLightDir, worldNormal,
+			dirToLight, worldNormal,
 			u_shadowMap, u_shadowRect,
-			u_softShadowsQuality, u_softShadowsRadius, u_shadowMapCullFront
+			u_softShadowsQuality, u_softShadowsRadius,
+			checkFlag(u_flags, SFL_INTERACTION_SHADOW_MAP_CULL_FRONT)
 		);
 		FragColor.rgb *= shadowsCoeff;
 	}

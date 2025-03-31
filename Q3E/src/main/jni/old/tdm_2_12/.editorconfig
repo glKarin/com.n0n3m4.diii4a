@@ -1,0 +1,40 @@
+# Note: you should install EditorConfig MSVC extension to make it work:
+#   https://marketplace.visualstudio.com/items?itemName=EditorConfigTeam.EditorConfig
+# It will enable proper style of indentation only for TheDarkMod solution.
+
+root = true
+
+# the main style: C/C++ source files
+[**/*.{cpp,c,h}]
+indent_style = tab
+indent_size = 4
+end_of_line = lf
+
+# shader files
+[**/*.{fs,vs,gs,glsl}]
+indent_style = tab
+indent_size = 4
+end_of_line = lf
+
+
+# files managed by MSVC
+[**/{*.vcxproj,*.vcxproj.*,*.props,*.natvis}]
+indent_style = space
+indent_size = 2
+end_of_line = crlf
+[**/*.sln]
+indent_style = tab
+indent_size = 2
+end_of_line = crlf
+
+# python source code
+[**/{SConscript,SConscript.*,*.py}]
+indent_style = tab
+indent_size = 4
+end_of_line = lf
+
+# CMake scripts
+[**/{CMakeLists.txt,*.cmake}]
+indent_style = tab
+indent_size = 4
+end_of_line = lf

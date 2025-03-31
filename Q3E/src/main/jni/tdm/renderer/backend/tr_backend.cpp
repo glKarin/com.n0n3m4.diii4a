@@ -22,6 +22,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/backend/RenderBackend.h"
 #include "renderer/backend/stages/BloomStage.h"
 #include "renderer/backend/FrameBufferManager.h"
+#include "renderer/backend/VertexArrayState.h"
 
 backEndState_t	backEnd;
 idCVarBool image_showBackgroundLoads( "image_showBackgroundLoads", "0", CVAR_RENDERER, "1 = print outstanding background loads" );
@@ -44,11 +45,6 @@ void RB_SetDefaultGLState( void ) {
 	qglClearDepth( 1.0f );
 #endif
 	//GL_FloatColor( 1.0f, 1.0f, 1.0f, 1.0f );
-
-	// the vertex arrays are always enabled. FIXME: Not exactly a 'default GL state'
-	const int attrib_indices[] = { 0,2,3,8,9,10 };
-	for ( auto attr_index : attrib_indices )
-		qglEnableVertexAttribArray( attr_index );
 
 	// make sure our GL state vector is set correctly
 	memset( &backEnd.glState, 0, sizeof( backEnd.glState ) );
@@ -78,9 +74,9 @@ void RB_SetDefaultGLState( void ) {
 	assert( backEnd.glState.currenttmu == 0 );
 	qglActiveTexture( GL_TEXTURE0 );
 
-	if ( r_useScissor.GetBool() ) {
-		GL_ScissorRelative( 0, 0, 1, 1 );
-	}
+	GL_ScissorRelative( 0, 0, 1, 1 );
+
+	vaState.SetDefaultState();
 
 	GL_CheckErrors();
 }
@@ -366,142 +362,10 @@ DepthBoundsTest::~DepthBoundsTest() {
 /*
 ============================================================================
 
-RENDER BACK END COLOR WRAPPERS
+RENDER BACKEND
 
 ============================================================================
 */
-
-/*
-====================
-GL_Color
-
-Vector color 3 component (clamped)
-====================
-*/
-/*GL_FloatColor( const idVec3 &color ) {
-	GLfloat parm[3];
-	parm[0] = idMath::ClampFloat( 0.0f, 1.0f, color[0] );
-	parm[1] = idMath::ClampFloat( 0.0f, 1.0f, color[1] );
-	parm[2] = idMath::ClampFloat( 0.0f, 1.0f, color[2] );
-	qglColor3f( parm[0], parm[1], parm[2] );
-}*/
-
-/*
-====================
-GL_Color
-
-Vector color 4 component (clamped)
-====================
-*/
-GLColorOverride::GLColorOverride( const idVec4 &color ) {
-	Enable( color.ToFloatPtr() );
-}
-
-/*
-====================
-GL_Color
-
-Float to vector color 3 or 4 component (clamped)
-====================
-*/
-GLColorOverride::GLColorOverride( const float *color ) {
-	Enable( color );
-}
-
-/*
-====================
-GL_Color
-
-Float color 3 component (clamped)
-====================
-*/
-GLColorOverride::GLColorOverride( float r, float g, float b ) {
-	GLfloat parm[4] = { r,g,b,1 };
-	Enable( parm );
-}
-
-/*
-====================
-GL_Color
-
-Float color 4 component (clamped)
-====================
-*/
-GLColorOverride::GLColorOverride( float r, float g, float b, float a ) {
-	GLfloat parm[4] = {r,g,b,a};
-	Enable( parm );
-}
-
-GLColorOverride::~GLColorOverride() {
-	if ( !enabled )
-		return;
-	qglEnableVertexAttribArray( 3 );
-}
-
-void GLColorOverride::Enable( const float* color ) {
-	GLfloat parm[4];
-	parm[0] = idMath::ClampFloat( 0.0f, 1.0f, color[0] );
-	parm[1] = idMath::ClampFloat( 0.0f, 1.0f, color[1] );
-	parm[2] = idMath::ClampFloat( 0.0f, 1.0f, color[2] );
-	parm[3] = idMath::ClampFloat( 0.0f, 1.0f, color[3] );
-	//qglColor4f( parm[0], parm[1], parm[2], parm[3] );
-	qglDisableVertexAttribArray( 3 );
-	qglVertexAttrib4fv( 3, parm );
-	enabled = true;
-}
-
-/*
-====================
-GL_Color
-
-Byte to vector color 3 or 4 component (clamped)
-====================
-*/
-void GL_ByteColor( const byte *color ) {
-	GLubyte parm[4] = { 255, 255, 255, 255 };
-	parm[0] = idMath::ClampByte( 0, 255, color[0] );
-	parm[1] = idMath::ClampByte( 0, 255, color[1] );
-	parm[2] = idMath::ClampByte( 0, 255, color[2] );
-	if ( color[3] ) {
-		parm[3] = idMath::ClampByte( 0, 255, color[3] );
-	}
-//	qglColor3ub( parm[0], parm[1], parm[2] );
-	qglVertexAttrib4ubv( 3, parm );
-}
-
-
-/*
-====================
-GL_Color
-
-Byte color 3 component (clamped)
-====================
-*/
-void GL_ByteColor( byte r, byte g, byte b ) {
-	GLubyte parm[4] = { 255, 255, 255, 255 };
-	parm[0] = idMath::ClampByte( 0, 255, r );
-	parm[1] = idMath::ClampByte( 0, 255, g );
-	parm[2] = idMath::ClampByte( 0, 255, b );
-	//qglColor3ub( parm[0], parm[1], parm[2] );
-	qglVertexAttrib4ubv( 3, parm );
-}
-
-/*
-====================
-GL_Color
-
-Byte color 4 component (clamped)
-====================
-*/
-void GL_ByteColor( byte r, byte g, byte b, byte a ) {
-	GLubyte parm[4] = { 255, 255, 255, 255 };
-	parm[0] = idMath::ClampByte( 0, 255, r );
-	parm[1] = idMath::ClampByte( 0, 255, g );
-	parm[2] = idMath::ClampByte( 0, 255, b );
-	parm[3] = idMath::ClampByte( 0, 255, a );
-	//qglColor4ub( parm[0], parm[1], parm[2], parm[3] );
-	qglVertexAttrib4ubv( 3, parm );
-}
 
 void GL_SetProjection( float* matrix ) {
 	qglBindBuffer( GL_UNIFORM_BUFFER, programManager->uboHandle );
@@ -526,9 +390,7 @@ This is not used by the normal game paths, just by some tools
 void RB_SetGL2D( void ) {
 	// set 2D virtual screen size
 	GL_ViewportVidSize( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
-	if ( r_useScissor.GetBool() ) {
-		GL_ScissorVidSize( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
-	}
+	GL_ScissorVidSize( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadIdentity();
 	qglOrtho( 0, 640, 480, 0, 0, 1 );		// always assume 640x480 virtual coordinates
@@ -561,9 +423,7 @@ static void	RB_SetBuffer( const void *data ) {
 #if !defined(_GLES)
 	qglDrawBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK );
 #endif
-#ifdef _GLES
-	qglReadBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK ); //karin: OpenGLES3.0
-#endif
+	qglReadBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK );
 
 	// note: clear was moved to RB_BeginDrawingView
 }

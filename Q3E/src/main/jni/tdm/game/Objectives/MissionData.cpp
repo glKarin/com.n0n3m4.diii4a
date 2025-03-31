@@ -865,6 +865,13 @@ void CMissionData::Event_MissionComplete()
 		return;
 	m_hasMissionEnded = true;
 
+	// stgatilov #6509: allow mapper to save game state into persistent info
+	const function_t* func = gameLocal.program.FindFunction( "on_mission_complete" );
+	if ( func ) {
+		idThread *thread = new idThread( func );
+		thread->DelayedStart( 0 );
+	}
+
 	// Fire the general mission end event
 	Event_MissionEnd();
 
@@ -916,6 +923,13 @@ void CMissionData::Event_MissionFailed( void )
 	if (m_hasMissionEnded)
 		return;
 	m_hasMissionEnded = true;
+
+	// stgatilov #6509: allow mapper to save game state into persistent info
+	const function_t* func = gameLocal.program.FindFunction( "on_mission_failed" );
+	if ( func ) {
+		idThread *thread = new idThread( func );
+		thread->DelayedStart( 0 );
+	}
 
 	// Fire the general mission end event
 	Event_MissionEnd();

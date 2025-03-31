@@ -66,16 +66,21 @@ void cb_Settings_InputInstallDirectory(Fl_Widget *self) {
 	//update Next and Restart buttons
 	std::string defaultDir = OsUtils::GetCwd();
 	if (defaultDir != installDir) {
-		if (pathIsDir)
+		if (pathIsDir) {
 			g_Settings_ButtonRestartNewDir->label("Restart");
-		else
+			g_Settings_ButtonNext->tooltip("Please click 'Restart' button to proceed.");
+		}
+		else {
 			g_Settings_ButtonRestartNewDir->label("Create and Restart");
+			g_Settings_ButtonNext->tooltip("Please click 'Create and Restart' button to proceed.");
+		}
 		g_Settings_ButtonRestartNewDir->show();
 		g_Settings_ButtonNext->deactivate();
 	}
 	else {
 		g_Settings_ButtonRestartNewDir->hide();
 		g_Settings_ButtonNext->activate();
+		g_Settings_ButtonNext->tooltip("");
 	}
 }
 

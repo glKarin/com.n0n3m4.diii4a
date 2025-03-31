@@ -31,12 +31,12 @@ bool g_tracingAllocStacks = false;
 	//stgatilov: not very good in terms of code size, but hopefully it won't be a problem in one cpp file
 	#define TRACY_MALLOC_REPORT(ptr, len) \
 		if (g_tracingAllocStacks) { \
-			TracySecureAllocS(ptr, len, 10) \
+			TracySecureAllocS(ptr, len, 10); \
 		} else { \
-			TracySecureAlloc(ptr, len) \
+			TracySecureAlloc(ptr, len); \
 		}
 	#define TRACY_FREE_ANNOUNCE(ptr) \
-		TracySecureFree(ptr)
+		TracySecureFree(ptr);
 #else
 	#define TRACY_MALLOC_REPORT(ptr, len)
 	#define TRACY_FREE_ANNOUNCE(ptr)

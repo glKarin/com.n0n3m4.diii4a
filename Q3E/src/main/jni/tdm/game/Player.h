@@ -58,6 +58,8 @@ extern const idEventDef EV_Player_GetLocation;
 extern const idEventDef EV_Player_GetFrobbed;
 extern const idEventDef EV_Player_SetFrobOnlyUsedByInv;
 extern const idEventDef EV_Player_GetCalibratedLightgemValue;
+extern const idEventDef EV_Player_SetAirAccelerate;
+extern const idEventDef EV_Player_IsAirborne;
 
 // tels: #3282
 extern const idEventDef EV_Player_GetShouldered;
@@ -545,8 +547,8 @@ public:
 	void					SpawnToPoint( const idVec3	&spawn_origin, const idAngles &spawn_angles );
 	void					SetClipModel( void );	// spectator mode uses a different bbox size
 
-	void					SavePersistantInfo( void );
-	void					RestorePersistantInfo( void );
+	void					SavePersistentInfo( void );
+	void					RestorePersistentInfo( void );
 
 	bool					UserInfoChanged( bool canModify );
 	idDict *				GetUserInfo( void );
@@ -1343,6 +1345,8 @@ private:
 	void					Event_GetIdealWeapon( void );
 	void					Event_RopeRemovalCleanup( idEntity *RopeEnt );
 	void					Event_GetCalibratedLightgemValue( void );
+	void					Event_SetAirAccelerate( float newAccel );
+	void					Event_IsAirborne( void );
 	
 /**
 * TDM Events

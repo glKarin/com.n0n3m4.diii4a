@@ -17,8 +17,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #include "renderer/tr_local.h"
 #include "renderer/backend/FrameBuffer.h"
-#include "renderer/backend/glsl.h"
 #include "renderer/backend/GLSLProgramManager.h"
+#include "renderer/backend/GLSLProgram.h"
+#include "renderer/backend/GLSLUniforms.h"
 #include "renderer/backend/stages/AmbientOcclusionStage.h"
 #include "renderer/backend/stages/BloomStage.h"
 #include "renderer/backend/FrameBufferManager.h"
@@ -263,6 +264,10 @@ void FB_ApplyScissor() {
 			backEnd.currentScissor.GetWidth(),
 			backEnd.currentScissor.GetHeight()
 		);
+	} else {
+		// can't apply view-dependent scissors (e.g. r_lockSurfaces)
+		// so reset scissor to full
+		GL_ScissorRelative( 0, 0, 1, 1 );
 	}
 }
 
@@ -281,8 +286,8 @@ void FB_DebugShowContents() {
 
 	GL_State( GLS_DEFAULT );
 
-	programManager->oldStageShader->Activate();
-	Uniforms::Global* transformUniforms = programManager->oldStageShader->GetUniformGroup<Uniforms::Global>();
+	programManager->renderToolsShader->Activate();
+	TransformUniforms* transformUniforms = programManager->renderToolsShader->GetUniformGroup<TransformUniforms>();
 	idMat4 ninety = mat4_identity * .9f;
 	ninety[3][3] = 1;
 	transformUniforms->modelViewMatrix.Set( ninety );

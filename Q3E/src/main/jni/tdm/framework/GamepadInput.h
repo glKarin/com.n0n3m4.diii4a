@@ -71,4 +71,6 @@ public:
 	static idList<padActionChange_t> GetActionStateChange();
 
 	static void WriteBindings( idFile *f );
+
+	static bool wasModifiedAfterLastWrite;
 };

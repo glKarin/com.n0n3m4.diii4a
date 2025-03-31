@@ -103,9 +103,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #define CPUSTRING						"e2k"
 #elif defined(__ANDROID__) //karin: Android arch
     #ifdef __aarch64__
-    #define CPUSTRING						"arm64"
+    	#define CPUSTRING						"arm64"
     #else
-    #define CPUSTRING						"arm"
+    	#define CPUSTRING						"arm"
     #endif
 #else
 #error unknown CPU

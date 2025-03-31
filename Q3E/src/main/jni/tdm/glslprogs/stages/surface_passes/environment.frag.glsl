@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 #pragma tdm_include "tdm_compression.glsl"
 
@@ -32,7 +33,7 @@ in mat3 var_TangentToWorldMatrix;
 out vec4 FragColor;
 
 void main() {
-	vec3 normalTangent = fetchSurfaceNormal(var_TexCoord, true, u_normalMap, u_RGTC);
+	vec3 normalTangent = unpackSurfaceNormal(texture(u_normalMap, var_TexCoord), true, u_RGTC);
 	vec3 normalWorld = normalize(var_TangentToWorldMatrix * normalTangent);
 
 	// calculate reflection vector

@@ -15,17 +15,28 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 in vec2 var_TexCoord;
 out vec4 draw_Color;
 uniform sampler2D u_texture;
 
+uniform float u_exposure;
+
+uniform float u_overbrightDesaturation;
+
+uniform bool u_compressEnable;
+uniform float u_compressSwitchPoint;
+uniform float u_compressSwitchMultiplier;
+uniform float u_compressInitialSlope;
+uniform float u_compressTailMultiplier;
+uniform float u_compressTailShift;
+uniform float u_compressTailPower;
+
 uniform float u_gamma, u_brightness;
 uniform float u_desaturation;
-uniform float u_colorCurveBias;
-uniform float u_colorCorrection, u_colorCorrectBias;
 
-uniform int u_sharpen;
+uniform bool u_sharpen;
 uniform float u_sharpness;
 
 uniform float u_ditherInput;
@@ -92,16 +103,16 @@ vec3 sharpen(vec2 texcoord) {
 	mxRGB += mxRGB2;
 
 	// Smooth minimum distance to signal limit divided by smooth max.
-	vec3 rcpMRGB = vec3(1) / mxRGB;
+	vec3 rcpMRGB = vec3(1.0) / mxRGB;
 	vec3 ampRGB = clamp(min(mnRGB, 2.0 - mxRGB) * rcpMRGB, vec3(0.0), vec3(1.0));
 
 	// Shaping amount of sharpening.
 	ampRGB = inversesqrt(ampRGB);
 
 	float peak = 8.0 - 3.0 * u_sharpness;
-	vec3 wRGB = -vec3(1) / (ampRGB * peak);
+	vec3 wRGB = -vec3(1.0) / (ampRGB * peak);
 
-	vec3 rcpWeightRGB = vec3(1) / (1.0 + 4.0 * wRGB);
+	vec3 rcpWeightRGB = vec3(1.0) / (1.0 + 4.0 * wRGB);
 
 	//                          0 w 0
 	//  Filter shape:           w 1 w
@@ -112,30 +123,6 @@ vec3 sharpen(vec2 texcoord) {
 	return outColor;
 }
 
-float mapColorComponent(float value) {
-	float color = max(value, 0.0);
-
-	//stgatilov: apply traditional gamma/brightness settings
-	color = pow(color, 1.0/u_gamma);
-	color *= u_brightness;
-
-	if (u_colorCurveBias != 0.0) {
-		//---------------------------------------------------------
-		//  Apply Smooth Exponential color falloff
-		//---------------------------------------------------------
-		float reduced1 = 1.0 - pow(2.718282, -3.0 * color * color);
-		color = mix(color, reduced1, u_colorCurveBias);
-	}
-	if (u_colorCorrectBias != 0.0) {
-		//---------------------------------------------------------
-		//  Apply Smooth Exponential color correction with a bias
-		//---------------------------------------------------------
-		float reduced2 = 1.0 - pow(2.718282, -u_colorCorrection * color);
-		color = mix(color, reduced2, u_colorCorrectBias);
-	}
-	return color;
-}
-
 vec3 ditherColor(vec3 value, float strength) {
 	vec2 tc = gl_FragCoord.xy / vec2(textureSize(u_noiseImage, 0));
 	vec3 noiseColor = textureLod(u_noiseImage, tc, 0.0).rgb;
@@ -143,9 +130,67 @@ vec3 ditherColor(vec3 value, float strength) {
 	return value;
 }
 
+float linstep(float vmin, float vmax, float value) {
+	float ratio = (value - vmin) / (vmax - vmin);
+	return clamp(ratio, 0.0, 1.0);
+}
+
+vec3 desaturateOverbright(vec3 color) {
+	// desaturate overbright colors by letting color component slightly leak into other components
+
+	// only affects overbright colors
+	float maxValue = max(max(color.r, color.g), color.b);
+	float overbright = linstep(1.0, 2.0, maxValue);
+	float strength = u_overbrightDesaturation * overbright;
+
+	// this matrix has zero sum (we want to NOT change sum of components)
+	mat3 shiftMatrix = (mat3(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0) - 3.0 * mat3(1.0)) * 0.5;
+	// blue colors is perceptually dark, it should desaturate slower
+	vec3 weights = vec3(0.2126, 0.7152, 0.0722);
+	shiftMatrix[0] *= weights[0];
+	shiftMatrix[1] *= weights[1];
+	shiftMatrix[2] *= weights[2];
+	mat3 colorTransform = mat3(1.0) + shiftMatrix * strength;
+
+	color = colorTransform * color;
+
+	return color;
+}
+
+float compressCurveScalar(float x) {
+	// compression curve consists of initial and tail parts
+	// see more: https://colab.research.google.com/gist/stgatilov/640485ffb49fb734e0642f6d5e34dff8/tonemap_compression_curve.ipynb
+	if (x < u_compressSwitchPoint) {
+		// initial: linear * exponent
+		float exponentialReduction = pow(u_compressSwitchMultiplier / u_compressInitialSlope, x / u_compressSwitchPoint);
+		return x * u_compressInitialSlope * exponentialReduction;
+	}
+	else {
+		// tail: tunable Reinhard with custom power
+		float deltaX = x - u_compressSwitchPoint;
+		float ratio = u_compressTailMultiplier / (u_compressTailShift + deltaX);
+		return 1.0 - pow(ratio, u_compressTailPower);
+	}
+}
+vec3 compressCurve(vec3 value) {
+	return vec3(compressCurveScalar(value.r), compressCurveScalar(value.g), compressCurveScalar(value.b));
+}
+
+vec3 adjustColor(vec3 color) {
+	// traditional gamma correction from Doom 3 (higher = brighter)
+	color = pow(color, vec3(1.0 / u_gamma));
+	// traditional brightness from Doom 3
+	color *= u_brightness;
+	// color desaturation if u > 0, oversaturation if u < 0
+	float luma = clamp(dot(vec3(0.2125, 0.7154, 0.0721), color.rgb), 0.0, 1.0);
+	color = mix(color, vec3(luma), u_desaturation);
+
+	return color;
+}
+
 void main() {
 	vec3 color;
-	if (u_sharpen != 0) {
+	if (u_sharpen) {
 		color = sharpen(var_TexCoord);
 	} else {
 		color = texture(u_texture, var_TexCoord).rgb;
@@ -153,18 +198,20 @@ void main() {
 
 	if (u_ditherInput > 0.0)
 		color = ditherColor(color, -u_ditherInput);
+	color = max(color, vec3(0.0));  // avoid NaNs
 
-	color.r = mapColorComponent(color.r);
-	color.g = mapColorComponent(color.g);
-	color.b = mapColorComponent(color.b);
+	color *= u_exposure;
 
-	if (u_desaturation != 0.0) {
-		float luma = clamp(dot(vec3(0.2125, 0.7154, 0.0721), color.rgb), 0.0, 1.0);
-		color = mix(color, vec3(luma), u_desaturation);
-	}
+	if (u_overbrightDesaturation > 0.0)
+		color = desaturateOverbright(color);
+
+	if (u_compressEnable)
+		color = compressCurve(color);
+
+	color = adjustColor(color);
 
 	if (u_ditherOutput > 0.0)
 		color = ditherColor(color, u_ditherOutput);
 
-	draw_Color = vec4(color, 1);
+	draw_Color = vec4(color, 1.0);
 }

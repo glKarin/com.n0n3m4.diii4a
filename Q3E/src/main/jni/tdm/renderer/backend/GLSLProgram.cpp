@@ -15,10 +15,11 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #include "precompiled.h"
 #include "renderer/backend/GLSLProgram.h"
+
 #include "renderer/backend/GLSLUniforms.h"
 #include <memory>
-
-#include "renderer/backend/glsl.h"
+#include "renderer/tr_local.h"
+#include "renderer/backend/VertexArrayState.h"
 #include "StdString.h"
 
 idCVar r_debugGLSL("r_debugGLSL", "0", CVAR_BOOL|CVAR_ARCHIVE, "If enabled, checks and warns about additional potential sources of GLSL shader errors.");
@@ -164,7 +165,7 @@ bool GLSLProgram::Validate() {
 void GLSLProgram::LoadFromFiles( const char *vertexFile, const char *fragmentFile, const idHashMapDict &defines ) {
 	AttachVertexShader( vertexFile, defines );
 	AttachFragmentShader( fragmentFile, defines );
-	Attributes::Default::Bind( this );
+	vaState.BindAttributesToProgram( this );
 	Link();
 }
 
@@ -344,19 +345,31 @@ GLuint GLSLProgram::CompileShader( GLint shaderType, const char *sourceFile, con
     idStr nameStr(sourceFile);
     nameStr.StripPath();
     const bool IsInteractionShader = nameStr.Find("interaction") == 0;
-    if(!IsInteractionShader && harm_r_useMediumPrecision.GetBool())
+    if(harm_r_useMediumPrecision.GetBool())
     {
-        const std::string highp("precision highp float;");
-        const std::string mediump("precision mediump float;");
-        std::string::size_type pos = 0;
-        while((pos = source.find(highp, pos)) != std::string::npos){
-            source.replace(pos, highp.size(), mediump);
-            pos += mediump.size();
+        if(!IsInteractionShader)
+        {
+            const std::string highp("precision highp float;");
+            const std::string mediump("precision mediump float;");
+            std::string::size_type pos = 0;
+            while((pos = source.find(highp, pos)) != std::string::npos){
+                source.replace(pos, highp.size(), mediump);
+                pos += mediump.size();
+            }
         }
-        common->Printf("'%s' float precision: medium\n", sourceFile);
+
+        const std::string ihighp("precision highp int;");
+        const std::string imediump("precision mediump int;");
+        std::string::size_type pos = 0;
+        while((pos = source.find(ihighp, pos)) != std::string::npos){
+            source.replace(pos, ihighp.size(), imediump);
+            pos += imediump.size();
+        }
+
+        common->Printf("'%s' precision: medium\n", sourceFile);
     }
     else
-        common->Printf("'%s' float precision: high\n", sourceFile);
+        common->Printf("'%s' precision: high\n", sourceFile);
 #endif
 	std::vector<std::string> sourceFiles { sourceFile };
 	ResolveIncludes( source, sourceFiles );

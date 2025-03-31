@@ -60,7 +60,6 @@ private:
 
 	idList<idTabRect>	tabInfo;
 	int					top;
-	float				sizeBias;
 	bool				horizontal;
 	idStr				tabStopStr;
 	idStr				tabAlignStr;

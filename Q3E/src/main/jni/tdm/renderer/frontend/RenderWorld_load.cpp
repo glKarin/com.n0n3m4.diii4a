@@ -111,22 +111,6 @@ idRenderModel *idRenderWorldLocal::ParseModel( idLexer *src ) {
 
 		((idMaterial*)surf.material)->AddReference();
 
-		if (!(com_editors & EDITOR_RUNPARTICLE)) {
-			//stgatilov #4957: preload all collisionStatic images
-			if (surf.material->Deform() == DFRM_PARTICLE || surf.material->Deform() == DFRM_PARTICLE2) {
-				const idDeclParticle *particleDecl = (idDeclParticle *)surf.material->GetDeformDecl();
-				const auto &prtStages = particleDecl->stages;
-				for (int g = 0; g < prtStages.Num(); g++)
-					if (prtStages[g]->collisionStatic) {
-						idPartSysEmitterSignature sign;
-						sign.mainName = model->Name();
-						sign.surfaceIndex = i;
-						sign.particleStageIndex = g;
-						idParticleStage::LoadCutoffTimeMap(idParticleStage::GetCollisionStaticImagePath(sign));
-					}
-			}
-		}
-
 		tri = R_AllocStaticTriSurf();
 		surf.geometry = tri;
 

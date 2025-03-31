@@ -408,7 +408,7 @@ viewLight_t *R_SetLightDefViewLight( idRenderLightLocal *light ) {
 			vLight->volumetricNoshadows = true;
 		}
 	}
-	if ( tr.viewDef->isSubview ) {
+	if ( tr.viewDef->isSubview && !tr.viewDef->isXray ) {
 		// does not work in subviews, at least because currentDepth is not up-to-date
 		// note: somehow, the engine does not like different shadows implementation in main view and lightgem,
 		// so I placed this condition AFTER shadows implementation is chosen
@@ -763,7 +763,7 @@ R_PrepareLightSurf
 =================
 */
 drawSurf_t *R_PrepareLightSurf( const srfTriangles_t *tri, const viewEntity_t *space,
-		const idMaterial *material, const idScreenRect &scissor, bool viewInsideShadow ) {
+		const idMaterial *material, const idScreenRect &scissor, bool viewInsideShadow, bool blockSelfShadows ) {
 	if ( !space ) {
 		space = &tr.viewDef->worldSpace;
 	}
@@ -779,6 +779,9 @@ drawSurf_t *R_PrepareLightSurf( const srfTriangles_t *tri, const viewEntity_t *s
 
 	if ( viewInsideShadow ) {
 		drawSurf->dsFlags |= DSF_VIEW_INSIDE_SHADOW;
+	}
+	if ( blockSelfShadows ) {	// #6571
+		drawSurf->dsFlags |= DSF_BLOCK_SELF_SHADOWS;
 	}
 
 	if ( !material ) {
@@ -1096,7 +1099,7 @@ void R_AddLightSurfaces( void ) {
 			if ( !vertexCache.CacheIsCurrent( tri->indexCache ) ) {
 				tri->indexCache = vertexCache.AllocIndex( tri->indexes, tri->numIndexes * sizeof( tri->indexes[0] ) );
 			}
-			drawSurf_t *surf = R_PrepareLightSurf( tri, NULL, NULL, vLight->scissorRect, true /* FIXME ? */ );
+			drawSurf_t *surf = R_PrepareLightSurf( tri, NULL, NULL, vLight->scissorRect, true /* FIXME ? */, false );
 			// actually link it in
 			surf->nextOnLight = vLight->globalShadows;
 			vLight->globalShadows = surf;
@@ -1269,6 +1272,7 @@ void R_AddDrawSurf( const srfTriangles_t *tri, const viewEntity_t *space, const 
 	drawSurf->CopyGeo( tri );
 	drawSurf->space = space;
 	drawSurf->material = material;
+	drawSurf->dynamicImageOverride = nullptr;
 	drawSurf->scissorRect = scissor;
 	drawSurf->sort = material->GetSort();
 	drawSurf->dsFlags = 0;
@@ -1484,10 +1488,13 @@ static void R_AddAmbientDrawsurfs( viewEntity_t *vEntity ) {
 
 		if ( !R_CullLocalBox( tri->bounds, vEntity->modelMatrix, 5, tr.viewDef->frustum ) ) {
 
-			if ( r_useClipPlaneCulling && tr.viewDef->clipPlane ) { // 4946 - try to cull transparent objects behind mirrors, that are ignored by clip plane during depth pass
-				idPlane inversePlane( -tr.viewDef->clipPlane->Normal(), -tr.viewDef->clipPlane->Dist() ); // for some reason, the clipPlane normal points to the wrong side
-				if ( R_CullLocalBox( tri->bounds, vEntity->modelMatrix, 1, &inversePlane ) ) { // can't just inverse R_CullLocalBox result, or else intersecting objects will disappear
-					continue; // maybe save a couple draw calls for solid objecets, too
+			// #4946: try to cull transparent objects behind mirrors, that are ignored by clip plane during depth pass
+			// maybe save a couple draw calls for solid objects too
+			if ( r_useClipPlaneCulling && tr.viewDef->numClipPlanes ) {
+				// function assumes positive orientation outside frustum
+				idPlane plane = -tr.viewDef->clipPlane[0];
+				if ( R_CullLocalBox( tri->bounds, vEntity->modelMatrix, 1, &plane ) ) {
+					continue;
 				}
 			}
 

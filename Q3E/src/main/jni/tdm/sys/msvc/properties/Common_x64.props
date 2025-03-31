@@ -3,18 +3,14 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <TdmExecutableName>TheDarkModx64</TdmExecutableName>
-    <ThirdPartyPlatform>\lib\win64_s_vc_rel_mt</ThirdPartyPlatform>
-    <ThirdPartyPlatformDbg>\lib\win64_s_vc_rel_mtd</ThirdPartyPlatformDbg>
+    <TdmBitness>64</TdmBitness>
   </PropertyGroup>
   <ItemGroup>
-    <BuildMacro Include="ThirdPartyPlatform">
-      <Value>$(ThirdPartyPlatform)</Value>
-    </BuildMacro>
-    <BuildMacro Include="ThirdPartyPlatformDbg">
-      <Value>$(ThirdPartyPlatformDbg)</Value>
-    </BuildMacro>
     <BuildMacro Include="TdmExecutableName">
       <Value>$(TdmExecutableName)</Value>
+    </BuildMacro>
+    <BuildMacro Include="TdmBitness">
+      <Value>$(TdmBitness)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

@@ -27,15 +27,20 @@ in vec3 attr_Bitangent;
 in vec3 attr_Normal;
 in vec4 attr_Color;
 
-out vec2 var_TexDiffuse;
+uniform int u_flags;
+
 out vec2 var_TexNormal;
+out vec2 var_TexParallax;
+out vec2 var_TexDiffuse;
 out vec2 var_TexSpecular;
+out vec2 var_TexCoord;
 out vec4 var_TexLight;
 out vec4 var_Color;
 out mat3 var_TangentBitangentNormalMatrix; 
 out vec3 var_LightDirLocal;  
 out vec3 var_ViewDirLocal;  
-out vec3 var_WorldLightDir;
+out vec3 var_LightDirWorld;
+out vec3 var_PositionModel;
 
 uniform vec3 u_globalViewOrigin;
 uniform vec3 u_globalLightOrigin;
@@ -44,6 +49,7 @@ uniform mat4 u_modelViewMatrix;
 uniform mat4 u_modelMatrix;
 uniform mat4 u_projectionMatrix;
 uniform vec4 u_bumpMatrix[2];
+uniform vec4 u_parallaxMatrix[2];
 uniform vec4 u_diffuseMatrix[2];
 uniform vec4 u_specularMatrix[2];
 uniform mat4 u_lightProjectionFalloff;
@@ -58,19 +64,20 @@ void interactionProcessVertex() {
 	generateSurfaceProperties(
 		attr_TexCoord, attr_Color, 
 		attr_Tangent, attr_Bitangent, attr_Normal,
-		u_bumpMatrix, u_diffuseMatrix, u_specularMatrix,
+		u_bumpMatrix, u_parallaxMatrix, u_diffuseMatrix, u_specularMatrix,
 		u_colorModulate, u_colorAdd,
-		var_TexNormal, var_TexDiffuse, var_TexSpecular,
+		u_flags,
+		var_TexNormal, var_TexParallax, var_TexDiffuse, var_TexSpecular,
 		var_Color, var_TangentBitangentNormalMatrix
 	);
+	var_TexCoord = attr_TexCoord.xy;
 
 	// light projection texgen
 	var_TexLight = computeLightTex(u_lightProjectionFalloff, attr_Position);
 
-
 	var_LightDirLocal = (worldPosToObject(u_globalLightOrigin, u_modelMatrix) - attr_Position.xyz) * var_TangentBitangentNormalMatrix;
 	var_ViewDirLocal = (worldPosToObject(u_globalViewOrigin, u_modelMatrix) - attr_Position.xyz) * var_TangentBitangentNormalMatrix;	
 
-	// light->fragment vector in world coordinates
-	var_WorldLightDir = (u_modelMatrix * attr_Position).xyz - u_globalLightOrigin;
+	var_LightDirWorld = u_globalLightOrigin - (u_modelMatrix * attr_Position).xyz;
+	var_PositionModel = attr_Position.xyz;
 }

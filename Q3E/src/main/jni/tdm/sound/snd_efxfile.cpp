@@ -29,7 +29,7 @@ static inline ALfloat _mB_to_gain(ALfloat millibels, ALfloat min, ALfloat max) {
 }
 
 idSoundEffect::idSoundEffect() :
-effect(0) {
+	effect(0) {
 }
 
 idSoundEffect::~idSoundEffect() {
@@ -97,6 +97,24 @@ bool idEFXFile::FindEffect(idStr &name, ALuint *effect) {
 	for (i = 0; i < effects.Num(); i++) {
 		if (effects[i]->name.Icmp(name) == 0) {
 			*effect = effects[i]->effect;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/*
+===============
+idEFXFile::GetEffect
+===============
+*/
+bool idEFXFile::GetEffect(idStr& name, idSoundEffect *soundEffect) {
+	int i;
+
+	for (i = 0; i < effects.Num(); i++) {
+		if (effects[i]->name.Icmp(name) == 0) {
+			*soundEffect = *effects[i];
 			return true;
 		}
 	}
@@ -252,6 +270,103 @@ bool idEFXFile::ReadEffectLegacy(idLexer &src, idSoundEffect *effect) {
 	return true;
 }
 
+/*
+===============
+idEFXFile::AddOrUpdatePreset
+
+Checks the internal list of location:sound effect mappings to see if a mapping exists for this location.
+If it doesn't exist, create a new object and add to the list.
+If it does exist, use the existing sound effect mapping.
+In both cases, the EFX database gets updated with the current preset for the location
+===============
+*/
+bool idEFXFile::AddOrUpdatePreset(idStr areaName, idStr efxPreset, ALuint* effect) {
+
+	idSoundEffect* soundEffect = new idSoundEffect;
+
+	const bool found = GetEffect(areaName, soundEffect);
+	ALenum err{};
+	bool ok;
+
+	if (!found) {
+
+		if (!soundEffect->alloc()) {
+			delete soundEffect;
+			Clear();
+			return false;
+		}
+
+		soundEffect->name = areaName;
+		effects.Append(soundEffect);
+	}
+
+	// update EFX database
+	ok = AddPreset(efxPreset, soundEffect, err);
+
+	if (!ok) {
+		return false;
+	}
+
+	// update effect - this is what's checked for change later
+	*effect = soundEffect->effect;
+
+	return true;
+}
+
+bool idEFXFile::AddPreset(idStr preset, idSoundEffect* effect, ALenum err) {
+
+	const EFXEAXREVERBPROPERTIES* props = NULL;
+	int k = 0;
+	for (k = 0; efxPresets[k].name[0]; k++)
+		if (efxPresets[k].name == preset) {
+			props = &efxPresets[k].props;
+			break;
+		}
+
+	// Reference the preset by index instead of name.
+	if (!props && idStr::IsNumeric(preset)) {
+		int idx = atoi(preset);
+		if (idx >= 0 && idx < k)
+			props = &efxPresets[idx].props;
+	}
+	if (!props) {
+		//src.Error("idEFXFile::ReadEffect: Unknown preset name %s", token.c_str());
+		return false;
+	}
+
+	efxf(AL_EAXREVERB_DENSITY, props->flDensity);
+	efxf(AL_EAXREVERB_DIFFUSION, props->flDiffusion);
+	efxf(AL_EAXREVERB_GAIN, props->flGain);
+	efxf(AL_EAXREVERB_GAINHF, props->flGainHF);
+	efxf(AL_EAXREVERB_GAINLF, props->flGainLF);
+	efxf(AL_EAXREVERB_DECAY_TIME, props->flDecayTime);
+	efxf(AL_EAXREVERB_DECAY_HFRATIO, props->flDecayHFRatio);
+	efxf(AL_EAXREVERB_DECAY_LFRATIO, props->flDecayLFRatio);
+	efxf(AL_EAXREVERB_REFLECTIONS_GAIN, props->flReflectionsGain);
+	efxf(AL_EAXREVERB_REFLECTIONS_DELAY, props->flReflectionsDelay);
+	efxfv(AL_EAXREVERB_REFLECTIONS_PAN, props->flReflectionsPan[0], props->flReflectionsPan[1], props->flReflectionsPan[2]);
+	efxf(AL_EAXREVERB_LATE_REVERB_GAIN, props->flLateReverbGain);
+	efxf(AL_EAXREVERB_LATE_REVERB_DELAY, props->flLateReverbDelay);
+	efxfv(AL_EAXREVERB_LATE_REVERB_PAN, props->flLateReverbPan[0], props->flLateReverbPan[1], props->flLateReverbPan[2]);
+	efxf(AL_EAXREVERB_ECHO_TIME, props->flEchoTime);
+	efxf(AL_EAXREVERB_ECHO_DEPTH, props->flEchoDepth);
+	efxf(AL_EAXREVERB_MODULATION_TIME, props->flModulationTime);
+	efxf(AL_EAXREVERB_MODULATION_DEPTH, props->flModulationDepth);
+	efxf(AL_EAXREVERB_AIR_ABSORPTION_GAINHF, props->flAirAbsorptionGainHF);
+	efxf(AL_EAXREVERB_HFREFERENCE, props->flHFReference);
+	efxf(AL_EAXREVERB_LFREFERENCE, props->flLFReference);
+	efxf(AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, props->flRoomRolloffFactor);
+	efxi(AL_EAXREVERB_DECAY_HFLIMIT, props->iDecayHFLimit);
+
+	return true;
+
+}
+
+/*
+===============
+idEFXFile::ReadEffectOpenAL
+===============
+*/
 bool idEFXFile::ReadEffectOpenAL(idLexer &src, idSoundEffect *effect) {
 	idToken token;
 
@@ -267,7 +382,7 @@ bool idEFXFile::ReadEffectOpenAL(idLexer &src, idSoundEffect *effect) {
 	if (!src.ExpectTokenString("{"))
 		return false;
 
-	ALenum err;
+	ALenum err{};
 	alGetError();
 	common->Printf("Loading EFX effect for location '%s' (#%u)\n", name.c_str(), effect->effect);
 
@@ -288,47 +403,9 @@ bool idEFXFile::ReadEffectOpenAL(idLexer &src, idSoundEffect *effect) {
 				return false;
 			token.ToUpper();
 
-			const EFXEAXREVERBPROPERTIES *props = NULL;
-			int k = 0;
-			for (k = 0; efxPresets[k].name[0]; k++)
-				if (efxPresets[k].name == token) {
-					props = &efxPresets[k].props;
-					break;
-				}
-			if (!props && (token.type == TT_NUMBER)) {
-				int idx = token.GetIntValue();
-				if (idx >= 0 && idx < k)
-					props = &efxPresets[idx].props;
-			}
-			if (!props) {
-				src.Error("idEFXFile::ReadEffect: Unknown preset name %s", token.c_str());
+			if (!AddPreset(token, effect, err)) {
 				return false;
 			}
-
-			efxf(AL_EAXREVERB_DENSITY, props->flDensity);
-			efxf(AL_EAXREVERB_DIFFUSION, props->flDiffusion);
-			efxf(AL_EAXREVERB_GAIN, props->flGain);
-			efxf(AL_EAXREVERB_GAINHF, props->flGainHF);
-			efxf(AL_EAXREVERB_GAINLF, props->flGainLF);
-			efxf(AL_EAXREVERB_DECAY_TIME, props->flDecayTime);
-			efxf(AL_EAXREVERB_DECAY_HFRATIO, props->flDecayHFRatio);
-			efxf(AL_EAXREVERB_DECAY_LFRATIO, props->flDecayLFRatio);
-			efxf(AL_EAXREVERB_REFLECTIONS_GAIN, props->flReflectionsGain);
-			efxf(AL_EAXREVERB_REFLECTIONS_DELAY, props->flReflectionsDelay);
-			efxfv(AL_EAXREVERB_REFLECTIONS_PAN, props->flReflectionsPan[0], props->flReflectionsPan[1], props->flReflectionsPan[2]);
-			efxf(AL_EAXREVERB_LATE_REVERB_GAIN, props->flLateReverbGain);
-			efxf(AL_EAXREVERB_LATE_REVERB_DELAY, props->flLateReverbDelay);
-			efxfv(AL_EAXREVERB_LATE_REVERB_PAN, props->flLateReverbPan[0], props->flLateReverbPan[1], props->flLateReverbPan[2]);
-			efxf(AL_EAXREVERB_ECHO_TIME, props->flEchoTime);
-			efxf(AL_EAXREVERB_ECHO_DEPTH, props->flEchoDepth);
-			efxf(AL_EAXREVERB_MODULATION_TIME, props->flModulationTime);
-			efxf(AL_EAXREVERB_MODULATION_DEPTH, props->flModulationDepth);
-			efxf(AL_EAXREVERB_AIR_ABSORPTION_GAINHF, props->flAirAbsorptionGainHF);
-			efxf(AL_EAXREVERB_HFREFERENCE, props->flHFReference);
-			efxf(AL_EAXREVERB_LFREFERENCE, props->flLFReference);
-			efxf(AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, props->flRoomRolloffFactor);
-			efxi(AL_EAXREVERB_DECAY_HFLIMIT, props->iDecayHFLimit);
-
 		} else if ( token == "DENSITY" ) {
 			efxf(AL_EAXREVERB_DENSITY, src.ParseFloat());
 		} else if ( token == "DIFFUSION" ) {
@@ -398,7 +475,9 @@ bool idEFXFile::LoadFile( const char *filename/*, bool OSPath*/ ) {
 	efxFilename = filename;
 	src.LoadFile( filename/*, OSPath*/ );
 	if ( !src.IsLoaded() ) {
-		return false;
+
+		// #6273: Just return true if file doesn't exist, as EFX can now be specified on location entities
+		return true;
 	}
 
 	if ( !src.ExpectTokenString( "Version" ) ) {

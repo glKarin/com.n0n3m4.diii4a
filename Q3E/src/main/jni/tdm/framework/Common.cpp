@@ -103,7 +103,7 @@ idCVar com_forceGenericSIMD( "com_forceGenericSIMD", "0", CVAR_SYSTEM | CVAR_NOC
 	"Other options include: SSE, SSE2, SSSE3, AVX, AVX2, [Win32]:IdAsm)"
 );
 idCVar com_fpexceptions( "com_fpexceptions", "0", CVAR_BOOL | CVAR_SYSTEM, "enable FP exceptions: throw exception when NaN or Inf value is produced" );
-idCVar com_developer( "developer", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_NOCHEAT, "developer mode" );
+idCVar com_developer( "developer", "0", CVAR_BOOL|CVAR_SYSTEM, "developer mode" );
 #ifdef __ANDROID__ //karin: allow console default
 idCVar com_allowConsole( "com_allowConsole", "1", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "allow toggling console with the tilde key" );
 #else
@@ -155,9 +155,6 @@ idGameEdit *	gameEdit = NULL;
 
 void Com_Crash_f( const idCmdArgs &args );
 
-// writes si_version to the config file - in a kinda obfuscated way
-//#define ID_WRITE_VERSION
-
 class idCommonLocal : public idCommon {
 public:
 								idCommonLocal( void );
@@ -172,8 +169,7 @@ public:
 	virtual void				StartupVariable( const char *match, bool once ) override;
 	virtual void				InitTool( const toolFlag_t tool, const idDict *dict ) override;
 	virtual void				ActivateTool( bool active ) override;
-    virtual void				WriteConfigToFile( const char *filename, const char* basePath = "fs_savepath", const eConfigExport configexport = eConfigExport_all) override;
-	virtual void				WriteFlaggedCVarsToFile( const char *filename, int flags, const char *setCmd ) override;
+    virtual void				WriteConfigToFile( const char *filename, eConfigExport configexport, const char* basePath = "fs_savepath") override;
 	virtual void				BeginRedirect( char *buffer, int buffersize, void (*flush)( const char * ) ) override;
 	virtual void				EndRedirect( void ) override;
 	virtual void				SetRefreshOnPrint( bool set ) override;
@@ -185,7 +181,6 @@ public:
 	virtual void				DWarning( const char *fmt, ...) override id_attribute((format(printf,2,3)));
 	virtual void				PrintWarnings( void ) override;
 	virtual void				ClearWarnings( const char *reason ) override;
-	virtual void				PacifierUpdate( loadkey_t key, int count ) override; // grayman #3763
 	virtual void				Error( const char *fmt, ... ) override id_attribute((format(printf,2,3)));
 	virtual void				DoError( const char *msg, int code ) override;
 	virtual void				FatalError( const char *fmt, ... ) override id_attribute( ( format( printf, 2, 3 ) ) );
@@ -258,10 +253,6 @@ private:
 	idStrList					errorList;
 
     uintptr_t					gameDLL;
-
-#ifdef ID_WRITE_VERSION
-	idCompressor *				config_compressor;
-#endif
 };
 
 idCommonLocal	commonLocal;
@@ -291,10 +282,6 @@ idCommonLocal::idCommonLocal( void ) {
 	rd_flush = NULL;
 
 	gameDLL = 0;
-
-#ifdef ID_WRITE_VERSION
-	config_compressor = NULL;
-#endif
 }
 
 /*
@@ -688,17 +675,6 @@ void idCommonLocal::ClearWarnings( const char *reason ) {
 	warningCaption = reason;
 	warningList.ClearFree();
 }
-
-/*
-==================
-idCommonLocal::PacifierUpdate
-==================
-*/
-void idCommonLocal::PacifierUpdate(loadkey_t key, int count) // grayman #3763
-{
-	session->PacifierUpdate(key, count);
-}
-
 
 /*
 ==================
@@ -1308,65 +1284,34 @@ void idCommonLocal::ActivateTool( bool active ) {
 
 /*
 ==================
-idCommonLocal::WriteFlaggedCVarsToFile
-==================
-*/
-void idCommonLocal::WriteFlaggedCVarsToFile( const char *filename, int flags, const char *setCmd ) {
-	idFile *f;
-
-	f = fileSystem->OpenFileWrite( filename, "fs_savepath", "" );
-	if ( !f ) {
-		Printf( "Couldn't write %s.\n", filename );
-		return;
-	} else {
-		cvarSystem->WriteFlaggedVariables( flags, setCmd, f );
-		fileSystem->CloseFile( f );
-	}
-}
-
-/*
-==================
 idCommonLocal::WriteConfigToFile
 ==================
 */
 void idCommonLocal::WriteConfigToFile( 
 	const char*						filename, 
-	const char*						basePath, 
-	const eConfigExport	configexport)
-{
-	idFile *f;
-#ifdef ID_WRITE_VERSION
-	ID_TIME_T t;
-	char *curtime;
-	idStr runtag;
-	idFile_Memory compressed( "compressed" );
-	idBase64 out;
-#endif
+	eConfigExport	configexport,
+	const char*		basePath
+) {
 
-	f = fileSystem->OpenFileWrite( filename, basePath, "" );
+	if ( configexport == eConfigExport_keybinds && !idKeyInput::wasModifiedAfterLastWrite )
+		return;
+	if ( configexport == eConfigExport_padbinds && !idGamepadInput::wasModifiedAfterLastWrite )
+		return;
+	if ( configexport == eConfigExport_cvars && !cvarSystem->WasArchivedCVarModifiedAfterLastWrite() )
+		return;
+
+	idFile *f = fileSystem->OpenFileWrite( filename, basePath, "" );
 	if ( !f ) {
 		Printf ("Couldn't write %s.\n", filename );
 		return;
 	}
 
-#ifdef ID_WRITE_VERSION
-	assert( config_compressor );
-	t = time( NULL );
-	curtime = ctime( &t );
-	sprintf( runtag, "%s - %s", cvarSystem->GetCVarString( "si_version" ), curtime );
-	config_compressor->Init( &compressed, true, 8 );
-	config_compressor->Write( runtag.c_str(), runtag.Length() );
-	config_compressor->FinishCompress( );
-	out.Encode( (const byte *)compressed.GetDataPtr(), compressed.Length() );
-	f->Printf( "// %s\n", out.c_str() );
-#endif
-
-	if (configexport == eConfigExport_all || configexport == eConfigExport_keybinds)
+	if ( configexport == eConfigExport_keybinds || configexport == eConfigExport_all )
 		idKeyInput::WriteBindings( f );
-	if (configexport == eConfigExport_all || configexport == eConfigExport_padbinds)
+	if ( configexport == eConfigExport_padbinds || configexport == eConfigExport_all )
 		idGamepadInput::WriteBindings( f );
-	if (configexport == eConfigExport_all || configexport == eConfigExport_cvars)
-		cvarSystem->WriteFlaggedVariables( CVAR_ARCHIVE, "seta", f );
+	if ( configexport == eConfigExport_cvars || configexport == eConfigExport_all )
+		cvarSystem->WriteArchivedCVars( f );
 
 	fileSystem->CloseFile( f );
 }
@@ -1385,20 +1330,14 @@ void idCommonLocal::WriteConfiguration( void ) {
 		return;
 	}
 
-	if ( !( cvarSystem->GetModifiedFlags() & CVAR_ARCHIVE ) ) {
-		return;
-	}
-
-	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
-
 	// disable printing out the "Writing to:" message
 	bool developer = com_developer.GetBool();
 	com_developer.SetBool( false );
 
 	// STiFU #4797: Separate config files for cvars and keybinds
-	WriteConfigToFile( CONFIG_FILE,	  "fs_savepath", idCommon::eConfigExport_cvars    );
-	WriteConfigToFile( KEYBINDS_FILE, "fs_savepath", idCommon::eConfigExport_keybinds );
-	WriteConfigToFile( PADBINDS_FILE, "fs_savepath", idCommon::eConfigExport_padbinds );
+	WriteConfigToFile( CONFIG_FILE,	  idCommon::eConfigExport_cvars    );
+	WriteConfigToFile( KEYBINDS_FILE, idCommon::eConfigExport_keybinds );
+	WriteConfigToFile( PADBINDS_FILE, idCommon::eConfigExport_padbinds );
 
 	// restore the developer cvar
 	com_developer.SetBool( developer );
@@ -1675,7 +1614,7 @@ void Com_WriteConfig_f( const idCmdArgs &args ) {
 	filename = args.Argv(1);
 	filename.DefaultFileExtension( ".cfg" );
 	commonLocal.Printf( "Writing %s.\n", filename.c_str() );
-	commonLocal.WriteConfigToFile( filename );
+	commonLocal.WriteConfigToFile( filename, idCommon::eConfigExport_all );
 }
 
 /*
@@ -2507,7 +2446,7 @@ void idCommonLocal::Frame( void ) {
 		static int64_t lastFrameAstroTime = Sys_Microseconds();
 		if (sessLocal.com_fixedTic.GetBool()) {
 			//stgatilov #4865: impose artificial FPS limit
-			int64_t minDeltaTime = 1000000 / sessLocal.com_maxFPS.GetInteger();
+			int64_t minDeltaTime = int64_t(1000000 / sessLocal.com_maxFPS.GetFloat());
 			int64_t currFrameAstroTime;
 			while (1) {
 				currFrameAstroTime = Sys_Microseconds();
@@ -2665,7 +2604,11 @@ void idCommonLocal::Async( void ) {
 
 	//stgatilov #4514: game tics happen even X microseconds (in cumulative sense)
 	//to see how often this function is called, see Sys_StartAsyncThread
-	static const int USERCMD_USEC = 16650;		// ~60.06 Hz --- a bit higher than vsync
+	//static const int USERCMD_USEC = 16650;		// ~60.06 Hz --- a bit higher than vsync
+	
+	// stgatilov #5575: reverted back to Doom 3 time to ensure game & gui time is synchronized with sound time
+	// this produces a visible double-frame every 0.4 second =(
+	static const int USERCMD_USEC = 16000;			// 62.5 Hz --- a bit higher than vsync
 
 	const int64_t usec = Sys_GetTimeMicroseconds();
 	if ( !lastTicUsec ) {
@@ -2878,10 +2821,6 @@ void idCommonLocal::Init( int argc, const char **argv, const char *cmdline )
 		// init commands
 		InitCommands();
 
-#ifdef ID_WRITE_VERSION
-		config_compressor = idCompressor::AllocArithmetic();
-#endif
-
 		// game specific initialization
 		InitGame();
 
@@ -2945,11 +2884,6 @@ void idCommonLocal::Shutdown( void ) {
 	// shut down the console command system
 	cmdSystem->Shutdown();
 
-#ifdef ID_WRITE_VERSION
-	delete config_compressor;
-	config_compressor = NULL;
-#endif
-
 	// free any buffered warning messages
 	ClearWarnings( GAME_NAME " shutdown" );
 	warningCaption.ClearFree();
@@ -2980,9 +2914,6 @@ void idCommonLocal::InitGame( void )
 
 	// init journalling, etc
 	eventLoop->Init();
-
-	// init the parallel job manager
-	parallelJobManager->Init();
 
 	// initialize the declaration manager
 	declManager->Init();
@@ -3042,11 +2973,11 @@ void idCommonLocal::InitGame( void )
 	// re-override anything from the config files with command line args
 	StartupVariable( NULL, false );
 
-	// if any archived cvars are modified after this, we will trigger a writing of the config file
-	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
-
 	// cvars are initialized, but not the rendering system. Allow preference startup dialog
 	Sys_DoPreferences();
+
+	// init the parallel job manager
+	parallelJobManager->Init();
 
 	// init the user command input code
 	usercmdGen->Init();

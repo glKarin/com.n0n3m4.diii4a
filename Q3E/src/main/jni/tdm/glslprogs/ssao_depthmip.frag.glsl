@@ -1,6 +1,7 @@
 #version 320 es
 
 precision highp float;
+precision highp int;
 
 /**
  Based on the SAO algorithm by Morgan McGuire and Michael Mara, NVIDIA Research

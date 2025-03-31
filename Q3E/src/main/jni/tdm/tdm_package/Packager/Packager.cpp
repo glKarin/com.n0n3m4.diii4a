@@ -228,7 +228,7 @@ void Packager::SortFilesIntoPk4s()
 	// Go through each file in the manifest and check which pattern applies
 	for (ReleaseManifest::iterator i = _manifest.begin(); i != _manifest.end(); /* in-loop increment */)
 	{
-		const std::string& destFilename = i->destFile.string();
+		const std::string& srcFilename = i->sourceFile.string();
 
 		bool matched = false;
 
@@ -239,7 +239,7 @@ void Packager::SortFilesIntoPk4s()
 			const Patterns& patterns = m->second;
 
 			// Does this filename match any of the patterns of this PK4 file?
-			if (Pk4Mappings::SearchString(patterns, destFilename))
+			if (Pk4Mappings::SearchString(patterns, srcFilename))
 			{
 				// Match
 				ManifestPak& pak = _package[pk4name];
@@ -264,7 +264,7 @@ void Packager::SortFilesIntoPk4s()
 		if (!matched) 
 		{
 			// If the file is a PK4 file itself, just add it to the list
-			if (File::IsArchive(i->destFile))
+			if (File::IsArchive(srcFilename))
 			{
 				const std::string& pk4name = i->sourceFile.string();
 
@@ -273,14 +273,14 @@ void Packager::SortFilesIntoPk4s()
 
 				_manifest.erase(i++);
 			}
-			else if (fs::is_directory(darkmodPath / i->destFile)) // Check if this is a folder
+			else if (fs::is_directory(darkmodPath / i->sourceFile)) // Check if this is a folder
 			{
 				// Unmatched folders can be removed
 				_manifest.erase(i++);
 			}
 			else
 			{
-				TraceLog::WriteLine(LOG_STANDARD, "Could not match file: " + i->destFile.string());
+				TraceLog::WriteLine(LOG_STANDARD, "Could not match file: " + srcFilename);
 				++i;
 			}
 		}

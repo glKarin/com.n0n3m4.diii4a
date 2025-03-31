@@ -1006,7 +1006,7 @@ void idPhysics_Player::AirMove( void ) {
 	wishspeed *= scale;
 
 	// not on ground, so little effect on velocity
-	idPhysics_Player::Accelerate( wishdir, wishspeed, PM_AIRACCELERATE );
+	idPhysics_Player::Accelerate( wishdir, wishspeed, PM_AIRACCELERATE * m_AirAccelerate );
 	
 	// don't apply friction on the wishdir direction
 	idPhysics_Player::Friction( wishdir );
@@ -3079,6 +3079,7 @@ idPhysics_Player::idPhysics_Player( void )
 	crouchSpeed = 0;
 	maxStepHeight = 0;
 	maxJumpHeight = 0;
+	m_AirAccelerate = 1.0f;
 	memset( &command, 0, sizeof( command ) );
 
 	lastJumpTime = -1;
@@ -3212,6 +3213,7 @@ void idPhysics_Player::Save( idSaveGame *savefile ) const {
 	savefile->WriteFloat( crouchSpeed );
 	savefile->WriteFloat( maxStepHeight );
 	savefile->WriteFloat( maxJumpHeight );
+	savefile->WriteFloat( m_AirAccelerate );
 	savefile->WriteInt( debugLevel );
 	savefile->WriteInt(lastJumpTime);
 
@@ -3323,6 +3325,7 @@ void idPhysics_Player::Restore( idRestoreGame *savefile ) {
 	savefile->ReadFloat( crouchSpeed );
 	savefile->ReadFloat( maxStepHeight );
 	savefile->ReadFloat( maxJumpHeight );
+	savefile->ReadFloat( m_AirAccelerate );
 	savefile->ReadInt( debugLevel );
 	savefile->ReadInt(lastJumpTime);
 
@@ -3547,6 +3550,16 @@ idPhysics_Player::GetMovementType - grayman #2345
 */
 int idPhysics_Player::GetMovementType( void ) {
 	return current.movementType;
+}
+
+/*
+================
+idPhysics_Player::SetAirAccelerate
+================
+*/
+void idPhysics_Player::SetAirAccelerate( const float newAirAccelerate ) 
+{
+	m_AirAccelerate = newAirAccelerate;
 }
 
 /*

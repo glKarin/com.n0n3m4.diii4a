@@ -162,6 +162,8 @@ typedef std::shared_ptr<CShop> CShopPtr;
 
 class CSearchManager; // grayman #3857
 
+class LightEstimateSystem;
+
 const int MAX_GAME_MESSAGE_SIZE		= 8192;
 const int MAX_ENTITY_STATE_SIZE		= 512;
 //const int ENTITY_PVS_SIZE			= ((MAX_GENTITIES+31)>>5);
@@ -231,6 +233,12 @@ typedef enum {
 	GAMESTATE_COMPLETED,			// greebo: Active during "Mission Complete" (TDM)
 	GAMESTATE_SHUTDOWN				// inside MapShutdown().  clearing memory.
 } gameState_t;
+
+typedef enum {
+	PERSISTENT_LOCATION_NOWHERE,	// persistent info does not exist yet
+	PERSISTENT_LOCATION_GAME,		// gameLocal.persistentLevelInfo is the most actual info
+	PERSISTENT_LOCATION_MAINMENU,	// sessionLocal.guiMainMenu contains the most actual info
+} persistentLevelInfoLocation_t;
 
 // Message type for user interaction in the main menu
 struct GuiMessage
@@ -446,6 +454,7 @@ public:
 	LodSystem				lodSystem;				// container for all entities with LOD
 	int						numEntitiesToDeactivate;// number of entities that became inactive in current frame
 	idDict					persistentLevelInfo;	// contains args that are kept around between levels
+	persistentLevelInfoLocation_t persistentLevelInfoLocation;
 
 	// The inventory class which keeps items safe between maps
 	CInventoryPtr			persistentPlayerInventory;
@@ -597,6 +606,9 @@ public:
 	// The singleton connection object
 	CHttpConnectionPtr		m_HttpConnection;
 	
+	// stgatilov #6546: aka "lightgem for bodies"
+	LightEstimateSystem *m_LightEstimateSystem;
+
 	/**
 	* Temporary storage of the walkspeed.  This is a workaround
 	*	because the walkspeed keeps getting reset.
@@ -669,9 +681,6 @@ public:
 
 	// A flag set by the player to fire a "final save" which must occur at the end of this frame
 	bool					m_TriggerFinalSave;
-
-	// grayman #2933 - store the start position selected during the mission briefing, if any
-	idStr					m_StartPosition;
 
 	int						m_spyglassOverlay; // grayman #3807 - no need to save/restore
 
@@ -963,6 +972,11 @@ public:
 
 	// Remove any persistent inventory items, clear inter-mission triggers, etc.
 	void					ClearPersistentInfo();
+
+	// stgatilov #6509: passing information between game and briefings/debriefings
+	void					ClearPersistentInfoInGui(idUserInterface *gui);
+	void					SyncPersistentInfoToGui(idUserInterface *gui, bool moveOwnership);
+	void					SyncPersistentInfoFromGui(const idUserInterface *gui, bool moveOwnership);
 
 	// Events invoked by the engine on reloadImages or vid_restart
 	virtual void			OnReloadImages() override;

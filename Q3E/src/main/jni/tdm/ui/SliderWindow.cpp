@@ -192,7 +192,12 @@ void idSliderWindow::SetRange(float _low, float _high, float _step) {
 }
 
 void idSliderWindow::SetValue(float _value) {
-	value = _value;
+	value = idMath::ClampFloat(low, high, _value);
+}
+
+void idSliderWindow::SetThumbSize(float _thumbWidth, float _thumbHeight) {
+	thumbWidth = _thumbWidth;
+	thumbHeight = _thumbHeight;
 }
 
 void idSliderWindow::Draw(int time, float x, float y) {

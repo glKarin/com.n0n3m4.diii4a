@@ -286,6 +286,10 @@ const idEventDef EV_ReadLightgemModifierFromWorldspawn("readLightgemModifierFrom
 
 const idEventDef EV_Player_GetCalibratedLightgemValue( "getCalibratedLightgemValue", EventArgs(), 'f', "Returns the calibrated light gem value.");
 
+const idEventDef EV_SetAirAccelerate( "setAirAccelerate", EventArgs('f', "newAccelerate", "" ), EV_RETURNS_VOID,
+	"Sets a multiplier for the player's horizontal acceleration while airborne. Default is 1.0.");
+const idEventDef EV_IsAirborne( "isAirborne", EventArgs(), 'd', "Checks whether the player is in the air." );
+
 // greebo: Changes the projectile entityDef name of the given weapon (e.g. "broadhead").
 const idEventDef EV_ChangeWeaponProjectile("changeWeaponProjectile", EventArgs('s', "weaponName", "", 's', "projectileDefName", ""), EV_RETURNS_VOID, 
 		"Changes the projectile entityDef name of the given weapon (e.g. \"broadhead\")\n" \
@@ -391,6 +395,8 @@ CLASS_DECLARATION( idActor, idPlayer )
 	EVENT( EV_Player_SelectWeapon,			idPlayer::Event_SelectWeapon )
 	EVENT( EV_Player_GetWeaponEntity,		idPlayer::Event_GetWeaponEntity )
 	EVENT( EV_Player_ExitTeleporter,		idPlayer::Event_ExitTeleporter )
+	EVENT( EV_SetAirAccelerate,				idPlayer::Event_SetAirAccelerate )
+	EVENT( EV_IsAirborne,					idPlayer::Event_IsAirborne )
 	EVENT( EV_Gibbed,						idPlayer::Event_Gibbed )
 
 	EVENT( EV_Player_GetEyePos,				idPlayer::Event_GetEyePos )
@@ -883,7 +889,7 @@ void idPlayer::Init( void ) {
 	ClearPain();
 
 	// restore persistent data
-	RestorePersistantInfo();
+	RestorePersistentInfo();
 
 	bobCycle		= 0;
 	stamina			= 0.0f;
@@ -1612,7 +1618,8 @@ void idPlayer::CollectItemsAndCategoriesForInventoryGrid( idList< CInventoryItem
 			// Reverse order. New items at the end.
 			CInventoryItemPtr item = category->GetItem((category->GetNumItems() - 1) - j);
 			// Except for the weapons, where reverse order is unintuitive...
-			if ( item->GetType() == CInventoryItem::IT_WEAPON )
+			// #6592
+			if ( item->GetType() == CInventoryItem::IT_WEAPON || cv_tdm_invgrid_sortstyle.GetInteger() > 0 )
 				item = category->GetItem( j );
 
 			// check if we should add this item to the grid
@@ -1780,7 +1787,7 @@ void idPlayer::UpdateInventoryGridGUI()
 	// Obsttorte
 	const int userChoice = GetGuiInt(inventoryGridOverlay, "UserChoice");
 	const int selectedItem = (pageSize * currentPage) + userChoice;
-	common->Printf("%d", selectedItem);
+	//common->Printf("%d", selectedItem);
 	// Handle request for prev/next pages.
 	if (pageRequest == 1 && (items.Num() - 1 >= pageSize * (currentPage + 1)))
 	{
@@ -2889,7 +2896,7 @@ idPlayer::SpawnToPoint
 
 Called every time a client is placed fresh in the world:
 after the first ClientBegin, and after each respawn
-Initializes all non-persistant parts of playerState
+Initializes all non-persistent parts of playerState
 
 when called here with spectating set to true, just place yourself and init
 ============
@@ -2982,12 +2989,12 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 
 /*
 ===============
-idPlayer::SavePersistantInfo
+idPlayer::SavePersistentInfo
 
 Saves any inventory and player stats when changing levels.
 ===============
 */
-void idPlayer::SavePersistantInfo( void ) {
+void idPlayer::SavePersistentInfo( void ) {
 	idDict &playerInfo = gameLocal.persistentPlayerInfo;
 
 	playerInfo.Clear();
@@ -3002,12 +3009,12 @@ void idPlayer::SavePersistantInfo( void ) {
 
 /*
 ===============
-idPlayer::RestorePersistantInfo
+idPlayer::RestorePersistentInfo
 
 Restores any inventory and player stats when changing levels.
 ===============
 */
-void idPlayer::RestorePersistantInfo( void ) {
+void idPlayer::RestorePersistentInfo( void ) {
 	// greebo: TDM doesn't need to load health or weapon from the dict, that is not (yet) intended since
 	// map switching within missions is not yet planned or fleshed out
 #if 0
@@ -3156,6 +3163,7 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud )
 	}*/
 
 	_hud->SetStateInt( "player_health", health );
+	_hud->SetStateInt( "player_max_health", maxHealth );
 	// Commented out by Dram. TDM does not use stamina
 	//_hud->SetStateInt( "player_stamina", staminapercentage );
 	_hud->SetStateInt( "player_shadow", 1 );
@@ -5400,7 +5408,7 @@ void idPlayer::PlaySwimmingSplashSound( const char *soundName )
 	const idSoundShader	*sndShader = declManager->FindSound( sound );
 	SetSoundVolume( sndShader->GetParms()->volume + volAdjust);
 	StartSoundShader( sndShader, SND_CHANNEL_ANY, SSF_GLOBAL, false, NULL );
-	SetSoundVolume( 0.0f );
+	SetSoundVolume();
 
 	// propagate the suspicious sound to AI
 	PropSoundDirect( soundName, true, false, volAdjust, 0 );
@@ -7217,10 +7225,11 @@ void idPlayer::UpdateInventoryHUD()
 		}
 	}
 
+	SetGuiString(m_InventoryOverlay, "Inventory_ItemId", curItem->GetItemId()); // Obsttorte #6096
+
 	// Now take the correct action based on the selected type
 	switch (curItem->GetType())
 	{
-		SetGuiString(m_InventoryOverlay, "Inventory_ItemId", curItem->GetItemId()); // Obsttorte #6096
 		case CInventoryItem::IT_ITEM:
 		{
 			// We display the default hud if the item doesn't have its own. Each item
@@ -9037,16 +9046,18 @@ bool idPlayer::IsUsedItemOrJunk(idEntity* target)
 			return true;
 
 		{
-			const bool notCandle = target->spawnArgs.GetString("skin_unlit", nullptr) == nullptr;    // Make sure it is not a candle
-			const bool isCandleHolderWithoutCandle = target->spawnArgs.GetBool("extinguished", "0"); // Works only if target is not lantern
-			if (notCandle && isCandleHolderWithoutCandle)
-				return true;
-		}
-
-		{
 			static const idStr sCandle("candle");
 			idEntity* candle = target->GetAttachmentByPosition(sCandle);
-			if (candle != nullptr && IsExtinguishedCandle(candle))
+			const bool hasCandle = candle != nullptr;
+			const bool notCandle = target->spawnArgs.GetString("skin_unlit", nullptr) == nullptr;    // Make sure it is not a candle
+			const bool isCandleHolderWithoutCandle =
+				target->spawnArgs.GetBool("extinguished", "0") // Works only if target is not lantern
+				&& !hasCandle;
+
+			if (notCandle && isCandleHolderWithoutCandle)
+				return true;
+
+			if (hasCandle && IsExtinguishedCandle(candle))
 				return true;
 		}
 	}
@@ -9136,6 +9147,24 @@ idPlayer::Event_GetCalibratedLightgemValue
 void idPlayer::Event_GetCalibratedLightgemValue( void ) {
 	float clampVal = GetCalibratedLightgemValue();
 	idThread::ReturnFloat(clampVal);
+}
+
+/*
+==================
+idPlayer::Event_SetAirAccelerate
+==================
+*/
+void idPlayer::Event_SetAirAccelerate( float newAccel ) {
+	physicsObj.SetAirAccelerate( newAccel );
+}
+
+/*
+==================
+idPlayer::Event_IsAirborne
+==================
+*/
+void idPlayer::Event_IsAirborne( void ) {
+	idThread::ReturnFloat(physicsObj.m_bMidAir);
 }
 
 /*
@@ -11593,7 +11622,7 @@ void idPlayer::PlayPlayerFootStepSound(idVec3* pPointOfContact /*= NULL*/, const
 		const idSoundShader* sndShader = declManager->FindSound( sound );
 		SetSoundVolume( sndShader->GetParms()->volume + GetMovementVolMod() + crouchVolAdjust); // grayman #3485
 		StartSoundShader( sndShader, SND_CHANNEL_BODY, 0, false, NULL );
-		SetSoundVolume( 0.0f );
+		SetSoundVolume();
 
 		// propagate the suspicious sound to other AI
 		PropSoundDirect( localSound, true, false, crouchVolAdjust, 0 ); // grayman #3355, grayman #3485

@@ -141,6 +141,9 @@ idHashIndex::operator=
 ================
 */
 ID_INLINE idHashIndex &idHashIndex::operator=( const idHashIndex &other ) {
+	if ( this == &other )
+		return *this;
+
 	granularity = other.granularity;
 	hashMask = other.hashMask;
 	lookupMask = other.lookupMask;

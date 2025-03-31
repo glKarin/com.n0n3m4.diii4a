@@ -1,0 +1,35 @@
+# explanation of package types:
+#   * header
+#       these deps are header-only, hence they don't need per-configuration builds
+#   * release
+#       these deps can be built only once in release mode, and then used both in release and debug builds
+#       this is possible only for pure C libraries built with /MT, and needs /nodefaultlib:LIBCMT.lib flag in debug build
+#   * vcdebug
+#       these deps must be built separately for each configuration on MSVC (both debug and release)
+#       this is required for C++ libs because iterator debugging and runtime differences are not allowed by MSVC
+packages:
+  - { ref: tinyformat/2.3.0@thedarkmod/local                , type: header }
+  - { ref: doctest/2.4.8                                    , type: header }
+  - { ref: tracy/0.8.1@thedarkmod/local                     , type: header }
+  - { ref: zlib/1.2.11                                      , type: release }
+  - { ref: minizip/1.2.11                                   , type: release }
+  - { ref: libcurl/7.80.0@thedarkmod/local                  , type: release }
+  - { ref: libjpeg/9d@thedarkmod/local                      , type: release }
+  - { ref: libpng/1.6.39                                    , type: release }
+  - { ref: ffmpeg/4.4.4@thedarkmod/local                    , type: release }
+  - { ref: vorbis/1.3.7                                     , type: release }
+  - { ref: fltk/1.3.8@thedarkmod/local                      , type: release }
+  - { ref: BLAKE2/20190724@thedarkmod/local                 , type: release }
+  - { ref: glfw/3.3.6                                       , type: release }
+  - { ref: openal/1.21.1@thedarkmod/local                   , type: vcdebug }
+  - { ref: pugixml/1.12.1                                   , type: vcdebug }
+
+options:
+  minizip:
+    # disable support of bzip2 format
+    bzip2: false
+  BLAKE2:
+    # enable SSE2 in hash library
+    SSE: "SSE2"
+  libcurl:
+    with_ssl: "mbedtls"

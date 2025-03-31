@@ -1553,7 +1553,7 @@ void CXYWnd::OnPaint() {
 				brush_t *pBrush;
 				brush_t *pList = ((m_nViewType == XZ) ? !g_bSwitch : g_bSwitch) ? &g_brBackSplits : &g_brFrontSplits;
 				for (pBrush = pList->next; pBrush != NULL && pBrush != pList; pBrush = pBrush->next) {
-					GL_FloatColor(1, 1, 0);
+					qglColor3f(1, 1, 0);
 
 					face_t	*face;
 					int		order;
@@ -2837,7 +2837,7 @@ void CXYWnd::XY_DrawGrid() {
 		{
 			if (g_pParentWnd->GetZWnd()->m_pZClip->IsEnabled())
 			{
-				GL_FloatColor(ZCLIP_COLOUR);
+				qglColor3f(ZCLIP_COLOUR);
 				qglLineWidth(2);
 				qglBegin (GL_LINES);
 
@@ -2896,7 +2896,7 @@ void CXYWnd::XY_DrawGrid() {
 	}
 
 	/*
-	 * if (true) { GL_FloatColor(g_qeglobals.d_savedinfo.colors[COLOR_GRIDMINOR]);
+	 * if (true) { qglColor3fv(g_qeglobals.d_savedinfo.colors[COLOR_GRIDMINOR].ToFloatPtr());
 	 * qglBegin (GL_LINES); qglVertex2f (x, yb); qglVertex2f (x, ye); qglEnd(); }
 	 */
 }
@@ -3079,7 +3079,7 @@ void CXYWnd::DrawCameraIcon() {
 
 	float scale = 1.0/m_fScale;	//jhefty - keep the camera icon proportionally the same size 
 
-	GL_FloatColor(0.0, 0.0, 1.0);
+	qglColor3f(0.0, 0.0, 1.0);
 	qglBegin(GL_LINE_STRIP);
 	qglVertex3f(x - 16*scale, y, 0);
 	qglVertex3f(x, y + 8*scale, 0);
@@ -3362,7 +3362,7 @@ void DrawPathLines(void) {
 			s1[1] = dir[0] * 8 + dir[1] * 8;
 			s2[1] = -dir[0] * 8 + dir[1] * 8;
 
-			GL_FloatColor(se->eclass->color[0], se->eclass->color[1], se->eclass->color[2]);
+			qglColor3f(se->eclass->color[0], se->eclass->color[1], se->eclass->color[2]);
 
 			qglBegin(GL_LINES);
 			qglVertex3fv(mid.ToFloatPtr());
@@ -3397,7 +3397,7 @@ void CXYWnd::PaintSizeInfo(int nDim1, int nDim2, idVec3 vMinBounds, idVec3 vMaxB
 	idVec3	vSize;
 	VectorSubtract(vMaxBounds, vMinBounds, vSize);
 
-	GL_FloatColor
+	qglColor3f
 	(
 		g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES][0] * .65,
 		g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES][1] * .65,
@@ -3649,10 +3649,10 @@ void CXYWnd::XY_Draw() {
 	);
 
 	if (RotateMode()) {
-		GL_FloatColor( 0.8f, 0.1f, 0.9f );
+		qglColor3f( 0.8f, 0.1f, 0.9f );
 	}
 	else if (ScaleMode()) {
-		GL_FloatColor( 0.1f, 0.8f, 0.1f );
+		qglColor3f( 0.1f, 0.8f, 0.1f );
 	}
 	else {
 		qglColor3fv(g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].ToFloatPtr());
@@ -3708,7 +3708,7 @@ void CXYWnd::XY_Draw() {
 	// edge / vertex flags
 	if (g_qeglobals.d_select_mode == sel_vertex) {
 		qglPointSize(4);
-		GL_FloatColor(0, 1, 0);
+		qglColor3f(0, 1, 0);
 		qglBegin(GL_POINTS);
 		for (i = 0; i < g_qeglobals.d_numpoints; i++) {
 			qglVertex3fv(g_qeglobals.d_points[i].ToFloatPtr());
@@ -3721,7 +3721,7 @@ void CXYWnd::XY_Draw() {
 		float	*v1, *v2;
 
 		qglPointSize(4);
-		GL_FloatColor(0, 0, 1);
+		qglColor3f(0, 0, 1);
 		qglBegin(GL_POINTS);
 		for (i = 0; i < g_qeglobals.d_numedges; i++) {
 			v1 = g_qeglobals.d_points[g_qeglobals.d_edges[i].p1].ToFloatPtr();
@@ -3738,7 +3738,7 @@ void CXYWnd::XY_Draw() {
 	if (g_pParentWnd->GetNurbMode() && g_pParentWnd->GetNurb()->GetNumValues()) {
 		int maxage = g_pParentWnd->GetNurb()->GetNumValues();
 		int time = 0;
-		GL_FloatColor(0, 0, 1);
+		qglColor3f(0, 0, 1);
 		qglPointSize(1);
 		qglBegin(GL_POINTS);
 		g_pParentWnd->GetNurb()->SetOrder(3);
@@ -3749,7 +3749,7 @@ void CXYWnd::XY_Draw() {
 		}
 		qglEnd();
 		qglPointSize(4);
-		GL_FloatColor(0, 0, 1);
+		qglColor3f(0, 0, 1);
 		qglBegin(GL_POINTS);
 		for (i = 0; i < maxage; i++) {
 			idVec2 v = g_pParentWnd->GetNurb()->GetValue(i);
@@ -3787,7 +3787,7 @@ void CXYWnd::XY_Draw() {
 		);
 		qglDisable(GL_BLEND);
         qglPolygonMode ( GL_FRONT_AND_BACK , GL_LINE );
-		GL_FloatColor(1.0f, 1.0f, 1.0f);
+		qglColor3f(1.0f, 1.0f, 1.0f);
 		qglRectf
 		(
 			g_qeglobals.d_vAreaTL[nDim1],
@@ -4525,23 +4525,23 @@ void CXYWnd::DrawPrecisionCrosshair( void )
 	qglBegin( GL_LINES );
 	{
 		/// Draw the horizontal precision line (in two pieces)
-		GL_FloatColor( crossEndColor.ToFloatPtr() );
+		qglColor4fv( crossEndColor.ToFloatPtr() );
 		qglVertex2f( m_mcLeft, y );
-		GL_FloatColor( crossMidColor.ToFloatPtr() );
+		qglColor4fv( crossMidColor.ToFloatPtr() );
 		qglVertex2f( x, y );
-		GL_FloatColor( crossMidColor.ToFloatPtr() );
+		qglColor4fv( crossMidColor.ToFloatPtr() );
 		qglVertex2f( x, y );
-		GL_FloatColor( crossEndColor.ToFloatPtr() );
+		qglColor4fv( crossEndColor.ToFloatPtr() );
 		qglVertex2f( m_mcRight, y );
 		
 		/// Draw the vertical precision line (in two pieces)
-		GL_FloatColor( crossEndColor.ToFloatPtr() );
+		qglColor4fv( crossEndColor.ToFloatPtr() );
 		qglVertex2f( x, m_mcTop );
-		GL_FloatColor( crossMidColor.ToFloatPtr() );
+		qglColor4fv( crossMidColor.ToFloatPtr() );
 		qglVertex2f( x, y );
-		GL_FloatColor( crossMidColor.ToFloatPtr() );
+		qglColor4fv( crossMidColor.ToFloatPtr() );
 		qglVertex2f( x, y );
-		GL_FloatColor( crossEndColor.ToFloatPtr() );
+		qglColor4fv( crossEndColor.ToFloatPtr() );
 		qglVertex2f( x, m_mcBottom );
 	}
 	qglEnd(); // GL_LINES

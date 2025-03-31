@@ -592,7 +592,7 @@ idTarget_Give::Event_Activate
 */
 void idTarget_Give::Event_Activate( idEntity *activator ) {
 	
-	if ( spawnArgs.GetBool( "development" ) && developer.GetInteger() == 0 ) {
+	if ( spawnArgs.GetBool( "development" ) && com_developer.GetInteger() == 0 ) {
 		return;
 	}
 

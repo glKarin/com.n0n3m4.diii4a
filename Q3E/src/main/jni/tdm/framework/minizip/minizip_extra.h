@@ -20,11 +20,6 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 extern "C" {
 #endif
 
-/*#ifdef __ANDROID__
-typedef u_int64_t ZPOS64_T;
-#define unztell unzTell
-#endif*/
-
 extern unzFile unzReOpen( const char* path, unzFile file );
 /* Re-Open a Zip file, i.e. clone an existing one and give it a new file descriptor. */
 

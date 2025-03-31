@@ -50,6 +50,7 @@ public:
 	virtual void				List() const override;
 	virtual int					Memory() const override;
 	virtual ID_TIME_T			Timestamp() const override;
+	virtual int					GetLoadVersion() const override;
 	virtual int					NumSurfaces() const override;
 	virtual int					NumBaseSurfaces() const override;
 	virtual const modelSurface_t *Surface( int surfaceNum ) const override;
@@ -72,6 +73,9 @@ public:
 	virtual void				ReadFromDemoFile( class idDemoFile *f ) override;
 	virtual void				WriteToDemoFile( class idDemoFile *f ) override;
 	virtual float				DepthHack() const override;
+	virtual void				GenerateSamples( idList<samplePointOnModel_t> &samples, const modelSamplingParameters_t &params, idRandom &rnd ) const override;
+	virtual idVec3				GetSamplePosition( const struct renderEntity_s *ent, const samplePointOnModel_t &sample ) const override;
+	virtual const idMaterial *	GetSampleMaterial( const struct renderEntity_s *ent, const samplePointOnModel_t &sample ) const override;
 
 	void						MakeDefaultModel();
 	
@@ -111,6 +115,7 @@ protected:
 	bool						reloadable;				// if not, reloadModels won't check timestamp
 	bool						levelLoadReferenced;	// for determining if it needs to be freed
 	ID_TIME_T					timeStamp;
+	int							loadVersion;			// stgatilov: how many times this model was loaded
 	idStr						proxySourceName;		// stgatilov #4970: name of the source model (only for proxy models)
 
 	static idCVar				r_mergeModelSurfaces;	// combine model surfaces with the same material
@@ -135,12 +140,13 @@ public:
 								~idMD5Mesh();
 
  	void						ParseMesh( idLexer &parser, int numJoints, const idJointMat *joints, idBounds *jointBounds );
-	void						UpdateSurface( const struct renderEntity_s *ent, const idJointMat *joints, modelSurface_t *surf );
+	void						UpdateSurface( const struct renderEntity_s *ent, const idJointMat *joints, modelSurface_t *surf ) const;
 	idBounds					CalcBounds( const idJointMat *joints );
 	int							NearestJoint( int a, int b, int c ) const;
 	int							NumVerts( void ) const;
 	int							NumTris( void ) const;
 	int							NumWeights( void ) const;
+	idVec3						UpdateVertex( const struct renderEntity_s *ent, const idJointMat *joints, int v ) const;
 
 private:
 	idList<idVec2>				texCoords;			// texture coordinates
@@ -151,9 +157,10 @@ private:
 	int							numTris;			// number of triangles
 	struct deformInfo_s *		deformInfo;			// used to create srfTriangles_t from base frames and new vertexes
 	int							surfaceNum;			// number of the static surface created for this mesh
+	idList<int>					vertexStarts;		// stgatilov: which is first pair in weightIndex of k-th vertex?
 
-	void						TransformVerts( idDrawVert *verts, const idJointMat *joints );
-	void						TransformScaledVerts( idDrawVert *verts, const idJointMat *joints, float scale );
+	void						TransformVerts( idDrawVert *verts, const idJointMat *joints ) const;
+	void						TransformScaledVerts( idDrawVert *verts, const idJointMat *joints, float scale ) const;
 };
 
 class idRenderModelMD5 : public idRenderModelStatic {
@@ -175,6 +182,9 @@ public:
 	virtual const char *		GetJointName( jointHandle_t handle ) const override;
 	virtual const idJointQuat *	GetDefaultPose( void ) const override;
 	virtual int					NearestJoint( int surfaceNum, int a, int b, int c ) const override;
+	virtual void				GenerateSamples( idList<samplePointOnModel_t> &samples, const modelSamplingParameters_t &params, idRandom &rnd ) const override;
+	virtual idVec3				GetSamplePosition( const struct renderEntity_s *ent, const samplePointOnModel_t &sample ) const override;
+	virtual const idMaterial *	GetSampleMaterial( const struct renderEntity_s *ent, const samplePointOnModel_t &sample ) const override;
 
 private:
 	idList<idMD5Joint>			joints;

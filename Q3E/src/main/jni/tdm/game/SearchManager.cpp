@@ -648,7 +648,8 @@ bool CSearchManager::GetNextSearchSpot(Search* search, idAI* ai, idVec3& nextSpo
 
 				float lightQuotient;
 
-				if ( checkIllumination && !search->_isCoopSearch) // grayman #4220 - swarm searchers don't care about this
+				if ( checkIllumination && !search->_isCoopSearch // grayman #4220 - swarm searchers don't care about this
+					&& g_lightQuotientAlgo.GetInteger() < 2 )	// stgatilov #6546: skip if LAS is disabled
 				{
 					idVec3 testLineTop = spot;
 					testLineTop.z += HIDING_OBJECT_HEIGHT;

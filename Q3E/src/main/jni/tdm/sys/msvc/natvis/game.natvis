@@ -16,8 +16,8 @@
   </Type>
 
   <Type Name="idEntityPtr&lt;*&gt;">
-    <DisplayString Condition="spawnId == 0">Eptr (empty)</DisplayString>
-    <DisplayString Condition="spawnId != 0">Eptr (num = {entityId}, spId = {spawnId})</DisplayString>
+    <DisplayString Condition="spawnId == 0">E#0/0 'null'</DisplayString>
+    <DisplayString Condition="spawnId != 0">E#{entityId}/{spawnId} {gameLocal.entities[entityId]->name}</DisplayString>
     <Expand>
       <Synthetic Name="[WRONG]" Condition="spawnId != 0 &amp;&amp; gameLocal.spawnIds[entityId] != spawnId">
         <DisplayString>set = {spawnId} != {gameLocal.spawnIds[entityId]} = stored</DisplayString>
@@ -52,8 +52,7 @@
   </Type>
 
   <Type Name="idCVar">
-    <DisplayString Condition="internalVar != 0">CVar {((idInternalCVar*)internalVar)->nameString} is: {((idInternalCVar*)internalVar)->valueString}  (default:{((idInternalCVar*)internalVar)->resetString})</DisplayString>
-    <DisplayString Condition="internalVar == 0">CVar {name,na} is: {value,na}</DisplayString>
+    <DisplayString >CVar {name,na} is: {value,na}  (default:{resetString})</DisplayString>
   </Type>
   
   <Type Name="idDeclLocal">
@@ -162,8 +161,9 @@
     <DisplayString>{commandId}</DisplayString>
     <Expand>
       <ExpandedItem Condition="commandId==1">*(drawSurfsCommand_t*)this</ExpandedItem>
-      <ExpandedItem Condition="commandId==2">*(setBufferCommand_t*)this</ExpandedItem>
-      <ExpandedItem Condition="commandId==3">*(copyRenderCommand_t*)this</ExpandedItem>
+      <ExpandedItem Condition="commandId==2">*(drawLightgemCommand_t*)this</ExpandedItem>
+      <ExpandedItem Condition="commandId==3">*(setBufferCommand_t*)this</ExpandedItem>
+      <ExpandedItem Condition="commandId==4">*(copyRenderCommand_t*)this</ExpandedItem>
     </Expand>
   </Type>
 
@@ -197,6 +197,15 @@
           <ArrayItems>
             <Size>numStages</Size>
             <ValuePointer>stages</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[interactionGroups]">
+        <DisplayString>{interactionGroupStarts,[numInteractionGroups + 1]na}</DisplayString>
+        <Expand>
+          <ArrayItems>
+            <Size>numInteractionGroups + 1</Size>
+            <ValuePointer>interactionGroupStarts</ValuePointer>
           </ArrayItems>
         </Expand>
       </Synthetic>
@@ -475,7 +484,14 @@
   <Type Name="idClipModel">
     <DisplayString>cm {entity,na}</DisplayString>
   </Type>
-  
+
+  <Type Name="contactInfo_t">
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Item Name="[entity]">gameLocal.entities[entityNum]</Item>
+    </Expand>
+  </Type>
+
   <Type Name="idBoxOctree">
     <DisplayString>octree #nodes={nodes.num} #chunks={allocator.active}</DisplayString>
   </Type>

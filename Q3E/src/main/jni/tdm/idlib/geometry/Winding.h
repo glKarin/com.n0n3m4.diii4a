@@ -255,6 +255,7 @@ ID_INLINE void idWinding::Clear( void ) {
 
 ID_INLINE void idWinding::ClearFree( void ) {
 	numPoints = 0;
+	allocedSize = 0;
 	delete[] p;
 	p = NULL;
 }

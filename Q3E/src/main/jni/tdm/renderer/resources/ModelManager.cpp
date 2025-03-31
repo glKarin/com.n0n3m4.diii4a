@@ -496,6 +496,7 @@ void idRenderModelManagerLocal::BeginLevelLoad() {
 	R_PurgeTriSurfData( frameData );
 }
 
+static idCVar r_vertexCacheStatic( "r_vertexCacheStatic", "1", CVAR_BOOL | CVAR_RENDERER, "Use static buffers in VertexCache?" );
 static idCVarInt r_capModelSize( "r_capModelSize", "0", CVAR_TOOL, "" );
 static idCVarBool r_modelSizeStats( "r_modelSizeStats", "0", CVAR_TOOL, "" );
 
@@ -556,82 +557,84 @@ void idRenderModelManagerLocal::EndLevelLoad() {
 		}
 	}
 
-	std::map<int, int> modelStats;
-	std::vector<int> modelSizes;
-	std::vector<int> modelOffsets;
+	if (r_vertexCacheStatic.GetBool()) {
+		std::map<int, int> modelStats;
+		std::vector<int> modelSizes;
+		std::vector<int> modelOffsets;
 
-	// create static vertex/index buffers for all models
-	for( int i = 0; i < models.Num(); i++ ) {
-		idRenderModel *model = models[i];
-		if( model->IsLoaded() ) {
-			int totalSize = 0;
-			for( int j = 0; j < model->NumSurfaces(); j++ ) {
-				auto& tri = *model->Surface( j )->geometry;
-				R_CreateStaticBuffersForTri( tri );
-				totalSize += tri.ambientCache.size;
-			}
-			if ( r_capModelSize > 0 ) {
-				if ( totalSize > 1024 * r_capModelSize )
-					common->Warning( "Model capped: %dKB - %s\n", totalSize / 1024, model->Name() );
-			}
-			if ( r_modelSizeStats ) {
-				modelSizes.push_back( totalSize );
-				extern uint32_t staticVertexSize;
-				modelOffsets.push_back( staticVertexSize );
-				int index = 0;
-				while ( totalSize ) {
-					totalSize /= 10;
-					modelStats[index]++;
-					index++;
+		// create static vertex/index buffers for all models
+		for( int i = 0; i < models.Num(); i++ ) {
+			idRenderModel *model = models[i];
+			if( model->IsLoaded() ) {
+				int totalSize = 0;
+				for( int j = 0; j < model->NumSurfaces(); j++ ) {
+					auto& tri = *model->Surface( j )->geometry;
+					R_CreateStaticBuffersForTri( tri );
+					totalSize += tri.ambientCache.size;
+				}
+				if ( r_capModelSize > 0 ) {
+					if ( totalSize > 1024 * r_capModelSize )
+						common->Warning( "Model capped: %dKB - %s\n", totalSize / 1024, model->Name() );
+				}
+				if ( r_modelSizeStats ) {
+					modelSizes.push_back( totalSize );
+					extern uint32_t staticVertexSize;
+					modelOffsets.push_back( staticVertexSize );
+					int index = 0;
+					while ( totalSize ) {
+						totalSize /= 10;
+						modelStats[index]++;
+						index++;
+					}
 				}
 			}
 		}
-	}
-	if ( r_modelSizeStats ) {
-		common->Printf( "Total models: %d, ", models.Num() );
-		int size = 1;
-		for ( auto it = modelStats.begin(); it != modelStats.end(); ++it )
-		{
-			int value = it->second;
-			common->Printf( ">%d bytes: %d, ", size, value );
-			size *= 10;
-		}
-		common->Printf( "\n" );
-		int rollGrp = 1, rollSum = 0;
-		int modelNum = int(modelSizes.size());
-		common->Printf( "Size distribution grouped by 10%%, from low to high:\n" );
-		for ( int index = 0; index < modelNum; index++ ) {
-			rollSum += modelSizes[index];
-			if ( index == modelNum * rollGrp / 10 - 1 ) {
-				common->Printf( "  %d%%: %d KB\n", rollGrp * 10, rollSum / 1024 );
-				rollGrp++;
+		if ( r_modelSizeStats ) {
+			common->Printf( "Total models: %d, ", models.Num() );
+			int size = 1;
+			for ( auto it = modelStats.begin(); it != modelStats.end(); ++it )
+			{
+				int value = it->second;
+				common->Printf( ">%d bytes: %d, ", size, value );
+				size *= 10;
 			}
-		}
-		common->Printf( "Offset distribution grouped by 10%%, from low to high:\n" );
-		rollGrp = 1;
-		for ( int index = 0; index < modelNum; index++ ) {
-			if ( index == modelNum * rollGrp / 10 - 1 ) {
-				common->Printf( "  %d%%: %d KB\n", rollGrp * 10, modelOffsets[index] / 1024 );
-				rollGrp++;
+			common->Printf( "\n" );
+			int rollGrp = 1, rollSum = 0;
+			int modelNum = int(modelSizes.size());
+			common->Printf( "Size distribution grouped by 10%%, from low to high:\n" );
+			for ( int index = 0; index < modelNum; index++ ) {
+				rollSum += modelSizes[index];
+				if ( index == modelNum * rollGrp / 10 - 1 ) {
+					common->Printf( "  %d%%: %d KB\n", rollGrp * 10, rollSum / 1024 );
+					rollGrp++;
+				}
 			}
-		}
-		std::sort( modelSizes.begin(), modelSizes.end() );
-		rollGrp = 1, rollSum = 0;
-		common->Printf( "Size distribution grouped by 10%%, from smallest to biggest:\n" );
-		for ( int index = 0; index < modelNum; index++ ) {
-			rollSum += modelSizes[index];
-			if ( index == modelNum * rollGrp / 10 - 1 ) {
-				common->Printf( "  %d%%: %d KB\n", rollGrp * 10, rollSum / 1024 );
-				rollGrp++;
+			common->Printf( "Offset distribution grouped by 10%%, from low to high:\n" );
+			rollGrp = 1;
+			for ( int index = 0; index < modelNum; index++ ) {
+				if ( index == modelNum * rollGrp / 10 - 1 ) {
+					common->Printf( "  %d%%: %d KB\n", rollGrp * 10, modelOffsets[index] / 1024 );
+					rollGrp++;
+				}
 			}
-		}
-		rollSum = 0, rollGrp = 0;
-		common->Printf( "Size distribution - top N:\n" );
-		for ( int index = modelNum - 1; index >= 0; index-- ) {
-			rollSum += modelSizes[index];
-			if( modelNum - index == (int64)1 << (rollGrp * 2)) {
-				common->Printf( "  top %d: %d KB\n", 1 << ( rollGrp * 2 ), rollSum / 1024 );
-				rollGrp++;
+			std::sort( modelSizes.begin(), modelSizes.end() );
+			rollGrp = 1, rollSum = 0;
+			common->Printf( "Size distribution grouped by 10%%, from smallest to biggest:\n" );
+			for ( int index = 0; index < modelNum; index++ ) {
+				rollSum += modelSizes[index];
+				if ( index == modelNum * rollGrp / 10 - 1 ) {
+					common->Printf( "  %d%%: %d KB\n", rollGrp * 10, rollSum / 1024 );
+					rollGrp++;
+				}
+			}
+			rollSum = 0, rollGrp = 0;
+			common->Printf( "Size distribution - top N:\n" );
+			for ( int index = modelNum - 1; index >= 0; index-- ) {
+				rollSum += modelSizes[index];
+				if( modelNum - index == (int64)1 << (rollGrp * 2)) {
+					common->Printf( "  top %d: %d KB\n", 1 << ( rollGrp * 2 ), rollSum / 1024 );
+					rollGrp++;
+				}
 			}
 		}
 	}

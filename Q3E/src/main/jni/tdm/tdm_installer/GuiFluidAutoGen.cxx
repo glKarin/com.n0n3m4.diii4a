@@ -1752,6 +1752,7 @@ This makes downloads slower, but can help in case of network issues.");
           g_Settings_ButtonReset->callback((Fl_Callback*)cb_g_Settings_ButtonReset);
         } // Fl_Button* g_Settings_ButtonReset
         { g_Settings_ButtonRestartNewDir = new Fl_Button(590, 155, 150, 30, "Create_and_Restart");
+          g_Settings_ButtonRestartNewDir->tooltip("Restart is required to proceed.");
         } // Fl_Button* g_Settings_ButtonRestartNewDir
         g_PageSettings->end();
       } // Fl_Group* g_PageSettings

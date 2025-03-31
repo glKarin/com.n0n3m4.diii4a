@@ -378,3 +378,43 @@ void CModInfo::GetMissionTitles(idStr missionTitles)
 		}
 	}
 }
+
+void CModInfo::StyleAsCMOS(idStr& title)
+{
+	// Chicago Manual of Style (CMOS) rules:
+	// 1. Move leading article to the end of the title.
+	//    - "The Example Title" (Original)
+	//    - "Example Title, The" (CMOS)
+	// 2. Given a subtitle, move leading article to the end of the
+	//    full title, not before the subtitle.
+	//    - "The Example Title: The Subtitle" (Original)
+	//    - "Example Title: The Subtitle, The" (CMOS)
+
+	if (!title)
+		return;
+
+	idStr originalTitle = title;
+	idStr prefix = "";
+	idStr suffix = "";
+
+	common->GetI18N()->MoveArticlesToBack(title, prefix, suffix);
+	if (!suffix.IsEmpty())
+	{
+		// found, remove prefix and append suffix
+		title.StripLeadingOnce(prefix.c_str());
+		title += suffix;
+	}
+}
+
+int CModInfo::SortCompareTitle(const idStr& a, const idStr& b)
+{
+	idStr aName = common->Translate(a);
+	idStr bName = common->Translate(b);
+
+	if (cvarSystem->GetCVarInteger("tdm_mission_list_title_style") == MISSION_LIST_TITLE_STYLE_CMOS) {
+		CModInfo::StyleAsCMOS(aName);
+		CModInfo::StyleAsCMOS(bName);
+	}
+
+	return aName.Icmp(bName);
+}

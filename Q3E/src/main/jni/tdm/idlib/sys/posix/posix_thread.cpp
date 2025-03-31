@@ -85,11 +85,11 @@ static int Sys_GetThreadName( pthread_t handle, char* namebuf, size_t buflen )
 {
 	int ret = 0;
 #ifdef __ANDROID__ //karin: pthread_getname_np on Android
-    #if __ANDROID_API__ >= 26
+#if __ANDROID_API__ >= 26
 	ret = pthread_getname_np( handle, namebuf, buflen );
-    #else
+#else
     ret = 0;
-    #endif
+#endif
 	if( ret != 0 )
 		idLib::common->Printf( "Getting threadname failed, reason: %s (%i)\n", strerror( errno ), errno );
 #elif defined(__linux__)

@@ -215,4 +215,15 @@ struct GLSLUniform_mat4 : GLSLUniformBase {
 #define DEFINE_UNIFORM(type, name) GLSLUniform_##type name = GLSLUniform_##type(program, "u_" #name);
 #define UNIFORM_GROUP_DEF(type) explicit type(GLSLProgram *program) : GLSLUniformGroup(program) {}
 
+// pack of uniforms defined in most shader programs
+struct TransformUniforms : public GLSLUniformGroup {
+	UNIFORM_GROUP_DEF(TransformUniforms)
+
+	DEFINE_UNIFORM( mat4, projectionMatrix )
+	DEFINE_UNIFORM( mat4, modelMatrix )
+	DEFINE_UNIFORM( mat4, modelViewMatrix )
+
+	void Set( const struct viewEntity_s *space );
+};
+
 #endif

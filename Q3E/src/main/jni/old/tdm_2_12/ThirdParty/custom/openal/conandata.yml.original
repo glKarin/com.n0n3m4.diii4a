@@ -1,0 +1,4 @@
+sources:
+  1.21.0:
+    sha256: cd3650530866f3906058225f4bfbe0052be19e0a29dcc6df185a460f9948feec
+    url: https://github.com/kcat/openal-soft/archive/openal-soft-1.21.0.tar.gz

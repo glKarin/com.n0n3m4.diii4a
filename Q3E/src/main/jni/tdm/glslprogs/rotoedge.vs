@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 // !!ARBvp1.0 OPTION ARB_position_invariant ;
 
 #pragma tdm_include "tdm_transform.glsl"

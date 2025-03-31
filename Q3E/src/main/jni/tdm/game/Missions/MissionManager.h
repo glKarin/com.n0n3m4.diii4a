@@ -25,6 +25,12 @@ namespace fs = stdext;
 #include <pugixml.hpp>
 typedef std::shared_ptr<pugi::xml_document> XmlDocumentPtr;
 
+#define MISSION_LIST_SORT_BY_TITLE    0
+#define MISSION_LIST_SORT_BY_DATE     1
+
+#define MISSION_LIST_SORT_DIRECTION_ASC     0
+#define MISSION_LIST_SORT_DIRECTION_DESC    1
+
 class CMissionDB;
 typedef std::shared_ptr<CMissionDB> CMissionDBPtr;
 
@@ -102,6 +108,7 @@ struct DownloadableMod
 	typedef DownloadableMod* DownloadableModPtr;
 
 	static int SortCompareTitle(const DownloadableModPtr* a, const DownloadableModPtr* b);
+	static int SortCompareDate(const DownloadableModPtr* a, const DownloadableModPtr* b);
 
 	// Gets the local path to the screenshot image (relative to darkmod path, e.g. fms/_missionshots/preview_monst02.jpg)
 	idStr GetLocalScreenshotPath(int screenshotNum) const;
@@ -153,6 +160,9 @@ private:
 	// A plain list of available fs_currentfm names
 	idStringList _availableMods;
 
+	// List of available mods along with info
+	idList<CModInfoPtr> _modListPrimary;
+
 	// A list of path => path associations for moving files around
 	typedef std::list< std::pair<fs::path, fs::path> > MoveList;
 
@@ -170,7 +180,7 @@ private:
 	// This value is saved and restored
 	int _curMissionIndex;
 
-	DownloadableModList _downloadableMods;
+	DownloadableModList _downloadableModsPrimary;
 
 	// The ID of the "Downloading mission list from server" message
 	int _refreshModListDownloadId;
@@ -200,8 +210,6 @@ public:
 	};
 
 public:
-	bool sortByDate = true;
-
 	CMissionManager();
 
 	~CMissionManager();
@@ -216,6 +224,12 @@ public:
 	// Save missionDB to hard drive right now!
 	// Note: it is done automatically in destructor.
 	void SaveDatabase() const;
+
+	// Creates mod list
+	void CreatePrimaryModList();
+
+	// Get the primary mod list
+	const idList<CModInfoPtr>& GetPrimaryModList() const;
 
 	// Returns the number of available mods
 	int GetNumMods();
@@ -308,8 +322,8 @@ public:
 
 	// -------- Mod Details Request ----------
 
-	// Starts a new request to download details of the given mod number
-	int StartDownloadingModDetails(int modNum);
+	// Starts a new request to download details of the given mod
+	int StartDownloadingModDetails(DownloadableMod* mod);
 
 	// Returns true if the mod details download is currently in progress,
 	// call ProcessReloadModDetailsRequest() to process it
@@ -321,14 +335,11 @@ public:
 
 	// -------- Screenshot Requests -----------
 	bool IsMissionScreenshotRequestInProgress();
-	int StartDownloadingMissionScreenshot(int missionIndex, int screenshotNum);
+	int StartDownloadingMissionScreenshot(DownloadableMod* mod, int screenshotNum);
 	CMissionManager::RequestStatus ProcessMissionScreenshotRequest();
 
-	// Accessor to the downloadble mission list
-	const DownloadableModList& GetDownloadableMods() const;
-
-	// Sorts the mod list
-	void SortDownloadableMods();
+	// Get the primary downloadable mission list
+	const DownloadableModList& GetPrimaryDownloadableMods() const;
 
 	// Convenience method which copies a file from <source> to <dest>
 	// If <overwrite> is set to TRUE, any existing destination file will be removed beforehand
@@ -362,17 +373,11 @@ private:
 	// Finds all available mods
 	void GenerateModList();
 
-	// Sorts all mods by display name
-	void SortModList();
-
-	// Compare functor to sort mods by display name
-	static int ModSortCompare(const int* a, const int* b);
-
 	// Loads the mod list from the given XML
 	bool LoadModListFromXml(const XmlDocumentPtr& doc);
 
-	// Loads mod details from the given XML, storing the data in the mod with the given number
-	void LoadModDetailsFromXml(const XmlDocumentPtr& doc, int modNum);
+	// Loads mod details from the given XML, storing the data in the mod with the given index
+	void LoadModDetailsFromXml(const XmlDocumentPtr& doc, int modIndex);
 
 	// Request status according to the pending download
 	RequestStatus GetRequestStatusForDownloadId(int downloadId);

@@ -30,7 +30,7 @@ idCVar r_shadowMapSinglePass(
 	"1 - render shadow maps for all lights in a single pass"
 );
 idCVar r_shadowMapAlphaTested(
-	"r_shadowMapAlphaTested", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE,
+	"r_shadowMapAlphaTested", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE,
 	"In case of alpha-tested material, apply alpha test to shadows too?\n"
 	"Note: stencil shadows cannot work with alpha test."
 );
@@ -97,9 +97,8 @@ void ShadowMapStage::DrawLight( const viewLight_t *vLight, const DrawMask &mask 
 
 	const renderCrop_t &page = vLight->shadowMapPage;
 	qglViewport( page.x, page.y, 6*page.width, page.width );
-	if ( r_useScissor.GetBool() ) {
-		qglScissor( page.x, page.y, 6*page.width, page.width );
-	}
+	// note: scissor must be always applied for correctness, also it is not view-dependent
+	qglScissor( page.x, page.y, 6*page.width, page.width );
 
 	if ( mask.clear )
 		qglClear( GL_DEPTH_BUFFER_BIT );
@@ -161,6 +160,12 @@ bool ShadowMapStage::ShouldDrawSurf( const drawSurf_t *surf ) const {
         #endif
         return false;
     }
+
+	// #6571. parallax surfaces with this flag don't work well if the surface is rendered to shadow maps
+	if ( auto parallaxStage = surf->material->GetParallaxStage() ) {
+		if ( parallaxStage->parallax->offsetExternalShadows )
+			return false;
+	}
 
 	return true;
 }

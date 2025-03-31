@@ -34,6 +34,8 @@ extern idCVar dmap_fasterAasBrushListMerge;
 extern idCVar dmap_pruneAasBrushesChopping;
 extern idCVar dmap_fasterAasWaterJumpReachability;
 extern idCVar dmap_disableCellSnappingTjunc;
+//TDM 2.13:
+extern idCVar dmap_outputNoSnap;
 
 
 typedef struct primitive_s {

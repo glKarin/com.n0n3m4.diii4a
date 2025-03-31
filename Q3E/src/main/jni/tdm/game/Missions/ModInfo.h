@@ -18,6 +18,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #include "precompiled.h"
 
+#define MISSION_LIST_TITLE_STYLE_ALPHA    0
+#define MISSION_LIST_TITLE_STYLE_CMOS     1
+
 class CModInfoDecl;
 typedef std::shared_ptr<CModInfoDecl> CModInfoDeclPtr;
 
@@ -117,6 +120,12 @@ public:
 
 	// grayman #3733
 	void	GetMissionTitles(idStr missionTitles);
+
+	// Format as CMOS title style
+	static void StyleAsCMOS(idStr& title);
+
+	// Compare functor to sort mission titles
+	static int SortCompareTitle(const idStr& a, const idStr& b);
 };
 typedef std::shared_ptr<CModInfo> CModInfoPtr;
 

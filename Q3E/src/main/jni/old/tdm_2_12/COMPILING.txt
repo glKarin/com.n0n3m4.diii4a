@@ -1,0 +1,80 @@
+To read the most recent compilation guide, please visit:
+  http://wiki.thedarkmod.com/index.php?title=The_Dark_Mod_-_Compilation_Guide
+
+Build process outputs TDM binaries to relative path "../darkmod", so you are strongly advised to have the following directory structure:
+  [base_tdm_path]/darkmod       <-- darkmod game location (contains e.g. TheDarkMod.exe)
+  [base_tdm_path]/darkmod_src   <-- source code location (contains e.g. TheDarkMod.sln)
+
+
+== Compiling on Windows ==
+
+Microsoft Visual Studio 2022 (VS2022) is used to build TDM on Windows.
+Open solution file TheDarkMod.sln to start working.
+Choose appropriate platform and configuration, then build solution.
+All built executables will be put into "../darkmod" directory, potentially replacing the TDM executables already located there.
+
+You can use VS2022 Community Edition.
+During installation, make sure to enable "Visual C++ MFC for x86 and x64", along with everything "Desktop development with C++" workflow enables.
+
+
+== Compiling on Linux ==
+
+You need GCC 5 or newer to build TDM on Linux.
+Anything older than GCC 4.7 surely won't work.
+CMake >= 3.14 is required to build TDM.
+
+You first need to create a build directory. Easiest option is to create a subdirectory in the source code
+root directory ("darkmod_src"):
+  mkdir build && cd build
+From your build directory, call CMake:
+  cmake -DCMAKE_BUILD_TYPE="Release" ..
+The '..' indicate the path to the source directory. If you chose a different location for your build directory
+instead of the suggested subdirectory, you have to adjust this parameter accordingly. Finally, build TDM by calling
+  make -j
+where the '-j' parameter instructs make to build the project in parallel for faster compile times.
+
+If you wish to compile a debug executable, pass '-DCMAKE_BUILD_TYPE="Debug"' to the CMake call.
+
+
+=== Ubuntu 16.04: native ===
+
+The best approach is to build binaries for the platform you have, i.e.: build 32-bit TDM on 32-bit OS, or 64-bit TDM on 64-bit OS.
+Here is the list of packages you need to install (on a clean Ubuntu installation):
+
+  sudo apt-get install subversion               //svnversion: not found
+  sudo apt-get install mesa-common-dev          //no such file: "Gl/gl.h"
+  sudo apt-get install libxxf86vm-dev           //no such file: "X11/extensions/xf86vmode.h"
+  sudo apt-get install libopenal-dev            //no such file: "AL/al.h"
+  sudo apt-get install libxext-dev              //no such file: "X11/extensions/Xext.h"
+  sudo snap install cmake                       //we need a recent version of CMake, so install from snap instead of apt
+
+Now run CMake as instructed above.
+
+
+=== Ubuntu 16.04: 32-bit version on 64-bit OS ===
+
+If you have 64-bit Linux, you can also build and run 32-bit TDM.
+Note that this approach is slightly more complicated.
+
+You have to install the following packages in addition to the ones listed above:
+
+  sudo apt-get install g++-multilib             //no such file: 'sys/cdefs.h'
+  sudo apt-get install libx11-dev:i386          //cannot find "-lX11"
+  sudo apt-get install libxxf86vm-dev:i386      //cannot find "-lXxf86vm"
+  sudo apt-get install libopenal-dev:i386       //cannot find "-lopenal"
+  sudo apt-get install libxext-dev:i386         //cannot find "-lXext"
+
+Then you need to call CMake with a toolchain file to target 32-bit:
+
+  cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_TOOLCHAIN_FILE="../sys/cmake/gcc_32bit.cmake" ..
+
+The 64-bit and 32-bit versions can be built independently on a single 64-bit Linux, but you need to use different
+build directories for each version.
+
+
+== Details ==
+
+If you work with SVN, please make sure that "svnversion" command works properly in OS console.
+In case of Windows, install TortoiseSVN with "command line client tools" included.
+In case of Linux, it is included in "subversion" package.
+If you build TDM yourself, run it, and then open TDM console, you should see the correct SVN revision number in the lower-right corner.

@@ -18,9 +18,11 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #include "renderer/tr_local.h"
 #include "renderer/backend/simplex.h"	// line font definition
-#include "renderer/backend/glsl.h"
 #include "renderer/backend/GLSLProgramManager.h"
+#include "renderer/backend/GLSLProgram.h"
+#include "renderer/backend/GLSLUniforms.h"
 #include "renderer/backend/ImmediateRendering.h"
+#include "renderer/backend/VertexArrayState.h"
 
 typedef struct debugBase_s {
 	idVec4		rgb;
@@ -74,8 +76,6 @@ typedef struct debugPrimitives_s {
 
 debugPrimitives_t r_debug, rb_debug;
 
-static void RB_DrawText( ImmediateRendering &ir, const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align );
-
 
 template<class DebugObject, int MaxN> DebugObject *DebugObjectSet<DebugObject, MaxN>::Append(int lifeTime, idVec4 rgb, bool depthTest) {
 	if (num < MaxN) {
@@ -120,6 +120,53 @@ template<class DebugObject, int MaxN> void DebugObjectSet<DebugObject, MaxN>::Co
 		arr[i] = src.arr[i];
 }
 
+GLSLProgram *testImageCubeShader = nullptr;
+
+/*
+=================
+RB_InitDebugTools
+=================
+*/
+void RB_InitDebugTools( void ) {
+	testImageCubeShader = programManager->Load( "testImageCube" );
+}
+
+/*
+=================
+RB_ShutdownDebugTools
+=================
+*/
+void RB_ShutdownDebugTools( void ) {
+	r_debug.text.Clear(0);
+	r_debug.lines.Clear(0);
+	r_debug.polygons.Clear(0);
+	rb_debug.text.Clear(0);
+	rb_debug.lines.Clear(0);
+	rb_debug.polygons.Clear(0);
+
+	testImageCubeShader = nullptr;
+}
+
+// simple way to locally override vertex color from mesh with constant
+// note: if you set colors via ImmediateRendering, then do NOT use this!
+struct OverrideColor {
+	OverrideColor() {
+		vaState.SetOverrideEnabled(Attributes::Color, true);
+	}
+	~OverrideColor() {
+		vaState.SetOverrideEnabled(Attributes::Color, false);
+	}
+	void Set(float r, float g, float b, float a = 1.0f) {
+		vaState.SetOverrideValuef(
+			Attributes::Color,
+			idMath::ClampFloat(0.0f, 1.0f, r),
+			idMath::ClampFloat(0.0f, 1.0f, g),
+			idMath::ClampFloat(0.0f, 1.0f, b),
+			idMath::ClampFloat(0.0f, 1.0f, a)
+		);
+	}
+};
+
 /*
 ================
 RB_CopyDebugPrimitivesToBackend
@@ -130,6 +177,8 @@ void RB_CopyDebugPrimitivesToBackend( void ) {
 	rb_debug.polygons.CopyFrom(r_debug.polygons);
 	rb_debug.text.CopyFrom(r_debug.text);
 }
+
+static void RB_DrawText( ImmediateRendering &ir, const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align );
 
 /*
 ================
@@ -178,7 +227,7 @@ RB_SimpleSpaceSetup
 void RB_SimpleSpaceSetup( const viewEntity_t *space ) {
 	// change the matrix if needed
 	if ( space != backEnd.currentSpace ) {
-		Uniforms::Global* globalUniforms = programManager->oldStageShader->GetUniformGroup<Uniforms::Global>();
+		TransformUniforms* globalUniforms = programManager->renderToolsShader->GetUniformGroup<TransformUniforms>();
 		globalUniforms->Set( space );
 		backEnd.currentSpace = space;
 	}
@@ -208,7 +257,7 @@ RB_SimpleScreenSetup
 void RB_SimpleScreenSetup( void ) {
 	GL_CheckErrors();
 	backEnd.currentSpace = nullptr;
-	Uniforms::Global* globalUniforms = programManager->oldStageShader->GetUniformGroup<Uniforms::Global>();
+	TransformUniforms* globalUniforms = programManager->renderToolsShader->GetUniformGroup<TransformUniforms>();
 	globalUniforms->modelMatrix.Set( mat4_identity.ToFloatPtr() );			//not used, actually
 	globalUniforms->modelViewMatrix.Set( mat4_identity.ToFloatPtr() );
 	//specify coordinates in [0..1] x [0..1] instead of [-1..1] x [-1..1]
@@ -227,7 +276,7 @@ RB_SimpleWorldSetup
 void RB_SimpleWorldSetup( void ) {
 	GL_CheckErrors();
 	backEnd.currentSpace = &backEnd.viewDef->worldSpace;
-	Uniforms::Global* globalUniforms = programManager->oldStageShader->GetUniformGroup<Uniforms::Global>();
+	TransformUniforms* globalUniforms = programManager->renderToolsShader->GetUniformGroup<TransformUniforms>();
 	globalUniforms->Set( backEnd.currentSpace );
 
 	backEnd.currentScissor = backEnd.viewDef->scissor;
@@ -499,7 +548,7 @@ void RB_ShowIntensity( void ) {
     qglOrtho( 0, 1, 0, 1, -1, 1 );
 	qglRasterPos2f( 0, 0 );
 	qglPopMatrix();
-	GL_FloatColor( 1, 1, 1 );
+	qglColor3f( 1, 1, 1 );
 	qglMatrixMode( GL_MODELVIEW );
 
 	qglDrawPixels( glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, colorReadback );
@@ -533,7 +582,7 @@ void RB_ShowDepthBuffer( void ) {
 	qglPopMatrix();
 
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
-	GL_FloatColor( 1, 1, 1 );
+	qglColor3f( 1, 1, 1 );
 
 	depthReadback = R_StaticAlloc( glConfig.vidWidth * glConfig.vidHeight*4 );
 	memset( depthReadback, 0, glConfig.vidWidth * glConfig.vidHeight*4 );
@@ -621,7 +670,8 @@ void RB_ShowSilhouette( void ) {
 	qglDisable( GL_TEXTURE_2D );
 	qglDisable( GL_STENCIL_TEST );
 
-	GL_FloatColor( 0, 0, 0 );
+	OverrideColor forcedColor;
+	forcedColor.Set( 0, 0, 0 );
 
 	GL_State( GLS_POLYMODE_LINE );
 
@@ -634,7 +684,7 @@ void RB_ShowSilhouette( void ) {
 	// now blend in edges that cast silhouettes
 	//
 	RB_SimpleWorldSetup();
-	GL_FloatColor( 0.5, 0, 0 );
+	forcedColor.Set( 0.5, 0, 0 );
 	GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE );
 
 	for ( vLight = backEnd.viewDef->viewLights ; vLight ; vLight = vLight->next ) {
@@ -671,7 +721,7 @@ void RB_ShowSilhouette( void ) {
 	qglEnable( GL_DEPTH_TEST );
 
 	GL_State( GLS_DEFAULT );
-	GL_FloatColor( 1,1,1 );
+	forcedColor.Set( 1,1,1 );
 	GL_Cull( CT_FRONT_SIDED );
 }
 
@@ -845,21 +895,24 @@ static void RB_ShowTris( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 
 	qglDisable( GL_STENCIL_TEST );
 
-	GL_FloatColor( 1, 1, 1 );
+	OverrideColor forcedColor;
+	forcedColor.Set( 1, 1, 1 );
 
 	GL_State( GLS_POLYMODE_LINE );
 
-	if ( r_showTris.GetInteger() & 1 ) {
+	if ( r_showTris.GetInteger() == 1 ) {
 		// only draw visible ones
 		qglPolygonOffset( -1, -2 );
 		qglEnable( GL_POLYGON_OFFSET_LINE );
-	} else 
+	} else {
 		qglDisable( GL_DEPTH_TEST );
-	if ( r_showTris.GetInteger() & 2 ) 
+	}
+	if ( r_showTris.GetInteger() < 3 ) 
 		// draw all front facing
 		GL_Cull( CT_FRONT_SIDED );
-	else
+	else {
 		GL_Cull( CT_TWO_SIDED );
+	}
 	RB_RenderDrawSurfListWithFunction( drawSurfs, numDrawSurfs, RB_T_RenderTriangleSurface );
 
 	qglEnable( GL_DEPTH_TEST );
@@ -978,8 +1031,6 @@ static void RB_ShowViewEntitys( viewEntity_t *vModels ) {
 	}
 	//qglDisable( GL_TEXTURE_2D );
 	qglDisable( GL_STENCIL_TEST );
-
-	GL_FloatColor( 1, 1, 1 );
 
 	GL_State( GLS_POLYMODE_LINE );
 
@@ -1678,12 +1729,7 @@ void RB_ShowLights( void ) {
 	if ( !r_showLights.GetInteger() ) {
 		return;
 	}
-	programManager->oldStageShader->Activate();
-	OldStageUniforms* oldStageUniforms = programManager->oldStageShader->GetUniformGroup<OldStageUniforms>();
-	const float zero[4] = { 0, 0, 0, 0 };
-	static const float one[4] = { 1, 1, 1, 1 };
-	oldStageUniforms->colorMul.Set( one );
-	oldStageUniforms->colorAdd.Set( zero );
+	programManager->renderToolsShader->Activate();
 
 	// all volumes are expressed in world coordinates
 	GL_CheckErrors();
@@ -1712,11 +1758,12 @@ void RB_ShowLights( void ) {
 				auto color = vLight->lightShader->IsAmbientLight() ? idVec4( 0, .5, .5, 0.25 )
 					: vLight->lightShader->LightCastsShadows() ? idVec4( 0, .5, .5, 0.25 )
 					: idVec4( .5, 0, .5, 0.25 );
-				GL_FloatColor( color );
+				OverrideColor forcedColor;
+				forcedColor.Set( color.x, color.y, color.z, color.w );
 				GL_State( GLS_DEPTHMASK | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA | GLS_DEPTHFUNC_LESS );
 				RB_DrawTriangles( tri );
 				color.w /= 4;
-				GL_FloatColor( color );
+				forcedColor.Set( color.x, color.y, color.z, color.w );
 				GL_State( GLS_DEPTHMASK | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA | GLS_DEPTHFUNC_ALWAYS );
 				RB_DrawTriangles( tri );
 			}
@@ -1724,10 +1771,11 @@ void RB_ShowLights( void ) {
 			if ( r_showLights.GetInteger() & 4 ) {
 				GL_State( GLS_POLYMODE_LINE | GLS_DEPTHMASK | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA | GLS_DEPTHFUNC_ALWAYS );
 				int c = index % 7 + 1;
-				GL_FloatColor( c & 1, c & 2, c & 4, 0.1f );
+				OverrideColor forcedColor;
+				forcedColor.Set( c & 1, c & 2, c & 4, 0.1f );
 				RB_DrawTriangles( tri );
 				GL_State( GLS_POLYMODE_LINE | GLS_DEPTHMASK | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA | GLS_DEPTHFUNC_LESS );
-				GL_FloatColor( c & 1, c & 2, c & 4, 0.3f );
+				forcedColor.Set( c & 1, c & 2, c & 4, 0.3f );
 				RB_DrawTriangles( tri );
 			}
 			GL_CheckErrors();
@@ -2163,8 +2211,6 @@ void RB_ShowDebugPolygons( void ) {
 	//qglDisable( GL_TEXTURE_2D );
 	qglDisable( GL_STENCIL_TEST );
 
-	qglEnable( GL_DEPTH_TEST );
-
 	if ( r_debugPolygonFilled.GetBool() ) {
 		GL_State( GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA | GLS_DEPTHMASK );
 		qglPolygonOffset( -1, -2 );
@@ -2175,9 +2221,13 @@ void RB_ShowDebugPolygons( void ) {
 		qglEnable( GL_POLYGON_OFFSET_LINE );
 	}
 	
+	qglDisable( GL_DEPTH_TEST );
+
 	ImmediateRendering ir;
 	for ( int i = 0 ; i < rb_debug.polygons.Num(); i++ ) {
 		debugPolygon_t *poly = rb_debug.polygons.Draw(i);
+		if ( poly->depthTest != false )
+			continue;
 		ir.glColor4fv( poly->rgb.ToFloatPtr() );
 
 		ir.glBegin( GL_POLYGON );
@@ -2187,6 +2237,23 @@ void RB_ShowDebugPolygons( void ) {
 		ir.glEnd();
 	}
 	ir.Flush();
+
+	qglEnable( GL_DEPTH_TEST );
+
+	for ( int i = 0 ; i < rb_debug.polygons.Num(); i++ ) {
+		debugPolygon_t *poly = rb_debug.polygons.Draw(i);
+		if ( poly->depthTest != true )
+			continue;
+		ir.glColor4fv( poly->rgb.ToFloatPtr() );
+
+		ir.glBegin( GL_POLYGON );
+		for ( int j = 0; j < poly->winding.GetNumPoints(); j++) {
+			ir.glVertex3fv( poly->winding[j].ToFloatPtr() );
+		}
+		ir.glEnd();
+	}
+	ir.Flush();
+
 	GL_State( GLS_DEFAULT );
 
 	if ( r_debugPolygonFilled.GetBool() ) {
@@ -2283,7 +2350,7 @@ void RB_TestGamma( void ) {
 
 	qglMatrixMode( GL_PROJECTION );
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
-	GL_FloatColor( 1, 1, 1 );
+	qglColor3f( 1, 1, 1 );
 	qglPushMatrix();
 	qglLoadIdentity(); 
 	qglDisable( GL_TEXTURE_2D );
@@ -2331,7 +2398,7 @@ static void RB_TestGammaBias( void ) {
 	qglLoadIdentity();
 	qglMatrixMode( GL_PROJECTION );
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
-	GL_FloatColor( 1, 1, 1 );
+	qglColor3f( 1, 1, 1 );
 	qglPushMatrix();
 	qglLoadIdentity(); 
 	qglDisable( GL_TEXTURE_2D );
@@ -2364,6 +2431,8 @@ void RB_TestImage( void ) {
 			tr.testVideoFrame = NULL;
 			return;
 		}
+	} else if ( tr.testImage && tr.testImageIsCubemap ) {
+		image = tr.testImage;
 	} else if ( tr.testImage && !tr.testImageIsCubemap ) {
 		int max = idMath::Imax(tr.testImage->uploadWidth, tr.testImage->uploadHeight);
 
@@ -2396,8 +2465,8 @@ void RB_TestImage( void ) {
 			DEFINE_UNIFORM(mat4, projectionMatrix);
 			DEFINE_UNIFORM(sampler, texCube);
 		};
-		programManager->testImageCubeShader->Activate();
-		auto uniforms = programManager->testImageCubeShader->GetUniformGroup<TestImageCubeUniforms>();
+		testImageCubeShader->Activate();
+		auto uniforms = testImageCubeShader->GetUniformGroup<TestImageCubeUniforms>();
 		uniforms->texCube.Set( 0 );
 		uniforms->modelViewMatrix.Set( viewMatrix );
 		uniforms->projectionMatrix.Set( projectionMatrix );
@@ -2447,7 +2516,7 @@ void RB_TestImage( void ) {
 		ir.glEnd();
 	}
 
-	programManager->oldStageShader->Activate();
+	programManager->renderToolsShader->Activate();
 }
 
 /*
@@ -2618,10 +2687,7 @@ void RB_RenderDebugTools( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 		backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 		backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1 );
-	programManager->oldStageShader->Activate();
-	OldStageUniforms* oldStageUniforms = programManager->oldStageShader->GetUniformGroup<OldStageUniforms>();
-	oldStageUniforms->colorMul.Set( 1, 1, 1, 1 );
-	oldStageUniforms->colorAdd.Set( 0, 0, 0, 0 );
+	programManager->renderToolsShader->Activate();
 	GL_SelectTexture(0);
 	globalImages->whiteImage->Bind();
 
@@ -2660,27 +2726,13 @@ void RB_RenderDebugTools( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	}
 }
 
-/*
-=================
-RB_ShutdownDebugTools
-=================
-*/
-void RB_ShutdownDebugTools( void ) {
-	r_debug.text.Clear(0);
-	r_debug.lines.Clear(0);
-	r_debug.polygons.Clear(0);
-	rb_debug.text.Clear(0);
-	rb_debug.lines.Clear(0);
-	rb_debug.polygons.Clear(0);
-}
-
+static idCVar r_maxTrisPerDrawCall( "r_maxTrisPerDrawCall", "0", CVAR_RENDERER, "Limit max tri per draw call" );
 void R_Tools() {
 	if ( r_showPortals ) // moved from backend to allow subviews and SMP
 		tr.viewDef->renderWorld->ShowPortals();
-	static idCVarInt r_maxTri( "r_maxTri", "0", CVAR_RENDERER, "Limit max tri per draw call" );
-	if ( r_maxTri ) {
+	if ( r_maxTrisPerDrawCall.GetInteger() > 0 ) {
 		auto limitTris = []( drawSurf_t* surf ) {
-			surf->numIndexes = Min<int>( r_maxTri*3, surf->numIndexes );
+			surf->numIndexes = Min<int>( r_maxTrisPerDrawCall.GetInteger() * 3, surf->numIndexes );
 		};
 		for ( int i = 0; i < tr.viewDef->numDrawSurfs; i++ )
 			limitTris( tr.viewDef->drawSurfs[i] );

@@ -3600,7 +3600,7 @@ void DrawProjectedLight(brush_t *b, bool bSelected, bool texture) {
 
 	tri = R_PolytopeSurface(6, planes, NULL);
 
-	GL_FloatColor(1, 0, 1);
+	qglColor3f(1, 0, 1);
 	for (i = 0; i < tri->numIndexes; i += 3) {
 		qglBegin(GL_LINE_LOOP);
 		qglVertex3fv(tri->verts[tri->indexes[i]].xyz.ToFloatPtr());
@@ -3627,7 +3627,7 @@ void DrawProjectedLight(brush_t *b, bool bSelected, bool texture) {
 	if (b->pointLight) {
 		if ( b->lightCenter[0] || b->lightCenter[1] || b->lightCenter[2] ) {
 			qglPointSize(8);
-			GL_FloatColor( 1.0f, 0.4f, 0.8f );
+			qglColor3f( 1.0f, 0.4f, 0.8f );
 			qglBegin(GL_POINTS);
 			tv = b->lightCenter;
 			if (transform) {
@@ -3644,7 +3644,7 @@ void DrawProjectedLight(brush_t *b, bool bSelected, bool texture) {
 
 	// projected light
 	qglPointSize(8);
-	GL_FloatColor( 1.0f, 0.4f, 0.8f );
+	qglColor3f( 1.0f, 0.4f, 0.8f );
 	qglBegin(GL_POINTS);
 	tv = b->lightRight;
 	if (transform) {
@@ -3670,7 +3670,7 @@ void DrawProjectedLight(brush_t *b, bool bSelected, bool texture) {
 	qglEnd();
 
 	if (b->startEnd) {
-		GL_FloatColor( 0.4f, 1.0f, 0.8f );
+		qglColor3f( 0.4f, 1.0f, 0.8f );
 		qglBegin(GL_POINTS);
 		qglVertex3fv(b->lightStart.ToFloatPtr());
 		qglVertex3fv(b->lightEnd.ToFloatPtr());
@@ -3771,12 +3771,12 @@ void DrawSpeaker(brush_t *b, bool bSelected, bool twoD) {
 	} else {
 		qglPushMatrix();
 		qglTranslatef(b->owner->origin.x, b->owner->origin.y, b->owner->origin.z );
-		GL_FloatColor( 0.4f, 0.4f, 0.4f );
+		qglColor3f( 0.4f, 0.4f, 0.4f );
 		qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
 #if 0	//TODO: restore this piece of code without GLU
 		GLUquadricObj* qobj = gluNewQuadric();
 		gluSphere(qobj, min, 8, 8);
-		GL_FloatColor( 0.8f, 0.8f, 0.8f );
+		qglColor3f( 0.8f, 0.8f, 0.8f );
 		gluSphere(qobj, max, 8, 8);
 		qglEnable(GL_BLEND);
 		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -3826,7 +3826,7 @@ void DrawLight(brush_t *b, bool bSelected) {
 		}
 	}
 
-	GL_FloatColor(vTriColor[0], vTriColor[1], vTriColor[2]);
+	qglColor3f(vTriColor[0], vTriColor[1], vTriColor[2]);
 
 	idVec3	vCorners[4];
 	float	fMid = b->mins[2] + (b->maxs[2] - b->mins[2]) / 2;
@@ -3866,7 +3866,7 @@ void DrawLight(brush_t *b, bool bSelected) {
 		vTriColor[0] *= 0.95f;
 		vTriColor[1] *= 0.95f;
 		vTriColor[2] *= 0.95f;
-		GL_FloatColor(vTriColor[0], vTriColor[1], vTriColor[2]);
+		qglColor3f(vTriColor[0], vTriColor[1], vTriColor[2]);
 		qglVertex3fv(vCorners[i].ToFloatPtr());
 	}
 
@@ -3885,7 +3885,7 @@ void DrawLight(brush_t *b, bool bSelected) {
 		vTriColor[0] *= 0.95f;
 		vTriColor[1] *= 0.95f;
 		vTriColor[2] *= 0.95f;
-		GL_FloatColor(vTriColor[0], vTriColor[1], vTriColor[2]);
+		qglColor3f(vTriColor[0], vTriColor[1], vTriColor[2]);
 		qglVertex3fv(vCorners[i].ToFloatPtr());
 	}
 
@@ -4006,7 +4006,7 @@ void Brush_DrawModel( brush_t *b, bool camera, bool bSelected ) {
 		}
 		DrawRenderModel( model, b->owner->origin, axis, camera );
 
-		GL_FloatColor( colorSave.ToFloatPtr() );
+		qglColor4fv( colorSave.ToFloatPtr() );
 
         if ( bSelected && camera )
         {
@@ -4026,7 +4026,7 @@ void Brush_DrawModel( brush_t *b, bool camera, bool bSelected ) {
             qglPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             qglDisable( GL_BLEND );
 			qglDisable( GL_DEPTH_TEST );
-            GL_FloatColor( 1.0f, 1.0f, 1.0f );
+			qglColor3f( 1.0f, 1.0f, 1.0f );
             qglPolygonOffset( 1.0f, 3.0f );
             DrawRenderModel( model, b->owner->origin, axis, false );
 			qglEnable( GL_DEPTH_TEST );
@@ -4085,7 +4085,7 @@ void GLTransformedVertex(float x, float y, float z, idMat3 mat, idVec3 origin, i
 	} else {
 		color.z = max;
 	}
-	GL_FloatColor(color.x, color.y, color.z);
+	qglColor3f(color.x, color.y, color.z);
 	qglVertex3f(v.x, v.y, v.z);
 
 }
@@ -4216,7 +4216,7 @@ void Brush_DrawModelInfo(brush_t *b, bool selected) {
 			qglColor3fv(b->owner->eclass->color.ToFloatPtr());
 		}
 		Brush_DrawModel(b, true, selected);
-		GL_FloatColor(color);
+		qglColor4fv(color);
 
 		if ( selected ) {
 			Brush_DrawAxis(b);
@@ -4282,13 +4282,13 @@ void Brush_DrawEnv( brush_t *b, bool cameraView, bool bSelected ) {
 		if ( bSelected ) {
 			qglColor3fv( g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].ToFloatPtr() );
 		} else {
-			GL_FloatColor( 1.f, 1.f, 1.f );
+			qglColor3f( 1.f, 1.f, 1.f );
 		}
 		DrawRenderModel( model, origin, axis, true );
 		delete model;
 		model = NULL;
 
-		GL_FloatColor( colorSave.ToFloatPtr() );
+		qglColor4fv( colorSave.ToFloatPtr() );
 	}
 }
 
@@ -4333,7 +4333,7 @@ void Brush_DrawCombatNode( brush_t *b, bool cameraView, bool bSelected ) {
 		pt2 = org + leftDir * cone_dist;
 		pt3 = org + rightDir * cone_dist;
 		pt4 = org + rightDir * min_dist;
-		GL_FloatColor(color.ToFloatPtr());
+		qglColor4fv(color.ToFloatPtr());
 		qglBegin(GL_LINE_STRIP);
 		qglVertex3fv( pt1.ToFloatPtr());
 		qglVertex3fv( pt2.ToFloatPtr());
@@ -4342,7 +4342,7 @@ void Brush_DrawCombatNode( brush_t *b, bool cameraView, bool bSelected ) {
 		qglVertex3fv( pt1.ToFloatPtr());
 		qglEnd();
 
-		GL_FloatColor(colorGreen.ToFloatPtr());
+		qglColor4fv(colorGreen.ToFloatPtr());
 		qglBegin(GL_LINE_STRIP);
 		qglVertex3fv( entorg.ToFloatPtr());
 		pt = (pt1 + pt4) * 0.5f;
@@ -4561,7 +4561,7 @@ void Brush_DrawCurve( brush_t *b, bool bSelected, bool cam ) {
 	int maxage = b->owner->curve->GetNumValues();
 	int i, time = 0;
 
-	GL_FloatColor( 0.0f, 0.0f, 1.0f );
+	qglColor3f( 0.0f, 0.0f, 1.0f );
 
 	for ( i = 0; i < maxage; i++) {
 
@@ -4597,7 +4597,7 @@ void Brush_DrawCurve( brush_t *b, bool bSelected, bool cam ) {
 					for ( k = 0; k < 3; k++ ) {
 						int	index = indexes[ j + 2 - k ];
 						float f = ShadeForNormal( verts[index].normal  );
-						GL_FloatColor( f, f, f );
+						qglColor3f( f, f, f );
 						qglTexCoord2fv( verts[index].st.ToFloatPtr() );
 						qglVertex3fv( verts[index].xyz.ToFloatPtr() );
 					}
@@ -4667,7 +4667,7 @@ void Brush_DrawXY(brush_t *b, int nViewType, bool bSelected, bool ignoreViewType
 	}
 	Brush_DrawCurve( b, bSelected, false );
 
-	GL_FloatColor(colorSave.ToFloatPtr());
+	qglColor4fv(colorSave.ToFloatPtr());
 
 	if (b->pPatch) {
 		Patch_DrawXY(b->pPatch);
@@ -4743,12 +4743,12 @@ void Brush_DrawXY(brush_t *b, int nViewType, bool bSelected, bool ignoreViewType
             return;
 		}
 	}
-	GL_FloatColor(colorSave.ToFloatPtr());
+	qglColor4fv(colorSave.ToFloatPtr());
 
 	if (b->modelHandle > 0) {
 		Brush_DrawEmitter( b, bSelected, false );
 		Brush_DrawModel(b, false, bSelected);
-		GL_FloatColor(colorSave.ToFloatPtr());
+		qglColor4fv(colorSave.ToFloatPtr());
 		return;
 	}
 

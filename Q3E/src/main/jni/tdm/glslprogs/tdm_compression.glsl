@@ -15,10 +15,10 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 // returns surface normal in tangent space
 // should handle all the specifics of normalmap format
-vec3 fetchSurfaceNormal(vec2 texCoord, bool hasNormalsTexture, in sampler2D normalsTexture, bool RGTC) {
-	if (hasNormalsTexture) {
+vec3 unpackSurfaceNormal(vec4 normalTexColor, bool useNormalTexture, bool RGTC) {
+	if (useNormalTexture) {
 		// fetch RGB, convert from [0, 1] to [-1, 1] range
-		vec3 bumpTexel = texture(normalsTexture, texCoord.st).xyz * 2.0 - 1.0;
+		vec3 bumpTexel = normalTexColor.xyz * 2.0 - 1.0;
 
 		if (RGTC) {
 			// RGTC compression: add positive Z value

@@ -78,6 +78,7 @@ void tdmEAS::Compile()
 	{
 		gameLocal.Error("Cannot Compile EAS, no AAS available.");
 	}
+	TRACE_CPU_SCOPE("EAS::Compile");
 
 	// First, allocate the memory for the cluster info structures
 	SetupClusterInfoStructures();
@@ -317,8 +318,6 @@ void tdmEAS::SetupRoutesBetweenClusters()
 			_routingIterations = 0;
 			FindRoutesToCluster(static_cast<int>(startCluster), startArea, static_cast<int>(goalCluster), goalArea);
 		}
-
-		common->PacifierUpdate(LOAD_KEY_ROUTING_INTERIM,(int)startCluster + 1); // grayman #3763
 	}
 }
 
@@ -655,7 +654,9 @@ RouteInfoList tdmEAS::FindRoutesToCluster(int startCluster, int startArea, int g
 
 				int targetStationIndex = GetElevatorStationIndex(positionEnt);
 
-				int nextArea = GetAreaNumForPosition(positionEnt->GetPhysics()->GetOrigin());
+				//int nextArea = GetAreaNumForPosition(positionEnt->GetPhysics()->GetOrigin());
+				// take precomputed value (much faster)
+				int nextArea = (targetStationIndex >= 0 ? _elevatorStations[targetStationIndex]->areaNum : 0);
 
 				if (nextArea <= 0)
 				{

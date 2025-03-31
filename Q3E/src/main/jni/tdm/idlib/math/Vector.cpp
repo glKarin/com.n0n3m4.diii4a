@@ -57,19 +57,6 @@ void idVec2::Lerp( const idVec2 &v1, const idVec2 &v2, const float l ) {
 }
 
 
-/*
-=============
-MulCW
-
-Multiply on vector component-wise
-=============
-*/
-void idVec2::MulCW( const idVec2& a ) {
-	x *= a.x;
-	y *= a.y;
-}
-
-
 //===============================================================
 //
 //	idVec3

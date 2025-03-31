@@ -297,7 +297,9 @@ bool idParticle_FindCutoffTextureSubregion(const idPartStageData &stg, const srf
 		idBounds texBounds;
 		texBounds.Clear();
 		for (int i = 0; i < tri->numIndexes; i++) {
-			idVec2 tc = tri->verts[tri->indexes[i]].st;
+			//VC 2022 optimizer breaks this code, so we use volatile as workaround
+			//See bug report: https://developercommunity.visualstudio.com/t/Optimization-bug-with-scalar-SSE/10707188
+			volatile idVec2 tc = tri->verts[tri->indexes[i]].st;
 			texBounds.AddPoint(idVec3(tc.x, tc.y, 0.0));
 		}
 		texBounds.IntersectsBounds(bounds_zeroOneCube);
@@ -350,18 +352,19 @@ void idParticle_PrepareCutoffMap(
 		//collisionStatic: individual texture is used for every combination of surface index and particle stage index
 		if ( sign.surfaceIndex >= 0 && sign.particleStageIndex >= 0 ) {
 			idStr imagePath = idParticleStage::GetCollisionStaticImagePath( sign );
-			image = idParticleStage::LoadCutoffTimeMap( imagePath );
-			if ( image->defaulted )
-				image = nullptr;	//image not found
-			else if ( !image->cpuData.pic ) {
-				assert(false);
-				image = nullptr;	//some SMP weirdness: do not crash at least
-			}
-			else {
-				const imageBlock_t &data = image->cpuData;
-				const byte *pic = data.GetPic(0);
-				if ( data.GetSizeInBytes() == 4 && pic[0] == 255 && pic[1] == 255 && pic[2] == 255 )
-					image = nullptr;	//collisionStatic was disabled for this emitter
+			if ( image = idParticleStage::LoadCutoffTimeMap( imagePath, true ) ) {
+				if ( image->defaulted )
+					image = nullptr;	//image not found
+				else if ( !image->cpuData.pic ) {
+					assert(false);
+					image = nullptr;	//some SMP weirdness: do not crash at least
+				}
+				else {
+					const imageBlock_t &data = image->cpuData;
+					const byte *pic = data.GetPic(0);
+					if ( data.GetSizeInBytes() == 4 && pic[0] == 255 && pic[1] == 255 && pic[2] == 255 )
+						image = nullptr;	//collisionStatic was disabled for this emitter
+				}
 			}
 		}
 		else {

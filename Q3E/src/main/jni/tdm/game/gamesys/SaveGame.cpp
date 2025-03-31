@@ -435,6 +435,7 @@ void idSaveGame::WriteRefSound( const refSound_t &refSound ) {
 	WriteFloat( refSound.parms.shakes );
 	WriteInt( refSound.parms.soundShaderFlags );
 	WriteInt( refSound.parms.soundClass );
+	WriteInt( refSound.parms.overrideMode );
 }
 
 void idSaveGame::WriteRenderView( const renderView_t &view ) {
@@ -1039,6 +1040,7 @@ void idRestoreGame::ReadRefSound( refSound_t &refSound ) {
 	ReadFloat( refSound.parms.shakes );
 	ReadInt( refSound.parms.soundShaderFlags );
 	ReadInt( refSound.parms.soundClass );
+	ReadInt( refSound.parms.overrideMode );
 }
 
 void idRestoreGame::ReadRenderView( renderView_t &view ) {

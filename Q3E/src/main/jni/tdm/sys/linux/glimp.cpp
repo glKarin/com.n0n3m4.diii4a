@@ -66,6 +66,12 @@ void GLimp_Shutdown() {
 }
 
 void GLimp_SwapBuffers() {
+	// swap interval is OS-specific extension,
+	// so we must check for it here instead of portably
+	if ( r_swapInterval.IsModified() ) {
+		r_swapInterval.ClearModified();
+		glfwSwapInterval( r_swapInterval.GetInteger() );
+	}
 	assert( window );
 	glfwSwapBuffers( window );
 }

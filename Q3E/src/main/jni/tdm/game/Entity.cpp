@@ -33,6 +33,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "Objectives/MissionData.h"
 #include <algorithm>
 #include "LodComponent.h"
+#include "LightEstimateSystem.h"
 
 /*
 ===============================================================================
@@ -126,6 +127,7 @@ const idEventDef EV_SetAngularVelocity( "setAngularVelocity", EventArgs('v', "ve
 	"a physics object is a vector that passes through the center of mass. The\n" \
 	"direction of this vector defines the axis of rotation and the magnitude\n" \
 	"defines the rate of rotation about the axis in radians per second.");
+const idEventDef EV_SetGravity( "setGravity", EventArgs('v', "newGravity", ""), EV_RETURNS_VOID, "Sets a new gravity vector for this entity. Note that non-upright vectors are poorly supported at present.");
 
 // tels #2897
 const idEventDef EV_ApplyImpulse( "applyImpulse", EventArgs(
@@ -162,7 +164,14 @@ const idEventDef EV_GetColor( "getColor", EventArgs(), 'v', "Gets the color of t
 const idEventDef EV_SetHealth( "setHealth", EventArgs( 'f', "newHealth", "" ), EV_RETURNS_VOID, 
 	"Sets the health of this entity to the new value. Setting health to 0 or lower via this method will result in the entity switching to its broken state." );
 const idEventDef EV_GetHealth( "getHealth", EventArgs(), 'f', "Gets the health of this entity." );
+const idEventDef EV_SetMaxHealth( "setMaxHealth", EventArgs( 'f', "newMaxHealth", "" ), EV_RETURNS_VOID, 
+	"Sets the max health of this entity to the new value. If current health is higher than max health, the current health will be lowered to become equal to max health. Setting health to 0 or lower via this method will result in the entity switching to its broken state." );
+const idEventDef EV_GetMaxHealth( "getMaxHealth", EventArgs(), 'f', "Gets the max health of this entity." );
 
+const idEventDef EV_SetFrobActionScript( "setFrobActionScript", EventArgs('s', "frobActionScript", "the new script to call when the entity is frobbed"), EV_RETURNS_VOID, 
+	"Changes the frob action script of this entity. Also updates the 'frob_action_script' spawnarg.");
+const idEventDef EV_SetUsedBy( "setUsedBy", EventArgs('e', "ent", "specify an entity here, like a key", 'd', "b_canUse", "whether the specified entity can use this entity"), EV_RETURNS_VOID,
+	"Allows to change which entities can use this entity.");
 const idEventDef EV_CacheSoundShader( "cacheSoundShader", EventArgs('s', "shaderName", "the sound shader to cache"), EV_RETURNS_VOID, 
 	"Ensure the specified sound shader is loaded by the system.\nPrevents cache misses when playing sound shaders.");
 const idEventDef EV_StartSoundShader( "startSoundShader", EventArgs('s', "shaderName", "the sound shader to play", 'd', "channel", "the channel to play the sound on"), 'f', 
@@ -567,9 +576,13 @@ ABSTRACT_DECLARATION( idClass, idEntity )
 	EVENT( EV_GetColor,				idEntity::Event_GetColor )
 	EVENT( EV_SetHealth,			idEntity::Event_SetHealth )
 	EVENT( EV_GetHealth,			idEntity::Event_GetHealth )
+	EVENT( EV_SetMaxHealth,			idEntity::Event_SetMaxHealth )
+	EVENT( EV_GetMaxHealth,			idEntity::Event_GetMaxHealth )
 	EVENT( EV_IsHidden,				idEntity::Event_IsHidden )
 	EVENT( EV_Hide,					idEntity::Event_Hide )
 	EVENT( EV_Show,					idEntity::Event_Show )
+	EVENT( EV_SetFrobActionScript,	idEntity::Event_SetFrobActionScript )
+	EVENT( EV_SetUsedBy,			idEntity::Event_SetUsedBy )
 	EVENT( EV_CacheSoundShader,		idEntity::Event_CacheSoundShader )
 	EVENT( EV_StartSoundShader,		idEntity::Event_StartSoundShader )
 	EVENT( EV_StartSound,			idEntity::Event_StartSound )
@@ -587,6 +600,7 @@ ABSTRACT_DECLARATION( idClass, idEntity )
 	EVENT( EV_SetLinearVelocity,	idEntity::Event_SetLinearVelocity )
 	EVENT( EV_GetAngularVelocity,	idEntity::Event_GetAngularVelocity )
 	EVENT( EV_SetAngularVelocity,	idEntity::Event_SetAngularVelocity )
+	EVENT( EV_SetGravity,			idEntity::Event_SetGravity )
 	EVENT( EV_ApplyImpulse,			idEntity::Event_ApplyImpulse )
 
 	EVENT( EV_SetContents,			idEntity::Event_SetContents )
@@ -935,10 +949,22 @@ void idGameEdit::ParseSpawnArgsToRefSound( const idDict *args, refSound_t *refSo
 
 	memset( refSound, 0, sizeof( *refSound ) );
 
-	refSound->parms.minDistance = args->GetFloat( "s_mindistance" );
-	refSound->parms.maxDistance = args->GetFloat( "s_maxdistance" );
-	refSound->parms.volume = args->GetFloat( "s_volume" );
-	refSound->parms.shakes = args->GetFloat( "s_shakes" );
+	auto ReadFloatParam = [&]( const char *spawnargName, int ssomFlag ) -> float {
+		// stgatilov #6346: mark parameter as overriding only when spawnarg is present, nonempty and valid number
+		// otherwise, parameter should not override anything (i.e. disabled)
+		const char *text;
+		float value;
+		if ( args->GetString( spawnargName, "", &text ) && sscanf( text, "%f", &value ) == 1 ) {
+			refSound->parms.overrideMode |= ssomFlag;
+			return value;
+		}
+		return 0.0f;
+	};
+
+	refSound->parms.minDistance = ReadFloatParam( "s_mindistance", SSOM_MIN_DISTANCE_OVERRIDE );
+	refSound->parms.maxDistance = ReadFloatParam( "s_maxdistance", SSOM_MAX_DISTANCE_OVERRIDE );
+	refSound->parms.volume = ReadFloatParam( "s_volume", SSOM_VOLUME_OVERRIDE );
+	refSound->parms.shakes = ReadFloatParam( "s_shakes", SSOM_SHAKES_OVERRIDE );
 
 	args->GetVector( "origin", "0 0 0", refSound->origin );
 
@@ -966,6 +992,7 @@ void idGameEdit::ParseSpawnArgsToRefSound( const idDict *args, refSound_t *refSo
 		refSound->parms.soundShaderFlags |= SSF_UNCLAMPED;
 	}
 	refSound->parms.soundClass = args->GetInt( "s_soundClass" );
+	refSound->parms.overrideMode |= SSOM_FLAGS_OR;
 
 	temp = args->GetString( "s_shader" );
 	if ( temp[0] != '\0' ) {
@@ -1109,7 +1136,7 @@ idEntity::idEntity()
 	// grayman #597 - for hiding arrows when nocked to the bow
 	m_HideUntilTime = 0;
 
-	// SteveL #3817. Make decals and overlays persistant.
+	// SteveL #3817. Make decals and overlays persistent.
 	needsDecalRestore = false;
 
 	memset( &xrayRenderEnt, 0, sizeof( xrayRenderEnt ) );
@@ -3115,6 +3142,11 @@ void idEntity::SetSolid( bool solidity ) {
 
 float idEntity::GetLightQuotient()
 {
+	if (g_lightQuotientAlgo.GetBool()) {
+		float value = gameLocal.m_LightEstimateSystem->GetLightOnEntity(this);
+		return value;
+	}
+
 	if (m_LightQuotientLastEvalTime < gameLocal.time)
 	{
 		idPhysics* physics = GetPhysics();
@@ -3177,6 +3209,19 @@ float idEntity::GetLightQuotient()
 
 	// Return the cached result
 	return m_LightQuotient;
+}
+
+bool idEntity::DebugGetLightQuotient(float &result) const {
+	if (g_lightQuotientAlgo.GetBool()) {
+		return gameLocal.m_LightEstimateSystem->DebugGetLightOnEntity(this, result);
+	}
+
+	if (m_LightQuotientLastEvalTime >= gameLocal.time - 300) {
+		result = m_LightQuotient;
+		return true;
+	} else {
+		return false;
+	}
 }
 
 /*
@@ -4020,6 +4065,11 @@ idEntity::SetSoundVolume
 */
 void idEntity::SetSoundVolume( float volume ) {
 	refSound.parms.volume = volume;
+	refSound.parms.overrideMode |= SSOM_VOLUME_OVERRIDE;
+}
+void idEntity::SetSoundVolume( void ) {
+	refSound.parms.volume = 0.0f;
+	refSound.parms.overrideMode &= ~SSOM_VOLUME_OVERRIDE;
 }
 
 /*
@@ -7164,6 +7214,34 @@ void idEntity::Event_GetHealth( void ) {
 
 /*
 ================
+idEntity::Event_SetMaxHealth
+================
+*/
+void idEntity::Event_SetMaxHealth( float newMaxHealth ) {
+	maxHealth = static_cast<int>(newMaxHealth);
+
+	if( health > maxHealth )
+	{
+		health = maxHealth;
+	}
+
+	if( health <= 0 && !m_bIsBroken )
+	{
+		BecomeBroken( NULL );
+	}
+}
+
+/*
+================
+idEntity::Event_GetMaxHealth
+================
+*/
+void idEntity::Event_GetMaxHealth( void ) {
+	idThread::ReturnInt( maxHealth );
+}
+
+/*
+================
 idEntity::Event_IsHidden
 ================
 */
@@ -7187,6 +7265,31 @@ idEntity::Event_Show
 */
 void idEntity::Event_Show( void ) {
 	Show();
+}
+
+/*
+================
+idEntity::Event_SetFrobActionScript
+================
+*/
+void idEntity::Event_SetFrobActionScript( const char *frobActionScript ) {
+	idStr str = frobActionScript;
+	m_FrobActionScript = str;
+	spawnArgs.Set("frob_action_script", str);
+}
+
+/*
+================
+idEntity::Event_SetUsedBy
+================
+*/
+void idEntity::Event_SetUsedBy( idEntity *useEnt, bool canUse ) {
+
+	if( canUse )
+		m_UsedByName.AddUnique( useEnt->name );
+
+	else
+		m_UsedByName.Remove( useEnt->name );
 }
 
 /*
@@ -7250,7 +7353,7 @@ tels:
 ================
 */
 void idEntity::Event_SetSoundVolume( float volume ) {
-	refSound.parms.volume = volume;
+	SetSoundVolume( volume );
 }
 
 /*
@@ -7368,6 +7471,15 @@ idEntity::Event_GetAngularVelocity
 */
 void idEntity::Event_GetAngularVelocity( void ) {
 	idThread::ReturnVector( GetPhysics()->GetAngularVelocity() );
+}
+
+/*
+================
+idEntity::Event_SetGravity
+================
+*/
+void idEntity::Event_SetGravity( const idVec3 &newGravity ) {
+	GetPhysics()->SetGravity( newGravity );
 }
 
 /*
@@ -12094,17 +12206,6 @@ bool idEntity::canSeeEntity(idEntity* target, const int useLighting)
 
 		if (useLighting)
 		{
-			/* grayman #3584 - GetLightQuotient() now does the following code:
-
-			idBounds entityBounds = target->GetPhysics()->GetAbsBounds();
-			entityBounds.ExpandSelf (0.1f); // A single point doesn't work with ellipse intersection
-
-			idVec3 bottomPoint = entityBounds[0];
-			idVec3 topPoint = entityBounds[1];
-			entity->GetLightQuotient()
-			float lightQuotient = LAS.queryLightingAlongLine (bottomPoint, topPoint, this, true);
-			*/
-
 			float lightQuotient = target->GetLightQuotient();
 
 			// Return TRUE if the lighting exceeds the threshold.

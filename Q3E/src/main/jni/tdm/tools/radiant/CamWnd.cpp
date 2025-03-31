@@ -806,16 +806,13 @@ void CCamWnd::DrawLightRadius(brush_t *pBrush) {
  =======================================================================================================================
  */
 void setGLMode(int mode) {
-	GLColorOverride scopedColor;
-	float color[4] = {1, 1, 1, 1};
-
 	switch (mode)
 	{
 		case cd_wire:
 			qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			qglDisable(GL_BLEND);
 			qglDisable(GL_DEPTH_TEST);
-			scopedColor.Enable( color );
+			qglColor4f(1, 1, 1, 1);
 			break;
 
 		case cd_solid:
@@ -950,7 +947,7 @@ void CCamWnd::Cam_Draw() {
 	// set the sound origin for both simple draw and rendered mode
 	// the editor uses opposite pitch convention
 	idMat3	axis = idAngles( -m_Camera.angles.pitch, m_Camera.angles.yaw, m_Camera.angles.roll ).ToMat3();
-	g_qeglobals.sw->PlaceListener( m_Camera.origin, axis, 0, Sys_Milliseconds(), "Undefined" );
+	g_qeglobals.sw->PlaceListener( m_Camera.origin, axis, 0, Sys_Milliseconds(), "Undefined", "");
 
 	if (renderMode) {
 		Cam_Render();
@@ -1059,14 +1056,14 @@ void CCamWnd::Cam_Draw() {
 	qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	if (renderMode) {
-		GL_FloatColor(1, 0, 0);
+		qglColor3f(1, 0, 0);
 		for (int i = 0; i < nCount; i++) {
 			face_t	*selFace = reinterpret_cast < face_t * > (g_ptrSelectedFaces.GetAt(i));
 			Face_Draw(selFace);
 		}
 	}
 
-	GL_FloatColor(1, 1, 1);
+	qglColor3f(1, 1, 1);
 	for (brush = pList->next; brush != pList; brush = brush->next) {
 		if (brush->pPatch || brush->modelHandle > 0) {
 			continue;
@@ -1079,7 +1076,7 @@ void CCamWnd::Cam_Draw() {
 	// edge / vertex flags
 	if (g_qeglobals.d_select_mode == sel_vertex) {
 		qglPointSize(4);
-		GL_FloatColor(0, 1, 0);
+		qglColor3f(0, 1, 0);
 		qglBegin(GL_POINTS);
 		for (i = 0; i < g_qeglobals.d_numpoints; i++) {
 			qglVertex3fv( g_qeglobals.d_points[i].ToFloatPtr() );
@@ -1092,7 +1089,7 @@ void CCamWnd::Cam_Draw() {
 		float	*v1, *v2;
 
 		qglPointSize(4);
-		GL_FloatColor(0, 0, 1);
+		qglColor3f(0, 0, 1);
 		qglBegin(GL_POINTS);
 		for (i = 0; i < g_qeglobals.d_numedges; i++) {
 			v1 = g_qeglobals.d_points[g_qeglobals.d_edges[i].p1].ToFloatPtr();

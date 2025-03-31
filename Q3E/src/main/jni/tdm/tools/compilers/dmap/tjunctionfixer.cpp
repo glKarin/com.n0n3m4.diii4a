@@ -184,7 +184,7 @@ void TJunctionFixer::MergeCloseVertices() {
 	clusterPos.SetNum(num, false);
 	idFlexList<int, 128> counts;
 	counts.SetNum(num);
-	memset(clusterPos.Ptr(), 0, clusterPos.Allocated());
+	clusterPos.FillZero();
 	memset(counts.Ptr(), 0, counts.Num() * sizeof(counts[0]));
 	for (int i = 0; i < clusterOfCorner.Num(); i++) {
 		int clusterIdx = clusterOfCorner[i];

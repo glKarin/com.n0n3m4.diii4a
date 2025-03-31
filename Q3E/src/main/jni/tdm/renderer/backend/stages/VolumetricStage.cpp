@@ -21,7 +21,6 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/resources/Image.h"
 #include "renderer/backend/GLSLProgramManager.h"
 #include "renderer/backend/GLSLUniforms.h"
-#include "renderer/backend/glsl.h"
 
 VolumetricStage volumetricImpl;
 VolumetricStage *volumetric = &volumetricImpl;
@@ -279,13 +278,17 @@ void VolumetricStage::SetScissor() {
 	rect.y1 = idMath::Imax( rect.y1 - margin, 0 );
 	rect.x2 = idMath::Imin( rect.x2 + margin, w - 1 );
 	rect.y2 = idMath::Imin( rect.y2 + margin, h - 1 );
-	// apply blur in real FBO pixels
-	GL_ScissorAbsolute(
-		rect.x1,
-		rect.y1,
-		rect.x2 - rect.x1 + 1,
-		rect.y2 - rect.y1 + 1
-	);
+	if ( r_useScissor.GetBool() ) {
+		// apply blur in real FBO pixels
+		GL_ScissorAbsolute(
+			rect.x1,
+			rect.y1,
+			rect.x2 - rect.x1 + 1,
+			rect.y2 - rect.y1 + 1
+		);
+	} else {
+		GL_ScissorRelative(0, 0, 1, 1);
+	}
 }
 
 void VolumetricStage::RenderFrustum(GLSLProgram *shader) {
@@ -296,7 +299,7 @@ void VolumetricStage::RenderFrustum(GLSLProgram *shader) {
 	//   3) can use frustum exit distance for clamping depth texture
 
 	// set modelview / projection
-	shader->GetUniformGroup<Uniforms::Global>()->Set( &viewDef->worldSpace );
+	shader->GetUniformGroup<TransformUniforms>()->Set( &viewDef->worldSpace );
 
 	drawSurf_t ds = { 0 };
 	ds.space = &viewDef->worldSpace;

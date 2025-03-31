@@ -23,11 +23,6 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/backend/FrameBufferManager.h"
 #include "renderer/backend/FrameBuffer.h"
 
-idCVar r_useNewRenderPasses( "r_useNewRenderPasses", "2", CVAR_INTEGER | CVAR_ARCHIVE| CVAR_RENDERER,
-	"Use new refactored code for rendering surface/light material stages",
-	0, 2
-);
-
 RenderBackend renderBackendImpl;
 RenderBackend *renderBackend = &renderBackendImpl;
 
@@ -62,10 +57,9 @@ void RenderBackend::Init() {
 	for ( int i = 0; i < 3; ++i ) {
 		qglBindBuffer( GL_PIXEL_PACK_BUFFER, lightgemPbos[i] );
 #ifdef _GLES //karin: RGBA
-		qglBufferData( GL_PIXEL_PACK_BUFFER, DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_RENDER_WIDTH * 4, nullptr, GL_STREAM_READ );
-#else
-		qglBufferData( GL_PIXEL_PACK_BUFFER, DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_RENDER_WIDTH * 3, nullptr, GL_STREAM_READ );
+		assert(DARKMOD_LG_BPP == 4);
 #endif
+		qglBufferData( GL_PIXEL_PACK_BUFFER, DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_BPP, nullptr, GL_STREAM_READ );
 	}
 	qglBindBuffer( GL_PIXEL_PACK_BUFFER, 0 ); // reset to default to allow sysmem ReadPixels if LG disabled
 }
@@ -74,7 +68,7 @@ void RenderBackend::Shutdown() {
 	if (!initialized)
 		return;
 	qglDeleteBuffers( 3, lightgemPbos );
-	
+
 	tonemapStage.Shutdown();
 	frobOutlineStage.Shutdown();
 	lightPassesStage.Shutdown();
@@ -105,8 +99,6 @@ void RenderBackend::DrawView( const viewDef_t *viewDef, bool colorIsBackground )
 	RB_ShowOverdraw();
 
 
-	int processed;
-
 	backEnd.depthFunc = GLS_DEPTHFUNC_EQUAL;
 
 	// clear the framebuffer, set the projection matrix, etc
@@ -128,74 +120,35 @@ void RenderBackend::DrawView( const viewDef_t *viewDef, bool colorIsBackground )
 		DrawShadowsAndInteractions( viewDef );
 	}
 
-	if ( r_useNewRenderPasses.GetInteger() > 0 ) {
-		int beforePostproc = 0;
-		while ( beforePostproc < numDrawSurfs && drawSurfs[beforePostproc]->sort < SS_POST_PROCESS )
-			beforePostproc++;
-		const drawSurf_t **postprocSurfs = (const drawSurf_t **)drawSurfs + beforePostproc;
-		int postprocCount = numDrawSurfs - beforePostproc;
+	int beforePostproc = 0;
+	while ( beforePostproc < numDrawSurfs && drawSurfs[beforePostproc]->sort < SS_POST_PROCESS )
+		beforePostproc++;
+	const drawSurf_t **postprocSurfs = (const drawSurf_t **)drawSurfs + beforePostproc;
+	int postprocCount = numDrawSurfs - beforePostproc;
 
-		surfacePassesStage.DrawSurfaces( viewDef, (const drawSurf_t **)drawSurfs, beforePostproc );
+	surfacePassesStage.DrawSurfaces( viewDef, (const drawSurf_t **)drawSurfs, beforePostproc );
 
-		if ( (r_frobOutline.GetInteger() > 0 || r_newFrob.GetInteger() == 1) && !viewDef->IsLightGem() ) {
-			frobOutlineStage.DrawFrobOutline( drawSurfs, numDrawSurfs );
-		}
-
-		if ( r_useNewRenderPasses.GetInteger() == 2 ) {
-			LightPassesStage::DrawMask mask;
-			mask.opaque = true;
-			mask.translucent = false;
-			lightPassesStage.DrawAllFogLights( viewDef, mask );
-
-			lightPassesStage.DrawAllBlendLights( viewDef );
-			volumetric->RenderAll( viewDef );
-
-			if ( surfacePassesStage.NeedCurrentRenderTexture( viewDef, postprocSurfs, postprocCount ) )
-				frameBuffers->UpdateCurrentRenderCopy();
-
-			surfacePassesStage.DrawSurfaces( viewDef, postprocSurfs, postprocCount );
-
-			// 2.08: second fog pass, translucent only
-			mask.opaque = false;
-			mask.translucent = true;
-			lightPassesStage.DrawAllFogLights( viewDef, mask );
-		}
-		else {
-			extern void RB_STD_FogAllLights( bool translucent );
-			RB_STD_FogAllLights( false );
-
-			if ( surfacePassesStage.NeedCurrentRenderTexture( viewDef, postprocSurfs, postprocCount ) )
-				frameBuffers->UpdateCurrentRenderCopy();
-
-			surfacePassesStage.DrawSurfaces( viewDef, postprocSurfs, postprocCount );
-
-			RB_STD_FogAllLights( true ); // 2.08: second fog pass, translucent only
-		}
+	if ( (r_frobOutline.GetInteger() > 0 || r_newFrob.GetInteger() == 1) && !viewDef->IsLightGem() ) {
+		frobOutlineStage.DrawFrobOutline( drawSurfs, numDrawSurfs );
 	}
-	else {
 
-		// now draw any non-light dependent shading passes
-		int RB_STD_DrawShaderPasses( drawSurf_t **drawSurfs, int numDrawSurfs, bool postProcessing );
-		processed = RB_STD_DrawShaderPasses( drawSurfs, numDrawSurfs, false );
+	LightPassesStage::DrawMask mask;
+	mask.opaque = true;
+	mask.translucent = false;
+	lightPassesStage.DrawAllFogLights( viewDef, mask );
 
-		if (
-			(r_frobOutline.GetInteger() > 0 || r_newFrob.GetInteger() == 1) && 
-			!viewDef->IsLightGem()
-		) {
-			frobOutlineStage.DrawFrobOutline( drawSurfs, numDrawSurfs );
-		}
+	lightPassesStage.DrawAllBlendLights( viewDef );
+	volumetric->RenderAll( viewDef );
 
-		// fog and blend lights
-		extern void RB_STD_FogAllLights( bool translucent );
-		RB_STD_FogAllLights( false );
+	if ( surfacePassesStage.NeedCurrentRenderTexture( viewDef, postprocSurfs, postprocCount ) )
+		frameBuffers->UpdateCurrentRenderCopy();
 
-		// now draw any post-processing effects using _currentRender
-		if ( processed < numDrawSurfs ) {
-			RB_STD_DrawShaderPasses( drawSurfs + processed, numDrawSurfs - processed, true );
-		}
+	surfacePassesStage.DrawSurfaces( viewDef, postprocSurfs, postprocCount );
 
-		RB_STD_FogAllLights( true ); // 2.08: second fog pass, translucent only
-	}
+	// 2.08: second fog pass, translucent only
+	mask.opaque = false;
+	mask.translucent = true;
+	lightPassesStage.DrawAllFogLights( viewDef, mask );
 
 #if !defined(_GLES) //karin: TODO: crash when build release
 	RB_RenderDebugTools( drawSurfs, numDrawSurfs );
@@ -209,27 +162,45 @@ void RenderBackend::DrawView( const viewDef_t *viewDef, bool colorIsBackground )
 }
 
 void RenderBackend::DrawLightgem( const viewDef_t *viewDef, byte *lightgemData ) {
+	TRACE_GL_SCOPE( "DrawLightgem" );
+
 	FrameBuffer *currentFbo = frameBuffers->activeFbo;
 	FrameBuffer *renderFbo = frameBuffers->currentRenderFbo;
 	frameBuffers->currentRenderFbo = lightgemFbo;
 	lightgemFbo->Bind();
-	
+
 	DrawView( viewDef, false );
 
-	// asynchronously copy contents of the lightgem framebuffer to a pixel buffer
-	qglBindBuffer( GL_PIXEL_PACK_BUFFER, lightgemPbos[currentLightgemPbo] );
-	qglPixelStorei( GL_PACK_ALIGNMENT, 1 );	// otherwise small rows get padded to 32 bits
+	{
+		TRACE_GL_SCOPE( "CopyToPbo" );
+		// asynchronously copy contents of the lightgem framebuffer to a pixel buffer
+		qglBindBuffer( GL_PIXEL_PACK_BUFFER, lightgemPbos[currentLightgemPbo] );
+		qglPixelStorei( GL_PACK_ALIGNMENT, 1 );	// otherwise small rows get padded to 32 bits
 #ifdef _GLES //karin: RGBA
-	qglReadPixels( 0, 0, DARKMOD_LG_RENDER_WIDTH, DARKMOD_LG_RENDER_WIDTH, GL_RGBA, GL_UNSIGNED_BYTE, nullptr );
+		qglReadPixels( 0, 0, DARKMOD_LG_RENDER_WIDTH, DARKMOD_LG_RENDER_WIDTH, GL_RGBA, GL_UNSIGNED_BYTE, nullptr );
 #else
-    qglReadPixels( 0, 0, DARKMOD_LG_RENDER_WIDTH, DARKMOD_LG_RENDER_WIDTH, GL_RGB, GL_UNSIGNED_BYTE, nullptr );
+    	qglReadPixels( 0, 0, DARKMOD_LG_RENDER_WIDTH, DARKMOD_LG_RENDER_WIDTH, GL_RGB, GL_UNSIGNED_BYTE, nullptr );
 #endif
+	}
 
-	// advance PBO index and actually copy the data stored in that PBO to local memory
-	// this PBO is from a previous frame, and data transfer should thus be reasonably fast
-	currentLightgemPbo = ( currentLightgemPbo + 1 ) % 3;
-	qglBindBuffer( GL_PIXEL_PACK_BUFFER, lightgemPbos[currentLightgemPbo] );
-	qglGetBufferSubData( GL_PIXEL_PACK_BUFFER, 0, DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_RENDER_WIDTH * 3, lightgemData );
+	{
+		TRACE_GL_SCOPE( "ReadFromPbo" );
+		// advance PBO index and actually copy the data stored in that PBO to local memory
+		// this PBO is from a previous frame, and data transfer should thus be reasonably fast
+		currentLightgemPbo = ( currentLightgemPbo + 1 ) % 3;
+		qglBindBuffer( GL_PIXEL_PACK_BUFFER, lightgemPbos[currentLightgemPbo] );
+#ifdef _GLES //karin: using mapping buffer
+		assert(DARKMOD_LG_BPP == 4);
+		void *mapPtr = qglMapBufferRange( GL_PIXEL_PACK_BUFFER, 0, DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_BPP, GL_MAP_READ_BIT );
+		if(mapPtr)
+		{
+			memcpy(lightgemData, mapPtr, DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_BPP);
+		}
+		qglUnmapBuffer( GL_PIXEL_PACK_BUFFER );
+#else
+		qglGetBufferSubData( GL_PIXEL_PACK_BUFFER, 0, DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_BPP, lightgemData );
+#endif
+	}
 
 	qglBindBuffer( GL_PIXEL_PACK_BUFFER, 0 );
 	currentFbo->Bind();
@@ -362,7 +333,7 @@ void RenderBackend::DrawShadowsAndInteractions( const viewDef_t *viewDef ) {
 	for ( viewLight_t *vLight = viewDef->viewLights; vLight; vLight = vLight->next ) {
 		if ( !interactionStage.ShouldDrawLight( vLight ) )
 			continue;
-	
+
 		if ( vLight->shadows == LS_MAPS ) {
 			if ( !singlePassShadowMaps ) {
 				DrawInteractionsWithShadowMapping( viewDef, vLight );

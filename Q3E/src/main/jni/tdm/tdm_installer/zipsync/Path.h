@@ -40,6 +40,8 @@ bool IfFileExists(const std::string &path);
 void RemoveFile(const std::string &path);
 void RenameFile(const std::string &oldPath, const std::string &newPath);
 bool CreateDir(const std::string &dirPath);
+bool RemoveDirectoryIfEmpty(const std::string dirPath);
 void CreateDirectoriesForFile(const std::string &filePath, const std::string &rootPath);
+void PruneDirectoriesAfterFileRemoval(const std::string &filePath, const std::string &rootPath);
 
 }

@@ -6,18 +6,18 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
-set(THIRDPARTY_PLATFORM_OVERRIDE "" CACHE STRING "If you build conan dependencies yourself with custom platform_name, pass platform_name string here")
+option(TDM_THIRDPARTY_ARTEFACTS "Use prebuilt artefacts at ThirdParty/artefacts?" ON)
 option(TDM_INSTALLER_FAST_DEBUG "Faster debug build: optimized libzipsync, disabled runtime checks" OFF)
 
-# TDM: use prebuilt artefacts for third-party libraries
-list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/cmake_find_package")
+if(TDM_THIRDPARTY_ARTEFACTS)
+    include(../ThirdParty/use_artefacts.cmake)
+endif()
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;RelWithDebInfo" CACHE STRING "" FORCE) 
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE) 
 
 if(TDM_INSTALLER_FAST_DEBUG AND MSVC)
     string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
-
 
 set(ZIPSYNC_OPTION_BUILD_TESTS OFF CACHE BOOL "")
 set(ZIPSYNC_OPTION_BUILD_TOOL OFF CACHE BOOL "")
@@ -62,35 +62,25 @@ set(sources
 if(MSVC)
     set(sources ${sources} WinResource.rc)  # for icon
     add_compile_options("/W2")
-    add_compile_options("$<$<CONFIG:RelWithDebInfo>:/Ob2>")
-    string(APPEND CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO " /INCREMENTAL:NO /OPT:REF")
+    add_compile_options("$<$<CONFIG:Release>:/Zi>")
+    string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /OPT:REF /DEBUG")
 elseif(UNIX)
-    string(APPEND CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -no-pie")
+    string(APPEND CMAKE_EXE_LINKER_FLAGS " -no-pie")
 endif()
 
-find_package(fltk REQUIRED)
-find_package(libjpeg REQUIRED)
+find_package(fltk REQUIRED CONFIG)
 add_executable(tdm_installer WIN32 ${sources})
-target_include_directories(tdm_installer PRIVATE zipsync ${fltk_INCLUDE_DIRS} ${libjpeg_INCLUDE_DIRS})
-target_link_libraries(tdm_installer PRIVATE libzipsync libzipsyncextra ${fltk_LIBRARIES} ${libjpeg_LIBRARIES})
+target_include_directories(tdm_installer PRIVATE zipsync)
+target_link_libraries(tdm_installer PRIVATE libzipsync libzipsyncextra fltk::fltk)
 
 if(UNIX)
     target_link_libraries(tdm_installer PRIVATE m dl X11 Xext pthread)  # fltk -> *
 elseif(MSVC)
-    set_property(TARGET tdm_installer PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set_property(TARGET tdm_installer libzipsync libzipsyncextra PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     target_compile_definitions(tdm_installer PRIVATE _CRT_SECURE_NO_DEPRECATE)
-    target_link_libraries(libzipsync INTERFACE ws2_32)                  # libzipsync -> libcurl -> ?
 endif()
 
-if(THIRDPARTY_PLATFORM_OVERRIDE)
-    if(UNIX)
-        set(FILENAME_SUFFIX ".custom")
-        set(OUTPUT_SUFFIX "${FILENAME_SUFFIX}")
-    elseif(MSVC)
-        set(FILENAME_SUFFIX "_custom.exe")
-        set(OUTPUT_SUFFIX "_custom")
-    endif()
-elseif(UNIX)
+if(UNIX)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(FILENAME_SUFFIX ".linux64")
         set(OUTPUT_SUFFIX "${FILENAME_SUFFIX}")
@@ -105,15 +95,6 @@ endif()
 
 target_compile_definitions(tdm_installer PRIVATE TDM_INSTALLER_EXECUTABLE_FILENAME_SUFFIX="${FILENAME_SUFFIX}")
 set_target_properties(tdm_installer PROPERTIES OUTPUT_NAME "tdm_installer${OUTPUT_SUFFIX}")
-
-
-# fix libcurl dependencies
-find_package(mbedtls REQUIRED)  # libzipsync -> libcurl -> mbedtls
-find_package(zlib REQUIRED)     # libzipsync -> libcurl -> zlib
-target_link_libraries(libzipsync INTERFACE ${mbedtls_LIBRARIES} ${zlib_LIBRARIES})
-
-# ensure same type of runtime on used zipsync libraries
-set_property(TARGET libzipsync libzipsyncextra PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 if(TDM_INSTALLER_FAST_DEBUG AND MSVC)
     target_compile_options(libzipsync PRIVATE /O2 /Ob2)

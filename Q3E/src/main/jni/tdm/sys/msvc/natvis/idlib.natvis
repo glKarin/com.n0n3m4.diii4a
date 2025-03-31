@@ -290,4 +290,8 @@
     <DisplayString>elems=[{begElem}..{endElem}) sons={{{sons[0]},{sons[1]}}} bounds={bounds}</DisplayString>
   </Type>
 
+  <Type Name="stdext::path">
+    <DisplayString>{((std::experimental::filesystem::v1::path*)d._Mypair._Myval2)->_Mystr}</DisplayString>
+  </Type>
+
 </AutoVisualizer>

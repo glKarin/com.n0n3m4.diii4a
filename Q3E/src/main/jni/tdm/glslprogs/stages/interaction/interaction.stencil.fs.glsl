@@ -14,7 +14,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
+#extension GL_ARB_texture_query_lod: enable
 precision highp float;
+precision highp int;
 
 out vec4 FragColor;
 
@@ -31,12 +33,13 @@ uniform vec4 u_stencilMipmapsScissor;
 
 void main() {
 	InteractionGeometry props;
-	FragColor.rgb = computeInteraction(props);
+	vec3 worldParallax;
+	FragColor.rgb = computeInteraction(props, worldParallax);
 
 	vec3 objectToLight = var_TangentBitangentNormalMatrix * var_LightDirLocal;
 	vec3 objectNormal = var_TangentBitangentNormalMatrix[2];
 
-	if (u_shadows && u_softShadowsQuality > 0) {
+	if (checkFlag(u_flags, SFL_INTERACTION_SHADOWS) && u_softShadowsQuality > 0) {
 		FragColor.rgb *= computeStencilSoftShadow(
 			u_stencilTexture, u_depthTexture,
 			objectToLight, objectNormal,

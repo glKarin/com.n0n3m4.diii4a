@@ -66,6 +66,8 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #include "Tasks/PlayAnimationTask.h" // #3597
 
+#include "game/LightEstimateSystem.h" // #6546
+
 const int AUD_ALERT_DELAY_MIN =  500; // grayman #3356 - min amount of time delay (ms) before processing an audio alert
 const int AUD_ALERT_DELAY_MAX = 1500; // grayman #3356 - max amount of time delay (ms) before processing an audio alert
 
@@ -5182,7 +5184,11 @@ bool idAI::CanSeeTargetPoint( idVec3 point, idEntity* target , bool checkLightin
 	if ( checkLighting )
 	{
 		idVec3 topPoint = point - (physicsObj.GetGravityNormal() * 32.0);
-		float maxDistanceToObserve = GetMaximumObservationDistanceForPoints(point, topPoint);
+		float maxDistanceToObserve;
+		if ( g_lightQuotientAlgo.GetInteger() > 0 )
+			maxDistanceToObserve = GetMaximumObservationDistance( target );
+		else
+			maxDistanceToObserve = GetMaximumObservationDistanceForPoints(point, topPoint);
 		idVec3 ownOrigin = physicsObj.GetOrigin();
 
 		return ( ( ( point - ownOrigin).LengthSqr() ) < Square(maxDistanceToObserve) ); // grayman #2866
@@ -5933,6 +5939,9 @@ void idAI::DeadMove( void ) {
 	physicsObj.SetDelta( delta );
 
 	RunPhysics();
+
+	// stgatilov #6546: keep light quotient always valid for AI bodies
+	gameLocal.m_LightEstimateSystem->TrackEntity( this );
 
 	//moveResult = physicsObj.GetMoveResult();
 	AI_ONGROUND = physicsObj.OnGround();
@@ -6707,7 +6716,7 @@ void idAI::PlayFootStepSound()
 		sndShader = declManager->FindSound( sound.c_str() );
 		SetSoundVolume( sndShader->GetParms()->volume + GetMovementVolMod() );
 		StartSoundShader( sndShader, SND_CHANNEL_BODY, 0, false, NULL );
-		SetSoundVolume( 0.0f );
+		SetSoundVolume();
 
 		// propagate the suspicious sound to other AI
 		PropSoundDirect( localSound, true, false, 0.0f, 0 ); // grayman #3355
@@ -12802,6 +12811,8 @@ void idAI::DropOnRagdoll( void )
 			pWeap->DeactivateAttack();
 			pWeap->DeactivateParry();
 			pWeap->ClearOwner();
+			// stgatilov #6546: track dropped melee weapon forever
+			gameLocal.m_LightEstimateSystem->TrackEntity( ent, 1000000000 );
 		}
 
 		// greebo: Check if we should set some attachments to nonsolid
@@ -13616,6 +13627,7 @@ bool idAI::CanGreet() // grayman #3338
 	{
 		return false;
 	}
+
 
 	// grayman #3448 - no greeting if involved in a conversation
 	// grayman #3559 - use simpler method

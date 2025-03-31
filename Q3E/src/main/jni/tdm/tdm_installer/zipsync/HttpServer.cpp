@@ -14,6 +14,13 @@ namespace ZipSync {
 //stupid GCC complains about printing uint64_t as "%llu"
 typedef unsigned long long uint64;
 
+//GCC workaround: cannot use constructor of nested struct in default value of argument
+HttpServer::PauseModel::PauseModel() = default;
+HttpServer::PauseModel::PauseModel(uint64_t bbp, int ps) {
+    bytesBetweenPauses = bbp;
+    pauseSeconds = ps;
+}
+
 HttpServer::~HttpServer() {
     Stop();
 }
@@ -96,7 +103,7 @@ struct ThreadState {
 };
 thread_local ThreadState threadState;
 
-int HttpServer::MhdFunction(
+MHD_Result HttpServer::MhdFunction(
     void *cls,
     MHD_Connection *connection,
     const char *url,
@@ -139,8 +146,7 @@ public:
             return;
         _clearTime += added;
         if (_clearTime >= _model->bytesBetweenPauses) {
-            using namespace std::chrono_literals;
-            std::this_thread::sleep_for(_model->pauseSeconds * 1000ms);
+            std::this_thread::sleep_for(_model->pauseSeconds * std::chrono::milliseconds(1000));
             _clearTime = 0;
         }
     }
@@ -273,13 +279,13 @@ public:
 #define PAGE_NOT_FOUND "<html><head><title>File not found</title></head><body>File not found</body></html>"
 #define PAGE_NOT_SATISFIABLE "<html><head><title>Range error</title></head><body>Range not satisfiable</body></html>"
 
-static int ReturnWithErrorResponse(MHD_Connection *connection, int httpCode, const char *content) {
+static MHD_Result ReturnWithErrorResponse(MHD_Connection *connection, int httpCode, const char *content) {
     MHD_Response *response = MHD_create_response_from_buffer(
         strlen(content),
         (void*)content,
         MHD_RESPMEM_MUST_COPY
     );
-    int ret = MHD_queue_response(
+    MHD_Result ret = MHD_queue_response(
         connection,
         httpCode,
         response
@@ -287,7 +293,7 @@ static int ReturnWithErrorResponse(MHD_Connection *connection, int httpCode, con
     return ret;
 }
 
-int HttpServer::AcceptCallback(
+MHD_Result HttpServer::AcceptCallback(
     MHD_Connection *connection,
     const char *url,
     const char *method,
@@ -373,7 +379,7 @@ int HttpServer::AcceptCallback(
     if (!response)
         return MHD_NO;
 
-    int ret = MHD_queue_response(
+    MHD_Result ret = MHD_queue_response(
         connection,
         httpCode,
         response

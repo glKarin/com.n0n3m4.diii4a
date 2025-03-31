@@ -15,6 +15,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 in float clipPlaneDist; 
 in vec4 var_TexCoord0;
@@ -35,6 +36,6 @@ void main() {
 		vec4 tex = texture(u_texture, var_TexCoord0.st);
 		if (tex.a <= u_alphaTest)
 			discard;
-		FragColor = tex * u_color;;
+		FragColor = tex * u_color;
 	}
 }

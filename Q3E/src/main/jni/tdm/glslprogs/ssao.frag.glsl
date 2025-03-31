@@ -1,6 +1,7 @@
 #version 320 es
 
 precision highp float;
+precision highp int;
 #extension GL_ARB_gpu_shader5 : enable
 
 /**
@@ -37,12 +38,12 @@ uniform block {
 };
 
 float nearZ = -0.5 * u_projectionMatrix[3][2];
-vec2 minusTwohalfTanFov = -2 * vec2(1 / u_projectionMatrix[0][0], 1 / u_projectionMatrix[1][1]);
-vec2 invTextureSize = vec2(1.0, 1.0) / textureSize(u_depthTexture, 0);
+vec2 minusTwohalfTanFov = -2.0 * vec2(1.0 / u_projectionMatrix[0][0], 1.0 / u_projectionMatrix[1][1]);
+vec2 invTextureSize = vec2(1.0, 1.0) / vec2(textureSize(u_depthTexture, 0));
 
 // The height in pixels of an object of height 1 world unit at distance z = -1 world unit.
 // Used to scale the radius of the sampling disc appropriately
-float projectionScale = textureSize(u_depthTexture, 0).y * (0.5 * u_projectionMatrix[1][1]);
+float projectionScale = float(textureSize(u_depthTexture, 0).y) * (0.5 * u_projectionMatrix[1][1]);
 const float tdmToMetres = 0.02309;
 
 vec3 currentTexelViewPos() {
@@ -150,7 +151,7 @@ float sampleAO(in ivec2 ssC, in vec3 C, in vec3 n_C, in float ssDiskRadius, in i
 const float farZ = -1500.0 * tdmToMetres;
 
 vec2 packViewSpaceZ(float viewSpaceZ) {
-	float compressedZ = clamp(viewSpaceZ * (1.0 / farZ), 0, 1);
+	float compressedZ = clamp(viewSpaceZ * (1.0 / farZ), 0.0, 1.0);
 	float temp = floor(compressedZ * 256.0);
 	float integerPart = temp * (1.0 / 256.0);
 	float fractionalPart = compressedZ * 256.0 - temp;
@@ -161,7 +162,7 @@ void main() {
 	ivec2 screenPos = ivec2(gl_FragCoord.xy);
 	vec3 position = currentTexelViewPos();
 
-	if (position.z > 0) {
+	if (position.z > 0.0) {
 		// these values are leftovers from subviews, e.g. the skybox
 		discard;
 	}

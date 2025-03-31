@@ -432,7 +432,16 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view, b
 	// place the sound origin for the player
 	// TODO: Support overriding the location area so that reverb settings can be applied for listening thru doors?
 	idVec3 p = player->GetPrimaryListenerLoc(); // grayman #4882
-	gameSoundWorld->PlaceListener( p, view->viewaxis, player->entityNumber + 1, gameLocal.time, hud ? hud->State().GetString( "location" ) : "Undefined" ); // grayman #4882
+
+	const idLocationEntity* currentLocation = player->GetLocation();
+	idStr efxPreset;
+
+	// #6273 The map might not be using the location system
+	if (currentLocation != NULL) {
+		efxPreset = currentLocation->spawnArgs.GetString("efx_preset");
+	}
+
+	gameSoundWorld->PlaceListener( p, view->viewaxis, player->entityNumber + 1, gameLocal.time, hud ? hud->State().GetString( "location" ) : "Undefined", efxPreset ); // grayman #4882
 //	gameSoundWorld->PlaceListener(player->GetListenerLoc(), view->viewaxis, player->entityNumber + 1, gameLocal.time, hud ? hud->State().GetString("location") : "Undefined");
 
 	// hack the shake in at the very last moment, so it can't cause any consistency problems

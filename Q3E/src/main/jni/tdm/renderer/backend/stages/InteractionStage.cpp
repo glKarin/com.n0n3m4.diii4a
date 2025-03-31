@@ -24,8 +24,10 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/backend/FrameBufferManager.h"
 #include "renderer/backend/stages/AmbientOcclusionStage.h"
 
+#include "glprogs/tdm_constants_shared.glsl"
+
 idCVar r_shadowMapOnTranslucent(
-	"r_shadowMapOnTranslucent", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE,
+	"r_shadowMapOnTranslucent", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE,
 	"Are shadows cast on translucent surfaces?\n"
 	"Note: stencil shadows cannot work on translucent objects."
 );
@@ -34,31 +36,28 @@ idCVar r_shadowMapOnTranslucent(
 struct InteractionStage::Uniforms : GLSLUniformGroup {
 	UNIFORM_GROUP_DEF( Uniforms )
 
+	DEFINE_UNIFORM( int, flags )
+
 	DEFINE_UNIFORM( sampler, normalTexture )
 	DEFINE_UNIFORM( sampler, diffuseTexture )
 	DEFINE_UNIFORM( sampler, specularTexture )
+	DEFINE_UNIFORM( sampler, parallaxTexture )
 	DEFINE_UNIFORM( sampler, lightProjectionTexture )
 	DEFINE_UNIFORM( sampler, lightProjectionCubemap )
 	DEFINE_UNIFORM( sampler, lightFalloffTexture )
-	DEFINE_UNIFORM( int, useNormalIndexedDiffuse )
-	DEFINE_UNIFORM( int, useNormalIndexedSpecular )
 	DEFINE_UNIFORM( sampler, lightDiffuseCubemap )
 	DEFINE_UNIFORM( sampler, lightSpecularCubemap )
 	DEFINE_UNIFORM( sampler, ssaoTexture )
 	DEFINE_UNIFORM( vec3, globalViewOrigin )
 	DEFINE_UNIFORM( vec3, globalLightOrigin )
 
-	DEFINE_UNIFORM( int, cubic )
 	DEFINE_UNIFORM( float, gamma )
 	DEFINE_UNIFORM( float, minLevel )
-	DEFINE_UNIFORM( int, ssaoEnabled )
 	DEFINE_UNIFORM( vec2, renderResolution )
 
-	DEFINE_UNIFORM( int, shadows )
 	DEFINE_UNIFORM( int, softShadowsQuality )
 	DEFINE_UNIFORM( float, softShadowsRadius )
 	DEFINE_UNIFORM( vec4, shadowRect )
-	DEFINE_UNIFORM( int, shadowMapCullFront )
 	DEFINE_UNIFORM( sampler, stencilTexture )
 	DEFINE_UNIFORM( sampler, depthTexture )
 	DEFINE_UNIFORM( sampler, shadowMap )
@@ -70,6 +69,7 @@ struct InteractionStage::Uniforms : GLSLUniformGroup {
 	DEFINE_UNIFORM( mat4, modelViewMatrix )
 	DEFINE_UNIFORM( mat4, projectionMatrix )
 	DEFINE_UNIFORM( vec4, bumpMatrix/*[2]*/ )
+	DEFINE_UNIFORM( vec4, parallaxMatrix/*[2]*/ )
 	DEFINE_UNIFORM( vec4, diffuseMatrix/*[2]*/ )
 	DEFINE_UNIFORM( vec4, specularMatrix/*[2]*/ )
 	DEFINE_UNIFORM( mat4, lightProjectionFalloff )
@@ -78,9 +78,11 @@ struct InteractionStage::Uniforms : GLSLUniformGroup {
 	DEFINE_UNIFORM( vec4, colorAdd )
 	DEFINE_UNIFORM( vec4, diffuseColor )
 	DEFINE_UNIFORM( vec4, specularColor )
-	DEFINE_UNIFORM( vec4, hasTextureDNS )
-	DEFINE_UNIFORM( int, useBumpmapLightTogglingFix )
-	DEFINE_UNIFORM( float, RGTC )
+
+	DEFINE_UNIFORM( vec2, parallaxHeightScale )
+	DEFINE_UNIFORM( ivec3, parallaxIterations )
+	DEFINE_UNIFORM( float, parallaxGrazingAngle )
+	DEFINE_UNIFORM( float, parallaxShadowSoftness )
 };
 
 enum TextureUnits {
@@ -97,6 +99,7 @@ enum TextureUnits {
 	TU_SHADOW_DEPTH = 10,
 	TU_SHADOW_STENCIL = 11,
 	TU_SHADOW_STENCIL_MIPMAPS = 12,
+	TU_PARALLAX = 13,
 };
 
 void InteractionStage::LoadInteractionShader( GLSLProgram *shader, const idStr &baseName ) {
@@ -115,6 +118,7 @@ void InteractionStage::LoadInteractionShader( GLSLProgram *shader, const idStr &
 	uniforms->normalTexture.Set( TU_NORMAL );
 	uniforms->diffuseTexture.Set( TU_DIFFUSE );
 	uniforms->specularTexture.Set( TU_SPECULAR );
+	uniforms->parallaxTexture.Set( TU_PARALLAX );
 }
 
 
@@ -171,6 +175,7 @@ void InteractionStage::DrawInteractions( const viewDef_t *viewDef, const viewLig
 
 	this->viewDef = viewDef;
 	this->vLight = vLight;
+	int lightFlags = 0;
 
 	// if using float buffers, alpha values are not clamped and can stack up quite high, since most interactions add 1 to its value
 	// this in turn causes issues with some shader stage materials that use DST_ALPHA blending.
@@ -187,8 +192,9 @@ void InteractionStage::DrawInteractions( const viewDef_t *viewDef, const viewLig
 	FB_ApplyScissor();
 
 	// bind the vertex and fragment program
-	ChooseInteractionProgram( vLight, list == DSL_TRANSLUCENT );
-	uniforms->cubic.Set( vLight->lightShader->IsCubicLight() ? 1 : 0 );
+	ChooseInteractionProgram( vLight, list == DSL_TRANSLUCENT, lightFlags );
+	if ( vLight->lightShader->IsCubicLight() )
+		lightFlags |= SFL_LIGHT_CUBIC;
 	uniforms->globalLightOrigin.Set( vLight->globalLightOrigin );
 	uniforms->globalViewOrigin.Set( viewDef->renderView.vieworg );
 	uniforms->renderResolution.Set( frameBuffers->activeFbo->Width(), frameBuffers->activeFbo->Height() );
@@ -213,22 +219,16 @@ void InteractionStage::DrawInteractions( const viewDef_t *viewDef, const viewLig
 
 		idImage *cubemap = vLight->lightShader->LightAmbientDiffuse();
 		if ( cubemap ) {
-			uniforms->useNormalIndexedDiffuse.Set( true );
+			lightFlags |= SFL_LIGHT_AMBIENT_HAS_DIFFUSE_CUBEMAP;
 			GL_SelectTexture( TU_LIGHT_DIFFUSE_CUBE );
 			cubemap->Bind();
-		}
-		else {
-			uniforms->useNormalIndexedDiffuse.Set( false );
 		}
 
 		cubemap = vLight->lightShader->LightAmbientSpecular();
 		if ( cubemap ) {
-			uniforms->useNormalIndexedSpecular.Set( true );
+			lightFlags |= SFL_LIGHT_AMBIENT_HAS_SPECULAR_CUBEMAP;
 			GL_SelectTexture( TU_LIGHT_SPECULAR_CUBE );
 			cubemap->Bind();
-		}
-		else {
-			uniforms->useNormalIndexedSpecular.Set( false );
 		}
 	}
 
@@ -261,7 +261,7 @@ void InteractionStage::DrawInteractions( const viewDef_t *viewDef, const viewLig
 		uniforms->stencilMipmapsLevel.Set( -1, -1 );
 	}
 
-	const idMaterial	*lightShader = vLight->lightShader;
+	const idMaterial *lightShader = vLight->lightShader;
 	for ( int lightStageNum = 0; lightStageNum < lightShader->GetNumStages(); lightStageNum++ ) {
 		const shaderStage_t	*lightStage = lightShader->GetStage( lightStageNum );
 
@@ -292,7 +292,7 @@ void InteractionStage::DrawInteractions( const viewDef_t *viewDef, const viewLig
 
 			ApplyDepthTweaks depthTweaks( surf );
 
-			ProcessSingleSurface( vLight, lightStage, surf );
+			ProcessSingleSurface( vLight, lightStage, surf, lightFlags );
 		}
 	}
 
@@ -316,7 +316,7 @@ void InteractionStage::BindShadowTexture( const TiledCustomMipmapStage *stencilS
 	}
 }
 
-void InteractionStage::ChooseInteractionProgram( const viewLight_t *vLight, bool translucent ) {
+void InteractionStage::ChooseInteractionProgram( const viewLight_t *vLight, bool translucent, int &lightFlags ) {
 	if ( vLight->lightShader->IsAmbientLight() ) {
 		interactionShader = ambientInteractionShader;
 	} else if ( vLight->shadowMapPage.width > 0 ) {
@@ -329,7 +329,8 @@ void InteractionStage::ChooseInteractionProgram( const viewLight_t *vLight, bool
 	uniforms = interactionShader->GetUniformGroup<Uniforms>();
 	uniforms->gamma.Set( viewDef->IsLightGem() ? 1 : r_ambientGamma.GetFloat() );
 	uniforms->minLevel.Set( r_ambientMinLevel.GetFloat() );
-	uniforms->ssaoEnabled.Set( ambientOcclusion->ShouldEnableForCurrentView() ? 1 : 0 );
+	if ( ambientOcclusion->ShouldEnableForCurrentView() )
+		lightFlags |= SFL_LIGHT_AMBIENT_HAS_SSAO;
 
 	bool doShadows = !vLight->noShadows && vLight->lightShader->LightCastsShadows();
 	// stgatilov #6490: stencil shadows cannot properly cast shadows on translucent objects
@@ -342,18 +343,17 @@ void InteractionStage::ChooseInteractionProgram( const viewLight_t *vLight, bool
 		doShadows = vLight->globalInteractions != NULL;
 	}
 	if ( doShadows ) {
-		uniforms->shadows.Set(true);
+		lightFlags |= SFL_INTERACTION_SHADOWS;
 		const renderCrop_t &page = vLight->shadowMapPage;
 		// https://stackoverflow.com/questions/5879403/opengl-texture-coordinates-in-pixel-space
 		idVec4 v( page.x, page.y, 0, page.width-1 );
 		v.ToVec2() = (v.ToVec2() * 2 + idVec2( 1, 1 )) / (2 * 6 * r_shadowMapSize.GetInteger());
 		v.w /= 6 * r_shadowMapSize.GetFloat();
 		uniforms->shadowRect.Set( v );
-	} else {
-		uniforms->shadows.Set(false);
 	}
 	extern idCVarBool r_shadowMapCullFront;
-	uniforms->shadowMapCullFront.Set( r_shadowMapCullFront );
+	if ( r_shadowMapCullFront.GetBool() )
+		lightFlags |= SFL_INTERACTION_SHADOW_MAP_CULL_FRONT;
 
 	if ( doShadows && ( vLight->globalShadows || vLight->localShadows ) && !viewDef->IsLightGem() ) {
 		uniforms->softShadowsQuality.Set( r_softShadowsQuality.GetInteger() );
@@ -365,111 +365,228 @@ void InteractionStage::ChooseInteractionProgram( const viewLight_t *vLight, bool
 	PreparePoissonSamples();
 }
 
-void InteractionStage::ProcessSingleSurface( const viewLight_t *vLight, const shaderStage_t *lightStage, const drawSurf_t *surf ) {
-	const idMaterial	*material = surf->material;
-	const float			*surfaceRegs = surf->shaderRegisters;
-	const idMaterial	*lightShader = vLight->lightShader;
-	drawInteraction_t	inter;
-
-	if ( !surf->ambientCache.IsValid() ) {
-		return;
-	}
-
-	inter.surf = surf;
-
-	inter.cubicLight = lightShader->IsCubicLight(); // nbohr1more #3881: cubemap lights
-	inter.ambientLight = lightShader->IsAmbientLight();
+void InteractionStage::SetupLightProperties( drawInteraction_t *inter, const viewLight_t *vLight, const shaderStage_t *lightStage, const drawSurf_t *surf )
+{
+	const idMaterial *lightShader = vLight->lightShader;
+	inter->cubicLight = lightShader->IsCubicLight(); // nbohr1more #3881: cubemap lights
+	inter->ambientLight = lightShader->IsAmbientLight();
 
 	idPlane lightProject[4];
 	R_GlobalPlaneToLocal( surf->space->modelMatrix, vLight->lightProject[0], lightProject[0] );
 	R_GlobalPlaneToLocal( surf->space->modelMatrix, vLight->lightProject[1], lightProject[1] );
 	R_GlobalPlaneToLocal( surf->space->modelMatrix, vLight->lightProject[2], lightProject[2] );
 	R_GlobalPlaneToLocal( surf->space->modelMatrix, vLight->lightProject[3], lightProject[3] );
-
-	memcpy( inter.lightProjection, lightProject, sizeof( inter.lightProjection ) );
+	memcpy( inter->lightProjection, lightProject, sizeof( inter->lightProjection ) );
 
 	idMat4 lightTexMatrix = vLight->GetTextureMatrix( lightStage );
 	// stgatilov: we no longer merge two transforms together, since we need light-volume coords in fragment shader
-	inter.lightTextureMatrix[0] = lightTexMatrix[0];
-	inter.lightTextureMatrix[1] = lightTexMatrix[1];
-
-	inter.bumpImage = NULL;
-	inter.specularImage = NULL;
-	inter.diffuseImage = NULL;
-	inter.diffuseColor[0] = inter.diffuseColor[1] = inter.diffuseColor[2] = inter.diffuseColor[3] = 0;
-	inter.specularColor[0] = inter.specularColor[1] = inter.specularColor[2] = inter.specularColor[3] = 0;
+	inter->lightTextureMatrix[0] = lightTexMatrix[0];
+	inter->lightTextureMatrix[1] = lightTexMatrix[1];
 
 	// backEnd.lightScale is calculated so that lightColor[] will never exceed
 	// tr.backEndRendererMaxLight
-	idVec4 lightColor = vLight->GetStageColor( lightStage );
-	lightColor.ToVec3() *= backEnd.lightScale;
-
-	// go through the individual stages
-	for ( int surfaceStageNum = 0; surfaceStageNum < material->GetNumStages(); surfaceStageNum++ ) {
-		const shaderStage_t	*surfaceStage = material->GetStage( surfaceStageNum );
-
-		if ( !surf->IsStageEnabled( surfaceStage ) )
-			continue;
-
-
-		void R_SetDrawInteraction( const shaderStage_t *surfaceStage, const float *surfaceRegs, idImage **image, idVec4 matrix[2], float color[4] );
-
-		switch ( surfaceStage->lighting ) {
-		case SL_AMBIENT: {
-			// ignore ambient stages while drawing interactions
-			break;
-		}
-		case SL_BUMP: {				
-			if ( !r_skipBump.GetBool() ) {
-				PrepareDrawCommand( &inter ); // draw any previous interaction
-				inter.diffuseImage = NULL;
-				inter.specularImage = NULL;
-				R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.bumpImage, inter.bumpMatrix, NULL );
-			}
-			break;
-		}
-		case SL_DIFFUSE: {
-			if ( inter.diffuseImage ) {
-				PrepareDrawCommand( &inter );
-			}
-			R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.diffuseImage,
-								  inter.diffuseMatrix, inter.diffuseColor.ToFloatPtr() );
-			inter.diffuseColor[0] *= lightColor[0];
-			inter.diffuseColor[1] *= lightColor[1];
-			inter.diffuseColor[2] *= lightColor[2];
-			inter.diffuseColor[3] *= lightColor[3];
-			inter.vertexColor = surfaceStage->vertexColor;
-			break;
-		}
-		case SL_SPECULAR: {
-			// nbohr1more: #4292 nospecular and nodiffuse fix
-			if ( vLight->noSpecular ) {
-				break;
-			}
-			if ( inter.specularImage ) {
-				PrepareDrawCommand( &inter );
-			}
-			R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.specularImage,
-								  inter.specularMatrix, inter.specularColor.ToFloatPtr() );
-			inter.specularColor[0] *= lightColor[0];
-			inter.specularColor[1] *= lightColor[1];
-			inter.specularColor[2] *= lightColor[2];
-			inter.specularColor[3] *= lightColor[3];
-			inter.vertexColor = surfaceStage->vertexColor;
-			break;
-		}
-		}
-	}
-
-	// draw the final interaction
-	PrepareDrawCommand( &inter );
+	inter->lightColor = vLight->GetStageColor( lightStage );
+	inter->lightColor.ToVec3() *= backEnd.lightScale;
 }
 
-void InteractionStage::PrepareDrawCommand( drawInteraction_t *din ) {
+void InteractionStage::ProcessSingleSurface( const viewLight_t *vLight, const shaderStage_t *lightStage, const drawSurf_t *surf, int lightFlags ) {
+	const idMaterial	*material = surf->material;
+	const float			*surfaceRegs = surf->shaderRegisters;
+
+	if ( !surf->ambientCache.IsValid() ) {
+		return;
+	}
+
+	extern idCVar r_materialNewParse;
+	if ( r_materialNewParse.GetBool() ) {
+		for ( int g = 0; g < material->GetNumInteractionGroups(); g++ ) {
+			drawInteraction_t inter = {};
+			inter.surf = surf;
+			SetupLightProperties( &inter, vLight, lightStage, surf );
+
+			int beg = material->GetInteractionGroupStart( g );
+			int end = material->GetInteractionGroupEnd( g );
+
+			// force flickering if several stages of same kind are enabled in one interaction group
+			// now that artists can partition stages into groups explicitly, make sure they don't rely on some specific rule
+			bool backwards = backEnd.frameCount % 2 == 0;
+			int step = ( backwards ? -1 : 1 );
+			if ( backwards ) {
+				idSwap( beg, end );
+				beg--; end--;
+			}
+
+			for ( int s = beg; s != end; s += step ) {
+				const shaderStage_t	*surfaceStage = material->GetStage( s );
+				if ( !surf->IsStageEnabled( surfaceStage ) )
+					continue;
+
+				void R_SetDrawInteraction( const shaderStage_t *surfaceStage, const float *surfaceRegs, idImage **image, idVec4 matrix[2], float color[4] );
+
+				if ( surfaceStage->lighting == SL_BUMP && !r_skipBump.GetBool() ) {
+					R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.bumpImage, inter.bumpMatrix, NULL );
+				}
+
+				if ( surfaceStage->lighting == SL_PARALLAX && !r_skipParallax.GetBool() ) {
+					R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.parallaxImage, inter.parallaxMatrix, NULL );
+					inter.parallax = *surfaceStage->parallax;
+
+					if ( inter.parallax.heightMinReg >= 0 )
+						inter.parallax.heightMin = surfaceRegs[inter.parallax.heightMinReg];
+					if ( inter.parallax.heightMaxReg >= 0 )
+						inter.parallax.heightMax = surfaceRegs[inter.parallax.heightMaxReg];
+
+					if ( inter.parallax.shadowSoftnessReg >= 0 ) {
+						inter.parallax.shadowSoftness = surfaceRegs[inter.parallax.shadowSoftnessReg];
+					} else {
+						// default value = 3 * height_step
+						inter.parallax.shadowSoftness = 3.0f * (inter.parallax.heightMax - inter.parallax.heightMin) / inter.parallax.shadowSteps;
+					}
+				}
+
+				if ( surfaceStage->lighting == SL_DIFFUSE && !r_skipDiffuse.GetBool() ) {
+					R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.diffuseImage,
+						inter.diffuseMatrix, inter.diffuseColor.ToFloatPtr() );
+					inter.diffuseColor[0] *= inter.lightColor[0];
+					inter.diffuseColor[1] *= inter.lightColor[1];
+					inter.diffuseColor[2] *= inter.lightColor[2];
+					inter.diffuseColor[3] *= inter.lightColor[3];
+					inter.vertexColor = surfaceStage->vertexColor;
+				}
+
+				// nbohr1more: #4292 nospecular fix
+				if ( surfaceStage->lighting == SL_SPECULAR && !r_skipSpecular.GetBool() && !vLight->noSpecular ) {
+					R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.specularImage,
+						inter.specularMatrix, inter.specularColor.ToFloatPtr() );
+					inter.specularColor[0] *= inter.lightColor[0];
+					inter.specularColor[1] *= inter.lightColor[1];
+					inter.specularColor[2] *= inter.lightColor[2];
+					inter.specularColor[3] *= inter.lightColor[3];
+					inter.vertexColor = surfaceStage->vertexColor;
+				}
+			}
+
+			// without diffuse and specular textures, this render will have no visible effect
+			// we need to avoid it, since otherwise animated textures (with 60+ if-ed stages) will be slow as hell
+			if (!inter.diffuseImage && !inter.specularImage)
+				continue;
+
+			PrepareDrawCommand( &inter, lightFlags );
+		}
+	}
+	else {
+		drawInteraction_t	inter;
+		inter.surf = surf;
+		SetupLightProperties( &inter, vLight, lightStage, surf );
+
+		auto ClearInter = [&inter]() {
+			inter.bumpImage = NULL;
+			inter.specularImage = NULL;
+			inter.diffuseImage = NULL;
+			inter.parallaxImage = NULL;
+			inter.diffuseColor[0] = inter.diffuseColor[1] = inter.diffuseColor[2] = inter.diffuseColor[3] = 0;
+			inter.specularColor[0] = inter.specularColor[1] = inter.specularColor[2] = inter.specularColor[3] = 0;
+		};
+		ClearInter();
+
+		// go through the individual stages
+		for ( int surfaceStageNum = 0; surfaceStageNum < material->GetNumStages(); surfaceStageNum++ ) {
+			const shaderStage_t	*surfaceStage = material->GetStage( surfaceStageNum );
+
+			if ( !surf->IsStageEnabled( surfaceStage ) )
+				continue;
+
+
+			void R_SetDrawInteraction( const shaderStage_t *surfaceStage, const float *surfaceRegs, idImage **image, idVec4 matrix[2], float color[4] );
+
+			switch ( surfaceStage->lighting ) {
+			case SL_AMBIENT: {
+				// ignore ambient stages while drawing interactions
+				break;
+			}
+			case SL_BUMP: {				
+				if ( !r_skipBump.GetBool() ) {
+					PrepareDrawCommand( &inter, lightFlags ); // draw any previous interaction
+					ClearInter();
+					R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.bumpImage, inter.bumpMatrix, NULL );
+				}
+				break;
+			}
+			case SL_PARALLAX: {				
+				if ( !r_skipParallax.GetBool() ) {
+					if ( inter.parallaxImage ) {
+						PrepareDrawCommand( &inter, lightFlags );
+						ClearInter();
+					}
+					R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.parallaxImage, inter.parallaxMatrix, NULL );
+					inter.parallax = *surfaceStage->parallax;
+
+					if ( inter.parallax.heightMinReg >= 0 )
+						inter.parallax.heightMin = surfaceRegs[inter.parallax.heightMinReg];
+					if ( inter.parallax.heightMaxReg >= 0 )
+						inter.parallax.heightMax = surfaceRegs[inter.parallax.heightMaxReg];
+
+					if ( inter.parallax.shadowSoftnessReg >= 0 ) {
+						inter.parallax.shadowSoftness = surfaceRegs[inter.parallax.shadowSoftnessReg];
+					} else {
+						// default value = 3 * height_step
+						inter.parallax.shadowSoftness = 3.0f * (inter.parallax.heightMax - inter.parallax.heightMin) / inter.parallax.shadowSteps;
+					}
+				}
+				break;
+			}
+			case SL_DIFFUSE: {
+				if ( inter.diffuseImage ) {
+					PrepareDrawCommand( &inter, lightFlags );
+					ClearInter();
+				}
+				R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.diffuseImage,
+									  inter.diffuseMatrix, inter.diffuseColor.ToFloatPtr() );
+				inter.diffuseColor[0] *= inter.lightColor[0];
+				inter.diffuseColor[1] *= inter.lightColor[1];
+				inter.diffuseColor[2] *= inter.lightColor[2];
+				inter.diffuseColor[3] *= inter.lightColor[3];
+				inter.vertexColor = surfaceStage->vertexColor;
+				break;
+			}
+			case SL_SPECULAR: {
+				// nbohr1more: #4292 nospecular and nodiffuse fix
+				if ( vLight->noSpecular ) {
+					break;
+				}
+				if ( inter.specularImage ) {
+					PrepareDrawCommand( &inter, lightFlags );
+					ClearInter();
+				}
+				R_SetDrawInteraction( surfaceStage, surfaceRegs, &inter.specularImage,
+									  inter.specularMatrix, inter.specularColor.ToFloatPtr() );
+				inter.specularColor[0] *= inter.lightColor[0];
+				inter.specularColor[1] *= inter.lightColor[1];
+				inter.specularColor[2] *= inter.lightColor[2];
+				inter.specularColor[3] *= inter.lightColor[3];
+				inter.vertexColor = surfaceStage->vertexColor;
+				break;
+			}
+			}
+		}
+
+		// draw the final interaction
+		PrepareDrawCommand( &inter, lightFlags );
+	}
+}
+
+void InteractionStage::PrepareDrawCommand( drawInteraction_t *din, int flags ) {
 	if ( !din->bumpImage ) {
-		if ( !r_skipBump.GetBool() )
+		extern idCVar r_materialNewParse;
+		if ( !r_skipBump.GetBool() && !r_materialNewParse.GetBool() )
 			return;
 		din->bumpImage = globalImages->flatNormalMap;		
+	}
+
+	bool enableParallax = true;
+	if ( !din->parallaxImage ) {
+		din->parallaxImage = globalImages->blackImage;
+		enableParallax = false;
 	}
 
 	if ( !din->diffuseImage || r_skipDiffuse.GetBool() ) {
@@ -487,14 +604,37 @@ void InteractionStage::PrepareDrawCommand( drawInteraction_t *din ) {
 	din->diffuseImage->Bind();
 	GL_SelectTexture( TU_SPECULAR );
 	din->specularImage->Bind();
+	GL_SelectTexture( TU_PARALLAX );
+	din->parallaxImage->Bind();
+
+	uniforms->parallaxHeightScale.Set( din->parallax.heightMin, din->parallax.heightMax );
+	uniforms->parallaxGrazingAngle.Set( din->parallax.grazingAngle );
+	uniforms->parallaxShadowSoftness.Set( din->parallax.shadowSoftness );
+	int shadowSteps = ( din->surf->dsFlags & DSF_BLOCK_SELF_SHADOWS ? 0 : din->parallax.shadowSteps );
+	uniforms->parallaxIterations.Set( din->parallax.linearSteps, din->parallax.refineSteps, shadowSteps );
+	if ( din->parallax.offsetExternalShadows )
+		flags |= SFL_INTERACTION_PARALLAX_OFFSET_EXTERNAL_SHADOWS;
 
 	vertexCache.VertexPosition( din->surf->ambientCache );
 
 	uniforms->modelMatrix.Set( din->surf->space->modelMatrix );
 	uniforms->modelViewMatrix.Set( din->surf->space->modelViewMatrix );
+
+	idVec4 matIdentity[2] = { idVec4(1, 0, 0, 0), idVec4(0, 1, 0, 0) };
+	idVec4 matZero[2] = { idVec4(0, 0, 0, 0), idVec4(0, 0, 0, 0) };	// TODO: remove this hack when "r_materialNewParse 0" is dead
+	bool nontrivialMatrix = false;
+	for ( const idVec4 *matr : { din->bumpMatrix, din->parallaxMatrix, din->diffuseMatrix, din->specularMatrix } ) {
+		if ( memcmp( matr, matIdentity, sizeof(matIdentity) ) != 0 && memcmp( matr, matZero, sizeof(matZero) ) != 0 )
+			nontrivialMatrix = true;
+	}
+	if ( nontrivialMatrix )
+		flags |= SFL_SURFACE_HAS_TEXTURE_MATRIX;
+
 	uniforms->bumpMatrix.SetArray( 2, (float*)din->bumpMatrix );
+	uniforms->parallaxMatrix.SetArray( 2, (float*)din->parallaxMatrix );
 	uniforms->diffuseMatrix.SetArray( 2, (float*)din->diffuseMatrix );
 	uniforms->specularMatrix.SetArray( 2, (float*)din->specularMatrix );
+
 	uniforms->lightProjectionFalloff.Set( (float*)din->lightProjection );
 	uniforms->lightTextureMatrix.SetArray( 2, (float*)din->lightTextureMatrix );
 	switch ( din->vertexColor ) {
@@ -513,13 +653,18 @@ void InteractionStage::PrepareDrawCommand( drawInteraction_t *din ) {
 	}
 	uniforms->diffuseColor.Set( din->diffuseColor );
 	uniforms->specularColor.Set( din->specularColor );
-	if ( !din->bumpImage ) {
-		uniforms->hasTextureDNS.Set( 1, 0, 1, 0 );
-	} else {
-		uniforms->hasTextureDNS.Set( 1, 1, 1, 0 );
-	}
-	uniforms->useBumpmapLightTogglingFix.Set( r_useBumpmapLightTogglingFix.GetBool() && !din->surf->material->ShouldCreateBackSides() );
-	uniforms->RGTC.Set( din->bumpImage->internalFormat == GL_COMPRESSED_RG_RGTC2 );
+	flags |= SFL_SURFACE_HAS_DIFFUSE_TEXTURE;
+	flags |= SFL_SURFACE_HAS_SPECULAR_TEXTURE;
+	if ( din->bumpImage )
+		flags |= SFL_SURFACE_HAS_NORMAL_TEXTURE;
+	if ( enableParallax )
+		flags |= SFL_SURFACE_HAS_PARALLAX_TEXTURE;
+	if ( din->bumpImage->internalFormat == GL_COMPRESSED_RG_RGTC2 )
+		flags |= SFL_SURFACE_NORMAL_TEXTURE_RGTC;
+	if ( r_useBumpmapLightTogglingFix.GetBool() && !din->surf->material->ShouldCreateBackSides() )
+		flags |= SFL_INTERACTION_BUMPMAP_LIGHT_TOGGLING_FIX;
+
+	uniforms->flags.Set( flags );
 
 	RB_DrawElementsWithCounters( din->surf, DCK_INTERACTION );
 }

@@ -34,13 +34,18 @@ static const int tabBorder = 4;
 // Time in milliseconds between clicks to register as a double-click
 static const int doubleClickSpeed = 300;
 
+// Time in milliseconds between typing to register as append to typed search
+static const int typedSpeed = 600;
+
+// Scrollbar width or height: hardcoded so that higher resolution images can be used
+static const float scrollbarSize = 16.0f;
+
 void idListWindow::CommonInit() {
 	typed = "";
 	typedTime = 0;
 	clickTime = 0;
 	currentSel.Clear();
 	top = 0;
-	sizeBias = 0;
 	horizontal = false;
 	scroller = new idSliderWindow(dc, gui);
 	multipleSel = false;
@@ -154,7 +159,7 @@ const char *idListWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 			return ret;
 		}
   
-		if ( gui->GetTime() > typedTime + 1000 ) {
+		if ( gui->GetTime() > typedTime + typedSpeed ) {
 			typed = "";
 		}
 		typedTime = gui->GetTime();
@@ -163,6 +168,16 @@ const char *idListWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 		for ( int i=0; i<listItems.Num(); i++ ) {
 			if ( idStr::Icmpn( typed, listItems[i], typed.Length() ) == 0 ) {
 				SetCurrentSel( i );
+
+				// Scroll selection into view
+				if (i < scroller->GetValue()) {
+					top = i;
+					scroller->SetValue( top );
+				} else if (i > scroller->GetValue() + (numVisibleLines - 1)) {
+					top = i - (numVisibleLines - 1);
+					scroller->SetValue( top );
+				}
+
 				break;
 			}
 		}
@@ -403,6 +418,7 @@ This is the same as in idEditWindow
 void idListWindow::InitScroller( bool horizontal )
 {
 	const char *thumbImage = "guis/assets/scrollbar_thumb.tga";
+	const idMaterial *thumbMat = declManager->FindMaterial(thumbImage);
 	const char *barImage = "guis/assets/scrollbarv.tga";
 	const char *scrollerName = "_scrollerWinV";
 
@@ -413,23 +429,25 @@ void idListWindow::InitScroller( bool horizontal )
 
 	const idMaterial *mat = declManager->FindMaterial( barImage );
 	mat->SetSort( SS_GUI );
-	sizeBias = mat->GetImageWidth();
 
 	idRectangle scrollRect;
 	if (horizontal) {
-		sizeBias = mat->GetImageHeight();
 		scrollRect.x = 0;
-		scrollRect.y = (clientRect.h - sizeBias);
+		scrollRect.y = (clientRect.h - scrollbarSize);
 		scrollRect.w = clientRect.w;
-		scrollRect.h = sizeBias;
+		scrollRect.h = scrollbarSize;
 	} else {
-		scrollRect.x = (clientRect.w - sizeBias);
+		scrollRect.x = (clientRect.w - scrollbarSize);
 		scrollRect.y = 0;
-		scrollRect.w = sizeBias;
+		scrollRect.w = scrollbarSize;
 		scrollRect.h = clientRect.h;
 	}
 
 	scroller->InitWithDefaults(scrollerName, scrollRect, foreColor, matColor, mat->GetName(), thumbImage, !horizontal, true);
+
+	// Scale scrollbar thumb
+	scroller->SetThumbSize(scrollbarSize, scrollbarSize);
+
 	InsertChild(scroller, NULL);
 	scroller->SetBuddy(this);
 }
@@ -445,13 +463,13 @@ void idListWindow::Draw(int time, float x, float y) {
 	float bottom = textRect.Bottom();
 	float width = textRect.w;
 
-	if ( scroller->GetHigh() > 0.0f ) {
-		if ( horizontal ) {
-			bottom -= sizeBias;
-		} else {
-			width -= sizeBias;
-			rect.w = width;
-		}
+	// Always make room for scrollbar regardless if it is visible.
+	// NOTE: Used to be conditional: if ( scroller->GetHigh() > 0.0f )
+	if ( horizontal ) {
+		bottom -= scrollbarSize;
+	} else {
+		width -= scrollbarSize;
+		rect.w = width;
 	}
 
 	if ( noEvents || !Contains(gui->CursorX(), gui->CursorY()) ) {
@@ -589,7 +607,13 @@ void idListWindow::UpdateList() {
 
 	SetCurrentSel( gui->State().GetInt( va( "%s_sel_0", listName.c_str() ) ) );
 
+	int scrollTo = gui->State().GetInt( va( "%s_scroll", listName.c_str() ), "-1" );
+	gui->SetStateInt( va( "%s_scroll", listName.c_str() ), -1 );
+
 	float value = scroller->GetValue();
+	if (scrollTo >= 0) {
+		value = scrollTo;
+	}
 	if ( value > listItems.Num() - 1 ) {
 		value = listItems.Num() - 1;
 	}
@@ -599,9 +623,16 @@ void idListWindow::UpdateList() {
 	scroller->SetValue(value);
 	top = value;
 
-	typedTime = 0;
-	clickTime = 0;
-	typed = "";
+	// Only reset typedTime and clickedTime if already timed out.
+	// Otherwise, a rapidly updating list on the same screen will
+	// reset the other list's timeout too soon.
+	if ( gui->GetTime() > typedTime + typedSpeed ) {
+		typedTime = 0;
+		typed = "";
+	}
+	if ( gui->GetTime() > clickTime + doubleClickSpeed ) {
+		clickTime = 0;
+	}
 }
 
 void idListWindow::StateChanged( bool redraw ) {

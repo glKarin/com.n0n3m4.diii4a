@@ -36,19 +36,19 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 	cvarName X			sets the value to X if the variable exists
 	set cvarName X		as above, but creates the CVar if not present
 
-	CVars may be declared in the global namespace, in classes and in functions.
-	However declarations in classes and functions should always be static to
-	save space and time. Making CVars static does not change their
-	functionality due to their global nature.
+	stgatilov #5600: CVars must be declared as global variable or as static class member.
+	Unlike original Doom 3, a cvar can only have one C++ variable connected to it.
+
+	stgatilov #5600: Standard thread-safety principles apply:
+	 * It is OK to read/write different cvars in parallel.
+	 * It is OK to read the same cvar in parallel.
+	 * It is WRONG to write cvar in parallel with reading/writing the same cvar.
+	 * Some methods are only called during initialization, they are never in parallel to anything.
 
 	CVars should be contructed only through one of the constructors with name,
 	value, flags and description. The name, value and description parameters
 	to the constructor have to be static strings, do not use va() or the like
 	functions returning a string.
-
-	CVars may be declared multiple times using the same name string. However,
-	they will all reference the same value and changing the value of one CVar
-	changes the value of all CVars with the same name.
 
 	CVars should always be declared with the correct type flag: CVAR_BOOL,
 	CVAR_INTEGER or CVAR_FLOAT. If no such flag is specified the CVar
@@ -99,9 +99,6 @@ typedef enum {
 
 class idCVar {
 public:
-							// Never use the default constructor.
-							idCVar( void ) { assert( typeid( this ) != typeid( idCVar ) ); }
-
 							// Always use one of the following constructors.
 							idCVar( const char *name, const char *value, int flags, const char *description,
 									argCompletion_t valueCompletion = NULL );
@@ -110,35 +107,31 @@ public:
 							idCVar( const char *name, const char *value, int flags, const char *description,
 									const char **valueStrings, argCompletion_t valueCompletion = NULL );
 
-	virtual					~idCVar( void ) {}
-
-	ID_FORCE_INLINE const char *		GetName( void ) const { return internalVar->name; }
-	ID_FORCE_INLINE int					GetFlags( void ) const { return internalVar->flags; }
-	ID_FORCE_INLINE const char *		GetDescription( void ) const { return internalVar->description; }
-	ID_FORCE_INLINE float				GetMinValue( void ) const { return internalVar->valueMin; }
-	ID_FORCE_INLINE float				GetMaxValue( void ) const { return internalVar->valueMax; }
+	ID_FORCE_INLINE const char *		GetName( void ) const { return name; }
+	ID_FORCE_INLINE int					GetFlags( void ) const { return flags; }
+	ID_FORCE_INLINE const char *		GetDescription( void ) const { return description; }
+	ID_FORCE_INLINE float				GetMinValue( void ) const { return valueMin; }
+	ID_FORCE_INLINE float				GetMaxValue( void ) const { return valueMax; }
 	ID_FORCE_INLINE const char **		GetValueStrings( void ) const { return valueStrings; }
 	ID_FORCE_INLINE argCompletion_t		GetValueCompletion( void ) const { return valueCompletion; }
 
-	ID_FORCE_INLINE bool					IsModified( void ) const { return ( internalVar->flags & CVAR_MODIFIED ) != 0; }
-	void					SetModified( void ) { internalVar->flags |= CVAR_MODIFIED; }
-	void					ClearModified( void ) { internalVar->flags &= ~CVAR_MODIFIED; }
+	ID_FORCE_INLINE bool				IsModified( void ) const { return ( flags & CVAR_MODIFIED ) != 0; }
+	void								SetModified( void ) { flags |= CVAR_MODIFIED; }
+	void								ClearModified( void ) { flags &= ~CVAR_MODIFIED; }
 
-	ID_FORCE_INLINE const char *			GetString( void ) const { return internalVar->value; }
-	ID_FORCE_INLINE bool					GetBool( void ) const { return ( internalVar->integerValue != 0 ); }
-	ID_FORCE_INLINE int						GetInteger( void ) const { return internalVar->integerValue; }
-	ID_FORCE_INLINE float					GetFloat( void ) const { return internalVar->floatValue; }
+	ID_FORCE_INLINE const char *		GetString( void ) const { return value; }
+	ID_FORCE_INLINE bool				GetBool( void ) const { return ( integerValue != 0 ); }
+	ID_FORCE_INLINE int					GetInteger( void ) const { return integerValue; }
+	ID_FORCE_INLINE float				GetFloat( void ) const { return floatValue; }
 
-	void					SetString( const char *value ) { internalVar->InternalSetString( value ); }
-	void					SetBool( const bool value ) { internalVar->InternalSetBool( value ); }
-	void					SetInteger( const int value ) { internalVar->InternalSetInteger( value ); }
-	void					SetFloat( const float value ) { internalVar->InternalSetFloat( value ); }
-
-	void					SetInternalVar( idCVar *cvar ) { internalVar = cvar; }
+	void					SetString( const char *value ) { InternalSetString( value ); }
+	void					SetBool( const bool value ) { InternalSetBool( value ); }
+	void					SetInteger( const int value ) { InternalSetInteger( value ); }
+	void					SetFloat( const float value ) { InternalSetFloat( value ); }
 
 	static void				RegisterStaticVars( void );
 
-protected:
+private:
 	const char *			name;					// name
 	const char *			value;					// value
 	const char *			description;			// description
@@ -149,17 +142,36 @@ protected:
 	argCompletion_t			valueCompletion;		// value auto-completion function
 	int						integerValue;			// atoi( string )
 	float					floatValue;				// atof( value )
-	idCVar *				internalVar;			// internal cvar
 	idCVar *				next;					// next statically declared cvar
 
+	// from idInternalCVar:
+	idStr					nameString;				// name
+	idStr					resetString;			// default value (resetting will change to this)
+	idStr					valueString;			// main value
+	bool					missionOverride;		// if true, then "missionString" overrides main value,
+	idStr					missionString;
+	idStr					descriptionString;		// description
+	friend class idCVarSystemLocal;
+
 private:
+	idCVar( void ) = default;
+
 	void					Init( const char *name, const char *value, int flags, const char *description,
 									float valueMin, float valueMax, const char **valueStrings, argCompletion_t valueCompletion );
 
-	virtual void			InternalSetString( const char *newValue ) {}
-	virtual void			InternalSetBool( const bool newValue ) {}
-	virtual void			InternalSetInteger( const int newValue ) {}
-	virtual void			InternalSetFloat( const float newValue ) {}
+	void					UpdateValue( void );
+	void					Set( const char *newValue, bool force, bool fromServer, bool mission );
+	void					Reset( void );
+
+	// from idInternalCVar:
+	void					InternalSetString( const char *newValue );
+	void					InternalServerSetString( const char *newValue );
+	void					InternalMissionSetString( const char *newValue );
+	void					InternalSetBool( const bool newValue );
+	void					InternalSetInteger( const int newValue );
+	void					InternalSetFloat( const float newValue );
+	static idCVar *			InternalCreate( const char *newName, int newFlags );
+	void					InternalRegister( void );
 
 	static idCVar *			staticVars;
 };
@@ -216,6 +228,7 @@ public:
 	virtual bool			IsInitialized( void ) const = 0;
 
 							// Registers a CVar.
+							// INTERNAL USE ONLY!
 	virtual void			Register( idCVar *cvar ) = 0;
 
 							// Finds the CVar with the given name.
@@ -227,12 +240,17 @@ public:
 	virtual void			SetCVarBool( const char *name, const bool value, int flags = 0 ) = 0;
 	virtual void			SetCVarInteger( const char *name, const int value, int flags = 0 ) = 0;
 	virtual void			SetCVarFloat( const char *name, const float value, int flags = 0 ) = 0;
+							// stgatilov #5453: override cvar value by mission
+							// value = NULL means: drop mission override
+	virtual void			SetCVarMissionString( const char *name, const char *value ) = 0;
 
 							// Gets the value of a CVar by name.
 	virtual const char *	GetCVarString( const char *name ) const = 0;
 	virtual bool			GetCVarBool( const char *name ) const = 0;
 	virtual int				GetCVarInteger( const char *name ) const = 0;
 	virtual float			GetCVarFloat( const char *name ) const = 0;
+							// stgatilov #5453: returns mission override or NULL if there is none
+	virtual const char *	GetCVarMissionString( const char *name ) const = 0;
 
 							// Called by the command system when argv(0) doesn't match a known command.
 							// Returns true if argv(0) is a variable reference and prints or changes the CVar.
@@ -242,72 +260,17 @@ public:
 	virtual void			CommandCompletion( void(*callback)( const char *s ) ) = 0;
 	virtual void			ArgCompletion( const char *cmdString, void(*callback)( const char *s ) ) = 0;
 
-							// Sets/gets/clears modified flags that tell what kind of CVars have changed.
-	virtual void			SetModifiedFlags( int flags ) = 0;
-	virtual int				GetModifiedFlags( void ) const = 0;
-	virtual void			ClearModifiedFlags( int flags ) = 0;
-
-							// Resets variables with one of the given flags set.
-	virtual void			ResetFlaggedVariables( int flags ) = 0;
-
-							// Removes auto-completion from the flagged variables.
-	virtual void			RemoveFlaggedAutoCompletion( int flags ) = 0;
-
-							// Writes variables with one of the given flags set to the given file.
-	virtual void			WriteFlaggedVariables( int flags, const char *setCmd, idFile *f ) const = 0;
-
 							// Moves CVars to and from dictionaries.
-	virtual const idDict *	MoveCVarsToDict( int flags ) const = 0;
+	virtual idDict			MoveCVarsToDict( int flags ) const = 0;
 	virtual void			SetCVarsFromDict( const idDict &dict ) = 0;
+
+	virtual bool			WasArchivedCVarModifiedAfterLastWrite() = 0;
+	virtual void			WriteArchivedCVars( idFile *f ) = 0;
+
+	virtual idDict			GetMissionOverrides() const = 0;
+	virtual void			SetMissionOverrides( const idDict &dict = {} ) = 0;
 };
 
 extern idCVarSystem *		cvarSystem;
-
-
-/*
-===============================================================================
-
-	CVar Registration
-
-	Each DLL using CVars has to declare a private copy of the static variable
-	idCVar::staticVars like this: idCVar * idCVar::staticVars = NULL;
-	Furthermore idCVar::RegisterStaticVars() has to be called after the
-	cvarSystem pointer is set when the DLL is first initialized.
-
-===============================================================================
-*/
-
-#define BAD_CVAR ((idCVar *)(size_t)(-1LL))
-
-ID_INLINE void idCVar::Init( const char *name, const char *value, int flags, const char *description,
-							float valueMin, float valueMax, const char **valueStrings, argCompletion_t valueCompletion ) {
-	this->name = name;
-	this->value = value;
-	this->flags = flags;
-	this->description = description;
-	this->flags = flags | CVAR_STATIC;
-	this->valueMin = valueMin;
-	this->valueMax = valueMax;
-	this->valueStrings = valueStrings;
-	this->valueCompletion = valueCompletion;
-	this->integerValue = 0;
-	this->floatValue = 0.0f;
-	this->internalVar = this;
-	if ( staticVars != BAD_CVAR) {
-		this->next = staticVars;
-		staticVars = this;
-	} else {
-		cvarSystem->Register( this );
-	}
-}
-
-ID_INLINE void idCVar::RegisterStaticVars( void ) {
-	if ( staticVars != BAD_CVAR) {
-		for ( idCVar *cvar = staticVars; cvar; cvar = cvar->next ) {
-			cvarSystem->Register( cvar );
-		}
-		staticVars = BAD_CVAR;
-	}
-}
 
 #endif /* !__CVARSYSTEM_H__ */

@@ -24,15 +24,18 @@ public final class Constants
     public static final String CONST_FDROID = "https://f-droid.org/packages/com.karin.idTech4Amm/";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
-    public static final String CONST_CODE_ALIAS = "Lin Daiyu"; // Natasha Verena Caitlyn
+    public static final String CONST_CODE_ALIAS = "Lin Daiyu"; // Natasha; Verena; Caitlyn
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
+            "The Dark Mod update to version 2.13. More view in `" + TextHelper.GenLinkText("https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/", "The Dark Mod(2.13)") + "`",
+            "Fix some The Dark Mod(ver 2.12) error.",
             "Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).",
             "Fix some lights missing on ceil in map game/airdefense1 on Quake 4.",
             "Add game portal support on Prey(2006).",
             "Fix wrong resurrection position from deathwalk state when load game after restart application on Prey(2006).",
             "Support game data folder creation with `Game path tips` button on launcher `General` tab.",
+            "[Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) will be removed on next release in the future!",
         };
 	};
 

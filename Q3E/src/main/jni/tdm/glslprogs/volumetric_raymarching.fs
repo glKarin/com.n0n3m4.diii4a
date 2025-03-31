@@ -15,11 +15,13 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 precision highp float;
+precision highp int;
 
 #pragma tdm_include "tdm_utils.glsl"
 #pragma tdm_include "tdm_transform.glsl"
 #pragma tdm_include "tdm_lightproject.glsl"
 #pragma tdm_include "tdm_shadowmaps.glsl"
+#pragma tdm_include "tdm_dither.glsl"
 
 uniform sampler2D u_lightProjectionTexture;
 uniform sampler2D u_lightFalloffTexture;
@@ -45,35 +47,18 @@ in vec4 worldPosition;
 
 out vec4 fragColor;
 
-// 8x8 Bayer matrix
-float DITHER_MATRIX[64] = float[](
-	0, 32, 8, 40, 2, 34, 10, 42,
-	48, 16, 56, 24, 50, 18, 58, 26,
-	12, 44, 4, 36, 14, 46, 6, 38,
-	60, 28, 52, 20, 62, 30, 54, 22,
-	3, 35, 11, 43, 1, 33, 9, 41,
-	51, 19, 59, 27, 49, 17, 57, 25,
-	15, 47, 7, 39, 13, 45, 5, 37,
-	63, 31, 55, 23, 61, 29, 53, 21
-);
-
-float ditherFraction() {
-	int x = int(gl_FragCoord.x), y = int(gl_FragCoord.y);
-	return DITHER_MATRIX[8 * (x&7) + (y&7)] / 64.0;
-}
-
 // get N samples from the fragment-view ray inside the frustum
 vec3 calcWithSampling(vec3 rayStart, vec3 rayVec, float minParam, float maxParam, int samplesNum) {
 	vec3 color = vec3(0.0);
 	for (int i = 0; i < samplesNum; i++) { 
 		float frac = 0.5;
 		if (u_randomize != 0)
-			frac = ditherFraction();
+			frac = ditherFractionBayer8();
 		float ratio = (i + frac) / samplesNum;
 		vec3 samplePos = rayStart + rayVec * mix(minParam, maxParam, ratio);
 		// shadow test
 		vec3 light2fragment = samplePos - u_lightOrigin;
-		float lit = 1;
+		float lit = 1.0;
 		if (u_shadows != 0) {
 			float depth = ShadowAtlasForVector(u_shadowMap, u_shadowRect, light2fragment);
 			vec3 absL = abs(light2fragment);
@@ -107,7 +92,7 @@ void main() {
 		float dotnp = dot(u_lightFrustum[i], vec4(rayStart, 1.0));
 		float dotnv = dot(u_lightFrustum[i].xyz, rayVec);
 		float param = -dotnp / dotnv;
-		if (dotnv > 0)
+		if (dotnv > 0.0)
 			maxParam = min(maxParam, param);
 		else
 			minParam = max(minParam, param);
@@ -140,12 +125,12 @@ void main() {
 		//start with exponential attenuation: 0 at D = 0, (1 - e^-5) at D = cap
 		float exponential = 1.0 - exp(-q * 5.0);
 		//then force fog to be opaque at D = cap
-		float transition = clamp((q - 0.9) / 0.1, 0, 1);
+		float transition = clamp((q - 0.9) / 0.1, 0.0, 1.0);
 		//exponential up to 90% of cap, perfectly opaque fog at 100% of cap (linear interpolation in-between)
 		float alpha = mix(exponential, 1, transition);
 		//add a bit of unscientific dithering to smoothen out color banding
 		if (u_randomize != 0)
-			alpha = min(alpha + 1e-2 * ditherFraction(), 1.0);
+			alpha = min(alpha + 1e-2 * ditherFractionBayer8(), 1.0);
 		fragColor.a = alpha;
 	}
 }

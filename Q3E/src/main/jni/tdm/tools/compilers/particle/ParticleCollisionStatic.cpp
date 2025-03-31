@@ -70,7 +70,7 @@ float PrtCollision::FindSegmentCollision(idVec3 start, idVec3 end, bool collideW
 	modelTrace_t mt;
 	//hitsCount += renderWorld->Trace(mt, start, end, 0.0f);
 	//hitsCount += renderWorld->FastWorldTrace(mt, start, end);
-	auto traceFilter = [&](const renderEntity_t *rent, const idRenderModel *model, const idMaterial *material) -> bool {
+	auto traceFilter = [&](const qhandle_t *handle, const renderEntity_t *rent, const idRenderModel *model, const idMaterial *material) -> bool {
 		if (collideWorldOnly)
 			return false;			//note: world is included automatically (fastWorld = true)
 

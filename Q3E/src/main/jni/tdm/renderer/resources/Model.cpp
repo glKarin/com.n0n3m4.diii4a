@@ -24,6 +24,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/resources/Model_lwo.h"
 #include "renderer/resources/Model_obj.h"
 #include "renderer/resources/Model_ma.h"
+#include "math/PoissonSampling.h"
 
 idCVar idRenderModelStatic::r_mergeModelSurfaces( "r_mergeModelSurfaces", "1", CVAR_BOOL|CVAR_RENDERER, "combine model surfaces with the same material" );
 idCVar idRenderModelStatic::r_slopVertex( "r_slopVertex", "0.01", CVAR_RENDERER, "merge xyz coordinates this far apart" );
@@ -49,6 +50,7 @@ idRenderModelStatic::idRenderModelStatic() {
 	reloadable = true;
 	levelLoadReferenced = false;
 	timeStamp = 0;
+	loadVersion = 0;
 }
 
 /*
@@ -333,6 +335,7 @@ idRenderModelStatic::LoadModel
 void idRenderModelStatic::LoadModel() {
 	PurgeModel();
 	InitFromFile( name );
+	loadVersion++;
 }
 
 /*
@@ -385,6 +388,15 @@ idRenderModelStatic::Timestamp
 */
 ID_TIME_T idRenderModelStatic::Timestamp() const {
 	return timeStamp;
+}
+
+/*
+================
+idRenderModelStatic::GetLoadVersion
+================
+*/
+int idRenderModelStatic::GetLoadVersion() const {
+	return loadVersion;
 }
 
 /*
@@ -2607,4 +2619,158 @@ void idRenderModelStatic::TransformModel( const idRenderModelStatic *sourceModel
 
 		AddSurface(newSurf);
 	}
+}
+
+void idRenderModelStatic::GenerateSamples( idList<samplePointOnModel_t> &samples, const modelSamplingParameters_t &params, idRandom &rnd ) const {
+
+	int numSurfs = NumBaseSurfaces();
+
+	// count triangles across surfaces
+	idList<int> surfaceStarts;
+	surfaceStarts.SetNum( numSurfs + 1 );
+	for ( int s = 0; s < numSurfs; s++ ) {
+		int numTris = surfaces[s].geometry->numIndexes / 3;
+		surfaceStarts[s + 1] = numTris;
+	}
+	// prepare prefix sums of tri counts
+	surfaceStarts[0] = 0;
+	for ( int s = 0; s < numSurfs; s++ )
+		surfaceStarts[s + 1] += surfaceStarts[s];
+	int totalTris = surfaceStarts[numSurfs];
+
+	// compute areas of triangles
+	idList<float> triAreas;
+	triAreas.SetNum( totalTris + 1 );
+	int pos = 0;
+	for ( int s = 0; s < numSurfs; s++ ) {
+		const srfTriangles_t *tri = surfaces[s].geometry;
+		int cnt = surfaceStarts[s + 1] - surfaceStarts[s];
+		for ( int i = 0; i < cnt; i++ ) {
+			int va = tri->indexes[3 * i + 0];
+			int vb = tri->indexes[3 * i + 1];
+			int vc = tri->indexes[3 * i + 2];
+			const idVec3 &pa = tri->verts[va].xyz;
+			const idVec3 &pb = tri->verts[vb].xyz;
+			const idVec3 &pc = tri->verts[vc].xyz;
+			triAreas[1 + (pos++)] = 0.5f * (pb - pa).Cross(pc - pa).Length();
+		}
+	}
+	assert( pos == totalTris );
+	// prepare prefix sums of triangles areas
+	triAreas[0] = 0.0f;
+	for ( int i = 0; i < totalTris; i++ )
+		triAreas[i + 1] += triAreas[i];
+
+	// compute desired number of samples according to settings
+	float totalArea = triAreas.Last();
+	float totalSamplesFloat = totalArea / idMath::Fmax( params.areaPerSample, 1.0f );
+	int totalSamples = (int) idMath::Fmin( totalSamplesFloat, params.maxSamplesTotal );
+
+	// distribute sample budget across surfaces
+	idList<int> numSamplesOnSurf;
+	numSamplesOnSurf.SetNum( numSurfs );
+	for ( int s = 0; s < numSurfs; s++ ) {
+		float ratio = ( triAreas[surfaceStarts[s + 1]] - triAreas[surfaceStarts[s]] ) / totalArea;
+		numSamplesOnSurf[s] = idMath::FtoiRound( ratio * totalSamples );
+		// note: we absolutely want at least 1 sample on each surface
+		// because all the other surfaces can get skin-mapped to nodraw at any moment!
+		numSamplesOnSurf[s] = idMath::Imax( numSamplesOnSurf[s], params.minSamplesPerSurface );
+		if (surfaceStarts[s + 1] == surfaceStarts[s])
+			numSamplesOnSurf[s] = 0;	// empty surface
+	}
+	totalSamples = 0;
+	for ( int s = 0; s < numSurfs; s++ )
+		totalSamples += numSamplesOnSurf[s];
+
+	samples.Clear();
+	for ( int s = 0; s < numSurfs; s++ ) {
+		const srfTriangles_t *tri = surfaces[s].geometry;
+		int cntBeg = surfaceStarts[s + 0];
+		int cntEnd = surfaceStarts[s + 1];
+		float areaBeg = triAreas[cntBeg];
+		float areaEnd = triAreas[cntEnd];
+		if ( numSamplesOnSurf[s] == 0 )
+			continue;
+
+		auto RandomSampleOnSurface = [&]() -> samplePointOnModel_t {
+			// use binary search to see which triangle we have picked
+			float param = areaBeg + rnd.RandomFloat() * ( areaEnd - areaBeg );
+			int i = idBinSearch_Less( triAreas.Ptr() + cntBeg, cntEnd - cntBeg, param );
+
+			// fetch triangle
+			int va = tri->indexes[3 * i + 0];
+			int vb = tri->indexes[3 * i + 1];
+			int vc = tri->indexes[3 * i + 2];
+			const idVec3 &pa = tri->verts[va].xyz;
+			const idVec3 &pb = tri->verts[vb].xyz;
+			const idVec3 &pc = tri->verts[vc].xyz;
+			// generate random barycentric coordinates
+			float u = rnd.RandomFloat();
+			float v = rnd.RandomFloat();
+			if ( u + v > 1.0f ) {
+				u = 1.0f - u;
+				v = 1.0f - v;
+			}
+			float w = 1.0f - u - v;
+			idVec3 pos = u * pa + v * pb + w * pc;
+
+			// fill sample
+			samplePointOnModel_t smp;
+			smp.surfaceIndex = s;
+			smp.triangleIndex = i;
+			smp.baryCoords = idVec3(u, v, w);
+			smp.staticPosition = pos;
+			return smp;
+		};
+
+		idList<samplePointOnModel_t> samplesOnSurf;
+		samplesOnSurf.SetNum( numSamplesOnSurf[s], false );
+		bool generated = false;
+		if ( params.poisson ) {
+			// poisson-like sampling (quite slow but covers model better)
+
+			exponentialSearchParams_t params;
+			params.initValue = idMath::Sqrt( ( areaEnd - areaBeg ) / samplesOnSurf.Num() );
+			params.minValue = 1.0f;
+			params.maxValue = 1e+5f;
+			params.absolutePrecision = params.relativePrecision = 0.3f;
+
+			if ( GeneratePoissonSamples(
+				samplesOnSurf, 10, params,
+				RandomSampleOnSurface,
+				[] ( const samplePointOnModel_t &a, const samplePointOnModel_t &b, float thres ) {
+					float distSq = ( a.staticPosition - b.staticPosition ).LengthSqr();
+					return distSq <= thres * thres;
+				}
+			) ) {
+				generated = true;
+			}
+		}
+
+		if ( !generated ) {
+			// compute all samples the simple way
+			for ( int q = 0; q < samplesOnSurf.Num(); q++ ) {
+				samplesOnSurf[q] = RandomSampleOnSurface();
+			}
+		}
+
+		// add these samples to output
+		samples.Append( samplesOnSurf );
+	}
+
+	// reorder samples randomly
+	for ( int i = 0; i < samples.Num(); i++ ) {
+		int j = rnd.RandomInt() % ( i + 1 );
+		idSwap( samples[i], samples[j] );
+	}
+}
+
+idVec3 idRenderModelStatic::GetSamplePosition( const struct renderEntity_s *ent, const samplePointOnModel_t &sample ) const {
+	return sample.staticPosition;
+}
+
+const idMaterial *idRenderModelStatic::GetSampleMaterial( const struct renderEntity_s *ent, const samplePointOnModel_t &sample ) const {
+	const idMaterial *material = surfaces[sample.surfaceIndex].material;
+	material = R_RemapShaderBySkin( material, ent->customSkin, ent->customShader );
+	return material;
 }

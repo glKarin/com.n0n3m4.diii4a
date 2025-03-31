@@ -53,6 +53,7 @@ const idEventDef EV_Thread_Assert( "assert", EventArgs('f', "condition", ""), EV
 const idEventDef EV_Thread_Trigger( "trigger", EventArgs('e', "entityToTrigger", ""), EV_RETURNS_VOID, "Triggers the given entity.");
 const idEventDef EV_Thread_SetCvar( "setcvar", EventArgs('s', "name", "", 's', "value", ""), EV_RETURNS_VOID, "Sets a cvar.");
 const idEventDef EV_Thread_GetCvar( "getcvar", EventArgs('s', "name", ""), 's', "Returns the string for a cvar.");
+const idEventDef EV_Thread_GetCvarF( "getcvarf", EventArgs('s', "name", ""), 'f', "Returns float value for a cvar.");
 const idEventDef EV_Thread_Random( "random", EventArgs('f', "range", ""), 'f', "Returns a random value X where 0 <= X < range.");
 const idEventDef EV_Thread_GetTime( "getTime", EventArgs(), 'f', "Returns the current game time in seconds." );
 const idEventDef EV_Thread_KillThread( "killthread", EventArgs('s', "threadName", ""), EV_RETURNS_VOID, "Kills all threads with the specified name");
@@ -64,11 +65,11 @@ const idEventDef EV_Thread_SetSpawnArg( "setSpawnArg", EventArgs('s', "key", "",
 const idEventDef EV_Thread_SpawnString( "SpawnString", EventArgs('s', "key", "", 's', "default", ""), 's', "Returns the string for the given spawn argument." );
 const idEventDef EV_Thread_SpawnFloat( "SpawnFloat", EventArgs('s', "key", "", 'f', "default", ""), 'f', "Returns the floating point value for the given spawn argument.");
 const idEventDef EV_Thread_SpawnVector( "SpawnVector", EventArgs('s', "key", "", 'v', "default", ""), 'v', "Returns the vector for the given spawn argument.");
-const idEventDef EV_Thread_ClearPersistantArgs( "clearPersistantArgs", EventArgs(), EV_RETURNS_VOID, "Clears data that persists between maps." );
-const idEventDef EV_Thread_SetPersistantArg( "setPersistantArg", EventArgs('s', "key", "", 's', "value", ""), EV_RETURNS_VOID, "Sets a key/value pair that persists between maps");
-const idEventDef EV_Thread_GetPersistantString( "getPersistantString", EventArgs('s', "key", ""), 's', "Returns the string for the given persistent arg");
-const idEventDef EV_Thread_GetPersistantFloat( "getPersistantFloat", EventArgs('s', "key", ""), 'f', "Returns the floating point value for the given persistent arg");
-const idEventDef EV_Thread_GetPersistantVector( "getPersistantVector", EventArgs('s', "key", ""), 'v', "Returns the vector for the given persistent arg");
+const idEventDef EV_Thread_ClearPersistentArgs( "clearPersistentArgs", EventArgs(), EV_RETURNS_VOID, "Clears data that persists between maps." );
+const idEventDef EV_Thread_SetPersistentArg( "setPersistentArg", EventArgs('s', "key", "", 's', "value", ""), EV_RETURNS_VOID, "Sets a key/value pair that persists between maps");
+const idEventDef EV_Thread_GetPersistentString( "getPersistentString", EventArgs('s', "key", ""), 's', "Returns the string for the given persistent arg");
+const idEventDef EV_Thread_GetPersistentFloat( "getPersistentFloat", EventArgs('s', "key", ""), 'f', "Returns the floating point value for the given persistent arg");
+const idEventDef EV_Thread_GetPersistentVector( "getPersistentVector", EventArgs('s', "key", ""), 'v', "Returns the vector for the given persistent arg");
 
 // Returns the number of the current mission (0-based)
 const idEventDef EV_Thread_GetCurrentMissionNum( "getCurrentMissionNum", EventArgs(), 'f', "Returns the number of the current mission (0-based, the first mission has number 0).");
@@ -90,6 +91,8 @@ const idEventDef EV_Thread_Log( "log", EventArgs('f', "x", ""), 'f', "Returns th
 const idEventDef EV_Thread_Pow( "pow", EventArgs('f', "x", "", 'f', "y", ""), 'f', "Returns the power of x to y.");
 const idEventDef EV_Thread_Ceil( "ceil", EventArgs('f', "x", ""), 'f', "Returns the smallest integer that is greater than or equal to the given value.");
 const idEventDef EV_Thread_Floor( "floor", EventArgs('f', "x", ""), 'f', "Returns the largest integer that is less than or equal to the given value.");
+const idEventDef EV_Thread_Min( "min", EventArgs('f', "x", "", 'f', "y", ""), 'f', "returns the smaller of two provided float values.");
+const idEventDef EV_Thread_Max( "max", EventArgs('f', "x", "", 'f', "y", ""), 'f', "returns the larger of two provided float values.");
 const idEventDef EV_Thread_SquareRoot( "sqrt", EventArgs('f', "square", ""), 'f', "Returns the square root of the given number.");
 const idEventDef EV_Thread_Normalize( "vecNormalize", EventArgs('v', "vec", ""), 'v', "Returns the normalized version of the given vector.");
 const idEventDef EV_Thread_VecLength( "vecLength", EventArgs('v', "vec", ""), 'f', "Returns the length of the given vector.");
@@ -327,6 +330,7 @@ CLASS_DECLARATION( idClass, idThread )
 	EVENT( EV_Thread_Trigger,				idThread::Event_Trigger )
 	EVENT( EV_Thread_SetCvar,				idThread::Event_SetCvar )
 	EVENT( EV_Thread_GetCvar,				idThread::Event_GetCvar )
+	EVENT( EV_Thread_GetCvarF,				idThread::Event_GetCvarF )
 	EVENT( EV_Thread_Random,				idThread::Event_Random )
 	EVENT( EV_Thread_GetTime,				idThread::Event_GetTime )
 	EVENT( EV_Thread_KillThread,			idThread::Event_KillThread )
@@ -338,11 +342,11 @@ CLASS_DECLARATION( idClass, idThread )
 	EVENT( EV_Thread_SpawnString,			idThread::Event_SpawnString )
 	EVENT( EV_Thread_SpawnFloat,			idThread::Event_SpawnFloat )
 	EVENT( EV_Thread_SpawnVector,			idThread::Event_SpawnVector )
-	EVENT( EV_Thread_ClearPersistantArgs,	idThread::Event_ClearPersistantArgs )
-	EVENT( EV_Thread_SetPersistantArg,		idThread::Event_SetPersistantArg )
-	EVENT( EV_Thread_GetPersistantString,	idThread::Event_GetPersistantString )
-	EVENT( EV_Thread_GetPersistantFloat,	idThread::Event_GetPersistantFloat )
-	EVENT( EV_Thread_GetPersistantVector,	idThread::Event_GetPersistantVector )
+	EVENT( EV_Thread_ClearPersistentArgs,	idThread::Event_ClearPersistentArgs )
+	EVENT( EV_Thread_SetPersistentArg,		idThread::Event_SetPersistentArg )
+	EVENT( EV_Thread_GetPersistentString,	idThread::Event_GetPersistentString )
+	EVENT( EV_Thread_GetPersistentFloat,	idThread::Event_GetPersistentFloat )
+	EVENT( EV_Thread_GetPersistentVector,	idThread::Event_GetPersistentVector )
 
 	EVENT( EV_Thread_GetCurrentMissionNum,	idThread::Event_GetCurrentMissionNum )
 	EVENT( EV_Thread_GetTDMVersion,			idThread::Event_GetTDMVersion )
@@ -359,6 +363,8 @@ CLASS_DECLARATION( idClass, idThread )
 	EVENT( EV_Thread_Pow,					idThread::Event_GetPow )
 	EVENT( EV_Thread_Floor,					idThread::Event_GetFloor )
 	EVENT( EV_Thread_Ceil,					idThread::Event_GetCeil )
+	EVENT( EV_Thread_Min,					idThread::Event_GetMin )
+	EVENT( EV_Thread_Max,					idThread::Event_GetMax )
 	EVENT( EV_Thread_SquareRoot,			idThread::Event_GetSquareRoot )
 	EVENT( EV_Thread_Normalize,				idThread::Event_VecNormalize )
 	EVENT( EV_Thread_VecLength,				idThread::Event_VecLength )
@@ -1349,7 +1355,7 @@ idThread::Event_SetCvar
 ================
 */
 void idThread::Event_SetCvar( const char *name, const char *value ) const {
-	cvarSystem->SetCVarString( name, value );
+	cvarSystem->SetCVarMissionString( name, value );
 }
 
 /*
@@ -1359,6 +1365,15 @@ idThread::Event_GetCvar
 */
 void idThread::Event_GetCvar( const char *name ) const {
 	ReturnString( cvarSystem->GetCVarString( name ) );
+}
+
+/*
+================
+idThread::Event_GetCvarFloat
+================
+*/
+void idThread::Event_GetCvarF( const char *name ) const {
+	ReturnFloat( cvarSystem->GetCVarFloat( name ) );
 }
 
 /*
@@ -1494,29 +1509,29 @@ void idThread::Event_SpawnVector( const char *key, idVec3 &defaultvalue ) {
 
 /*
 ================
-idThread::Event_ClearPersistantArgs
+idThread::Event_ClearPersistentArgs
 ================
 */
-void idThread::Event_ClearPersistantArgs( void ) {
+void idThread::Event_ClearPersistentArgs( void ) {
 	gameLocal.persistentLevelInfo.Clear();
 }
 
 
 /*
 ================
-idThread::Event_SetPersistantArg
+idThread::Event_SetPersistentArg
 ================
 */
-void idThread::Event_SetPersistantArg( const char *key, const char *value ) {
+void idThread::Event_SetPersistentArg( const char *key, const char *value ) {
 	gameLocal.persistentLevelInfo.Set( key, value );
 }
 
 /*
 ================
-idThread::Event_GetPersistantString
+idThread::Event_GetPersistentString
 ================
 */
-void idThread::Event_GetPersistantString( const char *key ) {
+void idThread::Event_GetPersistentString( const char *key ) {
 	const char *result;
 
 	gameLocal.persistentLevelInfo.GetString( key, "", &result );
@@ -1525,10 +1540,10 @@ void idThread::Event_GetPersistantString( const char *key ) {
 
 /*
 ================
-idThread::Event_GetPersistantFloat
+idThread::Event_GetPersistentFloat
 ================
 */
-void idThread::Event_GetPersistantFloat( const char *key ) {
+void idThread::Event_GetPersistentFloat( const char *key ) {
 	float result;
 
 	gameLocal.persistentLevelInfo.GetFloat( key, "0", result );
@@ -1537,10 +1552,10 @@ void idThread::Event_GetPersistantFloat( const char *key ) {
 
 /*
 ================
-idThread::Event_GetPersistantVector
+idThread::Event_GetPersistentVector
 ================
 */
-void idThread::Event_GetPersistantVector( const char *key ) {
+void idThread::Event_GetPersistentVector( const char *key ) {
 	idVec3 result;
 
 	gameLocal.persistentLevelInfo.GetVector( key, "0 0 0", result );
@@ -1673,6 +1688,22 @@ Tels: idThread::Event_GetFloor - returns the largest integer that is less than o
 */
 void idThread::Event_GetFloor( const float x ) {
 	ReturnInt( idMath::Floor( x ) );
+}
+
+/*
+Dragofer: idThread::Event_Min - returns the smaller of two provided float values
+================
+*/
+void idThread::Event_GetMin( const float x, const float y ) {
+	ReturnFloat( idMath::Fmin( x, y ) );
+}
+
+/*
+Dragofer: idThread::Event_Max - returns the larger of two provided float values
+================
+*/
+void idThread::Event_GetMax( const float x, const float y ) {
+	ReturnFloat( idMath::Fmax( x, y ) );
 }
 
 /*

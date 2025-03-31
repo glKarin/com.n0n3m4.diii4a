@@ -1,0 +1,7 @@
+sources:
+  4.4.4:
+    url: https://ffmpeg.org/releases/ffmpeg-4.4.4.tar.gz
+    sha1: c2556b51e3b4c9697e9fea0bd97bf0c495f079fe
+patches:
+  - patch_file: patches/fix_negative_shift_in_assembly.patch
+    base_path: source_subfolder

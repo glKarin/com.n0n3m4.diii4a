@@ -138,6 +138,14 @@ TEST_CASE("FileUtils") {
         StdioFileHolder f(fopen((dir / "test_dir" / "test_file").string().c_str(), "wt"));
     }
 
+    CHECK(stdext::exists(dir / "test_dir") == true);
+    CHECK(RemoveDirectoryIfEmpty((dir / "test_dir").string()) == false);
+    CHECK(stdext::exists(dir / "test_dir") == true);
+    RemoveFile((dir / "test_dir" / "test_file").string());
+    CHECK(RemoveDirectoryIfEmpty((dir / "test_dir").string()) == true);
+    CHECK(stdext::exists(dir / "test_dir") == false);
+    CHECK_THROWS(RemoveDirectoryIfEmpty((dir / "test_dir").string()));
+
     CreateDirectoriesForFile((dir / "test_file").string(), dir.string());
     CreateDirectoriesForFile((dir / "test_dir" / "test_file").string(), dir.string());
     CreateDirectoriesForFile((dir / "test_dir" / "a" / "b" / "c" / "test_file").string(), dir.string());
@@ -145,6 +153,13 @@ TEST_CASE("FileUtils") {
         StdioFileHolder f(fopen((dir / "test_dir" / "a" / "b" / "c" / "test_file").string().c_str(), "wt"));
     }
     CHECK(IfFileExists((dir / "test_dir" / "a" / "b" / "c" / "test_file").string()) == true);
+
+    PruneDirectoriesAfterFileRemoval((dir / "test_dir" / "a" / "b" / "c" / "test_file").string(), (dir / "test_dir").string());
+    CHECK(stdext::exists(dir / "test_dir" / "a" / "b" / "c") == true);
+    RemoveFile((dir / "test_dir" / "a" / "b" / "c" / "test_file").string());
+    PruneDirectoriesAfterFileRemoval((dir / "test_dir" / "a" / "b" / "c" / "test_file").string(), (dir / "test_dir").string());
+    CHECK(stdext::exists(dir / "test_dir" / "a") == false);
+    CHECK(stdext::exists(dir / "test_dir") == true);
 }
 
 TEST_CASE("ProvidedManifest: Read/Write") {
@@ -788,7 +803,7 @@ TEST_CASE("Downloader") {
             if (blk == 1) {
                 CHECK(data2 == DataIdentityBin);
                 CHECK(data3 == DataSquaresTxt);
-                CHECK(progressCnt >= 100);
+                CHECK(progressCnt >= 50);   // number of calls depends on CURL default settings...
                 int sumSize = DataTestTxt.size() + DataIdentityBin.size() + DataSquaresTxt.size();
                 CHECK(totalDownloaded == sumSize);
             }

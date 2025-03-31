@@ -88,6 +88,16 @@ textures/darkmod/stone/sculpted/trim_large_ornate_old_tiling_1d
 textures/darkmod/stone/sculpted/trim_small_ornate_old_tiling_1d
 textures/darkmod/nature/bones/bone_wall
 textures/darkmod/stone/cobblestones/cobblestones_large_uneven_darkgrey 
+textures/darkmod/stone/brick/blocks_multicolored_stained_trimmed
+textures/darkmod/stone/brick/grey_trimmed_blocks_dirty
+textures/darkmod/stone/brick/blocks_light_stained_trimmed
+textures/darkmod/stone/brick/blocks_palemasonry_small_regular_trimmed
+textures/darkmod/stone/brick/blocks_palemasonry_irregular_trimmed
+textures/darkmod/stone/brick/blocks_palemasonry_irregular
+textures/darkmod/wood/boards/planks_floor_redwood_posh_scuffed
+textures/darkmod/wood/boards/roof_framework_boards_large_old_red
+textures/darkmod/wood/panels/panel_decorative_red_grated
+textures/darkmod/wood/panels/panel_decorative_red_grated_grime
 
 If you believe any asset has been wrongfully included in The Dark Mod, please contact
 the team.

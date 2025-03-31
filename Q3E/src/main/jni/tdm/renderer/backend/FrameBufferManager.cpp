@@ -145,7 +145,7 @@ void FrameBufferManager::LeavePrimary(bool copyToDefault) {
 	if ( r_frontBuffer.GetBool() ) return;
 	// if we want to do tonemapping later, we need to continue to render to a texture,
 	// otherwise we can render the remaining UI views straight to the back buffer
-	FrameBuffer *targetFbo = r_tonemap ? guiFbo : defaultFbo;
+	FrameBuffer *targetFbo = r_tonemapInternal.GetBool() ? guiFbo : defaultFbo;
 	if (currentRenderFbo == targetFbo) return;
 
 	currentRenderFbo = targetFbo;
@@ -159,7 +159,7 @@ void FrameBufferManager::LeavePrimary(bool copyToDefault) {
 			backEnd.pc.c_copyFrameBuffer++;
 		}
 
-		if ( r_frontBuffer.GetBool() && !r_tonemap ) {
+		if ( r_frontBuffer.GetBool() && !r_tonemapInternal.GetBool() ) {
 			qglFinish();
 		}
 	}
@@ -247,9 +247,7 @@ void FrameBufferManager::CopyRender( const copyRenderCommand_t &cmd ) {
 	int backEndStartTime = Sys_Milliseconds();
 
 	if ( activeFbo == defaultFbo ) { // #4425: not applicable, raises gl errors
-#ifdef _GLES //karin: OpenGLES3.0
 		qglReadBuffer( GL_BACK );
-#endif
 	}
 
 	if ( activeFbo == primaryFbo && r_multiSamples.GetInteger() > 1 ) {
@@ -444,7 +442,7 @@ idList<renderCrop_t> FrameBufferManager::CreateShadowMapPages( const idList<int>
 	// initially, all lights have no window (i.e. no shadows)
 	idList<renderCrop_t> result;
 	result.SetNum( n );
-	memset( result.Ptr(), 0, result.Allocated() );
+	result.FillZero();
 
 	for ( int currentRatio = denominator; currentRatio >= minRatio; currentRatio >>= 1 ) {
 		for ( int i = 0; i < n; i++ ) {

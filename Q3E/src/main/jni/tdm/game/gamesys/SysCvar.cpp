@@ -515,6 +515,7 @@ idCVar cv_tdm_inv_loot_item_def("tdm_inv_loot_item_def", "atdm:inv_loot_info_ite
 idCVar cv_tdm_obj_gui_file(	"tdm_obj_hud_file", "guis/tdm_objectives.gui",	CVAR_GAME, "The name of the gui file that defines the in-game objectives.");
 idCVar cv_tdm_waituntilready_gui_file( "tdm_waituntilready_gui_file", "guis/tdm_waituntilready.gui",	CVAR_GAME, "The name of the gui file that is displayed after loading a map and before starting the gameplay action.");
 idCVar cv_tdm_invgrid_gui_file( "tdm_invgrid_hud_file", "guis/tdm_invgrid_parchment.gui",  CVAR_GAME | CVAR_ARCHIVE, "The name of the gui file that defines the in-game inventory grid.");
+idCVar cv_tdm_invgrid_sortstyle( "tdm_invgrid_sortstyle", "0",  CVAR_GAME | CVAR_ARCHIVE | CVAR_INTEGER, "Change how the inventory grid sorts items."); // #6592
 idCVar cv_tdm_subtitles_gui_file( "tdm_subtitles_gui_file", "guis/tdm_subtitles.gui",  CVAR_GAME, "The name of the gui file for in-game subtitles overlay");
 
 idCVar cv_tdm_hud_opacity(	"tdm_hud_opacity", "0.7",	CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT,	"The opacity of the HUD GUIs. [0..1]", 0, 1 );
@@ -611,6 +612,14 @@ idCVar cv_lg_fade_delay			("tdm_lg_fade_delay",			"0.09",		CVAR_GAME | CVAR_FLOA
 
 idCVar cv_empty_model("tdm_empty_model", "models/darkmod/misc/system/empty.lwo", CVAR_GAME | CVAR_ARCHIVE, "The empty model referenced by the 'waitForRender' script event.");
 
+idCVar g_lightQuotientAlgo(
+	"g_lightQuotientAlgo", "1", CVAR_INTEGER | CVAR_GAME,
+	"If set to 0, then use old LAS-based code.\n"
+	"If set to 1, then use new code in renderer frontend\n"
+	"If set to 2, then old LAS system is completely disabled",
+	0, 2
+);
+
 /**
  * Variables needed for lockpicking.
  */
@@ -679,9 +688,6 @@ idCVar ui_ready(					"ui_ready",				si_readyArgs[ 0 ],	CVAR_GAME | CVAR_USERINFO
 idCVar ui_spectate(					"ui_spectate",		si_spectateArgs[ 0 ],	CVAR_GAME | CVAR_USERINFO, "play or spectate", idCmdSystem::ArgCompletion_String<si_spectateArgs> );
 idCVar ui_chat(						"ui_chat",					"0",			CVAR_GAME | CVAR_USERINFO | CVAR_BOOL | CVAR_ROM , "player is chatting" );
 
-// change anytime vars
-idCVar developer(					"developer",				"0",			CVAR_GAME | CVAR_BOOL, "" );
-
 idCVar cv_gui_Width( 				"gui_Width",			"1.0",			CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "Size of the GUI as factor of the screen width. Default is 1.0 and stretches the GUI over the entire screen." );
 idCVar cv_gui_Height( 				"gui_Height",			"1.0",			CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "Size of the GUI as factor of the screen height. Default is 1.0 and stretches the GUI over the entire screen." );
 idCVar cv_gui_CenterX( 			"gui_CenterX",			"0.5",			CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "Position of the center of the GUI as percentage of the whole screen width. Default is 0.5 (half of the screen width)." );
@@ -729,6 +735,15 @@ idCVar g_showcamerainfo(			"g_showcamerainfo",			"0",			CVAR_GAME | CVAR_ARCHIVE
 idCVar g_showTestModelFrame(		"g_showTestModelFrame",		"0",			CVAR_GAME | CVAR_BOOL, "displays the current animation and frame # for testmodels" );
 idCVar g_showActiveEntities(		"g_showActiveEntities",		"0",			CVAR_GAME | CVAR_BOOL, "draws boxes around thinking entities.  dormant entities (outside of pvs) are drawn yellow.  non-dormant are green." );
 idCVar g_showEnemies(				"g_showEnemies",			"0",			CVAR_GAME | CVAR_BOOL, "draws boxes around monsters that have targeted the the player" );
+idCVar g_showLightQuotient(
+	"g_showLightQuotient", "0",	CVAR_GAME | CVAR_INTEGER,
+	"Displays current m_LightQuotient for nearby entities:\n"
+	"  1/-1 - value and bbox\n"
+	"  2/-2 - name, value, bbox\n"
+	"  3/-3 - value and samples\n"
+	"  negative - display where queried\n"
+	"  positive - force display for all entities"
+);
 
 idCVar g_frametime(					"g_frametime",				"0",			CVAR_GAME | CVAR_BOOL, "displays timing information for each game frame" );
 
@@ -964,3 +979,133 @@ idCVar net_serverDlTable(			"net_serverDlTable",		"",				CVAR_GAME | CVAR_ARCHIV
 idCVar s_driver("s_driver", "0", CVAR_GUI, "Dummy CVAR introduced by TDM to fix a console warning in Windows. Seems to be missing, but D3's mpmain.gui references this.");
 #endif
 
+
+// stgatilov #6530: extracted these constants from game scripts
+
+idCVar tdm_arrow_pullBackEncumbrance(
+	"tdm_arrow_pullBackEncumbrance", "0.30", CVAR_GAME | CVAR_FLOAT,
+	"Multiplier applied to player movement speed when bow is drawn back, e.g. 0.50 is half speed."
+);
+idCVar tdm_arrow_maxPower(
+	"tdm_arrow_maxPower", "1.0", CVAR_GAME | CVAR_FLOAT,
+	"Maximum power the arrow is launched.\n"
+	"This is a multiplier for 'velocity' in the .def file."
+);
+idCVar tdm_arrow_minPower(
+	"tdm_arrow_minPower", "0.1", CVAR_GAME | CVAR_FLOAT,
+	"Minimum power the arrow is launched.\n"
+	"This is a multiplier for 'velocity' in the .def file."
+);
+idCVar tdm_arrow_powerTime(
+	"tdm_arrow_powerTime", "1.5", CVAR_GAME | CVAR_FLOAT,
+	"Time it takes to go from minimum to maximum power.\n"
+);
+idCVar tdm_arrow_numProjectiles(
+	"tdm_arrow_numProjectiles", "1", CVAR_GAME | CVAR_INTEGER,
+	"How many projectiles to launch per shot.\n"
+	"Currently you can only fire one arrow at a time."
+);
+idCVar tdm_arrow_minReleaseTime(
+	"tdm_arrow_minReleaseTime", "0.05", CVAR_GAME | CVAR_FLOAT,
+	"Minimum time the 'pull arrow back' sequence is allowed to go for.\n"
+	"This is so you can't rapidly click the fire button and have a jittery effect."
+);
+idCVar tdm_arrow_tiredTime(
+	"tdm_arrow_tiredTime", "16.0", CVAR_GAME | CVAR_FLOAT,
+	"How long it takes for the player to get tired and put the arrow away.\n"
+);
+idCVar tdm_arrow_startTiredTime(
+	"tdm_arrow_startTiredTime", "12.0", CVAR_GAME | CVAR_FLOAT,
+	"How long it takes for tired anim to start playing.\n"
+	"Note: must be less than tdm_arrow_tired."
+);
+idCVar tdm_arrow_readyArrowTime(
+	"tdm_arrow_readyArrowTime", "1.0", CVAR_GAME | CVAR_FLOAT,
+	"How long it takes to ready the arrow in the bow (before pulling back).\n"
+	"If you let go of fire sooner, the arrow is put away."
+);
+idCVar tdm_arrow_cancelTime(
+	"tdm_arrow_cancelTime", "0.55", CVAR_GAME | CVAR_FLOAT,
+	"Duration of 'let go to early and put away' animation."
+);
+idCVar tdm_arrow_fireTime(
+	"tdm_arrow_fireTime", "0.1", CVAR_GAME | CVAR_FLOAT,
+	"Duration of `fire` animation."
+);
+idCVar tdm_arrow_zoomDelayTime(
+	"tdm_arrow_zoomDelayTime", "6.0", CVAR_GAME | CVAR_FLOAT,
+	"How long bowstring has to be held back before zoom starts."
+);
+idCVar tdm_arrow_zoomAmount(
+	"tdm_arrow_zoomAmount", "60.0", CVAR_GAME | CVAR_FLOAT,
+	"New FOV setting to zoom into when holding bowstring back.\n"
+	"E.g. engine uses 90 degrees for normal view. Set lower number to zoom in."
+);
+idCVar tdm_arrow_zoomInTime(
+	"tdm_arrow_zoomInTime", "2.0", CVAR_GAME | CVAR_FLOAT,
+	"How long to zoom in when holding bowstring back.\n"
+);
+idCVar tdm_arrow_zoomOutTime(
+	"tdm_arrow_zoomOutTime", "0.5", CVAR_GAME | CVAR_FLOAT,
+	"How long to zoom out when holding bowstring back.\n"
+);
+
+idCVar tdm_vinearrow_spacing(
+	"tdm_vinearrow_spacing", "16.0", CVAR_GAME | CVAR_FLOAT,
+	"Ideal distance between each vine piece (in Doom units)."
+);
+idCVar tdm_vinearrow_growTime(
+	"tdm_vinearrow_growTime", "0.7", CVAR_GAME | CVAR_FLOAT,
+	"How long it takes to grow a vine piece."
+);
+idCVar tdm_vinearrow_growIncrements(
+	"tdm_vinearrow_growIncrements", "10", CVAR_GAME | CVAR_INTEGER,
+	"How many growing increments."
+);
+idCVar tdm_vinearrow_traceInCount(
+	"tdm_vinearrow_traceInCount", "6", CVAR_GAME | CVAR_INTEGER,
+	"Number of attempts to find locations for vine pieces."
+);
+idCVar tdm_vinearrow_outDistance(
+	"tdm_vinearrow_outDistance", "20.0", CVAR_GAME | CVAR_FLOAT,
+	"How far out from the surface to start a child trace (in Doom units)."
+);
+idCVar tdm_vinearrow_angleSector(
+	"tdm_vinearrow_angleSector", "120.0", CVAR_GAME | CVAR_FLOAT,
+	"Angular size of sector where a random vine piece is planted for planting children."
+);
+idCVar tdm_vinearrow_angleSector2(
+	"tdm_vinearrow_angleSector2", "90.0", CVAR_GAME | CVAR_FLOAT,
+	"Angular size of sector where a random vine piece is planted for planting grandchildren."
+);
+idCVar tdm_vinearrow_angleSectorWater(
+	"tdm_vinearrow_angleSectorWater", "60.0", CVAR_GAME | CVAR_FLOAT,
+	"Angular size of sector where a random vine piece is planted after hit by water."
+);
+idCVar tdm_vinearrow_numChildren(
+	"tdm_vinearrow_numChildren", "3", CVAR_GAME | CVAR_INTEGER,
+	"How many direct children vines to grow from shot impact."
+);
+idCVar tdm_vinearrow_numGrandChildren(
+	"tdm_vinearrow_numGrandChildren", "2", CVAR_GAME | CVAR_INTEGER,
+	"How many grandchildren vines to grow from 2 direct children."
+);
+idCVar tdm_vinearrow_numChildrenWater(
+	"tdm_vinearrow_numChildrenWater", "2", CVAR_GAME | CVAR_INTEGER,
+	"How many additional children vines to grow on water stim."
+);
+
+idCVar tdm_flashbomb_playerDistanceFullBlind(
+	"tdm_flashbomb_playerDistanceFullBlind", "200.0", CVAR_GAME | CVAR_FLOAT,
+	"Within this distance, the thief is fully blinded (if he faces the detonation)."
+);
+idCVar tdm_flashbomb_playerDistanceNoBlind(
+	"tdm_flashbomb_playerDistanceNoBlind", "500.0", CVAR_GAME | CVAR_FLOAT,
+	"Within this distance, the thief is softly blinded (if he faces the detonation).\n"
+	"Above this value, the player doesn't get blinded at all."
+);
+idCVar tdm_flashbomb_maxPlayerApexAngle(
+	"tdm_flashbomb_maxPlayerApexAngle", "55.0", CVAR_GAME | CVAR_FLOAT,
+	"This is the angle defining how much the player can face away from the detonation and still get blinded. "
+	"A value of 0 means that the player must look EXACTLY in the direction of the detonation."
+);

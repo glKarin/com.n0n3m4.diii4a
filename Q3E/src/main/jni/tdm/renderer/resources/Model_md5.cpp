@@ -202,9 +202,11 @@ void idMD5Mesh::ParseMesh( idLexer &parser, int numJoints, const idJointMat *joi
 	scaledWeights = (idVec4 *) Mem_Alloc16( numWeights * sizeof( scaledWeights[0] ) );
 	weightIndex = (int *) Mem_Alloc16( numWeights * 2 * sizeof( weightIndex[0] ) );
 	memset( weightIndex, 0, numWeights * 2 * sizeof( weightIndex[0] ) );
+	vertexStarts.SetNum( texCoords.Num() + 1 );
 
 	count = 0;
 	for( i = 0; i < texCoords.Num(); i++ ) {
+		vertexStarts[i] = count;
 		num = firstWeightForVertex[i];
 		for( j = 0; j < numWeightsForVertex[i]; j++, num++, count++ ) {
 			scaledWeights[count].ToVec3() = tempWeights[num].offset * tempWeights[num].jointWeight;
@@ -213,6 +215,7 @@ void idMD5Mesh::ParseMesh( idLexer &parser, int numJoints, const idJointMat *joi
 		}
 		weightIndex[count * 2 - 1] = 1;
 	}
+	vertexStarts.Last() = count;
 
 	tempWeights.Clear();
 	numWeightsForVertex.Clear();
@@ -246,7 +249,7 @@ void idMD5Mesh::ParseMesh( idLexer &parser, int numJoints, const idJointMat *joi
 idMD5Mesh::TransformVerts
 ====================
 */
-void idMD5Mesh::TransformVerts( idDrawVert *verts, const idJointMat *entJoints ) {
+void idMD5Mesh::TransformVerts( idDrawVert *verts, const idJointMat *entJoints ) const {
 	SIMDProcessor->TransformVerts( verts, texCoords.Num(), entJoints, scaledWeights, weightIndex, numWeights );
 }
 
@@ -257,7 +260,7 @@ idMD5Mesh::TransformScaledVerts
 Special transform to make the mesh seem fat or skinny.  May be used for zombie deaths
 ====================
 */
-void idMD5Mesh::TransformScaledVerts( idDrawVert *verts, const idJointMat *entJoints, float scale ) {
+void idMD5Mesh::TransformScaledVerts( idDrawVert *verts, const idJointMat *entJoints, float scale ) const {
 	idVec4 *scaledWeights = (idVec4 *) _alloca16( numWeights * sizeof( scaledWeights[0] ) );
 	SIMDProcessor->Mul( scaledWeights[0].ToFloatPtr(), scale, scaledWeights[0].ToFloatPtr(), numWeights * 4 );
 	SIMDProcessor->TransformVerts( verts, texCoords.Num(), entJoints, scaledWeights, weightIndex, numWeights );
@@ -268,7 +271,7 @@ void idMD5Mesh::TransformScaledVerts( idDrawVert *verts, const idJointMat *entJo
 idMD5Mesh::UpdateSurface
 ====================
 */
-void idMD5Mesh::UpdateSurface( const struct renderEntity_s *ent, const idJointMat *entJoints, modelSurface_t *surf ) {
+void idMD5Mesh::UpdateSurface( const struct renderEntity_s *ent, const idJointMat *entJoints, modelSurface_t *surf ) const {
 	int i, base;
 	srfTriangles_t *tri;
 
@@ -424,6 +427,34 @@ idMD5Mesh::NumWeights
 */
 int	idMD5Mesh::NumWeights( void ) const {
 	return numWeights;
+}
+
+/*
+====================
+idMD5Mesh::UpdateVertex
+====================
+*/
+idVec3 idMD5Mesh::UpdateVertex( const struct renderEntity_s *ent, const idJointMat *joints, int v ) const {
+	// note: closely follows idMD5Mesh::UpdateSurface
+
+	float scale = 1.0f;
+	if ( ent->shaderParms[ SHADERPARM_MD5_SKINSCALE ] != 0.0f ) {
+		scale = ent->shaderParms[ SHADERPARM_MD5_SKINSCALE ];
+	}
+
+	// remap from mirror seam vertexes to original vertexes
+	int base = deformInfo->numOutputVerts - deformInfo->numMirroredVerts;
+	if ( v >= base )
+		v = deformInfo->mirroredVerts[v - base];
+
+	int start = vertexStarts[v];
+	int end = vertexStarts[v + 1];
+	assert(weightIndex[2 * end - 1] == 1);
+
+	idDrawVert res;
+	SIMDProcessor->TransformVerts( &res, 1, joints, scaledWeights + start, weightIndex + 2 * start, end - start );
+
+	return res.xyz * scale;
 }
 
 /***********************************************************************
@@ -734,6 +765,8 @@ idRenderModelMD5::InstantiateDynamicModel
 ====================
 */
 idRenderModel *idRenderModelMD5::InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel ) {
+	TRACE_CPU_SCOPE_TEXT( "InstantiateDynamicModel", ent ? GetTraceLabel(*ent) : "[null]" )
+
 	int					i, surfaceNum;
 	idMD5Mesh			*mesh;
 	idRenderModelStatic	*staticModel;
@@ -911,6 +944,73 @@ int idRenderModelMD5::NearestJoint( int surfaceNum, int a, int b, int c ) const 
 		}
 	}
 	return 0;
+}
+
+/*
+====================
+idRenderModelMD5::GenerateSamples
+====================
+*/
+void idRenderModelMD5::GenerateSamples( idList<samplePointOnModel_t> &samples, const modelSamplingParameters_t &params, idRandom &rnd ) const {
+	// convert T-pose: joint quaternions to joint matrices
+	int jn = defaultPose.Num();
+	idList<idJointMat> jointMats;
+	jointMats.SetNum( jn );
+	SIMDProcessor->ConvertJointQuatsToJointMats( jointMats.Ptr(), defaultPose.Ptr(), jn );
+
+	// fake render entity: only a few properties will be read from it
+	renderEntity_t rent;
+	memset( &rent, 0, sizeof(rent) );
+	rent.joints = jointMats.Ptr();
+	rent.numJoints = defaultPose.Num();
+	// generate static model in T-pose
+	idRenderModel *model = const_cast<idRenderModelMD5*>(this)->InstantiateDynamicModel( &rent, nullptr, nullptr );
+	assert( dynamic_cast<idRenderModelStatic*>( model ) );
+
+	// sample static surface
+	model->GenerateSamples( samples, params, rnd );
+
+	// InstantiateDynamicModel drops surfaces which don't render and don't case shadows (like e.g. nodrawsolid)
+	// it seems right now that we never need them, i.e. mapper will never skin-remap them to drawable material
+	// however, we need to renumber surfaces accordingly
+	for ( int s = 0; s < samples.Num(); s++ ) {
+		samplePointOnModel_t &smp = samples[s];
+		int genSurfIdx = smp.surfaceIndex;
+		const modelSurface_t *surf = model->Surface( genSurfIdx );
+		assert( surf->id >= 0 && surf->id < meshes.Num() );
+		smp.surfaceIndex = surf->id;
+	}
+
+	delete model;
+}
+
+/*
+====================
+idRenderModelMD5::GetSamplePosition
+====================
+*/
+idVec3 idRenderModelMD5::GetSamplePosition( const struct renderEntity_s *ent, const samplePointOnModel_t &sample ) const {
+	int m = sample.surfaceIndex;
+	int t = sample.triangleIndex;
+	int v0 = meshes[m].deformInfo->indexes[3 * t + 0];
+	int v1 = meshes[m].deformInfo->indexes[3 * t + 1];
+	int v2 = meshes[m].deformInfo->indexes[3 * t + 2];
+	idVec3 pos0 = meshes[m].UpdateVertex( ent, ent->joints, v0 );
+	idVec3 pos1 = meshes[m].UpdateVertex( ent, ent->joints, v1 );
+	idVec3 pos2 = meshes[m].UpdateVertex( ent, ent->joints, v2 );
+	idVec3 pos = sample.baryCoords.x * pos0 + sample.baryCoords.y * pos1 + sample.baryCoords.z * pos2;
+	return pos;
+}
+
+/*
+====================
+idRenderModelMD5::GetSampleMaterial
+====================
+*/
+const idMaterial *idRenderModelMD5::GetSampleMaterial( const struct renderEntity_s *ent, const samplePointOnModel_t &sample ) const {
+	const idMaterial *material = meshes[sample.surfaceIndex].shader;
+	material = R_RemapShaderBySkin( material, ent->customSkin, ent->customShader );
+	return material;
 }
 
 /*

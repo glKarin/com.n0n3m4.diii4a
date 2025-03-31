@@ -75,7 +75,7 @@ This may need to scan six cube map images
 */
 GLenum idImageAsset::SelectInternalFormat( byte const* const* dataPtrs, int numDataPtrs, int width, int height, textureDepth_t minimumDepth, GLint const* *swizzleMask ) {
 #ifdef _GLES //karin: only GL_RGBA
-    return GL_RGBA;
+    return GL_RGBA8;
 #else
 	int			i, c;
 	const byte	*scan;
@@ -282,6 +282,14 @@ helper function that takes the current width/height and might make them smaller
 void idImageAsset::GetDownsize( int &scaled_width, int &scaled_height ) const {
 	int size = 0;
 
+	if ( allowDownSize && globalImages->image_downSizeAll.GetInteger() )
+	{
+	   size = globalImages->image_downSizeAll.GetInteger();
+	   if ( size == 0 ) {
+			size = 64;
+		}
+	}
+	else {
 	// perform optional picmip operation to save texture memory
 	if ( depth == TD_SPECULAR && globalImages->image_downSizeSpecular.GetInteger() ) {
 		size = globalImages->image_downSizeSpecularLimit.GetInteger();
@@ -299,6 +307,7 @@ void idImageAsset::GetDownsize( int &scaled_width, int &scaled_height ) const {
 			size = 256;
 		}
 	}
+    }
 
 	if ( size > 0 ) {
 		while ( scaled_width > size || scaled_height > size ) {
@@ -1655,6 +1664,26 @@ int idImage::StorageSize() const {
 		baseSize = baseSize * 4 / 3;
 
 	return baseSize;
+}
+
+/*
+==================
+SizeOfCpuData
+
+stgatilov: only CPU-side data is reported.
+==================
+*/
+int idImageAsset::SizeOfCpuData() const {
+	int res = sizeof( *this );
+	if ( loadStack )
+		res += sizeof( *loadStack );
+	// note: some idStr-s are omitted --- don't care about it
+
+	res += cpuData.GetTotalSizeInBytes();
+	if ( compressedData )
+		res += compressedData->GetTotalSize();
+
+	return res;
 }
 
 /*

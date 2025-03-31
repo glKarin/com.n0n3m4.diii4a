@@ -29,7 +29,7 @@ enum jobSyncType_t {
 // NOTE: keep in sync with jobNames[]
 enum jobListId_t {
 	JOBLIST_RENDERER_FRONTEND	= 0,
-	JOBLIST_RENDERER_BACKEND	= 1,
+	//JOBLIST_RENDERER_BACKEND	= 1,			// stgatilov: nothing to parallelize in backend...
 	JOBLIST_UTILITY				= 9,			// won't print over-time warnings
 
 	MAX_JOBLISTS				= 32			// the editor may cause quite a few to be allocated
@@ -45,9 +45,19 @@ enum jobListPriority_t {
 };
 
 enum jobListParallelism_t {
-	JOBLIST_PARALLELISM_DEFAULT			= -1,	// use "jobs_numThreads" number of threads
-	JOBLIST_PARALLELISM_MAX_CORES		= -2,	// use a thread for each logical core (includes hyperthreads)
-	JOBLIST_PARALLELISM_MAX_THREADS		= -3	// use the maximum number of job threads, which can help if there is IO to overlap
+	//JOBLIST_PARALLELISM_DEFAULT			= -1,	// use "jobs_numThreads" number of threads
+	//JOBLIST_PARALLELISM_MAX_CORES		= -2,	// use a thread for each logical core (includes hyperthreads)
+	//JOBLIST_PARALLELISM_MAX_THREADS		= -3	// use the maximum number of job threads, which can help if there is IO to overlap
+
+	// stgatilov #6503: new levels of parallelism:
+	JOBLIST_PARALLELISM_REALTIME		= 0x40000000,	// make sure every PHYSICAL core has one thread to run (but no hyperthreading)
+														// used during gameplay for low latency realtime stuff
+														// note: it is expected that calling thread will soon WAIT for this joblist to finish
+	JOBLIST_PARALLELISM_NONINTERACTIVE	= 0x20000000,	// number of threads = number of LOGICAL cores
+														// used during non-interactive sections, where response time is not important
+	JOBLIST_PARALLELISM_FLAG_DISK		= 0x10000000,	// runs less threads if game is running off HDD (ORed as flag)
+														// added for joblists with heavy disk load (HDD is bad at parallel requests)
+	JOBLIST_PARALLELISM_NONE			= 0,			// run joblist on calling thread without any parallelism (useful for debug cvars)
 };
 
 #define assert_spu_local_store( ptr )
@@ -73,7 +83,7 @@ public:
 	void					InsertSyncPoint( jobSyncType_t syncType );
 
 	// Submit the jobs in this list.
-	void					Submit( idParallelJobList * waitForJobList = NULL, int parallelism = JOBLIST_PARALLELISM_DEFAULT );
+	void					Submit( idParallelJobList * waitForJobList = NULL, int parallelism = JOBLIST_PARALLELISM_REALTIME );
 	// Wait for the jobs in this list to finish. Will spin in place if any jobs are not done.
 	void					Wait();
 	// Try to wait for the jobs in this list to finish but either way return immediately. Returns true if all jobs are done.

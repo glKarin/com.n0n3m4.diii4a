@@ -23,7 +23,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 idRenderSystemLocal	tr;
 idRenderSystem	*renderSystem = &tr;
 
-idCVarBool r_tonemap( "r_tonemap", "1", CVAR_RENDERER | CVAR_ARCHIVE, "Use the tonemap correction (gamma, brightness, etc)" );
+idCVar r_tonemap( "r_tonemap", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Use the tonemap correction (gamma, brightness, etc)" );
+idCVar r_tonemapOnlyGame3d( "r_tonemapOnlyGame3d", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Skip tonemap in main menu, loading, and other GUI situations when game is not rendered" );
+idCVar r_tonemapInternal( "r_tonemapInternal", "-666", CVAR_RENDERER | CVAR_BOOL, "Internal cvar which shows whether tonemap is actually used" );
 idCVar r_smallCharSpacing( "r_smallCharSpacing", "1", CVAR_RENDERER | CVAR_ARCHIVE, "Console text symbol spacing", 0.5, 1 );
 
 /*
@@ -246,6 +248,8 @@ void	R_AddDrawViewCmd( viewDef_t &parms ) {
 		lockSurfView = *cmd->viewDef;
 		lockFrameReserve = frameData->frameMemoryAllocated;
 	}
+	R_LockView_BackendTransfer( parms );
+
 	tr.pc.c_numViews++;
 
 	R_ViewStatistics( parms );
@@ -264,11 +268,12 @@ without changing the composition of the scene, including
 culling.  The only thing that is modified is the
 view position and axis, no front end work is done at all
 
-
 Add the stored off command again, so the new rendering will use EXACTLY
 the same surfaces, including all the culling, even though the transformation
 matricies have been changed.  This allow the culling tightness to be
 evaluated interactively.
+
+stgatilov: use r_lockView instead, see functions just below
 ======================
 */
 void R_LockSurfaceScene( viewDef_t &parms ) {
@@ -291,6 +296,97 @@ void R_LockSurfaceScene( viewDef_t &parms ) {
 		myGlMultMatrix( vModel->modelMatrix,
 			cmd->viewDef->worldSpace.modelViewMatrix,
 		    vModel->modelViewMatrix );
+	}
+}
+
+/*
+======================
+R_LockView_FrontendStart
+
+Checks for changes in r_lockView cvar.
+Saves the current view if it has been locked just now,
+or the overrides the current view with the previously locked one.
+======================
+*/
+void R_LockView_FrontendStart( viewDef_t &viewDef ) {
+	renderView_t currentRenderView = viewDef.renderView;
+	if ( currentRenderView.viewID != VID_PLAYER_VIEW )
+		return;	// e.g. compass
+
+	// process modifications of cvar
+	if ( r_lockView.IsModified() ) {
+		r_lockView.ClearModified();
+
+		if ( r_lockView.GetInteger() == 0 ) {
+			// drop previous lock
+			tr.lockedViewAvailable = false;
+			// #6349 hack: enable scissors back (considering it as default)
+			r_useScissor.SetBool( true );
+			r_useDepthBoundsTest.SetBool( true );
+		}
+		else if ( r_lockView.GetInteger() > 0 && !tr.lockedViewAvailable ) {
+			// not yet locked, so lock view of the current frame
+			tr.lockedViewAvailable = true;
+			tr.lockedViewData = currentRenderView;
+			tr.lockedViewSinceFrame = tr.frameCount;
+			// #6349: disable view-dependent scissor optimizations
+			r_useScissor.SetBool( false );
+			r_useDepthBoundsTest.SetBool( false );
+		}
+	}
+
+	if ( tr.lockedViewAvailable && tr.lockedViewData.viewID == currentRenderView.viewID ) {
+		// this view was locked previously
+		const renderView_t &frozenView = tr.lockedViewData;
+
+		if ( r_lockView.GetInteger() > 0 ) {
+			// override view parameters with old ones
+			viewDef.renderView = frozenView;
+			// but retain current time: this makes particle effects dynamic
+			viewDef.renderView.time = currentRenderView.time;
+
+			if ( r_lockView.GetInteger() == 1 ) {
+				// save original parameters in order to restore them later for backend (allow flying camera around)
+				viewDef.unlockedRenderView = (renderView_t*)R_ClearedFrameAlloc( sizeof( renderView_t ) );
+				*viewDef.unlockedRenderView = currentRenderView;
+			}
+		}
+
+		if ( r_lockView.GetInteger() == 1 || r_lockView.GetInteger() == -1 ) {
+			// compute view frustum and draw it
+			viewDef_t temp;
+			memset( &temp, 0, sizeof(temp) );
+			temp.renderView = frozenView;
+			R_SetViewMatrix( temp );
+			R_SetupViewFrustum( temp );
+			gameRenderWorld->DebugFrustum( idVec4( 1, 0.3f, 0.8f, 1 ), temp.viewFrustum );
+
+			// also show where view direction goes from current position
+			idVec3 vector = ( currentRenderView.vieworg - frozenView.vieworg ).Normalized();
+			gameRenderWorld->DebugCircle( idVec4( 1, 0.8f, 0.3f, 1 ), currentRenderView.vieworg + vector * 100.0f, vector, 1.0f, 10 );
+		}
+	}
+}
+
+/*
+======================
+R_LockView_BackendTransfer
+
+Restores back original view parameters for backend so that player's current camera is used for drawing.
+======================
+*/
+void R_LockView_BackendTransfer( viewDef_t &viewDef ) {
+	if ( viewDef.unlockedRenderView ) {
+		// replace root view matrices with the override ones
+		viewDef.renderView = *viewDef.unlockedRenderView;
+
+		// rebuild view and projection matrices
+		R_SetViewMatrix( viewDef );
+		R_SetupProjection( viewDef );
+
+		// update the view origin and axis, and all the entity matricies
+		for ( viewEntity_t *vModel = viewDef.viewEntitys ; vModel ; vModel = vModel->next )
+			myGlMultMatrix( vModel->modelMatrix, viewDef.worldSpace.modelViewMatrix, vModel->modelViewMatrix );
 	}
 }
 
@@ -690,6 +786,7 @@ void idRenderSystemLocal::EndFrame( int *frontEndMsec, int *backEndMsec ) {
 	}
 
 	session->ExecuteDelayedFrameCommands();
+	globalImages->UpdateSingleThreaded();
 
 	// check for dynamic changes that require some initialization
 	R_CheckCvars();
@@ -705,6 +802,8 @@ void idRenderSystemLocal::EndFrame( int *frontEndMsec, int *backEndMsec ) {
 
 	// we can now release the vertexes used this frame
 	vertexCache.EndFrame();
+
+	PurgeOldSubviewImages();
 
 	if ( session->writeDemo ) {
 		session->writeDemo->WriteInt( DS_RENDER );
@@ -744,6 +843,80 @@ void idRenderSystemLocal::RenderViewToViewport( const renderView_t &renderView, 
 	viewport.y1 = idMath::FtoiTrunc( ( rc.y + rc.height ) - floor( ( renderView.y + renderView.height ) * hRatio + 0.5f ) );
 	viewport.y2 = idMath::FtoiTrunc( ( rc.y + rc.height ) - floor( renderView.y * hRatio + 0.5f ) - 1 );
 }
+
+/*
+=====================
+PurgeOldSubviewImages
+=====================
+*/
+void idRenderSystemLocal::PurgeOldSubviewImages() {
+	// this method should be called outside parallel section
+	assert(!session->IsFrontend());
+
+	static const int SUBVIEW_IMAGE_KILL_AFTER_FRAMES = 100;
+
+	for (int i = 0; i < subviewImages.Num(); i++) {
+		ImageForSubview &si = subviewImages[i];
+		if (si.purged)
+			continue;
+
+		if (frameCount - si.lastUsedFrameCount > SUBVIEW_IMAGE_KILL_AFTER_FRAMES) {
+			si.purged = true;
+			si.image->PurgeImage();
+		}
+	}
+}
+
+/*
+=====================
+CreateImageForSubview
+=====================
+*/
+idImageScratch *idRenderSystemLocal::CreateImageForSubview() {
+	// should be called from frontend
+	//assert(!com_smp.GetBool() || session->IsFrontend());	// can be called in backend from Session::StartWipe
+
+	renderCrop_t &rc = renderCrops[currentRenderCrop];
+	int width = rc.width;
+	int height = rc.height;
+
+	int slot = -1;
+	for (int i = 0; i < subviewImages.Num(); i++) {
+		ImageForSubview &si = subviewImages[i];
+
+		if (si.purged) {
+			slot = i;
+			continue;	// GPU texture was freed
+		}
+
+		if (si.lastUsedFrameCount == frameCount) {
+			continue;	// already occupied for this frame
+		}
+
+		if (si.width == width && si.height == height) {
+			// can reuse texture (not freed yet)
+			si.lastUsedFrameCount = frameCount;
+			return si.image;
+		}
+	}
+
+	if (slot < 0) {
+		// add new texture to the end
+		ImageForSubview &added = subviewImages.Alloc();
+		slot = subviewImages.IndexOf(&added);
+		added.width = width;
+		added.height = height;
+
+		idStr imageName = va("$subview$%d", slot);
+		added.image = globalImages->ImageScratch(imageName);
+	}
+
+	ImageForSubview &si = subviewImages[slot];
+	si.purged = false;	// will be generated in backend when data is copied into it
+	si.lastUsedFrameCount = frameCount;
+	return si.image;
+}
+
 
 static int RoundDownToPowerOfTwo( int v ) {
 	int	i;

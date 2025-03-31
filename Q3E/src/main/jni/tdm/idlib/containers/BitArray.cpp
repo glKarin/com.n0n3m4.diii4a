@@ -23,7 +23,7 @@ template<class TWord> static void TestStress(int size, int queries) {
 	idBitArray<TWord> bitset;
 
 	check.SetNum(size);
-	memset(check.Ptr(), false, check.Allocated());
+	check.FillZero();
 	bitset.Init(size);
 	bitset.SetBitsSameAll(false);
 

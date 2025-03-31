@@ -33,6 +33,6 @@ void main() {
 		vec4 tex = texture(u_texture, var_TexCoord0.st);
 		if (tex.a <= u_alphaTest)
 			discard;
-		FragColor = tex * u_color;;
+		FragColor = tex * u_color;
 	}
 }

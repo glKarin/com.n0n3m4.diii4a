@@ -103,12 +103,16 @@ void GLimp_CheckRequiredFeatures( void ) {
 		glConfig.maxTextureAnisotropy = 1;
 	}
 
-	glConfig.stencilTexturing = CHECK_FEATURE( GL_ARB_stencil_texturing );
+	glConfig.stencilTexturing = CHECK_FEATURE( GL_ARB_stencil_texturing ); //karin: not used
 	glConfig.depthBoundsTestAvailable = CHECK_FEATURE(GL_EXT_depth_bounds_test);
 	glConfig.bufferStorageAvailable = CHECK_FEATURE( GL_ARB_buffer_storage );
 
 	//it seems that these extensions are checked via GLAD_GL_xxx variables
+#ifdef _GLES //karin: support on OpenGL ES 3.0, but not include 1D texture
+    common->Printf("^2v^0 - using %s\n", "GL_ARB_texture_storage");
+#else
 	CHECK_FEATURE(GL_ARB_texture_storage);
+#endif
 	CHECK_FEATURE(GL_ARB_multi_draw_indirect);
 	CHECK_FEATURE(GL_ARB_vertex_attrib_binding);
 	CHECK_FEATURE(GL_ARB_compatibility);

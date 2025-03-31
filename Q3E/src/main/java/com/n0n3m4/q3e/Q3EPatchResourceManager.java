@@ -81,6 +81,18 @@ public class Q3EPatchResourceManager
         resourceList.add(rsc);
 
         rsc = new Q3EPatchResource(
+                Q3EGlobals.PatchResource.TDM_2_12_GLSL_SHADER,
+                Q3ELang.tr(context, R.string.the_dark_mod_glsl_shader) + "(2.12)",
+                Q3EGlobals.TDM_GLSL_SHADER_VERSION,
+                Q3EGlobals.GAME_TDM,
+                null,
+                Q3EPatchResource.EXTRACT_ZIP_TO_DIR,
+                "pak/darkmod/glprogs_2_12.pk4",
+                ""
+        );
+        resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource(
                 Q3EGlobals.PatchResource.GZDOOM_RESOURCE,
                 Q3ELang.tr(context, R.string.gzdoom_builtin_resource) + "(4.14.0)",
                 Q3EGlobals.GZDOOM_VERSION,

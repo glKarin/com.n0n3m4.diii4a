@@ -31,6 +31,38 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/resources/Image.h"
 
 
+idCVar tdm_mission_list_title_style(
+	"tdm_mission_list_title_style", "1", CVAR_GUI | CVAR_INTEGER | CVAR_ARCHIVE,
+	"Set mission list title display style:\n"
+	"  0 --- Alphabetical\n"
+	"  1 --- CMOS",
+	0, 1
+);
+
+idCVar tdm_mission_list_sort_direction(
+	"tdm_mission_list_sort_direction", "0", CVAR_GUI | CVAR_INTEGER | CVAR_ARCHIVE,
+	"Set mission list sort direction:\n"
+	"  0 --- ascending\n"
+	"  1 --- descending",
+	0, 1
+);
+
+idCVar tdm_download_list_sort_direction(
+	"tdm_download_list_sort_direction", "1", CVAR_GUI | CVAR_INTEGER | CVAR_ARCHIVE,
+	"Set download list sort direction:\n"
+	"  0 --- ascending\n"
+	"  1 --- descending",
+	0, 1
+);
+
+idCVar tdm_download_list_sort_by(
+	"tdm_download_list_sort_by", "1", CVAR_GUI | CVAR_INTEGER | CVAR_ARCHIVE,
+	"Set download list 'sort by':\n"
+	"  0 --- title\n"
+	"  1 --- date",
+	0, 1
+);
+
 idStr MissionScreenshot::GetLocalFilename() const
 {
 	idStr temp;
@@ -82,34 +114,15 @@ DownloadableMod::DownloadableMod() :
 {}
 
 // Static sort compare functor, sorting by mod title
-typedef DownloadableMod* DownloadableModPtr;
 
 int DownloadableMod::SortCompareTitle(const DownloadableModPtr* a, const DownloadableModPtr* b)
 {
-	//alexdiru 4499
-	idStr aName = common->Translate((*a)->title);
-	idStr prefix = "";
-	idStr suffix = "";
-	common->GetI18N()->MoveArticlesToBack(aName, prefix, suffix);
-	if (!suffix.IsEmpty())
-	{
-		// found, remove prefix and append suffix
-		aName.StripLeadingOnce(prefix.c_str());
-		aName += suffix;
-	}
+	return CModInfo::SortCompareTitle((*a)->title, (*b)->title);
+}
 
-	idStr bName = common->Translate((*b)->title);
-	prefix = "";
-	suffix = "";
-	common->GetI18N()->MoveArticlesToBack(bName, prefix, suffix);
-	if (!suffix.IsEmpty())
-	{
-		// found, remove prefix and append suffix
-		bName.StripLeadingOnce(prefix.c_str());
-		bName += suffix;
-	}
-
-	return aName.Icmp(bName);
+int DownloadableMod::SortCompareDate(const DownloadableModPtr* a, const DownloadableModPtr* b)
+{
+	return (*a)->releaseDate.Cmp((*b)->releaseDate);
 }
 
 idStr DownloadableMod::GetLocalScreenshotPath(int screenshotNum) const
@@ -143,7 +156,7 @@ CMissionManager::CMissionManager() :
 CMissionManager::~CMissionManager()
 {
 	// Clear contents and the list elements themselves
-	_downloadableMods.DeleteContents(true);
+	_downloadableModsPrimary.DeleteContents(true);
 
 	SaveDatabase();
 }
@@ -174,6 +187,21 @@ void CMissionManager::Restore(idRestoreGame* savefile)
 void CMissionManager::SaveDatabase() const
 {
 	_missionDB->Save();
+}
+
+void CMissionManager::CreatePrimaryModList()
+{
+	const int num_mods = GetNumMods();
+
+	_modListPrimary.SetNum(num_mods);
+	for (int i = 0; i < num_mods; i++) {
+		_modListPrimary[i] = GetModInfo(i);
+	}
+}
+
+const idList<CModInfoPtr>& CMissionManager::GetPrimaryModList() const
+{
+	return _modListPrimary;
 }
 
 // Returns the number of available missions
@@ -657,72 +685,10 @@ void CMissionManager::GenerateModList()
 		}
 	}
 
+	CreatePrimaryModList();
+
 	gameLocal.Printf("Found %d mods in the FM folder.\n", _availableMods.Num());
 	DM_LOG(LC_MAINMENU, LT_DEBUG)LOGSTRING("Found %d mods in the FM folder.\r", _availableMods.Num());
-
-	// Sort the mod list alphabetically
-	SortModList();
-}
-
-// grayman #3110 - rewritten due to freed memory crashes
-
-// Compare functor to sort missions by title
-int CMissionManager::ModSortCompare(const int* a, const int* b)
-{
-	// Get the mission titles (fs_currentfm stuff)
-	CModInfoPtr aInfo = gameLocal.m_MissionManager->GetModInfo(*a);
-	CModInfoPtr bInfo = gameLocal.m_MissionManager->GetModInfo(*b);
-
-	if ( ( aInfo == NULL ) || ( bInfo == NULL) )
-	{
-		return 0;
-	}
-
-	idStr aName = common->Translate( aInfo->displayName );
-	idStr prefix = "";
-	idStr suffix = "";
-	common->GetI18N()->MoveArticlesToBack( aName, prefix, suffix );
-	if ( !suffix.IsEmpty() )
-	{
-		// found, remove prefix and append suffix
-		aName.StripLeadingOnce( prefix.c_str() );
-		aName += suffix;
-	}
-
-	idStr bName = common->Translate( bInfo->displayName );
-	prefix = "";
-	suffix = "";
-	common->GetI18N()->MoveArticlesToBack( bName, prefix, suffix );
-	if ( !suffix.IsEmpty() )
-	{
-		// found, remove prefix and append suffix
-		bName.StripLeadingOnce( prefix.c_str() );
-		bName += suffix;
-	}
-
-	return aName.Icmp(bName);
-}
-
-void CMissionManager::SortModList()
-{
-	// greebo: idStrList has a specialised algorithm, preventing me
-	// from using a custom sort algorithm, hence this ugly thing here
-	idList<int> indexList;
-
-	indexList.SetNum(_availableMods.Num());
-	for (int i = 0; i < _availableMods.Num(); ++i)
-	{
-		indexList[i] = i;
-	}
-
-	indexList.Sort( CMissionManager::ModSortCompare );
-
-	idStrList temp = _availableMods;
-
-	for (int i = 0; i < indexList.Num(); ++i)
-	{
-		_availableMods[i] = temp[indexList[i]];
-	}
 }
 
 void CMissionManager::RefreshMetaDataForNewFoundMods()
@@ -1120,7 +1086,7 @@ void CMissionManager::UninstallMod()
 int CMissionManager::StartReloadDownloadableMods()
 {
 	// Clear contents and the list elements themselves
-	_downloadableMods.DeleteContents(true);
+	_downloadableModsPrimary.DeleteContents(true);
 
 	if (gameLocal.m_HttpConnection == NULL) return -1;
 
@@ -1200,25 +1166,23 @@ CMissionManager::RequestStatus CMissionManager::ProcessReloadDownloadableModsReq
 	return status;
 }
 
-int CMissionManager::StartDownloadingModDetails(int modNum)
+int CMissionManager::StartDownloadingModDetails(DownloadableMod* mod)
 {
-	// Index out of bounds?
-	if (modNum < 0 || modNum >= _downloadableMods.Num()) return -1;
+	int modIndex = _downloadableModsPrimary.FindIndex(mod);
+	if (mod == NULL || modIndex == -1) return -1;
 
 	// HTTP requests allowed?
 	if (gameLocal.m_HttpConnection == NULL) return -1;
 
-	const DownloadableMod& mod = *_downloadableMods[modNum];
-
-	idStr url = va(cv_tdm_mission_details_url.GetString(), mod.id);
+	idStr url = va(cv_tdm_mission_details_url.GetString(), mod->id);
 
 	fs::path tempFilename = g_Global.GetDarkmodPath();
 	tempFilename /= TMP_MISSION_DETAILS_FILENAME;
 
 	CDownloadPtr download(new CDownload({url}, tempFilename.string().c_str()));
 
-	// Store the mod number in the download class
-	download->GetUserData().id = modNum;
+	// Store the mod index in the download class
+	download->GetUserData().id = modIndex;
 
 	_modDetailsDownloadId = gameLocal.m_DownloadManager->AddDownload(download);
 
@@ -1256,10 +1220,10 @@ CMissionManager::RequestStatus CMissionManager::ProcessReloadModDetailsRequest()
 				CDownloadPtr download = gameLocal.m_DownloadManager->GetDownload(_modDetailsDownloadId);
 				assert(download != NULL);
 
-				// Mod number was stored as userdata in the download object
-				int modNum = download->GetUserData().id;
+				// Mod index was stored as userdata in the download object
+				int modIndex = download->GetUserData().id;
 
-				LoadModDetailsFromXml(doc, modNum);
+				LoadModDetailsFromXml(doc, modIndex);
 			}
 			else
 			{
@@ -1284,21 +1248,19 @@ bool CMissionManager::IsMissionScreenshotRequestInProgress()
 	return _modScreenshotDownloadId != -1;
 }
 
-int CMissionManager::StartDownloadingMissionScreenshot(int missionIndex, int screenshotNum)
+int CMissionManager::StartDownloadingMissionScreenshot(DownloadableMod* mod, int screenshotNum)
 {
 	assert(_modScreenshotDownloadId == -1); // ensure no download is in progress when this is called
 
-	// Index out of bounds?
-	if (missionIndex < 0 || missionIndex >= _downloadableMods.Num()) return -1;
+	int modIndex = _downloadableModsPrimary.FindIndex(mod);
+	if (mod == NULL || modIndex == -1) return -1;
 
 	// HTTP requests allowed?
 	if (gameLocal.m_HttpConnection == NULL) return -1;
 
-	const DownloadableMod& mission = *_downloadableMods[missionIndex];
+	assert(screenshotNum >= 0 && screenshotNum < mod->screenshots.Num());
 
-	assert(screenshotNum >= 0 && screenshotNum < mission.screenshots.Num());
-
-	idStr url = va(cv_tdm_mission_screenshot_url.GetString(), mission.screenshots[screenshotNum]->serverRelativeUrl.c_str());
+	idStr url = va(cv_tdm_mission_screenshot_url.GetString(), mod->screenshots[screenshotNum]->serverRelativeUrl.c_str());
 	idStr ext;
 	url.ExtractFileExtension(ext);
 
@@ -1314,7 +1276,7 @@ int CMissionManager::StartDownloadingMissionScreenshot(int missionIndex, int scr
 	CDownloadPtr download(new CDownload({url}, tempFilepath.string().c_str()));
 
 	// Store the mission and screenshot number in the download class
-	download->GetUserData().id = missionIndex;
+	download->GetUserData().id = modIndex;
 	download->GetUserData().id2 = screenshotNum;
 
 	_modScreenshotDownloadId = gameLocal.m_DownloadManager->AddDownload(download);
@@ -1341,12 +1303,12 @@ CMissionManager::RequestStatus CMissionManager::ProcessMissionScreenshotRequest(
 		if (status == SUCCESSFUL)
 		{
 			// Mission was stored as userdata in the download object
-			int missionIndex = download->GetUserData().id;
+			int modIndex = download->GetUserData().id;
 			int screenshotNum = download->GetUserData().id2;
 
-			assert(missionIndex >= 0 && missionIndex < _downloadableMods.Num());
+			assert(modIndex >= 0 && modIndex < _downloadableModsPrimary.Num());
 
-			DownloadableMod& mission = *_downloadableMods[missionIndex];
+			DownloadableMod& mission = *_downloadableModsPrimary[modIndex];
 
 			assert(screenshotNum >= 0 && screenshotNum < mission.screenshots.Num());
 
@@ -1402,7 +1364,7 @@ CMissionManager::RequestStatus CMissionManager::GetRequestStatusForDownloadId(in
 	};
 }
 
-void CMissionManager::LoadModDetailsFromXml(const XmlDocumentPtr& doc, int modNum)
+void CMissionManager::LoadModDetailsFromXml(const XmlDocumentPtr& doc, int modIndex)
 {
 	assert(doc != NULL);
 
@@ -1433,9 +1395,9 @@ void CMissionManager::LoadModDetailsFromXml(const XmlDocumentPtr& doc, int modNu
 
 	pugi::xpath_node node = doc->select_node("//tdm/mission");
 	
-	assert(modNum >= 0 && modNum < _downloadableMods.Num());
+	assert(modIndex >= 0 && modIndex < _downloadableModsPrimary.Num());
 
-	DownloadableMod& mod = *_downloadableMods[modNum];
+	DownloadableMod& mod = *_downloadableModsPrimary[modIndex];
 
 	mod.detailsLoaded = true;
 
@@ -1679,27 +1641,16 @@ bool CMissionManager::LoadModListFromXml(const XmlDocumentPtr& doc)
 		if (mission.missionUrls.Num() > 0 || mission.l10nPackUrls.Num() > 0)
 		{
 			// Copy-construct the local mission struct into the heap-allocated one
-			_downloadableMods.Append(new DownloadableMod(mission));
+			_downloadableModsPrimary.Append(new DownloadableMod(mission));
 		}
 	}
 
-	SortDownloadableMods();
 	return true;
 }
 
-void CMissionManager::SortDownloadableMods()
+const DownloadableModList& CMissionManager::GetPrimaryDownloadableMods() const
 {
-	if ( sortByDate ) {
-		_downloadableMods.Sort( []( DownloadableMod* const* a, DownloadableMod* const* b ) {
-			return ( *b )->releaseDate.Cmp( ( *a )->releaseDate );
-			} );
-	} else
-		_downloadableMods.Sort(DownloadableMod::SortCompareTitle);
-}
-
-const DownloadableModList& CMissionManager::GetDownloadableMods() const
-{
-	return _downloadableMods;
+	return _downloadableModsPrimary;
 }
 
 bool CMissionManager::ProcessMissionScreenshot(const fs::path& tempFilename, DownloadableMod& mod, int screenshotNum)

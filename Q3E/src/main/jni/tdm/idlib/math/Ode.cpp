@@ -85,8 +85,8 @@ idODE_Midpoint::~idODE_Midpoint
 =============
 */
 idODE_Midpoint::~idODE_Midpoint( void ) {
-	delete tmpState;
-	delete derivatives;
+	delete[] tmpState;
+	delete[] derivatives;
 }
 
 /*
@@ -142,11 +142,11 @@ idODE_RK4::~idODE_RK4
 =============
 */
 idODE_RK4::~idODE_RK4( void ) {
-	delete tmpState;
-	delete d1;
-	delete d2;
-	delete d3;
-	delete d4;
+	delete[] tmpState;
+	delete[] d1;
+	delete[] d2;
+	delete[] d3;
+	delete[] d4;
 }
 
 /*
@@ -215,12 +215,12 @@ idODE_RK4Adaptive::~idODE_RK4Adaptive
 =============
 */
 idODE_RK4Adaptive::~idODE_RK4Adaptive( void ) {
-	delete tmpState;
-	delete d1;
-	delete d1half;
-	delete d2;
-	delete d3;
-	delete d4;
+	delete[] tmpState;
+	delete[] d1;
+	delete[] d1half;
+	delete[] d2;
+	delete[] d3;
+	delete[] d4;
 }
 
 /*

@@ -13,26 +13,38 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
+#pragma tdm_include "tdm_constants_shared.glsl"
+
+// various helpers for transforming texcoords for different interaction stages
+vec2 transformSurfaceTexCoords(vec2 attrTexCoord, bool hasMatrix, vec4 texMatrix[2]) {
+	if (!hasMatrix)
+		return attrTexCoord;
+	mat2 matr = mat2(texMatrix[0].xy, texMatrix[1].xy);
+	return attrTexCoord * matr + vec2(texMatrix[0].w, texMatrix[1].w);
+}
+vec2 transformSurfaceTexOffset(vec2 attrTexCoord, bool hasMatrix, vec4 texMatrix[2]) {
+	if (!hasMatrix)
+		return attrTexCoord;
+	mat2 matr = mat2(texMatrix[0].xy, texMatrix[1].xy);
+	return attrTexCoord * matr;
+}
+
 // computes all vertex shader outputs related to surface texturing & coloring
 void generateSurfaceProperties(
 	vec4 attrTexCoord, vec4 attrColor,
 	vec3 attrTangent, vec3 attrBitangent, vec3 attrNormal,
-	vec4 bumpMatrix[2], vec4 diffuseMatrix[2], vec4 specularMatrix[2],
+	vec4 normalMatrix[2], vec4 parallaxMatrix[2], vec4 diffuseMatrix[2], vec4 specularMatrix[2],
 	vec4 colorModulate, vec4 colorAdd,
-	out vec2 texNormal, out vec2 texDiffuse, out vec2 texSpecular,
+	int flags,
+	out vec2 texNormal, out vec2 texParallax, out vec2 texDiffuse, out vec2 texSpecular,
 	out vec4 vertexColor, out mat3 matTangentToLocal
 ) {
-	// normal map texgen
-	texNormal.x = dot(attrTexCoord, bumpMatrix[0]);
-	texNormal.y = dot(attrTexCoord, bumpMatrix[1]);
-
-	// diffuse map texgen
-	texDiffuse.x = dot(attrTexCoord, diffuseMatrix[0]);
-	texDiffuse.y = dot(attrTexCoord, diffuseMatrix[1]);
-
-	// specular map texgen
-	texSpecular.x = dot(attrTexCoord, specularMatrix[0]);
-	texSpecular.y = dot(attrTexCoord, specularMatrix[1]);
+	// per-stage texcoords generation
+	bool hasMatrix = checkFlag(flags, SFL_SURFACE_HAS_TEXTURE_MATRIX);
+	texNormal = transformSurfaceTexCoords(attrTexCoord.xy, hasMatrix, normalMatrix);
+	texParallax = transformSurfaceTexCoords(attrTexCoord.xy, hasMatrix, parallaxMatrix);
+	texDiffuse = transformSurfaceTexCoords(attrTexCoord.xy, hasMatrix, diffuseMatrix);
+	texSpecular = transformSurfaceTexCoords(attrTexCoord.xy, hasMatrix, specularMatrix);
 
 	// color generation
 	vertexColor = attrColor * colorModulate + colorAdd;
@@ -61,7 +73,7 @@ InteractionGeometry computeInteractionGeometry(vec3 localToLight, vec3 localToVi
 	InteractionGeometry props;
 	props.localL = normalize(localToLight);
 	props.localV = normalize(localToView);
-	props.localN = localNormal;	// should be normalized in fetchSurfaceNormal
+	props.localN = localNormal;	// should be normalized in unpackSurfaceNormal
 	props.localH = normalize(props.localV + props.localL);
 	// must be done in tangent space, otherwise smoothing will suffer (see #4958)
 	props.NdotL = clamp(dot(props.localN, props.localL), 0.0, 1.0);
@@ -107,14 +119,14 @@ vec3 computeAdvancedInteraction(
 	// interaction properties:
 	InteractionGeometry props,
 	// surface color:
-	sampler2D diffuseTexture, vec3 diffuseParamColor, vec2 diffuseTexCoord,
-	sampler2D specularTexture, vec3 specularParamColor, vec2 specularTexCoord,
+	vec3 diffuseParamColor, vec4 diffuseTexColorA,
+	vec3 specularParamColor, vec4 specularTexColorA,
 	vec3 vertexColor,
 	// light parameters:
 	bool bumpmapTogglingFixEnabled
 ) {
-	vec3 diffuseTexColor = texture(diffuseTexture, diffuseTexCoord).rgb;
-	vec3 specularTexColor = texture(specularTexture, specularTexCoord).rgb;
+	vec3 diffuseTexColor = diffuseTexColorA.rgb;
+	vec3 specularTexColor = specularTexColorA.rgb;
 
 	FresnelRimCoeffs fresnelRim = computeFresnelRimCoefficients(props);
 	vec3 specularTerm = computeSpecularTerm(props, specularTexColor, fresnelRim);
@@ -148,8 +160,8 @@ vec4 computeAmbientInteraction(
 	// interaction properties:
 	AmbientGeometry props,
 	// surface color:
-	sampler2D diffuseTexture, vec3 diffuseParamColor, vec2 diffuseTexCoord,
-	sampler2D specularTexture, vec3 specularParamColor, vec2 specularTexCoord,
+	vec3 diffuseParamColor, vec4 diffuseTexColorA,
+	vec3 specularParamColor, vec4 specularTexColorA,
 	vec3 vertexColor,
 	// light properties
 	bool useNormalIndexedDiffuse, bool useNormalIndexedSpecular, samplerCube normalIndexedDiffuse, samplerCube normalIndexedSpecular,
@@ -157,8 +169,9 @@ vec4 computeAmbientInteraction(
 	float ambientMinLevel, float ambientGamma
 ) {
 	// compute the diffuse term
-	vec4 diffuseTexColor = texture(diffuseTexture, diffuseTexCoord);
-	vec3 specularTexColor = texture(specularTexture, specularTexCoord).rgb;
+	vec3 diffuseTexColor = diffuseTexColorA.rgb;
+	float diffuseTexAlpha = diffuseTexColorA.a;
+	vec3 specularTexColor = specularTexColorA.rgb;
 
 	// diffuse term
 	vec3 diffuseTerm = vec3(1);
@@ -177,7 +190,7 @@ vec4 computeAmbientInteraction(
 	specularTerm *= specularParamColor;
 
 	vec3 surfaceTerm = (diffuseTerm * diffuseTexColor.rgb + specularTerm * specularTexColor) * vertexColor;
-	vec4 result = vec4(surfaceTerm, diffuseTexColor.a);
+	vec4 result = vec4(surfaceTerm, diffuseTexAlpha);
 
 	// avoid negative values, which with floating point render buffers can lead to NaN artefacts
 	result = max(result, vec4(0));
