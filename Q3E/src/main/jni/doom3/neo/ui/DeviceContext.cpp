@@ -45,12 +45,12 @@ idVec4 idDeviceContext::colorNone;
 idCVar gui_smallFontLimit("gui_smallFontLimit", "0.30", CVAR_GUI | CVAR_ARCHIVE, "");
 idCVar gui_mediumFontLimit("gui_mediumFontLimit", "0.60", CVAR_GUI | CVAR_ARCHIVE, "");
 #ifdef _WCHAR_LANG
-idCVar harm_gui_wideCharLang("harm_gui_wideCharLang", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "enable wide character language support");
+idCVar harm_gui_wideCharLang("harm_gui_wideCharLang", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "enable wide-character language support");
 static bool _hasWideCharFont = false;
-#define AsWideCharLang(text_, len_) ( _hasWideCharFont && harm_gui_wideCharLang.GetBool() && idStr::IsNonASCII(text_, len_) )
+#define AsASCIICharLang(text_, len_) ( !_hasWideCharFont || !harm_gui_wideCharLang.GetBool() || idStr::IsPureASCII(text_, len_) )
 #endif
 #ifdef _D3BFG_FONT
-idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_INIT | CVAR_ARCHIVE, "use DOOM3-BFG fonts instead of old fonts\n"
+idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_INIT | CVAR_ARCHIVE, "using DOOM3-BFG new fonts instead of old fonts.\n"
 		"    0 or \"\": disable\n"
 		"    1: make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic(Only for DOOM3, Quake4 and Prey not support). e.g. \n"
 		"        'fonts/fontImage_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
@@ -58,7 +58,7 @@ idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_INIT |
 		"        'fonts/arial/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
 		"        'fonts/bank/fontImage_**.dat' -> 'newfonts/BankGothic_Md_BT/48.dat'\n"
 		"        'fonts/micro/fontImage_**.dat' -> 'newfonts/microgrammadbolext/48.dat'\n"
-		"    Otherwise you can setup DOOM3-BFG newfonts name to override all DOOM 3/Quake 4/Prey old fonts. e.g. \n"
+		"    Otherwise you can setup DOOM3-BFG new font name to override all DOOM 3/Quake 4/Prey old fonts. e.g. \n"
 		"        Chainlink_Semi_Bold\n"
 		"        Arial_Narrow\n"
 		"        BankGothic_Md_BT\n"
@@ -891,57 +891,8 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 		}
 
 #ifdef _WCHAR_LANG
-        if(AsWideCharLang(text, (int)len))
+        if(AsASCIICharLang(text, (int)len))
         {
-            idStr drawText = text;
-            int charIndex = 0;
-            int lastCharIndex = 0;
-
-            while( charIndex < len ) {
-				lastCharIndex = charIndex;
-                uint32_t textChar = drawText.UTF8Char( charIndex );
-
-                glyph = R_Font_GetGlyphInfo(useFont, textChar);
-                if (!glyph) {
-                    continue;
-                }
-
-				//karin: charIndex will increment when read UTF8 character, so use last charIndex
-                if( textChar == C_COLOR_ESCAPE && idStr::IsColor( drawText.c_str() + lastCharIndex ) ) {
-					// textChar == '^' and charIndex is color value current
-                    if( drawText[ charIndex ] == C_COLOR_DEFAULT ) {
-                        newColor = color;
-                    } else {
-                        newColor = idStr::ColorForIndex( drawText[ charIndex ] );
-                        newColor[3] = color[3];
-                    }
-                    if( cursor == charIndex - 1 || cursor == charIndex ) {
-                        float partialSkip = ((glyph->xSkip * useScale) + adjust) / 5.0f;
-
-                        if (cursor == count) {
-                            partialSkip *= 2.0f;
-                        } else {
-                            renderSystem->SetColor(newColor);
-                        }
-
-                        DrawEditCursor(x - partialSkip, y, scale);
-                    }
-                    renderSystem->SetColor( newColor );
-					charIndex++; //karin: skip color value character
-                    continue;
-                } else {
-                    float yadj = useScale * glyph->top;
-                    PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
-
-                    if( cursor == charIndex - 1 ) {
-                        DrawEditCursor( x, y, scale );
-                    }
-
-                    x += (glyph->xSkip * useScale) + adjust;
-                }
-            }
-        }
-        else
 #endif
 		while (s && *s && count < len) {
 			if (*s < GLYPH_START || *s > GLYPH_END) {
@@ -994,6 +945,59 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				count++;
 			}
 		}
+#ifdef _WCHAR_LANG
+        }
+        else
+        {
+            idStr drawText = text;
+            int charIndex = 0;
+            int lastCharIndex = 0;
+
+            while( charIndex < len ) {
+                lastCharIndex = charIndex;
+                uint32_t textChar = drawText.UTF8Char( charIndex );
+
+                glyph = R_Font_GetGlyphInfo(useFont, textChar);
+                if (!glyph) {
+                    continue;
+                }
+
+                //karin: charIndex will increment when read UTF8 character, so use last charIndex
+                if( textChar == C_COLOR_ESCAPE && idStr::IsColor( drawText.c_str() + lastCharIndex ) ) {
+                    // textChar == '^' and charIndex is color value current
+                    if( drawText[ charIndex ] == C_COLOR_DEFAULT ) {
+                        newColor = color;
+                    } else {
+                        newColor = idStr::ColorForIndex( drawText[ charIndex ] );
+                        newColor[3] = color[3];
+                    }
+                    if( cursor == charIndex - 1 || cursor == charIndex ) {
+                        float partialSkip = ((glyph->xSkip * useScale) + adjust) / 5.0f;
+
+                        if (cursor == count) {
+                            partialSkip *= 2.0f;
+                        } else {
+                            renderSystem->SetColor(newColor);
+                        }
+
+                        DrawEditCursor(x - partialSkip, y, scale);
+                    }
+                    renderSystem->SetColor( newColor );
+                    charIndex++; //karin: skip color value character
+                    continue;
+                } else {
+                    float yadj = useScale * glyph->top;
+                    PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+
+                    if( cursor == charIndex - 1 ) {
+                        DrawEditCursor( x, y, scale );
+                    }
+
+                    x += (glyph->xSkip * useScale) + adjust;
+                }
+            }
+        }
+#endif
 
 		if (cursor == len) {
 			DrawEditCursor(x, y, scale);
@@ -1041,37 +1045,7 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 
 #ifdef _WCHAR_LANG
     int len = (int)strlen(text);
-    if(AsWideCharLang(text, len))
-    {
-        idStr drawText = text;
-        int charIndex = 0;
-		float f = 0.0f;
-
-        if (limit > 0) {
-            while( charIndex < len ) {
-                if(charIndex >= limit)
-                    break;
-
-                if( idStr::IsColor( drawText.c_str() + charIndex ) ) {
-                    charIndex++;
-                } else {
-                    uint32_t textChar = drawText.UTF8Char( charIndex );
-                    f += R_Font_GetCharWidth(useFont, textChar, scale);
-                }
-            }
-        } else {
-            while( charIndex < len ) {
-                if( idStr::IsColor( drawText.c_str() + charIndex ) ) {
-                    charIndex++;
-                } else {
-                    uint32_t textChar = drawText.UTF8Char( charIndex );
-                    f += R_Font_GetCharWidth(useFont, textChar, scale);
-                }
-            }
-        }
-		return idMath::FtoiFast(f);
-    }
-    else
+    if(AsASCIICharLang(text, len))
     {
 #endif
 	if (limit > 0) {
@@ -1094,6 +1068,36 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 
 	return idMath::FtoiFast(scale * useFont->glyphScale * width);
 #ifdef _WCHAR_LANG
+    }
+    else
+    {
+        idStr drawText = text;
+        int charIndex = 0;
+        float f = 0.0f;
+
+        if (limit > 0) {
+            while( charIndex < len ) {
+                if(charIndex >= limit)
+                    break;
+
+                if( idStr::IsColor( drawText.c_str() + charIndex ) ) {
+                    charIndex += 2; //skip 2 characters, because color is ^x format
+                } else {
+                    uint32_t textChar = drawText.UTF8Char( charIndex );
+                    f += R_Font_GetCharWidth(useFont, textChar, scale);
+                }
+            }
+        } else {
+            while( charIndex < len ) {
+                if( idStr::IsColor( drawText.c_str() + charIndex ) ) {
+                    charIndex += 2; //skip 2 characters, because color is ^x format
+                } else {
+                    uint32_t textChar = drawText.UTF8Char( charIndex );
+                    f += R_Font_GetCharWidth(useFont, textChar, scale);
+                }
+            }
+        }
+        return idMath::FtoiFast(f);
     }
 #endif
 }
@@ -1120,6 +1124,10 @@ int idDeviceContext::TextHeight(const char *text, float scale, int limit)
 
 		count = 0;
 
+#ifdef _WCHAR_LANG
+        if(AsASCIICharLang(text, len))
+        {
+#endif
 		while (s && *s && count < len) {
 			if (idStr::IsColor(s)) {
 				s += 2;
@@ -1135,6 +1143,31 @@ int idDeviceContext::TextHeight(const char *text, float scale, int limit)
 				count++;
 			}
 		}
+#ifdef _WCHAR_LANG
+        }
+        else
+        {
+            idStr drawText = text;
+            int charIndex = 0;
+            float f = 0.0f;
+
+            while( charIndex < len ) {
+                if ( idStr::IsColor( drawText.c_str() + charIndex ) ) {
+                    charIndex += 2;
+                    continue;
+                } else {
+                    uint32_t textChar = drawText.UTF8Char( charIndex );
+                    f = R_Font_GetCharHeight(useFont, textChar, scale);
+
+                    if (max < f) {
+                        max = f;
+                    }
+                }
+            }
+
+            return idMath::FtoiFast(max);
+        }
+#endif
 	}
 
 	return idMath::FtoiFast(max * useScale);
@@ -1296,7 +1329,112 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 	wordBreak = false;
 
 #ifdef _WCHAR_LANG
-    if(AsWideCharLang(text, (int)strlen(text)))
+    if(AsASCIICharLang(text, (int)strlen(text)))
+    {
+#endif
+	while (p) {
+
+		if (*p == '\n' || *p == '\r' || *p == '\0') {
+			lineBreak = true;
+
+			if ((*p == '\n' && *(p + 1) == '\r') || (*p == '\r' && *(p + 1) == '\n')) {
+				p++;
+			}
+		}
+
+		int nextCharWidth = (idStr::CharIsPrintable(*p) ? CharWidth(*p, textScale) : cursorSkip);
+		// FIXME: this is a temp hack until the guis can be fixed not not overflow the bounding rectangles
+		//		  the side-effect is that list boxes and edit boxes will draw over their scroll bars
+		//	The following line and the !linebreak in the if statement below should be removed
+		nextCharWidth = 0;
+
+		if (!lineBreak && (textWidth + nextCharWidth) > rectDraw.w) {
+			// The next character will cause us to overflow, if we haven't yet found a suitable
+			// break spot, set it to be this character
+			if (len > 0 && newLine == 0) {
+				newLine = len;
+				newLinePtr = p;
+				newLineWidth = textWidth;
+			}
+
+			wordBreak = true;
+		} else if (lineBreak || (wrap && (*p == ' ' || *p == '\t'))) {
+			// The next character is in view, so if we are a break character, store our position
+			newLine = len;
+			newLinePtr = p + 1;
+			newLineWidth = textWidth;
+		}
+
+		if (lineBreak || wordBreak) {
+			float x = rectDraw.x;
+
+			if (textAlign == ALIGN_RIGHT) {
+				x = rectDraw.x + rectDraw.w - newLineWidth;
+			} else if (textAlign == ALIGN_CENTER) {
+				x = rectDraw.x + (rectDraw.w - newLineWidth) / 2;
+			}
+
+			if (wrap || newLine > 0) {
+				buff[newLine] = '\0';
+
+				// This is a special case to handle breaking in the middle of a word.
+				// if we didn't do this, the cursor would appear on the end of this line
+				// and the beginning of the next.
+				if (wordBreak && cursor >= newLine && newLine == len) {
+					cursor++;
+				}
+			}
+
+			if (!calcOnly) {
+				count += DrawText(x, y, textScale, color, buff, 0, 0, 0, cursor);
+			}
+
+			if (cursor < newLine) {
+				cursor = -1;
+			} else if (cursor >= 0) {
+				cursor -= (newLine + 1);
+			}
+
+			if (!wrap) {
+				return newLine;
+			}
+
+			if ((limit && count > limit) || *p == '\0') {
+				break;
+			}
+
+			y += lineSkip + 5;
+
+			if (!calcOnly && y > rectDraw.Bottom()) {
+				break;
+			}
+
+			p = newLinePtr;
+
+			if (breaks) {
+				breaks->Append(p - text);
+			}
+
+			len = 0;
+			newLine = 0;
+			newLineWidth = 0;
+			textWidth = 0;
+			lineBreak = false;
+			wordBreak = false;
+			continue;
+		}
+
+		buff[len++] = *p++;
+		buff[len] = '\0';
+
+		// update the width
+		if (*(buff + len - 1) != C_COLOR_ESCAPE && (len <= 1 || *(buff + len - 2) != C_COLOR_ESCAPE)) {
+			textWidth += textScale * useFont->glyphScale * useFont->glyphs[(const unsigned char)*(buff + len - 1)].xSkip;
+		}
+	}
+#ifdef _WCHAR_LANG
+    }
+    else
     {
         idStr drawText = text;
         int			charIndex = 0;
@@ -1426,108 +1564,7 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
             }
         }
     }
-    else
 #endif
-	while (p) {
-
-		if (*p == '\n' || *p == '\r' || *p == '\0') {
-			lineBreak = true;
-
-			if ((*p == '\n' && *(p + 1) == '\r') || (*p == '\r' && *(p + 1) == '\n')) {
-				p++;
-			}
-		}
-
-		int nextCharWidth = (idStr::CharIsPrintable(*p) ? CharWidth(*p, textScale) : cursorSkip);
-		// FIXME: this is a temp hack until the guis can be fixed not not overflow the bounding rectangles
-		//		  the side-effect is that list boxes and edit boxes will draw over their scroll bars
-		//	The following line and the !linebreak in the if statement below should be removed
-		nextCharWidth = 0;
-
-		if (!lineBreak && (textWidth + nextCharWidth) > rectDraw.w) {
-			// The next character will cause us to overflow, if we haven't yet found a suitable
-			// break spot, set it to be this character
-			if (len > 0 && newLine == 0) {
-				newLine = len;
-				newLinePtr = p;
-				newLineWidth = textWidth;
-			}
-
-			wordBreak = true;
-		} else if (lineBreak || (wrap && (*p == ' ' || *p == '\t'))) {
-			// The next character is in view, so if we are a break character, store our position
-			newLine = len;
-			newLinePtr = p + 1;
-			newLineWidth = textWidth;
-		}
-
-		if (lineBreak || wordBreak) {
-			float x = rectDraw.x;
-
-			if (textAlign == ALIGN_RIGHT) {
-				x = rectDraw.x + rectDraw.w - newLineWidth;
-			} else if (textAlign == ALIGN_CENTER) {
-				x = rectDraw.x + (rectDraw.w - newLineWidth) / 2;
-			}
-
-			if (wrap || newLine > 0) {
-				buff[newLine] = '\0';
-
-				// This is a special case to handle breaking in the middle of a word.
-				// if we didn't do this, the cursor would appear on the end of this line
-				// and the beginning of the next.
-				if (wordBreak && cursor >= newLine && newLine == len) {
-					cursor++;
-				}
-			}
-
-			if (!calcOnly) {
-				count += DrawText(x, y, textScale, color, buff, 0, 0, 0, cursor);
-			}
-
-			if (cursor < newLine) {
-				cursor = -1;
-			} else if (cursor >= 0) {
-				cursor -= (newLine + 1);
-			}
-
-			if (!wrap) {
-				return newLine;
-			}
-
-			if ((limit && count > limit) || *p == '\0') {
-				break;
-			}
-
-			y += lineSkip + 5;
-
-			if (!calcOnly && y > rectDraw.Bottom()) {
-				break;
-			}
-
-			p = newLinePtr;
-
-			if (breaks) {
-				breaks->Append(p - text);
-			}
-
-			len = 0;
-			newLine = 0;
-			newLineWidth = 0;
-			textWidth = 0;
-			lineBreak = false;
-			wordBreak = false;
-			continue;
-		}
-
-		buff[len++] = *p++;
-		buff[len] = '\0';
-
-		// update the width
-		if (*(buff + len - 1) != C_COLOR_ESCAPE && (len <= 1 || *(buff + len - 2) != C_COLOR_ESCAPE)) {
-			textWidth += textScale * useFont->glyphScale * useFont->glyphs[(const unsigned char)*(buff + len - 1)].xSkip;
-		}
-	}
 
 	return idMath::FtoiFast(rectDraw.w / charSkip);
 }

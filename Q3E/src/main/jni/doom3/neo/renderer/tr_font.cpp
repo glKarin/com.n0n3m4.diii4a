@@ -354,6 +354,12 @@ float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale
     return glyph ? (float)glyph->xSkip * info->glyphScale * scale : 0.0f;
 }
 
+float R_Font_GetCharHeight(const fontInfo_t *info, uint32_t charCode, float scale)
+{
+    const glyphInfo_t *glyph = R_Font_GetGlyphInfo(info, charCode, DEFAULT_MEASURE_CHAR);
+    return glyph ? (float)glyph->height * info->glyphScale * scale : 0.0f;
+}
+
 bool R_Font_ParseWideFont(fontInfo_t *outFont)
 {
     int i;

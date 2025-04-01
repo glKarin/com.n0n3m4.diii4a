@@ -418,16 +418,16 @@ class idStr
         ID_INLINE void		    CopyRange( const char* text, int start, int end );
 
 		// faster if assume is ASCII or UTF8
-        static ID_INLINE bool	IsNonASCII( const uint8_t* s, const int maxLen ) {
+        static ID_INLINE bool	IsPureASCII( const uint8_t* s, const int maxLen ) {
 			for( int i = 0; s[ i ] != '\0' && i < maxLen; i++ )
 			{
 				if( s[i] >= 0x80 )
-					return true;
+					return false;
 			}
-            return false;
-        }
-        static ID_INLINE bool	IsNonASCII( const char* s, const int maxLen ) {
-            return IsNonASCII( ( const uint8_t* )s, maxLen );
+			return true;
+		}
+        static ID_INLINE bool	IsPureASCII( const char* s, const int maxLen ) {
+            return IsPureASCII( ( const uint8_t* )s, maxLen );
         }
 #endif
 

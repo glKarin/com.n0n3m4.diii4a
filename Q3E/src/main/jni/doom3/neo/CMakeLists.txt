@@ -117,7 +117,7 @@ option(MODEL_VIEWER							"Add model viewer in engine" 												OFF)
 option(USE_MINIZ							"use miniz and minizip" 													ON)
 option(USE_STB_OGG							"use stb_vorbis" 															ON)
 option(D3BFG_OCCLUSION_CULLING				"DOOM3-BFG occlusion culling support" 										ON)
-option(WIDE_CHARACTER_LANGUAGE				"Wide-character language font support" 											ON)
+option(WIDE_CHARACTER_LANGUAGE				"Wide-character language font support" 										ON)
 option(D3BFG_NEW_FONT						"DOOM3-BFG new font support"												ON)
 
 # DOOM3 cores

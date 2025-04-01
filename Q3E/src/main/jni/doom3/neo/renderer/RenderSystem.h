@@ -154,6 +154,7 @@ typedef struct {
 
 const glyphInfo_t * R_Font_GetGlyphInfo(const fontInfo_t *info, uint32_t charIndex);
 float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale = 1.0f);
+float R_Font_GetCharHeight(const fontInfo_t *info, uint32_t charCode, float scale = 1.0f);
 
 void R_Font_FreeFontInfo(fontInfo_t *info);
 void R_Font_FreeFontInfoEx(fontInfoEx_t *ex);
