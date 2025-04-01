@@ -86,7 +86,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           cd Q3E\src\main\jni\doom3\neo
-          cmake ${{ steps.vcpkg_setup.outputs.vcpkg-cmake-config }} -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DDIRECTXSDK_INCLUDE_PATH=${{ github.workspace }}/vcpkg/packages/directxsdk_${{steps.strings.outputs.arch}}-windows/include/directxsdk -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }} CMakeLists.txt # -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
+          cmake ${{ steps.vcpkg_setup.outputs.vcpkg-cmake-config }} -B ${{ steps.strings.outputs.name }} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DDIRECTXSDK_INCLUDE_PATH=${{ github.workspace }}/vcpkg/packages/directxsdk_${{steps.strings.outputs.arch}}-windows/include/directxsdk -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }} CMakeLists.txt # -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
 
       - name: Run apt
         if: matrix.os == 'ubuntu-latest'
@@ -115,7 +115,7 @@ jobs:
           cd Q3E/src/main/jni/doom3/neo
           ls ${{ steps.strings.outputs.name }}
           cmake --build ${{ steps.strings.outputs.name }} --config ${{ matrix.build_type }}
-          
+
       - name: Copy OpenAL32.dll
         if: matrix.os == 'windows-latest'
         run: |
@@ -165,7 +165,7 @@ jobs:
         with:
           # path: packages
           merge-multiple: true
-          
+
       - name: List all packages
         run: |
           ls --color;
@@ -177,7 +177,7 @@ jobs:
           delete_release: true
           repo: glKarin/com.n0n3m4.diii4a
           github_token: ${{ secrets.TOKEN }}
-          
+
       - name: Get release date time
         id: release_datetime
         uses: Kaven-Universe/github-action-current-date-time@v1
