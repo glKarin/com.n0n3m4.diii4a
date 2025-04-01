@@ -54,9 +54,9 @@ idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_INIT |
 		"    0 or \"\": disable\n"
         "    1: make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic"
 #ifdef _RAVEN
-        "(`alien` font always disable)"
-#elif defined(_HUMANHEAD)
         "(`r_strogg` and `strogg` fonts always disable)"
+#elif defined(_HUMANHEAD)
+        "(`alien` font always disable)"
 #endif
         ". e.g. \n"
 #ifdef _RAVEN
