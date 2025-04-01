@@ -1,0 +1,5 @@
+The source code of Minizip is no longer embedded into TDM build.
+Minizip is now consumed as a third-party library (from ThirdParty/artefacts subdirectory), just like any other library.
+
+The files minizip_extra.c and minizip_extra.h only contain additional features.
+These are some functions added by either ID software or TDM team, which are not present in the official minizip distribution.

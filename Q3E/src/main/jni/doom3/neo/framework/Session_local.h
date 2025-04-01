@@ -194,6 +194,7 @@ class idSessionLocal : public idSession
 		static idCVar		com_aviDemoTics;
 		static idCVar		com_wipeSeconds;
 		static idCVar		com_guid;
+        static idCVar		com_disableAutoSaves;
 
 		static idCVar		gui_configServerRate;
 

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <TdmExecutableName>TheDarkModx64</TdmExecutableName>
+    <TdmBitness>64</TdmBitness>
+  </PropertyGroup>
+  <ItemGroup>
+    <BuildMacro Include="TdmExecutableName">
+      <Value>$(TdmExecutableName)</Value>
+    </BuildMacro>
+    <BuildMacro Include="TdmBitness">
+      <Value>$(TdmBitness)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

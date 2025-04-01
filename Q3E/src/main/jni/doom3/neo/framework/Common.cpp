@@ -239,10 +239,7 @@ class idCommonLocal : public idCommon
 #endif
 #ifdef _HUMANHEAD
 	virtual void				FixupKeyTranslations(const char *src, char *dst, int lengthAllocated) { (void) src; (void)dst; (void)lengthAllocated; }
-	virtual void				MaterialKeyForBinding(const char *binding, char *keyMaterial, char *key, bool &isBound) {
-		(void)binding; (void)keyMaterial; (void)key;
-		isBound = false;
-	}
+	virtual void				MaterialKeyForBinding(const char *binding, char *keyMaterial, char *key, bool &isBound);
 	virtual void				SetGameSensitivityFactor(float factor) { (void) factor; }
 #endif
 };
@@ -2742,7 +2739,7 @@ void idCommonLocal::Frame(void)
 
 		// the FPU stack better be empty at this point or some bad code or compiler bug left values on the stack
 		if (!Sys_FPU_StackIsEmpty()) {
-			Printf(Sys_FPU_GetState());
+			Printf("%s", Sys_FPU_GetState());
 			FatalError("idCommon::Frame: the FPU stack is not empty at the end of the frame\n");
 		}
 	}
@@ -3585,9 +3582,60 @@ void idCommonLocal::ShutdownGame(bool reloading)
 	fileSystem->Shutdown(reloading);
 }
 
+#ifdef _HUMANHEAD
+extern const char * IN_FirstKeyFromBinding(const char *binding, int *keycode = NULL);
+void idCommonLocal::MaterialKeyForBinding(const char *binding, char *keyMaterial, char *key, bool &isBound)
+{
+	// 256 length see game/Prey/prey_game.cpp::GetTip
+#define MAX_KEY_MATERIAL_LENGTH 256
+#define MAX_KEY_NAME_LENGTH 256
+	const char *k;
+	int i = -1;
+
+	//karin: only get first binding key
+	k = IN_FirstKeyFromBinding(binding, &i);
+	isBound = false;
+
+	if(k && k[0])
+	{
+		if(i == K_MOUSE1)
+			idStr::Copynz(keyMaterial, "textures/interface/tips/mouse1", MAX_KEY_MATERIAL_LENGTH);
+		else if(i == K_MOUSE2)
+			idStr::Copynz(keyMaterial, "textures/interface/tips/mouse2", MAX_KEY_MATERIAL_LENGTH);
+		else if(i == K_MOUSE3)
+			idStr::Copynz(keyMaterial, "textures/interface/tips/mouse3", MAX_KEY_MATERIAL_LENGTH);
+		else if(i == K_MWHEELDOWN)
+			idStr::Copynz(keyMaterial, "textures/interface/tips/mousedn", MAX_KEY_MATERIAL_LENGTH);
+		else if(i == K_MWHEELUP)
+			idStr::Copynz(keyMaterial, "textures/interface/tips/mouseup", MAX_KEY_MATERIAL_LENGTH);
+		else
+		{
+			isBound = strlen(k) > 1;
+			idStr::Copynz(key, k, MAX_KEY_NAME_LENGTH);
+			idStr::ToLower(key);
+		}
+	}
+
+	if(!keyMaterial[0])
+	{
+		if(isBound)
+			idStr::Copynz(keyMaterial, "textures/interface/tips/keywide", MAX_KEY_MATERIAL_LENGTH);
+		else
+			idStr::Copynz(keyMaterial, "textures/interface/tips/key", MAX_KEY_MATERIAL_LENGTH);
+	}
+#undef MAX_KEY_MATERIAL_LENGTH
+#undef MAX_KEY_NAME_LENGTH
+}
+#endif
+
 //k: temp memory allocate in stack / heap control on Android
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+#ifdef __ANDROID__
+#define _DYNAMIC_ALLOC_MAX_STACK "262144" // 256k
+#else
+#define _DYNAMIC_ALLOC_MAX_STACK "524288" // 512k
+#endif
 // #warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
-/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "262144", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `262144` bytes(Because stack memory is limited on OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory))."); // 524288 262144
+/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", _DYNAMIC_ALLOC_MAX_STACK, CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `" _DYNAMIC_ALLOC_MAX_STACK "` bytes(Because stack memory is limited on OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).");
 #endif
 

@@ -7100,6 +7100,14 @@ void hhPlayer::Save( idSaveGame *savefile ) const {
 	cameraInterpolator.Save( savefile );
 	//HUMANHEAD PCF mdl 05/04/06 - Save whether the light handle is active
 	savefile->WriteBool( IsLighterOn() );
+#ifdef _PREY //karin: should save player location before deathwalk and resurrect: Saving game If player in deathwalk state, player resurrection is working after load the save file; But player resurrection's position is missing when load the save file on application restart.
+    savefile->WriteVec3( deathwalkLastOrigin );
+    savefile->WriteMat3( deathwalkLastBBoxAxis );
+    savefile->WriteMat3( deathwalkLastViewAxis );
+    savefile->WriteAngles( deathwalkLastViewAngles );
+    savefile->WriteMat3( deathwalkLastEyeAxis );
+    savefile->WriteBool( deathwalkLastCrouching );
+#endif
 }
 
 //================
@@ -7260,6 +7268,14 @@ void hhPlayer::Restore( idRestoreGame *savefile ) {
 	if ( bLighter ) {
 		lighterHandle = gameRenderWorld->AddLightDef( &lighter );
 	}
+#ifdef _PREY //karin: should load player location before deathwalk and resurrect: Saving game If player in deathwalk state, player resurrection is working after load the save file; But player resurrection's position is missing when load the save file on application restart.
+    savefile->ReadVec3( deathwalkLastOrigin );
+    savefile->ReadMat3( deathwalkLastBBoxAxis );
+    savefile->ReadMat3( deathwalkLastViewAxis );
+    savefile->ReadAngles( deathwalkLastViewAngles );
+    savefile->ReadMat3( deathwalkLastEyeAxis );
+    savefile->ReadBool( deathwalkLastCrouching );
+#endif
 #ifdef _MOD_FULL_BODY_AWARENESS
 	idVec3 offset(0, 0, 0);
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)

@@ -402,6 +402,24 @@ viewLight_t *R_SetLightDefViewLight(idRenderLightLocal *light)
 	vLight->lightProject[1] = light->lightProject[1];
 	vLight->lightProject[2] = light->lightProject[2];
 	vLight->lightProject[3] = light->lightProject[3];
+#ifdef _D3BFG_CULLING
+    if(harm_r_occlusionCulling.GetBool())
+    {
+        //anon begin
+        // the fog plane is the light far clip plane
+        idPlane fogPlane((ID_RENDER_MATRIX light->baseLightProject)[2][0] - (ID_RENDER_MATRIX light->baseLightProject)[3][0],
+                         (ID_RENDER_MATRIX light->baseLightProject)[2][1] - (ID_RENDER_MATRIX light->baseLightProject)[3][1],
+                         (ID_RENDER_MATRIX light->baseLightProject)[2][2] - (ID_RENDER_MATRIX light->baseLightProject)[3][2],
+                         (ID_RENDER_MATRIX light->baseLightProject)[2][3] - (ID_RENDER_MATRIX light->baseLightProject)[3][3]);
+        const float planeScale = idMath::InvSqrt(fogPlane.Normal().LengthSqr());
+        vLight->fogPlane[0] = fogPlane[0] * planeScale;
+        vLight->fogPlane[1] = fogPlane[1] * planeScale;
+        vLight->fogPlane[2] = fogPlane[2] * planeScale;
+        vLight->fogPlane[3] = fogPlane[3] * planeScale;
+        //anon end
+    }
+    else
+#endif
 	vLight->fogPlane = light->frustum[5];
 	vLight->frustumTris = light->frustumTris;
 	vLight->falloffImage = light->falloffImage;
@@ -412,8 +430,8 @@ viewLight_t *R_SetLightDefViewLight(idRenderLightLocal *light)
 	vLight->next = tr.viewDef->viewLights;
 	tr.viewDef->viewLights = vLight;
 #ifdef _SHADOW_MAPPING
-    memcpy(vLight->baseLightProject, light->baseLightProject, sizeof(light->baseLightProject));
-	memcpy(vLight->inverseBaseLightProject, light->inverseBaseLightProject, sizeof(light->inverseBaseLightProject));
+    ID_RENDER_MATRIX_ASSIGN(vLight->baseLightProject, light->baseLightProject);
+	ID_RENDER_MATRIX_ASSIGN(vLight->inverseBaseLightProject, light->inverseBaseLightProject);
     vLight->pointLight = light->parms.pointLight;
     vLight->parallel = light->parms.parallel;
     vLight->lightCenter = light->parms.lightCenter;
@@ -1039,6 +1057,7 @@ bool R_IssueEntityDefCallback(idRenderEntityLocal *def)
 
 	if (!def->parms.hModel) {
 		common->Error("R_IssueEntityDefCallback: dynamic entity callback didn't set model");
+        return false;
 	}
 
 	if (r_checkBounds.GetBool()) {
@@ -1232,8 +1251,8 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 			shaderParms = renderEntity->shaderParms;
 		}
 
-		float oldFloatTime;
-		int oldTime;
+		float oldFloatTime = 0.0f;
+		int oldTime = 0.0f;
 
 		
 		if (space->entityDef && space->entityDef->parms.timeGroup) {
@@ -1500,8 +1519,8 @@ void R_AddModelSurfaces(void)
 			}
 		}
 
-		float oldFloatTime;
-		int oldTime;
+		float oldFloatTime = 0.0f;
+		int oldTime = 0.0f;
 
 #if !defined(_RAVEN)
 		game->SelectTimeGroup(vEntity->entityDef->parms.timeGroup);
@@ -1604,7 +1623,13 @@ void R_RemoveUnecessaryViewLights(void)
 	viewLight_t		*vLight;
 
 	// go through each visible light
+#ifdef _D3BFG_CULLING
+    int numViewLights = 0;
+#endif
 	for (vLight = tr.viewDef->viewLights ; vLight ; vLight = vLight->next) {
+#ifdef _D3BFG_CULLING
+        numViewLights++;
+#endif
 		// if the light didn't have any lit surfaces visible, there is no need to
 		// draw any of the shadows.  We still keep the vLight for debugging
 		// draws
@@ -1651,6 +1676,39 @@ void R_RemoveUnecessaryViewLights(void)
 			vLight->scissorRect.Intersect(surfRect);
 		}
 	}
+#ifdef _D3BFG_CULLING
+    if (harm_r_occlusionCulling.GetBool()) {
+        // sort the viewLights list so the largest lights come first, which will reduce
+        // the chance of GPU pipeline bubbles
+        struct sortLight_t
+        {
+            viewLight_t* 	vLight;
+            int				screenArea;
+            static int sort(const void* a, const void* b)
+            {
+                return ((sortLight_t*)a)->screenArea - ((sortLight_t*)b)->screenArea;
+            }
+        };
+        sortLight_t* sortLights = (sortLight_t*)_alloca(sizeof(sortLight_t)* numViewLights);
+        int	numSortLightsFilled = 0;
+        for (viewLight_t* vLight = tr.viewDef->viewLights; vLight != NULL; vLight = vLight->next)
+        {
+            sortLights[numSortLightsFilled].vLight = vLight;
+            sortLights[numSortLightsFilled].screenArea = vLight->scissorRect.GetArea();
+            numSortLightsFilled++;
+        }
+
+        qsort(sortLights, numSortLightsFilled, sizeof(sortLights[0]), sortLight_t::sort);
+
+        // rebuild the linked list in order
+        tr.viewDef->viewLights = NULL;
+        for (int i = 0; i < numSortLightsFilled; i++)
+        {
+            sortLights[i].vLight->next = tr.viewDef->viewLights;
+            tr.viewDef->viewLights = sortLights[i].vLight;
+        }
+    }
+#endif
 }
 
 #ifdef _RAVEN // particle

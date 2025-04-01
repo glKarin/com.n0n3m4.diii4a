@@ -281,7 +281,7 @@ If you have questions concerning this license or the applicable additional terms
 #define SOUND_TOOLS_BUILD				1		// Turn on for making builds for Ed to change reverbs, should be 0 in gold build
 #define GUIS_IN_DEMOS					1		// Include guis in demo streams
 #define	MUSICAL_LEVELLOADS				1		// Allow music playback during level loads
-#define GAMEPORTAL_PVS					0		// Allow PVS to flow through game portals
+#define GAMEPORTAL_PVS					1		// Allow PVS to flow through game portals
 #define GAMEPORTAL_SOUND				0		// Allow sound to flow through game portals (requires GAMEPORTAL_PVS)
 #define DEATHWALK_AUTOLOAD				1		// Append deathwalk map to all maps loaded
 #define	GAME_PLAYERDEFNAME				"player_tommy"

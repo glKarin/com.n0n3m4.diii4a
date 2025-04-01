@@ -32,8 +32,16 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
-//k 64 sizeof
+#ifdef _D3BFG_FONT
+#include "font/tr_font_bfg.cpp"
+#endif
+
+#ifdef _RAVEN //karin: quake4 fontdat file size
+#define FILESIZE_fontInfo_t (9236)
+#else
+//k 64 sizeof // because fontInfo_t::glyph is pointer, but is always 4 bytes on font file
 #define FILESIZE_fontInfo_t (20548)
+#endif
 
 #ifdef BUILD_FREETYPE
 #include "../ft2/fterrors.h"
@@ -287,6 +295,158 @@ float readFloat(void)
 	return me.ffred;
 }
 
+#ifdef _WCHAR_LANG
+void R_Font_FreeFontInfo(fontInfo_t *info)
+{
+    if(!info)
+        return;
+    if(info->indexes)
+    {
+        free(info->indexes);
+        info->indexes = NULL;
+    }
+    if(info->glyphsTable)
+    {
+        free(info->glyphsTable);
+        info->glyphsTable = NULL;
+    }
+}
+
+void R_Font_FreeFontInfoEx(fontInfoEx_t *ex)
+{
+    if(!ex)
+        return;
+
+    R_Font_FreeFontInfo(&ex->fontInfoSmall);
+    R_Font_FreeFontInfo(&ex->fontInfoMedium);
+    R_Font_FreeFontInfo(&ex->fontInfoLarge);
+}
+
+#define DEFAULT_SHOW_CHAR (int)'?'
+#define DEFAULT_MEASURE_CHAR (int)'*'
+
+ID_INLINE static const glyphInfo_t * R_Font_GetGlyphInfo(const fontInfo_t *info, uint32_t charCode, char defaultChar)
+{
+	// If is ACSII, using old struct
+    if(charCode >= GLYPH_START && charCode <= GLYPH_END)
+        return &info->glyphs[charCode];
+	// if non-ASCII and no unicode, using default
+	if(!info->numIndexes)
+        return defaultChar ? &info->glyphs[defaultChar] : NULL;
+	// if charcode not exists, using default
+    if(charCode >= (unsigned int)info->numIndexes)
+        return defaultChar ? &info->glyphs[defaultChar] : NULL;
+    int index = info->indexes[charCode];
+	// if charcode not mapping, using default
+    if(index < 0 || index >= info->numGlyphs)
+        return defaultChar ? &info->glyphs[defaultChar] : NULL;
+    return &info->glyphsTable[index];
+}
+
+const glyphInfo_t * R_Font_GetGlyphInfo(const fontInfo_t *info, uint32_t charCode)
+{
+	return R_Font_GetGlyphInfo(info, charCode, DEFAULT_SHOW_CHAR);
+}
+
+float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale)
+{
+	const glyphInfo_t *glyph = R_Font_GetGlyphInfo(info, charCode, DEFAULT_MEASURE_CHAR);
+    return glyph ? (float)glyph->xSkip * info->glyphScale * scale : 0.0f;
+}
+
+float R_Font_GetCharHeight(const fontInfo_t *info, uint32_t charCode, float scale)
+{
+    const glyphInfo_t *glyph = R_Font_GetGlyphInfo(info, charCode, DEFAULT_MEASURE_CHAR);
+    return glyph ? (float)glyph->height * info->glyphScale * scale : 0.0f;
+}
+
+bool R_Font_ParseWideFont(fontInfo_t *outFont)
+{
+    int i;
+
+    unsigned int magic = readInt();
+    unsigned int version = readInt();
+    int numFiles = readInt();
+    int width = readInt();
+    int height = readInt();
+
+    common->Printf("RegisterWideFont: magic=%d, version=%x, files=%d, size=%d x %d.\n", magic, version, numFiles, width, height);
+
+    if(magic != HARM_NEW_FONT_MAGIC)
+    {
+        common->Warning("RegisterWideFont: new font file magic is wrong: File(%u) != System(%u).\n", magic, HARM_NEW_FONT_MAGIC);
+        return false;
+    }
+    if(version > HARM_NEW_FONT_VERSION) //karin: TODO: compat old version
+    {
+        common->Warning("RegisterWideFont: new font file version is wrong: File(%x) != System(%x).\n", version, HARM_NEW_FONT_VERSION);
+        return false;
+    }
+
+    outFont->numIndexes = readInt();
+    common->Printf("RegisterWideFont: read %d indexes.\n", outFont->numIndexes);
+    if(outFont->numIndexes)
+    {
+        outFont->indexes = (int *)malloc(outFont->numIndexes * sizeof(*outFont->indexes));
+        for(i = 0; i < outFont->numIndexes; i++)
+        {
+            outFont->indexes[i] = readInt();
+        }
+
+        outFont->numGlyphs = readInt();
+        common->Printf("RegisterWideFont: read %d glyphs.\n", outFont->numGlyphs);
+        if(outFont->numGlyphs)
+        {
+            outFont->glyphsTable = (glyphInfo_t *)malloc(outFont->numGlyphs * sizeof(*outFont->glyphsTable));
+            for(i = 0; i < outFont->numGlyphs; i++)
+            {
+                glyphInfo_t *info = &outFont->glyphsTable[i];
+#ifdef _RAVEN //k: quake4 font: 9 float32 per char
+                info->imageWidth	= (int)readFloat();
+                info->imageHeight	= (int)readFloat();
+                info->xSkip		    = (int)readFloat();
+                info->pitch		    = (int)readFloat();
+                info->top			= (int)readFloat();
+                info->height		= info->top;
+                info->bottom		= 0;
+                info->s			    = readFloat();
+                info->t			    = readFloat();
+                info->s2			= readFloat();
+                info->t2			= readFloat();
+                //FIXME: the +6, -6 skips the embedded fonts/
+                memcpy(info->shaderName, &fdFile[fdOffset], 32);
+                fdOffset += 32;
+#else
+                info->height		= readInt();
+                info->top			= readInt();
+                info->bottom		= readInt();
+                info->pitch		    = readInt();
+                info->xSkip		    = readInt();
+                info->imageWidth	= readInt();
+                info->imageHeight	= readInt();
+                info->s			    = readFloat();
+                info->t			    = readFloat();
+                info->s2			= readFloat();
+                info->t2			= readFloat();
+                int junk /* font.glyphs[i].glyph */		= readInt();
+                //FIXME: the +6, -6 skips the embedded fonts/
+                memcpy(info->shaderName, &fdFile[fdOffset + 6], 32 - 6);
+                fdOffset += 32;
+#endif
+            }
+            return true;
+        }
+        else
+        {
+            R_Font_FreeFontInfo(outFont);
+            return false;
+        }
+    }
+
+    return false;
+}
+#endif
+
 /*
 ============
 RegisterFont
@@ -296,6 +456,12 @@ Loads 3 point sizes, 12, 24, and 48
 */
 bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 {
+#ifdef _D3BFG_FONT
+	if(idStr(fontName).Find("newfonts/") == 0)
+	{
+		return R_Font_LoadD3BFGFont(fontName, font);
+	}
+#endif
 #ifdef BUILD_FREETYPE
 	FT_Face face;
 	int j, k, xOut, yOut, lastStart, imageNumber;
@@ -364,8 +530,9 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 
 		len = fileSystem->ReadFile(name, NULL, &ftime);
 
-		//if (len != FILESIZE_fontInfo_t)
-		if (len <= 0) {
+		//if (len < FILESIZE_fontInfo_t)
+		if(len <= 0)
+		{
 			common->Warning("RegisterFont: couldn't find font: '%s'", name);
 			return false;
 		}
@@ -376,11 +543,11 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 
 		for (i = 0; i < GLYPHS_PER_FONT; i++) {
 #ifdef _RAVEN //k: quake4 font: 9 float32 per char
-			outFont->glyphs[i].imageWidth	= readFloat();
-			outFont->glyphs[i].imageHeight	= readFloat();
-			outFont->glyphs[i].xSkip		= readFloat();
-			outFont->glyphs[i].pitch		= readFloat();
-			outFont->glyphs[i].top			= readFloat();
+			outFont->glyphs[i].imageWidth	= (int)readFloat();
+			outFont->glyphs[i].imageHeight	= (int)readFloat();
+			outFont->glyphs[i].xSkip		= (int)readFloat();
+			outFont->glyphs[i].pitch		= (int)readFloat();
+			outFont->glyphs[i].top			= (int)readFloat();
 			outFont->glyphs[i].height		= outFont->glyphs[i].top;
 			outFont->glyphs[i].bottom		= 0;
 			outFont->glyphs[i].s			= readFloat();
@@ -409,16 +576,75 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 
 #ifdef _RAVEN //k: quake4 font remain 5 float32
 		readFloat(); //k: 12 / 24 / 48
-		int mw = readFloat(); //k: max height?
-		int mh = readFloat(); //k: max width?
+		int mw = (int)readFloat(); //k: max height?
+		int mh = (int)readFloat(); //k: max width?
 		readFloat(); //k: max width - max height
-		// readFloat(); //k: 0
+		// readFloat(); //k: 0 last float number
 		outFont->glyphScale = glyphScale;
 #else
 		outFont->glyphScale = readFloat();
 
 		int mw = 0;
 		int mh = 0;
+#endif
+
+#ifdef _WCHAR_LANG
+#define HARM_NEW_FONT_REQUIRE_BYTES (4 * 5)
+#ifdef _RAVEN
+        fdOffset += 4;
+#else
+        fdOffset += sizeof(outFont->name);
+#endif
+
+        outFont->numIndexes = 0;
+        outFont->indexes = NULL;
+        outFont->numGlyphs = 0;
+        outFont->glyphsTable = NULL;
+        if(fdOffset + HARM_NEW_FONT_REQUIRE_BYTES < len)
+        {
+            common->Printf("Font '%s (%d)' is new format.\n", fontName, pointSize);
+            if(R_Font_ParseWideFont(outFont))
+            {
+#ifdef _RAVEN //k: fix old ascii glyph font texture file name
+                for(i = 0; i < GLYPHS_PER_FONT; i++)
+                {
+                    if(i >= outFont->numIndexes)
+                        continue;
+                    int index = outFont->indexes[i];
+                    if(index < 0 || index >= outFont->numGlyphs)
+                        continue;
+                    idStr::snPrintf(outFont->glyphs[i].shaderName, sizeof(outFont->glyphs[i].shaderName), "%s_%s", fontName, outFont->glyphsTable[index].shaderName);
+                }
+#endif
+            }
+        }
+        else
+            common->Printf("Font '%s (%d)' is old format.\n", fontName, pointSize);
+
+        if(outFont->numIndexes > 0)
+        {
+            for (i = 0; i < outFont->numIndexes; i++) {
+                int index = outFont->indexes[i];
+                if(index < 0)
+                    continue;
+                glyphInfo_t *gi = &outFont->glyphsTable[index];
+#ifdef _RAVEN //k: quake4 font material
+                idStr::snPrintf(name, sizeof(name), "%s_%s", fontName, gi->shaderName);
+#else
+                idStr::snPrintf(name, sizeof(name), "%s/%s", fontName, gi->shaderName);
+#endif
+                gi->glyph = declManager->FindMaterial(name);
+                gi->glyph->SetSort(SS_GUI);
+
+                if (mh < gi->height) {
+                    mh = gi->height;
+                }
+
+                if (mw < gi->xSkip) {
+                    mw = gi->xSkip;
+                }
+            }
+        }
 #endif
 
 		for (i = GLYPH_START; i < GLYPH_END; i++) {
@@ -620,3 +846,7 @@ void R_DoneFreeType(void)
 #endif
 //	registeredFontCount = 0;
 }
+
+#ifdef _NEW_FONT_TOOLS
+#include "font/tr_font_tools.cpp"
+#endif

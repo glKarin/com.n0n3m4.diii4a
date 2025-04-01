@@ -1,0 +1,50 @@
+# local = True means the customized recipe is used instead of one from conan-center.
+# explanation of package bintype:
+#   * header
+#       these deps are header-only, hence they don't need per-configuration builds
+#   * release
+#       these deps can be built only once in release mode, and then used both in release and debug builds
+#       this is possible only for pure C libraries built with /MT, and needs /nodefaultlib:LIBCMT.lib flag in debug build
+#   * vcdebug
+#       these deps must be built separately for each configuration on MSVC (both debug and release)
+#       this is required for C++ libs because iterator debugging and runtime differences are not allowed by MSVC
+# explanation of package incltype:
+#   * [default]
+#       include files of this library are exactly the same on all platforms, os-es and builds
+#   * os:
+#       include files are different depending on OS, and should not be put into same directory in artefacts
+#       this happens for libraries which generate configuration header depending on build platform
+packages:
+  - { name: tinyformat  , version: "2.3.0"    , local: True   , bintype: header }
+  - { name: doctest     , version: "2.4.11"   , local: False  , bintype: header }
+  - { name: tracy       , version: "0.10"     , local: True   , bintype: header }
+  - { name: zlib        , version: "1.3.1"    , local: False  , bintype: release, incltype: os }
+  - { name: minizip     , version: "1.3.1"    , local: False  , bintype: release }
+  - { name: libcurl     , version: "8.6.0"    , local: True   , bintype: release }
+  - { name: mbedtls     , version: "3.6.0"    , local: False  , bintype: release }
+  - { name: libjpeg     , version: "9f"       , local: True   , bintype: release, incltype: os }
+  - { name: libpng      , version: "1.6.43"   , local: False  , bintype: release }
+  - { name: ffmpeg      , version: "6.1"      , local: True   , bintype: release }
+  - { name: vorbis      , version: "1.3.7"    , local: False  , bintype: release }
+  - { name: ogg         , version: "1.3.5"    , local: False  , bintype: release }
+  - { name: fltk        , version: "1.3.9"    , local: True   , bintype: release }
+  - { name: blake2      , version: "20190724" , local: True   , bintype: release }
+  - { name: glfw        , version: "3.4"      , local: False  , bintype: release }
+  - { name: openal      , version: "1.22.2"   , local: True   , bintype: vcdebug }
+  - { name: pugixml     , version: "1.14"     , local: False  , bintype: vcdebug }
+  - { name: xorg        , version: "system"   , local: True   , bintype: header, os: ["Linux", "FreeBSD"] }
+  - { name: libalsa     , version: "1.2.7.2"  , local: False  , bintype: release, os: ["Linux"] }
+
+options:
+  minizip:
+    # disable support of bzip2 format
+    bzip2: false
+  blake2:
+    # enable SSE2 in hash library
+    SSE: "SSE2"
+  libcurl:
+    with_ssl: "mbedtls"
+  xorg:
+    # stock recipe uses some X11 libs which can't be installed both 32-bit and 64-bit at once
+    # so don't install any libraries and hope glfw builds fine
+    exclude_lib: "xres,xi,xtst,xcomposite"

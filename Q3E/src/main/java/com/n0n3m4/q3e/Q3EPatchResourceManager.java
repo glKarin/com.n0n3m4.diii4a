@@ -70,12 +70,24 @@ public class Q3EPatchResourceManager
 
         rsc = new Q3EPatchResource(
                 Q3EGlobals.PatchResource.TDM_GLSL_SHADER,
-                Q3ELang.tr(context, R.string.the_dark_mod_glsl_shader),
+                Q3ELang.tr(context, R.string.the_dark_mod_glsl_shader) + "(2.13)",
                 Q3EGlobals.TDM_GLSL_SHADER_VERSION,
                 Q3EGlobals.GAME_TDM,
                 null,
                 Q3EPatchResource.EXTRACT_ZIP_TO_DIR,
                 "pak/darkmod/glprogs.pk4",
+                ""
+        );
+        resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource(
+                Q3EGlobals.PatchResource.TDM_2_12_GLSL_SHADER,
+                Q3ELang.tr(context, R.string.the_dark_mod_glsl_shader) + "(2.12)",
+                Q3EGlobals.TDM_GLSL_SHADER_VERSION,
+                Q3EGlobals.GAME_TDM,
+                null,
+                Q3EPatchResource.EXTRACT_ZIP_TO_DIR,
+                "pak/darkmod/glprogs_2_12.pk4",
                 ""
         );
         resourceList.add(rsc);
@@ -89,6 +101,18 @@ public class Q3EPatchResourceManager
                 Q3EPatchResource.COPY_DIR_TO_DIR,
                 "pak/gzdoom/4.14.0",
                 ""
+        );
+        resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource(
+                Q3EGlobals.PatchResource.DOOM3_BFG_CHINESE_TRANSLATION,
+                Q3ELang.tr(context, R.string.doom3_chinese_translation_doom3bfg),
+                "1",
+                Q3EGlobals.GAME_DOOM3,
+                null,
+                Q3EPatchResource.COPY_FILE_TO_DIR,
+                "pak/doom3/doom3_chinese_translation_doom3bfg.pk4",
+                "base"
         );
         resourceList.add(rsc);
     }

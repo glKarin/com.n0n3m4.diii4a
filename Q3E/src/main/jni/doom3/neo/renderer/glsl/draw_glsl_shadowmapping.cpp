@@ -513,11 +513,8 @@ void R_SaveColorBuffer(const char *name)
 	qglReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	//GL_CheckErrors("glReadPixels");
 
-#ifdef _USING_STB
     R_WriteScreenshotImage(name, data, width, height, 4, true);
-#else
-	R_WriteTGA(name, data, width, height, false);
-#endif
+	//R_WriteTGA(name, data, width, height, false);
 	free(data);
 	//free(ddata);
 }
@@ -750,14 +747,14 @@ ID_INLINE static void RB_CalcParallelLightMatrix(const viewLight_t* vLight, int 
 
         float lightViewMatrix[16];
 		MatrixLookAtRH( lightViewMatrix, viewPos, lightDir, viewDir );
-		idRenderMatrix::Transpose( *( idRenderMatrix* )lightViewMatrix, lightViewRenderMatrix );
+		idRenderMatrix::Transpose( ID_RENDER_MATRIX lightViewMatrix, lightViewRenderMatrix );
 #endif
 
     idBounds lightBounds;
     lightBounds.Clear();
 
     ALIGNTYPE16 frustumCorners_t corners;
-    idRenderMatrix::GetFrustumCorners( corners, *(idRenderMatrix *)vLight->inverseBaseLightProject, bounds_zeroOneCube );
+    idRenderMatrix::GetFrustumCorners( corners, ID_RENDER_MATRIX vLight->inverseBaseLightProject, bounds_zeroOneCube );
 
     idVec4 point, transf;
     for( int j = 0; j < 8; j++ )
@@ -777,7 +774,7 @@ ID_INLINE static void RB_CalcParallelLightMatrix(const viewLight_t* vLight, int 
 
     float lightProjectionMatrix[16];
     MatrixOrthogonalProjectionRH( lightProjectionMatrix, lightBounds[0][0], lightBounds[1][0], lightBounds[0][1], lightBounds[1][1], -lightBounds[1][2], -lightBounds[0][2] );
-    idRenderMatrix::Transpose( *( idRenderMatrix* )lightProjectionMatrix, lightProjectionRenderMatrix );
+    idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX lightProjectionMatrix, lightProjectionRenderMatrix );
 
 
     // 	'frustumMVP' goes from global space -> camera local space -> camera projective space
@@ -844,13 +841,13 @@ ID_INLINE static void RB_CalcParallelLightMatrix(const viewLight_t* vLight, int 
         //MatrixCrop(cropMatrix, cropBounds[0], cropBounds[1]);
 
         //idRenderMatrix cropRenderMatrix;
-        //idRenderMatrix::Transpose( *( idRenderMatrix* )cropMatrix, cropRenderMatrix );
+        //idRenderMatrix::Transpose( ID_RENDER_MATRIX cropMatrix, cropRenderMatrix );
 
         //idRenderMatrix tmp = lightProjectionRenderMatrix;
         //idRenderMatrix::Multiply( cropRenderMatrix, tmp, lightProjectionRenderMatrix );
 
         MatrixOrthogonalProjectionRH( lightProjectionMatrix, cropBounds[0][0], cropBounds[1][0], cropBounds[0][1], cropBounds[1][1], -cropBounds[1][2], -cropBounds[0][2] );
-        idRenderMatrix::Transpose( *( idRenderMatrix* )lightProjectionMatrix, lightProjectionRenderMatrix );
+        idRenderMatrix::Transpose( ID_RENDER_MATRIX lightProjectionMatrix, lightProjectionRenderMatrix );
 
         backEnd.shadowV[side] = lightViewRenderMatrix;
         backEnd.shadowP[side] = lightProjectionRenderMatrix;
@@ -932,7 +929,7 @@ ID_INLINE static void RB_CalcPointLightMatrix(const viewLight_t* vLight, int sid
     memcpy( unflippedLightViewMatrix, viewMatrix, sizeof( unflippedLightViewMatrix ) );
     R_MatrixMultiply( viewMatrix, s_flipMatrix, lightViewMatrix );
 
-    idRenderMatrix::Transpose( *( idRenderMatrix* )lightViewMatrix, lightViewRenderMatrix );
+    idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX lightViewMatrix, lightViewRenderMatrix );
 
 
 
@@ -983,7 +980,7 @@ ID_INLINE static void RB_CalcPointLightMatrix(const viewLight_t* vLight, int sid
     lightProjectionMatrix[2 * 4 + 3] = -1.0f;
     lightProjectionMatrix[3 * 4 + 3] = 0.0f;
 
-    idRenderMatrix::Transpose( *( idRenderMatrix* )lightProjectionMatrix, lightProjectionRenderMatrix );
+    idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX lightProjectionMatrix, lightProjectionRenderMatrix );
 }
 
 // Calculate view-matrix and projection-matrix of spot light
@@ -1119,7 +1116,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
             if(IsPrelightShadow)
                 modelRenderMatrix.Identity();
             else
-                idRenderMatrix::Transpose( *( idRenderMatrix* )drawSurf->space->modelMatrix, modelRenderMatrix );
+                idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX drawSurf->space->modelMatrix, modelRenderMatrix );
 
             idRenderMatrix modelToLightRenderMatrix;
             idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
@@ -1149,7 +1146,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
             }
 #endif
 
-            (*(idRenderMatrix *)modelMatrix) << drawSurf->space->modelMatrix;
+			idRenderMatrix::Copy(drawSurf->space->modelMatrix, modelMatrix);
 
             // set the local light position to allow the vertex program to project the shadow volume end cap to infinity
 			R_GlobalPointToLocal(drawSurf->space->modelMatrix, vLight->globalLightOrigin, localLight.ToVec3());
@@ -1428,7 +1425,7 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
                 if(IsPrelightShadow)
                     modelRenderMatrix.Identity();
                 else
-                    idRenderMatrix::Transpose( *( idRenderMatrix* )drawSurf->space->modelMatrix, modelRenderMatrix );
+                    idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX drawSurf->space->modelMatrix, modelRenderMatrix );
 
                 idRenderMatrix modelToLightRenderMatrix;
                 idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
@@ -1458,7 +1455,7 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
             }
 #endif
 
-                (*(idRenderMatrix *)modelMatrix) << drawSurf->space->modelMatrix;
+			idRenderMatrix::Copy(drawSurf->space->modelMatrix, modelMatrix);
 
                 // set the local light position to allow the vertex program to project the shadow volume end cap to infinity
                 R_GlobalPointToLocal(drawSurf->space->modelMatrix, vLight->globalLightOrigin, localLight.ToVec3());
@@ -1747,7 +1744,7 @@ ID_INLINE static void RB_ShadowMappingInteraction_setupMVP(const drawInteraction
 			lightProjectionRenderMatrix << backEnd.shadowP[0];
 
 			idRenderMatrix modelRenderMatrix;
-			idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
+			idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX din->surf->space->modelMatrix, modelRenderMatrix );
 
 			idRenderMatrix modelToLightRenderMatrix;
 			idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
@@ -1769,7 +1766,7 @@ ID_INLINE static void RB_ShadowMappingInteraction_setupMVP(const drawInteraction
 			lightProjectionRenderMatrix << backEnd.shadowP[i];
 
 			idRenderMatrix modelRenderMatrix;
-			idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
+			idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX din->surf->space->modelMatrix, modelRenderMatrix );
 
 			idRenderMatrix modelToLightRenderMatrix;
 			idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
@@ -1792,7 +1789,7 @@ ID_INLINE static void RB_ShadowMappingInteraction_setupMVP(const drawInteraction
 		lightProjectionRenderMatrix << backEnd.shadowP[0];
 
 		idRenderMatrix modelRenderMatrix;
-		idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
+		idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX din->surf->space->modelMatrix, modelRenderMatrix );
 
 		idRenderMatrix modelToLightRenderMatrix;
 		idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );

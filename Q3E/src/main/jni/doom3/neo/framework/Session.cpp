@@ -110,6 +110,8 @@ idCVar	idSessionLocal::com_aviDemoHeight("com_aviDemoHeight", "256", CVAR_SYSTEM
 idCVar	idSessionLocal::com_aviDemoTics("com_aviDemoTics", "2", CVAR_SYSTEM | CVAR_INTEGER, "", 1, 60);
 idCVar	idSessionLocal::com_wipeSeconds("com_wipeSeconds", "1", CVAR_SYSTEM, "");
 idCVar	idSessionLocal::com_guid("com_guid", "", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "");
+idCVar	idSessionLocal::com_disableAutoSaves( "com_disableAutoSaves", "0", CVAR_SYSTEM|CVAR_ARCHIVE|CVAR_BOOL,
+                                                "Don't create Autosaves when entering a new map" );
 
 #ifdef _HUMANHEAD //k: play level music when map loading
 static idCVar g_levelloadmusic("g_levelloadmusic", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "play music during level loads");
@@ -1084,7 +1086,7 @@ void idSessionLocal::StopPlayingRenderDemo()
 		float	demoFPS = numDemoFrames / demoSeconds;
 		idStr	message = va("%i frames rendered in %3.1f seconds = %3.1f fps\n", numDemoFrames, demoSeconds, demoFPS);
 
-		common->Printf(message);
+		common->Printf("%s", message.c_str());
 
 		if (timeDemo == TD_YES_THEN_QUIT) {
 			cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "quit\n");
@@ -1511,8 +1513,18 @@ void idSessionLocal::MoveToNewMap(const char *mapName)
     {
 #endif
     if (!mapSpawnData.serverInfo.GetBool("devmap")) {
-        // Autosave at the beginning of the level
-        SaveGame(GetAutoSaveName(mapName), true);
+        if ( !com_disableAutoSaves.GetBool() )
+        {
+            // DG: set an explicit savename to avoid problems with autosave names
+            //     (they were translated which caused problems like all alpha labs parts
+            //      getting the same filename in spanish, probably because the strings contained
+            //      dots and everything behind them was cut off as "file extension".. see #305)
+
+	        // Autosave at the beginning of the level
+	        SaveGame(GetAutoSaveName(mapName), true);
+	    }
+        else
+            common->Printf("Autosave at the beginning of the level disabled with `com_disableAutoSaves` = 1");
     }
 
     SetGUI(NULL, NULL);
@@ -1745,7 +1757,7 @@ void idSessionLocal::LoadLoadingGui(const char *mapName)
 	stripped.StripPath();
 
 	char guiMap[ MAX_STRING_CHARS ];
-	strncpy(guiMap, va("guis/map/%s.gui", stripped.c_str()), MAX_STRING_CHARS);
+    idStr::Copynz(guiMap, va("guis/map/%s.gui", stripped.c_str()), MAX_STRING_CHARS);
 	// give the gamecode a chance to override
 #if !defined(_RAVEN) && !defined(_HUMANHEAD) // k: quake4 and prey loading gui is generic
 	game->GetMapLoadingGUI(guiMap);
@@ -2928,6 +2940,9 @@ void idSessionLocal::Draw()
 		// NOTE that you can't use this for aviGame recording, it will tick at real com_frameTime between screenshots..
 		renderSystem->SetColor(colorBlack);
 		renderSystem->DrawStretchPic(0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial("_white"));
+#if 0 //karin: make active first?
+		guiTest->Activate(true, com_frameTime);
+#endif
 		guiTest->Redraw(com_frameTime);
 	} else if (guiActive && !guiActive->State().GetBool("gameDraw")) {
 
@@ -4112,7 +4127,7 @@ void idSessionLocal::ShowSubtitle(const idStrList &strList)
 				float f = textScale > 0.0f ? textScale : subtitlesTextScale[index]; \
 				if(f > 0.0f) \
 				{ \
-					sprintf(text, /*sizeof(text), */"%f", f); \
+					idStr::snPrintf(text, sizeof(text), "%f", f); \
 					desktop->SetChildWinVarVal(name, "textScale", text); \
 				} \
 			}
@@ -4131,14 +4146,14 @@ void idSessionLocal::ShowSubtitle(const idStrList &strList)
 		index = num - 1 - i;
 		if(index >= 0)
 		{
-			sprintf(text, /*sizeof(text), */"subtitleText%d", 3 - i);
+			idStr::snPrintf(text, sizeof(text), "subtitleText%d", 3 - i);
 			guiSubtitles->SetStateString(text, strList[index].c_str());
-			sprintf(text, /*sizeof(text), */"subtitleAlpha%d", 3 - i);
+            idStr::snPrintf(text, sizeof(text), "subtitleAlpha%d", 3 - i);
 			guiSubtitles->SetStateFloat(text, 1);
 		}
 		else
 		{
-			sprintf(text, /*sizeof(text), */"subtitleAlpha%d", 3 - i);
+            idStr::snPrintf(text, sizeof(text), "subtitleAlpha%d", 3 - i);
 			guiSubtitles->SetStateFloat(text, 0);
 		}
 	}

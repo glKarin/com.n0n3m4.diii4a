@@ -1617,7 +1617,7 @@ void idAsyncServer::ProcessAuthMessage(const idBitMsg &msg)
 		return;
 	}
 
-	idStr::snPrintf(challenges[ i ].guid, 12, client_guid);
+	idStr::snPrintf(challenges[ i ].guid, 12, "%s", client_guid);
 
 	if (reply == AUTH_OK) {
 		challenges[ i ].authState = CDK_OK;
@@ -1931,7 +1931,7 @@ void idAsyncServer::ProcessConnectMessage(const netadr_t from, const idBitMsg &m
 			PrintOOB(from, SERVER_PRINT_MISC, msg);
 
 			// update the guid in the challenges
-			idStr::snPrintf(challenges[ ichallenge ].guid, sizeof(challenges[ ichallenge ].guid), guid);
+			idStr::snPrintf(challenges[ ichallenge ].guid, sizeof(challenges[ ichallenge ].guid), "%s", guid);
 
 			// once auth replied denied, stop sending further requests
 			if (challenges[ ichallenge ].authReply != AUTH_DENY) {
@@ -2773,7 +2773,7 @@ void idAsyncServer::RunFrame(void)
 
 			idStr msg;
 			GetAsyncStatsAvgMsg(msg);
-			common->Printf(va("%s\n", msg.c_str()));
+			common->Printf("%s\n", msg.c_str());
 
 			nextAsyncStatsTime = serverTime + 1000;
 		}

@@ -180,7 +180,7 @@ class idImage
 		// May perform file loading if the image was not preloaded.
 		// May start a background image read.
 #ifdef _MULTITHREAD
-		void		Bind(bool *res = 0);
+		void		Bind(bool *res = NULL);
 #else
 		void		Bind();
 #endif
@@ -367,24 +367,6 @@ void	R_WritePalTGA(const char *filename, const byte *data, const byte *palette, 
 // data is in top-to-bottom raster order unless flipVertical is set
 
 
-#ifdef _MULTITHREAD
-typedef struct ActuallyLoadImage_data_s
-{
-	idImage *image;
-	bool checkForPrecompressed;
-	bool fromBackEnd;
-	ActuallyLoadImage_data_s(idImage *image, bool checkForPrecompressed, bool fromBackEnd)
-		: image(image),
-		checkForPrecompressed(checkForPrecompressed),
-		fromBackEnd(fromBackEnd)
-	{}
-	ActuallyLoadImage_data_s() 
-		: image(0),
-		checkForPrecompressed(false),
-		fromBackEnd(false)
-	{}
-} ActuallyLoadImage_data_t;
-#endif
 class idImageManager
 {
 	public:
@@ -531,17 +513,6 @@ class idImageManager
 		int	numActiveBackgroundImageLoads;
 		const static int MAX_BACKGROUND_IMAGE_LOADS = 8;
 
-#ifdef _MULTITHREAD
-	    idList<ActuallyLoadImage_data_t>	imagesAlloc; //List for the backend thread
-	    idList<idImage*>	imagesPurge; //List for the backend thread
-
-	    void				AddAllocList(idImage * image, bool checkForPrecompressed, bool fromBackEnd);
-	    void				AddPurgeList(idImage * image);
-
-	    bool				GetNextAllocImage(ActuallyLoadImage_data_t &ret);
-	    idImage *			GetNextPurgeImage();
-	    void                HandlePendingImage(void);
-#endif
 #ifdef _SHADOW_MAPPING
 	    // RB begin
 	    idImage*			shadowImage_2DRGBA[MAX_SHADOWMAP_RESOLUTIONS];
@@ -593,7 +564,7 @@ IMAGEFILES
 ====================================================================
 */
 
-void R_LoadImage(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2);
+void R_LoadImage(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2, bool disableDownSize = false);
 // pic is in top to bottom raster format
 bool R_LoadCubeImages(const char *cname, cubeFiles_t extensions, byte *pic[6], int *size, ID_TIME_T *timestamp);
 
@@ -608,15 +579,3 @@ IMAGEPROGRAM
 void R_LoadImageProgram(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, textureDepth_t *depth = NULL);
 const char *R_ParsePastImageProgram(idLexer &src);
 
-#ifdef _USING_STB
-void LoadJPG_stb(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp);
-void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
-void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
-
-void R_WritePNG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, int quality = 100, const char *basePath = NULL);
-void R_WriteJPG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, int compression = 0, const char *basePath = NULL);
-void R_WriteBMP(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
-void R_WriteDDS(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath = NULL);
-
-void R_WriteScreenshotImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
-#endif

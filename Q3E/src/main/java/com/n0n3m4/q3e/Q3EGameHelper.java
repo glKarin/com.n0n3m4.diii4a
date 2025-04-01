@@ -457,12 +457,28 @@ public class Q3EGameHelper
     {
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "darkmod", "glslprogs/idtech4amm.version");
-        final String version = Q3EGlobals.TDM_GLSL_SHADER_VERSION;
-        final String name = "The Dark Mod GLSL shader source";
+        String version = Q3EGlobals.TDM_GLSL_SHADER_VERSION;
+        String name = "The Dark Mod GLSL shader source";
+        String versionKey = Q3EInterface.GetGameVersionPreferenceKey(Q3EGlobals.GAME_TDM);
+        Q3EGlobals.PatchResource patchResource = Q3EGlobals.PatchResource.TDM_GLSL_SHADER;
+        if(null != versionKey)
+        {
+            String engineVersion = PreferenceManager.getDefaultSharedPreferences(m_context).getString(versionKey, Q3EGlobals.GAME_VERSION_CURRENT);
+            if(Q3EGlobals.GAME_VERSION_TDM_2_12.equals(engineVersion))
+            {
+                version = Q3EGlobals.TDM_2_12_GLSL_SHADER_VERSION;
+                name += "(2.12)";
+                patchResource = Q3EGlobals.PatchResource.TDM_2_12_GLSL_SHADER;
+            }
+            else
+            {
+                name += "(2.13)";
+            }
+        }
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
 
-        if(manager.Fetch(Q3EGlobals.PatchResource.TDM_GLSL_SHADER, overwrite) != null)
+        if(manager.Fetch(patchResource, overwrite) != null)
         {
             if (overwrite)
             {

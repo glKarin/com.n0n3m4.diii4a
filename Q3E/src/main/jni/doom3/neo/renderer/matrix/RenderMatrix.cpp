@@ -58,7 +58,6 @@ Constant render matrices
 
 ================================================================================================
 */
-#define ALIGNTYPE16
 #define assert_16_byte_aligned( ptr )		assert( ( ((uintptr_t)(ptr)) & 15 ) == 0 )
 #define IEEE_FLT_SIGNBITSET( a )	(reinterpret_cast<const unsigned int &>(a) >> IEEE_FLT_SIGN_BIT)
 const int SMALLEST_NON_DENORMAL					= 1 << IEEE_FLT_MANTISSA_BITS;
@@ -4683,3 +4682,48 @@ frustumCull_t idRenderMatrix::CullFrustumCornersToPlane( const frustumCorners_t&
 	
 #endif
 }
+
+#ifdef _RAVEN
+#define FRUSTUM_CULL_ON_PLANE 0
+// return 0 if all points on plane, otherwise same as idRenderMatrix::CullFrustumCornersToPlane
+int R_CullFrustumCornersToPlane( const frustumCorners_t& corners, const idPlane& plane )
+{
+    assert_16_byte_aligned( &corners );
+
+    //karin: restore points num on plane
+    int pointsInPlane = 0;
+
+    bool front = false;
+    bool back = false;
+    for( int i = 0; i < 8; i++ )
+    {
+        const float d = corners.x[i] * plane[0] + corners.y[i] * plane[1] + corners.z[i] * plane[2] + plane[3];
+        if( d >= 0.0f )
+        {
+            front = true;
+        }
+        else if( d <= 0.0f )
+        {
+            back = true;
+        }
+        // the point on plane
+        if(d == 0.0f)
+            pointsInPlane++;
+        if( back && front )
+        {
+            return FRUSTUM_CULL_CROSS;
+        }
+    }
+    // all points on plane
+    if(pointsInPlane == 8)
+        return FRUSTUM_CULL_ON_PLANE;
+    if( front )
+    {
+        return FRUSTUM_CULL_FRONT;
+    }
+    else
+    {
+        return FRUSTUM_CULL_BACK;
+    }
+}
+#endif

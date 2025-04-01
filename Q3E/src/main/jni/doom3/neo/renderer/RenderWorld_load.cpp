@@ -83,6 +83,12 @@ void idRenderWorldLocal::FreeWorld()
 		doublePortals = NULL;
 		numInterAreaPortals = 0;
 	}
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+	ClearGamePortalInfos();
+	numMapInterAreaPortals = 0;
+#endif
+#endif
 
 	if (areaNodes) {
 		R_StaticFree(areaNodes);
@@ -184,9 +190,27 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 
 		for (j = 0 ; j < tri->numVerts ; j++) {
 #ifdef _RAVEN // quake4 proc file
+#if 1
+            float	vec[12] = { 255.0f };
+            int numFloat = src->Parse1DMatrixOpenEnded( 12, vec );
+
+			tri->verts[j].xyz[0] = vec[0];
+			tri->verts[j].xyz[1] = vec[1];
+			tri->verts[j].xyz[2] = vec[2];
+			tri->verts[j].st[0] = vec[3];
+			tri->verts[j].st[1] = vec[4];
+			tri->verts[j].normal[0] = vec[5];
+			tri->verts[j].normal[1] = vec[6];
+			tri->verts[j].normal[2] = vec[7];
+			if(numFloat == 12) //karin: color???
+			{
+				tri->verts[j].color[0] = (byte)vec[8];
+				tri->verts[j].color[1] = (byte)vec[9];
+				tri->verts[j].color[2] = (byte)vec[10];
+				tri->verts[j].color[3] = (byte)vec[11];
+			}
+#else
 // jmarshall - quake 4 proc format
-            //float	vec[8];
-            //src->Parse1DMatrix( 8, vec );
 
             src->ExpectTokenString("(");
 
@@ -213,6 +237,7 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
                 src->ExpectTokenString(")");
             }
 // jmarshall end
+#endif
 #else
 			float	vec[8];
 
@@ -367,6 +392,12 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 	SetupAreaRefs();
 
 	numInterAreaPortals = src->ParseInt();
+#ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+	numMapInterAreaPortals = numInterAreaPortals;
+	ClearGamePortalInfos();
+#endif
+#endif
 
 	if (numInterAreaPortals < 0) {
 		src->Error("R_ParseInterAreaPortals: bad numInterAreaPortals");
@@ -986,11 +1017,19 @@ void idRenderWorldLocal::AddWorldModelEntities()
 		}
 
 		def->referenceBounds = def->parms.hModel->Bounds();
+#ifdef _D3BFG_CULLING
+        // the local and global reference bounds are the same for area models
+        if(harm_r_occlusionCulling.GetBool())
+        def->globalReferenceBounds = def->parms.hModel->Bounds();
+#endif
 
 		def->parms.axis[0][0] = 1;
 		def->parms.axis[1][1] = 1;
 		def->parms.axis[2][2] = 1;
 
+#ifdef _D3BFG_CULLING
+        //if(!harm_r_occlusionCulling.GetBool())
+#endif
 		R_AxisToModelMatrix(def->parms.axis, def->parms.origin, def->modelMatrix);
 
 		// in case an explicit shader is used on the world, we don't
@@ -1000,6 +1039,10 @@ void idRenderWorldLocal::AddWorldModelEntities()
 		                def->parms.shaderParms[2] =
 		                        def->parms.shaderParms[3] = 1;
 
+#ifdef _D3BFG_CULLING
+        if(harm_r_occlusionCulling.GetBool())
+        R_DeriveEntityData(def);
+#endif
 		AddEntityRefToArea(def, &portalAreas[i]);
 	}
 }

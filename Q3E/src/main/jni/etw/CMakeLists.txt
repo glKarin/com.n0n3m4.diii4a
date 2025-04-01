@@ -9,14 +9,16 @@ cmake_minimum_required(VERSION 3.10.3 FATAL_ERROR)
 
 project(ETLEGACY C CXX)
 
+if(NOT ANDROID)
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.21")
-    # cmake_policy(SET CMP0121 NEW) # NEW OLD
+    cmake_policy(SET CMP0121 NEW) # NEW OLD
 endif()
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.22")
-	# cmake_policy(SET CMP0127 NEW)
+	cmake_policy(SET CMP0127 NEW)
 endif()
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
-    # cmake_policy(SET CMP0135 NEW)
+    cmake_policy(SET CMP0135 NEW)
+endif()
 endif()
 
 if(ANDROID)
@@ -65,7 +67,9 @@ cmake_dependent_option(ZONE_DEBUG				"Enable zone debug mode"										OFF "BUIL
 cmake_dependent_option(HUNK_DEBUG				"Enable hunk debug mode"										OFF "BUILD_CLIENT OR BUILD_SERVER" OFF)
 
 # no support for 32 bit binaries on OpenBSD/amd64 or Apple OSX anymore
+if(NOT ANDROID) #karin: forbid build everytime when run cmake
 cmake_dependent_option(CROSS_COMPILE32 "Compile 32-bit x86 version of ET:L (64bit is incompatible with 2.60b)" ON "NOT APPLE; NOT ANDROID;NOT CMAKE_SYSTEM MATCHES OpenBSD*;CMAKE_SYSTEM_PROCESSOR MATCHES x86|X86|amd64|AMD64" OFF)
+endif()
 
 # Optional features
 option(FEATURE_CURL				"Enable auto-download support using cURL (client)"		ON)

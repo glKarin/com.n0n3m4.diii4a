@@ -436,7 +436,7 @@ static bool R_ParseImageProgram_r(idLexer &src, byte **pic, int *width, int *hei
 	}
 
 	if (!token.Icmp("addnormals")) {
-		byte	*pic2;
+		byte	*pic2 = NULL;
 		int		width2, height2;
 
 		MatchAndAppendToken(src, "(");
@@ -490,7 +490,7 @@ static bool R_ParseImageProgram_r(idLexer &src, byte **pic, int *width, int *hei
 	}
 
 	if (!token.Icmp("add")) {
-		byte	*pic2;
+		byte	*pic2 = NULL;
 		int		width2, height2;
 
 		MatchAndAppendToken(src, "(");
@@ -641,7 +641,9 @@ static bool R_ParseImageProgram_r(idLexer &src, byte **pic, int *width, int *hei
 	}
 
 	// load it as an image
-	R_LoadImage(token.c_str(), pic, width, height, &timestamp, true);
+	R_LoadImage(token.c_str(), pic, width, height, &timestamp, true
+			, token.Find("newfonts/") == 0 //karin: DOOM3-BFG new font NPOT texture not allow round down
+			);
 
 	if (timestamp == -1) {
 		return false;

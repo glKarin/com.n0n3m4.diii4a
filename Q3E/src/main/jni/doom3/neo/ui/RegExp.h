@@ -62,6 +62,11 @@ class idRegister
 
 ID_INLINE idRegister::idRegister(void)
 {
+    enabled = false;
+    type = -1;
+    regCount = 0;
+    memset(regs, 0, sizeof(regs));
+    var = NULL;
 }
 
 ID_INLINE idRegister::idRegister(const char *p, int t)
@@ -70,6 +75,7 @@ ID_INLINE idRegister::idRegister(const char *p, int t)
 	type = t;
 	assert(t >= 0 && t < NUMTYPES);
 	regCount = REGCOUNT[t];
+    memset(regs, 0, sizeof(regs)); //k 2025
 	enabled = (type == STRING) ? false : true;
 	var = NULL;
 };

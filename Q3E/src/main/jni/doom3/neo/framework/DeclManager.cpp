@@ -2077,6 +2077,7 @@ idDeclLocal::idDeclLocal(void)
 	everReferenced = false;
 	redefinedInReload = false;
 	nextInFile = NULL;
+    self = NULL;
 }
 
 /*

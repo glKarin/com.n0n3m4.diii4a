@@ -441,7 +441,7 @@ void idListWindow::PostParse()
 		r.w = (i < c - 1) ? tabStops[i+1] - r.x - tabBorder : -1;
 		r.align = (doAligns) ? tabAligns[i] : 0;
 
-#ifdef _RAVEN
+#if 1 // def _RAVEN //k 2025
 // jmarshall crash fix
         if(tabVAligns.Num() > 0 && i < tabVAligns.Num())
 // jmarshall end
@@ -454,19 +454,19 @@ void idListWindow::PostParse()
 			r.valign = 0;
 		}
 
-		if (tabTypes.Num() > 0) {
+		if (tabTypes.Num() > 0 && i < tabTypes.Num()) { //k 2025
 			r.type = tabTypes[i];
 		} else {
 			r.type = TAB_TYPE_TEXT;
 		}
 
-		if (tabSizes.Num() > 0) {
+		if (tabSizes.Num() > 0 && i < tabSizes.Num()) { //k 2025
 			r.iconSize = tabSizes[i];
 		} else {
 			r.iconSize.Zero();
 		}
 
-		if (tabIconVOffsets.Num() > 0) {
+		if (tabIconVOffsets.Num() > 0 && i < tabIconVOffsets.Num()) { //k 2025
 			r.iconVOffset = tabIconVOffsets[i];
 		} else {
 			r.iconVOffset = 0;

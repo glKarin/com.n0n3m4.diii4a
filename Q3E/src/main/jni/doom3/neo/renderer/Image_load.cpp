@@ -76,7 +76,58 @@ Used for determining memory utilization
 */
 int idImage::BitsForInternalFormat(int internalFormat) const
 {
+    switch ( internalFormat )
+    {
+#if !defined(GL_ES_VERSION_2_0)
+        case GL_INTENSITY8:
+#endif
+        case 1:
+            return 8;
+        case 2:
+        case GL_LUMINANCE_ALPHA:
+            return 16;
+        case 3:
+            return 32;		// on some future hardware, this may actually be 24, but be conservative
+        case 4:
+            return 32;
+        case GL_LUMINANCE:
+            return 8;
+        case GL_ALPHA:
+            return 8;
+        case GL_RGBA:
+        case GL_RGBA8:
+            return 32;
+        case GL_RGB:
+        case GL_RGB8:
+            return 32;		// on some future hardware, this may actually be 24, but be conservative
+        case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+            return 4;
+        case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+            return 4;
+        case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
 			return 8;
+        case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+            return 8;
+        case GL_RGBA4:
+            return 16;
+        case GL_RGB565:
+            return 16;
+        case GL_RGB5_A1:
+            return 16;
+#if !defined(GL_ES_VERSION_2_0)
+        case GL_COLOR_INDEX8_EXT:
+            return 8;
+        case GL_COLOR_INDEX:
+            return 8;
+#endif
+        case GL_COMPRESSED_RGB_ARB:
+            return 4;			// not sure
+        case GL_COMPRESSED_RGBA_ARB:
+            return 8;			// not sure
+        default:
+            common->Error( "R_BitsForInternalFormat: BAD FORMAT:%i", internalFormat );
+    }
+    return 0;
 }
 
 /*
@@ -220,7 +271,7 @@ void idImage::SetImageFilterAndRepeat() const
 			common->FatalError("R_CreateImage: bad texture filter");
 	}
 
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	if (glConfig.anisotropicAvailable) {
 		// only do aniso filtering on mip mapped images
 		if (filter == TF_DEFAULT) {
@@ -229,7 +280,7 @@ void idImage::SetImageFilterAndRepeat() const
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
 		}
 	}
-#endif
+//#endif
 
 #if !defined(GL_ES_VERSION_2_0)
 	if (glConfig.textureLODBiasAvailable) {
@@ -244,6 +295,11 @@ void idImage::SetImageFilterAndRepeat() const
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			break;
 		case TR_CLAMP_TO_BORDER:
+#if !defined(GL_ES_VERSION_2_0)
+            qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
+            qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
+            break;
+#endif
 		case TR_CLAMP_TO_ZERO:
 		case TR_CLAMP_TO_ZERO_ALPHA:
 		case TR_CLAMP:
@@ -730,6 +786,11 @@ void idImage::Generate3DImage(const byte *pic, int width, int height, int picDep
 			qglTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
 			break;
 		case TR_CLAMP_TO_BORDER:
+#if !defined(GL_ES_VERSION_2_0)
+            qglTexParameterf( GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
+            qglTexParameterf( GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
+            break;
+#endif
 		case TR_CLAMP_TO_ZERO:
 		case TR_CLAMP_TO_ZERO_ALPHA:
 		case TR_CLAMP:
@@ -1263,7 +1324,7 @@ bool idImage::CheckPrecompressedImage(bool fullLoad)
 	}
 
 	// god i love last minute hacks :-)
-	if (com_machineSpec.GetInteger() >= 1 && com_videoRam.GetInteger() >= 128 && imgName.Icmpn("lights/", 7) == 0) {
+	if (com_machineSpec.GetInteger() >= 1/* && com_videoRam.GetInteger() >= 128*/ && imgName.Icmpn("lights/", 7) == 0) {
 		return false;
 	}
 
@@ -1513,6 +1574,9 @@ int idImage::GenerateImageETC(int width, int height,
 	bool	preserveBorder;
 	int	scaled_width, scaled_height;
 
+    if(!r_useETC1.GetBool())
+        return 0;
+
 	{
 		char filename[MAX_IMAGE_NAME];
 		char *fptr = &filename[0];
@@ -1663,13 +1727,13 @@ void	idImage::ActuallyLoadImage(bool checkForPrecompressed, bool fromBackEnd)
 	{
 		if(pending)
 		{
-			globalImages->AddAllocList(this, checkForPrecompressed, fromBackEnd);
+			renderThread->AddAllocList( this, checkForPrecompressed, fromBackEnd );
 			return;
 		}
 		if(fromBackEnd)
 		{
 			//LOGI("ERROR!! CAN NOT LOAD IMAGE FROM BIND");
-			globalImages->AddAllocList( this, checkForPrecompressed, fromBackEnd );
+            renderThread->AddAllocList( this, checkForPrecompressed, fromBackEnd );
 			return;
 		}
 
@@ -1811,7 +1875,7 @@ void idImage::PurgeImage()
 #ifdef _MULTITHREAD
 	if(multithreadActive && pending)
 	{
-		globalImages->AddPurgeList(this);
+		renderThread->AddPurgeList(this);
 		return;
 	}
 #endif
@@ -2338,6 +2402,9 @@ void idImage::Print() const
 	}
 
 	switch (internalFormat) {
+#if !defined(GL_ES_VERSION_2_0)
+        case GL_INTENSITY8:
+#endif
 		case 1:
 			common->Printf("I     ");
 			break;
@@ -2358,9 +2425,11 @@ void idImage::Print() const
 			common->Printf("A     ");
 			break;
 		case GL_RGBA:
+        case GL_RGBA8:
 			common->Printf("RGBA  ");
 			break;
 		case GL_RGB:
+        case GL_RGB8:
 			common->Printf("RGB   ");
 			break;
 		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
@@ -2378,8 +2447,25 @@ void idImage::Print() const
 		case GL_RGBA4:
 			common->Printf("RGBA4 ");
 			break;
-		case GL_RGB5:
-			common->Printf("RGB5  ");
+		case GL_RGB565:
+			common->Printf("RGB565");
+			break;
+        case GL_RGB5_A1:
+            common->Printf("RGB5A1");
+            break;
+#if !defined(GL_ES_VERSION_2_0)
+        case GL_COLOR_INDEX8_EXT:
+            common->Printf( "CI8   " );
+            break;
+        case GL_COLOR_INDEX:
+            common->Printf( "CI    " );
+            break;
+#endif
+        case GL_COMPRESSED_RGB_ARB:
+            common->Printf( "RGBC  " );
+            break;
+        case GL_COMPRESSED_RGBA_ARB:
+            common->Printf( "RGBAC " );
 			break;
 		case 0:
 			common->Printf("      ");

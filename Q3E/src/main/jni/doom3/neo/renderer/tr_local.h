@@ -32,6 +32,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "qgl.h"
 
 #include "matrix/esUtil.h"
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
+#include "matrix/RenderMatrix.h"
+#endif
+
 #ifdef GL_ES_VERSION_3_0 // GLES3.1
 #define GL_BLIT_FRAMEBUFFER_AVAILABLE() ( GLIMP_PROCISVALID(qglBlitFramebuffer) )
 #define GL_DRAW_BUFFERS_AVAILABLE() ( GLIMP_PROCISVALID(qglDrawBuffers) )
@@ -122,6 +126,22 @@ class idScreenRect
 		void		Union(const idScreenRect &rect);
 		bool		Equals(const idScreenRect &rect) const;
 		bool		IsEmpty() const;
+
+#ifdef _D3BFG_CULLING
+        //anon begin
+        int			GetArea() const {
+            return (x2 - x1 + 1) * (y2 - y1 + 1);
+        }
+        //anon end
+		bool		IsEmptyWithZ() const {
+			return IsEmpty() || zmin > zmax;
+		}
+		void		IntersectWithZ( const idScreenRect &rect ) {
+			Intersect( rect );
+			zmin = zmin > rect.zmin ? zmin : rect.zmin;
+			zmax = zmax < rect.zmax ? zmax : rect.zmax;
+		}
+#endif
 };
 
 idScreenRect R_ScreenRectFromViewFrustumBounds(const idBounds &bounds);
@@ -297,9 +317,14 @@ class idRenderLightLocal : public idRenderLight
 		idInteraction 			*lastInteraction;
 
 		struct doublePortal_s 	*foggedPortals;
-#ifdef _SHADOW_MAPPING
-	float			baseLightProject[16];		// global xyz1 to projected light strq
-    float			inverseBaseLightProject[16];// transforms the zero-to-one cube to exactly cover the light in world space
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
+        RenderMatrix			baseLightProject;		// global xyz1 to projected light strq
+        RenderMatrix			inverseBaseLightProject;// transforms the zero-to-one cube to exactly cover the light in world space
+#endif
+#ifdef _D3BFG_CULLING
+        //anon begin
+        idBounds				globalLightBounds;
+        //anon end
 #endif
 };
 
@@ -358,6 +383,14 @@ class idRenderEntityLocal : public idRenderEntity
 		idInteraction 			*lastInteraction;
 
 		bool					needsPortalSky;
+
+#ifdef _D3BFG_CULLING
+        RenderMatrix			modelRenderMatrix;
+        // axis aligned bounding box in world space, derived from refernceBounds and
+        // modelMatrix in R_CreateEntityRefs()
+        idBounds		globalReferenceBounds;
+        RenderMatrix			inverseBaseModelProject;	// transforms the unit cube to exactly cover the model in world space
+#endif
 };
 
 
@@ -409,8 +442,8 @@ typedef struct viewLight_s {
     bool					parallel;					// lightCenter gives the direction to the light at infinity
     idVec3					lightCenter;				// offset the lighting direction for shading and
     int						shadowLOD;					// level of detail for shadowmap selection
-    float			baseLightProject[16];			// global xyz1 to projected light strq
-	float			inverseBaseLightProject[16];// transforms the zero-to-one cube to exactly cover the light in world space
+    RenderMatrix			baseLightProject;			// global xyz1 to projected light strq
+	RenderMatrix			inverseBaseLightProject;// transforms the zero-to-one cube to exactly cover the light in world space
     idVec3					lightRadius;		// xyz radius for point lights
 	const struct drawSurf_s	*perforatedShadows;	//karin: perforated surface for shadow mapping
 #endif
@@ -442,7 +475,7 @@ typedef struct viewEntity_s {
 	float				modelMatrix[16];		// local coords to global coords
 	float				modelViewMatrix[16];	// local coords to eye coords
 #ifdef _SHADOW_MAPPING
-	float mvp[16];
+	RenderMatrix		mvp;
 #endif
 } viewEntity_t;
 
@@ -755,8 +788,8 @@ typedef struct {
 
 	int					c_copyFrameBuffer;
 #ifdef _SHADOW_MAPPING
-    float		shadowV[6][16];				// shadow depth view matrix
-    float		shadowP[6][16];				// shadow depth projection matrix
+    RenderMatrix		shadowV[6];				// shadow depth view matrix
+    RenderMatrix		shadowP[6];				// shadow depth projection matrix
 #endif
 } backEndState_t;
 
@@ -1138,10 +1171,15 @@ extern idCVar r_debugRenderToTexture;
 extern idCVar harm_r_maxFps;
 extern idCVar harm_r_shadowCarmackInverse;
 
-#ifdef _USING_STB
 extern idCVar r_screenshotFormat;
 extern idCVar r_screenshotJpgQuality;
 extern idCVar r_screenshotPngCompression;
+
+#ifdef _D3BFG_CULLING
+extern idCVar harm_r_occlusionCulling;
+extern idCVar r_useLightPortalCulling;		// 0 = none, 1 = box, 2 = exact clip of polyhedron faces, 3 MVP to plane culling
+extern idCVar r_useLightAreaCulling;		// 0 = off, 1 = on
+extern idCVar r_useEntityPortalCulling;		// 0 = none, 1 = box
 #endif
 
 #ifdef _RAVEN
@@ -1409,6 +1447,9 @@ void R_FreeEntityDefOverlay(idRenderEntityLocal *def);
 void R_FreeEntityDefFadedDecals(idRenderEntityLocal *def, int time);
 
 void R_CreateLightDefFogPortals(idRenderLightLocal *ldef);
+#ifdef _D3BFG_CULLING
+void R_DeriveEntityData( idRenderEntityLocal *def );
+#endif
 
 /*
 ============================================================
@@ -2039,12 +2080,27 @@ void RB_SetDefaultGLState(void);
 void RB_SetGL2D(void);
 
 // write a comment to the r_logFile if it is enabled
+#ifdef _RENDERER_LOG_COMMENT
 void RB_LogComment(const char *comment, ...) id_attribute((format(printf,1,2)));
+#else
+#define RB_LogComment(...)
+#endif
 
 void RB_ShowImages(void);
 
 void RB_ExecuteBackEndCommands(const emptyCommand_t *cmds);
 
+void LoadJPG_stb(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp);
+void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
+void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
+void LoadBimage(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
+
+void R_WritePNG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, int quality = 100, const char *basePath = NULL);
+void R_WriteJPG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, int compression = 0, const char *basePath = NULL);
+void R_WriteBMP(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
+void R_WriteDDS(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath = NULL);
+
+void R_WriteScreenshotImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
 
 /*
 =============================================================
@@ -2124,10 +2180,18 @@ extern bool GLimp_CheckGLInitialized(void); // Check GL context initialized, onl
 extern unsigned int lastRenderTime;
 extern int r_maxFps;
 
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
+float R_ComputePointLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
+float R_ComputeSpotLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
+float R_ComputeParallelLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
+
+void R_SetupFrontEndViewDefMVP(void);
+void R_ShadowBounds( const idBounds& modelBounds, const idBounds& lightBounds, const idVec3& lightOrigin, idBounds& shadowBounds );
+#endif
+
 #ifdef _SHADOW_MAPPING
 
 #include "matrix/GLMatrix.h"
-#include "matrix/RenderMatrix.h"
 
 extern idCVar r_useShadowMapping;			// use shadow mapping instead of stencil shadows
 extern idCVar r_useHalfLambertLighting;		// use Half-Lambert lighting instead of classic Lambert
@@ -2167,13 +2231,8 @@ extern idCVar harm_r_shadowMapJitterScale;
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;
 
-float R_ComputePointLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
-float R_ComputeSpotLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
-float R_ComputeParallelLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
 void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLight);
 void R_SetupShadowMappingProjectionMatrix(idRenderLightLocal *light);
-void R_SetupFrontEndViewDefMVP(void);
-
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE

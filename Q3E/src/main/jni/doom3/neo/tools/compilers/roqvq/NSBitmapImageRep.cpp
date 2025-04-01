@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "roq.h"
 
-void R_LoadImage(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2);
+void R_LoadImage(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2, bool disableRoundDown = false);
 
 NSBitmapImageRep::NSBitmapImageRep(void)
 {

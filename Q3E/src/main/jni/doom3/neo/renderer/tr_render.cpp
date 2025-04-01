@@ -414,7 +414,7 @@ void RB_BindVariableStageImage(const textureStage_t *texture, const float *shade
 				// Save time to display
 				texture->image->cinmaticNextTime = (int)(1000 * ( backEnd.viewDef->floatTime + backEnd.viewDef->renderView.shaderParms[11] ) );
 				// Update next time
-				globalImages->AddAllocList( texture->image, true, true );
+				renderThread->AddAllocList( texture->image, true, true );
 			}
 		}
 		else

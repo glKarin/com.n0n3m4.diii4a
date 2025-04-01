@@ -44,6 +44,45 @@ idVec4 idDeviceContext::colorNone;
 
 idCVar gui_smallFontLimit("gui_smallFontLimit", "0.30", CVAR_GUI | CVAR_ARCHIVE, "");
 idCVar gui_mediumFontLimit("gui_mediumFontLimit", "0.60", CVAR_GUI | CVAR_ARCHIVE, "");
+#ifdef _WCHAR_LANG
+idCVar harm_gui_wideCharLang("harm_gui_wideCharLang", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "enable wide-character language support");
+static bool _hasWideCharFont = false;
+#define AsASCIICharLang(text_, len_) ( !_hasWideCharFont || !harm_gui_wideCharLang.GetBool() || idStr::IsPureASCII(text_, len_) )
+#endif
+#ifdef _D3BFG_FONT
+idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_INIT | CVAR_ARCHIVE, "using DOOM3-BFG new fonts instead of old fonts.\n"
+		"    0 or \"\": disable\n"
+        "    1: make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic"
+#ifdef _RAVEN
+        "(`r_strogg` and `strogg` fonts always disable)"
+#elif defined(_HUMANHEAD)
+        "(`alien` font always disable)"
+#endif
+        ". e.g. \n"
+#ifdef _RAVEN
+        "        'fonts/chain_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
+		"        'fonts/lowpixel_**.dat' -> 'newfonts/microgrammadbolext/48.dat'\n"
+        "        'fonts/marine_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
+        "        'fonts/profont_**.dat' -> 'newfonts/BankGothic_Md_BT/48.dat'\n"
+#elif defined(_HUMANHEAD)
+        "        'fonts/fontImage_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
+        "        'fonts/menu/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
+#else
+		"        'fonts/fontImage_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
+		"        'fonts/an/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
+		"        'fonts/arial/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
+		"        'fonts/bank/fontImage_**.dat' -> 'newfonts/BankGothic_Md_BT/48.dat'\n"
+		"        'fonts/micro/fontImage_**.dat' -> 'newfonts/microgrammadbolext/48.dat'\n"
+#endif
+		"    Otherwise you can setup DOOM3-BFG new font name to override all DOOM 3/Quake 4/Prey old fonts. e.g. \n"
+		"        Chainlink_Semi_Bold\n"
+		"        Arial_Narrow\n"
+		"        BankGothic_Md_BT\n"
+		"        microgrammadbolext\n"
+		"        DFPHeiseiGothicW7\n"
+		"        Sarasori_Rg\n"
+		);
+#endif
 
 
 idList<fontInfoEx_t> idDeviceContext::fonts;
@@ -84,10 +123,89 @@ int idDeviceContext::FindFont(const char *name)
 	fileName.Replace("fonts", va("fonts/%s", fontLang.c_str()));
 
 	fontInfoEx_t fontInfo;
+    memset(&fontInfo, 0, sizeof(fontInfoEx_t)); // DG: initialize this //k 2025
 	int index = fonts.Append(fontInfo);
 
-	if (renderSystem->RegisterFont(fileName, fonts[index])) {
+	bool fontLoaded = false;
+#ifdef _D3BFG_FONT
+	const char *d3bfgFontName = harm_gui_useD3BFGFont.GetString();
+	if(d3bfgFontName && d3bfgFontName[0] && idStr::Cmp(d3bfgFontName, "0") != 0)
+	{
+		if(idStr::Cmp(d3bfgFontName, "1") == 0)
+		{
+			idStr fname(name);
+			fname.StripPath();
+#ifdef _RAVEN
+            if(!idStr::Icmp("chain", fname))
+                d3bfgFontName = "Chainlink_Semi_Bold";
+            else if(!idStr::Icmp("lowpixel", fname))
+                d3bfgFontName = "microgrammadbolext";
+            else if(!idStr::Icmp("marine", fname))
+                d3bfgFontName = "Arial_Narrow";
+            else if(!idStr::Icmp("profont", fname))
+                d3bfgFontName = "BankGothic_Md_BT";
+            else if(!idStr::Icmp("r_strogg", fname))
+                d3bfgFontName = NULL;
+            else if(!idStr::Icmp("strogg", fname))
+                d3bfgFontName = NULL;
+            else
+                d3bfgFontName = "Chainlink_Semi_Bold";
+#elif defined(_HUMANHEAD)
+            if(!idStr::Icmp("menu", fname))
+                d3bfgFontName = "Arial_Narrow";
+            else if(!idStr::Icmp("alien", fname))
+                d3bfgFontName = NULL;
+            else
+                d3bfgFontName = "Chainlink_Semi_Bold";
+#else
+			if(!idStr::Icmp("an", fname))
+				d3bfgFontName = "Arial_Narrow";
+			else if(!idStr::Icmp("arial", fname))
+				d3bfgFontName = "Arial_Narrow";
+			else if(!idStr::Icmp("bank", fname))
+				d3bfgFontName = "BankGothic_Md_BT";
+			else if(!idStr::Icmp("micro", fname))
+				d3bfgFontName = "microgrammadbolext";
+			else
+				d3bfgFontName = "Chainlink_Semi_Bold";
+#endif
+		}
+        if(d3bfgFontName && d3bfgFontName[0])
+        {
+            idStr newFileName = fileName;
+            newFileName.Replace(va("fonts/%s", fontLang.c_str()), "newfonts/");
+            newFileName.StripFilename();
+            newFileName.AppendPath(d3bfgFontName);
+            if (renderSystem->RegisterFont(newFileName, fonts[index]))
+            {
+                common->Printf("Font '%s' using DOOM3-BFG new font '%s'.\n", name, newFileName.c_str());
+                fontLoaded = true;
+            }
+            else // load default if fail
+            {
+                common->Printf("Font '%s' load DOOM3-BFG new font '%s' fail, try using default font.\n", name, newFileName.c_str());
+                fontLoaded = renderSystem->RegisterFont(fileName, fonts[index]);
+            }
+        }
+        else
+        {
+            common->Printf("Font '%s' not use DOOM3-BFG new font.\n", name);
+            fontLoaded = renderSystem->RegisterFont(fileName, fonts[index]);
+        }
+	}
+	else
+#endif
+	fontLoaded = renderSystem->RegisterFont(fileName, fonts[index]);
+	if (fontLoaded) {
 		idStr::Copynz(fonts[index].name, name, sizeof(fonts[index].name));
+#ifdef _WCHAR_LANG
+		if(!_hasWideCharFont)
+		{
+			const fontInfoEx_t *f = &fonts[index];
+			if(f->fontInfoSmall.numIndexes > 0 || f->fontInfoMedium.numIndexes > 0 || f->fontInfoLarge.numIndexes > 0)
+				_hasWideCharFont = true;
+		}
+#endif
 		return index;
 	} else {
 		common->Printf("Could not register font %s [%s]\n", name, fileName.c_str());
@@ -192,12 +310,20 @@ void idDeviceContext::Init()
 	// DG: this is used for the "make sure menus are rendered as 4:3" hack
 	fixScaleForMenu.Set(1, 1);
 	fixOffsetForMenu.Set(0, 0);
+    scaleMenusTo43 = false;
 }
 
 void idDeviceContext::Shutdown()
 {
 	fontName.Clear();
 	clipRects.Clear();
+#ifdef _WCHAR_LANG
+	for(int i = 0; i < fonts.Num(); i++)
+	{
+		printf("Free font '%s'.\n", fonts[i].name);
+		R_Font_FreeFontInfoEx(&fonts[i]);
+	}
+#endif
 	fonts.Clear();
 	Clear();
 }
@@ -328,7 +454,7 @@ void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h)
 {
 	if (x) {
 		*x *= xScale;
-		if(r_scaleMenusTo43.GetBool())
+		if(scaleMenusTo43)
 		{
 			*x *= fixScaleForMenu.x; // DG: for "render menus as 4:3" hack
 			*x += fixOffsetForMenu.x;
@@ -337,7 +463,7 @@ void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h)
 
 	if (y) {
 		*y *= yScale;
-		if(r_scaleMenusTo43.GetBool())
+		if(scaleMenusTo43)
 		{
 			*y *= fixScaleForMenu.y; // DG: for "render menus as 4:3" hack
 			*y += fixOffsetForMenu.y;
@@ -346,7 +472,7 @@ void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h)
 
 	if (w) {
 		*w *= xScale;
-		if(r_scaleMenusTo43.GetBool())
+		if(scaleMenusTo43)
 		{
 			*w *= fixScaleForMenu.x; // DG: for "render menus as 4:3" hack
 		}
@@ -354,7 +480,7 @@ void idDeviceContext::AdjustCoords(float *x, float *y, float *w, float *h)
 
 	if (h) {
 		*h *= yScale;
-		if(r_scaleMenusTo43.GetBool())
+		if(scaleMenusTo43)
 		{
 			*h *= fixScaleForMenu.y; // DG: for "render menus as 4:3" hack
 		}
@@ -738,7 +864,7 @@ void idDeviceContext::DrawCursor(float *x, float *y, float size)
 	}
 
 	renderSystem->SetColor(colorWhite);
-	if(r_scaleMenusTo43.GetBool())
+	if(scaleMenusTo43)
 	{
 		// DG: I use this instead of plain AdjustCursorCoords and the following lines
 		//     to scale menus and other fullscreen GUIs to 4:3 aspect ratio
@@ -812,6 +938,10 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 			len = limit;
 		}
 
+#ifdef _WCHAR_LANG
+        if(AsASCIICharLang(text, (int)len))
+        {
+#endif
 		while (s && *s && count < len) {
 			if (*s < GLYPH_START || *s > GLYPH_END) {
 				s++;
@@ -863,6 +993,59 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				count++;
 			}
 		}
+#ifdef _WCHAR_LANG
+        }
+        else
+        {
+            idStr drawText = text;
+            int charIndex = 0;
+            int lastCharIndex = 0;
+
+            while( charIndex < len ) {
+                lastCharIndex = charIndex;
+                uint32_t textChar = drawText.UTF8Char( charIndex );
+
+                glyph = R_Font_GetGlyphInfo(useFont, textChar);
+                if (!glyph) {
+                    continue;
+                }
+
+                //karin: charIndex will increment when read UTF8 character, so use last charIndex
+                if( textChar == C_COLOR_ESCAPE && idStr::IsColor( drawText.c_str() + lastCharIndex ) ) {
+                    // textChar == '^' and charIndex is color value current
+                    if( drawText[ charIndex ] == C_COLOR_DEFAULT ) {
+                        newColor = color;
+                    } else {
+                        newColor = idStr::ColorForIndex( drawText[ charIndex ] );
+                        newColor[3] = color[3];
+                    }
+                    if( cursor == charIndex - 1 || cursor == charIndex ) {
+                        float partialSkip = ((glyph->xSkip * useScale) + adjust) / 5.0f;
+
+                        if (cursor == count) {
+                            partialSkip *= 2.0f;
+                        } else {
+                            renderSystem->SetColor(newColor);
+                        }
+
+                        DrawEditCursor(x - partialSkip, y, scale);
+                    }
+                    renderSystem->SetColor( newColor );
+                    charIndex++; //karin: skip color value character
+                    continue;
+                } else {
+                    float yadj = useScale * glyph->top;
+                    PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+
+                    if( cursor == charIndex - 1 ) {
+                        DrawEditCursor( x, y, scale );
+                    }
+
+                    x += (glyph->xSkip * useScale) + adjust;
+                }
+            }
+        }
+#endif
 
 		if (cursor == len) {
 			DrawEditCursor(x, y, scale);
@@ -908,6 +1091,11 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 
 	width = 0;
 
+#ifdef _WCHAR_LANG
+    int len = (int)strlen(text);
+    if(AsASCIICharLang(text, len))
+    {
+#endif
 	if (limit > 0) {
 		for (i = 0; text[i] != '\0' && i < limit; i++) {
 			if (idStr::IsColor(text + i)) {
@@ -927,6 +1115,39 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 	}
 
 	return idMath::FtoiFast(scale * useFont->glyphScale * width);
+#ifdef _WCHAR_LANG
+    }
+    else
+    {
+        idStr drawText = text;
+        int charIndex = 0;
+        float f = 0.0f;
+
+        if (limit > 0) {
+            while( charIndex < len ) {
+                if(charIndex >= limit)
+                    break;
+
+                if( idStr::IsColor( drawText.c_str() + charIndex ) ) {
+                    charIndex += 2; //skip 2 characters, because color is ^x format
+                } else {
+                    uint32_t textChar = drawText.UTF8Char( charIndex );
+                    f += R_Font_GetCharWidth(useFont, textChar, scale);
+                }
+            }
+        } else {
+            while( charIndex < len ) {
+                if( idStr::IsColor( drawText.c_str() + charIndex ) ) {
+                    charIndex += 2; //skip 2 characters, because color is ^x format
+                } else {
+                    uint32_t textChar = drawText.UTF8Char( charIndex );
+                    f += R_Font_GetCharWidth(useFont, textChar, scale);
+                }
+            }
+        }
+        return idMath::FtoiFast(f);
+    }
+#endif
 }
 
 int idDeviceContext::TextHeight(const char *text, float scale, int limit)
@@ -951,6 +1172,10 @@ int idDeviceContext::TextHeight(const char *text, float scale, int limit)
 
 		count = 0;
 
+#ifdef _WCHAR_LANG
+        if(AsASCIICharLang(text, len))
+        {
+#endif
 		while (s && *s && count < len) {
 			if (idStr::IsColor(s)) {
 				s += 2;
@@ -966,6 +1191,31 @@ int idDeviceContext::TextHeight(const char *text, float scale, int limit)
 				count++;
 			}
 		}
+#ifdef _WCHAR_LANG
+        }
+        else
+        {
+            idStr drawText = text;
+            int charIndex = 0;
+            float f = 0.0f;
+
+            while( charIndex < len ) {
+                if ( idStr::IsColor( drawText.c_str() + charIndex ) ) {
+                    charIndex += 2;
+                    continue;
+                } else {
+                    uint32_t textChar = drawText.UTF8Char( charIndex );
+                    f = R_Font_GetCharHeight(useFont, textChar, scale);
+
+                    if (max < f) {
+                        max = f;
+                    }
+                }
+            }
+
+            return idMath::FtoiFast(max);
+        }
+#endif
 	}
 
 	return idMath::FtoiFast(max * useScale);
@@ -1126,6 +1376,10 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 	lineBreak = false;
 	wordBreak = false;
 
+#ifdef _WCHAR_LANG
+    if(AsASCIICharLang(text, (int)strlen(text)))
+    {
+#endif
 	while (p) {
 
 		if (*p == '\n' || *p == '\r' || *p == '\0') {
@@ -1226,6 +1480,139 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 			textWidth += textScale * useFont->glyphScale * useFont->glyphs[(const unsigned char)*(buff + len - 1)].xSkip;
 		}
 	}
+#ifdef _WCHAR_LANG
+    }
+    else
+    {
+        idStr drawText = text;
+        int			charIndex = 0;
+        idStr textBuffer;
+        int			lastBreak = 0;
+        float		textWidthAtLastBreak = 0.0f;
+
+        while( charIndex < drawText.Length() ) {
+            uint32_t textChar = drawText.UTF8Char( charIndex );
+
+            // See if we need to start a new line.
+            if( textChar == '\n' || textChar == '\r' || charIndex == drawText.Length() ) {
+                lineBreak = true;
+                if( charIndex < drawText.Length() ) {
+                    // New line character and we still have more text to read.
+                    char nextChar = drawText[ charIndex + 1 ];
+                    if( ( textChar == '\n' && nextChar == '\r' ) || ( textChar == '\r' && nextChar == '\n' ) ) {
+                        // Just absorb extra newlines.
+                        textChar = drawText.UTF8Char( charIndex );
+                    }
+                }
+            }
+
+            // Check for escape colors if not then simply get the glyph width.
+            if( textChar == C_COLOR_ESCAPE && charIndex < drawText.Length() ) {
+                textBuffer.AppendUTF8Char( textChar );
+                textChar = drawText.UTF8Char( charIndex );
+            }
+
+            // If the character isn't a new line then add it to the text buffer.
+            if( textChar != '\n' && textChar != '\r' ) {
+                textWidth += R_Font_GetCharWidth( useFont, textChar, textScale );
+                textBuffer.AppendUTF8Char( textChar );
+            }
+
+            if( !lineBreak && ( textWidth > rectDraw.w ) ) {
+                // The next character will cause us to overflow, if we haven't yet found a suitable
+                // break spot, set it to be this character
+                if( textBuffer.Length() > 0 && lastBreak == 0 ) {
+                    lastBreak = textBuffer.Length();
+                    textWidthAtLastBreak = textWidth;
+                }
+                wordBreak = true;
+            } else if( lineBreak || ( wrap && ( textChar == ' ' || textChar == '\t' ) ) ) {
+                // The next character is in view, so if we are a break character, store our position
+                lastBreak = textBuffer.Length();
+                textWidthAtLastBreak = textWidth;
+            }
+
+            // We need to go to a new line
+            if( lineBreak || wordBreak ) {
+                float x = rectDraw.x;
+
+                if( textWidthAtLastBreak > 0 ) {
+                    textWidth = textWidthAtLastBreak;
+                }
+
+                // Align text if needed
+                if( textAlign == ALIGN_RIGHT ) {
+                    x = rectDraw.x + rectDraw.w - textWidth;
+                } else if( textAlign == ALIGN_CENTER ) {
+                    x = rectDraw.x + ( rectDraw.w - textWidth ) / 2;
+                }
+
+                if( wrap || lastBreak > 0 ) {
+                    // This is a special case to handle breaking in the middle of a word.
+                    // if we didn't do this, the cursor would appear on the end of this line
+                    // and the beginning of the next.
+                    if( wordBreak && cursor >= lastBreak && lastBreak == textBuffer.Length() ) {
+                        cursor++;
+                    }
+                }
+
+                // Draw what's in the current text buffer.
+                if( !calcOnly ) {
+                    if( lastBreak > 0 ) {
+                        count += DrawText( x, y, textScale, color, textBuffer.Left( lastBreak ).c_str(), 0, 0, 0, cursor );
+                        textBuffer = textBuffer.Right( textBuffer.Length() - lastBreak );
+                    } else {
+                        count += DrawText( x, y, textScale, color, textBuffer.c_str(), 0, 0, 0, cursor );
+                        textBuffer.Clear();
+                    }
+                }
+
+                if( cursor < lastBreak ) {
+                    cursor = -1;
+                } else if( cursor >= 0 ) {
+                    cursor -= ( lastBreak + 1 );
+                }
+
+                // If wrap is disabled return at this point.
+                if( !wrap ) {
+                    return lastBreak;
+                }
+
+                // If we've hit the allowed character limit then break.
+                if( limit && count > limit ) {
+                    break;
+                }
+
+                y += lineSkip + 5;
+
+                if( !calcOnly && y > rectDraw.Bottom() ) {
+                    break;
+                }
+
+                // If breaks were requested then make a note of this one.
+                if( breaks ) {
+                    breaks->Append( drawText.Length() - charIndex );
+                }
+
+                // Reset necessary parms for next line.
+                lastBreak = 0;
+                textWidth = 0;
+                textWidthAtLastBreak = 0;
+                lineBreak = false;
+                wordBreak = false;
+
+                // Reassess the remaining width
+                for( int i = 0; i < textBuffer.Length(); ) {
+                    if( textChar != C_COLOR_ESCAPE ) {
+                        textWidth += R_Font_GetCharWidth( useFont, textBuffer.UTF8Char( i ), textScale );
+                    }
+                }
+
+                continue;
+            }
+        }
+    }
+#endif
 
 	return idMath::FtoiFast(rectDraw.w / charSkip);
 }
@@ -1252,6 +1639,8 @@ char *idRectangle::String(void) const
 
 // DG: this is used for the "make sure menus are rendered as 4:3" hack
 void idDeviceContext::SetMenuScaleFix(bool enable) {
+    scaleMenusTo43 = enable;
+    
 	if(enable) {
 		float w = renderSystem->GetScreenWidth();
 		float h = renderSystem->GetScreenHeight();

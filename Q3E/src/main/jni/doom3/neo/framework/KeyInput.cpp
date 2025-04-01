@@ -841,3 +841,21 @@ void idKeyInput::Shutdown(void)
 	delete [] keys;
 	keys = NULL;
 }
+
+#ifdef _HUMANHEAD //karin: only get first binding key, return name and output keycode
+const char * IN_FirstKeyFromBinding(const char *binding, int *keycode = NULL)
+{
+	int i;
+
+	if (binding && *binding) {
+		for (i = 0; i < MAX_KEYS; i++) {
+			if (keys[i].binding.Icmp(binding) == 0) {
+				if(keycode)
+					*keycode = i;
+				return idKeyInput::KeyNumToString(i, true);
+			}
+		}
+	}
+	return NULL;
+}
+#endif

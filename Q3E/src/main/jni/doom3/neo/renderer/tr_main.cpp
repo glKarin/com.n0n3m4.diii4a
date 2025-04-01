@@ -1257,7 +1257,7 @@ void R_RenderView(viewDef_t *parms)
 	// portal-to-screen scissor box calculations
 	R_SetupProjection();
 
-#ifdef _SHADOW_MAPPING
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
 	R_SetupFrontEndViewDefMVP();
 #endif
 

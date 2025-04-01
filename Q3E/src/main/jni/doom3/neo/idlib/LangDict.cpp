@@ -87,6 +87,58 @@ bool idLangDict::Load(const char *fileName, bool clear /* _D3XP */)
 		return false;
 	}
 
+#ifdef _WCHAR_LANG
+    bool utf8 = false;
+
+    utf8Encoding_t encoding;
+    idStr::IsValidUTF8( buffer, len, encoding );
+    if( encoding == UTF8_INVALID )
+    {
+        idLib::Warning( "Language file %s is not valid UTF-8 or plain ASCII.", fileName );
+    }
+    else if( encoding == UTF8_INVALID_BOM )
+    {
+        idLib::Warning( "Language file %s is marked as UTF-8 but has invalid encoding.", fileName );
+    }
+    else if( encoding == UTF8_ENCODED_NO_BOM )
+    {
+        idLib::Warning( "Language file %s has no byte order marker. Fix this or roll back to a version that has the marker.", fileName );
+    }
+    else if( encoding != UTF8_ENCODED_BOM && encoding != UTF8_PURE_ASCII )
+    {
+        idLib::Warning( "Language file %s has unknown utf8Encoding_t.", fileName );
+    }
+
+    if( encoding == UTF8_ENCODED_BOM )
+    {
+        utf8 = true;
+    }
+#if 0 // else always as ascii text
+    else if( encoding == UTF8_PURE_ASCII )
+    {
+        utf8 = false;
+    }
+    else
+    {
+        assert( false );	// this should have been handled in VerifyUTF8 with a FatalError
+        return false;
+    }
+#endif
+
+    if( utf8 )
+    {
+        idLib::common->Printf( " as UTF-8\n" );
+    }
+    else
+    {
+        idLib::common->Printf( " as ASCII\n" );
+    }
+
+    if(utf8)
+    {
+        return LoadUTF8((const byte* )buffer, len, fileName);
+    }
+#endif
 	src.LoadMemory(buffer, strlen(buffer), fileName);
 
 	if (!src.IsLoaded()) {
@@ -264,6 +316,11 @@ const char *idLangDict::AddString(const char *str)
 	// kv.key = va( "#str_%05i", id );
 #endif
 	kv.value = str;
+#ifdef _WCHAR_LANG
+    bool isUtf8 = idStr::IsValidUTF8(str, (int)strlen(str));
+    if(isUtf8)
+        kv.value.ConvertToUTF8();
+#endif
 	c = args.Append(kv);
 	assert(kv.key.Cmpn(STRTABLE_ID, STRTABLE_ID_LENGTH) == 0);
 	hash.Add(GetHashKey(kv.key), c);
@@ -300,6 +357,11 @@ void idLangDict::AddKeyVal(const char *key, const char *val)
 	idLangKeyValue kv;
 	kv.key = key;
 	kv.value = val;
+#ifdef _WCHAR_LANG
+    bool isUtf8 = idStr::IsValidUTF8(val, (int)strlen(val));
+    if(isUtf8)
+        kv.value.ConvertToUTF8();
+#endif
 	assert(kv.key.Cmpn(STRTABLE_ID, STRTABLE_ID_LENGTH) == 0);
 	hash.Add(GetHashKey(kv.key), args.Append(kv));
 }
@@ -397,3 +459,168 @@ int idLangDict::GetHashKey(const char *str) const
 
 	return hashKey;
 }
+
+#ifdef _WCHAR_LANG
+/*
+========================
+idLangDict::Load
+========================
+*/
+bool idLangDict::LoadUTF8( const byte* buffer, const int bufferLen, const char* name )
+{
+    if( buffer == NULL || bufferLen <= 0 )
+    {
+        // let whoever called us deal with the failure (so sys_lang can be reset)
+        return false;
+    }
+
+    idStr tempKey;
+    idStr tempVal;
+
+    int line = 0;
+    int numStrings = 0;
+
+    int i = 0;
+    while( i < bufferLen )
+    {
+        uint32_t c = buffer[i++];
+        if( c == '/' )    // comment, read until new line
+        {
+            while( i < bufferLen )
+            {
+                c = buffer[i++];
+                if( c == '\n' )
+                {
+                    line++;
+                    break;
+                }
+            }
+        }
+        else if( c == '}' )
+        {
+            break;
+        }
+        else if( c == '\n' )
+        {
+            line++;
+        }
+        else if( c == '\"' )
+        {
+            int keyStart = i;
+            int keyEnd = -1;
+            while( i < bufferLen )
+            {
+                c = buffer[i++];
+                if( c == '\"' )
+                {
+                    keyEnd = i - 1;
+                    break;
+                }
+            }
+            if( keyEnd < keyStart )
+            {
+                idLib::Error( "%s File ended while reading key at line %d", name, line );
+            }
+            tempKey.CopyRange( ( char* )buffer, keyStart, keyEnd );
+
+            int valStart = -1;
+            while( i < bufferLen )
+            {
+                c = buffer[i++];
+                if( c == '\"' )
+                {
+                    valStart = i;
+                    break;
+                }
+            }
+            if( valStart < 0 )
+            {
+                idLib::Error( "%s File ended while reading value at line %d", name, line );
+            }
+            int valEnd = -1;
+            tempVal.CapLength( 0 );
+            while( i < bufferLen )
+            {
+                c = idStr::UTF8Char( buffer, i );
+                if( c == '\"' )
+                {
+                    valEnd = i - 1;
+                    continue;
+                }
+                if( c == '\n' )
+                {
+                    line++;
+                    break;
+                }
+                if( c == '\r' )
+                {
+                    continue;
+                }
+                if( c == '\\' )
+                {
+                    c = idStr::UTF8Char( buffer, i );
+                    if( c == 'n' )
+                    {
+                        c = '\n';
+                    }
+                    else if( c == 't' )
+                    {
+                        c = '\t';
+                    }
+                    else if( c == '\"' )
+                    {
+                        c = '\"';
+                    }
+                    else if( c == '\\' )
+                    {
+                        c = '\\';
+                    }
+                    else
+                    {
+                        idLib::Warning( "Unknown escape sequence %x at line %d", c, line );
+                    }
+                }
+                tempVal.AppendUTF8Char( c );
+            }
+            if( valEnd < valStart )
+            {
+                idLib::Error( "%s File ended while reading value at line %d", name, line );
+            }
+#if 0
+            if( lang_maskLocalizedStrings.GetBool() && tempVal.Length() > 0 && tempKey.Find( "#font_" ) == -1 )
+            {
+                int len = tempVal.Length();
+                if( len > 0 )
+                {
+                    tempVal.Fill( 'W', len - 1 );
+                }
+                else
+                {
+                    tempVal.Empty();
+                }
+                tempVal.Append( 'X' );
+            }
+#endif
+            idLangKeyValue kv;
+            kv.key = tempKey;
+			if(kv.key.Cmpn("#font_", 6) != 0) {
+                kv.value = tempVal;
+                assert(kv.key.Cmpn(STRTABLE_ID, STRTABLE_ID_LENGTH) == 0);
+                hash.Add(GetHashKey(kv.key), args.Append(kv));
+                numStrings++;
+			}
+        }
+    }
+
+    idLib::common->Printf( "%i strings read\n", numStrings );
+
+    // get rid of any waste due to geometric list growth
+    //mem.PushHeap();
+#if 0
+    args.Condense();
+#endif
+    //mem.PopHeap();
+
+    return true;
+}
+#endif

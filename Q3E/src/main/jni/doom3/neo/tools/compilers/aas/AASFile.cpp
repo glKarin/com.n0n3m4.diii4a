@@ -1152,6 +1152,11 @@ bool idAASFileLocal::ParseAreas(idLexer &src)
 		area.numFaces = src.ParseInt();
 		area.cluster = src.ParseInt();
 		area.clusterAreaNum = src.ParseInt();
+        area.reach = NULL;
+        area.rev_reach = NULL;
+        area.bounds.Zero();
+        area.center.Zero();
+        area.travelFlags = 0;
 #ifdef _RAVEN // quake4 aas file
 // jmarshall - AAS 1.08 
 		area.numFeatures = src.ParseInt();

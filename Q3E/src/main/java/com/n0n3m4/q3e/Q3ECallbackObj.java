@@ -247,13 +247,13 @@ public class Q3ECallbackObj
         int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, 0);
         if(eventQueue == 1)
         {
-            Log.i(TAG, "Using native event queue");
-            eventEngine = new Q3EEventEngineNative();
+            Log.i(TAG, "Using java event queue");
+            eventEngine = new Q3EEventEngineJava();
         }
         else
         {
-            Log.i(TAG, "Using java event queue");
-            eventEngine = new Q3EEventEngineJava();
+            Log.i(TAG, "Using native event queue");
+            eventEngine = new Q3EEventEngineNative();
         }
     }
 

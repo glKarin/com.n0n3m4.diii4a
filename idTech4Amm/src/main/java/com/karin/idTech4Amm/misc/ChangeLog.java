@@ -70,6 +70,15 @@ public class ChangeLog
         final ChangeLog[] CHANGES = {
                 ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2025-03-11", 62,
+                        "Add `OpenJK` support, `" + TextHelper.GenLinkText("https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/", "STAR WARS™ Jedi Knight - Jedi Academy™") + "` game standalone directory named `openja`, `" + TextHelper.GenLinkText("https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/", "STAR WARS™ Jedi Knight II - Jedi Outcast™") + "` game standalone directory named `openjo`. More view in `" + TextHelper.GenLinkText("https://github.com/JACoders/OpenJK", "OpenJK") + "`.",
+                        "Update version to 5.1 on RealRTCW, support Survival mode. And version 5.0 is keeping until version 5.1 is stable.",
+                        "Fix audio playing when disable OpenAL on Quake3/ETW/RTCW/RealRTCW.",
+                        "Add Vulkan renderer backend on Quake2.",
+                        "Fix create render context on GZDOOM, it will use OpenGL ES if Vulkan initialization fail.",
+                        "Add `Open menu` button at end of `General` tab on launcher."
+                ),
+
                 ChangeLog.Create("2025-02-27", 61,
                         "Add `FTEQW` support, game standalone directory named `fteqw`, support `" + TextHelper.GenLinkText("https://store.steampowered.com/app/9060/HeXen_II/", "HeXen II") + "`, `Half-Life` " + TextHelper.GenLinkText("https://github.com/eukara/freehl", "FreeHL") + ", `Counter Striker 1.5` " + TextHelper.GenLinkText("https://github.com/eukara/freecs", "FreeCS") + ". More view in `" + TextHelper.GenLinkText("https://www.fteqw.org", "FTEQW") + "`.",
                         "DOOM 3 BFG add Vulkan renderer backend.",

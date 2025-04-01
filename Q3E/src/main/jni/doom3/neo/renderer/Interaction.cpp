@@ -39,6 +39,14 @@ idInteraction implementation
 ===========================================================================
 */
 
+#ifdef _D3BFG_CULLING
+ID_INLINE bool R_CullModelBoundsToLight(const idRenderLightLocal * light, const idBounds & localBounds, const idRenderMatrix & modelRenderMatrix) {
+    idRenderMatrix modelLightProject;
+    idRenderMatrix::Multiply(ID_RENDER_MATRIX light->baseLightProject, modelRenderMatrix, modelLightProject);
+    return idRenderMatrix::CullBoundsToMVP(modelLightProject, localBounds, true);
+}
+#endif
+
 // FIXME: use private allocator for srfCullInfo_t
 
 /*
@@ -54,6 +62,41 @@ edge silhouettes.
 */
 void R_CalcInteractionFacing(const idRenderEntityLocal *ent, const srfTriangles_t *tri, const idRenderLightLocal *light, srfCullInfo_t &cullInfo)
 {
+#ifdef _D3BFG_CULLING
+    if(harm_r_occlusionCulling.GetBool())
+    {
+        if( cullInfo.facing != NULL )
+        {
+            return;
+        }
+
+        idVec3 localLightOrigin;
+        R_GlobalPointToLocal( ent->modelMatrix, light->globalLightOrigin, localLightOrigin );
+
+        const int numFaces = tri->numIndexes / 3;
+        cullInfo.facing = ( byte* ) R_StaticAlloc( ( numFaces + 1 ) * sizeof( cullInfo.facing[0] ) );
+
+        // exact geometric cull against face
+        for( int i = 0, face = 0; i < tri->numIndexes; i += 3, face++ )
+        {
+            const idDrawVert& v0 = tri->verts[tri->indexes[i + 0]];
+            const idDrawVert& v1 = tri->verts[tri->indexes[i + 1]];
+            const idDrawVert& v2 = tri->verts[tri->indexes[i + 2]];
+
+            //const idPlane plane( v0.xyz, v1.xyz, v2.xyz );
+            idPlane plane;
+            plane.FromPoints( v0.xyz, v1.xyz, v2.xyz, false );
+            const float d = plane.Distance( localLightOrigin );
+
+            cullInfo.facing[face] = ( d >= 0.0f );
+        }
+        cullInfo.facing[numFaces] = 1;	// for dangling edges to reference
+
+        // return;
+    }
+    else
+    {
+#endif
 	idVec3 localLightOrigin;
 
 	if (cullInfo.facing != NULL) {
@@ -78,6 +121,9 @@ void R_CalcInteractionFacing(const idRenderEntityLocal *ent, const srfTriangles_
 	SIMDProcessor->CmpGE(cullInfo.facing, planeSide, 0.0f, numFaces);
 
 	cullInfo.facing[ numFaces ] = 1;	// for dangling edges to reference
+#ifdef _D3BFG_CULLING
+    }
+#endif
 }
 
 /*
@@ -92,6 +138,60 @@ vertex is clearly inside, the entire triangle will be accepted.
 */
 void R_CalcInteractionCullBits(const idRenderEntityLocal *ent, const srfTriangles_t *tri, const idRenderLightLocal *light, srfCullInfo_t &cullInfo)
 {
+#ifdef _D3BFG_CULLING
+    if(harm_r_occlusionCulling.GetBool())
+    {
+        if( cullInfo.cullBits != NULL )
+        {
+            return;
+        }
+
+        idPlane frustumPlanes[6];
+        idRenderMatrix::GetFrustumPlanes( frustumPlanes, ID_RENDER_MATRIX light->baseLightProject, true, true );
+
+        int frontBits = 0;
+
+        // cull the triangle surface bounding box
+        for( int i = 0; i < 6; i++ )
+        {
+            R_GlobalPlaneToLocal( ent->modelMatrix, frustumPlanes[i], cullInfo.localClipPlanes[i] );
+
+            // get front bits for the whole surface
+            if( tri->bounds.PlaneDistance( cullInfo.localClipPlanes[i] ) >= LIGHT_CLIP_EPSILON )
+            {
+                frontBits |= 1 << i;
+            }
+        }
+
+        // if the surface is completely inside the light frustum
+        if( frontBits == ( ( 1 << 6 ) - 1 ) )
+        {
+            cullInfo.cullBits = LIGHT_CULL_ALL_FRONT;
+            return;
+        }
+
+        cullInfo.cullBits = ( byte* ) R_StaticAlloc( tri->numVerts * sizeof( cullInfo.cullBits[0] ) );
+        memset( cullInfo.cullBits, 0, tri->numVerts * sizeof( cullInfo.cullBits[0] ) );
+
+        for( int i = 0; i < 6; i++ )
+        {
+            // if completely infront of this clipping plane
+            if( frontBits & ( 1 << i ) )
+            {
+                continue;
+            }
+            for( int j = 0; j < tri->numVerts; j++ )
+            {
+                float d = cullInfo.localClipPlanes[i].Distance( tri->verts[j].xyz );
+                cullInfo.cullBits[j] |= ( d < LIGHT_CLIP_EPSILON ) << i;
+            }
+        }
+
+        // return;
+    }
+    else
+    {
+#endif
 	int i, frontBits;
 
 	if (cullInfo.cullBits != NULL) {
@@ -131,6 +231,9 @@ void R_CalcInteractionCullBits(const idRenderEntityLocal *ent, const srfTriangle
 		SIMDProcessor->Dot(planeSide, cullInfo.localClipPlanes[i], tri->verts, tri->numVerts);
 		SIMDProcessor->CmpLT(cullInfo.cullBits, i, planeSide, LIGHT_CLIP_EPSILON, tri->numVerts);
 	}
+#ifdef _D3BFG_CULLING
+    }
+#endif
 }
 
 /*
@@ -896,11 +999,27 @@ void idInteraction::CreateInteraction(const idRenderModel *model)
 
 	bounds = model->Bounds(&entityDef->parms);
 
+#ifdef _D3BFG_CULLING
+    if(harm_r_occlusionCulling.GetBool())
+    {
+        // if it doesn't contact the light frustum, none of the surfaces will
+        if( R_CullModelBoundsToLight( lightDef, bounds, ID_RENDER_MATRIX entityDef->modelRenderMatrix ) )
+        {
+            MakeEmpty();
+            return;
+        }
+    }
+    else
+    {
+#endif
 	// if it doesn't contact the light frustum, none of the surfaces will
 	if (R_CullLocalBox(bounds, entityDef->modelMatrix, 6, lightDef->frustum)) {
 		MakeEmpty();
 		return;
 	}
+#ifdef _D3BFG_CULLING
+    }
+#endif
 
 	// use the turbo shadow path
 	shadowGen_t shadowGen = SG_DYNAMIC;
@@ -946,10 +1065,24 @@ void idInteraction::CreateInteraction(const idRenderModel *model)
 			continue;
 		}
 
+#ifdef _D3BFG_CULLING
+        if(harm_r_occlusionCulling.GetBool())
+        {
+            // try to cull each surface
+            if ( R_CullModelBoundsToLight( lightDef, tri->bounds, ID_RENDER_MATRIX entityDef->modelRenderMatrix ) ) {
+                continue;
+            }
+        }
+        else
+        {
+#endif
 		// try to cull each surface
 		if (R_CullLocalBox(tri->bounds, entityDef->modelMatrix, 6, lightDef->frustum)) {
 			continue;
 		}
+#ifdef _D3BFG_CULLING
+        }
+#endif
 
 		surfaceInteraction_t *sint = &surfaces[c];
 
@@ -1172,6 +1305,41 @@ void idInteraction::AddActiveInteraction(void)
 	if (shadowScissor.IsEmpty()) {
 		return;
 	}
+
+#ifdef _D3BFG_CULLING
+	if(harm_r_occlusionCulling.GetBool())
+	{
+		// try to cull by loose shadow bounds
+		
+		// should we use the shadow bounds from pre-calculated interactions?
+		idBounds shadowBounds;
+		R_ShadowBounds( entityDef->globalReferenceBounds, lightDef->globalLightBounds, lightDef->globalLightOrigin, shadowBounds );
+		// duzenko: cull away if shadow is surely out of viewport
+		// note: a more precise version of such check is done later inside CullInteractionByViewFrustum
+
+		// this test is pointless if we knew the light was completely contained
+		// in the view frustum, but the entity would also be directly visible in most
+		// of those cases.
+
+		// this doesn't say that the shadow can't effect anything, only that it can't
+		// effect anything in the view, so we shouldn't set up a view entity
+		if ( idRenderMatrix::CullBoundsToMVP( tr.viewDef->worldSpace.mvp, shadowBounds ) )
+			return;
+
+		idScreenRect shadowScissor2 = vLight->scissorRect;
+		if(!shadowScissor2.IsEmpty())
+		{
+			// duzenko: intersect light scissor with shadow bounds
+			idBounds shadowProjectionBounds;
+			if ( !tr.viewDef->viewFrustum.ProjectionBounds( shadowBounds, shadowProjectionBounds ) )
+				return;
+			idScreenRect shadowRect = R_ScreenRectFromViewFrustumBounds( shadowProjectionBounds );
+			shadowScissor2.IntersectWithZ(shadowRect);
+			if ( shadowScissor2.IsEmptyWithZ() )
+				return;
+		}
+	}
+#endif
 
 	// We will need the dynamic surface created to make interactions, even if the
 	// model itself wasn't visible.  This just returns a cached value after it

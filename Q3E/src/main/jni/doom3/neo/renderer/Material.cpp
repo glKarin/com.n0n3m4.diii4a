@@ -119,7 +119,7 @@ void idMaterial::CommonInit()
 	refCount = 0;
 	portalSky = false;
 #ifdef _RAVEN // quake4 for trace
-	materialType = 0;
+	materialType = NULL;
 #endif
 #ifdef _HUMANHEAD
 	subviewClass = SC_MIRROR;
@@ -2432,7 +2432,7 @@ void idMaterial::ParseMaterial(idLexer &src)
         else if (!token.Icmp("materialType"))
         {
             src.ReadToken(&token);
-            materialType = declManager->FindMaterialType(token);
+            materialType = declManager->FindMaterialType(token, false);
             continue;
         }
 		else if (!token.Icmp("portalDistanceNear")) {

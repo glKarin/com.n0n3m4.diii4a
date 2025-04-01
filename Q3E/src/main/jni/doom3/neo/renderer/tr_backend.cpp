@@ -75,9 +75,13 @@ void RB_SetDefaultGLState(void)
 	qglEnable(GL_CULL_FACE);
 #if !defined(GL_ES_VERSION_2_0)
 	qglDisable(GL_LIGHTING);
+    qglDisable( GL_LINE_STIPPLE );
 #endif
 	qglDisable(GL_STENCIL_TEST);
 
+#if !defined(GL_ES_VERSION_2_0)
+    qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+#endif
 	qglDepthMask(GL_TRUE);
 	qglDepthFunc(GL_ALWAYS);
 
@@ -94,6 +98,13 @@ void RB_SetDefaultGLState(void)
 	for (i = glConfig.maxTextureUnits - 1 ; i >= 0 ; i--) {
 		GL_SelectTexture(i);
 
+        // object linear texgen is our default
+        qglTexGenf( GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR );
+        qglTexGenf( GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR );
+        qglTexGenf( GL_R, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR );
+        qglTexGenf( GL_Q, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR );
+
+        GL_TexEnv( GL_MODULATE );
 		qglDisable(GL_TEXTURE_2D);
 
 		if (glConfig.texture3DAvailable) {
@@ -113,6 +124,7 @@ void RB_SetDefaultGLState(void)
 RB_LogComment
 ====================
 */
+#ifdef _RENDERER_LOG_COMMENT
 void RB_LogComment(const char *comment, ...)
 {
 	va_list marker;
@@ -126,6 +138,7 @@ void RB_LogComment(const char *comment, ...)
 	vfprintf(tr.logFile, comment, marker);
 	va_end(marker);
 }
+#endif
 
 
 //=============================================================================

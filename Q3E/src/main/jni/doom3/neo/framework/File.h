@@ -273,6 +273,7 @@ class idFile_InZip : public idFile
 		idStr					name;			// name of the file in the pak
 		idStr					fullPath;		// full file path including pak file name
 #if !defined(_MINIZ)
+        //typedef unsigned long fileInPack_pos_t;
 		int						zipFilePos;		// zip file info position in pak
 #else
 	#if defined(__ANDROID__) && __ANDROID_API__ < 24

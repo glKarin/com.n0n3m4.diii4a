@@ -9,8 +9,8 @@ import com.karin.idTech4Amm.misc.TextHelper;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 62;
-    public static final String CONST_RELEASE = "2025-03-11"; // 02-12
+    public static final int    CONST_UPDATE_RELEASE = 63;
+    public static final String CONST_RELEASE = "2025-04-01"; // 02-12
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -24,16 +24,20 @@ public final class Constants
     public static final String CONST_FDROID = "https://f-droid.org/packages/com.karin.idTech4Amm/";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
-    public static final String CONST_CODE_ALIAS = "Lin Daiyu"; // Natasha Verena Caitlyn
+    public static final String CONST_CODE_ALIAS = "Lin Daiyu"; // Natasha; Verena; Caitlyn
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add `OpenJK` support, `" + TextHelper.GenLinkText("https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/", "STAR WARS™ Jedi Knight - Jedi Academy™") + "` game standalone directory named `openja`, `" + TextHelper.GenLinkText("https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/", "STAR WARS™ Jedi Knight II - Jedi Outcast™") + "` game standalone directory named `openjo`. More view in `" + TextHelper.GenLinkText("https://github.com/JACoders/OpenJK", "OpenJK") + "`.",
-            "Update version to 5.1 on RealRTCW, support Survival mode. And version 5.0 is keeping until version 5.1 is stable.",
-            "Fix audio playing when disable OpenAL on Quake3/ETW/RTCW/RealRTCW.",
-            "Add Vulkan renderer backend on Quake2.",
-            "Fix create render context on GZDOOM, it will use OpenGL ES if Vulkan initialization fail.",
-            "Add `Open menu` button at end of `General` tab on launcher.",
+            "The Dark Mod update to version 2.13. More view in `" + TextHelper.GenLinkText("https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/", "The Dark Mod(2.13)") + "`",
+            "Add wide-character language support and DOOM3-BFG new fonts support on DOOM 3/Quake 4/Prey(2006). Only support UTF-8(BOM) encoding translation file.",
+            "Add Chinese translation patch on DOOM3. First extract `DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)`, then add ` +set sys_lang chinese` to command line.",
+            "Fix some errors and light gem(so make cvar `tdm_lg_weak` value back to 0) on The Dark Mod(2.12 and 2.13).",
+            "Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).",
+            "Fix some lights missing on ceil in map game/airdefense1 on Quake 4.",
+            "Add game portal support on Prey(2006).",
+            "Fix wrong resurrection position from deathwalk state when load game after restart application on Prey(2006).",
+            "Support game data folder creation with `Game path tips` button on launcher `General` tab.",
+            "[Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) will be removed on next release in the future!",
         };
 	};
 

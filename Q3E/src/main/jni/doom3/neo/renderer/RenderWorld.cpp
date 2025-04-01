@@ -162,6 +162,9 @@ idRenderWorldLocal::idRenderWorldLocal()
 	interactionTableWidth = 0;
 	interactionTableHeight = 0;
 #ifdef _HUMANHEAD
+#if GAMEPORTAL_PVS
+	numMapInterAreaPortals = 0;
+#endif
 #if DEATHWALK_AUTOLOAD
 	numAppendPortalAreas = 0;
 #endif
@@ -966,7 +969,6 @@ int idRenderWorldLocal::PointInArea(const idVec3 &point) const
 		} else {
 			nodeNum = node->children[1];
 		}
-		//LOGI("NNN %d | %s ^ %s = %f | %d", nodeNum, node->plane.ToString(), point.ToString(), d, nodeNum < 0 ? -1 - nodeNum : -1)
 
 		if (nodeNum == 0) {
 			return -1;		// in solid
@@ -1052,7 +1054,14 @@ int idRenderWorldLocal::BoundsInAreas(const idBounds &bounds, int *areas, int ma
 	int numAreas = 0;
 
 	assert(areas);
-	assert(bounds[0][0] <= bounds[1][0] && bounds[0][1] <= bounds[1][1] && bounds[0][2] <= bounds[1][2]);
+	//assert(bounds[0][0] <= bounds[1][0] && bounds[0][1] <= bounds[1][1] && bounds[0][2] <= bounds[1][2]); //k 2025
+    // DG: apparently this happens sometimes.. handle it more gracefully than an assertion.
+    if ( bounds[0][0] > bounds[1][0] || bounds[0][1] > bounds[1][1] || bounds[0][2] > bounds[1][2] )
+    {
+        common->Warning( "idRenderWorld::BoundsInAreas() called with invalid bounds: { { %f %f %f }, { %f %f %f } } !",
+                         bounds[0][0], bounds[0][1], bounds[0][2], bounds[1][0], bounds[1][1], bounds[1][2] );
+        return numAreas;
+    }
 	assert(bounds[1][0] - bounds[0][0] < 1e4f && bounds[1][1] - bounds[0][1] < 1e4f && bounds[1][2] - bounds[0][2] < 1e4f);
 
 	if (!areaNodes) {
@@ -1213,7 +1222,7 @@ bool idRenderWorldLocal::ModelTrace(modelTrace_t &trace, qhandle_t entityHandle,
 
 	trace.fraction = 1.0f;
 #ifdef _RAVEN // quake4 trace
-	trace.materialType = 0;
+	trace.materialType = NULL;
 	trace.material = NULL;
 #endif
 
@@ -1879,6 +1888,9 @@ void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRender
 
 #else
 
+#ifdef _RAVEN //karin: restore points num on plane. fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+	int pointsInPlane = 0;
+#endif
 	for (i = 0 ; i < numPoints ; i++) {
 		float d;
 
@@ -1889,6 +1901,10 @@ void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRender
 		} else if (d <= 0.0f) {
 			back = true;
 		}
+#ifdef _RAVEN //karin: fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+		if(d == 0.0f)
+			pointsInPlane++;
+#endif
 
 		if (back && front) {
 			break;
@@ -1897,6 +1913,10 @@ void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRender
 
 #endif
 
+#ifdef _RAVEN //karin: if all points on plane, find front and back. fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+	if(/*(front || back) && */front != back && pointsInPlane == numPoints)
+		front = back = true;
+#endif
 	if (front) {
 		nodeNum = node->children[0];
 
@@ -2547,4 +2567,111 @@ bool idRenderWorldLocal::EffectDefHasSound(const renderEffect_s* reffect) {
 	return bse->CheckDefForSound(reffect); 
 }
 
+#endif
+
+#ifdef _D3BFG_CULLING
+#ifdef _RAVEN
+int R_CullFrustumCornersToPlane( const frustumCorners_t& corners, const idPlane& plane );
+#endif
+/*
+==================
+idRenderWorldLocal::PushFrustumIntoTree_r
+
+Used for both light volumes and model volumes.
+
+This does not clip the points by the planes, so some slop
+occurs.
+
+tr.viewCount should be bumped before calling, allowing it
+to prevent double checking areas.
+
+We might alternatively choose to do this with an area flow.
+==================
+*/
+void idRenderWorldLocal::PushFrustumIntoTree_r( idRenderEntityLocal* def, idRenderLightLocal* light,
+                                                const frustumCorners_t& corners, int nodeNum )
+{
+    if( nodeNum < 0 )
+    {
+        int areaNum = -1 - nodeNum;
+        portalArea_t* area = &portalAreas[ areaNum ];
+        if( area->viewCount == tr.viewCount )
+        {
+            return;	// already added a reference here
+        }
+        area->viewCount = tr.viewCount;
+
+        if( def != NULL )
+        {
+            AddEntityRefToArea( def, area );
+        }
+        if( light != NULL )
+        {
+            AddLightRefToArea( light, area );
+        }
+
+        return;
+    }
+
+    areaNode_t* node = areaNodes + nodeNum;
+
+    // if we know that all possible children nodes only touch an area
+    // we have already marked, we can early out
+    if( node->commonChildrenArea != CHILDREN_HAVE_MULTIPLE_AREAS && r_useNodeCommonChildren.GetBool() )
+    {
+        // note that we do NOT try to set a reference in this area
+        // yet, because the test volume may yet wind up being in the
+        // solid part, which would cause bounds slightly poked into
+        // a wall to show up in the next room
+        if( portalAreas[ node->commonChildrenArea ].viewCount == tr.viewCount )
+        {
+            return;
+        }
+    }
+
+    // exact check all the corners against the node plane
+#ifdef _RAVEN
+    //karin: fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+    int cull = R_CullFrustumCornersToPlane( corners, node->plane );
+#else
+    frustumCull_t cull = idRenderMatrix::CullFrustumCornersToPlane( corners, node->plane );
+#endif
+
+    if( cull != FRUSTUM_CULL_BACK )
+    {
+        nodeNum = node->children[0];
+        if( nodeNum != 0 )  	// 0 = solid
+        {
+            PushFrustumIntoTree_r( def, light, corners, nodeNum );
+        }
+    }
+
+    if( cull != FRUSTUM_CULL_FRONT )
+    {
+        nodeNum = node->children[1];
+        if( nodeNum != 0 )  	// 0 = solid
+        {
+            PushFrustumIntoTree_r( def, light, corners, nodeNum );
+        }
+    }
+}
+
+/*
+==============
+idRenderWorldLocal::PushFrustumIntoTree
+==============
+*/
+void idRenderWorldLocal::PushFrustumIntoTree( idRenderEntityLocal* def, idRenderLightLocal* light, const idRenderMatrix& frustumTransform, const idBounds& frustumBounds )
+{
+    if( areaNodes == NULL )
+    {
+        return;
+    }
+
+    // calculate the corners of the frustum in word space
+    ALIGNTYPE16 frustumCorners_t corners;
+    idRenderMatrix::GetFrustumCorners( corners, frustumTransform, frustumBounds );
+
+    PushFrustumIntoTree_r( def, light, corners, 0 );
+}
 #endif

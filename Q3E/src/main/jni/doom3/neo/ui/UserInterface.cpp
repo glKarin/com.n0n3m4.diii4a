@@ -410,7 +410,7 @@ const char *idUserInterfaceLocal::HandleEvent(const sysEvent_t *event, int _time
 	}
 
 	if (event->evType == SE_MOUSE) {
-		extern idCVar r_scaleMenusTo43; // DG: for the "scale menus to 4:3" hack
+		// DG: for the "scale menus to 4:3" hack
 		if(r_scaleMenusTo43.GetBool() && (!desktop || (desktop->GetFlags() & WIN_MENUGUI))) {
 			// DG: this is a fullscreen GUI, scale the mousedelta added to cursorX/Y
 			//     by 640/w, because the GUI pretends that everything is 640x480

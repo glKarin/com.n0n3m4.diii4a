@@ -155,6 +155,17 @@ typedef enum {
 	MEASURE_BANDWIDTH
 } Measure_t;
 
+#ifdef _WCHAR_LANG
+enum utf8Encoding_t
+{
+    UTF8_PURE_ASCII,		// no characters with values > 127
+    UTF8_ENCODED_BOM,		// characters > 128 encoded with UTF8, but no byte-order-marker at the beginning
+    UTF8_ENCODED_NO_BOM,	// characters > 128 encoded with UTF8, with a byte-order-marker at the beginning
+    UTF8_INVALID,			// has values > 127 but isn't valid UTF8
+    UTF8_INVALID_BOM		// has a byte-order-marker at the beginning, but isn't valuid UTF8 -- it's messed up
+};
+#endif
+
 class idStr
 {
 
@@ -386,6 +397,40 @@ class idStr
 		int					DynamicMemoryUsed() const;
 		static idStr		FormatNumber(int number);
 
+#ifdef _WCHAR_LANG
+        ID_INLINE int			UTF8Length() const;
+        ID_INLINE uint32_t		UTF8Char( int& idx ) const;
+        static int				UTF8Length( const byte* s );
+        static ID_INLINE uint32_t UTF8Char( const char* s, int& idx );
+        static uint32_t			UTF8Char( const byte* s, int& idx );
+        void					AppendUTF8Char( uint32_t c );
+        ID_INLINE void			ConvertToUTF8();
+        static bool				IsValidUTF8( const uint8_t* s, const int maxLen, utf8Encoding_t& encoding );
+        static ID_INLINE bool	IsValidUTF8( const char* s, const int maxLen, utf8Encoding_t& encoding )
+        {
+            return IsValidUTF8( ( const uint8_t* )s, maxLen, encoding );
+        }
+        static ID_INLINE bool	IsValidUTF8( const uint8_t* s, const int maxLen );
+        static ID_INLINE bool	IsValidUTF8( const char* s, const int maxLen )
+        {
+            return IsValidUTF8( ( const uint8_t* )s, maxLen );
+        }
+        ID_INLINE void		    CopyRange( const char* text, int start, int end );
+
+		// faster if assume is ASCII or UTF8
+        static ID_INLINE bool	IsPureASCII( const uint8_t* s, const int maxLen ) {
+			for( int i = 0; s[ i ] != '\0' && i < maxLen; i++ )
+			{
+				if( s[i] >= 0x80 )
+					return false;
+			}
+			return true;
+		}
+        static ID_INLINE bool	IsPureASCII( const char* s, const int maxLen ) {
+            return IsPureASCII( ( const uint8_t* )s, maxLen );
+        }
+#endif
+
 	protected:
 		int					len;
 		char 				*data;
@@ -611,6 +656,11 @@ ID_INLINE char &idStr::operator[](int index)
 
 ID_INLINE void idStr::operator=(const idStr &text)
 {
+    if (&text == this)
+    {
+        return;
+    }
+
 	int l;
 
 	l = text.Length();
@@ -1279,6 +1329,88 @@ ID_INLINE int idStr::DynamicMemoryUsed() const
 {
 	return (data == baseBuffer) ? 0 : alloced;
 }
+
+#ifdef _WCHAR_LANG
+/*
+========================
+idStr::UTF8Length
+========================
+*/
+ID_INLINE int idStr::UTF8Length() const
+{
+    return UTF8Length( ( byte* )data );
+}
+
+/*
+========================
+idStr::UTF8Char
+========================
+*/
+ID_INLINE uint32_t idStr::UTF8Char( int& idx ) const
+{
+    return UTF8Char( ( const byte* )data, idx );
+}
+
+/*
+========================
+idStr::ConvertToUTF8
+========================
+*/
+ID_INLINE void idStr::ConvertToUTF8()
+{
+    idStr temp( *this );
+    Clear();
+    for( int index = 0; index < temp.Length(); ++index )
+    {
+        AppendUTF8Char( temp[index] );
+    }
+}
+
+/*
+========================
+idStr::UTF8Char
+========================
+*/
+ID_INLINE uint32_t idStr::UTF8Char( const char* s, int& idx )
+{
+    return UTF8Char( ( byte* )s, idx );
+}
+
+/*
+========================
+idStr::IsValidUTF8
+========================
+*/
+ID_INLINE bool idStr::IsValidUTF8( const uint8_t* s, const int maxLen )
+{
+    utf8Encoding_t encoding;
+    return IsValidUTF8( s, maxLen, encoding );
+}
+
+/*
+========================
+idStr::CopyRange
+========================
+*/
+ID_INLINE void idStr::CopyRange( const char* text, int start, int end )
+{
+    int l = end - start;
+    if( l < 0 )
+    {
+        l = 0;
+    }
+
+    EnsureAlloced( l + 1 );
+
+    for( int i = 0; i < l; i++ )
+    {
+        data[ i ] = text[ start + i ];
+    }
+
+    data[ l ] = '\0';
+    len = l;
+}
+#endif
 
 #ifdef _RAVEN
 // RAVEN BEGIN

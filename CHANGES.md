@@ -2,6 +2,21 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan63 (2025-04-01)
+
+* The Dark Mod update to version 2.13. More view in [The Dark Mod(2.13)](https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/).
+* Add wide-character language support and DOOM3-BFG new fonts support on DOOM 3/Quake 4/Prey(2006). Only support UTF-8(BOM) encoding translation file.
+* Add Chinese translation patch on DOOM3. First extract `DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)`, then add ` +set sys_lang chinese` to command line.
+* Fix some errors and light gem(so make cvar `tdm_lg_weak` value back to 0) on The Dark Mod(2.12 and 2.13).
+* Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).
+* Fix some lights missing on ceil in map game/airdefense1 on Quake 4.
+* Add game portal support on Prey(2006).
+* Fix wrong resurrection position from deathwalk state when load game after restart application on Prey(2006).
+* Support game data folder creation with `Game path tips` button on launcher `General` tab.
+* [Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) will be removed on next release in the future!
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan62 (2025-03-11)
 
 * Add `OpenJK` support, [STAR WARS™ Jedi Knight - Jedi Academy™](https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/) game standalone directory named `openja`, [STAR WARS™ Jedi Knight II - Jedi Outcast™](https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/) game standalone directory named `openjo`. More view in [OpenJK](https://github.com/JACoders/OpenJK).

@@ -369,7 +369,7 @@ void idParser::Error(const char *str, ...) const
 	va_end(ap);
 
 	if (idParser::scriptstack) {
-		idParser::scriptstack->Error(text);
+		idParser::scriptstack->Error("%s", text);
 	}
 }
 
@@ -388,7 +388,7 @@ void idParser::Warning(const char *str, ...) const
 	va_end(ap);
 
 	if (idParser::scriptstack) {
-		idParser::scriptstack->Warning(text);
+		idParser::scriptstack->Warning("%s", text);
 	}
 }
 
@@ -842,11 +842,13 @@ int idParser::ExpandBuiltinDefine(idToken *deftoken, define_t *define, idToken *
 		}
 		case BUILTIN_STDC: {
 			idParser::Warning("__STDC__ not supported\n");
+            delete token; // DG: we probably shouldn't leak it, right?
 			*firsttoken = NULL;
 			*lasttoken = NULL;
 			break;
 		}
 		default: {
+            delete token; // DG: we probably shouldn't leak it, right?
 			*firsttoken = NULL;
 			*lasttoken = NULL;
 			break;
@@ -3627,7 +3629,7 @@ const char *idParser::GetPunctuationFromId(int id)
 		}
 	}
 
-	return "unkown punctuation";
+	return "unknown punctuation";
 }
 
 /*

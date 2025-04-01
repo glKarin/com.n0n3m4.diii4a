@@ -64,12 +64,12 @@ class idConsoleLocal : public idConsole
 		void				Dump(const char *toFile);
 		void				Clear();
 
+        virtual void		SaveHistory();
+        virtual void		LoadHistory();
+
 		//============================
 
 		const idMaterial 	*charSetShader;
-
-		virtual void		SaveHistory();
-		virtual void		LoadHistory();
 
 	private:
 		void				KeyDownEvent(int key);
@@ -285,7 +285,7 @@ float SCR_DrawAsyncStats(float y)
 
 		idStr msg;
 		idAsyncNetwork::server.GetAsyncStatsAvgMsg(msg);
-		SCR_DrawTextRightAlign(y, msg.c_str());
+		SCR_DrawTextRightAlign(y, "%s", msg.c_str());
 
 	} else if (idAsyncNetwork::client.IsActive()) {
 

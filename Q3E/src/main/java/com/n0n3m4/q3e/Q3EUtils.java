@@ -40,6 +40,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -229,6 +230,12 @@ public class Q3EUtils
             }
         }
         return safeInsetBottom;
+    }
+
+    public static boolean ActiveIsInvert(Activity activity)
+    {
+        int rotation = activity.getDisplay().getRotation();
+        return (rotation == Surface.ROTATION_270 || rotation == Surface.ROTATION_180);
     }
 
     public static int GetStatusBarHeight(Activity activity)

@@ -1420,7 +1420,7 @@ void idPlayer::SetWeapon( int weaponIndex ) {
 	}
 #ifdef _MOD_VIEW_BODY
 	if(viewBody)
-		viewBody->UpdateWeapon();
+		viewBody->UpdateBody();
 #endif
 }
  

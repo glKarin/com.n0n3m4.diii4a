@@ -211,6 +211,9 @@ void idViewBody::Restore( idRestoreGame *savefile ) {
 	savefile->ReadBool( allChannel );
 
 	animChannel = allChannel ? ANIMCHANNEL_ALL : ANIMCHANNEL_LEGS;
+
+    //2025: make visible when load game
+    UpdateBody();
 }
 
 /*
@@ -452,10 +455,18 @@ int idViewBody::GetBodyAnim( const char *animname ) {
 
 	if ( owner->animPrefix.Length() ) {
 		temp = va( "%s_%s", owner->animPrefix.c_str(), animname );
+        idStr str = spawnArgs.GetString ( va("anim %s", temp ), temp );
+        anim = animator.GetAnim( str.c_str() );
+        if ( anim ) {
+            return anim;
+        }
+        else if(str.Cmp(temp) != 0) // otherwise get default anim
+        {
 		anim = animator.GetAnim( temp );
 		if ( anim ) {
 			return anim;
 		}
+        }
 	}
 
 	anim = animator.GetAnim( animname );
@@ -465,10 +476,10 @@ int idViewBody::GetBodyAnim( const char *animname ) {
 
 /*
 =====================
-idViewBody::UpdateWeapon
+idViewBody::UpdateBody
 =====================
 */
-void idViewBody::UpdateWeapon(void)
+void idViewBody::UpdateBody(void)
 {
 	if ( IsLegsIdle ( false ) )
 		SetState ( "Legs_Idle", 0 );

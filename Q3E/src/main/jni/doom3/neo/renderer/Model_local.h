@@ -100,32 +100,32 @@ class idRenderModelStatic : public idRenderModel
 		struct aseModel_s 			*ConvertLWOToASE(const struct st_lwObject *obj, const char *fileName);
 
 #ifdef _MODEL_OBJ
-	bool						LoadOBJ( const char* fileName );
-	bool						ConvertOBJToModelSurfaces( const struct objModel_t* obj );
+        bool						LoadOBJ( const char* fileName );
+        bool						ConvertOBJToModelSurfaces( const struct objModel_t* obj );
 #endif
 #ifdef _MODEL_DAE
-	bool						LoadDAE( const char* fileName );
-	bool						ConvertDAEToModelSurfaces( const struct ColladaParser* obj );
+        bool						LoadDAE( const char* fileName );
+        bool						ConvertDAEToModelSurfaces( const struct ColladaParser* obj );
 #endif
 
 		bool						DeleteSurfaceWithId(int id);
 		void						DeleteSurfacesWithNegativeId(void);
 		bool						FindSurfaceWithId(int id, int &surfaceNum);
 #ifdef _RAVEN //k: for ShowSurface/HideSurface, static model using surfaces index as mask: 1 << index, name is shader material name
-		virtual int GetSurfaceMask(const char *name) const;
+		virtual int                 GetSurfaceMask(const char *name) const;
 		virtual idRenderModel *		InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask/* = ~SURF_COLLISION */ ) {
 			(void)surfMask;
 			return InstantiateDynamicModel(ent, view, cachedModel);
 		}
 
-		bool sky;
+		bool                        sky;
 #endif
 #ifdef _HUMANHEAD
-	virtual void				IntersectBounds( const idBounds &bounds, float displacement ) { }
+	    virtual void				IntersectBounds( const idBounds &bounds, float displacement ) { }
 
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-	bool						IsGameUpdatedModel(void) { return bIsGUM; }
-	void					SetGameUpdatedModel(bool gum) { bIsGUM = gum; }
+        bool						IsGameUpdatedModel(void) { return bIsGUM; }
+        void					    SetGameUpdatedModel(bool gum) { bIsGUM = gum; }
 #endif //HUMANHEAD END
 #endif
 
@@ -154,7 +154,7 @@ class idRenderModelStatic : public idRenderModel
 		static idCVar				r_slopNormal;			// merge normals that dot less than this
 #ifdef _HUMANHEAD
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-	bool						bIsGUM;
+	    bool						bIsGUM;
 #endif //HUMANHEAD END
 #endif
 };
@@ -217,11 +217,11 @@ class idRenderModelMD5 : public idRenderModelStatic
 		virtual const idJointQuat 	*GetDefaultPose(void) const;
 		virtual int					NearestJoint(int surfaceNum, int a, int b, int c) const;
 #ifdef _RAVEN //k: for ShowSurface/HideSurface, md5 model using mesh index as mask: 1 << index, name is shader material name
-		virtual int GetSurfaceMask(const char *name) const;
+		virtual int                 GetSurfaceMask(const char *name) const;
 #endif
 #if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
-	idRenderModelStatic * DynamicModelSnapshot(void) { return staticModelInstance; }
-	void ClearDynamicModelSnapshot(void) { staticModelInstance = NULL; }
+	    idRenderModelStatic *       DynamicModelSnapshot(void) { return staticModelInstance; }
+	    void                        ClearDynamicModelSnapshot(void) { staticModelInstance = NULL; }
 #endif
 
 	private:
@@ -235,10 +235,10 @@ class idRenderModelMD5 : public idRenderModelStatic
 		void						ParseJoint(idLexer &parser, idMD5Joint *joint, idJointQuat *defaultPose);
 
 #ifdef _RAVEN //k: show/hide surface
-		idList<idStr> surfaceShaderList;
+		idList<idStr>               surfaceShaderList;
 #endif
 #if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
-		idRenderModelStatic *staticModelInstance;
+		idRenderModelStatic         *staticModelInstance;
 #endif
 };
 

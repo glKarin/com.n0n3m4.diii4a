@@ -363,7 +363,7 @@ Read an ENVL chunk from an LWO2 file.
 lwEnvelope *lwGetEnvelope(idFile *fp, int cksize)
 {
 	lwEnvelope *env;
-	lwKey *key;
+	lwKey *key = NULL;
 	lwPlugin *plug;
 	unsigned int id;
 	unsigned short sz;
@@ -787,7 +787,7 @@ static float incoming(lwKey *key0, lwKey *key1)
 				in *= (key1->time - key0->time) / (key1->next->time - key0->time);
 
 			break;
-			return in;
+			//return in;
 
 		case ID_BEZ2:
 			in = key1->param[ 1 ] * (key1->time - key0->time);
@@ -1356,7 +1356,7 @@ int sgetI1(unsigned char **bp)
 	if (i > 127) i -= 256;
 
 	flen += 1;
-	*bp++;
+    *bp += 1; // *bp++;
 	return i;
 }
 
@@ -1397,7 +1397,7 @@ unsigned char sgetU1(unsigned char **bp)
 
 	c = **bp;
 	flen += 1;
-	*bp++;
+    *bp += 1; // *bp++;
 	return c;
 }
 
@@ -1884,7 +1884,7 @@ static int add_clip(char *s, lwClip **clist, int *nclips)
 		clip->source.still.name = s;
 	}
 
-	*nclips++;
+    *nclips += 1; // *nclips++;
 	clip->index = *nclips;
 
 	lwListAdd((void **)clist, clip);
@@ -1996,8 +1996,8 @@ Read an lwSurface from an LWOB file.
 lwSurface *lwGetSurface5(idFile *fp, int cksize, lwObject *obj)
 {
 	lwSurface *surf;
-	lwTexture *tex;
-	lwPlugin *shdr;
+	lwTexture *tex = NULL;
+	lwPlugin *shdr = NULL;
 	char *s;
 	float v[ 3 ];
 	unsigned int id, flags;
@@ -2170,6 +2170,7 @@ lwSurface *lwGetSurface5(idFile *fp, int cksize, lwObject *obj)
 
 			case ID_TFLG:
 				flags = getU2(fp);
+                i = 0;
 
 				if (flags & 1) i = 0;
 
@@ -2289,6 +2290,7 @@ lwSurface *lwGetSurface5(idFile *fp, int cksize, lwObject *obj)
 				break;
 
 			case ID_SDAT:
+                if ( !shdr ) goto Fail; //k 2025: add
 				shdr->data = getbytes(fp, sz);
 				break;
 

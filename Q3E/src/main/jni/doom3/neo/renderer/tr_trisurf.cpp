@@ -869,8 +869,12 @@ void R_CreateDupVerts(srfTriangles_t *tri)
 		}
 	}
 
+    if(tri->numDupVerts > 0) { //k 2025
 	tri->dupVerts = triDupVertAllocator.Alloc(tri->numDupVerts * 2);
 	memcpy(tri->dupVerts, tempDupVerts, tri->numDupVerts * 2 * sizeof(tri->dupVerts[0]));
+    } else {
+        tri->dupVerts = NULL;
+    }
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	_DROID_FREE(remap);
 	_DROID_FREE(tempDupVerts);
@@ -1195,8 +1199,12 @@ void R_IdentifySilEdges(srfTriangles_t *tri, bool omitCoplanarEdges)
 	}
 
 	tri->numSilEdges = numSilEdges;
+    if(numSilEdges > 0) { //k 2025
 	tri->silEdges = triSilEdgeAllocator.Alloc(numSilEdges);
 	memcpy(tri->silEdges, silEdges, numSilEdges * sizeof(tri->silEdges[0]));
+    } else {
+        tri->silEdges = NULL;
+    }
 }
 
 /*

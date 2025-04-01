@@ -1,0 +1,10 @@
+patches:
+  9d:
+  - base_path: source_subfolder
+    patch_file: patches/tdm-boolean-always-unsigned-char.patch
+  - base_path: source_subfolder
+    patch_file: patches/0001-libjpeg-add-msvc-dll-support.patch
+sources:
+  9d:
+    sha256: 2303a6acfb6cc533e0e86e8a9d29f7e6079e118b9de3f96e07a71a11c082fa6a
+    url: http://ijg.org/files/jpegsrc.v9d.tar.gz

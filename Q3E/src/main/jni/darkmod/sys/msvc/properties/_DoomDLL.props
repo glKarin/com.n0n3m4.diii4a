@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <_PropertySheetDisplayName>TheDarkMod Executable</_PropertySheetDisplayName>
+    <OutDir>$(SolutionDir)..\darkmod\</OutDir>
+    <TargetName>$(TdmExecutableName)</TargetName>
+  </PropertyGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_pugixml.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_openal.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_vorbis.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_ffmpeg.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_glfw.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_libcurl.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_libjpeg.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_libpng.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_minizip.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_tracy.props" />
+    <Import Project="$(SolutionDir)/ThirdParty/artefacts/windows_$(TdmBitness)/conan_doctest.props" />
+  </ImportGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>xinput9_1_0.lib;bcrypt.lib;Shell32.lib;Gdi32.lib;Advapi32.lib;dbghelp.lib;dinput8.lib;iphlpapi.lib;odbc32.lib;odbccp32.lib;winmm.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>16777216</StackReserveSize>
+      <StackCommitSize>16777216</StackCommitSize>
+      <LargeAddressAware>true</LargeAddressAware>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <ShowProgress>NotSet</ShowProgress>
+      <AdditionalOptions>/NATVIS:sys\msvc\natvis\idlib.natvis /NATVIS:sys\msvc\natvis\game.natvis %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>robocopy $(SolutionDir)glprogs $(OutDir)glprogs * /s /nfl /ndl /njh /njs
+if %errorlevel% leq 3 exit 0</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy glprogs (shaders)</Message>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>cd $(ProjectDir)
+call gen_svnversion.cmd
+</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Insert SVN revision number into svnversion.h</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+</Project>

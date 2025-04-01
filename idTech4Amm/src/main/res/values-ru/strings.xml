@@ -464,5 +464,12 @@
     <string name="code_">Код:</string>
     <string name="version">Версия</string>
     <string name="open_menu">Open menu</string>
+    <string name="create_folders">Create folders</string>
+    <string name="enable_doom3bfg_occlusion_culling_harm_r_occlusionCulling">Enable DOOM3-BFG occlusion culling(harm_r_occlusionCulling)</string>
+    <string name="game_path_tips">Game path tips</string>
+    <string name="create_game_folders">create game folders</string>
+    <string name="create_game_folders_successful">Create game folders successful!</string>
+    <string name="put_game_files_here">Put %1$s game files here</string>
+    <string name="please_put_game_data_files_into_this_folder">Please put %1$s game data files into this folder!</string>
 
 </resources>
