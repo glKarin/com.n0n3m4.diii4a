@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <TdmExecutableName>TheDarkMod</TdmExecutableName>
+    <ThirdPartyPlatform>\lib\win32_s_vc_rel_mt</ThirdPartyPlatform>
+    <ThirdPartyPlatformDbg>\lib\win32_s_vc_rel_mtd</ThirdPartyPlatformDbg>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="ThirdPartyPlatform">
+      <Value>$(ThirdPartyPlatform)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ThirdPartyPlatformDbg">
+      <Value>$(ThirdPartyPlatformDbg)</Value>
+    </BuildMacro>
+    <BuildMacro Include="TdmExecutableName">
+      <Value>$(TdmExecutableName)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>
