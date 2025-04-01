@@ -70,7 +70,7 @@ public class Q3EPatchResourceManager
 
         rsc = new Q3EPatchResource(
                 Q3EGlobals.PatchResource.TDM_GLSL_SHADER,
-                Q3ELang.tr(context, R.string.the_dark_mod_glsl_shader),
+                Q3ELang.tr(context, R.string.the_dark_mod_glsl_shader) + "(2.13)",
                 Q3EGlobals.TDM_GLSL_SHADER_VERSION,
                 Q3EGlobals.GAME_TDM,
                 null,

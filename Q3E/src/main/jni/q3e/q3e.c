@@ -84,7 +84,7 @@ static char *arg_str = NULL;
 
 static void *libdl;
 static ANativeWindow *window = NULL;
-static int usingNativeEventQueue = 0;
+static int usingNativeEventQueue = 1;
 static int usingNativeThread = 1;
 
 static int resultCode = -1;
@@ -496,6 +496,9 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	
 	LOGI("idTech4A++ game data directory: %s", game_data_dir);
 
+	LOGI("idTech4A++ using %s event queue.", usingNativeEventQueue ? "native" : "Java");
+	LOGI("idTech4A++ using %s thread.", usingNativeThread ? "pthread" : "Java");
+
 	const char *arg = (*env)->GetStringUTFChars(env, Cmdline, &iscopy);
 	LOGI("idTech4A++ game command: %s", arg);
 	argv = malloc(sizeof(char*) * 255);
@@ -890,6 +893,6 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, j
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit(JNIEnv *env, jclass clazz, jint eventQueueType, jint gameThreadType)
 {
-	usingNativeEventQueue = eventQueueType == EVENT_QUEUE_TYPE_NATIVE;
+	usingNativeEventQueue = eventQueueType != EVENT_QUEUE_TYPE_JAVA;
 	usingNativeThread = gameThreadType != GAME_THREAD_TYPE_JAVA;
 }

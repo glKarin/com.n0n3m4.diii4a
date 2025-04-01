@@ -101,19 +101,31 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_gui_useD3BFGFont", "bool", "0", "use DOOM3-BFG fonts instead of old fonts", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
                             "0", "disable",
                             "\"\"", "disable",
-                            "1", "make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic(Only for DOOM3, Quake4 and Prey not support). e.g. "
+                            "1", "make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic(Only for DOOM3, Quake4 and Prey not support). e.g. \n"
+                            + " In DOOM 3: \n"
                             + " 'fonts/fontImage_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
-                                    + " 'fonts/an/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat' "
-                                    + " 'fonts/arial/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat' "
-                                    + " 'fonts/bank/fontImage_**.dat' -> 'newfonts/BankGothic_Md_BT/48.dat' "
-                                    + " 'fonts/micro/fontImage_**.dat' -> 'newfonts/microgrammadbolext/48.dat' ",
+                            + " 'fonts/an/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat' \n"
+                            + " 'fonts/arial/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat' \n"
+                            + " 'fonts/bank/fontImage_**.dat' -> 'newfonts/BankGothic_Md_BT/48.dat' \n"
+                            + " 'fonts/micro/fontImage_**.dat' -> 'newfonts/microgrammadbolext/48.dat' \n"
+                            + "\n"
+                            + " In Quake 4(`r_strogg` and `strogg` fonts always disable): \n"
+                            + " 'fonts/chain_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
+                            + " 'fonts/lowpixel_**.dat' -> 'newfonts/microgrammadbolext/48.dat' \n"
+                            + " 'fonts/marine_**.dat' -> 'newfonts/Arial_Narrow/48.dat' \n"
+                            + " 'fonts/profont_**.dat' -> 'newfonts/BankGothic_Md_BT/48.dat' \n"
+                            + "\n"
+                            + " In Prey(`alien` font always disable): \n"
+                            + " 'fonts/fontImage_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
+                            + " 'fonts/menu/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat' \n"
+                            + "\n",
                             "<DOOM3-BFG font name>", "use a DOOM3-BFG new font by name override all DOOM 3/Quake 4/Prey old fonts. e.g. "
                             + " Chainlink_Semi_Bold "
-                                    + " Arial_Narrow "
-                                    + " BankGothic_Md_BT "
-                                    + " microgrammadbolext "
-                                    + " DFPHeiseiGothicW7 "
-                                    + " Sarasori_Rg "
+                            + " Arial_Narrow "
+                            + " BankGothic_Md_BT "
+                            + " microgrammadbolext "
+                            + " DFPHeiseiGothicW7 "
+                            + " Sarasori_Rg "
                             ),
                         KCVar.CreateCommand("exportFont", "string", "Convert ttf/ttc font file to DOOM3 wide character font file", 0),
                         KCVar.CreateCommand("extractBimage", "string", "extract DOOM3-BFG's bimage image to rga RGBA image files", 0)

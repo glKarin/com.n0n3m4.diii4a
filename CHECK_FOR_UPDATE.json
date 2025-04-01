@@ -1,7 +1,7 @@
 {
-    "release":62,
-    "update":"2025-03-11",
-    "version":"1.1.0harmattan62",
-    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan62/idTech4A++_1.1.0harmattan62.apk",
-    "changes":"  * Add `OpenJK` support, `STAR WARS™ Jedi Knight - Jedi Academy™` game standalone directory named `openja`, `STAR WARS™ Jedi Knight II - Jedi Outcast™` game standalone directory named `openjo`.\n  * Update version to 5.1 on RealRTCW, support Survival mode. And version 5.0 is keeping until version 5.1 is stable.\n  * Fix audio playing when disable OpenAL on Quake3/ETW/RTCW/RealRTCW.\n  * Add Vulkan renderer backend on Quake2.\n  * Fix create render context on GZDOOM, it will use OpenGL ES if Vulkan initialization fail.\n  * Add `Open menu` button at end of `General` tab on launcher."
+    "release":63,
+    "update":"2025-04-01",
+    "version":"1.1.0harmattan63",
+    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan63/idTech4A++_1.1.0harmattan63.apk",
+    "changes":"  * The Dark Mod update to version 2.13.\n  * Add wide-character language support and DOOM3-BFG new fonts support on DOOM 3/Quake 4/Prey(2006). Only support UTF-8(BOM) encoding translation file.\n  * Add Chinese translation patch on DOOM3. First extract `DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)`, then add ` +set sys_lang chinese` to command line.\n  * Fix some errors and light gem(so make cvar `tdm_lg_weak` value back to 0) on The Dark Mod(2.12 and 2.13).\n  * Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).\n  * Fix some lights missing on ceil in map game/airdefense1 on Quake 4.\n  * Add game portal support on Prey(2006).\n  * Fix wrong resurrection position from deathwalk state when load game after restart application on Prey(2006).\n  * Support game data folder creation with `Game path tips` button on launcher `General` tab.\n  * [Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) will be removed on next release in the future!"
 }

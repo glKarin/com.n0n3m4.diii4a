@@ -113,8 +113,8 @@
     </string-array>
 
     <string-array name="event_queue_labels">
-        <item>Java</item>
         <item>Native</item>
+        <item>Java</item>
     </string-array>
 
     <string-array name="event_queue_values">

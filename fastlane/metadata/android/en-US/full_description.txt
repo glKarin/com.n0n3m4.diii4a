@@ -10,6 +10,7 @@ Feature:
   png/dds texture image, jpeg/png/bmp format of screenshot
   obj/dae format static model
   pure soft shadow with shadow-mapping
+  Wide-character language translation support
   OpenGLES2.0/OpenGLES3.0
   OpenAL(soft) and EFX Reverb
   Phong/Blinn-phong/PBR/no-lighting rendering

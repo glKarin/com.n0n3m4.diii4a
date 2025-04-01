@@ -6,9 +6,9 @@
 ##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部/FTEQW/星球大战:绝地武士 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan62(lindaiyu)  
+1.1.0harmattan63(lindaiyu)  
 **Latest update:**
-2025-03-11  
+2025-04-01  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -23,9 +23,10 @@ GPLv3
 * pure soft shadow with shadow-mapping
 * soft shadow with stencil-shadow and translucent stencil shadow
 * lighting model: Phong/Blinn-phong/PBR/Ambient/No-lighting
+* Wide-character language translation support
 * debug render tools support with programming render pipeline
 * OpenGLES2.0/OpenGLES3.0
-* png/dds texture image, jpeg/png/bmp/dds format of screenshot
+* png/dds/bimage texture image, jpeg/png/bmp/dds format of screenshot
 * obj/dae format static model
 * OpenAL(soft) and EFX Reverb
 * DOOM3(with full body awareness mod)
@@ -51,6 +52,8 @@ GPLv3
 | No lighting | Yes<br/>(And support switch in gaming by set harm_r_lightingModel to 0) | Yes |
 | Debug render tools | Yes<br/>(need to set harm_r_renderToolsMultithread to 1 if with multi-threading) | - |
 | PBR lighting model | Yes<br/>(using [idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr). But specular textures are not RMAO format in idTech4 game data) | - |
+| Wide-character language and DOOM3-BFG new font | Yes | - |
+| DOOM3-BFG occlusion culling | Yes | - |
 
 > **Support games**
 
@@ -60,7 +63,7 @@ GPLv3
 | Quake IV | n0n3m4's dante | - | 2.0/3.0 | [Hardqore](https://www.moddb.com/mods/quake-4-hardqore) |
 | Prey(2006) | n0n3m4's dante | - | 2.0/3.0 |  |
 | DOOM 3 BFG(Classic DOOM 1&2) | [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) | 1.4.0<br/>(The last OpenGL renderer version) | 3.0/Vulkan1.1 |  |
-| The Dark Mod | [Dark Mod](https://www.thedarkmod.com) | 2.12 | 3.2<br/>(require geometry shader support) |  |
+| The Dark Mod | [Dark Mod](https://www.thedarkmod.com) | 2.12/2.13 | 3.2<br/>(require geometry shader support) |  |
 | Return to Castle Wolfenstein | [iortcw](https://github.com/iortcw/iortcw) | - | 1.1 |  |
 | Quake III Arena | [ioquake3](https://github.com/ioquake/ioq3) | - | 1.1 | Quake III Team Arena |
 | Quake II | [Yamagi Quake II](https://github.com/yquake2/yquake2) | - | 1.1/3.2/Vulkan | ctf<br/>rogue<br/>xatrix<br/>zaero |
@@ -91,21 +94,29 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Add `OpenJK` support, [STAR WARS™ Jedi Knight - Jedi Academy™](https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/) game standalone directory named `openja`, [STAR WARS™ Jedi Knight II - Jedi Outcast™](https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/) game standalone directory named `openjo`. More view in [OpenJK](https://github.com/JACoders/OpenJK).
-* Update version to 5.1 on RealRTCW, support Survival mode. And version 5.0 is keeping until version 5.1 is stable.
-* Fix audio playing when disable OpenAL on Quake3/ETW/RTCW/RealRTCW.
-* Add Vulkan renderer backend on Quake2.
-* Fix create render context on GZDOOM, it will use OpenGL ES if Vulkan initialization fail.
-* Add `Open menu` button at end of `General` tab on launcher.
+* The Dark Mod update to version 2.13. More view in [The Dark Mod(2.13)](https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/).
+* Add wide-character language support and DOOM3-BFG new fonts support on DOOM 3/Quake 4/Prey(2006). Only support UTF-8(BOM) encoding translation file.
+* Add Chinese translation patch on DOOM3. First extract `DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)`, then add ` +set sys_lang chinese` to command line.
+* Fix some errors and light gem(so make cvar `tdm_lg_weak` value back to 0) on The Dark Mod(2.12 and 2.13).
+* Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).
+* Fix some lights missing on ceil in map game/airdefense1 on Quake 4.
+* Add game portal support on Prey(2006).
+* Fix wrong resurrection position from deathwalk state when load game after restart application on Prey(2006).
+* Support game data folder creation with `Game path tips` button on launcher `General` tab.
+* [Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) will be removed on next release in the future!
 
 ----------------------------------------------------------------------------------
 
-* 新增`OpenJK`支持, [星球大战: 绝地武士-绝地学院](https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/)游戏独立文件夹命名为`openja`, [星球大战：绝地武士 - 绝地放逐者](https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/)游戏独立文件夹命名为`openjo` 详情[OpenJK](https://github.com/JACoders/OpenJK).
-* 真·重返德军总部更新至5.1版本, 支持幸存者模式. 保留5.0版本直到5.1版本稳定.
-* 修复雷神之锤3/德军总部-深入敌后/重返德军总部/真·重返德军总部禁用OpenAL时的音频播放.
-* 雷神之锤2新增Vulkan渲染器后端.
-* 修复GZDOOM渲染环境创建, 如果Vulkan实例创建失败将使用OpenGL ES渲染.
-* 启动器`通用`选项卡底部新增`打开菜单`按钮.
+* The Dark Mod版本更新至2.13. 详情[The Dark Mod(2.13)](https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/).
+* 毁灭战士3/雷神之锤4/掠食2006新增宽字体语言支持和毁灭战士3-BFG新字体支持. 本地化文件仅支持UTF-8(BOM)编码.
+* 毁灭战士3新增简体中文翻译补丁. 首先提取资源`毁灭战士3中文本地化(3DM毁灭战士3-BFG汉化补丁)`, 然后在启动命令中添加` +set sys_lang chinese`.
+* The Dark Mod(2.12和2.13版本)修复一些错误和light gem(因此cvar `tdm_lg_weak`值重置为0).
+* 毁灭战士3/雷神之锤4/掠食2006新增毁灭战士3-BFG的遮挡剔除功能, 使用cvar `harm_r_occlusionCulling`.
+* 雷神之锤4修复第一关部分天花板光源丢失.
+* 掠食2006新增游戏通道支持.
+* 修复掠食2006重新启动游戏然后加载玩家在deathwalk状态时的存档时复活位置错误.
+* 在启动器`通用`选项卡的`游戏路径提示`按钮添加创建游戏目录树功能.
+* [警告]: 真·重返德军总部(5.0版本)和The Dark Mod(2.12版本)将在下次版本发布时移除!
 
 ----------------------------------------------------------------------------------
 ### Standalone game directory
@@ -165,7 +176,7 @@ Tag with `-free` only for F-Droid update.
 | r_useShadowMapping | Bool | 0 | use shadow mapping instead of stencil shadows | ARCHIVE | All | Engine/Renderer |  | All |
 | harm_r_shadowMapAlpha | Float | 1.0 | shadow's alpha in shadow mapping | ARCHIVE | [0.0 - 1.0] | Engine/Renderer |  | All |
 | harm_r_shadowMapJitterScale | Float | 2.5 | scale factor for jitter offset | ARCHIVE |  | Engine/Renderer |  | All |
-| r_forceShadowMapsOnAlphaTestedSurfaces | Bool | 0 | render performed material shadow in shadow mapping | ARCHIVE, ISSUE |  | Engine/Renderer | 0 = same shadowing as with stencil shadows,<br/> 1 = ignore noshadows for alpha tested materials | All |
+| r_forceShadowMapsOnAlphaTestedSurfaces | Bool | DOOM3 is 1, Quake4/Prey is 0 | render performed material shadow in shadow mapping | ARCHIVE, ISSUE |  | Engine/Renderer | 0 = same shadowing as with stencil shadows,<br/> 1 = ignore noshadows for alpha tested materials | All |
 | harm_r_shadowMapLightType | Integer | 0 | debug light type mask in shadow mapping | DEBUG | 0, 1, 2, 3, 4, 5, 6, 7 | Engine/Renderer | 1 = parallel;<br/> 2 = point;<br/> 4 = spot | All |
 | harm_r_shadowMapDepthBuffer | Integer | 0 | render depth to color or depth texture in OpenGLES2.0 | INIT, DEBUG | 0, 1, 2, 3, 4 | Engine/Renderer | 0 = Auto;<br/> 1 = depth texture;<br/> 2 = color texture's red;<br/> 3 = color texture's rgba | All |
 | harm_r_shadowMapNonParallelLightUltra | Bool | 0 | non parallel light allow ultra quality shadow map texture |  |  | Engine/Renderer | max texture size is 2048x2048 | All |
@@ -184,11 +195,15 @@ Tag with `-free` only for F-Droid update.
 | r_useDXT | Bool | 0 | use DXT compression if possible | INIT |  | Engine/Renderer |  | All |
 | r_useETC2 | Bool | 0 | use ETC2 compression instead of RGBA4444 | INIT |  | Engine/Renderer | Only for OpenGLES3.0+ | All |
 | r_noLight | Bool | 0 | lighting disable hack | INIT |  | Engine/Renderer | 1 = disable lighting(not allow switch, must setup on command line) | All |
-| harm_r_useHighPrecision | Bool | Android = 0; Other = 1 | Use high precision float on GLSL shade | INIT |  | Engine/Renderer |  | All |
+| harm_r_useHighPrecision | Integer | Android = 0; Other = 1 | Use high precision float on GLSL shade | INIT | 0, 1, 2 | Engine/Renderer | 0 = use default precision(interaction/depth shaders use high precision, otherwise use medium precision)<br/>1 = all shaders use high precision as default precision exclude special variables<br/>2 = all shaders use high precision as default precision and special variables also use high precision | All |
+| harm_r_occlusionCulling | Bool | 0 | enable DOOM3-BFG occlusion culling | ARCHIVE |  | Engine/Renderer |  | All |
 | harm_fs_gameLibPath | String |  | Setup game dynamic library | ARCHIVE |  | Engine/Framework |  | Android |
 | harm_fs_gameLibDir | String |  | Setup game dynamic library directory path | ARCHIVE |  | Engine/Framework |  | Android |
-| harm_com_consoleHistory | Integer | 2 | Save/load console history | ARCHIVE | 0, 1, 2 | Engine/Framework | 0 = disable;<br/> 1 = loading in engine initialization, and saving in engine shutdown;<br/> 2 = loading in engine initialization, and saving in every e executing | All |
-| r_scaleMenusTo43 | Bool | 0 | Scale menus, fullscreen videos and PDA to 4:3 aspect ratio | ARCHIVE |  | Engine/GUI |  | All |
+| harm_com_consoleHistory | Integer | 2 | Save/load console history | ARCHIVE | 0, 1, 2 | Engine/Framework | 0 = disable;<br/> 1 = loading in engine initialization, and saving in engine shutdown;<br/> 2 = loading in engine initialization, and saving in every executing | All |
+| com_disableAutoSaves | Bool | 0 | Don't create Autosaves when entering a new map | ARCHIVE |  | Engine/Framework |  | All |
+| r_scaleMenusTo43 | Integer | 0 | Scale menus, fullscreen videos and PDA to 4:3 aspect ratio | ARCHIVE | 0, 1, -1 | Engine/GUI | 0 = disable;<br/> 1 = only scale menu type GUI as 4:3 aspect ratio;<br/> -1 = scale all GUI as 4:3 aspect ratio | All |
+| harm_gui_wideCharLang | Bool | 0 | enable wide character language support | ARCHIVE |  | Engine/GUI |  | All |
+| harm_gui_useD3BFGFont | String | 0 | use DOOM3-BFG fonts instead of old fonts | INIT | 0, "", 1, &lt;DOOM3-BFG font name&gt; | Engine/GUI | 0 or "" = disable;<br/><br/> 1 = make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic. e.g. <br/> - In DOOM 3: <br/> * 'fonts/fontImage_xx.dat' -&gt; 'newfonts/Chainlink_Semi_Bold/48.dat'<br/> * 'fonts/an/fontImage_xx.dat' -&gt; 'newfonts/Arial_Narrow/48.dat'<br/> * 'fonts/arial/fontImage_xx.dat' -&gt; 'newfonts/Arial_Narrow/48.dat'<br/> * 'fonts/bank/fontImage_xx.dat' -&gt; 'newfonts/BankGothic_Md_BT/48.dat'<br/> * 'fonts/micro/fontImage_xx.dat' -&gt; 'newfonts/microgrammadbolext/48.dat'<br/> - In Quake 4(`r_strogg` and `strogg` fonts always disable): <br/> *  'fonts/chain_xx.dat' -&gt; 'newfonts/Chainlink_Semi_Bold/48.dat'<br/> * 'fonts/lowpixel_xx.dat' -&gt; 'newfonts/microgrammadbolext/48.dat'<br/> * 'fonts/marine_xx.dat' -&gt; 'newfonts/Arial_Narrow/48.dat'<br/> * 'fonts/profont_xx.dat' -&gt; 'newfonts/BankGothic_Md_BT/48.dat'<br/> - In Prey(`alien` font always disable): <br/> * 'fonts/fontImage_xx.dat' -&gt; 'newfonts/Chainlink_Semi_Bold/48.dat'<br/> * 'fonts/menu/fontImage_xx.dat' -&gt; 'newfonts/Arial_Narrow/48.dat'<br/><br/> &lt;DOOM3-BFG font name&gt; = use a DOOM3-BFG new font by name override all DOOM 3/Quake 4/Prey old fonts. e.g.<br/> * Chainlink_Semi_Bold<br/> * Arial_Narrow<br/> * BankGothic_Md_BT<br/> * microgrammadbolext<br/> * DFPHeiseiGothicW7<br/> * Sarasori_Rg | All |
 | s_driver | String | AudioTrack | sound driver | ARCHIVE | AudioTrack, OpenSLES | Engine/Sound | sound if without OpenAL on Android | Android |
 | harm_s_OpenSLESBufferCount | Integer | 3 | Audio buffer count for OpenSLES | ARCHIVE | &gt;= 3 | Engine/Sound | min is 3, only for if without OpenAL and use OpenSLES on Android | Android |
 | harm_s_useAmplitudeDataOpenAL | Bool | 0 | Use amplitude data on OpenAL | DISABLE, ISSUE |  | Engine/Sound | It cause large shake | All |
@@ -236,6 +251,8 @@ Tag with `-free` only for F-Droid update.
 | convertImage | convert image format |  | Engine/Renderer |  | All |
 | r_multithread | print multi-threading state |  | Engine/Renderer | Only for tell user r_multithread is not a cvar | All |
 | glConfig | print OpenGL config |  | Engine/Renderer | print glConfig variable | All |
+| exportFont | Convert ttf/ttc font file to DOOM3 wide character font file |  | Engine/Renderer | require freetype2 | All |
+| extractBimage | extract DOOM3-BFG's bimage image |  | Engine/Renderer | extract to TGA RGBA image files | All |
 | botRunAAS | compiles an AAS file for a map for Quake 4 multiplayer-game |  | Game/Quake4 | Only for generate bot aas file if map has not aas file | All |
 | addBot | adds a new bot |  | Game/Quake4 | need SABotA9 files | All |
 | removeBot | removes bot specified by id (0,15) |  | Game/Quake4 | need SABotA9 files | All |
@@ -314,7 +331,7 @@ Tag with `-free` only for F-Droid update.
 
 #### Engine
 > 1. _MULTITHREAD: Add multithread support for rendering.
-> 2. _USING_STB: Using stb header for jpeg/png/dds texture image and jpeg/png/bmp/dds screenshot support.
+> 2. _USING_STB: Using stb jpeg instead of libjpeg for jpeg image file.
 > 3. _K_CLANG: If compiling by clang not GCC.
 > 4. _MODEL_OBJ: Add obj static model support.
 > 5. _MODEL_DAE: Add dae static model support.
@@ -326,6 +343,9 @@ Tag with `-free` only for F-Droid update.
 > 11. _SOFT_STENCIL_SHADOW: soft shadow(OpenGLES3.1+), must defined `_STENCIL_SHADOW_IMPROVE` first.
 > 12. _MINIZ: Using miniz instead of zlib, using minizip instead of DOOM3's UnZip.
 > 13. _USING_STB_OGG: Using stb_vorbis instead of libogg and libvorbis.
+> 14. _D3BFG_CULLING: Add DOOM3-BFG occlusion culling support.
+> 15. _WCHAR_LANG _NEW_FONT_TOOLS: Add wide-character language font support.
+> 16. _D3BFG_FONT: Add DOOM3-BFG new font support.
 
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGLES, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).

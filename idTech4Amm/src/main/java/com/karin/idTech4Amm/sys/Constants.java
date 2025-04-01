@@ -9,8 +9,8 @@ import com.karin.idTech4Amm.misc.TextHelper;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 62;
-    public static final String CONST_RELEASE = "2025-03-11"; // 02-12
+    public static final int    CONST_UPDATE_RELEASE = 63;
+    public static final String CONST_RELEASE = "2025-04-01"; // 02-12
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -29,9 +29,9 @@ public final class Constants
     {
         return new String[] {
             "The Dark Mod update to version 2.13. More view in `" + TextHelper.GenLinkText("https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/", "The Dark Mod(2.13)") + "`",
-            "Add DOOM3-BFG new fonts and wide-character language support. Only support UTF-8(BOM) encoding translation file.",
+            "Add wide-character language support and DOOM3-BFG new fonts support on DOOM 3/Quake 4/Prey(2006). Only support UTF-8(BOM) encoding translation file.",
             "Add Chinese translation patch on DOOM3. First extract `DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)`, then add ` +set sys_lang chinese` to command line.",
-            "Fix some The Dark Mod(ver 2.12) error.",
+            "Fix some errors and light gem(so make cvar `tdm_lg_weak` value back to 0) on The Dark Mod(2.12 and 2.13).",
             "Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).",
             "Fix some lights missing on ceil in map game/airdefense1 on Quake 4.",
             "Add game portal support on Prey(2006).",
