@@ -147,7 +147,6 @@ static void R_Font_ConvertD3BFGGlyph(const d3bfg_fontInfo_t &fontInfo, const d3b
 static void R_Font_ConvertD3BFGFont(const d3bfg_fontInfo_t &fontInfo, fontInfoEx_t &font, int imageWidth, int imageHeight)
 {
     int i, m, f;
-    fontInfo_t *info;
     glyphInfo_t *glyph;
     d3bfg_glyphInfo_t *d3bfg_glyph;
     int charcode;

@@ -52,12 +52,28 @@ static bool _hasWideCharFont = false;
 #ifdef _D3BFG_FONT
 idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_INIT | CVAR_ARCHIVE, "using DOOM3-BFG new fonts instead of old fonts.\n"
 		"    0 or \"\": disable\n"
-		"    1: make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic(Only for DOOM3, Quake4 and Prey not support). e.g. \n"
+        "    1: make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic"
+#ifdef _RAVEN
+        "(`alien` font always disable)"
+#elif defined(_HUMANHEAD)
+        "(`r_strogg` and `strogg` fonts always disable)"
+#endif
+        ". e.g. \n"
+#ifdef _RAVEN
+        "        'fonts/chain_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
+		"        'fonts/lowpixel_**.dat' -> 'newfonts/microgrammadbolext/48.dat'\n"
+        "        'fonts/marine_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
+        "        'fonts/profont_**.dat' -> 'newfonts/BankGothic_Md_BT/48.dat'\n"
+#elif defined(_HUMANHEAD)
+        "        'fonts/fontImage_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
+        "        'fonts/menu/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
+#else
 		"        'fonts/fontImage_**.dat' -> 'newfonts/Chainlink_Semi_Bold/48.dat'\n"
 		"        'fonts/an/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
 		"        'fonts/arial/fontImage_**.dat' -> 'newfonts/Arial_Narrow/48.dat'\n"
 		"        'fonts/bank/fontImage_**.dat' -> 'newfonts/BankGothic_Md_BT/48.dat'\n"
 		"        'fonts/micro/fontImage_**.dat' -> 'newfonts/microgrammadbolext/48.dat'\n"
+#endif
 		"    Otherwise you can setup DOOM3-BFG new font name to override all DOOM 3/Quake 4/Prey old fonts. e.g. \n"
 		"        Chainlink_Semi_Bold\n"
 		"        Arial_Narrow\n"
@@ -115,13 +131,33 @@ int idDeviceContext::FindFont(const char *name)
 	const char *d3bfgFontName = harm_gui_useD3BFGFont.GetString();
 	if(d3bfgFontName && d3bfgFontName[0] && idStr::Cmp(d3bfgFontName, "0") != 0)
 	{
-		idStr newFileName = fileName;
-		newFileName.Replace(va("fonts/%s", fontLang.c_str()), "newfonts/");
-		newFileName.StripFilename();
 		if(idStr::Cmp(d3bfgFontName, "1") == 0)
 		{
 			idStr fname(name);
 			fname.StripPath();
+#ifdef _RAVEN
+            if(!idStr::Icmp("chain", fname))
+                d3bfgFontName = "Chainlink_Semi_Bold";
+            else if(!idStr::Icmp("lowpixel", fname))
+                d3bfgFontName = "microgrammadbolext";
+            else if(!idStr::Icmp("marine", fname))
+                d3bfgFontName = "Arial_Narrow";
+            else if(!idStr::Icmp("profont", fname))
+                d3bfgFontName = "BankGothic_Md_BT";
+            else if(!idStr::Icmp("r_strogg", fname))
+                d3bfgFontName = NULL;
+            else if(!idStr::Icmp("strogg", fname))
+                d3bfgFontName = NULL;
+            else
+                d3bfgFontName = "Chainlink_Semi_Bold";
+#elif defined(_HUMANHEAD)
+            if(!idStr::Icmp("menu", fname))
+                d3bfgFontName = "Arial_Narrow";
+            else if(!idStr::Icmp("alien", fname))
+                d3bfgFontName = NULL;
+            else
+                d3bfgFontName = "Chainlink_Semi_Bold";
+#else
 			if(!idStr::Icmp("an", fname))
 				d3bfgFontName = "Arial_Narrow";
 			else if(!idStr::Icmp("arial", fname))
@@ -132,18 +168,30 @@ int idDeviceContext::FindFont(const char *name)
 				d3bfgFontName = "microgrammadbolext";
 			else
 				d3bfgFontName = "Chainlink_Semi_Bold";
+#endif
 		}
-		newFileName.AppendPath(d3bfgFontName);
-		if (renderSystem->RegisterFont(newFileName, fonts[index]))
-		{
-			common->Printf("Font '%s' using DOOM3-BFG new font '%s'.\n", name, newFileName.c_str());
-			fontLoaded = true;
-		}
-		else // load default if fail
-		{
-			common->Printf("Font '%s' load DOOM3-BFG new font '%s' fail, try using default font.\n", name, newFileName.c_str());
-			fontLoaded = renderSystem->RegisterFont(fileName, fonts[index]);
-		}
+        if(d3bfgFontName && d3bfgFontName[0])
+        {
+            idStr newFileName = fileName;
+            newFileName.Replace(va("fonts/%s", fontLang.c_str()), "newfonts/");
+            newFileName.StripFilename();
+            newFileName.AppendPath(d3bfgFontName);
+            if (renderSystem->RegisterFont(newFileName, fonts[index]))
+            {
+                common->Printf("Font '%s' using DOOM3-BFG new font '%s'.\n", name, newFileName.c_str());
+                fontLoaded = true;
+            }
+            else // load default if fail
+            {
+                common->Printf("Font '%s' load DOOM3-BFG new font '%s' fail, try using default font.\n", name, newFileName.c_str());
+                fontLoaded = renderSystem->RegisterFont(fileName, fonts[index]);
+            }
+        }
+        else
+        {
+            common->Printf("Font '%s' not use DOOM3-BFG new font.\n", name);
+            fontLoaded = renderSystem->RegisterFont(fileName, fonts[index]);
+        }
 	}
 	else
 #endif
