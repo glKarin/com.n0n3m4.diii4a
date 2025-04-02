@@ -55,17 +55,17 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
     if ( backEnd.vLight->lightShader->IsAmbientLight() && r_interactionLightingModel != HARM_INTERACTION_SHADER_AMBIENT ) {
         GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), 1.0f);
     } else {
-		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-			GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
-		else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-	    {
+        if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+            GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
+        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
+        {
 	        float se[2] = { harm_r_specularExponentPBR.GetFloat(), harm_r_normalCorrectionPBR.GetFloat() };
 	        GL_Uniform2fv(offsetof(shaderProgram_t, specularExponent), se);
-	    }
-	    else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
-	        GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_ambientLightingBrightness.GetFloat());
-		else
-			GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponent.GetFloat());
+        }
+        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
+            GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_ambientLightingBrightness.GetFloat());
+        else
+            GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponent.GetFloat());
     }
 
 	// set the textures
@@ -147,14 +147,14 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
         GL_UseProgram(&ambientLightingShader);
     else
     {
-		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-			GL_UseProgram(&interactionBlinnPhongShader);
-		else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-			GL_UseProgram(&interactionPBRShader);
-	    else if (r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT )
-	        GL_UseProgram(&ambientLightingShader);
-		else
-			GL_UseProgram(&interactionShader);
+        if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+            GL_UseProgram(&interactionBlinnPhongShader);
+        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
+            GL_UseProgram(&interactionPBRShader);
+        else if (r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT )
+            GL_UseProgram(&ambientLightingShader);
+        else
+            GL_UseProgram(&interactionShader);
     }
 
 	// enable the vertex arrays
@@ -340,14 +340,14 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil
 {
 	if (vLight->globalShadows || vLight->localShadows)
 	{
-	RB_StencilShadowPass(vLight->globalShadows);
-	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
-	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 0xFF);
+        RB_StencilShadowPass(vLight->globalShadows);
+        RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
+        RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 0xFF);
 
-	RB_StencilShadowPass(vLight->localShadows);
-	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
-	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 0xFF);
-}
+        RB_StencilShadowPass(vLight->localShadows);
+        RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
+        RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 0xFF);
+    }
 	else
 	{
 		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
@@ -359,12 +359,12 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil
 {
 	if (vLight->globalShadows || vLight->localShadows)
 	{
-	RB_StencilShadowPass(vLight->globalShadows);
-	RB_StencilShadowPass(vLight->localShadows);
-	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
+        RB_StencilShadowPass(vLight->globalShadows);
+        RB_StencilShadowPass(vLight->localShadows);
+        RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
 
-	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 1);
-	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 2);
+        RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 1);
+        RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 2);
 	}
 	else
 	{
@@ -376,39 +376,40 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil
 #endif
 
 #ifdef _SHADOW_MAPPING
+// combine
 static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping(viewLight_t *vLight)
 {
 	if(vLight->shadowLOD >= 0)
 	{
-		int	side, sideStop;
-
-		if( vLight->parallel )
-		{
-			side = 0;
-			//sideStop = r_shadowMapSplits.GetInteger() + 1;
-			sideStop = 1;
-		}
-		else if( vLight->pointLight )
-		{
-			if( r_shadowMapSingleSide.GetInteger() != -1 )
-			{
-				side = r_shadowMapSingleSide.GetInteger();
-				sideStop = side + 1;
-			}
-			else
-			{
-				side = 0;
-				sideStop = 6;
-			}
-		}
-		else
-		{
-			side = -1;
-			sideStop = 0;
-		}
-
 		if(vLight->globalShadows || vLight->localShadows || (r_shadowMapPerforated && vLight->perforatedShadows))
 		{
+            int	side, sideStop;
+
+            if( vLight->parallel )
+            {
+                side = 0;
+                //sideStop = r_shadowMapSplits.GetInteger() + 1;
+                sideStop = 1;
+            }
+            else if( vLight->pointLight )
+            {
+                if( r_shadowMapSingleSide.GetInteger() != -1 )
+                {
+                    side = r_shadowMapSingleSide.GetInteger();
+                    sideStop = side + 1;
+                }
+                else
+                {
+                    side = 0;
+                    sideStop = 6;
+                }
+            }
+            else
+            {
+                side = -1;
+                sideStop = 0;
+            }
+
 			qglDisable(GL_STENCIL_TEST);
 
 			for( int m = side; m < sideStop ; m++ )
@@ -430,6 +431,76 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping(viewLight_t *vLi
 	{
 		RB_GLSL_DrawInteraction_noShadow(vLight);
 	}
+}
+
+// non-combine
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping_separate(viewLight_t *vLight)
+{
+    if(vLight->shadowLOD >= 0)
+    {
+        if(vLight->globalShadows || vLight->localShadows || (r_shadowMapPerforated && vLight->perforatedShadows))
+        {
+            int	side, sideStop;
+            int m;
+
+            if( vLight->parallel )
+            {
+                side = 0;
+                //sideStop = r_shadowMapSplits.GetInteger() + 1;
+                sideStop = 1;
+            }
+            else if( vLight->pointLight )
+            {
+                if( r_shadowMapSingleSide.GetInteger() != -1 )
+                {
+                    side = r_shadowMapSingleSide.GetInteger();
+                    sideStop = side + 1;
+                }
+                else
+                {
+                    side = 0;
+                    sideStop = 6;
+                }
+            }
+            else
+            {
+                side = -1;
+                sideStop = 0;
+            }
+
+            qglDisable(GL_STENCIL_TEST);
+
+            for( m = side; m < sideStop ; m++ )
+            {
+                RB_ShadowMapPass( vLight->globalShadows, m, SHADOW_MAPPING_VOLUME, true );
+            }
+            RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
+
+            for( m = side; m < sideStop ; m++ )
+            {
+                RB_ShadowMapPass( vLight->localShadows, m, SHADOW_MAPPING_VOLUME, false );
+            }
+            // perforated as local shadow
+            if(r_shadowMapPerforated)
+            {
+                for( m = side; m < sideStop ; m++ )
+                {
+                    RB_ShadowMapPass( vLight->perforatedShadows, m, SHADOW_MAPPING_SURFACE, false );
+                }
+            }
+            RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
+
+            qglEnable(GL_STENCIL_TEST);
+        }
+        else
+        {
+            RB_GLSL_DrawInteraction_noShadow(vLight);
+        }
+    }
+    else
+    {
+        RB_GLSL_DrawInteraction_noShadow(vLight);
+    }
 }
 
 #ifdef _CONTROL_SHADOW_MAPPING_RENDERING
@@ -845,7 +916,7 @@ void RB_GLSL_DrawInteractions(void)
 			func = RB_GLSL_DrawInteraction_shadowMapping_control;
 		else
 #endif
-		func = RB_GLSL_DrawInteraction_shadowMapping;
+		func = r_shadowMapCombine ? RB_GLSL_DrawInteraction_shadowMapping : RB_GLSL_DrawInteraction_shadowMapping_separate;
 	}
 #endif
 

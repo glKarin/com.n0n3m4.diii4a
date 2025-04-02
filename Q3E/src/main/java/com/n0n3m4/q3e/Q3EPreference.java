@@ -183,6 +183,7 @@ public final class Q3EPreference
     public static final String pref_harm_max_console_height_frac      = "q3e_harm_max_console_height_frac"; //k
     public static final String pref_harm_r_occlusionCulling           = "q3e_harm_r_occlusionCulling"; //k
     public static final String pref_harm_gui_useD3BFGFont             = "q3e_harm_gui_useD3BFGFont"; //k
+    public static final String pref_harm_r_shadowMapCombine           = "q3e_harm_r_shadowMapCombine"; //k
 
     public static final String RUN_BACKGROUND                = "harm_run_background";
     public static final String RENDER_MEM_STATUS             = "harm_render_mem_status";

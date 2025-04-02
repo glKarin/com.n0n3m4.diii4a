@@ -600,6 +600,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/render_perforated_material_shadow_r_forceshadowmapsonalphatestedsurfaces" />
+
+                    <CheckBox
+                            android:id="@+id/cb_shadowMapCombine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/combine_shadow_mapping_harm_r_shadowmapcombine" />
                 </LinearLayout>
 
                 <TextView

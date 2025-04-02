@@ -96,12 +96,15 @@ Tag with `-free` only for F-Droid update.
 
 * The Dark Mod update to version 2.13. More view in [The Dark Mod(2.13)](https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/).
 * Add wide-character language support and DOOM3-BFG new fonts support on DOOM 3/Quake 4/Prey(2006). Only support UTF-8(BOM) encoding translation file.
-* Add Chinese translation patch on DOOM3. First extract `DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)`, then add ` +set sys_lang chinese` to command line.
-* Fix some errors and light gem(so make cvar `tdm_lg_weak` value back to 0) on The Dark Mod(2.12 and 2.13).
+* Add Chinese translation patch on DOOM3. First extract `DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)`, then ckecked `Use DOOM3-BFG fonts instead of old fonts and enable wide-character language support` on launcher, finally add ` +set sys_lang chinese` to command line.
+* Fix some errors and light gem(so reset cvar `tdm_lg_weak` value to 0) on The Dark Mod(2.12 and 2.13).
 * Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).
+* Add combine shadow mapping option with cvar `harm_r_shadowMapCombine`(default 1, like now) on DOOM 3/Quake 4/Prey(2006).
 * Fix some lights missing on ceil in map game/airdefense1 on Quake 4.
 * Add game portal support on Prey(2006).
 * Fix wrong resurrection position from deathwalk state when load game after restart application on Prey(2006).
+* Fix key binding tips UI on Prey(2006).
+* Using libogg/libvorbis instead of stb-vorbis of version 62 again on DOOM 3/Quake 4/Prey(2006).
 * Support game data folder creation with `Game path tips` button on launcher `General` tab.
 * [Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) will be removed on next release in the future!
 
@@ -109,12 +112,15 @@ Tag with `-free` only for F-Droid update.
 
 * The Dark Mod版本更新至2.13. 详情[The Dark Mod(2.13)](https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/).
 * 毁灭战士3/雷神之锤4/掠食2006新增宽字体语言支持和毁灭战士3-BFG新字体支持. 本地化文件仅支持UTF-8(BOM)编码.
-* 毁灭战士3新增简体中文翻译补丁. 首先提取资源`毁灭战士3中文本地化(3DM毁灭战士3-BFG汉化补丁)`, 然后在启动命令中添加` +set sys_lang chinese`.
+* 毁灭战士3新增简体中文翻译补丁. 首先提取资源`毁灭战士3中文本地化(3DM毁灭战士3-BFG汉化补丁)`, 然后在启动器选中`使用毁灭战士3-BFG字体并且启用宽字符字体支持`, 最后在启动命令中添加` +set sys_lang chinese`.
 * The Dark Mod(2.12和2.13版本)修复一些错误和light gem(因此cvar `tdm_lg_weak`值重置为0).
 * 毁灭战士3/雷神之锤4/掠食2006新增毁灭战士3-BFG的遮挡剔除功能, 使用cvar `harm_r_occlusionCulling`.
+* 毁灭战士3/雷神之锤4/掠食2006新增混合阴影映射选项, 使用cvar `harm_r_shadowMapCombine`(默认1, 和之前效果一样).
 * 雷神之锤4修复第一关部分天花板光源丢失.
 * 掠食2006新增游戏通道支持.
 * 修复掠食2006重新启动游戏然后加载玩家在deathwalk状态时的存档时复活位置错误.
+* 掠食2006修复按键绑定提示UI.
+* 毁灭战士3/雷神之锤4/掠食2006重新使用libogg/libvorbis代替62版本的stb-vorbis.
 * 在启动器`通用`选项卡的`游戏路径提示`按钮添加创建游戏目录树功能.
 * [警告]: 真·重返德军总部(5.0版本)和The Dark Mod(2.12版本)将在下次版本发布时移除!
 
@@ -177,6 +183,7 @@ Tag with `-free` only for F-Droid update.
 | harm_r_shadowMapAlpha | Float | 1.0 | shadow's alpha in shadow mapping | ARCHIVE | [0.0 - 1.0] | Engine/Renderer |  | All |
 | harm_r_shadowMapJitterScale | Float | 2.5 | scale factor for jitter offset | ARCHIVE |  | Engine/Renderer |  | All |
 | r_forceShadowMapsOnAlphaTestedSurfaces | Bool | DOOM3 is 1, Quake4/Prey is 0 | render performed material shadow in shadow mapping | ARCHIVE, ISSUE |  | Engine/Renderer | 0 = same shadowing as with stencil shadows,<br/> 1 = ignore noshadows for alpha tested materials | All |
+| harm_r_shadowMapCombine | Bool | 1 | combine local and global shadow mapping | ARCHIVE |  | Engine/Renderer |  | All |
 | harm_r_shadowMapLightType | Integer | 0 | debug light type mask in shadow mapping | DEBUG | 0, 1, 2, 3, 4, 5, 6, 7 | Engine/Renderer | 1 = parallel;<br/> 2 = point;<br/> 4 = spot | All |
 | harm_r_shadowMapDepthBuffer | Integer | 0 | render depth to color or depth texture in OpenGLES2.0 | INIT, DEBUG | 0, 1, 2, 3, 4 | Engine/Renderer | 0 = Auto;<br/> 1 = depth texture;<br/> 2 = color texture's red;<br/> 3 = color texture's rgba | All |
 | harm_r_shadowMapNonParallelLightUltra | Bool | 0 | non parallel light allow ultra quality shadow map texture |  |  | Engine/Renderer | max texture size is 2048x2048 | All |
