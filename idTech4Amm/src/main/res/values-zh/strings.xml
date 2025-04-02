@@ -323,7 +323,7 @@
     <string name="stencil_shadow_alpha_harm_r_stencilshadowalpha">半透明模板阴影透明度(harm_r_stencilShadowAlpha):</string>
     <string name="_0_1_default_0_5">0 - 1(默认1.0)</string>
     <string name="soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft">软模板阴影(仅OpenGLES3.1+)(harm_r_stencilShadowSoft)</string>
-    <string name="combine_stencil_shadow_harm_r_stencilshadowcombine">组合模板阴影(harm_r_stencilShadowCombine)</string>
+    <string name="combine_stencil_shadow_harm_r_stencilshadowcombine">混合模板阴影(harm_r_stencilShadowCombine)</string>
     <string name="automatic_setup_aspect_ratio_harm_r_autoaspectratio">自动设置屏幕高宽比(harm_r_autoAspectRatio)</string>
     <string name="setup_cvar_r_aspectratio_manually">手动设置cvar `r_aspectRatio`</string>
     <string name="force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio">强制设置cvar `r_aspectRatio`为-1(使用实际屏幕的宽高比)</string>
@@ -470,4 +470,6 @@
     <string name="create_game_folders_successful">创建游戏目录结构成功!</string>
     <string name="put_game_files_here">此处放%1$s数据文件</string>
     <string name="please_put_game_data_files_into_this_folder">请将%1$s游戏数据文件放到此目录下!</string>
+    <string name="use_doom3bfg_fonts_instead_of_old_fonts_and_enable_wide_character_language_support">使用毁灭战士3-BFG字体并且启用宽字符字体支持</string>
+    <string name="combine_shadow_mapping_harm_r_shadowmapcombine">混合阴影映射(harm_r_shadowMapCombine)</string>
 </resources>

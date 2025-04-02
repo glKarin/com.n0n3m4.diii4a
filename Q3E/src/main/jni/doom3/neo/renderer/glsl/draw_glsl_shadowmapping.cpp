@@ -68,6 +68,7 @@ bool r_usePackColorAsDepth = false; // Only OpenGLES2.0 and depth texture not su
 static bool r_dumpShadowMap = false; // backend
 static bool r_dumpShadowMapFrontEnd = false; // frontend
 static bool r_shadowMapPerforated = true;
+static bool r_shadowMapCombine = true;
 
 static shaderProgram_t *depthShader_2d = &depthShader;
 static shaderProgram_t *depthShader_cube = &depthShader;
@@ -996,94 +997,8 @@ RB_ShadowMapPass
  Generate shadow map texture
 =====================
 */
-void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool clear )
+static ID_INLINE void RB_ShadowMapping_DrawSurfs(const drawSurf_t* drawSurfs, int type, const viewLight_t* vLight, shaderProgram_t *shadowMapShader, shaderProgram_t *shadowMapPerforatedShader, const idRenderMatrix &lightProjectionRenderMatrix, const idRenderMatrix &lightViewRenderMatrix, float mvp[16], float modelMatrix[16], idVec4 &localLight, const float globalLightOrigin[4])
 {
-    const viewLight_t* vLight = backEnd.vLight;
-
-    RB_ShadowMapPass_T = clear ? 'G' : 'L';
-
-    RB_LogComment( "---------- RB_ShadowMapPass( side = %i ) ----------\n", side );
-
-	if(!harm_r_shadowMapDebug.GetInteger())
-	{
-		idFramebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
-        fb->Bind();
-		RB_ShadowMapping_attachTexture(fb, vLight, side);
-	}
-
-    GL_ViewportAndScissor( 0, 0, shadowMapResolutions[vLight->shadowLOD], shadowMapResolutions[vLight->shadowLOD] );
-
-	if(clear)
-	{
-		RB_ShadowMapping_clearBuffer();
-	}
-
-    if( drawSurfs == NULL
-        || RB_ShadowMapping_filterLightType()
-    )
-	{
-        Framebuffer::BindNull();
-        RB_ResetViewportAndScissorToDefaultCamera(backEnd.viewDef);
-        return;
-	}
-
-    // the actual stencil func will be set in the draw code, but we need to make sure it isn't
-    // disabled here, and that the value will get reset for the interactions without looking
-    // like a no-change-required
-    idRenderMatrix lightProjectionRenderMatrix;
-    idRenderMatrix lightViewRenderMatrix;
-
-    if( vLight->parallel && side >= 0 )
-    {
-        RB_CalcParallelLightMatrix(vLight, side, lightViewRenderMatrix, lightProjectionRenderMatrix);
-
-        backEnd.shadowV[0] << lightViewRenderMatrix;
-        backEnd.shadowP[0] << lightProjectionRenderMatrix;
-    }
-    else if( vLight->pointLight && side >= 0 )
-    {
-        RB_CalcPointLightMatrix(vLight, side, lightViewRenderMatrix, lightProjectionRenderMatrix);
-
-        backEnd.shadowV[side] << lightViewRenderMatrix;
-        backEnd.shadowP[side] << lightProjectionRenderMatrix;
-    }
-    else
-    {
-        RB_CalcSpotLightMatrix(vLight, lightViewRenderMatrix, lightProjectionRenderMatrix);
-
-        backEnd.shadowV[0] << lightViewRenderMatrix;
-        backEnd.shadowP[0] << lightProjectionRenderMatrix;
-    }
-
-    // backup current OpenGL state
-    uint64 glState = backEnd.glState.glStateBits;
-    int faceCulling = backEnd.glState.faceCulling;
-
-    // select shadow map shader
-    shaderProgram_t *shadowMapShader = RB_SelectShadowMapShader(vLight, side);
-    shaderProgram_t *shadowMapPerforatedShader = RB_SelectPerforatedShadowMapShader(vLight, side);
-
-    // setup OpenGL state
-    GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO |
-             /*GLS_DEPTHMASK | GLS_ALPHAMASK | GLS_GREENMASK | GLS_BLUEMASK |*/
-             // GLS_REDMASK |
-                     GLS_DEPTHFUNC_LESS); // TODO: in OpenGLES2.0, write RED color buffer(if depth texture not support) and depth buffer; in OpenGLES3.0, only write depth buffer
-    qglDisable(GL_BLEND);
-	qglDepthMask(GL_TRUE); // depth buffer lock update yet
-    //qglDepthFunc(GL_LESS);
-
-    // process the chain of shadows with the current rendering state
-    backEnd.currentSpace = NULL;
-    float mvp[16];
-    float modelMatrix[16];
-    idVec4 localLight;
-    float globalLightOrigin[4] = {
-            vLight->globalLightOrigin[0],
-            vLight->globalLightOrigin[1],
-            vLight->globalLightOrigin[2],
-            1.0f,
-    };
-
     for( const drawSurf_t* drawSurf = drawSurfs; drawSurf != NULL; drawSurf = drawSurf->nextOnLight )
     {
         if( drawSurf->geo->numIndexes == 0 )
@@ -1146,11 +1061,11 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
             }
 #endif
 
-			idRenderMatrix::Copy(drawSurf->space->modelMatrix, modelMatrix);
+            idRenderMatrix::Copy(drawSurf->space->modelMatrix, modelMatrix);
 
             // set the local light position to allow the vertex program to project the shadow volume end cap to infinity
-			R_GlobalPointToLocal(drawSurf->space->modelMatrix, vLight->globalLightOrigin, localLight.ToVec3());
-			localLight.w = 0.0f;
+            R_GlobalPointToLocal(drawSurf->space->modelMatrix, vLight->globalLightOrigin, localLight.ToVec3());
+            localLight.w = 0.0f;
 
             backEnd.currentSpace = drawSurf->space;
         }
@@ -1271,13 +1186,108 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
                         GL_PolygonOffset( false );
                     }
 
-					globalImages->BindNull();
+                    globalImages->BindNull();
                     GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
                     GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
                 }
             }
         }
     }
+}
+
+void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool clear )
+{
+    if(!drawSurfs && !clear)
+        return; // do nothing
+
+    const viewLight_t* vLight = backEnd.vLight;
+
+    RB_ShadowMapPass_T = clear ? 'G' : 'L';
+
+    RB_LogComment( "---------- RB_ShadowMapPass( side = %i ) ----------\n", side );
+
+	if(!harm_r_shadowMapDebug.GetInteger())
+	{
+		idFramebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
+        fb->Bind();
+		RB_ShadowMapping_attachTexture(fb, vLight, side);
+	}
+
+    GL_ViewportAndScissor( 0, 0, shadowMapResolutions[vLight->shadowLOD], shadowMapResolutions[vLight->shadowLOD] );
+
+	if(clear)
+	{
+		RB_ShadowMapping_clearBuffer();
+	}
+
+    if( drawSurfs == NULL
+        || RB_ShadowMapping_filterLightType()
+    )
+	{
+        Framebuffer::BindNull();
+        RB_ResetViewportAndScissorToDefaultCamera(backEnd.viewDef);
+        return;
+	}
+
+    // the actual stencil func will be set in the draw code, but we need to make sure it isn't
+    // disabled here, and that the value will get reset for the interactions without looking
+    // like a no-change-required
+    idRenderMatrix lightProjectionRenderMatrix;
+    idRenderMatrix lightViewRenderMatrix;
+
+    if( vLight->parallel && side >= 0 )
+    {
+        RB_CalcParallelLightMatrix(vLight, side, lightViewRenderMatrix, lightProjectionRenderMatrix);
+
+        backEnd.shadowV[0] << lightViewRenderMatrix;
+        backEnd.shadowP[0] << lightProjectionRenderMatrix;
+    }
+    else if( vLight->pointLight && side >= 0 )
+    {
+        RB_CalcPointLightMatrix(vLight, side, lightViewRenderMatrix, lightProjectionRenderMatrix);
+
+        backEnd.shadowV[side] << lightViewRenderMatrix;
+        backEnd.shadowP[side] << lightProjectionRenderMatrix;
+    }
+    else
+    {
+        RB_CalcSpotLightMatrix(vLight, lightViewRenderMatrix, lightProjectionRenderMatrix);
+
+        backEnd.shadowV[0] << lightViewRenderMatrix;
+        backEnd.shadowP[0] << lightProjectionRenderMatrix;
+    }
+
+    // backup current OpenGL state
+    uint64 glState = backEnd.glState.glStateBits;
+    int faceCulling = backEnd.glState.faceCulling;
+
+    // select shadow map shader
+    shaderProgram_t *shadowMapShader = RB_SelectShadowMapShader(vLight, side);
+    shaderProgram_t *shadowMapPerforatedShader = RB_SelectPerforatedShadowMapShader(vLight, side);
+
+    // setup OpenGL state
+    GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO |
+             /*GLS_DEPTHMASK | GLS_ALPHAMASK | GLS_GREENMASK | GLS_BLUEMASK |*/
+             // GLS_REDMASK |
+                     GLS_DEPTHFUNC_LESS); // TODO: in OpenGLES2.0, write RED color buffer(if depth texture not support) and depth buffer; in OpenGLES3.0, only write depth buffer
+    qglDisable(GL_BLEND);
+	qglDepthMask(GL_TRUE); // depth buffer lock update yet
+    //qglDepthFunc(GL_LESS);
+
+    // process the chain of shadows with the current rendering state
+    backEnd.currentSpace = NULL;
+    float mvp[16];
+    float modelMatrix[16];
+    idVec4 localLight;
+    float globalLightOrigin[4] = {
+            vLight->globalLightOrigin[0],
+            vLight->globalLightOrigin[1],
+            vLight->globalLightOrigin[2],
+            1.0f,
+    };
+
+    RB_ShadowMapping_DrawSurfs(drawSurfs, type, vLight, shadowMapShader, shadowMapPerforatedShader, lightProjectionRenderMatrix, lightViewRenderMatrix, mvp, modelMatrix, localLight, globalLightOrigin);
+
     backEnd.currentSpace = NULL;
 
     // if debug buffer
@@ -1297,6 +1307,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
     RB_ResetViewportAndScissorToDefaultCamera(backEnd.viewDef);
 }
 
+// always clear framebuffer depth
 void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_t *localShadowDrawSurf, const drawSurf_t *ambientDrawSurf, int side )
 {
     const viewLight_t* vLight = backEnd.vLight;
@@ -1380,12 +1391,19 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
             1.0f,
     };
 
+#if 1
+    if(globalShadowDrawSurf)
+        RB_ShadowMapping_DrawSurfs(globalShadowDrawSurf, SHADOW_MAPPING_VOLUME, vLight, shadowMapShader, shadowMapPerforatedShader, lightProjectionRenderMatrix, lightViewRenderMatrix, mvp, modelMatrix, localLight, globalLightOrigin);
+    if(localShadowDrawSurf)
+        RB_ShadowMapping_DrawSurfs(localShadowDrawSurf, SHADOW_MAPPING_VOLUME, vLight, shadowMapShader, shadowMapPerforatedShader, lightProjectionRenderMatrix, lightViewRenderMatrix, mvp, modelMatrix, localLight, globalLightOrigin);
+    if(ambientDrawSurf)
+        RB_ShadowMapping_DrawSurfs(ambientDrawSurf, SHADOW_MAPPING_SURFACE, vLight, shadowMapShader, shadowMapPerforatedShader, lightProjectionRenderMatrix, lightViewRenderMatrix, mvp, modelMatrix, localLight, globalLightOrigin);
+#else
     const drawSurf_t *list[3] = {
 		globalShadowDrawSurf,
 		localShadowDrawSurf,
 		ambientDrawSurf,
     };
-
     for(int i = 0; i < 3; i++)
     {
         const drawSurf_t* drawSurfs = list[i];
@@ -1393,201 +1411,9 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
             continue;
         const int type = i < 2 ? SHADOW_MAPPING_VOLUME : SHADOW_MAPPING_SURFACE;
 
-        for( const drawSurf_t* drawSurf = drawSurfs; drawSurf != NULL; drawSurf = drawSurf->nextOnLight )
-        {
-            if( drawSurf->geo->numIndexes == 0 )
-            {
-                continue;	// a job may have created an empty shadow geometry
-            }
-            /* //karin:
-             * prelight shadow's model matrix is using worldSpace->modelMatrix, also see in tr_light::R_AddLightSurfaces and tr_light::R_LinkLightSurf.
-             * although the world model matrix's is 4x4 matrix, but only has 3x3 identity matrix. 4th column and 4th row is 0 and not 1, so it's not 4x4 identity matrix, but it not effect to calc local light position.
-             * so we force using 4x4 identity matrix.
-             * current using cdrawSurf_t::geo->shadowIsPrelight for checking the shadow model is prelight.
-             */
-            const bool IsPrelightShadow = RB_ShadowMapping_isPrelightShadow(drawSurf);
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-            if( IsPrelightShadow )
-        {
-            if(r_shadowMappingScheme == SHADOW_MAPPING_NON_PRELIGHT)
-                continue;	// if prelight shadow using stencil shadow
-        }
-        else
-        {
-            if(r_shadowMappingScheme == SHADOW_MAPPING_PRELIGHT)
-                continue;	// if prelight shadow using stencil shadow
-        }
-#endif
-
-            if( drawSurf->space != backEnd.currentSpace )
-            {
-                idRenderMatrix modelRenderMatrix;
-                if(IsPrelightShadow)
-                    modelRenderMatrix.Identity();
-                else
-                    idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX drawSurf->space->modelMatrix, modelRenderMatrix );
-
-                idRenderMatrix modelToLightRenderMatrix;
-                idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
-
-                idRenderMatrix clipMVP;
-                idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
-
-#if 1
-                clipMVP >> mvp;
-#else
-                if (vLight->parallel)
-            {
-                idRenderMatrix MVP;
-                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
-                MVP >> mvp;
-            }
-            else if (side < 0)
-            {
-                // from OpenGL view space to OpenGL NDC ( -1 : 1 in XYZ )
-                idRenderMatrix MVP;
-                idRenderMatrix::Multiply(renderMatrix_windowSpaceToClipSpace, clipMVP, MVP);
-                MVP >> mvp;
-            }
-            else
-            {
-                clipMVP >> mvp;
-            }
-#endif
-
-			idRenderMatrix::Copy(drawSurf->space->modelMatrix, modelMatrix);
-
-                // set the local light position to allow the vertex program to project the shadow volume end cap to infinity
-                R_GlobalPointToLocal(drawSurf->space->modelMatrix, vLight->globalLightOrigin, localLight.ToVec3());
-                localLight.w = 0.0f;
-
-                backEnd.currentSpace = drawSurf->space;
-            }
-
-            if(type == SHADOW_MAPPING_VOLUME)
-                // if( !didDraw )
-            {
-                RB_ShadowMapping_polygonOffset();
-
-                GL_UseProgram(shadowMapShader);
-
-                GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
-
-                RB_SetMVP(mvp);
-                GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), modelMatrix);
-
-                GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
-                GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), localLight.ToFloatPtr());
-
-                // const float Frustum[] = {harm_r_shadowMapFrustumNear.GetFloat(), RB_GetPointLightFrustumFar(backEnd.vLight), 0, 0};
-                // GL_Unifor4fv(offsetof(shaderProgram_t, u_uniformParm[1]), Frustum);
-
-                GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t), vertexCache.Position(drawSurf->geo->shadowCache));
-
-                RB_DrawShadowElementsWithCounters_shadowMapping( drawSurf->geo/*, SM_REAR_CAP*/ );
-                //RB_DrawElementsWithCounters( drawSurf->geo );
-
-                // cleanup the shadow specific rendering state
-                GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
-            }
-            else
-            {
-                // bool didDraw = false;
-
-                const idMaterial* shader = drawSurf->material;
-
-                // get the expressions for conditionals / color / texcoords
-                const float* regs = drawSurf->shaderRegisters;
-                idVec4 color( 0, 0, 0, 1 );
-
-                // set polygon offset if necessary
-                if( shader && shader->TestMaterialFlag( MF_POLYGONOFFSET ) )
-                {
-                    GL_PolygonOffset( true, r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * shader->GetPolygonOffset() );
-                }
-                // else GL_PolygonOffset( false );
-
-                if( shader && shader->Coverage() == MC_PERFORATED )
-                {
-                    idDrawVert *ac = (idDrawVert *)vertexCache.Position(drawSurf->geo->ambientCache);
-                    // perforated surfaces may have multiple alpha tested stages
-                    for( int stage = 0; stage < shader->GetNumStages(); stage++ )
-                    {
-                        const shaderStage_t* pStage = shader->GetStage( stage );
-
-                        if( !pStage->hasAlphaTest ) {
-                            continue;
-                        }
-
-                        // check the stage enable condition
-                        if( regs[ pStage->conditionRegister ] == 0 ) {
-                            continue;
-                        }
-
-                        // if we at least tried to draw an alpha tested stage,
-                        // we won't draw the opaque surface
-                        //didDraw = true;
-
-                        // set the alpha modulate
-                        color[3] = regs[ pStage->color.registers[3] ];
-
-                        // skip the entire stage if alpha would be black
-                        if( color[3] <= 0.0f ) {
-                            continue;
-                        }
-
-                        // set privatePolygonOffset if necessary
-                        if( pStage->privatePolygonOffset )
-                        {
-                            GL_PolygonOffset( true, r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * pStage->privatePolygonOffset );
-                        }
-
-                        // renderProgManager.BindShader_TextureVertexColor();
-                        GL_UseProgram(shadowMapPerforatedShader);
-
-                        idDrawVert *ac = (idDrawVert *)vertexCache.Position(drawSurf->geo->ambientCache);
-                        GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
-                        GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), reinterpret_cast<void *>(&ac->st));
-
-                        RB_SetMVP(mvp);
-
-                        GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
-                        GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-
-                        GL_Color( color );
-                        GL_Uniform1fv(offsetof(shaderProgram_t, alphaTest), &regs[pStage->alphaTestRegister]);
-
-                        // bind the texture
-                        GL_SelectTexture( 0 );
-                        pStage->texture.image->Bind();
-
-                        // set texture matrix and texGens
-                        RB_PrepareStageTexturing( pStage, drawSurf, ac );
-
-                        // must render with less-equal for Z-Cull to work properly
-                        //k assert( ( GL_GetCurrentState() & GLS_DEPTHFUNC_BITS ) == GLS_DEPTHFUNC_LESS );
-
-                        // draw it
-                        RB_DrawElementsWithCounters( drawSurf->geo );
-
-                        // clean up
-                        RB_FinishStageTexturing( pStage, drawSurf, ac );
-
-                        // unset privatePolygonOffset if necessary
-                        if( pStage->privatePolygonOffset )
-                        {
-                            //GL_PolygonOffset( true, r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * shader->GetPolygonOffset() );
-                            GL_PolygonOffset( false );
-                        }
-
-                        globalImages->BindNull();
-                        GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
-                        GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-                    }
-                }
-            }
-        }
+        RB_ShadowMapping_DrawSurfs(drawSurfs, type, vLight, shadowMapShader, shadowMapPerforatedShader, lightProjectionRenderMatrix, lightViewRenderMatrix, mvp, modelMatrix, localLight, globalLightOrigin);
     }
+#endif
 
     backEnd.currentSpace = NULL;
 

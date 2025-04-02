@@ -439,6 +439,14 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_gui_useD3BFGFont, isChecked)
 						.commit();
 			}
+			else if (id == R.id.cb_shadowMapCombine)
+			{
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("harm_r_shadowMapCombine", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_r_shadowMapCombine, isChecked)
+						.commit();
+			}
 
 			// Doom 3 BFG
 			else if (id == R.id.doom3bfg_useCompressionCache)
@@ -1251,6 +1259,8 @@ public class GameLauncher extends Activity
 			if (!IsProp("harm_r_stencilShadowCombine")) setProp("harm_r_stencilShadowCombine", false);
 			V.cb_perforatedShadow.setChecked(getProp("r_forceShadowMapsOnAlphaTestedSurfaces", false));
 			if (!IsProp("r_forceShadowMapsOnAlphaTestedSurfaces")) setProp("r_forceShadowMapsOnAlphaTestedSurfaces", false);
+			V.cb_shadowMapCombine.setChecked(getProp("harm_r_shadowMapCombine", true));
+			if (!IsProp("harm_r_shadowMapCombine")) setProp("harm_r_shadowMapCombine", true);
 
 			V.cb_s_useOpenAL.setChecked(getProp("s_useOpenAL", false));
 			if (!IsProp("s_useOpenAL"))
@@ -1960,6 +1970,8 @@ public class GameLauncher extends Activity
 		V.cb_renderToolsMultithread.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_r_occlusionCulling.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_occlusionCulling, false));
 		V.cb_r_occlusionCulling.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.cb_shadowMapCombine.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_shadowMapCombine, true));
+		V.cb_shadowMapCombine.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		V.cb_gui_useD3BFGFont.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_gui_useD3BFGFont, false));
 		V.cb_gui_useD3BFGFont.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -2781,6 +2793,7 @@ public class GameLauncher extends Activity
 		mEdtr.putInt(Q3EPreference.pref_harm_max_console_height_frac, V.consoleHeightFracValue.getProgress());
 		mEdtr.putString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), V.edt_fs_game.getText().toString());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gui_useD3BFGFont, V.cb_gui_useD3BFGFont.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_r_shadowMapCombine, V.cb_shadowMapCombine.isChecked());
 
         mEdtr.commit();
     }
@@ -4561,6 +4574,7 @@ public class GameLauncher extends Activity
 		public CheckBox cb_r_occlusionCulling;
 		public RadioGroup rg_version_tdm;
 		public CheckBox cb_gui_useD3BFGFont;
+		public CheckBox cb_shadowMapCombine;
 
         public void Setup()
         {
@@ -4709,6 +4723,7 @@ public class GameLauncher extends Activity
 			cb_r_occlusionCulling = findViewById(R.id.cb_r_occlusionCulling);
 			rg_version_tdm = findViewById(R.id.rg_version_tdm);
 			cb_gui_useD3BFGFont = findViewById(R.id.cb_gui_useD3BFGFont);
+			cb_shadowMapCombine = findViewById(R.id.cb_shadowMapCombine);
         }
     }
 }

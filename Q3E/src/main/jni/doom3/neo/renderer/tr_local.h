@@ -2218,6 +2218,7 @@ extern idCVar r_forceShadowMapsOnAlphaTestedSurfaces;
 extern idCVar harm_r_shadowMapLod;
 extern idCVar harm_r_shadowMapBias;
 extern idCVar harm_r_shadowMapAlpha;
+extern idCVar harm_r_shadowMapCombine;
 #if 0
 extern idCVar harm_r_shadowMapSampleFactor;
 extern idCVar harm_r_shadowMapFrustumNear;

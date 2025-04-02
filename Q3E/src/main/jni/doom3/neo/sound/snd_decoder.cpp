@@ -250,6 +250,7 @@ int idWaveFile::OpenOGG(const char *strFileName, waveformatex_t *pwfx)
 		Sys_LeaveCriticalSection(CRITICAL_SECTION_ONE);
 		fileSystem->CloseFile(mhmmio);
 		mhmmio = NULL;
+        common->Warning( "Opening OGG file '%s' with libogg/libvorbis failed.", strFileName );
 		return -1;
 	}
 

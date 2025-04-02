@@ -71,6 +71,7 @@ static void R_InitGLSLCvars(void)
 #ifdef _SHADOW_MAPPING
 	r_shadowMapping = r_useShadowMapping.GetBool();
 	r_shadowMapPerforated = r_forceShadowMapsOnAlphaTestedSurfaces.GetBool();
+    r_shadowMapCombine = harm_r_shadowMapCombine.GetBool();
 #ifdef _CONTROL_SHADOW_MAPPING_RENDERING
 	int i = harm_r_shadowMappingScheme.GetInteger();
     if(i < 0 || i > SHADOW_MAPPING_NON_PRELIGHT)
@@ -182,6 +183,11 @@ void R_CheckBackEndCvars(void)
 		r_shadowMapPerforated = r_forceShadowMapsOnAlphaTestedSurfaces.GetBool();
 		r_forceShadowMapsOnAlphaTestedSurfaces.ClearModified();
 	}
+    if(harm_r_shadowMapCombine.IsModified())
+    {
+        r_shadowMapCombine = harm_r_shadowMapCombine.GetBool();
+        harm_r_shadowMapCombine.ClearModified();
+    }
 #ifdef _CONTROL_SHADOW_MAPPING_RENDERING
 	if(harm_r_shadowMappingScheme.IsModified())
 	{

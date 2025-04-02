@@ -2680,6 +2680,7 @@ idCVar r_forceShadowMapsOnAlphaTestedSurfaces( "r_forceShadowMapsOnAlphaTestedSu
 idCVar harm_r_shadowMapLod( "harm_r_shadowMapLod", "-1", CVAR_RENDERER | CVAR_INTEGER, "force using shadow map LOD(0 - 4, -1 = auto)" );
 idCVar harm_r_shadowMapBias( "harm_r_shadowMapBias", "0.001", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow's depth compare BIAS in shadow mapping" );
 idCVar harm_r_shadowMapAlpha( "harm_r_shadowMapAlpha", "1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow's alpha in shadow mapping" );
+idCVar harm_r_shadowMapCombine( "harm_r_shadowMapCombine", "1", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "combine local and global shadow mapping" );
 #if 0
 idCVar harm_r_shadowMapSampleFactor( "harm_r_shadowMapSampleFactor", "-1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)" );
 idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum near" );
