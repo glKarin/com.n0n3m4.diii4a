@@ -502,67 +502,6 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping_separate(viewLig
         RB_GLSL_DrawInteraction_noShadow(vLight);
     }
 }
-
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping_control(viewLight_t *vLight)
-{
-	if(vLight->shadowLOD >= 0)
-	{
-		int	side, sideStop;
-
-		if( vLight->parallel )
-		{
-			side = 0;
-			//sideStop = r_shadowMapSplits.GetInteger() + 1;
-			sideStop = 1;
-		}
-		else if( vLight->pointLight )
-		{
-			if( r_shadowMapSingleSide.GetInteger() != -1 )
-			{
-				side = r_shadowMapSingleSide.GetInteger();
-				sideStop = side + 1;
-			}
-			else
-			{
-				side = 0;
-				sideStop = 6;
-			}
-		}
-		else
-		{
-			side = -1;
-			sideStop = 0;
-		}
-
-		if(vLight->globalShadows || vLight->localShadows || (r_shadowMapPerforated && vLight->perforatedShadows))
-		{
-			qglDisable(GL_STENCIL_TEST);
-
-			for( int m = side; m < sideStop ; m++ )
-			{
-				RB_ShadowMapPasses( vLight->globalShadows, vLight->localShadows, r_shadowMapPerforated ? vLight->perforatedShadows : NULL, m );
-			}
-
-			qglEnable(GL_STENCIL_TEST);
-
-			RB_StencilShadowPass_shadowMapping(vLight->globalShadows);
-			RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
-			RB_StencilShadowPass_shadowMapping(vLight->localShadows);
-			RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
-		}
-		else
-		{
-			RB_GLSL_DrawInteraction_ptr(vLight);
-		}
-	}
-	else
-	{
-		RB_GLSL_DrawInteraction_ptr(vLight);
-	}
-}
-#endif
-
 #endif
 
 static ID_INLINE void RB_GLSL_DrawInteractionsFunction(RB_GLSL_DrawInteraction_f func)
@@ -670,9 +609,6 @@ void RB_GLSL_DrawInteractions(void)
 			r_dumpShadowMapFrontEnd = false;
 		}
 	}
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-	const bool PureShadowMapping = ShadowMapping && r_shadowMappingScheme == SHADOW_MAPPING_PURE;
-#endif
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE
@@ -773,26 +709,10 @@ void RB_GLSL_DrawInteractions(void)
 					}
 				}
 
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-				if(PureShadowMapping)
-				{
-#endif
 					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
 					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
 
 					qglEnable(GL_STENCIL_TEST);
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-				}
-				else
-				{
-					qglEnable(GL_STENCIL_TEST);
-
-					RB_StencilShadowPass_shadowMapping(vLight->globalShadows);
-					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
-					RB_StencilShadowPass_shadowMapping(vLight->localShadows);
-					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
-				}
-#endif
 			}
 			else
 			{
@@ -910,12 +830,7 @@ void RB_GLSL_DrawInteractions(void)
 			r_dumpShadowMap = true;
 			r_dumpShadowMapFrontEnd = false;
 		}
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-		const bool PureShadowMapping = ShadowMapping && r_shadowMappingScheme == SHADOW_MAPPING_PURE;
-		if(PureShadowMapping)
-			func = RB_GLSL_DrawInteraction_shadowMapping_control;
-		else
-#endif
+
 		func = r_shadowMapCombine ? RB_GLSL_DrawInteraction_shadowMapping : RB_GLSL_DrawInteraction_shadowMapping_separate;
 	}
 #endif
