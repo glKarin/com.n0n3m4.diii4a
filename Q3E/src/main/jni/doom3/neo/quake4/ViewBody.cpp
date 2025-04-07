@@ -611,6 +611,28 @@ void idViewBody::ExecuteState ( const char* statename ) {
 
 /*
 ================
+idWeapon::EnterCinematic
+================
+*/
+void idViewBody::EnterCinematic(void)
+{
+	StopSound(SND_CHANNEL_ANY, false);
+
+	Hide();
+}
+
+/*
+================
+idWeapon::ExitCinematic
+================
+*/
+void idViewBody::ExitCinematic(void)
+{
+	Show();
+}
+
+/*
+================
 idViewBody::State_Legs_Idle
 ================
 */

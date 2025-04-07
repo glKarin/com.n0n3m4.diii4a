@@ -94,6 +94,8 @@ public:
     virtual void			GetDebugInfo				( debugInfoProc_t proc, void* userData );
     idPlayer *              GetOwner                    ( void );
 	void					UpdateBody				    (void);
+	void					EnterCinematic				(void);
+	void					ExitCinematic				(void);
 
 protected:
     void				PlayAnim					( int channel, const char *animname, int blendFrames );

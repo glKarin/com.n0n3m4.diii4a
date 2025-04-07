@@ -3905,6 +3905,11 @@ void idPlayer::EnterCinematic( void ) {
    		weapon->PreSave();
 		weapon->EnterCinematic();
    	}
+#ifdef _MOD_VIEW_BODY
+	if (viewBody) {
+		viewBody->EnterCinematic();
+	}
+#endif
 
 	// Reset state flags   
 	memset ( &pfl, 0, sizeof(pfl) );
@@ -3930,6 +3935,11 @@ void idPlayer::ExitCinematic( void ) {
 		weapon->PostSave();
    		weapon->ExitCinematic();
    	}
+#ifdef _MOD_VIEW_BODY
+	if (viewBody) {
+		viewBody->ExitCinematic();
+	}
+#endif
    
    	SetAnimState( ANIMCHANNEL_TORSO, "Torso_Idle", 0 );
 	SetAnimState( ANIMCHANNEL_LEGS, "Legs_Idle", 0 );
@@ -8212,6 +8222,11 @@ bool idPlayer::EnterVehicle( idEntity* vehicle ) {
 	//HideCrosshair();
 // RAVEN END
   	
+#ifdef _MOD_VIEW_BODY
+	if( viewBody ) {
+		viewBody->Hide();
+	}
+#endif
   	return true;
 }
 
@@ -8236,6 +8251,11 @@ bool idPlayer::ExitVehicle ( bool force ) {
 	ShowCrosshair();
 // RAVEN END
 	
+#ifdef _MOD_VIEW_BODY
+	if( viewBody ) {
+		viewBody->Show();
+	}
+#endif
 	return true;
 }
 
