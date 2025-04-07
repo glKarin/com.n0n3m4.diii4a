@@ -316,6 +316,7 @@ class idRenderModel
 		virtual void				ReadFromDemoFile(class idDemoFile *f) = 0;
 		virtual void				WriteToDemoFile(class idDemoFile *f) = 0;
 #ifdef _RAVEN
+// ddynerman: Wolf LOD code
 // RAVEN BEGIN
 // bdube: surface flag manipulation
 	virtual int					GetSurfaceMask ( const char* surface ) const = 0;
@@ -324,6 +325,10 @@ class idRenderModel
 // dluetscher: added surface mask parameter
 	virtual idRenderModel *		InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask/* = ~SURF_COLLISION */ ) = 0;
 // RAVEN END
+
+		// jscott: for portal skies
+        virtual void                                SetHasSky( bool on ) = 0;
+        virtual bool                                GetHasSky( void ) const = 0;
 #endif
 #ifdef _HUMANHEAD
 	// HUMANHEAD pdm: Game access to liquid models

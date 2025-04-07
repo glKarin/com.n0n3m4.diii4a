@@ -118,7 +118,12 @@ class idRenderModelStatic : public idRenderModel
 			return InstantiateDynamicModel(ent, view, cachedModel);
 		}
 
-		bool                        sky;
+		virtual void SetHasSky( bool on ) {
+			hasSky = on;
+		}
+		virtual bool GetHasSky( void ) const {
+			return hasSky;
+		}
 #endif
 #ifdef _HUMANHEAD
 	    virtual void				IntersectBounds( const idBounds &bounds, float displacement ) { }
@@ -152,6 +157,9 @@ class idRenderModelStatic : public idRenderModel
 		static idCVar				r_slopVertex;			// merge xyz coordinates this far apart
 		static idCVar				r_slopTexCoord;			// merge texture coordinates this far apart
 		static idCVar				r_slopNormal;			// merge normals that dot less than this
+#ifdef _RAVEN //karin: portal sky
+		bool                        hasSky;
+#endif
 #ifdef _HUMANHEAD
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
 	    bool						bIsGUM;

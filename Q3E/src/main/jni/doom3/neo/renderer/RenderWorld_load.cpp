@@ -165,8 +165,8 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 // jmarshall - quake 4 proc format
     if (!src->PeekTokenString("{") && !src->PeekTokenString("}"))
     {
-        int sky = src->ParseInt();
-		(static_cast<idRenderModelStatic *>(model))->sky = sky ? true : false;
+        int hasSky = src->ParseInt();
+		(static_cast<idRenderModelStatic *>(model))->SetHasSky(hasSky ? true : false);
     }
 // jmarshall end
 #endif
@@ -1077,6 +1077,6 @@ bool idRenderWorldLocal::HasSkybox(int areaNum)
 		return false;
 
 	const idRenderModel *model = renderModelManager->CheckModel(va("_area%i", areaNum));
-	return model ? static_cast<const idRenderModelStatic *>(model)->sky : false;
+	return model ? static_cast<const idRenderModelStatic *>(model)->GetHasSky() : false;
 }
 #endif
