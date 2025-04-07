@@ -1615,12 +1615,29 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			MatchToken(src, ",");
 			b = ParseExpression(src);
 			// this just scales without a centering
+#ifdef _RAVEN //karin: for texfure/cameraView1 in game/core1
+			if(ts->dynamic == DI_REMOTE_RENDER) //karin: like centerscale
+			{
+			// this subtracts 0.5, then scales, then adds 0.5
+			matrix[0][0] = a;
+			matrix[0][1] = GetExpressionConstant(0);
+			matrix[0][2] = EmitOp(GetExpressionConstant(0.5), EmitOp(GetExpressionConstant(0.5), a, OP_TYPE_MULTIPLY), OP_TYPE_SUBTRACT);
+			matrix[1][0] = GetExpressionConstant(0);
+			matrix[1][1] = b;
+			matrix[1][2] = EmitOp(GetExpressionConstant(0.5), EmitOp(GetExpressionConstant(0.5), b, OP_TYPE_MULTIPLY), OP_TYPE_SUBTRACT);
+			}
+			else
+			{
+#endif
 			matrix[0][0] = a;
 			matrix[0][1] = GetExpressionConstant(0);
 			matrix[0][2] = GetExpressionConstant(0);
 			matrix[1][0] = GetExpressionConstant(0);
 			matrix[1][1] = b;
 			matrix[1][2] = GetExpressionConstant(0);
+#ifdef _RAVEN //karin: for texfure/cameraView1 in game/core1
+			}
+#endif
 
 			MultiplyTextureMatrix(ts, matrix);
 			continue;
@@ -1991,9 +2008,6 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			continue;
 		}
         if (!token.Icmp("shaderLevel3")) {
-			continue;
-		}
-        if (!token.Icmp("shaderLevel1")) {
 			continue;
 		}
         if (!token.Icmp("shuttleView")) {
