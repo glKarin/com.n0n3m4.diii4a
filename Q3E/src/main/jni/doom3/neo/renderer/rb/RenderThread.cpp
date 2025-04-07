@@ -51,6 +51,10 @@ idRenderThread::idRenderThread()
     memset(&render_thread, 0, sizeof(render_thread));
 //    imagesAlloc.Resize( 1024, 1024 );
 //    imagesPurge.Resize( 1024, 1024 );
+#ifdef _QUEUE_LIST_RECYCLE
+	imagesAlloc.SetRecycle(true);
+	imagesPurge.SetRecycle(true);
+#endif
 }
 
 void idRenderThread::BackendThreadExecute(void)
