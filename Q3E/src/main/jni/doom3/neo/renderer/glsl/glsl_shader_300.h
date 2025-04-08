@@ -1865,7 +1865,7 @@ ES3_STENCIL_SHADOW_SAMPLE_POISSON_DISK
 "        -toLightGlobal.z,\n"
 "        toLightGlobal.z\n"
 "    );\n"
-"    for( int i = 0; i < 6; i++ ) {\n"
+"    for( int i = 0; i < 6; ++i ) {\n"
 "        //if( axis[i] > axis[shadowIndex] ) {        shadowIndex = i;    }\n"
 "        shadowIndex = axis[i] > axis[shadowIndex] ? i : shadowIndex;\n"
 "    }\n"

@@ -781,6 +781,14 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 					vparm[d] = regs[ newStage->vertexParms[i][d] ];
 				GL_Uniform4fv(SHADER_PARMS_ADDR(u_vertexParm, i), vparm.ToFloatPtr());
 			}
+#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+			for ( int i = 0; i < newStage->numFragmentParms; i++ ) {
+				idVec4 fparm;
+				for (int d = 0; d < 4; d++)
+					fparm[d] = regs[ newStage->fragmentParms[i][d] ];
+				GL_Uniform4fv(SHADER_PARMS_ADDR(u_fragmentParm, i), fparm.ToFloatPtr());
+			}
+#endif
 
 			// setting textures
 			// note: the textures are also bound to TUs at this moment
@@ -1035,7 +1043,7 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 		}
 
 		// only dump if in a 3d view
-#if !defined(_RAVEN) //karin: sniper's blur is 2D //TODO: check it for avoid unused operation
+#if !defined(_RAVEN) && !defined(_HUMANHEAD) //karin: sniper's blur is 2D on Quake4 and spiritWalk and deathwalk on Prey //TODO: check it for avoid unused operation
 		if (backEnd.viewDef->viewEntitys)
 #endif
 		{

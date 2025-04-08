@@ -757,7 +757,12 @@ int idMaterial::ParseTerm(idLexer &src)
 #endif
 
 	if (!token.Icmp("fragmentPrograms")) {
+#ifdef _HUMANHEAD //karin: only support some ARB shaders to GLSL shaders
+		pd->registersAreConstant = false;
+		return EmitOp(0, 0, OP_TYPE_FRAGMENTPROGRAMS);
+#else
 		return GetExpressionConstant((float) glConfig.ARBFragmentProgramAvailable);
+#endif
 	}
 
 	if (!token.Icmp("sound")) {
@@ -1914,6 +1919,12 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			ParseFragmentMap(src, &newStage);
 			continue;
 		}
+#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+        if (!token.Icmp("fragmentparm")) {
+			ParseFragmentParm(src, &newStage);
+            continue;
+        }
+#endif
 
 #ifdef _RAVEN //karin: GLSL newShaderStage
 		if (!token.Icmp("glslProgram")) {
@@ -1968,17 +1979,19 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
         {
             continue;
         }
-        if (!token.Icmp("specularEXP"))
+        if (!token.Icmp("specularexp"))
         {
+#if 1
+			ss->specular.exponent = src.ParseFloat();
+			MatchToken(src, ",");
+			ss->specular.brightness = src.ParseFloat();
+#else
             idStr tmp;
             src.ParseRestOfLine(tmp); // 2 float
+#endif
             continue;
         }
 
-        if (!token.Icmp("fragmentparm")) {
-            src.SkipRestOfLine();
-            continue;
-        }
         if (!token.Icmp("shaderFallback3")) {
 			continue;
 		}
@@ -3363,6 +3376,21 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 				}
 				break;
 #endif
+#ifdef _HUMANHEAD //karin: calc dynamic variants on material stage
+			case OP_TYPE_FRAGMENTPROGRAMS: { //karin: check has ARB to GLSL shader stage is enabled current
+					float f = 0.0;
+					if (stages && !r_skipNewAmbient.GetBool()) {
+						for (int m = 0; m < numStages; m++) {
+							if (stages[ m ].newStage && stages[ m ].newStage->glslProgram > 0) {
+								f = 1.0;
+								break;
+							}
+						}
+					}
+					registers[op->c] = f;
+				}
+				break;
+#endif
 			default:
 				common->FatalError("R_EvaluateExpression: bad opcode");
 		}
@@ -3674,3 +3702,65 @@ void idMaterial::EvaluateRegisters( float *regs, const float entityParms[MAX_ENT
 	this->EvaluateRegisters(regs, entityParms, view, emitter);
 }
 #endif
+
+#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+/*
+================
+idMaterial::ParseFragmentParm
+
+If there is a single value, it will be repeated across all elements
+If there are two values, 3 = 0.0, 4 = 1.0
+if there are three values, 4 = 1.0
+================
+*/
+void idMaterial::ParseFragmentParm(idLexer &src, newShaderStage_t *newStage)
+{
+	idToken				token;
+
+	src.ReadTokenOnLine(&token);
+	int	parm = token.GetIntValue();
+
+	if (!token.IsNumeric() || parm < 0 || parm >= MAX_FRAGMENT_PARMS) {
+		common->Warning("bad fragmentParm number\n");
+		SetMaterialFlag(MF_DEFAULTED);
+		return;
+	}
+
+	if (parm >= newStage->numFragmentParms) {
+		newStage->numFragmentParms = parm+1;
+	}
+
+	newStage->fragmentParms[parm][0] = ParseExpression(src);
+
+	src.ReadTokenOnLine(&token);
+
+	if (!token[0] || token.Icmp(",")) {
+		newStage->fragmentParms[parm][1] =
+		        newStage->fragmentParms[parm][2] =
+		                newStage->fragmentParms[parm][3] = newStage->fragmentParms[parm][0];
+		return;
+	}
+
+	newStage->fragmentParms[parm][1] = ParseExpression(src);
+
+	src.ReadTokenOnLine(&token);
+
+	if (!token[0] || token.Icmp(",")) {
+		newStage->fragmentParms[parm][2] = GetExpressionConstant(0);
+		newStage->fragmentParms[parm][3] = GetExpressionConstant(1);
+		return;
+	}
+
+	newStage->fragmentParms[parm][2] = ParseExpression(src);
+
+	src.ReadTokenOnLine(&token);
+
+	if (!token[0] || token.Icmp(",")) {
+		newStage->fragmentParms[parm][3] = GetExpressionConstant(1);
+		return;
+	}
+
+	newStage->fragmentParms[parm][3] = ParseExpression(src);
+}
+#endif
+

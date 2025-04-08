@@ -444,6 +444,11 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMask", SHADER_HEATHAZE_WITH_MASK, &heatHazeWithMaskShader, HEATHAZEWITHMASK_VERT, HEATHAZEWITHMASK_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", SHADER_HEATHAZE_WITH_MASK_AND_VERTEX, &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("colorProcess", SHADER_COLORPROCESS, &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
+#ifdef _HUMANHEAD
+    ret.Append(GLSL_SHADER_SOURCE("screeneffect", SHADER_SCREENEFFECT, &screeneffectShader, SCREENEFFECT_VERT, SCREENEFFECT_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("radialblur", SHADER_RADIALBLUR, &radialblurShader, RADIALBLUR_VERT, RADIALBLUR_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("screenprocess", SHADER_SCREENPROCESS, &screenprocessShader, SCREENPROCESS_VERT, SCREENPROCESS_FRAG, "", ""));
+#endif
 
 	// shadow mapping
 #ifdef _SHADOW_MAPPING
@@ -821,6 +826,12 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 		if(shader->u_fragmentMap[i] != -1)
 			qglUniform1i(shader->u_fragmentMap[i], i);
 	}
+#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+	for (i = 0; i < MAX_FRAGMENT_PARMS; i++) {
+		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentParm%d", i);
+		shader->u_fragmentParm[i] = GL_GetUniformLocation(shader->program, buffer);
+	}
+#endif
 
 	//k: add cubemap texture units
 	for ( i = 0; i < MAX_FRAGMENT_IMAGES; i++ ) {

@@ -1566,6 +1566,11 @@ typedef enum {
 	SHADER_HEATHAZE_WITH_MASK,
 	SHADER_HEATHAZE_WITH_MASK_AND_VERTEX,
 	SHADER_COLORPROCESS,
+#ifdef _HUMANHEAD
+	SHADER_SCREENEFFECT, // spiritview
+	SHADER_RADIALBLUR, // deathview
+	SHADER_SCREENPROCESS, // unused
+#endif
 	// shadow mapping
 #ifdef _SHADOW_MAPPING
 	SHADER_DEPTH,
@@ -1606,7 +1611,7 @@ typedef enum {
 #define SHADER_BASE_END SHADER_TEXGEN
 
 #define SHADER_NEW_STAGE_BEGIN SHADER_HEATHAZE
-#define SHADER_NEW_STAGE_END SHADER_COLORPROCESS
+#define SHADER_NEW_STAGE_END (SHADER_DEPTH - 1)
 
 #ifdef _SHADOW_MAPPING
 #define SHADER_SHADOW_MAPPING_BEGIN SHADER_DEPTH
@@ -1741,6 +1746,9 @@ typedef struct shaderProgram_s {
 	//k: cubemap texture units
 	GLint		u_fragmentCubeMap[MAX_FRAGMENT_IMAGES];
 	GLint		u_vertexParm[MAX_VERTEX_PARMS];
+#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+	GLint		u_fragmentParm[MAX_FRAGMENT_PARMS];
+#endif
 	GLint		texgenS;
 	GLint		texgenT;
 	GLint		texgenQ;

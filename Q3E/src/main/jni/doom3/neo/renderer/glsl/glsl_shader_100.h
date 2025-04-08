@@ -1924,7 +1924,7 @@ SHADOW_MAPPING_SAMPLE_CUBE_POISSON_DISK
 "    axis[3] =  toLightGlobal.y;\n"
 "    axis[4] = -toLightGlobal.z;\n"
 "    axis[5] =  toLightGlobal.z;\n"
-"    for( int i = 0; i < 6; i++ ) {\n"
+"    for( int i = 0; i < 6; ++i ) {\n"
 "        //if( axis[i] > axis[shadowIndex] ) {        shadowIndex = i;    }\n"
 "        shadowIndex = axis[i] > axis[shadowIndex] ? i : shadowIndex;\n"
 "    }\n"

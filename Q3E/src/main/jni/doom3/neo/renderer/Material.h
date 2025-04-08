@@ -220,7 +220,18 @@ typedef enum {
 } stageVertexColor_t;
 
 static const int	MAX_FRAGMENT_IMAGES = 8;
+#ifdef _RAVEN
+// RAVEN BEGIN
+// AReis: Increased MAX_VERTEX_PARMS from 4 to 16 and added MAX_FRAGMENT_PARMS.
+static const int        MAX_VERTEX_PARMS = 16;
+static const int        MAX_FRAGMENT_PARMS = 8;
+// RAVEN END
+#elif defined(_HUMANHEAD)
+static const int	MAX_VERTEX_PARMS = 8;
+static const int	MAX_FRAGMENT_PARMS = 8;
+#else
 static const int	MAX_VERTEX_PARMS = 4;
+#endif
 #ifdef _RAVEN
 class rvNewShaderStage;
 #endif
@@ -229,6 +240,14 @@ typedef struct {
 	int					vertexProgram;
 	int					numVertexParms;
 	int					vertexParms[MAX_VERTEX_PARMS][4];	// evaluated register indexes
+
+#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+										   // RAVEN BEGIN
+// AReis: New Fragment Parm stuff.
+        int                                        numFragmentParms;
+        int                                        fragmentParms[MAX_FRAGMENT_PARMS][4];        // evaluated register indexes
+// RAVEN END
+#endif
 
 	int					fragmentProgram;
 	int					numFragmentProgramImages;
@@ -893,6 +912,9 @@ class idMaterial : public idDecl
 		void				SortInteractionStages();
 		void				AddImplicitStages(const textureRepeat_t trpDefault = TR_REPEAT);
 		void				CheckForConstantRegisters();
+#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+		void				ParseFragmentParm(idLexer &src, newShaderStage_t *newStage);
+#endif
 
 	private:
 		idStr				desc;				// description
