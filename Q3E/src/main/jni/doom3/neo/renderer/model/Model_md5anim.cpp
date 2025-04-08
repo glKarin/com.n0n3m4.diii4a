@@ -1066,7 +1066,7 @@ namespace md5anim
     {
         if(!md5anim->LoopAnim(edit.startFrame, edit.endFrame))
         {
-            common->Warning("%2d. Loop md5anim error: %s(%d - %d)", currentIndex, edit.startFrame, edit.endFrame);
+            common->Warning("%2d. Loop md5anim error: (%d - %d)", currentIndex, edit.startFrame, edit.endFrame);
             return false;
         }
 

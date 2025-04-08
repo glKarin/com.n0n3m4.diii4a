@@ -2,7 +2,11 @@
 
 // instead game::idTestModel in engine using idGameEdit interface
 
-#define MODEL_OFFSET_DISTANCE 50
+#define MODEL_TEST_OFFSET_DISTANCE 50.0f
+#define MODEL_TEST_OFFSET_LENGTH 1000.0f
+
+#define MODEL_TEST_ENTITY_NAME "idtech4amm_model_test"
+#define MODEL_TEST_ENTITY_DEF_PATH "def/" MODEL_TEST_ENTITY_NAME ".def"
 
 namespace modeltest
 {
@@ -60,6 +64,8 @@ namespace modeltest
         int                     GetAnimIndex(const char *animName) const;
         const char *            GetAnimName(int index, int *realIndex = NULL) const;
         void                    UpdateAnimTime(int time);
+        void					CreateModel(const char *model, const char *classname = NULL, const char *skin = NULL, const idDict *dict = NULL);
+        bool					CreateEntity(const char *model, idStr &name);
 
     private:
         renderEntity_t          worldEntity;
@@ -577,6 +583,37 @@ namespace modeltest
         TestFrame(&frameIndex);
     }
 
+    bool idModelTest::CreateEntity(const char *model, idStr &name)
+	{
+		const char *entityName = MODEL_TEST_ENTITY_NAME;
+		const char *defPath = MODEL_TEST_ENTITY_DEF_PATH;
+
+		const idDecl *decl = declManager->FindType(DECL_ENTITYDEF, entityName, false);
+		if(!decl)
+		{
+			bool suc = declManager->CreateNewDecl(DECL_ENTITYDEF, entityName, defPath);
+			if(!suc)
+			{
+				common->Warning("Create model test entityDef fail: %s -> %s", entityName, defPath);
+				return false;
+			}
+		}
+
+		idStr defStr;
+		defStr.Append(va("entityDef %s ", entityName));
+		defStr.Append("{\n");
+		defStr.Append(" \"spawnclass\" \"idAnimatedEntity\"\n");
+		defStr.Append(va(" \"model\" \"%s\"\n", model));
+		defStr.Append("}\n");
+
+		fileSystem->WriteFile(defPath, defStr.c_str(), defStr.Length());
+		declManager->ReloadFile(defPath, true);
+		fileSystem->RemoveFile(defPath);
+
+		name = entityName;
+		return true;
+	}
+
     void idModelTest::TestEntity(const char *classname, const char *skin, const idDict *dict)
     {
         idRenderWorld *world = RenderWorld();
@@ -585,10 +622,36 @@ namespace modeltest
 
         const idDict *args = gameEdit->FindEntityDefDict(classname);
         idStr name = args->GetString("model");
-        TestModel(name, classname, skin, dict);
+        CreateModel(name.c_str(), classname, skin, dict);
     }
-
+	
     void idModelTest::TestModel(const char *model, const char *classname, const char *skin, const idDict *dict)
+	{
+        idRenderWorld *world = RenderWorld();
+        if(!world)
+            return;
+
+		idStr modelName(model);
+		idStr extension;
+		modelName.ExtractFileExtension(extension);
+		if ((extension.Icmp("ase") == 0) || (extension.Icmp("lwo") == 0) || (extension.Icmp("ma") == 0)
+#ifdef _MODEL_OBJ
+				|| (extension.Icmp("obj") == 0)
+#endif
+#ifdef _MODEL_DAE
+				|| (extension.Icmp("dae") == 0)
+#endif
+		   )
+			CreateModel(model, "func_static", skin, dict);
+		else
+		{
+			idStr name;
+			if(CreateEntity(model, name))
+				CreateModel(model, name.c_str(), skin, dict);
+		}
+	}
+
+    void idModelTest::CreateModel(const char *model, const char *classname, const char *skin, const idDict *dict)
     {
         idRenderWorld *world = RenderWorld();
         if(!world)
@@ -600,18 +663,24 @@ namespace modeltest
         if(modelName.IsEmpty())
             return;
 
-        if(!classname || !classname[0])
-        {
-            idStr extension;
-            modelName.ExtractFileExtension(extension);
-            if ((extension.Icmp("ase") == 0) || (extension.Icmp("lwo") == 0) || (extension.Icmp("ma") == 0)
+		bool isAnimated;
+		idStr extension;
+		modelName.ExtractFileExtension(extension);
+		if ((extension.Icmp("ase") == 0) || (extension.Icmp("lwo") == 0) || (extension.Icmp("ma") == 0)
 #ifdef _MODEL_OBJ
-                                                                                || (extension.Icmp("obj") == 0)
+				|| (extension.Icmp("obj") == 0)
 #endif
 #ifdef _MODEL_DAE
-                                                                                   || (extension.Icmp("dae") == 0)
+				|| (extension.Icmp("dae") == 0)
 #endif
-                    )
+		   )
+			isAnimated = false;
+		else
+			isAnimated = true;
+
+        if(!classname || !classname[0])
+        {
+			if(!isAnimated)
                 animClass = "func_static";
             else
                 animClass = "func_animate";
@@ -623,7 +692,18 @@ namespace modeltest
         gameEdit->PlayerGetEyePosition(pos);
         idAngles angles;
         gameEdit->PlayerGetViewAngles(angles);
-        pos += angles.ToForward() * MODEL_OFFSET_DISTANCE;
+
+		idVec3 forward = angles.ToForward();
+		modelTrace_t mt;
+		idVec3 start = pos + forward * MODEL_TEST_OFFSET_DISTANCE;
+		idVec3 end = start + forward * MODEL_TEST_OFFSET_LENGTH;
+		if (!world->Trace(mt, start, end, 0.0f, true)) {
+			pos += forward * MODEL_TEST_OFFSET_DISTANCE;
+		}
+		else
+		{
+			pos = mt.point;
+		}
 
         idStr modelOrigin;
         modelOrigin += pos.x;
@@ -660,6 +740,12 @@ namespace modeltest
         spawnArgs.SetBool("noDynamicInteractions", noDynamicInteractions);
         if(skin && skin[0])
             spawnArgs.Set("skin", skin);
+		if(isAnimated)
+		{
+			spawnArgs.Set("wait", "0");
+			spawnArgs.Set("cycle", "-1");
+		}
+
         gameEdit->ParseSpawnArgsToRenderEntity(&spawnArgs, &worldEntity);
 
         if (worldEntity.hModel) {
