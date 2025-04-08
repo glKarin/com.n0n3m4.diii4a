@@ -1162,7 +1162,7 @@ void CL_InitUI( void ) {
 
 	// load the dll or bytecode
 #ifdef __ANDROID__ //karin: ui rename on Android
-	uivm = VM_Create( "realrtcwui", CL_UISystemCalls, Cvar_VariableValue("vm_ui") );
+	uivm = VM_Create( "realrtcw" _HARM_REALRTCW_DLL_VER "ui", CL_UISystemCalls, Cvar_VariableValue("vm_ui") );
 #else
 	uivm = VM_Create( "ui", CL_UISystemCalls, Cvar_VariableValue("vm_ui") );
 #endif

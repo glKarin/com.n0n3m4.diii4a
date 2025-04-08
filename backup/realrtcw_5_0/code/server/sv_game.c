@@ -981,7 +981,7 @@ void SV_InitGameProgs( void ) {
 
 	// load the dll or bytecode
 #ifdef __ANDROID__ //karin: qagame rename on Android
-	gvm = VM_Create( "realrtcwqagame", SV_GameSystemCalls, Cvar_VariableValue( "vm_game" ) );
+	gvm = VM_Create( "realrtcw" _HARM_REALRTCW_DLL_VER "qagame", SV_GameSystemCalls, Cvar_VariableValue( "vm_game" ) );
 #else
 	gvm = VM_Create( "qagame", SV_GameSystemCalls, Cvar_VariableValue( "vm_game" ) );
 #endif

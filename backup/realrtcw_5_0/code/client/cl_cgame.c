@@ -978,7 +978,7 @@ void CL_InitCGame( void ) {
 	}
 
 #ifdef __ANDROID__ //karin: cgame rename on Android
-	cgvm = VM_Create( "realrtcwcgame", CL_CgameSystemCalls, interpret );
+	cgvm = VM_Create( "realrtcw" _HARM_REALRTCW_DLL_VER "cgame", CL_CgameSystemCalls, interpret );
 #else
 	cgvm = VM_Create( "cgame", CL_CgameSystemCalls, interpret );
 #endif

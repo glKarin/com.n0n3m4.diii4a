@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
-project(realrtcw)
+project(realrtcw_5_0)
+set(REALRTCW_VERSION "5.0")
+set(REALRTCW_SUFFIX "_5_0")
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 98)
-
-set(REALRTCW_VERSION "5.0")
 
 option(USE_CODEC_OPUS "" ON)
 option(USE_FREETYPE "" ON)
@@ -675,15 +675,22 @@ if(USE_INTERNAL_ZLIB)
             )
 endif()
 
-set(REALRTCWLIBRARY RealRTCW)
+set(REALRTCW_DLL_PREFIX realrtcw${REALRTCW_SUFFIX})
+add_definitions(-D_HARM_REALRTCW_DLL_VER=\"${REALRTCW_SUFFIX}\")
+
+set(REALRTCWLIBRARY RealRTCW${REALRTCW_SUFFIX})
+set(REALRTCWLIBRARY_UI ${REALRTCW_DLL_PREFIX}ui)
+set(REALRTCWLIBRARY_CGAME ${REALRTCW_DLL_PREFIX}cgame)
+set(REALRTCWLIBRARY_QAGAME ${REALRTCW_DLL_PREFIX}qagame)
+set(REALRTCWLIBRARY_VORBIS ${REALRTCW_DLL_PREFIX}vorbis)
 
 # struct define conflict with opus
-add_library(realrtcw_vorbis STATIC
+add_library(${REALRTCWLIBRARY_VORBIS} STATIC
         ${realrtcw_vorbis_src}
 )
-set_target_properties(realrtcw_vorbis PROPERTIES COMPILE_FLAGS "-fPIC")
-target_include_directories(realrtcw_vorbis PRIVATE "code/${realrtcw_vorbis_dir}/include" "code/${realrtcw_vorbis_dir}/lib")
-target_include_directories(realrtcw_vorbis PRIVATE "code/${realrtcw_ogg_dir}/include")
+set_target_properties(${REALRTCWLIBRARY_VORBIS} PROPERTIES COMPILE_FLAGS "-fPIC")
+target_include_directories(${REALRTCWLIBRARY_VORBIS} PRIVATE "code/${realrtcw_vorbis_dir}/include" "code/${realrtcw_vorbis_dir}/lib")
+target_include_directories(${REALRTCWLIBRARY_VORBIS} PRIVATE "code/${realrtcw_ogg_dir}/include")
 
 add_library(${REALRTCWLIBRARY} SHARED
         ${realrtcwrenderer_src}
@@ -697,7 +704,7 @@ add_library(${REALRTCWLIBRARY} SHARED
 set_target_properties(${REALRTCWLIBRARY} PROPERTIES COMPILE_DEFINITIONS "BOTLIB")
 target_link_libraries(${REALRTCWLIBRARY}
         ${realrtcwclient_libs}
-        realrtcw_vorbis
+        ${REALRTCWLIBRARY_VORBIS}
         )
 target_include_directories(${REALRTCWLIBRARY} PRIVATE "code/curl-7.60.0/include")
 target_include_directories(${REALRTCWLIBRARY} PRIVATE "code/${realrtcw_ogg_dir}/include")
@@ -711,25 +718,25 @@ if(USE_FREETYPE)
 endif()
 target_include_directories(${REALRTCWLIBRARY} PRIVATE "code/jpeg-8c")
 target_include_directories(${REALRTCWLIBRARY} PRIVATE "code")
-target_include_directories(${REALRTCWLIBRARY} PRIVATE "../common")
+target_include_directories(${REALRTCWLIBRARY} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../common")
 if(USE_INTERNAL_ZLIB)
     target_include_directories(${REALRTCWLIBRARY} PRIVATE "code/${realrtcw_zlib_dir}")
 endif()
 
-add_library(realrtcwui SHARED
+add_library(${REALRTCWLIBRARY_UI} SHARED
         ${realrtcwui_src}
         )
-set_target_properties(realrtcwui PROPERTIES COMPILE_DEFINITIONS "UI")
-set_target_properties(realrtcwui PROPERTIES COMPILE_FLAGS "-fPIC")
+set_target_properties(${REALRTCWLIBRARY_UI} PROPERTIES COMPILE_DEFINITIONS "UI")
+set_target_properties(${REALRTCWLIBRARY_UI} PROPERTIES COMPILE_FLAGS "-fPIC")
 
-add_library(realrtcwcgame SHARED
+add_library(${REALRTCWLIBRARY_CGAME} SHARED
         ${realrtcwcgame_src}
         )
-set_target_properties(realrtcwcgame PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL;CGAME")
-set_target_properties(realrtcwcgame PROPERTIES COMPILE_FLAGS "-fPIC")
+set_target_properties(${REALRTCWLIBRARY_CGAME} PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL;CGAME")
+set_target_properties(${REALRTCWLIBRARY_CGAME} PROPERTIES COMPILE_FLAGS "-fPIC")
 
-add_library(realrtcwqagame SHARED
+add_library(${REALRTCWLIBRARY_QAGAME} SHARED
         ${realrtcwgame_src}
         )
-set_target_properties(realrtcwqagame PROPERTIES COMPILE_DEFINITIONS "GAMEDLL;QAGAME")
-set_target_properties(realrtcwqagame PROPERTIES COMPILE_FLAGS "-fPIC")
+set_target_properties(${REALRTCWLIBRARY_QAGAME} PROPERTIES COMPILE_DEFINITIONS "GAMEDLL;QAGAME")
+set_target_properties(${REALRTCWLIBRARY_QAGAME} PROPERTIES COMPILE_FLAGS "-fPIC")
