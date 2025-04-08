@@ -9,6 +9,10 @@ cmake_minimum_required(VERSION 3.10.3 FATAL_ERROR)
 
 project(ETLEGACY C CXX)
 
+#karin: make it static, forbid build everytime when run cmake
+set(ETL_BUILD_DATE "2024-11-12")
+set(ETL_BUILD_TIME "00:00:00")
+
 if(NOT ANDROID)
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.21")
     cmake_policy(SET CMP0121 NEW) # NEW OLD
