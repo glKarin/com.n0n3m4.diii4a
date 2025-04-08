@@ -2049,6 +2049,14 @@ void idPlayer::Spawn(void)
 	inventory.selPDA = 0;
 
 	if (!gameLocal.isMultiplayer) {
+#ifdef _D3LE
+
+        int startingHealth = gameLocal.world->spawnArgs.GetInt( "startingHealth", "0");
+        if ( (startingHealth > 0) && (health > startingHealth) )
+        {
+            health = startingHealth;
+        }
+#endif
 		if (g_skill.GetInteger() < 2) {
 			if (health < 25) {
 				health = 25;
