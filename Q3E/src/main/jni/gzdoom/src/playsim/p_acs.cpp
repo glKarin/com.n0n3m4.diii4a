@@ -6747,7 +6747,7 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 		case ACSF_StartSlideshow:
 			MIN_ARG_COUNT(1);
-			G_StartSlideshow(Level, FName(Level->Behaviors.LookupString(args[0])));
+			G_StartSlideshow(Level, FName(Level->Behaviors.LookupString(args[0])), FSTATE_InLevel);
 			break;
 
 		case ACSF_GetSectorHealth:
@@ -10336,6 +10336,11 @@ scriptwait:
 			break;
  		}
  	}
+
+	// There are several or more p-codes that can trigger a division or modulus of zero.
+	// Reset the active behavior back to the original if this happens.
+	if (state == SCRIPT_DivideBy0 || state == SCRIPT_ModulusBy0)
+		activeBehavior = savedActiveBehavior;
 
 	if (runaway != 0 && InModuleScriptNumber >= 0)
 	{

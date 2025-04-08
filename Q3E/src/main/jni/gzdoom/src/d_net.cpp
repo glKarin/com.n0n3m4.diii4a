@@ -75,7 +75,9 @@
 
 EXTERN_CVAR (Int, disableautosave)
 EXTERN_CVAR (Int, autosavecount)
-EXTERN_CVAR(Bool, cl_capfps)
+EXTERN_CVAR (Bool, cl_capfps)
+EXTERN_CVAR (Bool, vid_vsync)
+EXTERN_CVAR (Int, vid_maxfps)
 
 //#define SIMULATEERRORS		(RAND_MAX/3)
 #define SIMULATEERRORS			0
@@ -85,6 +87,8 @@ extern FString	savedescription;
 extern FString	savegamefile;
 
 extern short consistancy[MAXPLAYERS][BACKUPTICS];
+
+extern bool AppActive;
 
 #define netbuffer (doomcom.data)
 
@@ -149,6 +153,9 @@ static int 	entertic;
 static int	oldentertics;
 
 extern	bool	 advancedemo;
+
+CVAR(Bool, vid_dontdowait, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+CVAR(Bool, vid_lowerinbackground, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
 
 CVAR(Bool, net_ticbalance, false, CVAR_SERVERINFO | CVAR_NOSAVE)
 CUSTOM_CVAR(Int, net_extratic, 0, CVAR_SERVERINFO | CVAR_NOSAVE)
@@ -1878,6 +1885,12 @@ void TryRunTics (void)
 
 	bool doWait = (cl_capfps || pauseext || (r_NoInterpolate && !M_IsAnimated()));
 
+	if (vid_dontdowait && ((vid_maxfps > 0) || (vid_vsync == true)))
+		doWait = false;
+
+	if (!AppActive && vid_lowerinbackground)
+		doWait = true;
+
 	// get real tics
 	if (doWait)
 	{
@@ -2378,7 +2391,6 @@ void Net_DoCommand (int type, uint8_t **stream, int player)
 	case DEM_SUMMONFRIEND2:
 	case DEM_SUMMONFOE2:
 		{
-			PClassActor *typeinfo;
 			int angle = 0;
 			int16_t tid = 0;
 			uint8_t special = 0;
@@ -2393,11 +2405,11 @@ void Net_DoCommand (int type, uint8_t **stream, int player)
 				for(i = 0; i < 5; i++) args[i] = ReadInt32(stream);
 			}
 
-			typeinfo = PClass::FindActor(s);
-			if (typeinfo != NULL)
+			AActor *source = players[player].mo;
+			if(source != NULL)
 			{
-				AActor *source = players[player].mo;
-				if (source != NULL)
+				PClassActor * typeinfo = PClass::FindActor(s);
+				if (typeinfo != NULL)
 				{
 					if (GetDefaultByType (typeinfo)->flags & MF_MISSILE)
 					{
@@ -2440,6 +2452,20 @@ void Net_DoCommand (int type, uint8_t **stream, int player)
 								}
 								if(tid) spawned->SetTID(tid);
 							}
+						}
+					}
+				}
+				else
+				{ // not an actor, must be a visualthinker
+					PClass * typeinfo = PClass::FindClass(s);
+					if(typeinfo && typeinfo->IsDescendantOf("VisualThinker"))
+					{
+						DVector3 spawnpos = source->Vec3Angle(source->radius * 4, source->Angles.Yaw, 8.);
+						auto vt = DVisualThinker::NewVisualThinker(source->Level, typeinfo);
+						if(vt)
+						{
+							vt->PT.Pos = spawnpos;
+							vt->UpdateSector();
 						}
 					}
 				}

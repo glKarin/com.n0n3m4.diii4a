@@ -160,11 +160,9 @@ public final class Q3EGlobals
     public static final String GAME_VERSION_D3BFG_OPENGL = "OpenGL"; // Doom3-BFG(OpenGL)
     public static final String GAME_VERSION_D3BFG_VULKAN = "Vulkan"; // Doom3-BFG(Vulkan)
 
-    public static final String GAME_VERSION_REALRTCW_5_0 = "5.0"; // RealRTCW 5.0
-    public static final String GAME_VERSION_REALRTCW     = "5.1"; // RealRTCW 5.1
+    //public static final String GAME_VERSION_REALRTCW     = "5.1"; // RealRTCW 5.1
 
-    public static final String GAME_VERSION_TDM_2_12 = "2.12"; // TDM 2.12
-    public static final String GAME_VERSION_TDM      = "2.13"; // TDM 2.13
+    //public static final String GAME_VERSION_TDM      = "2.13"; // TDM 2.13
 
     // game config file
     public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg";
@@ -277,7 +275,6 @@ public final class Q3EGlobals
         DOOM3BFG_HLSL_SHADER,
         TDM_GLSL_SHADER,
         GZDOOM_RESOURCE,
-        TDM_2_12_GLSL_SHADER,
         DOOM3_BFG_CHINESE_TRANSLATION,
     }
 
@@ -405,7 +402,7 @@ public final class Q3EGlobals
     public static final String TDM_GLSL_SHADER_VERSION        = "2.13.1"; // 1: init
     public static final String TDM_2_12_GLSL_SHADER_VERSION   = "2.12.6"; // 6: fix a integer to float convert
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
-    public static final String GZDOOM_VERSION                 = "4.14.0.3"; // 3: change postprocess OpenGL shaders
+    public static final String GZDOOM_VERSION                 = "4.14.1.1"; // 1: init
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 

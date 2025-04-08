@@ -6,7 +6,6 @@
 #include "gstrings.h"
 #include "version.h"
 
-#if !defined(__ANDROID__) //karin: for arm32
 static_assert(sizeof(void*) == 8,
 	"Only LP64/LLP64 builds are officially supported. "
 	"Please do not attempt to build for other platforms; "
@@ -14,7 +13,6 @@ static_assert(sizeof(void*) == 8,
 	"there are e.g. known visual artifacts "
 	"<https://forum.zdoom.org/viewtopic.php?f=7&t=75673> "
 	"that lead to a bad user experience.");
-#endif
 
 // Some global engine variables taken out of the backend code.
 FStartupScreen* StartWindow;

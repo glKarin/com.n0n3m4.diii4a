@@ -1911,7 +1911,7 @@ int P_LookForPlayers (AActor *actor, INTBOOL allaround, FLookExParams *params)
 		player = actor->Level->Players[pnum];
 
 		if (!isTargetablePlayer(actor, player, allaround, params))
-				continue;
+			continue;
 		
 		// [RH] Need to be sure the reactiontime is 0 if the monster is
 		//		leaving its goal to go after a player.
@@ -2993,8 +2993,8 @@ void A_DoChaseNative(AActor * self, FState *melee, FState *missile, int flags)
 DEFINE_ACTION_FUNCTION_NATIVE(AActor, A_DoChase, A_DoChaseNative)
 {
 	PARAM_SELF_PROLOGUE(AActor);
-	PARAM_STATE(melee);
-	PARAM_STATE(missile);
+	PARAM_POINTER(melee, FState);
+	PARAM_POINTER(missile, FState);
 	PARAM_INT(flags);
 
 	A_DoChaseNative(self, melee, missile, flags);

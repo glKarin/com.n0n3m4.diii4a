@@ -1048,7 +1048,7 @@ void D_Display ()
 				if (DrawFSHUD || automapactive) StatusBar->DrawAltHUD();
 				if (players[consoleplayer].camera && players[consoleplayer].camera->player && !automapactive)
 				{
-					StatusBar->DrawCrosshair();
+					StatusBar->DrawCrosshair(vp.TicFrac);
 				}
 				StatusBar->CallDraw (HUD_AltHud, vp.TicFrac);
 				StatusBar->DrawTopStuff (HUD_AltHud);
@@ -3201,9 +3201,10 @@ static int D_InitGame(const FIWADInfo* iwad_info, std::vector<std::string>& allw
 
 	lfi.gameTypeFilter.push_back(LumpFilterIWAD.GetChars());
 	// Workaround for old Doom filter names.
-	if (LumpFilterIWAD.Compare("doom.id.doom") == 0)
+	if (LumpFilterIWAD.IndexOf("doom.id.doom") >= 0)
 	{
-		lfi.gameTypeFilter.push_back("doom.doom");
+		FString NewFilterName = (FString)"doom.doom" + LumpFilterIWAD.Mid(12); // "doom.id.doom" is 12 characters
+		lfi.gameTypeFilter.push_back(NewFilterName.GetChars());
 	}
 
 

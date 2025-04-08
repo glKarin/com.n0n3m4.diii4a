@@ -2803,9 +2803,29 @@ public class GameLauncher extends Activity
         ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.help), TextHelper.GetHelpText());
     }
 
+	private void ResetPreferences(int curVer, int newVer)
+	{
+		if(newVer == 64)
+		{
+			if(curVer >= 62 && curVer <= 63)
+			{
+				PreferenceManager.getDefaultSharedPreferences(this).edit()
+						.remove(Q3EPreference.pref_harm_realrtcw_version)
+						.commit();
+			}
+			if(curVer == 63)
+			{
+				PreferenceManager.getDefaultSharedPreferences(this).edit()
+						.remove(Q3EPreference.pref_harm_tdm_version)
+						.commit();
+			}
+		}
+	}
+
     private void OpenUpdate()
     {
-        if (IsUpdateRelease())
+		int[] vers = { 0, 0, };
+        if (IsUpdateRelease(vers))
 		{
 			Object[] args = new Object[1];
 			Runnable callback = new Runnable() {
@@ -2823,12 +2843,14 @@ public class GameLauncher extends Activity
 				}
 			};
 			ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.update_) + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetUpdateText(this), callback, args);
+
+			ResetPreferences(vers[0], vers[1]);
 		}
 		else
 			OpenUpdateTips();
     }
 
-    private boolean IsUpdateRelease()
+    private boolean IsUpdateRelease(int[] vers)
     {
         final String UPDATE_RELEASE = "UPDATE_RELEASE";
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -2836,6 +2858,8 @@ public class GameLauncher extends Activity
         if (r == Constants.CONST_UPDATE_RELEASE)
             return false;
         pref.edit().putInt(UPDATE_RELEASE, Constants.CONST_UPDATE_RELEASE).commit();
+		vers[0] = r;
+		vers[1] = Constants.CONST_UPDATE_RELEASE;
         return true;
     }
 
@@ -3481,7 +3505,7 @@ public class GameLauncher extends Activity
 		boolean openglVisible = true;
 		boolean quickloadVisible = true;
 		boolean skipintroVisible = true;
-		boolean versionVisible = false;
+		boolean versionVisible = KStr.NotEmpty(Q3EUtils.q3ei.game_version);
 
         if (Q3EUtils.q3ei.isPrey)
         {
@@ -3522,7 +3546,6 @@ public class GameLauncher extends Activity
 			openglVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
-			versionVisible = true;
 		}
 		else if (Q3EUtils.q3ei.isD3BFG)
 		{
@@ -3530,7 +3553,6 @@ public class GameLauncher extends Activity
 			openglVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
-			versionVisible = true;
 		}
 		else if (Q3EUtils.q3ei.isDOOM)
 		{
@@ -3549,7 +3571,6 @@ public class GameLauncher extends Activity
 		{
 			realrtcwVisible = true;
 			openglVisible = false;
-			versionVisible = true;
 		}
 		else if (Q3EUtils.q3ei.isFTEQW)
 		{
@@ -3598,9 +3619,10 @@ public class GameLauncher extends Activity
 		V.rg_fs_jagame.setVisibility(jaVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_jogame.setVisibility(joVisible ? View.VISIBLE : View.GONE);
 
-		V.rg_version_d3bfg.setVisibility(d3bfgVisible ? View.VISIBLE : View.GONE);
-		V.rg_version_realrtcw.setVisibility(realrtcwVisible ? View.VISIBLE : View.GONE);
-		V.rg_version_tdm.setVisibility(tdmVisible ? View.VISIBLE : View.GONE);
+		V.rg_version_d3bfg.setVisibility(versionVisible && d3bfgVisible ? View.VISIBLE : View.GONE);
+		V.rg_version_realrtcw.setVisibility(versionVisible && realrtcwVisible ? View.VISIBLE : View.GONE);
+		V.rg_version_tdm.setVisibility(versionVisible && tdmVisible ? View.VISIBLE : View.GONE);
+
 		V.gameversion_section.setVisibility(versionVisible ? View.VISIBLE : View.GONE);
 
 		V.idtech4_section.setVisibility(Q3EUtils.q3ei.IsIdTech4() ? View.VISIBLE : View.GONE);

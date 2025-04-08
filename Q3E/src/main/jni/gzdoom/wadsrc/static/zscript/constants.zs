@@ -723,6 +723,7 @@ enum EParticleFlags
 	SPF_NOFACECAMERA			= 1 << 12,
 	SPF_ROLLCENTER				= 1 << 13,
 	SPF_STRETCHPIXELS			= 1 << 14,
+	SPF_ALLOWSHADERS			= 1 << 15,
 
 	SPF_RELATIVE				= SPF_RELPOS|SPF_RELVEL|SPF_RELACCEL|SPF_RELANG
 };
@@ -1264,7 +1265,8 @@ enum IntermissionSequenceType
 {
 	FSTATE_EndingGame = 0,
 	FSTATE_ChangingLevel = 1,
-	FSTATE_InLevel = 2
+	FSTATE_InLevel = 2,
+	FSTATE_InLevelNoWipe = 3
 };
 
 enum Bobbing

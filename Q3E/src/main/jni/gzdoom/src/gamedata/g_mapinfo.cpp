@@ -793,7 +793,7 @@ void FMapInfoParser::ParseMusic(FString &name, int &order)
 //
 //==========================================================================
 
-void FMapInfoParser::ParseCutscene(CutsceneDef& cdef)
+void FMapInfoParser::ParseCutscene(CutsceneDef& cdef, bool allow_function)
 {
 	FString sound;
 	sc.MustGetStringName("{");
@@ -801,7 +801,7 @@ void FMapInfoParser::ParseCutscene(CutsceneDef& cdef)
 	{
 		sc.MustGetString();
 		if (sc.Compare("video")) { ParseAssign(); sc.MustGetString(); cdef.video = sc.String; cdef.function = ""; }
-		else if (sc.Compare("function")) { ParseAssign(); sc.SetCMode(false); sc.MustGetString(); sc.SetCMode(true); cdef.function = sc.String; cdef.video = ""; }
+		else if (sc.Compare("function") && allow_function) { ParseAssign(); sc.SetCMode(false); sc.MustGetString(); sc.SetCMode(true); cdef.function = sc.String; cdef.video = ""; }
 		else if (sc.Compare("sound")) { ParseAssign(); sc.MustGetString(); cdef.soundName = sc.String; }
 		else if (sc.Compare("soundid")) { ParseAssign(); sc.MustGetNumber(); cdef.soundID = sc.Number; }
 		else if (sc.Compare("fps")) { ParseAssign();  sc.MustGetNumber();  cdef.framespersec = sc.Number; }
@@ -2409,13 +2409,9 @@ static void SetLevelNum (level_info_t *info, int num)
 	for (unsigned int i = 0; i < wadlevelinfos.Size(); ++i)
 	{
 		if (wadlevelinfos[i].levelnum == num)
-		{
 			wadlevelinfos[i].levelnum = 0;
-			wadlevelinfos[i].broken_id24_levelnum = 0;
-		}
 	}
 	info->levelnum = num;
-	info->broken_id24_levelnum = num;	// at least make it work - somehow.
 }
 
 //==========================================================================

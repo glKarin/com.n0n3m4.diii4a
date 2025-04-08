@@ -696,25 +696,26 @@ void FLevelLocals::ReadOnePlayer(FSerializer &arc, bool fromHub)
 			continue;
 
 		if (!fromHub)
-					{
-						// This temp player has undefined pitch limits, so set them to something
-						// that should leave the pitch stored in the savegame intact when
-						// rendering. The real pitch limits will be set by P_SerializePlayers()
-						// via a net command, but that won't be processed in time for a screen
-						// wipe, so we need something here.
+		{
+			// This temp player has undefined pitch limits, so set them to something
+			// that should leave the pitch stored in the savegame intact when
+			// rendering. The real pitch limits will be set by P_SerializePlayers()
+			// via a net command, but that won't be processed in time for a screen
+			// wipe, so we need something here.
 			temp.MaxPitch = temp.MinPitch = temp.mo->Angles.Pitch;
 			CopyPlayer(Players[i], &temp, name.GetChars());
-					}
-					else
-					{
-						// we need the player actor, so that G_FinishTravel can destroy it later.
+		}
+		else
+		{
+			// we need the player actor, so that G_FinishTravel can destroy it later.
 			Players[i]->mo = temp.mo;
-			}
+		}
 
 		break;
-		}
-		arc.EndObject();
 	}
+
+	arc.EndObject();
+}
 
 //==========================================================================
 //
@@ -747,10 +748,10 @@ void FLevelLocals::ReadMultiplePlayers(FSerializer &arc, int numPlayers, bool fr
 		}
 	}
 
-		// Now try to match players from the savegame with players present
-		// based on their names. If two players in the savegame have the
-		// same name, then they are assigned to players in the current game
-		// on a first-come, first-served basis.
+	// Now try to match players from the savegame with players present
+	// based on their names. If two players in the savegame have the
+	// same name, then they are assigned to players in the current game
+	// on a first-come, first-served basis.
 	for (int i = 0; i < MAXPLAYERS; ++i)
 	{
 		if (!PlayerInGame(i))
@@ -759,10 +760,10 @@ void FLevelLocals::ReadMultiplePlayers(FSerializer &arc, int numPlayers, bool fr
 		for (auto& p : tempPlayers)
 		{
 			if (!p.bUsed && !p.Name.Compare(Players[i]->userinfo.GetName()))
-		{
+			{
 				// Found a match, so copy our temp player to the real player
 				if (!fromHub)
-			{
+				{
 					Printf("Found %s's (%d) data\n", Players[i]->userinfo.GetName(), i);
 					CopyPlayer(Players[i], &p.Info, p.Name.GetChars());
 				}
@@ -773,42 +774,42 @@ void FLevelLocals::ReadMultiplePlayers(FSerializer &arc, int numPlayers, bool fr
 
 				p.bUsed = true;
 				assignedPlayers[i] = true;
-					break;
-				}
+				break;
 			}
 		}
+	}
 
-		// Any players that didn't have matching names are assigned to existing
-		// players on a first-come, first-served basis.
+	// Any players that didn't have matching names are assigned to existing
+	// players on a first-come, first-served basis.
 	for (int i = 0; i < MAXPLAYERS; ++i)
-		{
+	{
 		if (!PlayerInGame(i) || assignedPlayers[i])
 			continue;
 
 		for (auto& p : tempPlayers)
-			{
+		{
 			if (!p.bUsed)
-				{
+			{
 				if (!fromHub)
-					{
+				{
 					Printf("Assigned %s (%d) to %s's data\n", Players[i]->userinfo.GetName(), i, p.Name.GetChars());
 					CopyPlayer(Players[i], &p.Info, p.Name.GetChars());
-			}
+				}
 				else
 				{
 					Players[i]->mo = p.Info.mo;
-		}
+				}
 
 				p.bUsed = true;
 				break;
-				}
 			}
 		}
+	}
 
 	// Remove any temp players that were not used. Happens if there are now
 	// less players in the game than there were in the save
 	for (auto& p : tempPlayers)
-		{
+	{
 		if (!p.bUsed)
 			p.Info.mo->Destroy();
 	}
@@ -989,7 +990,8 @@ void FLevelLocals::Serialize(FSerializer &arc, bool hubload)
 		("scrolls", Scrolls)
 		("automap", automap)
 		("interpolator", interpolator)
-		("frozenstate", frozenstate);
+		("frozenstate", frozenstate)
+		("visualthinkerhead", VisualThinkerHead);
 
 
 	// Hub transitions must keep the current total time

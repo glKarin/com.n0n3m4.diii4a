@@ -302,7 +302,7 @@ private:
 					auto* li = FindLevelInfo(state != StatCount ? wbs->next.GetChars() : wbs->current.GetChars());
 					if (!li)
 						return false;
-					if (li->broken_id24_levelnum != condition.param)
+					if (li->levelnum != condition.param)
 						return false;
 					break;
 				}
@@ -311,7 +311,7 @@ private:
 					auto* li = FindLevelInfo(state != StatCount ? wbs->next.GetChars() : wbs->current.GetChars());
 					if (!li)
 						return false;
-					if (li->broken_id24_levelnum <= condition.param)
+					if (li->levelnum <= condition.param)
 						return false;
 					break;
 				}
@@ -399,9 +399,9 @@ bool DInterBackground::LoadBackground(bool isenterpic)
 		}
 		else
 		{
-		exitpic = li->ExitPic.GetChars();
-		if (li->ExitPic.IsNotEmpty()) tilebackground = false;
-	}
+			exitpic = li->ExitPic.GetChars();
+			if (li->ExitPic.IsNotEmpty()) tilebackground = false;
+		}
 	}
 	lumpname = exitpic;
 
@@ -418,10 +418,10 @@ bool DInterBackground::LoadBackground(bool isenterpic)
 			}
 			else
 			{
-			lumpname = li->EnterPic.GetChars();
-			if (li->EnterPic.IsNotEmpty()) tilebackground = false;
+				lumpname = li->EnterPic.GetChars();
+				if (li->EnterPic.IsNotEmpty()) tilebackground = false;
+			}
 		}
-	}
 	}
 
 	// Try to get a default if nothing specified
@@ -920,6 +920,7 @@ bool DInterBackground::LoadBackground(bool isenterpic)
 		}
 		else
 		{
+			
 			Printf("Intermission script %s not found!\n", lumpname + 1);
 			texture = TexMan.GetTextureID("INTERPIC", ETextureType::MiscPatch);
 		}
@@ -959,11 +960,11 @@ void DInterBackground::updateAnimatedBack()
 	for (auto& layer : layers)
 	{
 		auto& anims = layer.anims;
-	for (i = 0; i<anims.Size(); i++)
-	{
-		in_anim_t * a = &anims[i];
-		switch (a->type & ANIM_TYPE)
+		for (i = 0; i < anims.Size(); i++)
 		{
+			in_anim_t* a = &anims[i];
+			switch (a->type & ANIM_TYPE)
+			{
 			case ANIM_NONE:
 				break;
 
@@ -987,25 +988,25 @@ void DInterBackground::updateAnimatedBack()
 					}
 				}
 				break;
-		case ANIM_ALWAYS:
-			if (bcnt >= a->nexttic)
-			{
-				if (++a->ctr >= (int)a->frames.Size())
+			case ANIM_ALWAYS:
+				if (bcnt >= a->nexttic)
 				{
-					if (a->data == 0) a->ctr = 0;
-					else a->ctr--;
+					if (++a->ctr >= (int)a->frames.Size())
+					{
+						if (a->data == 0) a->ctr = 0;
+						else a->ctr--;
+					}
+					a->nexttic = bcnt + a->period;
 				}
-				a->nexttic = bcnt + a->period;
+				break;
+
+			case ANIM_PIC:
+				a->ctr = 0;
+				break;
+
 			}
-			break;
-
-		case ANIM_PIC:
-			a->ctr = 0;
-			break;
-
 		}
 	}
-}
 }
 
 DEFINE_ACTION_FUNCTION(DInterBackground, updateAnimatedBack)
@@ -1061,52 +1062,52 @@ void DInterBackground::drawBackground(int state, bool drawsplat, bool snl_pointe
 		if (!ConditionsMet(state, layer.conditions))
 			continue;
 
-	for (i = 0; i<anims.Size(); i++)
-	{
-		in_anim_t * a = &anims[i];
-		level_info_t *li;
-
-		switch (a->type & ANIM_CONDITION)
+		for (i = 0; i < anims.Size(); i++)
 		{
-		case ANIM_IFVISITED:
-			li = FindLevelInfo(a->LevelName.GetChars());
-			if (li == NULL || !(li->flags & LEVEL_VISITED)) continue;
-			break;
+			in_anim_t* a = &anims[i];
+			level_info_t* li;
 
-		case ANIM_IFNOTVISITED:
-			li = FindLevelInfo(a->LevelName.GetChars());
-			if (li == NULL || (li->flags & LEVEL_VISITED)) continue;
-			break;
+			switch (a->type & ANIM_CONDITION)
+			{
+			case ANIM_IFVISITED:
+				li = FindLevelInfo(a->LevelName.GetChars());
+				if (li == NULL || !(li->flags & LEVEL_VISITED)) continue;
+				break;
 
-			// StatCount means 'leaving' - everything else means 'entering'!
-		case ANIM_IFENTERING:
-			if (state == StatCount || a->LevelName.CompareNoCase(wbs->next, 8)) continue;
-			break;
+			case ANIM_IFNOTVISITED:
+				li = FindLevelInfo(a->LevelName.GetChars());
+				if (li == NULL || (li->flags & LEVEL_VISITED)) continue;
+				break;
 
-		case ANIM_IFNOTENTERING:
-			if (state != StatCount && !a->LevelName.CompareNoCase(wbs->next, 8)) continue;
-			break;
+				// StatCount means 'leaving' - everything else means 'entering'!
+			case ANIM_IFENTERING:
+				if (state == StatCount || a->LevelName.CompareNoCase(wbs->next, 8)) continue;
+				break;
 
-		case ANIM_IFLEAVING:
-			if (state != StatCount || a->LevelName.CompareNoCase(wbs->current, 8)) continue;
-			break;
+			case ANIM_IFNOTENTERING:
+				if (state != StatCount && !a->LevelName.CompareNoCase(wbs->next, 8)) continue;
+				break;
 
-		case ANIM_IFNOTLEAVING:
-			if (state == StatCount && !a->LevelName.CompareNoCase(wbs->current, 8)) continue;
-			break;
+			case ANIM_IFLEAVING:
+				if (state != StatCount || a->LevelName.CompareNoCase(wbs->current, 8)) continue;
+				break;
 
-		case ANIM_IFTRAVELLING:
-			if (a->LevelName2.CompareNoCase(wbs->current, 8) || a->LevelName.CompareNoCase(wbs->next, 8)) continue;
-			break;
+			case ANIM_IFNOTLEAVING:
+				if (state == StatCount && !a->LevelName.CompareNoCase(wbs->current, 8)) continue;
+				break;
 
-		case ANIM_IFNOTTRAVELLING:
-			if (!a->LevelName2.CompareNoCase(wbs->current, 8) && !a->LevelName.CompareNoCase(wbs->next, 8)) continue;
-			break;
-		}
+			case ANIM_IFTRAVELLING:
+				if (a->LevelName2.CompareNoCase(wbs->current, 8) || a->LevelName.CompareNoCase(wbs->next, 8)) continue;
+				break;
+
+			case ANIM_IFNOTTRAVELLING:
+				if (!a->LevelName2.CompareNoCase(wbs->current, 8) && !a->LevelName.CompareNoCase(wbs->next, 8)) continue;
+				break;
+			}
 			if (a->ctr >= 0 && ConditionsMet(state, a->conditions))
 				DrawTexture(twod, a->frames[a->ctr].image, false, a->loc.x, a->loc.y,
-				DTA_VirtualWidthF, animwidth, DTA_VirtualHeightF, animheight, DTA_FullscreenScale, FSMode_ScaleToFit43, TAG_DONE);
-	}
+					DTA_VirtualWidthF, animwidth, DTA_VirtualHeightF, animheight, DTA_FullscreenScale, FSMode_ScaleToFit43, TAG_DONE);
+		}
 	}
 
 	if (drawsplat)
