@@ -151,6 +151,7 @@ qboolean GLVID_Init (rendererstate_t *info, unsigned char *palette)
 	vid.numpages = 3;
 
 	Q3E_GL_CONFIG_SET(samples, vid_multisample.ival/* * 2*/)
+	Q3E_GL_CONFIG_SET(swap_interval, -1);
 
 	int glesversion;
 
@@ -227,34 +228,23 @@ qboolean GLVID_Init (rendererstate_t *info, unsigned char *palette)
 
 void GLVID_SwapBuffers(void)
 {
-	if (vid_vsync.modified)
+	switch(qrenderer)
 	{
-		int interval;
-		vid_vsync.modified = false;
-		if (*vid_vsync.string)
-			interval = vid_vsync.ival;
-		else
-			interval = 1;	//default is to always vsync, according to EGL docs, so lets just do that.
-		Q3E_SwapInterval(interval);
-		Sys_Printf("Swap interval changed\n");
-	}
+		case QR_OPENGL:
+		if (vid_vsync.modified)
+		{
+			vid_vsync.modified = false;
+			if (*vid_vsync.string)
+			{
+				Q3E_SwapInterval(vid_vsync.ival);
+			}
+		}
 
-	Q3E_SwapBuffers();
-	TRACE(("Swap Buffers\n"));
-
-#if 0
-	EGLint w, h;
-	eglQuerySurface(sys_display, sys_surface, EGL_WIDTH, &w);
-	eglQuerySurface(sys_display, sys_surface, EGL_HEIGHT, &h);
-	if (w != vid.pixelwidth || h != vid.pixelheight)
-	{
-		vid.pixelwidth = w;
-		vid.pixelheight = h;
-		extern cvar_t vid_conautoscale;
-		Cvar_ForceCallback(&vid_conautoscale);
-		Sys_Printf("Video Resized\n");
+		Q3E_SwapBuffers();
+		break;
+		default:
+			break;
 	}
-#endif
 }
 
 qboolean GLVID_ApplyGammaRamps (unsigned int gammarampsize, unsigned short *ramps)
@@ -382,7 +372,7 @@ rendererinfo_t vkrendererinfo =
 
 	VKVID_Init,
 	VKVID_DeInit,
-	VKVID_SwapBuffers,
+	GLVID_SwapBuffers, // VKVID_SwapBuffers,
 	GLVID_ApplyGammaRamps,
 	NULL,//_CreateCursor,
 	NULL,//_SetCursor,

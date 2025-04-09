@@ -64,6 +64,7 @@ void GLimp_AndroidQuit(void)
 qboolean GLimp_InitGL(qboolean fullscreen)
 {
 	Q3E_GL_CONFIG_SET(fullscreen, 1);
+	Q3E_GL_CONFIG_SET(swap_interval, r_swapInterval->integer);
 	Q3E_GL_CONFIG_ES_1_1();
 
 	qboolean res = Q3E_InitGL();

@@ -93,6 +93,7 @@ static void GLES_PostInit(void)
 qbool GLimp_InitGL(qbool fullscreen)
 {
 	Q3E_GL_CONFIG_SET(fullscreen, 1);
+	Q3E_GL_CONFIG_SET(swap_interval, -1);
 	Q3E_GL_CONFIG_ES_2_0();
 
 	qbool res = Q3E_InitGL();
@@ -209,11 +210,29 @@ qbool GL_ExtensionSupported(const char *name)
 	return has;
 }
 
+static void VID_SetVsync_c(cvar_t *var)
+{
+	int vsyncwanted = cls.timedemo ? 0 : vid_vsync.integer;
+/*
+Can't check first: on Wayland SDL_GL_GetSwapInterval() may initially return 0 when vsync is on.
+On Xorg it returns the correct value.
+	if (SDL_GL_GetSwapInterval() == vsyncwanted)
+		return;
+*/
+
+	// __EMSCRIPTEN__ SDL_GL_SetSwapInterval() calls emscripten_set_main_loop_timing()
+	if (Q3E_SwapInterval(vsyncwanted))
+		Con_DPrintf("Vsync %s\n", vsyncwanted ? "activated" : "deactivated");
+	else
+		Con_Printf(CON_ERROR "ERROR: can't %s vsync because %s\n", vsyncwanted ? "activate" : "deactivate", Q3E_GetError());
+}
+
 void VID_Init (void)
 {
 	// DPI scaling prevents use of the native resolution, causing blurry rendering
 	// and/or mouse cursor problems and/or incorrect render area, so we need to opt-out.
 	// Must be set before first SDL_INIT_VIDEO. Documented in SDL_hints.h.
+	Cvar_RegisterCallback(&vid_vsync,                  VID_SetVsync_c);
 }
 
 void VID_EnableJoystick(qbool enable)

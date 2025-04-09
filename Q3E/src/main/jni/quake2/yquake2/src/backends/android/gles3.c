@@ -88,6 +88,7 @@ void GLES_PostInit(void)
 qboolean GLimp_InitGL(qboolean fullscreen)
 {
 	Q3E_GL_CONFIG_SET(fullscreen, 1);
+	Q3E_GL_CONFIG_SET(swap_interval, -1);
 	Q3E_GL_CONFIG_SET(debug_output, 0); // 1
 	Q3E_GL_CONFIG_ES_3_2();
 
@@ -206,7 +207,32 @@ qboolean GL3_IsVsyncActive(void)
  */
 void GL3_SetVsync(void)
 {
-	vsyncActive = false;
+	// Make sure that the user given
+	// value is SDL compatible...
+	int vsync = 0;
+
+	if (r_vsync->value == 1)
+	{
+		vsync = 1;
+	}
+	else if (r_vsync->value == 2)
+	{
+		vsync = -1;
+	}
+
+	if (!Q3E_SwapInterval(vsync))
+	{
+		if (vsync == -1)
+		{
+			vsync = 1;
+			// Not every system supports adaptive
+			// vsync, fallback to normal vsync.
+			R_Printf(PRINT_ALL, "Failed to set adaptive vsync, reverting to normal vsync.\n");
+			Q3E_SwapInterval(1);
+		}
+	}
+
+	vsyncActive = vsync != 0 ? true : false;
 }
 
 /*

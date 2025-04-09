@@ -90,6 +90,10 @@ void GLimp_Shutdown() {
 }
 
 void GLimp_SwapBuffers() {
+    if ( r_swapInterval.IsModified() ) {
+        r_swapInterval.ClearModified();
+        Q3E_SwapInterval( r_swapInterval.GetInteger() );
+    }
     Q3E_SwapBuffers();
 }
 
@@ -141,6 +145,7 @@ parameters and try again.
 bool GLimp_Init( glimpParms_t a ) {
     Q3E_GL_CONFIG_SET(fullscreen, 1);
     Q3E_GL_CONFIG_SET(samples, cvarSystem->GetCVarInteger( "r_multiSamples" ));
+    Q3E_GL_CONFIG_SET(swap_interval, -1);
     Q3E_GL_CONFIG_ES_3_2();
 
     if (!GLimp_OpenDisplay()) {

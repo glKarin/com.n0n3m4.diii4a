@@ -545,8 +545,41 @@ void GLimp_Shutdown()
 	Sys_Printf("[Harmattan]: EGL destroyed.\n");
 }
 
+static void GLimp_UpdateSwapInterval( void )
+{
+	EGLint swapIntervalRange[2] = { 0, 0 };
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_MIN_SWAP_INTERVAL, &swapIntervalRange[0]);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_MAX_SWAP_INTERVAL, &swapIntervalRange[1]);
+	common->Printf("Swap interval range: %d - %d\n", swapIntervalRange[0], swapIntervalRange[1]);
+	int swapInterval = r_swapInterval.GetInteger();
+	if(swapInterval < swapIntervalRange[0])
+		swapInterval = swapIntervalRange[0];
+	else if(swapInterval > swapIntervalRange[1])
+		swapInterval = swapIntervalRange[1];
+	if(swapInterval >= 0)
+	{
+		if(eglSwapInterval(eglDisplay, swapInterval))
+			common->Printf("Setup swap interval: %d\n", swapInterval);
+		else
+			common->Warning("Setup swap interval to %d fail", swapInterval);
+		// GLimp_HandleError("eglSwapInterval", false);
+	}
+	if(swapInterval != r_swapInterval.GetInteger())
+	{
+		r_swapInterval.SetInteger(swapInterval);
+		r_swapInterval.ClearModified();
+	}
+
+	eglSwapBuffers(eglDisplay, eglSurface);
+}
+
 void GLimp_SwapBuffers()
 {
+	if(r_swapInterval.IsModified())
+	{
+		r_swapInterval.ClearModified();
+		GLimp_UpdateSwapInterval();
+	}
 	eglSwapBuffers(eglDisplay, eglSurface);
 }
 
@@ -904,31 +937,7 @@ int GLES_Init(glimpParms_t &ap)
 		return false;
 	}
 
-	if(r_swapInterval.GetInteger() > 0)
-	{
-		EGLint swapIntervalRange[2] = { 0, 0 };
-		eglGetConfigAttrib(eglDisplay, eglConfig, EGL_MIN_SWAP_INTERVAL, &swapIntervalRange[0]);
-		eglGetConfigAttrib(eglDisplay, eglConfig, EGL_MAX_SWAP_INTERVAL, &swapIntervalRange[1]);
-		common->Printf("Swap interval range: %d - %d\n", swapIntervalRange[0], swapIntervalRange[1]);
-		int swapInterval = r_swapInterval.GetInteger();
-		if(swapInterval < swapIntervalRange[0])
-			swapInterval = swapIntervalRange[0];
-		else if(swapInterval > swapIntervalRange[1])
-			swapInterval = swapIntervalRange[1];
-		if(swapInterval > 0)
-		{
-			if(eglSwapInterval(eglDisplay, swapInterval))
-				common->Printf("Setup swap interval: %d\n", swapInterval);
-			else
-				common->Warning("Setup swap interval to %d fail", swapInterval);
-			// GLimp_HandleError("eglSwapInterval", false);
-		}
-		if(swapInterval != r_swapInterval.GetInteger())
-		{
-			r_swapInterval.SetInteger(swapInterval);
-			r_swapInterval.ClearModified();
-		}
-	}
+	GLimp_UpdateSwapInterval();
 
 	EGLConfigInfo_t info = GLimp_GetConfigInfo(eglConfig);
 	int tcolorbits = info.red + info.green + info.blue;

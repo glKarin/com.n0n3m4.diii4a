@@ -1564,12 +1564,12 @@ void idRenderBackend::CheckCVars()
 
 
 	// SRS - Enable SDL-driven vync changes without restart for UNIX-like OSs
-#if !defined(__ANDROID__) //karin: unuse SDL
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__)
 	extern idCVar r_swapInterval;
 	if( r_swapInterval.IsModified() )
 	{
 		r_swapInterval.ClearModified();
+#if !defined(__ANDROID__) //karin: unuse SDL
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		if( SDL_GL_SetSwapInterval( r_swapInterval.GetInteger() ) < 0 )
 		{
@@ -1581,8 +1581,14 @@ void idRenderBackend::CheckCVars()
 			common->Warning( "Vsync changes not supported without restart" );
 		}
 #endif
-	}
+#else
+		extern bool Q3E_SwapInterval(int interval);
+		if( !Q3E_SwapInterval( r_swapInterval.GetInteger() ) )
+		{
+			common->Warning( "Vsync changes not supported without restart" );
+		}
 #endif
+	}
 #endif
 	// SRS end
 	if( r_antiAliasing.IsModified() )

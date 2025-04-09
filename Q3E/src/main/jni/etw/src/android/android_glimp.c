@@ -42,6 +42,30 @@
 #include "../sys/sys_local.h"
 #include "../client/client.h"
 
+static float         displayAspect = 0.f;
+
+cvar_t *r_sdlDriver;
+cvar_t *r_allowSoftwareGL; // Don't abort out if a hardware visual can't be obtained
+cvar_t *r_allowResize; // make window resizable
+
+// Window cvars
+cvar_t *r_fullscreen = 0;
+cvar_t *r_noBorder;
+cvar_t *r_centerWindow;
+cvar_t *r_customwidth;
+cvar_t *r_customheight;
+cvar_t *r_swapInterval;
+cvar_t *r_mode;
+cvar_t *r_customaspect;
+cvar_t *r_displayRefresh;
+cvar_t *r_windowLocation;
+
+// Window surface cvars
+cvar_t *r_stencilbits;  // number of desired stencil bits
+cvar_t *r_depthbits;  // number of desired depth bits
+cvar_t *r_colorbits;  // number of desired color bits, only relevant for fullscreen
+cvar_t *r_ignorehwgamma;
+
 typedef enum
 {
 	RSERR_OK,
@@ -103,6 +127,7 @@ static void GLES_PostInit(glconfig_t *glConfig)
 qboolean GLimp_InitGL(glconfig_t *glConfig, qboolean fullscreen)
 {
     Q3E_GL_CONFIG_SET(fullscreen, 1);
+    Q3E_GL_CONFIG_SET(swap_interval, r_swapInterval->integer);
     Q3E_GL_CONFIG_ES_1_1();
 
     qboolean res = Q3E_InitGL();
@@ -112,30 +137,6 @@ qboolean GLimp_InitGL(glconfig_t *glConfig, qboolean fullscreen)
     }
     return res;
 }
-
-static float         displayAspect = 0.f;
-
-cvar_t *r_sdlDriver;
-cvar_t *r_allowSoftwareGL; // Don't abort out if a hardware visual can't be obtained
-cvar_t *r_allowResize; // make window resizable
-
-// Window cvars
-cvar_t *r_fullscreen = 0;
-cvar_t *r_noBorder;
-cvar_t *r_centerWindow;
-cvar_t *r_customwidth;
-cvar_t *r_customheight;
-cvar_t *r_swapInterval;
-cvar_t *r_mode;
-cvar_t *r_customaspect;
-cvar_t *r_displayRefresh;
-cvar_t *r_windowLocation;
-
-// Window surface cvars
-cvar_t *r_stencilbits;  // number of desired stencil bits
-cvar_t *r_depthbits;  // number of desired depth bits
-cvar_t *r_colorbits;  // number of desired color bits, only relevant for fullscreen
-cvar_t *r_ignorehwgamma;
 
 typedef struct vidmode_s
 {
@@ -405,9 +406,9 @@ static int GLimp_SetMode(glconfig_t *glConfig, int mode, qboolean fullscreen, qb
 {
 	char            type[32];
 	int             major, minor, contextVersion, samples;
-	
+
 	GLimp_ParseConfigString(glConfigString, type, &major, &minor, &contextVersion, &samples);
-	
+
 	glConfig->vidWidth  = screen_width;
 	glConfig->vidHeight = screen_height;
 

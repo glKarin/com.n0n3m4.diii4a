@@ -190,6 +190,7 @@ bool GLimp_Init( glimpParms_t parms )
 
 	Q3E_GL_CONFIG_SET(fullscreen, 1);
 	Q3E_GL_CONFIG_SET(samples, parms.multiSamples);
+	Q3E_GL_CONFIG_SET(swap_interval, r_swapInterval.GetInteger());
 	if(r_useOpenGL32.GetInteger() == 2)
 	{
 		Q3E_GL_CONFIG_ES_3_2();

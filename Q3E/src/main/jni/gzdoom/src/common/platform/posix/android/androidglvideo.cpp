@@ -423,6 +423,7 @@ IVideo *gl_CreateVideo()
 bool GLimp_InitGL(void)
 {
 	Q3E_GL_CONFIG_SET(fullscreen, 1);
+	Q3E_GL_CONFIG_SET(swap_interval, -1);
 	if (V_GetBackend() == 0)
 	{
 		Q3E_GL_CONFIG_ES_3_2();
@@ -511,6 +512,15 @@ int SystemGLFrameBuffer::GetClientHeight()
 
 void SystemGLFrameBuffer::SetVSync( bool vsync )
 {
+	if (vsync)
+	{
+		if (!Q3E_SwapInterval(-1))
+			Q3E_SwapInterval(1);
+	}
+	else
+	{
+		Q3E_SwapInterval(0);
+	}
 }
 
 void SystemGLFrameBuffer::SwapBuffers()
