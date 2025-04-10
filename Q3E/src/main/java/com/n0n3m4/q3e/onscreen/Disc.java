@@ -11,6 +11,8 @@ import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.KGLBitmapTexture;
+import com.n0n3m4.q3e.gl.Q3EGLIndexBuffer;
+import com.n0n3m4.q3e.gl.Q3EGLVertexBuffer;
 import com.n0n3m4.q3e.karin.KStr;
 
 import java.nio.ByteBuffer;
@@ -55,6 +57,9 @@ public class Disc extends Paintable implements TouchListener
 
     private int dotx, doty;
     private boolean dotjoyenabled = false;
+
+    private Q3EGLVertexBuffer vertexBuffer = null;
+    private Q3EGLIndexBuffer  indexBuffer  = null;
 
     public Disc(View vw, GL10 gl, int center_x, int center_y, int inner_radius, float a, char[] keys, char[] keymaps, int style, String texid, String name)
     {
@@ -202,7 +207,8 @@ public class Disc extends Paintable implements TouchListener
     {
         //main paint
         super.Paint(gl);
-        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+//        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha);
         if (null == m_parts || m_parts.length == 0)
             return;
 
@@ -212,9 +218,11 @@ public class Disc extends Paintable implements TouchListener
             {
                 //DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red,green,blue,p.pressed ? (float)Math.max(alpha, 0.9) : (float)(Math.min(alpha, 0.1)));
                 if (p.pressed)
-                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, cx, cy, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
+//                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, cx, cy, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
+                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 4, 0, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
                 else
-                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, cx, cy, red, green, blue, alpha - (alpha * 0.5f));
+//                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, cx, cy, red, green, blue, alpha - (alpha * 0.5f));
+                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 4, 0, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha - (alpha * 0.5f));
             }
         }
     }
@@ -246,6 +254,50 @@ public class Disc extends Paintable implements TouchListener
             {
                 m_parts[i] = GenPart(i, m_keys[i], m_keymaps[i], m_keys.length, gl);
             }
+        }
+    }
+
+    @Override
+    public void AsBuffer(GL11 gl)
+    {
+        if(null == vertexBuffer)
+            vertexBuffer = new Q3EGLVertexBuffer();
+        vertexBuffer.Data(gl, new Q3EGLVertexBuffer.VertexArray()
+                .Set(new FloatBuffer[]{ verts_p, tex_p }, 4)
+                .Append(new FloatBuffer[]{ m_fanVertexArray, tex_p }, 4)
+                .Buffer(), 4);
+        if(null == indexBuffer)
+            indexBuffer = new Q3EGLIndexBuffer();
+        indexBuffer.Data(gl, inds_p);
+    }
+
+    @Override
+    public void Release(GL11 gl)
+    {
+        if(tex_ind > 0)
+        {
+            Q3EGL.glDeleteTexture(gl, tex_ind);
+            tex_ind = 0;
+        }
+        if(null != m_parts)
+        {
+            for (Part p : m_parts)
+            {
+                Q3EGL.glDeleteTexture(gl, p.borderTextureId);
+                p.borderTextureId = 0;
+                Q3EGL.glDeleteTexture(gl, p.textureId);
+                p.textureId = 0;
+            }
+        }
+        if(null != vertexBuffer)
+        {
+            vertexBuffer.Delete(gl);
+            vertexBuffer = null;
+        }
+        if(null != indexBuffer)
+        {
+            indexBuffer.Delete(gl);
+            indexBuffer = null;
         }
     }
 
@@ -419,6 +471,8 @@ public class Disc extends Paintable implements TouchListener
         Disc newd = new Disc(tmp.view, gl, tmp.cx, tmp.cy, tmp.size / 2, tmp.alpha, null, null, tmp.m_style, tmp.tex_androidid, tmp.m_label);
         newd.tex_ind = tmp.tex_ind;
         newd.m_parts = tmp.m_parts;
+        newd.vertexBuffer = tmp.vertexBuffer;
+        newd.indexBuffer = tmp.indexBuffer;
         return newd;
     }
 

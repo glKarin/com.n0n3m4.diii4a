@@ -6,6 +6,8 @@ import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
+import com.n0n3m4.q3e.gl.Q3EGLIndexBuffer;
+import com.n0n3m4.q3e.gl.Q3EGLVertexBuffer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -34,6 +36,9 @@ public class Button extends Paintable implements TouchListener
     private final float initalpha;
     private final boolean canbeheld;
     private int m_width_2;
+
+    private Q3EGLVertexBuffer vertexBuffer = null;
+    private Q3EGLIndexBuffer indexBuffer = null;
 
     public Button(View vw, GL10 gl, int center_x, int center_y, int w, int h, String texid, int keyc, int stl, boolean canbheld, float a)
     {
@@ -80,10 +85,42 @@ public class Button extends Paintable implements TouchListener
     }
 
     @Override
+    public void AsBuffer(GL11 gl)
+    {
+        if(null == vertexBuffer)
+            vertexBuffer = new Q3EGLVertexBuffer();
+        vertexBuffer.Data(gl, new Q3EGLVertexBuffer.VertexArray().Set(new FloatBuffer[]{ verts_p, tex_p }, 4).Buffer(), 4);
+        if(null == indexBuffer)
+            indexBuffer = new Q3EGLIndexBuffer();
+        indexBuffer.Data(gl, inds_p);
+    }
+
+    @Override
+    public void Release(GL11 gl)
+    {
+        if(tex_ind > 0)
+        {
+            Q3EGL.glDeleteTexture(gl, tex_ind);
+            tex_ind = 0;
+        }
+        if(null != vertexBuffer)
+        {
+            vertexBuffer.Delete(gl);
+            vertexBuffer = null;
+        }
+        if(null != indexBuffer)
+        {
+            indexBuffer.Delete(gl);
+            indexBuffer = null;
+        }
+    }
+
+    @Override
     public void Paint(GL11 gl)
     {
         super.Paint(gl);
-        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+        //Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha);
     }
 
     private int lx;
@@ -178,6 +215,8 @@ public class Button extends Paintable implements TouchListener
     {
         Button newb = new Button(tmp.view, gl, tmp.cx, tmp.cy, tmp.width, tmp.height, tmp.tex_androidid, tmp.keycode, tmp.style, tmp.canbeheld, tmp.alpha);
         newb.tex_ind = tmp.tex_ind;
+        newb.vertexBuffer = tmp.vertexBuffer;
+        newb.indexBuffer = tmp.indexBuffer;
         return newb;
     }
 

@@ -120,6 +120,37 @@ public final class Q3EGL
         gl.glTranslatef(-trax, -tray, 0);
     }
 
+    public static void DrawVerts_GL1(GL11 gl, int texid, int cnt, Q3EGLVertexBuffer vertexBuffer, Q3EGLIndexBuffer indexBuffer, float trax, float tray, float r, float g, float b, float a)
+    {
+        gl.glColor4f(r, g, b, a);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, texid);
+        vertexBuffer.Bind(gl);
+        indexBuffer.Bind(gl);
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, vertexBuffer.Stride(), 8);
+        gl.glVertexPointer(2, GL10.GL_FLOAT, vertexBuffer.Stride(), 0);
+        gl.glTranslatef(trax, tray, 0);
+        gl.glDrawElements(GL10.GL_TRIANGLES, cnt, GL10.GL_UNSIGNED_BYTE, 0);
+        vertexBuffer.Unbind(gl);
+        indexBuffer.Unbind(gl);
+        gl.glTranslatef(-trax, -tray, 0);
+    }
+
+    public static void DrawVerts_GL1(GL11 gl, int texid, int vertexOffset, int indexOffset, int cnt, Q3EGLVertexBuffer vertexBuffer, Q3EGLIndexBuffer indexBuffer, float trax, float tray, float r, float g, float b, float a)
+    {
+        gl.glColor4f(r, g, b, a);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, texid);
+        vertexBuffer.Bind(gl);
+        indexBuffer.Bind(gl);
+        int offset = vertexBuffer.Stride() * vertexOffset;
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, vertexBuffer.Stride(), offset + 8);
+        gl.glVertexPointer(2, GL10.GL_FLOAT, vertexBuffer.Stride(), offset);
+        gl.glTranslatef(trax, tray, 0);
+        gl.glDrawElements(GL10.GL_TRIANGLES, cnt, GL10.GL_UNSIGNED_BYTE, indexOffset);
+        vertexBuffer.Unbind(gl);
+        indexBuffer.Unbind(gl);
+        gl.glTranslatef(-trax, -tray, 0);
+    }
+
     public static int loadGLTexture(GL10 gl, Bitmap bmp)
     {
         if(null == bmp)
@@ -200,6 +231,20 @@ public final class Q3EGL
         else
         {
             gl.glDeleteTextures(1, ts, 0);
+        }
+    }
+
+    public static void glClearError(GL10 gl)
+    {
+        while(gl.glGetError() != GL10.GL_NO_ERROR);
+    }
+
+    public static void glCheckError(GL10 gl, String name)
+    {
+        int err = gl.glGetError();
+        if(err != GL10.GL_NO_ERROR)
+        {
+            System.err.println("GLError: " + name + " -> " + Integer.toHexString(err));
         }
     }
 }
