@@ -2315,6 +2315,11 @@ void idMultiplayerGame::AddChatLine(const char *fmt, ...)
 
 	gameLocal.Printf("%s\n", temp.c_str());
 
+#ifdef MOD_BOTS // TinMan: process chat
+	if(BOT_ENABLED())
+    	botAi::ProcessCommand( temp );
+#endif
+
 	chatHistory[ chatHistoryIndex % NUM_CHAT_NOTIFY ].line = temp;
 	chatHistory[ chatHistoryIndex % NUM_CHAT_NOTIFY ].fade = 6;
 
@@ -2878,6 +2883,17 @@ void idMultiplayerGame::ServerStartVote(int clientNum, vote_flags_t voteIndex, c
 	voteTimeOut = gameLocal.time + 20000;
 
 	// mark players allowed to vote - only current ingame players, players joining during vote will be ignored
+#ifdef MOD_BOTS
+	if(BOT_ENABLED()) {
+		for ( i = 0; i < botAi::BOT_START_INDEX; i++ ) {  // TinMan: customs fix, Modified to leave bots out. No equal rights for bots here.
+			if ( gameLocal.entities[ i ] && gameLocal.entities[ i ]->IsType( idPlayer::Type ) ) {
+				playerState[ i ].vote = ( i == clientNum ) ? PLAYER_VOTE_YES : PLAYER_VOTE_WAIT;
+			} else {
+				playerState[i].vote = PLAYER_VOTE_NONE;
+			}
+		}
+    } else
+#endif
 	for (i = 0; i < gameLocal.numClients; i++) {
 		if (gameLocal.entities[ i ] && gameLocal.entities[ i ]->IsType(idPlayer::Type)) {
 			playerState[ i ].vote = (i == clientNum) ? PLAYER_VOTE_YES : PLAYER_VOTE_WAIT;
@@ -3862,3 +3878,26 @@ void idMultiplayerGame::ClientReadWarmupTime(const idBitMsg &msg)
 	warmupEndTime = msg.ReadLong();
 }
 
+#ifdef MOD_BOTS
+bool idMultiplayerGame::IsGametypeTeamBased(void)   /* CTF */
+{
+	switch (gameLocal.gameType)
+	{
+		case GAME_SP:
+		case GAME_DM:
+		case GAME_TOURNEY:
+		case GAME_LASTMAN:
+			return false;
+#ifdef CTF
+		case GAME_CTF:
+#endif
+		case GAME_TDM:
+			return true;
+
+		default:
+			assert(!"Add support for your new gametype here.");
+	}
+
+	return false;
+}
+#endif

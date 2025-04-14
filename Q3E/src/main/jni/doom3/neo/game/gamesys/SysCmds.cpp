@@ -2588,6 +2588,16 @@ void idGameLocal::InitConsoleCommands(void)
 	// localization help commands
 	cmdSystem->AddCommand("nextGUI",				Cmd_NextGUI_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"teleport the player to the next func_static with a gui");
 	cmdSystem->AddCommand("testid",				Cmd_TestId_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"output the string for the specified id.");
+
+#ifdef MOD_BOTS // TinMan: Bot console commmands
+    cmdSystem->AddCommand( "addBot",				botAi::Addbot_f,			CMD_FL_GAME,				"adds a new bot", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF> );
+    cmdSystem->AddCommand( "removeBot",				botAi::Removebot_f,			CMD_FL_GAME,				"removes bot specified by id (0,15)" /*, idCmdSystem::ArgCompletion_Integer<0,( botAi::BOT_MAX_BOTS - 1 )>*/ );
+
+    cmdSystem->AddCommand("addbots", botAi::Cmd_AddBot_f, CMD_FL_GAME, "adds multiplayer bots batch", botAi::ArgCompletion_addBot);
+    cmdSystem->AddCommand("fillbots", botAi::Cmd_FillBots_f, CMD_FL_GAME, "fill bots");
+    cmdSystem->AddCommand("sabot", botAi::Cmd_BotInfo_f, CMD_FL_GAME, "debug SaBot info");
+    cmdSystem->AddCommand("botLevel", botAi::Cmd_SetupBotLevel_f, CMD_FL_GAME, "setup all bot level");
+#endif
 }
 
 /*

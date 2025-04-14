@@ -351,6 +351,12 @@ void idGameLocal::ServerClientBegin(int clientNum)
 	outMsg.WriteByte(clientNum);
 	outMsg.WriteLong(spawnIds[ clientNum ]);
 	networkSystem->ServerSendReliableMessage(-1, outMsg);
+#ifdef MOD_BOTS
+	if(BOT_ENABLED()) {
+	// TinMan: Tell engine to spit out bots userinfo to clients
+		botAi::UpdateUI();
+    }
+#endif
 }
 
 /*
@@ -384,6 +390,17 @@ void idGameLocal::ServerClientDisconnect(int clientNum)
 	// clear the client PVS
 	memset(clientPVS[ clientNum ], 0, sizeof(clientPVS[ clientNum ]));
 
+#ifdef MOD_BOTS
+	if(BOT_ENABLED()) {
+		if(clientNum == gameLocal.localClientNum) {
+			// TinMan: remove bot entity
+            botAi::DisconnectAll();
+		} else if ( clientNum >= botAi::BOT_START_INDEX ) {
+            // TinMan: remove bot entity
+            botAi::Disconnect(clientNum);
+		}
+	}
+#endif
 	// delete the player entity
 	delete entities[ clientNum ];
 
@@ -632,6 +649,12 @@ void idGameLocal::ServerWriteSnapshot(int clientNum, int sequence, idBitMsg &msg
 	idRandom tagRandom;
 	tagRandom.SetSeed(random.RandomInt());
 	msg.WriteLong(tagRandom.GetSeed());
+#endif
+
+#ifdef MOD_BOTS
+    // TinMan: Manually shovel the bot usercmds, cause binaryc said so, and I don't want him to get angry
+	if(BOT_ENABLED())
+		botAi::WriteUserCmdsToSnapshot( msg );
 #endif
 
 	// create the snapshot
@@ -1084,6 +1107,12 @@ void idGameLocal::ClientReadSnapshot(int clientNum, int sequence, const int game
 #if ASYNC_WRITE_TAGS
 	idRandom tagRandom;
 	tagRandom.SetSeed(msg.ReadLong());
+#endif
+
+#ifdef MOD_BOTS
+    // TinMan: Grabby grabby bot usercmds, cause binaryc said so, and I don't want him to get angry
+	if(BOT_ENABLED())
+		botAi::ReadUserCmdsFromSnapshot( msg );
 #endif
 
 	// read all entities from the snapshot
@@ -1625,6 +1654,13 @@ gameReturn_t idGameLocal::ClientPrediction(int clientNum, const usercmd_t *clien
 	}
 
 	// set the user commands for this frame
+#ifdef MOD_BOTS
+    // TinMan: glad to see I got something right
+    // custom says: only set the first 16, this will get all possible users and not overwrite updated bot cmds.
+	if(BOT_ENABLED())
+		memcpy( usercmds, clientCmds, botAi::BOT_START_INDEX * sizeof( usercmds[ 0 ] ) );
+	else
+#endif
 	memcpy(usercmds, clientCmds, numClients * sizeof(usercmds[ 0 ]));
 
 	// run prediction on all entities from the last snapshot

@@ -271,6 +271,7 @@ public final class Q3EGlobals
     public enum PatchResource
     {
         QUAKE4_SABOT,
+        DOOM3_SABOT,
         DOOM3_RIVENSIN_ORIGIANL_LEVELS,
         DOOM3BFG_HLSL_SHADER,
         TDM_GLSL_SHADER,

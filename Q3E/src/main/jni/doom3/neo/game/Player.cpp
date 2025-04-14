@@ -34,6 +34,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _MOD_VIEW_BODY
 #include "ViewBody.cpp"
 #endif
+#ifdef MOD_BOTS
+#define IS_BOT() ( spawnArgs.GetInt("spawn_entnum") >= botAi::BOT_START_INDEX )
+#endif
+
 /*
 ===============================================================================
 
@@ -9503,6 +9507,11 @@ void idPlayer::UpdatePlayerIcons(void)
 	} else {
 		isLagged = false;
 	}
+#ifdef MOD_BOTS // TinMan: lag icon
+    if ( IS_BOT() /*spawnArgs.GetBool( "isBot" )*/ ) {
+        isLagged = false;
+    }
+#endif
 }
 
 /*

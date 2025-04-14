@@ -1,5 +1,3 @@
-// #ifdef MOD_BOTS
-
 idCVar harm_si_autoFillBots( "harm_si_autoFillBots", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Automatic fill bots after map loaded in multiplayer game(0 = disable; other number = bot num).", 0, botAi::BOT_MAX_BOTS );
 //karin: auto gen aas file for mp game map with bot
 idCVar harm_g_autoGenAASFileInMPGame( "harm_g_autoGenAASFileInMPGame", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic.");
@@ -19,18 +17,53 @@ void botAi::Addbot_f( const idCmdArgs &args )
 {
     const char *key, *value;
     int			i;
+    idVec3		org;
     idDict		dict;
+    const char* name;
+    idDict		userInfo;
+    idEntity *	ent;
 
-	if(!CanAddBot())
+    int newBotID = 0;
+    int newClientID = 0;
+
+    if ( !gameLocal.isMultiplayer )
+    {
+        gameLocal.Printf( "You may only add a bot to a multiplayer game\n" );
         return;
+    }
 
-	if (args.Argc() < 2)
-	{
-		common->Warning("USAGE: addBot <botdef> ...key/value pair. e.g. addBot bot_sabot_tinman - see def/bot_sabot_characters.def for more details\n");
-		return;
-	}
+    if ( !gameLocal.isServer )
+    {
+        gameLocal.Printf( "Bots may only be added on server, only it has the powah!\n" );
+        return;
+    }
+
+    // Try to find an ID in the bots list
+    i = botAi::FindIdleBotSlot();
+
+    if ( i >= BOT_MAX_BOTS )
+    {
+        gameLocal.Printf("The maximum number of bots are already in the game.\n");
+        return;
+    }
+    else
+    {
+        newBotID = i;
+    }
 
     value = args.Argv( 1 );
+
+    // TinMan: Check to see if valid def
+    const idDeclEntityDef *botDef = gameLocal.FindEntityDef( value );
+    const char *spawnclass = botDef->dict.GetString( "spawnclass" );
+    idTypeInfo *cls = idClass::GetClass( spawnclass );
+    if ( !cls || !cls->IsType( botAi::Type ) )
+    {
+        gameLocal.Printf( "def not of type botAi or no def name given\n" );
+        return;
+    }
+
+    dict.Set( "classname", value );
 
     // TinMan: Add rest of key/values passed in
     for( i = 2; i < args.Argc() - 1; i += 2 )
@@ -41,12 +74,62 @@ void botAi::Addbot_f( const idCmdArgs &args )
         dict.Set( key, value );
     }
 
-    i = AddBot(value, dict);
-    if (i < 0)
+    dict.Set( "name", va( "bot_%d", newBotID ) ); // TinMan: Set entity name for easier debugging
+    dict.SetInt( "botID", newBotID ); // TinMan: Bot needs to know this before it's spawned so it can sync up with the client
+    newClientID = BOT_START_INDEX + newBotID; // TinMan: client id, bots use >16
+
+    //gameLocal.Printf("Spawning bot as client %d\n", newClientID);
+
+    // Start up client
+    gameLocal.ServerClientConnect(newClientID, NULL);
+
+    gameLocal.ServerClientBegin(newClientID); // TinMan: spawn the fakeclient (and send message to do likewise on other machines)
+
+    idPlayer * botClient = static_cast< idPlayer * >( gameLocal.entities[ newClientID ] ); // TinMan: Make a nice and pretty pointer to fakeclient
+    // TinMan: Put our grubby fingerprints on fakeclient. *todo* may want to make these entity flags and make sure they go across to clients so we can rely on using them for clientside code
+    botClient->spawnArgs.SetBool( "isBot", true );
+    botClient->spawnArgs.SetInt( "botID", newBotID );
+
+    // TinMan: Add client to bot list
+    bots[newBotID].inUse	= true;
+    bots[newBotID].clientID = newClientID;
+
+    // TinMan: Spawn bot with our dict
+    gameLocal.SpawnEntityDef( dict, &ent, false );
+    botAi * newBot = static_cast< botAi * >( ent ); // TinMan: Make a nice and pretty pointer to bot
+
+    // TinMan: Add bot to bot list
+    bots[newBotID].entityNum = newBot->entityNumber;
+
+    // TinMan: Give me your name, licence and occupation.
+    name = newBot->spawnArgs.GetString( "npc_name" );
+    userInfo.Set( "ui_name", va( "[BOT%d] %s", newBotID, name) ); // TinMan: *debug* Prefix [BOTn]
+
+    // TinMan: I love the skin you're in.
+    int skinNum = newBot->spawnArgs.GetInt( "mp_skin" );
+    userInfo.Set( "ui_skin", ui_skinArgs[ skinNum ] );
+
+    // TinMan: Set team
+    if ( gameLocal.mpGame.IsGametypeTeamBased() )
     {
-        common->Warning("AddBot fail -> %d\n", i);
-        return;
+        userInfo.Set( "ui_team", newBot->spawnArgs.GetInt( "team" ) ? "Blue" : "Red" );
     }
+    else if ( gameLocal.gameType == GAME_SP )
+    {
+        botClient->team = newBot->spawnArgs.GetInt( "team" );
+    }
+
+    // TinMan: Finish up connecting - Called in SetUserInfo
+    //gameLocal.mpGame.EnterGame(newClientID);
+    //gameLocal.Printf("Bot has been connected, and client has begun.\n");
+
+    userInfo.Set( "ui_ready", "Ready" );
+
+    gameLocal.SetUserInfo( newClientID, userInfo, false, true ); // TinMan: apply the userinfo *note* func was changed slightly in 1.3
+
+    botClient->Spectate( false ); // TinMan: Finally done, get outa spectate
+
+    cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "updateUI %d\n", newClientID ) );
 }
 
 /*
@@ -89,6 +172,11 @@ void botAi::Removebot_f( const idCmdArgs &args )
     }
 }
 
+bool botAi::IsAvailable(void)
+{
+    return (botInitialized ? botAvailable : false);
+}
+
 int botAi::AddBot(const char *defName, idDict &dict)
 {
     const char *key, *value;
@@ -108,30 +196,12 @@ int botAi::AddBot(const char *defName, idDict &dict)
 
     if (!defName || !defName[0])
     {
-        common->Warning("Must set bot entity def name!\n");
+        gameLocal.Warning("Must set bot entity def name!\n");
         return -2;
     }
 
     // Try to find an ID in the bots list
-    for ( i = 0; i < BOT_MAX_BOTS; i++ )
-    {
-        if ( bots[i].inUse )
-        {
-            // TinMan: make sure it isn't an orphaned spot
-            if ( gameLocal.entities[ bots[i].clientID ] && gameLocal.entities[ bots[i].entityNum ]  )
-            {
-                continue;
-            }
-            else
-            {
-                break;
-            }
-        }
-        else
-        {
-            break;
-        }
-    }
+    i = botAi::FindIdleBotSlot();
 
     if ( i >= BOT_MAX_BOTS )
     {
@@ -213,12 +283,12 @@ int botAi::AddBot(const char *defName, idDict &dict)
 
     // TinMan: I love the skin you're in.
     int skinNum = newBot->spawnArgs.GetInt( "mp_skin" );
-    //k userInfo.Set( "ui_skin", ui_skinArgs[ skinNum ] );
+    userInfo.Set( "ui_skin", ui_skinArgs[ skinNum ] );
 
     // TinMan: Set team
-    if ( IsGametypeTeamBased() )
+    if ( gameLocal.mpGame.IsGametypeTeamBased() )
     {
-        userInfo.Set( "ui_team", newBot->spawnArgs.GetInt( "team" ) ? "Marine" : "Strogg" );
+        userInfo.Set( "ui_team", newBot->spawnArgs.GetInt( "team" ) ? "Blue" : "Red" );
     }
     else if ( gameLocal.gameType == GAME_SP )
     {
@@ -231,53 +301,9 @@ int botAi::AddBot(const char *defName, idDict &dict)
 
     userInfo.Set( "ui_ready", "Ready" );
 
-	idStrList playerModelNames;
-	int numMarinePlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_MARINE);
-	if(numMarinePlayerModel > 0)
-	{
-		int index = gameLocal.random.RandomInt(numMarinePlayerModel);
-		const char *modelName = playerModelNames[index];
-		userInfo.Set("model", modelName);
-		userInfo.Set("model_marine", modelName);
-		userInfo.Set("ui_model", modelName);
-		userInfo.Set("ui_model_marine", modelName);
-		userInfo.Set("def_default_model", modelName);
-		userInfo.Set("def_default_model_marine", modelName);
-		botClient->spawnArgs.Set("model", modelName);
-		botClient->spawnArgs.Set("model_marine", modelName);
-		botClient->spawnArgs.Set("ui_model", modelName);
-		botClient->spawnArgs.Set("ui_model_marine", modelName);
-		botClient->spawnArgs.Set("def_default_model", modelName);
-		botClient->spawnArgs.Set("def_default_model_marine", modelName);
-	}
-	int numStroggPlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_STROGG);
-	if(numStroggPlayerModel > 0)
-	{
-		int index = gameLocal.random.RandomInt(numStroggPlayerModel) + numMarinePlayerModel;
-		const char *modelName = playerModelNames[index];
-		userInfo.Set("model_strogg", modelName);
-		userInfo.Set("ui_model_strogg", modelName);
-		userInfo.Set("def_default_model_strogg", modelName);
-		botClient->spawnArgs.Set("model_strogg", modelName);
-		botClient->spawnArgs.Set("ui_model_strogg", modelName);
-		botClient->spawnArgs.Set("def_default_model_strogg", modelName);
-	}
-	int numPlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_NONE);
-	if(playerModelNames.Num() > 0)
-	{
-		int index = gameLocal.random.RandomInt(playerModelNames.Num());
-		const char *modelName = playerModelNames[index];
-		userInfo.Set("model", modelName);
-		userInfo.Set("ui_model", modelName);
-		userInfo.Set("def_default_model", modelName);
-		botClient->spawnArgs.Set("model", modelName);
-		botClient->spawnArgs.Set("ui_model", modelName);
-		botClient->spawnArgs.Set("def_default_model", modelName);
-	}
-
-    gameLocal.SetUserInfo( newClientID, userInfo, false ); // TinMan: apply the userinfo *note* func was changed slightly in 1.3
+    gameLocal.SetUserInfo( newClientID, userInfo, false, true ); // TinMan: apply the userinfo *note* func was changed slightly in 1.3
     botClient->Spectate( false ); // TinMan: Finally done, get outa spectate
-    botClient->UpdateModelSetup(true);
+    //botClient->UpdateModelSetup(true);
 
     cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "updateUI %d\n", newClientID ) );
 
@@ -297,24 +323,24 @@ int botAi::AddBot(const char *name)
 
 void botAi::Cmd_AddBot_f(const idCmdArgs& args)
 {
-	if(!CanAddBot())
+    if(!CanAddBot())
         return;
 
     if (args.Argc() < 2)
     {
-        common->Warning("USAGE: addbots <botdef> <...> e.g. addbots bot_sabot_tinman bot_sabot_fluffy bot_sabot_blackstar - see def/bot_sabot_characters.def for more details\n");
+        gameLocal.Warning("USAGE: addbots <botdef> <...> e.g. addbots bot_sabot_tinman bot_sabot_fluffy bot_sabot_blackstar - see def/bot_sabot_characters.def for more details\n");
         return;
     }
     int num = args.Argc() - 1;
     if(num > botAi::BOT_MAX_BOTS)
     {
-        common->Warning("Max bot num is %d\n", botAi::BOT_MAX_BOTS);
+        gameLocal.Warning("Max bot num is %d\n", botAi::BOT_MAX_BOTS);
         return;
     }
     int rest = CheckRestClients(num);
     if(rest < 0)
     {
-        common->Warning("bots has not enough (%d/%d)\n", rest + num, botAi::BOT_MAX_BOTS);
+        gameLocal.Warning("bots has not enough (%d/%d)\n", rest + num, botAi::BOT_MAX_BOTS);
         return;
     }
     for(int i = 0; i < num; i++)
@@ -323,7 +349,7 @@ void botAi::Cmd_AddBot_f(const idCmdArgs& args)
         int r = AddBot(value);
         if (r < 0)
         {
-            common->Warning("AddBot fail -> %d\n", i);
+            gameLocal.Warning("AddBot fail -> %d\n", i);
             return;
         }
     }
@@ -331,7 +357,7 @@ void botAi::Cmd_AddBot_f(const idCmdArgs& args)
 
 void botAi::Cmd_FillBots_f(const idCmdArgs& args)
 {
-	if(!CanAddBot())
+    if(!CanAddBot())
         return;
 
     int num = CheckRestClients(0);
@@ -344,14 +370,14 @@ void botAi::Cmd_FillBots_f(const idCmdArgs& args)
 
     if(num > botAi::BOT_MAX_BOTS)
     {
-        common->Warning("Max bot num is %d\n", botAi::BOT_MAX_BOTS);
+        gameLocal.Warning("Max bot num is %d\n", botAi::BOT_MAX_BOTS);
         return;
     }
 
     int rest = CheckRestClients(num);
     if(rest < 0)
     {
-        common->Warning("bots has not enough (%d/%d)\n", rest + num, botAi::BOT_MAX_BOTS);
+        gameLocal.Warning("bots has not enough (%d/%d)\n", rest + num, botAi::BOT_MAX_BOTS);
         return;
     }
 
@@ -410,38 +436,9 @@ int botAi::CheckRestClients(int num)
     return maxClients - num - numBots;
 }
 
-bool botAi::IsAvailable(void)
-{
-    static bool _available = false;
-    static bool _available_inited = false;
-
-    if(!_available_inited)
-    {
-        int i;
-        int num;
-        const char *val;
-
-        num = declManager->GetNumDecls(DECL_ENTITYDEF);
-
-        for (i = 0; i < num; i++) {
-            const idDeclEntityDef *decl = (const idDeclEntityDef *)declManager->DeclByIndex(DECL_ENTITYDEF, i , false);
-            if(!decl)
-                continue;
-            if(!idStr(decl->GetName()).IcmpPrefix("bot_sabot"))
-            {
-                _available = true;
-                break;
-            }
-        }
-        _available_inited = true;
-    }
-
-    return _available;
-}
-
 void botAi::Cmd_BotInfo_f(const idCmdArgs& args)
 {
-    gameLocal.Printf("SABot(a9)\n");
+    gameLocal.Printf("SABot(a7)\n");
     gameLocal.Printf("gameLocal.isMultiplayer: %d\n", gameLocal.isMultiplayer);
     gameLocal.Printf("gameLocal.isServer: %d\n", gameLocal.isServer);
     gameLocal.Printf("gameLocal.isClient: %d\n", gameLocal.isClient);
@@ -449,15 +446,16 @@ void botAi::Cmd_BotInfo_f(const idCmdArgs& args)
     gameLocal.Printf("BOT_ENABLED(): %d\n", BOT_ENABLED());
     gameLocal.Printf("Bot slots: total(%d)\n", botAi::BOT_MAX_BOTS);
 
-    int numAAS = gameLocal.GetNumAAS();
+    int numAAS = gameLocal.aasList.Num();
     bool botAasLoaded = false;
     gameLocal.Printf("Bot AAS: total(%d)\n", numAAS);
     for(int i = 0; i < numAAS; i++)
     {
-        idAAS *aas = gameLocal.GetAAS(i);
-        if(!aas)
+        idAAS *aasBase = gameLocal.GetAAS(i);
+        if(!aasBase)
             continue;
-        const idAASFile *aasFile = aas->GetFile();
+        idAASLocal *aas = (idAASLocal *)aasBase;
+        const idAASFile *aasFile = aas->file;
         if(!aasFile)
             continue;
         gameLocal.Printf("\t%d: %s\n", i, aasFile->GetName());
@@ -509,7 +507,21 @@ void botAi::Cmd_BotInfo_f(const idCmdArgs& args)
         else
             gameLocal.Printf("\t%d: <NOT PLAYER>\n", i);
     }
+
     gameLocal.Printf("gameLocal.numClients: connected(%d)\n", client);
+
+    for ( int i = 0; i < gameLocal.num_entities ; i++ )
+    {
+        const idEntity *ent = gameLocal.entities[ i ];
+
+        if(!ent)
+            continue;
+        if ( ent->IsType( botAi::Type ) )
+        {
+            const botAi *bot = (const botAi *)ent;
+            gameLocal.Printf("\t%d: Bot(%s) -> level=%d, fov=%f, aim rate=%f\n", bot->clientID, gameLocal.userInfo[ bot->clientID ].GetString( "ui_name" ), bot->botLevel, bot->spawnArgs.GetFloat("fov", ""), bot->aimRate);
+        }
+    }
 }
 
 bool botAi::CanAddBot(void)
@@ -528,18 +540,19 @@ bool botAi::CanAddBot(void)
 
     if ( !IsAvailable() )
     {
-        gameLocal.Warning( "SABot(a9) mod file missing!\n" );
+        gameLocal.Warning( "SABot(a7) mod file missing!\n" );
         return false;
     }
 
-    int numAAS = gameLocal.GetNumAAS();
+    int numAAS = gameLocal.aasList.Num();
     bool botAasLoaded = false;
     for(int i = 0; i < numAAS; i++)
     {
-        idAAS *aas = gameLocal.GetAAS(i);
-        if(!aas)
+        idAAS *aasBase = gameLocal.GetAAS(i);
+        if(!aasBase)
             continue;
-        const idAASFile *aasFile = aas->GetFile();
+        idAASLocal *aas = (idAASLocal *)aasBase;
+        const idAASFile *aasFile = aas->file;
         if(!aasFile)
             continue;
         if (idStr(aasFile->GetName()).Find( BOT_AAS, false ) > 0)
@@ -553,7 +566,47 @@ bool botAi::CanAddBot(void)
         gameLocal.Warning( "bot aas file not loaded!\n" );
         return false;
     }
-	return true;
+    return true;
 }
 
-// #endif
+void botAi::Cmd_SetupBotLevel_f(const idCmdArgs& args)
+{
+    if ( !gameLocal.isMultiplayer )
+    {
+        gameLocal.Warning( "You may only add a bot to a multiplayer game\n" );
+        return;
+    }
+
+    if ( !gameLocal.isServer )
+    {
+        gameLocal.Warning( "Bots may only be added on server, only it has the powah!\n" );
+        return;
+    }
+
+    if ( !IsAvailable() )
+    {
+        gameLocal.Warning( "SABot(a7) mod file missing!\n" );
+        return;
+    }
+
+    if (args.Argc() < 2)
+    {
+        gameLocal.Warning("USAGE: botLevel <bot level>\n");
+        return;
+    }
+
+    int level = atoi(args.Argv(1));
+    for ( int i = 0; i < gameLocal.num_entities ; i++ )
+    {
+        idEntity *ent = gameLocal.entities[ i ];
+
+        if(!ent)
+            continue;
+        if ( ent->IsType( botAi::Type ) )
+        {
+            botAi *bot = (botAi *)ent;
+            bot->SetBotLevel(level);
+        }
+    }
+}
+

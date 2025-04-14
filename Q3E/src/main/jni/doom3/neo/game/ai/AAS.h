@@ -42,6 +42,9 @@ enum {
 	PATHTYPE_WALKOFFLEDGE,
 	PATHTYPE_BARRIERJUMP,
 	PATHTYPE_JUMP
+#ifdef MOD_BOTS // TinMan: Elevinat0rs
+    , PATHTYPE_ELEVATOR
+#endif
 };
 
 typedef struct aasPath_s {

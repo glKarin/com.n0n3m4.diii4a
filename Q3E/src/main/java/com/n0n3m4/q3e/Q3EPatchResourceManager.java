@@ -39,7 +39,19 @@ public class Q3EPatchResourceManager
                 Q3EGlobals.GAME_QUAKE4,
                 null,
                 Q3EPatchResource.COPY_FILE_TO_DIR,
-                "pak/q4base/sabot_a9.pk4",
+                "pak/q4base/q4_sabot_a9.pk4",
+                null
+        );
+        resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource(
+                Q3EGlobals.PatchResource.DOOM3_SABOT,
+                Q3ELang.tr(context, R.string.doom3_bot_sabot_a7_mod),
+                "1",
+                Q3EGlobals.GAME_DOOM3,
+                null,
+                Q3EPatchResource.COPY_FILE_TO_DIR,
+                "pak/doom3/d3_sabot_a7.pk4",
                 null
         );
         resourceList.add(rsc);

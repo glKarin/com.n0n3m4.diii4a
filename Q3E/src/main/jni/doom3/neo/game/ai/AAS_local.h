@@ -32,6 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "AAS.h"
 #include "../Pvs.h"
 
+#ifdef MOD_BOTS // cusTom3 - aas extensions
+class BotAASBuild;
+#endif
 
 class idRoutingCache
 {
@@ -88,6 +91,10 @@ class idRoutingObstacle
 
 class idAASLocal : public idAAS
 {
+#ifdef MOD_BOTS // cusTom3 - aas extensions
+    friend class BotAASBuild;
+    friend class botAi;
+#endif
 	public:
 		idAASLocal(void);
 		virtual						~idAASLocal(void);
@@ -188,6 +195,11 @@ class idAASLocal : public idAAS
 		bool						PullPlayer(const idVec3 &origin, int toAreaNum) const;
 		void						RandomPullPlayer(const idVec3 &origin) const;
 		void						ShowPushIntoArea(const idVec3 &origin) const;
+
+#ifdef MOD_BOTS // cusTom3 - aas extensions
+private:
+		BotAASBuild *				botAASBuilder;
+#endif
 };
 
 #endif /* !__AAS_LOCAL_H__ */

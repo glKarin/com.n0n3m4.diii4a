@@ -245,8 +245,14 @@ class idEntityPtr
 
 //============================================================================
 
+#ifdef MOD_BOTS
+class botAi;
+#endif
 class idGameLocal : public idGame
 {
+#ifdef MOD_BOTS
+    friend class botAi;
+#endif
 	public:
 		idDict					serverInfo;				// all the tunable parameters, like numclients, etc
 		int						numClients;				// pulled from serverInfo and verified
@@ -771,4 +777,8 @@ const int	CINEMATIC_SKIP_DELAY	= SEC2MS(2.0f);
 #include "script/Script_Interpreter.h"
 #include "script/Script_Thread.h"
 
+#ifdef MOD_BOTS
+// TinMan: BotZ0r
+#include "bots/BotAI.h"
+#endif
 #endif	/* !__GAME_LOCAL_H__ */

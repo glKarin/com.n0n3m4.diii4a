@@ -741,7 +741,10 @@ idReachability *idAASLocal::GetAreaReachability(int areaNum, int reachabilityNum
 idAASLocal::ClusterAreaNum
 ============
 */
-ID_INLINE int idAASLocal::ClusterAreaNum(int clusterNum, int areaNum) const
+#if !defined(MOD_BOTS)
+ID_INLINE 
+#endif
+int idAASLocal::ClusterAreaNum(int clusterNum, int areaNum) const
 {
 	int side, areaCluster;
 

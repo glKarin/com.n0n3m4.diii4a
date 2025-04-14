@@ -126,6 +126,7 @@ option(CORE									"Build the core" 															ON)
 option(BASE									"Build the base game code" 													ON)
 
 option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" 								ON)
+option(D3_MOD_BOTS							"Build doom3 bots mod support" 												ON)
 endif()
 
 # DOOM3 mods
@@ -1744,6 +1745,10 @@ if(BASE)
 		set(d3_compile_definitions "${d3_compile_definitions};_MOD_FULL_BODY_AWARENESS")
 		set(d3_compile_definitions "${d3_compile_definitions};_MOD_VIEW_BODY")
 		message(STATUS "Build doom3 full body awareness mod support")
+	endif()
+	if(D3_MOD_BOTS)
+		set(d3_compile_definitions "${d3_compile_definitions};MOD_BOTS")
+		message(STATUS "Build doom3 bots mod support")
 	endif()
 	set_target_properties(game PROPERTIES COMPILE_DEFINITIONS "${d3_compile_definitions}")
 	target_include_directories(game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/game")
