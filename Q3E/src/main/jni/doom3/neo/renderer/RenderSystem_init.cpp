@@ -2269,9 +2269,7 @@ R_InitCommands
 */
 void R_InitCommands(void)
 {
-#if !defined(GL_ES_VERSION_2_0)
 	cmdSystem->AddCommand("MakeMegaTexture", idMegaTexture::MakeMegaTexture_f, CMD_FL_RENDERER|CMD_FL_CHEAT, "processes giant images");
-#endif
 	cmdSystem->AddCommand("sizeUp", R_SizeUp_f, CMD_FL_RENDERER, "makes the rendered view larger");
 	cmdSystem->AddCommand("sizeDown", R_SizeDown_f, CMD_FL_RENDERER, "makes the rendered view smaller");
 	cmdSystem->AddCommand("reloadGuis", R_ReloadGuis_f, CMD_FL_RENDERER, "reloads guis");

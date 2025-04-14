@@ -71,7 +71,11 @@ static byte	colors[8][4] = {
 static void R_EmptyLevelImage(idImage *image)
 {
 	int	c = MAX_LEVEL_WIDTH * MAX_LEVEL_WIDTH;
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+	_DROID_ALLOC16_DEF(byte, data, (c*4));
+#else
 	byte	*data = (byte *)_alloca(c*4);
+#endif
 
 	for (int i = 0 ; i < c ; i++) {
 		((int *)data)[i] = fillColor.intVal;
@@ -80,6 +84,9 @@ static void R_EmptyLevelImage(idImage *image)
 	// FIXME: this won't live past vid mode changes
 	image->GenerateImage(data, MAX_LEVEL_WIDTH, MAX_LEVEL_WIDTH,
 	                     TF_DEFAULT, false, TR_REPEAT, TD_HIGH_QUALITY);
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+	_DROID_FREE(data);
+#endif
 }
 
 
@@ -249,7 +256,11 @@ void idMegaTexture::BindForViewOrigin(const idVec3 viewOrigin)
 			globalImages->whiteImage->Bind();
 
 			static float	parms[4] = { -2, -2, 0, 1 };	// no contribution
-			glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i, parms);
+#if !defined(GL_ES_VERSION_2_0)
+            glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i, parms);
+#else
+            GL_Uniform4fv(SHADER_PARMS_ADDR(u_megaTextureLevel, i), parms);
+#endif
 		} else {
 			idTextureLevel	*level = &levels[ numLevels-1-i ];
 
@@ -263,7 +274,11 @@ void idMegaTexture::BindForViewOrigin(const idVec3 viewOrigin)
 				level->image->Bind();
 			}
 
+#if !defined(GL_ES_VERSION_2_0)
 			glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i, level->parms);
+#else
+            GL_Uniform4fv(SHADER_PARMS_ADDR(u_megaTextureLevel, i), level->parms);
+#endif
 		}
 	}
 
@@ -272,13 +287,21 @@ void idMegaTexture::BindForViewOrigin(const idVec3 viewOrigin)
 	parms[1] = 0;
 	parms[2] = 0;
 	parms[3] = 1;
+#if !defined(GL_ES_VERSION_2_0)
 	glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, 7, parms);
+#else
+    GL_Uniform4fv(SHADER_PARMS_ADDR(u_megaTextureLevel, 7), parms);
+#endif
 
 	parms[0] = 1;
 	parms[1] = 1;
 	parms[2] = r_terrainScale.GetFloat();
 	parms[3] = 1;
+#if !defined(GL_ES_VERSION_2_0)
 	glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, 8, parms);
+#else
+    GL_Uniform4fv(SHADER_PARMS_ADDR(u_megaTextureLevel, 8), parms);
+#endif
 }
 
 /*
@@ -326,6 +349,7 @@ void idMegaTexture::SetViewOrigin(const idVec3 viewOrigin)
 
 	float	texCenter[2];
 
+#if 1
 	// convert the viewOrigin to a texture center, which will
 	// be a different conversion for each megaTexture
 	for (int i = 0 ; i < 2 ; i++) {
@@ -335,6 +359,21 @@ void idMegaTexture::SetViewOrigin(const idVec3 viewOrigin)
 		        viewOrigin[2] * localViewToTextureCenter[i][2] +
 		        localViewToTextureCenter[i][3];
 	}
+#else
+    // TexCenter should be the normalized position between the min and max based on the player position.
+// jmarshall - heavily modified this, basically all we care about here is the min/max of the terrain.
+    idBounds surfaceBounds = currentTriMapping->bounds;
+// jmarshall end
+    idVec3 center = surfaceBounds.GetCenter();
+    idVec3 megaViewOrigin = currentViewOrigin - center;
+    idBounds megaBounds;
+    megaBounds[0] = surfaceBounds[0] - center;
+    megaBounds[1] = surfaceBounds[1] - center;
+
+    // Normalize megaViewOrigin between megabounds.
+    texCenter[0] = ((megaViewOrigin[0] - megaBounds[0][0]) / (megaBounds[1][0] - megaBounds[0][0]));
+    texCenter[1] = ((megaViewOrigin[1] - megaBounds[0][1]) / (megaBounds[1][1] - megaBounds[0][1]));
+#endif
 
 	for (int i = 0 ; i < numLevels ; i++) {
 		levels[i].UpdateForCenter(texCenter);
@@ -396,7 +435,7 @@ void idTextureLevel::UpdateTile(int localX, int localY, int globalX, int globalY
 	int size = TILE_SIZE;
 
 	while (1) {
-		glTexSubImage2D(GL_TEXTURE_2D, level, localX * size, localY * size, size, size, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		qglTexSubImage2D(GL_TEXTURE_2D, level, localX * size, localY * size, size, size, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		size >>= 1;
 		level++;
 
@@ -540,8 +579,13 @@ void	idMegaTexture::GenerateMegaMipMaps(megaTextureHeader_t *header, idFile *out
 	int	height = header->tilesHigh;
 
 	int		tileSize = header->tileSize * header->tileSize * 4;
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+	_DROID_ALLOC16_DEF(byte, oldBlock, tileSize);
+	_DROID_ALLOC16_DEF(byte, newBlock, tileSize);
+#else
 	byte	*oldBlock = (byte *)_alloca(tileSize);
 	byte	*newBlock = (byte *)_alloca(tileSize);
+#endif
 
 	while (width > 1 || height > 1) {
 		int	newHeight = (height+1) >> 1;
@@ -608,6 +652,10 @@ void	idMegaTexture::GenerateMegaMipMaps(megaTextureHeader_t *header, idFile *out
 	}
 
 	delete inFile;
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+	_DROID_FREE(oldBlock);
+	_DROID_FREE(newBlock);
+#endif
 }
 
 /*
@@ -664,7 +712,11 @@ void	idMegaTexture::GenerateMegaPreview(const char *fileName)
 	}
 
 	byte *pic = (byte *)R_StaticAlloc(width * height * tileBytes);
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+	_DROID_ALLOC16_DEF(byte, oldBlock, (tileBytes));
+#else
 	byte	*oldBlock = (byte *)_alloca(tileBytes);
+#endif
 
 	for (int y = 0 ; y < height ; y++) {
 		for (int x = 0 ; x < width ; x++) {
@@ -684,6 +736,9 @@ void	idMegaTexture::GenerateMegaPreview(const char *fileName)
 	R_StaticFree(pic);
 
 	delete fileHandle;
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+	_DROID_FREE(oldBlock);
+#endif
 }
 
 

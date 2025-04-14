@@ -1890,7 +1890,6 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 		if (!token.Icmp("megaTexture")) {
 			if (src.ReadTokenOnLine(&token)) {
-#if !defined(GL_ES_VERSION_2_0)
 				newStage.megaTexture = new idMegaTexture;
 
 				if (!newStage.megaTexture->InitFromMegaFile(token.c_str())) {
@@ -1899,11 +1898,21 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 					continue;
 				}
 
+#if !defined(GL_ES_VERSION_2_0)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, "megaTexture.vfp");
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, "megaTexture.vfp");
 #else
 				newStage.vertexProgram = -1;
 				newStage.fragmentProgram = -1;
+                //if(newStage.glslProgram <= 0)
+                {
+                    const shaderProgram_t *shaderProgram = shaderManager->Find("megaTexture");
+                    NS_DEBUG(common->Printf("NS vertexProgram: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
+                    if(shaderProgram && shaderProgram->program > 0)
+                        newStage.glslProgram = shaderProgram->program;
+                    else
+                        newStage.glslProgram = -1;
+                }
 #endif
 				continue;
 			}

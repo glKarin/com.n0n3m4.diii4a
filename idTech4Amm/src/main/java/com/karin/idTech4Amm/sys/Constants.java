@@ -30,7 +30,7 @@ public final class Constants
         return new String[] {
             "Fix makron remote render at screen for texfure/cameraView1 in map game/core1 on Quake 4.",
             "Add spiritview and deathview GLSL shaders on Prey(2006).",
-            "Update GZDOOM version to 2.14.1.",
+            "Update GZDOOM version to 4.14.1.",
         };
 	};
 

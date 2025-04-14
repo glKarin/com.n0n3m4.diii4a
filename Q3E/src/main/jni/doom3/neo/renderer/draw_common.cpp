@@ -734,12 +734,20 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
 			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+            GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Normal));
+            GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Bitangent));
+            GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Tangent));
 
 			if(!newStageAttrIsSet[index])
 			{
 				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
 				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
 				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), &ac->color);
+
+                GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
+                GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
+                GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
+
 				newStageAttrIsSet[index] = true;
 			}
 
@@ -764,6 +772,11 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 				modelMatrix.TransposeSelf();
 				GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelMatrix), modelMatrix.ToFloatPtr());
 
+                idVec4 localViewOrigin;
+                R_GlobalPointToLocal(surf->space->modelMatrix, backEnd.viewDef->renderView.vieworg, localViewOrigin.ToVec3());
+                localViewOrigin[3] = 1.0f;
+                GL_Uniform4fv(offsetof(shaderProgram_t, localViewOrigin), localViewOrigin.ToFloatPtr());
+
 				// obsolete: screen power of two correction factor, assuming the copy to _currentRender
 				// also copied an extra row and column for the bilerp
 				// if is pot, glUniform4f(1, 1, 0, 1);
@@ -773,6 +786,15 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			}
 
 			//============================================================================
+
+            // megaTextures bind a lot of images and set a lot of parameters
+            if ( newStage->megaTexture )
+            {
+                newStage->megaTexture->SetMappingForSurface( tri );
+                idVec3	localViewer;
+                R_GlobalPointToLocal( surf->space->modelMatrix, backEnd.viewDef->renderView.vieworg, localViewer );
+                newStage->megaTexture->BindForViewOrigin( localViewer );
+            }
 
 			// setting local parameters (specified in material definition)
 			for ( int i = 0; i < newStage->numVertexParms; i++ ) {
@@ -811,9 +833,17 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 					//GL_Uniform1i(SHADER_PARMS_ADDR(u_fragmentMap, i), i);
 				}
 			}
+            if ( newStage->megaTexture )
+            {
+                newStage->megaTexture->Unbind();
+            }
+
 			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
 			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+            GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Normal));
+            GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Bitangent));
+            GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Tangent));
 
 			GL_SelectTextureForce(0);
 			GL_UseProgram(NULL);

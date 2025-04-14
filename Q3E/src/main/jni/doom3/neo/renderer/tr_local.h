@@ -1566,6 +1566,7 @@ typedef enum {
 	SHADER_HEATHAZE_WITH_MASK,
 	SHADER_HEATHAZE_WITH_MASK_AND_VERTEX,
 	SHADER_COLORPROCESS,
+    SHADER_MEGATEXTURE,
 #ifdef _HUMANHEAD
 	SHADER_SCREENEFFECT, // spiritview
 	SHADER_RADIALBLUR, // deathview
@@ -1687,6 +1688,7 @@ DRAW_GLSL
 */
 
 #define MAX_UNIFORM_PARMS 8
+#define MAX_MEGATEXTURE_PARMS 9
 #define HARM_SHADER_NAME_LENGTH 64
 //#define _HARM_SHADER_NAME
 typedef struct shaderProgram_s {
@@ -1753,6 +1755,8 @@ typedef struct shaderProgram_s {
 	GLint		texgenT;
 	GLint		texgenQ;
 	GLint		u_uniformParm[MAX_UNIFORM_PARMS];
+
+    GLint       u_megaTextureLevel[MAX_MEGATEXTURE_PARMS];
 
 #ifdef _SHADOW_MAPPING
 	GLint		shadowMVPMatrix;

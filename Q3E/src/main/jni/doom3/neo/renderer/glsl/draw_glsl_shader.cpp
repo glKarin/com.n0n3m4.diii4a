@@ -444,6 +444,7 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMask", SHADER_HEATHAZE_WITH_MASK, &heatHazeWithMaskShader, HEATHAZEWITHMASK_VERT, HEATHAZEWITHMASK_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", SHADER_HEATHAZE_WITH_MASK_AND_VERTEX, &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("colorProcess", SHADER_COLORPROCESS, &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("megaTexture", SHADER_MEGATEXTURE, &megaTextureShader, MEGATEXTURE_VERT, MEGATEXTURE_FRAG, "", ""));
 #ifdef _HUMANHEAD
     ret.Append(GLSL_SHADER_SOURCE("screeneffect", SHADER_SCREENEFFECT, &screeneffectShader, SCREENEFFECT_VERT, SCREENEFFECT_FRAG, "", ""));
     ret.Append(GLSL_SHADER_SOURCE("radialblur", SHADER_RADIALBLUR, &radialblurShader, RADIALBLUR_VERT, RADIALBLUR_FRAG, "", ""));
@@ -535,13 +536,43 @@ static int RB_GLSL_ParseMacros(const char *macros, idStrList &ret)
 	return counter;
 }
 
+static int RB_GLSL_FindNextLinePositionOfVersion(const idStr &res)
+{
+	int index = res.Find("#version");
+	if(index == -1)
+		SHADER_ERROR("[Harmattan]: GLSL shader source can not find '#version'\n.");
+	index = res.Find('\n', index);
+	if(index == -1 || index + 1 == res.Length())
+		SHADER_ERROR("[Harmattan]: GLSL shader source '#version' not completed\n.");
+	return index + 1;
+}
+
+static void RB_GLSL_InsertGlobalDefines(idStr &res, const char *text)
+{
+	int index = RB_GLSL_FindNextLinePositionOfVersion(res);
+	idStr str("\n");
+	str.Append(text);
+	str.Append("\n");
+
+	res.Insert(str, index);
+}
+
 static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros, int highp = 0)
 {
     idStr res(source);
+
     if(highp > 0)
     {
         res.Replace("precision mediump float;", "precision highp float;");
         res.Replace("precision lowp float;", "precision highp float;");
+        idStr samplerPrecision = "precision highp sampler2D;\n"
+                                 "precision highp samplerCube;\n";
+        if(USING_GLES3)
+            samplerPrecision.Append("precision highp sampler2DArrayShadow;\n"
+                                 "precision highp sampler2DArray;\n"
+            );
+		RB_GLSL_InsertGlobalDefines(res, samplerPrecision.c_str());
+
 		if(highp > 1)
 		{
 			res.Replace("mediump ", "highp ");
@@ -560,23 +591,13 @@ static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros, int hi
 	if(0 == n)
 		return res;
 
-	int index = res.Find("#version");
-	if(index == -1)
-		SHADER_ERROR("[Harmattan]: GLSL shader source can not find '#version'\n.");
-
-	index = res.Find('\n', index);
-	if(index == -1 || index + 1 == res.Length())
-		SHADER_ERROR("[Harmattan]: GLSL shader source '#version' not completed\n.");
-
 	idStr m;
-	m += "\n";
 	for(int i = 0; i < list.Num(); i++)
 	{
-		m += "#define " + list[i] + "\n";
+		m.Append("#define " + list[i] + "\n");
 	}
-	m += "\n";
 
-	res.Insert(m.c_str(), index + 1);
+	RB_GLSL_InsertGlobalDefines(res, m);
 
 	// printf("%d|%s|\n%s\n", n, macros, res.c_str());
 	return res;
@@ -845,6 +866,11 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 		idStr::snPrintf(buffer, sizeof(buffer), "u_uniformParm%d", i);
 		shader->u_uniformParm[i] = GL_GetUniformLocation(shader->program, buffer);
 	}
+
+    for (i = 0; i < MAX_MEGATEXTURE_PARMS; i++) {
+        idStr::snPrintf(buffer, sizeof(buffer), "u_megaTextureLevel%d", i);
+        shader->u_uniformParm[i] = GL_GetUniformLocation(shader->program, buffer);
+    }
 
 #ifdef _SHADOW_MAPPING
 	shader->shadowMVPMatrix = GL_GetUniformLocation(shader->program, "shadowMVPMatrix");

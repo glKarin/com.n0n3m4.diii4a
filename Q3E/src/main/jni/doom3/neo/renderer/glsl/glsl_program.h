@@ -24,6 +24,7 @@ GLSL_PROGRAM_PROC shaderProgram_t heatHazeShader; //k: heatHaze shader
 GLSL_PROGRAM_PROC shaderProgram_t heatHazeWithMaskShader; //k: heatHaze with mask shader
 GLSL_PROGRAM_PROC shaderProgram_t heatHazeWithMaskAndVertexShader; //k: heatHaze with mask and vertex shader
 GLSL_PROGRAM_PROC shaderProgram_t colorProcessShader; //k: color process shader
+GLSL_PROGRAM_PROC shaderProgram_t megaTextureShader; //k: megatexture shader
 
 #ifdef _HUMANHEAD //karin: newstage
 GLSL_PROGRAM_PROC shaderProgram_t screeneffectShader; //k: screen effect shader spiritview
