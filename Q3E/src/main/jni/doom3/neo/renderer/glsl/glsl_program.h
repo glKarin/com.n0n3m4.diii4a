@@ -29,6 +29,8 @@ GLSL_PROGRAM_PROC shaderProgram_t megaTextureShader; //k: megatexture shader
 #ifdef _HUMANHEAD //karin: newstage
 GLSL_PROGRAM_PROC shaderProgram_t screeneffectShader; //k: screen effect shader spiritview
 GLSL_PROGRAM_PROC shaderProgram_t radialblurShader; //k: screen effect shader deathview
+GLSL_PROGRAM_PROC shaderProgram_t liquidShader; //k: liquid shader
+//GLSL_PROGRAM_PROC shaderProgram_t interactionLiquidShader; //k: interaction liquid shader: TODO: using liquidShader as alias
 GLSL_PROGRAM_PROC shaderProgram_t screenprocessShader; //k: screen process shader
 #endif
 

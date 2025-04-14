@@ -1570,6 +1570,8 @@ typedef enum {
 #ifdef _HUMANHEAD
 	SHADER_SCREENEFFECT, // spiritview
 	SHADER_RADIALBLUR, // deathview
+	SHADER_LIQUID, // liquid
+//    SHADER_INTERACTIONLIQUID, // interaction liquid
 	SHADER_SCREENPROCESS, // unused
 #endif
 	// shadow mapping
