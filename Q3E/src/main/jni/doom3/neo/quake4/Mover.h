@@ -411,8 +411,12 @@ public:
 
 	void					SetPortalState( bool open );
 #ifdef MOD_BOTS // cusTom3 - aas extensions - need for elevator reachabilities
-	idVec3					GetPosition1();
-    idVec3					GetPosition2();
+	idVec3					GetPosition1() {
+        return pos1;
+    }
+    idVec3					GetPosition2() {
+        return pos2;
+    }
 #endif
 
 protected:

@@ -1989,8 +1989,7 @@ void idPlayer::Spawn( void ) {
 			assert( spectating );
 		}
 #ifdef MOD_BOTS
-		else if ( IS_BOT() )
-		{
+		else if ( IS_BOT() ) {
 			// set yourself ready to spawn. idMultiplayerGame will decide when/if appropriate and call SpawnFromSpawnSpot
 			SetupWeaponEntity( );
 #ifdef _MOD_VIEW_BODY
