@@ -1,44 +1,9 @@
 
-void botAi::DisconnectAll(void)
-{
-    for ( int botID = 0; botID < botAi::BOT_MAX_BOTS; botID++ ) {
-        if ( botAi::bots[botID].inUse ) {
-            idEntity * ent = gameLocal.entities[ botAi::bots[botID].entityNum ];
-            if ( ent ) {
-                //common->Printf( "[idGameLocal::ServerClientDisconnect][Found bot #%d ent]\n", botID );
-                delete gameLocal.entities[ botAi::bots[botID].entityNum ];
-                // TinMan: TODO: memset?
-                // memset( botAi::bots[botID], 0, sizeof( botInfo_t ) );
-                botAi::bots[botID].inUse = false;
-                botAi::bots[botID].clientID = -1;
-                botAi::bots[botID].entityNum = -1;
-            }
-        }
-    }
-}
-
-void botAi::Disconnect(int clientNum)
-{
-    int botID = clientNum - botAi::BOT_START_INDEX;
-    if ( botAi::bots[botID].inUse ) {
-        idEntity * ent = gameLocal.entities[ botAi::bots[botID].entityNum ];
-        if ( ent ) {
-            //common->Printf( "[idGameLocal::ServerClientDisconnect][Found bot #%d ent]\n", botID );
-            delete gameLocal.entities[ botAi::bots[botID].entityNum ];
-            // TinMan: TODO: memset?
-            // memset( botAi::bots[botID], 0, sizeof( botInfo_t ) );
-            botAi::bots[botID].inUse = false;
-            botAi::bots[botID].clientID = -1;
-            botAi::bots[botID].entityNum = -1;
-        }
-    }
-}
-
 int botAi::FindIdleBotSlot(void)
 {
     int i;
 
-    for ( i = 0; i < BOT_MAX_BOTS; i++ )
+    for ( i = BOT_START_INDEX; i < BOT_MAX_BOTS; i++ )
     {
         if ( bots[i].inUse )
         {
@@ -65,9 +30,11 @@ void botAi::UpdateUI(void)
 {
     for ( int clientID = botAi::BOT_START_INDEX; clientID < MAX_CLIENTS; clientID++ ) {
         if ( gameLocal.entities[ clientID ] && gameLocal.entities[ clientID ]->IsType( idPlayer::Type ) ) {
+            idPlayer *client = static_cast<idPlayer *>(gameLocal.entities[ clientID ]);
             // core is in charge of syncing down userinfo changes
             // it will also call back game through SetUserInfo with the current info for update
-            cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "updateUI %d\n", clientID ) );
+            if(client->IsBotAvailable())
+                cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "updateUI %d\n", clientID ) );
         }
     }
 }
@@ -111,4 +78,10 @@ bool botAi::GenerateAAS(void)
     }
 
     return aasLoadSuc;
+}
+
+idPlayer * botAi::FindBotClient(int clientID)
+{
+    idEntity *entity = gameLocal.entities[ clientID ];
+    return (entity->IsType(idPlayer::Type) ? static_cast<idPlayer *>(entity) : NULL);
 }

@@ -1,4 +1,3 @@
-// #ifdef MOD_BOTS
 
 #define MAX_BOT_LEVEL 8
 
@@ -111,7 +110,7 @@ static idStr Bot_GetBotName( int index = -1 )
 
 bool botAi::botAvailable = false;
 bool botAi::botInitialized = false;
-void botAi::InitBot(void)
+void botAi::InitBotSystem(void)
 {
     if(botInitialized)
     {
@@ -169,4 +168,25 @@ void botAi::SetBotLevel(int level)
     botLevel = spawnArgs.GetInt( "botLevel", "0" );
 }
 
-// #endif
+bool botAi::IsGametypeTeamBased(void)   /* CTF */
+{
+    switch (gameLocal.gameType)
+    {
+        case GAME_SP:
+        case GAME_DM:
+        case GAME_TOURNEY:
+        case GAME_LASTMAN:
+            return false;
+#ifdef CTF
+            case GAME_CTF:
+#endif
+        case GAME_TDM:
+            return true;
+
+        default:
+            assert(!"Add support for your new gametype here.");
+    }
+
+    return false;
+}
+

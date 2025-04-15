@@ -236,9 +236,6 @@ class idMultiplayerGame
 		void			ServerClientConnect(int clientNum);
 
 		void			PlayerStats(int clientNum, char *data, const int len);
-#ifdef MOD_BOTS
-		bool 			IsGametypeTeamBased(void);
-#endif
 
 	private:
 		static const char	*MPGuis[];

@@ -211,8 +211,8 @@ bool botAASFindAttackPosition::TestArea( const idAAS *aas, int areaNum )
 ===============================================================================
 */
 
-const int botAi::BOT_MAX_BOTS		= 16;
-const int botAi::BOT_START_INDEX	= 16;
+const int botAi::BOT_MAX_BOTS		= MAX_CLIENTS;
+const int botAi::BOT_START_INDEX	= 1;
 
 botInfo_t botAi::bots[BOT_MAX_BOTS]; // TinMan: init bots array, must keep an eye on the blighters
 
@@ -427,7 +427,7 @@ botAi::botAi()
     //fl.networkSync		= true;
 
     botID				= 0;
-    clientID			= 0;
+    // clientID			= 0;
     playerEnt			= NULL;
     physicsObject		= NULL;
     inventory			= NULL;
@@ -460,7 +460,18 @@ botAi::~botAi
 */
 botAi::~botAi()
 {
+	gameLocal.Printf("Free bot: botID=%d\n", botID);
     ShutdownThreads();
+
+	if(botID >= BOT_START_INDEX && botID < BOT_MAX_BOTS)
+	{
+        idPlayer *client = botAi::FindBotClient(botID);
+        if(client)
+        {
+            gameLocal.Printf("Unlink bot: botID=%d\n", botID);
+            client->SetupBot(NULL);
+        }
+	}
 }
 
 /*
@@ -476,7 +487,7 @@ void botAi::WriteUserCmdsToSnapshot( idBitMsg &msg )
 
     numBots = 0;
     // TODO: this loops through all the clients, really only need to loop starting at BOT_START_INDEX
-    for ( i = 0; i < gameLocal.numClients; i++ )
+    for ( i = BOT_START_INDEX; i < gameLocal.numClients; i++ )
     {
         if ( bots[i].inUse )
         {
@@ -492,8 +503,8 @@ void botAi::WriteUserCmdsToSnapshot( idBitMsg &msg )
         if ( bots[i].inUse )
         {
             // cusTom3 - the index in the usercmds array is i + BOT_START_INDEX
-            msg.WriteBits( i + BOT_START_INDEX, 5 );
-            usercmd_t &cmd = gameLocal.usercmds[i + BOT_START_INDEX];
+            msg.WriteBits( i, 5 );
+            usercmd_t &cmd = gameLocal.usercmds[i];
             msg.WriteByte( cmd.buttons );
             msg.WriteShort( cmd.mx );
             msg.WriteShort( cmd.my );
@@ -629,10 +640,10 @@ void botAi::Spawn( void )
 
     // TinMan: Sync up with our client
     botID = spawnArgs.GetInt( "botID" );
-    clientID = bots[botID].clientID;
-    assert( clientID );
+    // clientID = bots[botID].clientID;
+    assert( clientID() );
 
-    playerEnt = static_cast< idPlayer * >( gameLocal.entities[ clientID ] ); // TinMan: Let the brain know what it's body is
+    playerEnt = static_cast< idPlayer * >( gameLocal.entities[ clientID() ] ); // TinMan: Let the brain know what it's body is
     physicsObject = static_cast< idPhysics_Player * >( playerEnt->GetPhysics() );
     inventory = &playerEnt->inventory;
 
@@ -655,6 +666,8 @@ void botAi::Spawn( void )
 
     LinkScriptVariables();
 
+	playerEnt->SetupBot(this);
+
     Init();
 
     BecomeActive( TH_THINK );
@@ -672,7 +685,6 @@ void botAi::Save( idSaveGame *savefile ) const
     int i;
 
     savefile->WriteInt( botID );
-    savefile->WriteInt( clientID );
     savefile->WriteObject( playerEnt );
 
     savefile->WriteAngles( viewAngles );
@@ -735,7 +747,6 @@ void botAi::Restore( idRestoreGame *savefile )
     int i;
 
     savefile->ReadInt( botID );
-    savefile->ReadInt( clientID );
     savefile->ReadObject( reinterpret_cast<idClass *&>( playerEnt ) );
 
     physicsObject = static_cast< idPhysics_Player * >( playerEnt->GetPhysics() );
@@ -991,7 +1002,7 @@ void botAi::UpdateUserCmd( void )
 
     usercmd_t *usercmd;
 
-    usercmd = &gameLocal.usercmds[ clientID ];
+    usercmd = &gameLocal.usercmds[ clientID() ];
     memset( usercmd, 0, sizeof( usercmd_t ) );
 
     // TinMan: viewang to usrcmd, usrcmd is viewang - deltaviewang
@@ -3007,7 +3018,6 @@ bool botAi::CanSee( idEntity *ent, bool useFov ) const
     return false;
 }
 
-#ifdef MOD_BOTS
 /***********************************************************************
 
 	Command System
@@ -3150,7 +3160,8 @@ void botAi::ProcessCommand( const char *text )
         }
         const char * botNum = args.Argv( 3 );
         int botID = atoi( botNum );
-        if ( botID > BOT_MAX_BOTS )
+        int clientID = botID;
+        if ( botID < BOT_START_INDEX || botID >= BOT_MAX_BOTS )
         {
             return;
         }
@@ -3162,7 +3173,7 @@ void botAi::ProcessCommand( const char *text )
         }
         else
         {
-            entity = gameLocal.entities[ bots[ botID ].clientID ];
+            entity = gameLocal.entities[ clientID ];
             assert( entity );
         }
         //} else if ( qualifier == "player" ) {	// TinMan: TODO: try and see if qualifier is a playername ( or part of one )
@@ -3225,7 +3236,7 @@ void botAi::ProcessCommand( const char *text )
     }
 
     // TinMan: Send commands to all selected bots
-    for ( int i = 0; i < BOT_MAX_BOTS; i++ )
+    for ( int i = BOT_START_INDEX; i < BOT_MAX_BOTS; i++ )
     {
         if ( bots[ i ].selected )
         {
@@ -3289,8 +3300,6 @@ trace_t botAi::GetPlayerTrace( idPlayer * player )
 
     return tr;
 }
-
-#endif
 
 /***********************************************************************
 
@@ -3713,7 +3722,7 @@ void botAi::Event_FindEnemies( int useFOV )
         }
 
         // TinMan: Friendly fire check, play nice!
-        if ( gameLocal.mpGame.IsGametypeTeamBased() || gameLocal.gameType == GAME_SP )   // TinMan: Nice function added by threewave, was thinking about writing one myself when custom pointed it out. Except it says sp isn't team based, try and tell the monsters that, the'll be laughing at you.
+        if ( IsGametypeTeamBased() || gameLocal.gameType == GAME_SP )   // TinMan: Nice function added by threewave, was thinking about writing one myself when custom pointed it out. Except it says sp isn't team based, try and tell the monsters that, the'll be laughing at you.
         {
             if ( actor->team == playerEnt->team )
             {
@@ -3762,7 +3771,7 @@ void botAi::Event_FindEnemies( int useFOV )
         }
 
         // TinMan: Friendly fire check, play nice!
-        if ( gameLocal.mpGame.IsGametypeTeamBased() || gameLocal.gameType == GAME_SP )   // TinMan: Nice function added by threewave, was thinking about writing one myself when custom pointed it out.
+        if ( IsGametypeTeamBased() || gameLocal.gameType == GAME_SP )   // TinMan: Nice function added by threewave, was thinking about writing one myself when custom pointed it out.
         {
             if ( actor->team == playerEnt->team )
             {
@@ -4084,7 +4093,7 @@ void botAi::Event_HeardSound( int ignore_team )
         }
 
         // TinMan: Friendly fire check, play nice!
-        if ( gameLocal.mpGame.IsGametypeTeamBased() || gameLocal.gameType == GAME_SP )   // TinMan: Nice function added by threewave, was thinking about writing one myself when custom pointed it out.
+        if ( IsGametypeTeamBased() || gameLocal.gameType == GAME_SP )   // TinMan: Nice function added by threewave, was thinking about writing one myself when custom pointed it out.
         {
             if ( actor->team == playerEnt->team && !ignore_team )
             {
@@ -5002,7 +5011,6 @@ void botAi::Event_GetWaitPosition( idEntity *ent )
     }
     idThread::ReturnVector( result );
 }
-#endif
 
 
 /*
@@ -5054,3 +5062,5 @@ void botAi::Event_ClearCommand( void )
 
 #include "BotAI_cmd.cpp"
 #include "BotAI_manager.cpp"
+
+#endif // end

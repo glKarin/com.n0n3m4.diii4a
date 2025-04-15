@@ -250,9 +250,6 @@ class botAi;
 #endif
 class idGameLocal : public idGame
 {
-#ifdef MOD_BOTS
-    friend class botAi;
-#endif
 	public:
 		idDict					serverInfo;				// all the tunable parameters, like numclients, etc
 		int						numClients;				// pulled from serverInfo and verified
@@ -489,6 +486,10 @@ class idGameLocal : public idGame
 		};
 
 		bool					NeedRestart();
+#ifdef MOD_BOTS
+        friend class botAi;
+        void                    ServerBotClientBegin(int clientNum, const idDict *clientArgs = NULL);
+#endif
 
 	private:
 		const static int		INITIAL_SPAWN_COUNT = 1;

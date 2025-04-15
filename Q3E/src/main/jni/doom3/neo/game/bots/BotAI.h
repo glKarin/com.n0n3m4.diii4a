@@ -29,10 +29,11 @@ class botSabot;
 // TinMan: Info for bots array
 typedef struct botInfo_s
 {
-    bool					inUse;
-    int						clientID;
-    int						entityNum;
+    bool					inUse; // if true, clients[clientID] is bot
+    int						clientID; // idPlayer's entityNumber
+    int						entityNum; // botAi's entityNumber
     bool					selected;
+	// char					defName[64]; // bot's sabot def name
 } botInfo_t;
 
 typedef enum
@@ -43,6 +44,14 @@ typedef enum
     SABOT_GOAL_FOLLOW,
     SABOT_GOAL_ATTACK
 } goalType_t;
+
+#if 0
+#define BOT_TO_CLIENT_ID(x) ((x) + 1)
+#define CLIENT_TO_BOT_ID(x) ((x) - 1)
+#else
+#define BOT_TO_CLIENT_ID(x) x
+#define CLIENT_TO_BOT_ID(x) x
+#endif
 
 // TinMan: expanded version of idmovestate
 class botMoveState
@@ -119,15 +128,17 @@ public:
     static void				Cmd_SetupBotLevel_f(const idCmdArgs& args);
     static int				GetNumCurrentActiveBots(void);
     static int				CheckRestClients(int num);
-    static void				InitBot(void);
-    static void				DisconnectAll(void);
-    static void				Disconnect(int clientNum);
+    static void				InitBotSystem(void);
     static void				UpdateUI(void);
     static int				FindIdleBotSlot(void);
     static bool				GenerateAAS(void);
+    static void				ReleaseBotSlot(int clientID);
+	static botAi *			SpawnBot(idPlayer *botClient);
+    static bool				PlayerHasBotSlot(int clientID);
+    static bool 			IsGametypeTeamBased(void);
+    static idPlayer * 		FindBotClient(int clientID);
 
 private:
-    static int				AddBot(const char *name, idDict &dict);
     static int				AddBot(const char *name);
     static bool             CanAddBot(void);
 
@@ -137,7 +148,11 @@ private:
 // Variables
 public:
     int						botID;
-    int						clientID;
+    int                     clientID(void) const {
+        return botID;
+    }
+    // botID == clientID
+    // int						clientID;
 
     idVec3					viewDir;
     idAngles				viewAngles;

@@ -335,6 +335,20 @@ class idPlayer : public idActor
 		idEntityPtr<idViewBody> viewBody;
 #endif
 #endif
+#ifdef MOD_BOTS
+		idEntityPtr<botAi> bot;
+		void SetupBot(botAi *bot);
+		void SpawnBot(void);
+        bool IsBot(void) const {
+            return spawnArgs.GetBool("isBot");
+        }
+        bool IsBotAvailable(void) const {
+            return IsBot() && bot.GetEntity() != NULL;
+        }
+        botAi * GetBot(void) {
+            return bot.GetEntity();
+        }
+#endif
 
 	public:
 		CLASS_PROTOTYPE(idPlayer);

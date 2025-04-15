@@ -327,7 +327,7 @@ void idGameLocal::Init(void)
 
 	gamestate = GAMESTATE_NOMAP;
 #ifdef MOD_BOTS
-    botAi::InitBot();
+    botAi::InitBotSystem();
 #endif
 
 	Printf("...%d aas types\n", aasList.Num());
@@ -994,21 +994,6 @@ void idGameLocal::LocalMapRestart()
 
 	gamestate = GAMESTATE_SHUTDOWN;
 
-#ifdef MOD_BOTS
-	if(BOT_ENABLED()) {
-		// TinMan: tell those who are going to stick around that they are restarting
-		for ( i = 0; i < MAX_GENTITIES; i++ ) {
-			if ( entities[ i ] ) {
-				if ( entities[ i ]->IsType( idPlayer::Type ) ) {
-					static_cast< idPlayer * >( entities[ i ] )->PrepareForRestart();
-				} else if ( entities[ i ]->IsType( botAi::Type ) ) {
-					//Printf( "found bot to shutdown\n" ); // TinMan: *debug*
-					static_cast< botAi * >( entities[ i ] )->PrepareForRestart();
-				}
-			}
-		}
-    } else
-#endif // cusTom3 - original version below
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		if (entities[ i ] && entities[ i ]->IsType(idPlayer::Type)) {
 			static_cast< idPlayer * >(entities[ i ])->PrepareForRestart();
@@ -1045,21 +1030,6 @@ void idGameLocal::LocalMapRestart()
 	// (note that if there are no players in the game, we could just leave it at it's current value)
 	spawnCount = latchSpawnCount;
 
-#ifdef MOD_BOTS
-	if(BOT_ENABLED()) {
-		// TinMan: restartz0r clients and botz0rs
-		for ( i = 0; i < MAX_GENTITIES; i++ ) {
-			if ( entities[ i ] ) {
-				if ( entities[ i ]->IsType( idPlayer::Type ) ) {
-					static_cast< idPlayer * >( entities[ i ] )->Restart();
-				} else if ( entities[ i ]->IsType( botAi::Type ) ) {
-					//Printf( "found bot to restart\n" ); // TinMan: *debug*
-					static_cast< botAi * >( entities[ i ] )->Restart();
-				}
-			}
-		}
-    } else
-#endif
 	// setup the client entities again
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		if (entities[ i ] && entities[ i ]->IsType(idPlayer::Type)) {
@@ -1551,28 +1521,6 @@ void idGameLocal::MapClear(bool clearClients)
 {
 	int i;
 
-#ifdef MOD_BOTS
-	if(BOT_ENABLED()) {
-		// TinMan: Keep bots alive
-		idEntity * ent;
-		for( i = ( clearClients ? 0 : MAX_CLIENTS ); i < MAX_GENTITIES; i++ ) {
-			if ( !clearClients ) {
-				ent = entities[ i ];
-				if ( ent ) {
-					if ( ent->IsType( botAi::Type ) ) {
-						//Printf( "[MapClear][Keep: %s]\n", entities[ i ]->name.c_str() );
-						continue;
-					}
-				}
-			}
-            delete entities[ i ];
-            // ~idEntity is in charge of setting the pointer to NULL
-            // it will also clear pending events for this entity
-            assert( !entities[ i ] );
-            spawnIds[ i ] = -1;
-		}
-	} else
-#endif
 	for (i = (clearClients ? 0 : MAX_CLIENTS); i < MAX_GENTITIES; i++) {
 		delete entities[ i ];
 		// ~idEntity is in charge of setting the pointer to NULL
@@ -1585,17 +1533,6 @@ void idGameLocal::MapClear(bool clearClients)
 
 	if (!clearClients) {
 		// add back the hashes of the clients
-#ifdef MOD_BOTS
-		if(BOT_ENABLED()) {
-			// TinMan: add back the hashes of the clients and bots
-			for ( i = 0; i < MAX_GENTITIES; i++ ) {
-				if ( !entities[ i ] ) {
-					continue;
-				}
-				entityHash.Add( entityHash.GenerateKey( entities[ i ]->name.c_str(), true ), i );
-			}
-        } else
-#endif
 		for (i = 0; i < MAX_CLIENTS; i++) {
 			if (!entities[ i ]) {
 				continue;

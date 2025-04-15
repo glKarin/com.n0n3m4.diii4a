@@ -351,12 +351,6 @@ void idGameLocal::ServerClientBegin(int clientNum)
 	outMsg.WriteByte(clientNum);
 	outMsg.WriteLong(spawnIds[ clientNum ]);
 	networkSystem->ServerSendReliableMessage(-1, outMsg);
-#ifdef MOD_BOTS
-	if(BOT_ENABLED()) {
-	// TinMan: Tell engine to spit out bots userinfo to clients
-		botAi::UpdateUI();
-    }
-#endif
 }
 
 /*
@@ -390,17 +384,6 @@ void idGameLocal::ServerClientDisconnect(int clientNum)
 	// clear the client PVS
 	memset(clientPVS[ clientNum ], 0, sizeof(clientPVS[ clientNum ]));
 
-#ifdef MOD_BOTS
-	if(BOT_ENABLED()) {
-		if(clientNum == gameLocal.localClientNum) {
-			// TinMan: remove bot entity
-            botAi::DisconnectAll();
-		} else if ( clientNum >= botAi::BOT_START_INDEX ) {
-            // TinMan: remove bot entity
-            botAi::Disconnect(clientNum);
-		}
-	}
-#endif
 	// delete the player entity
 	delete entities[ clientNum ];
 
@@ -1654,13 +1637,6 @@ gameReturn_t idGameLocal::ClientPrediction(int clientNum, const usercmd_t *clien
 	}
 
 	// set the user commands for this frame
-#ifdef MOD_BOTS
-    // TinMan: glad to see I got something right
-    // custom says: only set the first 16, this will get all possible users and not overwrite updated bot cmds.
-	if(BOT_ENABLED())
-		memcpy( usercmds, clientCmds, botAi::BOT_START_INDEX * sizeof( usercmds[ 0 ] ) );
-	else
-#endif
 	memcpy(usercmds, clientCmds, numClients * sizeof(usercmds[ 0 ]));
 
 	// run prediction on all entities from the last snapshot
@@ -1941,3 +1917,77 @@ void idEventQueue::Enqueue(entityNetEvent_t *event, outOfOrderBehaviour_t behavi
 
 	end = event;
 }
+
+#ifdef MOD_BOTS
+/*
+================
+idGameLocal::ServerBotClientBegin
+================
+*/
+void idGameLocal::ServerBotClientBegin(int clientNum, const idDict *clientArgs)
+{
+    idBitMsg	outMsg;
+    byte		msgBuf[MAX_GAME_MESSAGE_SIZE];
+
+    // initialize the decl remap
+    InitClientDeclRemap(clientNum);
+
+    // send message to initialize decl remap at the client (this is always the very first reliable game message)
+    outMsg.Init(msgBuf, sizeof(msgBuf));
+    outMsg.BeginWriting();
+    outMsg.WriteByte(GAME_RELIABLE_MESSAGE_INIT_DECL_REMAP);
+    networkSystem->ServerSendReliableMessage(clientNum, outMsg);
+
+    // spawn the player
+    // SpawnPlayer(clientNum);
+    {
+        idEntity	*ent;
+        idDict		args;
+
+        if(clientArgs)
+            args = *clientArgs;
+
+        // they can connect
+        Printf("SpawnBotPlayer: %i\n", clientNum);
+
+        args.SetBool("isBot", true);
+        args.SetInt("botID", clientNum);
+
+        args.SetInt("spawn_entnum", clientNum);
+        args.Set("name", va("player%d", clientNum + 1));
+        args.Set("classname", isMultiplayer ? "player_doommarine_mp" : "player_doommarine");
+
+        if (!SpawnEntityDef(args, &ent) || !entities[ clientNum ]) {
+            Error("Failed to spawn bot player as '%s'", args.GetString("classname"));
+        }
+
+        // make sure it's a compatible class
+        if (!ent->IsType(idPlayer::Type)) {
+            Error("'%s' spawned the bot player as a '%s'.  Bot Player spawnclass must be a subclass of idPlayer.", args.GetString("classname"), ent->GetClassname());
+        }
+
+        if (clientNum >= numClients) {
+            numClients = clientNum + 1;
+        }
+
+        mpGame.SpawnPlayer(clientNum);
+    }
+
+    if (clientNum == localClientNum) {
+        mpGame.EnterGame(clientNum);
+    }
+
+    // send message to spawn the player at the clients
+    outMsg.Init(msgBuf, sizeof(msgBuf));
+    outMsg.BeginWriting();
+    outMsg.WriteByte(GAME_RELIABLE_MESSAGE_SPAWN_PLAYER);
+    outMsg.WriteByte(clientNum);
+    outMsg.WriteLong(spawnIds[ clientNum ]);
+    networkSystem->ServerSendReliableMessage(-1, outMsg);
+	
+    if(BOT_ENABLED()) {
+        // TinMan: Tell engine to spit out bots userinfo to clients
+        botAi::UpdateUI();
+    }
+}
+#endif
