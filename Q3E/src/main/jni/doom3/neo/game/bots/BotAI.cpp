@@ -1344,7 +1344,7 @@ void botAi::SetAAS( void )
 
     //spawnArgs.GetString( "use_aas", NULL, use_aas );
     //aas = gameLocal.GetAAS( use_aas );
-    aas = gameLocal.GetAAS( "aas48" ); // TinMan: Hard coded the bots aas size
+    aas = gameLocal.GetAAS( BOT_AAS ); // TinMan: Hard coded the bots aas size
     if ( aas )
     {
         const idAASSettings *settings = aas->GetSettings();
