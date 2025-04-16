@@ -871,7 +871,7 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 
     for (i = 0; i < MAX_MEGATEXTURE_PARMS; i++) {
         idStr::snPrintf(buffer, sizeof(buffer), "u_megaTextureLevel%d", i);
-        shader->u_uniformParm[i] = GL_GetUniformLocation(shader->program, buffer);
+        shader->u_megaTextureLevel[i] = GL_GetUniformLocation(shader->program, buffer);
     }
 
 #ifdef _SHADOW_MAPPING
