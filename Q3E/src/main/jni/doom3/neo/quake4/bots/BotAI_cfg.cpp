@@ -1,10 +1,10 @@
-// #ifdef MOD_BOTS
 
-#define MAX_BOT_LEVEL 8
+static idCVar harm_si_botLevel( "harm_si_botLevel", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot level(0 = auto; 1 - 8 = default difficult level)." );
 
-static idCVar harm_si_botLevel( "harm_si_botLevel", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot level(0 = auto; 1 - 8 = difficult level).", 0, MAX_BOT_LEVEL );
+bool botAi::botAvailable = false;
+bool botAi::botInitialized = false;
 
-static int Bot_GetPlayerModelNames(idStrList &list, int team)
+int botAi::GetPlayerModelNames(idStrList &list, int team)
 {
 	int i;
 	int num = 0;
@@ -40,7 +40,7 @@ static int Bot_GetPlayerModelNames(idStrList &list, int team)
 	return num;
 }
 
-static int Bot_GetBotDefs( idStrList &list )
+int botAi::GetBotDefs( idStrList &list )
 {
     int num;
     int i;
@@ -63,7 +63,7 @@ static int Bot_GetBotDefs( idStrList &list )
     return res;
 }
 
-static int Bot_GetBotLevels( idDict &list )
+int botAi::GetBotLevels( idDict &list )
 {
     int num;
     int i;
@@ -86,7 +86,7 @@ static int Bot_GetBotLevels( idDict &list )
     return res;
 }
 
-static int Bot_GetBotLevelData( idDict &ret )
+int botAi::GetBotLevelData( int level, idDict &ret )
 {
     idDict dict;
     int num;
@@ -94,13 +94,18 @@ static int Bot_GetBotLevelData( idDict &ret )
     const char *defName;
     const idDeclEntityDef *decl;
 
-    num = Bot_GetBotLevels(dict);
+    num = GetBotLevels(dict);
     if(num == 0)
         return -1;
 
-    botLevel = harm_si_botLevel.GetInteger();
-    if(botLevel <= 0 || botLevel > MAX_BOT_LEVEL)
-        botLevel = gameLocal.random.RandomInt(MAX_BOT_LEVEL) + 1;
+    botLevel = level;
+    if(botLevel <= 0)
+    {
+        int n = gameLocal.random.RandomInt(num);
+        const idKeyValue *kv = dict.GetKeyVal(n);
+        if(kv)
+            botLevel = atoi(kv->GetKey());
+    }
     defName = dict.GetString(va("%d", botLevel), "");
     if(!defName || !defName[0])
         return -2;
@@ -112,7 +117,7 @@ static int Bot_GetBotLevelData( idDict &ret )
     return botLevel;
 }
 
-static idStr Bot_GetBotName( int index = -1 )
+idStr botAi::GetBotName( int index )
 {
     const idDeclEntityDef *decl = (const idDeclEntityDef *)declManager->FindType(DECL_ENTITYDEF, "bot_names" , false);
     if(!decl)
@@ -135,4 +140,69 @@ static idStr Bot_GetBotName( int index = -1 )
     return decl->dict.RandomPrefix("ui_name", gameLocal.random);
 }
 
-// #endif
+void botAi::InitBotSystem(void)
+{
+    if(botInitialized)
+    {
+        gameLocal.Warning("BotAI has initialized!");
+        return;
+    }
+
+    int i;
+    int num;
+
+    num = declManager->GetNumDecls(DECL_ENTITYDEF);
+
+    for (i = 0; i < num; i++) {
+        const idDeclEntityDef *decl = (const idDeclEntityDef *)declManager->DeclByIndex(DECL_ENTITYDEF, i , false);
+        if(!decl)
+            continue;
+        if(!idStr(decl->GetName()).IcmpPrefix("bot_sabot"))
+        {
+            botAvailable = true;
+            break;
+        }
+    }
+    botInitialized = true;
+    gameLocal.Printf("BotAI initialized: available=%d\n", botAvailable);
+}
+
+void botAi::SetBotLevel(int level)
+{
+    if(level >= 0)
+    {
+        idDict botLevelDict;
+        int find = GetBotLevelData(level, botLevelDict);
+        if(find > 0)
+        {
+            float fovDegrees;
+            botLevelDict.GetFloat( "fov", "90", fovDegrees );
+            SetFOV( fovDegrees );
+
+            aimRate			= botLevelDict.GetFloat( "aim_rate", "0.1" );
+            aimRate = idMath::ClampFloat(0.1f, 1.0f, aimRate);
+
+			findRadius		= botLevelDict.GetFloat("find_radius", "-1.0");
+
+            botLevel = find;
+
+            return;
+        }
+    }
+
+    float fovDegrees;
+    spawnArgs.GetFloat( "fov", "90", fovDegrees );
+    SetFOV( fovDegrees );
+
+    aimRate			= spawnArgs.GetFloat( "aim_rate", "0.1" );
+    aimRate = idMath::ClampFloat(0.1f, 1.0f, aimRate);
+	findRadius		= spawnArgs.GetFloat("find_radius", "-1.0");
+
+    botLevel = spawnArgs.GetInt( "botLevel", "0" );
+}
+
+bool botAi::IsGametypeTeamBased(void)   /* CTF */
+{
+    return gameLocal.IsTeamGame();
+}
+

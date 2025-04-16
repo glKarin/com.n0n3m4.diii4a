@@ -65,7 +65,7 @@ void botAi::Removebot_f( const idCmdArgs &args )
 
 bool botAi::IsAvailable(void)
 {
-    return (botInitialized ? botAvailable : false);
+    return botInitialized && botAvailable;
 }
 
 int botAi::AddBot(const char *defName)
@@ -139,8 +139,6 @@ int botAi::AddBot(const char *defName)
 
 bool botAi::RemoveBot( int killBotID )
 {
-    const char *value;
-
     if (killBotID < BOT_START_INDEX || killBotID >= BOT_MAX_NUM)
     {
         gameLocal.Warning( "Remove bot ID invalid: %d", killBotID );

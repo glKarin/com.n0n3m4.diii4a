@@ -1,8 +1,6 @@
 #ifndef __BOTSABOT_H__
 #define __BOTSABOT_H__
 
-#ifdef MOD_BOTS
-
 /*
 ===============================================================================
 
@@ -25,7 +23,5 @@ public:
 
     void					Think( void );
 };
-
-#endif
 
 #endif /* !__BOTSABOT_H__ */

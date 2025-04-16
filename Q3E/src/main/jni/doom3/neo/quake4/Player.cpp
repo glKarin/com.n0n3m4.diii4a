@@ -34,10 +34,6 @@
 idCVar net_predictionErrorDecay( "net_predictionErrorDecay", "112", CVAR_FLOAT | CVAR_GAME | CVAR_NOCHEAT, "time in milliseconds it takes to fade away prediction errors", 0.0f, 200.0f );
 idCVar net_showPredictionError( "net_showPredictionError", "-1", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT, "show prediction errors for the given client", -1, MAX_CLIENTS );
 
-#ifdef MOD_BOTS
-#define IS_BOT() ( spawnArgs.GetInt("spawn_entnum") >= botAi::BOT_START_INDEX )
-#endif
-
 /*
 ===============================================================================
 
@@ -1345,6 +1341,12 @@ idPlayer::idPlayer() {
 	teamAmmoRegenPending	= false;
 	teamDoubler			= NULL;		
 	teamDoublerPending		= false;
+#ifdef _MOD_VIEW_BODY
+    viewBody				= NULL;
+#endif
+#ifdef MOD_BOTS
+    bot						= NULL;
+#endif
 }
 
 /*
@@ -1437,7 +1439,7 @@ void idPlayer::SetupWeaponEntity( void ) {
 	
 	// don't setup weapons for spectators
 #ifdef MOD_BOTS
-    if ( !IS_BOT() && ( gameLocal.isClient || (weaponViewModel && weaponWorldModel) || spectating )  )
+    if ( !IsBot() && ( gameLocal.isClient || (weaponViewModel && weaponWorldModel) || spectating )  )
 #else
 	if ( gameLocal.isClient || (weaponViewModel && weaponWorldModel) || spectating ) 
 #endif
@@ -1781,6 +1783,9 @@ void idPlayer::Init( void ) {
 		teamDoublerPending = false;
 		teamDoubler = PlayEffect( "fx_doubler", renderEntity.origin, renderEntity.axis, true );
 	}
+#ifdef MOD_BOTS
+    SpawnBot();
+#endif
 }
 
 /*
@@ -1989,7 +1994,7 @@ void idPlayer::Spawn( void ) {
 			assert( spectating );
 		}
 #ifdef MOD_BOTS
-		else if ( IS_BOT() ) {
+		else if ( IsBot() ) {
 			// set yourself ready to spawn. idMultiplayerGame will decide when/if appropriate and call SpawnFromSpawnSpot
 			SetupWeaponEntity( );
 #ifdef _MOD_VIEW_BODY
@@ -2128,6 +2133,17 @@ idPlayer::~idPlayer() {
 #endif
 	
 	SetPhysics( NULL );
+#ifdef MOD_BOTS
+    if(IsBot())
+        botAi::ReleaseBotSlot(entityNumber);
+    if(bot)
+    {
+        gameLocal.Printf("Delete player bot: clientID=%d\n", entityNumber);
+        botAi::ReleaseBotSlot(entityNumber);
+        delete bot;
+        bot = NULL;
+    }
+#endif
 }
 
 /*
@@ -2722,6 +2738,12 @@ void idPlayer::PrepareForRestart( void ) {
 
 	// the sound world is going to be cleared, don't keep references to emitters
 	FreeSoundEmitter( false );
+#ifdef MOD_BOTS
+    if(bot)
+    {
+        bot->PrepareForRestart();
+    }
+#endif
 }
 
 /*
@@ -2744,6 +2766,12 @@ void idPlayer::Restart( void ) {
 
 	lastKiller = NULL;
 	useInitialSpawns = true;
+#ifdef MOD_BOTS
+    if(bot)
+    {
+        bot->Restart();
+    }
+#endif
 }
 
 /*
@@ -13700,7 +13728,7 @@ void idPlayer::SetupHead( const char* headModel, idVec3 headOffset ) {
 
 		rvClientAFAttachment* headEnt = clientHead.GetEntity();
 #ifdef MOD_BOTS //karin: fixed setup head
-		if(IS_BOT())
+		if(IsBot())
 			gameLocal.SpawnClientEntityDef( *headDict, (rvClientEntity**)&headEnt, false, "rvClientAFAttachment" );
 		else
 #endif
@@ -14384,7 +14412,7 @@ void idPlayer::SetupViewBody( void ) {
 
     // don't setup weapons for spectators
 #ifdef MOD_BOTS
-    if ( !IS_BOT() && ( gameLocal.isClient || viewBody || spectating )  )
+    if ( !IsBot() && ( gameLocal.isClient || viewBody || spectating )  )
 #else
     if ( gameLocal.isClient || viewBody || spectating )
 #endif
@@ -14405,7 +14433,7 @@ void idPlayer::SetupViewBody( void ) {
 
         decl = static_cast< const idDeclEntityDef * >( declManager->FindType( DECL_ENTITYDEF, player_viewbody_classname, false, false ) );
         if ( !decl ) {
-            gameLocal.Printf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
+            gameLocal.DPrintf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
             if( idStr::Cmp(player_viewbody_classname, VIEW_BODY_DEFAULT_CLASSNAME) )
             {
                 player_viewbody_classname = VIEW_BODY_DEFAULT_CLASSNAME;
@@ -14413,7 +14441,7 @@ void idPlayer::SetupViewBody( void ) {
             }
         }
         if ( !decl ) {
-            gameLocal.Printf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
+            gameLocal.DPrintf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
             return;
         }
 
@@ -14423,14 +14451,14 @@ void idPlayer::SetupViewBody( void ) {
         spawn = NULL;
         gameLocal.SpawnEntityDef( args, &spawn );
         if ( !spawn ) {
-            gameLocal.Printf( "idPlayer::SetupViewBody: failed to spawn viewBody\n" );
+            gameLocal.DPrintf( "idPlayer::SetupViewBody: failed to spawn viewBody\n" );
             return;
         }
         viewBody = static_cast<idViewBody*>(spawn);
         viewBody->Init( this, true );
         viewBody->SetName( va("%s_viewBody", name.c_str() ) );
         viewBody->SetInstance( instance );
-        gameLocal.Printf( "idPlayer::SetupViewBody: spawn viewBody -> %s\n", viewBody->GetName() );
+        gameLocal.DPrintf( "idPlayer::SetupViewBody: spawn viewBody -> %s\n", viewBody->GetName() );
     }
 
     viewBody->fl.persistAcrossInstances = true;
@@ -14469,3 +14497,19 @@ void idPlayer::UpdateBody( void ) {
 			);
 }
 #endif
+
+#ifdef MOD_BOTS
+void idPlayer::SetupBot(botAi *bot)
+{
+    this->bot = bot;
+}
+
+void idPlayer::SpawnBot(void)
+{
+    if(!BOT_ENABLED() || !spawnArgs.GetBool("isBot") || !botAi::PlayerHasBotSlot(entityNumber) || bot)
+        return;
+    //printf("Player bot spawn: %p %p\n", this, bot);
+    bot = botAi::SpawnBot(this);
+}
+#endif
+

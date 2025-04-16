@@ -1,5 +1,12 @@
 #ifndef __BOTAI_H__
 #define __BOTAI_H__
+/*
+===============================================================================
+
+	botAi
+
+===============================================================================
+*/
 
 #define BOT_ENABLED() (gameLocal.isMultiplayer && gameLocal.isServer && botAi::IsAvailable())
 
@@ -16,13 +23,6 @@ typedef enum {
 extern idCVar harm_si_autoFillBots;
 //karin: auto gen aas file for mp game map with bot
 extern idCVar harm_g_autoGenAASFileInMPGame;
-/*
-===============================================================================
-
-	botAi
-
-===============================================================================
-*/
 
 class botSabot;
 

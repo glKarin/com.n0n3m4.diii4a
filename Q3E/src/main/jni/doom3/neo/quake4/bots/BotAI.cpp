@@ -21,11 +21,6 @@ enum GetAimDirPreferred
 
 typedef int ammo_t;
 
-ID_INLINE static bool IsGametypeTeamBased(void)
-{
-    return gameLocal.IsTeamGame();
-}
-
 #include "BotAI_ctf.cpp"
 
 
@@ -134,10 +129,10 @@ void botMoveState::Restore( idRestoreGame *savefile )
 ===============================================================================
 */
 
-const int botAi::BOT_MAX_BOTS		= 16;
-const int botAi::BOT_START_INDEX	= 16;
+const int botAi::BOT_START_INDEX	= 1;
+const int botAi::BOT_MAX_BOTS		= MAX_CLIENTS - BOT_START_INDEX;
 
-botInfo_t botAi::bots[BOT_MAX_BOTS]; // TinMan: init bots array, must keep an eye on the blighters
+botInfo_t botAi::bots[MAX_CLIENTS]; // TinMan: init bots array, must keep an eye on the blighters
 
 const idEventDef BOT_SetNextState( "setNextState", "s" );
 const idEventDef BOT_SetState( "setState", "s" );
@@ -370,7 +365,7 @@ botAi::botAi()
     //fl.networkSync		= true;
 
     botID				= 0;
-    clientID			= 0;
+    // clientID			= 0;
     playerEnt			= NULL;
     physicsObject		= NULL;
     inventory			= NULL;
@@ -395,6 +390,10 @@ botAi::botAi()
     blockedRadius		= 0.0f;
     blockedMoveTime		= 750;
     lastPreferred		= GET_AIM_DIR_DEFAULT;
+
+	aimRate				= 0.1f;
+	findRadius			= -1.0f;
+	botLevel			= 0;
 }
 
 /*
@@ -404,7 +403,18 @@ botAi::~botAi
 */
 botAi::~botAi()
 {
+	gameLocal.Printf("Free bot: botID=%d\n", botID);
     ShutdownThreads();
+
+	if(botID >= BOT_START_INDEX && botID < BOT_MAX_NUM)
+	{
+        idPlayer *client = botAi::FindBotClient(botID);
+        if(client)
+        {
+            gameLocal.Printf("Unlink bot: botID=%d\n", botID);
+            client->SetupBot(NULL);
+        }
+	}
 }
 
 /*
@@ -420,7 +430,7 @@ void botAi::WriteUserCmdsToSnapshot( idBitMsg &msg )
 
     numBots = 0;
     // TODO: this loops through all the clients, really only need to loop starting at BOT_START_INDEX
-    for ( i = 0; i < botAi::BOT_MAX_BOTS/* //k gameLocal.numClients*/; i++ )
+    for ( i = BOT_START_INDEX; i < gameLocal.numClients; i++ )
     {
         if ( bots[i].inUse )
         {
@@ -430,14 +440,14 @@ void botAi::WriteUserCmdsToSnapshot( idBitMsg &msg )
     // send the number of bots over the wire
     msg.WriteBits( numBots, 5 );
 
-    for ( i = 0; i < botAi::BOT_MAX_BOTS/* //k gameLocal.numClients*/; i++ )
+    for ( i = 0; i < gameLocal.numClients; i++ )
     {
         // write the bot number over the wire
         if ( bots[i].inUse )
         {
             // cusTom3 - the index in the usercmds array is i + BOT_START_INDEX
-            msg.WriteBits( i + BOT_START_INDEX, 5 );
-            const usercmd_t &cmd = gameLocal.usercmds[i + BOT_START_INDEX];
+            msg.WriteBits( i, 5 );
+            const usercmd_t &cmd = gameLocal.usercmds[i];
             msg.WriteByte( cmd.buttons );
             msg.WriteShort( cmd.mx );
             msg.WriteShort( cmd.my );
@@ -562,6 +572,9 @@ void botAi::Init( void )
         aimRate = 0.1f;
     }
 
+    findRadius		= spawnArgs.GetFloat( "find_radius", "-1" );
+    botLevel = spawnArgs.GetInt( "botLevel", "0" );
+
     lastPreferred = GET_AIM_DIR_DEFAULT;
 }
 
@@ -576,10 +589,10 @@ void botAi::Spawn( void )
 
     // TinMan: Sync up with our client
     botID = spawnArgs.GetInt( "botID" );
-    clientID = bots[botID].clientID;
-    assert( clientID );
+    // clientID = bots[botID].clientID;
+    assert( clientID() );
 
-    playerEnt = static_cast< idPlayer * >( gameLocal.entities[ clientID ] ); // TinMan: Let the brain know what it's body is
+    playerEnt = static_cast< idPlayer * >( gameLocal.entities[ clientID() ] ); // TinMan: Let the brain know what it's body is
     physicsObject = static_cast< idPhysics_Player * >( playerEnt->GetPhysics() );
     inventory = &playerEnt->inventory;
 
@@ -621,7 +634,6 @@ void botAi::Save( idSaveGame *savefile ) const
     int i;
 
     savefile->WriteInt( botID );
-    savefile->WriteInt( clientID );
     savefile->WriteObject( playerEnt );
 
     savefile->WriteAngles( viewAngles );
@@ -671,6 +683,8 @@ void botAi::Save( idSaveGame *savefile ) const
     savefile->WriteInt( lastHitCheckTime );
 
     savefile->WriteInt( lastPreferred );
+    savefile->WriteFloat( findRadius );
+    savefile->WriteInt( botLevel );
 }
 
 /*
@@ -684,7 +698,6 @@ void botAi::Restore( idRestoreGame *savefile )
     int i;
 
     savefile->ReadInt( botID );
-    savefile->ReadInt( clientID );
     savefile->ReadObject( reinterpret_cast<idClass *&>( playerEnt ) );
 
     physicsObject = static_cast< idPhysics_Player * >( playerEnt->GetPhysics() );
@@ -729,6 +742,8 @@ void botAi::Restore( idRestoreGame *savefile )
     savefile->ReadInt( lastHitCheckTime );
 
     savefile->ReadInt( lastPreferred );
+    savefile->ReadFloat( findRadius );
+    savefile->ReadInt( botLevel );
 
     SetAAS();
 
@@ -944,7 +959,7 @@ void botAi::UpdateUserCmd( void )
 
     usercmd_t *usercmd;
 
-    usercmd = (usercmd_t *)&gameLocal.usercmds[ clientID ];
+    usercmd = (usercmd_t *)&gameLocal.usercmds[ clientID() ];
     memset( usercmd, 0, sizeof( usercmd_t ) );
 
     // TinMan: viewang to usrcmd, usrcmd is viewang - deltaviewang
@@ -3102,7 +3117,8 @@ void botAi::ProcessCommand( const char *text )
         }
         const char * botNum = args.Argv( 3 );
         int botID = atoi( botNum );
-        if ( botID > BOT_MAX_BOTS )
+        int clientID = botID;
+        if ( botID < BOT_START_INDEX || botID >= BOT_MAX_NUM )
         {
             return;
         }
@@ -3114,7 +3130,7 @@ void botAi::ProcessCommand( const char *text )
         }
         else
         {
-            entity = gameLocal.entities[ bots[ botID ].clientID ];
+            entity = gameLocal.entities[ clientID ];
             assert( entity );
         }
         //} else if ( qualifier == "player" ) {	// TinMan: TODO: try and see if qualifier is a playername ( or part of one )
@@ -3177,7 +3193,7 @@ void botAi::ProcessCommand( const char *text )
     }
 
     // TinMan: Send commands to all selected bots
-    for ( int i = 0; i < BOT_MAX_BOTS; i++ )
+    for ( int i = BOT_START_INDEX; i < BOT_MAX_NUM; i++ )
     {
         if ( bots[ i ].selected )
         {
@@ -3763,6 +3779,8 @@ void botAi::Event_FindInRadius( const idVec3 &origin, float radius/*, const char
     memset( entitySearchList, 0, sizeof( entitySearchList ) );
     numSearchListEntities = 0; // TinMan: Reset
 
+	if(findRadius > 0.0f)
+		radius = findRadius;
     if ( radius < 1 )
     {
         radius = 1;
@@ -5282,7 +5300,7 @@ idVec3 botAi::PredictTargetPosition( const idVec3 &targetPosition, const idVec3 
     idVec3 targetLocation = targetPosition; // = targetVelocity;
 
     int predictLoopMaximum = 10;
-    float predictErrorTollerance = 0.1;
+    float predictErrorTollerance = 0.1f;
 
     predictError = 100;
 
@@ -5334,5 +5352,6 @@ const char * botAi::GetCurrentWeapon(void)
 
 #include "BotAI_cmd.cpp"
 #include "BotAI_aas.cpp"
+#include "BotAI_manager.cpp"
 
 #endif

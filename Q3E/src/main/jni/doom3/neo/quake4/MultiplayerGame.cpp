@@ -6312,17 +6312,6 @@ void idMultiplayerGame::ServerStartVote( int clientNum, vote_flags_t voteIndex, 
 	voteValue = value;
 	voteTimeOut = gameLocal.time + 20000;
 	// mark players allowed to vote - only current ingame players, players joining during vote will be ignored
-#ifdef MOD_BOTS
-	if(BOT_ENABLED()) {
-		for ( i = 0; i < botAi::BOT_START_INDEX; i++ ) {  // TinMan: customs fix, Modified to leave bots out. No equal rights for bots here.
-			if ( gameLocal.entities[ i ] && gameLocal.entities[ i ]->IsType( idPlayer::Type ) ) {
-				playerState[ i ].vote = ( i == clientNum ) ? PLAYER_VOTE_YES : PLAYER_VOTE_WAIT;
-			} else {
-				playerState[i].vote = PLAYER_VOTE_NONE;
-			}
-		}
-    } else
-#endif
 	for ( i = 0; i < gameLocal.numClients; i++ ) {
 // RAVEN BEGIN
 // jnewquist: Use accessor for static class type 

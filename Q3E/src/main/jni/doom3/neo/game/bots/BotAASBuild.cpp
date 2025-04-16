@@ -894,7 +894,7 @@ void LoadMinimalMapStuff()
     //	//} else {
     //	//	inhibit++;
     //	//}
-    //mapFileName.SetFileExtension( "aas48" );
+    //mapFileName.SetFileExtension( BOT_AAS );
     //aasFile = AASFileManager->LoadAAS( mapFileName, mapFileCRC );
 
     //if ( !aasFile ) {

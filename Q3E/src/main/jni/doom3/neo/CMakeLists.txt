@@ -2330,12 +2330,6 @@ endif()
 if(QUAKE4)
 	# quake4 game source
 	set(src_quake4 ${base_q4game_src})
-	set(quake4_game_src
-			bots/BotAASBuild.cpp
-			bots/BotAI.cpp
-			bots/BotSabot.cpp
-			)
-	list(APPEND src_quake4 ${quake4_game_src})
 	set_src_dir(src_quake4 "quake4" ${src_quake4})
 	add_globbed_headers(src_quake4 "quake4")
 

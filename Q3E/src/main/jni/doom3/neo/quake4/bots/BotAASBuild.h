@@ -4,8 +4,6 @@
 #ifndef __BOTAASBUILD_H__
 #define __BOTAASBUILD_H__
 
-#ifdef MOD_BOTS
-
 #include "../ai/AAS_local.h"
 /*
 ===============================================================================
@@ -126,7 +124,5 @@ private:
     pvsHandle_t				targetPVS;
     int						PVSAreas[ idEntity::MAX_PVS_AREAS ];
 };
-
-#endif
 
 #endif /* !__BOTAASBUILD_H__ */

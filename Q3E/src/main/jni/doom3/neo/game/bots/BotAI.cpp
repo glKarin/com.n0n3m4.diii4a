@@ -508,7 +508,7 @@ void botAi::WriteUserCmdsToSnapshot( idBitMsg &msg )
         {
             // cusTom3 - the index in the usercmds array is i + BOT_START_INDEX
             msg.WriteBits( i, 5 );
-            usercmd_t &cmd = gameLocal.usercmds[i];
+            const usercmd_t &cmd = gameLocal.usercmds[i];
             msg.WriteByte( cmd.buttons );
             msg.WriteShort( cmd.mx );
             msg.WriteShort( cmd.my );

@@ -2590,7 +2590,7 @@ void idGameLocal::InitConsoleCommands(void)
 	cmdSystem->AddCommand("testid",				Cmd_TestId_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"output the string for the specified id.");
 
 #ifdef MOD_BOTS // TinMan: Bot console commmands
-    cmdSystem->AddCommand( "addBot",				botAi::Addbot_f,			CMD_FL_GAME,				"adds a new bot", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF> );
+    cmdSystem->AddCommand( "addBot",				botAi::Addbot_f,			CMD_FL_GAME,				"adds a new bot", botAi::ArgCompletion_addBot );
     cmdSystem->AddCommand( "removeBot",				botAi::Removebot_f,			CMD_FL_GAME,				"removes bot specified by id (1,31)", botAi::ArgCompletion_botSlots /*, idCmdSystem::ArgCompletion_Integer<0,( botAi::BOT_MAX_BOTS - 1 )>*/ );
 
     cmdSystem->AddCommand("addbots", botAi::Cmd_AddBots_f, CMD_FL_GAME, "adds multiplayer bots batch", botAi::ArgCompletion_addBot);
