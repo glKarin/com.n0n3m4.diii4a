@@ -211,10 +211,10 @@ bool botAASFindAttackPosition::TestArea( const idAAS *aas, int areaNum )
 ===============================================================================
 */
 
-const int botAi::BOT_MAX_BOTS		= MAX_CLIENTS;
 const int botAi::BOT_START_INDEX	= 1;
+const int botAi::BOT_MAX_BOTS		= MAX_CLIENTS - BOT_START_INDEX;
 
-botInfo_t botAi::bots[BOT_MAX_BOTS]; // TinMan: init bots array, must keep an eye on the blighters
+botInfo_t botAi::bots[MAX_CLIENTS]; // TinMan: init bots array, must keep an eye on the blighters
 
 const idEventDef BOT_SetNextState( "setNextState", "s" );
 const idEventDef BOT_SetState( "setState", "s" );
@@ -451,6 +451,10 @@ botAi::botAi()
     ignore_obstacles	= false;
     blockedRadius		= 0.0f;
     blockedMoveTime		= 750;
+
+	aimRate				= 0.1f;
+	findRadius			= -1.0f;
+	botLevel			= 0;
 }
 
 /*
@@ -463,7 +467,7 @@ botAi::~botAi()
 	gameLocal.Printf("Free bot: botID=%d\n", botID);
     ShutdownThreads();
 
-	if(botID >= BOT_START_INDEX && botID < BOT_MAX_BOTS)
+	if(botID >= BOT_START_INDEX && botID < BOT_MAX_NUM)
 	{
         idPlayer *client = botAi::FindBotClient(botID);
         if(client)
@@ -626,6 +630,7 @@ void botAi::Init( void )
         aimRate = 0.1f;
     }
 
+    findRadius		= spawnArgs.GetFloat( "find_radius", "-1" );
     botLevel = spawnArgs.GetInt( "botLevel", "0" );
 }
 
@@ -733,6 +738,7 @@ void botAi::Save( idSaveGame *savefile ) const
     savefile->WriteBool( lastHitCheckResult );
     savefile->WriteInt( lastHitCheckTime );
 
+    savefile->WriteFloat( findRadius );
     savefile->WriteInt( botLevel );
 }
 
@@ -790,6 +796,7 @@ void botAi::Restore( idRestoreGame *savefile )
     savefile->ReadBool( lastHitCheckResult );
     savefile->ReadInt( lastHitCheckTime );
 
+    savefile->ReadFloat( findRadius );
     savefile->ReadInt( botLevel );
 
     SetAAS();
@@ -3161,7 +3168,7 @@ void botAi::ProcessCommand( const char *text )
         const char * botNum = args.Argv( 3 );
         int botID = atoi( botNum );
         int clientID = botID;
-        if ( botID < BOT_START_INDEX || botID >= BOT_MAX_BOTS )
+        if ( botID < BOT_START_INDEX || botID >= BOT_MAX_NUM )
         {
             return;
         }
@@ -3236,7 +3243,7 @@ void botAi::ProcessCommand( const char *text )
     }
 
     // TinMan: Send commands to all selected bots
-    for ( int i = BOT_START_INDEX; i < BOT_MAX_BOTS; i++ )
+    for ( int i = BOT_START_INDEX; i < BOT_MAX_NUM; i++ )
     {
         if ( bots[ i ].selected )
         {
@@ -3821,6 +3828,8 @@ void botAi::Event_FindInRadius( const idVec3 &origin, float radius, const char *
     memset( entitySearchList, 0, sizeof( entitySearchList ) );
     numSearchListEntities = 0; // TinMan: Reset
 
+	if(findRadius > 0.0f)
+		radius = findRadius;
     if ( radius < 1 )
     {
         radius = 1;

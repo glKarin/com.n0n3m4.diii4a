@@ -1761,7 +1761,7 @@ idPlayer::~idPlayer()
         botAi::ReleaseBotSlot(entityNumber);
 	if(bot.GetEntity())
 	{
-        gameLocal.Printf("Delete player bot: clientID=%d, %p, %p\n", entityNumber, this, bot.GetEntity());
+        gameLocal.Printf("Delete player bot: clientID=%d\n", entityNumber);
 		botAi::ReleaseBotSlot(entityNumber);
 		delete bot.GetEntity();
 		bot = NULL;
@@ -9697,7 +9697,7 @@ void idPlayer::SpawnBot(void)
 {
     if(!BOT_ENABLED() || !spawnArgs.GetBool("isBot") || !botAi::PlayerHasBotSlot(entityNumber) || bot.GetEntity())
         return;
-    printf("Player bot spawn: %p %p\n", this, bot.GetEntity());
+    //printf("Player bot spawn: %p %p\n", this, bot.GetEntity());
 	bot = botAi::SpawnBot(this);
 }
 #endif

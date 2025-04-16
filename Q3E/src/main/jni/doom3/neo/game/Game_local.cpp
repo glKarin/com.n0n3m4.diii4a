@@ -1271,7 +1271,7 @@ void idGameLocal::InitFromNewMap(const char *mapName, idRenderWorld *renderWorld
 #ifdef MOD_BOTS //karin: auto fill bots in MP-game
 	if (BOT_ENABLED()) {
 		int botCount = harm_si_autoFillBots.GetInteger();
-		if(botCount > 0)
+		if(botCount != 0)
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, va("fillbots %d\n", botCount) );
 	}
 #endif

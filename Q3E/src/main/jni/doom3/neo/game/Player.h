@@ -202,6 +202,9 @@ typedef struct {
 #ifdef _MOD_VIEW_BODY
 class idViewBody;
 #endif
+#ifdef MOD_BOTS
+class botAi;
+#endif
 class idPlayer : public idActor
 {
 	public:
@@ -336,6 +339,7 @@ class idPlayer : public idActor
 #endif
 #endif
 #ifdef MOD_BOTS
+		friend class botAi;
 		idEntityPtr<botAi> bot;
 		void SetupBot(botAi *bot);
 		void SpawnBot(void);

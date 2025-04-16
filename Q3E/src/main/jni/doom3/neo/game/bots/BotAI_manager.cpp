@@ -3,7 +3,7 @@ int botAi::FindIdleBotSlot(void)
 {
     int i;
 
-    for ( i = BOT_START_INDEX; i < BOT_MAX_BOTS; i++ )
+    for ( i = BOT_START_INDEX; i < BOT_MAX_NUM; i++ )
     {
         if ( bots[i].inUse )
         {

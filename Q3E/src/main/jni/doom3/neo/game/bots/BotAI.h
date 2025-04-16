@@ -53,6 +53,8 @@ typedef enum
 #define CLIENT_TO_BOT_ID(x) x
 #endif
 
+#define BOT_MAX_NUM (botAi::BOT_START_INDEX + botAi::BOT_MAX_BOTS)
+
 // TinMan: expanded version of idmovestate
 class botMoveState
 {
@@ -122,8 +124,14 @@ public:
 
     static bool				IsAvailable(void);
     static void				ArgCompletion_addBot( const idCmdArgs &args, void(*callback)( const char *s ) );
-    static void				Cmd_AddBot_f( const idCmdArgs &args );
+    static void				ArgCompletion_botLevel( const idCmdArgs &args, void(*callback)( const char *s ) );
+    static void				ArgCompletion_botSlots( const idCmdArgs &args, void(*callback)( const char *s ) );
+    static void				Cmd_AddBots_f( const idCmdArgs &args );
     static void				Cmd_FillBots_f(const idCmdArgs& args);
+	static void				Cmd_AppendBots_f(const idCmdArgs& args);
+	static void				Cmd_CleanBots_f(const idCmdArgs& args);
+    static void				Cmd_RemoveBots_f( const idCmdArgs &args );
+	static void				Cmd_TruncBots_f(const idCmdArgs& args);
     static void				Cmd_BotInfo_f(const idCmdArgs& args);
     static void				Cmd_SetupBotLevel_f(const idCmdArgs& args);
     static int				GetNumCurrentActiveBots(void);
@@ -137,9 +145,15 @@ public:
     static bool				PlayerHasBotSlot(int clientID);
     static bool 			IsGametypeTeamBased(void);
     static idPlayer * 		FindBotClient(int clientID);
+    static int		 		GetNumConnectedClients(bool ava = false);
+    static int              GetBotDefs( idStrList &list );
+    static int              GetBotLevels( idDict &list );
+    static int              GetBotLevelData( int level, idDict &ret );
+    static idStr            GetBotName( int index );
 
 private:
     static int				AddBot(const char *name);
+	static bool				RemoveBot( int killBotID );
     static bool             CanAddBot(void);
 
     static bool             botAvailable;
@@ -257,6 +271,7 @@ protected:
     float					aimRate;
 
     float					fovDot;				// cos( fovDegrees )
+	float					findRadius;
     int                     botLevel;
 
     // enemy variables
