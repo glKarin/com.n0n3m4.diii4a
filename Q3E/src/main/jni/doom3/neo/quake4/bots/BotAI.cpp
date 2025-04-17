@@ -615,6 +615,8 @@ void botAi::Spawn( void )
 
     LinkScriptVariables();
 
+	playerEnt->SetupBot(this);
+
     Init();
 
     BecomeActive( TH_THINK );

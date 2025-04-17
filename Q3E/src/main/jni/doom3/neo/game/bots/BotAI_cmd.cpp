@@ -160,7 +160,7 @@ bool botAi::RemoveBot( int killBotID )
         gameLocal.Warning( "Remove player is not bot: %d", killBotID );
 		return false;
     }
-	gameLocal.Warning( "Disconnect bot client: %d", killBotID );
+    gameLocal.Printf( "Disconnect bot client: %d\n", killBotID );
 	gameLocal.ServerClientDisconnect( killBotID ); // TinMan: KaWhoosh! Youuure outa there!
 	return true;
 }
@@ -703,6 +703,9 @@ botAi * botAi::SpawnBot(idPlayer *botClient)
     gameLocal.SetUserInfo( newClientID, userInfo, false, true ); // TinMan: apply the userinfo *note* func was changed slightly in 1.3
     botClient->Spectate( false ); // TinMan: Finally done, get outa spectate
     //botClient->UpdateModelSetup(true);
+	
+    if ( IsGametypeTeamBased() )
+		botClient->BalanceTDM();
 
     cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "updateUI %d\n", newClientID ) );
 
