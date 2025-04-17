@@ -144,7 +144,7 @@ const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
 		const shaderProgram_t *shader = shaders[i];
 		if(!idStr::Icmp(name, shader->name))
         {
-            common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> %d %s.\n", shader->name, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "internal");
+            common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> %d, type=%d %s.\n", shader->name, shader->program, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "internal");
             return shader;
         }
 	}
@@ -218,13 +218,13 @@ shaderHandle_t idGLSLShaderManager::GetHandle(const char *name) const
 {
     int index;
 
+    index = FindCustomIndex(name);
+    if(index >= 0)
+        return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
+
     index = FindIndex(name);
     if(index >= 0)
         return GLSL_INTERNAL_SHADER_INDEX_TO_HANDLE(index);
-
-	index = FindCustomIndex(name);
-	if(index >= 0)
-		return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
 
     return INVALID_SHADER_HANDLE;
 }
@@ -240,14 +240,20 @@ int idGLSLShaderManager::FindCustomIndex(const char *name) const
 	return -1;
 }
 
-GLSLShaderProp * idGLSLShaderManager::FindCustom(const char *name)
+GLSLShaderProp * idGLSLShaderManager::FindCustom(const char *name, int *index)
 {
 	for(int i = 0; i < customShaders.Num(); i++)
 	{
 		GLSLShaderProp &p = customShaders[i];
 		if(!idStr::Icmp(name, p.name.c_str()))
-			return &p;
+        {
+            if(index)
+                *index = i;
+            return &p;
+        }
 	}
+    if(index)
+        *index = -1;
 	return NULL;
 }
 
@@ -265,18 +271,26 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 	}
 
 	// check has custom loaded
-	prop = FindCustom(inProp.name.c_str());
+	prop = FindCustom(inProp.name.c_str(), &index);
 	if(prop)
 	{
-		if(prop->program && prop->program->program > 0)
+		if(prop->program)
 		{
-			common->Printf("[Harmattan]: GLSL shader manager::Load custom shader '%s' has already loaded.\n", inProp.name.c_str());
-			return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
+            if(prop->program->program > 0)
+            {
+                common->Printf("[Harmattan]: GLSL shader manager::Load custom shader '%s' has already loaded.\n", inProp.name.c_str());
+                return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
+            }
+            else
+            {
+                common->Printf("[Harmattan]: GLSL shader manager::Load custom shader '%s' has already load failed.\n", inProp.name.c_str());
+                return INVALID_SHADER_HANDLE;
+            }
 		}
 		else
 		{
-			common->Printf("[Harmattan]: GLSL shader manager::Load custom shader '%s' has already load failed.\n", inProp.name.c_str());
-			return INVALID_SHADER_HANDLE;
+			common->Printf("[Harmattan]: GLSL shader manager::Load custom shader '%s' wait loading.\n", inProp.name.c_str());
+            return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
 		}
 	}
 
@@ -549,6 +563,20 @@ static int RB_GLSL_FindNextLinePositionOfVersion(const idStr &res)
 	return index + 1;
 }
 
+static idStr RB_GLSL_GetGLSLSourceVersion(const idStr &res)
+{
+    int start = res.Find("#version");
+    if(start == -1)
+    SHADER_ERROR("[Harmattan]: GLSL shader source can not find '#version'\n.");
+    start += strlen("#version");
+    int end = res.Find('\n', start);
+    if(end == -1)
+    SHADER_ERROR("[Harmattan]: GLSL shader source '#version' not completed\n.");
+    idStr str = res.Mid(start, end - start);
+    str.StripTrailingWhitespace();
+    return str;
+}
+
 static void RB_GLSL_InsertGlobalDefines(idStr &res, const char *text)
 {
 	int index = RB_GLSL_FindNextLinePositionOfVersion(res);
@@ -570,9 +598,15 @@ static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros, int hi
         idStr samplerPrecision = "precision highp sampler2D;\n"
                                  "precision highp samplerCube;\n";
         if(USING_GLES3)
-            samplerPrecision.Append("precision highp sampler2DArrayShadow;\n"
-                                 "precision highp sampler2DArray;\n"
-            );
+        {
+            idStr ver = RB_GLSL_GetGLSLSourceVersion(res);
+            if(ver.Cmp("120") > 0)
+            {
+                samplerPrecision.Append("precision highp sampler2DArrayShadow;\n"
+                                        "precision highp sampler2DArray;\n"
+                );
+            }
+        }
 		RB_GLSL_InsertGlobalDefines(res, samplerPrecision.c_str());
 
 		if(highp > 1)
@@ -849,7 +883,7 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 		if(shader->u_fragmentMap[i] != -1)
 			qglUniform1i(shader->u_fragmentMap[i], i);
 	}
-#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+#if 1 // defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
 	for (i = 0; i < MAX_FRAGMENT_PARMS; i++) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentParm%d", i);
 		shader->u_fragmentParm[i] = GL_GetUniformLocation(shader->program, buffer);
@@ -1692,4 +1726,80 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #endif
 
 #endif
+}
+
+bool RB_GLSL_FindGLSLShaderSource(const char *name, int type, idStr *source, idStr *realPath)
+{
+    idStr path;
+    void *data = NULL;
+    int length = 0;
+
+    idStrList exts;
+    if(type == 2) // fragment
+    {
+        exts.Append(".frag");
+        exts.Append(".fp");
+    }
+    else // == 1 vertex
+    {
+        exts.Append(".vert");
+        exts.Append(".vp");
+    }
+
+#if 0
+    // 1. find in glslprogs or glsl3progs
+    idStr glesDir = RB_GLSL_GetExternalShaderSourcePath();
+    path = glesDir;
+    path.AppendPath(name);
+    if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) <= 0)
+    {
+        path.StripFileExtension();
+        for(int i = 0; i < exts.Num(); i++)
+        {
+            path.SetFileExtension(exts[i]);
+            if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) > 0)
+            {
+                break;
+            }
+        }
+    }
+#endif
+
+    // 2. find in glprogs
+    if(length <= 0)
+    {
+        path = "glprogs";
+        path.AppendPath(name);
+        if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) <= 0)
+        {
+            path.StripFileExtension();
+            for(int i = 0; i < exts.Num(); i++)
+            {
+                path.SetFileExtension(exts[i]);
+                if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) > 0)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    if(length > 0)
+    {
+        if(realPath)
+            *realPath = path;
+        if(source)
+        {
+            idStr str;
+            str.Append((char *)data, length);
+            *source = str;
+        }
+
+        fileSystem->FreeFile(data);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

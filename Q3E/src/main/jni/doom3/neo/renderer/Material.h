@@ -231,6 +231,7 @@ static const int	MAX_VERTEX_PARMS = 8;
 static const int	MAX_FRAGMENT_PARMS = 8;
 #else
 static const int	MAX_VERTEX_PARMS = 4;
+static const int	MAX_FRAGMENT_PARMS = 4; // add for DOOM3
 #endif
 #ifdef _RAVEN
 class rvNewShaderStage;
@@ -241,11 +242,11 @@ typedef struct {
 	int					numVertexParms;
 	int					vertexParms[MAX_VERTEX_PARMS][4];	// evaluated register indexes
 
-#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
-										   // RAVEN BEGIN
+#if defined(_GLSL_PROGRAM) || defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+// RAVEN BEGIN
 // AReis: New Fragment Parm stuff.
-        int                                        numFragmentParms;
-        int                                        fragmentParms[MAX_FRAGMENT_PARMS][4];        // evaluated register indexes
+    int                 numFragmentParms;
+    int                 fragmentParms[MAX_FRAGMENT_PARMS][4];        // evaluated register indexes
 // RAVEN END
 #endif
 
@@ -254,7 +255,7 @@ typedef struct {
 	idImage 			*fragmentProgramImages[MAX_FRAGMENT_IMAGES];
 
 	idMegaTexture		*megaTexture;		// handles all the binding and parameter setting
-	int 				glslProgram;
+	int 				glslProgram;        // built-in shader is OpenGL shader program handle, otherwise is -(custom shader index + 1) (less than 0)
 } newShaderStage_t;
 
 #ifdef _HUMANHEAD
@@ -912,9 +913,10 @@ class idMaterial : public idDecl
 		void				SortInteractionStages();
 		void				AddImplicitStages(const textureRepeat_t trpDefault = TR_REPEAT);
 		void				CheckForConstantRegisters();
-#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+#if defined(_GLSL_PROGRAM) || defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
 		void				ParseFragmentParm(idLexer &src, newShaderStage_t *newStage);
 #endif
+        void                ParseGLSLProgram(idLexer &src, newShaderStage_t *newStage);
 
 	private:
 		idStr				desc;				// description

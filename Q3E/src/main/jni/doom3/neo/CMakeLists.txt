@@ -119,6 +119,7 @@ option(USE_STB_OGG							"use stb_vorbis" 															OFF)
 option(D3BFG_OCCLUSION_CULLING				"DOOM3-BFG occlusion culling support" 										ON)
 option(WIDE_CHARACTER_LANGUAGE				"Wide-character language font support" 										ON)
 option(D3BFG_NEW_FONT						"DOOM3-BFG new font support"												ON)
+option(GLSL_PROGRAM							"GLSL program on new material stage support"								ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -757,6 +758,10 @@ if(WIDE_CHARACTER_LANGUAGE)
 	set(CORE_DEFINES "${CORE_DEFINES};_NEW_FONT_TOOLS")
 	set(COMPILE_FREETYPE "1")
 	message(STATUS "Add wide-character language font support")
+endif()
+if(GLSL_PROGRAM)
+	add_definitions(-D_GLSL_PROGRAM)
+	message(STATUS "Add GLSL program on new material stage support")
 endif()
 
 if(OPENAL)

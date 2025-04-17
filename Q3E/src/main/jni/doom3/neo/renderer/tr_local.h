@@ -1750,7 +1750,7 @@ typedef struct shaderProgram_s {
 	//k: cubemap texture units
 	GLint		u_fragmentCubeMap[MAX_FRAGMENT_IMAGES];
 	GLint		u_vertexParm[MAX_VERTEX_PARMS];
-#if defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+#if defined(_GLSL_PROGRAM) || defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
 	GLint		u_fragmentParm[MAX_FRAGMENT_PARMS];
 #endif
 	GLint		texgenS;
@@ -1817,6 +1817,10 @@ struct GLSLShaderProp
 typedef int shaderHandle_t; // > 0 is internal shader(index = handle - 1), < 0 is custom shader(index = -handle - 1), = 0 is invalid
 #define SHADER_HANDLE_IS_VALID(x) ( (x) != idGLSLShaderManager::INVALID_SHADER_HANDLE )
 #define SHADER_HANDLE_IS_INVALID(x) ( (x) == idGLSLShaderManager::INVALID_SHADER_HANDLE )
+#define SHADER_HANDLE_INVALID (idGLSLShaderManager::INVALID_SHADER_HANDLE )
+#define SHADER_HANDLE_IS_BUILTIN(x) ( (x) > idGLSLShaderManager::INVALID_SHADER_HANDLE )
+#define SHADER_HANDLE_IS_CUSTOM(x) ( (x) < idGLSLShaderManager::INVALID_SHADER_HANDLE )
+#define SHADER_MAX_CUSTOM 32
 class idGLSLShaderManager
 {
 public:
@@ -1838,7 +1842,7 @@ private:
 	int FindIndex(const char *name) const; // return raw index
 	int FindIndex(GLuint handle) const; // return raw index
     int FindCustomIndex(const char *name) const; // return raw index
-    GLSLShaderProp * FindCustom(const char *name);
+    GLSLShaderProp * FindCustom(const char *name, int *index = NULL);
 
 private:
 	idList<shaderProgram_t *> shaders; // available shaders, include internal shaders and loaded custom shaders
@@ -1859,6 +1863,7 @@ void R_GLSL_Shutdown(void);
 void RB_GLSL_DrawInteractions(void);
 void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf);
 void RB_GLSL_DrawInteraction(const drawInteraction_t *din);
+bool RB_GLSL_FindGLSLShaderSource(const char *name, int type, idStr *source, idStr *realPath);
 
 void R_CheckBackEndCvars(void);
 
