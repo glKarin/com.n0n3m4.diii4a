@@ -574,6 +574,8 @@ static idStr RB_GLSL_GetGLSLSourceVersion(const idStr &res)
     SHADER_ERROR("[Harmattan]: GLSL shader source '#version' not completed\n.");
     idStr str = res.Mid(start, end - start);
     str.StripTrailingWhitespace();
+    str.StripLeading(' ');
+	//common->Printf("GLSL source version: %s\n", str.c_str());
     return str;
 }
 

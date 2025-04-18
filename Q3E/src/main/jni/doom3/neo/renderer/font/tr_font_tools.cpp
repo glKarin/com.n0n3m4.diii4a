@@ -373,7 +373,7 @@ static void R_Font_UnloadFont(ftGlobalVars_t *exporter)
 {
     if(exporter->faceData)
     {
-        free(exporter->faceData);
+        fileSystem->FreeFile(exporter->faceData);
         exporter->faceData = NULL;
     }
     exporter->len = 0;

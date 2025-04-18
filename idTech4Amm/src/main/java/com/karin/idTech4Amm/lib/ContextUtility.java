@@ -84,7 +84,7 @@ public final class ContextUtility
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        TextView messageText = (TextView)(dialog.findViewById(android.R.id.message));
+        TextView messageText = UIUtility.GetDialogMessageView(dialog);
         if(messageText != null) // never
         {
             if(!TextHelper.USING_HTML)
@@ -422,7 +422,7 @@ public final class ContextUtility
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        TextView messageText = (TextView)(dialog.findViewById(android.R.id.message));
+        TextView messageText = UIUtility.GetDialogMessageView(dialog);
         if(messageText != null) // never
         {
             if(!TextHelper.USING_HTML)

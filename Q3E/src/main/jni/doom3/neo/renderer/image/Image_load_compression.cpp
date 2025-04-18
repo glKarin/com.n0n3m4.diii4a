@@ -301,14 +301,14 @@ ID_INLINE static int etcavail(const char *cachefname) {
            && (r_useETC1.GetBool())
            && (cachefname != 0)
            && (cachefname[0] != 0)
-           && (fileSystem->ReadFile(cachefname, 0, 0) != -1
+           && (fileSystem->ReadFile(cachefname, NULL, NULL) != -1
            );
 }
 
 int uploadetc(const char *cachefname, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type) {
     char *tmp;
     int failed = 0;
-    int sz = fileSystem->ReadFile(cachefname, (void **)&tmp, 0);
+    int sz = fileSystem->ReadFile(cachefname, (void **)&tmp, NULL);
     if(sz)
     {
         imageCompression_t image;

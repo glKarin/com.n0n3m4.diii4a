@@ -10,7 +10,7 @@ import com.karin.idTech4Amm.misc.TextHelper;
 public final class Constants
 {
     public static final int    CONST_UPDATE_RELEASE = 63;
-    public static final String CONST_RELEASE = "2025-04-01"; // 02-12
+    public static final String CONST_RELEASE = "2025-04-30"; // 02-12
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -31,6 +31,13 @@ public final class Constants
             "Fix makron remote render at screen for texfure/cameraView1 in map game/core1 on Quake 4.",
             "Add spiritview and deathview GLSL shaders on Prey(2006).",
             "Update GZDOOM version to 4.14.1.",
+            "Add multiplayer game bot support on DOOM 3.",
+            "Add custom GLSL shader program of new stage material support on DOOM 3/Quake 4/Prey.",
+            "All game support setup vsync.",
+            "Improve multiplayer game bot system on Quake 4.",
+            "On-screen buttons using OpenGL buffer.",
+            "Add skip hit effect support with cvar `harm_g_skipHitEffect` amd command `skipHitEffect` on DOOM 3/Quake 4/Prey.",
+            "[Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) have removed on this release!"
         };
 	};
 

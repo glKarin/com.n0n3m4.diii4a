@@ -473,5 +473,9 @@
     <string name="please_put_game_data_files_into_this_folder">Пожалуйста поместите файлы игровых данных в эту папку %1$s !</string>
     <string name="use_doom3bfg_fonts_instead_of_old_fonts_and_enable_wide_character_language_support">Use DOOM3-BFG fonts instead of old fonts and enable wide-character language support</string>
     <string name="combine_shadow_mapping_harm_r_shadowmapcombine">Combine shadow mapping(harm_r_shadowMapCombine)</string>
+    <string name="max_command_line_editor_height">Max command line editor height(px)</string>
+    <string name="setup_max_command_line_editor_pixel_height">Setup max command line editor pixel height(0 means not limit)</string>
+    <string name="zero_means_not_limit">px, 0 means not limit</string>
+    <string name="skip_hit_effect_in_game">Skip hit effect in game(harm_g_skipHitEffect)</string>
 
 </resources>

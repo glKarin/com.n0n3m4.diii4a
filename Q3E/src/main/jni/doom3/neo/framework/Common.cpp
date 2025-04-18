@@ -2882,11 +2882,6 @@ void idCommonLocal::Async(void)
 	}
 }
 
-/*
-=================
-idCommonLocal::LoadGameDLL
-=================
-*/
 #ifdef _RAVEN // quake4 game dll
 #define _HARM_BASE_GAME_DLL "q4game"
 #elif defined(_HUMANHEAD) // prey game dll
@@ -2921,6 +2916,12 @@ static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_
 		"`<harm_fs_gameLibPath>/lib" _HARM_BASE_GAME_DLL DLL_SUFFIX "`, "
 		"default is empty will load by cvar `fs_game`."); // This cvar priority is higher than `fs_game`.
 static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "Setup game dynamic library directory path(default is empty, means using `" _DEFAULT_LIBRARY_DIR "`).");
+
+/*
+=================
+idCommonLocal::LoadGameDLL
+=================
+*/
 void idCommonLocal::LoadGameDLL(void)
 {
 #ifdef __DOOM_DLL__

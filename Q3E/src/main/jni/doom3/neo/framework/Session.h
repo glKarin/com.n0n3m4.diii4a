@@ -174,4 +174,5 @@ class idSession
 
 extern	idSession 	*session;
 
+extern void Com_ResetCVarValue(const char *name);
 #endif /* !__SESSION_H__ */

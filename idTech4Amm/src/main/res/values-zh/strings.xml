@@ -472,4 +472,8 @@
     <string name="please_put_game_data_files_into_this_folder">请将%1$s游戏数据文件放到此目录下!</string>
     <string name="use_doom3bfg_fonts_instead_of_old_fonts_and_enable_wide_character_language_support">使用毁灭战士3-BFG字体并且启用宽字符字体支持</string>
     <string name="combine_shadow_mapping_harm_r_shadowmapcombine">混合阴影映射(harm_r_shadowMapCombine)</string>
+    <string name="max_command_line_editor_height">最大命令行编辑框高度(px)</string>
+    <string name="setup_max_command_line_editor_pixel_height">设置最大命令行编辑框像素高度(0为不限制)</string>
+    <string name="zero_means_not_limit">像素为单位, 0为不限制</string>
+    <string name="skip_hit_effect_in_game">忽略游戏中被攻击影响效果(harm_g_skipHitEffect)</string>
 </resources>

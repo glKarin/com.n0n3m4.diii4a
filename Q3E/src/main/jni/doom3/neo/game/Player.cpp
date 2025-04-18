@@ -9619,15 +9619,22 @@ void idPlayer::SetupViewBody( void ) {
     idDict					args;
 
 #define VIEW_BODY_DEFAULT_CLASSNAME "player_viewbody"
-    if ( !viewBody.GetEntity() ) {
+    if ( viewBody.GetEntity() )
+		return;
+
         // setup the view model
         idStr player_viewbody_classname;
-        spawnArgs.GetString("player_viewbody", VIEW_BODY_DEFAULT_CLASSNAME, player_viewbody_classname);
+	if(!spawnArgs.GetString("player_viewbody", ""/*VIEW_BODY_DEFAULT_CLASSNAME*/, player_viewbody_classname))
+		return;
 
         if(!player_viewbody_classname.Length())
-            player_viewbody_classname = VIEW_BODY_DEFAULT_CLASSNAME;
+	{
+		// player_viewbody_classname = VIEW_BODY_DEFAULT_CLASSNAME;
+		return;
+	}
 
         decl = static_cast< const idDeclEntityDef * >( declManager->FindType( DECL_ENTITYDEF, player_viewbody_classname, false ) );
+	/*
         if ( !decl ) {
             gameLocal.DPrintf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
             if( idStr::Cmp(player_viewbody_classname, VIEW_BODY_DEFAULT_CLASSNAME) )
@@ -9636,6 +9643,7 @@ void idPlayer::SetupViewBody( void ) {
                 decl = static_cast< const idDeclEntityDef * >( declManager->FindType( DECL_ENTITYDEF, player_viewbody_classname, false ) );
             }
         }
+	*/
         if ( !decl ) {
             gameLocal.DPrintf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
             return;
@@ -9653,7 +9661,6 @@ void idPlayer::SetupViewBody( void ) {
         viewBody.GetEntity()->Init( this, true );
         viewBody.GetEntity()->SetName( va("%s_viewBody", name.c_str() ) );
         gameLocal.Printf( "idPlayer::SetupViewBody: spawn viewBody -> %s\n", viewBody.GetEntity()->GetName() );
-    }
 }
 
 /*

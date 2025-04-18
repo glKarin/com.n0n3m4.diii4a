@@ -128,8 +128,10 @@ public final class KCVarSystem
                             + " DFPHeiseiGothicW7 "
                             + " Sarasori_Rg "
                             ),
+                        KCVar.CreateCVar("harm_g_skipHitEffect", "bool", "0", "Skip all hit effect in game", KCVar.FLAG_INIT | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCommand("exportFont", "string", "Convert ttf/ttc font file to DOOM3 wide character font file", 0),
-                        KCVar.CreateCommand("extractBimage", "string", "extract DOOM3-BFG's bimage image to rga RGBA image files", 0)
+                        KCVar.CreateCommand("extractBimage", "string", "extract DOOM3-BFG's bimage image to rga RGBA image files", 0),
+                        KCVar.CreateCommand("skipHitEffect", "bool", "skip all hit effect in game", 0)
                 );
         KCVar.Group GAME_CVARS = new KCVar.Group("DOOM3", false)
                 .AddCVar(
@@ -138,7 +140,16 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "Head", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0)
+                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
+                    KCVar.CreateCommand("addBots", "string", "add multiplayer bots batch", 0),
+                    KCVar.CreateCommand("removeBots", "integer", "disconnect multi bots by client ID", 0),
+                    KCVar.CreateCommand("fillBots", "integer", "fill bots", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("appendBots", "integer", "append more bots", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("cleanBots", "", "disconnect all bots", 0),
+                    KCVar.CreateCommand("truncBots", "integer", "disconnect last bots", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("botLevel", "integer", "setup all bot level", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("addBot", "string", "adds a new bot", 0),
+                    KCVar.CreateCommand("removeBot", "string", "removes bot specified by id", 0)
                 );
         KCVar.Group RIVENSIN_CVARS = new KCVar.Group("Rivensin", false)
                 .AddCVar(
@@ -159,8 +170,15 @@ public final class KCVarSystem
                             "strogg", "fonts/strogg"
                     ),
                     KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0 = disable; other number = bot num)", 0),
-                    KCVar.CreateCommand("addbots", "string", "adds multiplayer bots batch(support `tab` complete, exam. addbots bot_name1 bot_name2 ...)", 0),
-                    KCVar.CreateCommand("fillbots", "integer", "fill bots(empty argument to fill max bots num, exam. fillbots 8)", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("addBots", "string", "adds multiplayer bots batch", 0),
+                    KCVar.CreateCommand("removeBots", "integer", "disconnect multi bots by client ID", 0),
+                    KCVar.CreateCommand("fillBots", "integer", "fill bots", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("appendBots", "integer", "append more bots", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("cleanBots", "", "disconnect all bots", 0),
+                    KCVar.CreateCommand("truncBots", "integer", "disconnect last bots", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("botLevel", "integer", "setup all bot level", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("addBot", "string", "adds a new bot", 0),
+                    KCVar.CreateCommand("removeBot", "string", "removes bot specified by id", 0),
                     KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "Mute player's footstep sound", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(forward-offset side-offset up-offset)", 0),

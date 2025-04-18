@@ -102,6 +102,15 @@
                 android:defaultValue="false"
                 android:summary="Open launcher when game finished"
                 />-->
+            <EditTextPreference
+                android:title="@string/max_command_line_editor_height"
+                android:key="harm_collapse_cmdline"
+                android:persistent="true"
+                android:defaultValue="0"
+                android:inputType="number"
+                android:summary="@string/zero_means_not_limit"
+                android:hint="@string/setup_max_command_line_editor_pixel_height"
+                />
             <CheckBoxPreference
                 android:title="@string/hide_ad_bar"
                 android:key="harm_hide_ad_bar"
