@@ -316,6 +316,8 @@ const idEventDef BOT_GetCommandEntity( "getCommandEntity", NULL, 'E' );
 const idEventDef BOT_GetCommandPosition( "getCommandPosition", NULL, 'v' );
 const idEventDef BOT_ClearCommand( "clearCommand", NULL, NULL );
 
+const idEventDef BOT_FindOther( "findOther", NULL, 'e' );
+
 CLASS_DECLARATION( idEntity, botAi )
 EVENT( BOT_SetNextState,					botAi::Event_SetNextState )
 EVENT( BOT_SetState,						botAi::Event_SetState )
@@ -414,6 +416,8 @@ EVENT( BOT_GetCommandType,					botAi::Event_GetCommandType )
 EVENT( BOT_GetCommandEntity,				botAi::Event_GetCommandEntity )
 EVENT( BOT_GetCommandPosition,				botAi::Event_GetCommandPosition )
 EVENT( BOT_ClearCommand,					botAi::Event_ClearCommand )
+
+EVENT( BOT_FindOther,						botAi::Event_FindOther )
 END_CLASS
 
 /*
@@ -5067,6 +5071,106 @@ void botAi::Event_ClearCommand( void )
     commandType = NULL;
     commandEntity = NULL;
     commandPosition.Zero();
+}
+
+/*
+============
+botAi::Event_FindOther
+TinMan: Finds all items in level and adds them to entitySearchList[]. *todo* this is more of a listitems
+============
+*/
+void botAi::Event_FindOther( void )
+{
+    idEntity *	ent;
+    int			i;
+    idVec3		entityOrigin, pushOrigin;
+    idBounds	playerBounds;
+
+    // TinMan: Clear existing list
+    memset( entitySearchList, 0, sizeof( entitySearchList ) );
+    numSearchListEntities = 0; // TinMan: Reset
+
+    for ( i = 0; i < MAX_GENTITIES; i++ )
+    {
+        ent = gameLocal.entities[ i ];
+        if ( ent )
+        {
+            if ( ent->IsType( idPlayerStart::Type ) )
+            {
+                // TinMan: Pathtogoal and other routing pushes entity origin into aas, which is ok if bot doesn't need to touch entity or if bot can touch the ent from the point it's told to go, but if it isn't in an area to start with it will likely push into another area where is isn't actually possible to reach the entity from.
+                // TinMan: Solution, as I don't want to touch routing functions I'll add filter here, basically check if item is lower than jump height
+                // *todo* still isn't perfect due to only doing bounds test rather than clip model test
+                // Note: There are of course cases where an item may be out of aas, but close enough for it to be trivial to navigate to, but thats a bigger kettle of fish.
+                if ( aas )
+                {
+                    entityOrigin = ent->GetPhysics()->GetOrigin();
+                    pushOrigin = entityOrigin;
+                    int num = PointReachableAreaNum( entityOrigin ); // TinMan: *todo* need to be set accurately?
+                    aas->PushPointIntoAreaNum( num, pushOrigin );
+
+                    if ( pushOrigin != entityOrigin )
+                    {
+                        //gameLocal.Printf( "[Event_FindItems][pushOrigin != entityOrigin][%s]\n", ent->name.c_str() );
+
+                        //idBounds testBounds = idBounds( pushOrigin ).Expand( 2 );
+                        //gameRenderWorld->DebugBounds( colorRed, testBounds, vec3_origin, 10000 );
+
+                        // TinMan: pushPont could be at any height, we want a position on the floor below to test from
+                        trace_t result;
+                        float max_dist = playerEnt->spawnArgs.GetFloat( "pm_jumpheight" );
+                        gameLocal.clip.Translation( result, pushOrigin, pushOrigin + ent->GetPhysics()->GetGravityNormal() * max_dist,	ent->GetPhysics()->GetClipModel(), ent->GetPhysics()->GetAxis(), MASK_SOLID, ent );
+                        //gameRenderWorld->DebugLine( colorCyan, pushOrigin, pushOrigin + ent->GetPhysics()->GetGravityNormal() * max_dist, 10000 );
+                        //gameRenderWorld->DebugLine( colorRed, pushOrigin, result.endpos, 10000 );
+                        if ( result.fraction < 1.0f )
+                        {
+                            // TinMan: Get where trace hit
+                            pushOrigin = result.endpos;
+                        }
+                        else
+                        {
+                            // TinMan: Trace longer than jump height so not reall gettable
+                            //gameLocal.Printf( "[Event_FindItems][Item higher than jumpheight: %s]\n", ent->name.c_str() );
+                            //gameLocal.Printf( "[Event_FindItems][Item not reachable (too high): %s]\n", ent->name.c_str() );
+                            continue;
+                        }
+
+
+                        //entBounds = ent->GetPhysics()->GetAbsBounds();
+                        // TinMan: Set up bounds to test from
+                        playerBounds = playerEnt->GetPhysics()->GetBounds();
+                        playerBounds += pushOrigin;
+
+                        // TinMan: Does the playerbounds under the pushedpoint touch the item?
+                        if ( !playerBounds.IntersectsBounds( ent->GetPhysics()->GetAbsBounds() ) )
+                        {
+                            // TinMan: Can't get the item via aas.
+                            //gameLocal.Printf( "[Event_FindItems][Item not reachable: %s]\n", ent->name.c_str() );
+                            //gameRenderWorld->DebugBounds( colorGreen, playerBounds, vec3_origin, 10000 );
+                            //gameRenderWorld->DebugBounds( colorMagenta, ent->GetPhysics()->GetAbsBounds(), vec3_origin, 10000 );
+                            continue;
+                        }
+
+                        /* *todo* *rem* cheaper check
+                        if ( !entBounds.ContainsPoint( pushOrigin ) ) {
+                        	gameLocal.Printf( "[Event_FindItems][Item not reachable: %s]\n", ent->name.c_str() );
+                        	gameRenderWorld->DebugBounds( colorMagenta, entBounds, vec3_origin, 10000 );
+                        	continue;
+                        }
+                        */
+
+                    }
+                }
+
+                entitySearchList[numSearchListEntities] = ent;
+                numSearchListEntities++;
+            }
+        }
+    }
+
+	if(numSearchListEntities > 0)
+		idThread::ReturnEntity( entitySearchList[gameLocal.random.RandomInt() % numSearchListEntities] );
+	else
+		idThread::ReturnEntity(NULL);
 }
 
 #include "BotAI_cmd.cpp"

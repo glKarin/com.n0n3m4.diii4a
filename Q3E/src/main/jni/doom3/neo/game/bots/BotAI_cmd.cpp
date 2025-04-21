@@ -1,6 +1,6 @@
-idCVar harm_si_autoFillBots( "harm_si_autoFillBots", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Automatic fill bots after map loaded in multiplayer game(0 = disable; -1 = max; > 0 = bot num).", -1, botAi::BOT_MAX_BOTS );
+idCVar botAi::harm_si_autoFillBots( "harm_si_autoFillBots", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Automatic fill bots after map loaded in multiplayer game(0 = disable; -1 = max; > 0 = bot num).", -1, botAi::BOT_MAX_BOTS );
 //karin: auto gen aas file for mp game map with bot
-idCVar harm_g_autoGenAASFileInMPGame( "harm_g_autoGenAASFileInMPGame", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic.");
+idCVar botAi::harm_g_autoGenAASFileInMPGame( "harm_g_autoGenAASFileInMPGame", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic.");
 
 #include "BotAI_cfg.cpp"
 
@@ -15,20 +15,36 @@ TinMan: Console command. Bring in teh b0tz!
 */
 void botAi::Addbot_f( const idCmdArgs &args )
 {
-    if(!CanAddBot())
+    if(!AllowBotOperation())
         return;
 
 	if(args.Argc() < 2)
 	{
-		gameLocal.Printf("Usage: %s <bot def name>\n", args.Argv(0));
+        common->Printf("USAGE: %s <botdef> ...key/value pair. e.g. addBot bot_sabot_tinman - see def/bot_sabot_characters.def for more details\n", args.Argv(0));
 		return;
 	}
-	int r = AddBot(args.Argv( 1 ));
-	if( r < 0 )
-	{
-		gameLocal.Warning("AddBot fail -> %d", r);
-		return;
-	}
+
+    const char *key, *value;
+    int			i;
+    idDict		dict;
+
+    value = args.Argv( 1 );
+
+    // TinMan: Add rest of key/values passed in
+    for( i = 2; i < args.Argc() - 1; i += 2 )
+    {
+        key = args.Argv( i );
+        value = args.Argv( i + 1 );
+
+        dict.Set( key, value );
+    }
+
+    i = AddBot(value, dict);
+    if (i < 0)
+    {
+        common->Warning("AddBot fail -> %d\n", i);
+        return;
+    }
 }
 
 /*
@@ -39,7 +55,7 @@ TinMan: Console command. Bye bye botty.
 */
 void botAi::Removebot_f( const idCmdArgs &args )
 {
-    if(!CanAddBot())
+    if(!AllowBotOperation())
         return;
 
     if(args.Argc() < 2)
@@ -68,14 +84,14 @@ bool botAi::IsAvailable(void)
     return botInitialized && botAvailable;
 }
 
-int botAi::AddBot(const char *defName)
+int botAi::AddBot(const char *defName, const idDict &dict)
 {
     int			i;
     idDict		userInfo;
     int newBotID;
     int newClientID;
 
-    if ( !CanAddBot() )
+    if ( !AllowBotOperation() )
     {
         return -1;
     }
@@ -121,10 +137,35 @@ int botAi::AddBot(const char *defName)
     // Start up client
     gameLocal.ServerClientConnect(newClientID, NULL);
 
-    idDict clientArgs;
+    idDict clientArgs = dict;
     clientArgs.SetBool("isBot", true);
     clientArgs.SetInt("botID", newBotID);
     clientArgs.Set("botDefName", defName);
+	int wp = MakeWeaponMask(harm_si_botWeapons.GetString());
+	if(wp != 0)
+	{
+		idStr weapon = MakeWeaponString(InsertBasicWeaponMask(wp));
+		gameLocal.Printf("Bot weapons: %s\n", weapon.c_str());
+		clientArgs.Set("weapon", weapon.c_str());
+	}
+	if(harm_si_botAmmo.GetInteger() != 0)
+	{
+		idDict ammo = MakeAmmoDict(wp, harm_si_botAmmo.GetInteger());
+		int numAmmo = ammo.GetNumKeyVals();
+		if(numAmmo > 0)
+		{
+			if(numAmmo > 0)
+			{
+				for(int m = 0; m < numAmmo; m++)
+				{
+					const idKeyValue *kv = ammo.GetKeyVal(m);
+					gameLocal.Printf("  %s = %s\n", kv->GetKey().c_str(), kv->GetValue().c_str());
+				}
+			}
+			clientArgs.Copy(ammo);
+		}
+	}
+
     gameLocal.ServerBotClientBegin(newClientID, &clientArgs); // TinMan: spawn the fakeclient (and send message to do likewise on other machines)
 
     idPlayer * botClient = static_cast< idPlayer * >( gameLocal.entities[ newClientID ] ); // TinMan: Make a nice and pretty pointer to fakeclient
@@ -167,7 +208,7 @@ bool botAi::RemoveBot( int killBotID )
 
 void botAi::Cmd_AddBots_f(const idCmdArgs& args)
 {
-    if(!CanAddBot())
+    if(!AllowBotOperation())
         return;
 
     if (args.Argc() < 2)
@@ -201,7 +242,7 @@ void botAi::Cmd_AddBots_f(const idCmdArgs& args)
 
 void botAi::Cmd_FillBots_f(const idCmdArgs& args)
 {
-    if(!CanAddBot())
+    if(!AllowBotOperation())
         return;
 
     int num = CheckRestClients(0);
@@ -248,7 +289,7 @@ void botAi::Cmd_FillBots_f(const idCmdArgs& args)
 
 void botAi::Cmd_RemoveBots_f(const idCmdArgs& args)
 {
-    if(!CanAddBot())
+    if(!AllowBotOperation())
         return;
 
     if (args.Argc() < 2)
@@ -270,7 +311,7 @@ void botAi::Cmd_RemoveBots_f(const idCmdArgs& args)
 
 void botAi::Cmd_AppendBots_f(const idCmdArgs& args)
 {
-    if(!CanAddBot())
+    if(!AllowBotOperation())
         return;
 
 	int max = botAi::BOT_MAX_BOTS;
@@ -358,7 +399,7 @@ void botAi::ArgCompletion_botSlots( const idCmdArgs &args, void(*callback)( cons
 
 void botAi::Cmd_CleanBots_f(const idCmdArgs& args)
 {
-    if(!CanAddBot())
+    if(!AllowBotOperation())
         return;
 
     for ( int clientID = BOT_START_INDEX; clientID < MAX_CLIENTS; clientID++ ) {
@@ -372,7 +413,7 @@ void botAi::Cmd_CleanBots_f(const idCmdArgs& args)
 
 void botAi::Cmd_TruncBots_f(const idCmdArgs& args)
 {
-    if(!CanAddBot())
+    if(!AllowBotOperation())
         return;
 
 	int num;
@@ -386,6 +427,8 @@ void botAi::Cmd_TruncBots_f(const idCmdArgs& args)
 		else
 			num = 1;
     }
+    else
+        num = BOT_MAX_NUM;
 
     for ( int clientID = MAX_CLIENTS - 1; num > 0 && clientID >= BOT_START_INDEX; clientID-- ) {
         if ( gameLocal.entities[ clientID ] && gameLocal.entities[ clientID ]->IsType( idPlayer::Type ) ) {
@@ -507,17 +550,17 @@ void botAi::Cmd_BotInfo_f(const idCmdArgs& args)
     }
 }
 
-bool botAi::CanAddBot(void)
+bool botAi::AllowBotOperation(void)
 {
     if ( !gameLocal.isMultiplayer )
     {
-        gameLocal.Warning( "You may only add a bot to a multiplayer game" );
+        gameLocal.Warning( "You may only operate bot to a multiplayer game" );
         return false;
     }
 
     if ( !gameLocal.isServer )
     {
-        gameLocal.Warning( "Bots may only be added on server, only it has the powah!" );
+        gameLocal.Warning( "Bots may only be operated on server, only it has the powah!" );
         return false;
     }
 
@@ -554,27 +597,12 @@ bool botAi::CanAddBot(void)
 
 void botAi::Cmd_SetupBotLevel_f(const idCmdArgs& args)
 {
-    if ( !gameLocal.isMultiplayer )
-    {
-        gameLocal.Warning( "You may only add a bot to a multiplayer game" );
+    if(!AllowBotOperation())
         return;
-    }
-
-    if ( !gameLocal.isServer )
-    {
-        gameLocal.Warning( "Bots may only be added on server, only it has the powah!" );
-        return;
-    }
-
-    if ( !IsAvailable() )
-    {
-        gameLocal.Warning( "SABot(a7) mod file missing!" );
-        return;
-    }
 
     if (args.Argc() < 2)
     {
-        gameLocal.Warning("USAGE: botLevel <bot level>");
+        gameLocal.Printf("USAGE: %s <bot level>\n", args.Argv(0));
         return;
     }
 
@@ -745,3 +773,125 @@ int botAi::GetNumConnectedClients(bool ava)
     }
 	return num;
 }
+
+void botAi::Cmd_SetupBotWeapons_f(const idCmdArgs& args)
+{
+    if(!AllowBotOperation())
+        return;
+
+    int w = 0;
+    if (args.Argc() >= 2)
+	{
+		int num = args.Argc();
+		idStrList list;
+		for(int i = 1; i < num; i++)
+		{
+			const char *value = args.Argv(i);
+			if(!idStr::Cmp("*", value))
+			{
+				w = BOT_ALL_MP_WEAPON;
+				break;
+			}
+			list.AddUnique(value);
+		}
+		if(w == 0)
+			w = MakeWeaponMask(list);
+
+	}
+	if(w == 0)
+		w = InsertBasicWeaponMask();
+
+	idStr weapon = MakeWeaponString(w);
+	gameLocal.Printf("Setup bot weapons: %s\n", weapon.c_str());
+	int a = harm_si_botAmmo.GetInteger();
+	if(a == 0)
+		a = 1;
+	idDict ammo = MakeAmmoDict(w, a);
+	int numAmmo = ammo.GetNumKeyVals();
+	if(numAmmo > 0)
+	{
+		for(int i = 0; i < numAmmo; i++)
+		{
+			const idKeyValue *kv = ammo.GetKeyVal(i);
+			gameLocal.Printf("  %s = %s\n", kv->GetKey().c_str(), kv->GetValue().c_str());
+		}
+	}
+	InsertEmptyAmmo(ammo);
+
+    for ( int clientID = BOT_START_INDEX; clientID < MAX_CLIENTS ; clientID++ )
+    {
+        if ( gameLocal.entities[ clientID ] && gameLocal.entities[ clientID ]->IsType( idPlayer::Type ) ) {
+            idPlayer *client = static_cast<idPlayer *>(gameLocal.entities[ clientID ]);
+			if(!client->IsBot())
+				continue;
+			client->spawnArgs.Set("weapon", weapon.c_str());
+			if(numAmmo > 0)
+			{
+				client->spawnArgs.Copy(ammo);
+			}
+		}
+    }
+	gameLocal.Printf("Setup bot weapons will be available after the bot next spawn.\n");
+}
+
+void botAi::Cmd_SetupBotAmmo_f(const idCmdArgs& args)
+{
+    if(!AllowBotOperation())
+        return;
+
+    int a = 0;
+    if (args.Argc() >= 2)
+	{
+		a = atoi(args.Argv(1));
+	}
+
+	gameLocal.Printf("Setup bot weapons ammo: %d\n", a);
+
+    for ( int clientID = BOT_START_INDEX; clientID < MAX_CLIENTS ; clientID++ )
+    {
+        if ( gameLocal.entities[ clientID ] && gameLocal.entities[ clientID ]->IsType( idPlayer::Type ) ) {
+            idPlayer *client = static_cast<idPlayer *>(gameLocal.entities[ clientID ]);
+			if(!client->IsBot())
+				continue;
+			const char *wp = client->spawnArgs.GetString("weapon", "");
+			int w = MakeWeaponMask(wp);
+			idDict ammo = MakeAmmoDict(w, a);
+			InsertEmptyAmmo(ammo);
+			int numAmmo = ammo.GetNumKeyVals();
+			if(numAmmo > 0)
+			{
+				gameLocal.Printf("Bot %d weapons: %s -> %x\n", clientID, wp, w);
+				for(int i = 0; i < numAmmo; i++)
+				{
+					const idKeyValue *kv = ammo.GetKeyVal(i);
+					gameLocal.Printf("  %s = %s\n", kv->GetKey().c_str(), kv->GetValue().c_str());
+				}
+				client->spawnArgs.Copy(ammo);
+			}
+		}
+    }
+	gameLocal.Printf("Setup bot weapons ammo will be available after the bot next spawn.\n");
+}
+
+void botAi::ArgCompletion_botWeapons( const idCmdArgs &args, void(*callback)( const char *s ) )
+{
+#define BOT_MW(I, N, A, U, M) \
+	callback(va("%s %d", args.Argv(0), I)); \
+	callback(va("%s %s", args.Argv(0), N)); \
+	callback(va("%s weapon_%s", args.Argv(0), N));
+
+	BOT_MW(0, "fists", "", 0, 0);
+	BOT_MW(1, "pistol", "bullets", 12, 320);
+	BOT_MW(2, "shotgun", "shells", 8, 320);
+	BOT_MW(3, "machinegun", "clip", 60, 600);
+	BOT_MW(4, "chaingun", "belt", 60, 600);
+	BOT_MW(5, "handgrenade", "grenades", 5, 50);
+	BOT_MW(6, "plasmagun", "cells", 30, 500);
+	BOT_MW(7, "rocketlauncher", "rockets", 5, 96);
+	BOT_MW(8, "bfg", "bfg", 4, 32);
+	BOT_MW(10, "chainsaw", "", 0, 0);
+	BOT_MW(11, "flashlight", "", 0, 0);
+
+#undef BOT_MW
+}
+

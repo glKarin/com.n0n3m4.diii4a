@@ -1983,7 +1983,7 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 		}
 
 		//k: in MP game, auto gen AAS file for map
-		if(harm_g_autoGenAASFileInMPGame.GetBool()) {
+		if(botAi::harm_g_autoGenAASFileInMPGame.GetBool()) {
             botAi::GenerateAAS();
 		}
     }
@@ -2010,7 +2010,7 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 
 #ifdef MOD_BOTS //karin: auto fill bots in MP-game
 	if (BOT_ENABLED()) {
-		int botCount = harm_si_autoFillBots.GetInteger();
+		int botCount = botAi::harm_si_autoFillBots.GetInteger();
 		if(botCount != 0)
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, va("fillbots %d\n", botCount) );
 	}

@@ -9,6 +9,8 @@
 */
 
 #define BOT_ENABLED() (gameLocal.isMultiplayer && gameLocal.isServer && botAi::IsAvailable())
+#define BOT_ALL_MP_WEAPON ( (1 << MAX_WEAPONS) - 1)
+#define BOT_SCRIPT_FILE "script/bot_main.script"
 
 typedef enum {
     TEAM_NONE = -1,
@@ -18,11 +20,6 @@ typedef enum {
 } team_t;
 
 #define BOT_AAS "botaas48"
-
-//karin: auto fill bots in MP-game
-extern idCVar harm_si_autoFillBots;
-//karin: auto gen aas file for mp game map with bot
-extern idCVar harm_g_autoGenAASFileInMPGame;
 
 class botSabot;
 
@@ -115,6 +112,12 @@ public:
     static const int		BOT_START_INDEX;
     static botInfo_t		bots[];
 
+    static idCVar           harm_si_botLevel;
+    static idCVar           harm_si_botWeapons;
+    static idCVar           harm_si_botAmmo;
+    static idCVar           harm_si_autoFillBots;
+    static idCVar           harm_g_autoGenAASFileInMPGame;
+
     static void				Addbot_f( const idCmdArgs &args );
     static void				Removebot_f( const idCmdArgs &args );
 
@@ -126,6 +129,7 @@ public:
     static void				ArgCompletion_addBot( const idCmdArgs &args, void(*callback)( const char *s ) );
     static void				ArgCompletion_botLevel( const idCmdArgs &args, void(*callback)( const char *s ) );
     static void				ArgCompletion_botSlots( const idCmdArgs &args, void(*callback)( const char *s ) );
+	static void				ArgCompletion_botWeapons( const idCmdArgs &args, void(*callback)( const char *s ) );
     static void				Cmd_AddBots_f( const idCmdArgs &args );
     static void				Cmd_FillBots_f(const idCmdArgs& args);
 	static void				Cmd_AppendBots_f(const idCmdArgs& args);
@@ -134,15 +138,22 @@ public:
 	static void				Cmd_TruncBots_f(const idCmdArgs& args);
     static void				Cmd_BotInfo_f(const idCmdArgs& args);
     static void				Cmd_SetupBotLevel_f(const idCmdArgs& args);
-    static int				GetNumCurrentActiveBots(void);
-    static int				CheckRestClients(int num);
+	static void				Cmd_SetupBotWeapons_f(const idCmdArgs& args);
+	static void				Cmd_SetupBotAmmo_f(const idCmdArgs& args);
     static void				InitBotSystem(void);
     static void				UpdateUI(void);
-    static int				FindIdleBotSlot(void);
     static bool				GenerateAAS(void);
     static void				ReleaseBotSlot(int clientID);
-	static botAi *			SpawnBot(idPlayer *botClient);
+    static botAi *			SpawnBot(idPlayer *botClient);
     static bool				PlayerHasBotSlot(int clientID);
+
+private:
+    static int				AddBot(const char *name, const idDict &dict = idDict());
+	static bool				RemoveBot( int killBotID );
+    static bool             AllowBotOperation(void);
+    static int				GetNumCurrentActiveBots(void);
+    static int				CheckRestClients(int num);
+    static int				FindIdleBotSlot(void);
     static bool 			IsGametypeTeamBased(void);
     static idPlayer * 		FindBotClient(int clientID);
     static int		 		GetNumConnectedClients(bool ava = false);
@@ -150,11 +161,12 @@ public:
     static int              GetBotLevels( idDict &list );
     static int              GetBotLevelData( int level, idDict &ret );
     static idStr            GetBotName( int index );
-
-private:
-    static int				AddBot(const char *name);
-	static bool				RemoveBot( int killBotID );
-    static bool             CanAddBot(void);
+    static int				MakeWeaponMask(const char *wp);
+    static int				MakeWeaponMask(const idStrList &list);
+    static int				InsertBasicWeaponMask(int i = 0);
+    static idStr			MakeWeaponString(int i);
+    static idDict			MakeAmmoDict(int wp, int num);
+    static void				InsertEmptyAmmo(idDict &dict);
 
     static bool             botAvailable;
     static bool             botInitialized;
@@ -435,6 +447,8 @@ private:
     void					Event_GetCommandEntity( void );
     void					Event_GetCommandPosition( void );
     void					Event_ClearCommand( void );
+
+    void					Event_FindOther( void );
 };
 
 /*

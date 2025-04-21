@@ -141,6 +141,11 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
+                    KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
+                    KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0 = disable; other number = bot num)", 0),
+                    KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot difficult level(0 = auto)", 0),
+                    KCVar.CreateCVar("harm_si_botWeapons", "string", "0", "Bot weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_shotgun,weapon_machinegun), and allow mix(e.g. shotgun,3,weapon_rocketlauncher). All weapon: 1=pistol, 2=shotgun, 3=machinegun, 4=chaingun, 5=handgrenade, 6=plasmagun, 7=rocketlauncher, 8=BFG, 10=chainsaw.", 0),
+                    KCVar.CreateCVar("harm_si_botAmmo", "integer", "0", "Bot weapon ammo when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo", 0),
                     KCVar.CreateCommand("addBots", "string", "add multiplayer bots batch", 0),
                     KCVar.CreateCommand("removeBots", "integer", "disconnect multi bots by client ID", 0),
                     KCVar.CreateCommand("fillBots", "integer", "fill bots", KCVar.FLAG_POSITIVE),
@@ -148,6 +153,8 @@ public final class KCVarSystem
                     KCVar.CreateCommand("cleanBots", "", "disconnect all bots", 0),
                     KCVar.CreateCommand("truncBots", "integer", "disconnect last bots", KCVar.FLAG_POSITIVE),
                     KCVar.CreateCommand("botLevel", "integer", "setup all bot level", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("botWeapons", "string", "setup all bot weapons", 0),
+                    KCVar.CreateCommand("botAmmo", "integer", "setup all bot weapons ammo", 0),
                     KCVar.CreateCommand("addBot", "string", "adds a new bot", 0),
                     KCVar.CreateCommand("removeBot", "string", "removes bot specified by id", 0)
                 );
@@ -160,7 +167,6 @@ public final class KCVarSystem
 
         KCVar.Group QUAKE4_CVARS = new KCVar.Group("Quake4", false)
                 .AddCVar(
-                    KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
                     KCVar.CreateCVar("harm_gui_defaultFont", "string", "chain", "Default font name", 0,
                             "chain", "fonts/chain",
                             "lowpixel", "fonts/lowpixel",
@@ -169,7 +175,11 @@ public final class KCVarSystem
                             "r_strogg", "fonts/r_strogg",
                             "strogg", "fonts/strogg"
                     ),
+                    KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
                     KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0 = disable; other number = bot num)", 0),
+                    KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot difficult level(0 = auto)", 0),
+                    KCVar.CreateCVar("harm_si_botWeapons", "string", "0", "Bot weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_machinegun,weapon_shotgun), and allow mix(e.g. machinegun,3,weapon_rocketlauncher). All weapon: 1=machinegun, 2=shotgun, 3=hyperblaster, 4=grenadelauncher, 5=nailgun, 6=rocketlauncher, 7=railgun, 8=lightninggun, 9=dmg, 10=napalmgun.", 0),
+                    KCVar.CreateCVar("harm_si_botAmmo", "integer", "0", "Bot weapon ammo when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo", 0),
                     KCVar.CreateCommand("addBots", "string", "adds multiplayer bots batch", 0),
                     KCVar.CreateCommand("removeBots", "integer", "disconnect multi bots by client ID", 0),
                     KCVar.CreateCommand("fillBots", "integer", "fill bots", KCVar.FLAG_POSITIVE),
@@ -177,6 +187,8 @@ public final class KCVarSystem
                     KCVar.CreateCommand("cleanBots", "", "disconnect all bots", 0),
                     KCVar.CreateCommand("truncBots", "integer", "disconnect last bots", KCVar.FLAG_POSITIVE),
                     KCVar.CreateCommand("botLevel", "integer", "setup all bot level", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("botWeapons", "string", "setup all bot weapons", 0),
+                    KCVar.CreateCommand("botAmmo", "integer", "setup all bot weapons ammo", 0),
                     KCVar.CreateCommand("addBot", "string", "adds a new bot", 0),
                     KCVar.CreateCommand("removeBot", "string", "removes bot specified by id", 0),
                     KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "Mute player's footstep sound", 0),

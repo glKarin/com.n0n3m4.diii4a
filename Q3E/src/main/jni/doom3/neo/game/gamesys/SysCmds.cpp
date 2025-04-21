@@ -2601,6 +2601,8 @@ void idGameLocal::InitConsoleCommands(void)
     cmdSystem->AddCommand("truncBots", botAi::Cmd_TruncBots_f, CMD_FL_GAME, "disconnect last bots");
     cmdSystem->AddCommand("sabot", botAi::Cmd_BotInfo_f, CMD_FL_GAME, "debug SaBot info");
     cmdSystem->AddCommand("botLevel", botAi::Cmd_SetupBotLevel_f, CMD_FL_GAME, "setup all bot level", botAi::ArgCompletion_botLevel);
+    cmdSystem->AddCommand("botWeapons", botAi::Cmd_SetupBotWeapons_f, CMD_FL_GAME, "setup all bot weapons", botAi::ArgCompletion_botWeapons);
+    cmdSystem->AddCommand("botAmmo", botAi::Cmd_SetupBotAmmo_f, CMD_FL_GAME, "setup all bot weapons ammo");
 #endif
 }
 

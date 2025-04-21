@@ -542,7 +542,7 @@ static int RB_GLSL_ParseMacros(const char *macros, idStrList &ret)
 		if(index == str.Length() - 1)
 			break;
 	}
-	if(start < str.Length() - 1)
+	if(start <= str.Length() - 1)
 	{
 		idStr s = str.Mid(start, str.Length() - start);
 		ret.AddUnique(s);

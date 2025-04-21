@@ -430,6 +430,9 @@ class idStr
             return IsPureASCII( ( const uint8_t* )s, maxLen );
         }
 #endif
+		static idList<idStr> 	Split(const char *macros, char ch = ',');
+		static idList<idStr> 	SplitUnique(const char *macros, char ch = ',');
+		static void 			StripWhitespace(idStr &str);
 
 	protected:
 		int					len;
