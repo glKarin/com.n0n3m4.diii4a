@@ -69,6 +69,7 @@ static bool r_dumpShadowMap = false; // backend
 static bool r_dumpShadowMapFrontEnd = false; // frontend
 static bool r_shadowMapPerforated = true;
 static bool r_shadowMapCombine = true;
+static int r_shadowMapParallelSplitFrustums = 0;
 
 static shaderProgram_t *depthShader_2d = &depthShader;
 static shaderProgram_t *depthShader_cube = &depthShader;
@@ -202,62 +203,18 @@ ID_INLINE static void RB_ShadowMapping_clearBuffer(void)
 // Setup shadow map sample in interaction pass
 ID_INLINE static void RB_ShadowMapping_setupSample(void)
 {
-#if 0
-    float sampleScale = 1.0;
-    float sampleFactor = harm_r_shadowMapSampleFactor.GetFloat();
-    float lod = sampleFactor != 0 ? SampleFactors[backEnd.vLight->shadowLOD] : 0.0;
-
-#ifdef GL_ES_VERSION_3_0
-    if(USING_GLES3)
-    {
-        if( backEnd.vLight->parallel )
-        {
-            sampleScale = 1.0;
-        }
-        else if( backEnd.vLight->pointLight )
-        {
-            sampleScale = 1.0;
-        }
-        else
-        {
-            sampleScale = 4.0;
-        }
-    }
-    else
-#endif
-    {
-		if( backEnd.vLight->parallel )
-		{
-			sampleScale = 1.0;
-		}
-		else if( backEnd.vLight->pointLight )
-		{
-			// if(sampleFactor != 0) lod = 0.2;
-			sampleScale = 100.0;
-		}
-		else
-		{
-			sampleScale = 4.0;
-		}
-    }
-
-    if(sampleFactor > 0.0)
-        sampleScale *= sampleFactor;
-
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[4]), lod * sampleScale);
-#endif
     const float ShadowMapTexelSize[] = {
             (float)shadowMapResolutions[backEnd.vLight->shadowLOD], // textureSize()
             SampleFactors[backEnd.vLight->shadowLOD], // 1.0 / textureSize()
-            harm_r_shadowMapJitterScale.GetFloat(), // sampler offset scale
+            r_shadowMapJitterScale.GetFloat(), // sampler offset scale
             0
     };
     GL_Uniform4fv(offsetof(shaderProgram_t, u_uniformParm[1]), ShadowMapTexelSize);
     const float ScreenSize[] = {
-            1.0f / tr.GetScreenWidth(), // 1.0 / screen_width
-            1.0f / tr.GetScreenHeight(), // 1.0 / screen_height
+            1.0f / (float)tr.GetScreenWidth(), // 1.0 / screen_width
+            1.0f / (float)tr.GetScreenHeight(), // 1.0 / screen_height
             (float)globalImages->blueNoiseImage256->uploadWidth, // jitter.textureSize()
-            1.0f / globalImages->blueNoiseImage256->uploadWidth, // 1.0 / jitter.textureSize()
+            1.0f / (float)globalImages->blueNoiseImage256->uploadWidth, // 1.0 / jitter.textureSize()
     };
     GL_Uniform4fv(offsetof(shaderProgram_t, u_uniformParm[2]), ScreenSize);
 }
@@ -767,11 +724,11 @@ ID_INLINE static void RB_CalcParallelLightMatrix(const viewLight_t* vLight, int 
     MatrixOrthogonalProjectionRH( lightProjectionMatrix, lightBounds[0][0], lightBounds[1][0], lightBounds[0][1], lightBounds[1][1], -lightBounds[1][2], -lightBounds[0][2] );
     idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX lightProjectionMatrix, lightProjectionRenderMatrix );
 
-
+	if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+	{
     // 	'frustumMVP' goes from global space -> camera local space -> camera projective space
     // invert the MVP projection so we can deform zero-to-one cubes into the frustum pyramid shape and calculate global bounds
 
-#if 0
     idRenderMatrix splitFrustumInverse;
         if( !idRenderMatrix::Inverse( backEnd.viewDef->frustumMVPs[FRUSTUM_CASCADE1 + side], splitFrustumInverse ) )
         {
@@ -838,11 +795,8 @@ ID_INLINE static void RB_CalcParallelLightMatrix(const viewLight_t* vLight, int 
         //idRenderMatrix::Multiply( cropRenderMatrix, tmp, lightProjectionRenderMatrix );
 
         MatrixOrthogonalProjectionRH( lightProjectionMatrix, cropBounds[0][0], cropBounds[1][0], cropBounds[0][1], cropBounds[1][1], -cropBounds[1][2], -cropBounds[0][2] );
-        idRenderMatrix::Transpose( ID_RENDER_MATRIX lightProjectionMatrix, lightProjectionRenderMatrix );
-
-        backEnd.shadowV[side] = lightViewRenderMatrix;
-        backEnd.shadowP[side] = lightProjectionRenderMatrix;
-#endif
+		idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX lightProjectionMatrix, lightProjectionRenderMatrix );
+	}
 }
 
 // Calculate view-matrix and projection-matrix of point light
@@ -1058,9 +1012,6 @@ static ID_INLINE void RB_ShadowMapping_DrawSurfs(const drawSurf_t* drawSurfs, in
             GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
             RB_SetMVP(mvp);
-            GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), modelMatrix);
-
-            GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
             GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), localLight.ToFloatPtr());
 
             // const float Frustum[] = {harm_r_shadowMapFrustumNear.GetFloat(), RB_GetPointLightFrustumFar(backEnd.vLight), 0, 0};
@@ -1217,8 +1168,8 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
     {
         RB_CalcParallelLightMatrix(vLight, side, lightViewRenderMatrix, lightProjectionRenderMatrix);
 
-        backEnd.shadowV[0] << lightViewRenderMatrix;
-        backEnd.shadowP[0] << lightProjectionRenderMatrix;
+        backEnd.shadowV[side] << lightViewRenderMatrix;
+        backEnd.shadowP[side] << lightProjectionRenderMatrix;
     }
     else if( vLight->pointLight && side >= 0 )
     {
@@ -1322,8 +1273,8 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
     {
         RB_CalcParallelLightMatrix(vLight, side, lightViewRenderMatrix, lightProjectionRenderMatrix);
 
-        backEnd.shadowV[0] << lightViewRenderMatrix;
-        backEnd.shadowP[0] << lightProjectionRenderMatrix;
+        backEnd.shadowV[side] << lightViewRenderMatrix;
+        backEnd.shadowP[side] << lightProjectionRenderMatrix;
     }
     else if( vLight->pointLight && side >= 0 )
     {
@@ -1431,8 +1382,29 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     // const float Frustum[] = {harm_r_shadowMapFrustumNear.GetFloat(), RB_GetPointLightFrustumFar(backEnd.vLight), 0, 0};
     // GL_Unifor4fv(offsetof(shaderProgram_t, u_uniformParm[4]), Frustum);
 
+
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3)
+#endif
+    if( backEnd.vLight->parallel )
+    {
+        float cascadeDistances[4];
+		if(r_shadowMapParallelSplitFrustums > 0)
+		{
+			cascadeDistances[0] = backEnd.viewDef->frustumSplitDistances[0];
+			cascadeDistances[1] = backEnd.viewDef->frustumSplitDistances[1];
+			cascadeDistances[2] = backEnd.viewDef->frustumSplitDistances[2];
+			cascadeDistances[3] = backEnd.viewDef->frustumSplitDistances[3];
+		}
+		else
+		{
+			cascadeDistances[0] = cascadeDistances[1] = cascadeDistances[2] = cascadeDistances[3] = idMath::INFINITY; //karin: force using 0 texture layer and shadow matrix
+		}
+        GL_Uniform4fv(offsetof(shaderProgram_t, u_uniformParm[3]), cascadeDistances); // rpCascadeDistances
+    }
+
 //#ifdef SHADOW_MAPPING_DEBUG
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[3]), harm_r_shadowMapBias.GetFloat());
+    // GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[4]), harm_r_shadowMapBias.GetFloat());
 //#endif
 
             // perform setup here that will be constant for all interactions
@@ -1483,9 +1455,6 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
 
         GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
         GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), ac->color);
-
-
-        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), surf->space->modelMatrix);
 
         // this may cause RB_GLSL_DrawInteraction to be exacuted multiple
         // times with different colors and images if the surface or light have multiple layers
@@ -1542,7 +1511,34 @@ ID_INLINE static void RB_ShadowMappingInteraction_setupMVP(const drawInteraction
 	 */
 	if( backEnd.vLight->parallel )
 	{
-		//for( int i = 0; i < 1; i++ )
+#ifdef GL_ES_VERSION_3_0
+        if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+        {
+            float ms[6 * 16];
+            for( int i = 0; i < ( r_shadowMapParallelSplitFrustums + 1 ); i++ )
+            {
+                lightViewRenderMatrix << backEnd.shadowV[i];
+                lightProjectionRenderMatrix << backEnd.shadowP[i];
+
+                idRenderMatrix modelRenderMatrix;
+                idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX din->surf->space->modelMatrix, modelRenderMatrix );
+
+                idRenderMatrix modelToLightRenderMatrix;
+                idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+                idRenderMatrix clipMVP;
+                idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+                idRenderMatrix MVP;
+                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+
+                MVP >> &ms[i * 16];
+            }
+
+            GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), 6, ms);
+        }
+        else
+#endif
 		{
 			lightViewRenderMatrix << backEnd.shadowV[0];
 			lightProjectionRenderMatrix << backEnd.shadowP[0];

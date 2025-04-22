@@ -1,11 +1,3 @@
-/*
-	macros:
-		BLINN_PHONG: using blinn-phong instead phong.
-		_PBR: using PBR.
-		_POINT_LIGHT: light type is point light.
-		_PARALLEL_LIGHT: light type is parallel light.
-		_SPOT_LIGHT: light type is spot light.
-*/
 #version 300 es
 //#pragma optimize(off)
 
@@ -13,6 +5,11 @@ precision highp float;
 
 //#define BLINN_PHONG
 //#define _PBR
+//#define _AMBIENT
+//#define _POINT_LIGHT
+//#define _SPOT_LIGHT
+//#define _PARALLEL_LIGHT
+//#define PARALLEL_LIGHT_CASCADE_FRUSTUM
 
 out vec2 var_TexDiffuse;
 out vec2 var_TexNormal;
@@ -20,13 +17,13 @@ out vec2 var_TexSpecular;
 out vec4 var_TexLight;
 out lowp vec4 var_Color;
 out vec3 var_L;
-#if defined(BLINN_PHONG) || defined(_PBR)
+#if defined(BLINN_PHONG) || defined(_PBR) || defined(_AMBIENT)
 out vec3 var_H;
 #endif
 #if !defined(BLINN_PHONG) || defined(_PBR)
 out vec3 var_V;
 #endif
-#ifdef _PBR
+#if defined(_PBR)
 out vec3 var_Normal;
 #endif
 
@@ -56,6 +53,9 @@ uniform vec4 u_specularMatrixS;
 uniform vec4 u_specularMatrixT;
 
 uniform highp mat4 u_modelViewProjectionMatrix;
+#if defined(_AMBIENT)
+out mat3 var_TangentToWorldMatrix;
+#endif
 
 uniform highp mat4 u_modelMatrix;
 uniform highp vec4 globalLightOrigin;
@@ -63,6 +63,10 @@ uniform highp vec4 globalLightOrigin;
 #ifdef _POINT_LIGHT
 out highp vec4 var_VertexPosition;
 out highp vec3 var_VertexToLight;
+#elif defined(_PARALLEL_LIGHT) && defined(PARALLEL_LIGHT_CASCADE_FRUSTUM)
+uniform highp mat4 u_modelViewMatrix;
+out highp vec4 var_ViewPosition;
+out highp vec4 var_VertexPosition;
 #else
 uniform highp mat4 shadowMVPMatrix;
 out highp vec4 var_ShadowCoord;
@@ -86,31 +90,39 @@ void main(void)
     var_TexLight.z = dot(u_lightFalloff, attr_Vertex);
     var_TexLight.w = dot(u_lightProjectionQ, attr_Vertex);
 
+#if defined(_AMBIENT)
+    vec3 L = normalize(vec3(0.0, 0.5, 1.0));
+    var_TangentToWorldMatrix = mat3(u_modelMatrix) * M;
+#else
     vec3 L = u_lightOrigin.xyz - attr_Vertex.xyz;
+#endif
     vec3 V = u_viewOrigin.xyz - attr_Vertex.xyz;
-    #if defined(BLINN_PHONG) || defined(_PBR)
+#if defined(BLINN_PHONG) || defined(_PBR) || defined(_AMBIENT)
     vec3 H = normalize(L) + normalize(V);
-    #endif
+#endif
 
     var_L = L * M;
-    #if defined(BLINN_PHONG) || defined(_PBR)
+#if defined(BLINN_PHONG) || defined(_PBR) || defined(_AMBIENT)
     var_H = H * M;
-    #endif
+#endif
 #if !defined(BLINN_PHONG) || defined(_PBR)
     var_V = V * M;
-    #endif
-#ifdef _PBR
+#endif
+#if defined(_PBR)
     var_Normal = attr_Normal * M;
-    #endif
+#endif
 
     var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
 
-    #ifdef _POINT_LIGHT
+#ifdef _POINT_LIGHT
     highp vec4 posInLight = u_modelMatrix * attr_Vertex;
     var_VertexToLight = globalLightOrigin.xyz - posInLight.xyz;
     var_VertexPosition = attr_Vertex;
-    #else
+#elif defined(_PARALLEL_LIGHT) && defined(PARALLEL_LIGHT_CASCADE_FRUSTUM)
+    var_ViewPosition = u_modelViewMatrix * attr_Vertex;
+    var_VertexPosition = attr_Vertex;
+#else
     var_ShadowCoord = attr_Vertex * shadowMVPMatrix;
-    #endif
+#endif
     gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 }

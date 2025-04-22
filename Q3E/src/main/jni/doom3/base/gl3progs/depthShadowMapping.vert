@@ -6,10 +6,8 @@ precision highp float;
 in highp vec4 attr_Vertex;
 
 uniform highp mat4 u_modelViewProjectionMatrix;
-uniform highp mat4 u_modelMatrix;
 uniform highp vec4 u_lightOrigin;
 
-uniform highp vec4 globalLightOrigin;
 // uniform lowp float u_uniformParm0; // .w 1.0 or 0.0
 
 void main(void)

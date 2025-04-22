@@ -1,7 +1,3 @@
-/*
-	macros:
-		_DEBUG: output z value to red component.
-*/
 #version 300 es
 //#pragma optimize(off)
 
@@ -12,7 +8,6 @@ uniform lowp float u_alphaTest;
 uniform lowp vec4 u_glColor;
 
 in vec2 var_TexDiffuse;
-
 #ifdef _DEBUG
 out vec4 _gl_FragColor;
 #endif

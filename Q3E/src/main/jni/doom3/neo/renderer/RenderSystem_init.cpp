@@ -1222,6 +1222,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("depth24Available: %d\n", glConfig.depth24Available);
 	common->Printf("gl_FragDepthAvailable: %d\n", glConfig.gl_FragDepthAvailable);
 	common->Printf("multiSamples: %d\n", glConfig.multiSamples);
+	common->Printf("sizeof(glIndex_t): %zd\n", sizeof(glIndex_t));
 #ifdef _SHADOW_MAPPING
 	extern bool r_useDepthTexture;
 	extern bool r_useCubeDepthTexture;
@@ -2655,11 +2656,11 @@ idCVar r_useShadowMapping( "r_useShadowMapping", "0", CVAR_RENDERER | CVAR_ARCHI
 idCVar r_shadowMapFrustumFOV( "r_shadowMapFrustumFOV", "90", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "oversize FOV for point light side matching" );
 idCVar r_shadowMapSingleSide( "r_shadowMapSingleSide", "-1", CVAR_RENDERER | CVAR_INTEGER, "only draw a single side (0-5) of point lights" );
 idCVar r_shadowMapImageSize( "r_shadowMapImageSize", "1024", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "", 128, 2048 );
-idCVar r_shadowMapJitterScale( "r_shadowMapJitterScale", "2.5", CVAR_RENDERER | CVAR_FLOAT/* | CVAR_ARCHIVE reopen in next version*/, "scale factor for jitter offset" );
+idCVar r_shadowMapJitterScale( "r_shadowMapJitterScale", "2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter offset" );
 idCVar r_shadowMapBiasScale( "r_shadowMapBiasScale", "0.0001", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter bias" );
 idCVar r_shadowMapRandomizeJitter( "r_shadowMapRandomizeJitter", "1", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "randomly offset jitter texture each draw" );
-idCVar r_shadowMapSamples( "r_shadowMapSamples", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "0, 1, 4, or 16" );
-idCVar r_shadowMapSplits( "r_shadowMapSplits", "3", CVAR_RENDERER | CVAR_INTEGER, "number of splits for cascaded shadow mapping with parallel lights", 0, 4 );
+idCVar r_shadowMapSamples( "r_shadowMapSamples", "16", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "0, 1, 4, or 16", 1, 64 );
+idCVar r_shadowMapSplits( "r_shadowMapSplits", "3", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "number of splits for cascaded shadow mapping with parallel lights(0=disable split cascaded frustum)", 0, 4 );
 idCVar r_shadowMapSplitWeight( "r_shadowMapSplitWeight", "0.9", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar r_shadowMapLodScale( "r_shadowMapLodScale", "1.4", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar r_shadowMapLodBias( "r_shadowMapLodBias", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "" );
@@ -2687,7 +2688,6 @@ idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RE
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "render depth to color or depth texture in OpenGLES2.0. 0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar harm_r_shadowMapNonParallelLightUltra( "harm_r_shadowMapNonParallelLightUltra", "0", CVAR_RENDERER | CVAR_BOOL/*//k next version open: | CVAR_ARCHIVE*/, "non parallel light allow ultra quality shadow map texture" );
-idCVar harm_r_shadowMapJitterScale( "harm_r_shadowMapJitterScale", "2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter offset" );
 
 #include "tr/tr_shadowmapping.cpp"
 #endif

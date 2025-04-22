@@ -52,19 +52,14 @@ public final class KCVarSystem
                         KCVar.CreateCVar("r_screenshotPngCompression", "integer", "3", "Compression level when using PNG screenshots (0-9)", KCVar.FLAG_POSITIVE),
 
                         KCVar.CreateCVar("r_useShadowMapping", "bool", "0", "use shadow mapping instead of stencil shadows", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "1.0", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_shadowMapJitterScale", "float", "2.5", "scale factor for jitter offset", KCVar.FLAG_POSITIVE),
-                        /*KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0),
-                        KCVar.CreateCVar("harm_r_shadowMappingScheme", "integer", "0", "shadow mapping rendering scheme", 0,
-                                "0", "always using shadow mapping",
-                                "1", "prelight shadow using shadow mapping, others using stencil shadow",
-                                "2", "non-prelight shadow using shadow mapping, others using stencil shadow"
-                        ),*/
                         KCVar.CreateCVar("r_forceShadowMapsOnAlphaTestedSurfaces", "bool", "0", "render perforated surface to shadow map(DOOM 3 default is 1)", KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "1.0", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("r_shadowMapJitterScale", "float", "2.5", "scale factor for jitter offset", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("r_shadowMapSplits", "integer", "3", "number of splits for cascaded shadow mapping with parallel lights(0: disable, max is 4)", 0),
+                        KCVar.CreateCVar("harm_r_shadowMapCombine", "bool", "1", "combine local and global shadow mapping", KCVar.FLAG_LAUNCHER),
 
                         KCVar.CreateCVar("harm_r_stencilShadowTranslucent", "bool", "0", "enable translucent shadow in stencil shadow", KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "1.0", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_shadowMapCombine", "bool", "1", "combine local and global shadow mapping", KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_stencilShadowCombine", "bool", "0", "combine local and global stencil shadow", KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_stencilShadowSoft", "bool", "0", "enable soft stencil shadow(Only OpenGLES3.1+)", KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_stencilShadowSoftBias", "float", "-1", "soft stencil shadow sampler BIAS(-1 = automatic; 0 = disable; positive = value)", 0),

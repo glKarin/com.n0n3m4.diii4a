@@ -72,6 +72,7 @@ static void R_InitGLSLCvars(void)
 	r_shadowMapping = r_useShadowMapping.GetBool();
 	r_shadowMapPerforated = r_forceShadowMapsOnAlphaTestedSurfaces.GetBool();
     r_shadowMapCombine = harm_r_shadowMapCombine.GetBool();
+    r_shadowMapParallelSplitFrustums = r_shadowMapSplits.GetInteger();
 #ifdef GL_ES_VERSION_3_0
 	if(!USING_GLES3) {
 #endif
@@ -182,6 +183,11 @@ void R_CheckBackEndCvars(void)
         r_shadowMapCombine = harm_r_shadowMapCombine.GetBool();
         harm_r_shadowMapCombine.ClearModified();
     }
+	if(r_shadowMapSplits.IsModified())
+	{
+		r_shadowMapParallelSplitFrustums = r_shadowMapSplits.GetInteger();
+		r_shadowMapSplits.ClearModified();
+	}
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE

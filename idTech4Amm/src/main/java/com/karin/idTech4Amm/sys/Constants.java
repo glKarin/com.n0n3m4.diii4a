@@ -37,6 +37,7 @@ public final class Constants
             "Improve multiplayer game bot system on Quake 4.",
             "On-screen buttons using OpenGL buffer.",
             "Add skip hit effect support with cvar `harm_g_skipHitEffect` amd command `skipHitEffect` on DOOM 3/Quake 4/Prey.",
+            "Add cascaded shadow mapping with parallel lights(cvar `r_shadowMapSplits`) on DOOM 3/Quake 4/Prey.",
             "[Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) have removed on this release!"
         };
 	};

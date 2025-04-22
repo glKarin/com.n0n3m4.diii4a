@@ -388,7 +388,11 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping(viewLight_t *vLi
             if( vLight->parallel )
             {
                 side = 0;
-                //sideStop = r_shadowMapSplits.GetInteger() + 1;
+#ifdef GL_ES_VERSION_3_0
+                if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+                    sideStop = r_shadowMapParallelSplitFrustums + 1;
+                else
+#endif
                 sideStop = 1;
             }
             else if( vLight->pointLight )
@@ -446,7 +450,11 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping_separate(viewLig
             if( vLight->parallel )
             {
                 side = 0;
-                //sideStop = r_shadowMapSplits.GetInteger() + 1;
+#ifdef GL_ES_VERSION_3_0
+                if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+                    sideStop = r_shadowMapParallelSplitFrustums + 1;
+                else
+#endif
                 sideStop = 1;
             }
             else if( vLight->pointLight )
@@ -663,8 +671,11 @@ void RB_GLSL_DrawInteractions(void)
 
             if( vLight->parallel )
             {
-                side = 0;
-                //sideStop = r_shadowMapSplits.GetInteger() + 1;
+#ifdef GL_ES_VERSION_3_0
+                if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+                    sideStop = r_shadowMapParallelSplitFrustums + 1;
+                else
+#endif
 				sideStop = 1;
             }
             else if( vLight->pointLight )

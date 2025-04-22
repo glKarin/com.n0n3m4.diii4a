@@ -84,6 +84,8 @@ enum
 	FRUSTUM_CASCADE5,
 	MAX_FRUSTUMS,
 };
+
+typedef idPlane frustum_t[FRUSTUM_PLANES];
 #endif
 
 #include "rb/Framebuffer.h"
@@ -545,6 +547,13 @@ typedef struct viewDef_s {
 	// crossing a closed door.  This is used to avoid drawing interactions
 	// when the light is behind a closed door.
 
+#ifdef _SHADOW_MAPPING
+	// RB parallel light split frustums
+    frustum_t			frustums[MAX_FRUSTUMS];					// positive sides face outward, [4] is the front clip plane
+    float				frustumSplitDistances[MAX_FRUSTUMS];
+    idRenderMatrix		frustumMVPs[MAX_FRUSTUMS];
+	// RB
+#endif
 } viewDef_t;
 
 
@@ -2205,6 +2214,7 @@ float R_ComputeSpotLightProjectionMatrix( idRenderLightLocal* light, idRenderMat
 float R_ComputeParallelLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
 
 void R_SetupFrontEndViewDefMVP(void);
+void R_SetupFrontEndFrustums(void);
 void R_ShadowBounds( const idBounds& modelBounds, const idBounds& lightBounds, const idVec3& lightOrigin, idBounds& shadowBounds );
 #endif
 
@@ -2246,7 +2256,6 @@ extern idCVar harm_r_shadowMapFrustumFar;
 extern idCVar harm_r_useLightScissors;
 extern idCVar harm_r_shadowMapDepthBuffer;
 extern idCVar harm_r_shadowMapNonParallelLightUltra;
-extern idCVar harm_r_shadowMapJitterScale;
 
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;
