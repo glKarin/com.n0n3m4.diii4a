@@ -46,7 +46,7 @@
     <string name="yes">Да</string>
     <string name="no">Нет</string>
     <string name="copy">Копировать</string>
-    <string name="button_setting_has_changed_can_you_save_it">Настройки кнопок изменились! Сохранить?</string>
+    <string name="button_setting_has_changed_can_you_save_it">Настройки кнопок изменились! Сохранить их?</string>
     <string name="exit">Выход</string>
     <string name="bot_q3_bot_support_in_mp_game">Боты Quake 4 (мод SABot-a9)</string>
     <string name="mp_game_map_aas_files">Файлы игры Quake4 в формате "aas"</string>
