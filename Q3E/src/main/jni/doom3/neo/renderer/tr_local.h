@@ -54,6 +54,19 @@ extern int GLES3_VERSION;
 #define USING_GLES32 (GLES3_VERSION > 1)
 #endif
 
+#define COLOR_MODULATE_IS_NORMALIZED 1
+
+extern const float zero[];
+extern const float one[];
+extern const float negOne[];
+#ifdef COLOR_MODULATE_IS_NORMALIZED
+extern const float oneModulate[];
+extern const float negOneModulate[];
+#else
+#define oneModulate one
+#define negOneModulate negOne
+#endif
+
 //#define _SHADOW_MAPPING
 #ifdef _SHADOW_MAPPING
 

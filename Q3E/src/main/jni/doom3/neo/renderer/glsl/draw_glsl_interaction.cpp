@@ -1,6 +1,10 @@
-static const float zero[4] = { 0, 0, 0, 0 };
-static const float one[4] = { 1, 1, 1, 1 };
-static const float negOne[4] = { -1, -1, -1, -1 };
+extern const float zero[] = { 0.0f };
+extern const float one[] = { 1.0f };
+extern const float negOne[] = { -1.0f };
+#ifdef COLOR_MODULATE_IS_NORMALIZED
+extern const float oneModulate[] = { 1.0f / 255.0f };
+extern const float negOneModulate[] = { -1.0f / 255.0f };
+#endif
 
 /*
 =========================================================================================
@@ -34,17 +38,17 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 
 	switch (din->vertexColor) {
 		case SVC_MODULATE:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), one);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), zero);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), oneModulate);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), zero);
 			break;
 		case SVC_INVERSE_MODULATE:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), negOne);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), negOneModulate);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
 			break;
 		case SVC_IGNORE:
 		default:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), zero);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), zero);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
 			break;
 	}
 

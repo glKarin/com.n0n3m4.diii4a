@@ -11,8 +11,8 @@ in vec3 attr_Normal;
 uniform highp mat4 u_modelViewProjectionMatrix;
 uniform mat4 u_modelViewMatrix;
 uniform mat4 u_textureMatrix;
-uniform lowp vec4 u_colorAdd;
-uniform lowp vec4 u_colorModulate;
+uniform lowp float u_colorAdd;
+uniform lowp float u_colorModulate;
 uniform vec4 u_viewOrigin;
 
 out vec3 var_TexCoord;
@@ -32,7 +32,7 @@ void main(void)
         u_modelViewMatrix * vec4(attr_TexCoord,0.0) )).xyz ;
 #endif
 
-    var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
+    var_Color = attr_Color * u_colorModulate + u_colorAdd;
 
     gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 }

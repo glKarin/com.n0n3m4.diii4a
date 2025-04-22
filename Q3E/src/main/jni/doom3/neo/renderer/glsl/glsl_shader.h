@@ -4,6 +4,13 @@
 // Unuse C++11 raw string literals for Traditional C++98
 
 #define GLSL_SHADER // static
+
+#ifdef COLOR_MODULATE_IS_NORMALIZED
+#define BYTE_COLOR(x) #x
+#else
+#define BYTE_COLOR(x) "(" #x " / 255.0)"
+#endif
+
 // heatHaze using BFG version, otherelse using 2004 ARB translation
 #define HEATHAZE_BFG 1
 

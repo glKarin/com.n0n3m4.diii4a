@@ -35,8 +35,8 @@ uniform vec4 u_lightProjectionS;
 uniform vec4 u_lightProjectionT;
 uniform vec4 u_lightFalloff;
 uniform vec4 u_lightProjectionQ;
-uniform lowp vec4 u_colorModulate;
-uniform lowp vec4 u_colorAdd;
+uniform lowp float u_colorModulate;
+uniform lowp float u_colorAdd;
 uniform lowp vec4 u_glColor;
 
 uniform vec4 u_lightOrigin;
@@ -95,7 +95,7 @@ void main(void)
     var_Normal = attr_Normal * M;
 #endif
 
-    var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
+    var_Color = attr_Color * u_colorModulate + u_colorAdd;
 
     gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 }

@@ -6,8 +6,8 @@ precision mediump float;
 attribute highp vec4 attr_Vertex;
 attribute lowp vec4 attr_Color;
 
-uniform lowp vec4 u_colorAdd;
-uniform lowp vec4 u_colorModulate;
+uniform lowp float u_colorAdd;
+uniform lowp float u_colorModulate;
 uniform vec4 u_texgenS;
 uniform vec4 u_texgenT;
 uniform vec4 u_texgenQ;
@@ -27,5 +27,5 @@ void main(void)
     var_TexCoord = vec4(dot( u_textureMatrix[0], texcoord0 ), dot( u_textureMatrix[1], texcoord0), texcoord0.z, texcoord0.w);
 
     // compute vertex modulation
-    var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
+    var_Color = attr_Color * u_colorModulate + u_colorAdd;
 }

@@ -227,7 +227,7 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 	const float	*regs;
 	float		color[4];
 	const srfTriangles_t	*tri;
-	const float	one[1] = { 1 };
+	//const float	one[1] = { 1 };
 
 	tri = surf->geo;
 	shader = surf->material;
@@ -592,11 +592,15 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 	const srfTriangles_t	*tri;
     // for decrement GPU transfer
     // TexGen state
-	bool attrIsSet[TG_GLASSWARP - TG_EXPLICIT] = { false };
-	bool uniformIsSet[TG_GLASSWARP - TG_EXPLICIT] = { false };
+	bool attrIsSet[TG_GLASSWARP - TG_EXPLICIT]/* = { false }*/;
+    memset(attrIsSet, 0, sizeof(attrIsSet));
+	bool uniformIsSet[TG_GLASSWARP - TG_EXPLICIT]/* = { false }*/;
+    memset(uniformIsSet, 0, sizeof(uniformIsSet));
     // Built-in new stage state
-	bool newStageAttrIsSet[SHADER_CUSTOM/*SHADER_NEW_STAGE_END - SHADER_NEW_STAGE_BEGIN + 1*/] = { false };
-	bool newStageUniformIsSet[SHADER_CUSTOM/*SHADER_NEW_STAGE_END - SHADER_NEW_STAGE_BEGIN + 1*/] = { false };
+	bool newStageAttrIsSet[SHADER_CUSTOM/*SHADER_NEW_STAGE_END - SHADER_NEW_STAGE_BEGIN + 1*/]/* = { false }*/;
+    memset(newStageAttrIsSet, 0, sizeof(newStageAttrIsSet));
+	bool newStageUniformIsSet[SHADER_CUSTOM/*SHADER_NEW_STAGE_END - SHADER_NEW_STAGE_BEGIN + 1*/]/* = { false }*/;
+    memset(newStageUniformIsSet, 0, sizeof(newStageUniformIsSet));
 #if defined(_GLSL_PROGRAM) // || defined(_RAVEN)
     // Custom new stage state
     idList<int> customNewStageAttrIsSet(SHADER_MAX_CUSTOM);
@@ -995,23 +999,23 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 		}
 
-		static const float zero[4] = { 0, 0, 0, 0 };
-		static const float one[4] = { 1, 1, 1, 1 };
-		static const float negOne[4] = { -1, -1, -1, -1 };
+//        static const float zero[4] = { 0, 0, 0, 0 };
+//        static const float one[4] = { 1, 1, 1, 1 };
+//        static const float negOne[4] = { -1, -1, -1, -1 };
 
 		switch (pStage->vertexColor) {
 			case SVC_MODULATE:
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), one);
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), zero);
+				GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), oneModulate);
+				GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), zero);
 				break;
 			case SVC_INVERSE_MODULATE:
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), negOne);
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+				GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), negOneModulate);
+				GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
 				break;
 			case SVC_IGNORE:
 			default:
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), zero);
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+				GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), zero);
+				GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
 				break;
 		}
 
