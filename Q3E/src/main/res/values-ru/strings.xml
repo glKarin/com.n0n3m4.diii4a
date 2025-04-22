@@ -37,27 +37,27 @@
     <string name="on_screen_buttons_position_unit_must_is_multiple_of_5_or_0">Единица позиции экранных кнопок должна быть кратна 5 или 0</string>
     <string name="setup_joystick_done">Настройка джойстика выполнена.</string>
     <string name="back">Назад</string>
-    <string name="extract_the_dark_mod_glsl_shader_source_files_fail">Extract The dark mod GLSL shader source files fail!</string>
-    <string name="extract_rbdoom3bfg_hlsl_shader_source_files_fail">Extract RBDOOM 3 BFG HLSL shader source files fail!</string>
-    <string name="extract_gzdoom_game_resource_files_fail">Extract GZDOOM game resource files fail!</string>
-    <string name="on_screen_buttons_layout_with_grid_limit">Button editor grid size</string>
-    <string name="position_unit">Position unit(0 = automatic, 1 = disable)</string>
+    <string name="extract_the_dark_mod_glsl_shader_source_files_fail">Извлечение GLSL шейдера The Dark Mod не удалось!</string>
+    <string name="extract_rbdoom3bfg_hlsl_shader_source_files_fail">Извлечение HLSL шейдера RBDOOM 3 BFG не удалось!</string>
+    <string name="extract_gzdoom_game_resource_files_fail">Извлечение файлов игры GZDOOM не удалось!</string>
+    <string name="on_screen_buttons_layout_with_grid_limit">Размер сетки редактора кнопок</string>
+    <string name="position_unit">Позиционный блок (0 = автоматически, 1 = отключить)</string>
     <string name="warning">Предупреждение</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
     <string name="copy">Копировать</string>
-    <string name="button_setting_has_changed_can_you_save_it">Button setting has changed! Can you save it?</string>
-    <string name="exit">Exit</string>
+    <string name="button_setting_has_changed_can_you_save_it">Настройки кнопок изменились! Сохранить?</string>
+    <string name="exit">Выход</string>
     <string name="bot_q3_bot_support_in_mp_game">Боты Quake 4 (мод SABot-a9)</string>
     <string name="mp_game_map_aas_files">Файлы игры Quake4 в формате "aas"</string>
     <string name="rivensin_play_original_doom3_level">Rivensin на оригинальных уровнях DOOM3</string>
-    <string name="rbdoom3_bfg_hlsl_shader">RBDOOM3-BFG HLSL shader</string>
-    <string name="the_dark_mod_glsl_shader">The Dark Mod GLSL shader</string>
-    <string name="gzdoom_builtin_resource">GZDOOM built-in resource</string>
-    <string name="close">Close</string>
-    <string name="open">Open</string>
-    <string name="exit_game">Exit game</string>
-    <string name="are_you_sure_exit_game">Are you sure exit game?</string>
-    <string name="doom3_chinese_translation_doom3bfg">DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)</string>
-    <string name="doom3_bot_sabot_a7_mod">DOOM3 Bot(SABot-a7 mod)</string>
+    <string name="rbdoom3_bfg_hlsl_shader">RBDOOM3-BFG HLSL шейдер</string>
+    <string name="the_dark_mod_glsl_shader">The Dark Mod GLSL шейдер</string>
+    <string name="gzdoom_builtin_resource">Внутренний ресурс GZDOOM</string>
+    <string name="close">Закрыть</string>
+    <string name="open">Открыть</string>
+    <string name="exit_game">Выйти из игры</string>
+    <string name="are_you_sure_exit_game">Вы уверены, что хотите выйти из игры?</string>
+    <string name="doom3_chinese_translation_doom3bfg">Перевод DOOM3 на китайский язык(от 3DM DOOM3-BFG китайский патч)</string>
+    <string name="doom3_bot_sabot_a7_mod">DOOM3 Bot(мод SABot-a9)</string>
 </resources>
