@@ -205,6 +205,9 @@ class botAi;
 #ifdef _MOD_VIEW_BODY
 class idViewBody;
 #endif
+#ifdef _MOD_VIEW_LIGHT
+class idViewLight;
+#endif
 class idPlayer : public idActor
 {
 	public:
@@ -337,6 +340,11 @@ class idPlayer : public idActor
         void                    SetupViewBody( void );
         void                    UpdateViewBody(void);
 #endif
+#ifdef _MOD_VIEW_LIGHT
+        friend class idViewLight;
+        idViewLight *           viewLight;
+        void                    SetupViewLight( void );
+        void                    UpdateViewLight(void);
 #endif
 #ifdef MOD_BOTS
 		friend class botAi;
