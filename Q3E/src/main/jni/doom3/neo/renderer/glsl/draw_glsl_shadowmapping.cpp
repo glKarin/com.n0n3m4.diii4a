@@ -77,7 +77,7 @@ static shaderProgram_t *depthPerforatedShader_2d = &depthPerforatedShader;
 static shaderProgram_t *depthPerforatedShader_cube = &depthPerforatedShader;
 
 // see Framebuffer.h::shadowMapResolutions
-static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0};
+static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = { 1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0 };
 
 static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "debug light type mask in shadow mapping. 1 = parallel; 2 = point; 4 = spot");
 static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "debug shadow map frame buffer.");
@@ -726,75 +726,75 @@ ID_INLINE static void RB_CalcParallelLightMatrix(const viewLight_t* vLight, int 
 
 	if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
 	{
-    // 	'frustumMVP' goes from global space -> camera local space -> camera projective space
-    // invert the MVP projection so we can deform zero-to-one cubes into the frustum pyramid shape and calculate global bounds
+		// 	'frustumMVP' goes from global space -> camera local space -> camera projective space
+		// invert the MVP projection so we can deform zero-to-one cubes into the frustum pyramid shape and calculate global bounds
 
-    idRenderMatrix splitFrustumInverse;
-        if( !idRenderMatrix::Inverse( backEnd.viewDef->frustumMVPs[FRUSTUM_CASCADE1 + side], splitFrustumInverse ) )
-        {
-            idLib::Warning( "splitFrustumMVP invert failed" );
-        }
+		idRenderMatrix splitFrustumInverse;
+		if( !idRenderMatrix::Inverse( backEnd.viewDef->frustumMVPs[FRUSTUM_CASCADE1 + side], splitFrustumInverse ) )
+		{
+			idLib::Warning( "splitFrustumMVP invert failed" );
+		}
 
-        // splitFrustumCorners in global space
-        ALIGNTYPE16 frustumCorners_t splitFrustumCorners;
-        idRenderMatrix::GetFrustumCorners( splitFrustumCorners, splitFrustumInverse, bounds_unitCube );
+		// splitFrustumCorners in global space
+		ALIGNTYPE16 frustumCorners_t splitFrustumCorners;
+		idRenderMatrix::GetFrustumCorners( splitFrustumCorners, splitFrustumInverse, bounds_unitCube );
 
 
-        idRenderMatrix lightViewProjectionRenderMatrix;
-        idRenderMatrix::Multiply( lightProjectionRenderMatrix, lightViewRenderMatrix, lightViewProjectionRenderMatrix );
+		idRenderMatrix lightViewProjectionRenderMatrix;
+		idRenderMatrix::Multiply( lightProjectionRenderMatrix, lightViewRenderMatrix, lightViewProjectionRenderMatrix );
 
-        // find the bounding box of the current split in the light's clip space
-        idBounds cropBounds;
-        cropBounds.Clear();
-        for( int j = 0; j < 8; j++ )
-        {
-            point[0] = splitFrustumCorners.x[j];
-            point[1] = splitFrustumCorners.y[j];
-            point[2] = splitFrustumCorners.z[j];
-            point[3] = 1;
+		// find the bounding box of the current split in the light's clip space
+		idBounds cropBounds;
+		cropBounds.Clear();
+		for( int j = 0; j < 8; j++ )
+		{
+			point[0] = splitFrustumCorners.x[j];
+			point[1] = splitFrustumCorners.y[j];
+			point[2] = splitFrustumCorners.z[j];
+			point[3] = 1;
 
-            lightViewRenderMatrix.TransformPoint( point, transf );
-            transf[0] /= transf[3];
-            transf[1] /= transf[3];
-            transf[2] /= transf[3];
+			lightViewRenderMatrix.TransformPoint( point, transf );
+			transf[0] /= transf[3];
+			transf[1] /= transf[3];
+			transf[2] /= transf[3];
 
-            cropBounds.AddPoint( transf.ToVec3() );
-        }
+			cropBounds.AddPoint( transf.ToVec3() );
+		}
 
-        // don't let the frustum AABB be bigger than the light AABB
-        if( cropBounds[0][0] < lightBounds[0][0] )
-        {
-            cropBounds[0][0] = lightBounds[0][0];
-        }
+		// don't let the frustum AABB be bigger than the light AABB
+		if( cropBounds[0][0] < lightBounds[0][0] )
+		{
+			cropBounds[0][0] = lightBounds[0][0];
+		}
 
-        if( cropBounds[0][1] < lightBounds[0][1] )
-        {
-            cropBounds[0][1] = lightBounds[0][1];
-        }
+		if( cropBounds[0][1] < lightBounds[0][1] )
+		{
+			cropBounds[0][1] = lightBounds[0][1];
+		}
 
-        if( cropBounds[1][0] > lightBounds[1][0] )
-        {
-            cropBounds[1][0] = lightBounds[1][0];
-        }
+		if( cropBounds[1][0] > lightBounds[1][0] )
+		{
+			cropBounds[1][0] = lightBounds[1][0];
+		}
 
-        if( cropBounds[1][1] > lightBounds[1][1] )
-        {
-            cropBounds[1][1] = lightBounds[1][1];
-        }
+		if( cropBounds[1][1] > lightBounds[1][1] )
+		{
+			cropBounds[1][1] = lightBounds[1][1];
+		}
 
-        cropBounds[0][2] = lightBounds[0][2];
-        cropBounds[1][2] = lightBounds[1][2];
+		cropBounds[0][2] = lightBounds[0][2];
+		cropBounds[1][2] = lightBounds[1][2];
 
-        //float cropMatrix[16];
-        //MatrixCrop(cropMatrix, cropBounds[0], cropBounds[1]);
+		//float cropMatrix[16];
+		//MatrixCrop(cropMatrix, cropBounds[0], cropBounds[1]);
 
-        //idRenderMatrix cropRenderMatrix;
-        //idRenderMatrix::Transpose( ID_RENDER_MATRIX cropMatrix, cropRenderMatrix );
+		//idRenderMatrix cropRenderMatrix;
+		//idRenderMatrix::Transpose( ID_RENDER_MATRIX cropMatrix, cropRenderMatrix );
 
-        //idRenderMatrix tmp = lightProjectionRenderMatrix;
-        //idRenderMatrix::Multiply( cropRenderMatrix, tmp, lightProjectionRenderMatrix );
+		//idRenderMatrix tmp = lightProjectionRenderMatrix;
+		//idRenderMatrix::Multiply( cropRenderMatrix, tmp, lightProjectionRenderMatrix );
 
-        MatrixOrthogonalProjectionRH( lightProjectionMatrix, cropBounds[0][0], cropBounds[1][0], cropBounds[0][1], cropBounds[1][1], -cropBounds[1][2], -cropBounds[0][2] );
+		MatrixOrthogonalProjectionRH( lightProjectionMatrix, cropBounds[0][0], cropBounds[1][0], cropBounds[0][1], cropBounds[1][1], -cropBounds[1][2], -cropBounds[0][2] );
 		idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX lightProjectionMatrix, lightProjectionRenderMatrix );
 	}
 }
@@ -1554,6 +1554,7 @@ ID_INLINE static void RB_ShadowMappingInteraction_setupMVP(const drawInteraction
 
 			idRenderMatrix MVP;
 			idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+
 			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
 		}
 	}

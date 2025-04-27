@@ -4253,7 +4253,7 @@ void idSessionLocal::UpdateScreen(byte *data, bool outOfSequence)
 	if (com_speeds.GetBool()) {
 		renderSystem->EndFrame(&time_frontend, &time_backend);
 	} else {
-		renderSystem->EndFrame(data, NULL, NULL);
+        renderSystem->EndFrame(data, NULL, NULL);
 	}
 
 	insideUpdateScreen = false;

@@ -885,38 +885,38 @@ class idRenderSystemLocal : public idRenderSystem
 		virtual void			UnCrop();
 		virtual bool			UploadImage(const char *imageName, const byte *data, int width, int height);
 #ifdef _HUMANHEAD
-    virtual void			SetEntireSceneMaterial(idMaterial* material) { (void)material; }; // HUMANHEAD CJR
-    virtual bool			IsScopeView() {
-        return scopeView;
-    };// HUMANHEAD CJR
-    virtual void			SetScopeView(bool view) {
-		scopeView = view; 
-	} // HUMANHEAD CJR
-    virtual bool			IsShuttleView() {
-        return shuttleView;
-    };// HUMANHEAD CJR
-    virtual void			SetShuttleView(bool view) {
-		shuttleView = view;
-	}
-    virtual bool			SupportsFragmentPrograms(void) {
-        return false;
-    };// HUMANHEAD CJR
-    virtual int				VideoCardNumber(void) {
-        return 0;
-    }
+        virtual void			SetEntireSceneMaterial(idMaterial* material) { (void)material; }; // HUMANHEAD CJR
+        virtual bool			IsScopeView() {
+            return scopeView;
+        };// HUMANHEAD CJR
+        virtual void			SetScopeView(bool view) {
+            scopeView = view;
+        } // HUMANHEAD CJR
+        virtual bool			IsShuttleView() {
+            return shuttleView;
+        };// HUMANHEAD CJR
+        virtual void			SetShuttleView(bool view) {
+            shuttleView = view;
+        }
+        virtual bool			SupportsFragmentPrograms(void) {
+            return false;
+        };// HUMANHEAD CJR
+        virtual int				VideoCardNumber(void) {
+            return 0;
+        }
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-	virtual void			LogViewRender(const struct renderView_s *view) { (void)view; }
+	    virtual void			LogViewRender(const struct renderView_s *view) { (void)view; }
 #endif //HUMANHEAD END
 
-	bool scopeView;
-	bool shuttleView;
-	int lastRenderSkybox;
-	ID_INLINE bool SkyboxRenderedInFrame() const {
-		return frameCount == lastRenderSkybox;
-	}
-	ID_INLINE void RenderSkyboxInFrame() {
-		lastRenderSkybox = frameCount;
-	}
+        bool scopeView;
+        bool shuttleView;
+        int lastRenderSkybox;
+        ID_INLINE bool SkyboxRenderedInFrame() const {
+            return frameCount == lastRenderSkybox;
+        }
+        ID_INLINE void RenderSkyboxInFrame() {
+            lastRenderSkybox = frameCount;
+        }
 #endif
 #ifdef _MULTITHREAD
 	virtual void EndFrame(byte *data, int *frontEndMsec, int *backEndMsec);
@@ -932,16 +932,16 @@ class idRenderSystemLocal : public idRenderSystem
 		void					RenderViewToViewport(const renderView_t *renderView, idScreenRect *viewport);
 #ifdef _RAVEN
 #ifndef _CONSOLE
-	virtual void			TrackTextureUsage( TextureTrackCommand command, int frametime = 0, const char *name=NULL ) { (void)command; (void)frametime; (void)name; }
+	    virtual void			TrackTextureUsage( TextureTrackCommand command, int frametime = 0, const char *name=NULL ) { (void)command; (void)frametime; (void)name; }
 #endif
-// RAVEN END
-	virtual void			SetSpecialEffect( ESpecialEffectType Which, bool Enabled ) { (void)Which; (void)Enabled; }
-	virtual void			SetSpecialEffectParm( ESpecialEffectType Which, int Parm, float Value ) { (void)Which; (void)Parm; (void)Value; }
-	virtual void			ShutdownSpecialEffects( void ) { }
-		virtual void			DrawStretchCopy( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *material ) {
-			DrawStretchPic(x, y, w, h, s1, t1, s2, t2, material);
-		}
-	virtual void			DebugGraph( float cur, float min, float max, const idVec4 &color ) { (void)cur, (void)min; (void)max; (void)color; }
+        // RAVEN END
+        virtual void			SetSpecialEffect( ESpecialEffectType Which, bool Enabled ) { (void)Which; (void)Enabled; }
+        virtual void			SetSpecialEffectParm( ESpecialEffectType Which, int Parm, float Value ) { (void)Which; (void)Parm; (void)Value; }
+        virtual void			ShutdownSpecialEffects( void ) { }
+            virtual void			DrawStretchCopy( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *material ) {
+                DrawStretchPic(x, y, w, h, s1, t1, s2, t2, material);
+            }
+        virtual void			DebugGraph( float cur, float min, float max, const idVec4 &color ) { (void)cur, (void)min; (void)max; (void)color; }
 #endif
 
 	public:

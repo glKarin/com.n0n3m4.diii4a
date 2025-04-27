@@ -1161,7 +1161,7 @@ void idInteraction::CreateInteraction(const idRenderModel *model)
 			}
 		}
 #endif
-		
+
 		// free the cull information when it's no longer needed
 		if (sint->lightTris != LIGHT_TRIS_DEFERRED) {
 			R_FreeInteractionCullInfo(sint->cullInfo);

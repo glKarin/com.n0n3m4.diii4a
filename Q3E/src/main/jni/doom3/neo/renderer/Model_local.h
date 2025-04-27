@@ -118,10 +118,10 @@ class idRenderModelStatic : public idRenderModel
 			return InstantiateDynamicModel(ent, view, cachedModel);
 		}
 
-		virtual void SetHasSky( bool on ) {
+		virtual void                SetHasSky( bool on ) {
 			hasSky = on;
 		}
-		virtual bool GetHasSky( void ) const {
+		virtual bool                GetHasSky( void ) const {
 			return hasSky;
 		}
 #endif

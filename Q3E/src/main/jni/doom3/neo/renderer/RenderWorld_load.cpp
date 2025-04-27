@@ -1043,7 +1043,7 @@ void idRenderWorldLocal::AddWorldModelEntities()
         if(harm_r_occlusionCulling.GetBool())
         R_DeriveEntityData(def);
 #endif
-		AddEntityRefToArea(def, &portalAreas[i]);
+        AddEntityRefToArea(def, &portalAreas[i]);
 	}
 }
 

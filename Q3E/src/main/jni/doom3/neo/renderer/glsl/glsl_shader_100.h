@@ -1707,7 +1707,7 @@ GLSL_SHADER const char DEPTH_VERT[] =
 "uniform highp mat4 u_modelViewProjectionMatrix;\n"
 "uniform highp vec4 u_lightOrigin;\n"
 "\n"
-"//uniform lowp float u_uniformParm0; // .w 1.0 or 0.0\n"
+"// uniform lowp float u_uniformParm0; // .w 1.0 or 0.0\n"
 "\n"
 "void main(void)\n"
 "{\n"
