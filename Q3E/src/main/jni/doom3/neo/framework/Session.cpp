@@ -2927,10 +2927,6 @@ void idSessionLocal::PacifierUpdate()
 		return;
 	}
 
-#ifdef _MULTITHREAD
-	if(multithreadActive && Sys_InRenderThread()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
-		return;
-#endif
 	int	time = eventLoop->Milliseconds();
 
 	if (time - lastPacifierTime < 100) {
@@ -2949,6 +2945,9 @@ void idSessionLocal::PacifierUpdate()
 
 	Sys_GenerateEvents();
 
+#ifdef _MULTITHREAD
+	if(!multithreadActive || !Sys_InRenderThread()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
+#endif
 	UpdateScreen();
 
 	idAsyncNetwork::client.PacifierUpdate();

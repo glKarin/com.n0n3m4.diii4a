@@ -491,7 +491,7 @@ void idCommonLocal::VPrintf(const char *fmt, va_list args)
 		// update the console if we are in a long-running command, like dmap
 		if (com_refreshOnPrint) {
 #ifdef _MULTITHREAD
-			if(!multithreadActive/* || !Sys_InRenderThread()*/)
+			if(!multithreadActive || !Sys_InRenderThread())
 #endif
 			session->UpdateScreen();
 		}
