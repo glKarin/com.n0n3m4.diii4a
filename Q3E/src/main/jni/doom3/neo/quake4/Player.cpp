@@ -9453,8 +9453,7 @@ void idPlayer::Think( void ) {
 			if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 				fullBodyAwarenessOffset = offset;
 			else
-				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
-			harm_pm_fullBodyAwarenessOffset.ClearModified();
+				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.");
 		}
 	}
 #endif
@@ -9733,7 +9732,7 @@ void idPlayer::Think( void ) {
 	} else if ( health > 0 && !gameLocal.inCinematic ) {
 		UpdateWeapon();
 #ifdef _MOD_VIEW_BODY
-        UpdateBody();
+        UpdateViewBody();
 #endif
 	}
 
@@ -12186,7 +12185,7 @@ void idPlayer::LocalClientPredictionThink( void ) {
 	}
 #ifdef _MOD_VIEW_BODY
     if ( !gameLocal.inCinematic && viewBody && ( health > 0 ) && !( gameLocal.isMultiplayer && spectating ) ) {
-        UpdateBody();
+        UpdateViewBody();
     }
 #endif
 
@@ -12372,7 +12371,7 @@ void idPlayer::NonLocalClientPredictionThink( void ) {
 	}
 #ifdef _MOD_VIEW_BODY
     if ( !gameLocal.inCinematic && viewBody && ( health > 0 ) && !( gameLocal.isMultiplayer && spectating ) ) {
-        UpdateBody();
+        UpdateViewBody();
     }
 #endif
 
@@ -14405,8 +14404,6 @@ idPlayer::SetupViewBody
 ==============
 */
 void idPlayer::SetupViewBody( void ) {
-    int						w;
-    const char				*weap;
     const idDeclEntityDef	*decl;
     idEntity				*spawn;
 
@@ -14466,10 +14463,10 @@ void idPlayer::SetupViewBody( void ) {
 
 /*
 ===============
-idPlayer::UpdateBody
+idPlayer::UpdateViewBody
 ===============
 */
-void idPlayer::UpdateBody( void ) {
+void idPlayer::UpdateViewBody( void ) {
     if ( !viewBody ) {
         return;
     }

@@ -4883,8 +4883,7 @@ void hhPlayer::Think( void ) {
 			if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 				fullBodyAwarenessOffset = offset;
 			else
-				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
-			harm_pm_fullBodyAwarenessOffset.ClearModified();
+				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.");
 		}
 	}
 #endif

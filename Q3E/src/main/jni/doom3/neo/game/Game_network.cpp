@@ -1984,7 +1984,6 @@ void idGameLocal::ServerBotClientBegin(int clientNum, const idDict *clientArgs)
     outMsg.WriteByte(clientNum);
     outMsg.WriteLong(spawnIds[ clientNum ]);
     networkSystem->ServerSendReliableMessage(-1, outMsg);
-	
     if(BOT_ENABLED()) {
         // TinMan: Tell engine to spit out bots userinfo to clients
         botAi::UpdateUI();

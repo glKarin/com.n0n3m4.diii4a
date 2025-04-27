@@ -2579,6 +2579,10 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t *clientCmds)
 	RunDebugInfo();
 	D_DrawDebugLines();
 
+#ifdef _MOD_FULL_BODY_AWARENESS
+    if(harm_pm_fullBodyAwarenessOffset.IsModified())
+        harm_pm_fullBodyAwarenessOffset.ClearModified();
+#endif
 	return ret;
 }
 

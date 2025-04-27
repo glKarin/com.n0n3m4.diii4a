@@ -3809,6 +3809,11 @@ TIME_THIS_SCOPE("idGameLocal::RunFrame - gameDebug.BeginFrame()");
 	RunDebugInfo();
 	D_DrawDebugLines();
 
+#ifdef _MOD_FULL_BODY_AWARENESS
+    if(harm_pm_fullBodyAwarenessOffset.IsModified())
+        harm_pm_fullBodyAwarenessOffset.ClearModified();
+#endif
+
 	g_simpleItems.ClearModified();
 	return ret;
 }
