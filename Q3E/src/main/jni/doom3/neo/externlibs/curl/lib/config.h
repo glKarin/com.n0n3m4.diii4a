@@ -32,10 +32,14 @@
 #define ENABLE_IPV6 1
 
 /* Define to 1 if you have the <alloca.h> header file. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_ALLOCA_H 1
+#endif
 
 /* Define to 1 if you have the <arpa/inet.h> header file. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_ARPA_INET_H 1
+#endif
 
 /* Define to 1 if you have the <assert.h> header file. */
 #define HAVE_ASSERT_H 1
@@ -59,7 +63,9 @@
 #define HAVE_DLFCN_H 1
 
 /* Define to 1 if you have the `dlopen' function. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_DLOPEN 1
+#endif
 
 /* Define to 1 if you have the <err.h> header file. */
 /* #undef HAVE_ERR_H */
@@ -110,13 +116,19 @@
 /* #undef HAVE_GETPASS_R */
 
 /* Define to 1 if you have the `getpwuid' function. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_GETPWUID 1
+#endif
 
 /* Define to 1 if you have the `gettimeofday' function. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_GETTIMEOFDAY 1
+#endif
 
 /* Define to 1 if you have the `gmtime_r' function. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_GMTIME_R 1
+#endif
 
 /* if you have the gssapi libraries */
 /* #undef HAVE_GSSAPI */
@@ -146,7 +158,9 @@
 #define HAVE_INTTYPES_H 1
 
 /* use ioctlsocket() for non-blocking sockets */
-/* #undef HAVE_IOCTLSOCKET */
+#ifdef _MSC_VER //karin
+#define HAVE_IOCTLSOCKET
+#endif
 
 /* use Ioctlsocket() for non-blocking sockets */
 /* #undef HAVE_IOCTLSOCKET_CASE */
@@ -188,7 +202,9 @@
 #define HAVE_LIMITS_H 1
 
 /* Define to 1 if you have the `localtime_r' function. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_LOCALTIME_R 1
+#endif
 
 /* if your compiler supports 'long long' */
 #define HAVE_LONGLONG 1
@@ -203,7 +219,9 @@
 #define HAVE_NETDB_H 1
 
 /* Define to 1 if you have the <netinet/in.h> header file. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_NETINET_IN_H 1
+#endif
 
 /* Define to 1 if you have the <net/if.h> header file. */
 #define HAVE_NET_IF_H 1
@@ -230,7 +248,9 @@
 /* #undef HAVE_OPENSSL_X509_H */
 
 /* use O_NONBLOCK for non-blocking sockets */
+#if !defined(_MSC_VER) //karin
 #define HAVE_O_NONBLOCK 1
+#endif
 
 /* Define to 1 if you have the <pem.h> header file. */
 /* #undef HAVE_PEM_H */
@@ -242,7 +262,9 @@
 #define HAVE_POLL 1
 
 /* Define to 1 if you have the <pwd.h> header file. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_PWD_H 1
+#endif
 
 /* Define to 1 if you have the `RAND_egd' function. */
 /* #undef HAVE_RAND_EGD */
@@ -266,7 +288,9 @@
 /* #undef HAVE_SGTTY_H */
 
 /* Define to 1 if you have the `sigaction' function. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_SIGACTION 1
+#endif
 
 /* Define to 1 if you have the `siginterrupt' function. */
 #define HAVE_SIGINTERRUPT 1
@@ -275,7 +299,9 @@
 #define HAVE_SIGNAL 1
 
 /* If you have sigsetjmp */
+#if !defined(_MSC_VER) //karin
 #define HAVE_SIGSETJMP 1
+#endif
 
 /* Define to 1 if you have the `socket' function. */
 #define HAVE_SOCKET 1
@@ -296,7 +322,9 @@
 #define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the `strcasecmp' function. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_STRCASECMP 1
+#endif
 
 /* Define to 1 if you have the `strcmpi' function. */
 /* #undef HAVE_STRCMPI */
@@ -309,6 +337,9 @@
 
 /* Define to 1 if you have the `stricmp' function. */
 /* #undef HAVE_STRICMP */
+#ifdef _MSC_VER //karin
+#define HAVE_STRICMP 1
+#endif
 
 /* Define to 1 if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H 1
@@ -328,7 +359,9 @@
 #define HAVE_STRSTR 1
 
 /* Define to 1 if you have the `strtok_r' function. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_STRTOK_R 1
+#endif
 
 /* Define to 1 if you have the `strtoll' function. */
 #define HAVE_STRTOLL 1
@@ -343,10 +376,14 @@
 #define HAVE_SYS_POLL_H 1
 
 /* Define to 1 if you have the <sys/select.h> header file. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_SYS_SELECT_H 1
+#endif
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_SYS_SOCKET_H 1
+#endif
 
 /* Define to 1 if you have the <sys/sockio.h> header file. */
 /* #undef HAVE_SYS_SOCKIO_H */
@@ -355,7 +392,9 @@
 #define HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/time.h> header file. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_SYS_TIME_H 1
+#endif
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
@@ -382,7 +421,9 @@
 #define HAVE_UNAME 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
+#if !defined(_MSC_VER) //karin
 #define HAVE_UNISTD_H 1
+#endif
 
 /* Define to 1 if you have the `utime' function. */
 #define HAVE_UTIME 1
@@ -391,7 +432,15 @@
 #define HAVE_UTIME_H 1
 
 /* Define to 1 if you have the <winsock.h> header file. */
+#ifdef _MSC_VER //karin
 /* #undef HAVE_WINSOCK_H */
+#define HAVE_WINSOCK_H 1
+#endif
+
+/* Define if you have the <winsock2.h> header file.  */
+#ifdef _MSC_VER //karin
+#define HAVE_WINSOCK2_H 1
+#endif
 
 /* Define this symbol if your OS supports changing the contents of argv */
 #define HAVE_WRITABLE_ARGV 1
@@ -448,7 +497,9 @@
 #define STDC_HEADERS 1
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#if !defined(_MSC_VER) //karin
 #define TIME_WITH_SYS_TIME 1
+#endif
 
 /* Define if you want to enable ares support */
 /* #undef USE_ARES */
@@ -486,3 +537,12 @@
 
 /* the signed version of size_t */
 /* #undef ssize_t */
+#ifdef _MSC_VER //karin
+#if defined(_WIN64)
+#define ssize_t long
+#else
+#define ssize_t int
+#endif
+
+//#define strtok_r strtok_s
+#endif
