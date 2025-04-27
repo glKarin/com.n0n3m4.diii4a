@@ -2584,8 +2584,8 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t *clientCmds)
         harm_pm_fullBodyAwarenessOffset.ClearModified();
 #endif
 #ifdef _MOD_VIEW_LIGHT
-    if(harm_ui_viewLightMaterial.IsModified())
-        harm_ui_viewLightMaterial.ClearModified();
+    if(harm_ui_viewLightShader.IsModified())
+        harm_ui_viewLightShader.ClearModified();
     if(harm_ui_viewLightRadius.IsModified())
         harm_ui_viewLightRadius.ClearModified();
     if(harm_ui_viewLightOffset.IsModified())

@@ -264,7 +264,7 @@ extern idCVar harm_ui_showViewBody;
 #endif
 #ifdef _MOD_VIEW_LIGHT
 extern idCVar harm_ui_showViewLight;
-extern idCVar harm_ui_viewLightMaterial;
+extern idCVar harm_ui_viewLightShader;
 extern idCVar harm_ui_viewLightRadius;
 extern idCVar harm_ui_viewLightOffset;
 extern idCVar harm_ui_viewLightType;

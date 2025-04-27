@@ -2312,9 +2312,12 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print internal GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
 	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export internal original C-String GLSL shader source for developer");
 #ifdef _EXTRAS_TOOLS
+    extern void MD5Anim_AddCommand(void);
 	MD5Anim_AddCommand();
 #endif
 #ifdef _ENGINE_MODEL_VIEWER
+    extern void ModelTest_AddCommand(void);
+    extern void ModelLight_AddCommand(void);
     ModelTest_AddCommand();
     ModelLight_AddCommand();
 #endif

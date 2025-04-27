@@ -9774,7 +9774,7 @@ void idPlayer::SetupViewLight( void ) {
 
     if(!player_viewblight_classname.Length())
     {
-        player_viewblight_classname = harm_ui_viewLightMaterial.GetString();
+        player_viewblight_classname = harm_ui_viewLightShader.GetString();
     }
     if(!player_viewblight_classname.Length())
     {
@@ -9846,16 +9846,16 @@ void idPlayer::UpdateViewLight( void ) {
         return;
     }
 
-    if(harm_ui_viewLightMaterial.IsModified())
+    if(harm_ui_viewLightShader.IsModified())
     {
-        idStr str = harm_ui_viewLightMaterial.GetString();
+        idStr str = harm_ui_viewLightShader.GetString();
         if(str.IsEmpty())
         {
             viewLight->SetOn(false);
             return;
         }
-        if(!viewLight->SetLight(harm_ui_viewLightMaterial.GetString()))
-            gameLocal.Warning("[Harmattan]: unable read harm_ui_viewLightMaterial.");
+        if(!viewLight->SetLight(harm_ui_viewLightShader.GetString()))
+            gameLocal.Warning("[Harmattan]: unable read harm_ui_viewLightShader.");
     }
     if(harm_ui_viewLightRadius.IsModified())
     {

@@ -2325,14 +2325,9 @@ extern float RB_overbright;
 #define HARM_CHECK_SHADER_ERROR(x)
 #endif
 
-#ifdef _EXTRAS_TOOLS
-void MD5Anim_AddCommand(void);
-#endif
 #ifdef _ENGINE_MODEL_VIEWER
 void ModelTest_RenderFrame(int time);
-void ModelTest_AddCommand(void);
 void ModelLight_RenderFrame(int time);
-void ModelLight_AddCommand(void);
 #endif
 
 extern idCVar harm_r_lightingModel;

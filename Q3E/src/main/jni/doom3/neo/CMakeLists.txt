@@ -10,37 +10,11 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 #set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
-option(USE_SYSTEM_CURL        "use system curl library"      		OFF)
-option(USE_SYSTEM_FREETYPE    "use system freetype2 library"      	OFF)
+option(USE_SYSTEM_OGGVORBIS    	"use system ogg/vorbis library"      	OFF)
+option(USE_SYSTEM_CURL        	"use system curl library"      			OFF)
+option(USE_SYSTEM_FREETYPE    	"use system freetype2 library"      	OFF)
 
 set(CORE_DEFINES "__DOOM_DLL__")
-
-# -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
-set(COMPILE_CURL        TRUE)
-set(COMPILE_FREETYPE    FALSE)
-
-if(USE_SYSTEM_CURL)
-    find_package(CURL QUIET)
-	if(CURL_FOUND)
-		set(curl_inc ${CURL_INCLUDE_DIR})
-		set(curl_lib ${CURL_LIBRARY})
-		set(COMPILE_CURL FALSE)
-		message(STATUS "using system curl")
-	else()
-		message(WARNING "libcurl not found, server downloads won't be available (apart from that doom3 will work)")
-		set(curl_inc "externlibs/curl/include" "externlibs/curl/lib")
-		set(curl_lib "static_curl")
-		set(COMPILE_CURL TRUE)
-		message(STATUS "using internal curl")
-	endif()
-else()
-    set(curl_inc "externlibs/curl/include" "externlibs/curl/lib")
-    set(curl_lib "static_curl")
-    set(COMPILE_CURL TRUE)
-    message(STATUS "using internal curl")
-endif()
-
-include_directories(${curl_inc})
 
 if(ANDROID)
 	add_definitions(-D__ANDROID__)
@@ -56,6 +30,12 @@ endif()
 
 add_definitions(-D_K_CLANG) # TODO
 add_definitions(-DID_ENABLE_CURL=1)
+
+set(COMPILE_OGGVORBIS       TRUE)
+set(COMPILE_CURL        	TRUE)
+set(COMPILE_FREETYPE    	FALSE)
+
+# -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 # set(CMAKE_BUILD_TYPE "Debug")
 # TODO
@@ -718,11 +698,7 @@ function(add_globbed_headers SRCLIST PATHPREFIX)
 	set(${SRCLIST} ${tmp_hdrs} ${${SRCLIST}})
 endfunction()
 
-if(COMPILE_CURL #[[STREQUAL "1"]])
-	set(local_libs ${local_libs} ${curl_lib})
-else()
-	set(sys_libs ${sys_libs} ${curl_lib})
-endif()
+set(REQUIRE_OGGVORBIS TRUE)
 
 if(USE_STB_IMAGE)
 	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB")
@@ -730,6 +706,7 @@ if(USE_STB_IMAGE)
 endif()
 if(USE_STB_OGG)
 	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB_OGG")
+	set(REQUIRE_OGGVORBIS FALSE)
 	message(STATUS "Using stb oggvorbis")
 endif()
 if(SUPPORT_OBJ)
@@ -1292,6 +1269,34 @@ endif()
 
 if(CORE OR RAVEN OR HUMANHEAD)
 
+if(USE_SYSTEM_CURL)
+		find_package(CURL QUIET)
+		if(CURL_FOUND)
+			set(curl_inc ${CURL_INCLUDE_DIR})
+			set(curl_lib ${CURL_LIBRARY})
+			set(COMPILE_CURL FALSE)
+			message(STATUS "using system curl")
+		else()
+			message(WARNING "libcurl not found, server downloads won't be available (apart from that doom3 will work)")
+			set(curl_inc "externlibs/curl/include" "externlibs/curl/lib")
+			set(curl_lib "static_curl")
+			set(COMPILE_CURL TRUE)
+			message(STATUS "using internal curl")
+		endif()
+	else()
+		set(curl_inc "externlibs/curl/include" "externlibs/curl/lib")
+		set(curl_lib "static_curl")
+		set(COMPILE_CURL TRUE)
+		message(STATUS "using internal curl")
+endif()
+include_directories(${curl_inc})
+
+if(COMPILE_CURL #[[STREQUAL "1"]])
+	set(local_libs ${local_libs} ${curl_lib})
+else()
+	set(sys_libs ${sys_libs} ${curl_lib})
+endif()
+
 if(COMPILE_CURL #[[STREQUAL "1"]])
 	message(STATUS "Build cURL")
 	find_package(ZLIB REQUIRED)
@@ -1364,47 +1369,81 @@ if(COMPILE_CURL #[[STREQUAL "1"]])
 	endif()
 endif()
 
+if(REQUIRE_OGGVORBIS)
+	if(USE_SYSTEM_OGGVORBIS)
+		find_package(Vorbis QUIET)
+		if(Vorbis_FOUND)
+			find_path (Vorbis_Vorbis_INCLUDE_DIR vorbis/codec.h)
+			find_path (Vorbis_Enc_INCLUDE_DIR vorbis/vorbisenc.h)
+			find_path (Vorbis_File_INCLUDE_DIR vorbis/vorbisfile.h)
+			set(Vorbis_Vorbis_LIBRARY Vorbis::vorbis)
+			set(Vorbis_Enc_LIBRARY Vorbis::vorbisenc)
+			set(Vorbis_File_LIBRARY Vorbis::vorbisfile)
+			set(oggvorbis_inc ${OGG_INCLUDE_DIR} ${Vorbis_Vorbis_INCLUDE_DIR} ${Vorbis_Enc_INCLUDE_DIR} ${Vorbis_File_INCLUDE_DIR})
+			set(oggvorbis_lib ${OGG_LIBRARY} ${Vorbis_Vorbis_LIBRARY} ${Vorbis_Enc_LIBRARY} ${Vorbis_File_LIBRARY})
+			set(COMPILE_OGGVORBIS FALSE)
+			message(STATUS "using system ogg/vorbis")
+		else()
+			set(oggvorbis_inc "externlibs/libogg/include" "externlibs/libvorbis/include")
+			set(oggvorbis_lib "static_oggvorbis")
+			set(COMPILE_OGGVORBIS TRUE)
+			message(STATUS "using internal ogg/vorbis")
+		endif()
+	else()
+		set(oggvorbis_inc "externlibs/libogg/include" "externlibs/libvorbis/include")
+		set(oggvorbis_lib "static_oggvorbis")
+		set(COMPILE_OGGVORBIS TRUE)
+		message(STATUS "using internal ogg/vorbis")
+	endif()
 
-if(NOT USE_STB_OGG)
-# Build internal ogg/vorbis
-set(src_ogg
-	externlibs/libogg/src/bitwise.c
-	externlibs/libogg/src/framing.c
-	externlibs/libvorbis/lib/analysis.c
-	externlibs/libvorbis/lib/floor1.c
-	externlibs/libvorbis/lib/psy.c
-	# externlibs/libvorbis/lib/tone.c
-	# externlibs/libvorbis/lib/barkmel.c
-	externlibs/libvorbis/lib/info.c
-	externlibs/libvorbis/lib/vorbisenc.c
-	externlibs/libvorbis/lib/bitrate.c
-	externlibs/libvorbis/lib/lookup.c
-	externlibs/libvorbis/lib/registry.c
-	externlibs/libvorbis/lib/vorbisfile.c
-	externlibs/libvorbis/lib/block.c
-	externlibs/libvorbis/lib/lpc.c
-	externlibs/libvorbis/lib/res0.c
-	externlibs/libvorbis/lib/window.c
-	externlibs/libvorbis/lib/codebook.c
-	externlibs/libvorbis/lib/lsp.c
-	externlibs/libvorbis/lib/sharedbook.c
-	externlibs/libvorbis/lib/envelope.c
-	externlibs/libvorbis/lib/mapping0.c
-	externlibs/libvorbis/lib/smallft.c
-	externlibs/libvorbis/lib/floor0.c
-	externlibs/libvorbis/lib/mdct.c
-	externlibs/libvorbis/lib/synthesis.c
-)
+	include_directories(${oggvorbis_inc})
 
-add_globbed_headers(src_ogg "externlibs/libogg")
-add_globbed_headers(src_ogg "externlibs/libvorbis")
-include_directories("externlibs/libogg/include")
-include_directories("externlibs/libvorbis/include")
-add_library(static_ogg STATIC ${src_ogg})
-target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libogg/include/ogg")
-target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/include/vorbis")
-target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/lib")
-set(local_libs ${local_libs} static_ogg)
+	if(COMPILE_OGGVORBIS #[[STREQUAL "1"]])
+		set(local_libs ${local_libs} ${oggvorbis_lib})
+	else()
+		set(sys_libs ${sys_libs} ${oggvorbis_lib})
+	endif()
+else()
+	set(COMPILE_OGGVORBIS FALSE)
+endif()
+if(COMPILE_OGGVORBIS #[[STREQUAL "1"]])
+	message(STATUS "Build ogg/vorbis")
+	# Build internal ogg/vorbis
+	set(src_oggvorbis
+			externlibs/libogg/src/bitwise.c
+			externlibs/libogg/src/framing.c
+			externlibs/libvorbis/lib/analysis.c
+			externlibs/libvorbis/lib/floor1.c
+			externlibs/libvorbis/lib/psy.c
+			# externlibs/libvorbis/lib/tone.c
+			# externlibs/libvorbis/lib/barkmel.c
+			externlibs/libvorbis/lib/info.c
+			externlibs/libvorbis/lib/vorbisenc.c
+			externlibs/libvorbis/lib/bitrate.c
+			externlibs/libvorbis/lib/lookup.c
+			externlibs/libvorbis/lib/registry.c
+			externlibs/libvorbis/lib/vorbisfile.c
+			externlibs/libvorbis/lib/block.c
+			externlibs/libvorbis/lib/lpc.c
+			externlibs/libvorbis/lib/res0.c
+			externlibs/libvorbis/lib/window.c
+			externlibs/libvorbis/lib/codebook.c
+			externlibs/libvorbis/lib/lsp.c
+			externlibs/libvorbis/lib/sharedbook.c
+			externlibs/libvorbis/lib/envelope.c
+			externlibs/libvorbis/lib/mapping0.c
+			externlibs/libvorbis/lib/smallft.c
+			externlibs/libvorbis/lib/floor0.c
+			externlibs/libvorbis/lib/mdct.c
+			externlibs/libvorbis/lib/synthesis.c
+			)
+
+	add_globbed_headers(src_oggvorbis "externlibs/libogg")
+	add_globbed_headers(src_oggvorbis "externlibs/libvorbis")
+	add_library(static_oggvorbis STATIC ${src_oggvorbis})
+	target_include_directories(static_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libogg/include/ogg")
+	target_include_directories(static_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/include/vorbis")
+	target_include_directories(static_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/lib")
 endif() # ogg
 
 if(REQUIRE_FREETYPE)
@@ -1438,6 +1477,7 @@ if(REQUIRE_FREETYPE)
 	endif()
 endif()
 if(COMPILE_FREETYPE)
+	message(STATUS "Build freetype2")
 	set(src_freetype # -2.9
 			externlibs/freetype/src/base/ftsystem.c
 			externlibs/freetype/src/base/ftdebug.c
