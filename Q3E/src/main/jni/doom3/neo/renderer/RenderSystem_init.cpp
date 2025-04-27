@@ -2316,6 +2316,7 @@ void R_InitCommands(void)
 #endif
 #ifdef _ENGINE_MODEL_VIEWER
     ModelTest_AddCommand();
+    ModelLight_AddCommand();
 #endif
 #ifdef _NEW_FONT_TOOLS
     extern void Font_AddCommand(void);

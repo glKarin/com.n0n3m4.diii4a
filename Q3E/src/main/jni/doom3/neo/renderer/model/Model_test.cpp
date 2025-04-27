@@ -224,7 +224,7 @@ namespace modeltest
 
     void idModelTest::Clean(void)
     {
-        if(modelDef != -1)
+        if(modelDef != -1 && RenderWorld())
             RenderWorld()->FreeEntityDef(modelDef);
         memset(&worldEntity, 0, sizeof(worldEntity));
         modelName.Clear();
@@ -856,15 +856,21 @@ namespace modeltest
         return dict;
     }
 
+    void CleanTestModel_f(const idCmdArgs &args)
+    {
+        modelTest.Clean();
+        common->Printf("TestModel clean.\n");
+    }
+
     void TestModel_f(const idCmdArgs &args)
     {
         idStr			name;
         idDict			dict;
 
         if (args.Argc() < 2) {
-            common->Printf("Usage: modelTest <model_name> [<class_name> skin <skin_name> noshadows noselfshadows noDynamicInteractions].\n");
+            common->Printf("Usage: %s <model_name> [<class_name> skin <skin_name> noshadows noselfshadows noDynamicInteractions].\n", args.Argv(0));
             // delete the testModel if active
-            modelTest.Clean();
+            CleanTestModel_f(idCmdArgs());
             return;
         }
 
@@ -880,21 +886,15 @@ namespace modeltest
         common->Printf("TestModel active.\n");
     }
 
-    void CleanTestModel_f(const idCmdArgs &args)
-    {
-        modelTest.Clean();
-        common->Printf("TestModel clean.\n");
-    }
-
     void TestEntity_f(const idCmdArgs &args)
     {
         idStr			name;
         idDict			dict;
 
         if (args.Argc() < 2) {
-            common->Printf("Usage: modelEntity <class_name> [skin <skin_name> noshadows noselfshadows noDynamicInteractions].\n");
+            common->Printf("Usage: %s <class_name> [skin <skin_name> noshadows noselfshadows noDynamicInteractions].\n", args.Argv(0));
             // delete the testModel if active
-            modelTest.Clean();
+            CleanTestModel_f(idCmdArgs());
             return;
         }
 
@@ -932,7 +932,7 @@ namespace modeltest
     void TestAnim_f(const idCmdArgs &args)
     {
         if (args.Argc() < 2) {
-            common->Printf("Usage: modelAnim <anim_name> [<start_frame> <end_frame>].\n");
+            common->Printf("Usage: %s <anim_name> [<start_frame> <end_frame>].\n", args.Argv(0));
             return;
         }
         if (!CanTest()) {
@@ -1094,12 +1094,17 @@ namespace modeltest
     }
 }
 
-void ModelTest_TestModel(int time)
+void ModelTest_RenderFrame(int time)
 {
     if(modeltest::modelTest.HasModel() && modeltest::modelTest.CanTest() == modeltest::CAN_TEST)
     {
         modeltest::modelTest.Render(time);
     }
+}
+
+void ModelTest_CleanModel(void)
+{
+    modeltest::CleanTestModel_f(idCmdArgs());
 }
 
 void ModelTest_AddCommand(void)
