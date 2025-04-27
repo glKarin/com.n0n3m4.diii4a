@@ -165,6 +165,7 @@ void GetPointOutsideObstacles(const obstacle_t *obstacles, const int numObstacle
 	int *queue;
 	bool *obstacleVisited;
 	idWinding2D w1, w2;
+    bestPlane.Zero();
 
 	if (obstacle) {
 		*obstacle = -1;
@@ -1215,6 +1216,7 @@ bool idAI::PredictPath(const idEntity *ent, const idAAS *aas, const idVec3 &star
 	idVec3 gravity, gravityDir, invGravityDir;
 	float maxStepHeight, minFloorCos;
 	pathTrace_t trace;
+    stepUp.Zero();
 
 	if (aas && aas->GetSettings()) {
 		gravity = aas->GetSettings()->gravity;
