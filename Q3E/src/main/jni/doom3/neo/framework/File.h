@@ -276,7 +276,7 @@ class idFile_InZip : public idFile
         //typedef unsigned long fileInPack_pos_t;
 		int						zipFilePos;		// zip file info position in pak
 #else
-	#if defined(__ANDROID__) && __ANDROID_API__ < 24
+    #if defined(__ANDROID__) && __ANDROID_API__ < 24
 		unsigned long /*uLong*/	zipFilePos;		// zip file info position in pak
     #else
         #if defined(_MSC_VER) || defined(__BORLANDC__)

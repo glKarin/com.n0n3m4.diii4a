@@ -107,9 +107,9 @@ class idDeviceContext
 		void				DrawEditCursor(float x, float y, float scale);
 
 		void 				SetMenuScaleFix(bool enable);
-		bool				IsMenuScaleFixActive() const {
-	            return scaleMenusTo43 && (fixOffsetForMenu.x != 0.0f || fixOffsetForMenu.y != 0.0f);
-		}
+        bool				IsMenuScaleFixActive() const {
+            return scaleMenusTo43 && (fixOffsetForMenu.x != 0.0f || fixOffsetForMenu.y != 0.0f);
+        }
 
 		enum {
 			CURSOR_ARROW,
@@ -180,9 +180,9 @@ class idDeviceContext
 
 		bool				mbcs;
 
-		// DG: this is used for the "make sure menus are rendered as 4:3" hack
-		idVec2				fixScaleForMenu;
-		idVec2				fixOffsetForMenu;
+        // DG: this is used for the "make sure menus are rendered as 4:3" hack
+        idVec2				fixScaleForMenu;
+        idVec2				fixOffsetForMenu;
         bool                scaleMenusTo43;
 };
 

@@ -132,9 +132,9 @@ class idDeclFX : public idDecl
 	private:
 		void					ParseSingleFXAction(idLexer &src, idFXSingleAction &FXAction);
 #ifdef _HUMANHEAD
-    // HUMANHEAD nla
-    void	ParseUseAxis(idStr& text, idFXSingleAction& action) const;
-    // HUMANHEAD END
+        // HUMANHEAD nla
+        void                    ParseUseAxis(idStr& text, idFXSingleAction& action) const;
+        // HUMANHEAD END
 #endif
 };
 

@@ -767,7 +767,7 @@ int idSampleDecoderLocal::DecodeOGG(idSoundSample *sample, int sampleOffset44k, 
 		}
 
 #if !defined(_USING_STB_OGG)
-		file.SetData((const char *)sample->nonCacheData, sample->objectMemSize);
+        file.SetData((const char *)sample->nonCacheData, sample->objectMemSize);
 
 		if (ov_openFile(&file, &ogg) < 0) {
 			failed = true;

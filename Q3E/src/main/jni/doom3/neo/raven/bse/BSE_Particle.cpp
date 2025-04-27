@@ -861,10 +861,10 @@ void rvBSEParticleStage::Default()
 	color.y = 1.0f;
 	color.z = 1.0f;
 	color.w = 1.0f;
-	fadeColor.x = 0.0f;
-	fadeColor.y = 0.0f;
-	fadeColor.z = 0.0f;
-	fadeColor.w = 0.0f;
+    fadeColor.x = 0.0f;
+    fadeColor.y = 0.0f;
+    fadeColor.z = 0.0f;
+    fadeColor.w = 0.0f;
 #if 1
     fadeInFraction = 0.0f;
     fadeOutFraction = 0.0f;
@@ -1492,17 +1492,17 @@ int rvBSEParticleStage::CreateParticle(rvBSE_particleGen_t *g, idDrawVert *verts
 
 	if(rvptype != PTYPE_MODEL)
 	{
-	verts[0].Clear();
-	verts[1].Clear();
-	verts[2].Clear();
-	verts[3].Clear();
+        verts[0].Clear();
+        verts[1].Clear();
+        verts[2].Clear();
+        verts[3].Clear();
 
-	ParticleColors(g, verts);
+        ParticleColors(g, verts);
 
-	// if we are completely faded out, kill the particle
-	if (verts[0].color[0] == 0 && verts[0].color[1] == 0 && verts[0].color[2] == 0 && verts[0].color[3] == 0) {
-		return 0;
-	}
+        // if we are completely faded out, kill the particle
+        if (verts[0].color[0] == 0 && verts[0].color[1] == 0 && verts[0].color[2] == 0 && verts[0].color[3] == 0) {
+            return 0;
+        }
 	}
 
 	ParticleOrigin(g, origin);

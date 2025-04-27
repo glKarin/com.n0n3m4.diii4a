@@ -61,7 +61,7 @@ class idSimpleWindow
 		virtual void	ReadFromSaveGame(idFile *savefile);
 #ifdef _RAVEN // quake4 gui function
 // jmarshall - quake 4 gui
-    void			ResetCinematics(void);
+        void			ResetCinematics(void);
 // jmarshall end
 #endif
 
@@ -106,9 +106,9 @@ class idSimpleWindow
 		idWinBool	hideCursor;
 
 #ifdef _HUMANHEAD
-	private:
-	int translateFontNum;
-	void Translate(int tFontNum = -1);
+    private:
+        int             translateFontNum;
+        void            Translate(int tFontNum = -1);
 #endif
 };
 

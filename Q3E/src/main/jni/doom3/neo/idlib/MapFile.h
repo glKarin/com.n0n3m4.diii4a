@@ -73,7 +73,7 @@ class idMapPrimitive
 #ifdef _RAVEN
 // RAVEN BEGIN
 // rjohnson: added resolve for handling func_groups and other aspects.  Before, radiant would do this processing on a map destroying the original data
-	virtual void			AdjustOrigin( idVec3 &delta ) { }
+	    virtual void			AdjustOrigin( idVec3 &delta ) { }
 // RAVEN END
 #endif
 
@@ -140,8 +140,8 @@ class idMapBrush : public idMapPrimitive
 #ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
-	static idMapBrush *		Parse( Lexer &src, const idVec3 &origin, bool newFormat = true, int version = CURRENT_MAP_VERSION );
-	static idMapBrush *		ParseQ3( Lexer &src, const idVec3 &origin );
+        static idMapBrush *		Parse( Lexer &src, const idVec3 &origin, bool newFormat = true, int version = CURRENT_MAP_VERSION );
+        static idMapBrush *		ParseQ3( Lexer &src, const idVec3 &origin );
 // RAVEN END
 #else
 		static idMapBrush 		*Parse(idLexer &src, const idVec3 &origin, bool newFormat = true, float version = CURRENT_MAP_VERSION);
@@ -162,7 +162,7 @@ class idMapBrush : public idMapPrimitive
 #ifdef _RAVEN
 // RAVEN BEGIN
 // rjohnson: added resolve for handling func_groups and other aspects.  Before, radiant would do this processing on a map destroying the original data
-    virtual void			AdjustOrigin( idVec3 &delta );
+        virtual void			AdjustOrigin( idVec3 &delta );
 // RAVEN END
 #endif
 
@@ -181,7 +181,7 @@ class idMapPatch : public idMapPrimitive, public idSurface_Patch
 #ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
-	static idMapPatch *		Parse( Lexer &src, const idVec3 &origin, bool patchDef3 = true, int version = CURRENT_MAP_VERSION );
+	    static idMapPatch *		Parse( Lexer &src, const idVec3 &origin, bool patchDef3 = true, int version = CURRENT_MAP_VERSION );
 // RAVEN END
 #else
 		static idMapPatch 		*Parse(idLexer &src, const idVec3 &origin, bool patchDef3 = true, float version = CURRENT_MAP_VERSION);

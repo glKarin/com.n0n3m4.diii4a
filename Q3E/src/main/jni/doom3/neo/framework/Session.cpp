@@ -1522,9 +1522,9 @@ void idSessionLocal::MoveToNewMap(const char *mapName)
             //      getting the same filename in spanish, probably because the strings contained
             //      dots and everything behind them was cut off as "file extension".. see #305)
 
-	        // Autosave at the beginning of the level
-	        SaveGame(GetAutoSaveName(mapName), true);
-	    }
+            // Autosave at the beginning of the level
+            SaveGame(GetAutoSaveName(mapName), true);
+        }
         else
             common->Printf("Autosave at the beginning of the level disabled with `com_disableAutoSaves` = 1");
     }

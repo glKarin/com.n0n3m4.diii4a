@@ -108,7 +108,7 @@ int idWinding::Split(const idPlane &plane, const float epsilon, idWinding **fron
 
 	assert(this);
 
-	dists = (float *) _alloca((numPoints+4) * sizeof(float));
+    dists = (float *) _alloca((numPoints+4) * sizeof(float));
 	sides = (byte *) _alloca((numPoints+4) * sizeof(byte));
 
 	counts[0] = counts[1] = counts[2] = 0;

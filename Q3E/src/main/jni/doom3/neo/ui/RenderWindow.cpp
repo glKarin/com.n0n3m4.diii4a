@@ -196,8 +196,8 @@ void idRenderWindow::Draw(int time, float x, float y)
 		float y = drawRect.y;
 		float w = drawRect.w;
 		float h = drawRect.h;
-		
-		dc->AdjustCoords(&x, &y, &w, &h);
+
+        dc->AdjustCoords(&x, &y, &w, &h);
 
 		refdef.x = x;
 		refdef.y = y;

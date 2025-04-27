@@ -203,20 +203,20 @@ typedef struct cm_model_s
 
 #ifdef _RAVEN // quake4 trm
 	bool					isTrmModel;
-	bool markRemove; //k: if ture, marked can replace
-	bool isTraceModel; //k: if true, returned by ModelFromTrm
-	cm_polygonRef_t *_trmPolygons[MAX_TRACEMODEL_POLYS];
-	cm_brushRef_t *_trmBrushes[1];
-	int refCount;
+	bool                    markRemove; //k: if ture, marked can replace
+	bool                    isTraceModel; //k: if true, returned by ModelFromTrm
+	cm_polygonRef_t         *_trmPolygons[MAX_TRACEMODEL_POLYS];
+	cm_brushRef_t           *_trmBrushes[1];
+	int                     refCount;
 
 	cm_model_t(void);
 
-	virtual const char *		GetName( void ) const;
-	virtual bool				GetBounds( idBounds &bounds ) const;
-	virtual bool				GetContents( int &contents ) const;
-	virtual bool				GetVertex( int vertexNum, idVec3 &vertex ) const;
-	virtual bool				GetEdge( int edgeNum, idVec3 &start, idVec3 &end ) const;
-	virtual bool				GetPolygon( int polygonNum, idFixedWinding &winding ) const;
+	virtual const char *	GetName( void ) const;
+	virtual bool			GetBounds( idBounds &bounds ) const;
+	virtual bool			GetContents( int &contents ) const;
+	virtual bool			GetVertex( int vertexNum, idVec3 &vertex ) const;
+	virtual bool			GetEdge( int edgeNum, idVec3 &start, idVec3 &end ) const;
+	virtual bool			GetPolygon( int polygonNum, idFixedWinding &winding ) const;
 #endif
 }
 #if !defined(_RAVEN)
@@ -327,13 +327,13 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		// load collision models from a map file
 		void			LoadMap(const idMapFile *mapFile);
 #ifdef _HUMANHEAD
-// HUMANHEAD pdm: Support for level appending
-	virtual const char *	ContentsName(const int contents) const { return StringFromContents(contents); }
+        // HUMANHEAD pdm: Support for level appending
+        virtual const char *ContentsName(const int contents) const { return StringFromContents(contents); }
 #if DEATHWALK_AUTOLOAD
-	virtual void			AppendMap( const idMapFile *mapFile );
-	virtual bool			WillUseAlreadyLoadedCollisionMap(const idMapFile *mapFile);
+        virtual void	AppendMap( const idMapFile *mapFile );
+        virtual bool	WillUseAlreadyLoadedCollisionMap(const idMapFile *mapFile);
 #endif
-// HUMANHEAD END
+        // HUMANHEAD END
 #endif
 		// frees all the collision models
 		void			FreeMap(void);
@@ -347,7 +347,7 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		bool			TrmFromModel(const char* mapName, const char *modelName, idTraceModel &trm ) { (void)mapName; return TrmFromModel(modelName, trm); }; //k DIFF_IMPL
 
 		// sets up a trace model for collision with other trace models
-		cmHandle_t ModelFromTrm(const char* mapName, const char* modelName, const idTraceModel &trm, const idMaterial *material );
+		cmHandle_t      ModelFromTrm(const char* mapName, const char* modelName, const idTraceModel &trm, const idMaterial *material );
 
 		// get clip handle for model
 		virtual cmHandle_t LoadModel(const char* mapName, const char *modelName, const bool precache ) {
@@ -360,10 +360,10 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 			return LoadModel(modelName, true);
 		}
 
-	virtual void				DebugOutput( const idVec3 &viewOrigin, const idMat3 &viewAxis ) {
-		(void)viewAxis;
-		DebugOutput(viewOrigin);
-	}
+        virtual void	DebugOutput( const idVec3 &viewOrigin, const idMat3 &viewAxis ) {
+            (void)viewAxis;
+            DebugOutput(viewOrigin);
+        }
 		virtual  void	DrawModel(cmHandle_t handle, const idVec3& modelOrigin, const idMat3& modelAxis, const idVec3& viewOrigin, const idMat3& viewAxis, const float radius) { (void)handle; (void)modelOrigin; (void)modelAxis; (void)viewOrigin; (void)viewAxis; (void)radius; }
 #endif
 
@@ -419,11 +419,11 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		// write a collision model file for the map entity
 		bool			WriteCollisionModelForMapEntity(const idMapEntity *mapEnt, const char *filename, const bool testTraceModel = true);
 #ifdef _HUMANHEAD
-	//HUMANHEAD rww
+	    //HUMANHEAD rww
 #if _HH_INLINED_PROC_CLIPMODELS
-	int				GetNumInlinedProcClipModels(void);
+	    int				GetNumInlinedProcClipModels(void);
 #endif
-	//HUMANHEAD END
+	    //HUMANHEAD END
 #endif
 
 	private:			// CollisionMap_translate.cpp
@@ -493,8 +493,8 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			FreeBrush(cm_model_t *model, cm_brush_t *brush);
 		void			FreeTree_r(cm_model_t *model, cm_node_t *headNode, cm_node_t *node);
 #ifdef _RAVEN
-		cm_model_t 	*AllocModel(cm_model_t * &model);
-		void ClearModel(cm_model_t *model);
+		cm_model_t 	    *AllocModel(cm_model_t * &model);
+		void            ClearModel(cm_model_t *model);
 		void			FreeModel_memory(cm_model_t *model);
 #else
 		void			FreeModel(cm_model_t *model);
@@ -513,11 +513,11 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		// loading of proc BSP tree
 		void			ParseProcNodes(idLexer *src);
 #ifdef _HUMANHEAD
-	//HUMANHEAD rww
+	    //HUMANHEAD rww
 #if _HH_INLINED_PROC_CLIPMODELS
-	void			CheckProcModelSurfClip(idLexer *src);
+	    void			CheckProcModelSurfClip(idLexer *src);
 #endif
-	//HUMANHEAD END
+	    //HUMANHEAD END
 #endif
 		void			LoadProcBSP(const char *name);
 		// removal of contained polygons
@@ -561,7 +561,7 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			FinishModel(cm_model_t *model);
 		void			BuildModels(const idMapFile *mapFile);
 #ifdef _RAVEN
-	void			BuildModels( const idMapFile *mapFile, bool forceCreateMap);
+	    void			BuildModels( const idMapFile *mapFile, bool forceCreateMap);
 #endif
 		cmHandle_t		FindModel(const char *name);
 		cm_model_t 	*CollisionModelForMapEntity(const idMapEntity *mapEnt);	// brush/patch model from .map
@@ -606,7 +606,7 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			ParseBrushes_v3(idLexer *src, cm_model_t *model);
 		cmHandle_t		FindModelAndIndex(const char *name, int &index);
 
-	int				numInlinedProcClipModels;
+	    int				numInlinedProcClipModels;
 #endif
 
 	private:			// collision map data
@@ -632,13 +632,13 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		int				maxContacts;
 		int				numContacts;
 #ifdef _HUMANHEAD
-	//HUMANHEAD rww
+	    //HUMANHEAD rww
 #if _HH_INLINED_PROC_CLIPMODELS
-	idList<const char *>	inlinedProcClipModelMats;
-	int						numInlinedProcClipModels;
-	bool					anyInlinedProcClipMats;
+        idList<const char *>	inlinedProcClipModelMats;
+        int						numInlinedProcClipModels;
+        bool					anyInlinedProcClipMats;
 #endif
-	//HUMANHEAD END
+	    //HUMANHEAD END
 #endif
 };
 

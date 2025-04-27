@@ -80,7 +80,7 @@ class idToken : public idStr
 #ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: added to allow Lexer direct access to token internals as well
-	friend class Lexer;
+	    friend class Lexer;
 // RAVEN END
 #endif
 

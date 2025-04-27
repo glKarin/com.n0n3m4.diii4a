@@ -261,17 +261,17 @@ class idLexer
 #ifdef _RAVEN
 // RAVEN BEGIN
 // rjohnson: added vertex color support to proc files.  assume a default RGBA of 0x000000ff
-	int				Parse1DMatrixOpenEnded( int MaxCount, float *m );
+	    int				Parse1DMatrixOpenEnded( int MaxCount, float *m );
 // RAVEN END
 
 // RAVEN BEGIN
 					// write a binary representation of a token
-	void			WriteBinaryToken(idToken *tok);
+	    void			WriteBinaryToken(idToken *tok);
 // RAVEN END
 
 // RAVEN BEGIN
 // dluetscher: added method to parse a structure array that is made up of numerics (floats, ints), and stores them in the given storage
-	void			ParseNumericStructArray( int numStructElements, int tokenSubTypeStructElements[], int arrayCount, byte *arrayStorage );
+	    void			ParseNumericStructArray( int numStructElements, int tokenSubTypeStructElements[], int arrayCount, byte *arrayStorage );
 // RAVEN END
 #endif
 
@@ -315,7 +315,7 @@ class idLexer
 #ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: This is the file that WriteBinaryToken will write to when the proper flags are set
-	idFile			*mBinaryFile;
+	    idFile			*mBinaryFile;
 // RAVEN END
 #endif
 };
