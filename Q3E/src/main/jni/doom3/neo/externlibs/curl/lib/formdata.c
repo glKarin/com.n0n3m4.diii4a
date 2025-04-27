@@ -116,6 +116,7 @@ Content-Disposition: form-data; name="FILECONTENT"
 #include <string.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include <time.h>
 
