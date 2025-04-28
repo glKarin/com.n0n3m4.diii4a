@@ -9,8 +9,8 @@ attribute highp vec4 attr_Vertex;
 
 uniform highp mat4 u_modelViewProjectionMatrix;
 uniform mat4 u_textureMatrix;
-uniform lowp float u_colorAdd;
-uniform lowp float u_colorModulate;
+uniform lowp float u_colorModulate; // 0 or 1/255
+uniform lowp float u_colorAdd; // 0 or 1
 
 varying vec2 var_TexDiffuse;
 varying lowp vec4 var_Color;

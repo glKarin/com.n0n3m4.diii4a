@@ -6,8 +6,8 @@ precision mediump float;
 in highp vec4 attr_Vertex;
 in lowp vec4 attr_Color;
 
-uniform lowp float u_colorAdd;
-uniform lowp float u_colorModulate;
+uniform lowp float u_colorModulate; // 0 or 1/255
+uniform lowp float u_colorAdd; // 0 or 1
 uniform vec4 u_texgenS;
 uniform vec4 u_texgenT;
 uniform vec4 u_texgenQ;

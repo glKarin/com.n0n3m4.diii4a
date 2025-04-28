@@ -459,11 +459,12 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", SHADER_HEATHAZE_WITH_MASK_AND_VERTEX, &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("colorProcess", SHADER_COLORPROCESS, &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
     ret.Append(GLSL_SHADER_SOURCE("megaTexture", SHADER_MEGATEXTURE, &megaTextureShader, MEGATEXTURE_VERT, MEGATEXTURE_FRAG, "", ""));
+	// D3XP
+	ret.Append(GLSL_SHADER_SOURCE("enviroSuit", SHADER_ENVIROSUIT, &enviroSuitShader, ENVIROSUIT_VERT, ENVIROSUIT_FRAG, "", ""));
 #ifdef _HUMANHEAD
     ret.Append(GLSL_SHADER_SOURCE("screeneffect", SHADER_SCREENEFFECT, &screeneffectShader, SCREENEFFECT_VERT, SCREENEFFECT_FRAG, "", ""));
     ret.Append(GLSL_SHADER_SOURCE("radialblur", SHADER_RADIALBLUR, &radialblurShader, RADIALBLUR_VERT, RADIALBLUR_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("liquid", SHADER_LIQUID, &liquidShader, LIQUID_VERT, LIQUID_FRAG, "", ""));
-    //ret.Append(GLSL_SHADER_SOURCE("interactionLiquid", SHADER_INTERACTIONLIQUID, &interactionLiquidShader, INTERACTIONLIQUID_VERT, INTERACTIONLIQUID_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("screenprocess", SHADER_SCREENPROCESS, &screenprocessShader, SCREENPROCESS_VERT, SCREENPROCESS_FRAG, "", ""));
 #endif
 
@@ -1621,10 +1622,11 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #undef _KARIN_GLSL_SHADER_H
 #undef _KARIN_GLSL_SHADER_100_H
 #undef _KARIN_GLSL_SHADER_300_H
+#undef _KARIN_PREY_GLSL_SHADER_100_H
+#undef _KARIN_PREY_GLSL_SHADER_300_H
+#undef _KARIN_D3XP_GLSL_SHADER_100_H
+#undef _KARIN_D3XP_GLSL_SHADER_300_H
 #include "glsl_shader.h"
-#undef _KARIN_GLSL_SHADER_H
-#undef _KARIN_GLSL_SHADER_100_H
-#undef _KARIN_GLSL_SHADER_300_H
 #ifdef GL_ES_VERSION_3_0
 #define EXPORT_SHADER_SOURCE(source, name, type) \
 	{ \
@@ -1636,84 +1638,50 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #else
 #define EXPORT_SHADER_SOURCE(source, name, type) RB_GLSL_ExportBaseGLSLShaderSource(source, name "." type, SHADER_ES_PATH);
 #endif
+#define EXPORT_SHADER_PAIR_SOURCE(source, name) \
+            EXPORT_SHADER_SOURCE(source##_VERT, name, "vert") \
+            EXPORT_SHADER_SOURCE(source##_FRAG, name, "frag")
 
 #define EXPORT_BASE_SHADER() \
-	EXPORT_SHADER_SOURCE(INTERACTION_VERT, "interaction", "vert"); \
-	EXPORT_SHADER_SOURCE(INTERACTION_FRAG, "interaction", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(SHADOW_VERT, "shadow", "vert"); \
-	EXPORT_SHADER_SOURCE(SHADOW_FRAG, "shadow", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(DEFAULT_VERT, "default", "vert"); \
-	EXPORT_SHADER_SOURCE(DEFAULT_FRAG, "default", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(ZFILL_VERT, "zfill", "vert"); \
-	EXPORT_SHADER_SOURCE(ZFILL_FRAG, "zfill", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(ZFILLCLIP_VERT, "zfillClip", "vert"); \
-	EXPORT_SHADER_SOURCE(ZFILLCLIP_FRAG, "zfillClip", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(CUBEMAP_VERT, "cubemap", "vert"); \
-	EXPORT_SHADER_SOURCE(CUBEMAP_FRAG, "cubemap", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(ENVIRONMENT_VERT, "environment", "vert"); \
-	EXPORT_SHADER_SOURCE(ENVIRONMENT_FRAG, "environment", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(ENVIRONMENT_VERT, "bumpyEnvironment", "vert"); \
-	EXPORT_SHADER_SOURCE(BUMPY_ENVIRONMENT_FRAG, "bumpyEnvironment", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(FOG_VERT, "fog", "vert"); \
-	EXPORT_SHADER_SOURCE(FOG_FRAG, "fog", "frag"); \
- \
+	EXPORT_SHADER_PAIR_SOURCE(INTERACTION, "interaction"); \
+	EXPORT_SHADER_PAIR_SOURCE(SHADOW, "shadow"); \
+	EXPORT_SHADER_PAIR_SOURCE(DEFAULT, "default"); \
+	EXPORT_SHADER_PAIR_SOURCE(ZFILL, "zfill"); \
+	EXPORT_SHADER_PAIR_SOURCE(ZFILLCLIP, "zfillClip"); \
+	EXPORT_SHADER_PAIR_SOURCE(CUBEMAP, "cubemap"); \
+	EXPORT_SHADER_PAIR_SOURCE(ENVIRONMENT, "environment"); \
+	EXPORT_SHADER_PAIR_SOURCE(BUMPY_ENVIRONMENT, "bumpyEnvironment"); \
+	EXPORT_SHADER_PAIR_SOURCE(FOG, "fog"); \
 	EXPORT_SHADER_SOURCE(BLENDLIGHT_VERT, "blendLight", "vert"); \
- \
 	EXPORT_SHADER_SOURCE(DIFFUSE_CUBEMAP_VERT, "diffuseCubemap", "vert"); \
- \
-	EXPORT_SHADER_SOURCE(TEXGEN_VERT, "texgen", "vert"); \
-	EXPORT_SHADER_SOURCE(TEXGEN_FRAG, "texgen", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(HEATHAZE_VERT, "heatHaze", "vert"); \
-	EXPORT_SHADER_SOURCE(HEATHAZE_FRAG, "heatHaze", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASK_VERT, "heatHazeWithMask", "vert"); \
-	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASK_FRAG, "heatHazeWithMask", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASKANDVERTEX_VERT, "heatHazeWithMaskAndVertex", "vert"); \
-	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASKANDVERTEX_FRAG, "heatHazeWithMaskAndVertex", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(COLORPROCESS_VERT, "colorProcess", "vert"); \
-	EXPORT_SHADER_SOURCE(COLORPROCESS_FRAG, "colorProcess", "frag"); \
-    EXPORT_SHADER_SOURCE(MEGATEXTURE_VERT, "megaTexture", "vert"); \
-	EXPORT_SHADER_SOURCE(MEGATEXTURE_FRAG, "megaTexture", "frag");
+	EXPORT_SHADER_PAIR_SOURCE(TEXGEN, "texgen"); \
+	EXPORT_SHADER_PAIR_SOURCE(HEATHAZE, "heatHaze"); \
+	EXPORT_SHADER_PAIR_SOURCE(HEATHAZEWITHMASK, "heatHazeWithMask"); \
+	EXPORT_SHADER_PAIR_SOURCE(HEATHAZEWITHMASKANDVERTEX, "heatHazeWithMaskAndVertex"); \
+	EXPORT_SHADER_PAIR_SOURCE(COLORPROCESS, "colorProcess"); \
+    EXPORT_SHADER_PAIR_SOURCE(MEGATEXTURE, "megaTexture");
+
+#define EXPORT_D3XP_SHADER() \
+    EXPORT_SHADER_PAIR_SOURCE(ENVIROSUIT, "enviroSuit");
 
 #ifdef _HUMANHEAD
 #define EXPORT_PREY_SHADER() \
-    EXPORT_SHADER_SOURCE(SCREENEFFECT_VERT, "screeneffect", "vert"); \
-	EXPORT_SHADER_SOURCE(SCREENEFFECT_FRAG, "screeneffect", "frag"); \
-    EXPORT_SHADER_SOURCE(RADIALBLUR_VERT, "radialblur", "vert"); \
-	EXPORT_SHADER_SOURCE(RADIALBLUR_FRAG, "radialblur", "frag"); \
-    EXPORT_SHADER_SOURCE(LIQUID_VERT, "liquid", "vert"); \
-	EXPORT_SHADER_SOURCE(LIQUID_FRAG, "liquid", "frag"); \
-    EXPORT_SHADER_SOURCE(SCREENPROCESS_VERT, "screenprocess", "vert"); \
-	EXPORT_SHADER_SOURCE(SCREENPROCESS_FRAG, "screenprocess", "frag");
+    EXPORT_SHADER_PAIR_SOURCE(SCREENEFFECT, "screeneffect"); \
+    EXPORT_SHADER_PAIR_SOURCE(RADIALBLUR, "radialblur"); \
+    EXPORT_SHADER_PAIR_SOURCE(LIQUID, "liquid"); \
+    EXPORT_SHADER_PAIR_SOURCE(SCREENPROCESS, "screenprocess");
 #endif
 	 
 #ifdef _SHADOW_MAPPING
 #define EXPORT_SHADOW_MAPPING_SHADER() \
-	EXPORT_SHADER_SOURCE(DEPTH_VERT, "depthShadowMapping", "vert"); \
-	EXPORT_SHADER_SOURCE(DEPTH_FRAG, "depthShadowMapping", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(DEPTH_PERFORATED_VERT, "depthPerforated", "vert"); \
-	EXPORT_SHADER_SOURCE(DEPTH_PERFORATED_FRAG, "depthPerforated", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(INTERACTION_SHADOW_MAPPING_VERT, "interactionShadowMapping", "vert"); \
-	EXPORT_SHADER_SOURCE(INTERACTION_SHADOW_MAPPING_FRAG, "interactionShadowMapping", "frag");
+	EXPORT_SHADER_PAIR_SOURCE(DEPTH, "depthShadowMapping"); \
+	EXPORT_SHADER_PAIR_SOURCE(DEPTH_PERFORATED, "depthPerforated"); \
+	EXPORT_SHADER_PAIR_SOURCE(INTERACTION_SHADOW_MAPPING, "interactionShadowMapping");
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE
 #define EXPORT_STENCIL_SHADOW_SHADER() \
-	EXPORT_SHADER_SOURCE(INTERACTION_STENCIL_SHADOW_VERT, "interactionStencilShadow", "vert"); \
-	EXPORT_SHADER_SOURCE(INTERACTION_STENCIL_SHADOW_FRAG, "interactionStencilShadow", "frag");
+	EXPORT_SHADER_PAIR_SOURCE(INTERACTION_STENCIL_SHADOW, "interactionStencilShadow");
 #endif
 
 #define SHADER_ES_PATH glprogs.c_str()
@@ -1722,6 +1690,7 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 
 	glprogs = "dev/glslprogs";
 	EXPORT_BASE_SHADER()
+    EXPORT_D3XP_SHADER()
 #ifdef _SHADOW_MAPPING
 	EXPORT_SHADOW_MAPPING_SHADER()
 #endif
@@ -1737,6 +1706,7 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 	glprogs = "dev/glsl3progs";
 
 	EXPORT_BASE_SHADER()
+    EXPORT_D3XP_SHADER()
 #ifdef _SHADOW_MAPPING
 	EXPORT_SHADOW_MAPPING_SHADER()
 #endif

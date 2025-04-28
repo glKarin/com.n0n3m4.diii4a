@@ -1,3 +1,6 @@
+#ifndef _KARIN_PREY_GLSL_SHADER_300_H
+#define _KARIN_PREY_GLSL_SHADER_300_H
+
 // screenprocess
 GLSL_SHADER const char ES3_SCREENPROCESS_VERT[] =
 "#version 300 es\n"
@@ -474,3 +477,5 @@ GLSL_SHADER const char ES3_LIQUID_FRAG[] =
 "    _gl_FragColor = vec4(color, 1.0);\n"
 "}\n"
 ;
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef _KARIN_PREY_GLSL_SHADER_100_H
+#define _KARIN_PREY_GLSL_SHADER_100_H
+
 // screenprocess
 GLSL_SHADER const char SCREENPROCESS_VERT[] =
 "#version 100\n"
@@ -468,3 +471,5 @@ GLSL_SHADER const char LIQUID_FRAG[] =
 "    gl_FragColor = vec4(color, 1.0);\n"
 "}\n"
 ;
+
+#endif

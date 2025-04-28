@@ -36,8 +36,8 @@ uniform vec4 u_lightProjectionS;
 uniform vec4 u_lightProjectionT;
 uniform vec4 u_lightFalloff;
 uniform vec4 u_lightProjectionQ;
-uniform lowp float u_colorModulate;
-uniform lowp float u_colorAdd;
+uniform lowp float u_colorModulate; // 0 or 1/255
+uniform lowp float u_colorAdd; // 0 or 1
 uniform lowp vec4 u_glColor;
 
 uniform vec4 u_lightOrigin;

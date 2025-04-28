@@ -11,8 +11,8 @@ in vec3 attr_Normal;
 uniform highp mat4 u_modelViewProjectionMatrix;
 uniform mat4 u_modelViewMatrix;
 uniform mat4 u_textureMatrix;
-uniform lowp float u_colorAdd;
-uniform lowp float u_colorModulate;
+uniform lowp float u_colorModulate; // 0 or 1/255
+uniform lowp float u_colorAdd; // 0 or 1
 uniform vec4 u_viewOrigin;
 
 out vec3 var_TexCoord;

@@ -25,6 +25,7 @@
 	GLSL_SHADER const char * x##_FRAG = a##_FRAG;
 
 #include "glsl_shader_100.h"
+#include "d3xp_glsl_shader_100.h"
 
 #ifdef _HUMANHEAD
 #include "prey_glsl_shader_100.h"
@@ -48,6 +49,7 @@
 	ES3_SHADER_SOURCE_ALIAS(x, a);
 
 #include "glsl_shader_300.h"
+#include "d3xp_glsl_shader_300.h"
 
 #ifdef _HUMANHEAD
 #include "prey_glsl_shader_300.h"
