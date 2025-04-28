@@ -476,6 +476,6 @@
     <string name="max_command_line_editor_height">Максимальная высота командной строки(px)</string>
     <string name="setup_max_command_line_editor_pixel_height">Установить максимальную высоту пикселя командной строки (0 - без ограничений)</string>
     <string name="zero_means_not_limit">px, 0 означает без ограничений</string>
-    <string name="skip_hit_effect_in_game">Пропустить hit эффект в игре(harm_g_skipHitEffect)</string>
+    <string name="skip_hit_effect_in_game">Убрать эффект тряски камеры при ударе(harm_g_skipHitEffect)</string>
 
 </resources>
