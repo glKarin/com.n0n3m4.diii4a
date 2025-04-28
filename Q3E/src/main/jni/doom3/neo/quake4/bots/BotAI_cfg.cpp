@@ -1,7 +1,7 @@
 
 idCVar botAi::harm_si_botLevel( "harm_si_botLevel", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot level(0 = auto; 1 - 8 = default difficult level)." );
-idCVar botAi::harm_si_botWeapons( "harm_si_botWeapons", "", CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_machinegun,weapon_shotgun), and allow mix(e.g. machinegun,3,weapon_rocketlauncher). All weapon: 1=machinegun, 2=shotgun, 3=hyperblaster, 4=grenadelauncher, 5=nailgun, 6=rocketlauncher, 7=railgun, 8=lightninggun, 9=dmg, 10=napalmgun." );
-idCVar botAi::harm_si_botAmmo( "harm_si_botAmmo", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot weapon ammo when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo" );
+idCVar botAi::harm_si_botWeapons( "harm_si_botWeapons", "", CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot initial weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_machinegun,weapon_shotgun), and allow mix(e.g. machinegun,3,weapon_rocketlauncher). All weapon: 1=machinegun, 2=shotgun, 3=hyperblaster, 4=grenadelauncher, 5=nailgun, 6=rocketlauncher, 7=railgun, 8=lightninggun, 9=dmg, 10=napalmgun." );
+idCVar botAi::harm_si_botAmmo( "harm_si_botAmmo", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot weapons initial ammo clip when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo clip" );
 
 bool botAi::botAvailable = false;
 bool botAi::botInitialized = false;

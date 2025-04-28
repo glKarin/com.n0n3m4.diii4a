@@ -344,11 +344,11 @@ idCVar harm_pm_fullBodyAwarenessHeadVisible( "harm_pm_fullBodyAwarenessHeadVisib
 idCVar harm_ui_showViewBody( "harm_ui_showViewBody", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "show view body" );
 #endif
 #ifdef _MOD_VIEW_LIGHT
-idCVar harm_ui_showViewLight( "harm_ui_showViewLight", "0", CVAR_GAME | CVAR_BOOL | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "show view flashlight" );
-idCVar harm_ui_viewLightShader( "harm_ui_viewLightShader", "lights/flashlight5", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "view flashlight material texture/entityDef name" );
-idCVar harm_ui_viewLightRadius( "harm_ui_viewLightRadius", "1280 640 640", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "view flashlight radius, format is \"<light_target> <light_right> <light_up>\"" );
-idCVar harm_ui_viewLightOffset( "harm_ui_viewLightOffset", "20 0 0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "view flashlight origin offset, format is \"<forward-offset> <side-offset> <up-offset>\"" );
-idCVar harm_ui_viewLightType( "harm_ui_viewLightType", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_INTEGER | CVAR_ARCHIVE, "view flashlight type. 0=spot light; 1=point light" );
+idCVar harm_ui_showViewLight( "harm_ui_showViewLight", "0", CVAR_GAME | CVAR_BOOL | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "show player view flashlight" );
+idCVar harm_ui_viewLightShader( "harm_ui_viewLightShader", "lights/flashlight5", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "player view flashlight material texture/entityDef name" );
+idCVar harm_ui_viewLightRadius( "harm_ui_viewLightRadius", "1280 640 640", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "player view flashlight radius, format is \"<light_target> <light_right> <light_up>\"" );
+idCVar harm_ui_viewLightOffset( "harm_ui_viewLightOffset", "0 0 0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "player view flashlight origin offset, format is \"<forward-offset> <side-offset> <up-offset>\"" );
+idCVar harm_ui_viewLightType( "harm_ui_viewLightType", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_INTEGER | CVAR_ARCHIVE, "player view flashlight type. 0=spot light; 1=point light" );
 #endif
 #ifdef __ANDROID__ //karin: re-normalize player movement direction. only for DIII4A smooth onscreen joystick control
 idCVar harm_g_normalizeMovementDirection("harm_g_normalizeMovementDirection", "0", CVAR_GAME | CVAR_BOOL, "Re-normalize player/walker movement direction");
