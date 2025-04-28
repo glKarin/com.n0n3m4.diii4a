@@ -4,101 +4,71 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import javax.microedition.khronos.opengles.GL11;
-
-public class Q3EGLVertexBuffer extends Q3EGLBuffer
+public class Q3EGLVertexBuffer
 {
-    private int stride = 0;
+    private FloatBuffer buffer;
 
-    public Q3EGLVertexBuffer()
+    public FloatBuffer Buffer()
     {
-        type = GL11.GL_ARRAY_BUFFER;
+        return buffer;
     }
 
-    public int Stride()
+    private FloatBuffer Make(FloatBuffer[] verts, int vertexCount)
     {
-        return stride;
-    }
-
-    public void Data(GL11 gl, FloatBuffer verts, int count)
-    {
-        stride = count * 4;
-        int lastPos = verts.position();
-
-        Gen(gl);
-        Bind(gl);
-        gl.glBufferData(type, 4 * (verts.capacity() - lastPos), verts, usage);
-        Unbind(gl);
-        verts.position(lastPos);
-    }
-
-    public static class VertexArray
-    {
-        private FloatBuffer buffer;
-
-        public FloatBuffer Buffer()
+        int[] vertsPos = new int[verts.length];
+        int[] vertsSize = new int[verts.length];
+        int[] vertsOffset = new int[verts.length];
+        int num = 0;
+        for(int i = 0; i < verts.length; i++)
         {
-            return buffer;
+            vertsPos[i] = verts[i].position();
+            vertsOffset[i] = verts[i].position();
+            vertsSize[i] = (verts[i].capacity() - verts[i].position()) / vertexCount;
+            num += vertsSize[i];
         }
+        int size = 4 * vertexCount * num;
 
-        private FloatBuffer Make(FloatBuffer[] verts, int vertexCount)
+        FloatBuffer buffers = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        for(int i = 0; i < vertexCount; i++)
         {
-            int[] vertsPos = new int[verts.length];
-            int[] vertsSize = new int[verts.length];
-            int[] vertsOffset = new int[verts.length];
-            int num = 0;
-            for(int i = 0; i < verts.length; i++)
+            for(int v = 0; v < verts.length; v++)
             {
-                vertsPos[i] = verts[i].position();
-                vertsOffset[i] = verts[i].position();
-                vertsSize[i] = (verts[i].capacity() - verts[i].position()) / vertexCount;
-                num += vertsSize[i];
-            }
-            int size = 4 * vertexCount * num;
-
-            FloatBuffer buffers = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder()).asFloatBuffer();
-            for(int i = 0; i < vertexCount; i++)
-            {
-                for(int v = 0; v < verts.length; v++)
+                for(int p = 0; p < vertsSize[v]; p++)
                 {
-                    for(int p = 0; p < vertsSize[v]; p++)
-                    {
-                        buffers.put(verts[v].get(vertsOffset[v]++));
-                    }
+                    buffers.put(verts[v].get(vertsOffset[v]++));
                 }
             }
-            buffers.position(0);
-
-            for(int i = 0; i < verts.length; i++)
-            {
-                verts[i].position(vertsPos[i]);
-            }
-
-            return buffers;
         }
+        buffers.position(0);
 
-        public VertexArray Set(FloatBuffer[] verts, int vertexCount)
+        for(int i = 0; i < verts.length; i++)
         {
-            buffer = Make(verts, vertexCount);
-            return this;
+            verts[i].position(vertsPos[i]);
         }
 
-        public VertexArray Append(FloatBuffer[] verts, int vertexCount)
-        {
-            FloatBuffer buf = Make(verts, vertexCount);
-            if(null == buffer)
-            {
-                buffer = buf;
-                return this;
-            }
-            int size = buffer.capacity() + buf.capacity();
-
-            FloatBuffer buffers = ByteBuffer.allocateDirect(size * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-            buffers.put(buffer).put(buf);
-            buffers.position(0);
-            buffer = buffers;
-            return this;
-        }
+        return buffers;
     }
 
+    public Q3EGLVertexBuffer Set(FloatBuffer[] verts, int vertexCount)
+    {
+        buffer = Make(verts, vertexCount);
+        return this;
+    }
+
+    public Q3EGLVertexBuffer Append(FloatBuffer[] verts, int vertexCount)
+    {
+        FloatBuffer buf = Make(verts, vertexCount);
+        if(null == buffer)
+        {
+            buffer = buf;
+            return this;
+        }
+        int size = buffer.capacity() + buf.capacity();
+
+        FloatBuffer buffers = ByteBuffer.allocateDirect(size * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        buffers.put(buffer).put(buf);
+        buffers.position(0);
+        buffer = buffers;
+        return this;
+    }
 }

@@ -8,7 +8,10 @@ import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EUtils;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
@@ -120,34 +123,34 @@ public final class Q3EGL
         gl.glTranslatef(-trax, -tray, 0);
     }
 
-    public static void DrawVerts_GL1(GL11 gl, int texid, int cnt, Q3EGLVertexBuffer vertexBuffer, Q3EGLIndexBuffer indexBuffer, float trax, float tray, float r, float g, float b, float a)
+    public static void DrawVerts_GL1(GL11 gl, int texid, int cnt, int vertexBuffer, int indexBuffer, float trax, float tray, float r, float g, float b, float a)
     {
         gl.glColor4f(r, g, b, a);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, texid);
-        vertexBuffer.Bind(gl);
-        indexBuffer.Bind(gl);
-        gl.glTexCoordPointer(2, GL10.GL_FLOAT, vertexBuffer.Stride(), 8);
-        gl.glVertexPointer(2, GL10.GL_FLOAT, vertexBuffer.Stride(), 0);
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vertexBuffer);
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 16, 8);
+        gl.glVertexPointer(2, GL10.GL_FLOAT, 16, 0);
         gl.glTranslatef(trax, tray, 0);
         gl.glDrawElements(GL10.GL_TRIANGLES, cnt, GL10.GL_UNSIGNED_BYTE, 0);
-        vertexBuffer.Unbind(gl);
-        indexBuffer.Unbind(gl);
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0);
         gl.glTranslatef(-trax, -tray, 0);
     }
 
-    public static void DrawVerts_GL1(GL11 gl, int texid, int vertexOffset, int indexOffset, int cnt, Q3EGLVertexBuffer vertexBuffer, Q3EGLIndexBuffer indexBuffer, float trax, float tray, float r, float g, float b, float a)
+    public static void DrawVerts_GL1(GL11 gl, int texid, int cnt, int vertexBuffer, int indexBuffer, int vertexOffset, int indexOffset, float trax, float tray, float r, float g, float b, float a)
     {
         gl.glColor4f(r, g, b, a);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, texid);
-        vertexBuffer.Bind(gl);
-        indexBuffer.Bind(gl);
-        int offset = vertexBuffer.Stride() * vertexOffset;
-        gl.glTexCoordPointer(2, GL10.GL_FLOAT, vertexBuffer.Stride(), offset + 8);
-        gl.glVertexPointer(2, GL10.GL_FLOAT, vertexBuffer.Stride(), offset);
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vertexBuffer);
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+        int offset = 16 * vertexOffset;
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 16, offset + 8);
+        gl.glVertexPointer(2, GL10.GL_FLOAT, 16, offset);
         gl.glTranslatef(trax, tray, 0);
         gl.glDrawElements(GL10.GL_TRIANGLES, cnt, GL10.GL_UNSIGNED_BYTE, indexOffset);
-        vertexBuffer.Unbind(gl);
-        indexBuffer.Unbind(gl);
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0);
         gl.glTranslatef(-trax, -tray, 0);
     }
 
@@ -246,5 +249,52 @@ public final class Q3EGL
         {
             System.err.println("GLError: " + name + " -> " + Integer.toHexString(err));
         }
+    }
+
+    public static void glDeleteBuffer(GL11 gl, int buffer)
+    {
+        if(buffer > 0)
+        {
+            IntBuffer buffers = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
+            buffers.put(buffer);
+            gl.glDeleteBuffers(1, buffers);
+        }
+    }
+
+    public static int glGenBuffer(GL11 gl, int buffer)
+    {
+        if(buffer <= 0)
+        {
+            IntBuffer buffers = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
+            gl.glGenBuffers(1, buffers);
+            buffer = buffers.get(0);
+        }
+        return buffer;
+    }
+
+    public static int glBufferData(GL11 gl, int buffer, int type, FloatBuffer verts, int usage)
+    {
+        int lastPos = verts.position();
+
+        buffer = glGenBuffer(gl, buffer);
+        gl.glBindBuffer(type, buffer);
+        gl.glBufferData(type, 4 * (verts.capacity() - lastPos), verts, usage);
+        gl.glBindBuffer(type, 0);
+        verts.position(lastPos);
+
+        return buffer;
+    }
+
+    public static int glBufferData(GL11 gl, int buffer, int type, ByteBuffer indexp, int usage)
+    {
+        int lastPos = indexp.position();
+
+        buffer = glGenBuffer(gl, buffer);
+        gl.glBindBuffer(type, buffer);
+        gl.glBufferData(type, (indexp.capacity() - lastPos), indexp, usage);
+        gl.glBindBuffer(type, 0);
+        indexp.position(lastPos);
+
+        return buffer;
     }
 }

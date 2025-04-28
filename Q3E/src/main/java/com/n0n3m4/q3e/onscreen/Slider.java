@@ -8,7 +8,6 @@ import android.view.View;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
-import com.n0n3m4.q3e.gl.Q3EGLIndexBuffer;
 import com.n0n3m4.q3e.gl.Q3EGLVertexBuffer;
 
 import java.nio.ByteBuffer;
@@ -43,8 +42,8 @@ public class Slider extends Paintable implements TouchListener
     private int[] tex_inds;
     private int m_split = SPLIT_NONE;
 
-    private Q3EGLVertexBuffer vertexBuffer = null;
-    private Q3EGLIndexBuffer  indexBuffer  = null;
+    private int vertexBuffer = 0;
+    private int indexBuffer  = 0;
 
     public Slider(View vw, GL10 gl, int center_x, int center_y, int w, int h, String texid,
                   int leftkey, int centerkey, int rightkey, int stl, float a)
@@ -160,12 +159,11 @@ public class Slider extends Paintable implements TouchListener
     @Override
     public void AsBuffer(GL11 gl)
     {
-        if(null == vertexBuffer)
-            vertexBuffer = new Q3EGLVertexBuffer();
-        vertexBuffer.Data(gl, new Q3EGLVertexBuffer.VertexArray().Set(new FloatBuffer[]{ verts_p, tex_p }, 4).Buffer(), 4);
-        if(null == indexBuffer)
-            indexBuffer = new Q3EGLIndexBuffer();
-        indexBuffer.Data(gl, inds_p);
+        vertexBuffer = Q3EGL.glBufferData(gl, vertexBuffer, gl.GL_ARRAY_BUFFER, new Q3EGLVertexBuffer()
+                .Set(new FloatBuffer[]{ verts_p, tex_p }, 4)
+                .Buffer(),
+                gl.GL_STATIC_DRAW);
+        indexBuffer = Q3EGL.glBufferData(gl, indexBuffer, gl.GL_ELEMENT_ARRAY_BUFFER, inds_p, gl.GL_STATIC_DRAW);
     }
 
     @Override
@@ -187,15 +185,15 @@ public class Slider extends Paintable implements TouchListener
                 }
             }
         }
-        if(null != vertexBuffer)
+        if(vertexBuffer > 0)
         {
-            vertexBuffer.Delete(gl);
-            vertexBuffer = null;
+            Q3EGL.glDeleteBuffer(gl, vertexBuffer);
+            vertexBuffer = 0;
         }
-        if(null != indexBuffer)
+        if(indexBuffer > 0)
         {
-            indexBuffer.Delete(gl);
-            indexBuffer = null;
+            Q3EGL.glDeleteBuffer(gl, indexBuffer);
+            indexBuffer = 0;
         }
     }
 

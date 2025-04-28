@@ -11,7 +11,6 @@ import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.KGLBitmapTexture;
-import com.n0n3m4.q3e.gl.Q3EGLIndexBuffer;
 import com.n0n3m4.q3e.gl.Q3EGLVertexBuffer;
 import com.n0n3m4.q3e.karin.KStr;
 
@@ -58,8 +57,8 @@ public class Disc extends Paintable implements TouchListener
     private int dotx, doty;
     private boolean dotjoyenabled = false;
 
-    private Q3EGLVertexBuffer vertexBuffer = null;
-    private Q3EGLIndexBuffer  indexBuffer  = null;
+    private int vertexBuffer = 0;
+    private int indexBuffer  = 0;
 
     public Disc(View vw, GL10 gl, int center_x, int center_y, int inner_radius, float a, char[] keys, char[] keymaps, int style, String texid, String name)
     {
@@ -219,10 +218,10 @@ public class Disc extends Paintable implements TouchListener
                 //DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red,green,blue,p.pressed ? (float)Math.max(alpha, 0.9) : (float)(Math.min(alpha, 0.1)));
                 if (p.pressed)
 //                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, cx, cy, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
-                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 4, 0, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
+                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, vertexBuffer, indexBuffer, 4, 0, cx, cy, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
                 else
 //                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, cx, cy, red, green, blue, alpha - (alpha * 0.5f));
-                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 4, 0, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha - (alpha * 0.5f));
+                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, vertexBuffer, indexBuffer, 4, 0, cx, cy, red, green, blue, alpha - (alpha * 0.5f));
             }
         }
     }
@@ -260,15 +259,12 @@ public class Disc extends Paintable implements TouchListener
     @Override
     public void AsBuffer(GL11 gl)
     {
-        if(null == vertexBuffer)
-            vertexBuffer = new Q3EGLVertexBuffer();
-        vertexBuffer.Data(gl, new Q3EGLVertexBuffer.VertexArray()
+        vertexBuffer = Q3EGL.glBufferData(gl, vertexBuffer, gl.GL_ARRAY_BUFFER, new Q3EGLVertexBuffer()
                 .Set(new FloatBuffer[]{ verts_p, tex_p }, 4)
                 .Append(new FloatBuffer[]{ m_fanVertexArray, tex_p }, 4)
-                .Buffer(), 4);
-        if(null == indexBuffer)
-            indexBuffer = new Q3EGLIndexBuffer();
-        indexBuffer.Data(gl, inds_p);
+                .Buffer(),
+                gl.GL_STATIC_DRAW);
+        indexBuffer = Q3EGL.glBufferData(gl, indexBuffer, gl.GL_ELEMENT_ARRAY_BUFFER, inds_p, gl.GL_STATIC_DRAW);
     }
 
     @Override
@@ -289,15 +285,15 @@ public class Disc extends Paintable implements TouchListener
                 p.textureId = 0;
             }
         }
-        if(null != vertexBuffer)
+        if(vertexBuffer > 0)
         {
-            vertexBuffer.Delete(gl);
-            vertexBuffer = null;
+            Q3EGL.glDeleteBuffer(gl, vertexBuffer);
+            vertexBuffer = 0;
         }
-        if(null != indexBuffer)
+        if(indexBuffer > 0)
         {
-            indexBuffer.Delete(gl);
-            indexBuffer = null;
+            Q3EGL.glDeleteBuffer(gl, indexBuffer);
+            indexBuffer = 0;
         }
     }
 
