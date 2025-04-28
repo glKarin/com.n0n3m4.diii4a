@@ -102,13 +102,13 @@ static const int	SSF_NO_DUPS =			BIT(9);	// try not to play the same sound twice
 
 #ifdef _RAVEN
 // RAVEN BEGIN
-static const int        SSF_USEDOPPLER = BIT(10);       // allow doppler pitch shifting effects
-static const int        SSF_NO_RANDOMSTART = BIT(11);   // don't offset the start position for looping sounds
-static const int        SSF_VO_FOR_PLAYER = BIT(12);    // Notifies a funcRadioChatter that this shader is directed at the player
-static const int        SSF_IS_VO = BIT(13);    // this sound is VO
-static const int        SSF_CAUSE_RUMBLE = BIT(14);     // causes joystick rumble
-static const int        SSF_CENTER = BIT(15);   // sound through center channel only
-static const int        SSF_HILITE = BIT(16);   // display debug info for this emitter
+static const int    SSF_USEDOPPLER = BIT(10);       // allow doppler pitch shifting effects
+static const int    SSF_NO_RANDOMSTART = BIT(11);   // don't offset the start position for looping sounds
+static const int    SSF_VO_FOR_PLAYER = BIT(12);    // Notifies a funcRadioChatter that this shader is directed at the player
+static const int    SSF_IS_VO = BIT(13);    // this sound is VO
+static const int    SSF_CAUSE_RUMBLE = BIT(14);     // causes joystick rumble
+static const int    SSF_CENTER = BIT(15);   // sound through center channel only
+static const int    SSF_HILITE = BIT(16);   // display debug info for this emitter
 // RAVEN END
 #endif
 #ifdef _HUMANHEAD
@@ -283,36 +283,36 @@ class idSoundShader : public idDecl
 #ifdef _RAVEN
 // RAVEN BEGIN
 // jscott: required access functions
-			bool			IsPrivateSound( void ) const { return( !!( parms.soundShaderFlags & SSF_PRIVATE_SOUND ) ); }
-			bool			IsAntiPrivateSound( void ) const { return( !!( parms.soundShaderFlags & SSF_ANTI_PRIVATE_SOUND ) ); }
-			bool			IsNoOcclusion( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_OCCLUSION ) ); }
-			bool			IsGlobal( void ) const { return( !!( parms.soundShaderFlags & SSF_GLOBAL ) ); }
-			bool			IsOmnidirectional( void ) const { return( !!( parms.soundShaderFlags & SSF_OMNIDIRECTIONAL ) ); }
-			bool			IsLooping( void ) const { return( !!( parms.soundShaderFlags & SSF_LOOPING ) ); }
-			bool			IsPlayOnce( void ) const { return( !!( parms.soundShaderFlags & SSF_PLAY_ONCE ) ); }
-			bool			IsUnclamped( void ) const { return( !!( parms.soundShaderFlags & SSF_UNCLAMPED ) ); }
-			bool			IsNoFlicker( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_FLICKER ) ); }
-			bool			IsNoDupes( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_DUPS ) ); }
-			bool			IsDoppler( void ) const { return( !!( parms.soundShaderFlags & SSF_USEDOPPLER ) ); }
-			bool			IsNoRandomStart( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_RANDOMSTART ) ); }
-			bool			IsVO_ForPlayer( void ) const { return( !!( parms.soundShaderFlags & SSF_VO_FOR_PLAYER ) ); }
-			bool			IsVO( void ) const { return( !!( parms.soundShaderFlags & SSF_IS_VO ) ); }
-			bool			IsCauseRumble( void ) const { return( !!( parms.soundShaderFlags & SSF_CAUSE_RUMBLE ) ); }
-			bool			IsCenter( void ) const { return( !!( parms.soundShaderFlags & SSF_CENTER ) ); }
+        bool			        IsPrivateSound( void ) const { return( !!( parms.soundShaderFlags & SSF_PRIVATE_SOUND ) ); }
+        bool			        IsAntiPrivateSound( void ) const { return( !!( parms.soundShaderFlags & SSF_ANTI_PRIVATE_SOUND ) ); }
+        bool			        IsNoOcclusion( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_OCCLUSION ) ); }
+        bool			        IsGlobal( void ) const { return( !!( parms.soundShaderFlags & SSF_GLOBAL ) ); }
+        bool			        IsOmnidirectional( void ) const { return( !!( parms.soundShaderFlags & SSF_OMNIDIRECTIONAL ) ); }
+        bool			        IsLooping( void ) const { return( !!( parms.soundShaderFlags & SSF_LOOPING ) ); }
+        bool			        IsPlayOnce( void ) const { return( !!( parms.soundShaderFlags & SSF_PLAY_ONCE ) ); }
+        bool			        IsUnclamped( void ) const { return( !!( parms.soundShaderFlags & SSF_UNCLAMPED ) ); }
+        bool			        IsNoFlicker( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_FLICKER ) ); }
+        bool			        IsNoDupes( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_DUPS ) ); }
+        bool			        IsDoppler( void ) const { return( !!( parms.soundShaderFlags & SSF_USEDOPPLER ) ); }
+        bool			        IsNoRandomStart( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_RANDOMSTART ) ); }
+        bool			        IsVO_ForPlayer( void ) const { return( !!( parms.soundShaderFlags & SSF_VO_FOR_PLAYER ) ); }
+        bool			        IsVO( void ) const { return( !!( parms.soundShaderFlags & SSF_IS_VO ) ); }
+        bool			        IsCauseRumble( void ) const { return( !!( parms.soundShaderFlags & SSF_CAUSE_RUMBLE ) ); }
+        bool			        IsCenter( void ) const { return( !!( parms.soundShaderFlags & SSF_CENTER ) ); }
 
-			float			GetVolume( void ) const { return( parms.volume ); }
-			float			GetShakes( void ) const { return( parms.shakes ); }
-			void			GetParms( soundShaderParms_t *out ) const { *out = parms; }
-			void			SetNoShakes( bool in ) { noShakes = in; }
-			bool			GetNoShakes( void ) const { return( noShakes ); }
+        float			        GetVolume( void ) const { return( parms.volume ); }
+        float			        GetShakes( void ) const { return( parms.shakes ); }
+        void			        GetParms( soundShaderParms_t *out ) const { *out = parms; }
+        void			        SetNoShakes( bool in ) { noShakes = in; }
+        bool			        GetNoShakes( void ) const { return( noShakes ); }
 
-			void			IncPlayCount( void ) { playCount++; }
-			int				GetPlayCount( void ) const { return( playCount ); }
+        void			        IncPlayCount( void ) { playCount++; }
+        int				        GetPlayCount( void ) const { return( playCount ); }
 // RAVEN END
 #endif
 
 #ifdef _HUMANHEAD
-	float					GetVolume(void) const { return parms.volume; }
+	    float					GetVolume(void) const { return parms.volume; }
 #endif
 
 	private:
@@ -337,15 +337,15 @@ class idSoundShader : public idDecl
 		int						numEntries;
 #ifdef _RAVEN
 // RAVEN BEGIN
-	bool					noShakes;					// Don't generate shake data
-	bool					frequentlyUsed;				// Expand this to pcm data no matter how long it is
+        bool					noShakes;					// Don't generate shake data
+        bool					frequentlyUsed;				// Expand this to pcm data no matter how long it is
 // RAVEN END
 // RAVEN BEGIN
 // bdube: frequency shift code from splash
-	float					minFrequencyShift;
-	float					maxFrequencyShift;
+        float					minFrequencyShift;
+        float					maxFrequencyShift;
 
-	int						playCount;					// For profiling
+        int						playCount;					// For profiling
 // RAVEN END
 #endif
 
@@ -384,7 +384,7 @@ class idSoundEmitter
 		virtual void			UpdateEmitter(const idVec3 &origin, int listenerId, const soundShaderParms_t *parms) = 0;
 #ifdef _RAVEN
 // jmarshall - todo add velocity
-	virtual void			UpdateEmitter(const idVec3& origin, const idVec3& velocity, int listenerId, const soundShaderParms_t* parms) = 0;
+	    virtual void			UpdateEmitter(const idVec3& origin, const idVec3& velocity, int listenerId, const soundShaderParms_t* parms) = 0;
 // jmarshalll end
 #endif
 
@@ -411,12 +411,12 @@ class idSoundEmitter
 		virtual	int				Index(void) const = 0;
 
 #ifdef _HUMANHEAD
-	//HUMANHEAD: aob
-	virtual void		ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier) = 0;
-	virtual soundShaderParms_t* GetSoundParms(idSoundShader* shader, const s_channelType channel) = 0;
-	virtual float			CurrentAmplitude( const s_channelType channel ) = 0;
-	virtual float			CurrentVoiceAmplitude( const s_channelType channel ) = 0;
-	//HUMANHEAD END
+        //HUMANHEAD: aob
+        virtual void		    ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier) = 0;
+        virtual soundShaderParms_t* GetSoundParms(idSoundShader* shader, const s_channelType channel) = 0;
+        virtual float			CurrentAmplitude( const s_channelType channel ) = 0;
+        virtual float			CurrentVoiceAmplitude( const s_channelType channel ) = 0;
+        //HUMANHEAD END
 #endif
 };
 
@@ -495,13 +495,13 @@ class idSoundWorld
 		virtual void			SetEnviroSuit(bool active) = 0;
 
 #ifdef _HUMANHEAD
-	//HUMANHEAD
-	virtual void			RegisterLocation(int area, const char *locationName) = 0;
-	virtual void			ClearAreaLocations() = 0;
-	//HUMANHEAD END
+        //HUMANHEAD
+        virtual void			RegisterLocation(int area, const char *locationName) = 0;
+        virtual void			ClearAreaLocations() = 0;
+        //HUMANHEAD END
 
-	virtual void			SetSpiritWalkEffect( bool active ) = 0;	// HUMANHEAD pdm
-	virtual void			SetVoiceDucker( bool active ) = 0;		// HUMANHEAD pdm
+        virtual void			SetSpiritWalkEffect( bool active ) = 0;	// HUMANHEAD pdm
+        virtual void			SetVoiceDucker( bool active ) = 0;		// HUMANHEAD pdm
 #endif
 };
 
@@ -593,12 +593,12 @@ class idSoundSystem
 		// is EAX support present - -1: disabled at compile time, 0: no suitable hardware, 1: ok, 2: failed to load OpenAL DLL
 		virtual int				IsEAXAvailable(void) = 0;
 #ifdef _RAVEN
-		virtual idSoundWorld* GetSoundWorldFromId(int worldId) = 0;
+		virtual idSoundWorld*   GetSoundWorldFromId(int worldId) = 0;
 		virtual idSoundEmitter* EmitterForIndex(int worldId, int index) = 0;
 		virtual int				AllocSoundEmitter(int worldId) = 0;
 		virtual void			FreeSoundEmitter(int worldId, int handle, bool immediate) = 0;
-		virtual void StopAllSounds(int worldId) = 0;
-		virtual void SetActiveSoundWorld(bool val) = 0;
+		virtual void            StopAllSounds(int worldId) = 0;
+		virtual void            SetActiveSoundWorld(bool val) = 0;
 		virtual void			FadeSoundClasses(int worldId, const int soundClass, const float to, const float over) = 0;
 		virtual	float			CurrentShakeAmplitudeForPosition(int worldId, const int time, const idVec3& listenerPosition) = 0;
 		virtual void			PlayShaderDirectly(int worldId, const char* name, int channel = -1) = 0;
@@ -606,56 +606,56 @@ class idSoundSystem
 		virtual void			WriteToSaveGame(int worldId, idFile* savefile) = 0;
 		virtual void			ReadFromSaveGame(int worldId, idFile* savefile) = 0;
 
-	// reset the listener portal to invalid during level transitions
-	virtual void			ResetListener( void ) = 0;
+        // reset the listener portal to invalid during level transitions
+        virtual void			ResetListener( void ) = 0;
 
 // RAVEN BEGIN
 // rjohnson: added list active sounds
-	virtual void			ListActiveSounds( int worldId ) = 0;
+        virtual void			ListActiveSounds( int worldId ) = 0;
 // RAVEN END
-	// End SoundWorld stuff
+// End SoundWorld stuff
 
 // RAVEN BEGIN
 // jscott: added
-	virtual size_t			ListSoundSummary( void ) = 0;
+        virtual size_t			ListSoundSummary( void ) = 0;
 
-	virtual bool			HasCache( void ) const = 0;
-	virtual rvCommonSample	*FindSample( const idStr &filename ) = 0;
-	virtual	int				SamplesToMilliseconds( int samples ) const = 0;
-	virtual void *			AllocSoundSample( int size ) = 0;
-	virtual void			FreeSoundSample( const byte *address ) = 0;
+        virtual bool			HasCache( void ) const = 0;
+        virtual rvCommonSample	*FindSample( const idStr &filename ) = 0;
+        virtual	int				SamplesToMilliseconds( int samples ) const = 0;
+        virtual void *			AllocSoundSample( int size ) = 0;
+        virtual void			FreeSoundSample( const byte *address ) = 0;
 
-	virtual bool			GetInsideLevelLoad( void ) const = 0;
-	virtual	bool			ValidateSoundShader( idSoundShader *shader ) = 0;
+        virtual bool			GetInsideLevelLoad( void ) const = 0;
+        virtual	bool			ValidateSoundShader( idSoundShader *shader ) = 0;
 
 // jscott: voice comm support
-	virtual	bool			EnableRecording( bool enable, bool test, float &micLevel ) = 0;
-	virtual int				GetVoiceData( byte *buffer, int maxSize ) = 0;
-	virtual void			PlayVoiceData( int clientNum, const byte *buffer, int bytes ) = 0;
-	virtual void			BufferVoiceData( void ) = 0;
-	virtual void			MixVoiceData( float *finalMixBuffer, int numSpeakers, int newTime ) = 0;
+        virtual	bool			EnableRecording( bool enable, bool test, float &micLevel ) = 0;
+        virtual int				GetVoiceData( byte *buffer, int maxSize ) = 0;
+        virtual void			PlayVoiceData( int clientNum, const byte *buffer, int bytes ) = 0;
+        virtual void			BufferVoiceData( void ) = 0;
+        virtual void			MixVoiceData( float *finalMixBuffer, int numSpeakers, int newTime ) = 0;
 // ddynerman: voice comm utility
-	virtual	int				GetCommClientNum( int channel ) const = 0;
-	virtual int				GetNumVoiceChannels( void ) const = 0;
+        virtual	int				GetCommClientNum( int channel ) const = 0;
+        virtual int				GetNumVoiceChannels( void ) const = 0;
 
 // jscott: reverb editor support
-	virtual	const char		*GetReverbName( int reverb ) = 0;
-	virtual	int				GetNumAreas( void ) = 0;
-	virtual	int				GetReverb( int area ) = 0;
-	virtual	bool			SetReverb( int area, const char *reverbName, const char *fileName ) = 0;
+        virtual	const char		*GetReverbName( int reverb ) = 0;
+        virtual	int				GetNumAreas( void ) = 0;
+        virtual	int				GetReverb( int area ) = 0;
+        virtual	bool			SetReverb( int area, const char *reverbName, const char *fileName ) = 0;
 
-	virtual void			EndCinematic() = 0;
+        virtual void			EndCinematic() = 0;
 
 // RAVEN END
 #endif
 
 #ifdef _HUMANHEAD
-	//HUMANHEAD rww
-	virtual int					GetSubtitleIndex(const char *soundName) = 0;
-	virtual void				SetSubtitleData(int subIndex, int subNum, const char *subText, float subTime, int subChannel) = 0;
-	virtual soundSub_t			*GetSubtitle(int subIndex, int subNum) = 0;
-	virtual soundSubtitleList_t *GetSubtitleList(int subIndex) = 0;
-	//HUMANHEAD END
+	    //HUMANHEAD rww
+        virtual int					GetSubtitleIndex(const char *soundName) = 0;
+        virtual void				SetSubtitleData(int subIndex, int subNum, const char *subText, float subTime, int subChannel) = 0;
+        virtual soundSub_t			*GetSubtitle(int subIndex, int subNum) = 0;
+        virtual soundSubtitleList_t *GetSubtitleList(int subIndex) = 0;
+	    //HUMANHEAD END
 #endif
 };
 

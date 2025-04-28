@@ -674,14 +674,14 @@ class idSys
 		virtual void			OpenURL(const char *url, bool quit) = 0;
 		virtual void			StartProcess(const char *exePath, bool quit) = 0;
 #ifdef _RAVEN
-	virtual int				Milliseconds(void) = 0;
+	    virtual int				Milliseconds(void) = 0;
 #endif
 #ifdef _HUMANHEAD
-	//HUMANHEAD rww
-	//logitech lcd keyboard interface functions
-	virtual bool			LGLCD_Valid(void) = 0;
-	virtual void			LGLCD_UploadImage(unsigned char *pixels, int w, int h, bool highPriority, bool flipColor) = 0;
-	//HUMANHEAD END
+        //HUMANHEAD rww
+        //logitech lcd keyboard interface functions
+        virtual bool			LGLCD_Valid(void) = 0;
+        virtual void			LGLCD_UploadImage(unsigned char *pixels, int w, int h, bool highPriority, bool flipColor) = 0;
+        //HUMANHEAD END
 #endif
 };
 

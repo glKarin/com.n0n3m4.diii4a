@@ -231,26 +231,26 @@ class idStr
 		int					Icmpn(const char *text, int n) const;
 		int					IcmpPrefix(const char *text) const;
 #ifdef _RAVEN
-		// RAVEN BEGIN
-  // bdube: changed to escapes
-      int                 IcmpNoEscape( const char *text ) const;
-  // RAVEN END
-  // RAVEN BEGIN 
+// RAVEN BEGIN
+// bdube: changed to escapes
+        int                 IcmpNoEscape( const char *text ) const;
+// RAVEN END
+// RAVEN BEGIN
 // bdube: escape codes
-	static int			IsEscape( const char *s, int* type = NULL );
-  // bdube: escapes 
-	int					IsEscape( int* type = NULL ) const;
-      static int          IcmpNoEscape( const char *s1, const char *s2 );
+	    static int			IsEscape( const char *s, int* type = NULL );
+// bdube: escapes
+	    int					IsEscape( int* type = NULL ) const;
+        static int          IcmpNoEscape( const char *s1, const char *s2 );
 
-	static char *		RemoveEscapes( char *s, int escapes = S_ESCAPE_ALL );
-	idStr &				RemoveEscapes ( int escapes = S_ESCAPE_ALL );
-  // RAVEN END
-  //
-	idStr &				ReplaceChar( const char from, const char to );
+	    static char *		RemoveEscapes( char *s, int escapes = S_ESCAPE_ALL );
+	    idStr &				RemoveEscapes ( int escapes = S_ESCAPE_ALL );
+// RAVEN END
+//
+	    idStr &				ReplaceChar( const char from, const char to );
 #endif
 #ifdef _RAVEN
-	// jmarshall: bot
-	void				StripDoubleQuotes(void);
+// jmarshall: bot
+	    void				StripDoubleQuotes(void);
 #endif
 
 
@@ -284,8 +284,8 @@ class idStr
 #ifdef _RAVEN
 // RAVEN BEGIN
 // abahr
-	void				Split( idList<idStr>& list, const char delimiter = ',', const char groupDelimiter = '\''  ) { Split( c_str(), list, delimiter, groupDelimiter ); }
-	static void			Split( const char* source, idList<idStr>& list, const char delimiter = ',', const char groupDelimiter = '\''  );
+	    void				Split( idList<idStr>& list, const char delimiter = ',', const char groupDelimiter = '\''  ) { Split( c_str(), list, delimiter, groupDelimiter ); }
+	    static void			Split( const char* source, idList<idStr>& list, const char delimiter = ',', const char groupDelimiter = '\''  );
 // RAVEN END
 		bool				Filter(const char *filter) const { return Filter(filter, true); }
 #endif
@@ -424,8 +424,8 @@ class idStr
 				if( s[i] >= 0x80 )
 					return false;
 			}
-			return true;
-		}
+            return true;
+        }
         static ID_INLINE bool	IsPureASCII( const char* s, const int maxLen ) {
             return IsPureASCII( ( const uint8_t* )s, maxLen );
         }
@@ -1417,21 +1417,22 @@ ID_INLINE void idStr::CopyRange( const char* text, int start, int end )
 
 #ifdef _RAVEN
 // RAVEN BEGIN
-  // bdube: escapes
+// bdube: escapes
 ID_INLINE int idStr::IsEscape( int* type ) const {
 	return idStr::IsEscape( data, type );
 }
-  ID_INLINE int idStr::IcmpNoEscape( const char *text ) const {
-      assert( text );
-      return idStr::IcmpNoEscape( data, text );
-  }
+
+ID_INLINE int idStr::IcmpNoEscape( const char *text ) const {
+  assert( text );
+  return idStr::IcmpNoEscape( data, text );
+}
 
 ID_INLINE idStr &idStr::RemoveEscapes ( int escapes ) {
 	idStr::RemoveEscapes( data, escapes );
 	len = Length( c_str() );
 	return *this;
 }
-  // RAVEN END
+// RAVEN END
 #endif
 
 #endif /* !__STR_H__ */

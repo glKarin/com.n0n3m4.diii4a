@@ -335,13 +335,20 @@ idCVar net_serverDlBaseURL("net_serverDlBaseURL",		"",				CVAR_GAME | CVAR_ARCHI
 idCVar net_serverDlTable("net_serverDlTable",		"",				CVAR_GAME | CVAR_ARCHIVE, "pak names for which download is provided, seperated by ;");
 #ifdef _MOD_FULL_BODY_AWARENESS
 idCVar harm_pm_fullBodyAwareness( "harm_pm_fullBodyAwareness", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "enables full-body awareness" );
-idCVar harm_pm_fullBodyAwarenessOffset("harm_pm_fullBodyAwarenessOffset", "0 0 0", CVAR_ARCHIVE | CVAR_GAME | CVAR_NETWORKSYNC, "full-body awareness offset(<forward-offset> <side-offset> <up-offset>)");
-idCVar harm_pm_fullBodyAwarenessHeadJoint( "harm_pm_fullBodyAwarenessHeadJoint", "Head", CVAR_GAME | CVAR_ARCHIVE, "head joint when without head model in full-body awareness" );
+idCVar harm_pm_fullBodyAwarenessOffset("harm_pm_fullBodyAwarenessOffset", "0 0 0", CVAR_ARCHIVE | CVAR_GAME | CVAR_NETWORKSYNC, "full-body awareness offset, format is \"<forward-offset> <side-offset> <up-offset>\"");
+idCVar harm_pm_fullBodyAwarenessHeadJoint( "harm_pm_fullBodyAwarenessHeadJoint", "Head", CVAR_GAME | CVAR_ARCHIVE | CVAR_NETWORKSYNC, "head joint when without head model in full-body awareness" );
 idCVar harm_pm_fullBodyAwarenessFixed( "harm_pm_fullBodyAwarenessFixed", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "do not attach view position to head in full-body awareness" );
 idCVar harm_pm_fullBodyAwarenessHeadVisible( "harm_pm_fullBodyAwarenessHeadVisible", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "do not suppress head in full-body awareness" );
 #endif
 #ifdef _MOD_VIEW_BODY
 idCVar harm_ui_showViewBody( "harm_ui_showViewBody", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "show view body" );
+#endif
+#ifdef _MOD_VIEW_LIGHT
+idCVar harm_ui_showViewLight( "harm_ui_showViewLight", "0", CVAR_GAME | CVAR_BOOL | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "show view flashlight" );
+idCVar harm_ui_viewLightShader( "harm_ui_viewLightShader", "lights/flashlight5", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "view flashlight material texture/entityDef name" );
+idCVar harm_ui_viewLightRadius( "harm_ui_viewLightRadius", "1280 640 640", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "view flashlight radius, format is \"<light_target> <light_right> <light_up>\"" );
+idCVar harm_ui_viewLightOffset( "harm_ui_viewLightOffset", "20 0 0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_ARCHIVE, "view flashlight origin offset, format is \"<forward-offset> <side-offset> <up-offset>\"" );
+idCVar harm_ui_viewLightType( "harm_ui_viewLightType", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_INTEGER | CVAR_ARCHIVE, "view flashlight type. 0=spot light; 1=point light" );
 #endif
 #ifdef __ANDROID__ //karin: re-normalize player movement direction. only for DIII4A smooth onscreen joystick control
 idCVar harm_g_normalizeMovementDirection("harm_g_normalizeMovementDirection", "0", CVAR_GAME | CVAR_BOOL, "Re-normalize player/walker movement direction");

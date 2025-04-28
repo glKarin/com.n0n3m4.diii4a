@@ -172,6 +172,8 @@ void idForce_Field::Evaluate(int time)
 	bounds.FromTransformedBounds(clipModel->GetBounds(), clipModel->GetOrigin(), clipModel->GetAxis());
 	numClipModels = gameLocal.clip.ClipModelsTouchingBounds(bounds, -1, clipModelList, MAX_GENTITIES);
 
+    torque.Zero();
+
 	for (i = 0; i < numClipModels; i++) {
 		cm = clipModelList[ i ];
 

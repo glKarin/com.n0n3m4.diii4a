@@ -214,7 +214,7 @@ static void etc2_compress_tex_image(const char *cachefname, GLenum target, GLint
 #else
     EncodeC((unsigned char *)pixels,
                 width, height,
-            4, // static_cast<int>(Etc::Image::Format::RGBA8),
+                4, // static_cast<int>(Etc::Image::Format::RGBA8),
                 0, // Etc::ErrorMetric::RGBA,
                 0, // fEffort,
                 numPhysicalCpuCores * numCpuPackages,

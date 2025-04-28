@@ -288,13 +288,13 @@ class idCommon
 		virtual int					KeyState(int key) = 0;
 
 #ifdef _HUMANHEAD
-	// HUMANHEAD pdm
-	virtual void				FixupKeyTranslations(const char *src, char *dst, int lengthAllocated) = 0;
-	virtual void				MaterialKeyForBinding(const char *binding, char *keyMaterial, char *key, bool &isBound) = 0;
+        // HUMANHEAD pdm
+        virtual void				FixupKeyTranslations(const char *src, char *dst, int lengthAllocated) = 0;
+        virtual void				MaterialKeyForBinding(const char *binding, char *keyMaterial, char *key, bool &isBound) = 0;
 
-	//HUMANHEAD rww
-	virtual void				SetGameSensitivityFactor(float factor) = 0; //allows game logic to set a sensitivity factor for input
-	//HUMANHEAD END
+        //HUMANHEAD rww
+        virtual void				SetGameSensitivityFactor(float factor) = 0; //allows game logic to set a sensitivity factor for input
+        //HUMANHEAD END
 #endif
 };
 

@@ -157,38 +157,38 @@ class idRenderWorldLocal : public idRenderWorld
 
 		//-----------------------
 #ifdef _RAVEN
-	virtual void			RenderScene( const renderView_t *renderView, int renderFlags/* = RF_NORMAL */) {
-		(void)renderFlags;
-		RenderScene(renderView);
-	}
-	virtual bool			HasSkybox(int areaNum);
+        virtual void			RenderScene( const renderView_t *renderView, int renderFlags/* = RF_NORMAL */) {
+            (void)renderFlags;
+            RenderScene(renderView);
+        }
+        virtual bool			HasSkybox(int areaNum);
 
-	virtual void			DebugClear(int time) {
-		DebugClearLines(time);
-		DebugClearPolygons(time);
-	};
+        virtual void			DebugClear(int time) {
+            DebugClearLines(time);
+            DebugClearPolygons(time);
+        };
 
 // jscott: want to be able to specify depth test
-	virtual void			DebugBounds(const idVec4& color, const idBounds& bounds, const idVec3& org, const int lifetime, bool depthTest) {
-		(void)depthTest;
-		DebugBox(color, idBox(bounds) + org, lifetime);
-	}
+        virtual void			DebugBounds(const idVec4& color, const idBounds& bounds, const idVec3& org, const int lifetime, bool depthTest) {
+            (void)depthTest;
+            DebugBox(color, idBox(bounds) + org, lifetime);
+        }
 
-	virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot, float nearDist, float alpha, int lifetime) { (void)color; (void)origin; (void)dir; (void)farDot; (void)farDist; (void)nearDot; (void)nearDist; (void)alpha; (void)lifetime; }
+        virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot, float nearDist, float alpha, int lifetime) { (void)color; (void)origin; (void)dir; (void)farDot; (void)farDist; (void)nearDot; (void)nearDist; (void)alpha; (void)lifetime; }
 
-	virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas );
-	void					FindVisibleAreas_r(const idVec3 &origin, int areaNum, const struct portalStack_s *ps, bool *visibleAreas);
+        virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas );
+        void					FindVisibleAreas_r(const idVec3 &origin, int areaNum, const struct portalStack_s *ps, bool *visibleAreas);
 
-	// jscott: handling of effects
-	virtual qhandle_t		AddEffectDef(const renderEffect_t* reffect, int time);
-	virtual bool			UpdateEffectDef(qhandle_t effectHandle, const renderEffect_t* reffect, int time);
-	virtual void			StopEffectDef(qhandle_t effectHandle);
-	virtual const class rvRenderEffectLocal* GetEffectDef(qhandle_t effectHandle) const;
-	virtual void			FreeEffectDef(qhandle_t effectHandle);
-	virtual bool			EffectDefHasSound(const renderEffect_s* reffect);
+// jscott: handling of effects
+        virtual qhandle_t		AddEffectDef(const renderEffect_t* reffect, int time);
+        virtual bool			UpdateEffectDef(qhandle_t effectHandle, const renderEffect_t* reffect, int time);
+        virtual void			StopEffectDef(qhandle_t effectHandle);
+        virtual const class rvRenderEffectLocal* GetEffectDef(qhandle_t effectHandle) const;
+        virtual void			FreeEffectDef(qhandle_t effectHandle);
+        virtual bool			EffectDefHasSound(const renderEffect_s* reffect);
 
 // jmarshall: BSE
-	idList<rvRenderEffectLocal*>	effectsDef;
+	    idList<rvRenderEffectLocal*>	effectsDef;
 // jmarshll end
 #endif
 

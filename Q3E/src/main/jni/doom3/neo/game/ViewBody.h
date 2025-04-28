@@ -7,7 +7,7 @@
 cvar harm_ui_showViewBody, default 0 = hide view body
 
 // player_viewbody def example:
-entityDef player_viewbody { // default name is player_viewbody, or setup in player entity with property 'player_viewbody'
+entityDef player_viewbody { // must setup in player entity with property 'player_viewbody'
     "spawnclass"				"idViewBody"
     "body_model"                "player_model_torso_and_lower_body" // body's md5 model: animations's name same as player model: string
     "body_offset"               "-15 0 0" // extras model offset: vector <forward right up>, default = 0 0 0
@@ -142,7 +142,7 @@ private:
     CLASS_STATES_PROTOTYPE ( idViewBody );
 };
 
-idPlayer * idViewBody::GetOwner( void )
+ID_INLINE idPlayer * idViewBody::GetOwner( void )
 {
     return owner;
 }

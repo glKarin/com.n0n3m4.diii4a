@@ -680,7 +680,7 @@ void RB_GLSL_DrawInteractions(void)
                     sideStop = r_shadowMapParallelSplitFrustums + 1;
                 else
 #endif
-				sideStop = 1;
+                sideStop = 1;
             }
             else if( vLight->pointLight )
             {

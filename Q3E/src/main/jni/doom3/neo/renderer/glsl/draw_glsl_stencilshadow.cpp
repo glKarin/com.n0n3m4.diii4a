@@ -32,14 +32,14 @@ void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *s
         GL_UseProgram(&ambientLightingTranslucentShader);
     else
     {
-		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-			GL_UseProgram(&interactionBlinnPhongTranslucentShader);
-		else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-			GL_UseProgram(&interactionPBRTranslucentShader);
+        if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+            GL_UseProgram(&interactionBlinnPhongTranslucentShader);
+        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
+            GL_UseProgram(&interactionPBRTranslucentShader);
         else if (r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT )
             GL_UseProgram(&ambientLightingTranslucentShader);
-		else
-			GL_UseProgram(&interactionTranslucentShader);
+        else
+            GL_UseProgram(&interactionTranslucentShader);
     }
 
 
@@ -220,14 +220,14 @@ void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, in
         GL_UseProgram(&ambientLightingSoftShader);
     else
     {
-		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-			GL_UseProgram(&interactionBlinnPhongSoftShader);
-		else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-			GL_UseProgram(&interactionPBRSoftShader);
+        if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+            GL_UseProgram(&interactionBlinnPhongSoftShader);
+        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
+            GL_UseProgram(&interactionPBRSoftShader);
         else if (r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT )
             GL_UseProgram(&ambientLightingSoftShader);
-		else
-			GL_UseProgram(&interactionSoftShader);
+        else
+            GL_UseProgram(&interactionSoftShader);
     }
 
 	// enable the vertex arrays

@@ -137,6 +137,10 @@ class idLight : public idEntity
 		void			Event_SetSoundHandles(void);
 		void			Event_FadeOut(float time);
 		void			Event_FadeIn(float time);
+
+#ifdef _MOD_VIEW_LIGHT
+        friend class idViewLight;
+#endif
 };
 
 #endif /* !__GAME_LIGHT_H__ */

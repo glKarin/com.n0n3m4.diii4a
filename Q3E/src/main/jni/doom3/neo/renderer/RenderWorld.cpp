@@ -750,7 +750,8 @@ void idRenderWorldLocal::RenderScene(const renderView_t *renderView)
 		return;
 	}
 #ifdef _ENGINE_MODEL_VIEWER
-	ModelTest_TestModel(renderView->time);
+	ModelTest_RenderFrame(renderView->time);
+    ModelLight_RenderFrame(renderView->time);
 #endif
 
 	copy = *renderView;

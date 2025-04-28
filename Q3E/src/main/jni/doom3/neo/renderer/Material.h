@@ -865,21 +865,21 @@ class idMaterial : public idDecl
 #ifdef _RAVEN // quake4 material
 // RAVEN BEGIN
 // dluetscher: added SURF_NO_T_FIX to merge surfaces (like decals), but skipping any T-junction fixing
-	bool				NoTFix( void ) const { return ( surfaceFlags & SURF_NO_T_FIX ) != 0; }
+            bool				NoTFix( void ) const { return ( surfaceFlags & SURF_NO_T_FIX ) != 0; }
 // RAVEN END
 
-	const rvDeclMatType* GetMaterialType(void) const { return(materialType); }
+            const rvDeclMatType* GetMaterialType(void) const { return(materialType); }
 // RAVEN BEGIN
 // rjohnson: added vertex randomizing
-						// regs should point to a float array large enough to hold GetNumRegisters() floats
-	void				EvaluateRegisters( float *regs, const float entityParms[MAX_ENTITY_SHADER_PARMS], 
-											const struct viewDef_s *view, int soundEmitter = 0, idVec3 *randomizer = NULL ) const;
-// RAVEN END
+        // regs should point to a float array large enough to hold GetNumRegisters() floats
+        void				EvaluateRegisters( float *regs, const float entityParms[MAX_ENTITY_SHADER_PARMS],
+                                                    const struct viewDef_s *view, int soundEmitter = 0, idVec3 *randomizer = NULL ) const;
+        // RAVEN END
 #endif
 #ifdef _HUMANHEAD
-						// HUMANHEAD tmj: returns how the subview should be rendered (i.e. mirror/portal/skybox)
-	subviewClass_t		GetSubviewClass( void) const { return subviewClass; }
-	int					GetDirectPortalDistance() const { return directPortalDistance; } // HUMANHEAD CJR:  direct render portal distance cull
+// HUMANHEAD tmj: returns how the subview should be rendered (i.e. mirror/portal/skybox)
+        subviewClass_t		GetSubviewClass( void) const { return subviewClass; }
+        int					GetDirectPortalDistance() const { return directPortalDistance; } // HUMANHEAD CJR:  direct render portal distance cull
 #endif
 #ifdef _NO_LIGHT
 		bool IsNoLight(void) const { return noLight; }
@@ -930,25 +930,25 @@ class idMaterial : public idDecl
 #ifdef _RAVEN // quake4 material
 // RAVEN BEGIN
 // jscott: for material types
-	const rvDeclMatType* materialType;
-	byte* materialTypeArray;	// an array of material type indices generated from the hit image
-	idStr				materialTypeArrayName;
-	int					MTAWidth;
-	int					MTAHeight;
+        const rvDeclMatType* materialType;
+        byte* materialTypeArray;	// an array of material type indices generated from the hit image
+        idStr				materialTypeArrayName;
+        int					MTAWidth;
+        int					MTAHeight;
 
-	// rjohnson: started tracking image/material usage
-	int					useCount;
-	int					globalUseCount;
+// rjohnson: started tracking image/material usage
+        int					useCount;
+        int					globalUseCount;
 
-	// AReis: New portal distance culling stuff.
-	float				portalDistanceNear;
-	float				portalDistanceFar;
-	idImage* portalImage;
+// AReis: New portal distance culling stuff.
+        float				portalDistanceNear;
+        float				portalDistanceFar;
+        idImage* portalImage;
 // RAVEN END
 #endif
 #ifdef _HUMANHEAD
-	subviewClass_t		subviewClass;		// HUMANHEAD tmj: Type of subview this surface points to
-	int					directPortalDistance; // HUMANHEAD:  Distance at which direct render portals are drawn
+        subviewClass_t		subviewClass;		// HUMANHEAD tmj: Type of subview this surface points to
+        int					directPortalDistance; // HUMANHEAD:  Distance at which direct render portals are drawn
 #endif
 
 		bool				noFog;				// surface does not create fog interactions

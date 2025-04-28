@@ -154,10 +154,10 @@ static void R_Font_ConvertD3BFGFont(const d3bfg_fontInfo_t &fontInfo, fontInfoEx
 
     memset(&font, 0, sizeof(font));
 
-    font.maxWidthSmall = int((float)fontInfo.oldInfo[0].maxWidth/4.0f);
-    font.maxHeightSmall = int((float)fontInfo.oldInfo[0].maxHeight/4.0f);
-    font.maxWidthMedium = int((float)fontInfo.oldInfo[1].maxWidth/2.0f);
-    font.maxHeightMedium = int((float)fontInfo.oldInfo[1].maxHeight/2.0f);
+    font.maxWidthSmall = int((float)fontInfo.oldInfo[0].maxWidth / 4.0f);
+    font.maxHeightSmall = int((float)fontInfo.oldInfo[0].maxHeight / 4.0f);
+    font.maxWidthMedium = int((float)fontInfo.oldInfo[1].maxWidth / 2.0f);
+    font.maxHeightMedium = int((float)fontInfo.oldInfo[1].maxHeight / 2.0f);
     font.maxWidthLarge = fontInfo.oldInfo[2].maxWidth;
     font.maxHeightLarge = fontInfo.oldInfo[2].maxHeight;
 

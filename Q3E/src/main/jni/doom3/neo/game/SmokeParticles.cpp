@@ -217,7 +217,7 @@ bool idSmokeParticles::EmitSmoke(const idDeclParticle *smoke, const int systemSt
 		int		finalParticleTime = stage->cycleMsec * stage->spawnBunching;
 		int		deltaMsec = gameLocal.time - systemStartTime;
 
-		int		nowCount, prevCount;
+		int		nowCount = 0, prevCount;
 
 		if (finalParticleTime == 0) {
 			// if spawnBunching is 0, they will all come out at once
@@ -252,7 +252,7 @@ bool idSmokeParticles::EmitSmoke(const idDeclParticle *smoke, const int systemSt
 		}
 
 		// find an activeSmokeStage that matches this
-		activeSmokeStage_t	*active;
+		activeSmokeStage_t	*active = NULL;
 		int i;
 
 		for (i = 0 ; i < activeStages.Num() ; i++) {

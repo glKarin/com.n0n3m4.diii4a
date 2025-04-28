@@ -1522,9 +1522,9 @@ void idSessionLocal::MoveToNewMap(const char *mapName)
             //      getting the same filename in spanish, probably because the strings contained
             //      dots and everything behind them was cut off as "file extension".. see #305)
 
-	        // Autosave at the beginning of the level
-	        SaveGame(GetAutoSaveName(mapName), true);
-	    }
+            // Autosave at the beginning of the level
+            SaveGame(GetAutoSaveName(mapName), true);
+        }
         else
             common->Printf("Autosave at the beginning of the level disabled with `com_disableAutoSaves` = 1");
     }
@@ -2927,10 +2927,6 @@ void idSessionLocal::PacifierUpdate()
 		return;
 	}
 
-#ifdef _MULTITHREAD
-	if(multithreadActive && Sys_InRenderThread()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
-		return;
-#endif
 	int	time = eventLoop->Milliseconds();
 
 	if (time - lastPacifierTime < 100) {
@@ -2949,6 +2945,9 @@ void idSessionLocal::PacifierUpdate()
 
 	Sys_GenerateEvents();
 
+#ifdef _MULTITHREAD
+	if(!multithreadActive || !Sys_InRenderThread()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
+#endif
 	UpdateScreen();
 
 	idAsyncNetwork::client.PacifierUpdate();
@@ -4254,7 +4253,7 @@ void idSessionLocal::UpdateScreen(byte *data, bool outOfSequence)
 	if (com_speeds.GetBool()) {
 		renderSystem->EndFrame(&time_frontend, &time_backend);
 	} else {
-		renderSystem->EndFrame(data, NULL, NULL);
+        renderSystem->EndFrame(data, NULL, NULL);
 	}
 
 	insideUpdateScreen = false;

@@ -183,31 +183,31 @@ class idWindow
 			ON_ENTERRELEASE,
 #ifdef _RAVEN // quake4 gui event
 // jmarshall - quake 4 guis
-        ON_BACKACTION,
-        ON_TABRELEASE,
-        ON_GAINFOCUS,
-        ON_LOSEFOCUS,
-        ON_SELCHANGE,
-        ON_INIT,
-        ON_JOYSTART,
-        ON_JOYSELECT,
-        ON_JOYBACK,
-        ON_JOYLSHOULDER,
-        ON_JOYRSHOULDER,
-        ON_JOYUP,
-        ON_JOYDOWN,
-        ON_JOYLEFT,
-        ON_JOYRIGHT,
-        ON_JOYBUTTON1,
-        ON_JOYBUTTON2,
-        ON_JOYBACKBUTTON,
+            ON_BACKACTION,
+            ON_TABRELEASE,
+            ON_GAINFOCUS,
+            ON_LOSEFOCUS,
+            ON_SELCHANGE,
+            ON_INIT,
+            ON_JOYSTART,
+            ON_JOYSELECT,
+            ON_JOYBACK,
+            ON_JOYLSHOULDER,
+            ON_JOYRSHOULDER,
+            ON_JOYUP,
+            ON_JOYDOWN,
+            ON_JOYLEFT,
+            ON_JOYRIGHT,
+            ON_JOYBUTTON1,
+            ON_JOYBUTTON2,
+            ON_JOYBACKBUTTON,
 // jmarshall end
 #endif
 #ifdef _HUMANHEAD
-		ON_TABACTIVATE,
-		ON_STARTUP,
-		ON_MAXCHARS,
-		ON_SLIDERCHANGE, // sliderDef idSliderWindow
+            ON_TABACTIVATE,
+            ON_STARTUP,
+            ON_MAXCHARS,
+            ON_SLIDERCHANGE, // sliderDef idSliderWindow
 #endif
 			SCRIPT_COUNT
 		};
@@ -452,75 +452,75 @@ class idWindow
 		idWinRectangle rect;				// overall rect
 		idWinVec4	backColor;
 #ifdef _RAVEN // quake4 gui var
-    idWinFloatPtr	backColor_r;
-    idWinFloatPtr	backColor_g;
-    idWinFloatPtr	backColor_b;
-    idWinFloatPtr	backColor_w;
+        idWinFloatPtr	backColor_r;
+        idWinFloatPtr	backColor_g;
+        idWinFloatPtr	backColor_b;
+        idWinFloatPtr	backColor_w;
 #endif
 		idWinVec4	matColor;
 #ifdef _RAVEN // quake4 gui var
-    idWinFloatPtr	matColor_r;
-    idWinFloatPtr	matColor_g;
-    idWinFloatPtr	matColor_b;
-    idWinFloatPtr	matColor_w;
+        idWinFloatPtr	matColor_r;
+        idWinFloatPtr	matColor_g;
+        idWinFloatPtr	matColor_b;
+        idWinFloatPtr	matColor_w;
 #endif
 		idWinVec4	foreColor;
 #ifdef _RAVEN // quake4 gui var
-    idWinFloatPtr	foreColor_r;
-    idWinFloatPtr	foreColor_g;
-    idWinFloatPtr	foreColor_b;
-    idWinFloatPtr	foreColor_w;
+        idWinFloatPtr	foreColor_r;
+        idWinFloatPtr	foreColor_g;
+        idWinFloatPtr	foreColor_b;
+        idWinFloatPtr	foreColor_w;
 #endif
 		idWinVec4	hoverColor;
 #ifdef _RAVEN // quake4 gui var
-    idWinFloatPtr	hoverColor_r;
-    idWinFloatPtr	hoverColor_g;
-    idWinFloatPtr	hoverColor_b;
-    idWinFloatPtr	hoverColor_w;
+        idWinFloatPtr	hoverColor_r;
+        idWinFloatPtr	hoverColor_g;
+        idWinFloatPtr	hoverColor_b;
+        idWinFloatPtr	hoverColor_w;
 #endif
 		idWinVec4	borderColor;
 #ifdef _RAVEN // quake4 gui var
-    idWinFloatPtr	borderColor_r;
-    idWinFloatPtr	borderColor_g;
-    idWinFloatPtr	borderColor_b;
-    idWinFloatPtr	borderColor_w;
+        idWinFloatPtr	borderColor_r;
+        idWinFloatPtr	borderColor_g;
+        idWinFloatPtr	borderColor_b;
+        idWinFloatPtr	borderColor_w;
 #endif
 		idWinFloat	textScale;
 		idWinFloat	rotate;
 		idWinStr	text;
 		idWinBackground	backGroundName;			//
 #ifdef _RAVEN // quake4 gui var
-    idWinFloat textspacing;
-    idWinFloat textstyle;
-    idWinInt itemheight;
-    idWinInt scrollbar;
-    idWinStr backgroundHover;
-    idWinStr backgroundFocus;
-    idWinStr backgroundLine;
-    idWinStr tabTextScales;
-    idWinInt cvarMin;
-    idWinStr model1;
-    idWinStr skin;
+        idWinFloat textspacing;
+        idWinFloat textstyle;
+        idWinInt itemheight;
+        idWinInt scrollbar;
+        idWinStr backgroundHover;
+        idWinStr backgroundFocus;
+        idWinStr backgroundLine;
+        idWinStr tabTextScales;
+        idWinInt cvarMin;
+        idWinStr model1;
+        idWinStr skin;
 #endif
 #ifdef _HUMANHEAD
-	idWinVec4 margins;
-	idWinVec2 cornerSize;
-	idWinVec2 edgeSize;
-	idWinVec4 hoverMatColor;
-	idWinVec4 focusColor;
-	idWinVec4 activeColor;
-	idWinVec4 seperatorLines;
-	idWinInt seperatorMargin;
-	idWinVec4 hoverBorderColor;
-	idWinInt activeTab;
-	idWinVec4 sepColor;
-	idWinVec2 tabMargins;
-	idWinFloat trailOffset;
-	idWinInt splineIn;
+        idWinVec4 margins;
+        idWinVec2 cornerSize;
+        idWinVec2 edgeSize;
+        idWinVec4 hoverMatColor;
+        idWinVec4 focusColor;
+        idWinVec4 activeColor;
+        idWinVec4 seperatorLines;
+        idWinInt seperatorMargin;
+        idWinVec4 hoverBorderColor;
+        idWinInt activeTab;
+        idWinVec4 sepColor;
+        idWinVec2 tabMargins;
+        idWinFloat trailOffset;
+        idWinInt splineIn;
 
-	int translateFontNum;
-	void Translate(int tFontNum = -1);
-	virtual void SetVisible(bool visible);
+        int                 translateFontNum;
+        void                Translate(int tFontNum = -1);
+        virtual void        SetVisible(bool visible);
 #endif
 
 		idList<idWinVar *> definedVars;

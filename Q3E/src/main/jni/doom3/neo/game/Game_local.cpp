@@ -2579,6 +2579,21 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t *clientCmds)
 	RunDebugInfo();
 	D_DrawDebugLines();
 
+#ifdef _MOD_FULL_BODY_AWARENESS
+    if(harm_pm_fullBodyAwarenessOffset.IsModified())
+        harm_pm_fullBodyAwarenessOffset.ClearModified();
+#endif
+#ifdef _MOD_VIEW_LIGHT
+    if(harm_ui_viewLightShader.IsModified())
+        harm_ui_viewLightShader.ClearModified();
+    if(harm_ui_viewLightRadius.IsModified())
+        harm_ui_viewLightRadius.ClearModified();
+    if(harm_ui_viewLightOffset.IsModified())
+        harm_ui_viewLightOffset.ClearModified();
+    if(harm_ui_viewLightType.IsModified())
+        harm_ui_viewLightType.ClearModified();
+#endif
+
 	return ret;
 }
 

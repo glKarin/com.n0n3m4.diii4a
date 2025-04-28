@@ -182,9 +182,9 @@ class idParser
 		static void		SetBaseFolder(const char *path);
 #ifdef _RAVEN
 // jmarshall
-	int				Parse1DMatrixLegacy(int x, float* m);
+	    int				Parse1DMatrixLegacy(int x, float* m);
 // jmarshall end
-	int				Parse1DMatrix( int x, float *m, bool ravenMatrix/* = false //k*/ );
+	    int				Parse1DMatrix( int x, float *m, bool ravenMatrix/* = false //k*/ );
 #endif
 
 

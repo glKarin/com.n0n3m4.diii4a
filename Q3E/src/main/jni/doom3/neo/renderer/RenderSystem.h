@@ -85,15 +85,15 @@ typedef struct glconfig_s {
 
 	bool				isInitialized;
 
-	bool framebufferObjectAvailable;
-	int maxRenderbufferSize;
-	int maxColorAttachments;
+	bool                framebufferObjectAvailable;
+	int                 maxRenderbufferSize;
+    int                 maxColorAttachments;
 
-	bool depthTextureAvailable;
-	bool depthTextureCubeMapAvailable;
-	bool depth24Available;
-	bool gl_FragDepthAvailable;
-	int multiSamples;
+	bool                depthTextureAvailable;
+	bool                depthTextureCubeMapAvailable;
+	bool                depth24Available;
+	bool                gl_FragDepthAvailable;
+	int                 multiSamples;
 } glconfig_t;
 
 
@@ -240,16 +240,16 @@ class idRenderSystem
 		virtual void			DrawBigStringExt(int x, int y, const char *string, const idVec4 &setColor, bool forceColor, const idMaterial *material) = 0;
 
 #ifdef _HUMANHEAD
-	virtual void			SetEntireSceneMaterial(idMaterial* material) = 0; // HUMANHEAD CJR
-	virtual bool			IsScopeView() = 0;// HUMANHEAD CJR
-	virtual void			SetScopeView(bool view) = 0; // HUMANHEAD CJR
-	virtual bool			IsShuttleView() = 0;// HUMANHEAD pdm
-	virtual void			SetShuttleView(bool view) = 0;// HUMANHEAD pdm
-	virtual bool			SupportsFragmentPrograms(void) = 0; // HUMANHEAD CJR
-	virtual int				VideoCardNumber(void) = 0; // HUMANHEAD CJR
+        virtual void			SetEntireSceneMaterial(idMaterial* material) = 0; // HUMANHEAD CJR
+        virtual bool			IsScopeView() = 0;// HUMANHEAD CJR
+        virtual void			SetScopeView(bool view) = 0; // HUMANHEAD CJR
+        virtual bool			IsShuttleView() = 0;// HUMANHEAD pdm
+        virtual void			SetShuttleView(bool view) = 0;// HUMANHEAD pdm
+        virtual bool			SupportsFragmentPrograms(void) = 0; // HUMANHEAD CJR
+        virtual int				VideoCardNumber(void) = 0; // HUMANHEAD CJR
 												
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-	virtual void			LogViewRender(const struct renderView_s *view) = 0;
+	    virtual void			LogViewRender(const struct renderView_s *view) = 0;
 #endif //HUMANHEAD END
 #endif
 

@@ -32,12 +32,13 @@ public final class Constants
             "Add spiritview and deathview GLSL shaders on Prey(2006).",
             "Update GZDOOM version to 4.14.1.",
             "Add multiplayer game bot support on DOOM 3.",
-            "Add custom GLSL shader program of new stage material support on DOOM 3/Quake 4/Prey.",
-            "All game support setup vsync.",
+            "Add player flashlight with cvar `harm_ui_showViewLight` on DOOM 3.",
+            "Add custom GLSL shader program of new stage material support on DOOM 3/Quake 4/Prey(2006).",
+            "All game support vsync setting.",
             "Improve multiplayer game bot system on Quake 4.",
             "On-screen buttons using OpenGL buffer.",
-            "Add skip hit effect support with cvar `harm_g_skipHitEffect` amd command `skipHitEffect` on DOOM 3/Quake 4/Prey.",
-            "Add cascaded shadow mapping with parallel lights(cvar `r_shadowMapSplits`) on DOOM 3/Quake 4/Prey.",
+            "Add skip hit effect support with cvar `harm_g_skipHitEffect` amd command `skipHitEffect` on DOOM 3/Quake 4/Prey(2006).",
+            "Add cascaded shadow mapping with parallel lights(cvar `r_shadowMapSplits`) on DOOM 3/Quake 4/Prey(2006).",
             "[Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) have removed on this release!"
         };
 	};
