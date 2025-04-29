@@ -15,24 +15,24 @@ varying vec4 var_Color;
 
 void main(void)
 {
+    // COMPUTE UNADJUSTED/ADJUSTED TEXCOORDS
     vec4 unadjustedTC = gl_FragCoord * u_windowCoords;
-    vec4 adjustedTC = unadjustedTC * u_nonPowerOfTwo;
 
-    vec4 R0 = texture2DProj(u_fragmentMap1, unadjustedTC.xyw);
+    // compute warp factor
+    vec4 R0 = texture2D(u_fragmentMap1, unadjustedTC.xy);
     R0 = R0 * var_Color;
     vec4 warpFactor = 1.0 - R0;
 
+    // compute _currentRender preturbed texcoords
     R0 = unadjustedTC;
-
-    float R1 = 1.0 / R0.w;
-    R0.w = 1.0;
-    R0.xy = R0.xy * R1;
 
     R0.xy = R0.xy - 0.5;
     R0.xy = R0.xy * warpFactor.xy;
     R0.xy = R0.xy + 0.5;
 
+    // scale by the screen non-power-of-two-adjust
     R0 = R0 * u_nonPowerOfTwo;
 
-    gl_FragColor = vec4(texture2DProj(u_fragmentMap0, R0.xyw).xyz, 1.0);
+    // do the _currentRender lookup
+    gl_FragColor = vec4(texture2D(u_fragmentMap0, R0.xy).xyz, 1.0);
 }
