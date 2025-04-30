@@ -717,3 +717,9 @@ void R_ConvertImage_f(const idCmdArgs &args)
         common->Printf("Convert error: %s\n", ret.c_str());
     }
 }
+
+void R_Image_AddCommand(void)
+{
+	cmdSystem->AddCommand("convertImage", R_ConvertImage_f, CMD_FL_RENDERER, "convert image format", idCmdSystem::ArgCompletion_ImageName);
+    cmdSystem->AddCommand("extractBimage", R_ExtractBImage_f, CMD_FL_RENDERER, "extract DOOM3-BFG's bimage image");
+}

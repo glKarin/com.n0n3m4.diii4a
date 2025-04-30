@@ -133,7 +133,7 @@ int idGLSLShaderManager::Add(shaderProgram_t *shader)
 		common->Warning("idGLSLShaderManager::Add shader's name is dup '%s'!", shader->name);
 		return index; // -1
 	}
-	common->Printf("idGLSLShaderManager::Add shader program '%s'.\n", shader->name);
+	common->Printf("idGLSLShaderManager::Add shader program '%s' -> %d.\n", shader->name, shader->program);
 	return shaders.Append(shader);
 }
 
@@ -1794,4 +1794,14 @@ bool RB_GLSL_FindGLSLShaderSource(const char *name, int type, idStr *source, idS
     {
         return false;
     }
+}
+
+#include "glsl_arb_shader.cpp"
+
+void GLSL_AddCommand(void)
+{
+	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export internal GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
+	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print internal GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
+	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export internal original C-String GLSL shader source for developer");
+    cmdSystem->AddCommand("convertARB", GLSL_ConvertARBShader_f, CMD_FL_RENDERER, "convert ARB shader to GLSL shader", GLSL_ArgCompletion_glprogs);
 }

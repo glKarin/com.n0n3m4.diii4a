@@ -2302,15 +2302,12 @@ void R_InitCommands(void)
 	extern void R_DumpShadowMap_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("harm_dumpShadowMap", R_DumpShadowMap_f, CMD_FL_RENDERER, "dump shadow map to file in next frame");
 #endif
-	extern void R_ConvertImage_f(const idCmdArgs &args);
-	cmdSystem->AddCommand("convertImage", R_ConvertImage_f, CMD_FL_RENDERER, "convert image format", idCmdSystem::ArgCompletion_ImageName);
-	extern void R_ExportGLSLShaderSource_f(const idCmdArgs &args);
-	extern void R_PrintGLSLShaderSource_f(const idCmdArgs &args);
-	extern void R_ExportDevShaderSource_f(const idCmdArgs &args);
-	common->Printf("[Harmattan]: GLSL command features: \n    exportGLSLShaderSource: export GLSL shader source to filesystem.\n    reloadGLSLprograms: reload external shader source.\n    printGLSLShaderSource: print shader source.\n    exportDevShaderSource: export original C-String GLSL shader source to filesystem.\n");
-	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export internal GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
-	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print internal GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
-	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export internal original C-String GLSL shader source for developer");
+
+	extern void R_Image_AddCommand(void);
+	R_Image_AddCommand();
+
+	extern void GLSL_AddCommand(void);
+	GLSL_AddCommand();
 #ifdef _EXTRAS_TOOLS
     extern void MD5Anim_AddCommand(void);
 	MD5Anim_AddCommand();
@@ -2325,8 +2322,6 @@ void R_InitCommands(void)
     extern void Font_AddCommand(void);
     Font_AddCommand();
 #endif
-    extern void R_ExtractBImage_f(const idCmdArgs &args);
-    cmdSystem->AddCommand("extractBimage", R_ExtractBImage_f, CMD_FL_RENDERER, "extract DOOM3-BFG's bimage image");
 }
 
 /*

@@ -1255,8 +1255,8 @@ bool R_LoadCubeImages(const char *imgName, cubeFiles_t extensions, byte *pics[6]
 	return true;
 }
 
-#include "image/Image_files_ext.cpp"
 #include "image/Image_bimage.cpp"
+#include "image/Image_files_ext.cpp"
 
 #include "DXT/DXTEncoder.cpp"
 #include "DXT/DXTDecoder.cpp"
