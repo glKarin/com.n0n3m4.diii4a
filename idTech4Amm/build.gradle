@@ -10,8 +10,8 @@ android {
         applicationId "com.karin.idTech4Amm"
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
-        versionCode 11063
-        versionName '1.1.0harmattan63'
+        versionCode 11065
+        versionName '1.1.0harmattan65'
          /*
             natasha: A CSOL CT character, for my Quake II for MeeGo Harmattan port version 5 at 2018
             verena: GC singer, for my first YouKu 3rd client for MeeGo Harmattan at 2015

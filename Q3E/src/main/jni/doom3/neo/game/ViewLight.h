@@ -7,7 +7,9 @@
 cvar harm_ui_showViewLight, default 0 = hide view flash light
 cvar harm_ui_viewLightShader, default lights/flashlight5 = view flash light material texture/entityDef name
 cvar harm_ui_viewLightRadius, default 1280 640 640 = view flash light radius
-cvar harm_ui_viewLightOffset, default 20 0 0 = view flash light origin offset
+cvar harm_ui_viewLightOffset, default 0 0 0 = view flash light origin offset
+cvar harm_ui_viewLightType, default 0 = player view flashlight type
+cvar harm_ui_viewLightOnWeapon, default 0 = player view flashlight follow weapon position
 */
 
 #include "State.h"

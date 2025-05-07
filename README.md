@@ -6,9 +6,9 @@
 ##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部/FTEQW/星球大战:绝地武士 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan63(lindaiyu)  
+1.1.0harmattan65(lindaiyu)  
 **Latest update:**
-2025-04-01  
+2025-05-05  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -17,7 +17,8 @@ Android 4.4+
 GPLv3  
 
 ----------------------------------------------------------------------------------
-> **idTech4's feature**  
+
+> ### idTech4's feature 
 * Linux/Windows(MinGW/MSVC(without editor)) build
 * multi-threading renderer
 * pure soft shadow with shadow-mapping
@@ -29,23 +30,19 @@ GPLv3
 * png/dds/bimage texture image, jpeg/png/bmp/dds format of screenshot
 * obj/dae format static model
 * OpenAL(soft) and EFX Reverb
-* DOOM3(with full body awareness mod)
-* Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
+* DOOM3(with full body awareness mod, view body mod, bot mod, view flashlight mod)
+* Quake4(with bot mod, full body awareness mod, view body mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
 
-> **Build DOOM3/Quake4/Prey(2006) mod for Android idTech4A++**  
+---------------------------------------------------------------------------------- 
 
-[DOOM 3 & RoE SDK](https://github.com/glKarin/idtech4amm_doom3_sdk)  
-[Quake 4 SDK](https://github.com/glKarin/idtech4amm_quake4_sdk)  
-[Prey(2006) SDK](https://github.com/glKarin/idtech4amm_prey_sdk)  
-
-> **Compare with other OpenGLES rendering version of DOOM3**  
+> ### Compare with other OpenGLES rendering version of DOOM3  
 
 | Feature | idTech4A++ | Other |
 |:-----|:-----:|:-----:|
 | Multi-threading | Support<br/>(but can't switch in gaming) | d3es-multithread support<br/>(and support switch in gaming) |
-| New stage shader<br/>(heatHaze, heatHazeWithMask, heatHazeWithMaskAndVertex, colorProcess) | Yes | - |
-| TexGen shader | Yes | - |
+| New stage shader<br/>(heatHaze, heatHazeWithMask, heatHazeWithMaskAndVertex, colorProcess, enviroSuit(D3XP)) | Yes | - |
+| TexGen | Yes | - |
 | Shadow mapping for pure soft shadow | Yes | - |
 | Soft/Translucent stencil shadow | Yes<br/>(Soft stencil shadow only support on OpenGLES3.1+) | - |
 | OpenGL ES version | 2.0 and 3.0+<br/>(point light shadow mapping shader use cubemap on OpenGLES2.0, use texture array on OpenGLES3.0+) | 2.0(3.0+ compat) |
@@ -55,7 +52,9 @@ GPLv3
 | Wide-character language and DOOM3-BFG new font | Yes | - |
 | DOOM3-BFG occlusion culling | Yes | - |
 
-> **Support games**
+----------------------------------------------------------------------------------
+
+> ### Support games
 
 | Game | Engine | Version | OpenGL ES/Vulkan version | Mods |
 |:-----|:-----:|:-----:|:-----:|:-----:|
@@ -68,12 +67,16 @@ GPLv3
 | Quake III Arena | [ioquake3](https://github.com/ioquake/ioq3) | - | 1.1 | Quake III Team Arena |
 | Quake II | [Yamagi Quake II](https://github.com/yquake2/yquake2) | - | 1.1/3.2/Vulkan | ctf<br/>rogue<br/>xatrix<br/>zaero |
 | Quake I | [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces) | - | 2.0 |  |
-| GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | 4.14.0 | 2.0/3.2/Vulkan |  |
+| GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | 4.14.1 | 2.0/3.2/Vulkan |  |
 | Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) Omni-Bot support | 2.83.1 | 1.1 |  |
 | RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.0/5.1 | 1.1 |  |
 | FTEQW | [FTEQW](https://www.fteqw.org) |  | 3.2/Vulkan |  |
 | STAR WARS™ Jedi Knight - Jedi Academy™ | [OpenJK](https://github.com/JACoders/OpenJK) |  | 1.1 |  |
 | STAR WARS™ Jedi Knight II - Jedi Outcast™ | [OpenJK](https://github.com/JACoders/OpenJK) |  | 1.1 |  |
+
+----------------------------------------------------------------------------------
+
+> ### on F-Droid
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -87,50 +90,68 @@ Tag with `-free` only for F-Droid update.
 | Ouya TV                         |   Yes  |    No    |
 | Khronos Vulkan validation layer |   Yes  |    No    |
 
-> Testing version(Non-release. Automatic CI building By Github actions when pushing commits)
+----------------------------------------------------------------------------------
+
+> ### Build DOOM3/Quake4/Prey(2006) mod for Android idTech4A++  
+
+* [DOOM 3 & RoE SDK](https://github.com/glKarin/idtech4amm_doom3_sdk)  
+* [Quake 4 SDK](https://github.com/glKarin/idtech4amm_quake4_sdk)  
+* [Prey(2006) SDK](https://github.com/glKarin/idtech4amm_prey_sdk) 
+
+----------------------------------------------------------------------------------
+
+> ### Testing version(Non-release. Automatic CI building By Github actions when pushing commits)
 * idTech4A++ for Android: [Android testing](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/android_testing).
 * DOOM 3/Quake 4/Prey(2006) for Windows x64: [Windows x64 testing](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/windows_x64_testing).
 
 ----------------------------------------------------------------------------------
-### Update
 
-* The Dark Mod update to version 2.13. More view in [The Dark Mod(2.13)](https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/).
-* Add wide-character language support and DOOM3-BFG new fonts support on DOOM 3/Quake 4/Prey(2006). Only support UTF-8(BOM) encoding translation file.
-* Add Chinese translation patch on DOOM3. First extract `DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)`, then ckecked `Use DOOM3-BFG fonts instead of old fonts and enable wide-character language support` on launcher, finally add ` +set sys_lang chinese` to command line.
-* Fix some errors and light gem(so reset cvar `tdm_lg_weak` value to 0) on The Dark Mod(2.12 and 2.13).
-* Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).
-* Add combine shadow mapping option with cvar `harm_r_shadowMapCombine`(default 1, like now) on DOOM 3/Quake 4/Prey(2006).
-* Fix some lights missing on ceil in map game/airdefense1 on Quake 4.
-* Add game portal support on Prey(2006).
-* Fix wrong resurrection position from deathwalk state when load game after restart application on Prey(2006).
-* Fix key binding tips UI on Prey(2006).
-* Using libogg/libvorbis instead of stb-vorbis of version 62 again on DOOM 3/Quake 4/Prey(2006).
-* Support game data folder creation with `Game path tips` button on launcher `General` tab.
-* [Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) will be removed on next release in the future!
+> ### Update
+
+* Add cascaded shadow mapping with parallel lights(cvar `r_shadowMapSplits`) in OpenGL ES3 on DOOM 3/Quake 4/Prey(2006).
+* Fix makron remote render at screen for texfure/cameraView1 in map game/core1 on Quake 4.
+* Add spiritview and deathview GLSL shaders on Prey(2006).
+* Update GZDOOM version to 4.14.1.
+* Add multiplayer game bot support(need extract `d3_sabot_a7.pk4` patch resource first) on DOOM 3.
+* Add player view flashlight with cvar `harm_ui_showViewLight`(include cvar: harm_ui_viewLightShader, harm_ui_viewLightRadius, harm_ui_viewLightOffset, harm_ui_viewLightType, harm_ui_viewLightOnWeapon), support bind to key for toggle(e.g. bind "g" "_impulse52") on DOOM 3.
+* Support vsync setting on all OpenGL game.
+* Improve multiplayer game bot system on Quake 4.
+* Add skip player hit effect support with cvar `harm_g_skipHitEffect` and command `skipHitEffect` on DOOM 3/Quake 4/Prey(2006).
+* Add enviroSuit player view vision GLSL shader on DOOM 3: RoE.
+* Custom GLSL shaders using high precision(for fix blood pool in map game/waste) on Quake 4.
+* Allow fire when focus NPC with cvar `harm_g_allowFireWhenFocusNPC` on Quake 4.
+* Add custom GLSL shader program of new stage material support(keyword is `programGLSL`, e.g. programGLSL yourShaderInglProgs) on DOOM 3/Quake 4/Prey(2006).
+* Fix save game path on FTEQW.
+* On-screen buttons using OpenGL buffer.
+* RealRTCW(ver 5.0) and The Dark Mod(2.12) have removed on this release!
+
+----------------------------------------------------------------------------------
+
+* 毁灭战士3/雷神之锤4/掠食2006在OpenGL ES3下启用阴影映射软阴影时, 平行光源将使用级联阴影映射(cvar `r_shadowMapSplits`).
+* 雷神之锤4中修复关卡game/core1中texfure/cameraView1材质上makron的远程渲染.
+* 掠食2006添加灵魂行走和死亡行的GLSL着色器.
+* GZDOOM版本更新至4.14.1.
+* 毁灭战士3中多人游戏添加bot支持(需要先解压`d3_sabot_a7.pk4`补丁资源).
+* 毁灭战士3中添加玩家视角手电筒功能, 使用cvar harm_ui_showViewLight开启(其他cvar: harm_ui_viewLightShader, harm_ui_viewLightRadius, harm_ui_viewLightOffset, harm_ui_viewLightType, harm_ui_viewLightOnWeapon), 支持绑定到按键来控制开关(例如 bind "g" "_impulse52").
+* 所有使用OpenGL渲染的游戏支持游戏内的垂直同步设置.
+* 雷神之锤4中bot系统改进.
+* 毁灭战士3/雷神之锤4/掠食2006中新增使用cvar `harm_g_skipHitEffect`和命令`skipHitEffect`来忽略角色被击影响.
+* 毁灭战士3: 邪恶复苏中新增生化防护服视觉GLSL着色器.
+* 雷神之锤4中外部GLSL着色器默认使用高精度浮点数(为了解决处理厂关卡的血池渲染).
+* 雷神之锤4中新增使用cvar `harm_g_allowFireWhenFocusNPC`控制当瞄准NPC时允许开火.
+* 毁灭战士3/雷神之锤4/掠食2006中材质配置支持自定义的GLSL着色器(关键词为`programGLSL`, 例如 programGLSL yourShaderInglProgs).
+* 修复FTEQW存档文件路径问题.
+* 虚拟按键使用OpenGL缓冲区.
+* 真·重返德军总部(5.0版本)和The Dark Mod(2.12版本)在此版本被移除!
 
 ----------------------------------------------------------------------------------
 
-* The Dark Mod版本更新至2.13. 详情[The Dark Mod(2.13)](https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/).
-* 毁灭战士3/雷神之锤4/掠食2006新增宽字体语言支持和毁灭战士3-BFG新字体支持. 本地化文件仅支持UTF-8(BOM)编码.
-* 毁灭战士3新增简体中文翻译补丁. 首先提取资源`毁灭战士3中文本地化(3DM毁灭战士3-BFG汉化补丁)`, 然后在启动器选中`使用毁灭战士3-BFG字体并且启用宽字符字体支持`, 最后在启动命令中添加` +set sys_lang chinese`.
-* The Dark Mod(2.12和2.13版本)修复一些错误和light gem(因此cvar `tdm_lg_weak`值重置为0).
-* 毁灭战士3/雷神之锤4/掠食2006新增毁灭战士3-BFG的遮挡剔除功能, 使用cvar `harm_r_occlusionCulling`.
-* 毁灭战士3/雷神之锤4/掠食2006新增混合阴影映射选项, 使用cvar `harm_r_shadowMapCombine`(默认1, 和之前效果一样).
-* 雷神之锤4修复第一关部分天花板光源丢失.
-* 掠食2006新增游戏通道支持.
-* 修复掠食2006重新启动游戏然后加载玩家在deathwalk状态时的存档时复活位置错误.
-* 掠食2006修复按键绑定提示UI.
-* 毁灭战士3/雷神之锤4/掠食2006重新使用libogg/libvorbis代替62版本的stb-vorbis.
-* 在启动器`通用`选项卡的`游戏路径提示`按钮添加创建游戏目录树功能.
-* [警告]: 真·重返德军总部(5.0版本)和The Dark Mod(2.12版本)将在下次版本发布时移除!
-
-----------------------------------------------------------------------------------
-### Standalone game directory
+> ### Standalone game directory
   Because more support games, it cause all game mods data directory put on a shared folder, them maybe have same name, and diffcult to view/manage. So application default enable `Standalone game directory` since version 1.1.0harmattan57, and you can also disable it on launcher settings.
   
   If enable `Standalone game directory`, game data directory should put on `Standalone game directory` itself(e.g.).
   
-> Games of `Standalone game directory` and folder name:
+##### Games of `Standalone game directory` and folder name:
 * **DOOM III**: doom3/
 * **Quake 4**: quake4/
 * **Prey(2006)**: prey/
@@ -144,15 +165,15 @@ Tag with `-free` only for F-Droid update.
 * **STAR WARS™ Jedi Knight - Jedi Academy™**: openja/
 * **STAR WARS™ Jedi Knight II - Jedi Outcast™**: openjo/
   
-> Games of always force `Standalone game directory`:
+##### Games of always force `Standalone game directory`:
 * **The Dark Mod**: darkmod/
 * **GZDOOM**: gzdoom/
 * **FTEQW**: fteqw/
 
 ----------------------------------------------------------------------------------
 
-##### idTech4's new Cvar
-###### Flag
+> ### idTech4's new Cvar
+##### Flag
 * ARCHIVE = save to/load from config file
 * FIXED = can't change in game
 * READONLY = readonly, always can't change
@@ -216,27 +237,41 @@ Tag with `-free` only for F-Droid update.
 | harm_s_useAmplitudeDataOpenAL | Bool | 0 | Use amplitude data on OpenAL | DISABLE, ISSUE |  | Engine/Sound | It cause large shake | All |
 | harm_in_smoothJoystick | Bool | 0 | Enable smooth joystick |  |  | Engine/Input | Automatic setup initial value by Android layer | Android |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
-| harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset(&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;) | ARCHIVE |  | Game/DOOM3 |  | All |
+| harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset, format is "&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;" | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessHeadJoint | String | Head | Set head joint when without head model in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessFixed | Bool | 0 | Do not attach view position to head in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessHeadVisible | Bool | 0 | Do not suppress head in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_ui_showViewBody | Bool | 0 | Show view body | ARCHIVE |  | Game/DOOM3 |  | All |
+| harm_ui_showViewLight | Bool | 0 | show player view flashlight | ARCHIVE |  | Game/DOOM3 |  | All |
+| harm_ui_viewLightShader | String | lights/flashlight5 | player view flashlight material texture/entityDef name | ARCHIVE |  | Game/DOOM3 |  | All |
+| harm_ui_viewLightRadius | Vector3 String | 1280 640 640 | player view flashlight radius, format is "&lt;light_target&gt; &lt;light_right&gt; &lt;light_up&gt;" | ARCHIVE |  | Game/DOOM3 |  | All |
+| harm_ui_viewLightOffset | Vector3 String | 0 0 0 | player view flashlight origin offset, format is "&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;" | ARCHIVE |  | Game/DOOM3 |  | All |
+| harm_ui_viewLightType | Integer | 0 | player view flashlight type | ARCHIVE | 0=spot light; 1=point light | Game/DOOM3 |  | All |
+| harm_ui_viewLightOnWeapon | Bool | 0 | player view flashlight follow weapon position | ARCHIVE |  | Game/DOOM3 |  | All |
+| harm_g_autoGenAASFileInMPGame | Bool | 1 | For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic | ARCHIVE |  | Game/DOOM3 |  | All |
+| harm_si_autoFillBots | Bool | 1 | Automatic fill bots after map loaded in multiplayer game | ARCHIVE | &gt;=0 | Game/DOOM3 | 0 = disable; other number = bot num | All |
+| harm_si_botLevel | Integer | 0 | Bot level | ARCHIVE | [0 - 8] | Game/DOOM3 | 0 = auto; 1 - 8 = difficult level | All |
+| harm_si_botWeapons | String | 0 | Bot initial weapons when spawn, separate by comma(,) | ARCHIVE | 1=pistol; 2=shotgun; 3=machinegun; 4=chaingun; 5=handgrenade; 6=plasmagun; 7=rocketlauncher; 8=BFG; 10=chainsaw; 0=none; *=all | Game/DOOM3 | Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_shotgun,weapon_machinegun), and allow mix(e.g. shotgun,3,weapon_rocketlauncher) | All |
+| harm_si_botAmmo | Integer | 0 | Bot weapons initial ammo clip when spawn, depend on harm_si_botWeapons | ARCHIVE |  | Game/DOOM3 | -1=max ammo, 0=none, &gt;0=ammo clip | All |
 | harm_pm_doubleJump | Bool | 0 | Enable double-jump | ARCHIVE |  | Game/DOOM3/Rivensin |  | All |
 | harm_pm_autoForceThirdPerson | Bool | 1 | Force set third person view after game level load end | ARCHIVE |  | Game/DOOM3/Rivensin |  | All |
 | harm_pm_preferCrouchViewHeight | Float | 32 | Set prefer crouch view height in Third-Person | ARCHIVE | &gt;= 0 | Game/DOOM3/Rivensin | suggest 32 - 39, less or equals 0 to disable | All |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
-| harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset(&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;) | ARCHIVE |  | Game/Quake4 |  | All |
+| harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset, format is "&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;" | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessHeadJoint | String | head_channel | Set head joint when without head model in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessFixed | Bool | 0 | Do not attach view position to head in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessHeadVisible | Bool | 0 | Do not suppress head in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
+| harm_gui_defaultFont | String | chain | Default font name | ARCHIVE | chain, lowpixel, marine, profont, r_strogg, strogg | Engine/Quake4/GUI | It will be available in next running | All |
 | harm_ui_showViewBody | Bool | 0 | Show view body | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_g_autoGenAASFileInMPGame | Bool | 1 | For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic | ARCHIVE |  | Game/Quake4 |  | All |
-| harm_gui_defaultFont | String | chain | Default font name | ARCHIVE | chain, lowpixel, marine, profont, r_strogg, strogg | Engine/Quake4/GUI | It will be available in next running | All |
 | harm_si_autoFillBots | Bool | 1 | Automatic fill bots after map loaded in multiplayer game | ARCHIVE | &gt;=0 | Game/Quake4 | 0 = disable; other number = bot num | All |
 | harm_si_botLevel | Integer | 0 | Bot level | ARCHIVE | [0 - 8] | Game/Quake4 | 0 = auto; 1 - 8 = difficult level | All |
-| harm_g_mutePlayerFootStep | Bool | 0 | Mute player's footstep sound | ARCHIVE |  | Game/Quake4 |  | All |
+| harm_si_botWeapons | String | 0 | Bot initial weapons when spawn, separate by comma(,) | ARCHIVE | 1=machinegun; 2=shotgun; 3=hyperblaster; 4=grenadelauncher; 5=nailgun; 6=rocketlauncher; 7=railgun; 8=lightninggun; 9=dmg; 10=napalmgun; 0=none; *=all | Game/Quake4 | Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_machinegun,weapon_shotgun), and allow mix(e.g. machinegun,3,weapon_rocketlauncher) | All |
+| harm_si_botAmmo | Integer | 0 | Bot weapons initial ammo clip when spawn, depend on harm_si_botWeapons | ARCHIVE |  | Game/Quake4 | -1=max ammo, 0=none, &gt;0=ammo clip | All |
+| harm_g_mutePlayerFootStep | Bool | 0 | mute player's footstep sound | ARCHIVE |  | Game/Quake4 |  | All |
+| harm_g_allowFireWhenFocusNPC | Bool | 0 | allow fire when focus NPC | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/Prey |  | All |
-| harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset(&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;) | ARCHIVE |  | Game/Prey |  | All |
+| harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset, format is "&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;" | ARCHIVE |  | Game/Prey |  | All |
 | harm_pm_fullBodyAwarenessHeadJoint | String | neck | Set head joint when without head model in full-body awareness | ARCHIVE |  | Game/Prey |  | All |
 | harm_pm_fullBodyAwarenessFixed | Bool | 0 | Do not attach view position to head in full-body awareness | ARCHIVE |  | Game/Prey |  | All |
 | harm_pm_fullBodyAwarenessHeadVisible | Bool | 0 | Do not suppress head in full-body awareness | ARCHIVE |  | Game/Prey |  | All |
@@ -247,62 +282,77 @@ Tag with `-free` only for F-Droid update.
 
 ----------------------------------------------------------------------------------
 
-##### idTech4's new command
+> ### idTech4's new command
 
 | Command | Description | Usage | Scope | Remark | Platform |
 |:---|:---|:---|:---|:---|:---:|
 | exportGLSLShaderSource | export GLSL shader source to filesystem |  | Engine/Renderer | Only export shaders of using OpenGLES2.0 or OpenGLES3.0 | All |
 | printGLSLShaderSource | print internal GLSL shader source |  | Engine/Renderer | Only print shaders of using OpenGLES2.0 or OpenGLES3.0 | All |
 | exportDevShaderSource | export internal original C-String GLSL shader source for developer |  | Engine/Renderer | Export all shaders of OpenGLES2.0 and OpenGLES3.0 | All |
+| convertARB | convert ARB shader to GLSL shader |  | Engine/Renderer | It has many errors, only port some ARB shader to GLSL shader | All |
 | reloadGLSLprograms | reloads GLSL programs |  | Engine/Renderer |  | All |
 | convertImage | convert image format |  | Engine/Renderer |  | All |
 | r_multithread | print multi-threading state |  | Engine/Renderer | Only for tell user r_multithread is not a cvar | All |
 | glConfig | print OpenGL config |  | Engine/Renderer | print glConfig variable | All |
 | exportFont | Convert ttf/ttc font file to DOOM3 wide character font file |  | Engine/Renderer | require freetype2 | All |
 | extractBimage | extract DOOM3-BFG's bimage image |  | Engine/Renderer | extract to TGA RGBA image files | All |
+| botRunAAS | compiles an AAS file for a map for DOOM 3 multiplayer-game |  | Game/DOOM3 | Only for generate bot aas file if map has not aas file | All |
+| addBot | adds a new bot |  | Game/DOOM3 | need SABotA7 files | All |
+| removeBot | removes bot specified by id (0,15) |  | Game/DOOM3 | need SABotA7 files | All |
+| addbots | adds multiplayer bots batch |  | Game/DOOM3 | need SABotA7 files | All |
+| fillbots | fill bots to maximum of server |  | Game/DOOM3 | need SABotA7 files | All |
+| removeBots | disconnect multi bots by client ID |  | Game/DOOM3 | need SABotA7 files | All |
+| appendBots | append more bots(over maximum of server) |  | Game/DOOM3 | need SABotA7 files | All |
+| cleanBots | disconnect all bots |  | Game/DOOM3 | need SABotA7 files | All |
+| truncBots | disconnect last bots |  | Game/DOOM3 | need SABotA7 files | All |
+| botLevel | setup all bot level |  | Game/DOOM3 | need SABotA7 files | All |
+| botWeapons | setup all bot initial weapons |  | Game/DOOM3 | need SABotA7 files | All |
+| botAmmo | setup all bot initial weapons ammo clip |  | Game/DOOM3 | need SABotA7 files | All |
 | botRunAAS | compiles an AAS file for a map for Quake 4 multiplayer-game |  | Game/Quake4 | Only for generate bot aas file if map has not aas file | All |
 | addBot | adds a new bot |  | Game/Quake4 | need SABotA9 files | All |
 | removeBot | removes bot specified by id (0,15) |  | Game/Quake4 | need SABotA9 files | All |
 | addbots | adds multiplayer bots batch |  | Game/Quake4 | need SABotA9 files | All |
-| fillbots | fill bots |  | Game/Quake4 | need SABotA9 files | All |
-| sabot | debug SaBot info |  | Game/Quake4 | need SABotA9 files | All |
+| fillbots | fill bots to maximum of server |  | Game/Quake4 | need SABotA9 files | All |
+| removeBots | disconnect multi bots by client ID |  | Game/Quake4 | need SABotA9 files | All |
+| appendBots | append more bots(over maximum of server) |  | Game/Quake4 | need SABotA9 files | All |
+| cleanBots | disconnect all bots |  | Game/Quake4 | need SABotA9 files | All |
+| truncBots | disconnect last bots |  | Game/Quake4 | need SABotA9 files | All |
+| botLevel | setup all bot level |  | Game/Quake4 | need SABotA9 files | All |
+| botWeapons | setup all bot initial weapons |  | Game/Quake4 | need SABotA9 files | All |
+| botAmmo | setup all bot initial weapons ammo clip |  | Game/Quake4 | need SABotA9 files | All |
 
 ----------------------------------------------------------------------------------
 
-#### About Prey(2006)
-###### For playing Prey(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). Now can play all levels, but some levels has bugs.
-> 1. Putting PC Prey game data file to `preybase` folder and START directly.
-> 2. Some problems solution: e.g. using cvar `harm_ui_translateAlienFont` to translate Alien text on GUI.
-> 3. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).
-> 4. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.
-> > * bind "Your key of spirit walk" "_impulse54"
-> > * bind "Your key of second mode attack of weapons" "_attackAlt"
-> > * bind "Your key of toggle lighter" "_impulse16"
-> > * bind "Your key of drop" "_impulse25"
+> ### About DOOM 3
+##### Switch current weapon and last weapon  
+```bind "Your key" "_impulse51"```
 
 ----------------------------------------------------------------------------------
 
-#### About Quake IV
-###### For playing Quake 4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). Now can play all levels, but some levels has bugs.  
-> 1. Putting PC Quake 4 game data file to `q4base` folder and START directly.
-> 2. Suggest to extract Quake 4 patch resource to `q4base` game data folder first(in menu `Other` -> `Extract resource`).
-> - `SABot a9 mod` multiplayer-game map aas files and bot scripts(for bots in multiplayer-game).
-
-###### Problems and resolutions  
-> 1. *Particle system*: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), but it not work yet. Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.
-> 2. *Entity render*: Some game entities render incorrect.
-
-###### Bot mod
-> 1. Added SABot a7 mod support.
-> 2. Extract `q4base/sabot_a9.pk4` file in apk to Quake4 game data folder, it includes some defs, scripts and MP game map AAS file.
-> 3. Set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(botaas32).
-> 4. Set `harm_si_autoFillBots` to 1 for automatic fill bots when start MP game.
-> 5. Execute `addbots` for add multiplayer bot.
-> 6. Execute `fillbots` for auto fill multiplayer bots.
+> ### About Quake IV
+##### For playing Quake 4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). Now can play all levels, but some levels has bugs.  
+1. Putting PC Quake 4 game data file to `q4base` folder and START directly.
+2. *Particle system*: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), but it not work yet. Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.
 
 ----------------------------------------------------------------------------------
-### Screenshot
-> Game
+
+> ### About Prey(2006)
+##### For playing Prey(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). Now can play all levels, but some levels has bugs.
+1. Putting PC Prey game data file to `base`(`preybase` on Android) folder and START directly.
+2. Some problems solution: e.g. using cvar `harm_ui_translateAlienFont` to translate Alien text on GUI.
+3. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).
+4. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.
+```
+bind "Your key of spirit walk" "_impulse54"
+bind "Your key of second mode attack of weapons" "_attackAlt"
+bind "Your key of toggle lighter" "_impulse16"
+bind "Your key of drop" "_impulse25"
+```
+
+----------------------------------------------------------------------------------
+
+> ### Screenshot
+##### Game
 
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_bathroom.png" alt="Classic bathroom">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_bathroom_jill_stars.png" alt="Classic bathroom in Rivensin mod">
@@ -310,12 +360,12 @@ Tag with `-free` only for F-Droid update.
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey.png" alt="Prey(2006) on DOOM3">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg.jpg" alt="DOOM3 BFG">
 
-> Mod
+##### Mod
 
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_roe.png" width="50%" alt="Resurrection of Evil"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_the_lost_mission.png" width="50%" alt="The lost mission">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_classic_doom3.png" width="50%" alt="Classic DOOM">
 
-> Other
+##### Other
 
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake_iii_arena.jpg" width="50%" alt="Quake III : Arena"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake_iii_team_arena.jpg" width="50%" alt="Quake III : Team Arena">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_return_to_castle_wolfenstein.jpg" width="50%" alt="Return to Castle Wolfenstein"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_the_dark_mod.jpg" width="50%" alt="The Dark Mod">
@@ -326,80 +376,177 @@ Tag with `-free` only for F-Droid update.
 
 ----------------------------------------------------------------------------------
 
-### Changes:
+> ### Changes:
 
 [Change logs](CHANGES.md ':include')
 
 ----------------------------------------------------------------------------------
 
-### Build:
+> ### Build:
 * idTech4A++ using std libc's malloc/free in Mem_Alloc/Mem_Free in idlib/Heap.cpp
 * idTech4A++ force using generic SIMD, not compile all SIMD of processor in all platform(TODO: enable them on windows/Linux)
 
-#### Engine
-> 1. _MULTITHREAD: Add multithread support for rendering.
-> 2. _USING_STB: Using stb jpeg instead of libjpeg for jpeg image file.
-> 3. _K_CLANG: If compiling by clang not GCC.
-> 4. _MODEL_OBJ: Add obj static model support.
-> 5. _MODEL_DAE: Add dae static model support.
-> 6. _SHADOW_MAPPING: Add Shadow mapping support.
-> 7. _OPENGLES3: Add OpenGLES3.0 support.
-> 8. _OPENAL _OPENAL_EFX _OPENAL_SOFT: Add OpenAL(soft) and EFX Reverb support.
-> 9. _NO_LIGHT: Add no lighting support.
-> 10. _STENCIL_SHADOW_IMPROVE: Add stencil shadow improve support(translucent shadow, force combine global shadow and self local shadow).
-> 11. _SOFT_STENCIL_SHADOW: soft shadow(OpenGLES3.1+), must defined `_STENCIL_SHADOW_IMPROVE` first.
-> 12. _MINIZ: Using miniz instead of zlib, using minizip instead of DOOM3's UnZip.
-> 13. _USING_STB_OGG: Using stb_vorbis instead of libogg and libvorbis.
-> 14. _D3BFG_CULLING: Add DOOM3-BFG occlusion culling support.
-> 15. _WCHAR_LANG _NEW_FONT_TOOLS: Add wide-character language font support.
-> 16. _D3BFG_FONT: Add DOOM3-BFG new font support.
+#### Engine macros
+1. **_MULTITHREAD**: Add multithread support for rendering.
+2. **_USING_STB**: Using stb jpeg instead of libjpeg for jpeg image file.
+3. **_K_CLANG**: If compiling by clang not GCC.
+4. **_MODEL_OBJ**: Add obj static model support.
+5. **_MODEL_DAE**: Add dae static model support.
+6. **_SHADOW_MAPPING**: Add Shadow mapping support.
+7. **_OPENGLES3**: Add OpenGLES3.0 support.
+8. **_OPENAL** **_OPENAL_EFX** **_OPENAL_SOFT**: Add OpenAL(soft) and EFX Reverb support.
+9. **_NO_LIGHT**: Add no lighting support.
+10. **_STENCIL_SHADOW_IMPROVE**: Add stencil shadow improve support(translucent shadow, force combine global shadow and self local shadow).
+11. **_SOFT_STENCIL_SHADOW**: soft shadow(OpenGLES3.1+), must defined `_STENCIL_SHADOW_IMPROVE` first.
+12. **_MINIZ**: Using miniz instead of zlib, using minizip instead of DOOM3's UnZip.
+13. **_USING_STB_OGG**: Using stb_vorbis instead of libogg and libvorbis.
+14. **_D3BFG_CULLING**: Add DOOM3-BFG occlusion culling support.
+15. **_WCHAR_LANG** **_NEW_FONT_TOOLS**: Add wide-character language font support.
+16. **_D3BFG_FONT**: Add DOOM3-BFG new font support.
 
-#### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGLES, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
-#### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
+#### * DOOM 3
+##### About `BOT` mod
+Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bot support in multiplayer-game.
+##### About `Full body awareness` mod
+Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support.
+Define macro `_MOD_VIEW_BODY` will compile view-body support.
+##### About `View flashlight` mod
+Define macro `_MOD_VIEW_LIGHT` will compile flashlight on player view support.
 
-#### Quake 4
+##### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGLES, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
+##### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
+
+#### * Quake 4
 ##### `_RAVEN`, `_QUAKE4` is patches macros, find them in `DIII4A` source code.
 ##### All new sources files put on `raven` folder.
-> 1. _RAVEN: for compile `core engine (DOOM3 source code)` and `idlib (DOOM3 source code)`.
-> 2. _QUAKE4: for compile `game (Q4SDK source code)` library.
-> 3. Build core engine: define macro `_RAVEN`, `_RAVEN_FX(OpenBSE if need, unnecessary)`
-> 4. Build game library: define macro `_RAVEN`, `_QUAKE4`
+1. **_RAVEN**: for compile `core engine (DOOM3 source code)` and `idlib (DOOM3 source code)`.
+2. **_QUAKE4**: for compile `game (Q4SDK source code)` library.
+3. Build core engine: define macro `_RAVEN`, `_RAVEN_FX(OpenBSE if need, unnecessary)`
+4. Build game library: define macro `_RAVEN`, `_QUAKE4`
 ##### About `BSE`
 Because `BSE` not open-source, so I default supply a `NULL` implement and a uncompleted but working implement with DOOM3 Particle/Fx system(using macros `_RAVEN_FX` marked).
-##### About `BOT`
+##### About `BOT` mod
 Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bot support in multiplayer-game.
-##### About `Full body awareness support`
+##### About `Full body awareness` mod
 Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support.
 Define macro `_MOD_VIEW_BODY` will compile view-body support.
 
-#### Prey(2006)
+#### * Prey(2006)
 ##### `_HUMANHEAD`, `_PREY` is patches macros, find them in `DIII4A` source code.
 ##### All new sources files put on `humanhead` folder.
-> 1. _HUMANHEAD: for compile `core engine (DOOM3 source code)` and `idlib (DOOM3 source code)`.
-> 2. _PREY: for compile `game (PreySDK source code)` library.
-> 3. Build core engine: define macro `_HUMANHEAD`
-> 4. Build game library: define macro `_HUMANHEAD`, `_PREY`, and original SDK macros `HUMANHEAD`
-##### About `Full body awareness support`
+1. **_HUMANHEAD**: for compile `core engine (DOOM3 source code)` and `idlib (DOOM3 source code)`.
+2. **_PREY**: for compile `game (PreySDK source code)` library.
+3. Build core engine: define macro `_HUMANHEAD`
+4. Build game library: define macro `_HUMANHEAD`, `_PREY`, and original SDK macros `HUMANHEAD`
+##### About `Full body awareness` mod
 Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support.
 
 #### Android
-##### Define macro `__ANDROID__`.
-> 1. _OPENSLES: Add OpenSLES support for sound.
+1. Define macro `__ANDROID__`.
+2. **_OPENSLES**: Add OpenSLES support for sound.
 
 #### Linux
-> 1. REQUIRE ALSA, zlib, X11, EGL
-> 2. ./cmake_linux_build_doom3_quak4_prey.sh
+1. REQUIRE ALSA, zlib, X11, EGL, SDL2
+2. ```./cmake_linux_build_doom3_quak4_prey.sh```
 
 #### Windows(MSVC)
-> 1. REQUIRE SDL2, cURL, zlib: vcpkg install SDL2 curl
-> 2. Setup your vcpkg.cmake path
-> 3. cmake_msvc_build_doom3_quak4_prey.bat
-> 4. Copy OpenAL32.dll from vcpkg package path to binary path: vcpkg install OpenAL-Soft
+1. REQUIRE SDL2, cURL, zlib: ```vcpkg install SDL2 curl```
+2. Setup your vcpkg.cmake path
+3. ```cmake_msvc_build_doom3_quak4_prey.bat```
+4. Copy OpenAL32.dll from vcpkg package path to binary path: ```vcpkg install OpenAL-Soft```
 
 ----------------------------------------------------------------------------------
 
-### Player body view in DOOM3/Quake4
-> 1. Declaration player_viewbody
+> ### Bot support on DOOM3/Quake4
+1. Extract `doom3/d3_sabot_a7.pk4`(DOOM 3) or `q4base/q4_sabot_a9.pk4`(Quake 4) file in apk to game data folder, it includes some defs, scripts and MP game map AAS file.
+2. Set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(botaa48 on DOOM 3, botaa32 on Quake 4).
+3. Set `harm_si_autoFillBots` to 1 for automatic fill bots when start MP game.
+
+##### cvars:
+* harm_si_botLevel: Setup bot level.
+* harm_si_botWeapons: Setup bot default weapons.
+* harm_si_botAmmo: Setup bot weapons ammo clip.
+
+##### command:
+* addBot: adds a new bot
+* removeBot: removes bot specified by id (1,31)
+* addBots: add multiplayer bots batch
+* removeBots: disconnect multi bots by client ID
+* fillBots: fill bots to maximum of server
+* appendBots: append more bots(over maximum of server)
+* cleanBots: disconnect all bots
+* truncBots: disconnect last bots
+* botLevel: setup all bot level
+* botWeapons: setup all bot initial weapons
+* botAmmo: setup all bot initial weapons ammo clip
+
+----------------------------------------------------------------------------------
+
+> ### Full-body-awareness on DOOM3/Quake4/Prey(2006)
+##### cvars:
+* harm_pm_fullBodyAwareness: enables full-body awareness
+* harm_pm_fullBodyAwarenessOffset: full-body awareness offset, format is "<forward-offset> <side-offset> <up-offset>"
+* harm_pm_fullBodyAwarenessHeadJoint: head joint when without head model in full-body awareness
+* harm_pm_fullBodyAwarenessFixed: do not attach view position to head in full-body awareness
+* harm_pm_fullBodyAwarenessHeadVisible: do not suppress head in full-body awareness
+
+##### example:
+1. Make full-body-awareness mode(view player model like first-person view)
+```
+harm_pm_fullBodyAwareness 1
+harm_pm_fullBodyAwarenessOffset 5 0 0
+harm_pm_fullBodyAwarenessHeadVisible 0
+harm_pm_fullBodyAwarenessFixed 0
+```
+
+2. Make third-person mode and use crosshair(different from `pm_thirdPerson`)
+```
+harm_pm_fullBodyAwareness 1
+harm_pm_fullBodyAwarenessOffset -55 -15 0
+harm_pm_fullBodyAwarenessHeadVisible 1
+harm_pm_fullBodyAwarenessFixed 1
+```
+
+----------------------------------------------------------------------------------
+
+> ### Player view flashlight on DOOM3
+##### cvars:
+* harm_ui_showViewLight: show view flashlight
+* harm_ui_viewLightShader: view flashlight material texture/entityDef name
+* harm_ui_viewLightRadius: view flashlight radius, format is "<light_target> <light_right> <light_up>"
+* harm_ui_viewLightOffset: view flashlight origin offset, format is "<forward-offset> <side-offset> <up-offset>"
+* harm_ui_viewLightType: view flashlight type. 0=spot light; 1=point light
+* harm_ui_viewLightOnWeapon: player view flashlight follow weapon position
+
+##### bind to key for toggle flashlight
+```
+// e.g. binding 'G' key, edit DoomConfig.cfg or autoexec.cfg file, and add this line:
+bind "g" "_impulse52"
+```
+
+##### example:
+1. Make spot flashlight(like flashlight weapon)
+```
+harm_ui_showViewLight 1
+harm_ui_viewLightShader lights/flashlight5
+harm_ui_viewLightRadius 1280 640 640
+harm_ui_viewLightOffset 0 0 0
+harm_ui_viewLightType 0
+```
+
+2. Make point flashlight
+```
+harm_ui_showViewLight 1
+harm_ui_viewLightShader lights/flashlight5
+harm_ui_viewLightRadius 640 640 640
+harm_ui_viewLightOffset 0 0 20
+harm_ui_viewLightType 1
+```
+
+----------------------------------------------------------------------------------
+
+> ### Player body view on DOOM3/Quake4
+**1. Declaration player_viewbody**
 ```
 entityDef player_viewbody { // default name is player_viewbody, or setup in player entity with property 'player_viewbody'
     "spawnclass"				"idViewBody"
@@ -416,7 +563,14 @@ entityDef player_viewbody { // default name is player_viewbody, or setup in play
     "hidesurface6" 			"shader_hand"
 }
 ```
-> 2. DOOM3's player view body model declaration(animations name same as idPlayer's model)
+**2. Set player player_viewbody spawn argument**
+```
+// on player.def
+entityDef player {
+    "player_viewbody"				"player_viewbody" // setup idViewBody's entityDef
+}
+```
+**3. DOOM3's player view body model declaration(animations name same as idPlayer's model)**
 ```
 // DOOM3 view body model example:
 model player_model_torso_and_lower_body {
@@ -447,7 +601,7 @@ model player_model_torso_and_lower_body {
     soft_land models/md5/player_model_torso_and_lower_body/soft_land.md5anim
 }
 ```
-> 3. Quake4's player view body model declaration(animations name same as idPlayer's model)
+**4. Quake4's player view body model declaration(animations name same as idPlayer's model)**
 ```
 // Quake4 view body model example:
 model player_model_torso_and_lower_body {
@@ -478,44 +632,48 @@ model player_model_torso_and_lower_body {
     soft_land models/md5/player_model_torso_and_lower_body/soft_land.md5anim
 }
 ```
+**5. enable view body by cvar**
+```
+harm_ui_showViewBody 1
+```
 
 ----------------------------------------------------------------------------------
 
-### About:
+> ### About:
 
 * Source in `assets/source` folder in APK file.
 * Using `exportGLSLShaderSource` command can export GLSL shaders.
 	
 ----------------------------------------------------------------------------------
 
-### Branch:
+> ### Branch:
 
-> `master`:
-> * /idTech4Amm: frontend source
-> * /Q3E /Q3E/src/main/jni/doom3: game source
-> * /CHECK_FOR_UPDATE.json: Check for update config JSON
+##### master:
+* /idTech4Amm: frontend source
+* /Q3E /Q3E/src/main/jni/doom3: game source
+* /CHECK_FOR_UPDATE.json: Check for update config JSON
 
-> `free`:
-> * For F-Droid pure free version.
+##### free:
+* For F-Droid pure free version.
 
-> `package`:
-> * /screenshot: screenshot pictures
-> * /source: Reference source
-> * /pak: Game resource
+##### package:
+* /screenshot: screenshot pictures
+* /source: Reference source
+* /pak: Game resource
 
-> `n0n3m4_original_old_version`:
-> * Original old `n0n3m4` version source.
+##### n0n3m4_original_old_version:
+* Original old `n0n3m4` version source.
 
 ----------------------------------------------------------------------------------
-### Extras download:
+> ### Extras download:
 
 * [Baidu网盘: https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w](https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w) 提取码: `pyyj`
 * [Baidu贴吧: BEYONDK2000](https://tieba.baidu.com/p/6825594793)
 * [F-Droid(different signature)](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
 
-### Open source licence
-> Game engine
+> ### Open source licence
+##### Game engine
 * DOOM 3: GPLv3
 * Quake4 SDK
 * Prey SDK
@@ -530,7 +688,7 @@ model player_model_torso_and_lower_body {
 * RealRTCW
 * FTEQW
 * OpenJK
-> Library(Source)
+##### Library(Source)
 * cJSON 
 * curl: The curl license
 * etc2comp
@@ -560,6 +718,6 @@ model player_model_torso_and_lower_body {
 * sqlite
 * stb
 * bzip2
-> Library(Binary)
+##### Library(Binary)
 * ffmpeg-kit
 ----------------------------------------------------------------------------------
