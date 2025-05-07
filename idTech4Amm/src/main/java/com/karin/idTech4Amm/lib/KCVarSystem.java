@@ -144,6 +144,7 @@ public final class KCVarSystem
                         "0", "spot light",
                         "1", "point light"
                     ),
+                    KCVar.CreateCVar("harm_ui_viewLightOnWeapon", "bool", "0", "player view flashlight follow weapon position", 0),
                     KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
                     KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0 = disable; other number = bot num)", 0),
                     KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot difficult level(0 = auto)", 0),
@@ -200,7 +201,9 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0)
+                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
+                    KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "mute player's footstep sound", 0),
+                    KCVar.CreateCVar("harm_g_allowFireWhenFocusNPC", "bool", "0", "allow fire when focus NPC", 0)
                 );
 
         KCVar.Group PREY_CVARS = new KCVar.Group("Prey(2006)", false)
