@@ -30,6 +30,9 @@
 #ifdef _MOD_VIEW_BODY
 #include "ViewBody.cpp"
 #endif
+#ifdef _QUAKE4 //karin: allow fire when focus NPC
+static idCVar harm_g_allowFireWhenFocusNPC( "harm_g_allowFireWhenFocusNPC", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "allow fire when focus NPC" );
+#endif
 
 idCVar net_predictionErrorDecay( "net_predictionErrorDecay", "112", CVAR_FLOAT | CVAR_GAME | CVAR_NOCHEAT, "time in milliseconds it takes to fade away prediction errors", 0.0f, 200.0f );
 idCVar net_showPredictionError( "net_showPredictionError", "-1", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT, "show prediction errors for the given client", -1, MAX_CLIENTS );
@@ -6302,6 +6305,9 @@ void idPlayer::Weapon_NPC( void ) {
 	}
 
 	if ( currentWeapon )	{
+#ifdef _QUAKE4 //karin: allow fire when focus NPC
+		if(!harm_g_allowFireWhenFocusNPC.GetBool())
+#endif
 		StopFiring();
 	}
 
@@ -6311,6 +6317,9 @@ void idPlayer::Weapon_NPC( void ) {
 	}
 
 	if ( talkCursor && ( usercmd.buttons & BUTTON_ATTACK ) && !( oldButtons & BUTTON_ATTACK ) ) {
+#ifdef _QUAKE4 //karin: allow fire when focus NPC
+		if(!harm_g_allowFireWhenFocusNPC.GetBool())
+#endif
 		buttonMask |= BUTTON_ATTACK;
 		if ( !talkingNPC ) {
 			idAI *focusAI = static_cast<idAI*>(focusEnt.GetEntity());
@@ -6322,6 +6331,10 @@ void idPlayer::Weapon_NPC( void ) {
 	} else if ( currentWeapon == SlotForWeapon ( "weapon_blaster" ) ) {
 		Weapon_Combat();
 	}
+#ifdef _QUAKE4 //karin: allow fire when focus NPC
+	if(harm_g_allowFireWhenFocusNPC.GetBool())
+		Weapon_Combat();
+#endif
 }
 
 
