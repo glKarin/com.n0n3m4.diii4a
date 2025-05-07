@@ -148,6 +148,7 @@ const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
             return shader;
         }
 	}
+	common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> NOT FOUND.\n", name);
 	return NULL;
 }
 
@@ -451,6 +452,7 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphong", SHADER_INTERACTION_BLINNPHONG, &interactionBlinnPhongShader, INTERACTION_VERT, INTERACTION_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
     ret.Append(GLSL_SHADER_SOURCE("ambientLighting", SHADER_AMBIENT_LIGHTING, &ambientLightingShader, INTERACTION_VERT, INTERACTION_FRAG, "_AMBIENT", "_AMBIENT"));
 	ret.Append(GLSL_SHADER_SOURCE("diffuseCubemap", SHADER_DIFFUSECUBEMAP, &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
+	// ret.Append(GLSL_SHADER_SOURCE("glasswarp", SHADER_GLASSWARP, &glasswarpShader, GLASSWARP_VERT, GLASSWARP_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("texgen", SHADER_TEXGEN, &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "", ""));
 
     // newStage
@@ -1449,7 +1451,7 @@ idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
 	ret += "\n";
 	ret += "//#pragma optimize(off)\n";
 	ret += "\n";
-	ret += "precision mediump float;\n";
+	ret += "precision highp float;\n";
 	ret += "\n";
 
 	ret += attribute + " highp vec4 attr_Vertex;\n";
@@ -1514,7 +1516,7 @@ idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version)
 	ret += "\n";
 	ret += "//#pragma optimize(off)\n";
 	ret += "\n";
-	ret += "precision mediump float;\n";
+	ret += "precision highp float;\n";
 	ret += "\n";
 
 	ret += out;

@@ -705,13 +705,6 @@ namespace modeltest
 			pos = mt.point;
 		}
 
-        idStr modelOrigin;
-        modelOrigin += pos.x;
-        modelOrigin += " ";
-        modelOrigin += pos.y;
-        modelOrigin += " ";
-        modelOrigin += pos.z;
-
         noshadows = false;
         noselfshadows = false;
         noDynamicInteractions = false;
@@ -729,12 +722,18 @@ namespace modeltest
         common->Printf("classname: %s\n", animClass.c_str());
         common->Printf("skin: %s\n", skinName.c_str());
 
+		forward = -forward;
+		forward[2] = 0.0f;
+		forward.Normalize();
+		idMat3 axis = forward.ToMat3();
+
         idDict spawnArgs;
         memset(&worldEntity, 0, sizeof(worldEntity));
         spawnArgs.Clear();
         spawnArgs.Set("classname", animClass.c_str());
         spawnArgs.Set("model", modelName.c_str());
-        spawnArgs.Set("origin", modelOrigin.c_str());
+        spawnArgs.SetVector("origin", pos);
+        spawnArgs.SetMatrix("rotation", axis);
         spawnArgs.SetBool("noshadows", noshadows);
         spawnArgs.SetBool("noselfshadows", noselfshadows);
         spawnArgs.SetBool("noDynamicInteractions", noDynamicInteractions);

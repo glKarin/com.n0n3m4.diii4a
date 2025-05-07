@@ -17,6 +17,7 @@ GLSL_PROGRAM_PROC shaderProgram_t interactionPBRShader; //k: PBR lighting model 
 GLSL_PROGRAM_PROC shaderProgram_t interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
 GLSL_PROGRAM_PROC shaderProgram_t ambientLightingShader; //k: Ambient lighting model interaction shader
 GLSL_PROGRAM_PROC shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
+// GLSL_PROGRAM_PROC shaderProgram_t glasswarpShader; //k: glasswarp shader
 GLSL_PROGRAM_PROC shaderProgram_t texgenShader; //k: texgen shader
 
 // new stage

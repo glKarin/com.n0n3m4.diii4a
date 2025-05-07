@@ -125,6 +125,7 @@ private:
     void OUTPUT(void);
     void ALIAS(void);
     void ATTRIB(void);
+    void ADDRESS(void);
     void _SAT_Start(void);
     void _SAT_End(void);
     void Dot(const char *t);
@@ -235,6 +236,7 @@ void idARBProgram::Command(const char *cmd)
     else ARB_HANDLE_CMD(MUL_SAT)
     else ARB_HANDLE_CMD(OUTPUT)
     else ARB_HANDLE_CMD(ATTRIB)
+    else ARB_HANDLE_CMD(ADDRESS)
     else
     {
         ParseUnknown();
@@ -261,12 +263,10 @@ void idARBProgram::ParseCMD(void)
         else if(!token.Icmp("OPTION"))
         {
             ParseOption();
-            continue;
         }
         else if(!token.Icmp("!"))
         {
             ParseType();
-            continue;
         }
         else
         {
@@ -280,7 +280,7 @@ void idARBProgram::ParseCMD(void)
 // ADD T, A, B -> T = A + B
 void idARBProgram::ADD(void)
 {
-    ExpectToken("ADD");
+    ExpectTokenString("ADD");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -296,7 +296,7 @@ void idARBProgram::ADD(void)
 // SUB T, A, B -> T = A - B
 void idARBProgram::SUB(void)
 {
-    ExpectToken("SUB");
+    ExpectTokenString("SUB");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -312,7 +312,7 @@ void idARBProgram::SUB(void)
 // MUL T, A, B -> T = A * B
 void idARBProgram::MUL(void)
 {
-    ExpectToken("MUL");
+    ExpectTokenString("MUL");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -328,7 +328,7 @@ void idARBProgram::MUL(void)
 // MAD T, A, B, C -> T = A * B + C
 void idARBProgram::MAD(void)
 {
-    ExpectToken("MAD");
+    ExpectTokenString("MAD");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -347,7 +347,7 @@ void idARBProgram::MAD(void)
 // MAD_SAT T, A, B, C -> T = clamp(A * B + C, 0.0, 1.0)
 void idARBProgram::MAD_SAT(void)
 {
-    ExpectToken("MAD_SAT");
+    ExpectTokenString("MAD_SAT");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -367,7 +367,7 @@ void idARBProgram::MAD_SAT(void)
 // ADD_SAT T, A, B -> T = clamp(A + B, 0.0, 1.0)
 void idARBProgram::ADD_SAT(void)
 {
-    ExpectToken("ADD_SAT");
+    ExpectTokenString("ADD_SAT");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -384,7 +384,7 @@ void idARBProgram::ADD_SAT(void)
 // MUL_SAT T, A, B -> T = clamp(A * B, 0.0, 1.0)
 void idARBProgram::MUL_SAT(void)
 {
-    ExpectToken("MUL_SAT");
+    ExpectTokenString("MUL_SAT");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -412,7 +412,7 @@ void idARBProgram::DP4_SAT(void)
 
 void idARBProgram::Dot_SAT(const char *t)
 {
-    ExpectToken(t);
+    ExpectTokenString(t);
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -459,12 +459,12 @@ void idARBProgram::TEX(void)
 // END
 void idARBProgram::END(void)
 {
-    ExpectToken("END");
+    ExpectTokenString("END");
 }
 
 void idARBProgram::ParseTexture(const char *cmd, const char *type)
 {
-    ExpectToken(cmd);
+    ExpectTokenString(cmd);
 
     idStr token;
     ParseValue();
@@ -516,18 +516,21 @@ void idARBProgram::ParseComment(void)
 
 void idARBProgram::ParseOption(void)
 {
-    ExpectToken("OPTION");
+    ExpectTokenString("OPTION");
 
-    parser.SkipRestOfLine();
+	idStr str;
+    parser.ReadRestOfLine(str);
+	AddToken("//");
+	AddToken(str);
 }
 
 void idARBProgram::ParseType(void)
 {
-    ExpectToken("!");
+    ExpectTokenString("!");
     parser.ExpectTokenString("!");
 
     idToken typeStr;
-    parser.ReadTokenOnLine(&typeStr);
+    parser.ExpectAnyToken(&typeStr);
     if(!typeStr.Icmpn("ARBvp", 5))
     {
         type = 1;
@@ -543,7 +546,10 @@ void idARBProgram::ParseType(void)
         parser.Error("Unexpect ARB type '%s'", typeStr.c_str());
         return;
     }
-    parser.ParseFloat();
+	AddToken("//");
+	AddToken(typeStr);
+    float ver = parser.ParseFloat();
+	AddToken(va("%f", ver));
 }
 
 void idARBProgram::ParseUnknown(void)
@@ -556,6 +562,19 @@ void idARBProgram::ParseUnknown(void)
     line.Append(" ");
     line.Append(str);
     common->Warning("Unknown command line: '%s'", line.c_str());
+    AddToken(line);
+}
+
+
+void idARBProgram::ADDRESS(void)
+{
+    idToken token;
+    parser.ReadToken(&token);
+    idStr str;
+    parser.ReadRestOfLine(str);
+    idStr line = token;
+    line.Append(" ");
+    line.Append(str);
     AddToken(line);
 }
 
@@ -732,9 +751,9 @@ idStr idARBTokenList::ToSource(void)
     idStr source;
     for(int i = 0; i < Num(); i++)
     {
-        const idStr &token = this->operator[](i);
+        const idStr &token = operator[](i);
         source.Append(token);
-        if(token.Icmp("\n"))
+        if(token.Cmp("\n") && token.Cmp(";") && (i < Num() - 1 && operator[](i + 1).Cmp(";")))
             source.Append(" ");
     }
     return source;
@@ -891,13 +910,13 @@ void idARBProgram::ParseState(void)
     idToken token;
     parser.ExpectTokenString(".");
 
-    parser.ReadTokenOnLine(&token);
+    parser.ExpectAnyToken(&token);
     idStr name;
 	const char *t = "vec4";
     if(!token.Icmp("matrix"))
     {
 		parser.ExpectTokenString(".");
-		parser.ReadTokenOnLine(&token);
+		parser.ExpectAnyToken(&token);
 		if(!token.Icmp("projection"))
 		{
 			if(ExpectTokenString("."))
@@ -961,7 +980,7 @@ void idARBProgram::ParseProgram(void)
     idToken token;
     parser.ExpectTokenString(".");
 
-    parser.ReadTokenOnLine(&token);
+    parser.ExpectAnyToken(&token);
     idStr name;
     if(!token.Icmp("env"))
     {
@@ -1005,7 +1024,8 @@ void idARBProgram::ParseVertex(void)
     idToken token;
     parser.ExpectTokenString(".");
 
-    parser.ReadTokenOnLine(&token);
+    parser.ExpectAnyToken(&token);
+	const char *dt = "vec4";
     idStr name;
     if(!token.Icmp("texcoord"))
     {
@@ -1022,6 +1042,7 @@ void idARBProgram::ParseVertex(void)
     else if(!token.Icmp("normal"))
     {
         name.Append("attr_Normal");
+		dt = "vec3";
     }
     else if(!token.Icmp("attrib"))
     {
@@ -1035,11 +1056,38 @@ void idARBProgram::ParseVertex(void)
     if(ExpectTokenString("["))
     {
         int index = parser.ParseInt();
-        name.Append(va("%d", index));
+		if(!token.Icmp("attrib"))
+		{
+			if(index == 9)
+			{
+				name = "attr_Tangent";
+				dt = "vec3";
+			}
+			else if(index == 10)
+			{
+				name = "attr_Bitangent";
+				dt = "vec3";
+			}
+			else if(index == 8)
+				name = "attr_TexCoord";
+			else if(index == 11)
+			{
+				name = "attr_Normal";
+				dt = "vec3";
+			}
+			else if(index == 12)
+				name = "attr_Vertex";
+			else if(index == 13)
+				name = "attr_Color";
+			else
+				name.Append(va("%d", index));
+		}
+		else
+			name.Append(va("%d", index));
         parser.ExpectTokenString("]");
     }
 
-    AddIn(name);
+    AddIn(name, dt);
 
     if(ExpectTokenString("."))
     {
@@ -1060,7 +1108,7 @@ void idARBProgram::ParseFragment(void)
     idToken token;
     parser.ExpectTokenString(".");
 
-    parser.ReadTokenOnLine(&token);
+    parser.ExpectAnyToken(&token);
     idStr name;
     if(!token.Icmp("position"))
     {
@@ -1107,7 +1155,7 @@ void idARBProgram::ParseResult(void)
     idToken token;
     parser.ExpectTokenString(".");
 
-    parser.ReadTokenOnLine(&token);
+    parser.ExpectAnyToken(&token);
     idStr name;
     if(!token.Icmp("position"))
     {
@@ -1155,7 +1203,7 @@ void idARBProgram::ParseResult(void)
 // TEMP A, B, C -> vec4 A; vec4 B; vec4 C
 void idARBProgram::TEMP(void)
 {
-    ExpectToken("TEMP");
+    ExpectTokenString("TEMP");
 
     idToken token;
 
@@ -1177,7 +1225,7 @@ void idARBProgram::TEMP(void)
 // MOV T, A -> T = A
 void idARBProgram::MOV(void)
 {
-    ExpectToken("MOV");
+    ExpectTokenString("MOV");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -1190,7 +1238,7 @@ void idARBProgram::MOV(void)
 // RCP T, A -> T = 1.0 / A
 void idARBProgram::RCP(void)
 {
-    ExpectToken("RCP");
+    ExpectTokenString("RCP");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -1205,7 +1253,7 @@ void idARBProgram::RCP(void)
 // RSQ T, A -> T = 1.0 / sqrt(A)
 void idARBProgram::RSQ(void)
 {
-    ExpectToken("RSQ");
+    ExpectTokenString("RSQ");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -1223,7 +1271,7 @@ void idARBProgram::RSQ(void)
 // KIL -> discard
 void idARBProgram::KIL(void)
 {
-    ExpectToken("KIL");
+    ExpectTokenString("KIL");
 
     AddToken("discard");
     AddEnding();
@@ -1232,7 +1280,7 @@ void idARBProgram::KIL(void)
 
 void idARBProgram::Dot(const char *t)
 {
-    ExpectToken(t);
+    ExpectTokenString(t);
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -1263,7 +1311,7 @@ void idARBProgram::DP4(void)
 // MIN T, A, B -> T = min(A, B)
 void idARBProgram::MIN(void)
 {
-    ExpectToken("MIN");
+    ExpectTokenString("MIN");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -1282,7 +1330,7 @@ void idARBProgram::MIN(void)
 // MAX T, A, B -> T = max(A, B)
 void idARBProgram::MAX(void)
 {
-    ExpectToken("MAX");
+    ExpectTokenString("MAX");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -1301,7 +1349,7 @@ void idARBProgram::MAX(void)
 // POW T, A, B -> T = pow(A, B)
 void idARBProgram::POW(void)
 {
-    ExpectToken("POW");
+    ExpectTokenString("POW");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -1320,7 +1368,7 @@ void idARBProgram::POW(void)
 // OUTPUT T = A
 void idARBProgram::OUTPUT(void)
 {
-    ExpectToken("OUTPUT");
+    ExpectTokenString("OUTPUT");
 
     idToken token;
     parser.ExpectAnyToken(&token);
@@ -1336,7 +1384,7 @@ void idARBProgram::OUTPUT(void)
 // ATTRIB T = A
 void idARBProgram::ATTRIB(void)
 {
-    ExpectToken("ATTRIB");
+    ExpectTokenString("ATTRIB");
 
     idToken token;
     parser.ExpectAnyToken(&token);
@@ -1352,7 +1400,7 @@ void idARBProgram::ATTRIB(void)
 // LRP T, A, B, C -> T = mix( C, B, A )
 void idARBProgram::LRP(void)
 {
-    ExpectToken("LRP");
+    ExpectTokenString("LRP");
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -1382,7 +1430,7 @@ void idARBProgram::LRP(void)
 // PARAM A[] = program.env[0..5] -> vec4 A[6] = vec4[6]( vec4(program.env[0]), ... )
 void idARBProgram::PARAM(void)
 {
-    ExpectToken("PARAM");
+    ExpectTokenString("PARAM");
 
     idToken token;
     parser.ExpectAnyToken(&token);

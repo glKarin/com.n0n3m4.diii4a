@@ -133,6 +133,45 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 		GL_Uniform4fv(offsetof(shaderProgram_t, texgenQ), plane);
 	}
 
+	else if (pStage->texture.texgen == TG_GLASSWARP)
+	{
+		GL_SelectTexture( 2 );
+		globalImages->scratchImage->Bind();
+
+		GL_SelectTexture( 1 );
+		globalImages->scratchImage2->Bind();
+
+		RB_LoadShaderTextureMatrix(surf->shaderRegisters, &pStage->texture, true);
+        float mat[16];
+		myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
+        
+        float plane[4];
+        plane[0] = mat[0 * 4 + 0];
+        plane[1] = mat[1 * 4 + 0];
+        plane[2] = mat[2 * 4 + 0];
+        plane[3] = mat[3 * 4 + 0];
+		GL_Uniform4fv(offsetof(shaderProgram_t, texgenS), plane);
+        
+        plane[0] = mat[0 * 4 + 1];
+        plane[1] = mat[1 * 4 + 1];
+        plane[2] = mat[2 * 4 + 1];
+        plane[3] = mat[3 * 4 + 1];
+		GL_Uniform4fv(offsetof(shaderProgram_t, texgenT), plane);
+        
+        plane[0] = mat[0 * 4 + 3];
+        plane[1] = mat[1 * 4 + 3];
+        plane[2] = mat[2 * 4 + 3];
+        plane[3] = mat[3 * 4 + 3];
+		GL_Uniform4fv(offsetof(shaderProgram_t, texgenQ), plane);
+
+		GL_SelectTexture( 0 );
+
+		GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
+		GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
+		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
+		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
+	}
+
 	else if (pStage->texture.texgen == TG_REFLECT_CUBE) {
 		// old d3asm: GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
 		
@@ -184,6 +223,17 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
 			//k: reflection cubemap // || pStage->texture.texgen == TG_REFLECT_CUBE
 	    || pStage->texture.texgen == TG_WOBBLESKY_CUBE) {
 		 GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
+	} else if (pStage->texture.texgen == TG_GLASSWARP) {
+		GL_SelectTexture( 2 );
+		globalImages->BindNull();
+
+		GL_SelectTexture( 1 );
+
+		globalImages->BindNull();
+		GL_SelectTexture( 0 );
+
+		GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
+		GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
 	} else if (pStage->texture.texgen == TG_REFLECT_CUBE) {
         // GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
         GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
@@ -592,9 +642,9 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 	const srfTriangles_t	*tri;
     // for decrement GPU transfer
     // TexGen state
-	bool attrIsSet[TG_GLASSWARP - TG_EXPLICIT]/* = { false }*/;
+	bool attrIsSet[TG_GLASSWARP - TG_EXPLICIT + 1]/* = { false }*/;
     memset(attrIsSet, 0, sizeof(attrIsSet));
-	bool uniformIsSet[TG_GLASSWARP - TG_EXPLICIT]/* = { false }*/;
+	bool uniformIsSet[TG_GLASSWARP - TG_EXPLICIT + 1]/* = { false }*/;
     memset(uniformIsSet, 0, sizeof(uniformIsSet));
     // Built-in new stage state
 	bool newStageAttrIsSet[SHADER_CUSTOM/*SHADER_NEW_STAGE_END - SHADER_NEW_STAGE_BEGIN + 1*/]/* = { false }*/;
@@ -965,6 +1015,9 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 				usingTexCoord = false;
 				break;
 			case TG_GLASSWARP: // unused
+				// GL_UseProgram(&glasswarpShader);
+				// usingTexCoord = false;
+				// break;
 				continue;
 			default:
 				GL_UseProgram(&defaultShader);
