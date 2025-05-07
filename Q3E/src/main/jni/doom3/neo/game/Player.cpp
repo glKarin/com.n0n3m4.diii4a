@@ -9809,6 +9809,7 @@ void idPlayer::SetupViewLight( void ) {
             args.Set("light_up", va("0 0 %f", v[2]));
             args.Set("light_right", va("0 %f 0", v[1]));
             args.Set("light_target", va("%f 0 0", v[0]));
+            args.SetBool("light_onWeapon", harm_ui_viewLightOnWeapon.GetBool());
             found = true;
         }
     }
@@ -9876,6 +9877,10 @@ void idPlayer::UpdateViewLight( void ) {
     if(harm_ui_viewLightType.IsModified())
     {
         viewLight->SetLightType(harm_ui_viewLightType.GetInteger());
+    }
+    if(harm_ui_viewLightOnWeapon.IsModified())
+    {
+        viewLight->SetOnWeapon(harm_ui_viewLightOnWeapon.GetBool());
     }
 
     // update weapon state, particles, dlights, etc

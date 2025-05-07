@@ -49,7 +49,7 @@ public:
     void			        SetLightParm(int parmnum, float value);
     void	                SetParm(const char *name, const char *value);
     void			        SetLightType(int type);
-	void					ParseSpawnArgsToRenderLight(void);
+    void			        SetOnWeapon(bool wp);
 
 protected:
 	void					SetupRenderLight( void );
@@ -60,6 +60,8 @@ protected:
     void	                UpdateLight(bool full);
     void					Respawn(void);
     void					Open				        ( bool open = true );
+	void					ParseSpawnArgsToRenderLight(void);
+	void					CorrectWeaponLightAxis(const idWeapon *wp);
 
 private:
     idDict                  spawnArgs;
@@ -68,6 +70,11 @@ private:
     idPlayer *              owner;
     bool                    on;
     idVec3                  lightOffset;
+	bool					onWeapon;
+
+	bool					currentWeapon;
+	bool					correctWeaponAxis;
+	idMat3					correctWeaponAxisMat;
 
     friend class idPlayer;
 
@@ -83,4 +90,5 @@ ID_INLINE bool idViewLight::IsOn( void ) const
 {
     return on;
 }
+
 #endif

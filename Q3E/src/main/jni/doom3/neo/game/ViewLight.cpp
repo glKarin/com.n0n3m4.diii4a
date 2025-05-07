@@ -40,6 +40,10 @@ idViewLight::idViewLight() {
     on                  = false;
 	lightDefHandle		= -1;
     lightOffset.Set(VIEW_LIGHT_DEFAULT_OFFSET_VALUE);
+	onWeapon			= false;
+	currentWeapon		= -2;
+	correctWeaponAxis	= false;
+	correctWeaponAxisMat.Identity();
 	memset(&renderLight, 0, sizeof(renderLight));
 }
 
@@ -101,6 +105,7 @@ void idViewLight::Respawn(void)
     // a light before the first present, and doesn't clear the prelight
 
     spawnArgs.GetVector("view_offset", VIEW_LIGHT_DEFAULT_OFFSET_STR, lightOffset);
+    onWeapon = spawnArgs.GetBool("light_onWeapon");
 
     PresentLightDefChange();
 }
@@ -199,11 +204,13 @@ void idViewLight::SetupRenderLight( void )
 	{
 		renderLight.allowLightInViewID = 0;
 		renderLight.lightId = LIGHTID_VIEW_MUZZLE_FLASH + owner->entityNumber;
+		renderLight.suppressLightInViewID = owner->entityNumber+1;
 	}
 	else
 	{
 		renderLight.allowLightInViewID = owner->entityNumber+1;
 		renderLight.lightId = LIGHTID_VIEW_MUZZLE_FLASH + owner->entityNumber;
+		renderLight.suppressLightInViewID = 0;
 	}
 }
 
@@ -266,13 +273,38 @@ idViewLight::Present
 void idViewLight::Present(void)
 {
 	// current transformation
-#ifdef _MOD_FULL_BODY_AWARENESS
-	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->focusUI)
-    renderLight.origin  = owner->firstPersonViewOrigin + lightOffset * owner->firstPersonViewAxis;
-	else
+	idWeapon *wp = owner->weapon.GetEntity();
+	if(onWeapon && wp)
+	{
+#if 0
+		if(pm_thirdPerson.GetBool())
+		{
+			wp->GetGlobalJointTransform(false, wp->flashJointWorld, renderLight.origin, renderLight.axis);
+		}
+		else
 #endif
-    renderLight.origin  = owner->firstPersonViewOrigin_viewWeaponOrigin + lightOffset * owner->firstPersonViewAxis;
-	renderLight.axis	= owner->firstPersonViewAxis;
+		{
+			if(wp->GetGlobalJointTransform(true, wp->flashJointView, renderLight.origin, renderLight.axis))
+				CorrectWeaponLightAxis(wp);
+		}
+	}
+	else
+	{
+#ifdef _MOD_FULL_BODY_AWARENESS
+		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->focusUI)
+		{
+#endif
+			renderLight.origin  = owner->firstPersonViewOrigin + lightOffset * owner->firstPersonViewAxis;
+			renderLight.axis	= owner->firstPersonViewAxis;
+#ifdef _MOD_FULL_BODY_AWARENESS
+		}
+		else
+		{
+			renderLight.origin  = owner->firstPersonViewOrigin_viewWeaponOrigin + lightOffset * owner->firstPersonViewAxis;
+			renderLight.axis	= owner->firstPersonViewAxis;
+		}
+#endif
+	}
 
 	// update the renderLight and renderEntity to render the light and flare
 	PresentLightDefChange();
@@ -455,4 +487,40 @@ void idViewLight::SetLightType(int type)
     }
 
     UpdateLight(false);
+}
+
+void idViewLight::SetOnWeapon( bool wp )
+{
+    spawnArgs.SetBool("light_onWeapon", wp);
+    onWeapon = wp;
+}
+
+void idViewLight::CorrectWeaponLightAxis(const idWeapon *wp)
+{
+	// fix rocket launcher, flashlight and super shotgun
+	if(currentWeapon != owner->currentWeapon)
+	{
+		currentWeapon = owner->currentWeapon;
+
+		correctWeaponAxis = (!idStr::Icmp("weapon_rocketlauncher", wp->weaponDef->GetName())
+				|| !idStr::Icmp("weapon_flashlight", wp->weaponDef->GetName())
+				|| !idStr::Icmp("weapon_shotgun_double", wp->weaponDef->GetName())
+		  );
+		if(correctWeaponAxis)
+		{
+			// from RAVEN idMat3::RotateRelative
+			float	sinVal, cosVal;
+
+			idMath::SinCos( DEG2RAD(-90.0f), sinVal, cosVal );
+
+			correctWeaponAxisMat.Identity();
+			correctWeaponAxisMat[0][0] = cosVal;
+			correctWeaponAxisMat[0][2] = -sinVal;
+			correctWeaponAxisMat[2][0] = sinVal;
+			correctWeaponAxisMat[2][2] = cosVal;
+		}
+	}
+
+	if(correctWeaponAxis)
+		renderLight.axis = correctWeaponAxisMat * renderLight.axis;
 }

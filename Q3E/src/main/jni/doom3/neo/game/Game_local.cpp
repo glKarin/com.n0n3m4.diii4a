@@ -2592,6 +2592,8 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t *clientCmds)
         harm_ui_viewLightOffset.ClearModified();
     if(harm_ui_viewLightType.IsModified())
         harm_ui_viewLightType.ClearModified();
+    if(harm_ui_viewLightOnWeapon.IsModified())
+        harm_ui_viewLightOnWeapon.ClearModified();
 #endif
 
 	return ret;

@@ -349,6 +349,9 @@ class idWeapon : public idAnimatedEntity
 		void					Event_NetReload(void);
 		void					Event_IsInvisible(void);
 		void					Event_NetEndReload(void);
+#ifdef _MOD_VIEW_LIGHT
+		friend class idViewLight;
+#endif
 };
 
 ID_INLINE bool idWeapon::IsLinked(void)

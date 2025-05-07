@@ -268,6 +268,7 @@ extern idCVar harm_ui_viewLightShader;
 extern idCVar harm_ui_viewLightRadius;
 extern idCVar harm_ui_viewLightOffset;
 extern idCVar harm_ui_viewLightType;
+extern idCVar harm_ui_viewLightOnWeapon;
 #endif
 #ifdef __ANDROID__ //karin: re-normalize player movement direction. only for DIII4A smooth onscreen joystick control
 extern idCVar harm_g_normalizeMovementDirection;
