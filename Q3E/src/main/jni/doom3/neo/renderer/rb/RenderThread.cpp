@@ -51,9 +51,13 @@ idRenderThread::idRenderThread()
     memset(&render_thread, 0, sizeof(render_thread));
 //    imagesAlloc.Resize( 1024, 1024 );
 //    imagesPurge.Resize( 1024, 1024 );
+#ifdef _QUEUE_LIST_RECYCLE
+	imagesAlloc.SetRecycle(true);
+	imagesPurge.SetRecycle(true);
+#endif
 }
 
-void idRenderThread::BackendThreadExecute(void)
+void idRenderThread::BackendThreadExecute( void )
 {
     if(!multithreadActive)
         return;
@@ -65,7 +69,7 @@ void idRenderThread::BackendThreadExecute(void)
     common->Printf("[Harmattan]: Render thread start -> %lu(%s)\n", render_thread.threadHandle, RENDER_THREAD_NAME);
 }
 
-void idRenderThread::BackendThreadShutdown(void)
+void idRenderThread::BackendThreadShutdown( void )
 {
     if(!multithreadActive)
         return;
@@ -81,7 +85,7 @@ void idRenderThread::BackendThreadShutdown(void)
     common->Printf("[Harmattan]: Render thread shutdown -> %s\n", RENDER_THREAD_NAME);
 }
 
-void idRenderThread::BackendThreadTask(void) // BackendThread ->
+void idRenderThread::BackendThreadTask( void ) // BackendThread ->
 {
     // waiting start
     Sys_WaitForEvent(TRIGGER_EVENT_RUN_BACKEND);
@@ -113,7 +117,7 @@ void idRenderThread::BackendThreadTask(void) // BackendThread ->
 
 
 // waiting backend render finished
-void idRenderThread::BackendThreadWait(void)
+void idRenderThread::BackendThreadWait( void )
 {
     while(/*multithreadActive &&*/ !backendFinished)
     {
@@ -123,7 +127,7 @@ void idRenderThread::BackendThreadWait(void)
     }
 }
 
-bool idRenderThread::IsActive(void) const
+bool idRenderThread::IsActive( void ) const
 {
     return multithreadActive && Sys_ThreadIsRunning(&render_thread);
 }

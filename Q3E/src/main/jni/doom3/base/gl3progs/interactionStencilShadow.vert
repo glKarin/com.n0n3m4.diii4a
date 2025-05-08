@@ -1,26 +1,3 @@
-/*
- * Copyright (C) 2012  Oliver McFadden <omcfadde@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-/*
-	macros:
-		BLINN_PHONG: using blinn-phong instead phong.
-		_PBR: using PBR.
-		_TRANSLUCENT: for translucent stencil shadow
-		_SOFT: soft stencil shadow
-*/
 #version 300 es
 //#pragma optimize(off)
 
@@ -28,6 +5,7 @@ precision highp float;
 
 //#define BLINN_PHONG
 //#define _PBR
+//#define _AMBIENT
 //#define _TRANSLUCENT
 //#define _SOFT
 
@@ -37,13 +15,13 @@ out vec2 var_TexSpecular;
 out vec4 var_TexLight;
 out lowp vec4 var_Color;
 out vec3 var_L;
-#if defined(BLINN_PHONG) || defined(_PBR)
+#if defined(BLINN_PHONG) || defined(_PBR) || defined(_AMBIENT)
 out vec3 var_H;
 #endif
 #if !defined(BLINN_PHONG) || defined(_PBR)
 out vec3 var_V;
 #endif
-#ifdef _PBR
+#if defined(_PBR)
 out vec3 var_Normal;
 #endif
 
@@ -58,8 +36,8 @@ uniform vec4 u_lightProjectionS;
 uniform vec4 u_lightProjectionT;
 uniform vec4 u_lightFalloff;
 uniform vec4 u_lightProjectionQ;
-uniform lowp vec4 u_colorModulate;
-uniform lowp vec4 u_colorAdd;
+uniform lowp float u_colorModulate; // 0 or 1/255
+uniform lowp float u_colorAdd; // 0 or 1
 uniform lowp vec4 u_glColor;
 
 uniform vec4 u_lightOrigin;
@@ -73,6 +51,10 @@ uniform vec4 u_specularMatrixS;
 uniform vec4 u_specularMatrixT;
 
 uniform highp mat4 u_modelViewProjectionMatrix;
+#if defined(_AMBIENT)
+uniform highp mat4 u_modelMatrix;
+out mat3 var_TangentToWorldMatrix;
+#endif
 
 void main(void)
 {
@@ -92,24 +74,29 @@ void main(void)
     var_TexLight.z = dot(u_lightFalloff, attr_Vertex);
     var_TexLight.w = dot(u_lightProjectionQ, attr_Vertex);
 
+#if defined(_AMBIENT)
+    vec3 L = normalize(vec3(0.0, 0.5, 1.0));
+    var_TangentToWorldMatrix = mat3(u_modelMatrix) * M;
+#else
     vec3 L = u_lightOrigin.xyz - attr_Vertex.xyz;
+#endif
     vec3 V = u_viewOrigin.xyz - attr_Vertex.xyz;
-#if defined(BLINN_PHONG) || defined(_PBR)
+#if defined(BLINN_PHONG) || defined(_PBR) || defined(_AMBIENT)
     vec3 H = normalize(L) + normalize(V);
 #endif
 
     var_L = L * M;
-#if defined(BLINN_PHONG) || defined(_PBR)
+#if defined(BLINN_PHONG) || defined(_PBR) || defined(_AMBIENT)
     var_H = H * M;
 #endif
 #if !defined(BLINN_PHONG) || defined(_PBR)
     var_V = V * M;
 #endif
-#ifdef _PBR
+#if defined(_PBR)
     var_Normal = attr_Normal * M;
 #endif
 
-    var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
+    var_Color = attr_Color * u_colorModulate + u_colorAdd;
 
     gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 }

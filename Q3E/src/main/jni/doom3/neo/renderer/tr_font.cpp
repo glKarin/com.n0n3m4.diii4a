@@ -584,8 +584,8 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 #else
 		outFont->glyphScale = readFloat();
 
-		int mw = 0;
-		int mh = 0;
+        int mw = 0;
+        int mh = 0;
 #endif
 
 #ifdef _WCHAR_LANG

@@ -1,25 +1,3 @@
-/*
- * Copyright (C) 2012  Oliver McFadden <omcfadde@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/*
-	macros:
-		BLINN_PHONG: using blinn-phong instead phong.
-		_PBR: using PBR.
-*/
 #version 300 es
 //#pragma optimize(off)
 
@@ -27,6 +5,7 @@ precision highp float;
 
 //#define BLINN_PHONG
 //#define _PBR
+//#define _AMBIENT
 
 //#define HALF_LAMBERT
 
@@ -42,13 +21,13 @@ in vec3 var_H;
 #if !defined(BLINN_PHONG) || defined(_PBR)
 in vec3 var_V;
 #endif
-#ifdef _PBR
+#if defined(_PBR)
 in vec3 var_Normal;
 #endif
 
 uniform vec4 u_diffuseColor;
 uniform vec4 u_specularColor;
-#ifdef _PBR
+#if defined(_PBR)
 uniform vec2 u_specularExponent;
 #else
 uniform float u_specularExponent;
@@ -58,11 +37,16 @@ uniform sampler2D u_fragmentMap0;    /* u_bumpTexture */
 uniform sampler2D u_fragmentMap1;    /* u_lightFalloffTexture */
 uniform sampler2D u_fragmentMap2;    /* u_lightProjectionTexture */
 uniform sampler2D u_fragmentMap3;    /* u_diffuseTexture */
+#if defined(_AMBIENT)
+uniform samplerCube u_fragmentCubeMap4;
+in mat3 var_TangentToWorldMatrix;
+#else
 uniform sampler2D u_fragmentMap4;    /* u_specularTexture */
 uniform sampler2D u_fragmentMap5;    /* u_specularFalloffTexture */
+#endif
 out vec4 _gl_FragColor;
 
-#ifdef _PBR
+#if defined(_PBR)
 float dot2_4(vec2 a, vec4 b) {
     return dot(vec4(a, 0.0, 0.0), b);
 }
@@ -137,31 +121,36 @@ void main(void)
     //float u_specularExponent = 4.0;
 
     vec3 L = normalize(var_L);
-    #if defined(BLINN_PHONG) || defined(_PBR)
+#if defined(BLINN_PHONG) || defined(_PBR)
     vec3 H = normalize(var_H);
-    #endif
-#if defined(BLINN_PHONG)
+#endif
+#if defined(BLINN_PHONG) || defined(_AMBIENT)
     vec3 N = 2.0 * texture(u_fragmentMap0, var_TexNormal.st).agb - 1.0;
-    #endif
-#if !defined(BLINN_PHONG) || defined(_PBR)
+#endif
+#if (!defined(BLINN_PHONG) && !defined(_AMBIENT)) || defined(_PBR)
     vec3 V = normalize(var_V);
     vec3 N = normalize(2.0 * texture(u_fragmentMap0, var_TexNormal.st).agb - 1.0);
-    #endif
+#endif
+
+#if defined(_AMBIENT)
+    vec3 globalNormal = var_TangentToWorldMatrix * N; // transform into ambient map space
+    vec3 ambientValue = texture(u_fragmentCubeMap4, globalNormal).rgb; // load the ambient value
+#endif
 
     float NdotL = clamp(dot(N, L), 0.0, 1.0);
-    #if defined(HALF_LAMBERT)
+#if defined(HALF_LAMBERT)
     NdotL *= 0.5;
     NdotL += 0.5;
     NdotL = NdotL * NdotL;
-    #endif
+#endif
 #if defined(BLINN_PHONG) || defined(_PBR)
     float NdotH = clamp(dot(N, H), 0.0, 1.0);
-    #endif
+#endif
 
     vec3 lightProjection = textureProj(u_fragmentMap2, var_TexLight.xyw).rgb;
     vec3 lightFalloff = texture(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;
     vec3 diffuseColor = texture(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;
-    #if defined(_PBR)
+#if defined(_PBR)
     vec3 AN = normalize(mix(normalize(var_Normal), N, u_specularExponent.y));
     vec4 Cd = vec4(diffuseColor.rgb, 1.0);
     vec4 specTex = texture(u_fragmentMap4, var_TexSpecular);
@@ -169,13 +158,13 @@ void main(void)
     vec4 metallic = vec4(specTex.g, specTex.g, specTex.g, specTex.g);
 
     vec4 Cl = vec4(lightProjection * lightFalloff, 1.0);
-    vec3 F0 = vec3(0.04);
+    vec3 F0 = vec3(0.04); 
     F0 = mix(F0, Cd.xyz, metallic.xyz);
 
     // cook-torrance brdf
-    float NDF = DistributionGGX(AN, H, roughness.x);
-    float G   = GeometrySmith(AN, V, L, roughness.x);
-    vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0); //max
+    float NDF = DistributionGGX(AN, H, roughness.x);        
+    float G   = GeometrySmith(AN, V, L, roughness.x);      
+    vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0); //max       
 
     vec3 kS = F;
     vec3 kD = vec3(1.0) - kS;
@@ -183,24 +172,27 @@ void main(void)
 
     vec3 numerator    = NDF * G * F;
     float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);
-    vec3 pbr     = numerator / max(denominator, 0.001);
+    vec3 pbr     = numerator / max(denominator, 0.001);  
 
-    #if 1
+#if 1
     vec4 Lo = (Cd/* * vec4(kD, 1.0)*/ + (u_specularExponent.x * vec4(pbr.rgb, 0.0) * u_specularColor)) * NdotL * Cl;
     _gl_FragColor = vec4(Lo.rgb, 1.0) * var_Color;
-    #else
+#else
     _gl_FragColor = var_Color * Cl * NdotL * Cd + (u_specularExponent.x * vec4(pbr.rgb, 0.0) * (u_specularColor/* * Cl*/));
-    #endif
+#endif
+#elif defined(_AMBIENT)
+    vec3 color = u_specularExponent * /*ambientValue * */diffuseColor * lightProjection * lightFalloff;
+    _gl_FragColor = vec4(color, 1.0) * var_Color;
 #else
     vec3 specularColor = 2.0 * texture(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;
 
-    #if defined(BLINN_PHONG)
+#if defined(BLINN_PHONG)
     float specularFalloff = pow(NdotH, u_specularExponent);
-    #else
+#else
     vec3 R = -reflect(L, N);
     float RdotV = clamp(dot(R, V), 0.0, 1.0);
     float specularFalloff = pow(RdotV, u_specularExponent);
-    #endif
+#endif
 
     vec3 color;
     color = diffuseColor;
@@ -209,5 +201,5 @@ void main(void)
     color *= lightFalloff;
 
     _gl_FragColor = vec4(color, 1.0) * var_Color;
-    #endif
+#endif
 }

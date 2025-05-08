@@ -715,7 +715,7 @@ void BotAASBuild::CreateReachability( const idVec3 &start, const idVec3 &end, in
     idReachability *reach;
 
     // add the reach to the end of the start areas reachability list
-    if ( reach = file->areas[fromAreaNum].reach )
+    if ( (reach = file->areas[fromAreaNum].reach) != NULL )
     {
         // get to the last reach in the list - he he
         for ( ; reach->next; reach = reach->next ) {}
@@ -736,7 +736,7 @@ void BotAASBuild::CreateReachability( const idVec3 &start, const idVec3 &end, in
     r->travelTime = 1; // TODO: distance calculation here
     r->edgeNum = 0; // TODO: elevator height here, portal wouldn't share edge either? make parameter if needed?
     r->areaTravelTimes = NULL;
-    if( reach = file->areas[toAreaNum].rev_reach )
+    if( (reach = file->areas[toAreaNum].rev_reach) != NULL )
     {
         // get to the end of the rev_reach list
         for ( ; reach->rev_next; reach = reach->rev_next ) {}

@@ -245,6 +245,9 @@ class idEntityPtr
 
 //============================================================================
 
+#ifdef MOD_BOTS
+class botAi;
+#endif
 class idGameLocal : public idGame
 {
 	public:
@@ -483,6 +486,10 @@ class idGameLocal : public idGame
 		};
 
 		bool					NeedRestart();
+#ifdef MOD_BOTS
+        friend class botAi;
+        void                    ServerBotClientBegin(int clientNum, const idDict *clientArgs = NULL);
+#endif
 
 	private:
 		const static int		INITIAL_SPAWN_COUNT = 1;
@@ -771,4 +778,8 @@ const int	CINEMATIC_SKIP_DELAY	= SEC2MS(2.0f);
 #include "script/Script_Interpreter.h"
 #include "script/Script_Thread.h"
 
+#ifdef MOD_BOTS
+// TinMan: BotZ0r
+#include "bots/BotAI.h"
+#endif
 #endif	/* !__GAME_LOCAL_H__ */

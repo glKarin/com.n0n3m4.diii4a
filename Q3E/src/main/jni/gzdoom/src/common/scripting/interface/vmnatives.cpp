@@ -902,6 +902,27 @@ DEFINE_ACTION_FUNCTION(_CVar, GetString)
 	ACTION_RETURN_STRING(v.String);
 }
 
+DEFINE_ACTION_FUNCTION(_CVar, GetDefaultInt)
+{
+	PARAM_SELF_STRUCT_PROLOGUE(FBaseCVar);
+	auto v = self->GetGenericRepDefault(CVAR_Int);
+	ACTION_RETURN_INT(v.Int);
+}
+
+DEFINE_ACTION_FUNCTION(_CVar, GetDefaultFloat)
+{
+	PARAM_SELF_STRUCT_PROLOGUE(FBaseCVar);
+	auto v = self->GetGenericRepDefault(CVAR_Float);
+	ACTION_RETURN_FLOAT(v.Float);
+}
+
+DEFINE_ACTION_FUNCTION(_CVar, GetDefaultString)
+{
+	PARAM_SELF_STRUCT_PROLOGUE(FBaseCVar);
+	auto v = self->GetGenericRepDefault(CVAR_String);
+	ACTION_RETURN_STRING(v.String);
+}
+
 DEFINE_ACTION_FUNCTION(_CVar, SetInt)
 {
 	// Only menus are allowed to change CVARs.
@@ -1706,7 +1727,7 @@ DEFINE_ACTION_FUNCTION(DScriptScanner, ScriptError)
 {
 	PARAM_SELF_PROLOGUE(DScriptScanner);
 
-	FString s = FStringFormat(VM_ARGS_NAMES);
+	FString s = FStringFormat(VM_ARGS_NAMES, 1);
 	self->wrapped.ScriptError("%s", s.GetChars());
 	return 0;
 }
@@ -1715,7 +1736,7 @@ DEFINE_ACTION_FUNCTION(DScriptScanner, ScriptMessage)
 {
 	PARAM_SELF_PROLOGUE(DScriptScanner);
 
-	FString s = FStringFormat(VM_ARGS_NAMES);
+	FString s = FStringFormat(VM_ARGS_NAMES, 1);
 	self->wrapped.ScriptMessage("%s", s.GetChars());
 	return 0;
 }
@@ -1796,3 +1817,16 @@ DEFINE_FIELD_NAMED_X(ScriptScanner, DScriptScanner, wrapped.Number, Number);
 DEFINE_FIELD_NAMED_X(ScriptScanner, DScriptScanner, wrapped.End, End);
 DEFINE_FIELD_NAMED_X(ScriptScanner, DScriptScanner, wrapped.Crossed, Crossed);
 DEFINE_FIELD_NAMED_X(ScriptScanner, DScriptScanner, wrapped.ParseError, ParseError);
+
+static int ValidateNameIndex(int index)
+{
+	return FName::IsValidName(index) ? index : 0;
+}
+
+DEFINE_ACTION_FUNCTION_NATIVE(DObject, ValidateNameIndex, ValidateNameIndex)
+{
+	PARAM_PROLOGUE;
+	PARAM_INT(index);
+
+	ACTION_RETURN_INT(ValidateNameIndex(index));
+}

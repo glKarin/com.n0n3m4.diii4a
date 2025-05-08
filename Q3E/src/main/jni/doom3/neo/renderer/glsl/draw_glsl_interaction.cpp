@@ -1,6 +1,10 @@
-static const float zero[4] = { 0, 0, 0, 0 };
-static const float one[4] = { 1, 1, 1, 1 };
-static const float negOne[4] = { -1, -1, -1, -1 };
+extern const float zero[] = { 0.0f };
+extern const float one[] = { 1.0f };
+extern const float negOne[] = { -1.0f };
+#ifdef COLOR_MODULATE_IS_NORMALIZED
+extern const float oneModulate[] = { 1.0f / 255.0f };
+extern const float negOneModulate[] = { -1.0f / 255.0f };
+#endif
 
 /*
 =========================================================================================
@@ -34,17 +38,17 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 
 	switch (din->vertexColor) {
 		case SVC_MODULATE:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), one);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), zero);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), oneModulate);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), zero);
 			break;
 		case SVC_INVERSE_MODULATE:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), negOne);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), negOneModulate);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
 			break;
 		case SVC_IGNORE:
 		default:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), zero);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), zero);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
 			break;
 	}
 
@@ -388,7 +392,11 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping(viewLight_t *vLi
             if( vLight->parallel )
             {
                 side = 0;
-                //sideStop = r_shadowMapSplits.GetInteger() + 1;
+#ifdef GL_ES_VERSION_3_0
+                if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+                    sideStop = r_shadowMapParallelSplitFrustums + 1;
+                else
+#endif
                 sideStop = 1;
             }
             else if( vLight->pointLight )
@@ -446,7 +454,11 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping_separate(viewLig
             if( vLight->parallel )
             {
                 side = 0;
-                //sideStop = r_shadowMapSplits.GetInteger() + 1;
+#ifdef GL_ES_VERSION_3_0
+                if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+                    sideStop = r_shadowMapParallelSplitFrustums + 1;
+                else
+#endif
                 sideStop = 1;
             }
             else if( vLight->pointLight )
@@ -502,67 +514,6 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping_separate(viewLig
         RB_GLSL_DrawInteraction_noShadow(vLight);
     }
 }
-
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping_control(viewLight_t *vLight)
-{
-	if(vLight->shadowLOD >= 0)
-	{
-		int	side, sideStop;
-
-		if( vLight->parallel )
-		{
-			side = 0;
-			//sideStop = r_shadowMapSplits.GetInteger() + 1;
-			sideStop = 1;
-		}
-		else if( vLight->pointLight )
-		{
-			if( r_shadowMapSingleSide.GetInteger() != -1 )
-			{
-				side = r_shadowMapSingleSide.GetInteger();
-				sideStop = side + 1;
-			}
-			else
-			{
-				side = 0;
-				sideStop = 6;
-			}
-		}
-		else
-		{
-			side = -1;
-			sideStop = 0;
-		}
-
-		if(vLight->globalShadows || vLight->localShadows || (r_shadowMapPerforated && vLight->perforatedShadows))
-		{
-			qglDisable(GL_STENCIL_TEST);
-
-			for( int m = side; m < sideStop ; m++ )
-			{
-				RB_ShadowMapPasses( vLight->globalShadows, vLight->localShadows, r_shadowMapPerforated ? vLight->perforatedShadows : NULL, m );
-			}
-
-			qglEnable(GL_STENCIL_TEST);
-
-			RB_StencilShadowPass_shadowMapping(vLight->globalShadows);
-			RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
-			RB_StencilShadowPass_shadowMapping(vLight->localShadows);
-			RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
-		}
-		else
-		{
-			RB_GLSL_DrawInteraction_ptr(vLight);
-		}
-	}
-	else
-	{
-		RB_GLSL_DrawInteraction_ptr(vLight);
-	}
-}
-#endif
-
 #endif
 
 static ID_INLINE void RB_GLSL_DrawInteractionsFunction(RB_GLSL_DrawInteraction_f func)
@@ -670,9 +621,6 @@ void RB_GLSL_DrawInteractions(void)
 			r_dumpShadowMapFrontEnd = false;
 		}
 	}
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-	const bool PureShadowMapping = ShadowMapping && r_shadowMappingScheme == SHADOW_MAPPING_PURE;
-#endif
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE
@@ -727,9 +675,12 @@ void RB_GLSL_DrawInteractions(void)
 
             if( vLight->parallel )
             {
-                side = 0;
-                //sideStop = r_shadowMapSplits.GetInteger() + 1;
-				sideStop = 1;
+#ifdef GL_ES_VERSION_3_0
+                if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+                    sideStop = r_shadowMapParallelSplitFrustums + 1;
+                else
+#endif
+                sideStop = 1;
             }
             else if( vLight->pointLight )
             {
@@ -773,26 +724,10 @@ void RB_GLSL_DrawInteractions(void)
 					}
 				}
 
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-				if(PureShadowMapping)
-				{
-#endif
 					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
 					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
 
 					qglEnable(GL_STENCIL_TEST);
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-				}
-				else
-				{
-					qglEnable(GL_STENCIL_TEST);
-
-					RB_StencilShadowPass_shadowMapping(vLight->globalShadows);
-					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
-					RB_StencilShadowPass_shadowMapping(vLight->localShadows);
-					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
-				}
-#endif
 			}
 			else
 			{
@@ -910,12 +845,7 @@ void RB_GLSL_DrawInteractions(void)
 			r_dumpShadowMap = true;
 			r_dumpShadowMapFrontEnd = false;
 		}
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-		const bool PureShadowMapping = ShadowMapping && r_shadowMappingScheme == SHADOW_MAPPING_PURE;
-		if(PureShadowMapping)
-			func = RB_GLSL_DrawInteraction_shadowMapping_control;
-		else
-#endif
+
 		func = r_shadowMapCombine ? RB_GLSL_DrawInteraction_shadowMapping : RB_GLSL_DrawInteraction_shadowMapping_separate;
 	}
 #endif

@@ -447,6 +447,19 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_r_shadowMapCombine, isChecked)
 						.commit();
 			}
+			else if (id == R.id.cb_g_skipHitEffect)
+			{
+				if(Q3EUtils.q3ei.IsIdTech4())
+				{
+					if(isChecked)
+						SetProp_temp("harm_g_skipHitEffect", "1");
+					else
+						RemoveProp_temp("harm_g_skipHitEffect");
+				}
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_g_skipHitEffect, isChecked)
+						.commit();
+			}
 
 			// Doom 3 BFG
 			else if (id == R.id.doom3bfg_useCompressionCache)
@@ -1038,7 +1051,10 @@ public class GameLauncher extends Activity
 	{
 		super.onWindowFocusChanged(hasFocus);
 		if(hasFocus)
+		{
 			CollapseMods(V.collapse_mods.isChecked());
+			CollapseCmdline(Q3EPreference.GetIntFromString(this, PreferenceKey.COLLAPSE_CMDLINE, 0));
+		}
 	}
 
 	@Override
@@ -1742,6 +1758,12 @@ public class GameLauncher extends Activity
 		V.consoleHeightFracValue.setOnSeekBarChangeListener(m_seekListener);
 		SelectRadioGroup(V.rg_depth_bits, Q3EPreference.DepthIndexByBits(mPrefs.getInt(Q3EPreference.pref_harm_depth_bit, Q3EGlobals.DEFAULT_DEPTH_BITS)));
 		V.rg_depth_bits.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		boolean skipHitEffect = mPrefs.getBoolean(Q3EPreference.pref_harm_g_skipHitEffect, false);
+		if(skipHitEffect && Q3EUtils.q3ei.IsIdTech4())
+			SetProp_temp("harm_g_skipHitEffect", "1");
+//		SelectRadioGroup(V.rg_r_autoAspectRatio, mPrefs.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1));
+		V.cb_g_skipHitEffect.setChecked(skipHitEffect);
+		V.cb_g_skipHitEffect.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView view, int id, KeyEvent ev)
@@ -2794,6 +2816,7 @@ public class GameLauncher extends Activity
 		mEdtr.putString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), V.edt_fs_game.getText().toString());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gui_useD3BFGFont, V.cb_gui_useD3BFGFont.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_shadowMapCombine, V.cb_shadowMapCombine.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_g_skipHitEffect, V.cb_g_skipHitEffect.isChecked());
 
         mEdtr.commit();
     }
@@ -2803,9 +2826,29 @@ public class GameLauncher extends Activity
         ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.help), TextHelper.GetHelpText());
     }
 
+	private void ResetPreferences(int curVer, int newVer)
+	{
+		if(newVer == 64)
+		{
+			if(curVer >= 62 && curVer <= 63)
+			{
+				PreferenceManager.getDefaultSharedPreferences(this).edit()
+						.remove(Q3EPreference.pref_harm_realrtcw_version)
+						.commit();
+			}
+			if(curVer == 63)
+			{
+				PreferenceManager.getDefaultSharedPreferences(this).edit()
+						.remove(Q3EPreference.pref_harm_tdm_version)
+						.commit();
+			}
+		}
+	}
+
     private void OpenUpdate()
     {
-        if (IsUpdateRelease())
+		int[] vers = { 0, 0, };
+        if (IsUpdateRelease(vers))
 		{
 			Object[] args = new Object[1];
 			Runnable callback = new Runnable() {
@@ -2823,12 +2866,14 @@ public class GameLauncher extends Activity
 				}
 			};
 			ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.update_) + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetUpdateText(this), callback, args);
+
+			ResetPreferences(vers[0], vers[1]);
 		}
 		else
 			OpenUpdateTips();
     }
 
-    private boolean IsUpdateRelease()
+    private boolean IsUpdateRelease(int[] vers)
     {
         final String UPDATE_RELEASE = "UPDATE_RELEASE";
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -2836,6 +2881,8 @@ public class GameLauncher extends Activity
         if (r == Constants.CONST_UPDATE_RELEASE)
             return false;
         pref.edit().putInt(UPDATE_RELEASE, Constants.CONST_UPDATE_RELEASE).commit();
+		vers[0] = r;
+		vers[1] = Constants.CONST_UPDATE_RELEASE;
         return true;
     }
 
@@ -3449,7 +3496,7 @@ public class GameLauncher extends Activity
         ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.special_cvar_list), TextHelper.GetCvarText());
     }
 
-    private void SetGame(String game)
+	private void SetGame(String game)
     {
         Q3EUtils.q3ei.SetupGame(game);
 		Q3EUtils.q3ei.SetupGameVersion(this);
@@ -3481,7 +3528,7 @@ public class GameLauncher extends Activity
 		boolean openglVisible = true;
 		boolean quickloadVisible = true;
 		boolean skipintroVisible = true;
-		boolean versionVisible = false;
+		boolean versionVisible = KStr.NotEmpty(Q3EUtils.q3ei.game_version);
 
         if (Q3EUtils.q3ei.isPrey)
         {
@@ -3522,7 +3569,6 @@ public class GameLauncher extends Activity
 			openglVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
-			versionVisible = true;
 		}
 		else if (Q3EUtils.q3ei.isD3BFG)
 		{
@@ -3530,7 +3576,6 @@ public class GameLauncher extends Activity
 			openglVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
-			versionVisible = true;
 		}
 		else if (Q3EUtils.q3ei.isDOOM)
 		{
@@ -3549,7 +3594,6 @@ public class GameLauncher extends Activity
 		{
 			realrtcwVisible = true;
 			openglVisible = false;
-			versionVisible = true;
 		}
 		else if (Q3EUtils.q3ei.isFTEQW)
 		{
@@ -3598,9 +3642,10 @@ public class GameLauncher extends Activity
 		V.rg_fs_jagame.setVisibility(jaVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_jogame.setVisibility(joVisible ? View.VISIBLE : View.GONE);
 
-		V.rg_version_d3bfg.setVisibility(d3bfgVisible ? View.VISIBLE : View.GONE);
-		V.rg_version_realrtcw.setVisibility(realrtcwVisible ? View.VISIBLE : View.GONE);
-		V.rg_version_tdm.setVisibility(tdmVisible ? View.VISIBLE : View.GONE);
+		V.rg_version_d3bfg.setVisibility(versionVisible && d3bfgVisible ? View.VISIBLE : View.GONE);
+		V.rg_version_realrtcw.setVisibility(versionVisible && realrtcwVisible ? View.VISIBLE : View.GONE);
+		V.rg_version_tdm.setVisibility(versionVisible && tdmVisible ? View.VISIBLE : View.GONE);
+
 		V.gameversion_section.setVisibility(versionVisible ? View.VISIBLE : View.GONE);
 
 		V.idtech4_section.setVisibility(Q3EUtils.q3ei.IsIdTech4() ? View.VISIBLE : View.GONE);
@@ -4213,6 +4258,12 @@ public class GameLauncher extends Activity
 	private void SetupCommandLine(boolean readonly)
 	{
 		UIUtility.EditText__SetReadOnly(V.edt_cmdline, readonly, InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+		V.edt_cmdline.post(new Runnable() {
+			@Override
+			public void run() {
+				CollapseCmdline(Q3EPreference.GetIntFromString(GameLauncher.this, PreferenceKey.COLLAPSE_CMDLINE, 0));
+			}
+		});
 	}
 
 	private void SetupTempCommandLine(boolean editable)
@@ -4424,6 +4475,23 @@ public class GameLauncher extends Activity
 		m_createGameFolderFunc.Start(new Bundle());
 	}
 
+	private void CollapseCmdline(int maxHeight)
+	{
+		ViewGroup.LayoutParams layoutParams = V.cmdline_container.getLayoutParams();
+		if(maxHeight > 0 && V.edt_cmdline.getHeight() > maxHeight)
+		{
+			layoutParams.height = maxHeight;
+			V.cmdline_container.setLayoutParams(layoutParams);
+			V.cmdline_container.setNestedScrollingEnabled(true);
+		}
+		else
+		{
+			layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+			V.cmdline_container.setLayoutParams(layoutParams);
+			V.cmdline_container.setNestedScrollingEnabled(false);
+		}
+	}
+
 
 
     private class ViewHolder
@@ -4575,6 +4643,8 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_version_tdm;
 		public CheckBox cb_gui_useD3BFGFont;
 		public CheckBox cb_shadowMapCombine;
+		public android.support.v4.widget.NestedScrollView cmdline_container;
+		public CheckBox cb_g_skipHitEffect;
 
         public void Setup()
         {
@@ -4724,6 +4794,8 @@ public class GameLauncher extends Activity
 			rg_version_tdm = findViewById(R.id.rg_version_tdm);
 			cb_gui_useD3BFGFont = findViewById(R.id.cb_gui_useD3BFGFont);
 			cb_shadowMapCombine = findViewById(R.id.cb_shadowMapCombine);
+			cmdline_container = findViewById(R.id.cmdline_container);
+			cb_g_skipHitEffect = findViewById(R.id.cb_g_skipHitEffect);
         }
     }
 }

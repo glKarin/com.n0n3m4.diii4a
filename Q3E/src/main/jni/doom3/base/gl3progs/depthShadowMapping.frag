@@ -1,7 +1,3 @@
-/*
-	macros:
-		_DEBUG: output z value to red component.
-*/
 #version 300 es
 //#pragma optimize(off)
 

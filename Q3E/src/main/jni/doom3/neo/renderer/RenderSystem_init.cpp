@@ -1222,6 +1222,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("depth24Available: %d\n", glConfig.depth24Available);
 	common->Printf("gl_FragDepthAvailable: %d\n", glConfig.gl_FragDepthAvailable);
 	common->Printf("multiSamples: %d\n", glConfig.multiSamples);
+	common->Printf("sizeof(glIndex_t): %zd\n", sizeof(glIndex_t));
 #ifdef _SHADOW_MAPPING
 	extern bool r_useDepthTexture;
 	extern bool r_useCubeDepthTexture;
@@ -2269,9 +2270,7 @@ R_InitCommands
 */
 void R_InitCommands(void)
 {
-#if !defined(GL_ES_VERSION_2_0)
 	cmdSystem->AddCommand("MakeMegaTexture", idMegaTexture::MakeMegaTexture_f, CMD_FL_RENDERER|CMD_FL_CHEAT, "processes giant images");
-#endif
 	cmdSystem->AddCommand("sizeUp", R_SizeUp_f, CMD_FL_RENDERER, "makes the rendered view larger");
 	cmdSystem->AddCommand("sizeDown", R_SizeDown_f, CMD_FL_RENDERER, "makes the rendered view smaller");
 	cmdSystem->AddCommand("reloadGuis", R_ReloadGuis_f, CMD_FL_RENDERER, "reloads guis");
@@ -2303,27 +2302,26 @@ void R_InitCommands(void)
 	extern void R_DumpShadowMap_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("harm_dumpShadowMap", R_DumpShadowMap_f, CMD_FL_RENDERER, "dump shadow map to file in next frame");
 #endif
-	extern void R_ConvertImage_f(const idCmdArgs &args);
-	cmdSystem->AddCommand("convertImage", R_ConvertImage_f, CMD_FL_RENDERER, "convert image format", idCmdSystem::ArgCompletion_ImageName);
-	extern void R_ExportGLSLShaderSource_f(const idCmdArgs &args);
-	extern void R_PrintGLSLShaderSource_f(const idCmdArgs &args);
-	extern void R_ExportDevShaderSource_f(const idCmdArgs &args);
-	common->Printf("[Harmattan]: GLSL command features: \n    exportGLSLShaderSource: export GLSL shader source to filesystem.\n    reloadGLSLprograms: reload external shader source.\n    printGLSLShaderSource: print shader source.\n    exportDevShaderSource: export original C-String GLSL shader source to filesystem.\n");
-	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export internal GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
-	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print internal GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
-	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export internal original C-String GLSL shader source for developer");
+
+	extern void R_Image_AddCommand(void);
+	R_Image_AddCommand();
+
+	extern void GLSL_AddCommand(void);
+	GLSL_AddCommand();
 #ifdef _EXTRAS_TOOLS
+    extern void MD5Anim_AddCommand(void);
 	MD5Anim_AddCommand();
 #endif
 #ifdef _ENGINE_MODEL_VIEWER
+    extern void ModelTest_AddCommand(void);
+    extern void ModelLight_AddCommand(void);
     ModelTest_AddCommand();
+    ModelLight_AddCommand();
 #endif
 #ifdef _NEW_FONT_TOOLS
     extern void Font_AddCommand(void);
     Font_AddCommand();
 #endif
-    extern void R_ExtractBImage_f(const idCmdArgs &args);
-    cmdSystem->AddCommand("extractBimage", R_ExtractBImage_f, CMD_FL_RENDERER, "extract DOOM3-BFG's bimage image");
 }
 
 /*
@@ -2657,11 +2655,11 @@ idCVar r_useShadowMapping( "r_useShadowMapping", "0", CVAR_RENDERER | CVAR_ARCHI
 idCVar r_shadowMapFrustumFOV( "r_shadowMapFrustumFOV", "90", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "oversize FOV for point light side matching" );
 idCVar r_shadowMapSingleSide( "r_shadowMapSingleSide", "-1", CVAR_RENDERER | CVAR_INTEGER, "only draw a single side (0-5) of point lights" );
 idCVar r_shadowMapImageSize( "r_shadowMapImageSize", "1024", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "", 128, 2048 );
-idCVar r_shadowMapJitterScale( "r_shadowMapJitterScale", "2.5", CVAR_RENDERER | CVAR_FLOAT/* | CVAR_ARCHIVE reopen in next version*/, "scale factor for jitter offset" );
+idCVar r_shadowMapJitterScale( "r_shadowMapJitterScale", "2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter offset" );
 idCVar r_shadowMapBiasScale( "r_shadowMapBiasScale", "0.0001", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter bias" );
 idCVar r_shadowMapRandomizeJitter( "r_shadowMapRandomizeJitter", "1", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "randomly offset jitter texture each draw" );
-idCVar r_shadowMapSamples( "r_shadowMapSamples", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "0, 1, 4, or 16" );
-idCVar r_shadowMapSplits( "r_shadowMapSplits", "3", CVAR_RENDERER | CVAR_INTEGER, "number of splits for cascaded shadow mapping with parallel lights", 0, 4 );
+idCVar r_shadowMapSamples( "r_shadowMapSamples", "16", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "0, 1, 4, or 16", 1, 64 );
+idCVar r_shadowMapSplits( "r_shadowMapSplits", "3", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "number of splits for cascaded shadow mapping with parallel lights(0=disable split cascaded frustum)", 0, 4 );
 idCVar r_shadowMapSplitWeight( "r_shadowMapSplitWeight", "0.9", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar r_shadowMapLodScale( "r_shadowMapLodScale", "1.4", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar r_shadowMapLodBias( "r_shadowMapLodBias", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "" );
@@ -2689,7 +2687,6 @@ idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RE
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "render depth to color or depth texture in OpenGLES2.0. 0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar harm_r_shadowMapNonParallelLightUltra( "harm_r_shadowMapNonParallelLightUltra", "0", CVAR_RENDERER | CVAR_BOOL/*//k next version open: | CVAR_ARCHIVE*/, "non parallel light allow ultra quality shadow map texture" );
-idCVar harm_r_shadowMapJitterScale( "harm_r_shadowMapJitterScale", "2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter offset" );
 
 #include "tr/tr_shadowmapping.cpp"
 #endif

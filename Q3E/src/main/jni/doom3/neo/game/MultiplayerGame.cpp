@@ -2315,6 +2315,11 @@ void idMultiplayerGame::AddChatLine(const char *fmt, ...)
 
 	gameLocal.Printf("%s\n", temp.c_str());
 
+#ifdef MOD_BOTS // TinMan: process chat
+	if(BOT_ENABLED())
+    	botAi::ProcessCommand( temp );
+#endif
+
 	chatHistory[ chatHistoryIndex % NUM_CHAT_NOTIFY ].line = temp;
 	chatHistory[ chatHistoryIndex % NUM_CHAT_NOTIFY ].fade = 6;
 
@@ -3861,4 +3866,3 @@ void idMultiplayerGame::ClientReadWarmupTime(const idBitMsg &msg)
 {
 	warmupEndTime = msg.ReadLong();
 }
-

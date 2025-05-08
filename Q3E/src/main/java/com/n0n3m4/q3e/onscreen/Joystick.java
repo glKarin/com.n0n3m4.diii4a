@@ -8,6 +8,7 @@ import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.KGLBitmapTexture;
+import com.n0n3m4.q3e.gl.Q3EGLVertexBuffer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -68,6 +69,9 @@ public class Joystick extends Paintable implements TouchListener
     private int m_joystickDeadZone_2 = 0;
     private boolean m_updateTexture = false;
     private int m_visibleMode = Q3EGlobals.ONSCRREN_JOYSTICK_VISIBLE_ALWAYS;
+
+    private int vertexBuffer = 0;
+    private int indexBuffer  = 0;
 
     public Joystick(View vw, GL10 gl, int r, float a, int x, int y, float fullZonePercent, float deadZonePercent, boolean unfixed, boolean editMode, int visibleMode, String texid)
     {
@@ -180,6 +184,57 @@ public class Joystick extends Paintable implements TouchListener
         tex_androidid = texid;
     }
 
+    @Override
+    public void AsBuffer(GL11 gl)
+    {
+        vertexBuffer = Q3EGL.glBufferData(gl, vertexBuffer, gl.GL_ARRAY_BUFFER, new Q3EGLVertexBuffer()
+                .Set(new FloatBuffer[]{ verts_p, tex_p }, 4)
+                .Append(new FloatBuffer[]{ vertsd_p, tex_p }, 4)
+                .Buffer(),
+                gl.GL_STATIC_DRAW);
+        indexBuffer = Q3EGL.glBufferData(gl, indexBuffer, gl.GL_ELEMENT_ARRAY_BUFFER, inds_p, gl.GL_STATIC_DRAW);
+    }
+
+    @Override
+    public void Release(GL11 gl)
+    {
+        if(tex_ind > 0)
+        {
+            Q3EGL.glDeleteTexture(gl, tex_ind);
+            tex_ind = 0;
+        }
+        if(texd_ind > 0)
+        {
+            Q3EGL.glDeleteTexture(gl, texd_ind);
+            texd_ind = 0;
+        }
+        if(m_borderTexture > 0)
+        {
+            Q3EGL.glDeleteTexture(gl, m_borderTexture);
+            m_borderTexture = 0;
+        }
+        if(m_outerTexture > 0)
+        {
+            Q3EGL.glDeleteTexture(gl, m_outerTexture);
+            m_outerTexture = 0;
+        }
+        if(m_deadZoneRadius > 0)
+        {
+            Q3EGL.glDeleteTexture(gl, m_deadZoneRadius);
+            m_deadZoneRadius = 0;
+        }
+        if(vertexBuffer > 0)
+        {
+            Q3EGL.glDeleteBuffer(gl, vertexBuffer);
+            vertexBuffer = 0;
+        }
+        if(indexBuffer > 0)
+        {
+            Q3EGL.glDeleteBuffer(gl, indexBuffer);
+            indexBuffer = 0;
+        }
+    }
+
     public void Paint(GL11 gl)
     {
         //main paint
@@ -193,13 +248,16 @@ public class Joystick extends Paintable implements TouchListener
             {
                 if(!m_unfixed)
                 {
-                    Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+//                    Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+                    Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha);
 
                     // int dp = dot_pos;//Multithreading.
                     if (dotjoyenabled)
-                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
+//                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
+                        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + dotx, cy + doty, red, green, blue, alpha);
                     else if (dot_pos != CONST_INVALID_DIRECTION)
-                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
+//                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
+                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
                 }
                 else
                 {
@@ -207,21 +265,26 @@ public class Joystick extends Paintable implements TouchListener
                     {
                         // GL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
                         if (dotjoyenabled)
-                            Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
+//                            Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
+                            Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + dotx, cy + doty, red, green, blue, alpha);
                         else if (dot_pos != CONST_INVALID_DIRECTION)
-                            Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
+//                            Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
+                            Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
                     }
                     else
-                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+//                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, m_posX, m_posY, red, green, blue, alpha);
                 }
             }
         }
         else
         {
             if(!m_unfixed)
-                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+//                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, m_posX, m_posY, red, green, blue, alpha);
             else
-                Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+//                Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, m_posX, m_posY, red, green, blue, alpha);
 
             if(null != m_outerVertexBuffer)
                 Q3EGL.DrawVerts_GL1(gl, m_outerTexture, 6, tex_p, m_outerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
@@ -534,6 +597,8 @@ public class Joystick extends Paintable implements TouchListener
         newj.m_outerTexture = tmp.m_outerTexture;
         newj.m_innerTexture = tmp.m_innerTexture;
         newj.m_borderTexture = tmp.m_borderTexture;
+        newj.vertexBuffer = tmp.vertexBuffer;
+        newj.indexBuffer = tmp.indexBuffer;
         return newj;
     }
 

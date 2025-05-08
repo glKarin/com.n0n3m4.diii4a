@@ -51,10 +51,10 @@ class idDeclTable : public idDecl
 		virtual void			FreeData(void);
 
 #ifdef _RAVEN
-			float			GetMaxValue( void ) const { return( maxValue ); }
-			float			GetMinValue( void ) const { return( minValue ); }
-// bdube: made virtual so it can be accessed in game
-	virtual
+        float			GetMaxValue( void ) const { return( maxValue ); }
+        float			GetMinValue( void ) const { return( minValue ); }
+        // bdube: made virtual so it can be accessed in game
+        virtual
 #endif
 #ifdef _HUMANHEAD
 		virtual	//HUMANHEAD pdm: made virtual so it can be called from game code

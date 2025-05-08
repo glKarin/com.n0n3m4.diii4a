@@ -570,18 +570,18 @@ class idSoundEmitterLocal : public idSoundEmitter
 		virtual void		FadeSound(const s_channelType channel, float to, float over);
 
 #ifdef _RAVEN
-	virtual void			UpdateEmitter(const idVec3& origin, const idVec3& velocity, int listenerId, const soundShaderParms_t* parms) {
-		// TODO: velocity for Miles doppler
-		(void)velocity;
-		UpdateEmitter(origin, listenerId, parms);
-	}
+        virtual void		UpdateEmitter(const idVec3& origin, const idVec3& velocity, int listenerId, const soundShaderParms_t* parms) {
+            // TODO: velocity for Miles doppler
+            (void)velocity;
+            UpdateEmitter(origin, listenerId, parms);
+        }
 #endif
 
 #ifdef _HUMANHEAD
-    virtual void		ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier);
-    virtual soundShaderParms_t* GetSoundParms(idSoundShader* shader, const s_channelType channel);
-	virtual float			CurrentAmplitude( const s_channelType channel ) { (void)channel; return 0.0f; }
-	virtual float			CurrentVoiceAmplitude( const s_channelType channel ) { (void)channel; return 0.0f; }
+        virtual void		ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier);
+        virtual soundShaderParms_t* GetSoundParms(idSoundShader* shader, const s_channelType channel);
+        virtual float		CurrentAmplitude( const s_channelType channel ) { (void)channel; return 0.0f; }
+        virtual float		CurrentVoiceAmplitude( const s_channelType channel ) { (void)channel; return 0.0f; }
 #endif
 
 		virtual bool		CurrentlyPlaying(void) const;
@@ -752,11 +752,11 @@ class idSoundWorldLocal : public idSoundWorld
 		float					FindAmplitude(idSoundEmitterLocal *sound, const int localTime, const idVec3 *listenerPosition, const s_channelType channel, bool shakesOnly);
 
 #ifdef _HUMANHEAD
-	virtual void			RegisterLocation(int area, const char *locationName) { (void)area; (void)locationName; }
-	virtual void			ClearAreaLocations() {}
+        virtual void			RegisterLocation(int area, const char *locationName) { (void)area; (void)locationName; }
+        virtual void			ClearAreaLocations() {}
 
-	virtual void			SetSpiritWalkEffect( bool active ) { (void)active; }
-	virtual void			SetVoiceDucker( bool active ) { (void)active; }
+        virtual void			SetSpiritWalkEffect( bool active ) { (void)active; }
+        virtual void			SetVoiceDucker( bool active ) { (void)active; }
 #endif
 		//============================================
 
@@ -912,7 +912,7 @@ class idSoundSystemLocal : public idSoundSystem
 		virtual int				IsEAXAvailable(void);
 
 #ifdef _RAVEN //karin: quake4 hide idSoundEmitter, and using handle
-		virtual idSoundWorld* GetSoundWorldFromId(int worldId);
+		virtual idSoundWorld*   GetSoundWorldFromId(int worldId);
 		virtual idSoundEmitter* EmitterForIndex(int worldId, int index) {
 			return GetSoundWorldFromId(worldId)->EmitterForIndex(index);
 		}
@@ -924,10 +924,10 @@ class idSoundSystemLocal : public idSoundSystem
 			if(emitter)
 				emitter->Free(immediate);
 		}
-		virtual void StopAllSounds(int worldId) {
+		virtual void            StopAllSounds(int worldId) {
 			GetSoundWorldFromId(worldId)->StopAllSounds();
 		}
-		virtual void SetActiveSoundWorld(bool val) { (void)val; }
+        virtual void            SetActiveSoundWorld(bool val) { (void)val; }
 		virtual void			FadeSoundClasses(int worldId, const int soundClass, const float to, const float over) {
 			GetSoundWorldFromId(worldId)->FadeSoundClasses(soundClass, to, over);
 		}
@@ -947,74 +947,74 @@ class idSoundSystemLocal : public idSoundSystem
 		virtual void			ReadFromSaveGame(int worldId, idFile* savefile) {
 			GetSoundWorldFromId(worldId)->ReadFromSaveGame(savefile);
 		}
-	virtual void			ResetListener( void ) { }
+        virtual void			ResetListener( void ) { }
 
-	virtual void			ListActiveSounds( int worldId ) { (void)worldId; }
+        virtual void			ListActiveSounds( int worldId ) { (void)worldId; }
 
-	virtual size_t			ListSoundSummary( void ) { return 0; }
+        virtual size_t			ListSoundSummary( void ) { return 0; }
 
-	virtual bool			HasCache( void ) const { return false; }
-	virtual rvCommonSample	*FindSample( const idStr &filename ) { (void)filename; return NULL; }
-	virtual void *			AllocSoundSample( int size ) { (void)size; return NULL; }
-	virtual void			FreeSoundSample( const byte *address ) { (void)address; }
+        virtual bool			HasCache( void ) const { return false; }
+        virtual rvCommonSample	*FindSample( const idStr &filename ) { (void)filename; return NULL; }
+        virtual void *			AllocSoundSample( int size ) { (void)size; return NULL; }
+        virtual void			FreeSoundSample( const byte *address ) { (void)address; }
 
-	virtual bool			GetInsideLevelLoad( void ) const { return false; }
-	virtual	bool			ValidateSoundShader( idSoundShader *shader ) { (void)shader; return false; };
+        virtual bool			GetInsideLevelLoad( void ) const { return false; }
+        virtual	bool			ValidateSoundShader( idSoundShader *shader ) { (void)shader; return false; };
 
-// jscott: voice comm support
-	virtual	bool			EnableRecording( bool enable, bool test, float &micLevel ) { (void)enable; (void)test; (void)micLevel; return false; };
-	virtual int				GetVoiceData( byte *buffer, int maxSize ) { (void)buffer; (void)maxSize; return 0; };
-	virtual void			PlayVoiceData( int clientNum, const byte *buffer, int bytes ) { (void)clientNum; (void)buffer; (void)bytes; };
-	virtual void			BufferVoiceData( void ) { };
-	virtual void			MixVoiceData( float *finalMixBuffer, int numSpeakers, int newTime ) { (void)finalMixBuffer; (void)numSpeakers; (void)newTime; };
-// ddynerman: voice comm utility
-	virtual	int				GetCommClientNum( int channel ) const { (void)channel; return 0; };
-	virtual int				GetNumVoiceChannels( void ) const { return 0; };
+    // jscott: voice comm support
+        virtual	bool			EnableRecording( bool enable, bool test, float &micLevel ) { (void)enable; (void)test; (void)micLevel; return false; };
+        virtual int				GetVoiceData( byte *buffer, int maxSize ) { (void)buffer; (void)maxSize; return 0; };
+        virtual void			PlayVoiceData( int clientNum, const byte *buffer, int bytes ) { (void)clientNum; (void)buffer; (void)bytes; };
+        virtual void			BufferVoiceData( void ) { };
+        virtual void			MixVoiceData( float *finalMixBuffer, int numSpeakers, int newTime ) { (void)finalMixBuffer; (void)numSpeakers; (void)newTime; };
+    // ddynerman: voice comm utility
+        virtual	int				GetCommClientNum( int channel ) const { (void)channel; return 0; };
+        virtual int				GetNumVoiceChannels( void ) const { return 0; };
 
-// jscott: reverb editor support
-	virtual	const char		*GetReverbName( int reverb );
-	virtual	int				GetNumAreas( void );
-	virtual	int				GetReverb( int area );
-	virtual	bool			SetReverb( int area, const char *reverbName, const char *fileName );
-	virtual void			EndCinematic() { }
+    // jscott: reverb editor support
+        virtual	const char		*GetReverbName( int reverb );
+        virtual	int				GetNumAreas( void );
+        virtual	int				GetReverb( int area );
+        virtual	bool			SetReverb( int area, const char *reverbName, const char *fileName );
+        virtual void			EndCinematic() { }
 
 private:
-	rvMapReverb reverb;
+	    rvMapReverb             reverb;
 public:
 #endif
 
 #ifdef _HUMANHEAD
-	//HUMANHEAD rww
-	virtual int					GetSubtitleIndex(const char *soundName);
-	virtual void				SetSubtitleData(int subIndex, int subNum, const char *subText, float subTime, int subChannel);
-	virtual soundSub_t			*GetSubtitle(int subIndex, int subNum);
-	virtual soundSubtitleList_t *GetSubtitleList(int subIndex);
-	//HUMANHEAD END
+        //HUMANHEAD rww
+        virtual int				GetSubtitleIndex(const char *soundName);
+        virtual void			SetSubtitleData(int subIndex, int subNum, const char *subText, float subTime, int subChannel);
+        virtual soundSub_t		*GetSubtitle(int subIndex, int subNum);
+        virtual soundSubtitleList_t *GetSubtitleList(int subIndex);
+        //HUMANHEAD END
 
-	//karin: simple show/hide subtitles: FrontEnd: handle GUI in main thread; BackEnd: update sound in async thread(If com_asyncSound != 0)
-	private:
-    typedef struct sb_soundSubtitle_s
-    {
-		int subIndex; // subtitle sound index in idList<soundSubtitleList_s>
-		int subNum; // subtitle text index - 1 in soundSubtitleList_s::subList
-        const soundSubtitle_s *subtitle; // subtitle data soundSub_t
-		int endTime; // end time(absolute value in ms), subtitle end if idSoundSystemLocal::GetCurrent44kHzTime() greater than this value
-    } sb_soundSubtitle_t; // backend
+        //karin: simple show/hide subtitles: FrontEnd: handle GUI in main thread; BackEnd: update sound in async thread(If com_asyncSound != 0)
+    private:
+        typedef struct sb_soundSubtitle_s
+        {
+            int subIndex; // subtitle sound index in idList<soundSubtitleList_s>
+            int subNum; // subtitle text index - 1 in soundSubtitleList_s::subList
+            const soundSubtitle_s *subtitle; // subtitle data soundSub_t
+            int endTime; // end time(absolute value in ms), subtitle end if idSoundSystemLocal::GetCurrent44kHzTime() greater than this value
+        } sb_soundSubtitle_t; // backend
 
-	bool SB_ContainsSubtitle(const soundSubtitle_s *subtitle) const; // backend
-    bool SB_AppendSubtitle(const idSoundChannel *chan); // backend
-    void SB_SetupSubtitle(void); // backend, call in idSoundSystemLocal::AsyncUpdate/idSoundSystemLocal::AsyncUpdateWrite
-	void SB_HideSubtitle(void); // backend, call in idSoundSystemLocal::AsyncUpdate/idSoundSystemLocal::AsyncUpdateWrite
+        bool                SB_ContainsSubtitle(const soundSubtitle_s *subtitle) const; // backend
+        bool                SB_AppendSubtitle(const idSoundChannel *chan); // backend
+        void                SB_SetupSubtitle(void); // backend, call in idSoundSystemLocal::AsyncUpdate/idSoundSystemLocal::AsyncUpdateWrite
+        void                SB_HideSubtitle(void); // backend, call in idSoundSystemLocal::AsyncUpdate/idSoundSystemLocal::AsyncUpdateWrite
 
-	bool SFB_HandleSubtitle(bool fromBackEnd, const void *data = NULL); // frontend/backend
+        bool                SFB_HandleSubtitle(bool fromBackEnd, const void *data = NULL); // frontend/backend
 
-	idList<sb_soundSubtitle_t> sb_subtitleQueue; // backend, next or current show, will hide subtitle if NULL
-    bool sfb_subtitleChanged; // frontend/backend, backend tell frontend has changed, and frontend tell backend not changed after sync
-	idList<const soundSubtitle_s *> sf_subtitleQueue; // frontend, show in player HUD GUI, hide subtitle if NULL
+        idList<sb_soundSubtitle_t> sb_subtitleQueue; // backend, next or current show, will hide subtitle if NULL
+        bool                sfb_subtitleChanged; // frontend/backend, backend tell frontend has changed, and frontend tell backend not changed after sync
+        idList<const soundSubtitle_s *> sf_subtitleQueue; // frontend, show in player HUD GUI, hide subtitle if NULL
 
-	public:
-	idList<soundSubtitleList_s> soundSubtitleList; // static
-	void SF_ShowSubtitle(void); // frontend, call in idSessionLocal::Frame
+        public:
+        idList<soundSubtitleList_s> soundSubtitleList; // static
+        void 				SF_ShowSubtitle(void); // frontend, call in idSessionLocal::Frame
 #endif
 
 	//-------------------------

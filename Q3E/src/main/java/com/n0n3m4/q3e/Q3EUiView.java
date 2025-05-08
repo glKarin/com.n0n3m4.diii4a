@@ -50,6 +50,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -65,6 +66,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
     private       boolean      m_edited            = false;
     private final int[]        drawerTextureId     = {0, 0};
     private       ViewGroup    layout;
+    private final List<Paintable> reloadList = new ArrayList<>();
 
     public Q3EUiView(Context context)
     {
@@ -140,6 +142,15 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         }
         gl.glPopMatrix();
         gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
+
+		if(!reloadList.isEmpty())
+		{
+			for (Paintable p : reloadList)
+			{
+				p.AsBuffer((GL11) gl);
+			}
+			reloadList.clear();
+		}
 
         synchronized (paint_elements) {
             for (Paintable p : paint_elements)
@@ -425,7 +436,11 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                 paint_elements.add((Paintable) o);
             }
 
-            for (Paintable p : paint_elements) p.loadtex(gl);
+            for (Paintable p : paint_elements)
+            {
+                p.loadtex(gl);
+                p.AsBuffer((GL11) gl);
+            }
 
             for (int i = 0; i < fingers.length; i++)
                 fingers[i] = new FingerUi(null, i);
@@ -517,7 +532,11 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         if (mInit)
         {
             mover.loadtex(gl);
-            for (Paintable p : paint_elements) p.loadtex(gl);
+            for (Paintable p : paint_elements)
+            {
+                p.loadtex(gl);
+                p.AsBuffer((GL11) gl);
+            }
         }
     }
 
@@ -610,7 +629,13 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Slider.CalcAspect(tmp.Style());
                     int width = (int) (size * scale);
                     int height = (int) (aspect * width + 0.5f);
-                    tmp.Resize(width, height);
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tmp.Resize(width, height);
+                            reloadList.add(tmp);
+                        }
+                    });
                 }
                 else if (p instanceof Button)
                 {
@@ -618,19 +643,37 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Button.CalcAspect(tmp.Style());
                     int width = (int) (size * scale);
                     int height = (int) (aspect * width + 0.5f);
-                    tmp.Resize(width, height);
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tmp.Resize(width, height);
+                            reloadList.add(tmp);
+                        }
+                    });
                 }
                 else if (p instanceof Joystick)
                 {
                     Joystick tmp = (Joystick) p;
                     int radius = (int) (size * scale) * 2;
-                    tmp.Resize(radius / 2);
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tmp.Resize(radius / 2);
+                            reloadList.add(tmp);
+                        }
+                    });
                 }
                 else if (p instanceof Disc)
                 {
                     Disc tmp = (Disc) p;
                     int radius = (int) (size * scale) * 2;
-                    tmp.Resize(radius / 2);
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tmp.Resize(radius / 2);
+                            reloadList.add(tmp);
+                        }
+                    });
                 }
 
                 m_edited = true;
@@ -663,7 +706,13 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Slider.CalcAspect(tmp.Style());
                     int width = size;
                     int height = (int) (aspect * width + 0.5f);
-                    tmp.Resize(width, height);
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tmp.Resize(width, height);
+                            reloadList.add(tmp);
+                        }
+                    });
                 }
                 else if (p instanceof Button)
                 {
@@ -671,19 +720,37 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Button.CalcAspect(tmp.Style());
                     int width = size;
                     int height = (int) (aspect * width + 0.5f);
-                    tmp.Resize(width, height);
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tmp.Resize(width, height);
+                            reloadList.add(tmp);
+                        }
+                    });
                 }
                 else if (p instanceof Joystick)
                 {
                     Joystick tmp = (Joystick) p;
                     int radius = size * 2;
-                    tmp.Resize(radius / 2);
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tmp.Resize(radius / 2);
+                            reloadList.add(tmp);
+                        }
+                    });
                 }
                 else if (p instanceof Disc)
                 {
                     Disc tmp = (Disc) p;
                     int radius = size * 2;
-                    tmp.Resize(radius / 2);
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tmp.Resize(radius / 2);
+                            reloadList.add(tmp);
+                        }
+                    });
                 }
 
                 m_edited = true;
@@ -873,5 +940,10 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
     public void SetLayout(ViewGroup layout)
     {
         this.layout = layout;
+    }
+
+    public void ReloadButton(Paintable paintable)
+    {
+        reloadList.add(paintable);
     }
 }

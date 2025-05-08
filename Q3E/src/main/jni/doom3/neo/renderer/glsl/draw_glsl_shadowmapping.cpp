@@ -69,6 +69,7 @@ static bool r_dumpShadowMap = false; // backend
 static bool r_dumpShadowMapFrontEnd = false; // frontend
 static bool r_shadowMapPerforated = true;
 static bool r_shadowMapCombine = true;
+static int r_shadowMapParallelSplitFrustums = 0;
 
 static shaderProgram_t *depthShader_2d = &depthShader;
 static shaderProgram_t *depthShader_cube = &depthShader;
@@ -76,17 +77,7 @@ static shaderProgram_t *depthPerforatedShader_2d = &depthPerforatedShader;
 static shaderProgram_t *depthPerforatedShader_cube = &depthPerforatedShader;
 
 // see Framebuffer.h::shadowMapResolutions
-static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0};
-
-// #define _CONTROL_SHADOW_MAPPING_RENDERING // prelight shadow using stencil shadow or shadow mapping
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-#define SHADOW_MAPPING_PURE 0 // always using shadow mapping
-#define SHADOW_MAPPING_PRELIGHT 1 // only prelight shadow using shadow mapping, others using stencil shadow
-#define SHADOW_MAPPING_NON_PRELIGHT 2 // only prelight shadow using stencil shadow, others using shadow mapping
-
-static int r_shadowMappingScheme = SHADOW_MAPPING_PURE;
-static idCVar harm_r_shadowMappingScheme( "harm_r_shadowMappingScheme", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "shadow mapping rendering scheme. 0 = always using shadow mapping; 1 = prelight shadow using shadow mapping, others using stencil shadow; 2 = non-prelight shadow using shadow mapping, others using stencil shadow", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
-#endif
+static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = { 1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0 };
 
 static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "debug light type mask in shadow mapping. 1 = parallel; 2 = point; 4 = spot");
 static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "debug shadow map frame buffer.");
@@ -212,62 +203,18 @@ ID_INLINE static void RB_ShadowMapping_clearBuffer(void)
 // Setup shadow map sample in interaction pass
 ID_INLINE static void RB_ShadowMapping_setupSample(void)
 {
-#if 0
-    float sampleScale = 1.0;
-    float sampleFactor = harm_r_shadowMapSampleFactor.GetFloat();
-    float lod = sampleFactor != 0 ? SampleFactors[backEnd.vLight->shadowLOD] : 0.0;
-
-#ifdef GL_ES_VERSION_3_0
-    if(USING_GLES3)
-    {
-        if( backEnd.vLight->parallel )
-        {
-            sampleScale = 1.0;
-        }
-        else if( backEnd.vLight->pointLight )
-        {
-            sampleScale = 1.0;
-        }
-        else
-        {
-            sampleScale = 4.0;
-        }
-    }
-    else
-#endif
-    {
-		if( backEnd.vLight->parallel )
-		{
-			sampleScale = 1.0;
-		}
-		else if( backEnd.vLight->pointLight )
-		{
-			// if(sampleFactor != 0) lod = 0.2;
-			sampleScale = 100.0;
-		}
-		else
-		{
-			sampleScale = 4.0;
-		}
-    }
-
-    if(sampleFactor > 0.0)
-        sampleScale *= sampleFactor;
-
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[4]), lod * sampleScale);
-#endif
     const float ShadowMapTexelSize[] = {
             (float)shadowMapResolutions[backEnd.vLight->shadowLOD], // textureSize()
             SampleFactors[backEnd.vLight->shadowLOD], // 1.0 / textureSize()
-            harm_r_shadowMapJitterScale.GetFloat(), // sampler offset scale
+            r_shadowMapJitterScale.GetFloat(), // sampler offset scale
             0
     };
     GL_Uniform4fv(offsetof(shaderProgram_t, u_uniformParm[1]), ShadowMapTexelSize);
     const float ScreenSize[] = {
-            1.0f / tr.GetScreenWidth(), // 1.0 / screen_width
-            1.0f / tr.GetScreenHeight(), // 1.0 / screen_height
+            1.0f / (float)tr.GetScreenWidth(), // 1.0 / screen_width
+            1.0f / (float)tr.GetScreenHeight(), // 1.0 / screen_height
             (float)globalImages->blueNoiseImage256->uploadWidth, // jitter.textureSize()
-            1.0f / globalImages->blueNoiseImage256->uploadWidth, // 1.0 / jitter.textureSize()
+            1.0f / (float)globalImages->blueNoiseImage256->uploadWidth, // 1.0 / jitter.textureSize()
     };
     GL_Uniform4fv(offsetof(shaderProgram_t, u_uniformParm[2]), ScreenSize);
 }
@@ -777,82 +724,79 @@ ID_INLINE static void RB_CalcParallelLightMatrix(const viewLight_t* vLight, int 
     MatrixOrthogonalProjectionRH( lightProjectionMatrix, lightBounds[0][0], lightBounds[1][0], lightBounds[0][1], lightBounds[1][1], -lightBounds[1][2], -lightBounds[0][2] );
     idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX lightProjectionMatrix, lightProjectionRenderMatrix );
 
+	if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+	{
+		// 	'frustumMVP' goes from global space -> camera local space -> camera projective space
+		// invert the MVP projection so we can deform zero-to-one cubes into the frustum pyramid shape and calculate global bounds
 
-    // 	'frustumMVP' goes from global space -> camera local space -> camera projective space
-    // invert the MVP projection so we can deform zero-to-one cubes into the frustum pyramid shape and calculate global bounds
+		idRenderMatrix splitFrustumInverse;
+		if( !idRenderMatrix::Inverse( backEnd.viewDef->frustumMVPs[FRUSTUM_CASCADE1 + side], splitFrustumInverse ) )
+		{
+			idLib::Warning( "splitFrustumMVP invert failed" );
+		}
 
-#if 0
-    idRenderMatrix splitFrustumInverse;
-        if( !idRenderMatrix::Inverse( backEnd.viewDef->frustumMVPs[FRUSTUM_CASCADE1 + side], splitFrustumInverse ) )
-        {
-            idLib::Warning( "splitFrustumMVP invert failed" );
-        }
-
-        // splitFrustumCorners in global space
-        ALIGNTYPE16 frustumCorners_t splitFrustumCorners;
-        idRenderMatrix::GetFrustumCorners( splitFrustumCorners, splitFrustumInverse, bounds_unitCube );
+		// splitFrustumCorners in global space
+		ALIGNTYPE16 frustumCorners_t splitFrustumCorners;
+		idRenderMatrix::GetFrustumCorners( splitFrustumCorners, splitFrustumInverse, bounds_unitCube );
 
 
-        idRenderMatrix lightViewProjectionRenderMatrix;
-        idRenderMatrix::Multiply( lightProjectionRenderMatrix, lightViewRenderMatrix, lightViewProjectionRenderMatrix );
+		idRenderMatrix lightViewProjectionRenderMatrix;
+		idRenderMatrix::Multiply( lightProjectionRenderMatrix, lightViewRenderMatrix, lightViewProjectionRenderMatrix );
 
-        // find the bounding box of the current split in the light's clip space
-        idBounds cropBounds;
-        cropBounds.Clear();
-        for( int j = 0; j < 8; j++ )
-        {
-            point[0] = splitFrustumCorners.x[j];
-            point[1] = splitFrustumCorners.y[j];
-            point[2] = splitFrustumCorners.z[j];
-            point[3] = 1;
+		// find the bounding box of the current split in the light's clip space
+		idBounds cropBounds;
+		cropBounds.Clear();
+		for( int j = 0; j < 8; j++ )
+		{
+			point[0] = splitFrustumCorners.x[j];
+			point[1] = splitFrustumCorners.y[j];
+			point[2] = splitFrustumCorners.z[j];
+			point[3] = 1;
 
-            lightViewRenderMatrix.TransformPoint( point, transf );
-            transf[0] /= transf[3];
-            transf[1] /= transf[3];
-            transf[2] /= transf[3];
+			lightViewRenderMatrix.TransformPoint( point, transf );
+			transf[0] /= transf[3];
+			transf[1] /= transf[3];
+			transf[2] /= transf[3];
 
-            cropBounds.AddPoint( transf.ToVec3() );
-        }
+			cropBounds.AddPoint( transf.ToVec3() );
+		}
 
-        // don't let the frustum AABB be bigger than the light AABB
-        if( cropBounds[0][0] < lightBounds[0][0] )
-        {
-            cropBounds[0][0] = lightBounds[0][0];
-        }
+		// don't let the frustum AABB be bigger than the light AABB
+		if( cropBounds[0][0] < lightBounds[0][0] )
+		{
+			cropBounds[0][0] = lightBounds[0][0];
+		}
 
-        if( cropBounds[0][1] < lightBounds[0][1] )
-        {
-            cropBounds[0][1] = lightBounds[0][1];
-        }
+		if( cropBounds[0][1] < lightBounds[0][1] )
+		{
+			cropBounds[0][1] = lightBounds[0][1];
+		}
 
-        if( cropBounds[1][0] > lightBounds[1][0] )
-        {
-            cropBounds[1][0] = lightBounds[1][0];
-        }
+		if( cropBounds[1][0] > lightBounds[1][0] )
+		{
+			cropBounds[1][0] = lightBounds[1][0];
+		}
 
-        if( cropBounds[1][1] > lightBounds[1][1] )
-        {
-            cropBounds[1][1] = lightBounds[1][1];
-        }
+		if( cropBounds[1][1] > lightBounds[1][1] )
+		{
+			cropBounds[1][1] = lightBounds[1][1];
+		}
 
-        cropBounds[0][2] = lightBounds[0][2];
-        cropBounds[1][2] = lightBounds[1][2];
+		cropBounds[0][2] = lightBounds[0][2];
+		cropBounds[1][2] = lightBounds[1][2];
 
-        //float cropMatrix[16];
-        //MatrixCrop(cropMatrix, cropBounds[0], cropBounds[1]);
+		//float cropMatrix[16];
+		//MatrixCrop(cropMatrix, cropBounds[0], cropBounds[1]);
 
-        //idRenderMatrix cropRenderMatrix;
-        //idRenderMatrix::Transpose( ID_RENDER_MATRIX cropMatrix, cropRenderMatrix );
+		//idRenderMatrix cropRenderMatrix;
+		//idRenderMatrix::Transpose( ID_RENDER_MATRIX cropMatrix, cropRenderMatrix );
 
-        //idRenderMatrix tmp = lightProjectionRenderMatrix;
-        //idRenderMatrix::Multiply( cropRenderMatrix, tmp, lightProjectionRenderMatrix );
+		//idRenderMatrix tmp = lightProjectionRenderMatrix;
+		//idRenderMatrix::Multiply( cropRenderMatrix, tmp, lightProjectionRenderMatrix );
 
-        MatrixOrthogonalProjectionRH( lightProjectionMatrix, cropBounds[0][0], cropBounds[1][0], cropBounds[0][1], cropBounds[1][1], -cropBounds[1][2], -cropBounds[0][2] );
-        idRenderMatrix::Transpose( ID_RENDER_MATRIX lightProjectionMatrix, lightProjectionRenderMatrix );
-
-        backEnd.shadowV[side] = lightViewRenderMatrix;
-        backEnd.shadowP[side] = lightProjectionRenderMatrix;
-#endif
+		MatrixOrthogonalProjectionRH( lightProjectionMatrix, cropBounds[0][0], cropBounds[1][0], cropBounds[0][1], cropBounds[1][1], -cropBounds[1][2], -cropBounds[0][2] );
+		idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX lightProjectionMatrix, lightProjectionRenderMatrix );
+	}
 }
 
 // Calculate view-matrix and projection-matrix of point light
@@ -1012,18 +956,6 @@ static ID_INLINE void RB_ShadowMapping_DrawSurfs(const drawSurf_t* drawSurfs, in
          * current using cdrawSurf_t::geo->shadowIsPrelight for checking the shadow model is prelight.
          */
         const bool IsPrelightShadow = RB_ShadowMapping_isPrelightShadow(drawSurf);
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-        if( IsPrelightShadow )
-        {
-            if(r_shadowMappingScheme == SHADOW_MAPPING_NON_PRELIGHT)
-                continue;	// if prelight shadow using stencil shadow
-        }
-        else
-        {
-            if(r_shadowMappingScheme == SHADOW_MAPPING_PRELIGHT)
-                continue;	// if prelight shadow using stencil shadow
-        }
-#endif
 
         if( drawSurf->space != backEnd.currentSpace )
         {
@@ -1080,9 +1012,6 @@ static ID_INLINE void RB_ShadowMapping_DrawSurfs(const drawSurf_t* drawSurfs, in
             GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
             RB_SetMVP(mvp);
-            GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), modelMatrix);
-
-            GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
             GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), localLight.ToFloatPtr());
 
             // const float Frustum[] = {harm_r_shadowMapFrustumNear.GetFloat(), RB_GetPointLightFrustumFar(backEnd.vLight), 0, 0};
@@ -1239,8 +1168,8 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
     {
         RB_CalcParallelLightMatrix(vLight, side, lightViewRenderMatrix, lightProjectionRenderMatrix);
 
-        backEnd.shadowV[0] << lightViewRenderMatrix;
-        backEnd.shadowP[0] << lightProjectionRenderMatrix;
+        backEnd.shadowV[side] << lightViewRenderMatrix;
+        backEnd.shadowP[side] << lightProjectionRenderMatrix;
     }
     else if( vLight->pointLight && side >= 0 )
     {
@@ -1344,8 +1273,8 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
     {
         RB_CalcParallelLightMatrix(vLight, side, lightViewRenderMatrix, lightProjectionRenderMatrix);
 
-        backEnd.shadowV[0] << lightViewRenderMatrix;
-        backEnd.shadowP[0] << lightProjectionRenderMatrix;
+        backEnd.shadowV[side] << lightViewRenderMatrix;
+        backEnd.shadowP[side] << lightProjectionRenderMatrix;
     }
     else if( vLight->pointLight && side >= 0 )
     {
@@ -1453,8 +1382,29 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     // const float Frustum[] = {harm_r_shadowMapFrustumNear.GetFloat(), RB_GetPointLightFrustumFar(backEnd.vLight), 0, 0};
     // GL_Unifor4fv(offsetof(shaderProgram_t, u_uniformParm[4]), Frustum);
 
+
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3)
+#endif
+    if( backEnd.vLight->parallel )
+    {
+        float cascadeDistances[4];
+		if(r_shadowMapParallelSplitFrustums > 0)
+		{
+			cascadeDistances[0] = backEnd.viewDef->frustumSplitDistances[0];
+			cascadeDistances[1] = backEnd.viewDef->frustumSplitDistances[1];
+			cascadeDistances[2] = backEnd.viewDef->frustumSplitDistances[2];
+			cascadeDistances[3] = backEnd.viewDef->frustumSplitDistances[3];
+		}
+		else
+		{
+			cascadeDistances[0] = cascadeDistances[1] = cascadeDistances[2] = cascadeDistances[3] = idMath::INFINITY; //karin: force using 0 texture layer and shadow matrix
+		}
+        GL_Uniform4fv(offsetof(shaderProgram_t, u_uniformParm[3]), cascadeDistances); // rpCascadeDistances
+    }
+
 //#ifdef SHADOW_MAPPING_DEBUG
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[3]), harm_r_shadowMapBias.GetFloat());
+    // GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[4]), harm_r_shadowMapBias.GetFloat());
 //#endif
 
             // perform setup here that will be constant for all interactions
@@ -1505,9 +1455,6 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
 
         GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
         GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), ac->color);
-
-
-        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), surf->space->modelMatrix);
 
         // this may cause RB_GLSL_DrawInteraction to be exacuted multiple
         // times with different colors and images if the surface or light have multiple layers
@@ -1564,7 +1511,34 @@ ID_INLINE static void RB_ShadowMappingInteraction_setupMVP(const drawInteraction
 	 */
 	if( backEnd.vLight->parallel )
 	{
-		//for( int i = 0; i < 1; i++ )
+#ifdef GL_ES_VERSION_3_0
+        if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+        {
+            float ms[6 * 16];
+            for( int i = 0; i < ( r_shadowMapParallelSplitFrustums + 1 ); i++ )
+            {
+                lightViewRenderMatrix << backEnd.shadowV[i];
+                lightProjectionRenderMatrix << backEnd.shadowP[i];
+
+                idRenderMatrix modelRenderMatrix;
+                idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX din->surf->space->modelMatrix, modelRenderMatrix );
+
+                idRenderMatrix modelToLightRenderMatrix;
+                idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+                idRenderMatrix clipMVP;
+                idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+                idRenderMatrix MVP;
+                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+
+                MVP >> &ms[i * 16];
+            }
+
+            GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), 6, ms);
+        }
+        else
+#endif
 		{
 			lightViewRenderMatrix << backEnd.shadowV[0];
 			lightProjectionRenderMatrix << backEnd.shadowP[0];
@@ -1580,6 +1554,7 @@ ID_INLINE static void RB_ShadowMappingInteraction_setupMVP(const drawInteraction
 
 			idRenderMatrix MVP;
 			idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+
 			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
 		}
 	}
@@ -1713,299 +1688,3 @@ ID_INLINE static void RB_getClearColor(float clearColor[4])
 	qglGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor);
 #endif
 }
-
-#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-/*
-======================
-RB_RenderDrawSurfChainWithFunction
-======================
-*/
-static void RB_RenderDrawSurfChainWithFunction_filter(const drawSurf_t *drawSurfs,
-                                        void (*triFunc_)(const drawSurf_t *), bool (*filter)(const drawSurf_t *))
-{
-    const drawSurf_t		*drawSurf;
-
-    backEnd.currentSpace = NULL;
-
-    for (drawSurf = drawSurfs ; drawSurf ; drawSurf = drawSurf->nextOnLight) {
-
-        if(filter && !filter(drawSurf))
-            continue;
-
-        // change the matrix if needed
-        if (drawSurf->space != backEnd.currentSpace) {
-            float	mat[16];
-            myGlMultMatrix(drawSurf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
-            GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
-
-            // we need the model matrix without it being combined with the view matrix
-            // so we can transform local vectors to global coordinates
-            GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), drawSurf->space->modelMatrix);
-        }
-
-        if (drawSurf->space->weaponDepthHack) {
-            RB_EnterWeaponDepthHack(drawSurf);
-        }
-
-        if (drawSurf->space->modelDepthHack) {
-            RB_EnterModelDepthHack(drawSurf);
-        }
-
-        // change the scissor if needed
-        if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(drawSurf->scissorRect)) {
-            backEnd.currentScissor = drawSurf->scissorRect;
-            qglScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
-                       backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
-                       backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
-                       backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1);
-        }
-
-        // render it
-        triFunc_(drawSurf);
-
-        if (drawSurf->space->weaponDepthHack || drawSurf->space->modelDepthHack != 0.0f) {
-            RB_LeaveDepthHack(drawSurf);
-        }
-
-        backEnd.currentSpace = drawSurf->space;
-    }
-
-    backEnd.currentSpace = NULL; //k2023
-}
-
-
-/*
-=====================
-RB_T_Shadow
-
-the shadow volumes face INSIDE
-=====================
-*/
-static void RB_T_Shadow_shadowMapping(const drawSurf_t *surf)
-{
-    const srfTriangles_t	*tri;
-
-    tri = surf->geo;
-
-    if (!tri->shadowCache) {
-        return;
-    }
-
-    // set the light position for the vertex program to project the rear surfaces
-    if (surf->space != backEnd.currentSpace) {
-        idVec4 localLight;
-
-        R_GlobalPointToLocal(surf->space->modelMatrix, backEnd.vLight->globalLightOrigin, localLight.ToVec3());
-        localLight.w = 0.0f;
-        GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), localLight.ToFloatPtr());
-/* //k2023
-		// set the modelview matrix for the viewer
-		float	mat[16];
-
-		myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
-		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);*/
-    }
-
-    tri = surf->geo;
-
-    GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t),
-                           vertexCache.Position(tri->shadowCache));
-
-    // we always draw the sil planes, but we may not need to draw the front or rear caps
-    int	numIndexes;
-    bool external = false;
-
-    if (!r_useExternalShadows.GetInteger()) {
-        numIndexes = tri->numIndexes;
-    } else if (r_useExternalShadows.GetInteger() == 2) {   // force to no caps for testing
-        numIndexes = tri->numShadowIndexesNoCaps;
-    } else if (!(surf->dsFlags & DSF_VIEW_INSIDE_SHADOW)) {
-        // if we aren't inside the shadow projection, no caps are ever needed needed
-        numIndexes = tri->numShadowIndexesNoCaps;
-        external = true;
-    } else if (!backEnd.vLight->viewInsideLight && !(surf->geo->shadowCapPlaneBits & SHADOW_CAP_INFINITE)) {
-        // if we are inside the shadow projection, but outside the light, and drawing
-        // a non-infinite shadow, we can skip some caps
-        if (backEnd.vLight->viewSeesShadowPlaneBits & surf->geo->shadowCapPlaneBits) {
-            // we can see through a rear cap, so we need to draw it, but we can skip the
-            // caps on the actual surface
-            numIndexes = tri->numShadowIndexesNoFrontCaps;
-        } else {
-            // we don't need to draw any caps
-            numIndexes = tri->numShadowIndexesNoCaps;
-        }
-
-        external = true;
-    } else {
-        // must draw everything
-        numIndexes = tri->numIndexes;
-    }
-
-    // debug visualization
-    if (r_showShadows.GetInteger()) {
-        float color[4];
-
-        if (r_showShadows.GetInteger() == 3) {
-            if (external) {
-                color[0] = 0.1;
-                color[1] = 1;
-                color[2] = 0.1;
-            } else {
-                // these are the surfaces that require the reverse
-                color[0] = 1;
-                color[1] = 0.1;
-                color[2] = 0.1;
-            }
-        } else {
-            // draw different color for turboshadows
-            if (surf->geo->shadowCapPlaneBits & SHADOW_CAP_INFINITE) {
-                if (numIndexes == tri->numIndexes) {
-                    color[0] = 1;
-                    color[1] = 0.1;
-                    color[2] = 0.1;
-                } else {
-                    color[0] = 1;
-                    color[1] = 0.4;
-                    color[2] = 0.1;
-                }
-            } else {
-                if (numIndexes == tri->numIndexes) {
-                    color[0] = 0.1;
-                    color[1] = 1;
-                    color[2] = 0.1;
-                } else if (numIndexes == tri->numShadowIndexesNoFrontCaps) {
-                    color[0] = 0.1;
-                    color[1] = 1;
-                    color[2] = 0.6;
-                } else {
-                    color[0] = 0.6;
-                    color[1] = 1;
-                    color[2] = 0.1;
-                }
-            }
-        }
-
-        color[0] /= backEnd.overBright;
-        color[1] /= backEnd.overBright;
-        color[2] /= backEnd.overBright;
-        color[3] = 1;
-        GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
-
-        qglStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        qglDisable(GL_STENCIL_TEST);
-        GL_Cull(CT_TWO_SIDED);
-        RB_DrawShadowElementsWithCounters(tri, numIndexes);
-        GL_Cull(CT_FRONT_SIDED);
-        if (r_shadows.GetBool())
-            qglEnable(GL_STENCIL_TEST);
-
-        return;
-    }
-
-    // depth-fail stencil shadows
-    if(!harm_r_shadowCarmackInverse.GetBool())
-    {
-        GLenum firstFace = backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK;
-        GLenum secondFace = backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT;
-        if ( !external ) {
-            qglStencilOpSeparate( firstFace, GL_KEEP, tr.stencilDecr, tr.stencilDecr );
-            qglStencilOpSeparate( secondFace, GL_KEEP, tr.stencilIncr, tr.stencilIncr );
-            RB_DrawShadowElementsWithCounters( tri, numIndexes );
-        }
-
-        qglStencilOpSeparate( firstFace, GL_KEEP, GL_KEEP, tr.stencilIncr );
-        qglStencilOpSeparate( secondFace, GL_KEEP, GL_KEEP, tr.stencilDecr );
-
-        RB_DrawShadowElementsWithCounters( tri, numIndexes );
-    }
-    else
-    {
-        if (!external) {
-            qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, tr.stencilDecr, GL_KEEP);
-            qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, tr.stencilIncr, GL_KEEP);
-        } else {
-            // traditional depth-pass stencil shadows
-            qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, GL_KEEP, tr.stencilIncr);
-            qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, GL_KEEP, tr.stencilDecr);
-        }
-        RB_DrawShadowElementsWithCounters(tri, numIndexes);
-    }
-}
-
-static ID_INLINE bool RB_StencilShadowPass_shadowMappingFilter(const drawSurf_t *surf)
-{
-    const bool IsPrelightShadow = RB_ShadowMapping_isPrelightShadow(surf);
-    return (r_shadowMappingScheme == SHADOW_MAPPING_PRELIGHT && !IsPrelightShadow) || (r_shadowMappingScheme == SHADOW_MAPPING_NON_PRELIGHT && IsPrelightShadow);
-}
-
-/*
-=====================
-RB_StencilShadowPass
- only prelight shadow
-
-Stencil test should already be enabled, and the stencil buffer should have
-been set to 128 on any surfaces that might receive shadows
-=====================
-*/
-static void RB_StencilShadowPass_shadowMapping(const drawSurf_t *drawSurfs)
-{
-    if (!r_shadows.GetBool()) {
-        return;
-    }
-
-    if (!drawSurfs) {
-        return;
-    }
-
-    RB_LogComment("---------- RB_StencilShadowPass_shadowMapping ----------\n");
-
-    // Use the stencil shadow shader
-    GL_UseProgram(&shadowShader);
-
-    // Setup attributes arrays
-    // Vertex attribute is always enabled
-    // Disable Color attribute (as it is enabled by default)
-    // Disable TexCoord attribute (as it is enabled by default)
-    GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
-
-    globalImages->BindNull();
-
-    // for visualizing the shadows
-    if (r_showShadows.GetInteger()) {
-        if (r_showShadows.GetInteger() == 2) {
-            // draw filled in
-            GL_State(GLS_DEPTHMASK | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHFUNC_LESS);
-        } else {
-            // draw as lines, filling the depth buffer
-            GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_POLYMODE_LINE | GLS_DEPTHFUNC_ALWAYS);
-        }
-    } else {
-        // don't write to the color buffer, just the stencil buffer
-        GL_State(GLS_DEPTHMASK | GLS_COLORMASK | GLS_ALPHAMASK | GLS_DEPTHFUNC_LESS);
-    }
-
-    if (r_shadowPolygonFactor.GetFloat() || r_shadowPolygonOffset.GetFloat()) {
-        qglPolygonOffset(r_shadowPolygonFactor.GetFloat(), -r_shadowPolygonOffset.GetFloat());
-        qglEnable(GL_POLYGON_OFFSET_FILL);
-    }
-
-    qglStencilFunc(GL_ALWAYS, 1, 255);
-
-    GL_Cull(CT_TWO_SIDED);
-
-    RB_RenderDrawSurfChainWithFunction_filter(drawSurfs, RB_T_Shadow_shadowMapping, RB_StencilShadowPass_shadowMappingFilter);
-
-    GL_Cull(CT_FRONT_SIDED);
-
-    if (r_shadowPolygonFactor.GetFloat() || r_shadowPolygonOffset.GetFloat()) {
-        qglDisable(GL_POLYGON_OFFSET_FILL);
-    }
-
-    qglStencilFunc(GL_GEQUAL, 128, 255);
-    qglStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
-    GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
-
-    GL_UseProgram(NULL);
-}
-#endif

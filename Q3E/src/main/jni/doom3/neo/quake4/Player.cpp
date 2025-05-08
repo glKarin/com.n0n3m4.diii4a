@@ -30,13 +30,12 @@
 #ifdef _MOD_VIEW_BODY
 #include "ViewBody.cpp"
 #endif
+#ifdef _QUAKE4 //karin: allow fire when focus NPC
+static idCVar harm_g_allowFireWhenFocusNPC( "harm_g_allowFireWhenFocusNPC", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "allow fire when focus NPC" );
+#endif
 
 idCVar net_predictionErrorDecay( "net_predictionErrorDecay", "112", CVAR_FLOAT | CVAR_GAME | CVAR_NOCHEAT, "time in milliseconds it takes to fade away prediction errors", 0.0f, 200.0f );
 idCVar net_showPredictionError( "net_showPredictionError", "-1", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT, "show prediction errors for the given client", -1, MAX_CLIENTS );
-
-#ifdef MOD_BOTS
-#define IS_BOT() ( spawnArgs.GetInt("spawn_entnum") >= botAi::BOT_START_INDEX )
-#endif
 
 /*
 ===============================================================================
@@ -1345,6 +1344,12 @@ idPlayer::idPlayer() {
 	teamAmmoRegenPending	= false;
 	teamDoubler			= NULL;		
 	teamDoublerPending		= false;
+#ifdef _MOD_VIEW_BODY
+    viewBody				= NULL;
+#endif
+#ifdef MOD_BOTS
+    bot						= NULL;
+#endif
 }
 
 /*
@@ -1437,7 +1442,7 @@ void idPlayer::SetupWeaponEntity( void ) {
 	
 	// don't setup weapons for spectators
 #ifdef MOD_BOTS
-    if ( !IS_BOT() && ( gameLocal.isClient || (weaponViewModel && weaponWorldModel) || spectating )  )
+    if ( !IsBot() && ( gameLocal.isClient || (weaponViewModel && weaponWorldModel) || spectating )  )
 #else
 	if ( gameLocal.isClient || (weaponViewModel && weaponWorldModel) || spectating ) 
 #endif
@@ -1781,6 +1786,9 @@ void idPlayer::Init( void ) {
 		teamDoublerPending = false;
 		teamDoubler = PlayEffect( "fx_doubler", renderEntity.origin, renderEntity.axis, true );
 	}
+#ifdef MOD_BOTS
+    SpawnBot();
+#endif
 }
 
 /*
@@ -1989,8 +1997,7 @@ void idPlayer::Spawn( void ) {
 			assert( spectating );
 		}
 #ifdef MOD_BOTS
-		else if ( IS_BOT() )
-		{
+		else if ( IsBot() ) {
 			// set yourself ready to spawn. idMultiplayerGame will decide when/if appropriate and call SpawnFromSpawnSpot
 			SetupWeaponEntity( );
 #ifdef _MOD_VIEW_BODY
@@ -2129,6 +2136,17 @@ idPlayer::~idPlayer() {
 #endif
 	
 	SetPhysics( NULL );
+#ifdef MOD_BOTS
+    if(IsBot())
+        botAi::ReleaseBotSlot(entityNumber);
+    if(bot)
+    {
+        gameLocal.Printf("Delete player bot: clientID=%d\n", entityNumber);
+        botAi::ReleaseBotSlot(entityNumber);
+        delete bot;
+        bot = NULL;
+    }
+#endif
 }
 
 /*
@@ -2723,6 +2741,12 @@ void idPlayer::PrepareForRestart( void ) {
 
 	// the sound world is going to be cleared, don't keep references to emitters
 	FreeSoundEmitter( false );
+#ifdef MOD_BOTS
+    if(bot)
+    {
+        bot->PrepareForRestart();
+    }
+#endif
 }
 
 /*
@@ -2745,6 +2769,12 @@ void idPlayer::Restart( void ) {
 
 	lastKiller = NULL;
 	useInitialSpawns = true;
+#ifdef MOD_BOTS
+    if(bot)
+    {
+        bot->Restart();
+    }
+#endif
 }
 
 /*
@@ -3905,6 +3935,11 @@ void idPlayer::EnterCinematic( void ) {
    		weapon->PreSave();
 		weapon->EnterCinematic();
    	}
+#ifdef _MOD_VIEW_BODY
+	if (viewBody) {
+		viewBody->EnterCinematic();
+	}
+#endif
 
 	// Reset state flags   
 	memset ( &pfl, 0, sizeof(pfl) );
@@ -3930,6 +3965,11 @@ void idPlayer::ExitCinematic( void ) {
 		weapon->PostSave();
    		weapon->ExitCinematic();
    	}
+#ifdef _MOD_VIEW_BODY
+	if (viewBody) {
+		viewBody->ExitCinematic();
+	}
+#endif
    
    	SetAnimState( ANIMCHANNEL_TORSO, "Torso_Idle", 0 );
 	SetAnimState( ANIMCHANNEL_LEGS, "Legs_Idle", 0 );
@@ -6265,6 +6305,9 @@ void idPlayer::Weapon_NPC( void ) {
 	}
 
 	if ( currentWeapon )	{
+#ifdef _QUAKE4 //karin: allow fire when focus NPC
+		if(!harm_g_allowFireWhenFocusNPC.GetBool())
+#endif
 		StopFiring();
 	}
 
@@ -6274,6 +6317,9 @@ void idPlayer::Weapon_NPC( void ) {
 	}
 
 	if ( talkCursor && ( usercmd.buttons & BUTTON_ATTACK ) && !( oldButtons & BUTTON_ATTACK ) ) {
+#ifdef _QUAKE4 //karin: allow fire when focus NPC
+		if(!harm_g_allowFireWhenFocusNPC.GetBool())
+#endif
 		buttonMask |= BUTTON_ATTACK;
 		if ( !talkingNPC ) {
 			idAI *focusAI = static_cast<idAI*>(focusEnt.GetEntity());
@@ -6285,6 +6331,10 @@ void idPlayer::Weapon_NPC( void ) {
 	} else if ( currentWeapon == SlotForWeapon ( "weapon_blaster" ) ) {
 		Weapon_Combat();
 	}
+#ifdef _QUAKE4 //karin: allow fire when focus NPC
+	if(harm_g_allowFireWhenFocusNPC.GetBool())
+		Weapon_Combat();
+#endif
 }
 
 
@@ -8212,6 +8262,11 @@ bool idPlayer::EnterVehicle( idEntity* vehicle ) {
 	//HideCrosshair();
 // RAVEN END
   	
+#ifdef _MOD_VIEW_BODY
+	if( viewBody ) {
+		viewBody->Hide();
+	}
+#endif
   	return true;
 }
 
@@ -8236,6 +8291,11 @@ bool idPlayer::ExitVehicle ( bool force ) {
 	ShowCrosshair();
 // RAVEN END
 	
+#ifdef _MOD_VIEW_BODY
+	if( viewBody ) {
+		viewBody->Show();
+	}
+#endif
 	return true;
 }
 
@@ -9406,8 +9466,7 @@ void idPlayer::Think( void ) {
 			if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 				fullBodyAwarenessOffset = offset;
 			else
-				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
-			harm_pm_fullBodyAwarenessOffset.ClearModified();
+				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.");
 		}
 	}
 #endif
@@ -9686,7 +9745,7 @@ void idPlayer::Think( void ) {
 	} else if ( health > 0 && !gameLocal.inCinematic ) {
 		UpdateWeapon();
 #ifdef _MOD_VIEW_BODY
-        UpdateBody();
+        UpdateViewBody();
 #endif
 	}
 
@@ -12139,7 +12198,7 @@ void idPlayer::LocalClientPredictionThink( void ) {
 	}
 #ifdef _MOD_VIEW_BODY
     if ( !gameLocal.inCinematic && viewBody && ( health > 0 ) && !( gameLocal.isMultiplayer && spectating ) ) {
-        UpdateBody();
+        UpdateViewBody();
     }
 #endif
 
@@ -12325,7 +12384,7 @@ void idPlayer::NonLocalClientPredictionThink( void ) {
 	}
 #ifdef _MOD_VIEW_BODY
     if ( !gameLocal.inCinematic && viewBody && ( health > 0 ) && !( gameLocal.isMultiplayer && spectating ) ) {
-        UpdateBody();
+        UpdateViewBody();
     }
 #endif
 
@@ -13681,7 +13740,7 @@ void idPlayer::SetupHead( const char* headModel, idVec3 headOffset ) {
 
 		rvClientAFAttachment* headEnt = clientHead.GetEntity();
 #ifdef MOD_BOTS //karin: fixed setup head
-		if(IS_BOT())
+		if(IsBot())
 			gameLocal.SpawnClientEntityDef( *headDict, (rvClientEntity**)&headEnt, false, "rvClientAFAttachment" );
 		else
 #endif
@@ -14358,14 +14417,12 @@ idPlayer::SetupViewBody
 ==============
 */
 void idPlayer::SetupViewBody( void ) {
-    int						w;
-    const char				*weap;
     const idDeclEntityDef	*decl;
     idEntity				*spawn;
 
     // don't setup weapons for spectators
 #ifdef MOD_BOTS
-    if ( !IS_BOT() && ( gameLocal.isClient || viewBody || spectating )  )
+    if ( !IsBot() && ( gameLocal.isClient || viewBody || spectating )  )
 #else
     if ( gameLocal.isClient || viewBody || spectating )
 #endif
@@ -14379,22 +14436,22 @@ void idPlayer::SetupViewBody( void ) {
     if ( !viewBody ) {
         // setup the view model
         idStr player_viewbody_classname;
-        spawnArgs.GetString("player_viewbody", VIEW_BODY_DEFAULT_CLASSNAME, player_viewbody_classname);
-
+        if(!spawnArgs.GetString("player_viewbody", ""/*VIEW_BODY_DEFAULT_CLASSNAME*/, player_viewbody_classname))
+			return;
         if(!player_viewbody_classname.Length())
-            player_viewbody_classname = VIEW_BODY_DEFAULT_CLASSNAME;
-
+			return;
         decl = static_cast< const idDeclEntityDef * >( declManager->FindType( DECL_ENTITYDEF, player_viewbody_classname, false, false ) );
+		/*
         if ( !decl ) {
-            gameLocal.Printf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
+            gameLocal.DPrintf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
             if( idStr::Cmp(player_viewbody_classname, VIEW_BODY_DEFAULT_CLASSNAME) )
             {
                 player_viewbody_classname = VIEW_BODY_DEFAULT_CLASSNAME;
                 decl = static_cast< const idDeclEntityDef * >( declManager->FindType( DECL_ENTITYDEF, player_viewbody_classname, false, false ) );
             }
-        }
+		   */
         if ( !decl ) {
-            gameLocal.Printf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
+            gameLocal.DPrintf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
             return;
         }
 
@@ -14404,14 +14461,14 @@ void idPlayer::SetupViewBody( void ) {
         spawn = NULL;
         gameLocal.SpawnEntityDef( args, &spawn );
         if ( !spawn ) {
-            gameLocal.Printf( "idPlayer::SetupViewBody: failed to spawn viewBody\n" );
+            gameLocal.DPrintf( "idPlayer::SetupViewBody: failed to spawn viewBody\n" );
             return;
         }
         viewBody = static_cast<idViewBody*>(spawn);
         viewBody->Init( this, true );
         viewBody->SetName( va("%s_viewBody", name.c_str() ) );
         viewBody->SetInstance( instance );
-        gameLocal.Printf( "idPlayer::SetupViewBody: spawn viewBody -> %s\n", viewBody->GetName() );
+        gameLocal.DPrintf( "idPlayer::SetupViewBody: spawn viewBody -> %s\n", viewBody->GetName() );
     }
 
     viewBody->fl.persistAcrossInstances = true;
@@ -14419,10 +14476,10 @@ void idPlayer::SetupViewBody( void ) {
 
 /*
 ===============
-idPlayer::UpdateBody
+idPlayer::UpdateViewBody
 ===============
 */
-void idPlayer::UpdateBody( void ) {
+void idPlayer::UpdateViewBody( void ) {
     if ( !viewBody ) {
         return;
     }
@@ -14450,3 +14507,19 @@ void idPlayer::UpdateBody( void ) {
 			);
 }
 #endif
+
+#ifdef MOD_BOTS
+void idPlayer::SetupBot(botAi *bot)
+{
+    this->bot = bot;
+}
+
+void idPlayer::SpawnBot(void)
+{
+    if(!BOT_ENABLED() || !spawnArgs.GetBool("isBot") || !botAi::PlayerHasBotSlot(entityNumber) || bot)
+        return;
+    //printf("Player bot spawn: %p %p\n", this, bot);
+    bot = botAi::SpawnBot(this);
+}
+#endif
+

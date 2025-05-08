@@ -1389,3 +1389,16 @@ void idCVar::SetReadonly(bool on)
     else
         internalVar->flags &= ~CVAR_ROM;
 }
+
+void Com_ResetCVarValue(const char *name)
+{
+	idInternalCVar *cvar;
+
+	cvar = localCVarSystem.FindInternal(name);
+
+	if (!cvar) {
+		return;
+	}
+
+	cvar->Reset();
+}

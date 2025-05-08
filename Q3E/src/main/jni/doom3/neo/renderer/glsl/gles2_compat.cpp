@@ -452,10 +452,8 @@ static void glrbStartRender(void)
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
 	GL_Uniform4fv(offsetof(shaderProgram_t, glColor), gl_Color);
-	const GLfloat zero[4] = {0, 0, 0, 0};
-	GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), zero);
-	const GLfloat one[4] = {1, 1, 1, 1};
-	GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), one);
+	GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), zero);
+	GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), oneModulate);
 
 	GLfloat	gl_MVPMatrix[16];
 	myGlMultMatrix(gl_ModelviewMatrix, gl_ProjectionMatrix, gl_MVPMatrix);

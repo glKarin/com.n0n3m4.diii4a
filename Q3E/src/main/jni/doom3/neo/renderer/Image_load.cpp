@@ -105,7 +105,7 @@ int idImage::BitsForInternalFormat(int internalFormat) const
         case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
             return 4;
         case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-			return 8;
+            return 8;
         case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
             return 8;
         case GL_RGBA4:
@@ -1473,7 +1473,7 @@ void idImage::UploadPrecompressedImage(byte *data, int len)
 				return;
 		}
 	}
-	#if 0
+#if 0
 	else if ((header->ddspf.dwFlags & DDSF_RGBA) && header->ddspf.dwRGBBitCount == 32) {
 		externalFormat = GL_BGRA_EXT;
 		internalFormat = GL_RGBA8;
@@ -1494,7 +1494,7 @@ void idImage::UploadPrecompressedImage(byte *data, int len)
 		externalFormat = GL_ALPHA;
 		internalFormat = GL_ALPHA8;
 	}
-	#endif
+#endif
 	else {
 		common->Warning("Invalid uncompressed internal format\n");
 		return;
@@ -1534,12 +1534,12 @@ void idImage::UploadPrecompressedImage(byte *data, int len)
 		} else {
 			if (FormatIsDXT(internalFormat)) {
 				qglCompressedTexImage2D(GL_TEXTURE_2D, i - skipMip, internalFormat, uw, uh, 0, size, imagedata);
-			} 
-			#if 0			
+			}
+#if 0
 			else {
 				qglTexImage2D(GL_TEXTURE_2D, i - skipMip, internalFormat, uw, uh, 0, externalFormat, GL_UNSIGNED_BYTE, imagedata);
 			}
-			#endif
+#endif
 		}
 
 		imagedata += size;
@@ -2466,7 +2466,7 @@ void idImage::Print() const
             break;
         case GL_COMPRESSED_RGBA_ARB:
             common->Printf( "RGBAC " );
-			break;
+            break;
 		case 0:
 			common->Printf("      ");
 			break;

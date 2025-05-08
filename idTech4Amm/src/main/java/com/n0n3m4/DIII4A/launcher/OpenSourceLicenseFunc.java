@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.FileUtility;
+import com.karin.idTech4Amm.lib.UIUtility;
 import com.karin.idTech4Amm.network.NetworkAccessManager;
 import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.DIII4A.GameLauncher;
@@ -51,7 +52,7 @@ public final class OpenSourceLicenseFunc extends GameLauncherFunc
                     m_text = Tr(R.string.empty_response_data);
                 if(null != m_dialog)
                 {
-                    TextView message = m_dialog.findViewById(android.R.id.message);
+                    TextView message = UIUtility.GetDialogMessageView(m_dialog);
                     if(null != message)
                         message.setText(m_text);
                 }

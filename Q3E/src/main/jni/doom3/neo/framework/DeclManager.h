@@ -494,12 +494,12 @@ class idDeclManager
 		virtual const idSoundShader 	*SoundByIndex(int index, bool forceParse = true) = 0;
 
 #ifdef _HUMANHEAD
-    //HUMANHEAD: aob
-    virtual const hhDeclBeam *		FindBeam( const char *name, bool makeDefault = true ) = 0; // HUMANHEAD CJR
-    virtual const hhDeclBeam *		BeamByIndex( int index, bool forceParse = true ) = 0; // HUMANHEAD CJR
+        //HUMANHEAD: aob
+        virtual const hhDeclBeam *		FindBeam( const char *name, bool makeDefault = true ) = 0; // HUMANHEAD CJR
+        virtual const hhDeclBeam *		BeamByIndex( int index, bool forceParse = true ) = 0; // HUMANHEAD CJR
 
-	virtual void					SetInsideLevelLoad(bool b) = 0;
-	virtual bool					GetInsideLevelLoad(void) = 0;
+        virtual void					SetInsideLevelLoad(bool b) = 0;
+        virtual bool					GetInsideLevelLoad(void) = 0;
 #endif
 };
 

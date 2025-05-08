@@ -52,19 +52,14 @@ public final class KCVarSystem
                         KCVar.CreateCVar("r_screenshotPngCompression", "integer", "3", "Compression level when using PNG screenshots (0-9)", KCVar.FLAG_POSITIVE),
 
                         KCVar.CreateCVar("r_useShadowMapping", "bool", "0", "use shadow mapping instead of stencil shadows", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "1.0", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_shadowMapJitterScale", "float", "2.5", "scale factor for jitter offset", KCVar.FLAG_POSITIVE),
-                        /*KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0),
-                        KCVar.CreateCVar("harm_r_shadowMappingScheme", "integer", "0", "shadow mapping rendering scheme", 0,
-                                "0", "always using shadow mapping",
-                                "1", "prelight shadow using shadow mapping, others using stencil shadow",
-                                "2", "non-prelight shadow using shadow mapping, others using stencil shadow"
-                        ),*/
                         KCVar.CreateCVar("r_forceShadowMapsOnAlphaTestedSurfaces", "bool", "0", "render perforated surface to shadow map(DOOM 3 default is 1)", KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "1.0", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("r_shadowMapJitterScale", "float", "2.5", "scale factor for jitter offset", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("r_shadowMapSplits", "integer", "3", "number of splits for cascaded shadow mapping with parallel lights(0: disable, max is 4)", 0),
+                        KCVar.CreateCVar("harm_r_shadowMapCombine", "bool", "1", "combine local and global shadow mapping", KCVar.FLAG_LAUNCHER),
 
                         KCVar.CreateCVar("harm_r_stencilShadowTranslucent", "bool", "0", "enable translucent shadow in stencil shadow", KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "1.0", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_shadowMapCombine", "bool", "1", "combine local and global shadow mapping", KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_stencilShadowCombine", "bool", "0", "combine local and global stencil shadow", KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_stencilShadowSoft", "bool", "0", "enable soft stencil shadow(Only OpenGLES3.1+)", KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_stencilShadowSoftBias", "float", "-1", "soft stencil shadow sampler BIAS(-1 = automatic; 0 = disable; positive = value)", 0),
@@ -128,17 +123,44 @@ public final class KCVarSystem
                             + " DFPHeiseiGothicW7 "
                             + " Sarasori_Rg "
                             ),
+                        KCVar.CreateCVar("harm_g_skipHitEffect", "bool", "0", "Skip all hit effect in game", KCVar.FLAG_INIT | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCommand("exportFont", "string", "Convert ttf/ttc font file to DOOM3 wide character font file", 0),
-                        KCVar.CreateCommand("extractBimage", "string", "extract DOOM3-BFG's bimage image to rga RGBA image files", 0)
+                        KCVar.CreateCommand("extractBimage", "string", "extract DOOM3-BFG's bimage image to rga RGBA image files", 0),
+                        KCVar.CreateCommand("skipHitEffect", "bool", "skip all hit effect in game", 0)
                 );
         KCVar.Group GAME_CVARS = new KCVar.Group("DOOM3", false)
                 .AddCVar(
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(forward-offset side-offset up-offset)", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset, format is \"<forward-offset> <side-offset> <up-offset>\"", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "Head", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0)
+                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
+                    KCVar.CreateCVar("harm_ui_showViewLight", "bool", "0", "show player view flashlight(mod)", 0),
+                    KCVar.CreateCVar("harm_ui_viewLightShader", "string", "lights/flashlight5", "player view flashlight material texture/entityDef name", 0),
+                    KCVar.CreateCVar("harm_ui_viewLightRadius", "vector3", "1280 640 640", "player view flashlight radius, format is \"<light_target> <light_right> <light_up>\"", 0),
+                    KCVar.CreateCVar("harm_ui_viewLightOffset", "string", "20 0 0", "player view flashlight origin offset, format is \"<forward-offset> <side-offset> <up-offset>\"", 0),
+                    KCVar.CreateCVar("harm_ui_viewLightType", "integer", "0", "player view flashlight type", 0,
+                        "0", "spot light",
+                        "1", "point light"
+                    ),
+                    KCVar.CreateCVar("harm_ui_viewLightOnWeapon", "bool", "0", "player view flashlight follow weapon position", 0),
+                    KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
+                    KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0 = disable; other number = bot num)", 0),
+                    KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot difficult level(0 = auto)", 0),
+                    KCVar.CreateCVar("harm_si_botWeapons", "string", "0", "Bot initial weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_shotgun,weapon_machinegun), and allow mix(e.g. shotgun,3,weapon_rocketlauncher). All weapon: 1=pistol, 2=shotgun, 3=machinegun, 4=chaingun, 5=handgrenade, 6=plasmagun, 7=rocketlauncher, 8=BFG, 10=chainsaw.", 0),
+                    KCVar.CreateCVar("harm_si_botAmmo", "integer", "0", "Bot weapons initial ammo clip when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo", 0),
+                    KCVar.CreateCommand("addBots", "string", "add multiplayer bots batch", 0),
+                    KCVar.CreateCommand("removeBots", "integer", "disconnect multi bots by client ID", 0),
+                    KCVar.CreateCommand("fillBots", "integer", "fill bots to maximum of server", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("appendBots", "integer", "append more bots(over maximum of server)", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("cleanBots", "", "disconnect all bots", 0),
+                    KCVar.CreateCommand("truncBots", "integer", "disconnect last bots", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("botLevel", "integer", "setup all bot level", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("botWeapons", "string", "setup all bot initial weapons", 0),
+                    KCVar.CreateCommand("botAmmo", "integer", "setup all bot weapons initial ammo clip", 0),
+                    KCVar.CreateCommand("addBot", "string", "adds a new bot", 0),
+                    KCVar.CreateCommand("removeBot", "string", "removes bot specified by id", 0)
                 );
         KCVar.Group RIVENSIN_CVARS = new KCVar.Group("Rivensin", false)
                 .AddCVar(
@@ -149,7 +171,6 @@ public final class KCVarSystem
 
         KCVar.Group QUAKE4_CVARS = new KCVar.Group("Quake4", false)
                 .AddCVar(
-                    KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
                     KCVar.CreateCVar("harm_gui_defaultFont", "string", "chain", "Default font name", 0,
                             "chain", "fonts/chain",
                             "lowpixel", "fonts/lowpixel",
@@ -158,16 +179,31 @@ public final class KCVarSystem
                             "r_strogg", "fonts/r_strogg",
                             "strogg", "fonts/strogg"
                     ),
+                    KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
                     KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0 = disable; other number = bot num)", 0),
-                    KCVar.CreateCommand("addbots", "string", "adds multiplayer bots batch(support `tab` complete, exam. addbots bot_name1 bot_name2 ...)", 0),
-                    KCVar.CreateCommand("fillbots", "integer", "fill bots(empty argument to fill max bots num, exam. fillbots 8)", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot difficult level(0 = auto)", 0),
+                    KCVar.CreateCVar("harm_si_botWeapons", "string", "0", "Bot initial weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_machinegun,weapon_shotgun), and allow mix(e.g. machinegun,3,weapon_rocketlauncher). All weapon: 1=machinegun, 2=shotgun, 3=hyperblaster, 4=grenadelauncher, 5=nailgun, 6=rocketlauncher, 7=railgun, 8=lightninggun, 9=dmg, 10=napalmgun.", 0),
+                    KCVar.CreateCVar("harm_si_botAmmo", "integer", "0", "Bot weapons initial ammo clip when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo", 0),
+                    KCVar.CreateCommand("addBots", "string", "adds multiplayer bots batch", 0),
+                    KCVar.CreateCommand("removeBots", "integer", "disconnect multi bots by client ID", 0),
+                    KCVar.CreateCommand("fillBots", "integer", "fill bots to maximum of server", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("appendBots", "integer", "append more bots(over maximum of server)", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("cleanBots", "", "disconnect all bots", 0),
+                    KCVar.CreateCommand("truncBots", "integer", "disconnect last bots", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("botLevel", "integer", "setup all bot level", KCVar.FLAG_POSITIVE),
+                    KCVar.CreateCommand("botWeapons", "string", "setup all bot initial weapons", 0),
+                    KCVar.CreateCommand("botAmmo", "integer", "setup all bot weapons initial ammo clip", 0),
+                    KCVar.CreateCommand("addBot", "string", "adds a new bot", 0),
+                    KCVar.CreateCommand("removeBot", "string", "removes bot specified by id", 0),
                     KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "Mute player's footstep sound", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(forward-offset side-offset up-offset)", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset, format is \"<forward-offset> <side-offset> <up-offset>\"", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0)
+                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
+                    KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "mute player's footstep sound", 0),
+                    KCVar.CreateCVar("harm_g_allowFireWhenFocusNPC", "bool", "0", "allow fire when focus NPC", 0)
                 );
 
         KCVar.Group PREY_CVARS = new KCVar.Group("Prey(2006)", false)
@@ -181,7 +217,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_ui_subtitlesTextScale", "float", "0.32", "Subtitles's text scale(less or equals 0 to unset)", 0),
 
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(forward-offset side-offset up-offset)", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset, format is \"<forward-offset> <side-offset> <up-offset>\"", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "neck", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0)

@@ -921,6 +921,11 @@ gameReturn_t hhGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 	RunDebugInfo();
 	D_DrawDebugLines();
 
+#ifdef _MOD_FULL_BODY_AWARENESS
+    if(harm_pm_fullBodyAwarenessOffset.IsModified())
+        harm_pm_fullBodyAwarenessOffset.ClearModified();
+#endif
+
 	//HUMANHEAD rww
 	if (logitechLCDEnabled) {
 		PROFILE_START("LogitechLCDUpdate", PROFMASK_NORMAL);

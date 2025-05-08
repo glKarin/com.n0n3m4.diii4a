@@ -125,11 +125,11 @@ class idCmdSystem
 		static void			ArgCompletion_SaveGame(const idCmdArgs &args, void(*callback)(const char *s));
 		static void			ArgCompletion_DemoName(const idCmdArgs &args, void(*callback)(const char *s));
 #ifdef _RAVEN
-	virtual void		ArgCompletion_Models( const idCmdArgs &args, void(*callback)( const char *s ), bool strogg, bool marine ) = 0;
+        virtual void		ArgCompletion_Models( const idCmdArgs &args, void(*callback)( const char *s ), bool strogg, bool marine ) = 0;
 
-	static void			ArgCompletion_ForceModel( const idCmdArgs &args, void(*callback)( const char *s ) );
-	static void			ArgCompletion_ForceModelStrogg( const idCmdArgs &args, void(*callback)( const char *s ) );
-	static void			ArgCompletion_ForceModelMarine( const idCmdArgs &args, void(*callback)( const char *s ) );
+        static void			ArgCompletion_ForceModel( const idCmdArgs &args, void(*callback)( const char *s ) );
+        static void			ArgCompletion_ForceModelStrogg( const idCmdArgs &args, void(*callback)( const char *s ) );
+        static void			ArgCompletion_ForceModelMarine( const idCmdArgs &args, void(*callback)( const char *s ) );
 #endif
 };
 

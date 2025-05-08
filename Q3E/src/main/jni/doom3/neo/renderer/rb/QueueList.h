@@ -1,6 +1,13 @@
 #ifndef _KARIN_QUEUE_LIST_H
 #define _KARIN_QUEUE_LIST_H
 
+#define _QUEUE_LIST_RECYCLE 1
+#if 1
+#define _QUEUE_LIST_DEBUG(x)
+#else
+#define _QUEUE_LIST_DEBUG(x) do { printf(#x " -> "); PrintInfo(); } while(0)
+#endif
+
 template< class T >
 class idQueueList
 {
@@ -12,7 +19,11 @@ public:
     };
 
 public:
+#ifdef _QUEUE_LIST_RECYCLE
+    explicit idQueueList( bool recycle = false );
+#else
 	idQueueList();
+#endif
 	~idQueueList();
 
     void                Append( const T &val );
@@ -30,6 +41,9 @@ public:
     // unsafe
     T &                 Get( void );
     const T &           Get( void ) const;
+#ifdef _QUEUE_LIST_RECYCLE
+	void				SetRecycle( bool recycle );
+#endif
 
 #if 0
     // only return first, only for compat with idList
@@ -46,21 +60,45 @@ public:
 #endif
 
 private:
+    void                FreeNode( idQueueListNode* node );
+    idQueueListNode*    AllocNode( void );
+    void                PrintInfo( void );
+    void                AppendNode( idQueueListNode* node );
+	void				Clean( void );
+
+private:
     idQueueListNode     *head;
     idQueueListNode     *tail;
+#ifdef _QUEUE_LIST_RECYCLE
+    idQueueList         *recycleList;
+#endif
 };
 
 template< class T >
+#ifdef _QUEUE_LIST_RECYCLE
+idQueueList<T>::idQueueList( bool recycle )
+#else
 idQueueList<T>::idQueueList()
+#endif
 {
 	head = NULL;
     tail = NULL;
+#ifdef _QUEUE_LIST_RECYCLE
+    if(recycle)
+        recycleList = new idQueueList(false);
+	else
+		recycleList = NULL;
+#endif
 }
 
 template< class T >
 idQueueList<T>::~idQueueList()
 {
-	Clear();
+	Clean();
+#ifdef _QUEUE_LIST_RECYCLE
+    if(recycleList)
+        delete recycleList;
+#endif
 }
 
 template< class T >
@@ -100,11 +138,73 @@ void idQueueList<T>::Clear( void )
 	while( node )
 	{
 	    next = node->next;
-	    delete node;
+        FreeNode(node);
         node = next;
 	}
 
     head = tail = NULL;
+}
+
+template< class T >
+void idQueueList<T>::Clean( void )
+{
+	idQueueListNode*	node;
+	idQueueListNode*	next;
+
+    node = head;
+	while( node )
+	{
+	    next = node->next;
+		delete node;
+        node = next;
+	}
+
+    head = tail = NULL;
+
+#ifdef _QUEUE_LIST_RECYCLE
+    if(recycleList)
+        recycleList->Clean();
+#endif
+}
+
+template< class T >
+ID_INLINE void idQueueList<T>::FreeNode( idQueueListNode* node )
+{
+#ifdef _QUEUE_LIST_RECYCLE
+    if(recycleList)
+        recycleList->AppendNode(node);
+    else
+#endif
+    delete node;
+}
+
+template< class T >
+ID_INLINE typename idQueueList<T>::idQueueListNode * idQueueList<T>::AllocNode( void )
+{
+#ifdef _QUEUE_LIST_RECYCLE
+    if(recycleList)
+    {
+        idQueueListNode *node = recycleList->Take();
+        if(node)
+            return node;
+    }
+#endif
+    return new idQueueListNode;
+}
+
+template< class T >
+ID_INLINE void idQueueList<T>::AppendNode( idQueueListNode* node )
+{
+    if(!head)
+    {
+        head = tail = node;
+    }
+    else
+    {
+        tail->next = node;
+        tail = node;
+    }
+    tail->next = NULL;
 }
 
 template< class T >
@@ -114,7 +214,10 @@ ID_INLINE void idQueueList<T>::Remove( void )
     {
         idQueueListNode *node = head;
         head = head->next;
-        delete node;
+		if(!head)
+			tail = NULL;
+        FreeNode(node);
+        _QUEUE_LIST_DEBUG(Remove);
     }
 }
 
@@ -143,6 +246,7 @@ ID_INLINE bool idQueueList<T>::Get( T *&ret )
 template< class T >
 ID_INLINE T & idQueueList<T>::Get( void )
 {
+    _QUEUE_LIST_DEBUG(Get);
     return head->data;
 }
 
@@ -165,6 +269,8 @@ typename idQueueList<T>::idQueueListNode * idQueueList<T>::Take( void )
     {
         idQueueListNode *node = head;
         head = head->next;
+		if(!head)
+			tail = NULL;
         return node;
     }
     else
@@ -174,18 +280,41 @@ typename idQueueList<T>::idQueueListNode * idQueueList<T>::Take( void )
 template< class T >
 void idQueueList<T>::Append( const T& val )
 {
-    idQueueListNode *node = new idQueueListNode;
-    node->data = val;
-    if(!head)
-    {
-        head = tail = node;
-    }
+    idQueueListNode *node = AllocNode();
+	node->data = val;
+    AppendNode(node);
+    _QUEUE_LIST_DEBUG(Append);
+}
+
+#ifdef _QUEUE_LIST_RECYCLE
+template< class T >
+void idQueueList<T>::SetRecycle( bool recycle )
+{
+	if(recycle)
+	{
+		if(!recycleList)
+			recycleList = new idQueueList(false);
+	}
+	else
+	{
+		if(recycleList)
+		{
+			delete recycleList;
+			recycleList = NULL;
+		}
+	}
+}
+#endif
+
+template< class T >
+void idQueueList<T>::PrintInfo( void )
+{
+#ifdef _QUEUE_LIST_RECYCLE
+    if(recycleList)
+        printf("idQueueList::%p -> num=%d, head=%p, tail=%p. recycle=%p(num=%d, head=%p, tail=%p)\n", this, Num(), head, tail, recycleList, recycleList->Num(), recycleList->head, recycleList->tail);
     else
-    {
-        tail->next = node;
-        tail = node;
-    }
-    tail->next = NULL;
+#endif
+    printf("idQueueList::%p -> num=%d, head=%p, tail=%p\n", this, Num(), head, tail);
 }
 
 #endif /* !_KARIN_QUEUE_LIST_H */

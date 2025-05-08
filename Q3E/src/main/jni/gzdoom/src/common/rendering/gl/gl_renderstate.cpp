@@ -416,6 +416,77 @@ void FGLRenderState::ApplyBlendMode()
 //==========================================================================
 
 static int dt2gl[] = { GL_POINTS, GL_LINES, GL_TRIANGLES, GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP };
+#ifdef _GLES //karin: glDrawArrays to glDrawElements
+#if 1
+class gzDrawArray
+{
+public:
+    gzDrawArray()
+        : indexes(nullptr),
+        size(0)
+    {}
+    ~gzDrawArray() {
+        Free();
+    }
+    void glDrawArrays(int dt2gl_dt, int index, int count) {
+        if(count == 0)
+            return;
+        int buf;
+        glGetIntegerv( GL_ELEMENT_ARRAY_BUFFER_BINDING, &buf);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        MakeIndexes(index, count);
+        TID(glDrawElements(dt2gl_dt, count, GL_UNSIGNED_INT, indexes));
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf);
+    }
+private:
+    void Free(void) {
+        if(indexes)
+        {
+            //printf("ddd::free %p %d\n", indexes, size);
+            free(indexes);
+            indexes = nullptr;
+        }
+        size = 0;
+    }
+    void Alloc(int newsize) {
+        indexes = (int *)malloc(4 * newsize);
+        size = newsize;
+        //printf("ddd::alloc %p %d\n", indexes, size);
+    }
+    void resize(int newsize) {
+        if(newsize > size) {
+            //printf("ddd::resize %d > %d\n", newsize, size);
+            Free();
+            Alloc(newsize);
+        }
+        //else printf("ddd::keep %d <= %d\n", newsize, size);
+    }
+    void MakeIndexes(int index, int count) {
+        resize(count);
+        for(int i = 0; i < count; ++i)
+            indexes[i] = index + i;
+    }
+    int *indexes;
+    int size;
+};
+static gzDrawArray _drawArray;
+#define gzDrawArrays(_t, _s, _c) _drawArray.glDrawArrays(_t, _s, _c)
+#else
+inline static gzDrawArray(int dt2gl_dt, int index, int count)
+{
+	int buf;
+	glGetIntegerv( GL_ELEMENT_ARRAY_BUFFER_BINDING, &buf);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	int *arr = (int*)malloc(4 * count);
+	for(int i = 0; i < count; ++i)
+		arr[i] = index + i;
+	TID(glDrawElements(dt2gl_dt, count, GL_UNSIGNED_INT, arr));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf);
+	free(arr);
+}
+#define gzDrawArrays(_t, _s, _c) gzDrawArray(_t, _s, _c)
+#endif
+#endif
 
 void FGLRenderState::Draw(int dt, int index, int count, bool apply)
 {
@@ -425,15 +496,7 @@ void FGLRenderState::Draw(int dt, int index, int count, bool apply)
 	}
 	drawcalls.Clock();
 #ifdef _GLES //karin: TODO glDrawArrays crash!!!
-	int buf;
-	glGetIntegerv( GL_ELEMENT_ARRAY_BUFFER_BINDING, &buf);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	int *arr = (int*)malloc(4 * count);
-	for(int i = 0; i < count; i++)
-		arr[i] = index + i;
-	TID(glDrawElements(dt2gl[dt], count, GL_UNSIGNED_INT, arr));
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf);
-	free(arr);
+    gzDrawArrays(dt2gl[dt], index, count);
 #else
 	glDrawArrays(dt2gl[dt], index, count);
 #endif

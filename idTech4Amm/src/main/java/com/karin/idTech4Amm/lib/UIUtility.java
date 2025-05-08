@@ -1,10 +1,13 @@
 package com.karin.idTech4Amm.lib;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +48,14 @@ public final class UIUtility
             }
         }
         return res;
+    }
+
+    public static TextView GetDialogMessageView(DialogInterface di)
+    {
+        if(!(di instanceof AlertDialog))
+            return null;
+
+        return ((AlertDialog)di).findViewById(android.R.id.message);
     }
 
     private UIUtility() {}

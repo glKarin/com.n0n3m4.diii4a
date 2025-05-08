@@ -141,20 +141,20 @@ class idBitMsg
 		static idVec3	BitsToDir(int bits, int numBits);
 
 #ifdef _RAVEN
-	int				GetRemainingData( void ) const;			// number of bytes left to read
-	const byte *	GetReadData( void ) const;
+        int				GetRemainingData( void ) const;			// number of bytes left to read
+        const byte *	GetReadData( void ) const;
 #endif
 
 #ifdef _HUMANHEAD
-	//HUMANHEAD: aob
-	void			WriteVec3( const idVec3& vector );
-	void			WriteMat3( const idMat3& axis );
-	void			WriteBool( bool boolean );
+        //HUMANHEAD: aob
+        void			WriteVec3( const idVec3& vector );
+        void			WriteMat3( const idMat3& axis );
+        void			WriteBool( bool boolean );
 
-	idVec3			ReadVec3() const;
-	idMat3			ReadMat3() const;
-	bool			ReadBool() const;
-	//HUMANHEAD END
+        idVec3			ReadVec3() const;
+        idMat3			ReadMat3() const;
+        bool			ReadBool() const;
+        //HUMANHEAD END
 #endif
 
 	private:
@@ -529,8 +529,8 @@ class idBitMsgDelta
 		idBitMsgDelta();
 		~idBitMsgDelta() {}
 #ifdef _RAVEN
-	void			InitWriting( const idBitMsg *base, idBitMsg *newBase, idBitMsg *delta ) { Init(base, newBase, delta); }
-	void			InitReading( const idBitMsg *base, idBitMsg *newBase, const idBitMsg *delta ) { Init(base, newBase, delta); }
+        void			InitWriting( const idBitMsg *base, idBitMsg *newBase, idBitMsg *delta ) { Init(base, newBase, delta); }
+        void			InitReading( const idBitMsg *base, idBitMsg *newBase, const idBitMsg *delta ) { Init(base, newBase, delta); }
 #endif
 
 		void			Init(const idBitMsg *base, idBitMsg *newBase, idBitMsg *delta);
@@ -552,26 +552,26 @@ class idBitMsgDelta
 #ifdef _RAVEN
 // RAVEN BEGIN
 // abahr:
-	void			WriteVec3( const idVec3& v );
-	void			WriteDeltaVec3( const idVec3& oldValue, const idVec3& newValue );
-	void			WriteVec4( const idVec4& v );
-	void			WriteDeltaVec4( const idVec4& oldValue, const idVec4& newValue );
-	void			WriteQuat( const idQuat& q );
-	void			WriteDeltaQuat( const idQuat& oldValue, const idQuat& newValue );
-    void			WriteMat3( const idMat3& m );
-	void			WriteDeltaMat3( const idMat3& oldValue, const idMat3& newValue );
+        void			WriteVec3( const idVec3& v );
+        void			WriteDeltaVec3( const idVec3& oldValue, const idVec3& newValue );
+        void			WriteVec4( const idVec4& v );
+        void			WriteDeltaVec4( const idVec4& oldValue, const idVec4& newValue );
+        void			WriteQuat( const idQuat& q );
+        void			WriteDeltaQuat( const idQuat& oldValue, const idQuat& newValue );
+        void			WriteMat3( const idMat3& m );
+        void			WriteDeltaMat3( const idMat3& oldValue, const idMat3& newValue );
 // RAVEN END
 
 // RAVEN BEGIN
 // abahr
-	idVec3			ReadVec3( void ) const;
-	idVec3			ReadDeltaVec3( const idVec3& oldValue ) const;
-	idVec4			ReadVec4( void ) const;
-	idVec4			ReadDeltaVec4( const idVec4& oldValue ) const;
-	idQuat			ReadQuat( void ) const;
-	idQuat			ReadDeltaQuat( const idQuat& oldValue ) const;
-	idMat3			ReadMat3( void ) const;
-	idMat3			ReadDeltaMat3( const idMat3& oldValue ) const;
+        idVec3			ReadVec3( void ) const;
+        idVec3			ReadDeltaVec3( const idVec3& oldValue ) const;
+        idVec4			ReadVec4( void ) const;
+        idVec4			ReadDeltaVec4( const idVec4& oldValue ) const;
+        idQuat			ReadQuat( void ) const;
+        idQuat			ReadDeltaQuat( const idQuat& oldValue ) const;
+        idMat3			ReadMat3( void ) const;
+        idMat3			ReadDeltaMat3( const idMat3& oldValue ) const;
 // RAVEN END
 #endif
 		void			WriteFloat(float f);

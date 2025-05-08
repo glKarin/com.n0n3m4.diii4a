@@ -133,7 +133,7 @@ int idGLSLShaderManager::Add(shaderProgram_t *shader)
 		common->Warning("idGLSLShaderManager::Add shader's name is dup '%s'!", shader->name);
 		return index; // -1
 	}
-	common->Printf("idGLSLShaderManager::Add shader program '%s'.\n", shader->name);
+	common->Printf("idGLSLShaderManager::Add shader program '%s' -> %d.\n", shader->name, shader->program);
 	return shaders.Append(shader);
 }
 
@@ -144,10 +144,11 @@ const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
 		const shaderProgram_t *shader = shaders[i];
 		if(!idStr::Icmp(name, shader->name))
         {
-            common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> %d %s.\n", shader->name, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "internal");
+            common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> %d, type=%d %s.\n", shader->name, shader->program, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "internal");
             return shader;
         }
 	}
+	common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> NOT FOUND.\n", name);
 	return NULL;
 }
 
@@ -218,13 +219,13 @@ shaderHandle_t idGLSLShaderManager::GetHandle(const char *name) const
 {
     int index;
 
+    index = FindCustomIndex(name);
+    if(index >= 0)
+        return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
+
     index = FindIndex(name);
     if(index >= 0)
         return GLSL_INTERNAL_SHADER_INDEX_TO_HANDLE(index);
-
-	index = FindCustomIndex(name);
-	if(index >= 0)
-		return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
 
     return INVALID_SHADER_HANDLE;
 }
@@ -240,14 +241,20 @@ int idGLSLShaderManager::FindCustomIndex(const char *name) const
 	return -1;
 }
 
-GLSLShaderProp * idGLSLShaderManager::FindCustom(const char *name)
+GLSLShaderProp * idGLSLShaderManager::FindCustom(const char *name, int *index)
 {
 	for(int i = 0; i < customShaders.Num(); i++)
 	{
 		GLSLShaderProp &p = customShaders[i];
 		if(!idStr::Icmp(name, p.name.c_str()))
-			return &p;
+        {
+            if(index)
+                *index = i;
+            return &p;
+        }
 	}
+    if(index)
+        *index = -1;
 	return NULL;
 }
 
@@ -265,18 +272,26 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 	}
 
 	// check has custom loaded
-	prop = FindCustom(inProp.name.c_str());
+	prop = FindCustom(inProp.name.c_str(), &index);
 	if(prop)
 	{
-		if(prop->program && prop->program->program > 0)
+		if(prop->program)
 		{
-			common->Printf("[Harmattan]: GLSL shader manager::Load custom shader '%s' has already loaded.\n", inProp.name.c_str());
-			return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
+            if(prop->program->program > 0)
+            {
+                common->Printf("[Harmattan]: GLSL shader manager::Load custom shader '%s' has already loaded.\n", inProp.name.c_str());
+                return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
+            }
+            else
+            {
+                common->Printf("[Harmattan]: GLSL shader manager::Load custom shader '%s' has already load failed.\n", inProp.name.c_str());
+                return INVALID_SHADER_HANDLE;
+            }
 		}
 		else
 		{
-			common->Printf("[Harmattan]: GLSL shader manager::Load custom shader '%s' has already load failed.\n", inProp.name.c_str());
-			return INVALID_SHADER_HANDLE;
+			common->Printf("[Harmattan]: GLSL shader manager::Load custom shader '%s' wait loading.\n", inProp.name.c_str());
+            return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
 		}
 	}
 
@@ -437,6 +452,7 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphong", SHADER_INTERACTION_BLINNPHONG, &interactionBlinnPhongShader, INTERACTION_VERT, INTERACTION_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
     ret.Append(GLSL_SHADER_SOURCE("ambientLighting", SHADER_AMBIENT_LIGHTING, &ambientLightingShader, INTERACTION_VERT, INTERACTION_FRAG, "_AMBIENT", "_AMBIENT"));
 	ret.Append(GLSL_SHADER_SOURCE("diffuseCubemap", SHADER_DIFFUSECUBEMAP, &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
+	// ret.Append(GLSL_SHADER_SOURCE("glasswarp", SHADER_GLASSWARP, &glasswarpShader, GLASSWARP_VERT, GLASSWARP_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("texgen", SHADER_TEXGEN, &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "", ""));
 
     // newStage
@@ -444,6 +460,15 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMask", SHADER_HEATHAZE_WITH_MASK, &heatHazeWithMaskShader, HEATHAZEWITHMASK_VERT, HEATHAZEWITHMASK_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", SHADER_HEATHAZE_WITH_MASK_AND_VERTEX, &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("colorProcess", SHADER_COLORPROCESS, &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("megaTexture", SHADER_MEGATEXTURE, &megaTextureShader, MEGATEXTURE_VERT, MEGATEXTURE_FRAG, "", ""));
+	// D3XP
+	ret.Append(GLSL_SHADER_SOURCE("enviroSuit", SHADER_ENVIROSUIT, &enviroSuitShader, ENVIROSUIT_VERT, ENVIROSUIT_FRAG, "", ""));
+#ifdef _HUMANHEAD
+    ret.Append(GLSL_SHADER_SOURCE("screeneffect", SHADER_SCREENEFFECT, &screeneffectShader, SCREENEFFECT_VERT, SCREENEFFECT_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("radialblur", SHADER_RADIALBLUR, &radialblurShader, RADIALBLUR_VERT, RADIALBLUR_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("liquid", SHADER_LIQUID, &liquidShader, LIQUID_VERT, LIQUID_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("screenprocess", SHADER_SCREENPROCESS, &screenprocessShader, SCREENPROCESS_VERT, SCREENPROCESS_FRAG, "", ""));
+#endif
 
 	// shadow mapping
 #ifdef _SHADOW_MAPPING
@@ -470,10 +495,10 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongPointLightShadowMapping", SHADER_INTERACTION_BLINNPHONG_POINT_LIGHT, &interactionShadowMappingBlinnPhongShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_CUBE_MACROS("_POINT_LIGHT,BLINN_PHONG"), "_POINT_LIGHT,BLINN_PHONG"));
     ret.Append(GLSL_SHADER_SOURCE("ambientLightingPointLightShadowMapping", SHADER_AMBIENT_LIGHTING_POINT_LIGHT, &ambientLightingShadowMappingShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_CUBE_MACROS("_POINT_LIGHT,_AMBIENT"), "_POINT_LIGHT,_AMBIENT"));
 	// parallel light
-	ret.Append(GLSL_SHADER_SOURCE("interactionParallelLightShadowMapping", SHADER_INTERACTION_PARALLEL_LIGHT, &interactionShadowMappingShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT,PHONG"), "_PARALLEL_LIGHT,PHONG"));
-	ret.Append(GLSL_SHADER_SOURCE("interactionPBRParallelLightShadowMapping", SHADER_INTERACTION_PBR_PARALLEL_LIGHT, &interactionShadowMappingPBRShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT,_PBR"), "_PARALLEL_LIGHT,_PBR"));
-	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongParallelLightShadowMapping", SHADER_INTERACTION_BLINNPHONG_PARALLEL_LIGHT, &interactionShadowMappingBlinnPhongShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT,BLINN_PHONG"), "_PARALLEL_LIGHT,BLINN_PHONG"));
-    ret.Append(GLSL_SHADER_SOURCE("ambientLightingParallelLightShadowMapping", SHADER_AMBIENT_LIGHTING_PARALLEL_LIGHT, &ambientLightingShadowMappingShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT,_AMBIENT"), "_PARALLEL_LIGHT,_AMBIENT"));
+	ret.Append(GLSL_SHADER_SOURCE("interactionParallelLightShadowMapping", SHADER_INTERACTION_PARALLEL_LIGHT, &interactionShadowMappingShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT,PARALLEL_LIGHT_CASCADE_FRUSTUM,PHONG"), "_PARALLEL_LIGHT,PARALLEL_LIGHT_CASCADE_FRUSTUM,PHONG"));
+	ret.Append(GLSL_SHADER_SOURCE("interactionPBRParallelLightShadowMapping", SHADER_INTERACTION_PBR_PARALLEL_LIGHT, &interactionShadowMappingPBRShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT,PARALLEL_LIGHT_CASCADE_FRUSTUM,_PBR"), "_PARALLEL_LIGHT,PARALLEL_LIGHT_CASCADE_FRUSTUM,_PBR"));
+	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongParallelLightShadowMapping", SHADER_INTERACTION_BLINNPHONG_PARALLEL_LIGHT, &interactionShadowMappingBlinnPhongShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT,PARALLEL_LIGHT_CASCADE_FRUSTUM,BLINN_PHONG"), "_PARALLEL_LIGHT,PARALLEL_LIGHT_CASCADE_FRUSTUM,BLINN_PHONG"));
+    ret.Append(GLSL_SHADER_SOURCE("ambientLightingParallelLightShadowMapping", SHADER_AMBIENT_LIGHTING_PARALLEL_LIGHT, &ambientLightingShadowMappingShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT,PARALLEL_LIGHT_CASCADE_FRUSTUM,_AMBIENT"), "_PARALLEL_LIGHT,PARALLEL_LIGHT_CASCADE_FRUSTUM,_AMBIENT"));
 	// spot light
 	ret.Append(GLSL_SHADER_SOURCE("interactionSpotLightShadowMapping", SHADER_INTERACTION_SPOT_LIGHT, &interactionShadowMappingShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_SPOT_LIGHT,PHONG"), "_SPOT_LIGHT,PHONG"));
 	ret.Append(GLSL_SHADER_SOURCE("interactionPBRSpotLightShadowMapping", SHADER_INTERACTION_PBR_SPOT_LIGHT, &interactionShadowMappingPBRShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_SPOT_LIGHT,_PBR"), "_SPOT_LIGHT,_PBR"));
@@ -520,7 +545,7 @@ static int RB_GLSL_ParseMacros(const char *macros, idStrList &ret)
 		if(index == str.Length() - 1)
 			break;
 	}
-	if(start < str.Length() - 1)
+	if(start <= str.Length() - 1)
 	{
 		idStr s = str.Mid(start, str.Length() - start);
 		ret.AddUnique(s);
@@ -530,13 +555,65 @@ static int RB_GLSL_ParseMacros(const char *macros, idStrList &ret)
 	return counter;
 }
 
+static int RB_GLSL_FindNextLinePositionOfVersion(const idStr &res)
+{
+	int index = res.Find("#version");
+	if(index == -1)
+		SHADER_ERROR("[Harmattan]: GLSL shader source can not find '#version'\n.");
+	index = res.Find('\n', index);
+	if(index == -1 || index + 1 == res.Length())
+		SHADER_ERROR("[Harmattan]: GLSL shader source '#version' not completed\n.");
+	return index + 1;
+}
+
+static idStr RB_GLSL_GetGLSLSourceVersion(const idStr &res)
+{
+    int start = res.Find("#version");
+    if(start == -1)
+    SHADER_ERROR("[Harmattan]: GLSL shader source can not find '#version'\n.");
+    start += strlen("#version");
+    int end = res.Find('\n', start);
+    if(end == -1)
+    SHADER_ERROR("[Harmattan]: GLSL shader source '#version' not completed\n.");
+    idStr str = res.Mid(start, end - start);
+    str.StripTrailingWhitespace();
+    str.StripLeading(' ');
+	//common->Printf("GLSL source version: %s\n", str.c_str());
+    return str;
+}
+
+static void RB_GLSL_InsertGlobalDefines(idStr &res, const char *text)
+{
+	int index = RB_GLSL_FindNextLinePositionOfVersion(res);
+	idStr str("\n");
+	str.Append(text);
+	str.Append("\n");
+
+	res.Insert(str, index);
+}
+
 static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros, int highp = 0)
 {
     idStr res(source);
+
     if(highp > 0)
     {
         res.Replace("precision mediump float;", "precision highp float;");
         res.Replace("precision lowp float;", "precision highp float;");
+        idStr samplerPrecision = "precision highp sampler2D;\n"
+                                 "precision highp samplerCube;\n";
+        if(USING_GLES3)
+        {
+            idStr ver = RB_GLSL_GetGLSLSourceVersion(res);
+            if(ver.Cmp("120") > 0)
+            {
+                samplerPrecision.Append("precision highp sampler2DArrayShadow;\n"
+                                        "precision highp sampler2DArray;\n"
+                );
+            }
+        }
+		RB_GLSL_InsertGlobalDefines(res, samplerPrecision.c_str());
+
 		if(highp > 1)
 		{
 			res.Replace("mediump ", "highp ");
@@ -555,23 +632,13 @@ static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros, int hi
 	if(0 == n)
 		return res;
 
-	int index = res.Find("#version");
-	if(index == -1)
-		SHADER_ERROR("[Harmattan]: GLSL shader source can not find '#version'\n.");
-
-	index = res.Find('\n', index);
-	if(index == -1 || index + 1 == res.Length())
-		SHADER_ERROR("[Harmattan]: GLSL shader source '#version' not completed\n.");
-
 	idStr m;
-	m += "\n";
 	for(int i = 0; i < list.Num(); i++)
 	{
-		m += "#define " + list[i] + "\n";
+		m.Append("#define " + list[i] + "\n");
 	}
-	m += "\n";
 
-	res.Insert(m.c_str(), index + 1);
+	RB_GLSL_InsertGlobalDefines(res, m);
 
 	// printf("%d|%s|\n%s\n", n, macros, res.c_str());
 	return res;
@@ -821,6 +888,12 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 		if(shader->u_fragmentMap[i] != -1)
 			qglUniform1i(shader->u_fragmentMap[i], i);
 	}
+#if 1 // defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+	for (i = 0; i < MAX_FRAGMENT_PARMS; i++) {
+		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentParm%d", i);
+		shader->u_fragmentParm[i] = GL_GetUniformLocation(shader->program, buffer);
+	}
+#endif
 
 	//k: add cubemap texture units
 	for ( i = 0; i < MAX_FRAGMENT_IMAGES; i++ ) {
@@ -834,6 +907,11 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 		idStr::snPrintf(buffer, sizeof(buffer), "u_uniformParm%d", i);
 		shader->u_uniformParm[i] = GL_GetUniformLocation(shader->program, buffer);
 	}
+
+    for (i = 0; i < MAX_MEGATEXTURE_PARMS; i++) {
+        idStr::snPrintf(buffer, sizeof(buffer), "u_megaTextureLevel%d", i);
+        shader->u_megaTextureLevel[i] = GL_GetUniformLocation(shader->program, buffer);
+    }
 
 #ifdef _SHADOW_MAPPING
 	shader->shadowMVPMatrix = GL_GetUniformLocation(shader->program, "shadowMVPMatrix");
@@ -1373,7 +1451,7 @@ idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
 	ret += "\n";
 	ret += "//#pragma optimize(off)\n";
 	ret += "\n";
-	ret += "precision mediump float;\n";
+	ret += "precision highp float;\n";
 	ret += "\n";
 
 	ret += attribute + " highp vec4 attr_Vertex;\n";
@@ -1438,7 +1516,7 @@ idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version)
 	ret += "\n";
 	ret += "//#pragma optimize(off)\n";
 	ret += "\n";
-	ret += "precision mediump float;\n";
+	ret += "precision highp float;\n";
 	ret += "\n";
 
 	ret += out;
@@ -1546,10 +1624,11 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #undef _KARIN_GLSL_SHADER_H
 #undef _KARIN_GLSL_SHADER_100_H
 #undef _KARIN_GLSL_SHADER_300_H
+#undef _KARIN_PREY_GLSL_SHADER_100_H
+#undef _KARIN_PREY_GLSL_SHADER_300_H
+#undef _KARIN_D3XP_GLSL_SHADER_100_H
+#undef _KARIN_D3XP_GLSL_SHADER_300_H
 #include "glsl_shader.h"
-#undef _KARIN_GLSL_SHADER_H
-#undef _KARIN_GLSL_SHADER_100_H
-#undef _KARIN_GLSL_SHADER_300_H
 #ifdef GL_ES_VERSION_3_0
 #define EXPORT_SHADER_SOURCE(source, name, type) \
 	{ \
@@ -1561,70 +1640,50 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #else
 #define EXPORT_SHADER_SOURCE(source, name, type) RB_GLSL_ExportBaseGLSLShaderSource(source, name "." type, SHADER_ES_PATH);
 #endif
+#define EXPORT_SHADER_PAIR_SOURCE(source, name) \
+            EXPORT_SHADER_SOURCE(source##_VERT, name, "vert") \
+            EXPORT_SHADER_SOURCE(source##_FRAG, name, "frag")
 
 #define EXPORT_BASE_SHADER() \
-	EXPORT_SHADER_SOURCE(INTERACTION_VERT, "interaction", "vert"); \
-	EXPORT_SHADER_SOURCE(INTERACTION_FRAG, "interaction", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(SHADOW_VERT, "shadow", "vert"); \
-	EXPORT_SHADER_SOURCE(SHADOW_FRAG, "shadow", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(DEFAULT_VERT, "default", "vert"); \
-	EXPORT_SHADER_SOURCE(DEFAULT_FRAG, "default", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(ZFILL_VERT, "zfill", "vert"); \
-	EXPORT_SHADER_SOURCE(ZFILL_FRAG, "zfill", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(ZFILLCLIP_VERT, "zfillClip", "vert"); \
-	EXPORT_SHADER_SOURCE(ZFILLCLIP_FRAG, "zfillClip", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(CUBEMAP_VERT, "cubemap", "vert"); \
-	EXPORT_SHADER_SOURCE(CUBEMAP_FRAG, "cubemap", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(ENVIRONMENT_VERT, "environment", "vert"); \
-	EXPORT_SHADER_SOURCE(ENVIRONMENT_FRAG, "environment", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(ENVIRONMENT_VERT, "bumpyEnvironment", "vert"); \
-	EXPORT_SHADER_SOURCE(BUMPY_ENVIRONMENT_FRAG, "bumpyEnvironment", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(FOG_VERT, "fog", "vert"); \
-	EXPORT_SHADER_SOURCE(FOG_FRAG, "fog", "frag"); \
- \
+	EXPORT_SHADER_PAIR_SOURCE(INTERACTION, "interaction"); \
+	EXPORT_SHADER_PAIR_SOURCE(SHADOW, "shadow"); \
+	EXPORT_SHADER_PAIR_SOURCE(DEFAULT, "default"); \
+	EXPORT_SHADER_PAIR_SOURCE(ZFILL, "zfill"); \
+	EXPORT_SHADER_PAIR_SOURCE(ZFILLCLIP, "zfillClip"); \
+	EXPORT_SHADER_PAIR_SOURCE(CUBEMAP, "cubemap"); \
+	EXPORT_SHADER_PAIR_SOURCE(ENVIRONMENT, "environment"); \
+	EXPORT_SHADER_PAIR_SOURCE(BUMPY_ENVIRONMENT, "bumpyEnvironment"); \
+	EXPORT_SHADER_PAIR_SOURCE(FOG, "fog"); \
 	EXPORT_SHADER_SOURCE(BLENDLIGHT_VERT, "blendLight", "vert"); \
- \
 	EXPORT_SHADER_SOURCE(DIFFUSE_CUBEMAP_VERT, "diffuseCubemap", "vert"); \
- \
-	EXPORT_SHADER_SOURCE(TEXGEN_VERT, "texgen", "vert"); \
-	EXPORT_SHADER_SOURCE(TEXGEN_FRAG, "texgen", "frag"); \
- \
-	EXPORT_SHADER_SOURCE(HEATHAZE_VERT, "heatHaze", "vert"); \
-	EXPORT_SHADER_SOURCE(HEATHAZE_FRAG, "heatHaze", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASK_VERT, "heatHazeWithMask", "vert"); \
-	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASK_FRAG, "heatHazeWithMask", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASKANDVERTEX_VERT, "heatHazeWithMaskAndVertex", "vert"); \
-	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASKANDVERTEX_FRAG, "heatHazeWithMaskAndVertex", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(COLORPROCESS_VERT, "colorProcess", "vert"); \
-	EXPORT_SHADER_SOURCE(COLORPROCESS_FRAG, "colorProcess", "frag");
+	EXPORT_SHADER_PAIR_SOURCE(TEXGEN, "texgen"); \
+	EXPORT_SHADER_PAIR_SOURCE(HEATHAZE, "heatHaze"); \
+	EXPORT_SHADER_PAIR_SOURCE(HEATHAZEWITHMASK, "heatHazeWithMask"); \
+	EXPORT_SHADER_PAIR_SOURCE(HEATHAZEWITHMASKANDVERTEX, "heatHazeWithMaskAndVertex"); \
+	EXPORT_SHADER_PAIR_SOURCE(COLORPROCESS, "colorProcess"); \
+    EXPORT_SHADER_PAIR_SOURCE(MEGATEXTURE, "megaTexture");
+
+#define EXPORT_D3XP_SHADER() \
+    EXPORT_SHADER_PAIR_SOURCE(ENVIROSUIT, "enviroSuit");
+
+#ifdef _HUMANHEAD
+#define EXPORT_PREY_SHADER() \
+    EXPORT_SHADER_PAIR_SOURCE(SCREENEFFECT, "screeneffect"); \
+    EXPORT_SHADER_PAIR_SOURCE(RADIALBLUR, "radialblur"); \
+    EXPORT_SHADER_PAIR_SOURCE(LIQUID, "liquid"); \
+    EXPORT_SHADER_PAIR_SOURCE(SCREENPROCESS, "screenprocess");
+#endif
 	 
 #ifdef _SHADOW_MAPPING
 #define EXPORT_SHADOW_MAPPING_SHADER() \
-	EXPORT_SHADER_SOURCE(DEPTH_VERT, "depthShadowMapping", "vert"); \
-	EXPORT_SHADER_SOURCE(DEPTH_FRAG, "depthShadowMapping", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(DEPTH_PERFORATED_VERT, "depthPerforated", "vert"); \
-	EXPORT_SHADER_SOURCE(DEPTH_PERFORATED_FRAG, "depthPerforated", "frag"); \
-	 \
-	EXPORT_SHADER_SOURCE(INTERACTION_SHADOW_MAPPING_VERT, "interactionShadowMapping", "vert"); \
-	EXPORT_SHADER_SOURCE(INTERACTION_SHADOW_MAPPING_FRAG, "interactionShadowMapping", "frag");
+	EXPORT_SHADER_PAIR_SOURCE(DEPTH, "depthShadowMapping"); \
+	EXPORT_SHADER_PAIR_SOURCE(DEPTH_PERFORATED, "depthPerforated"); \
+	EXPORT_SHADER_PAIR_SOURCE(INTERACTION_SHADOW_MAPPING, "interactionShadowMapping");
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE
 #define EXPORT_STENCIL_SHADOW_SHADER() \
-	EXPORT_SHADER_SOURCE(INTERACTION_STENCIL_SHADOW_VERT, "interactionStencilShadow", "vert"); \
-	EXPORT_SHADER_SOURCE(INTERACTION_STENCIL_SHADOW_FRAG, "interactionStencilShadow", "frag");
+	EXPORT_SHADER_PAIR_SOURCE(INTERACTION_STENCIL_SHADOW, "interactionStencilShadow");
 #endif
 
 #define SHADER_ES_PATH glprogs.c_str()
@@ -1633,11 +1692,15 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 
 	glprogs = "dev/glslprogs";
 	EXPORT_BASE_SHADER()
+    EXPORT_D3XP_SHADER()
 #ifdef _SHADOW_MAPPING
 	EXPORT_SHADOW_MAPPING_SHADER()
 #endif
 #ifdef _STENCIL_SHADOW_IMPROVE
 	EXPORT_STENCIL_SHADOW_SHADER()
+#endif
+#ifdef _HUMANHEAD
+    EXPORT_PREY_SHADER()
 #endif
 
 #ifdef GL_ES_VERSION_3_0
@@ -1645,12 +1708,102 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 	glprogs = "dev/glsl3progs";
 
 	EXPORT_BASE_SHADER()
+    EXPORT_D3XP_SHADER()
 #ifdef _SHADOW_MAPPING
 	EXPORT_SHADOW_MAPPING_SHADER()
 #endif
 #ifdef _STENCIL_SHADOW_IMPROVE
 	EXPORT_STENCIL_SHADOW_SHADER()
 #endif
+#ifdef _HUMANHEAD
+    EXPORT_PREY_SHADER()
+#endif
 
 #endif
+}
+
+bool RB_GLSL_FindGLSLShaderSource(const char *name, int type, idStr *source, idStr *realPath)
+{
+    idStr path;
+    void *data = NULL;
+    int length = 0;
+
+    idStrList exts;
+    if(type == 2) // fragment
+    {
+        exts.Append(".frag");
+        exts.Append(".fp");
+    }
+    else // == 1 vertex
+    {
+        exts.Append(".vert");
+        exts.Append(".vp");
+    }
+
+#if 0
+    // 1. find in glslprogs or glsl3progs
+    idStr glesDir = RB_GLSL_GetExternalShaderSourcePath();
+    path = glesDir;
+    path.AppendPath(name);
+    if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) <= 0)
+    {
+        path.StripFileExtension();
+        for(int i = 0; i < exts.Num(); i++)
+        {
+            path.SetFileExtension(exts[i]);
+            if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) > 0)
+            {
+                break;
+            }
+        }
+    }
+#endif
+
+    // 2. find in glprogs
+    if(length <= 0)
+    {
+        path = "glprogs";
+        path.AppendPath(name);
+        if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) <= 0)
+        {
+            path.StripFileExtension();
+            for(int i = 0; i < exts.Num(); i++)
+            {
+                path.SetFileExtension(exts[i]);
+                if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) > 0)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    if(length > 0)
+    {
+        if(realPath)
+            *realPath = path;
+        if(source)
+        {
+            idStr str;
+            str.Append((char *)data, length);
+            *source = str;
+        }
+
+        fileSystem->FreeFile(data);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+#include "glsl_arb_shader.cpp"
+
+void GLSL_AddCommand(void)
+{
+	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export internal GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
+	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print internal GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
+	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export internal original C-String GLSL shader source for developer");
+    cmdSystem->AddCommand("convertARB", GLSL_ConvertARBShader_f, CMD_FL_RENDERER, "convert ARB shader to GLSL shader", GLSL_ArgCompletion_glprogs);
 }

@@ -167,7 +167,7 @@ class idDict
 #ifdef _RAVEN
 // RAVEN BEGIN
 // abahr: added default value param
-	const char *		RandomPrefix( const char *prefix, idRandom &random, const char* defaultValue ) const;
+	    const char *		RandomPrefix( const char *prefix, idRandom &random, const char* defaultValue ) const;
 // RAVEN END
 #endif
 

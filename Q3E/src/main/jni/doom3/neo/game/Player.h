@@ -199,8 +199,14 @@ typedef struct {
 	idVec3	pos;
 } aasLocation_t;
 
+#ifdef MOD_BOTS
+class botAi;
+#endif
 #ifdef _MOD_VIEW_BODY
 class idViewBody;
+#endif
+#ifdef _MOD_VIEW_LIGHT
+class idViewLight;
 #endif
 class idPlayer : public idActor
 {
@@ -324,16 +330,36 @@ class idPlayer : public idActor
 
 		idDragEntity			dragEntity;
 #ifdef _MOD_FULL_BODY_AWARENESS
-		idVec3 firstPersonViewOrigin_playerViewOrigin; // melee
-		idVec3 firstPersonViewOrigin_viewWeaponOrigin; // launch
-		idVec3 fullBodyAwarenessOffset;
-
-#ifdef _MOD_VIEW_BODY
-		void SetupViewBody( void );
-		void UpdateBody(void);
-		friend class idViewBody;
-		idEntityPtr<idViewBody> viewBody;
+		idVec3                  firstPersonViewOrigin_playerViewOrigin; // melee
+		idVec3                  firstPersonViewOrigin_viewWeaponOrigin; // launch
+		idVec3                  fullBodyAwarenessOffset;
 #endif
+#ifdef _MOD_VIEW_BODY
+        friend class idViewBody;
+        idEntityPtr<idViewBody> viewBody;
+        void                    SetupViewBody( void );
+        void                    UpdateViewBody(void);
+#endif
+#ifdef _MOD_VIEW_LIGHT
+        friend class idViewLight;
+        idViewLight *           viewLight;
+        void                    SetupViewLight( void );
+        void                    UpdateViewLight(void);
+#endif
+#ifdef MOD_BOTS
+		friend class botAi;
+		idEntityPtr<botAi>      bot;
+		void                    SetupBot(botAi *bot);
+		void                    SpawnBot(void);
+        bool                    IsBot(void) const {
+            return spawnArgs.GetBool("isBot");
+        }
+        bool                    IsBotAvailable(void) const {
+            return IsBot() && bot.GetEntity() != NULL;
+        }
+        botAi *                 GetBot(void) {
+            return bot.GetEntity();
+        }
 #endif
 
 	public:

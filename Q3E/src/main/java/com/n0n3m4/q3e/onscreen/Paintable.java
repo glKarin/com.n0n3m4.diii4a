@@ -21,4 +21,14 @@ public class Paintable
     {
         //Empty by default
     }
+
+    public void AsBuffer(GL11 gl)
+    {
+        //Empty by default
+    }
+
+    public void Release(GL11 gl)
+    {
+        //Empty by default
+    }
 }

@@ -3237,11 +3237,18 @@ void idGameLocal::InitConsoleCommands( void ) {
 
 #ifdef MOD_BOTS // TinMan: Bot console commmands
 	cmdSystem->AddCommand( "addBot",				botAi::Addbot_f,			CMD_FL_GAME,				"adds a new bot", botAi::ArgCompletion_addBot );
-    cmdSystem->AddCommand( "removeBot",				botAi::Removebot_f,			CMD_FL_GAME,				"removes bot specified by id (0,15)" /*, idCmdSystem::ArgCompletion_Integer<0,( botAi::BOT_MAX_BOTS - 1 )>*/ );
+    cmdSystem->AddCommand( "removeBot",				botAi::Removebot_f,			CMD_FL_GAME,				"removes bot specified by id (1,31)" /*, idCmdSystem::ArgCompletion_Integer<0,( botAi::BOT_MAX_BOTS - 1 )>*/ );
 
-	cmdSystem->AddCommand("addbots", botAi::Cmd_AddBot_f, CMD_FL_GAME, "adds multiplayer bots batch", botAi::ArgCompletion_addBot);
-	cmdSystem->AddCommand("fillbots", botAi::Cmd_FillBots_f, CMD_FL_GAME, "fill bots");
-	cmdSystem->AddCommand("sabot", botAi::Cmd_BotInfo_f, CMD_FL_GAME, "debug SaBot info");
+    cmdSystem->AddCommand("addBots", botAi::Cmd_AddBots_f, CMD_FL_GAME, "add multiplayer bots batch", botAi::ArgCompletion_addBot);
+    cmdSystem->AddCommand("removeBots", botAi::Cmd_RemoveBots_f, CMD_FL_GAME, "disconnect multi bots by client ID", botAi::ArgCompletion_botSlots);
+    cmdSystem->AddCommand("fillBots", botAi::Cmd_FillBots_f, CMD_FL_GAME, "fill bots to maximum of server");
+    cmdSystem->AddCommand("appendBots", botAi::Cmd_AppendBots_f, CMD_FL_GAME, "append more bots(over maximum of server)");
+    cmdSystem->AddCommand("cleanBots", botAi::Cmd_CleanBots_f, CMD_FL_GAME, "disconnect all bots");
+    cmdSystem->AddCommand("truncBots", botAi::Cmd_TruncBots_f, CMD_FL_GAME, "disconnect last bots");
+    cmdSystem->AddCommand("sabot", botAi::Cmd_BotInfo_f, CMD_FL_GAME, "debug SaBot info");
+    cmdSystem->AddCommand("botLevel", botAi::Cmd_SetupBotLevel_f, CMD_FL_GAME, "setup all bot level", botAi::ArgCompletion_botLevel);
+    cmdSystem->AddCommand("botWeapons", botAi::Cmd_SetupBotWeapons_f, CMD_FL_GAME, "setup all bot initial weapons", botAi::ArgCompletion_botWeapons);
+    cmdSystem->AddCommand("botAmmo", botAi::Cmd_SetupBotAmmo_f, CMD_FL_GAME, "setup all bot initial weapons ammo clip");
 #endif
 }
 

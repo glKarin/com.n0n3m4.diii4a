@@ -37,6 +37,7 @@
 
 #include <stdio.h>
 #include "basics.h"
+#include "tarray.h"
 #include "sfmt/SFMTObj.h"
 
 class FSerializer;
@@ -46,7 +47,7 @@ class FRandom : public SFMTObj
 public:
 	FRandom() : FRandom(false) {}
 	FRandom(const char* name) : FRandom(name, false) {}
-	~FRandom ();
+	~FRandom();
 
 	int Seed() const
 	{

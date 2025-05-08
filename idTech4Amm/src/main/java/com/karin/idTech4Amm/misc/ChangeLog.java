@@ -70,6 +70,22 @@ public class ChangeLog
         final ChangeLog[] CHANGES = {
                 ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2025-04-01", 63,
+                        "The Dark Mod update to version 2.13. More view in `" + TextHelper.GenLinkText("https://www.thedarkmod.com/posts/the-dark-mod-2-13-has-been-released/", "The Dark Mod(2.13)") + "`",
+                        "Add wide-character language support and DOOM3-BFG new fonts support on DOOM 3/Quake 4/Prey(2006). Only support UTF-8(BOM) encoding translation file.",
+                        "Add Chinese translation patch on DOOM3. First extract `DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)`, then ckecked `Use DOOM3-BFG fonts instead of old fonts and enable wide-character language support` on launcher, finally add ` +set sys_lang chinese` to command line.",
+                        "Fix some errors and light gem(so reset cvar `tdm_lg_weak` value to 0) on The Dark Mod(2.12 and 2.13).",
+                        "Add DOOM3-BFG occlusion culling with cvar `harm_r_occlusionCulling` on DOOM 3/Quake 4/Prey(2006).",
+                        "Add combine shadow mapping option with cvar `harm_r_shadowMapCombine`(default 1, like now) on DOOM 3/Quake 4/Prey(2006).",
+                        "Fix some lights missing on ceil in map game/airdefense1 on Quake 4.",
+                        "Add game portal support on Prey(2006).",
+                        "Fix wrong resurrection position from deathwalk state when load game after restart application on Prey(2006).",
+                        "Fix key binding tips UI on Prey(2006).",
+                        "Using libogg/libvorbis instead of stb-vorbis of version 62 again on DOOM 3/Quake 4/Prey(2006).",
+                        "Support game data folder creation with `Game path tips` button on launcher `General` tab.",
+                        "[Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) will be removed on next release in the future!"
+                ),
+
                 ChangeLog.Create("2025-03-11", 62,
                         "Add `OpenJK` support, `" + TextHelper.GenLinkText("https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/", "STAR WARS™ Jedi Knight - Jedi Academy™") + "` game standalone directory named `openja`, `" + TextHelper.GenLinkText("https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/", "STAR WARS™ Jedi Knight II - Jedi Outcast™") + "` game standalone directory named `openjo`. More view in `" + TextHelper.GenLinkText("https://github.com/JACoders/OpenJK", "OpenJK") + "`.",
                         "Update version to 5.1 on RealRTCW, support Survival mode. And version 5.0 is keeping until version 5.1 is stable.",

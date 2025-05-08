@@ -757,7 +757,12 @@ int idMaterial::ParseTerm(idLexer &src)
 #endif
 
 	if (!token.Icmp("fragmentPrograms")) {
+#ifdef _HUMANHEAD //karin: only support some ARB shaders to GLSL shaders
+		pd->registersAreConstant = false;
+		return EmitOp(0, 0, OP_TYPE_FRAGMENTPROGRAMS);
+#else
 		return GetExpressionConstant((float) glConfig.ARBFragmentProgramAvailable);
+#endif
 	}
 
 	if (!token.Icmp("sound")) {
@@ -1615,12 +1620,29 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			MatchToken(src, ",");
 			b = ParseExpression(src);
 			// this just scales without a centering
+#ifdef _RAVEN //karin: for texfure/cameraView1 in game/core1
+			if(ts->dynamic == DI_REMOTE_RENDER) //karin: like centerscale
+			{
+			// this subtracts 0.5, then scales, then adds 0.5
+			matrix[0][0] = a;
+			matrix[0][1] = GetExpressionConstant(0);
+			matrix[0][2] = EmitOp(GetExpressionConstant(0.5), EmitOp(GetExpressionConstant(0.5), a, OP_TYPE_MULTIPLY), OP_TYPE_SUBTRACT);
+			matrix[1][0] = GetExpressionConstant(0);
+			matrix[1][1] = b;
+			matrix[1][2] = EmitOp(GetExpressionConstant(0.5), EmitOp(GetExpressionConstant(0.5), b, OP_TYPE_MULTIPLY), OP_TYPE_SUBTRACT);
+			}
+			else
+			{
+#endif
 			matrix[0][0] = a;
 			matrix[0][1] = GetExpressionConstant(0);
 			matrix[0][2] = GetExpressionConstant(0);
 			matrix[1][0] = GetExpressionConstant(0);
 			matrix[1][1] = b;
 			matrix[1][2] = GetExpressionConstant(0);
+#ifdef _RAVEN //karin: for texfure/cameraView1 in game/core1
+			}
+#endif
 
 			MultiplyTextureMatrix(ts, matrix);
 			continue;
@@ -1806,7 +1828,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #else
 				newStage.vertexProgram = -1;
 				newStage.fragmentProgram = -1;
-                //if(newStage.glslProgram <= 0)
+                //if(SHADER_HANDLE_IS_INVALID(newStage.glslProgram))
                 {
                     token.StripFileExtension();
                     const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
@@ -1814,7 +1836,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
                     if(shaderProgram && shaderProgram->program > 0)
                         newStage.glslProgram = shaderProgram->program;
                     else
-                        newStage.glslProgram = -1;
+                        newStage.glslProgram = SHADER_HANDLE_INVALID;
                 }
 #endif
 			}
@@ -1828,7 +1850,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, token.c_str());
 #else
 				newStage.fragmentProgram = -1;
-                //if(newStage.glslProgram <= 0)
+                //if(SHADER_HANDLE_IS_INVALID(newStage.glslProgram))
                 {
                     token.StripFileExtension();
                     const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
@@ -1836,7 +1858,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
                     if(shaderProgram && shaderProgram->program > 0)
                         newStage.glslProgram = shaderProgram->program;
                     else
-                        newStage.glslProgram = -1;
+                        newStage.glslProgram = SHADER_HANDLE_INVALID;
                 }
 #endif
 			}
@@ -1850,7 +1872,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, token.c_str());
 #else
 				newStage.vertexProgram = -1;
-                //if(newStage.glslProgram <= 0)
+                //if(SHADER_HANDLE_IS_INVALID(newStage.glslProgram))
                 {
                     token.StripFileExtension();
                     const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
@@ -1858,7 +1880,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
                     if(shaderProgram && shaderProgram->program > 0)
                         newStage.glslProgram = shaderProgram->program;
                     else
-                        newStage.glslProgram = -1;
+                        newStage.glslProgram = SHADER_HANDLE_INVALID;
                 }
 #endif
 			}
@@ -1868,7 +1890,6 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 		if (!token.Icmp("megaTexture")) {
 			if (src.ReadTokenOnLine(&token)) {
-#if !defined(GL_ES_VERSION_2_0)
 				newStage.megaTexture = new idMegaTexture;
 
 				if (!newStage.megaTexture->InitFromMegaFile(token.c_str())) {
@@ -1877,11 +1898,21 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 					continue;
 				}
 
+#if !defined(GL_ES_VERSION_2_0)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, "megaTexture.vfp");
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, "megaTexture.vfp");
 #else
 				newStage.vertexProgram = -1;
 				newStage.fragmentProgram = -1;
+                //if(SHADER_HANDLE_IS_INVALID(newStage.glslProgram))
+                {
+                    const shaderProgram_t *shaderProgram = shaderManager->Find("megaTexture");
+                    NS_DEBUG(common->Printf("NS vertexProgram: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
+                    if(shaderProgram && shaderProgram->program > 0)
+                        newStage.glslProgram = shaderProgram->program;
+                    else
+                        newStage.glslProgram = SHADER_HANDLE_INVALID;
+                }
 #endif
 				continue;
 			}
@@ -1897,26 +1928,32 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			ParseFragmentMap(src, &newStage);
 			continue;
 		}
+#if defined(_GLSL_PROGRAM) || defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+        if (!token.Icmp("fragmentparm")) {
+			ParseFragmentParm(src, &newStage);
+            continue;
+        }
+#endif
+
+        // karin:
+        /*
+         * full usage: programGLSL <vertex shader file(.vert|.vp)> <fragment shader file(.frag|.fp)> <shader name>
+         * e.g. programGLSL fog.vert blend.frag fog
+         * e.g. programGLSL fog -> programGLSL fog.vert fog.frag fog
+         * e.g. programGLSL fog.vert blend.frag -> programGLSL fog.vert blend.frag fog_blend
+         * e.g. programGLSL fog.vert fog.frag -> programGLSL fog.vert fog.frag fog
+         */
+        if (!token.Icmp("programGLSL")) {
+            newStage.vertexProgram = -1;
+            newStage.fragmentProgram = -1;
+            ParseGLSLProgram(src, &newStage);
+
+            continue;
+        }
 
 #ifdef _RAVEN //karin: GLSL newShaderStage
 		if (!token.Icmp("glslProgram")) {
 			newShaderStage.ParseGLSLProgram(src, this);
-#if 0
-			src.SkipRestOfLine();
-			//SetMaterialFlag(MF_DEFAULTED); // as default
-			/*
-			 blend blend
-			 // colored
-			 */
-			ss->drawStateBits = GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
-			/*
-			ss->color.registers[0] = EXP_REG_PARM0;
-			ss->color.registers[1] = EXP_REG_PARM1;
-			ss->color.registers[2] = EXP_REG_PARM2;
-			ss->color.registers[3] = EXP_REG_PARM3;
-			pd->registersAreConstant = false;
-			*/
-#endif
 			continue;
 		}
 		if (!token.Icmp("shaderParm")) {
@@ -1924,9 +1961,6 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 				newShaderStage.ParseShaderParm(src, this);
 			else
 				src.SkipRestOfLine();
-#if 0
-			src.SkipRestOfLine();
-#endif
 			continue;
 		}
 		if (!token.Icmp("shaderTexture")) {
@@ -1934,14 +1968,6 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 				newShaderStage.ParseShaderTexture(src, this);
 			else
 				src.SkipRestOfLine();
-#if 0
-			src.SkipRestOfLine();
-			/*
-			idToken t;
-			while(src.ReadTokenOnLine(&t))
-				idStr::Copynz(imageName, t.c_str(), sizeof(imageName));
-				*/
-#endif
 			continue;
 		}
 #endif
@@ -1951,17 +1977,19 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
         {
             continue;
         }
-        if (!token.Icmp("specularEXP"))
+        if (!token.Icmp("specularexp"))
         {
+#if 1
+			ss->specular.exponent = src.ParseFloat();
+			MatchToken(src, ",");
+			ss->specular.brightness = src.ParseFloat();
+#else
             idStr tmp;
             src.ParseRestOfLine(tmp); // 2 float
+#endif
             continue;
         }
 
-        if (!token.Icmp("fragmentparm")) {
-            src.SkipRestOfLine();
-            continue;
-        }
         if (!token.Icmp("shaderFallback3")) {
 			continue;
 		}
@@ -1991,9 +2019,6 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			continue;
 		}
         if (!token.Icmp("shaderLevel3")) {
-			continue;
-		}
-        if (!token.Icmp("shaderLevel1")) {
 			continue;
 		}
         if (!token.Icmp("shuttleView")) {
@@ -3349,6 +3374,21 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 				}
 				break;
 #endif
+#ifdef _HUMANHEAD //karin: calc dynamic variants on material stage
+			case OP_TYPE_FRAGMENTPROGRAMS: { //karin: check has ARB to GLSL shader stage is enabled current
+					float f = 0.0;
+					if (stages && !r_skipNewAmbient.GetBool()) {
+						for (int m = 0; m < numStages; m++) {
+							if (stages[ m ].newStage && stages[ m ].newStage->glslProgram > 0) {
+								f = 1.0;
+								break;
+							}
+						}
+					}
+					registers[op->c] = f;
+				}
+				break;
+#endif
 			default:
 				common->FatalError("R_EvaluateExpression: bad opcode");
 		}
@@ -3658,5 +3698,162 @@ void idMaterial::EvaluateRegisters( float *regs, const float entityParms[MAX_ENT
 	}
 
 	this->EvaluateRegisters(regs, entityParms, view, emitter);
+}
+#endif
+
+#if defined(_GLSL_PROGRAM) || defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+/*
+================
+idMaterial::ParseFragmentParm
+
+If there is a single value, it will be repeated across all elements
+If there are two values, 3 = 0.0, 4 = 1.0
+if there are three values, 4 = 1.0
+================
+*/
+void idMaterial::ParseFragmentParm(idLexer &src, newShaderStage_t *newStage)
+{
+	idToken				token;
+
+	src.ReadTokenOnLine(&token);
+	int	parm = token.GetIntValue();
+
+	if (!token.IsNumeric() || parm < 0 || parm >= MAX_FRAGMENT_PARMS) {
+		common->Warning("bad fragmentParm number\n");
+		SetMaterialFlag(MF_DEFAULTED);
+		return;
+	}
+
+	if (parm >= newStage->numFragmentParms) {
+		newStage->numFragmentParms = parm+1;
+	}
+
+	newStage->fragmentParms[parm][0] = ParseExpression(src);
+
+	src.ReadTokenOnLine(&token);
+
+	if (!token[0] || token.Icmp(",")) {
+		newStage->fragmentParms[parm][1] =
+		        newStage->fragmentParms[parm][2] =
+		                newStage->fragmentParms[parm][3] = newStage->fragmentParms[parm][0];
+		return;
+	}
+
+	newStage->fragmentParms[parm][1] = ParseExpression(src);
+
+	src.ReadTokenOnLine(&token);
+
+	if (!token[0] || token.Icmp(",")) {
+		newStage->fragmentParms[parm][2] = GetExpressionConstant(0);
+		newStage->fragmentParms[parm][3] = GetExpressionConstant(1);
+		return;
+	}
+
+	newStage->fragmentParms[parm][2] = ParseExpression(src);
+
+	src.ReadTokenOnLine(&token);
+
+	if (!token[0] || token.Icmp(",")) {
+		newStage->fragmentParms[parm][3] = GetExpressionConstant(1);
+		return;
+	}
+
+	newStage->fragmentParms[parm][3] = ParseExpression(src);
+}
+#endif
+
+#ifdef _GLSL_PROGRAM
+void idMaterial::ParseGLSLProgram(idLexer &src, newShaderStage_t *newStage)
+{
+    idToken token;
+
+    newStage->glslProgram = SHADER_HANDLE_INVALID;
+    if (!src.ReadTokenOnLine(&token))
+    {
+        return;
+    }
+
+    idStr name;
+    idStr vertexShaderFile;
+    idStr fragmentShaderFile;
+    idStrList list;
+
+    list.Append(token);
+    if (src.ReadTokenOnLine(&token)) {
+        list.Append(token);
+        if (src.ReadTokenOnLine(&token)) {
+            list.Append(token);
+        }
+    }
+    src.SkipRestOfLine();
+
+    if(list.Num() == 3)
+    {
+        vertexShaderFile = list[0];
+        fragmentShaderFile = list[1];
+        name = list[2];
+    }
+    else if(list.Num() == 2)
+    {
+        vertexShaderFile = list[0];
+        fragmentShaderFile = list[1];
+
+        idStr v = vertexShaderFile;
+        idStr f = fragmentShaderFile;
+        v.StripFileExtension();
+        f.StripFileExtension();
+        if(v == f)
+            name = v;
+        else
+            name = v + "_" + f;
+    }
+    else
+    {
+        name = list[0];
+        name.StripFileExtension();
+        vertexShaderFile = name;
+        fragmentShaderFile = name;
+    }
+
+    const shaderProgram_t *shaderProgram = shaderManager->Find(name.c_str());
+    NS_DEBUG(common->Printf("NS GLSL program: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
+    if(shaderProgram && shaderProgram->program > 0)
+    {
+        if(shaderProgram->type < SHADER_CUSTOM) // built-in shader
+            newStage->glslProgram = shaderProgram->program;
+        else
+            newStage->glslProgram = shaderManager->GetHandle(name.c_str());
+        return;
+    }
+
+    GLSLShaderProp prop(name);
+    idStr path;
+    idStr source;
+
+    if(!RB_GLSL_FindGLSLShaderSource(vertexShaderFile.c_str(), 1, &source, &path))
+    {
+        common->Warning("Material '%s' GLSL program vertex shader source file '%s' not exists", GetName(), vertexShaderFile.c_str());
+        return;
+    }
+    prop.vertex_shader_source_file = vertexShaderFile.c_str();
+    prop.default_vertex_shader_source = source;
+
+    if(!RB_GLSL_FindGLSLShaderSource(fragmentShaderFile.c_str(), 2, &source, &path))
+    {
+        common->Warning("Material '%s' GLSL program fragment shader source file '%s' not exists", GetName(), fragmentShaderFile.c_str());
+        return;
+    }
+    prop.fragment_shader_source_file = fragmentShaderFile.c_str();
+    prop.default_fragment_shader_source = source;
+
+    shaderHandle_t handle = shaderManager->Load(prop);
+
+    if(SHADER_HANDLE_IS_INVALID(handle))
+    {
+        common->Warning("Material '%s' Load GLSL shader program fail: %s.", GetName(), name.c_str());
+        return;
+    }
+
+    newStage->glslProgram = shaderManager->GetHandle(name.c_str());
 }
 #endif

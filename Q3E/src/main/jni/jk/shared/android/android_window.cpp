@@ -174,9 +174,9 @@ void WIN_Present( window_t *window )
 		if ( r_swapInterval->modified )
 		{
 			r_swapInterval->modified = qfalse;
-			if ( r_swapInterval->integer > 0 )
+			if ( !Q3E_SwapInterval( r_swapInterval->integer ) )
 			{
-				Q3E_SwapInterval(r_swapInterval->integer);
+				Com_DPrintf( "Q3E_SwapInterval failed: %s\n", Q3E_GetError() );
 			}
 		}
 	}
@@ -215,6 +215,7 @@ static rserr_t GLimp_SetMode(glconfig_t *glConfig, const windowDesc_t *windowDes
 	Q3E_GL_CONFIG_SET(samples, r_ext_multisample->value);
 
 	Q3E_GL_CONFIG_SET(fullscreen, 1);
+	Q3E_GL_CONFIG_SET(swap_interval, r_swapInterval->integer);
 	Q3E_GL_CONFIG_ES_1_1();
 
 	qboolean res = Q3E_InitGL();

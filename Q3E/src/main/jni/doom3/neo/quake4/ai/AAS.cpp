@@ -87,8 +87,7 @@ bool idAASLocal::Init( const idStr &mapName, unsigned int mapFileCRC ) {
 			if(!botAASBuilder)
 				botAASBuilder = new BotAASBuild();
 			botAASBuilder->Init( this );
-			if (mapName.Find( BOT_AAS, false ) > 0)
-			{
+			if (mapName.Find( BOT_AAS, false ) > 0) {
 				botAASBuilder->AddReachabilities();
 			}
         }
@@ -107,8 +106,7 @@ void idAASLocal::Shutdown( void ) {
 	if ( file ) {
 #ifdef MOD_BOTS // cusTom3 - aas extensions
 		if(BOT_ENABLED() && botAASBuilder) {
-			if (idStr(file->GetName()).Find( BOT_AAS, false ) > 0)
-			{
+			if (idStr(file->GetName()).Find( BOT_AAS, false ) > 0) {
 				botAASBuilder->FreeAAS();
 			}
 		}

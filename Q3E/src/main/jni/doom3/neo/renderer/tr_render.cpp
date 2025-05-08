@@ -712,6 +712,8 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 		// we need the model matrix without it being combined with the view matrix
 		// so we can transform local vectors to global coordinates
 		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), surf->space->modelMatrix);
+
+        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewMatrix), surf->space->modelViewMatrix);
 	}
 
 	// change the scissor if needed

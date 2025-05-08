@@ -592,6 +592,10 @@ void idGameLocal::Init( void ) {
 // RAVEN END
 
 	networkSystem->AddSortFunction( filterByMod );
+
+#ifdef MOD_BOTS
+    botAi::InitBotSystem();
+#endif
 }
 
 /*
@@ -1522,26 +1526,6 @@ void idGameLocal::LocalMapRestart( int instance ) {
 
 	gamestate = GAMESTATE_SHUTDOWN;
 
-#ifdef MOD_BOTS
-	if(BOT_ENABLED())
-	// TinMan: tell those who are going to stick around that they are restarting
-		for ( i = 0; i < MAX_GENTITIES; i++ )
-		{
-			if ( entities[ i ] )
-			{
-				if ( entities[ i ]->IsType( idPlayer::Type ) )
-				{
-					static_cast< idPlayer * >( entities[ i ] )->PrepareForRestart();
-				}
-				else if ( entities[ i ]->IsType( botAi::Type ) )
-				{
-					//Printf( "found bot to shutdown\n" ); // TinMan: *debug*
-					static_cast< botAi * >( entities[ i ] )->PrepareForRestart();
-				}
-			}
-		}
-    else
-#endif // cusTom3 - original version below
 	for ( i = 0; i < MAX_CLIENTS; i++ ) {
 // RAVEN BEGIN
 // jnewquist: Use accessor for static class type 
@@ -1578,26 +1562,6 @@ void idGameLocal::LocalMapRestart( int instance ) {
 	// (note that if there are no players in the game, we could just leave it at it's current value)
 	spawnCount = latchSpawnCount;
 
-#ifdef MOD_BOTS
-	if(BOT_ENABLED())
-	// TinMan: restartz0r clients and botz0rs
-		for ( i = 0; i < MAX_GENTITIES; i++ )
-		{
-			if ( entities[ i ] )
-			{
-				if ( entities[ i ]->IsType( idPlayer::Type ) )
-				{
-					static_cast< idPlayer * >( entities[ i ] )->Restart();
-				}
-				else if ( entities[ i ]->IsType( botAi::Type ) )
-				{
-					//Printf( "found bot to restart\n" ); // TinMan: *debug*
-					static_cast< botAi * >( entities[ i ] )->Restart();
-				}
-			}
-		}
-    else
-#endif
 	// setup the client entities again
 	for (i = 0; i < MAX_CLIENTS; i++) {
 // RAVEN BEGIN
@@ -2014,50 +1978,13 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 	// load navigation system for all the different monster sizes
 	if(BOT_ENABLED()) {
 		int i;
-		for( i = 0; i < aasNames.Num(); i++ )
-		{
+		for( i = 0; i < aasNames.Num(); i++ ) {
 			aasList[ i ]->Init( idStr( mapFileName ).SetFileExtension( aasNames[ i ] ).c_str(), mapFile->GetGeometryCRC() );
 		}
 
 		//k: in MP game, auto gen AAS file for map
-		if(harm_g_autoGenAASFileInMPGame.GetBool())
-		{
-			Printf("[Harmattan]: Check AAS load result......\n");
-			bool aasLoadSuc = false;
-			for( i = 0; i < aasNames.Num(); i++ ) {
-				if(aasList[ i ]->GetSettings())
-				{
-					aasLoadSuc = true;
-					break;
-				}
-			}
-			Printf("[Harmattan]: AAS load %s.\n", aasLoadSuc ? "success" : "fail");
-			if(!aasLoadSuc)
-			{
-				Printf("[Harmattan]: Check AAS file exists......\n");
-				bool aasFileExists = false;
-				for( i = 0; i < aasNames.Num(); i++ ) {
-					idStr aasFilePath( mapFileName );
-					aasFilePath.SetFileExtension( aasNames[ i ] );
-					if (fileSystem->ReadFile(aasFilePath, NULL, NULL) > 0) {
-						aasFileExists = true;
-						break;
-					}
-				}
-				Printf("[Harmattan]: AAS file %s.\n", aasFileExists ? "exists" : "not found");
-				if(!aasFileExists)
-				{
-					Printf("[Harmattan]: Generate AAS file %s......\n", mapFileName.c_str());
-					cmdSystem->BufferCommandText( CMD_EXEC_NOW, va("botRunAAS %s", mapFileName.c_str()) );
-					Printf("[Harmattan]: Generate AAS file %s completed. Try reload AAS.\n", mapFileName.c_str());
-					aasLoadSuc = false;
-					for( i = 0; i < aasNames.Num(); i++ ) {
-						if(aasList[ i ]->Init( idStr( mapFileName ).SetFileExtension( aasNames[ i ] ).c_str(), mapFile->GetGeometryCRC() ))
-							aasLoadSuc = true;
-					}
-					Printf("[Harmattan]: AAS reload %s.\n", aasLoadSuc ? "success" : "fail");
-				}
-			}
+		if(botAi::harm_g_autoGenAASFileInMPGame.GetBool()) {
+            botAi::GenerateAAS();
 		}
     }
 #endif
@@ -2082,10 +2009,9 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 	gamestate = GAMESTATE_ACTIVE;
 
 #ifdef MOD_BOTS //karin: auto fill bots in MP-game
-	if (BOT_ENABLED())
-	{
-		int botCount = harm_si_autoFillBots.GetInteger();
-		if(botCount > 0)
+	if (BOT_ENABLED()) {
+		int botCount = botAi::harm_si_autoFillBots.GetInteger();
+		if(botCount != 0)
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, va("fillbots %d\n", botCount) );
 	}
 #endif
@@ -2396,33 +2322,6 @@ void idGameLocal::MapClear( bool clearClients, int instance ) {
 	}
 // RAVEN END
 
-#ifdef MOD_BOTS
-	if(BOT_ENABLED())
-	// TinMan: Keep bots alive
-		for( i = ( clearClients ? 0 : MAX_CLIENTS ); i < MAX_GENTITIES; i++ )
-		{
-			if( instance >= 0 && entities[ i ] && entities[ i ]->GetInstance() != instance ) {
-				continue;
-			}
-
-			if ( !clearClients && entities[ i ] && entities[ i ]->IsType( botAi::Type ) )
-			{
-				//Printf( "[MapClear][Keep: %s]\n", entities[ i ]->name.c_str() );
-				continue;
-			}
-
-			delete entities[ i ];
-			// ~idEntity is in charge of setting the pointer to NULL
-			// it will also clear pending events for this entity
-			assert( !entities[ i ] );
-// RAVEN BEGIN
-// see FIXME in idRestoreGame::Error
-			entities[ i ] = NULL;
-// RAVEN END
-			spawnIds[ i ] = -1;
-		}
-    else
-#endif
 	for( i = ( clearClients ? 0 : MAX_CLIENTS ); i < MAX_GENTITIES; i++ ) {
 		if( instance >= 0 && entities[ i ] && entities[ i ]->GetInstance() != instance ) {
 			continue;
@@ -2448,25 +2347,6 @@ void idGameLocal::MapClear( bool clearClients, int instance ) {
 // RAVEN END
 
 	if ( !clearClients ) {
-#ifdef MOD_BOTS
-		if(BOT_ENABLED())
-			// TinMan: add back the hashes of the clients and bots
-			for ( i = 0; i < MAX_GENTITIES; i++ )
-			{
-				if ( !entities[ i ] )
-				{
-					continue;
-				}
-				entityHash.Add( entityHash.GenerateKey( entities[ i ]->name.c_str(), true ), i );
-// RAVEN BEGIN
-// rjohnson: reset spawnedEntities during clear to ensure no left over pieces that get remapped to a new id ( causing bad snapshot reading )
-				if ( instance == -1 ) {
-					entities[ i ]->spawnNode.AddToEnd( spawnedEntities );
-				}
-// RAVEN END
-			}
-		else
-#endif
 		// add back the hashes of the clients/stuff in other instances
 		for ( i = 0; i < MAX_GENTITIES; i++ ) {
 			if ( !entities[ i ] ) {
@@ -3606,11 +3486,9 @@ void idGameLocal::SortActiveEntityList( void ) {
 #ifdef MOD_BOTS
 	if(BOT_ENABLED()) {
 	// TinMan: Make bots king of the think list, where they shall rule with an iron fist. Basically they should think before thier fakeclient ents
-		for ( ent = activeEntities.Next(); ent != NULL; ent = next_ent )
-		{
+		for ( ent = activeEntities.Next(); ent != NULL; ent = next_ent ) {
 			next_ent = ent->activeNode.Next();
-			if ( ent->IsType( botAi::Type ) )
-			{
+			if ( ent->IsType( botAi::Type ) ) {
 				ent->activeNode.Remove();
 				ent->activeNode.AddToFront( activeEntities );
 			}
@@ -3930,6 +3808,11 @@ TIME_THIS_SCOPE("idGameLocal::RunFrame - gameDebug.BeginFrame()");
 	// show any debug info for this frame
 	RunDebugInfo();
 	D_DrawDebugLines();
+
+#ifdef _MOD_FULL_BODY_AWARENESS
+    if(harm_pm_fullBodyAwarenessOffset.IsModified())
+        harm_pm_fullBodyAwarenessOffset.ClearModified();
+#endif
 
 	g_simpleItems.ClearModified();
 	return ret;
@@ -8723,3 +8606,9 @@ void operator delete[]( void *p ) {
 #endif	// #else #ifdef ID_DEBUG_MEMORY
 #endif	// #if defined(ID_REDIRECT_NEWDELETE) || defined(_RV_MEM_SYS_SUPPORT)
 // RAVEN END
+
+#ifdef MOD_BOTS
+#include "bots/BotAASBuild.cpp"
+#include "bots/BotAI.cpp"
+#include "bots/BotSabot.cpp"
+#endif

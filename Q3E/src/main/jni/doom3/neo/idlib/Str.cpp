@@ -2405,3 +2405,70 @@ void idStr::StripDoubleQuotes(void)
 }
 #endif
 
+idList<idStr> idStr::SplitUnique(const char *macros, char ch)
+{
+	idStrList ret;
+
+	if(!macros || !macros[0])
+		return ret;
+
+	int start = 0;
+	int index;
+	idStr str(macros);
+	str.Strip(ch);
+	while((index = str.Find(ch, start)) != -1)
+	{
+		if(index - start > 0)
+		{
+			idStr s = str.Mid(start, index - start);
+			ret.AddUnique(s);
+		}
+		start = index + 1;
+		if(index == str.Length() - 1)
+			break;
+	}
+	if(start <= str.Length() - 1)
+	{
+		idStr s = str.Mid(start, str.Length() - start);
+		ret.AddUnique(s);
+	}
+
+	return ret;
+}
+
+idList<idStr> idStr::Split(const char *macros, char ch)
+{
+	idStrList ret;
+
+	if(!macros || !macros[0])
+		return ret;
+
+	int start = 0;
+	int index;
+	idStr str(macros);
+	str.Strip(ch);
+	while((index = str.Find(ch, start)) != -1)
+	{
+		if(index - start > 0)
+		{
+			idStr s = str.Mid(start, index - start);
+			ret.Append(s);
+		}
+		start = index + 1;
+		if(index == str.Length() - 1)
+			break;
+	}
+	if(start <= str.Length() - 1)
+	{
+		idStr s = str.Mid(start, str.Length() - start);
+		ret.Append(s);
+	}
+
+	return ret;
+}
+
+void idStr::StripWhitespace(idStr &str)
+{
+	str.StripTrailingWhitespace();
+	str.StripLeading(' ');
+}

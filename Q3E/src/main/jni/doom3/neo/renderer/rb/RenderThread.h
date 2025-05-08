@@ -40,11 +40,11 @@ public:
     volatile renderCrop_t	*pixelsCrop;
     volatile byte           *pixels;
 
-    void                    BackendThreadExecute(void);
-    void                    BackendThreadShutdown(void);
-    void                    BackendThreadWait(void);
-    void                    BackendThreadTask(void);
-    bool                    IsActive(void) const;
+    void                    BackendThreadExecute( void );
+    void                    BackendThreadShutdown( void );
+    void                    BackendThreadWait(void );
+    void                    BackendThreadTask( void );
+    bool                    IsActive( void ) const;
 
 // images queue
     void				    AddAllocList( idImage * image, bool checkForPrecompressed, bool fromBackEnd );

@@ -214,7 +214,7 @@ static void etc2_compress_tex_image(const char *cachefname, GLenum target, GLint
 #else
     EncodeC((unsigned char *)pixels,
                 width, height,
-            4, // static_cast<int>(Etc::Image::Format::RGBA8),
+                4, // static_cast<int>(Etc::Image::Format::RGBA8),
                 0, // Etc::ErrorMetric::RGBA,
                 0, // fEffort,
                 numPhysicalCpuCores * numCpuPackages,
@@ -301,14 +301,14 @@ ID_INLINE static int etcavail(const char *cachefname) {
            && (r_useETC1.GetBool())
            && (cachefname != 0)
            && (cachefname[0] != 0)
-           && (fileSystem->ReadFile(cachefname, 0, 0) != -1
+           && (fileSystem->ReadFile(cachefname, NULL, NULL) != -1
            );
 }
 
 int uploadetc(const char *cachefname, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type) {
     char *tmp;
     int failed = 0;
-    int sz = fileSystem->ReadFile(cachefname, (void **)&tmp, 0);
+    int sz = fileSystem->ReadFile(cachefname, (void **)&tmp, NULL);
     if(sz)
     {
         imageCompression_t image;

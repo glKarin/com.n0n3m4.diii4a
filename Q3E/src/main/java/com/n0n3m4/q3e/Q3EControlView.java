@@ -266,7 +266,11 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             {
                 paint_elements.clear();
             }
-            for (Paintable p : paint_elements) p.loadtex(gl);
+            for (Paintable p : paint_elements)
+            {
+                p.loadtex(gl);
+                p.AsBuffer((GL11) gl);
+            }
 
             for (int i = 0; i < fingers.length; i++)
                 fingers[i] = new Finger(null, i);
@@ -282,11 +286,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 /*            }*/
 
             mInit = true;
-            post(new Runnable()
-            {
+            post(new Runnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     getHolder().setFixedSize(orig_width, orig_height);
                 }
             });
@@ -324,7 +326,11 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
         if (mInit)
         {
-            for (Paintable p : paint_elements) p.loadtex(gl);
+            for (Paintable p : paint_elements)
+            {
+                p.loadtex(gl);
+                p.AsBuffer((GL11) gl);
+            }
         }
 
     }

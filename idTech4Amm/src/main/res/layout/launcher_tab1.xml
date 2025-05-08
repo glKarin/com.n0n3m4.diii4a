@@ -39,14 +39,19 @@
                     android:checked="false" />
             </LinearLayout>
 
-            <EditText
-                android:id="@+id/edt_cmdline"
+            <android.support.v4.widget.NestedScrollView
+                android:id="@+id/cmdline_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:imeOptions="flagNoExtractUi"
-                android:inputType="textNoSuggestions|textMultiLine"
-                android:textSize="16sp" />
+                android:layout_height="wrap_content">
+                <EditText
+                    android:id="@+id/edt_cmdline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:imeOptions="flagNoExtractUi"
+                    android:inputType="textNoSuggestions|textMultiLine"
+                    android:textSize="16sp" />
+            </android.support.v4.widget.NestedScrollView>
 
             <LinearLayout
                 android:id="@+id/temp_cmdline"
@@ -929,6 +934,12 @@
                                 android:text="@string/automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10" />
                     </RadioGroup>
                 </LinearLayout>-->
+
+                <CheckBox
+                    android:id="@+id/cb_g_skipHitEffect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/skip_hit_effect_in_game" />
 
                 <LinearLayout
                     android:id="@+id/dll_section"

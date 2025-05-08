@@ -1,24 +1,26 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
+
 project(doom3)
 
-# -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
-set(COMPILE_CURL "1")
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+# build type
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "Release")
+endif()
+#set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+
+option(USE_SYSTEM_OGGVORBIS    	"use system ogg/vorbis library"      	OFF)
+option(USE_SYSTEM_CURL        	"use system curl library"      			OFF)
+option(USE_SYSTEM_FREETYPE    	"use system freetype2 library"      	OFF)
+
 set(CORE_DEFINES "__DOOM_DLL__")
+
 if(ANDROID)
 	add_definitions(-D__ANDROID__)
 	add_definitions(-D_NO_PTHREAD_CANCEL)
 	set(CORE_DEFINES "${CORE_DEFINES};NO_ALSA;_NO_GAMMA")
 elseif(WIN32)
-	find_package(CURL QUIET)
-	if(CURL_FOUND)
-		set(COMPILE_CURL "1")
-		include_directories(${CURL_INCLUDE_DIR})
-		message(STATUS "libcurl found and enabled")
-	else()
-		message(WARNING "libcurl not found, server downloads won't be available (apart from that doom3 will work)")
-		set(CURL_LIBRARY "")
-		set(COMPILE_CURL "0")
-	endif()
 	set(CORE_DEFINES "${CORE_DEFINES};NO_ALSA")
 else()
 	set(CORE_DEFINES "${CORE_DEFINES};_NO_GAMMA")
@@ -26,12 +28,14 @@ else()
 	# apt-get install libgles-dev # GLES2/GLES3/EGL headers
 endif()
 
-set(COMPILE_FREETYPE "0")
-
 add_definitions(-D_K_CLANG) # TODO
-add_definitions(-DID_ENABLE_CURL=${COMPILE_CURL})
+add_definitions(-DID_ENABLE_CURL=1)
 
-#set(CMAKE_VERBOSE_MAKEFILE ON)
+set(COMPILE_OGGVORBIS       TRUE)
+set(COMPILE_CURL        	TRUE)
+set(COMPILE_FREETYPE    	FALSE)
+
+# -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 # set(CMAKE_BUILD_TYPE "Debug")
 # TODO
@@ -119,6 +123,7 @@ option(USE_STB_OGG							"use stb_vorbis" 															OFF)
 option(D3BFG_OCCLUSION_CULLING				"DOOM3-BFG occlusion culling support" 										ON)
 option(WIDE_CHARACTER_LANGUAGE				"Wide-character language font support" 										ON)
 option(D3BFG_NEW_FONT						"DOOM3-BFG new font support"												ON)
+option(GLSL_PROGRAM							"GLSL program on new material stage support"								ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -126,6 +131,7 @@ option(CORE									"Build the core" 															ON)
 option(BASE									"Build the base game code" 													ON)
 
 option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" 								ON)
+option(D3_MOD_BOTS							"Build doom3 bots mod support" 												ON)
 endif()
 
 # DOOM3 mods
@@ -327,12 +333,6 @@ if(cpu MATCHES ".*64.*" AND NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
 	message(FATAL_ERROR "If you're building in a 32bit chroot on a 64bit host, switch to it with 'linux32 chroot' or at least call cmake with linux32 (or your OSs equivalent)!")
 endif()
 
-# build type
-if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "Release")
-endif()
-#set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-
 # precompiled libraries from the dhewm3-libs repo
 #[[if(DHEWM3LIBS)
 	if(CMAKE_CROSSCOMPILING)
@@ -461,6 +461,7 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	else()
 		set(OPT_LEVEL "-O2")
 	endif()
+	#set(OPT_LEVEL "-O3")
 
 	#karin: don't add `-ffinite-math-only`, because cause NaN <= 0.0 is true, example: calc NaN `fov_y` when drawRect.w == drawRect.h == 0, and call idRenderWorld::RenderScene on ui/idRenderWindow::Draw
 	set(CMAKE_C_FLAGS_DEBUG "-g -ggdb -D_DEBUG -O0 -fPIC")
@@ -474,11 +475,12 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	set(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
 
 	add_compile_options(-fno-strict-aliasing)
+	#add_compile_options(-fsigned-char)
 	# dear idiot compilers, don't fuck up math code with useless FMA "optimizations"
 	# (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839)
 	CHECK_CXX_COMPILER_FLAG("-ffp-contract=off" cxx_has_fp-contract)
 	if(cxx_has_fp-contract)
-	add_compile_options(-ffp-contract=off)
+		add_compile_options(-ffp-contract=off)
 	endif()
 
 	if(NOT AROS)
@@ -628,20 +630,20 @@ else() #TODO linux
             add_definitions(-D_SDL)
             set(sys_libs ${sys_libs} ${SDLx_LIBRARY})
 	    else()
-		    find_package(SDL2)
-            if(SDL2_FOUND)
-                set(LINUX_SDL TRUE)
+		find_package(SDL2)
+		if(SDL2_FOUND)
+			set(LINUX_SDL TRUE)
                 message(STATUS "use system SDL2")
                 include_directories(${SDL2_INCLUDE_DIRS})
-                set(SDLx_LIBRARY ${SDL2_LIBRARIES})
-                add_definitions(-D_SDL)
-                set(sys_libs ${sys_libs} ${SDLx_LIBRARY})
-            else()
-                set(LINUX_SDL FALSE)
-                message(STATUS "SDL2 not found, using X11 + EGL")
-                set(sys_libs ${sys_libs} X11 EGL)
-            endif()
-	    endif()
+			set(SDLx_LIBRARY ${SDL2_LIBRARIES})
+			add_definitions(-D_SDL)
+			set(sys_libs ${sys_libs} ${SDLx_LIBRARY})
+		else()
+			set(LINUX_SDL FALSE)
+			message(STATUS "SDL2 not found, using X11 + EGL")
+			set(sys_libs ${sys_libs} X11 EGL)
+		endif()
+	endif()
 	endif()
 	if(NOT USE_MINIZ)
 		set(sys_libs ${sys_libs} z)
@@ -696,14 +698,7 @@ function(add_globbed_headers SRCLIST PATHPREFIX)
 	set(${SRCLIST} ${tmp_hdrs} ${${SRCLIST}})
 endfunction()
 
-if(COMPILE_CURL STREQUAL "1")
-	if(NOT WIN32)
-		set(local_libs ${local_libs} static_curl)
-	else()
-		set(sys_libs ${sys_libs} ${CURL_LIBRARY})
-	endif()
-	message(STATUS "Build cURL")
-endif()
+set(REQUIRE_OGGVORBIS TRUE)
 
 if(USE_STB_IMAGE)
 	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB")
@@ -711,6 +706,7 @@ if(USE_STB_IMAGE)
 endif()
 if(USE_STB_OGG)
 	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB_OGG")
+	set(REQUIRE_OGGVORBIS FALSE)
 	message(STATUS "Using stb oggvorbis")
 endif()
 if(SUPPORT_OBJ)
@@ -754,8 +750,12 @@ endif()
 if(WIDE_CHARACTER_LANGUAGE)
 	add_definitions(-D_WCHAR_LANG)
 	set(CORE_DEFINES "${CORE_DEFINES};_NEW_FONT_TOOLS")
-	set(COMPILE_FREETYPE "1")
+	set(REQUIRE_FREETYPE TRUE)
 	message(STATUS "Add wide-character language font support")
+endif()
+if(GLSL_PROGRAM)
+	add_definitions(-D_GLSL_PROGRAM)
+	message(STATUS "Add GLSL program on new material stage support")
 endif()
 
 if(OPENAL)
@@ -832,6 +832,7 @@ set(src_renderer
 	renderer/Image_program.cpp
 	renderer/Interaction.cpp
 	renderer/Material.cpp
+	renderer/MegaTexture.cpp
 	renderer/Model.cpp
 	renderer/ModelDecal.cpp
 	renderer/ModelManager.cpp
@@ -1268,117 +1269,215 @@ endif()
 
 if(CORE OR RAVEN OR HUMANHEAD)
 
-if(NOT WIN32)
-	if(COMPILE_CURL STREQUAL "1")
-		#//k curl
-		set(src_curl
-			externlibs/curl/lib/base64.c
-			externlibs/curl/lib/connect.c
-			externlibs/curl/lib/cookie.c
-			externlibs/curl/lib/dict.c
-			externlibs/curl/lib/easy.c
-			externlibs/curl/lib/escape.c
-			externlibs/curl/lib/file.c
-			externlibs/curl/lib/formdata.c
-			externlibs/curl/lib/ftp.c
-			externlibs/curl/lib/getdate.c
-			externlibs/curl/lib/getenv.c
-			externlibs/curl/lib/getinfo.c
-			externlibs/curl/lib/hash.c
-			externlibs/curl/lib/hostip.c
-			externlibs/curl/lib/http.c
-			externlibs/curl/lib/http_chunks.c
-			externlibs/curl/lib/if2ip.c
-			externlibs/curl/lib/krb4.c
-			externlibs/curl/lib/ldap.c
-			externlibs/curl/lib/llist.c
-			externlibs/curl/lib/memdebug.c
-			externlibs/curl/lib/mprintf.c
-			externlibs/curl/lib/multi.c
-			externlibs/curl/lib/netrc.c
-			externlibs/curl/lib/progress.c
-			externlibs/curl/lib/security.c
-			externlibs/curl/lib/sendf.c
-			externlibs/curl/lib/share.c
-			externlibs/curl/lib/speedcheck.c
-			externlibs/curl/lib/ssluse.c
-			externlibs/curl/lib/strequal.c
-			externlibs/curl/lib/strtok.c
-			externlibs/curl/lib/telnet.c
-			externlibs/curl/lib/timeval.c
-			externlibs/curl/lib/transfer.c
-			externlibs/curl/lib/url.c
-			externlibs/curl/lib/version.c
-			externlibs/curl/lib/http_digest.c
-			externlibs/curl/lib/http_ntlm.c
-			externlibs/curl/lib/inet_pton.c
-			externlibs/curl/lib/md5.c
-			externlibs/curl/lib/content_encoding.c
-		)
-
-		add_globbed_headers(src_curl "externlibs/curl/lib")
-		include_directories("externlibs/curl/lib")
-		include_directories("externlibs/curl/include")
-		add_library(static_curl STATIC ${src_curl})
-		set(CURL_DEFINES "HAVE_CONFIG_H") # without autoconf
-		INCLUDE(CheckFunctionExists)
-		check_function_exists(strlcat HAVE_STRLCAT)
-		if(NOT HAVE_STRLCAT)
-			set(CURL_DEFINES "${CURL_DEFINES};_NOT_HAVE_STRLCAT")
-			message(STATUS "No strlcat for cURL")
+if(USE_SYSTEM_CURL)
+		find_package(CURL QUIET)
+		if(CURL_FOUND)
+			set(curl_inc ${CURL_INCLUDE_DIR})
+			set(curl_lib ${CURL_LIBRARY})
+			set(COMPILE_CURL FALSE)
+			message(STATUS "using system curl")
 		else()
-			message(STATUS "Have strlcat for cURL")
+			message(WARNING "libcurl not found, server downloads won't be available (apart from that doom3 will work)")
+			set(curl_inc "externlibs/curl/include" "externlibs/curl/lib")
+			set(curl_lib "static_curl")
+			set(COMPILE_CURL TRUE)
+			message(STATUS "using internal curl")
 		endif()
-		set_target_properties(static_curl PROPERTIES COMPILE_DEFINITIONS "${CURL_DEFINES}")
+	else()
+		set(curl_inc "externlibs/curl/include" "externlibs/curl/lib")
+		set(curl_lib "static_curl")
+		set(COMPILE_CURL TRUE)
+		message(STATUS "using internal curl")
+endif()
+include_directories(${curl_inc})
+
+if(COMPILE_CURL #[[STREQUAL "1"]])
+	set(local_libs ${local_libs} ${curl_lib})
+else()
+	set(sys_libs ${sys_libs} ${curl_lib})
+endif()
+
+if(COMPILE_CURL #[[STREQUAL "1"]])
+	message(STATUS "Build cURL")
+	find_package(ZLIB REQUIRED)
+    #//k curl
+    set(src_curl
+        externlibs/curl/lib/base64.c
+        externlibs/curl/lib/connect.c
+        externlibs/curl/lib/cookie.c
+        externlibs/curl/lib/dict.c
+        externlibs/curl/lib/easy.c
+        externlibs/curl/lib/escape.c
+        externlibs/curl/lib/file.c
+        externlibs/curl/lib/formdata.c
+        externlibs/curl/lib/ftp.c
+        externlibs/curl/lib/getdate.c
+        externlibs/curl/lib/getenv.c
+        externlibs/curl/lib/getinfo.c
+        externlibs/curl/lib/hash.c
+        externlibs/curl/lib/hostip.c
+        externlibs/curl/lib/http.c
+        externlibs/curl/lib/http_chunks.c
+        externlibs/curl/lib/if2ip.c
+        externlibs/curl/lib/krb4.c
+        externlibs/curl/lib/ldap.c
+        externlibs/curl/lib/llist.c
+        externlibs/curl/lib/memdebug.c
+        externlibs/curl/lib/mprintf.c
+        externlibs/curl/lib/multi.c
+        externlibs/curl/lib/netrc.c
+        externlibs/curl/lib/progress.c
+        externlibs/curl/lib/security.c
+        externlibs/curl/lib/sendf.c
+        externlibs/curl/lib/share.c
+        externlibs/curl/lib/speedcheck.c
+        externlibs/curl/lib/ssluse.c
+        externlibs/curl/lib/strequal.c
+        externlibs/curl/lib/strtok.c
+        externlibs/curl/lib/telnet.c
+        externlibs/curl/lib/timeval.c
+        externlibs/curl/lib/transfer.c
+        externlibs/curl/lib/url.c
+        externlibs/curl/lib/version.c
+        externlibs/curl/lib/http_digest.c
+        externlibs/curl/lib/http_ntlm.c
+        externlibs/curl/lib/inet_pton.c
+        externlibs/curl/lib/md5.c
+        externlibs/curl/lib/content_encoding.c
+    )
+
+    add_globbed_headers(src_curl "externlibs/curl/lib")
+    add_library(static_curl STATIC ${src_curl})
+    set(CURL_DEFINES "HAVE_CONFIG_H") # without autoconf
+    INCLUDE(CheckFunctionExists)
+    check_function_exists(strlcat HAVE_STRLCAT)
+    if(NOT HAVE_STRLCAT)
+        set(CURL_DEFINES "${CURL_DEFINES};_NOT_HAVE_STRLCAT")
+        message(STATUS "No strlcat for cURL")
+    else()
+        message(STATUS "Have strlcat for cURL")
+    endif()
+    set_target_properties(static_curl PROPERTIES COMPILE_DEFINITIONS "${CURL_DEFINES}")
+    if(D3_COMPILER_IS_GCC_OR_CLANG)
         target_compile_options(static_curl PRIVATE -Wno-deprecated-non-prototype)
-		target_link_libraries(static_curl z)
+	endif()
+	target_include_directories(static_curl PRIVATE ${ZLIB_INCLUDE_DIRS})
+	if(WIN32)
+		target_link_libraries(static_curl PRIVATE ws2_32 ZLIB::ZLIB)
+	else()
+    	target_link_libraries(static_curl PRIVATE z)
 	endif()
 endif()
 
+if(REQUIRE_OGGVORBIS)
+	if(USE_SYSTEM_OGGVORBIS)
+		find_package(Vorbis QUIET)
+		if(Vorbis_FOUND)
+			find_path (Vorbis_Vorbis_INCLUDE_DIR vorbis/codec.h)
+			find_path (Vorbis_Enc_INCLUDE_DIR vorbis/vorbisenc.h)
+			find_path (Vorbis_File_INCLUDE_DIR vorbis/vorbisfile.h)
+			set(Vorbis_Vorbis_LIBRARY Vorbis::vorbis)
+			set(Vorbis_Enc_LIBRARY Vorbis::vorbisenc)
+			set(Vorbis_File_LIBRARY Vorbis::vorbisfile)
+			set(oggvorbis_inc ${OGG_INCLUDE_DIR} ${Vorbis_Vorbis_INCLUDE_DIR} ${Vorbis_Enc_INCLUDE_DIR} ${Vorbis_File_INCLUDE_DIR})
+			set(oggvorbis_lib ${OGG_LIBRARY} ${Vorbis_Vorbis_LIBRARY} ${Vorbis_Enc_LIBRARY} ${Vorbis_File_LIBRARY})
+			set(COMPILE_OGGVORBIS FALSE)
+			message(STATUS "using system ogg/vorbis")
+		else()
+			set(oggvorbis_inc "externlibs/libogg/include" "externlibs/libvorbis/include")
+			set(oggvorbis_lib "static_oggvorbis")
+			set(COMPILE_OGGVORBIS TRUE)
+			message(STATUS "using internal ogg/vorbis")
+		endif()
+	else()
+		set(oggvorbis_inc "externlibs/libogg/include" "externlibs/libvorbis/include")
+		set(oggvorbis_lib "static_oggvorbis")
+		set(COMPILE_OGGVORBIS TRUE)
+		message(STATUS "using internal ogg/vorbis")
+	endif()
 
-if(NOT USE_STB_OGG)
-# Build internal ogg/vorbis
-set(src_ogg
-	externlibs/libogg/src/bitwise.c
-	externlibs/libogg/src/framing.c
-	externlibs/libvorbis/lib/analysis.c
-	externlibs/libvorbis/lib/floor1.c
-	externlibs/libvorbis/lib/psy.c
-	# externlibs/libvorbis/lib/tone.c
-	# externlibs/libvorbis/lib/barkmel.c
-	externlibs/libvorbis/lib/info.c
-	externlibs/libvorbis/lib/vorbisenc.c
-	externlibs/libvorbis/lib/bitrate.c
-	externlibs/libvorbis/lib/lookup.c
-	externlibs/libvorbis/lib/registry.c
-	externlibs/libvorbis/lib/vorbisfile.c
-	externlibs/libvorbis/lib/block.c
-	externlibs/libvorbis/lib/lpc.c
-	externlibs/libvorbis/lib/res0.c
-	externlibs/libvorbis/lib/window.c
-	externlibs/libvorbis/lib/codebook.c
-	externlibs/libvorbis/lib/lsp.c
-	externlibs/libvorbis/lib/sharedbook.c
-	externlibs/libvorbis/lib/envelope.c
-	externlibs/libvorbis/lib/mapping0.c
-	externlibs/libvorbis/lib/smallft.c
-	externlibs/libvorbis/lib/floor0.c
-	externlibs/libvorbis/lib/mdct.c
-	externlibs/libvorbis/lib/synthesis.c
-)
+	include_directories(${oggvorbis_inc})
 
-add_globbed_headers(src_ogg "externlibs/libogg")
-add_globbed_headers(src_ogg "externlibs/libvorbis")
-include_directories("externlibs/libogg/include")
-include_directories("externlibs/libvorbis/include")
-add_library(static_ogg STATIC ${src_ogg})
-target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libogg/include/ogg")
-target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/include/vorbis")
-target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/lib")
-set(local_libs ${local_libs} static_ogg)
+	if(COMPILE_OGGVORBIS #[[STREQUAL "1"]])
+		set(local_libs ${local_libs} ${oggvorbis_lib})
+	else()
+		set(sys_libs ${sys_libs} ${oggvorbis_lib})
+	endif()
+else()
+	set(COMPILE_OGGVORBIS FALSE)
+endif()
+if(COMPILE_OGGVORBIS #[[STREQUAL "1"]])
+	message(STATUS "Build ogg/vorbis")
+	# Build internal ogg/vorbis
+	set(src_oggvorbis
+			externlibs/libogg/src/bitwise.c
+			externlibs/libogg/src/framing.c
+			externlibs/libvorbis/lib/analysis.c
+			externlibs/libvorbis/lib/floor1.c
+			externlibs/libvorbis/lib/psy.c
+			# externlibs/libvorbis/lib/tone.c
+			# externlibs/libvorbis/lib/barkmel.c
+			externlibs/libvorbis/lib/info.c
+			externlibs/libvorbis/lib/vorbisenc.c
+			externlibs/libvorbis/lib/bitrate.c
+			externlibs/libvorbis/lib/lookup.c
+			externlibs/libvorbis/lib/registry.c
+			externlibs/libvorbis/lib/vorbisfile.c
+			externlibs/libvorbis/lib/block.c
+			externlibs/libvorbis/lib/lpc.c
+			externlibs/libvorbis/lib/res0.c
+			externlibs/libvorbis/lib/window.c
+			externlibs/libvorbis/lib/codebook.c
+			externlibs/libvorbis/lib/lsp.c
+			externlibs/libvorbis/lib/sharedbook.c
+			externlibs/libvorbis/lib/envelope.c
+			externlibs/libvorbis/lib/mapping0.c
+			externlibs/libvorbis/lib/smallft.c
+			externlibs/libvorbis/lib/floor0.c
+			externlibs/libvorbis/lib/mdct.c
+			externlibs/libvorbis/lib/synthesis.c
+			)
+
+	add_globbed_headers(src_oggvorbis "externlibs/libogg")
+	add_globbed_headers(src_oggvorbis "externlibs/libvorbis")
+	add_library(static_oggvorbis STATIC ${src_oggvorbis})
+	target_include_directories(static_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libogg/include/ogg")
+	target_include_directories(static_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/include/vorbis")
+	target_include_directories(static_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/lib")
 endif() # ogg
 
-if(COMPILE_FREETYPE STREQUAL "1")
+if(REQUIRE_FREETYPE)
+	if(USE_SYSTEM_FREETYPE)
+		find_package(FREETYPE QUIET)
+		if(FREETYPE_FOUND)
+			set(freetype_inc ${FREETYPE_INCLUDE_DIRS})
+			set(freetype_lib ${FREETYPE_LIBRARIES})
+			set(COMPILE_FREETYPE FALSE)
+			message(STATUS "using system freetype")
+		else()
+			message(WARNING "libfreetype not found, wide character language font won't be available (apart from that doom3 will work)")
+			set(freetype_inc "externlibs/freetype/include")
+			set(freetype_lib "static_freetype")
+			set(COMPILE_FREETYPE TRUE)
+			message(STATUS "using internal freetype")
+		endif()
+	else()
+		set(freetype_inc "externlibs/freetype/include")
+		set(freetype_lib "static_freetype")
+		set(COMPILE_FREETYPE TRUE)
+		message(STATUS "using internal freetype")
+	endif()
+
+	include_directories(${freetype_inc})
+
+	if(COMPILE_FREETYPE #[[STREQUAL "1"]])
+		set(local_libs ${local_libs} ${freetype_lib})
+	else()
+		set(sys_libs ${sys_libs} ${freetype_lib})
+	endif()
+endif()
+if(COMPILE_FREETYPE)
+	message(STATUS "Build freetype2")
 	set(src_freetype # -2.9
 			externlibs/freetype/src/base/ftsystem.c
 			externlibs/freetype/src/base/ftdebug.c
@@ -1425,10 +1524,8 @@ if(COMPILE_FREETYPE STREQUAL "1")
 			)
 
 	add_globbed_headers(src_freetype "externlibs/freetype/include")
-	include_directories("externlibs/freetype/include")
 	add_definitions(-DFT2_BUILD_LIBRARY)
 	add_library(static_freetype STATIC ${src_freetype})
-	set(local_libs ${local_libs} static_freetype)
 endif()
 
 endif() # build engine
@@ -1526,17 +1623,17 @@ else()
 			sys/sdl/glimp.cpp
 		)
 	else()
-	set(src_sys_base
-		${src_sys_base}
-		sys/linux/main.cpp
-		sys/linux/input.cpp
-		sys/linux/sound.cpp
-		sys/linux/sound_alsa.cpp
-	)
-	set(src_sys_core
-		sys/linux/gles2.cpp
-	)
-endif()
+		set(src_sys_base
+			${src_sys_base}
+			sys/linux/main.cpp
+			sys/linux/input.cpp
+			sys/linux/sound.cpp
+			sys/linux/sound_alsa.cpp
+		)
+		set(src_sys_core
+			sys/linux/gles2.cpp
+		)
+	endif()
 
 endif()
 
@@ -1688,12 +1785,12 @@ if(CORE)
 	else()
 		set(DOOM3BINARY "Doom3")
 		if(CONSOLE)
-		add_executable(${DOOM3BINARY}
-				${src_core}
-				${src_sys_base}
-				${src_sys_core}
-				${src_editor_tools}
-				)
+			add_executable(${DOOM3BINARY}
+					${src_core}
+					${src_sys_base}
+					${src_sys_core}
+					${src_editor_tools}
+					)
 		else()
 			add_executable(${DOOM3BINARY} WIN32 MACOSX_BUNDLE
 					${src_core}
@@ -1734,15 +1831,20 @@ if(BASE)
 	add_globbed_headers(src_game "game")
 
 	add_library(game SHARED ${src_game})
-	
+
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_game})
-	
+
 	#set_target_properties(game PROPERTIES PREFIX "")
 	set(d3_compile_definitions "GAME_DLL")
 	if(D3_MOD_FULL_BODY_AWARENESS)
 		set(d3_compile_definitions "${d3_compile_definitions};_MOD_FULL_BODY_AWARENESS")
 		set(d3_compile_definitions "${d3_compile_definitions};_MOD_VIEW_BODY")
+		set(d3_compile_definitions "${d3_compile_definitions};_MOD_VIEW_LIGHT")
 		message(STATUS "Build doom3 full body awareness mod support")
+	endif()
+	if(D3_MOD_BOTS)
+		set(d3_compile_definitions "${d3_compile_definitions};MOD_BOTS")
+		message(STATUS "Build doom3 bots mod support")
 	endif()
 	set_target_properties(game PROPERTIES COMPILE_DEFINITIONS "${d3_compile_definitions}")
 	target_include_directories(game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/game")
@@ -2277,12 +2379,12 @@ if(RAVEN)
 	else()
 		set(QUAKE4BINARY "Quake4")
 		if(CONSOLE)
-		add_executable(${QUAKE4BINARY}
-				${src_core_raven}
-				${src_sys_base}
-				${src_sys_core}
-				${src_editor_tools}
-		)
+			add_executable(${QUAKE4BINARY}
+					${src_core_raven}
+					${src_sys_base}
+					${src_sys_core}
+					${src_editor_tools}
+			)
 		else()
 			add_executable(${QUAKE4BINARY} WIN32 MACOSX_BUNDLE
 					${src_core_raven}
@@ -2324,12 +2426,6 @@ endif()
 if(QUAKE4)
 	# quake4 game source
 	set(src_quake4 ${base_q4game_src})
-	set(quake4_game_src
-			bots/BotAASBuild.cpp
-			bots/BotAI.cpp
-			bots/BotSabot.cpp
-			)
-	list(APPEND src_quake4 ${quake4_game_src})
 	set_src_dir(src_quake4 "quake4" ${src_quake4})
 	add_globbed_headers(src_quake4 "quake4")
 
@@ -2437,12 +2533,12 @@ if(HUMANHEAD)
 	else()
 		set(PREYBINARY "Prey")
 		if(CONSOLE)
-		add_executable(${PREYBINARY}
-				${src_core_humanhead}
-				${src_sys_base}
-				${src_sys_core}
-				${src_editor_tools}
-				)
+			add_executable(${PREYBINARY}
+					${src_core_humanhead}
+					${src_sys_base}
+					${src_sys_core}
+					${src_editor_tools}
+					)
 		else()
 			add_executable(${PREYBINARY} WIN32 MACOSX_BUNDLE
 					${src_core_humanhead}

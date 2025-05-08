@@ -184,7 +184,7 @@ bool Image_LoadFromGeneratedFile( const char *binaryFileName, bimageFile_t &file
 			{
 #if 1
 				// SRS - Option 1: Scale and shift algorithm
-				uint16 pixelValue_rgb565 = img.data[pixelIndex + 0] << 8 | img.data[pixelIndex + 1];
+				uint16_t pixelValue_rgb565 = img.data[pixelIndex + 0] << 8 | img.data[pixelIndex + 1];
 				img.data[pixelIndex * 2 + 0] = ( ( ( pixelValue_rgb565 ) >> 11 ) * 527 + 23 ) >> 6;
 				img.data[pixelIndex * 2 + 1] = ( ( ( pixelValue_rgb565 & 0x07E0 ) >>  5 ) * 259 + 33 ) >> 6;
 				img.data[pixelIndex * 2 + 2] = ( ( ( pixelValue_rgb565 & 0x001F ) ) * 527 + 23 ) >> 6;
@@ -357,7 +357,7 @@ void LoadBimage(const char *filename, byte **pic, int *width, int *height, ID_TI
 			{
 #if 1
 				// SRS - Option 1: Scale and shift algorithm
-				uint16 pixelValue_rgb565 = img.data[pixelIndex + 0] << 8 | img.data[pixelIndex + 1];
+				uint16_t pixelValue_rgb565 = img.data[pixelIndex + 0] << 8 | img.data[pixelIndex + 1];
 				img.data[pixelIndex * 2 + 0] = ( ( ( pixelValue_rgb565 ) >> 11 ) * 527 + 23 ) >> 6;
 				img.data[pixelIndex * 2 + 1] = ( ( ( pixelValue_rgb565 & 0x07E0 ) >>  5 ) * 259 + 33 ) >> 6;
 				img.data[pixelIndex * 2 + 2] = ( ( ( pixelValue_rgb565 & 0x001F ) ) * 527 + 23 ) >> 6;

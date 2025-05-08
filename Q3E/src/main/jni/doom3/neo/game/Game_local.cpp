@@ -326,6 +326,9 @@ void idGameLocal::Init(void)
 	}
 
 	gamestate = GAMESTATE_NOMAP;
+#ifdef MOD_BOTS
+    botAi::InitBotSystem();
+#endif
 
 	Printf("...%d aas types\n", aasList.Num());
 	Printf("game initialized.\n");
@@ -960,6 +963,9 @@ void idGameLocal::LoadMap(const char *mapName, int randseed)
 	playerConnectedAreas.i = -1;
 
 	// load navigation system for all the different monster sizes
+#ifdef MOD_BOTS // cusTom3 - aas extensions - moved to later in InitFromNewMap so entities are spawned
+	if(!BOT_ENABLED())
+#endif
 	for (i = 0; i < aasNames.Num(); i++) {
 		aasList[ i ]->Init(idStr(mapFileName).SetFileExtension(aasNames[ i ]).c_str(), mapFile->GetGeometryCRC());
 	}
@@ -1238,6 +1244,21 @@ void idGameLocal::InitFromNewMap(const char *mapName, idRenderWorld *renderWorld
 
 	MapPopulate();
 
+#ifdef MOD_BOTS // cusTom3 - aas extensions - moved here from LoadMap so entities are spawned for botaas calculations
+	// load navigation system for all the different monster sizes
+	if(BOT_ENABLED()) {
+		int i;
+		for( i = 0; i < aasNames.Num(); i++ ) {
+			aasList[ i ]->Init( idStr( mapFileName ).SetFileExtension( aasNames[ i ] ).c_str(), mapFile->GetGeometryCRC() );
+		}
+
+		//k: in MP game, auto gen AAS file for map
+		if(botAi::harm_g_autoGenAASFileInMPGame.GetBool()) {
+            botAi::GenerateAAS();
+		}
+    }
+#endif
+
 	mpGame.Reset();
 
 	mpGame.Precache();
@@ -1247,6 +1268,13 @@ void idGameLocal::InitFromNewMap(const char *mapName, idRenderWorld *renderWorld
 
 	gamestate = GAMESTATE_ACTIVE;
 
+#ifdef MOD_BOTS //karin: auto fill bots in MP-game
+	if (BOT_ENABLED()) {
+		int botCount = botAi::harm_si_autoFillBots.GetInteger();
+		if(botCount != 0)
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, va("fillbots %d\n", botCount) );
+	}
+#endif
 	Printf("--------------------------------------\n");
 }
 
@@ -2311,6 +2339,18 @@ void idGameLocal::SortActiveEntityList(void)
 		}
 	}
 
+#ifdef MOD_BOTS
+	if(BOT_ENABLED()) {
+		// TinMan: Make bots king of the think list, where they shall rule with an iron fist. Basically they should think before thier fakeclient ents
+		for ( ent = activeEntities.Next(); ent != NULL; ent = next_ent ) {
+			next_ent = ent->activeNode.Next();
+			if ( ent->IsType( botAi::Type ) ) {
+				ent->activeNode.Remove();
+				ent->activeNode.AddToFront( activeEntities );
+			}
+		}
+	}
+#endif
 	sortTeamMasters = false;
 	sortPushers = false;
 }
@@ -2538,6 +2578,23 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t *clientCmds)
 	// show any debug info for this frame
 	RunDebugInfo();
 	D_DrawDebugLines();
+
+#ifdef _MOD_FULL_BODY_AWARENESS
+    if(harm_pm_fullBodyAwarenessOffset.IsModified())
+        harm_pm_fullBodyAwarenessOffset.ClearModified();
+#endif
+#ifdef _MOD_VIEW_LIGHT
+    if(harm_ui_viewLightShader.IsModified())
+        harm_ui_viewLightShader.ClearModified();
+    if(harm_ui_viewLightRadius.IsModified())
+        harm_ui_viewLightRadius.ClearModified();
+    if(harm_ui_viewLightOffset.IsModified())
+        harm_ui_viewLightOffset.ClearModified();
+    if(harm_ui_viewLightType.IsModified())
+        harm_ui_viewLightType.ClearModified();
+    if(harm_ui_viewLightOnWeapon.IsModified())
+        harm_ui_viewLightOnWeapon.ClearModified();
+#endif
 
 	return ret;
 }
@@ -4753,3 +4810,8 @@ idGameLocal::GetMapLoadingGUI
 */
 void idGameLocal::GetMapLoadingGUI(char gui[ MAX_STRING_CHARS ]) { }
 
+#ifdef MOD_BOTS
+#include "bots/BotAASBuild.cpp"
+#include "bots/BotAI.cpp"
+#include "bots/BotSabot.cpp"
+#endif

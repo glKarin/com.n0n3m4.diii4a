@@ -56,9 +56,9 @@ public interface UiViewOverlay extends TouchListener
                 int height = (int) (aspect * width + 0.5f);
                 view.post(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         tmp.Resize(width, height);
+                        view.ReloadButton(tmp);
                     }
                 });
             }
@@ -77,9 +77,9 @@ public interface UiViewOverlay extends TouchListener
                 int height = (int) (aspect * width + 0.5f);
                 view.post(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         tmp.Resize(width, height);
+                        view.ReloadButton(tmp);
                     }
                 });
             }
@@ -96,9 +96,9 @@ public interface UiViewOverlay extends TouchListener
                 int size = tmp.size + st;
                 view.post(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         tmp.Resize(size / 2);
+                        view.ReloadButton(tmp);
                     }
                 });
             }
@@ -116,9 +116,9 @@ public interface UiViewOverlay extends TouchListener
                 int size = tmp.size + st;
                 view.post(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         tmp.Resize(size / 2);
+                        view.ReloadButton(tmp);
                     }
                 });
             }

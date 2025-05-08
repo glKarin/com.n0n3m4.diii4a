@@ -48,9 +48,16 @@ If you have questions concerning this license or the applicable additional terms
 // to support the large models that renderBump loads, they need to be 32 bits
 #if 1
 
+#ifdef __ANDROID__ //karin: Android 32bits device has low memory
+
 #if D3_SIZEOFPTR == 4
 #define GL_INDEX_TYPE		GL_UNSIGNED_SHORT
 typedef short glIndex_t;
+#else
+#define GL_INDEX_TYPE		GL_UNSIGNED_INT
+typedef int glIndex_t;
+#endif
+
 #else
 #define GL_INDEX_TYPE		GL_UNSIGNED_INT
 typedef int glIndex_t;
@@ -316,23 +323,28 @@ class idRenderModel
 		virtual void				ReadFromDemoFile(class idDemoFile *f) = 0;
 		virtual void				WriteToDemoFile(class idDemoFile *f) = 0;
 #ifdef _RAVEN
-// RAVEN BEGIN
-// bdube: surface flag manipulation
-	virtual int					GetSurfaceMask ( const char* surface ) const = 0;
+        // ddynerman: Wolf LOD code
+        // RAVEN BEGIN
+        // bdube: surface flag manipulation
+        virtual int					GetSurfaceMask ( const char* surface ) const = 0;
 
-// RAVEN BEGIN
-// dluetscher: added surface mask parameter
-	virtual idRenderModel *		InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask/* = ~SURF_COLLISION */ ) = 0;
-// RAVEN END
+        // RAVEN BEGIN
+        // dluetscher: added surface mask parameter
+        virtual idRenderModel *		InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask/* = ~SURF_COLLISION */ ) = 0;
+        // RAVEN END
+
+		// jscott: for portal skies
+        virtual void                                SetHasSky( bool on ) = 0;
+        virtual bool                                GetHasSky( void ) const = 0;
 #endif
 #ifdef _HUMANHEAD
-	// HUMANHEAD pdm: Game access to liquid models
-	virtual void				IntersectBounds( const idBounds &bounds, float displacement ) = 0;
-	// HUMANHEAD END
+        // HUMANHEAD pdm: Game access to liquid models
+        virtual void				IntersectBounds( const idBounds &bounds, float displacement ) = 0;
+        // HUMANHEAD END
 
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-	virtual bool					IsGameUpdatedModel(void) = 0;
-	virtual void					SetGameUpdatedModel(bool gum) = 0;
+        virtual bool					IsGameUpdatedModel(void) = 0;
+        virtual void					SetGameUpdatedModel(bool gum) = 0;
 #endif //HUMANHEAD END
 #endif
 };

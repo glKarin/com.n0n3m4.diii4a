@@ -2,19 +2,12 @@
 
 // #define _CTF_BOT_CODE_D3
 
-typedef enum {
-    FLAGSTATUS_INBASE = 0,
-    FLAGSTATUS_TAKEN  = 1,
-    FLAGSTATUS_STRAY  = 2,
-    FLAGSTATUS_NONE   = 3
-} d3_flagStatus_t;
-
-ID_INLINE static bool IsCTFGame(void)
+bool botAi::IsCTFGame(void)
 {
     return gameLocal.isMultiplayer && gameLocal.IsFlagGameType();
 }
 
-static rvItemCTFFlag * GetTeamFlag(int team)
+rvItemCTFFlag * botAi::GetTeamFlag(int team)
 {
     assert(team == TEAM_MARINE || team == TEAM_STROGG);
 
@@ -51,7 +44,7 @@ static rvItemCTFFlag * GetTeamFlag(int team)
     return teamFlags[team];
 }
 
-static d3_flagStatus_t GetFlagStatus(int team)
+d3_flagStatus_t botAi::GetFlagStatus(int team)
 {
 #ifdef _CTF_BOT_CODE_D3
     //assert( IsGametypeFlagBased() );
@@ -92,7 +85,7 @@ static d3_flagStatus_t GetFlagStatus(int team)
 #endif
 }
 
-static int GetFlagCarrier(int team)
+int botAi::GetFlagCarrier(int team)
 {
 #ifdef _CTF_BOT_CODE_D3
     int iFlagCarrier = -1;

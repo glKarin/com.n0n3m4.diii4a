@@ -431,15 +431,30 @@ public:
 	float					buyMenuCash;
 // RITUAL END
 #ifdef _MOD_FULL_BODY_AWARENESS
-	idVec3 firstPersonViewOrigin_playerViewOrigin; // melee
-	idVec3 firstPersonViewOrigin_viewWeaponOrigin; // launch
-	idVec3 fullBodyAwarenessOffset;
+	idVec3                  firstPersonViewOrigin_playerViewOrigin; // melee
+	idVec3                  firstPersonViewOrigin_viewWeaponOrigin; // launch
+	idVec3                  fullBodyAwarenessOffset;
 #endif
 #ifdef _MOD_VIEW_BODY
-    idEntityPtr<idViewBody>	viewBody;
-    void SetupViewBody( void );
-    void UpdateBody(void);
     friend class idViewBody;
+    idEntityPtr<idViewBody>	viewBody;
+    void                    SetupViewBody( void );
+    void                    UpdateViewBody(void);
+#endif
+#ifdef MOD_BOTS
+    friend class botAi;
+    idEntityPtr<botAi>      bot;
+    void                    SetupBot(botAi *bot);
+    void                    SpawnBot(void);
+    bool                    IsBot(void) const {
+        return spawnArgs.GetBool("isBot");
+    }
+    bool                    IsBotAvailable(void) const {
+        return IsBot() && bot.GetEntity() != NULL;
+    }
+    botAi *                 GetBot(void) {
+        return bot.GetEntity();
+    }
 #endif
 
 public:

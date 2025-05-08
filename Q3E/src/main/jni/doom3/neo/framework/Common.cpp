@@ -491,7 +491,7 @@ void idCommonLocal::VPrintf(const char *fmt, va_list args)
 		// update the console if we are in a long-running command, like dmap
 		if (com_refreshOnPrint) {
 #ifdef _MULTITHREAD
-			if(!multithreadActive/* || !Sys_InRenderThread()*/)
+			if(!multithreadActive || !Sys_InRenderThread())
 #endif
 			session->UpdateScreen();
 		}
@@ -2573,7 +2573,7 @@ void idCommonLocal::InitCommands(void)
 	cmdSystem->AddCommand("dmap", Dmap_f, CMD_FL_TOOL, "compiles a map", idCmdSystem::ArgCompletion_MapName);
 	cmdSystem->AddCommand("renderbump", RenderBump_f, CMD_FL_TOOL, "renders a bump map", idCmdSystem::ArgCompletion_ModelName);
 	cmdSystem->AddCommand("renderbumpFlat", RenderBumpFlat_f, CMD_FL_TOOL, "renders a flat bump map", idCmdSystem::ArgCompletion_ModelName);
-#ifdef _RAVEN //k: for generate AAS file of mp game map and bot.
+#if !defined(_HUMANHEAD) //k: for generate AAS file of mp game map and bot on DOOM3 and Quake4.
 	cmdSystem->AddCommand("botRunAAS", RunAAS_f, CMD_FL_GAME, "compiles an AAS file for a map for Quake 4 multiplayer-game", idCmdSystem::ArgCompletion_MapName);
 #endif
 	cmdSystem->AddCommand("runAAS", RunAAS_f, CMD_FL_TOOL, "compiles an AAS file for a map", idCmdSystem::ArgCompletion_MapName);
@@ -2882,11 +2882,6 @@ void idCommonLocal::Async(void)
 	}
 }
 
-/*
-=================
-idCommonLocal::LoadGameDLL
-=================
-*/
 #ifdef _RAVEN // quake4 game dll
 #define _HARM_BASE_GAME_DLL "q4game"
 #elif defined(_HUMANHEAD) // prey game dll
@@ -2921,6 +2916,12 @@ static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_
 		"`<harm_fs_gameLibPath>/lib" _HARM_BASE_GAME_DLL DLL_SUFFIX "`, "
 		"default is empty will load by cvar `fs_game`."); // This cvar priority is higher than `fs_game`.
 static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "Setup game dynamic library directory path(default is empty, means using `" _DEFAULT_LIBRARY_DIR "`).");
+
+/*
+=================
+idCommonLocal::LoadGameDLL
+=================
+*/
 void idCommonLocal::LoadGameDLL(void)
 {
 #ifdef __DOOM_DLL__

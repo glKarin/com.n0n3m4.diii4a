@@ -401,6 +401,27 @@ bool idAASLocal::WalkPathToGoal(aasPath_t &path, int areaNum, const idVec3 &orig
 			path.secondaryGoal = reach->end;
 			path.reachability = reach;
 			break;
+#ifdef MOD_BOTS	// TinMan: Elevinat0rs
+		case TFL_ELEVATOR:
+			if(BOT_ENABLED()) {
+			/* custom3: i took a look at this. it seems many of the plats, especially on ctf1,
+			   go through a realm of areaNum=0 on the way up. this is a problem. lol.
+			   what i started doing as a hack is something like this.
+			   */
+			int time;
+			idReachability *next;
+			path.secondaryGoal = reach->end;
+			RouteToGoalArea(reach->toAreaNum, reach->end, goalAreaNum, travelFlags, time, &next);
+			while ( next && next->travelType == TFL_ELEVATOR ) {
+				path.secondaryGoal = next->end;
+				RouteToGoalArea( next->toAreaNum, next->end, goalAreaNum, travelFlags, time, &next);
+			}
+
+			path.type |= PATHTYPE_ELEVATOR;
+			path.reachability = reach;
+			break;
+            }
+#endif
 		default:
 			break;
 	}

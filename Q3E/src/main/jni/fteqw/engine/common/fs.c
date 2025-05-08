@@ -12,9 +12,6 @@
 #include "winquake.h"
 #endif
 
-#define HARM_FTE_HOME ".fte/"
-
-
 #ifdef FTE_TARGET_WEB	//for stuff that doesn't work right...
 #define FORWEB(a,b) a
 #else
@@ -922,6 +919,10 @@ mirror:
 
 qboolean FS_GamedirIsOkay(const char *path)
 {
+#ifdef _DIII4A //karin: remove .fte/, because not allow '/' in name
+	if(path && !strncmp(path, HARM_FTE_HOME, 5))
+		path = path + 5;
+#endif
 	char tmp[MAX_QPATH];
 	if (!*path || strchr(path, '\n') || strchr(path, '\r') || !strcmp(path, ".") || !strcmp(path, "..") || strchr(path, ':') || strchr(path, '/') || strchr(path, '\\') || strchr(path, '$'))
 	{
@@ -1187,6 +1188,14 @@ static void FS_Manifest_SetDefaultSettings(ftemanifest_t *man, const gamemode_in
 		}
 		if (j == sizeof(man->gamepath) / sizeof(man->gamepath[0]))
 		{
+#ifdef _DIII4A //karin: add /.fte as search path
+			for (j = 0; j < 4; j++)
+				if (game->dir[j] && *game->dir[j] == '*' && strlen(game->dir[j]) > 1)
+				{
+					Cmd_TokenizeString(va("basegame \"" HARM_FTE_HOME "%s\"", game->dir[j] + 1), false, false);
+					FS_Manifest_ParseTokens(man);
+				}
+#endif
 			for (j = 0; j < 4; j++)
 				if (game->dir[j])
 				{
@@ -3046,17 +3055,19 @@ vfsfile_t *QDECL FS_OpenVFS(const char *filename, const char *mode, enum fs_rela
 	{
 	case FS_GAMEONLY:	//OS access only, no paks. Used for (re)writing files.
 		vfs = NULL;
+#ifdef _DIII4A //karin: try find in .fte/
+		{
+			if (!try_snprintf(fullname, sizeof(fullname), "%s%s%s/%s", com_homepath, HARM_FTE_HOME, gamedirfile, filename))
+				return NULL;
+			if (*mode == 'w')
+				COM_CreatePath(fullname);
+			vfs = VFSOS_Open(fullname, mode);
+		}
+		if(!vfs)
+#endif
 		//FIXME: go via a searchpath, because then the fscache can be selectively updated
 		if (com_homepathenabled)
 		{
-#ifdef _DIII4A //karin: using <cwd>/.fte
-				if (!try_snprintf(fullname, sizeof(fullname), "%s%s%s/%s", com_homepath, HARM_FTE_HOME, gamedirfile, filename))
-					return NULL;
-				printf("fffff %s\n", fullname);
-				if (*mode == 'w')
-					COM_CreatePath(fullname);
-				vfs = VFSOS_Open(fullname, mode);
-#else
 			if (gameonly_homedir)
 			{
 				if ((*mode == 'w' && gameonly_gamedir->handle->CreateFile)
@@ -3074,7 +3085,6 @@ vfsfile_t *QDECL FS_OpenVFS(const char *filename, const char *mode, enum fs_rela
 					COM_CreatePath(fullname);
 				vfs = VFSOS_Open(fullname, mode);
 			}
-#endif
 		}
 		if (!vfs && *gamedirfile)
 		{
@@ -6889,6 +6899,14 @@ qboolean FS_ChangeGame(ftemanifest_t *man, qboolean allowreloadconfigs, qboolean
 				}
 				if (j == sizeof(man->gamepath) / sizeof(man->gamepath[0]))
 				{
+#ifdef _DIII4A //karin: add /.fte as search path
+					for (j = 0; j < 4; j++)
+						if (gamemode_info[i].dir[j] && *gamemode_info[i].dir[j] == '*' && strlen(gamemode_info[i].dir[j]) > 1)
+						{
+							Cmd_TokenizeString(va("basegame \"" HARM_FTE_HOME "%s\"", gamemode_info[i].dir[j] + 1), false, false);
+							FS_Manifest_ParseTokens(man);
+						}
+#endif
 					for (j = 0; j < 4; j++)
 						if (gamemode_info[i].dir[j])
 						{

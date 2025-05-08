@@ -54,6 +54,19 @@ extern int GLES3_VERSION;
 #define USING_GLES32 (GLES3_VERSION > 1)
 #endif
 
+#define COLOR_MODULATE_IS_NORMALIZED 1
+
+extern const float zero[];
+extern const float one[];
+extern const float negOne[];
+#ifdef COLOR_MODULATE_IS_NORMALIZED
+extern const float oneModulate[];
+extern const float negOneModulate[];
+#else
+#define oneModulate one
+#define negOneModulate negOne
+#endif
+
 //#define _SHADOW_MAPPING
 #ifdef _SHADOW_MAPPING
 
@@ -84,6 +97,8 @@ enum
 	FRUSTUM_CASCADE5,
 	MAX_FRUSTUMS,
 };
+
+typedef idPlane frustum_t[FRUSTUM_PLANES];
 #endif
 
 #include "rb/Framebuffer.h"
@@ -545,6 +560,13 @@ typedef struct viewDef_s {
 	// crossing a closed door.  This is used to avoid drawing interactions
 	// when the light is behind a closed door.
 
+#ifdef _SHADOW_MAPPING
+	// RB parallel light split frustums
+    frustum_t			frustums[MAX_FRUSTUMS];					// positive sides face outward, [4] is the front clip plane
+    float				frustumSplitDistances[MAX_FRUSTUMS];
+    idRenderMatrix		frustumMVPs[MAX_FRUSTUMS];
+	// RB
+#endif
 } viewDef_t;
 
 
@@ -863,38 +885,38 @@ class idRenderSystemLocal : public idRenderSystem
 		virtual void			UnCrop();
 		virtual bool			UploadImage(const char *imageName, const byte *data, int width, int height);
 #ifdef _HUMANHEAD
-    virtual void			SetEntireSceneMaterial(idMaterial* material) { (void)material; }; // HUMANHEAD CJR
-    virtual bool			IsScopeView() {
-        return scopeView;
-    };// HUMANHEAD CJR
-    virtual void			SetScopeView(bool view) {
-		scopeView = view; 
-	} // HUMANHEAD CJR
-    virtual bool			IsShuttleView() {
-        return shuttleView;
-    };// HUMANHEAD CJR
-    virtual void			SetShuttleView(bool view) {
-		shuttleView = view;
-	}
-    virtual bool			SupportsFragmentPrograms(void) {
-        return false;
-    };// HUMANHEAD CJR
-    virtual int				VideoCardNumber(void) {
-        return 0;
-    }
+        virtual void			SetEntireSceneMaterial(idMaterial* material) { (void)material; }; // HUMANHEAD CJR
+        virtual bool			IsScopeView() {
+            return scopeView;
+        };// HUMANHEAD CJR
+        virtual void			SetScopeView(bool view) {
+            scopeView = view;
+        } // HUMANHEAD CJR
+        virtual bool			IsShuttleView() {
+            return shuttleView;
+        };// HUMANHEAD CJR
+        virtual void			SetShuttleView(bool view) {
+            shuttleView = view;
+        }
+        virtual bool			SupportsFragmentPrograms(void) {
+            return false;
+        };// HUMANHEAD CJR
+        virtual int				VideoCardNumber(void) {
+            return 0;
+        }
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-	virtual void			LogViewRender(const struct renderView_s *view) { (void)view; }
+	    virtual void			LogViewRender(const struct renderView_s *view) { (void)view; }
 #endif //HUMANHEAD END
 
-	bool scopeView;
-	bool shuttleView;
-	int lastRenderSkybox;
-	ID_INLINE bool SkyboxRenderedInFrame() const {
-		return frameCount == lastRenderSkybox;
-	}
-	ID_INLINE void RenderSkyboxInFrame() {
-		lastRenderSkybox = frameCount;
-	}
+        bool scopeView;
+        bool shuttleView;
+        int lastRenderSkybox;
+        ID_INLINE bool SkyboxRenderedInFrame() const {
+            return frameCount == lastRenderSkybox;
+        }
+        ID_INLINE void RenderSkyboxInFrame() {
+            lastRenderSkybox = frameCount;
+        }
 #endif
 #ifdef _MULTITHREAD
 	virtual void EndFrame(byte *data, int *frontEndMsec, int *backEndMsec);
@@ -910,16 +932,16 @@ class idRenderSystemLocal : public idRenderSystem
 		void					RenderViewToViewport(const renderView_t *renderView, idScreenRect *viewport);
 #ifdef _RAVEN
 #ifndef _CONSOLE
-	virtual void			TrackTextureUsage( TextureTrackCommand command, int frametime = 0, const char *name=NULL ) { (void)command; (void)frametime; (void)name; }
+	    virtual void			TrackTextureUsage( TextureTrackCommand command, int frametime = 0, const char *name=NULL ) { (void)command; (void)frametime; (void)name; }
 #endif
-// RAVEN END
-	virtual void			SetSpecialEffect( ESpecialEffectType Which, bool Enabled ) { (void)Which; (void)Enabled; }
-	virtual void			SetSpecialEffectParm( ESpecialEffectType Which, int Parm, float Value ) { (void)Which; (void)Parm; (void)Value; }
-	virtual void			ShutdownSpecialEffects( void ) { }
-		virtual void			DrawStretchCopy( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *material ) {
-			DrawStretchPic(x, y, w, h, s1, t1, s2, t2, material);
-		}
-	virtual void			DebugGraph( float cur, float min, float max, const idVec4 &color ) { (void)cur, (void)min; (void)max; (void)color; }
+        // RAVEN END
+        virtual void			SetSpecialEffect( ESpecialEffectType Which, bool Enabled ) { (void)Which; (void)Enabled; }
+        virtual void			SetSpecialEffectParm( ESpecialEffectType Which, int Parm, float Value ) { (void)Which; (void)Parm; (void)Value; }
+        virtual void			ShutdownSpecialEffects( void ) { }
+            virtual void			DrawStretchCopy( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *material ) {
+                DrawStretchPic(x, y, w, h, s1, t1, s2, t2, material);
+            }
+        virtual void			DebugGraph( float cur, float min, float max, const idVec4 &color ) { (void)cur, (void)min; (void)max; (void)color; }
 #endif
 
 	public:
@@ -1560,12 +1582,23 @@ typedef enum {
 	SHADER_INTERACTION_BLINNPHONG,
     SHADER_AMBIENT_LIGHTING,
 	SHADER_DIFFUSECUBEMAP,
+	// SHADER_GLASSWARP,
 	SHADER_TEXGEN,
 	// new stage
 	SHADER_HEATHAZE,
 	SHADER_HEATHAZE_WITH_MASK,
 	SHADER_HEATHAZE_WITH_MASK_AND_VERTEX,
 	SHADER_COLORPROCESS,
+    SHADER_MEGATEXTURE,
+	// D3XP
+    SHADER_ENVIROSUIT,
+#ifdef _HUMANHEAD
+	SHADER_SCREENEFFECT, // spiritview
+	SHADER_RADIALBLUR, // deathview
+	SHADER_LIQUID, // liquid
+//    SHADER_INTERACTIONLIQUID, // interaction liquid
+	SHADER_SCREENPROCESS, // unused
+#endif
 	// shadow mapping
 #ifdef _SHADOW_MAPPING
 	SHADER_DEPTH,
@@ -1606,7 +1639,7 @@ typedef enum {
 #define SHADER_BASE_END SHADER_TEXGEN
 
 #define SHADER_NEW_STAGE_BEGIN SHADER_HEATHAZE
-#define SHADER_NEW_STAGE_END SHADER_COLORPROCESS
+#define SHADER_NEW_STAGE_END (SHADER_DEPTH - 1)
 
 #ifdef _SHADOW_MAPPING
 #define SHADER_SHADOW_MAPPING_BEGIN SHADER_DEPTH
@@ -1682,6 +1715,7 @@ DRAW_GLSL
 */
 
 #define MAX_UNIFORM_PARMS 8
+#define MAX_MEGATEXTURE_PARMS 9
 #define HARM_SHADER_NAME_LENGTH 64
 //#define _HARM_SHADER_NAME
 typedef struct shaderProgram_s {
@@ -1741,10 +1775,15 @@ typedef struct shaderProgram_s {
 	//k: cubemap texture units
 	GLint		u_fragmentCubeMap[MAX_FRAGMENT_IMAGES];
 	GLint		u_vertexParm[MAX_VERTEX_PARMS];
+#if defined(_GLSL_PROGRAM) || defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+	GLint		u_fragmentParm[MAX_FRAGMENT_PARMS];
+#endif
 	GLint		texgenS;
 	GLint		texgenT;
 	GLint		texgenQ;
 	GLint		u_uniformParm[MAX_UNIFORM_PARMS];
+
+    GLint       u_megaTextureLevel[MAX_MEGATEXTURE_PARMS];
 
 #ifdef _SHADOW_MAPPING
 	GLint		shadowMVPMatrix;
@@ -1803,6 +1842,10 @@ struct GLSLShaderProp
 typedef int shaderHandle_t; // > 0 is internal shader(index = handle - 1), < 0 is custom shader(index = -handle - 1), = 0 is invalid
 #define SHADER_HANDLE_IS_VALID(x) ( (x) != idGLSLShaderManager::INVALID_SHADER_HANDLE )
 #define SHADER_HANDLE_IS_INVALID(x) ( (x) == idGLSLShaderManager::INVALID_SHADER_HANDLE )
+#define SHADER_HANDLE_INVALID (idGLSLShaderManager::INVALID_SHADER_HANDLE )
+#define SHADER_HANDLE_IS_BUILTIN(x) ( (x) > idGLSLShaderManager::INVALID_SHADER_HANDLE )
+#define SHADER_HANDLE_IS_CUSTOM(x) ( (x) < idGLSLShaderManager::INVALID_SHADER_HANDLE )
+#define SHADER_MAX_CUSTOM 32
 class idGLSLShaderManager
 {
 public:
@@ -1824,7 +1867,7 @@ private:
 	int FindIndex(const char *name) const; // return raw index
 	int FindIndex(GLuint handle) const; // return raw index
     int FindCustomIndex(const char *name) const; // return raw index
-    GLSLShaderProp * FindCustom(const char *name);
+    GLSLShaderProp * FindCustom(const char *name, int *index = NULL);
 
 private:
 	idList<shaderProgram_t *> shaders; // available shaders, include internal shaders and loaded custom shaders
@@ -1845,6 +1888,7 @@ void R_GLSL_Shutdown(void);
 void RB_GLSL_DrawInteractions(void);
 void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf);
 void RB_GLSL_DrawInteraction(const drawInteraction_t *din);
+bool RB_GLSL_FindGLSLShaderSource(const char *name, int type, idStr *source, idStr *realPath);
 
 void R_CheckBackEndCvars(void);
 
@@ -2186,6 +2230,7 @@ float R_ComputeSpotLightProjectionMatrix( idRenderLightLocal* light, idRenderMat
 float R_ComputeParallelLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
 
 void R_SetupFrontEndViewDefMVP(void);
+void R_SetupFrontEndFrustums(void);
 void R_ShadowBounds( const idBounds& modelBounds, const idBounds& lightBounds, const idVec3& lightOrigin, idBounds& shadowBounds );
 #endif
 
@@ -2227,7 +2272,6 @@ extern idCVar harm_r_shadowMapFrustumFar;
 extern idCVar harm_r_useLightScissors;
 extern idCVar harm_r_shadowMapDepthBuffer;
 extern idCVar harm_r_shadowMapNonParallelLightUltra;
-extern idCVar harm_r_shadowMapJitterScale;
 
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;
@@ -2284,12 +2328,9 @@ extern float RB_overbright;
 #define HARM_CHECK_SHADER_ERROR(x)
 #endif
 
-#ifdef _EXTRAS_TOOLS
-void MD5Anim_AddCommand(void);
-#endif
 #ifdef _ENGINE_MODEL_VIEWER
-void ModelTest_TestModel(int time);
-void ModelTest_AddCommand(void);
+void ModelTest_RenderFrame(int time);
+void ModelLight_RenderFrame(int time);
 #endif
 
 extern idCVar harm_r_lightingModel;

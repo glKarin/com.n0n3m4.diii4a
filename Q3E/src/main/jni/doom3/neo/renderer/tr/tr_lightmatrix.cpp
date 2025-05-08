@@ -173,3 +173,85 @@ void R_SetupFrontEndViewDefMVP(void)
     }
 }
 
+void R_SetupSplitFrustums( viewDef_t* viewDef )
+{
+    idVec3			planeOrigin;
+
+    const float zNearStart = ( viewDef->renderView.cramZNear ) ? ( r_znear.GetFloat() * 0.25f ) : r_znear.GetFloat();
+    float zFarEnd = 10000;
+
+    float zNear = zNearStart;
+    float zFar = zFarEnd;
+
+    float lambda = r_shadowMapSplitWeight.GetFloat();
+    float ratio = zFarEnd / zNearStart;
+
+    for( int i = 0; i < 6; i++ )
+    {
+        tr.viewDef->frustumSplitDistances[i] = idMath::INFINITY;
+    }
+
+    for( int i = 1; i <= ( r_shadowMapSplits.GetInteger() + 1 ) && i < MAX_FRUSTUMS; i++ )
+    {
+        float si = (float)i / ( float )( r_shadowMapSplits.GetInteger() + 1 );
+
+        if( i > FRUSTUM_CASCADE1 )
+        {
+            zNear = zFar - ( zFar * 0.005f );
+        }
+
+        zFar = 1.005f * lambda * ( zNearStart * powf( ratio, si ) ) + ( 1 - lambda ) * ( zNearStart + ( zFarEnd - zNearStart ) * si );
+
+        if( i <= r_shadowMapSplits.GetInteger() )
+        {
+            tr.viewDef->frustumSplitDistances[i - 1] = zFar;
+        }
+
+        float projectionMatrix[16];
+        R_SetupProjectionMatrix2( tr.viewDef, zNear, zFar, projectionMatrix );
+
+        // setup render matrices for faster culling
+        idRenderMatrix projectionRenderMatrix;
+        idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX projectionMatrix, projectionRenderMatrix );
+        idRenderMatrix viewRenderMatrix;
+        idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX tr.viewDef->worldSpace.modelViewMatrix, viewRenderMatrix );
+        idRenderMatrix::Multiply( projectionRenderMatrix, viewRenderMatrix, tr.viewDef->frustumMVPs[i] );
+
+        // the planes of the view frustum are needed for portal visibility culling
+        idRenderMatrix::GetFrustumPlanes( tr.viewDef->frustums[i], tr.viewDef->frustumMVPs[i], false, true );
+
+        // the DOOM 3 frustum planes point outside the frustum
+        for( int j = 0; j < 6; j++ )
+        {
+            tr.viewDef->frustums[i][j] = - tr.viewDef->frustums[i][j];
+        }
+
+        // remove the Z-near to avoid portals from being near clipped
+        if( i == FRUSTUM_CASCADE1 )
+        {
+            tr.viewDef->frustums[i][4][3] -= r_znear.GetFloat();
+        }
+    }
+}
+
+void R_SetupFrontEndFrustums(void)
+{
+    if(r_useShadowMapping.GetBool())
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3 && r_shadowMapSplits.GetInteger() > 0)
+#endif
+    {
+        // the planes of the view frustum are needed for portal visibility culling
+        idRenderMatrix::GetFrustumPlanes( tr.viewDef->frustums[FRUSTUM_PRIMARY], tr.viewDef->worldSpace.mvp, false, true );
+
+        // the DOOM 3 frustum planes point outside the frustum
+        for( int i = 0; i < 6; i++ )
+        {
+            tr.viewDef->frustums[FRUSTUM_PRIMARY][i] = - tr.viewDef->frustums[FRUSTUM_PRIMARY][i];
+        }
+        // remove the Z-near to avoid portals from being near clipped
+        tr.viewDef->frustums[FRUSTUM_PRIMARY][4][3] -= r_znear.GetFloat();
+
+        R_SetupSplitFrustums( tr.viewDef );
+    }
+}

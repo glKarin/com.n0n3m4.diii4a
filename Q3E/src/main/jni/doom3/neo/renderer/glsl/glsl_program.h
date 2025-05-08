@@ -17,6 +17,7 @@ GLSL_PROGRAM_PROC shaderProgram_t interactionPBRShader; //k: PBR lighting model 
 GLSL_PROGRAM_PROC shaderProgram_t interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
 GLSL_PROGRAM_PROC shaderProgram_t ambientLightingShader; //k: Ambient lighting model interaction shader
 GLSL_PROGRAM_PROC shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
+// GLSL_PROGRAM_PROC shaderProgram_t glasswarpShader; //k: glasswarp shader
 GLSL_PROGRAM_PROC shaderProgram_t texgenShader; //k: texgen shader
 
 // new stage
@@ -24,6 +25,16 @@ GLSL_PROGRAM_PROC shaderProgram_t heatHazeShader; //k: heatHaze shader
 GLSL_PROGRAM_PROC shaderProgram_t heatHazeWithMaskShader; //k: heatHaze with mask shader
 GLSL_PROGRAM_PROC shaderProgram_t heatHazeWithMaskAndVertexShader; //k: heatHaze with mask and vertex shader
 GLSL_PROGRAM_PROC shaderProgram_t colorProcessShader; //k: color process shader
+GLSL_PROGRAM_PROC shaderProgram_t megaTextureShader; //k: megatexture shader										
+// D3XP
+GLSL_PROGRAM_PROC shaderProgram_t enviroSuitShader; //k: enviroSuit shader
+#ifdef _HUMANHEAD //karin: newstage
+GLSL_PROGRAM_PROC shaderProgram_t screeneffectShader; //k: screen effect shader spiritview
+GLSL_PROGRAM_PROC shaderProgram_t radialblurShader; //k: screen effect shader deathview
+GLSL_PROGRAM_PROC shaderProgram_t liquidShader; //k: liquid shader
+//GLSL_PROGRAM_PROC shaderProgram_t interactionLiquidShader; //k: interaction liquid shader: TODO: using liquidShader as alias
+GLSL_PROGRAM_PROC shaderProgram_t screenprocessShader; //k: screen process shader
+#endif
 
 // shadow mapping
 #ifdef _SHADOW_MAPPING

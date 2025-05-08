@@ -113,6 +113,8 @@ idCVar	idSessionLocal::com_guid("com_guid", "", CVAR_SYSTEM | CVAR_ARCHIVE | CVA
 idCVar	idSessionLocal::com_disableAutoSaves( "com_disableAutoSaves", "0", CVAR_SYSTEM|CVAR_ARCHIVE|CVAR_BOOL,
                                                 "Don't create Autosaves when entering a new map" );
 
+static idCVar harm_g_skipHitEffect("harm_g_skipHitEffect", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "Skip all hit effect in game");
+
 #ifdef _HUMANHEAD //k: play level music when map loading
 static idCVar g_levelloadmusic("g_levelloadmusic", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "play music during level loads");
 
@@ -1520,9 +1522,9 @@ void idSessionLocal::MoveToNewMap(const char *mapName)
             //      getting the same filename in spanish, probably because the strings contained
             //      dots and everything behind them was cut off as "file extension".. see #305)
 
-	        // Autosave at the beginning of the level
-	        SaveGame(GetAutoSaveName(mapName), true);
-	    }
+            // Autosave at the beginning of the level
+            SaveGame(GetAutoSaveName(mapName), true);
+        }
         else
             common->Printf("Autosave at the beginning of the level disabled with `com_disableAutoSaves` = 1");
     }
@@ -2320,6 +2322,42 @@ void Session_Hitch_f(const idCmdArgs &args)
 	}
 }
 
+static void G_SkipHitEffect(bool on)
+{
+	idStr cmds = on ? 
+		"set g_dvTime 0;set g_kickTime 0;set g_knockback 0"
+		: 
+		"reset g_dvTime;reset g_kickTime;reset g_knockback"
+		;
+	if(on)
+	{
+		common->Printf("Skip hit effect\n");
+		cvarSystem->SetCVarInteger("g_dvTime", 0);
+		cvarSystem->SetCVarInteger("g_kickTime", 0);
+		cvarSystem->SetCVarInteger("g_knockback", 0);
+	}
+	else
+	{
+		common->Printf("Recovery hit effect\n");
+		Com_ResetCVarValue("g_dvTime");
+		Com_ResetCVarValue("g_kickTime");
+		Com_ResetCVarValue("g_knockback");
+	}
+	common->Printf("%s\n", cmds.c_str());
+	//cmdSystem->BufferCommandText(CMD_EXEC_APPEND, cmds.c_str());
+}
+
+static void Game_SkipHitEffect_f(const idCmdArgs &args)
+{
+	bool disable = false;
+	if(args.Argc() > 1)
+	{
+		if(!idStr::Cmp(args.Argv(1), "0"))
+			disable = true;
+	}
+	G_SkipHitEffect(!disable);
+}
+
 /*
 ===============
 idSessionLocal::ScrubSaveGameFileName
@@ -2889,10 +2927,6 @@ void idSessionLocal::PacifierUpdate()
 		return;
 	}
 
-#ifdef _MULTITHREAD
-	if(multithreadActive && Sys_InRenderThread()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
-		return;
-#endif
 	int	time = eventLoop->Milliseconds();
 
 	if (time - lastPacifierTime < 100) {
@@ -2911,6 +2945,9 @@ void idSessionLocal::PacifierUpdate()
 
 	Sys_GenerateEvents();
 
+#ifdef _MULTITHREAD
+	if(!multithreadActive || !Sys_InRenderThread()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
+#endif
 	UpdateScreen();
 
 	idAsyncNetwork::client.PacifierUpdate();
@@ -3558,6 +3595,7 @@ void idSessionLocal::Init()
 	cmdSystem->AddCommand("promptKey", Session_PromptKey_f, CMD_FL_SYSTEM, "prompt and sets the CD Key");
 
 	cmdSystem->AddCommand("hitch", Session_Hitch_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "hitches the game");
+	cmdSystem->AddCommand("skipHitEffect", Game_SkipHitEffect_f, CMD_FL_GAME, "skip all hit effect in game");
 
 #ifdef _RAVEN //k: quake4 game cmd callback
 	cmdSystem->AddCommand("endOfGame", Session_EndOfGame_f, CMD_FL_SYSTEM, "ends the game");
@@ -3625,6 +3663,9 @@ void idSessionLocal::Init()
 	guiHandle = NULL;
 
 	ReadCDKey();
+
+	if(harm_g_skipHitEffect.GetBool())
+		G_SkipHitEffect(true); // cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "skipHitEffect;");
 
 	common->Printf("session initialized\n");
 	common->Printf("--------------------------------------\n");
@@ -4212,7 +4253,7 @@ void idSessionLocal::UpdateScreen(byte *data, bool outOfSequence)
 	if (com_speeds.GetBool()) {
 		renderSystem->EndFrame(&time_frontend, &time_backend);
 	} else {
-		renderSystem->EndFrame(data, NULL, NULL);
+        renderSystem->EndFrame(data, NULL, NULL);
 	}
 
 	insideUpdateScreen = false;

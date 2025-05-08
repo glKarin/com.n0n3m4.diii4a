@@ -1,10 +1,3 @@
-/*
-	macros:
-		BLINN_PHONG: using blinn-phong instead phong.
-		_PBR: using PBR.
-		_TRANSLUCENT: for translucent stencil shadow
-		_SOFT: soft stencil shadow
-*/
 #version 300 es
 //#pragma optimize(off)
 
@@ -12,6 +5,7 @@ precision highp float;
 
 //#define BLINN_PHONG
 //#define _PBR
+//#define _AMBIENT
 //#define _TRANSLUCENT
 //#define _SOFT
 
@@ -29,13 +23,13 @@ in vec3 var_H;
 #if !defined(BLINN_PHONG) || defined(_PBR)
 in vec3 var_V;
 #endif
-#ifdef _PBR
+#if defined(_PBR)
 in vec3 var_Normal;
 #endif
 
 uniform vec4 u_diffuseColor;
 uniform vec4 u_specularColor;
-#ifdef _PBR
+#if defined(_PBR)
 uniform vec2 u_specularExponent;
 #else
 uniform float u_specularExponent;
@@ -45,8 +39,13 @@ uniform sampler2D u_fragmentMap0;    /* u_bumpTexture */
 uniform sampler2D u_fragmentMap1;    /* u_lightFalloffTexture */
 uniform sampler2D u_fragmentMap2;    /* u_lightProjectionTexture */
 uniform sampler2D u_fragmentMap3;    /* u_diffuseTexture */
+#if defined(_AMBIENT)
+uniform samplerCube u_fragmentCubeMap4;
+in mat3 var_TangentToWorldMatrix;
+#else
 uniform sampler2D u_fragmentMap4;    /* u_specularTexture */
 uniform sampler2D u_fragmentMap5;    /* u_specularFalloffTexture */
+#endif
 #ifdef _SOFT
 uniform mediump usampler2D u_fragmentMap6;    /* stencil shadow texture */
 uniform highp vec4 u_nonPowerOfTwo;
@@ -58,7 +57,7 @@ uniform lowp float u_uniformParm0; // shadow alpha
 #endif
 out vec4 _gl_FragColor;
 
-#ifdef _PBR
+#if defined(_PBR)
 float dot2_4(vec2 a, vec4 b) {
     return dot(vec4(a, 0.0, 0.0), b);
 }
@@ -125,6 +124,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
+
 #endif
 
 void main(void)
@@ -135,12 +135,17 @@ void main(void)
 #if defined(BLINN_PHONG) || defined(_PBR)
     vec3 H = normalize(var_H);
 #endif
-#if defined(BLINN_PHONG)
+#if defined(BLINN_PHONG) || defined(_AMBIENT)
     vec3 N = 2.0 * texture(u_fragmentMap0, var_TexNormal.st).agb - 1.0;
 #endif
-#if !defined(BLINN_PHONG) || defined(_PBR)
+#if (!defined(BLINN_PHONG) && !defined(_AMBIENT)) || defined(_PBR)
     vec3 V = normalize(var_V);
     vec3 N = normalize(2.0 * texture(u_fragmentMap0, var_TexNormal.st).agb - 1.0);
+#endif
+
+#if defined(_AMBIENT)
+    vec3 globalNormal = var_TangentToWorldMatrix * N; // transform into ambient map space
+    vec3 ambientValue = texture(u_fragmentCubeMap4, globalNormal).rgb; // load the ambient value
 #endif
 
     float NdotL = clamp(dot(N, L), 0.0, 1.0);
@@ -186,6 +191,8 @@ void main(void)
 #else
     vec4 color = var_Color * Cl * NdotL * Cd + (u_specularExponent.x * vec4(pbr.rgb, 0.0) * (u_specularColor/* * Cl*/));
 #endif
+#elif defined(_AMBIENT)
+    vec3 color = u_specularExponent * /*ambientValue * */diffuseColor * lightProjection * lightFalloff;
 #else
     vec3 specularColor = 2.0 * texture(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;
 
@@ -199,23 +206,23 @@ void main(void)
 #endif
 
 #ifdef _SOFT
-    #define SAMPLES 12
-    #define SAMPLE_MULTIPLICATOR (1.0 / 12.0)
+#define SAMPLES 12
+#define SAMPLE_MULTIPLICATOR (1.0 / 12.0)
 vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
-        vec2( 0.6111618, 0.1050905 ),
-        vec2( 0.1088336, 0.1127091 ),
-        vec2( 0.3030421, -0.6292974 ),
-        vec2( 0.4090526, 0.6716492 ),
-        vec2( -0.1608387, -0.3867823 ),
-        vec2( 0.7685862, -0.6118501 ),
-        vec2( -0.1935026, -0.856501 ),
-        vec2( -0.4028573, 0.07754025 ),
-        vec2( -0.6411021, -0.4748057 ),
-        vec2( -0.1314865, 0.8404058 ),
-        vec2( -0.7005203, 0.4596822 ),
-        vec2( -0.9713828, -0.06329931 )
-        // , vec2( 0.0, 0.0 )
-    );
+    vec2( 0.6111618, 0.1050905 ), 
+    vec2( 0.1088336, 0.1127091 ), 
+    vec2( 0.3030421, -0.6292974 ), 
+    vec2( 0.4090526, 0.6716492 ), 
+    vec2( -0.1608387, -0.3867823 ), 
+    vec2( 0.7685862, -0.6118501 ), 
+    vec2( -0.1935026, -0.856501 ), 
+    vec2( -0.4028573, 0.07754025 ), 
+    vec2( -0.6411021, -0.4748057 ), 
+    vec2( -0.1314865, 0.8404058 ), 
+    vec2( -0.7005203, 0.4596822 ), 
+    vec2( -0.9713828, -0.06329931 ) 
+    // , vec2( 0.0, 0.0 )
+);
 
     vec2 screenTexCoord = gl_FragCoord.xy * u_windowCoords.xy;
     screenTexCoord = screenTexCoord * u_nonPowerOfTwo.xy;
@@ -239,6 +246,15 @@ vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
 #else
     _gl_FragColor = color;
 #endif
+#elif defined(_AMBIENT)
+#ifdef _SOFT
+    color *= shadow;
+#endif // _SOFT
+    _gl_FragColor = vec4(color, 1.0) * var_Color
+#ifdef _TRANSLUCENT
+         * u_uniformParm0
+#endif // _TRANSLUCENT
+        ;
 #else
     vec3 color;
     color = diffuseColor;
@@ -251,8 +267,8 @@ vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
 
     _gl_FragColor = vec4(color, 1.0) * var_Color
 #ifdef _TRANSLUCENT
-     * u_uniformParm0
+         * u_uniformParm0
 #endif // _TRANSLUCENT
-    ;
+        ;
 #endif
 }

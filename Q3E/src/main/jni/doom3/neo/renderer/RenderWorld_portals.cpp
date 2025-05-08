@@ -719,7 +719,7 @@ bool idRenderWorldLocal::CullEntityByPortals(const idRenderEntityLocal *entity, 
             return true;
 
         }
-        
+
         // return false;
 	}
     else
@@ -896,12 +896,12 @@ bool idRenderWorldLocal::CullLightByPortals(const idRenderLightLocal *light, con
             // nothing was visible
             return true;
         }
-        
+
         // return false;
     }
     else
     {
-#endif	
+#endif
 
 	if (r_useLightCulling.GetInteger() == 0) {
 		return false;
@@ -1007,7 +1007,7 @@ void idRenderWorldLocal::AddAreaLightRefs(int areaNum, const portalStack_t *ps)
 		if (r_singleLight.GetInteger() >= 0 && r_singleLight.GetInteger() != light->index)   {
 			continue;
 		}
-		
+
 
 #ifdef _D3BFG_CULLING
         if (harm_r_occlusionCulling.GetBool()) {
@@ -1041,13 +1041,13 @@ void idRenderWorldLocal::AddAreaLightRefs(int areaNum, const portalStack_t *ps)
         else
         {
 #endif
-		// check for being closed off behind a door
-		// a light that doesn't cast shadows will still light even if it is behind a door
-		if (r_useLightCulling.GetInteger() >= 3 &&
-		    !light->parms.noShadows && light->lightShader->LightCastsShadows()
-		    && light->areaNum != -1 && !tr.viewDef->connectedAreas[ light->areaNum ]) {
-			continue;
-		}
+        // check for being closed off behind a door
+        // a light that doesn't cast shadows will still light even if it is behind a door
+        if (r_useLightCulling.GetInteger() >= 3 &&
+            !light->parms.noShadows && light->lightShader->LightCastsShadows()
+            && light->areaNum != -1 && !tr.viewDef->connectedAreas[ light->areaNum ]) {
+            continue;
+        }
 #ifdef _D3BFG_CULLING
 	    }
 #endif
@@ -1663,7 +1663,7 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 
 		// get area num with origin and target origin
 		int srcArea = PointInArea(src);
-		if(srcArea < 0) 
+		if(srcArea < 0)
 			continue;
 		int dstArea = PointInArea(dst);
 		if(dstArea < 0)

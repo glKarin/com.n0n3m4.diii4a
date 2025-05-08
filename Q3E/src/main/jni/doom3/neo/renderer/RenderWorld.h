@@ -345,10 +345,10 @@ typedef struct renderEntity_s {
 //#endif //HUMANHEAD END
 	   
 	// HUMANHEAD:
-	bool				onlyVisibleInSpirit;	// True if this entity is only visible when spiritwalking or deathwalking
-	bool				onlyInvisibleInSpirit;	// True if this entity is only invisible when spiritwalking or deathwalking -tmj
-	bool				lowSkippable;			// bjk: True if skippable in low quality
-	float				eyeDistance;			// HUMANHEAD pdm: precalculated distance to eye
+	bool				    onlyVisibleInSpirit;	// True if this entity is only visible when spiritwalking or deathwalking
+	bool				    onlyInvisibleInSpirit;	// True if this entity is only invisible when spiritwalking or deathwalking -tmj
+	bool				    lowSkippable;			// bjk: True if skippable in low quality
+	float				    eyeDistance;			// HUMANHEAD pdm: precalculated distance to eye
 	// HUMANHEAD END
 #endif
 
@@ -409,15 +409,15 @@ typedef struct renderLight_s {
 #ifdef _RAVEN
 // RAVEN BEGIN
 // dluetscher: added a min light detail level setting that describes when this light is visible
-	float					detailLevel;
+    float					detailLevel;
 // ddynerman: no dynamic shadows - allows dmap to create optimized static shadows, but prevents dynamic shadows
-	bool					noDynamicShadows;
+    bool					noDynamicShadows;
 // RAVEN END
-	bool					globalLight;		// Whether this is a global light or not.
+    bool					globalLight;		// Whether this is a global light or not.
 
-	int						referenceSoundHandle;		// for shader sound tables, allowing effects to vary with sounds
+    int						referenceSoundHandle;		// for shader sound tables, allowing effects to vary with sounds
 #else
-	idSoundEmitter 		*referenceSound;		// for shader sound tables, allowing effects to vary with sounds
+	idSoundEmitter 		    *referenceSound;		// for shader sound tables, allowing effects to vary with sounds
 #endif
 } renderLight_t;
 
@@ -438,10 +438,10 @@ typedef struct renderView_s {
 	bool					forceUpdate;		// for an update
 
 #ifdef _HUMANHEAD
-	bool			viewSpiritEntities; // HUMANHEAD cjr: this renderView can see all onlyVisibleInSpirit entities
+	bool			        viewSpiritEntities; // HUMANHEAD cjr: this renderView can see all onlyVisibleInSpirit entities
 									   // tmj: this renderView cannot see onlyInvisibleInSpirit entities
 
-	float				frac;			// fraction of trace before hit
+	float				    frac;			// fraction of trace before hit
 #endif
 
 	// time in milliseconds for shader effects and other time dependent rendering issues
@@ -701,34 +701,34 @@ class idRenderWorld
 		virtual void			DrawText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align = 1, const int lifetime = 0, bool depthTest = false) = 0;
 
 #ifdef _HUMANHEAD
-	//HUMANHEAD rww
+	    //HUMANHEAD rww
 #if _HH_RENDERDEMO_HACKS
-	virtual void			DemoSmokeEvent(const idDeclParticle *smoke, const int systemTimeOffset, const float diversity, const idVec3 &origin, const idMat3 &axis) = 0;
+	    virtual void			DemoSmokeEvent(const idDeclParticle *smoke, const int systemTimeOffset, const float diversity, const idVec3 &origin, const idMat3 &axis) = 0;
 #endif
-	//HUMANHEAD END
-	// HUMANHEAD pdm: game portal support
+	    //HUMANHEAD END
+	    // HUMANHEAD pdm: game portal support
 #if GAMEPORTAL_PVS
-	virtual qhandle_t		FindGamePortal(const char *name) = 0;
-	virtual void			RegisterGamePortals(idMapFile *mapFile) = 0;
-	virtual void			DrawGamePortals(int mode, const idMat3 &viewAxis) = 0;
-	virtual bool			IsGamePortal( qhandle_t handle ) = 0;
-	virtual idVec3			GetGamePortalSrc( qhandle_t handle ) = 0;
-	virtual idVec3			GetGamePortalDst( qhandle_t handle ) = 0;
+        virtual qhandle_t		FindGamePortal(const char *name) = 0;
+        virtual void			RegisterGamePortals(idMapFile *mapFile) = 0;
+        virtual void			DrawGamePortals(int mode, const idMat3 &viewAxis) = 0;
+        virtual bool			IsGamePortal( qhandle_t handle ) = 0;
+        virtual idVec3			GetGamePortalSrc( qhandle_t handle ) = 0;
+        virtual idVec3			GetGamePortalDst( qhandle_t handle ) = 0;
 #endif
 #if GAMEPORTAL_SOUND
-	virtual int				NumSoundPortalsInArea( int areaNum ) = 0;
-	virtual int				NumGamePortalsInArea( int areaNum ) = 0;
-	virtual exitPortal_t	GetSoundPortal( int areaNum, int portalNum ) = 0;
-	virtual void			LevelInitSoundAreas() = 0;
-	virtual void			LevelShutdownSoundAreas() = 0;
-	virtual void			PrecalculateValidSoundAreas(const idVec3 listenerPosition, const int listenerArea) = 0;
-	virtual bool			ValidSoundArea(const int area) = 0;
-	virtual float			DistanceToSoundArea(const int area) = 0;
-	virtual float			MaxSoundAreaExtents(const int area) = 0;
+        virtual int				NumSoundPortalsInArea( int areaNum ) = 0;
+        virtual int				NumGamePortalsInArea( int areaNum ) = 0;
+        virtual exitPortal_t	GetSoundPortal( int areaNum, int portalNum ) = 0;
+        virtual void			LevelInitSoundAreas() = 0;
+        virtual void			LevelShutdownSoundAreas() = 0;
+        virtual void			PrecalculateValidSoundAreas(const idVec3 listenerPosition, const int listenerArea) = 0;
+        virtual bool			ValidSoundArea(const int area) = 0;
+        virtual float			DistanceToSoundArea(const int area) = 0;
+        virtual float			MaxSoundAreaExtents(const int area) = 0;
 
-	virtual void			DrawValidSoundAreas(const idVec3 &source, const idMat3 &viewAxis) = 0;
+        virtual void			DrawValidSoundAreas(const idVec3 &source, const idMat3 &viewAxis) = 0;
 #endif
-// HUMANHEAD END
+        // HUMANHEAD END
 #endif
 };
 #endif /* !__RENDERWORLD_H__ */

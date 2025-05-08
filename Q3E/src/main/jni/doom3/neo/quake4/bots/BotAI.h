@@ -9,26 +9,29 @@
 ===============================================================================
 */
 
-#ifdef MOD_BOTS
-
 #define BOT_ENABLED() (gameLocal.isMultiplayer && gameLocal.isServer && botAi::IsAvailable())
+#define BOT_ALL_MP_WEAPON ( (1 << MAX_WEAPONS) - 1)
+#define BOT_SCRIPT_FILE "scripts/bot_sabot_main.script"
 
 #define BOT_AAS "botaas32" // "aas48"
 
-//karin: auto fill bots in MP-game
-extern idCVar harm_si_autoFillBots;
-//karin: auto gen aas file for mp game map with bot
-extern idCVar harm_g_autoGenAASFileInMPGame;
-
 class botSabot;
+
+typedef enum {
+    FLAGSTATUS_INBASE = 0,
+    FLAGSTATUS_TAKEN  = 1,
+    FLAGSTATUS_STRAY  = 2,
+    FLAGSTATUS_NONE   = 3
+} d3_flagStatus_t;
 
 // TinMan: Info for bots array
 typedef struct botInfo_s
 {
-    bool					inUse;
-    int						clientID;
-    int						entityNum;
+    bool					inUse; // if true, clients[clientID] is bot
+    int						clientID; // idPlayer's entityNumber
+    int						entityNum; // botAi's entityNumber
     bool					selected;
+	// char					defName[64]; // bot's sabot def name
 } botInfo_t;
 
 typedef enum
@@ -39,6 +42,16 @@ typedef enum
     SABOT_GOAL_FOLLOW,
     SABOT_GOAL_ATTACK
 } goalType_t;
+
+#if 0
+#define BOT_TO_CLIENT_ID(x) ((x) + 1)
+#define CLIENT_TO_BOT_ID(x) ((x) - 1)
+#else
+#define BOT_TO_CLIENT_ID(x) x
+#define CLIENT_TO_BOT_ID(x) x
+#endif
+
+#define BOT_MAX_NUM (botAi::BOT_START_INDEX + botAi::BOT_MAX_BOTS)
 
 // TinMan: expanded version of idmovestate
 class botMoveState
@@ -81,6 +94,12 @@ public:
     static const int		BOT_START_INDEX;
     static botInfo_t		bots[];
 
+    static idCVar           harm_si_botLevel;
+    static idCVar           harm_si_botWeapons;
+    static idCVar           harm_si_botAmmo;
+    static idCVar           harm_si_autoFillBots;
+    static idCVar           harm_g_autoGenAASFileInMPGame;
+
     static void				Addbot_f( const idCmdArgs &args );
     static void				Removebot_f( const idCmdArgs &args );
 
@@ -88,10 +107,65 @@ public:
     void					PostCommand( int commandType, idEntity * commandEnt, idVec3 position );
     static trace_t			GetPlayerTrace( idPlayer * player );
 
+    static bool				IsAvailable(void);
+    static void				ArgCompletion_addBot( const idCmdArgs &args, void(*callback)( const char *s ) );
+    static void				ArgCompletion_botLevel( const idCmdArgs &args, void(*callback)( const char *s ) );
+    static void				ArgCompletion_botSlots( const idCmdArgs &args, void(*callback)( const char *s ) );
+    static void				ArgCompletion_botWeapons( const idCmdArgs &args, void(*callback)( const char *s ) );
+    static void				Cmd_AddBots_f( const idCmdArgs &args );
+    static void				Cmd_FillBots_f(const idCmdArgs& args);
+	static void				Cmd_AppendBots_f(const idCmdArgs& args);
+	static void				Cmd_CleanBots_f(const idCmdArgs& args);
+    static void				Cmd_RemoveBots_f( const idCmdArgs &args );
+	static void				Cmd_TruncBots_f(const idCmdArgs& args);
+    static void				Cmd_BotInfo_f(const idCmdArgs& args);
+    static void				Cmd_SetupBotLevel_f(const idCmdArgs& args);
+    static void				Cmd_SetupBotWeapons_f(const idCmdArgs& args);
+    static void				Cmd_SetupBotAmmo_f(const idCmdArgs& args);
+    static void				InitBotSystem(void);
+    static void				UpdateUI(void);
+    static void				ReleaseBotSlot(int clientID);
+    static bool				GenerateAAS(void);
+    static botAi *			SpawnBot(idPlayer *botClient);
+    static bool				PlayerHasBotSlot(int clientID);
+
+private:
+    static int				AddBot(const char *name, const idDict &dict = idDict());
+	static bool				RemoveBot( int killBotID );
+	static bool             AllowBotOperation(void);
+    static int              GetFlagCarrier(int team);
+    static d3_flagStatus_t  GetFlagStatus(int team);
+    static rvItemCTFFlag *  GetTeamFlag(int team);
+    static bool             IsCTFGame(void);
+    static int				GetNumCurrentActiveBots(void);
+    static int				CheckRestClients(int num);
+    static int				FindIdleBotSlot(void);
+    static bool 			IsGametypeTeamBased(void);
+    static idPlayer * 		FindBotClient(int clientID);
+    static int		 		GetNumConnectedClients(bool ava = false);
+    static int              GetBotDefs( idStrList &list );
+    static int              GetBotLevels( idDict &list );
+    static int              GetBotLevelData( int level, idDict &ret );
+    static idStr            GetBotName( int index );
+    static int              GetPlayerModelNames(idStrList &list, int team);
+    static int				MakeWeaponMask(const char *wp);
+    static int				MakeWeaponMask(const idStrList &list);
+    static int				InsertBasicWeaponMask(int i = 0);
+    static idStr			MakeWeaponString(int i);
+    static idDict			MakeAmmoDict(int wp, int num);
+    static void				InsertEmptyAmmo(idDict &dict);
+
+    static bool             botAvailable;
+    static bool             botInitialized;
+
 // Variables
 public:
     int						botID;
-    int						clientID;
+    int                     clientID(void) const {
+        return botID;
+    }
+    // botID == clientID
+    // int						clientID;
 
     idVec3					viewDir;
     idAngles				viewAngles;
@@ -176,6 +250,7 @@ public:
     void					SetState( const function_t *newState );
     void					SetState( const char *statename );
     void					UpdateScript( void );
+    void                    SetBotLevel(int level);
 
 protected:
     idPlayer			*	playerEnt;
@@ -196,6 +271,8 @@ protected:
     float					aimRate;
 
     float					fovDot;				// cos( fovDegrees )
+	float					findRadius;
+    int                     botLevel;
 
     // enemy variables
     idEntityPtr<idActor>	enemy;
@@ -370,21 +447,10 @@ private:
     void					Event_PowerUpActive( void ); // TinMan: at the moment just returns if any powerups are active *todo* plug it into playerent powerupactive and return which
 
 public:
-    static void				ArgCompletion_addBot( const idCmdArgs &args, void(*callback)( const char *s ) );
-    static void				Cmd_AddBot_f( const idCmdArgs &args );
-    static void				Cmd_FillBots_f(const idCmdArgs& args);
-    static void				Cmd_BotInfo_f(const idCmdArgs& args);
-    static int				GetNumCurrentActiveBots(void);
-    static int				CheckRestClients(int num);
-    static bool				IsAvailable(void);
-
     static idVec3			EyeOffset(idActor *actor);
     static void				GetAIAimTargets( idActor *actor, const idVec3 &lastSightPos, idVec3 &headPos, idVec3 &chestPos );
 
 private:
-    static int				AddBot(const char *name, idDict &dict);
-    static int				AddBot(const char *name);
-	static bool             CanAddBot(void);
     int						lastPreferred;
     idVec3                  PredictTargetPosition( const idVec3 &targetPosition, const idVec3 &myPosition, const idVec3 &targetVelocity, float projectileSpeed );
     float                   GetProjectileSpeed(const char *weaponName);
@@ -404,7 +470,5 @@ private:
 ===============================================================================
 */
 #include "BotSabot.h"
-
-#endif
 
 #endif /* !__BOTAI_H__ */

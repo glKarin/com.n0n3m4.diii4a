@@ -8,6 +8,7 @@ import android.view.View;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
+import com.n0n3m4.q3e.gl.Q3EGLVertexBuffer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -40,6 +41,9 @@ public class Slider extends Paintable implements TouchListener
     private int m_lastKey;
     private int[] tex_inds;
     private int m_split = SPLIT_NONE;
+
+    private int vertexBuffer = 0;
+    private int indexBuffer  = 0;
 
     public Slider(View vw, GL10 gl, int center_x, int center_y, int w, int h, String texid,
                   int leftkey, int centerkey, int rightkey, int stl, float a)
@@ -153,6 +157,47 @@ public class Slider extends Paintable implements TouchListener
     }
 
     @Override
+    public void AsBuffer(GL11 gl)
+    {
+        vertexBuffer = Q3EGL.glBufferData(gl, vertexBuffer, gl.GL_ARRAY_BUFFER, new Q3EGLVertexBuffer()
+                .Set(new FloatBuffer[]{ verts_p, tex_p }, 4)
+                .Buffer(),
+                gl.GL_STATIC_DRAW);
+        indexBuffer = Q3EGL.glBufferData(gl, indexBuffer, gl.GL_ELEMENT_ARRAY_BUFFER, inds_p, gl.GL_STATIC_DRAW);
+    }
+
+    @Override
+    public void Release(GL11 gl)
+    {
+        if(tex_ind > 0)
+        {
+            Q3EGL.glDeleteTexture(gl, tex_ind);
+            tex_ind = 0;
+        }
+        if(null != tex_inds)
+        {
+            for(int i = 0; i < tex_inds.length; i++)
+            {
+                if(tex_inds[i] > 0)
+                {
+                    Q3EGL.glDeleteTexture(gl, tex_inds[i]);
+                    tex_inds[i] = 0;
+                }
+            }
+        }
+        if(vertexBuffer > 0)
+        {
+            Q3EGL.glDeleteBuffer(gl, vertexBuffer);
+            vertexBuffer = 0;
+        }
+        if(indexBuffer > 0)
+        {
+            Q3EGL.glDeleteBuffer(gl, indexBuffer);
+            indexBuffer = 0;
+        }
+    }
+
+    @Override
     public void Paint(GL11 gl)
     {
         super.Paint(gl);
@@ -161,16 +206,22 @@ public class Slider extends Paintable implements TouchListener
             case SPLIT_DOWN_RIGHT: {
                 int x = width / 4;
                 int y = height / 4;
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[0], 6, tex_p, verts_p, inds_p, cx-x, cy+y, red, green, blue, alpha);
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[1], 6, tex_p, verts_p, inds_p, cx-x, cy-y, red, green, blue, alpha);
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[2], 6, tex_p, verts_p, inds_p, cx+x, cy-y, red, green, blue, alpha);
+//                Q3EGL.DrawVerts_GL1(gl, tex_inds[0], 6, tex_p, verts_p, inds_p, cx-x, cy+y, red, green, blue, alpha);
+//                Q3EGL.DrawVerts_GL1(gl, tex_inds[1], 6, tex_p, verts_p, inds_p, cx-x, cy-y, red, green, blue, alpha);
+//                Q3EGL.DrawVerts_GL1(gl, tex_inds[2], 6, tex_p, verts_p, inds_p, cx+x, cy-y, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[0], 6, vertexBuffer, indexBuffer, cx-x, cy+y, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[1], 6, vertexBuffer, indexBuffer, cx-x, cy-y, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[2], 6, vertexBuffer, indexBuffer, cx+x, cy-y, red, green, blue, alpha);
             }
                 break;
             case SPLIT_LEFT_RIGHT: {
                 int x = width / 3;
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[0], 6, tex_p, verts_p, inds_p, cx-x, cy, red, green, blue, alpha);
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[1], 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[2], 6, tex_p, verts_p, inds_p, cx+x, cy, red, green, blue, alpha);
+//                Q3EGL.DrawVerts_GL1(gl, tex_inds[0], 6, tex_p, verts_p, inds_p, cx-x, cy, red, green, blue, alpha);
+//                Q3EGL.DrawVerts_GL1(gl, tex_inds[1], 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+//                Q3EGL.DrawVerts_GL1(gl, tex_inds[2], 6, tex_p, verts_p, inds_p, cx+x, cy, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[0], 6, vertexBuffer, indexBuffer, cx-x, cy, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[1], 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[2], 6, vertexBuffer, indexBuffer, cx+x, cy, red, green, blue, alpha);
 //                int x = width / 2;
 //                Q3EGL.DrawVerts(gl, tex_inds[0], 6, tex_p, verts_p, inds_p, -x, 0, red, green, blue, alpha);
 //                Q3EGL.DrawVerts(gl, tex_inds[1], 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
@@ -178,7 +229,9 @@ public class Slider extends Paintable implements TouchListener
             }
                 break;
             default:
-                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+//                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha);
+                break;
         }
     }
 
@@ -304,6 +357,8 @@ public class Slider extends Paintable implements TouchListener
         if(null != tmp.tex_inds)
             news.tex_inds = Arrays.copyOf(tmp.tex_inds, 3);
         news.m_split = tmp.m_split;
+        news.vertexBuffer = tmp.vertexBuffer;
+        news.indexBuffer = tmp.indexBuffer;
         return news;
     }
 

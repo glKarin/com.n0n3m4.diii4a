@@ -37,6 +37,8 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <string.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <curl/mprintf.h>
 
@@ -864,7 +866,7 @@ static int dprintf_formatf(
 	  base = 16;
 	  digits = (p->flags & FLAGS_UPPER)? upper_digits : lower_digits;
 	  alt = 1;
-	  num = (unsigned long) ptr;
+	  num = (/*unsigned long //k*/uintptr_t) ptr;
 	  is_neg = 0;
 	  goto number;
 	}

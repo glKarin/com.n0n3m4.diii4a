@@ -76,11 +76,28 @@
 
 #ifdef WIN32
 #include <windows.h>
+#if !defined(EINPROGRESS)
 #define EINPROGRESS WSAEINPROGRESS
+#endif
+#if !defined(EWOULDBLOCK)
 #define EWOULDBLOCK WSAEWOULDBLOCK
+#endif
+#if !defined(EISCONN)
 #define EISCONN     WSAEISCONN
+#endif
+#if !defined(ENOTSOCK)
 #define ENOTSOCK    WSAENOTSOCK
+#endif
+#if !defined(ECONNREFUSED)
 #define ECONNREFUSED WSAECONNREFUSED
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+typedef unsigned long in_addr_t;
+#include <winsock2.h>
+#endif
 #endif
 
 #include "urldata.h"

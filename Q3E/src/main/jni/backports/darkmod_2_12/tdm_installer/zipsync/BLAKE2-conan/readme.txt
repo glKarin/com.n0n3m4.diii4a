@@ -1,1 +1,0 @@
-Taken from https://github.com/Enhex/conan-BLAKE2

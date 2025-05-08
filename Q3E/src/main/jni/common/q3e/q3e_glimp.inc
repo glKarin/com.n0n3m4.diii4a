@@ -177,6 +177,7 @@ typedef struct Q3EGLConfig_s
 	int major_version;
 	int minor_version;
 	unsigned debug_output;
+	int swap_interval;
 
     unsigned sample_buffers;
 	int egl_major_version;
@@ -203,6 +204,30 @@ typedef struct EGLConfigInfo_s
 	EGLint samples;
 	EGLint sample_buffers;
 } EGLConfigInfo_t;
+
+const char * Q3E_GetError(void)
+{
+	static const char *GLimp_StringErrors[] = {
+			"EGL_SUCCESS",
+			"EGL_NOT_INITIALIZED",
+			"EGL_BAD_ACCESS",
+			"EGL_BAD_ALLOC",
+			"EGL_BAD_ATTRIBUTE",
+			"EGL_BAD_CONFIG",
+			"EGL_BAD_CONTEXT",
+			"EGL_BAD_CURRENT_SURFACE",
+			"EGL_BAD_DISPLAY",
+			"EGL_BAD_MATCH",
+			"EGL_BAD_NATIVE_PIXMAP",
+			"EGL_BAD_NATIVE_WINDOW",
+			"EGL_BAD_PARAMETER",
+			"EGL_BAD_SURFACE",
+			"EGL_CONTEXT_LOST",
+	};
+
+	EGLint err = eglGetError();
+    return GLimp_StringErrors[err - EGL_SUCCESS];
+}
 
 static void Q3E_HandleEGLError(const char *func, Q3Ebool exit)
 {
@@ -801,6 +826,13 @@ Q3Ebool GLES_Init(void) {
 		return Q3E_FALSE;
 	}
 
+	if(q3e_glConfig.swap_interval >= 0)
+	{
+	    Q3E_PRINTF("[Harmattan]: Setup swap interval -> %d\n", q3e_glConfig.swap_interval);
+        if(!eglSwapInterval(eglDisplay, q3e_glConfig.swap_interval))
+            Q3E_PRINTF("Setup swap interval to %d fail", q3e_glConfig.swap_interval);
+	}
+
 	EGLConfigInfo_t info = Q3E_GetConfigInfo(eglConfig);
 
 	q3e_glConfig.red = info.red;
@@ -870,10 +902,16 @@ void Q3E_ReleaseWindow(Q3Ebool reset)
         win = NULL;
 }
 
-void Q3E_SwapInterval(int interval)
+Q3Ebool Q3E_SwapInterval(int interval)
 {
     if(eglDisplay != EGL_NO_DISPLAY)
-        eglSwapInterval(eglDisplay, interval);
+    {
+        Q3Ebool res = eglSwapInterval(eglDisplay, interval) ? Q3E_TRUE : Q3E_FALSE;
+        Q3E_PRINTF("Swap interval: %d -> %d\n", interval, res);
+        return res;
+    }
+    else
+        return Q3E_FALSE;
 }
 
 Q3Ebool Q3E_QuerySurfaceSize(int *width, int *height)

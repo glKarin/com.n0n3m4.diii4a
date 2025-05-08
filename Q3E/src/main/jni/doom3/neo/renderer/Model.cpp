@@ -60,8 +60,8 @@ idRenderModelStatic::idRenderModelStatic()
 	reloadable = true;
 	levelLoadReferenced = false;
 	timeStamp = 0;
-#ifdef _RAVEN
-	sky = false;
+#ifdef _RAVEN //karin: portal sky
+	hasSky = false;
 #endif
 }
 

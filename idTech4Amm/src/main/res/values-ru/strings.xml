@@ -471,7 +471,11 @@
     <string name="create_game_folders_successful">Создание игровых папок прошло успешно!</string>
     <string name="put_game_files_here">Поместите файлы игры здесь %1$s </string>
     <string name="please_put_game_data_files_into_this_folder">Пожалуйста поместите файлы игровых данных в эту папку %1$s !</string>
-    <string name="use_doom3bfg_fonts_instead_of_old_fonts_and_enable_wide_character_language_support">Use DOOM3-BFG fonts instead of old fonts and enable wide-character language support</string>
-    <string name="combine_shadow_mapping_harm_r_shadowmapcombine">Combine shadow mapping(harm_r_shadowMapCombine)</string>
+    <string name="use_doom3bfg_fonts_instead_of_old_fonts_and_enable_wide_character_language_support">Использовать шрифты DOOM3-BFG вместо старых шрифтов и включить поддержку расширенного набора символов</string>
+    <string name="combine_shadow_mapping_harm_r_shadowmapcombine">Объединить карты теней(harm_r_shadowMapCombine)</string>
+    <string name="max_command_line_editor_height">Максимальная высота командной строки(px)</string>
+    <string name="setup_max_command_line_editor_pixel_height">Установить максимальную высоту пикселя командной строки (0 - без ограничений)</string>
+    <string name="zero_means_not_limit">px, 0 означает без ограничений</string>
+    <string name="skip_hit_effect_in_game">Убрать эффект тряски камеры при ударе(harm_g_skipHitEffect)</string>
 
 </resources>

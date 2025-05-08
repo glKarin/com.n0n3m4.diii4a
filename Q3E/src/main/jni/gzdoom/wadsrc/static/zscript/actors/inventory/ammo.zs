@@ -38,15 +38,19 @@ class Ammo : Inventory
 	int BackpackAmount;
 	int BackpackMaxAmount;
 	meta int DropAmount;
+	meta double DropAmmoFactorMultiplier;
 	
 	property BackpackAmount: BackpackAmount;
 	property BackpackMaxAmount: BackpackMaxAmount;
 	property DropAmount: DropAmount;
+	property DropAmmoFactorMultiplier: DropAmmoFactorMultiplier;
 
 	Default
 	{
 		+INVENTORY.KEEPDEPLETED
 		Inventory.PickupSound "misc/ammo_pkup";
+		
+		Ammo.DropAmmoFactorMultiplier 1;
 	}
 
 	//===========================================================================
@@ -134,6 +138,9 @@ class Ammo : Inventory
 
 	override Inventory CreateCopy (Actor other)
 	{
+		if (IsCreatingLocalCopy())
+			return Super.CreateCopy(other);
+
 		Inventory copy;
 		int amount = Amount;
 
@@ -201,6 +208,8 @@ class Ammo : Inventory
 			dropammofactor = 0.5;
 			ignoreskill = false;
 		}
+        
+        dropammofactor *= DropAmmoFactorMultiplier;
 
 		if (dropamount > 0)
 		{
@@ -244,6 +253,9 @@ class BackpackItem : Inventory
 
 	override Inventory CreateCopy (Actor other)
 	{
+		if (IsCreatingLocalCopy())
+			return Super.CreateCopy(other);
+			
 		// Find every unique type of ammoitem. Give it to the player if
 		// he doesn't have it already, and double its maximum capacity.
 		uint end = AllActorClasses.Size();

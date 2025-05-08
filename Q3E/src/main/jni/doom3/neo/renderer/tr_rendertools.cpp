@@ -1090,6 +1090,13 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
 	tr.primaryWorld->DrawText(mt.material->GetName(), mt.point,
 	                          0.35f, colorBlue, tr.primaryView->renderView.viewaxis);
+#ifdef _RAVEN //karin: show materialType
+	if(mt.materialType)
+	{
+		tr.primaryWorld->DrawText(mt.materialType->GetName(), mt.point - tr.primaryView->renderView.viewaxis[2] * 12,
+				0.35f, colorGreen, tr.primaryView->renderView.viewaxis);
+	}
+#endif
 #ifdef _K_DEV //karin: show stage texgen
 	idStr str;
 	const char *TG_NAMES[] = {
@@ -1104,7 +1111,7 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 	};
 	for(int i = 0; i < mt.material->GetNumStages(); i++)
 		str += va("%d. %s\n", i, TG_NAMES[mt.material->GetStage(i)->texture.texgen]);
-	tr.primaryWorld->DrawText(str.c_str(), mt.point - tr.primaryView->renderView.viewaxis[2] * 12,
+	tr.primaryWorld->DrawText(str.c_str(), mt.point - tr.primaryView->renderView.viewaxis[2] * 24,
 	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
 #endif
 
@@ -2999,6 +3006,13 @@ void R_ShowSurfaceInfo(void)
 	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
 	tr.primaryWorld->DrawText(mt.material->GetName(), mt.point,
 	                          0.35f, colorBlue, tr.primaryView->renderView.viewaxis);
+#ifdef _RAVEN //karin: show materialType
+	if(mt.materialType)
+	{
+		tr.primaryWorld->DrawText(mt.materialType->GetName(), mt.point - tr.primaryView->renderView.viewaxis[2] * 12,
+				0.35f, colorGreen, tr.primaryView->renderView.viewaxis);
+	}
+#endif
 #ifdef _K_DEV //karin: show stage texgen
 	idStr str;
 	const char *TG_NAMES[] = {
@@ -3013,7 +3027,7 @@ void R_ShowSurfaceInfo(void)
 	};
 	for(int i = 0; i < mt.material->GetNumStages(); i++)
 		str += va("%d. %s\n", i, TG_NAMES[mt.material->GetStage(i)->texture.texgen]);
-	tr.primaryWorld->DrawText(str.c_str(), mt.point - tr.primaryView->renderView.viewaxis[2] * 12,
+	tr.primaryWorld->DrawText(str.c_str(), mt.point - tr.primaryView->renderView.viewaxis[2] * 24,
 	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
 #endif
 }

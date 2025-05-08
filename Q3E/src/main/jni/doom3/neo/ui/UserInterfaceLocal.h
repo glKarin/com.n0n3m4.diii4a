@@ -129,28 +129,28 @@ class idUserInterfaceLocal : public idUserInterface
 			return returnCmd;
 		};
 #ifdef _RAVEN //k: for Quake4 gui script
-	virtual void				SetInteractive(bool interactive);
-	virtual void				SetStateVec4( const char *varName, const idVec4& vector );
-	virtual idVec4				GetLightColor(void) { return vec4_one; }
-	virtual void				ClearState( void ) { }
-	virtual bool				GetMaxTextIndex( const char *windowName, const char *text, wrapInfo_t& wrapInfo ) const {
-		(void)windowName;
-		(void)text;
-		wrapInfo.lastWhitespace = -1;
-		wrapInfo.maxIndex = -1;
-		return false;
-	}
+        virtual void				SetInteractive(bool interactive);
+        virtual void				SetStateVec4( const char *varName, const idVec4& vector );
+        virtual idVec4				GetLightColor(void) { return vec4_one; }
+        virtual void				ClearState( void ) { }
+        virtual bool				GetMaxTextIndex( const char *windowName, const char *text, wrapInfo_t& wrapInfo ) const {
+            (void)windowName;
+            (void)text;
+            wrapInfo.lastWhitespace = -1;
+            wrapInfo.maxIndex = -1;
+            return false;
+        }
 #endif
 #ifdef _HUMANHEAD
-	virtual void CallStartup(void);
-    virtual void				Translate(const char *fontname);
-	private:
-	int translateFont;
+        virtual void                CallStartup(void);
+        virtual void				Translate(const char *fontname);
+    private:
+        int                         translateFont;
 #endif
 
 	private:
 #ifdef _RAVEN //k: check UI is interactive or desktop is interactive
-	bool IsDesktopInteractive() const;
+	    bool                        IsDesktopInteractive() const;
 #endif
 		bool						active;
 		bool						loading;

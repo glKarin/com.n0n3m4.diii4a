@@ -349,22 +349,7 @@ idViewBody::Think
 ================
 */
 void idViewBody::Think( void ) {
-	if(!owner)
-		return;
-
-    // set the physics position and orientation
-    GetPhysics()->SetOrigin( owner->GetPhysics()->GetOrigin() + bodyOffset * owner->viewAxis );
-    GetPhysics()->SetAxis(owner->viewAxis);
-
-	CHECK_MODEL();
-
-    UpdateVisuals();
-
-    if ( gameLocal.isNewFrame ) {
-        stateThread.Execute( );
-    }
-
-    UpdateAnimation( );
+    // do nothing because the present is called from the player through PresentWeapon
 }
 
 /*
@@ -401,6 +386,13 @@ idViewBody::PresentBody
 ================
 */
 void idViewBody::PresentBody( bool showViewModel ) {
+    if(!owner)
+        return;
+
+    // set the physics position and orientation
+    GetPhysics()->SetOrigin( owner->GetPhysics()->GetOrigin() + bodyOffset * owner->viewAxis );
+    GetPhysics()->SetAxis(owner->viewAxis);
+
     // Dont do anything with the weapon while its stale
     if ( fl.networkStale ) {
         return;
@@ -413,6 +405,8 @@ void idViewBody::PresentBody( bool showViewModel ) {
     }
 // RAVEN END
 
+    CHECK_MODEL();
+
     // only show the surface in player view
     renderEntity.allowSurfaceInViewID = owner->entityNumber + 1;
 
@@ -420,6 +414,13 @@ void idViewBody::PresentBody( bool showViewModel ) {
     renderEntity.weaponDepthHackInViewID = owner->entityNumber + 1;
 
     //weapon->Think();
+    UpdateVisuals();
+
+    if ( gameLocal.isNewFrame ) {
+        stateThread.Execute( );
+    }
+
+    UpdateAnimation( );
 
     // present the model
     if ( showViewModel ) {
@@ -489,7 +490,7 @@ int idViewBody::GetBodyAnim( const char *animname ) {
 	animname = spawnArgs.GetString ( va("anim %s", animname ), animname );
 
 	if ( owner->animPrefix.Length() ) {
-		temp = va( "%s_%s", owner->animPrefix.c_str(), animname );
+        temp = va( "%s_%s", owner->animPrefix.c_str(), animname );
 		idStr str = spawnArgs.GetString ( va("anim %s", temp ), temp );
 		anim = animator.GetAnim( str.c_str() );
 		if ( anim ) {
@@ -497,9 +498,9 @@ int idViewBody::GetBodyAnim( const char *animname ) {
 		}
 		else if(str.Cmp(temp) != 0) // otherwise get default anim
 		{
-		anim = animator.GetAnim( temp );
-		if ( anim ) {
-			return anim;
+			anim = animator.GetAnim( temp );
+			if ( anim ) {
+				return anim;
 			}
 		}
 	}
@@ -607,6 +608,28 @@ void idViewBody::ExecuteState ( const char* statename ) {
 
     SetState ( statename, 0 );
     stateThread.Execute ( );
+}
+
+/*
+================
+idWeapon::EnterCinematic
+================
+*/
+void idViewBody::EnterCinematic(void)
+{
+	StopSound(SND_CHANNEL_ANY, false);
+
+	Hide();
+}
+
+/*
+================
+idWeapon::ExitCinematic
+================
+*/
+void idViewBody::ExitCinematic(void)
+{
+	Show();
 }
 
 /*

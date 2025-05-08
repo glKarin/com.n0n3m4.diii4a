@@ -318,6 +318,9 @@ class rvGravityArea;
 
 //============================================================================
 
+#ifdef MOD_BOTS
+class botAi;
+#endif
 class idGameLocal : public idGame {
 public:
 	idDict					serverInfo;				// all the tunable parameters, like numclients, etc
@@ -908,6 +911,10 @@ public:
 	void					ClientSetStartingIndex( int i ) { clientInstanceFirstFreeIndex = i; }
 	void					ServerSetMinSpawnIndex( void );
 	void					ServerSetEntityIndexWatermark( int instanceID );
+#ifdef MOD_BOTS
+    friend class botAi;
+    void                    ServerBotClientBegin(int clientNum, const idDict *clientArgs = NULL);
+#endif
 
 private:
 // RAVEN BEGIN
