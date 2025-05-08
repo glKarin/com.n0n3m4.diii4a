@@ -79,7 +79,7 @@ dependencies {
     implementation files('libs/RootTools-2.4.jar')
     // Using LTS version for lower min SDK version
     //implementation('com.arthenica:mobile-ffmpeg-min:4.4.LTS')
-    implementation('com.arthenica:ffmpeg-kit-min:6.0-2.LTS')
+    //implementation('com.arthenica:ffmpeg-kit-min:6.0-2.LTS')
     // Using local ffmpeg libraries
     //api(name: 'mobile-ffmpeg-min_4_4_LTS', ext: 'aar')
     //implementation 'com.arthenica:mobile-ffmpeg-full:4.4.LTS'
