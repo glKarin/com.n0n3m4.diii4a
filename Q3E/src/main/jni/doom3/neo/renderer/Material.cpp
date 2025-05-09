@@ -967,7 +967,7 @@ int idMaterial::NameToSrcBlendMode(const idStr &name)
 	}
 #endif
 
-	common->Warning("unknown blend mode '%s' in material '%s'", name.c_str(), GetName());
+	common->Warning("unknown blend mode '%s' in material '%s' at '%s'", name.c_str(), GetName(), GetFileName());
 	SetMaterialFlag(MF_DEFAULTED);
 
 	return GLS_SRCBLEND_ONE;
@@ -998,7 +998,7 @@ int idMaterial::NameToDstBlendMode(const idStr &name)
 		return GLS_DSTBLEND_ONE_MINUS_SRC_COLOR;
 	}
 
-	common->Warning("unknown blend mode '%s' in material '%s'", name.c_str(), GetName());
+	common->Warning("unknown blend mode '%s' in material '%s' at '%s'", name.c_str(), GetName(), GetFileName());
 	SetMaterialFlag(MF_DEFAULTED);
 
 	return GLS_DSTBLEND_ONE;
@@ -2045,7 +2045,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		}
 #endif
 
-		common->Warning("unknown token '%s' in material '%s'", token.c_str(), GetName());
+		common->Warning("unknown token '%s' in material '%s' at '%s'", token.c_str(), GetName(), GetFileName());
 		SetMaterialFlag(MF_DEFAULTED);
 		return;
 	}
@@ -2818,7 +2818,7 @@ void idMaterial::ParseMaterial(idLexer &src)
 			ParseStage(src, trpDefault);
 			continue;
 		} else {
-			common->Warning("unknown general material parameter '%s' in '%s'", token.c_str(), GetName());
+			common->Warning("unknown general material parameter '%s' in '%s' at '%s'", token.c_str(), GetName(), GetFileName());
 			SetMaterialFlag(MF_DEFAULTED);
 			return;
 		}

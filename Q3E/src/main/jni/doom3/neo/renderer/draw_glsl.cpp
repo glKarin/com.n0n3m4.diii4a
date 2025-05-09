@@ -53,8 +53,11 @@ static idCVar harm_r_ambientLightingBrightness("harm_r_ambientLightingBrightness
 #ifdef _SHADOW_MAPPING
 #include "glsl/draw_glsl_shadowmapping.cpp"
 #endif
-#if defined(_STENCIL_SHADOW_IMPROVE)
+#ifdef _STENCIL_SHADOW_IMPROVE
 #include "glsl/draw_glsl_stencilshadow.cpp"
+#endif
+#ifdef _GLOBAL_ILLUMINATION
+#include "glsl/draw_glsl_globalIllumination.cpp"
 #endif
 
 #include "glsl/draw_glsl_interaction.cpp"

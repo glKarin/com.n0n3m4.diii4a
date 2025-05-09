@@ -7,7 +7,7 @@
     <string name="commandline">Команды:</string>
     <string name="game_working_directory">Путь к игровым файлам:</string>
     <string name="chooser">Выбрать</string>
-    <string name="disable_lighting">Отключить освещение в игре</string>
+    <string name="disable_lighting">Отключить освещение в игре(r_noLight)</string>
     <string name="use_dxt_textures_tegra_only_others_no_effect">Использовать DXT текстуры (Работает только на Tegra)</string>
     <string name="use_etc1_or_rgba4444_compression">Использовать ETC1 (или RGBA4444) сжатие</string>
     <string name="clear_vertex_buffer_cvar_harm_r_clearvertexbuffer">Очистить буфер вершин(harm_r_clearVertexBuffer)</string>
@@ -477,5 +477,8 @@
     <string name="setup_max_command_line_editor_pixel_height">Установить максимальную высоту пикселя командной строки (0 - без ограничений)</string>
     <string name="zero_means_not_limit">px, 0 означает без ограничений</string>
     <string name="skip_hit_effect_in_game">Убрать эффект тряски камеры при ударе(harm_g_skipHitEffect)</string>
+    <string name="render_global_illumination_harm_r_globalillumination">Render global illumination(harm_r_globalIllumination)</string>
+    <string name="global_illumination_brightness_harm_r_globalIlluminationBrightness">Global illumination brightness(harm_r_globalIlluminationBrightness)</string>
+    <string name="global_illumination_brightness">Global illumination brightness</string>
 
 </resources>

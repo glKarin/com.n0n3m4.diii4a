@@ -6,7 +6,7 @@
     <string name="commandline">命令行:</string>
     <string name="game_working_directory">游戏运行目录:</string>
     <string name="chooser">选择器</string>
-    <string name="disable_lighting">禁用光照</string>
+    <string name="disable_lighting">禁用光照(r_noLight)</string>
     <string name="use_dxt_textures_tegra_only_others_no_effect">使用DXT格式纹理(仅针对tegra, 其他无影响)</string>
     <string name="use_etc1_or_rgba4444_compression">使用ETC1(或RGBA4444)压缩纹理</string>
     <string name="clear_vertex_buffer_cvar_harm_r_clearvertexbuffer">清理顶点缓冲区(harm_r_clearVertexBuffer)</string>
@@ -476,4 +476,7 @@
     <string name="setup_max_command_line_editor_pixel_height">设置最大命令行编辑框像素高度(0为不限制)</string>
     <string name="zero_means_not_limit">像素为单位, 0为不限制</string>
     <string name="skip_hit_effect_in_game">忽略游戏中被攻击影响效果(harm_g_skipHitEffect)</string>
+    <string name="render_global_illumination_harm_r_globalillumination">渲染全局光照(harm_r_globalIllumination)</string>
+    <string name="global_illumination_brightness_harm_r_globalIlluminationBrightness">全局光照亮度(harm_r_globalIlluminationBrightness)</string>
+    <string name="global_illumination_brightness">全局光照亮度</string>
 </resources>

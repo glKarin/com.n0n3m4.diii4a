@@ -529,6 +529,35 @@
                     android:layout_height="wrap_content"
                     android:text="@string/disable_lighting" />
 
+                <CheckBox
+                    android:id="@+id/cb_r_globalIllumination"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/render_global_illumination_harm_r_globalillumination" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/global_illumination_brightness_harm_r_globalIlluminationBrightness" />
+
+                    <EditText
+                        android:id="@+id/edt_r_globalIlluminationBrightness"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/global_illumination_brightness"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="numberDecimal|textNoSuggestions"
+                        android:text="0.5" />
+                </LinearLayout>
+
                 <!-- Shadow -->
                 <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"

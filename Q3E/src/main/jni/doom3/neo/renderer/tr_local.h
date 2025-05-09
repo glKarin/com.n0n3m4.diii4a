@@ -1581,6 +1581,9 @@ typedef enum {
 	SHADER_INTERACTION_PBR,
 	SHADER_INTERACTION_BLINNPHONG,
     SHADER_AMBIENT_LIGHTING,
+#ifdef _GLOBAL_ILLUMINATION
+    SHADER_GLOBAL_ILLUMINATION,
+#endif
 	SHADER_DIFFUSECUBEMAP,
 	// SHADER_GLASSWARP,
 	SHADER_TEXGEN,
@@ -2357,6 +2360,14 @@ extern idCVar harm_r_useHighPrecision;
 #if !defined(__ANDROID__)
 #define GL_VERSION_NAME_GL_CORE "OpenGL_core"
 #define GL_VERSION_NAME_GL_COMPATIBILITY "OpenGL_compatibility"
+#endif
+
+#ifdef _GLOBAL_ILLUMINATION
+extern idCVar harm_r_globalIllumination;
+extern idCVar harm_r_globalIlluminationBrightness;
+#define HARM_RENDER_GLOBAL_ILLUMINATION() (harm_r_globalIllumination.GetBool() && harm_r_globalIlluminationBrightness.GetFloat() > 0.0f)
+
+void RB_DrawGlobalIlluminations( drawSurf_t **drawSurfs, int numDrawSurfs );
 #endif
 
 #endif /* !__TR_LOCAL_H__ */

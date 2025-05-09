@@ -37,8 +37,8 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "5.0", "Specular exponent in PBR interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_normalCorrectionPBR", "float", "1.0", "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("harm_r_ambientLightingBrightness", "float", "1.0", "Lighting brightness in ambient lighting", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_normalCorrectionPBR", "float", "1.0", "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_ambientLightingBrightness", "float", "1.0", "Lighting brightness in ambient lighting", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("r_maxFps", "integer", "0", "Limit maximum FPS. 0 = unlimited", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
 
                         KCVar.CreateCVar("r_screenshotFormat", "integer", "0", "Screenshot format", 0,
@@ -75,7 +75,9 @@ public final class KCVarSystem
                                 "1", "all shaders use high precision as default precision exclude special variables",
                                 "2", "all shaders use high precision as default precision and special variables also use high precision"
                         ),
-                        KCVar.CreateCVar("harm_r_occlusionCulling", "bool", "0", "Enable DOOM3-BFG occlusion culling", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT)
+                        KCVar.CreateCVar("harm_r_occlusionCulling", "bool", "0", "Enable DOOM3-BFG occlusion culling", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT),
+                        KCVar.CreateCVar("harm_r_globalIllumination", "bool", "0", "render global illumination before draw lighting interactions", KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_globalIlluminationBrightness", "float", "0.5", "global illumination brightness", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(

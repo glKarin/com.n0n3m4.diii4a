@@ -1938,7 +1938,14 @@ void	RB_STD_DrawView(void)
 			&& !r_noLight.GetBool()
 #endif
 	   )
-		RB_GLSL_DrawInteractions();
+    {
+#ifdef _GLOBAL_ILLUMINATION
+        if(HARM_RENDER_GLOBAL_ILLUMINATION())
+            RB_DrawGlobalIlluminations(drawSurfs, numDrawSurfs);
+#endif
+
+        RB_GLSL_DrawInteractions();
+    }
 
 	// disable stencil shadow test
 	qglStencilFunc(GL_ALWAYS, 128, 255);

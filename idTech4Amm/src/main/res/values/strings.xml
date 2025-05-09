@@ -9,7 +9,7 @@
     <string name="commandline">Commandline:</string>
     <string name="game_working_directory">Game working directory:</string>
     <string name="chooser">Chooser</string>
-    <string name="disable_lighting">Disable lighting</string>
+    <string name="disable_lighting">Disable lighting(r_noLight)</string>
     <string name="use_dxt_textures_tegra_only_others_no_effect">Use DXT textures (tegra only, others - no effect)</string>
     <string name="use_etc1_or_rgba4444_compression">Use ETC1 (or RGBA4444) compression</string>
     <string name="clear_vertex_buffer_cvar_harm_r_clearvertexbuffer">Clear vertex buffer(harm_r_clearVertexBuffer)</string>
@@ -480,5 +480,8 @@
     <string name="setup_max_command_line_editor_pixel_height">Setup max command line editor pixel height(0 means not limit)</string>
     <string name="zero_means_not_limit">px, 0 means not limit</string>
     <string name="skip_hit_effect_in_game">Skip hit effect in game(harm_g_skipHitEffect)</string>
+    <string name="render_global_illumination_harm_r_globalillumination">Render global illumination(harm_r_globalIllumination)</string>
+    <string name="global_illumination_brightness_harm_r_globalIlluminationBrightness">Global illumination brightness(harm_r_globalIlluminationBrightness)</string>
+    <string name="global_illumination_brightness">Global illumination brightness</string>
 
 </resources>
