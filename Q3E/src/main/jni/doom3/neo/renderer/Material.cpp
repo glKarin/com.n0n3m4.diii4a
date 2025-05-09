@@ -2055,7 +2055,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 	if (newStage.fragmentProgram || newStage.vertexProgram)
 #else
-	if (newStage.glslProgram)
+	if (newStage.fragmentProgram || newStage.vertexProgram || newStage.glslProgram)
 #endif
 	{
 		ss->newStage = (newShaderStage_t *)Mem_Alloc(sizeof(newStage));
@@ -3350,7 +3350,7 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 #ifdef _RAVEN //karin: calc dynamic variants on material stage
 			case OP_TYPE_GLSL_ENABLED: { //karin: GLSL shader stage is enabled current
 					float f = 0.0;
-					if (stages && !r_skipNewAmbient.GetBool()) {
+					if (stages) {
 						for (int m = 0; m < numStages; m++) {
 							if (stages[ m ].newShaderStage && stages[ m ].newShaderStage->IsValid()) {
 								f = 1.0;
@@ -3377,7 +3377,7 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 #ifdef _HUMANHEAD //karin: calc dynamic variants on material stage
 			case OP_TYPE_FRAGMENTPROGRAMS: { //karin: check has ARB to GLSL shader stage is enabled current
 					float f = 0.0;
-					if (stages && !r_skipNewAmbient.GetBool()) {
+					if (stages) {
 						for (int m = 0; m < numStages; m++) {
 							if (stages[ m ].newStage && stages[ m ].newStage->glslProgram > 0) {
 								f = 1.0;
