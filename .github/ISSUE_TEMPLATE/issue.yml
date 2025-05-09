@@ -98,3 +98,17 @@ body:
       placeholder: "Copy and paste / upload `stderr.txt` file contents"
     validations:
       required: false
+  - type: textarea
+    id: doomconfig_log
+    attributes:
+      label: DoomConfig.cfg (If it's DOOM 3/Quake 4/Prey2006 game)
+      placeholder: "Copy and paste / upload `DoomConfig.cfg` file contents"
+    validations:
+      required: false
+  - type: textarea
+    id: autoexec_log
+    attributes:
+      label: autoexec.cfg (If it's DOOM 3/Quake 4/Prey2006 game)
+      placeholder: "Copy and paste / upload `autoexec.cfg` file contents"
+    validations:
+      required: false

@@ -1599,7 +1599,7 @@ typedef enum {
 	SHADER_SCREENEFFECT, // spiritview
 	SHADER_RADIALBLUR, // deathview
 	SHADER_LIQUID, // liquid
-//    SHADER_INTERACTIONLIQUID, // interaction liquid
+    SHADER_MEMBRANE, // membrane
 	SHADER_SCREENPROCESS, // unused
 #endif
 	// shadow mapping

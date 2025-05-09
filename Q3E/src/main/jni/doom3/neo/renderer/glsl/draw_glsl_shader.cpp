@@ -470,6 +470,7 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
     ret.Append(GLSL_SHADER_SOURCE("screeneffect", SHADER_SCREENEFFECT, &screeneffectShader, SCREENEFFECT_VERT, SCREENEFFECT_FRAG, "", ""));
     ret.Append(GLSL_SHADER_SOURCE("radialblur", SHADER_RADIALBLUR, &radialblurShader, RADIALBLUR_VERT, RADIALBLUR_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("liquid", SHADER_LIQUID, &liquidShader, LIQUID_VERT, LIQUID_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("membrane", SHADER_MEMBRANE, &membraneShader, MEMBRANE_VERT, MEMBRANE_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("screenprocess", SHADER_SCREENPROCESS, &screenprocessShader, SCREENPROCESS_VERT, SCREENPROCESS_FRAG, "", ""));
 #endif
 
