@@ -452,6 +452,8 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	RB_LogComment("---------- RB_STD_FillDepthBuffer ----------\n");
 
+	qglDisable(GL_BLEND); //dante: add
+
 	if (backEnd.viewDef->numClipPlanes) {
 		GL_UseProgram(&depthFillClipShader);
 		GL_SelectTexture(1);
@@ -495,6 +497,7 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
     GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 
 	GL_UseProgram(NULL);
+	qglEnable(GL_BLEND); //dante: add
 }
 
 /*
@@ -1835,9 +1838,88 @@ a floating point value
 */
 void RB_STD_LightScale(void)
 {
-//#warning RB_STD_LightScale
-#if 0	//!defined(GL_ES_VERSION_2_0)
+#if 0 // TODO
 	float	v, f;
+
+	if (backEnd.overBright == 1.0f) {
+		return;
+	}
+
+	if (r_skipLightScale.GetBool()) {
+		return;
+	}
+
+	RB_LogComment("---------- RB_STD_LightScale ----------\n");
+
+	// the scissor may be smaller than the viewport for subviews
+	if (r_useScissor.GetBool()) {
+		qglScissor(backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
+		           backEnd.viewDef->viewport.y1 + backEnd.viewDef->scissor.y1,
+		           backEnd.viewDef->scissor.x2 - backEnd.viewDef->scissor.x1 + 1,
+		           backEnd.viewDef->scissor.y2 - backEnd.viewDef->scissor.y1 + 1);
+		backEnd.currentScissor = backEnd.viewDef->scissor;
+	}
+
+	float projectionMatrix[16];
+	float modelViewMatrix[16];
+	esOrtho((ESMatrix *)projectionMatrix, 0, 1, 0, 1, -1, 1);
+	esMatrixLoadIdentity((ESMatrix *)modelViewMatrix);
+	float	mat[16];
+	myGlMultMatrix(modelViewMatrix, projectionMatrix, mat);
+
+	GL_State(GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_SRC_COLOR);
+	GL_Cull(CT_TWO_SIDED);	// so mirror views also get it
+	GL_UseProgram(&defaultShader);
+    GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mat);
+    GL_UniformMatrix4fv(SHADER_PARM_ADDR(textureMatrix), modelViewMatrix);
+
+	GL_SelectTexture( 0 );
+	globalImages->whiteImage->Bind();
+	qglDisable(GL_DEPTH_TEST);
+	qglDisable(GL_STENCIL_TEST);
+
+	GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), zero);
+	GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
+
+	v = 1;
+	float color[4];
+	color[3] = 1.0f;
+	const float vs[] = {
+		0,0,
+		0,1,
+		1,1,
+		1,0
+	};
+
+	qglBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 2, GL_FLOAT, false, 0, vs);
+
+	while (idMath::Fabs(v - backEnd.overBright) > 0.01) {	// a little extra slop
+		f = backEnd.overBright / v;
+		f /= 2;
+
+		if (f > 1) {
+			f = 1;
+		}
+
+		color[0] = color[1] = color[2] = f;
+		color[1] = 1;
+		GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
+		v = v * f * 2;
+
+		qglDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	}
+	globalImages->BindNull();
+
+    GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+	GL_UseProgram(NULL);
+
+	qglEnable(GL_DEPTH_TEST);
+	GL_Cull(CT_FRONT_SIDED);
+#elif	!defined(GL_ES_VERSION_2_0)
+    float	v, f;
 
 	if (backEnd.overBright == 1.0f) {
 		return;
@@ -1928,11 +2010,9 @@ void	RB_STD_DrawView(void)
 
 	// fill the depth buffer and clear color buffer to black except on
 	// subviews
-	qglDisable(GL_BLEND);
 	RB_STD_FillDepthBuffer(drawSurfs, numDrawSurfs);
-	// main light renderer
-	qglEnable(GL_BLEND);
 
+	// main light renderer
 	if (r_interactionLightingModel != HARM_INTERACTION_SHADER_NOLIGHTING
 #ifdef _NO_LIGHT
 			&& !r_noLight.GetBool()

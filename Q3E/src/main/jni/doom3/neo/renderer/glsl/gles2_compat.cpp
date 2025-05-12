@@ -459,6 +459,9 @@ static void glrbStartRender(void)
 	myGlMultMatrix(gl_ModelviewMatrix, gl_ProjectionMatrix, gl_MVPMatrix);
 
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), gl_MVPMatrix);
+	float textureMatrix[16];
+	esMatrixLoadIdentity((ESMatrix *)textureMatrix);
+    GL_UniformMatrix4fv(SHADER_PARM_ADDR(textureMatrix), textureMatrix);
 
 	//Sys_Printf("Current shader program: %p\n", backEnd.glState.currentProgram);
 }
