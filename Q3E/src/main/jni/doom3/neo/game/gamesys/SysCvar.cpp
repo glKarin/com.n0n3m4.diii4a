@@ -351,6 +351,9 @@ idCVar harm_ui_viewLightOffset( "harm_ui_viewLightOffset", "0 0 0", CVAR_GAME | 
 idCVar harm_ui_viewLightType( "harm_ui_viewLightType", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_INTEGER | CVAR_ARCHIVE, "player view flashlight type. 0=spot light; 1=point light" );
 idCVar harm_ui_viewLightOnWeapon( "harm_ui_viewLightOnWeapon", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_INTEGER | CVAR_ARCHIVE, "player view flashlight follow weapon position" );
 #endif
+#ifdef MOD_BOTS
+idCVar harm_si_useCombatBboxInMPGame( "harm_si_useCombatBboxInMPGame", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "players force use combat bbox in multiplayer game" );
+#endif
 #ifdef __ANDROID__ //karin: re-normalize player movement direction. only for DIII4A smooth onscreen joystick control
 idCVar harm_g_normalizeMovementDirection("harm_g_normalizeMovementDirection", "0", CVAR_GAME | CVAR_BOOL, "Re-normalize player/walker movement direction");
 #endif

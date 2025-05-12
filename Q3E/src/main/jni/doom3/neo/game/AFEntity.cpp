@@ -888,6 +888,13 @@ idAFEntity_Base::SetCombatContents
 */
 void idAFEntity_Base::SetCombatContents(bool enable)
 {
+#ifdef MOD_BOTS //karin: for use_combat_bbox
+	if(!combatModel)
+	{
+		//combatModelContents = 0;
+		return;
+	}
+#endif
 	assert(combatModel);
 
 	if (enable && combatModelContents) {

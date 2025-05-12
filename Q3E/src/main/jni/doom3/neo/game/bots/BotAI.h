@@ -171,6 +171,10 @@ private:
     static bool             botAvailable;
     static bool             botInitialized;
 
+#ifdef _MOD_FULL_BODY_AWARENESS
+	static void				GetPlayerViewPos(idPlayer *player, idVec3 &origin, idMat3 &axis);
+#endif
+
 // Variables
 public:
     int						botID;

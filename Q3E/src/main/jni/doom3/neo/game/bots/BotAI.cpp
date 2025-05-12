@@ -6,6 +6,12 @@
 
 #include "../Game_local.h"
 
+#ifdef _MOD_FULL_BODY_AWARENESS
+#define Player_GetViewPos(p, o, a) GetPlayerViewPos(p, o, a)
+#else
+#define Player_GetViewPos(p, o, a) p->GetViewPos(o, a)
+#endif
+
 /*
 =====================
 botMoveState::botMoveState
@@ -970,7 +976,7 @@ void botAi::UpdateViewAngles( void )
     idAngles 	idealViewAngles;
     idAngles	delta;
 
-    playerEnt->GetViewPos( viewPos, axis );
+    Player_GetViewPos( playerEnt, viewPos, axis );
     viewAngles = playerEnt->viewAngles; // TinMan: Make sure we're cooking with the right ingredients
 
     viewDir.Normalize(); // TinMan: Viewdir is set by bot, there it should look
@@ -2963,7 +2969,7 @@ bool botAi::CheckFOV( const idVec3 &pos ) const
     idVec3	eyePos;
     idMat3	viewAxis;
 
-    playerEnt->GetViewPos( eyePos, viewAxis );
+    Player_GetViewPos( playerEnt, eyePos, viewAxis );
 
     delta = pos - eyePos;
 
@@ -3295,7 +3301,7 @@ trace_t botAi::GetPlayerTrace( idPlayer * player )
     int maxRange = 4096; // TinMan:  Max a bounds trace can do is 4096.
 
     dir = player->viewAngles.ToForward();
-    player->GetViewPos( eye, axis );
+    Player_GetViewPos( player, eye, axis );
 
     gameLocal.clip.TracePoint( tr, eye, eye + ( dir * maxRange ), CONTENTS_OPAQUE | CONTENTS_RENDERMODEL, player );
 
@@ -3653,7 +3659,7 @@ void botAi::Event_GetViewPosition( void )
 {
     idVec3 pos;
     idMat3 axis;
-    playerEnt->GetViewPos( pos, axis );
+    Player_GetViewPos( playerEnt, pos, axis );
     idThread::ReturnVector( pos );
 }
 
@@ -5172,6 +5178,22 @@ void botAi::Event_FindOther( void )
 	else
 		idThread::ReturnEntity(NULL);
 }
+
+#ifdef _MOD_FULL_BODY_AWARENESS
+void botAi::GetPlayerViewPos(idPlayer *owner, idVec3 &origin, idMat3 &axis)
+{
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->focusUI)
+	{
+		owner->GetViewPos(origin, axis);
+	}
+
+	else
+	{
+		origin = owner->firstPersonViewOrigin_playerViewOrigin;
+		axis = owner->firstPersonViewAxis;
+	}
+}
+#endif
 
 #include "BotAI_cmd.cpp"
 #include "BotAI_manager.cpp"
