@@ -238,7 +238,7 @@ class idDeclManagerLocal : public idDeclManager
 
 		virtual const idMaterial 		*FindMaterial(const char *name, bool makeDefault = true);
 		virtual const idDeclSkin 		*FindSkin(const char *name, bool makeDefault = true);
-		virtual const idSoundShader 	*FindSound(const char *name, bool makeDefault = true);        virtual const idDecl                 *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false) = 0;
+		virtual const idSoundShader 	*FindSound(const char *name, bool makeDefault = true);        virtual const idDecl                 *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false);
 #ifdef _RAVEN
 		virtual const idDeclTable *		FindTable( const char *name, bool makeDefault = true );
 		// RAVEN BEGIN
