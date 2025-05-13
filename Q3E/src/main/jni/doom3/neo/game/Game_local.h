@@ -489,6 +489,11 @@ class idGameLocal : public idGame
 #ifdef MOD_BOTS
         friend class botAi;
         void                    ServerBotClientBegin(int clientNum, const idDict *clientArgs = NULL);
+#ifdef _MOD_BOTS_ASSETS
+        void                    RegisterStartupScriptSources(const char *source);
+        void                    StartupProgramScript(void);
+        idStrList               startupScriptSources;
+#endif
 #endif
 
 	private:

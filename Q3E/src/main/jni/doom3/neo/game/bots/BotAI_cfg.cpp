@@ -3,25 +3,29 @@ idCVar botAi::harm_si_botLevel( "harm_si_botLevel", "0", CVAR_INTEGER | CVAR_GAM
 idCVar botAi::harm_si_botWeapons( "harm_si_botWeapons", "", CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot initial weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_shotgun,weapon_machinegun), and allow mix(e.g. shotgun,3,weapon_rocketlauncher). All weapon: 1=pistol, 2=shotgun, 3=machinegun, 4=chaingun, 5=handgrenade, 6=plasmagun, 7=rocketlauncher, 8=BFG, 10=chainsaw." );
 idCVar botAi::harm_si_botAmmo( "harm_si_botAmmo", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot weapons initial ammo when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo" );
 
+#ifdef _MOD_BOTS_ASSETS
+idCVar botAi::harm_g_botEnableBuiltinAssets( "harm_g_botEnableBuiltinAssets", "1", CVAR_BOOL | CVAR_GAME | CVAR_INIT | CVAR_ARCHIVE, "Enable built-in bot assets if external assets missing." );
+
+bool botAi::botEnableBuiltinAssets = false;
+#endif
+
 bool botAi::botAvailable = false;
 bool botAi::botInitialized = false;
 
-void botAi::InitBotSystem(void)
+bool botAi::InitBotSystem(void)
 {
     if(botInitialized)
     {
         gameLocal.Warning("BotAI has initialized!");
-        return;
+        return botAvailable;
     }
 
-    int i;
     int num;
     bool valid = false;
 
-    num = declManager->GetNumDecls(DECL_ENTITYDEF);
-
     // check def
-    for (i = 0; i < num; i++) {
+    num = declManager->GetNumDecls(DECL_ENTITYDEF);
+    for (int i = 0; i < num; i++) {
         const idDeclEntityDef *decl = (const idDeclEntityDef *)declManager->DeclByIndex(DECL_ENTITYDEF, i , false);
         if(!decl)
             continue;
@@ -36,10 +40,159 @@ void botAi::InitBotSystem(void)
     {
         valid = fileSystem->ReadFile(BOT_SCRIPT_FILE, NULL, NULL) > 0;
     }
+
+#ifdef _MOD_BOTS_ASSETS
+    // using built-in assets if external assets missing
+    if(!valid && harm_g_botEnableBuiltinAssets.GetBool())
+    {
+        valid = LoadResource();
+        if(valid)
+        {
+            gameLocal.Printf("BotAI: using built-in assets\n");
+            botEnableBuiltinAssets = true;
+        }
+    }
+#endif
+
     botAvailable = valid;
     botInitialized = true;
     gameLocal.Printf("BotAI initialized: available=%d\n", botAvailable);
+
+    return botAvailable;
 }
+
+#ifdef _MOD_BOTS_ASSETS
+bool botAi::LoadResource(void)
+{
+#define BOT_CHECK_DEF(name, dict) \
+    decl = declManager->FindType(DECL_ENTITYDEF, name, false); \
+    if(decl) { \
+        gameLocal.Printf("BotAI: using external entityDef: %s\n", name); \
+    } else { \
+        gameLocal.Printf("BotAI: using built-in entityDef: %s\n", name); \
+        decl = declManager->AddDeclDef(name, DECL_ENTITYDEF, dict); \
+    } \
+    if(!decl) { \
+        gameLocal.Printf("BotAI: entityDef not found: %s\n", name); \
+        return false; \
+    }
+
+    if(!botAi::harm_g_botEnableBuiltinAssets.GetBool())
+        return false;
+
+    const idDecl *decl;
+
+    // append botaas48 to aas_types, and reload aas_types
+    const idDict *declDict = gameLocal.FindEntityDefDict("aas_types", false);
+    if (!declDict) {
+        gameLocal.Error("Unable to find entityDef for 'aas_types'");
+        return false;
+    }
+    const idKeyValue *kv = declDict->MatchPrefix("type");
+    int index = 0;
+    bool found = false;
+    while (kv != NULL) {
+        if(!idStr::Icmp(kv->GetValue(), BOT_AAS))
+        {
+            found = true;
+            break;
+        }
+        idStr indexStr = kv->GetKey().Right(kv->GetKey().Length() - strlen("type"));
+        index = atoi(indexStr.c_str());
+        kv = declDict->MatchPrefix("type", kv);
+    }
+    if(found)
+    {
+        gameLocal.Printf("BotAI: %s found in 'aas_types'\n", BOT_AAS);
+    }
+    else
+    {
+        gameLocal.Printf("BotAI: append %s into 'aas_types'\n", BOT_AAS);
+        idDict dict = *declDict;
+        dict.Delete("classname");
+        idStr key = va("type%d", index + 1);
+        dict.Set(key.c_str(), BOT_AAS);
+        // rename old original aas_types
+        declManager->RenameDecl(DECL_ENTITYDEF, "aas_types", "aas_types_origin");
+        // add new aas_types
+        declManager->AddDeclDef("aas_types", DECL_ENTITYDEF, dict, true);
+    }
+
+    // append botaas48 into info_player_deathmatch, and reload info_player_deathmatch
+    declDict = gameLocal.FindEntityDefDict("info_player_deathmatch", false);
+    if (declDict) {
+        gameLocal.Printf("BotAI: append %s into 'info_player_deathmatch'\n", BOT_AAS);
+        idDict dict = *declDict;
+        dict.Delete("classname");
+        dict.Set("use_aas", BOT_AAS); // TinMan: So runaas compiles the aas for us
+        dict.Set("size", "48 48 82"); // TinMan: Must have size set for runaas
+        dict.Set("noclipmodel", "1"); // TinMan: ^ size set a clipmodel to bounds size, we don't want that.
+        // rename old original
+        declManager->RenameDecl(DECL_ENTITYDEF, "info_player_deathmatch", "info_player_deathmatch_origin");
+        // add new
+        declManager->AddDeclDef("info_player_deathmatch", DECL_ENTITYDEF, dict, true);
+    }
+
+    // append botaas48 into info_player_start, and reload info_player_start
+    declDict = gameLocal.FindEntityDefDict("info_player_start", false);
+    if (declDict) {
+        gameLocal.Printf("BotAI: append %s into 'info_player_start'\n", BOT_AAS);
+        idDict dict = *declDict;
+        dict.Delete("classname");
+        dict.Set("inherit", "info_player_deathmatch"); // TinMan: Much better with all the whatnot I'm adding
+        // rename old original
+        declManager->RenameDecl(DECL_ENTITYDEF, "info_player_start", "info_player_start_origin");
+        // add new
+        declManager->AddDeclDef("info_player_start", DECL_ENTITYDEF, dict, true);
+    }
+
+    // append botaas48 into info_player_teleport, and reload info_player_teleport
+    declDict = gameLocal.FindEntityDefDict("info_player_teleport", false);
+    if (declDict) {
+        gameLocal.Printf("BotAI: append %s into 'info_player_teleport'\n", BOT_AAS);
+        idDict dict = *declDict;
+        dict.Delete("classname");
+        dict.Set("inherit", "info_player_deathmatch"); // TinMan: Much better with all the whatnot I'm adding
+        // rename old original
+        declManager->RenameDecl(DECL_ENTITYDEF, "info_player_teleport", "info_player_teleport_origin");
+        // add new
+        declManager->AddDeclDef("info_player_teleport", DECL_ENTITYDEF, dict, true);
+    }
+
+    // create entity defs
+    BOT_CHECK_DEF(BOT_AAS, GetBotAASDef()); // botaas48
+    BOT_CHECK_DEF("bot_base", GetBotBaseDef());
+    BOT_CHECK_DEF("bot_sabot", GetBotSabotDef());
+    BOT_CHECK_DEF("bot_sabot_a8", GetBotSabotA8xDef());
+    BOT_CHECK_DEF("bot_sabot_tinman", GetBotSabotTinmanDef());
+    BOT_CHECK_DEF("bot_sabot_fluffy", GetBotSabotFluffyDef());
+    BOT_CHECK_DEF("bot_sabot_blackstar", GetBotSabotBlackstarDef());
+    BOT_CHECK_DEF("bot_names", GetBotSabotNamesDef());
+    BOT_CHECK_DEF("bot_level1", GetBotSabotLevel1Def());
+    BOT_CHECK_DEF("bot_level2", GetBotSabotLevel2Def());
+    BOT_CHECK_DEF("bot_level3", GetBotSabotLevel3Def());
+    BOT_CHECK_DEF("bot_level4", GetBotSabotLevel4Def());
+    BOT_CHECK_DEF("bot_level5", GetBotSabotLevel5Def());
+    BOT_CHECK_DEF("bot_level6", GetBotSabotLevel6Def());
+    BOT_CHECK_DEF("bot_level7", GetBotSabotLevel7Def());
+    BOT_CHECK_DEF("bot_level8", GetBotSabotLevel8Def());
+
+    bool valid = fileSystem->ReadFile(BOT_SCRIPT_FILE, NULL, NULL) > 0;
+    if(valid)
+    {
+        gameLocal.Printf("BotAI: using external script\n");
+    }
+    else
+    {
+        gameLocal.Printf("BotAI: using built-in script\n");
+        idStr source = GetBotMainScript();
+        gameLocal.RegisterStartupScriptSources(source);
+    }
+
+    return true;
+#undef BOT_CHECK_DEF
+}
+#endif
 
 int botAi::GetBotDefs( idStrList &list )
 {

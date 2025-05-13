@@ -5198,4 +5198,9 @@ void botAi::GetPlayerViewPos(idPlayer *owner, idVec3 &origin, idMat3 &axis)
 #include "BotAI_cmd.cpp"
 #include "BotAI_manager.cpp"
 
+#ifdef _MOD_BOTS_ASSETS
+#include "BotAI_def.cpp"
+#include "BotAI_script.cpp"
+#endif
+
 #endif // end

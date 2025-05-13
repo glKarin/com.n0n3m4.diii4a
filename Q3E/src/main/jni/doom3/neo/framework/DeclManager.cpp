@@ -2577,6 +2577,94 @@ bool idDeclLocal::EverReferenced(void) const
 	return everReferenced;
 }
 
+
+const idDecl * idDeclManagerLocal::AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force)
+{
+    const idDecl *decl;
+    if(!force)
+    {
+        decl = FindDeclWithoutParsing(type, defname, false);
+        if(decl)
+            return decl;
+    }
+
+    const idDeclType *typeInfoFound = NULL;
+
+    int numTypes = declManagerLocal.GetNumDeclTypes();
+    for (int i = 0; i < numTypes; i++) {
+        idDeclType *typeInfo = declManagerLocal.GetDeclType(i);
+
+        if (typeInfo && typeInfo->type == type) {
+            typeInfoFound = typeInfo;
+            break;
+        }
+    }
+    if(!typeInfoFound)
+    {
+        common->Warning("Generate def '%s' type '%d' not found", defname, type);
+        return NULL;
+    }
+
+    const idDeclFolder *declFolderFound = NULL;
+    for (int i = 0; i < declFolders.Num(); i++) {
+        if (declFolders[i]->defaultType == type) {
+            declFolderFound = declFolders[i];
+            break;
+        }
+    }
+    if(!declFolderFound)
+    {
+        common->Warning("Generate def '%s' folder '%d' not found", defname, type);
+        return NULL;
+    }
+
+    idStr fileName = va("_program_generated/%s/%s", declFolderFound->folder.c_str(), defname);
+    fileName.SetFileExtension(declFolderFound->extension.c_str());
+
+    idStr text;
+    text.Append(typeInfoFound->typeName);
+    text.Append(" ");
+    text.Append(defname);
+    text.Append(" {\n");
+    for(int i = 0; i < args.GetNumKeyVals(); i++)
+    {
+        const idKeyValue *kv = args.GetKeyVal(i);
+        text.Append("    ");
+        text.Append("\"");
+        text.Append(kv->GetKey().c_str());
+        text.Append("\" \"");
+        text.Append(kv->GetValue().c_str());
+        text.Append("\"\n");
+    }
+    text.Append("}\n");
+
+    if(fileSystem->WriteFile(fileName.c_str(), text.c_str(), text.Length()) <= 0)
+    {
+        common->Warning("Write generated def file '%s' to '%s' fail", defname, fileName.c_str());
+        return NULL;
+    }
+
+    decl = CreateNewDecl(type, defname, fileName.c_str());
+    if(!decl)
+    {
+        common->Warning("Generate decl '%s' fail", defname);
+        //fileSystem->RemoveFile(fileName);
+        return NULL;
+    }
+
+    declManager->ReloadFile(fileName, true);
+    fileSystem->RemoveFile(fileName);
+
+#if 0
+    common->Printf("Generate def '%s' to '%s'\n", defname, fileName.c_str());
+    idCmdArgs cmdArgs;
+    cmdArgs.TokenizeString(va("printEntityDef %s", defname), false);
+    PrintType(cmdArgs, DECL_ENTITYDEF);
+#endif
+
+    return decl;
+}
+
 #ifdef _RAVEN // quake4 guide
 /*
 ================

@@ -125,7 +125,15 @@ public:
     void					PostCommand( int commandType, idEntity * commandEnt, idVec3 position );
     static trace_t			GetPlayerTrace( idPlayer * player );
 
-    static bool				IsAvailable(void);
+    static bool				IsAvailable(void) {
+        return botInitialized && botAvailable;
+    }
+#ifdef _MOD_BOTS_ASSETS
+    static idCVar           harm_g_botEnableBuiltinAssets;
+    static bool 			UsingBuiltinAssets(void) {
+        return botEnableBuiltinAssets;
+    }
+#endif
     static void				ArgCompletion_addBot( const idCmdArgs &args, void(*callback)( const char *s ) );
     static void				ArgCompletion_botLevel( const idCmdArgs &args, void(*callback)( const char *s ) );
     static void				ArgCompletion_botSlots( const idCmdArgs &args, void(*callback)( const char *s ) );
@@ -140,7 +148,7 @@ public:
     static void				Cmd_SetupBotLevel_f(const idCmdArgs& args);
 	static void				Cmd_SetupBotWeapons_f(const idCmdArgs& args);
 	static void				Cmd_SetupBotAmmo_f(const idCmdArgs& args);
-    static void				InitBotSystem(void);
+    static bool				InitBotSystem(void);
     static void				UpdateUI(void);
     static bool				GenerateAAS(void);
     static void				ReleaseBotSlot(int clientID);
@@ -173,6 +181,33 @@ private:
 
 #ifdef _MOD_FULL_BODY_AWARENESS
 	static void				GetPlayerViewPos(idPlayer *player, idVec3 &origin, idMat3 &axis);
+#endif
+
+#ifdef _MOD_BOTS_ASSETS
+    static bool             botEnableBuiltinAssets;
+
+    static bool             LoadResource(void);
+    static idDict           GetBotAASDef(void);
+    static idDict           GetBotBaseDef(void);
+    static idDict           GetBotSabotDef(void);
+    static idDict           GetBotSabotA8xDef(void);
+    static idDict           GetBotSabotTinmanDef(void);
+    static idDict           GetBotSabotFluffyDef(void);
+    static idDict           GetBotSabotBlackstarDef(void);
+    static idDict           GetBotSabotNamesDef(void);
+    static idDict           GetBotSabotLevel1Def(void);
+    static idDict           GetBotSabotLevel2Def(void);
+    static idDict           GetBotSabotLevel3Def(void);
+    static idDict           GetBotSabotLevel4Def(void);
+    static idDict           GetBotSabotLevel5Def(void);
+    static idDict           GetBotSabotLevel6Def(void);
+    static idDict           GetBotSabotLevel7Def(void);
+    static idDict           GetBotSabotLevel8Def(void);
+    static idStr            GetBotBaseScript(void);
+    static idStr            GetBotEventsScript(void);
+    static idStr            GetBotMainScript(void);
+    static idStr            GetBotSabotScript(void);
+    static idStr            GetBotSabotA8Script(void);
 #endif
 
 // Variables

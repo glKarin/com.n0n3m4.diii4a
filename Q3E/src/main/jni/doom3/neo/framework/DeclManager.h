@@ -501,6 +501,8 @@ class idDeclManager
         virtual void					SetInsideLevelLoad(bool b) = 0;
         virtual bool					GetInsideLevelLoad(void) = 0;
 #endif
+
+        virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false) = 0;
 };
 
 extern idDeclManager 		*declManager;

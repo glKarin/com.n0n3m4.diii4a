@@ -304,6 +304,18 @@ void idGameLocal::Init(void)
 	InitConsoleCommands();
 
 	// load default scripts
+#ifdef MOD_BOTS
+    if(botAi::InitBotSystem())
+    {
+#ifdef _MOD_BOTS_ASSETS
+        if(botAi::UsingBuiltinAssets())
+            StartupProgramScript();
+        else
+#endif
+        program.Startup(SCRIPT_DEFAULT);
+    }
+    else
+#endif
 	program.Startup(SCRIPT_DEFAULT);
 
 	smokeParticles = new idSmokeParticles;
@@ -326,9 +338,6 @@ void idGameLocal::Init(void)
 	}
 
 	gamestate = GAMESTATE_NOMAP;
-#ifdef MOD_BOTS
-    botAi::InitBotSystem();
-#endif
 
 	Printf("...%d aas types\n", aasList.Num());
 	Printf("game initialized.\n");
@@ -4815,6 +4824,26 @@ idGameLocal::GetMapLoadingGUI
 void idGameLocal::GetMapLoadingGUI(char gui[ MAX_STRING_CHARS ]) { }
 
 #ifdef MOD_BOTS
+#ifdef _MOD_BOTS_ASSETS
+void idGameLocal::RegisterStartupScriptSources(const char *source)
+{
+    if(!source || !source[0])
+        return;
+    int num = startupScriptSources.Num();
+    startupScriptSources.AddUnique(source);
+    if(num != startupScriptSources.Num())
+        Printf("Register game startup script source: %d bytes\n", strlen(source));
+}
+
+void idGameLocal::StartupProgramScript(void)
+{
+    if(startupScriptSources.Num() > 0)
+        program.Startup(SCRIPT_DEFAULT, NULL, &startupScriptSources);
+    else
+        program.Startup(SCRIPT_DEFAULT);
+}
+#endif
+
 #include "bots/BotAASBuild.cpp"
 #include "bots/BotAI.cpp"
 #include "bots/BotSabot.cpp"
