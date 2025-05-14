@@ -2311,8 +2311,7 @@ void R_InitCommands(void)
 #ifdef _EXTRAS_TOOLS
     extern void MD5Anim_AddCommand(void);
 	MD5Anim_AddCommand();
-#endif
-#ifdef _ENGINE_MODEL_VIEWER
+
     extern void ModelTest_AddCommand(void);
     extern void ModelLight_AddCommand(void);
     ModelTest_AddCommand();

@@ -2331,7 +2331,7 @@ extern float RB_overbright;
 #define HARM_CHECK_SHADER_ERROR(x)
 #endif
 
-#ifdef _ENGINE_MODEL_VIEWER
+#ifdef _EXTRAS_TOOLS
 void ModelTest_RenderFrame(int time);
 void ModelLight_RenderFrame(int time);
 #endif

@@ -58,6 +58,10 @@ namespace modeltest
         int                     PrevFrame(int i = 1);
         int                     ListAnim(void) const;
         int                     AnimationList(md5anim_info_list_t &list) const;
+        const idRenderModelEntityDef  *GetDecl(void) const {
+            return decl && decl->IsValid() ? decl : NULL;
+        }
+        int                     GetAnimFile(idStrList &list) const;
 
     private:
         void                    BuildAnimation(int time);
@@ -72,6 +76,7 @@ namespace modeltest
         idStr                   modelName;
         qhandle_t               modelDef;
         idStr                   animName;
+        int                     animIndex;
         const idMD5Anim *       modelAnim;
         int                     animLength;
         int                     animStartTime;
@@ -87,8 +92,13 @@ namespace modeltest
         bool                    noDynamicInteractions;
         int                     startFrame;
         int                     endFrame;
+        idRenderModelEntityDef  *decl;
 
         friend void ArgCompletion_frameRange(const idCmdArgs &args, void(*callback)(const char *s));
+
+        friend void TestFrameCut_f(const idCmdArgs &args);
+        friend void TestFrameLoop_f(const idCmdArgs &args);
+        friend void TestFrameReverse_f(const idCmdArgs &args);
     };
 
     idModelTest::idModelTest()
@@ -106,7 +116,8 @@ namespace modeltest
       noselfshadows(false),
       noDynamicInteractions(false),
       startFrame(0),
-      endFrame(-1)
+      endFrame(-1),
+      decl(NULL)
     {
         memset(&worldEntity, 0, sizeof(worldEntity));
     }
@@ -114,6 +125,11 @@ namespace modeltest
     idModelTest::~idModelTest()
     {
         // Clean();
+        if(decl)
+        {
+            delete decl;
+            decl = NULL;
+        }
     }
 
     bool idModelTest::IsAnimatedModel(void) const
@@ -210,6 +226,18 @@ namespace modeltest
         return numAnim;
     }
 
+    int idModelTest::GetAnimFile(idStrList &list) const
+    {
+        if(!decl)
+            return -1;
+        if(animIndex < 0)
+            return -2;
+        if(animIndex >= decl->NumAnims())
+            return -3;
+        list = decl->GetAnimFile(animIndex);
+        return list.Num();
+    }
+
     int idModelTest::CanTest(void)
     {
         idRenderWorld *world = RenderWorld();
@@ -229,6 +257,7 @@ namespace modeltest
         memset(&worldEntity, 0, sizeof(worldEntity));
         modelName.Clear();
         animName.Clear();
+        animIndex = -1;
         modelAnim = NULL;
         modelDef = -1;
         animLength = 0;
@@ -245,6 +274,11 @@ namespace modeltest
         noDynamicInteractions = false;
         startFrame = 0;
         endFrame = -1;
+        if(decl)
+        {
+            delete decl;
+            decl = NULL;
+        }
     }
 
     void idModelTest::BuildAnimation(int time)
@@ -297,9 +331,11 @@ namespace modeltest
         modelAnim = NULL;
         animName = name;
         startFrame = start;
+        animIndex = -1;
         endFrame = end;
         if(!animName.IsEmpty())
         {
+            animIndex = GetAnimIndex(animName);
             updateAnimation = true;
             if(time >= 0)
                 BuildAnimation(time);
@@ -506,23 +542,22 @@ namespace modeltest
         if(!world)
             return -1;
         const char *n;
-        int index;
         if(animName.IsEmpty())
         {
-            index = 0;
-            n = GetAnimName(index);
-            common->Printf("animation index: %d\n", index);
+            animIndex = 0;
+            n = GetAnimName(animIndex);
+            common->Printf("animation index: %d\n", animIndex);
         }
         else
         {
-            index = GetAnimIndex(animName);
-            index++;
-            index = index % numAnim;
-            n = GetAnimName(index);
-            common->Printf("animation index: %d\n", index);
+            animIndex = GetAnimIndex(animName);
+            animIndex++;
+            animIndex = animIndex % numAnim;
+            n = GetAnimName(animIndex);
+            common->Printf("animation index: %d\n", animIndex);
         }
         TestAnim(n, time);
-        return n && n[0] ? index : -1;
+        return n && n[0] ? animIndex : -1;
     }
 
     int idModelTest::PrevAnim(int time)
@@ -546,22 +581,21 @@ namespace modeltest
         if(!world)
             return -1;
         const char *n;
-        int index;
         if(animName.IsEmpty())
         {
-            index = numAnim - 1;
-            n = GetAnimName(index, &index);
-            common->Printf("animation index: %d\n", index);
+            animIndex = numAnim - 1;
+            n = GetAnimName(animIndex, &animIndex);
+            common->Printf("animation index: %d\n", animIndex);
         }
         else
         {
-            index = GetAnimIndex(animName);
-            index--;
-            n = GetAnimName(index, &index);
-            common->Printf("animation index: %d\n", index);
+            animIndex = GetAnimIndex(animName);
+            animIndex--;
+            n = GetAnimName(animIndex, &animIndex);
+            common->Printf("animation index: %d\n", animIndex);
         }
         TestAnim(n, time);
-        return n && n[0] ? index : -1;
+        return n && n[0] ? animIndex : -1;
     }
 
     void idModelTest::TestSkin(const char *skin)
@@ -588,8 +622,8 @@ namespace modeltest
 		const char *entityName = MODEL_TEST_ENTITY_NAME;
 		const char *defPath = DECL_PROGRAM_GENERATED_DIRECTORY MODEL_TEST_ENTITY_DEF_PATH;
 
-		const idDecl *decl = declManager->FindType(DECL_ENTITYDEF, entityName, false);
-		if(!decl)
+		const idDecl *def = declManager->FindType(DECL_ENTITYDEF, entityName, false);
+		if(!def)
 		{
 			bool suc = declManager->CreateNewDecl(DECL_ENTITYDEF, entityName, defPath);
 			if(!suc)
@@ -764,6 +798,16 @@ namespace modeltest
             else
                 common->Printf("animated: false\n");
         }
+
+        idRenderModelEntityDef def;
+        if(def.Parse(model))
+        {
+            def.Print();
+            decl = new idRenderModelEntityDef;
+            *decl = def;
+        }
+        else
+            common->Printf("Load model def fail!\n");
     }
 
     void idModelTest::Render(int time)
@@ -1052,6 +1096,211 @@ namespace modeltest
         modelTest.ListAnim();
     }
 
+    void ShowModelEntityDef_f(const idCmdArgs &args)
+    {
+        if (args.Argc() < 2) {
+            common->Printf("Usage: %s <model_name>.\n", args.Argv(0));
+            return;
+        }
+
+        idRenderModelEntityDef def;
+        if(def.Parse(args.Argv(1)))
+            def.Print();
+        else
+            common->Printf("model '%s' entity def not found.\n", args.Argv(1));
+    }
+
+    void TestFrameCut_f(const idCmdArgs &args)
+    {
+        idStr			name;
+        idDict			dict;
+
+        if (!CanTest()) {
+            return;
+        }
+
+        if (!modelTest.HasModel()) {
+            common->Printf("No testModel active.\n");
+            return;
+        }
+
+        if (modelTest.animIndex < 0) {
+            common->Printf("No animation active.\n");
+            return;
+        }
+
+        idStrList anims;
+        if(modelTest.GetAnimFile(anims) < 0)
+        {
+            common->Printf("Animation file not found.\n");
+            return;
+        }
+
+        int start = 0;
+        int end = 0;
+        if (modelTest.frameIndex >= 0)
+        {
+            start = end = modelTest.frameIndex;
+        }
+        else if(modelTest.startFrame >= 0 && modelTest.endFrame >= 0)
+        {
+            start = modelTest.startFrame;
+            end = modelTest.endFrame;
+        }
+        else
+        {
+            common->Printf("No animation frame/range active.\n");
+            return;
+        }
+
+        if(anims.Num() > 1)
+            common->Printf("Only support single animation.\n");
+
+        idStr anim = anims[0];
+        idStr ext;
+        anim.ExtractFileExtension(ext);
+
+        idStr toPath;
+        if(args.Argc() > 1)
+            toPath = args.Argv(1);
+        else
+        {
+            toPath = anim;
+            toPath.StripFileExtension();
+            toPath.Append(va("_cut_%d_%d", start, end));
+        }
+        toPath.SetFileExtension(ext);
+
+        idStr cmd = va("cutAnim %s %s %d %d", toPath.c_str(), anim.c_str(), start, end);
+        common->Printf("Command: %s\n", cmd.c_str());
+
+        cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
+    }
+
+    void TestFrameLoop_f(const idCmdArgs &args)
+    {
+        idStr			name;
+        idDict			dict;
+
+        if (!CanTest()) {
+            return;
+        }
+
+        if (!modelTest.HasModel()) {
+            common->Printf("No testModel active.\n");
+            return;
+        }
+
+        if (modelTest.animIndex < 0) {
+            common->Printf("No animation active.\n");
+            return;
+        }
+
+        idStrList anims;
+        if(modelTest.GetAnimFile(anims) < 0)
+        {
+            common->Printf("Animation file not found.\n");
+            return;
+        }
+
+        int start = 0;
+        int end = -1;
+        if (modelTest.frameIndex >= 0)
+        {
+            start = end = modelTest.frameIndex;
+        }
+        else
+        {
+            start = modelTest.startFrame;
+            end = modelTest.endFrame;
+        }
+
+        if(anims.Num() > 1)
+            common->Printf("Only support single animation.\n");
+
+        idStr anim = anims[0];
+        idStr ext;
+        anim.ExtractFileExtension(ext);
+
+        idStr toPath;
+        if(args.Argc() > 1)
+            toPath = args.Argv(1);
+        else
+        {
+            toPath = anim;
+            toPath.StripFileExtension();
+            toPath.Append(va("_loop_%d_%d", start < 0 ? modelTest.numFrame + start : start, end < 0 ? modelTest.numFrame + end : end));
+        }
+        toPath.SetFileExtension(ext);
+
+        idStr cmd = va("loopAnim %s %s %d %d", toPath.c_str(), anim.c_str(), start, end);
+        common->Printf("Command: %s\n", cmd.c_str());
+
+        cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
+    }
+
+    void TestFrameReverse_f(const idCmdArgs &args)
+    {
+        idStr			name;
+        idDict			dict;
+
+        if (!CanTest()) {
+            return;
+        }
+
+        if (!modelTest.HasModel()) {
+            common->Printf("No testModel active.\n");
+            return;
+        }
+
+        if (modelTest.animIndex < 0) {
+            common->Printf("No animation active.\n");
+            return;
+        }
+
+        idStrList anims;
+        if(modelTest.GetAnimFile(anims) < 0)
+        {
+            common->Printf("Animation file not found.\n");
+            return;
+        }
+
+        int start = 0;
+        int end = -1;
+        if (modelTest.frameIndex >= 0)
+        {
+            start = end = modelTest.frameIndex;
+        }
+        else
+        {
+            start = modelTest.startFrame;
+            end = modelTest.endFrame;
+        }
+
+        if(anims.Num() > 1)
+            common->Printf("Only support single animation.\n");
+
+        idStr anim = anims[0];
+        idStr ext;
+        anim.ExtractFileExtension(ext);
+
+        idStr toPath;
+        if(args.Argc() > 1)
+            toPath = args.Argv(1);
+        else
+        {
+            toPath = anim;
+            toPath.StripFileExtension();
+            toPath.Append(va("_reverse_%d_%d", start < 0 ? modelTest.numFrame + start : start, end < 0 ? modelTest.numFrame + end : end));
+        }
+        toPath.SetFileExtension(ext);
+
+        idStr cmd = va("reverseAnim %s %s %d %d", toPath.c_str(), anim.c_str(), start, end);
+        common->Printf("Command: %s\n", cmd.c_str());
+
+        cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
+    }
+
 #undef _TEST_ANIM_TIME
 
     void ArgCompletion_modelTest(const idCmdArgs &args, void(*callback)(const char *s))
@@ -1124,4 +1373,10 @@ void ModelTest_AddCommand(void)
     cmdSystem->AddCommand("modelFrameRange", TestFrameRange_f, CMD_FL_RENDERER, "test model anim frame range", modeltest::ArgCompletion_frameRange);
 
     cmdSystem->AddCommand("modelListAnim", ListAnim_f, CMD_FL_RENDERER, "list test model animations");
+
+    cmdSystem->AddCommand("modelFrameCut", TestFrameCut_f, CMD_FL_RENDERER, "cut current test model anim frame/range");
+    cmdSystem->AddCommand("modelFrameLoop", TestFrameLoop_f, CMD_FL_RENDERER, "loop current test model anim frame/range");
+    cmdSystem->AddCommand("modelFrameReverse", TestFrameReverse_f, CMD_FL_RENDERER, "reverse current test model anim frame/range");
+
+    cmdSystem->AddCommand("modelEntityDef", ShowModelEntityDef_f, CMD_FL_RENDERER, "print model entity def", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
 }
