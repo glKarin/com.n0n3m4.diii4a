@@ -5356,4 +5356,9 @@ const char * botAi::GetCurrentWeapon(void)
 #include "BotAI_aas.cpp"
 #include "BotAI_manager.cpp"
 
+#ifdef _MOD_BOTS_ASSETS
+#include "BotAI_def.cpp"
+#include "BotAI_script.cpp"
+#endif
+
 #endif

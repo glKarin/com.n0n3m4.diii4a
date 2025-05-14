@@ -525,6 +525,10 @@ void idGameLocal::Init( void ) {
 	idClass::Init();
 
 	InitConsoleCommands();
+
+#ifdef MOD_BOTS
+    botAi::InitBotSystem(); // must before program startup and load aas_types
+#endif
 	// load default scripts
 	program.Startup( SCRIPT_DEFAULT );
 	
@@ -592,10 +596,6 @@ void idGameLocal::Init( void ) {
 // RAVEN END
 
 	networkSystem->AddSortFunction( filterByMod );
-
-#ifdef MOD_BOTS
-    botAi::InitBotSystem();
-#endif
 }
 
 /*
