@@ -2108,6 +2108,11 @@ void idProgram::Startup(const char *defaultScript)
 
 	// load the default script
 	if (defaultScript && *defaultScript) {
+#if defined(MOD_BOTS) && defined(_MOD_BOTS_ASSETS)
+        if(startupScriptSources.Num() > 0)
+            CompileFile(defaultScript, NULL, &startupScriptSources);
+        else
+#endif
 		CompileFile(defaultScript);
 	}
 
@@ -2332,6 +2337,9 @@ idProgram::idProgram
 idProgram::idProgram()
 {
 	FreeData();
+#if defined(MOD_BOTS) && defined(_MOD_BOTS_ASSETS)
+    startupScriptSources.SetGranularity(1);
+#endif
 }
 
 /*
@@ -2359,34 +2367,6 @@ void idProgram::ReturnEntity(idEntity *ent)
 }
 
 #if defined(MOD_BOTS) && defined(_MOD_BOTS_ASSETS)
-/*
-================
-idProgram::Startup
-================
-*/
-void idProgram::Startup(const char *defaultScript, const idStrList *files, const idStrList *sources)
-{
-    gameLocal.Printf("Initializing scripts\n");
-
-    // make sure all data is freed up
-    idThread::Restart();
-
-    // get ready for loading scripts
-    BeginCompilation();
-
-    // load the default script
-    if (defaultScript && *defaultScript) {
-        CompileFile(defaultScript, files, sources);
-    }
-
-    FinishCompilation();
-}
-
-/*
-================
-idProgram::CompileFile
-================
-*/
 void idProgram::CompileFile(const char *filename, const idStrList *files, const idStrList *sources)
 {
     char *src;
@@ -2425,5 +2405,15 @@ void idProgram::CompileFile(const char *filename, const idStrList *files, const 
     if (!result) {
         gameLocal.Error("Compile failed in file %s.", filename);
     }
+}
+
+void idProgram::RegisterStartupScriptSources(const char *source)
+{
+    if(!source || !source[0])
+        return;
+    int num = startupScriptSources.Num();
+    startupScriptSources.AddUnique(source);
+    if(num != startupScriptSources.Num())
+        gameLocal.Printf("Register game startup script source: %d bytes\n", strlen(source));
 }
 #endif

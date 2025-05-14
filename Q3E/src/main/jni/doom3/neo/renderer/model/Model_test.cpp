@@ -586,7 +586,7 @@ namespace modeltest
     bool idModelTest::CreateEntity(const char *model, idStr &name)
 	{
 		const char *entityName = MODEL_TEST_ENTITY_NAME;
-		const char *defPath = MODEL_TEST_ENTITY_DEF_PATH;
+		const char *defPath = DECL_PROGRAM_GENERATED_DIRECTORY MODEL_TEST_ENTITY_DEF_PATH;
 
 		const idDecl *decl = declManager->FindType(DECL_ENTITYDEF, entityName, false);
 		if(!decl)

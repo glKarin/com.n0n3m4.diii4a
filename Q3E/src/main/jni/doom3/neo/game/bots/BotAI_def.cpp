@@ -4,7 +4,7 @@
 idDict botAi::GetBotAASDef(void)
 {
     idDict dict;
-    BOT_SET_DEF_KV("defName", "botaas48");
+    BOT_SET_DEF_KV("defName", BOT_AAS);
     BOT_SET_DEF_KV("mins", "-24 -24 0");
     BOT_SET_DEF_KV("maxs", "24 24 82");
     BOT_SET_DEF_KV("usePatches", "0");
@@ -12,7 +12,7 @@ idDict botAi::GetBotAASDef(void)
     BOT_SET_DEF_KV("playerFlood", "0");
     BOT_SET_DEF_KV("allowSwimReachabilities", "0");
     BOT_SET_DEF_KV("allowFlyReachabilities", "1");
-    BOT_SET_DEF_KV("fileExtension", "botaas48");
+    BOT_SET_DEF_KV("fileExtension", BOT_AAS);
     BOT_SET_DEF_KV("gravity", "0 0 -1050");
     BOT_SET_DEF_KV("maxStepHeight", "18");
     BOT_SET_DEF_KV("maxBarrierHeight", "48");
@@ -513,82 +513,72 @@ idDict botAi::GetBotSabotNamesDef(void)
     return dict;
 }
 
-idDict botAi::GetBotSabotLevel1Def(void)
+idList<idDict> botAi::GetBotSabotLevelDef(void)
 {
-    idDict dict;
-    BOT_SET_DEF_KV("defName", "bot_level1");
-    BOT_SET_DEF_KV("fov", "10");
-    BOT_SET_DEF_KV("aim_rate", "0.01");
-    BOT_SET_DEF_KV("find_radius", "-1");
-    return dict;
-}
-
-idDict botAi::GetBotSabotLevel2Def(void)
-{
-    idDict dict;
-    BOT_SET_DEF_KV("defName", "bot_level2");
-    BOT_SET_DEF_KV("fov", "20");
-    BOT_SET_DEF_KV("aim_rate", "0.02");
-    BOT_SET_DEF_KV("find_radius", "300");
-    return dict;
-}
-
-idDict botAi::GetBotSabotLevel3Def(void)
-{
-    idDict dict;
-    BOT_SET_DEF_KV("defName", "bot_level3");
-    BOT_SET_DEF_KV("fov", "45");
-    BOT_SET_DEF_KV("aim_rate", "0.05");
-    BOT_SET_DEF_KV("find_radius", "400");
-    return dict;
-}
-
-idDict botAi::GetBotSabotLevel4Def(void)
-{
-    idDict dict;
-    BOT_SET_DEF_KV("defName", "bot_level4");
-    BOT_SET_DEF_KV("fov", "60");
-    BOT_SET_DEF_KV("aim_rate", "0.08");
-    BOT_SET_DEF_KV("find_radius", "500");
-    return dict;
-}
-
-idDict botAi::GetBotSabotLevel5Def(void)
-{
-    idDict dict;
-    BOT_SET_DEF_KV("defName", "bot_level5");
-    BOT_SET_DEF_KV("fov", "75");
-    BOT_SET_DEF_KV("aim_rate", "0.1");
-    BOT_SET_DEF_KV("find_radius", "600");
-    return dict;
-}
-
-idDict botAi::GetBotSabotLevel6Def(void)
-{
-    idDict dict;
-    BOT_SET_DEF_KV("defName", "bot_level6");
-    BOT_SET_DEF_KV("fov", "90");
-    BOT_SET_DEF_KV("aim_rate", "0.2");
-    BOT_SET_DEF_KV("find_radius", "700");
-    return dict;
-}
-
-idDict botAi::GetBotSabotLevel7Def(void)
-{
-    idDict dict;
-    BOT_SET_DEF_KV("defName", "bot_level7");
-    BOT_SET_DEF_KV("fov", "120");
-    BOT_SET_DEF_KV("aim_rate", "0.5");
-    BOT_SET_DEF_KV("find_radius", "800");
-    return dict;
-}
-
-idDict botAi::GetBotSabotLevel8Def(void)
-{
-    idDict dict;
-    BOT_SET_DEF_KV("defName", "bot_level8");
-    BOT_SET_DEF_KV("fov", "150");
-    BOT_SET_DEF_KV("aim_rate", "1.0");
-    BOT_SET_DEF_KV("find_radius", "1000");
-    return dict;
+    idList<idDict> list;
+    {
+        idDict dict;
+        BOT_SET_DEF_KV("defName", "bot_level1");
+        BOT_SET_DEF_KV("fov", "10");
+        BOT_SET_DEF_KV("aim_rate", "0.01");
+        BOT_SET_DEF_KV("find_radius", "-1");
+        list.Append(dict);
+    }
+    {
+        idDict dict;
+        BOT_SET_DEF_KV("defName", "bot_level2");
+        BOT_SET_DEF_KV("fov", "20");
+        BOT_SET_DEF_KV("aim_rate", "0.02");
+        BOT_SET_DEF_KV("find_radius", "300");
+        list.Append(dict);
+    }
+    {
+        idDict dict;
+        BOT_SET_DEF_KV("defName", "bot_level3");
+        BOT_SET_DEF_KV("fov", "45");
+        BOT_SET_DEF_KV("aim_rate", "0.05");
+        BOT_SET_DEF_KV("find_radius", "400");
+        list.Append(dict);
+    }
+    {
+        idDict dict;
+        BOT_SET_DEF_KV("defName", "bot_level4");
+        BOT_SET_DEF_KV("fov", "60");
+        BOT_SET_DEF_KV("aim_rate", "0.08");
+        BOT_SET_DEF_KV("find_radius", "500");
+        list.Append(dict);
+    }
+    {
+        idDict dict;
+        BOT_SET_DEF_KV("defName", "bot_level5");
+        BOT_SET_DEF_KV("fov", "75");
+        BOT_SET_DEF_KV("aim_rate", "0.1");
+        BOT_SET_DEF_KV("find_radius", "600");
+        list.Append(dict);
+    }
+    {
+        idDict dict;
+        BOT_SET_DEF_KV("defName", "bot_level6");
+        BOT_SET_DEF_KV("fov", "90");
+        BOT_SET_DEF_KV("aim_rate", "0.2");
+        BOT_SET_DEF_KV("find_radius", "700");
+        list.Append(dict);
+    }
+    {
+        idDict dict;
+        BOT_SET_DEF_KV("defName", "bot_level7");
+        BOT_SET_DEF_KV("fov", "120");
+        BOT_SET_DEF_KV("aim_rate", "0.5");
+        BOT_SET_DEF_KV("find_radius", "800");
+        list.Append(dict);
+    }
+    {
+        idDict dict;
+        BOT_SET_DEF_KV("defName", "bot_level8");
+        BOT_SET_DEF_KV("fov", "150");
+        BOT_SET_DEF_KV("aim_rate", "1.0");
+        BOT_SET_DEF_KV("find_radius", "1000");
+        list.Append(dict);
+    }
+    return list;
 }

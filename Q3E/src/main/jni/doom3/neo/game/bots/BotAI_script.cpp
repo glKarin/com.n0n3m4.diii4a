@@ -292,7 +292,9 @@ idStr botAi::GetBotEventsScript(void)
            "scriptEvent float\t\tgetCommandType();\n"
            "scriptEvent entity\tgetCommandEntity();\n"
            "scriptEvent vector\tgetCommandPosition();\n"
-           "scriptEvent void\t\tclearCommand();\n";
+           "scriptEvent void\t\tclearCommand();\n"
+            "\n"
+            "scriptEvent entity\t\tfindOther();\n";
 }
 
 /*******************************************************************************
@@ -611,6 +613,15 @@ idStr botAi::GetBotSabotScript(void)
            "\t\t\t\tstopMove();\n"
            "\t\t\t\twaitFrame(); // TinMan: Catch a breather.\n"
            "\t\t\t\t// TinMan: *todo* set up some kind of wander goal/state?\n"
+           "\n"
+           "\t\t\t\t//karin: forbid freeze, always moving!\n"
+           "\t\t\t\tgoal = findOther();\n"
+           "\t\t\t\tif(goal)\n"
+           "\t\t\t\t{\n"
+           "\t\t\t\t\tgoalType = SABOT_GOAL_MOVE;\n"
+           "\t\t\t\t\tmoveType = SABOT_MOVETYPE_ENTITY;\n"
+           "\t\t\t\t}\n"
+           "\n"
            "\t\t\t}\n"
            "\t\t}\n"
            "\t\t\n"
@@ -4264,6 +4275,15 @@ idStr botAi::GetBotSabotA8Script(void)
            "\t\t\t\tstopMove();\n"
            "\t\t\t\twaitFrame(); // TinMan: Catch a breather.\n"
            "\t\t\t\t// TinMan: *todo* set up some kind of wander goal/state?\n"
+           "\n"
+           "\t\t\t\t//karin: forbid freeze, always moving!\n"
+           "\t\t\t\tgoal = findOther();\n"
+           "\t\t\t\tif(goal)\n"
+           "\t\t\t\t{\n"
+           "\t\t\t\t\tgoalType = SABOT_GOAL_MOVE;\n"
+           "\t\t\t\t\tmoveType = SABOT_MOVETYPE_ENTITY;\n"
+           "\t\t\t\t}\n"
+           "\n"
            "\t\t\t}\n"
            "\t\t}\n"
            "\t\t\n"

@@ -238,7 +238,7 @@ class idDeclManagerLocal : public idDeclManager
 
 		virtual const idMaterial 		*FindMaterial(const char *name, bool makeDefault = true);
 		virtual const idDeclSkin 		*FindSkin(const char *name, bool makeDefault = true);
-		virtual const idSoundShader 	*FindSound(const char *name, bool makeDefault = true);        virtual const idDecl                 *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false);
+		virtual const idSoundShader 	*FindSound(const char *name, bool makeDefault = true);
 #ifdef _RAVEN
 		virtual const idDeclTable *		FindTable( const char *name, bool makeDefault = true );
 		// RAVEN BEGIN
@@ -297,21 +297,23 @@ class idDeclManagerLocal : public idDeclManager
 		// jmarshall end
 #endif
 #ifdef _HUMANHEAD
-    virtual const hhDeclBeam *		FindBeam( const char *name, bool makeDefault = true );
-    virtual const hhDeclBeam *		BeamByIndex( int index, bool forceParse = true );
-    virtual void					SetInsideLevelLoad(bool b) {
-        inLevelLoad = b;
-    }
-    virtual bool					GetInsideLevelLoad(void) {
-        return inLevelLoad;
-    }
+        virtual const hhDeclBeam *		FindBeam( const char *name, bool makeDefault = true );
+        virtual const hhDeclBeam *		BeamByIndex( int index, bool forceParse = true );
+        virtual void					SetInsideLevelLoad(bool b) {
+            inLevelLoad = b;
+        }
+        virtual bool					GetInsideLevelLoad(void) {
+            return inLevelLoad;
+        }
 #endif
 
 		virtual const idMaterial 		*MaterialByIndex(int index, bool forceParse = true);
 		virtual const idDeclSkin 		*SkinByIndex(int index, bool forceParse = true);
 		virtual const idSoundShader 	*SoundByIndex(int index, bool forceParse = true);
 
-	public:
+        virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false);
+
+public:
 		static void					MakeNameCanonical(const char *name, char *result, int maxLength);
 		idDeclLocal 				*FindTypeWithoutParsing(declType_t type, const char *name, bool makeDefault = true);
 
@@ -339,7 +341,7 @@ class idDeclManagerLocal : public idDeclManager
 		static idCVar				decl_show;
 
 #ifdef _HUMANHEAD
-    bool						inLevelLoad;
+        bool						inLevelLoad;
 #endif
 
 	private:
@@ -2618,7 +2620,7 @@ const idDecl * idDeclManagerLocal::AddDeclDef(const char *defname, declType_t ty
         return NULL;
     }
 
-    idStr fileName = va("_program_generated/%s/%s", declFolderFound->folder.c_str(), defname);
+    idStr fileName = va(DECL_PROGRAM_GENERATED_DIRECTORY "%s/%s", declFolderFound->folder.c_str(), defname);
     fileName.SetFileExtension(declFolderFound->extension.c_str());
 
     idStr text;

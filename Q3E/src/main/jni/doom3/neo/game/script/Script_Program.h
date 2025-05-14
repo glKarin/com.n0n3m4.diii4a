@@ -564,8 +564,10 @@ class idProgram
 		}
 
 #if defined(MOD_BOTS) && defined(_MOD_BOTS_ASSETS)
-        void                                        Startup(const char *defaultScript, const idStrList *files, const idStrList *sources);
+        void                                        RegisterStartupScriptSources(const char *source);
         void										CompileFile(const char *filename, const idStrList *files, const idStrList *sources);
+
+        idStrList                                   startupScriptSources;
 #endif
 };
 

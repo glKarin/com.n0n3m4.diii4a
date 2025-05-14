@@ -168,14 +168,12 @@ bool botAi::LoadResource(void)
     BOT_CHECK_DEF("bot_sabot_fluffy", GetBotSabotFluffyDef());
     BOT_CHECK_DEF("bot_sabot_blackstar", GetBotSabotBlackstarDef());
     BOT_CHECK_DEF("bot_names", GetBotSabotNamesDef());
-    BOT_CHECK_DEF("bot_level1", GetBotSabotLevel1Def());
-    BOT_CHECK_DEF("bot_level2", GetBotSabotLevel2Def());
-    BOT_CHECK_DEF("bot_level3", GetBotSabotLevel3Def());
-    BOT_CHECK_DEF("bot_level4", GetBotSabotLevel4Def());
-    BOT_CHECK_DEF("bot_level5", GetBotSabotLevel5Def());
-    BOT_CHECK_DEF("bot_level6", GetBotSabotLevel6Def());
-    BOT_CHECK_DEF("bot_level7", GetBotSabotLevel7Def());
-    BOT_CHECK_DEF("bot_level8", GetBotSabotLevel8Def());
+    idList<idDict> levels = GetBotSabotLevelDef();
+    for(int i = 0; i < levels.Num(); i++)
+    {
+        idStr name = va("bot_level%d", i + 1);
+        BOT_CHECK_DEF(name.c_str(), levels[i]);
+    }
 
     bool valid = fileSystem->ReadFile(BOT_SCRIPT_FILE, NULL, NULL) > 0;
     if(valid)
@@ -186,7 +184,7 @@ bool botAi::LoadResource(void)
     {
         gameLocal.Printf("BotAI: using built-in script\n");
         idStr source = GetBotMainScript();
-        gameLocal.RegisterStartupScriptSources(source);
+        gameLocal.program.RegisterStartupScriptSources(source);
     }
 
     return true;

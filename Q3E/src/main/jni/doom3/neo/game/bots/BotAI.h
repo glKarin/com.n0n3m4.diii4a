@@ -195,14 +195,7 @@ private:
     static idDict           GetBotSabotFluffyDef(void);
     static idDict           GetBotSabotBlackstarDef(void);
     static idDict           GetBotSabotNamesDef(void);
-    static idDict           GetBotSabotLevel1Def(void);
-    static idDict           GetBotSabotLevel2Def(void);
-    static idDict           GetBotSabotLevel3Def(void);
-    static idDict           GetBotSabotLevel4Def(void);
-    static idDict           GetBotSabotLevel5Def(void);
-    static idDict           GetBotSabotLevel6Def(void);
-    static idDict           GetBotSabotLevel7Def(void);
-    static idDict           GetBotSabotLevel8Def(void);
+    static idList<idDict>   GetBotSabotLevelDef(void);
     static idStr            GetBotBaseScript(void);
     static idStr            GetBotEventsScript(void);
     static idStr            GetBotMainScript(void);
