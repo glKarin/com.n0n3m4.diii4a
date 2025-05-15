@@ -5227,6 +5227,12 @@ void botAi::Event_TestMoveToPosition( const idVec3 &pos )
 {
     idVec3 goal = pos;
 
+    if(!aas)
+    {
+        idThread::ReturnFloat( false );
+        return;
+    }
+
     int toAreaNum = PointReachableAreaNum( goal );
     aas->PushPointIntoAreaNum( toAreaNum, goal );
 	idThread::ReturnFloat( toAreaNum > 0 );

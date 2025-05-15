@@ -134,6 +134,7 @@ public:
     static bool				GenerateAAS(void);
     static botAi *			SpawnBot(idPlayer *botClient);
     static bool				PlayerHasBotSlot(int clientID);
+    static void             PrepareResource(void);
 
 private:
     static int				AddBot(const char *name, const idDict &dict = idDict());
@@ -168,6 +169,7 @@ private:
     static bool             botEnableBuiltinAssets;
 
     static bool             LoadResource(void);
+    static void             ReplaceResource(void);
     static idDict           GetBotAASDef(void);
     static idDict           GetBotSabotDef(void);
     static idDict           GetBotSabotTinmanDef(void);
@@ -179,6 +181,9 @@ private:
     static idStr            GetBotEventsScript(void);
     static idStr            GetBotMainScript(void);
     static idStr            GetBotSabotScript(void);
+
+    static bool             ReplaceEntityDefDict(const char *name, const idDict &dict);
+    static bool             SetupEntityDefDict(const char *name, const idDict &dict);
 #endif
 
 // Variables

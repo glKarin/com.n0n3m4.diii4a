@@ -1113,3 +1113,57 @@ void RunReach_f(const idCmdArgs &args)
 	common->SetRefreshOnPrint(false);
 	common->PrintWarnings();
 }
+
+/*
+============
+RunSingleAAS_f
+============
+*/
+void RunSingleAAS_f(const idCmdArgs &args)
+{
+    int i;
+    idAASBuild aas;
+    idAASSettings settings;
+    idStr mapName;
+
+    if (args.Argc() <= 1) {
+        common->Printf("runAAS [options] <aas_type> <mapfile>\n"
+                       "options:\n"
+                       "  -usePatches        = use bezier patches for collision detection.\n"
+                       "  -writeBrushMap     = write a brush map with the AAS geometry.\n"
+                       "  -playerFlood       = use player spawn points as valid AAS positions.\n");
+        return;
+    }
+
+    common->ClearWarnings("compiling AAS");
+
+    common->SetRefreshOnPrint(true);
+
+    i = ParseOptions(args, settings);
+
+    i--;
+    const char *aas_type = args.Argv(i);
+
+    i++;
+
+    const idDict *settingsDict = gameEdit->FindEntityDefDict(aas_type, false);
+
+    if (!settingsDict) {
+        common->Warning("Unable to find '%s' in def/aas.def", aas_type);
+    } else {
+        settings.FromDict(aas_type, settingsDict);
+        mapName = args.Argv(i);
+        mapName.BackSlashesToSlashes();
+
+        if (mapName.Icmpn("maps/", 4) != 0) {
+            mapName = "maps/" + mapName;
+        }
+
+        aas.Build(mapName, &settings);
+    }
+
+    common->Printf("=======================================================\n");
+
+    common->SetRefreshOnPrint(false);
+    common->PrintWarnings();
+}
