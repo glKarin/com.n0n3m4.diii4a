@@ -505,6 +505,7 @@ class idDeclManager
 #endif
 
         virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false) = 0;
+		virtual bool					EntityDefSet(const char *name, const char *key, const char *value = NULL) = 0;
 };
 
 extern idDeclManager 		*declManager;

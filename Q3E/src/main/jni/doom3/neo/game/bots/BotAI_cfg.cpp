@@ -4,7 +4,7 @@ idCVar botAi::harm_si_botWeapons( "harm_si_botWeapons", "", CVAR_GAME | CVAR_NOC
 idCVar botAi::harm_si_botAmmo( "harm_si_botAmmo", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot weapons initial ammo when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo" );
 
 #ifdef _MOD_BOTS_ASSETS
-idCVar botAi::harm_g_botEnableBuiltinAssets( "harm_g_botEnableBuiltinAssets", "1", CVAR_BOOL | CVAR_GAME | CVAR_INIT | CVAR_ARCHIVE, "Enable built-in bot assets if external assets missing." );
+idCVar botAi::harm_g_botEnableBuiltinAssets( "harm_g_botEnableBuiltinAssets", "0", CVAR_BOOL | CVAR_GAME | CVAR_INIT | CVAR_ARCHIVE, "Enable built-in bot assets if external assets missing." );
 
 bool botAi::botEnableBuiltinAssets = false;
 #endif
@@ -42,8 +42,9 @@ bool botAi::InitBotSystem(void)
     }
 
 #ifdef _MOD_BOTS_ASSETS
-    // using built-in assets if external assets missing
-    if(!valid && harm_g_botEnableBuiltinAssets.GetBool())
+    if(valid)
+        gameLocal.Printf("BotAI: using external assets\n");
+    else if(harm_g_botEnableBuiltinAssets.GetBool()) // using built-in assets if external assets missing
     {
         valid = LoadResource();
         if(valid)
@@ -61,32 +62,63 @@ bool botAi::InitBotSystem(void)
     return botAvailable;
 }
 
-#ifdef _MOD_BOTS_ASSETS
-bool botAi::LoadResource(void)
+void botAi::PrepareResource(void)
 {
-#define BOT_CHECK_DEF(name, dict) \
-    decl = declManager->FindType(DECL_ENTITYDEF, name, false); \
-    if(decl) { \
-        gameLocal.Printf("BotAI: using external entityDef: %s\n", name); \
-    } else { \
-        gameLocal.Printf("BotAI: using built-in entityDef: %s\n", name); \
-        decl = declManager->AddDeclDef(name, DECL_ENTITYDEF, dict); \
-    } \
-    if(!decl) { \
-        gameLocal.Printf("BotAI: entityDef not found: %s\n", name); \
-        return false; \
-    }
+#ifdef _MOD_BOTS_ASSETS
+    if(UsingBuiltinAssets())
+        ReplaceResource();
+#endif
+}
 
-    if(!botAi::harm_g_botEnableBuiltinAssets.GetBool())
+#ifdef _MOD_BOTS_ASSETS
+bool botAi::ReplaceEntityDefDict(const char *name, const idDict &args)
+{
+    const idDict *declDict = gameLocal.FindEntityDefDict(name, false);
+    if(!declDict)
         return false;
 
-    const idDecl *decl;
+    idDict dict = *declDict;
+    dict.Delete("classname");
+    dict.Copy(args);
 
+    idStr newName(name);
+    newName.Append("_origin");
+    // rename old original
+    declManager->RenameDecl(DECL_ENTITYDEF, name, newName.c_str());
+    // add new
+    declManager->AddDeclDef(name, DECL_ENTITYDEF, dict, true);
+    return true;
+}
+
+bool botAi::SetupEntityDefDict(const char *name, const idDict &args)
+{
+    const idDict *declDict = gameLocal.FindEntityDefDict(name, false);
+    if(!declDict)
+        return false;
+
+    int num = args.GetNumKeyVals();
+    const idKeyValue *kv;
+    for(int i = 0; i < num; i++)
+    {
+        kv = args.GetKeyVal(i);
+        idStr curValue;
+        if(declDict->GetString(kv->GetKey(), "", curValue))
+        {
+            if(!curValue.Cmp(kv->GetValue()))
+                continue; // equals
+        }
+        declManager->EntityDefSet(name, kv->GetKey(), kv->GetValue());
+    }
+    return true;
+}
+
+void botAi::ReplaceResource(void)
+{
     // append botaas48 to aas_types, and reload aas_types
     const idDict *declDict = gameLocal.FindEntityDefDict("aas_types", false);
     if (!declDict) {
         gameLocal.Error("Unable to find entityDef for 'aas_types'");
-        return false;
+        return;
     }
     const idKeyValue *kv = declDict->MatchPrefix("type");
     int index = 0;
@@ -108,56 +140,82 @@ bool botAi::LoadResource(void)
     else
     {
         gameLocal.Printf("BotAI: append %s into 'aas_types'\n", BOT_AAS);
-        idDict dict = *declDict;
-        dict.Delete("classname");
         idStr key = va("type%d", index + 1);
+        idDict dict;
         dict.Set(key.c_str(), BOT_AAS);
-        // rename old original aas_types
-        declManager->RenameDecl(DECL_ENTITYDEF, "aas_types", "aas_types_origin");
-        // add new aas_types
-        declManager->AddDeclDef("aas_types", DECL_ENTITYDEF, dict, true);
+#if 1
+        SetupEntityDefDict("aas_types", dict);
+#else
+        ReplaceEntityDefDict("aas_types", dict);
+#endif
     }
 
     // append botaas48 into info_player_deathmatch, and reload info_player_deathmatch
-    declDict = gameLocal.FindEntityDefDict("info_player_deathmatch", false);
-    if (declDict) {
-        gameLocal.Printf("BotAI: append %s into 'info_player_deathmatch'\n", BOT_AAS);
-        idDict dict = *declDict;
-        dict.Delete("classname");
+    gameLocal.Printf("BotAI: append %s into 'info_player_deathmatch'\n", BOT_AAS);
+    {
+        idDict dict;
         dict.Set("use_aas", BOT_AAS); // TinMan: So runaas compiles the aas for us
         dict.Set("size", "48 48 82"); // TinMan: Must have size set for runaas
         dict.Set("noclipmodel", "1"); // TinMan: ^ size set a clipmodel to bounds size, we don't want that.
-        // rename old original
-        declManager->RenameDecl(DECL_ENTITYDEF, "info_player_deathmatch", "info_player_deathmatch_origin");
-        // add new
-        declManager->AddDeclDef("info_player_deathmatch", DECL_ENTITYDEF, dict, true);
+#if 1
+        SetupEntityDefDict("info_player_deathmatch", dict);
+#else
+        ReplaceEntityDefDict("info_player_deathmatch", dict);
+#endif
     }
 
     // append botaas48 into info_player_start, and reload info_player_start
-    declDict = gameLocal.FindEntityDefDict("info_player_start", false);
-    if (declDict) {
-        gameLocal.Printf("BotAI: append %s into 'info_player_start'\n", BOT_AAS);
-        idDict dict = *declDict;
-        dict.Delete("classname");
+    gameLocal.Printf("BotAI: append %s into 'info_player_start'\n", BOT_AAS);
+    {
+        idDict dict;
+#if 1
+        dict.Set("use_aas", BOT_AAS); // TinMan: So runaas compiles the aas for us
+        dict.Set("size", "48 48 82"); // TinMan: Must have size set for runaas
+        dict.Set("noclipmodel", "1"); // TinMan: ^ size set a clipmodel to bounds size, we don't want that.
+        SetupEntityDefDict("info_player_start", dict);
+#else
         dict.Set("inherit", "info_player_deathmatch"); // TinMan: Much better with all the whatnot I'm adding
-        // rename old original
-        declManager->RenameDecl(DECL_ENTITYDEF, "info_player_start", "info_player_start_origin");
-        // add new
-        declManager->AddDeclDef("info_player_start", DECL_ENTITYDEF, dict, true);
+        ReplaceEntityDefDict("info_player_start", dict);
+#endif
     }
 
     // append botaas48 into info_player_teleport, and reload info_player_teleport
-    declDict = gameLocal.FindEntityDefDict("info_player_teleport", false);
-    if (declDict) {
-        gameLocal.Printf("BotAI: append %s into 'info_player_teleport'\n", BOT_AAS);
-        idDict dict = *declDict;
-        dict.Delete("classname");
+    gameLocal.Printf("BotAI: append %s into 'info_player_teleport'\n", BOT_AAS);
+    {
+        idDict dict;
+#if 1
+        dict.Set("use_aas", BOT_AAS); // TinMan: So runaas compiles the aas for us
+        dict.Set("size", "48 48 82"); // TinMan: Must have size set for runaas
+        dict.Set("noclipmodel", "1"); // TinMan: ^ size set a clipmodel to bounds size, we don't want that.
+        SetupEntityDefDict("info_player_teleport", dict);
+#else
         dict.Set("inherit", "info_player_deathmatch"); // TinMan: Much better with all the whatnot I'm adding
-        // rename old original
-        declManager->RenameDecl(DECL_ENTITYDEF, "info_player_teleport", "info_player_teleport_origin");
-        // add new
-        declManager->AddDeclDef("info_player_teleport", DECL_ENTITYDEF, dict, true);
+        ReplaceEntityDefDict("info_player_teleport", dict);
+#endif
     }
+}
+
+bool botAi::LoadResource(void)
+{
+#define BOT_CHECK_DEF(name, dict) \
+    decl = declManager->FindType(DECL_ENTITYDEF, name, false); \
+    if(decl) { \
+        gameLocal.Printf("BotAI: using external entityDef: %s\n", name); \
+    } else { \
+        gameLocal.Printf("BotAI: using built-in entityDef: %s\n", name); \
+        decl = declManager->AddDeclDef(name, DECL_ENTITYDEF, dict); \
+    } \
+    if(!decl) { \
+        gameLocal.Printf("BotAI: entityDef not found: %s\n", name); \
+        return false; \
+    }
+
+    if(!botAi::harm_g_botEnableBuiltinAssets.GetBool())
+        return false;
+
+    ReplaceResource();
+
+    const idDecl *decl;
 
     // create entity defs
     BOT_CHECK_DEF(BOT_AAS, GetBotAASDef()); // botaas48

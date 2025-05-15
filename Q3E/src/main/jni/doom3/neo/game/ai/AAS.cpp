@@ -103,10 +103,12 @@ bool idAASLocal::Init(const idStr &mapName, unsigned int mapFileCRC)
 		if(BOT_ENABLED()) {
 			// TODO: don't need a builder unless it is a 48, but Init's for now, look at later
 			// if class changing is added models could change, would have to handle that here
-			if(!botAASBuilder)
-				botAASBuilder = new BotAASBuild();
-			botAASBuilder->Init( this );
-			if (mapName.Find( BOT_AAS, false ) > 0) {
+            idStr ext;
+            mapName.ExtractFileExtension(ext);
+			if (ext.Find( BOT_AAS, false ) >= 0) {
+                if(!botAASBuilder)
+                    botAASBuilder = new BotAASBuild();
+                botAASBuilder->Init( this );
 				botAASBuilder->AddReachabilities();
 			}
         }
@@ -126,10 +128,8 @@ void idAASLocal::Shutdown(void)
 {
 	if (file) {
 #ifdef MOD_BOTS // cusTom3 - aas extensions
-		if(BOT_ENABLED() && botAASBuilder) {
-			if (idStr(file->GetName()).Find( BOT_AAS, false ) > 0) {
-				botAASBuilder->FreeAAS();
-			}
+		if(botAASBuilder) {
+            botAASBuilder->FreeAAS();
 		}
 #endif // TODO: save the new information out to a file so it doesn't have to be processed each map load
 		ShutdownRouting();

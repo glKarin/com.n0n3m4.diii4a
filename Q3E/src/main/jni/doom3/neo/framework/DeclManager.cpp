@@ -312,6 +312,7 @@ class idDeclManagerLocal : public idDeclManager
 		virtual const idSoundShader 	*SoundByIndex(int index, bool forceParse = true);
 
         virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false);
+		virtual bool					EntityDefSet(const char *name, const char *key, const char *value = NULL);
 
 public:
 		static void					MakeNameCanonical(const char *name, char *result, int maxLength);
@@ -722,6 +723,10 @@ void idDeclFile::Reload(bool force)
 		fileSystem->ReadFile(fileName, NULL, &testTimeStamp);
 
 		if (testTimeStamp == timestamp) {
+			return;
+		}
+		//karin: 2025 don't load and parse if file not exists
+		if (testTimeStamp == FILE_NOT_FOUND_TIMESTAMP) {
 			return;
 		}
 	}
@@ -2665,6 +2670,34 @@ const idDecl * idDeclManagerLocal::AddDeclDef(const char *defname, declType_t ty
 #endif
 
     return decl;
+}
+
+bool idDeclManagerLocal::EntityDefSet(const char *name, const char *key, const char *value)
+{
+	idDeclLocal *decl;
+
+	decl = FindTypeWithoutParsing(DECL_ENTITYDEF, name, false);
+
+	if (!decl) {
+		return false;
+	}
+
+	if (!decl->self) {
+		return false;
+	}
+
+	// if it hasn't been parsed yet, parse it now
+	if (decl->declState == DS_UNPARSED) {
+		return false;
+	}
+
+	idDeclEntityDef *entityDef = (idDeclEntityDef *)decl->self;
+	if(value)
+		entityDef->dict.Set(key, value);
+	else
+		entityDef->dict.Delete(key);
+
+	return true;
 }
 
 #ifdef _RAVEN // quake4 guide
