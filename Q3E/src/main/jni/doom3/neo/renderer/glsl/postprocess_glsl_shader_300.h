@@ -474,7 +474,7 @@ _ES3_RETRO_POSTPROCESS_GENERAL_FUNCTION
 "    // + good saturation when colors are really needed\n"
 "    // - a bit too strong visible dithering pattern\n"
 "    // https://lospec.com/palette-list/famicube\n"
-"    const vec3 palette[NUM_COLORS] = vec3[NUM_COLORS] (// 64\n"
+"    /*const*/ vec3 palette[NUM_COLORS] = vec3[NUM_COLORS] (// 64\n"
 "        RGB( 0, 0, 0 ),\n"
 "        RGB( 21, 21, 21 ),\n"
 "        RGB( 35, 23, 18 ),\n"
