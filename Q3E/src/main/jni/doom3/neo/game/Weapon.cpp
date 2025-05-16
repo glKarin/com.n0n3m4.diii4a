@@ -2004,6 +2004,10 @@ void idWeapon::PresentWeapon(bool showViewModel)
         playerViewOrigin = owner->firstPersonViewOrigin_playerViewOrigin;
 #endif
 	playerViewAxis = owner->firstPersonViewAxis;
+#ifdef MOD_BOTS
+	if(gameLocal.isMultiplayer && (!worldModelRenderEntity || !worldModelRenderEntity->hModel))
+		worldModel.GetEntity()->GetPhysics()->SetOrigin(owner->GetEyePosition());
+#endif
 
 	// calculate weapon position based on player movement bobbing
 	owner->CalculateViewWeaponPos(viewWeaponOrigin, viewWeaponAxis);
