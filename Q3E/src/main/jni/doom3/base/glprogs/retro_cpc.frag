@@ -18,7 +18,7 @@ varying lowp vec4 var_Color;
 
 vec3 Average( vec3 pal[NUM_COLORS] )
 {
-    vec3 sum = vec3( 0 );
+    vec3 sum = vec3( 0.0 );
 
     for( int i = 0; i < NUM_COLORS; i++ )
     {
@@ -30,7 +30,7 @@ vec3 Average( vec3 pal[NUM_COLORS] )
 
 vec3 Deviation( vec3 pal[NUM_COLORS] )
 {
-    vec3 sum = vec3( 0 );
+    vec3 sum = vec3( 0.0 );
     vec3 avg = Average( pal );
 
     for( int i = 0; i < NUM_COLORS; i++ )
