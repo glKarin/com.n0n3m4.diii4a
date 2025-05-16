@@ -36,6 +36,7 @@ public final class Q3EPreference
     public static final String pref_harm_r_ambientLightingBrightness    = "q3e_harm_r_ambientLightingBrightness"; //k
     public static final String pref_harm_r_globalIllumination           = "q3e_harm_r_globalIllumination"; //k
     public static final String pref_harm_r_globalIlluminationBrightness = "q3e_harm_r_globalIlluminationBrightness"; //k
+    public static final String pref_harm_r_renderMode                   = "q3e_harm_r_renderMode"; //k
     public static final String pref_harm_mapBack                        = "q3e_harm_map_back"; //k
     public static final String pref_harm_game                           = "q3e_harm_game"; //k
     public static final String pref_harm_d3bfg_rendererBackend          = "q3e_harm_d3bfg_rendererBackend"; //k
@@ -186,7 +187,8 @@ public final class Q3EPreference
     public static final String pref_harm_r_occlusionCulling           = "q3e_harm_r_occlusionCulling"; //k
     public static final String pref_harm_gui_useD3BFGFont             = "q3e_harm_gui_useD3BFGFont"; //k
     public static final String pref_harm_r_shadowMapCombine           = "q3e_harm_r_shadowMapCombine"; //k
-    public static final String pref_harm_g_skipHitEffect                = "q3e_harm_g_skipHitEffect"; //k
+    public static final String pref_harm_g_skipHitEffect              = "q3e_harm_g_skipHitEffect"; //k
+    public static final String pref_harm_g_botEnableBuiltinAssets     = "q3e_harm_g_botEnableBuiltinAssets"; //k
 
     public static final String RUN_BACKGROUND                = "harm_run_background";
     public static final String RENDER_MEM_STATUS             = "harm_render_mem_status";

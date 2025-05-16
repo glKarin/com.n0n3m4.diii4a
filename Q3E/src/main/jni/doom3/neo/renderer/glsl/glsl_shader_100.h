@@ -1,5 +1,3 @@
-#ifndef _KARIN_GLSL_SHADER_100_H
-#define _KARIN_GLSL_SHADER_100_H
 
 // Unuse C++11 raw string literals for Traditional C++98
 
@@ -1599,6 +1597,50 @@ GLSL_SHADER const char MEGATEXTURE_FRAG[] =
 "}\n"
 ;
 
+GLSL_SHADER const char PLAIN_VERT[] =
+"#version 100\n"
+"//#pragma optimize(off)\n"
+"\n"
+"precision mediump float;\n"
+"\n"
+"attribute lowp vec4 attr_Color;\n"
+"attribute vec4 attr_TexCoord;\n"
+"attribute highp vec4 attr_Vertex;\n"
+"\n"
+"uniform highp mat4 u_modelViewProjectionMatrix;\n"
+"uniform lowp float u_colorModulate; // 0 or 1/255\n"
+"uniform lowp float u_colorAdd; // 0 or 1\n"
+"\n"
+"varying vec2 var_TexDiffuse;\n"
+"varying lowp vec4 var_Color;\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"    var_TexDiffuse = attr_TexCoord.xy;\n"
+"\n"
+"    var_Color = " BYTE_COLOR(attr_Color) " * u_colorModulate + u_colorAdd;\n"
+"\n"
+"    gl_Position = u_modelViewProjectionMatrix * attr_Vertex;\n"
+"}\n"
+;
+GLSL_SHADER const char PLAIN_FRAG[] =
+"#version 100\n"
+"//#pragma optimize(off)\n"
+"\n"
+"precision mediump float;\n"
+"\n"
+"uniform sampler2D u_fragmentMap0;\n"
+"uniform lowp vec4 u_glColor;\n"
+"\n"
+"varying vec2 var_TexDiffuse;\n"
+"varying lowp vec4 var_Color;\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"    gl_FragColor = texture2D(u_fragmentMap0, var_TexDiffuse) * u_glColor * var_Color;\n"
+"}\n"
+;
+
 
 
 #if 0
@@ -2655,7 +2697,5 @@ GLSL_SHADER const char GLOBAL_ILLUMINATION_FRAG[] =
 "#endif\n"
 "}\n"
 ;
-
-#endif
 
 #endif

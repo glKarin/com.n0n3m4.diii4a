@@ -20,7 +20,7 @@ varying vec3 var_L;
 #if defined(BLINN_PHONG) || defined(_PBR)
 varying vec3 var_H;
 #endif
-#if !defined(BLINN_PHONG) || defined(_PBR)
+#if (!defined(BLINN_PHONG) && !defined(_AMBIENT)) || defined(_PBR)
 varying vec3 var_V;
 #endif
 #if defined(_PBR)

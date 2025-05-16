@@ -524,11 +524,11 @@ void RB_SetProgramEnvironment(void)
 	// also copied an extra row and column for the bilerp
 	int	 w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
 	pot = globalImages->currentRenderImage->uploadWidth;
-	parm[0] = (float)w / pot;
+	parm[0] = (float)w / (float)pot;
 
 	int	 h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
 	pot = globalImages->currentRenderImage->uploadHeight;
-	parm[1] = (float)h / pot;
+	parm[1] = (float)h / (float)pot;
 
 	parm[2] = 0;
 	parm[3] = 1;
@@ -536,8 +536,8 @@ void RB_SetProgramEnvironment(void)
 	GL_Uniform4fv(offsetof(shaderProgram_t, nonPowerOfTwo), parm);
 
 	// window coord to 0.0 to 1.0 conversion
-	parm[0] = 1.0 / w;
-	parm[1] = 1.0 / h;
+	parm[0] = 1.0f / (float)w;
+	parm[1] = 1.0f / (float)h;
 	parm[2] = 0;
 	parm[3] = 1;
 	GL_Uniform4fv(offsetof(shaderProgram_t, windowCoords), parm);

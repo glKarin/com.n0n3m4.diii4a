@@ -480,5 +480,7 @@
     <string name="render_global_illumination_harm_r_globalillumination">Render global illumination(harm_r_globalIllumination)</string>
     <string name="global_illumination_brightness_harm_r_globalIlluminationBrightness">Global illumination brightness(harm_r_globalIlluminationBrightness)</string>
     <string name="global_illumination_brightness">Global illumination brightness</string>
+    <string name="retro_postprocess">Retro postprocess(r_renderMode)</string>
+    <string name="enable_built_in_bot_assets_if_external_assets_missing">Enable built-in bot assets if external assets missing(only DOOM 3 and Quake 4 base game)(harm_g_botEnableBuiltinAssets)</string>
 
 </resources>

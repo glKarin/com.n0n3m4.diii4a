@@ -524,12 +524,6 @@
                 </LinearLayout>
 
                 <CheckBox
-                    android:id="@+id/nolight"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/disable_lighting" />
-
-                <CheckBox
                     android:id="@+id/cb_r_globalIllumination"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -557,6 +551,12 @@
                         android:inputType="numberDecimal|textNoSuggestions"
                         android:text="0.5" />
                 </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/nolight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/disable_lighting" />
 
                 <!-- Shadow -->
                 <com.karin.idTech4Amm.widget.Divider
@@ -753,6 +753,26 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/enable_doom3bfg_occlusion_culling_harm_r_occlusionCulling" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:text="@string/retro_postprocess"/>
+                    <Spinner
+                        android:id="@+id/spinner_r_renderMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:dropDownWidth="196dp"
+                        android:layout_gravity="right|center_vertical"
+                        android:spinnerMode="dropdown"
+                        android:entries="@array/retro_postprocess_labels"/>
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -969,6 +989,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/skip_hit_effect_in_game" />
+
+                <CheckBox
+                    android:id="@+id/cb_g_botEnableBuiltinAssets"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_built_in_bot_assets_if_external_assets_missing" />
 
                 <LinearLayout
                     android:id="@+id/dll_section"

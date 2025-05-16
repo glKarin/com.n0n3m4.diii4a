@@ -1592,7 +1592,6 @@ typedef enum {
 	SHADER_HEATHAZE_WITH_MASK,
 	SHADER_HEATHAZE_WITH_MASK_AND_VERTEX,
 	SHADER_COLORPROCESS,
-    SHADER_MEGATEXTURE,
 	// D3XP
     SHADER_ENVIROSUIT,
 #ifdef _HUMANHEAD
@@ -1602,6 +1601,7 @@ typedef enum {
     SHADER_MEMBRANE, // membrane
 	SHADER_SCREENPROCESS, // unused
 #endif
+    SHADER_MEGATEXTURE,
 	// shadow mapping
 #ifdef _SHADOW_MAPPING
 	SHADER_DEPTH,
@@ -1634,6 +1634,14 @@ typedef enum {
     SHADER_AMBIENT_LIGHTING_SOFT,
 #endif
 #endif
+    // post process
+#ifdef _POSTPROCESS
+    SHADER_RETRO_2BIT,
+    SHADER_RETRO_C64,
+    SHADER_RETRO_CPC,
+    SHADER_RETRO_GENESIS,
+    SHADER_RETRO_PSX,
+#endif
     // costum
 	SHADER_CUSTOM,
 } glsl_program_t;
@@ -1642,7 +1650,7 @@ typedef enum {
 #define SHADER_BASE_END SHADER_TEXGEN
 
 #define SHADER_NEW_STAGE_BEGIN SHADER_HEATHAZE
-#define SHADER_NEW_STAGE_END (SHADER_DEPTH - 1)
+#define SHADER_NEW_STAGE_END SHADER_MEGATEXTURE
 
 #ifdef _SHADOW_MAPPING
 #define SHADER_SHADOW_MAPPING_BEGIN SHADER_DEPTH
@@ -1657,6 +1665,11 @@ typedef enum {
 #define SHADER_STENCIL_SHADOW_BEGIN SHADER_INTERACTION_TRANSLUCENT
 #define SHADER_STENCIL_SHADOW_END SHADER_INTERACTION_BLINNPHONG_TRANSLUCENT
 #endif
+#endif
+
+#ifdef _POSTPROCESS
+#define SHADER_POSTPROCESS_BEGIN SHADER_RETRO_2BIT
+#define SHADER_POSTPROCESS_END SHADER_RETRO_PSX
 #endif
 
 /*
@@ -2368,6 +2381,11 @@ extern idCVar harm_r_globalIlluminationBrightness;
 #define HARM_RENDER_GLOBAL_ILLUMINATION() (harm_r_globalIllumination.GetBool() && harm_r_globalIlluminationBrightness.GetFloat() > 0.0f)
 
 void RB_DrawGlobalIlluminations( drawSurf_t **drawSurfs, int numDrawSurfs );
+#endif
+
+#ifdef _POSTPROCESS
+extern idCVar r_renderMode;
+void RB_PP_Render(void);
 #endif
 
 #endif /* !__TR_LOCAL_H__ */

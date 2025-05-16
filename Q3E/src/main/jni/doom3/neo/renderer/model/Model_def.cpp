@@ -153,7 +153,7 @@ namespace modeltest
                 }
 
                 idRenderModelEntityDef copy;
-                boolean res = copy.Parse(token2.c_str());
+                bool res = copy.Parse(token2.c_str());
 
                 if (!res) {
                     common->Warning("Unknown model definition '%s'", token2.c_str());

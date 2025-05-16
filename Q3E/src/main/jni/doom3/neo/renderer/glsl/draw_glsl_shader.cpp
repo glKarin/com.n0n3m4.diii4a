@@ -463,7 +463,6 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMask", SHADER_HEATHAZE_WITH_MASK, &heatHazeWithMaskShader, HEATHAZEWITHMASK_VERT, HEATHAZEWITHMASK_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", SHADER_HEATHAZE_WITH_MASK_AND_VERTEX, &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("colorProcess", SHADER_COLORPROCESS, &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
-    ret.Append(GLSL_SHADER_SOURCE("megaTexture", SHADER_MEGATEXTURE, &megaTextureShader, MEGATEXTURE_VERT, MEGATEXTURE_FRAG, "", ""));
 	// D3XP
 	ret.Append(GLSL_SHADER_SOURCE("enviroSuit", SHADER_ENVIROSUIT, &enviroSuitShader, ENVIROSUIT_VERT, ENVIROSUIT_FRAG, "", ""));
 #ifdef _HUMANHEAD
@@ -473,6 +472,7 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("membrane", SHADER_MEMBRANE, &membraneShader, MEMBRANE_VERT, MEMBRANE_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("screenprocess", SHADER_SCREENPROCESS, &screenprocessShader, SCREENPROCESS_VERT, SCREENPROCESS_FRAG, "", ""));
 #endif
+    ret.Append(GLSL_SHADER_SOURCE("megaTexture", SHADER_MEGATEXTURE, &megaTextureShader, MEGATEXTURE_VERT, MEGATEXTURE_FRAG, "", ""));
 
 	// shadow mapping
 #ifdef _SHADOW_MAPPING
@@ -524,6 +524,14 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongSoft", SHADER_INTERACTION_BLINNPHONG_SOFT, &interactionBlinnPhongSoftShader, INTERACTION_STENCIL_SHADOW_VERT, INTERACTION_STENCIL_SHADOW_FRAG, "_SOFT,BLINN_PHONG", "_SOFT,BLINN_PHONG"));
     ret.Append(GLSL_SHADER_SOURCE("ambientLightingSoft", SHADER_AMBIENT_LIGHTING_SOFT, &ambientLightingSoftShader, INTERACTION_STENCIL_SHADOW_VERT, INTERACTION_STENCIL_SHADOW_FRAG, "_SOFT,_AMBIENT", "_SOFT,_AMBIENT"));
 #endif
+#endif
+
+#ifdef _POSTPROCESS
+    ret.Append(GLSL_SHADER_SOURCE("retro_2bit", SHADER_RETRO_2BIT, &retro2BitShader, RETRO_POSTPROCESS_2D_VERT, RETRO_2BIT_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("retro_c64", SHADER_RETRO_C64, &retroC64Shader, RETRO_POSTPROCESS_2D_VERT, RETRO_C64_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("retro_cpc", SHADER_RETRO_CPC, &retroCPCShader, RETRO_POSTPROCESS_2D_VERT, RETRO_CPC_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("retro_genesis", SHADER_RETRO_GENESIS, &retroGenesisShader, RETRO_POSTPROCESS_2D_VERT, RETRO_GENESIS_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("retro_ps1", SHADER_RETRO_PSX, &retroPS1Shader, RETRO_POSTPROCESS_2D_VERT, RETRO_PS1_FRAG, "", ""));
 #endif
 }
 
@@ -1039,6 +1047,28 @@ static bool RB_GLSL_InitShaders(void)
 		shaderManager->Add(prop->program);
 	}
 	REQUIRE_SHADER;
+#endif
+
+#ifdef _POSTPROCESS
+    UNNECESSARY_SHADER;
+    for(int i = SHADER_POSTPROCESS_BEGIN; i <= SHADER_POSTPROCESS_END; i++)
+    {
+        const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
+        if(!prop)
+            continue;
+        if(!RB_GLSL_LoadShaderProgramFromProp(prop))
+        {
+            common->Printf("[Harmattan]: not support postprocess!\n");
+            if(r_renderMode.GetInteger())
+            {
+                r_renderMode.SetInteger(0);
+            }
+            CVAR_READONLY(r_renderMode);
+            break;
+        }
+        shaderManager->Add(prop->program);
+    }
+    REQUIRE_SHADER;
 #endif
 
 	return true;
@@ -1626,13 +1656,8 @@ static void RB_GLSL_ExportDevGLSLShaderSource(const char *source, const char *na
 void R_ExportDevShaderSource_f(const idCmdArgs &args)
 {
 #undef _KARIN_GLSL_SHADER_H
-#undef _KARIN_GLSL_SHADER_100_H
-#undef _KARIN_GLSL_SHADER_300_H
-#undef _KARIN_PREY_GLSL_SHADER_100_H
-#undef _KARIN_PREY_GLSL_SHADER_300_H
-#undef _KARIN_D3XP_GLSL_SHADER_100_H
-#undef _KARIN_D3XP_GLSL_SHADER_300_H
 #include "glsl_shader.h"
+
 #ifdef GL_ES_VERSION_3_0
 #define EXPORT_SHADER_SOURCE(source, name, type) \
 	{ \
@@ -1690,6 +1715,16 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 	EXPORT_SHADER_PAIR_SOURCE(INTERACTION_STENCIL_SHADOW, "interactionStencilShadow");
 #endif
 
+#ifdef _POSTPROCESS
+#define EXPORT_POSTPROCESS_SHADER() \
+    EXPORT_SHADER_SOURCE(RETRO_POSTPROCESS_2D_VERT, "retro_postprocess_2d", "vert"); \
+	EXPORT_SHADER_SOURCE(RETRO_2BIT_FRAG, "retro_2bit", "frag"); \
+	EXPORT_SHADER_SOURCE(RETRO_C64_FRAG, "retro_c64", "frag"); \
+	EXPORT_SHADER_SOURCE(RETRO_CPC_FRAG, "retro_cpc", "frag"); \
+	EXPORT_SHADER_SOURCE(RETRO_GENESIS_FRAG, "retro_genesis", "frag"); \
+	EXPORT_SHADER_SOURCE(RETRO_PS1_FRAG, "retro_ps1", "frag");
+#endif
+
 #define SHADER_ES_PATH glprogs.c_str()
 	bool gl2 = true;
 	idStr glprogs;
@@ -1702,6 +1737,9 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #endif
 #ifdef _STENCIL_SHADOW_IMPROVE
 	EXPORT_STENCIL_SHADOW_SHADER()
+#endif
+#ifdef _POSTPROCESS
+    EXPORT_POSTPROCESS_SHADER()
 #endif
 #ifdef _HUMANHEAD
     EXPORT_PREY_SHADER()
@@ -1718,6 +1756,9 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #endif
 #ifdef _STENCIL_SHADOW_IMPROVE
 	EXPORT_STENCIL_SHADOW_SHADER()
+#endif
+#ifdef _POSTPROCESS
+    EXPORT_POSTPROCESS_SHADER()
 #endif
 #ifdef _HUMANHEAD
     EXPORT_PREY_SHADER()

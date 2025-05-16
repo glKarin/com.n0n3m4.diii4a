@@ -1,5 +1,3 @@
-#ifndef _KARIN_GLSL_SHADER_300_H
-#define _KARIN_GLSL_SHADER_300_H
 
 // Unuse C++11 raw string literals for Traditional C++98
 
@@ -1616,6 +1614,51 @@ GLSL_SHADER const char ES3_MEGATEXTURE_FRAG[] =
 "}\n"
 ;
 
+GLSL_SHADER const char ES3_PLAIN_VERT[] =
+"#version 300 es\n"
+"//#pragma optimize(off)\n"
+"\n"
+"precision mediump float;\n"
+"\n"
+"in lowp vec4 attr_Color;\n"
+"in vec4 attr_TexCoord;\n"
+"in highp vec4 attr_Vertex;\n"
+"\n"
+"uniform highp mat4 u_modelViewProjectionMatrix;\n"
+"uniform lowp float u_colorModulate; // 0 or 1/255\n"
+"uniform lowp float u_colorAdd; // 0 or 1\n"
+"\n"
+"out vec2 var_TexDiffuse;\n"
+"out lowp vec4 var_Color;\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"    var_TexDiffuse = attr_TexCoord.xy;\n"
+"\n"
+"    var_Color = " BYTE_COLOR(attr_Color) " * u_colorModulate + u_colorAdd;\n"
+"\n"
+"    gl_Position = u_modelViewProjectionMatrix * attr_Vertex;\n"
+"}\n"
+;
+GLSL_SHADER const char ES3_PLAIN_FRAG[] =
+"#version 300 es\n"
+"//#pragma optimize(off)\n"
+"\n"
+"precision mediump float;\n"
+"\n"
+"uniform sampler2D u_fragmentMap0;\n"
+"uniform lowp vec4 u_glColor;\n"
+"\n"
+"in vec2 var_TexDiffuse;\n"
+"in lowp vec4 var_Color;\n"
+"out vec4 _gl_FragColor;\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"    _gl_FragColor = texture(u_fragmentMap0, var_TexDiffuse) * u_glColor * var_Color;\n"
+"}\n"
+;
+
 
 
 #if 0
@@ -2616,7 +2659,5 @@ GLSL_SHADER const char ES3_GLOBAL_ILLUMINATION_FRAG[] =
 "#endif\n"
 "}\n"
 ;
-
-#endif
 
 #endif

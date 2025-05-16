@@ -525,6 +525,9 @@ class idImageManager
 	    idImage*			blueNoiseImage256;
 	    // RB end
 #endif
+#ifdef _POSTPROCESS
+        idImage 			*frameImage; //karin: capture current framebuffer color image between render 3D and 2D for postprocess
+#endif
 };
 
 extern idImageManager	*globalImages;		// pointer to global list for the rest of the system

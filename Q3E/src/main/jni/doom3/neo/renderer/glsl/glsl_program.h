@@ -22,6 +22,13 @@ GLSL_PROGRAM_PROC shaderProgram_t globalIlluminationShader; //k: Global illumina
 GLSL_PROGRAM_PROC shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
 // GLSL_PROGRAM_PROC shaderProgram_t glasswarpShader; //k: glasswarp shader
 GLSL_PROGRAM_PROC shaderProgram_t texgenShader; //k: texgen shader
+#ifdef _POSTPROCESS
+GLSL_PROGRAM_PROC shaderProgram_t retro2BitShader; //k: 2Bit postprocess shader
+GLSL_PROGRAM_PROC shaderProgram_t retroC64Shader; //k: C64 postprocess shader
+GLSL_PROGRAM_PROC shaderProgram_t retroCPCShader; //k: CPC postprocess shader
+GLSL_PROGRAM_PROC shaderProgram_t retroGenesisShader; //k: Genesis postprocess shader
+GLSL_PROGRAM_PROC shaderProgram_t retroPS1Shader; //k: PS1 postprocess shader
+#endif
 
 // new stage
 GLSL_PROGRAM_PROC shaderProgram_t heatHazeShader; //k: heatHaze shader

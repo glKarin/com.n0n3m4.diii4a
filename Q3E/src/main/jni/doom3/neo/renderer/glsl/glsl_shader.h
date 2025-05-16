@@ -27,6 +27,10 @@
 #include "glsl_shader_100.h"
 #include "d3xp_glsl_shader_100.h"
 
+#ifdef _POSTPROCESS
+#include "postprocess_glsl_shader_100.h"
+#endif
+
 #ifdef _HUMANHEAD
 #include "prey_glsl_shader_100.h"
 #endif
@@ -50,6 +54,10 @@
 
 #include "glsl_shader_300.h"
 #include "d3xp_glsl_shader_300.h"
+
+#ifdef _POSTPROCESS
+#include "postprocess_glsl_shader_300.h"
+#endif
 
 #ifdef _HUMANHEAD
 #include "prey_glsl_shader_300.h"

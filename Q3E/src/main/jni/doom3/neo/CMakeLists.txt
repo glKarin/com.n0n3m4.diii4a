@@ -124,6 +124,7 @@ option(WIDE_CHARACTER_LANGUAGE				"Wide-character language font support" 							
 option(D3BFG_NEW_FONT						"DOOM3-BFG new font support"												ON)
 option(GLSL_PROGRAM							"GLSL program on new material stage support"								ON)
 option(GLOBAL_ILLUMINATION					"Render global illumination before draw interactions"						ON)
+option(RETRO_POSTPROCESS					"Add retro postprocess rendering support"								   	ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -755,6 +756,10 @@ endif()
 if(GLOBAL_ILLUMINATION)
 	add_definitions(-D_GLOBAL_ILLUMINATION)
 	message(STATUS "Add global illumination support")
+endif()
+if(RETRO_POSTPROCESS)
+	add_definitions(-D_POSTPROCESS)
+	message(STATUS "Add retro postprocess rendering support")
 endif()
 
 if(OPENAL)

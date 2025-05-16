@@ -2700,4 +2700,8 @@ idCVar harm_r_stencilShadowSoftCopyStencilBuffer( "harm_r_stencilShadowSoftCopyS
 #endif
 #endif
 
+#ifdef _POSTPROCESS
+#include "rb/rb_postprocess.cpp"
+#endif
+
 idCVar harm_r_autoAspectRatio("harm_r_autoAspectRatio",			"1",			CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "automatic setup aspect ratio of view:\n0 = manual\n1 = force setup r_aspectRatio to -1\n2 = automatic setup r_aspectRatio to 0,1,2 by screen size", 0, 2);

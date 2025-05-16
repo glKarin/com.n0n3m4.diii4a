@@ -1,5 +1,3 @@
-#ifndef _KARIN_D3XP_GLSL_SHADER_100_H
-#define _KARIN_D3XP_GLSL_SHADER_100_H
 
 // environSuit
 GLSL_SHADER const char ENVIROSUIT_VERT[] =
@@ -73,7 +71,3 @@ GLSL_SHADER const char ENVIROSUIT_FRAG[] =
 "    gl_FragColor = vec4(texture2D(u_fragmentMap0, R0.xy).xyz, 1.0);\n"
 "}\n"
 ;
-
-#endif
-
-

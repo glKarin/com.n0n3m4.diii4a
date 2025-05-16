@@ -655,6 +655,9 @@ void RB_ExecuteBackEndCommands(const emptyCommand_t *cmds)
 
 				if (((const drawSurfsCommand_t *)cmds)->viewDef->viewEntitys) {
 					c_draw3d++;
+#ifdef _POSTPROCESS //karin: I think can render postprocess here
+                    RB_PP_Render();
+#endif
 				} else {
 					c_draw2d++;
 				}
