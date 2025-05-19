@@ -67,7 +67,6 @@ extern const float negOneModulate[];
 #define negOneModulate negOne
 #endif
 
-//#define _SHADOW_MAPPING
 #ifdef _SHADOW_MAPPING
 
 //#define SHADOW_MAPPING_DEBUG
@@ -2251,6 +2250,8 @@ void R_ShadowBounds( const idBounds& modelBounds, const idBounds& lightBounds, c
 #endif
 
 #ifdef _SHADOW_MAPPING
+
+#define ALLOW_SHADOW_MAPPING_ON_ALPHATEST_MTR(x) ( ( (shader->GetContentFlags() & CONTENTS_SOLID) != 0 || ( (shader->GetCullType() == CT_TWO_SIDED) || shader->ShouldCreateBackSides() ) ) && (shader->GetSort() != SS_DECAL) )
 
 #include "matrix/GLMatrix.h"
 
