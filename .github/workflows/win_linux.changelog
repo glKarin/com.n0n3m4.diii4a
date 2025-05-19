@@ -1,1 +1,1 @@
-add retro postprocess rendering from RBDOOM-3-BFG
+add retro postprocess rendering from RBDOOM-3-BFG: fix low fps on genesis pp shader

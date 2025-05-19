@@ -70,6 +70,11 @@ void RB_PP_Render(void)
     const int w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
     const int h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
 
+	if (r_useScissor.GetBool()) {
+		qglScissor(x, y, w, h);
+		backEnd.currentScissor = backEnd.viewDef->scissor;
+	}
+
     GLboolean depthMask;
     GLint bufferId;
     qglGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
@@ -77,19 +82,26 @@ void RB_PP_Render(void)
     GLboolean isBlend = qglIsEnabled(GL_BLEND);
     GLboolean isDepthTest = qglIsEnabled(GL_DEPTH_TEST);
 
-    if(isBlend)
-        qglDisable(GL_BLEND);
+	//int glState = backEnd.glState.glStateBits;
+	//GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO);
+
+
+    if(isBlend) qglDisable(GL_BLEND);
     if(isDepthTest)
         qglDisable(GL_DEPTH_TEST);
     if(depthMask)
         qglDepthMask(GL_FALSE);
-    qglBindBuffer(GL_ARRAY_BUFFER, 0);
+	if(bufferId != 0)
+		qglBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	const float hw = (float)w * 0.5f;
+	const float hh = (float)h * 0.5f;
 
     const float vs[] = {
-            0-(float)w*0.5f,0-(float)h*0.5f,
-            (float)w*0.5f,0-(float)h*0.5f,
-            0-(float)w*0.5f,(float)h*0.5f,
-            (float)w*0.5f,(float)h*0.5f,
+            -hw, -hh,
+            hw, -hh,
+            -hw, hh,
+            hw, hh,
     };
     static const float ts[] = {
             0,0,
@@ -98,10 +110,12 @@ void RB_PP_Render(void)
             1,1,
     };
 
-    globalImages->frameImage->CopyFramebuffer(x, y, w, h, true);
+    globalImages->frameImage->CopyFramebuffer(0, 0, glConfig.vidWidth, glConfig.vidHeight, true);
+	const float sw = glConfig.vidWidth;
+	const float sh = glConfig.vidHeight;
 
     float	parm[4];
-    int		pot;
+    float		pot;
 
     parm[2] = 0.0f;
     parm[3] = 1.0f;
@@ -109,16 +123,19 @@ void RB_PP_Render(void)
     // screen power of two correction factor, assuming the copy to _currentRender
     // also copied an extra row and column for the bilerp
     pot = globalImages->frameImage->uploadWidth;
-    parm[0] = (float)w / (float)pot;
+    parm[0] = sw / pot;
 
     pot = globalImages->frameImage->uploadHeight;
-    parm[1] = (float)h / (float)pot;
+    parm[1] = sh / pot;
 
     GL_Uniform4fv(SHADER_PARM_ADDR(nonPowerOfTwo), parm);
 
     // window coord to 0.0 to 1.0 conversion
-    parm[0] = 1.0f / (float)w;
-    parm[1] = 1.0f / (float)h;
+    parm[0] = 1.0f / sw;
+    parm[1] = 1.0f / sh;
+	//karin: need x and y offset coord if copy framebuffer with current viewport, and uv = gl_FragCoord.xy - nonPowerOfTwo.zw in fragment shader
+    //parm[2] = x;
+    //parm[3] = y;
     GL_Uniform4fv(SHADER_PARM_ADDR(windowCoords), parm);
 
     GL_SelectTexture( 0 );
@@ -138,6 +155,7 @@ void RB_PP_Render(void)
     GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
     GL_UseProgram(NULL);
 
+	//GL_State(glState);
     if(isBlend)
         qglEnable(GL_BLEND);
     if(isDepthTest)

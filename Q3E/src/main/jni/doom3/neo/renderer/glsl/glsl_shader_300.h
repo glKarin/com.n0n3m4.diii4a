@@ -1673,7 +1673,7 @@ GLSL_SHADER const char ES3_PLAIN_FRAG[] =
 #define ES3_STENCIL_SHADOW_SAMPLE_POISSON_DISK \
         "#define SAMPLES 16\n" \
         "#define SAMPLE_MULTIPLICATOR (1.0 / 16.0)\n" \
-        "vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](\n" \
+        "const vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](\n" \
         "    vec2( -0.94201624, -0.39906216 ), \n" \
         "    vec2( 0.94558609, -0.76890725 ), \n" \
         "    vec2( -0.094184101, -0.92938870 ), \n" \
@@ -1695,7 +1695,7 @@ GLSL_SHADER const char ES3_PLAIN_FRAG[] =
 #define ES3_SHADOW_MAPPING_SAMPLE_POISSON_DISK \
         "#define SAMPLES 12\n" \
         "#define SAMPLE_MULTIPLICATOR (1.0 / 12.0)\n" \
-        "vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](\n"\
+        "const vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](\n"\
         "    vec2( 0.6111618, 0.1050905 ), \n" \
         "    vec2( 0.1088336, 0.1127091 ), \n" \
         "    vec2( 0.3030421, -0.6292974 ), \n" \

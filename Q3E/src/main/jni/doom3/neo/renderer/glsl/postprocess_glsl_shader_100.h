@@ -353,7 +353,7 @@ GLSL_SHADER const char RETRO_CPC_FRAG[] =
 "#define RESOLUTION_DIVISOR 4.0\n"
 "#define NUM_COLORS 31 // original 27\n"
 "\n"
-"uniform sampler2D u_fragmentMap0; // currentRendert\n"
+"uniform sampler2D u_fragmentMap0; // currentRender\n"
 "\n"
 "uniform highp vec4 u_windowCoords;\n"
 "uniform highp vec4 u_nonPowerOfTwo;\n"
