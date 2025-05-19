@@ -2388,4 +2388,7 @@ extern idCVar r_renderMode;
 void RB_PP_Render(void);
 #endif
 
+extern idCVar harm_r_debugOpenGL;
+void RB_DebugOpenGL(void);
+
 #endif /* !__TR_LOCAL_H__ */

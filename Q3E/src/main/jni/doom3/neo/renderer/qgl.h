@@ -120,15 +120,6 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef GL_STENCIL_INDEX
 #define GL_STENCIL_INDEX                  0x1901
 #endif
-#ifndef GL_DEBUG_OUTPUT_SYNCHRONOUS
-#define GL_DEBUG_OUTPUT_SYNCHRONOUS       0x8242
-#endif
-#ifndef GL_DEBUG_OUTPUT
-#define GL_DEBUG_OUTPUT                   0x92E0
-#endif
-#ifndef GL_DEBUG_TYPE_ERROR
-#define GL_DEBUG_TYPE_ERROR               0x824C
-#endif
 #ifndef GL_TEXTURE_WIDTH
 #define GL_TEXTURE_WIDTH                  0x1000
 #endif
@@ -161,6 +152,98 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 #ifndef GL_TEXTURE_ALPHA_SIZE
 #define GL_TEXTURE_ALPHA_SIZE             0x805F
+#endif
+
+// debug
+#ifndef GL_DEBUG_OUTPUT_SYNCHRONOUS
+#define GL_DEBUG_OUTPUT_SYNCHRONOUS       0x8242
+#endif
+#ifndef GL_DEBUG_OUTPUT
+#define GL_DEBUG_OUTPUT                   0x92E0
+#endif
+#ifndef GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH
+#define GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH 0x8243
+#endif
+#ifndef GL_DEBUG_CALLBACK_FUNCTION
+#define GL_DEBUG_CALLBACK_FUNCTION        0x8244
+#endif
+#ifndef GL_DEBUG_CALLBACK_USER_PARAM
+#define GL_DEBUG_CALLBACK_USER_PARAM      0x8245
+#endif
+#ifndef GL_DEBUG_SOURCE_API
+#define GL_DEBUG_SOURCE_API               0x8246
+#endif
+#ifndef GL_DEBUG_SOURCE_WINDOW_SYSTEM
+#define GL_DEBUG_SOURCE_WINDOW_SYSTEM     0x8247
+#endif
+#ifndef GL_DEBUG_SOURCE_SHADER_COMPILER
+#define GL_DEBUG_SOURCE_SHADER_COMPILER   0x8248
+#endif
+#ifndef GL_DEBUG_SOURCE_THIRD_PARTY
+#define GL_DEBUG_SOURCE_THIRD_PARTY       0x8249
+#endif
+#ifndef GL_DEBUG_SOURCE_APPLICATION
+#define GL_DEBUG_SOURCE_APPLICATION       0x824A
+#endif
+#ifndef GL_DEBUG_SOURCE_OTHER
+#define GL_DEBUG_SOURCE_OTHER             0x824B
+#endif
+#ifndef GL_DEBUG_TYPE_ERROR
+#define GL_DEBUG_TYPE_ERROR               0x824C
+#endif
+#ifndef GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR
+#define GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR 0x824D
+#endif
+#ifndef GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR
+#define GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR  0x824E
+#endif
+#ifndef GL_DEBUG_TYPE_PORTABILITY
+#define GL_DEBUG_TYPE_PORTABILITY         0x824F
+#endif
+#ifndef GL_DEBUG_TYPE_PERFORMANCE
+#define GL_DEBUG_TYPE_PERFORMANCE         0x8250
+#endif
+#ifndef GL_DEBUG_TYPE_OTHER
+#define GL_DEBUG_TYPE_OTHER               0x8251
+#endif
+#ifndef GL_DEBUG_TYPE_MARKER
+#define GL_DEBUG_TYPE_MARKER              0x8268
+#endif
+#ifndef GL_DEBUG_TYPE_PUSH_GROUP
+#define GL_DEBUG_TYPE_PUSH_GROUP          0x8269
+#endif
+#ifndef GL_DEBUG_TYPE_POP_GROUP
+#define GL_DEBUG_TYPE_POP_GROUP           0x826A
+#endif
+#ifndef GL_DEBUG_SEVERITY_NOTIFICATION
+#define GL_DEBUG_SEVERITY_NOTIFICATION    0x826B
+#endif
+#ifndef GL_MAX_DEBUG_GROUP_STACK_DEPTH
+#define GL_MAX_DEBUG_GROUP_STACK_DEPTH    0x826C
+#endif
+#ifndef GL_DEBUG_GROUP_STACK_DEPTH
+#define GL_DEBUG_GROUP_STACK_DEPTH        0x826D
+#endif
+#ifndef GL_MAX_LABEL_LENGTH
+#define GL_MAX_LABEL_LENGTH               0x82E8
+#endif
+#ifndef GL_MAX_DEBUG_MESSAGE_LENGTH
+#define GL_MAX_DEBUG_MESSAGE_LENGTH       0x9143
+#endif
+#ifndef GL_MAX_DEBUG_LOGGED_MESSAGES
+#define GL_MAX_DEBUG_LOGGED_MESSAGES      0x9144
+#endif
+#ifndef GL_DEBUG_LOGGED_MESSAGES
+#define GL_DEBUG_LOGGED_MESSAGES          0x9145
+#endif
+#ifndef GL_DEBUG_SEVERITY_HIGH
+#define GL_DEBUG_SEVERITY_HIGH            0x9146
+#endif
+#ifndef GL_DEBUG_SEVERITY_MEDIUM
+#define GL_DEBUG_SEVERITY_MEDIUM          0x9147
+#endif
+#ifndef GL_DEBUG_SEVERITY_LOW
+#define GL_DEBUG_SEVERITY_LOW             0x9148
 #endif
 
 

@@ -94,6 +94,7 @@ typedef struct glconfig_s {
 	bool                depth24Available;
 	bool                gl_FragDepthAvailable;
 	int                 multiSamples;
+	bool				debugOutput;
 } glconfig_t;
 
 

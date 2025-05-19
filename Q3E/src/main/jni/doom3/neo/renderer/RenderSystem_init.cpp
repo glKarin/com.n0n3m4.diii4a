@@ -469,6 +469,7 @@ static void R_CheckPortableExtensions(void)
 		glConfig.depth24Available = R_CheckExtension("GL_OES_depth24");
 		glConfig.gl_FragDepthAvailable = R_CheckExtension("GL_EXT_frag_depth");
 	}
+	glConfig.debugOutput = R_CheckExtension("GL_KHR_debug");
 }
 
 
@@ -650,6 +651,11 @@ void R_InitOpenGL(void)
 
 	// recheck all the extensions (FIXME: this might be dangerous)
 	R_CheckPortableExtensions();
+
+#ifdef _OPENGLES3
+	// OpenGL debug
+	RB_DebugOpenGL();
+#endif
 
 	// parse our vertex and fragment programs, possibly disably support for
 	// one of the paths if there was an error
@@ -2705,3 +2711,5 @@ idCVar harm_r_stencilShadowSoftCopyStencilBuffer( "harm_r_stencilShadowSoftCopyS
 #endif
 
 idCVar harm_r_autoAspectRatio("harm_r_autoAspectRatio",			"1",			CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "automatic setup aspect ratio of view:\n0 = manual\n1 = force setup r_aspectRatio to -1\n2 = automatic setup r_aspectRatio to 0,1,2 by screen size", 0, 2);
+
+#include "rb/rb_debug.cpp"

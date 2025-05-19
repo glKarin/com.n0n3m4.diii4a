@@ -343,6 +343,11 @@ bool GLimp_Init(glimpParms_t parms) {
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glMinorVersion);
         }
 
+		if (harm_r_debugOpenGL.GetBool())
+		{
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+		}
+
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 
         const char* windowMode = "";
@@ -813,6 +818,13 @@ GLimp_DeactivateContext
 */
 void GLimp_DeactivateContext() {
     SDL_GL_MakeCurrent(window, NULL);
+}
+
+static void StubFunction(void) { }
+
+bool GLimp_ProcIsValid(const void *func)
+{
+    return func && (intptr_t)func != (intptr_t)StubFunction;
 }
 
 /*
