@@ -2414,6 +2414,6 @@ void idProgram::RegisterStartupScriptSources(const char *source)
     int num = startupScriptSources.Num();
     startupScriptSources.AddUnique(source);
     if(num != startupScriptSources.Num())
-        gameLocal.Printf("Register game startup script source: %d bytes\n", strlen(source));
+        gameLocal.Printf("Register game startup script source: %zd bytes\n", strlen(source));
 }
 #endif

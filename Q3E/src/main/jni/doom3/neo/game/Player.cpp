@@ -2414,7 +2414,7 @@ void idPlayer::SpawnToPoint(const idVec3 &spawn_origin, const idAngles &spawn_an
 #ifdef MOD_BOTS //karin: for use_combat_bbox
 	// Force players to use bounding boxes when in multiplayer
 	if ( gameLocal.isMultiplayer ) {
-		use_combat_bbox = harm_si_useCombatBboxInMPGame.GetBool() || spawnArgs.GetBool("use_combat_bbox");
+		use_combat_bbox = gameLocal.serverInfo.GetBool("harm_si_useCombatBboxInMPGame") || spawnArgs.GetBool("use_combat_bbox");
 
 		if(use_combat_bbox)
 		{
@@ -6971,27 +6971,6 @@ void idPlayer::Think(void)
 				fullBodyAwarenessOffset = offset;
 			else
 				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.");
-		}
-	}
-#endif
-#ifdef MOD_BOTS //karin: for use_combat_bbox
-	// Force players to use bounding boxes when in multiplayer
-	if ( gameLocal.isMultiplayer ) {
-		if(harm_si_useCombatBboxInMPGame.IsModified())
-		{
-			use_combat_bbox = harm_si_useCombatBboxInMPGame.GetBool() || spawnArgs.GetBool("use_combat_bbox");
-
-			if(use_combat_bbox)
-			{
-				// Make sure the combat model is unlinked
-				if ( combatModel ) {
-					combatModel->Unlink( );
-				}
-			}
-			else
-			{
-				SetCombatModel();
-			}
 		}
 	}
 #endif

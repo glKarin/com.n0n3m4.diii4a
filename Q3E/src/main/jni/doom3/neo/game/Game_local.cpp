@@ -2608,10 +2608,6 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t *clientCmds)
     if(harm_ui_viewLightOnWeapon.IsModified())
         harm_ui_viewLightOnWeapon.ClearModified();
 #endif
-#ifdef MOD_BOTS //karin: for use_combat_bbox
-    if(harm_si_useCombatBboxInMPGame.IsModified())
-        harm_si_useCombatBboxInMPGame.ClearModified();
-#endif
 
 	return ret;
 }
