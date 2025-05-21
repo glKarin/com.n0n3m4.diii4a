@@ -66,6 +66,7 @@ idCVar harm_r_openglVersion("harm_r_openglVersion",
 #define HARM_EGL_OPENGL_ES_BIT EGL_OPENGL_ES2_BIT
 #define HARM_EGL_CONTEXT_CLIENT_VERSION 2
 #endif
+#define HARM_EGL_CONTEXT_OPENGL_DEBUG harm_r_debugOpenGL.GetBool() ? EGL_CONTEXT_OPENGL_DEBUG : EGL_NONE
 
 #define GLFORMAT_RGB565 0x0565
 #define GLFORMAT_RGBA4444 0x4444
@@ -836,7 +837,7 @@ int GLES_Init(glimpParms_t &ap)
 				// EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
 				EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
 				EGL_CONTEXT_MINOR_VERSION_KHR, 2,
-                EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
+                HARM_EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
 				EGL_NONE
 		};
 		gles3_version = 2;
@@ -849,7 +850,7 @@ int GLES_Init(glimpParms_t &ap)
 					// EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
 					EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
 					EGL_CONTEXT_MINOR_VERSION_KHR, 1,
-					EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
+                    HARM_EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
 					EGL_NONE
 			};
 			gles3_version = 1;
@@ -859,7 +860,7 @@ int GLES_Init(glimpParms_t &ap)
 			{
 				EGLint ctxAttrib[] = {
 						EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
-						EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
+                        HARM_EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
 						EGL_NONE
 				};
 				gles3_version = 0;
@@ -872,7 +873,7 @@ int GLES_Init(glimpParms_t &ap)
 	{
 		EGLint ctxAttrib[] = {
 				EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
-                EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
+                HARM_EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
 				EGL_NONE
 		};
 		eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib);
