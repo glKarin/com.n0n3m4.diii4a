@@ -46,6 +46,7 @@
 #define LOG_TAG "Q3E::JNI"
 
 #define JNI_Version JNI_VERSION_1_4
+#define Q3E_MAX_ARGS 512 // 255
 
 //#define AUDIOTRACK_BYTEBUFFER 1
 
@@ -501,7 +502,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 
 	const char *arg = (*env)->GetStringUTFChars(env, Cmdline, &iscopy);
 	LOGI("idTech4A++ game command: %s", arg);
-	argv = malloc(sizeof(char*) * 255);
+	argv = malloc(sizeof(char*) * Q3E_MAX_ARGS);
     arg_str = strdup(arg);
 	argc = ParseCommandLine(arg_str, argv);
 	(*env)->ReleaseStringUTFChars(env, Cmdline, arg);
