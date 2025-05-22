@@ -261,7 +261,7 @@ bool botAi::CompileBotScript(bool check)
     const char botMainScript[] = "script/bot_main.script";
     idStr source = GetBotMainScript();
     gameLocal.Printf("Compile built-in bot script: %s, %d bytes\n", botMainScript, source.Length());
-    boolean result = gameLocal.program.CompileText(botMainScript, source.c_str(), false);
+    bool result = gameLocal.program.CompileText(botMainScript, source.c_str(), false);
     if (g_disasm.GetBool()) {
         gameLocal.program.Disassemble();
     }
