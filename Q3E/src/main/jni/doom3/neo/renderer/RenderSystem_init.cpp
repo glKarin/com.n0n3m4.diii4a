@@ -226,7 +226,7 @@ idCVar r_materialOverride("r_materialOverride", "", CVAR_RENDERER, "overrides al
 idCVar r_debugRenderToTexture("r_debugRenderToTexture", "0", CVAR_RENDERER | CVAR_INTEGER, "");
 
 idCVar harm_r_maxFps( "r_maxFps", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Limit maximum FPS. 0 = unlimited" );
-idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Stencil shadow using Carmack-Inverse.");
+idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_BOOL|CVAR_RENDERER|CVAR_ARCHIVE, "Stencil shadow using Carmack-Inverse.");
 idCVar r_scaleMenusTo43( "r_scaleMenusTo43", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio" );
 idCVar harm_r_useHighPrecision("harm_r_useHighPrecision",
 #ifdef __ANDROID__
@@ -1518,7 +1518,24 @@ void R_ScreenshotFilename(int &lastNumber, const char *base, idStr &fileName)
 		frac -= d*10;
 		e = frac;
 
-		sprintf(fileName, "%s%i%i%i%i%i.tga", base, a, b, c, d, e);
+        switch (cvarSystem->GetCVarInteger("r_screenshotFormat"))
+        {
+            case 1:
+                sprintf(fileName, "%s%i%i%i%i%i.bmp", base, a, b, c, d, e);
+                break;
+            case 2:
+                sprintf(fileName, "%s%i%i%i%i%i.png", base, a, b, c, d, e);
+                break;
+            case 3:
+                sprintf(fileName, "%s%i%i%i%i%i.jpg", base, a, b, c, d, e);
+                break;
+            case 4:
+                sprintf(fileName, "%s%i%i%i%i%i.dds", base, a, b, c, d, e);
+                break;
+            default:
+                sprintf(fileName, "%s%i%i%i%i%i.tga", base, a, b, c, d, e);
+                break;
+        }
 
 		if (lastNumber == 99999) {
 			break;
