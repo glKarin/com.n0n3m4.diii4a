@@ -562,13 +562,6 @@ class idProgram
 		int											NumFilenames(void) {
 			return fileList.Num();
 		}
-
-#if defined(MOD_BOTS) && defined(_MOD_BOTS_ASSETS)
-        void                                        RegisterStartupScriptSources(const char *source);
-        void										CompileFile(const char *filename, const idStrList *files, const idStrList *sources);
-
-        idStrList                                   startupScriptSources;
-#endif
 };
 
 /*

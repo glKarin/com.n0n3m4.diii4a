@@ -241,12 +241,37 @@ bool botAi::LoadResource(void)
     else
     {
         gameLocal.Printf("BotAI: using built-in script\n");
-        idStr source = GetBotMainScript();
-        gameLocal.program.RegisterStartupScriptSources(source);
+        if(!CompileBotScript())
+            return false;
     }
 
     return true;
 #undef BOT_CHECK_DEF
+}
+
+// From D3XP
+bool botAi::CompileBotScript(bool check)
+{
+    if(check)
+    {
+        if(!IsAvailable() || !UsingBuiltinAssets())
+            return false;
+    }
+
+    const char botMainScript[] = "script/bot_main.script";
+    idStr source = GetBotMainScript();
+    gameLocal.Printf("Compile built-in bot script: %s, %d bytes\n", botMainScript, source.Length());
+    boolean result = gameLocal.program.CompileText(botMainScript, source.c_str(), false);
+    if (g_disasm.GetBool()) {
+        gameLocal.program.Disassemble();
+    }
+    if (!result) {
+        gameLocal.Warning("Compile failed in file %s.", botMainScript);
+        return false;
+    }
+    gameLocal.program.FinishCompilation();
+    gameLocal.Printf("Compile built-in bot script finish\n");
+    return true;
 }
 #endif
 

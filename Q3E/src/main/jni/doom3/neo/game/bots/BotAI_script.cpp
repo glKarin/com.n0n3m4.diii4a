@@ -7289,7 +7289,8 @@ List of bots scripts and script used by framework
 ***********************************************************************/
 idStr botAi::GetBotMainScript(void)
 {
-    idStr source = "#define MAX_WEAPONS \t\t\t\t\t\t32 // TinMan: sync with gamecode\n"
+    idStr source = GetBotDefScript() +
+                   "#define MAX_WEAPONS \t\t\t\t\t\t32 // TinMan: sync with gamecode\n"
                    "\n"
                    "// TinMan: Path types, sync with game code\n"
                    "#define\tPATHTYPE_WALK\t\t\t\t\t\t0\n"
@@ -7329,4 +7330,15 @@ idStr botAi::GetBotMainScript(void)
     source.Append(GetBotSabotA8Script());
 
     return source;
+}
+
+idStr botAi::GetBotDefScript(void)
+{
+    // from script/ai_base.script
+    return "// move results\n"
+           "#define MOVE_STATUS_DONE 0 // move succeeded, or not moving\n"
+           "#define MOVE_STATUS_MOVING 1 // move in progress\n"
+           "#define MOVE_STATUS_BLOCKED_BY_MONSTER 8\n"
+           "\n"
+            ;
 }
