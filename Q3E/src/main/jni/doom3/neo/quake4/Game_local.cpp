@@ -526,11 +526,11 @@ void idGameLocal::Init( void ) {
 
 	InitConsoleCommands();
 
-#ifdef MOD_BOTS
-    botAi::InitBotSystem(); // must before program startup and load aas_types
-#endif
 	// load default scripts
 	program.Startup( SCRIPT_DEFAULT );
+#ifdef MOD_BOTS
+    botAi::InitBotSystem(); // must before load aas_types
+#endif
 	
 	// set up the aas
 // RAVEN BEGIN

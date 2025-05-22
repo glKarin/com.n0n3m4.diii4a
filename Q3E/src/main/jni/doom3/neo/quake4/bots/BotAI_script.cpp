@@ -3573,7 +3573,8 @@ bot_sabot_main.script
 ***********************************************************************/
 idStr botAi::GetBotMainScript(void)
 {
-    idStr source = "// TinMan: Path types, sync with game code\n"
+    idStr source = GetBotDefScript() +
+                   "// TinMan: Path types, sync with game code\n"
                    "#define\tPATHTYPE_WALK\t\t\t\t\t\t0\n"
                    "#define\tPATHTYPE_WALKOFFLEDGE\t\t1\n"
                    "#define\tPATHTYPE_BARRIERJUMP\t\t2\n"
@@ -3608,4 +3609,24 @@ idStr botAi::GetBotMainScript(void)
     source.Append(GetBotSabotScript());
 
     return source;
+}
+
+idStr botAi::GetBotDefScript(void)
+{
+    // from scripts/doom_defs.script
+    return "\n"
+           "#define true 1\n"
+           "#define false 0\n"
+           "#define CONTENTS_SOLID 1 // an eye is never valid in a solid\n"
+           "#define CONTENTS_BODY 256 // used for actors\n"
+           "#define CONTENTS_OPAQUE 2 // blocks visibility (for ai)\n"
+           "#define CONTENTS_RENDERMODEL 2048 // used for render models for collision \n"
+           "#define MASK_SOLID (CONTENTS_SOLID)\n"
+           "#define MASK_SHOT_RENDERMODEL (CONTENTS_SOLID|CONTENTS_RENDERMODEL)\n"
+           "// RAVEN BEGIN\n"
+           "// abahr: added sys. so we can call this from non object functions\n"
+           "#define eachFrame for( 0; 1; sys.waitFrame() )\n"
+           "// RAVEN END\n"
+           "\n"
+            ;
 }

@@ -651,13 +651,6 @@ public:
 	size_t										ScriptSummary( const idCmdArgs &args );
 	size_t										ClassSummary( const idCmdArgs &args );
 // RAVEN END
-
-#if defined(MOD_BOTS) && defined(_MOD_BOTS_ASSETS)
-    void                                        RegisterStartupScriptSources(const char *source);
-    void										CompileFile(const char *filename, const idStrList *files, const idStrList *sources);
-
-    idStrList                                   startupScriptSources;
-#endif
 };
 
 /*

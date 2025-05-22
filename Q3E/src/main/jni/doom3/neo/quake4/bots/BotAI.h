@@ -135,6 +135,9 @@ public:
     static botAi *			SpawnBot(idPlayer *botClient);
     static bool				PlayerHasBotSlot(int clientID);
     static void             PrepareResource(void);
+#ifdef _MOD_BOTS_ASSETS
+    static bool             CompileBotScript(bool check = false);
+#endif
 
 private:
     static int				AddBot(const char *name, const idDict &dict = idDict());
@@ -177,6 +180,7 @@ private:
     static idDict           GetBotSabotBlackstarDef(void);
     static idDict           GetBotSabotNamesDef(void);
     static idList<idDict>   GetBotSabotLevelDef(void);
+    static idStr            GetBotDefScript(void);
     static idStr            GetBotBaseScript(void);
     static idStr            GetBotEventsScript(void);
     static idStr            GetBotMainScript(void);

@@ -2315,11 +2315,6 @@ void idProgram::Startup( const char *defaultScript ) {
 
 	// load the default script
 	if ( defaultScript && *defaultScript ) {
-#if defined(MOD_BOTS) && defined(_MOD_BOTS_ASSETS)
-        if(startupScriptSources.Num() > 0)
-            CompileFile(defaultScript, NULL, &startupScriptSources);
-        else
-#endif
 		CompileFile( defaultScript );
 	}
 
@@ -2542,9 +2537,6 @@ idProgram::idProgram
 */
 idProgram::idProgram() {
 	FreeData();
-#if defined(MOD_BOTS) && defined(_MOD_BOTS_ASSETS)
-    startupScriptSources.SetGranularity(1);
-#endif
 }
 
 /*
@@ -2583,56 +2575,4 @@ void idProgram::ReturnEntity( const idEntity *ent ) {
 		*returnDef->value.entityNumberPtr = 0;
 	}
 }
-
-#if defined(MOD_BOTS) && defined(_MOD_BOTS_ASSETS)
-void idProgram::CompileFile(const char *filename, const idStrList *files, const idStrList *sources)
-{
-    char *src;
-    bool result;
-
-    if (fileSystem->ReadFile(filename, (void **)&src, NULL) < 0) {
-        gameLocal.Error("Couldn't load %s\n", filename);
-    }
-
-    idStr source = src;
-    fileSystem->FreeFile(src);
-
-    if(files)
-    {
-        for(int i = 0; i < files->Num(); i++)
-        {
-            source.Append("\n");
-            source.Append(va("#include \"%s\"\n", files->operator[](i).c_str()));
-        }
-    }
-    if(sources)
-    {
-        for(int i = 0; i < sources->Num(); i++)
-        {
-            source.Append("\n");
-            source.Append(sources->operator[](i));
-        }
-    }
-
-    result = CompileText(filename, source.c_str(), false);
-
-    if (g_disasm.GetBool()) {
-        Disassemble();
-    }
-
-    if (!result) {
-        gameLocal.Error("Compile failed in file %s.", filename);
-    }
-}
-
-void idProgram::RegisterStartupScriptSources(const char *source)
-{
-    if(!source || !source[0])
-        return;
-    int num = startupScriptSources.Num();
-    startupScriptSources.AddUnique(source);
-    if(num != startupScriptSources.Num())
-        gameLocal.Printf("Register game startup script source: %zd bytes\n", strlen(source));
-}
-#endif
 
