@@ -582,6 +582,9 @@ const void	RB_SwapBuffers(const void *data)
 	if (r_showImages.GetInteger() != 0) {
 		RB_ShowImages();
 	}
+#ifdef _IMGUI
+    RB_ImGui_Render();
+#endif
 
 	// force a gl sync if requested
 	if (r_finish.GetBool()) {

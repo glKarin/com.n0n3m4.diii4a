@@ -125,6 +125,9 @@ idCVar harm_r_openglVersion("harm_r_openglVersion",
 bool USING_GLES3 = true;
 bool USING_GL = false;
 int gl_version = DEFAULT_GLES_VERSION;
+#ifdef _OPENGLES3
+int GLES3_VERSION = USING_GLES3 ? 2 : -1;
+#endif
 
 static idCVar r_fullscreenDesktop( "r_fullscreenDesktop", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0: 'real' fullscreen mode 1: keep resolution 'desktop' fullscreen mode" );
 static idCVar win_xpos( "win_xpos", "-1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "horizontal position of window" );
@@ -133,6 +136,10 @@ static idCVar win_ypos( "win_ypos", "-1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_IN
 const int GRAB_GRABMOUSE	= (1 << 0);
 const int GRAB_HIDECURSOR	= (1 << 1);
 const int GRAB_RELATIVEMOUSE = (1 << 2);
+
+#ifdef _IMGUI
+#include "imgui.cpp"
+#endif
 
 static void SetSDLIcon()
 {
@@ -692,6 +699,7 @@ bool GLimp_Init(glimpParms_t parms) {
     }
 
     R_LoadOpenGLFunc();
+
     return true;
 }
 
@@ -733,6 +741,13 @@ GLimp_SwapBuffers
 ===================
 */
 void GLimp_SwapBuffers() {
+    if(r_swapInterval.IsModified())
+    {
+        r_swapInterval.ClearModified();
+        if (SDL_GL_SetSwapInterval(r_swapInterval.GetInteger()) < 0)
+            common->Warning("SDL_GL_SWAP_CONTROL not supported");
+    }
+
 #if SDL_VERSION_ATLEAST(2, 0, 0)
     SDL_GL_SwapWindow(window);
 #else

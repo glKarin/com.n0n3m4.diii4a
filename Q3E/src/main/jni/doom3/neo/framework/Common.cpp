@@ -31,6 +31,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../renderer/Image.h"
 
+#ifdef _IMGUI
+#include "../renderer/imgui/r_imgui.h"
+#endif
+
 #define	MAX_PRINT_MSG_SIZE	4096
 #define MAX_WARNING_LIST	256
 
@@ -2625,6 +2629,10 @@ void idCommonLocal::InitCommands(void)
 
 #ifdef ID_DEDICATED
 	cmdSystem->AddCommand("help", Com_Help_f, CMD_FL_SYSTEM, "shows help");
+#endif
+
+#ifdef _IMGUI
+    cmdSystem->AddCommand("idTech4AmmSettings", ImGui_OpenSettings_f, CMD_FL_SYSTEM, "Show idTech4A++ new cvars and commands");
 #endif
 }
 

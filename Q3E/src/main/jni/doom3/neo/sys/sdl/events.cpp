@@ -947,9 +947,17 @@ sysEvent_t Sys_GetEvent() {
 			if (ev.wheel.y > 0) {
 				res.evValue = K_MWHEELUP;
 				mouse_polls.Append(mouse_poll_t(M_DELTAZ, 1));
+#ifdef _IMGUI
+                if(R_ImGui_IsRunning())
+                    ImGui_MouseWheelEvent(0, ev.wheel.y);
+#endif
 			} else if (ev.wheel.y < 0) {
 				res.evValue = K_MWHEELDOWN;
 				mouse_polls.Append(mouse_poll_t(M_DELTAZ, -1));
+#ifdef _IMGUI
+                if(R_ImGui_IsRunning())
+                    ImGui_MouseWheelEvent(0, ev.wheel.y);
+#endif
 			}
 
 			res.evValue2 = 1;

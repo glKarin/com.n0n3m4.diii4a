@@ -1161,15 +1161,26 @@ void R_ShowglConfig_f(const idCmdArgs &args)
             break;
 #endif
         case GL_VERSION_GL_ES3:
+#ifdef _OPENGLES3
+			if(USING_GLES32)
+				glVersionName = "OpenGL ES3.2";
+			else if(USING_GLES31)
+				glVersionName = "OpenGL ES3.1";
+			else
+#endif
             glVersionName = "OpenGL ES3";
             break;
         default:
 #ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
-                glVersionName = "OpenGL ES3";
-	else
+			if(USING_GLES32)
+				glVersionName = "OpenGL ES3.2";
+			else if(USING_GLES31)
+				glVersionName = "OpenGL ES3.1";
+			else if(USING_GLES3)
+				glVersionName = "OpenGL ES3";
+			else
 #endif
-                glVersionName = "OpenGL ES2";
+			glVersionName = "OpenGL ES2";
             break;
     }
 
@@ -1229,6 +1240,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("gl_FragDepthAvailable: %d\n", glConfig.gl_FragDepthAvailable);
 	common->Printf("multiSamples: %d\n", glConfig.multiSamples);
 	common->Printf("sizeof(glIndex_t): %zd\n", sizeof(glIndex_t));
+	common->Printf("GL_KHR_debug: %d\n", glConfig.debugOutput);
 #ifdef _SHADOW_MAPPING
 	extern bool r_useDepthTexture;
 	extern bool r_useCubeDepthTexture;
@@ -2150,6 +2162,9 @@ void R_VidRestart_f(const idCmdArgs &args)
         // delete all shaders
         R_GLSL_Shutdown();
 
+#ifdef _IMGUI
+        RB_ImGui_Shutdown();
+#endif
 		// free the context and close the window
 		GLimp_Shutdown();
 		glConfig.isInitialized = false;
@@ -2569,6 +2584,9 @@ void idRenderSystemLocal::ShutdownOpenGL(void)
 {
 	// free the context and close the window
 	R_ShutdownFrameData();
+#ifdef _IMGUI
+    RB_ImGui_Shutdown();
+#endif
 	GLimp_Shutdown();
 	glConfig.isInitialized = false;
 }
@@ -2708,7 +2726,7 @@ idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RE
 #endif
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "render depth to color or depth texture in OpenGLES2.0. 0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
-idCVar harm_r_shadowMapNonParallelLightUltra( "harm_r_shadowMapNonParallelLightUltra", "0", CVAR_RENDERER | CVAR_BOOL/*//k next version open: | CVAR_ARCHIVE*/, "non parallel light allow ultra quality shadow map texture" );
+idCVar harm_r_shadowMapNonParallelLightUltra( "harm_r_shadowMapNonParallelLightUltra", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "non parallel light allow ultra quality shadow map texture" );
 
 #include "tr/tr_shadowmapping.cpp"
 #endif
@@ -2730,3 +2748,9 @@ idCVar harm_r_stencilShadowSoftCopyStencilBuffer( "harm_r_stencilShadowSoftCopyS
 idCVar harm_r_autoAspectRatio("harm_r_autoAspectRatio",			"1",			CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "automatic setup aspect ratio of view:\n0 = manual\n1 = force setup r_aspectRatio to -1\n2 = automatic setup r_aspectRatio to 0,1,2 by screen size", 0, 2);
 
 #include "rb/rb_debug.cpp"
+
+#ifdef _IMGUI
+#include "imgui/imgui.cpp"
+#include "imgui/imgui_event.cpp"
+#include "imgui/imgui_settings.cpp"
+#endif

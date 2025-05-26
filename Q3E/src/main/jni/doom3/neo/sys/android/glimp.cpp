@@ -101,6 +101,10 @@ static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
 
+#ifdef _IMGUI
+#include "imgui.cpp"
+#endif
+
 static void GLimp_HandleError(const char *func, bool exit = true)
 {
 	static const char *GLimp_StringErrors[] = {

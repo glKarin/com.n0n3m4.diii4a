@@ -1357,6 +1357,9 @@ void		GLimp_DeactivateContext(void);
 // being spent inside OpenGL.
 
 void		GLimp_EnableLogging(bool enable);
+#ifdef _IMGUI
+#include "imgui/r_imgui.h"
+#endif
 
 
 /*
