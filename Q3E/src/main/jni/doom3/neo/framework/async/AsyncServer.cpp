@@ -2700,6 +2700,7 @@ void idAsyncServer::RunFrame(void)
 
 		// advance game
 #ifdef _RAVEN
+		session->rw->DebugClear(0); // clear debug draw
 		gameReturn_t ret = game->RunFrame(userCmds[gameFrame & (MAX_USERCMD_BACKUP - 1)], 0, true, gameFrame);
 #else
 		gameReturn_t ret = game->RunFrame(userCmds[gameFrame & (MAX_USERCMD_BACKUP - 1)]);

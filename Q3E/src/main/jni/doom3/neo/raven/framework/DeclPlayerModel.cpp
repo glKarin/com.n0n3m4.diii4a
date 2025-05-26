@@ -69,13 +69,13 @@ bool rvDeclPlayerModel::Parse(const char* text, const int textLength, bool noCac
 		else if (token == "def_head_ui")
 		{
 			src.ReadToken(&token);
-			head = token;
+			uiHead = token;
 			continue;
 		}
 		else if (token == "def_head")
 		{
 			src.ReadToken(&token);
-			uiHead = token;
+			head = token;
 			continue;
 		}
 		else if (token == "model")

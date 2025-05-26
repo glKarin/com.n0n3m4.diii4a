@@ -88,9 +88,6 @@ bool USING_GLES3 = gl_version != 0x00020000;
 bool USING_GL = false;
 #ifdef _OPENGLES3
 int GLES3_VERSION = USING_GLES3 ? 0 : -1;
-#define USING_GLES30 (GLES3_VERSION > -1)
-#define USING_GLES31 (GLES3_VERSION > 0)
-#define USING_GLES32 (GLES3_VERSION > 1)
 #endif
 
 #define MAX_NUM_CONFIGS 1000

@@ -111,9 +111,9 @@ static bool RB_GLSL_LoadShaderProgramFromProp(const GLSLShaderProp *prop)
 #include "glsl_program.h"
 #undef GLSL_PROGRAM_PROC
 
-#define GLSL_INTERNAL_SHADER_INDEX_TO_HANDLE(x) ( (x) + 1 )
+#define GLSL_BUILTIN_SHADER_INDEX_TO_HANDLE(x) ( (x) + 1 )
 #define GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(x) ( -( (x) + 1) )
-#define GLSL_INTERNAL_SHADER_HANDLE_TO_INDEX(x) ( (x) - 1 )
+#define GLSL_BUILTIN_SHADER_HANDLE_TO_INDEX(x) ( (x) - 1 )
 #define GLSL_CUSTOM_SHADER_HANDLE_TO_INDEX(x) ( -(x) - 1 )
 
 const shaderHandle_t idGLSLShaderManager::INVALID_SHADER_HANDLE = 0;
@@ -144,7 +144,7 @@ const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
 		const shaderProgram_t *shader = shaders[i];
 		if(!idStr::Icmp(name, shader->name))
         {
-            common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> %d, type=%d %s.\n", shader->name, shader->program, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "internal");
+            common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> %d, type=%d %s.\n", shader->name, shader->program, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "built-in");
             return shader;
         }
 	}
@@ -172,7 +172,7 @@ int idGLSLShaderManager::FindIndex(const char *name) const
 		const shaderProgram_t *shader = shaders[i];
 		if(!idStr::Icmp(name, shader->name))
 		{
-			common->Printf("[Harmattan]: GLSL shader manager::FindIndex '%s' -> %d %s.\n", shader->name, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "internal");
+			common->Printf("[Harmattan]: GLSL shader manager::FindIndex '%s' -> %d %s.\n", shader->name, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "built-in");
 			return i;
 		}
 	}
@@ -198,7 +198,7 @@ const shaderProgram_t * idGLSLShaderManager::Get(shaderHandle_t handle) const
 
 	if(handle > 0)
 	{
-		index = GLSL_INTERNAL_SHADER_HANDLE_TO_INDEX(handle);
+		index = GLSL_BUILTIN_SHADER_HANDLE_TO_INDEX(handle);
 		if(index < shaders.Num())
 			return shaders[index];
 	}
@@ -225,7 +225,7 @@ shaderHandle_t idGLSLShaderManager::GetHandle(const char *name) const
 
     index = FindIndex(name);
     if(index >= 0)
-        return GLSL_INTERNAL_SHADER_INDEX_TO_HANDLE(index);
+        return GLSL_BUILTIN_SHADER_INDEX_TO_HANDLE(index);
 
     return INVALID_SHADER_HANDLE;
 }
@@ -268,7 +268,7 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 	if(index >= 0)
 	{
 		common->Printf("[Harmattan]: GLSL shader manager::Load shader '%s' has loaded.\n", inProp.name.c_str());
-		return GLSL_INTERNAL_SHADER_INDEX_TO_HANDLE(index);
+		return GLSL_BUILTIN_SHADER_INDEX_TO_HANDLE(index);
 	}
 
 	// check has custom loaded
@@ -419,11 +419,11 @@ idGLSLShaderManager idGLSLShaderManager::_shaderManager;
 idGLSLShaderManager *shaderManager = &idGLSLShaderManager::_shaderManager;
 
 #define _GLPROGS "glslprogs" // "gl2progs"
-static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "Setup external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
+static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_RENDERER | CVAR_INIT, "Setup external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
 
 #ifdef GL_ES_VERSION_3_0
 #define _GL3PROGS "glsl3progs"
-static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "Setup external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
+static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", "", CVAR_RENDERER | CVAR_INIT, "Setup external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
 #endif
 
 static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
@@ -1293,19 +1293,19 @@ int RB_GLSL_LoadShaderProgram(
 	RB_GLSL_LoadShader(fragment_shader_source_file, program, GL_FRAGMENT_SHADER);
 
 	if (!RB_GLSL_LinkShader(program, true)/* && !RB_GLSL_ValidateProgram(program)*/) {
-		common->Printf("[Harmattan]: 2. Load internal shader source\n");
+		common->Printf("[Harmattan]: 2. Load built-in shader source\n");
 		if(harm_r_useHighPrecision.GetBool())
 			common->Printf("'%s' use high precision float\n", name);
 		idStr vs = RB_GLSL_ExpandMacros(default_vertex_shader_source, macros, harm_r_useHighPrecision.GetInteger());
 		idStr fs = RB_GLSL_ExpandMacros(default_fragment_shader_source, macros, harm_r_useHighPrecision.GetInteger());
 		if(!RB_GLSL_CreateShaderProgram(program, vs.c_str(), fs.c_str(), name, type))
 		{
-			SHADER_ERROR("[Harmattan]: Load internal shader program fail!\n");
+			SHADER_ERROR("[Harmattan]: Load built-in shader program fail!\n");
 			return -1;
 		}
 		else
 		{
-			common->Printf("[Harmattan]: Load internal shader program success!\n\n");
+			common->Printf("[Harmattan]: Load built-in shader program success!\n\n");
 			return 2;
 		}
 	} else {
@@ -1847,8 +1847,8 @@ bool RB_GLSL_FindGLSLShaderSource(const char *name, int type, idStr *source, idS
 
 void GLSL_AddCommand(void)
 {
-	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export internal GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
-	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print internal GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
-	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export internal original C-String GLSL shader source for developer");
+	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export built-in GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
+	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print built-in GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
+	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export built-in original C-String GLSL shader source for developer");
     cmdSystem->AddCommand("convertARB", GLSL_ConvertARBShader_f, CMD_FL_RENDERER, "convert ARB shader to GLSL shader", GLSL_ArgCompletion_glprogs);
 }

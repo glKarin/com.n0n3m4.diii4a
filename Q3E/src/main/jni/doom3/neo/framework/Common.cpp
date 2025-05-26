@@ -3637,6 +3637,6 @@ void idCommonLocal::MaterialKeyForBinding(const char *binding, char *keyMaterial
 #define _DYNAMIC_ALLOC_MAX_STACK "524288" // 512k
 #endif
 // #warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
-/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", _DYNAMIC_ALLOC_MAX_STACK, CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `" _DYNAMIC_ALLOC_MAX_STACK "` bytes(Because stack memory is limited on OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).");
+/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", _DYNAMIC_ALLOC_MAX_STACK, CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `" _DYNAMIC_ALLOC_MAX_STACK "` bytes(Because stack memory is limited by OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).");
 #endif
 
