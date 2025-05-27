@@ -2750,7 +2750,7 @@ idCVar harm_r_autoAspectRatio("harm_r_autoAspectRatio",			"1",			CVAR_RENDERER |
 #include "rb/rb_debug.cpp"
 
 #ifdef _IMGUI
-#include "imgui/imgui.cpp"
-#include "imgui/imgui_event.cpp"
-#include "imgui/imgui_settings.cpp"
+#include "imgui/r_imgui.cpp"
+#include "imgui/r_imgui_event.cpp"
+#include "imgui/r_imgui_settings.cpp"
 #endif

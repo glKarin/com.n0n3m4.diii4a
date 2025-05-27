@@ -1085,6 +1085,12 @@ static void handleMouseGrab() {
 			showCursor = false;
 			grabMouse = relativeMouse = true;
 		}
+#ifdef _IMGUI
+        if ( R_ImGui_IsRunning() && R_ImGui_IsGrabMouse() ) {
+            showCursor = true;
+            relativeMouse = grabMouse = false;
+        }
+#endif
 
 		in_relativeMouseMode = relativeMouse;
 

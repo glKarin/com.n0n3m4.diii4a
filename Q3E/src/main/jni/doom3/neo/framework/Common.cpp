@@ -31,10 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../renderer/Image.h"
 
-#ifdef _IMGUI
-#include "../renderer/imgui/r_imgui.h"
-#endif
-
 #define	MAX_PRINT_MSG_SIZE	4096
 #define MAX_WARNING_LIST	256
 
@@ -2632,7 +2628,8 @@ void idCommonLocal::InitCommands(void)
 #endif
 
 #ifdef _IMGUI
-    cmdSystem->AddCommand("idTech4AmmSettings", ImGui_OpenSettings_f, CMD_FL_SYSTEM, "Show idTech4A++ new cvars and commands");
+    extern void R_ImGui_idTech4AmmSettings_f(const idCmdArgs &args);
+    cmdSystem->AddCommand("idTech4AmmSettings", R_ImGui_idTech4AmmSettings_f, CMD_FL_SYSTEM, "Show idTech4A++ new cvars and commands");
 #endif
 }
 
@@ -3529,6 +3526,9 @@ void idCommonLocal::InitGame(void)
 		cmdSystem->BufferCommandText(CMD_EXEC_NOW, "s_restart\n");
 		cmdSystem->ExecuteCommandBuffer();
 	}
+#ifdef _IMGUI
+    idKeyInput::SetBinding(K_F10, "idTech4AmmSettings");
+#endif
 }
 
 /*

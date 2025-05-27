@@ -333,7 +333,7 @@ public class Joystick extends Paintable implements TouchListener
         {
             keys[ind] = b;
             // Q3EUtils.q3ei.callbackObj.sendKeyEvent(b, (Q3EUtils.q3ei.callbackObj.notinmenu ? codes : Menu_Codes)[ind], 0);
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(b, Menu_Codes[ind], 0);
+            Q3EUtils.q3ei.callbackObj.sendKeyEvent(b, Menu_Codes[ind], 0); // always bind arrow keys
         }
     }
 
