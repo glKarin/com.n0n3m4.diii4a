@@ -378,7 +378,7 @@ void idImGuiSettings::Render(void)
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Appearing);
     ImGui::SetNextWindowSize(ImVec2(glConfig.vidWidth, glConfig.vidHeight), ImGuiCond_Appearing);
 
-    if (ImGui::BeginTabBar("Special cvar"))
+    if (ImGui::BeginTabBar("Special cvar and command"))
     {
         for(int i = 0; i < options.Num(); i++)
         {
@@ -722,5 +722,9 @@ void R_ImGui_idTech4AmmSettings_f(const idCmdArgs &args)
         ImGui_RegisterOptions();
         R_ImGui_SetRenderer(ImGui_RenderSettings, NULL, ImGui_CloseSettings);
         R_ImGui_Ready(true);
+    }
+    else
+    {
+        R_ImGui_Stop();
     }
 }

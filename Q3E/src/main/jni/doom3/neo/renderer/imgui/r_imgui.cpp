@@ -6,7 +6,7 @@
 #define IMGUI_CALLBACK_UPDATE_CVAR 2
 #define IMGUI_CALLBACK_COMMAND 3
 
-#if 1
+#if 0
 #if !defined(_MSC_VER)
 #define IMGUI_DEBUG(fmt, args...) printf(fmt, ##args);
 #else
@@ -102,7 +102,6 @@ private:
     GLimp_ImGui_Render_f draw; // backend read; frontend write
     GLimp_ImGui_Render_f end; // backend read; frontend write
     void *data; // backend read; frontend write
-public:
     bool grabMouse; // frontend write
     bool ready; // frontend write
     bool eventRunning; // frontend write
@@ -239,6 +238,7 @@ void idImGui::StartEvent(void)
         return;
     if(eventRunning)
         return;
+    callbacks.Clear();
     eventRunning = true;
     IMGUI_DEBUG("Frontend::Start event\n");
 }
@@ -249,6 +249,7 @@ void idImGui::Start(void)
         return;
     if(running)
         return;
+    events.Clear();
     running = true;
     IMGUI_DEBUG("Backend::Start\n");
 }
@@ -397,7 +398,6 @@ void RB_ImGui_Render(void)
 {
     if(!imGuiBackend.IsRunning())
         return;
-    imGuiBackend.PullEvent();
     imGuiBackend.Render();
 }
 
@@ -411,7 +411,12 @@ bool RB_ImGui_IsRunning(void)
 void RB_ImGui_Start(void)
 {
     if(imGuiBackend.IsRunning())
+    {
+        imGuiBackend.PullEvent();
+        if(!imGuiBackend.IsEventRunning())
+            RB_ImGui_Stop();
         return;
+    }
     if(!imGuiBackend.IsEventRunning())
         return;
     if(!imGuiBackend.IsInitialized())
@@ -497,6 +502,11 @@ void R_ImGui_Render(void)
 // frontend
 void R_ImGui_Stop(void)
 {
+    imGuiBackend.ExitEvent();
+#ifdef _MULTITHREAD
+    if(!multithreadActive)
+#endif
+        RB_ImGui_Stop();
 }
 
 // frontend
