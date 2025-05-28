@@ -39,13 +39,13 @@ If you have questions concerning this license or the applicable additional terms
 #define _VBO_IS_VALID
 #endif
 
-static volatile int current_frame = 0;
+//static volatile int current_frame = 0;
 //static volatile int render_frame = 0;
 //volatile int renderFrame = 0;
 #ifdef _MULTITHREAD
-#define deferredFreeList deferredFreeLists[current_frame]
-#define dynamicHeaders dynamicHeaderss[current_frame]
-#define dynamicAllocThisFrame dynamicAllocThisFrames[current_frame]
+#define deferredFreeList deferredFreeLists[usingFrame]
+#define dynamicHeaders dynamicHeaderss[usingFrame]
+#define dynamicAllocThisFrame dynamicAllocThisFrames[usingFrame]
 
 // vertex buffer
 #define _freeStaticHeaders freeStaticHeaderss[0]
@@ -661,7 +661,7 @@ void idVertexCache::EndFrame()
 	listNum = currentFrame % NUM_VERTEX_FRAMES;
 #ifdef _MULTITHREAD
 	if(multithreadActive)
-		current_frame = listNum;
+        usingFrame = listNum;
 #endif
 	staticAllocThisFrame = 0;
 	staticCountThisFrame = 0;

@@ -50,7 +50,7 @@ typedef struct vertCache_s {
 	struct vertCache_s *next, *prev;	// may be on the static list or one of the frame lists
 	int				frameUsed;			// it can't be purged if near the current frame
 #ifdef _MULTITHREAD
-	bool virtMemDirty;
+	bool            virtMemDirty;
 #endif
 } vertCache_t;
 
@@ -104,16 +104,17 @@ class idVertexCache
 		// listVertexCache calls this
 		void			List();
 #ifdef _MULTITHREAD
-	int GetListNum(void) const {
-		return listNum;
-	}
-	int GetNextListNum(void) const {
-		return (listNum + 1) % NUM_VERTEX_FRAMES;
-	}
-	void BeginBackEnd(int which);
-	void EndBackEnd(int which); // clear VBO
-	private:
-	vertCache_t* CreateTempVbo(int bytes, bool indexBuffer = false);
+        int             GetListNum(void) const {
+            return listNum;
+        }
+        int             GetNextListNum(void) const {
+            return (listNum + 1) % NUM_VERTEX_FRAMES;
+        }
+        void            BeginBackEnd(int which);
+        void            EndBackEnd(int which); // clear VBO
+
+    private:
+        vertCache_t*    CreateTempVbo(int bytes, bool indexBuffer = false);
 #endif
 
 	private:
@@ -163,6 +164,11 @@ class idVertexCache
 
 #if 0
 	int currentBoundVBO;
+#endif
+#ifdef _MULTITHREAD
+        volatile int    usingFrame; // current_frame: always 0 if without multi-threading, else same as ::listNum
+    public:
+        idVertexCache(void) : usingFrame(0) {}
 #endif
 };
 
