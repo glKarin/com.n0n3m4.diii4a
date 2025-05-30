@@ -73,6 +73,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class Q3EUtils
 {
@@ -906,6 +907,27 @@ public class Q3EUtils
         return new SimpleDateFormat(format).format(d);
     }
 
+    public static long Write(String filePath, byte[] in) throws RuntimeException
+    {
+        FileOutputStream fileoutputstream = null;
+
+        try
+        {
+            fileoutputstream = new FileOutputStream(filePath);
+            fileoutputstream.write(in);
+            fileoutputstream.flush();
+            return in.length;
+        }
+        catch(IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+        finally
+        {
+            Q3EUtils.Close(fileoutputstream);
+        }
+    }
+
     public static long Write(String filePath, InputStream in, int...bufferSizeArg) throws RuntimeException
     {
         FileOutputStream fileoutputstream = null;
@@ -1090,6 +1112,93 @@ public class Q3EUtils
         {
             Q3EUtils.Close(bis);
         }
+    }
+
+    public static boolean ExtractZipToZip(Context context, String assetPath, String systemFolderPath, boolean overwrite, String...files)
+    {
+        InputStream bis = null;
+        ZipInputStream zipinputstream = null;
+        ZipOutputStream outStream = null;
+        ByteArrayOutputStream bos = null;
+
+        File file = new File(systemFolderPath);
+
+        if(!overwrite && file.exists())
+            return false;
+
+        try
+        {
+            Q3EUtils.mkdir(file.getParent(), true);
+
+            bis = context.getAssets().open(assetPath);
+            zipinputstream = new ZipInputStream(bis);
+            bos = new ByteArrayOutputStream();
+            outStream = new ZipOutputStream(bos);
+
+            ZipEntry zipentry;
+            while ((zipentry = zipinputstream.getNextEntry()) != null)
+            {
+                String tmpname = zipentry.getName();
+                if(zipentry.isDirectory())
+                {
+                    // System.out.println("Skip dir" + tmpname);
+                    zipinputstream.closeEntry();
+                    continue;
+                }
+
+                boolean found = false;
+                if(null != files)
+                {
+                    for(String rule : files)
+                    {
+                        if(rule.endsWith("/"))
+                        {
+                            if(tmpname.startsWith(rule))
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if(tmpname.equals(rule))
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if(!found)
+                {
+                    //System.out.println("Skip " + tmpname);
+                    zipinputstream.closeEntry();
+                    continue;
+                }
+
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Extracting " + tmpname + " to " + systemFolderPath);
+
+                outStream.putNextEntry(new ZipEntry(tmpname));
+                Q3EUtils.Copy(outStream, zipinputstream, 4096);
+                outStream.closeEntry();
+                zipinputstream.closeEntry();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            Q3EUtils.Close(zipinputstream);
+            Q3EUtils.Close(bis);
+            Q3EUtils.Close(outStream);
+            Q3EUtils.Close(bos);
+        }
+
+        Q3EUtils.Write(systemFolderPath, bos.toByteArray());
+        return true;
     }
 
     public static boolean InMainThread(Context context)

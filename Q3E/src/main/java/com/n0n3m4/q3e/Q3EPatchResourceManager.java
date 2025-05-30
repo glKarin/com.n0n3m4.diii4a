@@ -32,87 +32,109 @@ public class Q3EPatchResourceManager
     {
         Q3EPatchResource rsc;
 
-        rsc = new Q3EPatchResource(
+        rsc = new Q3EPatchResource_fileToFile(
                 Q3EGlobals.PatchResource.QUAKE4_SABOT,
                 Q3ELang.tr(context, R.string.bot_q3_bot_support_in_mp_game),
                 "1",
                 Q3EGlobals.GAME_QUAKE4,
                 null,
-                Q3EPatchResource.COPY_FILE_TO_DIR,
                 "pak/q4base/q4_sabot_a9.pk4",
-                null
+                null,
+                "zzz_idTech4Amm_"
         );
         resourceList.add(rsc);
 
-        rsc = new Q3EPatchResource(
+        rsc = new Q3EPatchResource_fileToFile(
                 Q3EGlobals.PatchResource.DOOM3_SABOT,
                 Q3ELang.tr(context, R.string.doom3_bot_sabot_a7_mod),
                 "1",
                 Q3EGlobals.GAME_DOOM3,
                 null,
-                Q3EPatchResource.COPY_FILE_TO_DIR,
                 "pak/doom3/d3_sabot_a7.pk4",
-                null
+                null,
+                "zzz_idTech4Amm_"
         );
         resourceList.add(rsc);
 
-        rsc = new Q3EPatchResource(
+        rsc = new Q3EPatchResource_fileToFile(
                 Q3EGlobals.PatchResource.DOOM3_RIVENSIN_ORIGIANL_LEVELS,
                 Q3ELang.tr(context, R.string.rivensin_play_original_doom3_level),
                 "1",
                 Q3EGlobals.GAME_DOOM3,
                 "rivensin",
-                Q3EPatchResource.COPY_FILE_TO_DIR,
                 "pak/rivensin/play_original_doom3_level.pk4",
-                ""
+                "",
+                "zzz_idTech4Amm_"
         );
         resourceList.add(rsc);
 
-        rsc = new Q3EPatchResource(
+        rsc = new Q3EPatchResource_zipToDir(
                 Q3EGlobals.PatchResource.DOOM3BFG_HLSL_SHADER,
                 Q3ELang.tr(context, R.string.rbdoom3_bfg_hlsl_shader),
                 Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION,
                 Q3EGlobals.GAME_DOOM3BFG,
                 null,
-                Q3EPatchResource.EXTRACT_ZIP_TO_DIR,
                 "pak/doom3bfg/renderprogs.pk4",
                 "base"
         );
         resourceList.add(rsc);
 
-        rsc = new Q3EPatchResource(
+        rsc = new Q3EPatchResource_zipToDir(
                 Q3EGlobals.PatchResource.TDM_GLSL_SHADER,
                 Q3ELang.tr(context, R.string.the_dark_mod_glsl_shader) + "(2.13)",
                 Q3EGlobals.TDM_GLSL_SHADER_VERSION,
                 Q3EGlobals.GAME_TDM,
                 null,
-                Q3EPatchResource.EXTRACT_ZIP_TO_DIR,
                 "pak/darkmod/glprogs.pk4",
                 ""
         );
         resourceList.add(rsc);
 
-        rsc = new Q3EPatchResource(
+        rsc = new Q3EPatchResource_dirToDir(
                 Q3EGlobals.PatchResource.GZDOOM_RESOURCE,
                 Q3ELang.tr(context, R.string.gzdoom_builtin_resource) + "(4.14.1)",
                 Q3EGlobals.GZDOOM_VERSION,
                 Q3EGlobals.GAME_GZDOOM,
                 null,
-                Q3EPatchResource.COPY_DIR_TO_DIR,
                 "pak/gzdoom/4.14.1",
                 ""
         );
         resourceList.add(rsc);
 
-        rsc = new Q3EPatchResource(
+        rsc = new Q3EPatchResource_fileToDir(
                 Q3EGlobals.PatchResource.DOOM3_BFG_CHINESE_TRANSLATION,
                 Q3ELang.tr(context, R.string.doom3_chinese_translation_doom3bfg),
                 "1",
                 Q3EGlobals.GAME_DOOM3,
                 null,
-                Q3EPatchResource.COPY_FILE_TO_DIR,
                 "pak/doom3/doom3_chinese_translation_doom3bfg.pk4",
                 "base"
+        );
+        resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource_zipToZip(
+                Q3EGlobals.PatchResource.QUAKE4_SABOT,
+                Q3ELang.tr(context, R.string.bot_q3_bot_support_in_mp_game) + " " + Q3ELang.tr(context, R.string.mp_game_map_aas),
+                "1",
+                Q3EGlobals.GAME_QUAKE4,
+                null,
+                "pak/q4base/q4_sabot_a9.pk4",
+                null,
+                "zzz_idTech4Amm_q4_sabot_a9_aas.pk4",
+                "maps/"
+        );
+        resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource_zipToZip(
+                Q3EGlobals.PatchResource.DOOM3_SABOT,
+                Q3ELang.tr(context, R.string.doom3_bot_sabot_a7_mod) + " " + Q3ELang.tr(context, R.string.mp_game_map_aas),
+                "1",
+                Q3EGlobals.GAME_DOOM3,
+                null,
+                "pak/doom3/d3_sabot_a7.pk4",
+                null,
+                "zzz_idTech4Amm_d3_sabot_a7_aas.pk4",
+                "maps/"
         );
         resourceList.add(rsc);
     }
