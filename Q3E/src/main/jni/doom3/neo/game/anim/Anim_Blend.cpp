@@ -2304,6 +2304,10 @@ idDeclModelDef::idDeclModelDef()
 	for (int i = 0; i < ANIM_NumAnimChannels; i++) {
 		channelJoints[i].Clear();
 	}
+#ifdef _MOD_ANIM_MODEL_ROTATION
+    hasRotation = false;
+    rotation.Identity();
+#endif
 }
 
 /*
@@ -3025,6 +3029,44 @@ bool idDeclModelDef::Parse(const char *text, const int textLength)
 			}
 
 			channelJoints[ channel ].SetNum(num);
+#ifdef _MOD_ANIM_MODEL_ROTATION
+        } else if (token == "angle") { // e.g. angle (0 90 0)
+            idAngles angles;
+            if (!src.Parse1DMatrix(3, angles.ToFloatPtr())) {
+                src.Warning("Expected vector following 'angle'");
+                hasRotation = false;
+                rotation.Identity();
+            } else {
+                if(angles[0] != 0.0f || angles[1] != 0.0f || angles[2] != 0.0f)
+                {
+                    hasRotation = true;
+                    rotation = angles.ToMat3();
+                }
+                else
+                {
+                    hasRotation = false;
+                    rotation.Identity();
+                }
+            }
+        } else if (token == "rotation") { // e.g. rotation (0 0 1 1 0 0 0 1 0)
+            idMat3 rot;
+            if (!src.Parse1DMatrix(9, rot.ToFloatPtr())) {
+                src.Warning("Expected vector following 'rotation'");
+                hasRotation = false;
+                rotation.Identity();
+            } else {
+                if(!rot.IsIdentity(0.0f))
+                {
+                    hasRotation = true;
+                    rotation = rot;
+                }
+                else
+                {
+                    hasRotation = false;
+                    rotation.Identity();
+                }
+            }
+#endif
 		} else {
 			src.Warning("unknown token '%s'", token.c_str());
 			MakeDefault();
@@ -4727,6 +4769,10 @@ bool idAnimator::CreateFrame(int currentTime, bool force)
 
 	// add in the model offset
 	joints[0].SetTranslation(joints[0].ToVec3() + modelDef->GetVisualOffset());
+#ifdef _MOD_ANIM_MODEL_ROTATION
+    if(modelDef->HasRotation())
+        joints[0].SetRotation(joints[0].ToMat3() * modelDef->GetVisualRotation());
+#endif
 
 	// pointer to joint info
 	jointParent = modelDef->JointParents();

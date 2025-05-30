@@ -64,14 +64,14 @@ static void GLimp_DebugOpenGL(bool on)
     {
         qglEnable( GL_DEBUG_OUTPUT );
         qglEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        qglDebugMessageCallback( GLimp_OutputOpenGLCallback_f, 0 );
+        qglDebugMessageCallback( (GLDEBUGPROC)&GLimp_OutputOpenGLCallback_f, NULL );
         qglDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, 0, GL_TRUE);
     }
     else
     {
         qglDisable( GL_DEBUG_OUTPUT );
         qglDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        qglDebugMessageCallback( NULL, 0 );
+        qglDebugMessageCallback( NULL, NULL );
     }
 }
 
