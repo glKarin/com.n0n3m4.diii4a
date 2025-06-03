@@ -165,6 +165,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_si_botWeapons", "string", "0", "Bot initial weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_shotgun,weapon_machinegun), and allow mix(e.g. shotgun,3,weapon_rocketlauncher). All weapon: 1=pistol, 2=shotgun, 3=machinegun, 4=chaingun, 5=handgrenade, 6=plasmagun, 7=rocketlauncher, 8=BFG, 10=chainsaw.", 0),
                     KCVar.CreateCVar("harm_si_botAmmo", "integer", "0", "Bot weapons initial ammo clip when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo", 0),
                     KCVar.CreateCVar("harm_g_botEnableBuiltinAssets", "bool", "0", "enable built-in bot assets if external assets missing", KCVar.FLAG_INIT),
+                    KCVar.CreateCVar("harm_si_useCombatBboxInMPGame", "bool", "0", "players force use combat bbox in multiplayer game", 0),
                     KCVar.CreateCommand("addBots", "string", "add multiplayer bots batch", 0),
                     KCVar.CreateCommand("removeBots", "integer", "disconnect multi bots by client ID", 0),
                     KCVar.CreateCommand("fillBots", "integer", "fill bots to maximum of server", KCVar.FLAG_POSITIVE),

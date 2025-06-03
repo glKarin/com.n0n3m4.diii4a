@@ -7,14 +7,13 @@ Support DOOM III/Quake 4/Prey(2006)/DOOM3 BFG/Quake 1/Quake 2/Quake 3/Return to 
 
 Feature:
   multi-threading renderer
-  png/dds texture image, jpeg/png/bmp format of screenshot
-  obj/dae format static model
   pure soft shadow with shadow-mapping
-  Wide-character language translation support
+  wide-character language translation support
+  global illumination rendering
+  translucent/soft stencil shadow
+  Phong/Blinn-phong/PBR/no-lighting rendering
   OpenGLES2.0/OpenGLES3.0
   OpenAL(soft) and EFX Reverb
-  Phong/Blinn-phong/PBR/no-lighting rendering
-  translucent/soft stencil shadow
   
 Standalone game directory:
   Because more support games, it cause all game mods data directory put on a shared folder, them maybe have same name, and diffcult to view/manage. So application default enable `Standalone game directory` since version 1.1.0harmattan57, and you can also disable it on launcher settings.

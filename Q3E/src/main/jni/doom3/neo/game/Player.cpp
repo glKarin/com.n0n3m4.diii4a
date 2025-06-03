@@ -6326,11 +6326,13 @@ void idPlayer::PerformImpulse(int impulse)
 			break;
 		}
 
+#ifdef _DOOM3
         // RAVEN: bind "t" "_impulse51" in DoomConfig.cfg
         case 51 /* IMPULSE_51 */: {
             LastWeapon();
             break;
         }
+#endif
 
 #ifdef _MOD_VIEW_LIGHT
         // karin: bind "f" "_impulse52" in DoomConfig.cfg
@@ -9663,6 +9665,7 @@ bool idPlayer::NeedsIcon(void)
 	return entityNumber != gameLocal.localClientNum && (isLagged || isChatting);
 }
 
+#ifdef _DOOM3
 /*
 ===============
 idPlayer::LastWeapon
@@ -9684,6 +9687,7 @@ void idPlayer::LastWeapon( void ) {
 
     idealWeapon = previousWeapon;
 }
+#endif
 
 #ifdef _MOD_VIEW_BODY
 /*

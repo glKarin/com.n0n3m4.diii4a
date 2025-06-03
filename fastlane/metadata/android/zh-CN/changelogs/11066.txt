@@ -1,0 +1,4 @@
+* 毁灭战士3/雷神之锤4/掠食2006新增全局光照渲染以增加场景亮度(cvar harm_r_globalIllumination和harm_r_globalIlluminationBrightness), 可在启动器设置.
+* 毁灭战士3/雷神之锤4内置bot补丁资源编译到游戏库(因此现在只需要外部的aas文件, 不再需要defs/scripts补丁文件, 启动器也添加了仅提取aas文件支持), 如果外部bot补丁资源缺失, 则会启用内置bot补丁资源, 使用在命令行添加`+set harm_g_botEnableBuiltinAssets 1`或在启动器中启用.
+* 毁灭战士3/雷神之锤4/掠食2006新增RBDOOM-3-BFG v1.6.0的复古后期处理渲染(cvar r_renderMode), 可在启动器设置.
+* 毁灭战士3修复启用阴影映射时的镂空材质的阴影的错误渲染(cvar r_forceShadowMapsOnAlphaTestedSurfaces).

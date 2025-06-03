@@ -13,7 +13,7 @@ extern void GLimp_ActivateContext();
 extern void GLimp_DeactivateContext();
 extern void RB_GLSL_HandleShaders(void);
 
-static idCVar harm_r_multithread("harm_r_multithread",
+static idCVar r_multithread("r_multithread",
 #ifdef __ANDROID__
                                  "0"
 #else

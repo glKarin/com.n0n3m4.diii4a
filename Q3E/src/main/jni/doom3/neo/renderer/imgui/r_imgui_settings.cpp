@@ -592,7 +592,7 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCvar(NULL, "System", IMGUI_CVAR_GROUP_RENDERER);
 #if !defined(__ANDROID__)
     ImGui_RegisterCvar("harm_r_openglVersion", "Clear vertex buffer on every frame", IMGUI_CVAR_COMPONENT_COMBO, "GLES2=GLES 2.0;GLES3.0=GLES 3.0+;OpenGL_core=OpenGL desktop core;OpenGL_compatibility=OpenGL desktop compatibility");
-    ImGui_RegisterCvar("harm_r_multithread", "Enable multi-threading rendering");
+    ImGui_RegisterCvar("r_multithread", "Enable multi-threading rendering");
 #endif
     ImGui_RegisterCvar("harm_r_clearVertexBuffer", "Clear vertex buffer on every frame", IMGUI_CVAR_COMPONENT_COMBO, "0=No clear(original);1=Only free memory;2=Free memory and delete VBO(same as 1 if multi-threading)");
     ImGui_RegisterCvar(NULL, NULL, IMGUI_CVAR_GROUP_RENDERER);

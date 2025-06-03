@@ -468,7 +468,9 @@ class idPlayer : public idActor
 		void					NextWeapon(void);
 		void					NextBestWeapon(void);
 		void					PrevWeapon(void);
+#ifdef _DOOM3
     	void					LastWeapon					( void ); // RAVEN: switch last weapon
+#endif
 		void					SelectWeapon(int num, bool force);
 		void					DropWeapon(bool died) ;
 		void					StealWeapon(idPlayer *player);

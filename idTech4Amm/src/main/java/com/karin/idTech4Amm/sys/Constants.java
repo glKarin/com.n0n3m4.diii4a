@@ -9,8 +9,8 @@ import com.karin.idTech4Amm.misc.TextHelper;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 65;
-    public static final String CONST_RELEASE = "2025-05-05"; // 02-12
+    public static final int    CONST_UPDATE_RELEASE = 66;
+    public static final String CONST_RELEASE = "2025-06-25"; // 02-12
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -28,8 +28,8 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add global illumination rendering(cvar harm_r_globalIllumination and harm_r_globalIlluminationBrightness) at launcher on DOOM 3/Quake 4/Prey(2006).",
-            "Add built-in bot assets if external assets missing(so only require external aas files, defs/scripts files not required any longer, also extract aas files patch by launcher), add `+set harm_g_botEnableBuiltinAssets 1` on command to enable on DOOM 3/Quake 4.",
+            "Add global illumination rendering for make scene brighter(cvar harm_r_globalIllumination and harm_r_globalIlluminationBrightness) at launcher on DOOM 3/Quake 4/Prey(2006).",
+            "Add built-in bot assets if external assets missing(so only require external aas files, defs/scripts files not required any longer, also extract aas files patch by launcher), add `+set harm_g_botEnableBuiltinAssets 1` to command for enable on DOOM 3/Quake 4.",
             "Add retro postprocess rendering from RBDOOM-3-BFG 1.6.0(cvar r_renderMode) at launcher on DOOM 3/Quake 4/Prey(2006).",
             "Fix incorrect shadow rendering on perforated surfaces(cvar r_forceShadowMapsOnAlphaTestedSurfaces) with shadow mapping on DOOM 3.",
         };

@@ -1250,23 +1250,19 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("r_usePackColorAsDepth: %d\n", r_usePackColorAsDepth);
 #endif
 
+#ifdef _MULTITHREAD
+    extern intptr_t Sys_GetMainThread(void);
+    common->Printf("Multi-Thread: %s\n", multithreadActive ? "enabled" : "disabled");
+    common->Printf(" - Main thread handle: %lu\n", Sys_GetMainThread());
+    //if(multithreadActive)
+    {
+        const xthreadInfo *thread = &renderThread->render_thread;
+        common->Printf(" - Render thread(%s) handle: %lu\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
+    }
+#endif
+
 	common->Printf("%s\n", glVersionName.c_str());
 }
-
-#ifdef _MULTITHREAD
-static void R_Multithreading_f(const idCmdArgs &args)
-{
-	extern intptr_t Sys_GetMainThread(void);
-
-	common->Printf("[Harmattan]: Multi-Thread current is %s.\n", multithreadActive ? "enabled" : "disabled");
-	common->Printf("             - Main thread handle is %lu.\n", Sys_GetMainThread());
-	//if(multithreadActive)
-	{
-		const xthreadInfo *thread = &renderThread->render_thread;
-		common->Printf("             - Render thread(%s) handle is %lu.\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
-	}
-}
-#endif
 
 /*
 ==============================================================================
@@ -2333,9 +2329,6 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("listModes", R_ListModes_f, CMD_FL_RENDERER, "lists all video modes");
 	cmdSystem->AddCommand("reloadSurface", R_ReloadSurface_f, CMD_FL_RENDERER, "reloads the decl and images for selected surface");
 	cmdSystem->AddCommand("glConfig", R_ShowglConfig_f, CMD_FL_RENDERER, "print OpenGL config");
-#ifdef _MULTITHREAD
-	cmdSystem->AddCommand("r_multithread", R_Multithreading_f, CMD_FL_SYSTEM, "print multi-threading state");
-#endif
 #ifdef _SHADOW_MAPPING
 	extern void R_DumpShadowMap_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("harm_dumpShadowMap", R_DumpShadowMap_f, CMD_FL_RENDERER, "dump shadow map to file in next frame");
