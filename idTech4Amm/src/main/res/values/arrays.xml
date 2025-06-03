@@ -144,6 +144,19 @@
         <item>Backtrace</item>
     </string-array>
 
+    <string-array name="retro_postprocess_labels">
+        <item>None</item>
+        <item>CGA</item>
+        <item>CGA Highres</item>
+        <item>Commodore 64</item>
+        <item>Commodore 64 Highres</item>
+        <item>Amstrad CPC 6128</item>
+        <item>Amstrad CPC 6128 Highres</item>
+        <item>Sega Genesis</item>
+        <item>Sega Genesis Highres</item>
+        <item>Sony PSX</item>
+    </string-array>
+
     <string-array name="key_map_names">
         <item>Mouse 1</item>
         <item>Mouse 2</item>

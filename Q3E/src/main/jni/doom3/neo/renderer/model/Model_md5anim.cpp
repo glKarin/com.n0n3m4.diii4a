@@ -1000,7 +1000,7 @@ namespace md5anim
 
         md5anim = new idMD5AnimFile;
         md5anim->LoadAnim(animFile);
-        common->Printf("[idAnimEditor]: Input animation %d frames)\n", md5anim->NumFrames());
+        common->Printf("[idAnimEditor]: Input animation (%d frames)\n", md5anim->NumFrames());
         currentIndex = 0;
 
         for(int i = 0; i < cmds.Num(); i++)
@@ -1145,7 +1145,9 @@ namespace md5anim
             cmd.Append(" ");
         }
         cmd.Append("-o ");
-        cmd.Append(args.Argv(1));
+        idStr toPath = args.Argv(1);
+        toPath.SetFileExtension(".md5anim");
+        cmd.Append(toPath);
         common->Printf("cutAnim -> %s\n", cmd.c_str());
         cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
     }
@@ -1167,7 +1169,9 @@ namespace md5anim
             cmd.Append(" ");
         }
         cmd.Append("-o ");
-        cmd.Append(args.Argv(1));
+        idStr toPath = args.Argv(1);
+        toPath.SetFileExtension(".md5anim");
+        cmd.Append(toPath);
         common->Printf("reverseAnim -> %s\n", cmd.c_str());
         cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
     }
@@ -1189,7 +1193,9 @@ namespace md5anim
             cmd.Append(" ");
         }
         cmd.Append("-o ");
-        cmd.Append(args.Argv(1));
+        idStr toPath = args.Argv(1);
+        toPath.SetFileExtension(".md5anim");
+        cmd.Append(toPath);
         common->Printf("loopAnim -> %s\n", cmd.c_str());
         cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
     }
@@ -1211,7 +1217,9 @@ namespace md5anim
             cmd.Append(" ");
         }
         cmd.Append("-o ");
-        cmd.Append(args.Argv(1));
+        idStr toPath = args.Argv(1);
+        toPath.SetFileExtension(".md5anim");
+        cmd.Append(toPath);
         common->Printf("linkAnim -> %s\n", cmd.c_str());
         cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
     }

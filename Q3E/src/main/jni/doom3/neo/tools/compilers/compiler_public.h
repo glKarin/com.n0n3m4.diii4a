@@ -48,6 +48,7 @@ void RenderBumpFlat_f(const idCmdArgs &args);
 void RunAAS_f(const idCmdArgs &args);
 void RunAASDir_f(const idCmdArgs &args);
 void RunReach_f(const idCmdArgs &args);
+void RunSingleAAS_f(const idCmdArgs &args);
 
 // video file encoding
 void RoQFileEncode_f(const idCmdArgs &args);

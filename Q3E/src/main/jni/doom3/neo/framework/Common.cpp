@@ -2574,7 +2574,7 @@ void idCommonLocal::InitCommands(void)
 	cmdSystem->AddCommand("renderbump", RenderBump_f, CMD_FL_TOOL, "renders a bump map", idCmdSystem::ArgCompletion_ModelName);
 	cmdSystem->AddCommand("renderbumpFlat", RenderBumpFlat_f, CMD_FL_TOOL, "renders a flat bump map", idCmdSystem::ArgCompletion_ModelName);
 #if !defined(_HUMANHEAD) //k: for generate AAS file of mp game map and bot on DOOM3 and Quake4.
-	cmdSystem->AddCommand("botRunAAS", RunAAS_f, CMD_FL_GAME, "compiles an AAS file for a map for Quake 4 multiplayer-game", idCmdSystem::ArgCompletion_MapName);
+	cmdSystem->AddCommand("runSingleAAS", RunSingleAAS_f, CMD_FL_GAME, "compiles an AAS file of single type for a map for multiplayer-game", idCmdSystem::ArgCompletion_MapName);
 #endif
 	cmdSystem->AddCommand("runAAS", RunAAS_f, CMD_FL_TOOL, "compiles an AAS file for a map", idCmdSystem::ArgCompletion_MapName);
 	cmdSystem->AddCommand("runAASDir", RunAASDir_f, CMD_FL_TOOL, "compiles AAS files for all maps in a folder", idCmdSystem::ArgCompletion_MapName);
@@ -2625,6 +2625,11 @@ void idCommonLocal::InitCommands(void)
 
 #ifdef ID_DEDICATED
 	cmdSystem->AddCommand("help", Com_Help_f, CMD_FL_SYSTEM, "shows help");
+#endif
+
+#ifdef _IMGUI
+    extern void R_ImGui_idTech4AmmSettings_f(const idCmdArgs &args);
+    cmdSystem->AddCommand("idTech4AmmSettings", R_ImGui_idTech4AmmSettings_f, CMD_FL_SYSTEM, "Show idTech4A++ new cvars and commands");
 #endif
 }
 
@@ -3521,6 +3526,9 @@ void idCommonLocal::InitGame(void)
 		cmdSystem->BufferCommandText(CMD_EXEC_NOW, "s_restart\n");
 		cmdSystem->ExecuteCommandBuffer();
 	}
+#ifdef _IMGUI
+    idKeyInput::SetBinding(K_F10, "idTech4AmmSettings");
+#endif
 }
 
 /*
@@ -3637,6 +3645,6 @@ void idCommonLocal::MaterialKeyForBinding(const char *binding, char *keyMaterial
 #define _DYNAMIC_ALLOC_MAX_STACK "524288" // 512k
 #endif
 // #warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
-/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", _DYNAMIC_ALLOC_MAX_STACK, CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `" _DYNAMIC_ALLOC_MAX_STACK "` bytes(Because stack memory is limited on OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).");
+/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", _DYNAMIC_ALLOC_MAX_STACK, CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `" _DYNAMIC_ALLOC_MAX_STACK "` bytes(Because stack memory is limited by OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).");
 #endif
 

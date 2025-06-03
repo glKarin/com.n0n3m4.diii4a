@@ -2312,6 +2312,9 @@ void idImageManager::Init()
 	blueNoiseImage256 = globalImages->ImageFromFunction( "_blueNoise256", R_CreateBlueNoise256Image );
 	// RB end
 #endif
+#ifdef _POSTPROCESS
+    frameImage = ImageFromFunction("_frameRender", R_RGBA8Image);
+#endif
 }
 
 /*

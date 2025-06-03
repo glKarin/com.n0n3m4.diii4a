@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DECLMANAGER_H__
 #define __DECLMANAGER_H__
 
+#define DECL_PROGRAM_GENERATED_DIRECTORY "_program_generated/"
+
 #ifdef _RAVEN // quake4 new decl
 class rvDeclEffect;
 class rvDeclPlayback;
@@ -501,6 +503,9 @@ class idDeclManager
         virtual void					SetInsideLevelLoad(bool b) = 0;
         virtual bool					GetInsideLevelLoad(void) = 0;
 #endif
+
+        virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false) = 0;
+		virtual bool					EntityDefSet(const char *name, const char *key, const char *value = NULL) = 0;
 };
 
 extern idDeclManager 		*declManager;

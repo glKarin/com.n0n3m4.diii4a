@@ -226,7 +226,7 @@ idCVar r_materialOverride("r_materialOverride", "", CVAR_RENDERER, "overrides al
 idCVar r_debugRenderToTexture("r_debugRenderToTexture", "0", CVAR_RENDERER | CVAR_INTEGER, "");
 
 idCVar harm_r_maxFps( "r_maxFps", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Limit maximum FPS. 0 = unlimited" );
-idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Stencil shadow using Carmack-Inverse.");
+idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_BOOL|CVAR_RENDERER|CVAR_ARCHIVE, "Stencil shadow using Carmack-Inverse.");
 idCVar r_scaleMenusTo43( "r_scaleMenusTo43", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio" );
 idCVar harm_r_useHighPrecision("harm_r_useHighPrecision",
 #ifdef __ANDROID__
@@ -469,6 +469,7 @@ static void R_CheckPortableExtensions(void)
 		glConfig.depth24Available = R_CheckExtension("GL_OES_depth24");
 		glConfig.gl_FragDepthAvailable = R_CheckExtension("GL_EXT_frag_depth");
 	}
+	glConfig.debugOutput = R_CheckExtension("GL_KHR_debug");
 }
 
 
@@ -650,6 +651,11 @@ void R_InitOpenGL(void)
 
 	// recheck all the extensions (FIXME: this might be dangerous)
 	R_CheckPortableExtensions();
+
+#ifdef _OPENGLES3
+	// OpenGL debug
+	RB_DebugOpenGL();
+#endif
 
 	// parse our vertex and fragment programs, possibly disably support for
 	// one of the paths if there was an error
@@ -1155,15 +1161,26 @@ void R_ShowglConfig_f(const idCmdArgs &args)
             break;
 #endif
         case GL_VERSION_GL_ES3:
+#ifdef _OPENGLES3
+			if(USING_GLES32)
+				glVersionName = "OpenGL ES3.2";
+			else if(USING_GLES31)
+				glVersionName = "OpenGL ES3.1";
+			else
+#endif
             glVersionName = "OpenGL ES3";
             break;
         default:
 #ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
-                glVersionName = "OpenGL ES3";
-	else
+			if(USING_GLES32)
+				glVersionName = "OpenGL ES3.2";
+			else if(USING_GLES31)
+				glVersionName = "OpenGL ES3.1";
+			else if(USING_GLES3)
+				glVersionName = "OpenGL ES3";
+			else
 #endif
-                glVersionName = "OpenGL ES2";
+			glVersionName = "OpenGL ES2";
             break;
     }
 
@@ -1223,6 +1240,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("gl_FragDepthAvailable: %d\n", glConfig.gl_FragDepthAvailable);
 	common->Printf("multiSamples: %d\n", glConfig.multiSamples);
 	common->Printf("sizeof(glIndex_t): %zd\n", sizeof(glIndex_t));
+	common->Printf("GL_KHR_debug: %d\n", glConfig.debugOutput);
 #ifdef _SHADOW_MAPPING
 	extern bool r_useDepthTexture;
 	extern bool r_useCubeDepthTexture;
@@ -1232,23 +1250,19 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("r_usePackColorAsDepth: %d\n", r_usePackColorAsDepth);
 #endif
 
+#ifdef _MULTITHREAD
+    extern intptr_t Sys_GetMainThread(void);
+    common->Printf("Multi-Thread: %s\n", multithreadActive ? "enabled" : "disabled");
+    common->Printf(" - Main thread handle: %lu\n", Sys_GetMainThread());
+    //if(multithreadActive)
+    {
+        const xthreadInfo *thread = &renderThread->render_thread;
+        common->Printf(" - Render thread(%s) handle: %lu\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
+    }
+#endif
+
 	common->Printf("%s\n", glVersionName.c_str());
 }
-
-#ifdef _MULTITHREAD
-static void R_Multithreading_f(const idCmdArgs &args)
-{
-	extern intptr_t Sys_GetMainThread(void);
-
-	common->Printf("[Harmattan]: Multi-Thread current is %s.\n", multithreadActive ? "enabled" : "disabled");
-	common->Printf("             - Main thread handle is %lu.\n", Sys_GetMainThread());
-	//if(multithreadActive)
-	{
-		const xthreadInfo *thread = &renderThread->render_thread;
-		common->Printf("             - Render thread(%s) handle is %lu.\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
-	}
-}
-#endif
 
 /*
 ==============================================================================
@@ -1512,7 +1526,24 @@ void R_ScreenshotFilename(int &lastNumber, const char *base, idStr &fileName)
 		frac -= d*10;
 		e = frac;
 
-		sprintf(fileName, "%s%i%i%i%i%i.tga", base, a, b, c, d, e);
+        switch (cvarSystem->GetCVarInteger("r_screenshotFormat"))
+        {
+            case 1:
+                sprintf(fileName, "%s%i%i%i%i%i.bmp", base, a, b, c, d, e);
+                break;
+            case 2:
+                sprintf(fileName, "%s%i%i%i%i%i.png", base, a, b, c, d, e);
+                break;
+            case 3:
+                sprintf(fileName, "%s%i%i%i%i%i.jpg", base, a, b, c, d, e);
+                break;
+            case 4:
+                sprintf(fileName, "%s%i%i%i%i%i.dds", base, a, b, c, d, e);
+                break;
+            default:
+                sprintf(fileName, "%s%i%i%i%i%i.tga", base, a, b, c, d, e);
+                break;
+        }
 
 		if (lastNumber == 99999) {
 			break;
@@ -2127,6 +2158,9 @@ void R_VidRestart_f(const idCmdArgs &args)
         // delete all shaders
         R_GLSL_Shutdown();
 
+#ifdef _IMGUI
+        RB_ImGui_Shutdown();
+#endif
 		// free the context and close the window
 		GLimp_Shutdown();
 		glConfig.isInitialized = false;
@@ -2295,9 +2329,6 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("listModes", R_ListModes_f, CMD_FL_RENDERER, "lists all video modes");
 	cmdSystem->AddCommand("reloadSurface", R_ReloadSurface_f, CMD_FL_RENDERER, "reloads the decl and images for selected surface");
 	cmdSystem->AddCommand("glConfig", R_ShowglConfig_f, CMD_FL_RENDERER, "print OpenGL config");
-#ifdef _MULTITHREAD
-	cmdSystem->AddCommand("r_multithread", R_Multithreading_f, CMD_FL_SYSTEM, "print multi-threading state");
-#endif
 #ifdef _SHADOW_MAPPING
 	extern void R_DumpShadowMap_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("harm_dumpShadowMap", R_DumpShadowMap_f, CMD_FL_RENDERER, "dump shadow map to file in next frame");
@@ -2311,8 +2342,7 @@ void R_InitCommands(void)
 #ifdef _EXTRAS_TOOLS
     extern void MD5Anim_AddCommand(void);
 	MD5Anim_AddCommand();
-#endif
-#ifdef _ENGINE_MODEL_VIEWER
+
     extern void ModelTest_AddCommand(void);
     extern void ModelLight_AddCommand(void);
     ModelTest_AddCommand();
@@ -2547,6 +2577,9 @@ void idRenderSystemLocal::ShutdownOpenGL(void)
 {
 	// free the context and close the window
 	R_ShutdownFrameData();
+#ifdef _IMGUI
+    RB_ImGui_Shutdown();
+#endif
 	GLimp_Shutdown();
 	glConfig.isInitialized = false;
 }
@@ -2686,7 +2719,7 @@ idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RE
 #endif
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "render depth to color or depth texture in OpenGLES2.0. 0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
-idCVar harm_r_shadowMapNonParallelLightUltra( "harm_r_shadowMapNonParallelLightUltra", "0", CVAR_RENDERER | CVAR_BOOL/*//k next version open: | CVAR_ARCHIVE*/, "non parallel light allow ultra quality shadow map texture" );
+idCVar harm_r_shadowMapNonParallelLightUltra( "harm_r_shadowMapNonParallelLightUltra", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "non parallel light allow ultra quality shadow map texture" );
 
 #include "tr/tr_shadowmapping.cpp"
 #endif
@@ -2701,4 +2734,16 @@ idCVar harm_r_stencilShadowSoftCopyStencilBuffer( "harm_r_stencilShadowSoftCopyS
 #endif
 #endif
 
+#ifdef _POSTPROCESS
+#include "rb/rb_postprocess.cpp"
+#endif
+
 idCVar harm_r_autoAspectRatio("harm_r_autoAspectRatio",			"1",			CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "automatic setup aspect ratio of view:\n0 = manual\n1 = force setup r_aspectRatio to -1\n2 = automatic setup r_aspectRatio to 0,1,2 by screen size", 0, 2);
+
+#include "rb/rb_debug.cpp"
+
+#ifdef _IMGUI
+#include "imgui/r_imgui.cpp"
+#include "imgui/r_imgui_event.cpp"
+#include "imgui/r_imgui_settings.cpp"
+#endif

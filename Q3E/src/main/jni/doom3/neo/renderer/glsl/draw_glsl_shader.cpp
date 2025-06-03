@@ -111,9 +111,9 @@ static bool RB_GLSL_LoadShaderProgramFromProp(const GLSLShaderProp *prop)
 #include "glsl_program.h"
 #undef GLSL_PROGRAM_PROC
 
-#define GLSL_INTERNAL_SHADER_INDEX_TO_HANDLE(x) ( (x) + 1 )
+#define GLSL_BUILTIN_SHADER_INDEX_TO_HANDLE(x) ( (x) + 1 )
 #define GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(x) ( -( (x) + 1) )
-#define GLSL_INTERNAL_SHADER_HANDLE_TO_INDEX(x) ( (x) - 1 )
+#define GLSL_BUILTIN_SHADER_HANDLE_TO_INDEX(x) ( (x) - 1 )
 #define GLSL_CUSTOM_SHADER_HANDLE_TO_INDEX(x) ( -(x) - 1 )
 
 const shaderHandle_t idGLSLShaderManager::INVALID_SHADER_HANDLE = 0;
@@ -144,7 +144,7 @@ const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
 		const shaderProgram_t *shader = shaders[i];
 		if(!idStr::Icmp(name, shader->name))
         {
-            common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> %d, type=%d %s.\n", shader->name, shader->program, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "internal");
+            common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> %d, type=%d %s.\n", shader->name, shader->program, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "built-in");
             return shader;
         }
 	}
@@ -172,7 +172,7 @@ int idGLSLShaderManager::FindIndex(const char *name) const
 		const shaderProgram_t *shader = shaders[i];
 		if(!idStr::Icmp(name, shader->name))
 		{
-			common->Printf("[Harmattan]: GLSL shader manager::FindIndex '%s' -> %d %s.\n", shader->name, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "internal");
+			common->Printf("[Harmattan]: GLSL shader manager::FindIndex '%s' -> %d %s.\n", shader->name, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "built-in");
 			return i;
 		}
 	}
@@ -198,7 +198,7 @@ const shaderProgram_t * idGLSLShaderManager::Get(shaderHandle_t handle) const
 
 	if(handle > 0)
 	{
-		index = GLSL_INTERNAL_SHADER_HANDLE_TO_INDEX(handle);
+		index = GLSL_BUILTIN_SHADER_HANDLE_TO_INDEX(handle);
 		if(index < shaders.Num())
 			return shaders[index];
 	}
@@ -225,7 +225,7 @@ shaderHandle_t idGLSLShaderManager::GetHandle(const char *name) const
 
     index = FindIndex(name);
     if(index >= 0)
-        return GLSL_INTERNAL_SHADER_INDEX_TO_HANDLE(index);
+        return GLSL_BUILTIN_SHADER_INDEX_TO_HANDLE(index);
 
     return INVALID_SHADER_HANDLE;
 }
@@ -268,7 +268,7 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 	if(index >= 0)
 	{
 		common->Printf("[Harmattan]: GLSL shader manager::Load shader '%s' has loaded.\n", inProp.name.c_str());
-		return GLSL_INTERNAL_SHADER_INDEX_TO_HANDLE(index);
+		return GLSL_BUILTIN_SHADER_INDEX_TO_HANDLE(index);
 	}
 
 	// check has custom loaded
@@ -419,11 +419,11 @@ idGLSLShaderManager idGLSLShaderManager::_shaderManager;
 idGLSLShaderManager *shaderManager = &idGLSLShaderManager::_shaderManager;
 
 #define _GLPROGS "glslprogs" // "gl2progs"
-static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "Setup external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
+static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_RENDERER | CVAR_INIT, "Setup external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
 
 #ifdef GL_ES_VERSION_3_0
 #define _GL3PROGS "glsl3progs"
-static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "Setup external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
+static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", "", CVAR_RENDERER | CVAR_INIT, "Setup external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
 #endif
 
 static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
@@ -451,6 +451,9 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("interactionPBR", SHADER_INTERACTION_PBR, &interactionPBRShader, INTERACTION_VERT, INTERACTION_FRAG, "_PBR", "_PBR"));
 	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphong", SHADER_INTERACTION_BLINNPHONG, &interactionBlinnPhongShader, INTERACTION_VERT, INTERACTION_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
     ret.Append(GLSL_SHADER_SOURCE("ambientLighting", SHADER_AMBIENT_LIGHTING, &ambientLightingShader, INTERACTION_VERT, INTERACTION_FRAG, "_AMBIENT", "_AMBIENT"));
+#ifdef _GLOBAL_ILLUMINATION
+    ret.Append(GLSL_SHADER_SOURCE("globalIllumination", SHADER_GLOBAL_ILLUMINATION, &globalIlluminationShader, GLOBAL_ILLUMINATION_VERT, GLOBAL_ILLUMINATION_FRAG, "_BFG", "_BFG"));
+#endif
 	ret.Append(GLSL_SHADER_SOURCE("diffuseCubemap", SHADER_DIFFUSECUBEMAP, &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
 	// ret.Append(GLSL_SHADER_SOURCE("glasswarp", SHADER_GLASSWARP, &glasswarpShader, GLASSWARP_VERT, GLASSWARP_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("texgen", SHADER_TEXGEN, &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "", ""));
@@ -460,15 +463,16 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMask", SHADER_HEATHAZE_WITH_MASK, &heatHazeWithMaskShader, HEATHAZEWITHMASK_VERT, HEATHAZEWITHMASK_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", SHADER_HEATHAZE_WITH_MASK_AND_VERTEX, &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("colorProcess", SHADER_COLORPROCESS, &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
-    ret.Append(GLSL_SHADER_SOURCE("megaTexture", SHADER_MEGATEXTURE, &megaTextureShader, MEGATEXTURE_VERT, MEGATEXTURE_FRAG, "", ""));
 	// D3XP
 	ret.Append(GLSL_SHADER_SOURCE("enviroSuit", SHADER_ENVIROSUIT, &enviroSuitShader, ENVIROSUIT_VERT, ENVIROSUIT_FRAG, "", ""));
 #ifdef _HUMANHEAD
     ret.Append(GLSL_SHADER_SOURCE("screeneffect", SHADER_SCREENEFFECT, &screeneffectShader, SCREENEFFECT_VERT, SCREENEFFECT_FRAG, "", ""));
     ret.Append(GLSL_SHADER_SOURCE("radialblur", SHADER_RADIALBLUR, &radialblurShader, RADIALBLUR_VERT, RADIALBLUR_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("liquid", SHADER_LIQUID, &liquidShader, LIQUID_VERT, LIQUID_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("membrane", SHADER_MEMBRANE, &membraneShader, MEMBRANE_VERT, MEMBRANE_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("screenprocess", SHADER_SCREENPROCESS, &screenprocessShader, SCREENPROCESS_VERT, SCREENPROCESS_FRAG, "", ""));
 #endif
+    ret.Append(GLSL_SHADER_SOURCE("megaTexture", SHADER_MEGATEXTURE, &megaTextureShader, MEGATEXTURE_VERT, MEGATEXTURE_FRAG, "", ""));
 
 	// shadow mapping
 #ifdef _SHADOW_MAPPING
@@ -520,6 +524,14 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongSoft", SHADER_INTERACTION_BLINNPHONG_SOFT, &interactionBlinnPhongSoftShader, INTERACTION_STENCIL_SHADOW_VERT, INTERACTION_STENCIL_SHADOW_FRAG, "_SOFT,BLINN_PHONG", "_SOFT,BLINN_PHONG"));
     ret.Append(GLSL_SHADER_SOURCE("ambientLightingSoft", SHADER_AMBIENT_LIGHTING_SOFT, &ambientLightingSoftShader, INTERACTION_STENCIL_SHADOW_VERT, INTERACTION_STENCIL_SHADOW_FRAG, "_SOFT,_AMBIENT", "_SOFT,_AMBIENT"));
 #endif
+#endif
+
+#ifdef _POSTPROCESS
+    ret.Append(GLSL_SHADER_SOURCE("retro_2bit", SHADER_RETRO_2BIT, &retro2BitShader, RETRO_POSTPROCESS_2D_VERT, RETRO_2BIT_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("retro_c64", SHADER_RETRO_C64, &retroC64Shader, RETRO_POSTPROCESS_2D_VERT, RETRO_C64_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("retro_cpc", SHADER_RETRO_CPC, &retroCPCShader, RETRO_POSTPROCESS_2D_VERT, RETRO_CPC_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("retro_genesis", SHADER_RETRO_GENESIS, &retroGenesisShader, RETRO_POSTPROCESS_2D_VERT, RETRO_GENESIS_FRAG, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("retro_ps1", SHADER_RETRO_PSX, &retroPS1Shader, RETRO_POSTPROCESS_2D_VERT, RETRO_PS1_FRAG, "", ""));
 #endif
 }
 
@@ -1037,6 +1049,28 @@ static bool RB_GLSL_InitShaders(void)
 	REQUIRE_SHADER;
 #endif
 
+#ifdef _POSTPROCESS
+    UNNECESSARY_SHADER;
+    for(int i = SHADER_POSTPROCESS_BEGIN; i <= SHADER_POSTPROCESS_END; i++)
+    {
+        const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
+        if(!prop)
+            continue;
+        if(!RB_GLSL_LoadShaderProgramFromProp(prop))
+        {
+            common->Printf("[Harmattan]: not support postprocess!\n");
+            if(r_renderMode.GetInteger())
+            {
+                r_renderMode.SetInteger(0);
+            }
+            CVAR_READONLY(r_renderMode);
+            break;
+        }
+        shaderManager->Add(prop->program);
+    }
+    REQUIRE_SHADER;
+#endif
+
 	return true;
 }
 
@@ -1259,19 +1293,19 @@ int RB_GLSL_LoadShaderProgram(
 	RB_GLSL_LoadShader(fragment_shader_source_file, program, GL_FRAGMENT_SHADER);
 
 	if (!RB_GLSL_LinkShader(program, true)/* && !RB_GLSL_ValidateProgram(program)*/) {
-		common->Printf("[Harmattan]: 2. Load internal shader source\n");
+		common->Printf("[Harmattan]: 2. Load built-in shader source\n");
 		if(harm_r_useHighPrecision.GetBool())
 			common->Printf("'%s' use high precision float\n", name);
 		idStr vs = RB_GLSL_ExpandMacros(default_vertex_shader_source, macros, harm_r_useHighPrecision.GetInteger());
 		idStr fs = RB_GLSL_ExpandMacros(default_fragment_shader_source, macros, harm_r_useHighPrecision.GetInteger());
 		if(!RB_GLSL_CreateShaderProgram(program, vs.c_str(), fs.c_str(), name, type))
 		{
-			SHADER_ERROR("[Harmattan]: Load internal shader program fail!\n");
+			SHADER_ERROR("[Harmattan]: Load built-in shader program fail!\n");
 			return -1;
 		}
 		else
 		{
-			common->Printf("[Harmattan]: Load internal shader program success!\n\n");
+			common->Printf("[Harmattan]: Load built-in shader program success!\n\n");
 			return 2;
 		}
 	} else {
@@ -1622,13 +1656,8 @@ static void RB_GLSL_ExportDevGLSLShaderSource(const char *source, const char *na
 void R_ExportDevShaderSource_f(const idCmdArgs &args)
 {
 #undef _KARIN_GLSL_SHADER_H
-#undef _KARIN_GLSL_SHADER_100_H
-#undef _KARIN_GLSL_SHADER_300_H
-#undef _KARIN_PREY_GLSL_SHADER_100_H
-#undef _KARIN_PREY_GLSL_SHADER_300_H
-#undef _KARIN_D3XP_GLSL_SHADER_100_H
-#undef _KARIN_D3XP_GLSL_SHADER_300_H
 #include "glsl_shader.h"
+
 #ifdef GL_ES_VERSION_3_0
 #define EXPORT_SHADER_SOURCE(source, name, type) \
 	{ \
@@ -1686,6 +1715,16 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 	EXPORT_SHADER_PAIR_SOURCE(INTERACTION_STENCIL_SHADOW, "interactionStencilShadow");
 #endif
 
+#ifdef _POSTPROCESS
+#define EXPORT_POSTPROCESS_SHADER() \
+    EXPORT_SHADER_SOURCE(RETRO_POSTPROCESS_2D_VERT, "retro_postprocess_2d", "vert"); \
+	EXPORT_SHADER_SOURCE(RETRO_2BIT_FRAG, "retro_2bit", "frag"); \
+	EXPORT_SHADER_SOURCE(RETRO_C64_FRAG, "retro_c64", "frag"); \
+	EXPORT_SHADER_SOURCE(RETRO_CPC_FRAG, "retro_cpc", "frag"); \
+	EXPORT_SHADER_SOURCE(RETRO_GENESIS_FRAG, "retro_genesis", "frag"); \
+	EXPORT_SHADER_SOURCE(RETRO_PS1_FRAG, "retro_ps1", "frag");
+#endif
+
 #define SHADER_ES_PATH glprogs.c_str()
 	bool gl2 = true;
 	idStr glprogs;
@@ -1698,6 +1737,9 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #endif
 #ifdef _STENCIL_SHADOW_IMPROVE
 	EXPORT_STENCIL_SHADOW_SHADER()
+#endif
+#ifdef _POSTPROCESS
+    EXPORT_POSTPROCESS_SHADER()
 #endif
 #ifdef _HUMANHEAD
     EXPORT_PREY_SHADER()
@@ -1714,6 +1756,9 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #endif
 #ifdef _STENCIL_SHADOW_IMPROVE
 	EXPORT_STENCIL_SHADOW_SHADER()
+#endif
+#ifdef _POSTPROCESS
+    EXPORT_POSTPROCESS_SHADER()
 #endif
 #ifdef _HUMANHEAD
     EXPORT_PREY_SHADER()
@@ -1802,8 +1847,8 @@ bool RB_GLSL_FindGLSLShaderSource(const char *name, int type, idStr *source, idS
 
 void GLSL_AddCommand(void)
 {
-	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export internal GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
-	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print internal GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
-	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export internal original C-String GLSL shader source for developer");
+	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export built-in GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
+	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print built-in GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
+	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export built-in original C-String GLSL shader source for developer");
     cmdSystem->AddCommand("convertARB", GLSL_ConvertARBShader_f, CMD_FL_RENDERER, "convert ARB shader to GLSL shader", GLSL_ArgCompletion_glprogs);
 }

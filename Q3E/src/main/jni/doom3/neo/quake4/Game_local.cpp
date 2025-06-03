@@ -525,8 +525,12 @@ void idGameLocal::Init( void ) {
 	idClass::Init();
 
 	InitConsoleCommands();
+
 	// load default scripts
 	program.Startup( SCRIPT_DEFAULT );
+#ifdef MOD_BOTS
+    botAi::InitBotSystem(); // must before load aas_types
+#endif
 	
 	// set up the aas
 // RAVEN BEGIN
@@ -592,10 +596,6 @@ void idGameLocal::Init( void ) {
 // RAVEN END
 
 	networkSystem->AddSortFunction( filterByMod );
-
-#ifdef MOD_BOTS
-    botAi::InitBotSystem();
-#endif
 }
 
 /*
@@ -1476,13 +1476,21 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 	playerPVS.i = -1;
 	playerConnectedAreas.i = -1;
 
-#ifdef MOD_BOTS // cusTom3 - aas extensions - moved to later in InitFromNewMap so entities are spawned
+#ifdef MOD_BOTSxxx // cusTom3 - aas extensions - moved to later in InitFromNewMap so entities are spawned
 	if(!BOT_ENABLED())
 #endif
     // load navigation system for all the different monster sizes
     for( i = 0; i < aasNames.Num(); i++ ) {
         aasList[ i ]->Init( idStr( mapFileName ).SetFileExtension( aasNames[ i ] ).c_str(), mapFile->GetGeometryCRC() );
     }
+#ifdef MOD_BOTS // cusTom3 - aas extensions - moved to later in InitFromNewMap so entities are spawned
+    //k: in MP game, auto gen AAS file for map
+    if(BOT_ENABLED()) {
+        if(botAi::harm_g_autoGenAASFileInMPGame.GetBool()) {
+            botAi::GenerateAAS();
+        }
+    }
+#endif
 
 // RAVEN BEGIN
 // cdr: Obstacle Avoidance
@@ -1968,13 +1976,18 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 	SetGameType();
 // RAVEN END
 
+#ifdef MOD_BOTS
+    if(BOT_ENABLED()) {
+        botAi::PrepareResource();
+    }
+#endif
 	LoadMap( mapName, randseed );
 
 	InitScriptForMap();
 
 	MapPopulate();
 
-#ifdef MOD_BOTS // cusTom3 - aas extensions - moved here from LoadMap so entities are spawned for botaas calculations
+#ifdef MOD_BOTSxxx // cusTom3 - aas extensions - moved here from LoadMap so entities are spawned for botaas calculations
 	// load navigation system for all the different monster sizes
 	if(BOT_ENABLED()) {
 		int i;

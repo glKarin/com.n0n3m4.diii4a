@@ -9,8 +9,8 @@ import com.karin.idTech4Amm.misc.TextHelper;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 65;
-    public static final String CONST_RELEASE = "2025-05-05"; // 02-12
+    public static final int    CONST_UPDATE_RELEASE = 66;
+    public static final String CONST_RELEASE = "2025-06-25"; // 02-12
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -28,22 +28,10 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add cascaded shadow mapping with parallel lights(cvar `r_shadowMapSplits`) in OpenGL ES3 on DOOM 3/Quake 4/Prey(2006).",
-            "Fix makron remote render at screen for texfure/cameraView1 in map game/core1 on Quake 4.",
-            "Add spiritview and deathview GLSL shaders on Prey(2006).",
-            "Update GZDOOM version to 4.14.1.",
-            "Add multiplayer game bot support(need extract `d3_sabot_a7.pk4` patch resource first) on DOOM 3.",
-            "Add player view flashlight with cvar `harm_ui_showViewLight`(include cvar: harm_ui_viewLightShader, harm_ui_viewLightRadius, harm_ui_viewLightOffset, harm_ui_viewLightType, harm_ui_viewLightOnWeapon), support bind to key for toggle(bind \"g\" \"_impulse52\") on DOOM 3.",
-            "Support vsync setting on all OpenGL game.",
-            "Improve multiplayer game bot system on Quake 4.",
-            "Add skip player hit effect support with cvar `harm_g_skipHitEffect` and command `skipHitEffect` on DOOM 3/Quake 4/Prey(2006).",
-            "Add enviroSuit player view vision GLSL shader on DOOM 3: RoE.",
-            "Custom GLSL shaders using high precision(for fix blood pool in map game/waste) on Quake 4.",
-            "Allow fire when focus NPC with cvar `harm_g_allowFireWhenFocusNPC` on Quake 4.",
-            "Add custom GLSL shader program of new stage material support(keyword is `programGLSL`, e.g. programGLSL yourShaderInglProgs) on DOOM 3/Quake 4/Prey(2006).",
-            "Fix save game path on FTEQW.",
-            "On-screen buttons using OpenGL buffer.",
-            "[Warning]: RealRTCW(ver 5.0) and The Dark Mod(2.12) have removed on this release!"
+            "Add global illumination rendering for make scene brighter(cvar harm_r_globalIllumination and harm_r_globalIlluminationBrightness) at launcher on DOOM 3/Quake 4/Prey(2006).",
+            "Add built-in bot assets if external assets missing(so only require external aas files, defs/scripts files not required any longer, also extract aas files patch by launcher), add `+set harm_g_botEnableBuiltinAssets 1` to command for enable on DOOM 3/Quake 4.",
+            "Add retro postprocess rendering from RBDOOM-3-BFG 1.6.0(cvar r_renderMode) at launcher on DOOM 3/Quake 4/Prey(2006).",
+            "Fix incorrect shadow rendering on perforated surfaces(cvar r_forceShadowMapsOnAlphaTestedSurfaces) with shadow mapping on DOOM 3.",
         };
 	};
 

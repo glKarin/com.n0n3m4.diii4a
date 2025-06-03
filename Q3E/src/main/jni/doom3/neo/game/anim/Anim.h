@@ -372,6 +372,17 @@ class idDeclModelDef : public idDecl
 		idRenderModel 				*modelHandle;
 		idList<idAnim *>			anims;
 		const idDeclSkin 			*skin;
+#ifdef _MOD_ANIM_MODEL_ROTATION
+        bool                        hasRotation;
+        idMat3                      rotation;
+public:
+        bool                        HasRotation(void) const {
+            return hasRotation;
+        }
+        const idMat3                &GetVisualRotation(void) const {
+            return rotation;
+        }
+#endif
 };
 
 /*

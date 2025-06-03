@@ -1302,6 +1302,13 @@ public class Q3EInterface
 			boolean skipHitEffect = preferences.getBoolean(Q3EPreference.pref_harm_g_skipHitEffect, false);
 			if(skipHitEffect)
 				extraCommand = GetGameCommandEngine(extraCommand).SetBoolProp("harm_g_skipHitEffect", skipHitEffect).toString();
+
+			if(!isPrey)
+			{
+				boolean botEnableBuiltinAssets = preferences.getBoolean(Q3EPreference.pref_harm_g_botEnableBuiltinAssets, false);
+				if(botEnableBuiltinAssets)
+					extraCommand = GetGameCommandEngine(extraCommand).SetBoolProp("harm_g_botEnableBuiltinAssets", botEnableBuiltinAssets).toString();
+			}
 		}
 
 		if ((IsIdTech4() || IsIdTech3()) && preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))

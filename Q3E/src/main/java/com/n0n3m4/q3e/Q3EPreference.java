@@ -25,18 +25,21 @@ public final class Q3EPreference
     public static final String pref_useetc1cache  = "q3e_useetc1cache";
     public static final String pref_controlprefix = "q3e_controls_";
 
-    public static final String pref_harm_image_useetc2                = "q3e_image_useetc2"; //k
-    public static final String pref_harm_16bit                        = "q3e_harm_16bit";
-    public static final String pref_harm_depth_bit                    = "q3e_harm_depth_bit"; //k
-    public static final String pref_harm_r_harmclearvertexbuffer      = "q3e_r_harmclearvertexbuffer"; //k
-    public static final String pref_harm_r_specularExponent           = "q3e_harm_r_specularExponent"; //k
-    public static final String pref_harm_r_specularExponentBlinnPhong = "q3e_harm_r_specularExponentBlinnPhong"; //k
-    public static final String pref_harm_r_specularExponentPBR        = "q3e_harm_r_specularExponentPBR"; //k
-    public static final String pref_harm_r_lightingModel              = "q3e_harm_r_lightingModel"; //k
-    public static final String pref_harm_r_ambientLightingBrightness  = "q3e_harm_r_ambientLightingBrightness"; //k
-    public static final String pref_harm_mapBack                      = "q3e_harm_map_back"; //k
-    public static final String pref_harm_game                         = "q3e_harm_game"; //k
-    public static final String pref_harm_d3bfg_rendererBackend        = "q3e_harm_d3bfg_rendererBackend"; //k
+    public static final String pref_harm_image_useetc2                  = "q3e_image_useetc2"; //k
+    public static final String pref_harm_16bit                          = "q3e_harm_16bit";
+    public static final String pref_harm_depth_bit                      = "q3e_harm_depth_bit"; //k
+    public static final String pref_harm_r_harmclearvertexbuffer        = "q3e_r_harmclearvertexbuffer"; //k
+    public static final String pref_harm_r_specularExponent             = "q3e_harm_r_specularExponent"; //k
+    public static final String pref_harm_r_specularExponentBlinnPhong   = "q3e_harm_r_specularExponentBlinnPhong"; //k
+    public static final String pref_harm_r_specularExponentPBR          = "q3e_harm_r_specularExponentPBR"; //k
+    public static final String pref_harm_r_lightingModel                = "q3e_harm_r_lightingModel"; //k
+    public static final String pref_harm_r_ambientLightingBrightness    = "q3e_harm_r_ambientLightingBrightness"; //k
+    public static final String pref_harm_r_globalIllumination           = "q3e_harm_r_globalIllumination"; //k
+    public static final String pref_harm_r_globalIlluminationBrightness = "q3e_harm_r_globalIlluminationBrightness"; //k
+    public static final String pref_harm_r_renderMode                   = "q3e_harm_r_renderMode"; //k
+    public static final String pref_harm_mapBack                        = "q3e_harm_map_back"; //k
+    public static final String pref_harm_game                           = "q3e_harm_game"; //k
+    public static final String pref_harm_d3bfg_rendererBackend          = "q3e_harm_d3bfg_rendererBackend"; //k
 
     // DOOM 3
     public static final String pref_params                       = "q3e_params";
@@ -184,7 +187,8 @@ public final class Q3EPreference
     public static final String pref_harm_r_occlusionCulling           = "q3e_harm_r_occlusionCulling"; //k
     public static final String pref_harm_gui_useD3BFGFont             = "q3e_harm_gui_useD3BFGFont"; //k
     public static final String pref_harm_r_shadowMapCombine           = "q3e_harm_r_shadowMapCombine"; //k
-    public static final String pref_harm_g_skipHitEffect                = "q3e_harm_g_skipHitEffect"; //k
+    public static final String pref_harm_g_skipHitEffect              = "q3e_harm_g_skipHitEffect"; //k
+    public static final String pref_harm_g_botEnableBuiltinAssets     = "q3e_harm_g_botEnableBuiltinAssets"; //k
 
     public static final String RUN_BACKGROUND                = "harm_run_background";
     public static final String RENDER_MEM_STATUS             = "harm_render_mem_status";

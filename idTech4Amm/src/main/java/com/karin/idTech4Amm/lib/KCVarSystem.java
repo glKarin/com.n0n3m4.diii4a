@@ -37,8 +37,8 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "5.0", "Specular exponent in PBR interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_normalCorrectionPBR", "float", "1.0", "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("harm_r_ambientLightingBrightness", "float", "1.0", "Lighting brightness in ambient lighting", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_normalCorrectionPBR", "float", "1.0", "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_ambientLightingBrightness", "float", "1.0", "Lighting brightness in ambient lighting", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("r_maxFps", "integer", "0", "Limit maximum FPS. 0 = unlimited", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
 
                         KCVar.CreateCVar("r_screenshotFormat", "integer", "0", "Screenshot format", 0,
@@ -75,7 +75,21 @@ public final class KCVarSystem
                                 "1", "all shaders use high precision as default precision exclude special variables",
                                 "2", "all shaders use high precision as default precision and special variables also use high precision"
                         ),
-                        KCVar.CreateCVar("harm_r_occlusionCulling", "bool", "0", "Enable DOOM3-BFG occlusion culling", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT)
+                        KCVar.CreateCVar("harm_r_occlusionCulling", "bool", "0", "Enable DOOM3-BFG occlusion culling", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT),
+                        KCVar.CreateCVar("harm_r_globalIllumination", "bool", "0", "render global illumination before draw lighting interactions", KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_globalIlluminationBrightness", "float", "0.5", "global illumination brightness", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("r_renderMode", "integer", "0", "Enable retro postprocess rendering", KCVar.FLAG_LAUNCHER,
+                                "0", "None",
+                                "1", "CGA",
+                                "2", "CGA Highres",
+                                "3", "Commodore 64",
+                                "4", "Commodore 64 Highres",
+                                "5", "Amstrad CPC 6128",
+                                "6", "Amstrad CPC 6128 Highres",
+                                "7", "Sega Genesis",
+                                "8", "Sega Genesis Highres",
+                                "9", "Sony PSX"
+                        )
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(
@@ -146,10 +160,12 @@ public final class KCVarSystem
                     ),
                     KCVar.CreateCVar("harm_ui_viewLightOnWeapon", "bool", "0", "player view flashlight follow weapon position", 0),
                     KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
-                    KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0 = disable; other number = bot num)", 0),
+                    KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0 = disable; -1 = max; other number = bot num)", 0),
                     KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot difficult level(0 = auto)", 0),
                     KCVar.CreateCVar("harm_si_botWeapons", "string", "0", "Bot initial weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_shotgun,weapon_machinegun), and allow mix(e.g. shotgun,3,weapon_rocketlauncher). All weapon: 1=pistol, 2=shotgun, 3=machinegun, 4=chaingun, 5=handgrenade, 6=plasmagun, 7=rocketlauncher, 8=BFG, 10=chainsaw.", 0),
                     KCVar.CreateCVar("harm_si_botAmmo", "integer", "0", "Bot weapons initial ammo clip when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo", 0),
+                    KCVar.CreateCVar("harm_g_botEnableBuiltinAssets", "bool", "0", "enable built-in bot assets if external assets missing", KCVar.FLAG_INIT),
+                    KCVar.CreateCVar("harm_si_useCombatBboxInMPGame", "bool", "0", "players force use combat bbox in multiplayer game", 0),
                     KCVar.CreateCommand("addBots", "string", "add multiplayer bots batch", 0),
                     KCVar.CreateCommand("removeBots", "integer", "disconnect multi bots by client ID", 0),
                     KCVar.CreateCommand("fillBots", "integer", "fill bots to maximum of server", KCVar.FLAG_POSITIVE),
@@ -180,10 +196,11 @@ public final class KCVarSystem
                             "strogg", "fonts/strogg"
                     ),
                     KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
-                    KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0 = disable; other number = bot num)", 0),
+                    KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0 = disable; -1 = max; other number = bot num)", 0),
                     KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot difficult level(0 = auto)", 0),
                     KCVar.CreateCVar("harm_si_botWeapons", "string", "0", "Bot initial weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_machinegun,weapon_shotgun), and allow mix(e.g. machinegun,3,weapon_rocketlauncher). All weapon: 1=machinegun, 2=shotgun, 3=hyperblaster, 4=grenadelauncher, 5=nailgun, 6=rocketlauncher, 7=railgun, 8=lightninggun, 9=dmg, 10=napalmgun.", 0),
                     KCVar.CreateCVar("harm_si_botAmmo", "integer", "0", "Bot weapons initial ammo clip when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo", 0),
+                    KCVar.CreateCVar("harm_g_botEnableBuiltinAssets", "bool", "0", "enable built-in bot assets if external assets missing", KCVar.FLAG_INIT),
                     KCVar.CreateCommand("addBots", "string", "adds multiplayer bots batch", 0),
                     KCVar.CreateCommand("removeBots", "integer", "disconnect multi bots by client ID", 0),
                     KCVar.CreateCommand("fillBots", "integer", "fill bots to maximum of server", KCVar.FLAG_POSITIVE),

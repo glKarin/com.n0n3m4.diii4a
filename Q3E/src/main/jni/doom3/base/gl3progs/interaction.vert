@@ -16,7 +16,7 @@ out vec3 var_L;
 #if defined(BLINN_PHONG) || defined(_PBR) || defined(_AMBIENT)
 out vec3 var_H;
 #endif
-#if !defined(BLINN_PHONG) || defined(_PBR)
+#if (!defined(BLINN_PHONG) && !defined(_AMBIENT)) || defined(_PBR)
 out vec3 var_V;
 #endif
 #if defined(_PBR)
@@ -87,7 +87,7 @@ void main(void)
 #if defined(BLINN_PHONG) || defined(_PBR) || defined(_AMBIENT)
     var_H = H * M;
 #endif
-#if !defined(BLINN_PHONG) || defined(_PBR)
+#if (!defined(BLINN_PHONG) && !defined(_AMBIENT)) || defined(_PBR)
     var_V = V * M;
 #endif
 #if defined(_PBR)

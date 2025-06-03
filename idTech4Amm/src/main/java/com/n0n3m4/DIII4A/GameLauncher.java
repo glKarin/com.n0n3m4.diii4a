@@ -460,6 +460,27 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_g_skipHitEffect, isChecked)
 						.commit();
 			}
+			else if (id == R.id.cb_r_globalIllumination)
+			{
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("harm_r_globalIllumination", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_r_globalIllumination, isChecked)
+						.commit();
+			}
+			else if (id == R.id.cb_g_botEnableBuiltinAssets)
+			{
+				if(Q3EUtils.q3ei.IsIdTech4())
+				{
+					if(isChecked)
+						SetProp_temp("harm_g_botEnableBuiltinAssets", "1");
+					else
+						RemoveProp_temp("harm_g_botEnableBuiltinAssets");
+				}
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_g_botEnableBuiltinAssets, isChecked)
+						.commit();
+			}
 
 			// Doom 3 BFG
 			else if (id == R.id.doom3bfg_useCompressionCache)
@@ -825,6 +846,15 @@ public class GameLauncher extends Activity
 			{
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putInt(Q3EPreference.pref_harm_joystick_visible, getResources().getIntArray(R.array.joystick_visible_mode_values)[position])
+						.commit();
+			}
+
+			else if (viewId == R.id.spinner_r_renderMode)
+			{
+				if(Q3EUtils.q3ei.IsIdTech4())
+					SetProp("r_renderMode", position);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putInt(Q3EPreference.pref_harm_r_renderMode, position)
 						.commit();
 			}
 		}
@@ -1310,6 +1340,18 @@ public class GameLauncher extends Activity
 			{
 				if (!IsProp("harm_gui_wideCharLang")) setProp("harm_gui_wideCharLang", true);
 			}
+
+			V.cb_r_globalIllumination.setChecked(getProp("harm_r_globalIllumination", false));
+			if (!IsProp("harm_r_globalIllumination")) setProp("harm_r_globalIllumination", false);
+			str = GetProp("harm_r_globalIlluminationBrightness");
+			if (null != str)
+				V.edt_r_globalIlluminationBrightness.setText(str);
+			if (!IsProp("harm_r_globalIlluminationBrightness")) SetProp("harm_r_globalIlluminationBrightness", "0.5");
+
+			str = GetProp("r_renderMode");
+			if (null != str)
+				V.spinner_r_renderMode.setSelection(Q3EUtils.parseInt_s(str, 0));
+			if (!IsProp("r_renderMode")) SetProp("r_renderMode", "0");
 		}
 		else if(Q3EUtils.q3ei.isQ2)
 		{
@@ -1764,6 +1806,11 @@ public class GameLauncher extends Activity
 //		SelectRadioGroup(V.rg_r_autoAspectRatio, mPrefs.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1));
 		V.cb_g_skipHitEffect.setChecked(skipHitEffect);
 		V.cb_g_skipHitEffect.setOnCheckedChangeListener(m_checkboxChangeListener);
+		boolean botEnableBuiltinAssets = mPrefs.getBoolean(Q3EPreference.pref_harm_g_botEnableBuiltinAssets, false);
+		if(botEnableBuiltinAssets && Q3EUtils.q3ei.IsIdTech4())
+			SetProp_temp("harm_g_botEnableBuiltinAssets", "1");
+		V.cb_g_botEnableBuiltinAssets.setChecked(botEnableBuiltinAssets);
+		V.cb_g_botEnableBuiltinAssets.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView view, int id, KeyEvent ev)
@@ -1994,6 +2041,12 @@ public class GameLauncher extends Activity
 		V.cb_r_occlusionCulling.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_shadowMapCombine.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_shadowMapCombine, true));
 		V.cb_shadowMapCombine.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.cb_r_globalIllumination.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_globalIllumination, false));
+		V.cb_r_globalIllumination.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.edt_r_globalIlluminationBrightness.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_globalIlluminationBrightness, 0.5f));
+		V.edt_r_globalIlluminationBrightness.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_globalIlluminationBrightness", Q3EPreference.pref_harm_r_globalIlluminationBrightness, 0.5f));
+		V.spinner_r_renderMode.setSelection(mPrefs.getInt(Q3EPreference.pref_harm_r_renderMode, 0));
+		V.spinner_r_renderMode.setOnItemSelectedListener(m_itemSelectedListener);
 
 		V.cb_gui_useD3BFGFont.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_gui_useD3BFGFont, false));
 		V.cb_gui_useD3BFGFont.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -2817,6 +2870,10 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gui_useD3BFGFont, V.cb_gui_useD3BFGFont.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_shadowMapCombine, V.cb_shadowMapCombine.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_g_skipHitEffect, V.cb_g_skipHitEffect.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_r_globalIllumination, V.cb_r_globalIllumination.isChecked());
+		mEdtr.putFloat(Q3EPreference.pref_harm_r_globalIlluminationBrightness, Q3EUtils.parseFloat_s(V.edt_r_globalIlluminationBrightness.getText().toString(), 0.5f));
+		mEdtr.putInt(Q3EPreference.pref_harm_r_renderMode, V.spinner_r_renderMode.getSelectedItemPosition());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_g_botEnableBuiltinAssets, V.cb_g_botEnableBuiltinAssets.isChecked());
 
         mEdtr.commit();
     }
@@ -4645,6 +4702,10 @@ public class GameLauncher extends Activity
 		public CheckBox cb_shadowMapCombine;
 		public android.support.v4.widget.NestedScrollView cmdline_container;
 		public CheckBox cb_g_skipHitEffect;
+		public CheckBox cb_r_globalIllumination;
+		public EditText edt_r_globalIlluminationBrightness;
+		public Spinner spinner_r_renderMode;
+		public CheckBox cb_g_botEnableBuiltinAssets;
 
         public void Setup()
         {
@@ -4796,6 +4857,10 @@ public class GameLauncher extends Activity
 			cb_shadowMapCombine = findViewById(R.id.cb_shadowMapCombine);
 			cmdline_container = findViewById(R.id.cmdline_container);
 			cb_g_skipHitEffect = findViewById(R.id.cb_g_skipHitEffect);
+			cb_r_globalIllumination = findViewById(R.id.cb_r_globalIllumination);
+			edt_r_globalIlluminationBrightness = findViewById(R.id.edt_r_globalIlluminationBrightness);
+			spinner_r_renderMode = findViewById(R.id.spinner_r_renderMode);
+			cb_g_botEnableBuiltinAssets = findViewById(R.id.cb_g_botEnableBuiltinAssets);
         }
     }
 }

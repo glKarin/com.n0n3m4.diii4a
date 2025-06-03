@@ -186,6 +186,9 @@ void Cmd_ReloadScript_f( const idCmdArgs &args ) {
 
 	// recompile the scripts
 	gameLocal.program.Startup( SCRIPT_DEFAULT );
+#if defined(MOD_BOTS) && defined(_MOD_BOTS_ASSETS)
+    botAi::CompileBotScript(true);
+#endif
 
 	// error out so that the user can rerun the scripts
 	gameLocal.Error( "Exiting map to reload scripts" );

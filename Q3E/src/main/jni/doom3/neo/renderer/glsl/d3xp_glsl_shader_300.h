@@ -1,5 +1,3 @@
-#ifndef _KARIN_D3XP_GLSL_SHADER_300_H
-#define _KARIN_D3XP_GLSL_SHADER_300_H
 
 // environSuit
 GLSL_SHADER const char ES3_ENVIROSUIT_VERT[] =
@@ -75,7 +73,3 @@ GLSL_SHADER const char ES3_ENVIROSUIT_FRAG[] =
 "    _gl_FragColor = vec4(texture(u_fragmentMap0, R0.xy).xyz, 1.0);\n"
 "}\n"
 ;
-
-#endif
-
-

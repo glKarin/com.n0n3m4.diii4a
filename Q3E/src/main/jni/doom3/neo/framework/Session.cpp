@@ -1919,6 +1919,12 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	int		i;
 	bool	reloadingSameMap;
 
+#ifdef _EXTRAS_TOOLS
+    extern void ModelTest_CleanModel(void);
+    //extern void ModelLight_CleanLight(void);
+    ModelTest_CleanModel();
+    //ModelLight_CleanLight();
+#endif
 	// close console and remove any prints from the notify lines
 	console->Close();
 

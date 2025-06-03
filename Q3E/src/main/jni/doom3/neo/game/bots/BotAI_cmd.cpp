@@ -79,11 +79,6 @@ void botAi::Removebot_f( const idCmdArgs &args )
     }
 }
 
-bool botAi::IsAvailable(void)
-{
-    return botInitialized && botAvailable;
-}
-
 int botAi::AddBot(const char *defName, const idDict &dict)
 {
     int			i;
@@ -465,11 +460,14 @@ int botAi::CheckRestClients(int num)
 void botAi::Cmd_BotInfo_f(const idCmdArgs& args)
 {
     gameLocal.Printf("SABot(a7)\n");
-    gameLocal.Printf("gameLocal.isMultiplayer: %d\n", gameLocal.isMultiplayer);
-    gameLocal.Printf("gameLocal.isServer: %d\n", gameLocal.isServer);
-    gameLocal.Printf("gameLocal.isClient: %d\n", gameLocal.isClient);
-    gameLocal.Printf("botAi::IsAvailable(): %d\n", botAi::IsAvailable());
-    gameLocal.Printf("BOT_ENABLED(): %d\n", BOT_ENABLED());
+    gameLocal.Printf("game is multiplayer: %d\n", gameLocal.isMultiplayer);
+    gameLocal.Printf("game is server: %d\n", gameLocal.isServer);
+    gameLocal.Printf("game is client: %d\n", gameLocal.isClient);
+    gameLocal.Printf("Bot available: %d\n", botAi::IsAvailable());
+#ifdef _MOD_BOTS_ASSETS
+    gameLocal.Printf("Use built-in assets: %d\n", botAi::UsingBuiltinAssets());
+#endif
+    gameLocal.Printf("Bot enabled: %d\n", BOT_ENABLED());
     gameLocal.Printf("Bot slots: total(%d)\n", botAi::BOT_MAX_BOTS);
 
     int numAAS = gameLocal.aasList.Num();

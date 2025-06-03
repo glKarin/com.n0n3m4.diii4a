@@ -179,5 +179,15 @@ public final class KStr
         return Objects.toString(str, "");
     }
 
+    public static String Filename(String path)
+    {
+        return new File(path).getName();
+    }
+
+    public static String Filepath(String path)
+    {
+        return new File(path).getParent();
+    }
+
     private KStr() {}
 }

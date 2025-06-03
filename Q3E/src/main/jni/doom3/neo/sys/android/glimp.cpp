@@ -66,6 +66,7 @@ idCVar harm_r_openglVersion("harm_r_openglVersion",
 #define HARM_EGL_OPENGL_ES_BIT EGL_OPENGL_ES2_BIT
 #define HARM_EGL_CONTEXT_CLIENT_VERSION 2
 #endif
+#define HARM_EGL_CONTEXT_OPENGL_DEBUG harm_r_debugOpenGL.GetBool() ? EGL_CONTEXT_OPENGL_DEBUG : EGL_NONE
 
 #define GLFORMAT_RGB565 0x0565
 #define GLFORMAT_RGBA4444 0x4444
@@ -87,9 +88,6 @@ bool USING_GLES3 = gl_version != 0x00020000;
 bool USING_GL = false;
 #ifdef _OPENGLES3
 int GLES3_VERSION = USING_GLES3 ? 0 : -1;
-#define USING_GLES30 (GLES3_VERSION > -1)
-#define USING_GLES31 (GLES3_VERSION > 0)
-#define USING_GLES32 (GLES3_VERSION > 1)
 #endif
 
 #define MAX_NUM_CONFIGS 1000
@@ -103,47 +101,8 @@ static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
 
-#ifdef _OPENGLES3
-#define _GLDBG 0
-#if _GLDBG
-static void GLimp_OutputOpenGLCallback_f(GLenum source,
-                                 GLenum type,
-                                 GLuint id,
-                                 GLenum severity,
-                                 GLsizei length,
-                                 const GLchar* message,
-                                 const void* userParam)
-{
-    fprintf( stdout, "\nGL CALLBACK: %s type = 0x%X, severity = 0X%x, id = %u, message = %s\n",
-             ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
-             type, severity, id, message );
-}
-
-static void GLimp_DebugOpenGL(bool on)
-{
-    // if(!USING_GLES31) return;
-    if(!GL_DEBUG_MESSAGE_AVAILABLE())
-        return;
-    if(on)
-    {
-        qglEnable( GL_DEBUG_OUTPUT );
-        qglEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        qglDebugMessageCallback( GLimp_OutputOpenGLCallback_f, 0 );
-        qglDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, 0, GL_TRUE);
-    }
-    else
-    {
-        qglDisable( GL_DEBUG_OUTPUT );
-        qglDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        qglDebugMessageCallback( NULL, 0 );
-    }
-}
-#define DEBUG_OPENGL GLimp_DebugOpenGL(true);
-#define NO_DEBUG_OPENGL GLimp_DebugOpenGL(false);
-#else
-#define DEBUG_OPENGL
-#define NO_DEBUG_OPENGL
-#endif
+#ifdef _IMGUI
+#include "imgui.cpp"
 #endif
 
 static void GLimp_HandleError(const char *func, bool exit = true)
@@ -879,6 +838,7 @@ int GLES_Init(glimpParms_t &ap)
 				// EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
 				EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
 				EGL_CONTEXT_MINOR_VERSION_KHR, 2,
+                HARM_EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
 				EGL_NONE
 		};
 		gles3_version = 2;
@@ -891,6 +851,7 @@ int GLES_Init(glimpParms_t &ap)
 					// EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
 					EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
 					EGL_CONTEXT_MINOR_VERSION_KHR, 1,
+                    HARM_EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
 					EGL_NONE
 			};
 			gles3_version = 1;
@@ -900,6 +861,7 @@ int GLES_Init(glimpParms_t &ap)
 			{
 				EGLint ctxAttrib[] = {
 						EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
+                        HARM_EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
 						EGL_NONE
 				};
 				gles3_version = 0;
@@ -912,6 +874,7 @@ int GLES_Init(glimpParms_t &ap)
 	{
 		EGLint ctxAttrib[] = {
 				EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
+                HARM_EGL_CONTEXT_OPENGL_DEBUG, harm_r_debugOpenGL.GetBool() ? 1 : 0,
 				EGL_NONE
 		};
 		eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib);
@@ -965,6 +928,26 @@ int GLES_Init(glimpParms_t &ap)
 	return true;
 }
 
+bool GLimp_ExtensionSupported(const char *name)
+{
+	if(!qglGetString)
+	{
+		common->Warning("OpenGL not initialized!");
+		return false;
+	}
+
+    const char *exts = (const char *)qglGetString(GL_EXTENSIONS);
+    if(!exts)
+        return false;
+
+	idStr new_exts(exts);
+	new_exts.Append(" ");
+	bool has = new_exts.Find(name) >= 0;
+
+	common->Printf("[Harmattan]: OpenGL extension '%s' -> %s\n", name, has ? "support" : "missing");
+	return has;
+}
+
 /*
 ===================
 GLimp_Init
@@ -1008,9 +991,6 @@ bool GLimp_Init(glimpParms_t a)
 	common->Printf("GL_SHADING_LANGUAGE_VERSION: %s\n", glstring);
 
 	//has_gl_context = true;
-#ifdef _OPENGLES3
-	DEBUG_OPENGL;
-#endif
 	return true;
 }
 

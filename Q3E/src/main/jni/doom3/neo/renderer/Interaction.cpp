@@ -1134,7 +1134,9 @@ void idInteraction::CreateInteraction(const idRenderModel *model)
 		}
 
 #ifdef _SHADOW_MAPPING //karin: perforated surface for shadow mapping
-		if(HasShadows() && r_shadows.GetBool() && r_useShadowMapping.GetBool() && r_forceShadowMapsOnAlphaTestedSurfaces.GetBool() && shader->Coverage() == MC_PERFORATED && tri->numIndexes)
+		if(HasShadows() && r_shadows.GetBool() && r_useShadowMapping.GetBool() && r_forceShadowMapsOnAlphaTestedSurfaces.GetBool() && shader->Coverage() == MC_PERFORATED && tri->numIndexes 
+				&& ALLOW_SHADOW_MAPPING_ON_ALPHATEST_MTR(shader)
+				)
 		{
 #if 0 //karin: don't need precheck
 			bool handle = false;

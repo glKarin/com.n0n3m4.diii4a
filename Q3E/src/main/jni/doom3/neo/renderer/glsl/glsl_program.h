@@ -16,9 +16,19 @@ GLSL_PROGRAM_PROC shaderProgram_t blendLightShader; //k: blend light shader
 GLSL_PROGRAM_PROC shaderProgram_t interactionPBRShader; //k: PBR lighting model interaction shader
 GLSL_PROGRAM_PROC shaderProgram_t interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
 GLSL_PROGRAM_PROC shaderProgram_t ambientLightingShader; //k: Ambient lighting model interaction shader
+#ifdef _GLOBAL_ILLUMINATION
+GLSL_PROGRAM_PROC shaderProgram_t globalIlluminationShader; //k: Global illumination shader
+#endif
 GLSL_PROGRAM_PROC shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
 // GLSL_PROGRAM_PROC shaderProgram_t glasswarpShader; //k: glasswarp shader
 GLSL_PROGRAM_PROC shaderProgram_t texgenShader; //k: texgen shader
+#ifdef _POSTPROCESS
+GLSL_PROGRAM_PROC shaderProgram_t retro2BitShader; //k: 2Bit postprocess shader
+GLSL_PROGRAM_PROC shaderProgram_t retroC64Shader; //k: C64 postprocess shader
+GLSL_PROGRAM_PROC shaderProgram_t retroCPCShader; //k: CPC postprocess shader
+GLSL_PROGRAM_PROC shaderProgram_t retroGenesisShader; //k: Genesis postprocess shader
+GLSL_PROGRAM_PROC shaderProgram_t retroPS1Shader; //k: PS1 postprocess shader
+#endif
 
 // new stage
 GLSL_PROGRAM_PROC shaderProgram_t heatHazeShader; //k: heatHaze shader
@@ -29,10 +39,10 @@ GLSL_PROGRAM_PROC shaderProgram_t megaTextureShader; //k: megatexture shader
 // D3XP
 GLSL_PROGRAM_PROC shaderProgram_t enviroSuitShader; //k: enviroSuit shader
 #ifdef _HUMANHEAD //karin: newstage
-GLSL_PROGRAM_PROC shaderProgram_t screeneffectShader; //k: screen effect shader spiritview
-GLSL_PROGRAM_PROC shaderProgram_t radialblurShader; //k: screen effect shader deathview
-GLSL_PROGRAM_PROC shaderProgram_t liquidShader; //k: liquid shader
-//GLSL_PROGRAM_PROC shaderProgram_t interactionLiquidShader; //k: interaction liquid shader: TODO: using liquidShader as alias
+GLSL_PROGRAM_PROC shaderProgram_t screeneffectShader; //k: screen effect shader: spiritview
+GLSL_PROGRAM_PROC shaderProgram_t radialblurShader; //k: screen effect shader: deathview
+GLSL_PROGRAM_PROC shaderProgram_t liquidShader; //k: liquid shader: game/salvage
+GLSL_PROGRAM_PROC shaderProgram_t membraneShader; //k: membrane liquid shader: rocketlauncher
 GLSL_PROGRAM_PROC shaderProgram_t screenprocessShader; //k: screen process shader
 #endif
 

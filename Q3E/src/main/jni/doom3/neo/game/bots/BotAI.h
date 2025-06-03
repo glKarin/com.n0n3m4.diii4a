@@ -125,7 +125,15 @@ public:
     void					PostCommand( int commandType, idEntity * commandEnt, idVec3 position );
     static trace_t			GetPlayerTrace( idPlayer * player );
 
-    static bool				IsAvailable(void);
+    static bool				IsAvailable(void) {
+        return botInitialized && botAvailable;
+    }
+#ifdef _MOD_BOTS_ASSETS
+    static idCVar           harm_g_botEnableBuiltinAssets;
+    static bool 			UsingBuiltinAssets(void) {
+        return botEnableBuiltinAssets;
+    }
+#endif
     static void				ArgCompletion_addBot( const idCmdArgs &args, void(*callback)( const char *s ) );
     static void				ArgCompletion_botLevel( const idCmdArgs &args, void(*callback)( const char *s ) );
     static void				ArgCompletion_botSlots( const idCmdArgs &args, void(*callback)( const char *s ) );
@@ -140,12 +148,16 @@ public:
     static void				Cmd_SetupBotLevel_f(const idCmdArgs& args);
 	static void				Cmd_SetupBotWeapons_f(const idCmdArgs& args);
 	static void				Cmd_SetupBotAmmo_f(const idCmdArgs& args);
-    static void				InitBotSystem(void);
+    static bool				InitBotSystem(void);
     static void				UpdateUI(void);
     static bool				GenerateAAS(void);
     static void				ReleaseBotSlot(int clientID);
     static botAi *			SpawnBot(idPlayer *botClient);
     static bool				PlayerHasBotSlot(int clientID);
+    static void             PrepareResource(void);
+#ifdef _MOD_BOTS_ASSETS
+    static bool             CompileBotScript(bool check = false);
+#endif
 
 private:
     static int				AddBot(const char *name, const idDict &dict = idDict());
@@ -170,6 +182,35 @@ private:
 
     static bool             botAvailable;
     static bool             botInitialized;
+
+#ifdef _MOD_FULL_BODY_AWARENESS
+	static void				GetPlayerViewPos(idPlayer *player, idVec3 &origin, idMat3 &axis);
+#endif
+
+#ifdef _MOD_BOTS_ASSETS
+    static bool             botEnableBuiltinAssets;
+
+    static bool             LoadResource(void);
+    static void             ReplaceResource(void);
+    static idDict           GetBotAASDef(void);
+    static idDict           GetBotBaseDef(void);
+    static idDict           GetBotSabotDef(void);
+    static idDict           GetBotSabotA8xDef(void);
+    static idDict           GetBotSabotTinmanDef(void);
+    static idDict           GetBotSabotFluffyDef(void);
+    static idDict           GetBotSabotBlackstarDef(void);
+    static idDict           GetBotSabotNamesDef(void);
+    static idList<idDict>   GetBotSabotLevelDef(void);
+    static idStr            GetBotDefScript(void);
+    static idStr            GetBotBaseScript(void);
+    static idStr            GetBotEventsScript(void);
+    static idStr            GetBotMainScript(void);
+    static idStr            GetBotSabotScript(void);
+    static idStr            GetBotSabotA8Script(void);
+
+    static bool             ReplaceEntityDefDict(const char *name, const idDict &dict);
+    static bool             SetupEntityDefDict(const char *name, const idDict &dict);
+#endif
 
 // Variables
 public:

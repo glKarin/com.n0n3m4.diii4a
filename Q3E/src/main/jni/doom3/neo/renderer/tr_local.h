@@ -67,7 +67,6 @@ extern const float negOneModulate[];
 #define negOneModulate negOne
 #endif
 
-//#define _SHADOW_MAPPING
 #ifdef _SHADOW_MAPPING
 
 //#define SHADOW_MAPPING_DEBUG
@@ -1358,6 +1357,9 @@ void		GLimp_DeactivateContext(void);
 // being spent inside OpenGL.
 
 void		GLimp_EnableLogging(bool enable);
+#ifdef _IMGUI
+#include "imgui/r_imgui.h"
+#endif
 
 
 /*
@@ -1581,6 +1583,9 @@ typedef enum {
 	SHADER_INTERACTION_PBR,
 	SHADER_INTERACTION_BLINNPHONG,
     SHADER_AMBIENT_LIGHTING,
+#ifdef _GLOBAL_ILLUMINATION
+    SHADER_GLOBAL_ILLUMINATION,
+#endif
 	SHADER_DIFFUSECUBEMAP,
 	// SHADER_GLASSWARP,
 	SHADER_TEXGEN,
@@ -1589,16 +1594,16 @@ typedef enum {
 	SHADER_HEATHAZE_WITH_MASK,
 	SHADER_HEATHAZE_WITH_MASK_AND_VERTEX,
 	SHADER_COLORPROCESS,
-    SHADER_MEGATEXTURE,
 	// D3XP
     SHADER_ENVIROSUIT,
 #ifdef _HUMANHEAD
 	SHADER_SCREENEFFECT, // spiritview
 	SHADER_RADIALBLUR, // deathview
 	SHADER_LIQUID, // liquid
-//    SHADER_INTERACTIONLIQUID, // interaction liquid
+    SHADER_MEMBRANE, // membrane
 	SHADER_SCREENPROCESS, // unused
 #endif
+    SHADER_MEGATEXTURE,
 	// shadow mapping
 #ifdef _SHADOW_MAPPING
 	SHADER_DEPTH,
@@ -1631,6 +1636,14 @@ typedef enum {
     SHADER_AMBIENT_LIGHTING_SOFT,
 #endif
 #endif
+    // post process
+#ifdef _POSTPROCESS
+    SHADER_RETRO_2BIT,
+    SHADER_RETRO_C64,
+    SHADER_RETRO_CPC,
+    SHADER_RETRO_GENESIS,
+    SHADER_RETRO_PSX,
+#endif
     // costum
 	SHADER_CUSTOM,
 } glsl_program_t;
@@ -1639,7 +1652,7 @@ typedef enum {
 #define SHADER_BASE_END SHADER_TEXGEN
 
 #define SHADER_NEW_STAGE_BEGIN SHADER_HEATHAZE
-#define SHADER_NEW_STAGE_END (SHADER_DEPTH - 1)
+#define SHADER_NEW_STAGE_END SHADER_MEGATEXTURE
 
 #ifdef _SHADOW_MAPPING
 #define SHADER_SHADOW_MAPPING_BEGIN SHADER_DEPTH
@@ -1654,6 +1667,11 @@ typedef enum {
 #define SHADER_STENCIL_SHADOW_BEGIN SHADER_INTERACTION_TRANSLUCENT
 #define SHADER_STENCIL_SHADOW_END SHADER_INTERACTION_BLINNPHONG_TRANSLUCENT
 #endif
+#endif
+
+#ifdef _POSTPROCESS
+#define SHADER_POSTPROCESS_BEGIN SHADER_RETRO_2BIT
+#define SHADER_POSTPROCESS_END SHADER_RETRO_PSX
 #endif
 
 /*
@@ -2236,6 +2254,8 @@ void R_ShadowBounds( const idBounds& modelBounds, const idBounds& lightBounds, c
 
 #ifdef _SHADOW_MAPPING
 
+#define ALLOW_SHADOW_MAPPING_ON_ALPHATEST_MTR(x) ( ( (shader->GetContentFlags() & CONTENTS_SOLID) != 0 || ( (shader->GetCullType() == CT_TWO_SIDED) || shader->ShouldCreateBackSides() ) ) && (shader->GetSort() != SS_DECAL) )
+
 #include "matrix/GLMatrix.h"
 
 extern idCVar r_useShadowMapping;			// use shadow mapping instead of stencil shadows
@@ -2328,7 +2348,7 @@ extern float RB_overbright;
 #define HARM_CHECK_SHADER_ERROR(x)
 #endif
 
-#ifdef _ENGINE_MODEL_VIEWER
+#ifdef _EXTRAS_TOOLS
 void ModelTest_RenderFrame(int time);
 void ModelLight_RenderFrame(int time);
 #endif
@@ -2358,5 +2378,21 @@ extern idCVar harm_r_useHighPrecision;
 #define GL_VERSION_NAME_GL_CORE "OpenGL_core"
 #define GL_VERSION_NAME_GL_COMPATIBILITY "OpenGL_compatibility"
 #endif
+
+#ifdef _GLOBAL_ILLUMINATION
+extern idCVar harm_r_globalIllumination;
+extern idCVar harm_r_globalIlluminationBrightness;
+#define HARM_RENDER_GLOBAL_ILLUMINATION() (harm_r_globalIllumination.GetBool() && harm_r_globalIlluminationBrightness.GetFloat() > 0.0f)
+
+void RB_DrawGlobalIlluminations( drawSurf_t **drawSurfs, int numDrawSurfs );
+#endif
+
+#ifdef _POSTPROCESS
+extern idCVar r_renderMode;
+void RB_PP_Render(void);
+#endif
+
+extern idCVar harm_r_debugOpenGL;
+void RB_DebugOpenGL(void);
 
 #endif /* !__TR_LOCAL_H__ */

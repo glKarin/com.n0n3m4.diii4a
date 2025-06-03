@@ -3,6 +3,12 @@ idCVar botAi::harm_si_botLevel( "harm_si_botLevel", "0", CVAR_INTEGER | CVAR_GAM
 idCVar botAi::harm_si_botWeapons( "harm_si_botWeapons", "", CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot initial weapons when spawn, separate by comma(,); 0=none, *=all. Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_machinegun,weapon_shotgun), and allow mix(e.g. machinegun,3,weapon_rocketlauncher). All weapon: 1=machinegun, 2=shotgun, 3=hyperblaster, 4=grenadelauncher, 5=nailgun, 6=rocketlauncher, 7=railgun, 8=lightninggun, 9=dmg, 10=napalmgun." );
 idCVar botAi::harm_si_botAmmo( "harm_si_botAmmo", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Bot weapons initial ammo clip when spawn, depend on `harm_si_botWeapons`. -1=max ammo, 0=none, >0=ammo clip" );
 
+#ifdef _MOD_BOTS_ASSETS
+idCVar botAi::harm_g_botEnableBuiltinAssets( "harm_g_botEnableBuiltinAssets", "0", CVAR_BOOL | CVAR_GAME | CVAR_INIT | CVAR_ARCHIVE, "Enable built-in bot assets if external assets missing." );
+
+bool botAi::botEnableBuiltinAssets = false;
+#endif
+
 bool botAi::botAvailable = false;
 bool botAi::botInitialized = false;
 
@@ -36,10 +42,236 @@ void botAi::InitBotSystem(void)
     {
         valid = fileSystem->ReadFile(BOT_SCRIPT_FILE, NULL, NULL) > 0;
     }
+
+#ifdef _MOD_BOTS_ASSETS
+    if(valid)
+        gameLocal.Printf("BotAI: using external assets\n");
+    else if(harm_g_botEnableBuiltinAssets.GetBool()) // using built-in assets if external assets missing
+    {
+        valid = LoadResource();
+        if(valid)
+        {
+            gameLocal.Printf("BotAI: using built-in assets\n");
+            botEnableBuiltinAssets = true;
+        }
+    }
+#endif
+
     botAvailable = valid;
     botInitialized = true;
     gameLocal.Printf("BotAI initialized: available=%d\n", botAvailable);
 }
+
+void botAi::PrepareResource(void)
+{
+#ifdef _MOD_BOTS_ASSETS
+    if(UsingBuiltinAssets())
+        ReplaceResource();
+#endif
+}
+
+#ifdef _MOD_BOTS_ASSETS
+bool botAi::ReplaceEntityDefDict(const char *name, const idDict &args)
+{
+    const idDict *declDict = gameLocal.FindEntityDefDict(name, false);
+    if(!declDict)
+        return false;
+
+    idDict dict = *declDict;
+    dict.Delete("classname");
+    dict.Copy(args);
+
+    idStr newName(name);
+    newName.Append("_origin");
+    // rename old original
+    declManager->RenameDecl(DECL_ENTITYDEF, name, newName.c_str());
+    // add new
+    declManager->AddDeclDef(name, DECL_ENTITYDEF, dict, true);
+    return true;
+}
+
+bool botAi::SetupEntityDefDict(const char *name, const idDict &args)
+{
+    const idDict *declDict = gameLocal.FindEntityDefDict(name, false);
+    if(!declDict)
+        return false;
+
+    int num = args.GetNumKeyVals();
+    const idKeyValue *kv;
+    for(int i = 0; i < num; i++)
+    {
+        kv = args.GetKeyVal(i);
+        idStr curValue;
+        if(declDict->GetString(kv->GetKey(), "", curValue))
+        {
+            if(!curValue.Cmp(kv->GetValue()))
+                continue; // equals
+        }
+        declManager->EntityDefSet(name, kv->GetKey(), kv->GetValue());
+    }
+    return true;
+}
+
+void botAi::ReplaceResource(void)
+{
+    // append botaas32 to aas_types, and reload aas_types
+    const idDict *declDict = gameLocal.FindEntityDefDict("aas_types", false);
+    if (!declDict) {
+        gameLocal.Error("Unable to find entityDef for 'aas_types'");
+        return;
+    }
+    const idKeyValue *kv = declDict->MatchPrefix("type");
+    int index = 0;
+    bool found = false;
+    while (kv != NULL) {
+        if(!idStr::Icmp(kv->GetValue(), BOT_AAS))
+        {
+            found = true;
+            break;
+        }
+        idStr indexStr = kv->GetKey().Right(kv->GetKey().Length() - strlen("type"));
+        index = atoi(indexStr.c_str());
+        kv = declDict->MatchPrefix("type", kv);
+    }
+    if(found)
+    {
+        gameLocal.Printf("BotAI: %s found in 'aas_types'\n", BOT_AAS);
+    }
+    else
+    {
+        gameLocal.Printf("BotAI: append %s into 'aas_types'\n", BOT_AAS);
+        idStr key = va("type%d", index + 1);
+        idDict dict = *declDict;
+        dict.Set(key.c_str(), BOT_AAS);
+#if 1
+        SetupEntityDefDict("aas_types", dict);
+#else
+        ReplaceEntityDefDict("aas_types", dict);
+#endif
+    }
+
+    // append botaas32 into info_player_deathmatch, and reload info_player_deathmatch
+    gameLocal.Printf("BotAI: append %s into 'info_player_deathmatch'\n", BOT_AAS);
+    {
+        idDict dict;
+        dict.Set("use_aas", BOT_AAS); // TinMan: So runaas compiles the aas for us
+        dict.Set("size", "32 32 80"); // TinMan: Must have size set for runaas
+        dict.Set("noclipmodel", "1"); // TinMan: ^ size set a clipmodel to bounds size, we don't want that.
+#if 1
+        SetupEntityDefDict("info_player_deathmatch", dict);
+#else
+        ReplaceEntityDefDict("info_player_deathmatch", dict);
+#endif
+    }
+
+    // append botaas32 into info_player_start, and reload info_player_start
+    gameLocal.Printf("BotAI: append %s into 'info_player_start'\n", BOT_AAS);
+    {
+        idDict dict;
+#if 1
+        dict.Set("use_aas", BOT_AAS); // TinMan: So runaas compiles the aas for us
+        dict.Set("size", "32 32 80"); // TinMan: Must have size set for runaas
+        dict.Set("noclipmodel", "1"); // TinMan: ^ size set a clipmodel to bounds size, we don't want that.
+        SetupEntityDefDict("info_player_start", dict);
+#else
+        dict.Set("inherit", "info_player_deathmatch"); // TinMan: Much better with all the whatnot I'm adding
+        ReplaceEntityDefDict("info_player_start", dict);
+#endif
+    }
+
+    // append botaas32 into info_player_teleport, and reload info_player_teleport
+    gameLocal.Printf("BotAI: append %s into 'info_player_teleport'\n", BOT_AAS);
+    {
+        idDict dict;
+#if 1
+        dict.Set("use_aas", BOT_AAS); // TinMan: So runaas compiles the aas for us
+        dict.Set("size", "32 32 80"); // TinMan: Must have size set for runaas
+        dict.Set("noclipmodel", "1"); // TinMan: ^ size set a clipmodel to bounds size, we don't want that.
+        SetupEntityDefDict("info_player_teleport", dict);
+#else
+        dict.Set("inherit", "info_player_deathmatch"); // TinMan: Much better with all the whatnot I'm adding
+        ReplaceEntityDefDict("info_player_teleport", dict);
+#endif
+    }
+}
+
+bool botAi::LoadResource(void)
+{
+#define BOT_CHECK_DEF(name, dict) \
+    decl = declManager->FindType(DECL_ENTITYDEF, name, false); \
+    if(decl) { \
+        gameLocal.Printf("BotAI: using external entityDef: %s\n", name); \
+    } else { \
+        gameLocal.Printf("BotAI: using built-in entityDef: %s\n", name); \
+        decl = declManager->AddDeclDef(name, DECL_ENTITYDEF, dict); \
+    } \
+    if(!decl) { \
+        gameLocal.Printf("BotAI: entityDef not found: %s\n", name); \
+        return false; \
+    }
+
+    if(!botAi::harm_g_botEnableBuiltinAssets.GetBool())
+        return false;
+
+    ReplaceResource();
+
+    const idDecl *decl;
+
+    // create entity defs
+    BOT_CHECK_DEF(BOT_AAS, GetBotAASDef()); // botaas32
+    BOT_CHECK_DEF("bot_sabot", GetBotSabotDef());
+    BOT_CHECK_DEF("bot_sabot_tinman", GetBotSabotTinmanDef());
+    BOT_CHECK_DEF("bot_sabot_fluffy", GetBotSabotFluffyDef());
+    BOT_CHECK_DEF("bot_sabot_blackstar", GetBotSabotBlackstarDef());
+    BOT_CHECK_DEF("bot_names", GetBotSabotNamesDef());
+    idList<idDict> levels = GetBotSabotLevelDef();
+    for(int i = 0; i < levels.Num(); i++)
+    {
+        idStr name = va("bot_level%d", i + 1);
+        BOT_CHECK_DEF(name.c_str(), levels[i]);
+    }
+
+    bool valid = fileSystem->ReadFile(BOT_SCRIPT_FILE, NULL, NULL) > 0;
+    if(valid)
+    {
+        gameLocal.Printf("BotAI: using external script\n");
+    }
+    else
+    {
+        gameLocal.Printf("BotAI: using built-in script\n");
+        if(!CompileBotScript())
+            return false;
+    }
+
+    return true;
+#undef BOT_CHECK_DEF
+}
+
+// From D3XP
+bool botAi::CompileBotScript(bool check)
+{
+    if(check)
+    {
+        if(!IsAvailable() || !UsingBuiltinAssets())
+            return false;
+    }
+
+    const char botMainScript[] = "scripts/bot_sabot_main.script";
+    idStr source = GetBotMainScript();
+    gameLocal.Printf("Compile built-in bot script: %s, %d bytes\n", botMainScript, source.Length());
+    bool result = gameLocal.program.CompileText(botMainScript, source.c_str(), false);
+    if (g_disasm.GetBool()) {
+        gameLocal.program.Disassemble();
+    }
+    if (!result) {
+        gameLocal.Warning("Compile failed in file %s.", botMainScript);
+        return false;
+    }
+    gameLocal.program.FinishCompilation();
+    gameLocal.Printf("Compile built-in bot script finish\n");
+    return true;
+}
+#endif
 
 int botAi::GetPlayerModelNames(idStrList &list, int team)
 {

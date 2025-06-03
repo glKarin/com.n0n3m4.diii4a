@@ -6,9 +6,9 @@
 ##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部/FTEQW/星球大战:绝地武士 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan65(lindaiyu)  
+1.1.0harmattan66(lindaiyu)  
 **Latest update:**
-2025-05-05  
+2025-06-25  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -23,8 +23,9 @@ GPLv3
 * multi-threading renderer
 * pure soft shadow with shadow-mapping
 * soft shadow with stencil-shadow and translucent stencil shadow
+* global illumination rendering
 * lighting model: Phong/Blinn-phong/PBR/Ambient/No-lighting
-* Wide-character language translation support
+* Wide-character language translation and BFG new fonts support
 * debug render tools support with programming render pipeline
 * OpenGLES2.0/OpenGLES3.0
 * png/dds/bimage texture image, jpeg/png/bmp/dds format of screenshot
@@ -42,15 +43,16 @@ GPLv3
 |:-----|:-----:|:-----:|
 | Multi-threading | Support<br/>(but can't switch in gaming) | d3es-multithread support<br/>(and support switch in gaming) |
 | New stage shader<br/>(heatHaze, heatHazeWithMask, heatHazeWithMaskAndVertex, colorProcess, enviroSuit(D3XP)) | Yes | - |
-| TexGen | Yes | - |
 | Shadow mapping for pure soft shadow | Yes | - |
 | Soft/Translucent stencil shadow | Yes<br/>(Soft stencil shadow only support on OpenGLES3.1+) | - |
-| OpenGL ES version | 2.0 and 3.0+<br/>(point light shadow mapping shader use cubemap on OpenGLES2.0, use texture array on OpenGLES3.0+) | 2.0(3.0+ compat) |
 | No lighting | Yes<br/>(And support switch in gaming by set harm_r_lightingModel to 0) | Yes |
-| Debug render tools | Yes<br/>(need to set harm_r_renderToolsMultithread to 1 if with multi-threading) | - |
 | PBR lighting model | Yes<br/>(using [idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr). But specular textures are not RMAO format in idTech4 game data) | - |
 | Wide-character language and DOOM3-BFG new font | Yes | - |
 | DOOM3-BFG occlusion culling | Yes | - |
+| Global illumination rendering | Yes | - |
+| TexGen | Yes | - |
+| OpenGL ES version | 2.0 and 3.0+<br/>(point light shadow mapping shader use cubemap on OpenGLES2.0, use texture array on OpenGLES3.0+) | 2.0(3.0+ compat) |
+| Debug render tools | Yes<br/>(need to set harm_r_renderToolsMultithread to 1 if with multi-threading) | - |
 
 ----------------------------------------------------------------------------------
 
@@ -85,10 +87,11 @@ GPLv3
 Or download the latest APK from the [Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest).
 Tag with `-free` only for F-Droid update.
 
-| Feature                         | Github | F-Droid  |
-|:--------------------------------|:------:|:--------:|
-| Ouya TV                         |   Yes  |    No    |
-| Khronos Vulkan validation layer |   Yes  |    No    |
+| Feature                             | Github | F-Droid |
+|:------------------------------------|:------:|:-------:|
+| Android min version(because ffmpeg) |   7.0  |   4.4   |
+| Ouya TV                             |   Yes  |    No   |
+| Khronos Vulkan validation layer     |   Yes  |    No   |
 
 ----------------------------------------------------------------------------------
 
@@ -108,41 +111,19 @@ Tag with `-free` only for F-Droid update.
 
 > ### Update
 
-* Add cascaded shadow mapping with parallel lights(cvar `r_shadowMapSplits`) in OpenGL ES3 on DOOM 3/Quake 4/Prey(2006).
-* Fix makron remote render at screen for texfure/cameraView1 in map game/core1 on Quake 4.
-* Add spiritview and deathview GLSL shaders on Prey(2006).
-* Update GZDOOM version to 4.14.1.
-* Add multiplayer game bot support(need extract `d3_sabot_a7.pk4` patch resource first) on DOOM 3.
-* Add player view flashlight with cvar `harm_ui_showViewLight`(include cvar: harm_ui_viewLightShader, harm_ui_viewLightRadius, harm_ui_viewLightOffset, harm_ui_viewLightType, harm_ui_viewLightOnWeapon), support bind to key for toggle(e.g. bind "g" "_impulse52") on DOOM 3.
-* Support vsync setting on all OpenGL game.
-* Improve multiplayer game bot system on Quake 4.
-* Add skip player hit effect support with cvar `harm_g_skipHitEffect` and command `skipHitEffect` on DOOM 3/Quake 4/Prey(2006).
-* Add enviroSuit player view vision GLSL shader on DOOM 3: RoE.
-* Custom GLSL shaders using high precision(for fix blood pool in map game/waste) on Quake 4.
-* Allow fire when focus NPC with cvar `harm_g_allowFireWhenFocusNPC` on Quake 4.
-* Add custom GLSL shader program of new stage material support(keyword is `programGLSL`, e.g. programGLSL yourShaderInglProgs) on DOOM 3/Quake 4/Prey(2006).
-* Fix save game path on FTEQW.
-* On-screen buttons using OpenGL buffer.
-* RealRTCW(ver 5.0) and The Dark Mod(2.12) have removed on this release!
+> 1.1.0harmattan66 (2025-06-25)
+
+* Add global illumination rendering for make scene brighter(cvar harm_r_globalIllumination and harm_r_globalIlluminationBrightness) at launcher on DOOM 3/Quake 4/Prey(2006).
+* Add built-in bot assets if external assets missing(so only require external aas files, defs/scripts files not required any longer, also extract aas files patch by launcher), add `+set harm_g_botEnableBuiltinAssets 1` to command or setup at launcher for enable on DOOM 3/Quake 4.
+* Add retro postprocess rendering from RBDOOM-3-BFG 1.6.0(cvar r_renderMode) at launcher on DOOM 3/Quake 4/Prey(2006).
+* Fix incorrect shadow rendering on perforated surfaces(cvar r_forceShadowMapsOnAlphaTestedSurfaces) with shadow mapping on DOOM 3.
 
 ----------------------------------------------------------------------------------
 
-* 毁灭战士3/雷神之锤4/掠食2006在OpenGL ES3下启用阴影映射软阴影时, 平行光源将使用级联阴影映射(cvar `r_shadowMapSplits`).
-* 雷神之锤4中修复关卡game/core1中texfure/cameraView1材质上makron的远程渲染.
-* 掠食2006添加灵魂行走和死亡行的GLSL着色器.
-* GZDOOM版本更新至4.14.1.
-* 毁灭战士3中多人游戏添加bot支持(需要先解压`d3_sabot_a7.pk4`补丁资源).
-* 毁灭战士3中添加玩家视角手电筒功能, 使用cvar harm_ui_showViewLight开启(其他cvar: harm_ui_viewLightShader, harm_ui_viewLightRadius, harm_ui_viewLightOffset, harm_ui_viewLightType, harm_ui_viewLightOnWeapon), 支持绑定到按键来控制开关(例如 bind "g" "_impulse52").
-* 所有使用OpenGL渲染的游戏支持游戏内的垂直同步设置.
-* 雷神之锤4中bot系统改进.
-* 毁灭战士3/雷神之锤4/掠食2006中新增使用cvar `harm_g_skipHitEffect`和命令`skipHitEffect`来忽略角色被击影响.
-* 毁灭战士3: 邪恶复苏中新增生化防护服视觉GLSL着色器.
-* 雷神之锤4中外部GLSL着色器默认使用高精度浮点数(为了解决处理厂关卡的血池渲染).
-* 雷神之锤4中新增使用cvar `harm_g_allowFireWhenFocusNPC`控制当瞄准NPC时允许开火.
-* 毁灭战士3/雷神之锤4/掠食2006中材质配置支持自定义的GLSL着色器(关键词为`programGLSL`, 例如 programGLSL yourShaderInglProgs).
-* 修复FTEQW存档文件路径问题.
-* 虚拟按键使用OpenGL缓冲区.
-* 真·重返德军总部(5.0版本)和The Dark Mod(2.12版本)在此版本被移除!
+* 毁灭战士3/雷神之锤4/掠食2006新增全局光照渲染以增加场景亮度(cvar harm_r_globalIllumination和harm_r_globalIlluminationBrightness), 可在启动器设置.
+* 毁灭战士3/雷神之锤4内置bot补丁资源编译到游戏库(因此现在只需要外部的aas文件, 不再需要defs/scripts补丁文件, 启动器也添加了仅提取aas文件支持), 如果外部bot补丁资源缺失, 则会启用内置bot补丁资源, 使用在命令行添加`+set harm_g_botEnableBuiltinAssets 1`或在启动器中启用.
+* 毁灭战士3/雷神之锤4/掠食2006新增RBDOOM-3-BFG v1.6.0的复古后期处理渲染(cvar r_renderMode), 可在启动器设置.
+* 毁灭战士3修复启用阴影映射时的镂空材质的阴影的错误渲染(cvar r_forceShadowMapsOnAlphaTestedSurfaces).
 
 ----------------------------------------------------------------------------------
 
@@ -185,12 +166,12 @@ Tag with `-free` only for F-Droid update.
 | CVar | Type | Default | Description | Flag | Range | Scope | Remark | Platform |
 |:---|:---:|:--:|:---|:---:|:---:|:---|:---|:---:|
 | harm_r_openglVersion | String | GLES3.0 | OpenGL version | INIT | GLES2, GLES3.0, OpenGL_core, OpenGL_compatibility | Engine/Renderer | OpenGL_core, OpenGL_compatibility will use OpenGL desktop version, setup with launcher on Android | Windows, Linux |
-| harm_r_multithread | Bool | 1 | Multithread backend | INIT |  | Engine/Renderer | setup with launcher on Android | Windows, Linux |
+| r_multithread | Bool | 1 | Multithread backend | INIT |  | Engine/Renderer | setup with launcher on Android | Windows, Linux |
 | harm_r_clearVertexBuffer | Integer | 2 | Clear vertex buffer on every frame | ARCHIVE, FIXED | 0, 1, 2 | Engine/Renderer | 0 = not clear(original);<br/> 1 = only free VBO memory;<br/> 2 = free VBO memory and delete VBO handle(only without multi-threading, else same as 1) | All |
 | harm_r_maxAllocStackMemory | Integer | 262144 | Control allocate temporary memory when load model data | ARCHIVE |  | Engine/Renderer | For load large model, because stack memory is limited on OS.<br/> 0 = Always heap;<br/> Negative = Always stack;<br/> Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory) | All |
-| harm_r_shaderProgramDir | String |  | Setup external OpenGLES2 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glslprogs(default) | All |
-| harm_r_shaderProgramES3Dir | String |  | Setup external OpenGLES3 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glsl3progs(default) | All |
 | harm_r_shadowCarmackInverse | Bool | 0 | Stencil shadow using Carmack-Inverse | ARCHIVE |  | Engine/Renderer |  | All |
+| harm_r_globalIllumination | Bool | 0 | Render global illumination before draw interactions | ARCHIVE |  | Engine/Renderer |  | All |
+| harm_r_globalIlluminationBrightness | Float | 0.3 | Global illumination brightness | ARCHIVE |  | Engine/Renderer |  | All |
 | harm_r_lightingModel | Integer | 1 | Lighting model when draw interactions | ARCHIVE | 0, 1, 2, 3 | Engine/Renderer | 1 = Phong(default);<br/> 2 = Blinn-Phong;<br/> 3 = PBR;<br/> 0 = Ambient(no lighting) | All |
 | harm_r_specularExponent | Float | 3.0 | Specular exponent in Phong interaction lighting model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
 | harm_r_specularExponentBlinnPhong | Float | 12.0 | Specular exponent in Blinn-Phong interaction lighting model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
@@ -216,6 +197,7 @@ Tag with `-free` only for F-Droid update.
 | harm_r_stencilShadowSoft | Bool | 0 | enable soft stencil shadow | ARCHIVE | only OpenGLES3.1+ | Engine/Renderer |  | All |
 | harm_r_stencilShadowSoftBias | Float | -1 | soft stencil shadow sampler BIAS | ARCHIVE |  | Engine/Renderer | -1 to automatic; 0 = disable; positive = value | All |
 | harm_r_stencilShadowSoftCopyStencilBuffer | Bool | 0 | copy stencil buffer directly for soft stencil shadow | ARCHIVE | 0 = copy depth buffer and bind and renderer stencil buffer to texture directly<br/>1 = copy stencil buffer to texture directly | Engine/Renderer |  | All |
+| r_renderMode | Integer | 0 | retro postprocess render | ARCHIVE | 0 = Doom<br/>1 = CGA<br/>2 = CGA Highres<br/>3 = Commodore 64<br/>4 = Commodore 64 Highres<br/>5 = Amstrad CPC 6128<br/>6 = Amstrad CPC 6128 Highres<br/>7 = Sega Genesis<br/>8 = Sega Genesis Highres<br/>9 = Sony PSX | Engine/Renderer |  | All |
 | harm_r_autoAspectRatio | Integer | 1 | automatic setup aspect ratio of view | ARCHIVE | 0, 1, 2 | Engine/Renderer | 0 = manual<br/>1 = force setup r_aspectRatio to -1<br/>2 = automatic setup r_aspectRatio to 0,1,2 by screen size | Android |
 | harm_r_renderToolsMultithread | Bool | 0 | Enable render tools debug with GLES in multi-threading | ARCHIVE |  | Engine/Renderer |  | All |
 | r_useETC1 | Bool | 0 | use ETC1 compression | INIT |  | Engine/Renderer |  | All |
@@ -230,6 +212,9 @@ Tag with `-free` only for F-Droid update.
 | harm_com_consoleHistory | Integer | 2 | Save/load console history | ARCHIVE | 0, 1, 2 | Engine/Framework | 0 = disable;<br/> 1 = loading in engine initialization, and saving in engine shutdown;<br/> 2 = loading in engine initialization, and saving in every executing | All |
 | com_disableAutoSaves | Bool | 0 | Don't create Autosaves when entering a new map | ARCHIVE |  | Engine/Framework |  | All |
 | r_scaleMenusTo43 | Integer | 0 | Scale menus, fullscreen videos and PDA to 4:3 aspect ratio | ARCHIVE | 0, 1, -1 | Engine/GUI | 0 = disable;<br/> 1 = only scale menu type GUI as 4:3 aspect ratio;<br/> -1 = scale all GUI as 4:3 aspect ratio | All |
+| harm_r_shaderProgramDir | String |  | Setup external OpenGLES2 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glslprogs(default) | All |
+| harm_r_shaderProgramES3Dir | String |  | Setup external OpenGLES3 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glsl3progs(default) | All |
+| harm_r_debugOpenGL | Bool | 0 | debug OpenGL | ARCHIVE | only OpenGLES3.1+ | Engine/Renderer |  | All |
 | harm_gui_wideCharLang | Bool | 0 | enable wide character language support | ARCHIVE |  | Engine/GUI |  | All |
 | harm_gui_useD3BFGFont | String | 0 | use DOOM3-BFG fonts instead of old fonts | INIT | 0, "", 1, &lt;DOOM3-BFG font name&gt; | Engine/GUI | 0 or "" = disable;<br/><br/> 1 = make DOOM3 old fonts mapping to DOOM3-BFG new fonts automatic. e.g. <br/> - In DOOM 3: <br/> * 'fonts/fontImage_xx.dat' -&gt; 'newfonts/Chainlink_Semi_Bold/48.dat'<br/> * 'fonts/an/fontImage_xx.dat' -&gt; 'newfonts/Arial_Narrow/48.dat'<br/> * 'fonts/arial/fontImage_xx.dat' -&gt; 'newfonts/Arial_Narrow/48.dat'<br/> * 'fonts/bank/fontImage_xx.dat' -&gt; 'newfonts/BankGothic_Md_BT/48.dat'<br/> * 'fonts/micro/fontImage_xx.dat' -&gt; 'newfonts/microgrammadbolext/48.dat'<br/> - In Quake 4(`r_strogg` and `strogg` fonts always disable): <br/> *  'fonts/chain_xx.dat' -&gt; 'newfonts/Chainlink_Semi_Bold/48.dat'<br/> * 'fonts/lowpixel_xx.dat' -&gt; 'newfonts/microgrammadbolext/48.dat'<br/> * 'fonts/marine_xx.dat' -&gt; 'newfonts/Arial_Narrow/48.dat'<br/> * 'fonts/profont_xx.dat' -&gt; 'newfonts/BankGothic_Md_BT/48.dat'<br/> - In Prey(`alien` font always disable): <br/> * 'fonts/fontImage_xx.dat' -&gt; 'newfonts/Chainlink_Semi_Bold/48.dat'<br/> * 'fonts/menu/fontImage_xx.dat' -&gt; 'newfonts/Arial_Narrow/48.dat'<br/><br/> &lt;DOOM3-BFG font name&gt; = use a DOOM3-BFG new font by name override all DOOM 3/Quake 4/Prey old fonts. e.g.<br/> * Chainlink_Semi_Bold<br/> * Arial_Narrow<br/> * BankGothic_Md_BT<br/> * microgrammadbolext<br/> * DFPHeiseiGothicW7<br/> * Sarasori_Rg | All |
 | s_driver | String | AudioTrack | sound driver | ARCHIVE | AudioTrack, OpenSLES | Engine/Sound | sound if without OpenAL on Android | Android |
@@ -249,10 +234,12 @@ Tag with `-free` only for F-Droid update.
 | harm_ui_viewLightType | Integer | 0 | player view flashlight type | ARCHIVE | 0=spot light; 1=point light | Game/DOOM3 |  | All |
 | harm_ui_viewLightOnWeapon | Bool | 0 | player view flashlight follow weapon position | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_g_autoGenAASFileInMPGame | Bool | 1 | For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic | ARCHIVE |  | Game/DOOM3 |  | All |
-| harm_si_autoFillBots | Bool | 1 | Automatic fill bots after map loaded in multiplayer game | ARCHIVE | &gt;=0 | Game/DOOM3 | 0 = disable; other number = bot num | All |
+| harm_si_autoFillBots | Bool | 0 | Automatic fill bots after map loaded in multiplayer game | ARCHIVE | &gt;=0 | Game/DOOM3 | 0 = disable; other number = bot num | All |
 | harm_si_botLevel | Integer | 0 | Bot level | ARCHIVE | [0 - 8] | Game/DOOM3 | 0 = auto; 1 - 8 = difficult level | All |
 | harm_si_botWeapons | String | 0 | Bot initial weapons when spawn, separate by comma(,) | ARCHIVE | 1=pistol; 2=shotgun; 3=machinegun; 4=chaingun; 5=handgrenade; 6=plasmagun; 7=rocketlauncher; 8=BFG; 10=chainsaw; 0=none; *=all | Game/DOOM3 | Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_shotgun,weapon_machinegun), and allow mix(e.g. shotgun,3,weapon_rocketlauncher) | All |
 | harm_si_botAmmo | Integer | 0 | Bot weapons initial ammo clip when spawn, depend on harm_si_botWeapons | ARCHIVE |  | Game/DOOM3 | -1=max ammo, 0=none, &gt;0=ammo clip | All |
+| harm_g_botEnableBuiltinAssets | Bool | 0 | Enable built-in bot assets if external assets missing | INIT |  | Game/DOOM3 |  | All |
+| harm_si_useCombatBboxInMPGame | Bool | 0 | Players force use combat bbox in multiplayer game | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_doubleJump | Bool | 0 | Enable double-jump | ARCHIVE |  | Game/DOOM3/Rivensin |  | All |
 | harm_pm_autoForceThirdPerson | Bool | 1 | Force set third person view after game level load end | ARCHIVE |  | Game/DOOM3/Rivensin |  | All |
 | harm_pm_preferCrouchViewHeight | Float | 32 | Set prefer crouch view height in Third-Person | ARCHIVE | &gt;= 0 | Game/DOOM3/Rivensin | suggest 32 - 39, less or equals 0 to disable | All |
@@ -264,10 +251,11 @@ Tag with `-free` only for F-Droid update.
 | harm_gui_defaultFont | String | chain | Default font name | ARCHIVE | chain, lowpixel, marine, profont, r_strogg, strogg | Engine/Quake4/GUI | It will be available in next running | All |
 | harm_ui_showViewBody | Bool | 0 | Show view body | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_g_autoGenAASFileInMPGame | Bool | 1 | For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic | ARCHIVE |  | Game/Quake4 |  | All |
-| harm_si_autoFillBots | Bool | 1 | Automatic fill bots after map loaded in multiplayer game | ARCHIVE | &gt;=0 | Game/Quake4 | 0 = disable; other number = bot num | All |
+| harm_si_autoFillBots | Bool | 0 | Automatic fill bots after map loaded in multiplayer game | ARCHIVE | &gt;=0 | Game/Quake4 | 0 = disable; other number = bot num | All |
 | harm_si_botLevel | Integer | 0 | Bot level | ARCHIVE | [0 - 8] | Game/Quake4 | 0 = auto; 1 - 8 = difficult level | All |
 | harm_si_botWeapons | String | 0 | Bot initial weapons when spawn, separate by comma(,) | ARCHIVE | 1=machinegun; 2=shotgun; 3=hyperblaster; 4=grenadelauncher; 5=nailgun; 6=rocketlauncher; 7=railgun; 8=lightninggun; 9=dmg; 10=napalmgun; 0=none; *=all | Game/Quake4 | Allow weapon index(e.g. 2,3), weapon short name(e.g. shotgun,machinegun), weapon full name(e.g. weapon_machinegun,weapon_shotgun), and allow mix(e.g. machinegun,3,weapon_rocketlauncher) | All |
 | harm_si_botAmmo | Integer | 0 | Bot weapons initial ammo clip when spawn, depend on harm_si_botWeapons | ARCHIVE |  | Game/Quake4 | -1=max ammo, 0=none, &gt;0=ammo clip | All |
+| harm_g_botEnableBuiltinAssets | Bool | 0 | Enable built-in bot assets if external assets missing | INIT |  | Game/Quake4 |  | All |
 | harm_g_mutePlayerFootStep | Bool | 0 | mute player's footstep sound | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_g_allowFireWhenFocusNPC | Bool | 0 | allow fire when focus NPC | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/Prey |  | All |
@@ -292,7 +280,6 @@ Tag with `-free` only for F-Droid update.
 | convertARB | convert ARB shader to GLSL shader |  | Engine/Renderer | It has many errors, only port some ARB shader to GLSL shader | All |
 | reloadGLSLprograms | reloads GLSL programs |  | Engine/Renderer |  | All |
 | convertImage | convert image format |  | Engine/Renderer |  | All |
-| r_multithread | print multi-threading state |  | Engine/Renderer | Only for tell user r_multithread is not a cvar | All |
 | glConfig | print OpenGL config |  | Engine/Renderer | print glConfig variable | All |
 | exportFont | Convert ttf/ttc font file to DOOM3 wide character font file |  | Engine/Renderer | require freetype2 | All |
 | extractBimage | extract DOOM3-BFG's bimage image |  | Engine/Renderer | extract to TGA RGBA image files | All |
@@ -403,6 +390,10 @@ bind "Your key of drop" "_impulse25"
 14. **_D3BFG_CULLING**: Add DOOM3-BFG occlusion culling support.
 15. **_WCHAR_LANG** **_NEW_FONT_TOOLS**: Add wide-character language font support.
 16. **_D3BFG_FONT**: Add DOOM3-BFG new font support.
+17. **_GLOBAL_ILLUMINATION**: Add global illumination support.
+19. **_POSTPROCESS**: Add retro postprocess rendering support.
+19. **_GLSL_PROGRAM**: Add GLSL program on new material stage support.
+20. **_IMGUI**: Add imGUI support.
 
 #### * DOOM 3
 ##### About `BOT` mod
@@ -458,9 +449,10 @@ Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support
 ----------------------------------------------------------------------------------
 
 > ### Bot support on DOOM3/Quake4
-1. Extract `doom3/d3_sabot_a7.pk4`(DOOM 3) or `q4base/q4_sabot_a9.pk4`(Quake 4) file in apk to game data folder, it includes some defs, scripts and MP game map AAS file.
+1. Extract `doom3/d3_sabot_a7.pk4`(DOOM 3) or `q4base/q4_sabot_a9.pk4`(Quake 4) file in apk to game data folder, it includes some defs, scripts and MP game map AAS file(version < 66).
 2. Set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(botaa48 on DOOM 3, botaa32 on Quake 4).
-3. Set `harm_si_autoFillBots` to 1 for automatic fill bots when start MP game.
+3. Set `harm_si_autoFillBots` to -1 for automatic fill bots when start MP game.
+4. Set `harm_g_botEnableBuiltinAssets` to 1 for enable built-in bot assets if external assets missing(version >= 66), so only need MP game map aas files.
 
 ##### cvars:
 * harm_si_botLevel: Setup bot level.

@@ -5227,6 +5227,12 @@ void botAi::Event_TestMoveToPosition( const idVec3 &pos )
 {
     idVec3 goal = pos;
 
+    if(!aas)
+    {
+        idThread::ReturnFloat( false );
+        return;
+    }
+
     int toAreaNum = PointReachableAreaNum( goal );
     aas->PushPointIntoAreaNum( toAreaNum, goal );
 	idThread::ReturnFloat( toAreaNum > 0 );
@@ -5355,5 +5361,10 @@ const char * botAi::GetCurrentWeapon(void)
 #include "BotAI_cmd.cpp"
 #include "BotAI_aas.cpp"
 #include "BotAI_manager.cpp"
+
+#ifdef _MOD_BOTS_ASSETS
+#include "BotAI_def.cpp"
+#include "BotAI_script.cpp"
+#endif
 
 #endif

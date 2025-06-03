@@ -449,6 +449,10 @@ class idFileSystemLocal : public idFileSystem
 		static idCVar			fs_caseSensitiveOS;
 		static idCVar			fs_searchAddons;
 
+        static idCVar			fs_extraPath;
+        static idCVar			fs_extraResource;
+        static idCVar			fs_extraGame;
+
 		backgroundDownload_t 	*backgroundDownloads;
 		backgroundDownload_t	defaultBackgroundDownload;
 		xthreadInfo				backgroundThread;
@@ -502,6 +506,10 @@ class idFileSystemLocal : public idFileSystem
 		static size_t			CurlWriteFunction(void *ptr, size_t size, size_t nmemb, void *stream);
 		// curl_progress_callback in curl.h
 		static int				CurlProgressFunction(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
+
+        void                    AddExtraGameDirectory(const char *path, const char *gameName);
+        void                    AddExtraGameResource(const char *path);
+        void                    AddExtraGame(const char *gameNames);
 };
 
 idCVar	idFileSystemLocal::fs_restrict("fs_restrict", "", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "");
@@ -519,6 +527,10 @@ idCVar	idFileSystemLocal::fs_caseSensitiveOS("fs_caseSensitiveOS", "0", CVAR_SYS
 idCVar	idFileSystemLocal::fs_caseSensitiveOS("fs_caseSensitiveOS", "1", CVAR_SYSTEM | CVAR_BOOL, "");
 #endif
 idCVar	idFileSystemLocal::fs_searchAddons("fs_searchAddons", "0", CVAR_SYSTEM | CVAR_BOOL, "search all addon pk4s ( disables addon functionality )");
+
+idCVar	idFileSystemLocal::fs_extraPath("harm_fs_extraPath", "", CVAR_SYSTEM | CVAR_INIT, "extras search paths last, split by ','");
+idCVar	idFileSystemLocal::fs_extraResource("harm_fs_extraResource", "", CVAR_SYSTEM | CVAR_INIT, "extras search resource files directory path last, split by ','");
+idCVar	idFileSystemLocal::fs_extraGame("harm_fs_extraGame", "", CVAR_SYSTEM | CVAR_INIT, "extras search game last, split by ','");
 
 idFileSystemLocal	fileSystemLocal;
 idFileSystem 		*fileSystem = &fileSystemLocal;
@@ -2440,6 +2452,8 @@ idFileSystemLocal::SetupGameDirectories
 */
 void idFileSystemLocal::SetupGameDirectories(const char *gameName)
 {
+    AddExtraGameDirectory(fs_extraPath.GetString(), gameName);
+
 #ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is lowest
 	extern const char * Sys_ApplicationHomePath(void);
 	const char *app_path = Sys_ApplicationHomePath();
@@ -2531,6 +2545,8 @@ void idFileSystemLocal::Startup(void)
 		common->Printf("restarting filesystem with %d addon pak file(s) to include\n", addonChecksums.Num());
 	}
 
+    AddExtraGameResource(fs_extraResource.GetString());
+
 	SetupGameDirectories(BASE_GAMEDIR);
 
 	// fs_game_base override
@@ -2538,6 +2554,8 @@ void idFileSystemLocal::Startup(void)
 	    idStr::Icmp(fs_game_base.GetString(), BASE_GAMEDIR)) {
 		SetupGameDirectories(fs_game_base.GetString());
 	}
+
+    AddExtraGame(fs_extraGame.GetString());
 
 	// fs_game override
 	if (fs_game.GetString()[0] &&
@@ -3240,6 +3258,10 @@ void idFileSystemLocal::Init(void)
 	common->StartupVariable("fs_copyfiles", false);
 	common->StartupVariable("fs_restrict", false);
 	common->StartupVariable("fs_searchAddons", false);
+
+    common->StartupVariable("harm_fs_extraPath", false);
+    common->StartupVariable("harm_fs_extraResource", false);
+    common->StartupVariable("harm_fs_extraGame", false);
 
 #if !ID_ALLOW_D3XP
 
@@ -4827,6 +4849,58 @@ void idFileSystemLocal::FindMapScreenshot(const char *path, char *buf, int len)
 		}
 	}
 #endif
+}
+
+void idFileSystemLocal::AddExtraGameDirectory(const char *path, const char *gameName)
+{
+    if(path && path[0])
+    {
+        idStrList paths = idStr::SplitUnique(path, ',');
+        for(int i = 0; i < paths.Num(); i++)
+        {
+            common->Printf("Add extra game path: %s/%s\n", paths[i].c_str(), gameName);
+            AddGameDirectory(paths[i], gameName);
+        }
+    }
+}
+
+void idFileSystemLocal::AddExtraGameResource(const char *path)
+{
+    if(path && path[0])
+    {
+        idStrList paths = idStr::SplitUnique(path, ',');
+        for(int i = 0; i < paths.Num(); i++)
+        {
+            paths[i].StripTrailing('/');
+            paths[i].StripTrailing('\\');
+            idStr baseDir;
+            paths[i].ExtractFilePath(baseDir);
+            idStr dir;
+            paths[i].ExtractFileName(dir);
+            if(baseDir.IsEmpty())
+                baseDir = ".";
+            common->Printf("Add extra game resource: %s/%s\n", baseDir.c_str(), dir.c_str());
+            AddGameDirectory(baseDir, dir);
+        }
+    }
+}
+
+void idFileSystemLocal::AddExtraGame(const char *gameNames)
+{
+    if(gameNames && gameNames[0])
+    {
+        idStrList games = idStr::SplitUnique(gameNames, ',');
+        for(int i = 0; i < games.Num(); i++)
+        {
+            if(!idStr::Icmp(games[i], BASE_GAMEDIR)
+                || (fs_game_base.GetString()[0] && !idStr::Icmp(fs_game_base.GetString(), games[i]))
+                || (fs_game.GetString()[0] && !idStr::Icmp(fs_game.GetString(), games[i]))
+            )
+                continue;
+            common->Printf("Add extra game: %s\n", games[i].c_str());
+            SetupGameDirectories(games[i]);
+        }
+    }
 }
 
 #ifdef _RAVEN

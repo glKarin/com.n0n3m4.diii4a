@@ -582,6 +582,9 @@ const void	RB_SwapBuffers(const void *data)
 	if (r_showImages.GetInteger() != 0) {
 		RB_ShowImages();
 	}
+#ifdef _IMGUI
+    RB_ImGui_Render();
+#endif
 
 	// force a gl sync if requested
 	if (r_finish.GetBool()) {
@@ -655,6 +658,9 @@ void RB_ExecuteBackEndCommands(const emptyCommand_t *cmds)
 
 				if (((const drawSurfsCommand_t *)cmds)->viewDef->viewEntitys) {
 					c_draw3d++;
+#ifdef _POSTPROCESS //karin: I think can render postprocess here
+                    RB_PP_Render();
+#endif
 				} else {
 					c_draw2d++;
 				}

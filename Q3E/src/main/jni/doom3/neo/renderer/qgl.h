@@ -120,15 +120,6 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef GL_STENCIL_INDEX
 #define GL_STENCIL_INDEX                  0x1901
 #endif
-#ifndef GL_DEBUG_OUTPUT_SYNCHRONOUS
-#define GL_DEBUG_OUTPUT_SYNCHRONOUS       0x8242
-#endif
-#ifndef GL_DEBUG_OUTPUT
-#define GL_DEBUG_OUTPUT                   0x92E0
-#endif
-#ifndef GL_DEBUG_TYPE_ERROR
-#define GL_DEBUG_TYPE_ERROR               0x824C
-#endif
 #ifndef GL_TEXTURE_WIDTH
 #define GL_TEXTURE_WIDTH                  0x1000
 #endif
@@ -163,6 +154,98 @@ If you have questions concerning this license or the applicable additional terms
 #define GL_TEXTURE_ALPHA_SIZE             0x805F
 #endif
 
+// debug
+#ifndef GL_DEBUG_OUTPUT_SYNCHRONOUS
+#define GL_DEBUG_OUTPUT_SYNCHRONOUS       0x8242
+#endif
+#ifndef GL_DEBUG_OUTPUT
+#define GL_DEBUG_OUTPUT                   0x92E0
+#endif
+#ifndef GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH
+#define GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH 0x8243
+#endif
+#ifndef GL_DEBUG_CALLBACK_FUNCTION
+#define GL_DEBUG_CALLBACK_FUNCTION        0x8244
+#endif
+#ifndef GL_DEBUG_CALLBACK_USER_PARAM
+#define GL_DEBUG_CALLBACK_USER_PARAM      0x8245
+#endif
+#ifndef GL_DEBUG_SOURCE_API
+#define GL_DEBUG_SOURCE_API               0x8246
+#endif
+#ifndef GL_DEBUG_SOURCE_WINDOW_SYSTEM
+#define GL_DEBUG_SOURCE_WINDOW_SYSTEM     0x8247
+#endif
+#ifndef GL_DEBUG_SOURCE_SHADER_COMPILER
+#define GL_DEBUG_SOURCE_SHADER_COMPILER   0x8248
+#endif
+#ifndef GL_DEBUG_SOURCE_THIRD_PARTY
+#define GL_DEBUG_SOURCE_THIRD_PARTY       0x8249
+#endif
+#ifndef GL_DEBUG_SOURCE_APPLICATION
+#define GL_DEBUG_SOURCE_APPLICATION       0x824A
+#endif
+#ifndef GL_DEBUG_SOURCE_OTHER
+#define GL_DEBUG_SOURCE_OTHER             0x824B
+#endif
+#ifndef GL_DEBUG_TYPE_ERROR
+#define GL_DEBUG_TYPE_ERROR               0x824C
+#endif
+#ifndef GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR
+#define GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR 0x824D
+#endif
+#ifndef GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR
+#define GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR  0x824E
+#endif
+#ifndef GL_DEBUG_TYPE_PORTABILITY
+#define GL_DEBUG_TYPE_PORTABILITY         0x824F
+#endif
+#ifndef GL_DEBUG_TYPE_PERFORMANCE
+#define GL_DEBUG_TYPE_PERFORMANCE         0x8250
+#endif
+#ifndef GL_DEBUG_TYPE_OTHER
+#define GL_DEBUG_TYPE_OTHER               0x8251
+#endif
+#ifndef GL_DEBUG_TYPE_MARKER
+#define GL_DEBUG_TYPE_MARKER              0x8268
+#endif
+#ifndef GL_DEBUG_TYPE_PUSH_GROUP
+#define GL_DEBUG_TYPE_PUSH_GROUP          0x8269
+#endif
+#ifndef GL_DEBUG_TYPE_POP_GROUP
+#define GL_DEBUG_TYPE_POP_GROUP           0x826A
+#endif
+#ifndef GL_DEBUG_SEVERITY_NOTIFICATION
+#define GL_DEBUG_SEVERITY_NOTIFICATION    0x826B
+#endif
+#ifndef GL_MAX_DEBUG_GROUP_STACK_DEPTH
+#define GL_MAX_DEBUG_GROUP_STACK_DEPTH    0x826C
+#endif
+#ifndef GL_DEBUG_GROUP_STACK_DEPTH
+#define GL_DEBUG_GROUP_STACK_DEPTH        0x826D
+#endif
+#ifndef GL_MAX_LABEL_LENGTH
+#define GL_MAX_LABEL_LENGTH               0x82E8
+#endif
+#ifndef GL_MAX_DEBUG_MESSAGE_LENGTH
+#define GL_MAX_DEBUG_MESSAGE_LENGTH       0x9143
+#endif
+#ifndef GL_MAX_DEBUG_LOGGED_MESSAGES
+#define GL_MAX_DEBUG_LOGGED_MESSAGES      0x9144
+#endif
+#ifndef GL_DEBUG_LOGGED_MESSAGES
+#define GL_DEBUG_LOGGED_MESSAGES          0x9145
+#endif
+#ifndef GL_DEBUG_SEVERITY_HIGH
+#define GL_DEBUG_SEVERITY_HIGH            0x9146
+#endif
+#ifndef GL_DEBUG_SEVERITY_MEDIUM
+#define GL_DEBUG_SEVERITY_MEDIUM          0x9147
+#endif
+#ifndef GL_DEBUG_SEVERITY_LOW
+#define GL_DEBUG_SEVERITY_LOW             0x9148
+#endif
+
 
 //#include "matrix/esUtil.h"
 
@@ -186,4 +269,174 @@ typedef void (GL_APIENTRY  *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLe
 #endif
 #define QGLPROC(name, rettype, args) extern rettype (GL_APIENTRYP q##name) args;
 #include "qgl_proc.h"
+#endif
+
+//#define QGL_ALIAS
+#ifdef QGL_ALIAS
+
+#define glActiveTexture qglActiveTexture
+#define glAttachShader qglAttachShader
+#define glBindAttribLocation qglBindAttribLocation
+#define glBindBuffer qglBindBuffer
+#define glBindFramebuffer qglBindFramebuffer
+#define glBindRenderbuffer qglBindRenderbuffer
+#define glBindTexture qglBindTexture
+#define glBlendColor qglBlendColor
+#define glBlendEquation qglBlendEquation
+#define glBlendEquationSeparate qglBlendEquationSeparate
+#define glBlendFunc qglBlendFunc
+#define glBlendFuncSeparate qglBlendFuncSeparate
+#define glBufferData qglBufferData
+#define glBufferSubData qglBufferSubData
+#define glCheckFramebufferStatus qglCheckFramebufferStatus
+#define glClear qglClear
+#define glClearColor qglClearColor
+#define glClearDepthf qglClearDepthf
+#define glClearStencil qglClearStencil
+#define glColorMask qglColorMask
+#define glCompileShader qglCompileShader
+#define glCompressedTexImage2D qglCompressedTexImage2D
+#define glCompressedTexSubImage2D qglCompressedTexSubImage2D
+#define glCopyTexImage2D qglCopyTexImage2D
+#define glCopyTexSubImage2D qglCopyTexSubImage2D
+#define glCreateProgram qglCreateProgram
+#define glCreateShader qglCreateShader
+#define glCullFace qglCullFace
+#define glDeleteBuffers qglDeleteBuffers
+#define glDeleteFramebuffers qglDeleteFramebuffers
+#define glDeleteProgram qglDeleteProgram
+#define glDeleteRenderbuffers qglDeleteRenderbuffers
+#define glDeleteShader qglDeleteShader
+#define glDeleteTextures qglDeleteTextures
+#define glDepthFunc qglDepthFunc
+#define glDepthMask qglDepthMask
+#define glDepthRangef qglDepthRangef
+#define glDetachShader qglDetachShader
+#define glDisable qglDisable
+#define glDisableVertexAttribArray qglDisableVertexAttribArray
+#define glDrawArrays qglDrawArrays
+#define glDrawElements qglDrawElements
+#define glEnable qglEnable
+#define glEnableVertexAttribArray qglEnableVertexAttribArray
+#define glFinish qglFinish
+#define glFlush qglFlush
+#define glFramebufferRenderbuffer qglFramebufferRenderbuffer
+#define glFramebufferTexture2D qglFramebufferTexture2D
+#define glFrontFace qglFrontFace
+#define glGenBuffers qglGenBuffers
+#define glGenerateMipmap qglGenerateMipmap
+#define glGenFramebuffers qglGenFramebuffers
+#define glGenRenderbuffers qglGenRenderbuffers
+#define glGenTextures qglGenTextures
+#define glGetActiveAttrib qglGetActiveAttrib
+#define glGetActiveUniform qglGetActiveUniform
+#define glGetAttachedShaders qglGetAttachedShaders
+#define glGetAttribLocation qglGetAttribLocation
+#define glGetBooleanv qglGetBooleanv
+#define glGetBufferParameteriv qglGetBufferParameteriv
+#define glGetError qglGetError
+#define glGetFloatv qglGetFloatv
+#define glGetFramebufferAttachmentParameteriv qglGetFramebufferAttachmentParameteriv
+#define glGetIntegerv qglGetIntegerv
+#define glGetProgramiv qglGetProgramiv
+#define glGetProgramInfoLog qglGetProgramInfoLog
+#define glGetRenderbufferParameteriv qglGetRenderbufferParameteriv
+#define glGetShaderiv qglGetShaderiv
+#define glGetShaderInfoLog qglGetShaderInfoLog
+#define glGetShaderPrecisionFormat qglGetShaderPrecisionFormat
+#define glGetShaderSource qglGetShaderSource
+#define glGetString qglGetString
+#define glGetTexParameterfv qglGetTexParameterfv
+#define glGetTexParameteriv qglGetTexParameteriv
+#define glGetUniformfv qglGetUniformfv
+#define glGetUniformiv qglGetUniformiv
+#define glGetUniformLocation qglGetUniformLocation
+#define glGetVertexAttribfv qglGetVertexAttribfv
+#define glGetVertexAttribiv qglGetVertexAttribiv
+#define glGetVertexAttribPointerv qglGetVertexAttribPointerv
+#define glHint qglHint
+#define glIsBuffer qglIsBuffer
+#define glIsEnabled qglIsEnabled
+#define glIsFramebuffer qglIsFramebuffer
+#define glIsProgram qglIsProgram
+#define glIsRenderbuffer qglIsRenderbuffer
+#define glIsShader qglIsShader
+#define glIsTexture qglIsTexture
+#define glLineWidth qglLineWidth
+#define glLinkProgram qglLinkProgram
+#define glPixelStorei qglPixelStorei
+#define glPolygonOffset qglPolygonOffset
+#define glReadPixels qglReadPixels
+#define glReleaseShaderCompiler qglReleaseShaderCompiler
+#define glRenderbufferStorage qglRenderbufferStorage
+#define glSampleCoverage qglSampleCoverage
+#define glScissor qglScissor
+#define glShaderBinary qglShaderBinary
+#define glShaderSource qglShaderSource
+#define glStencilFunc qglStencilFunc
+#define glStencilFuncSeparate qglStencilFuncSeparate
+#define glStencilMask qglStencilMask
+#define glStencilMaskSeparate qglStencilMaskSeparate
+#define glStencilOp qglStencilOp
+#define glStencilOpSeparate qglStencilOpSeparate
+#define glTexImage2D qglTexImage2D
+#define glTexParameterf qglTexParameterf
+#define glTexParameterfv qglTexParameterfv
+#define glTexParameteri qglTexParameteri
+#define glTexParameteriv qglTexParameteriv
+#define glTexSubImage2D qglTexSubImage2D
+#define glUniform1f qglUniform1f
+#define glUniform1fv qglUniform1fv
+#define glUniform1i qglUniform1i
+#define glUniform1iv qglUniform1iv
+#define glUniform2f qglUniform2f
+#define glUniform2fv qglUniform2fv
+#define glUniform2i qglUniform2i
+#define glUniform2iv qglUniform2iv
+#define glUniform3f qglUniform3f
+#define glUniform3fv qglUniform3fv
+#define glUniform3i qglUniform3i
+#define glUniform3iv qglUniform3iv
+#define glUniform4f qglUniform4f
+#define glUniform4fv qglUniform4fv
+#define glUniform4i qglUniform4i
+#define glUniform4iv qglUniform4iv
+#define glUniformMatrix2fv qglUniformMatrix2fv
+#define glUniformMatrix3fv qglUniformMatrix3fv
+#define glUniformMatrix4fv qglUniformMatrix4fv
+#define glUseProgram qglUseProgram
+#define glValidateProgram qglValidateProgram
+#define glVertexAttrib1f qglVertexAttrib1f
+#define glVertexAttrib1fv qglVertexAttrib1fv
+#define glVertexAttrib2f qglVertexAttrib2f
+#define glVertexAttrib2fv qglVertexAttrib2fv
+#define glVertexAttrib3f qglVertexAttrib3f
+#define glVertexAttrib3fv qglVertexAttrib3fv
+#define glVertexAttrib4f qglVertexAttrib4f
+#define glVertexAttrib4fv qglVertexAttrib4fv
+#define glVertexAttribPointer qglVertexAttribPointer
+#define glViewport qglViewport
+
+
+#if USE_MAP
+#define glMapBufferRange qglMapBufferRange
+#define glUnmapBuffer qglUnmapBuffer
+#endif
+
+#ifdef _OPENGLES3
+// GLES3.0
+#define glTexImage3D qglTexImage3D
+#define glReadBuffer qglReadBuffer
+#define glDrawBuffers qglDrawBuffers
+#define glFramebufferTextureLayer qglFramebufferTextureLayer
+#define glBlitFramebuffer qglBlitFramebuffer
+
+// GLES3.1
+#define glDebugMessageControl qglDebugMessageControl
+#define glDebugMessageCallback qglDebugMessageCallback
+#define glGetDebugMessageLog qglGetDebugMessageLog
+#define glGetTexLevelParameteriv qglGetTexLevelParameteriv
+#define glGetInternalformativ qglGetInternalformativ
+#endif
+
 #endif

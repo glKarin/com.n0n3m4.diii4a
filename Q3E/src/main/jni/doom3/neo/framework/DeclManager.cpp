@@ -297,21 +297,24 @@ class idDeclManagerLocal : public idDeclManager
 		// jmarshall end
 #endif
 #ifdef _HUMANHEAD
-    virtual const hhDeclBeam *		FindBeam( const char *name, bool makeDefault = true );
-    virtual const hhDeclBeam *		BeamByIndex( int index, bool forceParse = true );
-    virtual void					SetInsideLevelLoad(bool b) {
-        inLevelLoad = b;
-    }
-    virtual bool					GetInsideLevelLoad(void) {
-        return inLevelLoad;
-    }
+        virtual const hhDeclBeam *		FindBeam( const char *name, bool makeDefault = true );
+        virtual const hhDeclBeam *		BeamByIndex( int index, bool forceParse = true );
+        virtual void					SetInsideLevelLoad(bool b) {
+            inLevelLoad = b;
+        }
+        virtual bool					GetInsideLevelLoad(void) {
+            return inLevelLoad;
+        }
 #endif
 
 		virtual const idMaterial 		*MaterialByIndex(int index, bool forceParse = true);
 		virtual const idDeclSkin 		*SkinByIndex(int index, bool forceParse = true);
 		virtual const idSoundShader 	*SoundByIndex(int index, bool forceParse = true);
 
-	public:
+        virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false);
+		virtual bool					EntityDefSet(const char *name, const char *key, const char *value = NULL);
+
+public:
 		static void					MakeNameCanonical(const char *name, char *result, int maxLength);
 		idDeclLocal 				*FindTypeWithoutParsing(declType_t type, const char *name, bool makeDefault = true);
 
@@ -339,7 +342,7 @@ class idDeclManagerLocal : public idDeclManager
 		static idCVar				decl_show;
 
 #ifdef _HUMANHEAD
-    bool						inLevelLoad;
+        bool						inLevelLoad;
 #endif
 
 	private:
@@ -720,6 +723,10 @@ void idDeclFile::Reload(bool force)
 		fileSystem->ReadFile(fileName, NULL, &testTimeStamp);
 
 		if (testTimeStamp == timestamp) {
+			return;
+		}
+		//karin: 2025 don't load and parse if file not exists
+		if (testTimeStamp == FILE_NOT_FOUND_TIMESTAMP) {
 			return;
 		}
 	}
@@ -2575,6 +2582,122 @@ idDeclLocal::EverReferenced
 bool idDeclLocal::EverReferenced(void) const
 {
 	return everReferenced;
+}
+
+
+const idDecl * idDeclManagerLocal::AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force)
+{
+    const idDecl *decl;
+    if(!force)
+    {
+        decl = FindDeclWithoutParsing(type, defname, false);
+        if(decl)
+            return decl;
+    }
+
+    const idDeclType *typeInfoFound = NULL;
+
+    int numTypes = declManagerLocal.GetNumDeclTypes();
+    for (int i = 0; i < numTypes; i++) {
+        idDeclType *typeInfo = declManagerLocal.GetDeclType(i);
+
+        if (typeInfo && typeInfo->type == type) {
+            typeInfoFound = typeInfo;
+            break;
+        }
+    }
+    if(!typeInfoFound)
+    {
+        common->Warning("Generate def '%s' type '%d' not found", defname, type);
+        return NULL;
+    }
+
+    const idDeclFolder *declFolderFound = NULL;
+    for (int i = 0; i < declFolders.Num(); i++) {
+        if (declFolders[i]->defaultType == type) {
+            declFolderFound = declFolders[i];
+            break;
+        }
+    }
+    if(!declFolderFound)
+    {
+        common->Warning("Generate def '%s' folder '%d' not found", defname, type);
+        return NULL;
+    }
+
+    idStr fileName = va(DECL_PROGRAM_GENERATED_DIRECTORY "%s/%s", declFolderFound->folder.c_str(), defname);
+    fileName.SetFileExtension(declFolderFound->extension.c_str());
+
+    idStr text;
+    text.Append(typeInfoFound->typeName);
+    text.Append(" ");
+    text.Append(defname);
+    text.Append(" {\n");
+    for(int i = 0; i < args.GetNumKeyVals(); i++)
+    {
+        const idKeyValue *kv = args.GetKeyVal(i);
+        text.Append("    ");
+        text.Append("\"");
+        text.Append(kv->GetKey().c_str());
+        text.Append("\" \"");
+        text.Append(kv->GetValue().c_str());
+        text.Append("\"\n");
+    }
+    text.Append("}\n");
+
+    if(fileSystem->WriteFile(fileName.c_str(), text.c_str(), text.Length()) <= 0)
+    {
+        common->Warning("Write generated def file '%s' to '%s' fail", defname, fileName.c_str());
+        return NULL;
+    }
+
+    decl = CreateNewDecl(type, defname, fileName.c_str());
+    if(!decl)
+    {
+        common->Warning("Generate decl '%s' fail", defname);
+        //fileSystem->RemoveFile(fileName);
+        return NULL;
+    }
+
+    declManager->ReloadFile(fileName, true);
+    fileSystem->RemoveFile(fileName);
+
+#if 0
+    common->Printf("Generate def '%s' to '%s'\n", defname, fileName.c_str());
+    idCmdArgs cmdArgs;
+    cmdArgs.TokenizeString(va("printEntityDef %s", defname), false);
+    PrintType(cmdArgs, DECL_ENTITYDEF);
+#endif
+
+    return decl;
+}
+
+bool idDeclManagerLocal::EntityDefSet(const char *name, const char *key, const char *value)
+{
+	idDeclLocal *decl;
+
+	decl = FindTypeWithoutParsing(DECL_ENTITYDEF, name, false);
+
+	if (!decl) {
+		return false;
+	}
+
+	if (!decl->self) {
+		return false;
+	}
+
+	// if it hasn't been parsed yet, parse it now
+	if (decl->declState == DS_UNPARSED) {
+		return false;
+	}
+
+	idDeclEntityDef *entityDef = (idDeclEntityDef *)decl->self;
+	if(value)
+		entityDef->dict.Set(key, value);
+	else
+		entityDef->dict.Delete(key);
+
+	return true;
 }
 
 #ifdef _RAVEN // quake4 guide

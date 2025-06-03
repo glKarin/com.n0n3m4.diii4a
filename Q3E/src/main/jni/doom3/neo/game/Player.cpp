@@ -1561,7 +1561,11 @@ void idPlayer::Spawn(void)
 	physicsObj.SetSelf(this);
 	SetClipModel();
 	physicsObj.SetMass(spawnArgs.GetFloat("mass", "100"));
+#ifdef MOD_BOTS //karin: for use_combat_bbox
+	physicsObj.SetContents(CONTENTS_BODY | (use_combat_bbox?CONTENTS_SOLID:0));
+#else
 	physicsObj.SetContents(CONTENTS_BODY);
+#endif
 	physicsObj.SetClipMask(MASK_PLAYERSOLID);
 	SetPhysics(&physicsObj);
 	InitAASLocation();
@@ -1623,7 +1627,7 @@ void idPlayer::Spawn(void)
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 		fullBodyAwarenessOffset = offset;
 	else
-		gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
+		gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
 
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
@@ -2256,7 +2260,7 @@ void idPlayer::Restore(idRestoreGame *savefile)
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 		fullBodyAwarenessOffset = offset;
 	else
-		gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
+		gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
 #endif
 #ifdef _MOD_VIEW_LIGHT
     SetupViewLight();
@@ -2407,6 +2411,24 @@ void idPlayer::SpawnToPoint(const idVec3 &spawn_origin, const idAngles &spawn_an
 	respawning = true;
 
 	Init();
+#ifdef MOD_BOTS //karin: for use_combat_bbox
+	// Force players to use bounding boxes when in multiplayer
+	if ( gameLocal.isMultiplayer ) {
+		use_combat_bbox = gameLocal.serverInfo.GetBool("harm_si_useCombatBboxInMPGame") || spawnArgs.GetBool("use_combat_bbox");
+
+		if(use_combat_bbox)
+		{
+			// Make sure the combat model is unlinked
+			if ( combatModel ) {
+				combatModel->Unlink( );
+			}
+		}
+		else
+		{
+			SetCombatModel();
+		}
+	}
+#endif
 
 	fl.noknockback = false;
 
@@ -6304,11 +6326,13 @@ void idPlayer::PerformImpulse(int impulse)
 			break;
 		}
 
+#ifdef _DOOM3
         // RAVEN: bind "t" "_impulse51" in DoomConfig.cfg
         case 51 /* IMPULSE_51 */: {
             LastWeapon();
             break;
         }
+#endif
 
 #ifdef _MOD_VIEW_LIGHT
         // karin: bind "f" "_impulse52" in DoomConfig.cfg
@@ -6668,10 +6692,18 @@ void idPlayer::Move(void)
 		physicsObj.SetContents(CONTENTS_CORPSE | CONTENTS_MONSTERCLIP);
 		physicsObj.SetMovementType(PM_DEAD);
 	} else if (gameLocal.inCinematic || gameLocal.GetCamera() || privateCameraView || (influenceActive == INFLUENCE_LEVEL2)) {
+#ifdef MOD_BOTS //karin: for use_combat_bbox
+		physicsObj.SetContents(CONTENTS_BODY | (use_combat_bbox?CONTENTS_SOLID:0));
+#else
 		physicsObj.SetContents(CONTENTS_BODY);
+#endif
 		physicsObj.SetMovementType(PM_FREEZE);
 	} else {
+#ifdef MOD_BOTS //karin: for use_combat_bbox
+		physicsObj.SetContents(CONTENTS_BODY | (use_combat_bbox?CONTENTS_SOLID:0));
+#else
 		physicsObj.SetContents(CONTENTS_BODY);
+#endif
 		physicsObj.SetMovementType(PM_NORMAL);
 	}
 
@@ -9633,6 +9665,7 @@ bool idPlayer::NeedsIcon(void)
 	return entityNumber != gameLocal.localClientNum && (isLagged || isChatting);
 }
 
+#ifdef _DOOM3
 /*
 ===============
 idPlayer::LastWeapon
@@ -9654,6 +9687,7 @@ void idPlayer::LastWeapon( void ) {
 
     idealWeapon = previousWeapon;
 }
+#endif
 
 #ifdef _MOD_VIEW_BODY
 /*

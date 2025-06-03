@@ -13,7 +13,7 @@ extern void GLimp_ActivateContext();
 extern void GLimp_DeactivateContext();
 extern void RB_GLSL_HandleShaders(void);
 
-static idCVar harm_r_multithread("harm_r_multithread",
+static idCVar r_multithread("r_multithread",
 #ifdef __ANDROID__
                                  "0"
 #else
@@ -85,16 +85,30 @@ void idRenderThread::BackendThreadShutdown( void )
     common->Printf("[Harmattan]: Render thread shutdown -> %s\n", RENDER_THREAD_NAME);
 }
 
-void idRenderThread::BackendThreadTask( void ) // BackendThread ->
+// only render thread is running and main thread is waiting
+ID_INLINE static void RB_OnlyRenderThreadRunningAndMainThreadWaiting(void)
 {
-    // waiting start
-    Sys_WaitForEvent(TRIGGER_EVENT_RUN_BACKEND);
-    // Purge all images,  Load all images
-    this->HandlePendingImage();
     // Load custom GLSL shader or reload GLSL shaders
     RB_GLSL_HandleShaders();
     // debug tools
     RB_SetupRenderTools();
+#ifdef _IMGUI
+    // start imgui
+    RB_ImGui_Start();
+#endif
+}
+
+void idRenderThread::BackendThreadTask( void ) // BackendThread ->
+{
+    // waiting start
+    Sys_WaitForEvent(TRIGGER_EVENT_RUN_BACKEND);
+
+    // Purge all images,  Load all images
+    this->HandlePendingImage();
+
+    // main thread is waiting render thread, only render thread is running
+    RB_OnlyRenderThreadRunningAndMainThreadWaiting();
+
     // image process finished
     Sys_TriggerEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
 

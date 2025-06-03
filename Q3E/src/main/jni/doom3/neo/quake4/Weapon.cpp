@@ -1134,6 +1134,53 @@ void rvWeapon::InitWorldModel( void ) {
 		ent->GetPhysics()->SetOrigin( vec3_origin );
 		ent->GetPhysics()->SetAxis( mat3_identity );
 
+#ifdef _QUAKE4
+        //karin: for world weapon attach to custom player model
+        const char *wpName = spawnArgs.GetString("inv_weapon");
+        if(wpName && wpName[0])
+        {
+            idVec3 ori;
+            idAngles ang;
+            idMat3 rot;
+            if(owner->spawnArgs.GetVector(va("%s_world_offset", wpName), "0 0 0", ori))
+            {
+                if(ori[0] != 0.0f || ori[1] != 0.0f || ori[2] != 0.0f)
+                    ent->GetPhysics()->SetOrigin(ori);
+            }
+#if 0
+            else if(owner->spawnArgs.GetVector(va("%s_world_origin", wpName), "0 0 0", ori))
+            {
+                if(ori[0] != 0.0f || ori[1] != 0.0f || ori[2] != 0.0f)
+                    ent->GetPhysics()->SetOrigin(ori);
+            }
+#endif
+            if(owner->spawnArgs.GetMatrix(va("%s_world_rotation", wpName), "1 0 0 0 1 0 0 0 1", rot))
+            {
+                if(!rot.IsIdentity(0.0f))
+                    ent->GetPhysics()->SetAxis(rot);
+            }
+            else if(owner->spawnArgs.GetAngles(va("%s_world_angle", wpName), "0 0 0", ang))
+            {
+                if(ang[0] != 0.0f || ang[1] != 0.0f || ang[2] != 0.0f)
+                    ent->GetPhysics()->SetAxis(ang.ToMat3());
+            }
+        }
+#if 0
+		static idCVar harm_g_playerWeaponWorldOffset("harm_g_playerWeaponWorldOffset", "", CVAR_GAME, "Test player weapon world offset(format is '<forward-side> <right-side> <up-side>').");
+		static idCVar harm_g_playerWeaponWorldAngle("harm_g_playerWeaponWorldAngle", "", CVAR_GAME, "Test player weapon world degree angle(format is '<pitch> <yaw> <roll>').");
+		idVec3 ori;
+		idAngles ang;
+		if(sscanf(harm_g_playerWeaponWorldOffset.GetString(), "%f %f %f", &ori.x, &ori.y, &ori.z) == 3)
+		{
+			ent->GetPhysics()->SetOrigin(ori);
+		}
+		if(sscanf(harm_g_playerWeaponWorldAngle.GetString(), "%f %f %f", &ang[0], &ang[1], &ang[2]) == 3)
+		{
+			ent->GetPhysics()->SetAxis(ang.ToMat3());
+		}
+#endif
+#endif
+
 		// supress model in player views, but allow it in mirrors and remote views
 		renderEntity_t *worldModelRenderEntity = ent->GetRenderEntity();
 		if ( worldModelRenderEntity ) {
