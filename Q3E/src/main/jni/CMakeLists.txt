@@ -46,6 +46,7 @@ OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 
 # Experimental
+OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
@@ -149,4 +150,12 @@ endif()
 if(GAME_QUAKES) # noire-dev/SourceTech/commit/b0a1d46740d5a76f172a2889f285214a95dd3702 noire-dev/QuakeSandbox/commit/f01cab6d123784f6e2aaa839e9ccd3ec0a6f1325
     message(STATUS "Build Quake SandBox")
     add_subdirectory ( quakes ) # Quake SandBox
+endif()
+
+
+if(GAME_SERIOUSSAM) # v1.10.7 | Update README.md | https://github.com/tx00100xt/SeriousSamClassic/commit/871c9ebf1af0a09a976a080cbdc2ab6e7a21ab57
+    message(STATUS "Build Serious Sam")
+    OPTION(GAME_SAMTFE  "Build Serious Sam Classic The First Encounter"                     ON)
+    OPTION(GAME_SAMTSE  "Build Serious Sam Classic The Second Encounter"                     OFF)
+    add_subdirectory ( serioussam ) # Serious-Engine
 endif()

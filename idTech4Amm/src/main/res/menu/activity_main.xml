@@ -85,6 +85,11 @@
                 android:title="@string/openjo"
                 android:icon="@drawable/jo_icon"
                 android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_samtfe"
+                android:title="@string/samtfe"
+                android:icon="@drawable/samtfe_icon"
+                android:showAsAction="never|withText"/>
         </menu>
     </item>
 

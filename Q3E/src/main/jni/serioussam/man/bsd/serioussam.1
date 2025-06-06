@@ -1,0 +1,321 @@
+.\" Manpage for serioussam
+.\" Contact  -- Alexander Pavlov <t.x00100x.t@yandex.ru> to correct errors or typos.
+.TH man 1 "11  2023" "1.0" "serioussam man page"
+.SH NAME
+.PP
+.BR serioussam
+is open source game engine version developed by Croteam for Serious Sam Classic
+(Windows, Linux, FreeBSD, OpenBSD, Raspberry Pi OS, macOS).
+Based on https://github.com/icculus/Serious-Engine
+.PP
+.SH SYNOPSIS
+Open terminal and put command:
+.TP
+\fBserioussam\fR
+\-\ For start Serious Sam Classic The First Encounter.
+.TP
+\fBserioussamse\fR
+\-\ For start Serious Sam Classic The Second Encounter.
+.TP
+.SS COMMAND LINE OPTIONS
+.nf
+\fBserioussam(se)\fR [+level levelname] [+game modname] [+portable]
+    [+connect ip:port] [+script scriptname] [+logfile filename]
+.fi
+.SH DESCRIPTION
+.PP
+Serious Sam: First Encounter is a high-adrenaline action-arcade shooter heavily
+focused on frantic arcade-style single player action. In a world where cyberpunk
+meets fantasy-fiction and advanced technology is mixed with black magic
+and psycho-powers, Sam travels through the beautiful world of ancient Egypt
+and several diverse planets, confronting countless Mental's minions on his way
+to the Mental's base.
+.PP
+Serious Sam: Second Encounter introduces three worlds where cyberpunk
+once again meets fantasy fiction, and features frantic action in
+12 massive single player levels. The Second Encounter includes three
+new episodes based in beautifully detailed ancient civilizations: South America,
+Babylon, and The Medieval Age. With fourteen total weapons at his disposal,
+three brand new, Sam is more serious than ever. He battles against hordes of
+old enemies and seven adversarial species in an effort to reach the Mental
+once and for all.
+.PP
+Having successfully defeated the Mental forces in ancient Egypt,
+Sam "Serious" Stone seizes an abandoned spacecraft. On course in his crusade
+to finally assassinate the great evil Mental, our hero's spaceship suddenly
+tumbles into the South American Mountains \-\ Sam seems destined to stay on Earth.
+He must fight the tougher, now more experienced members of Mental's destructive
+forces and find a new way to reach the notorious Mental himself.
+.PP
+.SH COMMAND LINE OPTIONS
+.PP
+\fB+level\fR
+.RS
+Starts the specified game level.
+.EX
+Example: \fBserioussam +level "Levels//01_Hatshepsut.wld"\fR
+.EE
+.RE
+.TP
+\fB+portable\fR
+.RS
+Enables full portable mode for Linux. All saves, recorded demo files, 
+settings files will be saved in the root directory of the game.
+.RE
+.TP
+\fB+connect\fR
+.RS
+Connects to the server using the specified ip and port.
+.EX
+Example: \fBserioussam +connect 192.168.0.100:25600\fR
+.EE
+.RE
+.TP
+\fB+script\fR
+.RS
+At startup, it launches a custom script for execution.
+.EX
+Example: \fBserioussam +script "Scripts//Myset.ini"\fR
+.EE
+.RE
+.TP
+\fB+game\fR
+.RS
+Runs the specified modification.
+.EX
+Example: \fBserioussam +game XPLUS\fR
+.EE
+.RE
+.TP
+\fB+logfile\fR
+.RS
+Specifies an alternative file for logging.
+.EX
+Example: \fBserioussam +logfile "Mylog.log"\fR
+.EE
+.RE
+.SH CONSOLE COMMANDS
+.PP
+Note: the man contains only new commands. You can look at the remaining commands
+in file \fIShellSymbols.txt\fR in \fIHELP\fR of the game directory.
+.PP
+\fBhud_bShowKills\fR
+.RS
+\-\ Shows the number of killed and remaining monsters on the map. Disabled by default.
+.RE
+.TP
+\fBhud_bShowPing\fR
+.RS
+\-\ Shows ping in a multiplayer game. Enabled by default.
+.RE
+.TP
+\fBhud_bShowScore\fR
+.RS
+\-\ Allows you to remove the top line in the HUD with the number of score. Disabled by default.
+.RE
+.TP
+\fBgam_bFixIlluminationsMethod\fR
+.RS
+\-\ Fix a bug with texture highlighting in the First Encounter.
+.TS
+tab(;) allbox;
+c c
+c c
+c c
+c c.
+Variable;Method used
+0;none
+1;fix textrure settings
+2;create additional lighting (better). Setting by default
+.TE
+.RE
+.TP
+\fBhud_bWeaponsIconScale
+.RS
+\-\ Sets the size for displaying the size of weapon icons in HUD.
+.TS
+tab(;) allbox;
+c c
+c c
+c c.
+Variable;Icon size
+0;small weapon icons
+1;big weapon icons (set by default)
+.TE
+.RE
+.SH INTRIDUCTION
+.PP
+This implementation of the source code provides for installation in the
+system, in the /usr/local/bin, /usr/local/lib, /usr/local/share directories.
+.PP
+During the launch of the game, the engine determines the place of launch,
+and if the launch occurred from the /usr/local/bin directory, it switches
+to the libraries search mode in the system directories. Also adds searching 
+for game data in various directories. About the search for game data will 
+be written below.
+.PP
+Otherwise, the engine considers that a local launch of the game has occurred
+and will look for game data in the root directory of the game.
+User data, such as game settings, log, saves, demos will be located in:
+.PP
+\fB ~/.local/share/Serious-Engine/serioussam/ - for TFE\fR
+\fB ~/.local/share/Serious-Engine/serioussamse/ - for TSE\fR
+.PP
+If you start the game with the \fB+portable\fR key, then there will be a full
+portable mode and user data, such as game settings, 
+log, saves, demos will also be located in the root directory of the game.
+.PP
+.SS Naming conventions for executable files and libraries
+.PP
+Internal game name for Serious Sam The First Encounter is \fIserioussam\fR,
+for Serious Sam The Second Encounter is \fIserioussamse\fR. These names are
+initially accepted in the engine and are used for example in a network
+game and a master server.
+.PP
+.SS Location of executables, libraries, and modification libraries
+.PP
+The executable files of the game are located in the \fI'/usr/local/bin'\fR directory.
+.PP
+\fB /usr/local/bin/"internal game name"\fR
+.PP
+The dedicated server and the font creation utility for the game are also
+located in this directory.
+.PP
+\fB /usr/local/bin/"internal game name"\fB-ded\fR
+\fB /usr/local/bin/"internal game name"\fB-mkfont\fR
+.PP
+The game libraries will be searched in the following directories:
+\fI /usr/local/lib/"internal-game-name"/\fR
+The location of the libraries of modifications is also on the same principle.
+.PP
+\fB /usr/local/lib/"internal game name"/Mods/"Mod name"\fR
+.PP
+Game libraries are assigned a suffix defined in file \fIModEXT.txt\fR
+The suffix is assigned to both game libraries and mod libraries.
+The game library engine must be located in the standard library search area.
+In one of: \fI/usr/local/lib\fR
+The game executable first loads the engine library, which loads the remaining
+libraries from the subdirectory with the game's internal name.
+To get output names by convention, use the cmake build 
+key \fB-DUSE_SYSTEM_INSTALL\fP=On
+.PP
+In accordance with the naming convention, we get the following location of the
+executable files, game libraries Serious Sam The First Encounter 
+and Serious Sam The Second Encounter for FreeBSD/OpenBSD:
+.PP
+\fB /usr/local/bin/serioussam\fR
+\fB /usr/local/bin/serioussam-ded\fR
+\fB /usr/local/bin/serioussam-mkfont\fR
+\fB /usr/local/lib/libEngine.so\fR
+\fB /usr/local/lib/serioussam/libShaders.so\fR
+\fB /usr/local/lib/serioussam/libGame.so\fR
+\fB /usr/local/lib/serioussam/libEntities.so\fR
+\fB /usr/local/lib/serioussam/libamp11lib.so\fR
+\fB /usr/local/bin/serioussamse\fR
+\fB /usr/local/bin/serioussamse-ded\fR
+\fB /usr/local/bin/serioussamse-mkfont\fR
+\fB /usr/local/lib/libEngineMP.so\fR
+\fB /usr/local/lib/serioussamse/libShaders.so\fR
+\fB /usr/local/lib/serioussamse/libGameMP.so\fR
+\fB /usr/local/lib/serioussamse/libEntitiesMP.so\fR
+\fB /usr/local/lib/serioussamse/libamp11lib.so\fR
+.PP
+For mod XPLUS:
+\fB /usr/local/lib/serioussam/Mods/XPLUS/libGame.so\fR
+\fB /usr/local/lib/serioussam/Mods/XPLUS/libEntities.so\fR
+\fB /usr/local/lib/serioussamse/Mods/XPLUS/libGameMP.so\fR
+\fB /usr/local/lib/serioussamse/Mods/XPLUS/libEntitiesMP.so\fR
+.PP
+For mod Serious Sam Alpha Remake (SSA):
+\fB /usr/local/lib/serioussam/Mods/SSA/libGame.so\fR
+\fB /usr/local/lib/serioussam/Mods/SSA/libEntities.so\fRq
+.PP
+.SS Location of game data, user data, and data modifications
+.PP
+During the launch of the game, the engine determines the launch location, and
+if the launch occurred from the /usr/local/bin directory, then the game data
+will be searched for the recommended paths. If the game data is not found using
+the recommended paths, then the search will be in the home directory, and when
+the game files are found, the path will be written to the configuration
+file (not recommended). If the game files are not found,
+a message box will appear.
+.PP
+Recommended paths for hosting game data:
+.PP
+\fB /usr/local/share/serioussam/\fR \-\ for TFE
+\fB /usr/local/share/serioussamse/\fR \-\ for TSE
+.PP
+or
+.PP
+\fB ~/.local/share/Serious-Engine/serioussam/\fR \-\ for TFE
+\fB ~/.local/share/Serious-Engine/serioussamse/\fR \-\ for TSE
+.PP
+Mod Data:
+.PP
+\fB /usr/local/share/serioussam/Mods/"Mod name"\fR \-\ for TFE
+\fB /usr/local/share/serioussamse/Mods/"Mod name"\fR \-\ for TSE
+.PP
+or
+.PP
+\fB ~/.local/share/Serious-Engine/serioussam/Mods/"Mod name"\fR \-\ for TFE
+\fB ~/.local/share/Serious-Engine/serioussamse/Mods/"Mod name"\fR \-\ for TSE
+.PP
+It is not allowed to arrange game data parts in different recommended paths.
+Also, if you chose your own path (which is not recommended), it must be
+the only one.
+.PP
+The file SE1_10b.gro is not included in the game data distributed on
+CDs or digital stores. If you chose the first recommended option, 
+set it to:
+.PP
+\fB /usr/local/share/serioussam/SE1_10b.gro\fR \-\ for TFE
+\fB /usr/local/share/serioussamse/SE1_10b.gro\fR \-\ for TSE
+.PP
+.SH PLAYING
+.PP
+This source release does not contain any game data, the game data is still
+covered by the original EULA and must be obeyed as usual.
+.PP
+To start the game, you'll need the original resurces of a licensed copy 
+of Serious Sam: The First Encounter and Serious Sam: The Second Encounter.
+.PP
+.SS Steam version 
+.PP
+If you have a digital copy of the game on Steam then the
+resources can be found in:
+\fB ~/.local/share/Steam/SteamApps/common/Serious Sam Classic The First Encounter\fR and
+\fB ~/.local/share/Steam/SteamApps/common/Serious Sam Classic The Second Encounter\fR
+(the default Steam game installation directory on Linux).
+.PP
+.SS GOG version
+.PP
+If you bought a digital on GOG, you can unpack the resources with the 
+innoextract CLI tool. To install innoextract via your package manager, run:
+.PP
+\fB sudo pkg install innoextract\fR - for FreeBSD
+\fB sudo pkg_add innoextract\fR - for OpenBSD
+.PP
+Copy files \fI"setup_serious_sam_the_first_encounter_2.0.0.10.exe"\fR and \fI"setup_serious_sam_the_second_encounter_2.1.0.8.exe"\fR 
+to a home directory and run the following commands:
+.PP
+\fB innoextract --gog setup_serious_sam_the_first_encounter_2.0.0.10.exe\fR
+.PP
+\fB innoextract --gog setup_serious_sam_the_second_encounter_2.1.0.8.exe\fR
+.PP
+.SS Physical version
+.PP
+If you bought a physical copy of the game and you have an ISO of your disk,
+you can unpack the resources with the any archive manager. Game resources are
+located in the Install directory of the disk. Just copy all the *.gro files
+from there, as well as the Levels directory to directories
+\fB ~/.local/share/Serious-Engine/serioussam\fR and
+\fB ~/.local/share/Serious-Engine/serioussamse\fR, respectively, for games 
+Serious Sam: The First Encounter and Serious Sam: The Second Encounter.
+.PP
+.SS Launching the game
+To start the game type in console: \fB serioussam\fR or \fB serioussamse\fR. You can also use the launch of the game through the menu.
+After installing the packages and copying all the data, you can check what we got.
+.SH BUGS
+There is no multiplayer compatibility between Windows and *nix systems.
+.SH AUTHOR
+ Alexander Pavlov <t.x00100x.t@yandex.ru>

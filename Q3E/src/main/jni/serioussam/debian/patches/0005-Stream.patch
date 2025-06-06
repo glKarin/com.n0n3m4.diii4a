@@ -1,0 +1,107 @@
+Description: Add additional data path /usr/share/games/<internal game name>
+Forwarded: not-needed
+--- a/SamTFE/Sources/Engine/Base/Stream.h	2024-02-15 12:44:53.057345383 +0300
++++ b/SamTFE/Sources/Engine/Base/Stream.h	2024-02-15 13:17:01.634702073 +0300
+@@ -391,6 +391,10 @@
+ 
+ // global string with application path
+ ENGINE_API extern CTFileName _fnmApplicationPath;
++#ifdef PLATFORM_UNIX
++// global string with additional search path
++ENGINE_API extern CTFileName _fnmAdditionalDirPath;
++#endif
+ // global string with user-specific writable directory.
+ ENGINE_API extern CTFileName _fnmUserDir;
+ // global string with current MOD path
+--- a/SamTFE/Sources/Engine/Base/Stream.cpp	2024-02-15 12:44:53.057345383 +0300
++++ b/SamTFE/Sources/Engine/Base/Stream.cpp	2024-02-15 13:17:01.634702073 +0300
+@@ -78,7 +78,9 @@
+ // global string with application path (utf-8)
+ CTFileName _fnmApplicationPath;
+ CTFileName _fnmApplicationPathTMP; // home dir or application path
+-
++#ifdef PLATFORM_UNIX
++CTFileName _fnmAdditionalDirPath; // additional search path
++#endif
+ // global string with filename of the started application
+ CTFileName _fnmApplicationExe;
+ // global string with user-specific writable directory.
+@@ -220,6 +222,16 @@
+   }
+   delete files;
+ 
++#ifdef PLATFORM_UNIX
++  // additional search path
++  files = _pFileSystem->FindFiles(_fnmAdditionalDirPath, "*.gro");
++  max = files->Count();
++  for (i = 0; i < max; i++) {
++    UNZIPAddArchive( _fnmAdditionalDirPath + ((*files)[i]) );
++  }
++  delete files;
++#endif
++
+   // if there is a mod active
+   if (_fnmMod!="") {
+     // for each group file in mod directory
+--- a/SamTSE/Sources/Engine/Base/Stream.h	2024-02-15 12:44:53.057345383 +0300
++++ b/SamTSE/Sources/Engine/Base/Stream.h	2024-02-15 13:17:01.634702073 +0300
+@@ -391,6 +391,10 @@
+ 
+ // global string with application path
+ ENGINE_API extern CTFileName _fnmApplicationPath;
++#ifdef PLATFORM_UNIX
++// global string with additional search path
++ENGINE_API extern CTFileName _fnmAdditionalDirPath;
++#endif
+ // global string with user-specific writable directory.
+ ENGINE_API extern CTFileName _fnmUserDir;
+ // global string with current MOD path
+--- a/SamTSE/Sources/Engine/Base/Stream.cpp	2024-02-15 12:44:53.057345383 +0300
++++ b/SamTSE/Sources/Engine/Base/Stream.cpp	2024-02-15 13:17:01.634702073 +0300
+@@ -78,7 +78,9 @@
+ // global string with application path (utf-8)
+ CTFileName _fnmApplicationPath;
+ CTFileName _fnmApplicationPathTMP; // home dir or application path
+-
++#ifdef PLATFORM_UNIX
++CTFileName _fnmAdditionalDirPath; // additional search path
++#endif
+ // global string with filename of the started application
+ CTFileName _fnmApplicationExe;
+ // global string with user-specific writable directory.
+@@ -194,15 +194,16 @@
+     }
+   }
+   // find eventual extension for the mod's dlls
+-  _strModExt = "";
++  _strModExt = "MP";
+   // DG: apparently both ModEXT.txt and ModExt.txt exist in the wild.
++/*
+   CTFileName tmp;
+   if(ExpandFilePath(EFP_READ, CTString("ModEXT.txt"), tmp) != EFP_NONE) {
+     LoadStringVar(CTString("ModEXT.txt"), _strModExt);
+   } else {
+     LoadStringVar(CTString("ModExt.txt"), _strModExt);
+   }
+-
++*/
+ 
+   CPrintF(TRANSV("Loading group files...\n"));
+ 
+@@ -220,6 +222,16 @@
+   }
+   delete files;
+ 
++#ifdef PLATFORM_UNIX
++  // additional search path
++  files = _pFileSystem->FindFiles(_fnmAdditionalDirPath, "*.gro");
++  max = files->Count();
++  for (i = 0; i < max; i++) {
++    UNZIPAddArchive( _fnmAdditionalDirPath + ((*files)[i]) );
++  }
++  delete files;
++#endif
++
+   // if there is a mod active
+   if (_fnmMod!="") {
+     // for each group file in mod directory

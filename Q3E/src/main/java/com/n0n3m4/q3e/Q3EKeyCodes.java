@@ -1776,6 +1776,14 @@ public class Q3EKeyCodes
     {
         InitKeycodes(KeyCodesSDL.class);
     }
+    public static void InitGZDOOMKeycodes()
+    {
+        InitSDLKeycodes();
+    }
+    public static void InitSamTFEKeycodes()
+    {
+        InitSDLKeycodes();
+    }
 
     public static void InitJKKeycodes()
     {

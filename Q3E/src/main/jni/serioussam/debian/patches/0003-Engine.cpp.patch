@@ -1,0 +1,434 @@
+Description: Set Debian specific paths: https://wiki.debian.org/Games/Checklist
+.
+Added support for the content of the demo version of the game.
+Forwarded: not-needed
+--- a/SamTFE/Sources/Engine/Engine.cpp	2023-11-28 16:51:55.989955484 +0300
++++ b/SamTFE/Sources/Engine/Engine.cpp	2024-01-25 12:59:40.376276525 +0300
+@@ -115,6 +115,7 @@
+ // Path vars
+ static INDEX sys_iGameBits = 0;
+ ENGINE_API INDEX sys_iSysPath = 0;
++ENGINE_API INDEX sys_iGameDemoMode = 0;
+ 
+ // Entities Adjesters
+ ENGINE_API FLOAT _fPlayerFOVAdjuster = 1.0f;
+@@ -172,7 +173,8 @@
+         } else {
+            if( strGameID == "serioussamse") {
+                int _testfile = strncmp((const char *)entry->d_name, (const char *) "SE1_00_Levels.gro", (size_t) 13 ); 
+-               if( _testfile == 0) {
++               int _testfile_demo = strncmp((const char *)entry->d_name, (const char *) "SEDemo1_00.gro", (size_t) 10 ); 
++               if( _testfile == 0 || _testfile_demo == 0) {
+                   memcpy(_path, name, 2047);
+                   CPrintF("Found: %s/%s\n", name, entry->d_name);
+                   _testfiledone = 1;
+@@ -676,10 +678,19 @@
+   _fnmApplicationPath = CTString(strDirPath);
+   _fnmApplicationExe = CTString(strExePath);
+ #ifdef PLATFORM_UNIX
+-    // rcg01012002 calculate user dir.
++  _fnmAdditionalDirPath = "/usr/share/games/" + strGameID + "/";
++  // rcg01012002 calculate user dir.
+   char buf[MAX_PATH];
+-  _pFileSystem->GetUserDirectory(buf, sizeof (buf));
+-  _fnmUserDir = CTString(buf);
++  //_pFileSystem->GetUserDirectory(buf, sizeof (buf));
++  struct passwd *pw = getpwuid(getuid());
++  struct stat st = {0};
++  const char *_homedir = pw->pw_dir;
++  strcpy(buf, _homedir);
++  buf[strlen(_homedir)] = 0x00;
++  _fnmUserDir = CTString(buf) + "/." + strGameID + "/";
++  if (stat((const char *) _fnmUserDir, &st) == -1) {
++    mkdir((const char *) _fnmUserDir, 0755);
++  }
+ #endif
+   try {
+     _fnmApplicationExe.RemoveApplicationPath_t();
+@@ -747,13 +758,10 @@
+ #elif defined(__NetBSD__)
+   int _isystempath = strncmp((const char *)strExePath, (const char *) "/usr/pkg/bin/", (size_t) 13 );
+ #else
+-  int _isystempath = strncmp((const char *)strExePath, (const char *) "/usr/bin/", (size_t) 9 );
++  int _isystempath = strncmp((const char *)strExePath, (const char *) "/usr/games/", (size_t) 11 );
+ #endif
+-  if( _isystempath == 0 ) {
+-       sys_iSysPath = 1; // using system path
+-  } else {
+-       sys_iSysPath = 0; // using standarted path
+-  }
++
++  sys_iSysPath = 1; // using system path
+ 
+   // get library path for mods
+   _fnmModLibPath = "";
+@@ -764,35 +772,19 @@
+   if( sys_iSysPath == 1 ) {
+     _fnmModLibPath = "/usr/pkg/lib/" + strGameID + "/";
+ #else
+-  if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib/aarch64-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/aarch64-linux-gnu/" + strGameID + "/"; 
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && _pFileSystem->IsDirectory((const char *) "/usr/lib/arm-linux-gnueabihf/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/arm-linux-gnueabihf/" + strGameID + "/";
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib/riscv64-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/riscv64-linux-gnu/" + strGameID + "/";
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib/s390x-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/s390x-linux-gnu/" + strGameID + "/"; 
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib/powerpc64-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/powerpc64-linux-gnu/" + strGameID + "/"; 
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib/x86_64-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/x86_64-linux-gnu/" + strGameID + "/";
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && _pFileSystem->IsDirectory((const char *) "/usr/lib/i386-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/i386-linux-gnu/" + strGameID + "/";
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib64/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib64/" + strGameID + "/";
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && _pFileSystem->IsDirectory((const char *) "/usr/lib//" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/" + strGameID + "/";
++  if( sys_iSysPath == 1 ) {  _fnmModLibPath = "/usr/lib/games/" + strGameID + "/";
+ #endif
+   } else if( sys_iSysPath == 0 ) {
+     _fnmModLibPath = _fnmApplicationPath;
+   } else {
+     CPrintF(TRANSV("ERROR: Game libraries not ound!\n"));
+-    FatalError(TRANSV("Failed to search game libraries installed!\nPlease reinstall the game.\nSee the log for more details.\nGame log is here: ~/.local/share/Serious-Engine/%s/SeriousSam.log"),(const char *) strGameID);
++    FatalError(TRANSV("Failed to search game libraries installed!\nPlease reinstall the game.\nSee the log for more details.\nGame log is here: ~/.%s/SeriousSam.log"),(const char *) strGameID);
+   }
+ 
+   if( sys_iSysPath == 1 ) { // search game data
+     CTFileName _fnm_usr_TestFile, _fnm_local_TestFile, _fnm_home_TestFile;
+-    CTString _fnmUserDataPath, _fnm_TestFile;
++    CTFileName _fnm_usr_TestDemoFile, _fnm_local_TestDemoFile, _fnm_home_TestDemoFile;
++    CTString _fnmUserDataPath, _fnm_TestFile, _fnm_TestDemoFile;
+     int _fd;
+ 
+     if( access((const char *) _fnmUserDir+_strLogFile+".cfg", F_OK) == 0 ) {
+@@ -808,35 +800,48 @@
+     // set testing files
+     if( strGameID == "serioussamse") {
+       _fnm_TestFile = "SE1_00_Levels.gro";
++      _fnm_TestDemoFile = "SEDemo1_00.gro";
+     } else {
+       _fnm_TestFile = "1_00_music.gro";
++      _fnm_TestDemoFile = "1_00_music_demo.gro";
+     }
+     CPrintF(TRANSV("Testing file: %s\n"), (const char *) _fnm_TestFile);
+ #if defined(__OpenBSD__) || defined(__FreeBSD__)
+     _fnm_usr_TestFile = "/usr/local/share/" + strGameID + "/" + _fnm_TestFile; //  data in usr
++    _fnm_usr_TestDemoFile = "/usr/local/share/" + strGameID + "/" + _fnm_TestDemoFile; //  data in usr
+ #elif defined(__NetBSD__)
+     _fnm_usr_TestFile = "/usr/pkg/share/" + strGameID + "/" + _fnm_TestFile; //  data in usr
++    _fnm_usr_TestDemoFile = "/usr/pkg/share/" + strGameID + "/" + _fnm_TestDemoFile; //  data in usr
+ #else
+-    _fnm_usr_TestFile = "/usr/share/" + strGameID + "/" + _fnm_TestFile; //  data in usr
++    _fnm_usr_TestFile = "/usr/share/games/" + strGameID + "/" + _fnm_TestFile; //  data in usr
++    _fnm_usr_TestDemoFile = "/usr/share/games/" + strGameID + "/" + _fnm_TestDemoFile; //  data in usr
+ #endif
+     _fnm_local_TestFile = _fnmUserDir + _fnm_TestFile;                   //  data in home .local
++    _fnm_local_TestDemoFile = _fnmUserDir + _fnm_TestDemoFile;
+     _fnm_home_TestFile = (const char *)_fnmUserDataPath  + _fnm_TestFile;
++    _fnm_home_TestDemoFile = (const char *)_fnmUserDataPath  + _fnm_TestDemoFile;
+     // test
+-    if( access((const char *) _fnm_home_TestFile, F_OK) != 0 ) {
+-      CPrintF(TRANSV("Testing system path: %s\n"), (const char *) _fnm_usr_TestFile);
+-      CPrintF(TRANSV("Testing local  path: %s\n"), (const char *) _fnm_local_TestFile);
+-      if( access((const char *) _fnm_usr_TestFile, F_OK) == 0 ) {
++    if( access((const char *) _fnm_home_TestFile, F_OK) != 0 && access((const char *) _fnm_home_TestDemoFile, F_OK) != 0 ) {
++      CPrintF(TRANSV("Testing system path1: %s\nTesting system path2: %s\n"), (const char *) _fnm_usr_TestFile, (const char *) _fnm_usr_TestDemoFile);
++      CPrintF(TRANSV("Testing local  path1: %s\nTesting local  path2: %s\n"), (const char *) _fnm_local_TestFile, (const char *) _fnm_local_TestDemoFile);
++      if( access((const char *) _fnm_usr_TestFile, F_OK) == 0 || access((const char *) _fnm_usr_TestDemoFile, F_OK) == 0 ) {
+ #if defined(__OpenBSD__) || defined(__FreeBSD__)
+         _fnmApplicationPath = "/usr/local/share/" + strGameID + "/";                       // all game data
+ #elif defined(__NetBSD__)
+         _fnmApplicationPath = "/usr/pkg/share/" + strGameID + "/";                       // all game data
+ #else
+-        _fnmApplicationPath = "/usr/share/" + strGameID + "/";                       // all game data
++        _fnmApplicationPath = "/usr/share/games/" + strGameID + "/";                       // all game data
+ #endif
+         CPrintF(TRANSV("Found usr path: %s\n"), (const char *) _fnmUserDataPath);
+-      } else if( access((const char *) _fnm_local_TestFile, F_OK) == 0 ) {
++        if( access((const char *) _fnm_usr_TestDemoFile, F_OK) == 0 ) {
++          sys_iGameDemoMode = 1;
++        }
++      } else if( access((const char *) _fnm_local_TestFile, F_OK) == 0 || access((const char *) _fnm_local_TestDemoFile, F_OK) == 0 ) {
+         _fnmApplicationPath = _fnmUserDir;                                           // all game data
+         CPrintF(TRANSV("Found local path: %s\n"), (const char *) _fnmUserDataPath);
++        if( access((const char *) _fnm_local_TestDemoFile, F_OK) == 0 ) {
++          sys_iGameDemoMode = 1;
++        }
+       } else {
+         // search in home dir 
+         // BOOL YesNoMessage(const char *strFormat, ...)
+@@ -845,7 +850,7 @@
+ #elif defined(__NetBSD__)
+         InfoMessage(TRANS("No game files were found in /usr/pkg/share/%s/\n or %s\nThe home directory will be searched."),(const char *) strGameID,(const char *) _fnmUserDir);
+ #else
+-        InfoMessage(TRANS("No game files were found in /usr/share/%s/\n or %s\nThe home directory will be searched."),(const char *) strGameID,(const char *) _fnmUserDir);
++        InfoMessage(TRANS("No game files were found in /usr/share/games/%s/\n or %s\nThe home directory will be searched."),(const char *) strGameID,(const char *) _fnmUserDir);
+ #endif
+         struct passwd *pw = getpwuid(getuid());
+         const char *_homedir = pw->pw_dir;
+@@ -855,12 +860,20 @@
+         _PATH = (CTString)_path;
+         _fnmApplicationPath = (CTFileName) _PATH + "/";
+         _fnm_home_TestFile  = (CTFileName) _PATH + "/" + _fnm_TestFile; 
++        _fnm_home_TestDemoFile  = (CTFileName) _PATH + "/" + _fnm_TestDemoFile; 
+         if( access((const char *) _fnm_home_TestFile, F_OK) == 0 ) {
+           //_fnmApplicationPath = (CTFileName) _PATH + "/";
+           CPrintF(TRANSV("Found home path: %s\n"), (const char *) _fnm_home_TestFile);
+           _fd = open((const char *) _fnmUserDir+_strLogFile+".cfg", O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+           size_t x = write(_fd, _path, 2048);
+           close(_fd);
++        } else if( access((const char *) _fnm_home_TestDemoFile, F_OK) == 0 ) {
++          //_fnmApplicationPath = (CTFileName) _PATH + "/";
++          CPrintF(TRANSV("Found home path: %s\n"), (const char *) _fnm_home_TestDemoFile);
++          _fd = open((const char *) _fnmUserDir+_strLogFile+".cfg", O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
++          size_t x = write(_fd, _path, 2048);
++          close(_fd);
++          sys_iGameDemoMode = 1;
+         } else {
+           CPrintF(TRANSV("ERROR: Game data not ound!\n"));
+           _fnmUserDataPath = "";
+@@ -869,11 +882,14 @@
+ #elif defined(__NetBSD__)
+           FatalError(TRANSV("Failed to search game data!\nPlease put the game data in the paths:\n/usr/pkg/share/%s/\n or %s\n or somewhere in your home directory\nSee the log for more details.\nGame log is here: ~/.local/share/Serious-Engine/%s/SeriousSam.log"),(const char *) strGameID,(const char *) _fnmUserDir,(const char *) strGameID);
+ #else
+-          FatalError(TRANSV("Failed to search game data!\nPlease put the game data in the paths:\n/usr/share/%s/\n or %s\n or somewhere in your home directory\nSee the log for more details.\nGame log is here: ~/.local/share/Serious-Engine/%s/SeriousSam.log"),(const char *) strGameID,(const char *) _fnmUserDir,(const char *) strGameID);
++          FatalError(TRANSV("Failed to search game data!\nPlease put the game data in the paths:\n/usr/share/games/%s/\n or %s\n or somewhere in your home directory\nSee the log for more details.\nGame log is here: ~/.%s/SeriousSam.log"),(const char *) strGameID,(const char *) _fnmUserDir,(const char *) strGameID);
+ #endif
+         }
+       } 
+     } else {
++      if( access((const char *) _fnm_home_TestDemoFile, F_OK) == 0 ) {
++        sys_iGameDemoMode = 1;
++      }
+       CPrintF(TRANSV("Found path: %s\n"), (const char *) _fnmUserDataPath);
+       _fnmApplicationPath = _fnmUserDataPath;                                         // all game data
+     }
+@@ -883,6 +896,12 @@
+   CPrintF(TRANSV("Executable: %s\n"), (const char *) strExePath);
+   CPrintF(TRANSV("Assumed engine data directory: %s\n"), (const char *) _fnmApplicationPath);
+   CPrintF(TRANSV("Assumed mods library directory: %s\n"), (const char *) _fnmModLibPath);
++  CPrintF(TRANSV("Assumed additional data directory: %s\n"), (const char *) _fnmAdditionalDirPath);
++  if( sys_iGameDemoMode == 1 ) {
++    CPrintF(TRANSV("Found Demo data. Demo mode Enabled.\n"));
++  } else {
++    CPrintF(TRANSV("Found Original data. Demo mode Disabled.\n"));
++  }
+ #endif
+ 
+   CPrintF("\n");
+--- a/SamTSE/Sources/Engine/Engine.cpp	2023-11-28 16:51:55.989955484 +0300
++++ b/SamTSE/Sources/Engine/Engine.cpp	2024-01-25 12:59:40.376276525 +0300
+@@ -115,6 +115,7 @@
+ // Path vars
+ static INDEX sys_iGameBits = 0;
+ ENGINE_API INDEX sys_iSysPath = 0;
++ENGINE_API INDEX sys_iGameDemoMode = 0;
+ 
+ // Entities Adjesters
+ ENGINE_API FLOAT _fPlayerFOVAdjuster = 1.0f;
+@@ -172,7 +173,8 @@
+         } else {
+            if( strGameID == "serioussamse") {
+                int _testfile = strncmp((const char *)entry->d_name, (const char *) "SE1_00_Levels.gro", (size_t) 13 ); 
+-               if( _testfile == 0) {
++               int _testfile_demo = strncmp((const char *)entry->d_name, (const char *) "SEDemo1_00.gro", (size_t) 10 ); 
++               if( _testfile == 0 || _testfile_demo == 0) {
+                   memcpy(_path, name, 2047);
+                   CPrintF("Found: %s/%s\n", name, entry->d_name);
+                   _testfiledone = 1;
+@@ -676,10 +678,19 @@
+   _fnmApplicationPath = CTString(strDirPath);
+   _fnmApplicationExe = CTString(strExePath);
+ #ifdef PLATFORM_UNIX
+-    // rcg01012002 calculate user dir.
++  _fnmAdditionalDirPath = "/usr/share/games/" + strGameID + "/";
++  // rcg01012002 calculate user dir.
+   char buf[MAX_PATH];
+-  _pFileSystem->GetUserDirectory(buf, sizeof (buf));
+-  _fnmUserDir = CTString(buf);
++  //_pFileSystem->GetUserDirectory(buf, sizeof (buf));
++  struct passwd *pw = getpwuid(getuid());
++  struct stat st = {0};
++  const char *_homedir = pw->pw_dir;
++  strcpy(buf, _homedir);
++  buf[strlen(_homedir)] = 0x00;
++  _fnmUserDir = CTString(buf) + "/." + strGameID + "/";
++  if (stat((const char *) _fnmUserDir, &st) == -1) {
++    mkdir((const char *) _fnmUserDir, 0755);
++  }
+ #endif
+   try {
+     _fnmApplicationExe.RemoveApplicationPath_t();
+@@ -747,13 +758,10 @@
+ #elif defined(__NetBSD__)
+   int _isystempath = strncmp((const char *)strExePath, (const char *) "/usr/pkg/bin/", (size_t) 13 );
+ #else
+-  int _isystempath = strncmp((const char *)strExePath, (const char *) "/usr/bin/", (size_t) 9 );
++  int _isystempath = strncmp((const char *)strExePath, (const char *) "/usr/games/", (size_t) 11 );
+ #endif
+-  if( _isystempath == 0 ) {
+-       sys_iSysPath = 1; // using system path
+-  } else {
+-       sys_iSysPath = 0; // using standarted path
+-  }
++
++  sys_iSysPath = 1; // using system path
+ 
+   // get library path for mods
+   _fnmModLibPath = "";
+@@ -764,35 +772,19 @@
+   if( sys_iSysPath == 1 ) {
+     _fnmModLibPath = "/usr/pkg/lib/" + strGameID + "/";
+ #else
+-  if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib/aarch64-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/aarch64-linux-gnu/" + strGameID + "/"; 
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && _pFileSystem->IsDirectory((const char *) "/usr/lib/arm-linux-gnueabihf/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/arm-linux-gnueabihf/" + strGameID + "/";
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib/riscv64-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/riscv64-linux-gnu/" + strGameID + "/";
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib/s390x-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/s390x-linux-gnu/" + strGameID + "/"; 
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib/powerpc64-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/powerpc64-linux-gnu/" + strGameID + "/"; 
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib/x86_64-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/x86_64-linux-gnu/" + strGameID + "/";
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && _pFileSystem->IsDirectory((const char *) "/usr/lib/i386-linux-gnu/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/i386-linux-gnu/" + strGameID + "/";
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && _pFileSystem->IsDirectory((const char *) "/usr/lib64/" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib64/" + strGameID + "/";
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && _pFileSystem->IsDirectory((const char *) "/usr/lib//" + strGameID)) {
+-    _fnmModLibPath = "/usr/lib/" + strGameID + "/";
++  if( sys_iSysPath == 1 ) {  _fnmModLibPath = "/usr/lib/games/" + strGameID + "/";
+ #endif
+   } else if( sys_iSysPath == 0 ) {
+     _fnmModLibPath = _fnmApplicationPath;
+   } else {
+     CPrintF(TRANSV("ERROR: Game libraries not ound!\n"));
+-    FatalError(TRANSV("Failed to search game libraries installed!\nPlease reinstall the game.\nSee the log for more details.\nGame log is here: ~/.local/share/Serious-Engine/%s/SeriousSam.log"),(const char *) strGameID);
++    FatalError(TRANSV("Failed to search game libraries installed!\nPlease reinstall the game.\nSee the log for more details.\nGame log is here: ~/.%s/SeriousSam.log"),(const char *) strGameID);
+   }
+ 
+   if( sys_iSysPath == 1 ) { // search game data
+     CTFileName _fnm_usr_TestFile, _fnm_local_TestFile, _fnm_home_TestFile;
+-    CTString _fnmUserDataPath, _fnm_TestFile;
++    CTFileName _fnm_usr_TestDemoFile, _fnm_local_TestDemoFile, _fnm_home_TestDemoFile;
++    CTString _fnmUserDataPath, _fnm_TestFile, _fnm_TestDemoFile;
+     int _fd;
+ 
+     if( access((const char *) _fnmUserDir+_strLogFile+".cfg", F_OK) == 0 ) {
+@@ -808,35 +800,48 @@
+     // set testing files
+     if( strGameID == "serioussamse") {
+       _fnm_TestFile = "SE1_00_Levels.gro";
++      _fnm_TestDemoFile = "SEDemo1_00.gro";
+     } else {
+       _fnm_TestFile = "1_00_music.gro";
++      _fnm_TestDemoFile = "1_00_music_demo.gro";
+     }
+     CPrintF(TRANSV("Testing file: %s\n"), (const char *) _fnm_TestFile);
+ #if defined(__OpenBSD__) || defined(__FreeBSD__)
+     _fnm_usr_TestFile = "/usr/local/share/" + strGameID + "/" + _fnm_TestFile; //  data in usr
++    _fnm_usr_TestDemoFile = "/usr/local/share/" + strGameID + "/" + _fnm_TestDemoFile; //  data in usr
+ #elif defined(__NetBSD__)
+     _fnm_usr_TestFile = "/usr/pkg/share/" + strGameID + "/" + _fnm_TestFile; //  data in usr
++    _fnm_usr_TestDemoFile = "/usr/pkg/share/" + strGameID + "/" + _fnm_TestDemoFile; //  data in usr
+ #else
+-    _fnm_usr_TestFile = "/usr/share/" + strGameID + "/" + _fnm_TestFile; //  data in usr
++    _fnm_usr_TestFile = "/usr/share/games/" + strGameID + "/" + _fnm_TestFile; //  data in usr
++    _fnm_usr_TestDemoFile = "/usr/share/games/" + strGameID + "/" + _fnm_TestDemoFile; //  data in usr
+ #endif
+     _fnm_local_TestFile = _fnmUserDir + _fnm_TestFile;                   //  data in home .local
++    _fnm_local_TestDemoFile = _fnmUserDir + _fnm_TestDemoFile;
+     _fnm_home_TestFile = (const char *)_fnmUserDataPath  + _fnm_TestFile;
++    _fnm_home_TestDemoFile = (const char *)_fnmUserDataPath  + _fnm_TestDemoFile;
+     // test
+-    if( access((const char *) _fnm_home_TestFile, F_OK) != 0 ) {
+-      CPrintF(TRANSV("Testing system path: %s\n"), (const char *) _fnm_usr_TestFile);
+-      CPrintF(TRANSV("Testing local  path: %s\n"), (const char *) _fnm_local_TestFile);
+-      if( access((const char *) _fnm_usr_TestFile, F_OK) == 0 ) {
++    if( access((const char *) _fnm_home_TestFile, F_OK) != 0 && access((const char *) _fnm_home_TestDemoFile, F_OK) != 0 ) {
++      CPrintF(TRANSV("Testing system path1: %s\nTesting system path2: %s\n"), (const char *) _fnm_usr_TestFile, (const char *) _fnm_usr_TestDemoFile);
++      CPrintF(TRANSV("Testing local  path1: %s\nTesting local  path2: %s\n"), (const char *) _fnm_local_TestFile, (const char *) _fnm_local_TestDemoFile);
++      if( access((const char *) _fnm_usr_TestFile, F_OK) == 0 || access((const char *) _fnm_usr_TestDemoFile, F_OK) == 0 ) {
+ #if defined(__OpenBSD__) || defined(__FreeBSD__)
+         _fnmApplicationPath = "/usr/local/share/" + strGameID + "/";                       // all game data
+ #elif defined(__NetBSD__)
+         _fnmApplicationPath = "/usr/pkg/share/" + strGameID + "/";                       // all game data
+ #else
+-        _fnmApplicationPath = "/usr/share/" + strGameID + "/";                       // all game data
++        _fnmApplicationPath = "/usr/share/games/" + strGameID + "/";                       // all game data
+ #endif
+         CPrintF(TRANSV("Found usr path: %s\n"), (const char *) _fnmUserDataPath);
+-      } else if( access((const char *) _fnm_local_TestFile, F_OK) == 0 ) {
++        if( access((const char *) _fnm_usr_TestDemoFile, F_OK) == 0 ) {
++          sys_iGameDemoMode = 1;
++        }
++      } else if( access((const char *) _fnm_local_TestFile, F_OK) == 0 || access((const char *) _fnm_local_TestDemoFile, F_OK) == 0 ) {
+         _fnmApplicationPath = _fnmUserDir;                                           // all game data
+         CPrintF(TRANSV("Found local path: %s\n"), (const char *) _fnmUserDataPath);
++        if( access((const char *) _fnm_local_TestDemoFile, F_OK) == 0 ) {
++          sys_iGameDemoMode = 1;
++        }
+       } else {
+         // search in home dir 
+         // BOOL YesNoMessage(const char *strFormat, ...)
+@@ -845,7 +850,7 @@
+ #elif defined(__NetBSD__)
+         InfoMessage(TRANS("No game files were found in /usr/pkg/share/%s/\n or %s\nThe home directory will be searched."),(const char *) strGameID,(const char *) _fnmUserDir);
+ #else
+-        InfoMessage(TRANS("No game files were found in /usr/share/%s/\n or %s\nThe home directory will be searched."),(const char *) strGameID,(const char *) _fnmUserDir);
++        InfoMessage(TRANS("No game files were found in /usr/share/games/%s/\n or %s\nThe home directory will be searched."),(const char *) strGameID,(const char *) _fnmUserDir);
+ #endif
+         struct passwd *pw = getpwuid(getuid());
+         const char *_homedir = pw->pw_dir;
+@@ -855,12 +860,20 @@
+         _PATH = (CTString)_path;
+         _fnmApplicationPath = (CTFileName) _PATH + "/";
+         _fnm_home_TestFile  = (CTFileName) _PATH + "/" + _fnm_TestFile; 
++        _fnm_home_TestDemoFile  = (CTFileName) _PATH + "/" + _fnm_TestDemoFile; 
+         if( access((const char *) _fnm_home_TestFile, F_OK) == 0 ) {
+           //_fnmApplicationPath = (CTFileName) _PATH + "/";
+           CPrintF(TRANSV("Found home path: %s\n"), (const char *) _fnm_home_TestFile);
+           _fd = open((const char *) _fnmUserDir+_strLogFile+".cfg", O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+           size_t x = write(_fd, _path, 2048);
+           close(_fd);
++        } else if( access((const char *) _fnm_home_TestDemoFile, F_OK) == 0 ) {
++          //_fnmApplicationPath = (CTFileName) _PATH + "/";
++          CPrintF(TRANSV("Found home path: %s\n"), (const char *) _fnm_home_TestDemoFile);
++          _fd = open((const char *) _fnmUserDir+_strLogFile+".cfg", O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
++          size_t x = write(_fd, _path, 2048);
++          close(_fd);
++          sys_iGameDemoMode = 1;
+         } else {
+           CPrintF(TRANSV("ERROR: Game data not ound!\n"));
+           _fnmUserDataPath = "";
+@@ -869,11 +882,14 @@
+ #elif defined(__NetBSD__)
+           FatalError(TRANSV("Failed to search game data!\nPlease put the game data in the paths:\n/usr/pkg/share/%s/\n or %s\n or somewhere in your home directory\nSee the log for more details.\nGame log is here: ~/.local/share/Serious-Engine/%s/SeriousSam.log"),(const char *) strGameID,(const char *) _fnmUserDir,(const char *) strGameID);
+ #else
+-          FatalError(TRANSV("Failed to search game data!\nPlease put the game data in the paths:\n/usr/share/%s/\n or %s\n or somewhere in your home directory\nSee the log for more details.\nGame log is here: ~/.local/share/Serious-Engine/%s/SeriousSam.log"),(const char *) strGameID,(const char *) _fnmUserDir,(const char *) strGameID);
++          FatalError(TRANSV("Failed to search game data!\nPlease put the game data in the paths:\n/usr/share/games/%s/\n or %s\n or somewhere in your home directory\nSee the log for more details.\nGame log is here: ~/.%s/SeriousSam.log"),(const char *) strGameID,(const char *) _fnmUserDir,(const char *) strGameID);
+ #endif
+         }
+       } 
+     } else {
++      if( access((const char *) _fnm_home_TestDemoFile, F_OK) == 0 ) {
++        sys_iGameDemoMode = 1;
++      }
+       CPrintF(TRANSV("Found path: %s\n"), (const char *) _fnmUserDataPath);
+       _fnmApplicationPath = _fnmUserDataPath;                                         // all game data
+     }
+@@ -883,6 +896,12 @@
+   CPrintF(TRANSV("Executable: %s\n"), (const char *) strExePath);
+   CPrintF(TRANSV("Assumed engine data directory: %s\n"), (const char *) _fnmApplicationPath);
+   CPrintF(TRANSV("Assumed mods library directory: %s\n"), (const char *) _fnmModLibPath);
++  CPrintF(TRANSV("Assumed additional data directory: %s\n"), (const char *) _fnmAdditionalDirPath);
++  if( sys_iGameDemoMode == 1 ) {
++    CPrintF(TRANSV("Found Demo data. Demo mode Enabled.\n"));
++  } else {
++    CPrintF(TRANSV("Found Original data. Demo mode Disabled.\n"));
++  }
+ #endif
+ 
+   CPrintF("\n");

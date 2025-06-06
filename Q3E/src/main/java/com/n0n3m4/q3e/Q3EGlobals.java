@@ -133,21 +133,22 @@ public final class Q3EGlobals
     public static final int SIGNALS_HANDLER_BACKTRACE = 2;
 
     // game engine library
-    public static final String LIB_ENGINE_ID            = "libidtech4.so"; // DOOM3
-    public static final String LIB_ENGINE_RAVEN         = "libidtech4_raven.so"; // Quake 4
-    public static final String LIB_ENGINE_HUMANHEAD     = "libidtech4_humanhead.so"; // Prey 2006
-    public static final String LIB_ENGINE2_ID           = "libyquake2.so"; // Quake 2
-    public static final String LIB_ENGINE3_ID           = "libioquake3.so"; // Quake 3
-    public static final String LIB_ENGINE3_RTCW         = "libiowolfsp.so"; // RTCW
-    public static final String LIB_ENGINE4_TDM          = "libTheDarkMod.so"; // TDM
-    public static final String LIB_ENGINE1_QUAKE        = "libdarkplaces.so"; // Quake 1
-    public static final String LIB_ENGINE4_D3BFG        = "libRBDoom3BFG.so"; // Doom3-BFG
-    public static final String LIB_ENGINE1_DOOM         = "libgzdoom.so"; // GZDOOM
-    public static final String LIB_ENGINE3_ETW          = "libetl.so"; // ETW
-    public static final String LIB_ENGINE3_REALRTCW     = "libRealRTCW.so"; // RealRTCW
-    public static final String LIB_ENGINE_FTEQW         = "libfteqw.so"; // FTEQW
-    public static final String LIB_ENGINE_JA            = "libopenjk_sp.so"; // Jedi Academy
-    public static final String LIB_ENGINE_JO            = "libopenjo_sp.so"; // Jedi Outcast
+    public static final String LIB_ENGINE_ID        = "libidtech4.so"; // DOOM3
+    public static final String LIB_ENGINE_RAVEN     = "libidtech4_raven.so"; // Quake 4
+    public static final String LIB_ENGINE_HUMANHEAD = "libidtech4_humanhead.so"; // Prey 2006
+    public static final String LIB_ENGINE2_ID       = "libyquake2.so"; // Quake 2
+    public static final String LIB_ENGINE3_ID       = "libioquake3.so"; // Quake 3
+    public static final String LIB_ENGINE3_RTCW     = "libiowolfsp.so"; // RTCW
+    public static final String LIB_ENGINE4_TDM      = "libTheDarkMod.so"; // TDM
+    public static final String LIB_ENGINE1_QUAKE    = "libdarkplaces.so"; // Quake 1
+    public static final String LIB_ENGINE4_D3BFG    = "libRBDoom3BFG.so"; // Doom3-BFG
+    public static final String LIB_ENGINE1_DOOM     = "libgzdoom.so"; // GZDOOM
+    public static final String LIB_ENGINE3_ETW      = "libetl.so"; // ETW
+    public static final String LIB_ENGINE3_REALRTCW = "libRealRTCW.so"; // RealRTCW
+    public static final String LIB_ENGINE_FTEQW     = "libfteqw.so"; // FTEQW
+    public static final String LIB_ENGINE_JA        = "libopenjk_sp.so"; // Jedi Academy
+    public static final String LIB_ENGINE_JO        = "libopenjo_sp.so"; // Jedi Outcast
+    public static final String LIB_ENGINE_SAMTFE    = "libSeriousSamTFE.so"; // Serious Sam First
 
     public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
     public static final String LIB_ENGINE3_REALRTCW_5_0 = "libRealRTCW_5_0.so"; // RealRTCW(5.0)
@@ -180,6 +181,7 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_FTEQW    = "fte.cfg";
     public static final String CONFIG_FILE_JA       = "openjk_sp.cfg";
     public static final String CONFIG_FILE_JO       = "openjo_sp.cfg";
+    public static final String CONFIG_FILE_SAMTFE   = "";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -197,6 +199,7 @@ public final class Q3EGlobals
     public static final String GAME_FTEQW    = "fteqw";
     public static final String GAME_JA       = "openja";
     public static final String GAME_JO       = "openjo";
+    public static final String GAME_SAMTFE   = "samtfe";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -214,6 +217,7 @@ public final class Q3EGlobals
     public static final String GAME_NAME_FTEQW    = "FTEQW";
     public static final String GAME_NAME_JA       = "Jedi Academy";
     public static final String GAME_NAME_JO       = "Jedi Outcast";
+    public static final String GAME_NAME_SAMTFE   = "Serious Sam TFE";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -233,6 +237,7 @@ public final class Q3EGlobals
     public static final String GAME_BASE_FTEQW      = "";
     public static final String GAME_BASE_JA         = "base";
     public static final String GAME_BASE_JO         = "base";
+    public static final String GAME_BASE_SAMTFE     = "";
 
     // game sub directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
@@ -250,6 +255,7 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_FTEQW    = "fteqw";
     public static final String GAME_SUBDIR_JA       = "openja";
     public static final String GAME_SUBDIR_JO       = "openjo";
+    public static final String GAME_SUBDIR_SAMTFE   = "serioussamtfe";
 
     // game type index(ID)
     public static final int GAME_ID_DOOM3    = 0;
@@ -267,6 +273,7 @@ public final class Q3EGlobals
     public static final int GAME_ID_FTEQW    = 12;
     public static final int GAME_ID_JA       = 13;
     public static final int GAME_ID_JO       = 14;
+    public static final int GAME_ID_SAMTFE   = 15;
 
     public enum PatchResource
     {
@@ -407,8 +414,8 @@ public final class Q3EGlobals
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 
-    public static final int[] GZDOOM_GL_VERSIONS = { 0, 330, 420, 430, 450, };
-    public static final String[] QUAKE2_RENDERER_BACKENDS = { "gl1", "gles3", "vk", };
+    public static final int[]    GZDOOM_GL_VERSIONS       = {0, 330, 420, 430, 450,};
+    public static final String[] QUAKE2_RENDERER_BACKENDS = {"gl1", "gles3", "vk",};
 
     public static final int DEFAULT_DEPTH_BITS = 24; // 16 32
 

@@ -90,6 +90,9 @@ public enum Game
 
     // OpenJO
     JO_BASE(Q3EGlobals.GAME_JO, "base", "", "jospgame", "", "base", false, R.string.openjo_base),
+
+    // SamTFE
+    TDM_SAMTFE(Q3EGlobals.GAME_SAMTFE, "", "", "samtfe", "", "", false, "SamTFE"),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

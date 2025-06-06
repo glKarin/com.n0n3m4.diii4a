@@ -1,0 +1,15 @@
+---
+include:
+  - https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/salsa-ci.yml
+  - https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/pipeline-jobs.yml
+
+# Disable tests that currently make no sense for this repo
+variables:
+#  SALSA_CI_DISABLE_APTLY: 1
+#  SALSA_CI_DISABLE_AUTOPKGTEST: 1
+#  SALSA_CI_DISABLE_BLHC: 1
+#  SALSA_CI_DISABLE_LINTIAN: 1
+#  SALSA_CI_DISABLE_PIUPARTS: 1
+   SALSA_CI_DISABLE_REPROTEST: 1
+#  SALSA_CI_DISABLE_BUILD_PACKAGE_ALL: 1
+#  SALSA_CI_DISABLE_BUILD_PACKAGE_ANY: 1

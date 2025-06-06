@@ -1,0 +1,1 @@
+Player files (Player0.plr, Player1.plr etc) are generated automatically in this folder. They are used for identification of players in multiplayer mode. You should not distribute .plr files together with any engine build because it might result in connection errors among network players.

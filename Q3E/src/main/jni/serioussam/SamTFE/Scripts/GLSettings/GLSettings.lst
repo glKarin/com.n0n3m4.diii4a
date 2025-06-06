@@ -1,0 +1,76 @@
+                                                         
+"*Radeon*8800*"       "ATI Radeon 8800"  "ATI-Radeon.ini"
+"*Radeon*8500*"       "ATI Radeon 8500"  "ATI-Radeon.ini"
+"*Radeon*7500*"       "ATI Radeon 7500"  "ATI-Radeon.ini"
+"*Radeon*7200*"       "ATI Radeon 7200"  "ATI-Radeon.ini"
+"*Radeon*7000*"       "ATI Radeon 7000"  "ATI-Radeon.ini"
+"*Radeon*VE*"         "ATI Radeon VE"    "ATI-Radeon.ini"
+"*Radeon*"            "ATI Radeon"       "ATI-Radeon.ini"
+"*R200*"              "ATI Radeon 8500"  "ATI-Radeon.ini"
+"*RV200*"             "ATI Radeon 7500"  "ATI-Radeon.ini"
+"*R100*"              "ATI Radeon 7200"  "ATI-Radeon.ini"
+"*RV100*"             "ATI Radeon 7000"  "ATI-Radeon.ini"
+"*RAGE*128*pro*dual*" "ATI Rage Maxx"    "ATI-Maxx.ini"
+"*RAGE*128*pro*"      "ATI Rage 128 pro" "ATI-Maxx.ini"
+"*RAGE*128*"          "ATI Rage 128"     "ATI-R128.ini"
+"*RAGE*pro*"          "ATI Rage Pro"     "ATI-RPRO.ini"
+"*Fire*GL4*"          "ATI FireGL4"      "ATI-FGL.ini"
+"*Fire*GL3*"          "ATI FireGL3"      "ATI-FGL.ini"
+"*Fire*GL2*"          "ATI FireGL2"      "ATI-FGL.ini"
+"*Fire*GL1*"          "ATI FireGL1"      "ATI-FGL.ini"
+"*Fire*GL*"           "ATI FireGL"       "ATI-FGL.ini"
+
+                       
+"*Voodoo5*"          "3Dfx Voodoo5"         "3Dfx-V5.ini"
+"*Voodoo4*"          "3Dfx Voodoo4"         "3Dfx-V5.ini"
+"*Voodoo3*"          "3Dfx Voodoo3"         "3Dfx-V3.ini"
+"*Voodoo2*"          "3Dfx Voodoo2"         "3Dfx-V2.ini"
+"*Voodoo*Banshee*"   "3Dfx Voodoo Banshee"  "3Dfx-V3.ini"
+"*Voodoo*Graphics*"  "3Dfx Voodoo Graphics" "3Dfx-V1.ini"
+"*Voodoo*"           "3Dfx Voodoo"          "3Dfx-V1.ini"
+
+
+"*Quadro*2*"        "nVidia Quadro2"         "NV-GF.ini"
+"*Quadro*"          "nVidia Quadro"          "NV-GF.ini"
+"*GeForce*256*DDR*" "nVidia GeForce 256 DDR" "NV-GF.ini"
+"*GeForce*256*"     "nVidia GeForce 256"     "NV-GF.ini"
+"*GeForce*2*Ultra*" "nVidia GeForce2 Ultra"  "NV-GF.ini"
+"*GeForce*2*Pro*    "nVidia GeForce2 Pro"    "NV-GF.ini"
+"*GeForce*2*MX*"    "nVidia GeForce2 MX"     "NV-GF.ini"
+"*GeForce*2*"       "nVidia GeForce2"        "NV-GF.ini"
+"*GTS*"             "nVidia GeForce2 GTS"    "NV-GF.ini"
+"*GeForce*3*500*"   "nVidia GeForce3 Ti 500" "NV-GF.ini"
+"*GeForce*3*200*"   "nVidia GeForce3 Ti 200" "NV-GF.ini"
+"*GeForce*3*"       "nVidia GeForce3"        "NV-GF.ini"
+"*TNT2*M64*"        "nVidia RivaTNT2 M64"    "NV-TNT.ini"
+"*TNT2*Vanta*"      "nVidia RivaTNT2 Vanta"  "NV-TNT.ini"
+"*TNT2*"            "nVidia RivaTNT2"        "NV-TNT.ini"
+"*TNT*"             "nVidia RivaTNT"         "NV-TNT.ini"
+
+                                                                        
+"*G550*" "Matrox G550" "MGA-G400.ini"
+"*G450*" "Matrox G450" "MGA-G400.ini"
+"*G400*" "Matrox G400" "MGA-G400.ini"
+"*G200*" "Matrox G200" "MGA-G200.ini"
+
+                                                                         
+"*Savage2000*" "S3 Savage2000" "S3-S2K.ini"
+"*Savage4*"    "S3 Savage4"    "S3-S4.ini"
+"*Savage*"     "S3 Savage"     "S3-S4.ini"
+
+
+"*Intel752*" "Intel i752" "I-i752.ini"
+"*i752*"     "Intel i752" "I-i752.ini"
+"*Intel740*" "Intel i740" "I-i740.ini"
+"*i740*"     "Intel i740" "I-i740.ini"
+
+                                                                       
+"*KYRO 2*"  "PowerVR Kyro2" "PVR-Kyro.ini"
+"*KYRO2*"   "PowerVR Kyro2" "PVR-Kyro.ini"
+"*KYRO II*" "PowerVR Kyro2" "PVR-Kyro.ini"
+"*KYROII*"  "PowerVR Kyro2" "PVR-Kyro.ini"
+"*KYRO*II*" "PowerVR Kyro2" "PVR-Kyro.ini"
+"*KYRO*"    "PowerVR Kyro"  "PVR-Kyro.ini"
+
+
+"*" "unrecognized 3D accelerator" "Default.ini"

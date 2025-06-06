@@ -1,0 +1,12 @@
+[Desktop Entry]
+X-AppImage-Arch=x86_64
+X-AppImage-Version=1.10.6d
+X-AppImage-Name=SeriousSamTSE
+Name=Serious Sam The Second Encounter
+Type=Application
+Comment=Linux port of Serious Sam Classic The Second Encounter
+Exec=serioussamse
+TryExec=serioussamse
+Icon=serioussam
+Categories=Game;ActionGame;Shooter;
+Keywords=serious;sam;first;person;shooter;singleplayer;multiplayer;

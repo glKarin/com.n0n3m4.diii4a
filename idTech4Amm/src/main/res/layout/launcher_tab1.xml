@@ -277,6 +277,11 @@
                         android:id="@+id/rg_fs_jogame"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_samtfegame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
                 </LinearLayout>
             </android.support.v4.widget.NestedScrollView>
 

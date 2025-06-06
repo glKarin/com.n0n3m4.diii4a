@@ -1,0 +1,13 @@
+Description: Global variable to support the content of the demo version of the game
+Forwarded: not-needed
+--- a/SamTFE/Sources/Engine/Engine.h	2024-03-04 19:25:48.961212942 +0300
++++ b/SamTFE/Sources/Engine/Engine.h	2024-03-04 19:51:24.933150308 +0300
+@@ -207,6 +207,8 @@
+ extern ENGINE_API CTString _strLogFile;
+ extern ENGINE_API CTFileName _fnmModLibPath;
+ extern ENGINE_API INDEX sys_iSysPath;
++extern ENGINE_API INDEX sys_iGameDemoMode;
++
+ #ifdef PLATFORM_WIN32
+ //
+ extern ENGINE_API FLOAT _fPlayerFOVAdjuster;

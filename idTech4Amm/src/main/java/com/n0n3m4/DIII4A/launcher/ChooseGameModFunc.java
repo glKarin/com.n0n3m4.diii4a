@@ -111,7 +111,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                     Q3EGlobals.GAME_SUBDIR_REALRTCW,
                     Q3EGlobals.GAME_SUBDIR_FTEQW,
                     Q3EGlobals.GAME_SUBDIR_JA,
-                    Q3EGlobals.GAME_SUBDIR_JO
+                    Q3EGlobals.GAME_SUBDIR_JO,
+                    Q3EGlobals.GAME_SUBDIR_SAMTFE
             ));
         }
 
@@ -184,6 +185,13 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 blackList.add(Q3EGlobals.GAME_BASE_JO);
             else
                 blackList.remove(Q3EGlobals.GAME_BASE_JO);
+        }
+        else if(Q3EUtils.q3ei.isSamTFE)
+        {
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_SAMTFE);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_SAMTFE);
         }
 /*        else if(Q3EUtils.q3ei.isTDM)
         {
@@ -287,6 +295,11 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 if(Q3EGlobals.GAME_BASE_JO.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_JO;
             }
+            else if(Q3EUtils.q3ei.isSamTFE)
+            {
+                if(Q3EGlobals.GAME_BASE_SAMTFE.equals(fileModel.name))
+                    name = Q3EGlobals.GAME_NAME_SAMTFE;
+            }
 /*            else if(Q3EUtils.q3ei.isTDM)
             {
                 if(Q3EGlobals.GAME_BASE_TDM.equals(fileModel.name))
@@ -353,6 +366,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGlobals.GAME_JO:
                         if(!Q3EUtils.q3ei.isJO)
+                            continue;
+                        break;
+                    case Q3EGlobals.GAME_SAMTFE:
+                        if(!Q3EUtils.q3ei.isSamTFE)
                             continue;
                         break;
                     case Q3EGlobals.GAME_DOOM3:

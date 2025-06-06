@@ -76,6 +76,8 @@ public enum GameResourceUrl
 
     JA_BASE(Q3EGlobals.GAME_JA, "base", "", "https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/", 2),
     JO_BASE(Q3EGlobals.GAME_JO, "base", "", "https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/", 2),
+
+    SAMTFE_BASE(Q3EGlobals.GAME_SAMTFE, "", "", "https://store.steampowered.com/app/41050/", 2),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

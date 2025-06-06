@@ -1,0 +1,5 @@
+serioussam (1.10.6d+dfsg-1) unstable; urgency=low
+
+  * Initial debianization. Closes: #1065096
+
+ -- Alexander Pavlov <t.x00100x.t@yandex.ru>  Wed, 28 Feb 2024 20:33:46 +0300

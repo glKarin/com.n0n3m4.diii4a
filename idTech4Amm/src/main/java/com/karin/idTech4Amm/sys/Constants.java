@@ -28,10 +28,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add global illumination rendering for make scene brighter(cvar harm_r_globalIllumination and harm_r_globalIlluminationBrightness) at launcher on DOOM 3/Quake 4/Prey(2006).",
-            "Add built-in bot assets if external assets missing(so only require external aas files, defs/scripts files not required any longer, also extract aas files patch by launcher), add `+set harm_g_botEnableBuiltinAssets 1` to command for enable on DOOM 3/Quake 4.",
-            "Add retro postprocess rendering from RBDOOM-3-BFG 1.6.0(cvar r_renderMode) at launcher on DOOM 3/Quake 4/Prey(2006).",
-            "Fix incorrect shadow rendering on perforated surfaces(cvar r_forceShadowMapsOnAlphaTestedSurfaces) with shadow mapping on DOOM 3.",
+            "Add Serious Sam Classic The First Encounter support, game standalone directory named `serioussamtfe`, more view in `" + TextHelper.GenLinkText("https://github.com/tx00100xt/SeriousSamClassic", "SeriousSamClassic") + "`.",
         };
 	};
 

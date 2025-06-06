@@ -1,0 +1,20 @@
+--- a/SamTFE/Sources/Engine/Engine.h	2024-02-15 19:31:13.859577578 +0300
++++ b/SamTFE/Sources/Engine/Engine.h	2024-02-15 18:03:57.590666776 +0300
+@@ -207,6 +207,7 @@
+ extern ENGINE_API CTString _strLogFile;
+ extern ENGINE_API CTFileName _fnmModLibPath;
+ extern ENGINE_API INDEX sys_iSysPath;
++extern ENGINE_API INDEX sys_iGameDataNotFound;
+ #ifdef PLATFORM_WIN32
+ //
+ extern ENGINE_API FLOAT _fPlayerFOVAdjuster;
+--- a/SamTSE/Sources/Engine/Engine.h	2024-02-15 19:31:13.859577578 +0300
++++ b/SamTSE/Sources/Engine/Engine.h	2024-02-15 18:03:57.590666776 +0300
+@@ -207,6 +207,7 @@
+ extern ENGINE_API CTString _strLogFile;
+ extern ENGINE_API CTFileName _fnmModLibPath;
+ extern ENGINE_API INDEX sys_iSysPath;
++extern ENGINE_API INDEX sys_iGameDataNotFound;
+ #ifdef PLATFORM_WIN32
+ //
+ extern ENGINE_API FLOAT _fPlayerFOVAdjuster;

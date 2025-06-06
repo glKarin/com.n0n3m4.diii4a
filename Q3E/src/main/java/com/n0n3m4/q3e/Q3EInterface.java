@@ -65,6 +65,7 @@ public class Q3EInterface
 	public boolean isFTEQW = false;
 	public boolean isJA = false;
 	public boolean isJO = false;
+	public boolean isSamTFE = false;
 
 	public boolean isD3BFG_Vulkan = false;
 
@@ -135,6 +136,8 @@ public class Q3EInterface
 			return Q3EGlobals.LIB_ENGINE_JA;
 		else if(isJO)
 			return Q3EGlobals.LIB_ENGINE_JO;
+		else if(isSamTFE)
+			return Q3EGlobals.LIB_ENGINE_SAMTFE;
 		else
 			return Q3EGlobals.LIB_ENGINE_ID;
 	}
@@ -213,6 +216,8 @@ public class Q3EInterface
 			return Q3EGlobals.CONFIG_FILE_JA;
 		else if(isJO)
 			return Q3EGlobals.CONFIG_FILE_JO;
+		else if(isSamTFE)
+			return Q3EGlobals.CONFIG_FILE_SAMTFE;
 		else
 			return Q3EGlobals.CONFIG_FILE_DOOM3;
 	}
@@ -247,6 +252,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_JA;
 		else if(isJO)
 			return Q3EGlobals.GAME_JO;
+		else if(isSamTFE)
+			return Q3EGlobals.GAME_SAMTFE;
 		else
 			return Q3EGlobals.GAME_DOOM3;
 	}
@@ -281,6 +288,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_NAME_JA;
 		else if(isJO)
 			return Q3EGlobals.GAME_NAME_JO;
+		else if(isSamTFE)
+			return Q3EGlobals.GAME_NAME_SAMTFE;
 		else
 			return Q3EGlobals.GAME_NAME_DOOM3;
 	}
@@ -315,6 +324,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_BASE_JA;
 		else if(isJO)
 			return Q3EGlobals.GAME_BASE_JO;
+		else if(isSamTFE)
+			return Q3EGlobals.GAME_BASE_SAMTFE;
 		else
 			return Q3EGlobals.GAME_BASE_DOOM3;
 	}
@@ -349,6 +360,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_SUBDIR_JA;
 		else if(isJO)
 			return Q3EGlobals.GAME_SUBDIR_JO;
+		else if(isSamTFE)
+			return Q3EGlobals.GAME_SUBDIR_SAMTFE;
 		else
 			return Q3EGlobals.GAME_SUBDIR_DOOM3;
 	}
@@ -383,6 +396,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_ID_JA;
 		else if(isJO)
 			return Q3EGlobals.GAME_ID_JO;
+		else if(isSamTFE)
+			return Q3EGlobals.GAME_ID_SAMTFE;
 		else
 			return Q3EGlobals.GAME_ID_DOOM3;
 	}
@@ -411,7 +426,7 @@ public class Q3EInterface
 		else if(isD3BFG)
 			Q3EKeyCodes.InitD3BFGKeycodes();
 		else if(isDOOM)
-			Q3EKeyCodes.InitSDLKeycodes();
+			Q3EKeyCodes.InitGZDOOMKeycodes();
 		else if(isETW)
 			Q3EKeyCodes.InitETWKeycodes();
 		else if(isRealRTCW)
@@ -422,6 +437,8 @@ public class Q3EInterface
 			Q3EKeyCodes.InitJKKeycodes();
 		else if(isJO)
 			Q3EKeyCodes.InitJKKeycodes();
+		else if(isSamTFE)
+			Q3EKeyCodes.InitSamTFEKeycodes();
 		else
 			Q3EKeyCodes.InitD3Keycodes();
 	}
@@ -449,7 +466,9 @@ public class Q3EInterface
 			subdatadir = subdir;
 		else if(isTDM
 				|| isDOOM
-				|| isFTEQW)
+				|| isFTEQW
+				|| isSamTFE
+		)
 			subdatadir = subdir;
 		else
 			subdatadir = null;
@@ -495,6 +514,8 @@ public class Q3EInterface
 			SetupJA();
 		else if(Q3EGlobals.GAME_JO.equalsIgnoreCase(name))
 			SetupJO();
+		else if(Q3EGlobals.GAME_SAMTFE.equalsIgnoreCase(name))
+			SetupSamTFE();
 		else
 			SetupDOOM3();
 	}
@@ -525,6 +546,7 @@ public class Q3EInterface
 		isFTEQW = false;
 		isJA = false;
 		isJO = false;
+		isSamTFE = false;
 	}
 
 	public void SetupDOOM3()
@@ -634,6 +656,13 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public void SetupSamTFE()
+	{
+		ResetGameState();
+		isSamTFE = true;
+		SetupGameConfig();
+	}
+
 	public void SetupGameVersion(String version)
 	{
 		if("".equals(version))
@@ -711,6 +740,8 @@ public class Q3EInterface
 			return "fs_game";
 		else if(isJO)
 			return "fs_game";
+		else if(isSamTFE)
+			return "";
 		else
 			return "fs_game";
 	}
@@ -723,6 +754,8 @@ public class Q3EInterface
 			return "fs_game_base";
 		else if(isFTEQW)
 			return "game";
+		else if(isSamTFE)
+			return "";
 		else
 			return "fs_game_base";
 	}
@@ -829,12 +862,12 @@ public class Q3EInterface
 
     public boolean IsInitGame()
 	{
-		return isD3 || isD3BFG || isQ2 || isQ1 || isQ3 || isRTCW || isTDM || isDOOM || isETW || isRealRTCW || isFTEQW || isJA || isJO;
+		return isD3 || isD3BFG || isQ2 || isQ1 || isQ3 || isRTCW || isTDM || isDOOM || isETW || isRealRTCW || isFTEQW || isJA || isJO || isSamTFE;
 	}
 
 	public boolean IsStandaloneGame()
 	{
-		return isTDM || isDOOM || isFTEQW;
+		return isTDM || isDOOM || isFTEQW || isSamTFE;
 	}
 
 	public static boolean IsStandaloneGame(String game)
@@ -842,6 +875,7 @@ public class Q3EInterface
 		return Q3EGlobals.GAME_TDM.equalsIgnoreCase(game)
 				|| Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(game)
 				|| Q3EGlobals.GAME_FTEQW.equalsIgnoreCase(game)
+				|| Q3EGlobals.GAME_SAMTFE.equalsIgnoreCase(game)
 				;
 	}
 
@@ -875,6 +909,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_SUBDIR_JA;
 		else if(Q3EGlobals.GAME_JO.equalsIgnoreCase(name))
 			return Q3EGlobals.GAME_SUBDIR_JO;
+		else if(Q3EGlobals.GAME_SAMTFE.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_SUBDIR_SAMTFE;
 		else
 			return Q3EGlobals.GAME_SUBDIR_DOOM3;
 	}
@@ -909,6 +945,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_ja_fs_game;
 		else if(isJO)
 			return Q3EPreference.pref_harm_jo_fs_game;
+		else if(isSamTFE)
+			return Q3EPreference.pref_harm_samtfe_fs_game;
 		else
 			return Q3EPreference.pref_harm_fs_game;
 	}
@@ -943,6 +981,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_ja_user_mod;
 		else if(isJO)
 			return Q3EPreference.pref_harm_jo_user_mod;
+		else if(isSamTFE)
+			return Q3EPreference.pref_harm_samtfe_user_mod;
 		else
 			return Q3EPreference.pref_harm_user_mod;
 	}
@@ -977,6 +1017,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_ja_game_mod;
 		else if(isJO)
 			return Q3EPreference.pref_harm_jo_game_mod;
+		else if(isSamTFE)
+			return Q3EPreference.pref_harm_samtfe_game_mod;
 		else
 			return Q3EPreference.pref_harm_game_mod;
 	}
@@ -1011,6 +1053,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_ja_game_lib;
 		else if(isJO)
 			return Q3EPreference.pref_harm_jo_game_lib;
+		else if(isSamTFE)
+			return Q3EPreference.pref_harm_samtfe_game_lib;
 		else
 			return Q3EPreference.pref_harm_game_lib;
 	}
@@ -1045,6 +1089,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_params_ja;
 		else if(isJO)
 			return Q3EPreference.pref_params_jo;
+		else if(isSamTFE)
+			return Q3EPreference.pref_params_samtfe;
 		else
 			return Q3EPreference.pref_params;
 	}
@@ -1079,6 +1125,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_ja_command_record;
 		else if(isJO)
 			return Q3EPreference.pref_harm_jo_command_record;
+		else if(isSamTFE)
+			return Q3EPreference.pref_harm_samtfe_command_record;
 		else
 			return Q3EPreference.pref_harm_command_record;
 	}
@@ -1145,6 +1193,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_ID_JA;
 		else if(Q3EGlobals.GAME_JO.equalsIgnoreCase(name))
 			return Q3EGlobals.GAME_ID_JO;
+		else if(Q3EGlobals.GAME_SAMTFE.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_ID_SAMTFE;
 		else
 			return Q3EGlobals.GAME_ID_DOOM3;
 	}
@@ -1200,6 +1250,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_ja_fs_game;
 		else if(Q3EGlobals.GAME_JO.equalsIgnoreCase(name))
 			return Q3EPreference.pref_harm_jo_fs_game;
+		else if(Q3EGlobals.GAME_SAMTFE.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_samtfe_fs_game;
 		else
 			return Q3EPreference.pref_harm_fs_game;
 	}
@@ -1246,6 +1298,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_ja_user_mod;
 		else if(Q3EGlobals.GAME_JO.equalsIgnoreCase(name))
 			return Q3EPreference.pref_harm_jo_user_mod;
+		else if(Q3EGlobals.GAME_SAMTFE.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_samtfe_user_mod;
 		else
 			return Q3EPreference.pref_harm_user_mod;
 	}
@@ -1280,6 +1334,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_BASE_JA;
 		else if(Q3EGlobals.GAME_JO.equalsIgnoreCase(name))
 			return Q3EGlobals.GAME_BASE_JO;
+		else if(Q3EGlobals.GAME_SAMTFE.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_SAMTFE;
 		else
 			return Q3EGlobals.GAME_BASE_DOOM3;
 	}

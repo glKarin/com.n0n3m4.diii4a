@@ -1,0 +1,66 @@
+Description: Added support for the content of the demo version of the game.
+Forwarded: not-needed
+--- a/SamTFE/Sources/SeriousSam/Menu.cpp	2024-03-04 19:25:49.384548006 +0300
++++ b/SamTFE/Sources/SeriousSam/Menu.cpp	2024-03-04 20:49:55.413381329 +0300
+@@ -50,6 +50,10 @@
+ //##############################################################################################################################3
+ //##############################################################################################################################3
+ //##############################################################################################################################3
++#ifdef PLATFORM_UNIX
++extern INDEX sys_iGameDemoMode;
++#endif
++
+ INDEX _iLocalPlayer = -1;
+ BOOL  _bPlayerMenuFromSinglePlayer = FALSE;
+ 
+@@ -2294,8 +2298,18 @@
+     _toLogoMenuA.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256a_demo.tex"));
+     _toLogoMenuB.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256b_demo.tex"));
+ #else
++  #ifdef PLATFORM_UNIX
++  if(sys_iGameDemoMode == 1) {
++    _toLogoMenuA.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256a_demo.tex"));
++    _toLogoMenuB.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256b_demo.tex"));
++  } else {
++    _toLogoMenuA.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256a.tex"));
++    _toLogoMenuB.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256b.tex"));
++  }
++  #else
+     _toLogoMenuA.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256a.tex"));
+     _toLogoMenuB.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256b.tex"));
++  #endif
+ #endif
+   }
+   catch (const char *strError) {
+--- a/SamTSE/Sources/SeriousSam/Menu.cpp	2024-03-04 19:25:49.384548006 +0300
++++ b/SamTSE/Sources/SeriousSam/Menu.cpp	2024-03-04 20:49:55.413381329 +0300
+@@ -50,6 +50,10 @@
+ //##############################################################################################################################3
+ //##############################################################################################################################3
+ //##############################################################################################################################3
++#ifdef PLATFORM_UNIX
++extern INDEX sys_iGameDemoMode;
++#endif
++
+ INDEX _iLocalPlayer = -1;
+ BOOL  _bPlayerMenuFromSinglePlayer = FALSE;
+ 
+@@ -2294,8 +2298,18 @@
+     _toLogoMenuA.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256a_demo.tex"));
+     _toLogoMenuB.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256b_demo.tex"));
+ #else
++  #ifdef PLATFORM_UNIX
++  if(sys_iGameDemoMode == 1) {
++    _toLogoMenuA.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256a_demo.tex"));
++    _toLogoMenuB.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256b_demo.tex"));
++  } else {
++    _toLogoMenuA.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256a.tex"));
++    _toLogoMenuB.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256b.tex"));
++  }
++  #else
+     _toLogoMenuA.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256a.tex"));
+     _toLogoMenuB.SetData_t(  CTFILENAME( "Textures\\Logo\\sam_menulogo256b.tex"));
++  #endif
+ #endif
+   }
+   catch (const char *strError) {

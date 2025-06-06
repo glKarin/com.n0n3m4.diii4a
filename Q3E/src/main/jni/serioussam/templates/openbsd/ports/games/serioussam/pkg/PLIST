@@ -1,0 +1,39 @@
+@bin bin/serioussam
+@bin bin/serioussam-ded
+@bin bin/serioussam-mkfont
+@bin bin/serioussamse
+@bin bin/serioussamse-ded
+@bin bin/serioussamse-mkfont
+@lib lib/libEngine.so.${LIBEngine_VERSION}
+@lib lib/libEngineMP.so.${LIBEngineMP_VERSION}
+lib/serioussam/
+@so lib/serioussam/libEntities.so
+@so lib/serioussam/libGame.so
+@so lib/serioussam/libShaders.so
+@so lib/serioussam/libamp11lib.so
+lib/serioussamse/
+@so lib/serioussamse/libEntitiesMP.so
+@so lib/serioussamse/libGameMP.so
+@so lib/serioussamse/libShaders.so
+@so lib/serioussamse/libamp11lib.so
+@man man/man1/serioussam.1
+@man man/man1/serioussamclassic.1
+share/applications/serioussam.desktop
+share/applications/serioussamse.desktop
+share/doc/pkg-readmes/${PKGSTEM}
+share/icons/hicolor/128x128/apps/serioussam.png
+share/icons/hicolor/128x128/apps/serioussamse.png
+share/icons/hicolor/16x16/apps/serioussam.png
+share/icons/hicolor/16x16/apps/serioussamse.png
+share/icons/hicolor/32x32/apps/serioussam.png
+share/icons/hicolor/32x32/apps/serioussamse.png
+share/icons/hicolor/48x48/apps/serioussam.png
+share/icons/hicolor/48x48/apps/serioussamse.png
+share/icons/hicolor/64x64/apps/serioussam.png
+share/icons/hicolor/64x64/apps/serioussamse.png
+share/serioussam/
+share/serioussam/SE1_10b.gro
+share/serioussamse/
+share/serioussamse/SE1_10b.gro
+@tag update-desktop-database
+@tag gtk-update-icon-cache %D/share/icons/hicolor

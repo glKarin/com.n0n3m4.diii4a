@@ -1,0 +1,1353 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build-alpine-x86:
+    name: Alpine ${{ matrix.Configuration }} ${{ matrix.Platform }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [x86]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install latest stable Alpine Linux
+      uses: jirutka/setup-alpine@master
+      with:
+        arch: ${{ matrix.Platform }}
+        branch: 'latest-stable'
+        packages: build-base cmake bison flex nasm xz sed sdl2-dev zlib-dev libogg-dev libvorbis-dev vulkan-loader vulkan-loader-dev vulkan-headers
+
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+         format: "YYYYMMDD"
+
+    - name: Show current date
+      run: |
+        echo "${{ steps.date.outputs.time }}"
+
+    - name: Run Prepare
+      shell: alpine.sh {0}
+      run: |
+          cd ${{github.workspace}}
+          find . -name "CMakeLists.txt" -exec sed -i 's/-march=native/-mtune=generic/g' {} +
+          mkdir x32 && mkdir x32/SamTFE && mkdir x32/SamTFE/Mods && mkdir x32/SamTFE/Mods/XPLUS
+          mkdir x32/SamTSE && mkdir x32/SamTSE/Mods && mkdir x32/SamTSE/Mods/XPLUS
+
+    - name: Run Build
+      shell: alpine.sh {0}
+      run: |
+          cd ${{github.workspace}}
+          cmake -B ${{github.workspace}}/build-x86 -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }} -DCMAKE_C_FLAGS=-mmmx -DCMAKE_CXX_FLAGS=-mmmx -DUSE_I386_NASM_ASM=TRUE
+          cd ${{github.workspace}}/build-x86
+          make -j$(nproc || echo 4)
+          make install
+          mv -f ${{github.workspace}}/SamTFE/Bin ${{github.workspace}}/x32/SamTFE
+          mv -f ${{github.workspace}}/SamTSE/Bin ${{github.workspace}}/x32/SamTSE
+    - name: Run Build XPLUS
+      shell: alpine.sh {0}
+      run: |
+          cd ${{github.workspace}}
+          cmake -B ${{github.workspace}}/build-x86-xplus -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }} -DCMAKE_C_FLAGS=-mmmx -DCMAKE_CXX_FLAGS=-mmmx -DUSE_I386_NASM_ASM=TRUE -DXPLUS=TRUE
+          cd ${{github.workspace}}/build-x86-xplus
+          make -j$(nproc || echo 4)
+          make install
+          mv -f ${{github.workspace}}/SamTFE/Mods/XPLUS/Bin ${{github.workspace}}/x32/SamTFE/Mods/XPLUS
+          mv -f ${{github.workspace}}/SamTSE/Mods/XPLUS/Bin ${{github.workspace}}/x32/SamTSE/Mods/XPLUS
+          echo "*** Create archive ***"
+          cd ${{github.workspace}}
+          cp -fr SamTFE/SE1_10b.gro x32/SamTFE
+          cp -fr SamTFE/ModEXT.txt x32/SamTFE
+          cp -fr SamTSE/SE1_10b.gro x32/SamTSE
+          cp -fr SamTSE/ModEXT.txt x32/SamTSE
+          tar -cJpvf SeriousSamClassic-${{ steps.date.outputs.time }}-alpine-x86-bin.tar.xz x32
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SeriousSamClassic-${{ steps.date.outputs.time }}-alpine-x86-bin.tar.xz
+        path: SeriousSamClassic-${{ steps.date.outputs.time }}-alpine-x86-bin.tar.xz
+
+  build-alpine-64:
+    name: Alpine ${{ matrix.Configuration }} ${{ matrix.Platform }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [x86_64]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install latest stable Alpine Linux
+      uses: jirutka/setup-alpine@master
+      with:
+        arch: ${{ matrix.Platform }}
+        branch: 'latest-stable'
+        packages: build-base cmake bison flex nasm xz sed sdl2-dev zlib-dev libogg-dev libvorbis-dev vulkan-loader vulkan-loader-dev vulkan-headers
+
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+         format: "YYYYMMDD"
+
+    - name: Show current date
+      run: |
+        echo "${{ steps.date.outputs.time }}"
+ 
+    - name: Run Prepare
+      shell: alpine.sh {0}
+      run: |
+          cd ${{github.workspace}}
+          find . -name "CMakeLists.txt" -exec sed -i 's/-march=native/-mtune=generic/g' {} +
+          mkdir x64 && mkdir x64/SamTFE && mkdir x64/SamTFE/Mods && mkdir x64/SamTFE/Mods/XPLUS
+          mkdir x64/SamTSE && mkdir x64/SamTSE/Mods && mkdir x64/SamTSE/Mods/XPLUS
+
+    - name: Run Build
+      shell: alpine.sh {0}
+      run: |
+          cd ${{github.workspace}}
+          CFLAGS="-w" CXXFLAGS="-w" cmake -B ${{github.workspace}}/build-x64 -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }}
+          cd ${{github.workspace}}/build-x64
+          make -j$(nproc || echo 4)
+          make install
+          mv -f ${{github.workspace}}/SamTFE/Bin ${{github.workspace}}/x64/SamTFE
+          mv -f ${{github.workspace}}/SamTSE/Bin ${{github.workspace}}/x64/SamTSE
+
+    - name: Run Build XPLUS
+      shell: alpine.sh {0}
+      run: |
+          cd ${{github.workspace}}
+          CFLAGS="-w" CXXFLAGS="-w" cmake -B ${{github.workspace}}/build-x64-xplus -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }} -DXPLUS=TRUE
+          cd ${{github.workspace}}/build-x64-xplus
+          make -j$(nproc || echo 4)
+          make install
+          mv -f ${{github.workspace}}/SamTFE/Mods/XPLUS/Bin ${{github.workspace}}/x64/SamTFE/Mods/XPLUS
+          mv -f ${{github.workspace}}/SamTSE/Mods/XPLUS/Bin ${{github.workspace}}/x64/SamTSE/Mods/XPLUS
+          echo "*** Create archive ***"
+          cd ${{github.workspace}}
+          cp -fr SamTFE/SE1_10b.gro x64/SamTFE
+          cp -fr SamTFE/ModEXT.txt x64/SamTFE
+          cp -fr SamTSE/SE1_10b.gro x64/SamTSE
+          cp -fr SamTSE/ModEXT.txt x64/SamTSE
+          tar -cJpvf SeriousSamClassic-${{ steps.date.outputs.time }}-alpine-x86_64-bin.tar.xz x64
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SeriousSamClassic-${{ steps.date.outputs.time }}-alpine-x86_64-bin.tar.xz
+        path: SeriousSamClassic-${{ steps.date.outputs.time }}-alpine-x86_64-bin.tar.xz
+
+  build-ubuntu-x64:
+    name: Ubuntu ${{ matrix.Configuration }} ${{ matrix.Platform }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [x64]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install packages
+      run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev &&
+          sudo apt-get install -qq -y bison flex zlib1g-dev libxxhash-dev &&
+          sudo apt-get install libvulkan1 libvulkan-dev vulkan-validationlayers vulkan-validationlayers-dev
+
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+         format: "YYYYMMDD"
+
+    - name: Show current date
+      run: |
+        echo "${{ steps.date.outputs.time }}"
+    - name: Prepare
+      run: |
+          cd ${{github.workspace}}
+          find . -name "CMakeLists.txt" -exec sed -i 's/-march=native/-mtune=generic/g' {} +
+          mkdir {x64,x64/SamTFE,x64/SamTFE/Mods,x64/SamTFE/Mods/XPLUS,x64/SamTSE,x64/SamTSE/Mods,x64/SamTSE/Mods/XPLUS,}
+    - name: Run Build
+      run: |
+          cd ${{github.workspace}}
+          cmake -B ${{github.workspace}}/build-x64 -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }}
+          cd ${{github.workspace}}/build-x64
+          make -j$(nproc || echo 4)
+          make install
+          mv -f ${{github.workspace}}/SamTFE/Bin ${{github.workspace}}/x64/SamTFE
+          mv -f ${{github.workspace}}/SamTSE/Bin ${{github.workspace}}/x64/SamTSE
+
+    - name: Run Build XPLUS
+      run: |
+          cd ${{github.workspace}}
+          cmake -B ${{github.workspace}}/build-x64-xplus -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }} -DXPLUS=TRUE
+          cd ${{github.workspace}}/build-x64-xplus
+          make -j$(nproc || echo 4)
+          make install
+          mv -f ${{github.workspace}}/SamTFE/Mods/XPLUS/Bin ${{github.workspace}}/x64/SamTFE/Mods/XPLUS
+          mv -f ${{github.workspace}}/SamTSE/Mods/XPLUS/Bin ${{github.workspace}}/x64/SamTSE/Mods/XPLUS
+          echo "*** Create archive ***"
+          cd ${{github.workspace}}
+          cp -fr {SamTFE/SE1_10b.gro,SamTFE/ModEXT.txt} x64/SamTFE
+          cp -fr {SamTSE/SE1_10b.gro,SamTSE/ModEXT.txt} x64/SamTSE
+          tar -cJpvf SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-amd64-bin.tar.xz x64
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-amd64-bin.tar.xz
+        path: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-amd64-bin.tar.xz
+
+  build-windows-x86:
+    name: Windows ${{ matrix.Configuration }} ${{ matrix.Platform }}
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [Win32]
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: microsoft/setup-msbuild@v2
+      with:
+        vs-version: '14.0'
+
+    - name: Setup Vulkan
+      run: |
+          $ver = 1.3.290.0
+          echo Version $ver
+          $ProgressPreference = 'SilentlyContinue'
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.3.290.0/windows/VulkanSDK-1.3.290.0-Installer.exe" -OutFile VulkanSDK.exe
+          echo Downloaded
+          .\VulkanSDK.exe --root C:\VulkanSDK  --accept-licenses --default-answer --confirm-command install com.lunarg.vulkan.32bit
+
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+         format: "YYYYMMDD"
+
+    - name: Show current date
+      run: |
+        echo "${{ steps.date.outputs.time }}"
+    - name: MS Build SamTFE XPLUS
+      working-directory: SamTFE\Sources
+      run: |
+         echo "*** Prepare sources and build SamTFE XPLUS ***"
+         del Entities\PlayerWeapons.es
+         copy Entities\PlayerWeaponsHD.es Entities\PlayerWeapons.es
+         msbuild /m /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTFE.sln
+         echo "*** Prepare directories ***"
+         cd ${{github.workspace}}
+         mkdir x32 && mkdir x32\SamTFE && mkdir x32\SamTFE\Bin && mkdir x32\SamTFE\Mods\XPLUS && mkdir x32\SamTFE\Mods\XPLUS\Bin
+         echo "*** Copy SamTFE XPLUS Libraries ***"
+         copy SamTFE\Bin\Entities.dll x32\SamTFE\Mods\XPLUS\Bin
+         copy SamTFE\Bin\Game.dll x32\SamTFE\Mods\XPLUS\Bin
+         del SamTFE\Bin\*.*
+
+    - name: MS Build SamTFE
+      working-directory: SamTFE\Sources
+      run: |
+         echo "*** Prepare sources and clean && build SamTFE ***"
+         del Entities\PlayerWeapons.es
+         copy Entities\PlayerWeapons_old.es Entities\PlayerWeapons.es
+         msbuild /t:Clean /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTFE.sln
+         msbuild /m /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTFE.sln
+         echo "*** Copy SamTFE Libraries and Executables ***"
+         cd ${{github.workspace}}
+         del SamTFE\Bin\*.lib
+         del SamTFE\Bin\*.map
+         copy SamTFE\Bin\*.* x32\SamTFE\Bin
+    - name: MS Build SamTSE XPLUS
+      working-directory: SamTSE\Sources
+      run: |
+         echo "*** Prepare sources and build SamTSE XPLUS ***"
+         del Entities\PlayerWeapons.es
+         copy Entities\PlayerWeaponsHD.es Entities\PlayerWeapons.es
+         msbuild /m /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTSE.sln
+         echo "*** Prepare directories ***"
+         cd ${{github.workspace}}
+         mkdir x32\SamTSE && mkdir x32\SamTSE\Bin && mkdir x32\SamTSE\Mods && mkdir x32\SamTSE\Mods\XPLUS && mkdir x32\SamTSE\Mods\XPLUS\Bin
+         echo "*** Copy SamTSE XPLUS Libraries ***"
+         copy SamTSE\Bin\EntitiesMP.dll x32\SamTSE\Mods\XPLUS\Bin
+         copy SamTSE\Bin\GameMP.dll x32\SamTSE\Mods\XPLUS\Bin
+         del SamTSE\Bin\*.*
+
+    - name: MS Build SamTSE
+      working-directory: SamTSE\Sources
+      run: |
+         echo "*** Prepare sources and clean && build SamTSE ***"
+         del Entities\PlayerWeapons.es
+         copy Entities\PlayerWeapons_old.es Entities\PlayerWeapons.es 
+         msbuild /t:Clean /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTSE.sln
+         msbuild /m /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTSE.sln
+         echo "*** Copy SamSFE Libraries and Executables ***"
+         cd ${{github.workspace}}
+         del SamTSE\Bin\*.lib
+         del SamTSE\Bin\*.map
+         copy SamTSE\Bin\*.* x32\SamTSE\Bin
+         echo "*** Copy Data files ***"
+         copy SamTFE\SE1_10b.gro x32\SamTFE
+         copy SamTFE\ModEXT.txt x32\SamTFE
+         copy SamTSE\SE1_10b.gro x32\SamTSE
+         copy SamTSE\ModEXT.txt x32\SamTSE
+         echo "*** Create archive ***"
+         7z a -mx=9 SeriousSamClassic-${{ steps.date.outputs.time }}-win32-bin.7z x32
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SeriousSamClassic-${{ steps.date.outputs.time }}-win32-bin.7z
+        path: SeriousSamClassic-${{ steps.date.outputs.time }}-win32-bin.7z
+
+  build-windows-x64:
+    name: Windows ${{ matrix.Configuration }} ${{ matrix.Platform }}
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [x64]
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: microsoft/setup-msbuild@v2
+      with:
+        vs-version: '14.0'
+
+    - name: Setup Vulkan
+      run: |
+          $ver = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
+          echo Version $ver
+          $ProgressPreference = 'SilentlyContinue'
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/$ver/windows/VulkanSDK-$ver-Installer.exe" -OutFile VulkanSDK.exe
+          echo Downloaded
+          .\VulkanSDK.exe --root C:\VulkanSDK  --accept-licenses --default-answer --confirm-command install
+
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+         format: "YYYYMMDD"
+
+    - name: Show current date
+      run: |
+        echo "${{ steps.date.outputs.time }}"
+    - name: MS Build SamTFE XPLUS
+      working-directory: SamTFE\Sources
+      run: |
+         echo "*** Prepare sources and build SamTFE XPLUS ***"
+         del Entities\PlayerWeapons.es
+         copy Entities\PlayerWeaponsHD.es Entities\PlayerWeapons.es
+         msbuild /m /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTFE.sln
+         echo "*** Prepare directories ***"
+         cd ${{github.workspace}}
+         mkdir x64 && mkdir x64\SamTFE && mkdir x64\SamTFE\Bin && mkdir x64\SamTFE\Mods && mkdir x64\SamTFE\Mods\XPLUS && mkdir x64\SamTFE\Mods\XPLUS\Bin
+         echo "*** Copy SamTFE XPLUS Libraries ***"
+         copy SamTFE\Bin\Entities.dll x64\SamTFE\Mods\XPLUS\Bin
+         copy SamTFE\Bin\Game.dll x64\SamTFE\Mods\XPLUS\Bin
+         del SamTFE\Bin\*.*
+
+    - name: MS Build SamTFE
+      working-directory: SamTFE\Sources
+      run: |
+         echo "*** Prepare sources and clean && build SamTFE ***"
+         del Entities\PlayerWeapons.es
+         copy Entities\PlayerWeapons_old.es Entities\PlayerWeapons.es
+         msbuild /t:Clean /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTFE.sln
+         msbuild /m /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTFE.sln
+         echo "*** Copy SamTFE Libraries and Executables ***"
+         cd ${{github.workspace}}
+         del SamTFE\Bin\*.lib
+         del SamTFE\Bin\*.map
+         copy SamTFE\Bin\*.* x64\SamTFE\Bin
+
+    - name: MS Build SamTSE XPLUS
+      working-directory: SamTSE\Sources
+      run: |
+         echo "*** Prepare sources and build SamTSE XPLUS ***"
+         del EntitiesMP\PlayerWeapons.es
+         copy EntitiesMP\PlayerWeaponsHD.es EntitiesMP\PlayerWeapons.es
+         msbuild /m /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTSE.sln
+         echo "*** Prepare directories ***"
+         cd ${{github.workspace}}
+         mkdir x64\SamTSE && mkdir x64\SamTSE\Bin && mkdir x64\SamTSE\Mods && mkdir x64\SamTSE\Mods\XPLUS && mkdir x64\SamTSE\Mods\XPLUS\Bin
+         echo "*** Copy SamTSE XPLUS Libraries ***"
+         copy SamTSE\Bin\EntitiesMP.dll x64\SamTSE\Mods\XPLUS\Bin
+         copy SamTSE\Bin\GameMP.dll x64\SamTSE\Mods\XPLUS\Bin
+         del SamTSE\Bin\*.*
+
+    - name: MS Build SamTSE
+      working-directory: SamTSE\Sources
+      run: |
+         echo "*** Prepare sources and clean && build SamTSE ***"
+         del EntitiesMP\PlayerWeapons.es
+         copy EntitiesMP\PlayerWeapons_old.es EntitiesMP\PlayerWeapons.es
+         msbuild /t:Clean /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTSE.sln
+         msbuild /m /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" SamTSE.sln
+         echo "*** Copy SamTSE Libraries and Executables ***"
+         cd ${{github.workspace}}
+         del SamTSE\Bin\*.lib
+         del SamTSE\Bin\*.map
+         copy SamTSE\Bin\*.* x64\SamTSE\Bin
+         echo "*** Copy Data files ***"
+         copy SamTFE\SE1_10b.gro x64\SamTFE
+         copy SamTFE\ModEXT.txt x64\SamTFE
+         copy SamTSE\SE1_10b.gro x64\SamTSE
+         copy SamTSE\ModEXT.txt x64\SamTSE
+         echo "*** Create archive ***"
+         7z a -mx=9 SeriousSamClassic-${{ steps.date.outputs.time }}-win64-bin.7z x64
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SeriousSamClassic-${{ steps.date.outputs.time }}-win64-bin.7z
+        path: SeriousSamClassic-${{ steps.date.outputs.time }}-win64-bin.7z
+
+  build-freebsd-x64:
+    name: FreeBSD ${{ matrix.Configuration }} ${{ matrix.Platform }}
+    runs-on: macos-13
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [x64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get current date
+        id: date
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+          format: "YYYYMMDD"
+
+      - name: Show current date
+        run: |
+          echo "${{ steps.date.outputs.time }}"
+
+      - name: Build on FreeBSD
+        uses: cross-platform-actions/action@v0.23.0
+        with:
+          operating_system: freebsd
+          architecture: x86-64
+          version: '13.1'
+          shell: bash
+          run: |
+            uname -a
+            sudo pkg install -y bison flex sdl2 libogg libvorbis zlib-ng cmake vulkan-headers
+            cd ${{github.workspace}}
+            mkdir {x64,x64/SamTFE,x64/SamTFE/Mods,x64/SamTFE/Mods/XPLUS,x64/SamTSE,x64/SamTSE/Mods,x64/SamTSE/Mods/XPLUS}
+            echo "*** Build ***"
+            cd ${{github.workspace}}/SamTFE/Sources
+            awk '{sub("-march=native","-mtune=generic")}1' CMakeLists.txt > CmakeTemp.txt && mv CmakeTemp.txt CMakeLists.txt
+            cat CMakeLists.txt | grep mtune
+            cd ${{github.workspace}}/SamTSE/Sources
+            awk '{sub("-march=native","-mtune=generic")}1' CMakeLists.txt > CmakeTemp.txt && mv CmakeTemp.txt CMakeLists.txt
+            cat CMakeLists.txt | grep mtune
+            cd ${{github.workspace}}
+            cmake -B ${{github.workspace}}/build-x64 -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }}
+            cd ${{github.workspace}}/build-x64
+            make -j$(sysctl -n hw.ncpu || echo 4)
+            make install
+            cd ${{github.workspace}}
+            cmake -B ${{github.workspace}}/build-x64-xplus -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }} -DXPLUS=TRUE
+            cd ${{github.workspace}}/build-x64-xplus
+            make -j$(sysctl -n hw.ncpu || echo 4)
+            make install
+            echo "*** Prepare Archive ***"
+            cd ${{github.workspace}}
+            mv -f ${{github.workspace}}/SamTFE/Bin ${{github.workspace}}/x64/SamTFE
+            mv -f ${{github.workspace}}/SamTSE/Bin ${{github.workspace}}/x64/SamTSE
+            mv -f ${{github.workspace}}/SamTFE/Mods/XPLUS/Bin ${{github.workspace}}/x64/SamTFE/Mods/XPLUS
+            mv -f ${{github.workspace}}/SamTSE/Mods/XPLUS/Bin ${{github.workspace}}/x64/SamTSE/Mods/XPLUS 
+            cp -vfr {SamTFE/SE1_10b.gro,SamTFE/ModEXT.txt} x64/SamTFE
+            cp -vfr {SamTSE/SE1_10b.gro,SamTSE/ModEXT.txt} x64/SamTSE
+            echo "*** Create archive ***"
+            XZ_DEFAULTS="-T 10" tar --use-compress-program=xz -cpvf SeriousSamClassic-${{ steps.date.outputs.time }}-bsd-amd64-bin.tar.xz x64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeriousSamClassic-${{ steps.date.outputs.time }}-bsd-amd64-bin.tar.xz
+          path: SeriousSamClassic-${{ steps.date.outputs.time }}-bsd-amd64-bin.tar.xz
+
+  build-macos-x64:
+    name: macOS ${{ matrix.Configuration }} ${{ matrix.Platform }}
+    runs-on: macos-13
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [x64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get current date
+        id: date
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+          format: "YYYYMMDD"
+
+      - name: Show current date
+        run: |
+          echo "${{ steps.date.outputs.time }}"
+
+      - name: Build on macOS
+        run: |
+            uname -a
+            brew install bison flex sdl2 libogg libvorbis zlib-ng cmake vulkan-loader vulkan-headers
+            cd ${{github.workspace}}
+            mkdir {x64,x64/SamTFE,x64/SamTFE/Mods,x64/SamTFE/Mods/XPLUS,x64/SamTFE/Mods/XPLUS/Bin,x64/SamTFE/Bin,x64/SamTSE,x64/SamTSE/Mods,x64/SamTSE/Mods/XPLUS,x64/SamTSE/Mods/XPLUS/Bin,x64/SamTSE/Bin}
+            echo "*** Build SamTFE ***"
+            cd ${{github.workspace}}/SamTFE/Sources
+            awk '{sub("-march=native","-mtune=generic")}1' CMakeLists.txt > CmakeTemp.txt && mv CmakeTemp.txt CMakeLists.txt
+            cat CMakeLists.txt | grep mtune
+            cmake -B ${{github.workspace}}/SamTFE/Sources/build-x64
+            cd ${{github.workspace}}/SamTFE/Sources/build-x64
+            make -j$(sysctl -n hw.ncpu || echo 4)
+            cd ${{github.workspace}}/SamTFE/Sources
+            cmake -B ${{github.workspace}}/SamTFE/Sources/build-x64-xplus -DXPLUS=TRUE
+            cd ${{github.workspace}}/SamTFE/Sources/build-x64-xplus
+            make -j$(sysctl -n hw.ncpu || echo 4)
+            echo "*** Build SamTSE ***"
+            cd ${{github.workspace}}/SamTSE/Sources
+            awk '{sub("-march=native","-mtune=generic")}1' CMakeLists.txt > CmakeTemp.txt && mv CmakeTemp.txt CMakeLists.txt
+            cat CMakeLists.txt | grep mtune
+            cmake -B ${{github.workspace}}/SamTSE/Sources/build-x64
+            cd ${{github.workspace}}/SamTSE/Sources/build-x64
+            make -j$(sysctl -n hw.ncpu || echo 4)
+            cd ${{github.workspace}}/SamTSE/Sources
+            cmake -B ${{github.workspace}}/SamTSE/Sources/build-x64-xplus  -DXPLUS=TRUE
+            cd ${{github.workspace}}/SamTSE/Sources/build-x64-xplus
+            make -j$(sysctl -n hw.ncpu || echo 4)
+            echo "*** Prepare Archive ***"
+            cd ${{github.workspace}}
+            cp -vfr SamTFE/Sources/build-x64/Debug/*.dylib x64/SamTFE/Bin
+            cp -vfr SamTFE/Sources/build-x64/{DedicatedServer,TEXConv,MakeFONT,SeriousSam} x64/SamTFE/Bin
+            cp -vfr SamTFE/Sources/build-x64-xplus/Debug/libEntities.dylib x64/SamTFE/Mods/XPLUS/Bin
+            cp -vfr SamTFE/Sources/build-x64-xplus/Debug/libGame.dylib x64/SamTFE/Mods/XPLUS/Bin
+            cp -vfr SamTSE/Sources/build-x64/Debug/*.dylib x64/SamTSE/Bin
+            cp -vfr SamTSE/Sources/build-x64/{DedicatedServer,TEXConv,MakeFONT,SeriousSam} x64/SamTSE/Bin
+            cp -vfr SamTSE/Sources/build-x64-xplus/Debug/libEntitiesMP.dylib x64/SamTSE/Mods/XPLUS/Bin
+            cp -vfr SamTSE/Sources/build-x64-xplus/Debug/libGameMP.dylib x64/SamTSE/Mods/XPLUS/Bin
+            cp -vfr {SamTFE/SE1_10b.gro,SamTFE/ModEXT.txt} x64/SamTFE
+            cp -vfr {SamTSE/SE1_10b.gro,SamTSE/ModEXT.txt} x64/SamTSE
+            echo "*** Create archive ***"
+            XZ_DEFAULTS="-T 10" tar --use-compress-program=xz -cpvf SeriousSamClassic-${{ steps.date.outputs.time }}-macos-amd64-bin.tar.xz x64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeriousSamClassic-${{ steps.date.outputs.time }}-macos-amd64-bin.tar.xz
+          path: SeriousSamClassic-${{ steps.date.outputs.time }}-macos-amd64-bin.tar.xz
+
+  build-raspios-armv7l:
+    name: RPi OS Lite ${{ matrix.Configuration }} ${{ matrix.arch }}
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch: [armv7l]
+        Configuration: [Release]
+        include:
+        - arch: armv7l
+          cpu: cortex-a53
+          base_image: raspios_lite:latest
+          cpu_info: cpuinfo/raspberrypi_3b
+
+    steps:
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+         format: "YYYYMMDD"
+
+    - name: Show current date
+      run: |
+        echo "${{ steps.date.outputs.time }}"
+
+    - uses: pguyot/arm-runner-action@v2
+      with:
+        image_additional_mb: 2048
+        base_image: ${{ matrix.base_image }}
+        cpu: ${{ matrix.cpu }}
+        cpu_info: ${{ matrix.cpu_info }}
+        shell: /bin/bash 
+        copy_artifact_path: Release
+        commands: |
+            mkdir Release
+            test `uname -m` = ${{ matrix.arch }}
+            grep Model /proc/cpuinfo
+            apt-get update -y --allow-releaseinfo-change
+            apt-get install --no-install-recommends -y git bison flex cmake make gcc libc6-dev libsdl2-dev libogg-dev libvorbis-dev zlib1g-dev libvulkan1 libvulkan-dev    
+            cat /proc/cpuinfo
+            cat /etc/os-release
+            mkdir {x32,x32/SamTFE,x32/SamTFE/Mods,x32/SamTFE/Mods/XPLUS,x32/SamTSE,x32/SamTSE/Mods,x32/SamTSE/Mods/XPLUS}
+            uname -a
+            gcc -c -Q -mcpu=native --help=target
+            git clone https://github.com/tx00100xt/SeriousSamClassic.git
+            echo "***build ***"
+            cmake SeriousSamClassic -B SeriousSamClassic/build-armv7l -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }} -DRPI4=TRUE
+            make -j4 -C SeriousSamClassic/build-armv7l
+            make -C SeriousSamClassic/build-armv7l install
+            echo "*** build XPLUS ***"
+            cmake SeriousSamClassic -B SeriousSamClassic/build-armv7l-xplus -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }} -DXPLUS=TRUE -DRPI4=TRUE
+            make -j4 -C SeriousSamClassic/build-armv7l-xplus
+            make -C SeriousSamClassic/build-armv7l-xplus install
+            mv -f SeriousSamClassic/SamTFE/Bin x32/SamTFE
+            mv -f SeriousSamClassic/SamTSE/Bin x32/SamTSE
+            mv -f SeriousSamClassic/SamTFE/Mods/XPLUS/Bin x32/SamTFE/Mods/XPLUS
+            mv -f SeriousSamClassic/SamTSE/Mods/XPLUS/Bin x32/SamTSE/Mods/XPLUS
+            echo "*** Copy Data files ***"
+            cp -vfr SeriousSamClassic/{SamTFE/SE1_10b.gro,SamTFE/ModEXT.txt} x32/SamTFE
+            cp -vfr SeriousSamClassic/{SamTSE/SE1_10b.gro,SamTSE/ModEXT.txt} x32/SamTSE
+            echo "*** Create archive ***"
+            mv x32 armv7l
+            XZ_DEFAULTS="-T 10" tar --use-compress-program=xz -cpvf SeriousSamClassic-${{ steps.date.outputs.time }}-rpios-armv7l-bin.tar.xz armv7l
+            cp SeriousSamClassic-${{ steps.date.outputs.time }}-rpios-armv7l-bin.tar.xz Release/
+    - name: Prepare Release
+      run: |
+         sudo mv ${{github.workspace}}/Release/SeriousSamClassic-${{ steps.date.outputs.time }}-rpios-armv7l-bin.tar.xz ${{github.workspace}}/
+
+    - name: Upload Release
+      uses: actions/upload-artifact@v4
+      with:
+        name: SeriousSamClassic-${{ steps.date.outputs.time }}-rpios-armv7l-bin.tar.xz
+        path: SeriousSamClassic-${{ steps.date.outputs.time }}-rpios-armv7l-bin.tar.xz
+
+  build-raspios-aarch64:
+    name: RPi OS Lite ${{ matrix.Configuration }} ${{ matrix.arch }}
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch: [aarch64]
+        Configuration: [Release]
+        include:
+        - arch: aarch64
+          cpu: cortex-a72
+          base_image: raspios_lite_arm64:latest
+          cpu_info: cpuinfo/raspberrypi_4b
+
+    steps:
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+         format: "YYYYMMDD"
+
+    - name: Show current date
+      run: |
+        echo "${{ steps.date.outputs.time }}"
+
+    - uses: pguyot/arm-runner-action@v2
+      with:
+        image_additional_mb: 2048
+        base_image: ${{ matrix.base_image }}
+        cpu: ${{ matrix.cpu }}
+        cpu_info: ${{ matrix.cpu_info }}
+        shell: /bin/bash 
+        copy_artifact_path: Release
+        commands: |
+            mkdir Release
+            test `uname -m` = ${{ matrix.arch }}
+            grep Model /proc/cpuinfo
+            apt-get update -y --allow-releaseinfo-change
+            apt-get install --no-install-recommends -y git bison flex cmake make gcc libc6-dev libsdl2-dev libogg-dev libvorbis-dev zlib1g-dev libvulkan1 libvulkan-dev
+            cat /proc/cpuinfo
+            cat /etc/os-release
+            mkdir {x64,x64/SamTFE,x64/SamTFE/Mods,x64/SamTFE/Mods/XPLUS,x64/SamTSE,x64/SamTSE/Mods,x64/SamTSE/Mods/XPLUS}
+            uname -a
+            gcc -c -Q -mcpu=native --help=target
+            git clone https://github.com/tx00100xt/SeriousSamClassic.git
+            echo "***build ***"
+            cmake SeriousSamClassic -B SeriousSamClassic/build-aarch64 -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }} -DRPI4=TRUE
+            make -j4 -C SeriousSamClassic/build-aarch64
+            make -C SeriousSamClassic/build-aarch64 install
+            echo "*** build XPLUS ***"
+            cmake SeriousSamClassic -B SeriousSamClassic/build-aarch64-xplus -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }} -DXPLUS=TRUE -DRPI4=TRUE
+            make -j4 -C SeriousSamClassic/build-aarch64-xplus
+            make -C SeriousSamClassic/build-aarch64-xplus install
+            mv -f SeriousSamClassic/SamTFE/Bin x64/SamTFE
+            mv -f SeriousSamClassic/SamTSE/Bin x64/SamTSE
+            mv -f SeriousSamClassic/SamTFE/Mods/XPLUS/Bin x64/SamTFE/Mods/XPLUS
+            mv -f SeriousSamClassic/SamTSE/Mods/XPLUS/Bin x64/SamTSE/Mods/XPLUS
+            echo "*** Copy Data files ***"
+            cp -vfr SeriousSamClassic/{SamTFE/SE1_10b.gro,SamTFE/ModEXT.txt} x64/SamTFE
+            cp -vfr SeriousSamClassic/{SamTSE/SE1_10b.gro,SamTSE/ModEXT.txt} x64/SamTSE
+            echo "*** Create archive ***"
+            mv x64 aarch64
+            XZ_DEFAULTS="-T 10" tar --use-compress-program=xz -cpvf SeriousSamClassic-${{ steps.date.outputs.time }}-rpios-aarch64-bin.tar.xz aarch64
+            cp SeriousSamClassic-${{ steps.date.outputs.time }}-rpios-aarch64-bin.tar.xz Release/
+    - name: Prepare Release
+      run: |
+         sudo mv ${{github.workspace}}/Release/SeriousSamClassic-${{ steps.date.outputs.time }}-rpios-aarch64-bin.tar.xz ${{github.workspace}}/
+
+    - name: Upload Release
+      uses: actions/upload-artifact@v4
+      with:
+        name: SeriousSamClassic-${{ steps.date.outputs.time }}-rpios-aarch64-bin.tar.xz
+        path: SeriousSamClassic-${{ steps.date.outputs.time }}-rpios-aarch64-bin.tar.xz
+
+  build-ubuntu-riscv64:
+    # The host should always be linux
+    runs-on: ubuntu-22.04
+    name: Ubuntu Release ${{ matrix.arch }}
+
+    # Run steps on a matrix of 4 arch/distro combinations
+    strategy:
+      matrix:
+        include:
+          - arch: riscv64
+            distro: ubuntu22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: uraimo/run-on-arch-action@v2
+        name: Build artifact
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
+
+          # Create an artifacts directory
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+          # Mount the artifacts directory as /artifacts in the container
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+          # Pass some environment variables to the container
+          env: | # YAML, but pipe character is necessary
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+          # The shell to run commands with in the container
+          shell: /bin/bash
+
+          # Install some dependencies in the container. This speeds up builds if
+          # you are also using githubToken. Any dependencies installed here will
+          # be part of the container image that gets cached, so subsequent
+          # builds don't have to re-install them. The image layer is cached
+          # publicly in your project's package repository, so it is vital that
+          # no secrets are present in the container state or logs.
+          install: |
+            case "${{ matrix.distro }}" in
+              ubuntu*|jessie|stretch|buster|bullseye)
+                apt-get update -qq -y
+                apt-get install -qq -y git cmake build-essential xz-utils &&
+                apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev &&
+                apt-get install -qq -y imagemagick bison flex zlib1g-dev libxxhash-dev &&
+                apt-get install -qq -y libvulkan1 libvulkan-dev vulkan-validationlayers vulkan-validationlayers-dev    
+                ;;
+              fedora*)
+                dnf -y update
+                dnf -y install git which
+                ;;
+              alpine*)
+                apk update
+                apk add git
+                ;;
+            esac
+          # Produce a binary artifact and place it in the mounted volume
+          run: |
+            cd ${{github.workspace}}
+            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DUSE_I386_NASM_ASM=FALSE
+            cd ${{github.workspace}}/build
+            make -j$(nproc || echo 4)
+            make install
+            cd ${{github.workspace}}
+            cmake -B ${{github.workspace}}/build-xplus -DCMAKE_BUILD_TYPE=Release -DUSE_I386_NASM_ASM=FALSE -DXPLUS=TRUE
+            cd ${{github.workspace}}/build-xplus
+            make -j$(nproc || echo 4)
+            make install
+      - name: Get current date
+        id: date
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+           format: "YYYYMMDD"
+
+      - name: Show current date
+        run: |
+          echo "${{ steps.date.outputs.time }}"
+      - name: Make artifact
+        # Items placed in /artifacts in the container will be in
+        # ${PWD}/artifacts on the host.
+        run: |
+            cd ${{github.workspace}}
+            mkdir riscv64 && cd riscv64
+            mkdir {SamTFE,SamTFE/Mods,SamTFE/Mods/XPLUS,SamTSE,SamTSE/Mods,SamTSE/Mods/XPLUS}
+            cd ${{github.workspace}}
+            mv -f ${{github.workspace}}/SamTFE/Bin ${{github.workspace}}/riscv64/SamTFE
+            mv -f ${{github.workspace}}/SamTSE/Bin ${{github.workspace}}/riscv64/SamTSE
+            mv -f ${{github.workspace}}/SamTFE/Mods/XPLUS/Bin ${{github.workspace}}/riscv64/SamTFE/Mods/XPLUS
+            mv -f ${{github.workspace}}/SamTSE/Mods/XPLUS/Bin ${{github.workspace}}/riscv64/SamTSE/Mods/XPLUS
+            echo "*** Copy Data files ***"
+            cp -vfr {SamTFE/SE1_10b.gro,SamTFE/ModEXT.txt} riscv64/SamTFE
+            cp -vfr {SamTSE/SE1_10b.gro,SamTSE/ModEXT.txt} riscv64/SamTSE
+            echo "*** Create archive ***"
+            tar -cJpvf SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-riscv64-bin.tar.xz riscv64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-riscv64-bin.tar.xz
+          path: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-riscv64-bin.tar.xz
+
+  build-ubuntu-ppc64le:
+    # The host should always be linux
+    runs-on: ubuntu-22.04
+    name: Ubuntu Release ${{ matrix.arch }}
+
+    # Run steps on a matrix of 4 arch/distro combinations
+    strategy:
+      matrix:
+        include:
+          - arch: ppc64le
+            distro: ubuntu22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: uraimo/run-on-arch-action@v2
+        name: Build artifact
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
+
+          # Create an artifacts directory
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+          # Mount the artifacts directory as /artifacts in the container
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+          # Pass some environment variables to the container
+          env: | # YAML, but pipe character is necessary
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+          # The shell to run commands with in the container
+          shell: /bin/bash
+
+          # Install some dependencies in the container. This speeds up builds if
+          # you are also using githubToken. Any dependencies installed here will
+          # be part of the container image that gets cached, so subsequent
+          # builds don't have to re-install them. The image layer is cached
+          # publicly in your project's package repository, so it is vital that
+          # no secrets are present in the container state or logs.
+          install: |
+            case "${{ matrix.distro }}" in
+              ubuntu*|jessie|stretch|buster|bullseye)
+                apt-get update -qq -y
+                apt-get install -qq -y git cmake build-essential xz-utils &&
+                apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev &&
+                apt-get install -qq -y imagemagick bison flex zlib1g-dev libxxhash-dev &&
+                apt-get install -qq -y libvulkan1 libvulkan-dev vulkan-validationlayers vulkan-validationlayers-dev    
+                ;;
+              fedora*)
+                dnf -y update
+                dnf -y install git which
+                ;;
+              alpine*)
+                apk update
+                apk add git
+                ;;
+            esac
+          # Produce a binary artifact and place it in the mounted volume
+          run: |
+            cd ${{github.workspace}}
+            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DUSE_I386_NASM_ASM=FALSE
+            cd ${{github.workspace}}/build
+            make -j$(nproc || echo 4)
+            make install
+            cd ${{github.workspace}}
+            cmake -B ${{github.workspace}}/build-xplus -DCMAKE_BUILD_TYPE=Release -DUSE_I386_NASM_ASM=FALSE -DXPLUS=TRUE
+            cd ${{github.workspace}}/build-xplus
+            make -j$(nproc || echo 4)
+            make install
+      - name: Get current date
+        id: date
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+           format: "YYYYMMDD"
+
+      - name: Show current date
+        run: |
+          echo "${{ steps.date.outputs.time }}"
+      - name: Make artifact
+        # Items placed in /artifacts in the container will be in
+        # ${PWD}/artifacts on the host.
+        run: |
+            cd ${{github.workspace}}
+            mkdir ppc64le && cd ppc64le
+            mkdir {SamTFE,SamTFE/Mods,SamTFE/Mods/XPLUS,SamTSE,SamTSE/Mods,SamTSE/Mods/XPLUS}
+            cd ${{github.workspace}}
+            mv -f ${{github.workspace}}/SamTFE/Bin ${{github.workspace}}/ppc64le/SamTFE
+            mv -f ${{github.workspace}}/SamTSE/Bin ${{github.workspace}}/ppc64le/SamTSE
+            mv -f ${{github.workspace}}/SamTFE/Mods/XPLUS/Bin ${{github.workspace}}/ppc64le/SamTFE/Mods/XPLUS
+            mv -f ${{github.workspace}}/SamTSE/Mods/XPLUS/Bin ${{github.workspace}}/ppc64le/SamTSE/Mods/XPLUS
+            echo "*** Copy Data files ***"
+            cp -vfr {SamTFE/SE1_10b.gro,SamTFE/ModEXT.txt} ppc64le/SamTFE
+            cp -vfr {SamTSE/SE1_10b.gro,SamTSE/ModEXT.txt} ppc64le/SamTSE
+            echo "*** Create archive ***"
+            tar -cJpvf SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-ppc64le-bin.tar.xz ppc64le
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-ppc64le-bin.tar.xz
+          path: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-ppc64le-bin.tar.xz
+
+  build-ubuntu-s390x:
+    # The host should always be linux
+    runs-on: ubuntu-22.04
+    name: Ubuntu Release ${{ matrix.arch }}
+
+    # Run steps on a matrix of 4 arch/distro combinations
+    strategy:
+      matrix:
+        include:
+          - arch: s390x
+            distro: ubuntu22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: uraimo/run-on-arch-action@v2
+        name: Build artifact
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
+
+          # Create an artifacts directory
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+          # Mount the artifacts directory as /artifacts in the container
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+          # Pass some environment variables to the container
+          env: | # YAML, but pipe character is necessary
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+          # The shell to run commands with in the container
+          shell: /bin/bash
+
+          # Install some dependencies in the container. This speeds up builds if
+          # you are also using githubToken. Any dependencies installed here will
+          # be part of the container image that gets cached, so subsequent
+          # builds don't have to re-install them. The image layer is cached
+          # publicly in your project's package repository, so it is vital that
+          # no secrets are present in the container state or logs.
+          install: |
+            case "${{ matrix.distro }}" in
+              ubuntu*|jessie|stretch|buster|bullseye)
+                apt-get update -qq -y
+                apt-get install -qq -y git cmake build-essential xz-utils &&
+                apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev &&
+                apt-get install -qq -y imagemagick bison flex zlib1g-dev libxxhash-dev &&
+                apt-get install -qq -y libvulkan1 libvulkan-dev vulkan-validationlayers vulkan-validationlayers-dev    
+                ;;
+              fedora*)
+                dnf -y update
+                dnf -y install git which
+                ;;
+              alpine*)
+                apk update
+                apk add git
+                ;;
+            esac
+          # Produce a binary artifact and place it in the mounted volume
+          run: |
+            cd ${{github.workspace}}
+            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DUSE_I386_NASM_ASM=FALSE
+            cd ${{github.workspace}}/build
+            make -j$(nproc || echo 4)
+            make install
+            cd ${{github.workspace}}
+            cmake -B ${{github.workspace}}/build-xplus -DCMAKE_BUILD_TYPE=Release -DUSE_I386_NASM_ASM=FALSE -DXPLUS=TRUE
+            cd ${{github.workspace}}/build-xplus
+            make -j$(nproc || echo 4)
+            make install
+      - name: Get current date
+        id: date
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+           format: "YYYYMMDD"
+
+      - name: Show current date
+        run: |
+          echo "${{ steps.date.outputs.time }}"
+      - name: Make artifact
+        # Items placed in /artifacts in the container will be in
+        # ${PWD}/artifacts on the host.
+        run: |
+            cd ${{github.workspace}}
+            mkdir s390x && cd s390x
+            mkdir {SamTFE,SamTFE/Mods,SamTFE/Mods/XPLUS,SamTSE,SamTSE/Mods,SamTSE/Mods/XPLUS}
+            cd ${{github.workspace}}
+            mv -f ${{github.workspace}}/SamTFE/Bin ${{github.workspace}}/s390x/SamTFE
+            mv -f ${{github.workspace}}/SamTSE/Bin ${{github.workspace}}/s390x/SamTSE
+            mv -f ${{github.workspace}}/SamTFE/Mods/XPLUS/Bin ${{github.workspace}}/s390x/SamTFE/Mods/XPLUS
+            mv -f ${{github.workspace}}/SamTSE/Mods/XPLUS/Bin ${{github.workspace}}/s390x/SamTSE/Mods/XPLUS
+            echo "*** Copy Data files ***"
+            cp -vfr {SamTFE/SE1_10b.gro,SamTFE/ModEXT.txt} s390x/SamTFE
+            cp -vfr {SamTSE/SE1_10b.gro,SamTSE/ModEXT.txt} s390x/SamTSE
+            echo "*** Create archive ***"
+            tar -cJpvf SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-s390x-bin.tar.xz s390x
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-s390x-bin.tar.xz
+          path: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-s390x-bin.tar.xz
+
+  build-appimage-x64:
+    name: AppImage ${{ matrix.Configuration }} ${{ matrix.Platform }}
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [x64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+        env: # Or as an environment variable
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+
+      - name: List keys5
+        run: gpg -K
+
+      - uses: actions/checkout@v4
+      - name: Install packages
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev &&
+          sudo apt-get install -qq -y bison flex zlib1g-dev libxxhash-dev &&
+          sudo apt-get install libvulkan1 libvulkan-dev libcurl4-nss-dev  libopenal-dev libopenal1
+
+      - name: Get current date
+        id: date
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+           format: "YYYYMMDD"
+
+      - name: Show current date
+        run: |
+          echo "${{ steps.date.outputs.time }}"
+      - name: Run Build
+        run: |
+          cd ${{github.workspace}}
+          ./build-appimage.sh
+          mv -f ${{github.workspace}}/SeriousSamTFE-1.10.6d-x86_64.AppImage SeriousSamTFE-${{ steps.date.outputs.time }}-1.10.6d-x86_64.AppImage
+          mv -f ${{github.workspace}}/SeriousSamTSE-1.10.6d-x86_64.AppImage SeriousSamTSE-${{ steps.date.outputs.time }}-1.10.6d-x86_64.AppImage
+      - name: Upload TFE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeriousSamTFE-${{ steps.date.outputs.time }}-1.10.6d-x86_64.AppImage
+          path: SeriousSamTFE-${{ steps.date.outputs.time }}-1.10.6d-x86_64.AppImage
+
+      - name: Upload TSE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeriousSamTSE-${{ steps.date.outputs.time }}-1.10.6d-x86_64.AppImage
+          path: SeriousSamTSE-${{ steps.date.outputs.time }}-1.10.6d-x86_64.AppImage
+
+  build-linux-mipsel:
+    name: Linux ${{ matrix.Configuration }} mipsel
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [x64]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install nipsel image
+      run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y xz-utils qemu qemu-user-static binfmt-support parted wget dosfstools zip
+          sudo adduser $USER kvm
+          echo "*** Download and install mipsel image ***"          
+          wget -c http://nightly.altlinux.org/p9-mipsel/release/alt-p9-lxqt-20190703-mipsel.img.xz
+          xz -d alt-p9-lxqt-20190703-mipsel.img.xz
+          mkdir alt-mipsel && mkdir alt-image
+          sudo losetup -f --show -o $((2048*512)) alt-p9-lxqt-20190703-mipsel.img
+          sudo mount /dev/loop3 alt-image
+          sudo cp -ax alt-image/* alt-mipsel
+          echo "*** Remove mipsel image ***"  
+          sudo umount alt-image
+          sudo losetup -d /dev/loop3
+          rm -f alt-p9-lxqt-20190703-mipsel.img
+          rm -f alt-p9-lxqt-20190703-mipsel.img.xz
+          echo "*** Install magic bytes ***"         
+          cat > qemu-mipsel.conf << EOF
+          :mipsel:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x08\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-mipsel-static:
+          EOF
+          echo "***  Create processor info ***"          
+          sudo cp -vfr qemu-mipsel.conf /etc/binfmt.d/
+          sudo sudo systemctl restart systemd-binfmt.service
+          sudo cat /proc/sys/fs/binfmt_misc/mipsel
+          echo "***  Create processor info ***"          
+          cat > Baikal-T << EOF
+          system type             : Baikal-T Generic SoC
+          machine                 : Baikal-T1 BFK3 evaluation board
+          processor               : 0
+          cpu model               : MIPS P5600 V3.0  FPU V2.0
+          BogoMIPS                : 1196.85
+          wait instruction        : yes
+          microsecond timers      : yes
+          tlb_entries             : 576
+          extra interrupt vector  : yes
+          hardware watchpoint     : yes, count: 4, address/irw mask: [0x0ffc, 0x0ffc, 0x0ffb, 0x0ffb]
+          isa                     : mips1 mips2 mips32r1 mips32r2
+          ASEs implemented        : vz msa eva xpa
+          shadow register sets    : 1
+          kscratch registers      : 3
+          package                 : 0
+          core                    : 0
+          VCED exceptions         : not available
+          VCEI exceptions         : not available   
+          EOF
+          echo "***  Create mount script ***"          
+          cat > alt-mipsel.sh << EOF
+          sudo mount --bind /proc alt-mipsel/proc
+          sudo mount --bind /sys alt-mipsel/sys
+          sudo mount --bind /dev alt-mipsel/dev
+          sudo mount --bind /dev/pts alt-mipsel/dev/pts
+          sudo mount --bind Baikal-T /proc/cpuinfo          
+          EOF
+          echo "***  Copy qemu user static binaries to mipsel dir ***"          
+          sudo cp -f /usr/bin/qemu-* alt-mipsel/usr/bin
+          chmod +x alt-mipsel.sh
+          cat > resolv.conf << EOF
+          nameserver 8.8.8.8
+          nameserver 8.8.4.4          
+          EOF
+          sudo cp -f resolv.conf alt-mipsel/etc
+          sudo cp -f resolv.conf alt-mipsel/var/resolv/etc
+
+    - name: Build
+      run: |
+          sudo sh alt-mipsel.sh
+          sudo chroot alt-mipsel /bin/bash -e <<EOF
+          uname -a
+          cat /proc/cpuinfo
+          apt-get update -qq
+          apt-get install -qq -y git cmake gcc-c++ libSDL2-devel libogg-devel libstdc++-devel-static libvorbis-devel zlib-devel flex bison
+          git clone https://github.com/tx00100xt/SeriousSamClassic.git seriossam
+          mkdir /seriossam/build
+          mkdir /seriossam/build-xplus
+          cd /seriossam/build
+          cmake ..
+          make -j8
+          make install
+          cd /seriossam/build-xplus
+          cmake -DXPLUS=TRUE ..
+          make -j8
+          make install
+          exit
+          EOF
+
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+         format: "YYYYMMDD"
+
+    - name: Show current date
+      run: |
+        echo "${{ steps.date.outputs.time }}"
+
+    - name: Create Archive
+      run: |
+          cd ${{github.workspace}}
+          mkdir {mipsel,mipsel/SamTFE,mipsel/SamTFE/Mods,mipsel/SamTFE/Mods/XPLUS,mipsel/SamTSE,mipsel/SamTSE/Mods,mipsel/SamTSE/Mods/XPLUS,}
+          sudo mv -f ${{github.workspace}}/alt-mipsel/seriossam/SamTFE/Bin ${{github.workspace}}/mipsel/SamTFE
+          sudo mv -f ${{github.workspace}}/alt-mipsel/seriossam/SamTSE/Bin ${{github.workspace}}/mipsel/SamTSE
+          sudo mv -f ${{github.workspace}}/alt-mipsel/seriossam/SamTFE/Mods/XPLUS/Bin ${{github.workspace}}/mipsel/SamTFE/Mods/XPLUS
+          sudo mv -f ${{github.workspace}}/alt-mipsel/seriossam/SamTSE/Mods/XPLUS/Bin ${{github.workspace}}/mipsel/SamTSE/Mods/XPLUS
+          sudo chown -R $USER:$USER mipsel
+          echo "*** Create archive ***"
+          cd ${{github.workspace}}
+          cp -fr {SamTFE/SE1_10b.gro,SamTFE/ModEXT.txt} mipsel/SamTFE
+          cp -fr {SamTSE/SE1_10b.gro,SamTSE/ModEXT.txt} mipsel/SamTSE
+          tar -cJpvf SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-mipsel-bin.tar.xz mipsel
+
+    - name: Free up resources
+      run: |
+          echo "***  Umount  ***" 
+          sudo umount ${{github.workspace}}/alt-mipsel/proc/cpuinfo
+          sudo umount ${{github.workspace}}/alt-mipsel/proc
+          sudo umount ${{github.workspace}}/alt-mipsel/dev/pts
+          sudo umount ${{github.workspace}}/alt-mipsel/dev
+          sudo umount ${{github.workspace}}/alt-mipsel/sys
+          echo "***  Remove mopsel image  ***"   
+          sudo rm -fr ${{github.workspace}}/alt-mipsel
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-mipsel-bin.tar.xz
+        path: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-mipsel-bin.tar.xz
+
+  build-linux-loongarch64:
+    name: Linux ${{ matrix.Configuration }} loongarch64
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [x64]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install loongarch64 image
+      run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y git xz-utils qemu qemu-user-static binfmt-support parted wget dosfstools zip p7zip-full squashfs-tools rpm2cpio
+          sudo adduser $USER kvm
+          echo "*** Download and install qemu-loongarch64-static ***"
+          wget -c http://mirror.ghettoforge.org/distributions/gf/el/9/gf/x86_64/qemu-user-static-loongarch64-8.2.0-1.2.gf.el9.x86_64.rpm
+          rpm2cpio qemu-user-static-loongarch64-8.2.0-1.2.gf.el9.x86_64.rpm | cpio -i --make-directories
+          sudo cp -vfr usr/bin/qemu-loongarch64-static /usr/bin
+          echo "*** Download and install loongarch64 image ***"
+          echo Images 20240221 20231201
+          wget -c http://get.srt.basealt.ru/ports/loongarch64/Sisyphus/images/loongarch64/regular-xfce-20240221-loongarch64.iso
+          7z x '-i!live'  regular-xfce-20240221-loongarch64.iso
+          sudo unsquashfs -d alt-loongarch64 live
+          rm -f regular-xfce-20240221-loongarch64.iso
+          rm -f live
+          echo "*** Install magic bytes ***"         
+          cat > qemu-loongarch64.conf << EOF
+          	:loongarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x02\x01:\xff\xff\xff\xff\xff\xff\xff\xfc\x00\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-loongarch64-static:
+          EOF
+          echo "***  Create processor info ***"          
+          sudo cp -vfr qemu-loongarch64.conf /etc/binfmt.d/
+          sudo sudo systemctl restart systemd-binfmt.service
+          sudo cat /proc/sys/fs/binfmt_misc/loongarch64
+          echo "***  Create processor info ***"          
+          cat > Loongson-3A5000 << EOF
+          system type             : generic-loongson-machine
+          processor               : 0
+          package                 : 0
+          core                    : 0
+          cpu family              : Loongson-64bit
+          model name              : Loongson-3A5000-HV
+          CPU Revision            : 0x11
+          FPU Revision            : 0x00
+          CPU MHz                 : 2500.00
+          BogoMIPS                : 5000.00
+          TLB entries             : 2112
+          Address sizes           : 48 bits physical, 48 bits virtual
+          isa                     : loongarch32 loongarch64
+          features                : cpucfg lam ual fpu lsx lasx complex crypto lvz lbt_x86 lbt_arm lbt_mips
+          hardware watchpoint     : yes, iwatch count: 8, dwatch count: 8   
+          EOF
+          echo "***  Create mount script ***"          
+          cat > alt-loongarch64.sh << EOF
+          sudo mount --bind /proc alt-loongarch64/proc
+          sudo mount --bind /sys alt-loongarch64/sys
+          sudo mount --bind /dev alt-loongarch64/dev
+          sudo mount --bind /dev/pts alt-loongarch64/dev/pts
+          sudo mount --bind Loongson-3A5000 /proc/cpuinfo          
+          EOF
+          echo "***  Copy qemu user static binaries to loongarch64 dir ***"          
+          sudo cp -vfr /usr/bin/qemu-* alt-loongarch64/usr/bin
+          chmod +x alt-loongarch64.sh
+          cat > resolv.conf << EOF
+          nameserver 8.8.8.8
+          nameserver 8.8.4.4          
+          EOF
+          sudo cp -f resolv.conf alt-loongarch64/etc
+          sudo cp -f resolv.conf alt-loongarch64/var/resolv/etc
+
+    - name: Build
+      run: |
+          sudo sh alt-loongarch64.sh
+          sudo chroot alt-loongarch64 /bin/bash -e <<EOF
+          uname -a
+          cat /proc/cpuinfo
+          apt-get update -qq
+          apt-get install -qq -y git cmake gcc-c++ libSDL2 libSDL2-devel-static libSDL2-devel libogg-devel libstdc++-devel-static libvorbis-devel zlib-devel flex bison
+          cp -vfr /usr/lib64/*SDL2* /usr/lib
+          cp -vfr /usr/lib64/*libz.* /usr/lib
+          git clone https://github.com/tx00100xt/SeriousSamClassic.git seriossam
+          mkdir /seriossam/build
+          mkdir /seriossam/build-xplus
+          cd /seriossam/build
+          cmake ..
+          make -j8
+          make install
+          cd /seriossam/build-xplus
+          cmake -DXPLUS=TRUE ..
+          make -j8
+          make install
+          exit
+          EOF
+
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+         format: "YYYYMMDD"
+
+    - name: Show current date
+      run: |
+        echo "${{ steps.date.outputs.time }}"
+
+    - name: Create Archive
+      run: |
+          cd ${{github.workspace}}
+          mkdir {loongarch64,loongarch64/SamTFE,loongarch64/SamTFE/Mods,loongarch64/SamTFE/Mods/XPLUS,loongarch64/SamTSE,loongarch64/SamTSE/Mods,loongarch64/SamTSE/Mods/XPLUS,}
+          sudo mv -f ${{github.workspace}}/alt-loongarch64/seriossam/SamTFE/Bin ${{github.workspace}}/loongarch64/SamTFE
+          sudo mv -f ${{github.workspace}}/alt-loongarch64/seriossam/SamTSE/Bin ${{github.workspace}}/loongarch64/SamTSE
+          sudo mv -f ${{github.workspace}}/alt-loongarch64/seriossam/SamTFE/Mods/XPLUS/Bin ${{github.workspace}}/loongarch64/SamTFE/Mods/XPLUS
+          sudo mv -f ${{github.workspace}}/alt-loongarch64/seriossam/SamTSE/Mods/XPLUS/Bin ${{github.workspace}}/loongarch64/SamTSE/Mods/XPLUS
+          sudo chown -R $USER:$USER loongarch64
+          echo "*** Create archive ***"
+          cd ${{github.workspace}}
+          cp -fr {SamTFE/SE1_10b.gro,SamTFE/ModEXT.txt} loongarch64/SamTFE
+          cp -fr {SamTSE/SE1_10b.gro,SamTSE/ModEXT.txt} loongarch64/SamTSE
+          tar -cJpvf SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-loongarch64-bin.tar.xz loongarch64
+
+    - name: Free up resources
+      run: |
+          echo "***  Umount  ***" 
+          sudo umount ${{github.workspace}}/alt-loongarch64/proc/cpuinfo
+          sudo umount ${{github.workspace}}/alt-loongarch64/proc
+          sudo umount ${{github.workspace}}/alt-loongarch64/dev/pts
+          sudo umount ${{github.workspace}}/alt-loongarch64/dev
+          sudo umount ${{github.workspace}}/alt-loongarch64/sys
+          echo "***  Remove mopsel image  ***"   
+          sudo rm -fr ${{github.workspace}}/alt-loongarch64
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-loongarch64-bin.tar.xz
+        path: SeriousSamClassic-${{ steps.date.outputs.time }}-lnx-loongarch64-bin.tar.xz

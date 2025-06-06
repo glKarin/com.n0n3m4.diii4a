@@ -1,0 +1,5 @@
+"Default" "Data\Default.ifr"
+"HP Force Feedback Mouse" "Data\Default.ifr"
+"Primax FX" "Data\Default.ifr"
+"Logitech iFeel Mouse" "Data\Logitech.ifr"
+"Nostromo n30 Game Mouse" "Data\Default.ifr"

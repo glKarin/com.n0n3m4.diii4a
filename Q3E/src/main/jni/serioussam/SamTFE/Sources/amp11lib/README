@@ -1,0 +1,74 @@
+
+                            amp11lib
+                           ==========
+
+             (c) 1997-2001 Niklas Beisert, Alen Ladavac
+
+amp11lib is an Audio-MPEG decoder and player library distributed under 
+the GNU Library General Public License Version 2 (see file COPYING).
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Library General Public
+License as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with this library; if not, write to the Free
+Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+usage:
+ see the file interface.txt for detailed explanation of how to call
+ amp11lib functions from an application.
+
+features:
+ -all features of amp11 concerning decoding mpeg music files,
+   streaming from http and playing on output
+ -can play more than one stream at the same time, with built-in mixing
+ -supports using more than one audio output device
+ -easy to use simple library interface callable from any language
+ -library compiling tested only with Visual C++ so far
+ -library calling tested with Visual C++ and VisualBasic so far
+
+comments/bugs/todos:
+  -'makeunix' and 'makewc' are not currently valid, since have not 
+   been tested yet
+  -test on other compilers/systems
+  -add support for equalizers
+  -support for multiple audio output devices has not actually been 
+     tested on multiple audio output devices at the same time yet :)
+
+revision history:
+  -al20010102:
+   -added support for mp3s with id3v2 tags (the tags are now skipped correctly)
+  -al20000318:
+   -second thread uses multimedia timer on win32, that should solve
+     most latency, skipping and blocking problems
+   -customizable timer frequency
+   -support for multiple audio output devices (not yet tested well)
+  -al19991024:
+   -first test version, not released
+
+a word on amp11 and amp11lib:
+
+  amp11lib is based on amp11 and its underlying mpxdec and binfile
+  libraries. this is in fact an interface for binfile/decoder part 
+  of amp11, and most comments/features that apply to amp11, apply 
+  to this library too.
+  it is intended to simplify incorporating decoding and playing of 
+  mpeg audio files in different applications. currently, it is 
+  beeing used for building a turn-tables-like-application with
+  visual basic, and as a plug-in music player for a pc game still
+  in development.
+
+contact:
+  Niklas Beisert - nbeisert@ph.tum.de
+  Alen Ladavac - elf@marvin.cc.fer.hr
+
+www:
+  http://www.ph.tum.de/~nbeisert/amp11.html
+  http://marvin.cc.fer.hr/~elf/amp11lib/

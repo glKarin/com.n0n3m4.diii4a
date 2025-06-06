@@ -1,0 +1,33 @@
+.\" Manpage for serioussamse-mkfont
+.\" Contact  -- Alexander Pavlov <t.x00100x.t@yandex.ru> to correct errors or typos.
+.TH man 6 "02  2024" "1.0" "serioussamse-mkfont man page"
+.SH NAME
+serioussamse-mkfont \- Font tables maker for the game Serious Sam Classic TSE
+.PP
+.SH DESCRIPTION
+.PP
+.BR serioussamse-mkfont
+is utility for creating fonts for the game Serious Sam Classic TSE. With this utility you can create your own
+fonts for the game. For example, this is how localization fonts were created for different languages.
+The placement of the input files must be in the game data directory.
+.PP
+.SH SYNOPSIS
+USAGE: serioussamse-mkfont <texture_file> <char_width> <char_height> <char_order_file> [-A]
+.PP
+texture_file: FULL PATH to texture file that represents font
+.PP
+char_width: maximum width (in pixels) of single character
+.PP
+char_height: maximum height (in pixels) of single character
+.PP
+char_order_file: full path to ASCII file that shows
+                 graphical order of character in font texture
+.PP
+-A: do not include alpha channel when determining character width 
+.PP
+NOTES: - out file will have the name as texture file, but ".fnt" extension
+       - texture file must begin with character that will be a replacement for
+         each character that hasn't got definition in this texture file
+.PP
+.SH AUTHOR
+ Alexander Pavlov <t.x00100x.t@yandex.ru>

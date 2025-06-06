@@ -1,0 +1,193 @@
+serioussam for Debian
+---------------------
+
+Introduction
+============
+
+This implementation of the source code provides for installation in the system, in the /usr/games, /usr/lib, /usr/share directories.
+
+During the launch of the game, the engine determines the place of launch, and if the launch occurred from the /usr/games directory, 
+it switches to the libraries search mode in the system directories. Also adds searching for game data in various directories. 
+About the search for game data will be written below.
+
+Otherwise, the engine considers that a local launch of the game has occurred and will look for game data in the root directory of the game.
+User data, such as game settings, log, saves, demos will be located in:
+
+~/.serioussam/ - for TFE
+~/.serioussamse/ - for TSE
+
+If you start the game with the +portable key, then there will be a full portable mode and user data, such as game settings, 
+log, saves, demos will also be located in the root directory of the game.
+
+Naming conventions for executable files and libraries
+=====================================================
+
+Internal game name for Serious Sam The First Encounter is serioussam, for Serious Sam The Second Encounter is serioussamse.
+These names are initially accepted in the engine and are used for example in a network game and a master server.
+
+Location of executables, libraries, and modification libraries
+==============================================================
+
+The executable files of the game are located in the '/usr/games' directory.
+
+/usr/games/"internal game name"
+
+The dedicated server and the font creation utility for the game are also located in this directory.
+
+/usr/games/"internal game name"-ded
+/usr/games/"internal game name"-mkfont
+/usr/games/"internal game name"-texconv
+
+The game libraries will be searched in the following directories:
+/usr/lib/games/"internal game name"/
+
+
+The location of the libraries of modifications is also on the same principle.
+/usr/lib/games/"internal game name"/Mods/"Mod name"/
+
+Game libraries are assigned a suffix defined in file ModEXT.txt
+The suffix is assigned to both game libraries and mod libraries.
+
+The game executable first loads the engine library, which loads the remaining libraries from the subdirectory with the game's internal name.
+
+To get output names by convention, use the cmake build key -DCMAKE_INSTALL_PREFIX:PATH=/usr
+
+In accordance with the naming convention, we get the following location of the executable files, game libraries Serious Sam The First Encounter and Serious Sam The Second Encounter for Ubuntu/Dedian:
+
+/usr/games/serioussam
+/usr/games/serioussam-ded
+/usr/games/serioussam-mkfont
+/usr/games/serioussam-texconv
+/usr/lib/games/serioussam/libShaders.so
+/usr/lib/games/serioussam/libGame.so
+/usr/lib/games/serioussam/libEntities.so
+/usr/lib/games/serioussam/libamp11lib.so
+/usr/games/serioussamse
+/usr/games/serioussamse-ded
+/usr/games/serioussamse-mkfont
+/usr/games/serioussamse-texconv
+/usr/lib/games/serioussamse/libShaders.so
+/usr/lib/games/serioussamse/libGameMP.so
+/usr/lib/games/serioussamse/libEntitiesMP.so
+/usr/lib/games/serioussamse/libamp11lib.so
+
+For mod XPLUS:
+/usr/lib/games/serioussam/Mods/XPLUS/libGame.so
+/usr/lib/games/serioussam/Mods/XPLUS/libEntities.so
+/usr/lib/games/serioussamse/Mods/XPLUS/libGameMP.so
+/usr/lib/games/serioussamse/Mods/XPLUS/libEntitiesMP.so
+
+For mod Serious Sam Alpha Remake (SSA):
+/usr/lib/games/serioussam/Mods/SSA/libGame.so
+/usr/lib/games/serioussam/Mods/SSA/libEntities.so
+
+Location of game data, user data, and data modifications
+========================================================
+
+During the launch of the game, the engine determines the launch location, and if the launch occurred from the /usr/games directory, then the game data will be searched for the recommended paths. If the game data is not found using the recommended paths, then the search will be in the home directory, and when the game files are found, the path will be written to the configuration file (not recommended). If the game files are not found, a message box will appear.
+
+Paths for hosting game data:
+
+~/.serioussam/ - for TFE
+~/.serioussamse/ - for TSE
+
+Mod Data:
+
+~/.serioussam/Mods/"Mod name" - for TFE
+~/.serioussamse/Mods/"Mod name" - for TSE
+
+The file SE1_10b.gro is not included in the game data distributed on CDs or digital stores.
+If you chose the first recommended option, set it to:
+
+/usr/share/games/serioussam/SE1_10b.gro - for TFE
+/usr/share/games/serioussamse/SE1_10b.gro - for TSE
+
+Playing the original game
+=========================
+
+This source release does not contain any game data, the game data is still
+covered by the original EULA and must be obeyed as usual.
+
+To start the game, you'll need the original resurces of a licensed copy of Serious Sam: The First Encounter and Serious Sam: The Second Encounter.
+
+Steam version 
+=============
+
+If you have a digital copy of the game on Steam then the resources can be found in 
+~/.local/share/Steam/SteamApps/common/Serious Sam Classic The Second Encounter/ (the default Steam game installation directory on Linux).
+
+
+GOG version
+===========
+If you bought a digital on GOG, you can unpack the resources with the innoextract CLI tool. To install innoextract via your package manager, run:
+ 
+sudo apt-get install innoextract
+
+Copy files "setup_serious_sam_the_first_encounter_2.0.0.10.exe" and "setup_serious_sam_the_second_encounter_2.1.0.8.exe" 
+to a home directory and run the following commands:
+
+innoextract --gog setup_serious_sam_the_first_encounter_2.0.0.10.exe
+
+innoextract --gog setup_serious_sam_the_second_encounter_2.1.0.8.exe
+
+Physical  version
+=================
+
+If you bought a physical copy of the game and you have an ISO of your disk, you can unpack the resources with the any archive manager. 
+Game resources are located in the Install directory of the disk. Just copy all the *.gro files from there, 
+as well as the Levels directory to directories ~/.serioussam and ~/.serioussamse, respectively, for games Serious Sam: The First Encounter and Serious Sam: The Second Encounter.
+
+Demo  version
+=============
+
+This implementation of the engine supports the use of content from the demo version of the game. When the game starts, 
+the engine determines the installed game content, and if it finds content from the demo version, it turns on the mode for using the demo version of the content.
+A demo version of the game can be obtained from many places. For example:
+
+https://www.moddb.com/downloads/serious-sam-the-first-encounter-demo
+https://www.moddb.com/downloads/serious-sam-the-second-encounter
+https://www.gamefront.com/games/serious-sam/file/serioussamdemo-exe
+https://www.gamefront.com/games/serious-sam-the-second-encounter/file/serious-sam-the-second-encounter-demo
+
+The most convenient way is to download using the wget from the WebArchive. 
+To install content from the demo version of the game, open a terminal and run the following commands:
+
+sudo apt install p7zip
+
+wget https://archive.org/download/SeriousSamDemo/SeriousSamDemo.exe
+wget https://archive.org/download/SeriousSamPatches/serioussampatch105_usa.exe
+7z x SeriousSamDemo.exe
+7z x -y serioussampatch105_usa.exe
+mkdir ~/.serioussam
+cp -ax Disk1/* ~/.serioussam
+rm -fr Disk1
+
+wget https://archive.org/download/serioussamsedemo/SeriousSamSEDemo.exe
+wget https://archive.org/download/SeriousSamPatches/secondencounterpatch107_usa.exe
+7z x SeriousSamSEDemo.exe
+7z x -y secondencounterpatch107_usa.exe
+mkdir ~/.serioussamse
+cp -ax Disk1/* ~/.serioussamse
+rm -fr Disk1
+
+When you first launch the game, goto Menu -> Options -> Execute Addons and select the default option. 
+The demo version uses old settings scripts. New ones you can take here: https://github.com/tx00100xt/SeriousSamClassic
+Just rewrite the Scripts directory replacing the files
+
+Launching the game
+==================
+
+To start the game type in console:
+
+serioussam
+
+or
+
+serioussamse
+
+
+You can also use the launch of the game through the menu.
+After installing the packages and copying all the data, you can check what we got.
+
+
+ -- Alexander Pavlov <t.x00100x.t@yandex.ru>  Wed, 28 Feb 2024 20:33:46 +0300
