@@ -37,7 +37,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef _GLES //karin: GLES function alias
 #define pglClearDepth pglClearDepthf
 #define pglDepthRange pglDepthRangef
-#define pglClipPlane pglClipPlanef                            #define pglGetClipPlane pglGetClipPlanef
+#define pglClipPlane pglClipPlanef
+#define pglGetClipPlane pglGetClipPlanef
 #define pglPolygonMode(x, y)
 #define pglDrawBuffer(x)
 #define pglReadBuffer(x)
