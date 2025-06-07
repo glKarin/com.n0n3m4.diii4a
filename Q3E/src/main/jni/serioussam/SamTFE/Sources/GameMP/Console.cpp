@@ -84,6 +84,9 @@ BOOL GetLineCountBackward(const char *pchrStringStart, const char *pchrStringEnd
   return TRUE;
 }
 
+#ifdef _DIII4A //karin: limit console max height
+extern float Android_GetConsoleMaxHeightFrac(float frac);
+#endif
 void CGame::ConsoleRender(CDrawPort *pdp)
 {
   if( _pGame->gm_csConsoleState==CS_OFF) {
@@ -95,6 +98,9 @@ void CGame::ConsoleRender(CDrawPort *pdp)
   // get console height
   con_fHeightFactor = Clamp( con_fHeightFactor, 0.1f, 1.0f);
   FLOAT fHeightFactor = con_fHeightFactor;
+#ifdef _DIII4A //karin: limit console max height
+	fHeightFactor = Android_GetConsoleMaxHeightFrac(con_fHeightFactor);
+#endif
   if( !gm_bGameOn) fHeightFactor = 0.9f;
 
   // calculate up-down speed to be independent of refresh speed
