@@ -51,7 +51,8 @@ static inline void BoxToGrid(
 #ifdef __arm__
 #if defined(PLATFORM_PANDORA) || defined(PLATFORM_PYRA)
   #define Isinf(a) (((*(unsigned int*)&a)&0x7fffffff)==0x7f800000)
-#elif defined(ANDROID)                                     		#define Isinf std::isinf
+#elif defined(ANDROID)
+  #define Isinf std::isinf
 #else
   #define Isinf isinff
 #endif
@@ -65,7 +66,12 @@ static inline void BoxToGrid(
   iMinZ = INDEX(floor(fMinZ/GRID_CELLSIZE));
   iMaxX = INDEX(ceil(fMaxX/GRID_CELLSIZE));
   iMaxZ = INDEX(ceil(fMaxZ/GRID_CELLSIZE));
-#else                                                           		iMinX = std::isinf(fMinX) ? GRID_MIN : INDEX(floor(fMinX/GRID_CELLSIZE));                                                   		iMinZ = std::isinf(fMinZ) ? GRID_MIN : INDEX(floor(fMinZ/GRID_CELLSIZE));                                                   		iMaxX = std::isinf(fMaxX) ? GRID_MIN : INDEX(ceil(fMaxX/GRID_CELLSIZE));                                                    		iMaxZ = std::isinf(fMaxZ) ? GRID_MIN : INDEX(ceil(fMaxZ/GRID_CELLSIZE));                                                  #endif
+#else
+		iMinX = std::isinf(fMinX) ? GRID_MIN : INDEX(floor(fMinX/GRID_CELLSIZE);
+		iMinZ = std::isinf(fMinZ) ? GRID_MIN : INDEX(floor(fMinZ/GRID_CELLSIZE));
+  iMaxX = std::isinf(fMaxX) ? GRID_MIN : INDEX(ceil(fMaxX/GRID_CELLSIZE));
+  iMaxZ = std::isinf(fMaxZ) ? GRID_MIN : INDEX(ceil(fMaxZ/GRID_CELLSIZE));
+#endif
 
   iMinX = Clamp(iMinX, (INDEX)GRID_MIN, (INDEX)GRID_MAX);
   iMinZ = Clamp(iMinZ, (INDEX)GRID_MIN, (INDEX)GRID_MAX);
