@@ -70,9 +70,14 @@ DLLFUNCTION( OGL, void , glEdgeFlagv,( const GLboolean *flag ),0,0);
 DLLFUNCTION( OGL, void , glScissor,( GLint x, GLint y,
                                    GLsizei width, GLsizei height),0,0);
 
+#ifdef _GLES //karin: glClipPlanef and glGetClipPlanef on GLES
+		DLLFUNCTION( OGL, void , glClipPlanef,( GLenum plane, const GLfloat *equation ),0,0);
+                                                              		DLLFUNCTION( OGL, void , glGetClipPlanef,( GLenum plane, GLfloat *equation ),0,0);
+#else
 DLLFUNCTION( OGL, void , glClipPlane,( GLenum plane, const GLdouble *equation ),0,0);
 
 DLLFUNCTION( OGL, void , glGetClipPlane,( GLenum plane, GLdouble *equation ),0,0);
+#endif
 
 #if !defined(_GLES) //karin: no glDrawBuffer and glReadBuffer on GLES
 DLLFUNCTION( OGL, void , glDrawBuffer,( GLenum mode ),0,0);
