@@ -15,7 +15,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #ifdef _DIII4A //karin: sound on Android
 #ifdef _ANDROID_SOUND_OBOE
-#include "SoundLibrary_diii4a.cpp"
+#include "SoundLibrary_oboe.cpp"
 #else
 #include "SoundLibrary_opensl.cpp"
 #endif
