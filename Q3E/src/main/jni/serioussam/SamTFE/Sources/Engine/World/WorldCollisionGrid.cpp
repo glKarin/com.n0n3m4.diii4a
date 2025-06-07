@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <Engine/Templates/StaticStackArray.cpp>
 #include <Engine/Templates/AllocationArray.h>
 #include <Engine/Templates/AllocationArray.cpp>
+#include <cmath> //karin: for isinf
 
 #define DEBUG_COLLIDEWITHALL 0
 
@@ -48,8 +49,9 @@ static inline void BoxToGrid(
   FLOAT fMaxX = boxEntity.Max()(1);
   FLOAT fMaxZ = boxEntity.Max()(3);
 #ifdef __arm__
-#if defined(PLATFORM_PANDORA) || defined(PLATFORM_PYRA) || defined(ANDROID) //karin: no isinff
+#if defined(PLATFORM_PANDORA) || defined(PLATFORM_PYRA)
   #define Isinf(a) (((*(unsigned int*)&a)&0x7fffffff)==0x7f800000)
+#elif defined(ANDROID)                                     		#define Isinf std::isinf
 #else
   #define Isinf isinff
 #endif
@@ -58,10 +60,12 @@ static inline void BoxToGrid(
   iMaxX = (Isinf(fMaxX))?INDEX(GRID_MIN):Clamp(INDEX(ceil(fMaxX/GRID_CELLSIZE)), (INDEX)GRID_MIN, (INDEX)GRID_MAX);
   iMaxZ = (Isinf(fMaxZ))?INDEX(GRID_MIN):Clamp(INDEX(ceil(fMaxZ/GRID_CELLSIZE)), (INDEX)GRID_MIN, (INDEX)GRID_MAX);
 #else
+#if 0 //karin: must check is inf, it cause block on intro
   iMinX = INDEX(floor(fMinX/GRID_CELLSIZE));
   iMinZ = INDEX(floor(fMinZ/GRID_CELLSIZE));
   iMaxX = INDEX(ceil(fMaxX/GRID_CELLSIZE));
   iMaxZ = INDEX(ceil(fMaxZ/GRID_CELLSIZE));
+#else                                                           		iMinX = std::isinf(fMinX) ? GRID_MIN : INDEX(floor(fMinX/GRID_CELLSIZE));                                                   		iMinZ = std::isinf(fMinZ) ? GRID_MIN : INDEX(floor(fMinZ/GRID_CELLSIZE));                                                   		iMaxX = std::isinf(fMaxX) ? GRID_MIN : INDEX(ceil(fMaxX/GRID_CELLSIZE));                                                    		iMaxZ = std::isinf(fMaxZ) ? GRID_MIN : INDEX(ceil(fMaxZ/GRID_CELLSIZE));                                                  #endif
 
   iMinX = Clamp(iMinX, (INDEX)GRID_MIN, (INDEX)GRID_MAX);
   iMinZ = Clamp(iMinZ, (INDEX)GRID_MIN, (INDEX)GRID_MAX);
