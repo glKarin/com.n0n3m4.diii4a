@@ -814,7 +814,10 @@ static void ogl_ClipPlane( const DOUBLE *pdViewPlane)
 
   _sfStats.StartTimer(CStatForm::STI_GFXAPI);
 
-#ifdef _GLES //karin: glClipPlanef                              const GLfloat cps[] = { pdViewPlane[0], pdViewPlane[1], pdViewPlane[2], pdViewPlane[3] };                                   pglClipPlane( GL_CLIP_PLANE0, cps);                         #else
+#ifdef _GLES //karin: glClipPlanef                              
+const GLfloat cps[] = { pdViewPlane[0], pdViewPlane[1], pdViewPlane[2], pdViewPlane[3] };                                   
+pglClipPlane( GL_CLIP_PLANE0, cps);                         
+#else
   pglClipPlane( GL_CLIP_PLANE0, pdViewPlane);
 #endif
   OGL_CHECKERROR;
