@@ -429,11 +429,6 @@ DECL_DLL INDEX plr_iHiScore = 0.0f;
 DECL_DLL void *ctl_pvPlayerControls = &pctlCurrent;
 DECL_DLL const SLONG ctl_slPlayerControlsSize = sizeof(pctlCurrent);
 
-#ifdef _DIII4A
-extern float analogx;
-extern float analogy;
-extern int analogenabled;
-#endif
 // called to compose action packet from current controls
 DECL_DLL void ctl_ComposeActionPacket(const CPlayerCharacter &pc, CPlayerAction &paAction, BOOL bPreScan)
 {
@@ -498,21 +493,9 @@ DECL_DLL void ctl_ComposeActionPacket(const CPlayerCharacter &pc, CPlayerAction 
 
   // add button movement/rotation/look actions to the axis actions
   if(pctlCurrent.bMoveForward  || (pctlCurrent.bStrafeFB&&pctlCurrent.bTurnUp)  ) paAction.pa_vTranslation(3) -= plr_fSpeedForward;
-#ifdef _DIII4A //karin: analog move
-	else if (analogenabled && analogy > 0) paAction.pa_vTranslation(3) -= plr_fSpeedForward * analogy;
-#endif
   if(pctlCurrent.bMoveBackward || (pctlCurrent.bStrafeFB&&pctlCurrent.bTurnDown)) paAction.pa_vTranslation(3) += plr_fSpeedBackward;
-#ifdef _DIII4A //karin: analog move
-	else if (analogenabled && analogy < 0) paAction.pa_vTranslation(3) -= plr_fSpeedBackward * analogy;
-#endif
   if(pctlCurrent.bMoveLeft  || (pctlCurrent.bStrafe&&pctlCurrent.bTurnLeft) ) paAction.pa_vTranslation(1) -= plr_fSpeedSide;
-#ifdef _DIII4A //karin: analog move
-	else if (analogenabled && analogx < 0) paAction.pa_vTranslation(1) += plr_fSpeedSide * analogx;
-#endif
   if(pctlCurrent.bMoveRight || (pctlCurrent.bStrafe&&pctlCurrent.bTurnRight)) paAction.pa_vTranslation(1) += plr_fSpeedSide;
-#ifdef _DIII4A //karin: analog move
-	else if (analogenabled && analogx > 0) paAction.pa_vTranslation(1) += plr_fSpeedSide * analogx;
-#endif
   if(pctlCurrent.bMoveUp       ) paAction.pa_vTranslation(2) += plr_fSpeedUp;
   if(pctlCurrent.bMoveDown     ) paAction.pa_vTranslation(2) -= plr_fSpeedUp;
 

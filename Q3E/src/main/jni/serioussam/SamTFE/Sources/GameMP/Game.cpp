@@ -760,12 +760,26 @@ FLOAT CControls::GetAxisValue(INDEX iAxis)
   return fReading*aa.aa_fAxisInfluence;
 }
 
+#ifdef _DIII4A //karin: analog move
+extern float analogx;
+extern float analogy;
+extern int analogenabled;
+#endif
 void CControls::CreateAction(const CPlayerCharacter &pc, CPlayerAction &paAction, BOOL bPreScan)
 {
   // set axis-controlled moving
   paAction.pa_vTranslation(1) = -GetAxisValue( AXIS_MOVE_LR);
   paAction.pa_vTranslation(2) = GetAxisValue( AXIS_MOVE_UD);
   paAction.pa_vTranslation(3) = -GetAxisValue( AXIS_MOVE_FB);
+#ifdef _DIII4A //karin: analog move
+  if (analogenabled)
+  {
+	  if(analogy > 0) paAction.pa_vTranslation(3) -= analogy;
+	  else if (analogy < 0) paAction.pa_vTranslation(3) -= analogy;
+	  if (analogx < 0) paAction.pa_vTranslation(1) += analogx;
+	  else if (analogx > 0) paAction.pa_vTranslation(1) += analogx;
+  }
+#endif
   // set axis-controlled rotation
   paAction.pa_aRotation(1) = (ANGLE)-GetAxisValue( AXIS_TURN_LR);
   paAction.pa_aRotation(2) = (ANGLE)GetAxisValue( AXIS_TURN_UD);

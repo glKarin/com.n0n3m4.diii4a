@@ -75,8 +75,10 @@ void Android_MouseMotionEvent(float dx, float dy);
 
 int Q3E_GetMouseState(int *x, int *y)
 {
-	*x = (int)in_positionX;
-	*y = (int)in_positionY;
+	if(x)
+		*x = (int)in_positionX;
+	if(y)
+		*y = (int)in_positionY;
 	return mouseState;
 }
 
@@ -136,11 +138,14 @@ void Q3E_MotionEvent(float dx, float dy)
 	// mouse motion event
 	Android_MouseMotionEvent(dx, dy);
 
-	event.type = SDL_MOUSEMOTION;
-	event.motion.x = (int)in_positionX;
-	event.motion.y = (int)in_positionY;
-	event.motion.xrel = (int)dx;
-	event.motion.yrel = (int)dy;
+	if(!relativeMouseMode)
+	{
+		event.type = SDL_MOUSEMOTION;
+		event.motion.x = (int)in_positionX;
+		event.motion.y = (int)in_positionY;
+		event.motion.xrel = (int)dx;
+		event.motion.yrel = (int)dy;
+	}
 }
 
 BOOL com_fullyInitialized = FALSE;
@@ -173,8 +178,16 @@ void Q3E_SetRelativeMouseMode(BOOL on)
 {
 	relativeMouseMode = on;
 	Android_GrabMouseCursor(on);
-	in_positionX = 0;
-	in_positionY = 0;
+	if(on)
+	{
+		in_positionX = IN_WINDOW_WIDTH / 2;
+		in_positionY = IN_WINDOW_HEIGHT / 2;
+	}
+	else
+	{
+		in_positionX = 0;
+		in_positionY = 0;
+	}
 	in_deltaX = 0;
 	in_deltaY = 0;
 }
@@ -199,11 +212,14 @@ BOOL Q3E_PollEvent(SDL_Event *ev)
 		return TRUE;
 	}
 	event.type = 0;
-	if(Android_PollEvents(1) && event.type)
+	while(Android_PollEvents(1))
 	{
-		memcpy(ev, &event, sizeof(SDL_Event));
-		event.type = 0;
-		return TRUE;
+		if(event.type) //maybe a analog event
+		{
+			memcpy(ev, &event, sizeof(SDL_Event));
+			event.type = 0;
+			return TRUE;
+		}
 	}
 	return FALSE;
 }

@@ -349,6 +349,10 @@ SDL_Scancode Q3E_GetScancodeFromKey(SDL_Keycode key)
 }
 extern const uint8_t * Q3E_GetKeyboardState(int *numkeys);
 extern void Q3E_GetRelativeMouseState(int *x, int *y);
+extern void Q3E_SetRelativeMouseMode(BOOL on);
+extern void Q3E_GetWindowSize(void *, int *winw, int *winh);
+extern void Q3E_GetMouseState(int *x, int *y);
+extern BOOL Q3E_PollEvent(SDL_Event *ev);
 
 
 extern INDEX inp_iKeyboardReadingMethod;
@@ -388,10 +392,6 @@ static CTCriticalSection sl_csInput;
 
 extern INDEX inp_ctJoysticksAllowed;
 
-extern void Q3E_SetRelativeMouseMode(BOOL on);
-extern void Q3E_GetWindowSize(void *, int *winw, int *winh);
-extern void Q3E_GetMouseState(int *x, int *y);
-extern BOOL Q3E_PollEvent(SDL_Event *ev);
 /*
 
 NOTE: Two different types of key codes are used here:
