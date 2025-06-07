@@ -58,8 +58,10 @@ void R_DrawCursor(void)
 	if(ce) pglDisableClientState(GL_COLOR_ARRAY);
 	GLboolean dt = pglIsEnabled(GL_DEPTH_TEST);
 	GLboolean bl = pglIsEnabled(GL_BLEND);
+	GLboolean tt = pglIsEnabled(GL_TEXTURE_2D);
 	if(dt) pglDisable(GL_DEPTH_TEST);
-	if(bl) pglDisable(GL_BLEND);
+	if(!bl) pglEnable(GL_BLEND);
+	if(tt) pglDisable(GL_TEXTURE_2D);
 	GLboolean dm;
 	pglGetBooleanv(GL_DEPTH_WRITEMASK, &dm);
 	if(dm) pglDepthMask(GL_FALSE);
@@ -70,10 +72,10 @@ void R_DrawCursor(void)
 	GLboolean cm[4];
 	pglGetBooleanv(GL_COLOR_WRITEMASK, cm);
 	pglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	*/
 	pglGetIntegerv(GL_BLEND_SRC, &blsrc);
 	pglGetIntegerv(GL_BLEND_DST, &bldst);
-	pglBlendFunc(GL_ONE, GL_ZERO);
-	*/
+	pglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// matrix
 	int x, y;
@@ -91,7 +93,7 @@ void R_DrawCursor(void)
 	pglRotatef(150.0f, 0, 0, 1);
 	
 	// draw
-	pglColor4f(1, 1, 1, 1);
+	pglColor4f(1, 1, 1, 0.9f);
 	GLfloat r = 50;
 	const GLfloat vs[] = {
 		0, 0,
@@ -108,14 +110,15 @@ void R_DrawCursor(void)
 	if(ne) pglEnableClientState(GL_NORMAL_ARRAY);
 	if(ce) pglEnableClientState(GL_COLOR_ARRAY);
 	if(dt) pglEnable(GL_DEPTH_TEST);
-	if(bl) pglEnable(GL_BLEND);
+	if(!bl) pglDisable(GL_BLEND);
+	if(tt) pglEnable(GL_TEXTURE_2D);
 	if(dm) pglDepthMask(GL_TRUE);
 	pglPopMatrix();
 	pglMatrixMode(GL_PROJECTION);
 	pglPopMatrix();
 	pglMatrixMode((GLenum)mm);
+	pglBlendFunc((GLenum)blsrc, (GLenum)bldst);
 	//pglColorMask(cm[0], cm[1], cm[2], cm[3]);
-	//pglBlendFunc((GLenum)blsrc, (GLenum)bldst);
 }
 
 void EGL_SwapBuffers(void) {
