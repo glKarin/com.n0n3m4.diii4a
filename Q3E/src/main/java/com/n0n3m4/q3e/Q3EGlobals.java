@@ -108,6 +108,11 @@ public final class Q3EGlobals
     public static final int ONSCRREN_JOYSTICK_VISIBLE_HIDDEN       = 1;
     public static final int ONSCRREN_JOYSTICK_VISIBLE_ONLY_PRESSED = 2;
 
+    // button swipe release delay
+    public static final int BUTTON_SWIPE_RELEASE_DELAY_AUTO        = -1;
+    public static final int BUTTON_SWIPE_RELEASE_DELAY_NONE        = 0;
+    public static final int SERIOUS_SAM_BUTTON_SWIPE_RELEASE_DELAY = 50;
+
     // disc button trigger
     public static final int ONSCRREN_DISC_SWIPE = 0;
     public static final int ONSCRREN_DISC_CLICK = 1;
@@ -284,6 +289,7 @@ public final class Q3EGlobals
         TDM_GLSL_SHADER,
         GZDOOM_RESOURCE,
         DOOM3_BFG_CHINESE_TRANSLATION,
+        //SERIOUS_SAM_TFE,
     }
 
 /*
@@ -411,6 +417,7 @@ public final class Q3EGlobals
     public static final String TDM_2_12_GLSL_SHADER_VERSION   = "2.12.6"; // 6: fix a integer to float convert
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
     public static final String GZDOOM_VERSION                 = "4.14.1.1"; // 1: init
+    //public static final String SAMTFE_VERSION                 = "1.10.7.1"; // 1: init
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 

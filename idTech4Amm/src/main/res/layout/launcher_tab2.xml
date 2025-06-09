@@ -213,6 +213,34 @@
             </LinearLayout>
         </LinearLayout>
 
+
+		<LinearLayout
+			android:id="@+id/launcher_tab2_release_delay_layout"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:orientation="horizontal">
+
+			<TextView
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:gravity="center_vertical"
+				android:text="@string/button_swipe_release_delay_ms"
+				android:textAppearance="?android:attr/textAppearanceSmall"/>
+			<EditText
+				android:id="@+id/button_swipe_release_delay"
+				android:inputType="numberSigned|textNoSuggestions"
+				android:ems="10"
+				android:hint="@string/y_axis_sensitivity_of_gyroscope"
+				android:imeOptions="flagNoExtractUi"
+				android:text="-1"
+				android:layout_width="100dp"
+				android:layout_height="wrap_content"
+				android:layout_gravity="right|center_vertical"
+				android:autofillHints="" />
+		</LinearLayout>
+
 		<CheckBox
 			android:id="@+id/hideonscr"
 			android:layout_width="wrap_content"

@@ -487,5 +487,6 @@
     <string name="global_illumination_brightness">Global illumination brightness</string>
     <string name="retro_postprocess">Retro postprocess(r_renderMode)</string>
     <string name="enable_built_in_bot_assets_if_external_assets_missing">Enable built-in bot assets if external assets missing(only DOOM 3 and Quake 4 base game)(harm_g_botEnableBuiltinAssets)</string>
+    <string name="button_swipe_release_delay_ms">Button swipe release delay(ms)\n-1 = automatic; 0 = none</string>
 
 </resources>

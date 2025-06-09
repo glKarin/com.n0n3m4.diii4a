@@ -71,8 +71,8 @@ DLLFUNCTION( OGL, void , glScissor,( GLint x, GLint y,
                                    GLsizei width, GLsizei height),0,0);
 
 #ifdef _GLES //karin: glClipPlanef and glGetClipPlanef on GLES
-		DLLFUNCTION( OGL, void , glClipPlanef,( GLenum plane, const GLfloat *equation ),0,0);
-                                                              		DLLFUNCTION( OGL, void , glGetClipPlanef,( GLenum plane, GLfloat *equation ),0,0);
+DLLFUNCTION( OGL, void , glClipPlanef,( GLenum plane, const GLfloat *equation ),0,0);
+DLLFUNCTION( OGL, void , glGetClipPlanef,( GLenum plane, GLfloat *equation ),0,0);
 #else
 DLLFUNCTION( OGL, void , glClipPlane,( GLenum plane, const GLdouble *equation ),0,0);
 

@@ -137,6 +137,17 @@ public class Q3EPatchResourceManager
                 "maps/"
         );
         resourceList.add(rsc);
+
+/*        rsc = new Q3EPatchResource_zipToDir(
+                Q3EGlobals.PatchResource.SERIOUS_SAM_TFE,
+                Q3ELang.tr(context, R.string.serious_sam_tfe_patch),
+                Q3EGlobals.SAMTFE_VERSION,
+                Q3EGlobals.GAME_SAMTFE,
+                null,
+                "pak/serioussam/SamTFE.zip",
+                ""
+        );
+        resourceList.add(rsc);*/
     }
 
     public String Fetch(Q3EGlobals.PatchResource type, boolean overwrite, String...fsgame)

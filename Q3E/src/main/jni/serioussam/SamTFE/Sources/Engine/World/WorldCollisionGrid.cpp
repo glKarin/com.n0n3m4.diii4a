@@ -67,8 +67,8 @@ static inline void BoxToGrid(
   iMaxX = INDEX(ceil(fMaxX/GRID_CELLSIZE));
   iMaxZ = INDEX(ceil(fMaxZ/GRID_CELLSIZE));
 #else
-		iMinX = std::isinf(fMinX) ? GRID_MIN : INDEX(floor(fMinX/GRID_CELLSIZE));
-		iMinZ = std::isinf(fMinZ) ? GRID_MIN : INDEX(floor(fMinZ/GRID_CELLSIZE));
+  iMinX = std::isinf(fMinX) ? GRID_MIN : INDEX(floor(fMinX/GRID_CELLSIZE));
+  iMinZ = std::isinf(fMinZ) ? GRID_MIN : INDEX(floor(fMinZ/GRID_CELLSIZE));
   iMaxX = std::isinf(fMaxX) ? GRID_MIN : INDEX(ceil(fMaxX/GRID_CELLSIZE));
   iMaxZ = std::isinf(fMaxZ) ? GRID_MIN : INDEX(ceil(fMaxZ/GRID_CELLSIZE));
 #endif

@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.view.View;
 
 import com.n0n3m4.q3e.karin.KBacktraceHandler;
 
@@ -239,6 +240,36 @@ public class Q3ECallbackObj
     public void sendMotionEvent(final float deltax, final float deltay)
     {
         eventEngine.SendMotionEvent(deltax, deltay);
+    }
+
+    public void sendAnalogDelayed(final boolean down, final float x, final float y, View view, final int delay)
+    {
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                eventEngine.SendAnalogEvent(down, x, y);
+            }
+        }, delay);
+    }
+
+    public void sendKeyEventDelayed(final boolean down, final int keycode, final int charcode, View view, final int delay)
+    {
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                eventEngine.SendKeyEvent(down, keycode, charcode);
+            }
+        }, delay);
+    }
+
+    public void sendMotionEventDelayed(final float deltax, final float deltay, View view, final int delay)
+    {
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                eventEngine.SendMotionEvent(deltax, deltay);
+            }
+        }, delay);
     }
 
     public void InitGUIInterface(Activity context)

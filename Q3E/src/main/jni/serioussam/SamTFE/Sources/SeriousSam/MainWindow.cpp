@@ -190,7 +190,7 @@ void CloseMainWindow(void)
     // destroy it
     #ifdef PLATFORM_WIN32
     DestroyWindow(_hwndMain);
-#elif defined(_DIII4A) //karin: no SDL
+    #elif defined(_DIII4A) //karin: no SDL
     #else
     SDL_DestroyWindow((SDL_Window *) _hwndMain);
     #endif
@@ -275,7 +275,7 @@ void OpenMainWindowNormal( PIX pixSizeI, PIX pixSizeJ)
   ResetMainWindowNormal();
 
 #elif defined(_DIII4A) //karin: ANativeWindow can changed when destroyed, ans this handle will not use on Android, but it must be setup non-null
-  _hwndMain = (void *)(intptr_t)1;
+  _hwndMain = (void *)(intptr_t)0x7FFFFFFF;
   SE_UpdateWindowHandle( _hwndMain);
   _pixLastSizeI = pixSizeI;
   _pixLastSizeJ = pixSizeJ;
@@ -319,7 +319,8 @@ void OpenMainWindowFullScreen( PIX pixSizeI, PIX pixSizeJ)
   SetWindowTextA( _hwndMain, achWindowTitle);
   ShowWindow(    _hwndMain, SW_SHOWNORMAL);
 
-#elif defined(_DIII4A) //karin: no SDL
+#elif defined(_DIII4A) //karin: ANativeWindow can changed when destroyed, ans this handle will not use on Android, but it must be setup non-null
+  _hwndMain = (void *)(intptr_t)0x7FFFFFFF;
   SE_UpdateWindowHandle( _hwndMain);
   _pixLastSizeI = pixSizeI;
   _pixLastSizeJ = pixSizeJ;

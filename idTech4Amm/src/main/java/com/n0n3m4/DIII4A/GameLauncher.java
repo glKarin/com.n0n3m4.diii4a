@@ -1970,16 +1970,9 @@ public class GameLauncher extends Activity
 		V.launcher_tab2_gyro_y_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
 		UpdateEnableGyro(V.launcher_tab2_enable_gyro.isChecked());
 		V.launcher_tab2_gyro_x_axis_sens.addTextChangedListener(new TextWatcher() {
-			public void onTextChanged(CharSequence s, int start, int before, int count)
-			{
-			}
-
-			public void beforeTextChanged(CharSequence s, int start, int count, int after)
-			{
-			}
-
-			public void afterTextChanged(Editable s)
-			{
+			public void onTextChanged(CharSequence s, int start, int before, int count) {}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+			public void afterTextChanged(Editable s) {
 				String value = s.length() == 0 ? "" + Q3EControlView.GYROSCOPE_X_AXIS_SENS : s.toString();
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EUtils.parseFloat_s(value, Q3EControlView.GYROSCOPE_Y_AXIS_SENS))
@@ -1987,19 +1980,23 @@ public class GameLauncher extends Activity
 			}
 		});
 		V.launcher_tab2_gyro_y_axis_sens.addTextChangedListener(new TextWatcher() {
-			public void onTextChanged(CharSequence s, int start, int before, int count)
-			{
-			}
-
-			public void beforeTextChanged(CharSequence s, int start, int count, int after)
-			{
-			}
-
-			public void afterTextChanged(Editable s)
-			{
+			public void onTextChanged(CharSequence s, int start, int before, int count) {}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+			public void afterTextChanged(Editable s) {
 				String value = s.length() == 0 ? "" + Q3EControlView.GYROSCOPE_Y_AXIS_SENS : s.toString();
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EUtils.parseFloat_s(value, Q3EControlView.GYROSCOPE_Y_AXIS_SENS))
+						.commit();
+			}
+		});
+		V.button_swipe_release_delay.setText(Q3EPreference.GetStringFromInt(mPrefs, Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO));
+		V.button_swipe_release_delay.addTextChangedListener(new TextWatcher() {
+			public void onTextChanged(CharSequence s, int start, int before, int count) {}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+			public void afterTextChanged(Editable s) {
+				String value = s.length() == 0 ? "" + Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO : s.toString();
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EUtils.parseInt_s(value, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO))
 						.commit();
 			}
 		});
@@ -2883,6 +2880,7 @@ public class GameLauncher extends Activity
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_globalIlluminationBrightness, Q3EUtils.parseFloat_s(V.edt_r_globalIlluminationBrightness.getText().toString(), 0.5f));
 		mEdtr.putInt(Q3EPreference.pref_harm_r_renderMode, V.spinner_r_renderMode.getSelectedItemPosition());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_g_botEnableBuiltinAssets, V.cb_g_botEnableBuiltinAssets.isChecked());
+		mEdtr.putInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EUtils.parseInt_s(V.button_swipe_release_delay.getText().toString(), Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO));
 
         mEdtr.commit();
     }
@@ -4738,6 +4736,7 @@ public class GameLauncher extends Activity
 		public EditText edt_r_globalIlluminationBrightness;
 		public Spinner spinner_r_renderMode;
 		public CheckBox cb_g_botEnableBuiltinAssets;
+		public EditText button_swipe_release_delay;
 
         public void Setup()
         {
@@ -4895,6 +4894,7 @@ public class GameLauncher extends Activity
 			edt_r_globalIlluminationBrightness = findViewById(R.id.edt_r_globalIlluminationBrightness);
 			spinner_r_renderMode = findViewById(R.id.spinner_r_renderMode);
 			cb_g_botEnableBuiltinAssets = findViewById(R.id.cb_g_botEnableBuiltinAssets);
+			button_swipe_release_delay = findViewById(R.id.button_swipe_release_delay);
         }
     }
 }
