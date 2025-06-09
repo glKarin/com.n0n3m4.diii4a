@@ -42,6 +42,7 @@ BOOL GLimp_InitGL(void)
 	return res;
 }
 
+#if 0
 extern void Q3E_GetMouseState(int *, int *);
 extern void Q3E_GetWindowSize(void *, int *, int *);
 extern BOOL Q3E_GetRelativeMouseMode(void);
@@ -120,10 +121,13 @@ void R_DrawCursor(void)
 	pglBlendFunc((GLenum)blsrc, (GLenum)bldst);
 	//pglColorMask(cm[0], cm[1], cm[2], cm[3]);
 }
+#endif
 
 void EGL_SwapBuffers(void) {
+#if 0
 	if(!Q3E_GetRelativeMouseMode())
 		R_DrawCursor();
+#endif
     Q3E_SwapBuffers();
 }
 

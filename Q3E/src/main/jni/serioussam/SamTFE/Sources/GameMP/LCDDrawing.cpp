@@ -216,9 +216,15 @@ extern void _LCDDrawPointer(PIX pixI, PIX pixJ)
     while (ShowCursor(FALSE) >= 0);
   } else {
     if (!_pInput->IsInputEnabled()) {
+#ifdef _DIII4A //karin: always show cursor on Android
+      while (ShowCursor(FALSE) >= 0);
+#else
       while (ShowCursor(TRUE) < 0);
+#endif
     }
+#if !defined(_DIII4A) //karin: always show cursor on Android
     return;
+#endif
   }
   PIX pixSizeI = _toPointer.GetWidth();
   PIX pixSizeJ = _toPointer.GetHeight();
