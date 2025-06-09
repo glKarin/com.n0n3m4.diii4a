@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.7)
 project(SeriousEngineTFE)
 
+set(SAM_PREFIX "SamTFE_")
+
 if(DIII4A)
     add_subdirectory(External/libogg)
     include_directories(${SAMTFE_OGG_INCLUDE_DIR})
@@ -992,7 +994,7 @@ else()
 	set(LIB_LINK_TYPE SHARED)
 endif()
 
-set(ENTITIESMPLIB "Entities${MP}${DEBUGSUFFIX}")
+set(ENTITIESMPLIB "${SAM_PREFIX}Entities${MP}${DEBUGSUFFIX}")
 if(INTERNAL_NAME STREQUAL "serioussam")
 	add_library(${ENTITIESMPLIB} ${LIB_LINK_TYPE}
      ${ENTITIES_CPP}
@@ -1019,7 +1021,7 @@ if(MACOSX)
 endif()
 add_dependencies(${ENTITIESMPLIB} ParseEntities${MP})
 
-set(GAMEMPLIB "Game${MP}${DEBUGSUFFIX}")
+set(GAMEMPLIB "${SAM_PREFIX}Game${MP}${DEBUGSUFFIX}")
 add_library(${GAMEMPLIB} ${LIB_LINK_TYPE}
     GameMP/Camera.cpp
     GameMP/CompMessage.cpp
@@ -1040,7 +1042,7 @@ endif()
 add_dependencies(${GAMEMPLIB} ParseEntities${MP})
 
 if(NOT XPLUS)
-set(SHADERSLIB "Shaders${MP}${DEBUGSUFFIX}")
+	set(SHADERSLIB "${SAM_PREFIX}Shaders${MP}${DEBUGSUFFIX}")
 add_library(${SHADERSLIB} ${LIB_LINK_TYPE}
     Shaders/AddShader.cpp
     Shaders/AddShaderDS.cpp
@@ -1138,14 +1140,14 @@ set(ENGINE_SAFEMATH_SRCS
     Engine/Math/Projection_Simple_DOUBLE.cpp
     Engine/Math/Geometry_DOUBLE.cpp
 )
-add_library(engine_safemath${MP} STATIC
+add_library(${SAM_PREFIX}engine_safemath${MP} STATIC
     ${ENGINE_SAFEMATH_SRCS}
 )
-target_compile_options(engine_safemath${MP} PRIVATE "-fno-unsafe-math-optimizations")
+target_compile_options(${SAM_PREFIX}engine_safemath${MP} PRIVATE "-fno-unsafe-math-optimizations")
 if(PANDORA)
-    target_compile_options(engine_safemath${MP} PRIVATE "-mfpu=vfpv3")
+	target_compile_options(${SAM_PREFIX}engine_safemath${MP} PRIVATE "-mfpu=vfpv3")
 endif()
-add_dependencies(engine_safemath${MP} ParseEntities${MP})
+add_dependencies(${SAM_PREFIX}engine_safemath${MP} ParseEntities${MP})
 
 set(ENGINE_SRCS
     ${ENGINE_ENTITIES_CPP}
@@ -1316,7 +1318,7 @@ set(ENGINE_SRCS
     ${ZLIB_SRCS}
 )
 if(NOT DIII4A)
-set(ENGINELIB "Engine${MP}${DEBUGSUFFIX}")
+	set(ENGINELIB "${SAM_PREFIX}Engine${MP}${DEBUGSUFFIX}")
 add_library(${ENGINELIB} ${LIB_LINK_TYPE}
      ${ENGINE_SRCS}
 )
@@ -1324,7 +1326,7 @@ if(MACOSX)
     target_link_libraries(${ENGINELIB} "-undefined dynamic_lookup")
 endif()
 add_dependencies(${ENGINELIB} ParseEntities${MP})
-target_link_libraries(${ENGINELIB} engine_safemath${MP})
+target_link_libraries(${ENGINELIB} ${SAM_PREFIX}engine_safemath${MP})
 if(FREEBSD)
 target_link_libraries(${ENGINELIB} ${SDL2_LIBRARY})
 target_link_libraries(${ENGINELIB} ${ZLIB_LIBRARIES})
@@ -1349,7 +1351,7 @@ set_target_properties(${ENGINELIB} PROPERTIES ENABLE_EXPORTS ON LINK_FLAGS "-Wl,
 endif()
 
 if(ANDROID)
-	add_library(SeriousSam${MP} SHARED
+	add_library(SeriousSamTFE${MP} SHARED
     ${ENGINE_SRCS}
     SeriousSam/LevelInfo.cpp
     SeriousSam/CmdLine.cpp
@@ -1365,7 +1367,7 @@ if(ANDROID)
     SeriousSam/MenuPrinting.cpp
 )
 else()
-add_executable(SeriousSam${MP}
+	add_executable(SeriousSamTFE${MP}
     #${ENGINE_SRCS}
     SeriousSam/LevelInfo.cpp
     SeriousSam/CmdLine.cpp
@@ -1382,13 +1384,13 @@ add_executable(SeriousSam${MP}
 )
 endif()
 if(DIII4A)
-	target_link_libraries(SeriousSam${MP} ${ENGINELIB} EGL android z ${ANDROID_SOUND_LIB} engine_safemath${MP} -Wl,--whole-archive ${ENTITIESMPLIB} ${GAMEMPLIB} amp11lib${MP} samtfe_ogg samtfe_vorbis -Wl,--no-whole-archive )
+	target_link_libraries(SeriousSamTFE${MP} ${ENGINELIB} EGL android z ${ANDROID_SOUND_LIB} ${SAM_PREFIX}engine_safemath${MP} -Wl,--whole-archive ${ENTITIESMPLIB} ${GAMEMPLIB} ${SAM_PREFIX}amp11lib${MP} samtfe_ogg samtfe_vorbis -Wl,--no-whole-archive )
 else()
-target_link_libraries(SeriousSam${MP} ${ENGINELIB})
+	target_link_libraries(SeriousSamTFE${MP} ${ENGINELIB})
 endif()
-add_dependencies(SeriousSam${MP} ParseEntities${MP})
+add_dependencies(SeriousSamTFE${MP} ParseEntities${MP})
 # Make symbols in the main executable available to dynamic objects
-set_target_properties(SeriousSam${MP} PROPERTIES ENABLE_EXPORTS ON)
+set_target_properties(SeriousSamTFE${MP} PROPERTIES ENABLE_EXPORTS ON)
 
 
 # !!! FIXME: this is an option because you have to recompile the entire engine twice.
@@ -1446,17 +1448,17 @@ set(AMP11LIB_SOURCE_FILES
     amp11lib/ampdec.h
     amp11lib/ampsynth.cpp)
 
-add_library(amp11lib${MP} ${LIB_LINK_TYPE} ${AMP11LIB_SOURCE_FILES})
+add_library(${SAM_PREFIX}amp11lib${MP} ${LIB_LINK_TYPE} ${AMP11LIB_SOURCE_FILES})
 endif()
 
 if(MACOSX)
-    target_link_libraries(SeriousSam${MP} ${ZLIB_LIBRARIES})
+	target_link_libraries(SeriousSamTFE${MP} ${ZLIB_LIBRARIES})
     if(USE_SYSTEM_SDL2) # use sdl2 framework on system
-      target_link_libraries(SeriousSam${MP} ${SDL2_LIBRARY})
+		target_link_libraries(SeriousSamTFE${MP} ${SDL2_LIBRARY})
     else() # use local libsdl2
 	  find_library(COCOA_FRAMEWORK Cocoa)
-      target_link_libraries(SeriousSam${MP} "${COCOA_FRAMEWORK}")
-      target_link_libraries(SeriousSam${MP} "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
+	  target_link_libraries(SeriousSamTFE${MP} "${COCOA_FRAMEWORK}")
+	  target_link_libraries(SeriousSamTFE${MP} "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
     endif()
     
     if(BUILD_DEDICATED_SERVER)
@@ -1471,12 +1473,12 @@ if(MACOSX)
 endif()
 
 if(LINUX)
-    set_target_properties(SeriousSam${MP} PROPERTIES LINK_FLAGS "-Wl,${RPATH_SETTINGS}")
-    target_link_libraries(SeriousSam${MP} "m")
-    target_link_libraries(SeriousSam${MP} "dl")
-    target_link_libraries(SeriousSam${MP} "pthread")
-    target_link_libraries(SeriousSam${MP} ${SDL2_LIBRARY})
-    target_link_libraries(SeriousSam${MP} ${ZLIB_LIBRARIES})
+	set_target_properties(SeriousSamTFE${MP} PROPERTIES LINK_FLAGS "-Wl,${RPATH_SETTINGS}")
+	target_link_libraries(SeriousSamTFE${MP} "m")
+	target_link_libraries(SeriousSamTFE${MP} "dl")
+	target_link_libraries(SeriousSamTFE${MP} "pthread")
+	target_link_libraries(SeriousSamTFE${MP} ${SDL2_LIBRARY})
+	target_link_libraries(SeriousSamTFE${MP} ${ZLIB_LIBRARIES})
     if(BUILD_DEDICATED_SERVER)
         set_target_properties(DedicatedServer${MP} PROPERTIES LINK_FLAGS "-Wl,${RPATH_SETTINGS}")
         target_link_libraries(DedicatedServer${MP} "m")
@@ -1504,11 +1506,11 @@ if(LINUX)
 endif()
 
 if(FREEBSD)
-    set_target_properties(SeriousSam${MP} PROPERTIES LINK_FLAGS "-Wl,${RPATH_SETTINGS}")
-    target_link_libraries(SeriousSam${MP} "m")
-    target_link_libraries(SeriousSam${MP} "pthread")
-    target_link_libraries(SeriousSam${MP} ${SDL2_LIBRARY})
-    target_link_libraries(SeriousSam${MP} ${ZLIB_LIBRARIES})
+	set_target_properties(SeriousSamTFE${MP} PROPERTIES LINK_FLAGS "-Wl,${RPATH_SETTINGS}")
+	target_link_libraries(SeriousSamTFE${MP} "m")
+	target_link_libraries(SeriousSamTFE${MP} "pthread")
+	target_link_libraries(SeriousSamTFE${MP} ${SDL2_LIBRARY})
+	target_link_libraries(SeriousSamTFE${MP} ${ZLIB_LIBRARIES})
     if(BUILD_DEDICATED_SERVER)
         set_target_properties(DedicatedServer${MP} PROPERTIES LINK_FLAGS "-Wl,${RPATH_SETTINGS}")
         target_link_libraries(DedicatedServer${MP} "m")
@@ -1520,28 +1522,28 @@ endif()
 
 # Set output name for not local installation
 if(LOCAL_INSTALL)
- set_target_properties(SeriousSam${MP} PROPERTIES OUTPUT_NAME "SeriousSamTFE")
+	set_target_properties(SeriousSamTFE${MP} PROPERTIES OUTPUT_NAME "SeriousSamTFE")
  if(NOT DIII4A)
  set_target_properties(DedicatedServer${MP}  PROPERTIES OUTPUT_NAME "DedicatedServer")
  set_target_properties(MakeFONT${MP} PROPERTIES OUTPUT_NAME "MakeFONT")
  set_target_properties(TEXConv${MP} PROPERTIES OUTPUT_NAME "TEXConv")
  endif()
- set_target_properties(amp11lib${MP} PROPERTIES OUTPUT_NAME "amp11lib${DEBUGSUFFIX}")
+ set_target_properties(${SAM_PREFIX}amp11lib${MP} PROPERTIES OUTPUT_NAME "${SAM_PREFIX}amp11lib${DEBUGSUFFIX}")
  if(NOT DIII4A)
  set_target_properties(${SHADERSLIBSE} PROPERTIES OUTPUT_NAME "Shaders${DEBUGSUFFIX}")
  endif()
 else()
     if(DIII4A)
- set_target_properties(SeriousSam${MP} PROPERTIES OUTPUT_NAME "SeriousSamTFE")
+		set_target_properties(SeriousSamTFE${MP} PROPERTIES OUTPUT_NAME "SeriousSamTFE")
      else()
- set_target_properties(SeriousSam${MP} PROPERTIES OUTPUT_NAME "${INTERNAL_NAME}")
+		 set_target_properties(SeriousSamTFE${MP} PROPERTIES OUTPUT_NAME "${INTERNAL_NAME}")
     endif()
  if(NOT DIII4A)
  set_target_properties(DedicatedServer${MP}  PROPERTIES OUTPUT_NAME "${INTERNAL_NAME}-ded")
  set_target_properties(MakeFONT${MP} PROPERTIES OUTPUT_NAME "${INTERNAL_NAME}-mkfont")
  set_target_properties(TEXConv${MP} PROPERTIES OUTPUT_NAME "${INTERNAL_NAME}-texconv")
  endif()
- set_target_properties(amp11lib${MP} PROPERTIES OUTPUT_NAME "amp11lib")
+ set_target_properties(${SAM_PREFIX}amp11lib${MP} PROPERTIES OUTPUT_NAME "${SAM_PREFIX}amp11lib")
  if(NOT DIII4A)
  set_target_properties(${SHADERSLIB} PROPERTIES OUTPUT_NAME "Shaders")
  endif()
@@ -1551,7 +1553,7 @@ endif() # NOT XPLUS
 # RAKE! Install Section.
 if(LOCAL_INSTALL AND NOT XPLUS)
 if(DEBUG) # RAKE! Will this work with TFE?
-    install(TARGETS SeriousSam${MP} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB}
+	install(TARGETS SeriousSamTFE${MP} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB}
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
             LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin/Debug"
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
@@ -1579,7 +1581,7 @@ if(DEBUG) # RAKE! Will this work with TFE?
                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     endif()
 else()
-    install(TARGETS SeriousSam${MP} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB} ${ENGINELIB}
+	install(TARGETS SeriousSamTFE${MP} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB} ${ENGINELIB}
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
             LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
@@ -1599,7 +1601,7 @@ else()
                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     endif()
     if(BUILD_AMP11LIB)
-        install(TARGETS amp11lib${MP}
+		install(TARGETS ${SAM_PREFIX}amp11lib${MP}
                 LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     endif()
@@ -1611,7 +1613,7 @@ elseif(LOCAL_INSTALL AND XPLUS)
 # NOT LOCAL INSTALL
 elseif(NOT LOCAL_INSTALL AND NOT XPLUS)
 if(DEBUG) # RAKE! Will this work with TFE?
-    install(TARGETS SeriousSam${MP} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB} ${ENGINELIB}
+	install(TARGETS SeriousSamTFE${MP} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB} ${ENGINELIB}
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
             LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin/Debug"
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
@@ -1631,12 +1633,12 @@ if(DEBUG) # RAKE! Will this work with TFE?
                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     endif()
     if(BUILD_AMP11LIB)
-        install(TARGETS amp11lib${MP}
+        install(TARGETS ${SAM_PREFIX}amp11lib${MP}
                 LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin/Debug"
                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     endif()
 else()
-    install(TARGETS SeriousSam${MP} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB}
+	install(TARGETS SeriousSamTFE${MP} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB}
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
             LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/${INTERNAL_NAME}"
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
@@ -1659,7 +1661,7 @@ else()
                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     endif()
     if(BUILD_AMP11LIB)
-        install(TARGETS amp11lib${MP}
+        install(TARGETS ${SAM_PREFIX}amp11lib${MP}
                 LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/${INTERNAL_NAME}"
                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     endif()

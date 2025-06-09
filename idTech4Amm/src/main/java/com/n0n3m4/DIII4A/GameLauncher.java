@@ -665,6 +665,7 @@ public class GameLauncher extends Activity
 					|| rgId == R.id.rg_fs_jagame
 					|| rgId == R.id.rg_fs_jogame
 					|| rgId == R.id.rg_fs_samtfegame
+					|| rgId == R.id.rg_fs_samtsegame
 			)
 			{
 				RadioButton checked = radioGroup.findViewById(id);
@@ -2622,6 +2623,11 @@ public class GameLauncher extends Activity
 			ChangeGame(Q3EGlobals.GAME_SAMTFE);
 			return true;
 		}
+		else if (itemId == R.id.main_menu_game_samtse)
+		{
+			ChangeGame(Q3EGlobals.GAME_SAMTSE);
+			return true;
+		}
 		else if (itemId == android.R.id.home)
 		{
 			ChangeGame();
@@ -3589,6 +3595,7 @@ public class GameLauncher extends Activity
 		boolean jaVisible = false;
 		boolean joVisible = false;
 		boolean samtfeVisible = false;
+		boolean samtseVisible = false;
 
 		boolean openglVisible = true;
 		boolean quickloadVisible = true;
@@ -3688,6 +3695,14 @@ public class GameLauncher extends Activity
 			skipintroVisible = false;
 			modVisible = false;
 		}
+		else if (Q3EUtils.q3ei.isSamTSE)
+		{
+			samtseVisible = true;
+			openglVisible = false;
+			quickloadVisible = false;
+			skipintroVisible = false;
+			modVisible = false;
+		}
         else
         {
             d3Visible = true;
@@ -3718,6 +3733,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_jagame.setVisibility(jaVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_jogame.setVisibility(joVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_samtfegame.setVisibility(samtfeVisible ? View.VISIBLE : View.GONE);
+		V.rg_fs_samtsegame.setVisibility(samtseVisible ? View.VISIBLE : View.GONE);
 
 		V.rg_version_d3bfg.setVisibility(versionVisible && d3bfgVisible ? View.VISIBLE : View.GONE);
 		V.rg_version_realrtcw.setVisibility(versionVisible && realrtcwVisible ? View.VISIBLE : View.GONE);
@@ -4067,6 +4083,7 @@ public class GameLauncher extends Activity
 				V.rg_fs_jagame,
 				V.rg_fs_jogame,
 				V.rg_fs_samtfegame,
+				V.rg_fs_samtsegame,
 		}[Q3EUtils.q3ei.game_id];
     }
 
@@ -4293,6 +4310,7 @@ public class GameLauncher extends Activity
 		groupRadios.put(Q3EGlobals.GAME_JA, V.rg_fs_jagame);
 		groupRadios.put(Q3EGlobals.GAME_JO, V.rg_fs_jogame);
 		groupRadios.put(Q3EGlobals.GAME_SAMTFE, V.rg_fs_samtfegame);
+		groupRadios.put(Q3EGlobals.GAME_SAMTSE, V.rg_fs_samtsegame);
 		Game[] values = Game.values();
 
 		for (Game value : values)
@@ -4375,9 +4393,8 @@ public class GameLauncher extends Activity
 			RemoveAllParamsPrefix(KidTechCommand.ARG_PREFIX_QUAKETECH);
 			SetParamPrefix(KidTechCommand.ARG_PREFIX_QUAKETECH, mod, "");
 		}
-		else if(Q3EUtils.q3ei.isSamTFE)
-		{
-		}
+		else if(Q3EUtils.q3ei.isSamTFE) {}
+		else if(Q3EUtils.q3ei.isSamTSE) {}
 		else
 			SetProp(arg, mod);
 	}
@@ -4402,6 +4419,8 @@ public class GameLauncher extends Activity
 		}
 		else if(Q3EUtils.q3ei.isSamTFE)
 			return "";
+		else if(Q3EUtils.q3ei.isSamTSE)
+			return "";
 		else
 			return GetProp(arg);
 	}
@@ -4416,6 +4435,7 @@ public class GameLauncher extends Activity
 		else if(Q3EUtils.q3ei.isFTEQW)
 			RemoveAllParamsPrefix(KidTechCommand.ARG_PREFIX_QUAKETECH);
 		else if(Q3EUtils.q3ei.isSamTFE);
+		else if(Q3EUtils.q3ei.isSamTSE);
 		else
 			RemoveProp(arg);
 	}
@@ -4668,6 +4688,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_jagame;
 		public RadioGroup rg_fs_jogame;
 		public RadioGroup rg_fs_samtfegame;
+		public RadioGroup rg_fs_samtsegame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -4850,6 +4871,7 @@ public class GameLauncher extends Activity
 			rg_fs_jagame = findViewById(R.id.rg_fs_jagame);
 			rg_fs_jogame = findViewById(R.id.rg_fs_jogame);
 			rg_fs_samtfegame = findViewById(R.id.rg_fs_samtfegame);
+			rg_fs_samtsegame = findViewById(R.id.rg_fs_samtsegame);
 			yquake2_section = findViewById(R.id.yquake2_section);
 			yquake2_vid_renderer = findViewById(R.id.yquake2_vid_renderer);
 			doom3bfg_section = findViewById(R.id.doom3bfg_section);

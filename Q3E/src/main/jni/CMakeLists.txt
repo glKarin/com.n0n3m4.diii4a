@@ -44,9 +44,9 @@ OPTION(GAME_ETW         "Build Wolfenstein: Enemy Territory"    ON)
 OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
+OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
 
 # Experimental
-OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
@@ -160,6 +160,6 @@ endif()
 if(GAME_SERIOUSSAM) # v1.10.7 | Update README.md | https://github.com/tx00100xt/SeriousSamClassic/commit/871c9ebf1af0a09a976a080cbdc2ab6e7a21ab57
     message(STATUS "Build Serious Sam")
     OPTION(GAME_SAMTFE  "Build Serious Sam Classic The First Encounter"                     ON)
-    OPTION(GAME_SAMTSE  "Build Serious Sam Classic The Second Encounter"                     OFF)
+    OPTION(GAME_SAMTSE  "Build Serious Sam Classic The Second Encounter"                    ON)
     add_subdirectory ( serioussam ) # Serious-Engine
 endif()

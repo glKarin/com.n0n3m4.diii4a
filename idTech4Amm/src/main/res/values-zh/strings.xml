@@ -90,6 +90,7 @@
     <string name="realrtcw">真·重返德军总部</string>
     <string name="fteqw">FTEQW</string>
     <string name="samtfe">英雄萨姆1</string>
+    <string name="samtse">英雄萨姆2</string>
     <string name="tdm">Dark mod</string>
     <string name="doom">毁灭战士</string>
     <string name="prey_2006">掠食(2006)</string>
@@ -462,6 +463,7 @@
     <string name="openja_base">星球大战：绝地武士-绝地学院</string>
     <string name="openjo_base">星球大战：绝地武士2-绝地放逐者</string>
     <string name="samtfe_base">英雄萨姆：第一次遭遇</string>
+    <string name="samtse_base">英雄萨姆：第二次遭遇</string>
     <string name="code_">Code:</string>
     <string name="version">版本</string>
     <string name="open_menu">打开菜单</string>

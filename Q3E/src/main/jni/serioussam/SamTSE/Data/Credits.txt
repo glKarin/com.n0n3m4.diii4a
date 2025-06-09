@@ -1,0 +1,38 @@
+Serious Sam The Second Encounter
+Serious Engine 1
+Credits
+
+CROTEAM:
+
+PROGRAMMING
+Alen Ladavac
+Davor Hunski
+Dean Sekulic
+Nikola Mosettig
+Darko Martinovic
+
+GAME DESIGN
+Davor Hunski
+Davor Tomicic
+
+2D ART
+Dinko Pavicic
+Petar Ivancek
+Zeljko Visnjic
+
+3D ART
+Admir Elezovic
+Tomislav Pongrac
+
+LEVEL DESIGN
+Davor Tomicic
+Davor Hunski
+Ivan Mika
+Tomislav Pongrac
+Damjan Mravunac
+
+MUSIC & SOUND
+Damjan Mravunac
+
+CEO
+Roman Ribaric

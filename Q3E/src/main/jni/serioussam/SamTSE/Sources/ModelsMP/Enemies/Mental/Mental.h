@@ -1,0 +1,78 @@
+/* Copyright (c) 2002-2012 Croteam Ltd. 
+This program is free software; you can redistribute it and/or modify
+it under the terms of version 2 of the GNU General Public License as published by
+the Free Software Foundation
+
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
+
+// Animation names
+#define MENTAL_ANIM_DEFAULT 0
+#define MENTAL_ANIM_BOWLREST 1
+#define MENTAL_ANIM_BOWLJUMP 2
+#define MENTAL_ANIM_GROUNDREST 3
+#define MENTAL_ANIM_RUN 4
+#define MENTAL_ANIM_WOUND01 5
+#define MENTAL_ANIM_PANIC 6
+#define MENTAL_ANIM_DEATH 7
+#define MENTAL_ANIM_CRATEANIMLEFT 8
+#define MENTAL_ANIM_CRATEANIMRIGHT 9
+#define MENTAL_ANIM_CRATEANIMLEFTSEATING 10
+#define MENTAL_ANIM_CRATEANIMRIGHTSEATING 11
+#define MENTAL_ANIM_GREET 12
+#define MENTAL_ANIM_GREETLOOP1 13
+#define MENTAL_ANIM_GREETLOOP2 14
+#define MENTAL_ANIM_GREETLOOP3 15
+#define MENTAL_ANIM_GREETLOOP4 16
+#define MENTAL_ANIM_GREETLOOPLEFT1 17
+#define MENTAL_ANIM_GREETLOOPLEFT2 18
+#define MENTAL_ANIM_GREETLOOPLEFT3 19
+#define MENTAL_ANIM_GREETLOOPLEFT4 20
+#define MENTAL_ANIM_GREETLOOPRIGHT1 21
+#define MENTAL_ANIM_GREETLOOPRIGHT2 22
+#define MENTAL_ANIM_GREETLOOPRIGHT3 23
+#define MENTAL_ANIM_GREETLOOPRIGHT4 24
+#define MENTAL_ANIM_GREETLOOPBOTH01 25
+#define MENTAL_ANIM_GREETLOOPBOTH02 26
+#define MENTAL_ANIM_GREETJUMP01 27
+#define MENTAL_ANIM_GREETJUMP02 28
+#define MENTAL_ANIM_GREETJUMP03 29
+#define MENTAL_ANIM_LEFTWAVE01 30
+#define MENTAL_ANIM_LEFTWAVE02 31
+#define MENTAL_ANIM_LEFTWAVE03 32
+#define MENTAL_ANIM_LEFTWAVE04 33
+#define MENTAL_ANIM_LEFTWAVE05 34
+#define MENTAL_ANIM_LEFTWAVE06 35
+#define MENTAL_ANIM_RIGHTWAVE01 36
+#define MENTAL_ANIM_RIGHTWAVE02 37
+#define MENTAL_ANIM_RIGHTWAVE03 38
+#define MENTAL_ANIM_RIGHTWAVE04 39
+#define MENTAL_ANIM_RIGHTWAVE05 40
+#define MENTAL_ANIM_RIGHTWAVE06 41
+#define MENTAL_ANIM_RIGHTWAVE07 42
+#define MENTAL_ANIM_RIGHTWAVE08 43
+#define MENTAL_ANIM_WALKZOMBIE 44
+#define MENTAL_ANIM_WALKANGEL 45
+#define MENTAL_ANIM_SNORE 46
+#define MENTAL_ANIM_GETUP 47
+
+// Color names
+
+// Patch names
+
+// Names of collision boxes
+#define MENTAL_COLLISION_BOX_PART_NAME 0
+
+// Attaching position names
+#define MENTAL_ATTACHMENT_HEAD 0
+#define MENTAL_ATTACHMENT_HORNS 1
+#define MENTAL_ATTACHMENT_AURA 2
+
+// Sound names

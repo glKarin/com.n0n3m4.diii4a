@@ -1,0 +1,49 @@
+	Interface description for amp11lib
+
+
+  Current amp11lib interface was built with two primary goals: to make
+it simple to use and to make it callable from different languages. 
+  It has to be simple in a way that the library does most things by 
+itself, e.g. you just to redirect an mpeg decoder to a player, and it 
+gets played from now on. Set and forget. That enables a programmer to 
+use this library even in development environments that are not suitable 
+for real-time scheduling, like Visual Basic, or Java. 
+  Also, the interface must be procedural and use only simple types, so 
+that it can be easily linked with different languages. I believe that
+the current form is very portable (at the interface level), since it
+is based mostly same paradigms as OpenGL interface, and it has proved
+very well on different platforms and languages, ranging from C, C++, 
+and Delphi, through Java and Visual Basic up to various Fortrans and I
+believe even Tcl.
+
+  All identifiers are prefixed with letters 'al' (short for amplib), to 
+prevent name-clashes.
+  Interface uses 32 bit integers and bools, 32 bit floats, simple 
+zero-terminated strings, and a handle type, which is just an int in fact.
+  Library requires manual initialization and cleanup using alInitLibrary 
+and alEndLibrary. I considered that safer than using automatic init/end
+for libraries, which, btw, is not portable.
+
+  Most work is done with alOpen functions and redirection functions. 
+Redirection provides automatic streaming from one stream to another.
+Generally, you open few streams, and redirect them one to another. Library
+then copies blocks from one source streams to destination streams 
+automatically handling any potentially needed mixing. To make redirection
+work, you need to enable it first. When you enable redirection, another
+thread is activated that sits in timer and does the redirection. If you
+only want to read/write files yourself, you just don't enable redirection
+and resources are not spent on another thread.
+
+  For example, to make an mpeg play to speakers, you need to make a 
+following sequence of calls:
+  
+  alInitLibrary
+  hPlayer = alOpenPlayer
+  hFile = alOpenInputFile
+  hDecoder = alOpenDecoder(hFile)
+  alEnableRedirection
+  alSetRedirection(hDecoder, hPlayer);
+
+  If you want to play more mpegs at the same time, just redirect more
+decoders to a single player. To pause one decoder, redirect in to 
+nothing (zero-handle).

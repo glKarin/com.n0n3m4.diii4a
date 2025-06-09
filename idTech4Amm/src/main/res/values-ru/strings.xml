@@ -383,6 +383,7 @@
     <string name="fteqw_base">FTEQW</string>
     <string name="fteqw">FTEQW</string>
     <string name="samtfe">SamTFE</string>
+    <string name="samtse">SamTSE</string>
     <string name="input_event_queue">Входная очередь событий</string>
     <string name="choose_input_event_queue_scheme">Выберите схему очереди входных событий</string>
     <string name="filter">Фильтр</string>
@@ -463,6 +464,7 @@
     <string name="openja_base">STAR WARS™ Jedi Knight-Jedi Academy™</string>
     <string name="openjo_base">STAR WARS™ Jedi Knight II-Jedi Outcast™</string>
     <string name="samtfe_base">Serious Sam Classic The First Encounter</string>
+    <string name="samtse_base">Serious Sam Classic The Second Encounter</string>
     <string name="code_">Код:</string>
     <string name="version">Версия</string>
     <string name="open_menu">Открыть меню</string>

@@ -389,6 +389,7 @@
     <string name="realrtcw">RealRTCW</string>
     <string name="fteqw">FTEQW</string>
     <string name="samtfe">SamTFE</string>
+    <string name="samtse">SamTSE</string>
     <string name="input_event_queue">Input event queue</string>
     <string name="choose_input_event_queue_scheme">Choose input event queue scheme</string>
     <string name="filter">Filter</string>
@@ -466,6 +467,7 @@
     <string name="openja_base">STAR WARS™ Jedi Knight-Jedi Academy™</string>
     <string name="openjo_base">STAR WARS™ Jedi Knight II-Jedi Outcast™</string>
     <string name="samtfe_base">Serious Sam Classic The First Encounter</string>
+    <string name="samtse_base">Serious Sam Classic The Second Encounter</string>
     <string name="code_">Code:</string>
     <string name="version">Version</string>
     <string name="open_menu">Open menu</string>

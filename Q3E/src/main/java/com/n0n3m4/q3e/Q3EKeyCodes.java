@@ -1784,6 +1784,10 @@ public class Q3EKeyCodes
     {
         InitSDLKeycodes();
     }
+    public static void InitSamTSEKeycodes()
+    {
+        InitSDLKeycodes();
+    }
 
     public static void InitJKKeycodes()
     {

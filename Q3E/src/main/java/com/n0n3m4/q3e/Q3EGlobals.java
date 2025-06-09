@@ -154,6 +154,7 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE_JA        = "libopenjk_sp.so"; // Jedi Academy
     public static final String LIB_ENGINE_JO        = "libopenjo_sp.so"; // Jedi Outcast
     public static final String LIB_ENGINE_SAMTFE    = "libSeriousSamTFE.so"; // Serious Sam First
+    public static final String LIB_ENGINE_SAMTSE    = "libSeriousSamTSE.so"; // Serious Sam Second
 
     public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
     public static final String LIB_ENGINE3_REALRTCW_5_0 = "libRealRTCW_5_0.so"; // RealRTCW(5.0)
@@ -187,6 +188,7 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_JA       = "openjk_sp.cfg";
     public static final String CONFIG_FILE_JO       = "openjo_sp.cfg";
     public static final String CONFIG_FILE_SAMTFE   = "";
+    public static final String CONFIG_FILE_SAMTSE   = "";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -205,6 +207,7 @@ public final class Q3EGlobals
     public static final String GAME_JA       = "openja";
     public static final String GAME_JO       = "openjo";
     public static final String GAME_SAMTFE   = "samtfe";
+    public static final String GAME_SAMTSE   = "samtse";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -223,6 +226,7 @@ public final class Q3EGlobals
     public static final String GAME_NAME_JA       = "Jedi Academy";
     public static final String GAME_NAME_JO       = "Jedi Outcast";
     public static final String GAME_NAME_SAMTFE   = "Serious Sam TFE";
+    public static final String GAME_NAME_SAMTSE   = "Serious Sam TSE";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -243,6 +247,7 @@ public final class Q3EGlobals
     public static final String GAME_BASE_JA         = "base";
     public static final String GAME_BASE_JO         = "base";
     public static final String GAME_BASE_SAMTFE     = "";
+    public static final String GAME_BASE_SAMTSE     = "";
 
     // game sub directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
@@ -261,6 +266,7 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_JA       = "openja";
     public static final String GAME_SUBDIR_JO       = "openjo";
     public static final String GAME_SUBDIR_SAMTFE   = "serioussamtfe";
+    public static final String GAME_SUBDIR_SAMTSE   = "serioussamtse";
 
     // game type index(ID)
     public static final int GAME_ID_DOOM3    = 0;
@@ -279,6 +285,7 @@ public final class Q3EGlobals
     public static final int GAME_ID_JA       = 13;
     public static final int GAME_ID_JO       = 14;
     public static final int GAME_ID_SAMTFE   = 15;
+    public static final int GAME_ID_SAMTSE   = 16;
 
     public enum PatchResource
     {
@@ -289,7 +296,6 @@ public final class Q3EGlobals
         TDM_GLSL_SHADER,
         GZDOOM_RESOURCE,
         DOOM3_BFG_CHINESE_TRANSLATION,
-        //SERIOUS_SAM_TFE,
     }
 
 /*
@@ -417,7 +423,6 @@ public final class Q3EGlobals
     public static final String TDM_2_12_GLSL_SHADER_VERSION   = "2.12.6"; // 6: fix a integer to float convert
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
     public static final String GZDOOM_VERSION                 = "4.14.1.1"; // 1: init
-    //public static final String SAMTFE_VERSION                 = "1.10.7.1"; // 1: init
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 

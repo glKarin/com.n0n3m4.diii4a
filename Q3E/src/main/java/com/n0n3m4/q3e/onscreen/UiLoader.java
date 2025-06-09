@@ -61,7 +61,7 @@ public class UiLoader
                 int sliderDelay = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);
                 if(sliderDelay < 0)
                 {
-                    if(Q3EUtils.q3ei.isSamTFE)
+                    if(Q3EUtils.q3ei.isSamTFE || Q3EUtils.q3ei.isSamTSE)
                         sliderDelay = Q3EGlobals.SERIOUS_SAM_BUTTON_SWIPE_RELEASE_DELAY;
                 }
                 key = Q3EKeyCodes.GetRealKeyCode(Q3EUtils.q3ei.arg_table[id * 4]);
@@ -124,7 +124,7 @@ public class UiLoader
                 int discDelay = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);
                 if(discDelay < 0)
                 {
-                    if(Q3EUtils.q3ei.isSamTFE)
+                    if(Q3EUtils.q3ei.isSamTFE || Q3EUtils.q3ei.isSamTSE)
                         discDelay = Q3EGlobals.SERIOUS_SAM_BUTTON_SWIPE_RELEASE_DELAY;
                 }
                 return new Disc(ctx, gl, cx, cy, size, (float) alpha / 100, keys, keymaps, Q3EUtils.q3ei.arg_table[id * 4 + 1], Q3EUtils.q3ei.texture_table[id], name, discDelay);

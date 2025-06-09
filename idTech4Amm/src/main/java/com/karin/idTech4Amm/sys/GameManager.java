@@ -34,6 +34,7 @@ public final class GameManager
             Q3EGlobals.GAME_JA,
             Q3EGlobals.GAME_JO,
             Q3EGlobals.GAME_SAMTFE,
+            Q3EGlobals.GAME_SAMTSE,
     };
 
     public static int[] GetGameIcons()
@@ -55,6 +56,7 @@ public final class GameManager
                 R.drawable.ja_icon,
                 R.drawable.jo_icon,
                 R.drawable.samtfe_icon,
+                R.drawable.samtse_icon,
         };
     }
 
@@ -77,6 +79,7 @@ public final class GameManager
                 R.string.openja_base,
                 R.string.openjo_base,
                 R.string.samtfe_base,
+                R.string.samtse_base,
         };
     }
 
@@ -99,6 +102,7 @@ public final class GameManager
                 R.color.theme_ja_main_color,
                 R.color.theme_jo_main_color,
                 R.color.theme_samtfe_main_color,
+                R.color.theme_samtse_main_color,
         };
     }
 
@@ -121,6 +125,7 @@ public final class GameManager
                 R.string.openja,
                 R.string.openjo,
                 R.string.samtfe,
+                R.string.samtse,
         };
     }
 

@@ -29,6 +29,7 @@ public final class Constants
     {
         return new String[] {
             "Add Serious Sam Classic The First Encounter support, game standalone directory named `serioussamtfe`, more view in `" + TextHelper.GenLinkText("https://github.com/tx00100xt/SeriousSamClassic", "SeriousSamClassic") + "`.",
+            "Add Serious Sam Classic The Second Encounter support, game standalone directory named `serioussamtse`, more view in `" + TextHelper.GenLinkText("https://github.com/tx00100xt/SeriousSamClassic", "SeriousSamClassic") + "`.",
         };
 	};
 

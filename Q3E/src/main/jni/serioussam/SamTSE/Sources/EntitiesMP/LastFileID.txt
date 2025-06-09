@@ -1,0 +1,7 @@
+Last ES ID number: 
+
+Enemies: 356 (GruntSka)
+Tools: 241 (HudPicHolder)
+Items: 807 (MessageItem)
+Weapons: 354 (Serious Bomb)
+Effects: 616 (Fireworks)
