@@ -486,4 +486,5 @@
     <string name="retro_postprocess">复古后期处理(r_renderMode)</string>
     <string name="enable_built_in_bot_assets_if_external_assets_missing">如果外部bot资源缺失, 则启用内建bot资源(仅支持毁灭战士3和雷神之锤4本体游戏)(harm_g_botEnableBuiltinAssets)</string>
     <string name="button_swipe_release_delay_ms">滑动按键释放延迟(毫秒)\n-1 = 自动; 0 = 无</string>
+    <string name="ms">毫秒</string>
 </resources>

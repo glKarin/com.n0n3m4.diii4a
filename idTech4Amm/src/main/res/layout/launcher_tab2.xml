@@ -232,7 +232,7 @@
 				android:id="@+id/button_swipe_release_delay"
 				android:inputType="numberSigned|textNoSuggestions"
 				android:ems="10"
-				android:hint="@string/button_swipe_release_delay_ms"
+				android:hint="@string/ms"
 				android:imeOptions="flagNoExtractUi"
 				android:text="-1"
 				android:layout_width="100dp"
