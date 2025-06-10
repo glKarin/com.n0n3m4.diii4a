@@ -106,6 +106,7 @@ import com.n0n3m4.DIII4A.launcher.SupportDeveloperFunc;
 import com.n0n3m4.DIII4A.launcher.TranslatorsFunc;
 import com.n0n3m4.q3e.Q3EAd;
 import com.n0n3m4.q3e.Q3EControlView;
+import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EKeyCodes;
@@ -689,9 +690,9 @@ public class GameLauncher extends Activity
 				if(Q3EUtils.q3ei.isQ2)
 				{
 					index = GetRadioGroupSelectIndex(radioGroup, id);
-					if(index < 0 || index >= Q3EGlobals.QUAKE2_RENDERER_BACKENDS.length)
+					if(index < 0 || index >= Q3EGameConstants.QUAKE2_RENDERER_BACKENDS.length)
 						index = 0;
-					String value2 = Q3EGlobals.QUAKE2_RENDERER_BACKENDS[index];
+					String value2 = Q3EGameConstants.QUAKE2_RENDERER_BACKENDS[index];
 					SetProp("vid_renderer", value2);
 				}
 			}
@@ -752,7 +753,7 @@ public class GameLauncher extends Activity
 				if(Q3EUtils.q3ei.isDOOM)
 				{
 					int value2 = GetRadioGroupSelectIndex(radioGroup, id);
-					value2 = value2 >= 0 && value2 < Q3EGlobals.GZDOOM_GL_VERSIONS.length ? Q3EGlobals.GZDOOM_GL_VERSIONS[value2] : 0;
+					value2 = value2 >= 0 && value2 < Q3EGameConstants.GZDOOM_GL_VERSIONS.length ? Q3EGameConstants.GZDOOM_GL_VERSIONS[value2] : 0;
 					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
 					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "harm_gl_version", value2);
 				}
@@ -1003,7 +1004,7 @@ public class GameLauncher extends Activity
 
 		public void afterTextChanged(Editable s)
 		{
-			String value = s.length() == 0 ? Q3EGlobals.GAME_EXECUABLE : s.toString();
+			String value = s.length() == 0 ? Q3EGameConstants.GAME_EXECUABLE : s.toString();
 			PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 					.putString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), value)
 					.commit();
@@ -1444,7 +1445,7 @@ public class GameLauncher extends Activity
 		index = 0;
 		if (str != null)
 		{
-			index = Utility.ArrayIndexOf(Q3EGlobals.QUAKE2_RENDERER_BACKENDS, str);
+			index = Utility.ArrayIndexOf(Q3EGameConstants.QUAKE2_RENDERER_BACKENDS, str);
 			if(index < 0)
 				index = 0;
 		}
@@ -1548,7 +1549,7 @@ public class GameLauncher extends Activity
 		if (str != null)
 		{
 			index = Q3EUtils.parseInt_s(str, 0);
-			index = Utility.ArrayIndexOf(Q3EGlobals.GZDOOM_GL_VERSIONS, index);
+			index = Utility.ArrayIndexOf(Q3EGameConstants.GZDOOM_GL_VERSIONS, index);
 			if(index < 0)
 				index = 0;
 		}
@@ -1681,13 +1682,13 @@ public class GameLauncher extends Activity
 	{
 		final SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		String gameType = mPrefs.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3);
+		String gameType = mPrefs.getString(Q3EPreference.pref_harm_game, Q3EGameConstants.GAME_DOOM3);
 
 		V.main_ad_layout.setVisibility(mPrefs.getBoolean(PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
 
 		SetGame(gameType);
 
-		V.edt_cmdline.setText(mPrefs.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGlobals.GAME_EXECUABLE));
+		V.edt_cmdline.setText(mPrefs.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGameConstants.GAME_EXECUABLE));
 		V.edt_mouse.setText(mPrefs.getString(Q3EPreference.pref_eventdev, "/dev/input/event???"));
 		V.edt_path.setText(mPrefs.getString(Q3EPreference.pref_datapath, default_gamedata));
 		m_edtPathFocused = V.edt_path.getText().toString();
@@ -2079,7 +2080,7 @@ public class GameLauncher extends Activity
 		int index = 0;
 		if(null != str)
 		{
-			index = Utility.ArrayIndexOf(Q3EGlobals.QUAKE2_RENDERER_BACKENDS, str);
+			index = Utility.ArrayIndexOf(Q3EGameConstants.QUAKE2_RENDERER_BACKENDS, str);
 			if(index < 0)
 				index = 0;
 		}
@@ -2202,7 +2203,7 @@ public class GameLauncher extends Activity
 		if (str != null)
 		{
 			index = Q3EUtils.parseInt_s(str, 0);
-			index = Utility.ArrayIndexOf(Q3EGlobals.GZDOOM_GL_VERSIONS, index);
+			index = Utility.ArrayIndexOf(Q3EGameConstants.GZDOOM_GL_VERSIONS, index);
 			if(index < 0)
 				index = 0;
 		}
@@ -2545,87 +2546,87 @@ public class GameLauncher extends Activity
 
 		else if (itemId == R.id.main_menu_game_doom3)
 		{
-			ChangeGame(Q3EGlobals.GAME_DOOM3);
+			ChangeGame(Q3EGameConstants.GAME_DOOM3);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_quake4)
 		{
-			ChangeGame(Q3EGlobals.GAME_QUAKE4);
+			ChangeGame(Q3EGameConstants.GAME_QUAKE4);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_prey)
 		{
-			ChangeGame(Q3EGlobals.GAME_PREY);
+			ChangeGame(Q3EGameConstants.GAME_PREY);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_quake1)
 		{
-			ChangeGame(Q3EGlobals.GAME_QUAKE1);
+			ChangeGame(Q3EGameConstants.GAME_QUAKE1);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_quake2)
 		{
-			ChangeGame(Q3EGlobals.GAME_QUAKE2);
+			ChangeGame(Q3EGameConstants.GAME_QUAKE2);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_quake3)
 		{
-			ChangeGame(Q3EGlobals.GAME_QUAKE3);
+			ChangeGame(Q3EGameConstants.GAME_QUAKE3);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_rtcw)
 		{
-			ChangeGame(Q3EGlobals.GAME_RTCW);
+			ChangeGame(Q3EGameConstants.GAME_RTCW);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_tdm)
 		{
-			ChangeGame(Q3EGlobals.GAME_TDM);
+			ChangeGame(Q3EGameConstants.GAME_TDM);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_doom3bfg)
 		{
-			ChangeGame(Q3EGlobals.GAME_DOOM3BFG);
+			ChangeGame(Q3EGameConstants.GAME_DOOM3BFG);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_doom)
 		{
-			ChangeGame(Q3EGlobals.GAME_GZDOOM);
+			ChangeGame(Q3EGameConstants.GAME_GZDOOM);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_etw)
 		{
-			ChangeGame(Q3EGlobals.GAME_ETW);
+			ChangeGame(Q3EGameConstants.GAME_ETW);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_realrtcw)
 		{
-			ChangeGame(Q3EGlobals.GAME_REALRTCW);
+			ChangeGame(Q3EGameConstants.GAME_REALRTCW);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_fteqw)
 		{
-			ChangeGame(Q3EGlobals.GAME_FTEQW);
+			ChangeGame(Q3EGameConstants.GAME_FTEQW);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_ja)
 		{
-			ChangeGame(Q3EGlobals.GAME_JA);
+			ChangeGame(Q3EGameConstants.GAME_JA);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_jo)
 		{
-			ChangeGame(Q3EGlobals.GAME_JO);
+			ChangeGame(Q3EGameConstants.GAME_JO);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_samtfe)
 		{
-			ChangeGame(Q3EGlobals.GAME_SAMTFE);
+			ChangeGame(Q3EGameConstants.GAME_SAMTFE);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_samtse)
 		{
-			ChangeGame(Q3EGlobals.GAME_SAMTSE);
+			ChangeGame(Q3EGameConstants.GAME_SAMTSE);
 			return true;
 		}
 		else if (itemId == android.R.id.home)
@@ -3086,7 +3087,7 @@ public class GameLauncher extends Activity
 	private void SetCmdText(String text)
     {
 		if(null == text || text.isEmpty())
-			text = Q3EGlobals.GAME_EXECUABLE;
+			text = Q3EGameConstants.GAME_EXECUABLE;
         EditText edit = V.edt_cmdline;
         if (edit.getText().toString().equals(text))
             return;
@@ -3107,7 +3108,7 @@ public class GameLauncher extends Activity
     {
 		String s = V.edt_cmdline.getText().toString();
 		if(s.isEmpty())
-			s = Q3EGlobals.GAME_EXECUABLE;
+			s = Q3EGameConstants.GAME_EXECUABLE;
 		return s;
     }
 
@@ -3245,7 +3246,7 @@ public class GameLauncher extends Activity
 			m_createCommandShortcutFunc = new CreateCommandShortcutFunc(this, CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT_WITH_COMMAND);
 		}
 		Bundle bundle = new Bundle();
-		bundle.putString("game", Q3EUtils.q3ei.GameType());
+		bundle.putString("game", Q3EUtils.q3ei.game);
 		String cmd = GetCmdText();
 		String tmpCmd = GetTempCmdText();
 		if(KStr.NotBlank(tmpCmd))
@@ -3781,7 +3782,7 @@ public class GameLauncher extends Activity
 		if(null == radioGroup)
 			return;
 
-		String cur = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).getString(key, Q3EGlobals.GAME_VERSION_CURRENT);
+		String cur = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).getString(key, Q3EGameConstants.GAME_VERSION_CURRENT);
 		int index = 0;
 		for(int i = 0; i < versions.length; i++)
 		{
@@ -3827,7 +3828,7 @@ public class GameLauncher extends Activity
         SetGame(newGame);
         preference.edit().putString(Q3EPreference.pref_harm_game_lib, "").commit();
 
-		String cmd = preference.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGlobals.GAME_EXECUABLE);
+		String cmd = preference.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGameConstants.GAME_EXECUABLE);
 		V.edt_cmdline.setText(cmd);
 		SetupCommandTextWatcher(true);
 		UnlockCmdUpdate();
@@ -4248,9 +4249,9 @@ public class GameLauncher extends Activity
 
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-		versionGroupRadios.put(Q3EGlobals.GAME_DOOM3BFG, V.rg_version_d3bfg);
-		versionGroupRadios.put(Q3EGlobals.GAME_REALRTCW, V.rg_version_realrtcw);
-		versionGroupRadios.put(Q3EGlobals.GAME_TDM, V.rg_version_tdm);
+		versionGroupRadios.put(Q3EGameConstants.GAME_DOOM3BFG, V.rg_version_d3bfg);
+		versionGroupRadios.put(Q3EGameConstants.GAME_REALRTCW, V.rg_version_realrtcw);
+		versionGroupRadios.put(Q3EGameConstants.GAME_TDM, V.rg_version_tdm);
 
 		for (String type : GameManager.Games)
 		{
@@ -4264,7 +4265,7 @@ public class GameLauncher extends Activity
 			if(null == key)
 				continue;
 			layoutParams = new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
-			String cur = preferences.getString(key, Q3EGlobals.GAME_VERSION_CURRENT);
+			String cur = preferences.getString(key, Q3EGameConstants.GAME_VERSION_CURRENT);
 
 			for(String version : versions)
 			{
@@ -4294,23 +4295,23 @@ public class GameLauncher extends Activity
 		RadioGroup group;
 		RadioGroup.LayoutParams layoutParams;
 
-		groupRadios.put(Q3EGlobals.GAME_DOOM3, V.rg_fs_game);
-		groupRadios.put(Q3EGlobals.GAME_QUAKE4, V.rg_fs_q4game);
-		groupRadios.put(Q3EGlobals.GAME_PREY, V.rg_fs_preygame);
-		groupRadios.put(Q3EGlobals.GAME_QUAKE1, V.rg_fs_q1game);
-		groupRadios.put(Q3EGlobals.GAME_QUAKE2, V.rg_fs_q2game);
-		groupRadios.put(Q3EGlobals.GAME_QUAKE3, V.rg_fs_q3game);
-		groupRadios.put(Q3EGlobals.GAME_RTCW, V.rg_fs_rtcwgame);
-		groupRadios.put(Q3EGlobals.GAME_TDM, V.rg_fs_tdmgame);
-		groupRadios.put(Q3EGlobals.GAME_DOOM3BFG, V.rg_fs_d3bfggame);
-		groupRadios.put(Q3EGlobals.GAME_GZDOOM, V.rg_fs_doomgame);
-		groupRadios.put(Q3EGlobals.GAME_ETW, V.rg_fs_etwgame);
-		groupRadios.put(Q3EGlobals.GAME_REALRTCW, V.rg_fs_realrtcwgame);
-		groupRadios.put(Q3EGlobals.GAME_FTEQW, V.rg_fs_fteqwgame);
-		groupRadios.put(Q3EGlobals.GAME_JA, V.rg_fs_jagame);
-		groupRadios.put(Q3EGlobals.GAME_JO, V.rg_fs_jogame);
-		groupRadios.put(Q3EGlobals.GAME_SAMTFE, V.rg_fs_samtfegame);
-		groupRadios.put(Q3EGlobals.GAME_SAMTSE, V.rg_fs_samtsegame);
+		groupRadios.put(Q3EGameConstants.GAME_DOOM3, V.rg_fs_game);
+		groupRadios.put(Q3EGameConstants.GAME_QUAKE4, V.rg_fs_q4game);
+		groupRadios.put(Q3EGameConstants.GAME_PREY, V.rg_fs_preygame);
+		groupRadios.put(Q3EGameConstants.GAME_QUAKE1, V.rg_fs_q1game);
+		groupRadios.put(Q3EGameConstants.GAME_QUAKE2, V.rg_fs_q2game);
+		groupRadios.put(Q3EGameConstants.GAME_QUAKE3, V.rg_fs_q3game);
+		groupRadios.put(Q3EGameConstants.GAME_RTCW, V.rg_fs_rtcwgame);
+		groupRadios.put(Q3EGameConstants.GAME_TDM, V.rg_fs_tdmgame);
+		groupRadios.put(Q3EGameConstants.GAME_DOOM3BFG, V.rg_fs_d3bfggame);
+		groupRadios.put(Q3EGameConstants.GAME_GZDOOM, V.rg_fs_doomgame);
+		groupRadios.put(Q3EGameConstants.GAME_ETW, V.rg_fs_etwgame);
+		groupRadios.put(Q3EGameConstants.GAME_REALRTCW, V.rg_fs_realrtcwgame);
+		groupRadios.put(Q3EGameConstants.GAME_FTEQW, V.rg_fs_fteqwgame);
+		groupRadios.put(Q3EGameConstants.GAME_JA, V.rg_fs_jagame);
+		groupRadios.put(Q3EGameConstants.GAME_JO, V.rg_fs_jogame);
+		groupRadios.put(Q3EGameConstants.GAME_SAMTFE, V.rg_fs_samtfegame);
+		groupRadios.put(Q3EGameConstants.GAME_SAMTSE, V.rg_fs_samtsegame);
 		Game[] values = Game.values();
 
 		for (Game value : values)
@@ -4334,7 +4335,7 @@ public class GameLauncher extends Activity
 				name = (String)value.name;
 			else
 				name = "";
-			if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(value.type))
+			if(Q3EGameConstants.GAME_GZDOOM.equalsIgnoreCase(value.type))
 			{
 				name += " (" + /*subdir +*/ value.file + ")";
 			}

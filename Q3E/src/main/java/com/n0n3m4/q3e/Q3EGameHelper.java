@@ -90,7 +90,7 @@ public class Q3EGameHelper
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
         if(KStr.IsEmpty(gameTypeName))
-            gameTypeName = preferences.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3);
+            gameTypeName = preferences.getString(Q3EPreference.pref_harm_game, Q3EGameConstants.GAME_DOOM3);
         else
             Q3EUtils.q3ei.ResetGameState();
 
@@ -159,9 +159,9 @@ public class Q3EGameHelper
         if(useUserCommand)
             cmd = gameCommand;
         else
-            cmd = preferences.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGlobals.GAME_EXECUABLE);
+            cmd = preferences.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGameConstants.GAME_EXECUABLE);
         if(null == cmd)
-            cmd = Q3EGlobals.GAME_EXECUABLE;
+            cmd = Q3EGameConstants.GAME_EXECUABLE;
 
         if(!useUserCommand)
         {
@@ -175,15 +175,15 @@ public class Q3EGameHelper
                 {
                     switch (Q3EUtils.q3ei.game)
                     {
-                        case Q3EGlobals.GAME_PREY:
-                            fs_game = "preybase";
+                        case Q3EGameConstants.GAME_PREY:
+                            fs_game = Q3EGameConstants.GAME_BASE_PREY;
                             break;
-                        case Q3EGlobals.GAME_QUAKE4:
-                            fs_game = "q4base";
+                        case Q3EGameConstants.GAME_QUAKE4:
+                            fs_game = Q3EGameConstants.GAME_BASE_QUAKE4;
                             break;
-                        case Q3EGlobals.GAME_DOOM3:
+                        case Q3EGameConstants.GAME_DOOM3:
                         default:
-                            fs_game = "base";
+                            fs_game = Q3EGameConstants.GAME_BASE_DOOM3;
                             break;
                     }
                 }
@@ -457,10 +457,10 @@ public class Q3EGameHelper
     {
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "darkmod", "glslprogs/idtech4amm.version");
-        String version = Q3EGlobals.TDM_GLSL_SHADER_VERSION;
+        String version = Q3EGameConstants.TDM_GLSL_SHADER_VERSION;
         String name = "The Dark Mod GLSL shader source";
-        String versionKey = Q3EInterface.GetGameVersionPreferenceKey(Q3EGlobals.GAME_TDM);
-        Q3EGlobals.PatchResource patchResource = Q3EGlobals.PatchResource.TDM_GLSL_SHADER;
+        String versionKey = Q3EInterface.GetGameVersionPreferenceKey(Q3EGameConstants.GAME_TDM);
+        Q3EGameConstants.PatchResource patchResource = Q3EGameConstants.PatchResource.TDM_GLSL_SHADER;
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
 
@@ -479,12 +479,12 @@ public class Q3EGameHelper
     {
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "doom3bfg/base", "renderprogs/idtech4amm.version");
-        final String version = Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION;
+        final String version = Q3EGameConstants.RBDOOM3BFG_HLSL_SHADER_VERSION;
         final String name = "RBDOOM 3 BFG HLSL shader source";
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
 
-        if(manager.Fetch(Q3EGlobals.PatchResource.DOOM3BFG_HLSL_SHADER, overwrite) != null)
+        if(manager.Fetch(Q3EGameConstants.PatchResource.DOOM3BFG_HLSL_SHADER, overwrite) != null)
         {
             if (overwrite)
             {
@@ -497,17 +497,17 @@ public class Q3EGameHelper
 
     public void ExtractGZDOOMResource()
     {
-        Q3EGlobals.PatchResource gzdoomResource;
+        Q3EGameConstants.PatchResource gzdoomResource;
         String versionCheckFile;
         //String versionName = "4.14.0";
 
         versionCheckFile = "idtech4amm.version";
-        gzdoomResource = Q3EGlobals.PatchResource.GZDOOM_RESOURCE;
+        gzdoomResource = Q3EGameConstants.PatchResource.GZDOOM_RESOURCE;
 
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", versionCheckFile);
         //final String engineVersionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.gzdoom.version");
-        final String version = Q3EGlobals.GZDOOM_VERSION;
+        final String version = Q3EGameConstants.GZDOOM_VERSION;
         String name = "GZDOOM game resource";
 
         //boolean change = CheckExtractResourceVersion(engineVersionFile, versionName, name);

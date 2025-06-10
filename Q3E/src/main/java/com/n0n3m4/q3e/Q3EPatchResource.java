@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public abstract class Q3EPatchResource
 {
-    public final Q3EGlobals.PatchResource type;
+    public final Q3EGameConstants.PatchResource type;
     public final String                   name;
     public final String                   version;
     public final String                   game;
@@ -17,7 +17,7 @@ public abstract class Q3EPatchResource
     public final String                   assetPath;
     public final String                   fsPath;
 
-    public Q3EPatchResource(Q3EGlobals.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath)
+    public Q3EPatchResource(Q3EGameConstants.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath)
     {
         this.type = type;
         this.name = name;
@@ -49,7 +49,7 @@ class Q3EPatchResource_fileToFile extends Q3EPatchResource
 {
     private final String prefix;
 
-    public Q3EPatchResource_fileToFile(Q3EGlobals.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath, String prefix)
+    public Q3EPatchResource_fileToFile(Q3EGameConstants.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath, String prefix)
     {
         super(type, name, version, game, mod, assetPath, fsPath);
         this.prefix = prefix;
@@ -74,7 +74,7 @@ class Q3EPatchResource_fileToFile extends Q3EPatchResource
 // public static final int COPY_FILE_TO_DIR      = 2; // copy assets/patch.pk4 -> dirname/
 class Q3EPatchResource_fileToDir extends Q3EPatchResource
 {
-    public Q3EPatchResource_fileToDir(Q3EGlobals.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath)
+    public Q3EPatchResource_fileToDir(Q3EGameConstants.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath)
     {
         super(type, name, version, game, mod, assetPath, fsPath);
     }
@@ -97,7 +97,7 @@ class Q3EPatchResource_filesToDir extends Q3EPatchResource
 {
     public final String[] assetFiles;
 
-    public Q3EPatchResource_filesToDir(Q3EGlobals.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath, String... assetFiles)
+    public Q3EPatchResource_filesToDir(Q3EGameConstants.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath, String... assetFiles)
     {
         super(type, name, version, game, mod, assetPath, fsPath);
 
@@ -126,7 +126,7 @@ class Q3EPatchResource_filesToDir extends Q3EPatchResource
 // public static final int EXTRACT_ZIP_TO_DIR    = 4; // extract assets/patch.zip -> dirname/
 class Q3EPatchResource_zipToDir extends Q3EPatchResource
 {
-    public Q3EPatchResource_zipToDir(Q3EGlobals.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath)
+    public Q3EPatchResource_zipToDir(Q3EGameConstants.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath)
     {
         super(type, name, version, game, mod, assetPath, fsPath);
     }
@@ -148,7 +148,7 @@ class Q3EPatchResource_zipToDir extends Q3EPatchResource
 // public static final int COPY_DIR_TO_DIR       = 5; // copy assets/ -> dirname/
 class Q3EPatchResource_dirToDir extends Q3EPatchResource
 {
-    public Q3EPatchResource_dirToDir(Q3EGlobals.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath)
+    public Q3EPatchResource_dirToDir(Q3EGameConstants.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath)
     {
         super(type, name, version, game, mod, assetPath, fsPath);
     }
@@ -172,7 +172,7 @@ class Q3EPatchResource_zipToZip extends Q3EPatchResource
     public final String   filename;
     public final String[] files;
 
-    public Q3EPatchResource_zipToZip(Q3EGlobals.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath, String filename, String... files)
+    public Q3EPatchResource_zipToZip(Q3EGameConstants.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath, String filename, String... files)
     {
         super(type, name, version, game, mod, assetPath, fsPath);
         this.filename = filename;

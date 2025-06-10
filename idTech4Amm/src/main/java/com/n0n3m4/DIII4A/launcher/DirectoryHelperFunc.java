@@ -24,7 +24,7 @@ import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.DIII4A.GameLauncher;
-import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
@@ -93,7 +93,7 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
                 String pathText = TextHelper.GenLinkText("file://" + path, path);
                 sb.append(" * ").append(pathText).append(endl);
 
-                if(!Q3EGlobals.GAME_QUAKE1.equals(game) && !Q3EGlobals.GAME_FTEQW.equals(game))
+                if(!Q3EGameConstants.GAME_QUAKE1.equals(game) && !Q3EGameConstants.GAME_FTEQW.equals(game))
                 {
                     String appHome = Q3EUtils.GetAppInternalSearchPath(m_gameLauncher, null);
                     String path2 = KStr.AppendPath(appHome, subdir, gameDataDir);

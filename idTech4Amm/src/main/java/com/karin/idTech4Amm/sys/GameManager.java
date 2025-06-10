@@ -3,7 +3,7 @@ package com.karin.idTech4Amm.sys;
 import android.support.annotation.NonNull;
 
 import com.karin.idTech4Amm.R;
-import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EUtils;
 
@@ -18,23 +18,23 @@ public final class GameManager
     private final Map<String, List<GameProp>> GameProps = new LinkedHashMap<>();
 
     public final static String[] Games = {
-            Q3EGlobals.GAME_DOOM3,
-            Q3EGlobals.GAME_QUAKE4,
-            Q3EGlobals.GAME_PREY,
-            Q3EGlobals.GAME_RTCW,
-            Q3EGlobals.GAME_QUAKE3,
-            Q3EGlobals.GAME_QUAKE2,
-            Q3EGlobals.GAME_QUAKE1,
-            Q3EGlobals.GAME_DOOM3BFG,
-            Q3EGlobals.GAME_TDM,
-            Q3EGlobals.GAME_GZDOOM,
-            Q3EGlobals.GAME_ETW,
-            Q3EGlobals.GAME_REALRTCW,
-            Q3EGlobals.GAME_FTEQW,
-            Q3EGlobals.GAME_JA,
-            Q3EGlobals.GAME_JO,
-            Q3EGlobals.GAME_SAMTFE,
-            Q3EGlobals.GAME_SAMTSE,
+            Q3EGameConstants.GAME_DOOM3,
+            Q3EGameConstants.GAME_QUAKE4,
+            Q3EGameConstants.GAME_PREY,
+            Q3EGameConstants.GAME_RTCW,
+            Q3EGameConstants.GAME_QUAKE3,
+            Q3EGameConstants.GAME_QUAKE2,
+            Q3EGameConstants.GAME_QUAKE1,
+            Q3EGameConstants.GAME_DOOM3BFG,
+            Q3EGameConstants.GAME_TDM,
+            Q3EGameConstants.GAME_GZDOOM,
+            Q3EGameConstants.GAME_ETW,
+            Q3EGameConstants.GAME_REALRTCW,
+            Q3EGameConstants.GAME_FTEQW,
+            Q3EGameConstants.GAME_JA,
+            Q3EGameConstants.GAME_JO,
+            Q3EGameConstants.GAME_SAMTFE,
+            Q3EGameConstants.GAME_SAMTSE,
     };
 
     public static int[] GetGameIcons()

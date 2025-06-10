@@ -14,7 +14,7 @@ import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.n0n3m4.DIII4A.GameLauncher;
-import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -95,7 +95,7 @@ public final class CreateGameFolderFunc extends GameLauncherFunc
                 String gameDataDir = value.file;
                 String path = KStr.AppendPath(DataDir, subdir);
 
-                if(Q3EGlobals.GAME_GZDOOM.equals(game))
+                if(Q3EGameConstants.GAME_GZDOOM.equals(game))
                 {
                     if(CreateFolder(path))
                         i++;
@@ -118,7 +118,7 @@ public final class CreateGameFolderFunc extends GameLauncherFunc
                         i++;
                     CreateTipText(path, fileGameName, defName);
 
-                    if(!Q3EGlobals.GAME_QUAKE1.equals(game) && !Q3EGlobals.GAME_FTEQW.equals(game))
+                    if(!Q3EGameConstants.GAME_QUAKE1.equals(game) && !Q3EGameConstants.GAME_FTEQW.equals(game))
                     {
                         String appHome = Q3EUtils.GetAppInternalSearchPath(m_gameLauncher, null);
                         String path2 = KStr.AppendPath(appHome, subdir, gameDataDir);

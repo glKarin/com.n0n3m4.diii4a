@@ -1,5 +1,6 @@
 package com.n0n3m4.q3e.karin;
 
+import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EGlobals;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class KidTechCommand
     public static final String ARG_PREFIX_QUAKETECH = "-";
     public static final String ARG_PREFIX_ALL = ARG_PREFIX_IDTECH + ARG_PREFIX_QUAKETECH;
 
-    private String m_cmd = Q3EGlobals.GAME_EXECUABLE;
+    private String m_cmd = Q3EGameConstants.GAME_EXECUABLE;
     private String argPrefix;
 
     public KidTechCommand(String str)
