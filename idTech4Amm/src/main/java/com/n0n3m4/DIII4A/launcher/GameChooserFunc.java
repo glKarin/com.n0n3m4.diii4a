@@ -64,7 +64,7 @@ public final class GameChooserFunc extends GameLauncherFunc
         {
             super(context, R.layout.game_list_delegate);
 
-            for(String game : GameManager.Games)
+            for(String game : GameManager.Games())
             {
                 GameItem item = new GameItem();
                 item.game = game;

@@ -42,7 +42,7 @@ public enum Q3EGame
     ),
 
     DOOM3BFG(Q3EGameConstants.GAME_ID_DOOM3BFG, Q3EGameConstants.GAME_DOOM3BFG, Q3EGameConstants.LIB_ENGINE4_D3BFG, Q3EGameConstants.GAME_NAME_DOOM3BFG, Q3EGameConstants.GAME_BASE_DOOM3BFG,
-            new String[] {
+            new String[]{
                     Q3EGameConstants.GAME_VERSION_D3BFG_OPENGL,
                     Q3EGameConstants.GAME_VERSION_D3BFG_VULKAN,
             }, Q3EGameConstants.GAME_SUBDIR_DOOMBFG, false, Q3EGameConstants.CONFIG_FILE_DOOM3BFG,

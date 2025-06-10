@@ -74,7 +74,7 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
         final String DataDir = preferences.getString(Q3EPreference.pref_datapath, "");
         final boolean Standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
         Game[] values = Game.values();
-        for (String game : GameManager.Games)
+        for (String game : GameManager.Games())
         {
             String gameName = Tr(GameManager.GetGameNameTs(game));
             sb.append("------- ").append(gameName).append(" -------").append(endl);

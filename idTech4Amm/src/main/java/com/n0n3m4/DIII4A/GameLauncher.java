@@ -3814,14 +3814,15 @@ public class GameLauncher extends Activity
         if (null == newGame || newGame.isEmpty())
         {
             int i;
-            for (i = 0; i < GameManager.Games.length; i++)
+			String[] Games = GameManager.Games();
+			for (i = 0; i < Games.length; i++)
             {
-                if (GameManager.Games[i].equalsIgnoreCase(Q3EUtils.q3ei.game))
+                if (Games[i].equalsIgnoreCase(Q3EUtils.q3ei.game))
                     break;
             }
-            if (i >= GameManager.Games.length)
-                i = GameManager.Games.length - 1;
-            newGame = GameManager.Games[(i + 1) % GameManager.Games.length];
+            if (i >= Games.length)
+                i = Games.length - 1;
+            newGame = Games[(i + 1) % Games.length];
         }
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         preference.edit().putString(Q3EPreference.pref_harm_game, newGame).commit();
@@ -4253,7 +4254,7 @@ public class GameLauncher extends Activity
 		versionGroupRadios.put(Q3EGameConstants.GAME_REALRTCW, V.rg_version_realrtcw);
 		versionGroupRadios.put(Q3EGameConstants.GAME_TDM, V.rg_version_tdm);
 
-		for (String type : GameManager.Games)
+		for (String type : GameManager.Games())
 		{
 			group = versionGroupRadios.get(type);
 			if(null == group)
@@ -4444,6 +4445,8 @@ public class GameLauncher extends Activity
 	private void SetSecondaryGameModToCommand(String mod)
 	{
 		String arg = Q3EUtils.q3ei.GetSecondaryGameCommandParm();
+		if(KStr.IsEmpty(arg))
+			return;
 		if(Q3EUtils.q3ei.isFTEQW)
 		{
 			SetParamPrefix(KidTechCommand.ARG_PREFIX_QUAKETECH, arg, mod);
@@ -4455,6 +4458,8 @@ public class GameLauncher extends Activity
 	private void RemoveSecondaryGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetSecondaryGameCommandParm();
+		if(KStr.IsEmpty(arg))
+			return;
 		if(Q3EUtils.q3ei.isFTEQW)
 			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_QUAKETECH, arg);
 		else
