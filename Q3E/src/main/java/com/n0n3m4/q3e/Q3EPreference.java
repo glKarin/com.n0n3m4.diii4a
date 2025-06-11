@@ -24,6 +24,8 @@ public final class Q3EPreference
     public static final String pref_usedxt        = "q3e_usedxt";
     public static final String pref_useetc1cache  = "q3e_useetc1cache";
     public static final String pref_controlprefix = "q3e_controls_";
+    public static final String pref_controlportraitprefix = "q3e_portrait_controls_";
+    public static final String pref_harm_portrait      = "harm_portrait";
 
     public static final String pref_harm_image_useetc2                  = "q3e_image_useetc2"; //k
     public static final String pref_harm_16bit                          = "q3e_harm_16bit";

@@ -19,6 +19,7 @@
 
 package com.n0n3m4.q3e;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
@@ -29,6 +30,7 @@ import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KidTech4Command;
 import com.n0n3m4.q3e.karin.KidTechCommand;
 import com.n0n3m4.q3e.karin.KidTechQuakeCommand;
+import com.n0n3m4.q3e.onscreen.Q3EControls;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -46,6 +48,7 @@ public class Q3EInterface
 
 	public int UI_SIZE;
 	public String[] defaults_table;
+	public String[] portrait_defaults_table;
 	public String[] texture_table;
 	public int[] type_table;
 	public int[] arg_table; // slider: key,key,key,style | button: key,canbeheld,style,null
@@ -596,7 +599,16 @@ public class Q3EInterface
     {
         defaults_table = new String[Q3EGlobals.UI_SIZE];
         Arrays.fill(defaults_table, "0 0 1 30");
+
+		portrait_defaults_table = new String[Q3EGlobals.UI_SIZE];
+		Arrays.fill(portrait_defaults_table, "0 0 1 30");
     }
+
+	public void InitUIDefaultLayout(Activity context)
+	{
+		defaults_table = Q3EControls.GetDefaultLayout(context, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY, false);
+		portrait_defaults_table = Q3EControls.GetPortraitDefaultLayout(context, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY, false);
+	}
 
     public void InitTable()
     {

@@ -91,7 +91,12 @@ public final class Q3EControls
 
     public static String[] GetDefaultLayout(Activity context, boolean friendly, float scale, int opacity, boolean landscape)
     {
-        return Q3EButtonLayoutManager.GetDefaultLayout(context, friendly, scale, opacity, landscape);
+        return Q3EButtonLayoutManager.GetDefaultLayout(context, friendly, scale, opacity, landscape, false);
+    }
+
+    public static String[] GetPortraitDefaultLayout(Activity context, boolean friendly, float scale, int opacity, boolean landscape)
+    {
+        return Q3EButtonLayoutManager.GetDefaultLayout(context, friendly, scale, opacity, landscape, true);
     }
 
     public static int[] GetDefaultSize(Activity context, boolean landscape)

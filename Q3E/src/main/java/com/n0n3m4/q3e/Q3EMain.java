@@ -24,10 +24,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +58,7 @@ public class Q3EMain extends Activity
     private       Q3EControlView mControlGLSurfaceView;
     private       KDebugTextView memoryUsageText;
     private       boolean        m_coverEdges      = true;
+    private       boolean        m_portrait         = false;
     @SuppressLint("StaticFieldLeak")
     public static Q3EGameHelper  gameHelper;
 
@@ -96,7 +99,12 @@ public class Q3EMain extends Activity
 
         // force landscape orientation
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) // 9
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        {
+            if(m_portrait)
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            else
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        }
 
         // hide navigation bar
         SetupUIFlags();
@@ -139,7 +147,7 @@ public class Q3EMain extends Activity
             View toolbar = mControlGLSurfaceView.Toolbar();
             if (toolbar != null)
             {
-                if (m_coverEdges)
+                if (m_coverEdges && !m_portrait)
                 {
                     int x = Q3EUtils.GetEdgeHeight(this, true);
                     if (x != 0)
@@ -192,7 +200,8 @@ public class Q3EMain extends Activity
         {
             mControlGLSurfaceView.Pause();
         }
-        Q3EUtils.CloseVKB(mGLSurfaceView);
+        if(m_initView)
+            Q3EUtils.CloseVKB(mGLSurfaceView);
     }
 
     @Override
@@ -215,6 +224,16 @@ public class Q3EMain extends Activity
         if (mAudio != null)
         {
             mAudio.resume();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    {
+        super.onConfigurationChanged(newConfig);
+        if(m_portrait && newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
+        {
+            InitView();
         }
     }
 
@@ -259,6 +278,7 @@ public class Q3EMain extends Activity
 
         m_hideNav = preferences.getBoolean(Q3EPreference.HIDE_NAVIGATION_BAR, true);
         m_renderMemStatus = preferences.getInt(Q3EPreference.RENDER_MEM_STATUS, 0);
+        m_portrait = preferences.getBoolean(Q3EPreference.pref_harm_portrait, false);
         String harm_run_background = preferences.getString(Q3EPreference.RUN_BACKGROUND, "1");
         if (null != harm_run_background)
             m_runBackground = Integer.parseInt(harm_run_background);
@@ -268,8 +288,6 @@ public class Q3EMain extends Activity
 
     private void InitGUI()
     {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         if (!Q3EOuya.Init(this))
             Q3EUtils.isOuya = false;
 
@@ -278,6 +296,23 @@ public class Q3EMain extends Activity
         mAudio.InitGUIInterface(this);
         Q3EUtils.q3ei.callbackObj = mAudio;
         Q3EJNI.setCallbackObject(mAudio);
+
+        mainLayout = new RelativeLayout(this);
+
+        if(!m_portrait)
+            InitView();
+
+        setContentView(mainLayout);
+    }
+
+    private boolean m_initView = false;
+    private void InitView()
+    {
+        if(m_initView)
+            return;
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         if (mGLSurfaceView == null)
             mGLSurfaceView = new Q3EView(this);
         Q3E.gameView = mGLSurfaceView;
@@ -291,7 +326,19 @@ public class Q3EMain extends Activity
         if (Q3EUtils.q3ei.view_motion_control_gyro && (gyroXSens != 0.0f || gyroYSens != 0.0f))
             mControlGLSurfaceView.SetGyroscopeSens(gyroXSens, gyroYSens);
         mControlGLSurfaceView.RenderView(mGLSurfaceView);
-        mainLayout = new RelativeLayout(this);
+
+        if(m_portrait)
+            InitPortraitGUI();
+        else
+            InitLandscapeGUI();
+
+        mControlGLSurfaceView.requestFocus();
+
+        m_initView = true;
+    }
+
+    private void InitLandscapeGUI()
+    {
         RelativeLayout.LayoutParams params;
 
         params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -316,10 +363,55 @@ public class Q3EMain extends Activity
             mainLayout.addView(memoryUsageText, params);
             memoryUsageText.setTypeface(Typeface.MONOSPACE);
         }
+    }
 
-        setContentView(mainLayout);
+    @SuppressLint("ResourceType")
+    private void InitPortraitGUI()
+    {
+        int[] size = Q3EUtils.GetGeometry(this, true, true, true);
 
-        mControlGLSurfaceView.requestFocus();
+        float ratio = (float)size[3] / (float)size[2];
+        int height = (int)((float)size[3] * ratio);
+
+        RelativeLayout.LayoutParams params;
+
+        params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
+        params.topMargin = size[0];
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+
+        mGLSurfaceView.setId(0x20202020);
+        mainLayout.addView(mGLSurfaceView, params);
+
+        //mControlGLSurfaceView.setZOrderOnTop();
+        mControlGLSurfaceView.setZOrderMediaOverlay(true);
+        params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        params.addRule(RelativeLayout.BELOW, mGLSurfaceView.getId());
+        //params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+        mainLayout.addView(mControlGLSurfaceView, params);
+
+        if (Q3EUtils.q3ei.function_key_toolbar)
+        {
+            params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
+            View key_toolbar = mControlGLSurfaceView.CreateToolbar();
+            mainLayout.addView(key_toolbar, params);
+        }
+
+        if (m_renderMemStatus > 0) //k
+        {
+            memoryUsageText = new KDebugTextView(mainLayout.getContext());
+            params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.BELOW, mGLSurfaceView.getId());
+            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+            mainLayout.addView(memoryUsageText, params);
+            memoryUsageText.setTypeface(Typeface.MONOSPACE);
+
+            memoryUsageText.Start(m_renderMemStatus * 1000);
+        }
     }
 
     @Override

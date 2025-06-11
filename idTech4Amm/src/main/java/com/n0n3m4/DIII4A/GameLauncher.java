@@ -1041,11 +1041,6 @@ public class GameLauncher extends Activity
         }
     };
 
-    private void InitUIDefaultLayout(Q3EInterface q3ei)
-    {
-		q3ei.defaults_table = Q3EControls.GetDefaultLayout(this, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY, false);
-    }
-
     public void InitQ3E(String game)
     {
         // Q3EKeyCodes.InitD3Keycodes();
@@ -1055,7 +1050,7 @@ public class GameLauncher extends Activity
 
         q3ei.InitD3();
 
-        InitUIDefaultLayout(q3ei);
+		q3ei.InitUIDefaultLayout(this);
 
         q3ei.default_path = default_gamedata;
 		q3ei.datadir = mPrefs.getString(Q3EPreference.pref_datapath, default_gamedata); //k add 20241113
@@ -1094,7 +1089,7 @@ public class GameLauncher extends Activity
     public void onAttachedToWindow()
     {
         super.onAttachedToWindow();
-        InitUIDefaultLayout(Q3EUtils.q3ei);
+		Q3EUtils.q3ei.InitUIDefaultLayout(this);
     }
 
     @Override

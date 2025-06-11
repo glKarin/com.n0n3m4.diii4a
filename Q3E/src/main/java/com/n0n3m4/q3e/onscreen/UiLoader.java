@@ -20,27 +20,30 @@ public class UiLoader
     int height;
     int width;
     //String filename;
+    boolean portrait = false;
 
     public static String[] defaults_table;
 
-    public UiLoader(View cnt, GL10 gl10, int w, int h)//, String fname)
+    public UiLoader(View cnt, GL10 gl10, int w, int h, boolean portrait)//, String fname)
     {
         ctx = cnt;
         gl = gl10;
         width = w;
         height = h;
+        this.portrait = portrait;
         //filename=fname;
-        defaults_table = Q3EUtils.q3ei.defaults_table;
+        defaults_table = portrait ? Q3EUtils.q3ei.portrait_defaults_table : Q3EUtils.q3ei.defaults_table;
 
         //Set defaults table
     }
 
     public Object LoadElement(int id, boolean editMode)
     {
+        String prefix = portrait ? Q3EPreference.pref_controlportraitprefix : Q3EPreference.pref_controlprefix;
         SharedPreferences shp = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
-        String tmp = shp.getString(Q3EPreference.pref_controlprefix + id, null);
+        String tmp = shp.getString(prefix + id, null);
         if (tmp == null) tmp = defaults_table[id];
-        UiElement el = new UiElement(tmp);
+        UiElement el = new UiElement(tmp, width, height);
         return LoadUiElement(id, el.cx, el.cy, el.size, el.alpha, editMode);
     }
 
@@ -135,10 +138,11 @@ public class UiLoader
 
     public boolean CheckVisible(int id)
     {
+        String prefix = portrait ? Q3EPreference.pref_controlportraitprefix : Q3EPreference.pref_controlprefix;
         SharedPreferences shp = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
-        String tmp = shp.getString(Q3EPreference.pref_controlprefix + id, null);
+        String tmp = shp.getString(prefix + id, null);
         if (tmp == null) tmp = defaults_table[id];
-        UiElement el = new UiElement(tmp);
+        UiElement el = new UiElement(tmp, width, height);
         final Rect ScreenRect = new Rect(0, 0, width, height);
         Rect btnRect;
         switch (Q3EUtils.q3ei.type_table[id])
