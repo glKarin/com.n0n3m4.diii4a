@@ -254,7 +254,7 @@ public class Joystick extends Paintable implements TouchListener
                     // int dp = dot_pos;//Multithreading.
                     if (dotjoyenabled)
 //                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
-                        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + dotx, cy + doty, red, green, blue, alpha);
+                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + dotx, cy + doty, red, green, blue, alpha);
                     else if (dot_pos != CONST_INVALID_DIRECTION)
 //                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
                         Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
