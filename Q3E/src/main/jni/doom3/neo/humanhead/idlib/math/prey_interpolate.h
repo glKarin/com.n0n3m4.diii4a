@@ -296,7 +296,7 @@ public:
 	void				SetStartTime( int time ) { this->startTime = time; }
 	void				SetPeriod( int period ) { this->period = period; }
 	void				SetMinValue( const type &min ) { this->minValue = min; }
-	void				SetMaxValue( const type &max ) { this->MaxValue = max; }
+	void				SetMaxValue( const type &max ) { this->maxValue = max; }
 	type				GetCurrentValue( int time ) const;
 	int					GetStartTime( void ) const { return startTime; }
 	int					GetPeriod( void ) const { return period; }
