@@ -57,6 +57,7 @@ public class Q3EButtonGeometry
         String[] layoutTable = new String[layouts.length];
         for (int i = 0; i < layouts.length; i++)
         {
+            //System.err.println(layouts[i].toString(maxw, maxh));
             layoutTable[i] = layouts[i].toString(maxw, maxh);
         }
         return layoutTable;

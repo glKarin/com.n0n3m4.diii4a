@@ -99,8 +99,7 @@ public class Q3EButtonLayoutManager
         {
             if (m_friendly)
             {
-                if (!hideNav)
-                    end += screenInfo.NAV_BAR_HEIGHT;
+                end += screenInfo.NAV_BAR_HEIGHT;
                 if (coverEdges)
                     start = screenInfo.EDGE_START_HEIGHT;
                 else
@@ -115,6 +114,7 @@ public class Q3EButtonLayoutManager
             }
         }
 
+        //System.err.println(screenInfo.toString());
         return m_portrait ? new int[] { Height, Width, start, end } : new int[] { Width, Height, start, end };
     }
 
@@ -334,6 +334,7 @@ public class Q3EButtonLayoutManager
         else
             resY = y;
 
+        //System.err.println(String.format("RRR %d %d | %d %d -> %d %d", x, y, maxw, maxh, resX, resY));
         return new Point(resX, resY);
     }
 }

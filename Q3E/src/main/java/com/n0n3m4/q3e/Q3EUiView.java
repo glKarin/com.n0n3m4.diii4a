@@ -146,16 +146,16 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         gl.glPopMatrix();
         gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
 
-		if(!reloadList.isEmpty())
-		{
-			for (Paintable p : reloadList)
-			{
-				p.AsBuffer((GL11) gl);
-			}
-			reloadList.clear();
-		}
-
         synchronized (paint_elements) {
+            if(!reloadList.isEmpty())
+            {
+                for (Paintable p : reloadList)
+                {
+                    p.AsBuffer((GL11) gl);
+                }
+                reloadList.clear();
+            }
+
             for (Paintable p : paint_elements)
             {
                 if(p instanceof Joystick)
@@ -949,6 +949,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
     public void ReloadButton(Paintable paintable)
     {
-        reloadList.add(paintable);
+        synchronized(paint_elements) {
+            reloadList.add(paintable);
+        }
     }
 }

@@ -231,7 +231,7 @@ public class Q3EMain extends Activity
     public void onConfigurationChanged(Configuration newConfig)
     {
         super.onConfigurationChanged(newConfig);
-        if(m_portrait && newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
+        if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT && m_portrait)
         {
             InitView();
         }
