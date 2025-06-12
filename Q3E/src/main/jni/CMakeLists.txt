@@ -16,8 +16,19 @@ add_definitions(-D__ANDROID__)
 option(ANDROID "Android build" ON)
 option(BUILD_TESTING "Build tests" OFF)
 
+set(DIII4A_DEPEND_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deplibs")
+set(DIII4A_DEPEND_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/depincs")
+set(DIII4A_DEPEND_COMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
+
 # backtrace for debug
 add_subdirectory ( common/bt )
+
+#set(Q3E_SDL TRUE)
+if(Q3E_SDL)
+    set(Q3E_SDL2_INCLUDE_PATH "${DIII4A_DEPEND_LIBRARY_PATH}/SDL2/include")
+    add_subdirectory(deplibs/SDL2)
+    add_subdirectory(deplibs/SDL2/q3e_test)
+endif()
 
 # Q3E jni engine
 add_subdirectory( q3e )
@@ -70,10 +81,6 @@ if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_RE
     add_subdirectory (deplibs/oboe) # 1.8.1
     add_subdirectory ( common )
 endif()
-
-set(DIII4A_DEPEND_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deplibs")
-set(DIII4A_DEPEND_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/depincs")
-set(DIII4A_DEPEND_COMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
 
 if(GAME_RTCW) # 438e7d413b5f7277187c35b032eb0ef9093ae778 | May 27, 2024 | All: Fix compilation on FreeBSD
     message(STATUS "Build Return to Castle Wolfenstein")

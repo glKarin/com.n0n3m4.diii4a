@@ -40,6 +40,13 @@
 #include "q3ethread.h"
 #include "q3eutility.h"
 #include "q3emisc.h"
+#ifdef _Q3E_SDL
+#include "q3esdl2.h"
+#else
+#define CALL_SDL(...)
+#define EXEC_SDL(...)
+#define INIT_SDL()
+#endif
 
 #include "doom3/neo/sys/android/sys_android.h"
 
@@ -97,6 +104,7 @@ static JavaVM *jVM;
 static jobject audioBuffer=0;
 static jobject q3eCallbackObj=0;
 static const jbyte *audio_track_buffer = NULL;
+static int mouse_available = 0;
 
 // game main thread
 static pthread_t				main_thread;
@@ -131,6 +139,14 @@ static jmethodID android_Backtrace_method;
 static void Android_AttachThread(void)
 {
 	ATTACH_JNI(env)
+}
+
+static void Android_DetachThread(void)
+{
+	JNIEnv *env = 0;
+	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) >= 0 ) {
+		(*jVM)->DetachCurrentThread(jVM);
+	}
 }
 
 static int backtrace_after_caught_signal(int signnum)
@@ -472,6 +488,9 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 		return JNI_FALSE; // init fail
 	}
 
+    INIT_SDL();
+	EXEC_SDL(Q3E_SDL_SetWindowSize, width, height);
+
 	const char *dir = (*env)->GetStringUTFChars(env, GameDir, &iscopy);
     game_data_dir = strdup(dir);
 	(*env)->ReleaseStringUTFChars(env, GameDir, dir);
@@ -522,6 +541,8 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 
 	Q3E_DumpArgs(argc, argv);
 
+	mouse_available = mouseAvailable;
+
 	Q3E_InitialContext_t context;
 	memset(&context, 0, sizeof(context));
 
@@ -545,6 +566,9 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 
 	window = ANativeWindow_fromSurface(env, view);
 	// set_gl_context(window);
+	CALL_SDL(onNativeSurfaceCreated);
+	CALL_SDL(nativeSetScreenResolution, width, height, width, height, refreshRate);
+	CALL_SDL(onNativeResize);
 
 	context.window = window;
 	context.width = width;
@@ -571,6 +595,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent(JNIEnv *env, jclass c, jint state, jint key, jint chr)
 {
     onKeyEvent(state,key,chr);
+	EXEC_SDL(Q3E_SDL_KeyEvent, key, state);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y)
@@ -581,6 +606,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent(JNIEnv *env, jclass c, jfloat x, jfloat y)
 {
     onMotionEvent(x, y);
+	EXEC_SDL(Q3E_SDL_MotionEvent, x, y);
 }
 
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Is64(JNIEnv *env, jclass c)
@@ -593,6 +619,7 @@ Java_com_n0n3m4_q3e_Q3EJNI_OnPause(JNIEnv *env, jclass clazz)
 {
 	if(on_pause)
 		on_pause();
+	CALL_SDL(nativePause);
 }
 
 JNIEXPORT void JNICALL
@@ -600,6 +627,7 @@ Java_com_n0n3m4_q3e_Q3EJNI_OnResume(JNIEnv *env, jclass clazz)
 {
 	if(on_resume)
     	on_resume();
+	CALL_SDL(nativeResume);
 }
 
 JNIEXPORT void JNICALL
@@ -613,6 +641,15 @@ Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view) {
 		window = ANativeWindow_fromSurface(env, view);
 	}
 	set_gl_context(window);
+	if(window)
+	{
+		CALL_SDL(onNativeSurfaceCreated);
+		CALL_SDL(onNativeSurfaceChanged);
+	}
+	else
+	{
+		CALL_SDL(onNativeSurfaceDestroyed);
+	}
 }
 
 void finish(void)
@@ -713,7 +750,9 @@ void grab_mouse(int grab)
 {
 	ATTACH_JNI(env)
 
+	if(mouse_available)
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_GrabMouse_method, (jboolean)grab);
+	EXEC_SDL(Q3E_SDL_SetRelativeMouseMode, grab);
 }
 
 void copy_to_clipboard(const char *text)
@@ -880,11 +919,13 @@ FILE * android_tmpfile(void)
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushKeyEvent(JNIEnv *env, jclass clazz, jint down, jint keycode, jint charcode)
 {
     Q3E_PushKeyEvent(down, keycode, charcode);
+	EXEC_SDL(Q3E_SDL_KeyEvent, keycode, down);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMotionEvent(JNIEnv *env, jclass clazz, jfloat deltax, jfloat deltay)
 {
     Q3E_PushMotionEvent(deltax, deltay);
+	EXEC_SDL(Q3E_SDL_MotionEvent, deltax, deltay);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y)
@@ -897,3 +938,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit(JNIEnv *env, jclass cl
 	usingNativeEventQueue = eventQueueType != EVENT_QUEUE_TYPE_JAVA;
 	usingNativeThread = gameThreadType != GAME_THREAD_TYPE_JAVA;
 }
+
+#ifdef _Q3E_SDL
+#include "q3esdl2.c"
+#endif

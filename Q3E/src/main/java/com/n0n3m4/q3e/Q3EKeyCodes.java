@@ -21,6 +21,7 @@ package com.n0n3m4.q3e;
 
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 
 import com.n0n3m4.q3e.device.Q3EOuya;
 
@@ -1619,6 +1620,91 @@ public class Q3EKeyCodes
     }
     ;
 
+    public static class KeyCodesAndroid
+    {
+        public static final int K_TAB    = KeyEvent.KEYCODE_TAB;
+        public static final int K_ENTER  = KeyEvent.KEYCODE_ENTER;
+        public static final int K_ESCAPE = KeyEvent.KEYCODE_ESCAPE;
+        public static final int K_SPACE  = KeyEvent.KEYCODE_SPACE;
+
+        public static final int K_BACKSPACE = KeyEvent.KEYCODE_DEL;
+
+        public static final int K_CAPSLOCK = KeyEvent.KEYCODE_CAPS_LOCK;
+        public static final int K_PAUSE    = KeyEvent.KEYCODE_BREAK;
+
+        public static final int K_UPARROW    = KeyEvent.KEYCODE_DPAD_UP;
+        public static final int K_DOWNARROW  = KeyEvent.KEYCODE_DPAD_DOWN;
+        public static final int K_LEFTARROW  = KeyEvent.KEYCODE_DPAD_LEFT;
+        public static final int K_RIGHTARROW = KeyEvent.KEYCODE_DPAD_RIGHT;
+
+        public static final int K_ALT   = KeyEvent.KEYCODE_ALT_LEFT;
+        public static final int K_CTRL  = KeyEvent.KEYCODE_CTRL_LEFT;
+        public static final int K_SHIFT = KeyEvent.KEYCODE_SHIFT_LEFT;
+        public static final int K_INS   = KeyEvent.KEYCODE_INSERT;
+        public static final int K_DEL   = KeyEvent.KEYCODE_FORWARD_DEL;
+        public static final int K_PGDN  = KeyEvent.KEYCODE_PAGE_DOWN;
+        public static final int K_PGUP  = KeyEvent.KEYCODE_PAGE_UP;
+        public static final int K_HOME  = KeyEvent.KEYCODE_MOVE_HOME;
+        public static final int K_END   = KeyEvent.KEYCODE_MOVE_END;
+
+        public static final int K_F1  = KeyEvent.KEYCODE_F1;
+        public static final int K_F2  = KeyEvent.KEYCODE_F2;
+        public static final int K_F3  = KeyEvent.KEYCODE_F3;
+        public static final int K_F4  = KeyEvent.KEYCODE_F4;
+        public static final int K_F5  = KeyEvent.KEYCODE_F5;
+        public static final int K_F6  = KeyEvent.KEYCODE_F6;
+        public static final int K_F7  = KeyEvent.KEYCODE_F7;
+        public static final int K_F8  = KeyEvent.KEYCODE_F8;
+        public static final int K_F9  = KeyEvent.KEYCODE_F9;
+        public static final int K_F10 = KeyEvent.KEYCODE_F10;
+        public static final int K_F11 = KeyEvent.KEYCODE_F11;
+        public static final int K_F12 = KeyEvent.KEYCODE_F12;
+
+        public static final int K_KP_HOME       = KeyEvent.KEYCODE_NUMPAD_7;
+        public static final int K_KP_UPARROW    = KeyEvent.KEYCODE_NUMPAD_8;
+        public static final int K_KP_PGUP       = KeyEvent.KEYCODE_NUMPAD_9;
+        public static final int K_KP_LEFTARROW  = KeyEvent.KEYCODE_NUMPAD_4;
+        public static final int K_KP_5          = KeyEvent.KEYCODE_NUMPAD_5;
+        public static final int K_KP_RIGHTARROW = KeyEvent.KEYCODE_NUMPAD_6;
+        public static final int K_KP_END        = KeyEvent.KEYCODE_NUMPAD_1;
+        public static final int K_KP_DOWNARROW  = KeyEvent.KEYCODE_NUMPAD_2;
+        public static final int K_KP_PGDN       = KeyEvent.KEYCODE_NUMPAD_3;
+        public static final int K_KP_ENTER      = KeyEvent.KEYCODE_NUMPAD_ENTER;
+        public static final int K_KP_INS        = KeyEvent.KEYCODE_NUMPAD_0;
+        public static final int K_KP_DEL        = KeyEvent.KEYCODE_NUMPAD_DOT; // A_PEROID
+        public static final int K_KP_SLASH      = KeyEvent.KEYCODE_NUMPAD_DIVIDE;
+        public static final int K_KP_MINUS      = KeyEvent.KEYCODE_NUMPAD_SUBTRACT;
+        public static final int K_KP_PLUS       = KeyEvent.KEYCODE_NUMPAD_ADD;
+        public static final int K_KP_NUMLOCK    = KeyEvent.KEYCODE_NUM_LOCK;
+        public static final int K_KP_STAR       = KeyEvent.KEYCODE_NUMPAD_MULTIPLY; // A_STAR
+        public static final int K_KP_EQUALS     = KeyEvent.KEYCODE_NUMPAD_EQUALS;
+
+        public static final int K_MOUSE1 = -MotionEvent.BUTTON_PRIMARY;
+        public static final int K_MOUSE2 = -MotionEvent.BUTTON_SECONDARY;
+        public static final int K_MOUSE3 = -MotionEvent.BUTTON_TERTIARY;
+        public static final int K_MOUSE4 = -MotionEvent.BUTTON_BACK;
+        public static final int K_MOUSE5 = -MotionEvent.BUTTON_FORWARD;
+
+        public static final int K_MWHEELDOWN = K_UPARROW;
+        public static final int K_MWHEELUP   = K_DOWNARROW;
+
+        public static final int J_LEFT  = 'a';
+        public static final int J_RIGHT = 'd';
+        public static final int J_UP    = K_UPARROW;
+        public static final int J_DOWN  = K_DOWNARROW;
+
+        public static final int K_KP_1 = K_KP_END;
+        public static final int K_KP_2 = K_KP_DOWNARROW;
+        public static final int K_KP_3 = K_KP_PGDN;
+        public static final int K_KP_4 = K_KP_LEFTARROW;
+        public static final int K_KP_6 = K_KP_RIGHTARROW;
+        public static final int K_KP_7 = K_KP_HOME;
+        public static final int K_KP_8 = K_KP_UPARROW;
+        public static final int K_KP_9 = K_KP_PGUP;
+        public static final int K_KP_0 = K_KP_INS;
+    }
+    ;
+
 
     public static class KeyCodes
     {
@@ -1775,6 +1861,11 @@ public class Q3EKeyCodes
     public static void InitSDLKeycodes()
     {
         InitKeycodes(KeyCodesSDL.class);
+    }
+
+    public static void InitAndroidKeycodes()
+    {
+        InitKeycodes(KeyCodesAndroid.class);
     }
     public static void InitGZDOOMKeycodes()
     {

@@ -10,7 +10,7 @@ if (DIII4A)
         add_definitions(-DSTATICALLY_LINKED)
     endif ()
     if (NOT CMAKE_BUILD_TYPE)
-        set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+        set(CMAKE_BUILD_TYPE "Release")
     endif ()
     set(CROSS_COMPILE TRUE) # don't call ecc, bison, flex if cross compile
     if(CMAKE_CROSSCOMPILING)

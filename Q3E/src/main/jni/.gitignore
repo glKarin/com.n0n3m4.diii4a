@@ -10,7 +10,7 @@ tdm/ThirdParty/artefacts/*/lib/*
 #duke4
 #gzdoom
 
-deplibs/SDL2
+#deplibs/SDL2
 backports/
 
 gzdoom_4.12.2/

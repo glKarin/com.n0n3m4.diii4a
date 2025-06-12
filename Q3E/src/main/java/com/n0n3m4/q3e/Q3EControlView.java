@@ -881,6 +881,10 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                     return Q3EKeyCodes.KeyCodes.K_MOUSE2;
                 case MotionEvent.BUTTON_TERTIARY:
                     return Q3EKeyCodes.KeyCodes.K_MOUSE3;
+                case MotionEvent.BUTTON_BACK:
+                    return Q3EKeyCodes.KeyCodes.K_MOUSE4;
+                case MotionEvent.BUTTON_FORWARD:
+                    return Q3EKeyCodes.KeyCodes.K_MOUSE5;
                 default:
                     return -1;
             }
@@ -894,6 +898,10 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 return Q3EKeyCodes.KeyCodes.K_MOUSE2;
             else if((buttonState & MotionEvent.BUTTON_TERTIARY) == MotionEvent.BUTTON_TERTIARY)
                 return Q3EKeyCodes.KeyCodes.K_MOUSE3;
+            else if((buttonState & MotionEvent.BUTTON_BACK) == MotionEvent.BUTTON_BACK)
+                return Q3EKeyCodes.KeyCodes.K_MOUSE4;
+            else if((buttonState & MotionEvent.BUTTON_FORWARD) == MotionEvent.BUTTON_FORWARD)
+                return Q3EKeyCodes.KeyCodes.K_MOUSE5;
             else
                 return -1;
         }
