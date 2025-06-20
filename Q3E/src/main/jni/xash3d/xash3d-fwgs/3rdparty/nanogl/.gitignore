@@ -6,7 +6,7 @@ CMakeFiles
 Makefile
 cmake_install.cmake
 install_manifest.txt
-CMakeLists.txt*
+#CMakeLists.txt*
 CMakeScripts
 Testing
 compile_commands.json
