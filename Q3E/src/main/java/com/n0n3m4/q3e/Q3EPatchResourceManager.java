@@ -137,6 +137,17 @@ public class Q3EPatchResourceManager
                 "maps/"
         );
         resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource_fileToDir(
+                Q3EGameConstants.PatchResource.XASH3D_EXTRAS,
+                Q3ELang.tr(context, R.string.xash3d_extras),
+                Q3EGameConstants.XASH3D_VERSION,
+                Q3EGameConstants.GAME_XASH3D,
+                null,
+                "pak/xash3d/extras.pk3",
+                null
+        );
+        resourceList.add(rsc);
     }
 
     public String Fetch(Q3EGameConstants.PatchResource type, boolean overwrite, String...fsgame)

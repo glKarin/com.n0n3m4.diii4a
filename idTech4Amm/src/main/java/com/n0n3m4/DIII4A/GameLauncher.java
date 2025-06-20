@@ -119,7 +119,6 @@ import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTechCommand;
-import com.n0n3m4.q3e.onscreen.Q3EControls;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -129,7 +128,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -667,6 +665,7 @@ public class GameLauncher extends Activity
 					|| rgId == R.id.rg_fs_jogame
 					|| rgId == R.id.rg_fs_samtfegame
 					|| rgId == R.id.rg_fs_samtsegame
+					|| rgId == R.id.rg_fs_xash3dgame
 			)
 			{
 				RadioButton checked = radioGroup.findViewById(id);
@@ -767,6 +766,19 @@ public class GameLauncher extends Activity
 					int value2 = GetRadioGroupSelectIndex(radioGroup, id);
 					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_renderer");
 					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "vid_renderer", value2 == 0 ? "vk" : "gl");
+				}
+			}
+
+			// FTEQW
+			else if (rgId == R.id.xash3d_ref)
+			{
+				if(Q3EUtils.q3ei.isXash3D)
+				{
+					index = GetRadioGroupSelectIndex(radioGroup, id);
+					if(index < 0 || index >= Q3EGameConstants.XASH3D_REFS.length)
+						index = 0;
+					String value2 = Q3EGameConstants.XASH3D_REFS[index];
+					SetParam("ref", value2);
 				}
 			}
         }
@@ -1379,6 +1391,10 @@ public class GameLauncher extends Activity
 		{
 			Updatehacktings_FTEQW();
 		}
+		else if(Q3EUtils.q3ei.isXash3D)
+		{
+			Updatehacktings_Xash3D();
+		}
 
 		// game mods for every games
 		str = GetGameModFromCommand();
@@ -1563,6 +1579,22 @@ public class GameLauncher extends Activity
 			index = "vk".equalsIgnoreCase(str) ? 0 : 1;
 		}
 		SelectRadioGroup(V.fteqw_vid_renderer, index);
+	}
+
+	private void Updatehacktings_Xash3D()
+	{
+		String str;
+		int index;
+
+		str = GetParam("ref");
+		index = 0;
+		if (str != null)
+		{
+			index = Utility.ArrayIndexOf(Q3EGameConstants.XASH3D_REFS, str);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.xash3d_ref, index);
 	}
 
     private void ThrowException()
@@ -1920,6 +1952,9 @@ public class GameLauncher extends Activity
 		// FTEQW
 		SetupUI_FTEQW();
 
+		// Xash3D
+		SetupUI_Xash3D();
+
 		//DIII4A-specific
 		SetupCommandTextWatcher(true);
 		V.edt_harm_r_specularExponent.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponent", Q3EPreference.pref_harm_r_specularExponent, 3.0f));
@@ -2221,6 +2256,20 @@ public class GameLauncher extends Activity
 		}
 		SelectRadioGroup(V.fteqw_vid_renderer, index);
 		V.fteqw_vid_renderer.setOnCheckedChangeListener(m_groupCheckChangeListener);
+	}
+
+	private void SetupUI_Xash3D()
+	{
+		String str = GetParam("ref");
+		int index = 0;
+		if(null != str)
+		{
+			index = Utility.ArrayIndexOf(Q3EGameConstants.XASH3D_REFS, str);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.xash3d_ref, index);
+		V.xash3d_ref.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
 	private void AfterCreated()
@@ -2622,6 +2671,11 @@ public class GameLauncher extends Activity
 		else if (itemId == R.id.main_menu_game_samtse)
 		{
 			ChangeGame(Q3EGameConstants.GAME_SAMTSE);
+			return true;
+		}
+		else if (itemId == R.id.main_menu_game_xash3d)
+		{
+			ChangeGame(Q3EGameConstants.GAME_XASH3D);
 			return true;
 		}
 		else if (itemId == android.R.id.home)
@@ -3592,6 +3646,7 @@ public class GameLauncher extends Activity
 		boolean joVisible = false;
 		boolean samtfeVisible = false;
 		boolean samtseVisible = false;
+		boolean xash3dVisible = false;
 
 		boolean openglVisible = true;
 		boolean quickloadVisible = true;
@@ -3699,6 +3754,13 @@ public class GameLauncher extends Activity
 			skipintroVisible = false;
 			modVisible = false;
 		}
+		else if (Q3EUtils.q3ei.isXash3D)
+		{
+			xash3dVisible = true;
+			openglVisible = false;
+			quickloadVisible = false;
+			skipintroVisible = false;
+		}
         else
         {
             d3Visible = true;
@@ -3730,6 +3792,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_jogame.setVisibility(joVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_samtfegame.setVisibility(samtfeVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_samtsegame.setVisibility(samtseVisible ? View.VISIBLE : View.GONE);
+		V.rg_fs_xash3dgame.setVisibility(xash3dVisible ? View.VISIBLE : View.GONE);
 
 		V.rg_version_d3bfg.setVisibility(versionVisible && d3bfgVisible ? View.VISIBLE : View.GONE);
 		V.rg_version_realrtcw.setVisibility(versionVisible && realrtcwVisible ? View.VISIBLE : View.GONE);
@@ -3745,6 +3808,7 @@ public class GameLauncher extends Activity
 		V.gzdoom_section.setVisibility(Q3EUtils.q3ei.isDOOM ? View.VISIBLE : View.GONE);
 		V.tdm_section.setVisibility(Q3EUtils.q3ei.isTDM ? View.VISIBLE : View.GONE);
 		V.fteqw_section.setVisibility(Q3EUtils.q3ei.isFTEQW ? View.VISIBLE : View.GONE);
+		V.xash3d_section.setVisibility(Q3EUtils.q3ei.isXash3D ? View.VISIBLE : View.GONE);
 
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
@@ -4081,6 +4145,7 @@ public class GameLauncher extends Activity
 				V.rg_fs_jogame,
 				V.rg_fs_samtfegame,
 				V.rg_fs_samtsegame,
+				V.rg_fs_xash3dgame,
 		}[Q3EUtils.q3ei.game_id];
     }
 
@@ -4308,6 +4373,7 @@ public class GameLauncher extends Activity
 		groupRadios.put(Q3EGameConstants.GAME_JO, V.rg_fs_jogame);
 		groupRadios.put(Q3EGameConstants.GAME_SAMTFE, V.rg_fs_samtfegame);
 		groupRadios.put(Q3EGameConstants.GAME_SAMTSE, V.rg_fs_samtsegame);
+		groupRadios.put(Q3EGameConstants.GAME_XASH3D, V.rg_fs_xash3dgame);
 		Game[] values = Game.values();
 
 		for (Game value : values)
@@ -4378,7 +4444,7 @@ public class GameLauncher extends Activity
 	private void SetGameModToCommand(String mod)
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D)
 			SetParam(arg, mod);
 		else if(Q3EUtils.q3ei.isDOOM)
 		{
@@ -4399,7 +4465,7 @@ public class GameLauncher extends Activity
 	private String GetGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D)
 			return GetParam(arg);
 		else if(Q3EUtils.q3ei.isDOOM)
 			return GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
@@ -4425,7 +4491,7 @@ public class GameLauncher extends Activity
 	private void RemoveGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D)
 			RemoveParam(arg);
 		else if(Q3EUtils.q3ei.isDOOM)
 			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
@@ -4690,6 +4756,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_jogame;
 		public RadioGroup rg_fs_samtfegame;
 		public RadioGroup rg_fs_samtsegame;
+		public RadioGroup rg_fs_xash3dgame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -4759,6 +4826,8 @@ public class GameLauncher extends Activity
 		public Spinner spinner_r_renderMode;
 		public CheckBox cb_g_botEnableBuiltinAssets;
 		public EditText button_swipe_release_delay;
+		public LinearLayout xash3d_section;
+		public RadioGroup xash3d_ref;
 
         public void Setup()
         {
@@ -4873,6 +4942,7 @@ public class GameLauncher extends Activity
 			rg_fs_jogame = findViewById(R.id.rg_fs_jogame);
 			rg_fs_samtfegame = findViewById(R.id.rg_fs_samtfegame);
 			rg_fs_samtsegame = findViewById(R.id.rg_fs_samtsegame);
+			rg_fs_xash3dgame = findViewById(R.id.rg_fs_xash3dgame);
 			yquake2_section = findViewById(R.id.yquake2_section);
 			yquake2_vid_renderer = findViewById(R.id.yquake2_vid_renderer);
 			doom3bfg_section = findViewById(R.id.doom3bfg_section);
@@ -4918,6 +4988,8 @@ public class GameLauncher extends Activity
 			spinner_r_renderMode = findViewById(R.id.spinner_r_renderMode);
 			cb_g_botEnableBuiltinAssets = findViewById(R.id.cb_g_botEnableBuiltinAssets);
 			button_swipe_release_delay = findViewById(R.id.button_swipe_release_delay);
+			xash3d_section = findViewById(R.id.xash3d_section);
+			xash3d_ref = findViewById(R.id.xash3d_ref);
         }
     }
 }

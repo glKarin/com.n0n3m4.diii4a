@@ -368,5 +368,15 @@ public class Q3ECallbackObj
     {
         Q3EUtils.q3ei.joystick_smooth = enable;
     }
+
+    public void SetMouseCursorVisible(boolean on)
+    {
+        gui.SetMouseCursorVisible(on);
+    }
+
+    public void SetMouseCursorPosition(int x, int y)
+    {
+        gui.SetMouseCursorPosition(x, y);
+    }
 }
 

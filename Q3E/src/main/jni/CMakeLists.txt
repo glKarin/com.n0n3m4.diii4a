@@ -5,33 +5,8 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
-project(idtech4amm)
+project(idTech4Amm)
 
-# build type
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
-endif()
-
-add_definitions(-D__ANDROID__)
-option(ANDROID "Android build" ON)
-option(BUILD_TESTING "Build tests" OFF)
-
-set(DIII4A_DEPEND_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deplibs")
-set(DIII4A_DEPEND_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/depincs")
-set(DIII4A_DEPEND_COMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
-
-# backtrace for debug
-add_subdirectory ( common/bt )
-
-#set(Q3E_SDL TRUE)
-if(Q3E_SDL)
-    set(Q3E_SDL2_INCLUDE_PATH "${DIII4A_DEPEND_LIBRARY_PATH}/SDL2/include")
-    add_subdirectory(deplibs/SDL2)
-    add_subdirectory(deplibs/SDL2/q3e_test)
-endif()
-
-# Q3E jni engine
-add_subdirectory( q3e )
 
 
 #[[OPTION(BUILD_D3        "Build DOOM 3"    OFF)
@@ -56,10 +31,44 @@ OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
+OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
 
 # Experimental
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
+
+
+
+# build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+add_definitions(-D__ANDROID__)
+option(ANDROID "Android build" ON)
+option(BUILD_TESTING "Build tests" OFF)
+
+set(DIII4A_DEPEND_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deplibs")
+set(DIII4A_DEPEND_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/depincs")
+set(DIII4A_DEPEND_COMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
+
+# backtrace for debug
+add_subdirectory ( common/bt )
+
+if(GAME_XASH3D)
+set(Q3E_SDL TRUE)
+endif()
+
+if(Q3E_SDL)
+    set(Q3E_SDL2_INCLUDE_PATH "${DIII4A_DEPEND_LIBRARY_PATH}/SDL2/include")
+    add_subdirectory(deplibs/SDL2)
+    #add_subdirectory(deplibs/SDL2/q3e_test)
+endif()
+
+# Q3E jni engine
+add_subdirectory( q3e )
+
+
 
 if(GAME_DOOM3)
     message(STATUS "Build DOOM 3/Quake 4/Prey(2006)")
@@ -152,6 +161,21 @@ if(GAME_JK) # 199ddc7642d0ed0e2bf007fe63d0dce3a4bb4908 | Nov 13, 2024 | Merge pu
 endif()
 
 
+if(GAME_SERIOUSSAM) # v1.10.7 | Update README.md | https://github.com/tx00100xt/SeriousSamClassic/commit/871c9ebf1af0a09a976a080cbdc2ab6e7a21ab57
+    message(STATUS "Build Serious Sam")
+    OPTION(GAME_SAMTFE  "Build Serious Sam Classic The First Encounter"                     ON)
+    OPTION(GAME_SAMTSE  "Build Serious Sam Classic The Second Encounter"                    ON)
+    add_subdirectory ( serioussam ) # Serious-Engine
+endif()
+
+
+if(GAME_XASH3D) # hlsdk-portable | Make cppcheck happy. | https://github.com/FWGS/hlsdk-portable/commit/f03c31c16a39890c56cb11709098f04d9f4b7363
+    # xash3d-fwgs | engine: platform: sdl2: assign K_AUX32 and K_AUX31 to volume buttons to match old engine behavior on Android | https://github.com/FWGS/xash3d-fwgs/commit/c90d1100965ec5a072d95c0c257f853a6673ca74
+    message(STATUS "Build Xash3D")
+    add_subdirectory(xash3d) # Xash3D
+endif()
+
+
 
 if(GAME_DNF)
     message(STATUS "Build Duke Nukem Forever")
@@ -161,12 +185,4 @@ endif()
 if(GAME_QUAKES) # noire-dev/SourceTech/commit/b0a1d46740d5a76f172a2889f285214a95dd3702 noire-dev/QuakeSandbox/commit/f01cab6d123784f6e2aaa839e9ccd3ec0a6f1325
     message(STATUS "Build Quake SandBox")
     add_subdirectory ( quakes ) # Quake SandBox
-endif()
-
-
-if(GAME_SERIOUSSAM) # v1.10.7 | Update README.md | https://github.com/tx00100xt/SeriousSamClassic/commit/871c9ebf1af0a09a976a080cbdc2ab6e7a21ab57
-    message(STATUS "Build Serious Sam")
-    OPTION(GAME_SAMTFE  "Build Serious Sam Classic The First Encounter"                     ON)
-    OPTION(GAME_SAMTSE  "Build Serious Sam Classic The Second Encounter"                    ON)
-    add_subdirectory ( serioussam ) # Serious-Engine
 endif()

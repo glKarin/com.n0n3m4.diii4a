@@ -287,6 +287,11 @@
                         android:id="@+id/rg_fs_samtsegame"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_xash3dgame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
                 </LinearLayout>
             </android.support.v4.widget.NestedScrollView>
 
@@ -1079,6 +1084,11 @@
                 android:id="@+id/fteqw_section"
                 layout="@layout/launcher_fteqw"
                 android:visibility="gone"></include>
+
+        <include
+            android:id="@+id/xash3d_section"
+            layout="@layout/launcher_xash3d"
+            android:visibility="gone"></include>
 
         <LinearLayout
             android:id="@+id/general_section"

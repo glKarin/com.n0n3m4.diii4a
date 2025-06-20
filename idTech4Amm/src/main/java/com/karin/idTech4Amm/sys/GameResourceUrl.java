@@ -1,6 +1,5 @@
 package com.karin.idTech4Amm.sys;
 
-import com.karin.idTech4Amm.R;
 import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.karin.KStr;
 
@@ -80,6 +79,9 @@ public enum GameResourceUrl
     SAMTFE_BASE(Q3EGameConstants.GAME_SAMTFE, "", "", "https://store.steampowered.com/app/41050/", 2),
 
     SAMTSE_BASE(Q3EGameConstants.GAME_SAMTSE, "", "", "https://store.steampowered.com/app/41060/", 2),
+
+    XASH_HLSDK(Q3EGameConstants.GAME_XASH3D, "", "", "https://github.com/FWGS/hlsdk-portable", 1),
+    XASH_FWGS(Q3EGameConstants.GAME_XASH3D, "", "", "https://github.com/FWGS/xash3d-fwgs", 1),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

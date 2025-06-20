@@ -101,6 +101,12 @@ public enum Q3EGame
             "", null, null, null,
             Q3EPreference.pref_harm_samtse_fs_game, Q3EPreference.pref_harm_samtse_user_mod, Q3EPreference.pref_harm_samtse_game_mod, Q3EPreference.pref_harm_samtse_game_lib, Q3EPreference.pref_params_samtse, Q3EPreference.pref_harm_samtse_command_record, null
     ),
+
+    XASH3D(Q3EGameConstants.GAME_ID_XASH3D, Q3EGameConstants.GAME_XASH3D, Q3EGameConstants.LIB_ENGINE_XASH3D, Q3EGameConstants.GAME_NAME_XASH3D, Q3EGameConstants.GAME_BASE_XASH3D,
+            null, Q3EGameConstants.GAME_SUBDIR_XASH3D, true, Q3EGameConstants.CONFIG_FILE_XASH3D,
+            "game", null, null, null,
+            Q3EPreference.pref_harm_xash3d_fs_game, Q3EPreference.pref_harm_xash3d_user_mod, Q3EPreference.pref_harm_xash3d_game_mod, Q3EPreference.pref_harm_xash3d_game_lib, Q3EPreference.pref_params_xash3d, Q3EPreference.pref_harm_xash3d_command_record, null
+    ),
     ;
 
     public final int    ID;

@@ -139,7 +139,7 @@ extern void Q3E_MotionEvent(float dx, float dy);
 //#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
 #define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
 #define _ANDROID_DLL_PATH ""
-#define _ANDROID_GAME_DATA_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME
+#define _ANDROID_GAME_DATA_PATH "/sdcard/diii4a"
 #define _ANDROID_APP_HOME_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME "/files"
 
 

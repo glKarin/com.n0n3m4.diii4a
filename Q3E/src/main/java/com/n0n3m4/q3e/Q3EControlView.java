@@ -78,8 +78,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     // render
     private boolean mInit = false;
     private boolean usesCSAA = false;
-    public static int orig_width;
-    public static int orig_height;
     private boolean hideonscr;
 
     // toolbar function
@@ -237,10 +235,10 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             if(m_usingMouseDevice)
                 m_mouseDevice = new Q3EMouseDevice(this);
 
-            orig_width = w;
-            orig_height = h;
+            Q3E.orig_width = w;
+            Q3E.orig_height = h;
 
-            UiLoader uildr = new UiLoader(this, gl, orig_width, orig_height, m_portrait);
+            UiLoader uildr = new UiLoader(this, gl, Q3E.orig_width, Q3E.orig_height, m_portrait);
 
             for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
             {
@@ -286,14 +284,14 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             {*/
             gl.glMatrixMode(gl.GL_PROJECTION);
             gl.glLoadIdentity();
-            gl.glOrthof(0, orig_width, orig_height, 0, -1, 1);
+            gl.glOrthof(0, Q3E.orig_width, Q3E.orig_height, 0, -1, 1);
 /*            }*/
 
             mInit = true;
             post(new Runnable() {
                 @Override
                 public void run() {
-                    getHolder().setFixedSize(orig_width, orig_height);
+                    getHolder().setFixedSize(Q3E.orig_width, Q3E.orig_height);
                 }
             });
         }

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res/com.karin.idTech4Amm"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+
+    <com.karin.idTech4Amm.widget.Divider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        myapp:label="@string/xash3d"
+        myapp:lineColor="@color/launcher_divider_color" />
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:text="@string/renderer_ref" />
+    <RadioGroup
+            android:id="@+id/xash3d_ref"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+        <RadioButton
+                android:id="@+id/xash3d_ref_gles1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="GLES1(NanoGL)" />
+        <RadioButton
+                android:id="@+id/xash3d_ref_gl4es"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GL4ES(OpenGL ES2.0)" />
+        <RadioButton
+            android:id="@+id/xash3d_ref_gles3compat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GLES3(gl2_shim compat)" />
+        <RadioButton
+            android:id="@+id/xash3d_ref_soft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Software(SDL2)" />
+    </RadioGroup>
+
+</LinearLayout>

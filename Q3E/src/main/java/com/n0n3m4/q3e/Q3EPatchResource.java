@@ -34,7 +34,7 @@ public abstract class Q3EPatchResource
     {
         String path = Q3EInterface.GetStandaloneDirectory(Q3EUtils.q3ei.standalone, game);
         if(null == fsPath)
-            path = KStr.AppendPath(path, null != fsgame ? fsgame[0] : null);
+            path = KStr.AppendPath(path, null != fsgame && fsgame.length > 0 ? fsgame[0] : null);
         else if(fsPath.isEmpty())
             path = KStr.AppendPath(path, mod);
         else

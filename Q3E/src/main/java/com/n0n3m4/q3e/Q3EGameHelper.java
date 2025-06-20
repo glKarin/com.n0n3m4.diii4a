@@ -523,14 +523,41 @@ public class Q3EGameHelper
             ShowMessage(R.string.extract_gzdoom_game_resource_files_fail);
     }
 
+    public void ExtractXash3DResource()
+    {
+        Q3EGameConstants.PatchResource resource;
+        String versionCheckFile;
+
+        versionCheckFile = "idtech4amm.version";
+        resource = Q3EGameConstants.PatchResource.XASH3D_EXTRAS;
+
+        Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
+        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "xash3d", versionCheckFile);
+        final String version = Q3EGameConstants.XASH3D_VERSION;
+        String name = "Xash3D game resource";
+
+        boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
+        if(manager.Fetch(resource, overwrite) != null)
+        {
+            if (overwrite)
+            {
+                DumpExtractResourceVersion(versionFile, version, name);
+            }
+        }
+        else
+            ShowMessage(R.string.extract_xash3d_extras_resource_files_fail);
+    }
+
     public void ExtractGameResource()
     {
         if(Q3EUtils.q3ei.IsTDMTech()) // if game is TDM, extract glsl shader
             ExtractTDMGLSLShaderSource();
         else if(Q3EUtils.q3ei.IsIdTech4BFG()) // if game is D3BFG, extract hlsl shader
             ExtractDOOM3BFGHLSLShaderSource();
-        else if(Q3EUtils.q3ei.isDOOM)
+        else if(Q3EUtils.q3ei.isDOOM) // pk3
             ExtractGZDOOMResource();
+        else if(Q3EUtils.q3ei.isXash3D) // extras.pk3
+            ExtractXash3DResource();
     }
 
     private int GetMSAA()
@@ -912,6 +939,9 @@ public class Q3EGameHelper
         String engineLib = GetEngineLib();
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Engine library: " + engineLib);
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Game libraries directory: " + libpath);
+
+        Q3E.surfaceWidth = width;
+        Q3E.surfaceHeight = height;
 
         boolean res = Q3EJNI.init(
                 engineLib,

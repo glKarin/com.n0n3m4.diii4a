@@ -62,4 +62,6 @@
     <string name="doom3_chinese_translation_doom3bfg">毁灭战士3中文本地化(3DM毁灭战士3-BFG汉化版)</string>
     <string name="doom3_bot_sabot_a7_mod">毁灭战士3 Bot(SABot-a7 mod)</string>
     <string name="mp_game_map_aas">多人游戏地图区域感知系统文件(aas)</string>
+    <string name="xash3d_extras">Xash3D额外资源</string>
+    <string name="extract_xash3d_extras_resource_files_fail">提取Xash3D额外资源文件失败!</string>
 </resources>
