@@ -421,7 +421,7 @@ endforeach()
 # Allow some projects to be built conditionally.
 set_option(SDL2_DISABLE_SDL2MAIN   "Disable building/installation of SDL2main" ON) # OFF
 set_option(SDL2_DISABLE_INSTALL    "Disable installation of SDL2" ${SDL2_SUBPROJECT})
-set_option(SDL2_DISABLE_UNINSTALL  "Disable uninstallation of SDL2" OFF)
+set_option(SDL2_DISABLE_UNINSTALL  "Disable uninstallation of SDL2" ON) #k OFF
 
 option_string(SDL_ASSERTIONS "Enable internal sanity checks (auto/disabled/release/enabled/paranoid)" "auto")
 #set_option(SDL_DEPENDENCY_TRACKING "Use gcc -MMD -MT dependency tracking" ON)
