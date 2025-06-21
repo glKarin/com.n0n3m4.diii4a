@@ -9,6 +9,13 @@ SDL_Android_GetAPI_f sdl_api;
 int USING_SDL = 0;
 static char *sdl_clipboardText = NULL;
 
+/** Standard activity result: operation canceled. */
+#define RESULT_CANCELED     0
+/** Standard activity result: operation succeeded. */
+#define RESULT_OK            -1
+/** Start of user-defined activity results. */
+#define RESULT_FIRST_USER    1
+
 #define INTERFACE_METHOD(ret, name, args) ret (* name) args;
 #include "../deplibs/SDL2/src/core/android/SDL_android_interface.h"
 
@@ -110,7 +117,8 @@ int openURL(const char *url)
 
 void requestPermission(const char *permission, int requestCode)
 {
-    
+    LOGI("Q3E SDL request permission '%s' with request code '%d'", permission, requestCode);
+    CALL_SDL(nativePermissionResult, requestCode, RESULT_OK);
 }
 
 int showToast(const char *message, int duration, int gravity, int xOffset, int yOffset)
