@@ -63,4 +63,6 @@
     <string name="doom3_chinese_translation_doom3bfg">DOOM3 Chinese translation(by 3DM DOOM3-BFG Chinese patch)</string>
     <string name="doom3_bot_sabot_a7_mod">DOOM3 Bot(SABot-a7 mod)</string>
     <string name="mp_game_map_aas">MP game map Area Awareness System file(aas)</string>
+    <string name="xash3d_extras">Xash3D extras</string>
+    <string name="extract_xash3d_extras_resource_files_fail">Extract Xash3D extras resource files fail!</string>
 </resources>

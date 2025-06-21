@@ -209,7 +209,10 @@ void CConsole::PutString(const char *strString)
 
   // if dedicated server
   extern BOOL _bDedicatedServer;
-  if (_bDedicatedServer) {
+#if !defined(_DIII4A)
+  if (_bDedicatedServer)
+#endif
+  {
     // print to output
     printf("%s", strString);
   }

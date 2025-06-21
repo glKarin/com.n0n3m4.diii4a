@@ -118,7 +118,7 @@ public final class CreateGameFolderFunc extends GameLauncherFunc
                         i++;
                     CreateTipText(path, fileGameName, defName);
 
-                    if(!Q3EGameConstants.GAME_QUAKE1.equals(game) && !Q3EGameConstants.GAME_FTEQW.equals(game))
+                    if(!Q3EGameConstants.GAME_QUAKE1.equals(game) && !Q3EGameConstants.GAME_FTEQW.equals(game) && !Q3EGameConstants.GAME_SAMTFE.equals(game) && !Q3EGameConstants.GAME_SAMTSE.equals(game))
                     {
                         String appHome = Q3EUtils.GetAppInternalSearchPath(m_gameLauncher, null);
                         String path2 = KStr.AppendPath(appHome, subdir, gameDataDir);

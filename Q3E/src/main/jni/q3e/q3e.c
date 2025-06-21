@@ -129,6 +129,11 @@ static jmethodID android_OpenDialog_method;
 static jmethodID android_Finish_method;
 static jmethodID android_Backtrace_method;
 
+#ifdef _Q3E_SDL
+static jmethodID android_SetCursorVisible_method;
+static jmethodID android_SetCursorPosition_method;
+#endif
+
 #define ATTACH_JNI(env) \
 	JNIEnv *env = 0; \
 	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) < 0 ) \
@@ -364,6 +369,8 @@ static void q3e_exit(void)
 	    LOGI("Unload game library");
 	}
 	Q3E_CloseRedirectOutput();
+
+	EXEC_SDL(Q3E_ShutdownSDL);
 }
 
 int JNI_OnLoad(JavaVM* vm, void* reserved)
@@ -434,6 +441,11 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_OpenDialog_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenDialog", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)I");
 	android_Finish_method = (*env)->GetMethodID(env, q3eCallbackClass, "Finish", "()V");
 	android_Backtrace_method = (*env)->GetMethodID(env, q3eCallbackClass, "Backtrace", "(IIII[Ljava/lang/String;)Z");
+
+#ifdef _Q3E_SDL
+	android_SetCursorVisible_method = (*env)->GetMethodID(env, q3eCallbackClass, "SetMouseCursorVisible", "(Z)V");
+	android_SetCursorPosition_method = (*env)->GetMethodID(env, q3eCallbackClass, "SetMouseCursorPosition", "(II)V");
+#endif
 }
 
 static void setup_Q3E_callback(void)
@@ -595,7 +607,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent(JNIEnv *env, jclass c, jint state, jint key, jint chr)
 {
     onKeyEvent(state,key,chr);
-	EXEC_SDL(Q3E_SDL_KeyEvent, key, state);
+	EXEC_SDL(Q3E_SDL_KeyEvent, key, state, chr);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y)
@@ -619,7 +631,7 @@ Java_com_n0n3m4_q3e_Q3EJNI_OnPause(JNIEnv *env, jclass clazz)
 {
 	if(on_pause)
 		on_pause();
-	CALL_SDL(nativePause);
+	//CALL_SDL(nativePause);
 }
 
 JNIEXPORT void JNICALL
@@ -627,7 +639,7 @@ Java_com_n0n3m4_q3e_Q3EJNI_OnResume(JNIEnv *env, jclass clazz)
 {
 	if(on_resume)
     	on_resume();
-	CALL_SDL(nativeResume);
+	//CALL_SDL(nativeResume);
 }
 
 JNIEXPORT void JNICALL
@@ -645,10 +657,12 @@ Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view) {
 	{
 		CALL_SDL(onNativeSurfaceCreated);
 		CALL_SDL(onNativeSurfaceChanged);
+	    CALL_SDL(nativeResume);
 	}
 	else
 	{
 		CALL_SDL(onNativeSurfaceDestroyed);
+	    CALL_SDL(nativePause);
 	}
 }
 
@@ -919,7 +933,7 @@ FILE * android_tmpfile(void)
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushKeyEvent(JNIEnv *env, jclass clazz, jint down, jint keycode, jint charcode)
 {
     Q3E_PushKeyEvent(down, keycode, charcode);
-	EXEC_SDL(Q3E_SDL_KeyEvent, keycode, down);
+	EXEC_SDL(Q3E_SDL_KeyEvent, keycode, down, charcode);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMotionEvent(JNIEnv *env, jclass clazz, jfloat deltax, jfloat deltay)
@@ -940,5 +954,21 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit(JNIEnv *env, jclass cl
 }
 
 #ifdef _Q3E_SDL
+static void set_mouse_cursor_visible(int visible)
+{
+    ATTACH_JNI(env)
+
+    //LOGI("Mouse cursor visible: %d", visible);
+    (*env)->CallVoidMethod(env, q3eCallbackObj, android_SetCursorVisible_method, visible ? JNI_TRUE : JNI_FALSE);
+}
+
+static void set_mouse_cursor_position(int x, int y)
+{
+    ATTACH_JNI(env)
+
+    //LOGI("Mouse cursor position: %d, %d", x, y);
+    (*env)->CallVoidMethod(env, q3eCallbackObj, android_SetCursorPosition_method, x, y);
+}
+
 #include "q3esdl2.c"
 #endif

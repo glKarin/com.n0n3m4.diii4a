@@ -29,7 +29,6 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +41,7 @@ import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.karin.KDebugTextView;
 import com.n0n3m4.q3e.karin.KLog;
+import com.n0n3m4.q3e.karin.KMouseCursor;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTechCommand;
@@ -51,6 +51,7 @@ public class Q3EMain extends Activity
     private       Q3ECallbackObj mAudio;
     private       Q3EView        mGLSurfaceView;
     private       RelativeLayout mainLayout;
+    private       KMouseCursor   mouseCursor;
     // k
     private       boolean        m_hideNav         = true;
     private       int            m_runBackground   = 1;
@@ -58,7 +59,7 @@ public class Q3EMain extends Activity
     private       Q3EControlView mControlGLSurfaceView;
     private       KDebugTextView memoryUsageText;
     private       boolean        m_coverEdges      = true;
-    private       boolean        m_portrait         = false;
+    private       boolean        m_portrait        = false;
     @SuppressLint("StaticFieldLeak")
     public static Q3EGameHelper  gameHelper;
 
@@ -70,7 +71,7 @@ public class Q3EMain extends Activity
 
         gameHelper = new Q3EGameHelper();
         gameHelper.SetContext(this);
-        
+
         // setup fullscreen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -90,7 +91,7 @@ public class Q3EMain extends Activity
         InitProps();
 
         // setup screen edges
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && m_coverEdges)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && m_coverEdges)
         {
             WindowManager.LayoutParams lp = getWindow().getAttributes();
             lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -98,7 +99,7 @@ public class Q3EMain extends Activity
         }
 
         // force landscape orientation
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) // 9
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) // 9
         {
             if(m_portrait)
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -122,7 +123,7 @@ public class Q3EMain extends Activity
         Q3ELang.Locale(this);
 
         // load game
-        if (gameHelper.checkGameFiles())
+        if(gameHelper.checkGameFiles())
         {
             // extract game required resource in apk
             gameHelper.ExtractGameResource();
@@ -142,15 +143,15 @@ public class Q3EMain extends Activity
     {
         super.onAttachedToWindow();
 
-        if (mControlGLSurfaceView != null)
+        if(mControlGLSurfaceView != null)
         {
             View toolbar = mControlGLSurfaceView.Toolbar();
-            if (toolbar != null)
+            if(toolbar != null)
             {
-                if (m_coverEdges && !m_portrait)
+                if(m_coverEdges && !m_portrait)
                 {
                     int x = Q3EUtils.GetEdgeHeight(this, true);
-                    if (x != 0)
+                    if(x != 0)
                         toolbar.setX(x);
                 }
                 int[] size = Q3EUtils.GetNormalScreenSize(this);
@@ -175,7 +176,7 @@ public class Q3EMain extends Activity
             mGLSurfaceView.Shutdown();*/
 
         super.onDestroy();
-        if (null != mAudio)
+        if(null != mAudio)
             mAudio.OnDestroy();
     }
 
@@ -185,18 +186,18 @@ public class Q3EMain extends Activity
         super.onPause();
 
         //k
-        if (memoryUsageText != null)
+        if(memoryUsageText != null)
             memoryUsageText.Stop();
 
-        if (m_runBackground < 2)
-            if (mAudio != null)
+        if(m_runBackground < 2)
+            if(mAudio != null)
             {
                 mAudio.pause();
             }
 
         Q3E.Pause();
 
-        if (mControlGLSurfaceView != null)
+        if(mControlGLSurfaceView != null)
         {
             mControlGLSurfaceView.Pause();
         }
@@ -210,18 +211,18 @@ public class Q3EMain extends Activity
         super.onResume();
 
         //k
-        if (memoryUsageText != null/* && m_renderMemStatus > 0*/)
+        if(memoryUsageText != null/* && m_renderMemStatus > 0*/)
             memoryUsageText.Start(m_renderMemStatus * 1000);
 
         //k if(m_runBackground < 1)
         Q3E.Resume();
-        if (mControlGLSurfaceView != null)
+        if(mControlGLSurfaceView != null)
         {
             mControlGLSurfaceView.Resume();
         }
 
         //k if(m_runBackground < 2)
-        if (mAudio != null)
+        if(mAudio != null)
         {
             mAudio.resume();
         }
@@ -247,7 +248,7 @@ public class Q3EMain extends Activity
     private void SetupUIFlags()
     {
         final View decorView = getWindow().getDecorView();
-        if (m_hideNav)
+        if(m_hideNav)
             decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
         else
             decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_OPTIONS);
@@ -280,7 +281,7 @@ public class Q3EMain extends Activity
         m_renderMemStatus = preferences.getInt(Q3EPreference.RENDER_MEM_STATUS, 0);
         m_portrait = preferences.getBoolean(Q3EPreference.pref_harm_portrait, false);
         String harm_run_background = preferences.getString(Q3EPreference.RUN_BACKGROUND, "1");
-        if (null != harm_run_background)
+        if(null != harm_run_background)
             m_runBackground = Integer.parseInt(harm_run_background);
         else
             m_runBackground = 1;
@@ -288,10 +289,10 @@ public class Q3EMain extends Activity
 
     private void InitGUI()
     {
-        if (!Q3EOuya.Init(this))
+        if(!Q3EOuya.Init(this))
             Q3EUtils.isOuya = false;
 
-        if (mAudio == null)
+        if(mAudio == null)
             mAudio = new Q3ECallbackObj();
         mAudio.InitGUIInterface(this);
         Q3EUtils.q3ei.callbackObj = mAudio;
@@ -306,6 +307,7 @@ public class Q3EMain extends Activity
     }
 
     private boolean m_initView = false;
+
     private void InitView()
     {
         if(m_initView)
@@ -313,17 +315,17 @@ public class Q3EMain extends Activity
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if (mGLSurfaceView == null)
+        if(mGLSurfaceView == null)
             mGLSurfaceView = new Q3EView(this);
         Q3E.gameView = mGLSurfaceView;
-        if (mControlGLSurfaceView == null)
+        if(mControlGLSurfaceView == null)
             mControlGLSurfaceView = new Q3EControlView(this);
         Q3E.controlView = mControlGLSurfaceView;
         mAudio.vw = mControlGLSurfaceView;
         mControlGLSurfaceView.EnableGyroscopeControl(Q3EUtils.q3ei.view_motion_control_gyro);
         float gyroXSens = preferences.getFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS);
         float gyroYSens = preferences.getFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
-        if (Q3EUtils.q3ei.view_motion_control_gyro && (gyroXSens != 0.0f || gyroYSens != 0.0f))
+        if(Q3EUtils.q3ei.view_motion_control_gyro && (gyroXSens != 0.0f || gyroYSens != 0.0f))
             mControlGLSurfaceView.SetGyroscopeSens(gyroXSens, gyroYSens);
         mControlGLSurfaceView.RenderView(mGLSurfaceView);
 
@@ -349,14 +351,14 @@ public class Q3EMain extends Activity
         mControlGLSurfaceView.setZOrderMediaOverlay(true);
         mainLayout.addView(mControlGLSurfaceView, params);
 
-        if (Q3EUtils.q3ei.function_key_toolbar)
+        if(Q3EUtils.q3ei.function_key_toolbar)
         {
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
             View key_toolbar = mControlGLSurfaceView.CreateToolbar();
             mainLayout.addView(key_toolbar, params);
         }
 
-        if (m_renderMemStatus > 0) //k
+        if(m_renderMemStatus > 0) //k
         {
             memoryUsageText = new KDebugTextView(mainLayout.getContext());
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -370,8 +372,8 @@ public class Q3EMain extends Activity
     {
         int[] size = Q3EUtils.GetGeometry(this, true, true, true);
 
-        float ratio = (float)size[3] / (float)size[2];
-        int height = (int)((float)size[3] * ratio);
+        float ratio = (float) size[3] / (float) size[2];
+        int height = (int) ((float) size[3] * ratio);
 
         RelativeLayout.LayoutParams params;
 
@@ -393,14 +395,14 @@ public class Q3EMain extends Activity
         params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
         mainLayout.addView(mControlGLSurfaceView, params);
 
-        if (Q3EUtils.q3ei.function_key_toolbar)
+        if(Q3EUtils.q3ei.function_key_toolbar)
         {
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
             View key_toolbar = mControlGLSurfaceView.CreateToolbar();
             mainLayout.addView(key_toolbar, params);
         }
 
-        if (m_renderMemStatus > 0) //k
+        if(m_renderMemStatus > 0) //k
         {
             memoryUsageText = new KDebugTextView(mainLayout.getContext());
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -465,5 +467,35 @@ public class Q3EMain extends Activity
             }
         }
         gameHelper.InitGlobalEnv(intentGame, intentCommand);
+    }
+
+    private void MakeMouseCursor()
+    {
+        if(null == mouseCursor)
+        {
+            Q3E.widthRatio = (float)Q3E.orig_width / (float)Q3E.surfaceWidth;
+            Q3E.heightRatio = (float)Q3E.orig_height / (float)Q3E.surfaceHeight;
+
+            mouseCursor = new KMouseCursor(this);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(KMouseCursor.WIDTH, KMouseCursor.HEIGHT);
+            mainLayout.addView(mouseCursor, params);
+        }
+    }
+
+    public void SetMouseCursorVisible(boolean visible)
+    {
+        MakeMouseCursor();
+        mouseCursor.SetVisible(visible);
+    }
+
+    public void SetMouseCursorPosition(int x, int y)
+    {
+        MakeMouseCursor();
+        if(Q3E.orig_width == Q3E.surfaceWidth && Q3E.orig_height == Q3E.surfaceHeight)
+            mouseCursor.SetPosition(x, y);
+        else
+        {
+            mouseCursor.SetPosition((int)((float)x * Q3E.widthRatio), (int)((float)y * Q3E.heightRatio));
+        }
     }
 }

@@ -70,6 +70,7 @@ public class Q3EInterface
 	public boolean isJO = false;
 	public boolean isSamTFE = false;
 	public boolean isSamTSE = false;
+	public boolean isXash3D = false;
 
 	public boolean isD3BFG_Vulkan = false;
 
@@ -203,6 +204,8 @@ public class Q3EInterface
 			return Q3EGameConstants.GAME_ID_SAMTFE;
 		else if(isSamTSE)
 			return Q3EGameConstants.GAME_ID_SAMTSE;
+		else if(isXash3D)
+			return Q3EGameConstants.GAME_ID_XASH3D;
 		else
 			return Q3EGameConstants.GAME_ID_DOOM3;
 	}
@@ -241,6 +244,8 @@ public class Q3EInterface
 			Q3EKeyCodes.InitSamTFEKeycodes();
 		else if(isSamTSE)
 			Q3EKeyCodes.InitSamTSEKeycodes();
+		else if(isXash3D)
+			Q3EKeyCodes.InitXash3DKeycodes();
 		else
 			Q3EKeyCodes.InitD3Keycodes();
 	}
@@ -302,6 +307,8 @@ public class Q3EInterface
 			SetupSamTFE();
 		else if(Q3EGameConstants.GAME_SAMTSE.equalsIgnoreCase(name))
 			SetupSamTSE();
+		else if(Q3EGameConstants.GAME_XASH3D.equalsIgnoreCase(name))
+			SetupXash();
 		else
 			SetupDOOM3();
 	}
@@ -325,6 +332,7 @@ public class Q3EInterface
 		isJO = false;
 		isSamTFE = false;
 		isSamTSE = false;
+		isXash3D = false;
 	}
 
 	public void SetupDOOM3()
@@ -448,6 +456,13 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public void SetupXash()
+	{
+		ResetGameState();
+		isXash3D = true;
+		SetupGameConfig();
+	}
+
 	public void SetupGameConfig()
 	{
 		game_id = GameID();
@@ -524,7 +539,7 @@ public class Q3EInterface
 
 	public String GetGameCommandPrefix()
 	{
-		if(isQ1 || isFTEQW)
+		if(isQ1 || isFTEQW || isXash3D)
 			return KidTechCommand.ARG_PREFIX_QUAKETECH;
 		if(isDOOM)
 			return KidTechCommand.ARG_PREFIX_QUAKETECH + KidTechCommand.ARG_PREFIX_IDTECH;
@@ -539,7 +554,7 @@ public class Q3EInterface
 
 	public KidTechCommand GetGameCommandEngine(String cmd)
 	{
-		if(isQ1 || isDOOM)
+		if(isQ1 || isDOOM || isXash3D)
 			return new KidTechQuakeCommand(cmd);
 		else
 			return new KidTech4Command(cmd);
@@ -628,12 +643,12 @@ public class Q3EInterface
 
     public boolean IsInitGame()
 	{
-		return isD3 || isD3BFG || isQ2 || isQ1 || isQ3 || isRTCW || isTDM || isDOOM || isETW || isRealRTCW || isFTEQW || isJA || isJO || isSamTFE || isSamTSE;
+		return isD3 || isD3BFG || isQ2 || isQ1 || isQ3 || isRTCW || isTDM || isDOOM || isETW || isRealRTCW || isFTEQW || isJA || isJO || isSamTFE || isSamTSE || isXash3D;
 	}
 
 	public boolean IsStandaloneGame()
 	{
-		return isTDM || isDOOM || isFTEQW || isSamTFE || isSamTSE;
+		return isTDM || isDOOM || isFTEQW || isSamTFE || isSamTSE || isXash3D;
 	}
 
 	public boolean IS_D3()

@@ -1,5 +1,6 @@
 package com.n0n3m4.q3e.onscreen;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -32,7 +33,7 @@ public class MouseButton implements TouchListener
     @Override
     public boolean isInside(int x, int y)
     {
-        return x <= Q3EControlView.orig_width / 2;
+        return x <= Q3E.orig_width / 2;
         // return true;
     }
 }

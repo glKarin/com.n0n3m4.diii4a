@@ -7,23 +7,41 @@
 
 SDL_Android_GetAPI_f sdl_api;
 int USING_SDL = 0;
+static char *sdl_clipboardText = NULL;
+
+/** Standard activity result: operation canceled. */
+#define RESULT_CANCELED     0
+/** Standard activity result: operation succeeded. */
+#define RESULT_OK            -1
+/** Start of user-defined activity results. */
+#define RESULT_FIRST_USER    1
 
 #define INTERFACE_METHOD(ret, name, args) ret (* name) args;
 #include "../deplibs/SDL2/src/core/android/SDL_android_interface.h"
 
 const char * clipboardGetText()
 {
-    return "";
+    if(sdl_clipboardText)
+    {
+        free(sdl_clipboardText);
+        sdl_clipboardText = NULL;
+    }
+    sdl_clipboardText = get_clipboard_text();
+    return sdl_clipboardText;
 }
 
 int clipboardHasText()
 {
-    return Q3E_FALSE;
+    char *text = get_clipboard_text();
+    int res = text && text[0];
+    if(text)
+        free(text);
+    return res;
 }
 
 void clipboardSetText(const char *text)
 {
-    
+    copy_to_clipboard(text);
 }
 
 int createCustomCursor(int *pixels, int w, int h, int x, int y)
@@ -99,7 +117,8 @@ int openURL(const char *url)
 
 void requestPermission(const char *permission, int requestCode)
 {
-    
+    LOGI("Q3E SDL request permission '%s' with request code '%d'", permission, requestCode);
+    CALL_SDL(nativePermissionResult, requestCode, RESULT_OK);
 }
 
 int showToast(const char *message, int duration, int gravity, int xOffset, int yOffset)
@@ -140,7 +159,7 @@ int showTextInput(int x, int y, int w, int h)
 
 int supportsRelativeMouse()
 {
-    return Q3E_FALSE;
+    return Q3E_TRUE;
 }
 
 int setSystemCursor(int cursorID)
@@ -155,7 +174,8 @@ void setOrientation(int w, int h, int resizable, const char *hint)
 
 int setRelativeMouseEnabled(int on)
 {
-    return Q3E_FALSE;
+    grab_mouse(on);
+    return Q3E_TRUE;
 }
 
 int getManifestEnvironmentVariables()
@@ -258,6 +278,16 @@ void detachCurrentThread()
     Android_DetachThread();
 }
 
+void Q3E_ShutdownSDL(void)
+{
+    if(sdl_clipboardText)
+    {
+        free(sdl_clipboardText);
+        sdl_clipboardText = NULL;
+    }
+    LOGI("Q3E SDL2 shutdown");
+}
+
 void Q3E_InitSDL(void)
 {
     if(!libdl)
@@ -268,7 +298,7 @@ void Q3E_InitSDL(void)
 
     if(sdl_api)
     {
-        LOGW("Q3E SDL2 has init");
+        LOGW("Q3E SDL2 has initialized");
         return;
     }
 
@@ -282,7 +312,7 @@ void Q3E_InitSDL(void)
     sdl_api = (SDL_Android_GetAPI_f)ptr;
     if(!sdl_api)
     {
-        LOGW("Game library not a Q3E SDL2");
+        LOGW("Game library not use Q3E SDL2");
         return;
     }
     LOGI("SDL2 API found!");
@@ -302,7 +332,10 @@ void Q3E_InitSDL(void)
     CALL_SDL(audio_nativeSetupJNI);
     CALL_SDL(controller_nativeSetupJNI);
 
+    atexit(Q3E_ShutdownSDL);
+
     USING_SDL = 1;
+    LOGI("Game library use SDL2");
 }
 
 typedef float mouse_pos_t;
@@ -310,7 +343,7 @@ static mouse_pos_t in_positionX = 0;
 static mouse_pos_t in_positionY = 0;
 static mouse_pos_t in_deltaX = 0;
 static mouse_pos_t in_deltaY = 0;
-static int8_t mouseState;
+//static int8_t mouseState;
 static uint8_t relativeMouseMode = Q3E_FALSE;
 static int IN_WINDOW_WIDTH;
 static int IN_WINDOW_HEIGHT;
@@ -322,11 +355,14 @@ void Q3E_SDL_SetRelativeMouseMode(int on)
     {
         in_positionX = IN_WINDOW_WIDTH / 2;
         in_positionY = IN_WINDOW_HEIGHT / 2;
+        set_mouse_cursor_visible(false);
     }
     else
     {
         in_positionX = 0;
         in_positionY = 0;
+        set_mouse_cursor_position(in_positionX, in_positionY);
+        set_mouse_cursor_visible(true);
     }
     in_deltaX = 0;
     in_deltaY = 0;
@@ -389,6 +425,8 @@ static void Q3E_SDL_MouseMotion(float dx, float dy)
 
         in_positionX = x;
         in_positionY = y;
+
+        set_mouse_cursor_position(in_positionX, in_positionY);
     }
 }
 
@@ -408,22 +446,28 @@ void Q3E_SDL_MotionEvent(float dx, float dy)
     // mouse motion event
     Q3E_SDL_MouseMotion(dx, dy);
 
-    if(!relativeMouseMode)
+    //if(!relativeMouseMode)
     {
-        onNativeMouse(0, ACTION_MOVE, in_positionX, in_positionY, relativeMouseMode);
+        CALL_SDL(onNativeMouse, 0, ACTION_MOVE, in_positionX, in_positionY, relativeMouseMode);
     }
 }
 
-void Q3E_SDL_KeyEvent(int key, int down)
+void Q3E_SDL_KeyEvent(int key, int down, int ch)
 {
     if(key < 0)
     {
-        onNativeMouse(-key, down ? ACTION_DOWN : ACTION_UP, in_positionX, in_positionY, relativeMouseMode);
+        CALL_SDL(onNativeMouse, -key, down ? ACTION_DOWN : ACTION_UP, in_positionX, in_positionY, relativeMouseMode);
         return;
     }
+	
     if(down)
     {
         CALL_SDL(onNativeKeyDown, key);
+		if(ch > 0)
+		{
+			const char text[] = { (char)ch, '\0' };
+			CALL_SDL(connection_nativeCommitText, text, 1);
+		}
     }
     else
     {

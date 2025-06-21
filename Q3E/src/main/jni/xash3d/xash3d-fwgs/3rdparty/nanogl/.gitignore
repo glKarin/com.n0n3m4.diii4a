@@ -1,0 +1,13 @@
+*~
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+#CMakeLists.txt*
+CMakeScripts
+Testing
+compile_commands.json
+_deps

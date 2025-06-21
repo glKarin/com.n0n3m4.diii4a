@@ -3,10 +3,12 @@ package com.n0n3m4.q3e;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.karin.KMouseCursor;
 
 public class Q3EGUI
 {
@@ -169,5 +171,27 @@ public class Q3EGUI
             }
         }
         return res[0];
+    }
+
+    public void SetMouseCursorVisible(boolean visible)
+    {
+        m_context.runOnUiThread(new Runnable() {
+            @Override
+            public void run()
+            {
+                Q3E.activity.SetMouseCursorVisible(visible);
+            }
+        });
+    }
+
+    public void SetMouseCursorPosition(int x, int y)
+    {
+        m_context.runOnUiThread(new Runnable() {
+            @Override
+            public void run()
+            {
+                Q3E.activity.SetMouseCursorPosition(x, y);
+            }
+        });
     }
 }

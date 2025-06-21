@@ -1,5 +1,6 @@
-set(DIII4A TRUE)
-if(DIII4A)
+set(Q3E TRUE)
+if(Q3E)
+  add_definitions(-D_Q3E)
 	set(CMAKE_CURRENT_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/build)
 	set(SDL_TEST_ENABLED_BY_DEFAULT OFF)
 	set(SDL_SHARED_ENABLED_BY_DEFAULT ON)
@@ -420,7 +421,7 @@ endforeach()
 # Allow some projects to be built conditionally.
 set_option(SDL2_DISABLE_SDL2MAIN   "Disable building/installation of SDL2main" ON) # OFF
 set_option(SDL2_DISABLE_INSTALL    "Disable installation of SDL2" ${SDL2_SUBPROJECT})
-set_option(SDL2_DISABLE_UNINSTALL  "Disable uninstallation of SDL2" OFF)
+set_option(SDL2_DISABLE_UNINSTALL  "Disable uninstallation of SDL2" ON) #k OFF
 
 option_string(SDL_ASSERTIONS "Enable internal sanity checks (auto/disabled/release/enabled/paranoid)" "auto")
 #set_option(SDL_DEPENDENCY_TRACKING "Use gcc -MMD -MT dependency tracking" ON)

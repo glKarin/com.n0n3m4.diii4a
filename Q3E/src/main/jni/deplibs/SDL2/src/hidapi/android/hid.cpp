@@ -1051,6 +1051,7 @@ int hid_init(void)
 {
 	if ( !g_initialized )
 	{
+#if !defined(_Q3E)
 		// HIDAPI doesn't work well with Android < 4.3
 		if (SDL_GetAndroidSDKVersion() >= 18) {
 			// Make sure thread is attached to JVM/env
@@ -1077,6 +1078,7 @@ int hid_init(void)
 			env->CallBooleanMethod( g_HIDDeviceManagerCallbackHandler, g_midHIDDeviceManagerInitialize, init_usb, init_bluetooth );
 			ExceptionCheck( env, NULL, "hid_init" );
 		}
+#endif
 		g_initialized = true;	// Regardless of result, so it's only called once
 	}
 	return 0;

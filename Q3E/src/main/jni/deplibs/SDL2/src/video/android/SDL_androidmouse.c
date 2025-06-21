@@ -222,16 +222,24 @@ void Android_OnMouse(SDL_Window *window, int state, int action, float x, float y
 
     switch (action) {
     case ACTION_DOWN:
+#ifdef _Q3E //karin: not all buttons mask on Q3E, only one button
+        button = TranslateButton(state);
+#else
         changes = state & ~last_state;
         button = TranslateButton(changes);
+#endif
         last_state = state;
         SDL_SendMouseMotion(window, 0, relative, (int)x, (int)y);
         SDL_SendMouseButton(window, 0, SDL_PRESSED, button);
         break;
 
     case ACTION_UP:
+#ifdef _Q3E //karin: not all buttons mask on Q3E, only one button
+        button = TranslateButton(state);
+#else
         changes = last_state & ~state;
         button = TranslateButton(changes);
+#endif
         last_state = state;
         SDL_SendMouseMotion(window, 0, relative, (int)x, (int)y);
         SDL_SendMouseButton(window, 0, SDL_RELEASED, button);

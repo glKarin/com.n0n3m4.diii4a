@@ -24,8 +24,8 @@ CMakeFiles
 cmake_install.cmake
 CMakeCache.txt
 *.sln
-x64
-x86
+/x64
+/x86
 build
 Release
 Debug

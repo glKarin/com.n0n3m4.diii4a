@@ -1,0 +1,18 @@
+BARNACLE_FIX_VISIBILITY=OFF # Barnacle tongue length fix
+CLIENT_WEAPONS=ON # Client local weapons prediction
+CROWBAR_IDLE_ANIM=OFF # Crowbar idle animation
+CROWBAR_DELAY_FIX=OFF # Crowbar attack delay fix
+CROWBAR_FIX_RAPID_CROWBAR=ON # Rapid crowbar fix
+GAUSS_OVERCHARGE_FIX=OFF # Gauss overcharge fix
+TRIPMINE_BEAM_DUPLICATION_FIX=OFF # Fix of tripmine beam duplication on level transition
+HANDGRENADE_DEPLOY_FIX=OFF # Handgrenade deploy animation fix after finishing a throw
+WEAPONS_ANIMATION_TIMES_FIX=OFF # Animation times fix for some weapons
+SATCHEL_OLD_BEHAVIOUR=OFF # Old pre-HL 25th satchel's behaviour
+SPEAKABLE_TARGETS=ON # Speakable cycler and func_button(breaks AMXModX offsets)
+OEM_BUILD=OFF # OEM Build
+HLDEMO_BUILD=OFF # Demo Build
+
+GAMEDIR=valve # Gamedir path
+SERVER_INSTALL_DIR=dlls # Where put server dll
+CLIENT_INSTALL_DIR=cl_dlls # Where put client dll 
+SERVER_LIBRARY_NAME=hl # Library name for PC platforms

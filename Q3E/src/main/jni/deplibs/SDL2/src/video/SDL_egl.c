@@ -1201,7 +1201,13 @@ EGLSurface *SDL_EGL_CreateSurface(_THIS, NativeWindowType nw)
                                         EGL_NATIVE_VISUAL_ID, &format_wanted);
 
     /* Format based on selected egl config. */
+#ifdef _Q3E //karin: fixed fullscreen size from launcher
+    extern int Android_SurfaceWidth;
+    extern int Android_SurfaceHeight;
+    ANativeWindow_setBuffersGeometry(nw, Android_SurfaceWidth, Android_SurfaceHeight, format_wanted);
+#else
     ANativeWindow_setBuffersGeometry(nw, 0, 0, format_wanted);
+#endif
 #endif
 
     if (_this->gl_config.framebuffer_srgb_capable) {

@@ -113,7 +113,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                     Q3EGameConstants.GAME_SUBDIR_JA,
                     Q3EGameConstants.GAME_SUBDIR_JO,
                     Q3EGameConstants.GAME_SUBDIR_SAMTFE,
-                    Q3EGameConstants.GAME_SUBDIR_SAMTSE
+                    Q3EGameConstants.GAME_SUBDIR_SAMTSE,
+                    Q3EGameConstants.GAME_SUBDIR_XASH3D
             ));
         }
 
@@ -200,6 +201,13 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 blackList.add(Q3EGameConstants.GAME_BASE_SAMTSE);
             else
                 blackList.remove(Q3EGameConstants.GAME_BASE_SAMTSE);
+        }
+        else if(Q3EUtils.q3ei.isXash3D)
+        {
+            if(standalone)
+                blackList.add(Q3EGameConstants.GAME_BASE_XASH3D);
+            else
+                blackList.remove(Q3EGameConstants.GAME_BASE_XASH3D);
         }
 /*        else if(Q3EUtils.q3ei.isTDM)
         {
@@ -313,6 +321,11 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 if(Q3EGameConstants.GAME_BASE_SAMTSE.equals(fileModel.name))
                     name = Q3EGameConstants.GAME_NAME_SAMTSE;
             }
+            else if(Q3EUtils.q3ei.isXash3D)
+            {
+                if(Q3EGameConstants.GAME_BASE_XASH3D.equals(fileModel.name))
+                    name = Q3EGameConstants.GAME_NAME_XASH3D;
+            }
 /*            else if(Q3EUtils.q3ei.isTDM)
             {
                 if(Q3EGameConstants.GAME_BASE_TDM.equals(fileModel.name))
@@ -387,6 +400,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGameConstants.GAME_SAMTSE:
                         if(!Q3EUtils.q3ei.isSamTSE)
+                            continue;
+                        break;
+                    case Q3EGameConstants.GAME_XASH3D:
+                        if(!Q3EUtils.q3ei.isXash3D)
                             continue;
                         break;
                     case Q3EGameConstants.GAME_DOOM3:

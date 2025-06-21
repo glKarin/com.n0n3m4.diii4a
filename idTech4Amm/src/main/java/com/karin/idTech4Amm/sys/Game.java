@@ -6,9 +6,6 @@ import com.karin.idTech4Amm.R;
 import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3ELang;
 
-import java.util.ArrayList;
-import java.util.List;
-
 // game config
 /*
  * config this can change launcher's game mod list.
@@ -92,10 +89,13 @@ public enum Game
     JO_BASE(Q3EGameConstants.GAME_JO, "base", "", "jospgame", "", "base", false, R.string.openjo_base),
 
     // SamTFE
-    TDM_SAMTFE(Q3EGameConstants.GAME_SAMTFE, "", "", "samtfe", "", "", false, R.string.samtfe_base),
+    SAMTFE_BASE(Q3EGameConstants.GAME_SAMTFE, "", "", "samtfe", "", "", false, R.string.samtfe_base),
 
     // SamTSE
-    TDM_SAMTSE(Q3EGameConstants.GAME_SAMTSE, "", "", "samtse", "", "", false, R.string.samtse_base),
+    SAMTSE_BASE(Q3EGameConstants.GAME_SAMTSE, "", "", "samtse", "", "", false, R.string.samtse_base),
+
+    // Xash3D
+    XASH3D(Q3EGameConstants.GAME_XASH3D, "valve", "valve", "xash3d", "", "", false, R.string.halflife_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......
