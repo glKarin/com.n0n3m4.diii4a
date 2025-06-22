@@ -12,7 +12,7 @@ include(CMakeDependentOption)
 include(FeatureSummary)
 
 set(OPUS_BUILD_SHARED_LIBRARY_HELP_STR "build shared library.")
-option(OPUS_BUILD_SHARED_LIBRARY ${OPUS_BUILD_SHARED_LIBRARY_HELP_STR} OFF)
+set(OPUS_BUILD_SHARED_LIBRARY False) #k: change option to set, because opus project has exists
 if(OPUS_BUILD_SHARED_LIBRARY OR BUILD_SHARED_LIBS OR OPUS_BUILD_FRAMEWORK)
   # Global flag to cause add_library() to create shared libraries if on.
   set(BUILD_SHARED_LIBS ON)
@@ -29,7 +29,7 @@ endif()
 add_feature_info(OPUS_BUILD_TESTING OPUS_BUILD_TESTING ${OPUS_BUILD_TESTING_HELP_STR})
 
 set(OPUS_CUSTOM_MODES_HELP_STR "enable non-Opus modes, e.g. 44.1 kHz & 2^n frames.")
-option(OPUS_CUSTOM_MODES ${OPUS_CUSTOM_MODES_HELP_STR} ON) #k OFF
+set(OPUS_CUSTOM_MODES True) #k: change option to set, because opus project has exists #k OFF
 add_feature_info(OPUS_CUSTOM_MODES OPUS_CUSTOM_MODES ${OPUS_CUSTOM_MODES_HELP_STR})
 
 set(OPUS_BUILD_PROGRAMS_HELP_STR "build programs.")
