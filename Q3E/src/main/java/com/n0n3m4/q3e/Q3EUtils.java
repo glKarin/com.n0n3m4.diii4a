@@ -1011,7 +1011,7 @@ public class Q3EUtils
 
             File file = new File(toFilePath);
             if(!overwrite && file.exists())
-                return false;
+                return true;
 
             Q3EUtils.mkdir(file.getParent(), true);
 

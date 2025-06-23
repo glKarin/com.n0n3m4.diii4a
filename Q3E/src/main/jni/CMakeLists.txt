@@ -55,10 +55,12 @@ set(DIII4A_DEPEND_COMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
 # backtrace for debug
 add_subdirectory ( common/bt )
 
+# using Q3E_SDL2
 if(GAME_XASH3D)
 set(Q3E_SDL TRUE)
 endif()
 
+# build SDL2
 if(Q3E_SDL)
     set(Q3E_SDL2_INCLUDE_PATH "${DIII4A_DEPEND_LIBRARY_PATH}/SDL2/include")
     add_subdirectory(deplibs/SDL2)
@@ -75,14 +77,14 @@ if(GAME_DOOM3)
     add_subdirectory ( doom3/neo ) # DOOM3 | RoE, Quake4, Prey(2006)
 endif()
 
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK)
+    message(STATUS "Build extras depend shared libraries")
+    add_subdirectory ( deplibs ) # common depend libraries
+
 if(NOT GAME_DOOM3)
     message(STATUS "Build OpenAL alone")
     add_subdirectory(doom3/neo/externlibs/openal-soft)
 endif()
-
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK)
-    message(STATUS "Build extras depend shared libraries")
-    add_subdirectory ( deplibs ) # common depend libraries
 endif()
 
 if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_SERIOUSSAM)

@@ -32,6 +32,7 @@ CALLBACK_METHOD(int, setSystemCursor, (int));
 CALLBACK_METHOD(void, setOrientation, (int, int, int, const char *));
 CALLBACK_METHOD(int, setRelativeMouseEnabled, (int));
 CALLBACK_METHOD(int, getManifestEnvironmentVariables, ());
+CALLBACK_METHOD(int, messageboxShowMessageBox, (int, const char *, const char *, int *, int *,  const char *[], int *));
 
 CALLBACK_METHOD(int *, getAudioOutputDevices, ());
 CALLBACK_METHOD(int *, getAudioInputDevices, ());

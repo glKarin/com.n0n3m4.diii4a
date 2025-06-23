@@ -268,6 +268,27 @@ void hapticStop(int device_id)
     
 }
 
+int messageboxShowMessageBox(int flags, const char *title, const char *message, int *button_flags, int *button_ids,  const char *button_texts[], int *colors)
+{
+    int num = ARRAY_ELEMENT_LENGTH(button_texts, const char *);
+    int res = open_dialog(title, message, num, button_texts);
+    switch(res)
+    {
+        case 1:
+            if(num > 0)
+                return button_ids[0];
+        case 2:
+            if(num > 1)
+                return button_ids[1];
+        case 3:
+            if(num > 2)
+                return button_ids[2];
+        default: // -1 0
+            return res;
+    }
+    return -2; // unknown
+}
+
 void attachCurrentThread()
 {
     Android_AttachThread();

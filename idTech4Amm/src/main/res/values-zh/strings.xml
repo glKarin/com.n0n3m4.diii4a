@@ -89,8 +89,8 @@
     <string name="etw">德军总部: 深入敌后</string>
     <string name="realrtcw">真·重返德军总部</string>
     <string name="fteqw">FTEQW</string>
-    <string name="samtfe">英雄萨姆1</string>
-    <string name="samtse">英雄萨姆2</string>
+    <string name="samtfe">英雄萨姆TFE</string>
+    <string name="samtse">英雄萨姆TSE</string>
     <string name="xash3d">Xash3D</string>
     <string name="xash3d_base">Xash3D</string>
     <string name="tdm">Dark mod</string>
@@ -298,6 +298,7 @@
     <string name="hexen_2_base">毁灭巫师2</string>
     <string name="halflife_base">半衰期</string>
     <string name="cs_1_5_base">反恐精英(1.5)</string>
+    <string name="cs_base">反恐精英</string>
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">毁灭战士3 BFG</string>
     <string name="doom_base">毁灭战士</string>

@@ -96,6 +96,7 @@ public enum Game
 
     // Xash3D
     XASH3D(Q3EGameConstants.GAME_XASH3D, "valve", "valve", "xash3d", "", "", false, R.string.halflife_base),
+    XASH3D_CS(Q3EGameConstants.GAME_XASH3D, "cstrike", "cstrike", "xash3d", "cstrike", "cstrike", true, R.string.cs_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

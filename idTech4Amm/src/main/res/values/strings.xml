@@ -297,6 +297,7 @@
     <string name="hexen_2_base">HeXen II</string>
     <string name="halflife_base">Half-Life</string>
     <string name="cs_1_5_base">Counter Strike(1.5)</string>
+    <string name="cs_base">Counter Strike</string>
 
     <string name="d3bfg_base">DOOM 3 BFG</string>
     <string name="doom_base">DOOM</string>

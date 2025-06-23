@@ -53,23 +53,29 @@
 #define INTERFACE_METHOD(ret, name, args) ret sdl_##name args;
 #include "SDL_android_interface.h"
 
-#define ARRAY_LENGTH(x) *((int *)(((int *)x) - 1))
-#define ARRAY_FREE(x) free(((int *)x) - 1)
-#define ARRAY_ALLOC(v, t, l) t *v = (t *)calloc(l * sizeof(t) + 4, 1); ARRAY_LENGTH(v) = l; v = (t *)((char *)v + 4);
-void * sdl_array_alloc(int size)
+#include "SDL_android_env.h"
+
+static SDL_INLINE void * sdl_array_alloc(int size)
 {
     if(size == 0)
         return NULL;
     ARRAY_ALLOC(res, char, size);
     return res;
 }
-int sdl_array_length(void *arr)
+
+static SDL_INLINE void * sdl_array_allocs(int size, int num)
+{
+    return sdl_array_alloc(size * num);
+}
+
+static SDL_INLINE int sdl_array_length(void *arr)
 {
     if(!arr)
         return 0;
     return ARRAY_LENGTH(arr);
 }
-void sdl_array_free(void *arr)
+
+static SDL_INLINE void sdl_array_free(void *arr)
 {
     if(!arr)
         return;
@@ -106,7 +112,6 @@ static pthread_once_t key_once = PTHREAD_ONCE_INIT;
 #define CALLM(name, ...) mid##name(__VA_ARGS__)
 #define METHOD(name) mid##name
 
-#include "SDL_android_env.h"
 __attribute__((visibility("default"))) void SDL_Android_GetAPI(const SDL_Android_Callback_t *callbacks, SDL_Android_Interface_t *interfaces)
 {
 #define CALLBACK_METHOD(ret, name, args) mid##name = callbacks->name;
@@ -1142,11 +1147,11 @@ int Android_JNI_OpenAudioDevice(int iscapture, int device_id, SDL_AudioSpec *spe
     } break;
     case ENCODING_PCM_16BIT:
     {
-        jbufobj = sdl_array_alloc(spec->samples * spec->channels * 2);
+        jbufobj = sdl_array_allocs(2, spec->samples * spec->channels);
     } break;
     case ENCODING_PCM_FLOAT:
     {
-        jbufobj = sdl_array_alloc(spec->samples * spec->channels * 4);
+        jbufobj = sdl_array_allocs(4, spec->samples * spec->channels);
     } break;
     default:
         return SDL_SetError("Unexpected audio format from Java: %d\n", audioformat);
@@ -1699,7 +1704,58 @@ int Android_JNI_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *bu
     (*env)->DeleteLocalRef(env, colors);
 
 #endif
-    return 0;
+    const char * title;
+    const char * message;
+    int *button_flags;
+    int *button_ids;
+    const char **button_texts;
+    int *colors = NULL;
+    int temp;
+    int i;
+
+    title = messageboxdata->title;
+    message = messageboxdata->message;
+
+    button_flags = sdl_array_allocs( sizeof(int), messageboxdata->numbuttons);
+    button_ids = sdl_array_allocs(sizeof(int), messageboxdata->numbuttons);
+    button_texts = sdl_array_allocs(sizeof(const char *), messageboxdata->numbuttons);
+    for (i = 0; i < messageboxdata->numbuttons; ++i) {
+        const SDL_MessageBoxButtonData *sdlButton;
+
+        if (messageboxdata->flags & SDL_MESSAGEBOX_BUTTONS_RIGHT_TO_LEFT) {
+            sdlButton = &messageboxdata->buttons[messageboxdata->numbuttons - 1 - i];
+        } else {
+            sdlButton = &messageboxdata->buttons[i];
+        }
+
+        temp = sdlButton->flags;
+        button_flags[i] = temp;
+        temp = sdlButton->buttonid;
+        button_ids[i] = temp;
+        button_texts[i] = sdlButton->text;
+    }
+
+    if (messageboxdata->colorScheme) {
+        colors = sdl_array_allocs(sizeof(int), SDL_MESSAGEBOX_COLOR_MAX);
+        for (i = 0; i < SDL_MESSAGEBOX_COLOR_MAX; ++i) {
+            temp = (0xFFU << 24) |
+                   (messageboxdata->colorScheme->colors[i].r << 16) |
+                   (messageboxdata->colorScheme->colors[i].g << 8) |
+                   (messageboxdata->colorScheme->colors[i].b << 0);
+            colors[i] = temp;
+        }
+    } else {
+        colors = NULL;
+    }
+
+    int res = CALLM(messageboxShowMessageBox, messageboxdata->flags, title, message, button_flags, button_ids, button_texts, colors);
+
+    sdl_array_free(button_flags);
+    sdl_array_free(button_ids);
+    sdl_array_free(button_texts);
+    sdl_array_free(colors);
+
+    return res;
 }
 
 /*
