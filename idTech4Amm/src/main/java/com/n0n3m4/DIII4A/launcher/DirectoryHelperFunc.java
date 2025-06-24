@@ -1,39 +1,21 @@
 package com.n0n3m4.DIII4A.launcher;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
-import com.karin.idTech4Amm.lib.KCVar;
-import com.karin.idTech4Amm.lib.KCVarSystem;
-import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.TextHelper;
-import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
-import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.DIII4A.GameLauncher;
-import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EInterface;
-import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KStr;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public final class DirectoryHelperFunc extends GameLauncherFunc
 {
@@ -93,7 +75,7 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
                 String pathText = TextHelper.GenLinkText("file://" + path, path);
                 sb.append(" * ").append(pathText).append(endl);
 
-                if(!Q3EGameConstants.GAME_QUAKE1.equals(game) && !Q3EGameConstants.GAME_FTEQW.equals(game) && !Q3EGameConstants.GAME_SAMTFE.equals(game) && !Q3EGameConstants.GAME_SAMTSE.equals(game))
+                if(Q3EInterface.IsSupportSecondaryDirGame(game))
                 {
                     String appHome = Q3EUtils.GetAppInternalSearchPath(m_gameLauncher, null);
                     String path2 = KStr.AppendPath(appHome, subdir, gameDataDir);

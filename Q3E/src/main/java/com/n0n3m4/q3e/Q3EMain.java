@@ -63,6 +63,11 @@ public class Q3EMain extends Activity
     @SuppressLint("StaticFieldLeak")
     public static Q3EGameHelper  gameHelper;
 
+    /*
+    Intent::extras
+    game: game type
+    command: command line arguments
+     */
     @SuppressLint("ResourceType")
     @Override
     public void onCreate(Bundle savedInstanceState)

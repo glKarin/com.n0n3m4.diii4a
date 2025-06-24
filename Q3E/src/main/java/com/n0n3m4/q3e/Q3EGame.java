@@ -177,4 +177,24 @@ public enum Q3EGame
         }
         return values[Q3EGameConstants.GAME_ID_DOOM3]; // DOOM3
     }
+
+    public static Q3EGame FindOrNull(int index)
+    {
+        Q3EGame[] values = values();
+        if(index >= 0 && index < values.length)
+            return values[index];
+        else
+            return null;
+    }
+
+    public static Q3EGame FindOrNull(String type)
+    {
+        Q3EGame[] values = values();
+        for(Q3EGame value : values)
+        {
+            if(value.TYPE.equalsIgnoreCase(type))
+                return value;
+        }
+        return null;
+    }
 }

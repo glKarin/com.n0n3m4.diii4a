@@ -110,12 +110,14 @@ static const fs_archive_t g_directory_archive =
 	.pfnAddArchive_Fullpath = FS_AddDir_Fullpath,
 };
 
+#if !defined(_DIII4A) //karin: unuse apk asset
 #if XASH_ANDROID
 static const fs_archive_t g_android_archive =
 {
 	.type = SEARCHPATH_ANDROID_ASSETS,
 	.pfnAddArchive_Fullpath = FS_AddAndroidAssets_Fullpath
 };
+#endif
 #endif
 
 #ifdef XASH_REDUCE_FD
@@ -476,8 +478,10 @@ void FS_AddGameDirectory( const char *dir, uint flags )
 
 	stringlistfreecontents( &list );
 
+#if !defined(_DIII4A) //karin: unuse apk asset
 #if XASH_ANDROID
 	FS_AddArchive_Fullpath( &g_android_archive, dir, flags );
+#endif
 #endif
 
 	// add the directory to the search path
@@ -1645,8 +1649,10 @@ qboolean FS_InitStdio( qboolean unused_set_to_true, const char *rootdir, const c
 
 	FS_InitMemory();
 
+#if !defined(_DIII4A) //karin: unuse apk asset
 #if XASH_ANDROID
 	FS_InitAndroid();
+#endif
 #endif
 
 	Q_strncpy( fs_rootdir, rootdir, sizeof( fs_rootdir ));

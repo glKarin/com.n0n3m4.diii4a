@@ -448,6 +448,24 @@ Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support
 
 ----------------------------------------------------------------------------------
 
+> ### Run idTech4A++ on other Android application with Android intent
+1. Setup game type with `game` key: also see Q3E/com.n0n3m4.q3e.Q3EGameConstants.java GAME_XXX constants. Valid value: `doom3` `quake4` `prey2006` `quake2` `quake3` `rtcw` `tdm` `quake1` `doom3bfg` `gzdoom` `etw` `realrtcw` `fteqw` `openja` `openjo` `samtfe` `samtse` `xash3d`
+2. Setup game command arguments with `command` key. Starts with `game.arm`
+
+##### e.g. Run CS1.6 with Xash3D engine
+```
+startActivity(new Intent().setComponent(new ComponentName("com.karin.idTech4Amm", "com.n0n3m4.q3e.Q3EMain"))
+		.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+		// 1. Setup game type
+		.putExtra("game", "xash3d")
+		// 2. Setup game command
+		.putExtra("command", "game.arm -ref gles1 -console -dev 2 -gamedir cstrike -game cstrike -dll /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libserver.so -clientdll /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libclient.so -menulib /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libmenu.so")
+		);
+finish();
+```
+
+----------------------------------------------------------------------------------
+
 > ### Bot support on DOOM3/Quake4
 1. Extract `doom3/d3_sabot_a7.pk4`(DOOM 3) or `q4base/q4_sabot_a9.pk4`(Quake 4) file in apk to game data folder, it includes some defs, scripts and MP game map AAS file(version < 66).
 2. Set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(botaa48 on DOOM 3, botaa32 on Quake 4).

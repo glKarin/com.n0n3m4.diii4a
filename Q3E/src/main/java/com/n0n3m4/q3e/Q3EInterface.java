@@ -661,6 +661,22 @@ public class Q3EInterface
 		return Q3EGame.Find(game).STANDALONE;
 	}
 
+	public static boolean IsSupportSecondaryDirGame(String game)
+	{
+		final String[] UnsupportGames = {
+				Q3EGameConstants.GAME_QUAKE1,
+				Q3EGameConstants.GAME_FTEQW,
+				Q3EGameConstants.GAME_SAMTFE,
+				Q3EGameConstants.GAME_SAMTSE,
+		};
+		for(String unsupportGame : UnsupportGames)
+		{
+			if(unsupportGame.equalsIgnoreCase(game))
+				return false;
+		}
+		return true;
+	}
+
 	public static String GetGameStandaloneDirectory(String game)
 	{
 		return Q3EGame.Find(game).DIR;
@@ -736,6 +752,11 @@ public class Q3EInterface
 	public static String GetEnableModPreferenceKey(String game)
 	{
 		return Q3EGame.Find(game).PREF_MOD_ENABLED;
+	}
+
+	public Q3EGame GameInfo()
+	{
+		return Q3EGame.Find(GameID());
 	}
 
 	public static String GetGameBaseDirectory(String game)
