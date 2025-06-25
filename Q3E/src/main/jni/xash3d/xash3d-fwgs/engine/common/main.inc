@@ -103,9 +103,9 @@ void Sys_SyncState(void)
 	}
 }
 
-static void FS_CreatePath( char *path )
+static void Q3E_CreatePath( char *path )
 {
-	printf("Create path: %s\n", path);
+	Q3E_PRINTF("Create path: %s\n", path);
 	char	*ofs, save;
 
 	int i = 1;
@@ -124,15 +124,53 @@ static void FS_CreatePath( char *path )
 	if(i < strlen(path) - 1)
 		_mkdir( path );
 }
-void Q3E_PostMain()
+
+static int Q3E_CheckParm( int argc, char **argv, const char *parm, int start )
+{
+	int	i;
+
+	for( i = start; i < argc; i++ )
+	{
+		if( !argv[i] )
+			continue;
+
+		if( !Q_stricmp( parm, argv[i] ))
+			return i;
+	}
+	return 0;
+}
+
+static int Q3E_GetParmFromCmdLine( int argc, char **argv, const char *parm, char *out, size_t size, int start )
+{
+	int	rargc = Q3E_CheckParm( argc, argv, parm, start );
+
+	if( !rargc || !out || (rargc + 1) >= argc || !argv[rargc + 1] || !argv[rargc + 1][0] )
+		return 0;
+
+	Q_strncpy( out, argv[rargc+1], size );
+
+	return rargc+1;
+}
+
+void Q3E_PostMain(int argc, char **argv)
 {
 	// add env vars
 	setenv("XASH3D_GAMELIBDIR", Sys_DLLInternalPath(), 1);
 	setenv("XASH3D_ENGLIBDIR", Sys_DLLDefaultPath(), 1);
+
+	char libdir[1024];
+	if(Q3E_GetParmFromCmdLine(argc, argv, "-gamelibdir", libdir, sizeof(libdir), 1))
+		setenv("XASH3D_GAMELIBDIR", libdir, 1);
+	if(Q3E_GetParmFromCmdLine(argc, argv, "-englibdir", libdir, sizeof(libdir), 1))
+		setenv("XASH3D_ENGLIBDIR", libdir, 1);
+
+	Q3E_PRINTF("XASH3D_GAMELIBDIR=%s\n", getenv("XASH3D_GAMELIBDIR"));
+	Q3E_PRINTF("XASH3D_ENGLIBDIR=%s\n", getenv("XASH3D_ENGLIBDIR"));
+
 	// create write game base directory
 	//char path[MAX_OSPATH] = { 0 };
 	//Q_snprintf(path, sizeof(path), "%s/%s", Sys_GameDataDefaultPath(), ".xash3d");
-	//FS_CreatePath( path );
+	//Q3E_CreatePath( path );
 }
 
 void IN_Analog(float *forward, float *side)

@@ -215,3 +215,7 @@ if(CMAKE_BUILD_TYPE MATCHES "Release")
 			POST_BUILD DEPENDS ${SVDLL_LIBRARY}
 			COMMAND ${CMAKE_STRIP} -s $<TARGET_FILE:${SVDLL_LIBRARY}>)
 endif()
+
+if(DIII4Axxx)
+set_target_properties(${SVDLL_LIBRARY} PROPERTIES OUTPUT_NAME "server")
+endif()

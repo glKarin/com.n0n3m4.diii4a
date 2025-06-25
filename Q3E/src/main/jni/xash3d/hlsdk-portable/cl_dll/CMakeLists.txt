@@ -254,3 +254,7 @@ if(CMAKE_BUILD_TYPE MATCHES "Release")
 			POST_BUILD DEPENDS ${CLDLL_LIBRARY}
 			COMMAND ${CMAKE_STRIP} -s $<TARGET_FILE:${CLDLL_LIBRARY}>)
 endif()
+
+if(DIII4Axxx)
+set_target_properties(${CLDLL_LIBRARY} PROPERTIES OUTPUT_NAME "client")
+endif()

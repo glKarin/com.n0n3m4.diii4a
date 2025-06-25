@@ -82,7 +82,7 @@ int main( int argc, char **argv )
 	szArgv = argv;
 #endif // XASH_PSVITA
 #ifdef _DIII4A //karin: setup env
-	Q3E_PostMain();
+	Q3E_PostMain(argc, argv);
 #endif
 	return Sys_Start();
 }

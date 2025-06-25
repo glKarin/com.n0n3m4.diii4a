@@ -37,7 +37,7 @@ void *ANDROID_LoadLibrary( const char *dllname )
 		Q_snprintf( path, MAX_SYSPATH, "%s/lib%s."OS_LIB_EXT, libdir[i], dllname );
 		pHandle = dlopen( path, RTLD_NOW );
 #ifdef _DIII4A //karin: print load dll path
-		printf("Load %s -> %p\n", path, pHandle);
+		printf("Load(env) %s -> %p\n", path, pHandle);
 #endif
 		if( pHandle )
 			return pHandle;
@@ -45,12 +45,35 @@ void *ANDROID_LoadLibrary( const char *dllname )
 		COM_PushLibraryError( dlerror() );
 	}
 
+#ifdef _DIII4A //karin: load library from std path
+	extern const char * Sys_DLLInternalPath();
+	extern const char * Sys_DLLDefaultPath();
+	libdir[0] = Sys_DLLInternalPath();
+	libdir[1] = Sys_DLLDefaultPath();
+
+	for( i = 0; i < 2; i++ )
+	{
+		if( !libdir[i] )
+			continue;
+
+		Q_snprintf( path, MAX_SYSPATH, "%s/lib%s."OS_LIB_EXT, libdir[i], dllname );
+		pHandle = dlopen( path, RTLD_NOW );
+#ifdef _DIII4A //karin: print load dll path
+		printf("Load(std) %s -> %p\n", path, pHandle);
+#endif
+		if( pHandle )
+			return pHandle;
+
+		COM_PushLibraryError( dlerror() );
+	}
+#endif
+
 	// HACKHACK: keep old behaviour for compatibility
 	if( Q_strstr( dllname, "." OS_LIB_EXT ) || Q_strstr( dllname, "/" ))
 	{
 		pHandle = dlopen( dllname, RTLD_NOW );
 #ifdef _DIII4A //karin: print load dll path
-		printf("Load %s -> %p\n", dllname, pHandle);
+		printf("Load(raw) %s -> %p\n", dllname, pHandle);
 #endif
 		if( pHandle )
 			return pHandle;
