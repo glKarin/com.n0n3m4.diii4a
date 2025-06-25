@@ -121,6 +121,8 @@ public class Q3EKeyCodes
         public static final int K_KP_8 = K_KP_UPARROW;
         public static final int K_KP_9 = K_KP_PGUP;
         public static final int K_KP_0 = K_KP_INS;
+
+        public static final int K_GRAVE      = KeyCodesGeneric.K_GRAVE;
     }
 
     // code/client/keycodes.h <- Q3
@@ -212,6 +214,8 @@ public class Q3EKeyCodes
         public static final int K_KP_8 = K_KP_UPARROW;
         public static final int K_KP_9 = K_KP_PGUP;
         public static final int K_KP_0 = K_KP_INS;
+
+        public static final int K_GRAVE      = KeyCodesGeneric.K_GRAVE;
     }
 
     // neo/framework/KeyInput.h
@@ -316,6 +320,8 @@ public class Q3EKeyCodes
         public static final int K_KP_8 = K_KP_UPARROW;
         public static final int K_KP_9 = K_KP_PGUP;
         public static final int K_KP_0 = K_KP_INS;
+
+        public static final int K_GRAVE      = KeyCodesGeneric.K_GRAVE;
     }
 
     // neo/sys/sys_public.h
@@ -557,6 +563,8 @@ public class Q3EKeyCodes
         public static final int J_RIGHT = 'd';
         public static final int J_UP    = K_UPARROW;
         public static final int J_DOWN  = K_DOWNARROW;
+
+        public static final int K_GRAVE      = KeyCodesGeneric.K_GRAVE;
     }
 
     private static final int SDLK_SCANCODE_MASK = (1 << 30);
@@ -1619,6 +1627,8 @@ public class Q3EKeyCodes
         public static final int K_KP_8 = K_KP_UPARROW;
         public static final int K_KP_9 = K_KP_PGUP;
         public static final int K_KP_0 = K_KP_INS;
+
+        public static final int K_GRAVE      = KeyCodesGeneric.K_GRAVE;
     }
 
     ;
@@ -1733,16 +1743,19 @@ public class Q3EKeyCodes
         public static final int K_Y = KeyEvent.KEYCODE_Y;
         public static final int K_Z = KeyEvent.KEYCODE_Z;
 
-        public static final int     K_0 = KeyEvent.KEYCODE_0;
-        public static final int     K_1 = KeyEvent.KEYCODE_1;
-        public static final int     K_2 = KeyEvent.KEYCODE_2;
-        public static final int     K_3 = KeyEvent.KEYCODE_3;
-        public static final int     K_4 = KeyEvent.KEYCODE_4;
-        public static final int     K_5 = KeyEvent.KEYCODE_5;
-        public static final int     K_6 = KeyEvent.KEYCODE_6;
-        public static final int     K_7 = KeyEvent.KEYCODE_7;
-        public static final int     K_8 = KeyEvent.KEYCODE_8;
-        public static final int     K_9 = KeyEvent.KEYCODE_9;
+        public static final int K_0 = KeyEvent.KEYCODE_0;
+        public static final int K_1 = KeyEvent.KEYCODE_1;
+        public static final int K_2 = KeyEvent.KEYCODE_2;
+        public static final int K_3 = KeyEvent.KEYCODE_3;
+        public static final int K_4 = KeyEvent.KEYCODE_4;
+        public static final int K_5 = KeyEvent.KEYCODE_5;
+        public static final int K_6 = KeyEvent.KEYCODE_6;
+        public static final int K_7 = KeyEvent.KEYCODE_7;
+        public static final int K_8 = KeyEvent.KEYCODE_8;
+        public static final int K_9 = KeyEvent.KEYCODE_9;
+
+        public static final int K_GRAVE = KeyEvent.KEYCODE_GRAVE;
+
         public static final boolean RAW = true;
     }
 
@@ -1844,6 +1857,8 @@ public class Q3EKeyCodes
         public static int K_KP_8;
         public static int K_KP_9;
         public static int K_KP_0;
+
+        public static int K_GRAVE;
 
         public static boolean RAW = false;
     }
@@ -2278,11 +2293,11 @@ public class Q3EKeyCodes
     public static final int ONSCRREN_DISC_KEYS_NUM    = 2;
 
     // disc button keys
-    public static final String[] ONSCRREN_DISC_KEYS_STRS     = new String[]{
+    public static final String[] ONSCRREN_DISC_KEYS_STRS     = new String[] {
             "1,2,3,4,5,6,7,8,9,q,0",
             "1,2,3,4,5,6,7,8,9,0",
     };
-    public static final int[][]  ONSCRREN_DISC_KEYS_KEYCODES = new int[][]{
+    public static final int[][]  ONSCRREN_DISC_KEYS_KEYCODES = new int[][] {
             null,
             {KeyCodesGeneric.K_KP_1, KeyCodesGeneric.K_KP_2, KeyCodesGeneric.K_KP_3, KeyCodesGeneric.K_KP_4, KeyCodesGeneric.K_KP_5, KeyCodesGeneric.K_KP_6, KeyCodesGeneric.K_KP_7, KeyCodesGeneric.K_KP_8, KeyCodesGeneric.K_KP_9, KeyCodesGeneric.K_KP_0},
     };

@@ -141,7 +141,7 @@ static void FS_UnloadProgs( void )
 }
 
 #ifdef XASH_INTERNAL_GAMELIBS
-#ifdef _DIII4A //karin: add xash3d_ prefix on library
+#ifdef _DIII4Axxx //karin: add xash3d_ prefix on library(TODO: can't rename this, because CS16-client using it)
 #define FILESYSTEM_STDIO_DLL "xash3d_filesystem_stdio"
 #else
 #define FILESYSTEM_STDIO_DLL "filesystem_stdio"

@@ -24,9 +24,4 @@ set(xash_filesystem_stdio_DEFINITIONS ";HAVE_DIRENT_D_TYPE")
 endif()
 set_target_properties(xash3d_filesystem_stdio PROPERTIES COMPILE_DEFINITIONS ${xash_filesystem_stdio_DEFINITIONS})
 
-
-
-
-
-
-
+set_target_properties(xash3d_filesystem_stdio PROPERTIES OUTPUT_NAME "filesystem_stdio")
