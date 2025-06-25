@@ -494,5 +494,6 @@
     <string name="portrait_mode">Portrait mode</string>
     <string name="portrait_orientation_screen">Portrait orientation screen</string>
     <string name="renderer_ref">Renderer(ref)</string>
+    <string name="server_client_sv_cl">Server/Client(sv_cl)</string>
 
 </resources>

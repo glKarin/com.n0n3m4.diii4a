@@ -751,7 +751,7 @@ public class GameLauncher extends Activity
 				}
 			}
 
-			// FTEQW
+			// Xash3D
 			else if (rgId == R.id.xash3d_ref)
 			{
 				if(Q3EUtils.q3ei.isXash3D)
@@ -761,6 +761,20 @@ public class GameLauncher extends Activity
 						index = 0;
 					String value2 = Q3EGameConstants.XASH3D_REFS[index];
 					SetParam("ref", value2);
+				}
+			}
+			else if (rgId == R.id.xash3d_sv_cl)
+			{
+				if(Q3EUtils.q3ei.isXash3D)
+				{
+					index = GetRadioGroupSelectIndex(radioGroup, id);
+					if(index < 0 || index >= Q3EGameConstants.XASH3D_SV_CLS.length)
+						index = 0;
+					String value2 = Q3EGameConstants.XASH3D_SV_CLS[index];
+					if(KStr.NotEmpty(value2))
+						SetParam("sv_cl", value2);
+					else
+						RemoveParam("sv_cl");
 				}
 			}
         }
@@ -1577,6 +1591,16 @@ public class GameLauncher extends Activity
 				index = 0;
 		}
 		SelectRadioGroup(V.xash3d_ref, index);
+
+		str = GetParam("sv_cl");
+		index = 0;
+		if (str != null)
+		{
+			index = Utility.ArrayIndexOf(Q3EGameConstants.XASH3D_SV_CLS, str);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.xash3d_sv_cl, index);
 	}
 
     private void ThrowException()
@@ -2252,6 +2276,17 @@ public class GameLauncher extends Activity
 		}
 		SelectRadioGroup(V.xash3d_ref, index);
 		V.xash3d_ref.setOnCheckedChangeListener(m_groupCheckChangeListener);
+
+		str = GetParam("sv_cl");
+		index = 0;
+		if(null != str)
+		{
+			index = Utility.ArrayIndexOf(Q3EGameConstants.XASH3D_SV_CLS, str);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.xash3d_sv_cl, index);
+		V.xash3d_sv_cl.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
 	private void AfterCreated()
@@ -4731,6 +4766,7 @@ public class GameLauncher extends Activity
 		public EditText button_swipe_release_delay;
 		public LinearLayout xash3d_section;
 		public RadioGroup xash3d_ref;
+		public RadioGroup xash3d_sv_cl;
 
 		private RadioGroup CreateGameRadioGroup()
 		{
@@ -4923,6 +4959,7 @@ public class GameLauncher extends Activity
 			button_swipe_release_delay = findViewById(R.id.button_swipe_release_delay);
 			xash3d_section = findViewById(R.id.xash3d_section);
 			xash3d_ref = findViewById(R.id.xash3d_ref);
+			xash3d_sv_cl = findViewById(R.id.xash3d_sv_cl);
         }
     }
 }

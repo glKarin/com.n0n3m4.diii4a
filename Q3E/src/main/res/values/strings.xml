@@ -65,4 +65,5 @@
     <string name="mp_game_map_aas">MP game map Area Awareness System file(aas)</string>
     <string name="xash3d_extras">Xash3D extras</string>
     <string name="extract_xash3d_extras_resource_files_fail">Extract Xash3D extras resource files fail!</string>
+    <string name="cs16_xash3d_extras">CS1.6(Xash3D) extras</string>
 </resources>

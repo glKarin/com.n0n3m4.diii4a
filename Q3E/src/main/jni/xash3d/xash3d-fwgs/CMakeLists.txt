@@ -3,12 +3,6 @@ project (xash3d-fwgs)
 
 include(CheckCXXCompilerFlag)
 
-add_definitions(-D_DIII4A)
-include_directories(${DIII4A_DEPEND_COMMON_PATH})
-if (NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "Release")
-endif ()
-
 add_compile_options(-Wno-ignored-attributes -Wno-macro-redefined)
 
 add_definitions(-DALLOCA_H=<malloc.h>)

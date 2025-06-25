@@ -21,6 +21,55 @@ GNU General Public License for more details.
 
 static char s_szLastError[1024] = "";
 
+#ifdef _DIII4A //karin: choose server/client library
+#define Q3E_SERVER_CLIENT_HL 0
+#define Q3E_SERVER_CLIENT_CS16 1
+#define Q3E_SERVER_CLIENT_CS16_YAPB 2
+static int sv_cl = -1;
+static int Q3E_ServerClientLib()
+{
+	if(sv_cl >= 0)
+		return sv_cl;
+
+	sv_cl = Q3E_SERVER_CLIENT_HL;
+	char svcl[32] = { 0 };
+	if( Sys_CheckParm( "-cstrike" ))
+	{
+		sv_cl = Q3E_SERVER_CLIENT_CS16;
+		if( Sys_GetParmFromCmdLine( "-cstrike", svcl ))
+		{
+			if(!Q_stricmp(svcl, "yapb"))
+				sv_cl = Q3E_SERVER_CLIENT_CS16_YAPB;
+		}
+	}
+	if( Sys_GetParmFromCmdLine( "-sv_cl", svcl ))
+	{
+		if(!Q_stricmp(svcl, "cs16"))
+			sv_cl = Q3E_SERVER_CLIENT_CS16;
+		else if(!Q_stricmp(svcl, "cs16_yapb"))
+			sv_cl = Q3E_SERVER_CLIENT_CS16_YAPB;
+	}
+
+	switch(sv_cl)
+	{
+		case Q3E_SERVER_CLIENT_CS16:
+			Q_strncpy( svcl, "cs16", sizeof( svcl ));
+			break;
+		case Q3E_SERVER_CLIENT_CS16_YAPB:
+			Q_strncpy( svcl, "cs16_yapb", sizeof( svcl ));
+			break;
+		case Q3E_SERVER_CLIENT_HL:
+		default:
+			Q_strncpy( svcl, "hlsdk", sizeof( svcl ));
+			break;
+	}
+	printf("Server/Client -> %s(%d)\n", svcl, sv_cl);
+	return sv_cl;
+}
+#define Q3E_RUN_CS16_SERVER_CLIENT() (Q3E_ServerClientLib() == Q3E_SERVER_CLIENT_CS16)
+#define Q3E_RUN_CS16_YAPB_SERVER_CLIENT() (Q3E_ServerClientLib() == Q3E_SERVER_CLIENT_CS16_YAPB)
+#endif
+
 const char *COM_GetLibraryError( void )
 {
 	return s_szLastError;
@@ -185,7 +234,12 @@ static void COM_GenerateServerLibraryPath( char *out, size_t size )
 {
 #ifdef XASH_INTERNAL_GAMELIBS // assuming library loader knows where to get libraries
 #ifdef _DIII4A //karin: rename server library
-	Q_strncpy( out, "hlsdk_server", size );
+	if(Q3E_RUN_CS16_SERVER_CLIENT())
+		Q_strncpy( out, "cs16_server", size );
+	else if(Q3E_RUN_CS16_YAPB_SERVER_CLIENT())
+		Q_strncpy( out, "cs16_yapb", size );
+	else
+		Q_strncpy( out, "hlsdk_server", size );
 #else
 	Q_strncpy( out, "server", size );
 #endif
@@ -235,6 +289,9 @@ void COM_GetCommonLibraryPath( ECommonLibraryType eLibType, char *out, size_t si
 		else
 		{
 #ifdef _DIII4A //karin: rename menu library
+		if(Q3E_RUN_CS16_SERVER_CLIENT() || Q3E_RUN_CS16_YAPB_SERVER_CLIENT())
+			COM_GenerateClientLibraryPath( "cs16_menu", out, size );
+		else
 			COM_GenerateClientLibraryPath( "xash3d_menu", out, size );
 #else
 			COM_GenerateClientLibraryPath( "menu", out, size );
@@ -249,7 +306,10 @@ void COM_GetCommonLibraryPath( ECommonLibraryType eLibType, char *out, size_t si
 		else
 		{
 #ifdef _DIII4A //karin: rename client library
-			COM_GenerateClientLibraryPath( "hlsdk_client", out, size );
+			if(Q3E_RUN_CS16_SERVER_CLIENT() || Q3E_RUN_CS16_YAPB_SERVER_CLIENT())
+				COM_GenerateClientLibraryPath( "cs16_client", out, size );
+			else
+				COM_GenerateClientLibraryPath( "hlsdk_client", out, size );
 #else
 			COM_GenerateClientLibraryPath( "client", out, size );
 #endif

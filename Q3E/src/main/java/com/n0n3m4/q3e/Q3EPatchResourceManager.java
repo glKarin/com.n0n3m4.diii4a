@@ -148,6 +148,17 @@ public class Q3EPatchResourceManager
                 null
         );
         resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource_fileToDir(
+                Q3EGameConstants.PatchResource.XASH3D_CS16_EXTRAS,
+                Q3ELang.tr(context, R.string.cs16_xash3d_extras),
+                "1",
+                Q3EGameConstants.GAME_XASH3D,
+                null,
+                "pak/xash3d/cs16client-extras.pk3",
+                null
+        );
+        resourceList.add(rsc);
     }
 
     public String Fetch(Q3EGameConstants.PatchResource type, boolean overwrite, String...fsgame)

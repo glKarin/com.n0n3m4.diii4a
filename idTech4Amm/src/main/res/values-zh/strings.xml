@@ -493,4 +493,5 @@
     <string name="portrait_mode">竖屏模式</string>
     <string name="portrait_orientation_screen">使用竖屏方向运行</string>
     <string name="renderer_ref">渲染器(ref)</string>
+    <string name="server_client_sv_cl">服务器/客户端(sv_cl)</string>
 </resources>

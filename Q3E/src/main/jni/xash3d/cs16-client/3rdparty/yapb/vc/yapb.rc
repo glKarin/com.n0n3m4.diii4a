@@ -1,0 +1,39 @@
+//
+// YaPB, based on PODBot by Markus Klinge ("CountFloyd").
+// Copyright © YaPB Project Developers <yapb@jeefo.net>.
+//
+// SPDX-License-Identifier: MIT
+//
+
+#include <winver.h>
+
+#ifdef VERSION_GENERATED
+#  define VERSION_HEADER <version.build.h>
+#else
+#  define VERSION_HEADER "../inc/version.h"
+#endif
+
+#include VERSION_HEADER
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION MODULE_VERSION_FILE
+PRODUCTVERSION MODULE_VERSION_FILE
+FILEOS 0x40004
+FILETYPE 0x2 {  
+    BLOCK "StringFileInfo" {
+      BLOCK "040904E4" {   
+         VALUE "CompanyName",       "YaPB Project"                                                               "\0"
+         VALUE "FileDescription",   "YaPB v" MODULE_VERSION "." MODULE_COMMIT_COUNT  " - The Counter-Strike Bot" "\0"
+         VALUE "LegalCopyright",    "Copyright \251 2004-2025 YaPB Project"                                      "\0"
+         VALUE "OriginalFilename",  "yapb.dll"                                                                   "\0"
+         VALUE "ProductName",       "YaPB"                                                                       "\0"
+         VALUE "InternalName",      "YaPB DLL"                                                                   "\0"
+         VALUE "FileVersion",       MODULE_VERSION "." MODULE_COMMIT_COUNT                                       "\0"
+         VALUE "ProductVersion",    MODULE_VERSION "." MODULE_COMMIT_COUNT                                       "\0"
+         VALUE "SpecialBuild",      MODULE_BUILD_ID                                                              "\0"
+      }
+    }
+    BLOCK "VarFileInfo" {
+       VALUE "Translation", 0x400, 1200
+    }
+}

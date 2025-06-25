@@ -17,6 +17,35 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="1dp"
+            android:text="@string/server_client_sv_cl" />
+    <RadioGroup
+            android:id="@+id/xash3d_sv_cl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+        <RadioButton
+                android:id="@+id/xash3d_sv_cl_hlsdk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="HLSDK" />
+        <RadioButton
+                android:id="@+id/xash3d_sv_cl_cs16"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CS1.6" />
+        <RadioButton
+                android:id="@+id/xash3d_sv_cl_cs16_yapb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CS1.6(yapb)" />
+    </RadioGroup>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
             android:text="@string/renderer_ref" />
     <RadioGroup
             android:id="@+id/xash3d_ref"

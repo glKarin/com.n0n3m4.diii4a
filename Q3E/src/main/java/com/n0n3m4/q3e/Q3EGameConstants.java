@@ -161,7 +161,7 @@ public final class Q3EGameConstants
 
     public enum PatchResource
     {
-        QUAKE4_SABOT, DOOM3_SABOT, DOOM3_RIVENSIN_ORIGIANL_LEVELS, DOOM3BFG_HLSL_SHADER, TDM_GLSL_SHADER, GZDOOM_RESOURCE, DOOM3_BFG_CHINESE_TRANSLATION, XASH3D_EXTRAS,
+        QUAKE4_SABOT, DOOM3_SABOT, DOOM3_RIVENSIN_ORIGIANL_LEVELS, DOOM3BFG_HLSL_SHADER, TDM_GLSL_SHADER, GZDOOM_RESOURCE, DOOM3_BFG_CHINESE_TRANSLATION, XASH3D_EXTRAS, XASH3D_CS16_EXTRAS,
     }
 
 /*
@@ -246,6 +246,7 @@ public final class Q3EGameConstants
     public static final String[] QUAKE2_RENDERER_BACKENDS = {"gl1", "gles3", "vk",};
 
     public static final String[] XASH3D_REFS = {"gles1", "gl4es", "gles3compat", "soft",};
+    public static final String[] XASH3D_SV_CLS = {"", "cs16", "cs16_yapb",};
 
     private Q3EGameConstants()
     {
