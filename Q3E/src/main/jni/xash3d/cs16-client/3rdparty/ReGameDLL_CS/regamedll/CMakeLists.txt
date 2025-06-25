@@ -357,11 +357,13 @@ else()
 	add_library(regamedll MODULE ${appversion.sh})
 endif()
 
+if(NOT DIII4A)
 if (NOT TARGET appversion)
 	add_custom_target(appversion DEPENDS COMMAND "${PROJECT_SOURCE_DIR}/version/appversion.sh" "${PROJECT_SOURCE_DIR}/..")
 endif()
 
 add_dependencies(regamedll appversion)
+endif()
 
 target_include_directories(regamedll PRIVATE
 	${PROJECT_SRC_DIR}
