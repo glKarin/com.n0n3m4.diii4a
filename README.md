@@ -459,7 +459,7 @@ startActivity(new Intent().setComponent(new ComponentName("com.karin.idTech4Amm"
 		// 1. Setup game type
 		.putExtra("game", "xash3d")
 		// 2. Setup game command
-		.putExtra("command", "game.arm -ref gles1 -console -dev 2 -gamedir cstrike -game cstrike -dll /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libserver.so -clientdll /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libclient.so -menulib /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libmenu.so")
+		.putExtra("command", "game.arm -ref gles1 -console -dev 2 -gamedir cstrike -game cstrike -dll /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libserver.so -clientlib /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libclient.so -menulib /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libmenu.so")
 		);
 finish();
 ```
