@@ -60,8 +60,8 @@
     <string name="are_you_sure_exit_game">Вы уверены, что хотите выйти из игры?</string>
     <string name="doom3_chinese_translation_doom3bfg">Перевод DOOM3 на китайский язык(от 3DM DOOM3-BFG китайский патч)</string>
     <string name="doom3_bot_sabot_a7_mod">DOOM3 Bot(мод SABot-a7)</string>
-    <string name="mp_game_map_aas">MP game map Area Awareness System file(aas)</string>
-    <string name="xash3d_extras">Xash3D extras</string>
-    <string name="extract_xash3d_extras_resource_files_fail">Extract Xash3D extras resource files fail!</string>
-    <string name="cs16_xash3d_extras">CS1.6(Xash3D) extras</string>
+    <string name="mp_game_map_aas">Файл системы опознавания области карты для сетевой игры(aas)</string>
+    <string name="xash3d_extras">Xash3D дополнительные ресурсы</string>
+    <string name="extract_xash3d_extras_resource_files_fail">Извлечение дополнительных файлов ресурсов Xash3D не удалось!</string>
+    <string name="cs16_xash3d_extras">CS1.6(Xash3D) дополнительные ресурсы</string>
 </resources>
