@@ -489,7 +489,7 @@
     <string name="global_illumination_brightness">Яркость глобального освещения</string>
     <string name="retro_postprocess">Ретро-постобработка(r_renderMode)</string>
     <string name="enable_built_in_bot_assets_if_external_assets_missing">Включить встроенные ресурсы бота, если внешние ресурсы отсутствуют (только для базовой игры DOOM 3 и Quake 4)(harm_g_botEnableBuiltinAssets)</string>
-    <string name="button_swipe_release_delay_ms">Задержка отпускания кнопки (мс)\n-1 = автоматически; 0 = нет</string>
+    <string name="button_swipe_release_delay_ms">Задержка отпуска кнопки (мс)\n-1 = автоматически; 0 = нет</string>
     <string name="ms">мс</string>
     <string name="portrait_mode">Портретный режим</string>
     <string name="portrait_orientation_screen">Портретная ориентация экрана</string>
