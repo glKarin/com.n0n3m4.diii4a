@@ -82,6 +82,7 @@ public enum GameResourceUrl
 
     XASH_HLSDK(Q3EGameConstants.GAME_XASH3D, "", "", "https://github.com/FWGS/hlsdk-portable", 1),
     XASH_FWGS(Q3EGameConstants.GAME_XASH3D, "", "", "https://github.com/FWGS/xash3d-fwgs", 1),
+    XASH_CS16(Q3EGameConstants.GAME_XASH3D, "", "", "https://github.com/Velaron/cs16-client", 1),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

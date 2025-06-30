@@ -60,6 +60,7 @@ public class Q3EMain extends Activity
     private       KDebugTextView memoryUsageText;
     private       boolean        m_coverEdges      = true;
     private       boolean        m_portrait        = false;
+    private       int            m_offsetY         = 0;
     @SuppressLint("StaticFieldLeak")
     public static Q3EGameHelper  gameHelper;
 
@@ -387,6 +388,8 @@ public class Q3EMain extends Activity
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
 
+        m_offsetY = params.topMargin;
+
         mGLSurfaceView.setId(0x20202020);
         mainLayout.addView(mGLSurfaceView, params);
 
@@ -474,12 +477,21 @@ public class Q3EMain extends Activity
         gameHelper.InitGlobalEnv(intentGame, intentCommand);
     }
 
+    public synchronized void SetupGameViewSize(int width, int height, boolean portrait)
+    {
+        if(m_portrait == portrait)
+        {
+            Q3E.GAME_VIEW_WIDTH = width;
+            Q3E.GAME_VIEW_HEIGHT = height;
+        }
+    }
+
     private void MakeMouseCursor()
     {
         if(null == mouseCursor)
         {
-            Q3E.widthRatio = (float)Q3E.orig_width / (float)Q3E.surfaceWidth;
-            Q3E.heightRatio = (float)Q3E.orig_height / (float)Q3E.surfaceHeight;
+            Q3E.widthRatio = (float) Q3E.GAME_VIEW_WIDTH / (float) Q3E.surfaceWidth;
+            Q3E.heightRatio = (float) Q3E.GAME_VIEW_HEIGHT / (float) Q3E.surfaceHeight;
 
             mouseCursor = new KMouseCursor(this);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(KMouseCursor.WIDTH, KMouseCursor.HEIGHT);
@@ -496,11 +508,11 @@ public class Q3EMain extends Activity
     public void SetMouseCursorPosition(int x, int y)
     {
         MakeMouseCursor();
-        if(Q3E.orig_width == Q3E.surfaceWidth && Q3E.orig_height == Q3E.surfaceHeight)
-            mouseCursor.SetPosition(x, y);
+        if(Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth && Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight)
+            mouseCursor.SetPosition(x, y + m_offsetY);
         else
         {
-            mouseCursor.SetPosition((int)((float)x * Q3E.widthRatio), (int)((float)y * Q3E.heightRatio));
+            mouseCursor.SetPosition((int) ((float) x * Q3E.widthRatio), (int) ((float) y * Q3E.heightRatio) + m_offsetY);
         }
     }
 }

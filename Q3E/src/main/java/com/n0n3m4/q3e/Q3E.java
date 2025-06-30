@@ -22,9 +22,12 @@ public final class Q3E
     // surface size
     public static int surfaceWidth = 1;
     public static int surfaceHeight = 1;
-    // window size
+    // window size(control view)
     public static int orig_width = 1;
     public static int orig_height = 1;
+    // window size(game view)
+    public static int GAME_VIEW_WIDTH = 1;
+    public static int GAME_VIEW_HEIGHT = 1;
     // ratio
     public static float widthRatio = 1.0f;
     public static float heightRatio = 1.0f;

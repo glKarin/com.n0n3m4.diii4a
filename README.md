@@ -1,14 +1,14 @@
 ## idTech4A++ (Harmattan Edition)  
 **idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
 #### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
-##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW/FTEQW/STAR WARS™ Jedi Knight OpenGLES on Android  
+##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic/Xash3D on Android  
 #### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版  
-##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部/FTEQW/星球大战:绝地武士 安卓OpenGLES移植版  
+##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部/FTEQW/星球大战:绝地武士/英雄萨姆/Xash3D 安卓移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan66(lindaiyu)  
+1.1.0harmattan67(luyiping)  
 **Latest update:**
-2025-06-25  
+2025-05-08  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -75,6 +75,9 @@ GPLv3
 | FTEQW | [FTEQW](https://www.fteqw.org) |  | 3.2/Vulkan |  |
 | STAR WARS™ Jedi Knight - Jedi Academy™ | [OpenJK](https://github.com/JACoders/OpenJK) |  | 1.1 |  |
 | STAR WARS™ Jedi Knight II - Jedi Outcast™ | [OpenJK](https://github.com/JACoders/OpenJK) |  | 1.1 |  |
+| Serious Sam Classic : The First Encounter | [SamTFE](https://github.com/tx00100xt/SeriousSamClassic) |  | 1.1 |  |
+| Serious Sam Classic : The Second Encounter | [SamTSE](https://github.com/tx00100xt/SeriousSamClassic) |  | 1.1 |  |
+| Xash3D | [Xash3D](https://github.com/FWGS/xash3d-fwgs) |  | 1.1/2.0/3.0 | [CS16-client](https://github.com/Velaron/cs16-client) |
 
 ----------------------------------------------------------------------------------
 
@@ -111,19 +114,15 @@ Tag with `-free` only for F-Droid update.
 
 > ### Update
 
-> 1.1.0harmattan66 (2025-06-25)
+> 1.1.0harmattan67 (2025-05-08)
 
-* Add global illumination rendering for make scene brighter(cvar harm_r_globalIllumination and harm_r_globalIlluminationBrightness) at launcher on DOOM 3/Quake 4/Prey(2006).
-* Add built-in bot assets if external assets missing(so only require external aas files, defs/scripts files not required any longer, also extract aas files patch by launcher), add `+set harm_g_botEnableBuiltinAssets 1` to command or setup at launcher for enable on DOOM 3/Quake 4.
-* Add retro postprocess rendering from RBDOOM-3-BFG 1.6.0(cvar r_renderMode) at launcher on DOOM 3/Quake 4/Prey(2006).
-* Fix incorrect shadow rendering on perforated surfaces(cvar r_forceShadowMapsOnAlphaTestedSurfaces) with shadow mapping on DOOM 3.
+* Add Serious Sam Classic The First Encounter(game standalone directory named `serioussamtfe`) and Serious Sam Classic The Second Encounter(game standalone directory named `serioussamtse`) support. More view in [SeriousSamClassic](https://github.com/tx00100xt/SeriousSamClassic).
+* Add Xash3D and Counter-Strike 1.6(need extract CS1.6 extras resource on launcher first) support, game standalone directory named `xash3d`, more view in [xash3d](https://github.com/FWGS/xash3d-fwgs) and [cs16-client](https://github.com/Velaron/cs16-client).
 
 ----------------------------------------------------------------------------------
 
-* 毁灭战士3/雷神之锤4/掠食2006新增全局光照渲染以增加场景亮度(cvar harm_r_globalIllumination和harm_r_globalIlluminationBrightness), 可在启动器设置.
-* 毁灭战士3/雷神之锤4内置bot补丁资源编译到游戏库(因此现在只需要外部的aas文件, 不再需要defs/scripts补丁文件, 启动器也添加了仅提取aas文件支持), 如果外部bot补丁资源缺失, 则会启用内置bot补丁资源, 使用在命令行添加`+set harm_g_botEnableBuiltinAssets 1`或在启动器中启用.
-* 毁灭战士3/雷神之锤4/掠食2006新增RBDOOM-3-BFG v1.6.0的复古后期处理渲染(cvar r_renderMode), 可在启动器设置.
-* 毁灭战士3修复启用阴影映射时的镂空材质的阴影的错误渲染(cvar r_forceShadowMapsOnAlphaTestedSurfaces).
+* 新增英雄萨姆: 第一次遭遇(游戏独立文件夹名为`serioussamtfe`)和英雄萨姆: 第二次遭遇(游戏独立文件夹名为`serioussamtse`). 更多详情[SeriousSamClassic](https://github.com/tx00100xt/SeriousSamClassic)支持.
+* 新增Xash3D和反恐精英1.6(需要先在启动器提取CS1.6额外资源)支持, 游戏独立文件夹名为`xash3d`, 更多详情[xash3d](https://github.com/FWGS/xash3d-fwgs)和[cs16-client](https://github.com/Velaron/cs16-client).
 
 ----------------------------------------------------------------------------------
 
@@ -150,6 +149,9 @@ Tag with `-free` only for F-Droid update.
 * **The Dark Mod**: darkmod/
 * **GZDOOM**: gzdoom/
 * **FTEQW**: fteqw/
+* **Serious Sam Classic - The First Encounter**: serioussamtfe/
+* **Serious Sam Classic - The Second Encounter**: serioussamtse/
+* **Xash3D**: xash3d/
 
 ----------------------------------------------------------------------------------
 
@@ -360,6 +362,8 @@ bind "Your key of drop" "_impulse25"
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom1.jpg" width="33%" alt="DOOM 3 BFG: DOOM I"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom3.jpg" width="34%" alt="DOOM 3 BFG: DOOM III"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom2.jpg" width="33%" alt="DOOM 3 BFG: DOOM II">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_wolfenstein_enemy_territory.jpg" width="50%" alt="Wolfenstein: Enemy Territory"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_realrtcw.jpg" width="50%" alt="RealRTCW">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_openja.jpg" width="50%" alt="STAR WARS™ Jedi Knight - Jedi Academy™"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_openjo.jpg" width="50%" alt="STAR WARS™ Jedi Knight II - Jedi Outcast™">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_serious_sam_tfe.jpg" width="50%" alt="Serious Sam Classic: The First Encounter"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_serious_sam_tse.jpg" width="50%" alt="Serious Sam Classic: The Second Encounter">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_xash3d_halflife.jpg" width="50%" alt="Xash3D: HalfLife"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_xash3d_cs16.jpg" width="50%" alt="Xash3D: Counter-Strike 1.6">
 
 ----------------------------------------------------------------------------------
 
@@ -459,7 +463,7 @@ startActivity(new Intent().setComponent(new ComponentName("com.karin.idTech4Amm"
 		// 1. Setup game type
 		.putExtra("game", "xash3d")
 		// 2. Setup game command
-		.putExtra("command", "game.arm -ref gles1 -console -dev 2 -gamedir cstrike -game cstrike -dll /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libserver.so -clientlib /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libclient.so -menulib /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libmenu.so")
+		.putExtra("command", "game.arm -ref gles1 -console -dev 2 -gamedir cstrike -game cstrike -gamelibdir /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64 -dll /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libserver.so -clientlib /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libclient.so -menulib /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/su.xash.cs16client-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libmenu.so")
 		);
 finish();
 ```
@@ -698,6 +702,8 @@ harm_ui_showViewBody 1
 * RealRTCW
 * FTEQW
 * OpenJK
+* SeriousSamClassic
+* Xash3D
 ##### Library(Source)
 * cJSON 
 * curl: The curl license
@@ -728,6 +734,7 @@ harm_ui_showViewBody 1
 * sqlite
 * stb
 * bzip2
+* SDL2
 ##### Library(Binary)
 * ffmpeg-kit
 ----------------------------------------------------------------------------------

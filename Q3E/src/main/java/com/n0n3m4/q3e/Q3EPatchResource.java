@@ -15,7 +15,7 @@ public abstract class Q3EPatchResource
     public final String                   game;
     public final String                   mod;
     public final String                   assetPath;
-    public final String                   fsPath;
+    public final String                   fsPath; // if null, append real mod name to path; if empty, always only path; else append fixed mod name to path
 
     public Q3EPatchResource(Q3EGameConstants.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath)
     {

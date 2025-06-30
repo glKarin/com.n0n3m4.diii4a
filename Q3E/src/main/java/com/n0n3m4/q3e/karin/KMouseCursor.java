@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -46,6 +47,7 @@ public class KMouseCursor extends View
         //m_texture = ((BitmapDrawable)getResources().getDrawable(R.drawable.pointer_arrow_large)).getBitmap();
         //m_texture = BitmapFactory.decodeResource(getResources(), R.drawable.pointer_arrow_large);
         Drawable cursor = getResources().getDrawable(R.drawable.pointer_arrow_large_white);
+        cursor = new InsetDrawable(cursor, -8, -5, -8, -5);
         setBackground(cursor);
         setFocusable(false);
         setFocusableInTouchMode(false);

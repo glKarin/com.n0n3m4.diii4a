@@ -2,6 +2,13 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan67 (2025-05-08)
+
+* Add Serious Sam Classic: The First Encounter(game standalone directory named `serioussamtfe`) and Serious Sam Classic: The Second Encounter(game standalone directory named `serioussamtse`) support. More view in [SeriousSamClassic](https://github.com/tx00100xt/SeriousSamClassic).
+* Add Xash3D and Counter-Strike 1.6(need extract CS1.6 extras resource on launcher first) support, game standalone directory named `xash3d`, more view in [xash3d](https://github.com/FWGS/xash3d-fwgs) and [cs16-client](https://github.com/Velaron/cs16-client).
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan66 (2025-06-25)
 
 * Add global illumination rendering for make scene brighter(cvar harm_r_globalIllumination and harm_r_globalIlluminationBrightness) at launcher on DOOM 3/Quake 4/Prey(2006).

@@ -10,14 +10,16 @@ android {
         applicationId "com.karin.idTech4Amm"
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
-        versionCode 11066
-        versionName '1.1.0harmattan66'
+        versionCode 11067
+        versionName '1.1.0harmattan67'
          /*
             natasha: A CSOL CT character, for my Quake II for MeeGo Harmattan port version 5 at 2018
             verena: GC singer, for my first YouKu 3rd client for MeeGo Harmattan at 2015
-            caitlyn: the Sheriff of Piltover on LOL, for  at 2017
+            caitlyn: the Sheriff of Piltover on LOL, for netlizard-game at 2017
+            lindaiyu: at 2025
+            luyiping: at 2002
          */
-        versionNameSuffix 'lindaiyu'
+        versionNameSuffix 'luyiping'
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
     }
