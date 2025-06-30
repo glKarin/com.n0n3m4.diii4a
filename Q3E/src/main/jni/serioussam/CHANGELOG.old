@@ -1,0 +1,3265 @@
+commit 8f1a2733d857a54829eca09287c68812c2814ba1
+Merge: 7fd3b65 90ed592
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Sep 11 18:39:20 2021 +0200
+
+    Merge pull request #43 from iamthesenate1/readme.md
+    
+    Fix some typos and rephrase some sentences in README.md
+
+commit 90ed592ff7e632b219d0dcf454a5813943a9bb38
+Author: iamthesenate1 <77978836+iamthesenate1@users.noreply.github.com>
+Date:   Sat Sep 11 19:38:08 2021 +0300
+
+    Update README.md
+
+commit 4f54c49b0829a23674cb1638350323e44140f2b1
+Author: iamthesenate1 <77978836+iamthesenate1@users.noreply.github.com>
+Date:   Sat Sep 11 19:24:44 2021 +0300
+
+    Fix some typos and rephrase some sentences in README.md
+
+commit 7fd3b651d184ebdac34372e49e3f95c6eede57ea
+Merge: 5231311 6f3ff98
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Sep 4 13:51:57 2021 +0200
+
+    Merge pull request #42 from iamthesenate1/GCC-11.x
+    
+    Fix compilation with GCC 11.X
+
+commit 6f3ff98fa40aa8a4d9fdf3d8c1bc8e766ec6e4a2
+Author: iamthesenate1 <77978836+iamthesenate1@users.noreply.github.com>
+Date:   Sat Sep 4 13:56:50 2021 +0300
+
+    Fix compilation with GCC 11.X
+
+commit 52313115bbc28d75d6b655014a2e7de4b8826606
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Aug 2 09:00:39 2021 +0200
+
+    Forgot this file for Pyra version
+
+commit f777ad622b9dca56233b4912ac7a3a23ae41655c
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Aug 2 08:59:05 2021 +0200
+
+    Added PYRA option (also inverted Shoulder buttons function on Pandora/Pyra build)
+
+commit 7aabe0bd70cefc61a4971b52291c9485f0c13382
+Merge: 8cafd5f aff8f25
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Apr 5 22:16:41 2021 +0200
+
+    Merge pull request #31 from linuxoidmc/master
+    
+    macOS/ARM: little nasty typo fix in .sh and force -O0 flag for every …
+
+commit aff8f250eb100f9244e4b8c993504a7835e13862
+Author: Pavel Zenov <9086704+linuxoidmc@users.noreply.github.com>
+Date:   Mon Apr 5 22:45:54 2021 +0300
+
+    macOS/ARM: little nasty typo fix in .sh and force -O0 flag for every build target as a temporary workaround for segfaults
+
+commit 8cafd5f8605016169ce3e6c689569414c8d5b3d3
+Merge: d11af2b b27a92c
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Apr 4 21:49:17 2021 +0200
+
+    Merge pull request #30 from linuxoidmc/master
+    
+    Initial support for Apple ARM64
+
+commit b27a92c881022cb375697475cdccf3302b658334
+Author: Pavel Zenov <9086704+linuxoidmc@users.noreply.github.com>
+Date:   Sun Apr 4 22:33:39 2021 +0300
+
+    Initial support for Apple ARM64
+
+commit d11af2bad8fc216a4408cf2fc658227599130e10
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Feb 21 09:24:22 2021 +0100
+
+    Captilized menu folder from Scripts folder (for #26)
+
+commit 253d2b9dd7754a19897f132d150e92669e27f503
+Merge: 0961898 370be31
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Aug 25 12:59:34 2020 +0200
+
+    Merge pull request #21 from bjoern-tantau/bjoern-tantau-sdl2-path
+    
+    Add SDL2 path for Ubuntu 18.04
+
+commit 370be31e314a3a8e3a9b0d415b6c76eae2c53d45
+Author: Björn Tantau <bjoern-tantau@users.noreply.github.com>
+Date:   Tue Aug 25 12:40:11 2020 +0200
+
+    Add SDL2 path for Ubuntu 18.04
+
+commit 096189821037707b8abfdd06f3bc4ce4568c2099
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Jul 11 10:26:01 2020 +0200
+
+    [PYRA] Fix some typos
+
+commit d1081324a26e3aa4f602be7c10e23d4ac8787c0a
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Jun 13 21:21:52 2020 +0200
+
+    [PYRA] Added PYRA Profile
+
+commit 6ee27922c46b571998017c70b13afd88588fcf26
+Merge: 164070a 6c21fbf
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Mar 28 07:35:16 2020 +0100
+
+    Merge pull request #17 from Skyrimus/patch-1
+    
+    Dedicated server compiling fix
+
+commit 6c21fbfa04a2b34e0c3dfb4291b5ac0e7282495f
+Author: Skyrimus <Skyrimus@yandex.ru>
+Date:   Sat Mar 28 04:09:45 2020 +0300
+
+    Dedicated server compiling fix
+
+commit 164070a54cdd7d9dcb4a9accb866bd32d21f29a8
+Merge: 669dc91 aae4713
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Sep 9 22:55:49 2019 +0200
+
+    Merge pull request #13 from r-a-sattarov/master
+    
+    MCST Elbrus CPU support
+
+commit aae4713e46adc054d10cbe08cbded65b4f289925
+Author: r-a-sattarov <r.a.sattarov@yandex.ru>
+Date:   Mon Sep 9 22:55:47 2019 +0300
+
+    E2K: added initial support for MCST Elbrus CPU
+
+commit 669dc9148d00318aa4aacfb80ed04b85bce7a759
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Aug 17 16:20:08 2019 +0200
+
+    So yeah, I just did what the stubbed said
+
+commit d20c647919890d02a7eb0670116d6940e9476083
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Aug 17 15:53:53 2019 +0200
+
+    Removed a warning
+
+commit ddf4b42b4c5cee282951051f9ddcb1cab4f3bb82
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Aug 17 12:49:42 2019 +0200
+
+    Fix math calculation in HUD_DrawBar, rounding float too soon (fix issue #7)
+
+commit fd2175173a90cdf422ab5819bb56ef9ffeef7428
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Aug 17 09:39:05 2019 +0200
+
+    Update README.md
+
+commit 921c0736d55eee104743732788ce3add03ab8dda
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Aug 17 09:37:58 2019 +0200
+
+    Improved README and build script. Now build RelWithDebInfo, that do works
+
+commit 29ed139802efc6d48252fe0692859297f6416dd8
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Aug 17 09:19:20 2019 +0200
+
+    Update README.md
+
+commit 60839e432394768cc7c57e24f87f647b55fe786f
+Merge: 5739a72 55a9d2f
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Thu Aug 1 07:42:50 2019 +0200
+
+    Merge pull request #11 from jdonald/fix-ghostbusterray
+    
+    Fix "CUnixDynamicLoader error: ... /Bin/libEntitiesMP.so: undefined symbol: CGhostBusterRay_DLLClass"
+
+commit 5739a7273ef6567355855416c17a5633840114cb
+Merge: 8010787 f2d6e31
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Thu Aug 1 07:41:35 2019 +0200
+
+    Merge pull request #10 from jdonald/fix-rpi-build
+    
+    Fix asm compile errors on Raspberry Pi
+
+commit 55a9d2fd27121adbfb61c67fbe163ba1718c09fb
+Author: James Donald <jdonald.x@gmail.com>
+Date:   Wed Jul 31 17:54:36 2019 -0700
+
+    Apply the same fix to TFE speculating that it has the same problem
+
+commit f09ab800d9c21b1cb7f56dec1aa816b7282f837b
+Author: James Donald <jdonald.x@gmail.com>
+Date:   Wed Jul 31 17:53:47 2019 -0700
+
+    Fix CGhostBusterRay_DLLClass error in TSE
+
+commit f2d6e31690bc3112b95a79c7ceac8b17457c5407
+Author: James Donald <jdonald.x@gmail.com>
+Date:   Wed Jul 31 17:01:38 2019 -0700
+
+    Attempt to be consistent with spacing if()
+
+commit 342347eda4c52efa92f0e6adcd3c7004f1e2b5d3
+Author: James Donald <jdonald.x@gmail.com>
+Date:   Wed Jul 31 16:55:55 2019 -0700
+
+    Add -mfpu=neon to avoid vector assembly errors
+
+commit 80107877089d871908be03e8ed4c98bb791b1619
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat May 25 11:44:25 2019 +0200
+
+    Removed generated (and useless) GhostBusterRay sources
+
+commit 79d8ee7b2af957cb32a566fb15530836d4ac41db
+Merge: f908d64 8e38e5a
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Mar 31 21:02:43 2019 +0200
+
+    Merged Pandora branch (with ARM specific optimization from notaz)
+
+commit 8e38e5ae505333a5319d0d42c4635ee1538c208b
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Mar 31 20:56:37 2019 +0200
+
+    Minor (mostly) cosmetics changes
+
+commit 0c303422591c91556f46c7bc33d53f09abd10f15
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Mar 31 17:16:33 2019 +0200
+
+    Small changes, mostly cosmetics
+
+commit 804522b8fb65a304c78a8d63afb3e3bff9660d26
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Mar 31 16:42:20 2019 +0200
+
+    Added ccache support in cmake project
+
+commit f908d64337d2b552cad087ec76ec9917837b9efd
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Jun 9 15:17:01 2018 +0200
+
+    No -j option when building ecc in build-linux64.sh
+
+commit b4a3825b128878c4cae7cf9a9276699719ab7933
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Jun 9 14:43:50 2018 +0200
+
+    Build ECC first in build-linux64.sh
+
+commit 6f129cb0e65ba099672d59c0acfc782e74fd4ae6
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Dec 22 14:02:10 2017 +0100
+
+    Small changes to build-linuxXX.sh (but consider thoses scripts as deprecated...)
+
+commit 668cc6dc56c47ce0738445c796d3430cceb6761d
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Dec 22 13:59:22 2017 +0100
+
+    Fixes (hopefully) build on ARM machine (other then Pandora, so RPI and ODroid should be good now)
+
+commit 18a59c0bba9f282fd127477e22cfcad8b00c0105
+Merge: 4108f92 360d19b
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Jul 24 13:25:30 2017 +0200
+
+    Merge pull request #2 from ptitSeb/master
+    
+    Fixed a portable C dithering option, fixing the red artifacts on shadows for some configurations
+
+commit 360d19b01c4386485c5a6d4ce268d44b59ee106a
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Jul 24 12:23:16 2017 +0200
+
+    Fixed a partable C dithering option, fixing the red artific on shadows for some configurations
+
+commit 4108f92185ef83f80d1b94295926113b2f3760dc
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun May 28 15:17:22 2017 +0200
+
+    Pandora version build 07, with notaz improvements
+
+commit dce391583cf3a0379fca1b317abb06cd49eae71b
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat May 27 15:41:24 2017 +0200
+
+    Use standard Sin/Cos version (fixing "The Pit" tilting floor issue, and maybe other similar issues too)
+
+commit a41642340ca90a0e00d48ae664c39acf7d6f7be0
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun May 21 19:00:33 2017 +0200
+
+    Small compilation (non arm architecture) Fix
+
+commit c769194787fdb075a05e35fd3c7a15acd553b8a7
+Merge: feb12b0 4720b55
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun May 21 18:50:43 2017 +0200
+
+    Merge branch 'master' of https://github.com/ptitSeb/Serious-Engine
+
+commit 4720b55ca5aa95125462da5e7665091804a8b3b1
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat May 20 00:18:13 2017 +0200
+
+    Need a dependencie on the libengine_safemath
+
+commit 0731a9d79a673233368d70c7eab034b01ac464be
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri May 19 23:42:33 2017 +0200
+
+    More fast-math experiment on Pandora
+
+commit ad81a5606a482503c1bc7f26214d34c9ac152bc4
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Apr 17 14:52:58 2017 +0200
+
+    Improvements and fixes to Pandora fast-math
+
+commit ae30b8b4dec20199487566b1dd25e55f340cb6e3
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Apr 17 13:11:58 2017 +0200
+
+    Experimental fast-math for Pandora
+
+commit feb12b02d4ed730f2fb93d991d5730fc375b488d
+Merge: dca5b7a 189edcb
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Dec 26 22:36:41 2016 +0100
+
+    Merge branch 'master' of https://github.com/ptitSeb/Serious-Engine
+
+commit d4f68c3863d8664cb78d988d97c9d4b25d70c821
+Merge: d5df0cb 189edcb
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Dec 26 20:38:50 2016 +0100
+
+    Merge branch 'master' of https://github.com/ptitSeb/Serious-Engine
+
+commit 189edcb75f17c310b602f828eae05af2f5a30264
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Thu Sep 22 12:15:57 2016 +0200
+
+    More #ifdef for TFE build
+
+commit e37a80ef830af95efbd63cf4e23a2c6c59623ef5
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Sep 21 19:25:13 2016 +0200
+
+    Some warning solved
+
+commit cf7056b4d6944e84b40cdccd07db4932a23711a8
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Sep 21 17:20:37 2016 +0200
+
+    Missing a const
+
+commit 1984179657b4f38dcefdba43145bb23b4b7084df
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Sep 21 17:14:06 2016 +0200
+
+    Fixed a missing #endif issue
+
+commit d5df0cbc583338afc185d35aa9fc748065e1353b
+Merge: 3e0171e 2aa0948
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Sep 11 20:51:11 2016 +0200
+
+    Merge branch 'master' of https://github.com/ptitSeb/Serious-Engine
+
+commit 2aa09480abf266a991868edcb6803f802f3f9296
+Merge: ad57104 6c2966e
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Sep 9 14:13:31 2016 +0200
+
+    Merge branch 'master' of https://github.com/ptitSeb/Serious-Engine
+
+commit ad57104c22af383392de55acb40fe921986b0502
+Merge: 570f166 57cd734
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Sep 9 14:11:53 2016 +0200
+
+    Merge work with remote
+
+commit 6c2966e2501bf7e7bda6cc1cf2ee8a945d50eb55
+Merge: 570f166 57cd734
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Sep 9 14:07:32 2016 +0200
+
+    Merge
+
+commit 57cd734dbcc5c2e6529f824dbe38f6370b930f00
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 07:20:41 2016 +0200
+
+    Don't regulate Framerate on Pandora
+    Restrict the Eps precision change only to Pandora platform
+    fix Inverted Right and Middle button on certain case with SDL
+    Added some Failsafe. Fixed a crash in the new game intro cinematic (when Boss of TFE die and Sam goes to the UFO) on the Pandora
+    Some Pandora fine-tunning
+    Tried some asynchronus input method, but doesn't seems to works
+
+commit 570f166b26316ed78a3a6f1e2dac573d64fe9d6f
+Merge: 54f8c48 1b895d7
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sun Jul 3 01:19:00 2016 -0400
+
+    Merge pull request #56 from DanielGibson/fix-null-crashes
+    
+    Fix crashes from this!=NULL removal
+
+commit 54f8c4881ac36891031124b069dc889c36a59685
+Merge: f7a61ad b4d1daa
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sun Jul 3 01:17:24 2016 -0400
+
+    Merge pull request #61 from yamgent/readme-improv
+    
+    Update README.md to include Linux
+
+commit f7a61adbc5f10bc946d590ae637753e4ee82e0b9
+Merge: d723153 e70a5bb
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sun Jul 3 01:14:00 2016 -0400
+
+    Merge pull request #62 from comicfans/fix_sscanf_stack_buffer_overflow
+    
+    fix sscanf stack buffer overflow. string should have '\0'
+
+commit e70a5bb92b4c8270d9e225fbf3411b5f1e549e86
+Author: comicfans44 <comicfans44@gmail.com>
+Date:   Sun Jul 3 04:33:41 2016 -0400
+
+    fix sscanf stack buffer overflow. string should have '\0'
+
+commit b4d1daa320755c41266820146b1fd6cb4e958dea
+Author: Tan Wang Leng <tanwangleng@outlook.com>
+Date:   Thu Jun 16 22:12:38 2016 +0800
+
+    Update README.md to include Linux
+
+commit 1b895d7478d01e3ed3f0986635e88a26328dd6b3
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon Jun 6 04:28:42 2016 +0200
+
+    Support both ModExt.txt and ModEXT.txt
+
+commit 882c7773b56647c98e5656331699a299a8a74614
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon Jun 6 03:53:57 2016 +0200
+
+    Game can be executed and quit without crashes
+    
+    mostly checks before calling AddReference()/RemReference()
+
+commit d723153576e3711eb2d047fb16ad707f44a53cf7
+Merge: aced268 577373f
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sun Jun 5 01:20:24 2016 -0400
+
+    Merge pull request #49 from yamgent/mod-ext-fix
+    
+    Fix ModEXT.txt issues
+
+commit aced26829a9f19b88e5369c19893fd212b1e7ff0
+Merge: 0b24c2f b30d3d8
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sun May 29 19:12:37 2016 -0400
+
+    Merge pull request #54 from DanielGibson/fix-warnings-rebase
+    
+    cherry-picked fixes by emlai, fix compilation again
+
+commit b30d3d86d885ee195b28adfce3570f2c415c4096
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon May 30 01:06:10 2016 +0200
+
+    Fix compilation from changes for GCC 6.1.1
+    
+    At least on my system floor() and log10() return double, so the other
+    arguments to Clamp() and ClampDn() didn't match anymore, now being float
+    instead of double.
+    I replaced the calls to log10f() and floorf() to avoid any ambiguities.
+
+commit 4b0e01145e2d9e394788b4a42e7c48fff3a43217
+Author: Emil Laine <emil.laine@cs.helsinki.fi>
+Date:   Sun Apr 24 00:57:23 2016 +0300
+
+    Fix warning -Wtautological-undefined-compare
+    
+    Quoting Clang:
+    "reference cannot be bound to dereferenced null pointer in well-defined
+    C++ code; comparison may be assumed to always evaluate to false"
+    
+    Conflicts:
+            Sources/CMakeLists.txt
+
+commit 16a2048a2cc6a766b36d1e90f7d8f160563dc140
+Author: Emil Laine <emil.laine@cs.helsinki.fi>
+Date:   Sun Apr 24 01:33:27 2016 +0300
+
+    Fix warning -Wchar-subscripts
+
+commit 13ba79ea5f5d496dbc80f16d8ba492e4f9e768f9
+Author: Emil Laine <emil.laine@cs.helsinki.fi>
+Date:   Sun Apr 24 01:28:13 2016 +0300
+
+    Remove unneeded -Wno-sign-compare
+    
+    (I didn't receive any warnings after enabling -Wsign-compare.)
+    
+    Conflicts:
+            Sources/CMakeLists.txt
+
+commit 5badefaf900165feb7196ee78343ceb5ba3d3a4a
+Author: Emil Laine <emil.laine@cs.helsinki.fi>
+Date:   Sun Apr 24 00:17:29 2016 +0300
+
+    Change remaining "if (this!=NULL)" to "ASSERT(this!=NULL)"
+    
+    Also changed all "if (this==NULL) return;"s.
+    
+    Fixes some -Wtautological-undefined-compare warnings.
+    
+    Quoting Clang:
+    "'this' pointer cannot be null in well-defined C++ code; comparison may
+    be assumed to always evaluate to false"
+
+commit 24d61d1cccac8c9b8e0b37781bda630a65f5f803
+Author: Emil Laine <emil.laine@cs.helsinki.fi>
+Date:   Sat Apr 23 23:32:03 2016 +0300
+
+    Use ASSERTALWAYS(msg) instead of ASSERT(false && msg)
+    
+    Thanks @SLAwww
+    
+    (The first parameter to _assert is actually the message, not the
+    expression to evaluate, so "false &&" doesn't belong in there.)
+    
+    Conflicts:
+            Sources/EntitiesMP/Summoner.es
+
+commit fe23b05aa22d3164d6f6388436258d67df7cf3f9
+Author: Emil Laine <emil.laine@cs.helsinki.fi>
+Date:   Sat Apr 23 04:05:17 2016 +0300
+
+    Fix ASSERT(<string_literal>)
+    
+    That would never trigger the ASSERT. Now they always do.
+    
+    Conflicts:
+            Sources/EntitiesMP/Summoner.es
+
+commit 0b24c2f06c786c6d8f9532a7fae4d87cb9661d75
+Merge: be4c22f ba8d82e
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue May 24 00:55:35 2016 -0400
+
+    Merge pull request #50 from Manuel-K/gcc-6.1.1-fix
+    
+    fix compilation errors with gcc 6.1.1 on Arch Linux
+
+commit be4c22f7e2eb8c5ebfd305ddaed53109fecb8ede
+Merge: a8c6c77 7b470d3
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue May 24 00:54:46 2016 -0400
+
+    Merge pull request #44 from DanielGibson/misc-impr
+    
+    Fix tons of compiler warnings
+
+commit ba8d82efafa55279022f6788aff183eb1e51c4db
+Author: Manuel K <Manuel-K@users.noreply.github.com>
+Date:   Sun May 22 01:16:38 2016 +0200
+
+    fix compilation errors with gcc 6.1.1 on Arch Linux
+
+commit 7b470d30ab2cc150d1420bc69374bb3b407f5f01
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Wed May 11 19:04:01 2016 +0200
+
+    Elemental.es/Computer.cpp changes according to @SLAwww's suggestions
+
+commit 7e7ab3e70e1d29105308e9b8ec3e00bf54a08bd0
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Tue Apr 26 17:54:57 2016 +0200
+
+    remove FIXMEs in GameMP/Computer.cpp
+    
+    and replace the corresponding conditions with more readable (but
+    equivalent) ones.
+
+commit b64df456b6c213d0ba46a318792f011119513a5f
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon Apr 25 01:44:09 2016 +0200
+
+    Fix TFE warnings and lots of unused variable warnings
+    
+    .. still, didn't look at unused variable warnings from *.es because
+    so many are generated.
+
+commit de4f96d2089a9ca5242ed301b7745bf3ccf2ff75
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon Apr 25 00:17:08 2016 +0200
+
+    Remove FIXMEs/silence Fish.es warnings
+    
+    Thanks to @SLAwww's explanations it's clear now :)
+
+commit 8106aedd9f4eb81c104ca8a78a0646a702610640
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Sun Apr 24 16:06:57 2016 +0200
+
+    Use at least 16bit for Depth-Buffer (fixes #37)
+    
+    Seems like on Windows 0 bits is handled as "Let Windows/Driver decide",
+    so handle that case by setting a reasonable value of 16.
+
+commit 40213b3e03829cb849d3a982c6fd738f1ae4feb4
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Sun Apr 24 01:05:23 2016 +0200
+
+    Ignore some more files (build dirs and generated)
+
+commit 1bfc6d5d8194bc6e527cff5d187920f27dfbc041
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Sun Apr 24 00:53:13 2016 +0200
+
+    Fix "unused but set variable" warnings from GCC
+
+commit dbe524f0b2697d6af060a944137c7da326a61402
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Sat Apr 23 20:25:08 2016 +0200
+
+    Fix more warnings, mostly about logical op parenthesis (TSE only)
+    
+    except for EntitiesMP/Fish.es which I'm not sure about, and in
+    Computer.cpp the weird "if (_iActiveMessage < _acmMessages.Count()==0)"
+    construct whichs intention I didn't fully grasp, either.
+
+commit 72edf1c7205bab097bf6298232167c82b5f386bf
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Sun Apr 24 01:01:37 2016 +0200
+
+    Commented out unused functions and variables
+    
+    many unused functions and variables are now commented out
+    
+    You'll still get tons of warnings, which should mostly fall in one of
+    the following categories:
+    1. Unnecessary variables or values generated from .es scripts
+    2. Pointers assigned to from functions with side-effects: DO NOT REMOVE!
+       Like CEntity *penNew = CreateEntity_t(...); - even if penNew isn't
+       used, CreateEntity() must be called there!
+
+commit bee4102374891c270f08ad4e3a27f69b4c592ea6
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Sat Apr 23 03:59:18 2016 +0200
+
+    Fix several warnings, warn if not using depth buffer
+    
+    Fixed -Wreorder warnings (hopefully the last?), also several potentially
+    uninitialized variables.
+    
+    In SetupPixelFormat_OGL() Assert if gap_iDepthBits ends up being 0.
+    
+    Small adjustments to cmake warning settings for gcc/clang
+
+commit c58328d8817949162abf5887acb98a4f5c60a462
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Fri Apr 22 19:40:09 2016 +0200
+
+    RSBinToGroups() use __builtin_clz() instead of manual bsr if available
+    
+    should be faster.
+
+commit 46353ffc5de145e5cc9dd965a88de5f23d0520c5
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Fri Apr 22 19:03:24 2016 +0200
+
+    make BYTESWAP*_unsigned() macros inline functions, use GCC builtins
+    
+    the builtins are only used when using GCC or clang, of course, otherwise
+    the usual shifting is done.
+    
+    Them being inline functions instead of macros increases type safety
+    and gets rid of problems with signed shifts.
+    
+    Changed two places in the code that swapped bytes in 32bit ints to use
+    BYTESWAP32_unsigned() instead - in case of PrepareTexture() this has
+    probably even fixed issues with signed shifts
+
+commit a8c6c77309a39b5d06206a60244dda309bec1b1c
+Merge: 056d77f ce46bd1
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon May 9 12:03:16 2016 -0400
+
+    Merge pull request #47 from notaz/asm_rework
+    
+    Asm rework
+
+commit 577373f91e65b5921fa16d4d76257edb91d32efa
+Author: Tan Wang Leng <tanwangleng@outlook.com>
+Date:   Thu May 5 13:47:02 2016 +0800
+
+    Fix casing for ModExt.txt
+    
+    Some file systems are case-sensitive, so use proper casing.
+
+commit b42612e8fb9c866a15c7427299d29dd72cb39f54
+Author: Tan Wang Leng <tanwangleng@outlook.com>
+Date:   Thu May 5 13:38:57 2016 +0800
+
+    Remove ModExt.txt symlink
+    
+    Does not work on Mac and Windows, and git unable to deal with
+    file thrashing with another file of similar name.
+
+commit ce46bd1e998231b323b2e95e3b530c204dca6976
+Author: notaz <notasas@gmail.com>
+Date:   Mon Apr 25 00:00:55 2016 +0300
+
+    make cpuid work on x86_64
+    
+    not that it's used for anything, just for the logs
+
+commit ff57a29e0f1b5d13d8a006b270442882a9f308b1
+Author: notaz <notasas@gmail.com>
+Date:   Sun Apr 24 21:38:59 2016 +0300
+
+    make separate option for using nasm asm
+    
+    Other asm is now enabled by default again, since asm blocks are now
+    smarter and won't fail to compile on non-i386 platforms.
+
+commit 1f70d4e242d96cac742e06a048774b70f9b06657
+Author: notaz <notasas@gmail.com>
+Date:   Sun Apr 24 20:16:04 2016 +0300
+
+    rework asm to always fall back to portable C code
+    
+    with this there is no need to worry about x86 asm switch for other
+    platforms.
+
+commit 78b26698ac6f401f7c44035572a236a4022e1a65
+Author: notaz <notasas@gmail.com>
+Date:   Sun Apr 24 18:04:43 2016 +0300
+
+    only enable __GNU_INLINE_X86_32__ for x86/IA32
+    
+    also don't error out if both __MSVC_INLINE__ and __GNU_INLINE_X86_32__
+    are not set, we have C fallbacks now
+
+commit 4b5cc03bf04bf44a5e0e734e9802d1e196b9be0c
+Author: notaz <notasas@gmail.com>
+Date:   Sun Apr 24 17:38:22 2016 +0300
+
+    rename __GNU_INLINE__ to __GNU_INLINE_X86_32__
+    
+    There is not only x86 in this world.
+    Simple sed job.
+
+commit 056d77f479d492e3c6f86bd791bee6797302de0a
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sat Apr 23 17:04:45 2016 -0700
+
+    Assume OSX if we have defined __APPLE__ (#46)
+
+commit 3e0171ea1b81ca273e2e62047965876021017edb
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 23 18:02:57 2016 +0200
+
+    Tried some asynchronus input method, but doesn't seems to works
+
+commit 45429a88d8c0735bfd35a7f43673f9068f739e50
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 23 18:01:27 2016 +0200
+
+    Some Pandora fine-tunning
+
+commit 16d6cb99fa586ed23414c05a172ac4e93cfce599
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 23 10:49:31 2016 +0200
+
+    Added some Failsafe. Fixed a crash in the new game intro cinematic (when Boss of TFE die and Sam goes to the UFO) on the Pandora
+
+commit 6bb2f81134260694897a729faf43b6aeb4656b30
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 13:10:32 2016 +0200
+
+    fix Inverted Right and Middle button on certain case with SDL
+
+commit 86ef2fee09675ca7ef5304bf19dc74ccae94a655
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Apr 17 09:45:01 2016 +0200
+
+    Restrict the Eps precision change only to Pandora platform
+
+commit 07e64e787e0cf8d4bfaf5eca38b8df91e0320575
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 07:20:41 2016 +0200
+
+    Don't regulate Framerate on Pandora
+
+commit 4db3022cbd63d6ed14d92993967394a9eaab89ac
+Author: Tan Wang Leng <tanwangleng@outlook.com>
+Date:   Sat Apr 23 22:49:07 2016 +0800
+
+    Fix mouse wheel for switching weapons
+    
+    This fixes #32. Strictly follows the Win32 version.
+
+commit b6d54121a58793deeca9e55387d3e0b00faa9708
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Apr 17 09:45:01 2016 +0200
+
+    Restrict the Eps precision change only to Pandora platform
+
+commit 90e408e02c337b9be967ebc6576ff3414dbe790a
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 07:20:41 2016 +0200
+
+    Don't regulate Framerate on Pandora
+
+commit 65d8d44f0eb238edce9a4c8fc92d9432d4ffd4a5
+Author: Tan Wang Leng <tanwangleng@outlook.com>
+Date:   Sat Apr 23 22:49:07 2016 +0800
+
+    Fix mouse wheel for switching weapons
+    
+    This fixes #32. Strictly follows the Win32 version.
+
+commit dca5b7a6ace3d4bc9e0b526d2f15ba72a70a4724
+Merge: bbb184a 88d553c
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Apr 22 23:04:19 2016 +0200
+
+    Merge branch 'master' of https://github.com/ptitSeb/Serious-Engine
+    
+    Conflicts:
+            Sources/Engine/Base/Types.h
+            Sources/Engine/Engine.h
+
+commit bbb184aad7bf51844f3d08100f6f3176c483e6b9
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 21:54:31 2016 +0200
+
+    More macro for UNIPTR_MAX
+
+commit df3592c88cb1ed65c868882e6c68d506bdadbc60
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 08:24:43 2016 +0200
+
+    Need __STDC_LIMIT_MACROS macro here too
+
+commit c15a2ce2b3cff676eab7ce625a49f0d22fd40dbe
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 07:30:43 2016 +0200
+
+    Nedd __STDC_LIMIT_MACROS for *_MAX constant to be defined
+
+commit c6415f84b527ef1b7d46993629c26d69e1884d59
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 07:20:41 2016 +0200
+
+    Don't regulate Framerate on Pandora
+
+commit e1921174d4ac8593c6512f75e57d21baca56325b
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Apr 17 09:45:01 2016 +0200
+
+    Restrict the Eps precision change only to Pandora platform
+
+commit c32b7cc829e17070dfb5b924cba5b78fb79662b4
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 13:10:32 2016 +0200
+
+    fix Inverted Right and Middle button on certain case with SDL
+
+commit b4e43fac952a767cf47826765e32d6f4d253f020
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 11:32:57 2016 +0200
+
+    Lower Epsilonon Pandora
+
+commit 88a0ec269b9dc3aabd5e28f6e7f242abb26e0d6e
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Fri Apr 22 10:57:32 2016 -0700
+
+    Use stdint.h everywhere since Serious Engine requires MSVC 2013 or greater (#40)
+
+commit cb3f3bf5213d7ac49bec2b8c68dc580c066f09e1
+Author: Rohit Nirmal <rohitnirmal9@gmail.com>
+Date:   Fri Apr 22 12:57:04 2016 -0500
+
+    Use those other averages. (#41)
+
+commit 7213794459fc4ce30e959780da96f435443d0da1
+Merge: 1039590 1f23f37
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Apr 21 23:00:03 2016 -0400
+
+    Merge pull request #38 from DanielGibson/fix-FloatToInt
+    
+    Fix for FloatToInt
+
+commit 10395909e8eaa34cbd0d1d1a3fcda0ed6db503bb
+Merge: fd52a04 52c1787
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Apr 21 22:46:07 2016 -0400
+
+    Merge pull request #39 from notaz/asm_fixes
+    
+    Asm fixes
+
+commit 1f23f37b36888e8c719fbaaa2c5938514b403f19
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Thu Apr 21 20:30:53 2016 +0200
+
+    CMakeLists.txt: suppress some warnings also for gcc, not only clang
+    
+    also, check for AppleClang, not only Clang.
+
+commit c74fa69bf682c13b02e4abbd455af7d3bbe47a7e
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Thu Apr 21 20:30:17 2016 +0200
+
+    gcc told me copysignf() in FloatToInt() didn't do anything. oops.
+    
+    sometimes using GCC *does* find problems clang didn't :)
+
+commit 52c178718ca888437eee900a5653ddf286a25f14
+Author: notaz <notasas@gmail.com>
+Date:   Fri Apr 22 02:25:24 2016 +0300
+
+    fix SoundMixer asm
+    
+    SoundMixer386.asm forgot to save some callee-save registers too
+
+commit b1837c2e584c151c883cd4c433fa6a427a438cc1
+Author: notaz <notasas@gmail.com>
+Date:   Tue Apr 19 04:21:13 2016 +0300
+
+    fix Graphics asm
+    
+    same stuff as in previous commit
+
+commit a1b84b3ba05535b59d929c9c19c1bce04873c73a
+Author: notaz <notasas@gmail.com>
+Date:   Thu Apr 21 04:35:19 2016 +0300
+
+    Revert "fix build on gcc 4.8"
+    
+    This reverts commit 8bbe4c1d5e72f47716c7c4745c7f3e862696b0e5.
+    Going to fix it properly.
+
+commit fd045e50259435ec5df2100ec88405267257287b
+Author: notaz <notasas@gmail.com>
+Date:   Tue Apr 19 04:26:35 2016 +0300
+
+    fix LayerMixer asm
+    
+    - clobber the whole x87 state for mmx (emms alone requires this)
+    - add all modified registers to clobber list
+      (in some cases use dummy output vars instead)
+    - use symbolic names
+    - use more relaxed constraints where possible
+    - allow gcc to allocate ebx replacement reg
+
+commit cb69bd3cdd603c837865447d0c2743bcc75843fc
+Author: notaz <notasas@gmail.com>
+Date:   Thu Apr 21 02:34:11 2016 +0300
+
+    add some asm helpers
+
+commit fd52a044d4ca2fa4b944bb9dd9fbe7c183bb5dd4
+Merge: e641994 7f68218
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Apr 21 12:40:44 2016 -0400
+
+    Merge pull request #36 from DrItanium/abstraction-layer
+    
+    Abstraction layer
+
+commit e64199441a62a6371aed8f7c45dd94ef3a5bab39
+Merge: 83b3e2f a28a7bb
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Apr 21 12:31:05 2016 -0400
+
+    Merge pull request #31 from DanielGibson/more-64bit-fixes
+    
+    More 64bit fixes
+
+commit a28a7bb00fa3a0a4578dada156939f83bf7eb684
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Thu Apr 21 17:46:44 2016 +0200
+
+    now TFE builds on OSX, too
+
+commit 2a5820948748566db5cbd831781422462d72fc7f
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Thu Apr 21 17:40:42 2016 +0200
+
+    Some cmake fixes, fixing OSX build (incl 64bit) + disable i386ASM by default
+    
+    OSX build was a bit broken, it needs to be linked against zlib.
+    Furthermore it now uses the systems libSDL2 framework, unless you use
+    -DUSE_SYSTEM_SDL2=FALSE
+    
+    i386 ASM is now disabled by default, we have plain C fallbacks for
+    everything that seems to work well enough (and if not they need more
+    testing which is likely to happen this way)
+
+commit 64e6b915b7fa542e9c5d96dffd4ca93aa776d7ef
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Wed Apr 20 18:05:43 2016 +0200
+
+    Fix out of bounds access of afStarsPositions in TFE Particles.cpp
+    
+    same as before for EntitiesMP/Common/Particles.cpp, this time for
+    the first encounter.
+
+commit 72bd84edb8ac481e61b112fec8966cf5e9af6d2c
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Wed Apr 20 18:04:56 2016 +0200
+
+    Fix 64-bit build of Entities/Player.es (of First Encounter)
+
+commit 430e0c8a951c55280db6f1fc91a3c0a929b8033e
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Wed Apr 20 17:47:11 2016 +0200
+
+    Remove "64-bit issue" STUBBED() in Model.cpp, as it only looks fishy
+    
+    .. but is really fine (most probably).
+    
+    I added comments instead; see them for explanation why it's fine ;-)
+
+commit d228b6a7a78460444368edf287f5acad8ddb8638
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Wed Apr 20 17:33:18 2016 +0200
+
+    make all BSP-related tags size_t so they can store pointers
+    
+    The tags are often initially assigned from pointers and then copied
+    around, even from one tag type to the other.
+    As BSPTree::MoveSubTreeToArray() uses them to get the original pointer,
+    we need the pointers anyway, so just CRC-ing the pointers doesn't seem
+    like a good option. As the tags are assigned from other tag-types
+    sometimes, I probably would have needed to add Pointers for the same
+    values in addition to the ULONG tags, that are also copied around along
+    the tags, to keep the tags ULONG - that seemed like a worse alternative.
+    
+    However, when writing (via BSPTree::Write_t()) the bn_ulPlaneTag tag
+    needs to be ULONG, so there I actually use CRC for 64bit pointers (via
+    IntPtrToID()) - when restoring (in Read_t()), the pointers aren't valid
+    anymore anyway, so that all should somehow be fine.
+    I assume that Write_t() is only used by the Editor, anyway, so I fear I
+    won't be able to test that part of the code on Linux anytime soon.
+
+commit b437abf10d4c0249f9c304907bfe04806a16a8cb
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Wed Apr 20 17:35:47 2016 +0200
+
+    Use PointerToID() for sound-event ID in CSoundObject::Play()/Stop()
+    
+    so that code should be 64bit-clean now.
+
+commit 23b6374e9ad57b9edbd7b7c1d300275be5f23238
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Wed Apr 20 17:37:37 2016 +0200
+
+    Add ULONG PointerToID(void*) and IntPtrToID(size_t) that CRC 64bit pointers
+    
+    Sometimes pointers are casted to ULONG just to get an ID or tag - this
+    is fine for 32bit pointers, but 64bit pointers will truncate which might
+    result in not being so unique after all.
+    CRC-ing the pointer should yield a more likely to be unique 32bit value.
+    NULL is a special case that yields 0 instead of the CRC, so code that
+    handles IDs/Tags with value 0 differently will continue to work.
+    For 32bit builds, it just returns the pointer as ULONG.
+
+commit e642cbcd2087486ca13255b1db7153e2bbdeb653
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Tue Apr 19 16:47:26 2016 +0200
+
+    Change PLATFORM_32/64BIT detection
+    
+    turns out that using UINTPTR_MAX is a pain on several systems like
+    FreeBSD or even older Linux/glibc systems, so maybe let's not do that
+    anymore.
+    Now I check for known CPU-architectures instead.
+    
+    I also added some sanity checks to make sure the detection was
+    correct.
+
+commit 7f682180f303f706dd108152c45e37d265678fa5
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Wed Apr 20 19:24:51 2016 -0700
+
+    Use SERIOUS_MHZ envvar for the time being
+
+commit dbd896b58d287140920808c424c6a2a372a2cf46
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Wed Apr 20 19:06:02 2016 -0700
+
+    Use the platform independent version of ReadTSC
+    
+    - If I use the gnu inline version, the game runs way too fast on my cpu due to
+      frequency scaling (I think).
+
+commit 1b873d3ab430a4c73b7fd635f2367bbdcbb2035c
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Wed Apr 20 18:50:36 2016 -0700
+
+    Bool's must be 32-bits wide
+
+commit 83b3e2fee32d645a558c95fcb0b909c49082aa46
+Merge: 3e84eaf e166958
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Apr 20 15:02:29 2016 -0400
+
+    Merge pull request #34 from rohit-n/reorder
+    
+    Silence -Wreorder warnings.
+
+commit e16695888163688688d56064e301562d9bc710cf
+Author: Rohit Nirmal <rohitnirmal9@gmail.com>
+Date:   Wed Apr 20 13:31:49 2016 -0500
+
+    Silence -Wreorder warnings.
+
+commit 3e84eafe157c151f60929db53a0fa8023f643de8
+Merge: 26b4941 9477af7
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue Apr 19 22:53:41 2016 -0400
+
+    Merge pull request #28 from salamanderrake/icculus-master-cmake-bms
+    
+    CMakeLists.txt changes plus install.
+
+commit 9477af7bfaca268205e9153dea18bb4e362d38fb
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Tue Apr 19 18:16:45 2016 -0400
+
+    CMakeLists.txt: Applied some changes Ryan wanted with the c/cxx flags.
+
+commit 88d553c8f46bd0e0a105be6896508416ff225720
+Merge: c8291e6 4bbe57b
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 23:47:30 2016 +0200
+
+    Merge branch 'master' of https://github.com/ptitSeb/Serious-Engine
+
+commit c8291e6d37cb476a2d1e7d29d1712d93f3706ff3
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 21:54:31 2016 +0200
+
+    More macro for UNIPTR_MAX
+
+commit e077fd664da8b5d226b22435db0d3ee1697a33ce
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 08:24:43 2016 +0200
+
+    Need __STDC_LIMIT_MACROS macro here too
+
+commit 4b47c278bbb49b8803bc218493885487c8970414
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 07:30:43 2016 +0200
+
+    Nedd __STDC_LIMIT_MACROS for *_MAX constant to be defined
+
+commit b9bb24e608bf823d30b0c67c3d953c53bc9286cf
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 07:20:41 2016 +0200
+
+    Don't regulate Framerate on Pandora
+
+commit 484d49434beed41fe72ec2ba3edcb8974a431bb7
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Apr 17 09:45:01 2016 +0200
+
+    Restrict the Eps precision change only to Pandora platform
+
+commit 9288c42268f5ffe67568691e0b17c2bd5a251991
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 13:10:32 2016 +0200
+
+    fix Inverted Right and Middle button on certain case with SDL
+
+commit 7c1cc68d6f06bfdd05719a589952dba8ddd2c81c
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 11:32:57 2016 +0200
+
+    Lower Epsilonon Pandora
+
+commit 26b494101070e23671957b27aa10c7ff7d0b3fe8
+Merge: fd1ba82 794180c
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue Apr 19 13:11:33 2016 -0400
+
+    Merge pull request #30 from Yamagi/bswap32
+    
+    bswap_32() is a linuxism, use inline code instead.
+
+commit 794180c598c34969c7320e7e5c72677b2fddac0b
+Author: Yamagi Burmeister <yamagi@yamagi.org>
+Date:   Tue Apr 19 19:04:02 2016 +0200
+
+    bswap_32() is a linuxism, use inline code instead.
+    
+    bswap_32() is a function specific to Linux, unavailable on FreeBSD and
+    OS X. Instead of messing with other platform specific functions, #ifdef
+    and so on provide a fast inline implementation.
+
+commit fd1ba82bc8cf199b3ce8d008b95ea82510b6bc49
+Merge: 1f7bb24 8de421d
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue Apr 19 08:59:59 2016 -0400
+
+    Merge pull request #29 from DanielGibson/fix-textures-crash
+    
+    Textures.cpp: improved td_pulObjects/td_ulObject fix
+
+commit 8de421dc9d3fdce68c348c8fc9932aae46076663
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Tue Apr 19 14:34:39 2016 +0200
+
+    Textures.cpp: improved td_pulObjects/td_ulObject fix
+    
+    * td_pulObjects is explicitly set to NULL in the constructor - before
+      only td_ulObject was set to NONE (0), so on 64bit half of
+      td_pulObjects bytes would remain garbage
+    * only check td_ulObject for NONE if td_ctFrames <= 1 (until now it
+      would frequently check it for NONE even if td_ctFrames > 1, if
+      td_pulObjects was != NULL)
+
+commit 380bade7c0fd814a17e5fcd60815cfb5d28a6ee8
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Tue Apr 19 04:43:59 2016 -0400
+
+    CMakeLists.txt: BMS, Added a small explanation about the default CMAKE_INSTALL_PREFIX
+
+commit 895921d8c16698651c56e5ffe8a998e9911d949c
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Tue Apr 19 04:27:12 2016 -0400
+
+    ModExt.txt: Created a link(don't know if this will work) to ModEXT.txt since the linux
+                version looks for ModExt.txt and not ModEXT.txt
+
+commit 90a614b03c1b962b6b71f8fdb657ab0deb86ad77
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Tue Apr 19 04:25:38 2016 -0400
+
+    CMakeLists.txt: Added an install section and fixed permissions issues with libraries.
+
+commit b7c49d4e514b889b1a67a3f84ecf0ed09d8fbfe7
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Mon Apr 18 21:46:10 2016 -0400
+
+    CMakeLists.txt: Some cleanup and removing redundent lines from the CMakeLists.txt file.
+
+commit ec1448c4d46fce4615a1450208411d554097a8f6
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Mon Apr 18 21:36:28 2016 -0400
+
+    build-linux32.sh: Renamed build-linux.sh build script to show which arch it is compiling
+    build-linux64.sh: for use build native 64bit linux binaries.
+
+commit 86b487df9e849c0295156dc61008ec12b1e8026a
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Fri Apr 15 22:54:34 2016 -0400
+
+    CMakelists.txt: Removed my attempt at making Engine a static lib again. plus other small cmake fixes
+
+commit 836a4abc43b81583c3668bc68bc873d983b5ed67
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Fri Apr 15 17:01:30 2016 -0400
+
+    CMakeLists.txt: Redid the section on c/cxx flags to sepereate them
+            so you can have c++ only flags along with c only flags
+            fore their respective .c/.cpp builds without conflict.
+
+commit 4bbe57bccbd808fe64e38810c358871108dd61bf
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 08:24:43 2016 +0200
+
+    Need __STDC_LIMIT_MACROS macro here too
+
+commit b9e4fb49c9f58968bb3a31eabff71f16d5dacb83
+Merge: f5d397e e3ffd51
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 07:31:06 2016 +0200
+
+    Merge branch 'master' of https://github.com/ptitSeb/Serious-Engine
+
+commit f5d397ebc668787671a2f08723a2d64885074c66
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 07:30:43 2016 +0200
+
+    Nedd __STDC_LIMIT_MACROS for *_MAX constant to be defined
+
+commit c5148824b2a7dd8030e4f09b23243d146850db76
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 19 07:20:41 2016 +0200
+
+    Don't regulate Framerate on Pandora
+
+commit 0d4437a1ac2a45ac233f61616250625a18d4afec
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Apr 17 09:45:01 2016 +0200
+
+    Restrict the Eps precision change only to Pandora platform
+
+commit 031223de356a524f44d6d8c6eeb7ce5dfc73a1da
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 13:10:32 2016 +0200
+
+    fix Inverted Right and Middle button on certain case with SDL
+
+commit 2dc1c2502a96cf71192e47f73aa80c1a246f469e
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 11:32:57 2016 +0200
+
+    Lower Epsilonon Pandora
+
+commit 1f7bb24a4d688c5e226409c5f488e5b2040470fc
+Merge: 17de1fd ab5d0a5
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Apr 18 22:33:58 2016 -0400
+
+    Merge pull request #26 from DanielGibson/64bit-stuff
+    
+    Some 64bit improvements, lots of 64bit TODOs/STUBBED()
+
+commit 17de1fdb461f7067d3be1759ff0556b040393e17
+Merge: aaba575 8bbe4c1
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Apr 18 22:31:03 2016 -0400
+
+    Merge pull request #27 from notaz/build_fix
+    
+    fix build on gcc 4.8
+
+commit 8bbe4c1d5e72f47716c7c4745c7f3e862696b0e5
+Author: notaz <notasas@gmail.com>
+Date:   Mon Apr 18 23:55:41 2016 +0300
+
+    fix build on gcc 4.8
+    
+    some versions of gcc want to inline DitherBitmap(), and this leads to trouble:
+    Sources/Engine/Graphics/Graphics.cpp:1167: Error: symbol `rowLoopE' is already defined
+    Sources/Engine/Graphics/Graphics.cpp:1170: Error: symbol `pixLoopEL' is already defined
+    ...
+
+commit ab5d0a584f4dc366f1312d9aa60f8cd3c2959d31
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon Apr 18 20:10:24 2016 +0200
+
+    Make Engine/Graphics/Texture.cpp 64bit-clean (hopefully!)
+    
+    ((ULONG*)td_ulObject)[iFr] is fishy - and ULONG td_ulObject already is
+    in an union with ULONG* td_pulObjects, so use td_pulObjects when
+    appropriate (i.e. if td_ctFrames>1)
+    Also fixed some checks accordingly.
+
+commit 93daf905f1cda0c095af8237a3136167f1b01663
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon Apr 18 19:37:02 2016 +0200
+
+    EntitiesMP/Common/Particles.cpp: Don't access afStarsPositions[i][3]
+    
+    fix out of bounds accesses of that array.
+    I guess the same will have to be done for Entities/Common/Particles.cpp
+
+commit 80990f23174bc9435395a3d511da3eef1c094c84
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon Apr 18 19:10:52 2016 +0200
+
+    Fix some more warnings, Warning about supressed warnings in cmake
+
+commit 5f5106e3638ecfc974f09f957a160a0c8e6dafce
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon Apr 18 18:52:52 2016 +0200
+
+    CShell::[SG]etCurrentWorld() instead of putting it in INDEX console var
+    
+    The code used to store the world pointer as a console variable
+    "pwoCurrentWorld" of type INDEX (int32) - that won't work for 64bit, so
+    I added CShell::SetCurrentWorld() and CShell::GetCurrentWorld() and
+    store it as a pointer.
+
+commit a4ca331de9678e5b25872a4e2c5cd90e2bc4052f
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Mon Apr 18 00:13:30 2016 -0700
+
+    Added some more todos
+
+commit f8cb52f8ad28b245c6bfe3d1bff2ede04119e9d4
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:50:00 2016 -0700
+
+    Delete an unused include
+
+commit a8c22df784516517bda91648aa08c093f567594f
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:49:18 2016 -0700
+
+    Forgot to write Engine to disk :(
+
+commit 2d8a4df68c8646f5f3cc68efed55f5a67004ca90
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:49:02 2016 -0700
+
+    Add the system specific include file
+
+commit 0c847ab47902413a1e0b69650dc7a8331f93532e
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:48:44 2016 -0700
+
+    Move system specific includes out to a separate file
+
+commit 8b8ec1f39afcfcadf4b813a65aff8e0156d8b5cd
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:30:48 2016 -0700
+
+    Add some C++11 features into Types.h since C++11 is so cool :D
+
+commit c8ab519b779e1118b16045a30802e0076ef71d0a
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:26:33 2016 -0700
+
+    More big endian targets to detect
+
+commit 42b282241469ec52973c5a6556272fe5da517247
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:20:59 2016 -0700
+
+    More todo's
+
+commit 35955d20ba043ea12d040a9d05fc2df008b4c13e
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:18:23 2016 -0700
+
+    use stdint.h instead of courage in Types.h
+
+commit 5b2933e217e5c07579de487c53db9afdcf3a2557
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:06:49 2016 -0700
+
+    Defined USE_PORTABLE_C when we can't figure out the platform
+
+commit 535832668fceeec3b1d9b65065c4c1d428732551
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:04:12 2016 -0700
+
+    Fixed a broken function call
+
+commit e5c0e4f3f4b47edd823f25046fa5962deec25add
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:02:49 2016 -0700
+
+    Add better platform detection abilities
+
+commit e82ad0c1319775b7ae9573d12779972b17c0e44c
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 23:02:39 2016 -0700
+
+    Move system specific deinit to a separate function for now
+
+commit b221d5fce2ad90fe949268445b33e5bf1fda3f85
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 22:53:31 2016 -0700
+
+    Make it so that anything system specific is not in SE_InitEngine
+
+commit a3c5d30f217474a21d049a978d819f2101710b52
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 22:49:58 2016 -0700
+
+    Move the "please abstract" seconds to separate static functions for now
+
+commit 6f901305788d5371b9842713f7d1fbd1b1a85ae2
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 22:40:36 2016 -0700
+
+    Added vim swap files to the .gitignore
+
+commit 21d4aec7f776d4874feefd7a175539fc06e80cc6
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 22:40:08 2016 -0700
+
+    Follow coding conventions
+
+commit 12e8b991b399812bb4421dc6dbcad87bf55d7add
+Author: Joshua Scoggins <Theoretically.x64@gmail.com>
+Date:   Sun Apr 17 22:39:19 2016 -0700
+
+    Move the platform identification code out of SE_InitEngine to PlatformIdentification
+
+commit 78ab018fdef55cef1b455ce4249b9fa4371b28d8
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon Apr 18 00:56:21 2016 +0200
+
+    CMakeLists.txt: output lib* to Debug/ subdir; suppress more warnings
+    
+    ssam expects lib* to be in the Debug subdir, so make cmake put it there,
+    this way it's easier to copy the binaries to your install/Bin/ dir to
+    test.
+    clang gives a lot of -Wlogical-op-parentheses warnings, suppress them.
+
+commit a358a1763f8f66074dccc7fe1210239b681fcd78
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Mon Apr 18 00:53:58 2016 +0200
+
+    Some more FIXMEs
+
+commit 599f6443286a558873241de98ddbe8a52dcb5625
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Sun Apr 17 23:35:04 2016 +0200
+
+    Resolved some 64bit issues, marked/commented some others
+    
+    introduced PLATFORM_32BIT and PLATFORM_64BIT macros, so you can do
+    #ifdef PLATFORM_64BIT if you need to.
+    I needed that for CDrawPort::GetID() to properly CRC a pointer.
+    Also added a sanity check in Engine/Base/Types.h that makes sure that
+    uintprt_t and size_t have the same size, as the code uses size_t to
+    store pointers (or cast from pointer to int) all over the place.
+    
+    Made some "tags" from Engine/Templates/BSP_internal.h size_t instead of
+    ULONG - they're used to store pointers to identify vertices and such,
+    so they'd better be big enough to actually store a pointer.
+    Some more are still missing.
+
+commit 8d26863a51dd8dc0c30831b17dbd4cef1119bb9d
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Sun Apr 17 23:15:56 2016 +0200
+
+    Improve some portable C implementations of math functions
+    
+    * FloatToInt() should now  round correctly ot nearest, even for
+      negative numbers
+    * Log2() now calls log2f() instead of log10()*3.321 - no idea what the
+      previous code was about, I doubt it's faster (and the ASM code uses
+      something like log2, too).
+    * FastLog2() (for integers) now uses __builtin_clz() when building with
+      GCC/clang - the resulting ASM should be pretty similar to the inline
+      ASM below. I wonder why that function takes signed ints, log2(-1) in
+      reality is an irrational number (but the function returns 31)..
+      Also, both the inline ASM and my version return 0 for Log2(0), but
+      INT_MIN would be closer to the truth
+    * commented out FastMaxLog2(), it's unused.
+    * implemented _rotl() using a fast(er) trick from
+      http://blog.regehr.org/archives/1063
+
+commit e3ffd518109c1186fd58e2ec01166c4bbdf4c367
+Merge: 630f636 acd3952
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Apr 17 09:46:45 2016 +0200
+
+    Restrict the Eps precision change only to Pandora platform
+
+commit 630f636b0eaa2719adfe6151b1fcb97d55d82f19
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sun Apr 17 09:45:01 2016 +0200
+
+    Restrict the Eps precision change only to Pandora platform
+
+commit 25d405c3a070f20c993874b27462f313d6e0cd2e
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 13:10:32 2016 +0200
+
+    fix Inverted Right and Middle button on certain case with SDL
+
+commit fb73e85d7401e510f7740ce840e262b263fbc02e
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 11:32:57 2016 +0200
+
+    Lower Epsilonon Pandora
+
+commit aaba5758568c0546dd0b8a471fb42e567827ac68
+Merge: dc2c869 b934fa1
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sat Apr 16 19:38:58 2016 -0400
+
+    Merge pull request #25 from DanielGibson/no-malloc-h-soundfix
+    
+    Only use <malloc.h> on Win32; increase SDL sound buffer
+
+commit b934fa1945c035e7b81d9570d1fd28501d9059ee
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Sun Apr 17 01:07:14 2016 +0200
+
+    Increase SDL soundbuffer for smoother sound playback
+    
+    before it sounded shitty on my system, no it sounds good.
+
+commit 24dcb9cc4f6a13c50fe415c0c47dc85a1c389086
+Author: Daniel Gibson <metalcaedes@gmail.com>
+Date:   Sun Apr 17 01:06:39 2016 +0200
+
+    Don't #include <malloc.h> on Linux, only on Windows
+    
+    Linux, FreeBSD and OSX should use stdlib.h instead.
+
+commit acd39526c9eca68684858c4047f63cf1d5e1c5b5
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 13:10:32 2016 +0200
+
+    fix Inverted Right and Middle button on certain case with SDL
+
+commit d3c7ea2e53495ab13441a6237cc75757266fd1e7
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 16 11:32:57 2016 +0200
+
+    Lower Epsilonon Pandora
+
+commit dc2c869cfc79c6da5449261540fc0d5a227982e2
+Merge: d66559a cd2a586
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Fri Apr 15 14:52:56 2016 -0400
+
+    Merge pull request #24 from ptitSeb/master
+    
+    More OpenPandora support (special keymap) and optionnal Multi-Threading.
+
+commit d66559abfacbdcb02075609ccc75ff6468c73844
+Merge: 8006012 0e672b8
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Fri Apr 15 13:07:29 2016 -0400
+
+    Merge pull request #23 from Yamagi/freebsd
+    
+    Add Freebsd support
+
+commit 8006012b90d6f0e44d063e03d57ed9de5616bce9
+Merge: 4f9b11e 1a7ec84
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Fri Apr 15 13:03:07 2016 -0400
+
+    Merge pull request #20 from stevenc99/rdynamic
+    
+    Export symbols of main executable to dynamic libs
+
+commit 4f9b11eadab990a57933589e38f60491de3d4825
+Merge: df6199d 95b4404
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Fri Apr 15 13:00:25 2016 -0400
+
+    Merge pull request #22 from stevenc99/DedicatedServer
+    
+    Dedicated server
+
+commit 0e672b866e36b47de70a583615ff76364e999275
+Author: Yamagi Burmeister <yamagi@yamagi.org>
+Date:   Wed Apr 13 19:24:51 2016 +0200
+
+    Determine CPU speed on FreeBSD
+
+commit cd2a586a9ec6a56082ed45d01b44dd648babe240
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 13 08:21:50 2016 +0200
+
+    Better #if condition, and add a warning to be better checked latter
+
+commit 95b4404cbc7e66b4f9e5ee53c4f3222ee20a27b4
+Author: Steven Chamberlain <steven@pyro.eu.org>
+Date:   Wed Apr 13 02:25:58 2016 +0100
+
+    DedicatedServer: declare a dummy _hwndMain
+
+commit 9f7467d3adb711537d9045a2fc2d9df5413b417f
+Author: Steven Chamberlain <steven@pyro.eu.org>
+Date:   Wed Apr 13 02:24:55 2016 +0100
+
+    Fix another 1L literal
+
+commit 1a7ec841cb7b7ec57fbd5c478c137e0e8d10099d
+Author: Steven Chamberlain <steven@pyro.eu.org>
+Date:   Tue Apr 12 19:42:39 2016 +0100
+
+    Export symbols of main executables for shared libs
+    
+    Set the ENABLE_EXPORTS property on the main executables, which adds
+    linker flag -rdynamic if the compiler supports it.  This ensures symbols
+    are available for dynamic objects (such as shared libEntitiesMPD.so) to
+    use.
+
+commit 9678ec3e5829c45025ecc918140d35b872ba8dba
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Tue Apr 12 22:29:39 2016 +0200
+
+    Enabled Multi-Threading (as an option) + OpenPandora specific changes (for Shoulder As Mouse Buttons)
+
+commit b299789db5cf623d7976f1c5359b71cbb4c7d682
+Author: Yamagi Burmeister <yamagi@yamagi.org>
+Date:   Tue Apr 12 19:25:58 2016 +0200
+
+    mntent.h is another linuxism and unnecessary on FreeBSD.
+
+commit d1d9c8d094d2f3345503caffd75cc57be9fd547f
+Author: Yamagi Burmeister <yamagi@yamagi.org>
+Date:   Tue Apr 12 19:24:57 2016 +0200
+
+    There's no malloc.h on FreeBSD.
+    
+    Like in OS X malloc() is part of stdlib.h.
+
+commit 08dae0c605188c1d9eb33497b959a4baade2a3b3
+Author: Yamagi Burmeister <yamagi@yamagi.org>
+Date:   Tue Apr 12 19:21:10 2016 +0200
+
+    Add FreeBSD defined to CMakeLists.txt
+    
+    - Detect FreeBSD.
+    - Set both PLATFORM_UNIX and PLATFORM_FREEBSD. The latter is required to
+      distinguish FreeBSD from other unixoid platforms like Linux.
+    - On FreeBSD 3rd party libs are installed to /usr/local, we need to add
+      /usr/local/include as include directory.
+    - Add linker options for FreeBSD. FreeBSD has no -ldl.
+
+commit df6199de702a778267d68160433a3eb5048e8df5
+Merge: a059520 2dd0115
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue Apr 12 01:38:05 2016 -0400
+
+    Merge pull request #19 from rcgordon/sdl2-port
+    
+    Sdl2 port
+
+commit 2dd011573bbc4f63f7402518e41a0eb5d2337ccb
+Merge: 1d4440f df16878
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue Apr 12 01:36:12 2016 -0400
+
+    Merge pull request #18 from salamanderrake/sdl2-port-findsdl2
+    
+    Auto linking SDL2 libraries
+
+commit a0595204d472fdc852fc8b46dc0c4392f96a330b
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue Apr 12 01:24:30 2016 -0400
+
+    Fixed what appears to be an uninitialized memory access.
+    
+    This appears to fix crashes in 64-bit Linux builds. Might all be luck, though.
+
+commit df16878e0eb68be2cbdd0c8f8305401cc838b3ad
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Tue Apr 12 01:21:25 2016 -0400
+
+    FindSDL2.cmake: Added module to help find system libraries for SDL2
+    CMakeLists.txt: Modified to link system wide SDL2 libraries and link to
+            system wide headers
+    SplashScreen.cpp: commented out as its post SDL2.0.4 >> SDL_WINDOW_SKIP_TASKBAR
+
+commit 67e940def8ba13eaf825b80b3dfe8ca1b4061e2b
+Merge: 56de02e dd0ad84
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue Apr 12 00:12:51 2016 -0400
+
+    Merge pull request #17 from RocketersAlex/linux-port
+    
+     GameAgent - list servers bugfix.
+
+commit 1d4440f02d35941aa5a00f80a73986c10420135b
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Apr 11 23:45:59 2016 -0400
+
+    Don't use FULLSCREEN_DESKTOP mode until Ryan finishes the backbuffer code.
+
+commit 56de02e4b8af17316664341612897593e0be7c69
+Merge: 1f1291d dfe262b
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Apr 11 22:59:05 2016 -0400
+
+    Merge pull request #14 from ptitSeb/master
+    
+    Preliminary support for The First Encounter
+
+commit dd0ad843850c1766637c23bc21d9e657f0e7d442
+Author: RocketersAlex <rocketers@yandex.ru>
+Date:   Tue Apr 12 04:10:43 2016 +0300
+
+    GameAgent - list servers bugfix (update)
+
+commit eeebba11dc42697c5ccb93620fe034abe7c5af14
+Author: RocketersAlex <rocketers@yandex.ru>
+Date:   Tue Apr 12 04:03:25 2016 +0300
+
+    GameAgent - list servers bugfix
+
+commit dfe262b61922cd10d5586808a3661745f4c7f249
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Mon Apr 11 08:32:38 2016 +0200
+
+    Don't pump SDL Event in GetInput, or they will be missing in SeriousSam.cpp:SubMain(...)
+
+commit 02af656d1cd87132182c197b1b2f2ae3c8ec8854
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sun Apr 10 00:54:45 2016 -0400
+
+    Whoops, forgot to actually enumerate physical display resolutions.
+
+commit 927c44e9d8c0bd9e017616d746348d723f83859a
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sun Apr 10 00:54:23 2016 -0400
+
+    Look for SDL2 libraries; I don't think this is right yet, though.
+
+commit cb039e972fd76d4265305830c9859a1644fed66f
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 9 23:57:58 2016 +0200
+
+    Remove some Float Divide to use Integer and Shift in C Portable helper function on LayerMixer
+
+commit 98ebac941a0d2c9ecb158244b9b3ad603ac7baab
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 9 14:15:33 2016 +0200
+
+    Change CTString.Match to treat backslashes as slash (fixes Netrisca categories for new messages)
+
+commit 87a67eccf53c8a86315f8dc84011b6910aecdd8e
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Sat Apr 9 13:20:13 2016 +0200
+
+    Fixed Portable C versio of ShadowMap Layer Mixer
+
+commit 6ce0b9b27e573c6fbae36ba0acf42a8dd36c6ebe
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sat Apr 9 02:18:57 2016 -0400
+
+    First attempt at a port to SDL2. Untested!
+
+commit 284f6c63ca635a6c6f0c0167593c9a760af762d7
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sat Apr 9 01:03:44 2016 -0400
+
+    Fixed a sizeof bug.
+    
+    If you have...
+    
+    void myfunc(char buf[16]) {
+        printf("%d\n", (int) sizeof (buf));
+    }
+    
+    ...this will print sizeof (char *) instead of 16, so this fixes a piece of
+    code that assumed the latter instead of the former.
+
+commit df746ab6d198c87abc960f4420a5473545e10421
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Apr 8 13:40:56 2016 +0200
+
+    A few TFE changes
+
+commit e1fd158fd6f4caab7914d0ac3424519b41c1bc0c
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Apr 8 08:18:46 2016 +0200
+
+    TFE now start a game
+
+commit a1b399177acd9bf50e0db7579ae78b360a5a4bb0
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Apr 8 07:51:50 2016 +0200
+
+    Added Entities generated files to .gitignore
+
+commit bd0b38ba00f728c730201fc5a6ada8e36d8d5245
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Apr 8 07:51:13 2016 +0200
+
+    It compile now
+
+commit 422db3c58c5b1ba36c14ece4d9fb9f583386c056
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Fri Apr 8 00:11:36 2016 +0200
+
+    Preliminary First Encounter support
+
+commit f37df7102959859a553b120fcf29b47032368c57
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Thu Apr 7 18:13:03 2016 +0200
+
+    Float fest\!
+
+commit 1f1291d2bc8fa7debd290ceefa03485d84932f8f
+Merge: 749dc05 8aa4b96
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Apr 7 12:05:25 2016 -0400
+
+    Merge github.com:Croteam-Official/Serious-Engine
+
+commit 749dc05fed04dc6974c5c3d79c08494f29222b28
+Merge: 239b9c7 6cc2a36
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Apr 7 12:04:08 2016 -0400
+
+    Merge pull request #13 from ptitSeb/master
+    
+    Fixes some Memory Corruptions, in 64bits and/or using Portable C
+
+commit 6cc2a36a34e233e72f714d766c76696ba0d8f530
+Merge: 6a2800e 253df3e
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Thu Apr 7 15:20:20 2016 +0200
+
+    Merge branch 'master' of https://github.com/ptitSeb/Serious-Engine
+
+commit 6a2800e2587cbc48aff3f49ad7d835e9f48d7218
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Thu Apr 7 15:19:13 2016 +0200
+
+    Preparing First Encounter (but it doesn't work for now)
+
+commit 253df3ec464bc900ee95bd59f3d7d903c534a5f7
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Thu Apr 7 12:07:12 2016 +0200
+
+    A closing bracket seemed missplaced
+
+commit 19bd3f733bc22a781a3e83291b57f4a9ab56688d
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Thu Apr 7 10:45:45 2016 +0200
+
+    Use SDL constants for mouse buttons
+
+commit 0c16613056b1d60b282b512bd842eadbad2062de
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Thu Apr 7 09:10:09 2016 +0200
+
+    Fix a nasty typo
+
+commit 3ec4d484e273e5cba7562d3e6f5f0e455578d587
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Thu Apr 7 09:09:51 2016 +0200
+
+    Fix for 64bits build
+
+commit 239b9c79928f6e130f4122a8d4b4c43907889911
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Apr 7 00:21:28 2016 -0400
+
+    Patched to compile.
+
+commit 6b9ebc3ccb2e81101f2480e71b0496d938f20c4b
+Author: Alexander Pavlov <rocketers@yandex.ru>
+Date:   Thu Apr 7 06:31:08 2016 +0300
+
+    Update GameAgent for Linuxport.
+
+commit d6800ca42a6bfa6dc242e02b5924cba855720afb
+Merge: 9820436 e2e6f41
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Apr 6 23:28:22 2016 -0400
+
+    Merge branch 'ptitSeb-master'
+
+commit e2e6f41582381ba0a1e924a5a0593987178cb2a2
+Merge: 9820436 2ccc337
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Apr 6 23:27:55 2016 -0400
+
+    Merge branch 'master' of git://github.com/ptitSeb/Serious-Engine into ptitSeb-master
+    
+    Conflicts:
+            Sources/Engine/Math/Float.cpp
+
+commit 9820436fbec00e060cbcd49552aa012a2ebf7b86
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Apr 6 23:16:30 2016 -0400
+
+    First pass at cleaning out 64-bit issues.
+    
+    Touches a lot of code to remove long constants like "1L", so this patch is
+    large and ugly, but I think it makes all those Clamp() calls look nicer in
+    the long run.
+    
+    Most of the game is 64-bit clean, since we can build without assembly code
+    now. I've marked the things that are obviously still wrong with STUBBED lines.
+    
+    That being said: a 64-bit build can already run the demos mostly correctly,
+    so we're actually almost there!
+    
+    There are a few obvious things that are obviously wrong, to be fixed.
+
+commit 70f3f7fe35d06331406b7f3fa189d6bb41a87b18
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Apr 6 23:19:40 2016 -0400
+
+    Turned off an assert that reads past the start of an array.
+    
+    It'll crash here anyway if that assertion would have triggered, I think.
+
+commit 2ccc3378987158c76aa239354d9d806df3de0f00
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 22:44:45 2016 +0200
+
+    The control87 is a fake one when using USE_PORTABLE_C, regardless the architecture
+
+commit efde059273da7907e113c5d246f8b085d121a750
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 22:43:51 2016 +0200
+
+    Getting paranoid with mixed integer / float operations
+
+commit ead5da376dc6a898128ffede174b8a34c3a73ce0
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 22:43:08 2016 +0200
+
+    Cannot cast a Float to Unsigned integer directly on ARM, of sign will be lost, so double cast
+
+commit 553dbe2c62d0db296fb67600152658aba7efb2e7
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Apr 6 15:42:40 2016 -0400
+
+    Deleted changelog autogenerated by Visual C++.
+
+commit 6b248af4d055212bcd7db444c4eb7c73fc186935
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Apr 6 15:35:12 2016 -0400
+
+    Moved STUBBED where all platforms can see it, made it more robust.
+
+commit b42025bc9f1fe51edb53659af015ea295907522b
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Apr 6 15:01:09 2016 -0400
+
+    Unix basedir: Don't read past start of array if $PATH has an empty item.
+
+commit 91827e7d2a66bc97f579d47484667cb999e42110
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Apr 6 13:40:08 2016 -0400
+
+    Define PLATFORM_PANDORA instead of PANDORA, to match other targets.
+
+commit 22fb22ab27f8a170a93c0476834645f0b6f78230
+Merge: 9581eeb 7590c3c
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Apr 6 13:03:10 2016 -0400
+
+    Merge pull request #11 from ptitSeb/master
+    
+    Portable C is useable now, plus a (beggining of) OpenPandora (arm processor) port
+
+commit 7590c3ca0447aecbf74bd0808b2c4f48bb05833b
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 16:30:39 2016 +0200
+
+    GLES hardware doen't read depth, so I assume ARM based machine can'tt either
+
+commit b76bbc77d43eac274cb473823aec3ad5658a00ad
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 14:15:05 2016 +0200
+
+    Fixed a typo
+
+commit 4bfca131b8655b92018c641ab820c3f7ff01218d
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:56:26 2016 +0200
+
+    gettimeofday is not reliable on PANDORA, so use clock_gettime instead
+
+commit ddb0e94ef23a46467af5a6f8585237a3d04d8a36
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:54:22 2016 +0200
+
+    Rename isMenuEnabled to isMenuEnabled_ to avoid a symbol collicion that (can) happens at runtime
+
+commit 4757cbbd2b0794c35ac733d1aba173510a8c3c48
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:52:10 2016 +0200
+
+    Just to be safe, as casting +inf to integer gives 0xFFFFFFFF on x86 and 0x7FFFFFFF on arm
+
+commit c4ac41ed563eed25aa8c66ff968b6597e5437248
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:49:12 2016 +0200
+
+    Added codepath for ARM here (simple copy of PPC version)
+
+commit b2fd42dc60791d212b86da15b98deaf42f27f464
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:48:32 2016 +0200
+
+    TREMOR function signatures
+
+commit 8dd48b5cd88c2aabf4ef8c89d60450acb69a5f0f
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:47:10 2016 +0200
+
+    Unstubbed the Portable C functions of LayerMixer
+
+commit af9d472619948d70e3fe2601810cdaffda1720dd
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:46:26 2016 +0200
+
+    Unstubbed the Dithered Portable C functions (ordered one unstested)
+
+commit 73aab13a79ed46766826dfc49fbb48be9ef6fb53
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:44:36 2016 +0200
+
+    Try to fix the Portable C UploadTexture_OGL function
+
+commit 8c03fccd64ee85d053f7884b4ecf63be42b3ca04
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:41:32 2016 +0200
+
+    Fixed the bsr Portable C function, the game start correctly now
+
+commit 8c49b5f7a08014ae43e1f9ba78b6529f9b3a1432
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:40:56 2016 +0200
+
+    Unstubbed the Fog Portable C function
+
+commit 2406f62c4b56fa7a26a9c37861902ab95d0338d4
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:40:02 2016 +0200
+
+    Unstubbed the Color Portable C functions
+
+commit 73ea5ca7d42263ea479d7811ca31e92500e842be
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:38:09 2016 +0200
+
+    Case fixing of an include
+
+commit 0252ff1b6cbc3432f366c536fa73755ad2fb90fd
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:37:07 2016 +0200
+
+    ARM processor don't convert +inf to 0xFFFFFFFF like a x86 processor do
+
+commit f105e7225ab11bc68de3807373091905b4dc7543
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:35:58 2016 +0200
+
+    Unstubbed the portable C sound mixer
+
+commit 4e9dee776361e8ba4e375bfb3aa5e1c225cbb4fc
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:33:54 2016 +0200
+
+    I had issue with the autoincrement. I prefer some warning about void* math
+
+commit 205d71ecccdb38a3aacdfcb7ace6edba8c09b5ca
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:32:52 2016 +0200
+
+    Tremor can be used instead of Vorbis. Usefull for ARM based machines
+
+commit ebb70977ea134bd43d7db25d494e660754cba1ee
+Author: ptitSeb <sebastien.chev@gmail.com>
+Date:   Wed Apr 6 13:31:53 2016 +0200
+
+    ASM is now an Option, and so is Pandora build. Tremor can be used instead of Vorbis, and the binary is rename to ssam to avoid collision in name for inplace compiling
+
+commit 9581eeb02ae584426d96acd8f7c6dc68bdb8c59d
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue Apr 5 12:06:18 2016 -0400
+
+    Let CMake file use a pre-built copy of ECC.
+    
+    This help cross-compilation. You can do something like this now, to get a
+    native ECC that runs on the build machine, then build the rest for the
+    cross-compile target system:
+    
+    rm -rf cmake-build-ecc
+    mkdir $_
+    cd $_
+    cmake ..
+    make ecc
+    cd ..
+    
+    rm -rf cmake-build
+    mkdir $_
+    cd $_
+    cmake -DECC=/wherever/SeriousEngine/Sources/cmake-build-ecc/ecc ..
+    make
+
+commit 3d07aec6cc3c3235b6464b266d40b11899e3a480
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Tue Apr 5 11:36:21 2016 -0400
+
+    Fixed a typo in the README (thanks, "Gymnasiast"!).
+
+commit 8aa4b9658abb0afb6121ba6ee274010992de045e
+Author: SLAwww <slawww@mail.ru>
+Date:   Tue Apr 5 14:34:00 2016 +0300
+
+    Fix typo
+
+commit 7bbd5df8c0cd387453cea03dd1078249b6e12e9b
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Apr 4 22:42:06 2016 -0400
+
+    Fixed a string-literal-to-char* conversion warning.
+
+commit c752e7cace166f43bab3e905003acf645244f661
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Apr 4 22:40:30 2016 -0400
+
+    Fixed a mismerge.
+    
+    (But I still need to figure out what I'm doing between SetAbsolutePath() and
+    whatever I had before...)
+
+commit 3adda272b7ac3572b38f71363150a2985365f59d
+Author: Steven Chamberlain <steven@pyro.eu.org>
+Date:   Tue Apr 5 03:09:51 2016 +0100
+
+    Fix pointer truncation on 64-bit
+    
+    Use size_t instead of int for arithmetic on pointers, to avoid
+    
+    truncation on ILP64 architectures (like amd64).
+
+commit 26f1a337495c1b434defc7f7d144824c46450941
+Author: Steven Chamberlain <steven@pyro.eu.org>
+Date:   Tue Apr 5 01:34:34 2016 +0100
+
+    Building on GNU/kFreeBSD and possibly Hurd
+    
+    * Only use ENOSR and ENOPKG if defined
+    
+    ENOSR and ENOPKG are part of the POSIX optional STREAMS extension, and
+    are not available on most other platforms than GNU/Linux.
+    
+    * Support building on other GNU platforms than Linux
+    
+    Build for other GNU platforms the same way as Linux:  this includes
+    CMAKE_SYSTEM_NAME "GNU" (GNU/Hurd) and "GNU/kFreeBSD" (GNU/kFreeBSD).
+
+commit 5ba4bccabd945aa92eaf7b2cad6c42cc4a0107fa
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Apr 4 16:09:41 2016 -0400
+
+    Backed out the splitting up of SeriousSam/Menu.cpp
+
+commit f35e86661e5636f04db5b48508ee4771316f96a6
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Apr 4 02:43:12 2016 -0400
+
+    Moved Ogg Vorbis files to the "External" directory, plugged into CMake project.
+
+commit 6436618937011c3afa15940d74e4c5f35de28467
+Merge: a7e4f82 6fb03b2
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Apr 4 02:41:23 2016 -0400
+
+    Merge github.com:Croteam-Official/Serious-Engine
+    
+    Conflicts:
+            Sources/Engine/Sound/SoundDecoder.cpp
+
+commit a7e4f8237e73d4dd58e1d8097f951ba9505e7422
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Apr 4 02:34:07 2016 -0400
+
+    Patched to compile on Linux, and cleaned out almost all compiler warnings.
+
+commit 6fb03b21be1481be1c3ae1fd8474bb4bf700ed57
+Author: SLAwww <slawww@mail.ru>
+Date:   Mon Apr 4 04:12:19 2016 +0300
+
+    OGG playback no longer unsupported
+
+commit 1e6eafd77760d3219cb014b0deaf2587431170cf
+Merge: 5b4c0ab 7068146
+Author: SLAwww <slawww@mail.ru>
+Date:   Mon Apr 4 00:43:41 2016 +0300
+
+    Merge pull request #33 from rcgordon/ecc-empty-files-simplify
+    
+    Simplify dealing with empty files in ECC
+
+commit 5b4c0abacf0312a334d5ded41a3ae53e9c877e07
+Merge: e07e08d f697fcc
+Author: SLAwww <slawww@croteam.com>
+Date:   Mon Apr 4 00:42:21 2016 +0300
+
+    Merge branch 'zcaliptium-vorbis-replace'
+
+commit f697fcc2f577e2eabf6a5e33e15415d0f9a5c549
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sun Apr 3 23:45:57 2016 +0300
+
+    Engine: Return dynamic vorbisfile library loading.
+
+commit 6e35f6bd113d978a25d916878eb79537ce353831
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sun Apr 3 18:59:48 2016 +0300
+
+    Initial commit
+
+commit 706814653dfb4a781c7cf70cbe6b2251d189c20a
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sun Apr 3 02:07:52 2016 -0400
+
+    Simplify dealing with empty files.
+    
+    Why write a parser when you already have a perfectly good one already?  :)
+
+commit f9bfaf7435b8aa0438073afb9389f137bee25894
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sun Apr 3 00:07:19 2016 -0400
+
+    Initial add of build-linux.sh
+
+commit 986140db644b5bb8e87cb9b83402bc4b781220db
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sun Apr 3 00:00:04 2016 -0400
+
+    Build on Mac OS X with reported number of CPU cores.
+
+commit 1a2ccb8f50a64145c5bd77f352822e7a03021631
+Merge: 33a3bda e07e08d
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sat Apr 2 23:56:12 2016 -0400
+
+    Merge github.com:Croteam-Official/Serious-Engine
+    
+    Conflicts:
+            Sources/Ecc/Parser.cpp
+            Sources/Ecc/Scanner.cpp
+            Sources/Engine/Base/Scanner.cpp
+            Sources/Engine/GameAgent/GameAgent.cpp
+            Sources/Engine/Graphics/Gfx_wrapper.h
+            Sources/Engine/Network/Network.cpp
+            Sources/Engine/Sound/SoundDecoder.h
+            Sources/Engine/Templates/HashTableTemplate.cpp
+            Sources/Engine/Terrain/Terrain.h
+            Sources/EntitiesMP/ParticleCloudsHolder.es
+            Sources/EntitiesMP/ParticleCloudsMarker.es
+            Sources/SeriousSam/CDCheck.h
+            Sources/SeriousSam/Menu.cpp
+            Sources/SeriousSam/MenuGadgets.cpp
+            Sources/SeriousSam/SeriousSam.cpp
+            Sources/SeriousSam/SplashScreen.cpp
+            Sources/SeriousSam/StdH.cpp
+            Sources/SeriousSam/StdH.h
+            Sources/Shaders/StdH.cpp
+
+commit 33a3bda3e3a2ab1d2b2b41a544ba8ad7731428b8
+Author: Tan Wang Leng <tanwangleng@outlook.com>
+Date:   Sun Apr 3 10:55:53 2016 +0800
+
+    Fix missing endif()
+
+commit cdcf6afc34245c0dfbacd01916ca4066c3618b6c
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Sat Apr 2 22:33:11 2016 -0400
+
+    Sources/CMakeLists.txt: Added missing find_packge(SDL REQUIRED) to link in the SDL1.2 libraries via ${SDL_LIBRARY} generate variable
+    
+    and added to the target_link_libraries for SeriousSam and SeriousSamDedicated. I don't know not linking the SDL library was
+    
+            the intended outcome but SeriousSam* was failing to link to libSeriousEngine.a.
+
+commit a96fe8de8bc134edd977579e508f527d77fcfeea
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sat Apr 2 21:55:48 2016 -0400
+
+    Patched to compile on Linux.
+    
+    (The EntitiesMP and/or GameMP libraries need symbols exported from the main
+    binary, but when we built the engine as a static library to reuse it between
+    the client and server, the Linux linker stripped out symbols those libraries
+    needed. If we can force these symbols to remain, or maybe move to shared
+    library..? then we can avoid building the engine sources twice to get the
+    dedicated server too. For now, though...good enough!)
+
+commit 74a7321a7ff462739193fad3004693540315af0d
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sat Apr 2 21:54:38 2016 -0400
+
+    Don't do the Mac policy for now, it upsets pre-3.0 CMake.
+    
+    I don't want to bump requirements to CMake 3 yet.
+
+commit 9c5fa5f0fc091f1ec4d3c2f25e2fdf52dc1511cb
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Sat Apr 2 02:03:41 2016 -0400
+
+    Fixed some things GCC complained about on this Linux box.
+
+commit 2be26952c7ecbbba3fce857dcd1a127187686620
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Sat Apr 2 01:12:25 2016 -0400
+
+    Case Issue with #include statement.
+    
+    * Gfx_wrapper.cpp: two #include statemenst with incorrect case.
+    
+    * Fixed an empty line issue
+
+commit 4ce00bca08566bf33f56bd8bb2797eb401c1815c
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Sat Apr 2 01:11:53 2016 -0400
+
+    Statistics_internal.h: Incorrect case as its Statistics_Internal.h on disk.
+
+commit 7778fdcaae51896c94f55e167fa217fdac9246dc
+Author: Salamanderrake <salamanderrake@gmail.com>
+Date:   Fri Apr 1 23:38:29 2016 -0400
+
+    Add missing ; to Sources/Ecc/Parser.y
+
+commit 49b5163cc9764f32bd9ab2a2135247f83dfdcbfb
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Fri Apr 1 15:17:48 2016 -0400
+
+    Regenerated parsers and scanners.
+
+commit d02a7a41c4d39cf592b7a557e6d7d5f6467d46e3
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Fri Apr 1 15:16:34 2016 -0400
+
+    Added CMake and a simple Mac build script, and nuked the awful old Makefile.
+
+commit 0d426d59988884aed7e7013a29a79ff3cb25abd0
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Fri Apr 1 14:04:24 2016 -0400
+
+    Fixed up some StdH includes.
+
+commit 3e59daa5e6f910c15e284a0101e5b06ad77f308c
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Fri Apr 1 12:19:18 2016 -0400
+
+    Fixed function signature for yyerror to take a const char *.
+
+commit e07e08d1e5e85655733bfab98204c08942216e21
+Merge: d8424a3 f9f4ec9
+Author: SLAwww <slawww@croteam.com>
+Date:   Fri Apr 1 14:45:54 2016 +0300
+
+    Merge branch 'zcaliptium-working-resolve'
+
+commit 5aea1f7c4dbd3182d10392c6f348db589b26fda7
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Fri Apr 1 01:48:29 2016 -0400
+
+    Untangle the symbols in the engine's parser and the Ska parser.
+
+commit b29b27a86888440da50b20f200ca6f8ee131810f
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Fri Apr 1 01:48:52 2016 -0400
+
+    Turn this back off.
+
+commit 0f6b9ca1c17d09e1c189cffccb9542f9f514544a
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 21:54:25 2016 -0400
+
+    We actually get NULL here, so these stay for now, Clang warnings be damned.
+
+commit 88c41117f5b37c0f927d1cee464d8b59c4f5cd30
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 21:53:54 2016 -0400
+
+    Fill in some stuff that is needed to compile.
+    
+    I had better versions of this stuff, which I still need to re-merge.
+
+commit f9f4ec904c9f6a3604d8e286a643bd6f7cfb06d5
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Fri Apr 1 01:12:10 2016 +0300
+
+    Fix the License.
+
+commit 9bb4fa43cd58937edc1ecd24e614d4325d05e820
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Fri Apr 1 01:04:08 2016 +0300
+
+    Update SeriousSam/StdH.h
+
+commit ecac2063fff3ba5720cef0d3dfeb4cd4b2e0adf4
+Merge: 664b20b 4cb76b5
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Fri Apr 1 01:00:14 2016 +0300
+
+    Resolve conflicts
+
+commit 664b20bad2887d24978b8b3f55e976be1c60bd71
+Merge: d8424a3 c5f5d72
+Author: SLAwww <slawww@mail.ru>
+Date:   Thu Mar 31 23:47:26 2016 +0300
+
+    Merge pull request #30 from RocketersAlex/fixstuff
+    
+    Update MSLegacy.h Network.cpp GameAgent.cpp
+
+commit 4cb76b506f892d206f4ff3566f2c3dc1e209aebf
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Thu Mar 31 23:27:11 2016 +0300
+
+    GameExecutable: Replace 4-spaced tabs with 2-spaced.
+
+commit f1e8add4ca67d7f43d44b1426018ab082cfc013f
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 16:01:23 2016 -0400
+
+    "-mdynamic-no-pic" was largely a Mac OS X/powerpc optimization. Remove it.
+
+commit 80471f50414fbbbb9a6eca4905f2c0bcdf1dbda3
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Thu Mar 31 22:57:40 2016 +0300
+
+    GameExecutable: Fix } else { formatting.
+    
+    Make code more readable.
+
+commit 887bc474e07257f0f9c608d3199238e39fa08029
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 14:13:28 2016 -0400
+
+    Deal with other things that are optimizing out instead of linking properly.
+
+commit 7c9d29ad1ac889b12444e76ca5f30de7af7917f2
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 14:30:36 2016 -0400
+
+    Naturally, there are two files with inline asm with an "mmShift" symbol.  :)
+
+commit 6434adfc1babd3ad862fecf64f269364ddbd84a3
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Thu Mar 31 22:43:28 2016 +0300
+
+    GameExecutable: Fix spaces for headers.
+
+commit 7972586d1dae4dcb7061c1edb28d9b4958227cc8
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Thu Mar 31 21:58:50 2016 +0300
+
+    GameExecutable: Cleanup. Make some extern functions and variables static.
+
+commit 3aa14342b31d03b84987bdeea160e93d16a6d031
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Thu Mar 31 20:58:27 2016 +0300
+
+    GameExecutable: Get rid of CMENU preprocessor.
+    
+    Use preprocessor for making the code shorter was bad idea. It makes
+    weird code parser, shows a lot of false errors and breaks code
+    highlighting(blinking).
+
+commit e9267112a1ff13c338d2215e158f1bd404b179da
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Thu Mar 31 20:12:26 2016 +0300
+
+    GameExecutable: Get rid of the TECHTESTONLY and _SE_DEMO code.
+
+commit ee754e7edf0b9955bfa73e9e53171c453348f794
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 13:04:57 2016 -0400
+
+    Made static variables that inline asm needs to touch non-static.
+    
+    I dislike having to do this, but Clang sees them as unused and removes them
+    from the object file, causing linking to fail.
+    
+    The real solution here is to remove all the assembly code because it's 2016
+    and this game doesn't have to run on 133MHz Pentium now.  :)
+
+commit ed527eb29e920bab32be722c8deef7d5cd4c22d0
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 12:40:11 2016 -0400
+
+    A little tapdancing to fix a missing symbol at link time.
+
+commit 2668cdc44f58ab79f0c502899617b057d5f7a919
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 12:26:43 2016 -0400
+
+    Fix up some mismerges and get the OpenGL code to compile again.
+
+commit c2be37282231a7b6878e373ab7c0f308927fa1cb
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 12:25:53 2016 -0400
+
+    Some work to get Stream.cpp compiling.
+
+commit fbfef87ce05a01e842a9cd6d97ef0b8163eb8c5e
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 12:25:40 2016 -0400
+
+    Fixed a mismerge.
+
+commit 75b824ddf811b5bcfaa3701e6621d3069d3f4715
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Thu Mar 31 12:22:55 2016 -0400
+
+    Removed the exception handling code from CTStream.
+    
+    I think this is a leftover from the mmap()-like code that used to be
+    in the engine, but now it's a lot of complexity to basically test this:
+    
+    - Was this a memory access violation?
+    - If no, crash.
+    - If yes:
+      - Was it part of a CTStream?
+      - If no, crash.
+      - If yes, crash.
+    
+    Instead, let's just crash.   :)
+    
+    (If I'm misunderstanding this, just roll back from revision control.)
+
+commit ca5873a2afdddf1df415869e81fd85e278903796
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Thu Mar 31 19:21:46 2016 +0300
+
+    GameExecutable: Some cleanup and reorder.
+    
+    Clean clean clean!
+
+commit c5f5d72e3f62924ddd8acf3c8cb1c5d58c2c644b
+Author: RocketersAlex <rocketers@yandex.ru>
+Date:   Thu Mar 31 05:43:38 2016 +0300
+
+    Update MSLegacy.h Network.cpp GameAgent.cpp
+
+commit cb907fbb87e260961e87644261e9c9a804379a86
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Thu Mar 31 03:38:57 2016 +0300
+
+    GameExecutable: Add License into sources.
+
+commit d8424a30420c474824204277215ef49896c54268
+Merge: 9373dd2 0d8f7da
+Author: SLAwww <slawww@croteam.com>
+Date:   Thu Mar 31 01:54:24 2016 +0300
+
+    Merge branch 'RocketersAlex-fixstuff'
+
+commit 1f0da8a4436b81059bdb8dbcd67cfdaad5085c31
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Wed Mar 30 23:09:51 2016 +0300
+
+    GameExecutable: Some cleanup for menu code.
+
+commit de240b4ad7e88b9f19aa8f35eeb3cd6c928873e3
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Wed Mar 30 22:25:24 2016 +0300
+
+    GameExecutable: Continue refactoring. Rename some files.
+
+commit ef788b52990fb5086a4f566f1dde37f4783efdcc
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Wed Mar 30 21:21:32 2016 +0300
+
+    GameExecutable: Put menus' extern variables into container.
+
+commit 105bc12d64f04f721c6c0cc6dca24fa69b511048
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 13:41:30 2016 -0400
+
+    Bunch more work on getting this to compile. Down to Stream and Gfx_OpenGL now.
+
+commit 36c6eb19c0b56070cb4a06a497180ecbccda3d1f
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Wed Mar 30 19:23:12 2016 +0300
+
+    Continue splitting Menu.cpp into multiple files.
+
+commit 7d118bd24931b9a7cfa5426ca56a1c5f6c5fbdf9
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 11:00:29 2016 -0400
+
+    First attempt at porting GameAgent code.
+
+commit 8ea00b12d20c3130dc91a8e5d389f511bdc8e5dd
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 11:00:01 2016 -0400
+
+    More work on getting this to compile.
+
+commit 4f061d916c129e405c6a8f48307d1583b5d23852
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 10:59:17 2016 -0400
+
+    Adding regenerated parsers so they'll stop spamming my diffs.
+
+commit 888b35dbca1c80d41332eaee110242f513d5a184
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 10:56:56 2016 -0400
+
+    Mismerge fix.
+
+commit 0d8f7da3186d9f0c90657980d50792ec99c231fe
+Author: RocketersAlex <rocketers@yandex.ru>
+Date:   Wed Mar 30 16:54:30 2016 +0300
+
+    Fixed SeriousSam and GameAgent bugs
+
+commit 146da64d86afbbd7c693b9d5ca329951b63774f9
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 04:00:23 2016 -0400
+
+    Fixed filename case on an include statement.
+
+commit 98972f6a43fb1e8987bd2f7102519247aab0c98e
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 03:58:31 2016 -0400
+
+    Build everything with -fPIC until we dump this Makefile for CMake.
+
+commit 2e7af8cf007c3d7f1a0e2b781060f7616cfc467f
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 02:01:02 2016 -0400
+
+    More mismerge corrections and other fixes to get this closer to compiling.
+
+commit 28a8b5cb2e0c4e18ac4d3c7d6283c1c676c55f0f
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 01:51:52 2016 -0400
+
+    Various patches to get this closer to compiling again.
+
+commit 6ac856824f8bd627440496c4aca36d3d5c4f3b7b
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 01:36:03 2016 -0400
+
+    Fixed mismerge.
+
+commit aa8d0216dbba33887468fcb7c95041e76ba0d828
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 01:31:46 2016 -0400
+
+    fixed a variable initialized and also marked 'extern'.
+
+commit 9bdb8becb1ca1a0096bb836c2054f92093d28c44
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 01:31:24 2016 -0400
+
+    Whoops, that '==' should be '='.
+
+commit 735b1cb66b1a3a07b4eeed730a711c8285361ec5
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 01:29:43 2016 -0400
+
+    Fixed mismerge.
+
+commit 892fbea6cd0f438dcbadb3aa2962ef3ee2769bb7
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 01:28:12 2016 -0400
+
+    Turned off some compiler warnings for now.
+    
+    Just need to see through the mess until this compiles again.
+
+commit 43e4866df487add3e6d39d09074adf32e50420ec
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 01:27:59 2016 -0400
+
+    Fixed a mismerge.
+
+commit 18b339a2b6729cb7a4b124b46f517c1a51c390c8
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Mar 30 01:25:58 2016 -0400
+
+    Uncommented to include Terrain.h. Let's see what happens.
+
+commit 31d597856dcc1e0437976f45208c5e92b2e1a224
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Tue Mar 29 23:49:32 2016 +0300
+
+    Add and remove excess empty lines between functions,
+    
+    Make code better.
+
+commit 2f10f864d877e1410959fbb8af89c2097482c77c
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Mar 28 23:21:44 2016 -0400
+
+    Silence a whole bunch of warnings about string literals vs non-const char *.
+
+commit a4000c69a83f50a7847e43a5acca58ddf9a963da
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Mar 28 23:49:36 2016 -0400
+
+    Clean out a bunch of compiler warnings.
+
+commit bafa5fca0534257caaa69f4af437403e0ef31a71
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Mar 28 22:20:20 2016 -0400
+
+    Blank .es files confuse ECC, so remove them.
+
+commit e564f155e57ad4b7550a6ee665d06f00d8d11603
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Mar 28 23:48:52 2016 -0400
+
+    Updated Makefile to (maybe) build this on a modern Mac.
+
+commit 24cb244d4399845aa22cb4d8bf1e25760ae66a11
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Mon Mar 28 21:03:54 2016 -0400
+
+    First attempt to hand-merge Ryan's Linux and Mac OS X port.
+    
+    This was a _ton_ of changes, made 15 years ago, so there are probably some
+    problems to work out still.
+    
+    Among others: Engine/Base/Stream.* was mostly abandoned and will need to be
+    re-ported.
+    
+    Still, this is a pretty good start, and probably holds a world record for
+    lines of changes or something.  :)
+
+commit 282ae65d9fac37f2df5ab0ac17b6c2d4ade90c2b
+Author: SLAwww <slawww@mail.ru>
+Date:   Fri Mar 25 17:28:31 2016 +0200
+
+    Update .gitignore
+
+commit 9373dd28a13728c905d859c1d00ae97e82812e31
+Merge: 503fc3a 987e9a6
+Author: SLAwww <slawww@croteam.com>
+Date:   Fri Mar 25 16:18:13 2016 +0200
+
+    Merge branch 'zcaliptium-FixReallyStupidTypos'
+
+commit 987e9a665542062f2ca71921576ce919903aeae5
+Merge: 503fc3a 1c5556d
+Author: SLAwww <slawww@croteam.com>
+Date:   Fri Mar 25 16:14:16 2016 +0200
+
+    Merge branch 'FixReallyStupidTypos' of https://github.com/zcaliptium/Serious-Engine into zcaliptium-FixReallyStupidTypos
+
+commit 503fc3a7ef98f8df687de4aab04712c86b8d4cd5
+Author: SLAwww <slawww@croteam.com>
+Date:   Fri Mar 25 16:09:30 2016 +0200
+
+    Updated gitignore
+
+commit 1c5556dbd90a2989492e3d76c5d616b5e55dd144
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Wed Mar 23 20:42:20 2016 +0300
+
+    Fixes II
+
+commit ef0b97049051959e816e593f978243c69e61a1b2
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Tue Mar 22 21:03:12 2016 +0300
+
+    Fixes
+
+commit c0a1b7bdf78460c775cf8b81da6bb989229f5c42
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Fri Mar 18 12:56:52 2016 +0300
+
+    .gitignore
+
+commit 2b742dbdbe4e70c4bc6147b6798af12c7bdfbcd0
+Author: SLAwww <slawww@mail.ru>
+Date:   Fri Mar 18 03:20:10 2016 +0200
+
+    Update README.md
+
+commit 3ef31a97aab2d088441af693c9f3dca63cb97bb3
+Author: SLAwww <slawww@croteam.com>
+Date:   Fri Mar 18 03:15:05 2016 +0200
+
+    ECC now works properly with long paths
+
+commit 344c836cd9bdafe917ec6176f8263f31fe99a3e7
+Author: Aron Visontai <aron88@hotmail.com>
+Date:   Wed Mar 16 21:56:08 2016 -0700
+
+    Fix compilation when build path is long
+    
+    Also remove generated file Parser.cpp
+
+commit 83bb896e893cf599be7bba30c67cc0ca8c36586f
+Author: SLAwww <slawww@mail.ru>
+Date:   Thu Mar 17 02:37:43 2016 +0200
+
+    Update README.md
+
+commit d29d0c64abc763c41b3261fbcd8a6e080af4d8df
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Wed Mar 16 21:56:44 2016 +0300
+
+    GameExecutable: Some improvements part II
+
+commit 66cc1d014f12f097499195d0f1f8c3727caa7c7c
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Wed Mar 16 21:43:05 2016 +0300
+
+    GameExecutable: Some improvements. Idk how to name it.
+    
+    Add some empty lines. Move some files. Replace long repeating variable
+    names with shorter preprocessors.
+
+commit d9cd480103ca3ee6e1488d7f44f93bc68adc9723
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Wed Mar 16 01:21:35 2016 +0300
+
+    GameExecutable: Move some stuff from Menu.cpp into files PART VII
+    
+    3700 lines! Yay!
+
+commit 7745f8ced1cf8be77c4c5b3328ebe7d75288c277
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Wed Mar 16 00:24:35 2016 +0300
+
+    GameExecutable: Move some stuff from Menu.cpp into files PART VI
+    
+    4183 lines... Continue working...
+
+commit 2fcc548f29cd2619cf6fdd3eaa3ca2edf1c215c7
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Tue Mar 15 01:03:22 2016 +0300
+
+    GameExecutable: Move some stuff from Menu.cpp into files PART V
+    
+    Now it's 4463 lines!
+
+commit 16990d713c7b63d10713d1c2d10e3a63cc4fe15a
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Mon Mar 14 23:45:56 2016 +0300
+
+    GameExecutable: Move some stuff from Menu.cpp into files PART IV
+    
+    Now it's 4901 lines! Progress!
+
+commit 899d297f7b7b91bd2d36538231e32979054277e3
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Mon Mar 14 03:59:44 2016 +0300
+
+    GameExecutable: Move some stuff from Menu.cpp into files PART THREE
+    
+    Menu.cpp is so large(>6000 lines). I'll separate it!
+
+commit dceb5522653c18dd71c7f8607de6425e9ff4f3df
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Mon Mar 14 02:57:22 2016 +0300
+
+    Update .gitignore AGAAAAAAIN!
+
+commit 764cc874c9a142ba04dce379aa0592b8387245d0
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Mon Mar 14 02:55:58 2016 +0300
+
+    Remove generated files
+
+commit 220875d2de1069777a04ecace23359ed78c6032b
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Mon Mar 14 02:46:30 2016 +0300
+
+    GameExecutable: Move some stuff from Menu.cpp into files PART TWO
+    
+    Menu.cpp is so large(>6000 lines). I'll separate it!
+
+commit 189c3433683f4f1bab851c88ff3da54d853f2903
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Mon Mar 14 00:52:32 2016 +0300
+
+    GameExecutable: Move some stuff from Menu.cpp into files
+    
+    Menu.cpp is so large(>6000 lines). I'll separate it!
+
+commit 44b3236906bf7a1609735acef44bdb1212d4fec9
+Merge: 36177ed c0d3720
+Author: SLAwww <slawww@mail.ru>
+Date:   Sun Mar 13 18:59:23 2016 +0200
+
+    Merge pull request #19 from megaserg/patch-1
+    
+    Make Github recognize *.es files as C++
+
+commit 36177ed84666aa82d1898cbd625104765715de5e
+Merge: 6e9fbef 618c63f
+Author: SLAwww <slawww@mail.ru>
+Date:   Sun Mar 13 18:58:41 2016 +0200
+
+    Merge pull request #18 from yamgent/master
+    
+    Delete text editor temp file
+
+commit 6e9fbef44a33c8df63ee2aa203c0a00ac6d4ad9f
+Author: SLAwww <slawww@croteam.com>
+Date:   Sun Mar 13 18:56:18 2016 +0200
+
+    Fixed error in Bison code
+
+commit c0d372051b982c3011ddf5ba824ac3aac8d0b933
+Author: Sergey Serebryakov <hellomind@gmail.com>
+Date:   Sun Mar 13 04:41:47 2016 -0700
+
+    Make Github recognize *.es files as C++
+    
+    Adding an override as described on https://github.com/github/linguist
+
+commit 618c63f50a6f781d6c8c30cd048f7e5afa88e6cd
+Author: Tan Wang Leng <tanwangleng@outlook.com>
+Date:   Sun Mar 13 16:31:45 2016 +0800
+
+    Delete text editor temp file
+    
+    A fellow contributor accidentally push an editor temp file. Diff utility shows no difference between this and the original DlgNumericAlpha.h file.
+
+commit b2745c617f97f56398e78f749794987009428cfb
+Author: SLAwww <slawww@croteam.com>
+Date:   Sun Mar 13 02:05:30 2016 +0200
+
+    Removed more generated files
+
+commit db1ad823cec3cf4d8379da9c10bb5c5aa041c872
+Author: SLAwww <slawww@croteam.com>
+Date:   Sun Mar 13 01:57:46 2016 +0200
+
+    Added another Visual Studio file to gitignore
+
+commit 11db0d533a74ea484a87cd802a955fd3cd7c6aa9
+Author: SLAwww <slawww@croteam.com>
+Date:   Sun Mar 13 01:55:29 2016 +0200
+
+    Added more generated files to gitignore
+
+commit fe24f3a2a46e741682b3a66df966a7b783872b81
+Author: SLAwww <slawww@croteam.com>
+Date:   Sun Mar 13 01:52:16 2016 +0200
+
+    Updated .gitignore and removed automatically generated files
+
+commit 0a3be0bca5ab27a9b558a2fe0ba38d58b678727a
+Merge: b8527ac 1a50ba6
+Author: SLAwww <slawww@mail.ru>
+Date:   Sun Mar 13 01:00:29 2016 +0200
+
+    Merge pull request #16 from Ragora/EccFixBase
+    
+    Remove close/reopen logic for file handle and fix Ecc crash on empty
+
+commit 1a50ba665a21676ec06b21bb6ba744b32ac2c4bf
+Author: Robert MacGregor <ragoradev@gmail.com>
+Date:   Sat Mar 12 17:36:50 2016 -0500
+
+    Check for NULL return from malloc in es vertification code and print error if es verification fails
+
+commit 9766df5f5b3c68e15769d624cfb8328eca9c303d
+Author: Robert MacGregor <ragoradev@gmail.com>
+Date:   Sat Mar 12 17:31:51 2016 -0500
+
+    Forgot to close dangling file handles
+
+commit d69cb55c21394a66cae01013ed48cae98427d786
+Author: Robert MacGregor <ragoradev@gmail.com>
+Date:   Sat Mar 12 17:27:34 2016 -0500
+
+    Add explicit 0-length check out of paranoia
+
+commit 609d71437f31408be46dfe96c9bc354f77afa3f5
+Author: Robert MacGregor <ragoradev@gmail.com>
+Date:   Sat Mar 12 17:20:41 2016 -0500
+
+    Remove close/reopen logic for file handle and fix Ecc crash on empty
+
+commit b8527ace7bb262de725bca087f2c4bc2b4f9b2cf
+Merge: c9fe415 9f50d3e
+Author: SLAwww <slawww@mail.ru>
+Date:   Sun Mar 13 00:06:45 2016 +0200
+
+    Merge pull request #12 from Ragora/EccFixBase
+    
+    Fix for Ecc failing on empty files
+
+commit 9f50d3ef84bb34ae70864927f73ef0b3fb0083c6
+Author: Robert MacGregor <ragoradev@gmail.com>
+Date:   Sat Mar 12 16:45:43 2016 -0500
+
+    Performance fix Ecc
+
+commit cfefaf581a64974b501b1a364fba57ebd74a311e
+Author: Robert MacGregor <ragoradev@gmail.com>
+Date:   Sat Mar 12 15:41:56 2016 -0500
+
+    Fix for Ecc failing on empty files
+
+commit 7273b4bbb9ccfad862ccc0b6ff51518b6d8c2cc9
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sat Mar 12 22:46:30 2016 +0300
+
+    Updaaaaaaaaaate .gitignore! Argh!
+    
+    The description was stolen!
+
+commit 216246cf15eec4fc2b62cd131513f1aeef514487
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sat Mar 12 18:25:48 2016 +0300
+
+    GameExecutable: Separate Menu.h into multiple files.
+    
+    Too many classes definitions in one file. Preparing for separation
+    Menu.cpp
+
+commit 3b5fdcd03d5ae6cb859e19a3f166f1d0dafe8bb4
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sat Mar 12 12:45:47 2016 +0300
+
+    Fix mistake in the Console Window
+    
+    No description
+
+commit c9fe415f2cddba5ef01c90e0943189b96b0d19b6
+Merge: 51d6b9b a4af93f
+Author: SLAwww <slawww@mail.ru>
+Date:   Sat Mar 12 04:03:00 2016 +0200
+
+    Merge pull request #2 from mattl/master
+    
+    Add GPL header to files
+
+commit 51d6b9b61b76525ec840f6c6f03a5cdc1c4b6585
+Merge: 27c0669 0eed454
+Author: SLAwww <slawww@mail.ru>
+Date:   Sat Mar 12 03:58:14 2016 +0200
+
+    Merge pull request #3 from aboyett/typo-fix
+    
+    README.md: fix "Serious Sam" spelling
+
+commit 0eed45413f47529889b62ef291d80c20555d647a
+Author: Andy Boyett <andy.boyett@gmail.com>
+Date:   Fri Mar 11 17:18:30 2016 -0800
+
+    README.md: fix "Serious Sam" spelling
+    
+    Minor typo fix in the name of an awesome game.
+
+commit a4af93fa317471e02c0f62526c8aa7453cfbd2a8
+Author: Matt Lee <mattl@cnuk.org>
+Date:   Fri Mar 11 18:20:51 2016 -0600
+
+    Add GPL header to files
+
+commit d1636a7990aeef035d86d3319dae827baadfe6ce
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sat Mar 12 02:28:31 2016 +0300
+
+    Update .gitignore again!!! AGAIN!
+    
+    I really hate VS because it makes too many useless generated stuff!
+
+commit 742d11a81328197f62bb90dd21c74d26c9fff224
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sat Mar 12 02:26:30 2016 +0300
+
+    WorldEditor: FIX Remove wrong and useless conversion
+    
+    Because this is issue!
+
+commit f33bb4519fd13c073390099803463c358666629d
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sat Mar 12 00:53:58 2016 +0300
+
+    Fix. I forgot to remove piece of my code.
+
+commit a84fb768833fe90eee6fb91249657b4e3bcadd9f
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sat Mar 12 00:45:21 2016 +0300
+
+    Game executable: Separate MenuGadgets(.h/.cpp)
+    
+    MenuGadets(.h/.cpp) separated into multiple files for each gadget!
+
+commit 47abf495f528ae1d3c1512550bc7d327310433a2
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sat Mar 12 00:19:50 2016 +0300
+
+    Update .gitignore again...
+    
+    Too many stuff generated by VS!
+
+commit 45eb940e035dfbf7ca165fe842401697ebc24a0d
+Author: zcaliptium <zcaliptium@gmail.com>
+Date:   Sat Mar 12 00:10:54 2016 +0300
+
+    Update .gitignore
+    
+    Because it's trying to update generated files by VS.
+
+commit 27c0669d8bf3977658e7bd87639274e1e1e664c7
+Author: SLAwww <slawww@mail.ru>
+Date:   Fri Mar 11 22:20:05 2016 +0200
+
+    Update README.md
+
+commit a7af6eb20bf38439cc15baf3d4112d9eda0612f6
+Author: SLAwww <slawww@croteam.com>
+Date:   Fri Mar 11 16:46:56 2016 +0200
+
+    Removing generated files
+
+commit 89c9fc2bf9baf7ff44e959524f5d439172e63685
+Author: SLAwww <slawww@mail.ru>
+Date:   Fri Mar 11 16:12:57 2016 +0200
+
+    Update GameAgent.txt
+
+commit 8068ab1fa2cda19956aabaed820d274c426e83a2
+Author: SLAwww <slawww@croteam.com>
+Date:   Fri Mar 11 16:08:56 2016 +0200
+
+    Uploading missing files and folders
+
+commit 111de045d0b6ddda074178414fc396aa7f80d6ae
+Author: SLAwww <slawww@mail.ru>
+Date:   Fri Mar 11 16:06:45 2016 +0200
+
+    Delete Empty
+
+commit ca3048de3be20c96729550a2950244732d3c377e
+Author: SLAwww <slawww@mail.ru>
+Date:   Fri Mar 11 16:06:22 2016 +0200
+
+    Create Empty
+
+commit b588995f2538ddb3eff341ce8e93297e6355212f
+Author: SLAwww <slawww@mail.ru>
+Date:   Fri Mar 11 16:06:05 2016 +0200
+
+    Delete Empty
+
+commit 27ca26fb3d7cbb4748135d0d991048d05910ec03
+Author: SLAwww <slawww@mail.ru>
+Date:   Fri Mar 11 16:05:49 2016 +0200
+
+    Create Empty
+
+commit 9d8b787be2c2e134becbd5f16c1a747a49160dc6
+Author: SLAwww <slawww@croteam.com>
+Date:   Fri Mar 11 15:57:17 2016 +0200
+
+    Uploading full engine sources
+
+commit 4b8c6df082813783f45ba92c1486cf8ade927464
+Author: SLAwww <slawww@mail.ru>
+Date:   Fri Mar 11 15:29:05 2016 +0200
+
+    Update README.md
+
+commit d6f53ccadbf314f46c4140ef4a27508c27aa16bb
+Author: SLAwww <slawww@mail.ru>
+Date:   Fri Mar 11 15:28:41 2016 +0200
+
+    Initial commit

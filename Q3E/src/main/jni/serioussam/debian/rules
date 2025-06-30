@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/architecture.mk
+include /usr/share/dpkg/pkg-info.mk
+
+# output every command that modifies files on the build system.
+#DH_VERBOSE = 1
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+CMAKE_ADDTIONAL_FLAGS ?=
+ifneq ($(DEB_HOST_ARCH_CPU),amd64)
+CMAKE_ADDITIONAL_FLAGS ?= -DUSE_INTRINSICS_SSE=OFF
+endif
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- -G "Unix Makefiles" \
+	 -DCMAKE_BUILD_TYPE=Release -DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH) \
+	 $(CMAKE_ADDITIONAL_FLAGS)
+
+override_dh_installchangelogs:
+	# We won't have a ChangeLog if packaging from a released tarball.
+	# In this case, use the CHANGELOG.md
+	dh_installchangelogs
+	if [ ! -e ChangeLog ]; then \
+	dh_installchangelogs -k CHANGELOG.md ; \
+	fi

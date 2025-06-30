@@ -20,27 +20,30 @@ public class UiLoader
     int height;
     int width;
     //String filename;
+    boolean portrait = false;
 
     public static String[] defaults_table;
 
-    public UiLoader(View cnt, GL10 gl10, int w, int h)//, String fname)
+    public UiLoader(View cnt, GL10 gl10, int w, int h, boolean portrait)//, String fname)
     {
         ctx = cnt;
         gl = gl10;
         width = w;
         height = h;
+        this.portrait = portrait;
         //filename=fname;
-        defaults_table = Q3EUtils.q3ei.defaults_table;
+        defaults_table = portrait ? Q3EUtils.q3ei.portrait_defaults_table : Q3EUtils.q3ei.defaults_table;
 
         //Set defaults table
     }
 
     public Object LoadElement(int id, boolean editMode)
     {
+        String prefix = portrait ? Q3EPreference.pref_controlportraitprefix : Q3EPreference.pref_controlprefix;
         SharedPreferences shp = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
-        String tmp = shp.getString(Q3EPreference.pref_controlprefix + id, null);
+        String tmp = shp.getString(prefix + id, null);
         if (tmp == null) tmp = defaults_table[id];
-        UiElement el = new UiElement(tmp);
+        UiElement el = new UiElement(tmp, width, height);
         return LoadUiElement(id, el.cx, el.cy, el.size, el.alpha, editMode);
     }
 
@@ -58,11 +61,17 @@ public class UiLoader
                 return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, editMode, visibleMode, Q3EUtils.q3ei.texture_table[id]);
             }
             case Q3EGlobals.TYPE_SLIDER:
+                int sliderDelay = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);
+                if(sliderDelay < 0)
+                {
+                    if(Q3EUtils.q3ei.isSamTFE || Q3EUtils.q3ei.isSamTSE)
+                        sliderDelay = Q3EGlobals.SERIOUS_SAM_BUTTON_SWIPE_RELEASE_DELAY;
+                }
                 key = Q3EKeyCodes.GetRealKeyCode(Q3EUtils.q3ei.arg_table[id * 4]);
                 key2 = Q3EKeyCodes.GetRealKeyCode(Q3EUtils.q3ei.arg_table[id * 4 + 1]);
                 key3 = Q3EKeyCodes.GetRealKeyCode(Q3EUtils.q3ei.arg_table[id * 4 + 2]);
                 int sh = Slider.HeightForWidth(size, Q3EUtils.q3ei.arg_table[id * 4 + 3]);
-                return new Slider(ctx, gl, cx, cy, size, sh, Q3EUtils.q3ei.texture_table[id], key, key2, key3, Q3EUtils.q3ei.arg_table[id * 4 + 3], (float) alpha / 100);
+                return new Slider(ctx, gl, cx, cy, size, sh, Q3EUtils.q3ei.texture_table[id], key, key2, key3, Q3EUtils.q3ei.arg_table[id * 4 + 3], (float) alpha / 100, sliderDelay);
             case Q3EGlobals.TYPE_DISC:
             {
                 int discKey = Q3EUtils.q3ei.arg_table[id * 4];
@@ -115,7 +124,13 @@ public class UiLoader
                     }
                     name = buf.toString();
                 }
-                return new Disc(ctx, gl, cx, cy, size, (float) alpha / 100, keys, keymaps, Q3EUtils.q3ei.arg_table[id * 4 + 1], Q3EUtils.q3ei.texture_table[id], name);
+                int discDelay = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);
+                if(discDelay < 0)
+                {
+                    if(Q3EUtils.q3ei.isSamTFE || Q3EUtils.q3ei.isSamTSE)
+                        discDelay = Q3EGlobals.SERIOUS_SAM_BUTTON_SWIPE_RELEASE_DELAY;
+                }
+                return new Disc(ctx, gl, cx, cy, size, (float) alpha / 100, keys, keymaps, Q3EUtils.q3ei.arg_table[id * 4 + 1], Q3EUtils.q3ei.texture_table[id], name, discDelay);
             }
         }
         return null;
@@ -123,10 +138,11 @@ public class UiLoader
 
     public boolean CheckVisible(int id)
     {
+        String prefix = portrait ? Q3EPreference.pref_controlportraitprefix : Q3EPreference.pref_controlprefix;
         SharedPreferences shp = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
-        String tmp = shp.getString(Q3EPreference.pref_controlprefix + id, null);
+        String tmp = shp.getString(prefix + id, null);
         if (tmp == null) tmp = defaults_table[id];
-        UiElement el = new UiElement(tmp);
+        UiElement el = new UiElement(tmp, width, height);
         final Rect ScreenRect = new Rect(0, 0, width, height);
         Rect btnRect;
         switch (Q3EUtils.q3ei.type_table[id])

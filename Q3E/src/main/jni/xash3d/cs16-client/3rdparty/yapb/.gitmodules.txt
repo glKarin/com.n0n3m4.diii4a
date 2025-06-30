@@ -1,0 +1,6 @@
+[submodule "ext/crlib"]
+	path = ext/crlib
+	url = https://github.com/yapb/crlib
+[submodule "ext/linkage"]
+	path = ext/linkage
+	url = https://github.com/yapb/linkage

@@ -1,0 +1,62 @@
+Description: Added support for the content of the demo version of the game.
+Forwarded: not-needed
+--- a/SamTFE/Sources/GameMP/Game.cpp	2024-03-05 01:29:26.099179933 +0300
++++ b/SamTFE/Sources/GameMP/Game.cpp	2024-03-05 01:33:46.905364621 +0300
+@@ -69,6 +69,7 @@
+ //  okay. It's just another copy of the same otherwise.
+ #ifdef PLATFORM_UNIX
+ extern CGame *_pGame;
++extern INDEX sys_iGameDemoMode;
+ #else
+ CGame *_pGame = NULL;
+ #endif
+@@ -1359,6 +1359,19 @@
+   // execute the startup script
+   _pShell->Execute(CTString("include \"")+fnmStartupScript+"\";");
+ 
++  // Check Demo version mode
++  #ifdef PLATFORM_UNIX
++  if(sys_iGameDemoMode == 1) {
++    #ifdef FIRST_ENCOUNTER  // First Encounter
++    CTString _strFirstLevel = "Levels\\KarnakDemo.wld";
++    _pShell->SetString("sam_strFirstLevel", _strFirstLevel); // sam_strFirstLevel = "Levels\\KarnakDemo.wld";
++    #else
++    CTString _strFirstLevel = "Levels\\LevelsMP\\Demo\\Palenque_Demo.wld";
++    _pShell->SetString("sam_strFirstLevel", _strFirstLevel); // sam_strFirstLevel = "Demo\\Palenque_Demo.wld";
++    #endif
++  }
++  #endif
++
+   // check the size and pointer of player control variables that are local to each player
+   if (ctl_slPlayerControlsSize <= 0
+     || static_cast<ULONG>(ctl_slPlayerControlsSize) > sizeof(((CLocalPlayer*)NULL)->lp_ubPlayerControlsState)
+--- a/SamTSE/Sources/GameMP/Game.cpp	2024-03-05 01:29:26.099179933 +0300
++++ b/SamTSE/Sources/GameMP/Game.cpp	2024-03-05 01:33:46.905364621 +0300
+@@ -69,6 +69,7 @@
+ //  okay. It's just another copy of the same otherwise.
+ #ifdef PLATFORM_UNIX
+ extern CGame *_pGame;
++extern INDEX sys_iGameDemoMode;
+ #else
+ CGame *_pGame = NULL;
+ #endif
+@@ -1359,6 +1359,19 @@
+   // execute the startup script
+   _pShell->Execute(CTString("include \"")+fnmStartupScript+"\";");
+ 
++  // Check Demo version mode
++  #ifdef PLATFORM_UNIX
++  if(sys_iGameDemoMode == 1) {
++    #ifdef FIRST_ENCOUNTER  // First Encounter
++    CTString _strFirstLevel = "Levels\\KarnakDemo.wld";
++    _pShell->SetString("sam_strFirstLevel", _strFirstLevel); // sam_strFirstLevel = "Levels\\KarnakDemo.wld";
++    #else
++    CTString _strFirstLevel = "Levels\\LevelsMP\\Demo\\Palenque_Demo.wld";
++    _pShell->SetString("sam_strFirstLevel", _strFirstLevel); // sam_strFirstLevel = "Demo\\Palenque_Demo.wld";
++    #endif
++  }
++  #endif
++
+   // check the size and pointer of player control variables that are local to each player
+   if (ctl_slPlayerControlsSize <= 0
+     || static_cast<ULONG>(ctl_slPlayerControlsSize) > sizeof(((CLocalPlayer*)NULL)->lp_ubPlayerControlsState)

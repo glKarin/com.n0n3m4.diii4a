@@ -50,6 +50,8 @@ add_subdirectory (curl) # -8.5.0
 
 add_subdirectory (bzip2) # -1.0.8
 
+# add_subdirectory (glm) # -0.9.9.3
+
 #add_subdirectory (libvpx) # -1.15.0
 
 #add_subdirectory (ktx) # KTX-Software-3.0.1

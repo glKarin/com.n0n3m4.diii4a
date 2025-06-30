@@ -1,0 +1,8 @@
+debian/serioussam.6
+debian/serioussamse.6
+debian/serioussam-ded.6
+debian/serioussamse-ded.6
+debian/serioussam-mkfont.6
+debian/serioussamse-mkfont.6
+debian/serioussam-texconv.6
+debian/serioussamse-texconv.6

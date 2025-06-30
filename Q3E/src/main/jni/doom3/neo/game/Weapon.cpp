@@ -742,6 +742,16 @@ void idWeapon::InitWorldModel(const idDeclEntityDef *def)
 
 	const char *model = def->dict.GetString("model_world");
 	const char *attach = def->dict.GetString("joint_attach");
+#ifdef _DOOM3 //karin: for world weapon attach to custom player model
+    const char *wpName = def->dict.GetString("inv_weapon");
+    if(wpName && wpName[0])
+        owner->spawnArgs.GetString(va("%s_joint_attach", wpName), attach, &attach);
+#if 0
+    static idCVar harm_g_playerWeaponJointAttach("harm_g_playerWeaponJointAttach", "", CVAR_GAME, "Test player world weapon joint attach.");
+    if(harm_g_playerWeaponJointAttach.GetString() && harm_g_playerWeaponJointAttach.GetString()[0])
+        attach = harm_g_playerWeaponJointAttach.GetString();
+#endif
+#endif
 
 	ent->SetSkin(NULL);
 
@@ -759,9 +769,7 @@ void idWeapon::InitWorldModel(const idDeclEntityDef *def)
 		ent->GetPhysics()->SetOrigin(vec3_origin);
 		ent->GetPhysics()->SetAxis(mat3_identity);
 
-#ifdef _DOOM3
-        //karin: for world weapon attach to custom player model
-        const char *wpName = def->dict.GetString("inv_weapon");
+#ifdef _DOOM3 //karin: for world weapon attach to custom player model
         if(wpName && wpName[0])
         {
             idVec3 ori;

@@ -57,5 +57,8 @@ target_link_libraries( # Specifies the target library.
         #${log-lib}
         ${q3e_lib}
         )
+if(Q3E_SDL)
+set_target_properties(q3eloader PROPERTIES COMPILE_DEFINITIONS "_Q3E_SDL")
+endif()
 target_compile_options(q3eloader PRIVATE -O3 -pipe -fPIC)
 target_include_directories(q3eloader PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/../common/bt)

@@ -33,6 +33,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.n0n3m4.q3e.event.Q3EQuitEvent;
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KOnceRunnable;
 
 import java.io.File;
@@ -75,9 +76,11 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         if(!mInit)
         {
+            KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Game view: %d x %d", w, h);
             mInit = Q3EMain.gameHelper.Start(holder.getSurface(), w, h);
 
             getHolder().setFixedSize(w, h);
+            Q3E.activity.SetupGameViewSize(getWidth(), getHeight(), true);
         }
     }
 

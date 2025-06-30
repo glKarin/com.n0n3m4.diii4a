@@ -1,0 +1,19 @@
+===========================================================================
+$NetBSD: MESSAGE,v 1.1 2023/11/27 19:16:39 nia Exp $
+
+Playing Serious Sam: The First and Second Encounter still requires Steam or
+GOG or CD copy of the game.
+This implementation of the source code provides for installation in the 
+system, in the /usr/pkg/bin, /usr/pkg/lib, /usr/pkg/share directories.
+
+Copy all content of the games Serious Sam Classic First Encounter and
+Serious Sam Classic Second Encounter to the appropriate directories:
+
+~/.local/share/Serious-Engine/serioussam/ - for TFE
+~/.local/share/Serious-Engine/serioussamse/ - for TSE
+
+They'll be here user data, such as game settings, log, saves, demos.
+
+For more information, see:
+https://github.com/tx00100xt/SeriousSamClassic/wiki
+===========================================================================

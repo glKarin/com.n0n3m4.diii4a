@@ -1,0 +1,65 @@
+#! /usr/bin/env python
+# encoding: utf-8
+# a1batross, mittorn, 2018
+
+from waflib import Utils
+import os
+
+def options(opt):
+	return
+
+def configure(conf):
+	if conf.env.COMPILER_CC == 'msvc':
+		# hl.def removes MSVC function name decoration from GiveFnptrsToDll on Windows.
+		# Without this, the lookup for this function fails.
+		hlDefNode = conf.path.find_resource("./hl.def")
+
+		if hlDefNode is not None:
+			conf.env.append_value('LINKFLAGS', '/def:%s' % hlDefNode.abspath())
+		else:
+			conf.fatal("Could not find hl.def")
+
+def build(bld):
+	excluded_files = ['mpstubb.cpp', 'stats.cpp', 'Wxdebug.cpp']
+
+	source = bld.path.ant_glob('**/*.cpp', excl=excluded_files)
+	source += bld.path.parent.ant_glob('pm_shared/*.c', 'public/safe_snprintf.c')
+	source += ['../game_shared/vcs_info.cpp']
+
+	defines = bld.env.EXPORT_DEFINES_LIST
+	if 'HAVE_STRLCPY=1' not in defines:
+		source += bld.path.parent.ant_glob('external/openbsd/strlcpy.c')
+
+	if 'HAVE_STRLCAT=1' not in defines:
+		source += bld.path.parent.ant_glob('external/openbsd/strlcat.c')
+
+	if bld.env.USE_VOICEMGR:
+		source += ['../game_shared/voice_gamemgr.cpp']
+	else:
+		defines += ['NO_VOICEGAMEMGR']
+
+	includes = [
+		'.',
+		'../common',
+		'../engine',
+		'../pm_shared',
+		'../game_shared',
+		'../public'
+	]
+
+	if bld.env.DEST_OS not in ['android', 'dos'] or bld.env.TERMUX:
+		install_path = os.path.join(bld.env.GAMEDIR, bld.env.SERVER_INSTALL_DIR)
+	else:
+		install_path = bld.env.PREFIX
+
+	bld.shlib(
+		source   = source,
+		target   = bld.env.SERVER_LIBRARY_NAME + bld.env.POSTFIX,
+		name     = 'server',
+		features = 'c cxx',
+		includes = includes,
+		defines  = defines,
+		install_path = install_path,
+		idx = bld.get_taskgen_count()
+	)
+

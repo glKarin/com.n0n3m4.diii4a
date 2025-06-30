@@ -1,0 +1,4009 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif\r\n"
+    "#include ""res\\WorldEditor.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\WorldEditor.ico"
+IDR_WEDTYPE             ICON    DISCARDABLE     "res\\WorldEditorDoc.ico"
+IDR_ICON_CONUS          ICON    DISCARDABLE     "res\\icon1.ico"
+IDR_ICON_TORUS          ICON    DISCARDABLE     "res\\idr_icon.ico"
+IDR_ICON_SPIRAL_STAIRCASES ICON    DISCARDABLE     "res\\ico00001.ico"
+IDR_ICON_LINEAR_STAIRCASES ICON    DISCARDABLE     "res\\ico00002.ico"
+IDR_ICON_SPHERE         ICON    DISCARDABLE     "res\\ico00003.ico"
+IDR_ICON_TERRAIN        ICON    DISCARDABLE     "res\\ico00004.ico"
+IDR_ICON_ADD            ICON    DISCARDABLE     "res\\ico00005.ico"
+IDR_ICON_ADD_REVERSE    ICON    DISCARDABLE     "res\\ico00006.ico"
+IDR_ICON_REMOVE         ICON    DISCARDABLE     "res\\ico00007.ico"
+IDR_ICON_REMOVE_REVERSE ICON    DISCARDABLE     "res\\ico00008.ico"
+IDR_ICON_SPLIT_SECTORS  ICON    DISCARDABLE     "res\\ico00009.ico"
+IDR_ICON_SPLIT_POLYGONS ICON    DISCARDABLE     "res\\ico00010.ico"
+IDR_ICON_JOIN_LAYERS    ICON    DISCARDABLE     "res\\ico00011.ico"
+IDR_ICON_ROOM           ICON    DISCARDABLE     "res\\ico00012.ico"
+IDR_ICON_MATERIAL       ICON    DISCARDABLE     "res\\ico00013.ico"
+IDR_ICON_INNER          ICON    DISCARDABLE     "res\\ico00014.ico"
+IDR_ICON_OUTER          ICON    DISCARDABLE     "res\\ico00015.ico"
+IDR_ICON_TOP_STAIRS     ICON    DISCARDABLE     "res\\ico00016.ico"
+IDR_ICON_TOP_SLOPE      ICON    DISCARDABLE     "res\\ico00017.ico"
+IDR_ICON_TOP_CEILING    ICON    DISCARDABLE     "res\\ico00018.ico"
+IDR_ICON_BOTTOM_FLOOR   ICON    DISCARDABLE     "res\\ico00019.ico"
+IDR_ICON_BOTTOM_SLOPE   ICON    DISCARDABLE     "res\\ico00020.ico"
+IDR_ICON_BOTTOM_STAIRS  ICON    DISCARDABLE     "res\\ico00021.ico"
+IDR_ICON_PANE_CSG       ICON    DISCARDABLE     "res\\ico00022.ico"
+IDR_ICON_PANE_POLYGON   ICON    DISCARDABLE     "res\\ico00023.ico"
+IDR_ICON_PANE_SECTOR    ICON    DISCARDABLE     "res\\ico00024.ico"
+IDR_ICON_PANE_ENTITY    ICON    DISCARDABLE     "res\\ico00025.ico"
+IDR_ICON_PANE_VERTEX    ICON    DISCARDABLE     "res\\ico00026.ico"
+IDR_ICON_PANE_TERRAIN   ICON    DISCARDABLE     "res\\ico00027.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
+IDB_DIRECTORY_ICONS     BITMAP  DISCARDABLE     "res\\director.bmp"
+IDR_WORK_TOOLS          BITMAP  MOVEABLE PURE   "res\\mainfram.bmp"
+IDR_ICONS_STOCK         BITMAP  MOVEABLE PURE   "res\\csg_tool.bmp"
+IDR_PROJECTIONS         BITMAP  MOVEABLE PURE   "res\\bmp00001.bmp"
+IDR_CSG_TOOLS           BITMAP  MOVEABLE PURE   "res\\bmp00002.bmp"
+IDR_SETTINGS_AND_UTILITY BITMAP  DISCARDABLE     "res\\toolbar1.bmp"
+IDR_VIEW_TOOLS          BITMAP  DISCARDABLE     "res\\bmp00003.bmp"
+IDR_MIP_TOOLS           BITMAP  DISCARDABLE     "res\\bmp00004.bmp"
+IDR_SHADOWS_AND_TEXTURE BITMAP  DISCARDABLE     "res\\bmp00005.bmp"
+IDR_SELECT_ENTITY       BITMAP  DISCARDABLE     "res\\bmp00006.bmp"
+IDB_TIPOFTHEDAY         BITMAP  DISCARDABLE     "res\\TipOfTheDay.bmp"
+IDR_VIEW_TOOLS2         BITMAP  DISCARDABLE     "res\\view_too.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_APP_ABOUT
+    BUTTON      ID_CONTEXT_HELP
+END
+
+IDR_WORK_TOOLS TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_CALCULATESHADOWS
+    BUTTON      ID_CHOOSE_COLOR
+    BUTTON      ID_DROP_MARKER
+    BUTTON      ID_TEST_CONNECTIONS
+    BUTTON      ID_TEST_CONNECTIONS_BACK
+    BUTTON      ID_CENTER_ENTITY
+    BUTTON      ID_CENTER_BCG_VIEWER
+    BUTTON      ID_SAVE_PICTURES_FOR_ENVIRONMENT
+END
+
+IDR_ICONS_STOCK TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_CREATE_PRIMITIVE
+    BUTTON      ID_BUTTON32893
+    SEPARATOR
+    BUTTON      ID_CSG_ADD
+    BUTTON      ID_CSG_REMOVE
+    BUTTON      ID_CSG_SPLIT_SECTORS
+    SEPARATOR
+    BUTTON      ID_CSG_JOIN_SECTORS
+    BUTTON      ID_BUTTON32895
+    BUTTON      ID_BUTTON32896
+    BUTTON      ID_BUTTON32899
+    BUTTON      ID_BUTTON32894
+    BUTTON      ID_BUTTON32900
+    BUTTON      ID_BUTTON32905
+    BUTTON      ID_BUTTON32910
+    BUTTON      ID_CIRCLE_MODES
+    SEPARATOR
+    BUTTON      ID_BUTTON32901
+    BUTTON      ID_BUTTON32902
+    BUTTON      ID_BUTTON32908
+    BUTTON      ID_BUTTON32906
+    BUTTON      ID_BUTTON32909
+    SEPARATOR
+    BUTTON      ID_BUTTON32911
+    BUTTON      ID_BUTTON32912
+    BUTTON      ID_BUTTON32916
+    BUTTON      ID_BUTTON32917
+    SEPARATOR
+    BUTTON      ID_BUTTON32920
+    BUTTON      ID_BUTTON32933
+    BUTTON      ID_BUTTON32934
+    BUTTON      ID_BUTTON32935
+    SEPARATOR
+    BUTTON      ID_BUTTON32953
+    BUTTON      ID_BUTTON32961
+    BUTTON      ID_BUTTON32963
+    BUTTON      ID_BUTTON32964
+    BUTTON      ID_CALL_TEXMAKER
+    BUTTON      ID_CALL_MODELER
+    BUTTON      ID_SELECT_BY_NAME
+    BUTTON      ID_DELETE_ENTITIES
+    BUTTON      ID_RECREATE_CURRENT_TEXTURE
+    BUTTON      ID_TOOL_RECREATE_TEXTURE
+    BUTTON      ID_BUTTON33087
+    BUTTON      ID_BUTTON33093
+    BUTTON      ID_BUTTON33127
+END
+
+IDR_PROJECTIONS TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_RESET_VIEWER
+    BUTTON      ID_ISOMETRIC_TOP
+    BUTTON      ID_ISOMETRIC_BOTTOM
+    BUTTON      ID_ISOMETRIC_RIGHT
+    BUTTON      ID_ISOMETRIC_LEFT
+    BUTTON      ID_ISOMETRIC_FRONT
+    BUTTON      ID_ISOMETRIC_BACK
+    BUTTON      ID_PERSPECTIVE
+    SEPARATOR
+    BUTTON      ID_SHOW_ORIENTATION
+    BUTTON      ID_SCENE_RENDERING_TIME
+    BUTTON      ID_MEASUREMENT_TAPE
+    BUTTON      ID_TAKE_SS
+    BUTTON      ID_TEST_GAME
+    BUTTON      ID_TEST_GAME_FULLSCREEN
+END
+
+IDR_CSG_TOOLS TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_CSG_DESTINATION
+    SEPARATOR
+    BUTTON      ID_SELECT_CSG_TARGET
+    BUTTON      ID_CONUS_PRIMITIVE
+    BUTTON      ID_TORUS_PRIMITIVE
+    BUTTON      ID_STAIRCASE_PRIMITIVE
+    BUTTON      ID_SPHERE_PRIMITIVE
+    BUTTON      ID_TERRAIN_PRIMITIVE
+    BUTTON      ID_CSG_CANCEL
+    BUTTON      ID_CLONE_CSG
+    SEPARATOR
+    BUTTON      ID_TRIANGULARIZE
+    SEPARATOR
+    BUTTON      ID_CSG_ADD
+    BUTTON      ID_CSG_REMOVE
+    BUTTON      ID_JOIN_LAYERS
+    SEPARATOR
+    BUTTON      ID_CSG_SPLIT_SECTORS
+    BUTTON      ID_CSG_JOIN_SECTORS
+    SEPARATOR
+    BUTTON      ID_CSG_SPLIT_POLYGONS
+    BUTTON      ID_CSG_JOIN_POLYGONS
+    BUTTON      ID_CSG_JOIN_ALL_POLYGONS
+    BUTTON      ID_CUT_MODE
+END
+
+IDR_SETTINGS_AND_UTILITY TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_WORLD_SETTINGS
+    BUTTON      ID_LIGHT_ANIMATION
+    BUTTON      ID_CREATE_TEXTURE
+END
+
+IDR_VIEW_TOOLS TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_DECADIC_GRID
+    BUTTON      ID_AUTO_SNAP
+    BUTTON      ID_GRID_ON_OFF
+    BUTTON      ID_TOGGLE_VIEW_PICTURES
+END
+
+IDR_MIP_TOOLS TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_AUTO_MIP_LEVELING
+    SEPARATOR
+    BUTTON      ID_EDIT_MIP_SWITCH_DISTANCE
+    SEPARATOR
+    BUTTON      ID_PREVIOUS_MIP_BRUSH
+    BUTTON      ID_NEXT_MIP_BRUSH
+    SEPARATOR
+    BUTTON      ID_CLONE_TO_MORE_PRECISE_MIP
+    BUTTON      ID_CREATE_EMPTY_MORE_PRECISE_MIP
+    BUTTON      ID_CLONE_TO_ROUGHER_MIP_LEVEL
+    BUTTON      ID_CREATE_EMPTY_ROUGHER_MIP
+    SEPARATOR
+    BUTTON      ID_DELETE_MIP
+END
+
+IDR_SHADOWS_AND_TEXTURE TOOLBAR DISCARDABLE  15, 15
+BEGIN
+    BUTTON      ID_TEXTURE_1
+    BUTTON      ID_TEXTURE_2
+    BUTTON      ID_TEXTURE_3
+    BUTTON      ID_VIEW_SHADOWS_ONOFF
+    BUTTON      ID_CALCULATE_SHADOWS_ONOFF
+    BUTTON      ID_BUTTON33130
+    BUTTON      ID_BUTTON33104
+    BUTTON      ID_BUTTON33131
+    BUTTON      ID_BUTTON33132
+END
+
+IDR_SELECT_ENTITY TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_BROWSE_ENTITIES_MODE
+    BUTTON      ID_ALIGN_VOLUME
+    BUTTON      ID_PREVIOUS_SELECTED_ENTITY
+    BUTTON      ID_NEXT_SELECTED_ENTITY
+    BUTTON      ID_SELECT_ALL_IN_VOLUME
+    BUTTON      ID_SELECT_BY_CLASS
+END
+
+IDR_VIEW_TOOLS2 TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_VIEW_SELECTION
+    SEPARATOR
+    BUTTON      ID_TOGGLE_VISIBILITY_TWEAKS
+    BUTTON      ID_ENABLE_VISIBILITY_TWEAKS
+    BUTTON      ID_MOVE_ANCHORED
+    BUTTON      ID_RENDER_TARGETS
+    BUTTON      ID_TARGET_TREE
+    BUTTON      ID_TOGGLE_ENTITY_NAMES
+    BUTTON      ID_VIEW_FROM_ENTITY
+    BUTTON      ID_MEASURE_ON
+    BUTTON      ID_UPDATE_LINKS
+    BUTTON      ID_HIDE_UNSELECTED
+    BUTTON      ID_HIDE_SELECTED
+    BUTTON      ID_SHOW_ALL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "Convert list",                ID_CONVERT_WORLDS
+        MENUITEM "&Import 3D Object(s)",        ID_IMPORT_3D_OBJECT
+        MENUITEM SEPARATOR
+        MENUITEM "&Preferences\tCtrl+P",        ID_FILE_PREFERENCES
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Game"
+    BEGIN
+        MENUITEM "&Player and controls for test game", ID_GAME_SELECT_PLAYER
+        MENUITEM "&Edit players and controls",  ID_GAME_PLAYER
+        MENUITEM "&Audio settings",             ID_GAME_AUDIO
+        MENUITEM "&Video settings",             ID_GAME_VIDEO
+        MENUITEM SEPARATOR
+        MENUITEM "Console\tCtrl+L",             ID_CONSOLE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Main toolbar",               ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "&CSG tools",                  ID_VIEW_CSGTOOLS
+        MENUITEM "&Projections bar",            ID_VIEW_PROJECTIONS_BAR
+        MENUITEM "&Work bar",                   ID_VIEW_WORK_BAR
+        MENUITEM "&Settings and utility",       ID_VIEW_SETTINGS_AND_UTILITY_BAR
+
+        MENUITEM "Shadows and texture",         ID_VIEW_SHADOWS_AND_TEXTURE_BAR
+
+        MENUITEM "Select entity",               ID_VIEW_SELECT_ENTITY_BAR
+        MENUITEM "&View tools",                 ID_VIEW_VIEW_TOOLS_BAR
+        MENUITEM "&View tools 2",               ID_VIEW_VIEW_TOOLS_BAR2
+        MENUITEM "&Mip tools",                  ID_VIEW_MIP_TOOLS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Browse window",              ID_VIEW_BROWSEDIALOGBAR
+        MENUITEM "&Property combo",             ID_VIEW_PROPERTYCOMBO
+        MENUITEM "&Info window\tQ, Ctrl+I",     ID_VIEW_INFOWINDOW
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "Ti&p of the Day",             ID_HELP_SHOWTIPOFTHEDAY
+        MENUITEM "&Help Topics",                ID_HELP_FINDER
+        MENUITEM SEPARATOR
+        MENUITEM "&About SeriousEditor...",     ID_APP_ABOUT
+    END
+END
+
+IDR_WEDTYPE MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        POPUP "&Perforce"
+        BEGIN
+            MENUITEM "Open for &Edit",              ID_CHECK_EDIT
+            MENUITEM "Open for &Add",               ID_CHECK_ADD
+            MENUITEM "Open for &Delete",            ID_CHECK_DELETE
+        END
+        MENUITEM "&Export 3D Object",           ID_EXPORT_3D_OBJECT
+        MENUITEM "&Import 3D Object(s)",        ID_IMPORT_3D_OBJECT
+        MENUITEM "Inse&rt 3D Object(s)",        ID_INSERT_3D_OBJECT
+        MENUITEM "Convert list",                ID_CONVERT_WORLDS
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...\tCtrl+Shift+S",   ID_FILE_SAVE_AS
+        MENUITEM "Save t&humbnail",             ID_SAVE_THUMBNAIL
+        MENUITEM "Take screen shoot\tAlt+C",    ID_TAKE_SS
+        MENUITEM SEPARATOR
+        MENUITEM "Create &texture\tCtrl+T",     ID_CREATE_TEXTURE
+        MENUITEM "Preferences\tCtrl+P",         ID_FILE_PREFERENCES
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Game"
+    BEGIN
+        MENUITEM "&Current player and controls", ID_GAME_SELECT_PLAYER
+        MENUITEM "&Player settings",            ID_GAME_PLAYER
+        MENUITEM "&Audio settings",             ID_GAME_AUDIO
+        MENUITEM "&Video settings",             ID_GAME_VIDEO
+        MENUITEM SEPARATOR
+        MENUITEM "Test Game\tT",                ID_TEST_GAME
+        MENUITEM "Test Game (full screen)\tCtrl+T", ID_TEST_GAME_FULLSCREEN
+        MENUITEM SEPARATOR
+        MENUITEM "&Console\tCtrl+L",            ID_CONSOLE
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "Snapshot\tCtrl+W",            ID_SNAPSHOT
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM "&Redo\tCtrl+Y",               ID_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "&CSG tools",                  ID_VIEW_CSGTOOLS
+        MENUITEM "&Projections bar",            ID_VIEW_PROJECTIONS_BAR
+        MENUITEM "&Work bar",                   ID_VIEW_WORK_BAR
+        MENUITEM "Shadows and texture",         ID_VIEW_SHADOWS_AND_TEXTURE_BAR
+
+        MENUITEM "Select entity",               ID_VIEW_SELECT_ENTITY_BAR
+        MENUITEM "&Settings and utility",       ID_VIEW_SETTINGS_AND_UTILITY_BAR
+
+        MENUITEM "&View tools",                 ID_VIEW_VIEW_TOOLS_BAR
+        MENUITEM "&View tools 2",               ID_VIEW_VIEW_TOOLS_BAR2
+        MENUITEM "&Mip tools",                  ID_VIEW_MIP_TOOLS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Browse window",              ID_VIEW_BROWSEDIALOGBAR
+        MENUITEM "&Property combo",             ID_VIEW_PROPERTYCOMBO
+        MENUITEM "&Info window\tQ, Ctrl+I",     ID_VIEW_INFOWINDOW
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Window",                 ID_WINDOW_NEW
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+        MENUITEM "S&plit",                      ID_WINDOW_SPLIT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "Ti&p of the Day",             ID_HELP_SHOWTIPOFTHEDAY
+        MENUITEM "&Help Topics",                ID_HELP_FINDER
+        MENUITEM SEPARATOR
+        MENUITEM "&About SeriousEditor...",     ID_APP_ABOUT
+    END
+END
+
+IDR_BROWSERPOPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        MENUITEM "Insert items",                ID_INSERT_ITEMS
+        MENUITEM "Delete items",                ID_DELETE_ITEMS
+        MENUITEM SEPARATOR
+        MENUITEM "Create and add texture",      ID_CREATE_AND_ADD_TEXTURE
+        MENUITEM "Recreate texture",            ID_RECREATE_TEXTURE
+        MENUITEM "Set as current texture\t(LMB x 2)", 
+                                                ID_SET_AS_CURRENT_TEXTURE
+        MENUITEM "Export texture",              ID_EXPORT_TEXTURE
+        MENUITEM "Select by texture(s) in sectors", 
+                                                ID_SELECT_BY_TEXTURE_IN_SELECTED_SECTORS
+
+        MENUITEM "Select by texture(s) in world", 
+                                                ID_SELECT_BY_TEXTURE_IN_WORLD
+
+        MENUITEM "Select except texture(s) in world", 
+                                                ID_SELECT_EXCEPT_TEXTURES
+        MENUITEM "Add textures from world",     ID_ADD_TEXTURES_FROM_WORLD
+        MENUITEM SEPARATOR
+        MENUITEM "Select for drop marker",      ID_SELECT_FOR_DROP_MARKER
+        MENUITEM "Convert to class",            ID_CONVERT_CLASS
+        POPUP "Show using ..."
+        BEGIN
+            MENUITEM "Small icons",                 ID_MICRO_ICONS
+            MENUITEM "Medium icons",                ID_SMALL_ICONS
+            MENUITEM "Large icons",                 ID_MEDIUM_ICONS
+            MENUITEM "Extra large icons",           ID_BIG_ICONS
+            MENUITEM "Description",                 ID_SHOW_DESCRIPTION
+            MENUITEM "File name",                   ID_SHOW_FILENAME
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Directory tree shortcuts\tW", ID_SHOW_TREE_SHORTCUTS
+        MENUITEM "Help",                        ID_BROWSER_CONTEXT_HELP
+    END
+END
+
+IDR_VTREEPOPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        MENUITEM "Create directory",            ID_CREATE_DIRECTORY
+        MENUITEM "Delete directory",            ID_DELETE_DIRECTORY
+        MENUITEM "Rename directory",            ID_RENAME_DIRECTORY
+        MENUITEM SEPARATOR
+        MENUITEM "Directory tree shortcuts\tW", ID_SHOW_TREE_SHORTCUTS
+        MENUITEM SEPARATOR
+        MENUITEM "Import virtual tree",         ID_IMPORT_VIRTUAL_TREE
+        MENUITEM "Export virtual tree",         ID_EXPORT_VIRTUAL_TREE
+        MENUITEM "Load virtual tree",           ID_LOAD_VIRTUAL_TREE
+        MENUITEM "Save virtual tree",           ID_SAVE_VIRTUAL_TREE
+        MENUITEM "Save As virtual tree",        ID_SAVE_AS_VIRTUAL_TREE
+        MENUITEM "Dump virtual tree",           ID_DUMP_VT
+    END
+END
+
+IDR_ENTITY_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        POPUP "Create primitive"
+        BEGIN
+            MENUITEM "Conus",                       ID_POPUP_CONUS
+            MENUITEM "Torus",                       ID_POPUP_TORUS
+            MENUITEM "Stairs",                      ID_POPUP_STAIRS
+            MENUITEM "Sphere",                      ID_POPUP_SPHERE
+            MENUITEM "Terrain",                     ID_POPUP_TERRAIN
+        END
+        MENUITEM "Select brush\tCtrl+Alt+LMB",  ID_SET_AS_CSG_TARGET
+        POPUP "Select"
+        BEGIN
+            MENUITEM "All entities",                ID_SELECT_ALL_ENTITIES_IN_WORLD
+
+            MENUITEM "All sectors in entity\tCtrl+Alt+A", 
+                                                    ID_SELECT_ALL_SECTORS
+            MENUITEM "All sectors entity is in\t(Alt+S)", 
+                                                    ID_SELECT_SECTORS_ARROUND_ENTITY_ON_CONTEXT
+
+            MENUITEM SEPARATOR
+            MENUITEM "Deselect hidden",             ID_DESELECT_HIDDEN
+            MENUITEM "Select hidden",               ID_SELECT_HIDDEN
+            MENUITEM "Using target tree\tShift+RMB, L", 
+                                                    ID_SELECT_USING_TARGET_TREE
+
+            MENUITEM "Using dialog\tCtrl+Shift+A,N", ID_SELECT_BY_CLASS
+            MENUITEM "Clones\tCtrl+E",              ID_SELECT_CLONES_ON_CONTEXT
+
+            MENUITEM "All of the same class\tCtrl+Shift+E", 
+                                                    ID_SELECT_OF_SAME_CLASS_ON_CONTEXT
+
+            MENUITEM "Target entity\t\\",           ID_SELECT_TARGET
+            MENUITEM "All target entities\tCtrl+\\", 
+                                                    ID_SELECT_ALL_TARGETS_ON_CONTEXT
+
+            MENUITEM "Entities who target\tShift+\\", 
+                                                    ID_SELECT_WHO_TARGETS_ON_CONTEXT
+
+            MENUITEM "Descendants",                 ID_SELECT_DESCENDANTS
+        END
+        POPUP "Position and orientation"
+        BEGIN
+            MENUITEM "Rotate to target origin",     ID_ROTATE_TO_TARGET_ORIGIN
+
+            MENUITEM "Rotate to target center",     ID_ROTATE_TO_TARGET_CENTER
+
+            MENUITEM "Copy placement",              ID_COPY_PLACEMENT
+            MENUITEM "Paste placement",             ID_PASTE_PLACEMENT
+            MENUITEM "Copy position",               ID_COPY_POSITION
+            MENUITEM "Paste position",              ID_PASTE_POSITION
+            MENUITEM "Copy orientation",            ID_COPY_ORIENTATION
+            MENUITEM "Paste orientation",           ID_PASTE_ORIENTATION
+            MENUITEM "Stretch child offset",        ID_STRETCH_RELATIVE_OFFSET
+
+            POPUP "Align"
+            BEGIN
+                MENUITEM "Align x",                     ID_ALIGN_X
+                MENUITEM "Align y",                     ID_ALIGN_Y
+                MENUITEM "Align z",                     ID_ALIGN_Z
+                MENUITEM "Align heading",               ID_ALIGN_H
+                MENUITEM "Align pitch",                 ID_ALIGN_P
+                MENUITEM "Align banking",               ID_ALIGN_B
+            END
+        END
+        MENUITEM "Reoptimize brush(es)",        ID_REOPTIMIZE_BRUSHES
+        MENUITEM "Discard shadows",             ID_DISCARD_SHADOWS
+        MENUITEM "Fall down\tBackspace",        ID_FALL_DOWN
+        MENUITEM SEPARATOR
+        MENUITEM "Copy\tCtrl+C",                ID_EDIT_COPY_ALTERNATIVE
+        MENUITEM "Clone\tCtrl+Shift+C",         ID_EDIT_COPY_ALTERNATIVE
+        MENUITEM "Update clones\tCtrl+Shift+U", ID_UPDATE_CLONES
+        MENUITEM "Update brushes",              ID_UPDATE_BRUSHES
+        MENUITEM "Paste\tCtrl+V",               ID_EDIT_PASTE
+        MENUITEM "Paste into layer\tCtrl+Shift+V", ID_EDIT_PASTE_ALTERNATIVE
+        MENUITEM "Delete",                      ID_DELETE_ENTITIES
+        MENUITEM "Clear all targets",           ID_CLEAR_ALL_TARGETS
+        MENUITEM "Auto texturize mip levels\tCtrl+U", ID_AUTOTEXTURIZE_MIPS
+        MENUITEM SEPARATOR
+        MENUITEM "Mirror and stretch entire world", ID_MIRROR_AND_STRETCH
+        MENUITEM SEPARATOR
+        MENUITEM "View properties\tF10",        ID_CURRENT_VIEW_PROPERTIES
+        MENUITEM "Help\tF1",                    ID_ENTITY_CONTEXT_HELP
+    END
+END
+
+IDR_SHORTCUTS_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Tree shortcuts"
+    BEGIN
+        MENUITEM "1. Shortcut 01",              ID_MENU_SHORTCUT01
+        MENUITEM "2. Shortcut 02",              ID_MENU_SHORTCUT02
+        MENUITEM "3. Shortcut 03",              ID_MENU_SHORTCUT03
+        MENUITEM "4. Shortcut 04",              ID_MENU_SHORTCUT04
+        MENUITEM "5. Shortcut 05",              ID_MENU_SHORTCUT05
+        MENUITEM "6. Shortcut 06",              ID_MENU_SHORTCUT06
+        MENUITEM "7. Shortcut 07",              ID_MENU_SHORTCUT07
+        MENUITEM "8. Shortcut 08",              ID_MENU_SHORTCUT08
+        MENUITEM "9. Shortcut 09",              ID_MENU_SHORTCUT09
+        MENUITEM "0. Shortcut 10",              ID_MENU_SHORTCUT10
+        MENUITEM SEPARATOR
+        MENUITEM "Store under buffer 1",        ID_STORE_MENU_SHORTCUT01
+        MENUITEM "Store under buffer 2",        ID_STORE_MENU_SHORTCUT02
+        MENUITEM "Store under buffer 3",        ID_STORE_MENU_SHORTCUT03
+        MENUITEM "Store under buffer 4",        ID_STORE_MENU_SHORTCUT04
+        MENUITEM "Store under buffer 5",        ID_STORE_MENU_SHORTCUT05
+        MENUITEM "Store under buffer 6",        ID_STORE_MENU_SHORTCUT06
+        MENUITEM "Store under buffer 7",        ID_STORE_MENU_SHORTCUT07
+        MENUITEM "Store under buffer 8",        ID_STORE_MENU_SHORTCUT08
+        MENUITEM "Store under buffer 9",        ID_STORE_MENU_SHORTCUT09
+        MENUITEM "Store under buffer 10",       ID_STORE_MENU_SHORTCUT10
+    END
+END
+
+IDR_POLYGON_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        POPUP "Create primitive"
+        BEGIN
+            MENUITEM "Conus",                       ID_POPUP_CONUS
+            MENUITEM "Torus",                       ID_POPUP_TORUS
+            MENUITEM "Stairs",                      ID_POPUP_STAIRS
+            MENUITEM "Sphere",                      ID_POPUP_SPHERE
+            MENUITEM "Terrain",                     ID_POPUP_TERRAIN
+        END
+        MENUITEM "Select brush\tCtrl+Alt+LMB",  ID_SET_AS_CSG_TARGET
+        POPUP "Select"
+        BEGIN
+            MENUITEM "Lights with influence",       ID_SELECT_LIGHTS
+            MENUITEM "Polygons with bad triangulation", 
+                                                    ID_SELECT_INVALIDTRIS
+            MENUITEM "By texture adjacent\tCtrl+RMBx2", 
+                                                    ID_SELECT_BY_TEXTURE_ADJACENT
+
+            MENUITEM "By color in sector\tCtrl+Shift+RMBx2", 
+                                                    ID_SELECT_BY_COLOR_IN_SECTOR
+
+            MENUITEM "By texture in sector\tCtrl+Shift+LMBx2", 
+                                                    ID_SELECT_BY_TEXTURE_IN_SECTOR
+
+            MENUITEM "Select sectors from other side", 
+                                                    ID_SELECT_SECTORS_OTHER_SIDE
+
+            MENUITEM "Seelct all vertices\tCtrl+A", ID_SELECT_ALL_VERTICES
+        END
+        MENUITEM "Reoptimize brush(es)",        ID_REOPTIMIZE_BRUSHES
+        MENUITEM "Discard shadows",             ID_DISCARD_SHADOWS
+        MENUITEM SEPARATOR
+        MENUITEM "Colorize polygons",           ID_CHOOSE_COLOR
+        MENUITEM "Find texture\tCtrl+F",        ID_FIND_TEXTURE
+        MENUITEM SEPARATOR
+        POPUP "Copy"
+        BEGIN
+            MENUITEM "Polygon properties\tCtrl+C",  ID_EDIT_COPY
+            MENUITEM "Texture\t,",                  ID_COPY_TEXTURE
+            MENUITEM "Mapping\tM",                  ID_MENU_COPY_MAPPING
+        END
+        POPUP "Paste"
+        BEGIN
+            MENUITEM "Polygon properties\tCtrl+V",  ID_EDIT_PASTE
+            MENUITEM "Polygon properties except textures\tCtrl+Shift+V", 
+                                                    ID_EDIT_PASTE_ALTERNATIVE
+
+            MENUITEM "Texture\tK",                  ID_PASTE_TEXTURE
+            MENUITEM "Mapping\tJ",                  ID_MENU_PASTE_MAPPING
+            MENUITEM "Mapping as projected\tU",     ID_MENU_PASTE_AS_PROJECTED_MAPPING
+
+        END
+        POPUP "Filter selection"
+        BEGIN
+            MENUITEM "Filter selection\tF",         ID_FILTER_SELECTION
+            MENUITEM "Remain selected by orientation\tAlt+Shift+LMB", 
+                                                    ID_REMAIN_SELECTEDBY_ORIENTATION
+
+            MENUITEM "Remain selected by orientation one side\tAlt+Ctrl+Shift+LMB", 
+                                                    ID_REMAIN_SELECTEDBY_ORIENTATION_SINGLE
+
+            MENUITEM "Deselect by orientation\tAlt+Shift+RMB", 
+                                                    ID_DESELECT_BY_ORIENTATION
+
+        END
+        POPUP "Mapping"
+        BEGIN
+            MENUITEM "Reset rotation",              ID_RESET_MAPPING_ROTATION
+
+            MENUITEM "Reset offset",                ID_RESET_MAPPING_OFFSET
+            MENUITEM "Random offset U",             ID_RANDOM_OFFSET_U
+            MENUITEM "Random offset V",             ID_RANDOM_OFFSET_V
+            MENUITEM "Reset stretch",               ID_RESET_MAPPING_STRETCH
+            MENUITEM "Fit smaller axis\tAlt+A",     ID_POPUP_AUTO_FIT_MAPPING
+
+            MENUITEM "Fit longer axis\tAlt+Shift+A", 
+                                                    ID_POPUP_AUTO_FIT_MAPPING_SMALL
+
+            MENUITEM "Fit both axis\tAlt+Shift+Ctrl+A", 
+                                                    ID_POPUP_AUTO_FIT_MAPPING_BOTH
+
+            MENUITEM "Align mapping U\tCtrl+K",     ID_MENU_ALIGN_MAPPING_U
+            MENUITEM "Align mapping V\tCtrl+Shift+K", 
+                                                    ID_MENU_ALIGN_MAPPING_V
+            MENUITEM "Swap 1st and 2nd layer",      ID_SWAP_LAYERS_12
+            MENUITEM "Swap 2nd and 3rd layer",      ID_SWAP_LAYERS_23
+        END
+        POPUP "Polygon manipulation"
+        BEGIN
+            MENUITEM "Triangularize clicked polygon", 
+                                                    ID_TRIANGULARIZE_POLYGON
+            MENUITEM "Flip polygons\tD",            ID_FLIP_POLYGON
+            MENUITEM "Delete polygons",             ID_DELETE_POLYGONS
+            MENUITEM "Clone polygons to brush",     ID_CLONE_POLYGONS
+            MENUITEM "Move polygons to brush",      ID_POLYGONS_TO_BRUSH
+            MENUITEM "Retriple polygons\tF9",       ID_RE_TRIPLE
+            MENUITEM "Join polygons\tShift+Num*",   ID_CSG_JOIN_POLYGONS
+            MENUITEM "Join all possible polygons\tAlt+Num*", 
+                                                    ID_CSG_JOIN_ALL_POLYGONS
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Mirror and stretch entire world", ID_MIRROR_AND_STRETCH
+        MENUITEM "Export displace map",         ID_EXPORT_DISPLACE_MAP
+        MENUITEM "Remove unused textures in world", 
+                                                ID_REMOVE_UNUSED_TEXTURES
+        MENUITEM SEPARATOR
+        MENUITEM "View properties\tF10",        ID_CURRENT_VIEW_PROPERTIES
+    END
+END
+
+IDR_SECTOR_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        POPUP "Create primitive"
+        BEGIN
+            MENUITEM "Conus",                       ID_POPUP_CONUS
+            MENUITEM "Torus",                       ID_POPUP_TORUS
+            MENUITEM "Stairs",                      ID_POPUP_STAIRS
+            MENUITEM "Sphere",                      ID_POPUP_SPHERE
+            MENUITEM "Terrain",                     ID_POPUP_TERRAIN
+        END
+        MENUITEM "Select active brush\tCtrl+Alt+LMB", ID_SET_AS_CSG_TARGET
+        POPUP "Select"
+        BEGIN
+            MENUITEM "Visible sectors",             ID_SELECT_VISIBLE_SECTORS
+
+            MENUITEM "Sectors with same name",      ID_SELECT_SECTORS_WITH_SAME_NAME
+
+            MENUITEM "All polygons in sector(s)\tCtrl+Alt+A", 
+                                                    ID_SELECT_ALL_POLYGONS
+            MENUITEM "All entities in sector(s)\tCtrl+A", 
+                                                    ID_SELECT_ALL_ENTITIES
+            MENUITEM "Links to this sector",        ID_SELECT_LINKS_TO_SECTOR
+
+        END
+        MENUITEM "Reoptimize brush(es)",        ID_REOPTIMIZE_BRUSHES
+        MENUITEM "Discard shadows",             ID_DISCARD_SHADOWS
+        MENUITEM SEPARATOR
+        MENUITEM "Hide selected",               ID_HIDE_SELECTED_SECTORS
+        MENUITEM "Hide unselected",             ID_HIDE_UNSELECTED_SECTORS
+        MENUITEM "Show all",                    ID_SHOW_ALL_SECTORS
+        MENUITEM SEPARATOR
+        MENUITEM "Sectors to brush",            ID_SECTORS_TO_BRUSH
+        MENUITEM "Copy sectors",                ID_COPY_SECTORS
+        MENUITEM "Copy sectors without entities\tCtrl+Shift+C", 
+                                                ID_EDIT_COPY_ALTERNATIVE
+        MENUITEM "Paste sectors",               ID_PASTE_SECTORS
+        MENUITEM "Delete sectors",              ID_DELETE_SECTORS
+        MENUITEM SEPARATOR
+        MENUITEM "Copy ambient color\t,",       ID_COPY_SECTOR_AMBIENT
+        MENUITEM "Paste ambient color\tk",      ID_PASTE_SECTOR_AMBIENT
+        MENUITEM SEPARATOR
+        MENUITEM "Join sectors",                ID_CSG_JOIN_SECTORS
+        MENUITEM "Colorize sectors",            ID_CHOOSE_COLOR
+        MENUITEM SEPARATOR
+        MENUITEM "Mirror and stretch entire world", ID_MIRROR_AND_STRETCH
+        MENUITEM SEPARATOR
+        MENUITEM "View properties\tF10",        ID_CURRENT_VIEW_PROPERTIES
+    END
+END
+
+IDR_CSG_PRIMITIVE_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        MENUITEM "Cancel CSG",                  ID_CSG_CANCEL
+        MENUITEM "Select brush\tCtrl+Alt+LMB",  ID_SET_AS_CSG_TARGET
+        MENUITEM "Select sector",               ID_CSG_SELECT_SECTOR
+        MENUITEM SEPARATOR
+        MENUITEM "Insert vertex\tShift+LMB",    ID_INSERT_VERTEX
+        MENUITEM "Delete vertex\tShift+RMB",    ID_DELETE_VERTEX
+        MENUITEM SEPARATOR
+        MENUITEM "Add primitive",               ID_CSG_ADD
+        MENUITEM "Remove primitive",            ID_CSG_REMOVE
+        MENUITEM "Split polygons",              ID_CSG_SPLIT_POLYGONS
+        MENUITEM "Split sectors",               ID_CSG_SPLIT_SECTORS
+        MENUITEM "Join layers",                 ID_JOIN_LAYERS
+        MENUITEM SEPARATOR
+        MENUITEM "View properties\tF10",        ID_CURRENT_VIEW_PROPERTIES
+    END
+END
+
+IDR_CSG_TEMPLATE_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        MENUITEM "Cancel CSG",                  ID_CSG_CANCEL
+        MENUITEM "Select brush\tCtrl+Alt+LMB",  ID_SET_AS_CSG_TARGET
+        MENUITEM "Select sector",               ID_CSG_SELECT_SECTOR
+        MENUITEM "Mirror and stretch second layer\tShift+/", 
+                                                ID_MIRROR_AND_STRETCH
+        MENUITEM SEPARATOR
+        MENUITEM "Add template",                ID_CSG_ADD
+        MENUITEM "Remove template",             ID_CSG_REMOVE
+        MENUITEM "Split polygons",              ID_CSG_SPLIT_POLYGONS
+        MENUITEM "Split sectors",               ID_CSG_SPLIT_SECTORS
+        MENUITEM "Join layers",                 ID_JOIN_LAYERS
+        MENUITEM SEPARATOR
+        MENUITEM "View properties\tF10",        ID_CURRENT_VIEW_PROPERTIES
+    END
+END
+
+IDR_THUMBNAIL_TEXTURE_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        MENUITEM "Recreate",                    ID_RECREATE_TEXTURE
+    END
+END
+
+IDR_COLOR_BUTTON MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        MENUITEM "Copy color",                  ID_COPY_COLOR
+        MENUITEM "Paste color",                 ID_PASTE_COLOR
+        MENUITEM "Numeric alpha",               ID_NUMERIC_ALPHA
+    END
+END
+
+IDR_PRIMITIVE_SETTINGS MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        MENUITEM "Reset primitive",             ID_RESET_PRIMITIVE
+        MENUITEM SEPARATOR
+        MENUITEM "Load primitive settings",     ID_LOAD_PRIMITIVE_SETTINGS
+        MENUITEM "Save primitive settings",     ID_SAVE_PRIMITIVE_SETTINGS
+        MENUITEM "Save As primitive settings",  ID_SAVE_AS_PRIMITIVE_SETTINGS
+
+    END
+END
+
+IDR_INFO_POLYGON_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        MENUITEM "Default properties",          ID_SET_AS_DEFAULT
+    END
+END
+
+IDR_VERTEX_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        POPUP "Create primitive"
+        BEGIN
+            MENUITEM "Conus",                       ID_POPUP_CONUS
+            MENUITEM "Torus",                       ID_POPUP_TORUS
+            MENUITEM "Stairs",                      ID_POPUP_STAIRS
+            MENUITEM "Sphere",                      ID_POPUP_SPHERE
+            MENUITEM "Terrain",                     ID_POPUP_TERRAIN
+        END
+        MENUITEM "Select brush\tCtrl+Alt+LMB",  ID_SET_AS_CSG_TARGET
+        MENUITEM "Reoptimize brush",            ID_REOPTIMIZE_BRUSHES
+        MENUITEM "Select all vertices\tCtrl+A", ID_SELECT_ALL_VERTICES
+        MENUITEM "Create polygon\tShift+RMB",   ID_CREATE_POLYGON
+        MENUITEM "Discard shadows",             ID_DISCARD_SHADOWS
+        MENUITEM "Numeric\tN",                  ID_POPUP_VTX_NUMERIC
+        MENUITEM "Align\tAlt+A",                ID_POPUP_VTX_ALLIGN
+        MENUITEM "Snap vertices to plane\tF",   ID_FUNCTION
+        MENUITEM "Filter\tCtrl+F",              ID_POPUP_VTX_FILTER
+        MENUITEM "Merge vertices\tM",           ID_MERGE_VERTICES
+        MENUITEM SEPARATOR
+        MENUITEM "Mirror and stretch entire world", ID_MIRROR_AND_STRETCH
+        MENUITEM SEPARATOR
+        MENUITEM "View properties\tF10",        ID_CURRENT_VIEW_PROPERTIES
+    END
+END
+
+IDR_STOCK MENU DISCARDABLE 
+BEGIN
+    POPUP "Stock"
+    BEGIN
+        POPUP "Mode"
+        BEGIN
+            MENUITEM "Entity",                      ID_ENTITY_MODE
+            MENUITEM "Polygon",                     ID_POLYGON_MODE
+            MENUITEM "Sector",                      ID_SECTOR_MODE
+            MENUITEM "Vertex",                      ID_VERTEX_MODE
+        END
+        POPUP "Create primitive"
+        BEGIN
+            MENUITEM "Conus",                       ID_POPUP_CONUS
+            MENUITEM "Torus",                       ID_POPUP_TORUS
+            MENUITEM "Stairs",                      ID_POPUP_STAIRS
+            MENUITEM "Sphere",                      ID_POPUP_SPHERE
+            MENUITEM "Terrain",                     ID_POPUP_TERRAIN
+        END
+    END
+END
+
+IDR_LINK_TREE_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        MENUITEM "Contract all\tCtrl+Shift+LMB", ID_LT_CONTRACT_ALL
+        MENUITEM "Expand all\tCtrl+Shift+RMB",  ID_LT_EXPAND_ALL
+        MENUITEM "Contract branch\tCtrl+LMB",   ID_LT_CONTRACT_BRANCH
+        MENUITEM "Expand branch\tCtrl+RMB",     ID_LT_EXPAND_BRANCH
+        MENUITEM "Leave branch\tShift+LMB",     ID_LT_LEAVE_BRANCH
+        MENUITEM "Last level\tShift+RMB",       ID_LT_LAST_LEVEL
+    END
+END
+
+IDR_TERRAIN_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Main"
+    BEGIN
+        MENUITEM "Select brush\t\\",            ID_SELECT_BRUSH
+        MENUITEM "Select terrain",              ID_SELECT_TERRAIN
+        MENUITEM "Pick layer\tCtrl+Alt+LMB",    ID_PICK_LAYER
+        MENUITEM "Select layer\tCtrl+RMB",      ID_SELECT_LAYER
+        POPUP "Edit mode"
+        BEGIN
+            MENUITEM "Altitude\t(U)",               ID_ALTITUDE_EDIT_MODE
+            MENUITEM "Texture\t(L)",                ID_LAYER_TEXTURE_EDIT_MODE
+
+        END
+        POPUP "Brush mode\tB"
+        BEGIN
+            MENUITEM "Paint\tJ",                    ID_TBRUSH_ALTITUDE
+            MENUITEM "Smooth\tO",                   ID_TBRUSH_SMOOTH
+            MENUITEM "Filter\tF",                   ID_TBRUSH_FILTER
+            MENUITEM "Limit down\tM",               ID_TBRUSH_MINIMUM
+            MENUITEM "Limit up\tX",                 ID_TBRUSH_MAXIMUM
+            MENUITEM "Flatten\t=",                  ID_TBRUSH_FLATTEN
+            MENUITEM "Posterize\t-",                ID_TBRUSH_POSTERIZE
+            MENUITEM "Random noise\tK",             ID_TBRUSH_NOISE
+            MENUITEM "Texture noise\tY",            ID_TBRUSH_CONTINOUS_NOISE
+
+            MENUITEM "Erase\tD",                    ID_TBRUSH_ERASE
+        END
+        POPUP "Terrain options"
+        BEGIN
+            MENUITEM "Terrain properties\tCtrl+Shift+T", 
+                                                    ID_TERRAIN_PROPERTIES
+            MENUITEM "Optimize terrain\tCtrl+Shift+Z", ID_OPTIMIZE_TERRAIN
+            MENUITEM "Recalculate terrain shadows\tCtrl+R", 
+                                                    ID_RECALCULATE_TERRAIN_SHADOWS
+
+            MENUITEM SEPARATOR
+            MENUITEM "Import 8 bit heightmap",      ID_IMPORT_HEIGHTMAP
+            MENUITEM "Import 16 bit heightmap",     ID_IMPORT_HEIGHTMAP16
+            MENUITEM "Export 8 bit heightmap",      ID_EXPORT_HEIGHTMAP
+            MENUITEM "Export 16 bit heightmap",     ID_EXPORT_HEIGHTMAP16
+            MENUITEM SEPARATOR
+            MENUITEM "View heightmap",              ID_VIEW_HEIGHTMAP
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "View properties\tF10",        ID_CURRENT_VIEW_PROPERTIES
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "/",            ID_VIRTUAL_TREE,        ASCII,  NOINVERT
+    "0",            ID_MENU_SHORTCUT10,     VIRTKEY, NOINVERT
+    "0",            ID_STORE_MENU_SHORTCUT10, VIRTKEY, CONTROL, NOINVERT
+    "1",            ID_MENU_SHORTCUT01,     VIRTKEY, NOINVERT
+    "1",            ID_STORE_MENU_SHORTCUT01, VIRTKEY, CONTROL, NOINVERT
+    "2",            ID_MENU_SHORTCUT02,     VIRTKEY, NOINVERT
+    "2",            ID_STORE_MENU_SHORTCUT02, VIRTKEY, CONTROL, NOINVERT
+    "3",            ID_MENU_SHORTCUT03,     VIRTKEY, NOINVERT
+    "3",            ID_STORE_MENU_SHORTCUT03, VIRTKEY, CONTROL, NOINVERT
+    "4",            ID_MENU_SHORTCUT04,     VIRTKEY, NOINVERT
+    "4",            ID_STORE_MENU_SHORTCUT04, VIRTKEY, CONTROL, NOINVERT
+    "5",            ID_MENU_SHORTCUT05,     VIRTKEY, NOINVERT
+    "5",            ID_STORE_MENU_SHORTCUT05, VIRTKEY, CONTROL, NOINVERT
+    "6",            ID_MENU_SHORTCUT06,     VIRTKEY, NOINVERT
+    "6",            ID_STORE_MENU_SHORTCUT06, VIRTKEY, CONTROL, NOINVERT
+    "7",            ID_MENU_SHORTCUT07,     VIRTKEY, NOINVERT
+    "7",            ID_STORE_MENU_SHORTCUT07, VIRTKEY, CONTROL, NOINVERT
+    "8",            ID_MENU_SHORTCUT08,     VIRTKEY, NOINVERT
+    "8",            ID_STORE_MENU_SHORTCUT08, VIRTKEY, CONTROL, NOINVERT
+    "9",            ID_MENU_SHORTCUT09,     VIRTKEY, NOINVERT
+    "9",            ID_STORE_MENU_SHORTCUT09, VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "I",            ID_VIEW_INFOWINDOW,     VIRTKEY, CONTROL, NOINVERT
+    "L",            ID_CONSOLE,             VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PREFERENCES,    VIRTKEY, CONTROL, NOINVERT
+    "Q",            ID_WINDOW_CLOSE,        VIRTKEY, ALT, NOINVERT
+    "R",            ID_RECREATE_CURRENT_TEXTURE, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE_AS,        VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "T",            ID_CREATE_TEXTURE,      VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    VK_DELETE,      ID_CSG_CANCEL,          VIRTKEY, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    VK_F1,          ID_HELP_FINDER,         VIRTKEY, NOINVERT
+    VK_F1,          ID_CONTEXT_HELP,        VIRTKEY, SHIFT, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    
+    VK_F11,         ID_EXPORT_ENTITIES,     VIRTKEY, NOINVERT
+    VK_F11,         ID_EXPORT_PLACEMENTS,   VIRTKEY, SHIFT, NOINVERT
+    
+    "W",            ID_SHOW_TREE_SHORTCUTS, VIRTKEY, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_WEDTYPE ACCELERATORS DISCARDABLE 
+BEGIN
+    ",",            ID_COPY_TEXTURE,        ASCII,  NOINVERT
+    "/",            ID_DESELECT_ALL,        ASCII,  NOINVERT
+    "0",            ID_BUFFER10,            VIRTKEY, ALT, NOINVERT
+    "0",            ID_EDIT_BUFFER10,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "0",            ID_TEXTURE_MODE_10,     VIRTKEY, SHIFT, NOINVERT
+    28,             ID_SELECT_ALL_TARGETS,  ASCII,  NOINVERT
+    "1",            ID_BUFFER01,            VIRTKEY, ALT, NOINVERT
+    "1",            ID_EDIT_BUFFER01,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "1",            ID_TEXTURE_MODE_1,      VIRTKEY, SHIFT, NOINVERT
+    "1",            ID_TEXTURE_1,           VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    190,            ID_VERTEX_MODE,         VIRTKEY, NOINVERT
+    "2",            ID_BUFFER02,            VIRTKEY, ALT, NOINVERT
+    "2",            ID_EDIT_BUFFER02,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "2",            ID_TEXTURE_MODE_2,      VIRTKEY, SHIFT, NOINVERT
+    "2",            ID_TEXTURE_2,           VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "3",            ID_BUFFER03,            VIRTKEY, ALT, NOINVERT
+    "3",            ID_EDIT_BUFFER03,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "3",            ID_TEXTURE_MODE_3,      VIRTKEY, SHIFT, NOINVERT
+    "3",            ID_TEXTURE_3,           VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "4",            ID_BUFFER04,            VIRTKEY, ALT, NOINVERT
+    "4",            ID_EDIT_BUFFER04,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "4",            ID_TEXTURE_MODE_4,      VIRTKEY, SHIFT, NOINVERT
+    "5",            ID_BUFFER05,            VIRTKEY, ALT, NOINVERT
+    "5",            ID_EDIT_BUFFER05,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "5",            ID_TEXTURE_MODE_5,      VIRTKEY, SHIFT, NOINVERT
+    "6",            ID_BUFFER06,            VIRTKEY, ALT, NOINVERT
+    "6",            ID_EDIT_BUFFER06,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "6",            ID_TEXTURE_MODE_6,      VIRTKEY, SHIFT, NOINVERT
+    "7",            ID_BUFFER07,            VIRTKEY, ALT, NOINVERT
+    "7",            ID_EDIT_BUFFER07,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "7",            ID_TEXTURE_MODE_7,      VIRTKEY, SHIFT, NOINVERT
+    "8",            ID_BUFFER08,            VIRTKEY, ALT, NOINVERT
+    "8",            ID_EDIT_BUFFER08,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "8",            ID_TEXTURE_MODE_8,      VIRTKEY, SHIFT, NOINVERT
+    "9",            ID_BUFFER09,            VIRTKEY, ALT, NOINVERT
+    "9",            ID_EDIT_BUFFER09,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "9",            ID_TEXTURE_MODE_9,      VIRTKEY, SHIFT, NOINVERT
+    ";",            ID_POSTERIZE,           ASCII,  NOINVERT
+    "=",            ID_EQUILIZE,            ASCII,  NOINVERT
+    "?",            ID_FLIP_LAYER,          ASCII,  NOINVERT
+    "A",            ID_SELECT_ALL,          VIRTKEY, CONTROL, NOINVERT
+    "A",            ID_SELECT_BY_CLASS,     VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "B",            ID_KEY_B,               VIRTKEY, NOINVERT
+    "C",            ID_CROSSROAD_FOR_C,     VIRTKEY, NOINVERT
+    "C",            ID_TAKE_SS,             VIRTKEY, ALT, NOINVERT
+    "C",            ID_EDIT_COPY_ALTERNATIVE, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "D",            ID_KEY_D,               VIRTKEY, NOINVERT
+    "D",            ID_TOGGLE_VISIBILITY_TWEAKS, VIRTKEY, CONTROL, NOINVERT
+    "D",            ID_TEST_CONNECTIONS,    VIRTKEY, ALT, NOINVERT
+    "D",            ID_ENABLE_VISIBILITY_TWEAKS, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "D",            ID_TEST_CONNECTIONS_BACK, VIRTKEY, SHIFT, ALT, NOINVERT
+    "E",            ID_ENTITY_MODE,         VIRTKEY, NOINVERT
+    "E",            ID_SELECT_CLONES,       VIRTKEY, CONTROL, NOINVERT
+    "E",            ID_KEY_CTRL_SHIFT_E,    VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "E",            ID_SELECT_OF_SAME_CLASS, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "F",            ID_FUNCTION,            VIRTKEY, NOINVERT
+    "F",            ID_CROSSROAD_FOR_CTRL_F, VIRTKEY, CONTROL, NOINVERT
+    "F",            ID_APPLY_FILTER,        VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "G",            ID_KEY_G,               VIRTKEY, NOINVERT
+    "G",            ID_KEY_CTRL_G,          VIRTKEY, CONTROL, NOINVERT
+    "G",            ID_KEY_CTRL_SHIFT_G,    VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "H",            ID_VIEW_SHADOWS_ONOFF,  VIRTKEY, NOINVERT
+    "H",            ID_CALCULATE_SHADOWS_ONOFF, VIRTKEY, CONTROL, NOINVERT
+    "I",            ID_SELECT_BY_CLASS_IMPORTANT, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "I",            ID_SHOW_ORIENTATION,    VIRTKEY, SHIFT, ALT, NOINVERT
+    "J",            ID_KEY_PASTE,           VIRTKEY, NOINVERT
+    "K",            ID_PASTE_TEXTURE,       VIRTKEY, NOINVERT
+    "K",            ID_MENU_ALIGN_MAPPING_U, VIRTKEY, CONTROL, NOINVERT
+    "K",            ID_KEY_CTRL_SHIFT_K,    VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "L",            ID_CROSSROAD_FOR_L,     VIRTKEY, NOINVERT
+    "L",            ID_TERRAIN_LAYER_OPTIONS, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "M",            ID_KEY_M,               VIRTKEY, NOINVERT
+    "M",            ID_MEASUREMENT_TAPE,    VIRTKEY, ALT, NOINVERT
+    "M",            ID_APPLY_MINIMUM,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "N",            ID_CROSSROAD_FOR_N,     VIRTKEY, NOINVERT
+    "N",            ID_APPLY_FLATTEN,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "O",            ID_KEY_O,               VIRTKEY, NOINVERT
+    "O",            ID_CLONE_CSG,           VIRTKEY, ALT, NOINVERT
+    "O",            ID_TE_SMOOTH,           VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "P",            ID_POLYGON_MODE,        VIRTKEY, NOINVERT
+    "P",            ID_TOGGLE_VIEW_PICTURES, VIRTKEY, ALT, NOINVERT
+    "P",            ID_EDIT_TERRAIN_PREFS,  VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "Q",            ID_MEASURE_ON,          VIRTKEY, CONTROL, NOINVERT
+    "R",            ID_TERRAIN_MODE,        VIRTKEY, NOINVERT
+    "R",            ID_CALCULATESHADOWS,    VIRTKEY, CONTROL, NOINVERT
+    "R",            ID_SCENE_RENDERING_TIME, VIRTKEY, ALT, NOINVERT
+    "S",            ID_SECTOR_MODE,         VIRTKEY, NOINVERT
+    "S",            ID_SELECT_SECTORS_ARROUND_ENTITY, VIRTKEY, ALT, NOINVERT
+    "T",            ID_TEST_GAME,           VIRTKEY, NOINVERT
+    "T",            ID_TEST_GAME_FULLSCREEN, VIRTKEY, CONTROL, NOINVERT
+    "T",            ID_TRIANGULARIZE_SELECTION, VIRTKEY, ALT, NOINVERT
+    "T",            ID_TERRAIN_PROPERTIES,  VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "U",            ID_KEY_U,               VIRTKEY, NOINVERT
+    "U",            ID_AUTOTEXTURIZE_MIPS,  VIRTKEY, CONTROL, NOINVERT
+    "U",            ID_UPDATE_CLONES,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "V",            ID_BROWSE_ENTITIES_MODE, VIRTKEY, NOINVERT
+    "V",            ID_EDIT_PASTE_ALTERNATIVE, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_ADD,         ID_CSG_ADD,             VIRTKEY, NOINVERT
+    VK_ADD,         ID_ZOOM_MORE,           VIRTKEY, CONTROL, NOINVERT
+    VK_ADD,         ID_CSG_ADD,             VIRTKEY, SHIFT, NOINVERT
+    VK_BACK,        ID_FALL_DOWN,           VIRTKEY, NOINVERT
+    VK_BACK,        ID_RESET_VIEWER,        VIRTKEY, CONTROL, NOINVERT
+    VK_BACK,        ID_CENTER_BCG_VIEWER,   VIRTKEY, SHIFT, NOINVERT
+    VK_DECIMAL,     ID_CSG_CANCEL,          VIRTKEY, NOINVERT
+    VK_DECIMAL,     ID_VERTEX_MODE,         VIRTKEY, NOINVERT
+    VK_DELETE,      ID_DELETE_ENTITIES,     VIRTKEY, NOINVERT
+    VK_DIVIDE,      ID_CSG_SPLIT_SECTORS,   VIRTKEY, NOINVERT
+    VK_DIVIDE,      ID_CSG_JOIN_SECTORS,    VIRTKEY, SHIFT, NOINVERT
+    VK_DOWN,        ID_ROTATE_DOWN,         VIRTKEY, NOINVERT
+    VK_DOWN,        ID_ROTATE_DOWN,         VIRTKEY, SHIFT, NOINVERT
+    VK_END,         ID_RESTORE_POSITION02,  VIRTKEY, NOINVERT
+    VK_END,         ID_STORE_POSITION02,    VIRTKEY, CONTROL, NOINVERT
+    VK_ESCAPE,      ID_ALTERNATIVE_MOVING_MODE, VIRTKEY, NOINVERT
+    VK_F10,         ID_CURRENT_VIEW_PROPERTIES, VIRTKEY, NOINVERT
+    VK_F5,          ID_ISOMETRIC_TOP,       VIRTKEY, NOINVERT
+    VK_F5,          ID_ISOMETRIC_BOTTOM,    VIRTKEY, SHIFT, NOINVERT
+    VK_F6,          ID_ISOMETRIC_RIGHT,     VIRTKEY, NOINVERT
+    VK_F6,          ID_ISOMETRIC_LEFT,      VIRTKEY, SHIFT, NOINVERT
+    VK_F7,          ID_ISOMETRIC_FRONT,     VIRTKEY, NOINVERT
+    VK_F7,          ID_ISOMETRIC_BACK,      VIRTKEY, SHIFT, NOINVERT
+    VK_F8,          ID_PERSPECTIVE,         VIRTKEY, NOINVERT
+    VK_F9,          ID_RE_TRIPLE,           VIRTKEY, NOINVERT
+    VK_HOME,        ID_RESTORE_POSITION01,  VIRTKEY, NOINVERT
+    VK_HOME,        ID_STORE_POSITION01,    VIRTKEY, CONTROL, NOINVERT
+    VK_LEFT,        ID_ROTATE_LEFT,         VIRTKEY, NOINVERT
+    VK_LEFT,        ID_ROTATE_LEFT,         VIRTKEY, SHIFT, NOINVERT
+    VK_MULTIPLY,    ID_CSG_SPLIT_POLYGONS,  VIRTKEY, NOINVERT
+    VK_MULTIPLY,    ID_CSG_JOIN_ALL_POLYGONS, VIRTKEY, ALT, NOINVERT
+    VK_MULTIPLY,    ID_CSG_JOIN_ALL_POLYGONS, VIRTKEY, CONTROL, ALT, 
+                                                    NOINVERT
+    VK_MULTIPLY,    ID_CSG_JOIN_POLYGONS,   VIRTKEY, SHIFT, NOINVERT
+    VK_MULTIPLY,    ID_CSG_JOIN_POLYGONS,   VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_NEXT,        ID_RESTORE_POSITION04,  VIRTKEY, NOINVERT
+    VK_NEXT,        ID_STORE_POSITION04,    VIRTKEY, CONTROL, NOINVERT
+    VK_NEXT,        ID_ADD_ROUGHER_MIP_LEVEL, VIRTKEY, SHIFT, NOINVERT
+    VK_NEXT,        ID_ADD_ROUGHER_MIP_LEVEL, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_PRIOR,       ID_RESTORE_POSITION03,  VIRTKEY, NOINVERT
+    VK_PRIOR,       ID_STORE_POSITION03,    VIRTKEY, CONTROL, NOINVERT
+    VK_PRIOR,       ID_ADD_MORE_PRECISE_MIP, VIRTKEY, SHIFT, NOINVERT
+    VK_PRIOR,       ID_ADD_MORE_PRECISE_MIP, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_RETURN,      ID_LAST_PRIMITIVE,      VIRTKEY, NOINVERT
+    VK_RIGHT,       ID_ROTATE_RIGHT,        VIRTKEY, NOINVERT
+    VK_RIGHT,       ID_ROTATE_RIGHT,        VIRTKEY, SHIFT, NOINVERT
+    VK_SUBTRACT,    ID_CSG_REMOVE,          VIRTKEY, NOINVERT
+    VK_SUBTRACT,    ID_ZOOM_LESS,           VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         ID_ROTATE,              VIRTKEY, NOINVERT
+    VK_TAB,         ID_ROTATE_BACK,         VIRTKEY, SHIFT, NOINVERT
+    VK_UP,          ID_ROTATE_UP,           VIRTKEY, NOINVERT
+    VK_UP,          ID_ROTATE_UP,           VIRTKEY, SHIFT, NOINVERT
+    "W",            ID_SNAPSHOT,            VIRTKEY, CONTROL, NOINVERT
+    "X",            ID_HIDE_UNSELECTED,     VIRTKEY, NOINVERT
+    "X",            ID_CUT_MODE,            VIRTKEY, CONTROL, NOINVERT
+    "X",            ID_HIDE_SELECTED,       VIRTKEY, ALT, NOINVERT
+    "X",            ID_APPLY_MAXIMUM,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "Y",            ID_KEY_Y,               VIRTKEY, NOINVERT
+    "Y",            ID_APPLY_CONTINOUS_NOISE, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "Z",            ID_VIEW_SELECTION,      VIRTKEY, NOINVERT
+    "Z",            ID_OPTIMIZE_LAYERS,     VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "[",            ID_PREVIOUS,            ASCII,  NOINVERT
+    "\\",           ID_KEY_BACKSLASH,       ASCII,  NOINVERT
+    "]",            ID_NEXT,                ASCII,  NOINVERT
+    "`",            ID_DESELECT_ALL,        ASCII,  NOINVERT
+    "`",            ID_MAXIMIZE_VIEW,       ASCII,  ALT, NOINVERT
+    "|",            ID_SELECT_WHO_TARGETS,  ASCII,  NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 216, 87
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About WorldEditor"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,108,7,20,20
+    DEFPUSHBUTTON   "OK",IDOK,177,7,32,13,WS_GROUP
+    CTEXT           "Serious Engine",IDC_STATIC,7,9,58,8,SS_NOPREFIX
+    LTEXT           "Copyright © 2001 CroTeam Ltd. All rights reserved.",
+                    IDC_STATIC,7,72,197,8
+    CTEXT           "Serious Editor",IDC_STATIC,7,18,60,8,SS_NOPREFIX
+    LTEXT           "For licensing Serious Engine email:",IDC_STATIC,7,42,
+                    115,8
+    LTEXT           "licensing@croteam.com",IDC_STATIC,129,42,80,8
+    LTEXT           "Please visit Croteam's WWW site at:",IDC_STATIC,7,51,
+                    121,8
+    LTEXT           "www.croteam.com",IDC_STATIC,129,51,80,8
+END
+
+IDD_CREATE_VIRTUAL_DIRECTORY DIALOG DISCARDABLE  0, 0, 318, 125
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Virtual directory"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_EDIT1,79,7,232,12,ES_AUTOHSCROLL
+    CONTROL         "List1",IDC_DIRECTORY_ICON_LIST,"SysListView32",
+                    LVS_SMALLICON | LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,7,
+                    34,304,59
+    LTEXT           "&New directory name:",IDC_STATIC,7,11,72,8
+    DEFPUSHBUTTON   "OK",IDOK,201,104,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,261,104,50,14
+END
+
+CG_IDD_BROWSEDIALOGBAR DIALOG DISCARDABLE  0, 0, 114, 268
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Tree1",IDC_VIRTUALTREE,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
+                    WS_BORDER | WS_TABSTOP,7,12,100,11
+END
+
+CG_IDD_PROPERTYCOMBO DIALOGEX 0, 0, 113, 323
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_PROPERTYCOMBO,6,3,103,196,CBS_DROPDOWNLIST | 
+                    CBS_SORT | CBS_DISABLENOSCROLL | WS_DISABLED | 
+                    WS_VSCROLL | WS_TABSTOP,WS_EX_LEFTSCROLLBAR
+    CONTROL         "",IDC_EASY,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,6,55,8,8
+    CONTROL         "",IDC_NORMAL,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,17,55,8,8
+    CONTROL         "",IDC_HARD,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,28,55,8,8
+    CONTROL         "",IDC_EXTREME,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,39,55,8,8
+    LTEXT           "E",IDC_EASY_T,6,47,8,8,WS_DISABLED
+    LTEXT           "N",IDC_NORMAL_T,17,47,8,8,WS_DISABLED
+    LTEXT           "H",IDC_HARD_T,28,47,8,8,WS_DISABLED
+    LTEXT           "X",IDC_EXTREME_T,41,47,8,8,WS_DISABLED
+    CONTROL         "",IDC_SINGLE,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,6,72,8,8
+    CONTROL         "",IDC_COOPERATIVE,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,17,72,8,8
+    CONTROL         "",IDC_DEATHMATCH,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,28,72,9,8
+    LTEXT           "S",IDC_SINGLE_T,6,64,8,8,WS_DISABLED
+    LTEXT           "C",IDC_COOPERATIVE_T,17,64,8,8,WS_DISABLED
+    LTEXT           "D",IDC_DEATHMATCH_T,28,64,8,8,WS_DISABLED
+    COMBOBOX        IDC_EDIT_ENUM,6,84,103,180,CBS_DROPDOWNLIST | CBS_SORT | 
+                    NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Value (Yes/No)",IDC_EDIT_BOOL,"Button",BS_AUTO3STATE | 
+                    NOT WS_VISIBLE | WS_TABSTOP,6,100,103,9
+    EDITTEXT        IDC_EDIT_STRING,6,112,103,12,ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE
+    EDITTEXT        IDC_EDIT_FLOAT,6,126,54,12,ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE
+    LTEXT           "Float range text",IDC_FLOAT_RANGE_T,6,204,64,8,NOT 
+                    WS_VISIBLE
+    CONTROL         "",IDC_EDIT_COLOR,"Button",BS_OWNERDRAW | NOT WS_VISIBLE | 
+                    WS_TABSTOP,82,268,28,10
+    PUSHBUTTON      "...",IDC_BROWSE_FILE,6,156,19,13,NOT WS_VISIBLE
+    LTEXT           "Choose color text",IDC_CHOOSE_COLOR_T,6,268,64,8,NOT 
+                    WS_VISIBLE
+    LTEXT           "File name text",IDC_FILE_NAME_T,6,214,64,8,NOT 
+                    WS_VISIBLE
+    EDITTEXT        IDC_EDIT_INDEX,6,141,54,12,ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE
+    LTEXT           "Index range text",IDC_INDEX_RANGE_T,6,225,64,8,NOT 
+                    WS_VISIBLE
+    EDITTEXT        IDC_EDIT_BBOX_MIN,6,190,36,12,ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE
+    EDITTEXT        IDC_EDIT_BBOX_MAX,42,190,36,12,ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE
+    CONTROL         "X",IDC_AXIS_X,"Button",BS_AUTORADIOBUTTON | NOT 
+                    WS_VISIBLE | WS_GROUP,6,175,21,10
+    CONTROL         "Y",IDC_AXIS_Y,"Button",BS_AUTORADIOBUTTON | NOT 
+                    WS_VISIBLE,30,175,21,10
+    CONTROL         "Z",IDC_AXIS_Z,"Button",BS_AUTORADIOBUTTON | NOT 
+                    WS_VISIBLE,52,175,21,10
+    CONTROL         "Entity class",IDC_ENTITY_CLASS,"Static",
+                    SS_LEFTNOWORDWRAP | NOT WS_VISIBLE | WS_GROUP,6,238,103,
+                    8
+    CONTROL         "Entity name",IDC_ENTITY_NAME,"Static",SS_LEFTNOWORDWRAP | 
+                    NOT WS_VISIBLE | WS_GROUP,6,247,103,8
+    CONTROL         "Entity description",IDC_ENTITY_DESCRIPTION,"Static",
+                    SS_LEFTNOWORDWRAP | NOT WS_VISIBLE | WS_GROUP,6,256,103,
+                    8
+    EDITTEXT        IDC_EDIT_HEADING,38,282,20,12,ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE
+    EDITTEXT        IDC_EDIT_PITCH,64,282,20,12,ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE
+    EDITTEXT        IDC_EDIT_BANKING,90,282,20,12,ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE
+    LTEXT           "HPB",IDC_ANGLE3D_T,6,284,16,8,NOT WS_VISIBLE
+    PUSHBUTTON      "X",IDC_NO_FILE,30,156,12,13,NOT WS_VISIBLE
+    CONTROL         "",IDC_DIFFICULTY_1,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,50,55,8,8
+    LTEXT           "1",IDC_DIFFICULTY_1_T,52,47,8,8,WS_DISABLED
+    CONTROL         "",IDC_DIFFICULTY_2,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,61,55,8,8
+    LTEXT           "2",IDC_DIFFICULTY_2_T,63,47,8,8,WS_DISABLED
+    CONTROL         "",IDC_DIFFICULTY_3,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,71,55,8,8
+    LTEXT           "3",IDC_DIFFICULTY_3_T,73,47,8,8,WS_DISABLED
+    CONTROL         "",IDC_DIFFICULTY_4,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,82,55,8,8
+    LTEXT           "4",IDC_DIFFICULTY_4_T,84,47,8,8,WS_DISABLED
+    CONTROL         "",IDC_DIFFICULTY_5,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,93,55,8,8
+    LTEXT           "5",IDC_DIFFICULTY_5_T,95,47,8,8,WS_DISABLED
+    CONTROL         "",IDC_GAME_MODE_1,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,39,72,8,8
+    LTEXT           "1",IDC_GAME_MODE_1_T,41,64,8,8,WS_DISABLED
+    CONTROL         "",IDC_GAME_MODE_2,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,50,72,8,8
+    LTEXT           "2",IDC_GAME_MODE_2_T,52,64,8,8,WS_DISABLED
+    CONTROL         "",IDC_GAME_MODE_3,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,60,72,8,8
+    LTEXT           "3",IDC_GAME_MODE_3_T,62,64,8,8,WS_DISABLED
+    CONTROL         "",IDC_GAME_MODE_4,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,71,72,8,8
+    LTEXT           "4",IDC_GAME_MODE_4_T,73,64,8,8,WS_DISABLED
+    CONTROL         "",IDC_GAME_MODE_5,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,82,72,8,8
+    LTEXT           "5",IDC_GAME_MODE_5_T,84,64,8,8,WS_DISABLED
+    CONTROL         "",IDC_GAME_MODE_6,"Button",BS_AUTO3STATE | BS_CENTER | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,93,72,8,8
+    LTEXT           "6",IDC_GAME_MODE_6_T,95,64,8,8,WS_DISABLED
+    PUSHBUTTON      "No target",IDC_NO_TARGET,48,157,61,13,NOT WS_VISIBLE
+    CONTROL         "",ID_FLAGS_PROPERTY,"Button",BS_OWNERDRAW | NOT 
+                    WS_VISIBLE | WS_TABSTOP,6,299,103,13
+END
+
+IDD_PREFERENCES DIALOG DISCARDABLE  0, 0, 290, 270
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "World editor preferences"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Copy state of existing window",IDC_PREFS_COPY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,17,112,8
+    CONTROL         "Set default colors",IDC_PREFS_SET_DEFAULT_COLORS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,26,112,8
+    CONTROL         "Maximize window on open",IDC_PREFS_MAXIMIZE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,34,112,10
+    CONTROL         "Allways update inactive views",IDC_PREFS_UPDATE_ALLWAYS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,43,112,10
+    CONTROL         "Automatic info",IDC_PREFS_AUTOMATIC_INFO,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,52,112,10
+    CONTROL         "Binary grid by default",
+                    IDC_PREFS_BINARY_GRID_BY_DEFAULT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,61,112,10
+    CONTROL         "Save undo for delete",IDC_PREFS_SAVE_UNDO_FOR_DELETE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,70,112,10
+    CONTROL         "Automaticly colorize primitives",
+                    IDC_PREFS_AUTO_COLORIZE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,15,79,112,10
+    CONTROL         "Show all on open",IDC_PREFS_SHOW_ALL_ON_OPEN,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,88,112,10
+    CONTROL         "Auto update displace map",
+                    IDC_PREFS_AUTO_UPDATE_DISPLACEMAP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,98,112,10
+    CONTROL         "&Hide shadows on start",IDC_PREFS_HIDE_SHADOWS_ON_START,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,107,112,10
+    CONTROL         "Slider1",IDC_UNDO_LEVELS,"msctls_trackbar32",
+                    TBS_AUTOTICKS | WS_TABSTOP,66,132,66,19
+    CONTROL         "Slider1",IDC_CSG_PRECISSION,"msctls_trackbar32",
+                    TBS_AUTOTICKS | WS_TABSTOP,66,152,66,19
+    COMBOBOX        IDC_TERRAIN_SELECTON_VISIBLE,70,205,65,100,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_TERRAIN_SELECTION_HIDDEN,70,220,65,100,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "1",IDC_RENDERING_PREFS01,152,26,22,14
+    PUSHBUTTON      "2",IDC_RENDERING_PREFS02,177,26,22,14
+    PUSHBUTTON      "3",IDC_RENDERING_PREFS03,202,26,22,14
+    PUSHBUTTON      "4",IDC_RENDERING_PREFS04,227,26,22,14
+    PUSHBUTTON      "5",IDC_RENDERING_PREFS05,252,26,22,14
+    PUSHBUTTON      "6",IDC_RENDERING_PREFS06,152,52,22,14
+    PUSHBUTTON      "7",IDC_RENDERING_PREFS07,177,52,22,14
+    PUSHBUTTON      "8",IDC_RENDERING_PREFS08,202,52,22,14
+    PUSHBUTTON      "9",IDC_RENDERING_PREFS09,227,52,22,14
+    PUSHBUTTON      "10",IDC_RENDERING_PREFS10,252,52,22,14
+    EDITTEXT        IDC_WND_STARTUP_CFG,250,74,27,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FLY_MODE_SPEED,225,107,52,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_API,225,125,52,100,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_EDIT_SS_PROJECT,214,170,63,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MEMORY_FOR_UNDO,225,205,52,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Change &full screen display mode",
+                    IDC_CHANGE_FULL_SCREEN_DISPLAY_MODE,5,245,126,16
+    PUSHBUTTON      "OK",IDOK,161,248,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,223,248,58,14
+    GROUPBOX        "User flags",IDC_STATIC,7,7,126,115,BS_CENTER
+    GROUPBOX        "Global settings",IDC_STATIC,7,123,126,64,BS_CENTER
+    LTEXT           "Undo levels:",IDC_STATIC,14,135,55,9
+    LTEXT           "CSG precission:",IDC_STATIC,14,155,55,9
+    GROUPBOX        "Rendering configurations",IDC_STATIC,142,7,141,84,
+                    BS_CENTER
+    LTEXT           "Window startup configuration:",IDC_STATIC,148,77,102,9
+    GROUPBOX        "Source safe",IDC_STATIC_SOURCE_SAFE_BORDER,142,158,141,
+                    29,BS_CENTER
+    LTEXT           "Source safe project:",IDC_STATIC_SOURCE_SAFE_PROJECT,
+                    146,173,65,8
+    LTEXT           "Static",IDC_CSG_PRECISSION_T,15,175,111,8
+    GROUPBOX        "Misc",IDC_MISC_BORDER,142,95,141,59,BS_CENTER
+    LTEXT           "Fly mode speed:",IDC_STATIC,151,111,61,9
+    LTEXT           "Display API:",IDC_STATIC,151,129,65,8
+    LTEXT           "Selection visible:",IDC_STATIC,10,209,60,8
+    GROUPBOX        "Terrain mode",IDC_STATIC,5,195,280,45,BS_CENTER
+    LTEXT           "Selection hidden:",IDC_STATIC,10,225,60,8
+    LTEXT           "Memory for undo (Mb):",IDC_STATIC,146,209,74,8
+    CONTROL         "&Auto update terrain distribution",
+                    IDC_PREFS_AUTO_GENERATE_TD,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,223,135,10
+END
+
+IDD_PG_PRIMITIVE DIALOGEX 0, 0, 208, 82
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION | WS_SYSMENU
+CAPTION "Primitives"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "W:",IDC_WIDTH_T,7,8,12,8
+    EDITTEXT        IDC_WIDTH,20,4,33,12,ES_AUTOHSCROLL
+    LTEXT           "L:",IDC_LENGHT_T,7,21,12,8
+    EDITTEXT        IDC_LENGHT,20,16,33,13,ES_AUTOHSCROLL
+    LTEXT           "H:",IDC_HEIGHT_T,7,34,12,8
+    EDITTEXT        IDC_HEIGHT,20,29,33,13,ES_AUTOHSCROLL
+    COMBOBOX        IDC_PRIMITIVE_HISTORY,40,42,16,234,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | 
+                    CBS_DISABLENOSCROLL | WS_VSCROLL,WS_EX_LEFTSCROLLBAR
+    LTEXT           "Shear x:",IDC_EDIT1_T,56,9,46,8
+    EDITTEXT        IDC_EDIT1,102,4,24,13,ES_AUTOHSCROLL
+    LTEXT           "Shear y:",IDC_EDIT2_T,56,22,46,8
+    EDITTEXT        IDC_EDIT2,102,17,24,13,ES_AUTOHSCROLL
+    LTEXT           "Base vtx:",IDC_EDIT3_T,56,34,46,8
+    EDITTEXT        IDC_EDIT3,102,30,24,12,ES_AUTOHSCROLL
+    LTEXT           "Stretch x:",IDC_EDIT4_T,129,8,34,8
+    COMBOBOX        IDC_TOP_SHAPE,166,4,41,257,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_EDIT4,183,4,24,12,ES_AUTOHSCROLL
+    LTEXT           "Stretch y:",IDC_EDIT5_T,129,21,34,8
+    COMBOBOX        IDC_BOTTOM_SHAPE,166,17,41,266,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT5,183,17,24,12,ES_AUTOHSCROLL
+    CONTROL         "&Room:",IDC_IF_ROOM,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,129,34,78,8
+    CONTROL         "&Spiral:",IDC_IF_SPIRAL,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,129,45,78,8
+    CONTROL         "&Create mip brushes",IDC_AUTO_CREATE_MIP_BRUSHES,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,70,92,8
+    LTEXT           "Polygon color:",IDC_STATIC,106,59,45,8
+    LTEXT           "Sector color:",IDC_STATIC,106,70,45,8
+    CONTROL         "",ID_POLYGON_COLOR,"Button",BS_OWNERDRAW | WS_TABSTOP,
+                    154,55,53,12
+    CONTROL         "",ID_SECTOR_COLOR,"Button",BS_OWNERDRAW | WS_TABSTOP,
+                    154,68,53,12
+    CONTROL         "&Outer:",IDC_IF_OUTER,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,56,45,70,8
+    LTEXT           "History:",IDC_STATIC,7,45,32,8
+    LTEXT           "Displace:",IDC_DISPLACE_T,56,45,30,8
+    PUSHBUTTON      "...",IDC_DISPLACE_BROWSE,161,44,21,10
+    PUSHBUTTON      "None",IDC_DISPLACE_NONE,186,44,21,10
+    LTEXT           "Displace.pcx",IDC_DISPLACE_FILE,85,45,73,8
+END
+
+IDD_PG_POSITION DIALOG DISCARDABLE  0, 0, 186, 61
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION | WS_SYSMENU
+CAPTION "Position"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_EDIT_X,18,8,60,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_Y,18,22,60,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_Z,18,36,60,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_HEADING,120,8,61,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PITCH,120,22,61,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_BANKING,120,36,61,12,ES_AUTOHSCROLL
+    LTEXT           "Heading:",IDC_STATIC_HEADING,86,9,32,8
+    LTEXT           "Pitch:",IDC_STATIC_PITCH,86,26,32,8
+    LTEXT           "Banking:",IDC_STATIC_BANKING,86,40,32,8
+    LTEXT           "X:",IDC_STATIC_X,4,12,14,8
+    LTEXT           "Y:",IDC_STATIC_Y,4,26,14,8
+    LTEXT           "Z:",IDC_STATIC_Z,4,40,14,8
+END
+
+IDD_RENDERING_PREFERENCES DIALOG DISCARDABLE  0, 0, 346, 270
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Change rendering preferences"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_PAPER_COLOR,"Button",BS_OWNERDRAW | WS_TABSTOP,84,
+                    19,75,12
+    CONTROL         "",IDC_GRID_COLOR,"Button",BS_OWNERDRAW | WS_TABSTOP,84,
+                    31,75,12
+    PUSHBUTTON      "...",IDC_BROWSE_BCG_PICTURE,140,48,19,12
+    CONTROL         "",IDC_VERTEX_COLORS,"Button",BS_OWNERDRAW | WS_TABSTOP,
+                    84,70,75,12
+    CONTROL         "",IDC_EDGES_COLORS,"Button",BS_OWNERDRAW | WS_TABSTOP,
+                    84,82,75,12
+    CONTROL         "",IDC_POLYGON_COLORS,"Button",BS_OWNERDRAW | WS_TABSTOP,
+                    84,94,75,12
+    CONTROL         "",IDC_SELECTION_COLOR,"Button",BS_OWNERDRAW | 
+                    WS_TABSTOP,84,106,75,12
+    COMBOBOX        IDC_VERTEX_FILL_TYPE,84,125,75,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_EDGES_FILL_TYPE,84,139,75,73,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_POLYGON_FILL_TYPE,84,153,75,73,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "&Auto rendering range",IDC_AUTO_RENDERING_RANGE,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,19,178,140,8
+    EDITTEXT        IDC_RENDERING_RANGE,115,189,44,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FAR_CLIP_PLANE,116,205,44,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_FLARE_FX,245,19,83,75,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Render &background",IDC_USE_TEXTURE_FOR_BCG,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,193,37,135,8
+    CONTROL         "Render f&ields",IDC_RENDER_FIELDS,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,193,48,135,8
+    CONTROL         "Render &mirrors",IDC_RENDER_MIRRORS,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,193,59,135,8
+    CONTROL         "Render &fog",IDC_RENDER_FOG,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,193,70,135,8
+    CONTROL         "Render &haze",IDC_RENDER_HAZE,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,193,81,135,8
+    CONTROL         "Bounding bo&x",IDC_BBOX,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | BS_LEFT | WS_TABSTOP,193,125,135,8
+    CONTROL         "&Wire frame",IDC_WIRE_FRAME,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,193,137,135,8
+    CONTROL         "&Shadows",IDC_SHADOWS,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,193,149,135,8
+    CONTROL         "Hidden &lines",IDC_HIDEN_LINES,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,193,161,135,8
+    CONTROL         "Render &editor models",IDC_RENDER_EDITOR_MODELS,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,193,173,135,8
+    COMBOBOX        IDC_TEXTURE_FILL_TYPE,245,185,83,67,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Load",ID_LOAD_PREFERENCES,110,250,50,14
+    PUSHBUTTON      "Save",ID_SAVE_PREFERENCES,170,250,50,14
+    PUSHBUTTON      "OK",IDOK,230,250,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,290,250,50,14
+    GROUPBOX        "World rendering",IDC_STATIC,7,7,162,233,BS_CENTER
+    LTEXT           "Paper color:",IDC_STATIC,19,22,63,8
+    LTEXT           "Grid color:",IDC_STATIC,19,34,63,8
+    LTEXT           "Vertices ink:",IDC_STATIC,19,74,51,8
+    LTEXT           "Edges ink:",IDC_STATIC,19,85,51,8
+    LTEXT           "Polygons ink:",IDC_STATIC,19,97,51,8
+    LTEXT           "Selection color:",IDC_STATIC,19,108,64,8
+    LTEXT           "Vertex fill type:",IDC_STATIC,19,129,52,8
+    LTEXT           "Edges fill type:",IDC_STATIC,19,143,52,8
+    LTEXT           "Polygon fill type:",IDC_STATIC,19,157,58,8
+    LTEXT           "Rendering range:",IDC_STATIC,19,193,86,8
+    GROUPBOX        "World rendering",IDC_STATIC,180,7,159,100,BS_CENTER
+    LTEXT           "Flare FX:",IDC_STATIC,193,24,52,8
+    GROUPBOX        "Model rendering",IDC_STATIC,180,110,159,95,BS_CENTER
+    LTEXT           "Texture type:",IDC_STATIC,193,189,52,8
+    LTEXT           "Bcg picture:",IDC_STATIC,19,50,40,8
+    LTEXT           "sky01.tex",IDC_BCG_PICTURE_T,61,50,74,8
+    LTEXT           "Far clip plane (-1 for none):",IDC_STATIC,20,208,86,8
+    CONTROL         "Use far clip plane in isometric projections",
+                    IDC_APPLY_CLIP_FOR_ISOMETRIC,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | BS_LEFT | WS_TABSTOP,20,222,140,8
+END
+
+IDD_PG_GLOBAL DIALOGEX 0, 0, 208, 82
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_ACCEPTFILES
+CAPTION "Global"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Selected polygons:",IDC_STATIC,89,8,62,8
+    LTEXT           "1000",IDC_SELECTED_POLYGONS,154,8,25,8
+    LTEXT           "Selected sectors:",IDC_STATIC,89,20,62,8
+    LTEXT           "1000",IDC_SELECTED_SECTORS,154,20,25,8
+    LTEXT           "Selected entities:",IDC_STATIC,89,32,62,8
+    LTEXT           "1000",IDC_SELECTED_ENTITIES,154,32,25,8
+    LTEXT           "Static",IDC_TEXTURE_INFO,7,66,172,9
+END
+
+IDD_SELECT_BY_NAME DIALOG DISCARDABLE  0, 0, 260, 148
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select entities by name"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LISTBOX         IDC_ENTITY_LIST,7,7,179,134,LBS_SORT | 
+                    LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,202,107,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,202,127,50,14
+    PUSHBUTTON      "&Select all",ID_SELECT_ALL,202,7,50,14
+    PUSHBUTTON      "&Deselect all",ID_DESELECT_ALL,202,27,50,14
+END
+
+IDD_WORLD_SETTINGS DIALOG DISCARDABLE  0, 0, 343, 312
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Background color:",IDC_STATIC,14,15,66,8
+    CONTROL         "",IDC_BACKGROUND_COLOR,"Button",BS_OWNERDRAW | 
+                    WS_TABSTOP,84,8,58,15
+    LTEXT           "Background picture:",IDC_STATIC,14,20,70,8,NOT 
+                    WS_VISIBLE
+    LTEXT           "c:\\work\\flesh\\textures\\backgrounds\\sky01.tex",
+                    IDC_PICTURE_FILE_T,84,20,224,8,NOT WS_VISIBLE
+    PUSHBUTTON      "...",IDC_BROWSE_BACKGROUND_PICTURE,311,17,19,11,NOT 
+                    WS_VISIBLE
+    GROUPBOX        "",IDC_STATIC,8,32,329,24,BS_LEFT
+    LTEXT           "Backdrop object:",IDC_STATIC,14,43,70,8
+    LTEXT           "c:\\work\\flesh\\textures\\backgrounds\\sky01.lwo",
+                    IDC_BACKDROP_OBJECT_T,84,43,224,8
+    PUSHBUTTON      "...",IDC_BROWSE_BACKDROP_OBJECT,311,40,19,11
+    GROUPBOX        "",IDC_STATIC,7,56,329,42,BS_LEFT
+    LTEXT           "Top view picture:",IDC_STATIC,15,65,70,8
+    LTEXT           "c:\\work\\flesh\\textures\\backgrounds\\sky01.tex",
+                    IDC_TOP_VIEW_PICTURE_T,85,65,224,8
+    PUSHBUTTON      "...",IDC_BROWSE_TOP_VIEW_PICTURE,312,61,19,12
+    LTEXT           "Width:",IDC_STATIC,15,81,30,8
+    EDITTEXT        IDC_TOP_VIEW_WIDTH,45,78,30,12,ES_AUTOHSCROLL
+    LTEXT           "Lenght:",IDC_STATIC,85,81,25,8
+    EDITTEXT        IDC_TOP_VIEW_HEIGHT,115,78,30,12,ES_AUTOHSCROLL
+    LTEXT           "Center x:",IDC_STATIC,155,81,30,8
+    EDITTEXT        IDC_TOP_VIEW_CENTER_X,185,78,30,12,ES_AUTOHSCROLL
+    LTEXT           "Center z:",IDC_STATIC,225,81,29,8
+    EDITTEXT        IDC_TOP_VIEW_CENTER_Y,255,78,30,12,ES_AUTOHSCROLL
+    GROUPBOX        "",IDC_STATIC,8,98,329,42,BS_LEFT
+    LTEXT           "Front view picture:",IDC_STATIC,16,110,70,8
+    LTEXT           "c:\\work\\flesh\\textures\\backgrounds\\sky01.tex",
+                    IDC_FRONT_VIEW_PICTURE_T,86,110,223,8
+    PUSHBUTTON      "...",IDC_BROWSE_FRONT_VIEW_PICTURE,312,106,19,12
+    LTEXT           "Width:",IDC_STATIC,16,127,30,8
+    EDITTEXT        IDC_FRONT_VIEW_WIDTH,46,122,30,12,ES_AUTOHSCROLL
+    LTEXT           "Height:",IDC_STATIC,86,127,30,8
+    EDITTEXT        IDC_FRONT_VIEW_HEIGHT,116,122,30,12,ES_AUTOHSCROLL
+    LTEXT           "Center x:",IDC_STATIC,156,127,30,8
+    EDITTEXT        IDC_FRONT_VIEW_CENTER_X,186,122,30,12,ES_AUTOHSCROLL
+    LTEXT           "Center y:",IDC_STATIC,226,127,30,8
+    EDITTEXT        IDC_FRONT_VIEW_CENTER_Y,256,122,30,12,ES_AUTOHSCROLL
+    GROUPBOX        "",IDC_STATIC,8,142,329,42,BS_LEFT
+    LTEXT           "Right view picture:",IDC_STATIC,16,152,70,8
+    LTEXT           "c:\\work\\flesh\\textures\\backgrounds\\sky01.tex",
+                    IDC_RIGHT_VIEW_PICTURE_T,86,152,223,8
+    PUSHBUTTON      "...",IDC_BROWSE_RIGHT_VIEW_PICTURE,312,150,19,12
+    LTEXT           "Lenght:",IDC_STATIC,16,171,25,8
+    EDITTEXT        IDC_RIGHT_VIEW_WIDTH,46,166,30,12,ES_AUTOHSCROLL
+    LTEXT           "Height:",IDC_STATIC,86,171,30,8
+    EDITTEXT        IDC_RIGHT_VIEW_HEIGHT,116,166,30,12,ES_AUTOHSCROLL
+    LTEXT           "Center z:",IDC_STATIC,156,171,29,8
+    EDITTEXT        IDC_RIGHT_VIEW_CENTER_X,186,166,30,12,ES_AUTOHSCROLL
+    LTEXT           "Center y:",IDC_STATIC,226,171,30,8
+    EDITTEXT        IDC_RIGHT_VIEW_CENTER_Y,256,166,30,12,ES_AUTOHSCROLL
+    GROUPBOX        "",IDC_STATIC,8,186,329,47,BS_LEFT
+    LTEXT           "Level name:",IDC_STATIC,14,200,46,8
+    EDITTEXT        IDC_EDIT_LEVEL_NAME,74,196,256,12,ES_AUTOHSCROLL
+    LTEXT           "Spawn flags:",IDC_STATIC,14,219,60,8
+    CONTROL         "",IDC_EASY,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,75,219,8,8
+    LTEXT           "E",IDC_EASY_T,75,211,8,8
+    CONTROL         "",IDC_NORMAL,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,86,219,8,8
+    LTEXT           "N",IDC_NORMAL_T,86,211,8,8
+    CONTROL         "",IDC_HARD,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,97,219,8,8
+    LTEXT           "H",IDC_HARD_T,97,211,8,8
+    CONTROL         "",IDC_EXTREME,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,108,219,8,8
+    CONTROL         "",IDC_DIFFICULTY_1B,"Button",BS_AUTOCHECKBOX | 
+                    BS_CENTER | BS_MULTILINE | WS_TABSTOP,119,219,8,8
+    LTEXT           "X",IDC_EXTREME_T,110,211,8,8
+    LTEXT           "1",IDC_DIFFICULTY_1_T2,121,211,8,8
+    CONTROL         "",IDC_DIFFICULTY_2B,"Button",BS_AUTOCHECKBOX | 
+                    BS_CENTER | BS_MULTILINE | WS_TABSTOP,130,219,8,8
+    LTEXT           "2",IDC_DIFFICULTY_2_T2,132,211,8,8
+    CONTROL         "",IDC_DIFFICULTY_3B,"Button",BS_AUTOCHECKBOX | 
+                    BS_CENTER | BS_MULTILINE | WS_TABSTOP,140,219,8,8
+    LTEXT           "3",IDC_DIFFICULTY_3_T2,142,211,8,8
+    CONTROL         "",IDC_DIFFICULTY_4B,"Button",BS_AUTOCHECKBOX | 
+                    BS_CENTER | BS_MULTILINE | WS_TABSTOP,151,219,8,8
+    LTEXT           "4",IDC_DIFFICULTY_4_T2,153,211,8,8
+    CONTROL         "",IDC_DIFFICULTY_5B,"Button",BS_AUTOCHECKBOX | 
+                    BS_CENTER | BS_MULTILINE | WS_TABSTOP,162,219,8,8
+    LTEXT           "5",IDC_DIFFICULTY_5_T2,164,211,8,8
+    CONTROL         "",IDC_SINGLE,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,183,219,8,8
+    LTEXT           "S",IDC_SINGLE_T,183,211,8,8
+    CONTROL         "",IDC_COOPERATIVE,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,194,219,8,8
+    LTEXT           "C",IDC_COOPERATIVE_T,194,211,8,8
+    CONTROL         "",IDC_DEATHMATCH,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,205,219,9,8
+    LTEXT           "D",IDC_DEATHMATCH_T,205,211,8,8
+    CONTROL         "",IDC_GAME_MODE_1B,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,216,219,8,8
+    LTEXT           "1",IDC_GAME_MODE_1_T2,218,211,8,8
+    CONTROL         "",IDC_GAME_MODE_2B,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,227,219,8,8
+    LTEXT           "2",IDC_GAME_MODE_2_T2,229,211,8,8
+    CONTROL         "",IDC_GAME_MODE_3B,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,237,219,8,8
+    LTEXT           "3",IDC_GAME_MODE_3_T2,239,211,8,8
+    CONTROL         "",IDC_GAME_MODE_4B,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,248,219,8,8
+    LTEXT           "4",IDC_GAME_MODE_4_T2,250,211,8,8
+    CONTROL         "",IDC_GAME_MODE_5B,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,259,219,8,8
+    LTEXT           "5",IDC_GAME_MODE_5_T2,261,211,8,8
+    CONTROL         "",IDC_GAME_MODE_6B,"Button",BS_AUTOCHECKBOX | BS_CENTER | 
+                    BS_MULTILINE | WS_TABSTOP,270,219,8,8
+    LTEXT           "6",IDC_GAME_MODE_6_T2,272,211,8,8
+    CTEXT           "Edit mission description",IDC_STATIC,7,239,329,8
+    EDITTEXT        IDC_MISSION_DESCRIPTION,7,251,329,36,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL
+    DEFPUSHBUTTON   "OK",ID_APPLY,231,291,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,287,291,50,14
+END
+
+IDD_PG_RENDERING_STATISTICS DIALOG DISCARDABLE  0, 0, 186, 82
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Stats"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_RENDERING_STATISTICS,7,7,172,68,ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | ES_WANTRETURN | 
+                    WS_VSCROLL | NOT WS_TABSTOP
+END
+
+IDD_PG_POLYGON DIALOG DISCARDABLE  0, 0, 208, 82
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION | WS_SYSMENU
+CAPTION "Polygon"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "&Transluscent",IDC_IS_TRANSLUSCENT,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,5,5,55,10
+    CONTROL         "&Portal",IDC_IS_PORTAL,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,5,24,34,10
+    CONTROL         "P&assable",IDC_IS_PASSABLE,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,5,34,45,10
+    CONTROL         "&Invisible",IDC_INVISIBLE,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,76,4,41,10
+    CONTROL         "&Detail",IDC_IS_DETAIL,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,76,14,50,10
+    CONTROL         "&Link",IDC_IS_OLD_PORTAL,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,76,24,28,10
+    RTEXT           "Surface:",IDC_STATIC_FRICTION,4,53,33,8
+    COMBOBOX        IDC_FRICTION_COMBO,37,51,60,249,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Mirror:",IDC_STATIC_MIRROR,4,68,33,8
+    COMBOBOX        IDC_MIRROR_COMBO,37,66,60,234,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "&Occluder",IDC_IS_OCCLUDER,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,76,34,45,10
+    CONTROL         "&Stairs",IDC_STAIRS,"Button",BS_AUTO3STATE | WS_TABSTOP,
+                    148,4,33,10
+    EDITTEXT        IDC_PRETENDER_DISTANCE,119,66,58,12,ES_AUTOHSCROLL
+    CTEXT           "Pretender distance:",IDC_STATIC_PRETENDER_DISTANCE,101,
+                    55,103,8
+    CONTROL         "&Transparent",IDC_IS_TRANSPARENT,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,5,15,54,10
+    CONTROL         "&Shoot trough",IDC_SHOOTTROUGH,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,148,14,57,10
+    CONTROL         "Dou&ble sided",IDC_DOUBLESIDED,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,148,24,56,10
+END
+
+IDD_AUTO_DELTA_CSG DIALOG DISCARDABLE  0, 0, 212, 57
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Auto delta CSG"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Set number of created CSG clones:",IDC_STATIC,7,11,133,
+                    9
+    EDITTEXT        IDC_NO_OF_CLONES,141,9,64,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,194,10,11,
+                    11
+    DEFPUSHBUTTON   "OK",IDOK,96,36,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,155,36,50,14
+END
+
+IDD_PROGRESS_DIALOG DIALOGEX 0, 0, 245, 71
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CTEXT           "Progress message",IDC_PROGRESS_MESSAGE,7,11,231,8
+    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",0x0,7,30,
+                    231,13,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Cancel",IDCANCEL,89,50,50,14
+END
+
+IDD_CREATE_TEXTURE DIALOG DISCARDABLE  0, 0, 292, 116
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create texture"
+FONT 8, "MS Sans Serif"
+BEGIN
+    COMBOBOX        IDC_COMBO1,156,21,129,55,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_COMBO2,156,37,129,54,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Add to browser",IDC_ADD_TO_BROWSER,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,7,76,149,8
+    DEFPUSHBUTTON   "Create",IDOK,175,91,50,15
+    PUSHBUTTON      "Cancel",IDCANCEL,235,92,50,14
+    LTEXT           "Source picture size (pixels):",IDC_STATIC,7,52,88,8
+    LTEXT           "Created textue size (meters):",IDC_STATIC,7,64,92,8
+    LTEXT           "Max mip level, size in mexels (cca milimiters):",
+                    IDC_STATIC,7,24,139,9
+    LTEXT           "1000x1000",IDC_SOURCE_SIZE,156,52,79,8
+    LTEXT           "1000x1000",IDC_CREATED_SIZE,156,64,79,8
+    LTEXT           "Created texture name:",IDC_CREATED_TEXTURE_NAME_T,7,7,
+                    278,8
+    LTEXT           "Max mip maps:",IDC_STATIC,7,40,139,9
+END
+
+IDD_PG_SECTOR DIALOG DISCARDABLE  0, 0, 208, 82
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION | WS_SYSMENU
+CAPTION "Sector"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Name:",IDC_STATIC_SECTOR_NAME,5,7,22,8
+    EDITTEXT        IDC_SECTOR_NAME,36,4,65,12,ES_AUTOHSCROLL
+    RTEXT           "Content:",IDC_STATIC_CONTENT_TYPE_T,4,24,28,8
+    COMBOBOX        IDC_CONTENT_TYPE_COMBO,36,19,65,237,CBS_DROPDOWNLIST | 
+                    CBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Force:",IDC_STATIC_FORCE_FIELD_T,4,36,21,8
+    COMBOBOX        IDC_FORCE_FIELD_COMBO,36,33,65,249,CBS_DROPDOWNLIST | 
+                    CBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Fog:",IDC_STATIC_FOG_T,3,51,15,8
+    COMBOBOX        IDC_FOG_COMBO,36,48,65,249,CBS_DROPDOWNLIST | 
+                    CBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Haze:",IDC_STATIC_HAZE_T,3,65,20,8
+    COMBOBOX        IDC_HAZE_COMBO,36,62,65,249,CBS_DROPDOWNLIST | 
+                    CBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Env:",IDC_STATIC_ENVIRONMENT_TYPE_T,107,6,20,8
+    COMBOBOX        IDC_STATIC_ENVIRONMENT_TYPE,127,4,77,237,
+                    CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "",ID_CLASSIFICATION_FLAGS,"Button",BS_OWNERDRAW | 
+                    WS_TABSTOP,110,48,94,11
+    CONTROL         "",ID_VISIBILITY_FLAGS,"Button",BS_OWNERDRAW | 
+                    WS_TABSTOP,110,34,94,11
+    LTEXT           "Ambient:",IDC_AMBIENT_COLOR_T,110,69,33,8
+    CONTROL         "",ID_SECTOR_COLOR,"Button",BS_OWNERDRAW | WS_TABSTOP,
+                    146,62,58,16
+    CONTROL         "&Include",IDC_SECTOR_INCLUDE,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,112,22,37,8
+    CONTROL         "E&xclude",IDC_SECTOR_EXCLUDE,"Button",
+                    BS_AUTORADIOBUTTON,155,22,43,8
+END
+
+IDD_TREE_SHORTCUTS DIALOG DISCARDABLE  0, 0, 169, 161
+STYLE DS_MODALFRAME | WS_POPUP
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Shortcut",IDC_SHORTCUT01,7,3,155,12,BS_LEFT
+    PUSHBUTTON      "Shortcut",IDC_SHORTCUT02,7,16,155,11,BS_LEFT
+    PUSHBUTTON      "Shortcut",IDC_SHORTCUT03,7,28,155,11,BS_LEFT
+    PUSHBUTTON      "Shortcut",IDC_SHORTCUT04,7,40,155,11,BS_LEFT
+    PUSHBUTTON      "Shortcut",IDC_SHORTCUT05,7,52,155,11,BS_LEFT
+    PUSHBUTTON      "Shortcut",IDC_SHORTCUT06,7,64,155,11,BS_LEFT
+    PUSHBUTTON      "Shortcut",IDC_SHORTCUT07,7,76,155,11,BS_LEFT
+    PUSHBUTTON      "Shortcut",IDC_SHORTCUT08,7,88,155,11,BS_LEFT
+    PUSHBUTTON      "Shortcut",IDC_SHORTCUT09,7,100,155,11,BS_LEFT
+    PUSHBUTTON      "Shortcut",IDC_SHORTCUT10,7,112,155,11,BS_LEFT
+    CTEXT           "Press numbers to choose directory",IDC_STATIC,7,133,162,
+                    9
+    CTEXT           "Press CTRL+numbers to store directory",IDC_STATIC,7,142,
+                    162,9
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,7,129,155,25
+END
+
+IDD_BROWSE_BY_CLASS DIALOG DISCARDABLE  0, 0, 531, 223
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select entities"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Entities in volume: 4",IDC_ENTITIES_IN_VOLUME_T,7,7,185,
+                    8
+    CONTROL         "List1",IDC_ENTITY_LIST,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,7,18,474,172
+    CONTROL         "&Volume",IDC_DISPLAY_VOLUME,"Button",BS_AUTOCHECKBOX | 
+                    BS_TOP | WS_TABSTOP,199,7,44,11
+    CONTROL         "&Importants",IDC_DISPLAY_IMPORTANTS,"Button",
+                    BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,251,7,47,11
+    LTEXT           "Pluggins:",IDC_PLUGGINS_T,325,7,31,8
+    COMBOBOX        IDC_PLUGGINS,358,3,120,314,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    PUSHBUTTON      "&Delete",ID_DELETE_BROWSE_BY_CLASS,14,198,46,14
+    PUSHBUTTON      "&Remove",ID_REMOVE,71,198,46,14
+    PUSHBUTTON      "&Leave",ID_LEAVE,128,198,46,14
+    PUSHBUTTON      "Select &all",ID_SELECT_ALL,185,198,46,14
+    PUSHBUTTON      "&Feed volume",ID_FEED_VOLUME,242,198,46,14
+    PUSHBUTTON      "R&evert",ID_REVERT,299,198,46,14
+    PUSHBUTTON      "&Sel. sectors",ID_SELECT_SECTORS,356,198,46,14
+    DEFPUSHBUTTON   "OK",IDOK,413,198,46,14
+    PUSHBUTTON      "Cancel",IDCANCEL,470,199,46,14
+END
+
+IDD_FILE_REQUESTER DIALOG DISCARDABLE  0, 0, 250, 80
+STYLE DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "",IDC_STATIC,0,0,250,80,NOT WS_GROUP
+END
+
+IDD_LIGHT_ANIMATION_EDITOR DIALOG DISCARDABLE  0, 0, 400, 167
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Light animation editor"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Animation:",ID_STATIC,12,22,68,8
+    COMBOBOX        IDC_LIGHT_ANIMATION_NAME_COMBO,113,18,162,93,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Add",ID_ADD_ANIMATION,285,16,50,14
+    PUSHBUTTON      "&Delete",ID_DELETE_ANIMATION,343,16,50,14
+    LTEXT           "Name:",ID_STATIC,12,37,68,8
+    EDITTEXT        IDC_LIGHT_ANIMATION_NAME,113,33,162,12,ES_AUTOHSCROLL
+    LTEXT           "Speed (seconds per frame):",ID_STATIC,12,52,93,8
+    EDITTEXT        IDC_LIGHT_ANIMATION_SPEED,113,48,41,12,ES_AUTOHSCROLL
+    LTEXT           "Number of frames:",ID_STATIC,12,67,68,8
+    EDITTEXT        IDC_LIGHT_ANIMATION_FRAMES,113,63,41,12,ES_AUTOHSCROLL
+    CONTROL         "Spin2",IDC_FRAMES_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS,155,64,11,11
+    CONTROL         "",IDC_TEST_AREA,"Static",SS_BLACKFRAME,12,91,44,40
+    PUSHBUTTON      "<",IDC_SCROLL_LEFT,62,91,10,16
+    PUSHBUTTON      "<<",IDC_SCROLL_PG_LEFT,73,91,10,16
+    CONTROL         "",IDC_FRAMES_AREA,"Static",SS_BLACKFRAME,84,91,286,16
+    PUSHBUTTON      ">>",IDC_SCROLL_PG_RIGHT,371,91,10,16
+    PUSHBUTTON      ">",IDC_SCROLL_RIGHT,382,91,10,16
+    CTEXT           "Frame: 24",IDC_CURRENT_FRAME,56,122,44,8
+    PUSHBUTTON      "D&elete key",IDC_DELETE_MARKER,101,117,47,14,
+                    WS_DISABLED
+    PUSHBUTTON      "&Load",ID_LOAD_ANIMATION,167,146,50,14
+    PUSHBUTTON      "&Save",ID_SAVE_ANIMATION,226,146,50,14
+    PUSHBUTTON      "Save As",ID_SAVE_AS_ANIMATION,285,146,50,14
+    PUSHBUTTON      "Close",ID_CLOSE,343,146,50,14
+END
+
+IDD_PG_TEXTURE DIALOG DISCARDABLE  0, 0, 208, 82
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Texture"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "...",IDC_BROWSE_TEXTURE,2,1,16,12
+    PUSHBUTTON      "&None",IDC_REMOVE_TEXTURE,22,1,27,12
+    CONTROL         "Texture &1",IDC_RADIO_TEXTURE,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,64,2,43,8
+    CONTROL         "Texture &2",IDC_TEXTURE_2,"Button",BS_AUTORADIOBUTTON,
+                    113,2,43,8
+    CONTROL         "Texture &3",IDC_TEXTURE_3,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,162,2,43,8
+    RTEXT           "Offset:",IDC_STATIC_OFFSET,57,17,28,8
+    EDITTEXT        IDC_OFFSET_U,86,13,27,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_OFFSET_V,114,13,27,12,ES_AUTOHSCROLL
+    RTEXT           "Stretch:",IDC_STATIC_STRETCH,57,30,28,8
+    EDITTEXT        IDC_STRETCH_U,86,26,27,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_STRETCH_V,114,26,27,12,ES_AUTOHSCROLL
+    RTEXT           "Rotation:",IDC_STATIC_ROTATION_SHEAR,55,43,30,8
+    EDITTEXT        IDC_ROTATION_U,86,39,27,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ROTATION_V,114,39,27,12,ES_AUTOHSCROLL
+    RTEXT           "Scroll:",IDC_STATIC_SCROLL,142,16,21,8
+    COMBOBOX        IDC_SCROLL_COMBO,164,12,41,270,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Blend:",IDC_STATIC_BLEND,142,31,21,8
+    COMBOBOX        IDC_BLEND_TYPE,164,26,41,257,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Clamp U/V",IDC_CLAMP_U,"Button",BS_AUTO3STATE | 
+                    BS_LEFTTEXT | WS_TABSTOP,142,40,54,8
+    CONTROL         "",IDC_CLAMP_V,"Button",BS_AUTO3STATE | BS_LEFTTEXT | 
+                    WS_TABSTOP,197,40,8,8
+    CONTROL         "&Reflective",IDC_REFLECTIVE,"Button",BS_AUTO3STATE | 
+                    BS_LEFTTEXT | WS_TABSTOP,142,49,63,8
+    CONTROL         "&After shadow",IDC_AFTER_SHADOW,"Button",BS_AUTO3STATE | 
+                    BS_LEFTTEXT | WS_TABSTOP,142,58,63,8
+    CONTROL         "",IDC_PREVIEW_FRAME,"Static",SS_BLACKFRAME,2,16,47,41
+    CONTROL         "1024x1024m(256x256) 9/9 A3!",IDC_TEXTURE_DIM_T,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,0,58,84,8
+    CONTROL         "",ID_COMBINE_COLOR,"Button",BS_OWNERDRAW | WS_TABSTOP,
+                    86,52,55,14
+    LTEXT           "Textures\\Hyper\\Shadows01.tex",IDC_TEXTURE_FILE_T,2,68,
+                    204,8
+END
+
+IDD_NUMERIC_ALPHA DIALOG DISCARDABLE  0, 0, 131, 57
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Numeric alpha"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_ALPHA,65,12,59,12,ES_AUTOHSCROLL
+    LTEXT           "Numeric alpha:",IDC_STATIC,12,16,53,8
+    DEFPUSHBUTTON   "OK",IDOK,15,36,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,74,36,50,14
+END
+
+IDD_PG_SHADOW DIALOG DISCARDABLE  0, 0, 208, 82
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION | WS_SYSMENU
+CAPTION "Shadow"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Don't &cast",IDC_IS_LIGHT_BEAM_PASSABLLE,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,4,4,71,10
+    CONTROL         "Don't &receive",IDC_IS_RECEIVING_SHADOWS,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,4,12,71,10
+    CONTROL         "&Accurate",IDC_HAS_PRECISE_SHADOWS,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,4,20,65,10
+    CONTROL         "&Dark corners",IDC_DARK_CORNERS,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,4,29,65,10
+    CONTROL         "Full &bright",IDC_NO_SHADOW,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,75,4,65,10
+    CONTROL         "D&ynamic only",IDC_DYNAMIC_LIGHTS_ONLY,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,75,12,65,10
+    CONTROL         "&No dynamic",IDC_NO_DYNAMIC_LIGHTS,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,75,22,65,10
+    CONTROL         "&Directional",IDC_HAS_DIRECTIONAL_SHADOWS,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,146,4,58,10
+    CONTROL         "Dir. a&mbient",IDC_HAS_DIRECTIONAL_AMBIENT,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,146,12,58,10
+    CONTROL         "No di&ffusion",IDC_NO_PLANE_DIFFUSION,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,146,20,58,10
+    RTEXT           "Gradient:",IDC_STATIC_GRADIENT,11,42,30,8
+    COMBOBOX        IDC_GRADIENT_COMBO,43,39,51,237,CBS_DROPDOWNLIST | 
+                    CBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Illumination:",IDC_STATIC_ILLUMINATION,1,55,40,8
+    COMBOBOX        IDC_ILLUMINATION_COMBO,43,52,51,250,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Blending:",IDC_STATIC_SHADOW_BLEND,1,69,40,8
+    COMBOBOX        IDC_SHADOW_BLEND_COMBO,43,66,51,235,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Cluster size:",IDC_STATIC_CLUSTER_SIZE,97,55,46,8
+    COMBOBOX        IDC_CLUSTER_SIZE_COMBO,146,51,58,250,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Color:",IDC_STATIC_SHADOW_COLOR,98,68,46,8
+    CONTROL         "",ID_SHADOW_COLOR,"Button",BS_OWNERDRAW | WS_TABSTOP,
+                    146,66,58,12
+END
+
+IDD_MIRROR_AND_STRETCH DIALOG DISCARDABLE  0, 0, 186, 95
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Mirror and stretch"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Stretch:",IDC_STATIC,9,11,26,8
+    EDITTEXT        IDC_STRETCH,39,7,58,14,ES_AUTOHSCROLL
+    LTEXT           "Mirror:",IDC_STATIC,9,31,20,8
+    CONTROL         "&None",IDC_MIRROR_NONE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,9,41,33,10
+    CONTROL         "Arround &X",IDC_MIRROR_X,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,9,51,47,10
+    CONTROL         "Arround &Y",IDC_MIRROR_Y,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,9,60,47,10
+    CONTROL         "Arround &Z",IDC_MIRROR_Z,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,9,70,47,10
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14
+END
+
+IDD_FILTER_POLYGON_SELECTION DIALOG DISCARDABLE  0, 0, 342, 231
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Filter polygon selection"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Polygon flags",IDC_STATIC,7,7,67,87,BS_CENTER
+    CONTROL         "&Transluscent",IDC_IS_TRANSLUSCENT2,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,12,18,58,10
+    CONTROL         "&Portal",IDC_IS_PORTAL2,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,12,28,58,10
+    CONTROL         "P&assable",IDC_IS_PASSABLE2,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,12,37,58,10
+    CONTROL         "&Invisible",IDC_INVISIBLE2,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,12,47,58,10
+    CONTROL         "&Detail",IDC_IS_DETAIL2,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,12,57,58,10
+    CONTROL         "&Link",IDC_IS_OLD_PORTAL2,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,12,67,58,10
+    CONTROL         "&Occluder",IDC_IS_OCCLUDER2,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,12,77,58,10
+    CONTROL         "Don't &cast shadows",IDC_IS_LIGHT_BEAM_PASSABLLE2,
+                    "Button",BS_AUTO3STATE | WS_TABSTOP,86,18,74,10
+    CONTROL         "Don't &receive shadows",IDC_IS_RECEIVING_SHADOWS2,
+                    "Button",BS_AUTO3STATE | WS_TABSTOP,86,27,84,10
+    CONTROL         "Full &bright",IDC_NO_SHADOW2,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,86,36,45,10
+    CONTROL         "D&ynamic lights only",IDC_DYNAMIC_LIGHTS_ONLY2,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,86,45,74,10
+    CONTROL         "&No dynamic lights",IDC_NO_DYNAMIC_LIGHTS2,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,86,54,69,10
+    CONTROL         "&Accurate shadows",IDC_HAS_PRECISE_SHADOWS2,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,86,63,71,10
+    CONTROL         "&Directional light",IDC_HAS_DIRECTIONAL_SHADOWS2,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,86,72,62,10
+    CONTROL         "Directional a&mbient",IDC_HAS_DIRECTIONAL_AMBIENT2,
+                    "Button",BS_AUTO3STATE | WS_TABSTOP,86,81,74,10
+    CONTROL         "No plane di&ffusion",IDC_NO_PLANE_DIFFUSION2,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,86,90,70,10
+    CONTROL         "&Dark corners",IDC_DARK_CORNERS2,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,86,99,67,10
+    LTEXT           "Cluster size:",IDC_STATIC,86,123,52,9
+    COMBOBOX        IDC_FILTER_CLUSTER_SIZE,138,120,68,137,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Cluster memory:",IDC_STATIC,86,139,52,9
+    COMBOBOX        IDC_FILTER_CLUSTER_MEMORY,138,136,67,137,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Shadow flags",IDC_STATIC,80,7,138,104,BS_CENTER
+    GROUPBOX        "Texture",IDC_STATIC,223,7,112,86,BS_CENTER
+    CONTROL         "Clamp U/V",IDC_CLAMP_U2,"Button",BS_AUTO3STATE | 
+                    BS_LEFTTEXT | WS_TABSTOP,236,18,80,8
+    CONTROL         "",IDC_CLAMP_V2,"Button",BS_AUTO3STATE | BS_LEFTTEXT | 
+                    WS_TABSTOP,319,18,8,8
+    CONTROL         "&Discardable",IDC_REFLECTIVE2,"Button",BS_AUTO3STATE | 
+                    BS_LEFTTEXT | WS_TABSTOP,236,27,91,8
+    CONTROL         "&After shadow",IDC_AFTER_SHADOW2,"Button",BS_AUTO3STATE | 
+                    BS_LEFTTEXT | WS_TABSTOP,236,36,91,8
+    GROUPBOX        "By orientation",IDC_STATIC,223,97,112,48,BS_CENTER
+    LTEXT           "H",IDC_STATIC,228,113,8,9
+    EDITTEXT        IDC_MIN_H,240,111,43,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_H,285,111,43,12,ES_AUTOHSCROLL
+    LTEXT           "P",IDC_STATIC,228,128,8,9
+    EDITTEXT        IDC_MIN_P,240,124,43,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_P,285,124,43,12,ES_AUTOHSCROLL
+    LTEXT           "X",IDC_STATIC,227,160,8,9
+    EDITTEXT        IDC_MIN_X,239,158,43,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_X,285,158,43,12,ES_AUTOHSCROLL
+    LTEXT           "Y",IDC_STATIC,227,176,8,9
+    EDITTEXT        IDC_MIN_Y,239,171,43,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_Y,285,171,43,12,ES_AUTOHSCROLL
+    LTEXT           "Z",IDC_STATIC,227,187,8,9
+    EDITTEXT        IDC_MIN_Z,239,184,43,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_Z,285,184,43,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,198,210,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,285,210,50,14
+    GROUPBOX        "Shadow size",IDC_STATIC,80,111,138,44,BS_CENTER
+    GROUPBOX        "By position",IDC_STATIC,223,148,112,53,BS_CENTER
+    LTEXT           "Surface:",IDC_STATIC,86,170,52,9
+    COMBOBOX        IDC_FILTER_POLYGON_SURFACE,138,167,68,137,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Polygon properties",IDC_STATIC,80,157,138,44,BS_CENTER
+    LTEXT           "Mirror:",IDC_STATIC,86,186,52,9,NOT WS_VISIBLE
+    COMBOBOX        IDC_FILTER_POLYGON_MIRROR,138,183,68,137,
+                    CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "",ID_COMBINE_COLOR,"Button",BS_OWNERDRAW | WS_TABSTOP,
+                    274,47,55,14
+    LTEXT           "Tex. color",IDC_STATIC,237,53,33,8
+END
+
+IDD_TIPOFTHEDAY DIALOG DISCARDABLE  0, 0, 280, 159
+STYLE DS_MODALFRAME | DS_SETFOREGROUND | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Tip of the Day"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "&Close",IDCANCEL,223,138,50,14
+    PUSHBUTTON      "&Next Tip",IDC_NEXTTIP,169,138,50,14
+    PUSHBUTTON      "&Previous Tip",IDC_PREVTIP,115,138,50,14
+    CONTROL         "&Show tips at startup",IDC_SHOWTIPSATSTARTUP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,142,79,10
+    CONTROL         "",IDC_STATIC,"Static",SS_GRAYRECT | SS_SUNKEN,7,7,38,
+                    121
+    CONTROL         IDR_ICON_REMOVE,IDC_STATIC,"Static",SS_BITMAP,15,14,21,
+                    20
+    CONTROL         "",IDC_TIPTEXT,"Static",SS_WHITERECT | SS_SUNKEN,45,7,
+                    228,121
+END
+
+IDD_DISPLACE_MAP_SIZE DIALOG DISCARDABLE  0, 0, 246, 127
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Choose displace map export size"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,142,106,47,14
+    PUSHBUTTON      "Cancel",IDCANCEL,192,106,47,14
+    LTEXT           "Note that bigger exporting size requires much more time to calculate.",
+                    IDC_STATIC,7,12,215,8
+    LTEXT           "The maximum displacement map size is 1024 x 1024 pixels.",
+                    IDC_STATIC,7,21,176,8
+    EDITTEXT        IDC_EDIT_DISPLACE_X_SIZE,78,59,51,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_DISPLACE_Y_SIZE,78,76,51,12,ES_AUTOHSCROLL
+    LTEXT           "Pixels per width:",IDC_STATIC,14,62,57,8
+    LTEXT           "Pixels per height:",IDC_STATIC,14,78,57,8
+    CONTROL         "Mid Pixel Sampling",IDC_EDIT_DISPLACE_MIDPIXELSAMPLING,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,62,73,10
+    CONTROL         "Maps larger then 256 x 256 pixels may take HOURS to calculate!",
+                    IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,7,30,
+                    198,10
+    CONTROL         "High Resolution (16bit)",
+                    IDC_EDIT_DISPLACE_16BITRESOLUTION,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,78,77,10
+    GROUPBOX        "Displace Map Size",IDC_STATIC,7,47,130,49
+    GROUPBOX        "Options",IDC_STATIC,141,47,98,49
+END
+
+IDD_COMMENT DIALOG DISCARDABLE  0, 0, 313, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Comment"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_COMMENT,7,7,299,60,ES_AUTOHSCROLL
+    PUSHBUTTON      "Cancel",IDCANCEL,198,73,50,14
+    DEFPUSHBUTTON   "OK",IDOK,256,73,50,14
+END
+
+IDD_LINK_TREE DIALOGEX 0, 0, 366, 255
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "Tree1",IDC_LINK_TREE,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
+                    WS_BORDER | WS_TABSTOP,0,0,366,246
+    CONTROL         "&C",IDC_LT_CLASS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    0,247,20,8
+    CONTROL         "&P",IDC_LT_PROPERTY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,20,247,20,8
+    CONTROL         "&N",IDC_LT_NAME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    40,247,20,8
+    CONTROL         "&W",IDC_LT_WHO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,60,
+                    247,20,8
+END
+
+IDD_FILTER_VERTEX_SELECTION DIALOG DISCARDABLE  0, 0, 186, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Filter vertex selection"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,71,73,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,73,50,14
+    LTEXT           "X min",IDC_STATIC,11,19,26,9
+    EDITTEXT        IDC_MIN_X,39,17,43,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_X,121,17,43,12,ES_AUTOHSCROLL
+    LTEXT           "Y min",IDC_STATIC,11,32,26,9
+    EDITTEXT        IDC_MIN_Y,39,30,43,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_Y,121,30,43,12,ES_AUTOHSCROLL
+    LTEXT           "Z min",IDC_STATIC,11,45,26,9
+    EDITTEXT        IDC_MIN_Z,39,43,43,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_Z,121,43,43,12,ES_AUTOHSCROLL
+    LTEXT           "X max",IDC_STATIC,92,19,26,9
+    LTEXT           "Y max",IDC_STATIC,92,32,26,9
+    LTEXT           "Z max",IDC_STATIC,92,45,26,9
+END
+
+IDD_ALLIGN_VERTICES DIALOG DISCARDABLE  0, 0, 52, 46
+STYLE DS_MODALFRAME | WS_POPUP
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "&X",IDC_ALLIGN_X,2,2,48,12,NOT WS_TABSTOP
+    PUSHBUTTON      "&Y",IDC_ALLIGN_Y,2,16,48,12,NOT WS_TABSTOP
+    PUSHBUTTON      "Z",IDC_ALLIGN_Z,2,31,48,12,NOT WS_TABSTOP
+END
+
+IDD_AUTO_TEXTURIZE DIALOG DISCARDABLE  0, 0, 230, 151
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Auto texturize"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Pretender texture style:",IDC_STATIC,7,12,72,8
+    COMBOBOX        IDC_PRETENDER_TEXTURE_STYLE,81,7,142,119,
+                    CBS_DROPDOWNLIST | WS_TABSTOP
+    LTEXT           "Pretender texture size:",IDC_STATIC,8,30,72,8
+    COMBOBOX        IDC_PRETENDER_TEXTURE_SIZE,82,26,141,119,
+                    CBS_DROPDOWNLIST | WS_TABSTOP
+    LTEXT           "Background fill color:",IDC_STATIC,7,49,72,8
+    CONTROL         "",ID_SECTOR_COLOR,"Button",BS_OWNERDRAW | WS_TABSTOP,82,
+                    44,58,16
+    CONTROL         "Expand edges",IDC_EXPAND_EDGES,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,7,65,83,8
+    DEFPUSHBUTTON   "OK",IDOK,116,130,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,173,130,50,14
+END
+
+IDD_STRETCH_CHILD_OFFSET DIALOG DISCARDABLE  0, 0, 121, 64
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Stretch child offset"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Stretch:",IDC_STATIC,7,19,45,9
+    EDITTEXT        IDC_CHILD_STRETCH,58,16,56,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,7,43,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,64,43,50,14
+END
+
+IDD_PG_TERRAIN DIALOGEX 0, 0, 208, 82
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_ACCEPTFILES
+CAPTION "Terrain"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+END
+
+IDD_EDIT_TERRAIN_BRUSH DIALOG DISCARDABLE  0, 0, 186, 84
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Edit terrain brush"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_FALLOFF,60,12,57,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_HOTSPOT,60,28,57,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&...",IDC_IMPORT_TERRAIN_BRUSH,60,44,19,12
+    PUSHBUTTON      "&Generate",ID_GENERATE_TERRAIN_BRUSH,129,10,50,14
+    DEFPUSHBUTTON   "OK",IDOK,129,63,50,14
+    LTEXT           "Fall off:",IDC_STATIC,7,15,50,9
+    LTEXT           "Hot spot:",IDC_STATIC,7,31,50,9
+    LTEXT           "Import brush:",IDC_STATIC,7,48,50,8
+END
+
+IDD_EDIT_FLOAT DIALOG DISCARDABLE  0, 0, 160, 54
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Type value"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Edited value",IDC_EDIT_FLOAT_T,13,10,76,9
+    EDITTEXT        IDC_EDIT_FLOAT,97,7,56,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,103,33,50,14
+END
+
+IDD_SNAP_VERTEX DIALOG DISCARDABLE  0, 0, 111, 86
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Snap vertex"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "X",IDC_STATIC,26,14,15,9
+    EDITTEXT        IDC_VTX_SNAP_X,43,12,43,12,ES_AUTOHSCROLL
+    LTEXT           "Y",IDC_STATIC,26,27,15,9
+    EDITTEXT        IDC_VTX_SNAP_Y,43,25,43,12,ES_AUTOHSCROLL
+    LTEXT           "Z",IDC_STATIC,26,40,15,9
+    EDITTEXT        IDC_VTX_SNAP_Z,43,38,43,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,30,64,50,14
+END
+
+IDD_EDIT_TERRAIN_LAYER DIALOG DISCARDABLE  0, 0, 347, 300
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Edit terrain layer"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_TRL_LAYER_NAME,64,12,276,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_ROTATE_U,64,50,46,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_ROTATE_V,64,65,46,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_OFFSET_X,168,49,42,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_OFFSET_Y,168,65,42,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_STRETCH_X,268,49,46,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_STRETCH_Y,268,65,46,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_LAYER_COVERAGE,64,125,33,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_COVERAGE_FADE,160,125,33,12,ES_AUTOHSCROLL
+    CONTROL         "Apply",IDC_APPLY_MIN_ALTITUDE_DISTRIBUTION,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,16,170,35,10
+    EDITTEXT        IDC_TRL_ALTITUDE_MIN,118,168,33,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_ALTITUDE_MIN_FADE,205,168,33,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_ALTITUDE_MIN_NOISE,289,168,33,12,ES_AUTOHSCROLL
+    CONTROL         "Apply",IDC_APPLY_MAX_ALTITUDE_DISTRIBUTION,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,16,186,35,10
+    EDITTEXT        IDC_TRL_ALTITUDE_MAX,118,184,33,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_ALTITUDE_MAX_FADE,205,184,33,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_ALTITUDE_MAX_NOISE,289,183,33,12,ES_AUTOHSCROLL
+    CONTROL         "Apply",IDC_APPLY_MIN_SLOPE_DISTRIBUTION,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,16,231,35,10
+    EDITTEXT        IDC_TRL_SLOPE_MIN,118,229,33,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_SLOPE_MIN_FADE,205,229,33,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_SLOPE_MIN_NOISE,289,230,33,12,ES_AUTOHSCROLL
+    CONTROL         "Apply",IDC_APPLY_MAX_SLOPE_DISTRIBUTION,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,16,247,35,10
+    EDITTEXT        IDC_TRL_SLOPE_MAX,118,245,33,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_SLOPE_MAX_FADE,205,245,33,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TRL_SLOPE_MAX_NOISE,289,244,33,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,290,280,50,14
+    CONTROL         "Auto &generate layer distribution",
+                    IDC_AUTO_GENERATE_LAYER_DISTRIBUTION,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,8,97,111,10
+    RTEXT           "Layer name",IDC_STATIC,7,15,52,9
+    RTEXT           "Rotate u",IDC_STATIC,7,53,52,9
+    RTEXT           "Rotate v",IDC_STATIC,7,68,52,9
+    RTEXT           "Offset x",IDC_STATIC,118,52,41,9
+    GROUPBOX        "Texture mapping",IDC_STATIC,7,33,333,52,BS_CENTER
+    RTEXT           "Offset y",IDC_STATIC,118,68,41,9
+    RTEXT           "Stretch x",IDC_STATIC,218,52,41,9
+    RTEXT           "Stretch y",IDC_STATIC,218,68,41,9
+    RTEXT           "Min altitude (%)",IDC_STATIC,61,171,54,9
+    RTEXT           "Max altitude (%)",IDC_STATIC,61,187,54,9
+    GROUPBOX        "Altitude distribution",IDC_STATIC,7,152,333,51,
+                    BS_CENTER
+    RTEXT           "Fade (%)",IDC_STATIC,170,171,30,9
+    RTEXT           "Fade (%)",IDC_STATIC,170,187,30,9
+    RTEXT           "Min slope",IDC_STATIC,69,232,46,9
+    RTEXT           "Max slope",IDC_STATIC,69,248,46,9
+    GROUPBOX        "Slope distribution",IDC_STATIC,7,213,333,51,BS_CENTER
+    RTEXT           "Fade (%)",IDC_STATIC,166,232,34,9
+    RTEXT           "Fade (%)",IDC_STATIC,166,248,34,9
+    RTEXT           "Coverage (%)",IDC_STATIC,11,128,46,9
+    GROUPBOX        "Random coverage",IDC_STATIC,7,113,333,28,BS_CENTER
+    RTEXT           "Noise (%)",IDC_STATIC,250,171,35,9
+    RTEXT           "Noise (%)",IDC_STATIC,250,186,35,9
+    RTEXT           "Fade (%)",IDC_STATIC,124,128,30,9
+    RTEXT           "Noise (%)",IDC_STATIC,249,233,35,9
+    RTEXT           "Noise (%)",IDC_STATIC,249,247,35,9
+END
+
+IDD_TE_OPTION_SETTINGS DIALOG DISCARDABLE  0, 0, 267, 215
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Terrain editing settings"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_PAINT_POWER,200,10,57,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_SMOOTH_POWER,200,25,57,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_FILTER_COMBO,85,40,173,180,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_FILTER_POWER,200,55,57,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EQUALIZE_VALUE,200,70,57,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_POSTERIZE_STEP,200,86,57,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_GENERATION_ALGORITHM,100,101,120,180,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Settings",IDC_GENERATION_SETTINGS,222,100,35,14
+    EDITTEXT        IDC_NOISE_STRENGTH,195,130,57,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&...",IDC_BROWSE_CONTINOUS_NOISE,200,150,15,14
+    PUSHBUTTON      "&View",IDC_VIEW_NOISE_TEXTURE,220,150,33,14
+    PUSHBUTTON      "&...",IDC_BROWSE_DISTRIBUTION_NOISE,200,167,15,14
+    PUSHBUTTON      "&View",IDC_VIEW_DISTRIBUTION_NOISE_TEXTURE,220,167,33,
+                    14
+    DEFPUSHBUTTON   "OK",IDOK,210,195,50,14
+    LTEXT           "Paint power (%):",IDC_STATIC,5,12,175,9
+    LTEXT           "Smooth power (%):",IDC_STATIC,5,28,175,9
+    LTEXT           "Min/Max/Flatten value (m):",IDC_STATIC,5,73,175,9
+    LTEXT           "Posterize step (m):",IDC_STATIC,5,88,175,9
+    LTEXT           "Noise altitude (m):",IDC_STATIC,15,135,170,9
+    LTEXT           "Terrain generation algorithm:",IDC_STATIC,5,105,90,9
+    LTEXT           "Filter:",IDC_STATIC,5,43,75,9
+    LTEXT           "Filter power (%):",IDC_STATIC,5,58,190,9
+    LTEXT           "Texture noise texture:",IDC_STATIC,15,153,80,9
+    GROUPBOX        "Noise",IDC_STATIC,5,120,255,70,BS_CENTER
+    LTEXT           "Distribution noise texture:",IDC_STATIC,15,170,80,9
+    LTEXT           "bla bla",IDC_CONTINOUS_NOISE_T,100,153,95,9
+    LTEXT           "bla bla",IDC_DISTRIBUTION_NOISE_T,100,170,95,9
+END
+
+IDD_TERRAIN_PROPERTIES DIALOG DISCARDABLE  0, 0, 417, 285
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Terrain properties"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_TERRAIN_LOD_SWITCH,350,240,54,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,360,265,50,14
+    EDITTEXT        IDC_TERRAIN_WIDTH,125,26,54,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TERRAIN_HEIGHT,125,40,54,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TERRAIN_LENGTH,125,53,54,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TERRAIN_HM_WIDTH,314,26,75,95,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_TERRAIN_HM_HEIGHT,314,41,75,95,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Slider1",IDC_SHADOW_MAP,"msctls_trackbar32",
+                    TBS_AUTOTICKS | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,139,
+                    104,90,10
+    CONTROL         "Slider1",IDC_SHADING_MAP,"msctls_trackbar32",
+                    TBS_AUTOTICKS | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,139,
+                    120,90,10
+    COMBOBOX        IDC_GLOBAL_PRETENDER,125,131,75,94,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_TILE_PRETENDER,125,210,70,95,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_TERRAIN_QUADS_PER_TILE,125,240,70,135,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Width (m)",IDC_STATIC,22,28,45,9
+    LTEXT           "Height (m)",IDC_STATIC,22,41,45,9
+    LTEXT           "Length (m)",IDC_STATIC,22,55,45,9
+    GROUPBOX        "Terrain size",IDC_STATIC,10,10,185,65,BS_CENTER
+    LTEXT           "Width (pixels)",IDC_STATIC,220,28,45,9
+    LTEXT           "Height (pixels)",IDC_STATIC,220,41,45,9
+    GROUPBOX        "Heightmap size",IDC_STATIC,205,10,200,65,BS_CENTER
+    LTEXT           "LOD switch distance (m):",IDC_STATIC,265,242,80,9
+    LTEXT           "Quads (vertices) per tile:",IDC_STATIC,20,242,85,9
+    GROUPBOX        "Pretender textures and shadow map sizes",IDC_STATIC,10,
+                    85,395,145,BS_CENTER
+    LTEXT           "Min",IDC_STATIC,125,120,15,10
+    LTEXT           "Max",IDC_STATIC,233,120,15,10
+    LTEXT           "Terrain model shadow map:",IDC_STATIC,20,120,95,8
+    LTEXT           "Min",IDC_STATIC,125,104,15,10
+    LTEXT           "Max",IDC_STATIC,233,104,15,10
+    LTEXT           "Terrain shadow map:",IDC_STATIC,20,104,95,8
+    LTEXT           "Static",IDC_HEIGHTIMAP_SIZE_T,220,60,170,10
+    LTEXT           "Static",IDC_SHADING_MAP_T,265,120,126,10
+    LTEXT           "Static",IDC_SHADOW_MAP_T,265,104,126,10
+    LTEXT           "Global pretender texturure:",IDC_STATIC,20,135,95,8
+    LTEXT           "Static",IDC_TERRAIN_PRETENDER_T,265,135,126,10
+    LTEXT           "Static",IDC_TILE_PRETENDER_T,20,212,100,10
+    LTEXT           "Static",IDC_TERRAIN_MEMORY_T,20,185,375,10
+    LTEXT           "Static",IDC_LAYER_MEMORY_T,20,170,375,10
+    LTEXT           "Static",IDC_TERRAIN_EDGE_MEMORY_T,20,155,375,10
+END
+
+IDD_GENERATE_FBM DIALOG DISCARDABLE  0, 0, 202, 300
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Generate fractal Brownian motion (fBm)"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_FBM_MAX_ALTITUDE,125,5,65,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FBM_OCTAVES,125,20,65,12,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_CT_OCTAVES_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | WS_GROUP,190,20,11,14
+    EDITTEXT        IDC_FBM_OCTAVE_STEP,125,35,65,12,ES_AUTOHSCROLL
+    CONTROL         "&Add negative values",IDC_ADD_NEGATIVE_VALUES,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,10,52,124,10
+    EDITTEXT        IDC_FBM_HIGH_FREQUENCY_STEP,125,80,65,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FBM_OCTAVE_AMPLITUDE_DECREASE,125,96,65,12,
+                    ES_AUTOHSCROLL
+    PUSHBUTTON      "&Randomize",IDC_FBM_RANDOMIZE,10,280,50,15
+    PUSHBUTTON      "&Export",IDC_FBM_EXPORT,75,280,50,15
+    DEFPUSHBUTTON   "OK",IDOK,140,280,50,15
+    LTEXT           "Number of octaves:",IDC_STATIC,10,21,110,9
+    CONTROL         "",IDC_FBM_PREVIEW_FRAME,"Static",SS_BLACKFRAME,15,115,
+                    168,150
+    LTEXT           "Octave stretch factor:",IDC_STATIC,10,35,110,9
+    LTEXT           "Max amplitude (m):",IDC_STATIC,10,7,110,9
+    LTEXT           "Octave amplitude decrease factor:",IDC_STATIC,10,99,110,
+                    9
+    LTEXT           "High frequency step:",IDC_STATIC,10,85,110,9
+    CONTROL         "Ran&dom octave offset",IDC_RANDOM_OFFSET,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,10,65,124,10
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "WORLDEDITOR MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "WORLDEDITOR\0"
+            VALUE "LegalCopyright", "Copyright © 1997\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "WORLDEDITOR.EXE\0"
+            VALUE "ProductName", "WORLDEDITOR Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 209
+        VERTGUIDE, 67
+        VERTGUIDE, 101
+        VERTGUIDE, 129
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 80
+        HORZGUIDE, 17
+        HORZGUIDE, 26
+        HORZGUIDE, 50
+        HORZGUIDE, 59
+        HORZGUIDE, 80
+    END
+
+    IDD_CREATE_VIRTUAL_DIRECTORY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 311
+        VERTGUIDE, 79
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 118
+        HORZGUIDE, 19
+    END
+
+    CG_IDD_BROWSEDIALOGBAR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 107
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 261
+    END
+
+    CG_IDD_PROPERTYCOMBO, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 109
+        VERTGUIDE, 18
+        VERTGUIDE, 30
+        VERTGUIDE, 42
+        VERTGUIDE, 70
+        VERTGUIDE, 82
+        VERTGUIDE, 94
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 318
+    END
+
+    IDD_PREFERENCES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 283
+        VERTGUIDE, 15
+        VERTGUIDE, 37
+        VERTGUIDE, 47
+        VERTGUIDE, 69
+        VERTGUIDE, 79
+        VERTGUIDE, 101
+        VERTGUIDE, 111
+        VERTGUIDE, 133
+        VERTGUIDE, 142
+        VERTGUIDE, 151
+        VERTGUIDE, 175
+        VERTGUIDE, 200
+        VERTGUIDE, 225
+        VERTGUIDE, 250
+        VERTGUIDE, 277
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 264
+        HORZGUIDE, 40
+        HORZGUIDE, 66
+    END
+
+    IDD_PG_PRIMITIVE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 207
+        VERTGUIDE, 20
+        VERTGUIDE, 56
+        VERTGUIDE, 109
+        VERTGUIDE, 129
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 78
+        HORZGUIDE, 16
+        HORZGUIDE, 29
+        HORZGUIDE, 42
+        HORZGUIDE, 53
+        HORZGUIDE, 67
+    END
+
+    IDD_PG_POSITION, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 181
+        VERTGUIDE, 18
+        VERTGUIDE, 78
+        VERTGUIDE, 86
+        VERTGUIDE, 120
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 60
+        HORZGUIDE, 20
+        HORZGUIDE, 34
+        HORZGUIDE, 48
+    END
+
+    IDD_RENDERING_PREFERENCES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 339
+        VERTGUIDE, 19
+        VERTGUIDE, 84
+        VERTGUIDE, 128
+        VERTGUIDE, 159
+        VERTGUIDE, 180
+        VERTGUIDE, 193
+        VERTGUIDE, 245
+        VERTGUIDE, 328
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 263
+    END
+
+    IDD_PG_GLOBAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 201
+        VERTGUIDE, 89
+        VERTGUIDE, 154
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
+        HORZGUIDE, 16
+        HORZGUIDE, 28
+        HORZGUIDE, 40
+    END
+
+    IDD_SELECT_BY_NAME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 252
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 141
+        HORZGUIDE, 27
+        HORZGUIDE, 107
+        HORZGUIDE, 127
+    END
+
+    IDD_WORLD_SETTINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 336
+        VERTGUIDE, 14
+        VERTGUIDE, 44
+        VERTGUIDE, 74
+        VERTGUIDE, 84
+        VERTGUIDE, 114
+        VERTGUIDE, 144
+        VERTGUIDE, 154
+        VERTGUIDE, 184
+        VERTGUIDE, 214
+        VERTGUIDE, 224
+        VERTGUIDE, 254
+        VERTGUIDE, 284
+        VERTGUIDE, 308
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 305
+        HORZGUIDE, 17
+        HORZGUIDE, 28
+        HORZGUIDE, 51
+        HORZGUIDE, 208
+        HORZGUIDE, 227
+    END
+
+    IDD_PG_RENDERING_STATISTICS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
+    END
+
+    IDD_PG_POLYGON, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 204
+        VERTGUIDE, 37
+        VERTGUIDE, 76
+        VERTGUIDE, 148
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 78
+        HORZGUIDE, 16
+        HORZGUIDE, 29
+    END
+
+    IDD_AUTO_DELTA_CSG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 205
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 50
+        HORZGUIDE, 15
+    END
+
+    IDD_PROGRESS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 238
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 64
+    END
+
+    IDD_CREATE_TEXTURE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 285
+        VERTGUIDE, 156
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 106
+        HORZGUIDE, 33
+        HORZGUIDE, 49
+        HORZGUIDE, 60
+        HORZGUIDE, 72
+        HORZGUIDE, 84
+    END
+
+    IDD_PG_SECTOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 204
+        VERTGUIDE, 36
+        VERTGUIDE, 92
+        VERTGUIDE, 101
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 77
+        HORZGUIDE, 14
+        HORZGUIDE, 22
+        HORZGUIDE, 30
+        HORZGUIDE, 46
+        HORZGUIDE, 57
+        HORZGUIDE, 67
+    END
+
+    IDD_TREE_SHORTCUTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 162
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 154
+        HORZGUIDE, 3
+        HORZGUIDE, 15
+        HORZGUIDE, 27
+        HORZGUIDE, 39
+        HORZGUIDE, 51
+        HORZGUIDE, 63
+        HORZGUIDE, 75
+        HORZGUIDE, 87
+        HORZGUIDE, 99
+        HORZGUIDE, 111
+        HORZGUIDE, 123
+    END
+
+    IDD_BROWSE_BY_CLASS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 524
+        VERTGUIDE, 403
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 216
+    END
+
+    IDD_LIGHT_ANIMATION_EDITOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 393
+        VERTGUIDE, 15
+        VERTGUIDE, 26
+        VERTGUIDE, 83
+        VERTGUIDE, 113
+        VERTGUIDE, 242
+        VERTGUIDE, 252
+        VERTGUIDE, 275
+        VERTGUIDE, 301
+        VERTGUIDE, 337
+        VERTGUIDE, 346
+        VERTGUIDE, 382
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 160
+        HORZGUIDE, 30
+        HORZGUIDE, 45
+        HORZGUIDE, 60
+        HORZGUIDE, 75
+        HORZGUIDE, 122
+    END
+
+    IDD_PG_TEXTURE, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 206
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 81
+        HORZGUIDE, 21
+    END
+
+    IDD_NUMERIC_ALPHA, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 124
+        VERTGUIDE, 12
+        VERTGUIDE, 65
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 50
+        HORZGUIDE, 24
+    END
+
+    IDD_PG_SHADOW, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 204
+        VERTGUIDE, 75
+        VERTGUIDE, 140
+        VERTGUIDE, 146
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 78
+        HORZGUIDE, 16
+        HORZGUIDE, 29
+    END
+
+    IDD_MIRROR_AND_STRETCH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
+
+    IDD_FILTER_POLYGON_SELECTION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 335
+        VERTGUIDE, 12
+        VERTGUIDE, 70
+        VERTGUIDE, 74
+        VERTGUIDE, 80
+        VERTGUIDE, 86
+        VERTGUIDE, 138
+        VERTGUIDE, 218
+        VERTGUIDE, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 224
+        HORZGUIDE, 18
+        HORZGUIDE, 132
+        HORZGUIDE, 148
+    END
+
+    IDD_TIPOFTHEDAY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 273
+        VERTGUIDE, 45
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 152
+        HORZGUIDE, 36
+    END
+
+    IDD_DISPLACE_MAP_SIZE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 239
+        VERTGUIDE, 71
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 120
+    END
+
+    IDD_COMMENT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 306
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 87
+    END
+
+    IDD_FILTER_VERTEX_SELECTION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 87
+    END
+
+    IDD_ALLIGN_VERTICES, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 50
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 44
+    END
+
+    IDD_AUTO_TEXTURIZE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 144
+    END
+
+    IDD_STRETCH_CHILD_OFFSET, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 114
+        VERTGUIDE, 52
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 57
+    END
+
+    IDD_EDIT_TERRAIN_BRUSH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        VERTGUIDE, 57
+        VERTGUIDE, 60
+        VERTGUIDE, 117
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 77
+        HORZGUIDE, 24
+        HORZGUIDE, 40
+        HORZGUIDE, 56
+    END
+
+    IDD_EDIT_FLOAT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 153
+        VERTGUIDE, 95
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 47
+        HORZGUIDE, 19
+    END
+
+    IDD_SNAP_VERTEX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 104
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 79
+    END
+
+    IDD_EDIT_TERRAIN_LAYER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 340
+        VERTGUIDE, 47
+        VERTGUIDE, 59
+        VERTGUIDE, 64
+        VERTGUIDE, 97
+        VERTGUIDE, 110
+        VERTGUIDE, 118
+        VERTGUIDE, 128
+        VERTGUIDE, 161
+        VERTGUIDE, 168
+        VERTGUIDE, 210
+        VERTGUIDE, 218
+        VERTGUIDE, 268
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 293
+        HORZGUIDE, 24
+        HORZGUIDE, 35
+    END
+
+    IDD_TE_OPTION_SETTINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 260
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 208
+    END
+
+    IDD_TERRAIN_PROPERTIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 410
+        VERTGUIDE, 82
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 278
+    END
+
+    IDD_GENERATE_FBM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 195
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 293
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_PG_PRIMITIVE DLGINIT
+BEGIN
+    IDC_TOP_SHAPE, 0x403, 7, 0
+0x7453, 0x6961, 0x7372, "\000" 
+    IDC_TOP_SHAPE, 0x403, 6, 0
+0x6c53, 0x706f, 0x0065, 
+    IDC_TOP_SHAPE, 0x403, 8, 0
+0x6543, 0x6c69, 0x6e69, 0x0067, 
+    IDC_BOTTOM_SHAPE, 0x403, 7, 0
+0x7453, 0x6961, 0x7372, "\000" 
+    IDC_BOTTOM_SHAPE, 0x403, 6, 0
+0x6c53, 0x706f, 0x0065, 
+    IDC_BOTTOM_SHAPE, 0x403, 6, 0
+0x6c46, 0x6f6f, 0x0072, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_CUT_LINE            CURSOR  DISCARDABLE     "arrowcop.cur"
+IDC_MIRROR              CURSOR  DISCARDABLE     "res\\mirror1.cur"
+IDC_TE_HEIGHTMAP        CURSOR  DISCARDABLE     "res\\te_heigh.cur"
+IDC_TE_LAYER_PAINT      CURSOR  DISCARDABLE     "res\\cur00001.cur"
+IDC_TE_ERASE            CURSOR  DISCARDABLE     "res\\te_layer.cur"
+IDC_TE_SMOOTH           CURSOR  DISCARDABLE     "res\\te_erase.cur"
+IDC_TE_RND_NOISE        CURSOR  DISCARDABLE     "res\\te_noise.cur"
+IDC_TE_MIN              CURSOR  DISCARDABLE     "res\\cur00002.cur"
+IDC_TE_MAX              CURSOR  DISCARDABLE     "res\\te_min1.cur"
+IDC_TE_FLATTEN          CURSOR  DISCARDABLE     "res\\te_max1.cur"
+IDC_TE_POSTERIZE        CURSOR  DISCARDABLE     "res\\te_poste.cur"
+IDC_TE_FILTER           CURSOR  DISCARDABLE     "res\\cur00003.cur"
+IDC_TE_PICK             CURSOR  DISCARDABLE     "res\\te_pick.cur"
+IDC_TE_CONTINOUS_NOISE  CURSOR  DISCARDABLE     "res\\cur00004.cur"
+IDC_TE_TILE_PAINTING    CURSOR  DISCARDABLE     "res\\te_pick1.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "Serious Editor"
+    IDR_WEDTYPE             "\nSedDoc\nWorld file\nWorlds (*.wld)\n.wld\nSeriousEditor.Document\nSerious Editor Document"
+    IDS_DEFAULT_FONT        "MS Sans Serif"
+    IDS_WED_ARIAL_FONT      "Arial"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "WorldEditor"
+    AFX_IDS_IDLEMESSAGE     "For Help, press F1"
+    AFX_IDS_HELPMODEMESSAGE "Select an object on which to get Help"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name (Ctrl+Shift+S)\nSave As (Ctrl+Shift+S)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+    ID_HELP_INDEX           "Opens Help\nHelp Topics"
+    ID_HELP_FINDER          "List Help topics\nHelp Topics"
+    ID_HELP_USING           "Display instructions about how to use help\nHelp"
+    ID_CONTEXT_HELP         "Display help for clicked on buttons, menus and windows\nHelp"
+    ID_HELP                 "Display help for current task or command\nHelp"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy selected sectors without entities\nCopy selected sectors without entities"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste (Ctrl+V)"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide main toolbar\nToggle main tool bar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle status bar"
+    ID_VIEW_BROWSEDIALOGBAR "Show or hide Browse window\nToggle Browse window"
+    ID_VIEW_PROPERTYCOMBO   "Toggle visibility of property dialog\nProperty dialog on/off"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SAVE_VIRTUAL_TREE    "Save virtual directory tree\nSave virtual directory tree"
+    ID_LOAD_VIRTUAL_TREE    "Load virtual directory tree\nLoad virtual directory tree"
+    ID_DELETE_DIRECTORY     "Delete current virtual directory\nDelete current virtual directory"
+    ID_INSERT_DIRECTORY     "Insert new directory\nInsert new directory"
+    ID_CREATE_DIRECTORY     "Create new virtual directory\nCreate new virtual directory"
+    ID_INSERT_OBJECTS       "Insert object files into virtual directory\nInsert object files into virtual directory"
+    ID_RENAME_DIRECTORY     "Rename current virtual directory\nRename current virtual directory"
+    ID_INSERT_ITEMS         "Insert items to current virtual tree directory\nInsert items to current virtual tree directory"
+    ID_SMALL_ICONS          "Show using medium icons\nShow using medium icons"
+    ID_BIG_ICONS            "Show using extra large icons\nShow using extra large icons"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+    AFX_IDS_MDICHILD        "Activate this window"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_DELETE_ITEMS         "Delete selected items\nDelete selected items"
+    ID_MEDIUM_ICONS         "Show using large icons\nShow using large icons"
+    ID_SHOW_DESCRIPTION     "Display items using descriptive names\nDisplay items using descriptive names"
+    ID_SHOW_FILENAME        "List items using file names\nList items using file names"
+    ID_VIEW_INFOWINDOW      "Toggle visibility of info window (Q, Ctrl+I)\nInfo window on/off (Q, Ctrl+I)"
+    ID_FILE_PREFERENCES     "Change world editor's preferences"
+    ID_CHOOSE_COLOR         "Choose color to colorize current selection\nColorize Selection (C)"
+    ID_CREATE_PRIMITIVE     "Create new primitive\nCreate Primitive (Num Enter)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDW_BROWSER             "Browse items\nBrowse items"
+    IDW_COLOR_PALETTE       "Pick color for current selection\nColorize selection"
+    IDC_PROPERTYCOMBO       "Entity property combo box\nEntity properties"
+    IDW_ACTIVE_TEXTURE      "Default texture for primitive"
+    IDW_THUMBNAIL           "Thumbnail"
+    IDC_BROWSE_FILE         "Entity property of file name type\nFile name property"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_VIRTUALTREE         "Manage virtual directory tree\nManage virtual directory tree"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TAKE_SCREEN_SHOOT    "Take screen shoot"
+    ID_SELECT_BY_CLASS      "Select entities by description (Ctrl+Shift+A, Ctrl+Shift+I, N)\nSelect by description (Ctrl+Shift+A, Ctrl+Shift+I, N)"
+    ID_CURRENT_VIEW_PROPERTIES 
+                            "Change view properties (F10)\nView properties (F10)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SAVE_THUMBNAIL       "Save thumbnail"
+    ID_ISOMETRIC_TOP        "Set current view to top projection\nTop (F5)"
+    ID_ISOMETRIC_BOTTOM     "Set current view to bottom projection\nBottom (Shift+F5)"
+    ID_ISOMETRIC_RIGHT      "Set current view to right projection\nRight (F6)"
+    ID_ISOMETRIC_LEFT       "Set current view to left projection\nLeft (Shift+F6)"
+    ID_ISOMETRIC_FRONT      "Set current view to front projection\nFront (F7)"
+    ID_ISOMETRIC_BACK       "Set current view to back projection\nBack (Shift+F7)"
+    ID_PERSPECTIVE          "Set current view to perspective projection\nPerspective (F8)"
+    ID_CSG_ADD_ROOMS        "Apply CSG operation ""add rooms"" (Num +)\nAdd rooms (Num +)"
+    ID_CSG_ADD_MATERIAL     "Apply CSG operation ""add material"" (Num *)\nAdd material (Num *)"
+    ID_CSG_REMOVE_MATERIAL  "Apply CSG operation ""remove material"" (Num -)\nRemove material (Num -)"
+    ID_CSG_SPLIT_SECTORS    "Split selected sectors by second layer\nSplit Sectors (Num /)"
+    ID_CSG_DESTINATION      "Select current brush\nCurrent brush"
+    ID_CSG_CANCEL           "Cancel current CSG operation\nCancel CSG (Num Del)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_GRID_ON_OFF          "Show/hide drawing grid (Ctrl+Shift+G)\nToggle Grid (Ctrl+Shift+G)"
+    ID_VIEW_CSGTOOLS        "Show or hide the CSG tool bar\nToggle CSG bar"
+    ID_SHOW_ORIENTATION     "Show/hide orientation icons\nToggle Orientation Icons (Alt+Shift+I)"
+    ID_TOP                  "Top projection (F5)\nTop (F5)"
+    ID_PROJECTION_TOP       "Top projection (F5)\nTop (F5)"
+    ID_PROJECTION_BOTTOM    "Bottom projection (Shift+F5)\nBottom (Shift+F5)"
+    ID_PROJECTION_LEFT      "Left projection (Shift+F6)\nLeft (Shift+F6)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PROJECTION_RIGHT     "Right projection (F6)\nBottom (F6)"
+    ID_PROJECTION_FRONT     "Front projection (F7)\nFront (F7)"
+    ID_PROJECTION_BACK      "Back projection (Shift+F7)\nBack (Shift+F7)"
+    ID_PROJECTION_ISOMETRIC "Perspective projection (F8)\nPerspective (F8)"
+    ID_IMPORT_LWO           "Import 3D object to a new document"
+    ID_MEASUREMENT_LENT     "Show/hide measurment lent (M)\\Measurement lent (M)"
+    ID_MEASUREMENT_TAPE     "Show/hide measurement tape\nToggle Measurement Tape (Alt+M)"
+    ID_FRAME_RATE           "Show/hide frame rate\nToggle Frame Rate (Ctrl+Alt+R)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TOGGLE_MODES         "Circle editing modes (Tab)\nCircle editing modes (Tab)"
+    ID_CIRCLE_MODES         "Circle editing modes for polygons/sectors/entities \nCircle Editing Modes (Tab)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SELECT_BY_NAME       "Select entities by name\nSelect By Name (N)"
+    ID_VIEW_PROJECTIONS_BAR "Show or hide the projections tool bar\nToggle projections bar"
+    ID_VIEW_SELECTON_BAR    "Show or hide work tool bar\nToggle work bar"
+    ID_BCG_SETTINGS         "Change background setings\nBackground Setings"
+    ID_VIEW_SELECTION       "Toggle selection rendering on and off\nToggle Selection Rendering  (Z)"
+    ID_DELETE_ENTITY        "Delete selected entities (Delete)\nDelete selected entities (Delete)"
+    ID_DELETE_ENTITIES      "Delete selected entities\nDelete Entities (Delete)"
+    ID_COPY_TEXTURE         "Click on texture and make it active\nCopy Texture (,)"
+    ID_TAKE_SS              "Take screen shoot of current view\nScreen Shoot (Alt+C)"
+    ID_ENTITY_MODE          "Switch to entity mode (E)\nSwitch to entity mode (E)"
+    ID_POLYGON_MODE         "Switch to polygon mode (P)\nSwitch to polygon mode (P)"
+    ID_SECTOR_MODE          "Switch to sector mode (S)\nSwitch to sector mode (S)"
+    ID_REMOVE_MATERIAL      "Apply CSG operation ""remove material"" (Num -)\nRemove material (Num -)"
+    ID_JOIN_SECTORS         "Apply CSG operation ""join sectors"" (Shift + Num /)\nJoin sectors (Shift + Num /)"
+    ID_CSG_JOIN_SECTORS     "Join selected sectors\nJoin Sectors (Shift+Num /)"
+    ID_TEST_GAME            "Test game mode\nTest game (T)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_CUT_MODE             "Cut mode on/off (Ctrl+X)\nCut mode on/off (Ctrl+X)"
+    ID_SELECT_ALL_TARGETS   "Select all targets of this entity (Ctrl+\\)\nSelect all targets of this entity (Ctrl+\\)"
+    ID_SELECT_ALL_TARGETS_ON_CONTEXT 
+                            "Select all targets of this entity (Ctrl+\\)\nSelect all targets of this entity (Ctrl+\\)"
+    ID_TEST_GAME_FULLSCREEN "Test game in full screen\nTest game in full screen (Ctrl+T)"
+    ID_SELECT_CLONES        "Select clones (Ctrl+E)\nSelect clones (Ctrl+E)"
+    ID_SELECT_CLONES_ON_CONTEXT 
+                            "Select clones (Ctrl+E)\nSelect clones (Ctrl+E)"
+    ID_FUNCTION             "Snap vertices to plane (F)\nSnap vertices to plane (F)"
+    ID_SELECT_ALL_VERTICES  "Select all vertices in polygon under mouse (Ctrl+A)\nSelect all vertices in polygon under mouse (Ctrl+A)"
+    ID_HIDE_UNSELECTED      "Remain selected (X)\nRemain selected (X)"
+    ID_HIDE_SELECTED        "Hide selected (Alt+X)\nHide selected (Alt+X)"
+    ID_SHOW_ALL             "Show all (Alt+A)\nShow all (Alt+A)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_AUTO_SNAP            "Enable/disable automatic snapping depending on current grid\nToggle Auto Snap"
+    ID_CSG_ADD              "Add second layer to world, hold down Shift for reverse priorities\nAdd (Num +, Shift+Num +)"
+    ID_CSG_REMOVE           "Remove second layer from world\nRemove (Num -)"
+    ID_SPLIT_POLYGONS       "Apply CSG operation split polygons (Shift+Num*)\nApply CSG operation split polygons (Shift+Num*)"
+    ID_JOIN_POLYGONS        "Apply CSG operation join polygons (Num*)\nApply CSG operation join polygons (Num*)"
+    ID_CSG_SPLIT_POLYGONS   "Split selected polygons by second layer\nSplit Polygons (Num*)"
+    ID_CSG_JOIN_POLYGONS    "Join selected polygons, hold down Ctrl to preserve polygons with different textures\nJoin Polygons (Shift+Num*, Ctrl+Shift+Num*)"
+    ID_AUTO_DELTA_PRIMITIVE "Clone last CSG operation (O), hold down <Shift> for numeric option\nClone CSG (O, Shift+O)"
+    ID_CLONE_CSG            "Repeat last CSG operation, hold down Alt key for numeric option\nRepeat CSG (O, Alt+O)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_MEASURE_ON           "Activete/deactivate measureme mode (Ctrl+Q)\nToggle Measure Mode (Ctrl+Q)"
+    ID_WORLD_SETTINGS       "Change world setings\nWorld Setings"
+    ID_SHOW_PANE_INFO       "Toggle pane info text\nToggle pane info"
+    ID_RESET_VIEWER         "Reset viewer's target to origin of the world\nReset viewer"
+    ID_CREATE_TEXTURE       "Create texture (Ctrl+Shif+T)\nCreate texture (Ctrl+Shif+T)"
+    ID_CALCULATESHADOWS     "Recalculate shadows, hold Ctrl for filtered shadows\nRecalculate shadows (R), (Ctrl+R)"
+    ID_EDIT_COPY_MAPPING    "Copy mapping parameters and put them on Clipboard (m)\nCopy mapping (m)"
+    ID_EDIT_PASTE_MAPPING   "Paste mapping parameters from Clipboard (j)\nPaste mapping (j)"
+    ID_GLOBAL_SETTINGS      "Change global setings\nGlobal Setings"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_IS_LIGHT_BEAM_PASSABLLE "Don't cast shadows"
+    IDC_NO_SHADOW           "If polygon is full bright (has no shadow)"
+    IDC_IS_RECEIVING_SHADOWS "If polygons receives shadows"
+    IDC_HAS_DIRECTIONAL_SHADOWS "If polygon is lighted with directional light"
+    IDC_NO_PLANE_DIFFUSION  "Don't calculate plane diffusion"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_EASY                "If entity exists in easy game mode\nIf entity exists in easy game mode"
+    IDC_EDIT_ENUM           "Entity property of enumeration type\nEnumeration property"
+    IDC_NORMAL              "If entity exists in normal game mode\nIf entity exists in normal game mode"
+    IDC_HARD                "If entity exists in hard game mode\nIf entity exists in hard game mode"
+    IDC_EXTREME             "If entity exists in extreme game mode\nIf entity exists in extreme game mode"
+    IDC_SINGLE              "If entity exists in single player game mode\nIf entity exists in single player game"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_COOPERATIVE         "If entity exists in cooperative game mode\nIf entity exists in cooperative game"
+    IDC_DEATHMATCH          "If entity exists in deathmatch game mode\nIf entity exists in deathmatch game"
+    IDC_EDIT_BOOL           "Entity property representing boolean value\nBoolean property"
+    IDC_EDIT_STRING         "Entity property of string type\nString property"
+    IDC_EDIT_FLOAT          "Entity property of real number type\nNumber property"
+    IDC_EDIT_COLOR          "Entity property of color type\nColor type"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SELECT_POLYGONS_BY_TEXTURE_IN_WORLD 
+                            "Select polygons by texture in world\nSelect polygons by texture in world"
+    ID_SELECT_BY_TEXTURE_IN_SELECTED_SECTORS 
+                            "Select polygons by texture in selected sectors (Shift+LMBx2)\nSelect polygons by texture in selected sectors"
+    ID_SELECT_BY_TEXTURE_IN_WORLD 
+                            "Select polygons by texture in world\nSelect polygons by texture in world"
+    ID_CSG_JOIN_ALL_POLYGONS 
+                            "Join all possible selected polygons, hold down Ctrl to preserve polygons with different textures\nJoin All Possible Polygons (Alt+Num*)"
+    ID_SELECT_BY_COLOR_IN_SECTOR 
+                            "Select by color in sector (Ctrl+Shift+RMBx2)\nSelect by color in sector (Ctrl+Shift+RMBx2)"
+    IDS_BROWSER_TOOL_TIP    "Davor Hunski je najbolji\nI on voli helicu"
+    ID_TRIANGULARIZE        "Triangularize primitive's polygons\nTriangularize primitive's polygons"
+    ID_CREATE_TORUS         "Create Torus Primitive\nCreate Torus Primitive"
+    ID_STAIRCASE_PRIMITIVE  "Create Stairs Primitive\nCreate Stairs Primitive"
+    ID_TERRAIN_PRIMITIVE    "Create Terrain Primitive\nCreate Terrain Primitive"
+    ID_SPHERE_PRIMITIVE     "Create Sphere Primitive\nCreate Sphere Primitive"
+    ID_CONUS_PRIMITIVE      "Create conus primitive\nCreate Conus Primitive (Num Enter)"
+    ID_TORUS_PRIMITIVE      "Create Torus Primitive\nCreate Torus Primitive"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_GAME_SETTINGS        "Change game setings\nGame Setings (Ctrl+U)"
+    ID_HIDE_SELECTED_SECTORS "Hide selected sectors\nHide selected (Alt+X)"
+    ID_SHOW_ALL_SECTORS     "Show all sectors\nShow all (Alt+A)"
+    ID_HIDE_UNSELECTED_SECTORS "Hide unselected sectors\nHide unselected (X)"
+    ID_RENDER_TARGETS       "Show/Hide entitiy targets\nShow targets (G)"
+    ID_CALL_MODELER         "Call model editor\nCall Modeler"
+    ID_CALL_TEXMAKER        "Call texture maker\nCall TexMaker"
+    ID_VIEW_SETTINGS_AND_UTILITY_BAR 
+                            "Show or hide the settings and utility tool bar\nToggle settings and utility bar"
+    ID_VIEW_VIEW_TOOLS_BAR  "Show or hide the view tools tool bar\nToggle view tools bar"
+    ID_GAME_PLAYER          "Edit players and controls\nEdit players and controls"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_EDIT_BBOX_MIN       "Change minimal value for selected axis\nSelected axis's minimum"
+    IDC_EDIT_BBOX_MAX       "Change maximum value for selected axis\nSelected axis's maximum"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_AXIS_X              "Select X axis for editing\nEdit X axis"
+    IDC_AXIS_Y              "Select Y axis for editing\nEdit Y axis"
+    IDC_AXIS_Z              "Select Z axis for editing\nEdit Z axis"
+    IDC_ENTITY_CLASS        "Class file name for selected entity\nEntity's class"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_GAME_AUDIO           "Adjust audio settings\nAudio settings"
+    ID_GAME_VIDEO           "Adjust video settings\nVideo settings"
+    ID_GAME_SELECT_PLAYER   "Select player and controls to play with\nSelect player and controls to play with"
+    ID_SHADOWS_NONE         "Show no shadows\nNo shadows (toggle-H)"
+    ID_SHADOWS_NO_FX        "Show shadows with no effects\nShadows but no effects (toggle-H)"
+    ID_SHADOWS_WITH_EFFECTS "Show shadow and shadow effects\nShadows and effects (toggle-H)"
+    ID_SAVE_AS_VIRTUAL_TREE "Save As virtual directory tree\nSave As virtual directory tree"
+    ID_MOVE_ANCHORED        "Enable anchored entity moving (valid for 5 minutes)\nEnable moving of anchored entities"
+    ID_PASTE_TEXTURE        "Paste active texture (K)\nPaste Texture (K)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_CENTER_ENTITY        "Center selected entity\nCenter selected entity (C)"
+    ID_BROWSE_ENTITIES_MODE "Enable/Disable entity browse by volume mode\nBrowse by volume (V)"
+    ID_NEXT_SELECTED_ENTITY "Select and center next selected entity\nNext entity ( ] )"
+    ID_PREVIOUS_SELECTED_ENTITY 
+                            "Select and center previous selected entity\nPrevious entity ( [ )"
+    ID_SCENE_STATISTICS     "Display scene statistics\nScene statistics (Alt + R)"
+    ID_SCENE_RENDERING_TIME "Show/hide frame rate\nToggle Frame Rate (Alt+R)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_RECREATE_TEXTURE     "Recreate texture\nRecreate texture"
+    ID_SELECT_ALL_IN_VOLUME "Select all entities in volume\nSelect all in volume ( Ctrl+A)"
+    ID_DROP_MARKER          "Drop marker at current position of entity\nDrop Marker (D)"
+    ID_TEST_CONNECTIONS     "Test entity connections\nTest connections (Alt+D)"
+    ID_JOIN_LAYERS          "Join layers (L)\nJoin layers (L)"
+    ID_ALIGN_VOLUME         "Align browsing volume to window\nAlign volume (A)"
+    ID_SHOW_TREE_SHORTCUTS  "Call directory tree shortcut list\nCall directory tree shortcut list"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_AUTO_MIP_LEVELING    "Enable/disable auto mip brushing\nAuto Mip Brushing(B)"
+    ID_DECADIC_GRID         "Toggle decadic and binary grid snapping type\nToggle Grid Type"
+    ID_ADD_MORE_PRECISE_MIP "Add or clone current mip brush to more precise mip level\nAdd, clone mip brush to more precise mip level (Shift+PgUp, Ctrl+Shift+PgUp)"
+    ID_ADD_ROUGHER_MIP_LEVEL 
+                            "Add or clone current mip brush to rougher mip level\nAdd, clone mip brush to rougher mip level (Shift+PgDn, Ctrl+Shift+PgDn)"
+    ID_DELETE_MIP           "Delete current mip brush\nDelete Mip Brush"
+    ID_CONSOLE              "Invoke console (Ctrl+L)\nInvoke console (Ctrl+L)"
+    ID_PREVIOUS_MIP         "Set manual mip factor to show previous mip brush\nPrevious Mip Brush ([)"
+    ID_NEXT_MIP             "Set manual mip factor to show next mip brush\nNext Mip Brush (])"
+    ID_PREVIOUS_MIP_BRUSH   "Set manual mip factor to show previous mip brush\nPrevious Mip Brush ([)"
+    ID_NEXT_MIP_BRUSH       "Set manual mip factor to show next mip brush\nNext Mip Brush (])"
+    ID_VIEW_MIP_TOOLS_BAR   "Show or hide the mip tools tool bar\nToggle mip tools bar"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TOOL_RECREATE_TEXTURE "Recreate texture\nRecreate texture"
+    ID_SET_AS_CSG_TARGET    "Select active brush (Ctrl+LMB)\nSelect active brush (Ctrl+LMB)"
+    ID_RECREATE_CURRENT_TEXTURE 
+                            "Recreate current texture (Ctrl+Shift+R)\nRecreate current texture (Ctrl+Shift+R)"
+    ID_CREATE_AND_ADD_TEXTURE "Create and add texture\nCreate and add texture"
+    ID_SELECT_POLYGONS      "Select polygons by texture in sector (Shift+LMB)\nSelect polygons by texture in sector (Shift+LMB)"
+    ID_SELECT_POLYGONS_IN_SECTOR 
+                            "Select polygons by texture in selected sectors (Shift+LMBx2)\nSelect polygons by texture in selected sectors (Shift+LMBx2)"
+    ID_SELECT_POLYGONS_IN_WORLD 
+                            "Select polygons by texture in world\nSelect polygons by texture in world"
+    ID_FIND_TEXTURE         "Find texture in browser (Ctrl+F)\nFind texture in browser (Ctrl+F)"
+    ID_SELECT_BY_TEXTURE_IN_SECTOR 
+                            "Select by texture in sector (Ctrl+Shift+LMBx2)\nSelect by texture in sector (Ctrl+Shift+LMBx2)"
+    ID_SELECT_BY_TEXTURE_ADJACENT 
+                            "Select by texture adjacent (Ctrl+RMBx2)\nSelect by texture adjacent (Ctrl+RMBx2)"
+    ID_SELECT_POLYGONS_BY_TEXTURE_IN_SELECTED_SECTORS 
+                            "Select polygons by texture in selected sectors (Shift+LMBx2)\nSelect polygons by texture in selected sectors"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_POPOUP_CONUS         "Create conus primitive\nCreate conus primitive"
+    ID_POPUP_CONUS          "Create conus primitive\nCreate conus primitive"
+    ID_POPUP_TORUS          "Create torus primitive\nCreate torus primitive"
+    ID_POPUP_STAIRS         "Create stairs primitive\nCreate stairs primitive"
+    ID_POPUP_SPHERE         "Create sphere primitive\nCreate sphere primitive"
+    ID_POPUP_TERRAIN        "Create terrain primitive\nCreate terrain primitive"
+    ID_TOGGLE_VIEW_PICTURES "Toggle view pictures (Alt+P)\nToggle view pictures (Alt+P)"
+    ID_SELECT_FOR_DROP_MARKER "Select for drop marker\nSelect for drop marker"
+    ID_LIGHT_ANIMATION      "Light animation editor\nLight animation editor"
+    ID_VIEW_FROM_ENTITY     "View from selected entity (Y)\nView from selected entity (Y)"
+    ID_SET_AS_CURRENT_TEXTURE 
+                            "Select as current texture (LMB x 2)\nSelect as current texture (LMB x 2)"
+    ID_SELECT_LIGHTS        "Select light entities that affect this polygon\nSelect light entities that affect this polygon"
+    ID_DISCARD_SHADOWS      "Discard shadows\nDiscard shadows"
+    ID_COPY_SECTOR_AMBIENT  "Copy ambient from right-clicked sector\nCopy ambient from right-clicked sector"
+    ID_PASTE_SECTOR_AMBIENT "Paste ambient to right-clicked sector\nPaste ambient to right-clicked sector"
+    ID_SELECT_ALL_POLYGONS  "Select all polygons in sector(s) Ctrl+Alt+A\nSelect all polygons in sector(s) Ctrl+Alt+A"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TOGGLE_LIGHT_SIZE    "Toggle light size\nToggle light size"
+    ID_COPY_SECTORS         "Copy selected sectors without entities\nCopy selected sectors without entities"
+    ID_PASTE_SECTORS        "Paste sectors from clipboard\nPaste sectors from clipboard"
+    ID_DELETE_SECTORS       "Delete selected sectors\nDelete selected sectors"
+    ID_CENTER_BCG_VIEWER    "Center Background Viewer (Shift+Backspace)\nCenter Background Viewer (Shift+Backspace)"
+    ID_CONVERT_WORLDS       "Convert given file list\nConvert given file list"
+    ID_TOGGLE_TOOL_TIPS     "Toggle data tips (I)\nToggle data tips (I)"
+    ID_TEXTURE_1            "Toggle texture 1 visibility (Ctrl+Shift+1)\nToggle texture 1 visibility (Ctrl+Shift+1)"
+    ID_TEXTURE_2            "Toggle texture 2 visibility (Ctrl+Shift+2)\nToggle texture 2 visibility (Ctrl+Shift+2)"
+    ID_TEXTURE_3            "Toggle texture 3 visibility (Ctrl+Shift+3)\nToggle texture 3 visibility (Ctrl+Shift+3)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDW_SHOW_TEXTURE        "Selected polygon's (selection) texture"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TOGGLE_SHADOWS       "Toggle:  -Shadows-  -No shadows-  -No auto refresh shadows- (H)\nToggle:  -Shadows-  -No shadows-  -No auto refresh shadows- (H)"
+    ID_VIEW_SHADOWS_AND_TEXTURE_BAR 
+                            "Show or hide the shadows and texture tool bar\nToggle shadows and texture tool bar"
+    ID_VIEW_SELECT_ENTITY_BAR 
+                            "Show or hide select entity tool bar\nToggle select entity tool bar"
+    ID_VIEW_WORK_BAR        "Show or hide work tool bar\nToggle work bar"
+    ID_PASTE_TEXTURE_AS_PROJECTED 
+                            "Paste active texture as projected\nPaste Texture As Projected (Shift+k)"
+    ID_EDIT_PASTE_AS_PROJECTED_MAPPING 
+                            "Paste mapping parameters from Clipboard as projected mapping (Ctrl+j)\nPaste mapping as projected mapping(Ctrl+j)"
+    ID_MENU_COPY_MAPPING    "Copy mapping parameters and put them on Clipboard (M)\nCopy mapping (M)"
+    ID_MENU_PASTE_MAPPING   "Paste mapping parameters from Clipboard (J)\nPaste mapping (J)"
+    ID_MENU_PASTE_AS_PROJECTED_MAPPING 
+                            "Paste mapping parameters from Clipboard as projected mapping (U)\nPaste mapping as projected mapping(U)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SELECT_ALL_SECTORS   "Select all sectors in entity (Ctrl+Alt+A)\nSelect all sectors in entity (Ctrl+Alt+A)"
+    ID_SELECT_ALL_ENTITIES  "Select all entities\nSelect all entities"
+    ID_COPY_COLOR           "Copy color\nCopy color"
+    ID_PASTE_COLOR          "Paste color\nPaste color"
+    ID_NUMERIC_ALPHA        "Numeric alpha\nNumeric alpha"
+    ID_CREATE_EMPTY_ROUGHER_MIP 
+                            "Create empty brush at rougher mip level\nCreate empty brush at rougher mip level"
+    ID_CREATE_EMPTY_MORE_PRECISE_MIP 
+                            "Create empty brush at more precise mip level\nCreate empty brush at more precise mip level"
+    ID_CLONE_TO_MORE_PRECISE_MIP 
+                            "Clone current mip brush to more precise mip level\nClone mip brush to more precise mip level"
+    ID_CLONE_TO_ROUGHER_MIP_LEVEL 
+                            "Clone current mip brush to rougher mip level\nClone current mip brush to rougher mip level"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_LOAD_PRIMITIVE_SETTINGS 
+                            "Load primitive settings\nLoad primitive settings"
+    ID_SAVE_PRIMITIVE_SETTINGS 
+                            "Save primitive settings\nSave primitive settings"
+    ID_SAVE_AS_PRIMITIVE_SETTINGS 
+                            "Save As primitive settings\nSave As primitive settings"
+    ID_EDIT_PASTE_ALTERNATIVE 
+                            "Alternative paste\nAlternative paste (Ctrl+Shift+V)"
+    ID_CALCULATE_SHADOWS_ONOFF 
+                            "Calculate shadows on/off\nCalculate shadows on/off (Ctrl+H)"
+    ID_VIEW_SHADOWS         "Toggle shadows on/off\nToggle shadows on/off (H)"
+    ID_VIEW_SHADOWS_ONOFF   "Toggle shadows on/off\nToggle shadows on/off (H)"
+    ID_SELECT_ALL_ENTITIES_IN_WORLD 
+                            "Select all entities in world\nSelect all entities in world"
+    ID_EDIT_PASTE_INTO_LAYER 
+                            "Paste copied entities into layer\nPaste into layer"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SELECT_SECTORS_WITH_SAME_NAME 
+                            "Select all sectors with same name\nSelect all sectors with same name"
+    ID_SELECT_SECTORS_ARROUND_ENTITY 
+                            "Select all sectors arround entity (Alt+C)\nSelect all sectors arround entity (Alt+C)"
+    ID_CHANGE_CLASS         "Convert entity selection to right clicked class\nConvert entity selection to right clicked class"
+    ID_CONVERT_CLASS        "Convert entity selection to right clicked class\nConvert entity selection to right clicked class"
+    ID_RESET_PRIMITIVE      "Reset primitive\nReset primitive"
+    ID_MENU_PASTE_TEXTURE   "Paste active texture\nPaste Texture (k)"
+    ID_MENU_COPY_TEXTURE    "Click on texture and make it active\nCopy Texture (,)"
+    ID_INSERT_VERTEX        "Insert vertex (Shift+LMB)\nInsert vertex (Shift+LMB)"
+    ID_DELETE_VERTEX        "Delete vertex (Shift+RMB)\nDelete vertex (Shift+RMB)"
+    ID_SELECT_TARGET        "Select current entity's target (\\)\nSelect current entity's target (\\)"
+    ID_SAVE_PICTURES_FOR_ENVIRONMENT 
+                            "Save pictures for environment\nSave pictures for environment"
+    ID_SELECT_SECTOR        "Select sector\nSelect sector"
+    ID_CSG_SELECT_SECTOR    "Select sector\nSelect sector"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_UPDATE_LINKS         "Update links\nUpdate links"
+    ID_MENU_ALIGN_MAPPING   "Align mapping U on selected polygons\nAlign mapping U on selected polygons"
+    ID_MENU_ALIGN_MAPPING_U "Align mapping U on selected polygons (Ctrl+K)\nAlign mapping U on selected polygons (Ctrl+K)"
+    ID_MENU_ALIGN_MAPPING_V "Align mapping V on selected polygons (Ctrl+Shift+K)\nAlign mapping V on selected polygons (Ctrl+Shift+K)"
+    ID_MICRO_ICONS          "Show using small icons\nShow using small icons"
+    ID_FALL_DOWN            "Force entities to fall down (Backspace)\nForce entities to fall down (Backspace)"
+    ID_EXCEPT_TEXTURES_IN_WORLD 
+                            "Selects polygons in world that contain textures that are not selected in browser\nSelects polygons in world that contain textures that are not selected in browser"
+    ID_SELECT_EXCEPT_TEXTURES 
+                            "Selects polygons in world that contain textures that are not selected in browser\nSelects polygons in world that contain textures that are not selected in browser"
+    ID_REMOVE_UNUSED_TEXTURES 
+                            "Remove unused textures from all of world's polygons (from non translucent portals)\nRemove unused textures from all of world's polygons (from non translucent portals)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SELECT_VISIBLE_SECTORS "Select visible sectors\nSelect visible sectors"
+    ID_SNAPSHOT             "Remember current world state for undo\nRemember current world state for undo"
+    ID_EDIT_COPY_ALTERNATIVE 
+                            "Copy alternative (Ctrl+Shift+C)\nCopy alternative (Ctrl+Shift+C)"
+    ID_MIRROR_AND_STRETCH   "Mirror and stretch\nMirror and stretch"
+    ID_DESELECT_BY_ORIENTATION 
+                            "Deselect by orientation (Alt+Shift+RMB)\nDeselect by orientation (Alt+Shift+RMB)"
+    ID_ADD_TEXTURES_FROM_WORLD 
+                            "Add all textures from world's polygons\nAdd all textures from world's polygons"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SELECT_WHO_TARGETS   "Select entities that target this entity (Shift+\\)\nSelect entities that target this entity (Shift+\\)"
+    ID_SELECT_INVALIDTRIS   "Select all polygons in world that were not triangulated properly\nSelect all polygons in world that were not triangulated properly"
+    ID_FILTER_SELECTION     "Filter selection (F)\nFilter selection (F)"
+    ID_TEST_CONNECTIONS_BACK 
+                            "Test entity connections backward (Alt+Shift+D)\nTest connections back (Alt+Shift+D)"
+    ID_SET_AS_DEFAULT       "Set current properties as defeault values for new primitives\nSet current properties as defeault values for new primitives"
+    ID_HELP_SHOWTIPOFTHEDAY "Displays Tip of the Day"
+    ID_UPDATE_CLONES        "Update clones (Ctrl+Shift+U)\nUpdate clones (Ctrl+Shift+U)"
+    ID_EDIT_MIP_SWITCH_DISTANCE 
+                            "Edit mip switch distance\nEdit mip switch distance"
+    ID_SELECT_SECTORS_OTHER_SIDE 
+                            "Select sectors from other side of portal\nSelect sectors from other side of portal"
+    ID_SELECT_LINKS_TO_SECTOR 
+                            "Select polygons that are links to this sector\nSelect polygons that are links to this sector"
+    ID_REMAIN_SELECTEDBY_ORIENTATION 
+                            "Remain selected by orientation (Alt+Shift+LMB)\nRemain selected by orientation (Alt+Shift+LMB)"
+    ID_VERTEX_MODE          "Switch to vertex mode (.)\nSwitch to vertex mode (.)"
+    ID_REOPTIMIZE_BRUSHES   "Reoptimize brushes\nReoptimize brushes"
+    ID_MERGE_POINTS         "Merge vertices (M)\nMerge vertices (M)"
+    ID_MERGE_VERTICES       "Merge vertices (M)\nMerge vertices (M)"
+    ID_EXPORT_DISPLACE_MAP  "Export displace map for are occupied by selected polygons\nExport displace map for are occupied by selected polygons"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_DYNAMIC_LIGHTS_ONLY "Apply only dynamic lights"
+    IDC_NO_DYNAMIC_LIGHTS   "Don't apply dynamic lights"
+    IDC_HAS_PRECISE_SHADOWS "Use precise shadow calculation"
+    IDC_HAS_DIRECTIONAL_AMBIENT 
+                            "If polygon receives ambient component of directional light"
+    IDC_DARK_CORNERS        "Apply ""dark corners"" to shadows"
+    IDC_APPLY_GRADIENT      "Apply gradient shadow"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SELECT_OF_SAME_CLASS "Select all entities of the same class (Ctrl+Shift+E)\nSelect all entities of the same class (Ctrl+Shift+E)"
+    ID_SELECT_OF_SAME_CLASS_ON_CONTEXT 
+                            "Select all entities of the same class (Ctrl+Shift+E)\nSelect all entities of the same class (Ctrl+Shift+E)"
+    ID_VIEW_AXIS            "Toggle view axis\nToggle view axis"
+    ID_RE_TRIPLE            "Retriple polygons (F9)\nRetriple polygons (F9)"
+    ID_SELECT_WHO_TARGETS_ON_CONTEXT 
+                            "Select entities that target this entity (Shift+\\)\nSelect entities that target this entity (Shift+\\)"
+    ID_SELECT_SECTORS_ARROUND_ENTITY_ON_CONTEXT 
+                            "Select all sectors arround entity (Alt+S)\nSelect all sectors arround entity (Alt+S)"
+    ID_DISCARD_ALL_TARGETS  "Clear all targets\nClear all targets"
+    ID_CLEAR_ALL_TARGETS    "Clear all targets\nClear all targets\n"
+    ID_EXPORT_TEXTURES      "Export texture\nExport texture"
+    ID_EXPORT_TEXTURE       "Export texture\nExport texture"
+    ID_CHECK_EDIT           "Open currently opened world for edit\nOpen currently opened world for edit"
+    ID_CHECK_ADD            "Open currently opened world for add\nOpen currently opened world for add"
+    ID_CHECK_DELETE         "Open currently opened world for delete\nOpen currently opened world for delete"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SELECT_CSG_TARGET    "Select current brush entity\nSelect current brush entity"
+    ID_REMAIN_SELECTEDBY_ORIENTATION_SINGLE 
+                            "Remain selected by orientation (Alt+Ctrl+Shift+LMB)\nRemain selected by orientation (Alt+Ctrl+Shift+LMB)"
+    ID_TRIANGULARIZE_POLYGON 
+                            "Triangularize right-clicked polygon\nTriangularize right-clicked polygon"
+    ID_BROWSER_HELP         "Display help chapter about class\nDisplay help chapter about class\n"
+    ID_BROWSER_CONTEXT_HELP "Display help chapter on this class\nDisplay help chapter on this class"
+    ID_ENTITY_CONTEXT_HELP  "Display help on entity (F1)\nDisplay help on entity (F1)"
+    ID_FIT_TEXTURE          "Auto fit mapping (Ctrl+Shift+LMB)\nAuto fit mapping (Ctrl+Shift+LMB)"
+    ID_FIT_MAPPING          "Auto fit mapping (Ctrl+Shift+LMB)\nAuto fit mapping (Ctrl+Shift+LMB)"
+    ID_AUTO_FIT_MAPPING     "Auto fit mapping (Ctrl+Shift+LMB)\nAuto fit mapping (Ctrl+Shift+LMB)"
+    ID_POPUP_AUTO_FIT_MAPPING 
+                            "Auto fits mapping onto selected polygons along smaller axis (Alt+A)\nAuto fits mapping onto selected polygons along smaller axis (Alt+A)"
+    ID_POPUP_AUTO_FIT_MAPPING_SMALL 
+                            "Auto fits mapping onto selected polygons along longer axis (Alt+Shift+A)\nAuto fits mapping onto selected polygons along longer axis (Alt+Shift+A)"
+    ID_POPUP_AUTO_FIT_MAPPING_BOTH 
+                            "Auto fits mapping onto selected polygons along both axis (Ctrl+Shift+Alt+A)\nAuto fits mapping onto selected polygons along both axis (Ctrl+Shift+Alt+A)"
+    ID_RESET_ROTATION       "Reset mapping rotation\nReset mapping rotation"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_RESET_OFFSET         "Reset mapping offset\nReset mapping offset"
+    ID_RESET_MAPPING_ROTATION "Reset mapping rotation\nReset mapping rotation"
+    ID_RESET_MAPPING_OFFSET "Reset mapping offset\nReset mapping offset"
+    ID_RESET_MAPPING_STRETCH "Reset mapping stretch\nReset mapping stretch"
+    ID_TOGGLE_ENTITY_NAMES  "Toggle entity names (Ctrl+G)\nToggle entity names (Ctrl+G)"
+    ID_VIEW_VIEW_TOOLS_BAR2 "Show or hide the view tools tool bar 2\nToggle view tools bar 2"
+    ID_VIEW_TARGET_TREE     "Select using target tree (Shift+RMB, L)\nSelect using target tree (Shift+RMB, L)"
+    ID_SELECT_USING_TARGET_TREE 
+                            "Select using target tree (Shift+RMB, L)\nSelect using target tree (Shift+RMB, L)"
+    ID_LT_EXPAND_ALL        "Expand all nodes (Ctrl+Shift+RMB)\nExpand all nodes (Ctrl+Shift+RMB)"
+    ID_LT_CONTRACT_BRANCH   "Contract branch (Ctrl+LMB)\nContract branch (Ctrl+LMB)"
+    ID_LT_EXPAND_BRANCH     "Expand branch (Ctrl+RMB)\nExpand branch (Ctrl+RMB)"
+    ID_LT_CONTRACT_LEVEL    "Contract level\nContract level"
+    ID_LT_EXPAND_LEVEL      "Expand level\nExpand level"
+    ID_LT_CONTRACT_ALL      "Contract all nodes (Ctrl+Shift+LMB)\nContract all nodes (Ctrl+Shift+LMB)"
+    ID_LT_LEAVE_BRANCH      "Leave branch (Shift+LMB)\nLeave branch (Shift+LMB)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_LT_LAST_LEVEL        "Last level (Shift+RMB)\nLast level (Shift+RMB)"
+    ID_TARGET_LIST          "Display target tree"
+    ID_TARGET_TREE          "Display target tree (L)\nDisplay target tree (L)"
+    ID_UPDATE_BRUSHES       "Update brushes\nUpdate brushes"
+    ID_TOGGLE_VISIBILITY_TWEAKS 
+                            "View sector visibility tweaking (Ctrl+D)\nView sector visibility tweaking (Ctrl+D)"
+    ID_SWAP_LAYERS_12       "Swap first and second layer\nSwap first and second layer"
+    ID_SWAP_LAYERS_23       "Swap second and third layer\nSwap second and third layer"
+    ID_IMPORT_3D_SERIES     "Import 3D object series to a new document"
+    ID_IMPORT_3D_OBJECT     "Insert 3D object(s) to a current document"
+    ID_INSERT_3D_OBJECT     "Insert 3D object(s) to a current document"
+    ID_EXPORT_3D_OBJECT     "Export selected polygons as 3D object"
+    ID_POPUP_VTX_NUMERIC    "Set vertex coordinates numerically\nSet vertex coordinates numerically"
+    ID_POPUP_VTX_ALLIGN     "Align to last vertex\nAlign to last vertex"
+    ID_POPUP_VTX_FILTER     "Filter vertices\nFilter vertices"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SELECT_DESCENDANTS   "Select all descendants\nSelect all descendants"
+    ID_ENABLE_VISIBILITY_TWEAKS 
+                            "Enable visibility tweaking influence (Ctrl+Shift+D)\nEnable visibility tweaking influence (Ctrl+Shift+D)"
+    ID_IMPORT_VIRTUAL_TREE  "Import virtual directory tree\nImport virtual directory tree"
+    ID_EXPORT_VIRTUAL_TREE  "Export virtual directory tree\nExport virtual directory tree"
+    ID_DUMP_VT              "Dump virtual tree\nDump virtual tree"
+    ID_TARGET_ENTITY        "Rotate entity to target origin of another entity\nRotate entity to target origin of another entity"
+    ID_ROTATE_TO_TARGET_ORIGIN 
+                            "Rotate entity to target origin of another entity\nRotate entity to target origin of another entity"
+    ID_ROTATE_TO_TARGET_CENTER 
+                            "Rotate entity to target center of another entity\nRotate entity to target center of another entity"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_COPY_PLACEMENT       "Copy placement\nCopy placement"
+    ID_PASTE_PLACEMENT      "Paste placement\nPaste placement"
+    ID_COPY_POSITION        "Copy position\nCopy position"
+    ID_PASTE_POSITION       "Paste position\nPaste position"
+    ID_COPY_ORIENTATION     "Copy orientation\nCopy orientation"
+    ID_PASTE_ORIENTATION    "Paste orientation\nPaste orientation"
+    ID_ALIGN_X              "Align x\nAlign x"
+    ID_ALIGN_Y              "Align y\nAlign y"
+    ID_ALIGN_Z              "Align z\nAlign z"
+    ID_ALIGN_H              "Align heading\nAlign heading"
+    ID_ALIGN_P              "Align pitch\nAlign pitch"
+    ID_ALIGN_B              "Align banking\nAlign banking"
+    ID_AUTOTEXTURIZE_MIPS   "Auto texturize mip levels (Ctrl+U)\nAuto texturize mip levels (Ctrl+U)"
+    ID_RANDOM_OFFSET_U      "Random offset V\nRandom offset V"
+    ID_RANDOM_OFFSET_V      "Random offset V\nRandom offset V"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_STRETCH_RELATIVE_OFFSET "Stretch child offset\nStretch child offset"
+    ID_DESELECT_HIDDEN      "Deselect hidden entities\nDeselect hidden entities"
+    ID_SELECT_HIDDEN        "Select hidden entities\nSelect hidden entities"
+    ID_SECTORS_TO_BRUSH     "Convert selected sectors to brush\nConvert selected sectors to brush"
+    ID_POLYGONS_TO_BRUSH    "Convert selected polygons to brush\nConvert selected polygons to brush"
+    ID_CLONE_POLYGONS       "Clone polygons to brush\nClone polygons to brush"
+    ID_DELETE_POLYGONS      "Delete selected polygons\nDelete selected polygons"
+    ID_FLIP_POLYGON         "Flip polygons (D)\nFlip polygons (D)"
+    ID_CREATE_POLYGON       "Create polygon\nCreate polygon"
+    ID_SELECT_TERRAIN_ENTITY "Select terrain\nSelect terrain"
+    ID_RECALCULATE_TERRAIN_SHADOWS 
+                            "Recalculate shadows on terrain (Ctrl+R)\nRecalculate shadows on terrain (Ctrl+R)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_OPTIMIZE_TERRAIN     "Optimize terrain (Ctrl+Shift+Z)\nOptimize terrain (Ctrl+Shift+Z)"
+    ID_SELECT_BRUSH         "Select brush (\\)\nSelect brush (\\)"
+    ID_SELECT_LAYER         "Select layer (Ctrl+RMB)\nSelect layer (Ctrl+RMB)"
+    ID_PICK_LAYER           "Pick layer (Ctrl+Alt+LMB)\nPick layer (Ctrl+Alt+LMB)"
+    ID_TOGGLE_EDIT_MODE     "Toggle edit mode (M)\nToggle edit mode (M)"
+    ID_ALTITUDE_EDIT_MODE   "Altitude editing (U)\nAltitude editing (U)"
+    ID_LAYER_TEXTURE_EDIT_MODE 
+                            "Texture editing mode (L)\nTexture editing mode (L)"
+    ID_CHANGE_TERRAIN_SIZE  "Change terrain size\nChange terrain size"
+    ID_EXPORT_HEIGHTMAP     "Export 8 bit heightmap\nExport 8 bit heightmap"
+    ID_IMPORT_HEIGHTMAP     "Import 8 bit heightmap\nImport 8 bit heightmap"
+    ID_LAYER_OPTIONS        "Layer options\nLayer options"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDW_TERRAIN_INTERFACE   "Terrain edit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SELECT_TERRAIN       "Select terrain\nSelect terrain"
+    ID_TBRUSH_HEIGHT        "Altitude brush\nAltitude brush"
+    ID_TBRUSH_ALTITUDE      "Paint brush\nPaint brush"
+    ID_TBRUSH_SMOOTH        "Smooth brush (O)\nSmooth brush (O)"
+    ID_TBRUSH_EQUILAZE      "Flatten brush (=)\nFlatten brush (=)"
+    ID_TBRUSH_ERASE         "Erase brush (D)\nErase brush (D)"
+    ID_TBRUSH_UNERASE       "Unerase brush\nUnerase brush"
+    ID_TBRUSH_FLATTEN       "Flatten brush (=)\nFlatten brush (=)"
+    ID_TBRUSH_NOISE         "Random noise brush (K)\nRandom noise brush (K)"
+    ID_VIEW_HEIGHTMAP       "View heightmap\nView heightmap"
+    ID_IMPORT_HEIGHTMAP16   "Import 16 bit heightmap\nImport 16 bit heightmap"
+    ID_EXPORT_HEIGHTMAP16   "Export 16 bit heightmap\nExport 16 bit heightmap"
+    ID_CHANGE_HIEGHTMAP_SIZE "Change heightmap size\nChange heightmap size"
+    ID_CHANGE_HEIGHTMAP_SIZE "Change heightmap size\nChange heightmap size"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TBRUSH_FILTER        "Filter brush (F)\nFilter brush (F)"
+    ID_TBRUSH_MINIMUM       "Limit down brush (M)\nLimit down brush (M)"
+    ID_TBRUSH_MAXIMUM       "Limit up brush (X)\nLimit up brush (X)"
+    ID_TBRUSH_POSTERIZE     "Posterize brush (-)\nPosterize brush (-)"
+    ID_TBRUSH_CONTINOUS_NOISE 
+                            "Texture noise brush (K)\nTexture noise brush (K)"
+    ID_TERRAIN_PROPERTIES   "Invoke terrain properties (Ctrl+Shift+T)\nInvoke terrain properties (Ctrl+Shift+T)"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif
+#include "res\WorldEditor.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

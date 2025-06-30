@@ -365,6 +365,9 @@ public final class KCVarSystem
         else if(Q3EUtils.q3ei.isFTEQW) ;
         else if(Q3EUtils.q3ei.isJA) ;
         else if(Q3EUtils.q3ei.isJO) ;
+        else if(Q3EUtils.q3ei.isSamTFE) ;
+        else if(Q3EUtils.q3ei.isSamTSE) ;
+        else if(Q3EUtils.q3ei.isXash3D) ;
         else
         {
             res.add(_cvars.get("RENDERER"));

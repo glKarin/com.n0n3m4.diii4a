@@ -413,6 +413,16 @@ void hhWeapon::InitWorldModel( const idDict *dict ) {
 
 	const char *model = dict->GetString( "model_world" );
 	const char *attach = dict->GetString( "joint_attach" );
+#ifdef _PREY //karin: for world weapon attach to custom player model
+    const char *wpName = dict->GetString("scriptobject");
+    if(wpName && wpName[0])
+        owner->spawnArgs.GetString(va("%s_joint_attach", wpName), attach, &attach);
+#if 0
+    static idCVar harm_g_playerWeaponJointAttach("harm_g_playerWeaponJointAttach", "", CVAR_GAME, "Test player world weapon joint attach.");
+    if(harm_g_playerWeaponJointAttach.GetString() && harm_g_playerWeaponJointAttach.GetString()[0])
+        attach = harm_g_playerWeaponJointAttach.GetString();
+#endif
+#endif
 
 	if (gameLocal.isMultiplayer) { //HUMANHEAD rww - shadow default based on whether the player shadows
 		ent->GetRenderEntity()->noShadow = MP_PLAYERNOSHADOW_DEFAULT;
@@ -426,9 +436,7 @@ void hhWeapon::InitWorldModel( const idDict *dict ) {
 		ent->BindToJoint( owner.GetEntity(), attach, true );
 		ent->GetPhysics()->SetOrigin( vec3_origin );
 		ent->GetPhysics()->SetAxis( mat3_identity );
-#ifdef _PREY
-        //karin: for world weapon attach to custom player model
-        const char *wpName = dict->GetString("scriptobject");
+#ifdef _PREY //karin: for world weapon attach to custom player model
         if(wpName && wpName[0])
         {
             idVec3 ori;

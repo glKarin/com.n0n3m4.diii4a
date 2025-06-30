@@ -15,6 +15,9 @@
     <color name="theme_fteqw_main_color">#FF8A74EB</color>
     <color name="theme_ja_main_color">#FF8ED4FF</color>
     <color name="theme_jo_main_color">#FF8EABFF</color>
+    <color name="theme_samtfe_main_color">#FFFFCC00</color>
+    <color name="theme_samtse_main_color">#FFCCCC00</color>
+    <color name="theme_xash3d_main_color">#FFF97C79</color>
     <color name="launcher_divider_color">#FFCCCCCC</color>
     <color name="pie_color">#FF4585E1</color>
 </resources>

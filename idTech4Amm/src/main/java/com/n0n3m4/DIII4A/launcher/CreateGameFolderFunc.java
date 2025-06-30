@@ -1,20 +1,15 @@
 package com.n0n3m4.DIII4A.launcher;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
-import com.karin.idTech4Amm.lib.FileUtility;
-import com.karin.idTech4Amm.misc.PreferenceBackup;
-import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.n0n3m4.DIII4A.GameLauncher;
-import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -22,7 +17,6 @@ import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.File;
-import java.io.OutputStream;
 
 public final class CreateGameFolderFunc extends GameLauncherFunc
 {
@@ -81,7 +75,7 @@ public final class CreateGameFolderFunc extends GameLauncherFunc
         final boolean Standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
         Game[] values = Game.values();
         int i = 0;
-        for (String game : GameManager.Games)
+        for (String game : GameManager.Games())
         {
             for (Game value : values)
             {
@@ -95,7 +89,7 @@ public final class CreateGameFolderFunc extends GameLauncherFunc
                 String gameDataDir = value.file;
                 String path = KStr.AppendPath(DataDir, subdir);
 
-                if(Q3EGlobals.GAME_GZDOOM.equals(game))
+                if(Q3EGameConstants.GAME_GZDOOM.equals(game))
                 {
                     if(CreateFolder(path))
                         i++;
@@ -118,7 +112,7 @@ public final class CreateGameFolderFunc extends GameLauncherFunc
                         i++;
                     CreateTipText(path, fileGameName, defName);
 
-                    if(!Q3EGlobals.GAME_QUAKE1.equals(game) && !Q3EGlobals.GAME_FTEQW.equals(game))
+                    if(Q3EInterface.IsSupportSecondaryDirGame(game))
                     {
                         String appHome = Q3EUtils.GetAppInternalSearchPath(m_gameLauncher, null);
                         String path2 = KStr.AppendPath(appHome, subdir, gameDataDir);

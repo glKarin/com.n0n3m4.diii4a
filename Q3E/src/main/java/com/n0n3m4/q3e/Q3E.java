@@ -18,6 +18,20 @@ public final class Q3E
     public static          Q3EControlView controlView;
     public static volatile boolean        running = false;
 
+
+    // surface size
+    public static int surfaceWidth = 1;
+    public static int surfaceHeight = 1;
+    // window size(control view)
+    public static int orig_width = 1;
+    public static int orig_height = 1;
+    // window size(game view)
+    public static int GAME_VIEW_WIDTH = 1;
+    public static int GAME_VIEW_HEIGHT = 1;
+    // ratio
+    public static float widthRatio = 1.0f;
+    public static float heightRatio = 1.0f;
+
     public static void Finish()
     {
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Finish activity......");

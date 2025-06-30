@@ -1,0 +1,88 @@
+GameAgent is the replacement for gameserver management, such as the serverlist.
+
+Querying the masterserver can be done using UDP packets the following way:
+
+  UDP Masterserver:9005 {
+    char 'e'
+  }
+
+This will make the masterserver respond with a list of servers currently joined and alive in the following way:
+
+  UDP {
+    char 's'
+    4 bytes of the IP (0x7F 0x00 0x00 0x01 would be 127.0.0.1)
+    short of the port
+  }
+
+To query gameservers for their current status, use their enumeration port (server port + 1):
+
+  UDP Gameserver:25601 {
+    byte 0x02
+  }
+
+An example response would be:
+
+  UDP {
+    char '0'
+    string ";players;8"
+    string ";maxplayers;16"
+    string ";level;Yodeller"
+    string ";gametype;Fragmatch"
+    string ";version;1.10"
+    string ";gamename;serioussamse"
+    string ";sessionname;Awesome Server"
+  }
+
+Note: strings in this documentation are not null terminated unless pointed out otherwise.
+
+This particular server would be a fragmatch server called "Awesome Server", having 8 out of 16 players, playing on Yodeller running on version 1.10.
+
+To query a gameserver for the players, you would do the following:
+
+  UDP Gameserver:25601 {
+    byte 0x03
+  }
+
+An example response would be:
+
+  UDP {
+    byte 0x01
+    
+    "players"
+    byte 0x02
+    "8"
+    byte 0x03
+    
+    { // for each player
+      "player_0"
+      byte 0x02
+      "Angelo"
+      byte 0x03
+      
+      "frags_0"
+      byte 0x02
+      "14"
+      byte 0x03
+      
+      "ping_0"
+      byte 0x02
+      "80"
+      byte 0x03
+    }
+    
+    byte 0x04
+  }
+
+Where "0" after the "player_" and "frags_" is the index of the player in the server, not a counter.
+
+Note: Players can be sent in multiple packets. Wait for the last 0x04 byte in a packet.
+
+The player querying is done differently than the server status query to work around issues with seperator characters in player names.
+
+Some useful things to remember when working with this packet:
+  Byte 0x01 in ASCII is SOH; start of header.
+  Byte 0x02 in ASCII is STX; start of text.
+  Byte 0x03 in ASCII is ETX; end of text.
+  Byte 0x04 in ASCII IS EOT; end of transmission.
+
+Invalid player names are indicated by either byte 0x11 or 0x12 as the player name (in "player_0").

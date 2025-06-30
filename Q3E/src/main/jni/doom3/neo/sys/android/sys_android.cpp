@@ -310,7 +310,7 @@ void Q3E_End(void)
 /* Functions of wrap JNI callback */
 void Android_GrabMouseCursor(bool grabIt)
 {
-    if(mouse_available/* && grab_mouse*/)
+    //if(mouse_available/* && grab_mouse*/)
         grab_mouse(grabIt);
 }
 

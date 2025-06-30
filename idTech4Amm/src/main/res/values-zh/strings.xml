@@ -89,6 +89,10 @@
     <string name="etw">德军总部: 深入敌后</string>
     <string name="realrtcw">真·重返德军总部</string>
     <string name="fteqw">FTEQW</string>
+    <string name="samtfe">英雄萨姆TFE</string>
+    <string name="samtse">英雄萨姆TSE</string>
+    <string name="xash3d">Xash3D</string>
+    <string name="xash3d_base">Xash3D</string>
     <string name="tdm">Dark mod</string>
     <string name="doom">毁灭战士</string>
     <string name="prey_2006">掠食(2006)</string>
@@ -294,6 +298,7 @@
     <string name="hexen_2_base">毁灭巫师2</string>
     <string name="halflife_base">半衰期</string>
     <string name="cs_1_5_base">反恐精英(1.5)</string>
+    <string name="cs_base">反恐精英</string>
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">毁灭战士3 BFG</string>
     <string name="doom_base">毁灭战士</string>
@@ -460,6 +465,8 @@
     <string name="openjo">OpenJO</string>
     <string name="openja_base">星球大战：绝地武士-绝地学院</string>
     <string name="openjo_base">星球大战：绝地武士2-绝地放逐者</string>
+    <string name="samtfe_base">英雄萨姆：第一次遭遇</string>
+    <string name="samtse_base">英雄萨姆：第二次遭遇</string>
     <string name="code_">Code:</string>
     <string name="version">版本</string>
     <string name="open_menu">打开菜单</string>
@@ -481,4 +488,10 @@
     <string name="global_illumination_brightness">全局光照亮度</string>
     <string name="retro_postprocess">复古后期处理(r_renderMode)</string>
     <string name="enable_built_in_bot_assets_if_external_assets_missing">如果外部bot资源缺失, 则启用内建bot资源(仅支持毁灭战士3和雷神之锤4本体游戏)(harm_g_botEnableBuiltinAssets)</string>
+    <string name="button_swipe_release_delay_ms">滑动按键释放延迟(毫秒)\n-1 = 自动; 0 = 无</string>
+    <string name="ms">毫秒</string>
+    <string name="portrait_mode">竖屏模式</string>
+    <string name="portrait_orientation_screen">使用竖屏方向运行</string>
+    <string name="renderer_ref">渲染器(ref)</string>
+    <string name="server_client_sv_cl">服务器/客户端(sv_cl)</string>
 </resources>

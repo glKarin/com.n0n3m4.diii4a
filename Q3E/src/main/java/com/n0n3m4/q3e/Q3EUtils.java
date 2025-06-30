@@ -49,6 +49,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.karin.KFDManager;
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.ByteArrayOutputStream;
@@ -235,8 +236,44 @@ public class Q3EUtils
 
     public static boolean ActiveIsInvert(Activity activity)
     {
-        int rotation = activity.getDisplay().getRotation();
+        int rotation;
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R)
+        {
+            rotation = activity.getDisplay().getRotation();
+        }
+        else
+        {
+            rotation = ((WindowManager) (activity.getSystemService(Context.WINDOW_SERVICE))).getDefaultDisplay().getRotation();
+        }
         return (rotation == Surface.ROTATION_270 || rotation == Surface.ROTATION_180);
+    }
+
+    public static boolean ActiveIsPortrait(Activity activity)
+    {
+        int rotation;
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R)
+        {
+            rotation = activity.getDisplay().getRotation();
+        }
+        else
+        {
+            rotation = ((WindowManager) (activity.getSystemService(Context.WINDOW_SERVICE))).getDefaultDisplay().getRotation();
+        }
+        return (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180);
+    }
+
+    public static boolean ActiveIsLandscape(Activity activity)
+    {
+        int rotation;
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R)
+        {
+            rotation = activity.getDisplay().getRotation();
+        }
+        else
+        {
+            rotation = ((WindowManager) (activity.getSystemService(Context.WINDOW_SERVICE))).getDefaultDisplay().getRotation();
+        }
+        return (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270);
     }
 
     public static int GetStatusBarHeight(Activity activity)
@@ -974,7 +1011,7 @@ public class Q3EUtils
 
             File file = new File(toFilePath);
             if(!overwrite && file.exists())
-                return false;
+                return true;
 
             Q3EUtils.mkdir(file.getParent(), true);
 
@@ -1264,5 +1301,43 @@ public class Q3EUtils
         {
             return false;
         }
+    }
+
+    public static int[] GetGeometry(Activity context, boolean currentIsLandscape, boolean hideNav, boolean coverEdges)
+    {
+        int safeInsetTop = Q3EUtils.GetEdgeHeight(context, currentIsLandscape);
+        int safeInsetBottom = Q3EUtils.GetEndEdgeHeight(context, currentIsLandscape);
+        // if invert
+        if(Q3EUtils.ActiveIsInvert(context))
+        {
+            int tmp = safeInsetTop;
+            safeInsetTop = safeInsetBottom;
+            safeInsetBottom = tmp;
+        }
+        int[] fullSize = Q3EUtils.GetFullScreenSize(context);
+        int[] size = Q3EUtils.GetNormalScreenSize(context);
+        if(currentIsLandscape)
+        {
+            int tmp = fullSize[0];
+            fullSize[0] = fullSize[1];
+            fullSize[1] = tmp;
+
+            tmp = size[0];
+            size[0] = size[1];
+            size[1] = tmp;
+        }
+        int navBarHeight = fullSize[1] - size[1] - safeInsetTop - safeInsetBottom;
+        int start = safeInsetTop;
+        int w = fullSize[0];
+        int h = fullSize[1];
+        if (!hideNav)
+            h -= navBarHeight;
+        if (!coverEdges)
+            h -= (safeInsetTop + safeInsetBottom);
+
+        final int Width = Math.max(w, h);
+        final int Height = Math.min(w, h);
+
+        return currentIsLandscape ? new int[] { start, 0, Width, Height, } : new int[] { 0, start, Height, Width, };
     }
 }

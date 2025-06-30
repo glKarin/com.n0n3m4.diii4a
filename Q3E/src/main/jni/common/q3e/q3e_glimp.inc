@@ -85,6 +85,19 @@
 #define GLFORMAT_RGBA8888 0x8888
 #define GLFORMAT_RGBA1010102 0xaaa2
 
+#if !defined(GL_VENDOR)
+#define GL_VENDOR                         0x1F00
+#endif
+#if !defined(GL_RENDERER)
+#define GL_RENDERER                       0x1F01
+#endif
+#if !defined(GL_VERSION)
+#define GL_VERSION                        0x1F02
+#endif
+#if !defined(GL_EXTENSIONS)
+#define GL_EXTENSIONS                     0x1F03
+#endif
+
 #define MAX_NUM_CONFIGS 1000
 
 // screen info
@@ -475,8 +488,8 @@ static void Q3E_PrintGLConfig()
 
 static void Q3E_PrintGLInfo(int version)
 {
-	const char * (* _qglGetString)(GLenum);
-	_qglGetString = Q3E_PTR_CAST(const char * (*)(GLenum), eglGetProcAddress("glGetString"));
+	const char * (* _qglGetString)(unsigned int);
+	_qglGetString = Q3E_PTR_CAST(const char * (*)(unsigned int), eglGetProcAddress("glGetString"));
 
 	const char *glstring;
 	glstring = (const char *) _qglGetString(GL_RENDERER);
@@ -1003,8 +1016,8 @@ void Q3E_SetupMultiSamples(int multisamples)
 
 Q3Ebool Q3E_GL_ExtensionSupported(const char *name)
 {
-	const char * (* _qglGetString)(GLenum);
-	_qglGetString = Q3E_PTR_CAST(const char * (*)(GLenum), eglGetProcAddress("glGetString"));
+	const char * (* _qglGetString)(unsigned int);
+	_qglGetString = Q3E_PTR_CAST(const char * (*)(unsigned int), eglGetProcAddress("glGetString"));
 
     const char *exts = (const char *)_qglGetString (GL_EXTENSIONS);
     if(!exts)

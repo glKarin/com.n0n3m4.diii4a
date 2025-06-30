@@ -1,0 +1,57 @@
+Serious Editor is a very powerful tool, but you will need to get acquainted with its interface to be able to use it well.
+It is recommended that you read at least the overview section in the help file and go through the tutorials before you start working.
+$
+By pressing 'Q', you can toggle the tool window on or off manually.
+$
+By pressing 'Z', you can toggle selection rendering (colored filters) on or off.
+$
+Use DataTips!
+In Info mode, you can point to an entity, polygon, or sector to view information about it. Info mode is toggled with 'I'.
+This works on selections too.
+$
+The 'A' key is used for aligning. It will align view to selected entities, polygons or sectors. In volume mode, it will align selection volume to the view.
+$
+The character next to an entity property name shows its shortcut key. Press Shift and that key to quickly select that property.
+$
+'Alt+Shift+A' selects parent entity property, 'Alt+Shift+S' selects spawn flags entity property.
+$
+Press 'W' to view or set virtual directory keyboard shortcuts.
+$
+'Ctrl+A' will select all entities in volume. In Primitive mode, it will align primitive to view.
+$
+You can remember two view positions in world by pressing 'Ctrl+Home' or 'Ctrl+End'. To jump to the remembered positions, press 'Home' or 'End'.
+$
+'Tab'/'Shift+Tab' rotates an entity or polygon texture by 90 degrees in current view. Use 'Left Arrow'/'Right Arrow' to rotate by 15 degrees.
+$
+Press 'N' or 'Ctrl+Shift+A' to browse all entities in current selection, current volume, or entire world by their names, classes, descriptions and positions.
+$
+Use '[' and ']' keys or mouse wheel to circle through selected polygons or entities in current volume.
+You can browse through custom selection of entities by pressing 'Feed to Volume' in the Entity Browser dialog (invoked by 'N' or 'Ctrl+Shift+A' ).
+$
+By pressing the tilde key ('~'), you deselect current selection (polygons, sectors or entities, depending on the current mode).
+If you press that key twice quickly (double-click it), all selections are deselected (polygons, sectors and entities).
+$
+Pressing 'Alt+~' maximizes the view under mouse pointer to entire window, or restores the window configuration back.
+$
+Undo buffer remembers each CSG operation as one Undo/Redo step. In Preferences, you can configure number of Undo/Redo steps remembered and select whether you want entity deletion to be remembered too.
+$
+You can use 'Ctrl+W' to remember an Undo/Redo step manually while performing other tasks besides CSG, (for example when you are texturizing), so that you can Undo those actions too.
+$
+Most operations like copying, mapping adjustment, etc. work on selection, or on the object you point to with the mouse.
+For example, you can select a few polygons, point to some unselected polygon, copy properties from it, then point to the selection and paste the properties there.
+$
+If you press 'Ctrl+C' in entity or sector mode, currently selected entities are copied. In none is selected, entire world is copied.
+$
+To copy sectors without entities, press 'Ctrl+Shift+C'.
+$
+You can paste entities from clipboard to second layer by 'Ctrl+Shift+V'. This way you can safely adjust their position as a group, without them being snapped to the grid.
+$
+Use ','/'K' to copy/paste texture in current texture layer.
+$
+'Ctrl+Shift+V' in polygon mode will paste all polygon properties except textures.
+$
+Use 'M'/'J' to copy/paste mapping in current texture layer.
+'U' will paste mapping projected from the original position that it was copied from.
+$
+'Ctrl+Shift+V' in polygon mode will paste all polygon properties except textures.
+$

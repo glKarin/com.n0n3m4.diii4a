@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Serious Sam The Second Encounter
+Type=Application
+Comment=Linux port of Serious Sam Classic The Second Encounter
+Exec=serioussamse
+TryExec=serioussamse
+Icon=serioussam
+Categories=Application;Game;

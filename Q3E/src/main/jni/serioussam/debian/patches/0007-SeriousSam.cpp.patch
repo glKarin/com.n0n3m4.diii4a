@@ -1,0 +1,76 @@
+Description: extern instead ENGINE_API because now static linked
+.
+Added support for the content of the demo version of the game.
+Forwarded: not-needed
+--- a/SamTFE/Sources/SeriousSam/SeriousSam.cpp	2024-03-03 14:34:44.362498177 +0300
++++ b/SamTFE/Sources/SeriousSam/SeriousSam.cpp	2024-03-02 13:26:23.000000000 +0300
+@@ -63,10 +63,11 @@
+ extern FLOAT _fGlobalButtonAdjuster;
+ extern FLOAT _fGlobalProfileFOVAdjuster;
+ #ifdef PLATFORM_UNIX
+-ENGINE_API FLOAT _fWeaponFOVAdjuster;
+-ENGINE_API FLOAT _fPlayerFOVAdjuster;
+-ENGINE_API FLOAT _fArmorHeightAdjuster;
+-ENGINE_API FLOAT _fFragScorerHeightAdjuster;
++extern FLOAT _fWeaponFOVAdjuster;
++extern FLOAT _fPlayerFOVAdjuster;
++extern FLOAT _fArmorHeightAdjuster;
++extern FLOAT _fFragScorerHeightAdjuster;
++extern INDEX sys_iGameDemoMode;
+ #else
+ extern ENGINE_API FLOAT _fPlayerFOVAdjuster;
+ extern ENGINE_API FLOAT _fWeaponFOVAdjuster;
+@@ -735,6 +735,17 @@
+     FatalError("%s", strError);
+   }
+ 
++  // Check Demo version mode
++  #ifdef PLATFORM_UNIX
++  if(sys_iGameDemoMode == 1) {
++    #ifdef FIRST_ENCOUNTER  // First Encounter
++      sam_strFirstLevel = "Levels\\KarnakDemo.wld";
++    #else
++      sam_strFirstLevel = "Levels\\LevelsMP\\Demo\\Palenque_Demo.wld";
++    #endif
++  }
++  #endif
++
+   // always disable all warnings when in serious sam
+   _pShell->Execute( "con_bNoWarnings=1;");
+ 
+--- a/SamTSE/Sources/SeriousSam/SeriousSam.cpp	2024-03-03 14:34:44.362498177 +0300
++++ b/SamTSE/Sources/SeriousSam/SeriousSam.cpp	2024-03-02 13:26:23.000000000 +0300
+@@ -63,10 +63,11 @@
+ extern FLOAT _fGlobalButtonAdjuster;
+ extern FLOAT _fGlobalProfileFOVAdjuster;
+ #ifdef PLATFORM_UNIX
+-ENGINE_API FLOAT _fWeaponFOVAdjuster;
+-ENGINE_API FLOAT _fPlayerFOVAdjuster;
+-ENGINE_API FLOAT _fArmorHeightAdjuster;
+-ENGINE_API FLOAT _fFragScorerHeightAdjuster;
++extern FLOAT _fWeaponFOVAdjuster;
++extern FLOAT _fPlayerFOVAdjuster;
++extern FLOAT _fArmorHeightAdjuster;
++extern FLOAT _fFragScorerHeightAdjuster;
++extern INDEX sys_iGameDemoMode;
+ #else
+ extern ENGINE_API FLOAT _fPlayerFOVAdjuster;
+ extern ENGINE_API FLOAT _fWeaponFOVAdjuster;
+@@ -735,6 +735,17 @@
+     FatalError("%s", strError);
+   }
+ 
++  // Check Demo version mode
++  #ifdef PLATFORM_UNIX
++  if(sys_iGameDemoMode == 1) {
++    #ifdef FIRST_ENCOUNTER  // First Encounter
++      sam_strFirstLevel = "Levels\\KarnakDemo.wld";
++    #else
++      sam_strFirstLevel = "Levels\\LevelsMP\\Demo\\Palenque_Demo.wld";
++    #endif
++  }
++  #endif
++
+   // always disable all warnings when in serious sam
+   _pShell->Execute( "con_bNoWarnings=1;");
+ 

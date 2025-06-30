@@ -1,0 +1,2728 @@
+MonitorsOn():
+-
+Enable multi-monitor support in Windows 98.
+You may use this to re-enable the second monitor once the display mode
+has been set and OpenGL has stabilized.
+-
+$
+
+MonitorsOff():
+-
+Disable multi-monitor support in Windows98.
+-
+$
+
+
+
+ogl_bUseCompiledVertexArrays:
+-
+=XYZ (each of 0 or 1)
+Enable/disable usage of Compiled Vertex Arrays for rendering of
+particles (X), world (Y) and/or models (Z). Enabling this can speedup
+rendering process, but may cause artefacts, crashes or heavy slowdowns
+on some boards.
+-
+$
+
+
+ogl_iMaxBurstSize:
+-
+Minumum number of vertices that can to passed to OpenGL in one vertex array.
+(0 = unlimited)
+-
+$
+
+
+
+gap_iUseTextureUnits:
+-
+Specify how much texture units to use for multi-texturing.
+(number of maximum units is limited by the hardware)
+1 = no multi-texturing
+2 = dual-texturing 
+3 = triple-texturing
+4 = quad-texturing
+-
+$
+
+
+ogl_iTextureCompressionType:
+-
+Specify texture compression type to use:
+  0 = no compression allowed
+  1 = default compression (thru ARB extension)
+  2 = S3TC
+  3 = FTX1
+  4 = S3TC (old)
+If specified texture compression type is not supported, 
+it'll automatically revert to first supported type.
+(order: 2 <-> 3 -> 1 -> 4 ->0)
+NOTE: It is recommended to set tex_iCompressionFormat=00,
+      before changing compression type.
+-
+$
+
+
+gap_bOptimizeStateChanges:
+-
+Ignore redundant state changes.
+-
+$
+
+gap_iOptimizeClipping:
+-
+Signal to GfxAPI whether clipping is needed or not for specific model.
+  0 = allways needed (safe)
+  1 = maybe not needed for mirror-plane (optimal for T&L boards)
+  2 = maybe not needed for frustum (optimal for non-T&L boards)
+-
+$
+
+gap_iDithering:
+-
+Select dithering method for 16-bit display modes.
+  0 = don't dither at all (not recommended)
+  1 = don't dither when blending (when dithering patterns are too visible)
+  2 = always dither (the best choice for most cases)
+-
+$
+
+
+gap_iFinish: 
+-
+0 = do not force API to finish rendering (performance)
+1 = finish all rendering before begining of next frame (optimal)
+2 = force finish of rendering before swapping of buffers (safe)
+3 = force finish of rendering before matrix change
+    and after swapping of buffers (paranoid)
+-
+$
+
+
+gap_iSwapInterval:
+-
+Number of vertical retraces to wait before swapping of buffers (0-9).
+-
+$
+
+
+ogl_bExclusive:
+-
+Claim exclusive window access in full screen mode.
+(might cause problems with some drivers)
+-
+$
+
+
+gap_bAllowSingleMipmap: 
+-
+Allow of only one mipmap for textures with one mipmap,
+instead of generating all lower mipmaps.
+-
+$
+
+gap_bAllowGrayTextures: 
+-
+Allow usage of grayscale internal formats for gray textures.
+-
+$
+
+ogl_bAllowQuadArrays: 
+-
+Select different rendering method for 2D primitives, simple model shadows
+and particles. This might improve or degrade performance and compatibility.
+(use with caution!)
+-
+$
+
+
+gap_iTextureFiltering:
+-
+Texture filtering mode (=XYZ).
+Interpolation types for X=magnification, Y=minification, Z=mipmap filter:
+  X=0 - same as Y-value
+  X=1 - nearest-neighbour
+  X=2 - bilinear
+  Y=1 - nearest-neighbour
+  Y=2 - bilinear
+  Z=0 - none (no mipmapping)
+  Z=1 - bilinear
+  Z=2 - trilinear
+-
+$
+
+gap_fTextureLODBias: 
+-
+LOD bias for mipmap switching.
+  <0 = more details (somewhat slower performance)
+   0 = default
+  >0 = less details (faster performance)
+(values lower than -2 might cause rendering slowdowns)
+-
+$
+
+gap_iTextureAnisotropy: 
+-
+Anisotropy degree for texture filtering (>=1).
+   1 = default (isotropic filtering)
+  >1 = anisotropic (2 is minimum)
+-
+$
+
+
+gap_iOptimizeDepthReads:
+-
+How and when to issue read from z-buffer requests (for lens flares).
+    0 = immediately upon request 
+    1 = at every frame
+    2 = 10 times a second
+-
+$
+
+gap_bForceTruform:
+-
+Use Truform (N-Patches) tesselation even on models
+that are not prepared for it.
+-
+$
+
+gap_iTruformLevel:
+-
+Specifiy tesselation level (detail).
+(0 = no tesselation)
+-
+$
+
+
+d3d_bUseHardwareTnL:
+-
+Specify whether to use HW T&L (if present) or not.
+Note: requires ApplyVideoMode()
+-
+$
+
+d3d_iMaxBurstSize:
+-
+Minumum number of vertices that can to passed to Direct3D in one vertex array.
+(0 = unlimited)
+-
+$
+
+
+d3d_iVertexBuffersSize:
+-
+Specify size of buffer that holds geometry for Direct3D.
+-
+$
+
+d3d_bAlternateDepthReads:
+-
+Setting this will improve performance of lens-flares,
+but might cause artefacts on some occasions.
+-
+$
+
+d3d_bOptimizeVertexBuffers:
+-
+Use alternate approach when submiting vertices to Direct3D.
+(0 is recommended for non-T&L boards)
+-
+$
+
+
+ogl_iTBufferEffect:
+-
+Type of T-Buffer effect to use:
+  0 = none
+  1 = partial anti-aliasing (doesn't blur text and 2D)
+  2 = motion blur
+NOTE: On some system configurations T-Buffer effect(s) might not work
+      properly. (driver issues)
+-
+$
+
+ogl_iTBufferSamples:
+-
+Number of T-Buffers to use for effect (2, 4 or 8).
+-
+$
+
+
+
+mdl_bCreateStrips:
+-
+Create triangle strips when loading models.
+-
+$
+
+mdl_bShowStrips:
+-
+DEBUG: Show model triangle strips in color.
+-
+$
+
+mdl_bFineQuality:
+-
+(should be left to 1 for now)
+-
+$
+
+mdl_iShadowQuality:
+-
+Quality of model shadow:
+  0 = no shadow
+  1 = low quality (single polygon - fast)
+  2 = high quality from one light (multiple polygons - slow)
+  3 = high quality from all lights (multiple shadows & polygons - very slow)
+-
+$
+
+mdl_fLODMul:
+-
+Multiplier for models LOD factor (default=1).
+-
+$
+
+mdl_fLODAdd:
+-
+Bias for models LOD factor (default=0).
+-
+$
+
+mdl_iLODDisappear:
+-
+When LOD model will disappear:
+  0 = never
+  1 = ignore bias level
+  2 = with bias level
+-
+$
+
+
+mdl_bRenderDetail:
+-
+Allow detail textures on models.
+-
+$
+
+mdl_bRenderSpecular: 
+-
+Allow specular reflection on models.
+-
+$
+
+mdl_bRenderReflection: 
+-
+Allow reflection mapping on models.
+-
+$
+
+mdl_bAllowOverbright:
+-
+Allow 'shiny' lighting on models (recommended).
+-
+$
+
+
+gap_iDepthBits:
+-
+Requested number of bits for z-buffer (24 or 32).
+Note: requires ApplyVideoMode()
+-
+$
+
+gap_iStencilBits:
+-
+Requested number of bits for stencil buffer (0 or 8).
+Note: requires ApplyVideoMode()
+-
+$
+
+
+gfx_fEnvParticlesDensity:
+-
+Specify density of grass and other environment particles.
+(1 = default)
+-
+$
+
+gfx_fEnvParticlesRange:
+-
+Specify dissapearing radius of grass and other environment particles.
+(1 = default)
+-
+$
+
+
+gfx_bRenderParticles:
+-
+Allow rendering of particle effects.
+-
+$
+
+gfx_bRenderFog:
+-
+Allow rendering of fog and haze.
+-
+$
+
+gfx_bRenderWorld:
+-
+Allow rendering of world.
+-
+$
+
+gfx_bRenderModels:
+-
+Allow rendering of models.
+-
+$
+
+gfx_bRenderPredicted:
+-
+Render entities that are predicted in network play.
+-
+$
+
+
+gfx_bClearScreen:
+-
+DEBUG: Fill video buffer with black at the begining of each frame.
+-
+$
+
+gap_iRefreshRate:
+-
+Set default screen refresh rate (in Hz; 0=don't set).
+-
+$
+
+gfx_bDisableMultiMonSupport:
+-
+This is needed for systems that don't support multimonitor & OpenGL (Win98).
+If it is not set in Win98, OpenGL probably won't start.
+(has no effect on WinNT/2k)
+-
+$
+
+
+gfx_ctMonitors:
+-
+How many monitors are attached to the system.
+-
+$
+
+gfx_bMultiMonDisabled:
+-
+Set if multimonitor is currently disabled.
+-
+$
+
+ogl_bGrabDepthBuffer:
+-
+When capturing screenshots, store Z-buffer values in screenshot alpha channel.
+-
+$
+
+
+gfx_bDecoratedText:
+-
+Allow decorated text output (bold, italic, color/alpha change and flashing).
+-
+$
+
+gfx_fSaturation:
+-
+Adjust global saturation:
+  0   = grayscale
+  0-1 = less color
+  1   = normal
+  1-2 = more color
+  >2  = color wrapping occurs (might get some nice psychedelic effects!)
+NOTE: requires /RefreshTestures()
+-
+$
+
+gfx_iHueShift:
+-
+Shift global HUE color component (0-359).
+NOTE: requires /RefreshTestures()
+-
+$
+
+gfx_fBrightness:
+-
+Adjust display brightness:
+  <0 = darken
+   0 = standard
+  >0 = brighten
+(doesn't work on NT4 platform)
+-
+$
+
+gfx_fContrast:
+-
+Adjust display contrast:
+  <1 = low contrast
+   1 = standard
+  >1 = high contrast
+(doesn't work on NT4 platform)
+-
+$
+
+gfx_fGamma:
+-
+Adjust display gamma factor:
+  <1 = darken
+   1 = standard
+  >1 = brighten
+(doesn't work on NT4 platform)
+-
+$
+
+gfx_iLevels:
+-
+Adjust color levels (posterization).
+  256 = standard
+(doesn't work on NT4 platform)
+-
+$
+
+
+gfx_tmProbeDecay:
+-
+How long texture can remain unreferenced before probing. (in seconds)
+(60 is recommended)
+-
+$
+
+gfx_fProbeRatio:
+-
+Maximum allowed texture and shadowmap upload/binds in one frame.
+(relative to maximum allowed texture size; 0.5 is recommended)
+-
+$
+
+
+gfx_bDisableWindowsKeys:
+-
+Disable windows keys when in full-screen. (recommended)
+-
+$
+
+
+
+tex_fSaturation:
+-
+Adjust texture saturation:
+  0   = grayscale
+  0-1 = less color
+  1   = normal
+  1-2 = more color
+  >2  = color wrapping occurs (might get some nice psychedelic effects!)
+-
+$
+
+tex_iHueShift:
+-
+Shift texture HUE color component (0-359).
+-
+$
+
+
+shd_fSaturation:
+-
+Adjust light/shadow saturation:
+  0   = grayscale
+  0-1 = less color
+  1   = normal
+  1-2 = more color
+  >2  = color wrapping occurs (might get some nice psychedelic effects!)
+-
+$
+
+
+shd_iHueShift:
+-
+Shift light/shadow HUE color component (0-359).
+-
+$
+
+
+gfx_iLensFlareQuality:
+-
+Quality of lens flare:
+  0 = do not render lens flare (and no z-buffer testing, also)
+  1 = render flare with corona only
+  2 = render flare with corona and reflections
+  3 = render flare with corona, reflections and glare effect
+-
+$
+
+
+GAPInfo():
+-
+Printout info about Graphics API subsystem (OpenGL or Direct3D).
+-
+$
+
+SoundInfo():
+-
+Printout info about sound subsystem.
+-
+$
+
+ModelsInfo():
+-
+Printout info about model rendering subsystem.
+-
+$                        
+
+WorldInfo():
+-
+Printout info about world rendering subsystem.
+-
+$
+
+NetworkInfo():
+-
+Printout info about networking subsystem.
+-
+$
+
+
+TexturesInfo():
+-
+Printout extensive report about texture memory usage.
+-
+$
+
+RefreshTextures():
+-
+Reload all loaded textures and uncache all cached shadow maps.
+-
+$
+
+UncacheShadows():
+-
+Uncache all cached shadow maps.
+-
+$
+
+CacheShadows():
+-
+Cache all shadow maps in world.
+(CAREFUL! - only for systems with lots of RAM)
+-
+$
+
+RecacheShadows():
+-
+Recache all shadow maps (uncache and eventually cache all).
+-
+$
+
+
+ReloadModels():
+-
+Reload all models.
+(this happens automatically when model precision is changed)
+-
+$
+
+ 
+tex_iNormalQuality:
+-
+Quality of normal (single-frame) textures:
+(=XY, X for opaque textures, Y for translucent textures)
+  0 = optimal format (texture that requires 32-bit will be in 32-bit mode)
+  1 = 16-bit format (high-color, conserve memory, low gradients' quality)
+  2 = 32-bit format (true-color, requires more memory, looks great!)
+  3 = compressed format
+-
+$
+
+tex_iAnimationQuality:
+-
+Quality of animation (multi-frame) textures:
+(=XY, X for opaque textures, Y for translucent textures)
+  0 = optimal format (texture that requires 32-bit will be in 32-bit mode)
+  1 = 16-bit format (high-color, conserve memory, low gradients' quality)
+  2 = 32-bit format (true-color, requires more memory, looks great!)
+  3 = compressed format
+-
+$
+
+tex_bDynamicMipmaps:
+-
+Select whether to let effect textures to generated mipmaps or not.
+-
+$
+
+tex_iDithering:
+-
+Dithering type for 16-bit textures (0-10):
+    0  = none
+  1-3  = low (recommended)
+  4-7  = medium
+  8-10 = high
+-
+$
+
+tex_iNormalSize:
+-
+Maximum allowed size for normal textures (5-11).
+TexWidth*TexHeight <= 2^(tex_fNormalSize*2)
+-
+$
+
+tex_iAnimationSize:
+-
+Maximum allowed size for animation textures (4-9).
+TexWidth*TexHeight <= 2^(tex_fAnimationSize*2)
+-
+$
+
+tex_iEffectSize:
+-
+Maximum allowed size for effect textures (5-8).
+TexWidth*TexHeight <= 2^(tex_fEffectSize*2)
+-
+$
+
+tex_iFogSize:
+-
+Maximum allowed size for fog texture (4-8).
+TexWidth*TexHeight <= 2^(tex_iFogSize*2)
+-
+$
+
+
+tex_bFineEffect:
+-
+Set 32-bit quality for effect textures.
+(only if normal textures haven't been dithered)
+-
+$
+
+tex_bFineFog:
+-
+Set 32-bit quality for fog/haze textures.
+-
+$
+
+tex_iFiltering:
+-
+Filter type and strength for normal and animation textures (-6 to +6).
+  <0 = more sharpen
+   0 = no filter
+  >0 = more blur
+-
+$
+
+tex_iEffectFiltering:
+-
+Filter type for fire/plasma effect textures (-6 to +6).
+  <0 = more sharpen
+   0 = no filter
+  >0 = more blur
+-
+$
+
+tex_bProgressiveFilter:
+-
+Allow mipmap filtering in creation time (boosts filter strength).
+-
+$
+
+tex_bCompressAlphaChannel:
+-
+When compressing translucent textures, also compress alpha channel.
+-
+$
+
+tex_bAlternateCompression:
+-
+Use better (but lower) compression for opaque textures.
+-
+$
+
+
+tex_bColorizeMipmaps:
+-
+DEBUG: Colorize mipmap levels.
+-
+$
+
+
+shd_bFineQuality:
+-
+Allow 32-bit quality for shadow maps.
+-
+$
+
+shd_iFiltering:
+-
+Blur filter strength for shadow maps (0=none; 6=max).
+-
+$
+
+shd_iDithering:
+-
+Dithering type for 16-bit shadow maps (0-5):
+    0 = none
+  1,2 = low (recommended)
+  3,4 = medium
+    5 = high
+-
+$
+
+shd_iStaticSize:
+-
+Maximum allowed size for static shadow maps (5-8).
+ShdWidth*ShdHeight <= 2^(shd_fStaticSize*2)
+-
+$
+
+shd_iDynamicSize:
+-
+Maximum allowed size for dynamic shadow maps (5-8).
+ShdWidth*ShdHeight <= 2^(shd_fDynamicSize*2)
+-
+$
+
+shd_iAllowDynamic:
+-
+Controls mixing and rendering of dynamic shadow maps.
+  0 = disallow (speed)
+  1 = allow only on some polygons (optimal)
+  2 = allow on every polygon (quality)
+-
+$
+
+shd_bDynamicMipmaps:
+-
+Allow dynamic shadow maps to be generated with all mipmaps (faster).
+(depends on 'gap_bAllowSingleMipmap')
+-
+$
+
+shd_tmFlushDelay:
+-
+How many seconds to keep stale cached shadow maps.
+-
+$
+
+shd_fCacheSize:
+-
+Size of buffer for cached shadow maps (in MB).
+-
+$
+
+shd_bCacheAll:
+-
+Cache all shadowmap upon level initialization.
+(CAREFUL! - only for systems with lots of RAM)
+-
+$
+
+shd_bColorize:
+-
+Show shadomap texture size with colorization.
+  Green  = small 
+  Yellow = medium
+  Red    = large
+-
+$
+
+
+shd_bAllowFlats:
+-
+Allow optimization of single colored (flat) shadowmaps to be optimized.
+-
+$
+
+shd_bShowFlats:
+-
+Show shadomaps that are optimized as flat in blue color.
+-
+$
+
+
+
+wld_bShowTriangles:
+-
+Show world triangles in wireframe.
+-
+$
+
+wld_bShowDetailTextures:
+-
+DEBUG: Show detail textures in color.
+-
+$
+
+wld_fEdgeOffsetI:
+-
+DEBUG: Rendering adjustment variable.
+-
+$
+
+wld_fEdgeAdjustK:
+-
+DEBUG: Rendering adjustment variable.
+-
+$
+
+wld_bAlwaysAddAll:
+-
+DEBUG: Allow adding of an entire world to rendering process.
+-
+$
+
+wld_bRenderEmptyBrushes:
+-
+DEBUG: Allow rendering of empty brushes.
+-
+$
+
+wld_bRenderShadowMaps:
+-
+DEBUG: Allow rendering of shadow maps layer.
+-
+$
+
+wld_bRenderTextures:
+-
+DEBUG: Allow rendering of all texture layers.
+-
+$
+
+wld_bTextureLayers:
+-
+Allow rendering of cpecified texture layer(s).
+Valid value is bitmask XYZ (each can be only 0 or 1):
+  X - set rendering state of texture layer 1
+  Y - set rendering state of texture layer 2
+  Z - set rendering state of texture layer 3
+-
+$
+
+
+wld_bRenderDetailPolygons:
+-
+DEBUG: Allow rendering of detail polygons in world.
+-
+$
+
+wld_iDetailRemovingBias:
+-
+LOD bias for removing detail textures.
+(3 is recommended)
+-
+$
+
+wld_bRenderMirrors:
+-
+Allow rendering of mirrors and portals.
+-
+$
+
+
+wld_bFastObjectOptimization:
+-
+EDITOR ONLY: Uses O(n log n) object optimization after CSG if enabled.
+Disable to use more accurate, but significantly slower O(n^2) algorithm.
+-
+$
+
+
+
+con_bNoWarnings:
+-
+If set, warnings are reported to console only, not as requesters.
+Always should be off in the game. Only on in editors.
+-
+$
+
+con_iLastLines:
+-
+Number of last console lines to be displayed on screen (0-15).
+-
+$
+
+con_tmLastLines:
+-
+How many seconds to keep last console lines on screen (0-10).
+-
+$
+
+con_fHeightFactor:
+-
+what part of screen height will console overtake (0.1-1.0)
+-
+$
+
+
+ListSymbols():
+-
+List user shell symbols.
+-
+$
+
+MakeAccessViolation(): 
+-
+DEBUG: Make an access violation. Use at own risk.
+-
+$
+
+MakeStackOverflow(): 
+-
+DEBUG: Make a stack overflow. Use at own risk.
+-
+$
+
+MakeFatalError(): 
+-
+DEBUG: Make fatal error. Use at own risk.
+-
+$
+
+MemoryInfo():
+-
+Report memory usage (heap walk; works only on WinNT/Win2K).
+-
+$
+
+
+dbg_bBreak:
+-
+DEBUG: Invoke breakpoint. Meaningless if not running from debugger.
+-
+$
+
+
+StockInfo():
+-
+Print info on memory used by each stock.
+-
+$
+
+StockDump():
+-
+Dump detailed information on all stocks to a 'Temp\StockDump.txt'.
+-
+$
+
+FreeUnusedStock():
+-
+Free all unused objects from all stocks.
+-
+$
+
+RendererInfo():
+-
+Print info on memory used by renderer.
+-
+$
+
+ClearRenderer():
+-
+Free all renderer buffers.
+-
+$
+
+
+dem_tmTimer:
+-
+Timer for demo playback [sec], you may increase this to skip forward,
+or you may move it slowly while in paused mode.
+-
+$
+
+dem_fSyncRate:
+-
+Demo sync speed [in FPS] - can be fractional.
+   0.0 = realtime sync
+  -1.0 = playing is paused (use dem_tmTimer to advance frame by frame)
+-
+$
+
+dem_fRealTimeFactor:
+-
+Slow/fast playback factor.
+Active only when in realtime mode (dem_fSyncRate=0).
+-
+$
+
+dem_bOnScreenDisplay:
+-
+On-screen-display of demo playing info.
+-
+$
+
+dem_bPlay:
+-
+Play 'Temp\Play.dem' on next test game from within editor.
+-
+$
+
+dem_bPlayByName:
+-
+Play demo given as world filename from command line.
+-
+$
+
+
+dem_bProfile:
+-
+Enable/disable extensive demo profiling.
+-
+$
+
+dem_iProfileRate:
+-
+Demo profile dump rate [in seconds, >=1].
+(how often to report average FPS in dump file)
+-
+$
+
+
+dem_iRecordedNumber:
+-
+Current number of quick-recorded demo.
+-
+$
+
+StartDemoRecording():
+-
+Starts recording of a new demo, by dem_iRecordedNumber into
+'Temp\RecordedXX.dem'.
+-
+$
+
+StopDemoRecording():
+-
+Stops recording of current demo, either from normal recording or
+from quick recording.
+-
+$
+
+
+ReportDemoProfile():
+-
+Printout extensive demo profile to console - dem_bProfile must be enabled.
+(automatically invoked after playing of demo has been finished)
+-
+$
+
+DumpDemoProfile():
+-
+Dump extensive demo profile to file 'temp\DemoProfile.lst'.
+(output rate is controled thru dem_iProfileRate)
+-
+$
+
+
+
+gam_bPretouch:
+-
+Allow pretouching of memory after loading.
+This might improve performance on systems with 128+ MB of RAM,
+but can cause some compatibility problems on Win9X/ME systems.
+-
+$
+
+
+gam_fRealTimeFactor:
+-
+Realtime factor in game.
+  <1 = slower
+   1 = normal
+  >1 = faster
+-
+$
+
+gam_iPrecachePolicy:
+-
+when and what to precache
+-
+$
+
+dem_iAnimFrame:
+-
+Set to >=0 to start recording each frame of the replayed demo
+as one screenshot. Used for making movies from game demos.
+-
+$
+
+
+gam_fManaTransferFactor:
+-
+How much mana to transfer when fragged another player.
+-
+$
+
+gam_iInitialMana:
+-
+Initial mana of a player after starting.
+-
+$
+
+gam_bQuickLoad:
+-
+Initiate quick-load in game.
+-
+$
+
+gam_bQuickSave:
+-
+Initiate quick-save in game.
+-
+$
+
+gam_iQuickStartDifficulty:
+-
+Difficulty level for testgame in SeriousEditor:
+  0 = easy
+  1 = normal
+  2 = hard
+  3 = serious
+-
+$
+
+gam_iQuickStartMode:
+-
+Game mode for testgame in SeriousEditor:
+  -1 = Flyover
+   0 = Cooperative
+   1 = DeathMatch
+(to be extended...)
+-
+$
+
+
+ser_bReportSyncOK:
+-
+Set to make server report when received OK sync-check from a client.
+-
+$
+
+ser_bReportSyncBad:
+-
+Set to make server report when received bad sync-check from a client.
+-
+$
+
+ser_bPauseOnSyncBad:
+-
+Pause game when syncbad occurs on any client.
+-
+$
+
+
+cmd_tmTick:
+-
+FOR SCRIPTS: current game tick
+-
+$
+
+cmd_cmdOnTick:
+-
+FOR SCRIPTS: command(s) to be executed on each tick
+-
+$
+
+cmd_cmdOnChat:
+-
+FOR SCRIPTS: command(s) to be executed on each chat message
+-
+$
+
+cmd_strChatSender:
+-
+FOR SCRIPTS: sender of current message (can be modified)
+-
+$
+
+cmd_strChatMessage:
+-
+FOR SCRIPTS: current chat message (can be modified)
+-
+$
+
+
+net_tmLatency: 
+-
+FOR SCRIPTS: current latency
+-
+$
+
+net_tmLatencyAvg:
+-
+How often to refresh latency for on-screen display.
+-
+$
+
+
+net_iCompression:
+-
+Type of compression used when sending packets:
+  0 = no compression
+  1 = optimal compression - fast
+  2 = best compression - slow
+Use high compression only for dedicated servers with lots of players. 
+It is not needed if player count is low (<8), and it can drain CPU too much
+if server is not dedicated.
+-
+$
+
+net_strLocalHost:
+-
+Name of local network interface to bind to. Both numeric and symbolic
+names are allowed.
+Use this for multihomed system in order to host a game, or connect to a game
+using a specific interface.
+-
+$
+
+net_strLocationCode:
+-
+Location code for country or state where the server is running. 
+This is used for reporting server locaction in internet games, so 
+that users would know which server is closer to them. This should be set to a 
+5 digit ZIP code (for US) or 2 letter abbreviation by ISO Standard 3166
+(for other conutries).
+If set to empty string (default), engine will look up default country locale
+set in system.
+-
+$
+
+
+net_bDumpStreamBlocks:
+-
+DEBUG: dump network stream blocks to file.
+-
+$
+
+net_bDumpConnectionInfo:
+-
+DEBUG: dump network connection info to file.
+-
+$
+
+
+net_strConnectPassword:
+-
+Password for connecting to server.
+-
+$
+
+net_strAdminPassword:
+-
+Password for remote administration of the server.
+-
+$
+
+Admin():
+-
+Remote-execute a console command on the server. You must have a valid net_strAdminPassword set for that server. If 
+your password is wrong, you will be kicked out. 
+
+Example:
+/Admin("NetworkInfo();")
+
+Will give you list of all players and their info.
+-
+$
+
+net_bReportSockets:
+-
+Report debugging information on TCP/IP socket connections.
+-
+$
+
+ser_tmSyncCheckFrequency:
+-
+How often should client generate sync-check (in seconds). 
+The value is taken at server start and frozen for entire duration of the game.
+-
+$
+
+ser_iSyncCheckBuffer:
+-
+How many old sync-checks should server keep buffered.
+-
+$
+
+ser_tmKeepAlive:
+-
+How often to send keep-alive messages. (in seconds)
+-
+$
+
+ser_tmPingUpdate:
+-
+How often to send ping-update from other clients. (in seconds)
+
+-
+$
+
+ser_bWaitFirstPlayer:
+-
+Game is paused until the first player has been joined.
+-
+$
+
+ser_iMaxAllowedBPS:
+-
+Limit maxium outgoing bandwidth per client (bytes per second).
+-
+$
+
+
+
+Kick():
+-
+Kicks player from server.
+Input parameters are client number (you can find it with NetworkInfo()), and explanation message.
+Example:
+
+/Kick(2, "please behave")
+-
+$
+
+
+net_iPort:
+-
+TCP port to use for network connection. Two more successive ports may be used.
+-
+$
+
+net_tmTimeOut:
+-
+Timeout value (in seconds) for receiving data from server.
+If no data is received in given ammount of time,
+the connection is considered lost.
+-
+$
+
+net_bReportCRC:
+-
+If set, all CRC values will be reported to the console,
+so you can check which file has wrong CRC.
+-
+$
+
+ser_iRememberBehind:
+-
+Number of ticks remembered by server for resending.
+-
+$
+
+cli_iReceiveBehind:
+-
+Number of last ticks that server replicates when sending actions to this to
+client. Remote-configurable at client.
+  1 = no replication
+-
+$
+
+cli_iSendBehind:
+-
+Number of last ticks that client replicates when sending actions to the server.
+  1 = no replication
+-
+$
+
+
+cli_iBufferActions:
+-
+Number of last ticks buffered on server to compensate for lag-oscillation.
+Remote-configurable at client.
+  1 = no compensation
+-
+$
+
+net_iGraphBuffer:
+-
+How many last net-info values to hold in buffer (20-1000).
+-
+$
+
+hud_bShowNetGraph:
+-
+Show net graph on screen.
+-
+$
+
+hud_bShowMessages:
+-
+Show counter of unread messages.
+-
+$
+
+
+net_iExactTimer:
+-
+Exactness level for network timer handling:
+  0 = lowest possible (if network is busy when timer is due, timer is skipped)
+  1 = partial (timers can be skipped, but are compensated later)
+  2 = highest possible (if network is busy, timer waits)
+Default value is 2, lowering could give some small performance
+bonus in single player, but will produce jerky movement in network play.
+-
+$
+
+cli_bEmulateDesync:
+-
+Pretend this computer has lost sync.
+-
+$
+
+ser_iExtensiveSyncCheck:
+-
+Do sync-check on all entities in the world. Configured on server before
+starting the session.
+-
+$
+
+cli_bDumpSync:
+-
+Dump sync data to file.
+-
+$
+
+cli_bDumpSyncEachTick:
+-
+DEBUG: Dump sync data to file at each tick. (careful!)
+-
+$
+
+
+
+ser_iExtensiveSyncCheck:
+-
+DEBUG: Do extensive sync check on server. (careful!)
+  0 = minimal (default)
+  1 = check all players and movers
+  2 = check all entities in world
+  3 = check all entities extensively
+-
+$
+
+
+ser_bClientsMayPause:
+-
+If set, clients may pause. If not set, only server may pause the game.
+-
+$
+
+ser_bEnumeration:
+-
+Enable/disable server from beeing enumerated in any way, either on LAN or iNet.
+Clients will have to know exact address of the server to connect.
+-
+$
+
+ser_bHeartbeatGameSpy:
+-
+Enable/disable server from reporting to GameSpy master server.
+This must be adjusted before the server is started.
+Changing this value while the server is running
+has no effect until restart of server.
+-
+$
+
+
+cli_bPrediction:
+-
+Enable/disable prediction.
+-
+$
+
+cli_iMaxPredictionSteps:
+-
+Maximum upper limit for prediction (one step = 0.05s).
+If lag gets above that value, it will be visible.
+-
+$
+
+cli_bPredictIfServer:
+-
+DEBUG: If this is set, prediction will be active even on server.
+-
+$
+
+cli_bPredictLocalPlayers:
+-
+If this is set local players will be predicted.
+-
+$
+
+
+cli_bReportPredicted:
+-
+Printout entities that are predicted.
+-
+$
+
+
+cli_bPredictRemotePlayers:
+-
+If this is set remote players will be predicted.
+-
+$
+
+cli_fPredictEntitiesRange:
+-
+If this is set to a number greater that 0, all predictable entities (enemies,
+projectiles,...) within the given range (in meters) will be predicted.
+-
+$
+
+cli_bAutoAdjustSettings:
+-
+If on, engine will automatically adjust prediction settings (cli_bPrediction
+and cli_iBufferActions) depending on current lag.
+-
+$
+
+cli_tmAutoAdjustThreshold:
+-
+Time value (in seconds) of apparent lag allowed before prediction is turned on.
+-
+$
+
+cli_bLerping:
+-
+Controls linear interpolation of current frame between two game 'ticks'. 
+If you turn this off, the game will appear as if running
+at the frequency of 20Hz.
+-
+$
+
+cli_bLerpActions:
+-
+Controls linear interpolation of current player actions
+between two game 'ticks'.
+(not functional yet)
+-
+$
+
+net_bLookupHostNames:
+-
+Resolve numeric IP addresses of remote hosts into symbolic name. 
+If your DNS is set up wrong, or is too slow, clients won't be able to connect
+to this computer if you turn this off.
+-
+$
+
+inp_iKeyboardReadingMethod:
+-
+How to read keyboard:
+  0 = using GetAsyncKey() (causes sticky mouse buttons on Win95)
+  1 = trapping virtual key messages (doesn't distinguish left & right keys)
+  2 = trapping keyboard scan codes (best method)
+-
+$
+
+inp_fMouseSensitivity:
+-
+Global sensitivity for mouse movement.
+-
+$
+
+inp_bInvertMouse:
+-
+Invert Y axis on mouse.
+-
+$
+
+inp_i2ndMousePort:
+-
+COM port used for .
+-
+$
+
+
+snd_fEarsDistance:
+-
+Distance between listener's ears.
+-
+$
+
+snd_fDelaySoundSpeed:
+-
+Sound speed used for delay [m/s].
+-
+$
+
+snd_fDopplerSoundSpeed:
+-
+Sound speed used for doppler effect [m/s].
+-
+$
+
+snd_fPanStrength:
+-
+Panning modifier.
+-
+$
+
+snd_fLRFilter:
+-
+Strength of left/right filter.
+-
+$
+
+snd_fBFilter:
+-
+Strength of back filter.
+-
+$
+
+snd_fUFilter:
+-
+Strength of up filter.
+-
+$
+
+snd_fDFilter:
+-
+Strength of down filter.
+-
+$
+
+snd_fSoundVolume:
+-
+Master volume for sound effects, wave output (0-1, 0=off, 1=max).
+-
+$
+
+snd_fMusicVolume:
+-
+Master volume for music, MPEG output (0-1, 0=off, 1=max).
+-
+$
+
+snd_tmMixAhead:
+-
+How many seconds to mix sound ahead (0.1 - 1.0).
+-
+$
+
+snd_bMono:
+-
+Simulate mono output.
+-
+$
+
+snd_fNormalizer:
+-
+How aggressive to normalize clipped sounds (0-1).
+  0 = don't normalize at all
+  1 = complete normalization
+-
+$
+
+snd_iMaxExtraChannels:
+-
+How many extra channels to take if device supports multiple channels.
+Used to prevent background sound from popping in on SBLive and similar.
+-
+$
+
+snd_iFormat:
+-
+Set sound format frequency (0-3).
+  0 = no sound
+  1 = 11 kHz 
+  2 = 22 kHz
+  3 = 44 kHz
+(all formats are 16bit stereo)
+-
+$
+
+snd_iDevice:
+-
+Which sound device to use, if multiple sound cards are present in system.
+-
+$
+
+snd_iInterface:
+-
+What API to use for sound output:
+  0 = WaveOut (in case of compatibility problems)
+  1 = DirectSound
+  2 = EAX (if supported)
+-
+$
+
+snd_fEAXPanning:
+-
+Adjust panning for EAX (only if needed).
+  <1 = pan left
+   0 = center (recommended)
+  >1 = pan right
+-
+$
+
+
+snd_iMaxOpenRetries:
+-
+How many times to retry when opening sound output.
+-
+$
+
+snd_tmOpenFailDelay:
+-
+How long to wait when retrying to retry open sound output.
+-
+$
+
+
+
+ctl_tmComputerDoubleClick:
+-
+Double click delay for calling computer.
+-
+$
+
+ctl_fButtonRotationSpeedH:
+-
+Speed of rotating via keyboard around heading axis.
+-
+$
+
+ctl_fButtonRotationSpeedP:
+-
+Speed of rotating via keyboard around pitch axis.
+-
+$
+
+ctl_fButtonRotationSpeedB:
+-
+Speed of rotating via keyboard around banking axis.
+-
+$  
+
+ctl_fAxisStrafingModifier:
+-
+How sensitive is mouse or joystick when strafing.
+(relative to rotation speed)
+-
+$
+
+
+hud_bShowInfo:
+-
+Show general HUD information.
+-
+$
+
+hud_iShowPlayers:
+-
+Show a list of all connected players:
+  1 = show list
+  0 = hide list
+ -1 = automatic, i.e. show only in multiplayer
+-
+$
+
+hud_iSortPlayers:
+-
+Sort players' list by:
+ -1 = autosort
+  0 = unsorted
+  1 = name
+  2 = health
+  3 = score
+  4 = mana
+  5 = frags
+  6 = deaths
+autosort sorts:
+  - by frags for fragmatch
+  - by score for scorematch
+  - by health for cooperative
+-
+$
+
+hud_tmLatencySnapshot:
+-
+How often to calculate latency.
+-
+$
+
+hud_bShowLatency:
+-
+Show latency.
+-
+$
+
+hud_bShowWeapon:
+-
+Show current weapon on screen.
+-
+$
+
+hud_bColorize:
+-
+Add cyan and yellow colors for graduation of ammounts. 
+-
+$
+
+hud_iColor:
+-
+Set HUD color (in RGB).
+-
+$
+
+hud_fOpacity:
+-
+Set HUD opacity (0-1).
+-
+$
+
+hud_fScaling:
+-
+Set HUD scaling factor.
+-
+$
+
+hud_tmWeaponsOnScreen:
+-
+How many seconds will weapon list remain on screen when changing weapons.
+-
+$
+
+
+plr_fBreathingStrength:
+-
+Strength of player breathing.
+-
+$
+
+plr_tmSnoopingTime:
+-
+How many seconds to keep snooping info after targeting player.
+-
+$
+
+plr_tmSnoopingDelay:
+-
+How many seconds will pass when targeting player before snooping mode
+will be activated.
+-
+$
+
+
+cht_bGod:
+-
+Allow invulnerability.
+-
+$
+
+cht_bFly:
+-
+Allow flying.
+-
+$
+
+cht_bGhost:
+-
+Allow walking thru walls.
+-
+$
+
+cht_bInvisible:
+-
+Enemies cannot see you.
+-
+$
+
+cht_fTranslationMultiplier:
+-
+Player speed multiplier (turbo mode).
+-
+$
+
+cht_bGiveAll:
+-
+Give all weapons and ammo.
+-
+$
+
+cht_bKillAll:
+-
+Kill all enemies that have you as target.
+-
+$
+
+cht_bOpen:
+-
+Open door that is targeted.
+(in case you've stuck somewhere)
+-
+$
+
+cht_bAllMessages:
+-
+Receive all NETRICSA messages.
+-
+$
+
+cht_bRefresh:
+-
+Refresh health.
+-
+$
+
+cht_iGoToMarker:
+-
+Number of start marker to go to.
+-
+$
+
+plr_fFOV:
+-
+Change player field-of-view.
+-
+$
+
+plr_fFrontClipDistance:
+-
+At what distance from eye-view, clipping to front plane will occur (0.05-0.5).
+(works only in-game, not in editor views)
+-
+$
+
+plr_bRenderPicked:
+-
+If on, you can still see items that you have picked if WeaponsStay is on.
+-
+$
+
+plr_bRenderPickedParticles:
+-
+If on, you can still see particles on items that you have picked
+if WeaponsStay is on.
+-
+$
+
+plr_bOnlySam:
+-
+Disable all player models except Serious Sam (to conserve memory)
+-
+$
+
+
+hud_bCrosshairFixed:
+-
+Render crosshair always in center of screen with constant size.
+-
+$
+
+hud_bCrosshairColoring:
+-
+Crosshair color represents enemy's energy.
+-
+$
+
+hud_iCrosshairType:
+-
+Selects type of crosshir (0=none).
+-
+$
+
+hud_fCrosshairScale:
+-
+Sets crosshair size (relative scaling factor).
+-
+$
+
+hud_fCrosshairRatio:
+-
+Sets crosshair size ratio with distance (relative scaling factor).
+-
+$
+
+hud_fCrosshairOpacity:
+-
+Set opacity for crosshair.
+-
+$
+
+hud_bShowResolution:
+-
+Displays current window or screen resolution.
+-
+$
+
+hud_bShowPlayerName:
+-
+Show name of targeted player (in multiplayer).
+-
+$
+
+hud_bShowUse:
+-
+Show when 'use' function can be invoked.
+-
+$
+
+hud_bShowCoords:
+-
+Show coordinates where player crosshair points to.
+-
+$
+
+hud_bShowTime:
+-
+Show elapsed playing time.
+-
+$
+
+hud_iStats:
+-
+Show frame statistics:
+  0 = none
+  1 = only FPS
+  2 = extensive timers 
+-
+$
+
+plr_iSelectPickedWeapon:
+-
+Automatically select picked weapon:
+  0 = never
+  1 = only if weapon is picked for the first time
+  2 = always
+-
+$
+
+    
+MakeWorldStatistics():
+-
+Dump statistics about current level to file.
+-
+$
+
+ReoptimizeAllBrushes():
+-
+EDITOR ONLY: Re-optimize all brushes in the world.
+-
+$
+
+
+SaveScreenShot():
+-
+Saves a screenshot to 'Screenshots\' directory.
+-
+$
+
+
+
+sam_bWideScreen:
+-
+Play in wide screen format (requires video mode restart).
+-
+$
+
+sam_bToggleConsole:
+-
+Invokes/shuts console (for key binding).
+-
+$
+
+sam_bFastAltTab:
+-
+Allow fast Alt-TAB switching, without reloading driver.
+-
+$
+
+sam_iMaxFPSActive:
+-
+Maximum refresh rate when active (in FPS).
+-
+$
+
+sam_iMaxFPSInactive:
+-
+Maximum refresh rate when inactive (in FPS).
+-
+$
+
+sam_tmDisplayModeReport:
+-
+How may seconds to keep display mode info on screen.
+-
+$
+
+sam_iVideoSetup:
+-
+Select predefined rendering preferences:
+  0 = speed
+  1 = normal (default)
+  2 = quality
+  3 = custom
+-
+$
+
+sam_bAutoPlayDemos:
+-
+Allow auto-playing of demos.
+-
+$
+
+
+ApplyRenderingPreferences():
+-
+Applies current rendering preferences.
+-
+$
+
+ApplyVideoMode():
+-
+Restarts video interface.
+-
+$
+
+
+Quit():
+-
+Quit Serious Sam.
+-
+$
+
+Benchmark():
+-
+Measure 3D accelerator OpenGL performance.
+-
+$
+
+
+
+wed_bSaveTestGameFirstTime:
+-
+Save test game when starting testgame first time, even if nothing was changed.
+This is to enable reinitialization of entities.
+Turn it off if you want to record demos from within editor.
+-
+$
+
+wed_bIgnoreTJunctions:
+-
+Edges that share t-junction do not touch.
+-
+$
+
+wed_fFrontClipDistance:
+-
+At what distance from eye-view, clipping to front plane will occur (0.02-2.0).
+(works only in editor views, not in-game)
+-
+$
+
+
+fil_bPreferZips:
+-
+If set, files are first searched in group files,
+instead of looking on disk first.
+-
+$
+
+ser_bReportSyncLate:
+-
+If set, server reports incoming syncs that come from client too late (after
+server has already flushed them from buffer).
+-
+$
+
+ser_bReportSyncEarly:
+-
+If set, server reports incoming syncs that come from client too early.
+This can happen if the server gets very slow, or is emulating a local lag.
+-
+$
+
+ser_iKickOnSyncBad:
+-
+Determines how many bad syncs will a server tolerate before kicking a client.
+0 means no kicking at all - note that that can lead to complete
+desynchronization of a game.
+-
+$
+
+ser_bKickOnSyncLate:
+-
+If set, server kicks a client when no sync was received for more than 2x
+entire sync buffer on the server. It is assumed that the client has stopped
+responding.
+-
+$
+
+net_tmConnectionTimeout:
+-
+Timeout before a connection attempt is canceled. (in seconds)
+-
+$
+
+net_tmProblemsTimeout:
+-
+Timeout before 'Connection unstable' is reported. (in seconds)
+-
+$
+
+net_tmDisconnectTimeout:
+-
+How long to wait for packets from server before disconnection. (in seconds)
+-
+$
+
+
+net_bReportTraffic:
+-
+DEBUG: Report sizes of all incoming/outgoing packets.
+-
+$
+
+net_bLerping:
+-
+Controls interpolation between frames.
+-
+$
+
+cli_fPredictionFilter:
+-
+Amount of filtering in between prediction errors. 
+0=no filtering
+must be <1, or entities will run out of control.
+-
+$
+
+cli_iMaxBPS:
+-
+Server side client configurable.
+Controls upper limit on outgoing traffic from client to server during
+connection. This limits overload on the client's connection.
+Determined in bytes per second.
+-
+$
+
+cli_iMinBPS:
+-
+Server side client configurable.
+Controls lower limit on outgoing traffic from client to server during play
+time. If higher than minimum needed to keep the connection, it will cause
+replicated packets from server to client. That is good because it compensates
+for lost packets. But setting it too high can choke a clients incoming
+bandwidth.
+Determined in bytes per second.
+-
+$
+
+net_fLimitLatencySend:
+-
+Emulate outgoing latency (seconds)
+-
+$
+
+net_fLimitLatencyRecv:
+-
+Emulate incoming latency (seconds)
+-
+$
+
+net_fLatencyVariationSend:
+-
+Emulate outgoing latency variation (seconds)
+-
+$
+
+net_fLatencyVariationRecv:
+-
+Emulate incoming latency variation (seconds)
+-
+$
+
+net_fLimitBandwidthSend:
+-
+Emulate outgoing bandwidth limit (bits per second).
+-
+$
+
+net_fLimitBandwidthRecv:
+-
+Emulate incoming bandwidth limit (bits per second).
+-
+$
+
+net_fDropPackets:
+-
+Emulate packet loss (factor 0-1).
+-
+$
+
+
+phy_fCollisionCacheAhead:
+-
+FOR DEBUGGING PURPOSES ONLY - DO NOT CHANGE!
+-
+$
+
+phy_fCollisionCacheAround:
+-
+FOR DEBUGGING PURPOSES ONLY - DO NOT CHANGE!
+-
+$
+
+
+inp_bAllowMouseAcceleration:
+-
+Enable/disable mouse acceleration in game.
+(it should be enabled if 'sharp turning' is on)
+-
+$
+
+
+inp_bMousePrecision:
+-
+Reduce mouse sensitivity for sharp aiming.
+(not recommended)
+-
+$
+
+inp_fMousePrecisionFactor:
+-
+For mouse precision mode control. (obsolete)
+-
+$
+
+inp_fMousePrecisionThreshold:
+-
+For mouse precision mode control. (obsolete)
+-
+$
+
+inp_fMousePrecisionTimeout:
+-
+For mouse precision mode control. (obsolete)
+-
+$
+
+inp_bFilterMouse:
+-
+Allow mouse filtering (smoothing).
+-
+$
+
+inp_bAllowPrescan:
+-
+Allow reading of input actions on each frame, instead each tick.
+(required for sharp turning)
+-
+$
+
+inp_ctJoysticksAllowed:
+-
+Maximum number of joystick ports to read.
+-
+$
+
+inp_bForceJoystickPolling:
+-
+Force polling of joystick even if no players have joystick configured.
+-
+$
+
+inp_bAutoDisableJoysticks:
+-
+Automatically disable any joystick that has failed a poll.
+-
+$
+
+
+inp_bMsgDebugger:
+-
+Printout of all user messages (>WM_USER) to console. You can use this to
+determine mouse messages for your custom mouse buttons.
+-
+$
+
+inp_iMButton4Up:
+-
+Windows message for releasing the 4th mouse button.
+-
+$
+
+inp_iMButton4Dn:
+-
+Windows message for pressing the 4th mouse button.
+-
+$
+
+inp_iMButton5Up:
+-
+Windows message for releasing the 5th mouse button.
+-
+$
+
+inp_iMButton5Dn:
+-
+Windows message for pressing the 5th mouse button.
+-
+$
+
+cli_fPredictPlayersRange:
+-
+Range inside which all players will be predicted, no matter if local or remote.
+-
+$
+
+cli_fPredictItemsRange:
+-
+Range inside items get predicted - for smoother item pickup.
+-
+$
+
+cli_tmPredictFoe:
+-
+How long (in secs) to predict you foe player after last time you targeted it.
+Used in deathmatch.
+-
+$
+
+cli_tmPredictAlly:
+-
+How long (in secs) to predict your ally player after last time you targeted it.
+Used in cooperative.
+-
+$
+
+cli_tmPredictEnemy:
+-
+How long (in secs) to predict you an enemy after last time you targeted it.
+Used in cooperative.
+-
+$
+
+cli_tmPredictEnemy:
+-
+How long (in seconds) to predict you an enemy after last time you targeted it.
+Used in cooperative.
+-
+$
+
+gam_iCredits:
+-
+Number of credits available for respawning in coop. 
+ -1 = infinite
+  0 = no respawning
+-
+$
+
+gam_iScoreLimit:
+-
+Score limit for scorematch.
+-
+$
+
+gam_iScoreLimit:
+-
+Score limit for scorematch.
+0=nolimit
+-
+$
+
+gam_iFragLimit:
+-
+Frag limit for fragmatch.
+0=nolimit
+-
+$
+
+gam_iTimeLimit:
+-
+Time limit for fragmatch/scorematch (minutes).
+0=nolimit
+-
+$
+
+gam_ctMaxPlayers:
+-
+Maximum number of players allowed to connect.
+-
+$
+
+gam_bWaitAllPlayers:
+-
+If turned on, game is paused until all players join in. Useful if you
+connection is slow.
+-
+$
+
+gam_bWeaponsStay:
+-
+Whether weapons stay after beeing picked up.
+-
+$
+
+gam_iQuickSaveSlots:
+-
+Number of slots to reserve for quicksaving. After all the slots are used,
+quick saves wrap around.
+-
+$
+
+gam_iStartDifficulty:
+-
+Difficulty level:
+ -1 = tourist
+  0 = easy
+  1 = normal
+  2 = hard
+  3 = serious
+-
+$
+
+gam_iStartMode:
+-
+Game mode:
+  0 = coop
+  1 = scorematch
+  2 = fragmatch
+-
+$
+
+gam_iObserverConfig:
+-
+Split screen configuration (1-4 players) for observing,
+demo replay or advanced observing.
+-
+$
+
+gam_iObserverOffset:
+-
+Scroll between players when observing.
+-
+$
+
+gam_tmSpawnInvulnerability:
+-
+How long the player is invulnerable after respawning. (in seconds)
+-
+$
+
+gam_iBlood:
+-
+Type of blood in game:
+  0 = none
+  1 = green
+  2 = red
+  3 = hippie (flower-power!)
+(cannot be changed during game)
+-
+$
+
+gam_bGibs:
+-
+Allow/dissalow gibbing and body explosions.
+(cannot be changed during game)
+-
+$
+
+gam_bAmmoStays:
+-
+-
+$
+
+gam_bHealthArmorStays:
+-
+-
+$
+
+gam_bAllowHealth:
+-
+-
+$
+
+gam_bAllowArmor:
+-
+-
+$
+
+gam_bInfiniteAmmo:
+-
+-
+$
+
+gam_bFriendlyFire:
+-
+-
+$
+
+gam_bPlayEntireGame:
+-
+-
+$
+
+gam_bRespawnInPlace:
+-
+When set, players will respawn in place - if killed by a monster. When killed by an environmental hazard, 
+player will always respawn at last marker.
+-
+$
+
+gam_fExtraEnemyStrength:
+-
+How much to increase enemy strength (for coop play).
+i.e: 0.15 = 15% 
+-
+$
+
+gam_fExtraEnemyStrengthPerPlayer:
+-
+How much to increase enemy strength per each player (for coop play).
+i.e: 0.1 for 5 player = 50% in total
+-
+$
+
+
+
+Say:
+-
+void Say(CTString)
+Used for binding sentences to keys. Like 'Say("Sorry")'.
+-
+$
+
+SayFromTo:
+-
+void SayFromTo(void)
+Say message to from one player to one or more other players.
+SayFromTo(1<<ctl_iCurrentPlayer, -1, "Just stay serious!");
+-
+$
+
+ctl_iCurrentPlayer:
+-
+Number of current player when executing key bindings. Use for bindings, like
+SayFromTo(1<<ctl_iCurrentPlayer, -1, "Just stay serious!");
+-
+$
+
+ded_bRestartWhenEmpty:
+-
+Controls what dedicated server does when all players disconnect.
+  1 = resets to the first map in the map cycle 
+  0 = keep current map
+-
+$
+
+mth_fCSGEpsilon:
+-
+Multiplier for CSG operations epsilon. 1.0 is default. Set to a higher value
+as a workaround for numerical errors if you have problems with cracks in polygons.
+-
+$

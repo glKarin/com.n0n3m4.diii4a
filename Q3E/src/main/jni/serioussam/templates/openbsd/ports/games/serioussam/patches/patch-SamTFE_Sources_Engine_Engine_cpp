@@ -1,0 +1,25 @@
+Index: SamTFE/Sources/Engine/Engine.cpp
+--- SamTFE/Sources/Engine/Engine.cpp.orig
++++ SamTFE/Sources/Engine/Engine.cpp
+@@ -740,20 +740,9 @@
+   // Path vars
+   sys_iGameBits  = (int)(CHAR_BIT * sizeof(void *));
+   CPrintF(TRANSV("Running %d-bit version\n"), sys_iGameBits);
++  sys_iSysPath = 1; // using system path
+ 
+ #ifdef PLATFORM_UNIX
+-#if defined(__OpenBSD__) || defined(__FreeBSD__)
+-  int _isystempath = strncmp((const char *)strExePath, (const char *) "/usr/local/bin/", (size_t) 15 );
+-#elif defined(__NetBSD__)
+-  int _isystempath = strncmp((const char *)strExePath, (const char *) "/usr/pkg/bin/", (size_t) 13 );
+-#else
+-  int _isystempath = strncmp((const char *)strExePath, (const char *) "/usr/bin/", (size_t) 9 );
+-#endif
+-  if( _isystempath == 0 ) {
+-       sys_iSysPath = 1; // using system path
+-  } else {
+-       sys_iSysPath = 0; // using standarted path
+-  }
+ 
+   // get library path for mods
+   _fnmModLibPath = "";

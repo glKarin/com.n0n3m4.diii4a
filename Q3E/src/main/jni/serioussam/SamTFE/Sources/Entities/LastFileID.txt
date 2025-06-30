@@ -1,0 +1,5 @@
+Last ES ID number: 
+
+Enemies: 341 (CreateRider)
+Tools: 232 (Counter)
+Items: 807 (MessageItem)

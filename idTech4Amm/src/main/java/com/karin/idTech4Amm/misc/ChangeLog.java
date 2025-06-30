@@ -70,6 +70,13 @@ public class ChangeLog
         final ChangeLog[] CHANGES = {
                 ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2025-06-25", 66,
+                        "Add global illumination rendering for make scene brighter(cvar harm_r_globalIllumination and harm_r_globalIlluminationBrightness) at launcher on DOOM 3/Quake 4/Prey(2006).",
+                        "Add built-in bot assets if external assets missing(so only require external aas files, defs/scripts files not required any longer, also extract aas files patch by launcher), add `+set harm_g_botEnableBuiltinAssets 1` to command for enable on DOOM 3/Quake 4.",
+                        "Add retro postprocess rendering from RBDOOM-3-BFG 1.6.0(cvar r_renderMode) at launcher on DOOM 3/Quake 4/Prey(2006).",
+                        "Fix incorrect shadow rendering on perforated surfaces(cvar r_forceShadowMapsOnAlphaTestedSurfaces) with shadow mapping on DOOM 3."
+                ),
+
                 ChangeLog.Create("2025-05-05", 65,
                         "Add cascaded shadow mapping with parallel lights(cvar `r_shadowMapSplits`) in OpenGL ES3 on DOOM 3/Quake 4/Prey(2006).",
                         "Fix makron remote render at screen for texfure/cameraView1 in map game/core1 on Quake 4.",

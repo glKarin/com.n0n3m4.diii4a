@@ -85,6 +85,21 @@
                 android:title="@string/openjo"
                 android:icon="@drawable/jo_icon"
                 android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_samtfe"
+                android:title="@string/samtfe"
+                android:icon="@drawable/samtfe_icon"
+                android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_samtse"
+                android:title="@string/samtse"
+                android:icon="@drawable/samtse_icon"
+                android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_xash3d"
+                android:title="@string/xash3d"
+                android:icon="@drawable/xash3d_icon"
+                android:showAsAction="never|withText"/>
         </menu>
     </item>
 

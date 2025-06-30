@@ -1,0 +1,510 @@
+Description: Fix spelling-error-in-binary patch
+Forwarded: not-needed
+diff -aurN a/SamTFE/Sources/Entities/BloodSpray.es b/SamTFE/Sources/Entities/BloodSpray.es
+--- a/SamTFE/Sources/Entities/BloodSpray.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTFE/Sources/Entities/BloodSpray.es	2024-03-03 18:51:02.374600218 +0300
+@@ -22,7 +22,7 @@
+   enum SprayParticlesType sptType, // type of particles
+   FLOAT fDamagePower,              // factor saying how powerfull damage has been
+   FLOAT fSizeMultiplier,           // stretch factor
+-  FLOAT3D vDirection,              // dammage direction  
++  FLOAT3D vDirection,              // damage direction  
+   CEntityPointer penOwner,         // who spawned the spray
+ };
+ 
+@@ -35,7 +35,7 @@
+ 
+   1 enum SprayParticlesType m_sptType = SPT_NONE,                    // type of particles
+   2 FLOAT m_tmStarted = 0.0f,                                        // time when spawned
+-  3 FLOAT3D m_vDirection = FLOAT3D(0,0,0),                           // dammage direction
++  3 FLOAT3D m_vDirection = FLOAT3D(0,0,0),                           // damage direction
+   5 CEntityPointer m_penOwner,                                       // who spawned the spray
+   6 FLOAT m_fDamagePower = 1.0f,                                     // power of inflicted damage
+   8 FLOATaabbox3D m_boxOwner = FLOATaabbox3D(FLOAT3D(0,0,0), 0.01f), // bounding box of blood spray's owner
+diff -aurN a/SamTFE/Sources/Entities/Player.es b/SamTFE/Sources/Entities/Player.es
+--- a/SamTFE/Sources/Entities/Player.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTFE/Sources/Entities/Player.es	2024-03-03 13:05:29.312328445 +0300
+@@ -5948,7 +5948,7 @@
+       // if any found
+       if (penNextPlayer!=NULL) {
+         // transfer keys to that player
+-        CPrintF(TRANS("%s leaving, all keys transfered to %s\n"), 
++        CPrintF(TRANS("%s leaving, all keys transferred to %s\n"), 
+           (const char*)m_strName, (const char*)penNextPlayer->GetPlayerName());
+         penNextPlayer->m_ulKeys |= m_ulKeys;
+       }
+diff -aurN a/SamTFE/Sources/Entities/WorldBase.es b/SamTFE/Sources/Entities/WorldBase.es
+--- a/SamTFE/Sources/Entities/WorldBase.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTFE/Sources/Entities/WorldBase.es	2024-03-03 13:04:18.947446108 +0300
+@@ -132,7 +132,7 @@
+     strm.Create_t(fnm);
+     CTString strLine;
+     strLine.PrintF("%-40s: %8s %8s %10s %10s", 
+-      "name", "count", "ammount", "health", "score");
++      "name", "count", "amount", "health", "score");
+     strm.PutLine_t(strLine);
+     {FOREACHINDYNAMICARRAY(_aes, EntityStats, ites) {
+       EntityStats &es = *ites;
+@@ -266,19 +266,19 @@
+ void CWorldBase_OnWorldInit(CWorld *pwo)
+ {
+   pwo->wo_attTextureTransformations[0].tt_strName = "None";
+-  pwo->wo_attTextureTransformations[1].tt_strName = "R Extremly Slow";
++  pwo->wo_attTextureTransformations[1].tt_strName = "R Extremely Slow";
+   pwo->wo_attTextureTransformations[2].tt_strName = "R Very Slow";
+   pwo->wo_attTextureTransformations[3].tt_strName = "R Slow";
+   pwo->wo_attTextureTransformations[4].tt_strName = "R Medium";
+   pwo->wo_attTextureTransformations[5].tt_strName = "R Fast";
+   pwo->wo_attTextureTransformations[6].tt_strName = "R Very Fast";
+-  pwo->wo_attTextureTransformations[7].tt_strName = "R Extremly Fast";
++  pwo->wo_attTextureTransformations[7].tt_strName = "R Extremely Fast";
+ 
+   pwo->wo_attTextureTransformations[8].tt_strName = "Dummy 1";
+   pwo->wo_attTextureTransformations[9].tt_strName = "Dummy 2";
+   pwo->wo_attTextureTransformations[10].tt_strName = "Dummy 3";
+ 
+-  pwo->wo_attTextureTransformations[11].tt_strName = "Water movement extremly slow";
++  pwo->wo_attTextureTransformations[11].tt_strName = "Water movement extremely slow";
+   pwo->wo_attTextureTransformations[12].tt_strName = "Water movement very slow";
+   pwo->wo_attTextureTransformations[13].tt_strName = "Water movement slow";
+   pwo->wo_attTextureTransformations[14].tt_strName = "Water movement normal";
+@@ -308,15 +308,15 @@
+   pwo->wo_attTextureTransformations[35].tt_strName = "Rotation Right 9";
+   pwo->wo_attTextureTransformations[36].tt_strName = "Rotation Right 10";
+ 
+-  pwo->wo_attTextureTransformations[37].tt_strName = "D Extremly Slow";
++  pwo->wo_attTextureTransformations[37].tt_strName = "D Extremely Slow";
+   pwo->wo_attTextureTransformations[38].tt_strName = "D Very Slow";
+   pwo->wo_attTextureTransformations[39].tt_strName = "D Slow";
+   pwo->wo_attTextureTransformations[40].tt_strName = "D Medium";
+   pwo->wo_attTextureTransformations[41].tt_strName = "D Fast";
+   pwo->wo_attTextureTransformations[42].tt_strName = "D Very Fast";
+-  pwo->wo_attTextureTransformations[43].tt_strName = "D Extremly Fast";
++  pwo->wo_attTextureTransformations[43].tt_strName = "D Extremely Fast";
+   pwo->wo_attTextureTransformations[44].tt_strName = "D Super Fast";
+-  pwo->wo_attTextureTransformations[45].tt_strName = "D Abnormaly Fast";
++  pwo->wo_attTextureTransformations[45].tt_strName = "D Abnormally Fast";
+ 
+ // static
+   pwo->wo_atbTextureBlendings[0].tb_strName         = "Opaque";
+diff -aurN a/SamTFE/Sources/EntitiesMP/Player.es b/SamTFE/Sources/EntitiesMP/Player.es
+--- a/SamTFE/Sources/EntitiesMP/Player.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTFE/Sources/EntitiesMP/Player.es	2024-03-03 13:05:29.316328495 +0300
+@@ -6840,7 +6840,7 @@
+       // if any found
+       if (penNextPlayer!=NULL) {
+         // transfer keys to that player
+-        CPrintF(TRANSV("%s leaving, all keys transfered to %s\n"), 
++        CPrintF(TRANSV("%s leaving, all keys transferred to %s\n"), 
+           (const char*)m_strName, (const char*)penNextPlayer->GetPlayerName());
+         penNextPlayer->m_ulKeys |= m_ulKeys;
+       }
+diff -aurN a/SamTFE/Sources/EntitiesMP/WorldBase.es b/SamTFE/Sources/EntitiesMP/WorldBase.es
+--- a/SamTFE/Sources/EntitiesMP/WorldBase.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTFE/Sources/EntitiesMP/WorldBase.es	2024-03-03 13:04:18.947446108 +0300
+@@ -302,13 +302,13 @@
+ void CWorldBase_OnWorldInit(CWorld *pwo)
+ {
+   pwo->wo_attTextureTransformations[0].tt_strName = "None";
+-  pwo->wo_attTextureTransformations[1].tt_strName = "R Extremly Slow";
++  pwo->wo_attTextureTransformations[1].tt_strName = "R Extremely Slow";
+   pwo->wo_attTextureTransformations[2].tt_strName = "R Very Slow";
+   pwo->wo_attTextureTransformations[3].tt_strName = "R Slow";
+   pwo->wo_attTextureTransformations[4].tt_strName = "R Medium";
+   pwo->wo_attTextureTransformations[5].tt_strName = "R Fast";
+   pwo->wo_attTextureTransformations[6].tt_strName = "R Very Fast";
+-  pwo->wo_attTextureTransformations[7].tt_strName = "R Extremly Fast";
++  pwo->wo_attTextureTransformations[7].tt_strName = "R Extremely Fast";
+ 
+   pwo->wo_attTextureTransformations[8].tt_strName = "Dummy 1";
+   pwo->wo_attTextureTransformations[9].tt_strName = "Dummy 2";
+@@ -344,15 +344,15 @@
+   pwo->wo_attTextureTransformations[35].tt_strName = "Rotation Right 9";
+   pwo->wo_attTextureTransformations[36].tt_strName = "Rotation Right 10";
+ 
+-  pwo->wo_attTextureTransformations[37].tt_strName = "D Extremly Slow";
++  pwo->wo_attTextureTransformations[37].tt_strName = "D Extremely Slow";
+   pwo->wo_attTextureTransformations[38].tt_strName = "D Very Slow";
+   pwo->wo_attTextureTransformations[39].tt_strName = "D Slow";
+   pwo->wo_attTextureTransformations[40].tt_strName = "D Medium";
+   pwo->wo_attTextureTransformations[41].tt_strName = "D Fast";
+   pwo->wo_attTextureTransformations[42].tt_strName = "D Very Fast";
+-  pwo->wo_attTextureTransformations[43].tt_strName = "D Extremly Fast";
++  pwo->wo_attTextureTransformations[43].tt_strName = "D Extremely Fast";
+   pwo->wo_attTextureTransformations[44].tt_strName = "D Super Fast";
+-  pwo->wo_attTextureTransformations[45].tt_strName = "D Abnormaly Fast";
++  pwo->wo_attTextureTransformations[45].tt_strName = "D Abnormally Fast";
+ 
+ // static
+   pwo->wo_atbTextureBlendings[0].tb_strName         = "Opaque";
+diff -aurN a/SamTFE/Sources/MakeFONT/MakeFONT.cpp b/SamTFE/Sources/MakeFONT/MakeFONT.cpp
+--- a/SamTFE/Sources/MakeFONT/MakeFONT.cpp	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTFE/Sources/MakeFONT/MakeFONT.cpp	2024-03-03 12:56:57.739273527 +0300
+@@ -101,7 +101,7 @@
+     printf("! Cannot save font.\n  %s\n", (const char *) strError);
+     exit(EXIT_FAILURE);
+   }
+-  printf( "- '%s' created successfuly.\n", (const char *) strFontFileName);
++  printf( "- '%s' created successfully.\n", (const char *) strFontFileName);
+   
+   exit( EXIT_SUCCESS);
+ }
+diff -aurN a/SamTFE/Sources/SeriousSam/Menu.cpp b/SamTFE/Sources/SeriousSam/Menu.cpp
+--- a/SamTFE/Sources/SeriousSam/Menu.cpp	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTFE/Sources/SeriousSam/Menu.cpp	2024-03-03 12:55:13.194625306 +0300
+@@ -5861,7 +5861,7 @@
+   // server visible trigger
+   TRIGGER_MG(mgNetworkVisible, 7,
+        mgNetworkMaxPlayers, mgNetworkGameOptions, TRANS("Server visible:"), astrNoYes);
+-  mgNetworkVisible.mg_strTip = TRANS("invisible servers are not listed, cleints have to join manually");
++  mgNetworkVisible.mg_strTip = TRANS("invisible servers are not listed, clients have to join manually");
+ 
+   // options button
+   mgNetworkGameOptions.mg_strText = TRANS("Game options");
+diff -aurN a/SamTFE/Sources/Shaders/AddShaderDS.cpp b/SamTFE/Sources/Shaders/AddShaderDS.cpp
+--- a/SamTFE/Sources/Shaders/AddShaderDS.cpp	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTFE/Sources/Shaders/AddShaderDS.cpp	2024-03-03 13:00:49.353268266 +0300
+@@ -25,7 +25,7 @@
+ #define BASE_COLOR   0
+ #define BASE_FLOAT   0
+ 
+-SHADER_MAIN(AddDS)
++SHADER_MAIN(AddShaderDS)
+ {
+ #if 0
+   shaSetTexture(BASE_TEXTURE);
+@@ -67,15 +67,15 @@
+ #endif
+ }
+ 
+-SHADER_DESC(AddDS,ShaderDesc &shDesc)
++SHADER_DESC(AddShaderDS,ShaderDesc &shDesc)
+ {
+   shDesc.sd_astrTextureNames.New(TEXTURE_COUNT);
+   shDesc.sd_astrTexCoordNames.New(UVMAPS_COUNT);
+   shDesc.sd_astrColorNames.New(COLOR_COUNT);
+   shDesc.sd_astrFloatNames.New(FLOAT_COUNT);
+ 
+-  shDesc.sd_astrTextureNames[0] = "AddDS texture";
+-  shDesc.sd_astrTexCoordNames[0] = "AddDS uvmap";
+-  shDesc.sd_astrColorNames[0] = "AddDS color";
+-  shDesc.sd_strShaderInfo = "AddDS shader";
++  shDesc.sd_astrTextureNames[0] = "AddShaderDS texture";
++  shDesc.sd_astrTexCoordNames[0] = "AddShaderDS uvmap";
++  shDesc.sd_astrColorNames[0] = "AddShaderDS color";
++  shDesc.sd_strShaderInfo = "AddShaderDS shader";
+ }
+diff -aurN a/SamTSE/Sources/EntitiesMP/BloodSpray.es b/SamTSE/Sources/EntitiesMP/BloodSpray.es
+--- a/SamTSE/Sources/EntitiesMP/BloodSpray.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/EntitiesMP/BloodSpray.es	2024-03-03 18:51:02.374600218 +0300
+@@ -23,7 +23,7 @@
+   enum SprayParticlesType sptType, // type of particles
+   FLOAT fDamagePower,              // factor saying how powerfull damage has been
+   FLOAT fSizeMultiplier,           // stretch factor
+-  FLOAT3D vDirection,              // dammage direction  
++  FLOAT3D vDirection,              // damage direction  
+   CEntityPointer penOwner,         // who spawned the spray
+   COLOR colCentralColor,           // central color of particles that is randomized a little
+   FLOAT fLaunchPower,
+@@ -39,7 +39,7 @@
+ 
+   1 enum SprayParticlesType m_sptType = SPT_NONE,                    // type of particles
+   2 FLOAT m_tmStarted = 0.0f,                                        // time when spawned
+-  3 FLOAT3D m_vDirection = FLOAT3D(0,0,0),                           // dammage direction
++  3 FLOAT3D m_vDirection = FLOAT3D(0,0,0),                           // damage direction
+   5 CEntityPointer m_penOwner,                                       // who spawned the spray
+   6 FLOAT m_fDamagePower = 1.0f,                                     // power of inflicted damage
+   8 FLOATaabbox3D m_boxSizedOwner = FLOATaabbox3D(FLOAT3D(0,0,0), 0.01f), // bounding box of blood spray's owner
+diff -aurN a/SamTSE/Sources/EntitiesMP/ModelHolder2.es b/SamTSE/Sources/EntitiesMP/ModelHolder2.es
+--- a/SamTSE/Sources/EntitiesMP/ModelHolder2.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/EntitiesMP/ModelHolder2.es	2024-03-03 18:51:15.454709433 +0300
+@@ -105,7 +105,7 @@
+  80 COLOR m_colBurning = COLOR(C_WHITE|CT_OPAQUE), // color applied when burning
+ 
+  90 enum DamageType m_dmtLastDamageType=DMT_CHAINSAW,
+- 91 FLOAT m_fChainSawCutDamage    "Chain saw cut dammage" 'C' = 300.0f,
++ 91 FLOAT m_fChainSawCutDamage    "Chain saw cut damage" 'C' = 300.0f,
+  93 INDEX m_iFirstRandomAnimation "First random animation" 'R' = -1,
+ 100 FLOAT m_fMaxTessellationLevel "Max tessellation level" = 0.0f,
+ 
+@@ -227,7 +227,7 @@
+       {
+         EDeath eDeath;  // we don't need any extra parameters
+         SendEvent(eDeath);
+-        //remember last dammage type
++        //remember last damage type
+         m_dmtLastDamageType=dmtType;
+       }
+     }
+@@ -290,7 +290,7 @@
+       {
+         EDeath eDeath;  // we don't need any extra parameters
+         SendEvent(eDeath);
+-        //remember last dammage type
++        //remember last damage type
+         m_dmtLastDamageType=dmtType;
+       }
+     }
+diff -aurN a/SamTSE/Sources/EntitiesMP/ModelHolder3.es b/SamTSE/Sources/EntitiesMP/ModelHolder3.es
+--- a/SamTSE/Sources/EntitiesMP/ModelHolder3.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/EntitiesMP/ModelHolder3.es	2024-03-03 18:51:20.426750986 +0300
+@@ -106,7 +106,7 @@
+ // 80 COLOR m_colBurning = COLOR(C_WHITE|CT_OPAQUE), // color applied when burning
+ 
+ // 90 enum DamageType m_dmtLastDamageType=DMT_CHAINSAW,
+-// 91 FLOAT m_fChainSawCutDamage    "Chain saw cut dammage" 'C' = 300.0f,
++// 91 FLOAT m_fChainSawCutDamage    "Chain saw cut damage" 'C' = 300.0f,
+ // 93 INDEX m_iFirstRandomAnimation "First random animation" 'R' = -1,
+ 100 FLOAT m_fMaxTessellationLevel "Max tessellation level" = 0.0f,
+ 
+@@ -239,7 +239,7 @@
+       {
+         EDeath eDeath;  // we don't need any extra parameters
+         SendEvent(eDeath);
+-        //remember last dammage type
++        //remember last damage type
+         m_dmtLastDamageType=dmtType;
+       }
+     }
+@@ -302,7 +302,7 @@
+       {
+         EDeath eDeath;  // we don't need any extra parameters
+         SendEvent(eDeath);
+-        //remember last dammage type
++        //remember last damage type
+         m_dmtLastDamageType=dmtType;
+       }
+     }
+diff -aurN a/SamTSE/Sources/Entities/Player.es b/SamTSE/Sources/Entities/Player.es
+--- a/SamTSE/Sources/Entities/Player.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/Entities/Player.es	2024-03-03 13:05:29.308328395 +0300
+@@ -5946,7 +5946,7 @@
+       // if any found
+       if (penNextPlayer!=NULL) {
+         // transfer keys to that player
+-        CPrintF(TRANS("%s leaving, all keys transfered to %s\n"), 
++        CPrintF(TRANS("%s leaving, all keys transferred to %s\n"), 
+           (const char*)m_strName, (const char*)penNextPlayer->GetPlayerName());
+         penNextPlayer->m_ulKeys |= m_ulKeys;
+       }
+diff -aurN a/SamTSE/Sources/Entities/WorldBase.es b/SamTSE/Sources/Entities/WorldBase.es
+--- a/SamTSE/Sources/Entities/WorldBase.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/Entities/WorldBase.es	2024-03-03 13:04:18.943446058 +0300
+@@ -266,13 +266,13 @@
+ void CWorldBase_OnWorldInit(CWorld *pwo)
+ {
+   pwo->wo_attTextureTransformations[0].tt_strName = "None";
+-  pwo->wo_attTextureTransformations[1].tt_strName = "R Extremly Slow";
++  pwo->wo_attTextureTransformations[1].tt_strName = "R Extremely Slow";
+   pwo->wo_attTextureTransformations[2].tt_strName = "R Very Slow";
+   pwo->wo_attTextureTransformations[3].tt_strName = "R Slow";
+   pwo->wo_attTextureTransformations[4].tt_strName = "R Medium";
+   pwo->wo_attTextureTransformations[5].tt_strName = "R Fast";
+   pwo->wo_attTextureTransformations[6].tt_strName = "R Very Fast";
+-  pwo->wo_attTextureTransformations[7].tt_strName = "R Extremly Fast";
++  pwo->wo_attTextureTransformations[7].tt_strName = "R Extremely Fast";
+ 
+   pwo->wo_attTextureTransformations[8].tt_strName = "Dummy 1";
+   pwo->wo_attTextureTransformations[9].tt_strName = "Dummy 2";
+@@ -308,15 +308,15 @@
+   pwo->wo_attTextureTransformations[35].tt_strName = "Rotation Right 9";
+   pwo->wo_attTextureTransformations[36].tt_strName = "Rotation Right 10";
+ 
+-  pwo->wo_attTextureTransformations[37].tt_strName = "D Extremly Slow";
++  pwo->wo_attTextureTransformations[37].tt_strName = "D Extremely Slow";
+   pwo->wo_attTextureTransformations[38].tt_strName = "D Very Slow";
+   pwo->wo_attTextureTransformations[39].tt_strName = "D Slow";
+   pwo->wo_attTextureTransformations[40].tt_strName = "D Medium";
+   pwo->wo_attTextureTransformations[41].tt_strName = "D Fast";
+   pwo->wo_attTextureTransformations[42].tt_strName = "D Very Fast";
+-  pwo->wo_attTextureTransformations[43].tt_strName = "D Extremly Fast";
++  pwo->wo_attTextureTransformations[43].tt_strName = "D Extremely Fast";
+   pwo->wo_attTextureTransformations[44].tt_strName = "D Super Fast";
+-  pwo->wo_attTextureTransformations[45].tt_strName = "D Abnormaly Fast";
++  pwo->wo_attTextureTransformations[45].tt_strName = "D Abnormally Fast";
+ 
+ // static
+   pwo->wo_atbTextureBlendings[0].tb_strName         = "Opaque";
+diff -aurN a/SamTSE/Sources/EntitiesMP/Player.es b/SamTSE/Sources/EntitiesMP/Player.es
+--- a/SamTSE/Sources/EntitiesMP/Player.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/EntitiesMP/Player.es	2024-03-03 13:05:29.312328445 +0300
+@@ -6842,7 +6842,7 @@
+       // if any found
+       if (penNextPlayer!=NULL) {
+         // transfer keys to that player
+-        CPrintF(TRANSV("%s leaving, all keys transfered to %s\n"), 
++        CPrintF(TRANSV("%s leaving, all keys transferred to %s\n"), 
+           (const char*)m_strName, (const char*)penNextPlayer->GetPlayerName());
+         penNextPlayer->m_ulKeys |= m_ulKeys;
+       }
+diff -aurN a/SamTSE/Sources/EntitiesMP/WorldBase.es b/SamTSE/Sources/EntitiesMP/WorldBase.es
+--- a/SamTSE/Sources/EntitiesMP/WorldBase.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/EntitiesMP/WorldBase.es	2024-03-03 13:04:18.947446108 +0300
+@@ -132,7 +132,7 @@
+     strm.Create_t(fnm);
+     CTString strLine;
+     strLine.PrintF("%-40s: %8s %8s %10s %10s", 
+-      "name", "count", "ammount", "health", "score");
++      "name", "count", "amount", "health", "score");
+     strm.PutLine_t(strLine);
+     {FOREACHINDYNAMICARRAY(_aes, EntityStats, ites) {
+       EntityStats &es = *ites;
+@@ -302,19 +302,19 @@
+ void CWorldBase_OnWorldInit(CWorld *pwo)
+ {
+   pwo->wo_attTextureTransformations[0].tt_strName = "None";
+-  pwo->wo_attTextureTransformations[1].tt_strName = "R Extremly Slow";
++  pwo->wo_attTextureTransformations[1].tt_strName = "R Extremely Slow";
+   pwo->wo_attTextureTransformations[2].tt_strName = "R Very Slow";
+   pwo->wo_attTextureTransformations[3].tt_strName = "R Slow";
+   pwo->wo_attTextureTransformations[4].tt_strName = "R Medium";
+   pwo->wo_attTextureTransformations[5].tt_strName = "R Fast";
+   pwo->wo_attTextureTransformations[6].tt_strName = "R Very Fast";
+-  pwo->wo_attTextureTransformations[7].tt_strName = "R Extremly Fast";
++  pwo->wo_attTextureTransformations[7].tt_strName = "R Extremely Fast";
+ 
+   pwo->wo_attTextureTransformations[8].tt_strName = "Dummy 1";
+   pwo->wo_attTextureTransformations[9].tt_strName = "Dummy 2";
+   pwo->wo_attTextureTransformations[10].tt_strName = "Dummy 3";
+ 
+-  pwo->wo_attTextureTransformations[11].tt_strName = "Water movement extremly slow";
++  pwo->wo_attTextureTransformations[11].tt_strName = "Water movement extremely slow";
+   pwo->wo_attTextureTransformations[12].tt_strName = "Water movement very slow";
+   pwo->wo_attTextureTransformations[13].tt_strName = "Water movement slow";
+   pwo->wo_attTextureTransformations[14].tt_strName = "Water movement normal";
+@@ -344,15 +344,15 @@
+   pwo->wo_attTextureTransformations[35].tt_strName = "Rotation Right 9";
+   pwo->wo_attTextureTransformations[36].tt_strName = "Rotation Right 10";
+ 
+-  pwo->wo_attTextureTransformations[37].tt_strName = "D Extremly Slow";
++  pwo->wo_attTextureTransformations[37].tt_strName = "D Extremely Slow";
+   pwo->wo_attTextureTransformations[38].tt_strName = "D Very Slow";
+   pwo->wo_attTextureTransformations[39].tt_strName = "D Slow";
+   pwo->wo_attTextureTransformations[40].tt_strName = "D Medium";
+   pwo->wo_attTextureTransformations[41].tt_strName = "D Fast";
+   pwo->wo_attTextureTransformations[42].tt_strName = "D Very Fast";
+-  pwo->wo_attTextureTransformations[43].tt_strName = "D Extremly Fast";
++  pwo->wo_attTextureTransformations[43].tt_strName = "D Extremely Fast";
+   pwo->wo_attTextureTransformations[44].tt_strName = "D Super Fast";
+-  pwo->wo_attTextureTransformations[45].tt_strName = "D Abnormaly Fast";
++  pwo->wo_attTextureTransformations[45].tt_strName = "D Abnormally Fast";
+ 
+ // static
+   pwo->wo_atbTextureBlendings[0].tb_strName         = "Opaque";
+diff -aurN a/SamTSE/Sources/MakeFONT/MakeFONT.cpp b/SamTSE/Sources/MakeFONT/MakeFONT.cpp
+--- a/SamTSE/Sources/MakeFONT/MakeFONT.cpp	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/MakeFONT/MakeFONT.cpp	2024-03-03 12:56:38.495138394 +0300
+@@ -101,7 +101,7 @@
+     printf("! Cannot save font.\n  %s\n", (const char *) strError);
+     exit(EXIT_FAILURE);
+   }
+-  printf( "- '%s' created successfuly.\n", (const char *) strFontFileName);
++  printf( "- '%s' created successfully.\n", (const char *) strFontFileName);
+   
+   exit( EXIT_SUCCESS);
+ }
+diff -aurN a/SamTSE/Sources/SeriousSam/Menu.cpp b/SamTSE/Sources/SeriousSam/Menu.cpp
+--- a/SamTSE/Sources/SeriousSam/Menu.cpp	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/SeriousSam/Menu.cpp	2024-03-03 12:54:51.498521155 +0300
+@@ -5861,7 +5861,7 @@
+   // server visible trigger
+   TRIGGER_MG(mgNetworkVisible, 7,
+        mgNetworkMaxPlayers, mgNetworkGameOptions, TRANS("Server visible:"), astrNoYes);
+-  mgNetworkVisible.mg_strTip = TRANS("invisible servers are not listed, cleints have to join manually");
++  mgNetworkVisible.mg_strTip = TRANS("invisible servers are not listed, clients have to join manually");
+ 
+   // options button
+   mgNetworkGameOptions.mg_strText = TRANS("Game options");
+diff -aurN a/SamTSE/Sources/Shaders/AddShaderDS.cpp b/SamTSE/Sources/Shaders/AddShaderDS.cpp
+--- a/SamTSE/Sources/Shaders/AddShaderDS.cpp	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/Shaders/AddShaderDS.cpp	2024-03-03 13:00:28.349066654 +0300
+@@ -25,7 +25,7 @@
+ #define BASE_COLOR   0
+ #define BASE_FLOAT   0
+ 
+-SHADER_MAIN(AddDS)
++SHADER_MAIN(AddShaderDS)
+ {
+ #if 0
+   shaSetTexture(BASE_TEXTURE);
+@@ -67,15 +67,15 @@
+ #endif
+ }
+ 
+-SHADER_DESC(AddDS,ShaderDesc &shDesc)
++SHADER_DESC(AddShaderDS,ShaderDesc &shDesc)
+ {
+   shDesc.sd_astrTextureNames.New(TEXTURE_COUNT);
+   shDesc.sd_astrTexCoordNames.New(UVMAPS_COUNT);
+   shDesc.sd_astrColorNames.New(COLOR_COUNT);
+   shDesc.sd_astrFloatNames.New(FLOAT_COUNT);
+ 
+-  shDesc.sd_astrTextureNames[0] = "AddDS texture";
+-  shDesc.sd_astrTexCoordNames[0] = "AddDS uvmap";
+-  shDesc.sd_astrColorNames[0] = "AddDS color";
+-  shDesc.sd_strShaderInfo = "AddDS shader";
++  shDesc.sd_astrTextureNames[0] = "AddShaderDS texture";
++  shDesc.sd_astrTexCoordNames[0] = "AddShaderDS uvmap";
++  shDesc.sd_astrColorNames[0] = "AddShaderDS color";
++  shDesc.sd_strShaderInfo = "AddShaderDS shader";
+ }
+diff -aurN a/SamTSE/Sources/EntitiesMP/Camera.es b/SamTSE/Sources/EntitiesMP/Camera.es
+--- a/SamTSE/Sources/EntitiesMP/Camera.es	2024-03-03 19:10:37.372778707 +0300
++++ b/SamTSE/Sources/EntitiesMP/Camera.es	2024-03-03 19:10:47.884871380 +0300
+@@ -75,7 +75,7 @@
+  65 FLOAT m_fRotateSpeed "AR Rotate speed" 'S' = 180.0f,
+  66 FLOAT m_fRotateTime "AR Rotate time" 'I' = 8.0f,
+  67 FLOAT m_fRadX "AR Radius X" 'X' = 8.0f,
+- 68 FLOAT m_fHeight "AR Height (controlls pitch)" 'H' = 4.0f,
++ 68 FLOAT m_fHeight "AR Height (controls pitch)" 'H' = 4.0f,
+  69 FLOAT m_fRadZ "AR Radius Z" 'Z' = 8.0f,
+ 
+  70 CEntityPointer m_penAutoCameraEndTarget "Auto camera end target",
+diff -aurN a/SamTFE/Sources/Entities/Damager.es b/SamTFE/Sources/Entities/Damager.es
+--- a/SamTFE/Sources/Entities/Damager.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTFE/Sources/Entities/Damager.es	2024-03-03 20:21:48.537575855 +0300
+@@ -12,7 +12,7 @@
+   1 CTString m_strName          "Name" 'N' = "Damager",
+   2 CTString m_strDescription = "",
+   3 enum DamageType m_dmtType "Type" 'Y' = DMT_ABYSS,    // type of damage
+-  4 FLOAT m_fAmmount "Ammount" 'A' = 1000.0f,             // ammount of damage
++  4 FLOAT m_fAmmount "Amount" 'A' = 1000.0f,             // amount of damage
+   5 CEntityPointer m_penToDamage "Entity to Damage" 'E',  // entity to damage, NULL to damage the triggerer
+   6 BOOL m_bDamageFromTriggerer "DamageFromTriggerer" 'S' = FALSE,  // make the triggerer inflictor of the damage
+ 
+diff -aurN a/SamTFE/Sources/Entities/Light.es b/SamTFE/Sources/Entities/Light.es
+--- a/SamTFE/Sources/Entities/Light.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTFE/Sources/Entities/Light.es	2024-03-03 20:21:59.245649164 +0300
+@@ -62,7 +62,7 @@
+    12 BOOL m_bDarkLight                   "Dark light" 'A' = FALSE,
+    13 FLOAT m_fNearClip                   "Clip near" = 0.1f,
+    14 FLOAT m_fFarClip                    "Clip far" = 0.01f,
+-   15 BOOL m_bSubstractSectorAmbient      "Substract sector ambient" 'S' = FALSE,
++   15 BOOL m_bSubstractSectorAmbient      "Subtract sector ambient" 'S' = FALSE,
+    16 BOOL m_bRenderAsSmallLight          "Render as small" 'R' = FALSE,
+    17 enum LensFlareType m_lftLensFlare   "Lens flare" 'L' = LFT_NONE,
+    18 BOOL m_bBackground                  "Background" 'B' = FALSE,
+diff -aurN a/SamTSE/Sources/EntitiesMP/Damager.es b/SamTSE/Sources/EntitiesMP/Damager.es
+--- a/SamTSE/Sources/EntitiesMP/Damager.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/EntitiesMP/Damager.es	2024-03-03 20:21:38.593507888 +0300
+@@ -27,7 +27,7 @@
+   1 CTString m_strName          "Name" 'N' = "Damager",
+   2 CTString m_strDescription = "",
+   3 enum DamageType m_dmtType "Type" 'Y' = DMT_ABYSS,    // type of damage
+-  4 FLOAT m_fAmmount "Ammount" 'A' = 1000.0f,             // ammount of damage
++  4 FLOAT m_fAmmount "Amount" 'A' = 1000.0f,             // amount of damage
+   5 CEntityPointer m_penToDamage "Entity to Damage" 'E',  // entity to damage, NULL to damage the triggerer
+   6 BOOL m_bDamageFromTriggerer "DamageFromTriggerer" 'S' = FALSE,  // make the triggerer inflictor of the damage
+  10 CEntityPointer m_penLastDamaged,
+diff -aurN a/SamTSE/Sources/EntitiesMP/Light.es b/SamTSE/Sources/EntitiesMP/Light.es
+--- a/SamTSE/Sources/EntitiesMP/Light.es	2024-03-02 13:26:23.000000000 +0300
++++ b/SamTSE/Sources/EntitiesMP/Light.es	2024-03-03 20:22:04.321683940 +0300
+@@ -77,7 +77,7 @@
+    12 BOOL m_bDarkLight                   "Dark light" 'A' = FALSE,
+    13 FLOAT m_fNearClip                   "Clip near" = 0.1f,
+    14 FLOAT m_fFarClip                    "Clip far" = 0.01f,
+-   15 BOOL m_bSubstractSectorAmbient      "Substract sector ambient" 'S' = FALSE,
++   15 BOOL m_bSubstractSectorAmbient      "Subtract sector ambient" 'S' = FALSE,
+    16 BOOL m_bRenderAsSmallLight          "Render as small" 'R' = FALSE,
+    17 enum LensFlareType m_lftLensFlare   "Lens flare" 'L' = LFT_NONE,
+    18 BOOL m_bBackground                  "Background" 'B' = FALSE,

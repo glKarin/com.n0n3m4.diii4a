@@ -1,0 +1,18 @@
++----------------------------------------------------------------------
+| Running ${PKGSTEM} on OpenBSD
++----------------------------------------------------------------------
+
+Playing Serious Sam: The First and Second Encounter requires the Steam,
+GOG or CD copy of the game.
+
+Copy all content of the original game to the appropriate
+directories:
+
+~/.local/share/Serious-Engine/serioussam/ - for TFE
+~/.local/share/Serious-Engine/serioussamse/ - for TSE
+
+These direcotories will contain user data, such as game settings, log,
+saves and demos.
+
+For more information, see:
+https://github.com/tx00100xt/SeriousSamClassic/wiki

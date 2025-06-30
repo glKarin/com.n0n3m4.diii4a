@@ -1,10 +1,5 @@
 package com.karin.idTech4Amm.sys;
 
-import android.support.annotation.NonNull;
-
-import com.karin.idTech4Amm.R;
-import com.n0n3m4.q3e.Q3EGlobals;
-import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EUtils;
 
 import java.util.ArrayList;
@@ -17,106 +12,9 @@ public final class GameManager
 {
     private final Map<String, List<GameProp>> GameProps = new LinkedHashMap<>();
 
-    public final static String[] Games = {
-            Q3EGlobals.GAME_DOOM3,
-            Q3EGlobals.GAME_QUAKE4,
-            Q3EGlobals.GAME_PREY,
-            Q3EGlobals.GAME_RTCW,
-            Q3EGlobals.GAME_QUAKE3,
-            Q3EGlobals.GAME_QUAKE2,
-            Q3EGlobals.GAME_QUAKE1,
-            Q3EGlobals.GAME_DOOM3BFG,
-            Q3EGlobals.GAME_TDM,
-            Q3EGlobals.GAME_GZDOOM,
-            Q3EGlobals.GAME_ETW,
-            Q3EGlobals.GAME_REALRTCW,
-            Q3EGlobals.GAME_FTEQW,
-            Q3EGlobals.GAME_JA,
-            Q3EGlobals.GAME_JO,
-    };
-
-    public static int[] GetGameIcons()
+    public static String[] Games()
     {
-        return new int[]{
-                R.drawable.d3_icon,
-                R.drawable.q4_icon,
-                R.drawable.prey_icon,
-                R.drawable.rtcw_icon,
-                R.drawable.q3_icon,
-                R.drawable.q2_icon,
-                R.drawable.q1_icon,
-                R.drawable.d3bfg_icon,
-                R.drawable.tdm_icon,
-                R.drawable.gzdoom_icon,
-                R.drawable.etw_icon,
-                R.drawable.realrtcw_icon,
-                R.drawable.fteqw_icon,
-                R.drawable.ja_icon,
-                R.drawable.jo_icon,
-        };
-    }
-
-    public static int[] GetGameNameRSs()
-    {
-        return new int[]{
-                R.string.doom_iii,
-                R.string.quake_iv_q4base,
-                R.string.prey_preybase,
-                R.string.rtcw_base,
-                R.string.quake_3_base,
-                R.string.quake_2_base,
-                R.string.quake_1_base,
-                R.string.d3bfg_base,
-                R.string.tdm_base,
-                R.string.doom_base,
-                R.string.etw_base,
-                R.string.realrtcw_base,
-                R.string.fteqw_base,
-                R.string.openja_base,
-                R.string.openjo_base,
-        };
-    }
-
-    public static int[] GetGameThemeColors()
-    {
-        return new int[]{
-                R.color.theme_doom3_main_color,
-                R.color.theme_quake4_main_color,
-                R.color.theme_prey_main_color,
-                R.color.theme_rtcw_main_color,
-                R.color.theme_quake3_main_color,
-                R.color.theme_quake2_main_color,
-                R.color.theme_quake1_main_color,
-                R.color.theme_d3bfg_main_color,
-                R.color.theme_tdm_main_color,
-                R.color.theme_gzdoom_main_color,
-                R.color.theme_etw_main_color,
-                R.color.theme_realrtcw_main_color,
-                R.color.theme_fteqw_main_color,
-                R.color.theme_ja_main_color,
-                R.color.theme_jo_main_color,
-        };
-    }
-
-    public static int[] GetGameNameTSs()
-    {
-        return new int[]{
-                R.string.doom_3,
-                R.string.quake_4,
-                R.string.prey_2006,
-                R.string.rtcw,
-                R.string.quake_3,
-                R.string.quake_2,
-                R.string.quake_1,
-                R.string.doom_3_bfg,
-                R.string.tdm,
-                R.string.doom,
-                R.string.etw,
-                R.string.realrtcw,
-                R.string.fteqw,
-                R.string.openja,
-                R.string.openjo,
-        };
+        return LauncherGame.GameTypes();
     }
 
     public GameManager()
@@ -170,7 +68,7 @@ public final class GameManager
         List<GameProp> props;
         GameProp prop;
 
-        for(String game : Games)
+        for(String game : Games())
             GameProps.put(game, new ArrayList<>());
         Game[] values = Game.values();
 
@@ -240,32 +138,32 @@ public final class GameManager
 
     public static int GetGameIcon()
     {
-        return GetGameIcons()[Q3EUtils.q3ei.game_id];
+        return LauncherGame.Find(Q3EUtils.q3ei.game_id).ICON_ID;
     }
 
-    public static int GetGameIcon(String name)
+    public static int GetGameIcon(String game)
     {
-        return GetGameIcons()[Q3EInterface.GetGameID(name)];
+        return LauncherGame.Find(game).ICON_ID;
     }
 
     public static int GetGameName()
     {
-        return GetGameNameRSs()[Q3EUtils.q3ei.game_id];
+        return LauncherGame.Find(Q3EUtils.q3ei.game_id).NAME_ID;
     }
 
-    public static int GetGameNameRS(String name)
+    public static int GetGameNameRS(String game)
     {
-        return GetGameNameRSs()[Q3EInterface.GetGameID(name)];
+        return LauncherGame.Find(game).NAME_ID;
     }
 
     public static int GetGameThemeColor()
     {
-        return GetGameThemeColors()[Q3EUtils.q3ei.game_id];
+        return LauncherGame.Find(Q3EUtils.q3ei.game_id).COLOR_ID;
     }
 
-    public static int GetGameNameTs(String name)
+    public static int GetGameNameTs(String game)
     {
-        return GetGameNameTSs()[Q3EInterface.GetGameID(name)];
+        return LauncherGame.Find(game).TYPE_ID;
     }
 
     public String[] GetGameLibs(String name, boolean makePlatform)

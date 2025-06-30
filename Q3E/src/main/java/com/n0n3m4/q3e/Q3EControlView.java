@@ -49,6 +49,7 @@ import android.widget.Toast;
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.gl.Q3EConfigChooser;
 import com.n0n3m4.q3e.karin.KKeyToolBar;
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.onscreen.Button;
 import com.n0n3m4.q3e.onscreen.Disc;
 import com.n0n3m4.q3e.onscreen.Finger;
@@ -77,8 +78,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     // render
     private boolean mInit = false;
     private boolean usesCSAA = false;
-    public static int orig_width;
-    public static int orig_height;
     private boolean hideonscr;
 
     // toolbar function
@@ -103,6 +102,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private int m_mapBack = Q3EGlobals.ENUM_BACK_ALL;
     private long m_lastPressBackTime = -1;
     private int m_pressBackCount = 0;
+    private boolean m_portrait = false;
 
 
     //RTCW4A-specific
@@ -224,19 +224,22 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         if (!mInit)
         {
+            KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Control view: %d x %d", w, h);
             SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
             hideonscr = mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false);
             mapvol = mPrefs.getBoolean(Q3EPreference.pref_mapvol, false);
             m_mapBack = mPrefs.getInt(Q3EPreference.pref_harm_mapBack, Q3EGlobals.ENUM_BACK_ALL); //k
+            m_portrait = mPrefs.getBoolean(Q3EPreference.pref_harm_portrait, false); //k
 
             if(m_usingMouseDevice)
                 m_mouseDevice = new Q3EMouseDevice(this);
 
-            orig_width = w;
-            orig_height = h;
+            Q3E.orig_width = w;
+            Q3E.orig_height = h;
+            Q3E.activity.SetupGameViewSize(w, h, false);
 
-            UiLoader uildr = new UiLoader(this, gl, orig_width, orig_height);
+            UiLoader uildr = new UiLoader(this, gl, Q3E.orig_width, Q3E.orig_height, m_portrait);
 
             for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
             {
@@ -280,16 +283,16 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
 /*            if(!Q3EGL.usegles20)
             {*/
-                gl.glMatrixMode(gl.GL_PROJECTION);
-                gl.glLoadIdentity();
-                gl.glOrthof(0, orig_width, orig_height, 0, -1, 1);
+            gl.glMatrixMode(gl.GL_PROJECTION);
+            gl.glLoadIdentity();
+            gl.glOrthof(0, Q3E.orig_width, Q3E.orig_height, 0, -1, 1);
 /*            }*/
 
             mInit = true;
             post(new Runnable() {
                 @Override
                 public void run() {
-                    getHolder().setFixedSize(orig_width, orig_height);
+                    getHolder().setFixedSize(Q3E.orig_width, Q3E.orig_height);
                 }
             });
         }
@@ -877,6 +880,10 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                     return Q3EKeyCodes.KeyCodes.K_MOUSE2;
                 case MotionEvent.BUTTON_TERTIARY:
                     return Q3EKeyCodes.KeyCodes.K_MOUSE3;
+                case MotionEvent.BUTTON_BACK:
+                    return Q3EKeyCodes.KeyCodes.K_MOUSE4;
+                case MotionEvent.BUTTON_FORWARD:
+                    return Q3EKeyCodes.KeyCodes.K_MOUSE5;
                 default:
                     return -1;
             }
@@ -890,6 +897,10 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 return Q3EKeyCodes.KeyCodes.K_MOUSE2;
             else if((buttonState & MotionEvent.BUTTON_TERTIARY) == MotionEvent.BUTTON_TERTIARY)
                 return Q3EKeyCodes.KeyCodes.K_MOUSE3;
+            else if((buttonState & MotionEvent.BUTTON_BACK) == MotionEvent.BUTTON_BACK)
+                return Q3EKeyCodes.KeyCodes.K_MOUSE4;
+            else if((buttonState & MotionEvent.BUTTON_FORWARD) == MotionEvent.BUTTON_FORWARD)
+                return Q3EKeyCodes.KeyCodes.K_MOUSE5;
             else
                 return -1;
         }

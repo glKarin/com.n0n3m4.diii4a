@@ -22,6 +22,13 @@
             android:defaultValue="true"
             android:summary="@string/cover_screen_edges_in_status_bar"
             />
+        <CheckBoxPreference
+            android:title="@string/portrait_mode"
+            android:key="harm_portrait"
+            android:persistent="true"
+            android:defaultValue="false"
+            android:summary="@string/portrait_orientation_screen"
+            />
     </PreferenceCategory>
 
         <PreferenceCategory

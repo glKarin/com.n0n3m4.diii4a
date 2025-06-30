@@ -1,5 +1,7 @@
 package com.n0n3m4.q3e.onscreen;
 
+import android.graphics.Point;
+
 public class Q3EButtonGeometry
 {
     public int x, y, width_or_radius, alpha;
@@ -32,14 +34,33 @@ public class Q3EButtonGeometry
         return x + " " + y + " " + width_or_radius + " " + alpha;
     }
 
+    public String toString(int maxw, int maxh)
+    {
+        Point point = Q3EButtonLayoutManager.ToRelPosition(x, y, maxw, maxh);
+        return point.x + " " + point.y + " " + width_or_radius + " " + alpha;
+    }
+
+
     public static String[] ToStrings(Q3EButtonGeometry[] layouts)
     {
-        String[] defaults_table = new String[layouts.length];
+        String[] layoutTable = new String[layouts.length];
         for (int i = 0; i < layouts.length; i++)
         {
-            defaults_table[i] = layouts[i].toString();
+            layoutTable[i] = layouts[i].toString();
         }
-        return defaults_table;
+        return layoutTable;
+    }
+
+
+    public static String[] ToStrings(Q3EButtonGeometry[] layouts, int maxw, int maxh)
+    {
+        String[] layoutTable = new String[layouts.length];
+        for (int i = 0; i < layouts.length; i++)
+        {
+            //System.err.println(layouts[i].toString(maxw, maxh));
+            layoutTable[i] = layouts[i].toString(maxw, maxh);
+        }
+        return layoutTable;
     }
 
     public static Q3EButtonGeometry[] Alloc(int size)

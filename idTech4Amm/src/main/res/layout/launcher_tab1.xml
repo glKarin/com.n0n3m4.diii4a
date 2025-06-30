@@ -202,81 +202,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_game"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_q4game"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_preygame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_q1game"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_q2game"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_q3game"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_rtcwgame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_tdmgame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_d3bfggame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_doomgame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_etwgame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_realrtcwgame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_fteqwgame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_jagame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
-
-                    <RadioGroup
-                        android:id="@+id/rg_fs_jogame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"></RadioGroup>
                 </LinearLayout>
             </android.support.v4.widget.NestedScrollView>
 
@@ -1069,6 +994,11 @@
                 android:id="@+id/fteqw_section"
                 layout="@layout/launcher_fteqw"
                 android:visibility="gone"></include>
+
+        <include
+            android:id="@+id/xash3d_section"
+            layout="@layout/launcher_xash3d"
+            android:visibility="gone"></include>
 
         <LinearLayout
             android:id="@+id/general_section"

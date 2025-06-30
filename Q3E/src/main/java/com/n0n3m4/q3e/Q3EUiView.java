@@ -32,12 +32,15 @@ import android.view.ViewGroup;
 
 import com.n0n3m4.q3e.gl.KGLBitmapTexture;
 import com.n0n3m4.q3e.gl.Q3EGL;
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.onscreen.Button;
 import com.n0n3m4.q3e.onscreen.Disc;
 import com.n0n3m4.q3e.onscreen.FingerUi;
 import com.n0n3m4.q3e.onscreen.Joystick;
 import com.n0n3m4.q3e.onscreen.MenuOverlay;
 import com.n0n3m4.q3e.onscreen.Paintable;
+import com.n0n3m4.q3e.onscreen.Q3EButtonGeometry;
+import com.n0n3m4.q3e.onscreen.Q3EButtonLayoutManager;
 import com.n0n3m4.q3e.onscreen.Q3EControls;
 import com.n0n3m4.q3e.onscreen.Slider;
 import com.n0n3m4.q3e.onscreen.TouchListener;
@@ -143,16 +146,16 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         gl.glPopMatrix();
         gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
 
-		if(!reloadList.isEmpty())
-		{
-			for (Paintable p : reloadList)
-			{
-				p.AsBuffer((GL11) gl);
-			}
-			reloadList.clear();
-		}
-
         synchronized (paint_elements) {
+            if(!reloadList.isEmpty())
+            {
+                for (Paintable p : reloadList)
+                {
+                    p.AsBuffer((GL11) gl);
+                }
+                reloadList.clear();
+            }
+
             for (Paintable p : paint_elements)
             {
                 if(p instanceof Joystick)
@@ -356,23 +359,23 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             if (touchListener instanceof Button)
             {
                 Button tmp = (Button) touchListener;
-                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString());
+                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString(width, height));
             }
             else if (touchListener instanceof Slider)
             {
                 Slider tmp = (Slider) touchListener;
-                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString());
+                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString(width, height));
             }
             else if (touchListener instanceof Joystick)
             {
                 Joystick tmp = (Joystick) touchListener;
-                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString());
+                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString(width, height));
             }
             //k
             else if (touchListener instanceof Disc)
             {
                 Disc tmp = (Disc) touchListener;
-                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString());
+                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString(width, height));
             }
         }
         mEdtr.commit();
@@ -419,7 +422,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             notifyTexCoordBuffer.put(notifyquadTexCoord);
             notifyTexCoordBuffer.position(0);
 
-            uildr = new UiLoader(this, gl, width, height);
+            uildr = new UiLoader(this, gl, width, height, false);
 
             final int moverWidth = Math.min(width / 4, 360);
             final int moverHeight = Math.min(width / 6, 320);
@@ -778,8 +781,9 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             {
                 Paintable p = paint_elements.get(i);
                 Point point = points[i];
-                int x = point.x;
-                int y = point.y;
+                Point absXY = Q3EButtonLayoutManager.ToAbsPosition(point.x, point.y, width, height);
+                int x = absXY.x;
+                int y = absXY.y;
                 if (p instanceof Slider)
                 {
                     Slider tmp = (Slider) p;
@@ -824,8 +828,9 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
                 Paintable p = paint_elements.get(i);
                 Point point = points[i];
-                int x = point.x;
-                int y = point.y;
+                Point absXY = Q3EButtonLayoutManager.ToAbsPosition(point.x, point.y, width, height);
+                int x = absXY.x;
+                int y = absXY.y;
                 if (p instanceof Slider)
                 {
                     Slider tmp = (Slider) p;
@@ -944,6 +949,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
     public void ReloadButton(Paintable paintable)
     {
-        reloadList.add(paintable);
+        synchronized(paint_elements) {
+            reloadList.add(paintable);
+        }
     }
 }

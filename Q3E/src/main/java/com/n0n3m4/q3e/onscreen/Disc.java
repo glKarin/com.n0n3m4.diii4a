@@ -59,8 +59,9 @@ public class Disc extends Paintable implements TouchListener
 
     private int vertexBuffer = 0;
     private int indexBuffer  = 0;
+    private int m_releaseDelay = 0;
 
-    public Disc(View vw, GL10 gl, int center_x, int center_y, int inner_radius, float a, char[] keys, char[] keymaps, int style, String texid, String name)
+    public Disc(View vw, GL10 gl, int center_x, int center_y, int inner_radius, float a, char[] keys, char[] keymaps, int style, String texid, String name, int delay)
     {
         view = vw;
         cx = center_x;
@@ -71,6 +72,7 @@ public class Disc extends Paintable implements TouchListener
         m_size_2 = size * size;
         m_outside_size_2 = outside_size * outside_size;
         m_style = style;
+        m_releaseDelay = delay;
         float[] verts_back = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
         float[] texcoords = {0, 0, 0, 1, 1, 1, 1, 0};
         byte[] indices = {0, 1, 2, 0, 2, 3};
@@ -340,7 +342,10 @@ public class Disc extends Paintable implements TouchListener
                                 {
                                     has = true;
                                     Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, p.keyCode, 0);
-                                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, p.keyCode, 0);
+                                    if(m_releaseDelay > 0)
+                                        Q3EUtils.q3ei.callbackObj.sendKeyEventDelayed(false, p.keyCode, 0, view, m_releaseDelay);
+                                    else
+                                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, p.keyCode, 0);
                                 }
                             }
                             p.pressed = false;
@@ -464,7 +469,7 @@ public class Disc extends Paintable implements TouchListener
 
     public static Disc Move(Disc tmp, GL10 gl)
     {
-        Disc newd = new Disc(tmp.view, gl, tmp.cx, tmp.cy, tmp.size / 2, tmp.alpha, null, null, tmp.m_style, tmp.tex_androidid, tmp.m_label);
+        Disc newd = new Disc(tmp.view, gl, tmp.cx, tmp.cy, tmp.size / 2, tmp.alpha, null, null, tmp.m_style, tmp.tex_androidid, tmp.m_label, tmp.m_releaseDelay);
         newd.tex_ind = tmp.tex_ind;
         newd.m_parts = tmp.m_parts;
         newd.vertexBuffer = tmp.vertexBuffer;

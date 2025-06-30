@@ -297,6 +297,7 @@
     <string name="hexen_2_base">HeXen II</string>
     <string name="halflife_base">Half-Life</string>
     <string name="cs_1_5_base">Counter Strike(1.5)</string>
+    <string name="cs_base">Counter Strike</string>
 
     <string name="d3bfg_base">DOOM 3 BFG</string>
     <string name="doom_base">DOOM</string>
@@ -388,6 +389,10 @@
     <string name="you_can_also_change_it_manually_on_launcher_settings">You can also change it manually on launcher settings.</string>
     <string name="realrtcw">RealRTCW</string>
     <string name="fteqw">FTEQW</string>
+    <string name="samtfe">SamTFE</string>
+    <string name="samtse">SamTSE</string>
+    <string name="xash3d">Xash3D</string>
+    <string name="xash3d_base">Xash3D</string>
     <string name="input_event_queue">Input event queue</string>
     <string name="choose_input_event_queue_scheme">Choose input event queue scheme</string>
     <string name="filter">Filter</string>
@@ -464,6 +469,8 @@
     <string name="openjo">OpenJO</string>
     <string name="openja_base">STAR WARS™ Jedi Knight-Jedi Academy™</string>
     <string name="openjo_base">STAR WARS™ Jedi Knight II-Jedi Outcast™</string>
+    <string name="samtfe_base">Serious Sam Classic The First Encounter</string>
+    <string name="samtse_base">Serious Sam Classic The Second Encounter</string>
     <string name="code_">Code:</string>
     <string name="version">Version</string>
     <string name="open_menu">Open menu</string>
@@ -485,5 +492,11 @@
     <string name="global_illumination_brightness">Global illumination brightness</string>
     <string name="retro_postprocess">Retro postprocess(r_renderMode)</string>
     <string name="enable_built_in_bot_assets_if_external_assets_missing">Enable built-in bot assets if external assets missing(only DOOM 3 and Quake 4 base game)(harm_g_botEnableBuiltinAssets)</string>
+    <string name="button_swipe_release_delay_ms">Button swipe release delay(ms)\n-1 = automatic; 0 = none</string>
+    <string name="ms">ms</string>
+    <string name="portrait_mode">Portrait mode</string>
+    <string name="portrait_orientation_screen">Portrait orientation screen</string>
+    <string name="renderer_ref">Renderer(ref)</string>
+    <string name="server_client_sv_cl">Server/Client(sv_cl)</string>
 
 </resources>

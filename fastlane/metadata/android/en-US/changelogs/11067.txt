@@ -1,0 +1,2 @@
+* Add Serious Sam Classic The First Encounter(game standalone directory named `serioussamtfe`) and Serious Sam Classic The Second Encounter(game standalone directory named `serioussamtse`) support.
+* Add Xash3D and Counter-Strike 1.6(need extract CS1.6 extras resource on launcher first) support, game standalone directory named `xash3d`.

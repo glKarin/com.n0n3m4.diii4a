@@ -382,6 +382,10 @@
     <string name="realrtcw_base">RealRTCW</string>
     <string name="fteqw_base">FTEQW</string>
     <string name="fteqw">FTEQW</string>
+    <string name="samtfe">SamTFE</string>
+    <string name="samtse">SamTSE</string>
+    <string name="xash3d">Xash3D</string>
+    <string name="xash3d_base">Xash3D</string>
     <string name="input_event_queue">Входная очередь событий</string>
     <string name="choose_input_event_queue_scheme">Выберите схему очереди входных событий</string>
     <string name="filter">Фильтр</string>
@@ -457,10 +461,13 @@
     <string name="hexen_2_base">HeXen II</string>
     <string name="halflife_base">Half-Life</string>
     <string name="cs_1_5_base">Counter Strike(1.5)</string>
+    <string name="cs_base">Counter Strike</string>
     <string name="openja">OpenJA</string>
     <string name="openjo">OpenJO</string>
     <string name="openja_base">STAR WARS™ Jedi Knight-Jedi Academy™</string>
     <string name="openjo_base">STAR WARS™ Jedi Knight II-Jedi Outcast™</string>
+    <string name="samtfe_base">Serious Sam Classic The First Encounter</string>
+    <string name="samtse_base">Serious Sam Classic The Second Encounter</string>
     <string name="code_">Код:</string>
     <string name="version">Версия</string>
     <string name="open_menu">Открыть меню</string>
@@ -472,15 +479,21 @@
     <string name="put_game_files_here">Поместите файлы игры здесь %1$s </string>
     <string name="please_put_game_data_files_into_this_folder">Пожалуйста поместите файлы игровых данных в эту папку %1$s !</string>
     <string name="use_doom3bfg_fonts_instead_of_old_fonts_and_enable_wide_character_language_support">Использовать шрифты DOOM3-BFG вместо старых шрифтов и включить поддержку расширенного набора символов</string>
-    <string name="combine_shadow_mapping_harm_r_shadowmapcombine">Объединить карты теней(harm_r_shadowMapCombine)</string>
+    <string name="combine_shadow_mapping_harm_r_shadowmapcombine">Комбинированные карты теней(harm_r_shadowMapCombine)</string>
     <string name="max_command_line_editor_height">Максимальная высота командной строки(px)</string>
     <string name="setup_max_command_line_editor_pixel_height">Установить максимальную высоту пикселя командной строки (0 - без ограничений)</string>
     <string name="zero_means_not_limit">px, 0 означает без ограничений</string>
-    <string name="skip_hit_effect_in_game">Убрать эффект тряски камеры при ударе(harm_g_skipHitEffect)</string>
-    <string name="render_global_illumination_harm_r_globalillumination">Render global illumination(harm_r_globalIllumination)</string>
-    <string name="global_illumination_brightness_harm_r_globalIlluminationBrightness">Global illumination brightness(harm_r_globalIlluminationBrightness)</string>
-    <string name="global_illumination_brightness">Global illumination brightness</string>
-    <string name="retro_postprocess">Retro postprocess(r_renderMode)</string>
-    <string name="enable_built_in_bot_assets_if_external_assets_missing">Enable built-in bot assets if external assets missing(only DOOM 3 and Quake 4 base game)(harm_g_botEnableBuiltinAssets)</string>
+    <string name="skip_hit_effect_in_game">Убрать эффект тряски камеры при получении урона(harm_g_skipHitEffect)</string>
+    <string name="render_global_illumination_harm_r_globalillumination">Рендеринг глобального освещения(harm_r_globalIllumination)</string>
+    <string name="global_illumination_brightness_harm_r_globalIlluminationBrightness">Яркость глобального освещения(harm_r_globalIlluminationBrightness)</string>
+    <string name="global_illumination_brightness">Яркость глобального освещения</string>
+    <string name="retro_postprocess">Ретро-постобработка(r_renderMode)</string>
+    <string name="enable_built_in_bot_assets_if_external_assets_missing">Включить встроенные ресурсы бота, если внешние ресурсы отсутствуют (только для базовой игры DOOM 3 и Quake 4)(harm_g_botEnableBuiltinAssets)</string>
+    <string name="button_swipe_release_delay_ms">Задержка отпуска кнопки (мс)\n-1 = автоматически; 0 = нет</string>
+    <string name="ms">мс</string>
+    <string name="portrait_mode">Портретный режим</string>
+    <string name="portrait_orientation_screen">Портретная ориентация экрана</string>
+    <string name="renderer_ref">Рендерер(ref)</string>
+    <string name="server_client_sv_cl">Сервер/Клиент(sv_cl)</string>
 
 </resources>

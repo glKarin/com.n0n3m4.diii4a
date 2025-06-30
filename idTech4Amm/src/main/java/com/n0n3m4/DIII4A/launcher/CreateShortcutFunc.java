@@ -56,13 +56,14 @@ public final class CreateShortcutFunc extends GameLauncherFunc
 
     public void run()
     {
-        final CharSequence[] items = new CharSequence[GameManager.Games.length];
-        final String[] values = new String[GameManager.Games.length];
+        String[] Games = GameManager.Games();
+        final CharSequence[] items = new CharSequence[Games.length];
+        final String[] values = new String[Games.length];
         // Map<String, Integer> pinnedShortcuts = GetPinnedShortcuts();
         int selected = -1;
-        for(int i = 0; i < GameManager.Games.length; i++)
+        for(int i = 0; i < Games.length; i++)
         {
-            String game = GameManager.Games[i];
+            String game = Games[i];
             items[i] = Tr(GameManager.GetGameNameRS(game));
             values[i] = game;
             if(game.equals(m_game))

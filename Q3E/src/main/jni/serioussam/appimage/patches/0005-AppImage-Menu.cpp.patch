@@ -1,0 +1,184 @@
+--- a/SamTFE/Sources/SeriousSam/Menu.cpp	2024-02-15 17:39:18.013451900 +0300
++++ b/SamTFE/Sources/SeriousSam/Menu.cpp	2024-02-15 17:38:41.916436199 +0300
+@@ -23,6 +23,9 @@
+ #define RADIOTRANS(str) ("ETRS" str)
+ #define TRANSLATERADIOARRAY(array) TranslateRadioTexts(array, ARRAYCOUNT(array))
+ 
++#ifdef PLATFORM_UNIX
++ENGINE_API extern INDEX sys_iGameDataNotFound;
++#endif
+ extern CMenuGadget *_pmgLastActivatedGadget;
+ extern BOOL bMenuActive;
+ extern BOOL bMenuRendering;
+@@ -896,18 +896,51 @@
+   return pgmCurrentMenu==NULL || pgmCurrentMenu==&gmMainMenu || pgmCurrentMenu==&gmInGameMenu;
+ }
+ 
+-// ---------------------- When activated functions 
+-void StartSinglePlayerMenu(void)
+-{
+-  ChangeToMenu( &gmSinglePlayerMenu);
+-}
+-
++// ---------------------- Exit Game
+ void ExitGame(void)
+ {
+   _bRunning = FALSE;
+   _bQuitScreen = TRUE;
+ }
+ 
++// ---------------------- When game data not found
++void DataNotInstalled(void)
++{
++  _pConfimedYes = &ExitGame;
++  _pConfimedNo = NULL;
++  mgConfirmLabel.mg_strText.PrintF(
++    TRANS("You don't have Game Data installed.\n\nPlease visit https://github.com/tx00100xt/SeriousSamClassic for more info."));
++  gmConfirmMenu.gm_pgmParentMenu = pgmCurrentMenu;
++  gmConfirmMenu.BeSmall();
++  ChangeToMenu( &gmConfirmMenu);
++
++  gmDisabledFunction.gm_pgmParentMenu = pgmCurrentMenu;
++  mgDisabledMenuButton.mg_strText.PrintF(
++    TRANS("You don't have Game Data installed.\n\n"
++          "Note that while the Serious-Engine source code has been released under GPL,\n"
++          "you still need to legally own the game and provide Serious Sam Classic The First Encounter\n" 
++          "and Serious Sam Classic The Second Encounter the game data to play.\n\n"
++          "Please put your game data somewhere in your home directory.\n\n"
++          "Preferably here:\n"
++          " \n"
++          " ~/.local/share/Serious-Engine/serioussam\n"
++          " \n"
++          " ~/.local/share/Serious-Engine/serioussamse\n"
++          " \n"));
++  mgDisabledTitle.mg_strText = TRANS("GAME DATA REQUIRED");
++  ChangeToMenu( &gmDisabledFunction);
++}
++
++// ---------------------- When activated functions 
++void StartSinglePlayerMenu(void)
++{
++  if (sys_iGameDataNotFound == 1) {
++    DataNotInstalled();
++    return;
++  }
++  ChangeToMenu( &gmSinglePlayerMenu);
++}
++
+ CTFileName _fnmModSelected;
+ CTString _strModURLSelected;
+ CTString _strModServerSelected;
+@@ -2209,6 +2278,10 @@
+ 
+ void StartNetworkMenu(void)
+ {
++  if (sys_iGameDataNotFound == 1) {
++    DataNotInstalled();
++    return;
++  }
+   ChangeToMenu( &gmNetworkMenu);
+ }
+ void StartNetworkJoinMenu(void)
+@@ -2227,6 +2300,10 @@
+ 
+ void StartSplitScreenMenu(void)
+ {
++  if (sys_iGameDataNotFound == 1) {
++    DataNotInstalled();
++    return;
++  }
+   ChangeToMenu( &gmSplitScreenMenu);
+ }
+ void StartSplitStartMenu(void)
+--- a/SamTSE/Sources/SeriousSam/Menu.cpp	2024-02-15 17:39:18.013451900 +0300
++++ b/SamTSE/Sources/SeriousSam/Menu.cpp	2024-02-15 17:38:41.916436199 +0300
+@@ -23,6 +23,9 @@
+ #define RADIOTRANS(str) ("ETRS" str)
+ #define TRANSLATERADIOARRAY(array) TranslateRadioTexts(array, ARRAYCOUNT(array))
+ 
++#ifdef PLATFORM_UNIX
++ENGINE_API extern INDEX sys_iGameDataNotFound;
++#endif
+ extern CMenuGadget *_pmgLastActivatedGadget;
+ extern BOOL bMenuActive;
+ extern BOOL bMenuRendering;
+@@ -896,18 +896,51 @@
+   return pgmCurrentMenu==NULL || pgmCurrentMenu==&gmMainMenu || pgmCurrentMenu==&gmInGameMenu;
+ }
+ 
+-// ---------------------- When activated functions 
+-void StartSinglePlayerMenu(void)
+-{
+-  ChangeToMenu( &gmSinglePlayerMenu);
+-}
+-
++// ---------------------- Exit Game
+ void ExitGame(void)
+ {
+   _bRunning = FALSE;
+   _bQuitScreen = TRUE;
+ }
+ 
++// ---------------------- When game data not found
++void DataNotInstalled(void)
++{
++  _pConfimedYes = &ExitGame;
++  _pConfimedNo = NULL;
++  mgConfirmLabel.mg_strText.PrintF(
++    TRANS("You don't have Game Data installed.\n\nPlease visit https://github.com/tx00100xt/SeriousSamClassic for more info."));
++  gmConfirmMenu.gm_pgmParentMenu = pgmCurrentMenu;
++  gmConfirmMenu.BeSmall();
++  ChangeToMenu( &gmConfirmMenu);
++
++  gmDisabledFunction.gm_pgmParentMenu = pgmCurrentMenu;
++  mgDisabledMenuButton.mg_strText.PrintF(
++    TRANS("You don't have Game Data installed.\n\n"
++          "Note that while the Serious-Engine source code has been released under GPL,\n"
++          "you still need to legally own the game and provide Serious Sam Classic The First Encounter\n" 
++          "and Serious Sam Classic The Second Encounter the game data to play.\n\n"
++          "Please put your game data somewhere in your home directory.\n\n"
++          "Preferably here:\n"
++          " \n"
++          " ~/.local/share/Serious-Engine/serioussam\n"
++          " \n"
++          " ~/.local/share/Serious-Engine/serioussamse\n"
++          " \n"));
++  mgDisabledTitle.mg_strText = TRANS("GAME DATA REQUIRED");
++  ChangeToMenu( &gmDisabledFunction);
++}
++
++// ---------------------- When activated functions 
++void StartSinglePlayerMenu(void)
++{
++  if (sys_iGameDataNotFound == 1) {
++    DataNotInstalled();
++    return;
++  }
++  ChangeToMenu( &gmSinglePlayerMenu);
++}
++
+ CTFileName _fnmModSelected;
+ CTString _strModURLSelected;
+ CTString _strModServerSelected;
+@@ -2209,6 +2278,10 @@
+ 
+ void StartNetworkMenu(void)
+ {
++  if (sys_iGameDataNotFound == 1) {
++    DataNotInstalled();
++    return;
++  }
+   ChangeToMenu( &gmNetworkMenu);
+ }
+ void StartNetworkJoinMenu(void)
+@@ -2227,6 +2300,10 @@
+ 
+ void StartSplitScreenMenu(void)
+ {
++  if (sys_iGameDataNotFound == 1) {
++    DataNotInstalled();
++    return;
++  }
+   ChangeToMenu( &gmSplitScreenMenu);
+ }
+ void StartSplitStartMenu(void)
