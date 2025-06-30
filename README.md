@@ -121,7 +121,7 @@ Tag with `-free` only for F-Droid update.
 
 ----------------------------------------------------------------------------------
 
-* 新增英雄萨姆: 第一次遭遇(游戏独立文件夹名为`serioussamtfe`)和英雄萨姆: 第二次遭遇(游戏独立文件夹名为`serioussamtse`). 更多详情[SeriousSamClassic](https://github.com/tx00100xt/SeriousSamClassic)支持.
+* 新增英雄萨姆: 第一次遭遇(游戏独立文件夹名为`serioussamtfe`)和英雄萨姆: 第二次遭遇(游戏独立文件夹名为`serioussamtse`)支持. 更多详情[SeriousSamClassic](https://github.com/tx00100xt/SeriousSamClassic).
 * 新增Xash3D和反恐精英1.6(需要先在启动器提取CS1.6额外资源)支持, 游戏独立文件夹名为`xash3d`, 更多详情[xash3d](https://github.com/FWGS/xash3d-fwgs)和[cs16-client](https://github.com/Velaron/cs16-client).
 
 ----------------------------------------------------------------------------------
