@@ -192,6 +192,18 @@ public final class Q3EGlobals
 
 
 
+    public static boolean IsFroidVersion()
+    {
+        return "fdroid".equalsIgnoreCase(BuildConfig.PRODUCT_FLAVOR);
+    }
+
+    public static boolean IsGithubVersion()
+    {
+        return !IsFroidVersion();
+    }
+
+
+
     public static  boolean IS_NEON      = false; // only armv7-a 32. arm64 always support, but using hard
     public static  boolean IS_64        = false;
     public static  boolean SYSTEM_64    = false;
@@ -249,7 +261,5 @@ public final class Q3EGlobals
         GetCpuInfo();
     }
 
-    private Q3EGlobals()
-    {
-    }
+    private Q3EGlobals() {}
 }

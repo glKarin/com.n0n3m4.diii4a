@@ -31,7 +31,7 @@ OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
-OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
+OPTION(GAME_XASH3D      "Build Xash3D"                          OFF)
 
 # Experimental
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
@@ -56,9 +56,9 @@ set(DIII4A_DEPEND_COMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
 add_subdirectory ( common/bt )
 
 # using Q3E_SDL2
-if(GAME_XASH3D)
+#if(GAME_XASH3D)
 set(Q3E_SDL TRUE)
-endif()
+#endif()
 
 # build SDL2
 if(Q3E_SDL)
