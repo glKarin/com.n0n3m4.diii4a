@@ -1,0 +1,216 @@
+//-----------------------------------------------------------------------------
+//	IVP_COMPACTBUILDER.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro OUTLIBDIR	"$LIBCOMMON"
+$Include "$SRCDIR\vpc_scripts\source_lib_base.vpc"
+
+$Configuration	"Debug"
+{
+	$General
+	{
+		$CharacterSet						"Use Multi-Byte Character Set"
+	}
+
+	$General [$WIN32]
+	{
+		$OutputDirectory					"..\obj\x86_debug\ivp_compactbuilder"
+		$IntermediateDirectory				"..\obj\x86_debug\ivp_compactbuilder"
+	}
+
+	$General [$WIN64]
+	{
+		$OutputDirectory					"..\obj\x64_debug\ivp_compactbuilder"
+		$IntermediateDirectory				"..\obj\x64_debug\ivp_compactbuilder"
+	}
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories		"$BASE;$SRCDIR\ivp\ivp_intern;$SRCDIR\ivp\ivp_collision;$SRCDIR\ivp\ivp_physics;$SRCDIR\ivp\ivp_surface_manager;$SRCDIR\ivp\ivp_utility;$SRCDIR\ivp\ivp_controller;$SRCDIR\ivp\ivp_compact_builder;$SRCDIR\ivp\havana\havok;$SRCDIR\ivp\havana"
+		$PreprocessorDefinitions			"$BASE;IVP_VERSION_SDK;HAVOK_MOPP"
+	}
+	
+	$Compiler [$WINDOWS]
+	{
+		$BasicRuntimeChecks					"Both (/RTC1, equiv. to /RTCsu)"
+		$WarningLevel						"Level 3 (/W3)"
+	}
+
+	$Compiler [$WIN32]
+	{
+		$PrecompiledHeaderFile				"..\obj\x86_debug\ivp_compactbuilder\ivp_compactbuilder_lib.pch"
+		$ASMListLocation					"..\obj\x86_debug\ivp_compactbuilder\"
+		$ObjectFileName						"..\obj\x86_debug\ivp_compactbuilder\"
+		$ProgramDatabaseFileName			"..\obj\x86_debug\ivp_compactbuilder\"
+	}
+
+	$Compiler [$WIN64]
+	{
+		$PrecompiledHeaderFile				"..\obj\x64_debug\ivp_compactbuilder\ivp_compactbuilder_lib.pch"
+		$ASMListLocation					"..\obj\x64_debug\ivp_compactbuilder\"
+		$ObjectFileName						"..\obj\x64_debug\ivp_compactbuilder\"
+		$ProgramDatabaseFileName			"..\obj\x64_debug\ivp_compactbuilder\"
+	}
+}
+
+$Configuration	"Release"
+{
+	$General
+	{
+		$CharacterSet						"Use Multi-Byte Character Set"
+	}
+
+	$General [$WIN32]
+	{
+		$OutputDirectory					"..\obj\x86_release\ivp_compactbuilder"
+		$IntermediateDirectory				"..\obj\x86_release\ivp_compactbuilder"
+	}
+
+	$General [$WIN64]
+	{
+		$OutputDirectory					"..\obj\x64_release\ivp_compactbuilder"
+		$IntermediateDirectory				"..\obj\x64_release\ivp_compactbuilder"
+	}
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories		"$BASE;$SRCDIR\ivp\ivp_intern;$SRCDIR\ivp\ivp_collision;$SRCDIR\ivp\ivp_physics;$SRCDIR\ivp\ivp_surface_manager;$SRCDIR\ivp\ivp_utility;$SRCDIR\ivp\ivp_controller;$SRCDIR\ivp\ivp_compact_builder;$SRCDIR\ivp\havana\havok;$SRCDIR\ivp\havana"
+		$PreprocessorDefinitions			"$BASE;IVP_VERSION_SDK;HAVOK_MOPP"
+	}
+
+	$Compiler [$WINDOWS]
+	{
+		$InlineFunctionExpansion			"Only __inline (/Ob1)"
+		$Create/UsePrecompiledHeader		"Use Precompiled Header (/Yu)"
+		$Create/UsePCHThroughFile			"ivp_physics.hxx"
+		$WarningLevel						"Level 3 (/W3)"
+	}
+
+	$Compiler [$WIN32]
+	{
+		$PrecompiledHeaderFile				"..\obj\x86_release\ivp_compactbuilder\ivp_compactbuilder_lib.pch"
+		$ASMListLocation					"..\obj\x86_release\ivp_compactbuilder\"
+		$ObjectFileName						"..\obj\x86_release\ivp_compactbuilder\"
+		$ProgramDatabaseFileName			"..\obj\x86_release\ivp_compactbuilder\"
+	}
+
+	$Compiler [$WIN64]
+	{
+		$PrecompiledHeaderFile				"..\obj\x64_release\ivp_compactbuilder\ivp_compactbuilder_lib.pch"
+		$ASMListLocation					"..\obj\x64_release\ivp_compactbuilder\"
+		$ObjectFileName						"..\obj\x64_release\ivp_compactbuilder\"
+		$ProgramDatabaseFileName			"..\obj\x64_release\ivp_compactbuilder\"
+	}
+}
+
+$Project "ivp_compactbuilder"
+{
+	$Folder	"IVP_COMPACT_BUILDER"
+	{
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_compact_ledge_gen.cxx"
+		{
+			$Configuration	"Release"
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader		"Create Precompiled Header (/Yc)"
+				}
+			}
+			$Configuration	"Debug"
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader		"Create Precompiled Header (/Yc)"
+					$Create/UsePCHThroughFile			"ivp_physics.hxx"
+				}
+			}
+		}
+
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_compact_ledge_gen.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_compact_modify.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_compact_modify.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_compact_recursive.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_compact_recursive.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_convex_decompositor.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_convex_decompositor.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_halfspacesoup.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_halfspacesoup.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_i_fpoint_vhash.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_i_fpoint_vhash.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_i_point_vhash.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_i_point_vhash.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_object_polygon_tetra.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_object_polygon_tetra.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_rot_inertia_solver.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_rot_inertia_solver.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_3ds.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_halfspacesoup.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_halfspacesoup.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_ledge_soup.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_ledge_soup.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_pointsoup.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_pointsoup.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_polygon_convex.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_polygon_convex.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_polyhdrn_cncv.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_polyhdrn_cncv.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_q12.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_surbuild_q12.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_templates_intern.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_templates_intern.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_tetra_intrude.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_tetra_intrude.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivp_triangle_gen.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivv_cluster_min_hash.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\ivv_cluster_min_hash.hxx"
+	}
+
+	$Folder	"IVP_QHULL"
+	{
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_a.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_geom.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_geom.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_geom2.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_global.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_io.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_io.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_mem.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_mem.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_merge.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_merge.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_poly.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_poly.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_poly2.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_qset.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_qset.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_stat.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_stat.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_user.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\qhull_user.hxx"
+	}
+
+	$Folder	"IVP_GEOMPACK"
+	{
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack.hxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_cutfac.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_cvdec3.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_drdec3.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_dsphdc.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_edght.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_initcb.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_insed3.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_insfac.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_insvr3.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_prime.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_ptpolg.cxx"
+		$File	"$SRCDIR\ivp\ivp_compact_builder\geompack_resedg.cxx"
+	}
+
+	$File	"$SRCDIR\ivp\ivp_compact_builder\3dsimport_co.cxx"
+	$File	"$SRCDIR\ivp\ivp_compact_builder\3dsimport_load.hxx"
+}

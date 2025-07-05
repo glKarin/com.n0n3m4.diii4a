@@ -32,6 +32,7 @@ OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
 OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
+OPTION(GAME_SOURCE      "Build Source"                          OFF)
 
 # Experimental
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
@@ -56,9 +57,9 @@ set(DIII4A_DEPEND_COMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
 add_subdirectory ( common/bt )
 
 # using Q3E_SDL2
-if(GAME_XASH3D)
+#if(GAME_XASH3D OR GAME_SOURCE)
 set(Q3E_SDL TRUE)
-endif()
+#endif()
 
 # build SDL2
 if(Q3E_SDL)
@@ -77,7 +78,7 @@ if(GAME_DOOM3)
     add_subdirectory ( doom3/neo ) # DOOM3 | RoE, Quake4, Prey(2006)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_SOURCE)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory ( deplibs ) # common depend libraries
 
@@ -175,6 +176,11 @@ if(GAME_XASH3D) # hlsdk-portable | Make cppcheck happy. | https://github.com/FWG
     # xash3d-fwgs | engine: platform: sdl2: assign K_AUX32 and K_AUX31 to volume buttons to match old engine behavior on Android | https://github.com/FWGS/xash3d-fwgs/commit/c90d1100965ec5a072d95c0c257f853a6673ca74
     message(STATUS "Build Xash3D")
     add_subdirectory(xash3d) # Xash3D
+endif()
+
+if(GAME_SOURCE)
+	message(STATUS "Build Source")
+    add_subdirectory(source) # Source-Engine
 endif()
 
 

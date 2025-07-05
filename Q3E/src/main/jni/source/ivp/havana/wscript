@@ -1,0 +1,64 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+from waflib import Utils
+import os
+
+top = '.'
+PROJECT_NAME = 'havana_constraints'
+
+def options(opt):
+	# stub
+	return
+
+def configure(conf):
+	conf.env.append_unique('DEFINES', [
+		'VPHYSICS_EXPORTS',
+		'HAVANA_CONSTRAINTS',
+		'HAVOK_MOPP',
+		'IVP_VERSION_SDK'
+	])
+
+def build(bld):
+	source = [
+		'havok/hk_physics/constraint/constraint.cpp',
+		'havok/hk_physics/constraint/ball_socket/ball_socket_constraint.cpp',
+		'havok/hk_physics/constraint/limited_ball_socket/limited_ball_socket_constraint.cpp',
+		'havok/hk_physics/constraint/ragdoll/ragdoll_constraint.cpp',
+		'havok/hk_physics/constraint/ragdoll/ragdoll_constraint_bp_builder.cpp',
+		'havok/hk_physics/constraint/local_constraint_system/local_constraint_system.cpp',
+		'havok/hk_physics/constraint/hinge/hinge_bp_builder.cpp',
+		'havok/hk_physics/constraint/hinge/hinge_constraint.cpp',
+		'havok/hk_physics/constraint/breakable_constraint/breakable_constraint.cpp',
+		'havok/hk_physics/constraint/fixed/fixed_constraint.cpp',
+		'havok/hk_physics/constraint/prismatic/prismatic_constraint.cpp',
+		'havok/hk_physics/constraint/pulley/pulley_constraint.cpp',
+		'havok/hk_physics/constraint/stiff_spring/stiff_spring_constraint.cpp',
+		'havok/hk_physics/core/rigid_body_core.cpp',
+		'havok/hk_physics/effector/rigid_body_binary_effector.cpp'
+	]
+
+	includes = [
+		'.',
+		'havok',
+		'../ivp_physics',
+		'../ivp_utility',
+		'../ivp_controller'
+	]
+
+	defines = []
+
+	libs = []
+
+	bld.stlib(
+		source   = source,
+		target   = PROJECT_NAME,
+		name     = PROJECT_NAME,
+		features = 'c cxx',
+		includes = includes,
+		defines  = defines,
+		use      = libs,
+		subsystem = bld.env.MSVC_SUBSYSTEM,
+		idx      = bld.get_taskgen_count()
+	)
+

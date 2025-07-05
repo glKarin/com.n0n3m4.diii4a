@@ -1,0 +1,182 @@
+//-----------------------------------------------------------------------------
+//	HK_BASE.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\..\..\.."
+$Macro OUTLIBDIR	"$LIBCOMMON"
+$Include "$SRCDIR\vpc_scripts\source_lib_base.vpc"
+
+$Configuration	"Debug"
+{
+	$General
+	{
+		$CharacterSet						"Use Multi-Byte Character Set"
+	}
+
+	$General [$WIN32]
+	{
+		$OutputDirectory					"$SRCDIR\ivp\obj\x86_debug\hk_base"
+		$IntermediateDirectory				"$SRCDIR\ivp\obj\x86_debug\hk_base"
+	}
+
+	$General [$WIN64]
+	{
+		$OutputDirectory					"$SRCDIR\ivp\obj\x64_debug\hk_base"
+		$IntermediateDirectory				"$SRCDIR\ivp\obj\x64_debug\hk_base"
+	}
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories		"$BASE;$SRCDIR\ivp\havana\havok;$SRCDIR\ivp\havana"
+        $PreprocessorDefinitions			"$BASE;VPHYSICS_EXPORTS;HAVANA_CONSTRAINTS;HAVOK_MOPP"
+		$Create/UsePrecompiledHeader		"Use Precompiled Header (/Yu)"
+		$Create/UsePCHThroughFile			"hk_base/base.h"
+	}
+
+	$Compiler [$WINDOWS]
+	{
+		$BasicRuntimeChecks					"Both (/RTC1, equiv. to /RTCsu)"
+		$WarningLevel						"Level 3 (/W3)"
+	}
+
+	$Compiler [$WIN32]
+	{
+		$PrecompiledHeaderFile				"$SRCDIR\ivp\obj\x86_debug\hk_base\hk_base.pch"
+		$ASMListLocation					"$SRCDIR\ivp\obj\x86_debug\hk_base\"
+		$ObjectFileName						"$SRCDIR\ivp\obj\x86_debug\hk_base\"
+		$ProgramDatabaseFileName			"$SRCDIR\ivp\obj\x86_debug\hk_base\"
+	}
+
+	$Compiler [$WIN64]
+	{
+		$PrecompiledHeaderFile				"$SRCDIR\ivp\obj\x64_debug\hk_base.pch"
+		$ASMListLocation					"$SRCDIR\ivp\obj\x64_debug\hk_base\"
+		$ObjectFileName						"$SRCDIR\ivp\obj\x64_debug\hk_base\"
+		$ProgramDatabaseFileName			"$SRCDIR\ivp\obj\x64_debug\hk_base\"
+	}
+}
+
+$Configuration	"Release"
+{
+	$General
+	{
+		$CharacterSet						"Use Multi-Byte Character Set"
+	}
+
+	$General [$WIN32]
+	{
+		$OutputDirectory					"$SRCDIR\ivp\obj\x86_release\hk_base"
+		$IntermediateDirectory				"$SRCDIR\ivp\obj\x86_release\hk_base"
+	}
+
+	$General [$WIN64]
+	{
+		$OutputDirectory					"$SRCDIR\ivp\obj\x64_release\hk_base"
+		$IntermediateDirectory				"$SRCDIR\ivp\obj\x64_release\hk_base"
+	}
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories		"$BASE;$SRCDIR\ivp\havana\havok;$SRCDIR\ivp\havana"
+		$PreprocessorDefinitions			"$BASE;VPHYSICS_EXPORTS;HAVANA_CONSTRAINTS;HAVOK_MOPP"
+		$Create/UsePrecompiledHeader		"Use Precompiled Header (/Yu)"
+		$Create/UsePCHThroughFile			"hk_base/base.h"
+	}
+
+	$Compiler [$WINDOWS]
+	{
+		$InlineFunctionExpansion			"Only __inline (/Ob1)"
+		$WarningLevel						"Level 3 (/W3)"
+	}
+
+	$Compiler [$WIN32]
+	{
+		$PrecompiledHeaderFile				"$SRCDIR\ivp\obj\x86_release\hk_base\hk_base.pch"
+		$ASMListLocation					"$SRCDIR\ivp\obj\x86_release\hk_base\"
+		$ObjectFileName						"$SRCDIR\ivp\obj\x86_release\hk_base\"
+		$ProgramDatabaseFileName			"$SRCDIR\ivp\obj\x86_release\hk_base\"
+	}
+
+	$Compiler [$WIN64]
+	{
+		$PrecompiledHeaderFile				"$SRCDIR\ivp\obj\x64_release\hk_base\hk_base.pch"
+		$ASMListLocation					"$SRCDIR\ivp\obj\x64_release\hk_base\"
+		$ObjectFileName						"$SRCDIR\ivp\obj\x64_release\hk_base\"
+		$ProgramDatabaseFileName			"$SRCDIR\ivp\obj\x64_release\hk_base\"
+	}
+}
+
+$Project "hk_base"
+{
+	$Folder	"memory"
+	{
+		$File	"memory\memory.cpp"
+		$File	"memory\memory.h"
+		$File	"memory\memory.inl"
+		$File	"memory\memory_managed_virtual_class.h"
+		$File	"memory\memory_util.cpp"
+		$File	"memory\memory_util.h"
+	}
+
+	$Folder	"array"
+	{
+		$File	"array\array.cpp"
+		$File	"array\array.h"
+		$File	"array\array.inl"
+		$File	"array\pre_allocated_array.h"
+	}
+
+	$Folder	"hash"
+	{
+		$File	"hash\hash.cpp"
+		$File	"hash\hash.h"
+		$File	"hash\hash.inl"
+	}
+
+	$Folder	"stopwatch"
+	{
+		$File	"stopwatch\stopwatch.cpp"
+		$File	"stopwatch\stopwatch.h"
+		$File	"stopwatch\stopwatch_qpt.inl"
+	}
+
+	$Folder	"string"
+	{
+		$File	"string\string.cpp"
+		$File	"string\string.h"
+	}
+
+	$Folder	"id_server"
+	{
+		$File	"id_server\id_server.cpp"
+		$File	"id_server\id_server.h"
+		$File	"id_server\id_server.inl"
+	}
+
+	$File	"stdafx.h"
+
+	$File	"base.h"
+	$File	"base_types.cpp"
+	{
+		$Configuration	"Debug"
+		{
+			$Compiler
+			{
+				$Create/UsePrecompiledHeader		"Create Precompiled Header (/Yc)"
+			}
+		}
+		$Configuration	"Release"
+		{
+			$Compiler
+			{
+				$Create/UsePrecompiledHeader		"Create Precompiled Header (/Yc)"
+			}
+		}
+	}
+
+	$File	"base_types.h"
+	$File	"console.cpp"
+	$File	"console.h"
+}

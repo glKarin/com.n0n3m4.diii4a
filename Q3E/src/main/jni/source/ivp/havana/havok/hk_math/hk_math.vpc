@@ -1,0 +1,227 @@
+//-----------------------------------------------------------------------------
+//	HK_MATH.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\..\..\.."
+$Macro OUTLIBDIR	"$LIBCOMMON"
+$Include "$SRCDIR\vpc_scripts\source_lib_base.vpc"
+
+$Configuration	"Debug"
+{
+	$General
+	{
+		$CharacterSet						"Use Multi-Byte Character Set"
+	}
+
+	$General [$WIN32]
+	{
+		$OutputDirectory					"$SRCDIR\ivp\obj\x86_debug\hk_math"
+		$IntermediateDirectory				"$SRCDIR\ivp\obj\x86_debug\hk_math"
+	}
+
+	$General [$WIN64]
+	{
+		$OutputDirectory					"$SRCDIR\ivp\obj\x64_debug\hk_math"
+		$IntermediateDirectory				"$SRCDIR\ivp\obj\x64_debug\hk_math"
+	}
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories		"$BASE;$SRCDIR\ivp\havana\havok;$SRCDIR\ivp\havana"
+        $PreprocessorDefinitions			"$BASE;VPHYSICS_EXPORTS;HAVANA_CONSTRAINTS;HAVOK_MOPP;_DEBUG;_LIB;HK_DEBUG"
+		$Create/UsePrecompiledHeader		"Use Precompiled Header (/Yu)"
+		$Create/UsePCHThroughFile			"hk_math/vecmath.h"
+	}
+
+	$Compiler [$WINDOWS]
+	{
+		$Optimization						"Disabled (/Od)"
+		$EnableMinimalRebuild				"Yes (/Gm)"
+		$BasicRuntimeChecks					"Both (/RTC1, equiv. to /RTCsu)"
+		$RuntimeLibrary						"Multi-threaded Debug (/MTd)"
+		$WarningLevel						"Level 3 (/W3)"
+		$SuppressStartupBanner				"Yes (/NOLOGO)"
+		$DebugInformationFormat				"Program Database for Edit & Continue (/ZI)"
+	}
+
+	$Compiler [$WIN32]
+	{
+		$PrecompiledHeaderFile				"$SRCDIR\ivp\obj\x86_debug\hk_math\hk_math.pch"
+		$ASMListLocation					"$SRCDIR\ivp\obj\x86_debug\hk_math\"
+		$ObjectFileName						"$SRCDIR\ivp\obj\x86_debug\hk_math\"
+		$ProgramDatabaseFileName			"$SRCDIR\ivp\obj\x86_debug\hk_math\"
+	}
+
+	$Compiler [$WIN64]
+	{
+		$PrecompiledHeaderFile				"$SRCDIR\ivp\obj\x64_debug\hk_math\hk_math.pch"
+		$ASMListLocation					"$SRCDIR\ivp\obj\x64_debug\hk_math\"
+		$ObjectFileName						"$SRCDIR\ivp\obj\x64_debug\hk_math\"
+		$ProgramDatabaseFileName			"$SRCDIR\ivp\obj\x64_debug\hk_math\"
+	}
+}
+
+$Configuration	"Release"
+{
+	$General
+	{
+		$CharacterSet						"Use Multi-Byte Character Set"
+	}
+
+	$General [$WIN32]
+	{
+		$OutputDirectory					"$SRCDIR\ivp\obj\x86_release\hk_math"
+		$IntermediateDirectory				"$SRCDIR\ivp\obj\x86_release\hk_math"
+	}
+
+	$General [$WIN64]
+	{
+		$OutputDirectory					"$SRCDIR\ivp\obj\x64_release\hk_math"
+		$IntermediateDirectory				"$SRCDIR\ivp\obj\x64_release\hk_math"
+	}
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories		"$BASE;$SRCDIR\ivp\havana\havok;$SRCDIR\ivp\havana"
+		$PreprocessorDefinitions			"$BASE;VPHYSICS_EXPORTS;HAVANA_CONSTRAINTS;HAVOK_MOPP"
+		$Create/UsePrecompiledHeader		"Use Precompiled Header (/Yu)"
+		$Create/UsePCHThroughFile			"hk_math/vecmath.h"
+	}
+
+	$Compiler [$WINDOWS]
+	{
+		$InlineFunctionExpansion			"Only __inline (/Ob1)"
+		$WarningLevel						"Level 3 (/W3)"
+	}
+
+	$Compiler [$WIN32]
+	{
+		$PrecompiledHeaderFile				"$SRCDIR\ivp\obj\x86_release\hk_math\hk_math.pch"
+		$ASMListLocation					"$SRCDIR\ivp\obj\x86_release\hk_math\"
+		$ObjectFileName						"$SRCDIR\ivp\obj\x86_release\hk_math\"
+		$ProgramDatabaseFileName			"$SRCDIR\ivp\obj\x86_release\hk_math\"
+	}
+
+	$Compiler [$WIN64]
+	{
+		$PrecompiledHeaderFile				"$SRCDIR\ivp\obj\x64_release\hk_math\hk_math.pch"
+		$ASMListLocation					"$SRCDIR\ivp\obj\x64_release\hk_math\"
+		$ObjectFileName						"$SRCDIR\ivp\obj\x64_release\hk_math\"
+		$ProgramDatabaseFileName			"$SRCDIR\ivp\obj\x64_release\hk_math\"
+	}
+}
+
+$Project "hk_math"
+{
+	$Folder	"lcp"
+	{
+		$File	"lcp\lcp_solver.cpp"
+		$File	"lcp\lcp_solver.h"
+	}
+
+	$Folder	"incr_lu"
+	{
+		$File	"incr_lu\incr_lu.cpp"
+		$File	"incr_lu\incr_lu.h"
+	}
+
+	$Folder	"gauss_elimination"
+	{
+		$File	"gauss_elimination\gauss_elimination.cpp"
+		$File	"gauss_elimination\gauss_elimination.h"
+	}
+
+	$Folder	"quaternion"
+	{
+		$File	"quaternion\quaternion.cpp"
+		$File	"quaternion\quaternion.h"
+		$File	"quaternion\quaternion.inl"
+		$File	"quaternion\quaternion_util.cpp"
+		$File	"quaternion\quaternion_util.h"
+	}
+
+	$Folder	"vector3"
+	{
+		$File	"vector3\vector3.cpp"
+		$File	"vector3\vector3.h"
+		$File	"vector3\vector3.inl"
+		$File	"vector3\vector3_util.cpp"
+		$File	"vector3\vector3_util.h"
+		$File	"vector3\vector3_util.inl"
+	}
+
+	$Folder	"matrix"
+	{
+		$File	"matrix\matrix_inverter.h"
+	}
+
+	$Folder	"vector_fpu"
+	{
+		$File	"vector_fpu\vector_fpu.h"
+		$File	"vector_fpu\vector_fpu.inl"
+	}
+
+	$File 	"stdafx.h"
+
+	$File	"dense_vector.h"
+	$File	"dense_vector.inl"
+	$File	"densematrix.cpp"
+	{
+		$Configuration	"Release"
+		{
+			$Compiler
+			{
+				$Create/UsePrecompiledHeader		"Create Precompiled Header (/Yc)"
+			}
+		}
+		$Configuration	"Debug"
+		{
+			$Compiler
+			{
+				$Create/UsePrecompiledHeader		"Create Precompiled Header (/Yc)"
+			}
+		}
+	}
+
+	$File	"densematrix.h"
+	$File	"densematrix.inl"
+	$File	"densematrix_util.cpp"
+	$File	"densematrix_util.h"
+	$File	"densematrix_util.inl"
+	$File	"eulerangles.cpp"
+	$File	"eulerangles.h"
+	$File	"interval.h"
+	$File	"math.cpp"
+	$File	"base_math.h"
+	$File	"math.inl"
+	$File	"matrix3.cpp"
+	$File	"matrix3.h"
+	$File	"matrix3.inl"
+	$File	"odesolve.cpp"
+	$File	"odesolve.h"
+	$File	"plane.cpp"
+	$File	"plane.h"
+	$File	"plane.inl"
+	$File	"qtransform.h"
+	$File	"qtransform.inl"
+	$File	"ray.h"
+	$File	"ray.inl"
+	$File	"rotation.cpp"
+	$File	"rotation.h"
+	$File	"rotation.inl"
+	$File	"spatial_matrix.cpp"
+	$File	"spatial_matrix.h"
+	$File	"spatial_matrix.inl"
+	$File	"spatial_vector.cpp"
+	$File	"spatial_vector.h"
+	$File	"spatial_vector.inl"
+	$File	"transform.cpp"
+	$File	"transform.h"
+	$File	"transform.inl"
+	$File	"types.h"
+	$File	"vecmath.h"
+	$File	"vector4.h"
+	$File	"vector4.inl"
+}

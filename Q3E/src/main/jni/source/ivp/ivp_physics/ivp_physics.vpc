@@ -1,0 +1,372 @@
+//-----------------------------------------------------------------------------
+//	IVP_PHYSICS.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro OUTLIBDIR	"$LIBCOMMON"
+$Include "$SRCDIR\vpc_scripts\source_lib_base.vpc"
+
+$Configuration	"Debug"
+{
+	$General
+	{
+		$CharacterSet						"Use Multi-Byte Character Set"
+	}
+
+	$General [$WIN32]
+	{
+		$OutputDirectory					"..\obj\x86_debug\ivp_physics"
+		$IntermediateDirectory				"..\obj\x86_debug\ivp_physics"
+	}
+
+	$General [$WIN64]
+	{
+		$OutputDirectory					"..\obj\x64_debug\ivp_physics"
+		$IntermediateDirectory				"..\obj\x64_debug\ivp_physics"
+	}
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\ivp\ivp_intern;$SRCDIR\ivp\ivp_collision;$SRCDIR\ivp\ivp_physics;$SRCDIR\ivp\ivp_surface_manager;$SRCDIR\ivp\ivp_utility;$SRCDIR\ivp\ivp_controller;$SRCDIR\ivp\ivp_compact_builder;$SRCDIR\ivp\havana\havok;$SRCDIR\ivp\havana"
+		$PreprocessorDefinitions		"$BASE;DEBUG;VPHYSICS_EXPORTS;HAVANA_CONSTRAINTS;HAVOK_MOPP;IVP_VERSION_SDK"
+	}
+
+	$Compiler [$WINDOWS]
+	{
+		$Optimization						"Disabled (/Od)"
+		$EnableMinimalRebuild				"Yes (/Gm)"
+		$BasicRuntimeChecks					"Both (/RTC1, equiv. to /RTCsu)"
+		$RuntimeLibrary						"Multi-threaded Debug (/MTd)"
+		$WarningLevel						"Level 3 (/W3)"
+		$SuppressStartupBanner				"Yes (/NOLOGO)"
+		$DebugInformationFormat				"Program Database for Edit & Continue (/ZI)"
+	}
+
+	$Compiler [$WIN32]
+	{
+		$PrecompiledHeaderFile				"..\obj\x86_debug\ivp_physics\ivp_physics_lib.pch"
+		$ASMListLocation					"..\obj\x86_debug\ivp_physics\"
+		$ObjectFileName						"..\obj\x86_debug\ivp_physics\"
+		$ProgramDatabaseFileName			"..\obj\x86_debug\ivp_physics\"
+	}
+
+	$Compiler [$WIN64]
+	{
+		$PrecompiledHeaderFile				"..\obj\x64_debug\ivp_physics\ivp_physics_lib.pch"
+		$ASMListLocation					"..\obj\x64_debug\ivp_physics\"
+		$ObjectFileName						"..\obj\x64_debug\ivp_physics\"
+		$ProgramDatabaseFileName			"..\obj\x64_debug\ivp_physics\"
+	}
+
+	$Librarian [$WINDOWS]
+	{
+		$SuppressStartupBanner				"Yes (/NOLOGO)"
+	}
+}
+
+$Configuration	"Release"
+{
+	$General
+	{
+		$CharacterSet						"Use Multi-Byte Character Set"
+	}
+
+	$General [$WIN32]
+	{
+		$OutputDirectory					"..\obj\x86_release\ivp_physics"
+		$IntermediateDirectory				"..\obj\x86_release\ivp_physics"
+	}
+
+	$General [$WIN64]
+	{
+		$OutputDirectory					"..\obj\x64_release\ivp_physics"
+		$IntermediateDirectory				"..\obj\x64_release\ivp_physics"
+	}
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories		"$BASE;$SRCDIR\ivp\ivp_intern;$SRCDIR\ivp\ivp_collision;$SRCDIR\ivp\ivp_physics;$SRCDIR\ivp\ivp_surface_manager;$SRCDIR\ivp\ivp_utility;$SRCDIR\ivp\ivp_controller;$SRCDIR\ivp\ivp_compact_builder;$SRCDIR\ivp\havana\havok;$SRCDIR\ivp\havana"
+		$PreprocessorDefinitions			"$BASE;VPHYSICS_EXPORTS;IVP_VERSION_SDK;HAVANA_CONSTRAINTS;HAVOK_MOPP"
+		$Create/UsePrecompiledHeader		"Use Precompiled Header (/Yu)"
+		$Create/UsePCHThroughFile			"ivp_physics.hxx"
+	}
+
+	$Compiler [$WINDOWS]
+	{
+		$InlineFunctionExpansion			"Only __inline (/Ob1)"
+		$WarningLevel						"Level 3 (/W3)"
+	}
+
+	$Compiler [$WIN32]
+	{
+		$PrecompiledHeaderFile				"..\obj\x86_release\ivp_physics\ivp_physics_lib.pch"
+		$ASMListLocation					"..\obj\x86_release\ivp_physics\"
+		$ObjectFileName						"..\obj\x86_release\ivp_physics\"
+		$ProgramDatabaseFileName			"..\obj\x86_release\ivp_physics\"
+	}
+
+	$Compiler [$WIN64]
+	{
+		$PrecompiledHeaderFile				"..\obj\x64_release\ivp_physics\ivp_physics_lib.pch"
+		$ASMListLocation					"..\obj\x64_release\ivp_physics\"
+		$ObjectFileName						"..\obj\x64_release\ivp_physics\"
+		$ProgramDatabaseFileName			"..\obj\x64_release\ivp_physics\"
+	}
+}
+
+$Project "ivp_physics"
+{
+	$Folder	"IVP_COLLISION"
+	{
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_3d_solver.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_3d_solver.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_cache_ledge_point.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_clustering_longrange.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_clustering_longrange.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_clustering_lrange_hash.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_clustering_lrange_hash.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_clustering_visual_hash.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_clustering_visual_hash.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_clustering_visualizer.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_clustering_visualizer.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_coll_del_root_mindist.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_collision.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_collision_filter.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_collision_filter.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_compact_ledge.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_compact_ledge.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_compact_ledge_solver.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_compact_ledge_solver.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_i_collision_vhash.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_i_collision_vhash.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_listener_collision.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist_debug.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist_event.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist_event.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist_intern.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist_macros.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist_mcases.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist_minimize.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist_minimize.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_mindist_recursive.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_oo_watcher.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_range_manager.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_range_manager.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_ray_solver.cxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_ray_solver.hxx"
+		$File	"$SRCDIR\ivp\ivp_collision\ivp_universe_manager.hxx"
+	}
+
+	$Folder	"IVP_CONTROLLER"
+	{
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_actuator.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_actuator.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_actuator_info.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_actuator_spring.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_actuator_spring.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_attacher_to_cores.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_buoyancy_solver.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_buoyancy_solver.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_car_system.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_car_system.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_constraint.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_constraint.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_constraint_car.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_constraint_car.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_constraint_fixed_keyed.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_constraint_fixed_keyed.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_constraint_local.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_constraint_local.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_constraint_types.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_airboat.cpp"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_airboat.h"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_buoyancy.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_buoyancy.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_floating.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_floating.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_golem.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_motion.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_motion.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_raycast_car.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_raycast_car.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_stiff_spring.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_stiff_spring.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_world_frict.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_controller_world_frict.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_forcefield.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_forcefield.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_multidimensional_interp.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_multidimensional_interp.hxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_template_constraint.cxx"
+		$File	"$SRCDIR\ivp\ivp_controller\ivp_template_constraint.hxx"
+	}
+
+	$Folder	"IVP_INTERN"
+	{
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_ball.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_calc_next_psi_solver.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_calc_next_psi_solver.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_controller_phantom.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_core.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_environment.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_friction.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_friction.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_friction_gaps.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_friction_solver.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_great_matrix.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_hull_manager.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_hull_manager_macros.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_i_controller_vhash.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_i_friction_hash.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_i_friction_hash.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_i_object_vhash.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_i_object_vhash.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_impact.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_impact.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_merge_core.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_merge_core.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_mindist_friction.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_object.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_object_attach.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_physic.cxx"
+		{
+			$Configuration	"Debug"
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader		"Create Precompiled Header (/Yc)"
+					$Create/UsePCHThroughFile			"ivp_physics.hxx"
+				}
+			}
+			$Configuration	"Release"
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader		"Create Precompiled Header (/Yc)"
+				}
+			}
+		}
+
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_physic_private.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_physic_private.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_polygon.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_sim_unit.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_sim_unit.hxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_solver_core_reaction.cxx"
+		$File	"$SRCDIR\ivp\ivp_intern\ivp_time.cxx"
+	}
+
+	$Folder	"IVP_PHYSICS"
+	{
+		$File	"$SRCDIR\ivp\ivp_physics\ive_graphics.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_anomaly_manager.cxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_anomaly_manager.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_authenticity.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_ball.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_betterdebugmanager.cxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_betterdebugmanager.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_betterstatisticsmanager.cxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_betterstatisticsmanager.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_cache_object.cxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_cache_object.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_contact_situation.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_core.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_core_macros.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_debug.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_debug_manager.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_environment.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_great_matrix.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_hull_manager.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_liquid_surface_descript.cxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_liquid_surface_descript.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_listener_hull.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_listener_object.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_listener_psi.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_material.cxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_material.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_object.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_object_attach.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_performancecounter.cxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_performancecounter.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_phantom.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_physics.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_polygon.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_radar.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_radar_appl.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_real_object.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_solver_core_reaction.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_stat_manager_cback_con.cxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_stat_manager_cback_con.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_surface_manager.cxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_surface_manager.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_templates.cxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_templates.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_time.hxx"
+		$File	"$SRCDIR\ivp\ivp_physics\ivp_time_event.hxx"
+	}
+
+	$Folder	"IVP_SURFACEMANAGER"
+	{
+		$File	"$SRCDIR\ivp\ivp_surface_manager\ivp_compact_grid.hxx"
+		$File	"$SRCDIR\ivp\ivp_surface_manager\ivp_compact_surface.cxx"
+		$File	"$SRCDIR\ivp\ivp_surface_manager\ivp_compact_surface.hxx"
+		$File	"$SRCDIR\ivp\ivp_surface_manager\ivp_gridbuild_array.cxx"
+		$File	"$SRCDIR\ivp\ivp_surface_manager\ivp_gridbuild_array.hxx"
+		$File	"$SRCDIR\ivp\ivp_surface_manager\ivp_surman_grid.cxx"
+		$File	"$SRCDIR\ivp\ivp_surface_manager\ivp_surman_grid.hxx"
+		$File	"$SRCDIR\ivp\ivp_surface_manager\ivp_surman_polygon.cxx"
+		$File	"$SRCDIR\ivp\ivp_surface_manager\ivp_surman_polygon.hxx"
+	}
+
+	$Folder	"IVP_UTILITY"
+	{
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_active_value.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_active_value.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_active_value_hash.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_bigvector.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_bigvector.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_diff_hash.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_float.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_fvector.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_geometry.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_geometry.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_hash.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_hash.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_linear.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_linear.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_linear_double.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_linear_macros.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_linear_PIII.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_linear_ps2.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_linear_software.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_linear_willamette.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_list.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_mapping.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_matrix_macros.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_memory.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_memory.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_min_hash.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_min_hash.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_min_list.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_min_list.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_os_dep.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_ps2.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_quat.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_quat.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_set.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_string.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_string.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_string_hash.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_types.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_types.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_vector.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_vector.hxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_vhash.cxx"
+		$File	"$SRCDIR\ivp\ivp_utility\ivu_vhash.hxx"
+	}
+}

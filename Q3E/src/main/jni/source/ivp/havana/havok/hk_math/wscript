@@ -1,0 +1,66 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+from waflib import Utils
+import os
+
+top = '.'
+
+PROJECT_NAME = 'hk_math'
+
+def options(opt):
+	# stub
+	return
+
+def configure(conf):
+	conf.env.append_unique('DEFINES', [
+		'VPHYSICS_EXPORTS',
+		'HAVANA_CONSTRAINTS',
+		'HAVOK_MOPP'
+	])
+
+def build(bld):
+	source = [
+		'lcp/lcp_solver.cpp',
+		'incr_lu/incr_lu.cpp',
+		'gauss_elimination/gauss_elimination.cpp',
+		'quaternion/quaternion.cpp',
+		'quaternion/quaternion_util.cpp',
+		'vector3/vector3.cpp',
+		'vector3/vector3_util.cpp',
+		'densematrix.cpp',
+		'densematrix_util.cpp',
+		'eulerangles.cpp',
+		'math.cpp',
+		'matrix3.cpp',
+		'odesolve.cpp',
+		'plane.cpp',
+		'rotation.cpp',
+		'spatial_matrix.cpp',
+		'spatial_vector.cpp',
+		'transform.cpp'
+	]
+
+	includes = [
+		'.',
+		'../',
+		'../../../ivp_utility/'
+	]
+
+	defines = []
+	libs = []
+
+
+	bld.stlib(
+		source   = source,
+		target   = PROJECT_NAME,
+		name     = PROJECT_NAME,
+		features = 'c cxx',
+		includes = includes,
+		defines  = defines,
+		use      = libs,
+
+		subsystem = bld.env.MSVC_SUBSYSTEM,
+		idx      = bld.get_taskgen_count()
+	)
+

@@ -1,0 +1,54 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+from waflib import Utils
+import os
+
+top = '.'
+PROJECT_NAME = 'hk_base'
+
+def options(opt):
+	# stub
+	return
+
+def configure(conf):
+	conf.env.append_unique('DEFINES', [
+		'VPHYSICS_EXPORTS',
+		'HAVANA_CONSTRAINTS',
+		'HAVOK_MOPP'
+	])
+
+def build(bld):
+	source = [
+		'memory/memory.cpp',
+		'memory/memory_util.cpp',
+		'array/array.cpp',
+		'hash/hash.cpp',
+		'stopwatch/stopwatch.cpp',
+		'string/string.cpp',
+		'id_server/id_server.cpp',
+		'base_types.cpp',
+		'console.cpp'
+	]
+
+	includes = [
+		'.',
+		'../'
+	]
+
+	defines = []
+
+	libs = []
+
+	bld.stlib(
+		source   = source,
+		target   = PROJECT_NAME,
+		name     = PROJECT_NAME,
+		features = 'c cxx',
+		includes = includes,
+		defines  = defines,
+		use      = libs,
+		subsystem = bld.env.MSVC_SUBSYSTEM,
+		idx      = bld.get_taskgen_count()
+	)
+

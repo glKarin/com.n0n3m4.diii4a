@@ -1,0 +1,100 @@
+cmake_minimum_required(VERSION 3.9)
+project (source_engine)
+
+set(DIII4A True)
+add_definitions(-D_DIII4A)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
+
+set(SOURCE_ENGINE_PREFIX "source_")
+
+set(DIII4A_DEPEND_DEPINC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../depincs")
+set(DIII4A_DEPEND_DEPLIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../deplibs")
+#set(DIII4A_DEPEND_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs")
+include_directories("${Q3E_SDL2_INCLUDE_PATH}")
+include_directories(${DIII4A_DEPEND_COMMON_PATH})
+#link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../SDL2")
+#link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../libs")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../xash3d/xash3d-fwgs/3rdparty/gl4es/gl4es/include")
+set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/output")
+
+add_compile_options(-w)
+
+add_subdirectory(thirdparty/libjpeg)
+add_subdirectory(thirdparty/libpng)
+add_subdirectory(thirdparty/zlib)
+add_subdirectory(thirdparty/curl)
+add_subdirectory(thirdparty/freetype)
+#add_subdirectory(thirdparty/fontconfig)
+
+set(CMAKE_CXX_STANDARD "11")
+
+set(SOURCE_CFLAGS "-fsigned-char -fpermissive")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SOURCE_CFLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ${SOURCE_CFLAGS}")
+
+add_definitions(-DDX_TO_GL_ABSTRACTION -DGL_GLEXT_PROTOTYPES -DBINK_VIDEO)
+add_definitions(-DTOGLES -DUSE_SDL)
+add_definitions(-DANDROID=1 -D_ANDROID=1 -DLINUX=1 -D_LINUX=1 -DPOSIX=1 -D_POSIX=1 -DGNUC -DNO_HOOK_MALLOC -D_DLL_EXT=.so)
+add_definitions(-DNDEBUG)
+add_definitions(-DGIT_COMMIT_HASH=\"29985681a18508e78dc79ad863952f830be237b6\")
+add_definitions(-DCOMPILER_GCC=1)
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	add_definitions(-DPLATFORM_64BITS=1)
+endif()
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/common")
+
+add_subdirectory(tier0)
+add_subdirectory(tier1)
+add_subdirectory(tier2)
+add_subdirectory(tier3)
+add_subdirectory(vstdlib)
+add_subdirectory(vpklib)
+add_subdirectory(appframework)
+add_subdirectory(bitmap)
+add_subdirectory(choreoobjects)
+add_subdirectory(datacache)
+add_subdirectory(dmxloader)
+add_subdirectory(filesystem)
+add_subdirectory(mathlib)
+add_subdirectory(datamodel)
+
+add_subdirectory(togles)
+#add_subdirectory(engine/voice_codecs/opus) #opus
+
+add_subdirectory(engine)
+add_subdirectory(engine/voice_codecs/minimp3)
+add_subdirectory(game/client)
+add_subdirectory(game/server)
+add_subdirectory(gameui)
+add_subdirectory(inputsystem)
+add_subdirectory(ivp/havana)
+add_subdirectory(ivp/havana/havok/hk_base)
+add_subdirectory(ivp/havana/havok/hk_math)
+add_subdirectory(ivp/ivp_compact_builder)
+add_subdirectory(ivp/ivp_physics)
+add_subdirectory(launcher)
+#add_subdirectory(launcher_main) # NOT Android
+add_subdirectory(materialsystem)
+#		'materialsystem/shaderapiempty',
+add_subdirectory(materialsystem/shaderapidx9)
+add_subdirectory(materialsystem/shaderlib)
+add_subdirectory(materialsystem/stdshaders)
+add_subdirectory(particles)
+add_subdirectory(scenefilecache)
+add_subdirectory(serverbrowser)
+add_subdirectory(soundemittersystem)
+add_subdirectory(studiorender)
+add_subdirectory(stub_steam)
+add_subdirectory(vgui2/matsys_controls)
+add_subdirectory(vgui2/src)
+add_subdirectory(vgui2/vgui_controls)
+add_subdirectory(vgui2/vgui_surfacelib)
+add_subdirectory(vguimatsurface) #fc tf2
+add_subdirectory(vphysics)
+add_subdirectory(vtf)
+add_subdirectory(utils/vtex) #jpg png zlib
+#add_subdirectory(unicode) # win32
+add_subdirectory(video)
