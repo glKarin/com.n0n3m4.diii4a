@@ -1340,4 +1340,16 @@ public class Q3EUtils
 
         return currentIsLandscape ? new int[] { start, 0, Width, Height, } : new int[] { 0, start, Height, Width, };
     }
+
+    public static List<String> FilesExistsInDirectory(String dir, String...files)
+    {
+        List<String> res = new ArrayList<>();
+        for(String file : files)
+        {
+            File f = new File(KStr.AppendPath(dir, file));
+            if(!f.exists())
+                res.add(file);
+        }
+        return res;
+    }
 }

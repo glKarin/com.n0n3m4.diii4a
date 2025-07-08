@@ -32,7 +32,7 @@ OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
 OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
-OPTION(GAME_SOURCE      "Build Source"                          OFF)
+OPTION(GAME_SOURCE      "Build Source"                          ON)
 
 # Experimental
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
@@ -178,7 +178,7 @@ if(GAME_XASH3D) # hlsdk-portable | Make cppcheck happy. | https://github.com/FWG
     add_subdirectory(xash3d) # Xash3D
 endif()
 
-if(GAME_SOURCE)
+if(GAME_SOURCE) # 29985681a18508e78dc79ad863952f830be237b6 | Dec 30, 2023 | Merge pull request #312 from AruMoon/add-master-server Add new master server
 	message(STATUS "Build Source")
     add_subdirectory(source) # Source-Engine
 endif()

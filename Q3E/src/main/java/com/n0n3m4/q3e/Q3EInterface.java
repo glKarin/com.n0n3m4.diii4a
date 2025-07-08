@@ -71,6 +71,7 @@ public class Q3EInterface
 	public boolean isSamTFE = false;
 	public boolean isSamTSE = false;
 	public boolean isXash3D = false;
+	public boolean isSource = false;
 
 	public boolean isD3BFG_Vulkan = false;
 
@@ -206,48 +207,10 @@ public class Q3EInterface
 			return Q3EGameConstants.GAME_ID_SAMTSE;
 		else if(isXash3D)
 			return Q3EGameConstants.GAME_ID_XASH3D;
+		else if(isSource)
+			return Q3EGameConstants.GAME_ID_SOURCE;
 		else
 			return Q3EGameConstants.GAME_ID_DOOM3;
-	}
-
-	public void SetupKeycodes()
-	{
-		if(isPrey)
-			Q3EKeyCodes.InitPreyKeycodes();
-		else if(isQ4)
-			Q3EKeyCodes.InitQ4Keycodes();
-		else if(isQ2)
-			Q3EKeyCodes.InitQ2Keycodes();
-		else if(isQ3)
-			Q3EKeyCodes.InitQ3Keycodes();
-		else if(isRTCW)
-			Q3EKeyCodes.InitRTCWKeycodes();
-		else if(isTDM)
-			Q3EKeyCodes.InitTDMKeycodes();
-		else if(isQ1)
-			Q3EKeyCodes.InitQ1Keycodes();
-		else if(isD3BFG)
-			Q3EKeyCodes.InitD3BFGKeycodes();
-		else if(isDOOM)
-			Q3EKeyCodes.InitGZDOOMKeycodes();
-		else if(isETW)
-			Q3EKeyCodes.InitETWKeycodes();
-		else if(isRealRTCW)
-			Q3EKeyCodes.InitRealRTCWKeycodes();
-		else if(isFTEQW)
-			Q3EKeyCodes.InitFTEQWKeycodes();
-		else if(isJA)
-			Q3EKeyCodes.InitJKKeycodes();
-		else if(isJO)
-			Q3EKeyCodes.InitJKKeycodes();
-		else if(isSamTFE)
-			Q3EKeyCodes.InitSamTFEKeycodes();
-		else if(isSamTSE)
-			Q3EKeyCodes.InitSamTSEKeycodes();
-		else if(isXash3D)
-			Q3EKeyCodes.InitXash3DKeycodes();
-		else
-			Q3EKeyCodes.InitD3Keycodes();
 	}
 
 	public static String GetStandaloneDirectory(boolean standalone, String game)
@@ -308,7 +271,9 @@ public class Q3EInterface
 		else if(Q3EGameConstants.GAME_SAMTSE.equalsIgnoreCase(name))
 			SetupSamTSE();
 		else if(Q3EGameConstants.GAME_XASH3D.equalsIgnoreCase(name))
-			SetupXash();
+			SetupXash3D();
+		else if(Q3EGameConstants.GAME_SOURCE.equalsIgnoreCase(name))
+			SetupSource();
 		else
 			SetupDOOM3();
 	}
@@ -333,6 +298,7 @@ public class Q3EInterface
 		isSamTFE = false;
 		isSamTSE = false;
 		isXash3D = false;
+		isSource = false;
 	}
 
 	public void SetupDOOM3()
@@ -456,10 +422,17 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
-	public void SetupXash()
+	public void SetupXash3D()
 	{
 		ResetGameState();
 		isXash3D = true;
+		SetupGameConfig();
+	}
+
+	public void SetupSource()
+	{
+		ResetGameState();
+		isSource = true;
 		SetupGameConfig();
 	}
 
@@ -476,7 +449,8 @@ public class Q3EInterface
 		libname = cfg.ENGINE_LIB;
 		config_name = cfg.CONFIG_FILE;
 
-		SetupKeycodes();
+		Q3EKeyCodes.InitKeycodes(cfg.KEYCODE);
+
 		SetupSubDir();
 	}
 
@@ -537,9 +511,14 @@ public class Q3EInterface
 		return Q3EGame.Find(game_id).MOD_SECONDARY_PARM;
 	}
 
+	public boolean IsUsingExternalLibraries()
+	{
+		return isXash3D;
+	}
+
 	public String GetGameCommandPrefix()
 	{
-		if(isQ1 || isFTEQW || isXash3D)
+		if(isQ1 || isFTEQW || isXash3D || isSource)
 			return KidTechCommand.ARG_PREFIX_QUAKETECH;
 		if(isDOOM)
 			return KidTechCommand.ARG_PREFIX_QUAKETECH + KidTechCommand.ARG_PREFIX_IDTECH;
@@ -554,7 +533,7 @@ public class Q3EInterface
 
 	public KidTechCommand GetGameCommandEngine(String cmd)
 	{
-		if(isQ1 || isDOOM || isXash3D)
+		if(isQ1 || isDOOM || isXash3D || isSource)
 			return new KidTechQuakeCommand(cmd);
 		else
 			return new KidTech4Command(cmd);
@@ -643,12 +622,12 @@ public class Q3EInterface
 
     public boolean IsInitGame()
 	{
-		return isD3 || isD3BFG || isQ2 || isQ1 || isQ3 || isRTCW || isTDM || isDOOM || isETW || isRealRTCW || isFTEQW || isJA || isJO || isSamTFE || isSamTSE || isXash3D;
+		return isD3 || isD3BFG || isQ2 || isQ1 || isQ3 || isRTCW || isTDM || isDOOM || isETW || isRealRTCW || isFTEQW || isJA || isJO || isSamTFE || isSamTSE || isXash3D || isSource;
 	}
 
 	public boolean IsStandaloneGame()
 	{
-		return isTDM || isDOOM || isFTEQW || isSamTFE || isSamTSE || isXash3D;
+		return isTDM || isDOOM || isFTEQW || isSamTFE || isSamTSE || isXash3D || isSource;
 	}
 
 	public boolean IS_D3()

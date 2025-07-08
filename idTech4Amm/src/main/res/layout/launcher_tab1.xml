@@ -1000,6 +1000,11 @@
             layout="@layout/launcher_xash3d"
             android:visibility="gone"></include>
 
+        <include
+            android:id="@+id/source_section"
+            layout="@layout/launcher_source"
+            android:visibility="gone"></include>
+
         <LinearLayout
             android:id="@+id/general_section"
             android:layout_width="match_parent"

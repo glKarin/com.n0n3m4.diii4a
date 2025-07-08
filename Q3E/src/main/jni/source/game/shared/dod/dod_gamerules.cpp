@@ -394,12 +394,24 @@ static CDODViewVectors g_DODViewVectors(
 		int count = args.FindArgInt( "-count", 1 );
 		count = clamp( count, 1, 16 );
 
+#ifdef _DIII4A //karin: default auto select team for bots
+		int iTeam = DODGameRules()->SelectDefaultTeam();
+		if(iTeam == TEAM_UNASSIGNED)
+		    iTeam = TEAM_ALLIES; // TEAM_SPECTATOR;
+#else
 		int iTeam = TEAM_ALLIES;
+#endif
 		const char *pVal = args.FindArg( "-team" );
 		if ( pVal )
 		{
 			iTeam = atoi( pVal );
+#ifdef _DIII4A //karin: random team for bots
+			iTeam = clamp( iTeam, -1, (GetNumberOfTeams()-1) );
+			if(iTeam < 0)
+			    iTeam = ( random->RandomInt(0,1) == 0 ) ? TEAM_ALLIES : TEAM_AXIS;
+#else
 			iTeam = clamp( iTeam, 0, (GetNumberOfTeams()-1) );
+#endif
 		}
 
 		int iClass = 0;
@@ -419,6 +431,74 @@ static CDODViewVectors g_DODViewVectors(
 			BotPutInServer( bFrozen, iTeam, iClass );
 		}
 	}
+
+#ifdef _DIII4A //karin: add bots to team
+	CON_COMMAND_F( bot_add_allies, "Add allies bots.", FCVAR_CHEAT )
+	{
+		//CDODPlayer *pPlayer = CDODPlayer::Instance( UTIL_GetCommandClientIndex() );
+
+		// The bot command uses switches like command-line switches.
+		// -count <count> tells how many bots to spawn.
+		// -team <index> selects the bot's team. Default is -1 which chooses randomly.
+		//	Note: if you do -team !, then it
+		// -class <index> selects the bot's class. Default is -1 which chooses randomly.
+		// -frozen prevents the bots from running around when they spawn in.
+
+		// Look at -count.
+		int count = args.FindArgInt( "-count", 1 );
+		count = clamp( count, 1, 16 );
+
+		int iClass = 0;
+		const char *pVal = args.FindArg( "-class" );
+		if ( pVal )
+		{
+			iClass = atoi( pVal );
+			iClass = clamp( iClass, 0, 10 );
+		}
+
+		// Look at -frozen.
+		bool bFrozen = !!args.FindArg( "-frozen" );
+
+		// Ok, spawn all the bots.
+		while ( --count >= 0 )
+		{
+			BotPutInServer( bFrozen, TEAM_ALLIES, iClass );
+		}
+	}
+
+	CON_COMMAND_F( bot_add_axis, "Add axis bots.", FCVAR_CHEAT )
+	{
+		//CDODPlayer *pPlayer = CDODPlayer::Instance( UTIL_GetCommandClientIndex() );
+
+		// The bot command uses switches like command-line switches.
+		// -count <count> tells how many bots to spawn.
+		// -team <index> selects the bot's team. Default is -1 which chooses randomly.
+		//	Note: if you do -team !, then it
+		// -class <index> selects the bot's class. Default is -1 which chooses randomly.
+		// -frozen prevents the bots from running around when they spawn in.
+
+		// Look at -count.
+		int count = args.FindArgInt( "-count", 1 );
+		count = clamp( count, 1, 16 );
+
+		int iClass = 0;
+		const char *pVal = args.FindArg( "-class" );
+		if ( pVal )
+		{
+			iClass = atoi( pVal );
+			iClass = clamp( iClass, 0, 10 );
+		}
+
+		// Look at -frozen.
+		bool bFrozen = !!args.FindArg( "-frozen" );
+
+		// Ok, spawn all the bots.
+		while ( --count >= 0 )
+		{
+			BotPutInServer( bFrozen, TEAM_AXIS, iClass );
+		}
+	}
+#endif
 
 
 	void RestartRound_f()

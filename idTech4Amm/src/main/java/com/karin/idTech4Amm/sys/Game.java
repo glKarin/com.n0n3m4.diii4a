@@ -95,8 +95,14 @@ public enum Game
     SAMTSE_BASE(Q3EGameConstants.GAME_SAMTSE, "", "", "samtse", "", "", false, R.string.samtse_base),
 
     // Xash3D
-    XASH3D(Q3EGameConstants.GAME_XASH3D, "valve", "valve", "xash3d", "", "", false, R.string.halflife_base),
+    XASH3D_HL(Q3EGameConstants.GAME_XASH3D, "valve", "valve", "xash3d", "", "", false, R.string.halflife_base),
     XASH3D_CS(Q3EGameConstants.GAME_XASH3D, "cstrike", "cstrike", "xash3d", "cstrike", "cstrike", true, R.string.cs_base),
+
+    // Source Engine
+    SOURCE_HL2(Q3EGameConstants.GAME_SOURCE, "hl2", "hl2", "source", "", "", false, R.string.halflife_2_base),
+    SOURCE_CSS(Q3EGameConstants.GAME_SOURCE, "cstrike", "cstrike", "source", "cstrike", "cstrike", true, R.string.css_base),
+    SOURCE_PORTAL(Q3EGameConstants.GAME_SOURCE, "portal", "portal", "source", "portal", "portal", true, R.string.portal_base),
+    SOURCE_DOD(Q3EGameConstants.GAME_SOURCE, "dod", "dod", "source", "dod", "dod", true, R.string.dod_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

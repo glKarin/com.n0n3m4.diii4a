@@ -37,6 +37,8 @@ public enum LauncherGame
     SAMTSE(Q3EGameConstants.GAME_ID_SAMTSE, Q3EGameConstants.GAME_SAMTSE, R.drawable.samtse_icon, R.string.samtse_base, R.color.theme_samtse_main_color, R.string.samtse),
 
     XASH3D(Q3EGameConstants.GAME_ID_XASH3D, Q3EGameConstants.GAME_XASH3D, R.drawable.xash3d_icon, R.string.xash3d_base, R.color.theme_xash3d_main_color, R.string.xash3d),
+
+    SOURCE(Q3EGameConstants.GAME_ID_SOURCE, Q3EGameConstants.GAME_SOURCE, R.drawable.source_icon, R.string.sourceengine_base, R.color.theme_source_main_color, R.string.sourceengine),
     ;
 
     public final int    GAME_ID;

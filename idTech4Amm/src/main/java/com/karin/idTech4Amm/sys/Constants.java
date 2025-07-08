@@ -28,8 +28,6 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add Serious Sam Classic: The First Encounter(game standalone directory named `serioussamtfe`) and Serious Sam Classic: The Second Encounter(game standalone directory named `serioussamtse`) support. More view in `" + TextHelper.GenLinkText("https://github.com/tx00100xt/SeriousSamClassic", "SeriousSamClassic") + "`.",
-            "Add Xash3D and Counter-Strike 1.6(need extract CS1.6 extras resource on launcher first) support, game standalone directory named `xash3d`, more view in `" + TextHelper.GenLinkText("https://github.com/FWGS/xash3d-fwgs", "xash3d") + "` and `" + TextHelper.GenLinkText("https://github.com/Velaron/cs16-client", "cs16-client") + "`.",
         };
 	};
 

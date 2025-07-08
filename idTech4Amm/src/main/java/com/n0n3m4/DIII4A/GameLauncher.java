@@ -777,6 +777,22 @@ public class GameLauncher extends Activity
 						RemoveParam("sv_cl");
 				}
 			}
+
+			// Source Engine
+			else if (rgId == R.id.source_sv_cl)
+			{
+				if(Q3EUtils.q3ei.isSource)
+				{
+					index = GetRadioGroupSelectIndex(radioGroup, id);
+					if(index < 0 || index >= Q3EGameConstants.SOURCE_ENGINE_SV_CLS.length)
+						index = 0;
+					String value2 = Q3EGameConstants.SOURCE_ENGINE_SV_CLS[index];
+					if(KStr.NotEmpty(value2))
+						SetParam("sv_cl", value2);
+					else
+						RemoveParam("sv_cl");
+				}
+			}
         }
     };
     private final View.OnClickListener m_buttonClickListener = new View.OnClickListener() {
@@ -1391,6 +1407,10 @@ public class GameLauncher extends Activity
 		{
 			Updatehacktings_Xash3D();
 		}
+		else if(Q3EUtils.q3ei.isSource)
+		{
+			Updatehacktings_Source();
+		}
 
 		// game mods for every games
 		str = GetGameModFromCommand();
@@ -1601,6 +1621,22 @@ public class GameLauncher extends Activity
 				index = 0;
 		}
 		SelectRadioGroup(V.xash3d_sv_cl, index);
+	}
+
+	private void Updatehacktings_Source()
+	{
+		String str;
+		int index;
+
+		str = GetParam("sv_cl");
+		index = 0;
+		if (str != null)
+		{
+			index = Utility.ArrayIndexOf(Q3EGameConstants.SOURCE_ENGINE_SV_CLS, str);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.source_sv_cl, index);
 	}
 
     private void ThrowException()
@@ -1961,6 +1997,9 @@ public class GameLauncher extends Activity
 		// Xash3D
 		SetupUI_Xash3D();
 
+		// Source Engine
+		SetupUI_Source();
+
 		//DIII4A-specific
 		SetupCommandTextWatcher(true);
 		V.edt_harm_r_specularExponent.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponent", Q3EPreference.pref_harm_r_specularExponent, 3.0f));
@@ -2289,6 +2328,23 @@ public class GameLauncher extends Activity
 		V.xash3d_sv_cl.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
+	private void SetupUI_Source()
+	{
+		String str;
+		int index;
+
+		str = GetParam("sv_cl");
+		index = 0;
+		if(null != str)
+		{
+			index = Utility.ArrayIndexOf(Q3EGameConstants.SOURCE_ENGINE_SV_CLS, str);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.source_sv_cl, index);
+		V.source_sv_cl.setOnCheckedChangeListener(m_groupCheckChangeListener);
+	}
+
 	private void AfterCreated()
 	{
 		try
@@ -2484,6 +2540,7 @@ public class GameLauncher extends Activity
 		menuGames.put(R.id.main_menu_game_samtfe, Q3EGameConstants.GAME_SAMTFE);
 		menuGames.put(R.id.main_menu_game_samtse, Q3EGameConstants.GAME_SAMTSE);
 		menuGames.put(R.id.main_menu_game_xash3d, Q3EGameConstants.GAME_XASH3D);
+		menuGames.put(R.id.main_menu_game_source, Q3EGameConstants.GAME_SOURCE);
 
 		return res;
     }
@@ -3602,6 +3659,7 @@ public class GameLauncher extends Activity
 		boolean samtfeVisible = false;
 		boolean samtseVisible = false;
 		boolean xash3dVisible = false;
+		boolean sourceVisible = false;
 
 		boolean openglVisible = true;
 		boolean quickloadVisible = true;
@@ -3716,6 +3774,13 @@ public class GameLauncher extends Activity
 			quickloadVisible = false;
 			skipintroVisible = false;
 		}
+		else if (Q3EUtils.q3ei.isSource)
+		{
+			sourceVisible = true;
+			openglVisible = false;
+			quickloadVisible = false;
+			skipintroVisible = false;
+		}
         else
         {
             d3Visible = true;
@@ -3748,6 +3813,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_samtfegame.setVisibility(samtfeVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_samtsegame.setVisibility(samtseVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_xash3dgame.setVisibility(xash3dVisible ? View.VISIBLE : View.GONE);
+		V.rg_fs_sourcegame.setVisibility(sourceVisible ? View.VISIBLE : View.GONE);
 
 		V.rg_version_d3bfg.setVisibility(versionVisible && d3bfgVisible ? View.VISIBLE : View.GONE);
 		V.rg_version_realrtcw.setVisibility(versionVisible && realrtcwVisible ? View.VISIBLE : View.GONE);
@@ -3764,6 +3830,7 @@ public class GameLauncher extends Activity
 		V.tdm_section.setVisibility(Q3EUtils.q3ei.isTDM ? View.VISIBLE : View.GONE);
 		V.fteqw_section.setVisibility(Q3EUtils.q3ei.isFTEQW ? View.VISIBLE : View.GONE);
 		V.xash3d_section.setVisibility(Q3EUtils.q3ei.isXash3D ? View.VISIBLE : View.GONE);
+		V.source_section.setVisibility(Q3EUtils.q3ei.isSource ? View.VISIBLE : View.GONE);
 
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
@@ -4310,6 +4377,7 @@ public class GameLauncher extends Activity
 		groupRadios.put(Q3EGameConstants.GAME_SAMTFE, V.rg_fs_samtfegame);
 		groupRadios.put(Q3EGameConstants.GAME_SAMTSE, V.rg_fs_samtsegame);
 		groupRadios.put(Q3EGameConstants.GAME_XASH3D, V.rg_fs_xash3dgame);
+		groupRadios.put(Q3EGameConstants.GAME_SOURCE, V.rg_fs_sourcegame);
 		Game[] values = Game.values();
 
 		for (Game value : values)
@@ -4380,7 +4448,7 @@ public class GameLauncher extends Activity
 	private void SetGameModToCommand(String mod)
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D || Q3EUtils.q3ei.isSource)
 			SetParam(arg, mod);
 		else if(Q3EUtils.q3ei.isDOOM)
 		{
@@ -4401,7 +4469,7 @@ public class GameLauncher extends Activity
 	private String GetGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D || Q3EUtils.q3ei.isSource)
 			return GetParam(arg);
 		else if(Q3EUtils.q3ei.isDOOM)
 			return GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
@@ -4427,7 +4495,7 @@ public class GameLauncher extends Activity
 	private void RemoveGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D || Q3EUtils.q3ei.isSource)
 			RemoveParam(arg);
 		else if(Q3EUtils.q3ei.isDOOM)
 			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
@@ -4695,6 +4763,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_samtfegame;
 		public RadioGroup rg_fs_samtsegame;
 		public RadioGroup rg_fs_xash3dgame;
+		public RadioGroup rg_fs_sourcegame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -4767,6 +4836,8 @@ public class GameLauncher extends Activity
 		public LinearLayout xash3d_section;
 		public RadioGroup xash3d_ref;
 		public RadioGroup xash3d_sv_cl;
+		public LinearLayout source_section;
+		public RadioGroup source_sv_cl;
 
 		private RadioGroup CreateGameRadioGroup()
 		{
@@ -4798,6 +4869,7 @@ public class GameLauncher extends Activity
 			rg_fs_samtfegame = CreateGameRadioGroup();
 			rg_fs_samtsegame = CreateGameRadioGroup();
 			rg_fs_xash3dgame = CreateGameRadioGroup();
+			rg_fs_sourcegame = CreateGameRadioGroup();
 			GameGroups = new RadioGroup[] {
 					rg_fs_game,
 					rg_fs_q4game,
@@ -4817,6 +4889,7 @@ public class GameLauncher extends Activity
 					rg_fs_samtfegame,
 					rg_fs_samtsegame,
 					rg_fs_xash3dgame,
+					rg_fs_sourcegame,
 			};
 
             edt_cmdline = findViewById(R.id.edt_cmdline);
@@ -4960,6 +5033,8 @@ public class GameLauncher extends Activity
 			xash3d_section = findViewById(R.id.xash3d_section);
 			xash3d_ref = findViewById(R.id.xash3d_ref);
 			xash3d_sv_cl = findViewById(R.id.xash3d_sv_cl);
+			source_section = findViewById(R.id.source_section);
+			source_sv_cl = findViewById(R.id.source_sv_cl);
         }
     }
 }

@@ -171,6 +171,13 @@ public final class Q3EPreference
     public static final String pref_params_xash3d                  = "q3e_params_xash3d"; //k
     public static final String pref_harm_xash3d_command_record     = "q3e_harm_xash3d_command_record";
     public static final String pref_harm_xash3d_game_mod           = "q3e_harm_xash3d_game_mod"; //k
+    // Source
+    public static final String pref_harm_source_fs_game            = "q3e_harm_source_fs_game"; //k
+    public static final String pref_harm_source_game_lib           = "q3e_harm_source_game_lib"; //k
+    public static final String pref_harm_source_user_mod           = "q3e_harm_source_user_mod"; //k
+    public static final String pref_params_source                  = "q3e_params_source"; //k
+    public static final String pref_harm_source_command_record     = "q3e_harm_source_command_record";
+    public static final String pref_harm_source_game_mod           = "q3e_harm_source_game_mod"; //k
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k

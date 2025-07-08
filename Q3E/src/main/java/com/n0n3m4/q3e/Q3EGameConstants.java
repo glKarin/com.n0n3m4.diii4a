@@ -21,6 +21,7 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE_SAMTFE    = "libSeriousSamTFE.so"; // Serious Sam First
     public static final String LIB_ENGINE_SAMTSE    = "libSeriousSamTSE.so"; // Serious Sam Second
     public static final String LIB_ENGINE_XASH3D    = "libxash3d.so"; // Xash3D
+    public static final String LIB_ENGINE_SOURCE    = "libsource.so"; // Source Engine
 
     public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
     //public static final String LIB_ENGINE3_REALRTCW_5_0 = "libRealRTCW_5_0.so"; // RealRTCW(5.0)
@@ -56,6 +57,7 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_SAMTFE   = "";
     public static final String CONFIG_FILE_SAMTSE   = "";
     public static final String CONFIG_FILE_XASH3D   = "";
+    public static final String CONFIG_FILE_SOURCE   = "";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -76,6 +78,7 @@ public final class Q3EGameConstants
     public static final String GAME_SAMTFE   = "samtfe";
     public static final String GAME_SAMTSE   = "samtse";
     public static final String GAME_XASH3D   = "xash3d";
+    public static final String GAME_SOURCE   = "source";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -96,6 +99,7 @@ public final class Q3EGameConstants
     public static final String GAME_NAME_SAMTFE   = "Serious Sam TFE";
     public static final String GAME_NAME_SAMTSE   = "Serious Sam TSE";
     public static final String GAME_NAME_XASH3D   = "Xash3D";
+    public static final String GAME_NAME_SOURCE   = "Source Engine";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -118,6 +122,7 @@ public final class Q3EGameConstants
     public static final String GAME_BASE_SAMTFE     = "";
     public static final String GAME_BASE_SAMTSE     = "";
     public static final String GAME_BASE_XASH3D     = "valve";
+    public static final String GAME_BASE_SOURCE     = "hl2";
 
     // game sub directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
@@ -138,6 +143,7 @@ public final class Q3EGameConstants
     public static final String GAME_SUBDIR_SAMTFE   = "serioussamtfe";
     public static final String GAME_SUBDIR_SAMTSE   = "serioussamtse";
     public static final String GAME_SUBDIR_XASH3D   = "xash3d";
+    public static final String GAME_SUBDIR_SOURCE   = "source";
 
     // game type index(ID)
     public static final int GAME_ID_DOOM3    = 0;
@@ -158,6 +164,7 @@ public final class Q3EGameConstants
     public static final int GAME_ID_SAMTFE   = 15;
     public static final int GAME_ID_SAMTSE   = 16;
     public static final int GAME_ID_XASH3D   = 17;
+    public static final int GAME_ID_SOURCE   = 18;
 
     public enum PatchResource
     {
@@ -247,6 +254,14 @@ public final class Q3EGameConstants
 
     public static final String[] XASH3D_REFS = {"gles1", "gl4es", "gles3compat", "soft",};
     public static final String[] XASH3D_SV_CLS = {"", "cs16", "cs16_yapb",};
+    public static final String[] XASH3D_LIBS = {
+            "libxash3d.so", "libxash3d_menu.so", "libxash3d_ref_gl4es.so", "libxash3d_ref_gles1.so", "libxash3d_ref_gles3compat.so", "libxash3d_ref_soft.so",
+            "libcs16_client.so", "libcs16_menu.so", "libcs16_server.so", "libcs16_yapb.so",
+            "libhlsdk_client.so", "libhlsdk_server.so",
+            "libfilesystem_stdio.so",
+    };
+
+    public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod",};
 
     private Q3EGameConstants()
     {
