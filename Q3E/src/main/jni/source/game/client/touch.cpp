@@ -39,7 +39,7 @@ extern ConVar sensitivity;
 #define MIN_ALPHA_IN_CUTSCENE 20
 
 ConVar touch_enable( "touch_enable", TOUCH_DEFAULT, FCVAR_ARCHIVE );
-#ifdef _DIII4A //karin: disable touch
+#ifdef _DIII4A //karin: disable built-in touch
 ConVar touch_draw( "touch_draw", TOUCH_DEFAULT, FCVAR_ARCHIVE );
 #else
 ConVar touch_draw( "touch_draw", "1", FCVAR_ARCHIVE );

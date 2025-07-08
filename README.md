@@ -92,9 +92,10 @@ Tag with `-free` only for F-Droid update.
 
 | Feature                             | Github | F-Droid |
 |:------------------------------------|:------:|:-------:|
-| Android min version(because ffmpeg) |   7.0  |   4.4   |
+| Android min version(because ffmpeg) |   4.4  |   7.0   |
 | Ouya TV                             |   Yes  |    No   |
 | Khronos Vulkan validation layer     |   Yes  |    No   |
+| Xash3D built-in game libraries      |   Yes  |    No   |
 
 ----------------------------------------------------------------------------------
 

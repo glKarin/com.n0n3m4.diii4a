@@ -1251,10 +1251,11 @@ void LoadEntityDLLs( const char *szBaseDir, bool bIsServerOnly )
 	modinfo->deleteThis();
 	
 	// Load the game .dll
-#ifdef _DIII4A //karin: append mod suffix to dll
-    const char *gamemod = CommandLine()->ParmValue("-game", "hl2");
+#ifdef _DIII4A //karin: append mod suffix to server dll
+	extern const char * Q3E_Engine_GetGameDLLSuffix();
+    const char *gamedll = Q3E_Engine_GetGameDLLSuffix();
     char server_dll[1024] = { 0 };
-    Q_snprintf(server_dll, sizeof(server_dll), "server_%s" DLL_EXT_STRING, gamemod);
+    Q_snprintf(server_dll, sizeof(server_dll), "server_%s" DLL_EXT_STRING, gamedll);
 	LoadThisDll( server_dll, bIsServerOnly );
 #else
 	LoadThisDll( "server" DLL_EXT_STRING, bIsServerOnly );

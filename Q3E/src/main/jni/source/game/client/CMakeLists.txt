@@ -1541,3 +1541,205 @@ target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
 
+
+
+# Portal
+set(source_portal_src
+		hud_chat.cpp
+		c_team_objectiveresource.cpp
+		c_team_objectiveresource.h
+)
+set(source_hl2_dll_src
+			episodic/flesh_internal_material_proxy.cpp
+			../shared/hl2/basehlcombatweapon_shared.cpp
+			hl2/c_antlion_dust.cpp
+			hl2/c_ar2_explosion.cpp
+			hl2/c_barnacle.cpp
+			hl2/c_barney.cpp
+			hl2/c_basehelicopter.cpp
+			hl2/c_basehelicopter.h
+			hl2/c_basehlcombatweapon.cpp
+			hl2/c_basehlcombatweapon.h
+			hl2/c_basehlplayer.cpp
+			hl2/c_basehlplayer.h
+			hl2/c_citadel_effects.cpp
+			hl2/c_corpse.cpp
+			hl2/c_corpse.h
+			hl2/c_env_alyxtemp.cpp
+			hl2/c_env_headcrabcanister.cpp
+			hl2/c_env_starfield.cpp
+			hl2/c_func_tankmortar.cpp
+			hl2/c_hl2_playerlocaldata.cpp
+			hl2/c_hl2_playerlocaldata.h
+			hl2/c_info_teleporter_countdown.cpp
+			hl2/c_npc_antlionguard.cpp
+			hl2/c_npc_combinegunship.cpp
+			hl2/c_npc_manhack.cpp
+			hl2/c_npc_rollermine.cpp
+			hl2/c_plasma_beam_node.cpp
+			hl2/c_prop_combine_ball.cpp
+			hl2/c_prop_combine_ball.h
+			hl2/c_rotorwash.cpp
+			hl2/c_script_intro.cpp
+			../shared/script_intro_shared.cpp
+			hl2/c_strider.cpp
+			hl2/c_te_concussiveexplosion.cpp
+			hl2/c_te_flare.cpp
+			hl2/c_thumper_dust.cpp
+			hl2/c_vehicle_airboat.cpp
+			hl2/c_vehicle_cannon.cpp
+			hl2/c_vehicle_crane.cpp
+			hl2/c_vehicle_crane.h
+			hl2/c_vehicle_prisoner_pod.cpp
+			episodic/c_vort_charge_token.cpp
+			hl2/c_weapon_crossbow.cpp
+			episodic/c_weapon_hopwire.cpp
+			episodic/c_vehicle_jeep_episodic.cpp
+			hl2/hud_radar.cpp
+ 			hl2/c_weapon_stunstick.cpp
+			../shared/hl2/citadel_effects_shared.h
+			hl2/clientmode_hlnormal.h
+			death.cpp
+			../shared/hl2/env_headcrabcanister_shared.cpp
+			../shared/hl2/env_headcrabcanister_shared.h
+			hl2/fx_antlion.cpp
+			hl2/fx_bugbait.cpp
+			hl2/fx_hl2_impacts.cpp
+			hl2/fx_hl2_tracers.cpp
+			../shared/hl2/hl2_gamerules.cpp
+			../shared/hl2/hl2_gamerules.h
+			../shared/hl2/hl2_shareddefs.h
+			../shared/hl2/hl_gamemovement.cpp
+			../shared/hl2/hl_gamemovement.h
+			hl2/hl_in_main.cpp
+			hl2/hl_prediction.cpp
+			hl2/hud_ammo.cpp
+			hl2/hud_battery.cpp
+			hl2/hud_blood.cpp
+			hl2/hud_bonusprogress.cpp
+			hl2/hud_credits.cpp
+			hl2/hud_damageindicator.cpp
+			hl2/hud_flashlight.cpp
+			hl2/hud_health.cpp
+			hl2/hud_poisondamageindicator.cpp
+			hud_squadstatus.cpp
+			hl2/hud_suitpower.cpp
+			hl2/hud_suitpower.h
+			hl2/hud_weaponselection.cpp
+			hl2/hud_zoom.cpp
+			hl2/shieldproxy.cpp
+			../shared/hl2/survival_gamerules.cpp
+			hl2/vgui_rootpanel_hl2.cpp
+)
+set(source_portal_dll_src
+			../shared/portal/achievements_portal.cpp
+			portal/c_env_lightraill_endpoint.cpp
+			portal/c_env_portal_path_track.cpp
+			portal/c_func_liquidportal.cpp
+			portal/c_func_liquidportal.h
+			portal/c_neurotoxin_countdown.cpp
+			portal/c_neurotoxin_countdown.h
+			portal/c_npc_portal_turret_floor.cpp
+			portal/c_npc_rocket_turret.cpp
+			portal/c_portal_player.cpp
+			portal/c_portal_player.h
+			portal/C_PortalGhostRenderable.cpp
+			portal/C_PortalGhostRenderable.h
+			portal/c_prop_energy_ball.cpp
+			portal/c_prop_portal.cpp
+			portal/c_prop_portal.h
+			portal/c_prop_portal_stats_display.cpp
+			portal/c_prop_portal_stats_display.h
+			portal/clientmode_portal.cpp
+			portal/clientmode_portal.h
+			../shared/portal/env_lightrail_endpoint_shared.h
+			../shared/portal/env_portal_path_track_shared.h
+			portal/fx_portal.cpp
+			portal/hud_quickinfo.cpp
+			portal/MaterialProxy_Portal_PickAlphaMask.cpp
+			portal/materialproxy_portalstatic.cpp
+			../shared/Multiplayer/multiplayer_animstate.cpp
+			../shared/Multiplayer/multiplayer_animstate.h
+			../shared/portal/portal_collideable_enumerator.cpp
+			../shared/portal/portal_collideable_enumerator.h
+			portal/portal_credits.cpp
+			portal/Portal_DynamicMeshRenderingUtils.cpp
+			portal/Portal_DynamicMeshRenderingUtils.h
+			../shared/portal/portal_gamemovement.cpp
+			../shared/portal/portal_gamerules.cpp
+			../shared/portal/portal_gamerules.h
+			portal/portal_hud_crosshair.cpp
+			portal/portal_hud_crosshair.h
+			../shared/portal/portal_player_shared.cpp
+			../shared/portal/portal_player_shared.h
+			../shared/portal/portal_playeranimstate.cpp
+			../shared/portal/portal_playeranimstate.h
+			portal/portal_render_targets.cpp
+			portal/portal_render_targets.h
+			../shared/portal/portal_shareddefs.cpp
+			../shared/portal/portal_shareddefs.h
+			../shared/portal/portal_usermessages.cpp
+			../shared/portal/portal_util_shared.cpp
+			../shared/portal/portal_util_shared.h
+			../shared/portal/prop_portal_shared.cpp
+			../shared/portal/prop_portal_shared.h
+			../shared/portal/PortalSimulation.cpp
+			../shared/portal/PortalSimulation.h
+			../shared/portal/StaticCollisionPolyhedronCache.cpp
+			../shared/portal/StaticCollisionPolyhedronCache.h
+			portal/PortalRender.cpp
+			portal/PortalRender.h
+			portal/c_portal_radio.cpp
+			portal/portalrenderable_flatbasic.cpp
+			portal/portalrenderable_flatbasic.h
+			portal/vgui_portal_stats_display_screen.cpp
+			portal/vgui_neurotoxin_countdown_screen.cpp
+			../shared/portal/portal_weapon_parse.cpp
+)
+set(source_portal_weapon_src
+				portal/c_weapon_physcannon.cpp
+				portal/c_weapon_portalgun.cpp
+				portal/c_weapon_portalgun.h
+				portal/c_weapon_stubs_portal.cpp
+				../shared/portal/weapon_portalbase.cpp
+				../shared/portal/weapon_portalbase.h
+				../shared/portal/weapon_portalbasecombatweapon.cpp
+				../shared/portal/weapon_portalbasecombatweapon.h
+				../shared/portal/weapon_portalgun_shared.cpp
+				../shared/portal/weapon_portalgun_shared.h
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_protal_src}
+    ${source_hl2_dll_src}
+    ${source_portal_dll_src}
+    ${source_portal_weapon_src}
+)
+list(REMOVE_ITEM source_src
+		../shared/weapon_parse_default.cpp
+		)
+
+set(source_inc
+	hl2
+	hl2/elements
+	portal
+	portal/vgui
+	../shared/hl2
+	../shared/Multiplayer
+	../../gcsdk/steamextra
+	../shared/portal
+	${source_base_inc}
+)
+
+set(source_lib
+		${source_base_lib}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}portal)
+set(source_def "${source_base_def};PORTAL;HL2_EPISODIC;HL2_CLIENT_DLL")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+

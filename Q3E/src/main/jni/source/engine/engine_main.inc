@@ -120,3 +120,14 @@ void Q3E_Engine_SetupClientInteraction()
         func(&cb);
     }
 }
+
+const char * Q3E_Engine_GetGameDLLSuffix()
+{
+    const char *gamedll = CommandLine()->ParmValue("-sv_cl", CommandLine()->ParmValue("-game", "hl2"));
+	if(Q_stricmp(gamedll, "cstrike") 
+			&& Q_stricmp(gamedll, "hl2")
+			&& Q_stricmp(gamedll, "portal")
+			)
+		gamedll = "hl2";
+	return gamedll;
+}

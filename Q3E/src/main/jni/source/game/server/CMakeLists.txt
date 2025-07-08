@@ -1213,6 +1213,7 @@ target_link_libraries(${binary_name} PRIVATE ${source_lib})
 
 
 
+# Counter-Strike: Source
 set(source_cs_src
 		hl2/Func_Monitor.cpp
 		h_cycler.cpp
@@ -1505,7 +1506,7 @@ set(source_src
     ${source_cs_nextbotplayer_src}
     ${source_cs_nextbotcommonbehaviors_src}
     ${source_cs_nextbotnavmeshentities_src}
-	
+
 	${source_navigation_mesh_src}
 )
 list(REMOVE_ITEM source_src
@@ -1526,6 +1527,361 @@ set(source_inc
 
 set(binary_name ${BINARY_NAME_PREFIX}cstrike)
 set(source_def "${source_base_def};USE_NAV_MESH;BOTS;CSTRIKE_DLL;NEXT_BOT")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+
+
+
+# Portal
+set(source_portal_source_src
+		ai_eventresponse.cpp
+		ai_eventresponse.h
+		ai_relationship.cpp
+		base_gameinterface.cpp
+		basegrenade_concussion.cpp
+		basegrenade_contact.cpp
+		basegrenade_timed.cpp
+		EntityFlame.h
+		hl2/Func_Monitor.cpp
+		grenadethrown.cpp
+		grenadethrown.h
+		h_cycler.cpp
+		h_cycler.h
+		logic_achievement.cpp
+		monstermaker.cpp
+		monstermaker.h
+		physics_bone_follower.h
+		../shared/ragdoll_shared.h
+		../shared/solidsetdefaults.h
+		team_spawnpoint.cpp
+		team_spawnpoint.h
+		../shared/touchlink.h
+		vehicle_choreo_generic.cpp
+		../shared/vehicle_choreo_generic_shared.h
+)
+set(source_hl2_dll_src
+			hl2/ai_allymanager.cpp
+			hl2/ai_behavior_actbusy.cpp
+			hl2/ai_behavior_actbusy.h
+			hl2/ai_behavior_operator.cpp
+			hl2/ai_behavior_operator.h
+			episodic/ai_behavior_alyx_injured.cpp
+			episodic/ai_behavior_alyx_injured.h
+			hl2/ai_behavior_functank.cpp
+			hl2/ai_behavior_functank.h
+			hl2/ai_behavior_holster.cpp
+			hl2/ai_behavior_holster.h
+			ai_behavior_passenger.cpp
+			ai_behavior_passenger.h
+			episodic/ai_behavior_passenger_companion.cpp
+			episodic/ai_behavior_passenger_companion.h
+			episodic/ai_behavior_passenger_zombie.cpp
+			episodic/ai_behavior_passenger_zombie.h
+			episodic/vehicle_jeep_episodic.cpp
+			episodic/vehicle_jeep_episodic.h
+			hl2/ai_behavior_police.cpp
+			hl2/ai_behavior_police.h
+			hl2/ai_goal_police.cpp
+			hl2/ai_goal_police.h
+			hl2/ai_interactions.h
+			hl2/ai_spotlight.cpp
+			hl2/ai_spotlight.h
+			hl2/antlion_dust.cpp
+			hl2/antlion_dust.h
+			hl2/antlion_maker.cpp
+			hl2/antlion_maker.h
+			hl2/ar2_explosion.cpp
+			hl2/ar2_explosion.h
+			basebludgeonweapon.cpp
+			basebludgeonweapon.h
+			hl2/basehlcombatweapon.cpp
+			hl2/basehlcombatweapon.h
+			../shared/hl2/basehlcombatweapon_shared.cpp
+			../shared/hl2/basehlcombatweapon_shared.h
+			hl2/cbasehelicopter.cpp
+			hl2/cbasehelicopter.h
+			hl2/cbasespriteprojectile.cpp
+			hl2/cbasespriteprojectile.h
+			hl2/citadel_effects.cpp
+			../shared/hl2/citadel_effects_shared.h
+			hl2/combine_mine.cpp
+			hl2/combine_mine.h
+			hl2/energy_wave.h
+			hl2/env_alyxemp.cpp
+			../shared/hl2/env_alyxemp_shared.h
+			hl2/env_headcrabcanister.cpp
+			../shared/hl2/env_headcrabcanister_shared.cpp
+			../shared/hl2/env_headcrabcanister_shared.h
+			hl2/env_speaker.cpp
+			hl2/env_starfield.cpp
+			hl2/func_recharge.cpp
+			hl2/func_tank.cpp
+			hl2/func_tank.h
+			hl2/grenade_ar2.cpp
+			hl2/grenade_ar2.h
+			hl2/grenade_bugbait.cpp
+			hl2/grenade_bugbait.h
+			hl2/grenade_frag.cpp
+			hl2/grenade_frag.h
+			hl2/grenade_spit.cpp
+			hl2/grenade_spit.h
+			hl2/hl2_ai_network.cpp
+			hl2/hl2_eventlog.cpp
+			../shared/hl2/hl2_gamerules.cpp
+			../shared/hl2/hl2_gamerules.h
+			hl2/hl2_player.cpp
+			hl2/hl2_player.h
+			../shared/hl2/hl2_player_shared.h
+			hl2/hl2_playerlocaldata.cpp
+			hl2/hl2_playerlocaldata.h
+			../shared/hl2/hl2_shareddefs.h
+			hl2/hl2_triggers.cpp
+			../shared/hl2/hl_gamemovement.cpp
+			../shared/hl2/hl_gamemovement.h
+			../shared/hl2/hl_movedata.h
+			hl2/hl_playermove.cpp
+			hl2/info_darknessmode_lightsource.cpp
+			hl2/info_darknessmode_lightsource.h
+			hl2/info_teleporter_countdown.cpp
+			hl2/item_ammo.cpp
+			hl2/item_battery.cpp
+			hl2/item_dynamic_resupply.cpp
+			hl2/item_dynamic_resupply.h
+			hl2/item_healthkit.cpp
+			hl2/item_itemcrate.cpp
+			hl2/item_suit.cpp
+			hl2/look_door.cpp
+			hl2/monster_dummy.cpp
+			hl2/npc_alyx_episodic.cpp
+			hl2/npc_alyx_episodic.h
+			hl2/npc_antlion.cpp
+			hl2/npc_antlion.h
+			hl2/npc_antlionguard.cpp
+			hl2/npc_apcdriver.cpp
+			hl2/npc_attackchopper.cpp
+			hl2/npc_attackchopper.h
+			hl2/npc_barnacle.cpp
+			hl2/npc_barnacle.h
+			hl2/npc_barney.cpp
+			hl2/npc_basescanner.cpp
+			hl2/npc_basescanner.h
+			hl2/npc_BaseZombie.cpp
+			hl2/npc_BaseZombie.h
+			hl2/npc_breen.cpp
+			hl2/npc_bullseye.cpp
+			hl2/npc_bullseye.h
+			hl2/npc_citizen17.cpp
+			hl2/npc_citizen17.h
+			hl2/npc_combine.cpp
+			hl2/npc_combine.h
+			hl2/npc_combinecamera.cpp
+			hl2/npc_combinedropship.cpp
+			hl2/npc_combinegunship.cpp
+			hl2/npc_combines.cpp
+			hl2/npc_combines.h
+			hl2/npc_cranedriver.cpp
+			hl2/npc_crow.cpp
+			hl2/npc_crow.h
+			hl2/npc_dog.cpp
+			hl2/npc_eli.cpp
+			hl2/npc_enemyfinder.cpp
+			hl2/npc_fastzombie.cpp
+			hl2/npc_fisherman.cpp
+			hl2/npc_gman.cpp
+			hl2/npc_headcrab.cpp
+			hl2/npc_headcrab.h
+			episodic/npc_hunter.cpp
+			episodic/npc_hunter.h
+			hl2/npc_ichthyosaur.cpp
+			hl2/npc_kleiner.cpp
+			hl2/npc_launcher.cpp
+			hl2/npc_manhack.cpp
+			hl2/npc_manhack.h
+			hl2/npc_metropolice.cpp
+			hl2/npc_metropolice.h
+			hl2/npc_monk.cpp
+			hl2/npc_mossman.cpp
+			hl2/npc_playercompanion.cpp
+			hl2/npc_playercompanion.h
+			hl2/npc_PoisonZombie.cpp
+			hl2/npc_rollermine.cpp
+			hl2/npc_rollermine.h
+			hl2/npc_scanner.cpp
+			hl2/npc_stalker.cpp
+			hl2/npc_stalker.h
+			hl2/npc_strider.cpp
+			hl2/npc_strider.h
+			npc_talker.cpp
+			npc_talker.h
+			hl2/npc_turret_ceiling.cpp
+			hl2/npc_turret_floor.cpp
+			hl2/npc_turret_ground.cpp
+			hl2/npc_vortigaunt_episodic.cpp
+			hl2/npc_vortigaunt_episodic.h
+			hl2/npc_zombie.cpp
+			hl2/npc_zombine.cpp
+			hl2/point_apc_controller.cpp
+			hl2/prop_combine_ball.cpp
+			hl2/prop_combine_ball.h
+			hl2/prop_thumper.cpp
+			hl2/proto_sniper.cpp
+			hl2/rotorwash.cpp
+			hl2/rotorwash.h
+			hl2/script_intro.cpp
+			hl2/script_intro.h
+			../shared/script_intro_shared.cpp
+			hl2/vehicle_airboat.cpp
+			hl2/vehicle_apc.h
+			hl2/vehicle_cannon.cpp
+			hl2/vehicle_crane.cpp
+			hl2/vehicle_crane.h
+			hl2/vehicle_jeep.cpp
+			hl2/vehicle_prisoner_pod.cpp
+			hl2/vehicle_viewcontroller.cpp
+			hl2/weapon_357.cpp
+			hl2/weapon_alyxgun.cpp
+			hl2/weapon_alyxgun.h
+			hl2/weapon_annabelle.cpp
+			hl2/weapon_ar2.cpp
+			hl2/weapon_ar2.h
+			hl2/weapon_bugbait.cpp
+			hl2/weapon_citizenpackage.cpp
+			hl2/weapon_citizenpackage.h
+			hl2/weapon_crossbow.cpp
+			hl2/weapon_crowbar.cpp
+			hl2/weapon_crowbar.h
+			weapon_cubemap.cpp
+			hl2/weapon_frag.cpp
+			hl2/weapon_pistol.cpp
+			hl2/weapon_rpg.cpp
+			hl2/weapon_rpg.h
+			hl2/weapon_shotgun.cpp
+			hl2/weapon_smg1.cpp
+			episodic/weapon_striderbuster.cpp
+			episodic/weapon_striderbuster.h
+			hl2/weapon_stunstick.cpp
+			hl2/weapon_stunstick.h
+)
+set(source_hl2_dll_unused_src
+				hl2/grenade_beam.cpp
+				hl2/grenade_beam.h
+				hl2/grenade_homer.cpp
+				hl2/grenade_homer.h
+				episodic/grenade_hopwire.cpp
+				episodic/grenade_hopwire.h
+				hl2/grenade_pathfollower.cpp
+				hl2/grenade_pathfollower.h
+				hl2/npc_missiledefense.cpp
+				hl2/vehicle_apc.cpp
+				hl2/weapon_cguard.cpp
+				hl2/weapon_flaregun.cpp
+				hl2/weapon_flaregun.h
+				episodic/weapon_hopwire.cpp
+)
+set(source_portal_src
+			../shared/portal/achievements_portal.cpp
+			portal/cbaseanimatingprojectile.cpp
+			portal/cbaseanimatingprojectile.h
+			portal/env_lightrail_endpoint.cpp
+			../shared/portal/env_lightrail_endpoint_shared.h
+			portal/env_portal_credits.cpp
+			portal/env_portal_path_track.cpp
+			../shared/portal/env_portal_path_track_shared.h
+			portal/func_liquidportal.cpp
+			portal/func_liquidportal.h
+			portal/func_noportal_volume.cpp
+			portal/func_noportal_volume.h
+			portal/func_portal_bumper.cpp
+			portal/func_portal_detector.cpp
+			portal/func_portal_detector.h
+			portal/func_portal_orientation.cpp
+			portal/func_portal_orientation.h
+			../shared/Multiplayer/multiplayer_animstate.cpp
+			../shared/Multiplayer/multiplayer_animstate.h
+			portal/neurotoxin_countdown.cpp
+			portal/npc_portal_turret_floor.cpp
+			portal/npc_portal_turret_ground.cpp
+			portal/npc_rocket_turret.cpp
+			portal/npc_security_camera.cpp
+			portal/PhysicsCloneArea.cpp
+			portal/physicsshadowclone.cpp
+			portal/physicsshadowclone.h
+			portal/portal_client.cpp
+			../shared/portal/portal_collideable_enumerator.cpp
+			../shared/portal/portal_collideable_enumerator.h
+			portal/Portal_CustomStatsVisualizer.cpp
+			../shared/portal/portal_gamemovement.cpp
+			../shared/portal/portal_gamerules.cpp
+			../shared/portal/portal_gamerules.h
+			portal/portal_gamestats.cpp
+			portal/portal_gamestats.h
+			portal/portal_physics_collisionevent.cpp
+			portal/portal_physics_collisionevent.h
+			portal/portal_placement.cpp
+			portal/portal_placement.h
+			portal/portal_player.cpp
+			portal/portal_player.h
+			../shared/portal/portal_player_shared.cpp
+			../shared/portal/portal_player_shared.h
+			../shared/portal/portal_playeranimstate.cpp
+			../shared/portal/portal_playeranimstate.h
+			../shared/portal/portal_shareddefs.cpp
+			../shared/portal/portal_shareddefs.h
+			../shared/portal/portal_usermessages.cpp
+			../shared/portal/portal_util_shared.cpp
+			../shared/portal/portal_util_shared.h
+			../shared/portal/PortalSimulation.cpp
+			../shared/portal/PortalSimulation.h
+			portal/prop_energy_ball.cpp
+			portal/prop_glados_core.cpp
+			portal/prop_portal.cpp
+			portal/prop_portal.h
+			portal/prop_portal_stats_display.cpp
+			../shared/portal/prop_portal_shared.cpp
+			../shared/portal/prop_portal_shared.h
+			portal/prop_telescopic_arm.cpp
+			../shared/portal/StaticCollisionPolyhedronCache.cpp
+			../shared/portal/StaticCollisionPolyhedronCache.h
+			portal/trigger_portal_cleanser.cpp
+			../shared/portal/portal_weapon_parse.cpp
+			portal/portal_radio.cpp
+)
+set(source_portal_weapons_src
+				../server/portal/weapon_physcannon.cpp
+				../server/portal/weapon_physcannon.h
+				../shared/portal/weapon_portalbase.cpp
+				../shared/portal/weapon_portalbase.h
+				../shared/portal/weapon_portalbasecombatweapon.cpp
+				portal/weapon_portalgun.cpp
+				portal/weapon_portalgun.h
+				../shared/portal/weapon_portalgun_shared.cpp
+				../shared/portal/weapon_portalgun_shared.h
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_portal_source_src}
+    ${source_hl2_dll_src}
+    ${source_hl2_dll_unused_src}
+    ${source_portal_src}
+    ${source_portal_weapons_src}
+)
+
+set(source_inc
+	../shared/portal
+	hl2
+	episodic
+	../shared/Multiplayer
+	../shared/hl2
+	../shared/portal
+	portal
+	${source_base_inc}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}portal)
+set(source_def "${source_base_def};PORTAL;HL2_DLL;HL2_EPISODIC;USES_SAVERESTORE")
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")

@@ -87,8 +87,10 @@ COptionsDialog::COptionsDialog(vgui::Panel *parent) : PropertyDialog(parent, "Op
 	AddPage(new COptionsSubKeyboard(this), "#GameUI_Keyboard");
 	AddPage(new COptionsSubMouse(this), "#GameUI_Mouse");
 
+#if !defined(_DIII4A) //karin: Q3E SDL2 not use touch event
 #ifdef ANDROID
 	AddPage(new COptionsSubTouch(this), "Touch");
+#endif
 #endif
 
 	m_pOptionsSubAudio = new COptionsSubAudio(this);

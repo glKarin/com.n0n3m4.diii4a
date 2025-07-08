@@ -1724,10 +1724,11 @@ bool ClientDLL_Load()
 		Host_AllowLoadModule( "client.dll","GAMEBIN", true );
 	}
 
-#ifdef _DIII4A //karin: append mod suffix to dll
-    const char *gamemod = CommandLine()->ParmValue("-game", "hl2");
+#ifdef _DIII4A //karin: append mod suffix to client dll
+	extern const char * Q3E_Engine_GetGameDLLSuffix();
+    const char *gamedll = Q3E_Engine_GetGameDLLSuffix();
     char client_dll[1024] = { 0 };
-    Q_snprintf(client_dll, sizeof(client_dll), "client_%s", gamemod);
+    Q_snprintf(client_dll, sizeof(client_dll), "client_%s", gamedll);
 	g_ClientDLLModule = g_pFileSystem->LoadModule( client_dll, "GAMEBIN", false );
 #else
 	g_ClientDLLModule = g_pFileSystem->LoadModule( "client", "GAMEBIN", false );
