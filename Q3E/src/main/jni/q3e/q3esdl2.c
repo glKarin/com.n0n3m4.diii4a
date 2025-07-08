@@ -330,14 +330,9 @@ void Q3E_InitSDL(void)
         return;
     }
 
-    sdl_api = (SDL_Android_GetAPI_f)ptr;
-    if(!sdl_api)
-    {
-        LOGW("Game library not use Q3E SDL2");
-        return;
-    }
     LOGI("SDL2 API found!");
 
+    sdl_api = (SDL_Android_GetAPI_f)ptr;
     SDL_Android_Callback_t callbacks;
 #define CALLBACK_METHOD(ret, name, args) callbacks.name = name;
 #include "../deplibs/SDL2/src/core/android/SDL_android_callback.h"
@@ -356,7 +351,7 @@ void Q3E_InitSDL(void)
     atexit(Q3E_ShutdownSDL);
 
     USING_SDL = 1;
-    LOGI("Game library use SDL2");
+    LOGI("Game library SDL2 initialized!");
 }
 
 typedef float mouse_pos_t;
@@ -374,19 +369,17 @@ void Q3E_SDL_SetRelativeMouseMode(int on)
     relativeMouseMode = on;
     if(on)
     {
-        in_positionX = IN_WINDOW_WIDTH / 2;
-        in_positionY = IN_WINDOW_HEIGHT / 2;
+        in_deltaX = IN_WINDOW_WIDTH / 2;
+        in_deltaY = IN_WINDOW_HEIGHT / 2;
         set_mouse_cursor_visible(false);
     }
     else
     {
-        in_positionX = 0;
-        in_positionY = 0;
+        //in_positionX = 0;
+        //in_positionY = 0;
         set_mouse_cursor_position(in_positionX, in_positionY);
         set_mouse_cursor_visible(true);
     }
-    in_deltaX = 0;
-    in_deltaY = 0;
 }
 
 void Q3E_SDL_SetWindowSize(int width, int height)
@@ -395,6 +388,8 @@ void Q3E_SDL_SetWindowSize(int width, int height)
         return;
     IN_WINDOW_WIDTH = width;
     IN_WINDOW_HEIGHT = height;
+	in_deltaX = IN_WINDOW_WIDTH / 2;
+	in_deltaY = IN_WINDOW_HEIGHT / 2;
 }
 
 static void Q3E_SDL_MouseMotion(float dx, float dy)
@@ -418,11 +413,8 @@ static void Q3E_SDL_MouseMotion(float dx, float dy)
             y = hh;
         }
 
-        in_deltaX += x;
-        in_deltaY += y;
-
-        in_positionX = x;
-        in_positionY = y;
+        in_deltaX = x;
+        in_deltaY = y;
     }
     else
     {
@@ -440,9 +432,6 @@ static void Q3E_SDL_MouseMotion(float dx, float dy)
         } else if(y >= IN_WINDOW_HEIGHT) {
             y = IN_WINDOW_HEIGHT - 1;
         }
-
-        in_deltaX += (x - in_positionX);
-        in_deltaY += (y - in_positionY);
 
         in_positionX = x;
         in_positionY = y;
@@ -469,7 +458,7 @@ void Q3E_SDL_MotionEvent(float dx, float dy)
 
     //if(!relativeMouseMode)
     {
-        CALL_SDL(onNativeMouse, 0, ACTION_MOVE, in_positionX, in_positionY, relativeMouseMode);
+        CALL_SDL(onNativeMouse, 0, ACTION_MOVE, relativeMouseMode ? in_deltaX : in_positionX, relativeMouseMode ? in_deltaY : in_positionY, relativeMouseMode);
     }
 }
 
@@ -477,7 +466,7 @@ void Q3E_SDL_KeyEvent(int key, int down, int ch)
 {
     if(key < 0)
     {
-        CALL_SDL(onNativeMouse, -key, down ? ACTION_DOWN : ACTION_UP, in_positionX, in_positionY, relativeMouseMode);
+        CALL_SDL(onNativeMouse, -key, down ? ACTION_DOWN : ACTION_UP, relativeMouseMode ? in_deltaX : in_positionX, relativeMouseMode ? in_deltaY : in_positionY, relativeMouseMode);
         return;
     }
 	
