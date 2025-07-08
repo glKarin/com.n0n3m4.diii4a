@@ -950,6 +950,7 @@ set(source_lib
 
 
 # HalfLife 2
+if(BUILD_SOURCE_HL2)
 set(source_hl2_src
 		ai_eventresponse.cpp
 		ai_eventresponse.h
@@ -1210,10 +1211,12 @@ add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_HL2)
 
 
 
 # Counter-Strike: Source
+if(BUILD_SOURCE_CSTRIKE)
 set(source_cs_src
 		hl2/Func_Monitor.cpp
 		h_cycler.cpp
@@ -1531,10 +1534,12 @@ add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_CSTRIKE)
 
 
 
 # Portal
+if(BUILD_SOURCE_PORTAL)
 set(source_portal_source_src
 		ai_eventresponse.cpp
 		ai_eventresponse.h
@@ -1886,3 +1891,192 @@ add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_PORTAL)
+
+
+
+if(BUILD_SOURCE_DOD)
+
+set(source_dod_src
+		../shared/playerclass_info_parse.cpp
+		../shared/playerclass_info_parse.h
+		../shared/hl2/survival_gamerules.cpp
+		team_spawnpoint.cpp
+		team_spawnpoint.h
+)
+
+set(source_dod_dll_src
+			../shared/dod/achievements_dod.cpp
+			dod/dod_ammo_box.cpp
+			dod/dod_ammo_box.h
+			dod/dod_area_capture.cpp
+			dod/dod_area_capture.h
+			dod/dod_basegrenade.cpp
+			dod/dod_basegrenade.h
+			dod/dod_baserocket.cpp
+			dod/dod_baserocket.h
+			dod/dod_bombdispenser.cpp
+			dod/dod_bombtarget.cpp
+			dod/dod_bombtarget.h
+			dod/dod_bot_temp.cpp
+			dod/dod_bot_temp.h
+			dod/dod_client.cpp
+			dod/dod_control_point.cpp
+			dod/dod_control_point.h
+			dod/dod_control_point_master.cpp
+			dod/dod_control_point_master.h
+			dod/dod_cvars.cpp
+			dod/dod_cvars.h
+			dod/dod_eventlog.cpp
+			dod/dod_gameinterface.cpp
+			dod/dod_gameinterface.h
+			../shared/dod/dod_gamemovement.cpp
+			../shared/dod/dod_gamerules.cpp
+			../shared/dod/dod_gamerules.h
+			dod/dod_gamestats.cpp
+			dod/dod_gamestats.h
+			dod/dod_handgrenade.cpp
+			dod/dod_handgrenade.h
+			dod/dod_hltvdirector.cpp
+			dod/dod_location.cpp
+			dod/dod_location.h
+			dod/dod_objective_resource.cpp
+			dod/dod_objective_resource.h
+			dod/dod_player.cpp
+			dod/dod_player.h
+			dod/dod_player_resource.cpp
+			dod/dod_player_resource.h
+			../shared/dod/dod_player_shared.cpp
+			../shared/dod/dod_player_shared.h
+			../shared/dod/dod_playeranimstate.cpp
+			../shared/dod/dod_playeranimstate.h
+			../shared/dod/dod_playerclass_info_parse.cpp
+			../shared/dod/dod_playerclass_info_parse.h
+			dod/dod_playermove.cpp
+			dod/dod_riflegrenade_ger.cpp
+			dod/dod_riflegrenade_ger.h
+			dod/dod_riflegrenade_us.cpp
+			dod/dod_riflegrenade_us.h
+			../shared/dod/dod_round_timer.cpp
+			../shared/dod/dod_shareddefs.cpp
+			../shared/dod/dod_shareddefs.h
+			dod/dod_smokegrenade.cpp
+			dod/dod_smokegrenade.h
+			dod/dod_smokegrenade_ger.cpp
+			dod/dod_smokegrenade_ger.h
+			dod/dod_smokegrenade_us.cpp
+			dod/dod_smokegrenade_us.h
+			dod/dod_statmgr.cpp
+			dod/dod_statmgr.h
+			dod/dod_stickgrenade.cpp
+			dod/dod_stickgrenade.h
+			dod/dod_team.cpp
+			dod/dod_team.h
+			../shared/dod/dod_usermessages.cpp
+			../shared/dod/dod_viewmodel.cpp
+			../shared/dod/dod_viewmodel.h
+			../shared/dod/dod_weapon_parse.cpp
+			../shared/dod/dod_weapon_parse.h
+			../shared/dod/fx_dod_shared.cpp
+			../shared/dod/fx_dod_shared.h
+			dod/grenadetrail.cpp
+			dod/grenadetrail.h
+			dod/rocket_bazooka.cpp
+			dod/rocket_bazooka.h
+			dod/rocket_pschreck.cpp
+			dod/rocket_pschreck.h
+			dod/te_firebullets.cpp
+			dod/te_firebullets.h
+			dod/unisignals.h
+			../shared/dod/weapon_30cal.cpp
+			../shared/dod/weapon_amerknife.cpp
+			../shared/dod/weapon_bar.cpp
+			../shared/dod/weapon_bazooka.cpp
+			../shared/dod/weapon_c96.cpp
+			../shared/dod/weapon_colt.cpp
+			../shared/dod/weapon_dodbase.cpp
+			../shared/dod/weapon_dodbase.h
+			../shared/dod/weapon_dodbasebomb.cpp
+			../shared/dod/weapon_dodbasebomb.h
+			../shared/dod/weapon_dodbasegrenade.cpp
+			../shared/dod/weapon_dodbasegrenade.h
+			../shared/dod/weapon_dodbasegun.cpp
+			../shared/dod/weapon_dodbasegun.h
+			../shared/dod/weapon_dodbasemelee.cpp
+			../shared/dod/weapon_dodbasemelee.h
+			../shared/dod/weapon_dodbaserpg.cpp
+			../shared/dod/weapon_dodbaserpg.h
+			../shared/dod/weapon_dodbipodgun.cpp
+			../shared/dod/weapon_dodbipodgun.h
+			../shared/dod/weapon_dodfireselect.cpp
+			../shared/dod/weapon_dodfireselect.h
+			../shared/dod/weapon_dodfullauto.cpp
+			../shared/dod/weapon_dodfullauto.h
+			../shared/dod/weapon_dodfullauto_punch.cpp
+			../shared/dod/weapon_dodfullauto_punch.h
+			../shared/dod/weapon_dodsemiauto.cpp
+			../shared/dod/weapon_dodsemiauto.h
+			../shared/dod/weapon_dodsniper.cpp
+			../shared/dod/weapon_dodsniper.h
+			../shared/dod/weapon_explodinghandgrenade.cpp
+			../shared/dod/weapon_explodingstickgrenade.cpp
+			../shared/dod/weapon_garand.cpp
+			../shared/dod/weapon_handgrenade.cpp
+			../shared/dod/weapon_k98.cpp
+			../shared/dod/weapon_k98_scoped.cpp
+			../shared/dod/weapon_m1carbine.cpp
+			../shared/dod/weapon_mg42.cpp
+			../shared/dod/weapon_mg42.h
+			../shared/dod/weapon_mp40.cpp
+			../shared/dod/weapon_mp44.cpp
+			../shared/dod/weapon_p38.cpp
+			../shared/dod/weapon_pschreck.cpp
+			../shared/dod/weapon_riflegrenade.cpp
+			../shared/dod/weapon_riflegrenade.h
+			../shared/dod/weapon_riflegrenade_ger.cpp
+			../shared/dod/weapon_riflegrenade_ger_live.cpp
+			../shared/dod/weapon_riflegrenade_us.cpp
+			../shared/dod/weapon_riflegrenade_us_live.cpp
+			../shared/dod/weapon_smokegrenade_ger.cpp
+			../shared/dod/weapon_smokegrenade_us.cpp
+			../shared/dod/weapon_spade.cpp
+			../shared/dod/weapon_spring.cpp
+			../shared/dod/weapon_stickgrenade.cpp
+			../shared/dod/weapon_thompson.cpp
+			dod/holiday_gift.cpp
+			dod/holiday_gift.h
+)
+
+set(source_dod_ifm_src
+			../shared/weapon_ifmbase.cpp
+			../shared/weapon_ifmbase.h
+			../shared/weapon_ifmbasecamera.cpp
+			../shared/weapon_ifmbasecamera.h
+			../shared/weapon_ifmsteadycam.cpp
+			../shared/weapon_ifmsteadycam.h
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_dod_src}
+    ${source_dod_dll_src}
+    ${source_dod_ifm_src}
+)
+list(REMOVE_ITEM source_src
+		ai_concommands.cpp
+
+)
+
+set(source_inc
+	../shared/dod
+	dod
+	${source_base_inc}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}dod)
+set(source_def "${source_base_def};BOTS;DOD_DLL")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_DOD)

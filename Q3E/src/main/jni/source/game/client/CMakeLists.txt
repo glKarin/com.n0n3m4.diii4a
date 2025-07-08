@@ -76,7 +76,7 @@ set(source_ui_src
 			../../common/movieobjects/timeutils.cpp
 			../../public/movieobjects/timeutils.h
 )
-endif()
+endif(BUILD_REPLAY)
 
 set(source_source_src
 		hl2/C_Func_Monitor.cpp
@@ -1162,6 +1162,7 @@ set(source_base_lib
 
 
 # HalfLife2
+if(BUILD_SOURCE_HL2)
 set(source_hl2_src
 		hud_chat.cpp
 		c_team_objectiveresource.cpp
@@ -1275,9 +1276,12 @@ add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_HL2)
+
 
 
 # Counter-Strike: Source
+if(BUILD_SOURCE_CSTRIKE)
 set(source_cs_replay_src
 		cstrike/cs_replay.cpp
 		cstrike/cs_replay.h
@@ -1540,10 +1544,12 @@ add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_CSTRIKE)
 
 
 
 # Portal
+if(BUILD_SOURCE_PORTAL)
 set(source_portal_src
 		hud_chat.cpp
 		c_team_objectiveresource.cpp
@@ -1742,4 +1748,251 @@ add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_PORTAL)
 
+
+
+if(BUILD_SOURCE_DOD)
+set(source_dod_src
+		hud_voicestatus.cpp
+
+		../shared/playerclass_info_parse.cpp
+		../shared/playerclass_info_parse.h
+)
+
+set(source_dod_dll_src
+			../shared/dod/achievements_dod.cpp
+			dod/c_dod_basegrenade.cpp
+			dod/c_dod_basegrenade.h
+			dod/c_dod_baserocket.cpp
+			dod/c_dod_bombdispenser.cpp
+			dod/c_dod_bombtarget.cpp
+			dod/c_dod_objective_resource.cpp
+			dod/c_dod_objective_resource.h
+			dod/c_dod_player.cpp
+			dod/c_dod_player.h
+			dod/c_dod_playerresource.cpp
+			dod/c_dod_playerresource.h
+			dod/c_dod_smokegrenade.cpp
+			dod/c_dod_smokegrenade.h
+			dod/c_dod_team.cpp
+			dod/c_dod_team.h
+			dod/c_grenadetrail.cpp
+			dod/c_grenadetrail.h
+			dod/c_te_firebullets.cpp
+			dod/clientmode_dod.cpp
+			dod/clientmode_dod.h
+			dod/dod_fx_explosions.cpp
+			../shared/dod/dod_gamemovement.cpp
+			../shared/dod/dod_gamerules.cpp
+			../shared/dod/dod_gamerules.h
+			dod/dod_headiconmanager.cpp
+			dod/dod_headiconmanager.h
+			dod/dod_hud_ammo.cpp
+			dod/dod_hud_areacapicon.cpp
+			dod/dod_hud_capturepanel.cpp
+			dod/dod_hud_capturepanel.h
+			dod/dod_hud_chat.cpp
+			dod/dod_hud_chat.h
+			dod/dod_hud_crosshair.cpp
+			dod/dod_hud_crosshair.h
+			dod/dod_hud_damageindicator.cpp
+			dod/dod_hud_deathnotice.cpp
+			dod/dod_hud_freezepanel.cpp
+			dod/dod_hud_freezepanel.h
+			dod/dod_hud_health.cpp
+			dod/dod_hud_hintdisplay.cpp
+			dod/dod_hud_history_resource.cpp
+			dod/dod_hud_objectiveicons.cpp
+			dod/dod_hud_playerstatus_ammo.cpp
+			dod/dod_hud_playerstatus_ammo.h
+			dod/dod_hud_playerstatus_fireselect.cpp
+			dod/dod_hud_playerstatus_fireselect.h
+			dod/dod_hud_playerstatus_health.cpp
+			dod/dod_hud_playerstatus_health.h
+			dod/dod_hud_playerstatus_mgheat.cpp
+			dod/dod_hud_playerstatus_mgheat.h
+			dod/dod_hud_playerstatus_stamina.cpp
+			dod/dod_hud_playerstatus_stamina.h
+			dod/dod_hud_playerstatus_tnt.cpp
+			dod/dod_hud_playerstatus_weapon.cpp
+			dod/dod_hud_playerstatus_weapon.h
+			dod/dod_hud_playerstatuspanel.cpp
+			dod/dod_hud_readyrestart.cpp
+			dod/dod_hud_restartround.cpp
+			dod/dod_hud_scope.cpp
+			dod/dod_hud_spec_crosshair.cpp
+			dod/dod_hud_spec_crosshair.h
+			dod/dod_hud_target_id.cpp
+			dod/dod_hud_tnt_pickup.cpp
+			dod/dod_hud_warmuplabel.cpp
+			dod/dod_hud_weaponselection.cpp
+			dod/dod_hud_winpanel.cpp
+			dod/dod_hud_winpanel.h
+			dod/dod_in_main.cpp
+			../shared/dod/dod_player_shared.cpp
+			../shared/dod/dod_player_shared.h
+			../shared/dod/dod_playeranimstate.cpp
+			../shared/dod/dod_playeranimstate.h
+			../shared/dod/dod_playerclass_info_parse.cpp
+			../shared/dod/dod_playerclass_info_parse.h
+			dod/dod_playerstats.cpp
+			dod/dod_playerstats.h
+			dod/dod_prediction.cpp
+			../shared/dod/dod_round_timer.cpp
+			../shared/dod/dod_shareddefs.cpp
+			../shared/dod/dod_shareddefs.h
+			../shared/dod/dod_usermessages.cpp
+			dod/dod_view_scene.cpp
+			dod/dod_view_scene.h
+			../shared/dod/dod_viewmodel.cpp
+			../shared/dod/dod_viewmodel.h
+			../shared/dod/dod_weapon_parse.cpp
+			../shared/dod/dod_weapon_parse.h
+			dod/VGUI/backgroundpanel.cpp
+			dod/VGUI/backgroundpanel.h
+			dod/VGUI/dodbutton.cpp
+			dod/VGUI/dodbutton.h
+			dod/VGUI/dodclassmenu.cpp
+			dod/VGUI/dodclassmenu.h
+			dod/VGUI/dodclientscoreboard.cpp
+			dod/VGUI/dodclientscoreboard.h
+			dod/VGUI/dodcornercutpanel.cpp
+			dod/VGUI/dodcornercutpanel.h
+			dod/VGUI/dodmenubackground.cpp
+			dod/VGUI/dodmenubackground.h
+			dod/VGUI/dodmouseoverpanelbutton.h
+			dod/VGUI/dodoverview.cpp
+			dod/VGUI/dodoverview.h
+			dod/VGUI/dodrandombutton.h
+			dod/VGUI/dodspectatorgui.cpp
+			dod/VGUI/dodspectatorgui.h
+			dod/VGUI/dodteammenu.cpp
+			dod/VGUI/dodteammenu.h
+			dod/VGUI/dodtextwindow.cpp
+			dod/VGUI/dodtextwindow.h
+			dod/VGUI/dodviewport.cpp
+			dod/VGUI/dodviewport.h
+			dod/fx_dod_blood.cpp
+			dod/fx_dod_blood.h
+			dod/fx_dod_ejectbrass.cpp
+			dod/fx_dod_filmgrain.cpp
+			dod/fx_dod_impact.cpp
+			dod/fx_dod_knifeslash.cpp
+			dod/fx_dod_muzzleflash.cpp
+			dod/fx_dod_muzzleflash.h
+			../shared/dod/fx_dod_shared.cpp
+			../shared/dod/fx_dod_shared.h
+			dod/fx_dod_tracers.cpp
+			dod/VGUI/idodviewportmsgs.h
+			dod/VGUI/vgui_rootpanel_dod.cpp
+			dod/VGUI/vgui_rootpanel_dod.h
+			../shared/dod/weapon_30cal.cpp
+			../shared/dod/weapon_amerknife.cpp
+			../shared/dod/weapon_bar.cpp
+			../shared/dod/weapon_bazooka.cpp
+			../shared/dod/weapon_c96.cpp
+			../shared/dod/weapon_colt.cpp
+			../shared/dod/weapon_dodbase.cpp
+			../shared/dod/weapon_dodbase.h
+			../shared/dod/weapon_dodbasebomb.cpp
+			../shared/dod/weapon_dodbasebomb.h
+			../shared/dod/weapon_dodbasegrenade.cpp
+			../shared/dod/weapon_dodbasegrenade.h
+			../shared/dod/weapon_dodbasegun.cpp
+			../shared/dod/weapon_dodbasegun.h
+			../shared/dod/weapon_dodbasemelee.cpp
+			../shared/dod/weapon_dodbasemelee.h
+			../shared/dod/weapon_dodbaserpg.cpp
+			../shared/dod/weapon_dodbaserpg.h
+			../shared/dod/weapon_dodbipodgun.cpp
+			../shared/dod/weapon_dodbipodgun.h
+			../shared/dod/weapon_dodfireselect.cpp
+			../shared/dod/weapon_dodfireselect.h
+			../shared/dod/weapon_dodfullauto.cpp
+			../shared/dod/weapon_dodfullauto.h
+			../shared/dod/weapon_dodfullauto_punch.cpp
+			../shared/dod/weapon_dodfullauto_punch.h
+			../shared/dod/weapon_dodsemiauto.cpp
+			../shared/dod/weapon_dodsemiauto.h
+			../shared/dod/weapon_dodsniper.cpp
+			../shared/dod/weapon_dodsniper.h
+			../shared/dod/weapon_explodinghandgrenade.cpp
+			../shared/dod/weapon_explodingstickgrenade.cpp
+			../shared/dod/weapon_garand.cpp
+			../shared/dod/weapon_handgrenade.cpp
+			../shared/dod/weapon_k98.cpp
+			../shared/dod/weapon_k98_scoped.cpp
+			../shared/dod/weapon_m1carbine.cpp
+			../shared/dod/weapon_mg42.cpp
+			../shared/dod/weapon_mg42.h
+			../shared/dod/weapon_mp40.cpp
+			../shared/dod/weapon_mp44.cpp
+			../shared/dod/weapon_p38.cpp
+			../shared/dod/weapon_pschreck.cpp
+			../shared/dod/weapon_riflegrenade.cpp
+			../shared/dod/weapon_riflegrenade.h
+			../shared/dod/weapon_riflegrenade_ger.cpp
+			../shared/dod/weapon_riflegrenade_ger_live.cpp
+			../shared/dod/weapon_riflegrenade_us.cpp
+			../shared/dod/weapon_riflegrenade_us_live.cpp
+			../shared/dod/weapon_smokegrenade_ger.cpp
+			../shared/dod/weapon_smokegrenade_us.cpp
+			../shared/dod/weapon_spade.cpp
+			../shared/dod/weapon_spring.cpp
+			../shared/dod/weapon_stickgrenade.cpp
+			../shared/dod/weapon_thompson.cpp
+)
+
+set(source_dod_game_controls_src
+			game_controls/buymenu.cpp
+			game_controls/buysubmenu.cpp
+			game_controls/classmenu.cpp
+)
+
+set(source_dod_ifm_src
+			../shared/weapon_ifmbase.cpp
+			../shared/weapon_ifmbase.h
+			../shared/weapon_ifmbasecamera.cpp
+			../shared/weapon_ifmbasecamera.h
+			../shared/weapon_ifmsteadycam.cpp
+)
+
+set(source_dod_game_controls_headers_src
+			game_controls/buymenu.h
+			game_controls/buysubmenu.h
+			game_controls/classmenu.h
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_dod_src}
+    ${source_dod_dll_src}
+    ${source_dod_game_controls_src}
+    ${source_dod_ifm_src}
+    ${source_dod_game_controls_headers_src}
+)
+list(REMOVE_ITEM source_src
+		../shared/weapon_parse_default.cpp
+		history_resource.cpp
+		hud_hintdisplay.cpp
+)
+
+set(source_inc
+	dod
+	dod/VGUI
+	../shared/dod
+	${source_base_inc}
+)
+
+set(source_lib
+		${source_base_lib}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}dod)
+set(source_def "${source_base_def};DOD_DLL;ENABLE_HTML_WINDOW")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_DOD)

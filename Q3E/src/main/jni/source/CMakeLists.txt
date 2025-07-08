@@ -46,6 +46,14 @@ endif()
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/common")
 
+option(BUILD_SOURCE_HL2 "Build Half-Life 2" ON)
+option(BUILD_SOURCE_CSTRIKE "Build Counter-Strike: Source" ON)
+option(BUILD_SOURCE_PORTAL "Build Portal" ON)
+option(BUILD_SOURCE_DOD "Build DOD: Source" ON)
+option(BUILD_SOURCE_HL2MP "Build Half-Life 2 Multiplayer" ON)
+option(BUILD_SOURCE_EPISODIC "Build Half-Life 2 Episodic" ON)
+option(BUILD_SOURCE_HL1 "Build Half-Life 1" ON)
+
 add_subdirectory(tier0)
 add_subdirectory(tier1)
 add_subdirectory(tier2)

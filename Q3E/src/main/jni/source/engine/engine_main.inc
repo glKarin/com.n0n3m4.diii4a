@@ -124,9 +124,19 @@ void Q3E_Engine_SetupClientInteraction()
 const char * Q3E_Engine_GetGameDLLSuffix()
 {
     const char *gamedll = CommandLine()->ParmValue("-sv_cl", CommandLine()->ParmValue("-game", "hl2"));
-	if(Q_stricmp(gamedll, "cstrike") 
+	if(true
+#ifdef _SV_CL_HL2
 			&& Q_stricmp(gamedll, "hl2")
+#endif
+#ifdef _SV_CL_CSTRIKE
+	        && Q_stricmp(gamedll, "cstrike")
+#endif
+#ifdef _SV_CL_PORTAL
 			&& Q_stricmp(gamedll, "portal")
+#endif
+#ifdef _SV_CL_DOD
+			&& Q_stricmp(gamedll, "dod")
+#endif
 			)
 		gamedll = "hl2";
 	return gamedll;
