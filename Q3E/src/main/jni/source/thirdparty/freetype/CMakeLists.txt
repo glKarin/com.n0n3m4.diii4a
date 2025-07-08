@@ -168,7 +168,7 @@ set(VERSION_PATCH "0")
 
 # Generate LIBRARY_VERSION and LIBRARY_SOVERSION.
 set(LIBTOOL_REGEX "version_info='([0-9]+):([0-9]+):([0-9]+)'")
-file(STRINGS "${PROJECT_SOURCE_DIR}/builds/unix/configure.raw"
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/builds/unix/configure.raw"
   VERSION_INFO
   REGEX ${LIBTOOL_REGEX})
 string(REGEX REPLACE
