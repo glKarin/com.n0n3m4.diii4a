@@ -64,6 +64,7 @@
 #include <execinfo.h>
 #endif
 #endif
+#endif
 
 qboolean stdinIsATTY;
 
