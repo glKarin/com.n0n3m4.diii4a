@@ -41,7 +41,9 @@
 #include "../qcommon/qcommon.h"
 #include "sys_local.h"
 
+#if __ANDROID_API__ >= 33
 #include <execinfo.h>
+#endif
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
