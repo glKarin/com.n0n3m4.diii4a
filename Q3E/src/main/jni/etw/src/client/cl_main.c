@@ -1937,8 +1937,8 @@ static unsigned int CL_ParseResponseServers(const netadr_t *from, msg_t *msg, ne
 
 static void CL_MarkBlockedServers()
 {
-	int          count = 0, i, j;
-	serverInfo_t *server;
+	int            count = 0, i, j;
+	serverInfo_t   *server;
 	const netadr_t *addr;
 
 	// if the arrays are considered in a "reset" state then just skip
@@ -2421,8 +2421,8 @@ void CL_StartVideoRecording(const char *aviname)
 
 	if (!aviname)
 	{
-		int i, last;
-		int a, b, c, d;
+		int        i, last;
+		int        a, b, c, d;
 		const char *ext = CL_GetVideoExtension();
 
 		for (i = 0; i <= 9999; i++)
@@ -2463,7 +2463,7 @@ void CL_StartVideoRecording(const char *aviname)
  */
 void CL_Video_f(void)
 {
-	char filename[MAX_OSPATH];
+	char       filename[MAX_OSPATH];
 	const char *ext;
 
 	if (!clc.demo.playing)
@@ -2567,8 +2567,8 @@ static void CL_FrameHandleVideo(int *msec)
 	if ((cl_avidemo->integer && *msec && ((inGame && clc.demo.playing) || cl_forceavidemo->integer))
 	    || (videoActive && (inGame && clc.demo.playing)))
 	{
-		float fps;
-		float frameDuration;
+		float     fps;
+		float     frameDuration;
 		const int videoFps = videoActive ? cl_aviFrameRate->integer : cl_avidemo->integer;
 
 		if (com_timescale->value > 0.0f)
@@ -3068,7 +3068,7 @@ void CL_RegisterConsoleFont(void)
 	if (fontName && fontName[0])
 	{
 		re.RegisterFont(fontName, smallCharHeight, &cls.consoleFont, qtrue);
-}
+	}
 
 	Com_Memset(&cls.etIconFont, 0, sizeof(cls.etIconFont));
 	re.RegisterFont("ETL-icon-font", smallCharHeight, &cls.etIconFont, qfalse);

@@ -83,8 +83,8 @@ int Con_ConsoleFieldWidth(void)
  */
 void Con_ToggleConsole_f(void)
 {
-	qboolean ctrl          = keys[K_LCTRL].down || keys[K_RCTRL].down;
-	qboolean alt           = keys[K_LALT].down || keys[K_RALT].down;
+	qboolean ctrl = keys[K_LCTRL].down || keys[K_RCTRL].down;
+	qboolean alt  = keys[K_LALT].down || keys[K_RALT].down;
 	float    shortConsole;
 	float    normalConsole;
 	float    fullConsole;
@@ -146,7 +146,7 @@ void Con_ToggleConsole_f(void)
 #ifdef _DIII4A //karin: limit console max height
             con.desiredFrac = Android_GetConsoleMaxHeightFrac(shortConsole);
 #else
-            con.desiredFrac = shortConsole;
+			con.desiredFrac = shortConsole;
 #endif
 		}
 		// full console
@@ -160,7 +160,7 @@ void Con_ToggleConsole_f(void)
 #ifdef _DIII4A //karin: limit console max height
             con.desiredFrac = Android_GetConsoleMaxHeightFrac(normalConsole);
 #else
-            con.desiredFrac = normalConsole;
+			con.desiredFrac = normalConsole;
 #endif
 		}
 	}
@@ -294,8 +294,8 @@ void Con_ClearNotify(void)
 void Con_CheckResize(void)
 {
 	int   i, width, dateLen, archLen;
-	int  tbuf[CON_TEXTSIZE];
-	byte tbuff[CON_TEXTSIZE];
+	int   tbuf[CON_TEXTSIZE];
+	byte  tbuff[CON_TEXTSIZE];
 	float scale = con_scale->value;
 
 	CL_SetConsoleScale(scale);
@@ -303,7 +303,7 @@ void Con_CheckResize(void)
 	dateLen = Q_PrintStrlen(con.date) + 1;
 	archLen = Q_PrintStrlen(con.arch) + 1;
 
-	width = (cls.glconfig.vidWidth / smallCharWidth) - 2;
+	width  = (cls.glconfig.vidWidth / smallCharWidth) - 2;
 	width -= dateLen >= archLen ? dateLen : archLen;
 
 	if (width == con.linewidth && !con_scale->modified)
@@ -373,9 +373,9 @@ void Con_CheckResize(void)
 	}
 
 	g_consoleField.widthInChars = Con_ConsoleFieldWidth();
-	con.current             = con.maxTotalLines - 1;
-	con.bottomDisplayedLine = con.current;
-	con.scrollIndex         = con.current;
+	con.current                 = con.maxTotalLines - 1;
+	con.bottomDisplayedLine     = con.current;
+	con.scrollIndex             = con.current;
 	con_scale->modified         = qfalse;
 }
 
@@ -636,8 +636,8 @@ void CL_ConsolePrint(char *txt)
 	if (!con.initialized)
 	{
 		static cvar_t null_cvar = { 0 };
-		con.color[0]  = con.color[1] = con.color[2] = con.color[3] = 1.0f;
-		con.linewidth = -1;
+		con.color[0]        = con.color[1] = con.color[2] = con.color[3] = 1.0f;
+		con.linewidth       = -1;
 		con.scale           = 1.0f;
 		con_scale           = &null_cvar;
 		con_scale->value    = 1.0f;
@@ -833,13 +833,13 @@ void Con_DrawInput(void)
 
 	// highlight the current autocompleted part
 	if (con.highlightOffset && g_consoleField.buffer[0])
-		{
-			re.SetColor(console_highlightcolor);
-			re.DrawStretchPic((2 + con.highlightOffset) * smallCharWidth,
-			                  y + 2,
-			                  (strlen(g_consoleField.buffer) - con.highlightOffset) * smallCharWidth,
-			                  smallCharHeight - 2, 0, 0, 0, 0, cls.whiteShader);
-		}
+	{
+		re.SetColor(console_highlightcolor);
+		re.DrawStretchPic((2 + con.highlightOffset) * smallCharWidth,
+		                  y + 2,
+		                  (strlen(g_consoleField.buffer) - con.highlightOffset) * smallCharWidth,
+		                  smallCharHeight - 2, 0, 0, 0, 0, cls.whiteShader);
+	}
 
 	re.SetColor(con.color);
 
@@ -1171,7 +1171,7 @@ void Con_RunConsole(void)
 	// short console support via shift+~
 	if (cls.keyCatchers & KEYCATCH_CONSOLE)
 	{
-        con.finalFrac = con.desiredFrac;
+		con.finalFrac = con.desiredFrac;
 	}
 	else
 	{

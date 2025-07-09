@@ -67,8 +67,79 @@
 #endif
 
 #ifdef __ANDROID__
+#if !defined(_DIII4A) //karin: unused jni
+#include <jni.h>
+qboolean call_copyIntoAPPDirectory(JNIEnv* env, jobject javaObject, const char* filename) {
+    // Find the class of the Java object
+    jclass javaClass = (*env)->GetObjectClass(env, javaObject);
+    if (!javaClass) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to find Java class.\n");
+        return qfalse;
+    }
+
+    // Get the method ID for the "copyIntoAPPDirectory" method
+    jmethodID methodID = (*env)->GetMethodID(env, javaClass, "copyIntoAPPDirectory", "(Ljava/lang/String;)Z");
+    if (!methodID) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to find method copyIntoAPPDirectory.\n");
+        return qfalse;
+    }
+
+    // Convert the C string filename to a Java string
+    jstring javaFilename = (*env)->NewStringUTF(env, filename);
+    if (!javaFilename) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to create Java string.\n");
+        return qfalse;
+    }
+
+    // Call the Java method
+    jboolean result = (*env)->CallBooleanMethod(env, javaObject, methodID, javaFilename);
+
+    // Clean up local references
+    (*env)->DeleteLocalRef(env, javaFilename);
+
+    return result == JNI_TRUE;
+}
+
+qboolean invoke_copy_into_app_directory(const char* filename) {
+    JNIEnv *env = (JNIEnv *) SDL_AndroidGetJNIEnv();
+
+    // Find the Java class containing the copyIntoAPPDirectory method
+    jclass javaClass = (*env)->FindClass(env, "com/etlegacy/app/CopyToInternal"); // Replace with your actual Java class name
+    if (!javaClass) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to find Java class.\n");
+        return qfalse;
+    }
+
+    // Get the constructor for the Java class
+    jmethodID constructor = (*env)->GetMethodID(env, javaClass, "<init>", "(Landroid/content/Context;)V");
+    if (!constructor) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to find constructor.\n");
+        return qfalse;
+    }
+
+    // Get the application context (replace with a valid Context jobject)
+    jobject appContext = SDL_AndroidGetActivity(); // You need to pass a valid Android context object here
+
+    // Create an instance of the Java class
+    jobject javaObject = (*env)->NewObject(env, javaClass, constructor, appContext);
+    if (!javaObject) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to create Java object.\n");
+        return qfalse;
+    }
+
+    // Call the copyIntoAPPDirectory method
+    qboolean result = call_copyIntoAPPDirectory(env, javaObject, filename);
+
+    // Clean up local references
+    (*env)->DeleteLocalRef(env, javaObject);
+    (*env)->DeleteLocalRef(env, javaClass);
+
+    return result;
+}
+
 // Android must exit out of the main call..
 #define MAIN_MUST_RETURN
+#endif
 #endif
 
 #ifdef MAIN_MUST_RETURN
@@ -846,7 +917,22 @@ static void *Sys_TryLibraryLoad(const char *base, const char *gamedir, const cha
 		libHandle = Sys_LoadLibrary(fname);
 	}
 #else
-	libHandle = Sys_LoadLibrary(fname);
+    char fnhomepath[MAX_OSPATH] = { 0 };
+
+    Q_strncpyz(fnhomepath, Sys_CdToExtStorage(), sizeof(fnhomepath));
+    Q_strcat(fnhomepath, sizeof(fnhomepath), "/Documents/etlegacy/");
+    Q_strcat(fnhomepath, sizeof(fnhomepath), gamedir);
+    Q_strcat(fnhomepath, sizeof(fnhomepath), "/");
+    Q_strcat(fnhomepath, sizeof(fnhomepath), fname);
+
+    if (invoke_copy_into_app_directory(fnhomepath))
+    {
+        char path[MAX_OSPATH] = { 0 };
+        Q_strncpyz(path, SDL_AndroidGetInternalStoragePath(), sizeof(path));
+        Q_strcat(path, sizeof(path), "/");
+        Q_strcat(path, sizeof(path), fname);
+        libHandle = Sys_LoadLibrary(path);
+    }
 #endif
 #endif
 
@@ -1180,35 +1266,35 @@ void Sys_BuildCommandLine(int argc, char **argv, char *buffer, size_t bufferSize
 		}
 
 		{
-		const qboolean containsSpaces = (qboolean)(strchr(argv[i], ' ') != NULL);
+			const qboolean containsSpaces = (qboolean)(strchr(argv[i], ' ') != NULL);
 
-		// Allow URIs to be passed without +connect
-		if (!Q_stricmpn(argv[i], "et://", 5) && Q_stricmpn(argv[i - 1], "+connect", 8))
-		{
-			Q_strcat(buffer, bufferSize, "+connect ");
+			// Allow URIs to be passed without +connect
+			if (!Q_stricmpn(argv[i], "et://", 5) && Q_stricmpn(argv[i - 1], "+connect", 8))
+			{
+				Q_strcat(buffer, bufferSize, "+connect ");
+			}
+
+			// Allow demo files to be passed without +demo for playback
+			if (FS_IsDemoExt(argv[i], -1) && Q_stricmpn(argv[i - 1], "+demo", 5) && Q_stricmpn(argv[i - 1], "+record", 7))
+			{
+				Q_strcat(buffer, bufferSize, "+demo dirty ");
+			}
+
+			if (containsSpaces)
+			{
+				Q_strcat(buffer, bufferSize, "\"");
+			}
+
+			Q_strcat(buffer, bufferSize, argv[i]);
+
+			if (containsSpaces)
+			{
+				Q_strcat(buffer, bufferSize, "\"");
+			}
+
+			Q_strcat(buffer, bufferSize, " ");
 		}
-
-		// Allow demo files to be passed without +demo for playback
-		if (FS_IsDemoExt(argv[i], -1) && Q_stricmpn(argv[i - 1], "+demo", 5) && Q_stricmpn(argv[i - 1], "+record", 7))
-		{
-			Q_strcat(buffer, bufferSize, "+demo dirty ");
-		}
-
-		if (containsSpaces)
-		{
-			Q_strcat(buffer, bufferSize, "\"");
-		}
-
-		Q_strcat(buffer, bufferSize, argv[i]);
-
-		if (containsSpaces)
-		{
-			Q_strcat(buffer, bufferSize, "\"");
-		}
-
-		Q_strcat(buffer, bufferSize, " ");
 	}
-}
 }
 
 #ifndef DEFAULT_BASEDIR
@@ -1243,7 +1329,7 @@ void Sys_SigHandler(int signal)
 	}
 	else if (signal == SIGSEGV)
 	{
-#if defined(__linux__) && !defined(__ANDROID__)
+#if defined(__linux__) && defined(__ANDROID_API__) >= 33
 		Sys_Backtrace(signal);
 		// NOTE : must not exit here, otherwise OS might not create coredumps
 #else
@@ -1430,10 +1516,10 @@ int main(int argc, char **argv)
 		CFRelease(url2);
 	}
 #else
-	Sys_SetBinaryPath(Sys_Dirname(argv[0]));
+    Sys_SetBinaryPath(Sys_Dirname(argv[0]));
 #endif
 
-	Sys_SetDefaultInstallPath(DEFAULT_BASEDIR); // Sys_BinaryPath() by default
+    Sys_SetDefaultInstallPath(DEFAULT_BASEDIR); // Sys_BinaryPath() by default
 
 	// Concatenate the command line for passing to Com_Init
 	Sys_BuildCommandLine(argc, argv, commandLine, sizeof(commandLine));

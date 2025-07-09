@@ -146,8 +146,8 @@ qboolean R_LoadSVG(imageData_t *data, byte **pic, int *width, int *height, byte 
 		float ratio = (float)image->width / image->height;
 
 		if (columns > rows)
-	{
-		columns = 2048;
+		{
+			columns = 2048;
 			rows    = (int)(2048 / ratio);
 		}
 		else
@@ -156,11 +156,11 @@ qboolean R_LoadSVG(imageData_t *data, byte **pic, int *width, int *height, byte 
 			columns = (int)(2048 * ratio);
 		}
 
-		scale   = (float)columns / image->width;
+		scale = (float)columns / image->width;
 	}
 
 	columns = MIN(columns, 2048);
-	rows = MIN(rows, 2048);
+	rows    = MIN(rows, 2048);
 
 	numPixels = columns * rows * 4;
 

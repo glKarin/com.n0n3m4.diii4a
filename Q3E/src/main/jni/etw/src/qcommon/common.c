@@ -3430,9 +3430,9 @@ void Com_Frame(void)
 				)
 			{
 				if (com_maxfpsMinimized->integer < 0)  // default
-			{
-				minMsec = 100; // = 1000/10;
-			}
+				{
+					minMsec = 100; // = 1000/10;
+				}
 				else if (com_maxfpsMinimized->integer > 0)
 				{
 					minMsec = 1000 / com_maxfpsMinimized->integer;
@@ -3445,11 +3445,11 @@ void Com_Frame(void)
 				)
 			{
 				if (com_maxfpsUnfocused->integer < 0)  // default
-			{
-				minMsec = 1000 / (com_maxfps->integer / 2);
-			}
+				{
+					minMsec = 1000 / (com_maxfps->integer / 2);
+				}
 				else if (com_maxfpsUnfocused->integer > 0)
-			{
+				{
 					minMsec = 1000 / com_maxfpsUnfocused->integer;
 				}
 			}

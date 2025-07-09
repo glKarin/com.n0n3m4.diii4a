@@ -11,6 +11,12 @@ set(BUILD_CLIENT ON)
 set(BUILD_MAINUI ON)
 set(BUILD_SERVER ON)
 
+if(DIII4A)
+set(CS16_C_FLAGS "-Wno-ignored-attributes")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CS16_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CS16_C_FLAGS}")
+endif()
+
 set(GAME_DIR "cstrike" CACHE STRING "Game directory name.")
 set(CLIENT_INSTALL_DIR "cl_dlls" CACHE STRING "Client library location.")
 set(SERVER_INSTALL_DIR "dlls" CACHE STRING "Server library location.")

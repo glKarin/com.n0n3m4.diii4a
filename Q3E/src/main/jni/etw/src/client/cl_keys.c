@@ -379,8 +379,8 @@ void Field_Draw(field_t *edit, int x, int y, int width, qboolean showCursor, qbo
  */
 void Field_Paste(field_t *edit)
 {
-	char   *cbd;
-	size_t pasteLen, i;
+	char     *cbd;
+	size_t   pasteLen, i;
 	uint32_t *chars;
 
 	cbd = IN_GetClipboardData();
@@ -1019,7 +1019,7 @@ void Key_SetBinding(int keynum, const char *binding)
  */
 char *Key_GetBinding(int keynum)
 {
-	if (keynum == -1)
+	if (keynum < 0 || keynum >= MAX_KEYS)
 	{
 		return "";
 	}

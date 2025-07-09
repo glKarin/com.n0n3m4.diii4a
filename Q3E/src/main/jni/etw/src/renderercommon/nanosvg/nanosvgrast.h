@@ -854,7 +854,7 @@ static int nsvg__cmpEdge(const void *p, const void *q)
 
 static NSVGactiveEdge* nsvg__addActive(NSVGrasterizer* r, NSVGedge* e, float startPoint)
 {
-	 NSVGactiveEdge* z;
+	NSVGactiveEdge* z;
 	float dxdy;
 
 	if (r->freelist != NULL) {

@@ -205,8 +205,10 @@ void AssetCache(void)
 
 	for (n = 0; n < NUM_CROSSHAIRS; n++)
 	{
-		uiInfo.uiDC.Assets.crosshairShader[n]    = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c", 'a' + n));
-		uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt", 'a' + n));
+        const qboolean useSVG = ui_cg_crosshairSVG.integer && DC->etLegacyClient;
+        
+		uiInfo.uiDC.Assets.crosshairShader[n]    = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c%s", 'a' + n, useSVG ? "_svg" : ""));
+		uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt%s", 'a' + n, useSVG ? "_svg" : ""));
 	}
 }
 
@@ -2964,8 +2966,11 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color)
 
 	trap_R_SetColor(uiInfo.xhairColor);
 	UI_DrawHandlePic(rect->x + (rect->w - sizeX) * 0.5f, rect->y + (rect->h - sizeY) * 0.5f, sizeX, sizeY, uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
-	trap_R_SetColor(uiInfo.xhairColorAlt);
-	UI_DrawHandlePic(rect->x + (rect->w - sizeX) * 0.5f, rect->y + (rect->h - sizeY) * 0.5f, sizeX, sizeY, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
+    if (uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair])
+    {
+        trap_R_SetColor(uiInfo.xhairColorAlt);
+        UI_DrawHandlePic(rect->x + (rect->w - sizeX) * 0.5f, rect->y + (rect->h - sizeY) * 0.5f, sizeX, sizeY, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
+    }
 
 	trap_R_SetColor(NULL);
 }
@@ -6502,7 +6507,7 @@ static int UI_CampaignCount(qboolean singlePlayer)
  */
 static void UI_InsertServerIntoDisplayList(int num, int position)
 {
-	int i;
+	int       i;
 	menuDef_t *menu;
 
 	if (position < 0 || position > uiInfo.serverStatus.numDisplayServers)
@@ -6517,15 +6522,15 @@ static void UI_InsertServerIntoDisplayList(int num, int position)
 	}
 	uiInfo.serverStatus.displayServers[position] = num;
 
-    // If we're inserting a server before the currently selected one, increment the selected item.
-    // This has improved UX over changing the item out from under the user, who might want to select a server
-    // and so something with it before the list finishes loading, which can take a while.
+	// If we're inserting a server before the currently selected one, increment the selected item.
+	// This has improved UX over changing the item out from under the user, who might want to select a server
+	// and so something with it before the list finishes loading, which can take a while.
 	if (position < uiInfo.serverStatus.currentServer)
 	{
-        uiInfo.serverStatus.currentServer++;
+		uiInfo.serverStatus.currentServer++;
 		menu = Menus_FindByName("serverList");
-        Menu_SetFeederSelection(menu, FEEDER_SERVERS, uiInfo.serverStatus.currentServer, NULL);
-    }
+		Menu_SetFeederSelection(menu, FEEDER_SERVERS, uiInfo.serverStatus.currentServer, NULL);
+	}
 }
 
 /**
@@ -9238,6 +9243,7 @@ vmCvar_t ui_cg_crosshairAlphaAlt;
 vmCvar_t ui_cg_crosshairSize;
 vmCvar_t ui_cg_crosshairScaleX;
 vmCvar_t ui_cg_crosshairScaleY;
+vmCvar_t ui_cg_crosshairSVG;
 
 vmCvar_t cl_bypassMouseInput;
 
@@ -9341,6 +9347,7 @@ static cvarTable_t cvarTable[] =
 	{ &ui_cg_crosshairSize,                "cg_crosshairSize",                    "48",                         CVAR_ARCHIVE,                   0 },
 	{ &ui_cg_crosshairScaleX,              "cg_crosshairScaleX",                  "1.0",                        CVAR_ARCHIVE,                   0 },
 	{ &ui_cg_crosshairScaleY,              "cg_crosshairScaleY",                  "1.0",                        CVAR_ARCHIVE,                   0 },
+    { &ui_cg_crosshairSVG,                 "cg_crosshairSVG",                     "0",                          CVAR_ARCHIVE,                   0 },
 	{ NULL,                                "cg_crosshairPulse",                   "1",                          CVAR_ARCHIVE,                   0 },
 	{ NULL,                                "cg_crosshairHealth",                  "0",                          CVAR_ARCHIVE,                   0 },
 
