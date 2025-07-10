@@ -1996,3 +1996,139 @@ target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
 endif(BUILD_SOURCE_DOD)
+
+
+
+if(BUILD_SOURCE_EPISODIC)
+set(source_episodic_src
+		hud_chat.cpp
+		c_team_objectiveresource.cpp
+		c_team_objectiveresource.h
+)
+
+set(source_episodic_dll_src
+			../shared/hl2/basehlcombatweapon_shared.cpp
+			../shared/episodic/achievements_ep1.cpp
+			../shared/episodic/achievements_ep2.cpp
+			../shared/episodic/achievements_epx.cpp
+			hl2/c_antlion_dust.cpp
+			hl2/c_ar2_explosion.cpp
+			hl2/c_barnacle.cpp
+			hl2/c_barney.cpp
+			hl2/c_basehelicopter.cpp
+			hl2/c_basehelicopter.h
+			hl2/c_basehlcombatweapon.cpp
+			hl2/c_basehlcombatweapon.h
+			hl2/c_basehlplayer.cpp
+			hl2/c_basehlplayer.h
+			hl2/c_citadel_effects.cpp
+			hl2/c_corpse.cpp
+			hl2/c_corpse.h
+			hl2/c_env_alyxtemp.cpp
+			hl2/c_env_headcrabcanister.cpp
+			hl2/c_env_starfield.cpp
+			hl2/c_func_tankmortar.cpp
+			hl2/c_hl2_playerlocaldata.cpp
+			hl2/c_hl2_playerlocaldata.h
+			hl2/c_info_teleporter_countdown.cpp
+			hl2/c_npc_antlionguard.cpp
+			hl2/c_npc_combinegunship.cpp
+			hl2/c_npc_manhack.cpp
+			hl2/c_npc_rollermine.cpp
+			hl2/c_plasma_beam_node.cpp
+			hl2/c_prop_combine_ball.cpp
+			hl2/c_prop_combine_ball.h
+			episodic/c_prop_scalable.cpp
+			hl2/c_rotorwash.cpp
+			hl2/c_script_intro.cpp
+			../shared/script_intro_shared.cpp
+			hl2/c_strider.cpp
+			hl2/c_te_concussiveexplosion.cpp
+			hl2/c_te_flare.cpp
+			hl2/c_thumper_dust.cpp
+			hl2/c_vehicle_airboat.cpp
+			hl2/c_vehicle_cannon.cpp
+			hl2/c_vehicle_crane.cpp
+			hl2/c_vehicle_crane.h
+			episodic/c_vehicle_jeep_episodic.cpp
+			hl2/c_vehicle_prisoner_pod.cpp
+			episodic/c_vort_charge_token.cpp
+			hl2/c_weapon__stubs_hl2.cpp
+			hl2/c_weapon_crossbow.cpp
+			episodic/c_weapon_hopwire.cpp
+			hl2/c_weapon_physcannon.cpp
+			hl2/c_weapon_stunstick.cpp
+			../shared/hl2/citadel_effects_shared.h
+			hl2/clientmode_hlnormal.cpp
+			hl2/clientmode_hlnormal.h
+			death.cpp
+			../shared/hl2/env_headcrabcanister_shared.cpp
+			../shared/hl2/env_headcrabcanister_shared.h
+			../shared/episodic/npc_advisor_shared.h
+			episodic/c_npc_advisor.cpp
+			episodic/episodic_screenspaceeffects.cpp
+			episodic/episodic_screenspaceeffects.h
+			episodic/flesh_internal_material_proxy.cpp
+			hl2/fx_antlion.cpp
+			hl2/fx_bugbait.cpp
+			hl2/fx_hl2_impacts.cpp
+			hl2/fx_hl2_tracers.cpp
+			hl2/hl2_clientmode.cpp
+			../shared/hl2/hl2_gamerules.cpp
+			../shared/hl2/hl2_gamerules.h
+			../shared/hl2/hl2_shareddefs.h
+			../shared/hl2/hl2_usermessages.cpp
+			../shared/hl2/hl_gamemovement.cpp
+			../shared/hl2/hl_gamemovement.h
+			hl2/hl_in_main.cpp
+			hl2/hl_prediction.cpp
+			hl2/hud_ammo.cpp
+			hl2/hud_battery.cpp
+			hl2/hud_blood.cpp
+			hl2/hud_credits.cpp
+			hl2/hud_damageindicator.cpp
+			hl2/hud_flashlight.cpp
+			hl2/hud_locator.cpp
+			hl2/hud_health.cpp
+			hl2/hud_poisondamageindicator.cpp
+			hud_posture.cpp
+			hl2/hud_quickinfo.cpp
+			hl2/hud_radar.cpp
+			hl2/hud_radar.h
+			hud_squadstatus.cpp
+			hl2/hud_suitpower.cpp
+			hl2/hud_suitpower.h
+			hl2/hud_weaponselection.cpp
+			hl2/hud_zoom.cpp
+			hl2/shieldproxy.cpp
+			../shared/hl2/survival_gamerules.cpp
+			hl2/vgui_rootpanel_hl2.cpp
+			episodic/c_npc_puppet.cpp
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_episodic_src}
+    ${source_episodic_dll_src}
+)
+
+set(source_inc
+	hl2
+	hl2/elements
+	../shared/hl2
+	../shared/episodic
+	../../public
+	${source_base_inc}
+)
+
+set(source_lib
+		${source_base_lib}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}episodic)
+set(source_def "${source_base_def};HL2_CLIENT_DLL;HL2_EPISODIC")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_EPISODIC)

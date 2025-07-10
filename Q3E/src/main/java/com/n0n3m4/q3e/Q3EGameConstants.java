@@ -57,7 +57,7 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_SAMTFE   = "";
     public static final String CONFIG_FILE_SAMTSE   = "";
     public static final String CONFIG_FILE_XASH3D   = "";
-    public static final String CONFIG_FILE_SOURCE   = "";
+    public static final String CONFIG_FILE_SOURCE   = "cfg/config.cfg";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -168,7 +168,7 @@ public final class Q3EGameConstants
 
     public enum PatchResource
     {
-        QUAKE4_SABOT, DOOM3_SABOT, DOOM3_RIVENSIN_ORIGIANL_LEVELS, DOOM3BFG_HLSL_SHADER, TDM_GLSL_SHADER, GZDOOM_RESOURCE, DOOM3_BFG_CHINESE_TRANSLATION, XASH3D_EXTRAS, XASH3D_CS16_EXTRAS,
+        QUAKE4_SABOT, DOOM3_SABOT, DOOM3_RIVENSIN_ORIGIANL_LEVELS, DOOM3BFG_HLSL_SHADER, TDM_GLSL_SHADER, GZDOOM_RESOURCE, DOOM3_BFG_CHINESE_TRANSLATION, XASH3D_EXTRAS, XASH3D_CS16_EXTRAS, SOURCE_ENGINE_EXTRAS,
     }
 
 /*
@@ -248,6 +248,7 @@ public final class Q3EGameConstants
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1"; // 1: init
     public static final String GZDOOM_VERSION                 = "4.14.1.1"; // 1: init
     public static final String XASH3D_VERSION                 = "0.21.1"; // 1: init
+    public static final String SOURCE_ENGINE_VERSION          = "1.16.1"; // 1: init
 
     public static final int[]    GZDOOM_GL_VERSIONS       = {0, 330, 420, 430, 450,};
     public static final String[] QUAKE2_RENDERER_BACKENDS = {"gl1", "gles3", "vk",};
@@ -261,7 +262,7 @@ public final class Q3EGameConstants
             "libfilesystem_stdio.so",
     };
 
-    public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod",};
+    public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod", "episodic",};
 
     private Q3EGameConstants()
     {

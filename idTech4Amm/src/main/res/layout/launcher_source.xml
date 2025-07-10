@@ -44,6 +44,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="dod" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_episodic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="episodic" />
     </RadioGroup>
 
 </LinearLayout>

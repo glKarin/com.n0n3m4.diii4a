@@ -137,6 +137,18 @@ const char * Q3E_Engine_GetGameDLLSuffix()
 #ifdef _SV_CL_DOD
 			&& Q_stricmp(gamedll, "dod")
 #endif
+#ifdef _SV_CL_EPISODIC
+			&& Q_stricmp(gamedll, "episodic")
+#endif
+#ifdef _SV_CL_HL2MP
+			&& Q_stricmp(gamedll, "hl2mp")
+#endif
+#ifdef _SV_CL_HL1
+			&& Q_stricmp(gamedll, "hl1")
+#endif
+#ifdef _SV_CL_HL1MP
+			&& Q_stricmp(gamedll, "hl1mp")
+#endif
 			)
 		gamedll = "hl2";
 	return gamedll;

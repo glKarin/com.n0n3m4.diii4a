@@ -66,4 +66,6 @@
     <string name="xash3d_extras">Xash3D extras</string>
     <string name="extract_xash3d_extras_resource_files_fail">Extract Xash3D extras resource files fail!</string>
     <string name="cs16_xash3d_extras">CS1.6(Xash3D) extras</string>
+    <string name="sourceengine_extras">Source Engine extras</string>
+    <string name="extract_source_engine_extras_resource_files_fail">Extract Source Engine extras resource files fail!</string>
 </resources>

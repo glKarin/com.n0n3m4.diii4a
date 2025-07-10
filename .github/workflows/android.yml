@@ -1,6 +1,6 @@
 # Only for building testing version by Github CI workflow
 
-name: Android apk CI(64bits only)
+name: Android apk CI(armv8-64 only)
 
 on:
   push:
@@ -69,6 +69,6 @@ jobs:
         repo_token: "${{ secrets.TOKEN }}"
         automatic_release_tag: "android_testing"
         prerelease: true
-        title: "Android testing (Non-release. Automatic CI builds)"
+        title: "Android armv8-64 testing (Non-release. Automatic CI builds)"
         files: |
           ${{ steps.rename_apk.outputs.value }}

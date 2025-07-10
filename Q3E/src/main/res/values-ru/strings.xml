@@ -64,4 +64,6 @@
     <string name="xash3d_extras">Xash3D дополнительные ресурсы</string>
     <string name="extract_xash3d_extras_resource_files_fail">Извлечение дополнительных файлов ресурсов Xash3D не удалось!</string>
     <string name="cs16_xash3d_extras">CS1.6(Xash3D) дополнительные ресурсы</string>
+    <string name="sourceengine_extras">Source Engine extras</string>
+    <string name="extract_source_engine_extras_resource_files_fail">Extract Source Engine extras resource files fail!</string>
 </resources>

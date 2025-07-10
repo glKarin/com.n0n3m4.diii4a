@@ -65,4 +65,6 @@
     <string name="xash3d_extras">Xash3D额外资源</string>
     <string name="extract_xash3d_extras_resource_files_fail">提取Xash3D额外资源文件失败!</string>
     <string name="cs16_xash3d_extras">反恐精英1.6(Xash3D)额外资源</string>
+    <string name="sourceengine_extras">起源引擎额外资源</string>
+    <string name="extract_source_engine_extras_resource_files_fail">提取起源引擎额外资源文件失败!</string>
 </resources>

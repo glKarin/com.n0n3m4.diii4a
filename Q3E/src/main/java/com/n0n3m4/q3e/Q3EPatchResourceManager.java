@@ -159,6 +159,17 @@ public class Q3EPatchResourceManager
                 ""
         );
         resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource_zipToDir(
+                Q3EGameConstants.PatchResource.SOURCE_ENGINE_EXTRAS,
+                Q3ELang.tr(context, R.string.sourceengine_extras),
+                Q3EGameConstants.SOURCE_ENGINE_VERSION,
+                Q3EGameConstants.GAME_SOURCE,
+                null,
+                "pak/source/extras.zip",
+                ""
+        );
+        resourceList.add(rsc);
     }
 
     public String Fetch(Q3EGameConstants.PatchResource type, boolean overwrite, String...fsgame)

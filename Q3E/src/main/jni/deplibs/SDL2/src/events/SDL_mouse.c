@@ -141,7 +141,11 @@ static void SDLCALL SDL_MouseTouchEventsChanged(void *userdata, const char *name
     SDL_bool default_value;
 
 #if defined(__ANDROID__) || (defined(__IPHONEOS__) && !defined(__TVOS__))
+#ifdef _Q3E //karin: always mouse event, default disable touch event
+    default_value = SDL_FALSE;
+#else
     default_value = SDL_TRUE;
+#endif
 #else
     default_value = SDL_FALSE;
 #endif

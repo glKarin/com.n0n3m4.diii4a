@@ -53,6 +53,7 @@ option(BUILD_SOURCE_DOD "Build DOD: Source" ON)
 option(BUILD_SOURCE_HL2MP "Build Half-Life 2 Multiplayer" ON)
 option(BUILD_SOURCE_EPISODIC "Build Half-Life 2 Episodic" ON)
 option(BUILD_SOURCE_HL1 "Build Half-Life 1" ON)
+option(BUILD_SOURCE_HL1MP "Build Half-Life 1 Multiplayer" ON)
 
 add_subdirectory(tier0)
 add_subdirectory(tier1)
@@ -70,10 +71,10 @@ add_subdirectory(mathlib)
 add_subdirectory(datamodel)
 
 add_subdirectory(togles)
-#add_subdirectory(engine/voice_codecs/opus) #opus
 
 add_subdirectory(engine)
 add_subdirectory(engine/voice_codecs/minimp3)
+add_subdirectory(engine/voice_codecs/opus) #opus
 add_subdirectory(game/client)
 add_subdirectory(game/server)
 add_subdirectory(gameui)

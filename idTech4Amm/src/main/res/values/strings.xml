@@ -504,5 +504,7 @@
     <string name="css_base">Counter-Strike: Source</string>
     <string name="portal_base">Portal</string>
     <string name="dod_base">Day of Defeat: Source</string>
+    <string name="halflife_2_ep1_base">Half-Life 2: Episodic 1</string>
+    <string name="halflife_2_ep2_base">Half-Life 2: Episodic 2</string>
 
 </resources>

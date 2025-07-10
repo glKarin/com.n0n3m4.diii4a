@@ -28,6 +28,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
+            "Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.2, fix Omni-bot initialization.",
         };
 	};
 
