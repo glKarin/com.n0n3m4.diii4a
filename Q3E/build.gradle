@@ -6,6 +6,16 @@ String[] ABIFILTERS = [
         /*, "armeabi", "x86", "x86_64"*/
 ]
 
+// filter ABI
+def abifilters = ABIFILTERS;
+if(project.properties.abifilters != null && !project.properties.abifilters.isEmpty()) {
+    println "[Q3E]: Using gradle.properties ABI filters = ${project.properties.abifilters}"
+    abifilters = project.properties.abifilters.split(",")
+} else {
+    println "[Q3E]: Using built-in ABI filters = ${Arrays.toString(abifilters)}"
+}
+println "[Q3E]: Build arch = " + Arrays.toString(abifilters)
+
 android {
     compileSdk project.properties.compileSdkVersion.toInteger()
     buildToolsVersion project.properties.buildToolsVersion
@@ -16,13 +26,13 @@ android {
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
 
-        ndk {
+/*        ndk {
             moduleName "q3eloader"
             abiFilters ABIFILTERS
-        }
+        }*/
         externalNativeBuild {
             cmake {
-                abiFilters ABIFILTERS
+                abiFilters abifilters
                 arguments "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21"/*, "-DANDROID_STL=c++_shared"*/
                 cppFlags "-fexceptions", "-frtti"
             }

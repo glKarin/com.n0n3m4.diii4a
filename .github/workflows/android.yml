@@ -1,6 +1,6 @@
 # Only for building testing version by Github CI workflow
 
-name: Android apk CI
+name: Android apk CI(64bits only)
 
 on:
   push:
@@ -45,7 +45,7 @@ jobs:
     - name: Build with Gradle
       run: |
         chmod +x ./gradlew
-        ./gradlew assembleRelease
+        ./gradlew assembleRelease -Pabifilters=arm64-v8a
 
     - name: Rename APK
       id: rename_apk
