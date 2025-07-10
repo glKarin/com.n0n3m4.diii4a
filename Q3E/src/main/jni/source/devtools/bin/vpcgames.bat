@@ -1,1 +1,0 @@
-vpc +gamedlls /allgames
