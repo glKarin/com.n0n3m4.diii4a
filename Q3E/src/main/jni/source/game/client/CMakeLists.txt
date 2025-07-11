@@ -2311,7 +2311,7 @@ set(source_lib
 		${source_base_lib}
 )
 
-set(binary_name ${BINARY_NAME_PREFIX}episodic)
+set(binary_name ${BINARY_NAME_PREFIX}hl2mp)
 set(source_def "${source_base_def};HL2MP;HL2_CLIENT_DLL")
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
