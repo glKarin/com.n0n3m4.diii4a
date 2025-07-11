@@ -2719,8 +2719,8 @@ set(source_hl1_dll2_src
 			hl2/monster_dummy.cpp
 			hl2/npc_metropolice.h
 			hl2/npc_playercompanion.h
-			npc_Talker.cpp
-			npc_Talker.h
+			npc_talker.cpp
+			npc_talker.h
 			hl2/prop_combine_ball.h
 			hl2/script_intro.h
 			hl2/vehicle_crane.h
@@ -2896,8 +2896,8 @@ set(source_hl1mp_dll2_src
 			hl2/monster_dummy.cpp
 			hl2/npc_metropolice.h
 			hl2/npc_playercompanion.h
-			npc_Talker.cpp
-			npc_Talker.h
+			npc_talker.cpp
+			npc_talker.h
 			hl2/prop_combine_ball.h
 			hl2/script_intro.h
 			hl2/vehicle_crane.h
