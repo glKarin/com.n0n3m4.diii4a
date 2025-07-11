@@ -2693,8 +2693,8 @@ set(source_hl1_src
 		basegrenade_contact.cpp
 		basegrenade_timed.cpp
 		hl2/Func_Monitor.cpp
-		GrenadeThrown.cpp
-		GrenadeThrown.h
+		grenadethrown.cpp
+		grenadethrown.h
 		h_cycler.cpp
 		../shared/predicted_viewmodel.cpp
 		../shared/predicted_viewmodel.h
@@ -2870,8 +2870,8 @@ set(source_hl1mp_src
 		basegrenade_contact.cpp
 		basegrenade_timed.cpp
 		hl2/Func_Monitor.cpp
-		GrenadeThrown.cpp
-		GrenadeThrown.h
+		grenadethrown.cpp
+		grenadethrown.h
 		h_cycler.cpp
 		../shared/predicted_viewmodel.cpp
 		../shared/predicted_viewmodel.h
