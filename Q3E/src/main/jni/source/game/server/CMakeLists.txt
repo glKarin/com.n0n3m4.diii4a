@@ -3,6 +3,34 @@ project (source-server)
 
 set(BINARY_NAME_PREFIX ${SOURCE_ENGINE_PREFIX}server_)
 
+# Nav mesh
+set(source_navigation_mesh_src
+			nav.h
+			nav_area.cpp
+			nav_area.h
+			nav_colors.cpp
+			nav_colors.h
+			nav_edit.cpp
+			nav_entities.cpp
+			nav_entities.h
+			nav_file.cpp
+			nav_generate.cpp
+			nav_ladder.cpp
+			nav_ladder.h
+			nav_merge.cpp
+			nav_mesh.cpp
+			nav_mesh.h
+			nav_mesh_factory.cpp
+			nav_node.cpp
+			nav_node.h
+			nav_pathfind.h
+			nav_simplify.cpp
+)
+set(source_navigation_mesh_inc "USE_NAV_MESH")
+
+
+
+# Replay
 set(source_replay_src
 		gamedll_replay.cpp
 		../../common/replay/ireplaysessionrecorder.h
@@ -10,6 +38,10 @@ set(source_replay_src
 		#../shared/replay_gamestats_shared.cpp
 		#../shared/replay_gamestats_shared.h
 )
+
+
+
+# 0. Base
 set(source_source_src
 		../shared/achievement_saverestore.cpp
 		../shared/achievement_saverestore.h
@@ -949,7 +981,8 @@ set(source_lib
 )
 
 
-# HalfLife 2
+
+# 1. Half-Life 2
 if(BUILD_SOURCE_HL2)
 set(source_hl2_src
 		ai_eventresponse.cpp
@@ -1215,7 +1248,7 @@ endif(BUILD_SOURCE_HL2)
 
 
 
-# Counter-Strike: Source
+# 2. Counter-Strike: Source
 if(BUILD_SOURCE_CSTRIKE)
 set(source_cs_src
 		hl2/Func_Monitor.cpp
@@ -1470,28 +1503,6 @@ set(source_cs_nextbotnavmeshentities_src
 				NextBot/NavMeshEntities/func_nav_prerequisite.cpp
 				NextBot/NavMeshEntities/func_nav_prerequisite.h
 )
-set(source_navigation_mesh_src 
-			nav.h
-			nav_area.cpp
-			nav_area.h
-			nav_colors.cpp
-			nav_colors.h
-			nav_edit.cpp
-			nav_entities.cpp
-			nav_entities.h
-			nav_file.cpp
-			nav_generate.cpp
-			nav_ladder.cpp
-			nav_ladder.h
-			nav_merge.cpp
-			nav_mesh.cpp
-			nav_mesh.h
-			nav_mesh_factory.cpp
-			nav_node.cpp
-			nav_node.h
-			nav_pathfind.h
-			nav_simplify.cpp
-)
 
 set(source_src
     ${source_base_src}
@@ -1529,7 +1540,7 @@ set(source_inc
 )
 
 set(binary_name ${BINARY_NAME_PREFIX}cstrike)
-set(source_def "${source_base_def};USE_NAV_MESH;BOTS;CSTRIKE_DLL;NEXT_BOT")
+set(source_def "${source_base_def};${source_navigation_mesh_inc};BOTS;CSTRIKE_DLL;NEXT_BOT")
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
@@ -1538,7 +1549,7 @@ endif(BUILD_SOURCE_CSTRIKE)
 
 
 
-# Portal
+# 3. Portal
 if(BUILD_SOURCE_PORTAL)
 set(source_portal_source_src
 		ai_eventresponse.cpp
@@ -1895,6 +1906,7 @@ endif(BUILD_SOURCE_PORTAL)
 
 
 
+# 4. Day of Defeat: Source
 if(BUILD_SOURCE_DOD)
 set(source_dod_src
 		../shared/playerclass_info_parse.cpp
@@ -2082,6 +2094,7 @@ endif(BUILD_SOURCE_DOD)
 
 
 
+# 5. Half-Life 2: Episodic 1 & 2
 if(BUILD_SOURCE_EPISODIC)
 set(source_episodic_src
 		ai_eventresponse.cpp
@@ -2374,3 +2387,653 @@ target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
 endif(BUILD_SOURCE_EPISODIC)
+
+
+
+# 6. Half-Life 2: Deathmatch
+if(BUILD_SOURCE_HL2MP)
+set(source_hl2mp_src
+		ai_relationship.cpp
+		basegrenade_concussion.cpp
+		basegrenade_contact.cpp
+		basegrenade_timed.cpp
+		EntityFlame.h
+		hl2/Func_Monitor.cpp
+		grenadethrown.cpp
+		grenadethrown.h
+		h_cycler.cpp
+		h_cycler.h
+		monstermaker.cpp
+		monstermaker.h
+		physics_bone_follower.h
+		../shared/predicted_viewmodel.cpp
+		../shared/predicted_viewmodel.h
+		../shared/ragdoll_shared.h
+		../shared/solidsetdefaults.h
+		../shared/hl2/survival_gamerules.cpp
+		team_objectiveresource.cpp
+		team_objectiveresource.h
+		team_spawnpoint.cpp
+		team_spawnpoint.h
+		team_control_point.cpp
+		team_control_point.h
+		team_control_point_master.cpp
+		team_control_point_master.h
+		team_control_point_round.cpp
+		team_control_point_round.h
+		team_train_watcher.cpp
+		team_train_watcher.h
+		../shared/teamplayroundbased_gamerules.cpp
+		../shared/touchlink.h
+		trigger_area_capture.cpp
+		trigger_area_capture.h
+		../shared/teamplay_round_timer.cpp
+		../shared/teamplay_round_timer.h
+)
+set(source_hl2mp_dll_src
+			hl2/ai_allymanager.cpp
+			hl2/ai_behavior_actbusy.cpp
+			hl2/ai_behavior_actbusy.h
+			hl2/ai_behavior_functank.cpp
+			hl2/ai_behavior_functank.h
+			hl2/ai_behavior_holster.cpp
+			hl2/ai_behavior_holster.h
+			hl2/ai_behavior_police.cpp
+			hl2/ai_behavior_police.h
+			hl2/ai_goal_police.cpp
+			hl2/ai_goal_police.h
+			hl2/ai_interactions.h
+			hl2/ai_spotlight.cpp
+			hl2/ai_spotlight.h
+			hl2/antlion_dust.cpp
+			hl2/antlion_dust.h
+			hl2/antlion_maker.cpp
+			hl2/antlion_maker.h
+			hl2/ar2_explosion.cpp
+			hl2/ar2_explosion.h
+			basebludgeonweapon.cpp
+			basebludgeonweapon.h
+			hl2/basehlcombatweapon.cpp
+			hl2/basehlcombatweapon.h
+			../shared/hl2/basehlcombatweapon_shared.cpp
+			../shared/hl2/basehlcombatweapon_shared.h
+			hl2/cbasehelicopter.cpp
+			hl2/cbasehelicopter.h
+			hl2/cbasespriteprojectile.cpp
+			hl2/cbasespriteprojectile.h
+			hl2/citadel_effects.cpp
+			../shared/hl2/citadel_effects_shared.h
+			hl2/combine_mine.cpp
+			hl2/combine_mine.h
+			hl2/energy_wave.h
+			hl2/env_alyxemp.cpp
+			../shared/hl2/env_alyxemp_shared.h
+			hl2/env_headcrabcanister.cpp
+			../shared/hl2/env_headcrabcanister_shared.cpp
+			../shared/hl2/env_headcrabcanister_shared.h
+			hl2/env_speaker.cpp
+			hl2/env_starfield.cpp
+			hl2/func_recharge.cpp
+			hl2/func_tank.cpp
+			hl2/func_tank.h
+			hl2/grenade_ar2.cpp
+			hl2/grenade_ar2.h
+			hl2/grenade_bugbait.cpp
+			hl2/grenade_bugbait.h
+			hl2/grenade_frag.cpp
+			hl2/grenade_frag.h
+			hl2/hl2_ai_network.cpp
+			hl2/hl2_eventlog.cpp
+			../shared/hl2/hl2_gamerules.cpp
+			../shared/hl2/hl2_gamerules.h
+			hl2/hl2_player.cpp
+			hl2/hl2_player.h
+			../shared/hl2/hl2_player_shared.h
+			hl2/hl2_playerlocaldata.cpp
+			hl2/hl2_playerlocaldata.h
+			../shared/hl2/hl2_shareddefs.h
+			hl2/hl2_triggers.cpp
+			../shared/hl2/hl2_usermessages.cpp
+			../shared/hl2/hl_gamemovement.cpp
+			../shared/hl2/hl_gamemovement.h
+			../shared/hl2/hl_movedata.h
+			hl2/hl_playermove.cpp
+			hl2/info_teleporter_countdown.cpp
+			hl2/item_ammo.cpp
+			hl2/item_battery.cpp
+			hl2/item_dynamic_resupply.cpp
+			hl2/item_dynamic_resupply.h
+			hl2/item_healthkit.cpp
+			hl2/item_itemcrate.cpp
+			hl2/item_suit.cpp
+			hl2/look_door.cpp
+			hl2/monster_dummy.cpp
+			hl2/npc_alyx.cpp
+			hl2/npc_alyx.h
+			hl2/npc_antlion.cpp
+			hl2/npc_antlion.h
+			hl2/npc_antlionguard.cpp
+			hl2/npc_apcdriver.cpp
+			hl2/npc_attackchopper.cpp
+			hl2/npc_attackchopper.h
+			hl2/npc_barnacle.cpp
+			hl2/npc_barnacle.h
+			hl2/npc_barney.cpp
+			hl2/npc_basescanner.cpp
+			hl2/npc_basescanner.h
+			hl2/npc_BaseZombie.cpp
+			hl2/npc_BaseZombie.h
+			hl2/npc_breen.cpp
+			hl2/npc_bullseye.cpp
+			hl2/npc_bullseye.h
+			hl2/npc_citizen17.cpp
+			hl2/npc_citizen17.h
+			hl2/npc_combine.cpp
+			hl2/npc_combine.h
+			hl2/npc_combinecamera.cpp
+			hl2/npc_combinedropship.cpp
+			hl2/npc_combinegunship.cpp
+			hl2/npc_combines.cpp
+			hl2/npc_combines.h
+			hl2/npc_cranedriver.cpp
+			hl2/npc_crow.cpp
+			hl2/npc_crow.h
+			hl2/npc_dog.cpp
+			hl2/npc_eli.cpp
+			hl2/npc_enemyfinder.cpp
+			hl2/npc_fisherman.cpp
+			hl2/npc_gman.cpp
+			hl2/npc_headcrab.cpp
+			hl2/npc_headcrab.h
+			hl2/npc_ichthyosaur.cpp
+			hl2/npc_kleiner.cpp
+			hl2/npc_launcher.cpp
+			hl2/npc_manhack.cpp
+			hl2/npc_manhack.h
+			hl2/npc_metropolice.cpp
+			hl2/npc_metropolice.h
+			hl2/npc_monk.cpp
+			hl2/npc_mossman.cpp
+			hl2/npc_playercompanion.cpp
+			hl2/npc_playercompanion.h
+			hl2/npc_PoisonZombie.cpp
+			hl2/npc_rollermine.cpp
+			hl2/npc_rollermine.h
+			hl2/npc_scanner.cpp
+			hl2/npc_stalker.cpp
+			hl2/npc_stalker.h
+			hl2/npc_strider.cpp
+			hl2/npc_strider.h
+			npc_talker.cpp
+			npc_talker.h
+			hl2/npc_turret_ceiling.cpp
+			hl2/npc_turret_floor.cpp
+			hl2/npc_turret_ground.cpp
+			hl2/npc_vortigaunt_episodic.cpp
+			hl2/npc_vortigaunt_episodic.h
+			hl2/npc_zombie.cpp
+			hl2/point_apc_controller.cpp
+			hl2/prop_combine_ball.cpp
+			hl2/prop_combine_ball.h
+			hl2/prop_thumper.cpp
+			hl2/proto_sniper.cpp
+			hl2/rotorwash.cpp
+			hl2/rotorwash.h
+			hl2/script_intro.cpp
+			hl2/script_intro.h
+			../shared/script_intro_shared.cpp
+			hl2/vehicle_airboat.cpp
+			hl2/vehicle_apc.h
+			hl2/vehicle_crane.cpp
+			hl2/vehicle_crane.h
+			hl2/vehicle_prisoner_pod.cpp
+			hl2/vehicle_viewcontroller.cpp
+			hl2/weapon_alyxgun.h
+			hl2/weapon_annabelle.cpp
+			hl2/weapon_bugbait.cpp
+			hl2/weapon_crowbar.h
+			weapon_cubemap.cpp
+)
+set(source_hl2mp_unused_src
+				hl2/grenade_beam.cpp
+				hl2/grenade_beam.h
+				hl2/grenade_homer.cpp
+				hl2/grenade_homer.h
+				hl2/grenade_pathfollower.cpp
+				hl2/grenade_pathfollower.h
+				hl2/npc_missiledefense.cpp
+				hl2/vehicle_apc.cpp
+				hl2/weapon_cguard.cpp
+				hl2/weapon_flaregun.cpp
+				hl2/weapon_flaregun.h
+)
+set(source_hl2mp_mp_src
+			hl2mp/hl2mp_bot_temp.cpp
+			hl2mp/hl2mp_bot_temp.h
+			hl2mp/hl2mp_client.cpp
+			hl2mp/hl2mp_cvars.cpp
+			hl2mp/hl2mp_gameinterface.cpp
+			hl2mp/hl2mp_gameinterface.h
+			../shared/hl2mp/hl2mp_gamerules.cpp
+			../shared/hl2mp/hl2mp_gamerules.h
+			hl2mp/hl2mp_player.cpp
+			hl2mp/hl2mp_player.h
+			../shared/hl2mp/hl2mp_player_shared.cpp
+			../shared/hl2mp/hl2mp_player_shared.h
+			../shared/hl2mp/hl2mp_weapon_parse.cpp
+			../shared/hl2mp/hl2mp_weapon_parse.h
+)
+
+set(source_hl2mp_weapons_src
+				hl2mp/grenade_satchel.cpp
+				hl2mp/grenade_satchel.h
+				hl2mp/grenade_tripmine.cpp
+				hl2mp/grenade_tripmine.h
+				hl2mp/te_hl2mp_shotgun_shot.cpp
+				hl2mp/te_hl2mp_shotgun_shot.h
+				../shared/hl2mp/weapon_357.cpp
+				../shared/hl2mp/weapon_ar2.cpp
+				../shared/hl2mp/weapon_ar2.h
+				../shared/hl2mp/weapon_crossbow.cpp
+				../shared/hl2mp/weapon_crowbar.cpp
+				../shared/hl2mp/weapon_frag.cpp
+				../shared/hl2mp/weapon_hl2mpbase.cpp
+				../shared/hl2mp/weapon_hl2mpbase.h
+				../shared/hl2mp/weapon_hl2mpbase_machinegun.cpp
+				../shared/hl2mp/weapon_hl2mpbase_machinegun.h
+				../shared/hl2mp/weapon_hl2mpbasebasebludgeon.cpp
+				../shared/hl2mp/weapon_hl2mpbasehlmpcombatweapon.cpp
+				../shared/hl2mp/weapon_hl2mpbasehlmpcombatweapon.h
+				../shared/hl2mp/weapon_physcannon.cpp
+				../shared/hl2mp/weapon_physcannon.h
+				../shared/hl2mp/weapon_pistol.cpp
+				../shared/hl2mp/weapon_rpg.cpp
+				../shared/hl2mp/weapon_rpg.h
+				../shared/hl2mp/weapon_shotgun.cpp
+				../shared/hl2mp/weapon_slam.cpp
+				../shared/hl2mp/weapon_slam.h
+				../shared/hl2mp/weapon_smg1.cpp
+				../shared/hl2mp/weapon_stunstick.cpp
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_hl2mp_src}
+    ${source_hl2mp_dll_src}
+    ${source_hl2mp_unused_src}
+    ${source_hl2mp_mp_src}
+    ${source_hl2mp_weapons_src}
+
+	${source_navigation_mesh_src}
+)
+
+set(source_inc
+	../shared/hl2
+	hl2
+	hl2mp
+	../shared/hl2mp
+	${source_base_inc}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}hl2mp)
+set(source_def "${source_base_def};HL2MP;HL2_DLL;${source_navigation_mesh_inc}")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_HL2MP)
+
+
+
+# 7. Half-Life 1: Source
+if(BUILD_SOURCE_HL1)
+set(source_hl1_src
+		base_gameinterface.cpp
+		basegrenade_concussion.cpp
+		basegrenade_contact.cpp
+		basegrenade_timed.cpp
+		hl2/Func_Monitor.cpp
+		GrenadeThrown.cpp
+		GrenadeThrown.h
+		h_cycler.cpp
+		../shared/predicted_viewmodel.cpp
+		../shared/predicted_viewmodel.h
+		../shared/hl2/survival_gamerules.cpp
+		team_spawnpoint.cpp
+		team_spawnpoint.h
+		../shared/weapon_parse_default.cpp
+)
+set(source_hl1_dll2_src
+			hl2/ai_behavior_police.h
+			hl2/ai_goal_police.h
+			hl2/ai_interactions.h
+			hl2/antlion_maker.h
+			hl2/CBaseSpriteProjectile.cpp
+			hl2/CBaseSpriteProjectile.h
+			../shared/hl2/citadel_effects_shared.h
+			hl2/energy_wave.h
+			../shared/hl2/env_alyxemp_shared.h
+			../shared/hl2/hl2_shareddefs.h
+			../shared/hl2/hl_movedata.h
+			hl2/look_door.cpp
+			hl2/monster_dummy.cpp
+			hl2/npc_metropolice.h
+			hl2/npc_playercompanion.h
+			npc_Talker.cpp
+			npc_Talker.h
+			hl2/prop_combine_ball.h
+			hl2/script_intro.h
+			hl2/vehicle_crane.h
+			hl2/weapon_crowbar.h
+			hl2/weapon_physcannon.h
+			hl2/weapon_stunstick.h
+)
+set(source_hl1_unused_src
+				hl2/grenade_beam.cpp
+				hl2/grenade_beam.h
+				hl2/grenade_homer.cpp
+				hl2/grenade_homer.h
+)
+set(source_hl1_dll_src
+			actanimating.cpp
+			actanimating.h
+			hl1/hl1_ai_basenpc.cpp
+			hl1/hl1_ai_basenpc.h
+			hl1/hl1_basecombatweapon.cpp
+			../shared/hl1/hl1_basecombatweapon_shared.cpp
+			../shared/hl1/hl1_basecombatweapon_shared.h
+			hl1/hl1_basegrenade.cpp
+			hl1/hl1_basegrenade.h
+			hl1_CBaseHelicopter.h
+			hl1/hl1_client.cpp
+			hl1/hl1_ents.cpp
+			hl1/hl1_env_speaker.cpp
+			hl1/hl1_eventlog.cpp
+			hl1/hl1_func_recharge.cpp
+			hl1/hl1_func_tank.cpp
+			../shared/hl1/hl1_gamemovement.cpp
+			../shared/hl1/hl1_gamemovement.h
+			../shared/hl1/hl1_gamerules.cpp
+			../shared/hl1/hl1_gamerules.h
+			hl1/hl1_grenade_mp5.cpp
+			hl1/hl1_grenade_mp5.h
+			hl1/hl1_grenade_spit.cpp
+			hl1/hl1_grenade_spit.h
+			hl1/hl1_item_ammo.cpp
+			hl1/hl1_item_battery.cpp
+			hl1/hl1_item_healthkit.cpp
+			hl1/hl1_item_longjump.cpp
+			hl1/hl1_item_suit.cpp
+			hl1/hl1_items.cpp
+			hl1/hl1_items.h
+			hl1/hl1_monstermaker.cpp
+			hl1/hl1_monstermaker.h
+			hl1/hl1_npc_aflock.cpp
+			hl1/hl1_npc_agrunt.cpp
+			hl1/hl1_npc_apache.cpp
+			hl1/hl1_npc_barnacle.cpp
+			hl1/hl1_npc_barnacle.h
+			hl1/hl1_npc_barney.cpp
+			hl1/hl1_npc_barney.h
+			hl1/hl1_npc_bigmomma.cpp
+			hl1/hl1_npc_bloater.cpp
+			hl1/hl1_npc_bullsquid.cpp
+			hl1/hl1_npc_bullsquid.h
+			hl1/hl1_npc_controller.cpp
+			hl1/hl1_npc_gargantua.cpp
+			hl1/hl1_npc_gargantua.h
+			hl1/hl1_npc_gman.cpp
+			hl1/hl1_npc_hassassin.cpp
+			hl1/hl1_npc_headcrab.cpp
+			hl1/hl1_npc_headcrab.h
+			hl1/hl1_npc_hgrunt.cpp
+			hl1/hl1_npc_hgrunt.h
+			hl1/hl1_npc_hornet.cpp
+			hl1/hl1_npc_hornet.h
+			hl1/hl1_npc_houndeye.cpp
+			hl1/hl1_npc_houndeye.h
+			hl1/hl1_npc_ichthyosaur.cpp
+			hl1/hl1_npc_ichthyosaur.h
+			hl1/hl1_npc_leech.cpp
+			hl1/hl1_npc_nihilanth.cpp
+			hl1/hl1_npc_osprey.cpp
+			hl1/hl1_npc_roach.cpp
+			hl1/hl1_npc_scientist.cpp
+			hl1/hl1_npc_scientist.h
+			hl1/hl1_npc_snark.cpp
+			hl1/hl1_npc_snark.h
+			hl1/hl1_npc_talker.cpp
+			hl1/hl1_npc_talker.h
+			hl1/hl1_npc_tentacle.cpp
+			hl1/hl1_npc_turret.cpp
+			hl1/hl1_npc_vortigaunt.cpp
+			hl1/hl1_npc_vortigaunt.h
+			hl1/hl1_npc_zombie.cpp
+			hl1/hl1_npc_zombie.h
+			hl1/hl1_player.cpp
+			hl1/hl1_player.h
+			../shared/hl1/hl1_player_shared.cpp
+			../shared/hl1/hl1_player_shared.h
+			hl1/hl1_playermove.cpp
+			../shared/hl1/hl1_usermessages.cpp
+			hl1/hl1_weapon_snark.cpp
+			hl1/hl1_weapon_tripmine.cpp
+			hl1/hl1_weaponbox.cpp
+			../shared/hl1/hl1mp_basecombatweapon_shared.cpp
+			hl1/hl1mp_bot_temp.cpp
+			hl1/hl1mp_player.cpp
+			../shared/hl1/hl1mp_weapon_357.cpp
+			../shared/hl1/hl1mp_weapon_crossbow.cpp
+			../shared/hl1/hl1mp_weapon_egon.cpp
+			../shared/hl1/hl1mp_weapon_gauss.cpp
+			../shared/hl1/hl1mp_weapon_glock.cpp
+			../shared/hl1/hl1mp_weapon_handgrenade.cpp
+			../shared/hl1/hl1mp_weapon_hornetgun.cpp
+			../shared/hl1/hl1mp_weapon_mp5.cpp
+			../shared/hl1/hl1mp_weapon_rpg.cpp
+			../shared/hl1/hl1mp_weapon_sachel.cpp
+			../shared/hl1/hl1mp_weapon_shotgun.cpp
+			hl1/hl1_weapon_crowbar.cpp
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_hl1_src}
+    ${source_hl1_dll2_src}
+    ${source_hl1_unused_src}
+    ${source_hl1_dll_src}
+)
+
+set(source_inc
+	../shared/hl1
+	../shared/hl2
+	hl1
+	hl2
+	${source_base_inc}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}hl1)
+set(source_def "${source_base_def};HL1_DLL")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_HL1)
+
+
+
+# 8. Half-Life 1 Deathmatch: Source
+if(BUILD_SOURCE_HL1MP)
+set(source_hl1mp_src
+		hl1/hl1mp_gameinterface.cpp
+		basegrenade_concussion.cpp
+		basegrenade_contact.cpp
+		basegrenade_timed.cpp
+		hl2/Func_Monitor.cpp
+		GrenadeThrown.cpp
+		GrenadeThrown.h
+		h_cycler.cpp
+		../shared/predicted_viewmodel.cpp
+		../shared/predicted_viewmodel.h
+		../shared/hl2/survival_gamerules.cpp
+		team_spawnpoint.cpp
+		team_spawnpoint.h
+		../shared/weapon_parse_default.cpp
+)
+set(source_hl1mp_dll2_src
+			hl2/ai_behavior_police.h
+			hl2/ai_goal_police.h
+			hl2/ai_interactions.h
+			hl2/antlion_maker.h
+			hl2/CBaseSpriteProjectile.cpp
+			hl2/CBaseSpriteProjectile.h
+			../shared/hl2/citadel_effects_shared.h
+			hl2/energy_wave.h
+			../shared/hl2/env_alyxemp_shared.h
+			../shared/hl2/hl2_shareddefs.h
+			../shared/hl2/hl_movedata.h
+			hl2/look_door.cpp
+			hl2/monster_dummy.cpp
+			hl2/npc_metropolice.h
+			hl2/npc_playercompanion.h
+			npc_Talker.cpp
+			npc_Talker.h
+			hl2/prop_combine_ball.h
+			hl2/script_intro.h
+			hl2/vehicle_crane.h
+			hl2/weapon_crowbar.h
+			hl2/weapon_physcannon.h
+			hl2/weapon_stunstick.h
+)
+set(source_hl1mp_unused_src
+				hl2/grenade_beam.cpp
+				hl2/grenade_beam.h
+				hl2/grenade_homer.cpp
+				hl2/grenade_homer.h
+)
+set(source_hl1mp_dll_src
+			actanimating.cpp
+			actanimating.h
+			hl1/hl1_ai_basenpc.cpp
+			hl1/hl1_ai_basenpc.h
+			hl1/hl1_basecombatweapon.cpp
+			../shared/hl1/hl1_basecombatweapon_shared.cpp
+			../shared/hl1/hl1_basecombatweapon_shared.h
+			hl1/hl1_basegrenade.cpp
+			hl1/hl1_basegrenade.h
+			hl1_CBaseHelicopter.h
+			hl1/hl1_client.cpp
+			hl1/hl1_ents.cpp
+			hl1/hl1_env_speaker.cpp
+			hl1/hl1_eventlog.cpp
+			hl1/hl1_func_recharge.cpp
+			hl1/hl1_func_tank.cpp
+			../shared/hl1/hl1_gamemovement.cpp
+			../shared/hl1/hl1_gamemovement.h
+			../shared/hl1/hl1_gamerules.cpp
+			../shared/hl1/hl1mp_gamerules.cpp
+			../shared/hl1/hl1_gamerules.h
+			hl1/hl1_grenade_mp5.cpp
+			hl1/hl1_grenade_mp5.h
+			hl1/hl1_grenade_spit.cpp
+			hl1/hl1_grenade_spit.h
+			hl1/hl1_item_ammo.cpp
+			hl1/hl1_item_battery.cpp
+			hl1/hl1_item_healthkit.cpp
+			hl1/hl1_item_longjump.cpp
+			hl1/hl1_item_suit.cpp
+			hl1/hl1_items.cpp
+			hl1/hl1_items.h
+			hl1/hl1_monstermaker.cpp
+			hl1/hl1_monstermaker.h
+			hl1/hl1_npc_aflock.cpp
+			hl1/hl1_npc_agrunt.cpp
+			hl1/hl1_npc_apache.cpp
+			hl1/hl1_npc_barnacle.cpp
+			hl1/hl1_npc_barnacle.h
+			hl1/hl1_npc_barney.cpp
+			hl1/hl1_npc_barney.h
+			hl1/hl1_npc_bigmomma.cpp
+			hl1/hl1_npc_bloater.cpp
+			hl1/hl1_npc_bullsquid.cpp
+			hl1/hl1_npc_bullsquid.h
+			hl1/hl1_npc_controller.cpp
+			hl1/hl1_npc_gargantua.cpp
+			hl1/hl1_npc_gargantua.h
+			hl1/hl1_npc_gman.cpp
+			hl1/hl1_npc_hassassin.cpp
+			hl1/hl1_npc_headcrab.cpp
+			hl1/hl1_npc_headcrab.h
+			hl1/hl1_npc_hgrunt.cpp
+			hl1/hl1_npc_hgrunt.h
+			hl1/hl1_npc_hornet.cpp
+			hl1/hl1_npc_hornet.h
+			hl1/hl1_npc_houndeye.cpp
+			hl1/hl1_npc_houndeye.h
+			hl1/hl1_npc_ichthyosaur.cpp
+			hl1/hl1_npc_ichthyosaur.h
+			hl1/hl1_npc_leech.cpp
+			hl1/hl1_npc_nihilanth.cpp
+			hl1/hl1_npc_osprey.cpp
+			hl1/hl1_npc_roach.cpp
+			hl1/hl1_npc_scientist.cpp
+			hl1/hl1_npc_scientist.h
+			hl1/hl1_npc_snark.cpp
+			hl1/hl1_npc_snark.h
+			hl1/hl1_npc_talker.cpp
+			hl1/hl1_npc_talker.h
+			hl1/hl1_npc_tentacle.cpp
+			hl1/hl1_npc_turret.cpp
+			hl1/hl1_npc_vortigaunt.cpp
+			hl1/hl1_npc_vortigaunt.h
+			hl1/hl1_npc_zombie.cpp
+			hl1/hl1_npc_zombie.h
+			hl1/hl1_player.cpp
+			hl1/hl1_player.h
+			../shared/hl1/hl1_player_shared.cpp
+			../shared/hl1/hl1_player_shared.h
+			hl1/hl1_playermove.cpp
+			../shared/hl1/hl1_usermessages.cpp
+			hl1/hl1_weapon_snark.cpp
+			hl1/hl1_weapon_tripmine.cpp
+			hl1/hl1_weaponbox.cpp
+			../shared/hl1/hl1mp_basecombatweapon_shared.cpp
+			hl1/hl1mp_bot_temp.cpp
+			hl1/hl1mp_player.cpp
+			../shared/hl1/hl1mp_weapon_357.cpp
+			../shared/hl1/hl1mp_weapon_crossbow.cpp
+			../shared/hl1/hl1mp_weapon_egon.cpp
+			../shared/hl1/hl1mp_weapon_gauss.cpp
+			../shared/hl1/hl1mp_weapon_glock.cpp
+			../shared/hl1/hl1mp_weapon_handgrenade.cpp
+			../shared/hl1/hl1mp_weapon_hornetgun.cpp
+			../shared/hl1/hl1mp_weapon_mp5.cpp
+			../shared/hl1/hl1mp_weapon_rpg.cpp
+			../shared/hl1/hl1mp_weapon_sachel.cpp
+			../shared/hl1/hl1mp_weapon_shotgun.cpp
+			../server/hl1/hl1_weapon_crowbar.cpp
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_hl1mp_src}
+    ${source_hl1mp_dll2_src}
+    ${source_hl1mp_unused_src}
+    ${source_hl1mp_dll_src}
+)
+
+set(source_inc
+	../shared/hl1
+	../shared/hl2
+	hl1
+	hl2
+	${source_base_inc}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}hl1mp)
+set(source_def "${source_base_def};HL1_DLL;HL1MP_DLL")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_HL1MP)

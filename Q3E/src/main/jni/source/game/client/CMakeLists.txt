@@ -5,6 +5,9 @@ set(BINARY_NAME_PREFIX ${SOURCE_ENGINE_PREFIX}client_)
 
 set(BUILD_REPLAY False)
 
+
+
+# Replay
 set(source_replay_src
 		replay/replaycamera.cpp
 		replay/replaycamera.h
@@ -78,6 +81,9 @@ set(source_ui_src
 )
 endif(BUILD_REPLAY)
 
+
+
+# 0. Base
 set(source_source_src
 		hl2/C_Func_Monitor.cpp
 		geiger.cpp
@@ -1161,7 +1167,7 @@ set(source_base_lib
 
 
 
-# HalfLife2
+# 1. Half-Life 2
 if(BUILD_SOURCE_HL2)
 set(source_hl2_src
 		hud_chat.cpp
@@ -1280,7 +1286,7 @@ endif(BUILD_SOURCE_HL2)
 
 
 
-# Counter-Strike: Source
+# 2. Counter-Strike: Source
 if(BUILD_SOURCE_CSTRIKE)
 set(source_cs_replay_src
 		cstrike/cs_replay.cpp
@@ -1548,7 +1554,7 @@ endif(BUILD_SOURCE_CSTRIKE)
 
 
 
-# Portal
+# 3. Portal
 if(BUILD_SOURCE_PORTAL)
 set(source_portal_src
 		hud_chat.cpp
@@ -1752,6 +1758,7 @@ endif(BUILD_SOURCE_PORTAL)
 
 
 
+# 4. Day of Defeat: Source
 if(BUILD_SOURCE_DOD)
 set(source_dod_src
 		hud_voicestatus.cpp
@@ -1999,6 +2006,7 @@ endif(BUILD_SOURCE_DOD)
 
 
 
+# 5. Half-Life 2: Episodic 1 & 2
 if(BUILD_SOURCE_EPISODIC)
 set(source_episodic_src
 		hud_chat.cpp
@@ -2132,3 +2140,404 @@ target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
 endif(BUILD_SOURCE_EPISODIC)
+
+
+
+# 6. Half-Life 2: Deathmatch
+if(BUILD_SOURCE_HL2MP)
+set(source_hl2mp_src
+		c_team_objectiveresource.cpp
+		c_team_objectiveresource.h
+		c_team_train_watcher.cpp
+		c_team_train_watcher.h
+		hud_voicestatus.cpp
+		../shared/predicted_viewmodel.cpp
+		../shared/predicted_viewmodel.h
+		../shared/teamplay_round_timer.cpp
+		../shared/teamplay_round_timer.h
+)
+set(source_hl2mp_dll_src
+ 			episodic/c_vort_charge_token.cpp
+			../shared/hl2/basehlcombatweapon_shared.cpp
+			hl2/c_antlion_dust.cpp
+			hl2/c_ar2_explosion.cpp
+			hl2/c_barnacle.cpp
+			hl2/c_barney.cpp
+			hl2/c_basehelicopter.cpp
+			hl2/c_basehelicopter.h
+			hl2/c_basehlcombatweapon.cpp
+			hl2/c_basehlcombatweapon.h
+			hl2/c_basehlplayer.cpp
+			hl2/c_basehlplayer.h
+			hl2/c_citadel_effects.cpp
+			hl2/c_corpse.cpp
+			hl2/c_corpse.h
+			hl2/c_env_alyxtemp.cpp
+			hl2/c_env_headcrabcanister.cpp
+			hl2/c_env_starfield.cpp
+			hl2/c_func_tankmortar.cpp
+			hl2/c_hl2_playerlocaldata.cpp
+			hl2/c_hl2_playerlocaldata.h
+			hl2/c_info_teleporter_countdown.cpp
+			hl2/c_npc_antlionguard.cpp
+			hl2/c_npc_combinegunship.cpp
+			hl2/c_npc_manhack.cpp
+			hl2/c_npc_rollermine.cpp
+			hl2/c_plasma_beam_node.cpp
+			hl2/c_prop_combine_ball.cpp
+			hl2/c_prop_combine_ball.h
+			hl2/c_rotorwash.cpp
+			hl2/c_script_intro.cpp
+			../shared/script_intro_shared.cpp
+			hl2/c_strider.cpp
+			hl2/c_te_concussiveexplosion.cpp
+			hl2/c_te_flare.cpp
+			hl2/c_thumper_dust.cpp
+			hl2/c_vehicle_airboat.cpp
+			hl2/c_vehicle_cannon.cpp
+			hl2/c_vehicle_crane.cpp
+			hl2/c_vehicle_crane.h
+			hl2/c_vehicle_prisoner_pod.cpp
+			hl2/c_weapon__stubs_hl2.cpp
+			hl2/c_weapon_crossbow.cpp
+			../shared/hl2/citadel_effects_shared.h
+			../shared/hl2/env_headcrabcanister_shared.cpp
+			../shared/hl2/env_headcrabcanister_shared.h
+			hl2/fx_antlion.cpp
+			hl2/fx_bugbait.cpp
+			hl2/fx_hl2_impacts.cpp
+			hl2/fx_hl2_tracers.cpp
+			hl2/hl2_clientmode.cpp
+			../shared/hl2/hl2_gamerules.cpp
+			../shared/hl2/hl2_gamerules.h
+			../shared/hl2/hl2_shareddefs.h
+			../shared/hl2/hl2_usermessages.cpp
+			../shared/hl2/hl_gamemovement.cpp
+			../shared/hl2/hl_gamemovement.h
+			hl2/hl_in_main.cpp
+			hl2/hl_prediction.cpp
+			hl2/hud_ammo.cpp
+			hl2/hud_battery.cpp
+			hl2/hud_blood.cpp
+			hl2/hud_credits.cpp
+			hl2/hud_damageindicator.cpp
+			hl2/hud_flashlight.cpp
+			hl2/hud_health.cpp
+			hl2/hud_poisondamageindicator.cpp
+			hl2/hud_quickinfo.cpp
+			hud_squadstatus.cpp
+			hl2/hud_suitpower.cpp
+			hl2/hud_suitpower.h
+			hl2/hud_weaponselection.cpp
+			hl2/hud_zoom.cpp
+			hl2/shieldproxy.cpp
+			hl2/vgui_rootpanel_hl2.cpp
+)
+set(source_hl2mp_mp_src
+			hl2mp/c_hl2mp_player.cpp
+			hl2mp/c_hl2mp_player.h
+			hl2mp/c_te_hl2mp_shotgun_shot.cpp
+			hl2mp/clientmode_hl2mpnormal.cpp
+			hl2mp/clientmode_hl2mpnormal.h
+			../shared/hl2mp/hl2mp_gamerules.cpp
+			../shared/hl2mp/hl2mp_gamerules.h
+			../shared/hl2mp/hl2mp_player_shared.cpp
+			../shared/hl2mp/hl2mp_player_shared.h
+			../shared/hl2mp/hl2mp_weapon_parse.cpp
+			../shared/hl2mp/hl2mp_weapon_parse.h
+)
+set(source_hl2mp_weapons_src
+				../shared/hl2mp/weapon_357.cpp
+				../shared/hl2mp/weapon_ar2.cpp
+				../shared/hl2mp/weapon_ar2.h
+				../shared/hl2mp/weapon_crossbow.cpp
+				../shared/hl2mp/weapon_crowbar.cpp
+				../shared/hl2mp/weapon_frag.cpp
+				../shared/hl2mp/weapon_hl2mpbase.cpp
+				../shared/hl2mp/weapon_hl2mpbase.h
+				../shared/hl2mp/weapon_hl2mpbase_machinegun.cpp
+				../shared/hl2mp/weapon_hl2mpbase_machinegun.h
+				../shared/hl2mp/weapon_hl2mpbasebasebludgeon.cpp
+				../shared/hl2mp/weapon_hl2mpbasehlmpcombatweapon.cpp
+				../shared/hl2mp/weapon_hl2mpbasehlmpcombatweapon.h
+				../shared/hl2mp/weapon_physcannon.cpp
+				../shared/hl2mp/weapon_physcannon.h
+				../shared/hl2mp/weapon_pistol.cpp
+				../shared/hl2mp/weapon_rpg.cpp
+				../shared/hl2mp/weapon_rpg.h
+				../shared/hl2mp/weapon_shotgun.cpp
+				../shared/hl2mp/weapon_slam.cpp
+				../shared/hl2mp/weapon_slam.h
+				../shared/hl2mp/weapon_smg1.cpp
+				../shared/hl2mp/weapon_stunstick.cpp
+)
+set(source_hl2mp_ui_src
+				hl2mp/ui/backgroundpanel.cpp
+				hl2mp/ui/backgroundpanel.h
+				hl2mp/hl2mp_hud_chat.cpp
+				hl2mp/hl2mp_hud_chat.h
+				hl2mp/hl2mp_hud_target_id.cpp
+				hl2mp/hl2mp_hud_team.cpp
+				hl2mp/ui/hl2mpclientscoreboard.cpp
+				hl2mp/ui/hl2mpclientscoreboard.h
+				hl2mp/ui/hl2mptextwindow.cpp
+				hl2mp/ui/hl2mptextwindow.h
+				hl2mp/hud_deathnotice.cpp
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_hl2mp_src}
+    ${source_hl2mp_dll_src}
+    ${source_hl2mp_mp_src}
+    ${source_hl2mp_weapons_src}
+    ${source_hl2mp_ui_src}
+)
+list(REMOVE_ITEM source_src
+		../shared/weapon_parse_default.cpp
+)
+
+set(source_inc
+	hl2mp/ui
+	hl2mp
+	../shared/hl2mp
+	hl2
+	hl2/elements
+	../shared/hl2
+	${source_base_inc}
+)
+
+set(source_lib
+		${source_base_lib}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}episodic)
+set(source_def "${source_base_def};HL2MP;HL2_CLIENT_DLL")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_HL2MP)
+
+
+
+# 7. Half-Life 1: Source
+if(BUILD_SOURCE_HL1)
+set(source_hl1_src
+		c_team_objectiveresource.cpp
+		c_team_objectiveresource.h
+		hud_chat.cpp
+		../shared/predicted_viewmodel.cpp
+		../shared/predicted_viewmodel.h
+)
+set(source_hl1_dll2_src
+			hl2/c_antlion_dust.cpp
+			hl2/c_basehelicopter.cpp
+			hl2/c_basehelicopter.h
+			hl2/c_basehlcombatweapon.h
+			hl2/c_corpse.cpp
+			hl2/c_corpse.h
+			hl2/c_hl2_playerlocaldata.h
+			hl2/c_rotorwash.cpp
+			../shared/hl2/citadel_effects_shared.h
+			../shared/hl2/env_headcrabcanister_shared.h
+			hl2/fx_bugbait.cpp
+			../shared/hl2/hl2_shareddefs.h
+			hl2/hl_in_main.cpp
+			hl2/hl_prediction.cpp
+			hl2/vgui_rootpanel_hl2.cpp
+)
+set(source_hl1_dll_src
+			hl1/c_hl1mp_player.cpp
+			../shared/hl1/hl1_basecombatweapon_shared.cpp
+			../shared/hl1/hl1_basecombatweapon_shared.h
+			hl1/hl1_c_legacytempents.cpp
+			hl1/hl1_c_player.cpp
+			hl1/hl1_c_player.h
+			hl1/hl1_c_rpg_rocket.cpp
+			hl1/hl1_c_weapon__stubs.cpp
+			hl1/hl1_clientmode.cpp
+			hl1/hl1_clientmode.h
+			hl1/hl1_fx_gauss.cpp
+			hl1/hl1_fx_gibs.cpp
+			hl1/hl1_fx_impacts.cpp
+			hl1/hl1_fx_shelleject.cpp
+			../shared/hl1/hl1_gamemovement.cpp
+			../shared/hl1/hl1_gamemovement.h
+			../shared/hl1/hl1_gamerules.cpp
+			hl1/hl1_hud_ammo.cpp
+			hl1/hl1_hud_battery.cpp
+			hl1/hl1_hud_damageindicator.cpp
+			hl1/hl1_hud_damagetiles.cpp
+			hl1/hl1_hud_flashlight.cpp
+			hl1/hl1_hud_geiger.cpp
+			hl1/hl1_hud_health.cpp
+			hl1/hl1_hud_history_resource.cpp
+			hl1/hl1_hud_numbers.cpp
+			hl1/hl1_hud_numbers.h
+			hl1/hl1_hud_train.cpp
+			hl1/hl1_hud_weaponselection.cpp
+			../shared/hl1/hl1_player_shared.cpp
+			../shared/hl1/hl1_player_shared.h
+			../shared/hl1/hl1_usermessages.cpp
+			../shared/hl1/hl1mp_basecombatweapon_shared.cpp
+			../shared/hl1/hl1mp_weapon_357.cpp
+			../shared/hl1/hl1mp_weapon_crossbow.cpp
+			../shared/hl1/hl1mp_weapon_egon.cpp
+			../shared/hl1/hl1mp_weapon_gauss.cpp
+			../shared/hl1/hl1mp_weapon_glock.cpp
+			../shared/hl1/hl1mp_weapon_handgrenade.cpp
+			../shared/hl1/hl1mp_weapon_hornetgun.cpp
+			../shared/hl1/hl1mp_weapon_mp5.cpp
+			../shared/hl1/hl1mp_weapon_rpg.cpp
+			../shared/hl1/hl1mp_weapon_sachel.cpp
+			../shared/hl1/hl1mp_weapon_shotgun.cpp
+			../server/hl1/hl1_weapon_crowbar.cpp
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_hl1_src}
+    ${source_hl1_dll2_src}
+    ${source_hl1_dll_src}
+)
+list(REMOVE_ITEM source_src
+		geiger.cpp
+		history_resource.cpp
+		train.cpp
+)
+
+set(source_inc
+	hl1
+	hl2
+	hl2/elements
+	../shared/hl1
+	../shared/hl2
+	${source_base_inc}
+)
+
+set(source_lib
+		${source_base_lib}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}hl1)
+set(source_def "${source_base_def};HL1_CLIENT_DLL")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_HL1)
+
+
+
+# 8. Half-Life 1 Deathmatch: Source
+if(BUILD_SOURCE_HL1MP)
+set(source_hl1mp_src
+		c_team_objectiveresource.cpp
+		c_team_objectiveresource.h
+		hud_chat.cpp
+		../shared/predicted_viewmodel.cpp
+		../shared/predicted_viewmodel.h
+)
+set(source_hl1mp_dll2_src
+			hl2/c_antlion_dust.cpp
+			hl2/c_basehelicopter.cpp
+			hl2/c_basehelicopter.h
+			hl2/c_basehlcombatweapon.h
+			hl2/c_corpse.cpp
+			hl2/c_corpse.h
+			hl2/c_hl2_playerlocaldata.h
+			hl2/c_rotorwash.cpp
+			../shared/hl2/citadel_effects_shared.h
+			../shared/hl2/env_headcrabcanister_shared.h
+			hl2/fx_bugbait.cpp
+			../shared/hl2/hl2_shareddefs.h
+			hl2/hl_in_main.cpp
+			hl2/hl_prediction.cpp
+			hl2/vgui_rootpanel_hl2.cpp
+)
+set(source_hl1mp_dll_src
+			hl1/hl1_c_legacytempents.cpp
+			hl1/hl1_c_player.cpp
+			hl1/hl1_c_player.h
+			hl1/hl1_c_rpg_rocket.cpp
+			hl1/hl1_c_weapon__stubs.cpp
+			hl1/hl1_clientmode.cpp
+			hl1/hl1_clientmode.h
+			hl1/hl1_clientscoreboard.cpp
+			hl1/hl1_hud_deathnotice.cpp
+			hl1/hl1_fx_gauss.cpp
+			hl1/hl1_fx_gibs.cpp
+			hl1/hl1_fx_impacts.cpp
+			hl1/hl1_fx_shelleject.cpp
+			../shared/hl1/hl1_gamemovement.cpp
+			../shared/hl1/hl1_gamemovement.h
+			hl1/hl1_hud_ammo.cpp
+			hl1/hl1_hud_battery.cpp
+			hl1/hl1_hud_damageindicator.cpp
+			hl1/hl1_hud_damagetiles.cpp
+			hl1/hl1_hud_flashlight.cpp
+			hl1/hl1_hud_geiger.cpp
+			hl1/hl1_hud_health.cpp
+			hl1/hl1_hud_history_resource.cpp
+			hl1/hl1_hud_numbers.cpp
+			hl1/hl1_hud_numbers.h
+			hl1/hl1_hud_train.cpp
+			hl1/hl1_hud_weaponselection.cpp
+			../shared/hl1/hl1_basecombatweapon_shared.cpp
+			../shared/hl1/hl1_gamerules.cpp
+			../shared/hl1/hl1_player_shared.cpp
+			../shared/hl1/hl1_player_shared.h
+			../shared/hl1/hl1_usermessages.cpp
+			../shared/hl1/hl1mp_weapon_357.cpp
+			../shared/hl1/hl1mp_weapon_crossbow.cpp
+			../shared/hl1/hl1mp_weapon_egon.cpp
+			../shared/hl1/hl1mp_weapon_gauss.cpp
+			../shared/hl1/hl1mp_weapon_glock.cpp
+			../shared/hl1/hl1mp_weapon_handgrenade.cpp
+			../shared/hl1/hl1mp_weapon_hornetgun.cpp
+			../shared/hl1/hl1mp_weapon_mp5.cpp
+			../shared/hl1/hl1mp_weapon_rpg.cpp
+			../shared/hl1/hl1mp_weapon_sachel.cpp
+			../shared/hl1/hl1mp_weapon_shotgun.cpp
+			../server/hl1/hl1_weapon_crowbar.cpp
+)
+set(source_hl1mp_mpdll_src
+			hl1/c_hl1mp_player.cpp
+			../shared/hl1/hl1mp_basecombatweapon_shared.cpp
+			../shared/hl1/hl1mp_gamerules.cpp
+)
+
+set(source_src
+    ${source_base_src}
+    ${source_hl1mp_src}
+    ${source_hl1mp_dll2_src}
+    ${source_hl1mp_dll_src}
+    ${source_hl1mp_mpdll_src}
+)
+list(REMOVE_ITEM source_src
+		geiger.cpp
+		history_resource.cpp
+		train.cpp
+)
+
+set(source_inc
+	./hl1
+	hl2
+	hl2/elements
+	../shared/hl1
+	../shared/hl2
+	${source_base_inc}
+)
+
+set(source_lib
+		${source_base_lib}
+)
+
+set(binary_name ${BINARY_NAME_PREFIX}hl1mp)
+set(source_def "${source_base_def};HL1_CLIENT_DLL;HL1MP_CLIENT_DLL")
+add_library (${binary_name} SHARED ${source_src})
+target_include_directories(${binary_name} PRIVATE ${source_inc})
+set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
+target_link_libraries(${binary_name} PRIVATE ${source_lib})
+endif(BUILD_SOURCE_HL1MP)

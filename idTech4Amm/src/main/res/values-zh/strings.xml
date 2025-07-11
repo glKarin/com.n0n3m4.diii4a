@@ -502,4 +502,7 @@
     <string name="dod_base">胜利之日: 起源</string>
     <string name="halflife_2_ep1_base">半衰期2: 第1章</string>
     <string name="halflife_2_ep2_base">半衰期2: 第2章</string>
+    <string name="halflife_2_mp_base">半衰期2: 死亡竞赛</string>
+    <string name="halflife_1_source_base">半衰期1: 起源</string>
+    <string name="halflife_1_mp_source_base">半衰期1-死亡竞赛: 起源</string>
 </resources>

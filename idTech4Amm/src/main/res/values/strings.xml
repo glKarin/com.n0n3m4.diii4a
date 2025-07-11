@@ -506,5 +506,8 @@
     <string name="dod_base">Day of Defeat: Source</string>
     <string name="halflife_2_ep1_base">Half-Life 2: Episodic 1</string>
     <string name="halflife_2_ep2_base">Half-Life 2: Episodic 2</string>
+    <string name="halflife_2_mp_base">Half-Life 2: Deathmatch</string>
+    <string name="halflife_1_source_base">Half-Life 1: Source</string>
+    <string name="halflife_1_mp_source_base">Half-Life 1 Deathmatch: Source</string>
 
 </resources>

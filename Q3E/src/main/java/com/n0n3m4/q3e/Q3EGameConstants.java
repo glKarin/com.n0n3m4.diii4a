@@ -262,7 +262,7 @@ public final class Q3EGameConstants
             "libfilesystem_stdio.so",
     };
 
-    public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod", "episodic",};
+    public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod", "episodic", "hl2mp", "hl1", "hl1mp",};
 
     private Q3EGameConstants()
     {

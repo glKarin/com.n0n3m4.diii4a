@@ -49,6 +49,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="episodic" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_hl2mp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hl2mp" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_hl1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hl1" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_hl1mp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hl1mp" />
     </RadioGroup>
 
 </LinearLayout>
