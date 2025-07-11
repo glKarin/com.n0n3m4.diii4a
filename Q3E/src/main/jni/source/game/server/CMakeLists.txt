@@ -2708,8 +2708,8 @@ set(source_hl1_dll2_src
 			hl2/ai_goal_police.h
 			hl2/ai_interactions.h
 			hl2/antlion_maker.h
-			hl2/CBaseSpriteProjectile.cpp
-			hl2/CBaseSpriteProjectile.h
+			hl2/cbasespriteprojectile.cpp
+			hl2/cbasespriteprojectile.h
 			../shared/hl2/citadel_effects_shared.h
 			hl2/energy_wave.h
 			../shared/hl2/env_alyxemp_shared.h
@@ -2885,8 +2885,8 @@ set(source_hl1mp_dll2_src
 			hl2/ai_goal_police.h
 			hl2/ai_interactions.h
 			hl2/antlion_maker.h
-			hl2/CBaseSpriteProjectile.cpp
-			hl2/CBaseSpriteProjectile.h
+			hl2/cbasespriteprojectile.cpp
+			hl2/cbasespriteprojectile.h
 			../shared/hl2/citadel_effects_shared.h
 			hl2/energy_wave.h
 			../shared/hl2/env_alyxemp_shared.h
