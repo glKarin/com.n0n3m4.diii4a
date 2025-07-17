@@ -11,4 +11,9 @@
     <dimen name="toolButtonSpacing">2dp</dimen>
     <dimen name="toolFunctionMargin">4dp</dimen>
     <dimen name="toolKeyNameFontSize">16sp</dimen>
+
+    <dimen name="keyboardHorizontalSpacing">2dp</dimen>
+    <dimen name="keyboardVerticalSpacing">1dp</dimen>
+    <dimen name="keyboardRowHeight">36dp</dimen>
+
 </resources>

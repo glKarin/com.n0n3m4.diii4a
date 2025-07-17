@@ -49,7 +49,6 @@ import android.view.inputmethod.InputMethodManager;
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.karin.KFDManager;
-import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.ByteArrayOutputStream;
@@ -129,18 +128,32 @@ public class Q3EUtils
         InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (q3ei.function_key_toolbar)
         {
-            boolean changed = imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
-            if (changed) // im from open to close
-                ToggleToolbar(false);
-            else // im is closed
+            boolean changed;
+            if(q3ei.builtin_virtual_keyboard)
             {
-                //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-                ToggleToolbar(true);
+                Q3E.activity.GetKeyboard().ToggleBuiltInVKB();
+                changed = Q3E.activity.GetKeyboard().IsBuiltInVKBVisible();
+                ToggleToolbar(changed);
             }
-        } else
+            else
+            {
+                changed = imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
+                if (changed) // im from open to close
+                    ToggleToolbar(false);
+                else // im is closed
+                {
+                    //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                    ToggleToolbar(true);
+                }
+            }
+        }
+        else
         {
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            if(q3ei.builtin_virtual_keyboard)
+                Q3E.activity.GetKeyboard().ToggleBuiltInVKB();
+            else
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         }
     }
 
@@ -154,20 +167,34 @@ public class Q3EUtils
         if (null != vw)
         {
             InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-            if (Q3EUtils.q3ei.function_key_toolbar)
-                Q3EUtils.ToggleToolbar(true);
+            if(q3ei.builtin_virtual_keyboard)
+                Q3E.activity.GetKeyboard().OpenBuiltInVKB();
+            else
+            {
+                //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }
         }
+        if (Q3EUtils.q3ei.function_key_toolbar)
+            Q3EUtils.ToggleToolbar(true);
     }
 
     public static void CloseVKB(View vw)
     {
         if (null != vw)
         {
-            InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
+            if(q3ei.builtin_virtual_keyboard)
+            {
+                Q3E.activity.GetKeyboard().CloseBuiltInVKB();
+            }
+            else
+            {
+                InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
+            }
         }
+        if (Q3EUtils.q3ei.function_key_toolbar)
+            Q3EUtils.ToggleToolbar(false);
     }
 
     public static int[] GetNormalScreenSize(Activity activity)
@@ -1351,5 +1378,31 @@ public class Q3EUtils
                 res.add(file);
         }
         return res;
+    }
+
+    public static String asset_get_contents(Context context, String path)
+    {
+        InputStream is = null;
+        try
+        {
+            is = context.getAssets().open(path);
+            String res = Read(is);
+            return res;
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+        finally
+        {
+            Close(is);
+        }
+    }
+
+    public static void SetViewZ(View view, int z)
+    {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            view.setZ(z);
     }
 }

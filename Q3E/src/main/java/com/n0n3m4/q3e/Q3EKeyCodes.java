@@ -1930,7 +1930,7 @@ public class Q3EKeyCodes
     }
 
 
-    public static int convertKeyCode(int keyCode, KeyEvent event)
+    public static int convertKeyCode(int keyCode, int uchar)
     {
         switch(keyCode)
         {
@@ -2049,7 +2049,7 @@ public class Q3EKeyCodes
         if(KeyCodes.RAW)
             return keyCode;
 
-        int uchar = event.getUnicodeChar(0);
+        //int uchar = event.getUnicodeChar(0);
         if((uchar < 127) && (uchar != 0))
             return uchar;
         return keyCode % 95 + 32;//Magic

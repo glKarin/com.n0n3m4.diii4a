@@ -505,4 +505,6 @@
     <string name="halflife_2_mp_base">半衰期2: 死亡竞赛</string>
     <string name="halflife_1_source_base">半衰期1: 起源</string>
     <string name="halflife_1_mp_source_base">半衰期1-死亡竞赛: 起源</string>
+    <string name="use_builtin_virtual_keyboard">使用内置软键盘</string>
+    <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">使用内置软键盘代替系统输入法键盘</string>
 </resources>

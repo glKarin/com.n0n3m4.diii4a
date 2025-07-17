@@ -316,14 +316,13 @@ public class Q3ECallbackObj
 
     public void ToggleToolbar(boolean on)
     {
-        vw.ToggleToolbar(on);
+        Q3E.activity.GetKeyboard().ToggleToolbar(on);
     }
 
 
     public void OpenURL(String url)
     {
-        vw.post(new Runnable()
-        {
+        vw.post(new Runnable() {
             @Override
             public void run()
             {

@@ -80,10 +80,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private boolean usesCSAA = false;
     private boolean hideonscr;
 
-    // toolbar function
-    private boolean m_toolbarActive = true;
-    private View m_keyToolbar = null;
-
     // mouse function
     private boolean m_usingMouse = false;
     private float m_lastMousePosX = -1;
@@ -373,7 +369,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 qKeyCode = Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE;
                 break;
             default:
-                qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event);
+                qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0));
                 break;
         }
         int t = getCharacter(keyCode, event);
@@ -404,7 +400,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 qKeyCode = Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE;
                 break;
             default:
-                qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event);
+                qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0));
                 break;
         }
         Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, qKeyCode, getCharacter(keyCode, event));
@@ -762,7 +758,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         if (m_enableGyro)
             StopGyroscope();
-        ToggleToolbar(false);
     }
 
     public void Resume()
@@ -776,53 +771,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         super.onDetachedFromWindow();
 
-        m_keyToolbar = null;
-        m_toolbarActive = true;
-    }
-
-    public View CreateToolbar()
-    {
-        if (Q3EUtils.q3ei.function_key_toolbar)
-        {
-            Context context = getContext();
-            m_keyToolbar = new KKeyToolBar(context);
-            m_keyToolbar.setVisibility(View.GONE);
-            try
-            {
-                String str = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.pref_harm_function_key_toolbar_y, "0");
-                if(null == str)
-                    str = "0";
-                int y = Integer.parseInt(str);
-                if (y > 0)
-                    m_keyToolbar.setY(y);
-            } catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-        return m_keyToolbar;
-    }
-
-    public View Toolbar()
-    {
-        return m_keyToolbar;
-    }
-
-    public void ToggleToolbar()
-    {
-        ToggleToolbar(!m_toolbarActive);
-    }
-
-    public void ToggleToolbar(boolean b)
-    {
-        if (null != m_keyToolbar && Q3EUtils.q3ei.function_key_toolbar)
-        {
-            m_toolbarActive = b;
-            if (m_toolbarActive)
-                m_keyToolbar.setVisibility(View.VISIBLE);
-            else
-                m_keyToolbar.setVisibility(View.GONE);
-        }
+        Q3E.activity.GetKeyboard().onDetachedFromWindow();
     }
 
     private int GetOnScreenType(TouchListener touchListener)

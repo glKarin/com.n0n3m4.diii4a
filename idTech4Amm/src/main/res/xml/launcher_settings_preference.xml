@@ -89,6 +89,13 @@
                 android:summary="@string/setup_function_key_toolbar_position_offset"
                 android:dependency="harm_function_key_toolbar"
                 />
+            <CheckBoxPreference
+                android:title="@string/use_builtin_virtual_keyboard"
+                android:key="harm_builtin_virtual_keyboard"
+                android:persistent="true"
+                android:defaultValue="false"
+                android:summary="@string/use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard"
+                />
         </PreferenceCategory>
         
         <PreferenceCategory

@@ -39,8 +39,6 @@ import com.n0n3m4.q3e.karin.KidTech4Command;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -124,6 +122,7 @@ public class Q3EGameHelper
         Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false);
         Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, false);
         Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EPreference.pref_harm_function_key_toolbar, true);
+        Q3EUtils.q3ei.builtin_virtual_keyboard = preferences.getBoolean(Q3EPreference.BUILTIN_VIRTUAL_KEYBOARD, false);
         Q3EUtils.q3ei.joystick_unfixed = preferences.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
         Q3EUtils.q3ei.joystick_smooth = preferences.getBoolean(Q3EPreference.pref_analog, true);
         Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = Q3EKeyCodes.GetRealKeyCode(preferences.getInt(Q3EPreference.VOLUME_UP_KEY, Q3EKeyCodes.KeyCodesGeneric.K_F3));

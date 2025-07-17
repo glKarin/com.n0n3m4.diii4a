@@ -324,4 +324,27 @@ public class KKeyToolBar extends LinearLayout {
         m_lastY = 0;
         m_pressed = false;
     }
+
+    public void Open()
+    {
+        setVisibility(View.VISIBLE);
+    }
+
+    public void Close()
+    {
+        setVisibility(View.GONE);
+    }
+
+    public boolean IsVisible()
+    {
+        return getVisibility() == View.VISIBLE;
+    }
+
+    public void SetVisible(boolean on)
+    {
+        if(on)
+            Open();
+        else
+            Close();
+    }
 }

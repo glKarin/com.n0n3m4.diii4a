@@ -509,5 +509,7 @@
     <string name="halflife_2_mp_base">Half-Life 2: Deathmatch</string>
     <string name="halflife_1_source_base">Half-Life 1: Source</string>
     <string name="halflife_1_mp_source_base">Half-Life 1 Deathmatch: Source</string>
+    <string name="use_builtin_virtual_keyboard">Use built-in virtual keyboard</string>
+    <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">Use built-in virtual keyboard instead of system input method keyboard</string>
 
 </resources>
