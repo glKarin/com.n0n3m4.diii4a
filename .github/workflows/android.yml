@@ -47,21 +47,28 @@ jobs:
         chmod +x ./gradlew
         # build Xash3d only
         echo "Build Xash3D libraries"
-        ./gradlew assembleRelease -Pabifilters=arm64-v8a -Pcmake_options="-DGAME_DOOM3=OFF -DGAME_RTCW=OFF -DGAME_QUAKE3=OFF -DGAME_QUAKE2=OFF -DGAME_QUAKE1=OFF -DGAME_TDM=OFF -DGAME_DOOM3BFG=OFF -DGAME_DOOM=OFF -DGAME_ETW=OFF -DGAME_REALRTCW=OFF -DGAME_FTEQW=OFF -DGAME_JK=OFF -DGAME_SERIOUSSAM=OFF -DGAME_REALRTCW=OFF -DGAME_SOURCE=OFF"
+        ./gradlew assembleRelease -Pabifilters=arm64-v8a -Pcmake_options=-DGAME_DOOM3=OFF,-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM3BFG=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_SOURCE=OFF
         echo "Copy Xash3D libraries to libs"
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libxash3d*so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libfilesystem_stdio.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libcs16_client.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libcs16_menu.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libcs16_server.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libcs16_yapb.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libhlsdk_client.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libhlsdk_server.so Q3E/libs/arm64-v8a
         # build Source only
         echo "Clean builds"
         ./gradlew clean
         echo "Build Source libraries"
-        ./gradlew assembleRelease -Pabifilters=arm64-v8a -Pcmake_options="-DGAME_DOOM3=OFF -DGAME_RTCW=OFF -DGAME_QUAKE3=OFF -DGAME_QUAKE2=OFF -DGAME_QUAKE1=OFF -DGAME_TDM=OFF -DGAME_DOOM3BFG=OFF -DGAME_DOOM=OFF -DGAME_ETW=OFF -DGAME_REALRTCW=OFF -DGAME_FTEQW=OFF -DGAME_JK=OFF -DGAME_SERIOUSSAM=OFF -DGAME_REALRTCW=OFF -DGAME_XASH3D=OFF"
+        ./gradlew assembleRelease -Pabifilters=arm64-v8a -Pcmake_options=-DGAME_DOOM3=OFF,-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM3BFG=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_XASH3D=OFF
         echo "Copy Source libraries to libs"
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libsource*so Q3E/libs/arm64-v8a
         # build Others
         echo "Clean builds"
         ./gradlew clean
         echo "Build final apk"
-        ./gradlew assembleRelease -Pabifilters=arm64-v8a -Pcmake_options="-DGAME_XASH3D=OFF -DGAME_SOURCE=OFF"
+        ./gradlew assembleRelease -Pabifilters=arm64-v8a -Pcmake_options=-DGAME_XASH3D=OFF,-DGAME_SOURCE=OFF
 
     - name: Rename APK
       id: rename_apk
