@@ -6,8 +6,12 @@ String[] ABIFILTERS = [
         /*, "armeabi", "x86", "x86_64"*/
 ]
 
+String[] CMAKE_ARGUMENTS = [
+        "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21"/*, "-DANDROID_STL=c++_shared"*/
+]
+
 // filter ABI
-def abifilters = ABIFILTERS;
+def abifilters = ABIFILTERS
 if(project.properties.abifilters != null && !project.properties.abifilters.isEmpty()) {
     println "[Q3E]: Using gradle.properties ABI filters = ${project.properties.abifilters}"
     abifilters = project.properties.abifilters.split(",")
@@ -15,6 +19,17 @@ if(project.properties.abifilters != null && !project.properties.abifilters.isEmp
     println "[Q3E]: Using built-in ABI filters = ${Arrays.toString(abifilters)}"
 }
 println "[Q3E]: Build arch = " + Arrays.toString(abifilters)
+
+// CMake options
+def cmake_arguments = CMAKE_ARGUMENTS
+if(project.properties.cmake_options != null && !project.properties.cmake_options.isEmpty()) {
+    println "[Q3E]: Add gradle.properties CMake options = ${project.properties.cmake_options}"
+    def add_options = project.properties.cmake_options.split(",")
+    cmake_arguments = new String[CMAKE_ARGUMENTS.length + add_options.length]
+    System.arraycopy(CMAKE_ARGUMENTS, 0, cmake_arguments, 0, CMAKE_ARGUMENTS.length)
+    System.arraycopy(add_options, 0, cmake_arguments, CMAKE_ARGUMENTS.length, add_options.length)
+}
+println "[Q3E]: CMake arguments = " + Arrays.toString(cmake_arguments)
 
 android {
     compileSdk project.properties.compileSdkVersion.toInteger()
@@ -33,7 +48,7 @@ android {
         externalNativeBuild {
             cmake {
                 abiFilters abifilters
-                arguments "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21"/*, "-DANDROID_STL=c++_shared"*/
+                arguments cmake_arguments
                 cppFlags "-fexceptions", "-frtti"
             }
         }
