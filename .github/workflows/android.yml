@@ -63,8 +63,10 @@ jobs:
         # build Source only
         echo "Clean builds"
         ./gradlew clean $bargs
+        rm -rf Q3E/.cxx
         echo "Build Source libraries"
-        bargs="$barch -Pcmake_options=-DGAME_DOOM3=OFF,-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM3BFG=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_XASH3D=OFF,-DBUILD_SOURCE_HL2=OFF,-DBUILD_SOURCE_HL2MP=OFF,-DBUILD_SOURCE_EPISODIC=OFF,-DBUILD_SOURCE_HL1=OFF,-DBUILD_SOURCE_HL1MP=OFF,-DBUILD_SOURCE_PORTAL=OFF"
+        # ,-DBUILD_SOURCE_HL2=OFF,-DBUILD_SOURCE_HL2MP=OFF,-DBUILD_SOURCE_EPISODIC=OFF,-DBUILD_SOURCE_HL1=OFF,-DBUILD_SOURCE_HL1MP=OFF,-DBUILD_SOURCE_PORTAL=OFF
+        bargs="$barch -Pcmake_options=-DGAME_DOOM3=OFF,-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM3BFG=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_XASH3D=OFF"
         ./gradlew assembleRelease $bargs
         echo "Copy Source libraries to libs"
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libsource*so Q3E/libs/arm64-v8a
@@ -72,6 +74,7 @@ jobs:
         # build Others
         echo "Clean builds"
         ./gradlew clean $bargs
+        rm -rf Q3E/.cxx
         echo "Build final apk"
         bargs="$barch -Pcmake_options=-DGAME_XASH3D=OFF,-DGAME_SOURCE=OFF"
         ./gradlew assembleRelease $bargs
