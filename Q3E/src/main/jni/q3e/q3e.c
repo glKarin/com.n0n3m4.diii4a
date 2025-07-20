@@ -618,7 +618,18 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent(JNIEnv *env, jclass c, jfloat x, jfloat y)
 {
     onMotionEvent(x, y);
-	EXEC_SDL(Q3E_SDL_MotionEvent, x, y);
+    if(!mouse_available)
+    {
+        EXEC_SDL(Q3E_SDL_MotionEvent, x, y);
+    }
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMouseEvent(JNIEnv *env, jclass c, jfloat x, jfloat y)
+{
+    if(mouse_available)
+    {
+        EXEC_SDL(Q3E_SDL_MouseEvent, x, y);
+    }
 }
 
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Is64(JNIEnv *env, jclass c)
@@ -939,7 +950,18 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushKeyEvent(JNIEnv *env, jcla
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMotionEvent(JNIEnv *env, jclass clazz, jfloat deltax, jfloat deltay)
 {
     Q3E_PushMotionEvent(deltax, deltay);
-	EXEC_SDL(Q3E_SDL_MotionEvent, deltax, deltay);
+    if(!mouse_available)
+    {
+        EXEC_SDL(Q3E_SDL_MotionEvent, deltax, deltay);
+    }
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMouseEvent(JNIEnv *env, jclass clazz, jfloat x, jfloat y)
+{
+    if(mouse_available)
+    {
+        EXEC_SDL(Q3E_SDL_MouseEvent, x, y);
+    }
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y)

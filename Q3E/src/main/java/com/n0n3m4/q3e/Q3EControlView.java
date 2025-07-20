@@ -455,7 +455,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             {
                 case MotionEvent.ACTION_BUTTON_PRESS: {
                     int gameMouseButton = ConvMouseButton(event);
-                    if(gameMouseButton >= 0)
+                    if(gameMouseButton != 0)
                     {
                         Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, gameMouseButton, 0);
                     }
@@ -463,7 +463,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                     break;
                 case MotionEvent.ACTION_BUTTON_RELEASE: {
                     int gameMouseButton = ConvMouseButton(event);
-                    if(gameMouseButton >= 0)
+                    if(gameMouseButton != 0)
                     {
                         Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, gameMouseButton, 0);
                     }
@@ -475,6 +475,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 //                case MotionEvent.ACTION_HOVER_EXIT: break;
                 case MotionEvent.ACTION_HOVER_MOVE:
                     Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
+                    Q3EUtils.q3ei.callbackObj.sendMouseEvent(Q3E.PhysicsToLogicalX(x), Q3E.PhysicsToLogicalY(y));
                     break;
                 case MotionEvent.ACTION_SCROLL:
                     float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
@@ -834,7 +835,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 case MotionEvent.BUTTON_FORWARD:
                     return Q3EKeyCodes.KeyCodes.K_MOUSE5;
                 default:
-                    return -1;
+                    return 0;
             }
         }
         else
@@ -851,7 +852,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             else if((buttonState & MotionEvent.BUTTON_FORWARD) == MotionEvent.BUTTON_FORWARD)
                 return Q3EKeyCodes.KeyCodes.K_MOUSE5;
             else
-                return -1;
+                return 0;
         }
     }
 
@@ -861,8 +862,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
-            Runnable runnable = new Runnable()
-            {
+            Runnable runnable = new Runnable() {
                 @Override
                 public void run()
                 {
@@ -929,7 +929,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         {
             case MotionEvent.ACTION_BUTTON_PRESS: {
                 int gameMouseButton = ConvMouseButton(event);
-                if(gameMouseButton >= 0)
+                if(gameMouseButton != 0)
                 {
                     Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, gameMouseButton, 0);
                 }
@@ -939,7 +939,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             break;
             case MotionEvent.ACTION_BUTTON_RELEASE: {
                 int gameMouseButton = ConvMouseButton(event);
-                if(gameMouseButton >= 0)
+                if(gameMouseButton != 0)
                 {
                     Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, gameMouseButton, 0);
                 }
@@ -973,6 +973,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                     }
                 }
                 Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
+                Q3EUtils.q3ei.callbackObj.sendMouseEvent(deltaX, deltaY);
                 break;
             case MotionEvent.ACTION_SCROLL:
                 // float scrollX = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
@@ -990,5 +991,10 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 break;
         }
         return true;
+    }
+
+    public boolean IsUsingMouse()
+    {
+        return m_usingMouse || m_usingMouseDevice;
     }
 }

@@ -32,6 +32,37 @@ public final class Q3E
     public static float widthRatio = 1.0f;
     public static float heightRatio = 1.0f;
 
+    public static int LogicalToPhysicsX(int x)
+    {
+        return Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth ? x : (int) ((float) x * Q3E.widthRatio);
+    }
+
+    public static int LogicalToPhysicsY(int y)
+    {
+        return Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight ? y : (int) ((float) y * Q3E.heightRatio);
+    }
+
+    public static float PhysicsToLogicalX(float x)
+    {
+        return Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth ? x : (x / Q3E.widthRatio);
+    }
+
+    public static float PhysicsToLogicalY(float y)
+    {
+        return Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight ? y : (y / Q3E.heightRatio);
+    }
+
+    public static boolean IsOriginalSize()
+    {
+        return Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth && Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight;
+    }
+
+    public synchronized static void CalcRatio()
+    {
+        Q3E.widthRatio = (float) Q3E.GAME_VIEW_WIDTH / (float) Q3E.surfaceWidth;
+        Q3E.heightRatio = (float) Q3E.GAME_VIEW_HEIGHT / (float) Q3E.surfaceHeight;
+    }
+
     public static void Finish()
     {
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Finish activity......");

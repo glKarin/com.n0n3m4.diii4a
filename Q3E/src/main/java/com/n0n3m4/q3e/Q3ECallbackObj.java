@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.n0n3m4.q3e.karin.KBacktraceHandler;
 
@@ -240,6 +241,11 @@ public class Q3ECallbackObj
     public void sendMotionEvent(final float deltax, final float deltay)
     {
         eventEngine.SendMotionEvent(deltax, deltay);
+    }
+
+    public void sendMouseEvent(final float x, final float y)
+    {
+        eventEngine.SendMouseEvent(x, y);
     }
 
     public void sendAnalogDelayed(final boolean down, final float x, final float y, View view, final int delay)

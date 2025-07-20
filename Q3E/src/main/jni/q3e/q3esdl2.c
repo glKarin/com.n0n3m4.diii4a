@@ -440,6 +440,20 @@ static void Q3E_SDL_MouseMotion(float dx, float dy)
     }
 }
 
+static void Q3E_SDL_MousePosition(float x, float y)
+{
+    if(relativeMouseMode)
+    {
+        in_deltaX = x;
+        in_deltaY = y;
+    }
+    else
+    {
+        in_positionX = x;
+        in_positionY = y;
+    }
+}
+
 #define ACTION_DOWN       0
 #define ACTION_UP         1
 #define ACTION_MOVE       2
@@ -455,6 +469,17 @@ void Q3E_SDL_MotionEvent(float dx, float dy)
 {
     // mouse motion event
     Q3E_SDL_MouseMotion(dx, dy);
+
+    //if(!relativeMouseMode)
+    {
+        CALL_SDL(onNativeMouse, 0, ACTION_MOVE, relativeMouseMode ? in_deltaX : in_positionX, relativeMouseMode ? in_deltaY : in_positionY, relativeMouseMode);
+    }
+}
+
+void Q3E_SDL_MouseEvent(float x, float y)
+{
+    // mouse motion event
+    Q3E_SDL_MousePosition(x, y);
 
     //if(!relativeMouseMode)
     {

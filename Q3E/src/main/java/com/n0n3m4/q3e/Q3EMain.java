@@ -30,6 +30,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -497,6 +498,7 @@ public class Q3EMain extends Activity
         {
             Q3E.GAME_VIEW_WIDTH = width;
             Q3E.GAME_VIEW_HEIGHT = height;
+            Q3E.CalcRatio();
         }
     }
 
@@ -504,9 +506,6 @@ public class Q3EMain extends Activity
     {
         if(null == mouseCursor)
         {
-            Q3E.widthRatio = (float) Q3E.GAME_VIEW_WIDTH / (float) Q3E.surfaceWidth;
-            Q3E.heightRatio = (float) Q3E.GAME_VIEW_HEIGHT / (float) Q3E.surfaceHeight;
-
             mouseCursor = new KMouseCursor(this);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(KMouseCursor.WIDTH, KMouseCursor.HEIGHT);
             mainLayout.addView(mouseCursor, params);
@@ -515,18 +514,29 @@ public class Q3EMain extends Activity
 
     public void SetMouseCursorVisible(boolean visible)
     {
-        MakeMouseCursor();
-        mouseCursor.SetVisible(visible);
+        if(mControlGLSurfaceView.IsUsingMouse())
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mControlGLSurfaceView.setPointerIcon(visible ? null : PointerIcon.getSystemIcon(this, PointerIcon.TYPE_NULL));
+            }
+        }
+        else
+        {
+            MakeMouseCursor();
+            mouseCursor.SetVisible(visible);
+        }
     }
 
     public void SetMouseCursorPosition(int x, int y)
     {
+        if(mControlGLSurfaceView.IsUsingMouse())
+            return;
         MakeMouseCursor();
-        if(Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth && Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight)
+        if(Q3E.IsOriginalSize())
             mouseCursor.SetPosition(x, y + m_offsetY);
         else
         {
-            mouseCursor.SetPosition((int) ((float) x * Q3E.widthRatio), (int) ((float) y * Q3E.heightRatio) + m_offsetY);
+            mouseCursor.SetPosition(Q3E.LogicalToPhysicsX(x), Q3E.LogicalToPhysicsY(y) + m_offsetY);
         }
     }
 

@@ -16,6 +16,7 @@ void Q3E_InitSDL(void);
 void Q3E_ShutdownSDL(void);
 
 void Q3E_SDL_MotionEvent(float dx, float dy);
+void Q3E_SDL_MouseEvent(float x, float y);
 void Q3E_SDL_KeyEvent(int key, int down, int ch);
 void Q3E_SDL_SetWindowSize(int w, int h);
 void Q3E_SDL_SetRelativeMouseMode(int on);

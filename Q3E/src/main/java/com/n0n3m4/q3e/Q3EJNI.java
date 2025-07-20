@@ -51,6 +51,7 @@ public class Q3EJNI {
 	public static native void sendKeyEvent(int state,int key,int character);
 	public static native void sendAnalog(int enable,float x,float y);
 	public static native void sendMotionEvent(float x, float y);
+	public static native void sendMouseEvent(float x, float y);
     public static native void shutdown();
     public static native boolean Is64();
     public static native void OnPause();
@@ -59,6 +60,7 @@ public class Q3EJNI {
 	public static native void PushKeyEvent(int state, int key, int character);
 	public static native void PushAnalogEvent(int enable, float x, float y);
 	public static native void PushMotionEvent(float x, float y);
+	public static native void PushMouseEvent(float x, float y);
 	public static native void PreInit(int eventQueueType, int gameThreadType);
 	public static native int main();
 	public static native long StartThread();

@@ -1087,6 +1087,7 @@ public class Q3EGameHelper
 
         Q3E.surfaceWidth = width;
         Q3E.surfaceHeight = height;
+        Q3E.CalcRatio();
 
         boolean res = Q3EJNI.init(
                 engineLib,
