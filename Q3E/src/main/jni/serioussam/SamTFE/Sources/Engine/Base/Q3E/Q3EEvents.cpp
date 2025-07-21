@@ -184,12 +184,12 @@ BOOL ScreenToClient(void *hWnd, LPPOINT lpPoint)
     return 1;  // success.  :)
 } // ScreenToClient
 
-
+extern void Android_ShowCursor(int on);
 int ShowCursor(BOOL yes)
 {
     static int count = 0;
     count += (yes) ? 1 : -1;
-    //SDL_ShowCursor((count >= 0) ? SDL_TRUE : SDL_FALSE);
+    Android_ShowCursor((count >= 0) ? 1 : 0);
     return count;
 } // ShowCursor
 

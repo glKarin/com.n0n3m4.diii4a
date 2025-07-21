@@ -41,6 +41,7 @@ import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
@@ -772,7 +773,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         super.onDetachedFromWindow();
 
-        Q3E.activity.GetKeyboard().onDetachedFromWindow();
+        if(null != Q3E.activity)
+            Q3E.activity.GetKeyboard().onDetachedFromWindow();
     }
 
     private int GetOnScreenType(TouchListener touchListener)
@@ -996,5 +998,18 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public boolean IsUsingMouse()
     {
         return m_usingMouse || m_usingMouseDevice;
+    }
+
+    public void ShowCursor(boolean on)
+    {
+        if(!m_usingMouse)
+            return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
+            if(on)
+                setPointerIcon(null);
+            else
+                setPointerIcon(PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_NULL));
+        }
     }
 }

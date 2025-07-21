@@ -517,7 +517,7 @@ public class Q3EMain extends Activity
         if(mControlGLSurfaceView.IsUsingMouse())
         {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                mControlGLSurfaceView.setPointerIcon(visible ? null : PointerIcon.getSystemIcon(this, PointerIcon.TYPE_NULL));
+                mControlGLSurfaceView.ShowCursor(visible);
             }
         }
         else

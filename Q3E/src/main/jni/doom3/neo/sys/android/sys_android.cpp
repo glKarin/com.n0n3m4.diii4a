@@ -95,6 +95,9 @@ void (*open_url)(const char *url);
 // Finish activity
 void (*exit_finish)(void);
 
+// Show cursor
+void (*show_cursor)(int on);
+
 
 
 /* Global context variables */
@@ -407,6 +410,12 @@ void Android_ExitFinish(void)
     exit_finish();
 }
 
+void Android_ShowCursor(int on)
+{
+    //if(show_cursor)
+    show_cursor(on));
+}
+
 float Android_GetConsoleMaxHeightFrac(float frac)
 {
     return console_max_height_frac > 0.0f && console_max_height_frac < frac ? console_max_height_frac : frac;
@@ -550,6 +559,7 @@ void Q3E_SetCallbacks(const void *callbacks)
     close_keyboard = ptr->Sys_closeKeyboard;
     open_url = ptr->Sys_openURL;
     exit_finish = ptr->Sys_exitFinish;
+    show_cursor = ptr->Sys_showCursor;
 
     show_toast = ptr->Gui_ShowToast;
     open_dialog = ptr->Gui_openDialog;

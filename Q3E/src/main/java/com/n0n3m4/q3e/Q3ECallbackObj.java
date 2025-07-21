@@ -22,7 +22,9 @@ package com.n0n3m4.q3e;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
+import android.view.PointerIcon;
 import android.view.View;
 import android.widget.Toast;
 
@@ -382,6 +384,16 @@ public class Q3ECallbackObj
     public void SetMouseCursorPosition(int x, int y)
     {
         gui.SetMouseCursorPosition(x, y);
+    }
+
+    public void ShowCursor(boolean on)
+    {
+        vw.post(new Runnable() {
+            @Override
+            public void run() {
+                vw.ShowCursor(on);
+            }
+        });
     }
 }
 

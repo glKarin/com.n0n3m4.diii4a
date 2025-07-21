@@ -85,6 +85,7 @@ static void setup_smooth_joystick(int enable);
 static void open_url(const char *url);
 static int open_dialog(const char *title, const char *message, int num, const char *buttons[]);
 static void finish(void);
+static void show_cursor(int on);
 
 // data
 static char *game_data_dir = NULL;
@@ -128,6 +129,7 @@ static jmethodID android_OpenURL_method;
 static jmethodID android_OpenDialog_method;
 static jmethodID android_Finish_method;
 static jmethodID android_Backtrace_method;
+static jmethodID android_ShowCursor_method;
 
 #ifdef _Q3E_SDL
 static jmethodID android_SetCursorVisible_method;
@@ -441,6 +443,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_OpenDialog_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenDialog", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)I");
 	android_Finish_method = (*env)->GetMethodID(env, q3eCallbackClass, "Finish", "()V");
 	android_Backtrace_method = (*env)->GetMethodID(env, q3eCallbackClass, "Backtrace", "(IIII[Ljava/lang/String;)Z");
+	android_ShowCursor_method = (*env)->GetMethodID(env, q3eCallbackClass, "ShowCursor", "(Z)V");
 
 #ifdef _Q3E_SDL
 	android_SetCursorVisible_method = (*env)->GetMethodID(env, q3eCallbackClass, "SetMouseCursorVisible", "(Z)V");
@@ -471,6 +474,7 @@ static void setup_Q3E_callback(void)
 	callback.Sys_closeKeyboard = &close_keyboard;
 	callback.Sys_openURL = &open_url;
 	callback.Sys_exitFinish = &finish;
+	callback.Sys_showCursor = &show_cursor;
 
 	callback.Gui_ShowToast = &show_toast;
 	callback.Gui_openDialog = &open_dialog;
@@ -910,6 +914,14 @@ void setup_smooth_joystick(int enable)
 	ATTACH_JNI(env)
 
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_SetupSmoothJoystick_method, (jboolean)enable);
+}
+
+void show_cursor(int on)
+{
+	ATTACH_JNI(env)
+
+	LOGI("Show cursor: %d", on);
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_ShowCursor_method, on ? JNI_TRUE : JNI_FALSE);
 }
 
 #define TMPFILE_NAME "idtech4amm_harmattan_tmpfile_XXXXXX"
