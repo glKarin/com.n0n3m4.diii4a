@@ -91,6 +91,7 @@ jobs:
       - name: Run apt
         if: matrix.os == 'ubuntu-latest'
         run: |
+          sudo apt update
           sudo dpkg --add-architecture i386
           sudo apt install -y gcc-multilib g++-multilib libopenal-dev libsdl2-dev # libwayland-dev libxext-dev # zlib1g-dev libcurl4-openssl-dev
 
