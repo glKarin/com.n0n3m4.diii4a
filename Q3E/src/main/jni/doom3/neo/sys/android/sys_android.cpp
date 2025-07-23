@@ -413,7 +413,7 @@ void Android_ExitFinish(void)
 void Android_ShowCursor(int on)
 {
     //if(show_cursor)
-    show_cursor(on));
+    show_cursor(on);
 }
 
 float Android_GetConsoleMaxHeightFrac(float frac)

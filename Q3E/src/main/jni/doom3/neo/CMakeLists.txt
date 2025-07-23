@@ -762,7 +762,7 @@ if(RETRO_POSTPROCESS)
 	add_definitions(-D_POSTPROCESS)
 	message(STATUS "Add retro postprocess rendering support")
 endif()
-if(IMGUI)
+if(IMGUI AND NOT LINUX_SDL)
 	add_definitions(-D_IMGUI)
 	message(STATUS "Add imGUI support")
 	add_subdirectory(externlibs/imgui)
@@ -1643,7 +1643,7 @@ else()
 			sys/linux/sound_alsa.cpp
 		)
 		set(src_sys_core
-			sys/linux/gles2.cpp
+			sys/linux/glimp.cpp
 		)
 	endif()
 

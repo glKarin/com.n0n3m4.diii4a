@@ -2392,6 +2392,19 @@ extern idCVar r_renderMode;
 void RB_PP_Render(void);
 #endif
 
+#ifdef _OPENGLES3
+#if !defined(__ANDROID__)
+#define DEFAULT_GLES_VERSION GL_VERSION_GL_CORE
+#else
+#define DEFAULT_GLES_VERSION GL_VERSION_GL_ES3
+#endif
+#else
+#define DEFAULT_GLES_VERSION GL_VERSION_GL_ES2
+#endif
+
+extern idCVar harm_r_openglVersion;
+extern int gl_version;
+
 extern idCVar harm_r_debugOpenGL;
 void RB_DebugOpenGL(void);
 

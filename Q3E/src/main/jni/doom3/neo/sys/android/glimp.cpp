@@ -50,19 +50,9 @@ idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEG
 					"Texture memory on the video card (in megabytes) - 0: autodetect", 0, 1024);
 
 #ifdef _OPENGLES3
-const char	*r_openglesArgs[]	= {
-		"GLES2",
-		"GLES3.0",
-		NULL };
-idCVar harm_r_openglVersion("harm_r_openglVersion",
-                              r_openglesArgs[0]
-		, CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
-                              "OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
-#define DEFAULT_GLES_VERSION 0x00020000 // still es2.0
-#define HARM_EGL_OPENGL_ES_BIT (gl_version != 0x00020000 ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_ES2_BIT)
-#define HARM_EGL_CONTEXT_CLIENT_VERSION (gl_version != 0x00020000 ? 3 : 2)
+#define HARM_EGL_OPENGL_ES_BIT (gl_version != GL_VERSION_GL_ES2 ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_ES2_BIT)
+#define HARM_EGL_CONTEXT_CLIENT_VERSION (gl_version != GL_VERSION_GL_ES2 ? 3 : 2)
 #else
-#define DEFAULT_GLES_VERSION 0x00020000
 #define HARM_EGL_OPENGL_ES_BIT EGL_OPENGL_ES2_BIT
 #define HARM_EGL_CONTEXT_CLIENT_VERSION 2
 #endif
@@ -81,14 +71,8 @@ int gl_format = GLFORMAT_RGBA8888;
 int gl_depth_bits = 24;
 // OpenGL multisamples
 int gl_msaa = 0;
-// OpenGL version
-int gl_version = DEFAULT_GLES_VERSION;
 
-bool USING_GLES3 = gl_version != 0x00020000;
-bool USING_GL = false;
-#ifdef _OPENGLES3
-int GLES3_VERSION = USING_GLES3 ? 0 : -1;
-#endif
+
 
 #define MAX_NUM_CONFIGS 1000
 static volatile ANativeWindow *win;

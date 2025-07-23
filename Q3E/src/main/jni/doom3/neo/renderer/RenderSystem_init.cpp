@@ -1145,7 +1145,6 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 		return;
 	}
 
-    extern int gl_version;
     idStr glVersionName;
     switch(gl_version)
     {
@@ -2739,6 +2738,44 @@ idCVar harm_r_stencilShadowSoftCopyStencilBuffer( "harm_r_stencilShadowSoftCopyS
 #endif
 
 idCVar harm_r_autoAspectRatio("harm_r_autoAspectRatio",			"1",			CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "automatic setup aspect ratio of view:\n0 = manual\n1 = force setup r_aspectRatio to -1\n2 = automatic setup r_aspectRatio to 0,1,2 by screen size", 0, 2);
+
+#ifdef _OPENGLES3
+const char	*r_openglesArgs[]	= {
+#ifdef __ANDROID__
+        GL_VERSION_NAME_GL_ES2,
+        GL_VERSION_NAME_GL_ES3,
+#else
+        GL_VERSION_NAME_GL_ES3,
+        GL_VERSION_NAME_GL_ES2,
+        GL_VERSION_NAME_GL_CORE,
+        GL_VERSION_NAME_GL_COMPATIBILITY,
+#endif
+        NULL };
+#ifdef __ANDROID__
+#define DEFAULT_GL_VERSION_NAME_INDEX 0
+#else
+#define DEFAULT_GL_VERSION_NAME_INDEX 2
+#endif
+idCVar harm_r_openglVersion("harm_r_openglVersion",
+                            r_openglesArgs[DEFAULT_GL_VERSION_NAME_INDEX]
+        , CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
+                            "OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
+#endif
+
+#ifdef __ANDROID__
+bool USING_GLES3 = DEFAULT_GLES_VERSION != GL_VERSION_GL_ES2;
+#ifdef _OPENGLES3
+int GLES3_VERSION = USING_GLES3 ? 0 : -1;
+#endif
+#else
+bool USING_GLES3 = true;
+bool USING_GL = false;
+#ifdef _OPENGLES3
+int GLES3_VERSION = USING_GLES3 ? 2 : -1;
+#endif
+#endif
+
+int gl_version = DEFAULT_GLES_VERSION;
 
 #include "rb/rb_debug.cpp"
 

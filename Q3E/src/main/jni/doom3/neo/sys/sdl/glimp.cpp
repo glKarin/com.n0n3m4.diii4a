@@ -107,28 +107,6 @@ static SDL_Surface *window = NULL;
 #define SDL_WINDOW_FULLSCREEN SDL_FULLSCREEN
 #endif
 
-#ifdef _OPENGLES3
-const char	*r_openglesArgs[]	= {
-        GL_VERSION_NAME_GL_ES3,
-        GL_VERSION_NAME_GL_ES2,
-        GL_VERSION_NAME_GL_CORE,
-        GL_VERSION_NAME_GL_COMPATIBILITY,
-        NULL };
-idCVar harm_r_openglVersion("harm_r_openglVersion",
-                              r_openglesArgs[2]
-        , CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
-                              "OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
-#define DEFAULT_GLES_VERSION GL_VERSION_GL_ES3
-#else
-#define DEFAULT_GLES_VERSION GL_VERSION_GL_ES2
-#endif
-bool USING_GLES3 = true;
-bool USING_GL = false;
-int gl_version = DEFAULT_GLES_VERSION;
-#ifdef _OPENGLES3
-int GLES3_VERSION = USING_GLES3 ? 2 : -1;
-#endif
-
 static idCVar r_fullscreenDesktop( "r_fullscreenDesktop", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0: 'real' fullscreen mode 1: keep resolution 'desktop' fullscreen mode" );
 static idCVar win_xpos( "win_xpos", "-1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "horizontal position of window" );
 static idCVar win_ypos( "win_ypos", "-1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "vertical position of window" );
