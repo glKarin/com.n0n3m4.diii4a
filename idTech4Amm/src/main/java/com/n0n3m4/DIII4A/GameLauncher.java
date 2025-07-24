@@ -3835,6 +3835,13 @@ public class GameLauncher extends Activity
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
 		V.skip_intro.setVisibility(skipintroVisible ? View.VISIBLE : View.GONE);
+		V.dll_section.setVisibility(Q3EUtils.q3ei.IsSupportExternalDLL() ? View.VISIBLE : View.GONE);
+		if(Q3EUtils.q3ei.IsIdTech4())
+			V.find_dll_desc.setText(R.string.using_external_game_library);
+		else if(Q3EUtils.q3ei.isXash3D)
+			V.find_dll_desc.setText(R.string.using_external_game_library_xash3d);
+		else
+			V.find_dll_desc.setText("");
 
 		String subdir = Q3EUtils.q3ei.subdatadir;
 		if(null == subdir)
@@ -4727,6 +4734,7 @@ public class GameLauncher extends Activity
         public TextView tv_mprefs;
         public LinearLayout layout_mouse_device;
         public CheckBox find_dll;
+		public TextView find_dll_desc;
 		public EditText edt_harm_r_maxFps;
 		public Button launcher_tab1_edit_cvar;
 		public Button launcher_tab1_patch_resource;
@@ -4940,6 +4948,7 @@ public class GameLauncher extends Activity
             tv_mprefs = findViewById(R.id.tv_mprefs);
             layout_mouse_device = findViewById(R.id.layout_mouse_device);
             find_dll = findViewById(R.id.find_dll);
+			find_dll_desc = findViewById(R.id.find_dll_desc);
 			edt_harm_r_maxFps = findViewById(R.id.edt_harm_r_maxFps);
 			launcher_tab1_edit_cvar = findViewById(R.id.launcher_tab1_edit_cvar);
 			launcher_tab1_patch_resource = findViewById(R.id.launcher_tab1_patch_resource);

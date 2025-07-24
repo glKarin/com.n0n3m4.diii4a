@@ -641,6 +641,11 @@ public class Q3EInterface
 		return Q3EGame.Find(game).STANDALONE;
 	}
 
+	public boolean IsSupportExternalDLL()
+	{
+		return IsIdTech4() || isXash3D;
+	}
+
 	public static boolean IsSupportSecondaryDirGame(String game)
 	{
 		final String[] UnsupportGames = {

@@ -357,7 +357,6 @@
     <string name="force_delete_vertex_buffer_on_every_end_frame">Принудительное удаление буфера вершин в каждом конечном кадре</string>
     <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">Удаляет буфер вершин, может быть медленнее, но безопаснее для памяти</string>
     <string name="find_game_library_in_game_data_directory">Найти игровую библиотеку в каталоге игры</string>
-    <string name="using_external_game_library">Имя файла библиотеки игры: arm64 = `gameaarch64.so` или `libgameaarch64.so`; arm32 = `gamearm.so` или `libgamearm.so`</string>
     <string name="perfected_doom_3">Perfected Doom 3</string>
     <string name="perfected_doom_3_resurrection_of_evil">Perfected Doom 3:Resurrection of Evil</string>
     <string name="nolighting">Без освещения</string>
@@ -508,5 +507,7 @@
     <string name="halflife_1_mp_source_base">Half-Life 1 Deathmatch: Source</string>
     <string name="use_builtin_virtual_keyboard">Use built-in virtual keyboard</string>
     <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">Use built-in virtual keyboard instead of system input method keyboard</string>
+    <string name="using_external_game_library">Game library file name in mod directory: arm64 = `gameaarch64.so`; arm32 = `gamearm.so`</string>
+    <string name="using_external_game_library_xash3d">Game library path in mod directory: arm64 = `lib/arm64-v8a/`; arm32 = `lib/armeabi-v7a/`.\nclient library could set by `-clientlib` on command, default is `client.so`; server library could set by `-dll` on command, default is `server.so`; menu library could set by `-menulib` on command, default is `menu.so`.</string>
 
 </resources>

@@ -68,6 +68,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1404,5 +1405,15 @@ public class Q3EUtils
     {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             view.setZ(z);
+    }
+
+    public static boolean ContainsIgnoreCase(Collection<String> list, String target)
+    {
+        for(String s : list)
+        {
+            if(target.equalsIgnoreCase(s))
+                return true;
+        }
+        return false;
     }
 }

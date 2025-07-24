@@ -922,29 +922,6 @@
                     android:text="@string/enable_built_in_bot_assets_if_external_assets_missing" />
 
                 <LinearLayout
-                    android:id="@+id/dll_section"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <CheckBox
-                        android:id="@+id/find_dll"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/find_game_library_in_game_data_directory" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="32dp"
-                        android:layout_marginTop="0dp"
-                        android:layout_marginBottom="0dp"
-                        android:text="@string/using_external_game_library"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -1056,6 +1033,30 @@
                     android:layout_height="wrap_content"
                     android:max="100"
                     />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/dll_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <CheckBox
+                    android:id="@+id/find_dll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/find_game_library_in_game_data_directory" />
+
+                <TextView
+                    android:id="@+id/find_dll_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="32dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="0dp"
+                    android:text="@string/using_external_game_library"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout

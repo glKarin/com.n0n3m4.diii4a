@@ -22,14 +22,13 @@ package com.n0n3m4.q3e;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
-import android.view.PointerIcon;
 import android.view.View;
-import android.widget.Toast;
 
 import com.n0n3m4.q3e.karin.KBacktraceHandler;
+import com.n0n3m4.q3e.karin.KStr;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 
@@ -394,6 +393,11 @@ public class Q3ECallbackObj
                 vw.ShowCursor(on);
             }
         });
+    }
+
+    public String CopyDLLToCache(String dllPath, String name)
+    {
+        return Q3E.CopyDLLToCache(dllPath, name);
     }
 }
 

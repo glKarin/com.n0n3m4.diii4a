@@ -208,7 +208,9 @@ public final class Q3EGlobals
     public static  boolean IS_64        = false;
     public static  boolean SYSTEM_64    = false;
     public static  String  ARCH         = "";
+    public static  String  ARCH_DIR     = "";
     private static boolean _is_detected = false;
+
 
     private static boolean GetCpuInfo()
     {
@@ -216,6 +218,7 @@ public final class Q3EGlobals
             return true;
         IS_64 = Q3EJNI.Is64();
         ARCH = IS_64 ? "aarch64" : "arm";
+        ARCH_DIR = IS_64 ? "arm64-v8a" : "armeabi-v7a";
         BufferedReader br = null;
         try
         {

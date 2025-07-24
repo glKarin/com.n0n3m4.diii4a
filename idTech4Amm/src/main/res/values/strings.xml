@@ -238,7 +238,7 @@
     <string name="add_game_library_file_success">Add game library file success.</string>
     <string name="add_game_library_file_fail">Add game library file fail!</string>
     <string name="find_game_library_in_game_data_directory">Find external game library in game data directory instead of default game library of apk</string>
-    <string name="using_external_game_library">Game library file name: arm64 = `gameaarch64.so` or `libgameaarch64.so`; arm32 = `gamearm.so` or `libgamearm.so`</string>
+    <string name="using_external_game_library">Game library file name in mod directory: arm64 = `gameaarch64.so`; arm32 = `gamearm.so`</string>
     <string name="not_supported">Not supported!</string>
     <string name="translators">Translators</string>
     <string name="note">Note</string>
@@ -511,5 +511,6 @@
     <string name="halflife_1_mp_source_base">Half-Life 1 Deathmatch: Source</string>
     <string name="use_builtin_virtual_keyboard">Use built-in virtual keyboard</string>
     <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">Use built-in virtual keyboard instead of system input method keyboard</string>
+    <string name="using_external_game_library_xash3d">Game library path in mod directory: arm64 = `lib/arm64-v8a/`; arm32 = `lib/armeabi-v7a/`.\nclient library could set by `-clientlib` on command, default is `client.so`; server library could set by `-dll` on command, default is `server.so`; menu library could set by `-menulib` on command, default is `menu.so`.</string>
 
 </resources>
