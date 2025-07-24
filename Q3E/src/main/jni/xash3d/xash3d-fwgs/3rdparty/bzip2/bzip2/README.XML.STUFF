@@ -2,10 +2,10 @@
   This file is part of bzip2/libbzip2, a program and library for
   lossless, block-sorting data compression.
 
-  bzip2/libbzip2 version 1.0.8 of 13 July 2019
-  Copyright (C) 1996-2019 Julian Seward <jseward@acm.org>
+  bzip2/libbzip2 version 1.1.0 of 6 September 2010
+  Copyright (C) 1996-2010 Julian Seward <jseward@acm.org>
 
-  Please read the WARNING, DISCLAIMER and PATENTS sections in the 
+  Please read the WARNING, DISCLAIMER and PATENTS sections in the
   README file.
 
   This program is released under the terms of the license contained
@@ -15,7 +15,7 @@
 The script xmlproc.sh takes an xml file as input,
 and processes it to create .pdf, .html or .ps output.
 It uses format.pl, a perl script to format <pre> blocks nicely,
- and add CDATA tags so writers do not have to use eg. &lt; 
+ and add CDATA tags so writers do not have to use eg. &lt;
 
 The file "entities.xml" must be edited to reflect current
 version, year, etc.
@@ -36,7 +36,7 @@ Usage:
   Output: manual.ps
 
 
-Notum bene: 
+Notum bene:
 - pdfxmltex barfs if given a filename with an underscore in it
 
 - xmltex won't work yet - there's a bug in passivetex

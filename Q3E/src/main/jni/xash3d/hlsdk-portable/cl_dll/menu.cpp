@@ -66,6 +66,69 @@ int CHudMenu::VidInit( void )
 	return 1;
 }
 
+/*
+=================================
+  ParseEscapeToken
+
+  Interprets the given escape token (backslash followed by a letter). The
+  first character of the token must be a backslash.  The second character
+  specifies the operation to perform:
+
+   \w : White text (this is the default)
+   \d : Dim (gray) text
+   \y : Yellow text
+   \r : Red text
+   \R : Right-align (just for the remainder of the current line)
+=================================
+*/
+
+static int menu_r, menu_g, menu_b, menu_x, menu_ralign;
+
+static inline const char* ParseEscapeToken( const char* token )
+{
+	if( *token != '\\' )
+		return token;
+
+	token++;
+
+	switch( *token )
+	{
+	case '\0':
+		return token;
+
+	case 'w':
+		menu_r = 255;
+		menu_g = 255;
+		menu_b = 255;
+		break;
+
+	case 'd':
+		menu_r = 100;
+		menu_g = 100;
+		menu_b = 100;
+		break;
+
+	case 'y':
+		menu_r = 255;
+		menu_g = 210;
+		menu_b = 64;
+		break;
+
+	case 'r':
+		menu_r = 210;
+		menu_g = 24;
+		menu_b = 0;
+		break;
+
+	case 'R':
+		menu_x = ScreenWidth / 2;
+		menu_ralign = TRUE;
+		break;
+	}
+
+	return ++token;
+}
+
 int CHudMenu::Draw( float flTime )
 {
 	int i;
@@ -97,27 +160,45 @@ int CHudMenu::Draw( float flTime )
 	// count the number of newlines
 	int nlc = 0;
 	for( i = 0; i < MAX_MENU_STRING && g_szMenuString[i] != '\0'; i++ )
-	{
 		if( g_szMenuString[i] == '\n' )
 			nlc++;
-	}
 
-	int nFontHeight = Q_max(12, screenInfo.iCharHeight);
+	int nFontHeight = Q_max( 12, screenInfo.iCharHeight );
 
 	// center it
-	int y = ( ScreenHeight / 2 ) - ( ( nlc / 2 ) * nFontHeight ) - (3 * nFontHeight + nFontHeight / 3); // make sure it is above the say text
-	int x = 20;
+	int y = ( ScreenHeight / 2 ) - (( nlc / 2 )* nFontHeight ) - ( 3 * nFontHeight + nFontHeight / 3 ); // make sure it is above the say text
 
-	i = 0;
-	while( i < MAX_MENU_STRING && g_szMenuString[i] != '\0' )
+	menu_r		= 255;
+	menu_g		= 255;
+	menu_b		= 255;
+	menu_x		= 20;
+	menu_ralign	= FALSE;
+
+	const char* sptr = g_szMenuString;
+
+	while( *sptr != '\0' )
 	{
-		gHUD.DrawHudString( x, y, 320, g_szMenuString + i, 255, 255, 255 );
-		y += nFontHeight;
-
-		while( i < MAX_MENU_STRING && g_szMenuString[i] != '\0' && g_szMenuString[i] != '\n' )
-			i++;
-		if( g_szMenuString[i] == '\n' )
-			i++;
+		if( *sptr == '\\' )
+			sptr = ParseEscapeToken( sptr );
+		else if( *sptr == '\n' )
+		{
+			menu_ralign	= FALSE;
+			menu_x 		= 20;
+			y += nFontHeight;
+			sptr++;
+		}
+		else
+		{
+			char menubuf[80] = "";
+			const char *ptr = sptr;
+			while( *sptr != '\0' && *sptr != '\n' && *sptr != '\\' )
+				sptr++;
+			strlcpy( menubuf, ptr, Q_min(( sptr - ptr + 1 ), (int)sizeof( menubuf )));
+			if( menu_ralign )
+				// IMPORTANT: Right-to-left rendered text does not parse escape tokens!
+				menu_x = gHUD.DrawHudStringReverse( menu_x, y, 0, menubuf, menu_r, menu_g, menu_b );
+			else menu_x = gHUD.DrawHudString( menu_x, y, 320, menubuf, menu_r, menu_g, menu_b );
+		}
 	}
 
 	return 1;

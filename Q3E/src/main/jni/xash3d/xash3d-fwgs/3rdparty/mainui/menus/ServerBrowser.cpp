@@ -182,7 +182,7 @@ struct favlist_entry_t
 
 	void QueryServer( void ) const
 	{
-		EngFuncs::ClientCmdF( false, "queryserver \"%s\" \"%s\"", sadr, prot );
+		EngFuncs::ClientCmdF( false, "ui_queryserver \"%s\" \"%s\"", sadr, prot );
 	}
 
 	char sadr[128];
@@ -684,12 +684,26 @@ void CMenuServerBrowser::Connect( server_t &server )
 
 	if( menu_internetgames->m_bLanOnly == false )
 	{
-		if( menu_internetgames->historyList.Count() > 20 ) // FIXME: make configurable
-			menu_internetgames->historyList.FastRemove( 0 );
-		menu_internetgames->historyList.AddToTail( favlist_entry_t( sadr, prot, true ) );
+		bool serverExists = false;
+
+		for( int i = 0; i < menu_internetgames->historyList.Count(); ++i )
+		{
+			if( strcmp( menu_internetgames->historyList[i].sadr, sadr ) == 0 && strcmp( menu_internetgames->historyList[i].prot, prot ) == 0 )
+			{
+				serverExists = true;
+				break;
+			}
+		}
+
+		if( !serverExists )
+		{
+			if( menu_internetgames->historyList.Count() > 20 ) // FIXME: make configurable
+				menu_internetgames->historyList.FastRemove( 0 );
+			menu_internetgames->historyList.AddToTail( favlist_entry_t( sadr, prot, true ) );
 
 
-		menu_internetgames->SaveLists();
+			menu_internetgames->SaveLists();
+		}
 	}
 
 	EngFuncs::ClientCmdF( false, "connect \"%s\" \"%s\"\n", sadr, prot );

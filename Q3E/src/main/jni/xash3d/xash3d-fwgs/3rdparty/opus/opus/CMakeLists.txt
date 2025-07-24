@@ -209,9 +209,11 @@ add_sources_group(fwgs_opus silk ${silk_headers} ${silk_sources})
 add_sources_group(fwgs_opus celt ${celt_headers} ${celt_sources})
 
 if(OPUS_FIXED_POINT)
+  add_sources_group(fwgs_opus silk ${silk_sources_fixed})
   target_include_directories(fwgs_opus PRIVATE silk/fixed)
   target_compile_definitions(fwgs_opus PRIVATE FIXED_POINT=1)
 else()
+  add_sources_group(fwgs_opus silk ${silk_sources_float})
   target_include_directories(fwgs_opus PRIVATE silk/float)
 endif()
 

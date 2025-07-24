@@ -1,6 +1,6 @@
 
 NAME
-       bzip2, bunzip2 - a block-sorting file compressor, v1.0.8
+       bzip2, bunzip2 - a block-sorting file compressor, v1.0.6
        bzcat - decompresses files to stdout
        bzip2recover - recovers data from damaged bzip2 files
 
@@ -345,7 +345,7 @@ CAVEATS
        but  the  details  of  what  the problem is sometimes seem
        rather misleading.
 
-       This manual page pertains to version 1.0.8 of bzip2.  Com-
+       This manual page pertains to version 1.1.0 of bzip2.  Com-
        pressed  data created by this version is entirely forwards
        and  backwards  compatible  with   the   previous   public
        releases,  versions  0.1pl2,  0.9.0,  0.9.5, 1.0.0, 1.0.1,
@@ -369,7 +369,7 @@ CAVEATS
 AUTHOR
        Julian Seward, jseward@acm.org
 
-       https://sourceware.org/bzip2/
+       https://gitlab.com/bzip2/bzip2
 
        The ideas embodied in bzip2 are due to (at least) the fol-
        lowing  people: Michael Burrows and David Wheeler (for the
@@ -388,4 +388,3 @@ AUTHOR
        gzip.  Many people sent patches, helped  with  portability
        problems,  lent  machines,  gave advice and were generally
        helpful.
-

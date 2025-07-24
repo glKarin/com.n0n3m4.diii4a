@@ -24,6 +24,7 @@ GNU General Public License for more details.
 #include "vid_common.h"
 #include "pm_local.h"
 #include "multi_emulator.h"
+#include "cl_spray.h"
 
 #define MAX_CMD_BUFFER        8000
 #define CL_CONNECTION_TIMEOUT 15.0f
@@ -97,6 +98,7 @@ static CVAR_DEFINE_AUTO( bottomcolor, "0", FCVAR_USERINFO|FCVAR_ARCHIVE|FCVAR_FI
 CVAR_DEFINE_AUTO( rate, "25000", FCVAR_USERINFO|FCVAR_ARCHIVE|FCVAR_FILTERABLE, "player network rate" );
 
 static CVAR_DEFINE_AUTO( cl_ticket_generator, "revemu2013", FCVAR_ARCHIVE, "you wouldn't steal a car" );
+static CVAR_DEFINE_AUTO( cl_advertise_engine_in_name, "1", FCVAR_ARCHIVE|FCVAR_PRIVILEGED, "add [Xash3D] to the nickname when connecting to GoldSrc servers" );
 
 client_t		cl;
 client_static_t	cls;
@@ -1029,6 +1031,10 @@ static void CL_WriteSteamTicket( sizebuf_t *send )
 	crc = CRC32_Final( crc );
 	i = GenerateRevEmu2013( buf, s, crc );
 	MSG_WriteBytes( send, buf, i );
+
+	// RevEmu2013: pTicket[1] = revHash (low), pTicket[5] = 0x01100001 (high)
+	*(uint32_t*)cls.steamid = LittleLong( ((uint32_t*)buf)[1] );
+	*(uint32_t*)(cls.steamid + 4) = LittleLong( ((uint32_t*)buf)[5] );
 }
 
 /*
@@ -1093,7 +1099,7 @@ static void CL_SendConnectPacket( connprotocol_t proto, int challenge )
 		Info_RemoveKey( cls.userinfo, "cl_maxpayload" );
 
 		name = Info_ValueForKey( cls.userinfo, "name" );
-		if( Q_strnicmp( name, "[Xash3D]", 8 ))
+		if( cl_advertise_engine_in_name.value && Q_strnicmp( name, "[Xash3D]", 8 ))
 			Info_SetValueForKeyf( cls.userinfo, "name", sizeof( cls.userinfo ), "[Xash3D]%s", name );
 
 		MSG_Init( &send, "GoldSrcConnect", send_buf, sizeof( send_buf ));
@@ -1312,18 +1318,15 @@ static void CL_CreateResourceList( void )
 	cl.num_resources = 0;
 	memset( rgucMD5_hash, 0, sizeof( rgucMD5_hash ));
 
-	if( cls.legacymode == PROTO_GOLDSRC )
-	{
-		// TODO: actually repack remapped.bmp into a WAD for GoldSrc servers
-		Q_strncpy( szFileName, "tempdecal.wad", sizeof( szFileName ));
-	}
-	else
-	{
 		// sanitize cvar value
 		if( Q_strcmp( cl_logoext.string, "bmp" ) && Q_strcmp( cl_logoext.string, "png" ))
 			Cvar_DirectSet( &cl_logoext, "bmp" );
 
 		Q_snprintf( szFileName, sizeof( szFileName ), "logos/remapped.%s", cl_logoext.string );
+	if( cls.legacymode == PROTO_GOLDSRC )
+	{
+		CL_ConvertImageToWAD3( szFileName );
+		Q_strncpy( szFileName, "tempdecal.wad", sizeof( szFileName ));
 	}
 	fp = FS_Open( szFileName, "rb", true );
 
@@ -1815,7 +1818,7 @@ static void CL_QueryServer_f( void )
 
 	if( Cmd_Argc( ) != 3 )
 	{
-		Con_Printf( S_USAGE "queryserver <adr> <protocol>\n" );
+		Con_Printf( S_USAGE "ui_queryserver <adr> <protocol>\n" );
 		return;
 	}
 
@@ -3038,7 +3041,7 @@ void CL_UpdateInfo( const char *key, const char *value )
 		MSG_WriteString( &cls.netchan.message, cls.userinfo );
 		break;
 	case PROTO_GOLDSRC:
-		if( !Q_stricmp( key, "name" ) && Q_strnicmp( value, "[Xash3D]", 8 ))
+		if( cl_advertise_engine_in_name.value && !Q_stricmp( key, "name" ) && Q_strnicmp( value, "[Xash3D]", 8 ))
 		{
 			// always prepend [Xash3D] on GoldSrc protocol :)
 			CL_ServerCommand( true, "setinfo \"%s\" \"[Xash3D]%s\"\n", key, value );
@@ -3355,6 +3358,7 @@ static void CL_InitLocal( void )
 	cl.resourcesonhand.pNext = cl.resourcesonhand.pPrev = &cl.resourcesonhand;
 
 	Cvar_RegisterVariable( &cl_ticket_generator );
+	Cvar_RegisterVariable( &cl_advertise_engine_in_name );
 
 	Cvar_RegisterVariable( &showpause );
 	Cvar_RegisterVariable( &mp_decals );
@@ -3453,7 +3457,7 @@ static void CL_InitLocal( void )
 	Cmd_AddCommand ("pause", NULL, "pause the game (if the server allows pausing)" );
 	Cmd_AddRestrictedCommand( "localservers", CL_LocalServers_f, "collect info about local servers" );
 	Cmd_AddRestrictedCommand( "internetservers", CL_InternetServers_f, "collect info about internet servers" );
-	Cmd_AddRestrictedCommand( "queryserver", CL_QueryServer_f, "query server info from console" );
+	Cmd_AddRestrictedCommand( "ui_queryserver", CL_QueryServer_f, "query server info from console" );
 	Cmd_AddCommand ("cd", CL_PlayCDTrack_f, "Play cd-track (not real cd-player of course)" );
 	Cmd_AddCommand ("mp3", CL_PlayCDTrack_f, "Play mp3-track (based on virtual cd-player)" );
 	Cmd_AddCommand ("waveplaylen", CL_WavePlayLen_f, "Get approximate length of wave file");

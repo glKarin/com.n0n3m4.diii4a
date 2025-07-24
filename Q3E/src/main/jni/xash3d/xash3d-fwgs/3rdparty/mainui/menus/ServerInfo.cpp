@@ -51,9 +51,9 @@ struct player_entry_t
 		int seconds = ( time - hours * 3600 - minutes * 60 );
 
 		if( hours != 0 )
-			time_str.Format( "%ih %i:%i", hours, minutes, seconds );
+			time_str.Format( "%02i:%02i:%02i", hours, minutes, seconds );
 		else
-			time_str.Format( "%i:%i", minutes, seconds );
+			time_str.Format( "%02i:%02i", minutes, seconds );
 	}
 
 	CUtlString index_str;

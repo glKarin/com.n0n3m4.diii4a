@@ -10,8 +10,8 @@ PATH="/usr/bin:$PATH"; export PATH
 
 prog=`echo $0 | sed 's|.*/||'`
 case "$prog" in
-	*egrep)	grep=${EGREP-egrep}	;;
-	*fgrep)	grep=${FGREP-fgrep}	;;
+	*egrep)	grep=${EGREP-grep -E}	;;
+	*fgrep)	grep=${FGREP-grep -F}	;;
 	*)	grep=${GREP-grep}	;;
 esac
 pat=""
@@ -19,7 +19,7 @@ while test $# -ne 0; do
   case "$1" in
   -e | -f) opt="$opt $1"; shift; pat="$1"
            if test "$grep" = grep; then  # grep is buggy with -e on SVR4
-             grep=egrep
+             grep="grep -E"
            fi;;
   -A | -B) opt="$opt $1 $2"; shift;;
   -*)	   opt="$opt $1";;
