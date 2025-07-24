@@ -153,3 +153,31 @@ const char * Q3E_Engine_GetGameDLLSuffix()
 		gamedll = "hl2";
 	return gamedll;
 }
+
+const char * Q3E_Engine_GetClientDLL(char *client_dll, int length)
+{
+    const char *customClientDll = CommandLine()->ParmValue("-clientdll", "");
+	if(customClientDll && customClientDll[0])
+		Q_snprintf(client_dll, length, "%s", customClientDll);
+	else
+	{
+		const char *gamedll = Q3E_Engine_GetGameDLLSuffix();
+		Q_snprintf(client_dll, length, "client_%s", gamedll);
+	}
+	printf("Client DLL: %s\n", client_dll);
+	return client_dll;
+}
+
+const char * Q3E_Engine_GetServerDLL(char *server_dll, int length)
+{
+    const char *customServerDll = CommandLine()->ParmValue("-serverdll", "");
+	if(customServerDll && customServerDll[0])
+		Q_snprintf(server_dll, length, "%s", customServerDll);
+	else
+	{
+		const char *gamedll = Q3E_Engine_GetGameDLLSuffix();
+		Q_snprintf(server_dll, length, "server_%s", gamedll);
+	}
+	printf("Server DLL: %s\n", server_dll);
+	return server_dll;
+}

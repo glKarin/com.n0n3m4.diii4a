@@ -1252,10 +1252,9 @@ void LoadEntityDLLs( const char *szBaseDir, bool bIsServerOnly )
 	
 	// Load the game .dll
 #ifdef _DIII4A //karin: append mod suffix to server dll
-	extern const char * Q3E_Engine_GetGameDLLSuffix();
-    const char *gamedll = Q3E_Engine_GetGameDLLSuffix();
+	extern const char * Q3E_Engine_GetServerDLL(char *server_dll, int length);
     char server_dll[1024] = { 0 };
-    Q_snprintf(server_dll, sizeof(server_dll), "server_%s" DLL_EXT_STRING, gamedll);
+    Q3E_Engine_GetServerDLL(server_dll, sizeof(server_dll));
 	LoadThisDll( server_dll, bIsServerOnly );
 #else
 	LoadThisDll( "server" DLL_EXT_STRING, bIsServerOnly );

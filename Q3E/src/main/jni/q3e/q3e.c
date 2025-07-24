@@ -86,6 +86,7 @@ static void open_url(const char *url);
 static int open_dialog(const char *title, const char *message, int num, const char *buttons[]);
 static void finish(void);
 static void show_cursor(int on);
+static char * copy_dll_to_cache(const char *dll_path, const char *file_name);
 
 // data
 static char *game_data_dir = NULL;
@@ -116,6 +117,7 @@ static jmethodID android_GrabMouse_method;
 static jmethodID android_SetupSmoothJoystick_method;
 static jmethodID android_CopyToClipboard_method;
 static jmethodID android_GetClipboardText_method;
+static jmethodID android_CopyDLLToCache_method;
 
 static jmethodID android_initAudio;
 static jmethodID android_writeAudio;
@@ -444,6 +446,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_Finish_method = (*env)->GetMethodID(env, q3eCallbackClass, "Finish", "()V");
 	android_Backtrace_method = (*env)->GetMethodID(env, q3eCallbackClass, "Backtrace", "(IIII[Ljava/lang/String;)Z");
 	android_ShowCursor_method = (*env)->GetMethodID(env, q3eCallbackClass, "ShowCursor", "(Z)V");
+	android_CopyDLLToCache_method = (*env)->GetMethodID(env, q3eCallbackClass, "CopyDLLToCache", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
 #ifdef _Q3E_SDL
 	android_SetCursorVisible_method = (*env)->GetMethodID(env, q3eCallbackClass, "SetMouseCursorVisible", "(Z)V");
@@ -475,6 +478,7 @@ static void setup_Q3E_callback(void)
 	callback.Sys_openURL = &open_url;
 	callback.Sys_exitFinish = &finish;
 	callback.Sys_showCursor = &show_cursor;
+	//callback.Sys_cacheDLL = &copy_dll_to_cache;
 
 	callback.Gui_ShowToast = &show_toast;
 	callback.Gui_openDialog = &open_dialog;
@@ -922,6 +926,53 @@ void show_cursor(int on)
 
 	LOGI("Show cursor: %d", on);
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_ShowCursor_method, on ? JNI_TRUE : JNI_FALSE);
+}
+
+char * copy_dll_to_cache(const char *dll_path, const char *file_name)
+{
+	ATTACH_JNI(env)
+
+	LOGI("Copy DLL: %s -> %s", dll_path, file_name);
+
+	const char *dll_path_str;
+	char cwd[1024] = { 0 };
+
+	if(dll_path[0] != '/')
+		dll_path_str = dll_path;
+	else
+	{
+		if(getcwd(cwd, sizeof(cwd)))
+		{
+			strcat(cwd, "/");
+			strcat(cwd, dll_path);
+			dll_path_str = cwd;
+		}
+		else
+			dll_path_str = dll_path;
+	}
+	jstring dllPath = (*env)->NewStringUTF(env, dll_path_str);
+	jstring dllPathRef = (*env)->NewWeakGlobalRef(env, dllPath);
+	(*env)->DeleteLocalRef(env, dllPath);
+
+	jstring fileNameRef = NULL;
+	if(file_name)
+	{
+		jstring fileName = (*env)->NewStringUTF(env, file_name);
+		fileNameRef = (*env)->NewWeakGlobalRef(env, fileName);
+		(*env)->DeleteLocalRef(env, fileName);
+	}
+
+	jstring str = (*env)->CallObjectMethod(env, q3eCallbackObj, android_CopyDLLToCache_method, dllPathRef, fileNameRef);
+
+	if(!str)
+		return NULL;
+
+	const char *nstr = (*env)->GetStringUTFChars(env, str, NULL);
+	char *res = NULL;
+	if(nstr)
+		res = strdup(nstr);
+	(*env)->ReleaseStringUTFChars(env, str, nstr);
+	return res;
 }
 
 #define TMPFILE_NAME "idtech4amm_harmattan_tmpfile_XXXXXX"
