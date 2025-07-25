@@ -397,7 +397,7 @@ public class Q3ECallbackObj
 
     public String CopyDLLToCache(String dllPath, String name)
     {
-        return Q3E.CopyDLLToCache(dllPath, name);
+        return Q3E.CopyDLLToCache(dllPath, Q3EUtils.q3ei.game, name);
     }
 }
 

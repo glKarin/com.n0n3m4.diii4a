@@ -33,6 +33,10 @@ void *ANDROID_LoadLibrary( const char *dllname )
 	{
 		if( !libdir[i] )
 			continue;
+#ifdef _DIII4A //karin: print load dll path
+        if( !libdir[i][0] )
+            continue;
+#endif
 
 		Q_snprintf( path, MAX_SYSPATH, "%s/lib%s."OS_LIB_EXT, libdir[i], dllname );
 		pHandle = dlopen( path, RTLD_NOW );
@@ -50,10 +54,12 @@ void *ANDROID_LoadLibrary( const char *dllname )
 	extern const char * Sys_DLLDefaultPath();
 	libdir[0] = Sys_DLLInternalPath();
 	libdir[1] = Sys_DLLDefaultPath();
+    if(Q_strcmp(libdir[0], libdir[1]) == 0)
+        libdir[1] = NULL;
 
 	for( i = 0; i < 2; i++ )
 	{
-		if( !libdir[i] )
+		if( !libdir[i] || !libdir[i][0] )
 			continue;
 
 		Q_snprintf( path, MAX_SYSPATH, "%s/lib%s."OS_LIB_EXT, libdir[i], dllname );

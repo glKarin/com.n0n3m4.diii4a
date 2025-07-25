@@ -160,16 +160,18 @@ public final class Q3E
     }
 
 
-    public static String GetDLLCachePath()
+    public static String GetDLLCachePath(String dir)
     {
-        return activity.getCacheDir().getAbsolutePath(); // /data/user/<package_name>/cache/
+        String path = activity.getCacheDir().getAbsolutePath();// /data/user/<package_name>/cache/
+        if(KStr.NotEmpty(dir))
+            path = KStr.AppendPath(path, dir);
+        return path;
     }
-
 
     // 1: fileName
     // 2: fileName.so
     // 3: libfileName.so
-    public static String CopyDLLToCache(String dllDir, String fileName, String name)
+    public static String CopyDLLToCache(String dllDir, String fileName, String subDir, String name)
     {
         List<String> guess = new ArrayList<>();
         guess.add(fileName);
@@ -184,14 +186,14 @@ public final class Q3E
 
         for(String g : guess)
         {
-            String res = CopyDLLToCache(KStr.AppendPath(dllDir, g), name);
+            String res = CopyDLLToCache(KStr.AppendPath(dllDir, g), subDir, name);
             if(null != res)
                 return res;
         }
         return null;
     }
 
-    public static String CopyDLLToCache(String dllPath, String name)
+    public static String CopyDLLToCache(String dllPath, String subDir, String name)
     {
         File file = new File(dllPath);
         if(!file.isFile() || !file.canRead())
@@ -200,7 +202,8 @@ public final class Q3E
             return null;
         }
 
-        String targetDir = GetDLLCachePath(); // /data/user/<package_name>/cache/
+        String targetDir = GetDLLCachePath(subDir); // /data/user/<package_name>/cache/
+        Q3EUtils.mkdir(targetDir, true);
         if(KStr.IsEmpty(name))
             name = file.getName();
         String cacheFile = KStr.AppendPath(targetDir, name);
@@ -218,7 +221,7 @@ public final class Q3E
         return res;
     }
 
-    public static String CopyDLLsToCache(String dllDirPath, String...excludes)
+    public static String CopyDLLsToCache(String dllDirPath, String subDir, String...excludes)
     {
         File dir = new File(dllDirPath);
         if(!dir.isDirectory())
@@ -240,8 +243,8 @@ public final class Q3E
                 continue;
             if(null != excludeList && Q3EUtils.ContainsIgnoreCase(excludeList, file.getName()))
                 continue;
-            CopyDLLToCache(file.getAbsolutePath(), file.getName());
+            CopyDLLToCache(file.getAbsolutePath(), subDir, file.getName());
         }
-        return GetDLLCachePath();
+        return GetDLLCachePath(subDir);
     }
 }

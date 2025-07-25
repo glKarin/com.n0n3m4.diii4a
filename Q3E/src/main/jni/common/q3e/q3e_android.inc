@@ -584,11 +584,13 @@ int Android_GetConsoleMaxHeight(int height, int maxHeight)
     return h < height ? h : height;
 }
 
+// always return full path of libraries
 const char * Sys_DLLInternalPath(void)
 {
     return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
 }
 
+// return full path of libraries if using external libs; else return empty
 const char * Sys_DLLDefaultPath(void)
 {
     if(!using_external_libs)

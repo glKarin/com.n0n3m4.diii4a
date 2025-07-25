@@ -192,6 +192,7 @@ public class Q3EGameHelper
                                 break;
                         }
                     }
+                    CleanDLLCachePath(Q3EUtils.q3ei.game);
                     String dll = FindDLL_idTech4(fs_game);
                     if(null != dll)
                         command.SetProp("harm_fs_gameLibPath", dll);
@@ -208,6 +209,8 @@ public class Q3EGameHelper
                     String dll;
                     Set<String> dlls = new HashSet<>();
                     boolean loaded = false;
+
+                    CleanDLLCachePath(Q3EUtils.q3ei.game);
 
                     dll = FindDLL_Xash3D(fs_game, "client", command.Param("clientlib"), dlls);
                     if(null != dll)
@@ -253,7 +256,14 @@ public class Q3EGameHelper
         KLog.I("Find idTech4 dll in " + DLLPath + "......");
         String Suffix = "game" + Q3EGlobals.ARCH + ".so"; // gameaarch64.so(64) / gamearm.so(32)
         String p = KStr.AppendPath(DLLPath, Suffix);
-        return Q3E.CopyDLLToCache(p, Suffix);
+        return Q3E.CopyDLLToCache(p, Q3EUtils.q3ei.game, Suffix);
+    }
+
+    public void CleanDLLCachePath(String dir)
+    {
+        String path = Q3E.GetDLLCachePath(dir);
+        KLog.I("Clean external library cache directory: " + path);
+        Q3EUtils.rmdir_r(path);
     }
 
     private String FindDLL_Xash3D(String fs_game, String type, String name, Collection<String> dlls)
@@ -267,24 +277,24 @@ public class Q3EGameHelper
         {
             case "client":
                 libname = KStr.NotEmpty(name) ? name : "client.so";
-                res = Q3E.CopyDLLToCache(DLLPath, libname, null);
+                res = Q3E.CopyDLLToCache(DLLPath, libname, Q3EUtils.q3ei.game, null);
                 if(null != res)
                     dlls.add(KStr.Filename(res));
                 break;
             case "server":
                 libname = KStr.NotEmpty(name) ? name : "server.so";
-                res = Q3E.CopyDLLToCache(DLLPath, libname, null);
+                res = Q3E.CopyDLLToCache(DLLPath, libname, Q3EUtils.q3ei.game, null);
                 if(null != res)
                     dlls.add(KStr.Filename(res));
                 break;
             case "menu":
                 libname = KStr.NotEmpty(name) ? name : "menu.so";
-                res = Q3E.CopyDLLToCache(DLLPath, libname, null);
+                res = Q3E.CopyDLLToCache(DLLPath, libname, Q3EUtils.q3ei.game, null);
                 if(null != res)
                     dlls.add(KStr.Filename(res));
                 break;
             default:
-                res = Q3E.CopyDLLsToCache(DLLPath, dlls.toArray(new String[0]));
+                res = Q3E.CopyDLLsToCache(DLLPath, Q3EUtils.q3ei.game, dlls.toArray(new String[0]));
                 break;
         }
         return res;
@@ -965,20 +975,7 @@ public class Q3EGameHelper
         // clean old libraries
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Clean external libraries: " + targetPath);
         File dir = new File(targetPath);
-        if(dir.isDirectory())
-        {
-            File[] files = dir.listFiles();
-            if(null != files && files.length > 0)
-            {
-                for(File f : files)
-                {
-                    if(!f.isFile() || !f.canRead())
-                        continue;
-                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Delete external library: " + f.getAbsolutePath());
-                    f.delete();
-                }
-            }
-        }
+        Q3EUtils.rmdir_r(dir);
 
         String arch = GetArchName();
         String localPath = Q3EUtils.GetDataPath(File.separator + "lib" + File.separator + arch);
@@ -1049,25 +1046,16 @@ public class Q3EGameHelper
         if(preferences.getBoolean(Q3EPreference.LOAD_LOCAL_ENGINE_LIB, false))
         {
             String localLibPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(libname);
-            File file = new File(localLibPath);
-            if(!file.isFile() || !file.canRead())
+            KLog.I("Find local engine library at " + localLibPath + "......");
+            String cacheFile = Q3E.CopyDLLToCache(localLibPath, "lib", null);
+            if(null != cacheFile)
             {
-                Log.w(Q3EGlobals.CONST_Q3E_LOG_TAG, "Local engine library not file or unreadable: " + localLibPath);
+                libPath = cacheFile;
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load local engine library: " + cacheFile);
             }
             else
             {
-                String cacheFile = m_context.getCacheDir() + File.separator + /*Q3EUtils.q3ei.*/libname;
-                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Found local engine library file: " + localLibPath);
-                long r = Q3EUtils.cp(localLibPath, cacheFile);
-                if(r > 0)
-                {
-                    libPath = cacheFile;
-                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load local engine library: " + cacheFile);
-                }
-                else
-                {
-                    Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload local engine library fail: " + cacheFile);
-                }
+                Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload local engine library fail: " + cacheFile);
             }
         }
         else if(preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false))
