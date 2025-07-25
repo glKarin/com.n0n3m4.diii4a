@@ -126,6 +126,7 @@ option(GLSL_PROGRAM							"GLSL program on new material stage support"								ON
 option(GLOBAL_ILLUMINATION					"Render global illumination before draw interactions"						ON)
 option(RETRO_POSTPROCESS					"Add retro postprocess rendering support"								   	ON)
 option(IMGUI								"Add imGUI support"								   							OFF)
+option(GL_INT_INDEX							"Use 4 bytes index on OpenGL"								   				ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -768,6 +769,10 @@ if(IMGUI AND NOT LINUX_SDL)
 	add_subdirectory(externlibs/imgui)
 	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs/imgui")
 	set(local_libs ${local_libs} static_imgui)
+endif()
+if(GL_INT_INDEX)
+	add_definitions(-D_GL_INT_INDEX)
+	message(STATUS "Use 4 bytes index on OpenGL for large model")
 endif()
 
 if(OPENAL)

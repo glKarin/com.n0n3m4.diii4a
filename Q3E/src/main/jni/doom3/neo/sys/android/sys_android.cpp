@@ -421,11 +421,18 @@ float Android_GetConsoleMaxHeightFrac(float frac)
     return console_max_height_frac > 0.0f && console_max_height_frac < frac ? console_max_height_frac : frac;
 }
 
+// always return full path of libraries
+const char * Sys_DLLInternalPath(void)
+{
+    return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
+}
+
+// return full path of libraries if using external libs; else return empty
 const char * Sys_DLLDefaultPath(void)
 {
     if(!using_external_libs)
         return "";
-    return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
+    return Sys_DLLInternalPath();
 }
 
 const char * Sys_GameDataDefaultPath(void)

@@ -46,6 +46,10 @@ If you have questions concerning this license or the applicable additional terms
 
 // using shorts for triangle indexes can save a significant amount of traffic, but
 // to support the large models that renderBump loads, they need to be 32 bits
+#ifdef _GL_INT_INDEX
+#define GL_INDEX_TYPE		GL_UNSIGNED_INT
+typedef int glIndex_t;
+#else
 #if 1
 
 #ifdef __ANDROID__ //karin: Android 32bits device has low memory
@@ -67,6 +71,8 @@ typedef int glIndex_t;
 
 #define GL_INDEX_TYPE		GL_UNSIGNED_SHORT
 typedef short glIndex_t;
+
+#endif
 
 #endif
 
