@@ -2,7 +2,8 @@
 [![Android Build Actions Status](https://github.com/glKarin/com.n0n3m4.diii4a/actions/workflows/android.yml/badge.svg)](https://github.com/glKarin/com.n0n3m4.diii4a/actions/workflows/android.yml) [![Windows/Linux Build Actions Status](https://github.com/glKarin/com.n0n3m4.diii4a/actions/workflows/win_linux.yml/badge.svg)](https://github.com/glKarin/com.n0n3m4.diii4a/actions/workflows/win_linux.yml)  
 [![Discord chat](https://img.shields.io/discord/1398154850239254568.svg?logo=discord&label=Discord%20chat)](https://discord.gg/Wr6K4QnxkH)  
 [![Latest Release](https://img.shields.io/github/downloads/glKarin/com.n0n3m4.diii4a/latest/total)](https://github.com/glKarin/com.n0n3m4.diii4a/releases)  
-[![Download Android testing](https://img.shields.io/badge/downloads-testing-orange)](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/android_testing) [![Download Windows/Linux testing](https://img.shields.io/github/downloads/glKarin/com.n0n3m4.diii4a/win_linux_testing/total?label=downloads%40Windows%2FLinux%20testing
+[![Download Android testing](https://img.shields.io/github/downloads/glKarin/com.n0n3m4.diii4a/android_testing/total?label=downloads%40Android%20testing
+)](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/android_testing) [![Download Windows/Linux testing](https://img.shields.io/github/downloads/glKarin/com.n0n3m4.diii4a/win_linux_testing/total?label=downloads%40Windows%2FLinux%20testing
 )](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/win_linux_testing)  
 **idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
 #### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
