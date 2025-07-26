@@ -1,5 +1,6 @@
 # idTech4A++ (Harmattan Edition)  <img align="right" width="128" height="128" src="https://github.com//glKarin/com.n0n3m4.diii4a/raw/master/idTech4Amm/src/main/res/drawable/icon.png" alt="idTech4A++" />  
 [![Android Build Actions Status](https://github.com/glKarin/com.n0n3m4.diii4a/actions/workflows/android.yml/badge.svg)](https://github.com/glKarin/com.n0n3m4.diii4a/actions/workflows/android.yml) [![Windows/Linux Build Actions Status](https://github.com/glKarin/com.n0n3m4.diii4a/actions/workflows/win_linux.yml/badge.svg)](https://github.com/glKarin/com.n0n3m4.diii4a/actions/workflows/win_linux.yml)  
+[![Discord chat](https://img.shields.io/discord/1398154850239254568.svg?logo=discord)](https://discord.gg/Wr6K4QnxkH)  
 [![Download Android testing](https://img.shields.io/badge/downloads-testing-orange)](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/android_testing) [![Download Windows/Linux testing](https://img.shields.io/badge/downloads-testing-orange)](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/win_linux_testing)  
 **idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
 #### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
