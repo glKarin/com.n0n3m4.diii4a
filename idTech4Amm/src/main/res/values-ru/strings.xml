@@ -505,9 +505,9 @@
     <string name="halflife_2_mp_base">Half-Life 2: Deathmatch</string>
     <string name="halflife_1_source_base">Half-Life 1: Source</string>
     <string name="halflife_1_mp_source_base">Half-Life 1 Deathmatch: Source</string>
-    <string name="use_builtin_virtual_keyboard">Use built-in virtual keyboard</string>
-    <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">Use built-in virtual keyboard instead of system input method keyboard</string>
-    <string name="using_external_game_library">Game library file name in mod directory: arm64 = `gameaarch64.so`; arm32 = `gamearm.so`</string>
-    <string name="using_external_game_library_xash3d">Game library path in mod directory: arm64 = `lib/arm64-v8a/`; arm32 = `lib/armeabi-v7a/`.\nclient library could set by `-clientlib` on command, default is `client.so`; server library could set by `-dll` on command, default is `server.so`; menu library could set by `-menulib` on command, default is `menu.so`.</string>
+    <string name="use_builtin_virtual_keyboard">Использовать встроенную виртуальную клавиатуру</string>
+    <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">Использовать встроенную виртуальную клавиатуру вместо системного метода ввода клавиатуры</string>
+    <string name="using_external_game_library">Имя файла библиотеки игры в каталоге мода: arm64 = `gameaarch64.so`; arm32 = `gamearm.so`</string>
+    <string name="using_external_game_library_xash3d">Путь к библиотеке игры в каталоге мода: arm64 = `lib/arm64-v8a/`; arm32 = `lib/armeabi-v7a/`.\nклиентская библиотека может быть установлена с помощью `-clientlib` в команде, по умолчанию `client.so`; серверная библиотека может быть установлена с помощью `-dll` в команде, по умолчанию `server.so`; библиотека меню может быть установлена с помощью `-menulib` в команде, по умолчанию `menu.so`.</string>
 
 </resources>
