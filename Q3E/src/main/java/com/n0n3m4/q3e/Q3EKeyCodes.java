@@ -1941,17 +1941,6 @@ public class Q3EKeyCodes
                 return KeyCodes.K_F2;
             case KeyEvent.KEYCODE_VOLUME_UP:
                 return KeyCodes.K_F3;
-            // dpad
-            case KeyEvent.KEYCODE_DPAD_UP:
-                return KeyCodes.K_UPARROW;
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                return KeyCodes.K_DOWNARROW;
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                return KeyCodes.K_LEFTARROW;
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                return KeyCodes.K_RIGHTARROW;
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-                return KeyCodes.K_CTRL;
             case KeyEvent.KEYCODE_ENTER:
                 return KeyCodes.K_ENTER;
             case KeyEvent.KEYCODE_BACK:
@@ -2009,6 +1998,19 @@ public class Q3EKeyCodes
                 return KeyCodes.K_PGDN;
             case KeyEvent.KEYCODE_PAGE_UP:
                 return KeyCodes.K_PGUP;
+            // Controller
+            // dpad
+            case KeyEvent.KEYCODE_DPAD_UP:
+                return KeyCodes.K_UPARROW;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                return KeyCodes.K_DOWNARROW;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                return KeyCodes.K_LEFTARROW;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                return KeyCodes.K_RIGHTARROW;
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                return KeyCodes.K_CTRL;
+            // a b c x y z
             case KeyEvent.KEYCODE_BUTTON_A:
                 return 'c';
             case KeyEvent.KEYCODE_BUTTON_B:
@@ -2023,14 +2025,46 @@ public class Q3EKeyCodes
                 return 'a';//That's why here is a, nobody cares.
             case KeyEvent.KEYCODE_BUTTON_Z:
                 return 'z';
+            // 1- 16
+            case KeyEvent.KEYCODE_BUTTON_1:
+                return KeyCodes.K_1;
+            case KeyEvent.KEYCODE_BUTTON_2:
+                return KeyCodes.K_2;
+            case KeyEvent.KEYCODE_BUTTON_3:
+                return KeyCodes.K_3;
+            case KeyEvent.KEYCODE_BUTTON_4:
+                return KeyCodes.K_4;
+            case KeyEvent.KEYCODE_BUTTON_5:
+                return KeyCodes.K_5;
+            case KeyEvent.KEYCODE_BUTTON_6:
+                return KeyCodes.K_6;
+            case KeyEvent.KEYCODE_BUTTON_7:
+                return KeyCodes.K_7;
+            case KeyEvent.KEYCODE_BUTTON_8:
+                return KeyCodes.K_8;
+            case KeyEvent.KEYCODE_BUTTON_9:
+                return KeyCodes.K_9;
+            case KeyEvent.KEYCODE_BUTTON_10:
+                return KeyCodes.K_0;
+
+            case KeyEvent.KEYCODE_BUTTON_11:
+                return KeyCodes.K_KP_1;
+            case KeyEvent.KEYCODE_BUTTON_12:
+                return KeyCodes.K_KP_2;
+            case KeyEvent.KEYCODE_BUTTON_13:
+                return KeyCodes.K_KP_3;
+            case KeyEvent.KEYCODE_BUTTON_14:
+                return KeyCodes.K_KP_4;
+            case KeyEvent.KEYCODE_BUTTON_15:
+                return KeyCodes.K_KP_5;
+            case KeyEvent.KEYCODE_BUTTON_16:
+                return KeyCodes.K_KP_6;
+
             //--------------------------------
             case KeyEvent.KEYCODE_BUTTON_START:
                 return KeyCodes.K_ESCAPE;
             case KeyEvent.KEYCODE_BUTTON_SELECT:
                 return KeyCodes.K_ENTER;
-            case KeyEvent.KEYCODE_MENU:
-                if(Q3EUtils.isOuya) return KeyCodes.K_ESCAPE;
-                break;
             case KeyEvent.KEYCODE_BUTTON_L2:
                 return KeyCodes.K_MWHEELDOWN;
             case KeyEvent.KEYCODE_BUTTON_R2:
@@ -2040,11 +2074,19 @@ public class Q3EKeyCodes
             case KeyEvent.KEYCODE_BUTTON_L1:
                 if(Q3EUtils.isOuya) return KeyCodes.K_SPACE;
                 return 'l';//dunno why
-            case Q3EOuya.BUTTON_L3:
+/*            case Q3EOuya.BUTTON_L3:
                 return '[';
             case Q3EOuya.BUTTON_R3:
+                return ']';*/
+            case KeyEvent.KEYCODE_BUTTON_THUMBL:
+                return '[';
+            case KeyEvent.KEYCODE_BUTTON_THUMBR:
                 return ']';
+            // end Controller
 
+            case KeyEvent.KEYCODE_MENU:
+                if(Q3EUtils.isOuya) return KeyCodes.K_ESCAPE;
+                break;
         }
         if(KeyCodes.RAW)
             return keyCode;
