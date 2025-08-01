@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/controller_configure"
+        >
+
+    <PreferenceCategory
+        android:key="joystick"
+        android:title="@string/joystick_dpad"
+        >
+        <CheckBoxPreference
+            android:title="@string/dpad_as_arrow_keys"
+            android:key="harm_dpad_as_arrow_key"
+            android:persistent="true"
+            android:defaultValue="false"
+            android:summary="@string/dpad_keys_always_as_arrow_keys"
+            />
+        <EditTextPreference
+            android:title="@string/left_joystick_dead_zone"
+            android:key="harm_left_joystick_deadzone"
+            android:persistent="true"
+            android:defaultValue="0.01"
+            android:inputType="numberDecimal"
+            android:summary="@string/left_joystick_dead_zone_summary"
+            />
+        <EditTextPreference
+            android:title="@string/right_joystick_dead_zone"
+            android:key="harm_right_joystick_deadzone"
+            android:persistent="true"
+            android:defaultValue="0"
+            android:inputType="numberDecimal"
+            android:summary="@string/right_joystick_dead_zone_summary"
+            />
+        <EditTextPreference
+            android:title="@string/right_joystick_sensitivity"
+            android:key="harm_right_joystick_sensitivity"
+            android:persistent="true"
+            android:defaultValue="1"
+            android:inputType="numberDecimal"
+            android:summary="@string/right_joystick_sensitivity_summary"
+            />
+    </PreferenceCategory>
+</PreferenceScreen>

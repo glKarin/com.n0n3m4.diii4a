@@ -163,8 +163,8 @@
         <item>Mouse 3</item>
         <item>Mouse 4</item>
         <item>Mouse 5</item>
-        <item>Mouse wheel up</item>
-        <item>Mouse wheel down</item>
+        <item>Mouse wheel-up</item>
+        <item>Mouse wheel-down</item>
         <item>A</item>
         <item>B</item>
         <item>C</item>
@@ -243,6 +243,22 @@
         <item>\\</item>
         <item>]</item>
         <item>\'</item>
+        <item>NumPad 1</item> <!--KP1-->
+        <item>NumPad 2</item>
+        <item>NumPad 3</item>
+        <item>NumPad 4</item>
+        <item>NumPad 5</item>
+        <item>NumPad 6</item>
+        <item>NumPad 7</item>
+        <item>NumPad 8</item>
+        <item>NumPad 9</item>
+        <item>NumPad 0</item> <!--KP0-->
+        <item>NumPad .</item> <!--KP.-->
+        <item>NumPad Enter</item>
+        <item>NumPad +</item>
+        <item>NumPad -</item>
+        <item>NumPad *</item>
+        <item>NumPad /</item><!--KP/-->
 <!--        <item>0x2</item>
         <item>0x3</item>
         <item>0x4</item>
@@ -336,6 +352,22 @@
         <item>92</item>
         <item>93</item>
         <item>39</item> <!--'-->
+        <item>171</item> <!--KP1-->
+        <item>172</item>
+        <item>173</item>
+        <item>168</item>
+        <item>169</item>
+        <item>170</item>
+        <item>165</item>
+        <item>166</item>
+        <item>167</item>
+        <item>175</item> <!--KP0-->
+        <item>176</item> <!--KP.-->
+        <item>174</item>
+        <item>181</item>
+        <item>179</item>
+        <item>183</item>
+        <item>177</item><!--KP/-->
 <!--        <item>2</item>
         <item>3</item>
         <item>4</item>

@@ -64,6 +64,7 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.karin.idTech4Amm.ControllerConfigActivity;
 import com.karin.idTech4Amm.OnScreenButtonConfigActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
@@ -859,6 +860,10 @@ public class GameLauncher extends Activity
 			else if (id == R.id.launcher_tab1_open_menu)
 			{
 				OpenMenu();
+			}
+			else if (id == R.id.setup_controller)
+			{
+				OpenControllerSetting();
 			}
         }
     };
@@ -1972,6 +1977,7 @@ public class GameLauncher extends Activity
 		V.launcher_tab1_game_data_chooser_button.setOnClickListener(m_buttonClickListener);
 		V.onscreen_button_setting.setOnClickListener(m_buttonClickListener);
 		V.setup_onscreen_button_theme.setOnClickListener(m_buttonClickListener);
+		V.setup_controller.setOnClickListener(m_buttonClickListener);
 
 		// Quake2
 		SetupUI_Quake2();
@@ -4199,6 +4205,12 @@ public class GameLauncher extends Activity
         new SetupControlsThemeFunc(this).Start(new Bundle());
     }
 
+	private void OpenControllerSetting()
+	{
+		Intent intent = new Intent(this, ControllerConfigActivity.class);
+		startActivity(intent);
+	}
+
     private String GetExternalGameLibraryPath()
     {
         return getFilesDir() + File.separator + Q3EUtils.q3ei.game + File.separator + Q3EGlobals.ARCH;
@@ -4730,6 +4742,7 @@ public class GameLauncher extends Activity
         public RadioGroup rg_s_driver;
         public CheckBox launcher_tab2_joystick_unfixed;
         public Button setup_onscreen_button_theme;
+		public Button setup_controller;
         public CheckBox using_mouse;
         public TextView tv_mprefs;
         public LinearLayout layout_mouse_device;
@@ -4944,6 +4957,7 @@ public class GameLauncher extends Activity
             rg_s_driver = findViewById(R.id.rg_s_driver);
             launcher_tab2_joystick_unfixed = findViewById(R.id.launcher_tab2_joystick_unfixed);
             setup_onscreen_button_theme = findViewById(R.id.setup_onscreen_button_theme);
+			setup_controller = findViewById(R.id.setup_controller);
             using_mouse = findViewById(R.id.using_mouse);
             tv_mprefs = findViewById(R.id.tv_mprefs);
             layout_mouse_device = findViewById(R.id.layout_mouse_device);

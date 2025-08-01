@@ -185,7 +185,7 @@ public final class TextHelper
             "2. Other idTech engine:",
             " e.g. `Return to Castle Wolfenstein`, `Quake III`, `Quake II`, `Quake`, `GZDOOM`, `Wolfenstein: Enemy Territory`, `RealRTCW`, `FTEQW`, `OpenJK`.",
             "3. Other open source engine:",
-            " e.g. `Serious Sam Classic`, `Xash3D`.",
+            " e.g. `Serious Sam Classic`.",
             null,
             "Source url in `assets/source` folder in APK file.",
             " `DIII4A.source.tgz.url`: launcher frontend source and game source, game source and OpenGLES2.0/3.0 shader source in `/Q3E/src/main/jni/doom3` of archive package.",

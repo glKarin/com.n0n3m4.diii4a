@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 
 project(doom3)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+# -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
+
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -34,8 +36,6 @@ add_definitions(-DID_ENABLE_CURL=1)
 set(COMPILE_OGGVORBIS       TRUE)
 set(COMPILE_CURL        	TRUE)
 set(COMPILE_FREETYPE    	FALSE)
-
-# -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 # set(CMAKE_BUILD_TYPE "Debug")
 # TODO

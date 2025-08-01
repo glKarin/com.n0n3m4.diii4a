@@ -508,4 +508,15 @@
     <string name="use_builtin_virtual_keyboard">使用内置软键盘</string>
     <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">使用内置软键盘代替系统输入法键盘</string>
     <string name="using_external_game_library_xash3d">游戏动态库目录放置在指定的mod文件夹下: arm64 = `lib/arm64-v8a/`; arm32 = `lib/armeabi-v7a/`.\nclient动态库可以使用命令行参数`-clientlib`指定, 默认为`client.so`.\nserver动态库可以使用命令行参数`-dll`指定, 默认为`server.so`.\nmenu动态库可以使用命令行参数`-menulib`指定, 默认为`menu.so`.</string>
+    <string name="configure_controller">配置手柄</string>
+    <string name="dpad_as_arrow_keys">十字键当作方向键</string>
+    <string name="dpad_keys_always_as_arrow_keys">十字键总是当作方向键使用</string>
+    <string name="left_joystick_dead_zone">左摇杆死区(0 - 1)</string>
+    <string name="right_joystick_dead_zone">右摇杆死区(0 - 1)</string>
+    <string name="right_joystick_sensitivity">右摇杆灵敏度(0.1 - 10)</string>
+    <string name="left_joystick_dead_zone_summary">左摇杆忽略移动中心比例(默认0.01)</string>
+    <string name="right_joystick_dead_zone_summary">右摇杆忽略移动中心比例(默认0)</string>
+    <string name="right_joystick_sensitivity_summary">右摇杆模拟鼠标移动灵敏度(默认1)</string>
+    <string name="joystick_dpad">摇杆/十字键</string>
+    <string name="controller_configure">手柄配置</string>
 </resources>

@@ -39,6 +39,13 @@
 			android:textAllCaps="false"
 			android:text="@string/setup_on_screen_button_theme"/>
 
+		<Button
+			android:id="@+id/setup_controller"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textAllCaps="false"
+			android:text="@string/configure_controller"/>
+
 		<CheckBox
 			android:id="@+id/smoothjoy"
 			android:layout_width="wrap_content"

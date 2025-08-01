@@ -3,8 +3,8 @@
     <string name="app_name" translatable="false">idTech4A++</string>
     <string name="app_title" translatable="false">idTech4A++</string>
     <string name="menu_settings">Settings</string>    
-    <string name="config_editor_name">Config Editor</string>
-    <string name="key_config_page_name">OnScreen Button Config</string>
+    <string name="config_editor_name">Configure Editor</string>
+    <string name="key_config_page_name">OnScreen Button Configure</string>
 
     <string name="commandline">Commandline:</string>
     <string name="game_working_directory">Game working directory:</string>
@@ -512,5 +512,16 @@
     <string name="use_builtin_virtual_keyboard">Use built-in virtual keyboard</string>
     <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">Use built-in virtual keyboard instead of system input method keyboard</string>
     <string name="using_external_game_library_xash3d">Game library path in mod directory: arm64 = `lib/arm64-v8a/`; arm32 = `lib/armeabi-v7a/`.\nclient library could set by `-clientlib` on command, default is `client.so`; server library could set by `-dll` on command, default is `server.so`; menu library could set by `-menulib` on command, default is `menu.so`.</string>
+    <string name="configure_controller">Configure controller</string>
+    <string name="dpad_as_arrow_keys">DPad as arrow keys</string>
+    <string name="dpad_keys_always_as_arrow_keys">DPad keys always as arrow keys</string>
+    <string name="left_joystick_dead_zone">Left joystick dead zone(0 - 1)</string>
+    <string name="right_joystick_dead_zone">Right joystick dead zone(0 - 1)</string>
+    <string name="right_joystick_sensitivity">Right joystick sensitivity(0.1 - 10)</string>
+    <string name="left_joystick_dead_zone_summary">Left joystick minimum axis value(default 0.01)</string>
+    <string name="right_joystick_dead_zone_summary">Right joystick minimum axis value(default 0)</string>
+    <string name="right_joystick_sensitivity_summary">Right joystick emulate mouse sensitivity(default 1)</string>
+    <string name="joystick_dpad">Joystick/DPad</string>
+    <string name="controller_configure">Controller configure</string>
 
 </resources>

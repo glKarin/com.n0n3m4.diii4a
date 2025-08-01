@@ -74,7 +74,7 @@ private:
     idVec3                  lightOffset;
 	bool					onWeapon;
 
-	bool					currentWeapon;
+	int					    currentWeapon;
 	bool					correctWeaponAxis;
 	idMat3					correctWeaponAxisMat;
 

@@ -2208,7 +2208,7 @@ public class Q3EKeyCodes
         public static final int K_KP_4 = 168;
         public static final int K_KP_5 = 169;
         public static final int K_KP_6 = 170;
-        public static final int K_KP_7 = 171;
+        public static final int K_KP_7 = 165;
         public static final int K_KP_8 = 166;
         public static final int K_KP_9 = 167;
         public static final int K_KP_0 = 175;
