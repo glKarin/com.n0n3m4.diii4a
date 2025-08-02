@@ -42,8 +42,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -74,6 +76,26 @@ public class Q3EGameHelper
     public void ShowMessage(int resId)
     {
         Toast.makeText(m_context, resId, Toast.LENGTH_LONG).show();
+    }
+
+    private void LoadControllerKeymap()
+    {
+        Integer code;
+        String fieldName;
+
+        Map<String, Integer> codeMap = Q3EKeyCodes.LoadGamePadButtonCodeMap(m_context);
+        for (String button : Q3EKeyCodes.CONTROLLER_BUTTONS) {
+            code = codeMap.get(button);
+            fieldName = Q3EKeyCodes.GetDefaultGamePadButtonFieldName(button);
+            if(null == code)
+            {
+                if(null != fieldName)
+                {
+                    code = Q3EKeyCodes.GetKeycodeByName(fieldName);
+                }
+            }
+            Q3EKeyCodes.SetKeycodeByName(fieldName, code);
+        }
     }
 
     public boolean checkGameFiles()
@@ -248,6 +270,9 @@ public class Q3EGameHelper
         String binDir = Q3EUtils.q3ei.GetGameDataDirectoryPath(null);
         cmd = binDir + "/" + cmd;
         Q3EUtils.q3ei.cmd = cmd;
+
+        // load controller button keymap
+        LoadControllerKeymap();
     }
 
     private String FindDLL_idTech4(String fs_game)

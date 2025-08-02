@@ -30,6 +30,7 @@ public final class Q3EPreference
     public static final String pref_harm_right_joystick_deadzone = "harm_right_joystick_deadzone";
     public static final String pref_harm_dpad_as_arrow_key       = "harm_dpad_as_arrow_key";
     public static final String pref_harm_right_joystick_sensitivity = "harm_right_joystick_sensitivity";
+    public static final String pref_harm_gamepad_keymap = "harm_gamepad_keymap";
 
     public static final String pref_harm_image_useetc2                  = "q3e_image_useetc2"; //k
     public static final String pref_harm_16bit                          = "q3e_harm_16bit";

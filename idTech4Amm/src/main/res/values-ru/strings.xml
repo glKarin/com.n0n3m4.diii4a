@@ -520,5 +520,8 @@
     <string name="right_joystick_sensitivity_summary">Right joystick emulate mouse sensitivity(default 1)</string>
     <string name="joystick_dpad">Joystick/DPad</string>
     <string name="controller_configure">Controller configure</string>
+    <string name="reset_controller_config">Reset controller config?</string>
+    <string name="controller_configure_has_reset">Controller configure has reset.</string>
+    <string name="reset_all_controller_configure">Reset all controller configure</string>
 
 </resources>

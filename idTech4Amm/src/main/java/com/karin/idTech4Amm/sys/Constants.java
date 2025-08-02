@@ -29,6 +29,7 @@ public final class Constants
     {
         return new String[] {
             "Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.2, fix Omni-bot initialization.",
+            "Fix game controller. Add game controller configure on launcher `CONTROL` tab.",
         };
 	};
 

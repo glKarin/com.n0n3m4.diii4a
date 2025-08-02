@@ -164,8 +164,8 @@
     <string name="no_file">No file!</string>
     <string name="save_file_successful">Save file successful.</string>
     <string name="save_file_failed">Save file failed!</string>
-    <string name="reset_onscreen_button_config">Reset on-screen button config?</string>
-    <string name="onscreen_button_config_has_reset">On-screen button config has reset.</string>
+    <string name="reset_onscreen_button_config">Reset on-screen button configure?</string>
+    <string name="onscreen_button_config_has_reset">On-screen button configure has reset.</string>
     <string name="toggle">Toggle</string>
     <string name="button">Button</string>
     <string name="slider">Slider</string>
@@ -187,7 +187,7 @@
     <string name="choose_data_folder">Choose data folder</string>
     <string name="choose_current_directory">Choose</string>
     <string name="unset">Unset</string>
-    <string name="edit_config_file">Edit config file</string>
+    <string name="edit_config_file">Edit configure file</string>
     <string name="operation">Operation</string>
     <string name="start">Start</string>
     <string name="language">Language</string>
@@ -523,5 +523,8 @@
     <string name="right_joystick_sensitivity_summary">Right joystick emulate mouse sensitivity(default 1)</string>
     <string name="joystick_dpad">Joystick/DPad</string>
     <string name="controller_configure">Controller configure</string>
+    <string name="reset_controller_config">Reset controller configuage?</string>
+    <string name="controller_configure_has_reset">Controller configure has reset.</string>
+    <string name="reset_all_controller_configure">Reset all controller configure</string>
 
 </resources>

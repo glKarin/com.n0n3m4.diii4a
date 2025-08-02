@@ -519,4 +519,7 @@
     <string name="right_joystick_sensitivity_summary">右摇杆模拟鼠标移动灵敏度(默认1)</string>
     <string name="joystick_dpad">摇杆/十字键</string>
     <string name="controller_configure">手柄配置</string>
+    <string name="reset_controller_config">重置手柄配置?</string>
+    <string name="controller_configure_has_reset">手柄配置已经重置.</string>
+    <string name="reset_all_controller_configure">重置所有手柄配置</string>
 </resources>
