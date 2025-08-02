@@ -85,15 +85,13 @@ public class Q3EGameHelper
 
         Map<String, Integer> codeMap = Q3EKeyCodes.LoadGamePadButtonCodeMap(m_context);
         for (String button : Q3EKeyCodes.CONTROLLER_BUTTONS) {
-            code = codeMap.get(button);
+            code = codeMap.get(button); // code = generic
             fieldName = Q3EKeyCodes.GetDefaultGamePadButtonFieldName(button);
             if(null == code)
             {
-                if(null != fieldName)
-                {
-                    code = Q3EKeyCodes.GetKeycodeByName(fieldName);
-                }
+                code = Q3EKeyCodes.GetDefaultGamePadButtonCode(button); // code = generic
             }
+            code = Q3EKeyCodes.GetRealKeyCode(code); // code = game
             Q3EKeyCodes.SetKeycodeByName(fieldName, code);
         }
     }
