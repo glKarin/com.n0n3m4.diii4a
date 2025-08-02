@@ -1673,8 +1673,8 @@ public class Q3EKeyCodes
         public static final int K_MOUSE4 = -MotionEvent.BUTTON_BACK;
         public static final int K_MOUSE5 = -MotionEvent.BUTTON_FORWARD;
 
-        public static final int K_MWHEELDOWN = K_DOWNARROW;
-        public static final int K_MWHEELUP = K_UPARROW;
+        public static final int K_MWHEELDOWN = KeyEvent.KEYCODE_PAGE_DOWN;
+        public static final int K_MWHEELUP = KeyEvent.KEYCODE_PAGE_UP;
 
         public static final int K_KP_1 = K_KP_END;
         public static final int K_KP_2 = K_KP_DOWNARROW;
