@@ -1727,6 +1727,8 @@ public class Q3EKeyCodes
         public static final int K_GRAVE = KeyEvent.KEYCODE_GRAVE;
         public static final int K_LBRACKET = KeyEvent.KEYCODE_LEFT_BRACKET;
         public static final int K_RBRACKET = KeyEvent.KEYCODE_RIGHT_BRACKET;
+
+        public static final boolean RAW = true;
     }
 
     public static class ControllerCodesAndroid
@@ -1766,8 +1768,6 @@ public class Q3EKeyCodes
         public static final int J_BUTTON_R2 = KeyEvent.KEYCODE_BUTTON_R2;
         public static final int J_BUTTON_L3 = KeyEvent.KEYCODE_BUTTON_THUMBL;
         public static final int J_BUTTON_R3 = KeyEvent.KEYCODE_BUTTON_THUMBR;
-
-        public static final boolean RAW = true;
     }
 
     ;
@@ -1921,6 +1921,7 @@ public class Q3EKeyCodes
 
     public static void InitKeycodes(Class<?> clazz)
     {
+        KeyCodes.RAW = false;
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Using key map: " + clazz.getName());
         for(Field f : KeyCodes.class.getDeclaredFields())
         {
@@ -2264,6 +2265,8 @@ public class Q3EKeyCodes
         public static final int K_KP_8 = 166;
         public static final int K_KP_9 = 167;
         public static final int K_KP_0 = 175;
+
+        public static final boolean RAW = false;
     }
 
     public static class ControllerCodesGeneric
