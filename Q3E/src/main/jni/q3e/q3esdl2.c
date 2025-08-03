@@ -1,5 +1,6 @@
 #include "q3esdl2.h"
 #include "../deplibs/SDL2/src/core/android/SDL_android_env.h"
+#include "../deplibs/SDL2/include/SDL.h"
 
 #include <dlfcn.h>
 
@@ -10,6 +11,7 @@
 SDL_Android_GetAPI_f sdl_api;
 int USING_SDL = 0;
 static char *sdl_clipboardText = NULL;
+static SDL_bool (*SDL_SetHint_f)(const char *name, const char *value);
 
 /** Standard activity result: operation canceled. */
 #define RESULT_CANCELED     0
@@ -395,7 +397,31 @@ void Q3E_ShutdownSDL(void)
         free(sdl_clipboardText);
         sdl_clipboardText = NULL;
     }
+    SDL_SetHint_f = NULL;
+    sdl_api = NULL;
     LOGI("Q3E SDL2 shutdown");
+}
+
+void Q3E_SDL_SetAudioDriver(int driver)
+{
+    if(!SDL_SetHint_f)
+    {
+        LOGW("Q3E SDL2 not initialized: SDL_SetHint missing");
+        return;
+    }
+    switch (driver) {
+        case Q3E_SDL_AUDIO_DRIVER_OPENSLES:
+            LOGI("Q3E SDL2 using 'opensles' as audio driver");
+            SDL_SetHint_f(SDL_HINT_AUDIODRIVER, "opensles");
+            break;
+        case Q3E_SDL_AUDIO_DRIVER_AAUDIO:
+            LOGI("Q3E SDL2 using 'aaudio' as audio driver");
+            SDL_SetHint_f(SDL_HINT_AUDIODRIVER, "aaudio");
+            break;
+        default:
+            LOGI("Q3E SDL2 using default audio driver");
+            break;
+    }
 }
 
 void Q3E_InitSDL(void)
@@ -438,6 +464,9 @@ void Q3E_InitSDL(void)
     CALL_SDL(controller_nativeSetupJNI);
 
     atexit(Q3E_ShutdownSDL);
+
+    void *SDL_SetHint = dlsym(libdl, "SDL_SetHint");
+    SDL_SetHint_f = (SDL_bool (*)(const char *name, const char *value))SDL_SetHint;
 
     USING_SDL = 1;
     LOGI("Game library SDL2 initialized!");

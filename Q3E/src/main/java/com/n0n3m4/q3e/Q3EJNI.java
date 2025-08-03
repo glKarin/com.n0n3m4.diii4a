@@ -46,6 +46,7 @@ public class Q3EJNI {
 			boolean smoothJoystick, // is smooth joystick
 			int consoleMaxHeightFrac, // max console height frac(0 - 100)
 			boolean usingExternalLibs, // using extern libraries
+			int sdlAudioDriver, // SDL audio driver: 0, 1, 2
             boolean continueNoGLContext
     );
 	public static native void sendKeyEvent(int state,int key,int character);

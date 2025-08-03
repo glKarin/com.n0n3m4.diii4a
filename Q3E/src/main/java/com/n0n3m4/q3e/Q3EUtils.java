@@ -1509,4 +1509,22 @@ public class Q3EUtils
         }
         return false;
     }
+
+    public static int ArrayIndexOf(String[] arr, String target, boolean cs)
+    {
+        for(int i = 0; i < arr.length; i++)
+        {
+            if(cs)
+            {
+                if(target.equals(arr[i]))
+                    return i;
+            }
+            else
+            {
+                if(target.equalsIgnoreCase(arr[i]))
+                    return i;
+            }
+        }
+        return -1;
+    }
 }

@@ -490,7 +490,7 @@ static void setup_Q3E_callback(void)
 	setCallbacks(&callback);
 }
 
-JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint depthBits, jint msaa, jint glVersion, jboolean redirectOutputToFile, jint signalsHandler, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jint consoleMaxHeightFrac, jboolean usingExternalLibs, jboolean bContinueNoGLContext)
+JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint depthBits, jint msaa, jint glVersion, jboolean redirectOutputToFile, jint signalsHandler, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jint consoleMaxHeightFrac, jboolean usingExternalLibs, jint sdlAudioDriver, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc;
@@ -511,6 +511,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	}
 
     INIT_SDL();
+	EXEC_SDL(Q3E_SDL_SetAudioDriver, sdlAudioDriver);
 	EXEC_SDL(Q3E_SDL_SetWindowSize, width, height);
 
 	const char *dir = (*env)->GetStringUTFChars(env, GameDir, &iscopy);

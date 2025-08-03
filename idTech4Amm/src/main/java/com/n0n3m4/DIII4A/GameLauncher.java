@@ -794,6 +794,17 @@ public class GameLauncher extends Activity
 						RemoveParam("sv_cl");
 				}
 			}
+
+			// SDL
+			else if (rgId == R.id.sdl_audio_driver)
+			{
+				index = GetRadioGroupSelectIndex(radioGroup, id);
+				if(index < 0 || index >= Q3EGameConstants.SDL_AUDIO_DRIVER.length)
+					index = 0;
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putString(Q3EPreference.pref_harm_sdl_audio_driver, Q3EGameConstants.SDL_AUDIO_DRIVER[index])
+						.commit();
+			}
         }
     };
     private final View.OnClickListener m_buttonClickListener = new View.OnClickListener() {
@@ -1979,6 +1990,9 @@ public class GameLauncher extends Activity
 		V.setup_onscreen_button_theme.setOnClickListener(m_buttonClickListener);
 		V.setup_controller.setOnClickListener(m_buttonClickListener);
 
+		// SDL
+		SetupUI_SDL();
+
 		// Quake2
 		SetupUI_Quake2();
 
@@ -2153,6 +2167,20 @@ public class GameLauncher extends Activity
 
 			public void afterTextChanged(Editable s) { }
 		});
+	}
+
+	private void SetupUI_SDL()
+	{
+		String str = PreferenceManager.getDefaultSharedPreferences(this).getString(Q3EPreference.pref_harm_sdl_audio_driver, Q3EGameConstants.SDL_AUDIO_DRIVER[0]);
+		int index = 0;
+		if(null != str)
+		{
+			index = Utility.ArrayIndexOf(Q3EGameConstants.SDL_AUDIO_DRIVER, str);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.sdl_audio_driver, index);
+		V.sdl_audio_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
 	private void SetupUI_Quake2()
@@ -3837,6 +3865,7 @@ public class GameLauncher extends Activity
 		V.fteqw_section.setVisibility(Q3EUtils.q3ei.isFTEQW ? View.VISIBLE : View.GONE);
 		V.xash3d_section.setVisibility(Q3EUtils.q3ei.isXash3D ? View.VISIBLE : View.GONE);
 		V.source_section.setVisibility(Q3EUtils.q3ei.isSource ? View.VISIBLE : View.GONE);
+		V.sdl_section.setVisibility(Q3EUtils.q3ei.IsUsingSDL() ? View.VISIBLE : View.GONE);
 
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
@@ -4859,6 +4888,8 @@ public class GameLauncher extends Activity
 		public RadioGroup xash3d_sv_cl;
 		public LinearLayout source_section;
 		public RadioGroup source_sv_cl;
+		public LinearLayout sdl_section;
+		public RadioGroup sdl_audio_driver;
 
 		private RadioGroup CreateGameRadioGroup()
 		{
@@ -5058,6 +5089,8 @@ public class GameLauncher extends Activity
 			xash3d_sv_cl = findViewById(R.id.xash3d_sv_cl);
 			source_section = findViewById(R.id.source_section);
 			source_sv_cl = findViewById(R.id.source_sv_cl);
+			sdl_section = findViewById(R.id.sdl_section);
+			sdl_audio_driver = findViewById(R.id.sdl_audio_driver);
         }
     }
 }

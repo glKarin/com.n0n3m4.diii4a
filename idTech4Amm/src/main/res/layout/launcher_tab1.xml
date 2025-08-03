@@ -982,6 +982,11 @@
             layout="@layout/launcher_source"
             android:visibility="gone"></include>
 
+        <include
+            android:id="@+id/sdl_section"
+            layout="@layout/launcher_sdl"
+            android:visibility="gone"></include>
+
         <LinearLayout
             android:id="@+id/general_section"
             android:layout_width="match_parent"

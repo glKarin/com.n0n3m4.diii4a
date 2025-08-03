@@ -502,6 +502,11 @@ public class Q3EInterface
 		return isDOOM;
 	}
 
+	public boolean IsUsingSDL()
+	{
+		return isXash3D || isSource;
+	}
+
 	public String GetGameCommandParm()
 	{
 		return Q3EGame.Find(game_id).MOD_PARM;

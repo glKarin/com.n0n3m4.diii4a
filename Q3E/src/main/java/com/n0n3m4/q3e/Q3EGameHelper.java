@@ -108,6 +108,25 @@ public class Q3EGameHelper
         return true;
     }
 
+    private int GetSDLAudioDriverID(String sdlAudioDriverName)
+    {
+        if(KStr.IsEmpty(sdlAudioDriverName))
+            return 0;
+        int res = Q3EUtils.ArrayIndexOf(Q3EGameConstants.SDL_AUDIO_DRIVER, sdlAudioDriverName, false);
+        if(res < 0)
+            return 0;
+        boolean supportAAudio = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
+        switch (res)
+        {
+            case 1:
+                return 1;
+            case 2:
+                return supportAAudio ? 2 : 0;
+            default:
+                return supportAAudio ? 2 : 1;
+        }
+    }
+
     public void InitGlobalEnv(String gameTypeName, String gameCommand)
     {
         KLog.I("Game initial: " + gameTypeName + " -> " + gameCommand);
@@ -1117,6 +1136,7 @@ public class Q3EGameHelper
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
         boolean useExternalLibPath = preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false);
         int consoleMaxHeightFrac = preferences.getInt(Q3EPreference.pref_harm_max_console_height_frac, 0);
+        int sdlAudioDriver = GetSDLAudioDriverID(preferences.getString(Q3EPreference.pref_harm_sdl_audio_driver, Q3EGameConstants.SDL_AUDIO_DRIVER[0]));
 
         String subdatadir = Q3EUtils.q3ei.subdatadir;
 
@@ -1180,6 +1200,7 @@ public class Q3EGameHelper
                 Q3EUtils.q3ei.joystick_smooth,
                 consoleMaxHeightFrac,
                 useExternalLibPath,
+                sdlAudioDriver,
                 runBackground > 0
         );
         if(res)

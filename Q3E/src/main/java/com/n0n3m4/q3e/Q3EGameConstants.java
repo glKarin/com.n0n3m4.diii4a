@@ -264,6 +264,8 @@ public final class Q3EGameConstants
 
     public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod", "episodic", "hl2mp", "hl1", "hl1mp",};
 
+    public static final String[] SDL_AUDIO_DRIVER = {"auto", "opensles", "aaudio",};
+
     private Q3EGameConstants()
     {
     }
