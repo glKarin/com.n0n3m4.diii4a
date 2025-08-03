@@ -136,6 +136,7 @@ static jmethodID android_ShowCursor_method;
 #ifdef _Q3E_SDL
 static jmethodID android_SetCursorVisible_method;
 static jmethodID android_SetCursorPosition_method;
+static jmethodID android_RequestPermission_method;
 #endif
 
 #define ATTACH_JNI(env) \
@@ -451,6 +452,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 #ifdef _Q3E_SDL
 	android_SetCursorVisible_method = (*env)->GetMethodID(env, q3eCallbackClass, "SetMouseCursorVisible", "(Z)V");
 	android_SetCursorPosition_method = (*env)->GetMethodID(env, q3eCallbackClass, "SetMouseCursorPosition", "(II)V");
+	android_RequestPermission_method = (*env)->GetMethodID(env, q3eCallbackClass, "RequestPermission", "(Ljava/lang/String;I)Z");
 #endif
 }
 
@@ -1053,6 +1055,21 @@ static void set_mouse_cursor_position(int x, int y)
 
     //LOGI("Mouse cursor position: %d, %d", x, y);
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_SetCursorPosition_method, x, y);
+}
+
+static int request_permission(const char *perm, int code)
+{
+	ATTACH_JNI(env)
+
+	if(!perm)
+		return Q3E_FALSE;
+
+	LOGI("Request permission: %s(%d)", perm, code);
+	jstring str = (*env)->NewStringUTF(env, perm);
+	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
+	(*env)->DeleteLocalRef(env, str);
+	jboolean res = (*env)->CallBooleanMethod(env, q3eCallbackObj, android_RequestPermission_method, nstr, code);
+	return res ? Q3E_TRUE : Q3E_FALSE;
 }
 
 #include "q3esdl2.c"

@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -47,6 +48,8 @@ import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTechCommand;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class Q3EMain extends Activity
 {
     private       Q3ECallbackObj mAudio;
@@ -68,6 +71,8 @@ public class Q3EMain extends Activity
     private       Q3EKeyboard keyboard;
     private static final int VIEW_BASE_Z = 100;
 
+    public final Q3EPermissionRequest permissionRequest = new Q3EPermissionRequest();
+
     /*
     Intent::extras
     game: game type
@@ -77,6 +82,8 @@ public class Q3EMain extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
+        KLog.D("UI thread: " + Thread.currentThread().getId());
+
         Q3E.activity = this;
 
         keyboard = new Q3EKeyboard(this);
@@ -558,5 +565,41 @@ public class Q3EMain extends Activity
     public boolean IsPortraint()
     {
         return m_portrait;
+    }
+
+    public void RequestPermission(String permission, int requestCode) {
+        permissionRequest.Request(permission, requestCode);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M/* 23 *//* Android 6.0 (M) */) {
+            KLog.I("Native request permission: " + permission + " with request code " +  requestCode + " -> " + true);
+            synchronized(permissionRequest) {
+                permissionRequest.Result(true);
+                permissionRequest.notifyAll();
+            }
+            return;
+        }
+
+        if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{ permission }, requestCode);
+        } else {
+            KLog.I("Native request permission: " + permission + " with request code " +  requestCode + " has granted");
+            synchronized(permissionRequest) {
+                permissionRequest.Result(true);
+                permissionRequest.notifyAll();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(permissionRequest.requestCode == requestCode && grantResults.length > 0)
+        {
+            boolean result = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
+            KLog.I("Native request permission: " + permissions[0] + " with request code " +  requestCode + " -> " + result);
+            synchronized(permissionRequest) {
+                permissionRequest.Result(result);
+                permissionRequest.notifyAll();
+            }
+        }
     }
 }

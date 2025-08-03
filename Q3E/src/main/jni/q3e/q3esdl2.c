@@ -5,6 +5,8 @@
 
 #include <android/keycodes.h>
 
+#define Q3E_SDL_FAKE_CUSTOM_CURSOR 1
+
 SDL_Android_GetAPI_f sdl_api;
 int USING_SDL = 0;
 static char *sdl_clipboardText = NULL;
@@ -44,23 +46,31 @@ void clipboardSetText(const char *text)
     copy_to_clipboard(text);
 }
 
+static int mLastCursorID = 0;
 int createCustomCursor(int *pixels, int w, int h, int x, int y)
 {
+    LOGW("Q3E SDL createCustomCursor(%p, %d, %d, %d, %d) -> not supported!", pixels, w, h, x, y);
+#ifdef Q3E_SDL_FAKE_CUSTOM_CURSOR
+    return ++mLastCursorID;
+#else
     return 0;
+#endif
 }
 
 void destroyCustomCursor(int id)
 {
-    
+    LOGW("Q3E SDL destroyCustomCursor(%d) -> not supported!", id);
 }
 
 void * getContext()
 {
+    LOGE("Q3E SDL getContext() -> not supported!");
     return NULL;
 }
 
 void * getDisplayDPI()
 {
+    LOGE("Q3E SDL getDisplayDPI() -> not supported!");
     return NULL;
 }
 
@@ -71,7 +81,7 @@ void * getNativeSurface()
 
 void initTouch()
 {
-    
+    LOGI("Q3E SDL initTouch() -> not supported!");
 }
 
 int isAndroidTV()
@@ -101,12 +111,12 @@ int isTablet()
 
 void manualBackButton()
 {
-    
+    LOGW("Q3E SDL manualBackButton() -> not supported!");
 }
 
 void minimizeWindow()
 {
-    
+    LOGW("Q3E SDL minimizeWindow() -> not supported!");
 }
 
 int openURL(const char *url)
@@ -117,8 +127,9 @@ int openURL(const char *url)
 
 void requestPermission(const char *permission, int requestCode)
 {
-    LOGI("Q3E SDL request permission '%s' with request code '%d'", permission, requestCode);
-    CALL_SDL(nativePermissionResult, requestCode, RESULT_OK);
+    int res = request_permission(permission, requestCode);
+    LOGI("Q3E SDL request permission '%s' with request code '%d', result = %d", permission, requestCode, res);
+    CALL_SDL(nativePermissionResult, requestCode, res);
 }
 
 int showToast(const char *message, int duration, int gravity, int xOffset, int yOffset)
@@ -134,17 +145,23 @@ int sendMessage(int command, int param)
 
 int setActivityTitle(const char *title)
 {
+    LOGW("Q3E SDL setActivityTitle(\"%s\") -> not supported!", title);
     return Q3E_FALSE;
 }
 
 int setCustomCursor(int cursorID)
 {
+    LOGW("Q3E SDL setCustomCursor(%d) -> not supported!", cursorID);
+#ifdef Q3E_SDL_FAKE_CUSTOM_CURSOR
+    return Q3E_TRUE;
+#else
     return Q3E_FALSE;
+#endif
 }
 
 void setWindowStyle(int fullscreen)
 {
-    
+    LOGW("Q3E SDL setWindowStyle(%d) -> not supported!", fullscreen);
 }
 
 int shouldMinimizeOnFocusLoss()
@@ -154,6 +171,7 @@ int shouldMinimizeOnFocusLoss()
 
 int showTextInput(int x, int y, int w, int h)
 {
+    LOGW("Q3E SDL showTextInput(%d, %d, %d, %d) -> not supported!", x, y, w, h);
     return Q3E_FALSE;
 }
 
@@ -164,12 +182,17 @@ int supportsRelativeMouse()
 
 int setSystemCursor(int cursorID)
 {
+    LOGW("Q3E SDL setSystemCursor(%d) -> not supported!", cursorID);
+#ifdef Q3E_SDL_FAKE_CUSTOM_CURSOR
+    return Q3E_TRUE;
+#else
     return Q3E_FALSE;
+#endif
 }
 
 void setOrientation(int w, int h, int resizable, const char *hint)
 {
-    
+    LOGW("Q3E SDL setOrientation(%d, %d, %d, \"%s\") -> not supported!", w, h, resizable, hint);
 }
 
 int setRelativeMouseEnabled(int on)
@@ -185,16 +208,19 @@ int getManifestEnvironmentVariables()
 
 int * getAudioOutputDevices()
 {
+    LOGW("Q3E SDL getAudioOutputDevices() -> not supported!");
     return NULL;
 }
 
 int * getAudioInputDevices()
 {
+    LOGW("Q3E SDL getAudioInputDevices() -> not supported!");
     return NULL;
 }
 
 int * audioOpen(int freq, int audioformat, int channels, int samples, int device_id)
 {
+    LOGW("Q3E SDL audioOpen(%d, %d, %d, %d, %d) -> not supported!", freq, audioformat, channels, samples, device_id);
     return NULL;
 }
 
@@ -215,11 +241,12 @@ void audioWriteFloatBuffer(float *buf)
 
 void audioClose()
 {
-    
+    LOGW("Q3E SDL audioClose() -> not supported!");
 }
 
 int * captureOpen(int freq, int audioformat, int channels, int samples, int device_id)
 {
+    LOGW("Q3E SDL captureOpen(%d, %d, %d, %d, %d) -> not supported!", freq, audioformat, channels, samples, device_id);
     return NULL;
 }
 
@@ -240,12 +267,74 @@ int captureReadFloatBuffer(float *buf, int b)
 
 void captureClose()
 {
-    
+    LOGW("Q3E SDL captureClose() -> not supported!");
 }
 
 void audioSetThreadPriority(int iscapture, int device_id)
 {
-    
+    //LOGW("Q3E SDL audioSetThreadPriority(%d, %d) -> not supported!", iscapture, device_id);
+
+    ATTACH_JNI(env)
+    int res = 0;
+
+    jclass Thread = (*env)->FindClass(env, "java/lang/Thread");
+    jmethodID currentThread = (*env)->GetStaticMethodID(env, Thread, "currentThread", "()Ljava/lang/Thread;");
+    jmethodID setName = (*env)->GetMethodID(env, Thread, "setName", "(Ljava/lang/String;)V");
+    jmethodID getId = (*env)->GetMethodID(env, Thread, "getId", "()J");
+    jobject thread;
+    jclass Process = (*env)->FindClass(env, "android/os/Process");
+    jmethodID setThreadPriority = (*env)->GetStaticMethodID(env, Process, "setThreadPriority", "(I)V");
+    int THREAD_PRIORITY_AUDIO = -16;
+    jfieldID THREAD_PRIORITY_AUDIO_field = (*env)->GetStaticFieldID(env, Process, "THREAD_PRIORITY_AUDIO", "I");
+    if(THREAD_PRIORITY_AUDIO_field)
+    {
+        THREAD_PRIORITY_AUDIO = (*env)->GetStaticIntField(env, Process, THREAD_PRIORITY_AUDIO_field);
+    }
+    jlong thread_id;
+
+    //try {
+
+        thread = (*env)->CallStaticObjectMethod(env, Thread, currentThread);
+        char name[9 + 32 + 1] = { 0 };
+        /* Set thread name */
+        if (iscapture) {
+            //Thread.currentThread().setName("SDLAudioC" + device_id);
+            snprintf(name, sizeof(name), "SDLAudioC%d", device_id);
+        } else {
+            //Thread.currentThread().setName("SDLAudioP" + device_id);
+            snprintf(name, sizeof(name), "SDLAudioP%d", device_id);
+        }
+        jstring str = (*env)->NewStringUTF(env, name);
+        jstring nstr = (*env)->NewWeakGlobalRef(env, str);
+        (*env)->DeleteLocalRef(env, str);
+        (*env)->CallVoidMethod(env, thread, setName, nstr);
+        if ((*env)->ExceptionCheck(env)) {
+            LOGE("modify thread properties failed Thread.setThread");
+            (*env)->ExceptionDescribe(env);
+            (*env)->ExceptionClear(env);
+            goto _Exit;
+        }
+
+        /* Set thread priority */
+        //android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
+        (*env)->CallStaticVoidMethod(env, Process, setThreadPriority, THREAD_PRIORITY_AUDIO);
+
+   // } catch (Exception e) {
+        if ((*env)->ExceptionCheck(env)) {
+            LOGE("modify thread properties failed ");
+            (*env)->ExceptionDescribe(env);
+            (*env)->ExceptionClear(env);
+            goto _Exit;
+        }
+    //}
+
+    res = 1;
+
+    //LOGW("Q3E SDL audioSetThreadPriority(%d, %d) -> not supported!", iscapture, device_id);
+
+_Exit:
+    thread_id = (*env)->CallLongMethod(env, thread, getId);
+    LOGW("Q3E SDL audioSetThreadPriority(%d, %d): thread name=%s(%ld), priority=%d -> %d", iscapture, device_id, name, thread_id, THREAD_PRIORITY_AUDIO, res);
 }
 
 void pollInputDevices()
