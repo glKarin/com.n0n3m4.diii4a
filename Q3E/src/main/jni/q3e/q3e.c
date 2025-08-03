@@ -283,7 +283,7 @@ void initAudio(void *buffer, int size)
 
 	ATTACH_JNI(env)
 
-	LOGI("Q3E AudioTrack init");
+	LOGI("Q3E AudioTrack initialization");
 #ifdef AUDIOTRACK_BYTEBUFFER
     tmp = (*env)->NewDirectByteBuffer(env, buffer, size);
 #else
