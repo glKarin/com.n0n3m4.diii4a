@@ -20,6 +20,7 @@ public final class Constants
     public static final String CONST_TIEBA = "https://tieba.baidu.com/p/6825594793";
 	public static final String CONST_DEVELOPER = "https://github.com/glKarin";
     public static final String CONST_DEVELOPER_XDA = "https://forum.xda-developers.com/member.php?u=10584229";
+    public static final String CONST_DISCORD = "https://discord.gg/Wr6K4QnxkH";
     public static final String CONST_PACKAGE = "com.karin.idTech4Amm";
     public static final String CONST_FDROID = "https://f-droid.org/packages/com.karin.idTech4Amm/";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
