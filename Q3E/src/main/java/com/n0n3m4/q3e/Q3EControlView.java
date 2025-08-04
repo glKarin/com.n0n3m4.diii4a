@@ -398,6 +398,23 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         return true;
     }
 
+    @Override
+    public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_UNKNOWN && event.getAction() == KeyEvent.ACTION_MULTIPLE)
+        {
+            String characters = event.getCharacters();
+            if(null != characters)
+            {
+                int length = characters.length();
+                if(length == 1)
+                    Q3EUtils.q3ei.callbackObj.sendCharEvent(characters.charAt(0));
+                else if(length > 1)
+                    Q3EUtils.q3ei.callbackObj.sendTextEvent(characters);
+            }
+        }
+        return super.onKeyMultiple(keyCode, repeatCount, event);
+    }
+
     //@Override
     public boolean OnKeyUp(int keyCode, KeyEvent event)
     {

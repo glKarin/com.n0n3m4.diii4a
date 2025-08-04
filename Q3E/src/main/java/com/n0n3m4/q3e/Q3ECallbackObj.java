@@ -251,6 +251,16 @@ public class Q3ECallbackObj
         eventEngine.SendMouseEvent(x, y);
     }
 
+    public void sendTextEvent(final String text)
+    {
+        eventEngine.SendTextEvent(text);
+    }
+
+    public void sendCharEvent(final int ch)
+    {
+        eventEngine.SendCharEvent(ch);
+    }
+
     public void sendAnalogDelayed(final boolean down, final float x, final float y, View view, final int delay)
     {
         view.postDelayed(new Runnable() {

@@ -23,6 +23,28 @@ static SDL_bool (*SDL_SetHint_f)(const char *name, const char *value);
 #define INTERFACE_METHOD(ret, name, args) ret (* name) args;
 #include "../deplibs/SDL2/src/core/android/SDL_android_interface.h"
 
+// from SDL2
+static void UnicodeToUtf8( int w , char *utf8buf)
+{
+    unsigned char *utf8s = (unsigned char *) utf8buf;
+
+    if ( w < 0x0080 ) {
+        utf8s[0] = ( unsigned char ) w;
+        utf8s[1] = 0;
+    }
+    else if ( w < 0x0800 ) {
+        utf8s[0] = 0xc0 | (( w ) >> 6 );
+        utf8s[1] = 0x80 | (( w ) & 0x3f );
+        utf8s[2] = 0;
+    }
+    else {
+        utf8s[0] = 0xe0 | (( w ) >> 12 );
+        utf8s[1] = 0x80 | (( ( w ) >> 6 ) & 0x3f );
+        utf8s[2] = 0x80 | (( w ) & 0x3f );
+        utf8s[3] = 0;
+    }
+}
+
 const char * clipboardGetText()
 {
     if(sdl_clipboardText)
@@ -307,9 +329,8 @@ void audioSetThreadPriority(int iscapture, int device_id)
             snprintf(name, sizeof(name), "SDLAudioP%d", device_id);
         }
         jstring str = (*env)->NewStringUTF(env, name);
-        jstring nstr = (*env)->NewWeakGlobalRef(env, str);
+        (*env)->CallVoidMethod(env, thread, setName, str);
         (*env)->DeleteLocalRef(env, str);
-        (*env)->CallVoidMethod(env, thread, setName, nstr);
         if ((*env)->ExceptionCheck(env)) {
             LOGE("modify thread properties failed Thread.setThread");
             (*env)->ExceptionDescribe(env);
@@ -605,6 +626,21 @@ void Q3E_SDL_MouseEvent(float x, float y)
     }
 }
 
+void Q3E_SDL_TextEvent(JNIEnv *env, jstring text)
+{
+    jboolean iscopy;
+    const char *utf8str = (*env)->GetStringUTFChars(env, text, &iscopy);
+    CALL_SDL(connection_nativeCommitText, utf8str, 0);
+    (*env)->ReleaseStringUTFChars(env, text, utf8str);
+}
+
+void Q3E_SDL_CharEvent(int ch)
+{
+    char text[4] = { 0 };
+    UnicodeToUtf8(ch, text);
+    CALL_SDL(connection_nativeCommitText, text, 1);
+}
+
 void Q3E_SDL_KeyEvent(int key, int down, int ch)
 {
     if(key < 0)
@@ -618,7 +654,8 @@ void Q3E_SDL_KeyEvent(int key, int down, int ch)
         CALL_SDL(onNativeKeyDown, key);
 		if(ch > 0)
 		{
-			const char text[] = { (char)ch, '\0' };
+            char text[4] = { 0 };
+            UnicodeToUtf8(ch, text);
 			CALL_SDL(connection_nativeCommitText, text, 1);
 		}
     }
