@@ -903,17 +903,23 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         //requestRender();
     }
 
-    private int GetPerfectGridSize()
+    private int GetPerfectGridSize(int PERFECT, int UNIT, int P)
     {
-        final int UNIT = 2;
-        final int PERFECT = 50;
-        int res = 2;
+        int res = UNIT;
 
-        for(int i = res; i < Math.min(width, height); i += UNIT)
+        int w = width;
+        int h = height;
+        if(w % UNIT != 0)
+            w -= (w % UNIT);
+        if(h % UNIT != 0)
+            h -= (h % UNIT);
+        int len = Math.min(w, h);
+
+        for(int i = res; i < len; i += P)
         {
-            if(width % i != 0)
+            if(w % i != 0)
                 continue;
-            if(height % i != 0)
+            if(h % i != 0)
                 continue;
 
             int diffa = i - PERFECT;
@@ -928,6 +934,26 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     res = i;
             }
         }
+        Log.i("Q3EUiView", "Get perfected unit(min unit=" + UNIT + ", perfect unit=" + PERFECT + ") -> " + res);
+        return res;
+    }
+
+    private int GetPerfectGridSize()
+    {
+        final int PERFECT = 50;
+        int res = GetPerfectGridSize(PERFECT, 2, 2);
+
+        if(res <= 2 * 5)
+        {
+            Log.i("Q3EUiView", "Unable get perfected unit, try to multiple of 5");
+            res = GetPerfectGridSize(PERFECT, 5, 5);
+            if(res <= 2 * 10)
+            {
+                Log.i("Q3EUiView", "Unable get perfected unit, try to multiple of 10");
+                res = GetPerfectGridSize(PERFECT, 10, 2);
+            }
+        }
+
         Log.i("Q3EUiView", "GetPerfectGridSize -> " + res);
         return res;
     }
