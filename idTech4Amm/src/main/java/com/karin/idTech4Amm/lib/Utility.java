@@ -1,5 +1,7 @@
 package com.karin.idTech4Amm.lib;
 
+import com.n0n3m4.q3e.Q3EUtils;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -42,24 +44,6 @@ public final class Utility
         return -1;
     }
 
-    public static int ArrayIndexOf(String[] arr, String target, boolean cs)
-    {
-        for(int i = 0; i < arr.length; i++)
-        {
-            if(cs)
-            {
-                if(target.equals(arr[i]))
-                    return i;
-            }
-            else
-            {
-                if(target.equalsIgnoreCase(arr[i]))
-                    return i;
-            }
-        }
-        return -1;
-    }
-
     public static boolean ArrayContains(Object[] arr, Object target)
     {
         return ArrayIndexOf(arr, target) >= 0;
@@ -67,7 +51,7 @@ public final class Utility
 
     public static boolean ArrayContains(String[] arr, String target, boolean cs)
     {
-        return ArrayIndexOf(arr, target, cs) >= 0;
+        return Q3EUtils.ArrayIndexOf(arr, target, cs) >= 0;
     }
 
     public static boolean InArrayRange(Object[] arr, int index)

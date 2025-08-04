@@ -16,8 +16,8 @@ android {
             natasha: A CSOL CT character, for my Quake II for MeeGo Harmattan port version 5 at 2018
             verena: GC singer, for my first YouKu 3rd client for MeeGo Harmattan at 2015
             caitlyn: the Sheriff of Piltover on LOL, for netlizard-game at 2017
-            lindaiyu: at 2025
-            luyiping: at 2002
+            lindaiyu: Red at 2025
+            luyiping: The Rain at 2002
          */
         versionNameSuffix 'luyiping'
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
@@ -90,5 +90,6 @@ android {
 dependencies {
     implementation project(':Q3E')
     implementation 'com.android.support:appcompat-v7:28.0.0'
+    //implementation 'com.android.support:preference-v7:28.0.0'
     implementation 'com.android.support:documentfile:28.0.0'
 }

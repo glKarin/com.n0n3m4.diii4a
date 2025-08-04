@@ -56,7 +56,7 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_JO       = "openjo_sp.cfg";
     public static final String CONFIG_FILE_SAMTFE   = "";
     public static final String CONFIG_FILE_SAMTSE   = "";
-    public static final String CONFIG_FILE_XASH3D   = "";
+    public static final String CONFIG_FILE_XASH3D   = "config.cfg";
     public static final String CONFIG_FILE_SOURCE   = "cfg/config.cfg";
 
     // game type token

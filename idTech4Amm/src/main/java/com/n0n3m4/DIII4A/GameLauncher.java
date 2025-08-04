@@ -812,13 +812,9 @@ public class GameLauncher extends Activity
         public void onClick(View view)
         {
 			int id = view.getId();
-			if (id == R.id.launcher_tab1_edit_autoexec)
+			if (id == R.id.launcher_tab1_edit_config)
 			{
-				EditFile("autoexec.cfg", false);
-			}
-			else if (id == R.id.launcher_tab1_edit_doomconfig)
-			{
-				EditFile(Q3EUtils.q3ei.config_name, true);
+				EditFile();
 			}
 			else if (id == R.id.launcher_tab1_game_lib_button)
 			{
@@ -1916,8 +1912,7 @@ public class GameLauncher extends Activity
 		});
 		boolean findDll = mPrefs.getBoolean(Q3EPreference.pref_harm_find_dll, false);
 		V.find_dll.setChecked(findDll);
-		V.launcher_tab1_edit_autoexec.setOnClickListener(m_buttonClickListener);
-		V.launcher_tab1_edit_doomconfig.setOnClickListener(m_buttonClickListener);
+		V.launcher_tab1_edit_config.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_edit_cvar.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_command_record.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_create_shortcut.setOnClickListener(m_buttonClickListener);
@@ -2501,11 +2496,8 @@ public class GameLauncher extends Activity
 		UnlockCmdUpdate();
 	}
 
-    private void EditFile(String file, boolean findInHome)
+    private void EditFile()
     {
-		if(KStr.IsEmpty(file))
-			return;
-
         if (null == m_editConfigFileFunc)
             m_editConfigFileFunc = new EditConfigFileFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE);
 
@@ -2520,11 +2512,11 @@ public class GameLauncher extends Activity
 				game = str;
 		}
 		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.subdatadir);
-		if(findInHome)
-			path = KStr.AppendPath(path, Q3EUtils.q3ei.GetGameHomeDirectoryPath());
         bundle.putString("game", game);
 		bundle.putString("path", path);
-        bundle.putString("file", file);
+		bundle.putString("base", Q3EUtils.q3ei.game_base);
+		bundle.putString("home", Q3EUtils.q3ei.GetGameHomeDirectoryPath());
+		bundle.putStringArray("files", Q3EUtils.q3ei.GetGameConfigFiles());
         m_editConfigFileFunc.Start(bundle);
     }
 
@@ -3667,7 +3659,6 @@ public class GameLauncher extends Activity
         Q3EUtils.q3ei.SetupGame(game);
 		Q3EUtils.q3ei.SetupGameVersion(this);
 
-        V.launcher_tab1_edit_doomconfig.setText(getString(R.string.edit_) + Q3EUtils.q3ei.config_name);
         if (null != V.main_menu_game)
             V.main_menu_game.setTitle(Q3EUtils.q3ei.game_name);
         ActionBar actionBar = getActionBar();
@@ -4746,8 +4737,7 @@ public class GameLauncher extends Activity
         public Button launcher_tab1_game_lib_button;
         public EditText res_x;
         public EditText res_y;
-        public Button launcher_tab1_edit_autoexec;
-        public Button launcher_tab1_edit_doomconfig;
+        public Button launcher_tab1_edit_config;
         public Button launcher_tab1_game_data_chooser_button;
         public RadioGroup rg_curpos;
         public EditText edt_harm_r_specularExponent;
@@ -4966,8 +4956,7 @@ public class GameLauncher extends Activity
             launcher_tab1_game_lib_button = findViewById(R.id.launcher_tab1_game_lib_button);
             res_x = findViewById(R.id.res_x);
             res_y = findViewById(R.id.res_y);
-            launcher_tab1_edit_autoexec = findViewById(R.id.launcher_tab1_edit_autoexec);
-            launcher_tab1_edit_doomconfig = findViewById(R.id.launcher_tab1_edit_doomconfig);
+            launcher_tab1_edit_config = findViewById(R.id.launcher_tab1_edit_config);
             launcher_tab1_game_data_chooser_button = findViewById(R.id.launcher_tab1_game_data_chooser_button);
             rg_curpos = findViewById(R.id.rg_curpos);
             edt_harm_r_specularExponent = findViewById(R.id.edt_harm_r_specularExponent);

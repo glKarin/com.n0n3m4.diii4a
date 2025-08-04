@@ -32,7 +32,9 @@ import com.n0n3m4.q3e.karin.KidTechCommand;
 import com.n0n3m4.q3e.karin.KidTechQuakeCommand;
 import com.n0n3m4.q3e.onscreen.Q3EControls;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 public class Q3EInterface
@@ -543,6 +545,117 @@ public class Q3EInterface
 			return new KidTechQuakeCommand(cmd);
 		else
 			return new KidTech4Command(cmd);
+	}
+
+	public String[] GetGameConfigFiles()
+	{
+		List<String> list = new ArrayList<>();
+
+		if(isQ4)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_QUAKE4);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isPrey)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_PREY);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isQ2)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_QUAKE2);
+			list.add("<mod>/yq2.cfg");
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/yq2.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isQ3)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_QUAKE3);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isRTCW)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_RTCW);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isQ1)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_QUAKE1);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isD3BFG)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_DOOM3BFG);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isTDM)
+		{
+			list.add(Q3EGameConstants.CONFIG_FILE_TDM);
+			list.add("autoexec.cfg");
+		}
+		else if(isDOOM)
+		{
+			list.add(Q3EGameConstants.CONFIG_FILE_GZDOOM);
+		}
+		else if(isETW)
+		{
+			list.add(Q3EGameConstants.CONFIG_FILE_ETW);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isRealRTCW)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_REALRTCW);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isFTEQW)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_FTEQW);
+			list.add("<mod>/autoexec.cfg");
+		}
+		else if(isJA)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_JA);
+			list.add("<mod>/autoexec_sp.cfg");
+			list.add("<base>/autoexec_sp.cfg");
+		}
+		else if(isJO)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_JO);
+			list.add("<mod>/autoexec_sp.cfg");
+			list.add("<base>/autoexec_sp.cfg");
+		}
+		else if(isSamTFE)
+		{
+		}
+		else if(isSamTSE)
+		{
+		}
+		else if(isXash3D)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_XASH3D);
+			list.add("<mod>/autoexec.cfg");
+		}
+		else if(isSource)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_SOURCE);
+		}
+		else
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_DOOM3);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+
+		return list.toArray(new String[0]);
 	}
 
     public void InitTextureTable()

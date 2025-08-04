@@ -31,8 +31,6 @@
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Показатель зеркальности света</string>
     <string name="sound">Выбор звука(s_driver)</string>
     <string name="load_quicksave_when_start_game">Загружать автосохранение при запуске игры</string>
-    <string name="edit_autoexec_cfg">Редактировать autoexec.cfg</string>
-    <string name="edit_doomconfig_cfg">Редактировать DoomConfig.cfg</string>
     <string name="note_gamepads_keyboards_must_be_configured_in_game_like_on_pc_not_here">Примечание: Геймпады/Клавиатуры должны быть настроены в игре (как на ПК), а не здесь.</string>
     <string name="configure_on_screen_controls">Настройки управления</string>
     <string name="on_screen_button_setting">Настройки кнопок</string>
@@ -525,5 +523,6 @@
     <string name="reset_all_controller_configure">Reset all controller configure</string>
     <string name="automatic">Automatic</string>
     <string name="sdl_audio_driver">SDL audio driver</string>
+    <string name="install_shortcut_tips_if_creating_failed">Maybe require grant install shortcut permission manually in system on some brand devices if creating failed.</string>
 
 </resources>

@@ -32,6 +32,7 @@ public class ConfigEditorActivity extends Activity
     private String m_filePath;
     private File m_file;
     private boolean m_edited = false;
+    private boolean m_creating = false;
 
     private final TextWatcher m_textWatcher = new TextWatcher() {
     public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -70,6 +71,7 @@ public class ConfigEditorActivity extends Activity
     {
         Intent intent = getIntent();
         String path = intent.getStringExtra("CONST_FILE_PATH");
+        m_creating = intent.getBooleanExtra("CONST_CREATING", false);
         if (path != null)
         {
             LoadFile(path);
@@ -99,6 +101,8 @@ public class ConfigEditorActivity extends Activity
 
         File file = new File(path);
         String text = Q3EUtils.file_get_contents(file);
+        if(null == text && m_creating)
+            text = "";
         if (text != null)
         {
             V.editText.setText(text);
@@ -122,6 +126,8 @@ public class ConfigEditorActivity extends Activity
     {
         if (m_file == null)
             return false;
+        if(m_creating)
+            Q3EUtils.mkdir(m_file.getParent(), true);
         return Q3EUtils.file_put_contents(m_file, V.editText.getText().toString());
     }
 
