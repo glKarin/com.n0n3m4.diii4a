@@ -641,6 +641,11 @@ void Q3E_SDL_CharEvent(int ch)
     CALL_SDL(connection_nativeCommitText, text, 1);
 }
 
+void Q3E_SDL_WheelEvent(float x, float y)
+{
+    CALL_SDL(onNativeMouse, 0, ACTION_SCROLL, x, y, 0);
+}
+
 void Q3E_SDL_KeyEvent(int key, int down, int ch)
 {
     if(key < 0)

@@ -28,6 +28,9 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendTextEvent
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendCharEvent
 (JNIEnv *, jclass, jint);
 
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendWheelEvent
+        (JNIEnv *, jclass, jfloat, jfloat);
+
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y);
   
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setRenderer
@@ -61,6 +64,9 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMouseEvent
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushTextEvent(JNIEnv *env, jclass clazz, jstring text);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushCharEvent(JNIEnv *env, jclass clazz, jint ch);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushWheelEvent
+        (JNIEnv *, jclass, jfloat, jfloat);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit
         (JNIEnv *, jclass, jint, jint);

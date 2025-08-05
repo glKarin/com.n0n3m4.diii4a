@@ -653,6 +653,11 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendCharEvent(JNIEnv *env, jcl
 	EXEC_SDL(Q3E_SDL_CharEvent, ch);
 }
 
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendWheelEvent(JNIEnv *env, jclass clazz, jfloat x, jfloat y)
+{
+	EXEC_SDL(Q3E_SDL_WheelEvent, x, y);
+}
+
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Is64(JNIEnv *env, jclass c)
 {    
     return sizeof(void *) == 8 ? JNI_TRUE : JNI_FALSE;
@@ -1048,6 +1053,11 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushTextEvent(JNIEnv *env, jcl
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushCharEvent(JNIEnv *env, jclass clazz, jint ch)
 {
 	EXEC_SDL(Q3E_SDL_CharEvent, ch);
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushWheelEvent(JNIEnv *env, jclass clazz, jfloat x, jfloat y)
+{
+	EXEC_SDL(Q3E_SDL_WheelEvent, x, y);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y)

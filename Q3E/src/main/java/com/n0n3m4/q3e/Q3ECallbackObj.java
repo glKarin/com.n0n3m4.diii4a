@@ -231,37 +231,42 @@ public class Q3ECallbackObj
         return Q3EUtils.GetClipboardText(Q3EMain.gameHelper.GetContext());
     }
 
-    public void sendAnalog(final boolean down, final float x, final float y)
+    public void sendAnalog(boolean down, float x, float y)
     {
         eventEngine.SendAnalogEvent(down, x, y);
     }
 
-    public void sendKeyEvent(final boolean down, final int keycode, final int charcode)
+    public void sendKeyEvent(boolean down, int keycode, int charcode)
     {
         eventEngine.SendKeyEvent(down, keycode, charcode);
     }
 
-    public void sendMotionEvent(final float deltax, final float deltay)
+    public void sendMotionEvent(float deltax, float deltay)
     {
         eventEngine.SendMotionEvent(deltax, deltay);
     }
 
-    public void sendMouseEvent(final float x, final float y)
+    public void sendMouseEvent(float x, float y)
     {
         eventEngine.SendMouseEvent(x, y);
     }
 
-    public void sendTextEvent(final String text)
+    public void sendTextEvent(String text)
     {
         eventEngine.SendTextEvent(text);
     }
 
-    public void sendCharEvent(final int ch)
+    public void sendCharEvent(int ch)
     {
         eventEngine.SendCharEvent(ch);
     }
 
-    public void sendAnalogDelayed(final boolean down, final float x, final float y, View view, final int delay)
+    public void sendWheelEvent(float x, float y)
+    {
+        eventEngine.SendWheelEvent(x, y);
+    }
+
+    public void sendAnalogDelayed(boolean down, float x, float y, View view, int delay)
     {
         view.postDelayed(new Runnable() {
             @Override
@@ -271,7 +276,7 @@ public class Q3ECallbackObj
         }, delay);
     }
 
-    public void sendKeyEventDelayed(final boolean down, final int keycode, final int charcode, View view, final int delay)
+    public void sendKeyEventDelayed(boolean down, int keycode, int charcode, View view, int delay)
     {
         view.postDelayed(new Runnable() {
             @Override
@@ -281,7 +286,7 @@ public class Q3ECallbackObj
         }, delay);
     }
 
-    public void sendMotionEventDelayed(final float deltax, final float deltay, View view, final int delay)
+    public void sendMotionEventDelayed(float deltax, float deltay, View view, int delay)
     {
         view.postDelayed(new Runnable() {
             @Override

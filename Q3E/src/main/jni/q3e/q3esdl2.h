@@ -27,5 +27,6 @@ void Q3E_SDL_SetRelativeMouseMode(int on);
 void Q3E_SDL_SetAudioDriver(int driver);
 void Q3E_SDL_TextEvent(JNIEnv *env, jstring text);
 void Q3E_SDL_CharEvent(int ch);
+void Q3E_SDL_WheelEvent(float x, float y);
 
 #endif
