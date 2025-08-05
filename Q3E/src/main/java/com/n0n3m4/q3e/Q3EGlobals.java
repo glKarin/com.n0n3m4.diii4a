@@ -43,33 +43,28 @@ public final class Q3EGlobals
     public static final int UI_N            = 27;
     public static final int UI_PLUS         = 28;
     public static final int UI_MINUS        = 29;
-    public static final int UI_SIZE         = UI_MINUS + 1;
-    /*public static final int UI_A            = 25;
-    public static final int UI_B            = 26;
-    public static final int UI_C            = 27;
-    public static final int UI_D            = 28;
-    public static final int UI_E            = 29;
-    public static final int UI_F            = 30;
-    public static final int UI_G            = 31;
-    public static final int UI_H            = 32;
-    public static final int UI_I            = 33;
-    public static final int UI_J            = 34;
-    public static final int UI_K            = 35;
-    public static final int UI_L            = 36;
-    public static final int UI_M            = 37;
-    public static final int UI_N            = 38;
-    public static final int UI_O            = 39;
-    public static final int UI_P            = 40;
-    public static final int UI_Q            = 41;
-    public static final int UI_R            = 42;
-    public static final int UI_S            = 43;
-    public static final int UI_T            = 44;
-    public static final int UI_U            = 45;
-    public static final int UI_V            = 46;
-    public static final int UI_W            = 47;
-    public static final int UI_X            = 48;
-    public static final int UI_Y            = 49;
-    public static final int UI_Z            = 50;*/
+
+    public static final int UI_Q            = 30;
+    public static final int UI_W            = 31;
+    public static final int UI_E            = 32;
+    public static final int UI_U            = 33;
+    public static final int UI_T            = 34;
+    public static final int UI_I            = 35;
+    public static final int UI_O            = 36;
+    public static final int UI_P            = 37;
+    public static final int UI_A            = 38;
+    public static final int UI_S            = 39;
+    public static final int UI_D            = 40;
+    public static final int UI_G            = 41;
+    public static final int UI_H            = 42;
+    public static final int UI_J            = 43;
+    public static final int UI_K            = 44;
+    public static final int UI_L            = 45;
+    public static final int UI_X            = 46;
+    public static final int UI_V            = 47;
+    public static final int UI_B            = 48;
+
+    public static final int UI_SIZE         = UI_B + 1;
 
     // on-screen item type
     public static final int TYPE_BUTTON       = 0;
@@ -168,6 +163,25 @@ public final class Q3EGlobals
             "N",
             "+",
             "-",
+            "Q",
+            "W",
+            "E",
+            "U",
+            "T",
+            "I",
+            "O",
+            "P",
+            "A",
+            "S",
+            "D",
+            "G",
+            "H",
+            "J",
+            "K",
+            "L",
+            "X",
+            "V",
+            "B",
     };
 
     // OpenGL Surface color format

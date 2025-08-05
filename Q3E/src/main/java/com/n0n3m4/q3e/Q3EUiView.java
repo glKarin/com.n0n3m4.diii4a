@@ -62,13 +62,14 @@ import javax.microedition.khronos.opengles.GL11;
 public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 {
     private       int          m_unit              = 0;
-    public final  int          step                = Q3EUtils.dip2px(getContext(), 5);
+    public  int          step                = 10;
     private       FloatBuffer  m_gridBuffer        = null;
     private       int          m_numGridLineVertex = 0;
     private final Object       m_gridLock          = new Object();
     private       boolean      m_edited            = false;
     private final int[]        drawerTextureId     = {0, 0};
     private       ViewGroup    layout;
+    private  int          m_drawerHeight                = 200;
     private final List<Paintable> reloadList = new ArrayList<>();
 
     public Q3EUiView(Context context)
@@ -76,6 +77,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         super(context);
 
         Q3EGL.usegles20 = false;
+        step = Q3EUtils.dip2px(getContext(), 5);
+        m_drawerHeight = Q3EUtils.dip2px(getContext(), 50) * 3 + Q3EUtils.dip2px(getContext(), 5);
 
         setRenderer(this);
 
@@ -500,7 +503,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
                 if ((yoffset == 0) && (y > height - height / 6))
                 {
-                    yoffset = height / 3;
+                    yoffset = Math.max(height / 3, m_drawerHeight);
                 }
                 else
                 {

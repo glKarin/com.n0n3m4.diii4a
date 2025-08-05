@@ -114,19 +114,29 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
         final String endl = TextHelper.GetDialogMessageEndl();
         KFDManager manager = KFDManager.Instance(m_gameLauncher);
         StringBuilder sb = new StringBuilder();
+        StringBuilder exbuf = new StringBuilder();
         String[] sps = manager.GetSearchPathFolders();
+        final String EXNAME = "Example_Theme";
         int i = 0;
+        int j = 0;
         for (String sp : sps)
         {
             sb.append(" ").append(++i).append(". ").append(sp).append(endl);
-            sb.append(" ").append(++i).append(". ").append(sp).append("/*.zipak").append(endl);
+            sb.append(" ").append(++i).append(". ").append(sp).append("/*" + Q3EGlobals.IDTECH4AMM_PAK_SUFFIX).append(endl);
+
+            exbuf.append(" ").append(++j).append(". ").append(sp).append("/controls_theme/").append(EXNAME).append("/*.png").append(endl);
+            exbuf.append(" ").append(++j).append(". ").append(sp).append("/*" + Q3EGlobals.IDTECH4AMM_PAK_SUFFIX).append("/controls_theme/").append(EXNAME).append("/*.png").append(endl);
         }
         final String Tips = "If choosing `External`, put button image files to `&lt;EXTERNAL SEARCH PATH&gt;` as same file name, will instead of apk internal image files."
                 + endl
-                + "Or putting button image files as a folder with your custom name in `&lt;EXTERNAL SEARCH PATH&gt;/controls_theme/`, the Theme chooser will show the folder name, and select the folder name instead of apk internal image files."
+                + "Or putting all button image files as a folder with your custom name in `&lt;EXTERNAL SEARCH PATH&gt;/controls_theme/`, the theme chooser will show the folder name, and select the folder name instead of apk internal image files."
                 + endl + endl
-                + "&lt;CURRENT ALL SEARCH PATH&gt; (.zipak is zip archive file): " + endl
+                + "&lt;EXTERNAL SEARCH PATH&gt; (.zipak is zip archive file): " + endl
                 + sb
+                + endl
+                + "Example: " + endl
+                + "Folder of button theme images named `" + EXNAME + "`, app will search image files from these path: " + endl
+                + exbuf
                 ;
         ContextUtility.OpenMessageDialog(m_gameLauncher, Tr(R.string.tips), TextHelper.GetDialogMessage(Tips));
     }
