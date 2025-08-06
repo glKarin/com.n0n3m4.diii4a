@@ -39,9 +39,6 @@
     <string name="on_screen_buttons_position_unit_must_is_multiple_of_5_or_0">虚拟按键位置单位必须是5的倍数或0</string>
     <string name="setup_joystick_done">摇杆设置完成.</string>
     <string name="back">返回</string>
-    <string name="extract_the_dark_mod_glsl_shader_source_files_fail">提取The Dark Mod GLSL着色器源码文件失败!</string>
-    <string name="extract_rbdoom3bfg_hlsl_shader_source_files_fail">提取RBDOOM 3 BFG HLSL着色器源码文件失败!</string>
-    <string name="extract_gzdoom_game_resource_files_fail">提取GZDOOM游戏资源文件失败!</string>
     <string name="position_unit">位置单位(0为自动, 1为禁用)</string>
     <string name="warning">警告</string>
     <string name="yes">是</string>
@@ -63,8 +60,9 @@
     <string name="doom3_bot_sabot_a7_mod">毁灭战士3 Bot(SABot-a7 mod)</string>
     <string name="mp_game_map_aas">多人游戏地图区域感知系统文件(aas)</string>
     <string name="xash3d_extras">Xash3D额外资源</string>
-    <string name="extract_xash3d_extras_resource_files_fail">提取Xash3D额外资源文件失败!</string>
     <string name="cs16_xash3d_extras">反恐精英1.6(Xash3D)额外资源</string>
     <string name="sourceengine_extras">起源引擎额外资源</string>
-    <string name="extract_source_engine_extras_resource_files_fail">提取起源引擎额外资源文件失败!</string>
+    <string name="external">外部的</string>
+    <string name="etlegacy_extras">ET: Legacy额外资源</string>
+    <string name="extract_files_fail">提取%1$s文件失败!</string>
 </resources>

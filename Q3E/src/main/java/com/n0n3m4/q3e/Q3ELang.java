@@ -7,6 +7,8 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
+import com.n0n3m4.q3e.karin.KStr;
+
 import java.util.Locale;
 
 public final class Q3ELang
@@ -32,6 +34,20 @@ public final class Q3ELang
     {
         String lang = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.LANG, CONST_LANG_SYSTEM);
         Locale(context, lang);
+    }
+
+    public static String AppLang(Context context)
+    {
+        String lang = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.LANG, CONST_LANG_SYSTEM);
+        if(CONST_LANG_SYSTEM.equals(lang))
+        {
+            Locale loc = Locale.getDefault();
+            lang = loc.getLanguage();
+            String country = loc.getCountry();
+            if(KStr.NotEmpty(country))
+                lang += "-" + country;
+        }
+        return lang;
     }
 
     public static void Locale(Context context, String language)

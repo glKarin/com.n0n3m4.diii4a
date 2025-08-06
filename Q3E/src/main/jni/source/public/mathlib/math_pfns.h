@@ -28,6 +28,8 @@ extern float (*pfFastCos)(float x);
 
 #ifdef _WIN32
 #define FastSinCos(x,s,c)   (*pfFastSinCos)(x,s,c)
+#elif _OSX
+#define FastSinCos(x,s,c)   __sincosf(x,s,c)
 #else
 #define FastSinCos(x,s,c)   sincosf(x,s,c)
 #endif

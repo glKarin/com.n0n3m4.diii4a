@@ -138,6 +138,19 @@ public final class KFDManager
         return File(path).OpenRead();
     }
 
+    public String ReadAsText(String path)
+    {
+        try
+        {
+            return File(path).ReadAsText();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public List<String> ListDir(String path)
     {
         return File(path).ListDir();

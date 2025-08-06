@@ -524,5 +524,9 @@
     <string name="automatic">Automatic</string>
     <string name="sdl_audio_driver">SDL audio driver</string>
     <string name="install_shortcut_tips_if_creating_failed">Maybe require grant install shortcut permission manually in system on some brand devices if creating failed.</string>
+    <string name="name_">Name: </string>
+    <string name="path_">Path: </string>
+    <string name="author_">Author: </string>
+    <string name="description_">Description: </string>
 
 </resources>

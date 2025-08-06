@@ -50,6 +50,7 @@ import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.karin.KFDManager;
 import com.n0n3m4.q3e.karin.KLog;
+import com.n0n3m4.q3e.karin.KControlsTheme;
 import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.ByteArrayOutputStream;
@@ -71,7 +72,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -460,15 +460,45 @@ public class Q3EUtils
         }
     }
 
-    public static LinkedHashMap<String, String> GetControlsThemes(Context context)
+    public static List<KControlsTheme> GetControlsThemes(Context context)
     {
-        LinkedHashMap<String, String> list = new LinkedHashMap<>();
-        list.put("/android_asset", "Default");
-        list.put("", "External");
-        List<String> controls_theme = KFDManager.Instance(context).ListDir("controls_theme");
+        KFDManager fs = KFDManager.Instance(context);
+        List<KControlsTheme> list = new ArrayList<>();
+        list.add(new KControlsTheme("/android_asset", Q3ELang.tr(context, R.string._default)));
+        list.add(new KControlsTheme("", Q3ELang.tr(context, R.string.external)));
+        List<String> controls_theme = fs.ListDir("controls_theme");
         for (String file : controls_theme)
         {
-            list.put("controls_theme/" + file, file);
+            String path = "controls_theme/" + file;
+
+            KControlsTheme item = new KControlsTheme(path, file);
+
+            List<String> searches = new ArrayList<>();
+            searches.add("");
+            String lang = Q3ELang.AppLang(context);
+            if(KStr.NotEmpty(lang))
+            {
+                int i = lang.indexOf("-");
+                if(i > 0)
+                {
+                    String l = lang.substring(0, i);
+                    if(!searches.contains(l))
+                        searches.add("." + l);
+                }
+                 if(!searches.contains(lang))
+                    searches.add("." + lang);
+            }
+
+            for(String search : searches)
+            {
+                String desc = fs.ReadAsText(path + "/description" + search + ".txt");
+                if(null != desc)
+                {
+                    item.Parse(desc);
+                }
+            }
+
+            list.add(item);
         }
         return list;
     }
@@ -917,6 +947,13 @@ public class Q3EUtils
         }
         else
             return rm(file);
+    }
+
+    public static String FileDir(String path)
+    {
+        if(path.endsWith("/") || path.endsWith("\\"))
+            return path;
+        return new File(path).getParentFile().getAbsolutePath();
     }
 
     public static boolean mkdir(String path, boolean p)

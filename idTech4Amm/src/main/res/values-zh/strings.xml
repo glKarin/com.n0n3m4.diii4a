@@ -523,4 +523,8 @@
     <string name="automatic">自动</string>
     <string name="sdl_audio_driver">SDL音频驱动</string>
     <string name="install_shortcut_tips_if_creating_failed">如果快捷方式创建失败, 某些品牌的设备可能需要先在系统应用设置中手动授权安装快捷方式权限.</string>
+    <string name="name_">名称: </string>
+    <string name="path_">路径: </string>
+    <string name="author_">作者: </string>
+    <string name="description_">详情: </string>
 </resources>

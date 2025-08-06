@@ -280,4 +280,19 @@ public final class KFileDescriptor
         }
         return res;
     }
+
+    public String ReadAsText()
+    {
+        InputStream is = OpenRead();
+        if(null == is)
+            return null;
+        try
+        {
+            return Q3EUtils.Read(is);
+        }
+        finally
+        {
+            Q3EUtils.Close(is);
+        }
+    }
 }

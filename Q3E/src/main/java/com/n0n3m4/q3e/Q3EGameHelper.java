@@ -490,6 +490,7 @@ public class Q3EGameHelper
     private boolean CheckExtractResourceOverwrite(String systemVersionPath, String apkVersion, String name)
     {
         boolean overwrite = false;
+        KLog.I("Check " + name + " resource file version: " + systemVersionPath + " with version " + apkVersion);
 
         try
         {
@@ -561,6 +562,7 @@ public class Q3EGameHelper
 
     private void DumpExtractResourceVersion(String systemVersionPath, String apkVersion, String name)
     {
+        Q3EUtils.mkdir(Q3EUtils.FileDir(systemVersionPath), true);
         Q3EUtils.file_put_contents(systemVersionPath, apkVersion);
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Write " + name + " file version is " + apkVersion);
     }
@@ -570,7 +572,7 @@ public class Q3EGameHelper
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_TDM, "glslprogs/idtech4amm.version");
         String version = Q3EGameConstants.TDM_GLSL_SHADER_VERSION;
-        String name = "The Dark Mod GLSL shader source";
+        String name = Q3ELang.tr(m_context, R.string.the_dark_mod_glsl_shader);
         String versionKey = Q3EInterface.GetGameVersionPreferenceKey(Q3EGameConstants.GAME_TDM);
         Q3EGameConstants.PatchResource patchResource = Q3EGameConstants.PatchResource.TDM_GLSL_SHADER;
 
@@ -584,15 +586,15 @@ public class Q3EGameHelper
             }
         }
         else
-            ShowMessage(R.string.extract_the_dark_mod_glsl_shader_source_files_fail);
+            ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
     public void ExtractDOOM3BFGHLSLShaderSource()
     {
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
-        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_DOOMBFG + "/base", "renderprogs/idtech4amm.version");
+        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EUtils.q3ei.subdatadir, "base", "renderprogs/idtech4amm.version");
         final String version = Q3EGameConstants.RBDOOM3BFG_HLSL_SHADER_VERSION;
-        final String name = "RBDOOM 3 BFG HLSL shader source";
+        final String name = Q3ELang.tr(m_context, R.string.rbdoom3_bfg_hlsl_shader);
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
 
@@ -604,7 +606,7 @@ public class Q3EGameHelper
             }
         }
         else
-            ShowMessage(R.string.extract_rbdoom3bfg_hlsl_shader_source_files_fail);
+            ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
     public void ExtractGZDOOMResource()
@@ -620,7 +622,7 @@ public class Q3EGameHelper
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_GZDOOM, versionCheckFile);
         //final String engineVersionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.gzdoom.version");
         final String version = Q3EGameConstants.GZDOOM_VERSION;
-        String name = "GZDOOM game resource";
+        String name = Q3ELang.tr(m_context, R.string.gzdoom_builtin_resource);
 
         //boolean change = CheckExtractResourceVersion(engineVersionFile, versionName, name);
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
@@ -632,7 +634,7 @@ public class Q3EGameHelper
             }
         }
         else
-            ShowMessage(R.string.extract_gzdoom_game_resource_files_fail);
+            ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
     public void ExtractXash3DResource()
@@ -646,7 +648,7 @@ public class Q3EGameHelper
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_XASH3D, versionCheckFile);
         final String version = Q3EGameConstants.XASH3D_VERSION;
-        String name = "Xash3D game resource";
+        String name = Q3ELang.tr(m_context, R.string.xash3d_extras);
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
         if(manager.Fetch(resource, overwrite) != null)
@@ -657,7 +659,32 @@ public class Q3EGameHelper
             }
         }
         else
-            ShowMessage(R.string.extract_xash3d_extras_resource_files_fail);
+            ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
+    }
+
+    public void ExtractETWResource()
+    {
+        Q3EGameConstants.PatchResource resource;
+        String versionCheckFile;
+
+        versionCheckFile = "idtech4amm.version";
+        resource = Q3EGameConstants.PatchResource.ET_LEGACY_EXTRAS;
+
+        Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
+        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EUtils.q3ei.subdatadir, "legacy", versionCheckFile);
+        final String version = Q3EGameConstants.ETW_VERSION;
+        String name = Q3ELang.tr(m_context, R.string.etlegacy_extras);
+
+        boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
+        if(manager.Fetch(resource, overwrite) != null)
+        {
+            if (overwrite)
+            {
+                DumpExtractResourceVersion(versionFile, version, name);
+            }
+        }
+        else
+            ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
     public void ExtractSourceEngineResource()
@@ -671,7 +698,7 @@ public class Q3EGameHelper
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_SOURCE, versionCheckFile);
         final String version = Q3EGameConstants.SOURCE_ENGINE_VERSION;
-        String name = "Source Engine game resource";
+        String name = Q3ELang.tr(m_context, R.string.sourceengine_extras);
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
         if(manager.Fetch(resource, overwrite) != null)
@@ -682,7 +709,7 @@ public class Q3EGameHelper
             }
         }
         else
-            ShowMessage(R.string.extract_source_engine_extras_resource_files_fail);
+            ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
     public void ExtractGameResource()
@@ -697,6 +724,8 @@ public class Q3EGameHelper
             ExtractXash3DResource();
         else if(Q3EUtils.q3ei.isSource) // fonts
             ExtractSourceEngineResource();
+        else if(Q3EUtils.q3ei.isETW)
+            ExtractETWResource();
     }
 
     private int GetMSAA()

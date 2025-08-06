@@ -21,7 +21,6 @@ import android.widget.TextView;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.misc.TextHelper;
-import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3EGlobals;
@@ -30,9 +29,10 @@ import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KFDManager;
+import com.n0n3m4.q3e.karin.KControlsTheme;
+import com.n0n3m4.q3e.karin.KStr;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 public final class SetupControlsThemeFunc extends GameLauncherFunc
@@ -59,17 +59,18 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(R.string.controls_theme);
         View widget = m_gameLauncher.getLayoutInflater().inflate(R.layout.controls_theme_dialog, null, false);
-        LinkedHashMap<String, String> schemes = Q3EUtils.GetControlsThemes(m_gameLauncher);
+        List<KControlsTheme> schemes = Q3EUtils.GetControlsThemes(m_gameLauncher);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher);
         String type = preferences.getString(Q3EPreference.CONTROLS_THEME, "");
         if(null == type)
             type = "";
         String[] theme = { type };
-        ArrayList<String> types = new ArrayList<>(schemes.keySet());
+        List<String> types = KControlsTheme.MakePathList(schemes);
+        List<String> values = KControlsTheme.MakeLabelList(schemes);
 
         Spinner spinner = widget.findViewById(R.id.controls_theme_spinner);
-        final ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(m_gameLauncher, android.R.layout.simple_spinner_dropdown_item, new ArrayList<>(schemes.values()));
+        final ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(m_gameLauncher, android.R.layout.simple_spinner_dropdown_item, values);
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(typeAdapter);
         spinner.setSelection(types.indexOf(theme[0]));
@@ -91,6 +92,25 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
             }
         });
 
+        View view = widget.findViewById(R.id.controls_theme_label);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                if(!"".equals(theme[0]) && !"/android_asset".equals(theme[0]))
+                {
+                    for(KControlsTheme scheme : schemes)
+                    {
+                        if(scheme.path.equals(theme[0]))
+                        {
+                            ShowInfo(scheme);
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+
         builder.setView(widget);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -104,9 +124,22 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
                     ShowTips();
                 }
             })
-                .setNegativeButton(R.string.cancel, null);
+            .setNegativeButton(R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void ShowInfo(KControlsTheme theme)
+    {
+        StringBuilder buf = new StringBuilder();
+        String endl = "\n";
+        buf.append(Tr(R.string.name_)).append(theme.name).append(endl);
+        buf.append(Tr(R.string.path_)).append(theme.path).append(endl);
+        if(KStr.NotEmpty(theme.author))
+            buf.append(Tr(R.string.author_)).append(theme.author).append(endl);
+        if(KStr.NotEmpty(theme.desc))
+            buf.append(Tr(R.string.description_)).append(theme.desc);
+        ContextUtility.OpenMessageDialog(m_gameLauncher, Tr(R.string.about), buf.toString());
     }
 
     private void ShowTips()
