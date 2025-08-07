@@ -34,7 +34,6 @@ import android.widget.Toast;
 
 import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
-import com.n0n3m4.q3e.karin.KidTech4Command;
 import com.n0n3m4.q3e.karin.KidTechCommand;
 
 import java.io.File;
@@ -42,7 +41,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -155,7 +153,7 @@ public class Q3EGameHelper
 
             Q3EUtils.q3ei.start_temporary_extra_command = Q3EUtils.q3ei.MakeTempBaseCommand(m_context);
         }
-        Q3EUtils.q3ei.SetupGameVersion(m_context);
+        Q3EUtils.q3ei.SetupEngineVersion(m_context);
 
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Run " + Q3EUtils.q3ei.game_name);
 

@@ -145,6 +145,27 @@ public final class Q3EGameConstants
     public static final String GAME_SUBDIR_XASH3D   = "xash3d";
     public static final String GAME_SUBDIR_SOURCE   = "source";
 
+    // game version
+    public static final String GAME_VERSION_DOOM3    = "1.3.1.1304";
+    public static final String GAME_VERSION_QUAKE4   = "1.4.2.1283";
+    public static final String GAME_VERSION_PREY     = "1.2.116";
+    public static final String GAME_VERSION_QUAKE2   = "8.41";
+    public static final String GAME_VERSION_QUAKE3   = "1.36";
+    public static final String GAME_VERSION_RTCW     = "1.51d";
+    public static final String GAME_VERSION_TDM      = "2.13";
+    public static final String GAME_VERSION_QUAKE1   = "";
+    public static final String GAME_VERSION_DOOM3BFG = "1.4.0";
+    public static final String GAME_VERSION_GZDOOM   = "4.14.1";
+    public static final String GAME_VERSION_ETW      = "2.83.2";
+    public static final String GAME_VERSION_REALRTCW = "5.1";
+    public static final String GAME_VERSION_FTEQW    = "1.05"; // ???
+    public static final String GAME_VERSION_JA       = "1.0.1.1";
+    public static final String GAME_VERSION_JO       = "1.0.1.1";
+    public static final String GAME_VERSION_SAMTFE   = "1.10.7";
+    public static final String GAME_VERSION_SAMTSE   = "1.10.7";
+    public static final String GAME_VERSION_XASH3D   = "0.21";
+    public static final String GAME_VERSION_SOURCE   = "1.16";
+
     // game type index(ID)
     public static final int GAME_ID_DOOM3    = 0;
     public static final int GAME_ID_QUAKE4   = 1;

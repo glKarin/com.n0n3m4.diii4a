@@ -33,6 +33,7 @@ public final class Constants
             "Fix game controller, and add game controller configure on launcher `CONTROL` tab.",
             "Add more alphabet on-screen buttons, and add `cs16-client` and `source-engine` on-screen button theme.",
             "Add load external game library support on Xash3D.",
+            "Add built-in soft keyboard support.",
         };
 	};
 

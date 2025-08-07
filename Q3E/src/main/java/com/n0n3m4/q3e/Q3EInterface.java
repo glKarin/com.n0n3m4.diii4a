@@ -84,11 +84,12 @@ public class Q3EInterface
 	public String game;
 	public String game_name;
 	public String game_base;
-	public String game_version;
+	public String engine_version;
 	public String datadir;
 	public boolean standalone = false;
 	public String subdatadir;
 	public int game_id;
+	public String game_version;
 
 	public Q3ECallbackObj callbackObj;
 
@@ -122,12 +123,12 @@ public class Q3EInterface
 
 	public String GetEngineLibName()
 	{
-		if(null == game_version || game_version.isEmpty())
+		if(null == engine_version || engine_version.isEmpty())
 			return EngineLibName();
 
 		if(isD3BFG)
 		{
-			if(Q3EGameConstants.GAME_VERSION_D3BFG_VULKAN.equalsIgnoreCase(game_version))
+			if(Q3EGameConstants.GAME_VERSION_D3BFG_VULKAN.equalsIgnoreCase(engine_version))
 				return Q3EGameConstants.LIB_ENGINE4_D3BFG_VULKAN;
 			else
 				return Q3EGameConstants.LIB_ENGINE4_D3BFG;
@@ -447,26 +448,28 @@ public class Q3EInterface
 		game = cfg.TYPE;
 		game_name = cfg.NAME;
 		game_base = cfg.BASE;
-		game_version = null;
+		game_version = cfg.VERSION;
 
 		libname = cfg.ENGINE_LIB;
 		config_name = cfg.CONFIG_FILE;
+
+		engine_version = null;
 
 		Q3EKeyCodes.InitKeycodes(cfg.KEYCODE);
 
 		SetupSubDir();
 	}
 
-	public void SetupGameVersion(String version)
+	public void SetupEngineVersion(String version)
 	{
 		if("".equals(version))
 			version = null;
-		game_version = version;
+		engine_version = version;
 	}
 
-	public void SetupGameVersion(Context context)
+	public void SetupEngineVersion(Context context)
 	{
-		SetupGameVersion(GameVersion(context));
+		SetupEngineVersion(GameVersion(context));
 	}
 
 	public boolean IsTDMTech()
@@ -859,7 +862,16 @@ public class Q3EInterface
 
 	public static String[] GetGameVersions(String game)
 	{
-		return Q3EGame.Find(game).VERSION;
+		switch(game)
+		{
+			case Q3EGameConstants.GAME_DOOM3BFG:
+				return new String[]{
+						Q3EGameConstants.GAME_VERSION_D3BFG_OPENGL,
+						Q3EGameConstants.GAME_VERSION_D3BFG_VULKAN,
+				};
+			default:
+				return null;
+		}
 	}
 
 	public static String GetGameModPreferenceKey(String game)

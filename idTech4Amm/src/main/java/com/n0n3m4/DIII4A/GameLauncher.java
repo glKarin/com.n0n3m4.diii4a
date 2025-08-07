@@ -79,6 +79,7 @@ import com.karin.idTech4Amm.sys.Theme;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.ExperimentalDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
+import com.karin.idTech4Amm.widget.Divider;
 import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.BackupPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.CVarEditorFunc;
@@ -1100,7 +1101,7 @@ public class GameLauncher extends Activity
 		if(null != game && !game.isEmpty())
 		{
 			q3ei.SetupGame(game);
-			q3ei.SetupGameVersion(this);
+			q3ei.SetupEngineVersion(this);
 		}
 
         Q3EUtils.q3ei = q3ei;
@@ -3416,10 +3417,10 @@ public class GameLauncher extends Activity
 		{
 			SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
 			preference.edit().putString(key, val).commit();
-			Q3EUtils.q3ei.SetupGameVersion(val);
+			Q3EUtils.q3ei.SetupEngineVersion(val);
 		}
 		else
-			Q3EUtils.q3ei.SetupGameVersion((String)null);
+			Q3EUtils.q3ei.SetupEngineVersion((String)null);
 	}
 
     private boolean LockCmdUpdate()
@@ -3657,7 +3658,7 @@ public class GameLauncher extends Activity
 	private void SetGame(String game)
     {
         Q3EUtils.q3ei.SetupGame(game);
-		Q3EUtils.q3ei.SetupGameVersion(this);
+		Q3EUtils.q3ei.SetupEngineVersion(this);
 
         if (null != V.main_menu_game)
             V.main_menu_game.setTitle(Q3EUtils.q3ei.game_name);
@@ -3689,7 +3690,7 @@ public class GameLauncher extends Activity
 		boolean openglVisible = true;
 		boolean quickloadVisible = true;
 		boolean skipintroVisible = true;
-		boolean versionVisible = KStr.NotEmpty(Q3EUtils.q3ei.game_version);
+		boolean versionVisible = KStr.NotEmpty(Q3EUtils.q3ei.engine_version);
 		boolean modVisible = true;
 
         if (Q3EUtils.q3ei.isPrey)
@@ -3844,7 +3845,18 @@ public class GameLauncher extends Activity
 		V.rg_version_realrtcw.setVisibility(versionVisible && realrtcwVisible ? View.VISIBLE : View.GONE);
 		V.rg_version_tdm.setVisibility(versionVisible && tdmVisible ? View.VISIBLE : View.GONE);
 
-		V.gameversion_section.setVisibility(versionVisible ? View.VISIBLE : View.GONE);
+		V.versions_container.setVisibility(versionVisible ? View.VISIBLE : View.GONE);
+		String gameVersion = Q3EUtils.q3ei.game_version;
+		if(KStr.NotEmpty(gameVersion))
+		{
+			V.gameversion_section.setVisibility(View.VISIBLE);
+			V.gameversion_label.SetText(Q3ELang.tr(this, R.string.version) + " " + gameVersion);
+		}
+		else
+		{
+			V.gameversion_section.setVisibility(View.GONE);
+			V.gameversion_label.SetText(Q3ELang.tr(this, R.string.version));
+		}
 
 		V.idtech4_section.setVisibility(Q3EUtils.q3ei.IsIdTech4() ? View.VISIBLE : View.GONE);
 		V.yquake2_section.setVisibility(Q3EUtils.q3ei.isQ2 ? View.VISIBLE : View.GONE);
@@ -4860,6 +4872,8 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_version_realrtcw;
 		public RadioGroup rg_version_d3bfg;
 		public LinearLayout gameversion_section;
+		public Divider      gameversion_label;
+		public LinearLayout versions_container;
 		public Button launcher_tab1_change_game;
 		public Button launcher_tab1_open_menu;
 		public CheckBox cb_r_occlusionCulling;
@@ -5060,6 +5074,8 @@ public class GameLauncher extends Activity
 			rg_version_realrtcw = findViewById(R.id.rg_version_realrtcw);
 			rg_version_d3bfg = findViewById(R.id.rg_version_d3bfg);
 			gameversion_section = findViewById(R.id.gameversion_section);
+			gameversion_label = findViewById(R.id.gameversion_label);
+			versions_container = findViewById(R.id.versions_container);
 			launcher_tab1_change_game = findViewById(R.id.launcher_tab1_change_game);
 			launcher_tab1_open_menu = findViewById(R.id.launcher_tab1_open_menu);
 			cb_r_occlusionCulling = findViewById(R.id.cb_r_occlusionCulling);

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 project (source-GameUI)
 
 set(binary_name ${SOURCE_ENGINE_PREFIX}GameUI)
+set(binary_output_name ${SOURCE_GAME_PREFIX}GameUI)
 
 set(source_src 
 		BackgroundMenuButton.cpp
@@ -117,3 +118,4 @@ target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
 target_link_libraries(${binary_name} PRIVATE ${source_lib})
 
+set_target_properties(${binary_name} PROPERTIES OUTPUT_NAME "${binary_output_name}")

@@ -19,6 +19,8 @@
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
     <!-- Touchscreen -->
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.screen.landscape" android:required="false"/>
+    <uses-feature android:name="android.software.leanback" android:required="false" />
     <!-- Mouse -->
     <uses-feature android:name="android.hardware.type.pc" android:required="false" />
     <!-- Audio -->

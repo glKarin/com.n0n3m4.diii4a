@@ -258,6 +258,7 @@
             android:orientation="vertical">
 
             <com.karin.idTech4Amm.widget.Divider
+                android:id="@+id/gameversion_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 myapp:label="@string/version"

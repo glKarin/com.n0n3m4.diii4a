@@ -802,7 +802,7 @@ CNavArea *CNavMesh::GetNavArea( CBaseEntity *pEntity, int nFlags, float flBeneat
 	}
 
 	// Check LOS if necessary
-	if ( use && ( nFlags && GETNAVAREA_CHECK_LOS ) && ( useZ < testPos.z - flStepHeight ) )
+	if ( use && ( nFlags & GETNAVAREA_CHECK_LOS ) && ( useZ < testPos.z - flStepHeight ) ) //SDKmm
 	{
 		// trace directly down to see if it's below us and unobstructed
 		trace_t result;

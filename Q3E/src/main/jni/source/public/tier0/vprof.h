@@ -15,6 +15,11 @@
 #include "tier0/vprof_telemetry.h"
 
 // VProf is enabled by default in all configurations -except- X360 Retail.
+#if 0 //SDKmm
+#if !( defined( _GAMECONSOLE ) && defined( _CERT ) )
+#define VPROF_ENABLED
+#endif
+#endif
 
 #if defined(_X360) && defined(VPROF_ENABLED)
 #include "tier0/pmc360.h"

@@ -75,6 +75,16 @@ public class Divider extends LinearLayout
             V.right_line.setBackgroundColor(m_initValues.lineColor);
         }
     }
+
+    public void SetText(String text)
+    {
+        V.text_label.setText(text);
+    }
+
+    public void SetText(int resid)
+    {
+        V.text_label.setText(resid);
+    }
     
     private class ViewHolder
     {

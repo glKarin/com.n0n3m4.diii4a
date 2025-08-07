@@ -967,7 +967,7 @@ set(source_base_inc
 
 set(source_base_def "DISABLE_STEAM=1;GAME_DLL;VECTOR;VERSION_SAFE_STEAM_API_INTERFACES;PROTECTED_THINGS_ENABLE;strncpy=use_Q_strncpy_instead;_snprintf=use_Q_snprintf_instead")
 
-set(source_lib
+set(source_base_lib
 	${SOURCE_ENGINE_PREFIX}tier0
 	${SOURCE_ENGINE_PREFIX}particles
 	${SOURCE_ENGINE_PREFIX}dmxloader
@@ -1243,7 +1243,7 @@ set(source_def "${source_base_def};HL2_DLL;USES_SAVERESTORE")
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
-target_link_libraries(${binary_name} PRIVATE ${source_lib})
+target_link_libraries(${binary_name} PRIVATE ${source_base_lib})
 endif(BUILD_SOURCE_HL2)
 
 
@@ -1544,7 +1544,7 @@ set(source_def "${source_base_def};${source_navigation_mesh_inc};BOTS;CSTRIKE_DL
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
-target_link_libraries(${binary_name} PRIVATE ${source_lib})
+target_link_libraries(${binary_name} PRIVATE ${source_base_lib})
 endif(BUILD_SOURCE_CSTRIKE)
 
 
@@ -1901,7 +1901,7 @@ set(source_def "${source_base_def};PORTAL;HL2_DLL;HL2_EPISODIC;USES_SAVERESTORE"
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
-target_link_libraries(${binary_name} PRIVATE ${source_lib})
+target_link_libraries(${binary_name} PRIVATE ${source_base_lib})
 endif(BUILD_SOURCE_PORTAL)
 
 
@@ -2089,7 +2089,7 @@ set(source_def "${source_base_def};BOTS;DOD_DLL")
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
-target_link_libraries(${binary_name} PRIVATE ${source_lib})
+target_link_libraries(${binary_name} PRIVATE ${source_base_lib})
 endif(BUILD_SOURCE_DOD)
 
 
@@ -2385,7 +2385,7 @@ set(source_def "${source_base_def};HL2_DLL;HL2_EPISODIC;USES_SAVERESTORE")
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
-target_link_libraries(${binary_name} PRIVATE ${source_lib})
+target_link_libraries(${binary_name} PRIVATE ${source_base_lib})
 endif(BUILD_SOURCE_EPISODIC)
 
 
@@ -2680,7 +2680,7 @@ set(source_def "${source_base_def};HL2MP;HL2_DLL;${source_navigation_mesh_inc}")
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
-target_link_libraries(${binary_name} PRIVATE ${source_lib})
+target_link_libraries(${binary_name} PRIVATE ${source_base_lib})
 endif(BUILD_SOURCE_HL2MP)
 
 
@@ -2857,7 +2857,7 @@ set(source_def "${source_base_def};HL1_DLL")
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
-target_link_libraries(${binary_name} PRIVATE ${source_lib})
+target_link_libraries(${binary_name} PRIVATE ${source_base_lib})
 endif(BUILD_SOURCE_HL1)
 
 
@@ -3035,5 +3035,5 @@ set(source_def "${source_base_def};HL1_DLL;HL1MP_DLL")
 add_library (${binary_name} SHARED ${source_src})
 target_include_directories(${binary_name} PRIVATE ${source_inc})
 set_target_properties(${binary_name} PROPERTIES COMPILE_DEFINITIONS "${source_def}")
-target_link_libraries(${binary_name} PRIVATE ${source_lib})
+target_link_libraries(${binary_name} PRIVATE ${source_base_lib})
 endif(BUILD_SOURCE_HL1MP)
