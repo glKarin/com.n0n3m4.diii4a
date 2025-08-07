@@ -155,6 +155,7 @@
     <string name="graphics">图形</string>
     <string name="controls">控制</string>
     <string name="do_you_want_to_support_the_developer">支持开发者?</string>
+    <string name="do_you_want_to_support_the_developer_text">idTech4A++是一个完全开放和免费的项目, 您可以免费获取此应用程序而无需支付任何费用, 并且也不必对此应用程序进行任何捐赠, 所有的捐赠链接都被删除.\n最后感谢支持.</string>
     <string name="donate_to">捐贈</string>
     <string name="more_apps_in">更多App在</string>
     <string name="dont_ask">不询问</string>

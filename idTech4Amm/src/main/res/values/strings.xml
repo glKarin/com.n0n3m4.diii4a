@@ -150,6 +150,7 @@
     <string name="graphics">Graphics</string>
     <string name="controls">Controls</string>
     <string name="do_you_want_to_support_the_developer">Do you want to support the developer?</string>
+    <string name="do_you_want_to_support_the_developer_text">idTech4A++ is a completely open and free project, so you can obtain this application for free without paying any fees, and also no need to make any donations to this application, all donation links have been removed.\nThank you for your support.</string>
     <string name="donate_to">Donate to </string>
     <string name="more_apps_in">More apps in</string>
     <string name="dont_ask">Don\'t ask</string>
