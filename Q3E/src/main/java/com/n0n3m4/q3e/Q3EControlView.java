@@ -107,6 +107,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private float leftJoystickDeadRange = 0.01f;
     private float rightJoystickDeadRange = 0.0f;
     private float rightJoystickSensitivity = 1.0f;
+//    private float m_lastLeftTriggerAxis = 0.0f;
+//    private float m_lastRightTriggerAxis = 0.0f;
+//    private float triggerSensitivity = 1.0f;
 
 
     //RTCW4A-specific
@@ -576,6 +579,25 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 
                 last_joystick_x = x;
                 last_joystick_y = y;
+
+/*                x = getCenteredAxis(event, inputDevice, MotionEvent.AXIS_LTRIGGER);
+                if(x == 0.0f)
+                    x = getCenteredAxis(event, inputDevice, MotionEvent.AXIS_BRAKE);
+                y = getCenteredAxis(event, inputDevice, MotionEvent.AXIS_RTRIGGER);
+                if(y == 0.0f)
+                    y = getCenteredAxis(event, inputDevice, MotionEvent.AXIS_GAS);
+
+                if(x > m_lastLeftTriggerAxis)
+                {
+                    Q3EUtils.q3ei.callbackObj.sendWheelEvent(0.0f, -(x - m_lastLeftTriggerAxis) * triggerSensitivity);
+                }
+                if(y > m_lastRightTriggerAxis)
+                {
+                    Q3EUtils.q3ei.callbackObj.sendWheelEvent(0.0f, (m_lastRightTriggerAxis - y) * triggerSensitivity);
+                }
+
+                m_lastLeftTriggerAxis = x;
+                m_lastRightTriggerAxis = y;*/
 
                 return true;
             }

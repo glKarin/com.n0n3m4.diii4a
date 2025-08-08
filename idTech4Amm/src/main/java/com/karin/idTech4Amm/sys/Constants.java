@@ -34,6 +34,7 @@ public final class Constants
             "Add more alphabet on-screen buttons, and add `cs16-client` and `source-engine` on-screen button theme.",
             "Add load external game library support on Xash3D.",
             "Add built-in soft keyboard support.",
+            "Update RealRTCW version to 5.2, version 5.1 will be removed on next release.",
         };
 	};
 

@@ -24,7 +24,7 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE_SOURCE    = "libsource.so"; // Source Engine
 
     public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
-    //public static final String LIB_ENGINE3_REALRTCW_5_0 = "libRealRTCW_5_0.so"; // RealRTCW(5.0)
+    public static final String LIB_ENGINE3_REALRTCW_5_1 = "libRealRTCW_5_1.so"; // RealRTCW(5.1)
     //public static final String LIB_ENGINE4_TDM_2_12     = "libTheDarkMod_2_12.so"; // TDM(2.12)
 
 
@@ -34,7 +34,8 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_D3BFG_OPENGL = "OpenGL"; // Doom3-BFG(OpenGL)
     public static final String GAME_VERSION_D3BFG_VULKAN = "Vulkan"; // Doom3-BFG(Vulkan)
 
-    //public static final String GAME_VERSION_REALRTCW     = "5.1"; // RealRTCW 5.1
+    public static final String GAME_VERSION_REALRTCW_5_1     = "5.1"; // RealRTCW 5.1
+
 
     //public static final String GAME_VERSION_TDM      = "2.13"; // TDM 2.13
 
@@ -157,7 +158,7 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_DOOM3BFG = "1.4.0";
     public static final String GAME_VERSION_GZDOOM   = "4.14.1";
     public static final String GAME_VERSION_ETW      = "2.83.2";
-    public static final String GAME_VERSION_REALRTCW = "5.1";
+    public static final String GAME_VERSION_REALRTCW = "5.2";
     public static final String GAME_VERSION_FTEQW    = "1.05"; // ???
     public static final String GAME_VERSION_JA       = "1.0.1.1";
     public static final String GAME_VERSION_JO       = "1.0.1.1";

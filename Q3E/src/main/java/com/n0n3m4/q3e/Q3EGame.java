@@ -79,7 +79,7 @@ public enum Q3EGame
     REALRTCW(Q3EGameConstants.GAME_ID_REALRTCW, Q3EGameConstants.GAME_REALRTCW, Q3EGameConstants.LIB_ENGINE3_REALRTCW, Q3EGameConstants.GAME_NAME_REALRTCW, Q3EGameConstants.GAME_BASE_REALRTCW,
             Q3EGameConstants.GAME_VERSION_REALRTCW, Q3EGameConstants.GAME_SUBDIR_REALRTCW, false, Q3EGameConstants.CONFIG_FILE_REALRTCW,
             "fs_game", null, null, ".realrtcw",
-            Q3EPreference.pref_harm_realrtcw_fs_game, Q3EPreference.pref_harm_realrtcw_user_mod, Q3EPreference.pref_harm_realrtcw_game_mod, Q3EPreference.pref_harm_realrtcw_game_lib, Q3EPreference.pref_params_realrtcw, Q3EPreference.pref_harm_realrtcw_command_record, null /* Q3EPreference.pref_harm_realrtcw_version */,
+            Q3EPreference.pref_harm_realrtcw_fs_game, Q3EPreference.pref_harm_realrtcw_user_mod, Q3EPreference.pref_harm_realrtcw_game_mod, Q3EPreference.pref_harm_realrtcw_game_lib, Q3EPreference.pref_params_realrtcw, Q3EPreference.pref_harm_realrtcw_command_record, Q3EPreference.pref_harm_realrtcw_version ,
             Q3EKeyCodes.KeyCodesRTCW.class
     ),
 

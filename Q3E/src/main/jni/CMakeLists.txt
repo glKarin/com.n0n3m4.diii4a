@@ -14,7 +14,7 @@ OPTION(BUILD_Q4        "Build Quake 4"    OFF)
 OPTION(BUILD_PREY      "Build Prey"    OFF)
 OPTION(BUILD_D3_MOD		"Build all DOOM3 mods" OFF)
 OPTION(BUILD_Q4_MOD		"Build all Quake4 mods" OFF)]]
-OPTION(BUILD_BACKPORT        "Build backport version"    OFF)
+OPTION(BUILD_BACKPORT        "Build backport version"    ON)
 
 
 # Supported
@@ -117,10 +117,10 @@ endif()
 if(GAME_TDM) # 2.13 | 2da36cc9e83046160b91bca91c116dc642740b78 | Mar 8, 2025 | Merge one commit from trunk.
     message(STATUS "Build The Dark Mod")
     add_subdirectory ( darkmod ) # The Dark Mod
-    if(BUILD_BACKPORT)
+#[[    if(BUILD_BACKPORT)
         # 2.12 | 5f4793f69bc0b61cbf2f921496455fb9e9296bcd | Feb 24, 2024 | Merged some changes from trunk.
         add_subdirectory ( backports/darkmod_2_12 "darkmod_2_12" )
-    endif()
+    endif()]]
 endif()
 
 if(GAME_DOOM3BFG) # 1.4.0 | f81a8c1dd9b762774a233ba071837b2c7a374751 | Mar 6, 2022 | Updated release notes
@@ -145,11 +145,11 @@ if(GAME_ETW) # v2.83.1 | e8d0ec06800630fd458791ccd29ed488e04648d9 | Nov 12, 2024
     add_subdirectory ( etw ) # ETW
 endif()
 
-if(GAME_REALRTCW) # 5.1 | a6e94b82bd11c41f62ffc969e27b0e63f267ef8e | Version is upped to 5.1
+if(GAME_REALRTCW) # 5.2 | Jul 26, 2025 | ad529d588e4dec717aff0779f9d1555eddc1e2be | Update ai_cast_survival.c
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
     if(BUILD_BACKPORT)
-        add_subdirectory ( backports/realrtcw_5_0 "realrtcw_5_0" ) # RealRTCW 5.0 # 5.0 | on Jul 2, 2024 | 49ebd2964f7d15be3ca2723401ef3ea07bfbf586 | Disable eject brass delay, it crashes the game
+        add_subdirectory ( backports/realrtcw_5_1 "realrtcw_5_1" ) # 5.1 | on Feb 14, 2025 | a6e94b82bd11c41f62ffc969e27b0e63f267ef8e | Version is upped to 5.1
     endif()
 endif()
 
