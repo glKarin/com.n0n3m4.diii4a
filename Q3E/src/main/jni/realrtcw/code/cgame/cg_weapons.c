@@ -63,7 +63,7 @@ int weapBanks[MAX_WEAP_BANKS][MAX_WEAPS_IN_BANK] = {
 	{WP_G43, WP_M1GARAND, WP_M1941, 0, 0, 0},																  //	5
 	{WP_FG42, WP_MP44, WP_BAR, 0, 0, 0},																	  //	6
 	{WP_M97, WP_AUTO5, 0, 0, 0},																	  //	7
-	{WP_GRENADE_LAUNCHER, WP_GRENADE_PINEAPPLE, WP_DYNAMITE, WP_AIRSTRIKE, WP_POISONGAS, WP_POISONGAS_MEDIC}, //	8
+	{WP_GRENADE_LAUNCHER, WP_GRENADE_PINEAPPLE, WP_DYNAMITE, WP_AIRSTRIKE, WP_POISONGAS, WP_POISONGAS_MEDIC, WP_DYNAMITE_ENG}, //	8
 	{WP_PANZERFAUST, WP_FLAMETHROWER, WP_MG42M, WP_BROWNING, 0, 0},											  //	9
 	{WP_VENOM, WP_TESLA, 0, 0, 0, 0}																		  //	10
 };
@@ -1418,7 +1418,7 @@ static qboolean CG_RW_ParseViewType( int handle, weaponInfo_t *weaponInfo, model
 			} else {
 				weaponInfo->weaponModel[viewType].skin[0] = trap_R_RegisterSkin( filename );
 			}
-		}  else if ( !Q_stricmp( token.string, "flashModel" ) ) {
+		} else if ( !Q_stricmp( token.string, "flashModel" ) ) {
 			if ( !PC_String_ParseNoAlloc( handle, filename, sizeof( filename ) ) ) {
 				return CG_RW_ParseError( handle, "expected flashModel filename" );
 			} else {
@@ -1508,18 +1508,31 @@ static qboolean CG_RW_ParseClient( int handle, weaponInfo_t *weaponInfo, int wea
 				}
 			}
 		} else if ( !Q_stricmp( token.string, "handsModel" ) ) {
-			if ( !PC_String_ParseNoAlloc( handle, filename, sizeof( filename ) ) ) {
-				return CG_RW_ParseError( handle, "expected handsModel filename" );
+			if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename)))
+			{
+				return CG_RW_ParseError(handle, "expected handsModel filename");
 			}
-			weaponInfo->handsModel = trap_R_RegisterModel( filename );
-			char handsskin[128]; //eugeny
-			char map[128];
-			memset(handsskin, 0, sizeof(handsskin));
+			weaponInfo->handsModel = trap_R_RegisterModel(filename);
+
+			char base[128], map[128];
+			char handsskin[128], upgradedSkin[128], upgradedMapSkin[128];
+
+			memset(base, 0, sizeof(base));
 			memset(map, 0, sizeof(map));
+			COM_StripExtension(filename, base, sizeof(base));
 			trap_Cvar_VariableStringBuffer("mapname", map, sizeof(map));
-			COM_StripExtension(filename, filename, sizeof (filename) );
-			Com_sprintf(handsskin, sizeof(handsskin), "%s_%s.skin", filename, map);
+
+			// Map-specific hands skin
+			Com_sprintf(handsskin, sizeof(handsskin), "%s_%s.skin", base, map);
 			weaponInfo->handsSkin = trap_R_RegisterSkin(handsskin);
+
+			// Generic upgraded skin
+			Com_sprintf(upgradedSkin, sizeof(upgradedSkin), "%s_upgraded.skin", base);
+			weaponInfo->upgradedSkin = trap_R_RegisterSkin(upgradedSkin);
+
+			// Map-specific upgraded skin
+			Com_sprintf(upgradedMapSkin, sizeof(upgradedMapSkin), "%s_upgraded_%s.skin", base, map);
+			weaponInfo->upgradedMapSkin = trap_R_RegisterSkin(upgradedMapSkin);
 		} else if ( !Q_stricmp( token.string, "flashDlightColor" ) ) {
 			if ( !PC_Vec_Parse( handle, &weaponInfo->flashDlightColor ) ) {
 				return CG_RW_ParseError( handle, "expected flashDlightColor as r g b" );
@@ -1700,11 +1713,11 @@ static qboolean CG_RW_ParseClient( int handle, weaponInfo_t *weaponInfo, int wea
 				return CG_RW_ParseError( handle, "expected missileDlight value" );
 			}
 		} else if ( !Q_stricmp( token.string, "wiTrailTime" ) ) {
-			if ( !PC_Int_Parse( handle, &weaponInfo->wiTrailTime ) ) {
+			if ( !PC_Int_Parse( handle, (int *)&weaponInfo->wiTrailTime ) ) {
 				return CG_RW_ParseError( handle, "expected wiTrailTime value" );
 			}
 		} else if ( !Q_stricmp( token.string, "trailRadius" ) ) {
-			if ( !PC_Int_Parse( handle, &weaponInfo->trailRadius ) ) {
+			if ( !PC_Int_Parse( handle, (int *)&weaponInfo->trailRadius ) ) {
 				return CG_RW_ParseError( handle, "expected trailRadius value" );
 			}
 		} else if ( !Q_stricmp( token.string, "missileDlightColor" ) ) {
@@ -2236,14 +2249,16 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles ) {
 #endif
 
 	// idle drift
-    
-	if ((cg.snap->ps.weaponstate == WEAPON_FIRING) && ( cg.predictedPlayerState.weapon == WP_FLAMETHROWER ))
+
+	if (!cg_vanilla_guns.integer &&
+		(cg.snap->ps.weaponstate == WEAPON_FIRING) &&
+		(cg.predictedPlayerState.weapon == WP_FLAMETHROWER))
 	{
-	scale = 15;
-	} 
-	else 
+		scale = 15; // apply reduced idle sway for flamethrower
+	}
+	else
 	{
-	scale = 80;
+		scale = 80; // default sway
 	}
 	fracsin = sin( cg.time * 0.001 );
 	angles[ROLL] += scale * fracsin * 0.01;
@@ -2388,6 +2403,7 @@ qboolean CG_DrawRealWeapons( centity_t *cent ) {
 	case AICHAR_PROTOSOLDIER:
 	case AICHAR_ZOMBIE:
 	case AICHAR_ZOMBIE_SURV:
+	case AICHAR_ZOMBIE_FLAME:
 	case AICHAR_ZOMBIE_GHOST:
 	case AICHAR_HELGA:      //----(SA)	added	// boss1 is now helga-blob
 	case AICHAR_WARZOMBIE:
@@ -2407,75 +2423,57 @@ CG_AddWeaponWithPowerups
 ========================
 */
 static void CG_AddWeaponWithPowerups( refEntity_t *gun, int powerups, playerState_t *ps, centity_t *cent ) {
+    // If ps is NULL, then:
+    // - For the local client, use the predicted player state.
+    // - For other entities (including AI), cast the entity state to a playerState_t.
+    if ( !ps ) {
+        if ( cent->currentState.number == cg.snap->ps.clientNum ) {
+            ps = &cg.predictedPlayerState;
+        } else {
+            ps = (playerState_t *)&cent->currentState;
+        }
+    }
+    
+    // add powerup effects
+    if ( powerups & ( 1 << PW_INVIS ) ) {
+        gun->customShader = cgs.media.invisShader;
+        trap_R_AddRefEntityToScene( gun );
+    } else {
+        trap_R_AddRefEntityToScene( gun );
 
-	// add powerup effects
-	if ( powerups & ( 1 << PW_INVIS ) ) {
-		gun->customShader = cgs.media.invisShader;
-		trap_R_AddRefEntityToScene( gun );
-	} else {
-		trap_R_AddRefEntityToScene( gun );
+        // blink if time left < 5s, toggling every 200ms for battlesuit
+        if ( powerups & ( 1 << PW_BATTLESUIT_SURV ) ) {
+            int timeLeft = ps->powerups[PW_BATTLESUIT_SURV] - cg.time;
+            if ((timeLeft < 5000) && ((cg.time / 200) % 2)) {
+                // skip rendering to blink
+            } else {
+                gun->customShader = cgs.media.battleWeaponShader;
+                trap_R_AddRefEntityToScene( gun );
+            }
+        }
 
-		if ( powerups & ( 1 << PW_BATTLESUIT_SURV ) ) {
-			gun->customShader = cgs.media.battleWeaponShader;
-			trap_R_AddRefEntityToScene( gun );
-		}
-		if ( powerups & ( 1 << PW_QUAD ) ) {
-			gun->customShader = cgs.media.quadWeaponShader;
-			trap_R_AddRefEntityToScene( gun );
-		}
-		if ( powerups & ( 1 << PW_VAMPIRE ) ) {
-			gun->customShader = cgs.media.redQuadShader;
-			trap_R_AddRefEntityToScene( gun );
-		}
-	}
-/*
-	if (ps && ps->clientNum == cg.snap->ps.clientNum) {
-		float	alpha, adjust;
-		weaponInfo_t	*weapon;
+        // blink for quad powerup
+        if ( powerups & ( 1 << PW_QUAD ) ) {
+            int timeLeft = ps->powerups[PW_QUAD] - cg.time;
+            if ((timeLeft < 5000) && ((cg.time / 200) % 2)) {
+                // skip rendering to blink
+            } else {
+                gun->customShader = cgs.media.quadWeaponShader;
+                trap_R_AddRefEntityToScene( gun );
+            }
+        }
 
-		weapon = &cg_weapons[ps->weapon];
-		//if (gun->hModel == weapon->handsModel)
-//		if (cg.snap->ps.onFireStart)
-		{
-
-			// add the flames if on fire
-//			alpha = 2.0 * (float)(FIRE_FLASH_TIME - (cg.time - cg.snap->ps.onFireStart))/FIRE_FLASH_TIME;
-alpha = 1;
-			if (alpha > 0) {
-				if (alpha >= 1.0) {
-					alpha = 1.0;
-				}
-				gun->shaderRGBA[3] = (unsigned char)(255.0*alpha);
-				// calc the fireRiseDir from the velocity
-				VectorNegate( cg.snap->ps.velocity, gun->fireRiseDir );
-				VectorNormalize( gun->fireRiseDir );
-				gun->fireRiseDir[2] += 1;
-				if (VectorNormalize( gun->fireRiseDir ) < 1) {
-					VectorClear( gun->fireRiseDir );
-					gun->fireRiseDir[2] = 1;
-				}
-				// now move towards the newDir
-				adjust = 5.0*(0.001*cg.frametime);
-				VectorMA( cg.v_fireRiseDir, adjust, gun->fireRiseDir, cg.v_fireRiseDir );
-				if (VectorNormalize( cg.v_fireRiseDir ) <= 0.1) {
-					VectorCopy( gun->fireRiseDir, cg.v_fireRiseDir );
-				}
-				VectorCopy( cg.v_fireRiseDir, gun->fireRiseDir );
-
-//				gun->reFlags |= REFLAG_ONLYHAND;
-gun->customShader = cgs.media.dripWetShader2;
-//				gun->customShader = cgs.media.onFireShader;
-				trap_R_AddRefEntityToScene( gun );
-//				gun->shaderTime = 500;
-//				trap_R_AddRefEntityToScene( gun );
-gun->customShader = cgs.media.dripWetShader;
-//				gun->customShader = cgs.media.onFireShader2;
-				trap_R_AddRefEntityToScene( gun );
-//				gun->reFlags &= ~REFLAG_ONLYHAND;
-			}
-		}
-	}
-*/
+        // blink for vampire powerup
+        if ( powerups & ( 1 << PW_VAMPIRE ) ) {
+            int timeLeft = ps->powerups[PW_VAMPIRE] - cg.time;
+            if ((timeLeft < 5000) && ((cg.time / 200) % 2)) {
+                // skip rendering to blink
+            } else {
+                gun->customShader = cgs.media.redQuadShader;
+                trap_R_AddRefEntityToScene( gun );
+            }
+        }
+    }
 }
 
 /*
@@ -3016,6 +3014,18 @@ qboolean CG_MonsterUsingWeapon( centity_t *cent, int aiChar, int weaponNum ) {
 }
 
 /*
+==============
+CG_WeaponIsUpgraded
+==============
+*/
+qboolean CG_WeaponIsUpgraded(weapon_t weaponNum) {
+	if (cg.snap->ps.clientNum != cg.clientNum) {
+		return qfalse;
+	}
+	return (cg.snap->ps.weaponUpgraded[weaponNum] != 0);
+}
+
+/*
 =============
 CG_AddPlayerWeapon
 
@@ -3106,9 +3116,12 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		gun.shaderRGBA[3] = 255;
 	}
 
-	if ( ps ) {
+	if (ps)
+	{
 		gun.hModel = weapon->weaponModel[W_FP_MODEL].model;
-	} else {
+	}
+	else
+	{
 		gun.hModel = weapon->weaponModel[W_TP_MODEL].model;
 	}
 
@@ -3190,11 +3203,27 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		drawpart = qtrue;
 	}
 
-	if ( drawpart && drawrealweap ) {
-		if (isPlayer && weapon->handsSkin) { // Eugeny
-        gun.customSkin = weapon->handsSkin;
-        }
-		CG_AddWeaponWithPowerups( &gun, cent->currentState.powerups, ps, cent );
+	if (drawpart && drawrealweap)
+	{
+		if (isPlayer)
+		{
+			if (CG_WeaponIsUpgraded(weaponNum))
+			{
+				if (weapon->upgradedMapSkin)
+				{
+					gun.customSkin = weapon->upgradedMapSkin;
+				}
+				else if (weapon->upgradedSkin)
+				{
+					gun.customSkin = weapon->upgradedSkin;
+				}
+			}
+			else if (weapon->handsSkin)
+			{
+				gun.customSkin = weapon->handsSkin;
+			}
+		}
+		CG_AddWeaponWithPowerups(&gun, cent->currentState.powerups, ps, cent);
 	}
 
 	if ( isPlayer && ps != NULL ) {
@@ -3229,8 +3258,23 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 			spunpart = qfalse;
 			barrel.hModel = weapon->partModels[W_FP_MODEL][i].model;
 
-			if ( isPlayer && weapon->handsSkin ) { // eugeny
-				barrel.customSkin = weapon->handsSkin;
+			if (isPlayer)
+			{
+				if (CG_WeaponIsUpgraded(weaponNum))
+				{
+					if (weapon->upgradedMapSkin)
+					{
+						barrel.customSkin = weapon->upgradedMapSkin;
+					}
+					else if (weapon->upgradedSkin)
+					{
+						barrel.customSkin = weapon->upgradedSkin;
+					}
+				}
+				else if (weapon->handsSkin)
+				{
+					barrel.customSkin = weapon->handsSkin;
+				}
 			}
 
 			// check for spinning
@@ -3349,7 +3393,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 					}
 			}
 		}
-	}
+		}
 
 	// make sure we aren't looking at cg.predictedPlayerEntity for LG
 	nonPredictedCent = &cg_entities[cent->currentState.number];
@@ -3470,6 +3514,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		 weaponNum == WP_GRENADE_PINEAPPLE ||
 		 weaponNum == WP_KNIFE ||
 		 weaponNum == WP_DYNAMITE ||
+		 weaponNum == WP_DYNAMITE_ENG ||
 		 weaponNum == WP_M7 ) {
 		return;
 	}
@@ -4435,6 +4480,8 @@ void CG_AltWeapon_f( void ) {
 	int original, num;
 	float spd = VectorLength( cg.snap->ps.velocity );
 
+	trap_S_StartSoundEx(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF);
+
 	if ( !cg.snap ) {
 		return;
 	}
@@ -4449,10 +4496,6 @@ void CG_AltWeapon_f( void ) {
 	if ( cg.time - cg.weaponSelectTime < cg_weaponCycleDelay.integer ) {
 		return; // force pause so holding it down won't go too fast
 
-	}
-	// Don't try to switch when in the middle of reloading.
-	if ( cg.snap->ps.weaponstate == WEAPON_RELOADING ) {
-		return;
 	}
 
 	original = cg.weaponSelect;
@@ -4763,11 +4806,11 @@ void CG_LastWeaponUsed_f( void ) {
 	if ( cg.time - cg.weaponSelectTime < cg_weaponCycleDelay.integer ) {
 		return; // force pause so holding it down won't go too fast
 	}
+
+	trap_S_StartSoundEx(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF);
+
 	cg.weaponSelectTime = cg.time;  // flash the current weapon icon
-	// don't switchback if reloading (it nullifies the reload)
-	if ( cg.snap->ps.weaponstate == WEAPON_RELOADING ) {
-		return;
-	}
+
 	if ( !cg.switchbackWeapon ) {
 		cg.switchbackWeapon = cg.weaponSelect;
 		return;
@@ -4790,6 +4833,10 @@ void CG_NextWeaponInBank_f( void ) {
 		return; // force pause so holding it down won't go too fast
 
 	}
+
+	trap_S_StartSoundEx(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF);
+
+
 	// this cvar is an option that lets the player use his weapon switching keys (probably the mousewheel)
 	// for zooming (binocs/snooper/sniper/etc.)
 	if ( cg.zoomval ) {
@@ -4818,6 +4865,9 @@ void CG_PrevWeaponInBank_f( void ) {
 		return; // force pause so holding it down won't go too fast
 
 	}
+
+	trap_S_StartSoundEx(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF);
+
 	// this cvar is an option that lets the player use his weapon switching keys (probably the mousewheel)
 	// for zooming (binocs/snooper/sniper/etc.)
 	if ( cg.zoomval ) {
@@ -4850,6 +4900,8 @@ void CG_NextWeapon_f( void ) {
 		return;
 	}
 
+	trap_S_StartSoundEx(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF);
+
 	// this cvar is an option that lets the player use his weapon switching keys (probably the mousewheel)
 	// for zooming (binocs/snooper/sniper/etc.)
 	if ( cg.zoomval ) {
@@ -4867,18 +4919,6 @@ void CG_NextWeapon_f( void ) {
 
 	}
 	cg.weaponSelectTime = cg.time;  // flash the current weapon icon
-
-	// Don't try to switch when in the middle of reloading.
-	// cheatinfo:	The server actually would let you switch if this check were not
-	//				present, but would discard the reload.  So the when you switched
-	//				back you'd have to start the reload over.  This seems bad, however
-	//				the delay for the current reload is already in effect, so you'd lose
-	//				the reload time twice.  (the first pause for the current weapon reload,
-	//				and the pause when you have to reload again 'cause you canceled this one)
-
-	if ( cg.snap->ps.weaponstate == WEAPON_RELOADING ) {
-		return;
-	}
 
 	CG_NextWeap( qtrue );
 }
@@ -4897,6 +4937,8 @@ void CG_PrevWeapon_f( void ) {
 		return;
 	}
 
+	trap_S_StartSoundEx(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF);
+
 	// this cvar is an option that lets the player use his weapon switching keys (probably the mousewheel)
 	// for zooming (binocs/snooper/sniper/etc.)
 	if ( cg.zoomval ) {
@@ -4915,12 +4957,8 @@ void CG_PrevWeapon_f( void ) {
 	}
 	cg.weaponSelectTime = cg.time;  // flash the current weapon icon
 
-	// Don't try to switch when in the middle of reloading.
-	if ( cg.snap->ps.weaponstate == WEAPON_RELOADING ) {
-		return;
-	}
-
 	CG_PrevWeap( qtrue );
+
 }
 
 
@@ -4934,6 +4972,8 @@ CG_WeaponBank_f
 void CG_WeaponBank_f( void ) {
 	int num, i, curweap;
 	int curbank = 0, curcycle = 0, bank = 0, cycle = 0;
+	
+	trap_S_StartSoundEx(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF);
 
 	if ( !cg.snap ) {
 		return;
@@ -4948,11 +4988,6 @@ void CG_WeaponBank_f( void ) {
 
 	}
 	cg.weaponSelectTime = cg.time;  // flash the current weapon icon
-
-	// Don't try to switch when in the middle of reloading.
-	if ( cg.snap->ps.weaponstate == WEAPON_RELOADING ) {
-		return;
-	}
 
 	bank = atoi( CG_Argv( 1 ) );
 
@@ -5001,6 +5036,8 @@ void CG_Weapon_f( void ) {
 	int bank = 0, cycle = 0, newbank = 0, newcycle = 0;
 	qboolean banked = qfalse;
 
+	trap_S_StartSoundEx(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF);
+
 	if ( !cg.snap ) {
 		return;
 	}
@@ -5012,11 +5049,6 @@ void CG_Weapon_f( void ) {
 	num = atoi( CG_Argv( 1 ) );
 
 	cg.weaponSelectTime = cg.time;  // flash the current weapon icon
-
-	// Don't try to switch when in the middle of reloading.
-	if ( cg.snap->ps.weaponstate == WEAPON_RELOADING ) {
-		return;
-	}
 
 
 	if ( num <= WP_NONE || num > WP_NUM_WEAPONS ) {
@@ -5411,7 +5443,8 @@ void CG_FireWeapon( centity_t *cent, int event ) {
 				  ent->weapon == WP_DYNAMITE ||
 				  ent->weapon == WP_AIRSTRIKE ||
 				  ent->weapon == WP_POISONGAS || 
-				  ent->weapon == WP_POISONGAS_MEDIC ) { 
+				  ent->weapon == WP_POISONGAS_MEDIC ||
+				  ent->weapon == WP_DYNAMITE_ENG ) { 
 		if ( ent->apos.trBase[0] > 0 ) { // underhand
 			return;
 		}
@@ -5990,6 +6023,47 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, in
 		break;
 
 	case WP_DYNAMITE:
+		shader = cgs.media.rocketExplosionShader;
+		sfx = cgs.media.sfx_dynamiteexp;
+		sfx2 = cgs.media.sfx_dynamiteexpDist;
+		sfx2range = 400;
+		mark = cgs.media.burnMarkShader;
+		radius = 64;
+		light = 300;
+		isSprite = qtrue;
+		duration = 1000;
+		lightColor[0] = 0.75;
+		lightColor[1] = 0.5;
+		lightColor[2] = 0.1;
+
+		shakeAmt = 0.25f;
+		shakeDur = 2800;
+		shakeRad = 8192;
+			for ( i = 0; i < 5; i++ ) {
+				for ( j = 0; j < 3; j++ )
+					sprOrg[j] = origin[j] + 64 * dir[j] + 24 * crandom();
+				sprVel[2] += rand() % 50;
+				CG_ParticleExplosion( "blacksmokeanimb", sprOrg, sprVel,
+									  3500 + rand() % 250,          // duration
+									  10,                           // startsize
+									  250 + rand() % 60 );     
+									       // endsize
+			}
+			VectorMA( origin, 16, dir, sprOrg );
+			VectorScale( dir, 100, sprVel );
+
+			// trying this one just for now just for variety
+			CG_ParticleExplosion( "explode1", sprOrg, sprVel,
+								  1200,         // duration
+								  9,            // startsize
+								  300 );        // endsize
+
+			CG_AddDebris( origin, dir,
+						  280,              // speed
+						  1400,             // duration
+						  7 + rand() % 2 ); // count
+		break;
+	case WP_DYNAMITE_ENG:
 		shader = cgs.media.rocketExplosionShader;
 		sfx = cgs.media.sfx_dynamiteexp;
 		sfx2 = cgs.media.sfx_dynamiteexpDist;

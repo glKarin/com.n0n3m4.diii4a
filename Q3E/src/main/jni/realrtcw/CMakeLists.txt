@@ -63,8 +63,8 @@ endif()
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-omit-frame-pointer -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-omit-frame-pointer -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
 
 # Switch off some annoying warnings
 if (${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
@@ -154,6 +154,7 @@ set(realrtcwgame_src
         code/game/ai_cast_script_actions.c
         code/game/ai_cast_script.c
         code/game/ai_cast_script_ents.c
+  		code/game/ai_cast_survival.c
         code/game/ai_cast_sight.c
         code/game/ai_cast_think.c
         code/game/ai_chat.c
@@ -185,6 +186,9 @@ set(realrtcwgame_src
         code/game/g_session.c
         code/game/g_spawn.c
         code/game/g_svcmds.c
+		code/game/g_survival_buy.c
+		code/game/g_survival_score.c
+		code/game/g_survival_misc.c
         code/game/g_target.c
         code/game/g_team.c
         code/game/g_tramcar.c

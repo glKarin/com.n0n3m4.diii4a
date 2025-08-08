@@ -406,6 +406,10 @@ void	*VM_ExplicitArgPtr( vm_t *vm, intptr_t intValue );
 qboolean VM_IsNative( vm_t *vm );
 
 intptr_t VM_Alloc( int size );
+#ifdef __ANDROID__ //karin: get dllHandle
+void * VM_GetDLLHandle(vm_t *vm);
+void * VM_FindSymbolInDLL(vm_t *vm, const char *name);
+#endif
 
 // for making block of memory available for passing data to a qvm
 unsigned VM_GetTempMemory( vm_t *vm, int size, const void *initData );

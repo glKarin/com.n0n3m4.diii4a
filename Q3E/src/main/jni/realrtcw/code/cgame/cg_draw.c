@@ -719,7 +719,7 @@ static void CG_DrawStatusBar( void ) {
 			CG_SetScreenPlacement(PLACE_RIGHT, PLACE_BOTTOM);
 		}
 
-		value = ps->ammo[BG_FindAmmoForWeapon( cent->currentState.weapon )];
+        value = ps->ammo[BG_FindAmmoForWeapon( cent->currentState.weapon )];
 		inclip = ps->ammoclip[BG_FindClipForWeapon( cent->currentState.weapon )];
 
 		if ( value > -1 ) {
@@ -740,7 +740,7 @@ static void CG_DrawStatusBar( void ) {
 
 			// pulsing grenade icon to help the player 'count' in their head
 			if ( ps->grenadeTimeLeft ) {
-				if ( ps->weapon == WP_DYNAMITE ) {
+				if ( ps->weapon == WP_DYNAMITE || ps->weapon == WP_DYNAMITE_ENG  ) {
 
 				} else {
 					if ( ( ( cg.grenLastTime ) % 1000 ) < ( ( ps->grenadeTimeLeft ) % 1000 ) ) {
@@ -1393,7 +1393,7 @@ static void CG_DrawPickupItem( void ) {
 #ifdef LOCALISATION
 			CG_DrawStringExt2( 640 - ( w / 2 ), 375, CG_TranslateString( pickupText ), color, qfalse, qtrue, 10, 10, 0 );
 #else
-			CG_DrawStringExt2( 640 - ( w / 2 ), 375, pickupText, color, qfalse, qtrue, 10, 10, 0 );
+			CG_DrawStringExt2( 320 - ( w / 2 ), 400, pickupText, color, qfalse, qtrue, 10, 10, 0 );
 #endif
 
 			trap_R_SetColor( NULL );
@@ -3066,7 +3066,7 @@ static void CG_DrawDynamiteStatus( void ) {
 	int timeleft;
 	float w;
 
-	if ( cg.snap->ps.weapon != WP_DYNAMITE ) {
+	if ( cg.snap->ps.weapon != WP_DYNAMITE && cg.snap->ps.weapon != WP_DYNAMITE_ENG ) {
 		return;
 	}
 

@@ -1145,3 +1145,19 @@ intptr_t VM_Alloc( int size ) {
 	return VM_ExplicitAlloc( currentVM, size );
 }
 
+#ifdef __ANDROID__ //karin: get dllHandle
+#include <dlfcn.h>
+
+void * VM_GetDLLHandle(vm_t *vm)
+{
+	return vm ? vm->dllHandle : NULL;
+}
+
+void * VM_FindSymbolInDLL(vm_t *vm, const char *name)
+{
+	if(!vm || !vm->dllHandle)
+		return NULL;
+
+	return dlsym(vm->dllHandle, name);
+}
+#endif

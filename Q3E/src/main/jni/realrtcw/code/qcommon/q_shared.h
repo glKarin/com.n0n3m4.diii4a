@@ -1534,6 +1534,8 @@ typedef struct playerState_s {
 	// 1NTERRUPTOR
 	printLabel_t scriptAccumLabel;
 
+	int weaponUpgraded[MAX_WEAPONS]; // 0 = not upgraded, 1 = upgraded
+
 } playerState_t;
 
 

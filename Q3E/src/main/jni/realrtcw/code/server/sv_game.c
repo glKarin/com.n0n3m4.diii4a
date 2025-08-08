@@ -320,6 +320,17 @@ static char * G_AllocMemoryPool( size_t size )
 
 	return g_memoryPool;
 }
+
+static void G_SetupAllocMemoryPool( qboolean on )
+{
+	void (*G_SetAllocMemoryPoolFcn_f)(void *ptr);
+	G_SetAllocMemoryPoolFcn_f = (void (*)(void *))VM_FindSymbolInDLL(gvm, "G_SetAllocMemoryPoolFcn");
+	Com_Printf("[client]: get qagame set alloc memory function: %p with %d.\n", G_SetAllocMemoryPoolFcn_f, on);
+	if(G_SetAllocMemoryPoolFcn_f)
+	{
+		G_SetAllocMemoryPoolFcn_f(on ? G_AllocMemoryPool : NULL);
+	}
+}
 #endif
 
 /*
@@ -917,10 +928,6 @@ intptr_t SV_GameSystemCalls( intptr_t *args ) {
 	// New in IORTCW
 	case G_ALLOC:
 		return VM_Alloc( args[1] );
-#ifdef __ANDROID__ //karin: static memory allocation for game
-	case G_REQUIRE_MEMORY_POOL:
-		return (intptr_t)G_AllocMemoryPool( (size_t)args[1] );
-#endif
 
 
 	default:
@@ -986,12 +993,18 @@ void SV_RestartGameProgs( void ) {
 		return;
 	}
 	VM_Call( gvm, GAME_SHUTDOWN, qtrue );
+#ifdef __ANDROID__ //karin: export alloc function to qagame
+	G_SetupAllocMemoryPool(qfalse);
+#endif
 
 	// do a restart instead of a free
 	gvm = VM_Restart(gvm, qtrue);
 	if ( !gvm ) {
 		Com_Error( ERR_FATAL, "VM_Restart on game failed" );
 	}
+#ifdef __ANDROID__ //karin: export alloc function to qagame
+	G_SetupAllocMemoryPool(qtrue);
+#endif
 
 	SV_InitGameVM( qtrue );
 }
@@ -1025,6 +1038,9 @@ void SV_InitGameProgs( void ) {
 	if ( !gvm ) {
 		Com_Error( ERR_FATAL, "VM_Create on game failed" );
 	}
+#ifdef __ANDROID__ //karin: export alloc function to qagame
+	G_SetupAllocMemoryPool(qtrue);
+#endif
 
 	SV_InitGameVM( qfalse );
 }

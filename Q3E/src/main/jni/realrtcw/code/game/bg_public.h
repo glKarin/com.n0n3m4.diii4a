@@ -505,6 +505,7 @@ typedef enum
 	AICHAR_SUPERSOLDIER_LAB,
 	AICHAR_ZOMBIE_SURV,
 	AICHAR_ZOMBIE_GHOST,
+	AICHAR_ZOMBIE_FLAME,
 	NUM_CHARACTERS
 } AICharacters_t;
 
@@ -557,6 +558,7 @@ typedef enum {
 	WP_GRENADE_LAUNCHER,
     WP_GRENADE_PINEAPPLE,
 	WP_DYNAMITE,
+	WP_DYNAMITE_ENG,
 	WP_AIRSTRIKE,
 	WP_ARTY,
 	WP_POISONGAS,
@@ -590,21 +592,28 @@ typedef struct ammoTable_s {
 	int weaponClass;
 	weapon_t weapAlts;
 	int weaponTeam;
-	int maxammo;            
-	int uses;               
-	int maxclip;            
+	int maxammo;
+	int maxammoUpgraded;            
+	int uses;
+	int usesUpgraded;               
+	int maxclip;
+	int maxclipUpgraded;            
 	int reloadTime;
 	int reloadTimeFull;         
 	int fireDelayTime;      
 	int nextShotTime;
-	int nextShotTime2;        
+	int nextShotTimeUpgraded;
+	int nextShotTime2;       
+	int nextShotTime2Upgraded; 
 	int maxHeat;            
 	int coolRate;    
 	int playerDamage;
+	int playerDamageUpgraded;
 	int aiDamage;
 	int playerSplashRadius;
 	int aiSplashRadius;
 	int spread;
+	int spreadUpgraded;
 	int aimSpreadScaleAdd;
     float spreadScale;  
 	int weapRecoilDuration;
@@ -629,7 +638,9 @@ typedef struct ammoTable_s {
 // Skill-based ammo parameters
 typedef struct ammoskill_s {
 	int maxammo;
+	int maxammoUpgraded;
 	int maxclip;
+	int maxclipUpgraded;
 } ammoskill_t;
 
 extern ammoTable_t ammoTable[WP_NUM_WEAPONS];
@@ -648,6 +659,7 @@ static const int autoReloadWeapons[] = {
 	WP_POISONGAS,
 	WP_AIRSTRIKE,
 	WP_POISONGAS_MEDIC,
+	WP_DYNAMITE_ENG,
 	WP_KNIFE,
 	WP_M7,
 	WP_ARTY,
@@ -855,6 +867,7 @@ typedef enum {
 	EV_COUGH,
 	EV_QUICKGRENS,
 	EV_PLAYER_HIT,  // hitsound event
+	EV_STOP_RELOADING_SOUND,
 	EV_MAX_EVENTS   // just added as an 'endcap'
 } entity_event_t;
 
@@ -1049,6 +1062,9 @@ typedef enum {
 	WEAP_RELOAD1_FAST,
 	WEAP_RELOAD2_FAST,
 	WEAP_RELOAD3_FAST,
+	WEAP_ALTSWITCHFROM_FAST,
+	WEAP_ALTSWITCHTO_FAST,
+	WEAP_DROP2_FAST,
 	MAX_WP_ANIMATIONS
 } weapAnimNumber_t;
 
@@ -1162,6 +1178,7 @@ typedef enum {
 	MOD_VENOM,
 	MOD_VENOM_FULL,
 	MOD_FLAMETHROWER,
+	MOD_FLAMETRAP,
 	MOD_TESLA,
 	MOD_HOLYCROSS,
 	MOD_MP34,
@@ -1289,6 +1306,7 @@ typedef struct gitem_s {
 	int giTag;
 
 	int giAmmoIndex;            // type of weapon ammo this uses.  (ex. WP_MP40 and WP_LUGER share 9mm ammo, so they both have WP_LUGER for giAmmoIndex)
+	int giAmmoIndexSurv;        // no ammo sharing in Survival
 	int giClipIndex;            // which clip this weapon uses.  this allows the sniper rifle to use the same clip as the garand, etc.
 
 	char        *precaches;     // string of all models and images this item will use
@@ -1819,10 +1837,14 @@ qboolean PC_Color_Parse( int handle, vec4_t *c );
 char *BG_GetWeaponFilename( weapon_t weaponNum );
 qboolean BG_ParseAmmoTable( int handle, weapon_t weaponNum );
 void BG_SetWeaponForSkill( weapon_t weaponNum, gameskill_t skill );
+int BG_GetMaxClip(const playerState_t *ps, int weapon);
+int BG_GetMaxAmmo(const playerState_t *ps, int weapon, float ltAmmoBonus);
+int BG_GetNextShotTime(const playerState_t *ps, weapon_t weapon, qboolean altFire);
 
 char *BG_GetCharacterFilename( AICharacters_t characterNum );
 qboolean BG_ParseBehaviorTable( int handle, AICharacters_t characterNum );
 void BG_SetBehaviorForSkill( AICharacters_t characterNum, gameskill_t skill );
+void BG_SetBehaviorForSurvival(AICharacters_t characterNum);
 
 // New ET vehicle path system
 #define MAX_PATH_CORNERS        512

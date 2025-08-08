@@ -27,6 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "g_local.h"
+#include "g_survival.h"
 
 #define MISSILE_PRESTEP_TIME    50
 
@@ -118,6 +119,22 @@ qboolean G_BounceMissile( gentity_t *ent, trace_t *trace ) {
       		}
 			
 			if ( ent->s.weapon == WP_DYNAMITE ) {
+				ent->r.ownerNum = ENTITYNUM_WORLD;
+
+				// make shootable
+					ent->health             = 5;
+					ent->takedamage         = qtrue;
+
+					// small target cube
+					VectorSet( ent->r.mins, -4, -4, 0 );
+					VectorCopy( ent->r.mins, ent->r.absmin );
+					VectorSet( ent->r.maxs, 4, 4, 8 );
+					VectorCopy( ent->r.maxs, ent->r.absmax );
+				
+
+			}
+
+			if ( ent->s.weapon == WP_DYNAMITE_ENG ) {
 				ent->r.ownerNum = ENTITYNUM_WORLD;
 
 				// make shootable
@@ -864,7 +881,7 @@ void G_RunSpit( gentity_t *ent ) {
 }
 
 
-int G_GetWeaponDamage( int weapon, qboolean player ); // JPW NERVE
+int G_GetWeaponDamage( int weapon, gentity_t *ent ); // JPW NERVE
 
 /*
 =================
@@ -886,7 +903,7 @@ gentity_t *fire_grenade( gentity_t *self, vec3_t start, vec3_t dir, int grenadeW
 
 	// no self->client for shooter_grenade's
 	if ( self->client && self->client->ps.grenadeTimeLeft ) {
-		if ( grenadeWPID == WP_DYNAMITE ) {   // remove any fraction of a 5 second 'click'
+		if ( grenadeWPID == WP_DYNAMITE || grenadeWPID == WP_DYNAMITE_ENG ) {   // remove any fraction of a 5 second 'click'
 			self->client->ps.grenadeTimeLeft *= 5;
 			self->client->ps.grenadeTimeLeft -= ( self->client->ps.grenadeTimeLeft % 5000 );
 			self->client->ps.grenadeTimeLeft += 5000;
@@ -899,7 +916,7 @@ gentity_t *fire_grenade( gentity_t *self, vec3_t start, vec3_t dir, int grenadeW
 		}
 	} else {
 		// let non-players throw the default duration
-		if ( grenadeWPID == WP_DYNAMITE ) {
+		if ( grenadeWPID == WP_DYNAMITE || grenadeWPID == WP_DYNAMITE_ENG ) {
 			if ( !noExplode ) {
 				bolt->nextthink = level.time + 5000;
 			}
@@ -926,16 +943,19 @@ gentity_t *fire_grenade( gentity_t *self, vec3_t start, vec3_t dir, int grenadeW
 
 // JPW NERVE -- commented out bolt->damage and bolt->splashdamage, override with G_GetWeaponDamage()
 // so it works with different netgame balance.  didn't uncomment bolt->damage on dynamite 'cause its so *special*
-	bolt->damage = G_GetWeaponDamage( grenadeWPID, isPlayer ); // overridden for dynamite
-	bolt->splashDamage = G_GetWeaponDamage( grenadeWPID, isPlayer );
+	bolt->damage = G_GetWeaponDamage(grenadeWPID, self);
+	bolt->splashDamage = G_GetWeaponDamage(grenadeWPID, self);
 
-	// Knightmare- G_GetWeaponDamage handles this now
-/*	if ( self->client && !self->aiCharacter ) {
-		bolt->damage *= 2;
-		bolt->splashDamage *= 2;
+	// Soldier explosive bonus (Survival mode only)
+	if (g_gametype.integer == GT_SURVIVAL &&
+		self->client &&
+		self->client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER)
+	{
+
+		// Increase damage and splash radius
+		bolt->damage *= svParams.soldierExplosiveDmgBonus;
+		bolt->splashDamage *= svParams.soldierExplosiveDmgBonus;
 	}
-*/
-// jpw
 
 	switch ( grenadeWPID ) {
 	case WP_GRENADE_LAUNCHER:
@@ -948,6 +968,16 @@ gentity_t *fire_grenade( gentity_t *self, vec3_t start, vec3_t dir, int grenadeW
 		bolt->methodOfDeath         = MOD_GRENADE;
 		bolt->splashMethodOfDeath   = MOD_GRENADE_SPLASH;
 		bolt->s.eFlags              = EF_BOUNCE_HALF;
+
+		// Soldier explosive bonus (Survival mode only)
+		if (g_gametype.integer == GT_SURVIVAL &&
+			self->client &&
+			self->client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER)
+		{
+
+			bolt->splashRadius *= svParams.soldierExplosiveDmgBonus;
+		}
+
 		break;
 	case WP_GRENADE_PINEAPPLE:
 		bolt->classname             = "grenade";
@@ -959,6 +989,16 @@ gentity_t *fire_grenade( gentity_t *self, vec3_t start, vec3_t dir, int grenadeW
 		bolt->methodOfDeath         = MOD_GRENADE;
 		bolt->splashMethodOfDeath   = MOD_GRENADE_SPLASH;
 		bolt->s.eFlags              = EF_BOUNCE_HALF;
+
+		// Soldier explosive bonus (Survival mode only)
+		if (g_gametype.integer == GT_SURVIVAL &&
+			self->client &&
+			self->client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER)
+		{
+
+			bolt->splashRadius *= svParams.soldierExplosiveDmgBonus;
+		}
+
 		break;
 	case WP_M7:
 		bolt->classname             = "m7_grenade";
@@ -971,6 +1011,16 @@ gentity_t *fire_grenade( gentity_t *self, vec3_t start, vec3_t dir, int grenadeW
 		bolt->splashMethodOfDeath   = MOD_M7;
 		bolt->s.eFlags              = EF_BOUNCE_HALF | EF_BOUNCE;
 		bolt->nextthink             = level.time + 4000;
+
+		// Soldier explosive bonus (Survival mode only)
+		if (g_gametype.integer == GT_SURVIVAL &&
+			self->client &&
+			self->client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER)
+		{
+
+			bolt->splashRadius *= svParams.soldierExplosiveDmgBonus;
+		}
+
 		break;
 	case WP_AIRSTRIKE:
 		bolt->classname             = "grenade";
@@ -997,6 +1047,32 @@ gentity_t *fire_grenade( gentity_t *self, vec3_t start, vec3_t dir, int grenadeW
 			bolt->splashRadius          = ammoTable[WP_DYNAMITE].aiSplashRadius;
 		} else {
 			bolt->splashRadius          = ammoTable[WP_DYNAMITE].playerSplashRadius;
+		}
+		bolt->methodOfDeath         = MOD_DYNAMITE;
+		bolt->splashMethodOfDeath   = MOD_DYNAMITE_SPLASH;
+		bolt->s.eFlags              = ( EF_BOUNCE | EF_BOUNCE_HALF );   // EF_BOUNCE_HEAVY;
+
+		bolt->health                = 5;
+		bolt->takedamage            = qfalse;
+		
+		bolt->die                   = G_MissileDie;
+		bolt->r.contents            = CONTENTS_CORPSE;      // (player can walk through)
+
+		// nope - this causes the dynamite to impact on the players bb when he throws it.
+		// will try setting it when it settles
+//			bolt->r.ownerNum			= ENTITYNUM_WORLD;	// (SA) make the world the owner of the dynamite, so the player can shoot it without modifying the bullet code to ignore players id for hits
+
+		break;
+		case WP_DYNAMITE_ENG:
+		// oh, this is /so/ cheap...
+		// you need to pick up new code ;)
+		trap_SendServerCommand( self - g_entities, va( "dp %d", ( bolt->nextthink - level.time ) / 1000 ) );
+		bolt->classname             = "dynamite";
+		bolt->damage                = 0;
+		if ( self->aiCharacter ) {
+			bolt->splashRadius          = ammoTable[WP_DYNAMITE_ENG].aiSplashRadius;
+		} else {
+			bolt->splashRadius          = ammoTable[WP_DYNAMITE_ENG].playerSplashRadius;
 		}
 		bolt->methodOfDeath         = MOD_DYNAMITE;
 		bolt->splashMethodOfDeath   = MOD_DYNAMITE_SPLASH;
@@ -1054,14 +1130,30 @@ gentity_t *fire_rocket( gentity_t *self, vec3_t start, vec3_t dir ) {
 	bolt->r.ownerNum = self->s.number;
 	bolt->parent = self;
 
-	if ( self->aiCharacter ) { // ai keep the values they've been using
-		bolt->damage = ammoTable[WP_PANZERFAUST].aiDamage;						
-		bolt->splashDamage = ammoTable[WP_PANZERFAUST].aiDamage;		
-		bolt->splashRadius = ammoTable[WP_PANZERFAUST].aiSplashRadius;		
-	} else {
-		bolt->damage = ammoTable[WP_PANZERFAUST].playerDamage;
-		bolt->splashDamage = ammoTable[WP_PANZERFAUST].playerDamage;
-		bolt->splashRadius = ammoTable[WP_PANZERFAUST].playerSplashRadius;	
+	if (self->aiCharacter)
+	{
+		// AI keeps using fixed values
+		bolt->damage = ammoTable[WP_PANZERFAUST].aiDamage;
+		bolt->splashDamage = ammoTable[WP_PANZERFAUST].aiDamage;
+		bolt->splashRadius = ammoTable[WP_PANZERFAUST].aiSplashRadius;
+	}
+	else
+	{
+		qboolean upgraded = self->client && self->client->ps.weaponUpgraded[WP_PANZERFAUST];
+
+		bolt->damage = upgraded ? ammoTable[WP_PANZERFAUST].playerDamageUpgraded : ammoTable[WP_PANZERFAUST].playerDamage;
+		bolt->splashDamage = bolt->damage; // Same value
+		bolt->splashRadius = ammoTable[WP_PANZERFAUST].playerSplashRadius;
+
+		// Soldier bonus (applied after base/upgraded damage is picked)
+		if (g_gametype.integer == GT_SURVIVAL &&
+			self->client &&
+			self->client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER)
+		{
+			bolt->damage *= 1.50f;
+			bolt->splashDamage *= 1.50f;
+			bolt->splashRadius *= 1.50f;
+		}
 	}
 
 	bolt->methodOfDeath = MOD_ROCKET;

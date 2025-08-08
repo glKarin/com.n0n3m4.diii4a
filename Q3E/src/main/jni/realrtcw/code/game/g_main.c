@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 
 #include "g_local.h"
+#include "g_survival.h"
 #ifdef STEAM // !defined(__ANDROID__) //karin: without steam
 #include "../../steam/steam.h"
 #else // using stub
@@ -52,6 +53,9 @@ gentity_t g_entities[MAX_GENTITIES];
 gclient_t g_clients[MAX_CLIENTS];
 
 int g_scriptGlobalAccumBuffer[G_MAX_SCRIPT_GLOBAL_ACCUM_BUFFERS];
+
+// Safe endgame fix
+qboolean g_endgameTriggered = qfalse;
 
 gentity_t       *g_camEnt = NULL;   //----(SA)	script camera
 
@@ -248,7 +252,7 @@ cvarTable_t gameCvarTable[] = {
 
 	{ &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
 
-	{ &g_friendlyFire, "g_friendlyFire", "1", CVAR_ARCHIVE, 0, qtrue  },
+	{ &g_friendlyFire, "g_friendlyFire", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue  },
 
 	{ &g_teamAutoJoin, "g_teamAutoJoin", "0", CVAR_ARCHIVE  },
 	{ &g_teamForceBalance, "g_teamForceBalance", "0", CVAR_ARCHIVE  },                            // NERVE - SMF - merge from team arena
@@ -1043,9 +1047,31 @@ void G_RegisterCvars( void ) {
 	}
 
 	// Rafael gameskill
-	if ( g_gameskill.integer < GSKILL_EASY || g_gameskill.integer > GSKILL_SURVIVAL ) {
-		G_Printf( "g_gameskill %i is out of range, default to medium\n", g_gameskill.integer );
-		trap_Cvar_Set( "g_gameskill", va( "%d", GSKILL_MEDIUM ) ); // default to medium
+	if (g_gameskill.integer < GSKILL_EASY || g_gameskill.integer > GSKILL_SURVIVAL)
+	{
+		trap_Cvar_Set("g_gameskill", va("%d", GSKILL_MEDIUM)); // default to medium
+		trap_Cvar_Update(&g_gameskill);
+	}
+
+	// If gamemode is not survival and g_gameskill is set to 5, override it to 1.
+	if (g_gametype.integer != GT_SURVIVAL && g_gameskill.integer == GSKILL_SURVIVAL)
+	{
+		trap_Cvar_Set("g_gameskill", "1");
+		trap_Cvar_Update(&g_gameskill);
+	}
+
+	// Force survival mode rules
+	if (g_gametype.integer == GT_SURVIVAL) {
+
+			trap_Cvar_Set("g_gameskill", "5");
+			trap_Cvar_Update(&g_gameskill);
+
+			trap_Cvar_Set("g_friendlyFire", "0");
+			trap_Cvar_Update(&g_friendlyFire);
+	} else {
+		// Ensure friendly fire is enabled for non-survival modes
+			trap_Cvar_Set("g_friendlyFire", "1");
+			trap_Cvar_Update(&g_friendlyFire);
 	}
 
 	bg_pmove_gameskill_integer = g_gameskill.integer;
@@ -1109,11 +1135,14 @@ void G_UpdateCvars( void ) {
 						AICast_CastScriptThink();
 
 						// if we are not watching a cutscene, save the game
-						if ( !g_entities[0].client->cameraPortal ) {
-							G_SaveGame( NULL );
-							G_SaveGame( "lastcheckpoint" );
+						if (!g_entities[0].client->cameraPortal)
+						{
+							if (g_gametype.integer != GT_SURVIVAL)
+							{
+								G_SaveGame(NULL);
+								G_SaveGame("lastcheckpoint");
+							}
 						}
-
 						trap_Cvar_Set( "cg_norender", "0" );  // camera has started, render 'on'
 						trap_Cvar_Set( "g_playerstart", "0" ); // reset calling of "playerstart" from script
 					}
@@ -2238,10 +2267,16 @@ void CheckReloadStatus( void ) {
 						trap_SendConsoleCommand( EXEC_APPEND, va( "svmap %s\n", level.nextMap ) );
 					} 
 				  }
-				} else if ( g_reloading.integer == RELOAD_ENDGAME ) {
-					G_EndGame();    // kick out to the menu and start the "endgame" menu (credits, etc)
-
-				} else {
+				}
+				else if (g_reloading.integer == RELOAD_ENDGAME)
+				{
+					// defer endgame until it's safe
+					g_endgameTriggered = qtrue;
+					level.reloadDelayTime = 0;
+					trap_Cvar_Set("g_reloading", "0"); // prevent it from looping
+				}
+				else
+				{
 					// set the loadgame flag, and restart the server
 					trap_Cvar_Set( "savegame_loading", "2" ); // 2 means it's a restart, so stop rendering until we are loaded
 					trap_SendConsoleCommand( EXEC_INSERT, "map_restart\n" );
@@ -2565,6 +2600,10 @@ void G_RunFrame( int levelTime ) {
 
 	// Ridah, move the AI
 	AICast_StartServerFrame( level.time );
+	if (g_gametype.integer == GT_SURVIVAL)
+	{
+		AICast_TickSurvivalWave();
+	}
 
 	// perform final fixups on the players
 	ent = &g_entities[0];
@@ -2600,4 +2639,9 @@ void G_RunFrame( int levelTime ) {
 	// Ridah, check if we are reloading, and times have expired
 	CheckReloadStatus();
 
+	if (g_endgameTriggered)
+	{
+		g_endgameTriggered = qfalse;
+		G_EndGame(); // this will now call trap_Endgame() safely
+	}
 }

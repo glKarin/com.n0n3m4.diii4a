@@ -230,88 +230,99 @@ AIFunc_ZombieMelee
 ================
 */
 
-int zombieHitDamage[5] = { // RealRTCW was 16,16,16,12,20
-	30,
-	25,
-	20,
-	20,
-	20
+int zombieHitDamage[5] = { // Default damage values
+    30,
+    25,
+    20,
+    20,
+    20
+};
+
+int zombieHitDamageSurvival[5] = { // Damage values for GT_SURVIVAL
+    60,
+    50,
+    40,
+    40,
+    30
 };
 
 #define NUM_ZOMBIE_ANIMS    5
 int zombieHitTimes[NUM_ZOMBIE_ANIMS][3] = { // up to three hits per attack
-	{ANIMLENGTH( 11,20 ),-1},
-	{ANIMLENGTH( 9,20 ),-1},
-	{ANIMLENGTH( 9,20 ),-1},
-	{ANIMLENGTH( 8,20 ),ANIMLENGTH( 16,20 ),-1},
-	{ANIMLENGTH( 8,20 ),ANIMLENGTH( 15,20 ),ANIMLENGTH( 24,20 )},
+    {ANIMLENGTH( 11,20 ),-1},
+    {ANIMLENGTH( 9,20 ),-1},
+    {ANIMLENGTH( 9,20 ),-1},
+    {ANIMLENGTH( 8,20 ),ANIMLENGTH( 16,20 ),-1},
+    {ANIMLENGTH( 8,20 ),ANIMLENGTH( 15,20 ),ANIMLENGTH( 24,20 )},
 };
 
 char *AIFunc_ZombieMelee( cast_state_t *cs ) {
-	gentity_t *ent = &g_entities[cs->entityNum];
-	int hitDelay = -1, anim;
-	trace_t *tr;
-	cast_state_t *ecs = AICast_GetCastState( cs->enemyNum );
-	aicast_predictmove_t move;
-	float enemyDist;
+    gentity_t *ent = &g_entities[cs->entityNum];
+    int hitDelay = -1, anim;
+    trace_t *tr;
+    cast_state_t *ecs = AICast_GetCastState( cs->enemyNum );
+    aicast_predictmove_t move;
+    float enemyDist;
 
-	if ( !ent->client->ps.torsoTimer ) {
-		return AIFunc_DefaultStart( cs );
-	}
+    if ( !ent->client->ps.torsoTimer ) {
+        return AIFunc_DefaultStart( cs );
+    }
 
-	if ( ecs ) {
+    if ( ecs ) {
 
-		anim = ( ent->client->ps.torsoAnim & ~ANIM_TOGGLEBIT ) - BG_AnimationIndexForString( "attack1", cs->entityNum );
-		if ( anim < 0 || anim >= NUM_ZOMBIE_ANIMS ) {
-			// animation interupted
-			return AIFunc_DefaultStart( cs );
-		}
-		if ( zombieHitTimes[anim][cs->animHitCount] >= 0 && cs->animHitCount < 3 ) {
+        anim = ( ent->client->ps.torsoAnim & ~ANIM_TOGGLEBIT ) - BG_AnimationIndexForString( "attack1", cs->entityNum );
+        if ( anim < 0 || anim >= NUM_ZOMBIE_ANIMS ) {
+            // animation interrupted
+            return AIFunc_DefaultStart( cs );
+        }
+        if ( zombieHitTimes[anim][cs->animHitCount] >= 0 && cs->animHitCount < 3 ) {
 
-			if ( !cs->animHitCount ) {
-				hitDelay = zombieHitTimes[anim][cs->animHitCount];
-			} else {
-				hitDelay = zombieHitTimes[anim][cs->animHitCount] - zombieHitTimes[anim][cs->animHitCount - 1];
-			}
+            if ( !cs->animHitCount ) {
+                hitDelay = zombieHitTimes[anim][cs->animHitCount];
+            } else {
+                hitDelay = zombieHitTimes[anim][cs->animHitCount] - zombieHitTimes[anim][cs->animHitCount - 1];
+            }
 
-			// check for inflicting damage
-			if ( level.time - cs->weaponFireTimes[cs->weaponNum] > hitDelay ) {
-				// do melee damage
-				if ( ( tr = CheckMeleeAttack( ent, AICast_WeaponRange( cs, cs->weaponNum ) + 4.0, qfalse ) ) && ( tr->entityNum == cs->enemyNum ) ) {
-					G_Damage( &g_entities[tr->entityNum], ent, ent, vec3_origin, tr->endpos,
-							  zombieHitDamage[anim], 0, MOD_MONSTER_MELEE );
-					G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[STAYSOUNDSCRIPT] ) );
-				} else {
-					G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[FOLLOWSOUNDSCRIPT] ) );
-				}
-				cs->weaponFireTimes[cs->weaponNum] = level.time;
-				cs->animHitCount++;
-			}
-		}
-		// face them
-		AICast_AimAtEnemy( cs );
-		if ( !ent->client->ps.legsTimer || zombieHitTimes[anim][cs->animHitCount] < 0 || cs->animHitCount >= 3 ) {
-			// if they are outside range, move forward
-			AICast_PredictMovement( ecs, 2, 0.5, &move, &g_entities[cs->enemyNum].client->pers.cmd, -1 );
-			enemyDist = Distance( move.endpos, cs->bs->origin );
-			enemyDist -= g_entities[cs->enemyNum].r.maxs[0];
-			enemyDist -= ent->r.maxs[0];
-			if ( /*anim != 4 &&*/ ( enemyDist > 16 ) ) {    // we can get closer
-				if ( ent->client->ps.legsTimer ) {
-					ent->client->ps.legsTimer = 0;      // allow legs us to move
-					if ( cs->castScriptStatus.scriptNoMoveTime < level.time + 200 ) { // dont move until the legs are done lerping out of attack anim
-						cs->castScriptStatus.scriptNoMoveTime = level.time + 200;
-					}
-				}
-				if ( !ent->client->ps.legsTimer && cs->castScriptStatus.scriptNoMoveTime < level.time ) {
-					trap_EA_MoveForward( cs->entityNum );
-				}
-			}
-		}
+            // check for inflicting damage
+            if ( level.time - cs->weaponFireTimes[cs->weaponNum] > hitDelay ) {
+                // do melee damage
+                if ( ( tr = CheckMeleeAttack( ent, AICast_WeaponRange( cs, cs->weaponNum ) + 4.0, qfalse ) ) && ( tr->entityNum == cs->enemyNum ) ) {
+                    // Use different damage values for GT_SURVIVAL
+                    int *currentZombieHitDamage = (g_gametype.integer == GT_SURVIVAL) ? zombieHitDamageSurvival : zombieHitDamage;
 
-	}
+                    G_Damage( &g_entities[tr->entityNum], ent, ent, vec3_origin, tr->endpos,
+                              currentZombieHitDamage[anim], 0, MOD_MONSTER_MELEE );
+                    G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[STAYSOUNDSCRIPT] ) );
+                } else {
+                    G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[FOLLOWSOUNDSCRIPT] ) );
+                }
+                cs->weaponFireTimes[cs->weaponNum] = level.time;
+                cs->animHitCount++;
+            }
+        }
+        // face them
+        AICast_AimAtEnemy( cs );
+        if ( !ent->client->ps.legsTimer || zombieHitTimes[anim][cs->animHitCount] < 0 || cs->animHitCount >= 3 ) {
+            // if they are outside range, move forward
+            AICast_PredictMovement( ecs, 2, 0.5, &move, &g_entities[cs->enemyNum].client->pers.cmd, -1 );
+            enemyDist = Distance( move.endpos, cs->bs->origin );
+            enemyDist -= g_entities[cs->enemyNum].r.maxs[0];
+            enemyDist -= ent->r.maxs[0];
+            if ( /*anim != 4 &&*/ ( enemyDist > 16 ) ) {    // we can get closer
+                if ( ent->client->ps.legsTimer ) {
+                    ent->client->ps.legsTimer = 0;      // allow legs us to move
+                    if ( cs->castScriptStatus.scriptNoMoveTime < level.time + 200 ) { // dont move until the legs are done lerping out of attack anim
+                        cs->castScriptStatus.scriptNoMoveTime = level.time + 200;
+                    }
+                }
+                if ( !ent->client->ps.legsTimer && cs->castScriptStatus.scriptNoMoveTime < level.time ) {
+                    trap_EA_MoveForward( cs->entityNum );
+                }
+            }
+        }
 
-	return NULL;
+    }
+
+    return NULL;
 }
 
 /*
@@ -1011,21 +1022,29 @@ char *AIFunc_RejectAttack1Start( cast_state_t *cs ) {
 //
 //=================================================================================
 
-int warriorHitDamage[5] = { // RealRTCW was 16,16,16,12,20.
-	40,
-	38,
-	35,
-	34,
-	30
+int warriorHitDamage[5] = { // Default damage values
+    40,
+    38,
+    35,
+    34,
+    30
+};
+
+int warriorHitDamageSurvival[5] = { // Damage values for GT_SURVIVAL
+    70,
+    60,
+    50,
+    45,
+    40
 };
 
 #define NUM_WARRIOR_ANIMS   5
 int warriorHitTimes[NUM_WARRIOR_ANIMS][3] = {   // up to three hits per attack
-	{ANIMLENGTH( 10,20 ),-1},
-	{ANIMLENGTH( 15,20 ),-1},
-	{ANIMLENGTH( 18,20 ),-1},
-	{ANIMLENGTH( 15,20 ),-1},
-	{ANIMLENGTH( 14,20 ),-1},
+    {ANIMLENGTH( 10,20 ),-1},
+    {ANIMLENGTH( 15,20 ),-1},
+    {ANIMLENGTH( 18,20 ),-1},
+    {ANIMLENGTH( 15,20 ),-1},
+    {ANIMLENGTH( 14,20 ),-1},
 };
 
 /*
@@ -1034,72 +1053,75 @@ AIFunc_WarriorZombieMelee
 ================
 */
 char *AIFunc_WarriorZombieMelee( cast_state_t *cs ) {
-	gentity_t *ent = &g_entities[cs->entityNum];
-	int hitDelay = -1, anim;
-	trace_t *tr;
-	cast_state_t *ecs = AICast_GetCastState( cs->enemyNum );
-	aicast_predictmove_t move;
-	float enemyDist;
+    gentity_t *ent = &g_entities[cs->entityNum];
+    int hitDelay = -1, anim;
+    trace_t *tr;
+    cast_state_t *ecs = AICast_GetCastState( cs->enemyNum );
+    aicast_predictmove_t move;
+    float enemyDist;
 
-	if ( !ent->client->ps.torsoTimer ) {
-		return AIFunc_DefaultStart( cs );
-	}
-	//
-	if ( cs->enemyNum < 0 ) {
-		return NULL;
-	}
-	if ( ecs ) {
+    if ( !ent->client->ps.torsoTimer ) {
+        return AIFunc_DefaultStart( cs );
+    }
+    //
+    if ( cs->enemyNum < 0 ) {
+        return NULL;
+    }
+    if ( ecs ) {
 
-		anim = ( ent->client->ps.torsoAnim & ~ANIM_TOGGLEBIT ) - BG_AnimationIndexForString( "attack1", cs->entityNum );
-		if ( anim < 0 || anim >= NUM_WARRIOR_ANIMS ) {
-			// animation interupted
-			return AIFunc_DefaultStart( cs );
-		}
-		if ( warriorHitTimes[anim][cs->animHitCount] >= 0 && cs->animHitCount < 3 ) {
+        anim = ( ent->client->ps.torsoAnim & ~ANIM_TOGGLEBIT ) - BG_AnimationIndexForString( "attack1", cs->entityNum );
+        if ( anim < 0 || anim >= NUM_WARRIOR_ANIMS ) {
+            // animation interrupted
+            return AIFunc_DefaultStart( cs );
+        }
+        if ( warriorHitTimes[anim][cs->animHitCount] >= 0 && cs->animHitCount < 3 ) {
 
-			if ( !cs->animHitCount ) {
-				hitDelay = warriorHitTimes[anim][cs->animHitCount];
-			} else {
-				hitDelay = warriorHitTimes[anim][cs->animHitCount] - warriorHitTimes[anim][cs->animHitCount - 1];
-			}
+            if ( !cs->animHitCount ) {
+                hitDelay = warriorHitTimes[anim][cs->animHitCount];
+            } else {
+                hitDelay = warriorHitTimes[anim][cs->animHitCount] - warriorHitTimes[anim][cs->animHitCount - 1];
+            }
 
-			// check for inflicting damage
-			if ( level.time - cs->weaponFireTimes[cs->weaponNum] > hitDelay ) {
-				// do melee damage
-				if ( ( tr = CheckMeleeAttack( ent, 44, qfalse ) ) && ( tr->entityNum == cs->enemyNum ) ) {
-					G_Damage( &g_entities[tr->entityNum], ent, ent, vec3_origin, tr->endpos,
-							  warriorHitDamage[anim], 0, MOD_MONSTER_MELEE );
-					G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[STAYSOUNDSCRIPT] ) );
-				} else {
-					G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[FOLLOWSOUNDSCRIPT] ) );
-				}
-				cs->weaponFireTimes[cs->weaponNum] = level.time;
-				cs->animHitCount++;
-			}
-		}
-		// face them
-		AICast_AimAtEnemy( cs );
-		if ( anim < 3 ) { // back handed-swinging, dont allow legs to move
-			// if they are outside range, move forward
-			AICast_PredictMovement( ecs, 2, 0.5, &move, &g_entities[cs->enemyNum].client->pers.cmd, -1 );
-			enemyDist = Distance( move.endpos, cs->bs->origin );
-			enemyDist -= g_entities[cs->enemyNum].r.maxs[0];
-			enemyDist -= ent->r.maxs[0];
-			if ( enemyDist > 16 ) {   // we can get closer
-				if ( ent->client->ps.legsTimer ) {
-					ent->client->ps.legsTimer = 0;      // allow legs us to move
-					if ( cs->castScriptStatus.scriptNoMoveTime < level.time + 200 ) { // dont move until the legs are done lerping out of attack anim
-						cs->castScriptStatus.scriptNoMoveTime = level.time + 200;
-					}
-				}
-				if ( cs->castScriptStatus.scriptNoMoveTime < level.time ) {
-					trap_EA_MoveForward( cs->entityNum );
-				}
-			}
-		}
-	}
+            // check for inflicting damage
+            if ( level.time - cs->weaponFireTimes[cs->weaponNum] > hitDelay ) {
+                // do melee damage
+                if ( ( tr = CheckMeleeAttack( ent, 44, qfalse ) ) && ( tr->entityNum == cs->enemyNum ) ) {
+                    // Use different damage values for GT_SURVIVAL
+                    int *currentWarriorHitDamage = (g_gametype.integer == GT_SURVIVAL) ? warriorHitDamageSurvival : warriorHitDamage;
 
-	return NULL;
+                    G_Damage( &g_entities[tr->entityNum], ent, ent, vec3_origin, tr->endpos,
+                              currentWarriorHitDamage[anim], 0, MOD_MONSTER_MELEE );
+                    G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[STAYSOUNDSCRIPT] ) );
+                } else {
+                    G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[FOLLOWSOUNDSCRIPT] ) );
+                }
+                cs->weaponFireTimes[cs->weaponNum] = level.time;
+                cs->animHitCount++;
+            }
+        }
+        // face them
+        AICast_AimAtEnemy( cs );
+        if ( anim < 3 ) { // back handed-swinging, don't allow legs to move
+            // if they are outside range, move forward
+            AICast_PredictMovement( ecs, 2, 0.5, &move, &g_entities[cs->enemyNum].client->pers.cmd, -1 );
+            enemyDist = Distance( move.endpos, cs->bs->origin );
+            enemyDist -= g_entities[cs->enemyNum].r.maxs[0];
+            enemyDist -= ent->r.maxs[0];
+            if ( enemyDist > 16 ) {   // we can get closer
+                if ( ent->client->ps.legsTimer ) {
+                    ent->client->ps.legsTimer = 0;      // allow legs us to move
+                    if ( cs->castScriptStatus.scriptNoMoveTime < level.time + 200 ) { // don't move until the legs are done lerping out of attack anim
+                        cs->castScriptStatus.scriptNoMoveTime = level.time + 200;
+                    }
+                }
+                if ( cs->castScriptStatus.scriptNoMoveTime < level.time ) {
+                    trap_EA_MoveForward( cs->entityNum );
+                }
+            }
+        }
+    }
+
+    return NULL;
 }
 
 /*

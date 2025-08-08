@@ -367,8 +367,8 @@ static void CG_SoundParseSounds( char *filename, char *buffer ) {
 CG_SoundLoadSoundFiles
 ===============
 */
-#define MAX_SOUND_FILES     128
-#define MAX_BUFFER          20000
+#define MAX_SOUND_FILES 256
+#define MAX_BUFFER 32768
 static void CG_SoundLoadSoundFiles( void ) {
 	char soundFiles[MAX_SOUND_FILES][MAX_QPATH];
 	char buffer[MAX_BUFFER];

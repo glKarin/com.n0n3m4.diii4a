@@ -30,6 +30,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+// Fix for potential lightgrid mismatches while building with MSYS2
+#pragma GCC optimize ("no-fast-math")
+
 /*
 
 Loads and prepares a map file for scene rendering.

@@ -1372,6 +1372,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_STEP ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE_SURV ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_STEP ][footstepcnt] );
+			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE_FLAME ) {
+				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_STEP ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_LOPER ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_LOPER_STEP ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_PROTOSOLDIER ) {
@@ -1423,6 +1425,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_WOOD ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE_SURV ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_WOOD ][footstepcnt] );
+			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE_FLAME ) {
+				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_WOOD ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_LOPER ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_LOPER_WOOD ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_PROTOSOLDIER ) {
@@ -1469,6 +1473,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_GRAVEL ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE_SURV ) {
+				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_GRAVEL ][footstepcnt] );
+			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE_FLAME ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_GRAVEL ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_PROTOSOLDIER ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_PROTOSOLDIER_GRAVEL][footstepcnt] );
@@ -1803,27 +1809,27 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 case EV_FILL_CLIP:
     DEBUGNAME( "EV_FILL_CLIP" );
     if ( cg_weapons[es->weapon].reloadSound ) {
-        if ( cg.predictedPlayerState.powerups[PW_HASTE_SURV] || cg.predictedPlayerState.perks[PERK_WEAPONHANDLING] ) {
-            trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSoundFast );
+        if ( cg.predictedPlayerState.perks[PERK_WEAPONHANDLING] ) {
+            trap_S_StartSoundEx( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSoundFast, SND_REQUESTCUT );
         } else {
-            trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSound );
+            trap_S_StartSoundEx( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSound, SND_REQUESTCUT );
         }
     }
     break;
 case EV_FILL_CLIP_FULL:
     DEBUGNAME( "EV_FILL_CLIP_FULL" );
     if ( cg_weapons[es->weapon].reloadFullSound ) {
-        if ( cg.predictedPlayerState.powerups[PW_HASTE_SURV] || cg.predictedPlayerState.perks[PERK_WEAPONHANDLING] ) {
-            trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFullSoundFast );
+        if (cg.predictedPlayerState.perks[PERK_WEAPONHANDLING] ) {
+            trap_S_StartSoundEx( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFullSoundFast, SND_REQUESTCUT );
         } else {
-            trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFullSound );
+            trap_S_StartSoundEx( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFullSound, SND_REQUESTCUT );
         }
     }
     break;
 	case EV_FILL_CLIP_AI:
 		DEBUGNAME( "EV_FILL_CLIP_AI" );
 		if ( cg_weapons[es->weapon].reloadSound ) {
-			trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSoundAi );
+			trap_S_StartSoundEx( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSoundAi, SND_REQUESTCUT );
 		}
 		break;
 
@@ -1842,7 +1848,7 @@ case EV_FILL_CLIP_FULL:
 
 	case EV_NOAMMO:
 		DEBUGNAME( "EV_NOAMMO" );
-		if ( ( es->weapon != WP_GRENADE_LAUNCHER ) && ( es->weapon != WP_GRENADE_PINEAPPLE ) && ( es->weapon != WP_DYNAMITE ) && ( es->weapon != WP_AIRSTRIKE ) && ( es->weapon != WP_POISONGAS ) && ( es->weapon != WP_POISONGAS_MEDIC )  ) {
+		if ( ( es->weapon != WP_GRENADE_LAUNCHER ) && ( es->weapon != WP_GRENADE_PINEAPPLE ) && ( es->weapon != WP_DYNAMITE )  && ( es->weapon != WP_DYNAMITE_ENG ) && ( es->weapon != WP_AIRSTRIKE ) && ( es->weapon != WP_POISONGAS ) && ( es->weapon != WP_POISONGAS_MEDIC )  ) {
 			trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.noAmmoSound );
 		}
 		if ( es->number == cg.snap->ps.clientNum && cg_autoReload.integer == 1 ) {
@@ -2031,7 +2037,7 @@ case EV_FILL_CLIP_FULL:
 		DEBUGNAME( "EV_GRENADE_BOUNCE" );
 
 		// DYNAMITE
-		if ( es->weapon == WP_DYNAMITE ) {
+		if ( es->weapon == WP_DYNAMITE || es->weapon == WP_DYNAMITE_ENG ) {
 			trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.dynamitebounce1 );
 		} else {
 			int flags;
@@ -2377,7 +2383,7 @@ case EV_FILL_CLIP_FULL:
 
 	case EV_GIB_PLAYER:
 		DEBUGNAME( "EV_GIB_PLAYER" );
-		if ( es->aiChar == AICHAR_ZOMBIE || es->aiChar == AICHAR_ZOMBIE_SURV || es->aiChar == AICHAR_ZOMBIE_GHOST ) {
+		if ( es->aiChar == AICHAR_ZOMBIE || es->aiChar == AICHAR_ZOMBIE_SURV || es->aiChar == AICHAR_ZOMBIE_FLAME || es->aiChar == AICHAR_ZOMBIE_GHOST ) {
 			trap_S_StartSound( es->pos.trBase, es->number, CHAN_VOICE, cgs.media.zombieDeathSound );
 		} else {
 			trap_S_StartSound( es->pos.trBase, es->number, CHAN_VOICE, cgs.media.gibSound );
@@ -2387,7 +2393,7 @@ case EV_FILL_CLIP_FULL:
 		break;
 	case EV_GIB_VAMPIRISM:
 		DEBUGNAME( "EV_GIB_VAMPIRISM" );
-		if ( es->aiChar == AICHAR_ZOMBIE || es->aiChar == AICHAR_ZOMBIE_SURV || es->aiChar == AICHAR_ZOMBIE_GHOST ) {
+		if ( es->aiChar == AICHAR_ZOMBIE || es->aiChar == AICHAR_ZOMBIE_SURV || es->aiChar == AICHAR_ZOMBIE_FLAME || es->aiChar == AICHAR_ZOMBIE_GHOST ) {
 			trap_S_StartSound( es->pos.trBase, es->number, CHAN_VOICE, cgs.media.zombieDeathSound );
 		} else {
 			trap_S_StartSound( es->pos.trBase, es->number, CHAN_VOICE, cgs.media.gibSound );
@@ -2407,8 +2413,12 @@ case EV_FILL_CLIP_FULL:
 		trap_S_StartSound( NULL, es->number, CHAN_WEAPON, 0 );  // kill weapon sound (could be reloading)
 
 		break;
-//----(SA)	end
+	case EV_STOP_RELOADING_SOUND:
+		DEBUGNAME( "EV_STOP_RELOADING_SOUND" );
 
+		trap_S_StartSoundEx(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF);
+
+		break;
 	case EV_STOPLOOPINGSOUND:
 		DEBUGNAME( "EV_STOPLOOPINGSOUND" );
 		trap_S_StopLoopingSound( es->number );
@@ -2443,6 +2453,8 @@ case EV_FILL_CLIP_FULL:
     // Add condition for AICHAR_ZOMBIE_SURV
     if (cent->currentState.aiChar == AICHAR_ZOMBIE_SURV) {
         cent->currentState.aiChar = AICHAR_ZOMBIE_SURV;
+    } else if (cent->currentState.aiChar == AICHAR_ZOMBIE_FLAME) {
+        cent->currentState.aiChar = AICHAR_ZOMBIE_FLAME; 
     } else {
         cent->currentState.aiChar = AICHAR_ZOMBIE;
     }
