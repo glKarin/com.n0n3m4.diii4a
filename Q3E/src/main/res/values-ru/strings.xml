@@ -61,7 +61,7 @@
     <string name="xash3d_extras">Xash3D дополнительные ресурсы</string>
     <string name="cs16_xash3d_extras">CS1.6(Xash3D) дополнительные ресурсы</string>
     <string name="sourceengine_extras">Source Engine дополнительные ресурсы</string>
-    <string name="external">External</string>
-    <string name="etlegacy_extras">ET: Legacy extras</string>
-    <string name="extract_files_fail">Extract %1$s files fail!</string>
+    <string name="external">Внешние</string>
+    <string name="etlegacy_extras">ET: Legacy дополнительные ресурсы</string>
+    <string name="extract_files_fail">Извлечение %1$s файлов не удалось!</string>
 </resources>

@@ -139,7 +139,7 @@
     <string name="graphics">Графика</string>
     <string name="controls">Управление</string>
     <string name="do_you_want_to_support_the_developer">Хотите поддержать разработчика?</string>
-    <string name="do_you_want_to_support_the_developer_text">idTech4A++ is a completely open and free project, so you can obtain this application for free without paying any fees, and also no need to make any donations to this application, all donation links have been removed.\nThank you for your support.</string>
+    <string name="do_you_want_to_support_the_developer_text">idTech4A++ это полностью открытый и бесплатный проект, поэтому вы можете получить это приложение бесплатно, не платя никаких средств, а также не нужно делать никаких пожертвований этому приложению, все ссылки на пожертвования были удалены.\nСпасибо за вашу поддержку.</string>
     <string name="donate_to">Пожертвовать</string>
     <string name="more_apps_in">Больше приложений в</string>
     <string name="dont_ask">Закрыть</string>
@@ -175,7 +175,7 @@
     <string name="choose_data_folder">Выберите папку данных</string>
     <string name="choose_current_directory">Выберите текущий каталог</string>
     <string name="unset">Отменить</string>
-    <string name="edit_config_file">Редактировать файл конфигурации</string>
+    <string name="edit_config_file">Редактировать конфиг</string>
     <string name="operation">Операция</string>
     <string name="start">Старт</string>
     <string name="language">Язык/Language</string>
@@ -508,26 +508,26 @@
     <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">Использовать встроенную виртуальную клавиатуру вместо системного метода ввода клавиатуры</string>
     <string name="using_external_game_library">Имя файла библиотеки игры в каталоге мода: arm64 = `gameaarch64.so`; arm32 = `gamearm.so`</string>
     <string name="using_external_game_library_xash3d">Путь к библиотеке игры в каталоге мода: arm64 = `lib/arm64-v8a/`; arm32 = `lib/armeabi-v7a/`.\nклиентская библиотека может быть установлена с помощью `-clientlib` в команде, по умолчанию `client.so`; серверная библиотека может быть установлена с помощью `-dll` в команде, по умолчанию `server.so`; библиотека меню может быть установлена с помощью `-menulib` в команде, по умолчанию `menu.so`.</string>
-    <string name="configure_controller">Configure controller</string>
-    <string name="dpad_as_arrow_keys">DPad as arrow keys</string>
-    <string name="dpad_keys_always_as_arrow_keys">DPad keys always as arrow keys</string>
-    <string name="left_joystick_dead_zone">Left joystick dead zone(0 - 1)</string>
-    <string name="right_joystick_dead_zone">Right joystick dead zone(0 - 1)</string>
-    <string name="right_joystick_sensitivity">Right joystick sensitivity(0.1 - 10)</string>
-    <string name="left_joystick_dead_zone_summary">Left joystick minimum axis value(default 0.01)</string>
-    <string name="right_joystick_dead_zone_summary">Right joystick minimum axis value(default 0)</string>
-    <string name="right_joystick_sensitivity_summary">Right joystick emulate mouse sensitivity(default 1)</string>
-    <string name="joystick_dpad">Joystick/DPad</string>
-    <string name="controller_configure">Controller configure</string>
-    <string name="reset_controller_config">Reset controller config?</string>
-    <string name="controller_configure_has_reset">Controller configure has reset.</string>
-    <string name="reset_all_controller_configure">Reset all controller configure</string>
-    <string name="automatic">Automatic</string>
-    <string name="sdl_audio_driver">SDL audio driver</string>
-    <string name="install_shortcut_tips_if_creating_failed">Maybe require grant install shortcut permission manually in system on some brand devices if creating failed.</string>
-    <string name="name_">Name: </string>
-    <string name="path_">Path: </string>
-    <string name="author_">Author: </string>
-    <string name="description_">Description: </string>
+    <string name="configure_controller">Настройки контроллера</string>
+    <string name="dpad_as_arrow_keys">DPad как клавиши со стрелками</string>
+    <string name="dpad_keys_always_as_arrow_keys">DPad клавиши всегда как клавиши со стрелками</string>
+    <string name="left_joystick_dead_zone">Мертвая зона левого джойстика(0 - 1)</string>
+    <string name="right_joystick_dead_zone">Мертвая зона правого джойстика(0 - 1)</string>
+    <string name="right_joystick_sensitivity">Чувствительность правого джойстика(0.1 - 10)</string>
+    <string name="left_joystick_dead_zone_summary">Минимальное значение оси левого джойстика(по умолчанию 0.01)</string>
+    <string name="right_joystick_dead_zone_summary">Минимальное значение оси правого джойстика(по умолчанию 0)</string>
+    <string name="right_joystick_sensitivity_summary">Правый джойстик эмулирует чувствительность мыши(по умолчанию 1)</string>
+    <string name="joystick_dpad">Джойстик/DPad</string>
+    <string name="controller_configure">Настройки контроллера</string>
+    <string name="reset_controller_config">Сбросить конфигурацию контроллера?</string>
+    <string name="controller_configure_has_reset">Конфигурация контроллера сброшена.</string>
+    <string name="reset_all_controller_configure">Сбросить все настройки контроллера</string>
+    <string name="automatic">Автоматически</string>
+    <string name="sdl_audio_driver">Аудиодрайвер SDL</string>
+    <string name="install_shortcut_tips_if_creating_failed">Возможно, потребуется вручную предоставить разрешение на установку ярлыка в системе на некоторых устройствах, если создание не удалось.</string>
+    <string name="name_">Имя: </string>
+    <string name="path_">Путь: </string>
+    <string name="author_">Автор: </string>
+    <string name="description_">Описание: </string>
 
 </resources>
