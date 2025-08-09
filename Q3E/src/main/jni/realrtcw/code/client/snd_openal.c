@@ -21,7 +21,7 @@
    ===========================================================================
    */
 
-#ifdef __ANDROID__xxx //karin: crash with OpenAL on Android, so use ioRTCW snd_openal.c //karin: disable from 5.2
+#ifdef __ANDROID__ //karin: crash with OpenAL on Android, so use ioRTCW snd_openal.c //karin: still in 5.2
 #include "snd_openal_rtcw.c"
 #else
 
