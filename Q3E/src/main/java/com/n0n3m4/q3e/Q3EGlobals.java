@@ -206,14 +206,14 @@ public final class Q3EGlobals
 
 
 
-    public static boolean IsFroidVersion()
+    public static boolean IsFDroidVersion()
     {
         return "fdroid".equalsIgnoreCase(BuildConfig.PRODUCT_FLAVOR);
     }
 
     public static boolean IsGithubVersion()
     {
-        return !IsFroidVersion();
+        return !IsFDroidVersion();
     }
 
 

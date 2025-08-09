@@ -9,8 +9,8 @@ import com.karin.idTech4Amm.misc.TextHelper;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 67;
-    public static final String CONST_RELEASE = "2025-05-08"; // 02-12
+    public static final int    CONST_UPDATE_RELEASE = 68;
+    public static final String CONST_RELEASE = "2025-08-09"; // 02-12; 05-08
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -30,7 +30,7 @@ public final class Constants
     {
         return new String[] {
             "Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.2, fix Omni-bot initialization.",
-            "Fix game controller, and add game controller configure on launcher `CONTROL` tab.",
+            "Fix game controller, and add game controller configure on launcher `CONTROLS` tab.",
             "Add more alphabet on-screen buttons, and add `cs16-client` and `source-engine` on-screen button theme.",
             "Add load external game library support on Xash3D.",
             "Add built-in soft keyboard support.",

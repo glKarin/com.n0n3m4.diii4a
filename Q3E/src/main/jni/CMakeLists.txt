@@ -8,6 +8,14 @@ cmake_minimum_required(VERSION 3.4.1)
 project(idTech4Amm)
 
 
+message(STATUS "Product flavor: ${DIII4A_PRODUCT_FLAVOR}")
+if(DIII4A_PRODUCT_FLAVOR STREQUAL "fdroid")
+    set(PRODUCT_FLAVOR_IS_GITHUB False)
+    set(PRODUCT_FLAVOR_IS_FDROID True)
+else()
+    set(PRODUCT_FLAVOR_IS_GITHUB True)
+    set(PRODUCT_FLAVOR_IS_FDROID False)
+endif()
 
 #[[OPTION(BUILD_D3        "Build DOOM 3"    OFF)
 OPTION(BUILD_Q4        "Build Quake 4"    OFF)
@@ -31,8 +39,10 @@ OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
+if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
 OPTION(GAME_SOURCE      "Build Source"                          ON)
+endif()
 
 # Experimental
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)

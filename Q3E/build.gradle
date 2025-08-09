@@ -6,8 +6,10 @@ String[] ABIFILTERS = [
         /*, "armeabi", "x86", "x86_64"*/
 ]
 
+String PRODUCT_FLAVOR = "github" // github fdroid
+
 String[] CMAKE_ARGUMENTS = [
-        "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21"/*, "-DANDROID_STL=c++_shared"*/
+        "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21", "-DDIII4A_PRODUCT_FLAVOR=" + PRODUCT_FLAVOR/*, "-DANDROID_STL=c++_shared"*/
 ]
 
 // filter ABI
@@ -53,9 +55,9 @@ android {
             }
         }
         versionCode 131130411
-        versionName '1.3.1.1304.11' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
+        versionName '1.3.1.1304.12' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
 
-        buildConfigField "String", "PRODUCT_FLAVOR", "\"github\"" // github fdroid
+        buildConfigField "String", "PRODUCT_FLAVOR", "\"" + PRODUCT_FLAVOR + "\""
     }
 
     buildTypes {

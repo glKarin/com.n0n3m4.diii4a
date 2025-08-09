@@ -1178,7 +1178,7 @@ public class Q3EGameHelper
         String libpath;
         String engineLib;
         // first: get default engine lib path and libraries path
-        if(Q3EGlobals.IsFroidVersion() && Q3EUtils.q3ei.IsUsingExternalLibraries())
+        if(Q3EGlobals.IsFDroidVersion() && Q3EUtils.q3ei.IsUsingExternalLibraries())
         {
             String[] libs = Q3EGameConstants.XASH3D_LIBS;
             libpath = CopyExternalLibraries(libs);
