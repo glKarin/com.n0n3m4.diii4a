@@ -323,6 +323,11 @@ static char * G_AllocMemoryPool( size_t size )
 
 static void G_SetupAllocMemoryPool( qboolean on )
 {
+    if(!gvm)
+    {
+        Com_Printf("[client]: WARNING: gvm not be created!\n");
+		return;
+    }
 	void (*G_SetAllocMemoryPoolFcn_f)(void *ptr);
 	G_SetAllocMemoryPoolFcn_f = (void (*)(void *))VM_FindSymbolInDLL(gvm, "G_SetAllocMemoryPoolFcn");
 	Com_Printf("[client]: get qagame set alloc memory function: %p with %d.\n", G_SetAllocMemoryPoolFcn_f, on);
@@ -950,6 +955,9 @@ void SV_ShutdownGameProgs( void ) {
 		return;
 	}
 	VM_Call( gvm, GAME_SHUTDOWN, qfalse );
+#ifdef __ANDROID__ //karin: export alloc function to qagame
+	G_SetupAllocMemoryPool(qfalse);
+#endif
 	VM_Free( gvm );
 	gvm = NULL;
 }

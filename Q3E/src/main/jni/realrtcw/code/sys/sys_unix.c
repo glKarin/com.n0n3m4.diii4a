@@ -1162,6 +1162,14 @@ Sys_OpenURL
 =================
 */
 void Sys_OpenURL( char *url, qboolean doexit ) {
+#ifdef __ANDROID__ //karin: open system browser
+	extern void Android_OpenURL(const char *url);
+	Android_OpenURL(url);
+	if ( doexit ) {
+		Com_DPrintf( "Sys_OpenURL %s (delaying to final exit)\n", url );
+		Cbuf_ExecuteText( EXEC_APPEND, "quit" );
+	}
+#else
 	char *basepath, *homepath, *pwdpath;
 	char fname[20];
 	char fn[MAX_OSPATH];
@@ -1207,6 +1215,6 @@ void Sys_OpenURL( char *url, qboolean doexit ) {
 	} else {
 		Sys_StartProcess( cmdline, qfalse );
 	}
-
+#endif
 }
 

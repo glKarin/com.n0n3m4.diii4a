@@ -453,10 +453,7 @@ public class GameLauncher extends Activity
 			{
 				if(Q3EUtils.q3ei.IsIdTech4())
 				{
-					if(isChecked)
-						SetProp_temp("harm_g_skipHitEffect", "1");
-					else
-						RemoveProp_temp("harm_g_skipHitEffect");
+					setProp("harm_g_skipHitEffect", isChecked);
 				}
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_g_skipHitEffect, isChecked)
@@ -474,10 +471,7 @@ public class GameLauncher extends Activity
 			{
 				if(Q3EUtils.q3ei.IsIdTech4())
 				{
-					if(isChecked)
-						SetProp_temp("harm_g_botEnableBuiltinAssets", "1");
-					else
-						RemoveProp_temp("harm_g_botEnableBuiltinAssets");
+					setProp("harm_g_botEnableBuiltinAssets", isChecked);
 				}
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_g_botEnableBuiltinAssets, isChecked)
@@ -1886,14 +1880,10 @@ public class GameLauncher extends Activity
 		SelectRadioGroup(V.rg_depth_bits, Q3EPreference.DepthIndexByBits(mPrefs.getInt(Q3EPreference.pref_harm_depth_bit, Q3EGlobals.DEFAULT_DEPTH_BITS)));
 		V.rg_depth_bits.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		boolean skipHitEffect = mPrefs.getBoolean(Q3EPreference.pref_harm_g_skipHitEffect, false);
-		if(skipHitEffect && Q3EUtils.q3ei.IsIdTech4())
-			SetProp_temp("harm_g_skipHitEffect", "1");
 //		SelectRadioGroup(V.rg_r_autoAspectRatio, mPrefs.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1));
 		V.cb_g_skipHitEffect.setChecked(skipHitEffect);
 		V.cb_g_skipHitEffect.setOnCheckedChangeListener(m_checkboxChangeListener);
 		boolean botEnableBuiltinAssets = mPrefs.getBoolean(Q3EPreference.pref_harm_g_botEnableBuiltinAssets, false);
-		if(botEnableBuiltinAssets && Q3EUtils.q3ei.IsIdTech4())
-			SetProp_temp("harm_g_botEnableBuiltinAssets", "1");
 		V.cb_g_botEnableBuiltinAssets.setChecked(botEnableBuiltinAssets);
 		V.cb_g_botEnableBuiltinAssets.setOnCheckedChangeListener(m_checkboxChangeListener);
 
