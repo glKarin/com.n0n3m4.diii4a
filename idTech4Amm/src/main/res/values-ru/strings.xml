@@ -175,7 +175,7 @@
     <string name="choose_data_folder">Выберите папку данных</string>
     <string name="choose_current_directory">Выберите текущий каталог</string>
     <string name="unset">Отменить</string>
-    <string name="edit_config_file">Редактировать файл конфигурации</string>
+    <string name="edit_config_file">Редактировать конфиг</string>
     <string name="operation">Операция</string>
     <string name="start">Старт</string>
     <string name="language">Язык/Language</string>
