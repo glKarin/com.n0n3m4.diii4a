@@ -11,6 +11,8 @@
     <declare-styleable name="Divider">
         <attr name="label" format="string"/>
         <attr name="lineColor" format="color"/>
+        <attr name="typeface" format="string"/>
+        <attr name="textStyle" format="string"/>
     </declare-styleable>
 
     <declare-styleable name="SelectDialogPreference">

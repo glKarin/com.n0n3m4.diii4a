@@ -43,6 +43,13 @@ public class ChangeLog
         StringBuilder sb = new StringBuilder();
         sb.append("------- ").append(date).append(" (R").append(release).append(") -------");
         sb.append(endl);
+        sb.append(GenContentString(endl));
+        return sb.toString();
+    }
+
+    public String GenContentString(String endl)
+    {
+        StringBuilder sb = new StringBuilder();
         if(logs != null && !logs.isEmpty())
         {
             for(String str : logs)

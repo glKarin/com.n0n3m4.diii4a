@@ -529,5 +529,7 @@
     <string name="path_">Путь: </string>
     <string name="author_">Автор: </string>
     <string name="description_">Описание: </string>
+    <string name="expand_all">Expand all</string>
+    <string name="collapse_all">Collapse all</string>
 
 </resources>

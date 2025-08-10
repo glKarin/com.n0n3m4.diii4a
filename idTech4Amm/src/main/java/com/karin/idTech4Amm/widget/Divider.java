@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,6 +61,10 @@ public class Divider extends LinearLayout
             if(null == label)
                 label = "";
             m_initValues.label = label;
+            String typeface = ta.getString(R.styleable.Divider_typeface);
+            m_initValues.typeface = typeface;
+            String textStyle = ta.getString(R.styleable.Divider_textStyle);
+            m_initValues.textStyle = textStyle;
             ta.recycle();
         }
         SetupUI(inflate);
@@ -73,6 +78,32 @@ public class Divider extends LinearLayout
             V.text_label.setText(m_initValues.label);
             V.left_line.setBackgroundColor(m_initValues.lineColor);
             V.right_line.setBackgroundColor(m_initValues.lineColor);
+            int textStyle = Typeface.NORMAL;
+            if(null != m_initValues.textStyle && !m_initValues.textStyle.isEmpty())
+            {
+                switch (m_initValues.textStyle.toLowerCase())
+                {
+                    case "bold":
+                        textStyle = Typeface.BOLD;
+                        break;
+                    case "italic":
+                        textStyle = Typeface.ITALIC;
+                        break;
+                    case "bold_italic":
+                        textStyle = Typeface.BOLD_ITALIC;
+                        break;
+                    case "normal":
+                    default:
+                        textStyle = Typeface.NORMAL;
+                        break;
+                }
+            }
+            Typeface typeface = null;
+            if(null != m_initValues.typeface && !m_initValues.typeface.isEmpty())
+            {
+                typeface = Typeface.create(m_initValues.typeface, textStyle);
+            }
+            V.text_label.setTypeface(typeface, textStyle);
         }
     }
 
@@ -104,5 +135,7 @@ public class Divider extends LinearLayout
     {
         public int lineColor = Color.argb(255, 0xCC, 0xCC, 0xCC);
         public String label = "";
+        public String typeface = "";
+        public String textStyle = "";
     }
 }

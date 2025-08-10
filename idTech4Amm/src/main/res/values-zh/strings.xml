@@ -528,4 +528,6 @@
     <string name="path_">路径: </string>
     <string name="author_">作者: </string>
     <string name="description_">详情: </string>
+    <string name="expand_all">全部展开</string>
+    <string name="collapse_all">全部折叠</string>
 </resources>

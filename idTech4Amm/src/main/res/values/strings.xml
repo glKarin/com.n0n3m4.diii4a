@@ -532,5 +532,7 @@
     <string name="path_">Path: </string>
     <string name="author_">Author: </string>
     <string name="description_">Description: </string>
+    <string name="expand_all">Expand all</string>
+    <string name="collapse_all">Collapse all</string>
 
 </resources>
