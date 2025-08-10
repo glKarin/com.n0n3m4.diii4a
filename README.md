@@ -7,14 +7,14 @@
 )](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/win_linux_testing)  
 **idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
 #### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
-##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic/Xash3D on Android  
+##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic on Android  
 #### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版  
-##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部/FTEQW/星球大战:绝地武士/英雄萨姆/Xash3D 安卓移植版  
+##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部/FTEQW/星球大战:绝地武士/英雄萨姆 安卓移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan67(luyiping)  
+1.1.0harmattan68(luyiping)  
 **Latest update:**
-2025-05-08  
+2025-08-09  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -76,14 +76,13 @@ GPLv3
 | Quake II | [Yamagi Quake II](https://github.com/yquake2/yquake2) | - | 1.1/3.2/Vulkan | ctf<br/>rogue<br/>xatrix<br/>zaero |
 | Quake I | [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces) | - | 2.0 |  |
 | GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | 4.14.1 | 2.0/3.2/Vulkan |  |
-| Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) Omni-Bot support | 2.83.1 | 1.1 |  |
-| RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.0/5.1 | 1.1 |  |
+| Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) Omni-Bot support | 2.83.2 | 1.1 |  |
+| RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.2/5.1 | 1.1 |  |
 | FTEQW | [FTEQW](https://www.fteqw.org) |  | 3.2/Vulkan |  |
 | STAR WARS™ Jedi Knight - Jedi Academy™ | [OpenJK](https://github.com/JACoders/OpenJK) |  | 1.1 |  |
 | STAR WARS™ Jedi Knight II - Jedi Outcast™ | [OpenJK](https://github.com/JACoders/OpenJK) |  | 1.1 |  |
 | Serious Sam Classic : The First Encounter | [SamTFE](https://github.com/tx00100xt/SeriousSamClassic) |  | 1.1 |  |
 | Serious Sam Classic : The Second Encounter | [SamTSE](https://github.com/tx00100xt/SeriousSamClassic) |  | 1.1 |  |
-| Xash3D | [Xash3D](https://github.com/FWGS/xash3d-fwgs) |  | 1.1/2.0/3.0 | [CS16-client](https://github.com/Velaron/cs16-client) |
 
 ----------------------------------------------------------------------------------
 
@@ -101,7 +100,6 @@ Tag with `-free` only for F-Droid update.
 | Android min version(because ffmpeg) |   4.4  |   7.0   |
 | Ouya TV                             |   Yes  |    No   |
 | Khronos Vulkan validation layer     |   Yes  |    No   |
-| Xash3D built-in game libraries      |   Yes  |    No   |
 
 ----------------------------------------------------------------------------------
 
@@ -121,15 +119,14 @@ Tag with `-free` only for F-Droid update.
 
 > ### Update
 
-> 1.1.0harmattan67 (2025-05-08)
+> 1.1.0harmattan68 (2025-08-09)
 
-* Add Serious Sam Classic The First Encounter(game standalone directory named `serioussamtfe`) and Serious Sam Classic The Second Encounter(game standalone directory named `serioussamtse`) support. More view in [SeriousSamClassic](https://github.com/tx00100xt/SeriousSamClassic).
-* Add Xash3D and Counter-Strike 1.6(need extract CS1.6 extras resource on launcher first) support, game standalone directory named `xash3d`, more view in [xash3d](https://github.com/FWGS/xash3d-fwgs) and [cs16-client](https://github.com/Velaron/cs16-client).
-
-----------------------------------------------------------------------------------
-
-* 新增英雄萨姆: 第一次遭遇(游戏独立文件夹名为`serioussamtfe`)和英雄萨姆: 第二次遭遇(游戏独立文件夹名为`serioussamtse`)支持. 更多详情[SeriousSamClassic](https://github.com/tx00100xt/SeriousSamClassic).
-* 新增Xash3D和反恐精英1.6(需要先在启动器提取CS1.6额外资源)支持, 游戏独立文件夹名为`xash3d`, 更多详情[xash3d](https://github.com/FWGS/xash3d-fwgs)和[cs16-client](https://github.com/Velaron/cs16-client).
+* Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.2, fix Omni-bot initialization.
+* Fix game controller, and add game controller configure on launcher `CONTROLS` tab.
+* Add more alphabet on-screen buttons, and add `cs16-client` and `source-engine` on-screen button theme.
+* Add load external game library support on Xash3D.
+* Add built-in soft keyboard support.
+* Update RealRTCW version to 5.2, version 5.1 will be removed on next release.
 
 ----------------------------------------------------------------------------------
 

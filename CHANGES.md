@@ -2,6 +2,17 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan68 (2025-08-09)
+
+* Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.2, fix Omni-bot initialization.
+* Fix game controller, and add game controller configure on launcher `CONTROLS` tab.
+* Add more alphabet on-screen buttons, and add `cs16-client` and `source-engine` on-screen button theme.
+* Add load external game library support on Xash3D.
+* Add built-in soft keyboard support.
+* Update RealRTCW version to 5.2, version 5.1 will be removed on next release.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan67 (2025-05-08)
 
 * Add Serious Sam Classic: The First Encounter(game standalone directory named `serioussamtfe`) and Serious Sam Classic: The Second Encounter(game standalone directory named `serioussamtse`) support. More view in [SeriousSamClassic](https://github.com/tx00100xt/SeriousSamClassic).

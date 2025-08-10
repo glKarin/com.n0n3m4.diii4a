@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
-String[] ABIFILTERS = [
+String[] ABIFILTERS = [       
+	"arm64-v8a",
         "armeabi-v7a",
-        "arm64-v8a"
         /*, "armeabi", "x86", "x86_64"*/
 ]
 
@@ -43,9 +43,9 @@ android {
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
 
-/*        ndk {
+        /*ndk {
             moduleName "q3eloader"
-            abiFilters ABIFILTERS
+            abiFilters abifilters
         }*/
         externalNativeBuild {
             cmake {
