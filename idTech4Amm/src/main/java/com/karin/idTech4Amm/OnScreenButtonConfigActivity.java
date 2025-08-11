@@ -60,6 +60,7 @@ public class OnScreenButtonConfigActivity extends Activity
     private Map<Integer, String> m_sliderStyleMap;
     private Map<Integer, String> m_keyMap;
     private Map<Integer, String> m_discStyleMap;
+    private String m_theme = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -67,8 +68,13 @@ public class OnScreenButtonConfigActivity extends Activity
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
 
-        boolean o = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKey.LAUNCHER_ORIENTATION, false);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean o = preferences.getBoolean(PreferenceKey.LAUNCHER_ORIENTATION, false);
         ContextUtility.SetScreenOrientation(this, o ? 0 : 1);
+
+        m_theme = preferences.getString(Q3EPreference.CONTROLS_THEME, "");
+        if(null == m_theme)
+            m_theme = "";
         
         m_styleMap = BuildKeyValueMapFromResource(R.array.onscreen_button_style_values, R.array.onscreen_button_style_labels);
         m_sliderStyleMap = BuildKeyValueMapFromResource(R.array.onscreen_slider_style_values, R.array.onscreen_slider_style_labels);
@@ -276,7 +282,8 @@ public class OnScreenButtonConfigActivity extends Activity
                 {
                     String[] split = texture.split(";");
                     String texturePath = split[0];
-                    this.texture = BitmapFactory.decodeStream(getAssets().open(texturePath));
+                    //this.texture = BitmapFactory.decodeStream(getAssets().open(texturePath));
+                    this.texture = Q3EUtils.LoadControlBitmap(OnScreenButtonConfigActivity.this, texturePath, m_theme);
                 }
                 catch(Exception e)
                 {
@@ -661,59 +668,4 @@ public class OnScreenButtonConfigActivity extends Activity
             }
         });
     }
-
-/*    private void OpenWeaponPanelKeysSetting()
-    {
-        final String[] Keys = {
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "q", "0",
-        };
-        final StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < Keys.length; i++)
-        {
-            sb.append(Keys[i]);
-            if(i < Keys.length - 1)
-                sb.append(",");
-        }
-        final boolean[] states = new boolean[Keys.length];
-
-        final SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String curKeys = mPrefs.getString(Q3EPreference.WEAPON_PANEL_KEYS, sb.toString());
-        if(null != curKeys && !curKeys.isEmpty())
-        {
-            List<String> keyList = Arrays.asList(curKeys.split(","));
-            for(int i = 0; i < Keys.length; i++)
-            {
-                states[i] = keyList.contains(Keys[i]);
-            }
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.weapon_panel_keys);
-        builder.setMultiChoiceItems(Keys, states, null);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id)
-                {
-                    final ListView lst = ((AlertDialog)dialog).getListView();
-                    SparseBooleanArray list = lst.getCheckedItemPositions();
-                    String keyStr = "";
-                    if(list.size() > 0)
-                    {
-                        Adapter adapter = lst.getAdapter();
-                        List<Object> tsb = new ArrayList<>();
-                        for(int i = 0; i < list.size(); i++)
-                        {
-                            int key = list.keyAt(i);
-                            if(!list.get(key))
-                                continue;
-                            tsb.add(adapter.getItem(key));
-                        }
-                        keyStr = KStr.Join(tsb, ",");
-                    }
-                    mPrefs.edit().putString(Q3EPreference.WEAPON_PANEL_KEYS, keyStr).commit();
-                }
-            });
-        builder.setNegativeButton(R.string.cancel, null);
-        AlertDialog dialog = builder.create();
-        dialog.show();
-	}*/
 }

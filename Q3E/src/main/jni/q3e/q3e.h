@@ -11,13 +11,25 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject
   (JNIEnv *, jclass, jobject);
 
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init
-  (JNIEnv *, jclass, jstring, jstring, jint, jint, jstring, jstring, jstring, jobject, jint, jint, jint, jint, jboolean, jint, jboolean, jboolean, jint, jstring, jboolean, jint, jboolean, jboolean);
+  (JNIEnv *, jclass, jstring, jstring, jint, jint, jstring, jstring, jstring, jobject, jint, jint, jint, jint, jboolean, jint, jboolean, jboolean, jint, jstring, jboolean, jint, jboolean, jint, jboolean);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent
   (JNIEnv *, jclass, jint, jint, jint);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent
   (JNIEnv *, jclass, jfloat, jfloat);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMouseEvent
+(JNIEnv *, jclass, jfloat, jfloat);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendTextEvent
+(JNIEnv *, jclass, jstring);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendCharEvent
+(JNIEnv *, jclass, jint);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendWheelEvent
+        (JNIEnv *, jclass, jfloat, jfloat);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y);
   
@@ -45,6 +57,16 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMotionEvent
 (JNIEnv *, jclass, jfloat, jfloat);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMouseEvent
+(JNIEnv *, jclass, jfloat, jfloat);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushTextEvent(JNIEnv *env, jclass clazz, jstring text);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushCharEvent(JNIEnv *env, jclass clazz, jint ch);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushWheelEvent
+        (JNIEnv *, jclass, jfloat, jfloat);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit
         (JNIEnv *, jclass, jint, jint);

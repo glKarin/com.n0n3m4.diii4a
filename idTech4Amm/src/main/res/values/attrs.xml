@@ -11,5 +11,14 @@
     <declare-styleable name="Divider">
         <attr name="label" format="string"/>
         <attr name="lineColor" format="color"/>
+        <attr name="typeface" format="string"/>
+        <attr name="textStyle" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="SelectDialogPreference">
+        <attr name="entries" format="reference" />
+        <attr name="entryValues" format="reference" />
+        <attr name="positiveManually" format="boolean"/>
+        <attr name="resetDefault" format="boolean"/>
     </declare-styleable>
 </resources>

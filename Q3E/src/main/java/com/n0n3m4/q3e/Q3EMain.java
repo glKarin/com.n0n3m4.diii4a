@@ -24,12 +24,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -45,6 +47,8 @@ import com.n0n3m4.q3e.karin.KMouseCursor;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTechCommand;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Q3EMain extends Activity
 {
@@ -64,6 +68,11 @@ public class Q3EMain extends Activity
     @SuppressLint("StaticFieldLeak")
     public static Q3EGameHelper  gameHelper;
 
+    private       Q3EKeyboard keyboard;
+    private static final int VIEW_BASE_Z = 100;
+
+    public final Q3EPermissionRequest permissionRequest = new Q3EPermissionRequest();
+
     /*
     Intent::extras
     game: game type
@@ -73,7 +82,11 @@ public class Q3EMain extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
+        KLog.D("UI thread: " + Thread.currentThread().getId());
+
         Q3E.activity = this;
+
+        keyboard = new Q3EKeyboard(this);
 
         gameHelper = new Q3EGameHelper();
         gameHelper.SetContext(this);
@@ -149,24 +162,7 @@ public class Q3EMain extends Activity
     {
         super.onAttachedToWindow();
 
-        if(mControlGLSurfaceView != null)
-        {
-            View toolbar = mControlGLSurfaceView.Toolbar();
-            if(toolbar != null)
-            {
-                if(m_coverEdges && !m_portrait)
-                {
-                    int x = Q3EUtils.GetEdgeHeight(this, true);
-                    if(x != 0)
-                        toolbar.setX(x);
-                }
-                int[] size = Q3EUtils.GetNormalScreenSize(this);
-                ViewGroup.LayoutParams layoutParams = toolbar.getLayoutParams();
-                layoutParams.width = size[0];
-                toolbar.setLayoutParams(layoutParams);
-                //mainLayout.requestLayout();
-            }
-        }
+        keyboard.onAttachedToWindow();
     }
 
     @Override
@@ -209,6 +205,7 @@ public class Q3EMain extends Activity
         }
         if(m_initView)
             Q3EUtils.CloseVKB(mGLSurfaceView);
+        keyboard.OnPause();
     }
 
     @Override
@@ -241,7 +238,12 @@ public class Q3EMain extends Activity
         if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT && m_portrait)
         {
             InitView();
+            //keyboard.onAttachedToWindow(m_offsetY);
         }
+/*        else if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && !m_portrait)
+        {
+            keyboard.onAttachedToWindow();
+        }*/
     }
 
     @Override
@@ -360,8 +362,16 @@ public class Q3EMain extends Activity
         if(Q3EUtils.q3ei.function_key_toolbar)
         {
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
-            View key_toolbar = mControlGLSurfaceView.CreateToolbar();
+            View key_toolbar = keyboard.CreateToolbar();
             mainLayout.addView(key_toolbar, params);
+            Q3EUtils.SetViewZ(key_toolbar, VIEW_BASE_Z + 3);
+        }
+        if(Q3EUtils.q3ei.builtin_virtual_keyboard)
+        {
+            params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            View vkb = keyboard.CreateBuiltInVKB();
+            mainLayout.addView(vkb, params);
+            Q3EUtils.SetViewZ(vkb, VIEW_BASE_Z + 2);
         }
 
         if(m_renderMemStatus > 0) //k
@@ -369,6 +379,7 @@ public class Q3EMain extends Activity
             memoryUsageText = new KDebugTextView(mainLayout.getContext());
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             mainLayout.addView(memoryUsageText, params);
+            Q3EUtils.SetViewZ(memoryUsageText, VIEW_BASE_Z + 1);
             memoryUsageText.setTypeface(Typeface.MONOSPACE);
         }
     }
@@ -406,8 +417,16 @@ public class Q3EMain extends Activity
         if(Q3EUtils.q3ei.function_key_toolbar)
         {
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
-            View key_toolbar = mControlGLSurfaceView.CreateToolbar();
+            View key_toolbar = keyboard.CreateToolbar();
             mainLayout.addView(key_toolbar, params);
+            Q3EUtils.SetViewZ(key_toolbar, VIEW_BASE_Z + 3);
+        }
+        if(Q3EUtils.q3ei.builtin_virtual_keyboard)
+        {
+            params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            View vkb = keyboard.CreateBuiltInVKB();
+            mainLayout.addView(vkb, params);
+            Q3EUtils.SetViewZ(vkb, VIEW_BASE_Z + 2);
         }
 
         if(m_renderMemStatus > 0) //k
@@ -418,10 +437,13 @@ public class Q3EMain extends Activity
             params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
             mainLayout.addView(memoryUsageText, params);
+            Q3EUtils.SetViewZ(memoryUsageText, VIEW_BASE_Z + 1);
             memoryUsageText.setTypeface(Typeface.MONOSPACE);
 
             memoryUsageText.Start(m_renderMemStatus * 1000);
         }
+
+        keyboard.onAttachedToWindow(m_offsetY);
     }
 
     @Override
@@ -457,6 +479,13 @@ public class Q3EMain extends Activity
                 return false;
             }
         }
+        else if(Q3EUtils.q3ei.isSource && Q3EGlobals.IsFDroidVersion())
+        {
+            Toast.makeText(this, "F-Droid version not support Source-Engine game, you can install Github version!", Toast.LENGTH_LONG).show();
+            finish();
+            Q3EUtils.RunLauncher(this);
+            return false;
+        }
         return true;
     }
 
@@ -483,6 +512,7 @@ public class Q3EMain extends Activity
         {
             Q3E.GAME_VIEW_WIDTH = width;
             Q3E.GAME_VIEW_HEIGHT = height;
+            Q3E.CalcRatio();
         }
     }
 
@@ -490,9 +520,6 @@ public class Q3EMain extends Activity
     {
         if(null == mouseCursor)
         {
-            Q3E.widthRatio = (float) Q3E.GAME_VIEW_WIDTH / (float) Q3E.surfaceWidth;
-            Q3E.heightRatio = (float) Q3E.GAME_VIEW_HEIGHT / (float) Q3E.surfaceHeight;
-
             mouseCursor = new KMouseCursor(this);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(KMouseCursor.WIDTH, KMouseCursor.HEIGHT);
             mainLayout.addView(mouseCursor, params);
@@ -501,18 +528,85 @@ public class Q3EMain extends Activity
 
     public void SetMouseCursorVisible(boolean visible)
     {
-        MakeMouseCursor();
-        mouseCursor.SetVisible(visible);
+        if(mControlGLSurfaceView.IsUsingMouse())
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mControlGLSurfaceView.ShowCursor(visible);
+            }
+        }
+        else
+        {
+            MakeMouseCursor();
+            mouseCursor.SetVisible(visible);
+        }
     }
 
     public void SetMouseCursorPosition(int x, int y)
     {
+        if(mControlGLSurfaceView.IsUsingMouse())
+            return;
         MakeMouseCursor();
-        if(Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth && Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight)
+        if(Q3E.IsOriginalSize())
             mouseCursor.SetPosition(x, y + m_offsetY);
         else
         {
-            mouseCursor.SetPosition((int) ((float) x * Q3E.widthRatio), (int) ((float) y * Q3E.heightRatio) + m_offsetY);
+            mouseCursor.SetPosition(Q3E.LogicalToPhysicsX(x), Q3E.LogicalToPhysicsY(y) + m_offsetY);
+        }
+    }
+
+    public Q3EKeyboard GetKeyboard()
+    {
+        return keyboard;
+    }
+
+    public RelativeLayout GetMainLayout()
+    {
+        return mainLayout;
+    }
+
+    public boolean IsCoverEdges()
+    {
+        return m_coverEdges;
+    }
+
+    public boolean IsPortraint()
+    {
+        return m_portrait;
+    }
+
+    public void RequestPermission(String permission, int requestCode) {
+        permissionRequest.Request(permission, requestCode);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M/* 23 *//* Android 6.0 (M) */) {
+            KLog.I("Native request permission: " + permission + " with request code " +  requestCode + " -> " + true);
+            synchronized(permissionRequest) {
+                permissionRequest.Result(true);
+                permissionRequest.notifyAll();
+            }
+            return;
+        }
+
+        if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{ permission }, requestCode);
+        } else {
+            KLog.I("Native request permission: " + permission + " with request code " +  requestCode + " has granted");
+            synchronized(permissionRequest) {
+                permissionRequest.Result(true);
+                permissionRequest.notifyAll();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(permissionRequest.requestCode == requestCode && grantResults.length > 0)
+        {
+            boolean result = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
+            KLog.I("Native request permission: " + permissions[0] + " with request code " +  requestCode + " -> " + result);
+            synchronized(permissionRequest) {
+                permissionRequest.Result(result);
+                permissionRequest.notifyAll();
+            }
         }
     }
 }

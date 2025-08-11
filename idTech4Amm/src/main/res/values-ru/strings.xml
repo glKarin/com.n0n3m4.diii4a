@@ -31,8 +31,6 @@
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Показатель зеркальности света</string>
     <string name="sound">Выбор звука(s_driver)</string>
     <string name="load_quicksave_when_start_game">Загружать автосохранение при запуске игры</string>
-    <string name="edit_autoexec_cfg">Редактировать autoexec.cfg</string>
-    <string name="edit_doomconfig_cfg">Редактировать DoomConfig.cfg</string>
     <string name="note_gamepads_keyboards_must_be_configured_in_game_like_on_pc_not_here">Примечание: Геймпады/Клавиатуры должны быть настроены в игре (как на ПК), а не здесь.</string>
     <string name="configure_on_screen_controls">Настройки управления</string>
     <string name="on_screen_button_setting">Настройки кнопок</string>
@@ -141,6 +139,7 @@
     <string name="graphics">Графика</string>
     <string name="controls">Управление</string>
     <string name="do_you_want_to_support_the_developer">Хотите поддержать разработчика?</string>
+    <string name="do_you_want_to_support_the_developer_text">idTech4A++ это полностью открытый и бесплатный проект, поэтому вы можете получить это приложение бесплатно, не платя никаких средств, а также не нужно делать никаких пожертвований этому приложению, все ссылки на пожертвования были удалены.\nСпасибо за вашу поддержку.</string>
     <string name="donate_to">Пожертвовать</string>
     <string name="more_apps_in">Больше приложений в</string>
     <string name="dont_ask">Закрыть</string>
@@ -176,7 +175,7 @@
     <string name="choose_data_folder">Выберите папку данных</string>
     <string name="choose_current_directory">Выберите текущий каталог</string>
     <string name="unset">Отменить</string>
-    <string name="edit_config_file">Редактировать файл конфигурации</string>
+    <string name="edit_config_file">Редактировать конфиг</string>
     <string name="operation">Операция</string>
     <string name="start">Старт</string>
     <string name="language">Язык/Language</string>
@@ -357,7 +356,6 @@
     <string name="force_delete_vertex_buffer_on_every_end_frame">Принудительное удаление буфера вершин в каждом конечном кадре</string>
     <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">Удаляет буфер вершин, может быть медленнее, но безопаснее для памяти</string>
     <string name="find_game_library_in_game_data_directory">Найти игровую библиотеку в каталоге игры</string>
-    <string name="using_external_game_library">Имя файла библиотеки игры: arm64 = `gameaarch64.so` или `libgameaarch64.so`; arm32 = `gamearm.so` или `libgamearm.so`</string>
     <string name="perfected_doom_3">Perfected Doom 3</string>
     <string name="perfected_doom_3_resurrection_of_evil">Perfected Doom 3:Resurrection of Evil</string>
     <string name="nolighting">Без освещения</string>
@@ -386,6 +384,8 @@
     <string name="samtse">SamTSE</string>
     <string name="xash3d">Xash3D</string>
     <string name="xash3d_base">Xash3D</string>
+    <string name="sourceengine">Source Engine</string>
+    <string name="sourceengine_base">Source Engine</string>
     <string name="input_event_queue">Входная очередь событий</string>
     <string name="choose_input_event_queue_scheme">Выберите схему очереди входных событий</string>
     <string name="filter">Фильтр</string>
@@ -495,5 +495,41 @@
     <string name="portrait_orientation_screen">Портретная ориентация экрана</string>
     <string name="renderer_ref">Рендерер(ref)</string>
     <string name="server_client_sv_cl">Сервер/Клиент(sv_cl)</string>
+    <string name="halflife_2_base">Half-Life 2</string>
+    <string name="css_base">Counter-Strike: Source</string>
+    <string name="portal_base">Portal</string>
+    <string name="dod_base">Day of Defeat: Source</string>
+    <string name="halflife_2_ep1_base">Half-Life 2: Episodic 1</string>
+    <string name="halflife_2_ep2_base">Half-Life 2: Episodic 2</string>
+    <string name="halflife_2_mp_base">Half-Life 2: Deathmatch</string>
+    <string name="halflife_1_source_base">Half-Life 1: Source</string>
+    <string name="halflife_1_mp_source_base">Half-Life 1 Deathmatch: Source</string>
+    <string name="use_builtin_virtual_keyboard">Использовать встроенную виртуальную клавиатуру</string>
+    <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">Использовать встроенную виртуальную клавиатуру вместо системного метода ввода клавиатуры</string>
+    <string name="using_external_game_library">Имя файла библиотеки игры в каталоге мода: arm64 = `gameaarch64.so`; arm32 = `gamearm.so`</string>
+    <string name="using_external_game_library_xash3d">Путь к библиотеке игры в каталоге мода: arm64 = `lib/arm64-v8a/`; arm32 = `lib/armeabi-v7a/`.\nклиентская библиотека может быть установлена с помощью `-clientlib` в команде, по умолчанию `client.so`; серверная библиотека может быть установлена с помощью `-dll` в команде, по умолчанию `server.so`; библиотека меню может быть установлена с помощью `-menulib` в команде, по умолчанию `menu.so`.</string>
+    <string name="configure_controller">Настройки контроллера</string>
+    <string name="dpad_as_arrow_keys">DPad как клавиши со стрелками</string>
+    <string name="dpad_keys_always_as_arrow_keys">DPad клавиши всегда как клавиши со стрелками</string>
+    <string name="left_joystick_dead_zone">Мертвая зона левого джойстика(0 - 1)</string>
+    <string name="right_joystick_dead_zone">Мертвая зона правого джойстика(0 - 1)</string>
+    <string name="right_joystick_sensitivity">Чувствительность правого джойстика(0.1 - 10)</string>
+    <string name="left_joystick_dead_zone_summary">Минимальное значение оси левого джойстика(по умолчанию 0.01)</string>
+    <string name="right_joystick_dead_zone_summary">Минимальное значение оси правого джойстика(по умолчанию 0)</string>
+    <string name="right_joystick_sensitivity_summary">Правый джойстик эмулирует чувствительность мыши(по умолчанию 1)</string>
+    <string name="joystick_dpad">Джойстик/DPad</string>
+    <string name="controller_configure">Настройки контроллера</string>
+    <string name="reset_controller_config">Сбросить конфигурацию контроллера?</string>
+    <string name="controller_configure_has_reset">Конфигурация контроллера сброшена.</string>
+    <string name="reset_all_controller_configure">Сбросить все настройки контроллера</string>
+    <string name="automatic">Автоматически</string>
+    <string name="sdl_audio_driver">Аудиодрайвер SDL</string>
+    <string name="install_shortcut_tips_if_creating_failed">Возможно, потребуется вручную предоставить разрешение на установку ярлыка в системе на некоторых устройствах, если создание не удалось.</string>
+    <string name="name_">Имя: </string>
+    <string name="path_">Путь: </string>
+    <string name="author_">Автор: </string>
+    <string name="description_">Описание: </string>
+    <string name="expand_all">Expand all</string>
+    <string name="collapse_all">Collapse all</string>
 
 </resources>

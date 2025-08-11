@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res/com.karin.idTech4Amm"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+
+    <com.karin.idTech4Amm.widget.Divider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        myapp:label="@string/sourceengine"
+        myapp:lineColor="@color/launcher_divider_color" />
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:text="@string/server_client_sv_cl" />
+    <RadioGroup
+            android:id="@+id/source_sv_cl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+        <RadioButton
+                android:id="@+id/source_sv_cl_hl2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="hl2" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_cstrike"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="cstrike" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_portal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="portal" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_dod"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="dod" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_episodic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="episodic" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_hl2mp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hl2mp" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_hl1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hl1" />
+        <RadioButton
+                android:id="@+id/source_sv_cl_hl1mp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hl1mp" />
+    </RadioGroup>
+
+</LinearLayout>

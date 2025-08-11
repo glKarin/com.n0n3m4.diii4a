@@ -430,10 +430,6 @@ typedef enum {
 
 	// New in IORTCW
 	G_ALLOC = 900
-#ifdef __ANDROID__
-	,
-	G_REQUIRE_MEMORY_POOL // require fixed address memory pool from client for game
-#endif
 } gameImport_t;
 
 

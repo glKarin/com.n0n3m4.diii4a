@@ -30,9 +30,32 @@ public final class SupportDeveloperFunc extends GameLauncherFunc
 
     public void run()
     {
-        Support_fdroid();
+        Support_free();
     }
 
+    private void Support_free()
+    {
+        AlertDialog.Builder bldr = new AlertDialog.Builder(m_gameLauncher);
+        bldr.setTitle(R.string.do_you_want_to_support_the_developer);
+        bldr.setMessage(R.string.do_you_want_to_support_the_developer_text);
+        bldr.setPositiveButton(R.string.ok, new AlertDialog.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        bldr.setNegativeButton(R.string.dont_ask, new AlertDialog.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dl = bldr.create();
+        //dl.setCancelable(false);
+        dl.show();
+    }
+
+    /*
     private void Support_fdroid()
     {
         AlertDialog.Builder bldr=new AlertDialog.Builder(m_gameLauncher);
@@ -67,7 +90,6 @@ public final class SupportDeveloperFunc extends GameLauncherFunc
 
     private void Support_n0n3m4()
     {
-        /*
         AlertDialog.Builder bldr=new AlertDialog.Builder(m_gameLauncher);
         bldr.setTitle(R.string.do_you_want_to_support_the_developer);
         bldr.setPositiveButton("Donate by PayPal", new AlertDialog.OnClickListener() {
@@ -91,6 +113,6 @@ public final class SupportDeveloperFunc extends GameLauncherFunc
         AlertDialog dl=bldr.create();
         dl.setCancelable(false);
         dl.show();
-        */
     }
+    */
 }

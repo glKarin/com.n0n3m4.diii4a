@@ -53,6 +53,7 @@ public final class CreateCommandShortcutFunc extends GameLauncherFunc
             Toast_long(Tr(R.string.permission_not_granted, "android.Manifest.permission.INSTALL_SHORTCUT"));
         if (res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
+        Toast_short(R.string.install_shortcut_tips_if_creating_failed);
         run();
     }
 

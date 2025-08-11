@@ -19,6 +19,8 @@
 
 package com.n0n3m4.q3e;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -26,7 +28,12 @@ import android.view.MotionEvent;
 import com.n0n3m4.q3e.device.Q3EOuya;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+@SuppressWarnings("unused")
 public class Q3EKeyCodes
 {
 
@@ -107,11 +114,6 @@ public class Q3EKeyCodes
         public static final int K_MWHEELDOWN = 183;
         public static final int K_MWHEELUP   = 184;
 
-        public static final int J_LEFT  = 'a';
-        public static final int J_RIGHT = 'd';
-        public static final int J_UP    = K_UPARROW;
-        public static final int J_DOWN  = K_DOWNARROW;
-
         public static final int K_KP_1 = K_KP_END;
         public static final int K_KP_2 = K_KP_DOWNARROW;
         public static final int K_KP_3 = K_KP_PGDN;
@@ -123,6 +125,8 @@ public class Q3EKeyCodes
         public static final int K_KP_0 = K_KP_INS;
 
         public static final int K_GRAVE      = KeyCodesGeneric.K_GRAVE;
+        public static final int K_LBRACKET    = KeyCodesGeneric.K_LBRACKET;
+        public static final int K_RBRACKET    = KeyCodesGeneric.K_RBRACKET;
     }
 
     // code/client/keycodes.h <- Q3
@@ -200,11 +204,6 @@ public class Q3EKeyCodes
         public static final int K_MWHEELDOWN = 183;
         public static final int K_MWHEELUP   = 184;
 
-        public static final int J_LEFT  = 'a';
-        public static final int J_RIGHT = 'd';
-        public static final int J_UP    = K_UPARROW;
-        public static final int J_DOWN  = K_DOWNARROW;
-
         public static final int K_KP_1 = K_KP_END;
         public static final int K_KP_2 = K_KP_DOWNARROW;
         public static final int K_KP_3 = K_KP_PGDN;
@@ -216,6 +215,8 @@ public class Q3EKeyCodes
         public static final int K_KP_0 = K_KP_INS;
 
         public static final int K_GRAVE      = KeyCodesGeneric.K_GRAVE;
+        public static final int K_LBRACKET    = KeyCodesGeneric.K_LBRACKET;
+        public static final int K_RBRACKET    = KeyCodesGeneric.K_RBRACKET;
     }
 
     // neo/framework/KeyInput.h
@@ -306,11 +307,6 @@ public class Q3EKeyCodes
         public static final int K_MWHEELDOWN = 195;
         public static final int K_MWHEELUP   = 196;
 
-        public static final int J_LEFT  = 'a';
-        public static final int J_RIGHT = 'd';
-        public static final int J_UP    = K_UPARROW;
-        public static final int J_DOWN  = K_DOWNARROW;
-
         public static final int K_KP_1 = K_KP_END;
         public static final int K_KP_2 = K_KP_DOWNARROW;
         public static final int K_KP_3 = K_KP_PGDN;
@@ -322,6 +318,8 @@ public class Q3EKeyCodes
         public static final int K_KP_0 = K_KP_INS;
 
         public static final int K_GRAVE      = KeyCodesGeneric.K_GRAVE;
+        public static final int K_LBRACKET    = KeyCodesGeneric.K_LBRACKET;
+        public static final int K_RBRACKET    = KeyCodesGeneric.K_RBRACKET;
     }
 
     // neo/sys/sys_public.h
@@ -462,14 +460,6 @@ public class Q3EKeyCodes
         public static final int K_MOUSE8      = 293;
         public static final int K_MWHEELDOWN  = 302; // 294;
         public static final int K_MWHEELUP    = 303; // 295;
-
-        //karin: change to a/d
-//        public static final int J_LEFT = K_LEFTARROW;
-//        public static final int J_RIGHT = K_RIGHTARROW;
-        public static final int J_LEFT  = K_A;
-        public static final int J_RIGHT = K_D;
-        public static final int J_UP    = K_UPARROW;
-        public static final int J_DOWN  = K_DOWNARROW;
     }
 
     // keys.h
@@ -559,12 +549,9 @@ public class Q3EKeyCodes
         public static final int K_MOUSE7     = 520;
         public static final int K_MOUSE8     = 521;
 
-        public static final int J_LEFT  = 'a';
-        public static final int J_RIGHT = 'd';
-        public static final int J_UP    = K_UPARROW;
-        public static final int J_DOWN  = K_DOWNARROW;
-
         public static final int K_GRAVE      = KeyCodesGeneric.K_GRAVE;
+        public static final int K_LBRACKET    = KeyCodesGeneric.K_LBRACKET;
+        public static final int K_RBRACKET    = KeyCodesGeneric.K_RBRACKET;
     }
 
     private static final int SDLK_SCANCODE_MASK = (1 << 30);
@@ -1532,14 +1519,6 @@ public class Q3EKeyCodes
 //        public static final int K_MOUSE8 = SDL_KeyCode.;
         public static final int K_MWHEELDOWN  = SDL_Mouse.SDL_BUTTON_X1;
         public static final int K_MWHEELUP    = SDL_Mouse.SDL_BUTTON_X2;
-
-        //karin: change to a/d
-//        public static final int J_LEFT = K_LEFTARROW;
-//        public static final int J_RIGHT = K_RIGHTARROW;
-        public static final int J_LEFT  = K_A;
-        public static final int J_RIGHT = K_D;
-        public static final int J_UP    = K_W; // K_UPARROW;
-        public static final int J_DOWN  = K_S; // K_DOWNARROW;
     }
 
     ;
@@ -1613,11 +1592,6 @@ public class Q3EKeyCodes
         public static final int K_MWHEELDOWN = 139;
         public static final int K_MWHEELUP   = 137;
 
-        public static final int J_LEFT  = 'a';
-        public static final int J_RIGHT = 'd';
-        public static final int J_UP    = K_UPARROW;
-        public static final int J_DOWN  = K_DOWNARROW;
-
         public static final int K_KP_1 = K_KP_END;
         public static final int K_KP_2 = K_KP_DOWNARROW;
         public static final int K_KP_3 = K_KP_PGDN;
@@ -1629,68 +1603,69 @@ public class Q3EKeyCodes
         public static final int K_KP_0 = K_KP_INS;
 
         public static final int K_GRAVE      = KeyCodesGeneric.K_GRAVE;
+        public static final int K_LBRACKET    = 40;
+        public static final int K_RBRACKET    = 41;
     }
 
     ;
 
-    public static class KeyCodesAndroid
-    {
-        public static final int K_TAB    = KeyEvent.KEYCODE_TAB;
-        public static final int K_ENTER  = KeyEvent.KEYCODE_ENTER;
+    public static class KeyCodesAndroid {
+        public static final int K_TAB = KeyEvent.KEYCODE_TAB;
+        public static final int K_ENTER = KeyEvent.KEYCODE_ENTER;
         public static final int K_ESCAPE = KeyEvent.KEYCODE_ESCAPE;
-        public static final int K_SPACE  = KeyEvent.KEYCODE_SPACE;
+        public static final int K_SPACE = KeyEvent.KEYCODE_SPACE;
 
         public static final int K_BACKSPACE = KeyEvent.KEYCODE_DEL;
 
         public static final int K_CAPSLOCK = KeyEvent.KEYCODE_CAPS_LOCK;
-        public static final int K_PAUSE    = KeyEvent.KEYCODE_BREAK;
+        public static final int K_PAUSE = KeyEvent.KEYCODE_BREAK;
 
-        public static final int K_UPARROW    = KeyEvent.KEYCODE_DPAD_UP;
-        public static final int K_DOWNARROW  = KeyEvent.KEYCODE_DPAD_DOWN;
-        public static final int K_LEFTARROW  = KeyEvent.KEYCODE_DPAD_LEFT;
+        public static final int K_UPARROW = KeyEvent.KEYCODE_DPAD_UP;
+        public static final int K_DOWNARROW = KeyEvent.KEYCODE_DPAD_DOWN;
+        public static final int K_LEFTARROW = KeyEvent.KEYCODE_DPAD_LEFT;
         public static final int K_RIGHTARROW = KeyEvent.KEYCODE_DPAD_RIGHT;
 
-        public static final int K_ALT   = KeyEvent.KEYCODE_ALT_LEFT;
-        public static final int K_CTRL  = KeyEvent.KEYCODE_CTRL_LEFT;
+        public static final int K_ALT = KeyEvent.KEYCODE_ALT_LEFT;
+        public static final int K_CTRL = KeyEvent.KEYCODE_CTRL_LEFT;
         public static final int K_SHIFT = KeyEvent.KEYCODE_SHIFT_LEFT;
-        public static final int K_INS   = KeyEvent.KEYCODE_INSERT;
-        public static final int K_DEL   = KeyEvent.KEYCODE_FORWARD_DEL;
-        public static final int K_PGDN  = KeyEvent.KEYCODE_PAGE_DOWN;
-        public static final int K_PGUP  = KeyEvent.KEYCODE_PAGE_UP;
-        public static final int K_HOME  = KeyEvent.KEYCODE_MOVE_HOME;
-        public static final int K_END   = KeyEvent.KEYCODE_MOVE_END;
+        public static final int K_INS = KeyEvent.KEYCODE_INSERT;
+        public static final int K_DEL = KeyEvent.KEYCODE_FORWARD_DEL;
+        public static final int K_PGDN = KeyEvent.KEYCODE_PAGE_DOWN;
+        public static final int K_PGUP = KeyEvent.KEYCODE_PAGE_UP;
+        public static final int K_HOME = KeyEvent.KEYCODE_MOVE_HOME;
+        public static final int K_END = KeyEvent.KEYCODE_MOVE_END;
 
-        public static final int K_F1  = KeyEvent.KEYCODE_F1;
-        public static final int K_F2  = KeyEvent.KEYCODE_F2;
-        public static final int K_F3  = KeyEvent.KEYCODE_F3;
-        public static final int K_F4  = KeyEvent.KEYCODE_F4;
-        public static final int K_F5  = KeyEvent.KEYCODE_F5;
-        public static final int K_F6  = KeyEvent.KEYCODE_F6;
-        public static final int K_F7  = KeyEvent.KEYCODE_F7;
-        public static final int K_F8  = KeyEvent.KEYCODE_F8;
-        public static final int K_F9  = KeyEvent.KEYCODE_F9;
+        public static final int K_F1 = KeyEvent.KEYCODE_F1;
+        public static final int K_F2 = KeyEvent.KEYCODE_F2;
+        public static final int K_F3 = KeyEvent.KEYCODE_F3;
+        public static final int K_F4 = KeyEvent.KEYCODE_F4;
+        public static final int K_F5 = KeyEvent.KEYCODE_F5;
+        public static final int K_F6 = KeyEvent.KEYCODE_F6;
+        public static final int K_F7 = KeyEvent.KEYCODE_F7;
+        public static final int K_F8 = KeyEvent.KEYCODE_F8;
+        public static final int K_F9 = KeyEvent.KEYCODE_F9;
         public static final int K_F10 = KeyEvent.KEYCODE_F10;
         public static final int K_F11 = KeyEvent.KEYCODE_F11;
         public static final int K_F12 = KeyEvent.KEYCODE_F12;
 
-        public static final int K_KP_HOME       = KeyEvent.KEYCODE_NUMPAD_7;
-        public static final int K_KP_UPARROW    = KeyEvent.KEYCODE_NUMPAD_8;
-        public static final int K_KP_PGUP       = KeyEvent.KEYCODE_NUMPAD_9;
-        public static final int K_KP_LEFTARROW  = KeyEvent.KEYCODE_NUMPAD_4;
-        public static final int K_KP_5          = KeyEvent.KEYCODE_NUMPAD_5;
+        public static final int K_KP_HOME = KeyEvent.KEYCODE_NUMPAD_7;
+        public static final int K_KP_UPARROW = KeyEvent.KEYCODE_NUMPAD_8;
+        public static final int K_KP_PGUP = KeyEvent.KEYCODE_NUMPAD_9;
+        public static final int K_KP_LEFTARROW = KeyEvent.KEYCODE_NUMPAD_4;
+        public static final int K_KP_5 = KeyEvent.KEYCODE_NUMPAD_5;
         public static final int K_KP_RIGHTARROW = KeyEvent.KEYCODE_NUMPAD_6;
-        public static final int K_KP_END        = KeyEvent.KEYCODE_NUMPAD_1;
-        public static final int K_KP_DOWNARROW  = KeyEvent.KEYCODE_NUMPAD_2;
-        public static final int K_KP_PGDN       = KeyEvent.KEYCODE_NUMPAD_3;
-        public static final int K_KP_ENTER      = KeyEvent.KEYCODE_NUMPAD_ENTER;
-        public static final int K_KP_INS        = KeyEvent.KEYCODE_NUMPAD_0;
-        public static final int K_KP_DEL        = KeyEvent.KEYCODE_NUMPAD_DOT; // A_PEROID
-        public static final int K_KP_SLASH      = KeyEvent.KEYCODE_NUMPAD_DIVIDE;
-        public static final int K_KP_MINUS      = KeyEvent.KEYCODE_NUMPAD_SUBTRACT;
-        public static final int K_KP_PLUS       = KeyEvent.KEYCODE_NUMPAD_ADD;
-        public static final int K_KP_NUMLOCK    = KeyEvent.KEYCODE_NUM_LOCK;
-        public static final int K_KP_STAR       = KeyEvent.KEYCODE_NUMPAD_MULTIPLY; // A_STAR
-        public static final int K_KP_EQUALS     = KeyEvent.KEYCODE_NUMPAD_EQUALS;
+        public static final int K_KP_END = KeyEvent.KEYCODE_NUMPAD_1;
+        public static final int K_KP_DOWNARROW = KeyEvent.KEYCODE_NUMPAD_2;
+        public static final int K_KP_PGDN = KeyEvent.KEYCODE_NUMPAD_3;
+        public static final int K_KP_ENTER = KeyEvent.KEYCODE_NUMPAD_ENTER;
+        public static final int K_KP_INS = KeyEvent.KEYCODE_NUMPAD_0;
+        public static final int K_KP_DEL = KeyEvent.KEYCODE_NUMPAD_DOT; // A_PEROID
+        public static final int K_KP_SLASH = KeyEvent.KEYCODE_NUMPAD_DIVIDE;
+        public static final int K_KP_MINUS = KeyEvent.KEYCODE_NUMPAD_SUBTRACT;
+        public static final int K_KP_PLUS = KeyEvent.KEYCODE_NUMPAD_ADD;
+        public static final int K_KP_NUMLOCK = KeyEvent.KEYCODE_NUM_LOCK;
+        public static final int K_KP_STAR = KeyEvent.KEYCODE_NUMPAD_MULTIPLY; // A_STAR
+        public static final int K_KP_EQUALS = KeyEvent.KEYCODE_NUMPAD_EQUALS;
 
         public static final int K_MOUSE1 = -MotionEvent.BUTTON_PRIMARY;
         public static final int K_MOUSE2 = -MotionEvent.BUTTON_SECONDARY;
@@ -1698,13 +1673,8 @@ public class Q3EKeyCodes
         public static final int K_MOUSE4 = -MotionEvent.BUTTON_BACK;
         public static final int K_MOUSE5 = -MotionEvent.BUTTON_FORWARD;
 
-        public static final int K_MWHEELDOWN = K_UPARROW;
-        public static final int K_MWHEELUP   = K_DOWNARROW;
-
-        public static final int J_LEFT  = K_LEFTARROW;
-        public static final int J_RIGHT = K_RIGHTARROW;
-        public static final int J_UP    = K_UPARROW;
-        public static final int J_DOWN  = K_DOWNARROW;
+        public static final int K_MWHEELDOWN = KeyEvent.KEYCODE_PAGE_DOWN;
+        public static final int K_MWHEELUP = KeyEvent.KEYCODE_PAGE_UP;
 
         public static final int K_KP_1 = K_KP_END;
         public static final int K_KP_2 = K_KP_DOWNARROW;
@@ -1755,8 +1725,49 @@ public class Q3EKeyCodes
         public static final int K_9 = KeyEvent.KEYCODE_9;
 
         public static final int K_GRAVE = KeyEvent.KEYCODE_GRAVE;
+        public static final int K_LBRACKET = KeyEvent.KEYCODE_LEFT_BRACKET;
+        public static final int K_RBRACKET = KeyEvent.KEYCODE_RIGHT_BRACKET;
 
         public static final boolean RAW = true;
+    }
+
+    public static class ControllerCodesAndroid
+    {
+        public static final int J_DPAD_UP = KeyEvent.KEYCODE_DPAD_UP;
+        public static final int J_DPAD_DOWN = KeyEvent.KEYCODE_DPAD_DOWN;
+        public static final int J_DPAD_LEFT = KeyEvent.KEYCODE_DPAD_LEFT;
+        public static final int J_DPAD_RIGHT = KeyEvent.KEYCODE_DPAD_RIGHT;
+        public static final int J_DPAD_CENTER = KeyEvent.KEYCODE_DPAD_CENTER;
+        public static final int J_BUTTON_A = KeyEvent.KEYCODE_BUTTON_A;
+        public static final int J_BUTTON_B = KeyEvent.KEYCODE_BUTTON_B;
+        public static final int J_BUTTON_C = KeyEvent.KEYCODE_BUTTON_C;
+        public static final int J_BUTTON_X = KeyEvent.KEYCODE_BUTTON_X;
+        public static final int J_BUTTON_Y = KeyEvent.KEYCODE_BUTTON_Y;
+        public static final int J_BUTTON_Z = KeyEvent.KEYCODE_BUTTON_Z;
+        public static final int J_BUTTON_1 = KeyEvent.KEYCODE_BUTTON_1;
+        public static final int J_BUTTON_2 = KeyEvent.KEYCODE_BUTTON_2;
+        public static final int J_BUTTON_3 = KeyEvent.KEYCODE_BUTTON_3;
+        public static final int J_BUTTON_4 = KeyEvent.KEYCODE_BUTTON_4;
+        public static final int J_BUTTON_5 = KeyEvent.KEYCODE_BUTTON_5;
+        public static final int J_BUTTON_6 = KeyEvent.KEYCODE_BUTTON_6;
+        public static final int J_BUTTON_7 = KeyEvent.KEYCODE_BUTTON_7;
+        public static final int J_BUTTON_8 = KeyEvent.KEYCODE_BUTTON_8;
+        public static final int J_BUTTON_9 = KeyEvent.KEYCODE_BUTTON_9;
+        public static final int J_BUTTON_10 = KeyEvent.KEYCODE_BUTTON_10;
+        public static final int J_BUTTON_11 = KeyEvent.KEYCODE_BUTTON_11;
+        public static final int J_BUTTON_12 = KeyEvent.KEYCODE_BUTTON_12;
+        public static final int J_BUTTON_13 = KeyEvent.KEYCODE_BUTTON_13;
+        public static final int J_BUTTON_14 = KeyEvent.KEYCODE_BUTTON_14;
+        public static final int J_BUTTON_15 = KeyEvent.KEYCODE_BUTTON_15;
+        public static final int J_BUTTON_16 = KeyEvent.KEYCODE_BUTTON_16;
+        public static final int J_BUTTON_START = KeyEvent.KEYCODE_BUTTON_START;
+        public static final int J_BUTTON_SELECT = KeyEvent.KEYCODE_BUTTON_SELECT;
+        public static final int J_BUTTON_L1 = KeyEvent.KEYCODE_BUTTON_L1;
+        public static final int J_BUTTON_R1 = KeyEvent.KEYCODE_BUTTON_R1;
+        public static final int J_BUTTON_L2 = KeyEvent.KEYCODE_BUTTON_L2;
+        public static final int J_BUTTON_R2 = KeyEvent.KEYCODE_BUTTON_R2;
+        public static final int J_BUTTON_L3 = KeyEvent.KEYCODE_BUTTON_THUMBL;
+        public static final int J_BUTTON_R3 = KeyEvent.KEYCODE_BUTTON_THUMBR;
     }
 
     ;
@@ -1859,121 +1870,70 @@ public class Q3EKeyCodes
         public static int K_KP_0;
 
         public static int K_GRAVE;
+        public static int K_LBRACKET;
+        public static int K_RBRACKET;
+
+        public static int J_DPAD_UP;
+        public static int J_DPAD_DOWN;
+        public static int J_DPAD_LEFT;
+        public static int J_DPAD_RIGHT;
+        public static int J_DPAD_CENTER;
+        public static int J_BUTTON_A;
+        public static int J_BUTTON_B;
+        public static int J_BUTTON_C;
+        public static int J_BUTTON_X;
+        public static int J_BUTTON_Y;
+        public static int J_BUTTON_Z;
+        public static int J_BUTTON_1;
+        public static int J_BUTTON_2;
+        public static int J_BUTTON_3;
+        public static int J_BUTTON_4;
+        public static int J_BUTTON_5;
+        public static int J_BUTTON_6;
+        public static int J_BUTTON_7;
+        public static int J_BUTTON_8;
+        public static int J_BUTTON_9;
+        public static int J_BUTTON_10;
+        public static int J_BUTTON_11;
+        public static int J_BUTTON_12;
+        public static int J_BUTTON_13;
+        public static int J_BUTTON_14;
+        public static int J_BUTTON_15;
+        public static int J_BUTTON_16;
+        public static int J_BUTTON_START;
+        public static int J_BUTTON_SELECT;
+        public static int J_BUTTON_L1;
+        public static int J_BUTTON_R1;
+        public static int J_BUTTON_L2;
+        public static int J_BUTTON_R2;
+        public static int J_BUTTON_L3;
+        public static int J_BUTTON_R3;
 
         public static boolean RAW = false;
     }
 
     ;
 
-    public static void InitRTCWKeycodes()
-    {
-        InitKeycodes(KeyCodesRTCW.class);
-    }
-
-    public static void InitRealRTCWKeycodes()
-    {
-        InitRTCWKeycodes();
-    }
-
-    public static void InitQ3Keycodes()
-    {
-        InitKeycodes(KeyCodesQ3.class);
-    }
-
-    public static void InitQ2Keycodes()
-    {
-        InitQ3Keycodes();
-    }
-
-    public static void InitETWKeycodes()
-    {
-        InitQ3Keycodes();
-    }
-
-    public static void InitFTEQWKeycodes()
-    {
-        InitQ3Keycodes();
-    }
-
     public static void InitD3Keycodes()
     {
         InitKeycodes(KeyCodesD3.class);
     }
 
-    public static void InitQ4Keycodes()
-    {
-        InitD3Keycodes();
-    }
-
-    public static void InitPreyKeycodes()
-    {
-        InitD3Keycodes();
-    }
-
-    public static void InitTDMKeycodes()
-    {
-        InitD3Keycodes();
-    }
-
-    public static void InitD3BFGKeycodes()
-    {
-        InitKeycodes(KeyCodesD3BFG.class);
-    }
-
-    public static void InitQ1Keycodes()
-    {
-        InitKeycodes(KeyCodesQ1.class);
-    }
-
-    public static void InitSDLKeycodes()
-    {
-        InitKeycodes(KeyCodesSDL.class);
-    }
-
-    public static void InitAndroidKeycodes()
-    {
-        InitKeycodes(KeyCodesAndroid.class);
-    }
-
-    public static void InitGZDOOMKeycodes()
-    {
-        InitSDLKeycodes();
-    }
-
-    public static void InitSamTFEKeycodes()
-    {
-        InitSDLKeycodes();
-    }
-
-    public static void InitSamTSEKeycodes()
-    {
-        InitSDLKeycodes();
-    }
-
-    public static void InitJKKeycodes()
-    {
-        InitKeycodes(KeyCodesJK.class);
-    }
-
-    public static void InitXash3DKeycodes()
-    {
-        InitKeycodes(KeyCodesAndroid.class);
-    }
-
     public static void InitKeycodes(Class<?> clazz)
     {
+        KeyCodes.RAW = false;
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Using key map: " + clazz.getName());
-        for(Field f : KeyCodes.class.getFields())
+        for(Field f : KeyCodes.class.getDeclaredFields())
         {
             try
             {
-                f.set(null, clazz.getField(f.getName()).get(null));
+                f.set(null, clazz.getDeclaredField(f.getName()).get(null));
             }
             catch(Exception ignored)
             {
                 try // else setup generic key codes
                 {
-                    f.set(null, KeyCodesGeneric.class.getField(f.getName()).get(null));
+                    f.set(null, KeyCodesGeneric.class.getDeclaredField(f.getName()).get(null));
                 }
                 catch(Exception ignored2)
                 {
@@ -1984,7 +1944,7 @@ public class Q3EKeyCodes
 
     public static int GetRealKeyCode(int keycodeGeneric)
     {
-        Field[] fields = KeyCodesGeneric.class.getFields();
+        Field[] fields = KeyCodesGeneric.class.getDeclaredFields();
         for(Field field : fields)
         {
             try
@@ -1993,9 +1953,10 @@ public class Q3EKeyCodes
                 if(key == keycodeGeneric)
                 {
                     String name = field.getName();
-                    Field f = KeyCodes.class.getField(name);
-                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Map virtual key: " + name + " = " + keycodeGeneric + " -> " + f.get(null));
-                    return (Integer) f.get(null);
+                    Field f = KeyCodes.class.getDeclaredField(name);
+                    Object o = f.get(null);
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Map virtual key: " + name + " = " + keycodeGeneric + " -> " + o);
+                    return (Integer) o;
                 }
             }
             catch(Exception ignored)
@@ -2005,6 +1966,7 @@ public class Q3EKeyCodes
         return keycodeGeneric;
     }
 
+    // UNUSED
     public static int[] GetRealKeyCodes(int[] keycodeGeneric)
     {
         int[] codes = new int[keycodeGeneric.length];
@@ -2013,6 +1975,7 @@ public class Q3EKeyCodes
         return codes;
     }
 
+    // Use in on-screen JoyStick
     public static void ConvertRealKeyCodes(int[] codes)
     {
         for(int i = 0; i < codes.length; i++)
@@ -2020,7 +1983,7 @@ public class Q3EKeyCodes
     }
 
 
-    public static int convertKeyCode(int keyCode, KeyEvent event)
+    public static int convertKeyCode(int keyCode, int uchar)
     {
         switch(keyCode)
         {
@@ -2031,17 +1994,6 @@ public class Q3EKeyCodes
                 return KeyCodes.K_F2;
             case KeyEvent.KEYCODE_VOLUME_UP:
                 return KeyCodes.K_F3;
-            // dpad
-            case KeyEvent.KEYCODE_DPAD_UP:
-                return KeyCodes.K_UPARROW;
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                return KeyCodes.K_DOWNARROW;
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                return KeyCodes.K_LEFTARROW;
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                return KeyCodes.K_RIGHTARROW;
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-                return KeyCodes.K_CTRL;
             case KeyEvent.KEYCODE_ENTER:
                 return KeyCodes.K_ENTER;
             case KeyEvent.KEYCODE_BACK:
@@ -2099,47 +2051,100 @@ public class Q3EKeyCodes
                 return KeyCodes.K_PGDN;
             case KeyEvent.KEYCODE_PAGE_UP:
                 return KeyCodes.K_PGUP;
+            // Controller
+            // dpad
+            case KeyEvent.KEYCODE_DPAD_UP:
+                return KeyCodes.K_UPARROW;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                return KeyCodes.K_DOWNARROW;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                return KeyCodes.K_LEFTARROW;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                return KeyCodes.K_RIGHTARROW;
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                return KeyCodes.K_CTRL;
+            // a b c x y z
             case KeyEvent.KEYCODE_BUTTON_A:
-                return 'c';
+                return KeyCodes.J_BUTTON_A;
             case KeyEvent.KEYCODE_BUTTON_B:
-                return 'r';
+                return KeyCodes.J_BUTTON_B;
             case KeyEvent.KEYCODE_BUTTON_X:
                 if(Q3EUtils.isOuya) return KeyCodes.K_ENTER;//No enter button on ouya
-                return KeyCodes.K_SPACE;//Why not?
+                return KeyCodes.J_BUTTON_X;//Why not?
             case KeyEvent.KEYCODE_BUTTON_Y:
-                return 'f';//RTCW use
+                return KeyCodes.J_BUTTON_Y;//RTCW use
             //These buttons are not so popular
             case KeyEvent.KEYCODE_BUTTON_C:
-                return 'a';//That's why here is a, nobody cares.
+                return KeyCodes.J_BUTTON_C;//That's why here is a, nobody cares.
             case KeyEvent.KEYCODE_BUTTON_Z:
-                return 'z';
+                return KeyCodes.J_BUTTON_Z;
+            // 1- 16
+            case KeyEvent.KEYCODE_BUTTON_1:
+                return KeyCodes.J_BUTTON_1;
+            case KeyEvent.KEYCODE_BUTTON_2:
+                return KeyCodes.J_BUTTON_2;
+            case KeyEvent.KEYCODE_BUTTON_3:
+                return KeyCodes.J_BUTTON_3;
+            case KeyEvent.KEYCODE_BUTTON_4:
+                return KeyCodes.J_BUTTON_4;
+            case KeyEvent.KEYCODE_BUTTON_5:
+                return KeyCodes.J_BUTTON_5;
+            case KeyEvent.KEYCODE_BUTTON_6:
+                return KeyCodes.J_BUTTON_6;
+            case KeyEvent.KEYCODE_BUTTON_7:
+                return KeyCodes.J_BUTTON_7;
+            case KeyEvent.KEYCODE_BUTTON_8:
+                return KeyCodes.J_BUTTON_8;
+            case KeyEvent.KEYCODE_BUTTON_9:
+                return KeyCodes.J_BUTTON_9;
+            case KeyEvent.KEYCODE_BUTTON_10:
+                return KeyCodes.J_BUTTON_10;
+
+            case KeyEvent.KEYCODE_BUTTON_11:
+                return KeyCodes.J_BUTTON_11;
+            case KeyEvent.KEYCODE_BUTTON_12:
+                return KeyCodes.J_BUTTON_12;
+            case KeyEvent.KEYCODE_BUTTON_13:
+                return KeyCodes.J_BUTTON_13;
+            case KeyEvent.KEYCODE_BUTTON_14:
+                return KeyCodes.J_BUTTON_14;
+            case KeyEvent.KEYCODE_BUTTON_15:
+                return KeyCodes.J_BUTTON_15;
+            case KeyEvent.KEYCODE_BUTTON_16:
+                return KeyCodes.J_BUTTON_16;
+
             //--------------------------------
             case KeyEvent.KEYCODE_BUTTON_START:
-                return KeyCodes.K_ESCAPE;
+                return KeyCodes.J_BUTTON_START;
             case KeyEvent.KEYCODE_BUTTON_SELECT:
-                return KeyCodes.K_ENTER;
+                return KeyCodes.J_BUTTON_SELECT;
+            case KeyEvent.KEYCODE_BUTTON_L2:
+                return KeyCodes.J_BUTTON_L2;
+            case KeyEvent.KEYCODE_BUTTON_R2:
+                return KeyCodes.J_BUTTON_R2;
+            case KeyEvent.KEYCODE_BUTTON_R1:
+                return KeyCodes.J_BUTTON_R1;//Sometimes it is necessary
+            case KeyEvent.KEYCODE_BUTTON_L1:
+                if(Q3EUtils.isOuya) return KeyCodes.K_SPACE;
+                return KeyCodes.J_BUTTON_L1;//dunno why
+/*            case Q3EOuya.BUTTON_L3:
+                return '[';
+            case Q3EOuya.BUTTON_R3:
+                return ']';*/
+            case KeyEvent.KEYCODE_BUTTON_THUMBL:
+                return KeyCodes.J_BUTTON_L3;
+            case KeyEvent.KEYCODE_BUTTON_THUMBR:
+                return KeyCodes.J_BUTTON_R3;
+            // end Controller
+
             case KeyEvent.KEYCODE_MENU:
                 if(Q3EUtils.isOuya) return KeyCodes.K_ESCAPE;
                 break;
-            case KeyEvent.KEYCODE_BUTTON_L2:
-                return KeyCodes.K_MWHEELDOWN;
-            case KeyEvent.KEYCODE_BUTTON_R2:
-                return KeyCodes.K_MWHEELUP;
-            case KeyEvent.KEYCODE_BUTTON_R1:
-                return KeyCodes.K_MOUSE1;//Sometimes it is necessary
-            case KeyEvent.KEYCODE_BUTTON_L1:
-                if(Q3EUtils.isOuya) return KeyCodes.K_SPACE;
-                return 'l';//dunno why
-            case Q3EOuya.BUTTON_L3:
-                return '[';
-            case Q3EOuya.BUTTON_R3:
-                return ']';
-
         }
         if(KeyCodes.RAW)
             return keyCode;
 
-        int uchar = event.getUnicodeChar(0);
+        //int uchar = event.getUnicodeChar(0);
         if((uchar < 127) && (uchar != 0))
             return uchar;
         return keyCode % 95 + 32;//Magic
@@ -2256,10 +2261,51 @@ public class Q3EKeyCodes
         public static final int K_KP_4 = 168;
         public static final int K_KP_5 = 169;
         public static final int K_KP_6 = 170;
-        public static final int K_KP_7 = 171;
+        public static final int K_KP_7 = 165;
         public static final int K_KP_8 = 166;
         public static final int K_KP_9 = 167;
         public static final int K_KP_0 = 175;
+
+        public static final boolean RAW = false;
+    }
+
+    public static class ControllerCodesGeneric
+    {
+        public static final int J_DPAD_UP = KeyCodesGeneric.K_UPARROW;
+        public static final int J_DPAD_DOWN = KeyCodesGeneric.K_DOWNARROW;
+        public static final int J_DPAD_LEFT = KeyCodesGeneric.K_LEFTARROW;
+        public static final int J_DPAD_RIGHT = KeyCodesGeneric.K_RIGHTARROW;
+        public static final int J_DPAD_CENTER = KeyCodesGeneric.K_CTRL;
+        public static final int J_BUTTON_A = KeyCodesGeneric.K_C;
+        public static final int J_BUTTON_B = KeyCodesGeneric.K_R;
+        public static final int J_BUTTON_C = KeyCodesGeneric.K_A;
+        public static final int J_BUTTON_X = KeyCodesGeneric.K_SPACE;
+        public static final int J_BUTTON_Y = KeyCodesGeneric.K_F;
+        public static final int J_BUTTON_Z = KeyCodesGeneric.K_Z;
+        public static final int J_BUTTON_1 = KeyCodesGeneric.K_1;
+        public static final int J_BUTTON_2 = KeyCodesGeneric.K_2;
+        public static final int J_BUTTON_3 = KeyCodesGeneric.K_3;
+        public static final int J_BUTTON_4 = KeyCodesGeneric.K_4;
+        public static final int J_BUTTON_5 = KeyCodesGeneric.K_5;
+        public static final int J_BUTTON_6 = KeyCodesGeneric.K_6;
+        public static final int J_BUTTON_7 = KeyCodesGeneric.K_7;
+        public static final int J_BUTTON_8 = KeyCodesGeneric.K_8;
+        public static final int J_BUTTON_9 = KeyCodesGeneric.K_9;
+        public static final int J_BUTTON_10 = KeyCodesGeneric.K_0;
+        public static final int J_BUTTON_11 = KeyCodesGeneric.K_F1;
+        public static final int J_BUTTON_12 = KeyCodesGeneric.K_F2;
+        public static final int J_BUTTON_13 = KeyCodesGeneric.K_F3;
+        public static final int J_BUTTON_14 = KeyCodesGeneric.K_F4;
+        public static final int J_BUTTON_15 = KeyCodesGeneric.K_F5;
+        public static final int J_BUTTON_16 = KeyCodesGeneric.K_F6;
+        public static final int J_BUTTON_START = KeyCodesGeneric.K_ESCAPE;
+        public static final int J_BUTTON_SELECT = KeyCodesGeneric.K_ENTER;
+        public static final int J_BUTTON_L1 = KeyCodesGeneric.K_L;
+        public static final int J_BUTTON_R1 = KeyCodesGeneric.K_MOUSE1;
+        public static final int J_BUTTON_L2 = KeyCodesGeneric.K_MWHEELDOWN;
+        public static final int J_BUTTON_R2 = KeyCodesGeneric.K_MWHEELUP;
+        public static final int J_BUTTON_L3 = KeyCodesGeneric.K_LBRACKET;
+        public static final int J_BUTTON_R3 = KeyCodesGeneric.K_RBRACKET;
     }
 
     public static int GetKeycodeByName(String name)
@@ -2267,14 +2313,14 @@ public class Q3EKeyCodes
         Field field;
         try
         {
-            field = KeyCodes.class.getField(name);
+            field = KeyCodes.class.getDeclaredField(name);
             return (int) field.get(null);
         }
         catch(NoSuchFieldException e)
         {
             try
             {
-                field = KeyCodesGeneric.class.getField(name);
+                field = KeyCodesGeneric.class.getDeclaredField(name);
                 return (int) field.get(null);
             }
             catch(Exception ex)
@@ -2289,6 +2335,26 @@ public class Q3EKeyCodes
         return 0;
     }
 
+    public static void SetKeycodeByName(String name, Integer code)
+    {
+        Field field;
+        try
+        {
+            if(null == code)
+            {
+                field = KeyCodesGeneric.class.getDeclaredField(name);
+                code = (int)field.get(null);
+            }
+            field = KeyCodes.class.getDeclaredField(name);
+            field.set(null, code);
+            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Map key: " + name + " -> " + code);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public static final int ONSCRREN_DISC_KEYS_WEAPON = 1;
     public static final int ONSCRREN_DISC_KEYS_NUM    = 2;
 
@@ -2301,4 +2367,71 @@ public class Q3EKeyCodes
             null,
             {KeyCodesGeneric.K_KP_1, KeyCodesGeneric.K_KP_2, KeyCodesGeneric.K_KP_3, KeyCodesGeneric.K_KP_4, KeyCodesGeneric.K_KP_5, KeyCodesGeneric.K_KP_6, KeyCodesGeneric.K_KP_7, KeyCodesGeneric.K_KP_8, KeyCodesGeneric.K_KP_9, KeyCodesGeneric.K_KP_0},
     };
+
+    public static final String[] CONTROLLER_BUTTONS = {
+            "button_a",
+            "button_b",
+            "button_c",
+            "button_x",
+            "button_y",
+            "button_z",
+            "button_l1",
+            "button_r1",
+            "button_l2",
+            "button_r2",
+            "button_l3",
+            "button_r3",
+            "button_start",
+            "button_select",
+            "button_1",
+            "button_2",
+            "button_3",
+            "button_4",
+            "button_5",
+            "button_6",
+            "button_7",
+            "button_8",
+            "button_9",
+            "button_10",
+            "button_11",
+            "button_12",
+            "button_13",
+            "button_14",
+            "button_15",
+            "button_16",
+    };
+
+    public static int GetDefaultGamePadButtonCode(String button)
+    {
+        try {
+            Field field = ControllerCodesGeneric.class.getDeclaredField("J_" + button.toUpperCase());
+            Object o = field.get(null);
+            return (Integer) o;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public static String GetDefaultGamePadButtonFieldName(String button)
+    {
+        try {
+            Field field = ControllerCodesGeneric.class.getDeclaredField("J_" + button.toUpperCase());
+            return field.getName();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Map<String, Integer> LoadGamePadButtonCodeMap(Context context)
+    {
+        Set<String> codeSet = PreferenceManager.getDefaultSharedPreferences(context).getStringSet(Q3EPreference.pref_harm_gamepad_keymap, new HashSet<>());
+        Map<String, Integer> codeMap = new HashMap<>();
+        for (String s : codeSet) {
+            String[] split = s.split(":");
+            codeMap.put(split[0], Q3EUtils.parseInt_s(split[1]));
+        }
+        return codeMap;
+    }
 }

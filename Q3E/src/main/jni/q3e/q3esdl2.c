@@ -1,13 +1,17 @@
 #include "q3esdl2.h"
 #include "../deplibs/SDL2/src/core/android/SDL_android_env.h"
+#include "../deplibs/SDL2/include/SDL.h"
 
 #include <dlfcn.h>
 
 #include <android/keycodes.h>
 
+#define Q3E_SDL_FAKE_CUSTOM_CURSOR 1
+
 SDL_Android_GetAPI_f sdl_api;
 int USING_SDL = 0;
 static char *sdl_clipboardText = NULL;
+static SDL_bool (*SDL_SetHint_f)(const char *name, const char *value);
 
 /** Standard activity result: operation canceled. */
 #define RESULT_CANCELED     0
@@ -18,6 +22,28 @@ static char *sdl_clipboardText = NULL;
 
 #define INTERFACE_METHOD(ret, name, args) ret (* name) args;
 #include "../deplibs/SDL2/src/core/android/SDL_android_interface.h"
+
+// from SDL2
+static void UnicodeToUtf8( int w , char *utf8buf)
+{
+    unsigned char *utf8s = (unsigned char *) utf8buf;
+
+    if ( w < 0x0080 ) {
+        utf8s[0] = ( unsigned char ) w;
+        utf8s[1] = 0;
+    }
+    else if ( w < 0x0800 ) {
+        utf8s[0] = 0xc0 | (( w ) >> 6 );
+        utf8s[1] = 0x80 | (( w ) & 0x3f );
+        utf8s[2] = 0;
+    }
+    else {
+        utf8s[0] = 0xe0 | (( w ) >> 12 );
+        utf8s[1] = 0x80 | (( ( w ) >> 6 ) & 0x3f );
+        utf8s[2] = 0x80 | (( w ) & 0x3f );
+        utf8s[3] = 0;
+    }
+}
 
 const char * clipboardGetText()
 {
@@ -44,23 +70,31 @@ void clipboardSetText(const char *text)
     copy_to_clipboard(text);
 }
 
+static int mLastCursorID = 0;
 int createCustomCursor(int *pixels, int w, int h, int x, int y)
 {
+    LOGW("Q3E SDL createCustomCursor(%p, %d, %d, %d, %d) -> not supported!", pixels, w, h, x, y);
+#ifdef Q3E_SDL_FAKE_CUSTOM_CURSOR
+    return ++mLastCursorID;
+#else
     return 0;
+#endif
 }
 
 void destroyCustomCursor(int id)
 {
-    
+    LOGW("Q3E SDL destroyCustomCursor(%d) -> not supported!", id);
 }
 
 void * getContext()
 {
+    LOGE("Q3E SDL getContext() -> not supported!");
     return NULL;
 }
 
 void * getDisplayDPI()
 {
+    LOGE("Q3E SDL getDisplayDPI() -> not supported!");
     return NULL;
 }
 
@@ -71,7 +105,7 @@ void * getNativeSurface()
 
 void initTouch()
 {
-    
+    LOGI("Q3E SDL initTouch() -> not supported!");
 }
 
 int isAndroidTV()
@@ -101,12 +135,12 @@ int isTablet()
 
 void manualBackButton()
 {
-    
+    LOGW("Q3E SDL manualBackButton() -> not supported!");
 }
 
 void minimizeWindow()
 {
-    
+    LOGW("Q3E SDL minimizeWindow() -> not supported!");
 }
 
 int openURL(const char *url)
@@ -117,8 +151,9 @@ int openURL(const char *url)
 
 void requestPermission(const char *permission, int requestCode)
 {
-    LOGI("Q3E SDL request permission '%s' with request code '%d'", permission, requestCode);
-    CALL_SDL(nativePermissionResult, requestCode, RESULT_OK);
+    int res = request_permission(permission, requestCode);
+    LOGI("Q3E SDL request permission '%s' with request code '%d', result = %d", permission, requestCode, res);
+    CALL_SDL(nativePermissionResult, requestCode, res);
 }
 
 int showToast(const char *message, int duration, int gravity, int xOffset, int yOffset)
@@ -134,17 +169,23 @@ int sendMessage(int command, int param)
 
 int setActivityTitle(const char *title)
 {
+    LOGW("Q3E SDL setActivityTitle(\"%s\") -> not supported!", title);
     return Q3E_FALSE;
 }
 
 int setCustomCursor(int cursorID)
 {
+    LOGW("Q3E SDL setCustomCursor(%d) -> not supported!", cursorID);
+#ifdef Q3E_SDL_FAKE_CUSTOM_CURSOR
+    return Q3E_TRUE;
+#else
     return Q3E_FALSE;
+#endif
 }
 
 void setWindowStyle(int fullscreen)
 {
-    
+    LOGW("Q3E SDL setWindowStyle(%d) -> not supported!", fullscreen);
 }
 
 int shouldMinimizeOnFocusLoss()
@@ -154,6 +195,7 @@ int shouldMinimizeOnFocusLoss()
 
 int showTextInput(int x, int y, int w, int h)
 {
+    LOGW("Q3E SDL showTextInput(%d, %d, %d, %d) -> not supported!", x, y, w, h);
     return Q3E_FALSE;
 }
 
@@ -164,12 +206,17 @@ int supportsRelativeMouse()
 
 int setSystemCursor(int cursorID)
 {
+    LOGW("Q3E SDL setSystemCursor(%d) -> not supported!", cursorID);
+#ifdef Q3E_SDL_FAKE_CUSTOM_CURSOR
+    return Q3E_TRUE;
+#else
     return Q3E_FALSE;
+#endif
 }
 
 void setOrientation(int w, int h, int resizable, const char *hint)
 {
-    
+    LOGW("Q3E SDL setOrientation(%d, %d, %d, \"%s\") -> not supported!", w, h, resizable, hint);
 }
 
 int setRelativeMouseEnabled(int on)
@@ -185,16 +232,19 @@ int getManifestEnvironmentVariables()
 
 int * getAudioOutputDevices()
 {
+    LOGW("Q3E SDL getAudioOutputDevices() -> not supported!");
     return NULL;
 }
 
 int * getAudioInputDevices()
 {
+    LOGW("Q3E SDL getAudioInputDevices() -> not supported!");
     return NULL;
 }
 
 int * audioOpen(int freq, int audioformat, int channels, int samples, int device_id)
 {
+    LOGW("Q3E SDL audioOpen(%d, %d, %d, %d, %d) -> not supported!", freq, audioformat, channels, samples, device_id);
     return NULL;
 }
 
@@ -215,11 +265,12 @@ void audioWriteFloatBuffer(float *buf)
 
 void audioClose()
 {
-    
+    LOGW("Q3E SDL audioClose() -> not supported!");
 }
 
 int * captureOpen(int freq, int audioformat, int channels, int samples, int device_id)
 {
+    LOGW("Q3E SDL captureOpen(%d, %d, %d, %d, %d) -> not supported!", freq, audioformat, channels, samples, device_id);
     return NULL;
 }
 
@@ -240,12 +291,73 @@ int captureReadFloatBuffer(float *buf, int b)
 
 void captureClose()
 {
-    
+    LOGW("Q3E SDL captureClose() -> not supported!");
 }
 
 void audioSetThreadPriority(int iscapture, int device_id)
 {
-    
+    //LOGW("Q3E SDL audioSetThreadPriority(%d, %d) -> not supported!", iscapture, device_id);
+
+    ATTACH_JNI(env)
+    int res = 0;
+
+    jclass Thread = (*env)->FindClass(env, "java/lang/Thread");
+    jmethodID currentThread = (*env)->GetStaticMethodID(env, Thread, "currentThread", "()Ljava/lang/Thread;");
+    jmethodID setName = (*env)->GetMethodID(env, Thread, "setName", "(Ljava/lang/String;)V");
+    jmethodID getId = (*env)->GetMethodID(env, Thread, "getId", "()J");
+    jobject thread;
+    jclass Process = (*env)->FindClass(env, "android/os/Process");
+    jmethodID setThreadPriority = (*env)->GetStaticMethodID(env, Process, "setThreadPriority", "(I)V");
+    int THREAD_PRIORITY_AUDIO = -16;
+    jfieldID THREAD_PRIORITY_AUDIO_field = (*env)->GetStaticFieldID(env, Process, "THREAD_PRIORITY_AUDIO", "I");
+    if(THREAD_PRIORITY_AUDIO_field)
+    {
+        THREAD_PRIORITY_AUDIO = (*env)->GetStaticIntField(env, Process, THREAD_PRIORITY_AUDIO_field);
+    }
+    jlong thread_id;
+
+    //try {
+
+        thread = (*env)->CallStaticObjectMethod(env, Thread, currentThread);
+        char name[9 + 32 + 1] = { 0 };
+        /* Set thread name */
+        if (iscapture) {
+            //Thread.currentThread().setName("SDLAudioC" + device_id);
+            snprintf(name, sizeof(name), "SDLAudioC%d", device_id);
+        } else {
+            //Thread.currentThread().setName("SDLAudioP" + device_id);
+            snprintf(name, sizeof(name), "SDLAudioP%d", device_id);
+        }
+        jstring str = (*env)->NewStringUTF(env, name);
+        (*env)->CallVoidMethod(env, thread, setName, str);
+        (*env)->DeleteLocalRef(env, str);
+        if ((*env)->ExceptionCheck(env)) {
+            LOGE("modify thread properties failed Thread.setThread");
+            (*env)->ExceptionDescribe(env);
+            (*env)->ExceptionClear(env);
+            goto _Exit;
+        }
+
+        /* Set thread priority */
+        //android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
+        (*env)->CallStaticVoidMethod(env, Process, setThreadPriority, THREAD_PRIORITY_AUDIO);
+
+   // } catch (Exception e) {
+        if ((*env)->ExceptionCheck(env)) {
+            LOGE("modify thread properties failed ");
+            (*env)->ExceptionDescribe(env);
+            (*env)->ExceptionClear(env);
+            goto _Exit;
+        }
+    //}
+
+    res = 1;
+
+    //LOGW("Q3E SDL audioSetThreadPriority(%d, %d) -> not supported!", iscapture, device_id);
+
+_Exit:
+    thread_id = (*env)->CallLongMethod(env, thread, getId);
+    LOGW("Q3E SDL audioSetThreadPriority(%d, %d): thread name=%s(%ld), priority=%d -> %d", iscapture, device_id, name, thread_id, THREAD_PRIORITY_AUDIO, res);
 }
 
 void pollInputDevices()
@@ -306,7 +418,31 @@ void Q3E_ShutdownSDL(void)
         free(sdl_clipboardText);
         sdl_clipboardText = NULL;
     }
+    SDL_SetHint_f = NULL;
+    sdl_api = NULL;
     LOGI("Q3E SDL2 shutdown");
+}
+
+void Q3E_SDL_SetAudioDriver(int driver)
+{
+    if(!SDL_SetHint_f)
+    {
+        LOGW("Q3E SDL2 not initialized: SDL_SetHint missing");
+        return;
+    }
+    switch (driver) {
+        case Q3E_SDL_AUDIO_DRIVER_OPENSLES:
+            LOGI("Q3E SDL2 using 'opensles' as audio driver");
+            SDL_SetHint_f(SDL_HINT_AUDIODRIVER, "opensles");
+            break;
+        case Q3E_SDL_AUDIO_DRIVER_AAUDIO:
+            LOGI("Q3E SDL2 using 'aaudio' as audio driver");
+            SDL_SetHint_f(SDL_HINT_AUDIODRIVER, "aaudio");
+            break;
+        default:
+            LOGI("Q3E SDL2 using default audio driver");
+            break;
+    }
 }
 
 void Q3E_InitSDL(void)
@@ -330,14 +466,9 @@ void Q3E_InitSDL(void)
         return;
     }
 
-    sdl_api = (SDL_Android_GetAPI_f)ptr;
-    if(!sdl_api)
-    {
-        LOGW("Game library not use Q3E SDL2");
-        return;
-    }
     LOGI("SDL2 API found!");
 
+    sdl_api = (SDL_Android_GetAPI_f)ptr;
     SDL_Android_Callback_t callbacks;
 #define CALLBACK_METHOD(ret, name, args) callbacks.name = name;
 #include "../deplibs/SDL2/src/core/android/SDL_android_callback.h"
@@ -355,8 +486,11 @@ void Q3E_InitSDL(void)
 
     atexit(Q3E_ShutdownSDL);
 
+    void *SDL_SetHint = dlsym(libdl, "SDL_SetHint");
+    SDL_SetHint_f = (SDL_bool (*)(const char *name, const char *value))SDL_SetHint;
+
     USING_SDL = 1;
-    LOGI("Game library use SDL2");
+    LOGI("Game library SDL2 initialized!");
 }
 
 typedef float mouse_pos_t;
@@ -374,19 +508,17 @@ void Q3E_SDL_SetRelativeMouseMode(int on)
     relativeMouseMode = on;
     if(on)
     {
-        in_positionX = IN_WINDOW_WIDTH / 2;
-        in_positionY = IN_WINDOW_HEIGHT / 2;
+        in_deltaX = IN_WINDOW_WIDTH / 2;
+        in_deltaY = IN_WINDOW_HEIGHT / 2;
         set_mouse_cursor_visible(false);
     }
     else
     {
-        in_positionX = 0;
-        in_positionY = 0;
+        //in_positionX = 0;
+        //in_positionY = 0;
         set_mouse_cursor_position(in_positionX, in_positionY);
         set_mouse_cursor_visible(true);
     }
-    in_deltaX = 0;
-    in_deltaY = 0;
 }
 
 void Q3E_SDL_SetWindowSize(int width, int height)
@@ -395,6 +527,8 @@ void Q3E_SDL_SetWindowSize(int width, int height)
         return;
     IN_WINDOW_WIDTH = width;
     IN_WINDOW_HEIGHT = height;
+	in_deltaX = IN_WINDOW_WIDTH / 2;
+	in_deltaY = IN_WINDOW_HEIGHT / 2;
 }
 
 static void Q3E_SDL_MouseMotion(float dx, float dy)
@@ -418,11 +552,8 @@ static void Q3E_SDL_MouseMotion(float dx, float dy)
             y = hh;
         }
 
-        in_deltaX += x;
-        in_deltaY += y;
-
-        in_positionX = x;
-        in_positionY = y;
+        in_deltaX = x;
+        in_deltaY = y;
     }
     else
     {
@@ -441,13 +572,24 @@ static void Q3E_SDL_MouseMotion(float dx, float dy)
             y = IN_WINDOW_HEIGHT - 1;
         }
 
-        in_deltaX += (x - in_positionX);
-        in_deltaY += (y - in_positionY);
-
         in_positionX = x;
         in_positionY = y;
 
         set_mouse_cursor_position(in_positionX, in_positionY);
+    }
+}
+
+static void Q3E_SDL_MousePosition(float x, float y)
+{
+    if(relativeMouseMode)
+    {
+        in_deltaX = x;
+        in_deltaY = y;
+    }
+    else
+    {
+        in_positionX = x;
+        in_positionY = y;
     }
 }
 
@@ -469,15 +611,46 @@ void Q3E_SDL_MotionEvent(float dx, float dy)
 
     //if(!relativeMouseMode)
     {
-        CALL_SDL(onNativeMouse, 0, ACTION_MOVE, in_positionX, in_positionY, relativeMouseMode);
+        CALL_SDL(onNativeMouse, 0, ACTION_MOVE, relativeMouseMode ? in_deltaX : in_positionX, relativeMouseMode ? in_deltaY : in_positionY, relativeMouseMode);
     }
+}
+
+void Q3E_SDL_MouseEvent(float x, float y)
+{
+    // mouse motion event
+    Q3E_SDL_MousePosition(x, y);
+
+    //if(!relativeMouseMode)
+    {
+        CALL_SDL(onNativeMouse, 0, ACTION_MOVE, relativeMouseMode ? in_deltaX : in_positionX, relativeMouseMode ? in_deltaY : in_positionY, relativeMouseMode);
+    }
+}
+
+void Q3E_SDL_TextEvent(JNIEnv *env, jstring text)
+{
+    jboolean iscopy;
+    const char *utf8str = (*env)->GetStringUTFChars(env, text, &iscopy);
+    CALL_SDL(connection_nativeCommitText, utf8str, 0);
+    (*env)->ReleaseStringUTFChars(env, text, utf8str);
+}
+
+void Q3E_SDL_CharEvent(int ch)
+{
+    char text[4] = { 0 };
+    UnicodeToUtf8(ch, text);
+    CALL_SDL(connection_nativeCommitText, text, 1);
+}
+
+void Q3E_SDL_WheelEvent(float x, float y)
+{
+    CALL_SDL(onNativeMouse, 0, ACTION_SCROLL, x, y, 0);
 }
 
 void Q3E_SDL_KeyEvent(int key, int down, int ch)
 {
     if(key < 0)
     {
-        CALL_SDL(onNativeMouse, -key, down ? ACTION_DOWN : ACTION_UP, in_positionX, in_positionY, relativeMouseMode);
+        CALL_SDL(onNativeMouse, -key, down ? ACTION_DOWN : ACTION_UP, relativeMouseMode ? in_deltaX : in_positionX, relativeMouseMode ? in_deltaY : in_positionY, relativeMouseMode);
         return;
     }
 	
@@ -486,7 +659,8 @@ void Q3E_SDL_KeyEvent(int key, int down, int ch)
         CALL_SDL(onNativeKeyDown, key);
 		if(ch > 0)
 		{
-			const char text[] = { (char)ch, '\0' };
+            char text[4] = { 0 };
+            UnicodeToUtf8(ch, text);
 			CALL_SDL(connection_nativeCommitText, text, 1);
 		}
     }

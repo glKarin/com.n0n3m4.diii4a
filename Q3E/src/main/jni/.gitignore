@@ -11,7 +11,7 @@ tdm/ThirdParty/artefacts/*/lib/*
 #gzdoom
 
 #deplibs/SDL2
-backports/
+#backports/
 
 gzdoom_4.12.2/
 quakes/

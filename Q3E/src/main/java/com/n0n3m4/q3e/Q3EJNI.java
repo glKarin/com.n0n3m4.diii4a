@@ -46,11 +46,16 @@ public class Q3EJNI {
 			boolean smoothJoystick, // is smooth joystick
 			int consoleMaxHeightFrac, // max console height frac(0 - 100)
 			boolean usingExternalLibs, // using extern libraries
+			int sdlAudioDriver, // SDL audio driver: 0, 1, 2
             boolean continueNoGLContext
     );
 	public static native void sendKeyEvent(int state,int key,int character);
 	public static native void sendAnalog(int enable,float x,float y);
 	public static native void sendMotionEvent(float x, float y);
+	public static native void sendMouseEvent(float x, float y);
+	public static native void sendTextEvent(String text);
+	public static native void sendCharEvent(int ch);
+	public static native void sendWheelEvent(float x, float y);
     public static native void shutdown();
     public static native boolean Is64();
     public static native void OnPause();
@@ -59,6 +64,10 @@ public class Q3EJNI {
 	public static native void PushKeyEvent(int state, int key, int character);
 	public static native void PushAnalogEvent(int enable, float x, float y);
 	public static native void PushMotionEvent(float x, float y);
+	public static native void PushMouseEvent(float x, float y);
+	public static native void PushTextEvent(String text);
+	public static native void PushCharEvent(int ch);
+	public static native void PushWheelEvent(float x, float y);
 	public static native void PreInit(int eventQueueType, int gameThreadType);
 	public static native int main();
 	public static native long StartThread();

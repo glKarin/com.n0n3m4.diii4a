@@ -960,6 +960,7 @@ void CL_MouseMove(usercmd_t *cmd)
 	float mx, my;
 	float accelSensitivity;
 	float rate;
+	float deltaStrafeSensitivity;
 
 	// allow mouse smoothing
 	if (m_filter->integer)
@@ -995,10 +996,13 @@ void CL_MouseMove(usercmd_t *cmd)
 		return;
 	}
 
+	// normalize '+strafe' sensitivity to 125FPS
+	deltaStrafeSensitivity = 0.008f * (1000.0f / (float)frame_msec);
+
 	// add mouse X/Y movement to cmd
 	if (kb[KB_STRAFE].active)
 	{
-		cmd->rightmove = ClampChar(cmd->rightmove + m_side->value * mx);
+		cmd->rightmove = ClampChar(cmd->rightmove + m_side->value * deltaStrafeSensitivity * mx);
 	}
 	else
 	{
@@ -1011,7 +1015,7 @@ void CL_MouseMove(usercmd_t *cmd)
 	}
 	else
 	{
-		cmd->forwardmove = ClampChar(cmd->forwardmove - m_forward->value * my);
+		cmd->forwardmove = ClampChar(cmd->forwardmove - m_forward->value * deltaStrafeSensitivity * my);
 	}
 }
 

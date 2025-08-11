@@ -41,7 +41,7 @@
 #include "../qcommon/qcommon.h"
 #include "sys_local.h"
 
-#if !defined(__ANDROID__) //karin: not support glibc on Android
+#if __ANDROID_API__ >= 33
 #include <execinfo.h>
 #endif
 #include <signal.h>
@@ -60,6 +60,9 @@
 #if !defined(_DIII4A) //karin: use Q3E JNI layer on Android
 #ifdef  __ANDROID__
 #include <jni.h>
+#if __ANDROID_API__ >= 33
+#include <execinfo.h>
+#endif
 #endif
 #endif
 
@@ -70,7 +73,7 @@ static char homePath[MAX_OSPATH] = { 0 };
 
 #if !defined(_DIII4A) //karin: use current work directory on Android
 #ifdef  __ANDROID__
-static char *Sys_CdToExtStorage(void)
+char *Sys_CdToExtStorage(void)
 {
     JNIEnv *env = (JNIEnv *) SDL_AndroidGetJNIEnv();
     jthrowable exception;
@@ -1313,7 +1316,7 @@ void Sys_Backtrace(int sig)
 	size_t size;
 
 	// Get the backtrace and write it to stderr
-#if !defined(__ANDROID__) //karin: not support glibc on Android
+#if __ANDROID_API__ >= 33
 	size = backtrace(syms, 32);
 #endif
 	fprintf(stderr, "--- Report this to the project - START ---\n");
@@ -1321,7 +1324,7 @@ void Sys_Backtrace(int sig)
 	fprintf(stderr, "VERSION: %s (%s)\n", ETLEGACY_VERSION, ETLEGACY_VERSION_SHORT);
 	fprintf(stderr, "BTIME: %s\n", PRODUCT_BUILD_TIME);
 	fprintf(stderr, "BACKTRACE:\n");
-#if !defined(__ANDROID__) //karin: not support glibc on Android
+#if __ANDROID_API__ >= 33
 	backtrace_symbols_fd(syms, size, STDERR_FILENO);
 #else
 	fprintf(stderr, "NOT SUPPORT ON Android!\n");

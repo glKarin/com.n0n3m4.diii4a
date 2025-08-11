@@ -43,33 +43,28 @@ public final class Q3EGlobals
     public static final int UI_N            = 27;
     public static final int UI_PLUS         = 28;
     public static final int UI_MINUS        = 29;
-    public static final int UI_SIZE         = UI_MINUS + 1;
-    /*public static final int UI_A            = 25;
-    public static final int UI_B            = 26;
-    public static final int UI_C            = 27;
-    public static final int UI_D            = 28;
-    public static final int UI_E            = 29;
-    public static final int UI_F            = 30;
-    public static final int UI_G            = 31;
-    public static final int UI_H            = 32;
-    public static final int UI_I            = 33;
-    public static final int UI_J            = 34;
-    public static final int UI_K            = 35;
-    public static final int UI_L            = 36;
-    public static final int UI_M            = 37;
-    public static final int UI_N            = 38;
-    public static final int UI_O            = 39;
-    public static final int UI_P            = 40;
-    public static final int UI_Q            = 41;
-    public static final int UI_R            = 42;
-    public static final int UI_S            = 43;
-    public static final int UI_T            = 44;
-    public static final int UI_U            = 45;
-    public static final int UI_V            = 46;
-    public static final int UI_W            = 47;
-    public static final int UI_X            = 48;
-    public static final int UI_Y            = 49;
-    public static final int UI_Z            = 50;*/
+
+    public static final int UI_Q            = 30;
+    public static final int UI_W            = 31;
+    public static final int UI_E            = 32;
+    public static final int UI_U            = 33;
+    public static final int UI_T            = 34;
+    public static final int UI_I            = 35;
+    public static final int UI_O            = 36;
+    public static final int UI_P            = 37;
+    public static final int UI_A            = 38;
+    public static final int UI_S            = 39;
+    public static final int UI_D            = 40;
+    public static final int UI_G            = 41;
+    public static final int UI_H            = 42;
+    public static final int UI_J            = 43;
+    public static final int UI_K            = 44;
+    public static final int UI_L            = 45;
+    public static final int UI_X            = 46;
+    public static final int UI_V            = 47;
+    public static final int UI_B            = 48;
+
+    public static final int UI_SIZE         = UI_B + 1;
 
     // on-screen item type
     public static final int TYPE_BUTTON       = 0;
@@ -164,10 +159,29 @@ public final class Q3EGlobals
             "Extra 8",
             "Extra 9",
             "Number",
-            "Y",
-            "N",
-            "+",
-            "-",
+            "Key Y",
+            "Key N",
+            "Key +",
+            "Key -",
+            "Key Q",
+            "Key W",
+            "Key E",
+            "Key U",
+            "Key T",
+            "Key I",
+            "Key O",
+            "Key P",
+            "Key A",
+            "Key S",
+            "Key D",
+            "Key G",
+            "Key H",
+            "Key J",
+            "Key K",
+            "Key L",
+            "Key X",
+            "Key V",
+            "Key B",
     };
 
     // OpenGL Surface color format
@@ -192,14 +206,14 @@ public final class Q3EGlobals
 
 
 
-    public static boolean IsFroidVersion()
+    public static boolean IsFDroidVersion()
     {
         return "fdroid".equalsIgnoreCase(BuildConfig.PRODUCT_FLAVOR);
     }
 
     public static boolean IsGithubVersion()
     {
-        return !IsFroidVersion();
+        return !IsFDroidVersion();
     }
 
 
@@ -208,7 +222,9 @@ public final class Q3EGlobals
     public static  boolean IS_64        = false;
     public static  boolean SYSTEM_64    = false;
     public static  String  ARCH         = "";
+    public static  String  ARCH_DIR     = "";
     private static boolean _is_detected = false;
+
 
     private static boolean GetCpuInfo()
     {
@@ -216,6 +232,7 @@ public final class Q3EGlobals
             return true;
         IS_64 = Q3EJNI.Is64();
         ARCH = IS_64 ? "aarch64" : "arm";
+        ARCH_DIR = IS_64 ? "arm64-v8a" : "armeabi-v7a";
         BufferedReader br = null;
         try
         {

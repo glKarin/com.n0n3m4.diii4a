@@ -77,7 +77,7 @@
 #define TEAMCHAT_WIDTH      70
 #define TEAMCHAT_HEIGHT     8
 
-#define NUM_CROSSHAIRS      16
+#define NUM_CROSSHAIRS      20
 
 // trails
 #define STYPE_STRETCH   0
@@ -3444,6 +3444,7 @@ localEntity_t *CG_AllocLocalEntity(void);
 localEntity_t *CG_FindLocalEntity(int index, int sideNum);
 void CG_AddLocalEntities(qboolean master);
 void CG_DemoRewindFixLocalEntities(void);
+void CG_ProjectBloodDecal(vec3_t *points, float radius);
 
 // cg_locations.c
 // these are called from the console command

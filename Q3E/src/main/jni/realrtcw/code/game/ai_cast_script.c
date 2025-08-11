@@ -77,6 +77,7 @@ qboolean AICast_ScriptAction_GiveArmor( cast_state_t *cs, char *params );		//---
 qboolean AICast_ScriptAction_SetArmor( cast_state_t *cs, char *params );		//----(SA)	added
 qboolean AICast_ScriptAction_GiveAmmo( cast_state_t *cs, char *params );		//----(SA)	added
 qboolean AICast_ScriptAction_GiveHealth( cast_state_t *cs, char *params );		//----(SA)	added
+qboolean AICast_ScriptAction_IncreaseRespawns( cast_state_t *cs, char *params );		//----(SA)	added
 qboolean AICast_ScriptAction_SuggestWeapon( cast_state_t *cs, char *params );	//----(SA)	added
 qboolean AICast_ScriptAction_GiveWeapon( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params );
@@ -92,6 +93,7 @@ qboolean AICast_ScriptAction_SaveCheckpoint( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_FireAtTarget( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_GodMode( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_Accum( cast_state_t *cs, char *params );
+qboolean AICast_ScriptAction_Wave( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_GlobalAccum( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_SpawnCast( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_MissionFailed( cast_state_t *cs, char *params );
@@ -302,6 +304,8 @@ qboolean AICast_ScriptAction_CatchFire( cast_state_t *cs, char *params );
 
 qboolean AICast_ScriptAction_ChangeAiTeam(cast_state_t* cs, char* params);
 qboolean AICast_ScriptAction_ChangeAiName(cast_state_t* cs, char* params);
+qboolean AICast_ScriptAction_ChangeAiSkin(cast_state_t* cs, char* params);
+qboolean AICast_ScriptAction_ChangeAiHead(cast_state_t* cs, char* params);
 qboolean AICast_ScriptAction_DropWeapon(cast_state_t* cs, char* params);
 qboolean AICast_ScriptAction_AccumPrint(cast_state_t* cs, char* params);
 qboolean AICast_ScriptAction_GlobalAccumPrint(cast_state_t* cs, char* params);
@@ -313,6 +317,8 @@ cast_script_stack_action_t scriptActions[] =
 	{"drop_weapon", AICast_ScriptAction_DropWeapon},
 	{"changeaiteam", AICast_ScriptAction_ChangeAiTeam},
 	{"changeainame", AICast_ScriptAction_ChangeAiName},
+	{"changeaiskin", AICast_ScriptAction_ChangeAiSkin},
+	{"changeaihead", AICast_ScriptAction_ChangeAiHead},
 	{"burn", AICast_ScriptAction_Burned},
 	{"accumprint", AICast_ScriptAction_AccumPrint},
 	{"globalaccumprint", AICast_ScriptAction_GlobalAccumPrint},
@@ -341,7 +347,8 @@ cast_script_stack_action_t scriptActions[] =
 	{"givearmor",        AICast_ScriptAction_GiveArmor},			//----(SA)	added
 	{"setarmor",     AICast_ScriptAction_SetArmor},					//----(SA)	added
 	{"giveammo",        AICast_ScriptAction_GiveAmmo},			
-	{"givehealth",        AICast_ScriptAction_GiveHealth},			
+	{"givehealth",        AICast_ScriptAction_GiveHealth},
+	{"increaserespawns",        AICast_ScriptAction_IncreaseRespawns},					
 	{"giveinventory",    AICast_ScriptAction_GiveInventory},
 	{"giveperk",    AICast_ScriptAction_GivePerk},
 	{"giveweapon",       AICast_ScriptAction_GiveWeapon},
@@ -356,6 +363,7 @@ cast_script_stack_action_t scriptActions[] =
 	{"fireattarget", AICast_ScriptAction_FireAtTarget},
 	{"godmode",          AICast_ScriptAction_GodMode},
 	{"accum",            AICast_ScriptAction_Accum},
+	{"wave",            AICast_ScriptAction_Wave},
 	{"globalaccum",      AICast_ScriptAction_GlobalAccum},
 	{"spawncast",        AICast_ScriptAction_SpawnCast},
 	{"missionfailed",    AICast_ScriptAction_MissionFailed},
@@ -594,6 +602,9 @@ cast_script_event_define_t scriptEvents[] =
 	{"painenemy",        AICast_EventMatch_StringEqual},
 	{"forced_mg42_unmount",  0},
 	{"respawn",          0},
+	{"wave_start",          0},
+	{"wave_end",          0},
+	{"start_survival",          0},
 
 	{NULL,              0}
 };
@@ -763,7 +774,7 @@ void AICast_ScriptParse( cast_state_t *cs ) {
 	int eventNum;
 	int numEventItems;
 	cast_script_event_t *curEvent;
-	char params[MAX_QPATH];
+	char params[MAX_INFO_STRING];
 	cast_script_stack_action_t  *action;
 	int i;
 	int bracketLevel;

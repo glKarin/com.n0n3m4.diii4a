@@ -27,6 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "g_local.h"
+#include "g_survival.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -170,26 +171,37 @@ Find the spot that we DON'T want to use
 */
 #define MAX_SPAWN_POINTS    128
 gentity_t *SelectNearestDeathmatchSpawnPoint( vec3_t from ) {
-	gentity_t   *spot;
-	vec3_t delta;
-	float dist, nearestDist;
-	gentity_t   *nearestSpot;
+    gentity_t   *spot;
+    vec3_t delta;
+    float dist, nearestDist;
+    gentity_t   *nearestSpot;
 
-	nearestDist = 999999;
-	nearestSpot = NULL;
-	spot = NULL;
+    nearestDist = 999999;
+    nearestSpot = NULL;
+    spot = NULL;
 
-	while ( ( spot = G_Find( spot, FOFS( classname ), "info_player_start" ) ) != NULL ) {
+    // Search for info_player_start
+    while ( ( spot = G_Find( spot, FOFS( classname ), "info_player_start" ) ) != NULL ) {
+        VectorSubtract( spot->s.origin, from, delta );
+        dist = VectorLength( delta );
+        if ( dist < nearestDist ) {
+            nearestDist = dist;
+            nearestSpot = spot;
+        }
+    }
 
-		VectorSubtract( spot->s.origin, from, delta );
-		dist = VectorLength( delta );
-		if ( dist < nearestDist ) {
-			nearestDist = dist;
-			nearestSpot = spot;
-		}
-	}
+    spot = NULL;
+    // Search for info_player_deathmatch
+    while ( ( spot = G_Find( spot, FOFS( classname ), "info_player_deathmatch" ) ) != NULL ) {
+        VectorSubtract( spot->s.origin, from, delta );
+        dist = VectorLength( delta );
+        if ( dist < nearestDist ) {
+            nearestDist = dist;
+            nearestSpot = spot;
+        }
+    }
 
-	return nearestSpot;
+    return nearestSpot;
 }
 
 /*
@@ -201,202 +213,45 @@ go to a random point that doesn't telefrag
 */
 #define MAX_SPAWN_POINTS    128
 gentity_t *SelectRandomDeathmatchSpawnPoint( void ) {
-	gentity_t   *spot;
-	int count;
-	int selection;
-	gentity_t   *spots[MAX_SPAWN_POINTS];
-
-	count = 0;
-	spot = NULL;
-
-	while ( ( spot = G_Find( spot, FOFS( classname ), "info_player_start" ) ) != NULL ) {
-		if ( SpotWouldTelefrag( spot ) ) {
-			continue;
-		}
-		spots[ count ] = spot;
-		count++;
-	}
-
-	if ( !count ) { // no spots that won't telefrag
-		return G_Find( NULL, FOFS( classname ), "info_player_start" );
-	}
-
-	selection = rand() % count;
-	return spots[ selection ];
-}
-
-gentity_t *SelectNearestDeathmatchSpawnPoint_AI( gentity_t *player, gentity_t *ent ) {
-	gentity_t   *spot;
-	vec3_t delta;
-	float dist, nearestDist;
-	gentity_t   *nearestSpot;
-
-	nearestDist = 999999;
-	nearestSpot = NULL;
-	spot = NULL;
-
-	while ( ( spot = G_Find( spot, FOFS( classname ), "info_ai_respawn" ) ) != NULL ) {
-
-		if ( spot->spawnflags & 1 ) {
-			continue;
-		}
-
-		if ( ent ) {
-			switch ( ent->aiCharacter ) {
-			case AICHAR_PROTOSOLDIER:
-			case AICHAR_SUPERSOLDIER:
-			case AICHAR_HELGA:
-			case AICHAR_HEINRICH:
-			case AICHAR_SUPERSOLDIER_LAB:
-				if ( !( spot->spawnflags & 2 ) ) {
-					continue;
-				}
-				break;
-			
-			default:
-				if ( spot->spawnflags & 2 ) {
-					continue;
-				}
-				break;
-			}
-
-			if ( ent->aiTeam != spot->aiTeam ) {
-				continue;
-			}
-
-		} else {
-			// Remove code if the calling SelectSpawnPoint_AI from ClientSpawn (g_client.c) is the misstake
-			if ( player->aiTeam != spot->aiTeam ) {
-				continue;
-			}
-		}
-
-		VectorSubtract( spot->s.origin, player->r.currentOrigin, delta );
-		dist = VectorLength( delta );
-		if ( dist < nearestDist ) {
-			nearestDist = dist;
-			nearestSpot = spot;
-		}
-	}
-
-	return nearestSpot;
-}
-
-
-/*
-================
-SelectRandomDeathmatchSpawnPoint_AI
-
-go to a random point that doesn't telefrag
-================
-*/
-#define MAX_SPAWN_POINTS_AI    128
-#define MAX_SPAWN_POINT_DISTANCE    8196
-gentity_t *SelectRandomDeathmatchSpawnPoint_AI( gentity_t *player, gentity_t *ent ) {
     gentity_t   *spot;
-    vec3_t delta;
-    float dist;
-    gentity_t   *spots[MAX_SPAWN_POINTS_AI];
-    int numSpots = 0;
+    int count;
+    int selection;
+    gentity_t   *spots[MAX_SPAWN_POINTS];
 
+    count = 0;
     spot = NULL;
 
-    while ( ( spot = G_Find( spot, FOFS( classname ), "info_ai_respawn" ) ) != NULL ) {
-
-		if ( spot->spawnflags & 1 ) {
-			continue;
-		}
-
-		if ( ent ) {
-			switch ( ent->aiCharacter ) {
-			case AICHAR_PROTOSOLDIER:
-			case AICHAR_SUPERSOLDIER:
-			case AICHAR_HELGA:
-			case AICHAR_HEINRICH:
-			case AICHAR_SUPERSOLDIER_LAB:
-				if ( !( spot->spawnflags & 2 ) ) {
-					continue;
-				}
-				break;
-			
-			default:
-				if ( spot->spawnflags & 2 ) {
-					continue;
-				}
-				break;
-			}
-
-			if ( ent->aiTeam != spot->aiTeam ) {
-				continue;
-			}
-
-		} else {
-			// Remove me if the calling SelectSpawnPoint_AI from ClientSpawn (g_client.c) is the misstake
-			if ( player->aiTeam != spot->aiTeam ) {
-				continue;
-			}
-		}
-
-        if ( player ) {
-            VectorSubtract( spot->s.origin, player->r.currentOrigin, delta );
-            dist = VectorLength( delta );
-            if ( dist < MAX_SPAWN_POINT_DISTANCE ) {
-                // Check if the spawn point is occupied
-                if ( !SpotWouldTelefrag( spot ) ) {
-                    spots[numSpots++] = spot;
-                }
-            }
-        } else {
-            spots[numSpots++] = spot;
+    // Search for info_player_start spawn points.
+    while ( ( spot = G_Find( spot, FOFS( classname ), "info_player_start" ) ) != NULL ) {
+        if ( SpotWouldTelefrag( spot ) ) {
+            continue;
+        }
+        spots[ count ] = spot;
+        count++;
+        if ( count >= MAX_SPAWN_POINTS ) {
+            break;
         }
     }
 
-    if ( numSpots == 0 ) {
-        return NULL;
-    }
-
-    return spots[rand() % numSpots];
-}
-
-
-/*
-===========
-SelectSpawnPoint_AI
-
-Chooses a player start, deathmatch start, etc
-============
-*/
-gentity_t *SelectSpawnPoint_AI( gentity_t *player, gentity_t *ent, vec3_t origin, vec3_t angles ) {
-    gentity_t   *spot;
-    gentity_t   *nearestSpot;
-
-    nearestSpot = SelectNearestDeathmatchSpawnPoint_AI( player, ent );
-
-    spot = SelectRandomDeathmatchSpawnPoint_AI( player, ent );
-    if ( spot == nearestSpot ) {
-        // roll again if it would be real close to point of death
-        spot = SelectRandomDeathmatchSpawnPoint_AI( player, ent );
-        if ( spot == nearestSpot ) {
-            // last try
-            spot = SelectRandomDeathmatchSpawnPoint_AI( player, ent );
+    spot = NULL;
+    // Also search for info_player_deathmatch spawn points.
+    while ( ( spot = G_Find( spot, FOFS( classname ), "info_player_deathmatch" ) ) != NULL ) {
+        if ( SpotWouldTelefrag( spot ) ) {
+            continue;
+        }
+        spots[ count ] = spot;
+        count++;
+        if ( count >= MAX_SPAWN_POINTS ) {
+            break;
         }
     }
 
-    // If no nearby spawn point was found, select any spawn point
-    if ( !spot ) {
-        spot = SelectRandomDeathmatchSpawnPoint_AI( NULL, ent );
+    if ( !count ) { // no spots that won't telefrag
+        return G_Find( NULL, FOFS( classname ), "info_player_start" );
     }
 
-    // If still no spawn point was found, report an error
-    if ( !spot ) {
-        G_Error( "Couldn't find a spawn point" );
-    }
-
-    VectorCopy( spot->s.origin, origin );
-    origin[2] += 9;
-    VectorCopy( spot->s.angles, angles );
-
-    return spot;
+    selection = rand() % count;
+    return spots[ selection ];
 }
 
 /*
@@ -661,25 +516,29 @@ ClientRespawn
 ================
 */
 void ClientRespawn( gentity_t *ent ) {
+	// In Survival mode, just restart the map instead of reloading save
+	if ( g_gametype.integer == GT_SURVIVAL ) {
+		trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
+		return;
+	}
 
 	// Ridah, if single player, reload the last saved game for this player
+	if ( g_reloading.integer || saveGamePending ) {
+		return;
+	}
 
-		if ( g_reloading.integer || saveGamePending ) {
-			return;
-		}
+	if ( !( ent->r.svFlags & SVF_CASTAI ) ) {
+		// Fast method, just do a map_restart, and then load in the savegame
+		// once everything is settled.
+		trap_SetConfigstring( CS_SCREENFADE, va( "1 %i 4000", level.time + 2000 ) );
+		trap_Cvar_Set( "g_reloading", "1" );
 
-		if ( !( ent->r.svFlags & SVF_CASTAI ) ) {
-			// Fast method, just do a map_restart, and then load in the savegame
-			// once everything is settled.
-			trap_SetConfigstring( CS_SCREENFADE, va( "1 %i 4000", level.time + 2000 ) );
-			trap_Cvar_Set( "g_reloading", "1" );
+		level.reloadDelayTime = level.time + 6000;
 
-			level.reloadDelayTime = level.time + 6000;
+		trap_SendServerCommand( -1, va( "snd_fade 0 %d", 6000 ) );  // fade sound out
 
-			trap_SendServerCommand( -1, va( "snd_fade 0 %d", 6000 ) );  // fade sound out
-
-			return;
-		}
+		return;
+	}
 	// done.
 
 	ent->client->ps.pm_flags &= ~PMF_LIMBO; // JPW NERVE turns off limbo
@@ -1522,7 +1381,7 @@ void ClientSpawn( gentity_t *ent ) {
 	ent->watertype = 0;
 	ent->flags = 0;
 
-	client->ps.persistant[PERS_WAVES] = 1;
+	client->ps.persistant[PERS_WAVES] = 0;
 
 	VectorCopy( playerMins, ent->r.mins );
 	VectorCopy( playerMaxs, ent->r.maxs );

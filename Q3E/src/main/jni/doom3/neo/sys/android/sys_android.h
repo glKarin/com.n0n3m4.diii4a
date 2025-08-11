@@ -26,6 +26,7 @@ typedef struct
     void (*Sys_closeKeyboard)(void); // close virtual keyboard
     void (*Sys_openURL)(const char *url); // open URL
     void (*Sys_exitFinish)(void); // finish activity
+    void (*Sys_showCursor)(int on); // show mouse cursor
 
     // GUI
     void (*Gui_ShowToast)(const char *text); // show info

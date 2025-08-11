@@ -4283,7 +4283,6 @@ void SP_props_flamethrower( gentity_t *ent ) {
 	ent->think = props_flamethrower_init;
 	ent->nextthink = level.time + 50;
 	ent->use = props_flamethrower_use;
-	ent->methodOfDeath = MOD_FLAMETHROWER;
 
 	G_SetOrigin( ent, ent->s.origin );
 

@@ -229,7 +229,9 @@ void Android_OnMouse(SDL_Window *window, int state, int action, float x, float y
         button = TranslateButton(changes);
 #endif
         last_state = state;
+#if !defined(_Q3E) //karin: not resend motion event
         SDL_SendMouseMotion(window, 0, relative, (int)x, (int)y);
+#endif
         SDL_SendMouseButton(window, 0, SDL_PRESSED, button);
         break;
 
@@ -241,7 +243,9 @@ void Android_OnMouse(SDL_Window *window, int state, int action, float x, float y
         button = TranslateButton(changes);
 #endif
         last_state = state;
+#if !defined(_Q3E) //karin: not resend motion event
         SDL_SendMouseMotion(window, 0, relative, (int)x, (int)y);
+#endif
         SDL_SendMouseButton(window, 0, SDL_RELEASED, button);
         break;
 

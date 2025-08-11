@@ -40,6 +40,24 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef __ANDROID__ //karin: static memory allocation from client: too large
 static char *memoryPool = NULL;
+static char * (*g_require_memory_pool)(size_t size);
+
+__attribute__((visibility("default"))) void G_SetAllocMemoryPoolFcn(void *ptr)
+{
+	fprintf(stderr, "[qagame]: set alloc memory pool function: %p\n", ptr );
+	g_require_memory_pool = (char *(*)(size_t))ptr;
+}
+
+char * trap_RequireMemoryPool( size_t size ) {
+	if(!g_require_memory_pool)
+	{
+		G_Error( "Must get alloc memory function pointer first!" );
+		return NULL;
+	}
+	char *pool = (char *)g_require_memory_pool(size);
+	G_Printf( "[qagame]: alloc memory pool: %zd -> %p\n", size, pool );
+	return (char *)g_require_memory_pool(size);
+}
 #else
 static char memoryPool[POOLSIZE];
 #endif
@@ -72,7 +90,6 @@ void *G_Alloc( int size ) {
 
 void G_InitMemory( void ) {
 #ifdef __ANDROID__ //karin: static memory allocation from client
-	extern char * trap_RequireMemoryPool( int size );
 	memoryPool = trap_RequireMemoryPool(POOLSIZE);
 	if(memoryPool)
 		G_Printf("G_InitMemory: Game require %d bytes memory pool: %p.\n", POOLSIZE, memoryPool);

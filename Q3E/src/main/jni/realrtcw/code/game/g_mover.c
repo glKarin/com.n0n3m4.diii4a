@@ -35,6 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "g_local.h"
+#include "g_survival.h"
 
 char *hintStrings[] = {
 	"",                  // HINT_NONE
@@ -83,8 +84,6 @@ char *hintStrings[] = {
 
 	"",                  // HINT_BAD_USER
 };
-
-extern svParams_t svParams;
 
 /*
 ===============================================================================
@@ -2151,40 +2150,6 @@ G_TryDoor
 */
 void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	qboolean walking = qfalse, locked = qfalse;
-
-	int price;
-	price = ent->price;
-
-    if (g_gametype.integer == GT_SURVIVAL)
-    {
-        if (!price)
-        {
-            price = 0;
-        }
-
-        // Ensure AI cannot activate the door
-        if (activator->aiCharacter)
-        {
-            return;
-        }
-
-        // Check if player has enough points
-        if (activator->client->ps.persistant[PERS_SCORE] < price)
-        {
-            trap_SendServerCommand(-1, "mu_play sound/items/use_nothing.wav 0\n");
-            return; // Player doesn't have enough points
-        }
-        else
-        {
-            if ((ent->active == qfalse) && (!ent->teammaster || ent->teammaster->active == qfalse)) // Only deduct points if the door or its teammaster is not already open
-            {
-                activator->client->ps.persistant[PERS_SCORE] -= price;
-                ent->key = 0;
-                locked = qfalse;
-				trap_SendServerCommand( -1, "mu_play sound/misc/buy.wav 0\n" );
-            }
-        }
-    }
 
 	walking = (qboolean)( ent->flags & FL_SOFTACTIVATE );
 
@@ -4744,6 +4709,12 @@ void use_invisible_user( gentity_t *ent, gentity_t *other, gentity_t *activator 
 			trap_SendServerCommand(-1, "mu_play sound/items/use_nothing.wav 0\n");
 			return; // Player doesn't have enough points
 		}
+
+		// Restrict usage if targetname is "reinforce_call" and no friendly AI are spawned
+		if (Q_stricmp(ent->targetname, "reinforce_call") == 0 && svParams.spawnedThisWaveFriendly != svParams.aliveFriendliestoCallReinforce) {
+			trap_SendServerCommand(-1, "mu_play sound/items/use_nothing.wav 0\n");
+			return;
+		}
 	}
 
 	if ( ent->wait < level.time ) {
@@ -4789,15 +4760,40 @@ void use_invisible_user( gentity_t *ent, gentity_t *other, gentity_t *activator 
 		}
 	}
 
-	G_UseTargets( ent, other ); //----(SA)	how about this so the triggered targets have an 'activator' as well as an 'other'?
-								//----(SA)	Please let me know if you forsee any problems with this.
+	G_UseTargets(ent, other);
 
 	if (g_gametype.integer == GT_SURVIVAL)
 	{
 		activator->client->ps.persistant[PERS_SCORE] -= price;
+
+		if (price > 0)
+		{
+			trap_SendServerCommand(activator->s.number, "mu_play sound/misc/buy.wav 0\n");
+		}
+	}
+
+	if (ent->spawnflags & 16)
+	{
+		// Kill the linked trigger_objective_info if it targets this entity
+		gentity_t *e;
+		for (int i = 0; i < level.num_entities; i++)
+		{
+			e = &g_entities[i];
+			if (!e->inuse)
+				continue;
+
+			if (e->classname && Q_stricmp(e->classname, "trigger_objective_info") == 0)
+			{
+				if (e->target && ent->targetname && Q_stricmp(e->target, ent->targetname) == 0)
+				{
+					G_FreeEntity(e);
+				}
+			}
+		}
+
+		G_FreeEntity(ent);
 	}
 }
-
 
 void func_invisible_user( gentity_t *ent ) {
 	int i;

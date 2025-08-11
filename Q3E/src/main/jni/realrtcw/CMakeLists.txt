@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(realrtcw)
-set(REALRTCW_VERSION "5.1")
+set(REALRTCW_VERSION "5.2")
 set(REALRTCW_SUFFIX "")
+set(REALRTCW_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 98)
@@ -63,8 +64,8 @@ endif()
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-omit-frame-pointer -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-omit-frame-pointer -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
 
 # Switch off some annoying warnings
 if (${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
@@ -154,6 +155,7 @@ set(realrtcwgame_src
         code/game/ai_cast_script_actions.c
         code/game/ai_cast_script.c
         code/game/ai_cast_script_ents.c
+  		code/game/ai_cast_survival.c
         code/game/ai_cast_sight.c
         code/game/ai_cast_think.c
         code/game/ai_chat.c
@@ -185,6 +187,9 @@ set(realrtcwgame_src
         code/game/g_session.c
         code/game/g_spawn.c
         code/game/g_svcmds.c
+		code/game/g_survival_buy.c
+		code/game/g_survival_score.c
+		code/game/g_survival_misc.c
         code/game/g_target.c
         code/game/g_team.c
         code/game/g_tramcar.c
@@ -718,7 +723,7 @@ if(USE_FREETYPE)
 endif()
 target_include_directories(${REALRTCWLIBRARY} PRIVATE "code/jpeg-8c")
 target_include_directories(${REALRTCWLIBRARY} PRIVATE "code")
-target_include_directories(${REALRTCWLIBRARY} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../common")
+target_include_directories(${REALRTCWLIBRARY} PRIVATE "${REALRTCW_BASE_DIR}/../common")
 if(USE_INTERNAL_ZLIB)
     target_include_directories(${REALRTCWLIBRARY} PRIVATE "code/${realrtcw_zlib_dir}")
 endif()

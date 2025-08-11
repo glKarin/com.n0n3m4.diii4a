@@ -308,7 +308,7 @@ else()
   set_target_properties( crypto PROPERTIES OUTPUT_NAME "crypto" )
 endif()
 
-install( TARGETS crypto
+install( TARGETS crypto EXPORT crypto
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib )

@@ -37,9 +37,6 @@
     <string name="on_screen_buttons_position_unit_must_is_multiple_of_5_or_0">Единица позиции экранных кнопок должна быть кратна 5 или 0</string>
     <string name="setup_joystick_done">Настройка джойстика выполнена.</string>
     <string name="back">Назад</string>
-    <string name="extract_the_dark_mod_glsl_shader_source_files_fail">Извлечение GLSL шейдера The Dark Mod не удалось!</string>
-    <string name="extract_rbdoom3bfg_hlsl_shader_source_files_fail">Извлечение HLSL шейдера RBDOOM 3 BFG не удалось!</string>
-    <string name="extract_gzdoom_game_resource_files_fail">Извлечение файлов игры GZDOOM не удалось!</string>
     <string name="on_screen_buttons_layout_with_grid_limit">Размер сетки редактора кнопок</string>
     <string name="position_unit">Позиционный блок (0 = автоматически, 1 = отключить)</string>
     <string name="warning">Предупреждение</string>
@@ -62,6 +59,9 @@
     <string name="doom3_bot_sabot_a7_mod">DOOM3 Bot(мод SABot-a7)</string>
     <string name="mp_game_map_aas">Файл системы опознавания области карты для сетевой игры(aas)</string>
     <string name="xash3d_extras">Xash3D дополнительные ресурсы</string>
-    <string name="extract_xash3d_extras_resource_files_fail">Извлечение дополнительных файлов ресурсов Xash3D не удалось!</string>
     <string name="cs16_xash3d_extras">CS1.6(Xash3D) дополнительные ресурсы</string>
+    <string name="sourceengine_extras">Source Engine дополнительные ресурсы</string>
+    <string name="external">Внешние</string>
+    <string name="etlegacy_extras">ET: Legacy дополнительные ресурсы</string>
+    <string name="extract_files_fail">Извлечение %1$s файлов не удалось!</string>
 </resources>

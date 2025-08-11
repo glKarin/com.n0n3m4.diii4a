@@ -3,8 +3,8 @@
     <string name="app_name" translatable="false">idTech4A++</string>
     <string name="app_title" translatable="false">idTech4A++</string>
     <string name="menu_settings">Settings</string>    
-    <string name="config_editor_name">Config Editor</string>
-    <string name="key_config_page_name">OnScreen Button Config</string>
+    <string name="config_editor_name">Configure Editor</string>
+    <string name="key_config_page_name">OnScreen Button Configure</string>
 
     <string name="commandline">Commandline:</string>
     <string name="game_working_directory">Game working directory:</string>
@@ -40,8 +40,6 @@
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Phong specular exponent</string>
     <string name="sound">Sound(s_driver)</string>
     <string name="load_quicksave_when_start_game">Load QuickSave when start game</string>
-    <string name="edit_autoexec_cfg">Edit autoexec.cfg</string>
-    <string name="edit_doomconfig_cfg">Edit DoomConfig.cfg</string>
     <string name="note_gamepads_keyboards_must_be_configured_in_game_like_on_pc_not_here">Note: Gamepads/Keyboards must be configured in-game (like on PC), not here</string>
     <string name="configure_on_screen_controls">Configure on-screen controls</string>
     <string name="on_screen_button_setting">On-screen button setting</string>
@@ -152,6 +150,7 @@
     <string name="graphics">Graphics</string>
     <string name="controls">Controls</string>
     <string name="do_you_want_to_support_the_developer">Do you want to support the developer?</string>
+    <string name="do_you_want_to_support_the_developer_text">idTech4A++ is a completely open and free project, so you can obtain this application for free without paying any fees, and also no need to make any donations to this application, all donation links have been removed.\nThank you for your support.</string>
     <string name="donate_to">Donate to </string>
     <string name="more_apps_in">More apps in</string>
     <string name="dont_ask">Don\'t ask</string>
@@ -164,8 +163,8 @@
     <string name="no_file">No file!</string>
     <string name="save_file_successful">Save file successful.</string>
     <string name="save_file_failed">Save file failed!</string>
-    <string name="reset_onscreen_button_config">Reset on-screen button config?</string>
-    <string name="onscreen_button_config_has_reset">On-screen button config has reset.</string>
+    <string name="reset_onscreen_button_config">Reset on-screen button configure?</string>
+    <string name="onscreen_button_config_has_reset">On-screen button configure has reset.</string>
     <string name="toggle">Toggle</string>
     <string name="button">Button</string>
     <string name="slider">Slider</string>
@@ -187,7 +186,7 @@
     <string name="choose_data_folder">Choose data folder</string>
     <string name="choose_current_directory">Choose</string>
     <string name="unset">Unset</string>
-    <string name="edit_config_file">Edit config file</string>
+    <string name="edit_config_file">Edit configure file</string>
     <string name="operation">Operation</string>
     <string name="start">Start</string>
     <string name="language">Language</string>
@@ -238,7 +237,7 @@
     <string name="add_game_library_file_success">Add game library file success.</string>
     <string name="add_game_library_file_fail">Add game library file fail!</string>
     <string name="find_game_library_in_game_data_directory">Find external game library in game data directory instead of default game library of apk</string>
-    <string name="using_external_game_library">Game library file name: arm64 = `gameaarch64.so` or `libgameaarch64.so`; arm32 = `gamearm.so` or `libgamearm.so`</string>
+    <string name="using_external_game_library">Game library file name in mod directory: arm64 = `gameaarch64.so`; arm32 = `gamearm.so`</string>
     <string name="not_supported">Not supported!</string>
     <string name="translators">Translators</string>
     <string name="note">Note</string>
@@ -393,6 +392,8 @@
     <string name="samtse">SamTSE</string>
     <string name="xash3d">Xash3D</string>
     <string name="xash3d_base">Xash3D</string>
+    <string name="sourceengine">Source Engine</string>
+    <string name="sourceengine_base">Source Engine</string>
     <string name="input_event_queue">Input event queue</string>
     <string name="choose_input_event_queue_scheme">Choose input event queue scheme</string>
     <string name="filter">Filter</string>
@@ -498,5 +499,40 @@
     <string name="portrait_orientation_screen">Portrait orientation screen</string>
     <string name="renderer_ref">Renderer(ref)</string>
     <string name="server_client_sv_cl">Server/Client(sv_cl)</string>
+    <string name="halflife_2_base">Half-Life 2</string>
+    <string name="css_base">Counter-Strike: Source</string>
+    <string name="portal_base">Portal</string>
+    <string name="dod_base">Day of Defeat: Source</string>
+    <string name="halflife_2_ep1_base">Half-Life 2: Episodic 1</string>
+    <string name="halflife_2_ep2_base">Half-Life 2: Episodic 2</string>
+    <string name="halflife_2_mp_base">Half-Life 2: Deathmatch</string>
+    <string name="halflife_1_source_base">Half-Life 1: Source</string>
+    <string name="halflife_1_mp_source_base">Half-Life 1 Deathmatch: Source</string>
+    <string name="use_builtin_virtual_keyboard">Use built-in virtual keyboard</string>
+    <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">Use built-in virtual keyboard instead of system input method keyboard</string>
+    <string name="using_external_game_library_xash3d">Game library path in mod directory: arm64 = `lib/arm64-v8a/`; arm32 = `lib/armeabi-v7a/`.\nclient library could set by `-clientlib` on command, default is `client.so`; server library could set by `-dll` on command, default is `server.so`; menu library could set by `-menulib` on command, default is `menu.so`.</string>
+    <string name="configure_controller">Configure controller</string>
+    <string name="dpad_as_arrow_keys">DPad as arrow keys</string>
+    <string name="dpad_keys_always_as_arrow_keys">DPad keys always as arrow keys</string>
+    <string name="left_joystick_dead_zone">Left joystick dead zone(0 - 1)</string>
+    <string name="right_joystick_dead_zone">Right joystick dead zone(0 - 1)</string>
+    <string name="right_joystick_sensitivity">Right joystick sensitivity(0.1 - 10)</string>
+    <string name="left_joystick_dead_zone_summary">Left joystick minimum axis value(default 0.01)</string>
+    <string name="right_joystick_dead_zone_summary">Right joystick minimum axis value(default 0)</string>
+    <string name="right_joystick_sensitivity_summary">Right joystick emulate mouse sensitivity(default 1)</string>
+    <string name="joystick_dpad">Joystick/DPad</string>
+    <string name="controller_configure">Controller configure</string>
+    <string name="reset_controller_config">Reset controller configuage?</string>
+    <string name="controller_configure_has_reset">Controller configure has reset.</string>
+    <string name="reset_all_controller_configure">Reset all controller configure</string>
+    <string name="automatic">Automatic</string>
+    <string name="sdl_audio_driver">SDL audio driver</string>
+    <string name="install_shortcut_tips_if_creating_failed">Maybe require grant install shortcut permission manually in system on some brand devices if creating failed.</string>
+    <string name="name_">Name: </string>
+    <string name="path_">Path: </string>
+    <string name="author_">Author: </string>
+    <string name="description_">Description: </string>
+    <string name="expand_all">Expand all</string>
+    <string name="collapse_all">Collapse all</string>
 
 </resources>

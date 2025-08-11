@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.view.Surface;
 
 import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KLog;
@@ -152,6 +153,7 @@ public class Q3EButtonLayoutManager
         final int Attack_Bottom_Margin = Dip2px_s(40); //k 20
         final int JoyStick_Left_Margin = Dip2px_s(35); //k 30
         final int JoyStick_Bottom_Margin = Dip2px_s(40); //k 30
+        final int Hide_Space = Dip2px_s(5);
         final int Alpha = m_opacity;
 
         Q3EButtonGeometry[] layouts = Q3EButtonGeometry.Alloc(Q3EGlobals.UI_SIZE);
@@ -191,15 +193,40 @@ public class Q3EButtonLayoutManager
         layouts[Q3EGlobals.UI_N].Set(bottomLineRight - MediumButton_Width * 2 + MediumButton_Width / 2 - Horizontal_Space * 2 + (MediumButton_Width / 2 - SmallButton_Width / 2), Height - MediumButton_Width - SmallButton_Width / 2, SmallButton_Width, Alpha);
 
         // hide default
-        int extraX = 0;
-        for (int i = Q3EGlobals.UI_0; i <= Q3EGlobals.UI_9; i++)
-            layouts[i].Set(extraX = SmallButton_Width / 2 + SmallButton_Width * (i - Q3EGlobals.UI_0), Height + SmallButton_Width / 2, SmallButton_Width, Alpha);
+        int extraX = Start;
+        int extraY = Hide_Space;
+        for (int i = Q3EGlobals.UI_0; i <= Q3EGlobals.UI_B; i++)
+        {
+            if(i >= Q3EGlobals.UI_Y && i <= Q3EGlobals.UI_MINUS)
+                continue;
 
-        extraX += SmallButton_Width;
-        layouts[Q3EGlobals.UI_NUM_PANEL].Set(extraX, Height + Panel_Radius, Panel_Radius, Alpha);
-        extraX += Panel_Radius * 2;
-/*        for (int i = Q3EGlobals.UI_Y; i <= Q3EGlobals.UI_N; i++)
-            layouts[i].Set(extraX + SmallButton_Width * (i - Q3EGlobals.UI_Y), Height + SmallButton_Width / 2, SmallButton_Width, Alpha);*/
+            int wlen = extraX;
+            if(Q3EInterface._defaultType[i] == Q3EGlobals.TYPE_DISC)
+            {
+                wlen += Panel_Radius * 2;
+            }
+            else
+            {
+                wlen += SmallButton_Width;
+            }
+
+            if(wlen > EndWidth)
+            {
+                extraX = Start;
+                extraY += Math.max(Panel_Radius * 2, SmallButton_Width);
+            }
+
+            if(Q3EInterface._defaultType[i] == Q3EGlobals.TYPE_DISC)
+            {
+                layouts[i].Set(extraX + Panel_Radius, Height + Panel_Radius + extraY, Panel_Radius, Alpha);
+                extraX += Panel_Radius * 2;
+            }
+            else
+            {
+                layouts[i].Set(extraX + SmallButton_Width / 2, Height + SmallButton_Width / 2 + extraY, SmallButton_Width, Alpha);
+                extraX += SmallButton_Width;
+            }
+        }
 
         return Q3EButtonGeometry.ToStrings(layouts, Width, Height);
     }
@@ -224,6 +251,7 @@ public class Q3EButtonLayoutManager
         final int Attack_Bottom_Margin = Dip2px_s(140); //k 20
         final int JoyStick_Left_Margin = Dip2px_s(35); //k 30
         final int JoyStick_Bottom_Margin = Dip2px_s(140); //k 30
+        final int Hide_Space = Dip2px_s(5);
         final int Alpha = m_opacity;
 
         Q3EButtonGeometry[] layouts = Q3EButtonGeometry.Alloc(Q3EGlobals.UI_SIZE);
@@ -263,15 +291,40 @@ public class Q3EButtonLayoutManager
         layouts[Q3EGlobals.UI_N].Set(bottomLineRight - MediumButton_Width - Horizontal_Space * 2 + (MediumButton_Width / 2 - SmallButton_Width / 2), EndHeight - MediumButton_Width - SmallButton_Width / 2, SmallButton_Width, Alpha);
 
         // hide default
-        int extraX = 0;
-        for (int i = Q3EGlobals.UI_0; i <= Q3EGlobals.UI_9; i++)
-            layouts[i].Set(extraX = SmallButton_Width / 2 + SmallButton_Width * (i - Q3EGlobals.UI_0), Height + SmallButton_Width / 2, SmallButton_Width, Alpha);
+        int extraX = Start;
+        int extraY = Hide_Space;
+        for (int i = Q3EGlobals.UI_0; i <= Q3EGlobals.UI_B; i++)
+        {
+            if(i >= Q3EGlobals.UI_Y && i <= Q3EGlobals.UI_MINUS)
+                continue;
 
-        extraX += SmallButton_Width;
-        layouts[Q3EGlobals.UI_NUM_PANEL].Set(extraX, Height + Panel_Radius, Panel_Radius, Alpha);
-        extraX += Panel_Radius * 2;
-/*        for (int i = Q3EGlobals.UI_Y; i <= Q3EGlobals.UI_N; i++)
-            layouts[i].Set(extraX + SmallButton_Width * (i - Q3EGlobals.UI_Y), EndHeight + SmallButton_Width / 2, SmallButton_Width, Alpha);*/
+            int wlen = extraX;
+            if(Q3EInterface._defaultType[i] == Q3EGlobals.TYPE_DISC)
+            {
+                wlen += Panel_Radius * 2;
+            }
+            else
+            {
+                wlen += SmallButton_Width;
+            }
+
+            if(wlen > Width)
+            {
+                extraX = Start;
+                extraY += Math.max(Panel_Radius * 2, SmallButton_Width);
+            }
+
+            if(Q3EInterface._defaultType[i] == Q3EGlobals.TYPE_DISC)
+            {
+                layouts[i].Set(extraX + Panel_Radius, Height + Panel_Radius + extraY, Panel_Radius, Alpha);
+                extraX += Panel_Radius * 2;
+            }
+            else
+            {
+                layouts[i].Set(extraX + SmallButton_Width / 2, Height + SmallButton_Width / 2 + extraY, SmallButton_Width, Alpha);
+                extraX += SmallButton_Width;
+            }
+        }
 
         return Q3EButtonGeometry.ToStrings(layouts, Width, Height);
     }

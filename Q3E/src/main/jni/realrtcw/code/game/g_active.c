@@ -196,18 +196,40 @@ void P_WorldEffects( gentity_t *ent ) {
 	//
 	// check for burning from flamethrower
 	//
-	if ( ent->s.onFireEnd > level.time && ( AICast_AllowFlameDamage( ent->s.number ) ) ) {
-		gentity_t *attacker;
+	if (ent->s.onFireEnd > level.time && AICast_AllowFlameDamage(ent->s.number))
+	{
+		gentity_t *attacker = &g_entities[ent->flameBurnEnt];
+		int damageMOD = MOD_FLAMETHROWER;
 
-		if ( ent->health > 0 ) {
-			attacker = g_entities + ent->flameBurnEnt;
-				if ( ent->r.svFlags & SVF_CASTAI ) {
-					G_Damage( ent, attacker, attacker, NULL, NULL, 2, DAMAGE_NO_KNOCKBACK, MOD_FLAMETHROWER );
-				} else if ( ( ent->s.onFireEnd - level.time ) > FIRE_FLASH_TIME / 2 && rand() % 5000 < ( ent->s.onFireEnd - level.time ) ) { // as it fades out, also fade out damage rate
-					G_Damage( ent, attacker, attacker, NULL, NULL, 1, DAMAGE_NO_KNOCKBACK, MOD_FLAMETHROWER );
+		// In Survival mode, if flame source is a props_flamethrower, treat differently
+		if (g_gametype.integer == GT_SURVIVAL)
+		{
+			if (!attacker || !attacker->client)
+			{
+				if (attacker && attacker->classname && !Q_stricmp(attacker->classname, "props_flamethrower"))
+				{
+					attacker = &g_entities[0]; // Force attacker to be player
+					damageMOD = MOD_FLAMETRAP; // Use specific mod
 				}
-		} else if ( ent->s.onFireEnd > level.time + 4000 ) {  // dead, so sto pthe flames soon
-			ent->s.onFireEnd = level.time + 4000;   // stop burning soon
+			}
+		}
+
+		if (ent->health > 0)
+		{
+			int oldHealth = ent->health;
+
+			// Apply damage with selected MOD
+			G_Damage(ent, attacker, attacker, NULL, NULL, 2, DAMAGE_NO_KNOCKBACK, damageMOD);
+
+			// Stop fire effect if no damage is dealt
+			if ((oldHealth - ent->health) <= 0)
+			{
+				ent->s.onFireEnd = 0;
+			}
+		}
+		else if (ent->s.onFireEnd > level.time + 4000)
+		{
+			ent->s.onFireEnd = level.time + 4000;
 		}
 	}
 }
@@ -539,9 +561,13 @@ if ((g_regen.integer == 1 || g_gametype.integer == GT_SURVIVAL) && level.time >=
 		}
 
 
-		// count down armor when over max // RealRTCW if more than 100
-		if ( client->ps.stats[STAT_ARMOR] > 100 ) {
-			client->ps.stats[STAT_ARMOR]--;
+		// count down armor when over max
+		if (g_gametype.integer != GT_SURVIVAL)
+		{
+			if (client->ps.stats[STAT_ARMOR] > 100)
+			{
+				client->ps.stats[STAT_ARMOR]--;
+			}
 		}
 	}
 
@@ -1174,7 +1200,24 @@ void ClientThink_real( gentity_t *ent ) {
 		}
 	}
 #endif
+
+	if ( g_gametype.integer == GT_SURVIVAL ) {
+		for ( i = 0; i < level.num_entities; ++i ) {
+			if ( g_entities[i].r.svFlags & SVF_CASTAI && g_entities[i].aiTeam == ent->aiTeam && &g_entities[i] != ent ) {
+				trap_UnlinkEntity( &g_entities[i] );
+			}
+		}
+	}
+
 	monsterslick = Pmove( &pm );
+
+	if ( g_gametype.integer == GT_SURVIVAL ) {
+		for ( i = 0; i < level.num_entities; ++i ) {
+			if ( g_entities[i].r.svFlags & SVF_CASTAI && g_entities[i].aiTeam == ent->aiTeam && &g_entities[i] != ent ) {
+				trap_LinkEntity( &g_entities[i] );
+			}
+		}
+	}
 
 	if ( monsterslick && !( ent->flags & FL_NO_MONSTERSLICK ) ) {
 		{
@@ -1736,12 +1779,12 @@ void ClientEndFrame( gentity_t *ent ) {
 			AICast_CheckDangerousEntity( ent, DANGER_CLIENTAIM, HOLYCROSS_RANGE + 150, 0.5, 0.6, ( ent->client->buttons & BUTTON_ATTACK ? qtrue : qfalse ) );
 			break;
 		case WP_MONSTER_ATTACK1:
-			if ( ent->aiCharacter == AICHAR_ZOMBIE || ent->aiCharacter == AICHAR_ZOMBIE_SURV || ent->aiCharacter == AICHAR_ZOMBIE_GHOST ) {
+			if ( ent->aiCharacter == AICHAR_ZOMBIE || ent->aiCharacter == AICHAR_ZOMBIE_SURV || ent->aiCharacter == AICHAR_ZOMBIE_GHOST | ent->aiCharacter == AICHAR_ZOMBIE_FLAME  ) {
 				AICast_CheckDangerousEntity( ent, DANGER_CLIENTAIM | DANGER_FLAMES, FLAMETHROWER_RANGE + 150, 0.5, 0.8, qtrue );
 			}
 			break;
 		case WP_MONSTER_ATTACK2:
-			if ( ent->aiCharacter == AICHAR_ZOMBIE || ent->aiCharacter == AICHAR_ZOMBIE_SURV || ent->aiCharacter == AICHAR_ZOMBIE_GHOST  ) {
+			if ( ent->aiCharacter == AICHAR_ZOMBIE || ent->aiCharacter == AICHAR_ZOMBIE_SURV || ent->aiCharacter == AICHAR_ZOMBIE_GHOST || ent->aiCharacter == AICHAR_ZOMBIE_FLAME   ) {
 				if ( ent->client->ps.eFlags & EF_MONSTER_EFFECT ) {
 					AICast_CheckDangerousEntity( ent, 0, 4000, 0.5, 0.8, qtrue );
 				}

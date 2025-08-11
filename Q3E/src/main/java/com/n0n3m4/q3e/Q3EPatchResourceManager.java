@@ -159,6 +159,28 @@ public class Q3EPatchResourceManager
                 ""
         );
         resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource_zipToDir(
+                Q3EGameConstants.PatchResource.SOURCE_ENGINE_EXTRAS,
+                Q3ELang.tr(context, R.string.sourceengine_extras),
+                Q3EGameConstants.SOURCE_ENGINE_VERSION,
+                Q3EGameConstants.GAME_SOURCE,
+                null,
+                "pak/source/extras.zip",
+                ""
+        );
+        resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource_fileToDir(
+                Q3EGameConstants.PatchResource.ET_LEGACY_EXTRAS,
+                Q3ELang.tr(context, R.string.etlegacy_extras) + "(2.83.2)",
+                Q3EGameConstants.ETW_VERSION,
+                Q3EGameConstants.GAME_ETW,
+                null,
+                "pak/etw/legacy_v2.83.2.pk3",
+                "legacy"
+        );
+        resourceList.add(rsc);
     }
 
     public String Fetch(Q3EGameConstants.PatchResource type, boolean overwrite, String...fsgame)

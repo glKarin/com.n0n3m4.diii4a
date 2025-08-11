@@ -2264,7 +2264,7 @@ void CG_ParticleBloodCloud( centity_t *cent, vec3_t origin, vec3_t dir ) {
 
 		p->roll = rand() % 179;
 
-		if ( cent->currentState.aiChar == AICHAR_ZOMBIE || cent->currentState.aiChar == AICHAR_ZOMBIE_SURV || cent->currentState.aiChar == AICHAR_ZOMBIE_GHOST ) {
+		if ( cent->currentState.aiChar == AICHAR_ZOMBIE || cent->currentState.aiChar == AICHAR_ZOMBIE_SURV || cent->currentState.aiChar == AICHAR_ZOMBIE_FLAME || cent->currentState.aiChar == AICHAR_ZOMBIE_GHOST ) {
 			p->color = MUSTARD;
 		} else {
 			p->color = BLOODRED;

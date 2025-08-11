@@ -456,15 +456,16 @@ int BG_IndexForString( char *token, animStringItem_t *strings, qboolean allowFai
 			strav->hash = BG_StringHashValue( strav->string );
 		}
 		if ( ( hash == strav->hash ) && !Q_stricmp( token, strav->string ) ) {
-			// found a match
-			return i;
+			return i;  // Match found
 		}
 	}
-	// no match found
+
+	// No match found
 	if ( !allowFail ) {
-		BG_AnimParseError( "BG_IndexForString: unknown token '%s'", token );
+		// Graceful fallback instead of crash
+		Com_Printf( "WARNING: BG_IndexForString: unknown token '%s'\n", token );
 	}
-	//
+
 	return -1;
 }
 
@@ -2131,10 +2132,13 @@ void BG_AnimUpdatePlayerStateConditions( pmove_t *pmove ) {
 		ps->eFlags &= ~EF_CROUCHING;
 	}
 
-	if ( pmove->cmd.buttons & BUTTON_ATTACK ) {
-		BG_UpdateConditionValue( ps->clientNum, ANIM_COND_FIRING, qtrue, qtrue );
-	} else {
-		BG_UpdateConditionValue( ps->clientNum, ANIM_COND_FIRING, qfalse, qtrue );
+	if ((pmove->cmd.buttons & BUTTON_ATTACK) || (pmove->cmd.wbuttons & WBUTTON_ATTACK2))
+	{
+		BG_UpdateConditionValue(ps->clientNum, ANIM_COND_FIRING, qtrue, qtrue);
+	}
+	else
+	{
+		BG_UpdateConditionValue(ps->clientNum, ANIM_COND_FIRING, qfalse, qtrue);
 	}
 }
 

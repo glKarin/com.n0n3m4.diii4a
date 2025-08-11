@@ -1,5 +1,5 @@
 idTech4A++ is idTech game runtime environment for Android.
-Support DOOM III/Quake 4/Prey(2006)/DOOM3 BFG/Quake 1/Quake 2/Quake 3/Return to Castle Wolfenstein/The Dark Mod/GZDOOM/Wolfenstein: Enemy Territory/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic/Xash3D
+Support DOOM III/Quake 4/Prey(2006)/DOOM3 BFG/Quake 1/Quake 2/Quake 3/Return to Castle Wolfenstein/The Dark Mod/GZDOOM/Wolfenstein: Enemy Territory/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic
 
   1. Putting your PC game data(external folder) to launcher setting `Game working directory`(default `/sdcard/diii4a`).
   2. Click left icon or right game name text of launcher status bar for choosing game, and select game mod in tab `GENERAL`'s `Game`.
@@ -40,7 +40,6 @@ Standalone game directory:
   FTEQW: fteqw/
   Serious Sam Classic - The First Encounter: serioussamtfe/
   Serious Sam Classic - The Second Encounter: serioussamtse/
-  Xash3D: xash3d/
 
 Folder name of games/mods:
   DOOM III: base/
@@ -96,6 +95,3 @@ Folder name of games/mods:
   Serious Sam Classic - The First Encounter: serioussamtfe/
   
   Serious Sam Classic - The Second Encounter: serioussamtse/
-  
-  Xash3D-HalfLife: valve/
-  Xash3D-Counter-Strike 1.6: cstrike/

@@ -1264,6 +1264,12 @@ void Cmd_Kill_f(gentity_t *ent, unsigned int dwCommand, int value)
 		return;
 	}
 
+	if (g_gamestate.integer == GS_PLAYING && ent->client->isSpawnInvulnerability && ent->client->ps.powerups[PW_INVULNERABLE] > level.time)
+	{
+		trap_SendServerCommand(ent - g_entities, "cp \"You are invulnerable - ^3/kill^7 is disabled.\"");
+		return;
+	}
+
 	if (ent->health <= 0)
 	{
 		limbo(ent, qtrue);
@@ -4837,7 +4843,7 @@ void Cmd_IntermissionPlayerKillsDeaths_f(gentity_t *ent, unsigned int dwCommand,
 
 		if (g_entities[i].inuse)
 		{
-			Q_strcat(buffer, sizeof(buffer), va("%i %i %i %i %i %i %i",
+			Q_strcat(buffer, sizeof(buffer), va("%i %i %i %i %i %i %i ",
 			                                    level.clients[i].sess.kills,
 			                                    level.clients[i].sess.kill_assists,
 			                                    level.clients[i].sess.deaths,
@@ -4848,7 +4854,7 @@ void Cmd_IntermissionPlayerKillsDeaths_f(gentity_t *ent, unsigned int dwCommand,
 		}
 		else
 		{
-			Q_strcat(buffer, sizeof(buffer), "0 0 0 0 0 0 ");
+			Q_strcat(buffer, sizeof(buffer), "0 0 0 0 0 0 0 ");
 		}
 	}
 

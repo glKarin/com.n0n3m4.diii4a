@@ -62,13 +62,14 @@ import javax.microedition.khronos.opengles.GL11;
 public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 {
     private       int          m_unit              = 0;
-    public final  int          step                = Q3EUtils.dip2px(getContext(), 5);
+    public  int          step                = 10;
     private       FloatBuffer  m_gridBuffer        = null;
     private       int          m_numGridLineVertex = 0;
     private final Object       m_gridLock          = new Object();
     private       boolean      m_edited            = false;
     private final int[]        drawerTextureId     = {0, 0};
     private       ViewGroup    layout;
+    private  int          m_drawerHeight                = 200;
     private final List<Paintable> reloadList = new ArrayList<>();
 
     public Q3EUiView(Context context)
@@ -76,6 +77,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         super(context);
 
         Q3EGL.usegles20 = false;
+        step = Q3EUtils.dip2px(getContext(), 5);
+        m_drawerHeight = Q3EUtils.dip2px(getContext(), 50) * 3 + Q3EUtils.dip2px(getContext(), 5);
 
         setRenderer(this);
 
@@ -500,7 +503,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
                 if ((yoffset == 0) && (y > height - height / 6))
                 {
-                    yoffset = height / 3;
+                    yoffset = Math.max(height / 3, m_drawerHeight);
                 }
                 else
                 {
@@ -903,17 +906,23 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         //requestRender();
     }
 
-    private int GetPerfectGridSize()
+    private int GetPerfectGridSize(int PERFECT, int UNIT, int P)
     {
-        final int UNIT = 2;
-        final int PERFECT = 50;
-        int res = 2;
+        int res = UNIT;
 
-        for(int i = res; i < Math.min(width, height); i += UNIT)
+        int w = width;
+        int h = height;
+        if(w % UNIT != 0)
+            w -= (w % UNIT);
+        if(h % UNIT != 0)
+            h -= (h % UNIT);
+        int len = Math.min(w, h);
+
+        for(int i = res; i < len; i += P)
         {
-            if(width % i != 0)
+            if(w % i != 0)
                 continue;
-            if(height % i != 0)
+            if(h % i != 0)
                 continue;
 
             int diffa = i - PERFECT;
@@ -928,6 +937,26 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     res = i;
             }
         }
+        Log.i("Q3EUiView", "Get perfected unit(min unit=" + UNIT + ", perfect unit=" + PERFECT + ") -> " + res);
+        return res;
+    }
+
+    private int GetPerfectGridSize()
+    {
+        final int PERFECT = 50;
+        int res = GetPerfectGridSize(PERFECT, 2, 2);
+
+        if(res <= 2 * 5)
+        {
+            Log.i("Q3EUiView", "Unable get perfected unit, try to multiple of 5");
+            res = GetPerfectGridSize(PERFECT, 5, 5);
+            if(res <= 2 * 10)
+            {
+                Log.i("Q3EUiView", "Unable get perfected unit, try to multiple of 10");
+                res = GetPerfectGridSize(PERFECT, 10, 2);
+            }
+        }
+
         Log.i("Q3EUiView", "GetPerfectGridSize -> " + res);
         return res;
     }

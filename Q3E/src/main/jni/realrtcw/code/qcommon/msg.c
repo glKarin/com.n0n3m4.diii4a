@@ -1552,7 +1552,7 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 			MSG_WriteBits( msg, persistantbits, MAX_PERSISTANT );
 			for ( i = 0 ; i < MAX_PERSISTANT ; i++ )
 				if ( persistantbits & ( 1 << i ) ) {
-					MSG_WriteShort( msg, to->persistant[i] );
+					MSG_WriteLong( msg, to->persistant[i] );
 				}
 		} else {
 			MSG_WriteBits( msg, 0, 1 ); // no change to persistant
@@ -1732,6 +1732,53 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 			MSG_WriteBits( msg, 0, 1 ); // no change
 		}
 	}
+
+
+	int upgradedBits[4] = {0};
+
+	for (int j = 0; j < 4; j++)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			int index = i + j * 16;
+			if (to->weaponUpgraded[index] != from->weaponUpgraded[index])
+			{
+				upgradedBits[j] |= 1 << i;
+			}
+		}
+	}
+
+	if (upgradedBits[0] || upgradedBits[1] || upgradedBits[2] || upgradedBits[3])
+	{
+		MSG_WriteBits(msg, 1, 1); // something changed
+
+		for (int j = 0; j < 4; j++)
+		{
+			if (upgradedBits[j])
+			{
+				MSG_WriteBits(msg, 1, 1);
+				MSG_WriteShort(msg, upgradedBits[j]);
+
+				for (int i = 0; i < 16; i++)
+				{
+					if (upgradedBits[j] & (1 << i))
+					{
+						int index = i + j * 16;
+						MSG_WriteShort(msg, to->weaponUpgraded[index]);
+					}
+				}
+			}
+			else
+			{
+				MSG_WriteBits(msg, 0, 1); // no change in this block
+			}
+		}
+	}
+	else
+	{
+		MSG_WriteBits(msg, 0, 1); // no upgrade flags changed
+	}
+
 #endif
 
 	//1NTERRUPTOR
@@ -1850,7 +1897,7 @@ void MSG_ReadDeltaPlayerstate( msg_t *msg, playerState_t *from, playerState_t *t
 			bits = MSG_ReadBits (msg, MAX_PERSISTANT);
 			for ( i = 0 ; i < MAX_PERSISTANT ; i++ ) {
 				if ( bits & ( 1 << i ) ) {
-					to->persistant[i] = MSG_ReadShort( msg );
+					to->persistant[i] = MSG_ReadLong( msg );
 				}
 			}
 		}
@@ -1939,6 +1986,26 @@ void MSG_ReadDeltaPlayerstate( msg_t *msg, playerState_t *from, playerState_t *t
 			for ( i = 0 ; i < 16 ; i++ ) {
 				if ( bits & ( 1 << i ) ) {
 					to->ammoclip[i + ( j * 16 )] = MSG_ReadShort( msg );
+				}
+			}
+		}
+	}
+
+	if (MSG_ReadBits(msg, 1))
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			if (MSG_ReadBits(msg, 1))
+			{
+				int bits = MSG_ReadShort(msg);
+
+				for (int i = 0; i < 16; i++)
+				{
+					if (bits & (1 << i))
+					{
+						int index = i + j * 16;
+						to->weaponUpgraded[index] = MSG_ReadShort(msg);
+					}
 				}
 			}
 		}

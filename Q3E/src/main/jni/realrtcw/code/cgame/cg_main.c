@@ -313,6 +313,7 @@ vmCvar_t int_cl_timenudge;
 vmCvar_t cg_bodysink;
 vmCvar_t cg_gunPosLock;
 vmCvar_t cg_weaponBounceSound;
+vmCvar_t cg_showSocials;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -519,9 +520,9 @@ cvarTable_t cvarTable[] = {
 	
 
 	// JPW NERVE
-	{ &cg_medicChargeTime,  "g_medicChargeTime", "20000", 0 }, // communicated by systeminfo
-	{ &cg_LTChargeTime, "g_LTChargeTime", "35000", 0 }, // communicated by systeminfo
-	{ &cg_engineerChargeTime,   "g_engineerChargeTime", "30000", 0 }, // communicated by systeminfo
+	{ &cg_medicChargeTime,  "g_medicChargeTime", "40000", 0 }, // communicated by systeminfo
+	{ &cg_LTChargeTime, "g_LTChargeTime", "40000", 0 }, // communicated by systeminfo
+	{ &cg_engineerChargeTime,   "g_engineerChargeTime", "40000", 0 }, // communicated by systeminfo
 	{ &cg_soldierChargeTime,    "g_soldierChargeTime", "20000", 0 }, // communicated by systeminfo
 	{ &cg_bluelimbotime,        "g_bluelimbotime", "30000", 0 }, // communicated by systeminfo
 	{ &cg_redlimbotime,         "g_redlimbotime", "30000", 0 }, // communicated by systeminfo
@@ -566,6 +567,8 @@ cvarTable_t cvarTable[] = {
 	{ &cg_realism, "g_realism", "0", CVAR_ARCHIVE},
 
 	{ &cg_weaponBounceSound, "cg_weaponBounceSound", "1",CVAR_ARCHIVE	},
+
+	{ &cg_showSocials, "cg_showSocials", "1",CVAR_ARCHIVE	},
 };
 int cvarTableSize = ARRAY_LEN( cvarTable );
 void CG_setClientFlags( void );
@@ -996,7 +999,7 @@ static void CG_LoadTranslationTextStrings(const char *file) {
 	int len, i;
 	char *token;
 
-	Com_sprintf(filename, MAX_QPATH, "%s", file); //karin: error: format string is not a string literal (potentially insecure) [-Werror,-Wformat-security]
+	Com_sprintf(filename, MAX_QPATH, "%s", file);
 	len = trap_FS_FOpenFile(filename, &f, FS_READ);
 	if (len <= 0) {
 		CG_Printf(S_COLOR_RED "WARNING: string translation file (main/%s)\n", filename);
@@ -1211,6 +1214,7 @@ static void CG_RegisterSounds( void ) {
 
 	cgs.media.poisonGasCough = trap_S_RegisterSound( "sound/weapons/gasgrenade/cough.wav");
 	cgs.media.knifeThrow = trap_S_RegisterSound( "sound/weapons/knife/knife_throw.wav");
+	cgs.media.nullSound = trap_S_RegisterSound( "sound/misc/null.wav");
 
 	for ( i = 0 ; i < 4 ; i++ ) {
 		Com_sprintf( name, sizeof( name ), "sound/player/footsteps/step%i.wav", i + 1 );

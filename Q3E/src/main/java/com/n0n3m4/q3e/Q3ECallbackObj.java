@@ -20,13 +20,17 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 
 import com.n0n3m4.q3e.karin.KBacktraceHandler;
+import com.n0n3m4.q3e.karin.KStr;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 
@@ -227,22 +231,42 @@ public class Q3ECallbackObj
         return Q3EUtils.GetClipboardText(Q3EMain.gameHelper.GetContext());
     }
 
-    public void sendAnalog(final boolean down, final float x, final float y)
+    public void sendAnalog(boolean down, float x, float y)
     {
         eventEngine.SendAnalogEvent(down, x, y);
     }
 
-    public void sendKeyEvent(final boolean down, final int keycode, final int charcode)
+    public void sendKeyEvent(boolean down, int keycode, int charcode)
     {
         eventEngine.SendKeyEvent(down, keycode, charcode);
     }
 
-    public void sendMotionEvent(final float deltax, final float deltay)
+    public void sendMotionEvent(float deltax, float deltay)
     {
         eventEngine.SendMotionEvent(deltax, deltay);
     }
 
-    public void sendAnalogDelayed(final boolean down, final float x, final float y, View view, final int delay)
+    public void sendMouseEvent(float x, float y)
+    {
+        eventEngine.SendMouseEvent(x, y);
+    }
+
+    public void sendTextEvent(String text)
+    {
+        eventEngine.SendTextEvent(text);
+    }
+
+    public void sendCharEvent(int ch)
+    {
+        eventEngine.SendCharEvent(ch);
+    }
+
+    public void sendWheelEvent(float x, float y)
+    {
+        eventEngine.SendWheelEvent(x, y);
+    }
+
+    public void sendAnalogDelayed(boolean down, float x, float y, View view, int delay)
     {
         view.postDelayed(new Runnable() {
             @Override
@@ -252,7 +276,7 @@ public class Q3ECallbackObj
         }, delay);
     }
 
-    public void sendKeyEventDelayed(final boolean down, final int keycode, final int charcode, View view, final int delay)
+    public void sendKeyEventDelayed(boolean down, int keycode, int charcode, View view, int delay)
     {
         view.postDelayed(new Runnable() {
             @Override
@@ -262,7 +286,7 @@ public class Q3ECallbackObj
         }, delay);
     }
 
-    public void sendMotionEventDelayed(final float deltax, final float deltay, View view, final int delay)
+    public void sendMotionEventDelayed(float deltax, float deltay, View view, int delay)
     {
         view.postDelayed(new Runnable() {
             @Override
@@ -316,14 +340,13 @@ public class Q3ECallbackObj
 
     public void ToggleToolbar(boolean on)
     {
-        vw.ToggleToolbar(on);
+        Q3E.activity.GetKeyboard().ToggleToolbar(on);
     }
 
 
     public void OpenURL(String url)
     {
-        vw.post(new Runnable()
-        {
+        vw.post(new Runnable() {
             @Override
             public void run()
             {
@@ -377,6 +400,43 @@ public class Q3ECallbackObj
     public void SetMouseCursorPosition(int x, int y)
     {
         gui.SetMouseCursorPosition(x, y);
+    }
+
+    public void ShowCursor(boolean on)
+    {
+        vw.post(new Runnable() {
+            @Override
+            public void run() {
+                vw.ShowCursor(on);
+            }
+        });
+    }
+
+    public String CopyDLLToCache(String dllPath, String name)
+    {
+        return Q3E.CopyDLLToCache(dllPath, Q3EUtils.q3ei.game, name);
+    }
+
+    public boolean RequestPermission(String permission, int requestCode)
+    {
+        synchronized(Q3E.activity.permissionRequest) {
+            try
+            {
+                Q3E.activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        Q3E.activity.RequestPermission(permission, requestCode);
+                    }
+                });
+                Q3E.activity.permissionRequest.wait();
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+        return Q3E.activity.permissionRequest.IsGranted();
     }
 }
 

@@ -125,14 +125,23 @@ public class Slider extends Paintable implements TouchListener
                 }
                 else
                 {
+                    float w = (float)width / 3.0f;
                     for (int i = 0; i < verts.length; i += 2)
                     {
-                        verts[i] = verts[i] * width / 3;
+                        verts[i] = verts[i] * w;
 						verts[i + 1] = verts[i + 1] * height;
 //                        verts[i + 1] = Math.min(verts[i] * width / 3, verts[i + 1] * height) + cy;
 //                        verts[i] = verts[i] * width / 2 + cx;
 //                        verts[i + 1] = verts[i + 1] * height + cy;
                     }
+
+                    float h = (float)height / w;
+                    float y1 = (1.0f - h) * 0.5f;
+                    float y2 = y1 + h;
+                    float[] texcoords = {0, y1, 0, y2, 1, y2, 1, y1};
+                    tex_p.put(texcoords);
+                    tex_p.position(0);
+
                     m_split = SPLIT_LEFT_RIGHT;
                 }
 

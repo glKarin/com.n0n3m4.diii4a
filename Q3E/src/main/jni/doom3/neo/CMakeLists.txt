@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 
 project(doom3)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+# -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
+
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -34,8 +36,6 @@ add_definitions(-DID_ENABLE_CURL=1)
 set(COMPILE_OGGVORBIS       TRUE)
 set(COMPILE_CURL        	TRUE)
 set(COMPILE_FREETYPE    	FALSE)
-
-# -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 # set(CMAKE_BUILD_TYPE "Debug")
 # TODO
@@ -126,6 +126,7 @@ option(GLSL_PROGRAM							"GLSL program on new material stage support"								ON
 option(GLOBAL_ILLUMINATION					"Render global illumination before draw interactions"						ON)
 option(RETRO_POSTPROCESS					"Add retro postprocess rendering support"								   	ON)
 option(IMGUI								"Add imGUI support"								   							OFF)
+option(GL_INT_INDEX							"Use 4 bytes index on OpenGL"								   				ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -762,12 +763,16 @@ if(RETRO_POSTPROCESS)
 	add_definitions(-D_POSTPROCESS)
 	message(STATUS "Add retro postprocess rendering support")
 endif()
-if(IMGUI)
+if(IMGUI AND NOT LINUX_SDL)
 	add_definitions(-D_IMGUI)
 	message(STATUS "Add imGUI support")
 	add_subdirectory(externlibs/imgui)
 	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs/imgui")
 	set(local_libs ${local_libs} static_imgui)
+endif()
+if(GL_INT_INDEX)
+	add_definitions(-D_GL_INT_INDEX)
+	message(STATUS "Use 4 bytes index on OpenGL for large model")
 endif()
 
 if(OPENAL)
@@ -1643,7 +1648,7 @@ else()
 			sys/linux/sound_alsa.cpp
 		)
 		set(src_sys_core
-			sys/linux/gles2.cpp
+			sys/linux/glimp.cpp
 		)
 	endif()
 

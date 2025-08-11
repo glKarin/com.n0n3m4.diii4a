@@ -433,6 +433,13 @@ namespace Utils
 				basePath = Utils::FindFile(pathOverride.filename());
 				basePath = basePath.parent_path();
 			}
+#ifdef _DIII4A //karin: if library file not exists, also using parent path
+			if(basePath.empty())
+			{
+				basePath = fs::path(pPathOverride);
+				basePath = basePath.parent_path();
+			}
+#endif
 		}
 		catch(const std::exception & ex)
 		{

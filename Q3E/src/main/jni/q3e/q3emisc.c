@@ -107,6 +107,7 @@ void Q3E_PrintCallbacks(const Q3E_Callback_t *callback)
 	LOGI("    close_keyboard: %p", callback->Sys_closeKeyboard);
 	LOGI("    open_url: %p", callback->Sys_openURL);
 	LOGI("    exit_finish: %p", callback->Sys_exitFinish);
+	LOGI("    show_cursor: %p", callback->Sys_showCursor);
 	LOGI("  GUI: ");
 	LOGI("    show_toast: %p", callback->Gui_ShowToast);
 	LOGI("    open_dialog: %p", callback->Gui_openDialog);

@@ -685,6 +685,8 @@ typedef struct weaponInfo_s {
 
 	qhandle_t handsSkin; // eugeny
     qhandle_t legskin;
+	qhandle_t upgradedSkin;
+	qhandle_t upgradedMapSkin;
 //----(SA)	end
 
 	qboolean droppedAnglesHack;
@@ -1554,7 +1556,8 @@ typedef struct {
 	qhandle_t sizeCursor;
 
 	sfxHandle_t poisonGasCough;
-	sfxHandle_t		knifeThrow;
+	sfxHandle_t knifeThrow;
+	sfxHandle_t nullSound;
 
 } cgMedia_t;
 
@@ -1937,6 +1940,8 @@ extern vmCvar_t cg_gunPosLock;
 
 extern vmCvar_t cg_hudStyle;
 extern vmCvar_t	cg_weaponBounceSound;
+
+extern vmCvar_t cg_showSocials;
 
 //
 // cg_main.c

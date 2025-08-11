@@ -1,10 +1,37 @@
 apply plugin: 'com.android.library'
 
 String[] ABIFILTERS = [
+	"arm64-v8a",
         "armeabi-v7a",
-        "arm64-v8a"
         /*, "armeabi", "x86", "x86_64"*/
 ]
+
+String PRODUCT_FLAVOR = "fdroid" // github fdroid
+
+String[] CMAKE_ARGUMENTS = [
+        "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21", "-DDIII4A_PRODUCT_FLAVOR=" + PRODUCT_FLAVOR/*, "-DANDROID_STL=c++_shared"*/
+]
+
+// filter ABI
+def abifilters = ABIFILTERS
+if(project.properties.abifilters != null && !project.properties.abifilters.isEmpty()) {
+    println "[Q3E]: Using gradle.properties ABI filters = ${project.properties.abifilters}"
+    abifilters = project.properties.abifilters.split(",")
+} else {
+    println "[Q3E]: Using built-in ABI filters = ${Arrays.toString(abifilters)}"
+}
+println "[Q3E]: Build arch = " + Arrays.toString(abifilters)
+
+// CMake options
+def cmake_arguments = CMAKE_ARGUMENTS
+if(project.properties.cmake_options != null && !project.properties.cmake_options.isEmpty()) {
+    println "[Q3E]: Add gradle.properties CMake options = ${project.properties.cmake_options}"
+    def add_options = project.properties.cmake_options.split(",")
+    cmake_arguments = new String[CMAKE_ARGUMENTS.length + add_options.length]
+    System.arraycopy(CMAKE_ARGUMENTS, 0, cmake_arguments, 0, CMAKE_ARGUMENTS.length)
+    System.arraycopy(add_options, 0, cmake_arguments, CMAKE_ARGUMENTS.length, add_options.length)
+}
+println "[Q3E]: CMake arguments = " + Arrays.toString(cmake_arguments)
 
 android {
     compileSdk project.properties.compileSdkVersion.toInteger()
@@ -16,21 +43,21 @@ android {
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
 
-        ndk {
+        /*ndk {
             moduleName "q3eloader"
-            abiFilters ABIFILTERS
-        }
+            abiFilters abifilters
+        }*/
         externalNativeBuild {
             cmake {
-                abiFilters ABIFILTERS
-                arguments "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21"/*, "-DANDROID_STL=c++_shared"*/
+                abiFilters abifilters
+                arguments cmake_arguments
                 cppFlags "-fexceptions", "-frtti"
             }
         }
         versionCode 131130411
-        versionName '1.3.1.1304.11' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
+        versionName '1.3.1.1304.12' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
 
-        buildConfigField "String", "PRODUCT_FLAVOR", "\"fdroid\"" // github
+        buildConfigField "String", "PRODUCT_FLAVOR", "\"" + PRODUCT_FLAVOR + "\""
     }
 
     buildTypes {

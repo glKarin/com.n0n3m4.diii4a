@@ -57,44 +57,51 @@ pathCorner_t pathCorners[MAX_PATH_CORNERS];
 ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
     // No weapon
 	{   
-		WP_NONE,             // weaponindex
-	    WEAPON_CLASS_NONE,   // weaponClass
-		WP_NONE,             // weap alt
-		WEAPON_TEAM_NONE,   // weapon team
-	    0,                   // maxammo
-		0,                   // uses
-		0,                   // maxclip
-		0,                   // reloadTime
-		0,                   // reloadTimeFull
-		50,                  // fireDelayTime
-		0,                   // nextShotTime
-		0,                   // nextShotTime2
-		0,                   // maxHeat
-		0,                   // coolRate
-		0,                   // playerDamage
-		0,                   // aiDamage
-		0,                   // playerSplashRadius
-		0,                   // aiSplashRadius
-		0,                   // spread
-		0,                   // aimSpreadScaleadd
-		0.0f,                // spreadScale
-		0,                   // weapRecoilDuration
-		{0, 0},              // weapRecoilPitch
-		{0,0},               // weapRecoilYaw
-		1.00,                // soundRange
-		1.00,                // moveSpeed
-		0,                   // twoHand
-		0,                   // upAngle
-		{0.0, 0.0},          // falloffdistance
-		0,                   // mod     
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,       
+		WP_NONE,             // 1.weaponindex
+	    WEAPON_CLASS_NONE,   // 2. weaponClass
+		WP_NONE,             // 3. weap alt
+		WEAPON_TEAM_NONE,    //  4. weapon team
+	    0,                   // 5. maxammo
+		0,                   // 6. maxammoUpgraded
+		0,                   // 7. uses
+		0,                   // 7.5 uses upgraded
+		0,                   // 8. maxclip
+		0,                   // 9. maxclipUpgraded
+		0,                   // 10. reloadTime
+		0,                   // 11. reloadTimeFull
+		50,                  // 12. fireDelayTime
+		0,                   // 13. nextShotTime
+		0,                   // 14. nextShotTimeUpgraded
+		0,                   // 15. nextShotTime2
+		0,                   // 16. nextShotTime2Upgraded
+		0,                   // 17. maxHeat
+		0,                   // 18. coolRate
+		0,                   // 19. playerDamage
+		0,                   // 20. playerDamageUpgraded
+		0,                   // 21. aiDamage
+		0,                   // 22. playerSplashRadius
+		0,                   // 23. aiSplashRadius
+		0,                   // 24. spread
+		0,                   // 25. spreadUpgraded
+		0,                   // 26. aimSpreadScaleadd
+		0.0f,                // 27. spreadScale
+		0,                   // 28. weapRecoilDuration
+		{0, 0},              // 29. weapRecoilPitch
+		{0,0},               // 30. weapRecoilYaw
+		1.00,                // 31. soundRange
+		1.00,                // 32. moveSpeed
+		0,                   // 33. twoHand
+		0,                   // 34. upAngle
+		{0.0, 0.0},          // 35. falloffdistance
+		0,                   // 36. mod     
+		0,                   // 37. shotgunReloadStart
+		0,                   // 38. shotgunReloadLoop;
+		0,                   // 39. shotgunReloadEnd;
+		0,                   // 40. shotgunPumpStart;
+		0,                   // 41. shotgunPumpLoop;
+		0,                   // 42. shotgunPumpEnd;
+		0,                   // 43. brassDelayEmpty;
+		0,                   // 44. brassDelay;
 	}, 
     
 	// Melee weapons
@@ -106,10 +113,17 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 	    0,                  
 		0,                         
 		0,                  
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,                   
 		0,
 		0,                 
 		0,                  
+		0,
 		0,                  
 		0,                   
 		0,                    
@@ -147,12 +161,19 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		WEAPON_TEAM_AXIS,          
 		0,          
 		0,                     
+		0,
 		0,                     
 		0,                 
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,                 
 		0,
 		0,                 
 		0,                 
+		0,
 		0,                    
 		0,                   
 		0,                   
@@ -190,9 +211,16 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,                     
 		0,                     
 		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,                 
 		0,                  
 		0,                  
+		0,
 		0,                  
 		0,                    
 		0,                   
@@ -232,8 +260,15 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,                   
 		0,              
 		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,                 
-		0,               
+		0, 
+		0,              
 		0,                
 		0,                  
 		0,                  
@@ -272,7 +307,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,        
 		0,
-		0,        
+		0,
+		0,  
+		0,
+		0,
+		0,
+		0,
+		0,      
+		0,
 		0,       
 		0,       
 		0,       
@@ -313,6 +355,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,        
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,
 		0,       
 		0,       
@@ -355,6 +404,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,        
 		0,       
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,      
 		0,
 		0,      
@@ -395,10 +451,17 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,        
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0, 
 		0,      
 		0,       
 		0,       
+		0,
 		0,      
 		0,      
 		0,       
@@ -437,7 +500,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,        
 		0, 
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,      
+		0,
 		0,       
 		0,       
 		0,      
@@ -479,7 +549,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,        
 		0,       
+		0,
 		0, 
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,      
 		0,       
 		0,      
@@ -519,11 +596,18 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,       
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,       
 		0,
 		0,        
 		0,        
 		0,      
+		0,
 		0,      
 		0,        
 		0,          
@@ -559,6 +643,12 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,       
 		0,       
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,        
 		0,       
 		0,
@@ -567,6 +657,7 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,    
 		0,    
 		0,        
+		0,
 		0,          
 		0,          
 		0,          
@@ -602,10 +693,17 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,
 		0,       
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,       
 		0,        
 		0,        
-		0,      
+		0, 
+		0,     
 		0,      
 		0,        
 		0,          
@@ -642,10 +740,17 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,
 		0,       
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,        
 		0,       
 		0,      
 		0,       
+		0,
 		0,      
 		0,      
 		0,        
@@ -683,12 +788,19 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,        
 		0,
+		0,
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,       
 		0,      
 		0,      
 		0,      
 		0,      
+		0,
 		0,       
 		0,         
 		0,          
@@ -727,7 +839,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,       
 		0,      
-		0,      
+		0, 
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,     
+		0,
 		0,      
 		0,      
 		0,       
@@ -767,6 +886,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,       
 		0,     
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,
 		0,      
 		0,      
@@ -808,8 +934,15 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,
 		0,        
 		0,       
-		0,      
-		0,      
+		0,  
+		0,    
+		0,
+		0, 
+		0,
+		0,
+		0,
+		0,
+		0,     
 		0,      
 		0,      
 		0,       
@@ -849,7 +982,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,
 		0,        
 		0,        
-		0,       
+		0,  
+		0,     
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,       
 		0,       
 		0,      
@@ -893,6 +1033,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,       
 		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,      
 		0,      
 		0,       
@@ -932,7 +1079,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,       
 		0,       
-		0,       
+		0, 
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,      
 		0,
 		0,      
 		0,      
@@ -972,9 +1126,16 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,       
 		0,        
+		0,  
+		0,     
+		0,
 		0,       
-		0,       
-		0,       
+		0, 
+		0,
+		0,
+		0,
+		0,
+		0,      
 		0,      
 		0,      
 		0,        
@@ -1012,7 +1173,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,
 		0,       
-		0,        
+		0,  
+		0,      
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,       
 		0,       
 		0,       
@@ -1053,6 +1221,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,       
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,       
 		0,       
 		0,       
@@ -1093,6 +1268,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,       
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,        
 		0,       
 		0,      
@@ -1136,8 +1318,15 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,        
 		0,       
+		0,
 		0,      
 		0,      
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,      
 		0,      
 		0,       
@@ -1177,7 +1366,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,      
 		0,        
 		0,       
-		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,  
+		0,      
+		0,
 		0,        
 		0,   
 		0,    
@@ -1217,7 +1413,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,
 		0,      
-		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,  
+		0,      
+		0,
 		0,       
 		0,        
 		0,        
@@ -1259,7 +1462,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,        
 		0,        
-		0,      
+		0,
+		0, 
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,     
 		0,
 		0,      
 		0,      
@@ -1300,7 +1510,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,      
 		0,        
 		0,
-		0,       
+		0, 
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,      
+		0,
 		0,        
 		0,        
 		0,      
@@ -1339,9 +1556,16 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,      
 		0,       
 		0,      
-		0,        
 		0, 
-		0,      
+		0,
+		0,
+		0,
+		0,
+		0,       
+		0, 
+		0,  
+		0,    
+		0,
 		0,        
 		0,        
 		0,   
@@ -1381,6 +1605,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,
 		0,       
 		0,       
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,        
 		0,       
 		0,       
@@ -1423,8 +1654,15 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,        
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,       
 		0,      
+		0,
 		0,      
 		0,      
 		0,      
@@ -1463,6 +1701,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,        
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,
 		0,       
 		0,      
@@ -1506,7 +1751,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,       
 		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,      
+		0,
 		0,      
 		0,      
 		0,      
@@ -1547,7 +1799,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,           
 		0,        
 		0,         
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,         
+		0,
 		0,
 		0,      
 		0,      
@@ -1588,6 +1847,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,           
 		0,        
 		0,         
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,         
 		0,
 		0,      
@@ -1628,7 +1894,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,           
 		0,        
-		0,         
+		0, 
+		0,  
+		0,      
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,
 		0,         
 		0,      
@@ -1666,14 +1939,21 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		WEAPON_TEAM_COMMON,       
 		0,                   
 		0,       
-		0,        
+		0,  
+		0,      
 		0,           
 		0,        
 		0,         
 		0,
 		0,         
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,      
-		0,      
+		0, 
+		0,     
 		0,      
 		0,        
 		0,        
@@ -1701,6 +1981,54 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 	}, 
 
 		{   
+		WP_DYNAMITE_ENG,
+		WEAPON_CLASS_GRENADE,
+		WP_NONE, 
+		WEAPON_TEAM_COMMON,       
+		0,                   
+		0,       
+		0,        
+		0,           
+		0,        
+		0,         
+		0,
+		0,  
+		0,       
+		0,      
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,      
+		0,      
+		0,        
+		0,        
+		0, 
+		0,       
+		0,          
+		0,                  
+		0.0f,            
+		0,               
+		{0, 0},         
+		{0,0},              
+		0,               
+		0.0,               
+		0,               
+		0,
+		{0.0, 0.0},             
+		MOD_DYNAMITE, 
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,                                 
+	}, 
+
+		{   
 		WP_SMOKETRAIL,
 		WEAPON_CLASS_GRENADE,
 		WP_NONE, 
@@ -1710,6 +2038,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,           
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,         
 		0,
 		0,         
@@ -1750,10 +2085,17 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,       
 		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,        
 		0,       
 		0,       
-		0,       
+		0,  
+		0,     
 		0,      
 		0,      
 		0,      
@@ -1792,8 +2134,15 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,        
 		0,
+		0,  
+		0,      
+		0,
+		0,
+		0,
+		0,
+		0,
+		0, 
 		0,        
-		0,         
 		0,      
 		0,      
 		0,      
@@ -1833,8 +2182,15 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0,        
 		0,
-		0,        
+		0, 
+		0,
+		0,       
 		0,         
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,      
 		0,      
 		0,      
@@ -1873,9 +2229,16 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,         
 		0,       
 		0,
+		0,  
+		0,      
 		0,        
+		0, 
+		0,
+		0,
+		0,
+		0,
 		0,        
-		0,         
+		0,
 		0,      
 		0,      
 		0,      
@@ -1916,7 +2279,14 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,
 		0,        
 		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,         
+		0,
 		0,      
 		0,      
 		0,      
@@ -1959,8 +2329,15 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,        
 		0,       
 		0,       
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,       
 		0,      
+		0,
 		0,
 		0,      
 		0,       
@@ -1998,9 +2375,16 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,       
 		0, 
 		0,       
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,        
 		0,      
 		0,       
+		0,
 		0,       
 		0,      
 		0,      
@@ -2040,6 +2424,13 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,
 		0,       
 		0,       
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
 		0,        
 		0,       
 		0,       
@@ -2077,17 +2468,24 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		WEAPON_CLASS_NONE,
 		WP_NONE,
 		WEAPON_TEAM_NONE,  
+		999,
 		999,                 
+		0,
 		0,       
+		999,
 		999,      
+		0,
 		0,           
 		50,        
+		1000,
 		1000,      
+		1000,
 		1000,      
 		0,
 		0,      
 		0,      
 		0,        
+		0,
 		0,          
 		0,          
 		0,          
@@ -2098,7 +2496,7 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		{0,0},           
 		{0,0},              
 		1000,               
-		0,                  
+		0.0f,                 
 		0,               
 		0,
 		{0.0, 0.0},               
@@ -2118,16 +2516,23 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		WEAPON_CLASS_NONE,
 		WP_NONE, 
 		WEAPON_TEAM_NONE, 
+		999,
 		999,                 
+		0,
 		0,       
+		999,
 		999,      
+		0,
 		0,           
 		50,        
+		250,
 		250,       
+		250,
 		250,       
 		0,      
 		0,
-		0,      
+		0, 
+		0,     
 		0,        
 		0,          
 		0,          
@@ -2159,15 +2564,22 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		WEAPON_CLASS_NONE,
 		WP_NONE,
 		WEAPON_TEAM_NONE,  
+		999,
 		999,                 
-		0,       
-		999,      
+		0,  
+		0,     
+		999,
+		999,
+		0,      
 		0,           
 		50,        
-		250,       
+		250, 
+		250,      
+		250,
 		250,      
 		0,
 		0,      
+		0,
 		0,      
 		0,        
 		0,          
@@ -2507,6 +2919,7 @@ gitem_t bg_itemlist[] =
 		WP_NONE, //giWeapon
 		0,       //giTag
 		0,          // ammoindex
+		0,          // ammoindexSurv
 		0,          // clipindex
 		"",          // precache
 		"",          // sounds
@@ -2547,6 +2960,7 @@ model="models/powerups/clipboard/clipboard.md3"
 		0,
 		0,
 		0,
+		0,
 		"",
 		"",
 		{0,0,0,0,0,0}
@@ -2576,6 +2990,7 @@ model="models/powerups/treasure/goldbar.md3"
 		5,
 		IT_TREASURE,
 		WP_NONE,
+		0,
 		0,
 		0,
 		0,
@@ -2610,6 +3025,7 @@ model="models/powerups/health/health_s.md3"
 		0,
 		0,
 		0,
+		0,
 		"",
 		"",
 		{15,10,5,5,1,10}
@@ -2635,6 +3051,7 @@ model="models/powerups/health/health_m.md3"
 		0,
 		0,
 		0,
+		0,
 		"",
 		"",
 		{30,25,15,10,3,20}
@@ -2657,6 +3074,7 @@ model="models/powerups/health/health_l.md3"
 		50,
 		IT_HEALTH,
 		WP_NONE,
+		0,
 		0,
 		0,
 		0,
@@ -2696,6 +3114,7 @@ model="models/powerups/health/health_t1.md3"
 		0,
 		0,
 		0,
+		0,
 		"",
 		"",
 		{15,15,15,10,2,10}   // amount given in first stage based on gameskill level
@@ -2730,6 +3149,7 @@ model="models/powerups/health/health_b1.md3"
 		0,
 		0,
 		0,
+		0,
 		"",
 		"",
 		{15,15,15,10,2,10}   // amount given in first stage based on gameskill level
@@ -2758,6 +3178,7 @@ model="models/powerups/health/health_wallbox.md3"
 		0,
 		0,
 		0,
+		0,
 		"",
 		"",
 		{25,25,25,15,3,15}
@@ -2782,6 +3203,7 @@ model="models/powerups/health/health_w.md3"
 		25,
 		IT_HEALTH,
 		WP_NONE,
+		0,
 		0,
 		0,
 		0,
@@ -2815,6 +3237,7 @@ model="models/powerups/instant/stamina_stein.md3"
 		IT_POWERUP,
 		WP_NONE,
 		PW_NOFATIGUE,
+		0,
 		0,
 		0,
 		"",
@@ -2857,6 +3280,7 @@ model="models/powerups/instant/stamina_brandy1.md3"
 		PW_NOFATIGUE,
 		0,
 		0,
+		0,
 		"",
 		"",
 		{30,25,20,15,1,20}
@@ -2888,6 +3312,7 @@ model="models/powerups/armor/armor_body1.md3"
 		0,
 		0,
 		0,
+		0,
 		"",
 		"",
 		{75,75,75,75,75,75}
@@ -2913,6 +3338,7 @@ model="models/powerups/armor/armor_body2.md3"
 		0,
 		0,
 		0,
+		0,
 		"",
 		"",
 		{75,75,75,75,75,75}
@@ -2935,6 +3361,7 @@ model="models/powerups/armor/armor_head1.md3"
 		25,
 		IT_ARMOR,
 		WP_NONE,
+		0,
 		0,
 		0,
 		0,
@@ -2971,6 +3398,7 @@ model="models/weapons2/knife/knife.md3"
 		WP_KNIFE,
 		WP_KNIFE,
 		WP_KNIFE,
+		WP_KNIFE,
 		"",                     
 		"",                     
 		{0,0,0,0,0,0}
@@ -2994,6 +3422,7 @@ model="models/weapons2/luger/luger.md3"
 		"Luger",             
 		50,
 		IT_WEAPON,
+		WP_LUGER,
 		WP_LUGER,
 		WP_LUGER,
 		WP_LUGER,
@@ -3025,6 +3454,7 @@ model="models/weapons2/mauser/mauser.md3"
 		WP_MAUSER,
 		WP_MAUSER,
 		WP_MAUSER,
+		WP_MAUSER,
 		"",                      
 		"",                      
 		{0,0,0,0,0,0}
@@ -3051,6 +3481,7 @@ model="models/weapons2/thompson/thompson.md3"
 		WP_THOMPSON,
 		WP_COLT,
 		WP_THOMPSON,
+		WP_THOMPSON,
 		"",                 
 		"",                  
 		{0,0,0,0,0,0}
@@ -3073,6 +3504,7 @@ model="models/weapons2/mauser/mauser.md3"
 		"delisle",          
 		50,
 		IT_WEAPON,
+		WP_DELISLE,
 		WP_DELISLE,
 		WP_DELISLE,
 		WP_DELISLE,
@@ -3104,6 +3536,7 @@ model="models/weapons2/mauser/mauser.md3"
 		WP_DELISLESCOPE,
 		WP_DELISLE,
 		WP_DELISLE,
+		WP_DELISLE,
 		"",                      
 		"",                      
 		{0,0,0,0,0,0}
@@ -3128,6 +3561,7 @@ model="models/weapons2/mauser/mauser.md3"
 		IT_WEAPON,
 		WP_M1941SCOPE,
 		WP_M1941SCOPE,
+		WP_M1941,
 		WP_M1941,
 		WP_M1941,
 		"",                      
@@ -3155,6 +3589,7 @@ model="models/weapons2/sten/sten.md3"
 		WP_STEN,
 		WP_LUGER,
 		WP_STEN,
+		WP_STEN,
 		"",                  
 		"",                 
 		{0,0,0,0,0,0}
@@ -3179,6 +3614,7 @@ dual colts
 		WP_AKIMBO,
 		WP_AKIMBO,
 		WP_COLT,
+		WP_AKIMBO,
 		WP_AKIMBO,
 		"",                     
 		"",                     
@@ -3206,6 +3642,7 @@ dual TT33
 		WP_DUAL_TT33,
 		WP_TT33,
 		WP_DUAL_TT33,
+		WP_DUAL_TT33,
 		"",                     
 		"",                     
 		{0,0,0,0,0,0}
@@ -3228,6 +3665,7 @@ model="models/weapons2/colt/colt.md3"
 		"Colt",                  
 		50,
 		IT_WEAPON,
+		WP_COLT,
 		WP_COLT,
 		WP_COLT,
 		WP_COLT,
@@ -3261,6 +3699,7 @@ model="models/weapons2/garand/garand.md3"
 		WP_GARAND,
 		WP_GARAND,
 		WP_GARAND,
+		WP_GARAND,
 		"",                      
 		"",                      
 		{0,0,0,0,0,0}
@@ -3290,6 +3729,7 @@ model="models\weapons2\mp40\mp40.md3"
 		WP_MP40,
 		WP_LUGER,
 		WP_MP40,
+		WP_MP40,
 		"",                  
 		"",                
 		{0,0,0,0,0,0}
@@ -3317,6 +3757,7 @@ model="models/weapons2/fg42/fg42.md3"
 		WP_FG42,
 		WP_FG42,
 		WP_MAUSER,
+		WP_FG42,
 		WP_FG42,
 		"",                  
 		"",                  
@@ -3346,6 +3787,7 @@ model="models/weapons2/sp5/sp5.md3"
 		WP_SILENCER,
 		WP_SILENCER,
 		WP_LUGER,
+		WP_SILENCER,
 		WP_LUGER,
 		"",                 
 		"",                  
@@ -3369,6 +3811,7 @@ model="models/weapons2/panzerfaust/pf.md3"
 		"Panzerfaust",               
 		1,
 		IT_WEAPON,
+		WP_PANZERFAUST,
 		WP_PANZERFAUST,
 		WP_PANZERFAUST,
 		WP_PANZERFAUST,
@@ -3401,6 +3844,7 @@ weapon_grenadelauncher
 		WP_GRENADE_LAUNCHER,
 		WP_GRENADE_LAUNCHER,
 		WP_GRENADE_LAUNCHER,
+		WP_GRENADE_LAUNCHER,
 		"",                      
 		"sound/weapons/grenade/hgrenb1a.wav sound/weapons/grenade/hgrenb2a.wav",             
 		{0,0,0,0,0,0}
@@ -3426,6 +3870,7 @@ weapon_grenadePineapple
 		WP_GRENADE_PINEAPPLE,
 		WP_GRENADE_PINEAPPLE,
 		WP_GRENADE_PINEAPPLE,
+		WP_GRENADE_PINEAPPLE,
 		"",                      
 		"sound/weapons/grenade/hgrenb1a.wav sound/weapons/grenade/hgrenb2a.wav",            
 		{0,0,0,0,0,0}
@@ -3446,6 +3891,7 @@ weapon_grenadePineapple
 		"Dynamite Weapon",       
 		7,
 		IT_WEAPON,
+		WP_DYNAMITE,
 		WP_DYNAMITE,
 		WP_DYNAMITE,
 		WP_DYNAMITE,
@@ -3479,6 +3925,7 @@ model="models/weapons2/venom/pu_venom.md3"
 		WP_VENOM,
 		WP_MG42M,
 		WP_VENOM,
+		WP_VENOM,
 		"",                      
 		"",                      
 		{0,0,0,0,0,0}
@@ -3503,6 +3950,7 @@ model="models/weapons2/flamethrower/pu_flamethrower.md3"
 		"Flamethrower",             
 		200,
 		IT_WEAPON,
+		WP_FLAMETHROWER,
 		WP_FLAMETHROWER,
 		WP_FLAMETHROWER,
 		WP_FLAMETHROWER,
@@ -3535,6 +3983,7 @@ model="models/weapons2/tesla/pu_tesla.md3"
 		WP_TESLA,
 		WP_TESLA,
 		WP_TESLA,
+		WP_TESLA,
 		"",                          
 		"",                          
 		{0,0,0,0,0,0}
@@ -3563,6 +4012,7 @@ model="models/weapons2/mauser/pu_mauser_scope.md3"
 		WP_SNIPERRIFLE,
 		WP_MAUSER,
 		WP_MAUSER,
+		WP_MAUSER,
 		"",                         
 		"",                         
 		{0,0,0,0,0,0}
@@ -3589,6 +4039,7 @@ model="models/weapons2/garand/garand.md3"
 		WP_SNOOPERSCOPE,
 		WP_GARAND,
 		WP_GARAND,
+		WP_GARAND,
 		"",                          
 		"",                          
 		{0,0,0,0,0,0}
@@ -3611,7 +4062,8 @@ model="models/weapons2/garand/garand.md3"
 		IT_WEAPON,
 		WP_FG42SCOPE,
 		WP_FG42SCOPE,      
-		WP_MAUSER,      
+		WP_MAUSER,
+		WP_FG42,      
 		WP_FG42,        
 		"",                          
 		"",                          
@@ -3637,6 +4089,7 @@ weapon_monster_attack1 (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 		IT_WEAPON,
 		WP_MONSTER_ATTACK1,
 		WP_MONSTER_ATTACK1,
+		WP_MONSTER_ATTACK1,
 		WP_MONSTER_ATTACK1,        
 		WP_MONSTER_ATTACK1,         
 		"",                         
@@ -3658,6 +4111,7 @@ weapon_monster_attack2 (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 		"MonsterAttack2",            
 		100,
 		IT_WEAPON,
+		WP_MONSTER_ATTACK2,
 		WP_MONSTER_ATTACK2,
 		WP_MONSTER_ATTACK2,
 		WP_MONSTER_ATTACK2,        
@@ -3683,6 +4137,7 @@ weapon_monster_attack3 (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 		IT_WEAPON,
 		WP_MONSTER_ATTACK3,
 		WP_MONSTER_ATTACK3,
+		WP_MONSTER_ATTACK3,
 		WP_MONSTER_ATTACK3,        
 		WP_MONSTER_ATTACK3,
 		"",                          
@@ -3705,6 +4160,7 @@ weapon_mortar (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 		"nopickup(WP_MORTAR)",      
 		6,
 		IT_WEAPON,
+		WP_MORTAR,
 		WP_MORTAR,
 		WP_MORTAR,
 		WP_MORTAR,
@@ -3741,6 +4197,7 @@ model="models/weapons2/mp34/mp34_3rd.md3"
 		WP_MP34,
 		WP_LUGER,
 		WP_MP34,
+		WP_MP34,
 		"",                  
 		"",                 
 		{0,0,0,0,0,0}
@@ -3766,6 +4223,7 @@ model="models/weapons2/tt33/tt33.md3"
 		"tt33",             
 		30,
 		IT_WEAPON,
+		WP_TT33,
 		WP_TT33,
 		WP_TT33,
 		WP_TT33,
@@ -3799,6 +4257,7 @@ model="models/weapons2/ppsh/ppsh.md3"
 		WP_PPSH,
 		WP_TT33,
 		WP_PPSH,
+		WP_PPSH,
 		"",                  
 		"",                 
 		{0,0,0,0,0}
@@ -3824,6 +4283,7 @@ model="models/weapons2/mosin/mosin.md3"
 		"mosin",               
 		30,
 		IT_WEAPON,
+		WP_MOSIN,
 		WP_MOSIN,
 		WP_MOSIN,
 		WP_MOSIN,
@@ -3857,6 +4317,7 @@ model="models/multiplayer/g43/g43_3rd.md3"
 		WP_G43,
 		WP_MAUSER,
 		WP_G43,
+		WP_G43,
 		"",                  
 		"",                  
 		{0,0,0,0,0,0}
@@ -3883,6 +4344,7 @@ model="models/multiplayer/m1941/m1941_3rd.md3"
 		"m1941",             
 		30,
 		IT_WEAPON,
+		WP_M1941,
 		WP_M1941,
 		WP_M1941,
 		WP_M1941,
@@ -3917,6 +4379,7 @@ model="models/multiplayer/m1_garand/m1_garand_3rd.md3"
 		WP_M1GARAND,
 		WP_BAR,
 		WP_M1GARAND,
+		WP_M1GARAND,
 		"",                 
 		"",                  
 		{0,0,0,0,0,0}
@@ -3939,6 +4402,7 @@ model="models/weapons2/mauser/mauser.md3"
 		"m7", 
 		200,
 		IT_WEAPON,
+		WP_M7,
 		WP_M7,
 		WP_M7,
 		WP_M7,
@@ -3972,6 +4436,7 @@ model="models/weapons2/bar/bar3rd.md3"
 		WP_BAR,
 		WP_BAR,
 		WP_BAR,
+		WP_BAR,
 		"",                  
 		"",                  
 		{0,0,0,0,0,0}
@@ -3997,6 +4462,7 @@ model="models/weapons2/mp44/mp44.md3"
 		"MP44",             
 		30,
 		IT_WEAPON,
+		WP_MP44,
 		WP_MP44,
 		WP_MP44,
 		WP_MP44,
@@ -4027,6 +4493,7 @@ model="models/multiplayer/mg42/mg42_3rd.md3"
 		WP_MG42M,
 		WP_MG42M,
 		WP_MG42M,
+		WP_MG42M,
 		"",                      
 		"",                      
 		{0,0,0,0,0,0}
@@ -4053,6 +4520,7 @@ model="models/multiplayer/mg42/mg42_3rd.md3"
 		WP_BROWNING,
 		WP_MG42M,
 		WP_BROWNING,
+		WP_BROWNING,
 		"",                      
 		"",                      
 		{0,0,0,0,0,0}
@@ -4075,6 +4543,7 @@ model="models/weapons2/m97/m97_3rd.md3"
 			"m97",            
 			700,
 			IT_WEAPON,
+			WP_M97,
 			WP_M97,
 			WP_M97,
 			WP_M97,
@@ -4106,6 +4575,7 @@ model="models/weapons2/m97/m97_3rd.md3"
 			WP_AUTO5,
 			WP_M97,
 			WP_AUTO5,
+			WP_AUTO5,
 			"",                      
 			"",                     
 			{ 0,0,0,0,0,0 }
@@ -4136,6 +4606,7 @@ model="models/weapons2/p38/luger.md3"
 		WP_HDM,
 		WP_HDM,
 		WP_HDM,
+		WP_HDM,
 		"",                  
 		"",                 
 		{0,0,0,0,0,0}
@@ -4157,6 +4628,7 @@ model="models/weapons2/tesla/pu_tesla.md3"
 		"Holy Cross",             
 		30,
 		IT_WEAPON,
+		WP_HOLYCROSS,
 		WP_HOLYCROSS,
 		WP_HOLYCROSS,
 		WP_HOLYCROSS,
@@ -4190,6 +4662,7 @@ model="models/weapons2/p38/luger.md3"
 		WP_REVOLVER,
 		WP_REVOLVER,
 		WP_REVOLVER,
+		WP_REVOLVER,
 		"",                 
 		"",                  
 		{0,0,0,0,0,0}
@@ -4208,6 +4681,7 @@ model="models/weapons2/p38/luger.md3"
 		"smokeGrenade",              
 		50,
 		IT_WEAPON,
+		WP_AIRSTRIKE,
 		WP_AIRSTRIKE,
 		WP_AIRSTRIKE,
 		WP_AIRSTRIKE,
@@ -4235,8 +4709,35 @@ model="models/weapons2/p38/luger.md3"
 		WP_POISONGAS_MEDIC,
 		WP_POISONGAS_MEDIC,
 		WP_POISONGAS_MEDIC,
+		WP_POISONGAS_MEDIC,
 		"",                      
 		"sound/weapons/grenade/hgrenb1a.wav sound/weapons/grenade/hgrenb2a.wav",            
+		{0,0,0,0,0,0}
+	},
+
+
+	//weapon_dynamite
+
+	{
+		"weapon_dynamite_eng",
+		"sound/misc/w_pkup.wav",
+		{   
+		"",
+		"",
+		""
+		},
+
+		"icons/iconw_dynamite_1",    
+		"Dynamite Weapon",       
+		7,
+		IT_WEAPON,
+		WP_DYNAMITE_ENG,
+		WP_DYNAMITE_ENG,
+		WP_DYNAMITE_ENG,
+		WP_DYNAMITE_ENG,
+		WP_DYNAMITE_ENG,
+		"",                      
+		"",                     
 		{0,0,0,0,0,0}
 	},
 
@@ -4256,6 +4757,7 @@ weapon_arty (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 		"Artillery",             
 		50, // this should never be picked up
 		IT_WEAPON,
+		WP_ARTY,
 		WP_ARTY,
 		WP_ARTY,
 		WP_ARTY,
@@ -4285,6 +4787,7 @@ weapon_smoketrail -- only used as a special effects emitter for smoke trails (ar
 		WP_SMOKETRAIL,
 		WP_SMOKETRAIL,
 		WP_SMOKETRAIL,
+		WP_SMOKETRAIL,
 		"",                     
 		"sound/weapons/grenade/hgrenb1a.wav sound/weapons/grenade/hgrenb2a.wav",             
 		{0,0,0,0,0,0}
@@ -4303,6 +4806,7 @@ weapon_smoketrail -- only used as a special effects emitter for smoke trails (ar
 		0,
 		IT_WEAPON,
 		WP_POISONGAS,		
+		WP_POISONGAS,
 		WP_POISONGAS,
 		WP_POISONGAS,
 		WP_POISONGAS,
@@ -4334,10 +4838,12 @@ weapon_smoketrail -- only used as a special effects emitter for smoke trails (ar
 		WP_POISONGAS,
 		WP_POISONGAS,
 		WP_POISONGAS,
+		WP_POISONGAS,
 		"",                  
 		"", 
 		{5,4,3,2,2,3}                
 	},
+
 
 /*QUAKED ammo_m7 (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -4357,6 +4863,7 @@ model="models/powerups/ammo/m7ammo_bag.md3"
 		200,
 		IT_AMMO,
 		WP_NONE,
+		WP_M7,
 		WP_M7,
 		WP_M7,
 		WP_M7,
@@ -4387,6 +4894,7 @@ model="models/powerups/ammo/amcell.md3"
 		WP_HOLYCROSS,
 		WP_HOLYCROSS,
 		WP_HOLYCROSS,
+		WP_HOLYCROSS,
 		"",                  
 		"",                  
 		{10,10,10,10,10,10}
@@ -4413,6 +4921,7 @@ model="models/powerups/ammo/ttammo.md3"
 		IT_AMMO,
 		WP_NONE,
 		WP_PPSH,
+		WP_TT33,
 		WP_TT33,
 		WP_PPSH,
 		"",                  
@@ -4441,6 +4950,7 @@ model="models/powerups/ammo/ttammo.md3"
 		IT_AMMO,
 		WP_NONE,
 		WP_PPSH,
+		WP_TT33,
 		WP_TT33,
 		WP_PPSH,
 		"",                  
@@ -4471,6 +4981,7 @@ model="models/powerups/ammo/mosina.md3"
 		WP_MOSIN,
 		WP_MOSIN,
 		WP_MOSIN,
+		WP_MOSIN,
 		"",                          
 		"",                          
 		{20,20,15,15,15,20}		
@@ -4497,6 +5008,7 @@ model="models/powerups/ammo/barammo.md3"
 		IT_AMMO,
 		WP_NONE,
 		WP_BAR,
+		WP_M1GARAND,
 		WP_M1GARAND,
 		WP_BAR,
 		"",                 
@@ -4526,6 +5038,7 @@ model="models/powerups/ammo/barammo_l.md3"
 		WP_NONE,
 		WP_BAR,
 		WP_M1GARAND,
+		WP_M1GARAND,
 		WP_BAR,
 		"",                 
 		"",                  
@@ -4552,6 +5065,7 @@ model="models/powerups/ammo/barammo.md3"
 		60,
 		IT_AMMO,
 		WP_NONE,
+		WP_M1941,
 		WP_M1941,
 		WP_M1941,
 		WP_M1941,
@@ -4583,6 +5097,7 @@ model="models/powerups/ammo/barammo.md3"
 		WP_HDM,
 		WP_HDM,
 		WP_HDM,
+		WP_HDM,
 		"",                 
 		"",                  
 		{50,40,40,30,30,40}	
@@ -4608,6 +5123,7 @@ model="models/powerups/ammo/am45cal_m.md3"
 		60,
 		IT_AMMO,
 		WP_NONE,
+		WP_DELISLE,
 		WP_DELISLE,
 		WP_DELISLE,
 		WP_DELISLE,
@@ -4639,6 +5155,7 @@ model="models/powerups/ammo/44ammo.md3"
 		WP_MP44,
 		WP_MP44,
 		WP_MP44,
+		WP_MP44,
 		"",                 
 		"",                  
 		{60,60,45,45,45,50}	
@@ -4664,6 +5181,7 @@ model="models/powerups/ammo/44ammo_l.md3"
 		60,
 		IT_AMMO,
 		WP_NONE,
+		WP_MP44,
 		WP_MP44,
 		WP_MP44,
 		WP_MP44,
@@ -4695,6 +5213,7 @@ model="models/powerups/ammo/44ammo_l.md3"
 		WP_M97,
 		WP_M97,
 		WP_M97,
+		WP_M97,
 		"",                  
 		"",                 
 		{ 10,10,10,10,10,10 }
@@ -4720,6 +5239,7 @@ model="models/powerups/ammo/44ammo_l.md3"
 		12,
 		IT_AMMO,
 		WP_NONE,
+		WP_REVOLVER,
 		WP_REVOLVER,
 		WP_REVOLVER,
 		WP_REVOLVER,
@@ -4755,6 +5275,7 @@ model="models/powerups/ammo/am9mm_s.md3"
 		WP_LUGER,
 		WP_LUGER,
 		WP_LUGER,
+		WP_LUGER,
 		"",                  
 		"",                  
 		{32,24,16,16,16,24}
@@ -4779,6 +5300,7 @@ model="models/powerups/ammo/am9mm_m.md3"
 		60,
 		IT_AMMO,
 		WP_NONE,
+		WP_LUGER,
 		WP_LUGER,
 		WP_LUGER,
 		WP_LUGER,
@@ -4807,6 +5329,7 @@ model="models/powerups/ammo/am9mm_l.md3"
 		100,
 		IT_AMMO,
 		WP_NONE,
+		WP_LUGER,
 		WP_LUGER,
 		WP_LUGER,
 		WP_LUGER,
@@ -4839,6 +5362,7 @@ model="models/powerups/ammo/am45cal_s.md3"
 		WP_COLT,
 		WP_COLT,
 		WP_COLT,
+		WP_COLT,
 		"",                
 		"",                  
 		{40,30,20,20,20,30}
@@ -4866,6 +5390,7 @@ model="models/powerups/ammo/am45cal_m.md3"
 		WP_COLT,
 		WP_COLT,
 		WP_COLT,
+		WP_COLT,
 		"",                
 		"",                
 		{60,45,30,30,30,45}
@@ -4889,6 +5414,7 @@ model="models/powerups/ammo/am45cal_l.md3"
 		100,
 		IT_AMMO,
 		WP_NONE,
+		WP_COLT,
 		WP_COLT,
 		WP_COLT,
 		WP_COLT,
@@ -4923,6 +5449,7 @@ model="models/powerups/ammo/am792mm_s.md3"
 		WP_MAUSER,
 		WP_MAUSER,
 		WP_MAUSER,
+		WP_MAUSER,
 		"",                          
 		"",                         
 		{20,15,10,5,5,15}
@@ -4947,6 +5474,7 @@ model="models/powerups/ammo/am792mm_m.md3"
 		10,
 		IT_AMMO,
 		WP_NONE,
+		WP_MAUSER,
 		WP_MAUSER,
 		WP_MAUSER,
 		WP_MAUSER,
@@ -4978,6 +5506,7 @@ model="models/powerups/ammo/am792mm_l.md3"
 		WP_MAUSER,
 		WP_MAUSER,
 		WP_MAUSER,
+		WP_MAUSER,
 		"",                         
 		"",                          
 		{60,40,30,20,20,40}
@@ -5003,6 +5532,7 @@ model="models/powerups/ammo/am30cal_s.md3"
 		50,
 		IT_AMMO,
 		WP_NONE,
+		WP_GARAND,
 		WP_GARAND,
 		WP_GARAND,
 		WP_GARAND,
@@ -5034,6 +5564,7 @@ model="models/powerups/ammo/am30cal_m.md3"
 		WP_GARAND,
 		WP_GARAND,
 		WP_GARAND,
+		WP_GARAND,
 		"",                        
 		"",                          
 		{5,5,5,5,5,5}
@@ -5059,6 +5590,7 @@ model="models/powerups/ammo/am30cal_l.md3"
 		50,
 		IT_AMMO,
 		WP_NONE,
+		WP_GARAND,
 		WP_GARAND,
 		WP_GARAND,
 		WP_GARAND,
@@ -5090,6 +5622,7 @@ model="models/powerups/ammo/am127mm.md3"
 		WP_MG42M,
 		WP_MG42M,
 		WP_MG42M,
+		WP_MG42M,
 		"",                         
 		"",                        
 		{100,100,100,100,100,100}
@@ -5114,6 +5647,7 @@ model="models/powerups/ammo/amgren_bag.md3"
 		5,
 		IT_AMMO,
 		WP_NONE,
+		WP_GRENADE_LAUNCHER,
 		WP_GRENADE_LAUNCHER,
 		WP_GRENADE_LAUNCHER,
 		WP_GRENADE_LAUNCHER,
@@ -5144,6 +5678,7 @@ model="models/powerups/ammo/amgrenus_bag.md3"
 		WP_GRENADE_PINEAPPLE,
 		WP_GRENADE_PINEAPPLE,
 		WP_GRENADE_PINEAPPLE,
+		WP_GRENADE_PINEAPPLE,
 		"",                      
 		"",                    
 		{4,3,2,2,2,2}
@@ -5168,6 +5703,7 @@ model="models/powerups/ammo/dynamite.md3"
 		1,
 		IT_AMMO,
 		WP_NONE,
+		WP_DYNAMITE,
 		WP_DYNAMITE,
 		WP_DYNAMITE,
 		WP_DYNAMITE,
@@ -5201,6 +5737,7 @@ model="models/powerups/ammo/amcell.md3"
 		WP_TESLA,
 		WP_TESLA,
 		WP_TESLA,
+		WP_TESLA,
 		"",                  
 		"",                  
 		{75,50,30,25,25,50}
@@ -5228,6 +5765,7 @@ model="models/powerups/ammo/amfuel.md3"
 		100,
 		IT_AMMO,
 		WP_NONE,
+		WP_FLAMETHROWER,
 		WP_FLAMETHROWER,
 		WP_FLAMETHROWER,
 		WP_FLAMETHROWER,
@@ -5260,6 +5798,7 @@ model="models/powerups/ammo/ampf.md3"
 		WP_PANZERFAUST,
 		WP_PANZERFAUST,
 		WP_PANZERFAUST,
+		WP_PANZERFAUST,
 		"",                     
 		"",                     
 		{4,3,2,2,2,3}
@@ -5289,10 +5828,546 @@ used by: Monster Attack 1 (specific to each monster)
 		WP_MONSTER_ATTACK1,
 		WP_MONSTER_ATTACK1,
 		WP_MONSTER_ATTACK1,
+		WP_MONSTER_ATTACK1,
 		"",
 		"",
 		{0,0,0,0,0,0}
 	},
+
+// Those  entries below are needed for Survival ammo logic
+{
+		"luger_ammo",
+		"sound/misc/am_pkup.wav",
+		{ 
+		"models/powerups/ammo/default.md3",
+		0,
+		0
+		},
+
+		"icons/iconw_default",
+		"luger_ammo",           		
+		60,
+		IT_AMMO,
+		WP_NONE,
+		WP_LUGER,
+		WP_LUGER,
+		WP_LUGER,
+		WP_LUGER,
+		"",                 
+		"",                  
+		{50,50,50,50,50,50}	
+	},
+
+{
+	"silencer_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"silencer_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_SILENCER,
+	WP_SILENCER,
+	WP_SILENCER,
+	WP_SILENCER,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"colt_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"colt_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_COLT,
+	WP_COLT,
+	WP_COLT,
+	WP_COLT,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"tt33_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"tt33_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_TT33,
+	WP_TT33,
+	WP_TT33,
+	WP_TT33,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"revolver_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"revolver_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_REVOLVER,
+	WP_REVOLVER,
+	WP_REVOLVER,
+	WP_REVOLVER,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"hdm_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"hdm_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_HDM,
+	WP_HDM,
+	WP_HDM,
+	WP_HDM,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"akimbo_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"akimbo_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_AKIMBO,
+	WP_AKIMBO,
+	WP_AKIMBO,
+	WP_AKIMBO,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"dual_tt33_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"dual_tt33_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_DUAL_TT33,
+	WP_DUAL_TT33,
+	WP_DUAL_TT33,
+	WP_DUAL_TT33,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"mp40_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"mp40_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_MP40,
+	WP_MP40,
+	WP_MP40,
+	WP_MP40,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"thompson_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"thompson_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_THOMPSON,
+	WP_THOMPSON,
+	WP_THOMPSON,
+	WP_THOMPSON,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"sten_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"sten_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_STEN,
+	WP_STEN,
+	WP_STEN,
+	WP_STEN,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"ppsh_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"ppsh_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_PPSH,
+	WP_PPSH,
+	WP_PPSH,
+	WP_PPSH,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"mp34_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"mp34_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_MP34,
+	WP_MP34,
+	WP_MP34,
+	WP_MP34,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"mauser_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"mauser_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_MAUSER,
+	WP_MAUSER,
+	WP_MAUSER,
+	WP_MAUSER,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"garand_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"garand_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_GARAND,
+	WP_GARAND,
+	WP_GARAND,
+	WP_GARAND,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"mosin_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"mosin_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_MOSIN,
+	WP_MOSIN,
+	WP_MOSIN,
+	WP_MOSIN,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"delisle_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"delisle_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_DELISLE,
+	WP_DELISLE,
+	WP_DELISLE,
+	WP_DELISLE,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"m1garand_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"m1garand_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_M1GARAND,
+	WP_M1GARAND,
+	WP_M1GARAND,
+	WP_M1GARAND,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"g43_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"g43_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_G43,
+	WP_G43,
+	WP_G43,
+	WP_G43,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"m1941_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"m1941_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_M1941,
+	WP_M1941,
+	WP_M1941,
+	WP_M1941,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"mp44_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"mp44_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_MP44,
+	WP_MP44,
+	WP_MP44,
+	WP_MP44,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"fg42_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"fg42_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_FG42,
+	WP_FG42,
+	WP_FG42,
+	WP_FG42,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"bar_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"bar_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_BAR,
+	WP_BAR,
+	WP_BAR,
+	WP_BAR,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"m97_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"m97_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_M97,
+	WP_M97,
+	WP_M97,
+	WP_M97,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"auto5_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"auto5_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_AUTO5,
+	WP_AUTO5,
+	WP_AUTO5,
+	WP_AUTO5,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"browning_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"browning_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_BROWNING,
+	WP_BROWNING,
+	WP_BROWNING,
+	WP_BROWNING,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"mg42m_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"mg42m_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_MG42M,
+	WP_MG42M,
+	WP_MG42M,
+	WP_MG42M,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"panzerfaust_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/rocket.md3", 0, 0 },
+	"icons/iconw_panzerfaust",
+	"panzerfaust_ammo",
+	5,
+	IT_AMMO,
+	WP_NONE,
+	WP_PANZERFAUST,
+	WP_PANZERFAUST,
+	WP_PANZERFAUST,
+	WP_PANZERFAUST,
+	"",
+	"",
+	{1,1,1,1,1,1}
+},
+{
+	"flamethrower_fuel",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/fuel.md3", 0, 0 },
+	"icons/iconw_flamethrower",
+	"flamethrower_fuel",
+	100,
+	IT_AMMO,
+	WP_NONE,
+	WP_FLAMETHROWER,
+	WP_FLAMETHROWER,
+	WP_FLAMETHROWER,
+	WP_FLAMETHROWER,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"venom_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/venom.md3", 0, 0 },
+	"icons/iconw_venom",
+	"venom_ammo",
+	200,
+	IT_AMMO,
+	WP_NONE,
+	WP_VENOM,
+	WP_VENOM,
+	WP_VENOM,
+	WP_VENOM,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
+	"tesla_energy",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/tesla.md3", 0, 0 },
+	"icons/iconw_tesla",
+	"tesla_energy",
+	100,
+	IT_AMMO,
+	WP_NONE,
+	WP_TESLA,
+	WP_TESLA,
+	WP_TESLA,
+	WP_TESLA,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
 
 /*QUAKED holdable_wine (.3 .3 1) (-8 -8 -8) (8 8 8) SUSPENDED SPIN - RESPAWN
 
@@ -5316,6 +6391,7 @@ model="models/powerups/holdable/wine.md3"
 		IT_HOLDABLE,
 		WP_NONE,
 		HI_WINE,
+		0,
 		0,
 		0,
 		"",                             
@@ -5350,6 +6426,7 @@ model="models/powerups/holdable/adrenaline.md3"
 		HI_ADRENALINE,
 		0,
 		0,
+		0,
 		"",                              
 		"sound/pickup/holdable/use_adrenaline.wav", 
 		{1,1,1,1,1,1}
@@ -5376,6 +6453,7 @@ model="models/powerups/holdable/eg_syringe.md3"
 		IT_HOLDABLE,
 		WP_NONE,
 		HI_EG_SYRINGE,
+		0,
 		0,
 		0,
 		"",                              
@@ -5407,6 +6485,7 @@ model="models/powerups/holdable/bg_syringe.md3"
 		HI_BG_SYRINGE,
 		0,
 		0,
+		0,
 		"",                              
 		"sound/pickup/holdable/use_adrenaline.wav", 
 		{1,1,1,1,1,1}
@@ -5434,6 +6513,7 @@ model="models/powerups/holdable/lp_syringe.md3"
 		IT_HOLDABLE,
 		WP_NONE,
 		HI_LP_SYRINGE,
+		0,
 		0,
 		0,
 		"",                              
@@ -5468,6 +6548,7 @@ model="models/powerups/holdable/bandages.md3"
 		HI_BANDAGES,
 		0,
 		0,
+		0,
 		"",                             
 		"sound/pickup/holdable/use_bandages.wav",
 		{1,1,1,1,1,1}
@@ -5494,6 +6575,7 @@ model="models/powerups/holdable/venom_book.md3"
 		IT_HOLDABLE,
 		WP_NONE,
 		HI_BOOK1,
+		0,
 		0,
 		0,
 		"",                             
@@ -5523,6 +6605,7 @@ model="models/powerups/holdable/paranormal_book.md3"
 		HI_BOOK2,
 		0,
 		0,
+		0,
 		"",                             
 		"sound/pickup/holdable/use_book.wav",  
 		{0,0,0,0,0,0}
@@ -5550,6 +6633,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 		HI_BOOK3,
 		0,
 		0,
+		0,
 		"",                            
 		"sound/pickup/holdable/use_book.wav",    
 		{0,0,0,0,0,0}
@@ -5562,7 +6646,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 */
 		{
 		"item_quad",
-		"sound/misc/powerup_pickup.wav",
+		"sound/misc/powerup_quad.wav",
 		{
 		"models/powerups/survival/thule_b.md3",
 		0, 
@@ -5576,6 +6660,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 		PW_QUAD,
 		0,
 		0,
+		0,
 		"",                            
 		"sound/items/damage2.wav sound/items/damage3.wav",   
 		{0,0,0,0,0,0}
@@ -5585,7 +6670,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 */
 		{
 		"item_vampire",
-		"sound/misc/powerup_pickup.wav",
+		"sound/misc/powerup_vampirism.wav",
 		{
 		"models/powerups/survival/thule_r.md3",
 		0, 
@@ -5599,6 +6684,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 		PW_VAMPIRE,
 		0,
 		0,
+		0,
 		"",                            
 		"",   
 		{0,0,0,0,0,0}
@@ -5608,7 +6694,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 */
 		{
 		"item_ammopw",
-		"sound/misc/powerup_pickup.wav",
+		"sound/misc/powerup_resupply.wav",
 		{
 		"models/powerups/survival/thule_gr.md3",
 		0, 
@@ -5620,6 +6706,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 		IT_POWERUP,
 		WP_NONE,
 		PW_AMMO,
+		0,
 		0,
 		0,
 		"",                            
@@ -5645,6 +6732,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 		PW_HASTE,
 		0,
 		0,
+		0,
 		"",                          
 		"",   
 		{0,0,0,0,0,0}
@@ -5666,6 +6754,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 		IT_POWERUP,
 		WP_NONE,
 		PW_HASTE_SURV,
+		0,
 		0,
 		0,
 		"",                          
@@ -5693,6 +6782,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 		PW_BATTLESUIT,
 		0,
 		0,
+		0,
 		"",                          
 		"sound/items/airout.wav sound/items/protect3.wav",   
 		{0,0,0,0,0,0}
@@ -5703,7 +6793,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 */
 		{
 		"item_enviro_surv",
-		"sound/misc/powerup_pickup.wav",
+		"sound/misc/powerup_shield.wav",
 		{
 		"models/powerups/survival/thule_g.md3",
 		0, 
@@ -5717,6 +6807,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 		PW_BATTLESUIT_SURV,
 		0,
 		0,
+		0,
 		"",                          
 		"sound/items/airout.wav sound/items/protect3.wav",   
 		{0,0,0,0,0,0}
@@ -5728,7 +6819,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 */
 		{
 		"item_invis",
-		"sound/misc/powerup_pickup.wav",
+		"sound/misc/powerup_invis.wav",
 		{
 		"models/powerups/instant/invis.md3",
 		0, 
@@ -5740,6 +6831,7 @@ model="models/powerups/holdable/zemphr_book.md3"
 		IT_POWERUP,
 		WP_NONE,
 		PW_INVIS,
+		0,
 		0,
 		0,
 		"",                          
@@ -5774,6 +6866,7 @@ model="models/powerups/holdable/bandages.md3"
 		PERK_RESILIENCE,
 		0,
 		0,
+		0,
 		"",                             
 		"",
 		{0,0,0,0,0,0}
@@ -5803,6 +6896,7 @@ model="models/powerups/holdable/bandages.md3"
 		IT_PERK,
 		WP_NONE,
 		PERK_SCAVENGER,
+		0,
 		0,
 		0,
 		"",                             
@@ -5837,6 +6931,7 @@ model="models/powerups/holdable/bandages.md3"
 		PERK_RUNNER,
 		0,
 		0,
+		0,
 		"",                             
 		"",
 		{0,0,0,0,0,0}
@@ -5867,6 +6962,7 @@ model="models/powerups/holdable/bandages.md3"
 		IT_PERK,
 		WP_NONE,
 		PERK_WEAPONHANDLING,
+		0,
 		0,
 		0,
 		"",                             
@@ -5901,6 +6997,7 @@ model="models/powerups/holdable/bandages.md3"
 		PERK_RIFLING,
 		0,
 		0,
+		0,
 		"",                             
 		"",
 		{0,0,0,0,0,0}
@@ -5933,6 +7030,7 @@ model="models/powerups/holdable/bandages.md3"
 		PERK_SECONDCHANCE,
 		0,
 		0,
+		0,
 		"",                             
 		"",
 		{0,0,0,0,0,0}
@@ -5962,6 +7060,7 @@ model="models/powerups/keys/binoculars.md3"
 		INV_BINOCS,
 		0,
 		0,
+		0,
 		"",                      
 		"models/keys/key.wav",
 		{0,0,0,0,0,0}
@@ -5984,6 +7083,7 @@ weapon_magicammo (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 		"Ammo Pack",             // pickup
 		50, // this should never be picked up
 		IT_WEAPON,
+		WP_NONE,
 		WP_NONE,
 		WP_NONE,
 		WP_NONE,
@@ -6147,7 +7247,30 @@ weapon_t BG_FindAmmoForWeapon( weapon_t weapon ) {
 	const int NUM_TABLE_ELEMENTS = WP_NUM_WEAPONS;
 	static weapon_t lookupTable[WP_NUM_WEAPONS];
 	static qboolean lookupTableInit = qtrue;
+	qboolean survival = qfalse;
 
+    #ifdef GAMEDLL
+	    if (g_gametype.integer == GT_SURVIVAL)
+    #endif
+    #ifdef CGAMEDLL
+		if (cg_gameType.integer == GT_SURVIVAL)
+    #endif
+			survival = qtrue;
+
+    if (survival) {
+	if ( lookupTableInit ) {
+		for ( i = 0; i < NUM_TABLE_ELEMENTS; i++ ) {
+			lookupTable[i] = 0; // default value for no match found
+			for ( it = bg_itemlist + 1 ; it->classname ; it++ ) {
+				if ( it->giType == IT_WEAPON && it->giTag == i ) {
+					lookupTable[i] = it->giAmmoIndexSurv;
+				}
+			}
+		}
+		// table is created
+		lookupTableInit = qfalse;
+	}
+	} else {
 	if ( lookupTableInit ) {
 		for ( i = 0; i < NUM_TABLE_ELEMENTS; i++ ) {
 			lookupTable[i] = 0; // default value for no match found
@@ -6159,6 +7282,7 @@ weapon_t BG_FindAmmoForWeapon( weapon_t weapon ) {
 		}
 		// table is created
 		lookupTableInit = qfalse;
+	}
 	}
 
 	if ( weapon > NUM_TABLE_ELEMENTS ) {
@@ -6399,51 +7523,48 @@ WARNING: when numOfClips is 0, DO NOT CHANGE ANYTHING under ps.
 =================================
 */
 // Gordon: setting numOfClips = 0 allows you to check if the client needs ammo, but doesnt give any
-qboolean BG_AddMagicAmmo( playerState_t *ps, int numOfClips ) {
-    int i, weapon;
-    int ammoAdded = qfalse;
-    int maxammo;
-    int clip;
-    int weapNumOfClips;
+qboolean BG_AddMagicAmmo(playerState_t *ps, int numOfClips) {
+	int i, weapon;
+	qboolean ammoAdded = qfalse;
 
-    for ( i = 0; reloadableWeapons[i] >= 0; i++ ) {
-        weapon = reloadableWeapons[i];
+	for (i = 0; reloadableWeapons[i] >= 0; i++) {
+		weapon = reloadableWeapons[i];
+		if (!COM_BitCheck(ps->weapons, weapon))
+			continue;
 
-        // Only skip heavy weapons if player class isn't PC_SOLDIER
-        if ( ( weapon == WP_PANZERFAUST
-            || weapon == WP_TESLA
-            || weapon == WP_FLAMETHROWER
-            || weapon == WP_BROWNING
-            || weapon == WP_MG42M )
-            && ps->stats[STAT_PLAYER_CLASS] != PC_SOLDIER )
-        {
-            continue;
-        }
+		int ammoIndex = BG_FindAmmoForWeapon(weapon);
+		int maxammo   = BG_GetMaxAmmo(ps, weapon, 1.5f);
+		int maxclip   = BG_GetMaxClip(ps, weapon);
 
-        if ( COM_BitCheck( ps->weapons, weapon ) ) {
-            maxammo = ammoTable[weapon].maxammo;
-            clip = BG_FindAmmoForWeapon( weapon );
-            if ( ps->ammo[clip] < maxammo ) {
-                if ( !numOfClips ) {
-                    return qtrue;
-                }
-                ammoAdded = qtrue;
+		if (weapon == WP_FLAMETHROWER || weapon == WP_TESLA) {
+			if (ps->ammoclip[ammoIndex] < maxammo) {
+				if (!numOfClips)
+					return qtrue;
 
-                // Akimbo case
-                if ( weapon == WP_AKIMBO || weapon == WP_DUAL_TT33 ) {
-                    weapNumOfClips = numOfClips * 2;
-                } else {
-                    weapNumOfClips = numOfClips;
-                }
+				ps->ammoclip[ammoIndex] = maxammo;
+				ammoAdded = qtrue;
+			}
+		} else {
+			if (ps->ammo[ammoIndex] < maxammo) {
+				if (!numOfClips)
+					return qtrue;
 
-                ps->ammo[clip] += weapNumOfClips * ammoTable[weapon].maxclip;
-                if ( ps->ammo[clip] > maxammo ) {
-                    ps->ammo[clip] = maxammo;
-                }
-            }
-        }
-    }
-    return ammoAdded;
+				int clipsToAdd = (weapon == WP_AKIMBO || weapon == WP_DUAL_TT33)
+					? numOfClips * 2
+					: numOfClips;
+
+				ps->ammo[ammoIndex] += clipsToAdd * maxclip;
+
+				if (ps->ammo[ammoIndex] > maxammo) {
+					ps->ammo[ammoIndex] = maxammo;
+				}
+
+				ammoAdded = qtrue;
+			}
+		}
+	}
+
+	return ammoAdded;
 }
 
 
@@ -6477,8 +7598,9 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 	int ammoweap;
 	qboolean multiplayer = qfalse;
 
-	if ( ent->modelindex < 1 || ent->modelindex >= bg_numItems ) {
-		Com_Error( ERR_DROP, "BG_CanItemBeGrabbed: index out of range" );
+	if (ent->modelindex < 1 || ent->modelindex >= bg_numItems)
+	{
+		Com_Error(ERR_DROP, "BG_CanItemBeGrabbed: index out of range");
 	}
 
 	item = &bg_itemlist[ent->modelindex];
@@ -6486,44 +7608,62 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 	switch ( item->giType ) {
 
 	case IT_WEAPON:
-		// JPW NERVE -- medics & engineers can only pick up same weapon type
-		if ( multiplayer ) {
-			if ( ( ps->stats[STAT_PLAYER_CLASS] == PC_MEDIC ) || ( ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER ) ) {
-				if ( !COM_BitCheck( ps->weapons, item->giTag ) ) {
+		if (multiplayer)
+		{
+			if ((ps->stats[STAT_PLAYER_CLASS] == PC_MEDIC) || (ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER))
+			{
+				if (!COM_BitCheck(ps->weapons, item->giTag))
+				{
 					return qfalse;
 				}
 			}
-		} else {
-			if ( COM_BitCheck( ps->weapons, item->giTag ) ) {               // you have the weap
-				if ( isClipOnly( item->giTag ) ) {
-					if ( ps->ammoclip[item->giAmmoIndex] >= ammoTable[item->giAmmoIndex].maxclip ) {
+		}
+		else
+		{
+			if (COM_BitCheck(ps->weapons, item->giTag))
+			{
+				if (isClipOnly(item->giTag))
+				{
+					int maxclip = BG_GetMaxClip(ps, item->giTag);
+
+					if (ps->ammoclip[item->giAmmoIndex] >= maxclip)
+					{
 						return qfalse;
 					}
-				} else {
-					if ( ps->ammo[item->giAmmoIndex] >= ammoTable[item->giAmmoIndex].maxammo ) { // you are loaded with the ammo
+				}
+				else
+				{
+					int maxammo = BG_GetMaxAmmo(ps, item->giTag, 1.5f);
+
+					if (ps->ammo[item->giAmmoIndex] >= maxammo)
+					{
 						return qfalse;
 					}
 				}
 			}
 		}
-		// JPW
 		return qtrue;
 
 	case IT_AMMO:
-		ammoweap = BG_FindAmmoForWeapon( item->giTag );
+		ammoweap = BG_FindAmmoForWeapon(item->giTag);
 
-		if ( isClipOnly( ammoweap ) ) {
-			if ( ps->ammoclip[ammoweap] >= ammoTable[ammoweap].maxclip ) {
+		if (isClipOnly(ammoweap))
+		{
+			int maxclip = BG_GetMaxClip(ps, ammoweap);
+
+			if (ps->ammoclip[ammoweap] >= maxclip)
+			{
 				return qfalse;
 			}
 		}
 
-		if ( ps->ammo[ammoweap] >= ammoTable[ammoweap].maxammo ) {
+		int maxammo = BG_GetMaxAmmo(ps, ammoweap, 1.5f);
+		if (ps->ammo[ammoweap] >= maxammo)
+		{
 			return qfalse;
 		}
 
 		return qtrue;
-
 	case IT_ARMOR:
 		// we also clamp armor to the maxhealth for handicapping
 //			if ( ps->stats[STAT_ARMOR] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
@@ -7449,6 +8589,7 @@ char *eventnames[] = {
 	"EV_COUGH",
 	"EV_QUICKGRENS",
 	"EV_PLAYER_HIT",
+	"EV_STOP_RELOADING_SOUND",
 
 	"EV_MAX_EVENTS"
 };
@@ -8201,6 +9342,7 @@ char *BG_GetWeaponFilename( weapon_t weaponNum )
 		case WP_BROWNING:          return "browning.weap";
 		case WP_AIRSTRIKE:         return "airstrike.weap";
 		case WP_POISONGAS_MEDIC:   return "poisongas_medic.weap";
+		case WP_DYNAMITE_ENG:      return "dynamite_eng.weap";
 		case WP_ARTY:              return "arty.weap";
 		case WP_SMOKETRAIL:        return "smoketrail.weap";
 		case WP_POISONGAS:         return "poisongas.weap";
@@ -8247,103 +9389,200 @@ qboolean BG_ParseAmmoTable( int handle, weapon_t weaponNum )
 		}
 
 		// Ammo parameters for each difficulty level
-		if ( !Q_stricmp( token.string, "maxammoPerSkill" ) ) {
-			for (int i = 0; i < GSKILL_NUM_SKILLS; ++i) {
-				if ( !PC_Int_Parse( handle, &ammoSkill[i][weaponNum].maxammo ) ) {
-					PC_SourceError( handle, "expected maxammo value for skill level" );
+		if (!Q_stricmp(token.string, "maxammoPerSkill"))
+		{
+			for (int i = 0; i < GSKILL_NUM_SKILLS; ++i)
+			{
+				if (!PC_Int_Parse(handle, &ammoSkill[i][weaponNum].maxammo))
+				{
+					PC_SourceError(handle, "expected maxammo value for skill level");
 					return qfalse;
 				}
 			}
-		} else if ( !Q_stricmp( token.string, "maxclipPerSkill" ) ) {
-			for (int i = 0; i < GSKILL_NUM_SKILLS; ++i) {
-				if ( !PC_Int_Parse( handle, &ammoSkill[i][weaponNum].maxclip ) ) {
-					PC_SourceError( handle, "expected maxclip value for skill level" );
+		}
+		else if (!Q_stricmp(token.string, "maxclipPerSkill"))
+		{
+			for (int i = 0; i < GSKILL_NUM_SKILLS; ++i)
+			{
+				if (!PC_Int_Parse(handle, &ammoSkill[i][weaponNum].maxclip))
+				{
+					PC_SourceError(handle, "expected maxclip value for skill level");
+					return qfalse;
+				}
+			}
+		}
+		else if (!Q_stricmp(token.string, "maxclipUpgradedPerSkill"))
+		{
+			for (int i = 0; i < GSKILL_NUM_SKILLS; ++i)
+			{
+				if (!PC_Int_Parse(handle, &ammoSkill[i][weaponNum].maxclipUpgraded))
+				{
+					PC_SourceError(handle, "expected maxclipUpgraded value for skill level");
+					return qfalse;
+				}
+			}
+		}
+		else if (!Q_stricmp(token.string, "maxammoUpgradedPerSkill"))
+		{
+			for (int i = 0; i < GSKILL_NUM_SKILLS; ++i)
+			{
+				if (!PC_Int_Parse(handle, &ammoSkill[i][weaponNum].maxammoUpgraded))
+				{
+					PC_SourceError(handle, "expected maxammoUpgraded value for skill level");
 					return qfalse;
 				}
 			}
 		}
 		// Values common to all skill levels
-		else if ( !Q_stricmp( token.string, "uses" ) ) {
+		else if (!Q_stricmp(token.string, "uses"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].uses ) ) {
 				PC_SourceError( handle, "expected uses value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "reloadTime" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "usesUpgraded"))
+		{
+			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].usesUpgraded ) ) {
+				PC_SourceError( handle, "expected usesUpgraded value" );
+				return qfalse;
+			}
+		}
+		else if (!Q_stricmp(token.string, "reloadTime"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].reloadTime ) ) {
 				PC_SourceError( handle, "expected reloadTime value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "reloadTimeFull" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "reloadTimeFull"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].reloadTimeFull ) ) {
 				PC_SourceError( handle, "expected reloadTimeFull value" );
 				return qfalse;
 			}
-		}  else if ( !Q_stricmp( token.string, "fireDelayTime" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "fireDelayTime"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].fireDelayTime ) ) {
 				PC_SourceError( handle, "expected fireDelayTime value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "nextShotTime" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "nextShotTime"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].nextShotTime ) ) {
 				PC_SourceError( handle, "expected nextShotTime value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "nextShotTime2" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "nextShotTime2"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].nextShotTime2 ) ) {
 				PC_SourceError( handle, "expected nextShotTime2 value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "maxHeat" ) ) {
+		}
+				else if (!Q_stricmp(token.string, "nextShotTimeUpgraded"))
+		{
+			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].nextShotTimeUpgraded ) ) {
+				PC_SourceError( handle, "expected nextShotTimeUpgraded value" );
+				return qfalse;
+			}
+		}
+		else if (!Q_stricmp(token.string, "nextShotTime2Upgraded"))
+		{
+			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].nextShotTime2Upgraded ) ) {
+				PC_SourceError( handle, "expected nextShotTime2Upgraded value" );
+				return qfalse;
+			}
+		}
+		else if (!Q_stricmp(token.string, "maxHeat"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].maxHeat ) ) {
 				PC_SourceError( handle, "expected maxHeat value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "coolRate" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "coolRate"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].coolRate ) ) {
 				PC_SourceError( handle, "expected coolRate value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "playerDamage" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "playerDamage"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].playerDamage ) ) {
 				PC_SourceError( handle, "expected playerDamage value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "aiDamage" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "playerDamageUpgraded"))
+		{
+			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].playerDamageUpgraded ) ) {
+				PC_SourceError( handle, "expected playerDamageUpgraded value" );
+				return qfalse;
+			}
+		}
+		else if (!Q_stricmp(token.string, "aiDamage"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].aiDamage ) ) {
 				PC_SourceError( handle, "expected aiDamage value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "playerSplashRadius" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "playerSplashRadius"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].playerSplashRadius ) ) {
 				PC_SourceError( handle, "expected playerSplashRadius value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "aiSplashRadius" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "aiSplashRadius"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].aiSplashRadius ) ) {
 				PC_SourceError( handle, "expected aiSplashRadius value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "spread" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "spread"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].spread ) ) {
 				PC_SourceError( handle, "expected spread value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "aimSpreadScaleAdd" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "spreadUpgraded"))
+		{
+			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].spreadUpgraded ) ) {
+				PC_SourceError( handle, "expected spread value" );
+				return qfalse;
+			}
+		}
+		else if (!Q_stricmp(token.string, "aimSpreadScaleAdd"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].aimSpreadScaleAdd ) ) {
 				PC_SourceError( handle, "expected aimSpreadScaleAdd value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "spreadScale" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "spreadScale"))
+		{
 			if ( !PC_Float_Parse( handle, &ammoTable[weaponNum].spreadScale ) ) {
 				PC_SourceError( handle, "expected spreadScale value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "weapRecoilDuration" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "weapRecoilDuration"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].weapRecoilDuration ) ) {
 				PC_SourceError( handle, "expected weapRecoilDuration value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "weapRecoilPitch" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "weapRecoilPitch"))
+		{
 			if ( !PC_Float_Parse( handle, &ammoTable[weaponNum].weapRecoilPitch[0] ) ) {
 				PC_SourceError( handle, "expected weapRecoilPitch.x value" );
 				return qfalse;
@@ -8352,7 +9591,9 @@ qboolean BG_ParseAmmoTable( int handle, weapon_t weaponNum )
 				PC_SourceError( handle, "expected weapRecoilPitch.y value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "weapRecoilYaw" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "weapRecoilYaw"))
+		{
 			if ( !PC_Float_Parse( handle, &ammoTable[weaponNum].weapRecoilYaw[0] ) ) {
 				PC_SourceError( handle, "expected weapRecoilYaw.x value" );
 				return qfalse;
@@ -8361,27 +9602,37 @@ qboolean BG_ParseAmmoTable( int handle, weapon_t weaponNum )
 				PC_SourceError( handle, "expected weapRecoilYaw.y value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "soundRange" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "soundRange"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].soundRange ) ) {
 				PC_SourceError( handle, "expected soundRange value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "moveSpeed" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "moveSpeed"))
+		{
 			if ( !PC_Float_Parse( handle, &ammoTable[weaponNum].moveSpeed ) ) {
 				PC_SourceError( handle, "expected moveSpeed value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "twoHand" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "twoHand"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].twoHand ) ) {
 				PC_SourceError( handle, "expected twoHand value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "upAngle" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "upAngle"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].upAngle ) ) {
 				PC_SourceError( handle, "expected upAngle value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "falloffDistance" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "falloffDistance"))
+		{
 			if ( !PC_Float_Parse( handle, &ammoTable[weaponNum].falloffDistance[0] ) ) {
 				PC_SourceError( handle, "expected falloffdistance.min value" );
 				return qfalse;
@@ -8390,50 +9641,68 @@ qboolean BG_ParseAmmoTable( int handle, weapon_t weaponNum )
 				PC_SourceError( handle, "expected falloffdistance.max value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "shotgunReloadStart" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "shotgunReloadStart"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].shotgunReloadStart ) ) {
 				PC_SourceError( handle, "expected shotgunReloadStart value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "shotgunReloadLoop" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "shotgunReloadLoop"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].shotgunReloadLoop ) ) {
 				PC_SourceError( handle, "expected shotgunReloadLoop value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "shotgunReloadEnd" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "shotgunReloadEnd"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].shotgunReloadEnd ) ) {
 				PC_SourceError( handle, "expected shotgunReloadEnd value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "shotgunPumpStart" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "shotgunPumpStart"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].shotgunPumpStart ) ) {
 				PC_SourceError( handle, "expected shotgunPumpStart value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "shotgunPumpLoop" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "shotgunPumpLoop"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].shotgunPumpLoop ) ) {
 				PC_SourceError( handle, "expected shotgunPumpLoop value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "shotgunPumpEnd" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "shotgunPumpEnd"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].shotgunPumpEnd  ) ) {
 				PC_SourceError( handle, "expected shotgunPumpEnd value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "brassDelayEmpty" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "brassDelayEmpty"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].brassDelayEmpty  ) ) {
 				PC_SourceError( handle, "expected brassDelayEmpty value" );
 				return qfalse;
 			}
-		} else if ( !Q_stricmp( token.string, "brassDelay" ) ) {
+		}
+		else if (!Q_stricmp(token.string, "brassDelay"))
+		{
 			if ( !PC_Int_Parse( handle, &ammoTable[weaponNum].brassDelay  ) ) {
 				PC_SourceError( handle, "expected brassDelay value" );
 				return qfalse;
 			}
-		} else {
+		}
+		else
+		{
 			PC_SourceError( handle, "unknown token '%s'", token.string );
 			return qfalse;
-		} 
+		}
 	}
 
 	return qtrue;
@@ -8441,13 +9710,83 @@ qboolean BG_ParseAmmoTable( int handle, weapon_t weaponNum )
 
 
 // Set weapon parameters for specified skill
-void BG_SetWeaponForSkill( weapon_t weaponNum, gameskill_t skill )
-{
+void BG_SetWeaponForSkill( weapon_t weaponNum, gameskill_t skill ) {
 	if ( ammoSkill[skill][weaponNum].maxammo > 0 )
 		ammoTable[weaponNum].maxammo = ammoSkill[skill][weaponNum].maxammo;
 
 	if ( ammoSkill[skill][weaponNum].maxclip > 0 )
 		ammoTable[weaponNum].maxclip = ammoSkill[skill][weaponNum].maxclip;
+
+	if ( ammoSkill[skill][weaponNum].maxclipUpgraded > 0 )
+		ammoTable[weaponNum].maxclipUpgraded = ammoSkill[skill][weaponNum].maxclipUpgraded;
+
+	if ( ammoSkill[skill][weaponNum].maxammoUpgraded > 0 )
+		ammoTable[weaponNum].maxammoUpgraded = ammoSkill[skill][weaponNum].maxammoUpgraded;
 }
 
-// New ET vehicle path system
+/*
+==========================
+BG_GetMaxClip
+
+Returns the correct clip size for the given weapon and player state,
+taking into account whether the weapon is upgraded.
+==========================
+*/
+int BG_GetMaxClip(const playerState_t *ps, int weapon) {
+	if (!ps || weapon <= WP_NONE || weapon >= WP_NUM_WEAPONS) {
+		return 0;
+	}
+
+	const ammoTable_t *wt = &ammoTable[weapon];
+
+	if (ps->weaponUpgraded[weapon]) {
+		return wt->maxclipUpgraded;
+	} else {
+		return wt->maxclip;
+	}
+}
+
+/*
+==========================
+BG_GetMaxAmmo
+
+Returns the correct max ammo capacity for the given weapon and player state,
+taking into account whether the weapon is upgraded and any class-specific bonuses.
+==========================
+*/
+int BG_GetMaxAmmo(const playerState_t *ps, int weapon, float ltAmmoBonus) {
+	if (!ps || weapon <= WP_NONE || weapon >= WP_NUM_WEAPONS) {
+		return 0;
+	}
+
+	const ammoTable_t *wt = &ammoTable[weapon];
+	int maxAmmo = ps->weaponUpgraded[weapon]
+		? wt->maxammoUpgraded
+		: wt->maxammo;
+
+	if (ps->stats[STAT_PLAYER_CLASS] == PC_LT) {
+		maxAmmo *= ltAmmoBonus;
+	}
+
+	return maxAmmo;
+}
+
+/*
+==========================
+BG_GetMaxAmmo
+
+Returns the correct max ammo capacity for the given weapon and player state,
+taking into account whether the weapon is upgraded and any class-specific bonuses.
+==========================
+*/
+
+int BG_GetNextShotTime(const playerState_t *ps, weapon_t weapon, qboolean altFire) {
+	const ammoTable_t *wtd = GetWeaponTableData(weapon);
+	qboolean upgraded = ps->weaponUpgraded[weapon];
+
+	if (altFire) {
+		return upgraded ? wtd->nextShotTime2Upgraded : wtd->nextShotTime2;
+	} else {
+		return upgraded ? wtd->nextShotTimeUpgraded : wtd->nextShotTime;
+	}
+}

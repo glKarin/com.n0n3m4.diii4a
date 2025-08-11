@@ -37,8 +37,6 @@
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Phong光照下镜面反射指数</string>
     <string name="sound">音频实现(s_driver)</string>
     <string name="load_quicksave_when_start_game">启动游戏时自动加载快速存档</string>
-    <string name="edit_autoexec_cfg">编辑 autoexec.cfg</string>
-    <string name="edit_doomconfig_cfg">编辑 DoomConfig.cfg</string>
     <string name="note_gamepads_keyboards_must_be_configured_in_game_like_on_pc_not_here">说明: 游戏手柄/键盘按键映射都在游戏中设置(就像在PC端一样), 而不在启动器中设置</string>
     <string name="configure_on_screen_controls">配置虚拟按键</string>
     <string name="on_screen_button_setting">虚拟按键功能</string>
@@ -93,6 +91,8 @@
     <string name="samtse">英雄萨姆TSE</string>
     <string name="xash3d">Xash3D</string>
     <string name="xash3d_base">Xash3D</string>
+    <string name="sourceengine">起源引擎</string>
+    <string name="sourceengine_base">起源引擎</string>
     <string name="tdm">Dark mod</string>
     <string name="doom">毁灭战士</string>
     <string name="prey_2006">掠食(2006)</string>
@@ -155,6 +155,7 @@
     <string name="graphics">图形</string>
     <string name="controls">控制</string>
     <string name="do_you_want_to_support_the_developer">支持开发者?</string>
+    <string name="do_you_want_to_support_the_developer_text">idTech4A++是一个完全开放和免费的项目, 您可以免费获取此应用程序而无需支付任何费用, 并且也不必对此应用程序进行任何捐赠, 所有的捐赠链接都被删除.\n最后感谢支持.</string>
     <string name="donate_to">捐贈</string>
     <string name="more_apps_in">更多App在</string>
     <string name="dont_ask">不询问</string>
@@ -241,7 +242,7 @@
     <string name="access_external_game_library">访问外部游戏运行库</string>
     <string name="load_external_game_library">载入外部游戏运行库</string>
     <string name="find_game_library_in_game_data_directory">优先使用外部游戏数据文件夹下的游戏动态库代替apk内置的</string>
-    <string name="using_external_game_library">游戏动态库文件名: arm64 = `gameaarch64.so`或`libgameaarch64.so`; arm32 = `gamearm.so`或`libgamearm.so`</string>
+    <string name="using_external_game_library">游戏动态库文件放置在指定的mod文件夹下: arm64 = `gameaarch64.so`; arm32 = `gamearm.so`</string>
     <string name="not_supported">不支持!</string>
     <string name="translators">翻译者</string>
     <string name="note">声明</string>
@@ -494,4 +495,39 @@
     <string name="portrait_orientation_screen">使用竖屏方向运行</string>
     <string name="renderer_ref">渲染器(ref)</string>
     <string name="server_client_sv_cl">服务器/客户端(sv_cl)</string>
+    <string name="halflife_2_base">半衰期2</string>
+    <string name="css_base">反恐精英: 起源</string>
+    <string name="portal_base">传送门</string>
+    <string name="dod_base">胜利之日: 起源</string>
+    <string name="halflife_2_ep1_base">半衰期2: 第1章</string>
+    <string name="halflife_2_ep2_base">半衰期2: 第2章</string>
+    <string name="halflife_2_mp_base">半衰期2: 死亡竞赛</string>
+    <string name="halflife_1_source_base">半衰期1: 起源</string>
+    <string name="halflife_1_mp_source_base">半衰期1-死亡竞赛: 起源</string>
+    <string name="use_builtin_virtual_keyboard">使用内置软键盘</string>
+    <string name="use_builtin_virtual_keyboard_instead_of_system_virtual_keyboard">使用内置软键盘代替系统输入法键盘</string>
+    <string name="using_external_game_library_xash3d">游戏动态库目录放置在指定的mod文件夹下: arm64 = `lib/arm64-v8a/`; arm32 = `lib/armeabi-v7a/`.\nclient动态库可以使用命令行参数`-clientlib`指定, 默认为`client.so`.\nserver动态库可以使用命令行参数`-dll`指定, 默认为`server.so`.\nmenu动态库可以使用命令行参数`-menulib`指定, 默认为`menu.so`.</string>
+    <string name="configure_controller">配置手柄</string>
+    <string name="dpad_as_arrow_keys">十字键当作方向键</string>
+    <string name="dpad_keys_always_as_arrow_keys">十字键总是当作方向键使用</string>
+    <string name="left_joystick_dead_zone">左摇杆死区(0 - 1)</string>
+    <string name="right_joystick_dead_zone">右摇杆死区(0 - 1)</string>
+    <string name="right_joystick_sensitivity">右摇杆灵敏度(0.1 - 10)</string>
+    <string name="left_joystick_dead_zone_summary">左摇杆忽略移动中心比例(默认0.01)</string>
+    <string name="right_joystick_dead_zone_summary">右摇杆忽略移动中心比例(默认0)</string>
+    <string name="right_joystick_sensitivity_summary">右摇杆模拟鼠标移动灵敏度(默认1)</string>
+    <string name="joystick_dpad">摇杆/十字键</string>
+    <string name="controller_configure">手柄配置</string>
+    <string name="reset_controller_config">重置手柄配置?</string>
+    <string name="controller_configure_has_reset">手柄配置已经重置.</string>
+    <string name="reset_all_controller_configure">重置所有手柄配置</string>
+    <string name="automatic">自动</string>
+    <string name="sdl_audio_driver">SDL音频驱动</string>
+    <string name="install_shortcut_tips_if_creating_failed">如果快捷方式创建失败, 某些品牌的设备可能需要先在系统应用设置中手动授权安装快捷方式权限.</string>
+    <string name="name_">名称: </string>
+    <string name="path_">路径: </string>
+    <string name="author_">作者: </string>
+    <string name="description_">详情: </string>
+    <string name="expand_all">全部展开</string>
+    <string name="collapse_all">全部折叠</string>
 </resources>

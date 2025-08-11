@@ -232,7 +232,7 @@ static void CG_DrawPlayerWeaponIcon( rectDef_t *rect, qboolean drawHighlighted, 
 			scale = (float)(cg.predictedPlayerState.grenadeTimeLeft/(KNIFECHARGETIME/7.f));
 			halfScale = scale * 0.5f;
 		}
-		else if ( realweap == WP_DYNAMITE ) {
+		else if ( realweap == WP_DYNAMITE || realweap == WP_DYNAMITE_ENG ) {
 			if ( ( ( cg.grenLastTime ) % 1000 ) > ( ( cg.predictedPlayerState.grenadeTimeLeft ) % 1000 ) ) {
 				trap_S_StartLocalSound( cgs.media.grenadePulseSound4, CHAN_LOCAL_SOUND );
 			}
@@ -528,6 +528,7 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 	switch ( weap ) {      // some weapons don't draw ammo count text
 	case WP_AIRSTRIKE:
 	case WP_POISONGAS_MEDIC:
+	case WP_DYNAMITE_ENG:
 		return;
 
 	case WP_AKIMBO:
@@ -551,7 +552,6 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 	default:
 		break;
 	}
-
 
 	if ( type == 0 ) { // ammo
 		value = cg.snap->ps.ammo[BG_FindAmmoForWeapon( weap )];
@@ -1407,21 +1407,39 @@ float CG_GetValue( int ownerDraw, int type ) {
 		return ps->stats[STAT_ARMOR];
 		break;
 	case CG_PLAYER_AMMO_VALUE:
-		if ( cent->currentState.weapon ) {
-			if ( type == RANGETYPE_RELATIVE ) {
-				int weap = BG_FindAmmoForWeapon( cent->currentState.weapon );
-				return (float)ps->ammo[weap] / (float)ammoTable[weap].maxammo;
-			} else {
-				return ps->ammo[BG_FindAmmoForWeapon( cent->currentState.weapon )];
+		if (cent->currentState.weapon)
+		{
+			const playerState_t *ps = &cg.snap->ps;
+			int weap = BG_FindAmmoForWeapon(cent->currentState.weapon);
+
+			if (type == RANGETYPE_RELATIVE)
+			{
+				int maxAmmo = BG_GetMaxAmmo(ps, weap, 1.5f);
+				return (float)ps->ammo[weap] / (float)maxAmmo;
+			}
+			else
+			{
+				return ps->ammo[weap];
 			}
 		}
 		break;
 	case CG_PLAYER_AMMOCLIP_VALUE:
-		if ( cent->currentState.weapon ) {
-			if ( type == RANGETYPE_RELATIVE ) {
-				return (float)ps->ammoclip[BG_FindClipForWeapon( cent->currentState.weapon )] / (float)ammoTable[cent->currentState.weapon].maxclip;
-			} else {
-				return ps->ammoclip[BG_FindClipForWeapon( cent->currentState.weapon )];
+		if (cent->currentState.weapon)
+		{
+			const playerState_t *ps = &cg.snap->ps;
+			int weapon = cent->currentState.weapon;
+
+			int clipIndex = BG_FindClipForWeapon(weapon);
+			int clipAmmo = ps->ammoclip[clipIndex];
+			int maxClip = BG_GetMaxClip(ps, weapon);
+
+			if (type == RANGETYPE_RELATIVE)
+			{
+				return (float)clipAmmo / (float)maxClip;
+			}
+			else
+			{
+				return clipAmmo;
 			}
 		}
 		break;
@@ -2068,14 +2086,26 @@ static void CG_DrawWeapRecharge( rectDef_t *rect, vec4_t color, int align ) {
 
 		weap = cg.snap->ps.weapon;
 
-		if ( !( cg.snap->ps.eFlags & EF_ZOOMING ) ) {
-			if ( weap != WP_AIRSTRIKE && weap !=WP_POISONGAS_MEDIC ) {
-				//fade = qtrue;
-				return;
-			}
+		
+		// Determine charge time based on class
+		switch (cg.snap->ps.stats[STAT_PLAYER_CLASS])
+		{
+		case PC_MEDIC:
+			chargeTime = cg_medicChargeTime.value;
+			break;
+		case PC_ENGINEER:
+			chargeTime = cg_engineerChargeTime.value;
+			break;
+		case PC_SOLDIER:
+			chargeTime = cg_soldierChargeTime.value;
+			break;
+		case PC_LT:
+			chargeTime = cg_LTChargeTime.value;
+			break;
+		default:
+		    chargeTime = 30000;
+			break;
 		}
-
-		chargeTime = cg_LTChargeTime.value;
 
 		barFrac = (float)( cg.time - cg.snap->ps.classWeaponTime ) / chargeTime;
 

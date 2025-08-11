@@ -43,7 +43,7 @@ public class Joystick extends Paintable implements TouchListener
     private int dotx, doty;
     private boolean dotjoyenabled = false;
 
-    private final int[] codes = { Q3EKeyCodes.KeyCodesGeneric.J_UP, Q3EKeyCodes.KeyCodesGeneric.J_RIGHT, Q3EKeyCodes.KeyCodesGeneric.J_DOWN, Q3EKeyCodes.KeyCodesGeneric.J_LEFT };
+    //private final int[] codes = { Q3EKeyCodes.KeyCodesGeneric.J_UP, Q3EKeyCodes.KeyCodesGeneric.J_RIGHT, Q3EKeyCodes.KeyCodesGeneric.J_DOWN, Q3EKeyCodes.KeyCodesGeneric.J_LEFT };
     private final int[] Menu_Codes = { Q3EKeyCodes.KeyCodesGeneric.K_UPARROW, Q3EKeyCodes.KeyCodesGeneric.K_RIGHTARROW, Q3EKeyCodes.KeyCodesGeneric.K_DOWNARROW, Q3EKeyCodes.KeyCodesGeneric.K_LEFTARROW };
     private final boolean[] keys = {false, false, false, false};
     private final boolean[] enarr = new boolean[4];
@@ -81,7 +81,7 @@ public class Joystick extends Paintable implements TouchListener
         this.m_fullZonePercent = fullZonePercent;
         this.m_deadZonePercent = deadZonePercent;
 
-        Q3EKeyCodes.ConvertRealKeyCodes(codes);
+        //Q3EKeyCodes.ConvertRealKeyCodes(codes);
         Q3EKeyCodes.ConvertRealKeyCodes(Menu_Codes);
 
         view = vw;
@@ -240,26 +240,29 @@ public class Joystick extends Paintable implements TouchListener
         //main paint
         super.Paint(gl);
 
-        if(!m_editMode)
+        if(m_editMode)
+        {
+            if(m_unfixed)
+//                Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, m_posX, m_posY, red, green, blue, alpha);
+            else
+//                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, m_posX, m_posY, red, green, blue, alpha);
+
+            if(null != m_outerVertexBuffer)
+                Q3EGL.DrawVerts_GL1(gl, m_outerTexture, 6, tex_p, m_outerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
+            else if(null != m_borderVertexBuffer)
+                Q3EGL.DrawVerts_GL1(gl, m_borderTexture, 6, tex_p, m_borderVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
+            if(null != m_innerVertexBuffer)
+                Q3EGL.DrawVerts_GL1(gl, m_innerTexture, 6, tex_p, m_innerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */1, 0, 0, alpha);
+        }
+        else
         {
             if((m_visibleMode != Q3EGlobals.ONSCRREN_JOYSTICK_VISIBLE_HIDDEN && m_visibleMode != Q3EGlobals.ONSCRREN_JOYSTICK_VISIBLE_ONLY_PRESSED) // always
                     || (m_visibleMode == Q3EGlobals.ONSCRREN_JOYSTICK_VISIBLE_ONLY_PRESSED && m_pressed) // only pressed
             )
             {
-                if(!m_unfixed)
-                {
-//                    Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
-                    Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha);
-
-                    // int dp = dot_pos;//Multithreading.
-                    if (dotjoyenabled)
-//                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
-                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + dotx, cy + doty, red, green, blue, alpha);
-                    else if (dot_pos != CONST_INVALID_DIRECTION)
-//                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
-                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
-                }
-                else
+                if(m_unfixed)
                 {
                     if(m_pressed)
                     {
@@ -275,23 +278,20 @@ public class Joystick extends Paintable implements TouchListener
 //                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
                         Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, m_posX, m_posY, red, green, blue, alpha);
                 }
-            }
-        }
-        else
-        {
-            if(!m_unfixed)
-//                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
-                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, m_posX, m_posY, red, green, blue, alpha);
-            else
-//                Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
-                Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, m_posX, m_posY, red, green, blue, alpha);
+                else
+                {
+//                    Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+                    Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha);
 
-            if(null != m_outerVertexBuffer)
-                Q3EGL.DrawVerts_GL1(gl, m_outerTexture, 6, tex_p, m_outerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
-            else if(null != m_borderVertexBuffer)
-                Q3EGL.DrawVerts_GL1(gl, m_borderTexture, 6, tex_p, m_borderVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
-            if(null != m_innerVertexBuffer)
-                Q3EGL.DrawVerts_GL1(gl, m_innerTexture, 6, tex_p, m_innerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */1, 0, 0, alpha);
+                    // int dp = dot_pos;//Multithreading.
+                    if (dotjoyenabled)
+//                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
+                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + dotx, cy + doty, red, green, blue, alpha);
+                    else if (dot_pos != CONST_INVALID_DIRECTION)
+//                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
+                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, vertexBuffer, indexBuffer, 4, 0, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
+                }
+            }
         }
     }
 

@@ -35,6 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 
 
 #include "g_local.h"
+#include "g_survival.h"
 
 extern void AimAtTarget( gentity_t * self );
 
@@ -1710,8 +1711,7 @@ void Fire_Lead( gentity_t *ent, gentity_t *activator, float spread, int damage, 
 	}
 
 	if ( traceEnt->takedamage ) {
-		G_Damage( traceEnt, ent, ent, forward, tr.endpos,
-				  damage, 0, MOD_MACHINEGUN );
+    G_Damage(traceEnt, ent, activator, forward, tr.endpos, damage, 0, MOD_MACHINEGUN);
 	}
 
 	if ( !Q_stricmp( ent->classname, "misc_mg42" ) ) {
@@ -1998,13 +1998,10 @@ void mg42_track( gentity_t *self, gentity_t *other ) {
 
 				if (g_gametype.integer == GT_SURVIVAL)
 				{
-
-					if (other->client->ps.persistant[PERS_SCORE] < 1)
+					if (!Survival_TrySpendMG42Points(other))
 					{
 						return;
 					}
-					// Deduct points as cost
-					other->client->ps.persistant[PERS_SCORE] -= 1;
 				}
 
 				// Now proceed as usual for both survival (with enough points) and non-survival

@@ -6,26 +6,32 @@ import android.preference.PreferenceManager;
 
 public final class Q3EPreference
 {
-    public static final String pref_datapath              = "q3e_datapath";
-    public static final String pref_hideonscr             = "q3e_hideonscr";
-    public static final String pref_mapvol                = "q3e_mapvol";
-    public static final String pref_analog                = "q3e_analog";
-    public static final String pref_detectmouse           = "q3e_detectmouse";
-    public static final String pref_eventdev              = "q3e_eventdev";
-    public static final String pref_mousepos              = "q3e_mousepos";
-    public static final String pref_scrres                = "q3e_scrres";
-    public static final String pref_resx                  = "q3e_resx";
-    public static final String pref_resy                  = "q3e_resy";
-    public static final String pref_32bit                 = "q3e_32bit";
-    public static final String pref_msaa                  = "q3e_msaa";
-    public static final String pref_2fingerlmb            = "q3e_2fingerlmb";
-    public static final String pref_nolight               = "q3e_nolight";
-    public static final String pref_useetc1               = "q3e_useetc1";
-    public static final String pref_usedxt                = "q3e_usedxt";
-    public static final String pref_useetc1cache          = "q3e_useetc1cache";
-    public static final String pref_controlprefix         = "q3e_controls_";
-    public static final String pref_controlportraitprefix = "q3e_portrait_controls_";
-    public static final String pref_harm_portrait         = "harm_portrait";
+    public static final String pref_datapath                     = "q3e_datapath";
+    public static final String pref_hideonscr                    = "q3e_hideonscr";
+    public static final String pref_mapvol                       = "q3e_mapvol";
+    public static final String pref_analog                       = "q3e_analog";
+    public static final String pref_detectmouse                  = "q3e_detectmouse";
+    public static final String pref_eventdev                     = "q3e_eventdev";
+    public static final String pref_mousepos                     = "q3e_mousepos";
+    public static final String pref_scrres                       = "q3e_scrres";
+    public static final String pref_resx                         = "q3e_resx";
+    public static final String pref_resy                         = "q3e_resy";
+    public static final String pref_32bit                        = "q3e_32bit";
+    public static final String pref_msaa                         = "q3e_msaa";
+    public static final String pref_2fingerlmb                   = "q3e_2fingerlmb";
+    public static final String pref_nolight                      = "q3e_nolight";
+    public static final String pref_useetc1                      = "q3e_useetc1";
+    public static final String pref_usedxt                       = "q3e_usedxt";
+    public static final String pref_useetc1cache                 = "q3e_useetc1cache";
+    public static final String pref_controlprefix                = "q3e_controls_";
+    public static final String pref_controlportraitprefix        = "q3e_portrait_controls_";
+    public static final String pref_harm_portrait                = "harm_portrait";
+    public static final String pref_harm_left_joystick_deadzone  = "harm_left_joystick_deadzone";
+    public static final String pref_harm_right_joystick_deadzone = "harm_right_joystick_deadzone";
+    public static final String pref_harm_dpad_as_arrow_key       = "harm_dpad_as_arrow_key";
+    public static final String pref_harm_right_joystick_sensitivity = "harm_right_joystick_sensitivity";
+    public static final String pref_harm_gamepad_keymap = "harm_gamepad_keymap";
+    public static final String pref_harm_sdl_audio_driver = "harm_sdl_audio_driver";
 
     public static final String pref_harm_image_useetc2                  = "q3e_image_useetc2"; //k
     public static final String pref_harm_16bit                          = "q3e_harm_16bit";
@@ -165,12 +171,19 @@ public final class Q3EPreference
     public static final String pref_harm_samtse_command_record   = "q3e_harm_samtse_command_record";
     public static final String pref_harm_samtse_game_mod         = "q3e_harm_samtse_game_mod"; //k
     // Xash3D
-    public static final String pref_harm_xash3d_fs_game            = "q3e_harm_xash3d_fs_game"; //k
-    public static final String pref_harm_xash3d_game_lib           = "q3e_harm_xash3d_game_lib"; //k
-    public static final String pref_harm_xash3d_user_mod           = "q3e_harm_xash3d_user_mod"; //k
-    public static final String pref_params_xash3d                  = "q3e_params_xash3d"; //k
-    public static final String pref_harm_xash3d_command_record     = "q3e_harm_xash3d_command_record";
-    public static final String pref_harm_xash3d_game_mod           = "q3e_harm_xash3d_game_mod"; //k
+    public static final String pref_harm_xash3d_fs_game          = "q3e_harm_xash3d_fs_game"; //k
+    public static final String pref_harm_xash3d_game_lib         = "q3e_harm_xash3d_game_lib"; //k
+    public static final String pref_harm_xash3d_user_mod         = "q3e_harm_xash3d_user_mod"; //k
+    public static final String pref_params_xash3d                = "q3e_params_xash3d"; //k
+    public static final String pref_harm_xash3d_command_record   = "q3e_harm_xash3d_command_record";
+    public static final String pref_harm_xash3d_game_mod         = "q3e_harm_xash3d_game_mod"; //k
+    // Source
+    public static final String pref_harm_source_fs_game          = "q3e_harm_source_fs_game"; //k
+    public static final String pref_harm_source_game_lib         = "q3e_harm_source_game_lib"; //k
+    public static final String pref_harm_source_user_mod         = "q3e_harm_source_user_mod"; //k
+    public static final String pref_params_source                = "q3e_params_source"; //k
+    public static final String pref_harm_source_command_record   = "q3e_harm_source_command_record";
+    public static final String pref_harm_source_game_mod         = "q3e_harm_source_game_mod"; //k
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k
@@ -238,6 +251,7 @@ public final class Q3EPreference
     public static final String AUTOSAVE_BUTTON_SETTINGS      = "harm_autosave_button_settings";
     public static final String BUTTON_SWIPE_RELEASE_DELAY    = "harm_button_swipe_release_delay";
     public static final String DISC_PANEL_KEYS_PREFIX        = "harm_disc_panel_keys_";
+    public static final String BUILTIN_VIRTUAL_KEYBOARD      = "harm_builtin_virtual_keyboard"; //k
 
     public static float GetFloatFromString(Context context, String name, float defVal)
     {

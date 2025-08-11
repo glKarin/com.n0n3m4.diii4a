@@ -78,7 +78,7 @@ If you have questions concerning this license or the applicable additional terms
 #define LEGACY_HEARTBEAT_FOR_MASTER	"Wolfenstein-1"
 
 #ifndef PRODUCT_VERSION
-  #define PRODUCT_VERSION "5.1"
+  #define PRODUCT_VERSION "5.2"
 #endif
 
 #define Q3_VERSION PRODUCT_NAME " " PRODUCT_VERSION
@@ -1532,6 +1532,8 @@ typedef struct playerState_s {
 	float footstepCount;
 	// Jaybird - Shotgun
 	qboolean	m97reloadInterrupt;
+
+	int weaponUpgraded[MAX_WEAPONS]; // 0 = not upgraded, 1 = upgraded
 
 } playerState_t;
 

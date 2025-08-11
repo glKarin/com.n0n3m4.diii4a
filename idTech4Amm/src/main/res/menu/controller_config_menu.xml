@@ -1,0 +1,5 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/controller_config_reset"
+        android:title="@string/reset"
+        android:showAsAction="ifRoom"/>
+</menu>

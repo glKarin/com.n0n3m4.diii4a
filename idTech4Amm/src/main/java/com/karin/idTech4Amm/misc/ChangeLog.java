@@ -43,6 +43,13 @@ public class ChangeLog
         StringBuilder sb = new StringBuilder();
         sb.append("------- ").append(date).append(" (R").append(release).append(") -------");
         sb.append(endl);
+        sb.append(GenContentString(endl));
+        return sb.toString();
+    }
+
+    public String GenContentString(String endl)
+    {
+        StringBuilder sb = new StringBuilder();
         if(logs != null && !logs.isEmpty())
         {
             for(String str : logs)
@@ -69,6 +76,11 @@ public class ChangeLog
     {
         final ChangeLog[] CHANGES = {
                 ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
+
+                ChangeLog.Create("2025-05-08", 67,
+                        "Add Serious Sam Classic: The First Encounter(game standalone directory named `serioussamtfe`) and Serious Sam Classic: The Second Encounter(game standalone directory named `serioussamtse`) support. More view in `" + TextHelper.GenLinkText("https://github.com/tx00100xt/SeriousSamClassic", "SeriousSamClassic") + "`.",
+                        "Add Xash3D and Counter-Strike 1.6(need extract CS1.6 extras resource on launcher first) support, game standalone directory named `xash3d`, more view in `" + TextHelper.GenLinkText("https://github.com/FWGS/xash3d-fwgs", "xash3d") + "` and `" + TextHelper.GenLinkText("https://github.com/Velaron/cs16-client", "cs16-client") + "`."
+                ),
 
                 ChangeLog.Create("2025-06-25", 66,
                         "Add global illumination rendering for make scene brighter(cvar harm_r_globalIllumination and harm_r_globalIlluminationBrightness) at launcher on DOOM 3/Quake 4/Prey(2006).",

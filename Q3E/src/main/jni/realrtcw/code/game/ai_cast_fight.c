@@ -519,6 +519,7 @@ float AICast_WeaponRange( cast_state_t *cs, int weaponnum ) {
 			return XSHEPHERD_MELEE_RANGE;
 		case AICHAR_ZOMBIE: // zombie flaming attack
 		case AICHAR_ZOMBIE_SURV:
+		case AICHAR_ZOMBIE_FLAME:
 		case AICHAR_ZOMBIE_GHOST:
 			return ZOMBIE_FLAME_RADIUS - 50;      // get well within range before starting
 		}
@@ -529,6 +530,7 @@ float AICast_WeaponRange( cast_state_t *cs, int weaponnum ) {
 			return 8000;
 		case AICHAR_ZOMBIE: // zombie spirit attack
 		case AICHAR_ZOMBIE_SURV:
+		case AICHAR_ZOMBIE_FLAME:
 		case AICHAR_ZOMBIE_GHOST:
 			return 1000;
 		case AICHAR_HELGA:  // zombie spirit attack // RealRTCW was 1900
@@ -547,6 +549,7 @@ float AICast_WeaponRange( cast_state_t *cs, int weaponnum ) {
 			return 2000;
 		case AICHAR_ZOMBIE:
 		case AICHAR_ZOMBIE_SURV:
+		case AICHAR_ZOMBIE_FLAME:
 		case AICHAR_ZOMBIE_GHOST:
 			return 44;
 		case AICHAR_DOG:
@@ -960,6 +963,7 @@ qboolean AICast_WeaponUsable( cast_state_t *cs, int weaponNum ) {
 		// don't attempt to lob a grenade more than this often, since we will abort a grenade
 		// throw if it's not safe, we shouldn't keep switching back too quickly
 	case WP_DYNAMITE:
+	case WP_DYNAMITE_ENG:
 	case WP_GRENADE_LAUNCHER:
 	case WP_GRENADE_PINEAPPLE:
 		if ( cs->enemyNum < 0 ) {
@@ -989,6 +993,7 @@ qboolean AICast_WeaponUsable( cast_state_t *cs, int weaponNum ) {
 		switch ( g_entities[cs->entityNum].aiCharacter ) {
 		case AICHAR_ZOMBIE: // zombie flaming attack
 		case AICHAR_ZOMBIE_SURV:
+		case AICHAR_ZOMBIE_FLAME:
 		case AICHAR_ZOMBIE_GHOST:
 			delay = 4000;
 			if ( dist < 0 ) { // || dist < 128) {
@@ -1037,6 +1042,7 @@ qboolean AICast_WeaponUsable( cast_state_t *cs, int weaponNum ) {
 			break;
 		case AICHAR_ZOMBIE:
 		case AICHAR_ZOMBIE_SURV:
+		case AICHAR_ZOMBIE_FLAME:
 		case AICHAR_ZOMBIE_GHOST:
 			delay = 6000;
 			// zombie "flying spirit" attack
@@ -1121,6 +1127,7 @@ qboolean AICast_WeaponUsable( cast_state_t *cs, int weaponNum ) {
 		case AICHAR_ZOMBIE:
 		case AICHAR_ZOMBIE_SURV:
 		case AICHAR_ZOMBIE_GHOST:
+		case AICHAR_ZOMBIE_FLAME:
 			return qtrue;   // always usable
 		default:
 			delay = -1;
@@ -1476,7 +1483,7 @@ void AICast_WeaponSway( cast_state_t *cs, vec3_t ofs ) {
 	VectorClear( ofs );
 	switch ( cs->weaponNum ) {
 	case WP_MONSTER_ATTACK1:
-		if ( cs->aiCharacter != AICHAR_ZOMBIE && cs->aiCharacter != AICHAR_ZOMBIE_SURV && cs->aiCharacter != AICHAR_ZOMBIE_GHOST ) {
+		if ( cs->aiCharacter != AICHAR_ZOMBIE && cs->aiCharacter != AICHAR_ZOMBIE_SURV && cs->aiCharacter != AICHAR_ZOMBIE_GHOST && cs->aiCharacter != AICHAR_ZOMBIE_FLAME ) {
 			break;      // only allow flaming zombie beyond here
 		}
 	case WP_FLAMETHROWER:
@@ -2084,6 +2091,10 @@ void AICast_CheckDangerousEntity( gentity_t *ent, int dangerFlags, float dangerD
 	gentity_t *trav;
 	int i, endTime;
 	float dist;
+
+	if (g_gametype.integer == GT_SURVIVAL) {
+		return; // don't do this in survival mode
+	}
 	//
 	//
 	if ( dangerFlags & DANGER_MISSILE ) {

@@ -1853,6 +1853,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	{
 		int      i;
 		qboolean spunpart;
+		int      anim = cg.snap->ps.weapAnim & ~ANIM_TOGGLEBIT;
 
 		for (i = W_PART_1; i < W_MAX_PARTS; i++)
 		{
@@ -1863,20 +1864,68 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 					continue;
 				}
 			}
-			// blend out the right hand of garand after reloading
-			else if (weaponNum == WP_CARBINE)
+			// BLEND OUT SOME HANDS
+			// blend out the right hand of PF when not reloading
+			else if (weaponNum == WP_PANZERFAUST)
 			{
-				if (i == 2 /* right hand */ && cg.predictedPlayerEntity.pe.weap.frame > 57 && cg.predictedPlayerEntity.pe.weap.frame < 65)
+				if (i == 4 /* right hand */ && (ps->weaponstate != WEAPON_DROPPING))
 				{
 					continue;
 				}
 			}
-			// blend out the right hand of garand/m7 while attaching the rifle
-			// grenade to fix a shipped animation quirk where the hand would
-			// reappear on the bottom right at the last parts of the animation
-			else if (weaponNum == WP_M7)
+			// blend out the left hand of pistols
+			else if (weaponNum == WP_COLT || weaponNum == WP_LUGER || weaponNum == WP_SILENCED_COLT || weaponNum == WP_SILENCER)
 			{
-				if (i == 2 /* right hand */ && cg.predictedPlayerEntity.pe.weap.frame > 130 && cg.predictedPlayerEntity.pe.weap.frame < 136)
+				if ((i == 3 /* left hand */ && (ps->weaponstate != WEAPON_RELOADING /* show only during reload */))
+				    || (weaponNum == WP_SILENCER && i == 5 /* excess normally out-of-view hand */)
+				    || (weaponNum == WP_SILENCED_COLT && i == 6 /* excess normally out-of-view hand */))
+				{
+					continue;
+				}
+			}
+			// blend out the right hand of garand
+			else if (weaponNum == WP_CARBINE || weaponNum == WP_KAR98)
+			{
+				if (i == 2 /* right hand */ && (
+						// for some frames, after reloading
+						(cg.predictedPlayerEntity.pe.weap.frame > 57 && cg.predictedPlayerEntity.pe.weap.frame < 65)
+						// for every animation other than reloading...
+						|| (ps->weaponstate != WEAPON_RELOADING
+						    // ...except detaching rg
+						    && (anim != WEAP_ALTSWITCHTO))
+						))
+				{
+					continue;
+				}
+			}
+			// blend out the right hand of garand/m7
+			else if (weaponNum == WP_M7 || weaponNum == WP_GPG40)
+			{
+				if (i == 2 /* right hand */ && (
+						// for some frames, while attaching the rifle grenade to fix
+						// a shipped animation quirk where the hand would reappear on
+						// the bottom right at the last parts of the animation
+						(cg.predictedPlayerEntity.pe.weap.frame > 130 && cg.predictedPlayerEntity.pe.weap.frame < 136)
+						// blend out, except when attaching rg
+						|| anim != WEAP_ALTSWITCHFROM))
+				{
+					continue;
+				}
+			}
+			// blend out the right hand of scoped rifles
+			else if (weaponNum == WP_K43 || weaponNum == WP_GARAND)
+			{
+				if (i == 2 /* right hand */ &&
+				    ((cg.predictedPlayerEntity.pe.weap.frame > 58 && cg.predictedPlayerEntity.pe.weap.frame < 65) || ps->weaponstate != WEAPON_RELOADING))
+				{
+					continue;
+				}
+			}
+			// blend out the hand and the mag of thompson instead of freezing at lowest point during reloading for a few frames
+			else if (weaponNum == WP_THOMPSON)
+			{
+				if ((i == 1 /* mag */ || i == 2 /* hand */)
+				    && (cg.predictedPlayerEntity.pe.weap.frame > 28 && cg.predictedPlayerEntity.pe.weap.frame < 32))
 				{
 					continue;
 				}
@@ -1983,9 +2032,10 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 				// reposition dynamite relative to hand (it pierced the hand by default)
 				else if (weaponNum == WP_DYNAMITE && i == 0)
 				{
+					// FIXME : rotation doesn't work as expected on YAW / PITCH angle
 					CG_Transform(&barrel, 0.9,
 					             0.6, 0.5, 1.4,
-					             13.0, 11.0, 18.0);
+					             0 /*13.0*/, 11.0, 0 /*18.0*/);
 				}
 				// reposition pineapple relative to hand (it hovered by default)
 				else if (weaponNum == WP_GRENADE_PINEAPPLE && i == 0)
@@ -5232,28 +5282,14 @@ static void CG_AddBloodSplat(vec3_t origin, vec3_t end, vec3_t dir)
 	if (cg_blood.integer && cg_bloodTime.integer && (lastBloodSpat > cg.time || lastBloodSpat < cg.time - 500))
 	{
 		vec3_t trend;
-		vec4_t projection;
 
 		VectorMA(end, 128, dir, trend);
 		trap_CM_BoxTrace(&trace, end, trend, NULL, NULL, 0, MASK_SHOT & ~CONTENTS_BODY);
 
 		if (trace.fraction < 1)
 		{
-			//CG_ImpactMark( cgs.media.bloodDotShaders[rand()%5], trace.endpos, trace.plane.normal, random()*360,
-			//  1,1,1,1, qtrue, 15+random()*20, qfalse, cg_bloodTime.integer * 1000 );
-#if 0
-			VectorSubtract(vec3_origin, dir, projection);
-			projection[3] = 64;
-			VectorMA(trace.endpos, -8.0f, projection, markOrigin);
-			CG_ImpactMark(cgs.media.bloodDotShaders[rand() % 5], markOrigin, projection, 15.0f + random() * 20.0f, 360.0f * random(),
-			              1.0f, 1.0f, 1.0f, 1.0f, cg_bloodTime.integer * 1000);
-#else
-			VectorSet(projection, 0, 0, -1);
-			projection[3] = 15.0f + random() * 20.0f;
+			CG_ProjectBloodDecal((vec3_t *) origin, 15.0f + random() * 20.0f);
 
-			trap_R_ProjectDecal(cgs.media.bloodDotShaders[rand() % 5], 1, (vec3_t *) origin, projection, colorWhite,
-			                    cg_bloodTime.integer * 1000, (cg_bloodTime.integer * 1000) >> 4);
-#endif
 			lastBloodSpat = cg.time;
 		}
 		else if (lastBloodSpat < cg.time - 1000)
@@ -5265,21 +5301,7 @@ static void CG_AddBloodSplat(vec3_t origin, vec3_t end, vec3_t dir)
 
 			if (trace.fraction < 1)
 			{
-				//CG_ImpactMark( cgs.media.bloodDotShaders[rand()%5], trace.endpos, trace.plane.normal, random()*360,
-				//  1,1,1,1, qtrue, 15+random()*10, qfalse, cg_bloodTime.integer * 1000 );
-#if 0
-				VectorSubtract(vec3_origin, dir, projection);
-				projection[3] = 64;
-				VectorMA(trace.endpos, -8.0f, projection, markOrigin);
-				CG_ImpactMark(cgs.media.bloodDotShaders[rand() % 5], markOrigin, projection, 15.0f + random() * 10.0f, 360.0f * random(),
-				              1.0f, 1.0f, 1.0f, 1.0f, cg_bloodTime.integer * 1000);
-#else
-				VectorSet(projection, 0, 0, -1);
-				projection[3] = 15.0f + random() * 20.0f;
-
-				trap_R_ProjectDecal(cgs.media.bloodDotShaders[rand() % 5], 1, (vec3_t *) origin, projection, colorWhite,
-				                    cg_bloodTime.integer * 1000, (cg_bloodTime.integer * 1000) >> 4);
-#endif
+				CG_ProjectBloodDecal((vec3_t *) origin, 15.0f + random() * 20.0f);
 				lastBloodSpat = cg.time;
 			}
 		}
@@ -5922,7 +5944,7 @@ void SnapVectorTowards(vec3_t v, vec3_t to)
 }
 
 /**
- * @brief Renders bullet tracers if  tracer option is valid.
+ * @brief Renders bullet tracers if tracer option is valid.
  * @param[in] pstart
  * @param[in] pend
  * @param[in] sourceEntityNum
@@ -5930,12 +5952,12 @@ void SnapVectorTowards(vec3_t v, vec3_t to)
  */
 void CG_DrawBulletTracer(vec3_t pstart, vec3_t pend, int sourceEntityNum)
 {
-	if (cg_tracers.integer == 2 && sourceEntityNum != cg.clientNum)
+	if (cg_tracers.integer == 2 && sourceEntityNum != cg.snap->ps.clientNum)
 	{
 		return; // Only own tracers
 	}
 
-	if (cg_tracers.integer == 3 && sourceEntityNum == cg.clientNum)
+	if (cg_tracers.integer == 3 && sourceEntityNum == cg.snap->ps.clientNum)
 	{
 		return; // Only others tracers
 	}

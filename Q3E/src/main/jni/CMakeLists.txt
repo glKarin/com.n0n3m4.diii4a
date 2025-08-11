@@ -8,13 +8,21 @@ cmake_minimum_required(VERSION 3.4.1)
 project(idTech4Amm)
 
 
+message(STATUS "Product flavor: ${DIII4A_PRODUCT_FLAVOR}")
+if(DIII4A_PRODUCT_FLAVOR STREQUAL "fdroid")
+    set(PRODUCT_FLAVOR_IS_GITHUB False)
+    set(PRODUCT_FLAVOR_IS_FDROID True)
+else()
+    set(PRODUCT_FLAVOR_IS_GITHUB True)
+    set(PRODUCT_FLAVOR_IS_FDROID False)
+endif()
 
 #[[OPTION(BUILD_D3        "Build DOOM 3"    OFF)
 OPTION(BUILD_Q4        "Build Quake 4"    OFF)
 OPTION(BUILD_PREY      "Build Prey"    OFF)
 OPTION(BUILD_D3_MOD		"Build all DOOM3 mods" OFF)
 OPTION(BUILD_Q4_MOD		"Build all Quake4 mods" OFF)]]
-OPTION(BUILD_BACKPORT        "Build backport version"    OFF)
+OPTION(BUILD_BACKPORT        "Build backport version"    ON)
 
 
 # Supported
@@ -31,7 +39,10 @@ OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
-OPTION(GAME_XASH3D      "Build Xash3D"                          OFF)
+if(NOT PRODUCT_FLAVOR_IS_FDROID)
+OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
+OPTION(GAME_SOURCE      "Build Source"                          ON)
+endif()
 
 # Experimental
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
@@ -56,7 +67,7 @@ set(DIII4A_DEPEND_COMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
 add_subdirectory ( common/bt )
 
 # using Q3E_SDL2
-#if(GAME_XASH3D)
+#if(GAME_XASH3D OR GAME_SOURCE)
 set(Q3E_SDL TRUE)
 #endif()
 
@@ -77,7 +88,7 @@ if(GAME_DOOM3)
     add_subdirectory ( doom3/neo ) # DOOM3 | RoE, Quake4, Prey(2006)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_SOURCE)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory ( deplibs ) # common depend libraries
 
@@ -116,10 +127,10 @@ endif()
 if(GAME_TDM) # 2.13 | 2da36cc9e83046160b91bca91c116dc642740b78 | Mar 8, 2025 | Merge one commit from trunk.
     message(STATUS "Build The Dark Mod")
     add_subdirectory ( darkmod ) # The Dark Mod
-    if(BUILD_BACKPORT)
+#[[    if(BUILD_BACKPORT)
         # 2.12 | 5f4793f69bc0b61cbf2f921496455fb9e9296bcd | Feb 24, 2024 | Merged some changes from trunk.
         add_subdirectory ( backports/darkmod_2_12 "darkmod_2_12" )
-    endif()
+    endif()]]
 endif()
 
 if(GAME_DOOM3BFG) # 1.4.0 | f81a8c1dd9b762774a233ba071837b2c7a374751 | Mar 6, 2022 | Updated release notes
@@ -144,11 +155,11 @@ if(GAME_ETW) # v2.83.1 | e8d0ec06800630fd458791ccd29ed488e04648d9 | Nov 12, 2024
     add_subdirectory ( etw ) # ETW
 endif()
 
-if(GAME_REALRTCW) # 5.1 | a6e94b82bd11c41f62ffc969e27b0e63f267ef8e | Version is upped to 5.1
+if(GAME_REALRTCW) # 5.2 | Jul 26, 2025 | ad529d588e4dec717aff0779f9d1555eddc1e2be | Update ai_cast_survival.c
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
     if(BUILD_BACKPORT)
-        add_subdirectory ( backports/realrtcw_5_0 "realrtcw_5_0" ) # RealRTCW 5.0 # 5.0 | on Jul 2, 2024 | 49ebd2964f7d15be3ca2723401ef3ea07bfbf586 | Disable eject brass delay, it crashes the game
+        add_subdirectory ( backports/realrtcw_5_1 "realrtcw_5_1" ) # 5.1 | on Feb 14, 2025 | a6e94b82bd11c41f62ffc969e27b0e63f267ef8e | Version is upped to 5.1
     endif()
 endif()
 
@@ -175,6 +186,11 @@ if(GAME_XASH3D) # hlsdk-portable | Make cppcheck happy. | https://github.com/FWG
     # xash3d-fwgs | engine: platform: sdl2: assign K_AUX32 and K_AUX31 to volume buttons to match old engine behavior on Android | https://github.com/FWGS/xash3d-fwgs/commit/c90d1100965ec5a072d95c0c257f853a6673ca74
     message(STATUS "Build Xash3D")
     add_subdirectory(xash3d) # Xash3D
+endif()
+
+if(GAME_SOURCE) # 29985681a18508e78dc79ad863952f830be237b6 | Dec 30, 2023 | Merge pull request #312 from AruMoon/add-master-server Add new master server
+	message(STATUS "Build Source")
+    add_subdirectory(source) # Source-Engine
 endif()
 
 

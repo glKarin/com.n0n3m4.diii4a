@@ -89,6 +89,12 @@ void Sys_UnloadDll(void *dllHandle);
 void Sys_ParseArgs(int argc, char **argv);
 void Sys_BuildCommandLine(int argc, char **argv, char *buffer, size_t bufferSize);
 
+#ifdef __ANDROID__
+#if !defined(_DIII4A) //karin: unused
+char *Sys_CdToExtStorage(void);
+#endif
+#endif
+
 #ifdef USE_WINDOWS_CONSOLE
 void Conbuf_AppendText(const char *msg);
 void Sys_DestroyConsole(void);

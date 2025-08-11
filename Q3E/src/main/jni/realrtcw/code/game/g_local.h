@@ -80,8 +80,6 @@ If you have questions concerning this license or the applicable additional terms
 #define FL_NODRAW               0x01000000
 #define FL_DOORNOISE            0x02000000  //----(SA)	added
 
-#define ANNOUNCE_SOUNDS_COUNT 32
-
 // movers are things like doors, plats, buttons, etc
 typedef enum {
 	MOVER_POS1,
@@ -100,127 +98,6 @@ typedef enum {
 	MOVER_1TO2ROTATE,
 	MOVER_2TO1ROTATE
 } moverState_t;
-
-typedef struct svParams_s
-{
-	// not loaded
-	int activeAI[NUM_CHARACTERS];
-	int survivalKillCount;
-	int maxActiveAI[NUM_CHARACTERS];
-	int waveCount;
-	int waveKillCount;
-	int killCountRequirement;
-
-
-	// loaded from .surv file
-	int initialKillCountRequirement;
-
-	int initialSoldiersCount;
-	int initialEliteGuardsCount;
-	int initialBlackGuardsCount;
-	int initialVenomsCount;
-
-	int initialZombiesCount;
-	int initialWarriorsCount;
-	int initialProtosCount;
-	int initialGhostsCount;
-	int initialPriestsCount;
-	int initialPartisansCount;
-
-	float healthIncreaseMultiplier;
-	float speedIncreaseDivider;
-
-	float spawnTimeDecreaseDivider;
-	int   minSpawnTime;
-	int   startingSpawnTime;
-    int   friendlySpawnTime;
-
-	int soldiersIncrease;
-	int eliteGuardsIncrease;
-	int blackGuardsIncrease;
-	int venomsIncrease;
-	int zombiesIncrease;
-	int warriorsIncrease;
-	int protosIncrease;
-	int partisansIncrease;
-	int ghostsIncrease;
-	int priestsIncrease;
-
-	int maxSoldiers;
-	int maxEliteGuards;
-	int maxBlackGuards;
-	int maxVenoms;
-
-	int maxZombies;
-	int maxWarriors;
-	int maxProtos;
-	int maxGhosts;
-	int maxPriests;
-	int maxPartisans;
-
-	int waveEg;
-	int waveBg;
-	int waveV;
-
-	int waveWarz;
-	int waveProtos;
-	int waveGhosts;
-	int wavePriests;
-
-	int wavePartisans;
-
-	int zombieHealthCap;
-	int warriorHealthCap;
-	int protosHealthCap;
-	int ghostHealthCap;
-	int priestHealthCap;
-
-	int partisansHealthCap;
-
-	int soldierHealthCap;	
-	int eliteGuardHealthCap;
-	int blackGuardHealthCap;
-	int venomHealthCap;
-
-	int soldierBaseHealth;
-	int eliteGuardBaseHealth;
-	int blackGuardBaseHealth;
-	int venomBaseHealth;
-
-	int partisansBaseHealth;
-
-	int zombieBaseHealth;
-	int warriorBaseHealth;
-	int protosBaseHealth;
-	int ghostBaseHealth;
-	int priestBaseHealth;
-
-	int powerupDropChance;
-	int powerupDropChanceScavengerIncrease;
-
-	int treasureDropChance;
-	int treasureDropChanceScavengerIncrease;
-
-	int ammoStandPrice;
-	int healthStandPrice;
-
-	int scoreHeadshotKill;
-	int scoreHit;
-	int scoreBaseKill;
-	int scoreSoldierBonus;
-	int scoreZombieBonus;
-	int scoreEliteBonus;
-	int scoreWarzBonus;
-	int scoreProtosBonus;
-	int scoreBlackBonus;
-	int scoreVenomBonus;
-	int scorePriestBonus;
-	int scoreGhostBonus;
-	int scoreKnifeBonus;
-
-	char announcerSound[ANNOUNCE_SOUNDS_COUNT][MAX_QPATH];
-
-} svParams_t;
 
 typedef enum {
     RADIUS_SCOPE_ANY,
@@ -568,7 +445,8 @@ struct gentity_s {
 	int price;                 // item price, survival mode
     char  *buy_item;
 	int isWeapon;    
-	int wave;				   // wave number, survival mode           
+	int wave;				   // wave number, survival mode   
+	int lastPainMOD; // last meansOfDeath used in pain function        
 };
 
 // Ridah
@@ -1012,8 +890,6 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float
 qboolean G_RadiusDamage2( vec3_t origin, gentity_t *inflictor, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod, RadiusScope scope );
 void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
 void TossClientWeapons( gentity_t *self );
-void TossClientItems( gentity_t *self, gentity_t *attacker );
-void TossClientPowerups( gentity_t *self, gentity_t *attacker );
 
 // damage flags
 #define DAMAGE_RADIUS               0x00000001  // damage was indirect
@@ -1099,7 +975,6 @@ int TeamCount( int ignoreClientNum, team_t team );
 team_t PickTeam( int ignoreClientNum );
 void SetClientViewAngle( gentity_t *ent, vec3_t angle );
 gentity_t *SelectSpawnPoint( vec3_t avoidPoint, vec3_t origin, vec3_t angles );
-gentity_t *SelectSpawnPoint_AI ( gentity_t *player, gentity_t *ent, vec3_t origin, vec3_t angles ) ;
 void ClientRespawn(gentity_t *ent);
 void BeginIntermission( void );
 void InitBodyQue( void );
@@ -1376,6 +1251,9 @@ extern vmCvar_t g_realism;
 extern vmCvar_t g_regen;
 extern vmCvar_t	g_flushItems;
 extern vmCvar_t g_vanilla_guns;
+
+// Safe endgame fix
+extern qboolean g_endgameTriggered;
 
 void	trap_Print( const char *text );
 void	trap_Error( const char *text ) __attribute__((noreturn));

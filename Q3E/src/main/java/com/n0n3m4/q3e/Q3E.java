@@ -7,6 +7,12 @@ import android.os.Build;
 import com.n0n3m4.q3e.event.Q3EExitEvent;
 import com.n0n3m4.q3e.event.Q3EQuitEvent;
 import com.n0n3m4.q3e.karin.KOnceRunnable;
+import com.n0n3m4.q3e.karin.KStr;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public final class Q3E
 {
@@ -31,6 +37,37 @@ public final class Q3E
     // ratio
     public static float widthRatio = 1.0f;
     public static float heightRatio = 1.0f;
+
+    public static int LogicalToPhysicsX(int x)
+    {
+        return Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth ? x : (int) ((float) x * Q3E.widthRatio);
+    }
+
+    public static int LogicalToPhysicsY(int y)
+    {
+        return Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight ? y : (int) ((float) y * Q3E.heightRatio);
+    }
+
+    public static float PhysicsToLogicalX(float x)
+    {
+        return Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth ? x : (x / Q3E.widthRatio);
+    }
+
+    public static float PhysicsToLogicalY(float y)
+    {
+        return Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight ? y : (y / Q3E.heightRatio);
+    }
+
+    public static boolean IsOriginalSize()
+    {
+        return Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth && Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight;
+    }
+
+    public synchronized static void CalcRatio()
+    {
+        Q3E.widthRatio = (float) Q3E.GAME_VIEW_WIDTH / (float) Q3E.surfaceWidth;
+        Q3E.heightRatio = (float) Q3E.GAME_VIEW_HEIGHT / (float) Q3E.surfaceHeight;
+    }
 
     public static void Finish()
     {
@@ -120,5 +157,94 @@ public final class Q3E
             }
         };
         Q3EUtils.q3ei.callbackObj.PushEvent(runnable);
+    }
+
+
+    public static String GetDLLCachePath(String dir)
+    {
+        String path = activity.getCacheDir().getAbsolutePath();// /data/user/<package_name>/cache/
+        if(KStr.NotEmpty(dir))
+            path = KStr.AppendPath(path, dir);
+        return path;
+    }
+
+    // 1: fileName
+    // 2: fileName.so
+    // 3: libfileName.so
+    public static String CopyDLLToCache(String dllDir, String fileName, String subDir, String name)
+    {
+        List<String> guess = new ArrayList<>();
+        guess.add(fileName);
+        String filename = fileName.toLowerCase();
+        if(!filename.endsWith(".so"))
+        {
+            fileName += ".so";
+            guess.add(fileName);
+        }
+        if(!filename.startsWith("lib"))
+            guess.add("lib" + fileName);
+
+        for(String g : guess)
+        {
+            String res = CopyDLLToCache(KStr.AppendPath(dllDir, g), subDir, name);
+            if(null != res)
+                return res;
+        }
+        return null;
+    }
+
+    public static String CopyDLLToCache(String dllPath, String subDir, String name)
+    {
+        File file = new File(dllPath);
+        if(!file.isFile() || !file.canRead())
+        {
+            Log.w(Q3EGlobals.CONST_Q3E_LOG_TAG, "Missing DLL " + dllPath);
+            return null;
+        }
+
+        String targetDir = GetDLLCachePath(subDir); // /data/user/<package_name>/cache/
+        Q3EUtils.mkdir(targetDir, true);
+        if(KStr.IsEmpty(name))
+            name = file.getName();
+        String cacheFile = KStr.AppendPath(targetDir, name);
+        String res = null;
+
+        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copy DLL " + dllPath + " -> " + cacheFile);
+        long r = Q3EUtils.cp(dllPath, cacheFile);
+        if(r > 0)
+        {
+            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copy DLL success: " + dllPath + " -> " + cacheFile);
+            res = cacheFile;
+        }
+        else
+            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copy DLL fail: " + dllPath + " -> " + cacheFile);
+        return res;
+    }
+
+    public static String CopyDLLsToCache(String dllDirPath, String subDir, String...excludes)
+    {
+        File dir = new File(dllDirPath);
+        if(!dir.isDirectory())
+            return null;
+
+        File[] files = dir.listFiles();
+        if(null == files || files.length == 0)
+            return null;
+
+        List<String> excludeList = null;
+        if(null != excludes && excludes.length > 0)
+        {
+            excludeList = Arrays.asList(excludes);
+        }
+        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copy DLLs " + dllDirPath);
+        for(File file : files)
+        {
+            if(!file.getName().toLowerCase().endsWith(".so"))
+                continue;
+            if(null != excludeList && Q3EUtils.ContainsIgnoreCase(excludeList, file.getName()))
+                continue;
+            CopyDLLToCache(file.getAbsolutePath(), subDir, file.getName());
+        }
+        return GetDLLCachePath(subDir);
     }
 }

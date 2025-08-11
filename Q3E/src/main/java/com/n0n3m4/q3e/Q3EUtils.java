@@ -50,6 +50,7 @@ import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.karin.KFDManager;
 import com.n0n3m4.q3e.karin.KLog;
+import com.n0n3m4.q3e.karin.KControlsTheme;
 import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.ByteArrayOutputStream;
@@ -69,8 +70,8 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -129,18 +130,32 @@ public class Q3EUtils
         InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (q3ei.function_key_toolbar)
         {
-            boolean changed = imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
-            if (changed) // im from open to close
-                ToggleToolbar(false);
-            else // im is closed
+            boolean changed;
+            if(q3ei.builtin_virtual_keyboard)
             {
-                //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-                ToggleToolbar(true);
+                Q3E.activity.GetKeyboard().ToggleBuiltInVKB();
+                changed = Q3E.activity.GetKeyboard().IsBuiltInVKBVisible();
+                ToggleToolbar(changed);
             }
-        } else
+            else
+            {
+                changed = imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
+                if (changed) // im from open to close
+                    ToggleToolbar(false);
+                else // im is closed
+                {
+                    //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                    ToggleToolbar(true);
+                }
+            }
+        }
+        else
         {
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            if(q3ei.builtin_virtual_keyboard)
+                Q3E.activity.GetKeyboard().ToggleBuiltInVKB();
+            else
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         }
     }
 
@@ -154,20 +169,34 @@ public class Q3EUtils
         if (null != vw)
         {
             InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-            if (Q3EUtils.q3ei.function_key_toolbar)
-                Q3EUtils.ToggleToolbar(true);
+            if(q3ei.builtin_virtual_keyboard)
+                Q3E.activity.GetKeyboard().OpenBuiltInVKB();
+            else
+            {
+                //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }
         }
+        if (Q3EUtils.q3ei.function_key_toolbar)
+            Q3EUtils.ToggleToolbar(true);
     }
 
     public static void CloseVKB(View vw)
     {
         if (null != vw)
         {
-            InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
+            if(q3ei.builtin_virtual_keyboard)
+            {
+                Q3E.activity.GetKeyboard().CloseBuiltInVKB();
+            }
+            else
+            {
+                InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
+            }
         }
+        if (Q3EUtils.q3ei.function_key_toolbar)
+            Q3EUtils.ToggleToolbar(false);
     }
 
     public static int[] GetNormalScreenSize(Activity activity)
@@ -431,15 +460,45 @@ public class Q3EUtils
         }
     }
 
-    public static LinkedHashMap<String, String> GetControlsThemes(Context context)
+    public static List<KControlsTheme> GetControlsThemes(Context context)
     {
-        LinkedHashMap<String, String> list = new LinkedHashMap<>();
-        list.put("/android_asset", "Default");
-        list.put("", "External");
-        List<String> controls_theme = KFDManager.Instance(context).ListDir("controls_theme");
+        KFDManager fs = KFDManager.Instance(context);
+        List<KControlsTheme> list = new ArrayList<>();
+        list.add(new KControlsTheme("/android_asset", Q3ELang.tr(context, R.string._default)));
+        list.add(new KControlsTheme("", Q3ELang.tr(context, R.string.external)));
+        List<String> controls_theme = fs.ListDir("controls_theme");
         for (String file : controls_theme)
         {
-            list.put("controls_theme/" + file, file);
+            String path = "controls_theme/" + file;
+
+            KControlsTheme item = new KControlsTheme(path, file);
+
+            List<String> searches = new ArrayList<>();
+            searches.add("");
+            String lang = Q3ELang.AppLang(context);
+            if(KStr.NotEmpty(lang))
+            {
+                int i = lang.indexOf("-");
+                if(i > 0)
+                {
+                    String l = lang.substring(0, i);
+                    if(!searches.contains(l))
+                        searches.add("." + l);
+                }
+                 if(!searches.contains(lang))
+                    searches.add("." + lang);
+            }
+
+            for(String search : searches)
+            {
+                String desc = fs.ReadAsText(path + "/description" + search + ".txt");
+                if(null != desc)
+                {
+                    item.Parse(desc);
+                }
+            }
+
+            list.add(item);
         }
         return list;
     }
@@ -777,7 +836,7 @@ public class Q3EUtils
 
     public static boolean rm(String path)
     {
-        if(null == path)
+        if(KStr.IsEmpty(path))
             return false;
         return rm(new File(path));
     }
@@ -789,13 +848,112 @@ public class Q3EUtils
 
         try
         {
-            return file.delete();
+            boolean ok = file.delete();
+            KLog.D("rm: " + file.getAbsolutePath() + " -> " + (ok ? "success" : "fail"));
+            return ok;
         }
         catch (Exception e)
         {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static boolean rmdir(String path)
+    {
+        if(KStr.IsEmpty(path))
+            return false;
+        return rmdir(new File(path));
+    }
+
+    public static boolean rmdir(File file)
+    {
+        if(null == file || !file.isDirectory())
+            return false;
+
+        String[] list = file.list();
+        if(null != list && list.length > 0)
+            return false;
+
+        try
+        {
+            boolean ok = file.delete();
+            KLog.D("rmdir: " + file.getAbsolutePath() + " -> " + (ok ? "success" : "fail"));
+            return ok;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean rmdir_r(String path)
+    {
+        if(KStr.IsEmpty(path))
+            return false;
+        return rmdir_r(new File(path));
+    }
+
+    public static boolean rmdir_r(File file)
+    {
+        if(null == file || !file.isDirectory())
+            return false;
+
+        File[] files = file.listFiles();
+        if(null == files || files.length == 0)
+            return true;
+
+        try
+        {
+            for(File f : files)
+            {
+                if(!rm_r(f))
+                    return false;
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean rm_r(String path)
+    {
+        if(KStr.IsEmpty(path))
+            return false;
+        return rm_r(new File(path));
+    }
+
+    public static boolean rm_r(File file)
+    {
+        if(null == file)
+            return false;
+
+        if(file.isDirectory())
+        {
+            File[] files = file.listFiles();
+            if(null != files && files.length > 0)
+            {
+                for(File f : files)
+                {
+                    if(!rm_r(f))
+                        return false;
+                }
+            }
+            return rmdir(file);
+        }
+        else
+            return rm(file);
+    }
+
+    public static String FileDir(String path)
+    {
+        if(path.endsWith("/") || path.endsWith("\\"))
+            return path;
+        return new File(path).getParentFile().getAbsolutePath();
     }
 
     public static boolean mkdir(String path, boolean p)
@@ -1351,5 +1509,59 @@ public class Q3EUtils
                 res.add(file);
         }
         return res;
+    }
+
+    public static String asset_get_contents(Context context, String path)
+    {
+        InputStream is = null;
+        try
+        {
+            is = context.getAssets().open(path);
+            String res = Read(is);
+            return res;
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+        finally
+        {
+            Close(is);
+        }
+    }
+
+    public static void SetViewZ(View view, int z)
+    {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            view.setZ(z);
+    }
+
+    public static boolean ContainsIgnoreCase(Collection<String> list, String target)
+    {
+        for(String s : list)
+        {
+            if(target.equalsIgnoreCase(s))
+                return true;
+        }
+        return false;
+    }
+
+    public static int ArrayIndexOf(String[] arr, String target, boolean cs)
+    {
+        for(int i = 0; i < arr.length; i++)
+        {
+            if(cs)
+            {
+                if(target.equals(arr[i]))
+                    return i;
+            }
+            else
+            {
+                if(target.equalsIgnoreCase(arr[i]))
+                    return i;
+            }
+        }
+        return -1;
     }
 }
