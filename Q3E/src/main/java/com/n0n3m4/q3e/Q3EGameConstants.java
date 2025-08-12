@@ -104,7 +104,7 @@ public final class Q3EGameConstants
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
-    public static final String GAME_BASE_D3XP       = "d3xp";
+    //public static final String GAME_BASE_D3XP       = "d3xp";
     public static final String GAME_BASE_QUAKE4     = "q4base";
     public static final String GAME_BASE_PREY       = "preybase"; // Other platform is `base`
     public static final String GAME_BASE_QUAKE2     = "baseq2";
@@ -150,13 +150,13 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_DOOM3    = "1.3.1.1304";
     public static final String GAME_VERSION_QUAKE4   = "1.4.2.1283";
     public static final String GAME_VERSION_PREY     = "1.2.116";
-    public static final String GAME_VERSION_QUAKE2   = "8.41";
+    public static final String GAME_VERSION_QUAKE2   = "8.51";
     public static final String GAME_VERSION_QUAKE3   = "1.36";
     public static final String GAME_VERSION_RTCW     = "1.51d";
     public static final String GAME_VERSION_TDM      = "2.13";
     public static final String GAME_VERSION_QUAKE1   = "";
     public static final String GAME_VERSION_DOOM3BFG = "1.4.0";
-    public static final String GAME_VERSION_GZDOOM   = "4.14.1";
+    public static final String GAME_VERSION_GZDOOM   = "4.14.2";
     public static final String GAME_VERSION_ETW      = "2.83.2";
     public static final String GAME_VERSION_REALRTCW = "5.2";
     public static final String GAME_VERSION_FTEQW    = "1.05"; // ???
@@ -265,16 +265,16 @@ public final class Q3EGameConstants
     public static final String GAME_EXECUABLE = "game.arm";
 
     // extra internal game file version: <Game engine version>.<idTech4A++ patch version>
-    public static final String TDM_GLSL_SHADER_VERSION        = "2.13.1"; // 1: init
-    public static final String TDM_2_12_GLSL_SHADER_VERSION   = "2.12.6"; // 6: fix a integer to float convert
-    public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1"; // 1: init
-    public static final String GZDOOM_VERSION                 = "4.14.1.1"; // 1: init
-    public static final String XASH3D_VERSION                 = "0.21.1"; // 1: init
-    public static final String SOURCE_ENGINE_VERSION          = "1.16.1"; // 1: init
-    public static final String ETW_VERSION                    = "2.83.2.1"; // 1: init
+    public static final String TDM_GLSL_SHADER_VERSION        = GAME_VERSION_TDM + ".1"; // 1: init
+    //public static final String TDM_2_12_GLSL_SHADER_VERSION   = "2.12.6"; // 6: fix a integer to float convert
+    public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = GAME_VERSION_DOOM3BFG + ".1"; // 1: init
+    public static final String GZDOOM_VERSION                 = GAME_VERSION_GZDOOM + ".1"; // 1: init
+    public static final String XASH3D_VERSION                 = GAME_VERSION_XASH3D + ".1"; // 1: init
+    public static final String SOURCE_ENGINE_VERSION          = GAME_VERSION_SOURCE + ".1"; // 1: init
+    public static final String ETW_VERSION                    = GAME_VERSION_ETW + ".1"; // 1: init
 
     public static final int[]    GZDOOM_GL_VERSIONS       = {0, 330, 420, 430, 450,};
-    public static final String[] QUAKE2_RENDERER_BACKENDS = {"gl1", "gles3", "vk",};
+    public static final String[] QUAKE2_RENDERER_BACKENDS = {"gles1", "gles3", "vk",};
 
     public static final String[] XASH3D_REFS = {"gles1", "gl4es", "gles3compat", "soft",};
     public static final String[] XASH3D_SV_CLS = {"", "cs16", "cs16_yapb",};
@@ -288,6 +288,8 @@ public final class Q3EGameConstants
     public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod", "episodic", "hl2mp", "hl1", "hl1mp",};
 
     public static final String[] SDL_AUDIO_DRIVER = {"auto", "opensles", "aaudio",};
+
+    public static final String[] OPENAL_DRIVER = {"auto", "opensl", "oboe",};
 
     private Q3EGameConstants()
     {

@@ -77,6 +77,15 @@ public class ChangeLog
         final ChangeLog[] CHANGES = {
                 ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2025-08-09", 68,
+                        "Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.2, fix Omni-bot initialization.",
+                        "Fix game controller, and add game controller configure on launcher `CONTROLS` tab.",
+                        "Add more alphabet on-screen buttons, and add `cs16-client` and `source-engine` on-screen button theme.",
+                        "Add load external game library support on Xash3D.",
+                        "Add built-in soft keyboard support.",
+                        "Update RealRTCW version to 5.2, version 5.1 will be removed on next release."
+                ),
+
                 ChangeLog.Create("2025-05-08", 67,
                         "Add Serious Sam Classic: The First Encounter(game standalone directory named `serioussamtfe`) and Serious Sam Classic: The Second Encounter(game standalone directory named `serioussamtse`) support. More view in `" + TextHelper.GenLinkText("https://github.com/tx00100xt/SeriousSamClassic", "SeriousSamClassic") + "`.",
                         "Add Xash3D and Counter-Strike 1.6(need extract CS1.6 extras resource on launcher first) support, game standalone directory named `xash3d`, more view in `" + TextHelper.GenLinkText("https://github.com/FWGS/xash3d-fwgs", "xash3d") + "` and `" + TextHelper.GenLinkText("https://github.com/Velaron/cs16-client", "cs16-client") + "`."

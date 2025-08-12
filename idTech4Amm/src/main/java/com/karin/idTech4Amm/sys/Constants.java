@@ -29,12 +29,8 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.2, fix Omni-bot initialization.",
-            "Fix game controller, and add game controller configure on launcher `CONTROLS` tab.",
-            "Add more alphabet on-screen buttons, and add `cs16-client` and `source-engine` on-screen button theme.",
-            "Add load external game library support on Xash3D.",
-            "Add built-in soft keyboard support.",
-            "Update RealRTCW version to 5.2, version 5.1 will be removed on next release.",
+            "Update Quake 2(yquake2) version to 8.51, update vulkan renderer.",
+            "Update GZDOOM version to 4.14.2.",
         };
 	};
 

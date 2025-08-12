@@ -109,6 +109,13 @@ public:
 	EScopeFlags ScopeFlags = (EScopeFlags)0;
 	bool            SizeKnown = true;
 
+	bool			VMInternalStruct = false;
+
+	PType * LocalType = nullptr;
+
+	PType * SetLocalType(PType * LocalType) { this->LocalType = LocalType; return this; }
+	PType * GetLocalType() { return LocalType ? LocalType : this; }
+
 	PType(unsigned int size = 1, unsigned int align = 1);
 	virtual ~PType();
 	virtual bool isNumeric() { return false; }

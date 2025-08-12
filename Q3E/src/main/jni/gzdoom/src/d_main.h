@@ -34,7 +34,7 @@
 #include "c_cvars.h"
 
 extern bool		advancedemo;
-extern bool hud_toggled;
+EXTERN_CVAR(Bool, hud_toggled);
 void D_ToggleHud();
 
 struct event_t;
@@ -136,6 +136,7 @@ class FIWadManager
 	void ValidateIWADs();
 	FString IWADPathFileSearch(const FString &file);
 public:
+
 	FIWadManager(const char *fn, const char *fnopt);
 	const FIWADInfo *FindIWAD(std::vector<std::string>& wadfiles, const char *iwad, const char *basewad, const char *optionalwad);
 	const FString *GetAutoname(unsigned int num) const

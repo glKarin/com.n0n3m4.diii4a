@@ -81,7 +81,7 @@ public class Q3EPatchResourceManager
 
         rsc = new Q3EPatchResource_zipToDir(
                 Q3EGameConstants.PatchResource.TDM_GLSL_SHADER,
-                Q3ELang.tr(context, R.string.the_dark_mod_glsl_shader) + "(2.13)",
+                Q3ELang.tr(context, R.string.the_dark_mod_glsl_shader) + "(" + Q3EGameConstants.GAME_VERSION_TDM + ")",
                 Q3EGameConstants.TDM_GLSL_SHADER_VERSION,
                 Q3EGameConstants.GAME_TDM,
                 null,
@@ -92,11 +92,11 @@ public class Q3EPatchResourceManager
 
         rsc = new Q3EPatchResource_dirToDir(
                 Q3EGameConstants.PatchResource.GZDOOM_RESOURCE,
-                Q3ELang.tr(context, R.string.gzdoom_builtin_resource) + "(4.14.1)",
+                Q3ELang.tr(context, R.string.gzdoom_builtin_resource) + "(" + Q3EGameConstants.GAME_VERSION_GZDOOM + ")",
                 Q3EGameConstants.GZDOOM_VERSION,
                 Q3EGameConstants.GAME_GZDOOM,
                 null,
-                "pak/gzdoom/4.14.1",
+                "pak/gzdoom/" + Q3EGameConstants.GAME_VERSION_GZDOOM,
                 ""
         );
         resourceList.add(rsc);
@@ -173,11 +173,11 @@ public class Q3EPatchResourceManager
 
         rsc = new Q3EPatchResource_fileToDir(
                 Q3EGameConstants.PatchResource.ET_LEGACY_EXTRAS,
-                Q3ELang.tr(context, R.string.etlegacy_extras) + "(2.83.2)",
+                Q3ELang.tr(context, R.string.etlegacy_extras) + "(" + Q3EGameConstants.GAME_VERSION_ETW + ")",
                 Q3EGameConstants.ETW_VERSION,
                 Q3EGameConstants.GAME_ETW,
                 null,
-                "pak/etw/legacy_v2.83.2.pk3",
+                "pak/etw/legacy_v" + Q3EGameConstants.GAME_VERSION_ETW + ".pk3",
                 "legacy"
         );
         resourceList.add(rsc);
