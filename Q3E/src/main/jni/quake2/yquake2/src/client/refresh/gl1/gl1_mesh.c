@@ -169,11 +169,11 @@ R_DrawAliasFrameLerp(entity_t *currententity, dmdl_t *paliashdr, float backlerp)
 					index_xyz = order[2];
 					order += 3;
 
-				R_BufferVertex(s_lerped[index_xyz][0],
-					s_lerped[index_xyz][1], s_lerped[index_xyz][2]);
+				GLBUFFER_VERTEX(s_lerped[index_xyz][0],
+					s_lerped[index_xyz][1], s_lerped[index_xyz][2])
 
-				R_BufferColor(shadelight[0], shadelight[1],
-					shadelight[2], alpha);
+				GLBUFFER_COLOR(shadelight[0], shadelight[1],
+					shadelight[2], alpha)
 				}
 				while (--count);
 			}
@@ -191,13 +191,13 @@ R_DrawAliasFrameLerp(entity_t *currententity, dmdl_t *paliashdr, float backlerp)
 					/* normals and vertexes come from the frame list */
 					l = shadedots[verts[index_xyz].lightnormalindex];
 
-				R_BufferVertex(s_lerped[index_xyz][0],
-					s_lerped[index_xyz][1], s_lerped[index_xyz][2]);
+				GLBUFFER_VERTEX(s_lerped[index_xyz][0],
+					s_lerped[index_xyz][1], s_lerped[index_xyz][2])
 
-				R_BufferSingleTex(tex[0], tex[1]);
+				GLBUFFER_SINGLETEX(tex[0], tex[1])
 
-				R_BufferColor(l * shadelight[0], l * shadelight[1],
-					l * shadelight[2], alpha);
+				GLBUFFER_COLOR(l * shadelight[0], l * shadelight[1],
+					l * shadelight[2], alpha)
 				}
 				while (--count);
 			}
@@ -207,6 +207,11 @@ R_DrawAliasFrameLerp(entity_t *currententity, dmdl_t *paliashdr, float backlerp)
 static void
 R_DrawAliasShadow(entity_t *currententity, dmdl_t *paliashdr, int posenum)
 {
+	// Don't do stencil test on unsupported stereo modes
+	const qboolean stencilt = ( gl_state.stencil && gl1_stencilshadow->value &&
+		( gl_state.stereo_mode < STEREO_MODE_ROW_INTERLEAVED
+		|| gl_state.stereo_mode > STEREO_MODE_PIXEL_INTERLEAVED ) );
+
 	int *order;
 	vec3_t point;
 	float height = 0, lheight;
@@ -219,7 +224,7 @@ R_DrawAliasShadow(entity_t *currententity, dmdl_t *paliashdr, int posenum)
 	R_UpdateGLBuffer(buf_shadow, 0, 0, 0, 1);
 
 	/* stencilbuffer shadows */
-	if (gl_state.stencil && gl1_stencilshadow->value)
+	if (stencilt)
 	{
 		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_EQUAL, 1, 2);
@@ -255,7 +260,7 @@ R_DrawAliasShadow(entity_t *currententity, dmdl_t *paliashdr, int posenum)
 			point[1] -= shadevector[1] * (point[2] + lheight);
 			point[2] = height;
 
-			R_BufferVertex( point[0], point[1], point[2] );
+			GLBUFFER_VERTEX( point[0], point[1], point[2] )
 
 			order += 3;
 		}
@@ -265,7 +270,7 @@ R_DrawAliasShadow(entity_t *currententity, dmdl_t *paliashdr, int posenum)
 	R_ApplyGLBuffer();
 
 	/* stencilbuffer shadows */
-	if (gl_state.stencil && gl1_stencilshadow->value)
+	if (stencilt)
 	{
 		glDisable(GL_STENCIL_TEST);
 	}
@@ -664,9 +669,7 @@ R_DrawAliasModel(entity_t *currententity, const model_t *currentmodel)
 	if (gl_showbbox->value)
 	{
 		glDisable(GL_CULL_FACE);
-#if !defined(_GLES) //karin: not support glPolygonMode on GLES 1.1
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-#endif
 		glDisable(GL_TEXTURE_2D);
 
 		glEnableClientState(GL_VERTEX_ARRAY);
@@ -675,9 +678,7 @@ R_DrawAliasModel(entity_t *currententity, const model_t *currentmodel)
 		glDisableClientState(GL_VERTEX_ARRAY);
 
 		glEnable(GL_TEXTURE_2D);
-#if !defined(_GLES) //karin: not support glPolygonMode on GLES 1.1
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-#endif
 		glEnable(GL_CULL_FACE);
 	}
 

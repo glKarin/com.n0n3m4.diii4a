@@ -695,7 +695,9 @@ RE_SetSky
 */
 // 3dstudio environment map names
 static char	*suf[6] = {"rt", "bk", "lf", "ft", "up", "dn"};
-void RE_SetSky_s (const char *name, float rotate, const vec3_t axis)
+
+void
+RE_SetSky(const char *name, float rotate, vec3_t axis)
 {
 	char	skyname[MAX_QPATH];
 	int		i;

@@ -38,6 +38,8 @@ static SDL_GLContext context = NULL;
 qboolean IsHighDPIaware = false;
 static qboolean vsyncActive = false;
 
+extern cvar_t *gl1_discardfb;
+
 // ----
 
 /*
@@ -47,6 +49,26 @@ void
 RI_EndFrame(void)
 {
 	R_ApplyGLBuffer();	// to draw buffered 2D text
+
+#ifdef YQ2_GL1_GLES
+	static const GLenum attachments[3] = {GL_COLOR_EXT, GL_DEPTH_EXT, GL_STENCIL_EXT};
+
+	if (qglDiscardFramebufferEXT)
+	{
+		switch ((int)gl1_discardfb->value)
+		{
+			case 1:
+				qglDiscardFramebufferEXT(GL_FRAMEBUFFER_OES, 3, &attachments[0]);
+				break;
+			case 2:
+				qglDiscardFramebufferEXT(GL_FRAMEBUFFER_OES, 2, &attachments[1]);
+				break;
+			default:
+				break;
+		}
+	}
+#endif
+
 	SDL_GL_SwapWindow(window);
 }
 
@@ -80,8 +102,13 @@ int RI_PrepareForWindow(void)
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
+#ifdef USE_SDL3
+	if (SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8))
+#else
 	if (SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8) == 0)
+#endif
 	{
 		gl_state.stencil = true;
 	}
@@ -90,6 +117,12 @@ int RI_PrepareForWindow(void)
 		gl_state.stencil = false;
 	}
 
+#ifdef YQ2_GL1_GLES
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#endif
+
 	// Let's see if the driver supports MSAA.
 	int msaa_samples = 0;
 
@@ -97,7 +130,11 @@ int RI_PrepareForWindow(void)
 	{
 		msaa_samples = gl_msaa_samples->value;
 
+#ifdef USE_SDL3
+		if (!SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1))
+#else
 		if (SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1) < 0)
+#endif
 		{
 			R_Printf(PRINT_ALL, "MSAA is unsupported: %s\n", SDL_GetError());
 
@@ -106,7 +143,11 @@ int RI_PrepareForWindow(void)
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 		}
+#ifdef USE_SDL3
+		else if (!SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaa_samples))
+#else
 		else if (SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaa_samples) < 0)
+#endif
 		{
 			R_Printf(PRINT_ALL, "MSAA %ix is unsupported: %s\n", msaa_samples, SDL_GetError());
 
@@ -143,7 +184,11 @@ void RI_SetVsync(void)
 		vsync = -1;
 	}
 
+#ifdef USE_SDL3
+	if (!SDL_GL_SetSwapInterval(vsync))
+#else
 	if (SDL_GL_SetSwapInterval(vsync) == -1)
+#endif
 	{
 		if (vsync == -1)
 		{
@@ -156,7 +201,7 @@ void RI_SetVsync(void)
 
 #ifdef USE_SDL3
 	int vsyncState;
-	if (SDL_GL_GetSwapInterval(&vsyncState) != 0)
+	if (!SDL_GL_GetSwapInterval(&vsyncState))
 	{
 		R_Printf(PRINT_ALL, "Failed to get vsync state, assuming vsync inactive.\n");
 		vsyncActive = false;
@@ -220,6 +265,21 @@ int RI_InitContext(void* win)
 		return false;
 	}
 
+#ifdef YQ2_GL1_GLES
+
+	// Load GL pointers through GLAD and check context.
+	if( !gladLoadGLES1Loader( (void * (*)(const char *)) SDL_GL_GetProcAddress ) )
+	{
+		R_Printf(PRINT_ALL, "RI_InitContext(): ERROR: loading OpenGL ES function pointers failed!\n");
+		return false;
+	}
+
+	gl_config.major_version = GLVersion.major;
+	gl_config.minor_version = GLVersion.minor;
+	R_Printf(PRINT_ALL, "Initialized OpenGL ES version %d.%d context\n", gl_config.major_version, gl_config.minor_version);
+
+#else
+
 	// Check if it's really OpenGL 1.4.
 	const char* glver = (char *)glGetString(GL_VERSION);
 	sscanf(glver, "%d.%d", &gl_config.major_version, &gl_config.minor_version);
@@ -231,12 +291,18 @@ int RI_InitContext(void* win)
 		return false;
 	}
 
+#endif
+
 	// Check if we've got the requested MSAA.
 	int msaa_samples = 0;
 
 	if (gl_msaa_samples->value)
 	{
+#ifdef USE_SDL3
+		if (SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &msaa_samples))
+#else
 		if (SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &msaa_samples) == 0)
+#endif
 		{
 			ri.Cvar_SetValue("r_msaa_samples", msaa_samples);
 		}
@@ -250,7 +316,11 @@ int RI_InitContext(void* win)
 
 	if (gl_state.stencil)
 	{
+#ifdef USE_SDL3
+		if (!SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &stencil_bits) || stencil_bits < 8)
+#else
 		if (SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &stencil_bits) < 0 || stencil_bits < 8)
+#endif
 		{
 			gl_state.stencil = false;
 		}
@@ -262,7 +332,11 @@ int RI_InitContext(void* win)
 	// Window title - set here so we can display renderer name in it.
 	char title[40] = {0};
 
+#ifdef YQ2_GL1_GLES
+	snprintf(title, sizeof(title), "Yamagi Quake II %s - OpenGL ES 1.0", YQ2VERSION);
+#else
 	snprintf(title, sizeof(title), "Yamagi Quake II %s - OpenGL 1.4", YQ2VERSION);
+#endif
 	SDL_SetWindowTitle(window, title);
 
 #if SDL_VERSION_ATLEAST(2, 26, 0)
@@ -300,7 +374,11 @@ RI_ShutdownContext(void)
 	{
 		if(context)
 		{
+#ifdef USE_SDL3
+			SDL_GL_DestroyContext(context);
+#else
 			SDL_GL_DeleteContext(context);
+#endif
 			context = NULL;
 		}
 	}
@@ -314,12 +392,11 @@ RI_ShutdownContext(void)
 int RI_GetSDLVersion()
 {
 #ifdef USE_SDL3
-	SDL_Version ver;
+	int version = SDL_GetVersion();
+	return SDL_VERSIONNUM_MAJOR(version);
 #else
 	SDL_version ver;
-#endif
-
 	SDL_VERSION(&ver);
-
 	return ver.major;
+#endif
 }

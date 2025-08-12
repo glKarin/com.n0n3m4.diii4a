@@ -33,6 +33,9 @@
 #include <windows.h>
 #endif
 
+#ifdef YQ2_GL1_GLES
+#include "../glad-gles1/include/glad/glad.h"
+#else
 #if defined(__APPLE__)
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl.h>
@@ -42,10 +45,12 @@
 #define glFrustum glFrustumf
 #define glDepthRange glDepthRangef
 #define glOrtho glOrthof
+#define glPolygonMode(...)
 
 typedef GLfloat GLdouble;
 #else
 #include <GL/gl.h>
+#endif
 #endif
 
 #ifndef APIENTRY
@@ -101,5 +106,7 @@ extern void ( APIENTRY *qglColorTableEXT ) ( GLenum, GLenum, GLsizei, GLenum,
 		GLenum, const GLvoid * );
 extern void ( APIENTRY *qglActiveTexture ) ( GLenum texture );
 extern void ( APIENTRY *qglClientActiveTexture ) ( GLenum texture );
+extern void ( APIENTRY *qglDiscardFramebufferEXT ) ( GLenum target,
+		GLsizei numAttachments, const GLenum *attachments );
 
 #endif

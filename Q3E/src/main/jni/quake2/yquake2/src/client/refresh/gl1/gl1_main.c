@@ -91,6 +91,8 @@ cvar_t *gl1_particle_square;
 cvar_t *gl1_palettedtexture;
 cvar_t *gl1_pointparameters;
 cvar_t *gl1_multitexture;
+cvar_t *gl1_lightmapcopies;
+cvar_t *gl1_discardfb;
 
 cvar_t *gl_drawbuffer;
 cvar_t *gl_lightmap;
@@ -141,12 +143,16 @@ cvar_t *gl1_stereo_separation;
 cvar_t *gl1_stereo_anaglyph_colors;
 cvar_t *gl1_stereo_convergence;
 
+static cvar_t *gl1_waterwarp;
 
 refimport_t ri;
 
 void LM_FreeLightmapBuffers(void);
 void Scrap_Free(void);
 void Scrap_Init(void);
+
+extern void R_SetDefaultState(void);
+extern void R_ResetGLBuffer(void);
 
 void
 R_RotateForEntity(entity_t *e)
@@ -626,6 +632,19 @@ R_PolyBlend(void)
 	glColor4f(1, 1, 1, 1);
 }
 
+static void
+R_ResetClearColor(void)
+{
+	if (gl1_discardfb->value == 1 && !r_clear->value)
+	{
+		glClearColor(0, 0, 0, 0.5);
+	}
+	else
+	{
+		glClearColor(1, 0, 0.5, 0.5);
+	}
+}
+
 void
 R_SetupFrame(void)
 {
@@ -703,25 +722,41 @@ R_SetupFrame(void)
 				vid.height - r_newrefdef.height - r_newrefdef.y,
 				r_newrefdef.width, r_newrefdef.height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(1, 0, 0.5, 0.5);
+		R_ResetClearColor();
 		glDisable(GL_SCISSOR_TEST);
 	}
 }
 
 void
-R_MYgluPerspective(GLdouble fovy, GLdouble aspect,
-		GLdouble zNear, GLdouble zFar)
+R_SetPerspective(GLdouble fovy)
 {
+	// gluPerspective style parameters
+	static const GLdouble zNear = 4;
+	const GLdouble zFar = (r_farsee->value) ? 8192.0f : 4096.0f;
+	const GLdouble aspectratio = (GLdouble)r_newrefdef.width / r_newrefdef.height;
+
 	GLdouble xmin, xmax, ymin, ymax;
 
+	// traditional gluPerspective calculations - https://youtu.be/YqSNGcF5nvM?t=644
 	ymax = zNear * tan(fovy * M_PI / 360.0);
+	xmax = ymax * aspectratio;
+
+	if ((r_newrefdef.rdflags & RDF_UNDERWATER) && gl1_waterwarp->value)
+	{
+		const GLdouble warp = sin(r_newrefdef.time * 1.5) * 0.03 * gl1_waterwarp->value;
+		ymax *= 1.0 - warp;
+		xmax *= 1.0 + warp;
+	}
+
 	ymin = -ymax;
+	xmin = -xmax;
 
-	xmin = ymin * aspect;
-	xmax = ymax * aspect;
-
-	xmin += - gl1_stereo_convergence->value * (2 * gl_state.camera_separation) / zNear;
-	xmax += - gl1_stereo_convergence->value * (2 * gl_state.camera_separation) / zNear;
+	if (gl_state.camera_separation)
+	{
+		const GLdouble separation = - gl1_stereo_convergence->value * (2 * gl_state.camera_separation) / zNear;
+		xmin += separation;
+		xmax += separation;
+	}
 
 	glFrustum(xmin, xmax, ymin, ymax, zNear, zFar);
 }
@@ -729,7 +764,6 @@ R_MYgluPerspective(GLdouble fovy, GLdouble aspect,
 void
 R_SetupGL(void)
 {
-	float screenaspect;
 	int x, x2, y2, y, w, h;
 
 	/* set up viewport */
@@ -759,18 +793,10 @@ R_SetupGL(void)
 	glViewport(x, y2, w, h);
 
 	/* set up projection matrix */
-	screenaspect = (float)r_newrefdef.width / r_newrefdef.height;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	if (r_farsee->value == 0)
-	{
-		R_MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4, 4096);
-	}
-	else
-	{
-		R_MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4, 8192);
-	}
+	R_SetPerspective(r_newrefdef.fov_y);
 
 	glCullFace(GL_FRONT);
 
@@ -805,21 +831,31 @@ R_SetupGL(void)
 void
 R_Clear(void)
 {
-	// Check whether the stencil buffer needs clearing, and do so if need be.
-	GLbitfield stencilFlags = 0;
-	if (gl_state.stereo_mode >= STEREO_MODE_ROW_INTERLEAVED && gl_state.stereo_mode <= STEREO_MODE_PIXEL_INTERLEAVED) {
-		glClearStencil(GL_FALSE);
-		stencilFlags |= GL_STENCIL_BUFFER_BIT;
+	// Define which buffers need clearing
+	GLbitfield clearFlags = 0;
+	GLenum depthFunc = GL_LEQUAL;
+
+	// This breaks stereo modes, but we'll leave that responsibility to the user
+	if (r_clear->value)
+	{
+		clearFlags |= GL_COLOR_BUFFER_BIT;
+	}
+
+	// No stencil shadows allowed when using certain stereo modes, otherwise "wallhack" happens
+	if (gl_state.stereo_mode >= STEREO_MODE_ROW_INTERLEAVED && gl_state.stereo_mode <= STEREO_MODE_PIXEL_INTERLEAVED)
+	{
+		glClearStencil(0);
+		clearFlags |= GL_STENCIL_BUFFER_BIT;
+	}
+	else if (gl_shadows->value && gl_state.stencil && gl1_stencilshadow->value)
+	{
+		glClearStencil(1);
+		clearFlags |= GL_STENCIL_BUFFER_BIT;
 	}
 
 	if (gl1_ztrick->value)
 	{
 		static int trickframe;
-
-		if (r_clear->value)
-		{
-			glClear(GL_COLOR_BUFFER_BIT | stencilFlags);
-		}
 
 		trickframe++;
 
@@ -827,31 +863,40 @@ R_Clear(void)
 		{
 			gldepthmin = 0;
 			gldepthmax = 0.49999;
-			glDepthFunc(GL_LEQUAL);
 		}
 		else
 		{
 			gldepthmin = 1;
 			gldepthmax = 0.5;
-			glDepthFunc(GL_GEQUAL);
+			depthFunc = GL_GEQUAL;
 		}
 	}
 	else
 	{
-		if (r_clear->value)
-		{
-			glClear(GL_COLOR_BUFFER_BIT | stencilFlags | GL_DEPTH_BUFFER_BIT);
-		}
-		else
-		{
-			glClear(GL_DEPTH_BUFFER_BIT | stencilFlags);
-		}
+		clearFlags |= GL_DEPTH_BUFFER_BIT;
 
 		gldepthmin = 0;
 		gldepthmax = 1;
-		glDepthFunc(GL_LEQUAL);
 	}
 
+	switch ((int)gl1_discardfb->value)
+		{
+		case 1:
+			if (gl_state.stereo_mode == STEREO_MODE_NONE)
+			{
+				clearFlags |= GL_COLOR_BUFFER_BIT;
+		}
+		case 2:
+			clearFlags |= GL_STENCIL_BUFFER_BIT;
+		default:
+			break;
+		}
+
+	if (clearFlags)
+	{
+		glClear(clearFlags);
+	}
+	glDepthFunc(depthFunc);
 	glDepthRange(gldepthmin, gldepthmax);
 
 	if (gl_zfix->value)
@@ -864,13 +909,6 @@ R_Clear(void)
 		{
 			glPolygonOffset(-0.05, -1);
 		}
-	}
-
-	/* stencilbuffer shadows */
-	if (gl_shadows->value && gl_state.stencil && gl1_stencilshadow->value)
-	{
-		glClearStencil(GL_TRUE);
-		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 }
 
@@ -969,9 +1007,15 @@ R_RenderView(refdef_t *fd)
 			case STEREO_MODE_COLUMN_INTERLEAVED:
 			case STEREO_MODE_PIXEL_INTERLEAVED:
 				{
-#if !defined(_GLES) //karin: TODO: glBegin/glEnd
 					qboolean flip_eyes = true;
 					int client_x, client_y;
+
+					GLshort screen[] = {
+						0, 0,
+						(GLshort)vid.width, 0,
+						(GLshort)vid.width, (GLshort)vid.height,
+						0, (GLshort)vid.height
+					};
 
 					//GLimp_GetClientAreaOffset(&client_x, &client_y);
 					client_x = 0;
@@ -980,59 +1024,63 @@ R_RenderView(refdef_t *fd)
 					R_SetGL2D();
 
 					glEnable(GL_STENCIL_TEST);
-					glStencilMask(GL_TRUE);
+					glStencilMask(1);
 					glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
 					glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
 					glStencilFunc(GL_NEVER, 0, 1);
 
-					glBegin(GL_QUADS);
-					{
-						glVertex2i(0, 0);
-						glVertex2i(vid.width, 0);
-						glVertex2i(vid.width, vid.height);
-						glVertex2i(0, vid.height);
-					}
-					glEnd();
+					glEnableClientState(GL_VERTEX_ARRAY);
+					glVertexPointer(2, GL_SHORT, 0, screen);
+					glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+					glDisableClientState(GL_VERTEX_ARRAY);
 
 					glStencilOp(GL_INVERT, GL_KEEP, GL_KEEP);
 					glStencilFunc(GL_NEVER, 1, 1);
 
-					glBegin(GL_LINES);
+					if (gl_state.stereo_mode == STEREO_MODE_ROW_INTERLEAVED || gl_state.stereo_mode == STEREO_MODE_PIXEL_INTERLEAVED)
 					{
-						if (gl_state.stereo_mode == STEREO_MODE_ROW_INTERLEAVED || gl_state.stereo_mode == STEREO_MODE_PIXEL_INTERLEAVED) {
-							int y;
-							for (y = 0; y <= vid.height; y += 2) {
-								glVertex2f(0, y - 0.5f);
-								glVertex2f(vid.width, y - 0.5f);
+						for (int y = 0; y <= vid.height; y += 2)
+						{
+							gl_buf.vtx[gl_buf.vt    ] = 0;
+							gl_buf.vtx[gl_buf.vt + 1] = y - 0.5f;
+							gl_buf.vtx[gl_buf.vt + 2] = vid.width;
+							gl_buf.vtx[gl_buf.vt + 3] = y - 0.5f;
+							gl_buf.vt += 4;
 							}
 							flip_eyes ^= (client_y & 1);
 						}
 
-						if (gl_state.stereo_mode == STEREO_MODE_COLUMN_INTERLEAVED || gl_state.stereo_mode == STEREO_MODE_PIXEL_INTERLEAVED) {
-							int x;
-							for (x = 0; x <= vid.width; x += 2) {
-								glVertex2f(x - 0.5f, 0);
-								glVertex2f(x - 0.5f, vid.height);
+					if (gl_state.stereo_mode == STEREO_MODE_COLUMN_INTERLEAVED || gl_state.stereo_mode == STEREO_MODE_PIXEL_INTERLEAVED)
+					{
+						for (int x = 0; x <= vid.width; x += 2)
+						{
+							gl_buf.vtx[gl_buf.vt    ] = x - 0.5f;
+							gl_buf.vtx[gl_buf.vt + 1] = 0;
+							gl_buf.vtx[gl_buf.vt + 2] = x - 0.5f;
+							gl_buf.vtx[gl_buf.vt + 3] = vid.height;
+							gl_buf.vt += 4;
 							}
 							flip_eyes ^= (client_x & 1);
 						}
-					}
-					glEnd();
 
-					glStencilMask(GL_FALSE);
+					glEnableClientState(GL_VERTEX_ARRAY);
+					glVertexPointer(2, GL_FLOAT, 0, gl_buf.vtx);
+					glDrawArrays(GL_LINES, 0, gl_buf.vt / 2);
+					glDisableClientState(GL_VERTEX_ARRAY);
+					gl_buf.vt = 0;
+
+					glStencilMask(0);
 					glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 					glStencilFunc(GL_EQUAL, drawing_left_eye ^ flip_eyes, 1);
 					glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-#endif
 				}
 				break;
 			default:
 				break;
 		}
 	}
-
 
 	if (r_norefresh->value)
 	{
@@ -1169,6 +1217,12 @@ RI_RenderFrame(refdef_t *fd)
 	R_SetGL2D();
 }
 
+#ifdef YQ2_GL1_GLES
+#define GLES1_ENABLED_ONLY	"1"
+#else
+#define GLES1_ENABLED_ONLY	"0"
+#endif
+
 void
 R_Register(void)
 {
@@ -1227,6 +1281,8 @@ R_Register(void)
 #else
 	gl1_multitexture = ri.Cvar_Get("gl1_multitexture", "1", CVAR_ARCHIVE);
 #endif
+	gl1_lightmapcopies = ri.Cvar_Get("gl1_lightmapcopies", GLES1_ENABLED_ONLY, CVAR_ARCHIVE);
+	gl1_discardfb = ri.Cvar_Get("gl1_discardfb", GLES1_ENABLED_ONLY, CVAR_ARCHIVE);
 
 	gl_drawbuffer = ri.Cvar_Get("gl_drawbuffer", "GL_BACK", 0);
 	r_vsync = ri.Cvar_Get("r_vsync", "1", CVAR_ARCHIVE);
@@ -1258,11 +1314,15 @@ R_Register(void)
 	gl1_stereo_anaglyph_colors = ri.Cvar_Get( "gl1_stereo_anaglyph_colors", "rc", CVAR_ARCHIVE );
 	gl1_stereo_convergence = ri.Cvar_Get( "gl1_stereo_convergence", "1", CVAR_ARCHIVE );
 
+	gl1_waterwarp = ri.Cvar_Get( "gl1_waterwarp", "1.0", CVAR_ARCHIVE );
+
 	ri.Cmd_AddCommand("imagelist", R_ImageList_f);
 	ri.Cmd_AddCommand("screenshot", R_ScreenShot);
 	ri.Cmd_AddCommand("modellist", Mod_Modellist_f);
 	ri.Cmd_AddCommand("gl_strings", R_Strings);
 }
+
+#undef GLES1_ENABLED_ONLY
 
 /*
  * Changes the video mode
@@ -1418,12 +1478,27 @@ R_SetMode(void)
 	return true;
 }
 
+// just to avoid too many preprocessor directives in RI_Init()
+typedef enum
+{
+	rf_opengl14,
+	rf_opengles10
+} refresher_t;
+
 qboolean
 RI_Init(void)
 {
 	int j;
 	byte *colormap;
 	extern float r_turbsin[256];
+
+#ifdef YQ2_GL1_GLES
+#define GLEXTENSION_NPOT	"GL_OES_texture_npot"
+	static const refresher_t refresher = rf_opengles10;
+#else
+#define GLEXTENSION_NPOT	"GL_ARB_texture_non_power_of_two"
+	static const refresher_t refresher = rf_opengl14;
+#endif
 
 	Swap_Init();
 
@@ -1480,7 +1555,7 @@ RI_Init(void)
 
 	sscanf(gl_config.version_string, "%d.%d", &gl_config.major_version, &gl_config.minor_version);
 
-	if (gl_config.major_version == 1)
+	if (refresher == rf_opengl14 && gl_config.major_version == 1)
 	{
 		if (gl_config.minor_version < 4)
 		{
@@ -1498,10 +1573,9 @@ RI_Init(void)
 	/* Point parameters */
 	R_Printf(PRINT_ALL, " - Point parameters: ");
 
-#if !defined(_GLES) //karin: support point parameter on GLES 1.1
-	if ( strstr(gl_config.extensions_string, "GL_ARB_point_parameters") ||
+	if ( refresher == rf_opengles10 ||
+		strstr(gl_config.extensions_string, "GL_ARB_point_parameters") ||
 		strstr(gl_config.extensions_string, "GL_EXT_point_parameters") )	// should exist for all OGL 1.4 hw...
-#endif
 	{
 		qglPointParameterf = (void (APIENTRY *)(GLenum, GLfloat))RI_GetProcAddress ( "glPointParameterf" );
 		qglPointParameterfv = (void (APIENTRY *)(GLenum, const GLfloat *))RI_GetProcAddress ( "glPointParameterfv" );
@@ -1593,11 +1667,7 @@ RI_Init(void)
 	/* Non power of two textures */
 	R_Printf(PRINT_ALL, " - Non power of two textures: ");
 
-#ifdef _GLES //karin: npot texture extension name on GLES 1.1
-	if (strstr(gl_config.extensions_string, "GL_OES_texture_npot"))
-#else
-	if (strstr(gl_config.extensions_string, "GL_ARB_texture_non_power_of_two"))
-#endif
+	if (strstr(gl_config.extensions_string, GLEXTENSION_NPOT))
 	{
 		gl_config.npottextures = true;
 		R_Printf(PRINT_ALL, "Okay\n");
@@ -1608,6 +1678,8 @@ RI_Init(void)
 		R_Printf(PRINT_ALL, "Failed\n");
 	}
 
+#undef GLEXTENSION_NPOT
+
 	// ----
 
 	/* Multitexturing */
@@ -1615,9 +1687,7 @@ RI_Init(void)
 
 	R_Printf(PRINT_ALL, " - Multitexturing: ");
 
-#if !defined(_GLES) //karin: support multi texture on GLES 1.1
-	if (strstr(gl_config.extensions_string, "GL_ARB_multitexture"))
-#endif
+	if ( refresher == rf_opengles10 || strstr(gl_config.extensions_string, "GL_ARB_multitexture") )
 	{
 		qglActiveTexture = (void (APIENTRY *)(GLenum))RI_GetProcAddress ("glActiveTexture");
 		qglClientActiveTexture = (void (APIENTRY *)(GLenum))RI_GetProcAddress ("glClientActiveTexture");
@@ -1648,6 +1718,65 @@ RI_Init(void)
 
 	// ----
 
+	/* Lightmap copies: keep multiple copies of "the same" lightmap on video memory.
+	 * All of them are actually different, because they are affected by different dynamic lighting,
+	 * in different frames. This is not meant for Immediate-Mode Rendering systems (desktop),
+	 * but for Tile-Based / Deferred Rendering ones (embedded / mobile), since active manipulation
+	 * of textures already being used in the last few frames can cause slowdown on these systems.
+	 * Needless to say, GPU memory usage is highly increased, so watch out in low memory situations.
+	 */
+
+	R_Printf(PRINT_ALL, " - Lightmap copies: ");
+	gl_config.lightmapcopies = false;
+	if (gl_config.multitexture && gl1_lightmapcopies->value)
+	{
+		gl_config.lightmapcopies = true;
+		R_Printf(PRINT_ALL, "Okay\n");
+	}
+	else
+	{
+		R_Printf(PRINT_ALL, "Disabled\n");
+	}
+
+	// ----
+
+	/* Discard framebuffer: Enables the use of a "performance hint" to the graphic
+	 * driver in GLES1, to get rid of the contents of the different framebuffers.
+	 * Useful for some GPUs that may attempt to keep them and/or write them back to
+	 * external/uniform memory, actions that are useless for Quake 2 rendering path.
+	 * https://registry.khronos.org/OpenGL/extensions/EXT/EXT_discard_framebuffer.txt
+	 * This extension is used by 'gl1_discardfb', and regardless of its existence,
+	 * that cvar will enable glClear at the start of each frame, helping mobile GPUs.
+	 */
+
+#ifdef YQ2_GL1_GLES
+	R_Printf(PRINT_ALL, " - Discard framebuffer: ");
+
+	if (strstr(gl_config.extensions_string, "GL_EXT_discard_framebuffer"))
+	{
+		qglDiscardFramebufferEXT = (void (APIENTRY *)(GLenum, GLsizei, const GLenum *))
+				RI_GetProcAddress ("glDiscardFramebufferEXT");
+	}
+
+	if (gl1_discardfb->value)
+	{
+		if (qglDiscardFramebufferEXT)	// enough to verify availability
+		{
+			R_Printf(PRINT_ALL, "Okay\n");
+		}
+		else
+		{
+			R_Printf(PRINT_ALL, "Failed\n");
+		}
+	}
+	else
+	{
+		R_Printf(PRINT_ALL, "Disabled\n");
+	}
+#endif
+
+	// ----
+
 	/* Big lightmaps: this used to be fast, but after the implementation of the "GL Buffer", it
 	 * became too evident that the bigger the texture, the slower the call to glTexSubImage2D() is.
 	 * Original logic remains, but it's preferable not to make it visible to the user.
@@ -1662,6 +1791,7 @@ RI_Init(void)
 
 	// ----
 
+	R_ResetClearColor();
 	R_SetDefaultState();
 
 	Scrap_Init();
@@ -1669,6 +1799,7 @@ RI_Init(void)
 	Mod_Init();
 	R_InitParticleTexture();
 	Draw_InitLocal();
+	R_ResetGLBuffer();
 
 	return true;
 }
@@ -1700,17 +1831,17 @@ RI_BeginFrame(float camera_separation)
 	gl_state.camera_separation = camera_separation;
 
 	// force a vid_restart if gl1_stereo has been modified.
-	if ( gl_state.stereo_mode != gl1_stereo->value ) {
+	if ( gl_state.stereo_mode != gl1_stereo->value )
+	{
 		// If we've gone from one mode to another with the same special buffer requirements there's no need to restart.
-		if ( GL_GetSpecialBufferModeForStereoMode( gl_state.stereo_mode ) == GL_GetSpecialBufferModeForStereoMode( gl1_stereo->value )  ) {
+		if ( GL_GetSpecialBufferModeForStereoMode( gl_state.stereo_mode ) == GL_GetSpecialBufferModeForStereoMode( gl1_stereo->value ) )
+		{
 			gl_state.stereo_mode = gl1_stereo->value;
 		}
 		else
 		{
 			R_Printf(PRINT_ALL, "stereo supermode changed, restarting video!\n");
-			cvar_t	*ref;
-			ref = ri.Cvar_Get("vid_fullscreen", "0", CVAR_ARCHIVE);
-			ref->modified = true;
+			ri.Cmd_ExecuteText(EXEC_APPEND, "vid_restart\n");
 		}
 	}
 
@@ -1810,7 +1941,7 @@ RI_BeginFrame(float camera_separation)
 	{
 		gl_drawbuffer->modified = false;
 
-#if !defined(_GLES) //karin: not support stereo frame buffer on GLES 1.1
+#ifndef YQ2_GL1_GLES
 		if ((gl_state.camera_separation == 0) || gl_state.stereo_mode != STEREO_MODE_OPENGL)
 		{
 			if (Q_stricmp(gl_drawbuffer->string, "GL_FRONT") == 0)
@@ -1893,7 +2024,7 @@ RI_SetPalette(const unsigned char *palette)
 
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(1, 0, 0.5, 0.5);
+	R_ResetClearColor();
 }
 
 /* R_DrawBeam */
@@ -1992,9 +2123,9 @@ extern int RI_InitContext(void* win);
 
 extern void RI_BeginRegistration(char *model);
 extern struct model_s * RI_RegisterModel(char *name);
-extern struct image_s * RI_RegisterSkin(char *name);
+extern struct image_s * RI_RegisterSkin(const char *name);
 
-extern void RI_SetSky(char *name, float rotate, vec3_t axis);
+extern void RI_SetSky(const char *name, float rotate, vec3_t axis);
 extern void RI_EndRegistration(void);
 
 extern void RI_RenderFrame(refdef_t *fd);

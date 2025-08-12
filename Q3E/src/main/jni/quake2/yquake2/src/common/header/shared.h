@@ -37,16 +37,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdbool.h>
 
-#ifdef true
- #undef true
-#endif
-
-#ifdef false
- #undef false
-#endif
-
-typedef enum {false, true}  qboolean;
+typedef int qboolean;
 typedef unsigned char byte;
 
 #ifndef NULL
@@ -63,19 +56,23 @@ typedef unsigned char byte;
   #if defined(__GNUC__)
 	#define YQ2_ATTR_MALLOC         __attribute__ ((__malloc__))
 	#define YQ2_ATTR_INLINE         __attribute__((always_inline)) inline
+	#define YQ2_ATTR_RETURNS_NONNULL __attribute__ ((returns_nonnull))
   #elif defined(_MSC_VER)
 	#define YQ2_ATTR_MALLOC         __declspec(restrict)
 	#define YQ2_ATTR_INLINE         __forceinline
+	#define YQ2_ATTR_RETURNS_NONNULL
   #else
 	// no equivalent per see
 	#define YQ2_ATTR_MALLOC
 	#define YQ2_ATTR_INLINE         inline
+	#define YQ2_ATTR_RETURNS_NONNULL
   #endif
 #elif defined(__GNUC__) // GCC and clang should support this attribute
 	#define YQ2_ALIGNAS_SIZE(SIZE)  __attribute__(( __aligned__(SIZE) ))
 	#define YQ2_ALIGNAS_TYPE(TYPE)  __attribute__(( __aligned__(__alignof__(TYPE)) ))
 	// must be used as prefix (YQ2_ATTR_NORETURN void bla();)!
 	#define YQ2_ATTR_NORETURN       __attribute__ ((noreturn))
+	#define YQ2_ATTR_RETURNS_NONNULL __attribute__ ((returns_nonnull))
 	#define YQ2_ATTR_MALLOC         __attribute__ ((__malloc__))
 	#define YQ2_ATTR_INLINE         __attribute__((always_inline)) inline
 	// GCC supports this extension since 4.6
@@ -96,6 +93,7 @@ typedef unsigned char byte;
 
 	// must be used as prefix (YQ2_ATTR_NORETURN void bla();)!
 	#define YQ2_ATTR_NORETURN       __declspec(noreturn)
+	#define YQ2_ATTR_RETURNS_NONNULL
 	#define YQ2_ATTR_MALLOC         __declspec(restrict)
 	#define YQ2_ATTR_INLINE         __forceinline
 	#define YQ2_STATIC_ASSERT(C, M) assert((C) && M)
@@ -104,6 +102,7 @@ typedef unsigned char byte;
 	#define YQ2_ALIGNAS_SIZE(SIZE)
 	#define YQ2_ALIGNAS_TYPE(TYPE)
 	#define YQ2_ATTR_NORETURN
+	#define YQ2_ATTR_RETURNS_NONNULL
 	#define YQ2_ATTR_MALLOC
 	#define YQ2_ATTR_INLINE         inline
 	#define YQ2_STATIC_ASSERT(C, M) assert((C) && M)
@@ -302,7 +301,7 @@ void RotatePointAroundVector(vec3_t dst,
 
 char *COM_SkipPath(char *pathname);
 void COM_StripExtension(char *in, char *out);
-const char *COM_FileExtension(const char *in);
+YQ2_ATTR_RETURNS_NONNULL const char *COM_FileExtension(const char *in);
 void COM_FileBase(char *in, char *out);
 void COM_FilePath(const char *in, char *out);
 void COM_DefaultExtension(char *path, const char *extension);
@@ -328,6 +327,14 @@ char *Q_strlwr(char *s);
 /* portable safe string copy/concatenate */
 int Q_strlcpy(char *dst, const char *src, int size);
 int Q_strlcat(char *dst, const char *src, int size);
+
+/* Delete n characters from s starting at index i */
+void Q_strdel(char *s, size_t i, size_t n);
+
+/* Insert src into dest starting at index i, total, n is the total size of the buffer */
+/* Returns length of src on success, 0 if there is not enough space in dest for src */
+size_t Q_strins(char *dest, const char *src, size_t i, size_t n);
+qboolean Q_strisnum(const char *s);
 
 /* ============================================= */
 
@@ -401,7 +408,7 @@ int Hunk_End(void);
 #define SFF_SYSTEM 0x10
 
 /* pass in an attribute mask of things you wish to REJECT */
-char *Sys_FindFirst(char *path, unsigned musthave, unsigned canthave);
+char *Sys_FindFirst(const char *path, unsigned musthave, unsigned canthave);
 char *Sys_FindNext(unsigned musthave, unsigned canthave);
 void Sys_FindClose(void);
 

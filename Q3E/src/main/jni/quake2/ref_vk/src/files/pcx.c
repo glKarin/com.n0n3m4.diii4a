@@ -116,18 +116,352 @@ fixQuitScreen(byte* px)
 	}
 }
 
-void
-LoadPCX(const char *origname, byte **pic, byte **palette, int *width, int *height)
+static const byte *
+PCX_RLE_Decode(byte *pix, byte *pix_max, const byte *raw, const byte *raw_max,
+	int bytes_per_line, qboolean *image_issues)
 {
-	byte *raw;
-	pcx_t *pcx;
-	int x, y;
-	int len, full_size;
-	int pcx_width, pcx_height;
+	int x;
+
+	for (x = 0; x < bytes_per_line; )
+	{
+		int runLength;
+		byte dataByte;
+
+		if (raw >= raw_max)
+		{
+			// no place for read
+			*image_issues = true;
+			return raw;
+		}
+		dataByte = *raw++;
+
+		if ((dataByte & 0xC0) == 0xC0)
+		{
+			runLength = dataByte & 0x3F;
+			if (raw >= raw_max)
+			{
+				// no place for read
+				*image_issues = true;
+				return raw;
+			}
+			dataByte = *raw++;
+		}
+		else
+		{
+			runLength = 1;
+		}
+
+		while (runLength-- > 0)
+		{
+			if (pix_max <= (pix + x))
+			{
+				// no place for write
+				*image_issues = true;
+				return raw;
+			}
+			else
+			{
+				pix[x++] = dataByte;
+			}
+		}
+	}
+	return raw;
+}
+
+static void
+PCX_Decode(const char *name, const byte *raw, int len, byte **pic, byte **palette,
+	int *width, int *height, int *bitsPerPixel)
+{
+	const pcx_t *pcx;
+	int full_size;
+	int pcx_width, pcx_height, bytes_per_line;
 	qboolean image_issues = false;
-	int dataByte, runLength;
 	byte *out, *pix;
+	const byte *data;
+
+	*pic = NULL;
+	*bitsPerPixel = 8;
+
+	if (palette)
+	{
+		*palette = NULL;
+	}
+
+	if (len < sizeof(pcx_t))
+	{
+		return;
+	}
+
+	/* parse the PCX file */
+	pcx = (const pcx_t *)raw;
+
+	data = &pcx->data;
+
+	bytes_per_line = LittleShort(pcx->bytes_per_line);
+	pcx_width = LittleShort(pcx->xmax) - LittleShort(pcx->xmin);
+	pcx_height = LittleShort(pcx->ymax) - LittleShort(pcx->ymin);
+
+	if ((pcx->manufacturer != 0x0a) ||
+		(pcx->version != 5) ||
+		(pcx->encoding != 1) ||
+		(pcx_width <= 0) ||
+		(pcx_height <= 0) ||
+		(bytes_per_line <= 0) ||
+		(pcx->color_planes <= 0) ||
+		(pcx->bits_per_pixel <= 0))
+	{
+		R_Printf(PRINT_ALL, "%s: Bad pcx file %s: version: %d:%d, encoding: %d\n",
+			__func__, name, pcx->manufacturer, pcx->version, pcx->encoding);
+		return;
+	}
+
+	full_size = (pcx_height + 1) * (pcx_width + 1);
+	if ((pcx->color_planes == 3 || pcx->color_planes == 4) &&
+		pcx->bits_per_pixel == 8)
+	{
+		full_size *= 4;
+		*bitsPerPixel = 32;
+	}
+
+	out = malloc(full_size);
+	if (!out)
+	{
+		R_Printf(PRINT_ALL, "%s: Can't allocate for %s\n", __func__, name);
+		return;
+	}
+
+	*pic = out;
+
+	pix = out;
+
+	if (width)
+	{
+		*width = pcx_width + 1;
+	}
+
+	if (height)
+	{
+		*height = pcx_height + 1;
+	}
+
+	if ((pcx->color_planes == 3 || pcx->color_planes == 4)
+		&& pcx->bits_per_pixel == 8)
+	{
+		int x, y, linesize;
+		byte *line;
+
+		if (bytes_per_line <= pcx_width)
+		{
+			image_issues = true;
+		}
+
+		/* clean image alpha */
+		memset(pix, 255, full_size);
+
+		linesize = Q_max(bytes_per_line, pcx_width + 1) * pcx->color_planes;
+		line = malloc(linesize);
+
+		for (y = 0; y <= pcx_height; y++, pix += (pcx_width + 1) * 4)
+		{
+			data = PCX_RLE_Decode(line, line + linesize,
+				data, (byte *)pcx + len,
+				bytes_per_line * pcx->color_planes, &image_issues);
+
+			for (x = 0; x <= pcx_width; x++) {
+				int j;
+
+				for (j = 0; j < pcx->color_planes; j++)
+				{
+					pix[4 * x + j] = line[x + bytes_per_line * j];
+				}
+			}
+		}
+
+		free(line);
+	}
+	else if (pcx->bits_per_pixel == 1)
+	{
+		byte *line;
+		int y;
+
+		if (palette)
+		{
+			*palette = malloc(768);
+
+			if (!(*palette))
+			{
+				R_Printf(PRINT_ALL, "%s: Can't allocate for %s\n", __func__, name);
+				free(out);
+				return;
+			}
+
+			memcpy(*palette, pcx->palette, sizeof(pcx->palette));
+		}
+
+		line = malloc(bytes_per_line * pcx->color_planes);
+
+		for (y = 0; y <= pcx_height; y++, pix += pcx_width + 1)
+		{
+			int x;
+
+			data = PCX_RLE_Decode(line, line + bytes_per_line * pcx->color_planes,
+				data, (byte *)pcx + len,
+				bytes_per_line * pcx->color_planes, &image_issues);
+
+			for (x = 0; x <= pcx_width; x++)
+			{
+				int m, i, v;
+
+				m = 0x80 >> (x & 7);
+				v = 0;
+
+				for (i = pcx->color_planes - 1; i >= 0; i--) {
+					v <<= 1;
+					v += (line[i * bytes_per_line + (x >> 3)] & m) ? 1 : 0;
+				}
+				pix[x] = v;
+			}
+		}
+		free(line);
+	}
+	else if (pcx->color_planes == 1 && pcx->bits_per_pixel == 8)
+	{
+		int y, linesize;
+		byte *line;
+
+		if (palette)
+		{
+			*palette = malloc(768);
+
+			if (!(*palette))
+			{
+				R_Printf(PRINT_ALL, "%s: Can't allocate for %s\n", __func__, name);
+				free(out);
+				return;
+			}
+
+			if (len > 768)
+			{
+				memcpy(*palette, (byte *)pcx + len - 768, 768);
+
+				if ((((byte *)pcx)[len - 769] != 0x0C))
+				{
+					R_Printf(PRINT_DEVELOPER, "%s: %s has no palette marker\n",
+						__func__, name);
+				}
+			}
+			else
+			{
+				image_issues = true;
+			}
+		}
+
+		if (bytes_per_line <= pcx_width)
+		{
+			image_issues = true;
+		}
+
+		linesize = Q_max(bytes_per_line, pcx_width + 1);
+		line = malloc(linesize);
+		for (y = 0; y <= pcx_height; y++, pix += pcx_width + 1)
+		{
+			data = PCX_RLE_Decode(line, line + linesize,
+				data, (byte *)pcx + len,
+				bytes_per_line, &image_issues);
+			/* copy only visible part */
+			memcpy(pix, line, pcx_width + 1);
+		}
+		free(line);
+	}
+	else if (pcx->color_planes == 1 &&
+		(pcx->bits_per_pixel == 2 || pcx->bits_per_pixel == 4))
+	{
+		int y;
+
+		byte *line;
+
+		if (palette)
+		{
+			*palette = malloc(768);
+
+			if (!(*palette))
+			{
+				R_Printf(PRINT_ALL, "%s: Can't allocate for %s\n", __func__, name);
+				free(out);
+				return;
+			}
+
+			memcpy(*palette, pcx->palette, sizeof(pcx->palette));
+		}
+
+		line = malloc(bytes_per_line);
+
+		for (y = 0; y <= pcx_height; y++, pix += pcx_width + 1)
+		{
+			int x, mask, div;
+
+			data = PCX_RLE_Decode(line, line + bytes_per_line,
+				data, (byte *)pcx + len,
+				bytes_per_line, &image_issues);
+
+			mask = (1 << pcx->bits_per_pixel) - 1;
+			div = 8 / pcx->bits_per_pixel;
+
+			for (x = 0; x <= pcx_width; x++)
+			{
+				unsigned v, shift;
+
+				v = line[x / div] & 0xFF;
+				/* for 2 bits:
+				 * 0 -> 6
+				 * 1 -> 4
+				 * 3 -> 2
+				 * 4 -> 0
+				 */
+				shift = pcx->bits_per_pixel * ((div - 1) - x % div);
+				pix[x] = (v >> shift) & mask;
+			}
+		}
+
+		free(line);
+	}
+	else
+	{
+		R_Printf(PRINT_ALL, "%s: Bad pcx file %s: planes: %d, bits: %d\n",
+			__func__, name, pcx->color_planes, pcx->bits_per_pixel);
+		free(*pic);
+		*pic = NULL;
+	}
+
+	if (pcx->color_planes != 1 || pcx->bits_per_pixel != 8)
+	{
+		R_Printf(PRINT_DEVELOPER, "%s: %s has uncommon flags, "
+			"could be unsupported by other engines\n",
+			__func__, name);
+	}
+
+	if (data - (byte *)pcx > len)
+	{
+		R_Printf(PRINT_DEVELOPER, "%s: %s file was malformed\n",
+			__func__, name);
+		free(*pic);
+		*pic = NULL;
+	}
+
+	if (image_issues)
+	{
+		R_Printf(PRINT_ALL, "%s: %s file has possible size issues.\n",
+			__func__, name);
+	}
+}
+
+void
+LoadPCX(const char *origname, byte **pic, byte **palette, int *width, int *height,
+	int *bitsPerPixel)
+{
 	char filename[256];
+	byte *raw;
+	int len;
 
 	FixFileExt(origname, "pcx", filename, sizeof(filename));
 
@@ -140,156 +474,25 @@ LoadPCX(const char *origname, byte **pic, byte **palette, int *width, int *heigh
 
 	/* load the file */
 	len = ri.FS_LoadFile(filename, (void **)&raw);
-
-	if (!raw || len < sizeof(pcx_t))
+	if (!raw)
 	{
-		R_Printf(PRINT_DEVELOPER, "Bad pcx file %s\n", filename);
+		/* no such file */
 		return;
 	}
 
-	/* parse the PCX file */
-	pcx = (pcx_t *)raw;
+	PCX_Decode(filename, raw, len, pic, palette, width, height, bitsPerPixel);
 
-	pcx->xmin = LittleShort(pcx->xmin);
-	pcx->ymin = LittleShort(pcx->ymin);
-	pcx->xmax = LittleShort(pcx->xmax);
-	pcx->ymax = LittleShort(pcx->ymax);
-	pcx->hres = LittleShort(pcx->hres);
-	pcx->vres = LittleShort(pcx->vres);
-	pcx->bytes_per_line = LittleShort(pcx->bytes_per_line);
-	pcx->palette_type = LittleShort(pcx->palette_type);
-
-	raw = &pcx->data;
-
-	pcx_width = pcx->xmax - pcx->xmin;
-	pcx_height = pcx->ymax - pcx->ymin;
-
-	if ((pcx->manufacturer != 0x0a) || (pcx->version != 5) ||
-		(pcx->encoding != 1) || (pcx->bits_per_pixel != 8) ||
-		(pcx_width >= 4096) || (pcx_height >= 4096))
-	{
-		R_Printf(PRINT_ALL, "Bad pcx file %s\n", filename);
-		ri.FS_FreeFile(pcx);
-		return;
-	}
-
-	if (pcx->bytes_per_line <= pcx_width)
-	{
-		pcx->bytes_per_line = pcx_width + 1;
-		image_issues = true;
-	}
-
-	full_size = (pcx_height + 1) * (pcx_width + 1);
-	out = malloc(full_size);
-	if (!out)
-	{
-		R_Printf(PRINT_ALL, "Can't allocate\n");
-		ri.FS_FreeFile(pcx);
-		return;
-	}
-
-	*pic = out;
-
-	pix = out;
-
-	if (palette)
-	{
-		*palette = malloc(768);
-		if (!(*palette))
-		{
-			R_Printf(PRINT_ALL, "Can't allocate\n");
-			free(out);
-			ri.FS_FreeFile(pcx);
-			return;
-		}
-		if (len > 768)
-		{
-			memcpy(*palette, (byte *)pcx + len - 768, 768);
-		}
-		else
-		{
-			image_issues = true;
-		}
-	}
-
-	if (width)
-	{
-		*width = pcx_width + 1;
-	}
-
-	if (height)
-	{
-		*height = pcx_height + 1;
-	}
-
-	for (y = 0; y <= pcx_height; y++, pix += pcx_width + 1)
-	{
-		for (x = 0; x < pcx->bytes_per_line; )
-		{
-			if (raw - (byte *)pcx > len)
-			{
-				// no place for read
-				image_issues = true;
-				x = pcx_width;
-				break;
-			}
-			dataByte = *raw++;
-
-			if ((dataByte & 0xC0) == 0xC0)
-			{
-				runLength = dataByte & 0x3F;
-				if (raw - (byte *)pcx > len)
-				{
-					// no place for read
-					image_issues = true;
-					x = pcx_width;
-					break;
-				}
-				dataByte = *raw++;
-			}
-			else
-			{
-				runLength = 1;
-			}
-
-			while (runLength-- > 0)
-			{
-				if ((*pic + full_size) <= (pix + x))
-				{
-					// no place for write
-					image_issues = true;
-					x += runLength;
-					runLength = 0;
-				}
-				else
-				{
-					pix[x++] = dataByte;
-				}
-			}
-		}
-	}
-
-	if (raw - (byte *)pcx > len)
-	{
-		R_Printf(PRINT_DEVELOPER, "PCX file %s was malformed", filename);
-		free(*pic);
-		*pic = NULL;
-	}
-	else if(pcx_width == 319 && pcx_height == 239
-			&& Q_strcasecmp(filename, "pics/quit.pcx") == 0
-			&& Com_BlockChecksum(pcx, len) == 3329419434u)
+	if(*pic && *bitsPerPixel == 8 && width && height
+		&& *width == 319 && *height == 239
+		&& Q_strcasecmp(filename, "pics/quit.pcx") == 0
+		&& Com_BlockChecksum(raw, len) == 3329419434u)
 	{
 		// it's the quit screen, and the baseq2 one (identified by checksum)
 		// so fix it
 		fixQuitScreen(*pic);
 	}
 
-	if (image_issues)
-	{
-		R_Printf(PRINT_ALL, "PCX file %s has possible size issues.\n", filename);
-	}
-
-	ri.FS_FreeFile(pcx);
+	ri.FS_FreeFile(raw);
 }
 
 void
@@ -318,180 +521,23 @@ GetPCXInfo(const char *origname, int *width, int *height)
 	return;
 }
 
-static byte
-Convert24to8(const byte *d_8to24table, const int rgb[3])
-{
-	int i, best, diff;
-
-	best = 255;
-	diff = 1 << 20;
-
-	for (i = 0; i < 256; i ++)
-	{
-		int j, curr_diff;
-
-		curr_diff = 0;
-
-		for (j = 0; j < 3; j++)
-		{
-			int v;
-
-			v = d_8to24table[i * 4 + j] - rgb[j];
-			curr_diff += v * v;
-		}
-
-		if (curr_diff < diff)
-		{
-			diff = curr_diff;
-			best = i;
-		}
-	}
-
-	return best;
-}
-
-static void
-GenerateColormap(const byte *palette, byte *out_colormap)
-{
-	// https://quakewiki.org/wiki/Quake_palette
-	int num_fullbrights = 32; /* the last 32 colours will be full bright */
-	int x;
-
-	for (x = 0; x < 256; x++)
-	{
-		int y;
-
-		for (y = 0; y < 64; y++)
-		{
-			if (x < 256 - num_fullbrights)
-			{
-				int rgb[3], i;
-
-				for (i = 0; i < 3; i++)
-				{
-					/* divide by 32, rounding to nearest integer */
-					rgb[i] = (palette[x * 4 + i] * (63 - y) + 16) >> 5;
-					if (rgb[i] > 255)
-					{
-						rgb[i] = 255;
-					}
-				}
-
-				out_colormap[y*256+x] = Convert24to8(palette, rgb);
-			}
-			else
-			{
-				/* this colour is a fullbright, just keep the original colour */
-				out_colormap[y*256+x] = x;
-			}
-		}
-	}
-}
-
-void
-GetPCXPalette24to8(byte *d_8to24table, byte** d_16to8table)
-{
-	unsigned char * table16to8;
-	char tablefile[] = "pics/16to8.dat";
-
-	*d_16to8table = NULL;
-	ri.FS_LoadFile(tablefile, (void **)&table16to8);
-
-	if (!table16to8)
-	{
-		R_Printf(PRINT_ALL, "%s: Couldn't load %s\n", __func__, tablefile);
-	}
-
-	*d_16to8table = malloc(0x10000);
-	if (!(*d_16to8table))
-	{
-		ri.Sys_Error(ERR_FATAL, "%s: Couldn't allocate memory for d_16to8table", __func__);
-		// code never returns after ERR_FATAL
-		return;
-	}
-
-	if (table16to8)
-	{
-		// Use predefined convert map
-		memcpy(*d_16to8table, table16to8, 0x10000);
-		ri.FS_FreeFile((void *)table16to8);
-	}
-	else
-	{
-		// create new one
-		unsigned int r;
-
-		R_Printf(PRINT_ALL, "%s: Generate 16 to 8 bit table\n", __func__);
-
-		for (r = 0; r < 32; r++)
-		{
-			int g;
-
-			for (g = 0; g < 64; g++)
-			{
-				int b;
-
-				for (b = 0; b < 32; b++)
-				{
-					int c, rgb[3];
-
-					rgb[0] = r << 3;
-					rgb[1] = g << 2;
-					rgb[2] = b << 3;
-
-					c = r | ( g << 5 ) | ( b << 11 );
-
-					// set color with minimal difference
-					(*d_16to8table)[c & 0xFFFF] = Convert24to8(d_8to24table, rgb);
-				}
-			}
-		}
-	}
-}
-
 /*
 ===============
 GetPCXPalette
 ===============
 */
 void
-GetPCXPalette(byte **colormap, unsigned *d_8to24table)
+GetPCXPalette (byte **colormap, unsigned *d_8to24table)
 {
-	char	filename[] = "pics/colormap.pcx";
 	byte	*pal;
-	int		i;
+	int		i, bitsPerPixel;
 
 	/* get the palette and colormap */
-	LoadPCX(filename, colormap, &pal, NULL, NULL);
-	if (!*colormap || !pal)
+	LoadPCX ("pics/colormap.pcx", colormap, &pal, NULL, NULL, &bitsPerPixel);
+	if (!*colormap || !pal || bitsPerPixel != 8)
 	{
-		R_Printf(PRINT_ALL, "%s: Couldn't load %s, use generated palette\n",
-			__func__, filename);
-
-		/* palette r:2bit, g:3bit, b:3bit */
-		for (i=0 ; i < 256; i++)
-		{
-			unsigned v;
-
-			v = (255U<<24) + (((i >> 0) & 0x3) << (6 + 0)) +
-							 (((i >> 2) & 0x7) << (5 + 8)) +
-							 (((i >> 5) & 0x7) << (5 + 16));
-			d_8to24table[i] = LittleLong(v);
-		}
-
-		d_8to24table[255] &= LittleLong(0xffffff);	// 255 is transparent
-
-		/* generate colormap */
-		*colormap = malloc(256 * 320);
-		if (!(*colormap))
-		{
-			ri.Sys_Error(ERR_FATAL, "%s: Couldn't allocate memory for colormap", __func__);
-			// code never returns after ERR_FATAL
-			return;
-		}
-
-		GenerateColormap((const byte *)d_8to24table, *colormap);
-		return;
+		ri.Sys_Error (ERR_FATAL, "%s: Couldn't load pics/colormap.pcx",
+			__func__);
 	}
 
 	for (i=0 ; i<256 ; i++)

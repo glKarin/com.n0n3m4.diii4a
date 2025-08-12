@@ -32,7 +32,7 @@
 #include "shared_safe.h"
 #include "crc.h"
 
-#define VKVERSION "1.0.8"
+#define VKVERSION "1.0.10"
 
 #ifndef YQ2OSTYPE
 #error YQ2OSTYPE should be defined by the build system
@@ -166,7 +166,7 @@ void COM_AddParm(char *parm);
 void COM_Init(void);
 void COM_InitArgv(int argc, char **argv);
 
-char *CopyString(char *in);
+char *CopyString(const char *in);
 
 /* ================================================================== */
 
@@ -447,27 +447,27 @@ void Cmd_ForwardToServer(void);
 
 extern cvar_t *cvar_vars;
 
-cvar_t *Cvar_Get(char *var_name, char *value, int flags);
+cvar_t *Cvar_Get(const char *var_name, const char *value, int flags);
 
 /* creates the variable if it doesn't exist, or returns the existing one */
 /* if it exists, the value will not be changed, but flags will be ORed in */
 /* that allows variables to be unarchived without needing bitflags */
 
-cvar_t *Cvar_Set(char *var_name, char *value);
+cvar_t *Cvar_Set(const char *var_name, const char *value);
 
 /* will create the variable if it doesn't exist */
 
-cvar_t *Cvar_ForceSet(char *var_name, char *value);
+cvar_t *Cvar_ForceSet(const char *var_name, char *value);
 
 /* will set the variable even if NOSET or LATCH */
 
-cvar_t *Cvar_FullSet(char *var_name, char *value, int flags);
+cvar_t *Cvar_FullSet(const char *var_name, const char *value, int flags);
 
-void Cvar_SetValue(char *var_name, float value);
+void Cvar_SetValue(const char *var_name, float value);
 
 /* expands value to a string and calls Cvar_Set */
 
-float Cvar_VariableValue(char *var_name);
+float Cvar_VariableValue(const char *var_name);
 
 /* returns 0 if not defined or non numeric */
 
@@ -490,7 +490,7 @@ qboolean Cvar_Command(void);
 /* command.  Returns true if the command was a variable reference that */
 /* was handled. (print or change) */
 
-void Cvar_WriteVariables(char *path);
+void Cvar_WriteVariables(const char *path);
 
 /* appends lines containing "set variable value" for all variables */
 /* with the archive flag set to true. */
@@ -615,7 +615,7 @@ qboolean Netchan_CanReliable(netchan_t *chan);
 #include "files.h"
 
 cmodel_t *CM_LoadMap(char *name, qboolean clientload, unsigned *checksum);
-cmodel_t *CM_InlineModel(char *name);       /* *1, *2, etc */
+cmodel_t *CM_InlineModel(const char *name);       /* *1, *2, etc */
 
 int CM_NumClusters(void);
 int CM_NumInlineModels(void);
@@ -700,18 +700,18 @@ int FS_FRead(void *buffer, int size, int count, fileHandle_t f);
 // returns NULL if f is no valid handle
 const char* FS_GetFilenameForHandle(fileHandle_t f);
 
-char **FS_ListFiles(char *findname, int *numfiles,
+char **FS_ListFiles(const char *findname, int *numfiles,
 		unsigned musthave, unsigned canthave);
-char **FS_ListFiles2(char *findname, int *numfiles,
+char **FS_ListFiles2(const char *findname, int *numfiles,
 		unsigned musthave, unsigned canthave);
 void FS_FreeList(char **list, int nfiles);
 
 void FS_InitFilesystem(void);
 void FS_ShutdownFilesystem(void);
-void FS_BuildGameSpecificSearchPath(char *dir);
+void FS_BuildGameSpecificSearchPath(const char *dir);
 char *FS_Gamedir(void);
-char *FS_NextPath(char *prevpath);
-int FS_LoadFile(char *path, void **buffer);
+char *FS_NextPath(const char *prevpath);
+int FS_LoadFile(const char *path, void **buffer);
 qboolean FS_FileInGamedir(const char *file);
 qboolean FS_AddPAKFromGamedir(const char *pak);
 const char* FS_GetNextRawPath(const char* lastRawPath);
@@ -749,8 +749,6 @@ YQ2_ATTR_NORETURN void Com_Quit(void);
 
 /* Ugly work around for unsupported
  * format specifiers unter mingw. */
-#define YQ2_COM_PRIu64 PRIu64
-
 #ifdef WIN32
 #define YQ2_COM_PRId64 "%I64d"
 #define YQ2_COM_PRIdS "%Id"
@@ -868,5 +866,7 @@ const char *Sys_GetBinaryDir(void);
 void Sys_SetupFPU(void);
 
 /* ======================================================================= */
+
+void Mods_NamesFinish(void);
 
 #endif

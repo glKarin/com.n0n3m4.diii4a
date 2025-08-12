@@ -105,7 +105,7 @@ void VID_WriteScreenshot(int width, int height, int comp, const void* data)
 		if (argc > 2)
 		{
 			const char* q = Cmd_Argv(2);
-			int qualityStrLen = strlen(q);
+			size_t qualityStrLen = strlen(q);
 
 			for (i = 0; i < qualityStrLen; ++i)
 			{
@@ -240,6 +240,7 @@ vidmode_t vid_modes[] = {
 	{"Mode 29: 3840x2160", 3840, 2160, 29},
 	{"Mode 30: 4096x2160", 4096, 2160, 30},
 	{"Mode 31: 5120x2880", 5120, 2880, 31},
+	{"Mode 32: 1600x900", 1600, 900, 32},
 };
 
 #define VID_NUM_MODES (sizeof(vid_modes) / sizeof(vid_modes[0]))
@@ -247,7 +248,7 @@ vidmode_t vid_modes[] = {
 /*
  * Callback function for the 'vid_listmodes' cmd.
  */
-void
+static void
 VID_ListModes_f(void)
 {
 	int i;
@@ -264,7 +265,7 @@ VID_ListModes_f(void)
 /*
  * Returns informations about the given mode.
  */
-qboolean
+static qboolean
 VID_GetModeInfo(int *width, int *height, int mode)
 {
 	if ((mode < 0) || (mode >= VID_NUM_MODES))
@@ -341,7 +342,7 @@ VID_HasRenderer(const char *renderer)
 	VID_GetRendererLibPath(renderer, reflib_path, sizeof(reflib_path));
 
 #ifdef __ANDROID__ //karin: add `lib` prefix on library name
-	if ( ( reflib_path[0] != '/' && ( strcmp(renderer, "gl1") == 0 || strcmp(renderer, "gles3") == 0 || strcmp(renderer, "vk") == 0 ) ) || Sys_IsFile(reflib_path))
+	if ( ( reflib_path[0] != '/' && ( /*strcmp(renderer, "gl1") == 0 ||*/ strcmp(renderer, "gles3") == 0 || strcmp(renderer, "vk") == 0 || strcmp(renderer, "gles1") == 0 ) ) || Sys_IsFile(reflib_path))
 #else
 	if (Sys_IsFile(reflib_path))
 #endif
@@ -355,7 +356,7 @@ VID_HasRenderer(const char *renderer)
 /*
  * Called by the renderer to request a restart.
  */
-void
+static void
 VID_RequestRestart(ref_restart_t rs)
 {
 	restart_state = rs;
@@ -364,7 +365,7 @@ VID_RequestRestart(ref_restart_t rs)
 /*
  * Restarts the renderer.
  */
-void
+static void
 VID_Restart_f(void)
 {
 	if (restart_state == RESTART_UNDEF)
@@ -378,7 +379,7 @@ VID_Restart_f(void)
 /*
  * Shuts the renderer down and unloads it.
  */
-void
+static void
 VID_ShutdownRenderer(void)
 {
 	if (ref_active)
@@ -398,7 +399,7 @@ VID_ShutdownRenderer(void)
 /*
  * Loads and initializes a renderer.
  */
-qboolean
+static qboolean
 VID_LoadRenderer(void)
 {
 	refimport_t	ri;
@@ -555,10 +556,11 @@ VID_CheckChanges(void)
 		// Mkay, let's try our luck.
 		while (!VID_LoadRenderer())
 		{
-			// We try: custom -> gl3 -> gles3 -> gl1 -> soft.
+			// We try: custom -> gl3 -> gles3 -> gl1 -> gles1 -> soft.
 			if ((strcmp(vid_renderer->string, "gl3") != 0) &&
 				(strcmp(vid_renderer->string, "gles3") != 0) &&
 				(strcmp(vid_renderer->string, "gl1") != 0) &&
+				(strcmp(vid_renderer->string, "gles1") != 0) &&
 				(strcmp(vid_renderer->string, "soft") != 0))
 			{
 				Com_Printf("Retrying with gl3...\n");
@@ -575,6 +577,11 @@ VID_CheckChanges(void)
 				Cvar_Set("vid_renderer", "gl1");
 			}
 			else if (strcmp(vid_renderer->string, "gl1") == 0)
+			{
+				Com_Printf("Retrying with gles1...\n");
+				Cvar_Set("vid_renderer", "gles1");
+			}
+			else if (strcmp(vid_renderer->string, "gles1") == 0)
 			{
 				Com_Printf("Retrying with soft...\n");
 				Cvar_Set("vid_renderer", "soft");
@@ -659,7 +666,7 @@ R_RegisterModel(char *name)
 }
 
 struct image_s*
-R_RegisterSkin(char *name)
+R_RegisterSkin(const char *name)
 {
 	if (ref_active)
 	{
@@ -670,7 +677,7 @@ R_RegisterSkin(char *name)
 }
 
 void
-R_SetSky(char *name, float rotate, vec3_t axis)
+R_SetSky(const char *name, float rotate, vec3_t axis)
 {
 	if (ref_active)
 	{
@@ -697,7 +704,7 @@ R_RenderFrame(refdef_t *fd)
 }
 
 struct image_s*
-Draw_FindPic(char *name)
+Draw_FindPic(const char *name)
 {
 	if (ref_active)
 	{
@@ -709,7 +716,7 @@ Draw_FindPic(char *name)
 
 
 void
-Draw_GetPicSize(int *w, int *h, char *name)
+Draw_GetPicSize(int *w, int *h, const char *name)
 {
 	if (ref_active)
 	{
@@ -718,7 +725,7 @@ Draw_GetPicSize(int *w, int *h, char *name)
 }
 
 void
-Draw_StretchPic(int x, int y, int w, int h, char *name)
+Draw_StretchPic(int x, int y, int w, int h, const char *name)
 {
 	if (ref_active)
 	{
@@ -727,7 +734,7 @@ Draw_StretchPic(int x, int y, int w, int h, char *name)
 }
 
 void
-Draw_PicScaled(int x, int y, char *pic, float factor)
+Draw_PicScaled(int x, int y, const char *pic, float factor)
 {
 	if (ref_active)
 	{
@@ -745,7 +752,7 @@ Draw_CharScaled(int x, int y, int num, float scale)
 }
 
 void
-Draw_TileClear(int x, int y, int w, int h, char *name)
+Draw_TileClear(int x, int y, int w, int h, const char *name)
 {
 	if (ref_active)
 	{

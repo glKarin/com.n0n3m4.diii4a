@@ -327,7 +327,7 @@ char *
 ED_NewString(const char *string)
 {
 	char *newb, *new_p;
-	int i, l;
+	size_t i, l;
 
 	if (!string)
 	{
@@ -700,6 +700,9 @@ SpawnEntities(const char *mapname, char *entities, const char *spawnpoint)
 		ED_CallSpawn(ent);
 	}
 
+	/* in case the last entity in the entstring has spawntemp fields */
+	memset(&st, 0, sizeof(st));
+
 	gi.dprintf("%i entities inhibited.\n", inhibit);
 
 	G_FindTeams();
@@ -908,7 +911,14 @@ SP_worldspawn(edict_t *ent)
 	gi.configstring(CS_SKYAXIS, va("%f %f %f",
 				st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]));
 
-	gi.configstring(CS_CDTRACK, va("%i", ent->sounds));
+	if (st.music && st.music[0])
+	{
+		gi.configstring(CS_CDTRACK, st.music);
+	}
+	else
+	{
+		gi.configstring(CS_CDTRACK, va("%i", ent->sounds));
+	}
 
 	gi.configstring(CS_MAXCLIENTS, va("%i", (int)(maxclients->value)));
 

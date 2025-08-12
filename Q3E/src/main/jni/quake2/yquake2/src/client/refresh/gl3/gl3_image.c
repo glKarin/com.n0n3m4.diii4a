@@ -186,7 +186,7 @@ GL3_BindLightmap(int lightmapnum)
 /*
  * Returns has_alpha
  */
-qboolean
+static qboolean
 GL3_Upload32(unsigned *data, int width, int height, qboolean mipmap)
 {
 	qboolean res;
@@ -237,7 +237,7 @@ GL3_Upload32(unsigned *data, int width, int height, qboolean mipmap)
 /*
  * Returns has_alpha
  */
-qboolean
+static qboolean
 GL3_Upload8(byte *data, int width, int height, qboolean mipmap, qboolean is_sky)
 {
 	int s = width * height;
@@ -605,7 +605,8 @@ gl3image_t *
 GL3_FindImage(const char *name, imagetype_t type)
 {
 	gl3image_t *image;
-	int i, len;
+	size_t len;
+	int i;
 	char *ptr;
 	char namewe[256];
 	const char* ext;
@@ -616,22 +617,21 @@ GL3_FindImage(const char *name, imagetype_t type)
 	}
 
 	ext = COM_FileExtension(name);
-	if(!ext[0])
+	if (!ext[0])
 	{
 		/* file has no extension */
 		return NULL;
 	}
 
-	len = strlen(name);
-
 	/* Remove the extension */
-	memset(namewe, 0, 256);
-	memcpy(namewe, name, len - (strlen(ext) + 1));
-
-	if (len < 5)
+	len = (ext - name) - 1;
+	if ((len < 1) || (len > sizeof(namewe) - 1))
 	{
 		return NULL;
 	}
+
+	memcpy(namewe, name, len);
+	namewe[len] = 0;
 
 	/* fix backslashes */
 	while ((ptr = strchr(name, '\\')))
@@ -664,7 +664,7 @@ GL3_FindImage(const char *name, imagetype_t type)
 }
 
 gl3image_t *
-GL3_RegisterSkin(char *name)
+GL3_RegisterSkin(const char *name)
 {
 	return GL3_FindImage(name, it_skin);
 }

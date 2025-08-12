@@ -36,7 +36,7 @@ extern int edit_line;
 extern int key_linepos;
 
 void
-DrawStringScaled(int x, int y, char *s, float factor)
+DrawStringScaled(int x, int y, const char *s, float factor)
 {
 	while (*s)
 	{
@@ -47,7 +47,7 @@ DrawStringScaled(int x, int y, char *s, float factor)
 }
 
 void
-DrawAltStringScaled(int x, int y, char *s, float factor)
+DrawAltStringScaled(int x, int y, const char *s, float factor)
 {
 	while (*s)
 	{
@@ -60,8 +60,8 @@ DrawAltStringScaled(int x, int y, char *s, float factor)
 void
 Key_ClearTyping(void)
 {
-	key_lines[edit_line][1] = 0; /* clear any typing */
-	key_linepos = 1;
+	key_lines[edit_line][0] = '\0';
+	key_linepos = 0;
 }
 
 void
@@ -471,6 +471,10 @@ Con_DrawInput(void)
 	int i;
 	float scale;
 	char *text;
+	char ch;
+	size_t txtlen;
+	int linepos;
+	int draw_icon;
 
 	if (cls.key_dest == key_menu)
 	{
@@ -485,29 +489,50 @@ Con_DrawInput(void)
 
 	scale = SCR_GetConsoleScale();
 	text = key_lines[edit_line];
-
-	/* add the cursor frame */
-	text[key_linepos] = 10 + ((int)(cls.realtime >> 8) & 1);
-
-	/* fill out remainder with spaces */
-	for (i = key_linepos + 1; i < con.linewidth; i++)
-	{
-		text[i] = ' ';
-	}
+	linepos = key_linepos;
 
 	/* prestep if horizontally scrolling */
-	if (key_linepos >= con.linewidth)
+	if (linepos >= (con.linewidth - 1))
 	{
-		text += 1 + key_linepos - con.linewidth;
+		int ofs = 1 + linepos - con.linewidth;
+
+		text += ofs;
+		linepos -= ofs;
+
+		draw_icon = 0;
+	}
+	else
+	{
+		Draw_CharScaled(8 * scale, con.vislines - 22 * scale, CON_INPUT_INDICATOR, scale);
+		draw_icon = 1;
 	}
 
-	for (i = 0; i < con.linewidth; i++)
-	{
-		Draw_CharScaled(((i + 1) << 3) * scale, con.vislines - 22 * scale, text[i], scale);
-	}
+	txtlen = strlen(text);
 
-	/* remove cursor */
-	key_lines[edit_line][key_linepos] = 0;
+	for (i = 0; i < (con.linewidth - draw_icon); i++)
+	{
+		if (i == linepos)
+		{
+			if ((cls.realtime >> 8) & 1)
+			{
+				ch = CON_INPUT_CURSOR;
+			}
+			else
+			{
+				ch = (text[i] == '\0') ? 10 : text[i];
+			}
+		}
+		else if (i >= txtlen)
+		{
+			ch = ' ';
+		}
+		else
+		{
+			ch = text[i];
+		}
+
+		Draw_CharScaled(((i + 1 + draw_icon) << 3) * scale, con.vislines - 22 * scale, ch, scale);
+	}
 }
 
 /*
@@ -605,7 +630,7 @@ Con_DrawConsole(float frac)
 {
 	int i, j, x, y, n;
 	int rows;
-	int verLen;
+	size_t verLen;
 	char *text;
 	int row;
 	int lines;
@@ -765,7 +790,7 @@ Con_DrawConsole(float frac)
 		sprintf(dlbar + strlen(dlbar), " %02d%%", cls.downloadpercent);
 
 		/* draw it */
-		y = con.vislines - 12;
+		y = (lines - 12 * scale) / scale;
 
 		for (i = 0; i < strlen(dlbar); i++)
 		{

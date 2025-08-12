@@ -1758,12 +1758,6 @@ static int RE_PrepareForWindow(void)
 #endif
 }
 
-static void
-RE_SetSky (char *name, float rotate, vec3_t axis)
-{
-	RE_SetSky_s (name, rotate, axis);
-}
-
 /*
 ===============
 GetRefAPI

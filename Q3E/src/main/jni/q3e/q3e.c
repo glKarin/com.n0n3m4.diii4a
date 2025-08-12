@@ -1071,6 +1071,20 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit(JNIEnv *env, jclass cl
 	usingNativeThread = gameThreadType != GAME_THREAD_TYPE_JAVA;
 }
 
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Setenv(
+		JNIEnv *env, jclass cls,
+		jstring name, jstring value)
+{
+	const char *utfname = (*env)->GetStringUTFChars(env, name, NULL);
+	const char *utfvalue = (*env)->GetStringUTFChars(env, value, NULL);
+
+	LOGI("setenv(%s, %s, 1)", utfname, utfvalue);
+	setenv(utfname, utfvalue, 1);
+
+	(*env)->ReleaseStringUTFChars(env, name, utfname);
+	(*env)->ReleaseStringUTFChars(env, value, utfvalue);
+}
+
 #ifdef _Q3E_SDL
 static void set_mouse_cursor_visible(int visible)
 {

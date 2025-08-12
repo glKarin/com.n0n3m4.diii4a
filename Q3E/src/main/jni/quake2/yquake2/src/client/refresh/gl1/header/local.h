@@ -34,24 +34,34 @@
 #include "../../ref_shared.h"
 #include "qgl.h"
 
-
+#ifdef YQ2_GL1_GLES
+#define REF_VERSION "Yamagi Quake II OpenGL ES1 Refresher"
+#define GL_COLOR_INDEX	GL_RGBA
+#define GL_COLOR_INDEX8_EXT	GL_RGBA
+#else
+#define REF_VERSION "Yamagi Quake II OpenGL Refresher"
 #ifndef GL_COLOR_INDEX8_EXT
  #define GL_COLOR_INDEX8_EXT GL_COLOR_INDEX
 #endif
+#endif
 
 #define MAX_LIGHTMAPS 128
+#define MAX_LIGHTMAP_COPIES 3	// Meant for tile / deferred rendering platforms
 #define MAX_SCRAPS 1
 #define TEXNUM_LIGHTMAPS 1024
-#define TEXNUM_SCRAPS (TEXNUM_LIGHTMAPS + MAX_LIGHTMAPS)
+#define TEXNUM_SCRAPS (TEXNUM_LIGHTMAPS + MAX_LIGHTMAPS * MAX_LIGHTMAP_COPIES)
 #define TEXNUM_IMAGES (TEXNUM_SCRAPS + MAX_SCRAPS)
 #define MAX_GLTEXTURES 1024
 #define BLOCK_WIDTH 128		// default values; now defined in glstate_t
 #define BLOCK_HEIGHT 128
-#define REF_VERSION "Yamagi Quake II OpenGL Refresher"
 #define BACKFACE_EPSILON 0.01
 #define LIGHTMAP_BYTES 4
 #define MAX_TEXTURE_UNITS 2
 #define GL_LIGHTMAP_FORMAT GL_RGBA
+
+// GL buffer definitions
+#define MAX_VERTICES	16384
+#define MAX_INDICES 	(MAX_VERTICES * 4)
 
 /* up / down */
 #define PITCH 0
@@ -118,10 +128,27 @@ typedef enum
 	buf_shadow
 } buffered_draw_t;
 
+typedef struct	//	832k aprox.
+{
+	buffered_draw_t	type;
+
+	GLfloat
+		vtx[MAX_VERTICES * 3],	// vertexes
+		tex[MAX_TEXTURE_UNITS][MAX_VERTICES * 2],	// texture coords
+		clr[MAX_VERTICES * 4];	// color components
+
+	GLushort idx[MAX_INDICES];	// indices for the draw call
+
+	GLuint vt, tx, cl;	// indices for GLfloat arrays above
+
+	int	texture[MAX_TEXTURE_UNITS];
+	int	flags;	// entity flags
+	float	alpha;
+} glbuffer_t;
+
 #include "model.h"
 
-void R_SetDefaultState(void);
-
+extern glbuffer_t gl_buf;
 extern float gldepthmin, gldepthmax;
 
 extern image_t gltextures[MAX_GLTEXTURES];
@@ -276,10 +303,10 @@ void R_SwapBuffers(int);
 image_t *R_LoadPic(const char *name, byte *pic, int width, int realwidth,
 		int height, int realheight, size_t data_size, imagetype_t type, int bits);
 image_t *R_FindImage(const char *name, imagetype_t type);
-void R_TextureMode(char *string);
+void R_TextureMode(const char *string);
 void R_ImageList_f(void);
 
-void R_SetTexturePalette(unsigned palette[256]);
+void R_SetTexturePalette(const unsigned palette[256]);
 
 void R_InitImages(void);
 void R_ShutdownImages(void);
@@ -287,20 +314,39 @@ void R_ShutdownImages(void);
 void R_FreeUnusedImages(void);
 qboolean R_ImageHasFreeSpace(void);
 
-void R_TextureAlphaMode(char *string);
-void R_TextureSolidMode(char *string);
+void R_TextureAlphaMode(const char *string);
+void R_TextureSolidMode(const char *string);
 int Scrap_AllocBlock(int w, int h, int *x, int *y);
+
+// GL buffer operations
+
+#define GLBUFFER_VERTEX(X, Y, Z) \
+	gl_buf.vtx[gl_buf.vt] = X; gl_buf.vtx[gl_buf.vt+1] = Y; \
+	gl_buf.vtx[gl_buf.vt+2] = Z; gl_buf.vt += 3;
+
+#define GLBUFFER_SINGLETEX(S, T) \
+	gl_buf.tex[0][gl_buf.tx] = S; gl_buf.tex[0][gl_buf.tx+1] = T; gl_buf.tx += 2;
+
+#define GLBUFFER_MULTITEX(CS, CT, LS, LT) \
+	gl_buf.tex[0][gl_buf.tx] = CS; gl_buf.tex[0][gl_buf.tx+1] = CT; \
+	gl_buf.tex[1][gl_buf.tx] = LS; gl_buf.tex[1][gl_buf.tx+1] = LT; gl_buf.tx += 2;
+
+#define GLBUFFER_COLOR(R, G, B, A) \
+	gl_buf.clr[gl_buf.cl] = R; gl_buf.clr[gl_buf.cl+1] = G; \
+	gl_buf.clr[gl_buf.cl+2] = B; gl_buf.clr[gl_buf.cl+3] = A; gl_buf.cl += 4;
 
 void R_ApplyGLBuffer(void);
 void R_UpdateGLBuffer(buffered_draw_t type, int colortex, int lighttex, int flags, float alpha);
 void R_Buffer2DQuad(GLfloat ul_vx, GLfloat ul_vy, GLfloat dr_vx, GLfloat dr_vy,
 	GLfloat ul_tx, GLfloat ul_ty, GLfloat dr_tx, GLfloat dr_ty);
 void R_SetBufferIndices(GLenum type, GLuint vertices_num);
-void R_BufferVertex(GLfloat x, GLfloat y, GLfloat z);
-void R_BufferSingleTex(GLfloat s, GLfloat t);
-void R_BufferMultiTex(GLfloat cs, GLfloat ct, GLfloat ls, GLfloat lt);
-void R_BufferColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 
+#ifdef YQ2_GL1_GLES
+#define glPolygonMode(...)
+#define glFrustum(...) glFrustumf(__VA_ARGS__)
+#define glDepthRange(...) glDepthRangef(__VA_ARGS__)
+#define glOrtho(...) glOrthof(__VA_ARGS__)
+#else
 #ifdef DEBUG
 void glCheckError_(const char *file, const char *function, int line);
 // Ideally, the following list should contain all OpenGL calls.
@@ -350,6 +396,7 @@ void glCheckError_(const char *file, const char *function, int line);
 #define glBegin(...) glBegin(__VA_ARGS__); glCheckError_(__FILE__, __func__, __LINE__)
 #define glEnd() glEnd(); glCheckError_(__FILE__, __func__, __LINE__)
 #endif
+#endif
 
 /* GL extension emulation functions */
 void R_DrawParticles2(int n,
@@ -377,6 +424,7 @@ typedef struct
 	qboolean palettedtexture;
 	qboolean pointparameters;
 	qboolean multitexture;
+	qboolean lightmapcopies;	// many copies of same lightmap, for embedded
 
 	// ----
 
@@ -412,7 +460,6 @@ typedef struct
 
 typedef struct
 {
-	int internal_format;
 	int current_lightmap_texture;
 
 	msurface_t *lightmap_surfaces[MAX_LIGHTMAPS];
@@ -461,12 +508,12 @@ void RI_GetDrawableSize(int* width, int* height);
 int RI_GetSDLVersion();
 
 /* g11_draw */
-extern image_t * RDraw_FindPic(char *name);
-extern void RDraw_GetPicSize(int *w, int *h, char *pic);
-extern void RDraw_PicScaled(int x, int y, char *pic, float factor);
-extern void RDraw_StretchPic(int x, int y, int w, int h, char *pic);
+extern image_t * RDraw_FindPic(const char *name);
+extern void RDraw_GetPicSize(int *w, int *h, const char *pic);
+extern void RDraw_PicScaled(int x, int y, const char *pic, float factor);
+extern void RDraw_StretchPic(int x, int y, int w, int h, const char *pic);
 extern void RDraw_CharScaled(int x, int y, int num, float scale);
-extern void RDraw_TileClear(int x, int y, int w, int h, char *pic);
+extern void RDraw_TileClear(int x, int y, int w, int h, const char *pic);
 extern void RDraw_Fill(int x, int y, int w, int h, int c);
 extern void RDraw_FadeScreen(void);
 extern void RDraw_StretchRaw(int x, int y, int w, int h, int cols, int rows, const byte *data, int bits);

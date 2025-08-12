@@ -29,6 +29,10 @@
 
 #include "header/client.h"
 
+void Key_ClearTyping(void);
+void IN_GetClipboardText(char *out, size_t n);
+int IN_SetClipboardText(const char *s);
+
 static cvar_t *cfg_unbindall;
 
 /*
@@ -135,62 +139,6 @@ keyname_t keynames[] = {
 	{"MWHEELUP", K_MWHEELUP},
 	{"MWHEELDOWN", K_MWHEELDOWN},
 
-	{"BTN_A", K_BTN_A},
-	{"BTN_B", K_BTN_B},
-	{"BTN_X", K_BTN_X},
-	{"BTN_Y", K_BTN_Y},
-	{"STICK_LEFT", K_STICK_LEFT},
-	{"STICK_RIGHT", K_STICK_RIGHT},
-	{"SHOULDR_LEFT", K_SHOULDER_LEFT},
-	{"SHOULDR_RIGHT", K_SHOULDER_RIGHT},
-	{"TRIG_LEFT", K_TRIG_LEFT},
-	{"TRIG_RIGHT", K_TRIG_RIGHT},
-
-	{"DP_UP", K_DPAD_UP},
-	{"DP_DOWN", K_DPAD_DOWN},
-	{"DP_LEFT", K_DPAD_LEFT},
-	{"DP_RIGHT", K_DPAD_RIGHT},
-
-	{"PADDLE_1", K_PADDLE_1},
-	{"PADDLE_2", K_PADDLE_2},
-	{"PADDLE_3", K_PADDLE_3},
-	{"PADDLE_4", K_PADDLE_4},
-	{"BTN_MISC1", K_BTN_MISC1},
-	{"TOUCHPAD", K_TOUCHPAD},
-	{"BTN_BACK", K_BTN_BACK},
-	{"BTN_GUIDE", K_BTN_GUIDE},
-	{"BTN_START", K_BTN_START},
-
-	// virtual keys you get by pressing the corresponding normal joy key
-	// and the altselector key
-	{"BTN_A_ALT", K_BTN_A_ALT},
-	{"BTN_B_ALT", K_BTN_B_ALT},
-	{"BTN_X_ALT", K_BTN_X_ALT},
-	{"BTN_Y_ALT", K_BTN_Y_ALT},
-	{"STICK_LEFT_ALT", K_STICK_LEFT_ALT},
-	{"STICK_RIGHT_ALT", K_STICK_RIGHT_ALT},
-	{"SHOULDR_LEFT_ALT", K_SHOULDER_LEFT_ALT},
-	{"SHOULDR_RIGHT_ALT", K_SHOULDER_RIGHT_ALT},
-	{"TRIG_LEFT_ALT", K_TRIG_LEFT_ALT},
-	{"TRIG_RIGHT_ALT", K_TRIG_RIGHT_ALT},
-
-	{"DP_UP_ALT", K_DPAD_UP_ALT},
-	{"DP_DOWN_ALT", K_DPAD_DOWN_ALT},
-	{"DP_LEFT_ALT", K_DPAD_LEFT_ALT},
-	{"DP_RIGHT_ALT", K_DPAD_RIGHT_ALT},
-
-	{"PADDLE_1_ALT", K_PADDLE_1_ALT},
-	{"PADDLE_2_ALT", K_PADDLE_2_ALT},
-	{"PADDLE_3_ALT", K_PADDLE_3_ALT},
-	{"PADDLE_4_ALT", K_PADDLE_4_ALT},
-	{"BTN_MISC1_ALT", K_BTN_MISC1_ALT},
-	{"TOUCHPAD_ALT", K_TOUCHPAD_ALT},
-	{"BTN_BACK_ALT", K_BTN_BACK_ALT},
-	{"BTN_GUIDE_ALT", K_BTN_GUIDE_ALT},
-	{"BTN_START_ALT", K_BTN_START_ALT},
-
-	{"JOY_BACK", K_JOY_BACK},
-
 	{"SUPER", K_SUPER},
 	{"COMPOSE", K_COMPOSE},
 	{"MODE", K_MODE},
@@ -263,14 +211,156 @@ keyname_t keynames[] = {
 	{NULL, 0}
 };
 
+static char *gamepadbtns[] =
+{
+	// It is imperative that this list of buttons follow EXACTLY the order they
+	// appear in QKEYS enum in keyboard.h, which in turn is the same order as
+	// they appear in SDL_GamepadButton / SDL_GameControllerButton enum.
+	"BTN_SOUTH",
+	"BTN_EAST",
+	"BTN_WEST",
+	"BTN_NORTH",
+	"BTN_BACK",
+	"BTN_GUIDE",
+	"BTN_START",
+	"STICK_LEFT",
+	"STICK_RIGHT",
+	"SHOULDR_LEFT",
+	"SHOULDR_RIGHT",
+	"DP_UP",
+	"DP_DOWN",
+	"DP_LEFT",
+	"DP_RIGHT",
+	"BTN_MISC1",
+	"PADDL_RIGHT1",
+	"PADDL_LEFT1",
+	"PADDL_RIGHT2",
+	"PADDL_LEFT2",
+	"TOUCHPAD",
+	"BTN_MISC2",
+	"BTN_MISC3",
+	"BTN_MISC4",
+	"BTN_MISC5",
+	"BTN_MISC6",
+	"TRIG_LEFT",
+	"TRIG_RIGHT",
+	// Same with _ALT buttons ( button + 'alt modifier' pressed )
+	"BTN_SOUTH_ALT",
+	"BTN_EAST_ALT",
+	"BTN_WEST_ALT",
+	"BTN_NORTH_ALT",
+	"BTN_BACK_ALT",
+	"BTN_GUIDE_ALT",
+	"BTN_START_ALT",
+	"STICK_LEFT_ALT",
+	"STICK_RIGHT_ALT",
+	"SHOULDR_LEFT_ALT",
+	"SHOULDR_RIGHT_ALT",
+	"DP_UP_ALT",
+	"DP_DOWN_ALT",
+	"DP_LEFT_ALT",
+	"DP_RIGHT_ALT",
+	"BTN_MISC1_ALT",
+	"PADDL_RIGHT1_ALT",
+	"PADDL_LEFT1_ALT",
+	"PADDL_RIGHT2_ALT",
+	"PADDL_LEFT2_ALT",
+	"TOUCHPAD_ALT",
+	"BTN_MISC2_ALT",
+	"BTN_MISC3_ALT",
+	"BTN_MISC4_ALT",
+	"BTN_MISC5_ALT",
+	"BTN_MISC6_ALT",
+	"TRIG_LEFT_ALT",
+	"TRIG_RIGHT_ALT"
+};
+
+#define NUM_GAMEPAD_BTNS (sizeof gamepadbtns / sizeof gamepadbtns[0])
+
+static char *gpbtns_face[] =
+{
+	// Xbox
+	"A",
+	"B",
+	"X",
+	"Y",
+	"VIEW",
+	"XBOX",
+	"MENU",
+	"LS",
+	"RS",
+	"LB",
+	"RB",
+	// Playstation
+	"CROSS",
+	"CIRCLE",
+	"SQUARE",
+	"TRIANGLE",
+	"CREATE",
+	"PS",
+	"OPTIONS",
+	"L3",
+	"R3",
+	"L1",
+	"R1",
+	// Nintendo Switch
+	"B",
+	"A",
+	"Y",
+	"X",
+	"-",
+	"HOME",
+	"+",
+	"L stick",
+	"R stick",
+	"L btn",
+	"R btn",
+};
+
+static char *gpbtns_paddles[] =
+{
+	// Xbox
+	"SHARE",
+	"P1",
+	"P3",
+	"P2",
+	"P4",
+	// Playstation
+	"MIC",
+	"RB",
+	"LB",
+	"Right Fn",
+	"Left Fn",
+	// Switch
+	"CAPTURE",
+	"Right SR",
+	"Left SL",
+	"Right SL",
+	"Left SR" // JoyCon btn positions suck
+};
+
+static char *gpbtns_triggers[] =
+{
+	// Xbox
+	"LT",
+	"RT",
+	// Playstation
+	"L2",
+	"R2",
+	// Switch
+	"ZL",
+	"ZR"
+};
+
 /* ------------------------------------------------------------------ */
 
-void
+static void
 CompleteCommand(void)
 {
-	char *cmd, *s;
+	char *cmd;
+	char *s;
 
-	s = key_lines[edit_line] + 1;
+	s = key_lines[edit_line];
 
 	if ((*s == '\\') || (*s == '/'))
 	{
@@ -278,74 +368,68 @@ CompleteCommand(void)
 	}
 
 	cmd = Cmd_CompleteCommand(s);
-
-	if (cmd)
+	if (!cmd)
 	{
-		key_lines[edit_line][1] = '/';
-		strcpy(key_lines[edit_line] + 2, cmd);
-		key_linepos = strlen(cmd) + 2;
-
-		if (Cmd_IsComplete(cmd))
-		{
-			key_lines[edit_line][key_linepos] = ' ';
-			key_linepos++;
-			key_lines[edit_line][key_linepos] = 0;
-		}
-		else
-		{
-			key_lines[edit_line][key_linepos] = 0;
-		}
+		return;
 	}
 
-	return;
+	*key_lines[edit_line] = '/';
+	strcpy(key_lines[edit_line] + 1, cmd);
+	key_linepos = strlen(cmd) + 1;
+
+	if (Cmd_IsComplete(cmd))
+	{
+		key_lines[edit_line][key_linepos] = ' ';
+		key_linepos++;
+	}
+
+	key_lines[edit_line][key_linepos] = '\0';
 }
 
-void
+static void
 CompleteMapNameCommand(void)
 {
-	int i;
-	char *s, *t, *cmdArg;
+	char *s, *cmdArg;
 	const char *mapCmdString = "map ";
 
-	s = key_lines[edit_line] + 1;
+	s = key_lines[edit_line];
 
 	if ((*s == '\\') || (*s == '/'))
 	{
 		s++;
 	}
 
-	t = s;
-
-	for (i = 0; i < strlen(mapCmdString); i++)
+	if (strncmp(mapCmdString, s, strlen(mapCmdString)) != 0)
 	{
-		if (t[i] == mapCmdString[i])
-		{
-			s++;
-		}
-		else
-		{
-			return;
-		}
+		return;
 	}
 
-	cmdArg = Cmd_CompleteMapCommand(s);
+	cmdArg = Cmd_CompleteMapCommand(s + strlen(mapCmdString));
 
 	if (cmdArg)
 	{
-		key_lines[edit_line][1] = '/';
-		strcpy(key_lines[edit_line] + 2, mapCmdString);
+		snprintf(key_lines[edit_line], MAXCMDLINE, "/%s%s", mapCmdString, cmdArg);
 		key_linepos = strlen(key_lines[edit_line]);
-		strcpy(key_lines[edit_line] + key_linepos, cmdArg);
-		key_linepos = key_linepos + strlen(cmdArg);
 	}
 }
 
 /*
  * Interactive line editing and console scrollback
  */
-void
+static int
+IsInConsole(void)
+{
+	return cls.key_dest == key_console ||
+		(cls.key_dest == key_game &&
+		(cls.state == ca_disconnected || cls.state == ca_connecting));
+}
+
+static void
 Key_Console(int key)
 {
+	char txt[2];
+	char cliptext[256];
+
 	/*
 	 * Ignore keypad in console to prevent duplicate
 	 * entries through key presses processed as a
@@ -375,11 +459,40 @@ Key_Console(int key)
 			break;
 	}
 
-	if (key == 'l')
+	if (keydown[K_CTRL])
 	{
-		if (keydown[K_CTRL])
+		if (key == 'l')
 		{
 			Cbuf_AddText("clear\n");
+			return;
+		}
+
+		if (key == 'c' || key == 'x')
+		{
+			if (*key_lines[edit_line] != '\0')
+			{
+				if (IN_SetClipboardText(key_lines[edit_line]))
+				{
+					Com_Printf("Copy to clipboard failed.\n");
+				}
+				else if (key == 'x')
+				{
+					Key_ClearTyping();
+				}
+			}
+
+			return;
+		}
+
+		if (key == 'v')
+		{
+			IN_GetClipboardText(cliptext, sizeof(cliptext));
+
+			if (*cliptext != '\0')
+			{
+				key_linepos += Q_strins(key_lines[edit_line], cliptext, key_linepos, MAXCMDLINE);
+			}
+
 			return;
 		}
 	}
@@ -387,23 +500,22 @@ Key_Console(int key)
 	if ((key == K_ENTER) || (key == K_KP_ENTER))
 	{
 		/* slash text are commands, else chat */
-		if ((key_lines[edit_line][1] == '\\') ||
-			(key_lines[edit_line][1] == '/'))
+		if ((*key_lines[edit_line] == '\\') || (*key_lines[edit_line] == '/'))
 		{
-			Cbuf_AddText(key_lines[edit_line] + 2); /* skip the > */
+			Cbuf_AddText(key_lines[edit_line] + 1); /* skip the > */
 		}
 		else
 		{
-			Cbuf_AddText(key_lines[edit_line] + 1); /* valid command */
+			Cbuf_AddText(key_lines[edit_line]); /* valid command */
 		}
 
 		Cbuf_AddText("\n");
-		Com_Printf("%s\n", key_lines[edit_line]);
+		Com_Printf("%c%s\n", CON_INPUT_INDICATOR, key_lines[edit_line]);
+
 		edit_line = (edit_line + 1) & (NUM_KEY_LINES - 1);
 		history_line = edit_line;
-		key_lines[edit_line][0] = ']';
-		key_lines[edit_line][1] = '\0';
-		key_linepos = 1;
+
+		Key_ClearTyping();
 
 		if (cls.state == ca_disconnected)
 		{
@@ -423,12 +535,32 @@ Key_Console(int key)
 		return;
 	}
 
-	if ((key == K_BACKSPACE) || (key == K_LEFTARROW) ||
-		(key == K_KP_LEFTARROW) ||
+	if (key == K_LEFTARROW)
+	{
+		if (key_linepos > 0)
+		{
+			key_linepos--;
+		}
+
+		return;
+	}
+
+	if (key == K_RIGHTARROW)
+	{
+		if (key_lines[edit_line][key_linepos] != '\0')
+		{
+			key_linepos++;
+		}
+
+		return;
+	}
+
+	if ((key == K_BACKSPACE) ||
 		((key == 'h') && (keydown[K_CTRL])))
 	{
-		if (key_linepos > 1)
+		if (key_linepos > 0)
 		{
+			Q_strdel(key_lines[edit_line], key_linepos - 1, 1);
 			key_linepos--;
 		}
 
@@ -437,9 +569,11 @@ Key_Console(int key)
 
 	if (key == K_DEL)
 	{
-		memmove(key_lines[edit_line] + key_linepos,
-				key_lines[edit_line] + key_linepos + 1,
-				sizeof(key_lines[edit_line]) - key_linepos - 1);
+		if (key_lines[edit_line][key_linepos] != '\0')
+		{
+			Q_strdel(key_lines[edit_line], key_linepos, 1);
+		}
+
 		return;
 	}
 
@@ -451,7 +585,7 @@ Key_Console(int key)
 			history_line = (history_line - 1) & (NUM_KEY_LINES-1);
 		}
 		while (history_line != edit_line &&
-			   !key_lines[history_line][1]);
+			   key_lines[history_line][0] == '\0');
 
 		if (history_line == edit_line)
 		{
@@ -459,7 +593,8 @@ Key_Console(int key)
 		}
 
 		memmove(key_lines[edit_line], key_lines[history_line], sizeof(key_lines[edit_line]));
-		key_linepos = (int)strlen(key_lines[edit_line]);
+		key_linepos = strlen(key_lines[edit_line]);
+
 		return;
 	}
 
@@ -476,17 +611,16 @@ Key_Console(int key)
 			history_line = (history_line + 1) & (NUM_KEY_LINES-1);
 		}
 		while (history_line != edit_line &&
-			   !key_lines[history_line][1]);
+			   key_lines[history_line][0] == '\0');
 
 		if (history_line == edit_line)
 		{
-			key_lines[edit_line][0] = ']';
-			key_linepos = 1;
+			Key_ClearTyping();
 		}
 		else
 		{
 			memmove(key_lines[edit_line], key_lines[history_line], sizeof(key_lines[edit_line]));
-			key_linepos = (int)strlen(key_lines[edit_line]);
+			key_linepos = strlen(key_lines[edit_line]);
 		}
 
 		return;
@@ -521,7 +655,7 @@ Key_Console(int key)
 
 		else
 		{
-			key_linepos = 1;
+			key_linepos = 0;
 		}
 
 		return;
@@ -536,7 +670,7 @@ Key_Console(int key)
 
 		else
 		{
-			key_linepos = (int)strlen(key_lines[edit_line]);
+			key_linepos = strlen(key_lines[edit_line]);
 		}
 
 		return;
@@ -547,32 +681,10 @@ Key_Console(int key)
 		return; /* non printable character */
 	}
 
-	if (key_linepos < MAXCMDLINE - 1)
-	{
-		int last;
-		int length;
+	*txt = key;
+	*(txt + 1) = '\0';
 
-		length = strlen(key_lines[edit_line]);
-
-		if (length >= MAXCMDLINE - 1)
-		{
-			return;
-		}
-
-		last = key_lines[edit_line][key_linepos];
-
-		memmove(key_lines[edit_line] + key_linepos + 1,
-				key_lines[edit_line] + key_linepos,
-				length - key_linepos);
-
-		key_lines[edit_line][key_linepos] = key;
-		key_linepos++;
-
-		if (!last)
-		{
-			key_lines[edit_line][key_linepos] = 0;
-		}
-	}
+	key_linepos += Q_strins(key_lines[edit_line], txt, key_linepos, MAXCMDLINE);
 }
 
 qboolean chat_team;
@@ -580,7 +692,7 @@ char chat_buffer[MAXCMDLINE];
 int chat_bufferlen = 0;
 int chat_cursorpos = 0;
 
-void
+static void
 Key_Message(int key)
 {
 	char last;
@@ -708,10 +820,11 @@ Key_Message(int key)
  * Single ascii characters return themselves, while
  * the K_* names are matched up.
  */
-int
+static int
 Key_StringToKeynum(char *str)
 {
 	keyname_t *kn;
+	int i;
 
 	if (!str || !str[0])
 	{
@@ -728,6 +841,14 @@ Key_StringToKeynum(char *str)
 		if (!Q_stricmp(str, kn->name))
 		{
 			return kn->keynum;
+		}
+	}
+
+	for (i = 0; i < NUM_GAMEPAD_BTNS; i++)
+	{
+		if (!Q_stricmp(str, gamepadbtns[i]))
+		{
+			return K_JOY_FIRST_BTN + i;
 		}
 	}
 
@@ -758,6 +879,11 @@ Key_KeynumToString(int keynum)
 		return tinystr;
 	}
 
+	if (keynum >= K_JOY_FIRST_BTN) // gamepad button
+	{
+		return gamepadbtns[keynum - K_JOY_FIRST_BTN];
+	}
+
 	for (kn = keynames; kn->name; kn++)
 	{
 		if (keynum == kn->keynum)
@@ -767,6 +893,49 @@ Key_KeynumToString(int keynum)
 	}
 
 	return "<UNKNOWN KEYNUM>";
+}
+
+/*
+ * Same as Key_KeynumToString(), but for joystick/gamepad buttons.
+ */
+char *
+Key_KeynumToString_Joy(int key)
+{
+	extern gamepad_labels_t joy_current_lbls;
+	const int lbl_style = (int)joy_current_lbls - 1;
+
+	if (key < K_JOY_FIRST_BTN)
+	{
+		return Key_KeynumToString(key);
+	}
+
+	// Don't print the _ALT buttons (buttons with the alt modifier pressed)
+	if (key >= K_JOY_FIRST_BTN_ALT)
+	{
+		key -= K_JOY_FIRST_BTN_ALT - K_JOY_FIRST_BTN;
+	}
+
+	if (lbl_style < 0) // was SDL
+	{
+		goto exit_sdl;
+	}
+
+	// Alter this logic if new gamepad buttons are added in SDL
+	if (key < K_DPAD_UP) // face & shoulder buttons
+	{
+		return gpbtns_face[lbl_style * (K_DPAD_UP - K_BTN_SOUTH) + key - K_BTN_SOUTH];
+	}
+	else if (key >= K_TRIG_LEFT) // triggers
+	{
+		return gpbtns_triggers[lbl_style * (K_JOY_FIRST_BTN_ALT - K_TRIG_LEFT) + key - K_TRIG_LEFT];
+	}
+	else if (key > K_DPAD_RIGHT && key < K_TOUCHPAD) // paddles & misc1
+	{
+		return gpbtns_paddles[lbl_style * (K_TOUCHPAD - K_BTN_MISC1) + key - K_BTN_MISC1];
+	}
+
+exit_sdl:
+	return gamepadbtns[key - K_JOY_FIRST_BTN];
 }
 
 void
@@ -795,7 +964,7 @@ Key_SetBinding(int keynum, char *binding)
 	keybindings[keynum] = new;
 }
 
-void
+static void
 Key_Unbind_f(void)
 {
 	int b;
@@ -817,7 +986,7 @@ Key_Unbind_f(void)
 	Key_SetBinding(b, "");
 }
 
-void
+static void
 Key_Unbindall_f(void)
 {
 	int i;
@@ -835,7 +1004,7 @@ Key_Unbindall_f(void)
  * (=> default.cfg is done) */
 extern qboolean doneWithDefaultCfg;
 
-void
+static void
 Key_Bind_f(void)
 {
 	int i, c, b;
@@ -858,7 +1027,7 @@ Key_Bind_f(void)
 	}
 
 	/* don't allow binding escape or the special console keys */
-	if(b == K_ESCAPE || b == '^' || b == '`' || b == '~' || b == K_JOY_BACK)
+	if(b == K_ESCAPE || b == '^' || b == '`' || b == '~')
 	{
 		if(doneWithDefaultCfg)
 		{
@@ -953,7 +1122,7 @@ Key_WriteConsoleHistory()
 		int lineIdx = (edit_line+i) & (NUM_KEY_LINES-1);
 		const char* line = key_lines[lineIdx];
 
-		if(line[1] != '\0' && strcmp(lastWrittenLine, line ) != 0)
+		if(*line != '\0' && strcmp(lastWrittenLine, line) != 0)
 		{
 			// if the line actually contains something besides the ] prompt,
 			// and is not identical to the last written line, write it to the file
@@ -1000,6 +1169,7 @@ Key_ReadConsoleHistory()
 			history_line = i;
 			break;
 		}
+
 		// remove trailing newlines
 		int lastCharIdx = strlen(key_lines[i])-1;
 		while((key_lines[i][lastCharIdx] == '\n' || key_lines[i][lastCharIdx] == '\r') && lastCharIdx >= 0)
@@ -1007,12 +1177,21 @@ Key_ReadConsoleHistory()
 			key_lines[i][lastCharIdx] = '\0';
 			--lastCharIdx;
 		}
+
+		/* backwards compatibility with old history files */
+		if(key_lines[i][0] == ']')
+		{
+			memmove(key_lines[i], key_lines[i] + 1, MAXCMDLINE - 1);
+		}
 	}
+
+	/* don't remember the input line */
+	Key_ClearTyping();
 
 	fclose(f);
 }
 
-void
+static void
 Key_Bindlist_f(void)
 {
 	int i;
@@ -1032,12 +1211,11 @@ Key_Init(void)
 	int i;
 	for (i = 0; i < NUM_KEY_LINES; i++)
 	{
-		key_lines[i][0] = ']';
-		key_lines[i][1] = 0;
+		key_lines[i][0] = '\0';
 	}
 	// can't call Key_ReadConsoleHistory() here because FS_Gamedir() isn't set yet
 
-	key_linepos = 1;
+	key_linepos = 0;
 
 	/* init 128 bit ascii characters in console mode */
 	for (i = 32; i < 128; i++)
@@ -1045,6 +1223,7 @@ Key_Init(void)
 		consolekeys[i] = true;
 	}
 
+	consolekeys[K_DEL] = true;
 	consolekeys[K_ENTER] = true;
 	consolekeys[K_KP_ENTER] = true;
 	consolekeys[K_TAB] = true;
@@ -1166,12 +1345,12 @@ Key_Event(int key, qboolean down, qboolean special)
 	unsigned int time = Sys_Milliseconds();
 
 	// evil hack for the joystick key altselector, which turns K_BTN_x into K_BTN_x_ALT
-	if(joy_altselector_pressed && key >= K_JOY_FIRST_REGULAR && key <= K_JOY_LAST_REGULAR)
+	if(joy_altselector_pressed && key >= K_JOY_FIRST_BTN && key < K_JOY_FIRST_BTN_ALT)
 	{
 		// make sure key is not the altselector itself (which we won't turn into *_ALT)
 		if(keybindings[key] == NULL || strcmp(keybindings[key], "+joyaltselector") != 0)
 		{
-			int altkey = key + (K_JOY_FIRST_REGULAR_ALT - K_JOY_FIRST_REGULAR);
+			int altkey = key + (K_JOY_FIRST_BTN_ALT - K_JOY_FIRST_BTN);
 			// allow fallback to binding with non-alt key
 			if(keybindings[altkey] != NULL || keybindings[key] == NULL)
 				key = altkey;
@@ -1238,7 +1417,7 @@ Key_Event(int key, qboolean down, qboolean special)
 	}
 
 	/* Key is unbound */
-	if ((key >= K_MOUSE1 && key != K_JOY_BACK) && !keybindings[key] && (cls.key_dest != key_console) &&
+	if ((key >= K_MOUSE1) && !keybindings[key] && (cls.key_dest != key_console) &&
 		(cls.state == ca_active))
 	{
 		Com_Printf("%s (%d) is unbound, hit F4 to set.\n", Key_KeynumToString(key), key);
@@ -1259,47 +1438,43 @@ Key_Event(int key, qboolean down, qboolean special)
 	   - moves one menu level up
 	   - closes the menu
 	   - closes the help computer
-	   - closes the chat window
-	   Fully same logic for K_JOY_BACK */
-	if (!cls.disable_screen)
+	   - closes the chat window	*/
+	if (key == K_ESCAPE && !cls.disable_screen)
 	{
-		if (key == K_ESCAPE || key == K_JOY_BACK)
+		if (!down)
 		{
-			if (!down)
-			{
-				return;
-			}
-
-			/* Close the help computer */
-			if (cl.frame.playerstate.stats[STAT_LAYOUTS] &&
-				(cls.key_dest == key_game))
-			{
-				Cbuf_AddText("cmd putaway\n");
-				return;
-			}
-
-			switch (cls.key_dest)
-			{
-				/* Close chat window */
-				case key_message:
-					Key_Message(key);
-					break;
-
-				/* Close menu or one layer up */
-				case key_menu:
-					M_Keydown(key);
-					break;
-
-				/* Pause game and / or leave console,
-				   break into the menu. */
-				case key_game:
-				case key_console:
-					M_Menu_Main_f();
-					break;
-			}
-
 			return;
 		}
+
+		/* Close the help computer */
+		if (cl.frame.playerstate.stats[STAT_LAYOUTS] &&
+			(cls.key_dest == key_game))
+		{
+			Cbuf_AddText("cmd putaway\n");
+			return;
+		}
+
+		switch (cls.key_dest)
+		{
+			/* Close chat window */
+			case key_message:
+				Key_Message(key);
+				break;
+
+			/* Close menu or one layer up */
+			case key_menu:
+				M_Keydown(key);
+				break;
+
+			/* Pause game and / or leave console,
+			   break into the menu. */
+			case key_game:
+			case key_console:
+				M_Menu_Main_f();
+				break;
+		}
+
+		return;
 	}
 
 	/* This is one of the most ugly constructs I've
@@ -1378,6 +1553,16 @@ Key_Event(int key, qboolean down, qboolean special)
 		}
 
 		return;
+	}
+
+	/* FIXME: Better way to do CTRL+<key> actions in the console?
+	   special should be set to true in this case.
+	*/
+	if (keydown[K_CTRL] &&
+		(IsInConsole() || cls.key_dest == key_menu) &&
+		key >= 'a' && key <= 'z')
+	{
+		special = true;
 	}
 
 	/* All input subsystems handled after this point only

@@ -1001,7 +1001,7 @@ SDL_Cache(sfx_t *sfx, wavinfo_t *info, byte *data, short volume,
  * and cinematic playback.
  */
 void
-SDL_RawSamples(int samples, int rate, int width, int channels, byte *data, float volume)
+SDL_RawSamples(int samples, int rate, int width, int channels, const byte *data, float volume)
 {
 	float scale;
 	int dst;
@@ -1062,9 +1062,9 @@ SDL_RawSamples(int samples, int rate, int width, int channels, byte *data, float
 			dst = s_rawend & (MAX_RAW_SAMPLES - 1);
 			s_rawend++;
 			s_rawsamples[dst].left =
-				(((byte *)data)[src * 2] - 128) * intVolume;
+					(((byte *)data)[src * 2] - 128) * intVolume;
 			s_rawsamples[dst].right =
-				(((byte *)data)[src * 2 + 1] - 128) * intVolume;
+					(((byte *)data)[src * 2 + 1] - 128) * intVolume;
 		}
 	}
 	else if ((channels == 1) && (width == 1))

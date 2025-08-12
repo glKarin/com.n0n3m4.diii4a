@@ -86,7 +86,8 @@ extern struct image_s* LoadM32(const char *origname, imagetype_t type, loadimage
 extern void FixFileExt(const char *origname, const char *ext, char *filename, size_t size);
 extern void GetPCXPalette(byte **colormap, unsigned *d_8to24table);
 extern void GetPCXPalette24to8(byte *d_8to24table, byte** d_16to8table);
-extern void LoadPCX(const char *origname, byte **pic, byte **palette, int *width, int *height);
+extern void LoadPCX(const char *origname, byte **pic, byte **palette, int *width, int *height,
+	int *bitsPerPixel);
 extern void GetPCXInfo(const char *origname, int *width, int *height);
 extern void GetWalInfo(const char *name, int *width, int *height);
 extern void GetM8Info(const char *name, int *width, int *height);
@@ -259,8 +260,8 @@ int Mod_LoadFile(char *name, void **buffer);
 #define DLIGHT_CUTOFF 64
 
 typedef void (*marksurfacelights_t)(dlight_t *light, int bit, mnode_t *node,
-	int r_dlightframecount);
-extern void R_MarkLights (dlight_t *light, int bit, mnode_t *node, int r_dlightframecount,
+	int lightframecount);
+extern void R_MarkLights(dlight_t *light, int bit, mnode_t *node, int lightframecount,
 	marksurfacelights_t mark_surface_lights);
 extern struct image_s *R_TextureAnimation(const entity_t *currententity,
 	const mtexinfo_t *tex);

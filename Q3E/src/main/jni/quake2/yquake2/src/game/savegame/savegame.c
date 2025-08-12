@@ -247,7 +247,7 @@ InitGame(void)
 	aimfix = gi.cvar("aimfix", "0", CVAR_ARCHIVE);
 	g_machinegun_norecoil = gi.cvar("g_machinegun_norecoil", "0", CVAR_ARCHIVE);
 	g_quick_weap = gi.cvar("g_quick_weap", "1", CVAR_ARCHIVE);
-	g_swap_speed = gi.cvar("g_swap_speed", "1", 0);
+	g_swap_speed = gi.cvar("g_swap_speed", "1", CVAR_ARCHIVE);
 
 	/* items */
 	InitItems();
@@ -370,7 +370,7 @@ void
 WriteField1(FILE *f, field_t *field, byte *base)
 {
 	void *p;
-	int len;
+	size_t len;
 	int index;
 	functionList_t *func;
 	mmoveList_t *mmove;
@@ -492,7 +492,7 @@ WriteField1(FILE *f, field_t *field, byte *base)
 void
 WriteField2(FILE *f, field_t *field, byte *base)
 {
-	int len;
+	size_t len;
 	void *p;
 	functionList_t *func;
 	mmoveList_t *mmove;

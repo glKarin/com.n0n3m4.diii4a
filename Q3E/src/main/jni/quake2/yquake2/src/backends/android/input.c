@@ -108,6 +108,12 @@ static cvar_t *windowed_pauseonfocuslost;
 static cvar_t *windowed_mouse;
 static cvar_t *haptic_feedback_filter;
 
+// Using japanese style for confirm & cancel buttons on gamepad
+qboolean japanese_confirm = false;
+
+// Gamepad labels' style (Xbox, Playstation, etc.) in use, normally set after detection
+gamepad_labels_t joy_current_lbls = LBL_SDL;
+
 // ----
 
 typedef struct haptic_effects_cache {
