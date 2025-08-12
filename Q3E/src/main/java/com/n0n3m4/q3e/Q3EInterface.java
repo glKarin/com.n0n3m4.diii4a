@@ -75,8 +75,6 @@ public class Q3EInterface
 	public boolean isXash3D = false;
 	public boolean isSource = false;
 
-	public boolean isD3BFG_Vulkan = false;
-
 	public String default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
 	public String libname;
@@ -510,6 +508,11 @@ public class Q3EInterface
 	public boolean IsUsingSDL()
 	{
 		return isXash3D || isSource;
+	}
+
+	public boolean IsUsingOpenAL()
+	{
+		return isD3 || isQ4 || isPrey || isD3BFG || isTDM || isQ3 || isQ2 || isQ1 || isRTCW || isDOOM || isETW || isRealRTCW || isFTEQW || isJA || isJO || isSamTFE || isSamTSE;
 	}
 
 	public String GetGameCommandParm()

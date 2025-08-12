@@ -804,6 +804,17 @@ public class GameLauncher extends Activity
 						.putString(Q3EPreference.pref_harm_sdl_audio_driver, Q3EGameConstants.SDL_AUDIO_DRIVER[index])
 						.commit();
 			}
+
+			// OpenAL
+			else if (rgId == R.id.openal_driver)
+			{
+				index = GetRadioGroupSelectIndex(radioGroup, id);
+				if(index < 0 || index >= Q3EGameConstants.OPENAL_DRIVER.length)
+					index = 0;
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putString(Q3EPreference.pref_harm_openal_driver, Q3EGameConstants.OPENAL_DRIVER[index])
+						.commit();
+			}
         }
     };
     private final View.OnClickListener m_buttonClickListener = new View.OnClickListener() {
@@ -1983,6 +1994,9 @@ public class GameLauncher extends Activity
 		// SDL
 		SetupUI_SDL();
 
+		// OpenAL
+		SetupUI_OpenAL();
+
 		// Quake2
 		SetupUI_Quake2();
 
@@ -2171,6 +2185,20 @@ public class GameLauncher extends Activity
 		}
 		SelectRadioGroup(V.sdl_audio_driver, index);
 		V.sdl_audio_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
+	}
+
+	private void SetupUI_OpenAL()
+	{
+		String str = PreferenceManager.getDefaultSharedPreferences(this).getString(Q3EPreference.pref_harm_openal_driver, Q3EGameConstants.OPENAL_DRIVER[0]);
+		int index = 0;
+		if(null != str)
+		{
+			index = Utility.ArrayIndexOf(Q3EGameConstants.OPENAL_DRIVER, str);
+			if(index < 0)
+				index = 0;
+		}
+		SelectRadioGroup(V.openal_driver, index);
+		V.openal_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
 	private void SetupUI_Quake2()
@@ -3895,6 +3923,7 @@ public class GameLauncher extends Activity
 		V.xash3d_section.setVisibility(Q3EUtils.q3ei.isXash3D ? View.VISIBLE : View.GONE);
 		V.source_section.setVisibility(Q3EUtils.q3ei.isSource ? View.VISIBLE : View.GONE);
 		V.sdl_section.setVisibility(Q3EUtils.q3ei.IsUsingSDL() ? View.VISIBLE : View.GONE);
+		V.openal_section.setVisibility(Q3EUtils.q3ei.IsUsingOpenAL() ? View.VISIBLE : View.GONE);
 
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
@@ -4920,6 +4949,8 @@ public class GameLauncher extends Activity
 		public RadioGroup source_sv_cl;
 		public LinearLayout sdl_section;
 		public RadioGroup sdl_audio_driver;
+		public LinearLayout openal_section;
+		public RadioGroup openal_driver;
 
 		private RadioGroup CreateGameRadioGroup()
 		{
@@ -5122,6 +5153,8 @@ public class GameLauncher extends Activity
 			source_sv_cl = findViewById(R.id.source_sv_cl);
 			sdl_section = findViewById(R.id.sdl_section);
 			sdl_audio_driver = findViewById(R.id.sdl_audio_driver);
+			openal_section = findViewById(R.id.openal_section);
+			openal_driver = findViewById(R.id.openal_driver);
         }
     }
 }

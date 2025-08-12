@@ -125,6 +125,27 @@ public class Q3EGameHelper
         }
     }
 
+    private String GetOpenALDriverNames(String openalAudioDriverName)
+    {
+        if(KStr.IsEmpty(openalAudioDriverName))
+            return null;
+        int res = Q3EUtils.ArrayIndexOf(Q3EGameConstants.OPENAL_DRIVER, openalAudioDriverName, false);
+        if(res <= 0)
+            return null;
+        String[] drivers = new String[2];
+        if(res == 2)
+        {
+            drivers[0] = Q3EGameConstants.OPENAL_DRIVER[2];
+            drivers[1] = Q3EGameConstants.OPENAL_DRIVER[1];
+        }
+        else
+        {
+            drivers[0] = Q3EGameConstants.OPENAL_DRIVER[1];
+            drivers[1] = Q3EGameConstants.OPENAL_DRIVER[2];
+        }
+        return String.join(",", drivers);
+    }
+
     public void InitGlobalEnv(String gameTypeName, String gameCommand)
     {
         KLog.I("Game initial: " + gameTypeName + " -> " + gameCommand);
@@ -1164,6 +1185,7 @@ public class Q3EGameHelper
         boolean useExternalLibPath = preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false);
         int consoleMaxHeightFrac = preferences.getInt(Q3EPreference.pref_harm_max_console_height_frac, 0);
         int sdlAudioDriver = GetSDLAudioDriverID(preferences.getString(Q3EPreference.pref_harm_sdl_audio_driver, Q3EGameConstants.SDL_AUDIO_DRIVER[0]));
+        String openalDriver = GetOpenALDriverNames(preferences.getString(Q3EPreference.pref_harm_openal_driver, Q3EGameConstants.OPENAL_DRIVER[0]));
 
         String subdatadir = Q3EUtils.q3ei.subdatadir;
 
@@ -1205,6 +1227,11 @@ public class Q3EGameHelper
         Q3E.surfaceWidth = width;
         Q3E.surfaceHeight = height;
         Q3E.CalcRatio();
+
+        //Q3EJNI.Setenv("ALSOFT_LOGFILE", "/sdcard/diii4a/openal.log");
+        //Q3EJNI.Setenv("ALSOFT_LOGLEVEL", "3");
+        if(null != openalDriver)
+            Q3EJNI.Setenv("ALSOFT_DRIVERS", openalDriver);
 
         boolean res = Q3EJNI.init(
                 engineLib,

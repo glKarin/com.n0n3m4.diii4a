@@ -531,5 +531,6 @@
     <string name="description_">Описание: </string>
     <string name="expand_all">Expand all</string>
     <string name="collapse_all">Collapse all</string>
+    <string name="openal_driver">OpenAL driver</string>
 
 </resources>

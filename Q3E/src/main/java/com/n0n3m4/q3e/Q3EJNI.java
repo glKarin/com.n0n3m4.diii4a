@@ -73,6 +73,7 @@ public class Q3EJNI {
 	public static native long StartThread();
 	public static native void StopThread();
 	public static native void NotifyExit();
+	public static native void Setenv(String name, String value);
 
 	static {
 		System.loadLibrary("q3eloader");

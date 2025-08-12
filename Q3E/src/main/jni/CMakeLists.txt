@@ -83,9 +83,27 @@ add_subdirectory( q3e )
 
 
 
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_SERIOUSSAM)
+    set(DIII4A_BUILD_COMMON True)
+endif()
+
+if(GAME_DOOM3 OR GAME_DNF OR GAME_TDM OR GAME_DOOM OR DIII4A_BUILD_COMMON)
+    set(DIII4A_BUILD_OPENAL True)
+endif()
+
+if(DIII4A_BUILD_OPENAL)
+    message(STATUS "Build oboe for audio")
+    add_subdirectory (deplibs/oboe) # 1.8.1
+endif()
+
 if(GAME_DOOM3)
     message(STATUS "Build DOOM 3/Quake 4/Prey(2006)")
     add_subdirectory ( doom3/neo ) # DOOM3 | RoE, Quake4, Prey(2006)
+endif()
+
+if(DIII4A_BUILD_COMMON)
+    message(STATUS "Build common static libraries")
+    add_subdirectory ( common )
 endif()
 
 if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_SOURCE)
@@ -98,11 +116,7 @@ if(NOT GAME_DOOM3)
 endif()
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_SERIOUSSAM)
-    message(STATUS "Build common static libraries")
-    add_subdirectory (deplibs/oboe) # 1.8.1
-    add_subdirectory ( common )
-endif()
+
 
 if(GAME_RTCW) # 438e7d413b5f7277187c35b032eb0ef9093ae778 | May 27, 2024 | All: Fix compilation on FreeBSD
     message(STATUS "Build Return to Castle Wolfenstein")
@@ -114,7 +128,7 @@ if(GAME_QUAKE3) # https://github.com/ioquake/ioq3/commit/3fb9006e6461b877b67781c
     add_subdirectory ( quake3 ) # Quake 3 Arena | Team Arena
 endif()
 
-if(GAME_QUAKE2) # 8.4 | 141bf6e7ddf0ee0895783db1de90d96e6a483ab0 | Aug 9, 2024 | Bump version number to 8.41.
+if(GAME_QUAKE2) # 8.51 | dc473a9830fd705430d2aef1f78f23d6777216a3 | May 11, 2025 | Bump version number to 8.51.
     message(STATUS "Build Quake 2")
     add_subdirectory ( quake2 ) # Quake 2
 endif()
