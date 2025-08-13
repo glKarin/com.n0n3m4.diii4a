@@ -189,5 +189,25 @@ public final class KStr
         return new File(path).getParent();
     }
 
+    public static String[] ParseEnv(String str)
+    {
+        if(IsBlank(str))
+            return null;
+        int index = str.indexOf('=');
+        if(index <= 0)
+            return null;
+        String[] res = { str.substring(0, index), "" };
+        if(index < str.length() - 1)
+            res[1] = str.substring(index + 1);
+        return res;
+    }
+
+    public static String MakeEnv(String name, String value)
+    {
+        if(IsBlank(name))
+            return null;
+        return name + "=" + (null != value ? value : "");
+    }
+
     private KStr() {}
 }

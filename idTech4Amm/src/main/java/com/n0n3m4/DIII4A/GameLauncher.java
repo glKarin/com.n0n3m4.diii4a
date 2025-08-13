@@ -100,6 +100,7 @@ import com.n0n3m4.DIII4A.launcher.DebugPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.DebugTextHistoryFunc;
 import com.n0n3m4.DIII4A.launcher.DirectoryHelperFunc;
 import com.n0n3m4.DIII4A.launcher.EditConfigFileFunc;
+import com.n0n3m4.DIII4A.launcher.EditEnvFunc;
 import com.n0n3m4.DIII4A.launcher.EditExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractPatchResourceFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractSourceFunc;
@@ -881,6 +882,10 @@ public class GameLauncher extends Activity
 			else if (id == R.id.setup_controller)
 			{
 				OpenControllerSetting();
+			}
+			else if (id == R.id.launcher_tab1_edit_env)
+			{
+				OpenEnvEditor();
 			}
         }
     };
@@ -1927,6 +1932,7 @@ public class GameLauncher extends Activity
 		V.launcher_tab1_change_game.setOnClickListener(m_buttonClickListener);
 		registerForContextMenu(V.launcher_tab1_open_menu);
 		V.launcher_tab1_open_menu.setOnClickListener(m_buttonClickListener);
+		V.launcher_tab1_edit_env.setOnClickListener(m_buttonClickListener);
 
 		boolean userMod = mPrefs.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
 		V.fs_game_user.setChecked(userMod);
@@ -2766,18 +2772,23 @@ public class GameLauncher extends Activity
 
 		AlertDialog dialog = builder.create();
 		dialog.create();
-
-		dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
+		dialog.setOnShowListener(new DialogInterface.OnShowListener() {
 			@Override
-			public void onClick(View view) {
-				changelogView.ExpandAll();
-			}
-		});
+			public void onShow(DialogInterface d)
+			{
+				dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						changelogView.ExpandAll();
+					}
+				});
 
-		dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				changelogView.CollapseAll();
+				dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						changelogView.CollapseAll();
+					}
+				});
 			}
 		});
 
@@ -3355,6 +3366,15 @@ public class GameLauncher extends Activity
 		bundle.putString("command", cmd);
 		bundle.putString("key", PreferenceKey);
 		m_chooseCommandRecordFunc.Start(bundle);
+	}
+
+	private void OpenEnvEditor()
+	{
+		final String PreferenceKey = Q3EUtils.q3ei.GetGameEnvPreferenceKey();
+		EditEnvFunc m_editEnvFunc = new EditEnvFunc(this);
+		Bundle bundle = new Bundle();
+		bundle.putString("key", PreferenceKey);
+		m_editEnvFunc.Start(bundle);
 	}
 
 	private void OpenDirectoryHelper()
@@ -4960,6 +4980,7 @@ public class GameLauncher extends Activity
 		public RadioGroup sdl_audio_driver;
 		public LinearLayout openal_section;
 		public RadioGroup openal_driver;
+		public Button launcher_tab1_edit_env;
 
 		private RadioGroup CreateGameRadioGroup()
 		{
@@ -5164,6 +5185,7 @@ public class GameLauncher extends Activity
 			sdl_audio_driver = findViewById(R.id.sdl_audio_driver);
 			openal_section = findViewById(R.id.openal_section);
 			openal_driver = findViewById(R.id.openal_driver);
+			launcher_tab1_edit_env = findViewById(R.id.launcher_tab1_edit_env);
         }
     }
 }

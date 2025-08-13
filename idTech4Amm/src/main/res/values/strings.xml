@@ -535,5 +535,12 @@
     <string name="expand_all">Expand all</string>
     <string name="collapse_all">Collapse all</string>
     <string name="openal_driver">OpenAL driver</string>
+    <string name="edit_env">Edit env</string>
+    <string name="value_">Value:</string>
+    <string name="input_value">Input value</string>
+    <string name="input_name">Input name</string>
+    <string name="env">Env</string>
+    <string name="must_choose_a_env">Must choose a env</string>
+    <string name="name_must_not_empty">Name must not empty!</string>
 
 </resources>

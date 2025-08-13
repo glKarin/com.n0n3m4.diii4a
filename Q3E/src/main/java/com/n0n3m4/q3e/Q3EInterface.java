@@ -843,6 +843,11 @@ public class Q3EInterface
 		return Q3EGame.Find(game_id).PREF_CMD_RECORD;
 	}
 
+	public String GetGameEnvPreferenceKey()
+	{
+		return Q3EGame.Find(game_id).PREF_ENV;
+	}
+
 	public String GetGameVersionPreferenceKey()
 	{
 		return Q3EGame.Find(game_id).PREF_VERSION;

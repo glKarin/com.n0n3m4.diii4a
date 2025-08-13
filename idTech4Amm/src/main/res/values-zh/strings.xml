@@ -531,4 +531,11 @@
     <string name="expand_all">全部展开</string>
     <string name="collapse_all">全部折叠</string>
     <string name="openal_driver">OpenAL驱动</string>
+    <string name="edit_env">编辑环境变量</string>
+    <string name="value_">值: </string>
+    <string name="input_value">输入值</string>
+    <string name="input_name">输入名称</string>
+    <string name="env">环境变量</string>
+    <string name="must_choose_a_env">必须只选择一个环境变量</string>
+    <string name="name_must_not_empty">名称不能为空!</string>
 </resources>

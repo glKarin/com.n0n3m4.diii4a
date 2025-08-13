@@ -1227,10 +1227,22 @@ public class Q3EGameHelper
         Q3E.surfaceHeight = height;
         Q3E.CalcRatio();
 
+        String envPreferenceKey = Q3EUtils.q3ei.GetGameEnvPreferenceKey();
+        Set<String> envs = preferences.getStringSet(envPreferenceKey, null);
+        if(null != envs)
+        {
+            for(String env : envs)
+            {
+                String[] e = KStr.ParseEnv(env);
+                if(null != e)
+                    Q3EJNI.Setenv(e[0], e[1], 1);
+            }
+        }
+
         //Q3EJNI.Setenv("ALSOFT_LOGFILE", "/sdcard/diii4a/openal.log");
         //Q3EJNI.Setenv("ALSOFT_LOGLEVEL", "3");
         if(null != openalDriver)
-            Q3EJNI.Setenv("ALSOFT_DRIVERS", openalDriver);
+            Q3EJNI.Setenv("ALSOFT_DRIVERS", openalDriver, 1);
 
         boolean res = Q3EJNI.init(
                 engineLib,
