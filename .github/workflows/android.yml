@@ -45,11 +45,22 @@ jobs:
     - name: Build with Gradle
       run: |
         chmod +x ./gradlew
+        echo "disk usage: >>>"
+        df -h
+        du -ch
+        echo "<<< disk usage"
         barch=-Pabifilters=arm64-v8a
+        # remove 32bit libraries
+        echo "Remove 32bit libraries"
+        rm -rf Q3E/libs/armeabi-v7a
         # build Xash3d only
         echo "Build Xash3D libraries"
         bargs="$barch -Pcmake_options=-DGAME_DOOM3=OFF,-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM3BFG=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_SOURCE=OFF"
         ./gradlew assembleRelease $bargs
+        echo "disk usage: >>>"
+        df -h
+        du -ch
+        echo "<<< disk usage"
         echo "Copy Xash3D libraries to libs"
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libxash3d*so Q3E/libs/arm64-v8a
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libfilesystem_stdio.so Q3E/libs/arm64-v8a
@@ -63,27 +74,47 @@ jobs:
         # build Source only
         echo "Clean builds"
         ./gradlew clean $bargs
-        rm -rf Q3E/.cxx
+        rm -rf Q3E/.cxx Q3E/build idTech4Amm/build
+        echo "disk usage: >>>"
+        df -h
+        du -ch
+        echo "<<< disk usage"
         echo "Build Source libraries"
         # ,-DBUILD_SOURCE_HL2=OFF,-DBUILD_SOURCE_HL2MP=OFF,-DBUILD_SOURCE_EPISODIC=OFF,-DBUILD_SOURCE_HL1=OFF,-DBUILD_SOURCE_HL1MP=OFF,-DBUILD_SOURCE_PORTAL=OFF
         bargs="$barch -Pcmake_options=-DGAME_DOOM3=OFF,-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM3BFG=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_XASH3D=OFF"
         ./gradlew assembleRelease $bargs
+        echo "disk usage: >>>"
+        df -h
+        du -ch
+        echo "<<< disk usage"
         echo "Copy Source libraries to libs"
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libsource*so Q3E/libs/arm64-v8a
         ls Q3E/libs/arm64-v8a
         # build Others
         echo "Clean builds"
         ./gradlew clean $bargs
-        rm -rf Q3E/.cxx
+        rm -rf Q3E/.cxx Q3E/build idTech4Amm/build
+        echo "disk usage: >>>"
+        df -h
+        du -ch
+        echo "<<< disk usage"
         echo "Build final apk"
         bargs="$barch -Pcmake_options=-DGAME_XASH3D=OFF,-DGAME_SOURCE=OFF"
         ./gradlew assembleRelease $bargs
+        echo "disk usage: >>>"
+        df -h
+        du -ch
+        echo "<<< disk usage"
 
     - name: Rename APK
       id: rename_apk
       run: |
         apk_file=idTech4A++-testing-`date "+%Y_%m_%d-%H_%M_%S"`.apk
         cp ./idTech4Amm/build/outputs/apk/release/idTech4Amm-release.apk $apk_file
+        echo "disk usage: >>>"
+        df -h
+        du -ch
+        echo "<<< disk usage"
         echo "::set-output name=value::$apk_file"
       working-directory: ${{ github.workspace }}
 
