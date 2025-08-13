@@ -44,8 +44,7 @@ jobs:
 
     - name: Build with Gradle
       run: |
-        echo "work directory: "
-        pwd
+        echo "work directory: `pwd`"
         chmod +x ./gradlew
         echo "disk usage: >>>"
         df -h
@@ -77,6 +76,7 @@ jobs:
         echo "Clean builds"
         ./gradlew clean $bargs
         rm -rf Q3E/.cxx Q3E/build idTech4Amm/build
+        rm -rf Q3E/src/main/jni/xash3d
         echo "disk usage: >>>"
         df -h
         du -ch | tail -n -1
@@ -92,16 +92,57 @@ jobs:
         echo "Copy Source libraries to libs"
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libsource*so Q3E/libs/arm64-v8a
         ls Q3E/libs/arm64-v8a
-        # build Others
+        # build idTech4 only
         echo "Clean builds"
         ./gradlew clean $bargs
         rm -rf Q3E/.cxx Q3E/build idTech4Amm/build
+        rm -rf Q3E/src/main/jni/source
+        echo "disk usage: >>>"
+        df -h
+        du -ch | tail -n -1
+        echo "<<< disk usage"
+        echo "Build idTech4"
+        bargs="$barch -Pcmake_options=-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_XASH3D=OFF,-DGAME_SOURCE=OFF"
+        ./gradlew assembleRelease $bargs
+        echo "disk usage: >>>"
+        df -h
+        du -ch | tail -n -1
+        echo "<<< disk usage"
+        echo "Copy idTech4 libraries to libs"
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libidtech4*.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libRBDoom3BFG*.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libgame.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libd3xp.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libcdoom.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libd3le.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libfraggingfree.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libhardcorps.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libhexeneoc.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/liblibrecoop.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/liblibrecoopxp.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/liboverthinked.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libperfected.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libperfected_roe.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/librivensin.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libsabot.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libtfphobos.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libq4game.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libhardqore.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libpreygame.so Q3E/libs/arm64-v8a
+        ls Q3E/libs/arm64-v8a
+        # build non-idTech4 only
+        echo "Clean builds"
+        ./gradlew clean $bargs
+        rm -rf Q3E/.cxx Q3E/build idTech4Amm/build
+        rm -rf Q3E/src/main/jni/source
+        rm -rf Q3E/src/main/jni/doom3/neo/[^ae]*
+        rm -rf Q3E/src/main/jni/doom3bfg
         echo "disk usage: >>>"
         df -h
         du -ch | tail -n -1
         echo "<<< disk usage"
         echo "Build final apk"
-        bargs="$barch -Pcmake_options=-DGAME_XASH3D=OFF,-DGAME_SOURCE=OFF"
+        bargs="$barch -Pcmake_options=-DGAME_XASH3D=OFF,-DGAME_SOURCE=OFF,-DGAME_DOOM3=OFF,-DGAME_DOOM3BFG=OFF"
         ./gradlew assembleRelease $bargs
         echo "disk usage: >>>"
         df -h
