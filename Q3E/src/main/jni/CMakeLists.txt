@@ -22,7 +22,7 @@ OPTION(BUILD_Q4        "Build Quake 4"    OFF)
 OPTION(BUILD_PREY      "Build Prey"    OFF)
 OPTION(BUILD_D3_MOD		"Build all DOOM3 mods" OFF)
 OPTION(BUILD_Q4_MOD		"Build all Quake4 mods" OFF)]]
-OPTION(BUILD_BACKPORT        "Build backport version"    ON)
+OPTION(BUILD_BACKPORT        "Build backport version"    OFF)
 
 
 # Supported
@@ -172,9 +172,9 @@ endif()
 if(GAME_REALRTCW) # 5.2 | Jul 26, 2025 | ad529d588e4dec717aff0779f9d1555eddc1e2be | Update ai_cast_survival.c
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
-    if(BUILD_BACKPORT)
+#[[    if(BUILD_BACKPORT)
         add_subdirectory ( backports/realrtcw_5_1 "realrtcw_5_1" ) # 5.1 | on Feb 14, 2025 | a6e94b82bd11c41f62ffc969e27b0e63f267ef8e | Version is upped to 5.1
-    endif()
+    endif()]]
 endif()
 
 if(GAME_FTEQW) # 5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 | engine/common/fs.c: Update game definitions

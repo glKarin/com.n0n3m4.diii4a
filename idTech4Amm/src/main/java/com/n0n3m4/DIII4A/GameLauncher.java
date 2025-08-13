@@ -3056,6 +3056,15 @@ public class GameLauncher extends Activity
 						.commit();
 			}
 		}
+		if(newVer == 69)
+		{
+			if((curVer >= 62 && curVer <= 63) || curVer == 68)
+			{
+				PreferenceManager.getDefaultSharedPreferences(this).edit()
+						.remove(Q3EPreference.pref_harm_realrtcw_version)
+						.commit();
+			}
+		}
 	}
 
     private void OpenUpdate()
@@ -3467,7 +3476,7 @@ public class GameLauncher extends Activity
 	private void SetGameVersion(String val)
 	{
 		String key = Q3EUtils.q3ei.GetGameVersionPreferenceKey();
-		if(null != key)
+		if(null != key && Q3EUtils.q3ei.HasVersions())
 		{
 			SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
 			preference.edit().putString(key, val).commit();
@@ -3744,7 +3753,7 @@ public class GameLauncher extends Activity
 		boolean openglVisible = true;
 		boolean quickloadVisible = true;
 		boolean skipintroVisible = true;
-		boolean versionVisible = KStr.NotEmpty(Q3EUtils.q3ei.engine_version);
+		boolean versionVisible = Q3EUtils.q3ei.HasVersions();
 		boolean modVisible = true;
 
         if (Q3EUtils.q3ei.isPrey)
