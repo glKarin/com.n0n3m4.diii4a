@@ -106,14 +106,14 @@ if(DIII4A_BUILD_COMMON)
     add_subdirectory ( common )
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_SOURCE)
-    message(STATUS "Build extras depend shared libraries")
-    add_subdirectory ( deplibs ) # common depend libraries
-
-if(NOT GAME_DOOM3)
+if(NOT GAME_DOOM3 AND DIII4A_BUILD_OPENAL)
     message(STATUS "Build OpenAL alone")
     add_subdirectory(doom3/neo/externlibs/openal-soft)
 endif()
+
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_SOURCE)
+    message(STATUS "Build extras depend shared libraries")
+    add_subdirectory ( deplibs ) # common depend libraries
 endif()
 
 

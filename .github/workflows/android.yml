@@ -44,10 +44,12 @@ jobs:
 
     - name: Build with Gradle
       run: |
+        echo "work directory: "
+        pwd
         chmod +x ./gradlew
         echo "disk usage: >>>"
         df -h
-        du -ch
+        du -ch | tail -n -1
         echo "<<< disk usage"
         barch=-Pabifilters=arm64-v8a
         # remove 32bit libraries
@@ -59,7 +61,7 @@ jobs:
         ./gradlew assembleRelease $bargs
         echo "disk usage: >>>"
         df -h
-        du -ch
+        du -ch | tail -n -1
         echo "<<< disk usage"
         echo "Copy Xash3D libraries to libs"
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libxash3d*so Q3E/libs/arm64-v8a
@@ -77,7 +79,7 @@ jobs:
         rm -rf Q3E/.cxx Q3E/build idTech4Amm/build
         echo "disk usage: >>>"
         df -h
-        du -ch
+        du -ch | tail -n -1
         echo "<<< disk usage"
         echo "Build Source libraries"
         # ,-DBUILD_SOURCE_HL2=OFF,-DBUILD_SOURCE_HL2MP=OFF,-DBUILD_SOURCE_EPISODIC=OFF,-DBUILD_SOURCE_HL1=OFF,-DBUILD_SOURCE_HL1MP=OFF,-DBUILD_SOURCE_PORTAL=OFF
@@ -85,7 +87,7 @@ jobs:
         ./gradlew assembleRelease $bargs
         echo "disk usage: >>>"
         df -h
-        du -ch
+        du -ch | tail -n -1
         echo "<<< disk usage"
         echo "Copy Source libraries to libs"
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libsource*so Q3E/libs/arm64-v8a
@@ -96,14 +98,14 @@ jobs:
         rm -rf Q3E/.cxx Q3E/build idTech4Amm/build
         echo "disk usage: >>>"
         df -h
-        du -ch
+        du -ch | tail -n -1
         echo "<<< disk usage"
         echo "Build final apk"
         bargs="$barch -Pcmake_options=-DGAME_XASH3D=OFF,-DGAME_SOURCE=OFF"
         ./gradlew assembleRelease $bargs
         echo "disk usage: >>>"
         df -h
-        du -ch
+        du -ch | tail -n -1
         echo "<<< disk usage"
 
     - name: Rename APK
@@ -113,7 +115,7 @@ jobs:
         cp ./idTech4Amm/build/outputs/apk/release/idTech4Amm-release.apk $apk_file
         echo "disk usage: >>>"
         df -h
-        du -ch
+        du -ch | tail -n -1
         echo "<<< disk usage"
         echo "::set-output name=value::$apk_file"
       working-directory: ${{ github.workspace }}
