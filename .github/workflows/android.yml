@@ -27,10 +27,21 @@ jobs:
         working-directory: /mnt
         
     steps:
+    - name: Mound working directory
+      run: |
+        echo `whoami`
+        stat /mnt
+        mkdir /mnt/aaa
+        ls /mnt
+        sudo mount --bind /mnt $GITHUB_WORKSPACE
+        sudo chown 777 /mnt
+        echo "disk usage: >>>"
+        sudo mount
+        df -h
+        du -ch | tail -n -1
+        echo "<<< disk usage"
     - name: Checkout code
       uses: actions/checkout@v2
-      with:
-        path: /mnt
 
     - name: Setup jdk 11
       uses: actions/setup-java@v4
