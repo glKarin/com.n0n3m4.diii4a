@@ -24,19 +24,15 @@ jobs:
 
     defaults:
       run:
-        working-directory: /mnt
+        working-directory: .
         
     steps:
     - name: Mound working directory
       run: |
-        echo `whoami`
-        stat /mnt
-        mkdir /mnt/aaa
-        ls /mnt
-        sudo mount --bind /mnt $GITHUB_WORKSPACE
-        sudo chown 777 /mnt
+        u=`whoami`
+        sudo mkdir /mnt/diii4a
+        sudo chown $u /mnt -R
         echo "disk usage: >>>"
-        sudo mount
         df -h
         du -ch | tail -n -1
         echo "<<< disk usage"
@@ -57,6 +53,8 @@ jobs:
 
     - name: Build with Gradle
       run: |
+        mv ./* /mnt/diii4a/
+        cd /mnt/diii4a
         echo "work directory: `pwd`"
         chmod +x ./gradlew
         echo "disk usage: >>>"
@@ -165,6 +163,7 @@ jobs:
     - name: Rename APK
       id: rename_apk
       run: |
+        cd /mnt/diii4a
         apk_file=idTech4A++-testing-`date "+%Y_%m_%d-%H_%M_%S"`.apk
         cp ./idTech4Amm/build/outputs/apk/release/idTech4Amm-release.apk $apk_file
         echo "disk usage: >>>"
