@@ -2735,8 +2735,6 @@ public class GameLauncher extends Activity
 		}
 		else if (itemId == R.id.main_menu_change_game)
 		{
-			String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.subdatadir);
-			ContextUtility.OpenFolder(this, path);
 			OpenGameList();
 			return true;
 		}

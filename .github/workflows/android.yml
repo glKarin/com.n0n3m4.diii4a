@@ -53,6 +53,7 @@ jobs:
 
     - name: Build with Gradle
       run: |
+        echo "Move to working directory"
         mv ./* /mnt/diii4a/
         cd /mnt/diii4a
         echo "work directory: `pwd`"
