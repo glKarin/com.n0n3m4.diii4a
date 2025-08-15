@@ -29,7 +29,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-      path: /mnt
+      with:
+        path: /mnt
 
     - name: Setup jdk 11
       uses: actions/setup-java@v4
