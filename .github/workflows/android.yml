@@ -16,7 +16,7 @@ on:
       #- 'idTech4Amm/**'
       #- 'Q3E/**'
       - '.github/workflows/android.yml'
-      - '.github/workflows/android.changelog'$GITHUB_WORKSPACE
+      - '.github/workflows/android.changelog'
 
 jobs:
   build-android:
