@@ -39,12 +39,14 @@ OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
+OPTION(GAME_URT "Build Urbant Error"                    ON)
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
 OPTION(GAME_SOURCE      "Build Source"                          ON)
 endif()
 
 # Experimental
+OPTION(GAME_Q3RALLY "Build Quake 3 Rally"                    OFF)
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
@@ -83,7 +85,7 @@ add_subdirectory( q3e )
 
 
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_SERIOUSSAM)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_SERIOUSSAM)
     set(DIII4A_BUILD_COMMON True)
 endif()
 
@@ -111,7 +113,7 @@ if(NOT GAME_DOOM3 AND DIII4A_BUILD_OPENAL)
     add_subdirectory(doom3/neo/externlibs/openal-soft)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_SOURCE)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_SOURCE)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory ( deplibs ) # common depend libraries
 endif()
@@ -205,6 +207,16 @@ endif()
 if(GAME_SOURCE) # 29985681a18508e78dc79ad863952f830be237b6 | Dec 30, 2023 | Merge pull request #312 from AruMoon/add-master-server Add new master server
 	message(STATUS "Build Source")
     add_subdirectory(source) # Source-Engine
+endif()
+
+if(GAME_Q3RALLY) # v0.5b | Aug 5, 2025 | https://github.com/Q3Rally-Team/q3rally/commit/d495c7518dc17d24357de1df5b308ba251994d1e
+    message(STATUS "Build Q3Rally")
+    add_subdirectory ( q3rally/engine ) # Quake 3 Rally
+endif()
+
+if(GAME_URT) # 4.3.4 | May 26, 2018 | https://github.com/FrozenSand/ioq3-for-UrbanTerror-4/commit/53fdee781c263168965f48cb87cc9187705f5ca3 | Removed dmflags from the serverinfo string, it's an unused leftover from Quake 2
+    message(STATUS "Build Urban Terror")
+    add_subdirectory ( urt ) # Urban Terror
 endif()
 
 

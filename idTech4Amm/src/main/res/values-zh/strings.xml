@@ -538,4 +538,6 @@
     <string name="env">环境变量</string>
     <string name="must_choose_a_env">必须只选择一个环境变量</string>
     <string name="name_must_not_empty">名称不能为空!</string>
+    <string name="urbanterror">UrT</string>
+    <string name="urbanterror_base">Urban Terror</string>
 </resources>

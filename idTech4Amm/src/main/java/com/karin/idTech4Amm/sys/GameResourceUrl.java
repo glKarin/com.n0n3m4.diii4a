@@ -8,6 +8,8 @@ import java.util.List;
 
 public enum GameResourceUrl
 {
+    // KARIN_NEW_GAME_BOOKMARK
+
     // DOOM 3
     DOOM3_BASE(Q3EGameConstants.GAME_DOOM3, "base", "", "https://store.steampowered.com/app/208200/DOOM_3/", 2),
     DOOM3_D3XP(Q3EGameConstants.GAME_DOOM3, "d3xp", "", "https://store.steampowered.com/app/9070/DOOM_3_Resurrection_of_Evil/", 2),
@@ -85,6 +87,8 @@ public enum GameResourceUrl
     XASH_CS16(Q3EGameConstants.GAME_XASH3D, "", "", "https://github.com/Velaron/cs16-client", 1),
 
     SOURCE_ENGINE(Q3EGameConstants.GAME_SOURCE, "", "", "https://github.com/nillerusr/source-engine", 1),
+
+    URT_BASE(Q3EGameConstants.GAME_URT, "", "", "https://www.urbanterror.info", 1),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

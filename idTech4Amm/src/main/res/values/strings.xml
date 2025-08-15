@@ -542,5 +542,7 @@
     <string name="env">Env</string>
     <string name="must_choose_a_env">Must choose a env</string>
     <string name="name_must_not_empty">Name must not empty!</string>
+    <string name="urbanterror">Q3-UT4</string>
+    <string name="urbanterror_base">Urban Terror</string>
 
 </resources>

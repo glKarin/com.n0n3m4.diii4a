@@ -29,6 +29,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
+            "Add `Urban Terror`(ver 4.3.4) support, game standalone directory named `urt`, game data directory named `q3ut4`. More view in `" + TextHelper.GenLinkText("https://www.urbanterror.info", "Urban Terror") + "`.",
             "Update Quake 2(yquake2) version to 8.51, update vulkan renderer.",
             "Update GZDOOM version to 4.14.2.",
         };

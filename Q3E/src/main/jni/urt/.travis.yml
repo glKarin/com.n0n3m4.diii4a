@@ -1,0 +1,82 @@
+language: c
+dist: trusty
+sudo: true
+
+addons:
+  apt:
+    packages:
+      - mingw-w64
+      - libgl1-mesa-dev
+      - libsdl2-dev
+      - libfreetype6-dev
+      - libxxf86vm-dev
+
+env:
+  global:
+    - MAKEFLAGS=-j4
+
+matrix:
+  include:
+    - os: linux
+
+    - os: linux
+      env: CC= PLATFORM="mingw32" ARCH="x86_64" DEFAULT_HOMEDIR=.
+
+    - os: linux
+      env: CC= PLATFORM="mingw32" ARCH="x86" DEFAULT_HOMEDIR=.
+
+    - os: osx
+
+script:
+  - |
+    set -e
+    make all
+    if [[ $TRAVIS_OS_NAME == osx ]]; then
+      make all ARCH=x86
+    fi
+    make all ARCHIVE=1 -j1
+    set +e
+
+notifications:
+  email: false
+
+# Should have been in before_deploy: https://github.com/travis-ci/travis-ci/issues/2570
+after_success:
+  - |
+    cd build
+    ls -al
+    rm -rf */
+    version=$(git show -s --pretty=format:%ad-%h --date=short)
+    for file in *.zip; do
+      bname=$(basename "$file" .zip)
+      bname=${bname/mingw32-/windows}
+      bname=${bname/darwin-universal/macOS}
+      bname=${bname/linux-/linux}
+      bname=${bname/x86_64/64}
+      bname=${bname/x86/32}
+      mv "$file" "Quake3-UrT-${bname}-${version}.zip"
+    done
+    cd ..
+
+deploy:
+  - provider: gcs
+    access_key_id: GOOGCLGNLWAEBU5YLYK5
+    secret_access_key:
+      secure: "OmuACtWXvmKR4hIlNDwfOh+ZuoMUuivuskyV2n9zD01hpfwfXNQhQrNyLjOMaw2sGHQk2ZKRpmWoMjenfsjDf875Vj1SbytQgBQiLjw77KGHC+cJV9I0uL/BcS8YS+PeZOFmVbUeL7cSfbkBO/z/nJpvnJGPYX1Xj31skCemvzS9QAo3B6RgNGHqI7N4BvBzhcpsyOPzsi9HyOkXo1L6IkpBu+uU8qsfQhA0KexKnIYvM2q1llcU/Ux8hYTpRWJ3TVQb/uNnpijG4E2rKBEZs1bCj2U5Pb5zMsNG8zo6lwbB+tIq3quhXyob9oCn2Sqvj4seDTJzcQZ51Sfa2SsKNsMC7rPlkIKXtpo63U5eijms+F3vU9Y7msJmWc2vVYM5TI0oF18oNJ6oaAyhNsKerSBW3rUHkPE3p9GCn/db3nyVbc3wnm+GY5m2v3QQXtnMXubPLK85gFPRWQoupugdPttqL0DeOlHma+Kepr08Cz9HpFTvIepa9LcotvH9LxnvoYDBVVAb2qQMETemlPFOoAg7ZnMj1SERXst1lYT0LpxbhQ208wikJcJmtQaUfDZWPFOlnm395i3fwfXH73K1pHdeIb9Z3m55qFftALg9boNqTagHzxlfptvePzJVuj3vQIlvnHR3rrp+ozdACQMNR7z5pQ+FNgb7dsmxvjecau4="
+    bucket: builds.iourtm9.tk
+    skip-cleanup: true
+    local-dir: build
+    upload-dir: ${TRAVIS_BRANCH}/build-${TRAVIS_BUILD_NUMBER}
+    on:
+      repo: mickael9/ioq3
+      all_branches: true
+
+  - provider: releases
+    api_key:
+      secure: "XJ6PU1vhcw8GxCcPSWoH6ouvnHznw/EFmU0rpvJoJcMObIF0oAzhO6BwxRMFvXT9P51azpZuUm8uTr5bdaQnKz9pPeQBR2fPk0Sp6C7SARqG+kwnwAEFJQU9az8U0E0tr/a6izPaBo1o6NArarJRxpZirjep+7Pxek9tO/7aRP5v5NqnSAFOki5bo5Y1tNOPj4E5U0aAPBl3HcrLZlq4vTKHzfYCNgugyvayjUu+m+nrzZ7DcuSQIPG+oHW1KhZdWdhhpEkRcWxhxP5PHWLJC6UuOOPnqvdJ3G8IG5vJTKBI5eqcSr8W02KtYy6s5ERZn7omBi5/+JQ6Jp+Z69pGsTJ4BkjFEBxMohi87R+yChrMrqo9Eb/XR1lq1FRn9MQg5dZrGrjQ0db+5CnMi+vy/GVwHHdsJd5Sv8beTp2lJiAgIpKJ7mLV5ZGgIwRZkctKe65BzbwN+ryr7/YL1htz5TchHZbAR1WZ6vO6nINcVNF8DgGZSnT5np/gFGeBvDLzxQxxQFXOKL+p+x/3nZEfOln0dKFxd9OFxGDgmF8SlROEmBVm0Yhz1xAWTV9YkcNsSp3XmbuNBL1EkQpl33dNP5eWmQGi9evEPKSNI/Qgf7jMzqcfRoKUaxFaO2FtKlH7kdaPB6DEiJZAGKHuzz/bv+vCW4/1NVZOz/09123guAs="
+    file-glob: true
+    file: build/*
+    skip-cleanup: true
+    on:
+      repo: mickael9/ioq3
+      condition: "${TRAVIS_TAG} == v[0-9]*"

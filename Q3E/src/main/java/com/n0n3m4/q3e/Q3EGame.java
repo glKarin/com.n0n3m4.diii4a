@@ -2,6 +2,8 @@ package com.n0n3m4.q3e;
 
 public enum Q3EGame
 {
+    // KARIN_NEW_GAME_BOOKMARK
+
     DOOM3(Q3EGameConstants.GAME_ID_DOOM3, Q3EGameConstants.GAME_DOOM3, Q3EGameConstants.LIB_ENGINE_ID, Q3EGameConstants.GAME_NAME_DOOM3, Q3EGameConstants.GAME_BASE_DOOM3,
             Q3EGameConstants.GAME_VERSION_DOOM3, Q3EGameConstants.GAME_SUBDIR_DOOM3, false, Q3EGameConstants.CONFIG_FILE_DOOM3,
             "fs_game", "fs_game_base", null, null,
@@ -128,6 +130,13 @@ public enum Q3EGame
             "game", null, null, null,
             Q3EPreference.pref_harm_source_fs_game, Q3EPreference.pref_harm_source_user_mod, Q3EPreference.pref_harm_source_game_mod, Q3EPreference.pref_harm_source_game_lib, Q3EPreference.pref_params_source, Q3EPreference.pref_harm_source_command_record, null, Q3EPreference.pref_harm_source_env,
             Q3EKeyCodes.KeyCodesAndroid.class
+    ),
+
+    URT(Q3EGameConstants.GAME_ID_URT, Q3EGameConstants.GAME_URT, Q3EGameConstants.LIB_ENGINE3_URT, Q3EGameConstants.GAME_NAME_URT, Q3EGameConstants.GAME_BASE_URT,
+            Q3EGameConstants.GAME_VERSION_URT, Q3EGameConstants.GAME_SUBDIR_URT, false, Q3EGameConstants.CONFIG_FILE_URT,
+            "fs_game", null, null, ".q3a",
+            Q3EPreference.pref_harm_urt_fs_game, Q3EPreference.pref_harm_urt_user_mod, Q3EPreference.pref_harm_urt_game_mod, Q3EPreference.pref_harm_urt_game_lib, Q3EPreference.pref_params_urt, Q3EPreference.pref_harm_urt_command_record, null, Q3EPreference.pref_harm_urt_env,
+            Q3EKeyCodes.KeyCodesQ3.class
     ),
     ;
 

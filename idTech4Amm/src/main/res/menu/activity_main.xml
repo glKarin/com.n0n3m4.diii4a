@@ -105,6 +105,11 @@
                 android:title="@string/sourceengine"
                 android:icon="@drawable/source_icon"
                 android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_urt"
+                android:title="@string/urbanterror"
+                android:icon="@drawable/urbanterror_icon"
+                android:showAsAction="never|withText"/>
         </menu>
     </item>
 
