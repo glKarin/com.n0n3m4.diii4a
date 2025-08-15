@@ -29,7 +29,9 @@ jobs:
     steps:
     - name: Mound working directory
       run: |
+        echo `whoami`
         sudo mount --bind /mnt $GITHUB_WORKSPACE
+        sudo chown 777 /mnt
         echo "disk usage: >>>"
         sudo mount
         df -h
