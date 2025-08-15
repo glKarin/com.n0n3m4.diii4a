@@ -135,7 +135,7 @@ jobs:
         ./gradlew clean $bargs
         rm -rf Q3E/.cxx Q3E/build idTech4Amm/build
         rm -rf Q3E/src/main/jni/source
-        rm -rf Q3E/src/main/jni/doom3/neo/[^ae]*
+        rm -rf Q3E/src/main/jni/doom3/neo/[^es]*
         rm -rf Q3E/src/main/jni/doom3bfg
         echo "disk usage: >>>"
         df -h
