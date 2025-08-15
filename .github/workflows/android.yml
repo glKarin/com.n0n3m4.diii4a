@@ -29,7 +29,12 @@ jobs:
     steps:
     - name: Mound working directory
       run: |
-        mount /mnt $GITHUB_WORKSPACE
+        sudo mount /mnt $GITHUB_WORKSPACE
+        echo "disk usage: >>>"
+        sudo mount
+        df -h
+        du -ch | tail -n -1
+        echo "<<< disk usage"
     - name: Checkout code
       uses: actions/checkout@v2
 
