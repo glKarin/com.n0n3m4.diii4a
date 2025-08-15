@@ -47,5 +47,5 @@ profile
 
 # CMake
 ####################
-CMakeLists.txt
+#CMakeLists.txt
 cmake-build-debug/

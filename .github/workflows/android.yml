@@ -167,6 +167,7 @@ jobs:
         cd /mnt/diii4a
         apk_file=idTech4A++-testing-`date "+%Y_%m_%d-%H_%M_%S"`.apk
         cp ./idTech4Amm/build/outputs/apk/release/idTech4Amm-release.apk $apk_file
+        apk_file=`pwd`/$apk_file
         echo "disk usage: >>>"
         df -h
         du -ch | tail -n -1
