@@ -16,7 +16,7 @@ on:
       #- 'idTech4Amm/**'
       #- 'Q3E/**'
       - '.github/workflows/android.yml'
-      - '.github/workflows/android.changelog'
+      - '.github/workflows/android.changelog'$GITHUB_WORKSPACE
 
 jobs:
   build-android:
@@ -24,9 +24,12 @@ jobs:
 
     defaults:
       run:
-        working-directory: /mnt
+        working-directory: .
         
     steps:
+    - name: Mound working directory
+      run: |
+        mount /mnt $GITHUB_WORKSPACE
     - name: Checkout code
       uses: actions/checkout@v2
 
