@@ -930,10 +930,10 @@ void GfxInfo_f( void )
 		}
 	}
 	else
+#endif
 	{
 		R_PrintLongString( (char *) qglGetString( GL_EXTENSIONS ) );
 	}
-#endif
 	ri.Printf( PRINT_ALL, "\n" );
 	ri.Printf( PRINT_ALL, "GL_MAX_TEXTURE_SIZE: %d\n", glConfig.maxTextureSize );
 	ri.Printf( PRINT_ALL, "GL_MAX_TEXTURE_UNITS_ARB: %d\n", glConfig.numTextureUnits );
