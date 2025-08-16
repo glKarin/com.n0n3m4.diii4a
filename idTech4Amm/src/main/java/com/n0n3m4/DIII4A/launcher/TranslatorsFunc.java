@@ -88,7 +88,7 @@ public final class TranslatorsFunc extends GameLauncherFunc
             tror.lang = "Русский";
             tror.author = "ALord7";
             tror.group = "4pda";
-            tror.url = "https://4pda.ru/forum/index.php?showuser=5043340";
+            tror.url = "https://4pda.to/forum/index.php?showuser=5043340";
             m_list.add(tror);
 
             SetData(m_list);
