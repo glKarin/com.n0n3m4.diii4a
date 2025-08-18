@@ -192,7 +192,7 @@ ID_INLINE void idCmdSystem::ArgCompletion_ImageName(const idCmdArgs &args, void(
 {
 	cmdSystem->ArgCompletion_FolderExtension(args, callback, "/", false, ".tga", ".dds", ".jpg", ".pcx"
 #ifdef _USING_STB
-											 , ".jpeg", ".png", "dds", "bmp"
+											 , ".jpeg", ".png", ".dds", ".bmp", ".exr", ".hdr"
 #endif
 											 , NULL);
 }

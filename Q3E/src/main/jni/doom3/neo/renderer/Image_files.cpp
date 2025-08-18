@@ -27,6 +27,15 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // for disable macros
+// basic defines and includes
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_ONLY_HDR
+#define STBI_NO_LINEAR
+#define STBI_ONLY_JPEG // at least for now, only use it for JPEG
+#define STBI_NO_STDIO  // images are passed as buffers
+#define STBI_ONLY_PNG
+#include "../externlibs/stb/stb_image.h"
+
 #define TINYEXR_IMPLEMENTATION
 #ifdef _MINIZ
 #define TINYEXR_USE_INTERNAL_MINIZ 0
@@ -37,7 +46,7 @@ If you have questions concerning this license or the applicable additional terms
 //#undef vsnprintf
 //#undef strcmp
 //#undef strncmp
-#include "../../externlibs/tinyexr/tinyexr.h"
+#include "../externlibs/tinyexr/tinyexr.h"
 //#define snprintf		use_idStr_snPrintf
 //#define vsnprintf		use_idStr_vsnPrintf
 //#define strcmp			idStr::Cmp		// use_idStr_Cmp
@@ -1093,8 +1102,13 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 						LoadEXR(name.c_str(), pic, width, height, timestamp);
 						if ((pic && *pic == 0) || (timestamp && *timestamp == -1)) {
 							name.StripFileExtension();
-							name.DefaultFileExtension(".bimage");
-							LoadBimage(name.c_str(), pic, width, height, timestamp);
+							name.DefaultFileExtension(".hdr");
+							LoadHDR(name.c_str(), pic, width, height, timestamp);
+                            if ((pic && *pic == 0) || (timestamp && *timestamp == -1)) {
+                                name.StripFileExtension();
+                                name.DefaultFileExtension(".bimage");
+                                LoadBimage(name.c_str(), pic, width, height, timestamp);
+                            }
 						}
 					}	
 				}
@@ -1112,6 +1126,8 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 		LoadDDS(name.c_str(), pic, width, height, timestamp);
 	} else if (ext == "exr") {
 		LoadEXR(name.c_str(), pic, width, height, timestamp);
+    } else if (ext == "hdr") {
+        LoadHDR(name.c_str(), pic, width, height, timestamp);
 	} else if (ext == "bimage") {
 		LoadBimage(name.c_str(), pic, width, height, timestamp);
 	}

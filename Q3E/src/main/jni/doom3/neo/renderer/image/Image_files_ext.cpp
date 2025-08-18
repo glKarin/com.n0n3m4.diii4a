@@ -1,12 +1,4 @@
-// basic defines and includes
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_NO_HDR
-#define STBI_NO_LINEAR
-#define STBI_ONLY_JPEG // at least for now, only use it for JPEG
-#define STBI_NO_STDIO  // images are passed as buffers
-#define STBI_ONLY_PNG
 
-#include "../../externlibs/stb/stb_image.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../../externlibs/stb/stb_image_write.h"
@@ -223,6 +215,21 @@ static void R_ImageRGBA8888ToRGB888(const byte *data, int width, int height, byt
 	}
 }
 #endif
+static void R_ImageColorByteToFloat(const byte *data, int width, int height, int comp, float *to)
+{
+    int		i, j, m;
+    const byte		*temp;
+    float *target;
+
+    for (i = 0 ; i < width ; i++) {
+        for (j = 0 ; j < height ; j++) {
+            temp = data + j * comp * width + i * comp;
+            target = to + j * comp * width + i * comp;
+            for(m = 0; m < comp; m++)
+                target[m] = (float)temp[m] / 255.0f;
+        }
+    }
+}
 
 // Save functions
 static void R_StbWriteImageFile(void *context, void *data, int size)
@@ -315,7 +322,7 @@ Interfaces with tinyexr
 LoadEXR
 =======================
 */
-void LoadEXR(const char* filename, byte **pic, int *width, int *height, ID_TIME_T* timestamp)
+void LoadEXR(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp)
 {
 	if( !pic )
 	{
@@ -662,7 +669,118 @@ cleanup:
 
 #endif
 }
+
+/*
+=======================
+LoadHDR
+
+RB: load floating point data from memory and convert it into packed R11G11B10F data
+=======================
+*/
+static void LoadHDR( const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp )
+{
+    if( !pic )
+    {
+        fileSystem->ReadFile( filename, NULL, timestamp );
+        return;	// just getting timestamp
+    }
+
+    *pic = NULL;
+
+    // load the file
+    const byte* fbuffer = NULL;
+    int fileSize = fileSystem->ReadFile( filename, ( void** )&fbuffer, timestamp );
+    if( !fbuffer )
+    {
+        return;
+    }
+
+    int32 numChannels;
+
+    byte* rgba = stbi_load_from_memory( ( stbi_uc const* ) fbuffer, fileSize, width, height, &numChannels, STBI_rgb_alpha );
+
+    if( numChannels != 3 && numChannels != 4 )
+    {
+        common->Error( "LoadHDR( %s ): HDR has not 3/4 channels\n", filename );
+    }
+
+#if 0
+    if( rgba )
+    {
+        int32 pixelCount = *width * *height;
+        byte* out = ( byte* )R_StaticAlloc( pixelCount * 4 );
+
+        *pic = out;
+
+        // convert to packed R11G11B10F as uint32 for each pixel
+
+        const float* src = rgba;
+        byte* dst = out;
+        for( int i = 0; i < pixelCount; i++ )
+        {
+            // read 3 floats and ignore the alpha channel
+            float p[3];
+
+            p[0] = src[0];
+            p[1] = src[1];
+            p[2] = src[2];
+
+            // convert
+            uint32_t value = float3_to_r11g11b10f( p );
+            *( uint32_t* )dst = value;
+
+            src += 4;
+            dst += 4;
+        }
+
+        free( rgba );
+    }
+#else
+    if ( rgba == NULL ) {
+        common->Warning( "stb_image was unable to load HDR %s : %s\n",
+                         filename, stbi_failure_reason());
+        return;
+    }
+
+    // *pic must be allocated with R_StaticAlloc(), but stb_image allocates with malloc()
+    // (and as there is no R_StaticRealloc(), #define STBI_MALLOC etc won't help)
+    // so the decoded data must be copied once
+    int size = *width * *height * 4;
+    *pic = (byte *)R_StaticAlloc( size );
+    memcpy( *pic, rgba, size );
+    // now that decodedImageData has been copied into *pic, it's not needed anymore
+    stbi_image_free( rgba );
+#endif
+
+    Mem_Free( ( void* )fbuffer );
+}
 // RB end
+
+void R_WriteHDR(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
+{
+    byte *ndata = NULL;
+    if(flipVertical)
+    {
+        ndata = (byte *) malloc(width * height * comp);
+        memcpy(ndata, data, width * height * comp);
+        R_ImageFlipVertical(ndata, width, height, comp);
+        data = ndata;
+    }
+    if(!basePath)
+        basePath = "fs_savepath";
+    idFile *f = fileSystem->OpenFileWrite(filename, basePath);
+    if(f)
+    {
+        float *fdata = (float *)malloc(width * height * comp * sizeof(float));
+        R_ImageColorByteToFloat(data, width, height, comp, fdata);
+        int r = stbi_write_hdr_to_func(R_StbWriteImageFile, (void *)f, width, height, comp, fdata);
+        if(!r)
+            common->Warning("R_WriteHDR fail: %d", r);
+        free(fdata);
+        fileSystem->CloseFile(f);
+    }
+    free(ndata);
+}
 
 void R_WriteDDS(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
 {
@@ -715,6 +833,11 @@ void R_WriteScreenshotImage(const char *filename, const byte *data, int width, i
         case SSFE_EXR: {
             fn.SetFileExtension("exr");
             R_WriteEXR(fn.c_str(), data, width, height, comp, flipVertical, basePath);
+        }
+            break;
+        case SSFE_HDR: {
+            fn.SetFileExtension("hdr");
+            R_WriteHDR(fn.c_str(), data, width, height, comp, flipVertical, basePath);
         }
             break;
         case SSFE_TGA:
@@ -885,6 +1008,11 @@ bool R_ConvertImage(const char *filename, const char *toFormat, idStr &ret, int 
     else if(!idStr::Icmp(toFormat, "exr"))
     {
         R_WriteEXR(targetPath.c_str(), pic, width, height, comp, flipVertical);
+        res = true;
+    }
+    else if(!idStr::Icmp(toFormat, "hdr"))
+    {
+        R_WriteHDR(targetPath.c_str(), pic, width, height, comp, flipVertical);
         res = true;
     }
     else

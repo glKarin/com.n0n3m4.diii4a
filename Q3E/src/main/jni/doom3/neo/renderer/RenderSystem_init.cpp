@@ -236,7 +236,7 @@ idCVar harm_r_useHighPrecision("harm_r_useHighPrecision",
 #endif
                                , CVAR_RENDERER | CVAR_INTEGER | CVAR_INIT, "Use high precision float on GLSL shader");
 
-idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG, 4 = DDS, 5 = EXR", 0, LAST_SCREENSHOT_FORMAT, idCmdSystem::ArgCompletion_Integer<SSFE_TGA, LAST_SCREENSHOT_FORMAT>); // screenshotFormat_t
+idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG, 4 = DDS, 5 = EXR, 6 = HDR", 0, LAST_SCREENSHOT_FORMAT, idCmdSystem::ArgCompletion_Integer<SSFE_TGA, LAST_SCREENSHOT_FORMAT>); // screenshotFormat_t
 idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (0-100)", 0, 100, idCmdSystem::ArgCompletion_Integer<0, 100>);
 idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9)", 0, 9, idCmdSystem::ArgCompletion_Integer<0, 9>);
 
@@ -1460,6 +1460,13 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
             R_WriteEXR(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
         }
             break;
+        case SSFE_HDR: {
+            idStr fn(fileName);
+            fn.SetFileExtension("hdr");
+            const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+            R_WriteHDR(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
+        }
+            break;
 		case SSFE_TGA:
 		default:
 
@@ -1534,17 +1541,23 @@ void R_ScreenshotFilename(int &lastNumber, const char *base, idStr &fileName)
 
         switch (cvarSystem->GetCVarInteger("r_screenshotFormat"))
         {
-            case 1:
+            case SSFE_BMP:
                 sprintf(fileName, "%s%i%i%i%i%i.bmp", base, a, b, c, d, e);
                 break;
-            case 2:
+            case SSFE_PNG:
                 sprintf(fileName, "%s%i%i%i%i%i.png", base, a, b, c, d, e);
                 break;
-            case 3:
+            case SSFE_JPG:
                 sprintf(fileName, "%s%i%i%i%i%i.jpg", base, a, b, c, d, e);
                 break;
-            case 4:
+            case SSFE_DDS:
                 sprintf(fileName, "%s%i%i%i%i%i.dds", base, a, b, c, d, e);
+                break;
+            case SSFE_EXR:
+                sprintf(fileName, "%s%i%i%i%i%i.exr", base, a, b, c, d, e);
+                break;
+            case SSFE_HDR:
+                sprintf(fileName, "%s%i%i%i%i%i.hdr", base, a, b, c, d, e);
                 break;
             default:
                 sprintf(fileName, "%s%i%i%i%i%i.tga", base, a, b, c, d, e);
@@ -1633,27 +1646,6 @@ void R_ScreenShot_f(const idCmdArgs &args)
 
 	tr.TakeScreenshot(width, height, checkname, blends, NULL);
 
-    switch(r_screenshotFormat.GetInteger())
-    {
-        case SSFE_BMP:
-            checkname.SetFileExtension("bmp");
-            break;
-        case SSFE_PNG:
-            checkname.SetFileExtension("png");
-            break;
-        case SSFE_JPG:
-            checkname.SetFileExtension("jpg");
-            break;
-        case SSFE_DDS:
-            checkname.SetFileExtension("dds");
-            break;
-        case SSFE_EXR:
-            checkname.SetFileExtension("exr");
-            break;
-        case SSFE_TGA:
-        default:
-            break;
-    }
 	common->Printf("Wrote %s\n", checkname.c_str());
 }
 
