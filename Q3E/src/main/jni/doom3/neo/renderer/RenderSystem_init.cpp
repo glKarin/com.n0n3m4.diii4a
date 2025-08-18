@@ -236,7 +236,7 @@ idCVar harm_r_useHighPrecision("harm_r_useHighPrecision",
 #endif
                                , CVAR_RENDERER | CVAR_INTEGER | CVAR_INIT, "Use high precision float on GLSL shader");
 
-idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG, 4 = DDS", 0, 4, idCmdSystem::ArgCompletion_Integer<0, 4>);
+idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG, 4 = DDS, 5 = EXR", 0, LAST_SCREENSHOT_FORMAT, idCmdSystem::ArgCompletion_Integer<SSFE_TGA, LAST_SCREENSHOT_FORMAT>); // screenshotFormat_t
 idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (0-100)", 0, 100, idCmdSystem::ArgCompletion_Integer<0, 100>);
 idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9)", 0, 9, idCmdSystem::ArgCompletion_Integer<0, 9>);
 
@@ -1425,35 +1425,42 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 
 	switch(r_screenshotFormat.GetInteger())
 	{
-		case 1: {// bmp
+		case SSFE_BMP: {
 			idStr fn(fileName);
 			fn.SetFileExtension("bmp");
 			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
 			R_WriteBMP(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
 		}
 			break;
-		case 2: {// png
+		case SSFE_PNG: {
 			idStr fn(fileName);
 			fn.SetFileExtension("png");
 			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
 			R_WritePNG(fn.c_str(), buffer + 18, width, height, 4, true, idMath::ClampInt(0, 9, r_screenshotPngCompression.GetInteger()), basePath);
 		}
 			break;
-		case 3: {// jpg
+		case SSFE_JPG: {
 			idStr fn(fileName);
 			fn.SetFileExtension("jpg");
 			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
 			R_WriteJPG(fn.c_str(), buffer + 18, width, height, 4, true, idMath::ClampInt(0, 9, idMath::ClampInt(1, 100, r_screenshotJpgQuality.GetInteger())), basePath);
 		}
 			break;
-		case 4: {// dds
+		case SSFE_DDS: {
 			idStr fn(fileName);
 			fn.SetFileExtension("dds");
 			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
 			R_WriteDDS(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
 		}
 			break;
-		case 0: // tga
+        case SSFE_EXR: {
+            idStr fn(fileName);
+            fn.SetFileExtension("exr");
+            const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+            R_WriteEXR(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
+        }
+            break;
+		case SSFE_TGA:
 		default:
 
 			// fill in the header (this is vertically flipped, which glReadPixels emits)
@@ -1626,6 +1633,27 @@ void R_ScreenShot_f(const idCmdArgs &args)
 
 	tr.TakeScreenshot(width, height, checkname, blends, NULL);
 
+    switch(r_screenshotFormat.GetInteger())
+    {
+        case SSFE_BMP:
+            checkname.SetFileExtension("bmp");
+            break;
+        case SSFE_PNG:
+            checkname.SetFileExtension("png");
+            break;
+        case SSFE_JPG:
+            checkname.SetFileExtension("jpg");
+            break;
+        case SSFE_DDS:
+            checkname.SetFileExtension("dds");
+            break;
+        case SSFE_EXR:
+            checkname.SetFileExtension("exr");
+            break;
+        case SSFE_TGA:
+        default:
+            break;
+    }
 	common->Printf("Wrote %s\n", checkname.c_str());
 }
 

@@ -2152,15 +2152,27 @@ void RB_ShowImages(void);
 
 void RB_ExecuteBackEndCommands(const emptyCommand_t *cmds);
 
+typedef enum screenshotFormat_e {
+    SSFE_TGA = 0,
+    SSFE_BMP,
+    SSFE_PNG,
+    SSFE_JPG,
+    SSFE_DDS,
+    SSFE_EXR,
+} screenshotFormat_t;
+#define LAST_SCREENSHOT_FORMAT SSFE_EXR
+
 void LoadJPG_stb(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadBimage(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
+void LoadEXR(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 
 void R_WritePNG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, int quality = 100, const char *basePath = NULL);
 void R_WriteJPG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, int compression = 0, const char *basePath = NULL);
 void R_WriteBMP(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
 void R_WriteDDS(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath = NULL);
+void R_WriteEXR( const char* filename, const byte* data, int width, int height, int comp, bool flipVertical, const char* basePath = NULL );
 
 void R_WriteScreenshotImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
 
