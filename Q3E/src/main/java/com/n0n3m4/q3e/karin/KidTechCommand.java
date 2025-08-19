@@ -584,7 +584,7 @@ public class KidTechCommand
                 }
                 hasArg0 = true;
             }
-            else if(c == '+' || c == '-')
+            else if(/*c == '+' || c == '-'*/ argPrefix.contains("" + c))
             {
                 readingSet = false;
                 String cmd = ReadWord(m_cmd, i + 1);

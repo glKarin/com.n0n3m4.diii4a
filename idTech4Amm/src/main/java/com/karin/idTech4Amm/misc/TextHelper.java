@@ -212,36 +212,6 @@ public final class TextHelper
         }
 		return GetDialogMessage(sb.toString());
 	}
-
-    public static CharSequence GetChangesText()
-    {
-        final ChangeLog[] CHANGES = ChangeLog.GetChangeLogs();
-        StringBuilder sb = new StringBuilder();
-        final String endl = GetDialogMessageEndl();
-        for(ChangeLog changeLog : CHANGES)
-        {
-            if(null != changeLog)
-                sb.append(changeLog.GenString(endl));
-            sb.append(endl);
-        }
-        return GetDialogMessage(sb.toString());
-    }
-    
-    public static CharSequence GetCvarText()
-    {
-        StringBuilder sb = new StringBuilder();
-        final String endl = GetDialogMessageEndl();
-        for(Map.Entry<String, KCVar.Group> item : KCVarSystem.CVars().entrySet())
-        {
-            KCVar.Group value = item.getValue();
-            sb.append("------- ").append(value.name).append(" -------");
-            sb.append(endl);
-            for(KCVar cvar : value.list)
-                sb.append(KCVarSystem.GenCVarString(cvar, endl));
-            sb.append(endl);
-        }
-        return GetDialogMessage(sb.toString());
-    }
     
 	private TextHelper() {}
 }

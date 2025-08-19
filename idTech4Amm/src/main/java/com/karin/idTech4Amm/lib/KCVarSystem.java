@@ -46,7 +46,9 @@ public final class KCVarSystem
                                 "1", "BMP",
                                 "2", "PNG",
                                 "3", "JPG",
-                                "4", "DDS"
+                                "4", "DDS",
+                                "5", "EXR",
+                                "6", "HDR"
                                 ),
                         KCVar.CreateCVar("r_screenshotJpgQuality", "integer", "75", "Screenshot quality for JPG images (0-100)", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("r_screenshotPngCompression", "integer", "3", "Compression level when using PNG screenshots (0-9)", KCVar.FLAG_POSITIVE),
@@ -319,6 +321,37 @@ public final class KCVarSystem
                         )
                 );
 
+        KCVar.Group URT_CVARS = new KCVar.Group("UrT", true)
+                .AddCVar(
+                        KCVar.CreateCVar("harm_bot_autoAdd", "integer", "0", "Add bots automatic(0 = disable; -1 = maximum; Positive number = bots num)", KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_bot_level", "integer", "0", "Bot difficulty level(0 = random; 1 - 5 = bot difficulty level)", KCVar.FLAG_LAUNCHER | KCVar.FLAG_POSITIVE)
+                );
+
+        KCVar.Group XASH3D_CVARS = new KCVar.Group("Xash3D", true)
+                .AddCVar(
+                        KCVar.CreateParam("sv_cl", "string", "", "Server/Client", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
+                                "\"\"", "Half-Life",
+                                "hlsdk", "Half-Life",
+                                "cs16", "Counter-Strike 1.6",
+                                "cs16_yapb", "Counter-Strike 1.6(yapb)"
+                                )
+                );
+
+        KCVar.Group SOURCE_CVARS = new KCVar.Group("Source", true)
+                .AddCVar(
+                        KCVar.CreateParam("sv_cl", "string", "", "Server/Client", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
+                                "\"\"", "Half-Life 2",
+                                "hl2", "Half-Life 2",
+                                "cstrike", "Counter-Strike: Source",
+                                "portal", "Portal",
+                                "dod", "Day of Defeat: Source",
+                                "episodic", "Half-Life 2: Episodic 1 & 2",
+                                "hl2mp", "Half-Life 2: Deathmatch",
+                                "hl1", "Half-Life 1: Source",
+                                "hl1mp", "Half-Life 1 Deathmatch: Source"
+                        )
+                );
+
         _cvars.put("RENDERER", RENDERER_CVARS);
         _cvars.put("FRAMEWORK", FRAMEWORK_CVARS);
         _cvars.put("base", GAME_CVARS);
@@ -330,6 +363,9 @@ public final class KCVarSystem
         _cvars.put("ETW", ETW_CVARS);
         _cvars.put("TDM", TDM_CVARS);
         _cvars.put("GZDOOM", GZDOOM_CVARS);
+        _cvars.put("UrT", URT_CVARS);
+        _cvars.put("Xash3D", XASH3D_CVARS);
+        _cvars.put("Source", SOURCE_CVARS);
 
         return _cvars;
     }
@@ -358,6 +394,12 @@ public final class KCVarSystem
             res.add(_cvars.get("ETW"));
         else if(Q3EUtils.q3ei.isRealRTCW)
             res.add(_cvars.get("RealRTCW"));
+        else if(Q3EUtils.q3ei.isXash3D)
+            res.add(_cvars.get("Xash3D"));
+        else if(Q3EUtils.q3ei.isUrT)
+            res.add(_cvars.get("UrT"));
+        else if(Q3EUtils.q3ei.isSource)
+            res.add(_cvars.get("Source"));
         else if(Q3EUtils.q3ei.isD3)
         {
             res.add(_cvars.get("RENDERER"));
@@ -379,52 +421,5 @@ public final class KCVarSystem
                 res.add(_cvars.get(game));
         }
         return res;
-    }
-
-    public static String GenCVarString(KCVar cvar, String endl)
-    {
-        StringBuilder sb = new StringBuilder();
-        if(cvar.category == KCVar.CATEGORY_COMMAND)
-        {
-            sb.append(TextHelper.FormatDialogMessageSpace("  *[Command] ")).append(cvar.name);
-            sb.append(endl);
-            if(!KCVar.TYPE_NONE.equals(cvar.type))
-                sb.append(TextHelper.FormatDialogMessageSpace("    (")).append(cvar.type).append(")");
-        }
-        else
-        {
-            sb.append(TextHelper.FormatDialogMessageSpace("  *[CVar] ")).append(cvar.name);
-            sb.append(endl);
-            sb.append(TextHelper.FormatDialogMessageSpace("    - ")).append(KStr.ucfirst(cvar.type)).append(TextHelper.FormatDialogMessageSpace("  default: ")).append(cvar.defaultValue);
-            if(cvar.HasFlags(Integer.MAX_VALUE & ~(Integer.MAX_VALUE & KCVar.FLAG_LAUNCHER)))
-            {
-                sb.append(TextHelper.FormatDialogMessageSpace("  ("));
-                if(cvar.HasFlag(KCVar.FLAG_POSITIVE))
-                    sb.append(" Positive");
-                if(cvar.HasFlag(KCVar.FLAG_INIT))
-                    sb.append(" CommandLine-Only");
-                if(cvar.HasFlag(KCVar.FLAG_AUTO))
-                    sb.append(" Auto-Setup");
-                if(cvar.HasFlag(KCVar.FLAG_READONLY))
-                    sb.append(" Readonly");
-                if(cvar.HasFlag(KCVar.FLAG_DISABLED))
-                    sb.append(" Disabled");
-                sb.append(" )");
-            }
-        }
-        sb.append(endl);
-        sb.append(TextHelper.FormatDialogMessageSpace("    ")).append(cvar.description);
-        sb.append(endl);
-        if(null != cvar.values)
-        {
-            for(KCVar.Value str : cvar.values)
-            {
-                sb.append(TextHelper.FormatDialogMessageSpace("      "));
-                sb.append(str.value).append(" - ").append(str.desc);
-                sb.append(endl);
-            }
-        }
-        sb.append(endl);
-        return sb.toString();
     }
 }

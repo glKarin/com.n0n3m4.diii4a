@@ -540,4 +540,9 @@
     <string name="name_must_not_empty">名称不能为空!</string>
     <string name="urbanterror">UrT</string>
     <string name="urbanterror_base">Urban Terror</string>
+    <string name="add_bots_automatic_harm_bot_autoadd">自动添加Bot(harm_bot_autoAdd)</string>
+    <string name="number_of_bots">Bot数量</string>
+    <string name="bot_difficulty_level_harm_bot_botlevel">Bot难度(harm_bot_botLevel)</string>
+    <string name="_0_random_n1_5_bot_difficulty_level">0 = 随机\n1 - 5 = Bot难度等级</string>
+    <string name="_0_disable_n_1_maximum_npositive_number_bots_num">0 = 禁用\n-1 = 最大\n正数 = Bot数量</string>
 </resources>

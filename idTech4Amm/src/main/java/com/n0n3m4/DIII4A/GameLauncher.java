@@ -70,6 +70,7 @@ import com.karin.idTech4Amm.ControllerConfigActivity;
 import com.karin.idTech4Amm.OnScreenButtonConfigActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
+import com.karin.idTech4Amm.lib.KCVarSystem;
 import com.karin.idTech4Amm.lib.UIUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.ChangeLog;
@@ -79,6 +80,7 @@ import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.karin.idTech4Amm.sys.Theme;
+import com.karin.idTech4Amm.ui.CVarListView;
 import com.karin.idTech4Amm.ui.ChangelogView;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.ExperimentalDialog;
@@ -1440,6 +1442,10 @@ public class GameLauncher extends Activity
 		{
 			Updatehacktings_Source();
 		}
+		else if(Q3EUtils.q3ei.isUrT)
+		{
+			Updatehacktings_UrT();
+		}
 
 		// game mods for every games
 		str = GetGameModFromCommand();
@@ -1666,6 +1672,19 @@ public class GameLauncher extends Activity
 				index = 0;
 		}
 		SelectRadioGroup(V.source_sv_cl, index);
+	}
+
+	private void Updatehacktings_UrT()
+	{
+		String str;
+
+		str = GetProp("harm_bot_autoAdd");
+		if (str != null)
+			V.urt_bot_autoAdd.setText(str);
+
+		str = GetProp("harm_bot_level");
+		if (str != null)
+			V.urt_bot_level.setText(str);
 	}
 
     private void ThrowException()
@@ -2031,6 +2050,9 @@ public class GameLauncher extends Activity
 
 		// Source Engine
 		SetupUI_Source();
+
+		// UrT
+		SetupUI_UrT();
 
 		//DIII4A-specific
 		SetupCommandTextWatcher(true);
@@ -2405,6 +2427,57 @@ public class GameLauncher extends Activity
 		V.source_sv_cl.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
+	private void SetupUI_UrT()
+	{
+		String str = GetProp("harm_bot_autoAdd");
+		if(null != str)
+		{
+			V.urt_bot_autoAdd.setText(str);
+		}
+		V.urt_bot_autoAdd.addTextChangedListener(new TextWatcher() {
+			public void onTextChanged(CharSequence s, int start, int before, int count)
+			{
+				if(Q3EUtils.q3ei.isUrT)
+					SetProp("harm_bot_autoAdd", s);
+			}
+
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+			public void afterTextChanged(Editable s)
+			{
+				if(Q3EUtils.q3ei.isUrT)
+				{
+					String value = s.length() == 0 ? "0" : s.toString();
+					SetProp("harm_bot_autoAdd", value);
+				}
+			}
+		});
+
+		str = GetProp("harm_bot_level");
+		if(null != str)
+		{
+			V.urt_bot_level.setText(str);
+		}
+		V.urt_bot_level.addTextChangedListener(new TextWatcher() {
+			public void onTextChanged(CharSequence s, int start, int before, int count)
+			{
+				if(Q3EUtils.q3ei.isUrT)
+					SetProp("harm_bot_level", s);
+			}
+
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+			public void afterTextChanged(Editable s)
+			{
+				if(Q3EUtils.q3ei.isUrT)
+				{
+					String value = s.length() == 0 ? "0" : s.toString();
+					SetProp("harm_bot_level", value);
+				}
+			}
+		});
+	}
+
 	private void AfterCreated()
 	{
 		try
@@ -2759,8 +2832,6 @@ public class GameLauncher extends Activity
 
     private void OpenChanges()
     {
-        //ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.changes), TextHelper.GetChangesText());
-
 		ChangelogView changelogView = new ChangelogView(this, ChangeLog.GetChangeLogs());
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.changes);
@@ -3549,7 +3620,42 @@ public class GameLauncher extends Activity
 
     private void OpenCvarListDetail()
     {
-        ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.special_cvar_list), TextHelper.GetCvarText());
+		CVarListView cvarListView = new CVarListView(this, new ArrayList<>(KCVarSystem.CVars().values()));
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.special_cvar_list);
+		builder.setView(cvarListView);
+		builder.setPositiveButton(R.string.ok, new AlertDialog.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		builder.setNeutralButton(R.string.expand_all, null);
+		builder.setNegativeButton(R.string.collapse_all, null);
+
+		AlertDialog dialog = builder.create();
+		dialog.create();
+		dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+			@Override
+			public void onShow(DialogInterface d)
+			{
+				dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						cvarListView.ExpandAll();
+					}
+				});
+
+				dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						cvarListView.CollapseAll();
+					}
+				});
+			}
+		});
+
+		dialog.show();
     }
 
 	private void SetGame(String game)
@@ -3613,6 +3719,7 @@ public class GameLauncher extends Activity
 		V.fteqw_section.setVisibility(Q3EUtils.q3ei.isFTEQW ? View.VISIBLE : View.GONE);
 		V.xash3d_section.setVisibility(Q3EUtils.q3ei.isXash3D ? View.VISIBLE : View.GONE);
 		V.source_section.setVisibility(Q3EUtils.q3ei.isSource ? View.VISIBLE : View.GONE);
+		V.urt_section.setVisibility(Q3EUtils.q3ei.isUrT ? View.VISIBLE : View.GONE);
 		V.sdl_section.setVisibility(Q3EUtils.q3ei.IsUsingSDL() ? View.VISIBLE : View.GONE);
 		V.openal_section.setVisibility(Q3EUtils.q3ei.IsUsingOpenAL() ? View.VISIBLE : View.GONE);
 
@@ -4624,6 +4731,9 @@ public class GameLauncher extends Activity
 		public LinearLayout openal_section;
 		public RadioGroup openal_driver;
 		public Button launcher_tab1_edit_env;
+		public LinearLayout urt_section;
+		public EditText urt_bot_autoAdd;
+		public EditText urt_bot_level;
 
 		private RadioGroup CreateGameRadioGroup(int[] id)
 		{
@@ -4817,6 +4927,9 @@ public class GameLauncher extends Activity
 			openal_section = findViewById(R.id.openal_section);
 			openal_driver = findViewById(R.id.openal_driver);
 			launcher_tab1_edit_env = findViewById(R.id.launcher_tab1_edit_env);
+			urt_section = findViewById(R.id.urt_section);
+			urt_bot_autoAdd = findViewById(R.id.urt_bot_autoAdd);
+			urt_bot_level = findViewById(R.id.urt_bot_level);
         }
     }
 }

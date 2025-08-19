@@ -513,6 +513,10 @@ void SV_BotInitCvars(void) {
 	Cvar_Get("bot_interbreedbots", "10", CVAR_CHEAT);	//number of bots used for interbreeding
 	Cvar_Get("bot_interbreedcycle", "20", CVAR_CHEAT);	//bot interbreeding cycle
 	Cvar_Get("bot_interbreedwrite", "", CVAR_CHEAT);	//write interbreeded bots to this file
+#ifdef __ANDROID__ //karin: auto add bots
+	Cvar_Get("harm_bot_level", "0", CVAR_ARCHIVE);
+	Cvar_Get("harm_bot_autoAdd", "0", CVAR_ARCHIVE);
+#endif
 }
 
 /*
@@ -634,3 +638,125 @@ int SV_BotGetSnapshotEntity( int client, int sequence ) {
 	return svs.snapshotEntities[(frame->first_entity + sequence) % svs.numSnapshotEntities].number;
 }
 
+#ifdef __ANDROID__ //karin: auto add bots
+// https://www.urbanterror.info/support/188-game-bots/
+// /addbot <type> <level> <team> <ping> <server nick>
+/*
+ <level> should be between 1 (n00bish) - 5 (malevolent)
+
+so the following would add a level 4 bot called "=lvl4=Puma" to the blue team:
+
+/addbot Puma 4 Blue 76 =lvl4=Puma
+
+Each bot type has it's own weapon load out - Puma for example uses a LR300ML + Spas + Baretta combo. By making sure at least 1 bot has the same weapons as you, you'll never run out of ammo.
+
+Tactically, the bots are not very bright, and you can't give them orders like q3 bots, however they do use the same evasion techniques (varying levels of crouching, bunny hopping and strafing) as live players, with varying levels of aggression.
+ */
+/*
+ Abbey
+ Algiers
+ Austria
+ Dressing room
+ Firing Range
+ Mandolin *
+ Riyadh
+ Prague*
+ Toxic*
+ Uptown
+
+Some maps work better than others. The maps marked with an asterisk are maps where the bots have trouble getting out of the spawn points.
+ */
+
+void SV_AddBots(int bot_autoAdd, int bot_level)
+{
+	int maxBots;
+    const int BotLimit = sv_maxclients->integer - 1; // exclude player
+	if(bot_autoAdd < 0)
+		maxBots = BotLimit;
+	else
+		maxBots = bot_autoAdd > BotLimit ? BotLimit : bot_autoAdd;
+	int botLevel;
+	if(bot_level <= 0)
+		botLevel = 0;
+	else
+		botLevel = bot_level;
+
+	const char *Bots[] = {
+			"boa",
+			"cheetah",
+			"chicken",
+			"cobra",
+			"cockroach",
+			"cougar",
+			"goose",
+			"mantis",
+			"penguin",
+			"puma",
+			"python",
+			"raven",
+			"scarab",
+			"scorpion",
+			"tiger",
+			"widow",
+	};
+	const int NumBot = sizeof(Bots) / sizeof(Bots[0]);
+
+	Com_Printf("[Harmattan]: Fill bots automatic %d.\n", maxBots);
+	char cmd[1024];
+	for(int i = 0; i < maxBots; i++)
+	{
+		int bl;
+		if(botLevel == 0)
+			bl = rand() % 5 + 1;
+		else
+			bl = botLevel;
+		int bi = rand() % NumBot;
+		const char *botName = Bots[bi];
+		snprintf(cmd, sizeof(cmd), "addbot %s %d", botName, bl);
+		Cbuf_ExecuteText(EXEC_NOW, cmd);
+		Com_Printf("[Harmattan]: %s.\n", cmd);
+	}
+
+	Com_Printf("[Harmattan]: team balance.\n");
+	Cbuf_ExecuteText(EXEC_NOW, "rcon balanceteams");
+}
+
+void SV_EnableBots(void)
+{
+	cvar_t *bot_autoAdd = Cvar_Get("harm_bot_autoAdd", "0", CVAR_ARCHIVE);
+	if(!bot_autoAdd || bot_autoAdd->integer == 0)
+	{
+		Com_Printf("[Harmattan]: Disable enable-bot automatic.\n");
+		return;
+	}
+	Cvar_Set( "bot_enable", "1");
+	bot_enable = 1;
+	Com_Printf("[Harmattan]: Enable bot automatic.\n");
+}
+
+void SV_FillBots(void)
+{
+	cvar_t *bot_autoAdd = Cvar_Get("harm_bot_autoAdd", "0", CVAR_ARCHIVE);
+	if(!bot_autoAdd || bot_autoAdd->integer == 0)
+	{
+		Com_Printf("[Harmattan]: Disable fill bots automatic.\n");
+		return;
+	}
+
+	cvar_t *bot_level = Cvar_Get("harm_bot_level", "0", CVAR_ARCHIVE);
+	SV_AddBots(bot_autoAdd->integer, bot_level->integer);
+}
+
+void SV_FillBots_f(void)
+{
+	cvar_t *bot_enable = Cvar_Get("bot_enable", "1", 0);
+	if(!bot_enable || bot_enable->integer == 0)
+	{
+		Com_Printf("[Harmattan]: bot disabled.\n");
+		return;
+	}
+
+	cvar_t *bot_level = Cvar_Get("harm_bot_level", "0", CVAR_ARCHIVE);
+	SV_AddBots(-1, bot_level->integer);
+}
+#endif

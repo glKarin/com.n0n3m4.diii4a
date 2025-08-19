@@ -1950,6 +1950,10 @@ void SV_AddOperatorCommands( void ) {
 	Cmd_AddCommand("bandel", SV_BanDel_f);
 	Cmd_AddCommand("exceptdel", SV_ExceptDel_f);
 	Cmd_AddCommand("flushbans", SV_FlushBans_f);
+#ifdef __ANDROID__ //karin: fill bots command
+	extern void SV_FillBots_f(void);
+	Cmd_AddCommand("fillbots", SV_FillBots_f);
+#endif
 }
 
 /*

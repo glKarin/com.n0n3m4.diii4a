@@ -984,6 +984,11 @@
             android:visibility="gone"></include>
 
         <include
+            android:id="@+id/urt_section"
+            layout="@layout/launcher_urt"
+            android:visibility="gone"></include>
+
+        <include
             android:id="@+id/openal_section"
             layout="@layout/launcher_openal"
             android:visibility="gone"></include>

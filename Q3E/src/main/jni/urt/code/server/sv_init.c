@@ -287,6 +287,10 @@ static void SV_Startup( void ) {
 	
 	// Join the ipv6 multicast group now that a map is running so clients can scan for us on the local network.
 	NET_JoinMulticast6();
+#ifdef __ANDROID__ //karin: enable bot automatic
+	extern void SV_EnableBots(void);
+	SV_EnableBots();
+#endif
 }
 
 
@@ -850,6 +854,10 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	}
 #endif
 
+#ifdef __ANDROID__ //karin: add bot automatic
+	extern void SV_FillBots(void);
+	SV_FillBots();
+#endif
 	Com_Printf ("-----------------------------------\n");
 }
 
