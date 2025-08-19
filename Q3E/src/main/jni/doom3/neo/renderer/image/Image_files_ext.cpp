@@ -677,7 +677,7 @@ LoadHDR
 RB: load floating point data from memory and convert it into packed R11G11B10F data
 =======================
 */
-static void LoadHDR( const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp )
+void LoadHDR( const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp )
 {
     if( !pic )
     {
