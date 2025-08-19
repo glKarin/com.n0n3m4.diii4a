@@ -27,6 +27,11 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // for disable macros
+//#undef snprintf
+//#undef vsnprintf
+//#undef strcmp
+//#undef strncmp
+
 // basic defines and includes
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_HDR
@@ -39,14 +44,11 @@ If you have questions concerning this license or the applicable additional terms
 #define TINYEXR_IMPLEMENTATION
 #ifdef _MINIZ
 #define TINYEXR_USE_INTERNAL_MINIZ 0
-#define TINYEXR_USE_CXX11 0
 #define TINYEXR_EXTERNAL_MINIZ_INCLUDE "../miniz/miniz.h"
 #endif
-//#undef snprintf
-//#undef vsnprintf
-//#undef strcmp
-//#undef strncmp
+#define TINYEXR_USE_CXX11 0
 #include "../externlibs/tinyexr/tinyexr.h"
+
 //#define snprintf		use_idStr_snPrintf
 //#define vsnprintf		use_idStr_vsnPrintf
 //#define strcmp			idStr::Cmp		// use_idStr_Cmp
