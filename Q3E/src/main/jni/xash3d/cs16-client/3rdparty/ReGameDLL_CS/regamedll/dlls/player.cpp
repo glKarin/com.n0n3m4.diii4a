@@ -1233,7 +1233,7 @@ BOOL EXT_FUNC CBasePlayer::__API_HOOK(TakeDamage)(entvars_t *pevInflictor, entva
 
 		if (!ShouldDoLargeFlinch(m_LastHitGroup, iGunType))
 		{
-			m_flVelocityModifier = 0.5f;
+			TakeDamageImpulse(pAttack, 0.0f, 0.5f);
 
 			if (m_LastHitGroup == HITGROUP_HEAD)
 				m_bHighDamage = (flDamage > 60);
@@ -1246,10 +1246,13 @@ BOOL EXT_FUNC CBasePlayer::__API_HOOK(TakeDamage)(entvars_t *pevInflictor, entva
 		{
 			if (pev->velocity.Length() < 300)
 			{
-				Vector attack_velocity = (pev->origin - pAttack->pev->origin).Normalize() * 170;
-				pev->velocity = pev->velocity + attack_velocity;
+#ifdef REGAMEDLL_ADD
+				float knockbackValue = knockback.value;
+#else
+				float knockbackValue = 170;
+#endif
 
-				m_flVelocityModifier = 0.65f;
+				TakeDamageImpulse(pAttack, knockbackValue, 0.65f);
 			}
 
 			SetAnimation(PLAYER_LARGE_FLINCH);
@@ -1847,11 +1850,7 @@ void EXT_FUNC CBasePlayer::__API_HOOK(RemoveAllItems)(BOOL removeSuit)
 	int i;
 
 #ifdef REGAMEDLL_FIXES
-	if (m_pTank)
-	{
-		m_pTank->Use(this, this, USE_OFF, 0);
-		m_pTank = nullptr;
-	}
+	DetachTank();
 #endif
 
 	if (m_bHasDefuser)
@@ -2350,11 +2349,7 @@ void EXT_FUNC CBasePlayer::__API_HOOK(Killed)(entvars_t *pevAttacker, int iGib)
 #endif
 	}
 
-	if (m_pTank)
-	{
-		m_pTank->Use(this, this, USE_OFF, 0);
-		m_pTank = nullptr;
-	}
+	DetachTank();
 
 #ifndef REGAMEDLL_FIXES
 	CSound *pSound = CSoundEnt::SoundPointerForIndex(CSoundEnt::ClientSoundIndex(edict()));
@@ -3834,11 +3829,7 @@ LINK_HOOK_CLASS_VOID_CHAIN2(CBasePlayer, Disappear)
 
 void EXT_FUNC CBasePlayer::__API_HOOK(Disappear)()
 {
-	if (m_pTank)
-	{
-		m_pTank->Use(this, this, USE_OFF, 0);
-		m_pTank = nullptr;
-	}
+	DetachTank();
 
 #ifndef REGAMEDLL_FIXES
 	CSound *pSound = CSoundEnt::SoundPointerForIndex(CSoundEnt::ClientSoundIndex(edict()));
@@ -4102,11 +4093,8 @@ void EXT_FUNC CBasePlayer::__API_HOOK(StartObserver)(Vector &vecPosition, Vector
 	if (m_pActiveItem)
 		m_pActiveItem->Holster();
 
-	if (m_pTank)
-	{
-		m_pTank->Use(this, this, USE_OFF, 0);
-		m_pTank = nullptr;
-	}
+	// stop controlling any tank
+	DetachTank();
 
 	// clear out the suit message cache so we don't keep chattering
 	SetSuitUpdate(nullptr, SUIT_SENTENCE, SUIT_REPEAT_OK);
@@ -4207,12 +4195,9 @@ void CBasePlayer::PlayerUse()
 	// Hit Use on a train?
 	if (m_afButtonPressed & IN_USE)
 	{
-		if (m_pTank)
+		if (DetachTank())
 		{
-			// Stop controlling the tank
 			// TODO: Send HUD Update
-			m_pTank->Use(this, this, USE_OFF, 0);
-			m_pTank = nullptr;
 			return;
 		}
 
@@ -4389,6 +4374,19 @@ LINK_HOOK_CLASS_VOID_CHAIN2(CBasePlayer, UseEmpty)
 void EXT_FUNC CBasePlayer::__API_HOOK(UseEmpty)()
 {
 	EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/wpn_denyselect.wav", 0.4, ATTN_NORM);
+}
+
+bool CBasePlayer::DetachTank()
+{
+	if (m_pTank)
+	{
+		// Stop controlling the tank
+		m_pTank->Use(this, this, USE_OFF, 0);
+		m_pTank = nullptr;
+		return true;
+	}
+
+	return false;
 }
 
 void CBasePlayer::HostageUsed()
@@ -5594,7 +5592,9 @@ CTSpawn:
 	// The terrorist spawn points
 	else if (g_pGameRules->IsDeathmatch() && m_iTeam == TERRORIST)
 	{
+#ifdef REGAMEDLL_ADD
 TSpawn:
+#endif
 		pSpot = g_pLastTerroristSpawn;
 
 		if (SelectSpawnSpot("info_player_deathmatch", pSpot))
@@ -8164,7 +8164,9 @@ void CBasePlayer::InitStatusBar()
 	m_SbarString0[0] = '\0';
 }
 
-void CBasePlayer::UpdateStatusBar()
+LINK_HOOK_CLASS_VOID_CHAIN2(CBasePlayer, UpdateStatusBar)
+
+void EXT_FUNC CBasePlayer::__API_HOOK(UpdateStatusBar)()
 {
 	int newSBarState[SBAR_END];
 	char sbuf0[MAX_SBAR_STRING];
@@ -10861,6 +10863,17 @@ bool CBasePlayer::Kill()
 		CSGameRules()->m_iConsecutiveVIP = 10;
 
 	return true;
+}
+
+LINK_HOOK_CLASS_VOID_CHAIN(CBasePlayer, TakeDamageImpulse, (CBasePlayer *pAttacker, float flKnockbackForce, float flVelModifier), pAttacker, flKnockbackForce, flVelModifier)
+
+void EXT_FUNC CBasePlayer::__API_HOOK(TakeDamageImpulse)(CBasePlayer *pAttacker, float flKnockbackForce, float flVelModifier)
+{
+	if (flKnockbackForce != 0.0f)
+		pev->velocity += (pev->origin - pAttacker->pev->origin).Normalize() * flKnockbackForce;
+
+	if (flVelModifier != 0.0f)
+		m_flVelocityModifier = flVelModifier;
 }
 
 const usercmd_t *CBasePlayer::GetLastUserCommand() const

@@ -395,7 +395,7 @@ bool FloydWarshallAlgo::load () {
    return true;
 }
 
-void FloydWarshallAlgo::save () {
+void FloydWarshallAlgo::save () const {
    if (!m_length) {
       return;
    }
@@ -448,7 +448,7 @@ bool DijkstraAlgo::find (int srcIndex, int destIndex, NodeAdderFn onAddedNode, i
    m_distance[srcIndex] = 0;
 
    while (!m_queue.empty ()) {
-      auto route = m_queue.pop ();
+      const auto &route = m_queue.pop ();
       auto current = route.second;
 
       // finished search

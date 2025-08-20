@@ -174,9 +174,9 @@ cvar_t freezetime_duck                   = { "mp_freezetime_duck", "1", 0, 1.0f,
 cvar_t freezetime_jump                   = { "mp_freezetime_jump", "1", 0, 1.0f, nullptr };
 cvar_t jump_height                       = { "mp_jump_height", "45", FCVAR_SERVER, 45.0f, nullptr };
 
-cvar_t hostages_rescued_ratio = { "mp_hostages_rescued_ratio", "1.0", 0, 1.0f, nullptr };
+cvar_t hostages_rescued_ratio  = { "mp_hostages_rescued_ratio", "1.0", 0, 1.0f, nullptr };
 
-cvar_t legacy_vehicle_block               = { "mp_legacy_vehicle_block", "1", 0, 0.0f, nullptr };
+cvar_t legacy_vehicle_block    = { "mp_legacy_vehicle_block", "1", 0, 0.0f, nullptr };
 
 cvar_t dying_time              = { "mp_dying_time", "3.0", 0, 3.0f, nullptr };
 cvar_t defuser_allocation      = { "mp_defuser_allocation", "0", 0, 0.0f, nullptr };
@@ -198,6 +198,8 @@ cvar_t randomspawn             = { "mp_randomspawn", "0", FCVAR_SERVER, 0.0f, nu
 
 cvar_t playerid_showhealth     = { "mp_playerid_showhealth", "1", 0, 1.0f, nullptr };
 cvar_t playerid_field          = { "mp_playerid_field", "3", 0, 3.0f, nullptr };
+
+cvar_t knockback               = { "mp_knockback", "170", 0, 170.0f, nullptr };
 
 void GameDLL_Version_f()
 {
@@ -484,6 +486,8 @@ void EXT_FUNC GameDLLInit()
 	CVAR_REGISTER(&stamina_restore_rate);
 
 	CVAR_REGISTER(&flymove_method);
+
+	CVAR_REGISTER(&knockback);
 
 	// print version
 	CONSOLE_ECHO("ReGameDLL version: " APP_VERSION "\n");

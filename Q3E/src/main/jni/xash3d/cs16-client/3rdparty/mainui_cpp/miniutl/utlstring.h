@@ -4,11 +4,9 @@
 //
 //=============================================================================
 
+#pragma once
 #ifndef UTLSTRING_H
 #define UTLSTRING_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "miniutl.h"
 #include "generichash.h"
@@ -100,7 +98,7 @@ public:
 	void SetDirect( const char *pValue, size_t nChars );
 
 	// Get the length of the string in characters.
-	uint32 Length() const;
+	uint32_t Length() const;
 	bool IsEmpty() const;
 
 	// Format like sprintf.
@@ -110,7 +108,7 @@ public:
 	size_t AppendFormat( PRINTF_FORMAT_STRING const char *pFormat, ... ) FMTFUNCTION( 2, 3 );
 
 	// convert bytes to hex string and append
-	void AppendHex( const uint8 *pbInput, size_t cubInput, bool bLowercase = true );
+	void AppendHex( const uint8_t *pbInput, size_t cubInput, bool bLowercase = true );
 
 	// replace a single character with another, returns hit count
 	size_t Replace( char chTarget, char chReplacement );
@@ -453,12 +451,12 @@ inline void CUtlString::SetPtr( char *pchString )
 }
 
 
-inline uint32 CUtlString::Length() const
+inline uint32_t CUtlString::Length() const
 {
 	if ( !m_pchString )
 		return 0;
 
-	return (uint32) V_strlen( m_pchString );
+	return (uint32_t) V_strlen( m_pchString );
 }
 
 
@@ -660,7 +658,7 @@ public:
 template<>
 struct HashFunctor<CUtlString>
 {
-	uint32 operator()(const CUtlString &strKey) const
+	uint32_t operator()(const CUtlString &strKey) const
 	{
 		return HashString( strKey.String() );
 	}
@@ -668,7 +666,7 @@ struct HashFunctor<CUtlString>
 
 struct HashFunctorUtlStringCaseless
 {
-	typedef uint32 TargetType;
+	typedef uint32_t TargetType;
 	TargetType operator()(const CUtlString &strKey) const
 	{
 		return HashStringCaseless( strKey.String() );
@@ -677,7 +675,7 @@ struct HashFunctorUtlStringCaseless
 
 // HashItem() overload that works automatically with our hash containers
 template<>
-inline uint32 HashItem( const CUtlString &item )
+inline uint32_t HashItem( const CUtlString &item )
 {
 	return HashString( item );
 }

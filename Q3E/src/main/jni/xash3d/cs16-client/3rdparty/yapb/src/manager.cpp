@@ -18,6 +18,7 @@ ConVar cv_think_fps ("think_fps", "30.0", "Specifies how many times per second b
 ConVar cv_think_fps_disable ("think_fps_disable", "1", "Allows to completely disable think fps on Xash3D.", true, 0.0f, 1.0f, Var::Xash3D);
 
 ConVar cv_autokill_delay ("autokill_delay", "0.0", "Specifies amount of time in seconds when bots will be killed if no humans left alive.", true, 0.0f, 90.0f);
+ConVar cv_first_human_restart ("first_human_restart", "0.0", "Restart the game if first human player joined the bot game.", true, 0.0f, 1.0f);
 
 ConVar cv_join_after_player ("join_after_player", "0", "Specifies whether bots should join server, only when at least one human player in game.");
 ConVar cv_join_team ("join_team", "any", "Forces all bots to join team specified here.", false);
@@ -60,12 +61,11 @@ ConVar mp_freezetime ("mp_freezetime", nullptr, Var::GameRef, true, "0");
 BotManager::BotManager () {
    // this is a bot manager class constructor
 
-   for (int i = 0; i < kGameTeamNum; ++i) {
-      m_leaderChoosen[i] = false;
-      m_economicsGood[i] = true;
-
-      m_lastRadioTime[i] = 0.0f;
-      m_lastRadio[i] = kInvalidRadioSlot;
+   for (auto &td : m_teamData) {
+      td.leaderChoosen = false;
+      td.positiveEco = true;
+      td.lastRadioSlot = kInvalidRadioSlot;
+      td.lastRadioTimestamp = 0.0f;
    }
    reset ();
 
@@ -465,11 +465,34 @@ void BotManager::maintainLeaders () {
    }
 
    // select leader each team somewhere in round start
-   if (m_timeRoundStart + 5.0f > game.time () && m_timeRoundStart + 10.0f < game.time ()) {
+   if (m_timeRoundStart + rg (1.5f, 3.0f) < game.time ()) {
       for (int team = 0; team < kGameTeamNum; ++team) {
          selectLeaders (team, false);
       }
    }
+}
+
+void BotManager::maintainRoundRestart () {
+   if (!cv_first_human_restart || !game.isDedicated ()) {
+      return;
+   }
+   const int totalHumans = getHumansCount (true);
+   const int totalBots = getBotCount ();
+
+   if (totalHumans > 0
+      && m_numPreviousPlayers == 0
+      && totalHumans == 1
+      && totalBots > 0
+      && !m_resetHud) {
+
+      static ConVarRef sv_restartround ("sv_restartround");
+
+      if (sv_restartround.exists ()) {
+         sv_restartround.set ("1");
+      }
+   }
+   m_numPreviousPlayers = totalHumans;
+   m_resetHud = false;
 }
 
 void BotManager::maintainAutoKill () {
@@ -669,7 +692,7 @@ void BotManager::killAllBots (int team, bool silent) {
    // this function kills all bots on server (only this dll controlled bots)
 
    for (const auto &bot : m_bots) {
-      if (team != -1 && game.getRealTeam (bot->ent ()) != team) {
+      if (team != Team::Invalid && game.getRealTeam (bot->ent ()) != team) {
          continue;
       }
       bot->kill ();
@@ -922,11 +945,14 @@ void BotManager::listBots () {
          bot->index (),
          bot->pev->netname.chars (),
          bot->m_personality == Personality::Rusher ? "rusher" : bot->m_personality == Personality::Normal ? "normal" : "careful",
+
          botTeam (bot->ent ()),
          bot->m_difficulty,
          static_cast <int> (bot->pev->frags),
+
          bot->m_deathCount,
          bot->m_isAlive ? "yes" : "no",
+
          timelimitStr);
    }
    ctrl.msg ("%d bots", m_bots.length ());
@@ -1005,11 +1031,13 @@ void BotManager::updateTeamEconomics (int team, bool setTrue) {
    // that have not enough money to buy primary (with economics), and if this result higher 80%, player is can't
    // buy primary weapons.
 
+   auto &ecoStatus = m_teamData[team].positiveEco;
+
    if (setTrue || !cv_economics_rounds) {
-      m_economicsGood[team] = true;
+      ecoStatus = true;
       return; // don't check economics while economics disable
    }
-   const int *econLimit = conf.getEconLimit ();
+   const auto econLimit = conf.getEconLimit ();
 
    int numPoorPlayers = 0;
    int numTeamPlayers = 0;
@@ -1023,19 +1051,19 @@ void BotManager::updateTeamEconomics (int team, bool setTrue) {
          ++numTeamPlayers; // update count of team
       }
    }
-   m_economicsGood[team] = true;
+   ecoStatus = true;
 
    if (numTeamPlayers <= 1) {
       return;
    }
    // if 80 percent of team have no enough money to purchase primary weapon
    if ((numTeamPlayers * 80) / 100 <= numPoorPlayers) {
-      m_economicsGood[team] = false;
+      ecoStatus = false;
    }
 
    // winner must buy something!
    if (m_lastWinner == team) {
-      m_economicsGood[team] = true;
+      ecoStatus = true;
    }
 }
 
@@ -1123,7 +1151,7 @@ Bot::Bot (edict_t *bot, int difficulty, int personality, int team, int skin) {
       }
    }
 
-   char reject[StringBuffer::StaticBufferSize] = { 0, };
+   char reject[128] = { 0, };
    MDLL_ClientConnect (bot, bot->v.netname.chars (), strings.format ("127.0.0.%d", clientIndex + 100), reject);
 
    if (!strings.isEmpty (reject)) {
@@ -1490,6 +1518,7 @@ void Bot::newRound () {
    m_askCheckTime = rg (30.0f, 90.0f);
    m_minSpeed = 260.0f;
    m_prevSpeed = 0.0f;
+   m_prevVelocity = 0.0f;
    m_prevOrigin = Vector (kInfiniteDistance, kInfiniteDistance, kInfiniteDistance);
    m_prevTime = game.time ();
    m_lookUpdateTime = game.time ();
@@ -1569,6 +1598,7 @@ void Bot::newRound () {
          m_hitboxEnumerator = cr::makeUnique <PlayerHitboxEnumerator> ();
       }
    }
+   showChatterIcon (false);
 
    m_approachingLadderTimer.invalidate ();
    m_forgetLastVictimTimer.invalidate ();
@@ -1608,6 +1638,24 @@ void Bot::newRound () {
 
    m_buyState = BuyState::PrimaryWeapon;
    m_lastEquipTime = 0.0f;
+
+   // setup radio percent each round
+   const auto badMorale = m_fearLevel > m_agressionLevel ? rg.chance (75) : rg.chance (35);
+
+   switch (m_personality) {
+   case Personality::Normal:
+   default:
+      m_radioPercent = badMorale ? rg (50, 75) : rg (25, 50);
+      break;
+
+   case Personality::Rusher:
+      m_radioPercent = badMorale ? rg (35, 50) : rg (15, 35);
+      break;
+
+   case Personality::Careful:
+      m_radioPercent = badMorale ? rg (70, 90) : rg (50, 70);
+      break;
+   }
 
    // if bot died, clear all weapon stuff and force buying again
    if (!m_isAlive) {
@@ -2035,21 +2083,24 @@ void BotManager::updateInterestingEntities () {
 }
 
 void BotManager::selectLeaders (int team, bool reset) {
+   auto &leaderChoosen = m_teamData[team].leaderChoosen;
+
    if (reset) {
-      m_leaderChoosen[team] = false;
+      leaderChoosen = false;
       return;
    }
 
-   if (m_leaderChoosen[team]) {
+   if (leaderChoosen) {
       return;
    }
+   auto &leaderChoosenT = m_teamData[Team::Terrorist].leaderChoosen;
+   auto &leaderChoosenCT = m_teamData[Team::CT].leaderChoosen;
 
    if (game.mapIs (MapFlags::Assassination)) {
-      if (team == Team::CT && !m_leaderChoosen[Team::CT]) {
+      if (team == Team::CT && !leaderChoosenCT) {
          for (const auto &bot : m_bots) {
             if (bot->m_isVIP) {
-               // vip bot is the leader
-               bot->m_isLeader = true;
+               bot->m_isLeader = true; // vip bot is the leader
 
                if (rg.chance (50)) {
                   bot->pushRadioMessage (Radio::FollowMe);
@@ -2057,9 +2108,9 @@ void BotManager::selectLeaders (int team, bool reset) {
                }
             }
          }
-         m_leaderChoosen[Team::CT] = true;
+         leaderChoosenCT = true;
       }
-      else if (team == Team::Terrorist && !m_leaderChoosen[Team::Terrorist]) {
+      else if (team == Team::Terrorist && !leaderChoosenT) {
          auto bot = bots.findHighestFragBot (team);
 
          if (bot != nullptr && bot->m_isAlive) {
@@ -2069,11 +2120,11 @@ void BotManager::selectLeaders (int team, bool reset) {
                bot->pushRadioMessage (Radio::FollowMe);
             }
          }
-         m_leaderChoosen[Team::Terrorist] = true;
+         leaderChoosenT = true;
       }
    }
    else if (game.mapIs (MapFlags::Demolition)) {
-      if (team == Team::Terrorist && !m_leaderChoosen[Team::Terrorist]) {
+      if (team == Team::Terrorist && !leaderChoosenT) {
          for (const auto &bot : m_bots) {
             if (bot->m_hasC4) {
                // bot carrying the bomb is the leader
@@ -2091,9 +2142,9 @@ void BotManager::selectLeaders (int team, bool reset) {
                }
             }
          }
-         m_leaderChoosen[Team::Terrorist] = true;
+         leaderChoosenT = true;
       }
-      else if (!m_leaderChoosen[Team::CT]) {
+      else if (!leaderChoosenCT) {
          if (auto bot = bots.findHighestFragBot (team)) {
             bot->m_isLeader = true;
 
@@ -2101,31 +2152,31 @@ void BotManager::selectLeaders (int team, bool reset) {
                bot->pushRadioMessage (Radio::FollowMe);
             }
          }
-         m_leaderChoosen[Team::CT] = true;
+         leaderChoosenCT = true;
       }
    }
    else if (game.mapIs (MapFlags::Escape | MapFlags::KnifeArena | MapFlags::FightYard)) {
       auto bot = bots.findHighestFragBot (team);
 
-      if (!m_leaderChoosen[team] && bot) {
+      if (!leaderChoosen && bot) {
          bot->m_isLeader = true;
 
          if (rg.chance (30)) {
             bot->pushRadioMessage (Radio::FollowMe);
          }
-         m_leaderChoosen[team] = true;
+         leaderChoosen = true;
       }
    }
    else {
       auto bot = bots.findHighestFragBot (team);
 
-      if (!m_leaderChoosen[team] && bot) {
+      if (!leaderChoosen && bot) {
          bot->m_isLeader = true;
 
          if (rg.chance (team == Team::Terrorist ? 30 : 40)) {
             bot->pushRadioMessage (Radio::FollowMe);
          }
-         m_leaderChoosen[team] = true;
+         leaderChoosen = true;
       }
    }
 }
@@ -2140,7 +2191,7 @@ void BotManager::initRound () {
       updateTeamEconomics (team);
       selectLeaders (team, true);
 
-      m_lastRadioTime[team] = 0.0f;
+      m_teamData[team].lastRadioTimestamp = 0.0f;
    }
    reset ();
 

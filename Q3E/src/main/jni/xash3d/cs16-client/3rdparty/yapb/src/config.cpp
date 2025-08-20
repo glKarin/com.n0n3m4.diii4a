@@ -46,6 +46,19 @@ void BotConfig::loadMainConfig (bool isFirstLoad) {
       return false;
    };
 
+   auto storeVarValue = [] (cvar_t *c,  StringRef value) {
+      auto &cvars = game.getCvars ();
+
+      for (auto &var : cvars) {
+         if (var.name == c->name) {
+            var.init = value;
+            engfuncs.pfnCvar_DirectSet (c, value.chars ());
+
+            break;
+         }
+      }
+   };
+
    String line {};
    MemFile file {};
 
@@ -77,16 +90,16 @@ void BotConfig::loadMainConfig (bool isFirstLoad) {
 
                   // preserve quota number if it's zero
                   if (cv_quota.name () == cvar->name && cv_quota.as <int> () <= 0) {
-                     engfuncs.pfnCvar_DirectSet (cvar, value);
+                     storeVarValue (cvar, value);
                      continue;
                   }
                   ctrl.msg ("Bot CVAR '%s' differs from the stored in the config (%s/%s). Ignoring.", cvar->name, cvar->string, value);
 
                   // ensure cvar will have old value
-                  engfuncs.pfnCvar_DirectSet (cvar, cvar->string);
+                  storeVarValue (cvar, cvar->string);
                }
                else {
-                  engfuncs.pfnCvar_DirectSet (cvar, value);
+                  storeVarValue (cvar, value);
                }
             }
             else {
@@ -108,12 +121,17 @@ void BotConfig::loadMainConfig (bool isFirstLoad) {
    // preload custom config
    conf.loadCustomConfig ();
 
+   // startup the sockets on windows and check if our host is available
+   if (isFirstLoad) {
+      http.startup (conf.fetchCustom ("CheckConnectivityHost"), "Bot is unable to check network availability. Networking features are disabled.");
+   }
+
    // bind the correct menu key for bot menu...
    if (!game.isDedicated ()) {
       auto val = cv_bind_menu_key.as <StringRef> ();
 
       if (!val.empty ()) {
-         game.serverCommand ("bind \"%s\" \"yb menu\"", val);
+         game.serverCommand ("bind \"%s\" \"%s menu\"", val, product.cmdPri);
       }
    }
    static const bool disableLogWrite = conf.fetchCustom ("DisableLogFile").startsWith ("yes");
@@ -208,28 +226,29 @@ void BotConfig::loadWeaponsConfig () {
             trim.trim ();
          }
          auto splitted = pair[1].split (",");
+         auto key = pair[0];
 
-         if (pair[0].startsWith ("MapStandard")) {
-            addWeaponEntries (m_weapons, false, pair[0], splitted);
+         if (key.startsWith ("MapStandard")) {
+            addWeaponEntries (m_weapons, false, key, splitted);
          }
-         else if (pair[0].startsWith ("MapAS")) {
-            addWeaponEntries (m_weapons, true, pair[0], splitted);
+         else if (key.startsWith ("MapAS")) {
+            addWeaponEntries (m_weapons, true, key, splitted);
          }
 
-         else if (pair[0].startsWith ("GrenadePercent")) {
-            addIntEntries (m_grenadeBuyPrecent, pair[0], splitted);
+         else if (key.startsWith ("GrenadePercent")) {
+            addIntEntries (m_grenadeBuyPrecent, key, splitted);
          }
-         else if (pair[0].startsWith ("Economics")) {
-            addIntEntries (m_botBuyEconomyTable, pair[0], splitted);
+         else if (key.startsWith ("Economics")) {
+            addIntEntries (m_botBuyEconomyTable, key, splitted);
          }
-         else if (pair[0].startsWith ("PersonalityNormal")) {
-            addIntEntries (m_normalWeaponPrefs, pair[0], splitted);
+         else if (key.startsWith ("PersonalityNormal")) {
+            addIntEntries (m_normalWeaponPrefs, key, splitted);
          }
-         else if (pair[0].startsWith ("PersonalityRusher")) {
-            addIntEntries (m_rusherWeaponPrefs, pair[0], splitted);
+         else if (key.startsWith ("PersonalityRusher")) {
+            addIntEntries (m_rusherWeaponPrefs, key, splitted);
          }
-         else if (pair[0].startsWith ("PersonalityCareful")) {
-            addIntEntries (m_carefulWeaponPrefs, pair[0], splitted);
+         else if (key.startsWith ("PersonalityCareful")) {
+            addIntEntries (m_carefulWeaponPrefs, key, splitted);
          }
       }
       file.close ();
@@ -244,7 +263,7 @@ void BotConfig::loadChatterConfig () {
 
    // chatter initialization
    if (game.is (GameFlags::HasBotVoice) && cv_radio_mode.as <int> () == 2
-      && openConfig ("chatter", "Couldn't open chatter system configuration", &file)) {
+      && openConfig ("chatter", "Couldn't open chatter configuration.", &file)) {
 
       m_chatter.clear ();
 
@@ -402,7 +421,7 @@ void BotConfig::loadChatConfig () {
    MemFile file {};
 
    // chat config initialization
-   if (openConfig ("chat", "Chat file not found.", &file, true)) {
+   if (openConfig ("chat", "Couldn't open chat configuration.", &file, true)) {
       StringArray *chat = nullptr;
 
       StringArray keywords {};
@@ -549,7 +568,7 @@ void BotConfig::loadLanguageConfig () {
       file.close ();
    }
    else if (cv_language.as <StringRef> () != "en") {
-      logger.error ("Couldn't load language configuration");
+      logger.error ("Couldn't load language configuration.");
    }
 }
 
@@ -697,10 +716,10 @@ void BotConfig::loadCustomConfig () {
          { "ZMDelayCvar",  "zp_delay" },
          { "ZMInfectedTeam", "T" },
          { "EnableFakeBotFeatures", "no" },
-         { "DisableLogFile", "no" }
+         { "DisableLogFile", "no" },
+         { "CheckConnectivityHost", "yapb.jeefo.net" }
       };
    };
-
    setDefaults ();
 
    // has errors ?
@@ -760,12 +779,13 @@ void BotConfig::loadLogosConfig () {
          if (isCommentLine (line)) {
             continue;
          }
-         addLogoIndex (line);
+         addLogoIndex (line.trim ());
       }
    }
 
    // use defaults
    if (m_logosIndices.empty ()) {
+      game.print ("EMPTY!!!!!");
       auto defaults = String { "{biohaz;{graf003;{graf004;{graf005;{lambda06;{target;{hand1;{spit2;{bloodhand6;{foot_l;{foot_r" }.split (";");
 
       for (const auto &logo : defaults) {

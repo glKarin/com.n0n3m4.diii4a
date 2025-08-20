@@ -13,13 +13,19 @@
 #endif // _WIN32
 
 #include <sys/types.h> // off_t
+#ifdef STDINT_H
 #include STDINT_H
+#else // !STDINT_H
+#include <stdint.h>
+#endif // !STDINT_H
 #include <assert.h>
 
 typedef uint8_t  byte;
 typedef float    vec_t;
 typedef vec_t    vec2_t[2];
+#ifndef vec3_t // SDK renames it to Vector
 typedef vec_t    vec3_t[3];
+#endif
 typedef vec_t    vec4_t[4];
 typedef vec_t    quat_t[4];
 typedef byte     rgba_t[4];	// unsigned byte colorpack
@@ -44,6 +50,7 @@ typedef int qboolean;
 
 #define BIT( n )		( 1U << ( n ))
 #define BIT64( n )		( 1ULL << ( n ))
+
 #define SetBits( iBitVector, bits )	((iBitVector) = (iBitVector) | (bits))
 #define ClearBits( iBitVector, bits )	((iBitVector) = (iBitVector) & ~(bits))
 #define FBitSet( iBitVector, bit )	((iBitVector) & (bit))
@@ -59,6 +66,8 @@ typedef int qboolean;
 // color strings
 #define IsColorString( p )	( p && *( p ) == '^' && *(( p ) + 1) && *(( p ) + 1) >= '0' && *(( p ) + 1 ) <= '9' )
 #define ColorIndex( c )	((( c ) - '0' ) & 7 )
+
+#undef EXPORT
 
 #if defined( __GNUC__ )
 	#if defined( __i386__ )
@@ -82,8 +91,10 @@ typedef int qboolean;
 	#define NORETURN           __attribute__(( noreturn ))
 	#define NONNULL            __attribute__(( nonnull ))
 	#define RETURNS_NONNULL    __attribute__(( returns_nonnull ))
-	#if __clang__
-		#define PFN_RETURNS_NONNULL // clang has bugged returns_nonnull for functions pointers, it's ignored and generates a warning about objective-c? O_o
+	#if __clang__ || __MCST__
+		// clang has bugged returns_nonnull for functions pointers, it's ignored and generates a warning about objective-c? O_o
+		// lcc doesn't support it at all
+		#define PFN_RETURNS_NONNULL
 	#else
 		#define PFN_RETURNS_NONNULL RETURNS_NONNULL
 	#endif

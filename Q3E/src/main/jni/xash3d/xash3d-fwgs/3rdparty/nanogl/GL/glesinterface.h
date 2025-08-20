@@ -27,15 +27,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 #endif
 
+
+#ifdef _WIN32
+#include <windows.h> //APIENTRY
+#endif
+
 #ifdef SOFTFP_LINK
 #define S __attribute__( ( pcs( "aapcs" ) ) )
 #else
 #define S
 #endif
 
-#ifdef _WIN32
-#include <windows.h> //APIENTRY
-#endif
 #ifndef APIENTRY
 #ifdef _MSC_VER
 #define APIENTRY WINAPI
@@ -259,5 +261,7 @@ struct GlESInterface
 #pragma no_softfp_linkage
 #endif
 #endif
+
+#undef S
 
 #endif

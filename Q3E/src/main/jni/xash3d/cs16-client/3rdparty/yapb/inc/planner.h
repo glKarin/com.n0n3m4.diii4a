@@ -198,7 +198,7 @@ public:
    bool load ();
 
    // flush matrices to disk, so we will not rebuild them on load same map
-   void save ();
+   void save () const;
 
    // do the pathfinding
    bool find (int srcIndex, int destIndex, NodeAdderFn onAddedNode, int *pathDistance = nullptr);

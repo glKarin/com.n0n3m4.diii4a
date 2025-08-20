@@ -1,10 +1,20 @@
 #ifndef __GL__H__
 #define __GL__H__
 
-#ifdef NANOGL_MANGLE_PREPEND
-#define GL_MANGLE( x ) p ## x
+#ifndef NANOGL_APIENTRY
+#if defined(_WIN32)
+#define NANOGL_APIENTRY __stdcall
 #else
-#define GL_MANGLE( x ) x
+#define NANOGL_APIENTRY
+#endif
+#endif
+
+#ifdef NANOGL_MANGLE_PREPEND
+#define GL_MANGLE( x ) NANOGL_APIENTRY p ## x
+#define GL_MANGLE_NAME( x ) p ## x
+#else
+#define GL_MANGLE( x ) NANOGL_APIENTRY x
+#define GL_MANGLE_NAME( x ) x
 #endif
 
 #ifdef __cplusplus
@@ -716,43 +726,32 @@ GLenum GL_MANGLE(glCheckFramebufferStatus)( GLenum target );
 void GL_MANGLE(glBindRenderbuffer)( GLenum target, GLuint renderbuffer );
 void GL_MANGLE(glDeleteRenderbuffers)( GLsizei n, const GLuint *renderbuffers );
 void GL_MANGLE(glGenRenderbuffers)( GLsizei n, GLuint *renderbuffers );
-
 void GL_MANGLE(glRenderbufferStorage)( GLenum target, GLenum internalformat, GLsizei width, GLsizei height );
-
 void GL_MANGLE(glFramebufferTexture2D)( GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level );
-
 void GL_MANGLE(glFramebufferRenderbuffer)( GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer );
 
 void GL_MANGLE(glNormalPointer)( GLenum type, GLsizei stride, const void *ptr );
 
 void GL_MANGLE(glMultiTexCoord3f)( GLenum, GLfloat, GLfloat, GLfloat );
 void GL_MANGLE(glMultiTexCoord3fARB)( GLenum, GLfloat, GLfloat, GLfloat );
-
 void GL_MANGLE(glMultiTexCoord2f)( GLenum, GLfloat, GLfloat );
 void GL_MANGLE(glMultiTexCoord2fARB)( GLenum, GLfloat, GLfloat );
 
-
 void GL_MANGLE(glDrawArrays)( GLenum mode, GLint first, GLsizei count );
 
-
 void GL_MANGLE(glBindBufferARB)( GLuint target, GLuint index );
-
 void GL_MANGLE(glGenBuffersARB)( GLuint count, GLuint *indexes );
-
 void GL_MANGLE(glDeleteBuffersARB)( GLuint count, GLuint *indexes );
-
 void GL_MANGLE(glBufferDataARB)( GLuint target, GLuint size, void *buffer, GLuint type );
-
 void GL_MANGLE(glBufferSubDataARB)( GLuint target, GLsizei offset, GLsizei size, void *buffer );
 
 GLboolean GL_MANGLE(glIsEnabled)( GLenum cap );
 
-typedef void ( *GL_DEBUG_PROC_ARB )( unsigned int source, unsigned int type, unsigned int id, unsigned int severity, int length, const char* message, void* userParam );
+typedef void ( NANOGL_APIENTRY *GL_DEBUG_PROC_ARB )( unsigned int source, unsigned int type, unsigned int id, unsigned int severity, int length, const char* message, void* userParam );
 void GL_MANGLE(glDebugMessageControlARB)( GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint* ids, GLboolean enabled );
 void GL_MANGLE(glDebugMessageInsertARB)( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char* buf );
 void GL_MANGLE(glDebugMessageCallbackARB)( GL_DEBUG_PROC_ARB callback, void* userParam );
 GLuint GL_MANGLE(glGetDebugMessageLogARB)( GLuint count, GLsizei bufsize, GLenum* sources, GLenum* types, GLuint* ids, GLuint* severities, GLsizei* lengths, char* messageLog );
-
 
 #ifdef __cplusplus
 }

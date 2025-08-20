@@ -36,6 +36,11 @@ You still needed to copy `valve` directory as all game resources located there.
 
 For additional info, run Xash3D with `-help` command line key.
 
+### Android
+0) Install the APK file.
+1) Copy `valve` directory to a folder named `xash` in the Internal storage.
+2) Run games from within the app.
+
 ## Contributing
 * Before sending an issue, check if someone already reported your issue. Make sure you're following "How To Ask Questions The Smart Way" guide by Eric Steven Raymond. Read more: http://www.catb.org/~esr/faqs/smart-questions.html.
 * Issues are accepted in both English and Russian.
@@ -76,11 +81,20 @@ This repository contains our fork of HLSDK and restored source code for Half-Lif
 
 ##### RedHat/Fedora
 * Only for 32-bit engine on 64-bit x86 operating system:
-  * Install development tools: `$ sudo dnf install git gcc gcc-c++ glibc-devel.i686 SDL2-devel.i686 opus-devel.i686 freetype-devel.i686 bzip2-devel.i686 libvorbis-devel.i686 opusfile-devel.i686 libogg-devel.i686`.
+  * Install development tools: `$ sudo dnf install git gcc gcc-c++ glibc-devel.i686 SDL3-devel.i686 sdl2-compat-devel.i686 opus-devel.i686 freetype-devel.i686 bzip2-devel.i686 libvorbis-devel.i686 opusfile-devel.i686 libogg-devel.i686`.
   * Set PKG_CONFIG_PATH environment variable to point at 32-bit libraries: `$ export PKG_CONFIG_PATH=/usr/lib/pkgconfig`.
 
 * For 64-bit engine on 64-bit x86 and other non-x86 systems:
-  * Install development tools: `$ sudo dnf install git gcc gcc-c++ SDL2-devel opus-devel freetype-devel bzip2-devel libvorbis-devel opusfile-devel libogg-devel`.
+  * Install development tools: `$ sudo dnf install git gcc gcc-c++ SDL3-devel sdl2-compat-devel opus-devel freetype-devel bzip2-devel libvorbis-devel opusfile-devel libogg-devel`.
+
+* Clone this repostory: `$ git clone --recursive https://github.com/FWGS/xash3d-fwgs`.
+
+#### Android (Windows/Linux/macOS)
+* Install [Android Studio](https://developer.android.com/studio) (or the command line tools).
+* Install [Python](https://python.org) (at least 2.7, latest is better).
+* Install [Git](https://git-scm.com/download/win).
+* Install [Ninja](https://ninja-build.org/).
+* Install [CMake](https://cmake.org/) (for some dependencies).
 
 * Clone this repostory: `$ git clone --recursive https://github.com/FWGS/xash3d-fwgs`.
 
@@ -100,3 +114,6 @@ If compiling 32-bit on amd64, make sure `PKG_CONFIG_PATH` from the previous step
 1) Configure build: `./waf configure` (you need to pass `-8` to compile 64-bit engine on 64-bit x86 processor).
 2) Compile: `./waf build`.
 3) Install: `./waf install --destdir=/path/to/any/output/directory`.
+
+#### Android (Windows/Linux/macOS)
+You can just open the `android` folder in Android Studio and build from here, or use `gradlew` to build from command line.

@@ -61,15 +61,15 @@ void *eglGetProcAddress( const char *procname )
 #if defined( __MULTITEXTURE_SUPPORT__ )
 	if ( !strcmp( procname, "glMultiTexCoord2fARB" ) )
 	{
-		return (void *)&GL_MANGLE(glMultiTexCoord2fARB);
+		return (void *)&GL_MANGLE_NAME(glMultiTexCoord2fARB);
 	}
 	else if ( !strcmp( procname, "glActiveTextureARB" ) )
 	{
-		return (void *)&GL_MANGLE(glActiveTexture);
+		return (void *)&GL_MANGLE_NAME(glActiveTexture);
 	}
 	else if ( !strcmp( procname, "glClientActiveTextureARB" ) )
 	{
-		return (void *)&GL_MANGLE(glClientActiveTexture);
+		return (void *)&GL_MANGLE_NAME(glClientActiveTexture);
 	}
 
 #endif

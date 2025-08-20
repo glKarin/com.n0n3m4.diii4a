@@ -5,18 +5,13 @@
 //
 //========================================================================//
 
+#pragma once
 #ifndef VSTDLIB_STRTOOLS_H
 #define VSTDLIB_STRTOOLS_H
-#pragma once
 
 #include <ctype.h>
 #include <string.h>
-
-#ifdef __MINGW32__
-	// for __MINGW_PRINTF_FORMAT
-	#include <stdio.h>
-#endif
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <stdarg.h>

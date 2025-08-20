@@ -13,45 +13,42 @@
 //
 //=============================================================================
 
+#pragma once
 #ifndef GENERICHASH_H
 #define GENERICHASH_H
 
-#if defined(_WIN32)
-#pragma once
-#endif
-
 #include "miniutl.h"
 
-uint32 MurmurHash3_32( const void *key, size_t len, uint32 seed, bool bCaselessStringVariant = false );
-void MurmurHash3_128( const void * key, const int len, const uint32 seed, void * out );
+uint32_t MurmurHash3_32( const void *key, size_t len, uint32_t seed, bool bCaselessStringVariant = false );
+void MurmurHash3_128( const void * key, const int len, const uint32_t seed, void * out );
 
-inline uint32 HashString( const char *pszKey, size_t len )
+inline uint32_t HashString( const char *pszKey, size_t len )
 {
 	return MurmurHash3_32( pszKey, len, 1047 /*anything will do for a seed*/, false );
 }
 
-inline uint32 HashStringCaseless( const char *pszKey, size_t len )
+inline uint32_t HashStringCaseless( const char *pszKey, size_t len )
 {
 	return MurmurHash3_32( pszKey, len, 1047 /*anything will do for a seed*/, true );
 }
 
-inline uint32 HashString( const char *pszKey )
+inline uint32_t HashString( const char *pszKey )
 {
 	return HashString( pszKey, strlen( pszKey ) );
 }
 
-inline uint32 HashStringCaseless( const char *pszKey )
+inline uint32_t HashStringCaseless( const char *pszKey )
 {
 	return HashStringCaseless( pszKey, strlen( pszKey ) );
 }
 
-inline uint32 HashInt64( uint64 h )
+inline uint32_t HashInt64( uint64_t h )
 {
 	// roughly equivalent to MurmurHash3_32( &lower32, sizeof(uint32), upper32_as_seed )...
 	// theory being that most of the entropy is in the lower 32 bits and we still mix
 	// everything together at the end, so not fully shuffling upper32 is not a big deal
-	uint32 h1 = static_cast<uint32>( h>>32 );
-	uint32 k1 = (uint32)h;
+	uint32_t h1 = static_cast<uint32_t>( h>>32 );
+	uint32_t k1 = (uint32_t)h;
 
 	k1 *= 0xcc9e2d51;
 	k1 = (k1 << 15) | (k1 >> 17);
@@ -70,7 +67,7 @@ inline uint32 HashInt64( uint64 h )
 	return h1;
 }
 
-inline uint32 HashInt( uint32 h )
+inline uint32_t HashInt( uint32_t h )
 {
 	h ^= h >> 16;
 	h *= 0x85ebca6b;
@@ -81,19 +78,19 @@ inline uint32 HashInt( uint32 h )
 }
 
 template <typename T>
-inline uint32 HashItemAsBytes( const T&item )
+inline uint32_t HashItemAsBytes( const T&item )
 {
-	if ( sizeof(item) == sizeof(uint32) )
-		return HashInt( *(uint32*)&item );
+	if ( sizeof( item ) == sizeof( uint32_t ))
+		return HashInt( *(uint32_t*)&item );
 
-	if ( sizeof(item) == sizeof(uint64) )
-		return HashInt64( *(uint64*)&item );
+	if ( sizeof( item ) == sizeof( uint64_t ))
+		return HashInt64( *(uint64_t*)&item );
 
 	return MurmurHash3_32( &item, sizeof(item), 1047 );
 }
 
 template <typename T>
-inline uint32 HashItem( const T &item )
+inline uint32_t HashItem( const T &item )
 {
 	return HashItemAsBytes( item );
 }
@@ -102,7 +99,7 @@ inline uint32 HashItem( const T &item )
 template<typename T>
 struct HashFunctor
 {
-	typedef uint32 TargetType;
+	typedef uint32_t TargetType;
 	TargetType operator()(const T &key) const
 	{
 		return HashItem( key );
@@ -112,7 +109,7 @@ struct HashFunctor
 template<>
 struct HashFunctor<char *>
 {
-	typedef uint32 TargetType;
+	typedef uint32_t TargetType;
 	TargetType operator()(const char *key) const
 	{
 		return HashString( key );
@@ -122,7 +119,7 @@ struct HashFunctor<char *>
 template<>
 struct HashFunctor<char const *>
 {
-	typedef uint32 TargetType;
+	typedef uint32_t TargetType;
 	TargetType operator()(const char *key) const
 	{
 		return HashString( key );
@@ -131,7 +128,7 @@ struct HashFunctor<char const *>
 
 struct HashFunctorStringCaseless
 {
-	typedef uint32 TargetType;
+	typedef uint32_t TargetType;
 	TargetType operator()(const char *key) const
 	{
 		return HashStringCaseless( key );
@@ -141,7 +138,7 @@ struct HashFunctorStringCaseless
 template<class T>
 struct HashFunctorUnpaddedStructure
 {
-	typedef uint32 TargetType;
+	typedef uint32_t TargetType;
 	TargetType operator()(const T &key) const
 	{
 		return HashItemAsBytes( key );

@@ -7,15 +7,12 @@
 // Serialization/unserialization buffer
 //=============================================================================//
 
+#pragma once
 #ifndef UTLBUFFER_H
 #define UTLBUFFER_H
 
-#ifdef _WIN32
-#pragma once
-#endif
-
-#include "utlmemory.h"
 #include <stdarg.h>
+#include "utlmemory.h"
 #include "utlstring.h"
 #include "minbase_endian.h"
 
@@ -151,8 +148,8 @@ public:
 	void			Purge();
 
 	void			Swap( CUtlBuffer &buf );
-	void			TakeOwnershipOfMemory( CUtlMemory<uint8> &mem );
-	void			ReleaseToMemory( CUtlMemory<uint8> &mem, int *punCurrentPut );
+	void			TakeOwnershipOfMemory( CUtlMemory<uint8_t> &mem );
+	void			ReleaseToMemory( CUtlMemory<uint8_t> &mem, int *punCurrentPut );
 
 	// detaches the memory, returns it, and clears the members (but detached memory is preserved)
 	void *			DetachAndClear();
@@ -169,15 +166,15 @@ public:
 	//		GetString will read a string until a space is reached
 
 	char			GetChar();
-	uint8			GetUint8();
+	uint8_t			GetUint8();
 	short			GetShort();
 	unsigned short	GetUnsignedShort();
 	int				GetInt();
 	int				GetIntHex();
 	unsigned int	GetUnsignedInt();
-	int16			GetInt16();
-	uint64			GetUnsignedInt64();
-	int64			GetInt64();
+	int16_t			GetInt16();
+	uint64_t		GetUnsignedInt64();
+	int64_t			GetInt64();
 	float			GetFloat();
 	double			GetDouble();
 	bool			GetString( char *pString, int nMaxLen );
@@ -241,14 +238,14 @@ public:
 	// Text mode: it'll convert the numbers to text versions
 	//		PutString will not write a terminating character
 	void			PutChar( char c );
-	void			PutUint8( uint8 ub );
+	void			PutUint8( uint8_t ub );
 	void			PutShort( short s );
 	void			PutUnsignedShort( unsigned short us );
 	void			PutInt( int i );
 	void			PutUnsignedInt( unsigned int u );
-	void			PutInt16( int16 s16 );
-	void			PutUnsignedInt64( uint64 u64 );
-	void			PutInt64( int64 u64 );
+	void			PutInt16( int16_t s16 );
+	void			PutUnsignedInt64( uint64_t u64 );
+	void			PutInt64( int64_t u64 );
 	void			PutFloat( float f );
 	void			PutDouble( double d );
 	void			PutString( const char* pString );
@@ -378,15 +375,15 @@ protected:
 	// it can't read *anything* new
 	bool CheckArbitraryPeekGet( int nOffset, int &nIncrement );
 
-	CUtlMemory<uint8> m_Memory;
+	CUtlMemory<uint8_t> m_Memory;
 	int m_Get;
 	int m_Put;
 
 	int m_nMaxPut;
-	uint16 m_nTab;
+	uint16_t m_nTab;
 
-	uint8 m_Error;
-	uint8 m_Flags;
+	uint8_t m_Error;
+	uint8_t m_Flags;
 
 	UtlBufferOverflowFunc_t m_GetOverflowFunc;
 	UtlBufferOverflowFunc_t m_PutOverflowFunc;
@@ -460,15 +457,15 @@ inline void *CUtlBuffer::ReservePut( int nBytes )
 			{									\
 				if( sizeof(_type) == 2 )		\
 				{								\
-					_val = LittleWord( (uint16)*(_type *)PeekGet() ); \
+					_val = LittleWord( (uint16_t)*(_type *)PeekGet() ); \
 				}								\
 				else if ( sizeof(_type) == 4 )	\
 				{								\
-					_val = LittleDWord( (uint32)*(_type *)PeekGet() ); \
+					_val = LittleDWord( (uint32_t)*(_type *)PeekGet() ); \
 				}								\
 				else if ( sizeof(_type) == 8 )	\
 				{								\
-					_val = LittleQWord( (uint64)*(_type *)PeekGet() );	\
+					_val = LittleQWord( (uint64_t)*(_type *)PeekGet() );	\
 				}								\
 				else							\
 				{								\
@@ -479,15 +476,15 @@ inline void *CUtlBuffer::ReservePut( int nBytes )
 			{									\
 				if( sizeof(_type) == 2 )		\
 				{								\
-					_val = BigWord( (uint16)*(_type *)PeekGet() ); \
+					_val = BigWord( (uint16_t)*(_type *)PeekGet() ); \
 				}								\
 				else if ( sizeof(_type) == 4 )	\
 				{								\
-					_val = BigDWord( (uint32)*(_type *)PeekGet() ); \
+					_val = BigDWord( (uint32_t)*(_type *)PeekGet() ); \
 				}								\
 				else if ( sizeof(_type) == 8 )	\
 				{								\
-					_val = BigQWord( (uint64)*(_type *)PeekGet() );	\
+					_val = BigQWord( (uint64_t)*(_type *)PeekGet() );	\
 				}								\
 				else							\
 				{								\
@@ -559,15 +556,15 @@ inline void* CUtlBuffer::PeekPut( int offset )
 		{									\
 			if( sizeof(_type) == 2 )		\
 			{								\
-				*(_type *)PeekPut() = (_type)LittleWord( (uint16)_val ); \
+				*(_type *)PeekPut() = (_type)LittleWord( (uint16_t)_val ); \
 			}								\
 			else if ( sizeof(_type) == 4 )	\
 			{								\
-				*(_type *)PeekPut() = (_type)LittleDWord( (uint32)_val ); \
+				*(_type *)PeekPut() = (_type)LittleDWord( (uint32_t)_val ); \
 			}								\
 			else if ( sizeof(_type) == 8 )	\
 			{								\
-				*(_type *)PeekPut() = (_type)LittleQWord( (uint64)_val ); \
+				*(_type *)PeekPut() = (_type)LittleQWord( (uint64_t)_val ); \
 			}								\
 			else							\
 			{								\
@@ -578,15 +575,15 @@ inline void* CUtlBuffer::PeekPut( int offset )
 		{									\
 			if( sizeof(_type) == 2 )		\
 			{								\
-				*(_type *)PeekPut() = (_type)BigWord( (uint16)_val );   \
+				*(_type *)PeekPut() = (_type)BigWord( (uint16_t)_val );   \
 			}								\
 			else if ( sizeof(_type) == 4 )	\
 			{								\
-				*(_type *)PeekPut() = (_type)BigDWord( (uint32)_val );  \
+				*(_type *)PeekPut() = (_type)BigDWord( (uint32_t)_val );  \
 			}								\
 			else if ( sizeof(_type) == 8 )	\
 			{								\
-				*(_type *)PeekPut() = (_type)BigQWord( (uint64)_val );	\
+				*(_type *)PeekPut() = (_type)BigQWord( (uint64_t)_val );	\
 			}								\
 			else							\
 			{								\

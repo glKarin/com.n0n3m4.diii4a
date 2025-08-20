@@ -10,7 +10,7 @@ add_definitions(-DSTDINT_H=<stdint.h>)
 add_definitions(-D_GNU_SOURCE)
 add_definitions(-DHAVE_TGMATH_H)
 add_definitions(-DHAVE_STRNCASECMP -DHAVE_STRCASECMP)
-add_definitions(-DXASH_BUILD_COMMIT=\"c90d1100965ec5a072d95c0c257f853a6673ca74\" -DXASH_BUILD_BRANCH=\"master\" -DXASH_BUILD_COMMIT_DATE=\"Jun\ 7,\ 2025\")
+add_definitions(-DXASH_BUILD_COMMIT=\"74b196d2c362ea195967be6f139faeed18795a53\" -DXASH_BUILD_BRANCH=\"master\" -DXASH_BUILD_COMMIT_DATE=\"2025-8-18\")
 
 add_subdirectory(public)
 add_subdirectory(filesystem)

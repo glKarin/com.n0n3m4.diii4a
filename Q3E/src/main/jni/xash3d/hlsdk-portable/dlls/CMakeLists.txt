@@ -23,7 +23,7 @@
 cmake_minimum_required(VERSION 3.9)
 project (SVDLL)
 
-set (SVDLL_LIBRARY hlsdk_server)
+set (SVDLL_LIBRARY server_hl)
 
 if(NOT MSVC)
 	add_compile_options(-fno-exceptions) # GCC/Clang flag
@@ -148,7 +148,6 @@ set (SVDLL_SOURCES
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c
-	../game_shared/vcs_info.cpp
 	../public/safe_snprintf.c
 )
 
@@ -183,21 +182,24 @@ else()
 endif()
 
 add_library (${SVDLL_LIBRARY} SHARED ${SVDLL_SOURCES})
+target_link_libraries(${SVDLL_LIBRARY} hlsdk_vcs_info)
 
-set_target_properties (${SVDLL_LIBRARY} PROPERTIES
-	POSITION_INDEPENDENT_CODE 1)
+set_target_properties (${SVDLL_LIBRARY} PROPERTIES POSITION_INDEPENDENT_CODE 1)
 
-if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Android" OR XASH_TERMUX)
+if(APPLE AND NOT "${SERVER_LIBRARY_NAME_OSX}" STREQUAL "")
+	# on Apple platforms we always use gamedll_osx liblist/gameinfo key, if it's set
+	set(SVDLL_NAME "${SERVER_LIBRARY_NAME_OSX}")
+elseif(NOT WIN32 AND NOT "${SERVER_LIBRARY_NAME_LINUX}" STREQUAL "")
+	# on non-Windows platforms we use gamedll_linux liblist/gameinfo key, if it's set
+	set(SVDLL_NAME "${SERVER_LIBRARY_NAME_LINUX}")
+else()
+	# on Windows or if no gamedll_osx or gamedll_linux is set, use default gamedll key
 	set(SVDLL_NAME "${SERVER_LIBRARY_NAME}")
-
-	set_target_properties(${SVDLL_LIBRARY} PROPERTIES
-		OUTPUT_NAME "${SVDLL_NAME}${POSTFIX}"
-		PREFIX "")
 endif()
 
-if(MSVC)
+set_target_postfix_with_name(${SVDLL_LIBRARY} ${SVDLL_NAME})
+
 	set_property(TARGET ${SVDLL_LIBRARY} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
 
 if(HAVE_LTO)
 	set_property(TARGET ${SVDLL_LIBRARY} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)

@@ -23,8 +23,7 @@ def build(bld):
 	excluded_files = ['mpstubb.cpp', 'stats.cpp', 'Wxdebug.cpp']
 
 	source = bld.path.ant_glob('**/*.cpp', excl=excluded_files)
-	source += bld.path.parent.ant_glob('pm_shared/*.c', 'public/safe_snprintf.c')
-	source += ['../game_shared/vcs_info.cpp']
+	source += bld.path.parent.ant_glob(['pm_shared/*.c', 'public/safe_snprintf.c'])
 
 	defines = bld.env.EXPORT_DEFINES_LIST
 	if 'HAVE_STRLCPY=1' not in defines:
@@ -47,18 +46,29 @@ def build(bld):
 		'../public'
 	]
 
-	if bld.env.DEST_OS not in ['android', 'dos'] or bld.env.TERMUX:
+	if bld.env.DEST_OS != 'dos' and not bld.env.ANDROID_APK:
 		install_path = os.path.join(bld.env.GAMEDIR, bld.env.SERVER_INSTALL_DIR)
 	else:
 		install_path = bld.env.PREFIX
 
+	if bld.env.DEST_OS == 'darwin' and bld.env.SERVER_LIBRARY_NAME_OSX:
+		# on Apple platforms we always use gamedll_osx liblist/gameinfo key, if it's set
+		server_dll_name = bld.env.SERVER_LIBRARY_NAME_OSX
+	elif bld.env.DEST_OS != 'win32' and bld.env.SERVER_LIBRARY_NAME_LINUX:
+		# on non-Windows platforms we use gamedll_linux liblist/gameinfo key, if it's set
+		server_dll_name = bld.env.SERVER_LIBRARY_NAME_LINUX
+	else:
+		# on Windows or if no gamedll_osx or gamedll_linux is set, use default gamedll key
+		server_dll_name = bld.env.SERVER_LIBRARY_NAME
+
 	bld.shlib(
 		source   = source,
-		target   = bld.env.SERVER_LIBRARY_NAME + bld.env.POSTFIX,
+		target   = server_dll_name + bld.env.POSTFIX,
 		name     = 'server',
 		features = 'c cxx',
 		includes = includes,
 		defines  = defines,
+		use      = 'vcs_info',
 		install_path = install_path,
 		idx = bld.get_taskgen_count()
 	)

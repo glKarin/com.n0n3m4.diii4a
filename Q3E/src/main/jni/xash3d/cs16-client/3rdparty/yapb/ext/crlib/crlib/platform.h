@@ -18,8 +18,16 @@ CR_NAMESPACE_BEGIN
 #  define CR_WINDOWS
 #endif
 
+#if defined(__EMSCRIPTEN__)
+#  define CR_EMSCRIPTEN
+#endif
+
 #if defined(__ANDROID__)
 #  define CR_ANDROID
+#endif
+
+#if defined(__vita__)
+#  define CR_PSVITA
 #endif
 
 #if !defined(CR_DEBUG) && (defined(DEBUG) || defined(_DEBUG))
@@ -53,7 +61,6 @@ CR_NAMESPACE_BEGIN
 #elif defined(__aarch64__)
 #  define CR_ARCH_ARM64
 #endif
-
 #if defined(CR_ARCH_ARM32) || defined(CR_ARCH_ARM64)
 #   define CR_ARCH_ARM
 #endif
@@ -129,7 +136,7 @@ CR_NAMESPACE_BEGIN
 #endif
 
 // no symbol versioning in native builds
-#if !defined(CR_NATIVE_BUILD)
+#if !defined(CR_NATIVE_BUILD) && !defined(CR_NO_GLIBC_VERSIONING)
 
 // set the minimal glibc as we can
 #if defined(CR_ARCH_ARM64) || defined(CR_ARCH_PPC64)
@@ -218,11 +225,18 @@ constexpr auto kLibrarySuffix = ".dll";
 #  include <io.h>
 #else
 constexpr auto kPathSeparator = "/";
+
 #  if defined(CR_MACOS)
       constexpr auto kLibrarySuffix = ".dylib";
 #  else
       constexpr auto kLibrarySuffix = ".so";
 #endif
+
+#  if defined(CR_PSVITA)
+#     define FNM_CASEFOLD 0x10
+#     include <sys/syslimits.h>
+#  endif
+
 #  include <unistd.h>
 #  include <dirent.h>
 #  include <fnmatch.h>
@@ -263,6 +277,8 @@ struct Platform : public Singleton <Platform> {
    bool arm = false;
    bool ppc = false;
    bool simd = false;
+   bool psvita = false;
+   bool emscripten = false;
 
    char appName[64] = {};
 
@@ -291,8 +307,16 @@ struct Platform : public Singleton <Platform> {
       arm = true;
 #endif
 
+#if defined(CR_PSVITA)
+      psvita = true;
+#endif
+
 #if defined(CR_ARCH_PPC)
       ppc = true;
+#endif
+
+#if defined(CR_EMSCRIPTEN)
+   	  emscripten = true;
 #endif
 
 #if !defined(CR_DISABLE_SIMD)

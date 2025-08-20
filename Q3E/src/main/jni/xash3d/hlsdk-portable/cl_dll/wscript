@@ -40,7 +40,7 @@ def configure(conf):
 			conf.fatal('VGUI was enabled but VGUI cannot be used')
 
 def build(bld):
-	libs = []
+	libs = ['vcs_info']
 	defines = ['CLIENT_DLL']
 	defines += bld.env.EXPORT_DEFINES_LIST
 	includes = ['.',
@@ -114,7 +114,7 @@ def build(bld):
 	if 'HAVE_STRLCAT=1' not in defines:
 		source += bld.path.parent.ant_glob('external/openbsd/strlcat.c')
 
-	if bld.env.DEST_OS not in ['android', 'dos'] or bld.env.TERMUX:
+	if bld.env.DEST_OS != 'dos' and not bld.env.ANDROID_APK:
 		install_path = os.path.join(bld.env.GAMEDIR, bld.env.CLIENT_INSTALL_DIR)
 	else:
 		install_path = bld.env.PREFIX

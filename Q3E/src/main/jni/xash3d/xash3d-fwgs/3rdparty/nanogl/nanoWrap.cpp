@@ -1142,7 +1142,7 @@ void GL_MANGLE(glDisable)( GLenum cap )
 
 void GL_MANGLE(glVertex2f)( GLfloat x, GLfloat y )
 {
-	GL_MANGLE(glVertex3f)( x, y, 0.0f );
+	GL_MANGLE_NAME(glVertex3f)( x, y, 0.0f );
 }
 
 __FORCEINLINE unsigned int ClampTo255( float value )
@@ -1282,7 +1282,7 @@ void GL_MANGLE(glTexParameterf)( GLenum target, GLenum pname, GLfloat param )
 
 void GL_MANGLE(glTexParameterfv)( GLenum target, GLenum pname, const GLfloat *params )
 {
-	GL_MANGLE(glTexParameterf)( target, pname, params[0] );
+	GL_MANGLE_NAME(glTexParameterf)( target, pname, params[0] );
 }
 
 void GL_MANGLE(glTexImage2D)( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels )
@@ -1505,17 +1505,17 @@ void GL_MANGLE(glCopyTexImage2D)( GLenum target, GLint level, GLenum internalfor
 
 void GL_MANGLE(glTexImage1D)( GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels )
 {
-	GL_MANGLE(glTexImage2D)( GL_TEXTURE_2D, level, internalformat, width, 1, border, format, type, pixels );
+	GL_MANGLE_NAME(glTexImage2D)( GL_TEXTURE_2D, level, internalformat, width, 1, border, format, type, pixels );
 }
 
 void GL_MANGLE(glTexImage3D)( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid *pixels )
 {
-	GL_MANGLE(glTexImage2D)( GL_TEXTURE_2D, level, internalformat, width, height, border, format, type, pixels );
+	GL_MANGLE_NAME(glTexImage2D)( GL_TEXTURE_2D, level, internalformat, width, height, border, format, type, pixels );
 }
 
 void GL_MANGLE(glTexSubImage1D)( GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid *pixels )
 {
-	GL_MANGLE(glTexSubImage2D)( target, level, xoffset, 0, width, 1, format, type, pixels );
+	GL_MANGLE_NAME(glTexSubImage2D)( target, level, xoffset, 0, width, 1, format, type, pixels );
 }
 
 void GL_MANGLE(glTexSubImage3D)( GLenum target, GLint level,
@@ -1525,7 +1525,7 @@ void GL_MANGLE(glTexSubImage3D)( GLenum target, GLint level,
                       GLenum format,
                       GLenum type, const GLvoid *pixels )
 {
-	GL_MANGLE(glTexSubImage2D)( target, level, xoffset, yoffset, width, height, format, type, pixels );
+	GL_MANGLE_NAME(glTexSubImage2D)( target, level, xoffset, yoffset, width, height, format, type, pixels );
 }
 
 GLboolean GL_MANGLE(glIsTexture)( GLuint texture )
@@ -2230,7 +2230,7 @@ void GL_MANGLE(glMultiTexCoord2fARB)( GLenum target, GLfloat s, GLfloat t )
 {
 	if ( target == GL_TEXTURE0 )
 	{
-		GL_MANGLE(glTexCoord2f)( s, t );
+		GL_MANGLE_NAME(glTexCoord2f)( s, t );
 	}
 	else
 	{
@@ -2241,12 +2241,12 @@ void GL_MANGLE(glMultiTexCoord2fARB)( GLenum target, GLfloat s, GLfloat t )
 
 void GL_MANGLE(glMultiTexCoord3fARB)( GLenum a, GLfloat b, GLfloat c, GLfloat )
 {
-	return GL_MANGLE(glMultiTexCoord2fARB)( a, b, c );
+	return GL_MANGLE_NAME(glMultiTexCoord2fARB)( a, b, c );
 }
 
 void GL_MANGLE(glMultiTexCoord2f)( GLenum a, GLfloat b, GLfloat c )
 {
-	GL_MANGLE(glMultiTexCoord2fARB)(a,b,c);
+	GL_MANGLE_NAME(glMultiTexCoord2fARB)(a,b,c);
 }
 
 #endif

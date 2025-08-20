@@ -269,7 +269,7 @@ void GraphAnalyze::cleanup () {
    }
 }
 
-void GraphAnalyze::displayOverlayMessage () {
+void GraphAnalyze::displayOverlayMessage () const {
    auto listenserverEdict = game.getLocalEntity ();
 
    if (game.isNullEntity (listenserverEdict) || !m_isAnalyzing) {

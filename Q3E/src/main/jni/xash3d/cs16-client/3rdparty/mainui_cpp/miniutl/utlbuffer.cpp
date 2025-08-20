@@ -6,10 +6,6 @@
 // Serialization buffer
 //===========================================================================//
 
-#ifndef _XBOX
-#pragma warning (disable : 4514)
-#endif
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <ctype.h>
@@ -655,7 +651,7 @@ bool CUtlBuffer::GetString( char *pString, int nMaxChars )
 	if ( !IsText() )
 	{
 		char c = GetChar();
-		VerifyEquals( c, 0 );
+		assert( c==0 );
 	}
 	return true;
 }
@@ -916,9 +912,6 @@ bool CUtlBuffer::SeekGet( SeekType_t type, int offset )
 //-----------------------------------------------------------------------------
 // Parse...
 //-----------------------------------------------------------------------------
-
-#pragma warning ( disable : 4706 )
-
 int CUtlBuffer::VaScanf( const char* pFmt, va_list list )
 {
 	Assert( pFmt );
@@ -1086,8 +1079,6 @@ int CUtlBuffer::VaScanf( const char* pFmt, va_list list )
 	}
 	return numScanned;
 }
-
-#pragma warning ( default : 4706 )
 
 int CUtlBuffer::Scanf( const char* pFmt, ... )
 {
@@ -1620,7 +1611,7 @@ void CUtlBuffer::Swap( CUtlBuffer &buf )
 //-----------------------------------------------------------------------------
 // Take ownership of mem from a CUtlMemory
 //-----------------------------------------------------------------------------
-void CUtlBuffer::TakeOwnershipOfMemory( CUtlMemory<uint8> &mem )
+void CUtlBuffer::TakeOwnershipOfMemory( CUtlMemory<uint8_t> &mem )
 {
 	m_Get = 0;
 	m_Put = mem.Count();
@@ -1636,7 +1627,7 @@ void CUtlBuffer::TakeOwnershipOfMemory( CUtlMemory<uint8> &mem )
 // The punCurrentPut parameter is because that information (how much of the memory
 // allocated has been written to) is lost when transferring into a CUtlMemory
 //-----------------------------------------------------------------------------
-void CUtlBuffer::ReleaseToMemory( CUtlMemory<uint8> &mem, int *punCurrentPut )
+void CUtlBuffer::ReleaseToMemory( CUtlMemory<uint8_t> &mem, int *punCurrentPut )
 {
 	*punCurrentPut = m_Put;
 	m_Memory.Swap( mem );
@@ -1672,24 +1663,24 @@ void CUtlBuffer::PutChar( char c )
 	PUT_BIN_DATA( char, c );
 }
 
-void CUtlBuffer::PutUint8( uint8 ub )
+void CUtlBuffer::PutUint8( uint8_t ub )
 {
-	PUT_TYPE( uint8, ub );
+	PUT_TYPE( uint8_t, ub );
 }
 
-void CUtlBuffer::PutUnsignedInt64( uint64 ub )
+void CUtlBuffer::PutUnsignedInt64( uint64_t ub )
 {
-	PUT_TYPE( uint64, ub );
+	PUT_TYPE( uint64_t, ub );
 }
 
-void CUtlBuffer::PutInt64( int64 ub )
+void CUtlBuffer::PutInt64( int64_t ub )
 {
-	PUT_TYPE( int64, ub );
+	PUT_TYPE( int64_t, ub );
 }
 
-void CUtlBuffer::PutInt16( int16 s16 )
+void CUtlBuffer::PutInt16( int16_t s16 )
 {
-	PUT_TYPE( int16, s16 );
+	PUT_TYPE( int16_t, s16 );
 }
 
 void  CUtlBuffer::PutShort( short s )
@@ -1717,8 +1708,8 @@ void CUtlBuffer::PutFloat( float f )
 #if _MSC_VER == 1200 //!!!
 	if (!IsText())
 	{
-		uint32 _f = *(uint32*)&f;
-		PUT_BIN_DATA( uint32, _f );
+		uint32_t _f = *(uint32_t*)&f;
+		PUT_BIN_DATA( uint32_t, _f );
 	}
 	else
 	{
@@ -1734,8 +1725,8 @@ void CUtlBuffer::PutDouble( double d )
 #if _MSC_VER == 1200 //!!!
 	if (!IsText())
 	{
-		int64 _f = *(int64*)&d;
-		PUT_BIN_DATA( int64, _f );
+		int64_t _f = *(int64_t*)&d;
+		PUT_BIN_DATA( int64_t, _f );
 	}
 	else
 	{
@@ -1757,47 +1748,47 @@ char CUtlBuffer::GetChar()
 	return c;
 }
 
-uint8 CUtlBuffer::GetUint8()
+uint8_t CUtlBuffer::GetUint8()
 {
 	// %u Scanf writes to a 32-bit number
-	uint32 ub;
-	GET_TYPE( uint8, ub, "%u" );
-	return (uint8)ub;
+	uint32_t ub;
+	GET_TYPE( uint8_t, ub, "%" PRIu32 );
+	return (uint8_t)ub;
 }
 
-uint64 CUtlBuffer::GetUnsignedInt64()
+uint64_t CUtlBuffer::GetUnsignedInt64()
 {
-	uint64 ub;
-	GET_TYPE( uint64, ub, "%llu" );
+	uint64_t ub;
+	GET_TYPE( uint64_t, ub, "%" PRIu64 );
 	return ub;
 }
 
-int64 CUtlBuffer::GetInt64()
+int64_t CUtlBuffer::GetInt64()
 {
-	int64 ub;
-	GET_TYPE( int64, ub, "%lld" );
+	int64_t ub;
+	GET_TYPE( int64_t, ub, "%" PRIi64 );
 	return ub;
 }
 
-int16 CUtlBuffer::GetInt16()
+int16_t CUtlBuffer::GetInt16()
 {
 	// %d Scanf writes to a 32-bit number
-	int32 s16;
-	GET_TYPE( int16, s16, "%d" );
-	return (int16)s16;
+	int32_t s16;
+	GET_TYPE( int16_t, s16, "%" PRIi32 );
+	return (int16_t)s16;
 }
 
 short CUtlBuffer::GetShort()
 {
 	// %d Scanf writes to a 32-bit number
-	int32 s;
+	int32_t s;
 	GET_TYPE( short, s, "%d" );
 	return (short)s;
 }
 
 unsigned short CUtlBuffer::GetUnsignedShort()
 {
-	uint32 s;
+	uint32_t s;
 	GET_TYPE( unsigned short, s, "%u" );
 	return (unsigned short)s;
 }
@@ -1833,11 +1824,11 @@ float CUtlBuffer::GetFloat()
 		{
 			if ( (m_Flags & CUtlBuffer::LITTLE_ENDIAN_BUFFER ) )
 			{
-				f = LittleDWord( (uint32)*(float *)PeekGet() );
+				f = LittleDWord( (uint32_t)*(float *)PeekGet() );
 			}									\
 			else if ( (m_Flags & CUtlBuffer::BIG_ENDIAN_BUFFER ) )
 			{
-				f = BigDWord( (uint32)*(float *)PeekGet() );
+				f = BigDWord( (uint32_t)*(float *)PeekGet() );
 			}
 			else
 			{
@@ -1871,11 +1862,11 @@ double CUtlBuffer::GetDouble()
 		{
 			if ( (m_Flags & CUtlBuffer::LITTLE_ENDIAN_BUFFER ) )
 			{
-				d = (int64)LittleQWord( (uint64)*(double *)PeekGet() );
+				d = (int64_t)LittleQWord( (uint64_t)*(double *)PeekGet() );
 			}									\
 			else if ( (m_Flags & CUtlBuffer::BIG_ENDIAN_BUFFER ) )
 			{
-				d = (int64)BigQWord( (uint64)*(double *)PeekGet() );
+				d = (int64_t)BigQWord( (uint64_t)*(double *)PeekGet() );
 			}
 			else
 			{

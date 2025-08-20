@@ -9,6 +9,39 @@
 
 #include <crlib/basic.h>
 
+#if defined(CR_PSVITA) || defined(CR_ARCH_ARM) || defined(CR_ARCH_PPC)
+
+CR_NAMESPACE_BEGIN
+
+// shim for unsupported platforms
+template <typename T> class Detour final : public NonCopyable {
+public:
+   explicit Detour () = default;
+
+   Detour (StringRef module, StringRef name, T *address) {
+      initialize (module, name, address);
+   }
+   ~Detour () = default;
+
+public:
+   void initialize (StringRef, StringRef, T *) {}
+   void install (void *, const bool) {}
+
+   bool valid () const { return false; }
+   bool detoured () const { return false; }
+   bool detour () { return false; }
+   bool restore () { return false; }
+
+public:
+   template <typename... Args> decltype (auto) operator () (Args &&...args) {
+      return reinterpret_cast <T *> (reinterpret_cast <uint8_t *> (NULL)) (cr::forward <Args> (args)...);
+   }
+};
+
+CR_NAMESPACE_END
+
+#else
+
 #if !defined(CR_WINDOWS)
 #  include <sys/mman.h>
 #  include <pthread.h>
@@ -189,10 +222,12 @@ public:
       return overwriteMemory (savedBytes_, false);
    }
 
-   template <typename... Args > decltype (auto) operator () (Args &&...args) {
+   template <typename... Args> decltype (auto) operator () (Args &&...args) {
       DetourSwitch sw { this };
       return reinterpret_cast <T *> (original_) (cr::forward <Args> (args)...);
    }
 };
 
 CR_NAMESPACE_END
+
+#endif

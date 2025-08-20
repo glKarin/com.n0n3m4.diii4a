@@ -11,12 +11,13 @@ ConVar cv_has_team_semiclip ("has_team_semiclip", "0", "When enabled, bots will 
 ConVar cv_graph_slope_height ("graph_slope_height", "24.0", "Determines the maximum slope height change between the current and next node to consider the current link as a jump link. Only for generated graphs.", true, 12.0f, 48.0f);
 
 int Bot::findBestGoal () {
-   if (m_isCreature) {
-      if (!graph.m_terrorPoints.empty ()) {
+   if (game.is (GameFlags::ZombieMod) && m_isCreature) {
+      const auto &players = bots.countTeamPlayers ();
+
+      if (players.first < graph.m_terrorPoints.length <int> ()) {
          return graph.m_terrorPoints.random ();
       }
-
-      if (!graph.m_goalPoints.empty ()) {
+      else if (players.first < graph.m_goalPoints.length <int> ()) {
          return graph.m_goalPoints.random ();
       }
       return graph.random ();
@@ -172,7 +173,10 @@ int Bot::findBestGoal () {
    float campDesire = rg (0.0f, 100.0f) + defensive;
 
    if (!usesCampGun ()) {
-      campDesire *= 0.5f;
+      campDesire = 0.0f;
+   }
+   else if (usesSniper ()) {
+      campDesire = rg (1.5f, 2.5f) * campDesire;
    }
 
    int tactic = GoalTactic::Defensive;
@@ -198,7 +202,7 @@ int Bot::findBestGoal () {
 int Bot::findBestGoalWhenBombAction () {
    int result = kInvalidNodeIndex;
 
-   if (!bots.isBombPlanted ()) {
+   if (!bots.isBombPlanted () && !cv_ignore_objectives) {
       game.searchEntities ("classname", "weaponbox", [&] (edict_t *ent) {
          if (util.isModel (ent, "backpack.mdl")) {
             result = graph.getNearest (game.getEntityOrigin (ent));
@@ -281,17 +285,17 @@ int Bot::findGoalPost (int tactic, IntArray *defensive, IntArray *offensive) {
    else if (tactic == GoalTactic::Offensive && !(*offensive).empty ()) { // offensive goal
       postProcessGoals (*offensive, goalChoices);
    }
-   else if (tactic == GoalTactic::Goal && !graph.m_goalPoints.empty ()) // map goal node
-   {
+   else if (tactic == GoalTactic::Goal && !graph.m_goalPoints.empty ()) { // map goal node
+
       // force bomber to select closest goal, if round-start goal was reset by something
-      if (m_hasC4 && bots.getRoundStartTime () + 20.0f < game.time ()) {
+      if (m_isVIP || (m_hasC4 && bots.getRoundStartTime () + 20.0f < game.time ())) {
          float nearestDistanceSq = kInfiniteDistance;
          int count = 0;
 
          for (const auto &point : graph.m_goalPoints) {
             const float distanceSq = graph[point].origin.distanceSq (pev->origin);
 
-            if (distanceSq > cr::sqrf (1024.0f)) {
+            if (distanceSq > cr::sqrf (1024.0f) || isGroupOfEnemies (graph[point].origin)) {
                continue;
             }
             if (distanceSq < nearestDistanceSq) {
@@ -588,7 +592,7 @@ void Bot::doPlayerAvoidance (const Vector &normal) {
    }
 }
 
-void Bot::checkTerrain (float movedDistance, const Vector &dirNormal) {
+void Bot::checkTerrain (const Vector &dirNormal) {
 
    // if avoiding someone do not consider stuck
    TraceResult tr {};
@@ -598,6 +602,7 @@ void Bot::checkTerrain (float movedDistance, const Vector &dirNormal) {
 
    // minimal speed for consider stuck
    const float minimalSpeed = isDucking () ? kMinMovedDistance : kMinMovedDistance * 4;
+   const auto randomProbeTime = rg (0.75f, 1.15f);
 
    // standing still, no need to check?
    if ((cr::abs (m_moveSpeed) >= minimalSpeed || cr::abs (m_strafeSpeed) >= minimalSpeed)
@@ -611,7 +616,7 @@ void Bot::checkTerrain (float movedDistance, const Vector &dirNormal) {
          m_firstCollideTime = 0.0f;
       }
       // didn't we move enough previously?
-      else if (movedDistance < kMinMovedDistance && m_prevSpeed > 20.0f) {
+      else if (m_movedDistance < kMinMovedDistance && (m_prevSpeed > 20.0f || m_prevVelocity < m_moveSpeed / 2)) {
          m_prevTime = game.time (); // then consider being stuck
          m_isStuck = true;
 
@@ -641,9 +646,16 @@ void Bot::checkTerrain (float movedDistance, const Vector &dirNormal) {
          }
       }
 
+      if (m_probeTime >= game.time ()) {
+         m_isStuck = true;
+      }
+      else if (m_probeTime + randomProbeTime < game.time () && !cr::fzero (m_probeTime)) {
+         resetCollision (); // resets its collision state because it was too long time in probing state
+      }
+
       // not stuck?
       if (!m_isStuck) {
-         if (m_probeTime + rg (0.75f, 1.15f) < game.time ()) {
+         if (m_probeTime + randomProbeTime < game.time ()) {
             resetCollision (); // reset collision memory if not being stuck for 0.5 secs
          }
          else {
@@ -844,7 +856,7 @@ void Bot::checkTerrain (float movedDistance, const Vector &dirNormal) {
             }
 
             m_collideTime = game.time ();
-            m_probeTime = game.time () + 0.5f;
+            m_probeTime = game.time () + randomProbeTime;
             m_collisionProbeBits = bits;
             m_collisionState = CollisionState::Probing;
             m_collStateIndex = 0;
@@ -854,10 +866,9 @@ void Bot::checkTerrain (float movedDistance, const Vector &dirNormal) {
       if (m_collisionState == CollisionState::Probing) {
          if (m_probeTime < game.time ()) {
             m_collStateIndex++;
-            m_probeTime = game.time () + 0.5f;
+            m_probeTime = game.time () + randomProbeTime;
 
             if (m_collStateIndex >= kMaxCollideMoves) {
-               m_navTimeset = game.time () - 5.0f;
                resetCollision ();
             }
          }
@@ -866,7 +877,13 @@ void Bot::checkTerrain (float movedDistance, const Vector &dirNormal) {
             switch (m_collideMoves[m_collStateIndex]) {
             case CollisionState::Jump:
                if ((isOnFloor () || isInWater ()) && !isOnLadder ()) {
-                  pev->button |= IN_JUMP;
+                  if (isInWater ()
+                     || !m_isCreature
+                     || m_lastDamageTimestamp < game.time ()
+                     || (m_currentTravelFlags & PathFlag::Jump)) {
+
+                     pev->button |= IN_JUMP;
+                  }
                }
                break;
 
@@ -893,10 +910,8 @@ void Bot::checkFall () {
    if (isPreviousLadder ()) {
       return;
    }
-   else if (graph.exists (m_currentNodeIndex)) {
-      if (graph[m_currentNodeIndex].flags & NodeFlag::Ladder) {
-         return;
-      }
+   else if ((m_pathFlags & NodeFlag::Ladder) && isPreviousLadder () && isOnLadder ()) {
+      return;
    }
 
    if (!m_checkFall) {
@@ -904,7 +919,7 @@ void Bot::checkFall () {
          m_checkFallPoint[0] = pev->origin;
 
          if (!game.isNullEntity (m_enemy)) {
-            m_checkFallPoint[1] = game.getEntityOrigin (m_enemy);
+            m_checkFallPoint[1] = m_enemy->v.origin;
          }
          else if (m_currentNodeIndex != kInvalidNodeIndex) {
             m_checkFallPoint[1] = m_pathOrigin;
@@ -930,17 +945,17 @@ void Bot::checkFall () {
    const float nowDistanceSq = pev->origin.distanceSq (m_checkFallPoint[1]);
 
    if (nowDistanceSq > baseDistanceSq
-      && (nowDistanceSq > baseDistanceSq * 1.8f || nowDistanceSq > baseDistanceSq + 260.0f)
-      && baseDistanceSq >= cr::sqrf (124.0f) && nowDistanceSq >= cr::sqrf (146.0f)) {
+      && (nowDistanceSq > baseDistanceSq * 1.2f || nowDistanceSq > baseDistanceSq + 200.0f)
+      && baseDistanceSq >= cr::sqrf (80.0f) && nowDistanceSq >= cr::sqrf (100.0f)) {
       fixFall = true;
    }
-   else if (cr::abs (m_checkFallPoint[1].z) > cr::abs (pev->origin.z) + 138.0f
-      || cr::abs (m_checkFallPoint[0].z) > cr::abs (pev->origin.z) + 138.0f) {
+   else if (m_checkFallPoint[1].z > pev->origin.z + 128.0f
+      && m_checkFallPoint[0].z > pev->origin.z + 128.0f) {
       fixFall = true;
    }
    else if (m_currentNodeIndex != kInvalidNodeIndex
-      && nowDistanceSq > cr::sqrf (32.0f)
-      && cr::abs (m_checkFallPoint[1].z) > cr::abs (pev->origin.z) + 72.0f) {
+      && nowDistanceSq > cr::sqrf (16.0f)
+      && m_checkFallPoint[1].z > pev->origin.z + 62.0f) {
       fixFall = true;
    }
 
@@ -1294,8 +1309,8 @@ bool Bot::updateNavigation () {
                   const auto &dirToPoint = (pev->origin - origin).normalize2d_apx ();
                   const auto &forwardMove = m_moveAngles.forward ().normalize2d_apx ();
 
-                  if (distanceSq < cr::sqrf (80.0f)) {
-                     if ((dirToPoint | forwardMove) < 0.0f && !checkWallOnBehind ()) {
+                  if (distanceSq < cr::sqrf (96.0f)) {
+                     if ((dirToPoint | forwardMove) < 0.0f) {
                         m_moveSpeed = -pev->maxspeed;
                      }
                   }
@@ -1307,7 +1322,7 @@ bool Bot::updateNavigation () {
    }
 
    float desiredDistanceSq = cr::sqrf (8.0f);
-   float nodeDistanceSq = pev->origin.distanceSq (m_pathOrigin);
+   const float nodeDistanceSq = pev->origin.distanceSq (m_pathOrigin);
 
    // initialize the radius for a special node type, where the node is considered to be reached
    if (m_pathFlags & NodeFlag::Lift) {
@@ -1947,13 +1962,16 @@ bool Bot::findNextBestNodeEx (const IntArray &data, bool handleFails) {
 float Bot::getEstimatedNodeReachTime () {
    const bool longTermReachability = (m_pathFlags & NodeFlag::Crouch)
       || (m_pathFlags & NodeFlag::Ladder)
-      || (pev->button & IN_DUCK)
-      || (m_oldButtons & IN_DUCK);
+      || ((pev->button | pev->oldbuttons) & IN_DUCK);
 
    float estimatedTime = longTermReachability ? 8.5f : 3.5f;
 
    // if just fired at enemy, increase reachability
    if (m_shootTime + 0.25f > game.time ()) {
+      return estimatedTime;
+   }
+
+   if (m_lastDamageTimestamp < game.time () && !cr::fzero (m_lastDamageTimestamp) && !m_isStuck && m_isCreature) {
       return estimatedTime;
    }
 
@@ -3096,7 +3114,7 @@ bool Bot::isBlockedLeft () {
    pev->angles.angleVectors (&forward, &right, nullptr);
 
    // do a trace to the left...
-   game.testLine (pev->origin, forward * direction - right * 48.0f, TraceIgnore::Monsters, ent (), &tr);
+   game.testLine (pev->origin, pev->origin - forward * direction - right * 48.0f, TraceIgnore::Monsters, ent (), &tr);
 
    // check if the trace hit something...
    if (game.mapIs (MapFlags::HasDoors) && tr.flFraction < 1.0f && !util.isDoorEntity (tr.pHit)) {
@@ -3109,8 +3127,8 @@ bool Bot::isBlockedRight () {
    TraceResult tr {};
    float direction = 48.0f;
 
-   if (m_moveSpeed < 0.0f) {
-      direction = -48.0f;
+   if (m_moveSpeed > 0.0f) {
+      direction = 48.0f;
    }
    Vector right {}, forward {};
    pev->angles.angleVectors (&forward, &right, nullptr);
@@ -3420,7 +3438,7 @@ bool Bot::isReachableNode (int index) {
    return tr.flFraction >= 1.0f;
 }
 
-bool Bot::isPreviousLadder () {
+bool Bot::isPreviousLadder () const {
    const auto prevNodeIndex = m_previousNodes[0];
 
    // bot entered ladder path

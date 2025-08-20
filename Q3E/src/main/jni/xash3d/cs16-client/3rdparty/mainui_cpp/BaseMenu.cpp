@@ -28,9 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "YesNoMessageBox.h"
 #include "BackgroundBitmap.h"
 #include "FontManager.h"
-#ifdef CS16CLIENT
-#include "Scoreboard.h"
-#endif
 #include "cursor_type.h"
 
 cvar_t		*ui_showmodels;
@@ -45,17 +42,10 @@ static CMenuEntry	*s_pEntries = NULL;
 const char	*uiSoundOldPrefix	= "media/";
 const char	*uiSoundNewPrefix	= "sound/common/";
 const char	*uiSounds[] = {
-#ifdef CS16CLIENT
-	"",
-	"",
-	"sound/UI/buttonclickrelease.wav",
-	"sound/UI/buttonrollover.wav",
-#else
 	"media/launch_upmenu1.wav",
 	"media/launch_dnmenu1.wav",
 	"media/launch_select2.wav",
 	"",
-#endif
 	"media/launch_glow1.wav",
 	"media/launch_deny2.wav",
 	"media/launch_select1.wav",
@@ -1139,11 +1129,6 @@ void UI_Init( void )
 	ui_show_window_stack = EngFuncs::CvarRegister( "ui_show_window_stack", "0", FCVAR_ARCHIVE );
 	ui_borderclip = EngFuncs::CvarRegister( "ui_borderclip", "0", FCVAR_ARCHIVE );
 	ui_language = EngFuncs::CvarRegister( "ui_language", "english", FCVAR_ARCHIVE );
-
-#ifdef CS16CLIENT
-	// autofill ammo after bought weapon
-	EngFuncs::CvarRegister( "ui_cs_autofill", "0", FCVAR_ARCHIVE );
-#endif // CS16CLIENT
 
 	// show cl_predict dialog
 	EngFuncs::CvarRegister( "menu_mp_firsttime2", "1", FCVAR_ARCHIVE );

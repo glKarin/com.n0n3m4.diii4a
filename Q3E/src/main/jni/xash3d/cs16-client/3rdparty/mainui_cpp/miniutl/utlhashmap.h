@@ -5,12 +5,9 @@
 //
 //=============================================================================//
 
+#pragma once
 #ifndef UTLHASHMAP_H
 #define UTLHASHMAP_H
-
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "bitstring.h"
 #include "utlvector.h"
@@ -268,7 +265,7 @@ inline int CUtlHashMap<K,T,L,H>::InsertUnconstructed( const KeyType_t &key, int 
 	IncrementalRehash();
 
 	// hash the item
-	uint32 hash = m_HashFunc( key );
+	uint32_t hash = m_HashFunc( key );
 
 	// migrate data forward, if necessary
 	int cBucketsToModAgainst = m_vecHashBuckets.Count() >> 1;
@@ -486,7 +483,7 @@ inline void CUtlHashMap<K,T,L,H>::RehashNodesInBucket( int iBucketSrc )
 
 		// work out where the node should go
 		const KeyType_t &key = m_memNodes[iNode].m_key;
-		uint32 hash = m_HashFunc( key );
+		uint32_t hash = m_HashFunc( key );
 		int iBucketDest = basetypes::ModPowerOf2( hash, m_vecHashBuckets.Count() );
 
 		// if the hash bucket has changed, move it
@@ -515,7 +512,7 @@ inline int CUtlHashMap<K,T,L,H>::Find( const KeyType_t &key ) const
 		return InvalidIndex();
 
 	// hash the item
-	uint32 hash = m_HashFunc( key );
+	uint32_t hash = m_HashFunc( key );
 
 	// find the bucket
 	int cBucketsToModAgainst = m_vecHashBuckets.Count();
@@ -671,7 +668,7 @@ inline void CUtlHashMap<K,T,L,H>::RemoveAt( IndexType_t i )
 	}
 
 	// unfortunately, we have to re-hash to find which bucket we're in
-	uint32 hash = m_HashFunc( m_memNodes[i].m_key );
+	uint32_t hash = m_HashFunc( m_memNodes[i].m_key );
 	int cBucketsToModAgainst = m_vecHashBuckets.Count();
 	int iBucket = basetypes::ModPowerOf2( hash, cBucketsToModAgainst );
 	if ( RemoveNodeFromBucket( iBucket, i ) )

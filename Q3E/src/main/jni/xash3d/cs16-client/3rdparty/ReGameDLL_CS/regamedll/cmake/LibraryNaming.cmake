@@ -16,9 +16,9 @@ macro(check_group_build_target symbol group)
 endmacro()
 
 # So there is a problem:
-# 1. Number of these symbols only grows, as we support more and more ports
-# 2. CMake was written by morons and can't check these symbols in parallel
-# 3. MSVC is very slow at everything (startup, parsing, generating error)
+# 1. Total number of these symbols only grows, as we support more and more ports
+# 2. CMake don't have a way to check symbols in parallel (similar to Waf's multicheck)
+# 3. MSVC is incredibly slow at everything (startup, parsing, generating error)
 
 # Solution: group these symbols and set variable if one of them was found
 # this way we can reorder to reorder them by most common configurations
@@ -36,7 +36,7 @@ endmacro()
 # grep '^#undef XASH' build.h | grep "XASH_RISCV_" |  awk '{ print "check_build_target(" $2 ")"}'
 # echo "endif()"
 
-# NOTE: Android must have priority over Linux to work correctly!
+# NOTE: Android must have priority over Linux to work correctly, as Android matches both Linux and it's own macros!
 
 set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/public/")
 check_build_target(XASH_64BIT)
@@ -62,6 +62,7 @@ check_group_build_target(XASH_ARM XASH_ARCHITECTURE)
 check_group_build_target(XASH_MIPS XASH_ARCHITECTURE)
 check_group_build_target(XASH_PPC XASH_ARCHITECTURE)
 check_group_build_target(XASH_JS XASH_ARCHITECTURE)
+check_group_build_target(XASH_WASM XASH_ARCHITECTURE)
 check_group_build_target(XASH_E2K XASH_ARCHITECTURE)
 check_group_build_target(XASH_RISCV XASH_ARCHITECTURE)
 check_group_build_target(XASH_LITTLE_ENDIAN XASH_ENDIANNESS)
@@ -79,6 +80,9 @@ if(XASH_RISCV)
 check_build_target(XASH_RISCV_DOUBLEFP)
 check_build_target(XASH_RISCV_SINGLEFP)
 check_build_target(XASH_RISCV_SOFTFP)
+endif()
+if(XASH_ANDROID)
+check_build_target(XASH_TERMUX)
 endif()
 unset(CMAKE_REQUIRED_INCLUDES)
 
@@ -181,13 +185,17 @@ elseif(XASH_PPC)
 	if(XASH_LITTLE_ENDIAN)
 		set(BUILDARCH "${BUILDARCH}el")
 	endif()
+elseif(XASH_WASM)
+	if(XASH_64BIT)
+		set(BUILDARCH "wasm64")
+	else()
+		set(BUILDARCH "wasm32")
+	endif()
 else()
 	message(SEND_ERROR "Place your architecture name here! If this is a mistake, try to fix conditions above and report a bug")
 endif()
 
-if(BUILDOS STREQUAL "android")
-	set(POSTFIX "") # force disable for Android, as Android ports aren't distributed in normal way and doesn't follow library naming
-elseif(BUILDOS AND BUILDARCH)
+if(BUILDOS AND BUILDARCH)
 	set(POSTFIX "_${BUILDOS}_${BUILDARCH}")
 elseif(BUILDARCH)
 	set(POSTFIX "_${BUILDARCH}")
@@ -196,3 +204,12 @@ else()
 endif()
 
 message(STATUS "Library postfix: " ${POSTFIX})
+
+macro(set_target_postfix target)
+	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${target}${POSTFIX}" PREFIX "")
+endmacro()
+
+macro(set_target_postfix_with_name target name)
+	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${name}${POSTFIX}" PREFIX "")
+endmacro()
+

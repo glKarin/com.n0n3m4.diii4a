@@ -99,6 +99,7 @@ enum EDefaultBtns
 #define PC_TOUCH_BUTTONS "gfx/shell/btn_touch_buttons"
 #define PC_FAVORITE      "gfx/shell/btn_favorite"
 #define PC_UNFAVORITE    "gfx/shell/btn_unfavorite"
+#define PC_CROSSHAIR	 "gfx/shell/btn_xhair"
 
 #define BUTTON_NOFOCUS	0
 #define BUTTON_FOCUS	1

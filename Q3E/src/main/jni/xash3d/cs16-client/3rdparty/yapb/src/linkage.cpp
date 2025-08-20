@@ -86,7 +86,7 @@ CR_EXPORT int GetEntityAPI (gamefuncs_t *table, int interfaceVersion) {
 
    plat.bzero (table, sizeof (gamefuncs_t));
 
-   if (!(game.is (GameFlags::Metamod))) {
+   if (!game.is (GameFlags::Metamod)) {
       auto api_GetEntityAPI = game.lib ().resolve <decltype (&GetEntityAPI)> (__func__);
 
       // pass other DLLs engine callbacks to function table...
@@ -436,6 +436,23 @@ CR_EXPORT int GetEntityAPI (gamefuncs_t *table, int interfaceVersion) {
       };
    }
 
+   // add some bullet spread on games, where w're runnung without metamod
+   if (!game.is (GameFlags::Metamod) && !game.is (GameFlags::Legacy)) {
+      table->pfnCmdStart = [] (const edict_t *player, usercmd_t *cmd, unsigned int random_seed) CR_FORCE_STACK_ALIGN {
+         // some MODs don't feel like doing like everybody else. It's the case in DMC, where players
+         // don't select their weapons using a simple client command, but have to use an horrible
+         // datagram like this. CmdStart() marks the start of a network packet clients send to the
+         // server that holds a limited set of requests (see the usercmd_t structure for details).
+         // It has been adapted for usage to HLTV spectators, who don't send ClientCommands, but send
+         // all their update information to the server using usercmd's instead, it seems.
+
+         if (!cv_whose_your_daddy && bots[const_cast <edict_t *> (player)]) {
+            random_seed = rg (0, 0x7fffffff);
+         }
+         dllapi.pfnCmdStart (player, cmd, random_seed);
+      };
+   }
+
    table->pfnPM_Move = [] (playermove_t *pm, int server) CR_FORCE_STACK_ALIGN {
       // this is the player movement code clients run to predict things when the server can't update
       // them often enough (or doesn't want to). The server runs exactly the same function for
@@ -459,7 +476,7 @@ CR_EXPORT int GetEntityAPI (gamefuncs_t *table, int interfaceVersion) {
       // would all have the dull "models/player.mdl" one). The entity for which the keyvalue data
       // pointer is requested is pentKeyvalue, the pointer to the keyvalue data structure pkvd.
 
-      if (game.isNullEntity (ent) && strcmp (ent->v.classname.chars (), "func_breakable") == 0) {
+      if (!game.isNullEntity (ent) && strcmp (ent->v.classname.chars (), "func_breakable") == 0) {
          if (kvd && kvd->szKeyName && strcmp (kvd->szKeyName, "material") == 0) {
             if (atoi (kvd->szValue) == 7) {
                game.markBreakableAsInvalid (ent);

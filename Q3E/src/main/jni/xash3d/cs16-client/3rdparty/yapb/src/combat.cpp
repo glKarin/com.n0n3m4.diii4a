@@ -19,7 +19,7 @@ ConVar cv_aim_trace_consider_glass ("aim_trace_consider_glass", "0", "Bots will 
 ConVar mp_friendlyfire ("mp_friendlyfire", nullptr, Var::GameRef);
 ConVar sv_gravity ("sv_gravity", nullptr, Var::GameRef);
 
-int Bot::numFriendsNear (const Vector &origin, const float radius) {
+int Bot::numFriendsNear (const Vector &origin, const float radius) const {
    if (game.is (GameFlags::FreeForAll)) {
       return 0; // no friends on free for all mode
    }
@@ -39,7 +39,7 @@ int Bot::numFriendsNear (const Vector &origin, const float radius) {
    return count;
 }
 
-int Bot::numEnemiesNear (const Vector &origin, const float radius) {
+int Bot::numEnemiesNear (const Vector &origin, const float radius) const {
    if (game.is (GameFlags::FreeForAll)) {
       return 0; // no enemies on free for all mode
    }
@@ -129,7 +129,7 @@ bool Bot::isEnemyNoTarget (edict_t *enemy) {
    return !!(enemy->v.flags & FL_NOTARGET);
 }
 
-bool Bot::isEnemyInDarkArea (edict_t *enemy) {
+bool Bot::isEnemyInDarkArea (edict_t *enemy) const {
    if (!cv_check_darkness && game.isNullEntity (enemy)) {
       return false;
    }
@@ -669,8 +669,7 @@ Vector Bot::getBodyOffsetError (float distance) {
       m_aimLastError = Vector (
          rg (mins.x * hitError, maxs.x * hitError), 
          rg (mins.y * hitError, maxs.y * hitError),
-         rg (mins.z * hitError * 0.5f, maxs.z * hitError * 0.5f)
-      );
+         rg (mins.z * hitError * 0.5f, maxs.z * hitError * 0.5f));
 
       const auto &aimError = conf.getDifficultyTweaks (m_difficulty)->aimError;
       m_aimLastError += Vector (rg (-aimError.x, aimError.x), rg (-aimError.y, aimError.y), rg (-aimError.z, aimError.z));
@@ -773,21 +772,21 @@ Vector Bot::getEnemyBodyOffset () {
    return spot;
 }
 
-Vector Bot::getCustomHeight (float distance) {
+Vector Bot::getCustomHeight (float distance) const {
    enum DistanceIndex {
       Long, Middle, Short
    };
 
    constexpr float kOffsetRanges[9][3] = {
-      { 0.0f,  0.0f,   0.0f }, // none
-      { 0.0f,  0.0f,   0.0f }, // melee
-      { 0.5f, -0.1f,  -1.5f }, // pistol
-      { 6.5f,  6.0f,  -2.0f }, // shotgun
-      { 0.5f, -7.5f,  -9.5f }, // zoomrifle
-      { 0.5f, -7.5f,  -9.5f }, // rifle
-      { 0.5f, -7.5f,  -9.5f }, // smg
-      { 0.0f, -2.5f,  -6.0f }, // sniper
-      { 1.5f, -4.0f,  -9.0f }  // heavy
+      { 0.0f,  0.0f,  0.0f }, // none
+      { 0.0f,  0.0f,  0.0f }, // melee
+      { 0.5f, -0.1f, -1.5f }, // pistol
+      { 6.5f,  6.0f, -2.0f }, // shotgun
+      { 0.5f, -7.5f, -9.5f }, // zoomrifle
+      { 0.5f, -7.5f, -9.5f }, // rifle
+      { 0.5f, -7.5f, -9.5f }, // smg
+      { 0.0f, -2.5f, -6.0f }, // sniper
+      { 1.5f, -4.0f, -9.0f }  // heavy
    };
 
    // only high-skilled bots do that 
@@ -808,14 +807,14 @@ Vector Bot::getCustomHeight (float distance) {
    return { 0.0f, 0.0f, kOffsetRanges[m_weaponType][distanceIndex] };
 }
 
-bool Bot::isFriendInLineOfFire (float distance) {
+bool Bot::isFriendInLineOfFire (float distance) const {
    // bot can't hurt teammates, if friendly fire is not enabled...
    if (!mp_friendlyfire || game.is (GameFlags::CSDM)) {
       return false;
    }
 
    TraceResult tr {};
-   game.testLine (getEyesPos (), getEyesPos () + distance * pev->v_angle.normalize (), TraceIgnore::None, ent (), &tr);
+   game.testLine (getEyesPos (), getEyesPos () + pev->v_angle.normalize_apx () * distance, TraceIgnore::None, ent (), &tr);
 
    // check if we hit something
    if (util.isPlayer (tr.pHit) && tr.pHit != ent ()) {
@@ -868,7 +867,7 @@ bool Bot::isPenetrableObstacle (const Vector &dest) {
    return isPenetrableObstacle2 (dest, penetratePower);
 }
 
-bool Bot::isPenetrableObstacle1 (const Vector &dest, int penetratePower) {
+bool Bot::isPenetrableObstacle1 (const Vector &dest, int penetratePower) const {
    TraceResult tr {};
 
    float obstacleDistanceSq = 0.0f;
@@ -906,7 +905,7 @@ bool Bot::isPenetrableObstacle1 (const Vector &dest, int penetratePower) {
    return false;
 }
 
-bool Bot::isPenetrableObstacle2 (const Vector &dest, int) {
+bool Bot::isPenetrableObstacle2 (const Vector &dest, int) const {
    // this function returns if enemy can be shoot through some obstacle
 
    const Vector &source = getEyesPos ();
@@ -941,7 +940,7 @@ bool Bot::isPenetrableObstacle2 (const Vector &dest, int) {
    return false;
 }
 
-bool Bot::isPenetrableObstacle3 (const Vector &dest, int penetratePower) {
+bool Bot::isPenetrableObstacle3 (const Vector &dest, int penetratePower) const {
    // this function returns if enemy can be shoot through some obstacle
 
    TraceResult tr {};
@@ -1557,8 +1556,8 @@ void Bot::attackMovement () {
          m_strafeSetTime = strafeUpdateTime ();
       }
 
-      const bool wallOnRight = checkWallOnRight (72.0f);
-      const bool wallOnLeft = checkWallOnLeft (72.0f);
+      const bool wallOnRight = checkWallOnRight (96.0f);
+      const bool wallOnLeft = checkWallOnLeft (96.0f);
 
       if (m_dodgeStrafeDir == Dodge::Left) {
          if (!wallOnLeft) {
@@ -1606,10 +1605,11 @@ void Bot::attackMovement () {
       }
 
       if (m_difficulty >= Difficulty::Normal
+         && distanceSq < cr::sqrf (kSprayDistance)
          && (m_jumpTime + 5.0f < game.time ()
-            && isOnFloor ()
-            && rg (0, 1000) < (m_isReloading ? 8 : 2)
-            && pev->velocity.length2d () > 150.0f) && !usesSniper () && isEnemyCone) {
+         && isOnFloor ()
+         && rg (0, 1000) < (m_isReloading ? 8 : 2)
+         && pev->velocity.length2d () > 150.0f) && !usesSniper () && isEnemyCone) {
 
          pev->button |= IN_JUMP;
       }
@@ -1659,13 +1659,13 @@ void Bot::attackMovement () {
    ignoreCollision ();
 }
 
-bool Bot::hasPrimaryWeapon () {
+bool Bot::hasPrimaryWeapon () const {
    // this function returns returns true, if bot has a primary weapon
 
    return (pev->weapons & kPrimaryWeaponMask) != 0;
 }
 
-bool Bot::hasSecondaryWeapon () {
+bool Bot::hasSecondaryWeapon () const {
    // this function returns returns true, if bot has a secondary weapon
 
    return (pev->weapons & kSecondaryWeaponMask) != 0;
@@ -1752,7 +1752,7 @@ int Bot::bestSecondaryCarried () {
    return weaponIndex;
 }
 
-int Bot::bestGrenadeCarried () {
+int Bot::bestGrenadeCarried () const {
    if (pev->weapons & cr::bit (Weapon::Explosive)) {
       return Weapon::Explosive;
    }
@@ -1792,7 +1792,7 @@ bool Bot::rateGroundWeapon (edict_t *ent) {
    return groundIndex > hasWeapon;
 }
 
-bool Bot::hasAnyWeapons () {
+bool Bot::hasAnyWeapons () const {
    return !!(pev->weapons & (kPrimaryWeaponMask | kSecondaryWeaponMask));
 }
 
@@ -1813,14 +1813,13 @@ bool Bot::hasAnyAmmoInClip () {
 }
 
 bool Bot::isKnifeMode () {
-   return cv_jasonmode ||
-      (usesKnife () && !hasAnyWeapons ())
+   return cv_jasonmode || (usesKnife () && !hasAnyWeapons ())
       || m_isCreature
       || ((m_states & Sense::SeeingEnemy) && usesKnife () && !hasAnyAmmoInClip ());
 }
 
 bool Bot::isGrenadeWar () {
-   const bool hasSomeGreandes = bestGrenadeCarried () != -1;
+   const bool hasSomeGreandes = bestGrenadeCarried () != kGrenadeInventoryEmpty;
 
    // if has grenade an not other weapons, assume we're in grenade war
    if (!hasAnyWeapons () && hasSomeGreandes) {
@@ -1902,7 +1901,7 @@ void Bot::selectSecondary () {
    pev->weapons = oldWeapons;
 }
 
-int Bot::getBestOwnedWeapon () {
+int Bot::getBestOwnedWeapon () const {
    auto tab = conf.getRawWeapons ();
 
    int weapons = pev->weapons;
@@ -1921,7 +1920,7 @@ int Bot::getBestOwnedWeapon () {
    return num;
 }
 
-int Bot::getBestOwnedPistol () {
+int Bot::getBestOwnedPistol () const {
    auto tab = conf.getRawWeapons ();
 
    int weapons = pev->weapons;
@@ -2111,11 +2110,11 @@ void Bot::checkReload () {
    }
 }
 
-float Bot::calculateScaleFactor (edict_t *ent) {
-   Vector entSize = ent->v.maxs - ent->v.mins;
+float Bot::calculateScaleFactor (edict_t *ent) const {
+   const auto &entSize = ent->v.maxs - ent->v.mins;
    const float entArea = 2.0f * (entSize.x * entSize.y + entSize.y * entSize.z + entSize.x * entSize.z);
 
-   Vector botSize = pev->maxs - pev->mins;
+   const auto &botSize = pev->maxs - pev->mins;
    const float botArea = 2.0f * (botSize.x * botSize.y + botSize.y * botSize.z + botSize.x * botSize.z);
 
    return entArea / botArea;
@@ -2571,11 +2570,11 @@ bool Bot::isEnemyNoticeable (float range) {
    return rg (0.0f, 100.0f) < noticeChance;
 }
 
-int Bot::getAmmo () {
+int Bot::getAmmo () const {
    return getAmmo (m_currentWeapon);
 }
 
-int Bot::getAmmo (int id) {
+int Bot::getAmmo (int id) const {
    const auto &prop = conf.getWeaponProp (id);
 
    if (prop.ammo1 == -1 || prop.ammo1 > kMaxWeapons - 1) {

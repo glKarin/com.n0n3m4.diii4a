@@ -13,7 +13,7 @@ ConVar cv_whose_your_daddy ("whose_your_daddy", "0", "Enables or disables extra 
 // game console variables
 ConVar mp_flashlight ("mp_flashlight", nullptr, Var::GameRef);
 
-float Bot::isInFOV (const Vector &destination) {
+float Bot::isInFOV (const Vector &destination) const {
    const float entityAngle = cr::wrapAngle360 (destination.yaw ()); // find yaw angle from source to destination...
    const float viewAngle = cr::wrapAngle360 (pev->v_angle.y); // get bot's current view angle...
 
@@ -368,7 +368,7 @@ bool Frustum::isObjectInsidePlane (const Plane &plane, const Vector &center, flo
    return isPointInsidePlane (top) || isPointInsidePlane (bottom);
 }
 
-void Frustum::calculate (Planes &planes, const Vector &viewAngle, const Vector &viewOffset) {
+void Frustum::calculate (Planes &planes, const Vector &viewAngle, const Vector &viewOffset) const {
    Vector forward {}, right {}, up {};
    viewAngle.angleVectors (&forward, &right, &up);
 
@@ -433,7 +433,7 @@ void Bot::setAimDirection () {
       }
 
       // don't switch view right away after loosing focus with current enemy 
-      if ((m_shootTime + 1.5f > game.time () || m_seeEnemyTime + 1.5f > game.time ())
+      if ((m_shootTime + rg (1.0f, 1.5f) > game.time () || m_seeEnemyTime + 1.5f > game.time ())
          && m_forgetLastVictimTimer.elapsed ()
          && !m_lastEnemyOrigin.empty ()
          && util.isAlive (m_lastEnemy)

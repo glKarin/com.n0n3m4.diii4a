@@ -93,19 +93,6 @@ static const byte Enby[] = {
 	0x2C, 0x2C, 0x2C,
 };
 
-static struct {
-	const char *name;
-	int r, g, b;
-} g_CrosshairColors[] = {
-	{ "#Valve_Green", 50, 250, 50 },
-	{ "#Valve_Red", 250, 50, 50 },
-	{ "#Valve_Blue", 50, 50, 250 },
-	{ "#Valve_Yellow", 250, 250, 50 },
-	{ "#Valve_Ltblue", 50, 250, 250 },
-};
-
-static const char* g_CrosshairSizes[] = { "auto", "small", "medium", "large" };
-
 #define FLAG_L( str, x ) str, x, sizeof( x ) / 3
 #define FLAG( x ) FLAG_L( #x, x )
 
@@ -142,7 +129,6 @@ class CMenuPlayerSetup : public CMenuFramework
 {
 private:
 	void _Init() override;
-	void _VidInit() override;
 	void Reload() override;
 public:
 	CMenuPlayerSetup() : CMenuFramework( "CMenuPlayerSetup" ), msgBox( true ) { }
@@ -214,23 +200,8 @@ public:
 
 	CMenuYesNoMessageBox msgBox;
 
-	class CMenuCrosshairPreview : public CMenuBaseItem
-	{
-	public:
-		virtual void Draw();
-		int r, g, b;
-		HIMAGE hImage;
-		HIMAGE hWhite;
-	} crosshairPreview;
-
-	CMenuSpinControl crosshairSize;
-	CMenuSpinControl crosshairColor;
-	CMenuCheckBox crosshairTranslucent;
-
 	bool hideModels, hideLogos;
 };
-
-ADD_MENU( menu_playersetup, CMenuPlayerSetup, UI_PlayerSetup_Menu );
 
 void CMenuPlayerSetup::CMenuLogoPreview::Draw()
 {
@@ -274,88 +245,6 @@ void CMenuPlayerSetup::CMenuLogoPreview::Draw()
 			EngFuncs::PIC_Set( hImage, color->rgb[i * 3 + 0], color->rgb[i * 3 + 1], color->rgb[i * 3 + 2] );
 			EngFuncs::PIC_DrawTrans( ui_pt, ui_sz, &rc2 );
 		}
-	}
-
-	int textHeight = m_scPos.y - (m_scChSize * 1.5f);
-	uint textflags = ( iFlags & QMF_DROPSHADOW ) ? ETF_SHADOW : 0;
-	UI_DrawString( font, m_scPos.x, textHeight, m_scSize.w, m_scChSize, szName, uiColorHelp, m_scChSize, QM_LEFT, textflags | ETF_FORCECOL );
-
-	// draw the rectangle
-	if( eFocusAnimation == QM_HIGHLIGHTIFFOCUS && IsCurrentSelected() )
-		UI_DrawRectangle( m_scPos, m_scSize, uiInputTextColor );
-	else
-		UI_DrawRectangle( m_scPos, m_scSize, uiInputFgColor );
-
-}
-
-void CMenuPlayerSetup::CMenuCrosshairPreview::Draw()
-{
-	int length;
-	int x = m_scPos.x, y = m_scPos.y;
-	int w = m_scSize.w, h = m_scSize.h;
-	int delta;
-	int i = menu_playersetup->crosshairColor.GetCurrentValue();
-	int r = g_CrosshairColors[i].r, g = g_CrosshairColors[i].g, b = g_CrosshairColors[i].b, a = 180;
-
-	if( !hImage )
-	{
-		UI_FillRect( m_scPos, m_scSize, uiPromptBgColor );
-	}
-	else
-	{
-		EngFuncs::PIC_Set( hImage, 255, 255, 255 );
-		EngFuncs::PIC_DrawTrans( m_scPos, m_scSize );
-	}
-
-	switch( (int)menu_playersetup->crosshairSize.GetCurrentValue() )
-	{
-	case 1:
-		length = 10;
-		break;
-	case 2:
-		length = 20;
-		break;
-	case 3:
-		length = 30;
-		break;
-	case 0:
-		if( ScreenWidth < 640 )
-			length = 30;
-		else if( ScreenWidth < 1024 )
-			length = 20;
-		else length = 10;
-	}
-
-	length *= ScreenHeight / 768.0f;
-	delta = ( w / 2 - length ) * 0.5f;
-
-	if( !menu_playersetup->crosshairTranslucent.bChecked )
-	{
-		EngFuncs::PIC_Set( hWhite, r, g, b, a );
-		EngFuncs::PIC_DrawTrans(x + w / 2, y + delta, 1, length );
-
-		EngFuncs::PIC_Set( hWhite, r, g, b, a );
-		EngFuncs::PIC_DrawTrans(x + w / 2, y + h / 2 + delta, 1, length );
-
-		EngFuncs::PIC_Set( hWhite, r, g, b, a );
-		EngFuncs::PIC_DrawTrans(x + delta, y + h / 2, length, 1 );
-
-		EngFuncs::PIC_Set( hWhite, r, g, b, a );
-		EngFuncs::PIC_DrawTrans(x + w / 2 + delta, y + h / 2, length, 1 );
-	}
-	else
-	{
-		EngFuncs::PIC_Set( hWhite, r, g, b, a );
-		EngFuncs::PIC_DrawAdditive(x + w / 2, y + delta, 1, length );
-
-		EngFuncs::PIC_Set( hWhite, r, g, b, a );
-		EngFuncs::PIC_DrawAdditive(x + w / 2, y + h / 2 + delta, 1, length );
-
-		EngFuncs::PIC_Set( hWhite, r, g, b, a );
-		EngFuncs::PIC_DrawAdditive(x + delta, y + h / 2, length, 1 );
-
-		EngFuncs::PIC_Set( hWhite, r, g, b, a );
-		EngFuncs::PIC_DrawAdditive(x + w / 2 + delta, y + h / 2, length, 1 );
 	}
 
 	int textHeight = m_scPos.y - (m_scChSize * 1.5f);
@@ -445,25 +334,12 @@ UI_PlayerSetup_SetConfig
 */
 void CMenuPlayerSetup::SetConfig( void )
 {
-	int i;
-	char color[32];
-
 	name.WriteCvar();
 	model.WriteCvar();
 	topColor.WriteCvar();
 	bottomColor.WriteCvar();
 	hiModels.WriteCvar();
 	showModels.WriteCvar();
-
-	i = crosshairSize.GetCurrentValue();
-	EngFuncs::CvarSetString( "cl_crosshair_size", g_CrosshairSizes[i] );
-
-	i = crosshairColor.GetCurrentValue();
-	snprintf( color, sizeof( color ), "%i %i %i", g_CrosshairColors[i].r, g_CrosshairColors[i].g, g_CrosshairColors[i].b );
-	EngFuncs::CvarSetString( "cl_crosshair_color", color );
-
-	crosshairTranslucent.WriteCvar();
-
 	WriteNewLogo();
 }
 
@@ -690,6 +566,8 @@ void CMenuPlayerSetup::_Init( void )
 
 	AddButton( L( "Adv. Options" ), nullptr, PC_ADV_OPT, UI_GameOptions_Menu );
 	gameOpt->SetGrayed( !UI_AdvUserOptions_IsAvailable() );
+	
+	AddButton( L( "Crosshair" ), nullptr, PC_CROSSHAIR, UI_Crosshair_Menu );
 
 	showModels.iFlags |= addFlags;
 	showModels.szName = L( "Show 3D preview" );
@@ -742,7 +620,7 @@ void CMenuPlayerSetup::_Init( void )
 			for( size_t i = 0; i < V_ARRAYSIZE( g_LogoColors ); i++ )
 				itemlist[i] = L( g_LogoColors[i].name );
 
-			logoImage.szName = L( "Spraypaint image" );
+			logoImage.szName = L( "GameUI_SpraypaintImage" );
 			logoImage.SetRect( 460, 370, 200, 200 );
 
 			logo.Setup( &logosModel );
@@ -771,36 +649,6 @@ void CMenuPlayerSetup::_Init( void )
 		AddItem( logoImage );
 	}
 
-	static const char *itemlist[V_ARRAYSIZE( g_CrosshairColors )];
-	static CStringArrayModel colors( itemlist, V_ARRAYSIZE( g_CrosshairColors ) );
-	for( size_t i = 0; i < V_ARRAYSIZE( g_CrosshairColors ); i++ )
-		itemlist[i] = L( g_CrosshairColors[i].name );
-
-	static const char *sizelist[] = { "Auto-size", "Small", "Medium", "Large" };
-	static CStringArrayModel sizes( sizelist, V_ARRAYSIZE( sizelist ));
-
-	crosshairPreview.szName = L( "Crosshair appearance" );
-	crosshairPreview.SetRect( 700, 370, 200, 200 );
-	crosshairPreview.hImage = EngFuncs::PIC_Load( "gfx/vgui/crosshair.tga", 0 );
-	crosshairPreview.hWhite = EngFuncs::PIC_Load( "*white" );
-
-	crosshairSize.Setup( &sizes );
-	crosshairSize.LinkCvar( "cl_crosshair_size", CMenuEditable::CVAR_VALUE );
-	crosshairSize.SetRect( 700, crosshairPreview.pos.y + crosshairPreview.size.h + UI_OUTLINE_WIDTH, 200, 32 );
-
-	crosshairColor.Setup( &colors );
-	crosshairColor.LinkCvar( "cl_crosshair_color", CMenuEditable::CVAR_STRING );
-	crosshairColor.SetRect( 700, crosshairSize.pos.y + crosshairSize.size.h + UI_OUTLINE_WIDTH, 200, 32 );
-
-	crosshairTranslucent.SetNameAndStatus( "Translucent", NULL );
-	crosshairTranslucent.LinkCvar( "cl_crosshair_translucent" );
-	crosshairTranslucent.SetCoord( 700, crosshairColor.pos.y + crosshairColor.size.h + UI_OUTLINE_WIDTH );
-
-	AddItem( crosshairPreview );
-	AddItem( crosshairSize );
-	AddItem( crosshairColor );
-	AddItem( crosshairTranslucent );
-
 	if( !(gMenu.m_gameinfo.flags & GFL_NOMODELS) )
 	{
 		AddItem( topColor );
@@ -816,51 +664,10 @@ void CMenuPlayerSetup::_Init( void )
 	}
 }
 
-void CMenuPlayerSetup::_VidInit()
-{
-	char color[32];
-	int rgb[3];
-	char size[32];
-	int i, j;
-
-	strncpy( color, EngFuncs::GetCvarString( "cl_crosshair_color" ), sizeof( color ));
-	sscanf( color, "%d %d %d", &rgb[0], &rgb[1], &rgb[2] );
-	j = V_ARRAYSIZE( g_CrosshairColors );
-	for( i = 0; i <= j; i++ )
-	{
-		if( i == j )
-		{
-			crosshairColor.SetCurrentValue( color );
-			break;
-		}
-
-		if( g_CrosshairColors[i].r == rgb[0] && g_CrosshairColors[i].g == rgb[1] && g_CrosshairColors[i].b == rgb[2] )
-		{
-			crosshairColor.SetCurrentValue( i );
-			break;
-		}
-	}
-
-	strncpy( size, EngFuncs::GetCvarString( "cl_crosshair_size" ), sizeof( size ));
-	j = V_ARRAYSIZE( g_CrosshairSizes );
-	for( i = 0; i <= j; i++ )
-	{
-		if( i == j )
-		{
-			crosshairSize.SetCurrentValue( EngFuncs::GetCvarFloat( "cl_crosshair_size" ));
-			break;
-		}
-
-		if( !stricmp( size, g_CrosshairSizes[i] ))
-		{
-			crosshairSize.SetCurrentValue( i );
-			break;
-		}
-	}
-}
-
 void CMenuPlayerSetup::Reload()
 {
 	if( !hideLogos ) UpdateLogo();
 	if( !hideModels ) UpdateModel();
 }
+
+ADD_MENU( menu_playersetup, CMenuPlayerSetup, UI_PlayerSetup_Menu );

@@ -363,6 +363,8 @@ public:
 	void SetScoreboardDefaults( void );
 	void GetAllPlayersInfo( void );
 
+	bool ShouldDrawScoreboard() const;
+
 	CHudUserCmd(ShowScores);
 	CHudUserCmd(HideScores);
 	CHudUserCmd(ShowScoreboard2);
@@ -973,6 +975,7 @@ public:
 	{
 		return m_scrinfo.charWidths[ ch ];
 	}
+
 	inline int GetCharHeight( )
 	{
 		return m_scrinfo.iCharHeight;
@@ -1013,10 +1016,6 @@ public:
 	cvar_t *cl_gunsmoke;
 	cvar_t *hud_textmode;
 	cvar_t *hud_colored;
-#ifdef __ANDROID__
-	cvar_t *cl_android_force_defaults;
-#endif
-	cvar_t *hud_scale;
 	cvar_t *cscl_currentmoney;
 	cvar_t *cscl_currentmap;
 	cvar_t *cscl_mapprefix;

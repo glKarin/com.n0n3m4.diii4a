@@ -6,10 +6,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#ifndef _XBOX
-#pragma warning (disable:4514)
-#endif
-
+#define _GNU_SOURCE 1 // need for vasprintf
 #include "utlstring.h"
 #include "utlvector.h"
 #include "winlite.h"
@@ -391,7 +388,7 @@ size_t CUtlString::TrimTrailingWhitespace()
 	if ( m_pchString == NULL )
 		return 0;
 
-	uint32 cChars = Length();
+	uint32_t cChars = Length();
 	if ( cChars == 0 )
 		return 0;
 
@@ -418,7 +415,7 @@ void CUtlString::AssertStringTooLong()
 //-----------------------------------------------------------------------------
 // Purpose: format binary data as hex characters, appending to existing data
 //-----------------------------------------------------------------------------
-void CUtlString::AppendHex( const uint8 *pbInput, size_t cubInput, bool bLowercase /*= true*/ )
+void CUtlString::AppendHex( const uint8_t *pbInput, size_t cubInput, bool bLowercase /*= true*/ )
 {
 	if ( !cubInput )
 		return;
@@ -436,7 +433,7 @@ void CUtlString::AppendHex( const uint8 *pbInput, size_t cubInput, bool bLowerca
 	char *pOut = newValue.Access() + existingLen;
 	for ( ; cubInput; --cubInput, ++pbInput )
 	{
-		uint8 val = *pbInput;
+		uint8_t val = *pbInput;
 		*pOut++ = pchHexLookup[val >> 4];
 		*pOut++ = pchHexLookup[val & 15];
 	}
@@ -446,7 +443,7 @@ void CUtlString::AppendHex( const uint8 *pbInput, size_t cubInput, bool bLowerca
 
 
 // Catch invalid UTF-8 sequences and return false if found, or true if the sequence is correct
-static bool BVerifyValidUTF8Continuation( size_t unStart, size_t unContinuationLength, const uint8 *pbCharacters )
+static bool BVerifyValidUTF8Continuation( size_t unStart, size_t unContinuationLength, const uint8_t *pbCharacters )
 {
 	for ( size_t i = 0; i < unContinuationLength; ++ i )
 	{
@@ -468,7 +465,7 @@ bool CUtlString::TruncateUTF8Internal( size_t unMaxChars, size_t unMaxBytes )
 	if ( !m_pchString )
 		return false;
 
-	const uint8 *pbCharacters = ( const uint8 * )m_pchString;
+	const uint8_t *pbCharacters = ( const uint8_t * )m_pchString;
 	size_t unBytes = 0;
 	size_t unChars = 0;
 	bool bSuccess = true;

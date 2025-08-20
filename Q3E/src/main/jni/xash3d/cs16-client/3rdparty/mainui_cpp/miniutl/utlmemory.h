@@ -7,18 +7,12 @@
 // A growable memory class.
 //===========================================================================//
 
+#pragma once
 #ifndef UTLMEMORY_H
 #define UTLMEMORY_H
 
-#ifdef _WIN32
-#pragma once
-#endif
-
 #include <string.h>
 #include "miniutl.h"
-
-#pragma warning(push)
-#pragma warning (disable:4100) // 'identifier' : unreferenced formal parameter
 
 //-----------------------------------------------------------------------------
 
@@ -97,7 +91,7 @@ protected:
 		EXTERNAL_CONST_BUFFER_MARKER = -2,
 	};
 
-	uint32 m_unSizeOfElements;
+	uint32_t m_unSizeOfElements;
 	void * m_pMemory;
 	int m_nAllocationCount;
 	int m_nGrowSize;
@@ -181,7 +175,7 @@ public:
 	void SetGrowSize( int size )							{}
 
 private:
-	uint8 m_Memory[SIZE*sizeof(T)];
+	uint8_t m_Memory[SIZE*sizeof(T)];
 };
 
 //-----------------------------------------------------------------------------
@@ -264,7 +258,5 @@ inline const T *CUtlMemory<T>::Base() const
 {
 	return (const T*)m_pMemory;
 }
-
-#pragma warning(pop)
 
 #endif // UTLMEMORY_H

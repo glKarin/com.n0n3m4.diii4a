@@ -884,14 +884,14 @@ inline void  CUtlRBTreeBase< I, E >::_SetRightChild( I i, I child, size_t unSize
 template < class I, class E >
 inline typename CUtlRBTreeInternal::Links_t<I> const &CUtlRBTreeBase< I, E >::_Links( I i, size_t unNodeSize, void *pMemBase ) const 
 {
-	return (i != INVALID_RBTREE_IDX ) ? *(CUtlRBTreeInternal::Links_t<I> *)( (uint8*)pMemBase + (unNodeSize*i) ) : m_Sentinel;
+	return (i != INVALID_RBTREE_IDX ) ? *(CUtlRBTreeInternal::Links_t<I> *)( (uint8_t*)pMemBase + (unNodeSize*i) ) : m_Sentinel;
 }
 
 template < class I, class E >
 inline typename CUtlRBTreeInternal::Links_t<I> &CUtlRBTreeBase< I, E >::_Links( I i, size_t unNodeSize, void *pMemBase )       
 { 
 	DbgAssert(i != INVALID_RBTREE_IDX ); 
-	return *(CUtlRBTreeInternal::Links_t<I> *)( (uint8*)pMemBase + (unNodeSize*i) );
+	return *(CUtlRBTreeInternal::Links_t<I> *)( (uint8_t*)pMemBase + (unNodeSize*i) );
 }
 
 //-----------------------------------------------------------------------------

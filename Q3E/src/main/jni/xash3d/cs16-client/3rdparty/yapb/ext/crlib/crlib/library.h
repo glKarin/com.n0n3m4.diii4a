@@ -10,8 +10,13 @@
 #include <crlib/basic.h>
 #include <crlib/string.h>
 
-#if defined(CR_LINUX) || defined(CR_MACOS)
-#  include <dlfcn.h>
+#if !defined(CR_WINDOWS)
+#  if defined(CR_PSVITA)
+#     define VRTLD_LIBDL_COMPAT
+#     include <vrtld.h>
+#  else
+#     include <dlfcn.h>
+#  endif
 #  include <errno.h>
 #  include <fcntl.h>
 #  include <sys/stat.h>

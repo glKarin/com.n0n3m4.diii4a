@@ -561,10 +561,12 @@ static void R_GetRendererName( char *dest, size_t size, const char *opt )
 	#define FMT2 OS_LIB_PREFIX "ref_%s." OS_LIB_EXT
 #endif
 #ifdef _DIII4A //karin: add xash3d_ prefix on library
+	#define XASH_FMT1 "%s." OS_LIB_EXT
+	#define XASH_FMT2 "ref_%s." OS_LIB_EXT
 		if( !Q_strncmp( opt, "ref_", 4 ))
-			Q_snprintf( dest, size, "xash3d_" FMT1, opt );
+			Q_snprintf( dest, size, OS_LIB_PREFIX "xash3d_" XASH_FMT1, opt );
 		else
-			Q_snprintf( dest, size, "xash3d_" FMT2, opt );
+			Q_snprintf( dest, size, OS_LIB_PREFIX "xash3d_" XASH_FMT2, opt );
 #else
 		if( !Q_strncmp( opt, "ref_", 4 ))
 			Q_snprintf( dest, size, FMT1, opt );

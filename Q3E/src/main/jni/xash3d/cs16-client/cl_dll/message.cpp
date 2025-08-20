@@ -251,6 +251,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 	length = 0;
 	width = 0;
 	m_parms.totalWidth = 0;
+	Con_UtfProcessChar( 0 );
 	while ( *pText )
 	{
 		if ( *pText == '\n' )
@@ -261,7 +262,16 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			width = 0;
 		}
 		else
-			width += gHUD.GetCharWidth((unsigned char)*pText);
+		{
+			int uch = Con_UtfProcessChar( (unsigned char)*pText );
+
+			if ( !uch )
+			{
+				pText++;
+				continue;
+			}
+			width += gHUD.GetCharWidth( uch );
+		}
 		pText++;
 		length++;
 	}
@@ -284,8 +294,15 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 		{
 			unsigned char c = *pText;
 			line[m_parms.lineLength] = c;
-			m_parms.width += gHUD.GetCharWidth(c);
 			m_parms.lineLength++;
+			int uch = Con_UtfProcessChar( c );
+
+			if ( !uch )
+			{
+				pText++;
+				continue;
+			}
+			m_parms.width += gHUD.GetCharWidth( uch );
 			pText++;
 		}
 		pText++;		// Skip LF
@@ -300,8 +317,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			MessageScanNextChar();
 			
 			if ( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
-				DrawUtils::TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b );
-			m_parms.x = next;
+				m_parms.x += DrawUtils::TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b );
 		}
 
 		m_parms.y += gHUD.GetCharHeight();
@@ -471,6 +487,17 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 				message->fxtime = 0.25;
 				message->holdtime = 5;
 			}
+
+			// safety check - don't add empty messages
+            if ( !message->pMessage || message->pMessage[0] == '\0' ) 
+            {
+                // clean up custom messages
+                if ( !strcmp(message->pName, "Custom") ) 
+                {
+                    delete[] message->pMessage;
+                }
+                return; // bail out if message is empty
+            }
 
 			for ( j = 0; j < maxHUDMessages; j++ )
 			{

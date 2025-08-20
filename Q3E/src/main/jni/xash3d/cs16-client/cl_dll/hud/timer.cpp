@@ -56,7 +56,7 @@ int CHudTimer::VidInit()
 int CHudTimer::Draw( float fTime )
 {
 	if ( ( gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH ) )
-        return 1;
+		return 1;
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
 		return 1;
@@ -82,21 +82,35 @@ int CHudTimer::Draw( float fTime )
 	}
 
 	DrawUtils::ScaleColors( r, g, b, MIN_ALPHA );
-    
-	int iWatchWidth = gHUD.GetSpriteRect(m_HUD_timer).Width();
-    
-	int x = ScreenWidth/2 - 50;
-	int y = ScreenHeight - 1.5 * gHUD.m_iFontHeight ;
-    
-    SPR_Set(gHUD.GetSprite(m_HUD_timer), r, g, b);
-    SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_timer));
-        
-	x = DrawUtils::DrawHudNumber2( x + iWatchWidth / 4, y, false, 2, minutes, r, g, b );
-	// draw :
-	FillRGBA(x + iWatchWidth / 4, y + gHUD.m_iFontHeight / 4, 2, 2, r, g, b, 100);
-	FillRGBA(x + iWatchWidth / 4, y + gHUD.m_iFontHeight - gHUD.m_iFontHeight / 4, 2, 2, r, g, b, 100);
 
-	m_right = DrawUtils::DrawHudNumber2( x + iWatchWidth / 2, y, true, 2, seconds, r, g, b );
+	int iWatchWidth = gHUD.GetSpriteRect(m_HUD_timer).Width();
+	int iDigitWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).Width();
+	int iColonWidth = iDigitWidth / 2;
+
+	// Always reserve space for 2 digits for minutes to keep layout consistent
+	int totalWidth = iWatchWidth + 2 * iDigitWidth + iColonWidth + 2 * iDigitWidth;
+
+	int x = (ScreenWidth - totalWidth) / 2;
+	int y = ScreenHeight - 1.5 * gHUD.m_iFontHeight;
+
+	SPR_Set(gHUD.GetSprite(m_HUD_timer), r, g, b);
+	SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_timer));
+	x += iWatchWidth;
+
+	if (minutes < 10)
+		// Shift x to the right by one digit width to reserve space for the leading zero, then draw 1 digit without the leading zero
+		x = DrawUtils::DrawHudNumber2(x + iDigitWidth, y, false, 1, minutes, r, g, b);
+	else
+		// Draw 2 digits, including the leading zero if needed
+		x = DrawUtils::DrawHudNumber2(x, y, true, 2, minutes, r, g, b);
+
+	// Draw colon (":")
+	FillRGBA(x + iColonWidth / 2, y + gHUD.m_iFontHeight / 4, 2, 2, r, g, b, 100);
+	FillRGBA(x + iColonWidth / 2, y + gHUD.m_iFontHeight - gHUD.m_iFontHeight / 4, 2, 2, r, g, b, 100);
+	x += iColonWidth;
+
+	m_right = DrawUtils::DrawHudNumber2(x, y, true, 2, seconds, r, g, b);
+
 	return 1;
 }
 

@@ -11,6 +11,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include <math.h>
 #include "strtools.h"
 
@@ -53,58 +54,36 @@
 // Purpose: String formatter with specified size
 //
 
-#ifdef _DEBUG
-#define QUIET_TRUNCATION false
-#else
-#define QUIET_TRUNCATION true		// Force quiet for release builds
-#endif
-
 class CNumStr
 {
 public:
 
 	CNumStr() { m_szBuf[0] = 0; m_nLength = 0; }
-	explicit CNumStr( bool b )		{ SetBool( b ); } 
-
-	explicit CNumStr( int8 n8 )		{ SetInt8( n8 ); }
-	explicit CNumStr( uint8 un8 )	{ SetUint8( un8 );  }
-
-	explicit CNumStr( int16 n16 )	{ SetInt16( n16 ); }
-	explicit CNumStr( uint16 un16 )	{ SetUint16( un16 );  }
-
-	explicit CNumStr( int32 n32 )	{ SetInt32( n32 ); }
-	explicit CNumStr( uint32 un32 )	{ SetUint32( un32 ); }
-
-	explicit CNumStr( int64 n64 )	{ SetInt64( n64 ); }
-	explicit CNumStr( uint64 un64 )	{ SetUint64( un64 ); }
-
-	explicit CNumStr( double f )	{ SetDouble( f ); }
-	explicit CNumStr( float f )		{ SetFloat( f ); }
+	explicit CNumStr( bool b )        { SetBool( b ); }
+	explicit CNumStr( int8_t n8 )     { SetInt8( n8 ); }
+	explicit CNumStr( uint8_t un8 )   { SetUint8( un8 ); }
+	explicit CNumStr( int16_t n16 )   { SetInt16( n16 ); }
+	explicit CNumStr( uint16_t un16 ) { SetUint16( un16 ); }
+	explicit CNumStr( int32_t n32 )   { SetInt32( n32 ); }
+	explicit CNumStr( uint32_t un32 ) { SetUint32( un32 ); }
+	explicit CNumStr( int64_t n64 )   { SetInt64( n64 ); }
+	explicit CNumStr( uint64_t un64 ) { SetUint64( un64 ); }
+	explicit CNumStr( double f )      { SetDouble( f ); }
+	explicit CNumStr( float f )       { SetFloat( f ); }
 
 #define NUMSTR_FAST_DIGIT( digit )					{ m_nLength = 1; m_szBuf[0] = '0' + ( digit ); m_szBuf[1] = 0; return m_szBuf; }
 #define NUMSTR_CHECK_FAST( val, utype )				if ( (utype)val < 10 ) NUMSTR_FAST_DIGIT( (utype)val )
 
-	inline const char* SetBool( bool b )			{ NUMSTR_FAST_DIGIT( b & 1 ); }
-
-#ifdef _WIN32
-	inline const char* SetInt8( int8 n8 )			{ NUMSTR_CHECK_FAST( n8,   uint8 )	_itoa( (int32)n8, m_szBuf, 10 ); m_nLength = V_strlen(m_szBuf); return m_szBuf; }
-	inline const char* SetUint8( uint8 un8 )		{ NUMSTR_CHECK_FAST( un8,  uint8 )	_itoa( (int32)un8, m_szBuf, 10 ); m_nLength = V_strlen(m_szBuf); return m_szBuf; }
-	inline const char* SetInt16( int16 n16 )		{ NUMSTR_CHECK_FAST( n16,  uint16 )	_itoa( (int32)n16, m_szBuf, 10 ); m_nLength = V_strlen(m_szBuf); return m_szBuf; }
-	inline const char* SetUint16( uint16 un16 )		{ NUMSTR_CHECK_FAST( un16, uint16 )	_itoa( (int32)un16, m_szBuf, 10 ); m_nLength = V_strlen(m_szBuf); return m_szBuf; }
-	inline const char* SetInt32( int32 n32 )		{ NUMSTR_CHECK_FAST( n32,  uint32 )	_itoa( n32, m_szBuf, 10 ); m_nLength = V_strlen(m_szBuf); return m_szBuf; }
-	inline const char* SetUint32( uint32 un32 )		{ NUMSTR_CHECK_FAST( un32, uint32 )	_i64toa( (int64)un32, m_szBuf, 10 ); m_nLength = V_strlen(m_szBuf); return m_szBuf; }
-	inline const char* SetInt64( int64 n64 )		{ NUMSTR_CHECK_FAST( n64,  uint64 )	_i64toa( n64, m_szBuf, 10 ); m_nLength = V_strlen(m_szBuf); return m_szBuf; }
-	inline const char* SetUint64( uint64 un64 )		{ NUMSTR_CHECK_FAST( un64, uint64 )	_ui64toa( un64, m_szBuf, 10 ); m_nLength = V_strlen(m_szBuf); return m_szBuf; }
-#else
-	inline const char* SetInt8( int8 n8 )			{ NUMSTR_CHECK_FAST( n8,   uint8 )	m_nLength = V_snprintf( m_szBuf, sizeof(m_szBuf), "%d", (int32)n8 ); return m_szBuf; }
-	inline const char* SetUint8( uint8 un8 )		{ NUMSTR_CHECK_FAST( un8,  uint8 )	m_nLength = V_snprintf( m_szBuf, sizeof(m_szBuf), "%d", (int32)un8 ); return m_szBuf; }
-	inline const char* SetInt16( int16 n16 )		{ NUMSTR_CHECK_FAST( n16,  uint16 )	m_nLength = V_snprintf( m_szBuf, sizeof(m_szBuf), "%d", (int32)n16 ); return m_szBuf; }
-	inline const char* SetUint16( uint16 un16 )		{ NUMSTR_CHECK_FAST( un16, uint16 )	m_nLength = V_snprintf( m_szBuf, sizeof(m_szBuf), "%d", (int32)un16 ); return m_szBuf; }
-	inline const char* SetInt32( int32 n32 )		{ NUMSTR_CHECK_FAST( n32,  uint32 )	m_nLength = V_snprintf( m_szBuf, sizeof(m_szBuf), "%d", n32 ); return m_szBuf; }
-	inline const char* SetUint32( uint32 un32 )		{ NUMSTR_CHECK_FAST( un32, uint32 )	m_nLength = V_snprintf( m_szBuf, sizeof(m_szBuf), "%u", un32 ); return m_szBuf; }
-	inline const char* SetInt64( int64 n64 )		{ NUMSTR_CHECK_FAST( n64,  uint64 )	m_nLength = V_snprintf( m_szBuf, sizeof(m_szBuf), "%lld", n64 ); return m_szBuf; }
-	inline const char* SetUint64( uint64 un64 )		{ NUMSTR_CHECK_FAST( un64, uint64 )	m_nLength = V_snprintf( m_szBuf, sizeof(m_szBuf), "%llu", un64 ); return m_szBuf; }
-#endif
+	inline const char* SetBool( bool b )          { NUMSTR_FAST_DIGIT( b & 1 ); }
+	inline const char* SetInt8( int8_t n8 )       { NUMSTR_CHECK_FAST( n8,   uint8_t )  m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%" PRIi32, n8 ); return m_szBuf; }
+	inline const char* SetUint8( uint8_t un8 )    { NUMSTR_CHECK_FAST( un8,  uint8_t )  m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%" PRIi32, un8 ); return m_szBuf; }
+	inline const char* SetInt16( int16_t n16 )    { NUMSTR_CHECK_FAST( n16,  uint16_t ) m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%" PRIi32, n16 ); return m_szBuf; }
+	inline const char* SetUint16( uint16_t un16 ) { NUMSTR_CHECK_FAST( un16, uint16_t ) m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%" PRIi32, un16 ); return m_szBuf; }
+	inline const char* SetInt32( int32_t n32 )    { NUMSTR_CHECK_FAST( n32,  uint32_t ) m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%" PRIi32, n32 ); return m_szBuf; }
+	inline const char* SetUint32( uint32_t un32 ) { NUMSTR_CHECK_FAST( un32, uint32_t ) m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%" PRIu32, un32 ); return m_szBuf; }
+	inline const char* SetInt64( int64_t n64 )    { NUMSTR_CHECK_FAST( n64,  uint64_t ) m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%" PRIi64, n64 ); return m_szBuf; }
+	inline const char* SetUint64( uint64_t un64 ) { NUMSTR_CHECK_FAST( un64, uint64_t ) m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%" PRIu64, un64 ); return m_szBuf; }
+	inline const char* SetHexUint64( uint64_t un64 ) { m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%" PRIx64, un64 ); return m_szBuf; }
 
 	inline const char* SetDouble( double f )
 	{
@@ -112,9 +91,9 @@ public:
 		if ( f == 0.0  && !signbit( f ) )
 			NUMSTR_FAST_DIGIT( 0 );
 #endif
-		if ( f == 1.0  )
+		if ( f == 1.0 )
 			NUMSTR_FAST_DIGIT( 1 );
-		m_nLength = V_snprintf( m_szBuf, sizeof(m_szBuf), "%.18g", f );
+		m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%.18g", f );
 		return m_szBuf;
 	}
 	inline const char* SetFloat( float f )
@@ -125,10 +104,10 @@ public:
 #endif
 		if ( f == 1.0f )
 			NUMSTR_FAST_DIGIT( 1 );
-		m_nLength = V_snprintf( m_szBuf, sizeof(m_szBuf), "%.18g", f );
+		m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%.18g", f );
 		return m_szBuf;
 	}
-	//SDR_PUBLIC inline const char* SetHexUint64( uint64 un64 )	{ V_binarytohex( (uint8 *)&un64, sizeof( un64 ), m_szBuf, sizeof( m_szBuf ) ); m_nLength = V_strlen(m_szBuf); return m_szBuf; }
+	//SDR_PUBLIC
 
 #undef NUMSTR_FAST_DIGIT
 #undef NUMSTR_CHECK_FAST
@@ -151,7 +130,6 @@ public:
 protected:
 	char m_szBuf[28]; // long enough to hold 18 digits of precision, a decimal, a - sign, e+### suffix, and quotes
 	int m_nLength;
-
 };
 
 #endif // FMTSTR_H

@@ -20,15 +20,12 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 project(MAINUI)
 
-# By default we require C++11 support.
-# But it can be overriden with -DMY_COMPILER_SUCKS compiler option
-# It's not recommended and may not work(as it's done only for MSVC6 support)
 set(CMAKE_CXX_STANDARD 11)
 
-set(MAINUI_LIBRARY xash3d_menu)
+set(MAINUI_LIBRARY menu_hl)
 
 option(MAINUI_USE_CUSTOM_FONT_RENDER "Use custom font rendering" ON)
 option(MAINUI_USE_STB "Use stb_truetype.h for rendering(*nix-only)" OFF)
@@ -43,31 +40,10 @@ file(GLOB MAINUI_MENUS_SOURCES "menus/*.cpp" "menus/dynamic/*.cpp")
 file(GLOB MAINUI_FONT_RENDER_SOURCES "font/*.cpp")
 file(GLOB MAINUI_SOURCES "miniutl/*.cpp" "*.cpp")
 
-if(CS16CLIENT)
-	add_definitions(-DCS16CLIENT)
-	list(APPEND MAINUI_SOURCES
-		${XASH_SDK}/common/interface.cpp
-		menus/Scoreboard.cpp
-		menus/client/JoinGame.cpp
-		menus/client/JoinClass.cpp
-		menus/client/ClientWindow.cpp
-		)
-endif()
-
-list(APPEND MAINUI_SOURCES ${MAINUI_CONTROLS_SOURCES})
-list(APPEND MAINUI_SOURCES ${MAINUI_MENUS_SOURCES})
-list(APPEND MAINUI_SOURCES ${MAINUI_FONT_RENDER_SOURCES})
-add_library(${MAINUI_LIBRARY} MODULE ${MAINUI_SOURCES})
+add_library(${MAINUI_LIBRARY} SHARED ${MAINUI_CONTROLS_SOURCES} ${MAINUI_MENUS_SOURCES} ${MAINUI_FONT_RENDER_SOURCES} ${MAINUI_SOURCES})
 
 if(NOT WIN32 AND NOT MINGW)
 	add_compile_options(-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-macro-redefined)
-else()
-	# Only for MSVC6 compatibility mode! Newer VC does fail with this define
-	# add_definitions(-DMY_COMPILER_SUCKS)
-endif()
-
-if(XASH_SAILFISH)
-	add_definitions(-D__SAILFISH__)
 endif()
 
 if(MAINUI_FONT_SCALE)
@@ -76,8 +52,7 @@ endif()
 
 add_definitions(-DSTDINT_H=<cstdint>)
 
-# Force stb_truetype for Apple devices, as there is no Apple native font renderer
-# And freetype&fontconfig isn't used on this platform by default
+# Android uses stb_truetype by default for rendering fonts
 if(ANDROID)
 	set(MAINUI_USE_STB TRUE)
 endif()

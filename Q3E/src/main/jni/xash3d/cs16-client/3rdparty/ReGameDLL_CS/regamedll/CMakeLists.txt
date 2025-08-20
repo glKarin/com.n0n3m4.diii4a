@@ -440,22 +440,22 @@ if (NOT MSVC)
 endif()
 
 if (XASH_COMPAT)
-	if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-		if(DIII4A)
-			set_target_properties(regamedll PROPERTIES OUTPUT_NAME cs16_server)
-		else()
-		set_target_properties(regamedll PROPERTIES
-			OUTPUT_NAME server)
+	if (WIN32)
+		if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+			target_compile_definitions(regamedll PRIVATE XASH_64BIT)
 		endif()
-	elseif (WIN32)
 		set_target_properties(regamedll PROPERTIES
 			PREFIX ""
 			OUTPUT_NAME mp${POSTFIX})
+	elseif (DIII4A) #k: don't rename library
+			set_target_properties(regamedll PROPERTIES OUTPUT_NAME server_cs)
 	else()
 		set_target_properties(regamedll PROPERTIES
 			PREFIX ""
 			OUTPUT_NAME cs${POSTFIX})
 	endif()
+elseif (DIII4A) #k: don't rename library
+		set_target_properties(regamedll PROPERTIES OUTPUT_NAME server_cs)
 elseif (WIN32)
 	set_target_properties(regamedll PROPERTIES
 		OUTPUT_NAME mp

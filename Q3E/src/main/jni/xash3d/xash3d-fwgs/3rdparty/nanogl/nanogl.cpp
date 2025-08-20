@@ -80,7 +80,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <dlfcn.h>
 #define loadDriver( x ) dlopen( x, RTLD_NOW | RTLD_LOCAL )
 #define procAddress( x, y ) dlsym( x, y )
-#define freeDriver( x ) dlclose() x )
+#define freeDriver( x ) dlclose( x )
 #define GL_LIB "libGL.so.1"
 #define GLES_LIB "libGLESv1_CM.so"
 #define EGL_LIB "libEGL.so"
@@ -453,5 +453,5 @@ void nanoGL_Destroy( )
 	}
 
 	// release lib
-	dlclose( glesLib );
+	freeDriver( glesLib );
 }

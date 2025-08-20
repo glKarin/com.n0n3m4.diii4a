@@ -42,7 +42,7 @@ public:
    bool visible (int srcIndex, int destIndex, VisIndex vis = VisIndex::Any);
 
    void load ();
-   void save ();
+   void save () const;
    void rebuild ();
 
 public:

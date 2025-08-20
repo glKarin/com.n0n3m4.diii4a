@@ -288,12 +288,12 @@ public final class Q3EGameConstants
     public static final String[] QUAKE2_RENDERER_BACKENDS = {"gles1", "gles3", "vk",};
 
     public static final String[] XASH3D_REFS   = {"gles1", "gl4es", "gles3compat", "soft",};
-    public static final String[] XASH3D_SV_CLS = {"", "cs16", "cs16_yapb",};
+    public static final String[] XASH3D_SV_CLS = {"", "hl", "cs16", "cs16_yapb",};
     public static final String[] XASH3D_LIBS   = {
-            "libxash3d.so", "libxash3d_menu.so", "libxash3d_ref_gl4es.so", "libxash3d_ref_gles1.so", "libxash3d_ref_gles3compat.so", "libxash3d_ref_soft.so",
-            "libcs16_client.so", "libcs16_menu.so", "libcs16_server.so", "libcs16_yapb.so",
-            "libhlsdk_client.so", "libhlsdk_server.so",
-            "libfilesystem_stdio.so",
+            "libxash3d.so", "libfilesystem_stdio.so",
+            "libxash3d_ref_gl4es.so", "libxash3d_ref_gles1.so", "libxash3d_ref_gles3compat.so", "libxash3d_ref_soft.so",
+            "libclient_hl.so", "libserver_hl.so", "libmenu_hl.so",
+            "libclient_cs.so", "libmenu_cs.so", "libserver_cs.so", "libserver_yapb.so",
     };
 
     public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod", "episodic", "hl2mp", "hl1", "hl1mp",};

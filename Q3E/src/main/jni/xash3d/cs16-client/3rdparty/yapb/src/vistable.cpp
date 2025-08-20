@@ -179,7 +179,7 @@ void GraphVistable::load () {
    }
 }
 
-void GraphVistable::save () {
+void GraphVistable::save () const {
    if (!graph.length () || graph.hasChanged () || m_rebuild) {
       return;
    }

@@ -17,7 +17,7 @@ int BotControl::cmdAddBot () {
 
    // this is duplicate error as in main bot creation code, but not to be silent
    if (!graph.length () || graph.hasChanged ()) {
-      ctrl.msg ("There is no graph found or graph is changed. Cannot create bot.");
+      msg ("There is no graph found or graph is changed. Cannot create bot.");
       return BotCommandResult::Handled;
    }
 
@@ -91,7 +91,7 @@ int BotControl::cmdKillBots () {
       bots.killAllBots (Team::Terrorist, silentKill);
    }
    else {
-      bots.killAllBots (-1, silentKill);
+      bots.killAllBots (Team::Invalid, silentKill);
    }
    return BotCommandResult::Handled;
 }
@@ -204,6 +204,9 @@ int BotControl::cmdCvars () {
 
    auto match = arg <StringRef> (pattern);
 
+   // stop printing if executed once more
+   flushPrintQueue ();
+
    // revert all the cvars to their default values
    if (match == "defaults") {
       msg ("Bots cvars has been reverted to their default values.");
@@ -244,7 +247,7 @@ int BotControl::cmdCvars () {
       cfg.puts ("// Configuration file for %s\n\n", product.name);
    }
    else {
-      ctrl.setRapidOutput (true);
+      setRapidOutput (true);
    }
 
    for (const auto &cvar : game.getCvars ()) {
@@ -303,7 +306,7 @@ int BotControl::cmdCvars () {
          msg (" ");
       }
    }
-   ctrl.setRapidOutput (false);
+   setRapidOutput (false);
 
    if (isSave) {
       if (!cfg) {
@@ -633,7 +636,7 @@ int BotControl::cmdNodeErase () {
 
    // prevent accidents when graph are deleted unintentionally
    if (arg <StringRef> (iamsure) == "iamsure") {
-      bstor.unlinkFromDisk (false);
+      bstor.unlinkFromDisk (false, false);
    }
    else {
       msg ("Please, append \"iamsure\" as parameter to get graph erased from the disk.");
@@ -644,7 +647,7 @@ int BotControl::cmdNodeErase () {
 int BotControl::cmdNodeEraseTraining () {
    enum args { graph_cmd = 1, cmd };
 
-   bstor.unlinkFromDisk (true);
+   bstor.unlinkFromDisk (true, false);
 
    return BotCommandResult::Handled;
 }
@@ -2172,13 +2175,13 @@ void BotControl::maintainAdminRights () {
          }
          else if (password != engfuncs.pfnInfoKeyValue (engfuncs.pfnGetInfoKeyBuffer (ent), key.chars ())) {
             client.flags &= ~ClientFlags::Admin;
-            ctrl.msg ("Player %s had lost remote access to %s.", ent->v.netname.chars (), product.name);
+            msg ("Player %s had lost remote access to %s.", ent->v.netname.chars (), product.name);
          }
       }
       else if (!(client.flags & ClientFlags::Admin) && !key.empty () && !password.empty ()) {
          if (password == engfuncs.pfnInfoKeyValue (engfuncs.pfnGetInfoKeyBuffer (ent), key.chars ())) {
             client.flags |= ClientFlags::Admin;
-            ctrl.msg ("Player %s had gained full remote access to %s.", ent->v.netname.chars (), product.name);
+            msg ("Player %s had gained full remote access to %s.", ent->v.netname.chars (), product.name);
          }
       }
    }

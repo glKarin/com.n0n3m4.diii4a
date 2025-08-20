@@ -218,16 +218,16 @@ public:
    bool convertOldFormat ();
    bool isConnected (int a, int b);
    bool isConnected (int index);
-   bool isNodeReacheableEx (const Vector &src, const Vector &destination, const float maxHeight);
-   bool isNodeReacheable (const Vector &src, const Vector &destination);
-   bool isNodeReacheableWithJump (const Vector &src, const Vector &destination);
+   bool isNodeReacheableEx (const Vector &src, const Vector &destination, const float maxHeight) const;
+   bool isNodeReacheable (const Vector &src, const Vector &destination) const;
+   bool isNodeReacheableWithJump (const Vector &src, const Vector &destination) const;
    bool checkNodes (bool teleportPlayer, bool onlyPaths = false);
    bool isVisited (int index);
-   bool isAnalyzed () const;
 
    bool saveGraphData ();
    bool loadGraphData ();
    bool canDownload ();
+   bool isAnalyzed () const;
 
    void saveOldFormat ();
    void reset ();
@@ -251,23 +251,21 @@ public:
    void startLearnJump ();
    void setVisited (int index);
    void clearVisited ();
-   void initBuckets ();
-   void addToBucket (const Vector &pos, int index);
+
    void eraseFromBucket (const Vector &pos, int index);
    void setBombOrigin (bool reset = false, const Vector &pos = nullptr);
    void unassignPath (int from, int to);
-   void convertFromPOD (Path &path, const PODPath &pod);
+   void convertFromPOD (Path &path, const PODPath &pod) const;
    void convertToPOD (const Path &path, PODPath &pod);
-   void convertCampDirection (Path &path);
+   void convertCampDirection (Path &path) const;
    void setAutoPathDistance (const float distance);
    void showStats ();
    void showFileInfo ();
-   void emitNotify (int32_t sound);
+   void emitNotify (int32_t sound) const;
    void syncCollectOnline ();
    void collectOnline ();
 
-   IntArray getNearestInRadius (float radius, const Vector &origin, int maxCount = -1);
-   const IntArray &getNodesInBucket (const Vector &pos);
+   IntArray getNearestInRadius (const float radius, const Vector &origin, int maxCount = -1);
 
 public:
    StringRef getAuthor () const {
@@ -351,6 +349,21 @@ public:
    // gets the node numbers
    const IntArray &getNodeNumbers () {
       return m_nodeNumbers;
+   }
+
+   // reinitialize buckets
+   void initBuckets () {
+      m_hashTable.clear ();
+   }
+
+   // get the bucket of nodes near position
+   const IntArray &getNodesInBucket (const Vector &pos) {
+      return m_hashTable[locateBucket (pos)];
+   }
+
+   // add a node to position bucket
+   void addToBucket (const Vector &pos, int index) {
+      m_hashTable[locateBucket (pos)].emplace (index);
    }
 
 public:

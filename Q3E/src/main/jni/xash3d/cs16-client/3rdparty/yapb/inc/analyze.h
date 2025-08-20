@@ -53,7 +53,7 @@ private:
    void cleanup ();
 
    // show overlay message about analyzing
-   void displayOverlayMessage ();
+   void displayOverlayMessage () const;
 
 public:
 

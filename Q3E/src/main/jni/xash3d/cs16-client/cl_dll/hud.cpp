@@ -34,6 +34,8 @@
 
 #include "camera.h"
 
+#include "draw_util.h"
+
 #if _WIN32
 #define strncasecmp _strnicmp
 #endif
@@ -294,7 +296,6 @@ void CHud :: Init( void )
 	CVAR_CREATE( "menu_bg_fill", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "buymenu_stayon", "0", FCVAR_ARCHIVE );
 
-	hud_scale    = gEngfuncs.pfnGetCvarPointer( "hud_scale" );
 	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
 	hud_colored  = CVAR_CREATE( "hud_colored", "0", FCVAR_ARCHIVE );
 	cl_righthand = CVAR_CREATE( "cl_righthand", "1", FCVAR_ARCHIVE );
@@ -309,6 +310,9 @@ void CHud :: Init( void )
 	cl_weapon_sparks = CVAR_CREATE( "cl_weapon_sparks", "1", FCVAR_ARCHIVE );
 	cl_weapon_wallpuff = CVAR_CREATE( "cl_weapon_wallpuff", "1", FCVAR_ARCHIVE );
 	zoom_sens_ratio = CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
+
+	cl_charset = gEngfuncs.pfnGetCvarPointer( "cl_charset" );
+	con_charset = gEngfuncs.pfnGetCvarPointer( "con_charset" );
 
 	m_pShowHealth = CVAR_CREATE( "scoreboard_showhealth", "1", FCVAR_ARCHIVE );
 	m_pShowMoney = CVAR_CREATE( "scoreboard_showmoney", "1", FCVAR_ARCHIVE );

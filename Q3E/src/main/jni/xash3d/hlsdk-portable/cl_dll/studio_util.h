@@ -36,5 +36,6 @@ void	ConcatTransforms( float in1[3][4], float in2[3][4], float out[3][4] );
 void	MatrixCopy( float in[3][4], float out[3][4] );
 void	QuaternionMatrix( vec4_t quaternion, float (*matrix)[4] );
 void	QuaternionSlerp( vec4_t p, vec4_t q, float t, vec4_t qt );
+void	QuaternionSlerpX4( vec4_t p[4], vec4_t q[4], float t, vec4_t qt[4] );
 void	AngleQuaternion( float *angles, vec4_t quaternion );
 #endif // STUDIO_UTIL_H

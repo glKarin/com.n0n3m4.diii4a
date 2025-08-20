@@ -121,7 +121,7 @@ void Bot::normal_ () {
          if (allowedCampWeapon && m_timeCamping + 10.0f < game.time () && !m_hasHostage) {
             bool campingAllowed = true;
 
-            // Check if it's not allowed for this team to camp here
+            // check if it's not allowed for this team to camp here
             if (m_team == Team::Terrorist) {
                if (m_pathFlags & NodeFlag::CTOnly) {
                   campingAllowed = false;
@@ -134,25 +134,18 @@ void Bot::normal_ () {
             }
 
             // don't allow vip on as_ maps to camp + don't allow terrorist carrying c4 to camp
-            if (campingAllowed
-               && (m_isVIP || (game.mapIs (MapFlags::Demolition) && m_team == Team::Terrorist && !bots.isBombPlanted () && m_hasC4))) {
+            if (m_isVIP || (game.mapIs (MapFlags::Demolition) && m_team == Team::Terrorist && !bots.isBombPlanted () && m_hasC4)) {
                campingAllowed = false;
             }
 
             // check if another bot is already camping here
-            if (campingAllowed && isOccupiedNode (m_currentNodeIndex)) {
+            if (isOccupiedNode (m_currentNodeIndex)) {
                campingAllowed = false;
             }
 
             // skip sniper node if we don't have sniper weapon
-            if (campingAllowed && !usesSniper () && (m_pathFlags & NodeFlag::Sniper)) {
+            if (!usesSniper () && (m_pathFlags & NodeFlag::Sniper)) {
                campingAllowed = false;
-            }
-
-            // if the bot is about to come to the camp spot, but there is already someone else camping
-            if (!campingAllowed && getTask ()->data == m_currentNodeIndex && getTask ()->data != kInvalidNodeIndex) {
-               clearSearchNodes ();
-               getTask ()->data = kInvalidNodeIndex;
             }
 
             if (campingAllowed) {
@@ -192,8 +185,9 @@ void Bot::normal_ () {
          if (game.mapIs (MapFlags::HostageRescue)) {
             // CT Bot has some hostages following?
             if (m_team == Team::CT && m_hasHostage) {
+
                // and reached a rescue point?
-               if (m_pathFlags & NodeFlag::Rescue) {
+               if (m_inRescueZone && (m_pathFlags & NodeFlag::Rescue)) {
                   m_hostages.clear ();
                }
             }
@@ -405,13 +399,12 @@ void Bot::huntEnemy_ () {
    }
 
    // bots skill higher than 60?
-   if (cv_walking_allowed && mp_footsteps && m_difficulty >= Difficulty::Normal && !isKnifeMode ()) {
+   if (cv_walking_allowed && mp_footsteps && m_difficulty >= Difficulty::Normal) {
+
       // then make him move slow if near enemy
-      if (!(m_currentTravelFlags & PathFlag::Jump)) {
-         if (m_currentNodeIndex != kInvalidNodeIndex) {
-            if (m_path->radius < 32.0f && !isOnLadder () && !isInWater () && m_seeEnemyTime + 4.0f > game.time ()) {
-               m_moveSpeed = getShiftSpeed ();
-            }
+      if (m_currentNodeIndex != kInvalidNodeIndex && !(m_currentTravelFlags & PathFlag::Jump)) {
+         if (m_path->radius < 32.0f && !isOnLadder () && !isInWater () && m_seeEnemyTime + 4.0f > game.time ()) {
+            m_moveSpeed = getShiftSpeed ();
          }
       }
    }
@@ -622,7 +615,7 @@ void Bot::blind_ () {
 }
 
 void Bot::camp_ () {
-   if (!cv_camping_allowed || m_isCreature) {
+   if (!cv_camping_allowed || isKnifeMode ()) {
       completeTask ();
       return;
    }
@@ -1473,13 +1466,13 @@ void Bot::shootBreakable_ () {
    }
    else {
       TraceResult tr {};
-      game.testLine (pev->origin, m_breakableOrigin, TraceIgnore::None, ent (), &tr);
+      game.testLine (pev->origin, m_breakableOrigin, TraceIgnore::Monsters , ent (), &tr);
 
-      if (tr.pHit != m_breakableEntity || !util.isVisible (tr.vecEndPos, ent ())) {
+      if (tr.pHit != m_breakableEntity && !cr::fequal (tr.flFraction, 1.0f)) {
          m_ignoredBreakable.push (tr.pHit);
 
          m_breakableEntity = nullptr;
-         m_breakableOrigin = nullptr;
+         m_breakableOrigin.clear ();
 
          completeTask ();
          return;
@@ -1493,8 +1486,6 @@ void Bot::shootBreakable_ () {
 
    m_navTimeset = game.time ();
    m_lookAtSafe = m_breakableOrigin;
-
-   const float distToObstacle = pev->origin.distanceSq (m_lookAtSafe);
 
    // is bot facing the breakable?
    if (util.getConeDeviation (ent (), m_lookAtSafe) >= 0.90f) {
@@ -1510,11 +1501,12 @@ void Bot::shootBreakable_ () {
             pev->button |= IN_ATTACK;
          }
       }
+      const float distToObstacle = pev->origin.distanceSq (m_lookAtSafe);
 
       // if with knife with no ammo, recompute breakable distance
       if (!hasAnyAmmoInClip ()
          && usesKnife ()
-         && distToObstacle > cr::sqrf (72.0f)) {
+         && distToObstacle > cr::sqrf (32.0f)) {
 
          completeTask ();
       }
@@ -1703,6 +1695,7 @@ void Bot::pickupItem_ () {
                for (const auto &client : util.getClients ()) {
                   if ((client.flags & ClientFlags::Used) && !(client.ent->v.flags & FL_FAKECLIENT) && (client.flags & ClientFlags::Alive) &&
                      client.team == m_team && client.ent->v.origin.distanceSq (ent->v.origin) <= cr::sqrf (240.0f)) {
+
                      return EntitySearchResult::Continue;
                   }
                }

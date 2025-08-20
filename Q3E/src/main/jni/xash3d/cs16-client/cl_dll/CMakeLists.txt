@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(client)
 
-set(CLIENT_LIB cs16_client)
+set(CLIENT_LIB client_cs)
 
 file(GLOB CS_CLIENT_SRC "*.cpp")
 file(GLOB CS_EV_SRC "events/*.cpp")
@@ -19,6 +19,7 @@ list(REMOVE_ITEM CS_INPUT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/input/input_sdl.cpp")
 list(REMOVE_ITEM CS_CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/inputw32.cpp")
 list(REMOVE_ITEM CS_WPN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/cs_wpn/cs_baseentity.cpp")
 list(APPEND CS_CLIENT_SRC ../common/interface.cpp)
+list(APPEND CS_CLIENT_SRC ../public/utflib.cpp)
 
 list(APPEND CS_CLIENT_SRC ${CS_EV_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_WPN_SRC})
@@ -48,7 +49,7 @@ include_directories(
 	../3rdparty/mainui_cpp/menus
 	../3rdparty/mainui_cpp/miniutl)
 
-add_definitions(-DCLIENT_WEAPONS -DCLIENT_DLL)
+add_definitions(-DCLIENT_WEAPONS -DCLIENT_DLL -DSTDINT_H=<cstdint>)
 
 if(NOT MSVC)
 	add_definitions(-DLINUX -D_LINUX)

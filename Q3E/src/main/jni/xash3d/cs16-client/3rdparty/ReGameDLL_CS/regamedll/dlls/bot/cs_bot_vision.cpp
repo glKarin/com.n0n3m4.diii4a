@@ -797,7 +797,9 @@ CBasePlayer *CCSBot::FindMostDangerousThreat()
 			float distSq = d.LengthSquared();
 
 #ifdef REGAMEDLL_ADD
-			if (isSniperRifle(pPlayer->m_pActiveItem)) {
+			CBasePlayerWeapon *pCurrentWeapon = static_cast<CBasePlayerWeapon *>(pPlayer->m_pActiveItem);
+			if (pCurrentWeapon && isSniperRifle(pCurrentWeapon))
+			{
 				m_isEnemySniperVisible = true;
 				if (sniperThreat)
 				{
@@ -1003,7 +1005,7 @@ CBasePlayer *CCSBot::FindMostDangerousThreat()
 			return currentThreat;
 		}
 
-		// if we are a sniper and we see a sniper threat, attack it unless 
+		// if we are a sniper and we see a sniper threat, attack it unless
 		// there are other close enemies facing me
 		if (IsSniper() && sniperThreat)
 		{

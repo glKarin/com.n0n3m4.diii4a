@@ -10,7 +10,6 @@
 #include <crlib/basic.h>
 
 #if !defined(CR_WINDOWS)
-#  include <sys/mman.h>
 #  include <pthread.h>
 #  include <errno.h>
 #else

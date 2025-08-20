@@ -19,18 +19,30 @@ GNU General Public License for more details.
 #include "platform/android/lib_android.h"
 #include "platform/android/dlsym-weak.h" // Android < 5.0
 
-void *ANDROID_LoadLibrary( const char *dllname )
+void *ANDROID_LoadLibrary( const char *path )
 {
-	char path[MAX_SYSPATH];
-	const char *libdir[2];
-	int i;
-	void *pHandle = NULL;
+#ifdef _DIII4A //karin: normalize library file name
+	const char *libdir[2], *_name = COM_FileWithoutPath( path );
+	char name[MAX_SYSPATH] = { 0 };
+	if(Q_strstr(_name, "lib") != _name)
+		strcat(name, "lib");
+	strcat(name, _name);
+	if(Q_strstr(_name, ".so") != (_name + (strlen(_name) - 3)))
+		strcat(name, ".so");
+#else
+	const char *libdir[2], *name = COM_FileWithoutPath( path );
+#endif
+	char fullpath[MAX_SYSPATH];
+	void *handle;
 
-	libdir[0] = getenv("XASH3D_GAMELIBDIR");
-	libdir[1] = getenv("XASH3D_ENGLIBDIR");
+	libdir[0] = getenv( "XASH3D_GAMELIBDIR" ); // TODO: remove this once distributing games from APKs will be deprecated
+	libdir[1] = NULL; // TODO: put here data directory where libraries will be downloaded to
 
-	for( i = 0; i < 2; i++ )
+	for( int i = 0; i < ARRAYSIZE( libdir ); i++ )
 	{
+		// this is an APK directory, get base path
+		const char *p = i == 0 ? name : path;
+
 		if( !libdir[i] )
 			continue;
 #ifdef _DIII4A //karin: print load dll path
@@ -38,13 +50,18 @@ void *ANDROID_LoadLibrary( const char *dllname )
             continue;
 #endif
 
-		Q_snprintf( path, MAX_SYSPATH, "%s/lib%s."OS_LIB_EXT, libdir[i], dllname );
-		pHandle = dlopen( path, RTLD_NOW );
+		Q_snprintf( fullpath, sizeof( fullpath ), "%s/%s", libdir[i], p );
+
+		handle = dlopen( fullpath, RTLD_NOW );
 #ifdef _DIII4A //karin: print load dll path
-		printf("Load(env) %s -> %p\n", path, pHandle);
+		printf("Load(env) %s -> %p\n", fullpath, handle);
 #endif
-		if( pHandle )
-			return pHandle;
+
+		if( handle )
+		{
+			Con_Reportf( "%s: loading library %s successful\n", __func__, fullpath );
+			return handle;
+		}
 
 		COM_PushLibraryError( dlerror() );
 	}
@@ -57,41 +74,39 @@ void *ANDROID_LoadLibrary( const char *dllname )
     if(Q_strcmp(libdir[0], libdir[1]) == 0)
         libdir[1] = NULL;
 
-	for( i = 0; i < 2; i++ )
+	for( int i = 0; i < ARRAYSIZE( libdir ); i++ )
 	{
+		// this is an APK directory, get base path
+		const char *p = name; // i == 0 ? name : path;
+
 		if( !libdir[i] || !libdir[i][0] )
 			continue;
 
-		Q_snprintf( path, MAX_SYSPATH, "%s/lib%s."OS_LIB_EXT, libdir[i], dllname );
-		pHandle = dlopen( path, RTLD_NOW );
-#ifdef _DIII4A //karin: print load dll path
-		printf("Load(std) %s -> %p\n", path, pHandle);
-#endif
-		if( pHandle )
-			return pHandle;
+		Q_snprintf( fullpath, sizeof( fullpath ), "%s/%s", libdir[i], p );
+
+		handle = dlopen( fullpath, RTLD_NOW );
+		printf("Load(std) %s -> %p\n", fullpath, handle);
+
+		if( handle )
+		{
+			Con_Reportf( "%s: loading library %s successful\n", __func__, fullpath );
+			return handle;
+		}
 
 		COM_PushLibraryError( dlerror() );
 	}
 #endif
 
-	// HACKHACK: keep old behaviour for compatibility
-	if( Q_strstr( dllname, "." OS_LIB_EXT ) || Q_strstr( dllname, "/" ))
-	{
-		pHandle = dlopen( dllname, RTLD_NOW );
+	// find in system search path, that includes our APK
+	handle = dlopen( name, RTLD_NOW );
 #ifdef _DIII4A //karin: print load dll path
-		printf("Load(raw) %s -> %p\n", dllname, pHandle);
+	printf("Load(raw) %s -> %p\n", name, handle);
 #endif
-		if( pHandle )
-			return pHandle;
-	}
-	else
+	if( handle )
 	{
-		Q_snprintf( path, MAX_SYSPATH, "lib%s."OS_LIB_EXT, dllname );
-		pHandle = dlopen( path, RTLD_NOW );
-		if( pHandle )
-			return pHandle;
+		Con_Reportf( "%s: loading library %s from LD_LIBRARY_PATH successful\n", __func__, name );
+		return handle;
 	}
-
 	COM_PushLibraryError( dlerror() );
 
 	return NULL;

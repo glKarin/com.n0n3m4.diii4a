@@ -656,8 +656,7 @@ void EXT_FUNC CHalfLifeMultiplay::__API_HOOK(CleanUpMap)()
 #endif
 
 	// Remove grenades and C4
-	const int grenadesRemoveCount = 20;
-	UTIL_RemoveOther("grenade", grenadesRemoveCount);
+	UTIL_RemoveOther("grenade");
 
 #ifndef REGAMEDLL_FIXES
 	// Remove defuse kit
@@ -1816,6 +1815,11 @@ void EXT_FUNC CHalfLifeMultiplay::__API_HOOK(RestartRound)()
 
 			if (!UTIL_IsValidPlayer(pPlayer))
 				continue;
+
+#ifdef REGAMEDLL_FIXES
+			if (!pPlayer->IsBot())
+				pPlayer->ForceClientDllUpdate();
+#endif
 
 			pPlayer->Reset();
 		}
@@ -3246,19 +3250,6 @@ void CHalfLifeMultiplay::CareerRestart()
 	}
 
 	m_bSkipSpawn = false;
-
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
-
-		if (!UTIL_IsValidPlayer(pPlayer))
-			continue;
-
-		if (!pPlayer->IsBot())
-		{
-			pPlayer->ForceClientDllUpdate();
-		}
-	}
 }
 
 BOOL CHalfLifeMultiplay::IsMultiplayer()

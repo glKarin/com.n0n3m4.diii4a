@@ -224,7 +224,7 @@ void Game::levelShutdown () {
 
 }
 
-void Game::drawLine (edict_t *ent, const Vector &start, const Vector &end, int width, int noise, const Color &color, int brightness, int speed, int life, DrawLine type) {
+void Game::drawLine (edict_t *ent, const Vector &start, const Vector &end, int width, int noise, const Color &color, int brightness, int speed, int life, DrawLine type) const {
    // this function draws a arrow visible from the client side of the player whose player entity
    // is pointed to by ent, from the vector location start to the vector location end,
    // which is supposed to last life tenths seconds, and having the color defined by RGB.
@@ -410,7 +410,7 @@ bool Game::checkVisibility (edict_t *ent, uint8_t *set) {
    return engfuncs.pfnCheckVisibility (ent, set) > 0;
 }
 
-uint8_t *Game::getVisibilitySet (Bot *bot, bool pvs) {
+uint8_t *Game::getVisibilitySet (Bot *bot, bool pvs) const {
    if (is (GameFlags::Xash3DLegacy)) {
       return nullptr;
    }
@@ -545,7 +545,7 @@ void Game::prepareBotArgs (edict_t *ent, String str) {
             m_botArgs.emplace (args.substr (quote, args.length () - 1).trim ("\"")); // add string with trimmed quotes
          }
          else {
-            for (auto arg : args.split (" ")) {
+            for (auto &&arg : args.split (" ")) {
                m_botArgs.emplace (arg);
             }
          }
@@ -555,12 +555,12 @@ void Game::prepareBotArgs (edict_t *ent, String str) {
       }
       MDLL_ClientCommand (ent);
 
-      // clear space for next cmd
+      // clear space for next cmd 
       m_botArgs.clear ();
    };
 
    if (str.find (';', 0) != String::InvalidIndex) {
-      for (auto part : str.split (";")) {
+      for (auto &&part : str.split (";")) {
          parsePartArgs (part.trim ());
       }
    }
@@ -658,7 +658,7 @@ void ConVar::revert () {
 
    for (const auto &var : cvars) {
       if (var.name == ptr->name) {
-         set (var.initial);
+         set (var.init.chars ());
          break;
       }
    }
@@ -728,7 +728,7 @@ void Game::checkCvarsBounds () {
       static ConVarRef sv_forcesimulating ("sv_forcesimulating");
 
       if (sv_forcesimulating.exists () && !cr::fequal (sv_forcesimulating.value (), 1.0f)) {
-         game.print ("Force-enable Xash3D sv_forcesimulating cvar.");
+         print ("Force-enable Xash3D sv_forcesimulating cvar.");
          sv_forcesimulating.set ("1.0");
       }
    }
@@ -789,18 +789,70 @@ void Game::registerCvars (bool gameVars) {
    }
 }
 
+void Game::constructCSBinaryName (StringArray &libs) {
+#ifdef _DIII4A //karin: load cs16 server dll
+   libs.insert (0, { "libserver_cs" });
+#else
+   String libSuffix {}; // construct library suffix
+
+   if (plat.android) {
+      libSuffix += "_android";
+   }
+   else if (plat.psvita) {
+      libSuffix += "_psvita";
+   }
+
+   if (plat.x64) {
+      if (plat.arm) {
+         libSuffix += "_arm64";
+      }
+      else if (plat.ppc) {
+         libSuffix += "_ppc64le";
+      }
+      else {
+         libSuffix += "_amd64";
+      }
+   }
+   else {
+      if (plat.arm) {
+         // don't want to put whole build.h logic from xash3d, just set whatever is supported by the YaPB
+         if (plat.android) {
+            libSuffix += "_armv7l";
+         }
+         else {
+            libSuffix += "_armv7hf";
+         }
+      }
+      else if (!plat.nix && !plat.win && !plat.macos) {
+         libSuffix += "_i386";
+      }
+   }
+
+   if (libSuffix.empty ())
+      libs.insert (0, { "mp", "cs", "cs_i386" });
+   else {
+      // on Android, it's important to have `lib` prefix, otherwise package manager won't unpack the libraries
+      if (plat.android)
+         libs.insert (0, { "libcs" });
+      else
+         libs.insert (0, { "mp", "cs" });
+
+      for (auto &lib : libs) {
+         lib += libSuffix;
+      }
+   }
+#endif
+}
+
 bool Game::loadCSBinary () {
    StringRef modname = getRunningModName ();
 
    if (modname.empty ()) {
       return false;
    }
-   Array <StringRef> libs { "mp", "cs", "cs_i386" };
 
-   // lookup for x64 binaries first
-   if (plat.x64) {
-      libs.insert (0, { "mp_amd64", "mp_arm64", "cs_arm64", "cs_amd64" });
-   }
+   StringArray libs {};
+   constructCSBinaryName (libs);
 
    auto libCheck = [&] (StringRef mod, StringRef dll) {
       // try to load gamedll
@@ -818,11 +870,30 @@ bool Game::loadCSBinary () {
 
    // search the libraries inside game dlls directory
    for (const auto &lib : libs) {
-      auto path = strings.joinPath (modname, "dlls", lib) + kLibrarySuffix;
+      String path {};
 
-      // if we can't read file, skip it
-      if (!plat.fileExists (path.chars ())) {
-         continue;
+      if (plat.android) {
+         // this will be removed as soon as mod downloader will be implemented on engine side
+         auto gamelibdir = plat.env ("XASH3D_GAMELIBDIR");
+         path = strings.joinPath (gamelibdir, lib) + kLibrarySuffix;
+
+         // if we can't read file, skip it
+         if (!plat.fileExists (path.chars ())) {
+            path = "";
+         }
+      }
+
+      if (plat.emscripten) {
+        path = String(plat.env ("XASH3D_GAMELIBPATH")); // defined by launcher
+      }
+
+      if (path.empty()) {
+         path = strings.joinPath (modname, "dlls", lib) + kLibrarySuffix;
+
+         // if we can't read file, skip it
+         if (!plat.fileExists (path.chars ())) {
+            continue;
+         }
       }
 
       // special case, czero is always detected first, as it's has custom directory
@@ -834,13 +905,13 @@ bool Game::loadCSBinary () {
          }
          m_gameLib.load (path);
 
-         // verify dll is OK
+         // verify dll is OK 
          return libCheck (modname, lib);
       }
       else {
          m_gameLib.load (path);
 
-         // verify dll is OK
+         // verify dll is OK 
          if (!libCheck (modname, lib)) {
             return false;
          }
@@ -912,9 +983,6 @@ bool Game::postload () {
    // set out user agent for http stuff
    http.setUserAgent (strings.format ("%s/%s", product.name, product.version));
 
-   // startup the sockets on windows and check if our host is available (hardcoded, yup)
-   http.startup ("yapb.jeefo.net", "Bot is unable to check network availability. Networking features are disabled.");
-
    // set the app name
    plat.setAppName (product.name.chars ());
 
@@ -935,14 +1003,14 @@ bool Game::postload () {
    }
 
    // register fake metamod command handler if we not! under mm
-   if (!(game.is (GameFlags::Metamod))) {
+   if (!(is (GameFlags::Metamod))) {
       game.registerEngineCommand ("meta", [] () {
          game.print ("You're launched standalone version of %s. Metamod is not installed or not enabled!", product.name);
       });
    }
 
    // is 25th anniversary
-   if (game.is25thAnniversaryUpdate ()) {
+   if (is25thAnniversaryUpdate ()) {
       m_gameFlags |= GameFlags::AnniversaryHL25;
    }
 
@@ -952,35 +1020,25 @@ bool Game::postload () {
    // register engine lib handle
    m_engineLib.locate (reinterpret_cast <void *> (engfuncs.pfnPrecacheModel));
 
-   if (plat.android) {
+   if (plat.android || plat.emscripten) {
       m_gameFlags |= (GameFlags::Xash3D | GameFlags::Mobility | GameFlags::HasBotVoice | GameFlags::ReGameDLL);
 
       if (is (GameFlags::Metamod)) {
          return true; // we should stop the attempt for loading the real gamedll, since metamod handle this for us
       }
-#ifdef _DIII4A //karin: load cs16 server dll
-      auto gamedll = strings.format ("%s/%s", plat.env ("XASH3D_GAMELIBDIR"), "libcs16_server.so");
-      printf("yapb load server library -> %s\n", gamedll);
-#else
-      auto gamedll = strings.format ("%s/%s", plat.env ("XASH3D_GAMELIBDIR"), "libserver.so");
-#endif
-
-      if (!m_gameLib.load (gamedll)) {
-         logger.fatal ("Unable to load gamedll \"%s\". Exiting... (gamedir: %s)", gamedll, getRunningModName ());
-      }
    }
-   else {
-      const bool binaryLoaded = loadCSBinary ();
 
-      if (!binaryLoaded && !is (GameFlags::Metamod)) {
-         logger.fatal ("Mod that you has started, not supported by this bot (gamedir: %s)", getRunningModName ());
-      }
+   const bool binaryLoaded = loadCSBinary ();
 
-      if (is (GameFlags::Metamod)) {
-         m_gameLib.unload ();
-         return true;
-      }
+   if (!binaryLoaded && !is (GameFlags::Metamod)) {
+      logger.fatal ("Mod that you has started, not supported by this bot (gamedir: %s)", getRunningModName ());
    }
+
+   if (is (GameFlags::Metamod)) {
+      m_gameLib.unload ();
+      return true;
+   }
+
    return false;
 }
 
@@ -1069,7 +1127,10 @@ void Game::slowFrame () {
       graph.setBombOrigin ();
 
       // ensure the server admin is confident about features he's using
-      game.ensureHealthyGameEnvironment ();
+      ensureHealthyGameEnvironment ();
+
+      // maintain round restart for first human join
+      bots.maintainRoundRestart ();
 
       // update next update time
       m_halfSecondFrame = nextUpdate * 0.25f + time ();
@@ -1120,7 +1181,7 @@ void Game::slowFrame () {
 void Game::searchEntities (StringRef field, StringRef value, EntitySearch functor) {
    edict_t *ent = nullptr;
 
-   while (!game.isNullEntity (ent = engfuncs.pfnFindEntityByString (ent, field.chars (), value.chars ()))) {
+   while (!isNullEntity (ent = engfuncs.pfnFindEntityByString (ent, field.chars (), value.chars ()))) {
       if ((ent->v.flags & EF_NODRAW) || (ent->v.flags & FL_CLIENT)) {
          continue;
       }
@@ -1131,11 +1192,11 @@ void Game::searchEntities (StringRef field, StringRef value, EntitySearch functo
    }
 }
 
-void Game::searchEntities (const Vector &position, float radius, EntitySearch functor) {
+void Game::searchEntities (const Vector &position, float radius, EntitySearch functor) const {
    edict_t *ent = nullptr;
    const Vector &pos = position.empty () ? m_startEntity->v.origin : position;
 
-   while (!game.isNullEntity (ent = engfuncs.pfnFindEntityInSphere (ent, pos, radius))) {
+   while (!isNullEntity (ent = engfuncs.pfnFindEntityInSphere (ent, pos, radius))) {
       if ((ent->v.flags & EF_NODRAW) || (ent->v.flags & FL_CLIENT)) {
          continue;
       }
@@ -1150,7 +1211,7 @@ bool Game::hasEntityInGame (StringRef classname) {
    return !isNullEntity (engfuncs.pfnFindEntityByString (nullptr, "classname", classname.chars ()));
 }
 
-void Game::printBotVersion () {
+void Game::printBotVersion () const {
    String gameVersionStr {};
    StringArray botRuntimeFlags {};
 
@@ -1221,18 +1282,28 @@ void Game::printBotVersion () {
 }
 
 void Game::ensureHealthyGameEnvironment () {
-   if (!isDedicated () || game.is (GameFlags::Legacy | GameFlags::Xash3D)) {
+   const bool dedicated = isDedicated ();
+
+   if (!dedicated || is (GameFlags::Legacy | GameFlags::Xash3D)) {
+      if (!dedicated) {
+
+         // force enable pings on listen servers if disabled at all
+         if (is (GameFlags::Modern) && cv_show_latency.as <int> () == 0) {
+            cv_show_latency.set (2);
+         }
+      }
       return; // listen servers doesn't care about it at all
    }
 
    // magic string that's enables the features
    constexpr auto kAllowHash = StringRef::fnv1a32 ("i'm confident for what i'm doing");
+   constexpr auto kAllowHash2 = StringRef::fnv1a32 ("\"i'm confident for what i'm doing\"");
 
    // fetch custom variable, so fake features are explicitly enabled
    static auto enableFakeFeatures = StringRef::fnv1a32 (conf.fetchCustom ("EnableFakeBotFeatures").chars ());
 
    // if string matches, do not affect the cvars
-   if (enableFakeFeatures == kAllowHash) {
+   if (enableFakeFeatures == kAllowHash || enableFakeFeatures == kAllowHash2) {
       return;
    }
 
@@ -1254,7 +1325,7 @@ void Game::ensureHealthyGameEnvironment () {
       notifyPeacefulRevert (cv_show_avatars);
    }
 
-   // disable fake queries
+   // disable fake queries 
    if (cv_enable_query_hook) {
       cv_enable_query_hook.set (0);
 
@@ -1265,7 +1336,7 @@ void Game::ensureHealthyGameEnvironment () {
 edict_t *Game::createFakeClient (StringRef name) {
    auto ent = engfuncs.pfnCreateFakeClient (name.chars ());
 
-   if (game.isNullEntity (ent)) {
+   if (isNullEntity (ent)) {
       return nullptr;
    }
    auto netname = ent->v.netname;

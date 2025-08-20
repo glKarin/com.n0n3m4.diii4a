@@ -1,3 +1,4 @@
+include_guard(GLOBAL)
 include(CheckSymbolExists)
 
 macro(check_build_target symbol)
@@ -56,6 +57,7 @@ check_group_build_target(XASH_NSWITCH XASH_PLATFORM)
 check_group_build_target(XASH_PSVITA XASH_PLATFORM)
 check_group_build_target(XASH_WASI XASH_PLATFORM)
 check_group_build_target(XASH_SUNOS XASH_PLATFORM)
+check_group_build_target(XASH_HURD XASH_PLATFORM)
 check_group_build_target(XASH_X86 XASH_ARCHITECTURE)
 check_group_build_target(XASH_AMD64 XASH_ARCHITECTURE)
 check_group_build_target(XASH_ARM XASH_ARCHITECTURE)
@@ -115,6 +117,8 @@ elseif(XASH_WASI)
 	set(BUILDOS "wasi")
 elseif(XASH_SUNOS)
 	set(BUILDOS "sunos")
+elseif(XASH_HURD)
+	set(BUILDOS "hurd")
 else()
 	message(SEND_ERROR "Place your operating system name here! If this is a mistake, try to fix conditions above and report a bug")
 endif()
@@ -195,14 +199,33 @@ else()
 	message(SEND_ERROR "Place your architecture name here! If this is a mistake, try to fix conditions above and report a bug")
 endif()
 
-if(BUILDOS STREQUAL "android" AND NOT XASH_TERMUX)
-	set(POSTFIX "") # force disable for Android, as Android ports aren't distributed in normal way and doesn't follow library naming
-elseif(BUILDOS AND BUILDARCH)
+if(DIII4A) #k: unuse suffix
+if(BUILDOS AND BUILDARCH)
 	set(POSTFIX "_${BUILDOS}_${BUILDARCH}")
 elseif(BUILDARCH)
 	set(POSTFIX "_${BUILDARCH}")
 else()
 	set(POSTFIX "")
 endif()
+endif()
 
 message(STATUS "Library postfix: " ${POSTFIX})
+
+macro(set_target_postfix target)
+    if(NOT DIII4A) #k: don't rename library
+	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${target}${POSTFIX}")
+	endif()
+	if(NOT ANDROID)
+		set_target_properties(${target} PROPERTIES PREFIX "")
+	endif()
+endmacro()
+
+macro(set_target_postfix_with_name target name)
+    if(NOT DIII4A) #k: don't rename library
+	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${name}${POSTFIX}")
+	endif()
+	if(NOT ANDROID)
+		set_target_properties(${target} PROPERTIES PREFIX "")
+	endif()
+endmacro()
+

@@ -71,6 +71,7 @@ public:
 	virtual const char *GetName() const { return "Hunt"; }
 
 	void ClearHuntArea() { m_huntArea = nullptr; }
+	CNavArea *GetHuntArea() { return m_huntArea; }
 
 private:
 	CNavArea *m_huntArea;
@@ -204,6 +205,7 @@ public:
 	const Vector &GetHidingSpot() const { return m_hidingSpot; }
 
 	void SetSearchArea(CNavArea *area) { m_searchFromArea = area; }
+	CNavArea *GetSearchArea() { return m_searchFromArea; }
 	void SetSearchRange(float range) { m_range = range; }
 
 	void SetDuration(float time) { m_duration = time; }
@@ -543,6 +545,10 @@ public:
 	void DestroyPath();
 
 	float GetFeetZ() const;										// return Z of bottom of feet
+
+	void OnDestroyNavDataNotify(NavNotifyDestroyType navNotifyType, void *dead);
+	void RemovePath(CNavArea *area);
+	void RemoveHidingSpot(HidingSpot *spot);
 
 	enum PathResult
 	{

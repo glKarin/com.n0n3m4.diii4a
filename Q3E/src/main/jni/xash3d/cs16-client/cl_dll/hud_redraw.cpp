@@ -21,6 +21,9 @@
 #include "triangleapi.h"
 
 #include <string.h>
+
+#include "draw_util.h"
+
 #define MAX_LOGO_FRAMES 56
 
 int grgLogoFrame[MAX_LOGO_FRAMES] = 
@@ -133,6 +136,22 @@ int CHud :: Redraw( float flTime, int intermission )
 
 		SPR_DrawAdditive(i, x, y, NULL);
 	}
+
+	// update codepage parameters
+	if( !stricmp( con_charset->string, "cp1251" ))
+	{
+		g_codepage = 1251;
+	}
+	else if( !stricmp( con_charset->string, "cp1252" ))
+	{
+		g_codepage = 1252;
+	}
+	else
+	{
+		g_codepage = 0;
+	}
+
+	g_accept_utf8 = !stricmp( cl_charset->string, "utf-8" );
 
 	return 1;
 }

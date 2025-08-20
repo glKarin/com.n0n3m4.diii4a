@@ -198,8 +198,7 @@ if(GAME_SERIOUSSAM) # v1.10.7 | Update README.md | https://github.com/tx00100xt/
 endif()
 
 
-if(GAME_XASH3D) # hlsdk-portable | Make cppcheck happy. | https://github.com/FWGS/hlsdk-portable/commit/f03c31c16a39890c56cb11709098f04d9f4b7363
-    # xash3d-fwgs | engine: platform: sdl2: assign K_AUX32 and K_AUX31 to volume buttons to match old engine behavior on Android | https://github.com/FWGS/xash3d-fwgs/commit/c90d1100965ec5a072d95c0c257f853a6673ca74
+if(GAME_XASH3D) # xash3d-fwgs | https://github.com/FWGS/xash3d-fwgs/commit/74b196d2c362ea195967be6f139faeed18795a53
     message(STATUS "Build Xash3D")
     add_subdirectory(xash3d) # Xash3D
 endif()

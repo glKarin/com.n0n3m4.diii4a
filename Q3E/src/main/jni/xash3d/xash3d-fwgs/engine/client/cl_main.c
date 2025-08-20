@@ -24,7 +24,6 @@ GNU General Public License for more details.
 #include "vid_common.h"
 #include "pm_local.h"
 #include "multi_emulator.h"
-#include "cl_spray.h"
 
 #define MAX_CMD_BUFFER        8000
 #define CL_CONNECTION_TIMEOUT 15.0f
@@ -1318,11 +1317,11 @@ static void CL_CreateResourceList( void )
 	cl.num_resources = 0;
 	memset( rgucMD5_hash, 0, sizeof( rgucMD5_hash ));
 
-		// sanitize cvar value
-		if( Q_strcmp( cl_logoext.string, "bmp" ) && Q_strcmp( cl_logoext.string, "png" ))
-			Cvar_DirectSet( &cl_logoext, "bmp" );
+	// sanitize cvar value
+	if( Q_strcmp( cl_logoext.string, "bmp" ) && Q_strcmp( cl_logoext.string, "png" ))
+		Cvar_DirectSet( &cl_logoext, "bmp" );
 
-		Q_snprintf( szFileName, sizeof( szFileName ), "logos/remapped.%s", cl_logoext.string );
+	Q_snprintf( szFileName, sizeof( szFileName ), "logos/remapped.%s", cl_logoext.string );
 	if( cls.legacymode == PROTO_GOLDSRC )
 	{
 		CL_ConvertImageToWAD3( szFileName );
@@ -3043,7 +3042,6 @@ void CL_UpdateInfo( const char *key, const char *value )
 	case PROTO_GOLDSRC:
 		if( cl_advertise_engine_in_name.value && !Q_stricmp( key, "name" ) && Q_strnicmp( value, "[Xash3D]", 8 ))
 		{
-			// always prepend [Xash3D] on GoldSrc protocol :)
 			CL_ServerCommand( true, "setinfo \"%s\" \"[Xash3D]%s\"\n", key, value );
 			break;
 		}

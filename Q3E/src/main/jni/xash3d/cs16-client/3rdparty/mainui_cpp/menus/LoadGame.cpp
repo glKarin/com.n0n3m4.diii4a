@@ -446,11 +446,11 @@ void UI_LoadSaveGame_Precache( void )
 
 void UI_LoadSaveGame_Menu( bool saveMode )
 {
-	if( gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY )
-	{
-		// completely ignore save\load menus for multiplayer_only
-		return;
-	}
+	// if( gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY )
+	// {
+	// 	// completely ignore save\load menus for multiplayer_only
+	// 	return;
+	// }
 
 	if( !EngFuncs::CheckGameDll( )) return;
 

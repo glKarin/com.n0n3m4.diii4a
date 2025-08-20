@@ -70,6 +70,7 @@ private:
 	CMenuPicButton	saveRestore;
 	CMenuPicButton	multiPlayer;
 	CMenuPicButton	customGame;
+	CMenuPicButton	readme;
 	CMenuPicButton	previews;
 	CMenuPicButton	quit;
 
@@ -225,6 +226,11 @@ void CMenuMain::_Init( void )
 	customGame.iFlags |= QMF_NOTIFY;
 	customGame.onReleased = UI_CustomGame_Menu;
 
+	// TODO: add readme screen later
+	readme.SetNameAndStatus( L("View Readme"), L( "StringsList_194" ) );
+	readme.SetPicture( PC_VIEW_README );
+	readme.iFlags |= QMF_NOTIFY;
+
 	previews.SetNameAndStatus( L( "Previews" ), L( "StringsList_400" ) );
 	previews.SetPicture( PC_PREVIEWS );
 	previews.iFlags |= QMF_NOTIFY;
@@ -251,11 +257,11 @@ void CMenuMain::_Init( void )
 	if ( gMenu.m_gameinfo.gamemode == GAME_SINGLEPLAYER_ONLY )
 		multiPlayer.SetGrayed( true );
 
-	if ( gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY )
-	{
-		saveRestore.SetGrayed( true );
-		hazardCourse.SetGrayed( true );
-	}
+	// if ( gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY )
+	// {
+	// 	saveRestore.SetGrayed( true );
+	// 	hazardCourse.SetGrayed( true );
+	// }
 
 	// too short execute string - not a real command
 	if( strlen( MenuStrings[IDS_MEDIA_PREVIEWURL] ) <= 3 )
@@ -299,6 +305,7 @@ void CMenuMain::_Init( void )
 	if ( bCustomGame )
 		AddItem( customGame );
 
+	AddItem( readme );
 	AddItem( previews );
 	AddItem( quit );
 	AddItem( minimizeBtn );
@@ -329,6 +336,9 @@ void CMenuMain::VidInit( bool connected )
 
 	// let's start calculating positions
 	int yoffset = previews_voffset - ygap;
+
+	readme.SetCoord( hoffset, yoffset );
+	yoffset -= ygap;
 
 	if( bCustomGame )
 	{
@@ -377,8 +387,6 @@ void CMenuMain::VidInit( bool connected )
 
 	// they exist in the original and can be mistakenly clicked
 	newGame.SetVisibility( !ui_menu_style->value );
-	hazardCourse.SetVisibility( bTrainMap && !ui_menu_style->value );
-	saveRestore.SetVisibility( !ui_menu_style->value );
 
 	if( connected && single )
 	{

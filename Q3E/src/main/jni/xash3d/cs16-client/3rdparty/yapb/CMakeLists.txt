@@ -8,7 +8,7 @@
 #
 cmake_minimum_required(VERSION 3.5)
 
-project(cs16_yapb VERSION 4.5 LANGUAGES CXX)
+project(server_yapb VERSION 4.5 LANGUAGES CXX)
 
 if(NOT ANDROID)
    set(CMAKE_SHARED_MODULE_PREFIX "")
@@ -43,7 +43,11 @@ set(YAPB_SRC
     "src/vistable.cpp"
 )
 
-add_library(${PROJECT_NAME} MODULE ${YAPB_SRC})
+if(CMAKE_SYSTEM_NAME MATCHES "Emscripten")
+    add_executable(${PROJECT_NAME} ${YAPB_SRC})
+else ()
+    add_library(${PROJECT_NAME} SHARED ${YAPB_SRC})
+endif ()
 find_package(Git QUIET)
 
 if(GIT_FOUND)
@@ -61,7 +65,7 @@ if(GIT_FOUND)
     target_compile_definitions(${PROJECT_NAME} PRIVATE VERSION_GENERATED)
 else()
     execute_process(COMMAND hostname OUTPUT_VARIABLE BUILD_MACHINE OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
-    set(BUILD_HASH "aeff9f8d4648c3a918b033339ec93c530d43a0de")
+    set(BUILD_HASH "f66f0e621dbcf8e59d01ca5958e59ec4a94bc47f")
     set(BUILD_COUNT "1")
     set(BUILD_AUTHOR "yapb")
 
@@ -85,11 +89,19 @@ if((CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     target_compile_options(${PROJECT_NAME} PRIVATE -DCR_NATIVE_BUILD -flto=auto -fno-exceptions -fno-rtti -fno-threadsafe-statics -pthread)
    endif()
 
+    if(NOT CMAKE_SYSTEM_NAME MATCHES "Emscripten")
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
         target_compile_options(${PROJECT_NAME} PRIVATE -march=armv8-a+fp+simd)
     elseif(BUILD_X86)
         target_compile_options(${PROJECT_NAME} PRIVATE -mmmx -msse -msse2 -msse3 -mfpmath=sse)
     endif()
+    else ()
+        #target_compile_options(${PROJECT_NAME} PRIVATE -msse -msse2 -msse3 -msimd128 -fPIC)
+        target_compile_definitions(${PROJECT_NAME} PRIVATE CR_DISABLE_SIMD)
+        target_compile_options(${PROJECT_NAME} PRIVATE -fPIC -fvisibility=hidden)
+        target_link_options(${PROJECT_NAME} PRIVATE -sSIDE_MODULE=1)
+        set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".wasm")
+    endif ()
 
     if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
         target_compile_options(${PROJECT_NAME} PRIVATE -funroll-loops -fomit-frame-pointer -fno-stack-protector -fvisibility=hidden -fvisibility-inlines-hidden -fno-math-errno)
@@ -127,9 +139,13 @@ if((CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endif()
 
+    if(VITA)
+        target_compile_options(${PROJECT_NAME} PRIVATE -fno-use-cxa-atexit)
+    else()
     if(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "arm" OR CMAKE_SYSTEM_PROCESSOR MATCHES "^ppc")
         target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
         target_link_options(${PROJECT_NAME} PRIVATE -fPIC)
+        endif()
     endif()
 elseif(WIN32 AND MSVC)
     set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -149,7 +165,7 @@ if(WIN32 OR MINGW)
     target_sources(${PROJECT_NAME} PRIVATE "vc/yapb.rc")
 elseif(ANDROID)
     target_link_libraries(${PROJECT_NAME} PRIVATE m dl log)
-else()
+elseif(NOT VITA)
     target_link_libraries(${PROJECT_NAME} PRIVATE m dl pthread)
 endif()
 

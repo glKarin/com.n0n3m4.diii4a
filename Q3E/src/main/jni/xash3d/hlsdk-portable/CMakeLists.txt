@@ -45,12 +45,11 @@ option(USE_VGUI "Enable VGUI1." OFF)
 option(USE_NOVGUI_MOTD "Prefer non-VGUI MOTD when USE_VGUI is enabled" OFF)
 option(USE_NOVGUI_SCOREBOARD "Prefer non-VGUI Scoreboard when USE_VGUI is enabled" OFF)
 option(USE_VOICEMGR "Enable VOICE MANAGER." OFF)
-#k option(BUILD_CLIENT "Build client dll" ON)
-#k option(BUILD_SERVER "Build server dll" ON)
 set(BUILD_CLIENT True)
 set(BUILD_SERVER True)
 option(LTO "Enable interprocedural optimization" OFF)
 option(POLLY "Enable pollyhedral optimization" OFF)
+option(ANDROID_APK "Enable APK styled deploy" OFF)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "")
@@ -98,24 +97,6 @@ endif()
 CHECK_FUNCTION_EXISTS(strlcpy HAVE_STRLCPY)
 CHECK_FUNCTION_EXISTS(strlcat HAVE_STRLCAT)
 
-execute_process(COMMAND "git" "describe" "--dirty" "--always"
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-execute_process(COMMAND "git" "rev-parse" "--abbrev-ref" "HEAD"
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_BRANCH
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-if(GIT_VERSION)
-	add_definitions(-DXASH_BUILD_COMMIT="${GIT_VERSION}")
-endif()
-
-if(GIT_BRANCH)
-	add_definitions(-DXASH_BUILD_BRANCH="${GIT_BRANCH}")
-endif()
-
 file(STRINGS "mod_options.txt" MOD_OPTIONS_STRINGS REGEX "^([A-Za-z0-9_-]+)=([A-Za-z0-9_-]+)\ \#\ (.*)$")
 foreach(LINE IN LISTS MOD_OPTIONS_STRINGS)
 	# file() itself doesn't populate CMAKE_MATCH_<n>, so
@@ -134,10 +115,17 @@ foreach(LINE IN LISTS MOD_OPTIONS_STRINGS)
 				message(STATUS ${CMAKE_MATCH_3} " is disabled")
 			endif()
 		else()
+			message(STATUS ${CMAKE_MATCH_3} " set to " ${CMAKE_MATCH_2})
 			set(${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE STRING "${CMAKE_MATCH_3}")
 		endif()
 	endif()
 endforeach()
+
+if(ANDROID_APK)
+	set(GAMEDIR ".")
+	set(SERVER_INSTALL_DIR ".")
+	set(CLIENT_INSTALL_DIR ".")
+endif()
 
 if(HLDEMO_BUILD AND OEM_BUILD)
 	message(FATAL_ERROR "Don't mix Demo and OEM builds!")
@@ -216,6 +204,8 @@ if(HAVE_TGMATH_H)
 		add_definitions(-DHAVE_TGMATH_H)
 	endif()
 endif()
+
+add_subdirectory(game_shared)
 
 if(BUILD_CLIENT)
 	message(STATUS "Building client enabled")

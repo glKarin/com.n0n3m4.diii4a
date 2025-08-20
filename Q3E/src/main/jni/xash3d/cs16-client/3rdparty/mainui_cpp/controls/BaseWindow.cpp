@@ -79,7 +79,7 @@ bool CMenuBaseWindow::IsVisible() const
 
 void CMenuBaseWindow::SaveAndPopMenu()
 {
-	EngFuncs::ClientCmd( FALSE, "trysaveconfig\n" );
+	EngFuncs::ClientCmd( FALSE, "host_writeconfig\n" );
 	Hide();
 }
 

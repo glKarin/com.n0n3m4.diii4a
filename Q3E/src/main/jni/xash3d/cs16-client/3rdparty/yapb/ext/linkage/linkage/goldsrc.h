@@ -489,6 +489,9 @@ typedef cr::Vector vec3_t;
 struct edict_t;
 struct playermove_t;
 
+struct SAVERESTOREDATA;
+struct TYPEDESCRIPTION;
+
 template <typename StrType, typename IndexType> class HLString final {
 public:
    using Type = StrType;
@@ -1210,10 +1213,10 @@ struct gamefuncs_t {
    void (*pfnTouch)(edict_t *pentTouched, edict_t *pentOther);
    void (*pfnBlocked)(edict_t *pentBlocked, edict_t *pentOther);
    void (*pfnKeyValue)(edict_t *pentKeyvalue, KeyValueData *pkvd);
-   void (*pfnSave)(edict_t *pent, struct SAVERESTOREDATA *pSaveData);
+   void (*pfnSave)(edict_t *pent, SAVERESTOREDATA *pSaveData);
    int (*pfnRestore)(edict_t *pent, SAVERESTOREDATA *pSaveData, int globalEntity);
    void (*pfnSetAbsBox)(edict_t *pent);
-   void (*pfnSaveWriteFields)(SAVERESTOREDATA *, const char *, void *, struct TYPEDESCRIPTION *, int);
+   void (*pfnSaveWriteFields)(SAVERESTOREDATA *, const char *, void *, TYPEDESCRIPTION *, int);
    void (*pfnSaveReadFields)(SAVERESTOREDATA *, const char *, void *, TYPEDESCRIPTION *, int);
    void (*pfnSaveGlobalState)(SAVERESTOREDATA *);
    void (*pfnRestoreGlobalState)(SAVERESTOREDATA *);

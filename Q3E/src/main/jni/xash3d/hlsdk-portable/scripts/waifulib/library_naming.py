@@ -64,6 +64,7 @@ DEFINES = [
 'XASH_WASI',
 'XASH_WASM',
 'XASH_SUNOS',
+'XASH_HURD',
 ]
 
 def configure(conf):
@@ -109,6 +110,8 @@ def configure(conf):
 		buildos = "wasi"
 	elif conf.env.XASH_SUNOS:
 		buildos = "sunos"
+	elif conf.env.XASH_HURD:
+		buildos = "hurd"
 	else:
 		conf.fatal("Place your operating system name in build.h and library_naming.py!\n"
 			"If this is a mistake, try to fix conditions above and report a bug")
@@ -183,10 +186,7 @@ def configure(conf):
 		if conf.env.XASH_X86:
 			buildarch = ''
 
-	if conf.env.XASH_ANDROID and not conf.env.XASH_TERMUX:
-		# force disable for Android, as Android ports aren't distributed in normal way and doesn't follow library naming
-		postfix = ''
-	elif buildos != '' and buildarch != '':
+	if buildos != '' and buildarch != '':
 		postfix = '_%s_%s' % (buildos,buildarch)
 	elif buildarch != '':
 		postfix = '_%s' % buildarch

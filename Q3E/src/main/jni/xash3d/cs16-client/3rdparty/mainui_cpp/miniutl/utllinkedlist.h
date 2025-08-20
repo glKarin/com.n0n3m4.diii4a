@@ -6,13 +6,11 @@
 // $NoKeywords: $
 //=============================================================================//
 
+#pragma once
 #ifndef UTLLINKEDLIST_H
 #define UTLLINKEDLIST_H
 
-#ifdef _WIN32
-#pragma once
-#endif
-
+#include <inttypes.h>
 #include "utlmemory.h"
 
 // This is a useful macro to iterate from head to tail in a CUtlLinkedList.
@@ -305,7 +303,7 @@ inline I  CUtlLinkedList<T,I>::Previous( I i ) const
 template <class T, class I>
 inline I  CUtlLinkedList<T,I>::Next( I i ) const  
 { 
-	DbgAssertMsg1( IsValidIndex(i), "CUtlLinkedList::Next: invalid index %lld\n", (int64)i ); 
+	DbgAssertMsg1( IsValidIndex(i), "CUtlLinkedList::Next: invalid index %" PRIi64 "\n", (int64_t)i );
 	return InternalElement(i).m_Next; 
 }
 

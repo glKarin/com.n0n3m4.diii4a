@@ -6,12 +6,9 @@
 // $NoKeywords: $
 //=============================================================================//
 
+#pragma once
 #ifndef UTLMAP_H
 #define UTLMAP_H
-
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include "utlrbtree.h"
 

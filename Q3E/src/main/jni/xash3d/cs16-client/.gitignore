@@ -43,8 +43,7 @@
 *.ilk
 *.autosave
 
-android/pak/
-android/assets/extras.pak
+android/app/src/main/assets
 *-build
 *admob-id.xml
 

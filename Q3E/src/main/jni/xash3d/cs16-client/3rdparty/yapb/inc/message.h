@@ -33,7 +33,8 @@ CR_DECLARE_SCOPED_ENUM (NetMsg,
    ItemStatus = 22,
    ScoreInfo = 23,
    ScoreAttrib = 24,
-   SayText = 25
+   SayText = 25,
+   ResetHUD = 26
 )
 
 // vgui menus (since latest steam updates is obsolete, but left for old cs)
@@ -124,6 +125,7 @@ private:
    void netMsgFlashBat ();
    void netMsgScoreInfo ();
    void netMsgScoreAttrib ();
+   void netMsgResetHUD ();
 
 private:
    Bot *pickBot (int32_t index);
@@ -154,7 +156,7 @@ public:
 
 private:
    void reset () {
-      m_current = NetMsg::None;
+      stopCollection ();
       m_bot = nullptr;
    }
 };

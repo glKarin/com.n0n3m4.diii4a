@@ -102,7 +102,7 @@ void ServerQueryHook::init () {
    }
 }
 
-SharedLibrary::Func DynamicLinkerHook::lookup (SharedLibrary::Handle module, const char *function) {
+SharedLibrary::Func EntityLinkHook::lookupSymbol (SharedLibrary::Handle module, const char *function) {
    static const auto &gamedll = game.lib ().handle ();
    static const auto &self = m_self.handle ();
 
@@ -148,7 +148,7 @@ SharedLibrary::Func DynamicLinkerHook::lookup (SharedLibrary::Handle module, con
    return nullptr;
 }
 
-bool DynamicLinkerHook::callPlayerFunction (edict_t *ent) {
+bool EntityLinkHook::callPlayerFunction (edict_t *ent) {
    auto callPlayer = [&] () {
       reinterpret_cast <EntityProto> (reinterpret_cast <void *> (m_exports["player"])) (&ent->v);
    };
@@ -169,11 +169,11 @@ bool DynamicLinkerHook::callPlayerFunction (edict_t *ent) {
    return true;
 }
 
-bool DynamicLinkerHook::needsBypass () const {
+bool EntityLinkHook::needsBypass () const {
    return !plat.win && !game.isDedicated ();
 }
 
-void DynamicLinkerHook::initialize () {
+void EntityLinkHook::initialize () {
 #if defined(LINKENT_STATIC)
    return;
 #endif

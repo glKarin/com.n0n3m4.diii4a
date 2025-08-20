@@ -337,7 +337,7 @@ void CCSBot::ResetValues()
 // NOTE: For some reason, this can be called twice when a bot is added.
 void CCSBot::SpawnBot()
 {
-	TheCSBots()->ValidateMapData();
+	TheCSBots()->LoadNavigationMap();
 	ResetValues();
 
 	Q_strlcpy(m_name, STRING(pev->netname));

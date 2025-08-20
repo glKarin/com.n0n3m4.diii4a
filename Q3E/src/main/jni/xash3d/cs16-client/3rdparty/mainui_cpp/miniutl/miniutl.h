@@ -13,9 +13,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
 
 #if defined(_MSC_VER)
-	#define FORCEINLINE			    __forceinline
 	#define FMTFUNCTION( x, y )
 #else
 	#if defined(__GNUC__)
@@ -24,14 +24,8 @@
 		#else
 			#define FMTFUNCTION( fmtargnumber, firstvarargnumber ) __attribute__ (( format( __printf__, fmtargnumber, firstvarargnumber )))
 		#endif
-		#if __GNUC__ >= 4
-			#define FORCEINLINE          inline __attribute__ ((always_inline))
-		#else
-			#define FORCEINLINE inline
-		#endif
 		#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 	#else
-		#define FORCEINLINE          inline
 		#define PRINTF_FORMAT_STRING
 		#define FMTFUNCTION( x, y )
 	#endif
@@ -98,32 +92,18 @@
 
 #define Assert( x ) assert( x )
 #define DbgAssert( x ) assert( x ) // a1ba: this should raise under debugger only?
+#define AssertMsg( x, msg ) assert( x && msg )
 
 #ifndef NDEBUG
-inline void AssertMsg( int pred, const char *fmt, ... )
-{
-	char buf[1024];
-	va_list va;
-	va_start( va, fmt );
-	_vsnprintf( buf, sizeof( buf ), fmt, va );
-	va_end( va );
+#define AssertMsg1( x, msg, msg1 ) { \
+	if( !x ) fprintf( stderr, msg, msg1 ); \
+	assert( x && msg ); }
 
-	assert( pred && fmt );
-}
-
-#define AssertMsg1( x, msg, msg1 ) AssertMsg( x, msg, msg1 )
-#define DbgAssertMsg1( x, msg, msg1 ) AssertMsg( x, msg, msg1 )
-#define AssertMsg2( x, msg, msg1, msg2 ) AssertMsg( x, msg, msg1, msg2 )
-#define AssertEquals( _exp, _expectedValue ) AssertMsg2( (_exp) == (_expectedValue), "Expected %d but got %d!", (_expectedValue), (_exp) )
+#define DbgAssertMsg1( x, msg, msg1 ) AssertMsg1( x, msg, msg1 )
 #else
-#define AssertMsg( x, msg ) ( x )
 #define AssertMsg1( x, msg, msg1 ) ( x )
 #define DbgAssertMsg1( x, msg, msg1 ) ( x )
-#define AssertMsg2( x, msg, msg1, msg2 ) ( x )
-#define AssertEquals( x, y ) ( x )
 #endif
-
-#define VerifyEquals( x, y ) AssertEquals( x, y )
 
 #define PvAlloc   malloc
 #define PvRealloc realloc
@@ -148,7 +128,7 @@ inline void Error( const char *msg )
 // This is the preferred Min operator. Using the MIN macro can lead to unexpected
 // side-effects or more expensive code.
 template< class T >
-static FORCEINLINE T const & Min( T const &val1, T const &val2 )
+static inline T const & Min( T const &val1, T const &val2 )
 {
 	return val1 < val2 ? val1 : val2;
 }
@@ -156,45 +136,12 @@ static FORCEINLINE T const & Min( T const &val1, T const &val2 )
 // This is the preferred Max operator. Using the MAX macro can lead to unexpected
 // side-effects or more expensive code.
 template< class T >
-static FORCEINLINE T const & Max( T const &val1, T const &val2 )
+static inline T const & Max( T const &val1, T const &val2 )
 {
 	return val1 > val2 ? val1 : val2;
 }
 
 #define V_ARRAYSIZE( arr ) ( sizeof((arr)) / sizeof((arr)[0]) )
-
-#if _MSC_VER == 1200
-// msvc6 only targets win32
-typedef char int8;
-typedef unsigned char uint8;
-
-typedef short int16;
-typedef unsigned short uint16;
-
-typedef int int32;
-typedef unsigned int uint32;
-
-typedef __int64 int64;
-typedef unsigned __int64 uint64;
-#else
-#include <stdint.h>
-typedef int8_t int8;
-typedef uint8_t uint8;
-
-typedef int16_t int16;
-typedef uint16_t uint16;
-
-typedef int32_t int32;
-typedef uint32_t uint32;
-
-#ifdef __ANDROID__ //karin: conflit
-typedef long long int64;
-typedef unsigned long long uint64;
-#else
-typedef int64_t int64;
-typedef uint64_t uint64;
-#endif
-#endif
 
 typedef unsigned int uint;
 

@@ -45,7 +45,7 @@ private:
 
 #if defined(CR_WINDOWS) && defined(CR_CXX_MSVC)
    __cpuidex (reinterpret_cast <int32_t *> (data), 1, 0);
-#else
+#elif !defined(CR_EMSCRIPTEN)
       __get_cpuid (0x1, &data[eax], &data[ebx], &data[ecx], &data[edx]);
 #endif
       sse3 = !!(data[ecx] & CpuCap::SSE3);
@@ -56,7 +56,7 @@ private:
 
 #if defined(CR_WINDOWS) && defined(CR_CXX_MSVC)
       __cpuidex (reinterpret_cast <int32_t *> (data), 7, 0);
-#else
+#elif !defined(CR_EMSCRIPTEN)
       __get_cpuid (0x7, &data[eax], &data[ebx], &data[ecx], &data[edx]);
 #endif
       avx2 = !!(data[ebx] & CpuCap::AVX2);

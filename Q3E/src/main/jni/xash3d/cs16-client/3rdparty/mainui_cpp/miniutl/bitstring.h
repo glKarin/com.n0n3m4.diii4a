@@ -18,9 +18,9 @@
 // $NoKeywords: $
 //=============================================================================//
 
+#pragma once
 #ifndef BITSTRING_H
 #define BITSTRING_H
-#pragma once
 
 class CUtlBuffer;
 
@@ -99,12 +99,14 @@ public:
 	bool	IsFixedSize() const			{ return false; }
 	int		Size(void) const			{ return m_numBits; }
 	void	Resize( int numBits );		// resizes bit array
-	
+
 	int 		GetNumInts() const		{ return m_numInts; }
 	int *		GetInts()				{ return m_numInts == 1 ? &m_iBitStringStorage : m_pInt;	}
 	const int *	GetInts() const			{ return m_numInts == 1 ? &m_iBitStringStorage : m_pInt;	}
 
 	void	Validate( class CValidator &validator, const char *pchName );
+
+	void Clear();
 
 protected:
 	CVariableBitStringBase();
@@ -112,7 +114,7 @@ protected:
 	CVariableBitStringBase( const CVariableBitStringBase &from );
 	CVariableBitStringBase &operator=( const CVariableBitStringBase &from );
 	~CVariableBitStringBase(void);
-	
+
 	void 		ValidateOperand( const CVariableBitStringBase &operand ) const;
 
 	unsigned	GetEndMask() const		{ return ::GetEndMask( Size() ); }
@@ -240,7 +242,17 @@ public:
 
 inline CVariableBitStringBase::CVariableBitStringBase()
 {
-	memset( this, 0, sizeof( *this ) );
+	Clear();
+}
+
+//-----------------------------------------------------------------------------
+
+inline void CVariableBitStringBase::Clear()
+{
+	m_numBits = 0;
+	m_numInts = 0;
+	m_iBitStringStorage = 0;
+	m_pInt = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -269,7 +281,7 @@ inline CVariableBitStringBase::CVariableBitStringBase( const CVariableBitStringB
 		memcpy( GetInts(), from.GetInts(), m_numInts * sizeof(int) );
 	}
 	else
-		memset( this, 0, sizeof( *this ) );
+		Clear();
 }
 
 //-----------------------------------------------------------------------------

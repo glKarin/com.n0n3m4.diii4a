@@ -18,19 +18,21 @@
 #include <crlib/random.h>
 #include <crlib/thread.h>
 
-#if defined(CR_LINUX) || defined(CR_MACOS)
+#if defined(CR_WINDOWS)
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+#else
 #  include <netinet/in.h>
 #  include <sys/socket.h>
 #  include <sys/types.h>
+#if !defined(CR_PSVITA)
 #  include <sys/uio.h>
+#endif
 #  include <arpa/inet.h>
 #  include <unistd.h>
 #  include <errno.h>
 #  include <netdb.h>
 #  include <fcntl.h>
-#elif defined(CR_WINDOWS)
-#  include <winsock2.h>
-#  include <ws2tcpip.h>
 #endif
 
 // status codes for http client

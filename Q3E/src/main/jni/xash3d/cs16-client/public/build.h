@@ -69,7 +69,6 @@ Then you can use another oneliner to query all variables:
 #undef XASH_IRIX
 #undef XASH_JS
 #undef XASH_LINUX
-#undef XASH_LINUX_UNKNOWN
 #undef XASH_LITTLE_ENDIAN
 #undef XASH_MIPS
 #undef XASH_MOBILE_PLATFORM
@@ -82,10 +81,14 @@ Then you can use another oneliner to query all variables:
 #undef XASH_RISCV_SINGLEFP
 #undef XASH_RISCV_SOFTFP
 #undef XASH_SERENITY
+#undef XASH_SUNOS
+#undef XASH_TERMUX
 #undef XASH_WIN32
 #undef XASH_X86
 #undef XASH_NSWITCH
 #undef XASH_PSVITA
+#undef XASH_WASI
+#undef XASH_WASM
 
 //================================================================
 //
@@ -94,8 +97,6 @@ Then you can use another oneliner to query all variables:
 //================================================================
 #if defined _WIN32
 	#define XASH_WIN32 1
-#elif defined __EMSCRIPTEN__
-	#define XASH_EMSCRIPTEN 1
 #elif defined __WATCOMC__ && defined __DOS__
 	#define XASH_DOS4GW 1
 #else // POSIX compatible
@@ -103,12 +104,8 @@ Then you can use another oneliner to query all variables:
 	#if defined __linux__
 		#if defined __ANDROID__
 			#define XASH_ANDROID 1
-		#else
-			#include <features.h>
-			// if our system libc has features.h header
-			// try to detect it to not confuse other libcs with built with glibc game libraries
-			#if !defined __GLIBC__
-				#define XASH_LINUX_UNKNOWN 1
+			#if defined __TERMUX__
+				#define XASH_TERMUX 1
 			#endif
 		#endif
 		#define XASH_LINUX 1
@@ -134,6 +131,12 @@ Then you can use another oneliner to query all variables:
 		#define XASH_NSWITCH 1
 	#elif defined __vita__
 		#define XASH_PSVITA 1
+	#elif defined __wasi__
+		#define XASH_WASI 1
+	#elif defined __sun__
+		#define XASH_SUNOS 1
+	#elif defined __EMSCRIPTEN__
+		#define XASH_EMSCRIPTEN 1
 	#else
 		#error
 	#endif
@@ -144,7 +147,7 @@ Then you can use another oneliner to query all variables:
 // but we still need XASH_MOBILE_PLATFORM for the engine.
 // So this macro is defined entirely in build-system: see main wscript
 // HLSDK/PrimeXT/other SDKs users note: you may ignore this macro
-#if XASH_ANDROID || XASH_IOS || XASH_NSWITCH || XASH_PSVITA || XASH_SAILFISH
+#if ( XASH_ANDROID && !XASH_TERMUX ) || XASH_IOS || XASH_NSWITCH || XASH_PSVITA || XASH_SAILFISH
 	#define XASH_MOBILE_PLATFORM 1
 #endif
 
@@ -191,8 +194,9 @@ Then you can use another oneliner to query all variables:
 	#define XASH_ARM   8
 #elif defined __mips__
 	#define XASH_MIPS 1
-#elif defined __EMSCRIPTEN__
-	#define XASH_JS 1
+// commented out to avoid misdetection, modern Emscripten versions target WASM only
+//#elif defined __EMSCRIPTEN__
+//	#define XASH_JS 1
 #elif defined __e2k__
 	#define XASH_64BIT 1
 	#define XASH_E2K 1
@@ -242,8 +246,17 @@ Then you can use another oneliner to query all variables:
 	#else
 		#error "Unknown RISC-V float ABI"
 	#endif
+#elif defined __wasm__
+	#if defined __wasm64__
+		#define XASH_64BIT 1
+	#endif
+	#define XASH_WASM 1
 #else
 	#error "Place your architecture name here! If this is a mistake, try to fix conditions above and report a bug"
+#endif
+
+#if !XASH_64BIT && ( defined( __LP64__ ) || defined( _LP64 ))
+#define XASH_64BIT 1
 #endif
 
 #if XASH_ARM == 8

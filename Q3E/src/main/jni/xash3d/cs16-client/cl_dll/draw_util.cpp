@@ -33,6 +33,7 @@ version.
 #include "triangleapi.h"
 #include <string.h>
 #include <ctype.h>
+#include "utflib.h"
 
 float DrawUtils::color[3];
 
@@ -52,17 +53,53 @@ byte g_color_table[][4] =
 {240, 180,  24, 255},	// default color (can be changed by user)
 };
 
+int g_codepage = 0;
+qboolean g_accept_utf8;
+
+cvar_t *con_charset;
+cvar_t *cl_charset;
+
+/*
+============================
+Con_UtfProcessChar
+
+Convert utf char to current font's single-byte encoding
+============================
+*/
+int Con_UtfProcessCharForce( int in )
+{
+	// TODO: get rid of global state where possible
+	static utfstate_t state = { 0 };
+
+	uint32_t ch = Q_DecodeUTF8( &state, in );
+
+	if( g_codepage == 1251 )
+		return Q_UnicodeToCP1251( ch );
+	if( g_codepage == 1252 )
+		return Q_UnicodeToCP1252( ch );
+
+	return '?'; // not implemented yet
+}
+
+int Con_UtfProcessChar( int in )
+{
+	if( !g_accept_utf8 ) // incoming character is not a UTF-8 sequence
+		return in;
+
+	// otherwise, decode it and convert to selected codepage
+	return Con_UtfProcessCharForce( in );
+}
 
 int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, int r, int g, int b, float scale, bool drawing )
 {
+	int first_xpos = xpos;
 	char *szIt = (char *)str;
+
+	Con_UtfProcessChar( 0 );
+
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		int next = xpos + gHUD.GetCharWidth((unsigned char)*szIt); // variable-width fonts look cool
-		if ( next > iMaxX )
-			return xpos;
-
 		if ( *szIt == '\\' && *( szIt + 1 ) != '\n' && *( szIt + 1 ) != 0 )
 		{
 			// an escape character
@@ -82,9 +119,10 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 				UnpackRGB( r, g, b, RGB_GRAY );
 				continue;
 			case 'R':
-				//if( drawing ) return xpos;
-				//return DrawHudStringReverse( iMaxX, ypos, first_xpos, szIt, r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
-				xpos = iMaxX - gHUD.GetCharWidth('M') * 10;
+				//if ( drawing )
+					//return xpos;
+				//return DrawHudStringReverse( iMaxX, ypos, first_xpos, ++szIt, r, g, b, scale, true ); // set 'drawing' to true, to stop when '\R' is catched
+				xpos = iMaxX - gHUD.GetCharWidth( 'M' ) * 10;
 				++szIt;
 			}
 		}
@@ -99,13 +137,18 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 			}
 			continue;
 		}
-		if ( g_iXash )
-		{
-			int c = (unsigned int)(unsigned char)*szIt;
-			xpos += gEngfuncs.pfnVGUI2DrawCharacterAdd( xpos, ypos, c, r, g, b, 0 );
-		}	
-		else
-			xpos += TextMessageDrawChar( xpos, ypos, *szIt, r, g, b, scale );
+
+		int uch = Con_UtfProcessChar( (unsigned char)*szIt );
+
+		//if ( !uch )
+			//continue;
+
+		int next = xpos + gHUD.GetCharWidth( uch ); // variable-width fonts look cool
+
+		if ( next > iMaxX )
+			return xpos;
+
+		xpos += TextMessageDrawChar( xpos, ypos, ( unsigned char )*szIt, r, g, b, scale );
 	}
 
 	return xpos;
@@ -114,14 +157,11 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 
 int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, float scale, bool drawing )
 {
+	int first_xpos = xpos;
+
 	// iterate through the string in reverse
 	for ( signed int i = strlen( szString ); i >= 0; i-- )
 	{
-		int next = xpos - gHUD.GetCharWidth((unsigned char)szString[i]); // variable-width fonts look cool
-		if ( next < iMinX )
-			return xpos;
-		xpos = next;
-
 		if ( i > 1 )
 		{
 			if( szString[i - 1] == '\\' )
@@ -140,9 +180,10 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 					UnpackRGB( r, g, b, RGB_WHITE );
 					break;
 				case 'R':
-				//if( drawing ) return xpos;
-				//else return DrawHudString( iMinX, ypos, first_xpos, &szString[i - 1], r, g, b, true ); // set 'drawing' to true, to stop when '\R' is catched
-				//xpos = iMinX + gHUD.m_scrinfo.charWidths['M'] * i ;
+					if ( drawing )
+						return xpos;
+
+					return DrawHudString( iMinX, ypos, first_xpos, &szString[i - 1], r, g, b, scale, true ); // set 'drawing' to true, to stop when '\R' is catched
 				case 'd':
 					UnpackRGB( r, g, b, RGB_GRAY );
 					break;
@@ -162,7 +203,19 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 			}
 		}
 
-		TextMessageDrawChar( xpos, ypos, szString[i], r, g, b, scale );
+		int uch = Con_UtfProcessChar( (unsigned char)szString[i] );
+
+		/*if ( !uch )
+			continue;*/
+
+		int next = xpos - gHUD.GetCharWidth( uch ); // variable-width fonts look cool
+
+		if ( next < iMinX )
+			return xpos;
+
+		xpos = next;
+
+		TextMessageDrawChar( xpos, ypos, (unsigned char)szString[i], r, g, b );
 	}
 
 	return xpos;
@@ -308,6 +361,9 @@ void DrawUtils::Draw2DQuad( float x1, float y1, float x2, float y2 )
 int DrawUtils::HudStringLen( const char *szIt, float scale )
 {
 	int l;
+
+	Con_UtfProcessChar( 0 );
+
 	// count length until we hit the null character or a newline character
 	for ( l = 0; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
@@ -324,7 +380,13 @@ int DrawUtils::HudStringLen( const char *szIt, float scale )
 			continue;
 		}
 
-		l += gHUD.m_scrinfo.charWidths[(unsigned char)*szIt] * scale;
+		int uch = Con_UtfProcessChar( (unsigned char)*szIt );
+
+		if ( !uch )
+			continue;
+
+		l += gHUD.GetCharWidth( uch );
 	}
+
 	return l;
 }

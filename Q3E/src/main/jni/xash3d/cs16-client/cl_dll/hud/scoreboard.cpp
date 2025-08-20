@@ -122,27 +122,36 @@ void CHudScoreboard :: InitHUDData( void )
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 }
 
+bool CHudScoreboard :: ShouldDrawScoreboard() const
+{
+	if( m_bForceDraw )
+		return true;
+
+	if( m_bShowscoresHeld || gHUD.m_Health.m_iHealth <= 0 || gHUD.m_iIntermission )
+		return true;
+
+	return false;
+}
+
 // Y positions
 #define ROW_GAP  15
 
 int CHudScoreboard :: Draw( float flTime )
 {
+	if( !ShouldDrawScoreboard( ))
+		return 1;
+
 	if( !m_bForceDraw )
 	{
-		if ( (!m_bShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission) )
-			return 1;
-		else
-		{
-			xstart     = 0.125f * ScreenWidth;
-			xend       = ScreenWidth - xstart;
-			ystart     = 90;
-			yend       = ScreenHeight - ystart;
-			m_colors.r = 0;
-			m_colors.g = 0;
-			m_colors.b = 0;
-			m_colors.a = 153;
-			m_bDrawStroke = true;
-		}
+		xstart     = 0.125f * ScreenWidth;
+		xend       = ScreenWidth - xstart;
+		ystart     = 90;
+		yend       = ScreenHeight - ystart;
+		m_colors.r = 0;
+		m_colors.g = 0;
+		m_colors.b = 0;
+		m_colors.a = 153;
+		m_bDrawStroke = true;
 	}
 
 	return DrawScoreboard(flTime);

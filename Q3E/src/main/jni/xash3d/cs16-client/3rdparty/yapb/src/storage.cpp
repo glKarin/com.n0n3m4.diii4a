@@ -92,12 +92,21 @@ template <typename U> bool BotStorage::load (SmallArray <U> &data, ExtenHeader *
       return false;
    }
 
+   // erase the current graph just in case
+   auto unlinkIfGraph = [&] () {
+      if (isGraph) {
+         unlinkFromDisk (false, true);
+      }
+   };
+
    // read the header
    StorageHeader hdr {};
    file.read (&hdr, sizeof (StorageHeader));
 
    // check the magic
    if (hdr.magic != kStorageMagic && hdr.magic != kStorageMagicUB) {
+      unlinkIfGraph ();
+
       if (tryReload ()) {
          return true;
       }
@@ -111,6 +120,8 @@ template <typename U> bool BotStorage::load (SmallArray <U> &data, ExtenHeader *
 
    // check the count
    if (hdr.length == 0 || hdr.length > kMaxNodes || hdr.length < kMaxNodeLinks) {
+      unlinkIfGraph ();
+
       if (tryReload ()) {
          return true;
       }
@@ -395,7 +406,7 @@ int32_t BotStorage::storageToBotFile (int32_t options) {
    return BotFile::Graph;
 }
 
-void BotStorage::unlinkFromDisk (bool onlyTrainingData) {
+void BotStorage::unlinkFromDisk (bool onlyTrainingData, bool silenceMessages) {
    // this function removes graph file from the hard disk
 
    StringArray unlinkable {};
@@ -412,9 +423,12 @@ void BotStorage::unlinkFromDisk (bool onlyTrainingData) {
    for (const auto &item : unlinkable) {
       if (plat.fileExists (item.chars ())) {
          plat.removeFile (item.chars ());
-         ctrl.msg ("File %s, has been deleted from the hard disk", item);
+
+         if (!silenceMessages) {
+            ctrl.msg ("File %s, has been deleted from the hard disk", item);
+         }
       }
-      else {
+      else if (!silenceMessages) {
          logger.error ("Unable to open %s", item);
       }
    }
@@ -434,7 +448,7 @@ StringRef BotStorage::getRunningPath () {
    static String path {};
 
    // we're do not do relative (against bot's library) paths on android 
-   if (plat.android) {
+   if (!game.is (GameFlags::Metamod)) {
       if (path.empty ()) {
          path = strings.joinPath (game.getRunningModName (), folders.addons, folders.bot);
       }
@@ -467,7 +481,7 @@ StringRef BotStorage::getRunningPathVFS () {
    static String path {};
 
    // we're do not do relative (against bot's library) paths on android 
-   if (plat.android) {
+   if (!game.is (GameFlags::Metamod)) {
       if (path.empty ()) {
          path = strings.joinPath (folders.addons, folders.bot);
       }

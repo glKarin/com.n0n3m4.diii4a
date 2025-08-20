@@ -258,7 +258,7 @@ void CHudSpectatorGui::CalcAllNeededData( )
 
 	label.m_iCounterTerrorists = 0;
 	label.m_iTerrorists = 0;
-	for( int i = 0; i < gHUD.m_Scoreboard.m_iNumTeams; i++ )
+	for( int i = 1; i <= gHUD.m_Scoreboard.m_iNumTeams; i++ )
 	{
 		switch( g_TeamInfo[i].teamnumber )
 		{
@@ -278,7 +278,7 @@ void CHudSpectatorGui::CalcAllNeededData( )
 		int iMinutes = max( 0, (int)( gHUD.m_Timer.m_iTime + gHUD.m_Timer.m_fStartTime - gHUD.m_flTime ) / 60);
 		int iSeconds = max( 0, (int)( gHUD.m_Timer.m_iTime + gHUD.m_Timer.m_fStartTime - gHUD.m_flTime ) - (iMinutes * 60));
 
-		sprintf( label.m_szTimer, "%i:%i", iMinutes, iSeconds );
+		sprintf( label.m_szTimer, "%i:%02i", iMinutes, iSeconds );
 	}
 
 	// player name

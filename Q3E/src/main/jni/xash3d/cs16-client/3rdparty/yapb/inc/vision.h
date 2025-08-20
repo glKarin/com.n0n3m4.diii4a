@@ -52,7 +52,7 @@ public:
 
 public:
    // updates bot view frustum
-   void calculate (Planes &planes, const Vector &viewAngle, const Vector &viewOffset);
+   void calculate (Planes &planes, const Vector &viewAngle, const Vector &viewOffset) const;
 
    // check if object inside frustum plane
    bool isObjectInsidePlane (const Plane &plane, const Vector &center, float height, float radius) const;

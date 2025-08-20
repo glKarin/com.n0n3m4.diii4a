@@ -114,13 +114,21 @@ CR_DECLARE_SCOPED_ENUM (CollisionState,
    StrafeRight
 )
 
-// counter-strike team id's
+// counter-strike team id's (internal for bot)
 CR_DECLARE_SCOPED_ENUM (Team,
    Terrorist = 0,
    CT,
    Spectator,
    Unassigned,
    Invalid = -1
+)
+
+// counter-strike team id's (used by gamedll, for reference)
+CR_DECLARE_SCOPED_ENUM (CSTeam,
+   Unassigned = 0,
+   Terrorist,
+   CT,
+   Spectator
 )
 
 // item status for StatusIcon message

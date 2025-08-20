@@ -32,7 +32,7 @@ ANDROID_NDK_API_MIN = {
 	23: 16,
 	25: 19,
 	27: 19,
-	28: 19,
+	28: 21,
 } # minimal API level ndk revision supports
 
 ANDROID_STPCPY_API_MIN = 21 # stpcpy() introduced in SDK 21
@@ -543,7 +543,14 @@ def options(opt):
 		help='enable building for Emscripten')
 
 def configure(conf):
-	if conf.options.ANDROID_OPTS:
+	if 'CROSS_COMPILE' in conf.environ:
+		toolchain_path = conf.environ['CROSS_COMPILE']
+		conf.environ['CC'] = toolchain_path + 'cc'
+		conf.environ['CXX'] = toolchain_path + 'c++'
+		conf.environ['STRIP'] = toolchain_path + 'strip'
+		conf.environ['OBJDUMP'] = toolchain_path + 'objdump'
+		conf.environ['AR'] = toolchain_path + 'ar'
+	elif conf.options.ANDROID_OPTS:
 		values = conf.options.ANDROID_OPTS.split(',')
 		if len(values) != 3:
 			conf.fatal('Invalid --android paramater value!')

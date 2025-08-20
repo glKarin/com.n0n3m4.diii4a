@@ -82,7 +82,7 @@ public:
       int penetratePower,
       int maxClip,
       int type,
-      bool fireHold) :  id (id), name (name), model (model), price (price), minPrimaryAmmo (minPriAmmo), teamStandard (teamStd), 
+      bool fireHold) :  id (id), name (name), model (model), price (price), minPrimaryAmmo (minPriAmmo), teamStandard (teamStd),
       teamAS (teamAs), buyGroup (buyGroup), buySelect (buySelect), buySelectT (buySelectT), buySelectCT (buySelectCT),
       penetratePower (penetratePower), maxClip (maxClip), type (type), primaryFireHold (fireHold)
    { }
@@ -113,6 +113,14 @@ struct Client {
 struct FrameDelay {
    float interval {};
    float time {};
+};
+
+// shared team data for bot
+struct BotTeamData {
+   bool leaderChoosen {}; // is team leader choose thees round
+   bool positiveEco {};  // is team able to buy anything
+   float lastRadioTimestamp {}; // global radio time
+   int32_t lastRadioSlot = { kInvalidRadioSlot }; // last radio message for team
 };
 
 // include bot graph stuff
@@ -225,6 +233,7 @@ private:
    int m_tryOpenDoor {}; // attempt's to open the door
    int m_liftState {}; // state of lift handling
    int m_radioSelect {}; // radio entry
+   int m_radioPercent {}; // radio usage percent (in response)
    int m_killsCount {}; // the kills count of a bot
 
    int m_lastPredictIndex {}; // last predicted path index
@@ -235,6 +244,7 @@ private:
    float m_prevTime {}; // time previously checked movement speed
    float m_heavyTimestamp {}; // is it time to execute heavy-weight functions
    float m_prevSpeed {}; // speed some frames before
+   float m_prevVelocity {}; // velocity some frames before
    float m_timeDoorOpen {}; // time to next door open check
    float m_timeHitDoor {}; // specific time after hitting the door
    float m_lastChatTime {}; // time bot last chatted
@@ -288,6 +298,7 @@ private:
    float m_lastVictimTime {}; // time when bot killed an enemy
    float m_killsInterval {}; // interval between kills
    float m_lastDamageTimestamp {}; // last damage from take damage fn
+   float m_movedDistance {}; // bot moved distance
 
    bool m_moveToGoal {}; // bot currently moving to goal??
    bool m_isStuck {}; // bot is stuck
@@ -309,6 +320,7 @@ private:
    bool m_needToSendWelcomeChat {}; // bot needs to greet people on server?
    bool m_isCreature {}; // bot is not a player, but something else ? zombie ?
    bool m_isOnInfectedTeam {}; // bot is zombie (this assumes bot is a creature)
+   bool m_infectedEnemyTeam {}; // the enemy is a zombie (assumed to be a hostile creature)
    bool m_defuseNotified {}; // bot is notified about bomb defusion
    bool m_jumpSequence {}; // next path link will be jump link
    bool m_checkFall {}; // check bot fall
@@ -351,7 +363,6 @@ private:
    Vector m_breakableOrigin {}; // origin of breakable
    Vector m_rightRef {}; // right referential vector
    Vector m_checkFallPoint[2] {}; // check fall point
-   Vector m_prevVelocity {}; // velocity some frames before
 
    Array <edict_t *> m_ignoredBreakable {}; // list of ignored breakables
    Array <edict_t *> m_ignoredItems {}; // list of  pointers to entity to ignore for pickup
@@ -370,7 +381,7 @@ private:
    CountdownTimer m_repathTimer {}; // bots is going to repath his route
 
 private:
-   int pickBestWeapon (Array <int> &vec, int moneySave);
+   int pickBestWeapon (Array <int> &vec, int moneySave) const;
    int getRandomCampDir ();
    int findAimingNode (const Vector &to, int &pathLength);
    int findNearestNode ();
@@ -382,18 +393,18 @@ private:
    int findGoalPost (int tactic, IntArray *defensive, IntArray *offensive);
    int bestPrimaryCarried ();
    int bestSecondaryCarried ();
-   int bestGrenadeCarried ();
-   int getBestOwnedWeapon ();
-   int getBestOwnedPistol ();
+   int bestGrenadeCarried () const;
+   int getBestOwnedWeapon () const;
+   int getBestOwnedPistol () const;
    int changeNodeIndex (int index);
-   int numEnemiesNear (const Vector &origin, const float radius);
-   int numFriendsNear (const Vector &origin, const float radius);
+   int numEnemiesNear (const Vector &origin, const float radius) const;
+   int numFriendsNear (const Vector &origin, const float radius) const;
 
    float getBombTimeleft () const;
    float getEstimatedNodeReachTime ();
-   float isInFOV (const Vector &dest);
+   float isInFOV (const Vector &dest) const;
    float getShiftSpeed ();
-   float calculateScaleFactor (edict_t *ent);
+   float calculateScaleFactor (edict_t *ent) const;
 
    bool canReplaceWeapon ();
    bool canDuckUnder (const Vector &normal);
@@ -418,14 +429,14 @@ private:
    bool seesEnemy (edict_t *player);
    bool hasActiveGoal ();
    bool advanceMovement ();
-   bool isBombDefusing (const Vector &bombOrigin);
+   bool isBombDefusing (const Vector &bombOrigin) const;
    bool isOccupiedNode (int index, bool needZeroVelocity = false);
    bool seesItem (const Vector &dest, StringRef classname);
    bool lastEnemyShootable ();
    bool rateGroundWeapon (edict_t *ent);
    bool reactOnEnemy ();
    bool selectBestNextNode ();
-   bool hasAnyWeapons ();
+   bool hasAnyWeapons () const;
    bool hasAnyAmmoInClip ();
    bool isKnifeMode ();
    bool isGrenadeWar ();
@@ -439,13 +450,13 @@ private:
    bool isEnemyHidden (edict_t *enemy);
    bool isEnemyInvincible (edict_t *enemy);
    bool isEnemyNoTarget (edict_t *enemy);
-   bool isEnemyInDarkArea (edict_t *enemy);
-   bool isFriendInLineOfFire (float distance);
+   bool isEnemyInDarkArea (edict_t *enemy) const;
+   bool isFriendInLineOfFire (float distance) const;
    bool isGroupOfEnemies (const Vector &location);
    bool isPenetrableObstacle (const Vector &dest);
-   bool isPenetrableObstacle1 (const Vector &dest, int penetratePower);
-   bool isPenetrableObstacle2 (const Vector &dest, int penetratePower);
-   bool isPenetrableObstacle3 (const Vector &dest, int penetratePower);
+   bool isPenetrableObstacle1 (const Vector &dest, int penetratePower) const;
+   bool isPenetrableObstacle2 (const Vector &dest, int penetratePower) const;
+   bool isPenetrableObstacle3 (const Vector &dest, int penetratePower) const;
    bool isEnemyBehindShield (edict_t *enemy);
    bool checkChatKeywords (String &reply);
    bool isReplyingToChat ();
@@ -455,13 +466,13 @@ private:
    bool canRunHeavyWeight ();
    bool isEnemyInSight (Vector &endPos);
    bool isEnemyNoticeable (float range);
-   bool isCreature ();
-   bool isPreviousLadder ();
+   bool isCreature () const;
+   bool isPreviousLadder () const;
    bool isIgnoredItem (edict_t *ent);
 
    void doPlayerAvoidance (const Vector &normal);
    void selectCampButtons (int index);
-   void instantChatter (int type);
+   void instantChatter (int type) const;
    void update ();
    void runMovement ();
    void checkSpawnConditions ();
@@ -484,11 +495,11 @@ private:
    void postProcessGoals (const IntArray &goals, int result[]);
    void updatePickups ();
    void ensurePickupEntitiesClear ();
-   void checkTerrain (float movedDistance, const Vector &dirNormal);
+   void checkTerrain (const Vector &dirNormal);
    void checkFall ();
    void checkDarkness ();
    void checkParachute ();
-   void updatePracticeValue (int damage);
+   void updatePracticeValue (int damage) const;
    void updatePracticeDamage (edict_t *attacker, int damage);
    void findShortestPath (int srcIndex, int destIndex);
    void findPath (int srcIndex, int destIndex, FindPath pathType = FindPath::Fast);
@@ -520,6 +531,7 @@ private:
    void updateRightRef ();
    void donateC4ToHuman ();
    void clearAmmoInfo ();
+   void handleChatterTaskChange (Task tid);
 
    void completeTask ();
    void executeTasks ();
@@ -562,9 +574,9 @@ private:
    Vector isBombAudible ();
    Vector getBodyOffsetError (float distance);
    Vector getCampDirection (const Vector &dest);
-   Vector getCustomHeight (float distance);
+   Vector getCustomHeight (float distance) const;
 
-   uint8_t computeMsec ();
+   uint8_t computeMsec () const;
 
 private:
    bool isOnLadder () const {
@@ -734,7 +746,7 @@ public:
    void pushMsgQueue (int message);
    void prepareChatMessage (StringRef message);
    void checkForChat ();
-   void showChatterIcon (bool show, bool disconnect = false);
+   void showChatterIcon (bool show, bool disconnect = false) const;
    void clearSearchNodes ();
    void checkBreakable (edict_t *touch);
    void checkBreakablesAround ();
@@ -756,16 +768,16 @@ public:
    void sendBotToOrigin (const Vector &origin);
    void markStale ();
    bool hasHostage ();
-   bool hasPrimaryWeapon ();
-   bool hasSecondaryWeapon ();
+   bool hasPrimaryWeapon () const;
+   bool hasSecondaryWeapon () const;
    bool hasShield ();
    bool isShieldDrawn ();
    bool findNextBestNode ();
    bool findNextBestNodeEx (const IntArray &data, bool handleFails);
    bool seesEntity (const Vector &dest, bool fromBody = false);
 
-   int getAmmo ();
-   int getAmmo (int id);
+   int getAmmo () const;
+   int getAmmo (int id) const;
    int getNearestToPlantedBomb ();
 
    float getConnectionTime ();
@@ -792,7 +804,7 @@ public:
       return getTask ()->id;
    }
 
-   edict_t *ent () {
+   edict_t *ent () const {
       return pev->pContainingEntity;
    };
 
