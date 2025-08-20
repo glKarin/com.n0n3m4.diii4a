@@ -77,12 +77,13 @@ jobs:
         echo "Copy Xash3D libraries to libs"
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libxash3d*so Q3E/libs/arm64-v8a
         cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libfilesystem_stdio.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libcs16_client.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libcs16_menu.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libcs16_server.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libcs16_yapb.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libhlsdk_client.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libhlsdk_server.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libclient_cs.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libmenu_cs.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libserver_cs.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libserver_yapb.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libclient_hl.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libserver_hl.so Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libmenu_hl.so Q3E/libs/arm64-v8a
         ls Q3E/libs/arm64-v8a
         # build Source only
         echo "Clean builds"
