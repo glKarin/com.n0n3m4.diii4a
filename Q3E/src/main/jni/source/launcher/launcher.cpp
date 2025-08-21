@@ -690,6 +690,13 @@ bool CSourceAppSystemGroup::Create()
 	};
 
 #if defined( USE_SDL )
+#ifdef _DIII4A //karin: setup special GL config
+    extern void Q3E_SetGLConfig(int format, int depth, int msaa);
+	extern int gl_format;
+	extern int gl_depth_bits;
+	extern int gl_msaa;
+	Q3E_SetGLConfig(gl_format, gl_depth_bits, gl_msaa);
+#endif
 	AddSystem( (IAppSystem *)CreateSDLMgr(), SDLMGR_INTERFACE_VERSION );
 #endif
 

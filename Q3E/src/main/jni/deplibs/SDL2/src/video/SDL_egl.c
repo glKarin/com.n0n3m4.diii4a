@@ -711,6 +711,228 @@ static void dumpconfig(_THIS, EGLConfig config)
 
 #endif /* DUMP_EGL_CONFIG */
 
+#ifdef _Q3E //karin: choose special EGL config
+typedef struct EGLConfigInfo_s
+{
+	EGLint red;
+	EGLint green;
+	EGLint blue;
+	EGLint alpha;
+	EGLint buffer;
+	EGLint depth;
+	EGLint stencil;
+	EGLint samples;
+	EGLint sample_buffers;
+} EGLConfigInfo_t;
+static EGLConfigInfo_t _q3e_glTarget;
+static SDL_EGL_VideoData *_q3e_egl_data;
+#define q_eglGetConfigAttrib(b, c, d) _q3e_egl_data->eglGetConfigAttrib(_q3e_egl_data->egl_display, b, c, d);
+#define SDL_HINT_EGL_Q3E_SPECIAL_CONFIG "SDL_HINT_EGL_Q3E_SPECIAL_CONFIG"
+
+static SDL_bool Q3E_ForceSpecialConfig(void)
+{
+    SDL_bool ret = SDL_GetHintBoolean(SDL_HINT_EGL_Q3E_SPECIAL_CONFIG, SDL_FALSE);
+    SDL_Log("SDL_EGL_Q3E: force using special config -> %d", ret);
+    return ret;
+}
+
+static int Q3E_CompareEGLConfig(const void *left, const void *right)
+{
+	const EGLConfig lhs = *(EGLConfig *)left;
+	const EGLConfig rhs = *(EGLConfig *)right;
+	int r = _q3e_glTarget.red;
+	int g = _q3e_glTarget.green;
+	int b = _q3e_glTarget.blue;
+	int a = _q3e_glTarget.alpha;
+	int d = _q3e_glTarget.depth;
+	int s = _q3e_glTarget.samples;
+
+	int lr, lg, lb, la, ld, ls;
+	int rr, rg, rb, ra, rd, rs;
+	int rat1, rat2;
+
+	q_eglGetConfigAttrib(lhs, EGL_RED_SIZE, &lr);
+	q_eglGetConfigAttrib(lhs, EGL_GREEN_SIZE, &lg);
+	q_eglGetConfigAttrib(lhs, EGL_BLUE_SIZE, &lb);
+	q_eglGetConfigAttrib(lhs, EGL_ALPHA_SIZE, &la);
+
+	q_eglGetConfigAttrib(rhs, EGL_RED_SIZE, &rr);
+	q_eglGetConfigAttrib(rhs, EGL_GREEN_SIZE, &rg);
+	q_eglGetConfigAttrib(rhs, EGL_BLUE_SIZE, &rb);
+	q_eglGetConfigAttrib(rhs, EGL_ALPHA_SIZE, &ra);
+
+	rat1 = (abs(lr - r) + abs(lg - g) + abs(lb - b));//*1000000-(ld*10000+la*100+ls);
+	rat2 = (abs(rr - r) + abs(rg - g) + abs(rb - b));//*1000000-(rd*10000+ra*100+rs);
+
+	if(d && (rat1 == rat2))
+	{
+        q_eglGetConfigAttrib(lhs, EGL_DEPTH_SIZE, &ld);
+        //q_eglGetConfigAttrib(lhs, EGL_STENCIL_SIZE, &ls);
+
+        q_eglGetConfigAttrib(rhs, EGL_DEPTH_SIZE, &rd);
+        //q_eglGetConfigAttrib(rhs, EGL_STENCIL_SIZE, &rs);
+
+        rat1 = abs(ld - d);
+        rat2 = abs(rd - d);
+	}
+
+	if(s && (rat1 == rat2))
+	{
+        q_eglGetConfigAttrib(lhs, EGL_SAMPLES, &ls);
+
+        q_eglGetConfigAttrib(rhs, EGL_SAMPLES, &rs);
+
+        rat1 = abs(ls - s);
+        rat2 = abs(rs - s);
+	}
+
+	return rat1 - rat2;
+}
+
+static EGLConfig Q3E_ChooseEGLConfig(_THIS, EGLConfig configs[], int size)
+{
+	_q3e_glTarget.red = _this->gl_config.red_size;
+	_q3e_glTarget.green = _this->gl_config.green_size;
+	_q3e_glTarget.blue = _this->gl_config.blue_size;
+	_q3e_glTarget.alpha = _this->gl_config.alpha_size;
+	_q3e_glTarget.depth = _this->gl_config.depth_size;
+	_q3e_glTarget.samples = _this->gl_config.multisamplesamples;
+    _q3e_egl_data = _this->egl_data;
+
+    SDL_Log("SDL_EGL_Q3E: EGL config red=%d, green=%d, blue=%d, alpha=%d, depth=%d, samples=%d\n", _q3e_glTarget.red, _q3e_glTarget.green, _q3e_glTarget.blue, _q3e_glTarget.alpha, _q3e_glTarget.depth, _q3e_glTarget.samples);
+
+	qsort(configs, size, sizeof(EGLConfig), Q3E_CompareEGLConfig);
+	return configs[0];
+}
+
+static int SDL_EGL_PrivateChooseSpecialConfig(_THIS, SDL_bool set_config_caveat_none)
+{
+    /* 64 seems nice. */
+    EGLint attribs[64];
+    EGLint found_configs = 0, value;
+    /* 128 seems even nicer here */
+    EGLConfig configs[128];
+    SDL_bool has_matching_format = SDL_FALSE;
+    int i, j, best_bitdiff = -1, best_truecolor_bitdiff = -1;
+    int truecolor_config_idx = -1;
+
+    /* Get a valid EGL configuration */
+    i = 0;
+    attribs[i++] = EGL_RED_SIZE;
+    attribs[i++] = _this->gl_config.red_size;
+    attribs[i++] = EGL_GREEN_SIZE;
+    attribs[i++] = _this->gl_config.green_size;
+    attribs[i++] = EGL_BLUE_SIZE;
+    attribs[i++] = _this->gl_config.blue_size;
+
+    if (set_config_caveat_none) {
+        attribs[i++] = EGL_CONFIG_CAVEAT;
+        attribs[i++] = EGL_NONE;
+    }
+
+    if (_this->gl_config.alpha_size) {
+        attribs[i++] = EGL_ALPHA_SIZE;
+        attribs[i++] = _this->gl_config.alpha_size;
+    }
+
+    if (_this->gl_config.buffer_size) {
+        attribs[i++] = EGL_BUFFER_SIZE;
+        attribs[i++] = _this->gl_config.buffer_size;
+    }
+
+    if (_this->gl_config.depth_size) {
+        attribs[i++] = EGL_DEPTH_SIZE;
+        attribs[i++] = _this->gl_config.depth_size;
+    }
+
+    if (_this->gl_config.stencil_size) {
+        attribs[i++] = EGL_STENCIL_SIZE;
+        attribs[i++] = _this->gl_config.stencil_size;
+    }
+
+    if (_this->gl_config.multisamplebuffers) {
+        attribs[i++] = EGL_SAMPLE_BUFFERS;
+        attribs[i++] = _this->gl_config.multisamplebuffers;
+    }
+
+    if (_this->gl_config.multisamplesamples) {
+        attribs[i++] = EGL_SAMPLES;
+        attribs[i++] = _this->gl_config.multisamplesamples;
+    }
+
+    if (_this->gl_config.floatbuffers) {
+        attribs[i++] = EGL_COLOR_COMPONENT_TYPE_EXT;
+        attribs[i++] = EGL_COLOR_COMPONENT_TYPE_FLOAT_EXT;
+    }
+
+    if (_this->egl_data->is_offscreen) {
+        attribs[i++] = EGL_SURFACE_TYPE;
+        attribs[i++] = EGL_PBUFFER_BIT;
+    }
+
+    attribs[i++] = EGL_RENDERABLE_TYPE;
+    if (_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES) {
+#ifdef EGL_KHR_create_context
+        if (_this->gl_config.major_version >= 3 &&
+            SDL_EGL_HasExtension(_this, SDL_EGL_DISPLAY_EXTENSION, "EGL_KHR_create_context")) {
+            attribs[i++] = EGL_OPENGL_ES3_BIT_KHR;
+        } else
+#endif
+            if (_this->gl_config.major_version >= 2) {
+            attribs[i++] = EGL_OPENGL_ES2_BIT;
+        } else {
+            attribs[i++] = EGL_OPENGL_ES_BIT;
+        }
+        _this->egl_data->eglBindAPI(EGL_OPENGL_ES_API);
+    } else {
+        attribs[i++] = EGL_OPENGL_BIT;
+        _this->egl_data->eglBindAPI(EGL_OPENGL_API);
+    }
+
+    if (_this->egl_data->egl_surfacetype) {
+        attribs[i++] = EGL_SURFACE_TYPE;
+        attribs[i++] = _this->egl_data->egl_surfacetype;
+    }
+
+    attribs[i++] = EGL_NONE;
+
+    SDL_assert(i < SDL_arraysize(attribs));
+
+    if (_this->egl_data->eglChooseConfig(_this->egl_data->egl_display,
+                                         attribs,
+                                         configs, SDL_arraysize(configs),
+                                         &found_configs) == EGL_FALSE ||
+        found_configs == 0) {
+        return -1;
+    }
+
+    /* first ensure that a found config has a matching format, or the function will fall through. */
+    if (_this->egl_data->egl_required_visual_id) {
+        for (i = 0; i < found_configs; i++) {
+            EGLint format;
+            _this->egl_data->eglGetConfigAttrib(_this->egl_data->egl_display,
+                                                configs[i],
+                                                EGL_NATIVE_VISUAL_ID, &format);
+            if (_this->egl_data->egl_required_visual_id == format) {
+                has_matching_format = SDL_TRUE;
+                break;
+            }
+        }
+    }
+
+    /* eglChooseConfig returns a number of configurations that match or exceed the requested attribs. */
+    /* From those, we select the one that matches our requirements more closely via a makeshift algorithm */
+
+	_this->egl_data->egl_config = Q3E_ChooseEGLConfig(_this, configs, found_configs);
+
+#ifdef DUMP_EGL_CONFIG
+    dumpconfig(_this, _this->egl_data->egl_config);
+#endif
+
+    return 0;
+}
+#endif
+
 static int SDL_EGL_PrivateChooseConfig(_THIS, SDL_bool set_config_caveat_none)
 {
     /* 64 seems nice. */
@@ -916,6 +1138,23 @@ int SDL_EGL_ChooseConfig(_THIS)
     if (!_this->egl_data) {
         return SDL_SetError("EGL not initialized");
     }
+#ifdef _Q3E //karin: choose special EGL config
+    if(Q3E_ForceSpecialConfig())
+    {
+        /* Try with EGL_CONFIG_CAVEAT set to EGL_NONE, to avoid any EGL_SLOW_CONFIG or EGL_NON_CONFORMANT_CONFIG */
+        ret = SDL_EGL_PrivateChooseSpecialConfig(_this, SDL_TRUE);
+        if (ret == 0) {
+            return 0;
+        }
+
+        /* Fallback with all configs */
+        ret = SDL_EGL_PrivateChooseSpecialConfig(_this, SDL_FALSE);
+        if (ret == 0) {
+            SDL_Log("SDL_EGL_ChooseConfig: found a slow EGL special config");
+            return 0;
+        }
+    }
+#endif
 
     /* Try with EGL_CONFIG_CAVEAT set to EGL_NONE, to avoid any EGL_SLOW_CONFIG or EGL_NON_CONFORMANT_CONFIG */
     ret = SDL_EGL_PrivateChooseConfig(_this, SDL_TRUE);

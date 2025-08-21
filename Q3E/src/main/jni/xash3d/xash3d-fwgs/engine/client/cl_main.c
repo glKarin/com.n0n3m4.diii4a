@@ -1066,6 +1066,9 @@ static void CL_SendConnectPacket( connprotocol_t proto, int challenge )
 	if( adr.port == 0 ) adr.port = MSG_BigShort( PORT_SERVER );
 
 	input_devices = IN_CollectInputDevices();
+#ifdef _DIII4A //karin: allow all input type for server
+    input_devices = 0;
+#endif
 	IN_LockInputDevices( adrtype != NA_LOOPBACK ? true : false );
 
 	// GoldSrc doesn't need sv_cheats set to 0, it's handled by svc_goldsrc_sendextrainfo

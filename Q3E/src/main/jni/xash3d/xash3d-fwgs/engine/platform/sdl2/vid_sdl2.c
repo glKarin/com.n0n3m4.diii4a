@@ -872,8 +872,128 @@ void GL_SwapBuffers( void )
 	SDL_GL_SwapWindow( host.hWnd );
 }
 
+#ifdef _DIII4A //karin: reset RGBA and depth to special value
+extern int gl_format;
+extern int gl_depth_bits;
+extern int gl_msaa;
+#define GLFORMAT_RGB565 0x0565
+#define GLFORMAT_RGBA4444 0x4444
+#define GLFORMAT_RGBA5551 0x5551
+#define GLFORMAT_RGBA8888 0x8888
+#define GLFORMAT_RGBA1010102 0xaaa2
+#endif
 int GL_SetAttribute( int attr, int val )
 {
+#ifdef _DIII4A //karin: reset RGBA and depth to special value
+    const SDL_bool UsingSpecialConfig = SDL_GetHintBoolean("SDL_HINT_EGL_Q3E_SPECIAL_CONFIG", SDL_FALSE);
+    if(UsingSpecialConfig)
+    {
+        switch( attr )
+        {
+            case REF_GL_RED_SIZE: {
+                switch (gl_format) {
+                    case GLFORMAT_RGB565:
+                        val = 5;
+                        break;
+                    case GLFORMAT_RGBA4444:
+                        val = 4;
+                        break;
+                    case GLFORMAT_RGBA5551:
+                        val = 5;
+                        break;
+                    case GLFORMAT_RGBA1010102:
+                        val = 10;
+                        break;
+                    case GLFORMAT_RGBA8888:
+                    default:
+                        val = 8;
+                        break;
+                }
+            }
+                break;
+            case REF_GL_GREEN_SIZE: {
+                switch (gl_format) {
+                    case GLFORMAT_RGB565:
+                        val = 6;
+                        break;
+                    case GLFORMAT_RGBA4444:
+                        val = 4;
+                        break;
+                    case GLFORMAT_RGBA5551:
+                        val = 5;
+                        break;
+                    case GLFORMAT_RGBA1010102:
+                        val = 10;
+                        break;
+                    case GLFORMAT_RGBA8888:
+                    default:
+                        val = 8;
+                        break;
+                }
+            }
+                break;
+            case REF_GL_BLUE_SIZE: {
+                switch (gl_format) {
+                    case GLFORMAT_RGB565:
+                        val = 5;
+                        break;
+                    case GLFORMAT_RGBA4444:
+                        val = 4;
+                        break;
+                    case GLFORMAT_RGBA5551:
+                        val = 5;
+                        break;
+                    case GLFORMAT_RGBA1010102:
+                        val = 10;
+                        break;
+                    case GLFORMAT_RGBA8888:
+                    default:
+                        val = 8;
+                        break;
+                }
+            }
+                break;
+            case REF_GL_ALPHA_SIZE: {
+                switch (gl_format) {
+                    case GLFORMAT_RGB565:
+                        val = 0;
+                        break;
+                    case GLFORMAT_RGBA4444:
+                        val = 4;
+                        break;
+                    case GLFORMAT_RGBA5551:
+                        val = 1;
+                        break;
+                    case GLFORMAT_RGBA1010102:
+                        val = 2;
+                        break;
+                    case GLFORMAT_RGBA8888:
+                    default:
+                        val = 8;
+                        break;
+                }
+            }
+                break;
+
+            case REF_GL_DEPTH_SIZE: {
+                switch(gl_depth_bits)
+                {
+                    case 16:
+                        val = 16;
+                        break;
+                    case 32:
+                        val = 32;
+                        break;
+                    case 24:
+                    default:
+                        val = 24;
+                        break;
+                }
+            }
+                break;
+        }
+    }
+#endif
 	switch( attr )
 	{
 #define MAP_REF_API_ATTRIBUTE_TO_SDL( name ) case REF_##name: return SDL_GL_SetAttribute( SDL_##name, val );

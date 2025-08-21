@@ -77,6 +77,19 @@ t_eglGetDisplay _eglGetDisplay;
 t_eglQueryString _eglQueryString;
 #endif
 
+#ifdef _DIII4A //karin: using special GL config
+static int gl_format;
+static int gl_depth_bits;
+static int gl_msaa;
+
+void Q3E_SetGLConfig(int format, int depth, int msaa)
+{
+    gl_format = format;
+    gl_depth_bits = depth;
+    gl_msaa = msaa;
+}
+#endif
+
 /*
 From Ryan Gordon:
  
@@ -618,6 +631,15 @@ InitReturnVal_t CSDLMgr::Init()
 	_eglGetDisplay = (t_eglGetDisplay)dlsym(l_egl, "eglGetDisplay");
 	_eglQueryString = (t_eglQueryString)dlsym(l_egl, "eglQueryString");
 
+#ifdef _DIII4A //karin: using special GL config
+#define GLFORMAT_RGB565 0x0565
+#define GLFORMAT_RGBA4444 0x4444
+#define GLFORMAT_RGBA5551 0x5551
+#define GLFORMAT_RGBA8888 0x8888
+#define GLFORMAT_RGBA1010102 0xaaa2
+	const bool UsingSpecialConfig = SDL_GetHintBoolean("SDL_HINT_EGL_Q3E_SPECIAL_CONFIG", SDL_FALSE) == SDL_TRUE && gl_format && gl_depth_bits;
+	if(!UsingSpecialConfig || gl_format == GLFORMAT_RGBA8888)
+#endif
 	if( _eglInitialize && _eglInitialize && _eglQueryString )
 	{
 		EGLDisplay display = _eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -653,15 +675,78 @@ InitReturnVal_t CSDLMgr::Init()
 		_glGetProcAddress = (t_glGetProcAddress)dlsym(l_gl4es, "gl4es_glGetProcAddress");
 	}
 #endif
+#ifdef _DIII4A //karin: using special GL config
+	if(UsingSpecialConfig)
+	{
+		switch(gl_format)
+		{
+			case GLFORMAT_RGB565:
+				SET_GL_ATTR(SDL_GL_RED_SIZE, 5);
+				SET_GL_ATTR(SDL_GL_GREEN_SIZE, 6);
+				SET_GL_ATTR(SDL_GL_BLUE_SIZE, 5);
+				SET_GL_ATTR(SDL_GL_ALPHA_SIZE, 0);
+				break;
+			case GLFORMAT_RGBA4444:
+				SET_GL_ATTR(SDL_GL_RED_SIZE, 4);
+				SET_GL_ATTR(SDL_GL_GREEN_SIZE, 4);
+				SET_GL_ATTR(SDL_GL_BLUE_SIZE, 4);
+				SET_GL_ATTR(SDL_GL_ALPHA_SIZE, 4);
+				break;
+			case GLFORMAT_RGBA5551:
+				SET_GL_ATTR(SDL_GL_RED_SIZE, 5);
+				SET_GL_ATTR(SDL_GL_GREEN_SIZE, 5);
+				SET_GL_ATTR(SDL_GL_BLUE_SIZE, 5);
+				SET_GL_ATTR(SDL_GL_ALPHA_SIZE, 1);
+				break;
+			case GLFORMAT_RGBA1010102:
+				SET_GL_ATTR(SDL_GL_RED_SIZE, 10);
+				SET_GL_ATTR(SDL_GL_GREEN_SIZE, 10);
+				SET_GL_ATTR(SDL_GL_BLUE_SIZE, 10);
+				SET_GL_ATTR(SDL_GL_ALPHA_SIZE, 2);
+				break;
+			case GLFORMAT_RGBA8888:
+			default:
 	SET_GL_ATTR(SDL_GL_RED_SIZE, 8);
 	SET_GL_ATTR(SDL_GL_GREEN_SIZE, 8);
 	SET_GL_ATTR(SDL_GL_BLUE_SIZE, 8);
 	SET_GL_ATTR(SDL_GL_ALPHA_SIZE, 8);
+				break;
+		}
+	}
+	else
+	{
+#endif
+	SET_GL_ATTR(SDL_GL_RED_SIZE, 8);
+	SET_GL_ATTR(SDL_GL_GREEN_SIZE, 8);
+	SET_GL_ATTR(SDL_GL_BLUE_SIZE, 8);
+	SET_GL_ATTR(SDL_GL_ALPHA_SIZE, 8);
+#ifdef _DIII4A //karin: using special GL config
+	}
+#endif
 	SET_GL_ATTR(SDL_GL_DOUBLEBUFFER, 1);
 
 #ifdef OSX
 	SET_GL_ATTR(SDL_GL_DEPTH_SIZE, 0);
 #else
+#ifdef _DIII4A //karin: using special GL config
+	if(UsingSpecialConfig)
+	{
+		switch(gl_depth_bits)
+		{
+			case 16:
+				SET_GL_ATTR(SDL_GL_DEPTH_SIZE, 16);
+				break;
+			case 32:
+				SET_GL_ATTR(SDL_GL_DEPTH_SIZE, 32);
+				break;
+			case 24:
+			default:
+				SET_GL_ATTR(SDL_GL_DEPTH_SIZE, 24);
+				break;
+		}
+	}
+	else
+#endif
 	SET_GL_ATTR(SDL_GL_DEPTH_SIZE, 24);
 	SET_GL_ATTR(SDL_GL_STENCIL_SIZE, 8);
 #endif
