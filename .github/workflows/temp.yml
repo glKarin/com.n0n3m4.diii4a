@@ -1,0 +1,77 @@
+# Only for building testing version by Github CI workflow
+
+name: Android apk temp CI(armv8-64 only)
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      #- 'idTech4Amm/**'
+      #- 'Q3E/**'
+      - '.github/workflows/temp.yml'
+  pull_request:
+    branches: [ "master" ]
+    paths:
+      #- 'idTech4Amm/**'
+      #- 'Q3E/**'
+      - '.github/workflows/temp.yml'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: .
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup jdk 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: 11
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Setup build environment
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install build-essential # libtinfo5
+
+    - name: Build with Gradle
+      run: |
+        echo "Build apk"
+        barch=-Pabifilters=arm64-v8a
+        # remove 32bit libraries
+        echo "Remove 32bit libraries"
+        rm -rf Q3E/libs/armeabi-v7a
+        bargs="$barch -Pcmake_options=-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_URT=OFF,-DGAME_XASH3D=OFF,-DGAME_SOURCE=OFF,-DGAME_XASH3D=OFF,-DGAME_SOURCE=OFF,-DBUILD_Q4=OFF,-DBUILD_PREY=OFF,-DBUILD_Q4_MOD=OFF,-DGAME_DOOM3BFG=OFF"
+        ./gradlew assembleRelease $bargs
+
+    - name: Rename APK
+      id: rename_apk
+      run: |
+        apk_file=idTech4A++-temp-testing-`date "+%Y_%m_%d-%H_%M_%S"`.apk
+        cp ./idTech4Amm/build/outputs/apk/release/idTech4Amm-release.apk $apk_file
+        echo "::set-output name=value::$apk_file"
+      working-directory: ${{ github.workspace }}
+
+    - name: Delete tag and release
+      uses: dev-drprasad/delete-tag-and-release@v1.1
+      with:
+        tag_name: android_testing_temp
+        delete_release: true
+        repo: glKarin/com.n0n3m4.diii4a
+        github_token: ${{ secrets.TOKEN }}
+
+    - name: Create release
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.TOKEN }}"
+        automatic_release_tag: "android_testing_temp"
+        prerelease: true
+        title: "Android armv8-64 temp testing (Non-release. Automatic CI builds)"
+        files: |
+          ${{ steps.rename_apk.outputs.value }}
