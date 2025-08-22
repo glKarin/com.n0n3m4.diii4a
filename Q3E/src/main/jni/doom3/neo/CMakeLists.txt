@@ -2141,7 +2141,7 @@ if(HEXENEOC)
 	set_target_properties(hexeneoc PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(hexeneoc idlib)
 	if(NOT MSVC)
-		target_compile_options(hexeneoc PRIVATE -Wno-format-security)
+		target_compile_options(hexeneoc PRIVATE -Wno-format-security -fno-unsafe-math-optimizations)
 	endif()
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
