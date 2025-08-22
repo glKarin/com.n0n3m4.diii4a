@@ -43,7 +43,7 @@ jobs:
     - name: Build with Gradle
       run: |
         echo "work directory: `pwd`"
-        echo "Build temp2 apk"
+        echo "Build temp22 apk"
         chmod +x ./gradlew
         barch=-Pabifilters=arm64-v8a
         # remove 32bit libraries
