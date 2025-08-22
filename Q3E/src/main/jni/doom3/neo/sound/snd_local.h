@@ -170,6 +170,9 @@ typedef waveformat_s waveformat_t;
 enum {
 	WAVE_FORMAT_TAG_PCM		= 1,
 	WAVE_FORMAT_TAG_OGG		= 2
+#ifdef _SND_MP3
+	, WAVE_FORMAT_TAG_MP3	= 3
+#endif
 };
 
 /* specific waveform format structure for PCM data */
@@ -270,6 +273,15 @@ class idWaveFile
         byte*			oggData; // the contents of the .ogg for stbi_vorbis (it doesn't support custom reading callbacks)
 #endif
 		bool			isOgg;
+#ifdef _SND_MP3
+		void			*mp3;
+		void			*mp3Data;
+		bool			isMp3;
+	private:
+		int				OpenMP3(const char *strFileName, waveformatex_t *pwfx = NULL);
+		int				ReadMP3(byte *pBuffer, int dwSizeToRead, int *pdwSizeRead);
+		int				CloseMP3(void);
+#endif
 
 	private:
 		int				ReadMMIO(void);

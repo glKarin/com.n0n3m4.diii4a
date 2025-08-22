@@ -30,6 +30,18 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "snd_local.h"
+
+#ifdef _SND_MP3
+//#define MINIMP3_FLOAT_OUTPUT
+#define MINIMP3_NO_SIMD
+#define MINIMP3_IMPLEMENTATION
+//#define MINIMP3_ALLOW_MONO_STEREO_TRANSITION
+#if !defined(MINIMP3_ALLOW_MONO_STEREO_TRANSITION)
+#define MP3D_ALLOW_MONO_STEREO_TRANSITION 0
+#endif
+#include "../externlibs/minimp3/minimp3_ex.h"
+#endif
+
 #if !defined(_USING_STB_OGG)
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
@@ -490,6 +502,9 @@ class idSampleDecoderLocal : public idSampleDecoder
 		void					Clear(void);
 		int						DecodePCM(idSoundSample *sample, int sampleOffset44k, int sampleCount44k, float *dest);
 		int						DecodeOGG(idSoundSample *sample, int sampleOffset44k, int sampleCount44k, float *dest);
+#ifdef _SND_MP3
+		int						DecodeMP3(idSoundSample *sample, int sampleOffset44k, int sampleCount44k, float *dest);
+#endif
 
 	private:
 		bool					failed;				// set if decoding failed
@@ -503,6 +518,9 @@ class idSampleDecoderLocal : public idSampleDecoder
 		OggVorbis_File			ogg;				// OggVorbis file
 #else
         stb_vorbis*				stbv;				// stb_vorbis (Ogg) handle, using lastSample->nonCacheData
+#endif
+#ifdef _SND_MP3
+		mp3dec_ex_t				*mp3;
 #endif
 };
 
@@ -590,6 +608,9 @@ void idSampleDecoderLocal::Clear(void)
 #ifdef _USING_STB_OGG
     stbv = NULL;
 #endif
+#ifdef _SND_MP3
+	mp3 = NULL;
+#endif
 }
 
 /*
@@ -615,6 +636,13 @@ void idSampleDecoderLocal::ClearDecoder(void)
 #endif
 			break;
 		}
+#ifdef _SND_MP3
+		case WAVE_FORMAT_TAG_MP3: {
+            mp3dec_ex_close( mp3 );
+            mp3 = NULL;
+			break;
+		}
+#endif
 	}
 
 	Clear();
@@ -674,6 +702,12 @@ void idSampleDecoderLocal::Decode(idSoundSample *sample, int sampleOffset44k, in
 			readSamples44k = DecodeOGG(sample, sampleOffset44k, sampleCount44k, dest);
 			break;
 		}
+#ifdef _SND_MP3
+		case WAVE_FORMAT_TAG_MP3: {
+			readSamples44k = DecodeMP3(sample, sampleOffset44k, sampleCount44k, dest);
+			break;
+		}
+#endif
 		default: {
 			readSamples44k = 0;
 			break;
@@ -874,3 +908,7 @@ int idSampleDecoderLocal::DecodeOGG(idSoundSample *sample, int sampleOffset44k, 
 
 	return (readSamples << shift);
 }
+
+#ifdef _SND_MP3
+#include "snd_mp3.cpp"
+#endif

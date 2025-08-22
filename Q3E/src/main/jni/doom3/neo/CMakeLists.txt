@@ -127,6 +127,7 @@ option(GLOBAL_ILLUMINATION					"Render global illumination before draw interacti
 option(RETRO_POSTPROCESS					"Add retro postprocess rendering support"								   	ON)
 option(IMGUI								"Add imGUI support"								   							OFF)
 option(GL_INT_INDEX							"Use 4 bytes index on OpenGL"								   				ON)
+option(MP3_SUPPORT							"Add mp3 sound support"								   						ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -773,6 +774,10 @@ endif()
 if(GL_INT_INDEX)
 	add_definitions(-D_GL_INT_INDEX)
 	message(STATUS "Use 4 bytes index on OpenGL for large model")
+endif()
+if(MP3_SUPPORT)
+	set(CORE_DEFINES "${CORE_DEFINES};_SND_MP3")
+	message(STATUS "mp3 sound support")
 endif()
 
 if(OPENAL)
