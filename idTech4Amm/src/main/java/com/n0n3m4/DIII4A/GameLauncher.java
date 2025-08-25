@@ -3138,6 +3138,12 @@ public class GameLauncher extends Activity
         EditText edit = V.edt_cmdline;
         if (edit.getText().toString().equals(text))
             return;
+		// disable focus command edittext when toggle other checkbox/radiogroup/edittext
+		boolean editable = edit.isFocusable() || edit.isFocusableInTouchMode();
+		if(editable)
+		{
+			edit.setEnabled(false);
+		}
         int pos = edit.getSelectionStart();
         edit.setText(text);
 		pos = Math.max(0, Math.min(pos, text.length()));
@@ -3148,6 +3154,10 @@ public class GameLauncher extends Activity
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+		if(editable)
+		{
+			edit.setEnabled(true);
 		}
     }
 
