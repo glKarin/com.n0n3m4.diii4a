@@ -258,6 +258,11 @@ void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPla
 			mat->surfaces.Append(s);
 			materials.Append(mat);
 		}
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+        _DROID_FREE(cullBits);
+        _DROID_FREE(texCoords);
+        _DROID_FREE(vertexRemap);
+#endif
 	}
 
 	// remove the oldest overlay surfaces if there are too many per material
@@ -270,9 +275,6 @@ void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPla
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	_DROID_FREE(overlayVerts);
 	_DROID_FREE(overlayIndexes);
-	_DROID_FREE(cullBits);
-	_DROID_FREE(texCoords);
-	_DROID_FREE(vertexRemap);
 #endif
 }
 

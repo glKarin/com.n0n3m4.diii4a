@@ -321,6 +321,16 @@ extern idCommon 		*common;
 #endif
 
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+
+#ifdef __ANDROID__
+#define _DYNAMIC_ALLOC_MAX_STACK "262144" // 256k
+#else
+#define _DYNAMIC_ALLOC_MAX_STACK "524288" // 512k
+#endif
+
+#define _DYNAMIC_ALLOC_CVAR_DECL idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", _DYNAMIC_ALLOC_MAX_STACK, CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `" _DYNAMIC_ALLOC_MAX_STACK "` bytes(Because stack memory is limited by OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).")
+#define _DYNAMIC_ALLOC_CVAR_EXTERN extern idCVar harm_r_maxAllocStackMemory
+
 #if 1
 extern idCVar harm_r_maxAllocStackMemory;
 #define HARM_MAX_STACK_ALLOC_SIZE (harm_r_maxAllocStackMemory.GetInteger())
