@@ -63,7 +63,7 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
             GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
         else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
         {
-			if(harm_r_PBRRMAOSpecularMap.GetBool() || r_skipSpecular.GetBool() /* || din->specularImage == globalImages->blackImage*/)
+			if(harm_r_PBRRMAOSpecularMap.GetBool() || r_skipSpecular.GetBool() || din->specularImage == globalImages->blackImage)
 			{
 				float se[] = { harm_r_specularExponentPBR.GetFloat(), harm_r_PBRNormalCorrection.GetFloat(), 0.0f, 0.0f };
 				GL_Uniform4fv(offsetof(shaderProgram_t, specularExponent), se);
