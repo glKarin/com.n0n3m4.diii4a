@@ -1,4 +1,43 @@
 
+#define MP3DEC_SHORT_BUFFER_SIZE MINIMP3_MAX_SAMPLES_PER_FRAME
+#define MP3DEC_GET_SAMPLES_BY_MP3DEC_EX_READ 1
+
+#ifdef MP3DEC_GET_SAMPLES_BY_MP3DEC_EX_READ
+/*
+====================
+mp3dec_ex_read_s
+ buf: allow NULL
+====================
+*/
+static size_t mp3dec_ex_read_s(mp3dec_ex_t *dec, mp3d_sample_t *buf, size_t samples)
+{
+    if (!dec)
+    {
+        dec->last_error = MP3D_E_PARAM;
+        return 0;
+    }
+    mp3dec_frame_info_t frame_info;
+    memset(&frame_info, 0, sizeof(frame_info));
+    size_t samples_requested = samples;
+    while (samples)
+    {
+        mp3d_sample_t *buf_frame = NULL;
+        size_t read_samples = mp3dec_ex_read_frame(dec, &buf_frame, &frame_info, samples);
+        if (!read_samples)
+        {
+            break;
+        }
+        if(buf)
+        {
+            memcpy(buf, buf_frame, read_samples * sizeof(mp3d_sample_t));
+            buf += read_samples;
+        }
+        samples -= read_samples;
+    }
+    return samples_requested - samples;
+}
+#endif
+
 static const char* my_minimp3_strerror(int mp3decError)
 {
     switch(mp3decError)
@@ -53,22 +92,62 @@ int idWaveFile::OpenMP3(const char *strFileName, waveformatex_t *pwfx)
 
     mfileTime = mhmmio->Timestamp();
 
+    // num frames, not samples of all channels
+    int numSamples = 0;
+
     mp3dec_frame_info_t info;
     memset(&info, 0, sizeof(info));
-
-    int numSamples = 0;
 
     int offset = 0;
     while (offset < fileSize) {
 		info.frame_bytes = 0;
-		int samples = mp3dec_decode_frame(&dec.mp3d, buf + offset, fileSize - offset, 0, &info);
+        // mp3dec_decode_frame return num frames, not samples of all channels
+		int frames = mp3dec_decode_frame(&dec.mp3d, buf + offset, fileSize - offset, 0, &info);
 
-        if (samples == 0 && info.frame_bytes == 0) break;
+        if (frames == 0)
+        {
+            if(info.frame_bytes == 0) // EOF
+            {
+                break;
+            }
+//            else if(info.frame_bytes > 0) // skip ID3 or other extras data, but no samples
+//            {
+//            }
+        }
+        else
+            numSamples += frames;
 
         offset += info.frame_bytes;
-
-        numSamples += samples;
     }
+
+#ifdef MP3DEC_GET_SAMPLES_BY_MP3DEC_EX_READ //karin: try to get samples with mp3dec_ex_read
+    mp3dec_ex_t dec_temp = dec;
+    int numSamplesEx = 0;
+    while( true ) {
+        // mp3dec_ex_read return samples of all channels, not num frames
+        int ret = mp3dec_ex_read_s(&dec, NULL, MP3DEC_SHORT_BUFFER_SIZE);
+        if ( ret == 0 ) {
+            if ( dec.last_error != 0) {
+                common->Warning( "Opening MP3 file '%s' with minimp3 mp3dec_ex_read_s() failed: %s\n", strFileName, my_minimp3_strerror(dec.last_error) );
+                numSamplesEx = -1;
+            }
+            break;
+        }
+        numSamplesEx += ret;
+    }
+    dec = dec_temp;
+
+    if(numSamplesEx > 0)
+    {
+        // numSamplesEx is samples of all channels, but we need num frames
+        numSamplesEx /= info.channels;
+        if(numSamples != numSamplesEx)
+        {
+            common->Warning( "Opening MP3 file '%s' with minimp3: mp3dec_decode_frame() read %d samples, but mp3dec_ex_read() read %d samples. using mp3dec_ex_read() result\n", strFileName, numSamples, numSamplesEx );
+            numSamples = numSamplesEx;
+        }
+    }
+#endif
 
     if( numSamples == 0 ) {
         common->Warning( "Couldn't get sound length of '%s' with minimp3: %d\n", strFileName, numSamples );
@@ -114,6 +193,8 @@ int idWaveFile::OpenMP3(const char *strFileName, waveformatex_t *pwfx)
 /*
 ====================
 idWaveFile::ReadMP3
+ total: total shorts, byte size = total * sizeof(short)
+ ret: read shorts/samples(= frames * channel), byte size = ret * sizeof(short)
 ====================
 */
 int idWaveFile::ReadMP3(byte *pBuffer, int dwSizeToRead, int *pdwSizeRead)
@@ -124,13 +205,13 @@ int idWaveFile::ReadMP3(byte *pBuffer, int dwSizeToRead, int *pdwSizeRead)
 
     do {
 #ifdef MINIMP3_FLOAT_OUTPUT
-#define MP3DEC_SHORT_BUFFER_SIZE MINIMP3_MAX_SAMPLES_PER_FRAME
 		float fbuffer[2 * MP3DEC_SHORT_BUFFER_SIZE];
         int numShorts = MINIMP3_MIN(MP3DEC_SHORT_BUFFER_SIZE, total);
         int ret = mp3dec_ex_read(dec, fbuffer, numShorts);
 #else
-        int ret = mp3dec_ex_read(dec, bufferPtr, total);
-#define numShorts total
+        int numShorts = MINIMP3_MIN(MP3DEC_SHORT_BUFFER_SIZE/*/2*/, total);
+        // mp3dec_ex_read return samples of all channels, not num frames
+        int ret = mp3dec_ex_read(dec, bufferPtr, numShorts);
 #endif
         if ( ret == 0 ) {
             if ( dec->last_error != 0) {
@@ -242,11 +323,12 @@ int idSampleDecoderLocal::DecodeMP3(idSoundSample *sample, int sampleOffset44k, 
 	do {
 #ifdef MINIMP3_FLOAT_OUTPUT
         float samplesBuf[2 * MIXBUFFER_SAMPLES];
-        int reqSamples = MINIMP3_MIN( MIXBUFFER_SAMPLES, totalSamples); // / sample->objectInfo.nChannels;
+        int reqSamples = MINIMP3_MIN( MIXBUFFER_SAMPLES, totalSamples);
         int ret = mp3dec_ex_read( mp3, samplesBuf, reqSamples );
 #else
         short samplesBuf[2 * MIXBUFFER_SAMPLES];
-        int reqSamples = MINIMP3_MIN( MIXBUFFER_SAMPLES, totalSamples); // / sample->objectInfo.nChannels;
+        int reqSamples = MINIMP3_MIN( MIXBUFFER_SAMPLES, totalSamples);
+        // mp3dec_ex_read return samples of all channels, not num frames
         int ret = mp3dec_ex_read( mp3, samplesBuf, reqSamples );
 #endif
         if ( reqSamples == 0 ) {
