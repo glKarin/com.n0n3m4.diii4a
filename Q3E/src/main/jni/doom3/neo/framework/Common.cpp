@@ -2628,8 +2628,8 @@ void idCommonLocal::InitCommands(void)
 #endif
 
 #ifdef _IMGUI
-    extern void R_ImGui_idTech4AmmSettings_f(const idCmdArgs &args);
-    cmdSystem->AddCommand("idTech4AmmSettings", R_ImGui_idTech4AmmSettings_f, CMD_FL_SYSTEM, "Show idTech4A++ new cvars and commands");
+    extern void R_ImGui_Startup(void);
+    R_ImGui_Startup();
 #endif
 }
 

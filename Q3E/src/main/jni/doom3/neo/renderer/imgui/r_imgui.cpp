@@ -2,11 +2,16 @@
 
 #include "imgui.h"
 
-#define IMGUI_CALLBACK_EXIT 1
-#define IMGUI_CALLBACK_UPDATE_CVAR 2
-#define IMGUI_CALLBACK_COMMAND 3
+enum {
+    IG_CALLBACK_EXIT = 1,
+    IG_CALLBACK_UPDATE_CVAR,
+    IG_CALLBACK_COMMAND,
+};
 
-#if 0
+#define IG_USER_EVENT_DATA_LENGTH 64
+#define IG_COMMAND_NAME "imgui_command"
+
+#if 1
 #if !defined(_MSC_VER)
 #define IMGUI_DEBUG(fmt, args...) printf(fmt, ##args);
 #else
@@ -15,6 +20,20 @@
 #else
 #define IMGUI_DEBUG(fmt, ...)
 #endif
+
+enum {
+    IG_SE_USER = SE_CONSOLE + 1,
+};
+
+enum {
+    IG_USER_EVENT_RESET = 1,
+    IG_USER_EVENT_EXIT,
+};
+
+typedef struct imGuiUserEvent_s {
+    int type;
+    char str[IG_USER_EVENT_DATA_LENGTH];
+} imGuiUserEvent_t;
 
 typedef struct imGuiEvent_s
 {
@@ -35,6 +54,7 @@ typedef struct imGuiEvent_s
             float dx;
             float dy;
         } wheel;
+        imGuiUserEvent_t user;
     } data;
 } imGuiEvent_t;
 
@@ -91,9 +111,15 @@ public:
     void PullCallback(void); // frontend read
 
 protected:
+    enum {
+        IG_FLAG_RESET_POSITION = BIT(0),
+        IG_FLAG_RESET_SIZE = BIT(1),
+    };
     void NewFrame(void); // backend
     void EndFrame(void); // backend
     static void Demo(void *);
+    void HandleUserEvent(const imGuiUserEvent_t &ev); // backend read
+    bool CheckFlag(int what, bool reset);
 
 private:
     bool isInitialized; // backend write
@@ -107,6 +133,7 @@ private:
     bool eventRunning; // frontend write
     idList<imGuiEvent_t> events; // backend read; frontend write
     idList<imGuiCallback_t> callbacks; // frontend read; backend write
+    int flags; // internal flags
 };
 
 idImGui::idImGui(void)
@@ -118,7 +145,8 @@ idImGui::idImGui(void)
   data(NULL),
   grabMouse(false),
   ready(false),
-  eventRunning(false)
+  eventRunning(false),
+  flags(0)
 {
     draw = &idImGui::Demo;
     events.SetGranularity(1);
@@ -137,9 +165,12 @@ void idImGui::Init(void)
 
     GLimp_ImGui_Init();
 
-    ImFontConfig font_cfg;
-    font_cfg.SizePixels = imgui_fontScale.GetFloat() > 0.0f ? imgui_fontScale.GetFloat() : 22.0f;
-    io.Fonts->AddFontDefault(&font_cfg);
+    if(imgui_fontScale.GetFloat() > 0.0f)
+    {
+        ImFontConfig font_cfg;
+        font_cfg.SizePixels = imgui_fontScale.GetFloat();
+        io.Fonts->AddFontDefault(&font_cfg);
+    }
 
     // Arbitrary scale-up
     // FIXME: Put some effort into DPI awareness
@@ -155,7 +186,8 @@ void idImGui::NewFrame(void)
 {
     ImGuiIO& io = ImGui::GetIO();
 
-    if(imgui_scale.IsModified())
+    ImGui::GetStyle().ScaleAllSizes(1.0f);
+/*    if(imgui_scale.IsModified())
     {
         ImGui::GetStyle().ScaleAllSizes(1.0f);
         imgui_scale.ClearModified();
@@ -163,9 +195,12 @@ void idImGui::NewFrame(void)
 
     if(imgui_fontScale.IsModified())
     {
-        io.Fonts->ConfigData[0].SizePixels = imgui_fontScale.GetFloat() > 0.0f ? imgui_fontScale.GetFloat() : 22.0f;
+        float fontScale = imgui_fontScale.GetFloat() > 0.0f ? imgui_fontScale.GetFloat() : 22.0f;
+        printf("FFF %f\n", fontScale);
+        io.Fonts->ConfigData[0].SizePixels = fontScale;
+        ImGui::SetWindowFontScale(fontScale);
         imgui_fontScale.ClearModified();
-    }
+    }*/
 
     // Start the Dear ImGui frame
     GLimp_ImGui_NewFrame();
@@ -186,11 +221,25 @@ void idImGui::Render(void)
         begin(data);
     NewFrame();
     {
+        if(CheckFlag(IG_FLAG_RESET_POSITION, true))
+            ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+        else
+            ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Appearing);
+        if(CheckFlag(IG_FLAG_RESET_SIZE, true))
+            ImGui::SetNextWindowSize(ImVec2(glConfig.vidWidth, glConfig.vidHeight), ImGuiCond_Always);
+        else
+            ImGui::SetNextWindowSize(ImVec2(glConfig.vidWidth, glConfig.vidHeight), ImGuiCond_Appearing);
+
         if(draw)
             draw(data);
 
         // Rendering
         ImGui::Render();
+
+        if(ImGui::IsKeyReleased(ImGuiKey_Escape))
+        {
+            RB_ImGui_Stop();
+        }
     }
     EndFrame();
 
@@ -249,7 +298,9 @@ void idImGui::Start(void)
         return;
     if(running)
         return;
+#if 1
     events.Clear();
+#endif
     running = true;
     IMGUI_DEBUG("Backend::Start\n");
 }
@@ -259,6 +310,9 @@ void idImGui::Stop(void)
     if(!running)
         return;
     running = false;
+#if 1
+    events.Clear();
+#endif
     IMGUI_DEBUG("Backend::Stop\n");
 }
 
@@ -303,6 +357,41 @@ void idImGui::HandleEvent(const imGuiEvent_t &ev)
         case SE_CHAR:
             io.AddInputCharacter(ev.data.input.ch);
             return;
+        case IG_SE_USER:
+            HandleUserEvent(ev.data.user);
+            return;
+        default:
+            return;
+    }
+}
+
+bool idImGui::CheckFlag(int what, bool reset)
+{
+    int res = flags & what;
+    if(reset)
+        flags &= ~res;
+    return res ? true : false;
+}
+
+void idImGui::HandleUserEvent(const imGuiUserEvent_t &ev)
+{
+    switch (ev.type) {
+        case IG_USER_EVENT_RESET: {
+            if(!idStr::Icmp("position", ev.str))
+            {
+                flags |= IG_FLAG_RESET_POSITION;
+            }
+            else if(!idStr::Icmp("size", ev.str))
+            {
+                flags |= IG_FLAG_RESET_SIZE;
+            }
+        }
+            break;
+        case IG_USER_EVENT_EXIT:
+            ExitEvent();
+            break;
+        default:
+            return;
     }
 }
 
@@ -321,13 +410,13 @@ void idImGui::HandleCallback(const imGuiCallback_t &cb)
 {
     IMGUI_DEBUG("Frontend::Handle callback -> %d\n", cb.type);
     switch (cb.type) {
-        case IMGUI_CALLBACK_UPDATE_CVAR:
+        case IG_CALLBACK_UPDATE_CVAR:
             cvarSystem->SetCVarString(cb.key, cb.value);
             return;
-        case IMGUI_CALLBACK_COMMAND:
+        case IG_CALLBACK_COMMAND:
 			cmdSystem->BufferCommandText(CMD_EXEC_APPEND, cb.key);
             return;
-        case IMGUI_CALLBACK_EXIT:
+        case IG_CALLBACK_EXIT:
             ExitEvent();
             return;
     }
@@ -430,7 +519,7 @@ void RB_ImGui_Start(void)
 void RB_ImGui_PushExitCallback(void)
 {
     imGuiCallback_t cb;
-    cb.type = IMGUI_CALLBACK_EXIT;
+    cb.type = IG_CALLBACK_EXIT;
     imGuiBackend.PushCallback(cb);
 }
 
@@ -554,11 +643,24 @@ void R_ImGui_PushInputEvent(char ch)
     imGuiBackend.PushEvent(ev);
 }
 
+// frontend
+void R_ImGui_PushImGuiEvent(int subType, const char data[IG_USER_EVENT_DATA_LENGTH])
+{
+    imGuiEvent_t ev;
+    ev.type = IG_SE_USER;
+    ev.data.user.type = subType;
+    if(data)
+        idStr::snPrintf(ev.data.user.str, sizeof(ev.data.user.str), "%s", data);
+    else
+        memset(ev.data.user.str, 0, sizeof(ev.data.user.str));
+    imGuiBackend.PushEvent(ev);
+}
+
 // backend
 void RB_ImGui_PushCVarCallback(const char *name, const char *value)
 {
     imGuiCallback_t cb;
-    cb.type = IMGUI_CALLBACK_UPDATE_CVAR;
+    cb.type = IG_CALLBACK_UPDATE_CVAR;
     cb.key = name;
     cb.value = value;
     imGuiBackend.PushCallback(cb);
@@ -587,7 +689,44 @@ void RB_ImGui_PushCVarCallback(const char *name, bool value)
 void RB_ImGui_PushCmdCallback(const char *cmd)
 {
     imGuiCallback_t cb;
-    cb.type = IMGUI_CALLBACK_COMMAND;
+    cb.type = IG_CALLBACK_COMMAND;
     cb.key = cmd;
     imGuiBackend.PushCallback(cb);
+}
+
+void R_ImGui_Command_f(const idCmdArgs &args)
+{
+#if 0
+    if(!R_ImGui_IsRunning())
+    {
+        common->Warning("ImGui not running");
+        return;
+    }
+#endif
+    if(args.Argc() < 2)
+    {
+        common->Printf("Usage: %s reset|quit|exit|close [reset=position|size]\n", args.Argv(0));
+        return;
+    }
+    const char *cmd = args.Argv(1);
+    if(!idStr::Icmp("reset", cmd))
+    {
+        R_ImGui_PushImGuiEvent(IG_USER_EVENT_RESET, args.Argv(2));
+    }
+    else if(!idStr::Icmp("quit", cmd) || !idStr::Icmp("exit", cmd) || !idStr::Icmp("close", cmd))
+    {
+        R_ImGui_PushImGuiEvent(IG_USER_EVENT_EXIT, NULL);
+    }
+    else
+    {
+        common->Warning("Unknown ImGui command: %s", cmd);
+        return;
+    }
+
+#if 1
+    if(!R_ImGui_IsRunning())
+    {
+        imGuiBackend.PullEvent();
+    }
+#endif
 }
