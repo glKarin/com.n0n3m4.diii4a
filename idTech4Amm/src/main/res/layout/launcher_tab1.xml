@@ -426,6 +426,30 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/launcher_layout_PBRNormalCorrection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/pbr_normal_correction_surface_smoothness" />
+
+                    <EditText
+                        android:id="@+id/edt_harm_r_PBRNormalCorrection"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="0.0 - 1.0"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="numberDecimal|textNoSuggestions"
+                        android:text="0.25" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/launcher_layout_ambient_lighting_brightness"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

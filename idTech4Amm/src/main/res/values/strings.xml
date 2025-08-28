@@ -549,5 +549,6 @@
     <string name="bot_difficulty_level_harm_bot_botlevel">Bot difficulty level(harm_bot_botLevel)</string>
     <string name="_0_random_n1_5_bot_difficulty_level">0 = random\n1 - 5 = bot difficulty level</string>
     <string name="_0_disable_n_1_maximum_npositive_number_bots_num">0 = disable\n-1 = maximum\nPositive number = bots num</string>
+    <string name="pbr_normal_correction_surface_smoothness">PBR normal correction(Surface smoothness)\n(harm_r_PBRNormalCorrection):</string>
 
 </resources>

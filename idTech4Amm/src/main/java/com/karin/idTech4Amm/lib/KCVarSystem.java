@@ -37,7 +37,10 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "5.0", "Specular exponent in PBR interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_normalCorrectionPBR", "float", "1.0", "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_PBRNormalCorrection", "float", "0.25", "Vertex normal correction(Surface smoothness) in PBR interaction lighting model(1 = pure using bump texture(Lower smoothness); 0 = pure using vertex normal(High smoothness); 0.0 - 1.0 = bump texture * harm_r_PBRNormalCorrection + vertex normal * (1 - harm_r_PBRNormalCorrection))", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_PBRRoughnessCorrection", "float", "0.55", "max roughness for old specular texture. 0 = disable; else = roughness = harm_r_PBRRoughnessCorrection - texture(specularTexture, st).r", 0),
+                        KCVar.CreateCVar("harm_r_PBRMetallicCorrection", "float", "0", "min metallic for old specular texture. 0 = disable; else = metallic = texture(specularTexture, st).r + harm_r_PBRMetallicCorrection", 0),
+                        KCVar.CreateCVar("harm_r_PBRRMAOSpecularMap", "bool", "0", "Specular map is standard PBR RAMO texture or old non-PBR texture", 0),
                         KCVar.CreateCVar("harm_r_ambientLightingBrightness", "float", "1.0", "Lighting brightness in ambient lighting", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("r_maxFps", "integer", "0", "Limit maximum FPS. 0 = unlimited", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
 

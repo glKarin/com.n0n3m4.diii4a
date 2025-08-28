@@ -545,4 +545,5 @@
     <string name="bot_difficulty_level_harm_bot_botlevel">Bot难度(harm_bot_botLevel)</string>
     <string name="_0_random_n1_5_bot_difficulty_level">0 = 随机\n1 - 5 = Bot难度等级</string>
     <string name="_0_disable_n_1_maximum_npositive_number_bots_num">0 = 禁用\n-1 = 最大\n正数 = Bot数量</string>
+    <string name="pbr_normal_correction_surface_smoothness">PBR法线修正(表面光滑度)\n(harm_r_PBRNormalCorrection):</string>
 </resources>

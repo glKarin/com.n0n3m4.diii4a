@@ -1312,6 +1312,11 @@ public class GameLauncher extends Activity
 				V.edt_harm_r_specularExponentPBR.setText(str);
 			if (!IsProp("harm_r_specularExponentPBR")) SetProp("harm_r_specularExponentPBR", "5.0");
 
+			str = GetProp("harm_r_PBRNormalCorrection");
+			if (null != str)
+				V.edt_harm_r_PBRNormalCorrection.setText(str);
+			if (!IsProp("harm_r_PBRNormalCorrection")) SetProp("harm_r_PBRNormalCorrection", "0.25");
+
 			str = GetProp("harm_r_ambientLightingBrightness");
 			if (null != str)
 				V.edt_harm_r_ambientLightingBrightness.setText(str);
@@ -1927,7 +1932,6 @@ public class GameLauncher extends Activity
 		boolean botEnableBuiltinAssets = mPrefs.getBoolean(Q3EPreference.pref_harm_g_botEnableBuiltinAssets, false);
 		V.cb_g_botEnableBuiltinAssets.setChecked(botEnableBuiltinAssets);
 		V.cb_g_botEnableBuiltinAssets.setOnCheckedChangeListener(m_checkboxChangeListener);
-
 		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView view, int id, KeyEvent ev)
 			{
@@ -2000,6 +2004,7 @@ public class GameLauncher extends Activity
 		V.edt_harm_r_specularExponent.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponent, 3.0f));
 		V.edt_harm_r_specularExponentBlinnPhong.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponentBlinnPhong, 12.0f));
 		V.edt_harm_r_specularExponentPBR.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponentPBR, 5.0f));
+		V.edt_harm_r_PBRNormalCorrection.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_PBRNormalCorrection, 0.25f));
 		V.edt_harm_r_ambientLightingBrightness.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_ambientLightingBrightness, 1.0f));
 		V.edt_harm_r_maxFps.setText(Q3EPreference.GetStringFromInt(mPrefs, Q3EPreference.pref_harm_r_maxFps, 0));
 
@@ -2059,6 +2064,7 @@ public class GameLauncher extends Activity
 		V.edt_harm_r_specularExponent.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponent", Q3EPreference.pref_harm_r_specularExponent, 3.0f));
 		V.edt_harm_r_specularExponentBlinnPhong.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponentBlinnPhong", Q3EPreference.pref_harm_r_specularExponentBlinnPhong, 12.0f));
 		V.edt_harm_r_specularExponentPBR.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponentPBR", Q3EPreference.pref_harm_r_specularExponentPBR, 5.0f));
+		V.edt_harm_r_PBRNormalCorrection.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_PBRNormalCorrection", Q3EPreference.pref_harm_r_PBRNormalCorrection, 0.25f));
 		V.edt_harm_r_ambientLightingBrightness.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_ambientLightingBrightness", Q3EPreference.pref_harm_r_ambientLightingBrightness, 1.0f));
 		V.edt_harm_r_maxFps.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count)
@@ -3056,6 +3062,7 @@ public class GameLauncher extends Activity
         mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponent, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 3.0f));
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentBlinnPhong, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentBlinnPhong.getText().toString(), 12.0f));
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentPBR, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentPBR.getText().toString(), 5.0f));
+		mEdtr.putFloat(Q3EPreference.pref_harm_r_PBRNormalCorrection, Q3EUtils.parseFloat_s(V.edt_harm_r_PBRNormalCorrection.getText().toString(), 0.25f));
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_ambientLightingBrightness, Q3EUtils.parseFloat_s(V.edt_harm_r_ambientLightingBrightness.getText().toString(), 1.0f));
         mEdtr.putString(Q3EPreference.pref_harm_s_driver, GetRadioGroupSelectIndex(V.rg_s_driver) == 1 ? "OpenSLES" : "AudioTrack");
 		mEdtr.putInt(Q3EPreference.pref_harm_r_maxFps, Q3EUtils.parseInt_s(V.edt_harm_r_maxFps.getText().toString(), 0));
@@ -4744,6 +4751,7 @@ public class GameLauncher extends Activity
 		public LinearLayout urt_section;
 		public EditText urt_bot_autoAdd;
 		public EditText urt_bot_level;
+		public EditText edt_harm_r_PBRNormalCorrection;
 
 		private RadioGroup CreateGameRadioGroup(int[] id)
 		{
@@ -4940,6 +4948,7 @@ public class GameLauncher extends Activity
 			urt_section = findViewById(R.id.urt_section);
 			urt_bot_autoAdd = findViewById(R.id.urt_bot_autoAdd);
 			urt_bot_level = findViewById(R.id.urt_bot_level);
+			edt_harm_r_PBRNormalCorrection = findViewById(R.id.edt_harm_r_PBRNormalCorrection);
         }
     }
 }

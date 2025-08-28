@@ -41,6 +41,7 @@ public final class Q3EPreference
     public static final String pref_harm_r_specularExponent             = "q3e_harm_r_specularExponent"; //k
     public static final String pref_harm_r_specularExponentBlinnPhong   = "q3e_harm_r_specularExponentBlinnPhong"; //k
     public static final String pref_harm_r_specularExponentPBR          = "q3e_harm_r_specularExponentPBR"; //k
+    public static final String pref_harm_r_PBRNormalCorrection          = "q3e_harm_r_PBRNormalCorrection"; //k
     public static final String pref_harm_r_lightingModel                = "q3e_harm_r_lightingModel"; //k
     public static final String pref_harm_r_ambientLightingBrightness    = "q3e_harm_r_ambientLightingBrightness"; //k
     public static final String pref_harm_r_globalIllumination           = "q3e_harm_r_globalIllumination"; //k
