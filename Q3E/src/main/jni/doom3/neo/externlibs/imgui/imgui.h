@@ -202,10 +202,26 @@ struct ImGuiViewport;               // A Platform Window (always only one in 'ma
 //   - In Visual Studio: CTRL+comma ("Edit.GoToAll") can follow symbols inside comments, whereas CTRL+F12 ("Edit.GoToImplementation") cannot.
 //   - In Visual Studio w/ Visual Assist installed: ALT+G ("VAssistX.GoToImplementation") can also follow symbols inside comments.
 //   - In VS Code, CLion, etc.: CTRL+click can follow symbols inside comments.
-enum ImGuiDir : int;                // -> enum ImGuiDir              // Enum: A cardinal direction (Left, Right, Up, Down)
-enum ImGuiKey : int;                // -> enum ImGuiKey              // Enum: A key identifier (ImGuiKey_XXX or ImGuiMod_XXX value)
-enum ImGuiMouseSource : int;        // -> enum ImGuiMouseSource      // Enum; A mouse input source identifier (Mouse, TouchScreen, Pen)
-enum ImGuiSortDirection : ImU8;     // -> enum ImGuiSortDirection    // Enum: A sorting direction (ascending or descending)
+enum ImGuiDir                // -> enum ImGuiDir              // Enum: A cardinal direction (Left, Right, Up, Down)
+#if 0 // __cplusplus >= 201103L
+: int
+#endif
+;
+enum ImGuiKey                // -> enum ImGuiKey              // Enum: A key identifier (ImGuiKey_XXX or ImGuiMod_XXX value)
+#if 0 // __cplusplus >= 201103L
+: int
+#endif
+;
+enum ImGuiMouseSource        // -> enum ImGuiMouseSource      // Enum; A mouse input source identifier (Mouse, TouchScreen, Pen)
+#if 0 // __cplusplus >= 201103L
+: int
+#endif
+;
+enum ImGuiSortDirection     // -> enum ImGuiSortDirection    // Enum: A sorting direction (ascending or descending)
+#if 0 // __cplusplus >= 201103L
+: ImU8
+#endif
+;
 typedef int ImGuiCol;               // -> enum ImGuiCol_             // Enum: A color identifier for styling
 typedef int ImGuiCond;              // -> enum ImGuiCond_            // Enum: A condition for many Set*() functions
 typedef int ImGuiDataType;          // -> enum ImGuiDataType_        // Enum: A primary data type
@@ -1426,7 +1442,10 @@ enum ImGuiDataType_
 };
 
 // A cardinal direction
-enum ImGuiDir : int
+enum ImGuiDir
+#if 0 // __cplusplus >= 201103L
+: int
+#endif
 {
     ImGuiDir_None    = -1,
     ImGuiDir_Left    = 0,
@@ -1437,7 +1456,10 @@ enum ImGuiDir : int
 };
 
 // A sorting direction
-enum ImGuiSortDirection : ImU8
+enum ImGuiSortDirection
+#if 0 // __cplusplus >= 201103L
+: ImU8
+#endif
 {
     ImGuiSortDirection_None         = 0,
     ImGuiSortDirection_Ascending    = 1,    // Ascending = 0->9, A->Z etc.
@@ -1450,7 +1472,10 @@ enum ImGuiSortDirection : ImU8
 // Read details about the 1.87+ transition : https://github.com/ocornut/imgui/issues/4921
 // Note that "Keys" related to physical keys and are not the same concept as input "Characters", the later are submitted via io.AddInputCharacter().
 // The keyboard key enum values are named after the keys on a standard US keyboard, and on other keyboard types the keys reported may not match the keycaps.
-enum ImGuiKey : int
+enum ImGuiKey
+#if 0 // __cplusplus >= 201103L
+: int
+#endif
 {
     // Keyboard
     ImGuiKey_None = 0,
@@ -1848,7 +1873,10 @@ enum ImGuiMouseCursor_
 // Historically we use "Mouse" terminology everywhere to indicate pointer data, e.g. MousePos, IsMousePressed(), io.AddMousePosEvent()
 // But that "Mouse" data can come from different source which occasionally may be useful for application to know about.
 // You can submit a change of pointer type using io.AddMouseSourceEvent().
-enum ImGuiMouseSource : int
+enum ImGuiMouseSource
+#if 0 // __cplusplus >= 201103L
+: int
+#endif
 {
     ImGuiMouseSource_Mouse = 0,         // Input is coming from an actual mouse.
     ImGuiMouseSource_TouchScreen,       // Input is coming from a touch screen (no hovering prior to initial press, less precise initial press aiming, dual-axis wheeling possible).
