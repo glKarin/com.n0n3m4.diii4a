@@ -5,6 +5,10 @@
 
 #include "../../framework/Session_local.h"
 
+#ifdef _IMGUI
+#include "../../renderer/imgui/r_imgui.h"
+#endif
+
 #ifdef _MULTITHREAD
 extern bool multithreadActive;
 extern bool Sys_ShutdownRenderThread(void);
@@ -491,14 +495,24 @@ void Q3E_KeyEvent(int state,int key,int character)
         if(!ctrl_state || character == '\b')
         Posix_QueEvent(SE_CHAR, character, 0, 0, NULL);
     }
+#ifdef _IMGUI
+    if(!R_ImGui_IsRunning())
+#endif
     Posix_AddKeyboardPollEvent(key, state);
 }
 
 void Q3E_MotionEvent(float dx, float dy)
 {
     Posix_QueEvent(SE_MOUSE, dx, dy, 0, NULL);
+#ifdef _IMGUI
+    if(!R_ImGui_IsRunning())
+    {
+#endif
     Posix_AddMousePollEvent(M_DELTAX, dx);
     Posix_AddMousePollEvent(M_DELTAY, dy);
+#ifdef _IMGUI
+    }
+#endif
 }
 
 void Q3E_Analog(int enable,float x,float y)
