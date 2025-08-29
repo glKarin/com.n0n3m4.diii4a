@@ -92,10 +92,10 @@ ID_INLINE static void RB_OnlyRenderThreadRunningAndMainThreadWaiting(void)
     RB_GLSL_HandleShaders();
     // debug tools
     RB_SetupRenderTools();
-#ifdef _IMGUI
+//#ifdef _IMGUI
     // start imgui
-    RB_ImGui_Start();
-#endif
+    //RB_ImGui_Start();
+//#endif
 }
 
 void idRenderThread::BackendThreadTask( void ) // BackendThread ->

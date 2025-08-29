@@ -3,7 +3,9 @@
 #include "imgui.h"
 
 idCVar imgui_scale( "imgui_scale", "-1.0", CVAR_SYSTEM|CVAR_FLOAT|CVAR_ARCHIVE, "factor to scale ImGUI menus by (-1: auto)" );
-idCVar imgui_fontScale( "imgui_fontScale", "-1.0", CVAR_SYSTEM|CVAR_FLOAT|CVAR_ARCHIVE, "factor to scale ImGUI menus by (-1: auto)" );
+idCVar imgui_fontScale( "imgui_fontScale", "-1.0", CVAR_SYSTEM|CVAR_FLOAT|CVAR_ARCHIVE, "factor to scale ImGUI font by (-1: auto)" );
+idCVar imgui_cursorScale( "imgui_cursorScale", "-1.0", CVAR_SYSTEM|CVAR_FLOAT|CVAR_ARCHIVE, "factor to scale ImGUI soft cursor by (-1: auto)" );
+idCVar imgui_scrollbarScale( "imgui_scrollbarScale", "-1.0", CVAR_SYSTEM|CVAR_FLOAT|CVAR_ARCHIVE, "factor to scale ImGUI scrollbar by (-1: auto)" );
 
 enum cvarFlag
 {
@@ -379,9 +381,37 @@ void idImGuiSettings::Render(void)
 
     if(imgui_fontScale.IsModified())
     {
-        float fontScale = imgui_fontScale.GetFloat() > 0.0f ? imgui_fontScale.GetFloat() : 1.0f;
-        ImGui::SetWindowFontScale(fontScale);
+		if(imgui_fontScale.GetFloat() > 0.0f)
+		{
+			ImGui::SetWindowFontScale(imgui_fontScale.GetFloat());
+		}
         imgui_fontScale.ClearModified();
+    }
+    if(imgui_scale.IsModified())
+    {
+		if(imgui_scale.GetFloat() > 0.0f)
+		{
+			// Arbitrary scale-up
+			// FIXME: Put some effort into DPI awareness
+			ImGui::GetStyle().ScaleAllSizes(imgui_scale.GetFloat());
+		}
+        imgui_scale.ClearModified();
+    }
+    if(imgui_cursorScale.IsModified())
+    {
+		if(imgui_cursorScale.GetFloat() > 0.0f)
+		{
+			ImGui::GetStyle().MouseCursorScale = imgui_cursorScale.GetFloat();
+		}
+        imgui_cursorScale.ClearModified();
+    }
+    if(imgui_scrollbarScale.IsModified())
+    {
+		if(imgui_scrollbarScale.GetFloat() > 0.0f)
+		{
+			ImGui::GetStyle().ScrollbarSize = imgui_scrollbarScale.GetFloat();
+		}
+        imgui_scrollbarScale.ClearModified();
     }
 
     if (ImGui::BeginTabBar("Special cvar and command"))
@@ -440,66 +470,27 @@ void idImGuiSettings::Render(void)
 
 void idImGuiSettings::UpdateCVar(idCVar *cvar, int v)
 {
-#ifdef _MULTITHREAD
-    if(multithreadActive)
-    {
-        RB_ImGui_PushCVarCallback(cvar->GetName(), v);
-        return;
-    }
-#endif
-    if(cvar->GetInteger() != v)
-        cvar->SetInteger(v);
+    RB_ImGui_PushCVarCallback(cvar->GetName(), v);
 }
 
 void idImGuiSettings::UpdateCVar(idCVar *cvar, float v)
 {
-#ifdef _MULTITHREAD
-    if(multithreadActive)
-    {
-        RB_ImGui_PushCVarCallback(cvar->GetName(), v);
-        return;
-    }
-#endif
-    if(cvar->GetFloat() != v)
-        cvar->SetFloat(v);
+    RB_ImGui_PushCVarCallback(cvar->GetName(), v);
 }
 
 void idImGuiSettings::UpdateCVar(idCVar *cvar, bool v)
 {
-#ifdef _MULTITHREAD
-    if(multithreadActive)
-    {
-        RB_ImGui_PushCVarCallback(cvar->GetName(), v);
-        return;
-    }
-#endif
-    if(cvar->GetBool() != v)
-        cvar->SetBool(v);
+    RB_ImGui_PushCVarCallback(cvar->GetName(), v);
 }
 
 void idImGuiSettings::UpdateCVar(idCVar *cvar, const char *v)
 {
-#ifdef _MULTITHREAD
-    if(multithreadActive)
-    {
-        RB_ImGui_PushCVarCallback(cvar->GetName(), v);
-        return;
-    }
-#endif
-    if(idStr::Cmp(cvar->GetString(), v))
-        cvar->SetString(v);
+    RB_ImGui_PushCVarCallback(cvar->GetName(), v);
 }
 
 void idImGuiSettings::ExecCommand(const char *cmd)
 {
-#ifdef _MULTITHREAD
-    if(multithreadActive)
-    {
-        RB_ImGui_PushCmdCallback(cmd);
-        return;
-    }
-#endif
-	cmdSystem->BufferCommandText(CMD_EXEC_APPEND, cmd);
+    RB_ImGui_PushCmdCallback(cmd);
 }
 
 ID_INLINE static void ImGui_RegisterCvar(const char *name = NULL, const char *displayName = NULL, int flag = 0, const char *options = NULL)
@@ -541,7 +532,7 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCvar("harm_r_specularExponentBlinnPhong", "Specular exponent in Blinn-Phong");
     ImGui_RegisterCvar("harm_r_specularExponentPBR", "Specular exponent in PBR");
     ImGui_RegisterCvar("harm_r_PBRNormalCorrection", "Vertex normal correction in PBR(Surface smoothness)");
-    ImGui_RegisterCvar("harm_r_PBRRMAOSpecularMap", "Vertex normal correction in PBR");
+    ImGui_RegisterCvar("harm_r_PBRRMAOSpecularMap", "Is standard RAMO specular texture in PBR");
     ImGui_RegisterCvar("harm_r_PBRRoughnessCorrection", "Max roughness for old specular texture in PBR");
     ImGui_RegisterCvar("harm_r_PBRMetallicCorrection", "Min metallic for old specular texture in PBR");
 #ifdef _GLOBAL_ILLUMINATION
@@ -615,7 +606,9 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterLabel("System", IG_CVAR_GROUP_RENDERER);
 #if !defined(__ANDROID__)
     ImGui_RegisterCvar("harm_r_openglVersion", "Clear vertex buffer on every frame", IG_CVAR_COMPONENT_COMBO, "GLES2=GLES 2.0;GLES3.0=GLES 3.0+;OpenGL_core=OpenGL desktop core;OpenGL_compatibility=OpenGL desktop compatibility");
+#ifdef _MULTITHREAD
     ImGui_RegisterCvar("r_multithread", "Enable multi-threading rendering");
+#endif
 #endif
     ImGui_RegisterCvar("harm_r_clearVertexBuffer", "Clear vertex buffer on every frame", IG_CVAR_COMPONENT_COMBO, "0=No clear(original);1=Only free memory;2=Free memory and delete VBO(same as 1 if multi-threading)");
     ImGui_RegisterDivide(IG_CVAR_GROUP_RENDERER);
@@ -672,6 +665,8 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCvar("harm_si_botWeapons", "Bot initial weapons");
     ImGui_RegisterCvar("harm_si_botAmmo", "Bot initial weapon ammo clips");
     ImGui_RegisterCvar("harm_g_botEnableBuiltinAssets", "Enable built-in bot assets");
+    ImGui_RegisterCmd("fillBots", "Fill bots to limit", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_GAME);
+    ImGui_RegisterCmd("cleanBots", "Disconnect all bots", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_GAME);
     ImGui_RegisterDivide(IG_CVAR_GROUP_GAME);
 #elif defined(_HUMANHEAD)
     ImGui_RegisterLabel("Full-body awareness", IG_CVAR_GROUP_GAME);
@@ -709,6 +704,8 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCvar("harm_si_botWeapons", "Bot initial weapons");
     ImGui_RegisterCvar("harm_si_botAmmo", "Bot initial weapon ammo clips");
     ImGui_RegisterCvar("harm_g_botEnableBuiltinAssets", "Enable built-in bot assets");
+    ImGui_RegisterCmd("fillBots", "Fill bots to limit", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_GAME);
+    ImGui_RegisterCmd("cleanBots", "Disconnect all bots", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_GAME);
     ImGui_RegisterDivide(IG_CVAR_GROUP_GAME);
 
     ImGui_RegisterLabel("Rivensin Mod", IG_CVAR_GROUP_GAME);
@@ -721,6 +718,8 @@ void ImGui_RegisterOptions(void)
 	// other
     ImGui_RegisterCvar("imgui_scale", "ImGui scale", IG_CVAR_GROUP_OTHER);
     ImGui_RegisterCvar("imgui_fontScale", "ImGui font scale", IG_CVAR_GROUP_OTHER);
+    ImGui_RegisterCvar("imgui_cursorScale", "ImGui soft cursor scale", IG_CVAR_GROUP_OTHER);
+    ImGui_RegisterCvar("imgui_scrollbarScale", "ImGui scrollbar scale", IG_CVAR_GROUP_OTHER);
     ImGui_RegisterCmd(IG_COMMAND_NAME " reset position", "Reset ImGui position", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_OTHER);
     ImGui_RegisterCmd(IG_COMMAND_NAME " reset size", "Reset ImGui size", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_OTHER);
     ImGui_RegisterCmd(IG_COMMAND_NAME " close", "Close ImGui", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_OTHER);
@@ -728,7 +727,7 @@ void ImGui_RegisterOptions(void)
     imGuiSettings.isInitialized = true;
 }
 
-void ImGui_CloseSettings(void *)
+static void ImGui_CloseSettings(void *)
 {
     if(!imGuiSettings.visible)
     {
@@ -746,17 +745,16 @@ void R_ImGui_idTech4AmmSettings_f(const idCmdArgs &args)
     if(!R_ImGui_IsRunning())
     {
         ImGui_RegisterOptions();
-        R_ImGui_SetRenderer(ImGui_RenderSettings, NULL, ImGui_CloseSettings);
-        R_ImGui_Ready(true);
-    }
-    else
-    {
-        //R_ImGui_Stop();
+		imgui_fontScale.SetModified();
+		imgui_scale.SetModified();
+		imgui_cursorScale.SetModified();
+		imgui_scrollbarScale.SetModified();
+        R_ImGui_Ready(ImGui_RenderSettings, NULL, ImGui_CloseSettings, NULL, !console->Active());
     }
 }
 
 void R_ImGui_Startup(void)
 {
     cmdSystem->AddCommand("idTech4AmmSettings", R_ImGui_idTech4AmmSettings_f, CMD_FL_SYSTEM, "Show idTech4A++ new cvars and commands");
-    cmdSystem->AddCommand(IG_COMMAND_NAME, R_ImGui_Command_f, CMD_FL_SYSTEM, "DON'T EXEC");
+    cmdSystem->AddCommand(IG_COMMAND_NAME, R_ImGui_Command_f, CMD_FL_SYSTEM, "ImGui user command");
 }

@@ -171,9 +171,9 @@ static void R_IssueRenderCommands(volatile frameData_t *fd)
 // only main thread is running and render thread is waiting
 ID_INLINE static void R_OnlyMainThreadRunningAndRenderThreadWaiting(void)
 {
-#ifdef _IMGUI
-    R_ImGui_Render();
-#endif
+//#ifdef _IMGUI
+//    R_ImGui_Render();
+//#endif
 }
 
 static void RenderCommands(renderCrop_t *pc = NULL, byte *pix = NULL)

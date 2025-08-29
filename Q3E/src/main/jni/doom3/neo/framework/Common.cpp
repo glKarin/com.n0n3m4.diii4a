@@ -30,6 +30,9 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "../renderer/Image.h"
+#ifdef _IMGUI
+#include "../renderer/imgui/r_imgui.h"
+#endif
 
 #define	MAX_PRINT_MSG_SIZE	4096
 #define MAX_WARNING_LIST	256
@@ -2710,6 +2713,10 @@ void idCommonLocal::Frame(void)
 
 		eventLoop->RunEventLoop();
 
+#ifdef _IMGUI
+        R_ImGui_HandleCallback();
+#endif
+
 		com_frameTime = com_ticNumber * USERCMD_MSEC;
 
 		idAsyncNetwork::RunFrame();
@@ -3527,7 +3534,12 @@ void idCommonLocal::InitGame(void)
 		cmdSystem->ExecuteCommandBuffer();
 	}
 #ifdef _IMGUI
+    const char *binding = idKeyInput::GetBinding(K_F10);
+    if(!binding || !binding[0])
+    {
+        common->Printf("Bind F10 to command 'idTech4AmmSettings'\n");
     idKeyInput::SetBinding(K_F10, "idTech4AmmSettings");
+    }
 #endif
 }
 
