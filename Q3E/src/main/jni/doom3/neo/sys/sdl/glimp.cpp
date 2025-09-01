@@ -872,8 +872,6 @@ void GLimp_Startup(void)
     const char *openglVersion = cvarSystem->GetCVarString("harm_r_openglVersion");
     if(openglVersion && openglVersion[0])
     {
-//        extern int gl_version;
-//        extern bool USING_GLES3;
         Sys_Printf("[Harmattan]: harm_r_openglVersion = %s\n", openglVersion);
         if(!idStr::Icmp(GL_VERSION_NAME_GL_ES2, openglVersion))
         {
