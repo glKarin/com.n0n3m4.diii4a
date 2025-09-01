@@ -149,7 +149,7 @@ public final class Q3EGameConstants
     public static final String GAME_SUBDIR_SAMTFE   = "serioussamtfe";
     public static final String GAME_SUBDIR_SAMTSE   = "serioussamtse";
     public static final String GAME_SUBDIR_XASH3D   = "xash";
-    public static final String GAME_SUBDIR_SOURCE   = "source";
+    public static final String GAME_SUBDIR_SOURCE   = "srceng";
     public static final String GAME_SUBDIR_URT      = "urt";
 
     // game version

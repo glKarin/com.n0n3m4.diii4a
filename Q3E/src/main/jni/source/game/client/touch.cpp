@@ -657,7 +657,9 @@ void CTouchControls::Frame()
 	else
 		m_bCutScene = false;
 
+#if !defined(_DIII4A) //karin: disable built-in touch
 	if( touch_enable.GetBool() && touch_draw.GetBool() && !enginevgui->IsGameUIVisible() ) Paint();
+#endif
 }
 
 void CTouchControls::Paint()
@@ -934,6 +936,7 @@ CTouchButton *CTouchControls::FindButton( const char *name )
 
 void CTouchControls::ProcessEvent(touch_event_t *ev)
 {
+#if !defined(_DIII4A) //karin: disable built-in touch
 	if( !touch_enable.GetBool() )
 		return;
 
@@ -947,6 +950,7 @@ void CTouchControls::ProcessEvent(touch_event_t *ev)
 		FingerMotion( ev );
 	else
 		FingerPress( ev );
+#endif
 }
 
 void CTouchControls::EditEvent(touch_event_t *ev)

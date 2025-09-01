@@ -37,6 +37,7 @@ public final class Constants
             "Update Quake 2(yquake2) version to 8.51, update vulkan renderer.",
             "Update GZDOOM version to 4.14.2.",
             "Rename Xash3D game standalone folder to `xash`.",
+            "Rename Source Engine game standalone folder to `srceng`.",
         };
 	};
 
