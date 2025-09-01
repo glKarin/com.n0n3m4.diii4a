@@ -406,7 +406,7 @@ bool R_Font_ParseWideFont(fontInfo_t *outFont)
                 info->imageHeight	= (int)readFloat();
                 info->xSkip		    = (int)readFloat();
                 info->pitch		    = (int)readFloat();
-                info->top			= (int)readFloat();
+                info->top			= (int)readFloat(); // p_horiBearingY
                 info->height		= info->top;
                 info->bottom		= 0;
                 info->s			    = readFloat();
@@ -547,7 +547,7 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 			outFont->glyphs[i].imageHeight	= (int)readFloat();
 			outFont->glyphs[i].xSkip		= (int)readFloat();
 			outFont->glyphs[i].pitch		= (int)readFloat();
-			outFont->glyphs[i].top			= (int)readFloat();
+			outFont->glyphs[i].top			= (int)readFloat(); // p_horiBearingY
 			outFont->glyphs[i].height		= outFont->glyphs[i].top;
 			outFont->glyphs[i].bottom		= 0;
 			outFont->glyphs[i].s			= readFloat();

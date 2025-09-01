@@ -428,12 +428,6 @@ void idWindow::CleanUp()
     ops.Clear();
     updateVars.Clear();
 
-#if 0 //def _RAVEN
-// jmarshall
-    updateVars.Clear();
-// jmarshall end
-#endif
-
 	for (i = 0; i < SCRIPT_COUNT; i++) {
 		delete scripts[i];
 	}
