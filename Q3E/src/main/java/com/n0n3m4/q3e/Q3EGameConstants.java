@@ -22,7 +22,7 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE_SAMTSE    = "libSeriousSamTSE.so"; // Serious Sam Second
     public static final String LIB_ENGINE_XASH3D    = "libxash3d.so"; // Xash3D
     public static final String LIB_ENGINE_SOURCE    = "libsource.so"; // Source Engine
-    public static final String LIB_ENGINE3_URT       = "liburbanterror.so"; // Q3 Urban Terror
+    public static final String LIB_ENGINE3_URT      = "liburbanterror.so"; // Q3 Urban Terror
 
     public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
     //public static final String LIB_ENGINE3_REALRTCW_5_1 = "libRealRTCW_5_1.so"; // RealRTCW(5.1)
@@ -60,7 +60,7 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_SAMTSE   = "";
     public static final String CONFIG_FILE_XASH3D   = "config.cfg";
     public static final String CONFIG_FILE_SOURCE   = "cfg/config.cfg";
-    public static final String CONFIG_FILE_URT       = "q3config.cfg";
+    public static final String CONFIG_FILE_URT      = "q3config.cfg";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -82,7 +82,7 @@ public final class Q3EGameConstants
     public static final String GAME_SAMTSE   = "samtse";
     public static final String GAME_XASH3D   = "xash3d";
     public static final String GAME_SOURCE   = "source";
-    public static final String GAME_URT       = "urt";
+    public static final String GAME_URT      = "urt";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -104,7 +104,7 @@ public final class Q3EGameConstants
     public static final String GAME_NAME_SAMTSE   = "Serious Sam TSE";
     public static final String GAME_NAME_XASH3D   = "Xash3D";
     public static final String GAME_NAME_SOURCE   = "Source Engine";
-    public static final String GAME_NAME_URT       = "Urban Terror";
+    public static final String GAME_NAME_URT      = "Urban Terror";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -128,9 +128,9 @@ public final class Q3EGameConstants
     public static final String GAME_BASE_SAMTSE     = "";
     public static final String GAME_BASE_XASH3D     = "valve";
     public static final String GAME_BASE_SOURCE     = "hl2";
-    public static final String GAME_BASE_URT         = "q3ut4";
+    public static final String GAME_BASE_URT        = "q3ut4";
 
-    // game sub directory
+    // game standalone directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
     public static final String GAME_SUBDIR_QUAKE4   = "quake4";
     public static final String GAME_SUBDIR_PREY     = "prey";
@@ -148,9 +148,9 @@ public final class Q3EGameConstants
     public static final String GAME_SUBDIR_JO       = "openjo";
     public static final String GAME_SUBDIR_SAMTFE   = "serioussamtfe";
     public static final String GAME_SUBDIR_SAMTSE   = "serioussamtse";
-    public static final String GAME_SUBDIR_XASH3D   = "xash3d";
+    public static final String GAME_SUBDIR_XASH3D   = "xash";
     public static final String GAME_SUBDIR_SOURCE   = "source";
-    public static final String GAME_SUBDIR_URT       = "urt";
+    public static final String GAME_SUBDIR_URT      = "urt";
 
     // game version
     public static final String GAME_VERSION_DOOM3    = "1.3.1.1304";
@@ -172,7 +172,7 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_SAMTSE   = "1.10.7";
     public static final String GAME_VERSION_XASH3D   = "0.21";
     public static final String GAME_VERSION_SOURCE   = "1.16";
-    public static final String GAME_VERSION_URT       = "4.3.4";
+    public static final String GAME_VERSION_URT      = "4.3.4";
 
     // game type index(ID)
     public static final int GAME_ID_DOOM3    = 0;
@@ -194,7 +194,7 @@ public final class Q3EGameConstants
     public static final int GAME_ID_SAMTSE   = 16;
     public static final int GAME_ID_XASH3D   = 17;
     public static final int GAME_ID_SOURCE   = 18;
-    public static final int GAME_ID_URT       = 19;
+    public static final int GAME_ID_URT      = 19;
 
 
     public static final int NUM_SUPPORT_GAME = 20;
