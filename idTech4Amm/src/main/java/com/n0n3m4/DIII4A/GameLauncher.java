@@ -41,8 +41,6 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -70,7 +68,6 @@ import com.karin.idTech4Amm.ControllerConfigActivity;
 import com.karin.idTech4Amm.OnScreenButtonConfigActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
-import com.karin.idTech4Amm.lib.KCVarSystem;
 import com.karin.idTech4Amm.lib.UIUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.ChangeLog;
@@ -80,7 +77,6 @@ import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.karin.idTech4Amm.sys.Theme;
-import com.karin.idTech4Amm.ui.CVarListView;
 import com.karin.idTech4Amm.ui.ChangelogView;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.ExperimentalDialog;
@@ -89,6 +85,7 @@ import com.karin.idTech4Amm.widget.Divider;
 import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.BackupPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.CVarEditorFunc;
+import com.n0n3m4.DIII4A.launcher.CVarHelperFunc;
 import com.n0n3m4.DIII4A.launcher.CheckForUpdateFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseCommandRecordFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseExtrasFileFunc;
@@ -135,12 +132,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 @SuppressLint({"ApplySharedPref", "CommitPrefEdits"})
 public class GameLauncher extends Activity
@@ -3653,42 +3646,9 @@ public class GameLauncher extends Activity
 
     private void OpenCvarListDetail()
     {
-		CVarListView cvarListView = new CVarListView(this, new ArrayList<>(KCVarSystem.CVars().values()));
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.special_cvar_list);
-		builder.setView(cvarListView);
-		builder.setPositiveButton(R.string.ok, new AlertDialog.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		builder.setNeutralButton(R.string.expand_all, null);
-		builder.setNegativeButton(R.string.collapse_all, null);
-
-		AlertDialog dialog = builder.create();
-		dialog.create();
-		dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-			@Override
-			public void onShow(DialogInterface d)
-			{
-				dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View view) {
-						cvarListView.ExpandAll();
-					}
-				});
-
-				dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View view) {
-						cvarListView.CollapseAll();
-					}
-				});
-			}
-		});
-
-		dialog.show();
+		CVarHelperFunc m_cVarHelperFunc = new CVarHelperFunc(this);
+		Bundle bundle = new Bundle();
+		m_cVarHelperFunc.Start(bundle);
     }
 
 	private void SetGame(String game)
