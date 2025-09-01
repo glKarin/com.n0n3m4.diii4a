@@ -1482,10 +1482,18 @@ static void Touch_DrawButtons( touchbuttonlist_t *list )
 
 void Touch_Draw( void )
 {
+#ifdef _DIII4A //karin: don't draw built-in vkb
+    if( !touch.initialized || ( !touch.clientonly ))
+#else
 	if( !touch.initialized || ( !touch_enable.value && !touch.clientonly ))
+#endif
 		return;
 
+#ifdef _DIII4A //karin: don't draw built-in vkb
+    if( cls.key_dest != key_game )
+#else
 	if( cls.key_dest != key_game && !touch_in_menu.value )
+#endif
 		return;
 
 	Touch_InitConfig();
@@ -2155,7 +2163,11 @@ int IN_TouchEvent( touchEventType type, int fingerID, float x, float y, float dx
 		}
 	}
 
+#ifdef _DIII4A //karin: don't draw built-in vkb
+    if( !touch.initialized || ( !touch.clientonly ))
+#else
 	if( !touch.initialized || ( !touch_enable.value && !touch.clientonly ))
+#endif
 		return false;
 
 	y *= (float)refState.height / refState.width / Touch_AspectRatio();
@@ -2224,7 +2236,11 @@ void Touch_KeyEvent( int key, int down )
 
 qboolean Touch_WantVisibleCursor( void )
 {
+#ifdef _DIII4A //karin: don't draw built-in vkb
+    return touch.clientonly;
+#else
 	return ( touch_enable.value && touch_emulate.value ) || touch.clientonly || touch_in_menu.value;
+#endif
 }
 
 void Touch_Shutdown( void )
