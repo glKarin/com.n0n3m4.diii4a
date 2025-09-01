@@ -507,8 +507,6 @@ public class Q3EUiConfig extends Activity
                 .putFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, dz)
                 .putFloat(Q3EPreference.pref_harm_joystick_release_range, range)
                 .commit();
-        Q3EUtils.q3ei.joystick_release_range = range;
-        Q3EUtils.q3ei.joystick_inner_dead_zone = dz;
         vw.UpdateJoystick(range, dz);
         Toast.makeText(Q3EUiConfig.this, R.string.setup_joystick_done, Toast.LENGTH_SHORT).show();
     }

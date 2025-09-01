@@ -50,18 +50,23 @@ public class UiLoader
     private Object LoadUiElement(int id, int cx, int cy, int size, int alpha, boolean editMode)
     {
         int key, key2, key3;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
         switch (Q3EUtils.q3ei.type_table[id])
         {
             case Q3EGlobals.TYPE_BUTTON:
+                boolean disableMouseMotion = preferences.getBoolean(Q3EPreference.pref_harm_disable_mouse_button_motion, false);
                 int bh = Button.HeightForWidth(size, Q3EUtils.q3ei.arg_table[id * 4 + 2]);
                 key = Q3EKeyCodes.GetRealKeyCode(Q3EUtils.q3ei.arg_table[id * 4]);
-                return new Button(ctx, gl, cx, cy, size, bh, Q3EUtils.q3ei.texture_table[id], key, Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 1] == 1, (float) alpha / 100);
+                return new Button(ctx, gl, cx, cy, size, bh, Q3EUtils.q3ei.texture_table[id], key, Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 1] == 1, !disableMouseMotion, (float) alpha / 100);
             case Q3EGlobals.TYPE_JOYSTICK: {
-                int visibleMode = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getInt(Q3EPreference.pref_harm_joystick_visible, Q3EGlobals.ONSCRREN_JOYSTICK_VISIBLE_ALWAYS);
-                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, editMode, visibleMode, Q3EUtils.q3ei.texture_table[id]);
+                int visibleMode = preferences.getInt(Q3EPreference.pref_harm_joystick_visible, Q3EGlobals.ONSCRREN_JOYSTICK_VISIBLE_ALWAYS);
+                boolean showDot = preferences.getBoolean(Q3EPreference.pref_harm_hide_joystick_center, false);
+                float joystick_release_range = preferences.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
+                float joystick_inner_dead_zone = preferences.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
+                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, joystick_release_range, joystick_inner_dead_zone, !Q3EUtils.q3ei.joystick_unfixed, !editMode, visibleMode, !showDot, Q3EUtils.q3ei.texture_table[id]);
             }
             case Q3EGlobals.TYPE_SLIDER:
-                int sliderDelay = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);
+                int sliderDelay = preferences.getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);
                 if(sliderDelay < 0)
                 {
                     if(Q3EUtils.q3ei.isSamTFE || Q3EUtils.q3ei.isSamTSE)
@@ -79,7 +84,7 @@ public class UiLoader
                     discKey = 1;
                 else if(discKey > Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length)
                     discKey = 2;
-                String keysStr = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getString(Q3EPreference.DISC_PANEL_KEYS_PREFIX + discKey, Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[discKey - 1]);
+                String keysStr = preferences.getString(Q3EPreference.DISC_PANEL_KEYS_PREFIX + discKey, Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[discKey - 1]);
                 final int[] keycodes = Q3EKeyCodes.ONSCRREN_DISC_KEYS_KEYCODES[discKey - 1];
                 final String[] labels = Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[discKey - 1].split(",");
                 char[] keys = null;
@@ -124,7 +129,7 @@ public class UiLoader
                     }
                     name = buf.toString();
                 }
-                int discDelay = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);
+                int discDelay = preferences.getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);
                 if(discDelay < 0)
                 {
                     if(Q3EUtils.q3ei.isSamTFE || Q3EUtils.q3ei.isSamTSE)

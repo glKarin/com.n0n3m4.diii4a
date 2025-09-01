@@ -244,6 +244,8 @@ public final class Q3EPreference
     public static final String pref_harm_joystick_release_range       = "harm_joystick_release_range"; //k
     public static final String pref_harm_joystick_unfixed             = "harm_joystick_unfixed"; //k
     public static final String pref_harm_joystick_visible             = "harm_joystick_visible"; //k
+    public static final String pref_harm_hide_joystick_center         = "harm_hide_joystick_center"; //k
+    public static final String pref_harm_disable_mouse_button_motion         = "harm_disable_mouse_button_motion"; //k
     public static final String pref_harm_joystick_inner_dead_zone     = "harm_joystick_inner_dead_zone"; //k
     public static final String pref_harm_using_mouse                  = "harm_using_mouse"; //k
     public static final String pref_harm_find_dll                     = "harm_find_dll"; //k

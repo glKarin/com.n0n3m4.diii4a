@@ -36,10 +36,14 @@ public class Button extends Paintable implements TouchListener
     private final boolean canbeheld;
     private int m_width_2;
 
+    private int lx;
+    private int ly;
+
     private int vertexBuffer = 0;
     private int indexBuffer = 0;
+    private boolean allowMouseButtonMotion = true;
 
-    public Button(View vw, GL10 gl, int center_x, int center_y, int w, int h, String texid, int keyc, int stl, boolean canbheld, float a)
+    public Button(View vw, GL10 gl, int center_x, int center_y, int w, int h, String texid, int keyc, int stl, boolean canbheld, boolean mouseMotion, float a)
     {
         view = vw;
         cx = center_x;
@@ -51,6 +55,7 @@ public class Button extends Paintable implements TouchListener
         keycode = keyc;
         style = stl;
         canbeheld = canbheld;
+        allowMouseButtonMotion = mouseMotion;
         float[] verts = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
         float[] texcoords = {0, 0, 0, 1, 1, 1, 1, 0};
         byte[] indices = {0, 1, 2, 0, 2, 3};
@@ -121,9 +126,6 @@ public class Button extends Paintable implements TouchListener
         Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, vertexBuffer, indexBuffer, cx, cy, red, green, blue, alpha);
     }
 
-    private int lx;
-    private int ly;
-
     @Override
     public boolean onTouchEvent(int x, int y, int act)
     {
@@ -163,6 +165,8 @@ public class Button extends Paintable implements TouchListener
         else if (act == -1)
             Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, keycode, 0);
 
+        if(allowMouseButtonMotion)
+        {
         if (keycode == Q3EKeyCodes.KeyCodes.K_MOUSE1 || keycode == Q3EKeyCodes.KeyCodes.K_MOUSE2)
         {
             if (Q3EUtils.q3ei.callbackObj.notinmenu)
@@ -175,6 +179,7 @@ public class Button extends Paintable implements TouchListener
             {
                 Q3EUtils.q3ei.callbackObj.sendMotionEvent(0, 0);//???
             }
+        }
         }
         return true;
     }
@@ -211,7 +216,7 @@ public class Button extends Paintable implements TouchListener
 
     public static Button Move(Button tmp, GL10 gl)
     {
-        Button newb = new Button(tmp.view, gl, tmp.cx, tmp.cy, tmp.width, tmp.height, tmp.tex_androidid, tmp.keycode, tmp.style, tmp.canbeheld, tmp.alpha);
+        Button newb = new Button(tmp.view, gl, tmp.cx, tmp.cy, tmp.width, tmp.height, tmp.tex_androidid, tmp.keycode, tmp.style, tmp.canbeheld, tmp.allowMouseButtonMotion, tmp.alpha);
         newb.tex_ind = tmp.tex_ind;
         newb.vertexBuffer = tmp.vertexBuffer;
         newb.indexBuffer = tmp.indexBuffer;

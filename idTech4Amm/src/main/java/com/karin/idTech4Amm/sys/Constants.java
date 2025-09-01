@@ -25,15 +25,18 @@ public final class Constants
     public static final String CONST_FDROID = "https://f-droid.org/packages/com.karin.idTech4Amm/";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
+    public static final String CONST_TESTING_URL = "https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/android_testing";
     public static final String CONST_CODE_ALIAS = "Lu Yiping"; // Natasha; Verena; Caitlyn; Lin Daiyu
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
             "Optimize PBR shaders with original specular texture on DOOM 3/Quake 4/Prey(2006).",
             "Add mp3 sound file support on DOOM 3/Quake 4/Prey(2006).",
+            "Add settings by ImGui on DOOM 3/Quake 4/Prey(2006), command is `idTech4AmmSettings`, default binding to F10.",
             "Add `Urban Terror`(ver 4.3.4) support, game standalone directory named `urt`, game data directory named `q3ut4`. More view in `" + TextHelper.GenLinkText("https://www.urbanterror.info", "Urban Terror") + "`.",
             "Update Quake 2(yquake2) version to 8.51, update vulkan renderer.",
             "Update GZDOOM version to 4.14.2.",
+            "Rename Xash3D game standalone folder to `xash`.",
         };
 	};
 

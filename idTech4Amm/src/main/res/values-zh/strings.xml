@@ -312,7 +312,7 @@
     <string name="scroll_to_bottom">底部</string>
     <string name="scroll">滚动</string>
     <string name="pause">暂停</string>
-    <string name="joystick_visible">摇杆显示:</string>
+    <string name="joystick_visible">显示摇杆:</string>
     <string name="suggest_game_woring_directory_tips">Android11/11+建议在`%1$s`下创建文件夹作为游戏数据文件夹以加快加载速度!</string>
     <string name="sub_directory">独立目录: </string>
     <string name="app_is_rebooting">应用重启中......</string>
@@ -546,4 +546,7 @@
     <string name="_0_random_n1_5_bot_difficulty_level">0 = 随机\n1 - 5 = Bot难度等级</string>
     <string name="_0_disable_n_1_maximum_npositive_number_bots_num">0 = 禁用\n-1 = 最大\n正数 = Bot数量</string>
     <string name="pbr_normal_correction_surface_smoothness">PBR法线修正(表面光滑度)\n(harm_r_PBRNormalCorrection):</string>
+    <string name="joystick_center_dot_visible">隐藏摇杆中心圆点</string>
+    <string name="download_testing">下载测试版</string>
+    <string name="disable_motion_when_virtual_mouse_button_hold">当虚拟鼠标按键按下时禁止鼠标移动事件</string>
 </resources>

@@ -550,5 +550,8 @@
     <string name="_0_random_n1_5_bot_difficulty_level">0 = random\n1 - 5 = bot difficulty level</string>
     <string name="_0_disable_n_1_maximum_npositive_number_bots_num">0 = disable\n-1 = maximum\nPositive number = bots num</string>
     <string name="pbr_normal_correction_surface_smoothness">PBR normal correction(Surface smoothness)\n(harm_r_PBRNormalCorrection):</string>
+    <string name="joystick_center_dot_visible">Hide joystick center dot</string>
+    <string name="download_testing">Download testing</string>
+    <string name="disable_motion_when_virtual_mouse_button_hold">Disable mouse motion when virtual mouse button hold</string>
 
 </resources>

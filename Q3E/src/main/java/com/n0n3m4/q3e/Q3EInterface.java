@@ -97,8 +97,6 @@ public class Q3EInterface
 	public String cmd = Q3EGameConstants.GAME_EXECUABLE;
 	public boolean multithread = false;
 	public boolean function_key_toolbar = false;
-	public float joystick_release_range = 0.0f;
-	public float joystick_inner_dead_zone = 0.0f;
 	public boolean joystick_unfixed = false;
 	public boolean joystick_smooth          = true; // Q3EView::analog
 	public boolean builtin_virtual_keyboard = false;

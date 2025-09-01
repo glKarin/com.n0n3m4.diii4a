@@ -191,43 +191,6 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
     public void RefreshTgt(FingerUi fn)
     {
         SetModified();
-        /*if (fn.target instanceof Button)
-        {
-            final Button tmp = (Button) fn.target;
-            final Button newb = Button.Move(tmp, uildr.gl);
-            fn.target = newb;
-            touch_elements.set(touch_elements.indexOf(tmp), newb);
-            paint_elements.set(paint_elements.indexOf(tmp), newb);
-            m_edited = true;
-        }
-        else if (fn.target instanceof Joystick)
-        {
-            final Joystick tmp = (Joystick) fn.target;
-            final Joystick newj = Joystick.Move(tmp, uildr.gl, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone);
-            fn.target = newj;
-            touch_elements.set(touch_elements.indexOf(tmp), newj);
-            paint_elements.set(paint_elements.indexOf(tmp), newj);
-            m_edited = true;
-        }
-        else if (fn.target instanceof Slider)
-        {
-            final Slider tmp = (Slider) fn.target;
-            final Slider news = Slider.Move(tmp, uildr.gl);
-            fn.target = news;
-            touch_elements.set(touch_elements.indexOf(tmp), news);
-            paint_elements.set(paint_elements.indexOf(tmp), news);
-            m_edited = true;
-        }
-        //k
-        else if (fn.target instanceof Disc)
-        {
-            final Disc tmp = (Disc) fn.target;
-            final Disc newd = Disc.Move(tmp, uildr.gl);
-            fn.target = newd;
-            touch_elements.set(touch_elements.indexOf(tmp), newd);
-            paint_elements.set(paint_elements.indexOf(tmp), newd);
-            m_edited = true;
-        }*/
 
         //PrintInfo(fn);
     }

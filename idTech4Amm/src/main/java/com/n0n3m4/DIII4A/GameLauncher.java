@@ -302,6 +302,18 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_using_mouse, isChecked)
 						.commit();
 			}
+			else if (id == R.id.tab2_hide_joystick_center)
+			{
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_hide_joystick_center, isChecked)
+						.commit();
+			}
+			else if (id == R.id.tab2_disable_mouse_button_motion)
+			{
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_disable_mouse_button_motion, isChecked)
+						.commit();
+			}
 			else if (id == R.id.find_dll)
 			{
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
@@ -1124,9 +1136,7 @@ public class GameLauncher extends Activity
 
         Q3EUtils.q3ei = q3ei;
 
-		Q3EUtils.q3ei.joystick_release_range = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
 		Q3EUtils.q3ei.joystick_unfixed = mPrefs.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
-		Q3EUtils.q3ei.joystick_inner_dead_zone = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
     }
 
 	@Override
@@ -1841,6 +1851,8 @@ public class GameLauncher extends Activity
 		V.smoothjoy.setChecked(mPrefs.getBoolean(Q3EPreference.pref_analog, true));
 		V.launcher_tab2_joystick_unfixed.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false));
 		V.launcher_tab2_joystick_visible.setSelection(Utility.ArrayIndexOf(getResources().getIntArray(R.array.joystick_visible_mode_values), mPrefs.getInt(Q3EPreference.pref_harm_joystick_visible, Q3EGlobals.ONSCRREN_JOYSTICK_VISIBLE_ALWAYS)));
+		V.tab2_hide_joystick_center.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_hide_joystick_center, false));
+		V.tab2_disable_mouse_button_motion.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_disable_mouse_button_motion, false));
 		V.detectmouse.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.detectmouse.setChecked(mPrefs.getBoolean(Q3EPreference.pref_detectmouse, true));
 
@@ -2088,6 +2100,8 @@ public class GameLauncher extends Activity
 		V.image_useetc2.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.smoothjoy.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.launcher_tab2_joystick_unfixed.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.tab2_hide_joystick_center.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.tab2_disable_mouse_button_motion.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.launcher_tab2_joystick_visible.setOnItemSelectedListener(m_itemSelectedListener);
 		V.edt_path.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_datapath, default_gamedata, new Runnable() {
 			@Override
@@ -2817,11 +2831,11 @@ public class GameLauncher extends Activity
 			OpenGameList();
 			return true;
 		}
-/*		else if (itemId == R.id.main_menu_shortcut_command)
+		else if (itemId == R.id.main_menu_download_testing)
 		{
-			OpenShortcutWithCommandCreator();
+			OpenDownloadTestingDialog();
 			return true;
-		}*/
+		}
 		else if (itemId == android.R.id.home)
 		{
 			ChangeGame();
@@ -3093,6 +3107,8 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_skip_intro, V.skip_intro.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_multithreading, V.multithreading.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_hide_joystick_center, V.tab2_hide_joystick_center.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_disable_mouse_button_motion, V.tab2_disable_mouse_button_motion.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_joystick_visible, getResources().getIntArray(R.array.joystick_visible_mode_values)[V.launcher_tab2_joystick_visible.getSelectedItemPosition()]);
         mEdtr.putBoolean(Q3EPreference.pref_harm_find_dll, V.find_dll.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, V.cb_s_useOpenAL.isChecked());
@@ -4062,6 +4078,11 @@ public class GameLauncher extends Activity
         m_checkForUpdateFunc.Start(new Bundle());
     }
 
+	private void OpenDownloadTestingDialog()
+	{
+		ContextUtility.OpenUrlExternally(this, Constants.CONST_TESTING_URL);
+	}
+
     private RadioGroup GetGameModRadioGroup()
     {
 		return V.GameGroups[Q3EUtils.q3ei.game_id];
@@ -4752,6 +4773,8 @@ public class GameLauncher extends Activity
 		public EditText urt_bot_autoAdd;
 		public EditText urt_bot_level;
 		public EditText edt_harm_r_PBRNormalCorrection;
+		public CheckBox tab2_hide_joystick_center;
+		public CheckBox tab2_disable_mouse_button_motion;
 
 		private RadioGroup CreateGameRadioGroup(int[] id)
 		{
@@ -4949,6 +4972,8 @@ public class GameLauncher extends Activity
 			urt_bot_autoAdd = findViewById(R.id.urt_bot_autoAdd);
 			urt_bot_level = findViewById(R.id.urt_bot_level);
 			edt_harm_r_PBRNormalCorrection = findViewById(R.id.edt_harm_r_PBRNormalCorrection);
+			tab2_hide_joystick_center = findViewById(R.id.tab2_hide_joystick_center);
+			tab2_disable_mouse_button_motion = findViewById(R.id.tab2_disable_mouse_button_motion);
         }
     }
 }
