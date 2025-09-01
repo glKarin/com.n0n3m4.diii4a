@@ -262,9 +262,10 @@ void idImGuiSettings::RenderToolTips(const idCVar *cvar)
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_ForTooltip))
     {
         const char *desc = cvar->GetDescription();
-        if(!desc && !desc[0])
-            desc = cvar->GetName();
-        ImGui::SetTooltip("%s", desc);
+        if(desc && desc[0])
+            ImGui::SetTooltip("<%s = %s>\n%s", cvar->GetName(), cvar->GetString(), desc);
+        else
+            ImGui::SetTooltip("<%s = %s>", cvar->GetName(), cvar->GetString());
     }
 }
 
@@ -309,7 +310,7 @@ void idImGuiSettings::RenderButtonCVar(const cvarSettingItem_t &item)
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_ForTooltip))
     {
 		const char *desc = item.command.c_str();
-        ImGui::SetTooltip("%s", desc);
+        ImGui::SetTooltip("<%s>\n%s", desc, item.name.c_str());
     }
 }
 
@@ -524,6 +525,12 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCvar("harm_r_maxAllocStackMemory", "Control memory allocation on heap or stack", IG_CVAR_GROUP_FRAMEWORK);
     ImGui_RegisterCvar("com_disableAutoSaves", "Don't create Autosaves on new map");
     ImGui_RegisterDivide(IG_CVAR_GROUP_FRAMEWORK);
+    // filesystem
+    ImGui_RegisterLabel("File System", IG_CVAR_GROUP_FRAMEWORK);
+    ImGui_RegisterCvar("harm_fs_basepath_extras", "Extras search paths last(split by ',')");
+    ImGui_RegisterCvar("harm_fs_addon_extras", "Extras search addon files directory path last(split by ',')");
+    ImGui_RegisterCvar("harm_fs_game_base_extras", "Extras search game mod last(split by ',')");
+    ImGui_RegisterDivide(IG_CVAR_GROUP_FRAMEWORK);
 
     // renderer
     ImGui_RegisterLabel("Lighting", IG_CVAR_GROUP_RENDERER);
@@ -605,7 +612,7 @@ void ImGui_RegisterOptions(void)
 
     ImGui_RegisterLabel("System", IG_CVAR_GROUP_RENDERER);
 #if !defined(__ANDROID__)
-    ImGui_RegisterCvar("harm_r_openglVersion", "Clear vertex buffer on every frame", IG_CVAR_COMPONENT_COMBO, "GLES2=GLES 2.0;GLES3.0=GLES 3.0+;OpenGL_core=OpenGL desktop core;OpenGL_compatibility=OpenGL desktop compatibility");
+    ImGui_RegisterCvar("harm_r_openglVersion", "OpenGL version", IG_CVAR_COMPONENT_COMBO | IG_CVAR_GROUP_RENDERER, "GLES2=GLES 2.0;GLES3.0=GLES 3.0+;OpenGL_core=OpenGL desktop core;OpenGL_compatibility=OpenGL desktop compatibility");
 #ifdef _MULTITHREAD
     ImGui_RegisterCvar("r_multithread", "Enable multi-threading rendering");
 #endif

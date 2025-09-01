@@ -449,9 +449,9 @@ class idFileSystemLocal : public idFileSystem
 		static idCVar			fs_caseSensitiveOS;
 		static idCVar			fs_searchAddons;
 
-        static idCVar			fs_extraPath;
-        static idCVar			fs_extraResource;
-        static idCVar			fs_extraGame;
+        static idCVar			fs_basepath_extras;
+        static idCVar			fs_addon_extras;
+        static idCVar			fs_game_base_extras;
 
 		backgroundDownload_t 	*backgroundDownloads;
 		backgroundDownload_t	defaultBackgroundDownload;
@@ -528,9 +528,9 @@ idCVar	idFileSystemLocal::fs_caseSensitiveOS("fs_caseSensitiveOS", "1", CVAR_SYS
 #endif
 idCVar	idFileSystemLocal::fs_searchAddons("fs_searchAddons", "0", CVAR_SYSTEM | CVAR_BOOL, "search all addon pk4s ( disables addon functionality )");
 
-idCVar	idFileSystemLocal::fs_extraPath("harm_fs_extraPath", "", CVAR_SYSTEM | CVAR_INIT, "extras search paths last, split by ','");
-idCVar	idFileSystemLocal::fs_extraResource("harm_fs_extraResource", "", CVAR_SYSTEM | CVAR_INIT, "extras search resource files directory path last, split by ','");
-idCVar	idFileSystemLocal::fs_extraGame("harm_fs_extraGame", "", CVAR_SYSTEM | CVAR_INIT, "extras search game last, split by ','");
+idCVar	idFileSystemLocal::fs_basepath_extras("harm_fs_basepath_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search paths last, split by ','");
+idCVar	idFileSystemLocal::fs_addon_extras("harm_fs_addon_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search addon files directory path last, split by ','");
+idCVar	idFileSystemLocal::fs_game_base_extras("harm_fs_game_base_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search game mod last, split by ','");
 
 idFileSystemLocal	fileSystemLocal;
 idFileSystem 		*fileSystem = &fileSystemLocal;
@@ -2452,7 +2452,7 @@ idFileSystemLocal::SetupGameDirectories
 */
 void idFileSystemLocal::SetupGameDirectories(const char *gameName)
 {
-    AddExtraGameDirectory(fs_extraPath.GetString(), gameName);
+    AddExtraGameDirectory(fs_basepath_extras.GetString(), gameName);
 
 #ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is lowest
 	extern const char * Sys_ApplicationHomePath(void);
@@ -2545,7 +2545,7 @@ void idFileSystemLocal::Startup(void)
 		common->Printf("restarting filesystem with %d addon pak file(s) to include\n", addonChecksums.Num());
 	}
 
-    AddExtraGameResource(fs_extraResource.GetString());
+    AddExtraGameResource(fs_addon_extras.GetString());
 
 	SetupGameDirectories(BASE_GAMEDIR);
 
@@ -2555,7 +2555,7 @@ void idFileSystemLocal::Startup(void)
 		SetupGameDirectories(fs_game_base.GetString());
 	}
 
-    AddExtraGame(fs_extraGame.GetString());
+    AddExtraGame(fs_game_base_extras.GetString());
 
 	// fs_game override
 	if (fs_game.GetString()[0] &&
@@ -3259,9 +3259,9 @@ void idFileSystemLocal::Init(void)
 	common->StartupVariable("fs_restrict", false);
 	common->StartupVariable("fs_searchAddons", false);
 
-    common->StartupVariable("harm_fs_extraPath", false);
-    common->StartupVariable("harm_fs_extraResource", false);
-    common->StartupVariable("harm_fs_extraGame", false);
+    common->StartupVariable("harm_fs_basepath_extras", false);
+    common->StartupVariable("harm_fs_addon_extras", false);
+    common->StartupVariable("harm_fs_game_base_extras", false);
 
 #if !ID_ALLOW_D3XP
 
