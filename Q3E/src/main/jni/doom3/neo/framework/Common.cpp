@@ -2718,6 +2718,15 @@ void idCommonLocal::Frame(void)
 #endif
 
 		com_frameTime = com_ticNumber * USERCMD_MSEC;
+#ifdef _RAVEN //karin: Q4D 2025 clear debug
+		if(session->rw)
+		{
+			if (!idAsyncNetwork::IsActive()) // if (com_editors & EDITOR_REVERB) // 0x2000
+				session->rw->DebugClear(0);
+			else if (!idAsyncNetwork::client.IsActive())
+				session->rw->DebugClear(0/* com_frameTime */);
+		}
+#endif
 
 		idAsyncNetwork::RunFrame();
 

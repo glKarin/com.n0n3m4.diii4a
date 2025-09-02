@@ -3432,7 +3432,7 @@ void idSessionLocal::RunGameTic()
 	// run the game logic every player move
 	int	start = Sys_Milliseconds();
 #ifdef _RAVEN
-	rw->DebugClear(0);
+	// rw->DebugClear(0); // clear debug draw(version 1)
 	gameReturn_t	ret = game->RunFrame(&cmd, 0, true, 0); // jmarshall: serverGameFrame isn't used
 #else
 	gameReturn_t	ret = game->RunFrame(&cmd);
