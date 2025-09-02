@@ -721,17 +721,24 @@ int idMaterial::ParseTerm(idLexer &src)
 	if (!token.Icmp("glslPrograms")) {
 		pd->registersAreConstant = false;
 		return EmitOp(0, 0, OP_TYPE_GLSL_ENABLED);
-		// return GetExpressionConstant(0.0f);
 	}
 	if (!token.Icmp("POTCorrectionX")) {
+#if 1 //k: Q4D 2025 static
+        float potx = (float)glConfig.vidWidth / (float)MakePowerOfTwo(glConfig.vidWidth);
+        return GetExpressionConstant(potx);
+#else // dynamic
 		pd->registersAreConstant = false;
 		return EmitOp(0, 0, OP_TYPE_POT_X);
-		// return GetExpressionConstant(1.0f);
+#endif
 	}
 	if (!token.Icmp("POTCorrectionY")) {
+#if 1 //k: Q4D 2025 static
+        float poty = (float)glConfig.vidHeight / (float)MakePowerOfTwo(glConfig.vidHeight);
+        return GetExpressionConstant(poty);
+#else // dynamic
 		pd->registersAreConstant = false;
 		return EmitOp(0, 0, OP_TYPE_POT_Y);
-		// return GetExpressionConstant(1.0f);
+#endif
 	}
 	if (!token.Icmp("DecalLife")) {
 		return GetExpressionConstant(0.0f);
@@ -742,10 +749,10 @@ int idMaterial::ParseTerm(idLexer &src)
 	if (!token.Icmp("VertexRandomizer")) {
 		return GetExpressionConstant(0.0f);
 	}
-    if (!token.Icmp("viewOrigin")) {
+/*    if (!token.Icmp("viewOrigin")) {
         pd->registersAreConstant = false;
         return GetExpressionConstant(0.0f);
-    }
+    }*/
 #endif
 
 #ifdef _HUMANHEAD
@@ -1405,8 +1412,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		}
 
 #ifdef _RAVEN // quake4 material property
-        if (!token.Icmp("nomips"))
-        {
+        if (!token.Icmp("nomips")) {
             continue;
         }
 #endif
@@ -3371,14 +3377,24 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 				}
 				break;
 			case OP_TYPE_POT_X: { //karin: screen width and power of two width
-					int w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
+#if 1
+					int w = glConfig.vidWidth;
+					int potw = globalImages->currentRenderImage->uploadWidth; // MakePowerOfTwo(glConfig.vidWidth)
+#else
+					int w = tr.viewDef->viewport.x2 - tr.viewDef->viewport.x1 + 1;
 					int potw = globalImages->currentRenderImage->uploadWidth;
+#endif
 					registers[op->c] = (float) w / (float) potw;
 				}
 				break;
 			case OP_TYPE_POT_Y: { //karin: screen height and power of two height
-					int h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
+#if 1
+					int h = glConfig.vidHeight;
+					int poth = globalImages->currentRenderImage->uploadHeight; // MakePowerOfTwo(glConfig.vidHeight)
+#else
+					int h = tr.viewDef->viewport.y2 - tr.viewDef->viewport.y1 + 1;
 					int poth = globalImages->currentRenderImage->uploadHeight;
+#endif
 					registers[op->c] = (float) h / (float) poth;
 				}
 				break;

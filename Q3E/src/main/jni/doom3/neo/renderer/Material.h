@@ -100,6 +100,13 @@ typedef enum {
 	DI_CUBE_RENDER,
 	DI_MIRROR_RENDER,
 	DI_XRAY_RENDER,
+#ifdef _RAVEN
+    // RAVEN BEGIN
+// AReis: Used for water reflection/refraction.
+    DI_REFLECTION_RENDER,
+    DI_REFRACTION_RENDER,
+// RAVEN END
+#endif
 #ifdef _HUMANHEAD
 	DI_PORTAL_RENDER, // HUMANHEAD
 	DI_SKYBOX_RENDER, // HUMANHEAD tmj
@@ -163,6 +170,12 @@ typedef enum {
 	EXP_REG_GLOBAL6,
 	EXP_REG_GLOBAL7,
 
+#ifdef _RAVEN
+    // RAVEN BEGIN
+// rjohnson: added vertex randomizing
+	EXP_REG_VERTEX_RANDOMIZER,
+// RAVEN END
+#endif
 #ifdef _HUMANHEAD
 	EXP_REG_DISTANCE, // HUMANHEAD: CJR
 #endif
