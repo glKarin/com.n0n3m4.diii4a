@@ -289,6 +289,9 @@ idUserInterfaceLocal::idUserInterfaceLocal()
 	//so the reg eval in gui parsing doesn't get bogus values
 	time = 0;
 	refs = 1;
+#ifdef _RAVEN
+	lightColor = vec4_one;
+#endif
 #ifdef _HUMANHEAD
 	translateFont = -1;
 #endif
@@ -391,6 +394,9 @@ bool idUserInterfaceLocal::InitFromFile(const char *qpath, bool rebuild, bool ca
 		uiManagerLocal.guis.Append(this);
 	}
 
+#ifdef _RAVEN
+	lightColor = vec4_one;
+#endif
 #ifdef _HUMANHEAD
 	translateFont = -1;
 #endif

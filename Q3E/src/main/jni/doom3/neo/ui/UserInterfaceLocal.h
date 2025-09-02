@@ -131,7 +131,7 @@ class idUserInterfaceLocal : public idUserInterface
 #ifdef _RAVEN //k: for Quake4 gui script
         virtual void				SetInteractive(bool interactive);
         virtual void				SetStateVec4( const char *varName, const idVec4& vector );
-        virtual idVec4				GetLightColor(void) { return vec4_one; }
+        virtual idVec4				GetLightColor(void) { return lightColor; }
         virtual void				ClearState( void ) { }
         virtual bool				GetMaxTextIndex( const char *windowName, const char *text, wrapInfo_t& wrapInfo ) const {
             (void)windowName;
@@ -140,6 +140,7 @@ class idUserInterfaceLocal : public idUserInterface
             wrapInfo.maxIndex = -1;
             return false;
         }
+        void						SetLightColor(const idVec4 &c) { lightColor = c; }
 #endif
 #ifdef _HUMANHEAD
         virtual void                CallStartup(void);
@@ -151,6 +152,7 @@ class idUserInterfaceLocal : public idUserInterface
 	private:
 #ifdef _RAVEN //k: check UI is interactive or desktop is interactive
 	    bool                        IsDesktopInteractive() const;
+		idVec4						lightColor;
 #endif
 		bool						active;
 		bool						loading;
