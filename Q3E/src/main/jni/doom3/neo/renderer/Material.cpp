@@ -956,9 +956,11 @@ int idMaterial::NameToSrcBlendMode(const idStr &name)
 	} else if (!name.Icmp("GL_SRC_ALPHA_SATURATE")) {
 		return GLS_SRCBLEND_ALPHA_SATURATE;
 	}
-#ifdef _RAVEN //k: quake4 blend
+#ifdef _RAVEN //k: quake4 src blend
 	else if (!name.Icmp("GL_SRC_COLOR")) {
 		return GLS_SRCBLEND_SRC_COLOR;
+	} else if (!name.Icmp("GL_ONE_MINUS_SRC_COLOR")) {
+		return GLS_SRCBLEND_ONE_MINUS_SRC_COLOR;
 	}
 #endif
 #ifdef _HUMANHEAD
@@ -967,7 +969,7 @@ int idMaterial::NameToSrcBlendMode(const idStr &name)
 	}
 #endif
 
-	common->Warning("unknown blend mode '%s' in material '%s' at '%s'", name.c_str(), GetName(), GetFileName());
+	common->Warning("unknown src blend mode '%s' in material '%s' at '%s'", name.c_str(), GetName(), GetFileName());
 	SetMaterialFlag(MF_DEFAULTED);
 
 	return GLS_SRCBLEND_ONE;
@@ -997,8 +999,15 @@ int idMaterial::NameToDstBlendMode(const idStr &name)
 	} else if (!name.Icmp("GL_ONE_MINUS_SRC_COLOR")) {
 		return GLS_DSTBLEND_ONE_MINUS_SRC_COLOR;
 	}
+#ifdef _RAVEN //k: quake4 dst blend
+    else if (!name.Icmp("GL_DST_COLOR")) {
+		return GLS_DSTBLEND_DST_COLOR;
+	} else if (!name.Icmp("GL_ONE_MINUS_DST_COLOR")) {
+		return GLS_DSTBLEND_ONE_MINUS_DST_COLOR;
+	}
+#endif
 
-	common->Warning("unknown blend mode '%s' in material '%s' at '%s'", name.c_str(), GetName(), GetFileName());
+	common->Warning("unknown dst blend mode '%s' in material '%s' at '%s'", name.c_str(), GetName(), GetFileName());
 	SetMaterialFlag(MF_DEFAULTED);
 
 	return GLS_DSTBLEND_ONE;

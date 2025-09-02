@@ -1247,9 +1247,9 @@ const int GLS_SRCBLEND_DST_ALPHA				= 0x00000007;
 const int GLS_SRCBLEND_ONE_MINUS_DST_ALPHA		= 0x00000008;
 const int GLS_SRCBLEND_ALPHA_SATURATE			= 0x00000009;
 const int GLS_SRCBLEND_BITS						= 0x0000000f;
-
-#ifdef _RAVEN //k: quake4 blend
-const int GLS_SRCBLEND_SRC_COLOR				= 0x00000002;
+#ifdef _RAVEN //k: quake4 src blend
+const int GLS_SRCBLEND_SRC_COLOR				= 0x0000000a;
+const int GLS_SRCBLEND_ONE_MINUS_SRC_COLOR		= 0x0000000b;
 #endif
 
 const int GLS_DSTBLEND_ZERO						= 0x0;
@@ -1261,6 +1261,10 @@ const int GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA		= 0x00000060;
 const int GLS_DSTBLEND_DST_ALPHA				= 0x00000070;
 const int GLS_DSTBLEND_ONE_MINUS_DST_ALPHA		= 0x00000080;
 const int GLS_DSTBLEND_BITS						= 0x000000f0;
+#ifdef _RAVEN //k: quake4 dst blend
+const int GLS_DSTBLEND_DST_COLOR				= 0x00000090;
+const int GLS_DSTBLEND_ONE_MINUS_DST_COLOR		= 0x000000a0;
+#endif
 
 
 // these masks are the inverse, meaning when set the qglColorMask value will be 0,
