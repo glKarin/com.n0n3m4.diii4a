@@ -190,9 +190,10 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 
 		for (j = 0 ; j < tri->numVerts ; j++) {
 #ifdef _RAVEN // quake4 proc file
-#if 1
-            float	vec[12] = { 255.0f };
+            float	vec[12];
             int numFloat = src->Parse1DMatrixOpenEnded( 12, vec );
+			if ( numFloat != 8 && numFloat != 12 )
+				src->Error("R_ParseModel: bad vertex read");
 
 			tri->verts[j].xyz[0] = vec[0];
 			tri->verts[j].xyz[1] = vec[1];
@@ -202,42 +203,21 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 			tri->verts[j].normal[0] = vec[5];
 			tri->verts[j].normal[1] = vec[6];
 			tri->verts[j].normal[2] = vec[7];
-			if(numFloat == 12) //karin: color???
+			if(numFloat == 12) //karin: color
 			{
-				tri->verts[j].color[0] = (byte)vec[8];
-				tri->verts[j].color[1] = (byte)vec[9];
-				tri->verts[j].color[2] = (byte)vec[10];
-				tri->verts[j].color[3] = (byte)vec[11];
-			}
-#else
-// jmarshall - quake 4 proc format
-
-            src->ExpectTokenString("(");
-
-            tri->verts[j].xyz[0] = src->ParseFloat();
-            tri->verts[j].xyz[1] = src->ParseFloat();
-            tri->verts[j].xyz[2] = src->ParseFloat();
-            tri->verts[j].st[0] = src->ParseFloat();
-            tri->verts[j].st[1] = src->ParseFloat();
-            tri->verts[j].normal[0] = src->ParseFloat();
-            tri->verts[j].normal[1] = src->ParseFloat();
-            tri->verts[j].normal[2] = src->ParseFloat();
-
-            if (src->PeekTokenString(")"))
-            {
-                src->ExpectTokenString(")");
+				tri->verts[j].color[0] = (byte)(vec[8]);
+				tri->verts[j].color[1] = (byte)(vec[9]);
+				tri->verts[j].color[2] = (byte)(vec[10]);
+				tri->verts[j].color[3] = (byte)(vec[11]);
             }
             else
             {
-                while (!src->PeekTokenString(")"))
-                {
-                    src->ParseFloat(); // jmarshall: not sure what the extra values here are for.
-                }
-
-                src->ExpectTokenString(")");
+				// *(int *)tri->verts[j].color = -16777216;
+				tri->verts[j].color[0] = 0;
+				tri->verts[j].color[1] = 0;
+				tri->verts[j].color[2] = 0;
+				tri->verts[j].color[3] = 255;
             }
-// jmarshall end
-#endif
 #else
 			float	vec[8];
 
