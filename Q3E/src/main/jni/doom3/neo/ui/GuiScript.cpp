@@ -307,12 +307,13 @@ void Script_NamedEvent(idWindow* window, idList<idGSWinVar>* src)
     int p = idStr::FindText(parm->c_str(), "::");
     if (p <= 0)
     {
-        window->RunNamedEvent(parm->c_str());
+        // window->RunNamedEvent(parm->c_str()); (version 1)
+		window->GetGui()->HandleNamedEvent(parm->c_str()); //k: q4d 2025
     }
     else
     {
-        idStr windowName = parmStr.Mid(0, p);
-        idStr varName = parmStr.Mid(p + 2, parmStr.Length() - (p + 2));
+        idStr windowName = parmStr.Left(p);
+        idStr varName = parmStr.Right(parmStr.Length() - (p + 2));
 
         //k drawWin_t* childWindow = window->FindChildByName(windowName);
         drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(windowName);
