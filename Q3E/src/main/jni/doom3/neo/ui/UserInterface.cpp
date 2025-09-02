@@ -290,6 +290,7 @@ idUserInterfaceLocal::idUserInterfaceLocal()
 	time = 0;
 	refs = 1;
 #ifdef _RAVEN
+	initialized = false;
 	lightColor = vec4_one;
 #endif
 #ifdef _HUMANHEAD
@@ -381,7 +382,7 @@ bool idUserInterfaceLocal::InitFromFile(const char *qpath, bool rebuild, bool ca
 		common->Warning("Couldn't load gui: '%s'", qpath);
 	}
 
-#ifdef _RAVENxxx //k: GUI initilized event, not here
+#ifdef _RAVENxxx //k: GUI initilized event, not here(version 1)
 	desktop->RunScript(idWindow::ON_INIT);
 #endif
 
@@ -395,6 +396,7 @@ bool idUserInterfaceLocal::InitFromFile(const char *qpath, bool rebuild, bool ca
 	}
 
 #ifdef _RAVEN
+	initialized = false;
 	lightColor = vec4_one;
 #endif
 #ifdef _HUMANHEAD
@@ -481,6 +483,13 @@ void idUserInterfaceLocal::Redraw(int _time)
 
 	if (!loading && desktop) {
 		time = _time;
+#ifdef _RAVEN //k: q4d 2025 call ON_INIT gui event(version 3)
+		if(!initialized)
+		{
+			initialized = true;
+			desktop->Init();
+		}
+#endif
 #ifdef _HUMANHEAD
 		if(translateFont >= 0)
 			desktop->Translate(translateFont);
@@ -559,7 +568,7 @@ float idUserInterfaceLocal::GetStateFloat(const char *varName, const char *defau
 
 void idUserInterfaceLocal::StateChanged(int _time, bool redraw)
 {
-#ifdef _RAVEN //k: run onInit gui script
+#ifdef _RAVENxxx //k: run onInit gui script(version 2)
 	const bool IsInit = time == 0;
 #endif
 
@@ -567,7 +576,7 @@ void idUserInterfaceLocal::StateChanged(int _time, bool redraw)
 
 	if (desktop) {
 		desktop->StateChanged(redraw);
-#ifdef _RAVEN //k: GUI initilized event here now
+#ifdef _RAVENxxx //k: GUI initilized event here now(version 2)
 		if(IsInit)
 		{
 			//LOGI("GUI Initing -> %s::%s", GetStateString("name"), (const char *)desktop->GetName())
@@ -697,6 +706,9 @@ bool idUserInterfaceLocal::WriteToSaveGame(idFile *savefile) const
 
 	savefile->Write(&cursorX, sizeof(cursorX));
 	savefile->Write(&cursorY, sizeof(cursorY));
+#ifdef _RAVEN
+	savefile->Write(&initialized, sizeof(initialized));
+#endif
 
 	desktop->WriteToSaveGame(savefile);
 
@@ -743,6 +755,9 @@ bool idUserInterfaceLocal::ReadFromSaveGame(idFile *savefile)
 
 	savefile->Read(&cursorX, sizeof(cursorX));
 	savefile->Read(&cursorY, sizeof(cursorY));
+#ifdef _RAVEN
+	savefile->Read(&initialized, sizeof(initialized));
+#endif
 
 	desktop->ReadFromSaveGame(savefile);
 

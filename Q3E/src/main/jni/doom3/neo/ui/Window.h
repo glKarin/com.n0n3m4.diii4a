@@ -286,6 +286,7 @@ class idWindow
 
 #ifdef _RAVEN // quake4 gui function
     	void ClearTransitions(void);
+		void Init(void);
 #endif
 
 		virtual bool Parse(idParser *src, bool rebuild = true);

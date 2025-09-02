@@ -2111,7 +2111,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 		// run a few frames to allow everything to settle
 		for (i = 0; i < 10; i++) {
 #ifdef _RAVEN
-			game->RunFrame(mapSpawnData.mapSpawnUsercmd, 0, false, 0); // serverGameFrame isn't used
+			game->RunFrame(mapSpawnData.mapSpawnUsercmd, 0, false, 1); // serverGameFrame isn't used
 #else
 			game->RunFrame(mapSpawnData.mapSpawnUsercmd);
 #endif

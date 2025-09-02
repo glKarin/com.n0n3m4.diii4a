@@ -152,6 +152,7 @@ class idUserInterfaceLocal : public idUserInterface
 	private:
 #ifdef _RAVEN //k: check UI is interactive or desktop is interactive
 	    bool                        IsDesktopInteractive() const;
+		bool						initialized;
 		idVec4						lightColor;
 #endif
 		bool						active;
