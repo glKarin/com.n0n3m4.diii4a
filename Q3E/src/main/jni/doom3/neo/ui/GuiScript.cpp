@@ -308,7 +308,7 @@ void Script_NamedEvent(idWindow* window, idList<idGSWinVar>* src)
     if (p <= 0)
     {
         // window->RunNamedEvent(parm->c_str()); (version 1)
-		window->GetGui()->HandleNamedEvent(parm->c_str()); //k: q4d 2025
+		window->GetGui()->HandleNamedEvent(parm->c_str()); //k: Q4D 2025
     }
     else
     {
@@ -429,7 +429,6 @@ void Script_SetLightColor(idWindow* window, idList<idGSWinVar>* src)
 			drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(windowName);
 			if(childWindow)
 			{
-				idWinVar *winvar;
 				if(childWindow->win)
 					parm = childWindow->win->GetWinVarByName(varName, false);
 				else if(childWindow->simp)
