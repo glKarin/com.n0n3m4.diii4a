@@ -218,7 +218,8 @@ idUserInterface *idUserInterfaceManagerLocal::FindGui(const char *qpath, bool au
 
 		if (!idStr::Icmp(guis[i]->GetSourceFile(), qpath)) {
 #ifdef _RAVEN //k: for Quake4 level `tram1` middle bridge door gui and `process2` elevator 1 gui not work
-			if (!forceNOTUnique && (needUnique || guis[i]->IsDesktopInteractive())) 
+			//if (!forceNOTUnique && (needUnique || guis[i]->IsDesktopInteractive())) // version 1
+			if (!forceNOTUnique && (needUnique || guis[i]->IsInteractive() || guis[i]->IsUniqued())) //k: q4d 2025 version 2
 #else
 			if (!forceNOTUnique && (needUnique || guis[i]->IsInteractive())) 
 #endif
