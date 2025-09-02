@@ -1415,7 +1415,7 @@ idWindow::DrawBackground
 */
 void idWindow::DrawBackground(const idRectangle &drawRect)
 {
-#ifdef _RAVEN //k: don't draw background color for main menu black screen.
+#ifdef _RAVENxxx //k: don't draw background color for main menu black screen.
 	if(parent && parent->parent) //k: only non-root directly children. for draw brackets
 #endif
 	if (backColor.w()) {
@@ -4853,7 +4853,7 @@ idWindow::IsSimple
 */
 bool idWindow::IsSimple()
 {
-#ifdef _RAVEN
+#ifdef _RAVENxxx
 // jmarshall - quake 4 guis
     return false;
 // jmarshall end

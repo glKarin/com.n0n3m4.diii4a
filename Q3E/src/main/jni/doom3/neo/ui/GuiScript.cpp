@@ -316,7 +316,7 @@ void Script_NamedEvent(idWindow* window, idList<idGSWinVar>* src)
 
         //k drawWin_t* childWindow = window->FindChildByName(windowName);
         drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(windowName);
-        if (childWindow)
+        if (childWindow && childWindow->win/* support idSimpleWindow now */)
         {
             childWindow->win->RunNamedEvent(varName);
         }
@@ -339,7 +339,7 @@ void Script_StopTransitions(idWindow* window, idList<idGSWinVar>* src)
 
     //k drawWin_t* childWindow = window->FindChildByName(parmStr);
     drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(parmStr);
-    if (childWindow)
+    if (childWindow && childWindow->win/* support idSimpleWindow now */)
     {
         childWindow->win->ClearTransitions();
     }
@@ -376,7 +376,7 @@ void Script_ResetVideo(idWindow* window, idList<idGSWinVar>* src)
             childWindow->win->ResetCinematics();
             childWindow->win->EvalRegs(-1, true);
         }
-        else
+        else // if(childWindow->simp)
         {
             childWindow->simp->ResetCinematics();
         }
@@ -440,7 +440,7 @@ void Script_NamedEvent(idWindow* window, idList<idGSWinVar>* src)
 
         //k drawWin_t* childWindow = window->FindChildByName(windowName);
         drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(windowName);
-        if (childWindow)
+        if (childWindow && childWindow->win/* support idSimpleWindow now */)
         {
             childWindow->win->RunNamedEvent(varName);
         }
