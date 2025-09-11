@@ -451,6 +451,23 @@ void idMaterial::ParseDecalInfo(idLexer &src)
 	idToken token;
 
 	decalInfo.stayTime = src.ParseFloat() * 1000;
+#ifdef _RAVEN //karin: Q4 is decalinfo	10, 0.5
+    if ( src.ReadToken(&token) )
+    {
+        if ( idStr::Cmp(token, ",") )
+            src.UnreadToken(&token);
+        else
+        {
+            //TODO Quake4 decal
+            float maxAngle = src.ParseFloat();
+            decalInfo.fadeTime = maxAngle * 1000;
+            for (int i = 0 ; i < 4 ; i++) {
+                decalInfo.start[i] = 1.0f;
+                decalInfo.end[i] = 0.0f;
+            }
+        }
+    }
+#else
 	decalInfo.fadeTime = src.ParseFloat() * 1000;
 	float	start[4], end[4];
 	src.Parse1DMatrix(4, start);
@@ -460,6 +477,7 @@ void idMaterial::ParseDecalInfo(idLexer &src)
 		decalInfo.start[i] = start[i];
 		decalInfo.end[i] = end[i];
 	}
+#endif
 }
 
 /*

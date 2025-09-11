@@ -43,6 +43,12 @@ class idAngles;
 class idPolar3;
 class idMat3;
 
+#ifdef _RAVEN
+// RAVEN BEGIN
+class rvAngles;
+// RAVEN END
+#endif
+
 //===============================================================
 //
 //	idVec2 - 2D vector
@@ -437,142 +443,179 @@ class idVec3
 		void			Lerp(const idVec3 &v1, const idVec3 &v2, const float l);
 		void			SLerp(const idVec3 &v1, const idVec3 &v2, const float l);
 #ifdef _RAVEN
+// RAVEN BEGIN
 // bdube: added vec2 equal
-	idVec3 &		operator=( const idVec2 &a );
-// abahr: added axis so we can create matrix with non-x vector
-	idMat3			ToMat3( int axis ) const;		// vector should be normalized
-	bool			IsZero( void ) const;
-	float			Dist(const idVec3 &Pt) const
-	{
-		idVec3 delta(x,y,z);
-		delta = delta - Pt;
-		return delta.LengthFast();
-	}
-
-// RAVEN BEGIN
-
-    ////////////////////////////////////////////////////////////////////////////////////
-	// Distance OnlyXY
-    ////////////////////////////////////////////////////////////////////////////////////
-	float			DistXY(const idVec3& Pt) const
-	{
-		idVec3 delta(x,y,Pt.z);
-		delta = delta - Pt;
-		return delta.LengthFast();	
-	}
-// cdr - Extremely useful Vector opterations for Computational Geometry
-    ////////////////////////////////////////////////////////////////////////////////////
-	// Area Of The Parallel Pipid (2D)
-	//
-	// Given two more points, this function calculates the area of the parallel pipid
-	// formed.
-	//
-	// Note: This function CAN return a negative "area" if (this) is above or right of
-	// (A) and (B)...  We do not take the abs because the sign of the "area" is needed
-	// for the left right test
-	//
-	//
-	//               ___---( ... )
-	//        (A)---/        /
-	//        /             /
-	//       /             /
-	//      /             /
-	//     /      ___---(B)
-	//  (this)---/
-	//
-    ////////////////////////////////////////////////////////////////////////////////////
-	float			AreaParallelPipid(const idVec3 &A, const idVec3 &B) const	{
-		return ((A.x*B.y - A.y*B.x) + (B.x*y - x*B.y) + (x*A.y - A.x*y));
-	}
-
-    ////////////////////////////////////////////////////////////////////////////////////
-	// The Left Right Test (2D)
-	//
-	// Given a line segment (Start->End) and a tolerance for *right on*, this function
-	// evaluates which side the point is of the line.
-	//
-	//
-	//
-	//          (this)        ___---/(End)
-	//                 ___---/
-	//          ___---/
-	//  (Start)/
-	//
-    ////////////////////////////////////////////////////////////////////////////////////
-	bool			IsLeftOf(const idVec3 &Start, const idVec3 &End) const {
-		return (AreaParallelPipid(Start, End)>0.0f);
-	}
-
-    ////////////////////////////////////////////////////////////////////////////////////
-	// Distance To Line Segment
-	//
-	// Given a line segment (Start->End) this function will return the distance of the
-	// given point (this) to the segment.  You must also pass in a Scale argument which
-	// will tell you:
-	//  Scale (-INF, 0.0f) => (this) projected before (Start)
-	//  Scale [0.0f, 1.0f] => (this) projected inside the segment (Start->End)
-	//  Scale (1.0f, +INF) => (this) projected beyond (End)
-	//
-	//
-	//
-	//          (this)        ___---/(End)
-	//                 ___---/
-	//          ___---/
-	//  (Start)/
-	//
-    ////////////////////////////////////////////////////////////////////////////////////
-	float			DistToLineSeg(const idVec3 &Start, const idVec3 &End, float& Scale) const {
-		static idVec3 U;
-		static idVec3 V;
-		static float ULen2;
-
-		V		= (*this) - Start;				// Compute V
-		U		= End	  - Start;				// Compute U
-		ULen2	= U.LengthSqr();				// Normalize U
-		Scale	= (V*U / ULen2);				// Find the scale of this vector on U
-		if (Scale<0.0f)	{return Dist(Start);}	// If Negative Scale, Projected In Front Of Start
-		if (Scale>1.0f)	{return Dist(End);}		// If Positive Scale, Projected In Beyond End
-		return Dist(Start + (U*Scale));			// Otherwise, project U to new location and return dist
-	}
-
-    ////////////////////////////////////////////////////////////////////////////////////
-	// Distance Squared OnlyXY
-    ////////////////////////////////////////////////////////////////////////////////////
-	float			Dist2XY(const idVec3& Pt) const
-	{
-		return ((Pt.x-x)*(Pt.x-x) + (Pt.y-y)*(Pt.y-y));
-	}
-// abahr:
-	bool			ProjectToLineSeg(const idVec3 &Start, const idVec3 &End) {
-		static idVec3 U;
-		static idVec3 V;
-		static float ULen2;
-		static float Scale;
-
-		V		= (*this) - Start;				// Compute V
-		U		= End	  - Start;				// Compute U
-		ULen2	= U.LengthSqr();				// Normalize U
-		Scale	= (V*U / ULen2);				// Find the scale of this vector on U
-
-		if (Scale<0.0f) {
-			(*this) = Start;					// If Negative Scale, Projected In Front Of Start
-			return false;						// Off The End
-		} else if (Scale>1.0f)	{
-			(*this) = End;						// If Positive Scale, Projected In Beyond End
-			return false;						// Off The End
-		} else {			
-			(*this) = Start + (U*Scale);		// Otherwise, project U to new location and return dist
-		}
-		return true;							// Perpendicular Intersection Is On The Segment
-	}
-
-	idVec3			ToNormal() const { idVec3 v( *this ); v.Normalize(); return v; }
-
-	idVec3			Random( const idVec3& range, idRandom& random ) const;
-
-// RAVEN BEGIN
-	float			ProjectOntoVector(const idVec3 &U);
+        idVec3 &		operator=( const idVec2 &a );
+        idVec3 &		operator*=( const idVec3 &a );
 // RAVEN END
+// RAVEN BEGIN
+// ddynerman: vector normalization operator
+        idVec3 &		operator~( void );
+// RAVEN END
+// RAVEN BEGIN
+// abahr: added axis so we can create matrix with non-x vector
+	    idMat3			ToMat3( int axis ) const;		// vector should be normalized
+// abahr:
+        idVec3			ToNormal() const { idVec3 v( *this ); v.Normalize(); return v; }
+        idVec3			Random( const idVec3& range, idRandom& random ) const;
+// RAVEN END
+// RAVEN BEGIN
+        float			ProjectOntoVector(const idVec3 &U);
+// RAVEN END
+// RAVEN BEGIN
+// cdr - Extremely useful Vector opterations for Computational Geometry
+        ////////////////////////////////////////////////////////////////////////////////////
+        // Area Of The Parallel Pipid (2D)
+        //
+        // Given two more points, this function calculates the area of the parallel pipid
+        // formed.
+        //
+        // Note: This function CAN return a negative "area" if (this) is above or right of
+        // (A) and (B)...  We do not take the abs because the sign of the "area" is needed
+        // for the left right test
+        //
+        //
+        //               ___---( ... )
+        //        (A)---/        /
+        //        /             /
+        //       /             /
+        //      /             /
+        //     /      ___---(B)
+        //  (this)---/
+        //
+        ////////////////////////////////////////////////////////////////////////////////////
+        float			AreaParallelPipid(const idVec3 &A, const idVec3 &B) const	{
+            return ((A.x*B.y - A.y*B.x) + (B.x*y - x*B.y) + (x*A.y - A.x*y));
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////
+        // The Left Right Test (2D)
+        //
+        // Given a line segment (Start->End) and a tolerance for *right on*, this function
+        // evaluates which side the point is of the line.
+        //
+        //
+        //
+        //          (this)        ___---/(End)
+        //                 ___---/
+        //          ___---/
+        //  (Start)/
+        //
+        ////////////////////////////////////////////////////////////////////////////////////
+        bool			IsLeftOf(const idVec3 &Start, const idVec3 &End) const {
+            return (AreaParallelPipid(Start, End)>0.0f);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////
+        // Distance To Line Segment
+        //
+        // Given a line segment (Start->End) this function will return the distance of the
+        // given point (this) to the segment.  You must also pass in a Scale argument which
+        // will tell you:
+        //  Scale (-INF, 0.0f) => (this) projected before (Start)
+        //  Scale [0.0f, 1.0f] => (this) projected inside the segment (Start->End)
+        //  Scale (1.0f, +INF) => (this) projected beyond (End)
+        //
+        //
+        //
+        //          (this)        ___---/(End)
+        //                 ___---/
+        //          ___---/
+        //  (Start)/
+        //
+        ////////////////////////////////////////////////////////////////////////////////////
+        float			DistToLineSeg(const idVec3 &Start, const idVec3 &End, float& Scale) const {
+            static idVec3 U;
+            static idVec3 V;
+            static float ULen2;
+
+            V		= (*this) - Start;				// Compute V
+            U		= End	  - Start;				// Compute U
+            ULen2	= U.LengthSqr();				// Normalize U
+            Scale	= (V*U / ULen2);				// Find the scale of this vector on U
+            if (Scale<0.0f)	{return Dist(Start);}	// If Negative Scale, Projected In Front Of Start
+            if (Scale>1.0f)	{return Dist(End);}		// If Positive Scale, Projected In Beyond End
+            return Dist(Start + (U*Scale));			// Otherwise, project U to new location and return dist
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////
+        // Project On To Line Segment
+        //
+        // Given a line segment (Start->End) this function will project the point onto the
+        // segment.
+        //
+        //          (this)        ___---(End)
+        //			    \     ---/
+        //          __ (Result)
+        //  (Start)
+        //
+        ////////////////////////////////////////////////////////////////////////////////////
+        bool			ProjectToLineSeg(const idVec3 &Start, const idVec3 &End) {
+            static idVec3 U;
+            static idVec3 V;
+            static float ULen2;
+            static float Scale;
+
+            V		= (*this) - Start;				// Compute V
+            U		= End	  - Start;				// Compute U
+            ULen2	= U.LengthSqr();				// Normalize U
+            Scale	= (V*U / ULen2);				// Find the scale of this vector on U
+
+            if (Scale<0.0f) {
+                (*this) = Start;					// If Negative Scale, Projected In Front Of Start
+                return false;						// Off The End
+            } else if (Scale>1.0f)	{
+                (*this) = End;						// If Positive Scale, Projected In Beyond End
+                return false;						// Off The End
+            } else {
+                (*this) = Start + (U*Scale);		// Otherwise, project U to new location and return dist
+            }
+            return true;							// Perpendicular Intersection Is On The Segment
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////
+        // Distance Squared (Much Faster than Dist)
+        ////////////////////////////////////////////////////////////////////////////////////
+        float			Dist2(const idVec3& Pt) const
+        {
+            return ((Pt.x-x)*(Pt.x-x) + (Pt.y-y)*(Pt.y-y) + (Pt.z-z)*(Pt.z-z));
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////
+        // Distance Squared OnlyXY
+        ////////////////////////////////////////////////////////////////////////////////////
+        float			Dist2XY(const idVec3& Pt) const
+        {
+            return ((Pt.x-x)*(Pt.x-x) + (Pt.y-y)*(Pt.y-y));
+        }
+        ////////////////////////////////////////////////////////////////////////////////////
+        // Distance OnlyXY
+        ////////////////////////////////////////////////////////////////////////////////////
+        float			DistXY(const idVec3& Pt) const
+        {
+            idVec3 delta(x,y,Pt.z);
+            delta = delta - Pt;
+            return delta.LengthFast();
+        }
+// RAVEN END
+
+// RAVEN BEGIN
+// jscott: Ensures second element greater than first
+        void			EnsureIncremental( void );
+// jscott: for BSE
+        int				GetLargestAxis( void ) const;
+// jscott: for rvAngles
+        rvAngles		ToRadians( void ) const;
+        idMat3			&ToMat3( idMat3 &mat ) const;		// vector should be normalized
+        float			Dist(const idVec3 &Pt) const
+        {
+            idVec3 delta(x,y,z);
+            delta = delta - Pt;
+            return delta.LengthFast();
+        }
+
+// RAVEN END
+	    bool			IsZero( void ) const;
 #endif
 
 #ifdef _HUMANHEAD
@@ -2425,25 +2468,30 @@ ID_INLINE idVec3 idPolar3::ToVec3(void) const
 
 #ifdef _RAVEN
 
+// RAVEN BEGIN
 // bdube: added vec3 from vec2 assignment
 ID_INLINE idVec3 &idVec3::operator=( const idVec2 &a ) {
-	x = a.x;
-	y = a.y;
-	return *this;
+    x = a.x;
+    y = a.y;
+    return *this;
 }
-
-// abahr
-ID_INLINE idVec3 idVec3::Random( const idVec3& range, idRandom& random ) const {
-	idVec3 v( *this );
-	for( int ix = 0; ix < GetDimension(); ++ix ) {
-		v[ ix ] += v[ ix ] * range[ix] * random.CRandomFloat();
-	}
-	return v;
+ID_INLINE idVec3 &idVec3::operator*=( const idVec3 &a )
+{
+    x *= a.x;
+    y *= a.y;
+    z *= a.z;
+    return *this;
 }
+// RAVEN END
 
-ID_INLINE bool idVec3::IsZero( void ) const {
-	return ( ( ( *( const unsigned int * ) &( x ) ) | ( *( const unsigned int * ) &( y ) ) | ( *( const unsigned int * ) &( z ) ) ) & ~( 1<<31 ) ) == 0;
-} //k 64long???
+// RAVEN BEGIN
+// ddynerman: vector normalization operator
+ID_INLINE idVec3& idVec3::operator~( void ) {
+    Normalize();
+    return *this;
+}
+// RAVEN END
+
 // RAVEN BEGIN
 ////////////////////////////////////////////////////////////////////////////////////
 // Project
@@ -2474,6 +2522,69 @@ ID_INLINE float	idVec3::ProjectOntoVector(const idVec3 &U)
 	return Scale;
 }
 // RAVEN END
+
+// RAVEN BEGIN
+// jscott: ensures the second element is greater than the first and that the third is greater than the 2nd
+ID_INLINE void idVec3::EnsureIncremental( void )
+{
+    float temp;
+
+    if ( y < x )
+    {
+        temp = x;
+        x = y;
+        y = temp;
+    }
+
+    if ( z < y )
+    {
+        temp = y;
+        y = z;
+        z = temp;
+    }
+
+    if ( y < x )
+    {
+        temp = x;
+        x = y;
+        y = temp;
+    }
+}
+
+ID_INLINE int idVec3::GetLargestAxis( void ) const
+{
+    float a = fabs( x );
+    float b = fabs( y );
+    float c = fabs( z );
+
+    if( a >= b && a >= c )
+    {
+        return( 0 );
+    }
+    if( b >= a && b >= c )
+    {
+        return( 1 );
+    }
+    if( c >= a && c >= b )
+    {
+        return( 2 );
+    }
+    return( 0 );
+}
+
+// abahr
+ID_INLINE idVec3 idVec3::Random( const idVec3& range, idRandom& random ) const {
+    idVec3 v( *this );
+    for( int ix = 0; ix < GetDimension(); ++ix ) {
+        v[ ix ] += v[ ix ] * range[ix] * random.CRandomFloat();
+    }
+    return v;
+}
+// RAVEN END
+
+ID_INLINE bool idVec3::IsZero( void ) const {
+    return ( ( ( *( const unsigned int * ) &( x ) ) | ( *( const unsigned int * ) &( y ) ) | ( *( const unsigned int * ) &( z ) ) ) & ~( 1<<31 ) ) == 0;
+} //k 64long???
 #endif
 
 /*

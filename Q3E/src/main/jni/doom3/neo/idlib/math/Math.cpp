@@ -137,6 +137,10 @@ float idMath::BitsToFloat(int i, int exponentBits, int mantissaBits)
 // RAVEN BEGIN
 // jscott: renamed to prevent name clash
 const float idMath::FLOAT_EPSILON	= 1.192092896e-07f;
+// RAVEN END
+// RAVEN BEGIN
+const float	idMath::THREEFOURTHS_PI	= 0.75f * PI;
+// RAVEN END
 
 // abahr:
 float idMath::Lerp( const idVec2& range, float frac ) {

@@ -432,6 +432,50 @@ const char *idVecX::ToString(int precision) const
 
 #ifdef _RAVEN
 
+// RAVEN BEGIN
+/*
+=============
+idVec3::ToRadians
+=============
+*/
+rvAngles idVec3::ToRadians( void ) const
+{
+	float forward;
+	float yaw;
+	float pitch;
+
+	if( !x && !y )
+	{
+		yaw = 0.0f;
+		if( z > 0.0f )
+		{
+			pitch = idMath::HALF_PI;
+		}
+		else
+		{
+			pitch = idMath::THREEFOURTHS_PI;
+		}
+	}
+	else
+	{
+		yaw = idMath::ATan( y, x );
+		if( yaw < 0.0f )
+		{
+			yaw += idMath::TWO_PI;
+		}
+
+		forward = ( float )idMath::Sqrt( x * x + y * y );
+		pitch = idMath::ATan( z, forward );
+		if( pitch < 0.0f )
+		{
+			pitch += idMath::TWO_PI;
+		}
+	}
+
+	return( rvAngles( -pitch, yaw, 0.0f ) );
+}
+// RAVEN END
+
 /*
 =============
 idVec3::ToMat3
@@ -464,6 +508,33 @@ idMat3 idVec3::ToMat3( int axis ) const {
 
 	return mat;
 }
+// RAVEN END
+
+// RAVEN BEGIN
+// jscott: slightly quicker version without the copy
+idMat3 &idVec3::ToMat3( idMat3 &mat ) const
+{
+	float	d;
+
+	mat[0] = *this;
+	d = x * x + y * y;
+	if ( !d )
+	{
+		mat[1][0] = 1.0f;
+		mat[1][1] = 0.0f;
+		mat[1][2] = 0.0f;
+	}
+	else
+	{
+		d = idMath::InvSqrt( d );
+		mat[1][0] = -y * d;
+		mat[1][1] = x * d;
+		mat[1][2] = 0.0f;
+	}
+	mat[2] = Cross( mat[1] );
+	return( mat );
+}
+// RAVEN END
 #endif
 
 #ifdef _HUMANHEAD

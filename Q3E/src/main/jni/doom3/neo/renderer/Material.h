@@ -69,12 +69,19 @@ typedef enum {
 	// set AFTER image format selection
 } textureRepeat_t;
 
+#ifdef _RAVENxxx //karin: TODO decal in Quake4
+typedef struct {
+    int		stayTime;		// msec for no change
+    float	maxAngle;		// maximum dot product to reject projection angles
+} decalInfo_t;
+#else
 typedef struct {
 	int		stayTime;		// msec for no change
 	int		fadeTime;		// msec to fade vertex colors over
 	float	start[4];		// vertex color at spawn (possibly out of 0.0 - 1.0 range, will clamp after calc)
 	float	end[4];			// vertex color at fade-out (possibly out of 0.0 - 1.0 range, will clamp after calc)
 } decalInfo_t;
+#endif
 
 typedef enum {
 	DFRM_NONE,
