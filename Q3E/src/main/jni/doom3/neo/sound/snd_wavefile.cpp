@@ -182,11 +182,20 @@ int idWaveFile::ReadMMIO(void)
 	memset(&mpwfx, 0, sizeof(waveformatextensible_t));
 
 	mhmmio->Read(&mckRiff, 12);
+#ifdef _DEBUG
+    bool isNotWav = !isOgg
+#ifdef _SND_MP3
+                    && !isMp3
+#endif
+            ;
+    assert(isNotWav);
+#else
 	assert(!isOgg 
 #ifdef _SND_MP3
 			&& !isMp3
 #endif
 			);
+#endif
 	mckRiff.ckid = LittleLong(mckRiff.ckid);
 	mckRiff.cksize = LittleLong(mckRiff.cksize);
 	mckRiff.fccType = LittleLong(mckRiff.fccType);
@@ -205,11 +214,15 @@ int idWaveFile::ReadMMIO(void)
 			return -1;
 		}
 
+#ifdef _DEBUG
+        assert(isNotWav);
+#else
 		assert(!isOgg 
 #ifdef _SND_MP3
 			&& !isMp3
 #endif
 				);
+#endif
 		ckIn.ckid = LittleLong(ckIn.ckid);
 		ckIn.cksize = LittleLong(ckIn.cksize);
 		ckIn.dwDataOffset += ckIn.cksize-8;
@@ -226,11 +239,15 @@ int idWaveFile::ReadMMIO(void)
 		return -1;
 	}
 
+#ifdef _DEBUG
+    assert(isNotWav);
+#else
 	assert(!isOgg 
 #ifdef _SND_MP3
 			&& !isMp3
 #endif
 			);
+#endif
 	pcmWaveFormat.wf.wFormatTag = LittleShort(pcmWaveFormat.wf.wFormatTag);
 	pcmWaveFormat.wf.nChannels = LittleShort(pcmWaveFormat.wf.nChannels);
 	pcmWaveFormat.wf.nSamplesPerSec = LittleLong(pcmWaveFormat.wf.nSamplesPerSec);
@@ -301,11 +318,20 @@ int idWaveFile::ResetFile(void)
 		} while (mck.ckid != mmioFOURCC('d', 'a', 't', 'a'));
 
 		mhmmio->Read(&mck.cksize, 4);
+#ifdef _DEBUG
+        bool isNotWav = !isOgg
+#ifdef _SND_MP3
+                        && !isMp3
+#endif
+        ;
+        assert(isNotWav);
+#else
 		assert(!isOgg 
 #ifdef _SND_MP3
 			&& !isMp3
 #endif
 				);
+#endif
 		mck.cksize = LittleLong(mck.cksize);
 		mseekBase = mhmmio->Tell();
 	}

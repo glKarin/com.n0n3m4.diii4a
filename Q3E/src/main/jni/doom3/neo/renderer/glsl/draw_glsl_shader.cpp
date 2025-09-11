@@ -945,7 +945,7 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 
 static const GLSLShaderProp * RB_GLSL_FindShaderProp(const idList<GLSLShaderProp> &Props, int type)
 {
-	for(int i = 0; i <= SHADER_CUSTOM; i++)
+	for(int i = 0; i < Props.Num()/*<= SHADER_CUSTOM*/; i++)
 	{
 		const GLSLShaderProp &prop = Props[i];
 		if(prop.type == type)
