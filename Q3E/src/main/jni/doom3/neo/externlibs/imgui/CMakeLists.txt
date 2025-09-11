@@ -23,5 +23,5 @@ else()
 	set(src_imgui ${src_imgui} backends/imgui_impl_sdl2.cpp)
 endif()
 
-ADD_LIBRARY(static_imgui STATIC ${src_imgui})
-target_include_directories(static_imgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../)
+ADD_LIBRARY(idtech4_imgui STATIC ${src_imgui})
+target_include_directories(idtech4_imgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../)

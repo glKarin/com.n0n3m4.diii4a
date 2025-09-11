@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-project(EtcLib)
-include_directories(./Etc)
-include_directories(./EtcCodec)
+project(idtech4_EtcLib)
+#include_directories(./Etc)
+#include_directories(./EtcCodec)
 
 set(CMAKE_CXX_STANDARD "11")
 file(GLOB EtcLib_SOURCES
@@ -22,4 +22,4 @@ file(GLOB EtcLib_SOURCES
         EtcCodec/*.h
         Etc/*.cpp
         EtcCodec/*.cpp)
-ADD_LIBRARY(static_EtcLib STATIC ${EtcLib_SOURCES})
+ADD_LIBRARY(idtech4_EtcLib STATIC ${EtcLib_SOURCES})
