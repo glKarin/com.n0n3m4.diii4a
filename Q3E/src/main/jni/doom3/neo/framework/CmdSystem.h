@@ -131,6 +131,9 @@ class idCmdSystem
         static void			ArgCompletion_ForceModelStrogg( const idCmdArgs &args, void(*callback)( const char *s ) );
         static void			ArgCompletion_ForceModelMarine( const idCmdArgs &args, void(*callback)( const char *s ) );
 #endif
+#if defined(_RAVEN) || 1
+		static void			ArgCompletion_GuiName( const idCmdArgs &args, void(*callback)(const char *s) );
+#endif
 };
 
 extern idCmdSystem 	*cmdSystem;
@@ -234,4 +237,12 @@ ID_INLINE void idCmdSystem::ArgCompletion_ForceModelMarine( const idCmdArgs &arg
 	cmdSystem->ArgCompletion_Models( args, callback, false, true );
 }
 #endif
+
+#if defined(_RAVEN) || 1
+ID_INLINE void idCmdSystem::ArgCompletion_GuiName( const idCmdArgs &args, void(*callback)( const char *s ) )
+{
+	cmdSystem->ArgCompletion_FolderExtension( args, callback, "guis/", false, ".gui", false );
+}
+#endif
+
 #endif /* !__CMDSYSTEM_H__ */
