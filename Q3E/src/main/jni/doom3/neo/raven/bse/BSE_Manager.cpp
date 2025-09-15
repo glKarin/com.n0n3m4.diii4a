@@ -59,7 +59,7 @@ static const char	*bse_singleSegmentTypeArgs[]	= {
         "sound",
         "decal",
         "light",
-        "dv",
+        "doublevision",
         "shake",
         "tunnel",
 

@@ -233,10 +233,10 @@ bool rvSpriteParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt,
     const float c = cos(angle), s = sin(angle);
     
 #if 1 //k??? TODO Q4D original source code
-	idVec3 right = view[2] * s - view[1] * c;
+	idVec3 left = view[1] * c - view[2] * s;
 	idVec3 up = view[2] * c + view[1] * s;
 
-    idVec3 halfRight = right * (size.x);
+    idVec3 halfRight = left * (size.x);
     idVec3 halfUp = up * (size.y);
 
     const int packed = HandleTint(effect, tint, alphaOverride);
@@ -255,11 +255,10 @@ bool rvSpriteParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt,
     // BL
     v[3].xyz = pos + halfUp; v[3].st = idVec2(0, 1);
     *reinterpret_cast<uint32_t*>(v[3].color) = packed;
-	BSE_SETUP_VERT_NORMAL(v[0], pos);
-	BSE_SETUP_VERT_NORMAL(v[1], pos);
-	BSE_SETUP_VERT_NORMAL(v[2], pos);
-	BSE_SETUP_VERT_NORMAL(v[3], pos);
 #else
+	idVec3 right = view[2] * s - view[1] * c;
+	idVec3 up = view[2] * c + view[1] * s;
+
     idVec3 halfRight = right * (size.x * kHalf);
     idVec3 halfUp = up * (size.y * kHalf);
 
@@ -280,6 +279,10 @@ bool rvSpriteParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt,
     v[3].xyz = pos - halfRight + halfUp; v[3].st = idVec2(0, 1);
     *reinterpret_cast<uint32_t*>(v[3].color) = packed;
 #endif
+	BSE_SETUP_VERT_NORMAL(v[0], pos);
+	BSE_SETUP_VERT_NORMAL(v[1], pos);
+	BSE_SETUP_VERT_NORMAL(v[2], pos);
+	BSE_SETUP_VERT_NORMAL(v[3], pos);
 
     glIndex_t* idx = &tri->indexes[tri->numIndexes];
     idx[0] = base; idx[1] = base + 2; idx[2] = base + 1; //k??? TODO: CCW, for fix smoke sprite, original is CW 0, 1, 2
@@ -347,10 +350,6 @@ bool rvLineParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt, c
 	v[1].xyz = pos - offset; v[1].st = idVec2(0, 1);
 	v[2].xyz = newPos - offset; v[2].st = idVec2(mTextureScale, 1);
 	v[3].xyz = newPos + offset; v[3].st = idVec2(mTextureScale, 0);
-	BSE_SETUP_VERT_NORMAL(v[0], pos);
-	BSE_SETUP_VERT_NORMAL(v[1], pos);
-	BSE_SETUP_VERT_NORMAL(v[2], pos);
-	BSE_SETUP_VERT_NORMAL(v[3], pos);
 #else
     idVec3 halfOffset = BSE::Normalized(viewRight.Cross(len)) * halfWidth;
 
@@ -365,6 +364,10 @@ bool rvLineParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt, c
     v[3].xyz = pos + len + halfOffset; v[3].st = idVec2(mTextureScale, 0);
 #endif
     for (int i = 0; i < 4; ++i) *reinterpret_cast<uint32_t*>(v[i].color) = packed;
+	BSE_SETUP_VERT_NORMAL(v[0], pos);
+	BSE_SETUP_VERT_NORMAL(v[1], pos);
+	BSE_SETUP_VERT_NORMAL(v[2], pos);
+	BSE_SETUP_VERT_NORMAL(v[3], pos);
 
     glIndex_t* idx = &tri->indexes[tri->numIndexes];
     idx[0] = base; idx[1] = base + 1; idx[2] = base + 2;
@@ -419,10 +422,6 @@ bool rvOrientedParticle::Render(const rvBSE* effect, const rvParticleTemplate* p
     v[1].xyz = pos - up; v[1].st = idVec2(1, 0);
     v[2].xyz = pos + right; v[2].st = idVec2(1, 1);
     v[3].xyz = pos + up; v[3].st = idVec2(0, 1);
-	BSE_SETUP_VERT_NORMAL(v[0], pos);
-	BSE_SETUP_VERT_NORMAL(v[1], pos);
-	BSE_SETUP_VERT_NORMAL(v[2], pos);
-	BSE_SETUP_VERT_NORMAL(v[3], pos);
 #else
     v[0].xyz = pos - right - up; v[0].st = idVec2(0, 0);
     v[1].xyz = pos + right - up; v[1].st = idVec2(1, 0);
@@ -430,6 +429,10 @@ bool rvOrientedParticle::Render(const rvBSE* effect, const rvParticleTemplate* p
     v[3].xyz = pos - right + up; v[3].st = idVec2(0, 1);
 #endif
     for (int i = 0; i < 4; ++i) *reinterpret_cast<uint32_t*>(v[i].color) = packed;
+	BSE_SETUP_VERT_NORMAL(v[0], pos);
+	BSE_SETUP_VERT_NORMAL(v[1], pos);
+	BSE_SETUP_VERT_NORMAL(v[2], pos);
+	BSE_SETUP_VERT_NORMAL(v[3], pos);
 
     glIndex_t* idx = &tri->indexes[tri->numIndexes];
     idx[0] = base; idx[1] = base + 1; idx[2] = base + 2;
