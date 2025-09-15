@@ -480,8 +480,10 @@ float rvParticleTemplate::GetFurthestDistance() const {
     maxAccel.x -= gravVec.x;  maxAccel.y -= gravVec.y;  maxAccel.z -= gravVec.z;
 
     // 5) Prepare overall min/max trackers
-    idVec3 overallMin(FLT_MAX, FLT_MAX, FLT_MAX);
-    idVec3 overallMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+#define ID_FLT_MAX          3.402823466e+38F        // max value
+    idVec3 overallMin(ID_FLT_MAX, ID_FLT_MAX, ID_FLT_MAX);
+    idVec3 overallMax(-ID_FLT_MAX, -ID_FLT_MAX, -ID_FLT_MAX);
+#undef ID_FLT_MAX
 
     // 6) Sample 8 time steps and all 16 combinations of parameter extremes
     const float duration = mDuration.y;

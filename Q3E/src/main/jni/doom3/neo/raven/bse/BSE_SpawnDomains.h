@@ -22,7 +22,8 @@
 #include <stddef.h>     //  size_t
 #include <stdint.h>     //  uint32_t
 #include <math.h>       //  fabs, sqrt
-#include <float.h>       //  FLT_MAX
+//#include <float.h>       //  FLT_MAX
+
 
 // Forward declarations to avoid pulling heavy headers into every unit
 class idVec3;
