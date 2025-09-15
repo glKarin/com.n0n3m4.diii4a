@@ -133,6 +133,10 @@ idGame 		*game = NULL;
 idGameEdit 	*gameEdit = NULL;
 #endif
 
+#ifdef _RAVEN
+bool com_debugHudActive = false;
+#endif
+
 // writes si_version to the config file - in a kinda obfuscated way
 //#define ID_WRITE_VERSION
 
