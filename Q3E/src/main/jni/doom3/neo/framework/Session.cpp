@@ -962,23 +962,7 @@ static void Session_ExitCmdDemo_f(const idCmdArgs &args)
 	sessLocal.cmdDemoFile = NULL;
 }
 
-#ifdef _RAVEN //k: endOfGame game cmd
-static void Session_EndOfGame_f(const idCmdArgs &args)
-{
-	sessLocal.Stop();
-	sessLocal.StartMenu();
-
-	if (soundSystem) {
-		soundSystem->SetMute(false);
-	}
-
-	if (sessLocal.guiActive) {
-		drawWin_t *dw = sessLocal.guiActive->GetDesktop()->FindChildByName("main_b_credits");
-		if(dw && dw->win)
-			dw->win->RunScript(idWindow::ON_ACTION);
-	}
-}
-
+#ifdef _RAVEN //k: gui event cmd
 static void Session_GuiEvent_f(const idCmdArgs &args)
 {
 	if (sessLocal.guiActive) {
@@ -3537,7 +3521,10 @@ void idSessionLocal::RunGameTic()
 		}
 #ifdef _RAVEN //k: quake4 game cmd
 		else if (!idStr::Icmp(args.Argv(0), "endOfGame")) {
-			cmdSystem->BufferCommandText(CMD_EXEC_INSERT, "stoprecording ; disconnect ; endOfGame");
+			if(guiGameOver)
+				SetGUI(guiGameOver, NULL);
+			else
+				cmdSystem->BufferCommandText(CMD_EXEC_INSERT, "stoprecording ; disconnect");
 		}
 #endif
 	}
@@ -3586,7 +3573,11 @@ void idSessionLocal::Init()
 #endif
 
 	cmdSystem->AddCommand("demoShot", Session_DemoShot_f, CMD_FL_SYSTEM, "writes a screenshot for a demo");
-	cmdSystem->AddCommand("testGUI", Session_TestGUI_f, CMD_FL_SYSTEM, "tests a gui");
+	cmdSystem->AddCommand("testGUI", Session_TestGUI_f, CMD_FL_SYSTEM, "tests a gui"
+#if defined(_RAVEN) || 1
+			, idCmdSystem::ArgCompletion_GuiName
+#endif
+			);
 
 #ifndef	ID_DEDICATED
 	cmdSystem->AddCommand("saveGame", SaveGame_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "saves a game");
@@ -3604,7 +3595,6 @@ void idSessionLocal::Init()
 	cmdSystem->AddCommand("skipHitEffect", Game_SkipHitEffect_f, CMD_FL_GAME, "skip all hit effect in game");
 
 #ifdef _RAVEN //k: quake4 game cmd callback
-	cmdSystem->AddCommand("endOfGame", Session_EndOfGame_f, CMD_FL_SYSTEM, "ends the game");
 	cmdSystem->AddCommand("GuiEvent", Session_GuiEvent_f, CMD_FL_SYSTEM, "handle GUI event");
 #endif
 #ifdef _HUMANHEAD //k: for sound in new game
