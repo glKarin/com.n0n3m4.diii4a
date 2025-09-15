@@ -43,6 +43,62 @@ If you have questions concerning this license or the applicable additional terms
 #define WriteBig(x) WriteInt( BigLong(x) )
 #define Big(x) x = BigLong(x)
 
+static int BitsForFormat( textureFormat_t format )
+{
+    switch( format )
+    {
+        case FMT_NONE:
+            return 0;
+        case FMT_RGBA8:
+            return 32;
+        case FMT_XRGB8:
+            return 32;
+        case FMT_RGB565:
+            return 16;
+        case FMT_L8A8:
+            return 16;
+        case FMT_ALPHA:
+            return 8;
+        case FMT_LUM8:
+            return 8;
+        case FMT_INT8:
+            return 8;
+        case FMT_DXT1:
+            return 4;
+        case FMT_DXT5:
+            return 8;
+            // RB: added ETC compression
+//        case FMT_ETC1_RGB8_OES:
+//            return 4;
+//        case FMT_SHADOW_ARRAY:
+//            return ( 32 * 6 );
+//        case FMT_RG16F:
+//            return 32;
+//        case FMT_RGBA16F:
+//            return 64;
+//        case FMT_RGBA32F:
+//            return 128;
+//        case FMT_R32F:
+//            return 32;
+//        case FMT_R11G11B10F:
+//            return 32;
+            // RB end
+        case FMT_DEPTH:
+            return 32;
+//        case FMT_DEPTH_STENCIL:
+//            return 32;
+        case FMT_X16:
+            return 16;
+        case FMT_Y16_X16:
+            return 32;
+//        case FMT_R8:
+//            return 4;
+        default:
+            assert( 0 );
+            return 0;
+    }
+}
+
 void Bimage_GetGeneratedFileName( idStr& gfn, const char* name )
 {
 	gfn = "generated/images";
