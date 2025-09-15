@@ -71,6 +71,11 @@ typedef struct portalArea_s {
 	portal_t 		*portals;		// never changes after load
 	areaReference_t	entityRefs;		// head/tail of doubly linked list, may change
 	areaReference_t	lightRefs;		// head/tail of doubly linked list, may change
+#ifdef _RAVEN
+#ifdef _RAVEN_BSE
+    areaReference_t	effectRefs;		// head/tail of doubly linked list, may change
+#endif
+#endif
 } portalArea_t;
 
 
@@ -187,9 +192,17 @@ class idRenderWorldLocal : public idRenderWorld
         virtual void			FreeEffectDef(qhandle_t effectHandle);
         virtual bool			EffectDefHasSound(const renderEffect_s* reffect);
 
-// jmarshall: BSE
-	    idList<rvRenderEffectLocal*>	effectsDef;
-// jmarshll end
+#ifdef _RAVEN_BSE
+        void                    MarkEffectDef(int effectHandle);
+        void                    PushEffectDef(int effectHandle);
+        void                    AddAreaEffectRefs(int areaNum, const portalStack_s *ps);
+        void                    AddEffectRefToArea(rvRenderEffectLocal *reffect, portalArea_t *area);
+        void					PushPolytopeIntoTree_r(idRenderEntityLocal *def, idRenderLightLocal *light, rvRenderEffectLocal *reffect, const idBox *box, const idVec3 *points, int numPoints, int nodeNum);
+
+        void					PushPolytopeIntoTree(idRenderEntityLocal *def, idRenderLightLocal *light, rvRenderEffectLocal *reffect, const idBox *box, const idVec3 *points, int numPoints);
+#endif
+
+	    idList<rvRenderEffectLocal*>	effectDefs;
 #endif
 
 #ifdef _D3BFG_CULLING

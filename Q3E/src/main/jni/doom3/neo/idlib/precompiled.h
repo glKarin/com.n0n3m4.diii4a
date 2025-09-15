@@ -34,9 +34,19 @@ If you have questions concerning this license or the applicable additional terms
 //-----------------------------------------------------
 
 #if defined(_K_DEV)
-#define LOGI(fmt, args...) { common->Printf(fmt, ##args); common->Printf("\n"); }
-#define LOGW(fmt, args...) common->Warning(fmt, ##args);
-#define LOGE(fmt, args...) common->Error(fmt, ##args);
+#if 0 //!defined(_MSC_VER)
+#define LOGI(fmt, args...) do { common->Printf(fmt, ##args); common->Printf("\n"); } while(0);
+#define LOGW(fmt, args...) do { common->Warning(fmt, ##args) } while(0);
+#define LOGE(fmt, args...) do { common->Error(fmt, ##args); } while(0);
+
+#define LOGFI(type, args...) do { common->Printf("[" #type "] -> " ##args); common->Printf("\n"); } while(0);
+#else
+#define LOGI(fmt, ...) do { common->Printf(fmt, __VA_ARGS__); common->Printf("\n"); } while(0);
+#define LOGW(fmt, ...) do { common->Warning(fmt, __VA_ARGS__) } while(0);
+#define LOGE(fmt, ...) do { common->Error(fmt, __VA_ARGS__); } while(0);
+
+#define LOGFI(type, ...) do { common->Printf("[" #type "] -> " __VA_ARGS__); common->Printf("\n"); } while(0);
+#endif
 #endif
 
 #define ID_TIME_T time_t
@@ -240,7 +250,11 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 #include "../raven/idlib/math/Radians.h"
 // RAVEN BEGIN
 // jscott: Effects system interface
+#ifdef _RAVEN_BSE
 #include "../raven/bse/BSEInterface.h"
+#else
+#include "../raven/fx/BSEInterface.h"
+#endif
 // RAVEN END
 
 #include "../raven/framework/DeclPlayerModel.h"

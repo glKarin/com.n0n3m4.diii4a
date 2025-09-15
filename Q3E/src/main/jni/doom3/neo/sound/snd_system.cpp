@@ -2290,7 +2290,7 @@ bool idSoundSystemLocal::SFB_HandleSubtitle(bool fromBackEnd, const void *data)
 {
 	bool changed;
 
-	Sys_EnterCriticalSection(CRITICAL_SECTION_THREE);
+	Sys_EnterCriticalSection(CRITICAL_SECTION_SUBTITLE);
 	{
 		if(fromBackEnd) // backend
 		{
@@ -2338,7 +2338,7 @@ bool idSoundSystemLocal::SFB_HandleSubtitle(bool fromBackEnd, const void *data)
 			}
 		}
 	}
-	Sys_LeaveCriticalSection(CRITICAL_SECTION_THREE);
+	Sys_LeaveCriticalSection(CRITICAL_SECTION_SUBTITLE);
 	return changed;
 }
 

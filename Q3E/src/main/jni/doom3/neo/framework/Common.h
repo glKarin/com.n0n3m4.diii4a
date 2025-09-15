@@ -156,6 +156,11 @@ typedef MemInfo_t MemInfo;
 // bdube: forward declarations
 class idInterpreter;
 class idProgram;
+
+// RAVEN BEGIN
+// bdube: added timing dict
+extern bool                        com_debugHudActive;                // The debug hud is active in the game
+// RAVEN END
 #endif
 
 class idCommon

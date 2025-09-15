@@ -1083,6 +1083,11 @@ void idRenderWorldLocal::AddAreaRefs(int areaNum, const portalStack_t *ps)
 	// add the models and lights, using more precise culling to the planes
 	AddAreaEntityRefs(areaNum, ps);
 	AddAreaLightRefs(areaNum, ps);
+#ifdef _RAVEN
+#ifdef _RAVEN_BSE
+    AddAreaEffectRefs(areaNum, ps);
+#endif
+#endif
 }
 
 /*
@@ -1161,6 +1166,11 @@ void idRenderWorldLocal::FindViewLightsAndEntities(void)
 	// clear the visible lightDef and entityDef lists
 	tr.viewDef->viewLights = NULL;
 	tr.viewDef->viewEntitys = NULL;
+#ifdef _RAVEN // particle
+#ifdef _RAVEN_BSE
+    tr.viewDef->viewEffects = NULL;
+#endif
+#endif
 
 	// find the area to start the portal flooding in
 	if (!r_usePortals.GetBool()) {
@@ -1483,7 +1493,6 @@ void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, c
 	portalArea_t 	*area;
 	const portalStack_t	*check;
 	portalStack_t	newStack;
-	int				i, j;
 	idVec3			v1, v2;
 	int				addPlanes;
 	idFixedWinding	w;		// we won't overflow because MAX_PORTAL_PLANES = 20
@@ -1581,6 +1590,39 @@ void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, c
 		FindVisibleAreas_r(origin, p->intoArea, &newStack, visibleAreas);
 	}
 }
+
+#ifdef _RAVEN_BSE
+void idRenderWorldLocal::AddAreaEffectRefs(int areaNum, const portalStack_s *ps) {
+    areaReference_s *p_effectRefs; // ebp
+    areaReference_s *i; // edi
+    rvRenderEffectLocal *effect; // esi
+    int suppressSurfaceInViewID; // eax
+    int allowSurfaceInViewID; // eax
+    viewEffect_s *v8; // eax
+
+    p_effectRefs = &portalAreas[areaNum].effectRefs;
+    for (i = p_effectRefs->areaNext; i != p_effectRefs; i = i->areaNext) {
+        effect = i->effect;
+        if (!r_skipSuppress.GetBool()) {
+            suppressSurfaceInViewID = effect->parms.suppressSurfaceInViewID;
+            if (suppressSurfaceInViewID) {
+                if (suppressSurfaceInViewID == tr.viewDef->renderView.viewID)
+                    continue;
+            }
+            allowSurfaceInViewID = effect->parms.allowSurfaceInViewID;
+            if (allowSurfaceInViewID) {
+                if (allowSurfaceInViewID != tr.viewDef->renderView.viewID)
+                    continue;
+            }
+        }
+        if (!r_useEntityCulling.GetBool()
+            || !R_CullLocalBox(effect->referenceBounds, effect->modelMatrix, ps->numPortalPlanes, ps->portalPlanes)) {
+            v8 = R_SetEffectDefViewEntity(effect);
+            v8->scissorRect.Union(ps->rect);
+        }
+    }
+}
+#endif
 #endif
 
 #ifdef _HUMANHEAD

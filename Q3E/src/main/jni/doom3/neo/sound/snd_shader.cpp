@@ -816,3 +816,33 @@ const char *idSoundShader::GetSound(int index) const
 
 	return "";
 }
+
+#ifdef _RAVEN
+ID_INLINE int GetDurationMS(const idSoundSample* sample)
+{
+  int samples = sample->LengthIn44kHzSamples();
+  return soundSystemLocal.SamplesToMilliseconds(samples);
+}
+
+float idSoundShader::GetTimeLength(void) const
+{
+	int v2; // esi
+	const idSoundSample *entry; // edi
+	float v4; // st7
+	float longest; // [esp+8h] [ebp-4h]
+
+	longest = 0.0;
+	for ( v2 = 0; v2 < numEntries; v2++ )
+	{
+		entry = entries[v2];
+		if ( entry )
+		{
+			v4 = GetDurationMS(entry) * 0.001f;
+			if ( v4 > longest )
+				longest = v4;
+		}
+	}
+	return longest;
+}
+
+#endif

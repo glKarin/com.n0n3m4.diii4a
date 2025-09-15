@@ -1712,28 +1712,406 @@ void R_RemoveUnecessaryViewLights(void)
 }
 
 #ifdef _RAVEN // particle
+
+#ifdef _RAVEN_BSE
+idRenderModel * R_EffectDefDynamicModel(rvRenderEffectLocal *def)
+{
+    rvBSEManager *v1; // ebx
+    const char *v2; // eax
+    idRenderModel *dynamicModel; // ecx
+    idRenderModel *v5; // ecx
+    float v6; // st7
+    idVec3 ndc; // [esp+Ch] [ebp-2Ch] BYREF
+    idPlane clip; // [esp+18h] [ebp-20h] BYREF
+    idPlane eye; // [esp+28h] [ebp-10h] BYREF
+
+    if ( !tr.viewDef || !def->effect )
+        return NULL;
+    v1 = bse;
+    v2 = def->parms.declEffect->GetName();
+    if ( bse->Filtered(v2) )
+        return NULL;
+    if ( def->dynamicModelFrameCount != tr.frameCount )
+    {
+        dynamicModel = def->dynamicModel;
+        if ( dynamicModel )
+            delete dynamicModel;
+        def->dynamicModel = def->effect->Render(&def->parms, tr.viewDef);
+        def->dynamicModelFrameCount = tr.frameCount;
+    }
+    v5 = def->dynamicModel;
+    if ( v5 && 0.0f != v5->DepthHack() )
+    {
+        if ( tr.viewDef )
+        {
+            R_TransformModelToClip(
+                    def->parms.origin,
+                    tr.viewDef->worldSpace.modelViewMatrix,
+                    tr.viewDef->projectionMatrix,
+                    eye,
+                    clip);
+            R_TransformClipToDevice(clip, tr.viewDef, ndc);
+            v6 = def->dynamicModel->DepthHack();
+            def->parms.modelDepthHack = v6 * (1.0f - ndc.z);
+        }
+    }
+    return def->dynamicModel;
+}
+
+static int compareEffect(const void *a, const void *b)
+{
+    const viewEffect_s *veA = (viewEffect_s *)a;
+    const viewEffect_s *veB = (viewEffect_s *)b;
+    return 0; //k??? TODO no source code for sort effects comparor
+}
+
+viewEffect_s * R_SetEffectDefViewEntity(rvRenderEffectLocal *def)
+{
+    viewEffect_s *v2; // esi
+
+    if ( def->viewCount == tr.viewCount )
+        return def->viewEffect;
+    def->viewCount = tr.viewCount;
+    v2 = (viewEffect_s *)R_ClearedFrameAlloc(sizeof(viewEffect_s));
+    v2->effectDef = def;
+    v2->scissorRect.Clear();
+	v2->weaponDepthHack = def->parms.weaponDepthHackInViewID == tr.viewDef->renderView.viewID; // effect in world
+    v2->modelDepthHack = def->parms.modelDepthHack;
+    v2->weaponDepthHackInViewID = def->parms.weaponDepthHackInViewID;
+    R_AxisToModelMatrix(def->parms.axis, def->parms.origin, v2->modelMatrix);
+    if ( tr.viewDef )
+    {
+        myGlMultMatrix(v2->modelMatrix, tr.viewDef->worldSpace.modelViewMatrix, v2->modelViewMatrix);
+        idVec3 dis = v2->effectDef->parms.origin - tr.viewDef->renderView.vieworg;
+        v2->distanceToCamera = dis.LengthSqr();
+        v2->next = tr.viewDef->viewEffects;
+        tr.viewDef->viewEffects = v2;
+    }
+    def->viewEffect = v2;
+    return v2;
+}
+
+int R_SortViewEffects(viewEffect_s ***array)
+{
+    viewEffect_s *viewEffects; // eax
+    int i; // esi
+    viewEffect_s **v3; // eax
+    viewEffect_s **v4; // ecx
+    viewEffect_s *j; // eax
+
+    viewEffects = tr.viewDef->viewEffects;
+    if(!viewEffects)
+        return 0;
+    int size = sizeof(viewEffect_s *);
+    for ( i = 0; viewEffects; ++i )
+        viewEffects = viewEffects->next;
+    v3 = (viewEffect_s **)R_FrameAlloc(size * i);
+    *array = v3;
+    v4 = v3;
+    for ( j = tr.viewDef->viewEffects; j; ++v4 )
+    {
+        *v4 = j;
+        j = j->next;
+    }
+    //qsort(*array, i, size, compareEffect); //k??? TODO no sort effects
+    return i;
+}
+
+void R_AddDrawSurf(const srfTriangles_t *tri, const viewEffect_s *space, const renderEffect_s *renderEntity,
+                   const idMaterial *shader, const idScreenRect &scissor)
+{
+    drawSurf_t		*drawSurf;
+    const float		*shaderParms;
+    static float	refRegs[MAX_EXPRESSION_REGISTERS];	// don't put on stack, or VC++ will do a page touch
+    //float			generatedShaderParms[MAX_ENTITY_SHADER_PARMS];
+
+    drawSurf = (drawSurf_t *)R_FrameAlloc(sizeof(*drawSurf));
+#ifdef _MULTITHREAD
+    drawSurf->geoOrig = tri;
+    if(multithreadActive) //k: alloc a frame copy, because Model::geometry will free in next frame on CPU
+    {
+        srfTriangles_t *newTri = (srfTriangles_t *)R_FrameAlloc(sizeof(srfTriangles_t));
+        *newTri = *tri;
+        drawSurf->geo = newTri;
+    }
+    else
+#endif
+        drawSurf->geo = tri;
+#if 1 // create viewEntity_s from viewEffect_s
+    viewEntity_t *espace = (viewEntity_t *)R_ClearedFrameAlloc(sizeof(*espace));
+	espace->scissorRect = space->scissorRect;
+	espace->weaponDepthHack = space->weaponDepthHack;
+	espace->modelDepthHack = space->modelDepthHack;
+	memcpy(&espace->modelMatrix[0], &space->modelMatrix[0], sizeof(espace->modelMatrix));
+	memcpy(&espace->modelViewMatrix[0], &space->modelViewMatrix[0], sizeof(espace->modelViewMatrix));
+
+    espace->entityDef = (idRenderEntityLocal *)R_ClearedFrameAlloc(sizeof(*espace->entityDef));
+    *espace->entityDef = idRenderEntityLocal();
+    memcpy(&espace->entityDef->modelMatrix[0], &space->effectDef->modelMatrix[0], sizeof(espace->entityDef->modelMatrix));
+    espace->entityDef->world = space->effectDef->world;
+    espace->entityDef->index = space->effectDef->index;
+    espace->entityDef->lastModifiedFrameNum = space->effectDef->lastModifiedFrameNum;
+    espace->entityDef->archived = space->effectDef->archived;
+    espace->entityDef->dynamicModel = space->effectDef->dynamicModel;
+    espace->entityDef->referenceBounds = space->effectDef->referenceBounds;
+    espace->entityDef->viewCount = space->effectDef->viewCount;
+    espace->entityDef->viewEntity = espace;
+    espace->entityDef->visibleCount = space->effectDef->visibleCount;
+    espace->entityDef->entityRefs = space->effectDef->effectRefs;
+
+	espace->entityDef->parms.suppressSurfaceInViewID = space->effectDef->parms.suppressSurfaceInViewID;
+	espace->entityDef->parms.allowSurfaceInViewID = space->effectDef->parms.allowSurfaceInViewID;
+    espace->entityDef->parms.origin = space->effectDef->parms.origin;
+    espace->entityDef->parms.axis = space->effectDef->parms.axis;
+    espace->entityDef->parms.referenceSoundHandle = space->effectDef->parms.referenceSoundHandle;
+    espace->entityDef->parms.weaponDepthHackInViewID = space->effectDef->parms.weaponDepthHackInViewID;
+    espace->entityDef->parms.modelDepthHack = space->effectDef->parms.modelDepthHack;
+    espace->entityDef->parms.weaponDepthHack = space->effectDef->parms.weaponDepthHackInViewID == tr.viewDef->renderView.viewID;
+    memcpy(espace->entityDef->parms.shaderParms, space->effectDef->parms.shaderParms, sizeof(espace->entityDef->parms.shaderParms));
+#endif
+    drawSurf->space = (viewEntity_s *)espace;
+    drawSurf->material = shader;
+    drawSurf->scissorRect = scissor;
+    drawSurf->sort = shader->GetSort() + tr.sortOffset;
+    drawSurf->dsFlags = 0;
+
+    // bumping this offset each time causes surfaces with equal sort orders to still
+    // deterministically draw in the order they are added
+    tr.sortOffset += 0.000001f;
+
+    // if it doesn't fit, resize the list
+    if (tr.viewDef->numDrawSurfs == tr.viewDef->maxDrawSurfs) {
+        drawSurf_t	**old = tr.viewDef->drawSurfs;
+        int			count;
+
+        if (tr.viewDef->maxDrawSurfs == 0) {
+            tr.viewDef->maxDrawSurfs = INITIAL_DRAWSURFS;
+            count = 0;
+        } else {
+            count = tr.viewDef->maxDrawSurfs * sizeof(tr.viewDef->drawSurfs[0]);
+            tr.viewDef->maxDrawSurfs *= 2;
+        }
+
+        tr.viewDef->drawSurfs = (drawSurf_t **)R_FrameAlloc(tr.viewDef->maxDrawSurfs * sizeof(tr.viewDef->drawSurfs[0]));
+        memcpy(tr.viewDef->drawSurfs, old, count);
+    }
+
+    tr.viewDef->drawSurfs[tr.viewDef->numDrawSurfs] = drawSurf;
+    tr.viewDef->numDrawSurfs++;
+
+    // process the shader expressions for conditionals / color / texcoords
+    const float	*constRegs = shader->ConstantRegisters();
+
+    if (constRegs) {
+        // shader only uses constant values
+        drawSurf->shaderRegisters = constRegs;
+    } else {
+        float *regs = (float *)R_FrameAlloc(shader->GetNumRegisters() * sizeof(float));
+        drawSurf->shaderRegisters = regs;
+
+        // a reference shader will take the calculated stage color value from another shader
+        // and use that for the parm0-parm3 of the current shader, which allows a stage of
+        // a light model and light flares to pick up different flashing tables from
+        // different light shaders
+#if 0
+        if (renderEntity->referenceShader) {
+            // evaluate the reference shader to find our shader parms
+            const shaderStage_t *pStage;
+
+#ifdef _RAVEN //karin: quake4 using handle
+            renderEntity->referenceShader->EvaluateRegisters(refRegs, renderEntity->shaderParms, tr.viewDef, renderEntity->referenceSoundHandle);
+#else
+            renderEntity->referenceShader->EvaluateRegisters(refRegs, renderEntity->shaderParms, tr.viewDef, renderEntity->referenceSound);
+#endif
+            pStage = renderEntity->referenceShader->GetStage(0);
+
+            memcpy(generatedShaderParms, renderEntity->shaderParms, sizeof(generatedShaderParms));
+            generatedShaderParms[0] = refRegs[ pStage->color.registers[0] ];
+            generatedShaderParms[1] = refRegs[ pStage->color.registers[1] ];
+            generatedShaderParms[2] = refRegs[ pStage->color.registers[2] ];
+
+            shaderParms = generatedShaderParms;
+        } else
+#endif
+        {
+            // evaluate with the entityDef's shader parms
+            shaderParms = renderEntity->shaderParms;
+        }
+
+        float oldFloatTime = 0.0f;
+        int oldTime = 0.0f;
+
+
+#if 0
+        if (space->entityDef && space->entityDef->parms.timeGroup) {
+            oldFloatTime = tr.viewDef->floatTime;
+            oldTime = tr.viewDef->renderView.time;
+
+            tr.viewDef->floatTime = tr.viewDef->renderView.time * 0.001;
+        }
+#endif
+
+        shader->EvaluateRegisters(regs, shaderParms, tr.viewDef, renderEntity->referenceSoundHandle);
+
+#if 0
+        if (space->entityDef && space->entityDef->parms.timeGroup) {
+            tr.viewDef->floatTime = oldFloatTime;
+            tr.viewDef->renderView.time = oldTime;
+        }
+#endif
+    }
+
+    // check for deformations
+    R_DeformDrawSurf(drawSurf);
+
+#if 0
+    // skybox surfaces need a dynamic texgen
+    switch (shader->Texgen()) {
+        case TG_SKYBOX_CUBE:
+            R_SkyboxTexGen(drawSurf, tr.viewDef->renderView.vieworg);
+            break;
+        case TG_WOBBLESKY_CUBE:
+            R_WobbleskyTexGen(drawSurf, tr.viewDef->renderView.vieworg);
+            break;
+    }
+#endif
+
+#if 0
+    // check for gui surfaces
+    idUserInterface	*gui = NULL;
+
+    if (!space->entityDef) {
+        gui = shader->GlobalGui();
+    } else {
+        int guiNum = shader->GetEntityGui() - 1;
+
+        if (guiNum >= 0 && guiNum < MAX_RENDERENTITY_GUI) {
+            gui = renderEntity->gui[ guiNum ];
+        }
+
+        if (gui == NULL) {
+            gui = shader->GlobalGui();
+        }
+    }
+
+    if (gui) {
+        // force guis on the fast time
+        float oldFloatTime;
+        int oldTime;
+
+        oldFloatTime = tr.viewDef->floatTime;
+        oldTime = tr.viewDef->renderView.time;
+
+#ifdef _RAVEN
+        tr.viewDef->floatTime = tr.viewDef->renderView.time * 0.001;
+#else
+        tr.viewDef->floatTime = game->GetTimeGroupTime(1) * 0.001;
+		tr.viewDef->renderView.time = game->GetTimeGroupTime(1);
+#endif
+
+        idBounds ndcBounds;
+
+        if (!R_PreciseCullSurface(drawSurf, ndcBounds)) {
+            // did we ever use this to forward an entity color to a gui that didn't set color?
+//			memcpy( tr.guiShaderParms, shaderParms, sizeof( tr.guiShaderParms ) );
+            R_RenderGuiSurf(gui, drawSurf);
+        }
+
+        tr.viewDef->floatTime = oldFloatTime;
+        tr.viewDef->renderView.time = oldTime;
+    }
+#endif
+
+    // we can't add subviews at this point, because that would
+    // increment tr.viewCount, messing up the rest of the surface
+    // adds for this view
+}
+
+void R_AddAmbientEffectDrawsurfs(viewEffect_s *vEffect) {
+    idRenderModel *dynamicModel; // ebp
+    const modelSurface_t *v2; // eax
+    srfTriangles_s *v4; // esi
+    const idMaterial *v5; // eax
+    int i; // [esp+4h] [ebp-Ch]
+    rvRenderEffectLocal *def; // [esp+8h] [ebp-8h]
+    int total; // [esp+Ch] [ebp-4h]
+
+    dynamicModel = vEffect->effectDef->dynamicModel;
+    def = vEffect->effectDef;
+    total = dynamicModel->NumSurfaces();
+    for (i = 0; i < total; ++i) {
+        v2 = dynamicModel->Surface(i);
+        v4 = v2->geometry;
+        if (v4) {
+            if (v4->numIndexes) {
+                v5 = v2->shader;
+                if (v5) {
+                    if (/*((int) v5[66] > 0 || v5[19] || v5[20])
+                        && //k??? TODO some idMaterial property as condition, need get property name by memory offset in 32bits */ !R_CullLocalBox(v4->bounds, vEffect->modelMatrix, 5, tr.viewDef->frustum)) {
+                        def->visibleCount = tr.viewCount;
+                        // if (!v4->primBatchMesh)  //k??? TODO no the property, same as DOOM3 if true
+                        {
+                            if (!R_CreateAmbientCache(v4, false))
+                                return;
+                            vertexCache.Touch(v4->ambientCache);
+                            if (!v4->indexCache)
+                                vertexCache.Alloc(v4->indexes, sizeof(v4->indexes[0]) * v4->numIndexes, &v4->indexCache,
+                                                  true);
+                            if (v4->indexCache)
+                                vertexCache.Touch(v4->indexCache);
+                        }
+                        R_AddDrawSurf(
+                                v4,
+                                vEffect,
+                                &vEffect->effectDef->parms,
+                                v5,
+                                vEffect->scissorRect/*,
+                                0 */);
+                        v4->ambientViewCount = tr.viewCount;
+                    }
+                }
+            }
+        }
+    }
+}
+
 /*
 ===============
 R_AddEffectSurfaces
 ===============
 */
 void R_AddEffectSurfaces(void) {
-#if 1 //karin: once
-	static int lastServiceTime = -1;
-	if(tr.frameCount == lastServiceTime)
-		return;
-	lastServiceTime = tr.frameCount;
-#endif
-	idRenderWorldLocal* world = tr.viewDef->renderWorld;
-	rvRenderEffectLocal *effect;
+    int v0; // eax
+    viewEffect_s **v1; // esi
+    int v2; // edi
+    viewEffect_s *v3; // ebx
+    idScreenRect *p_scissorRect; // ecx
+    idRenderModel *v5; // eax
+    viewEffect_s **array; // [esp+4h] [ebp-4h] BYREF
 
-	for (int i = 0; i < world->effectsDef.Num(); i++) {
-		effect = world->effectsDef[i];
-		if (effect == NULL)
-			continue;
-
-		bse->ServiceEffect(effect, MS2SEC(effect->gameTime)/*tr.frameShaderTime*/);
-	}
+    v0 = R_SortViewEffects(&array);
+    v1 = array;
+    for(v2 = v0 - 1; v2 >= 0; --v2)
+    {
+        v3 = *v1;
+        p_scissorRect = &(*v1++)->scissorRect;
+        if ( p_scissorRect->IsEmpty() )
+        {
+            //++tr.pc.c_culledViewEffects;
+        }
+        else
+        {
+            v5 = R_EffectDefDynamicModel(v3->effectDef);
+            if ( v5 )
+            {
+                if ( v5->NumSurfaces() > 0 )
+                {
+                    R_AddAmbientEffectDrawsurfs(v3);
+                    //++tr.pc.c_visibleViewEffects;
+                }
+            }
+        }
+    }
 }
 #endif
-
+#endif

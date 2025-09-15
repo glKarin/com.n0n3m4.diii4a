@@ -689,6 +689,9 @@ void idRenderSystemLocal::BeginFrame(int windowWidth, int windowHeight)
 	if (!glConfig.isInitialized) {
 		return;
 	}
+#ifdef _RAVEN //karin: BSE
+	bse->UpdateRateTimes();
+#endif
 
 	// determine which back end we will use
 	SetBackEndRenderer();

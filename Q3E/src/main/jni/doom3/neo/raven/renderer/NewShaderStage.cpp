@@ -358,7 +358,6 @@ bool rvNewShaderStage::LoadSource(const char *name, const char *extension, idStr
 
 bool rvNewShaderStage::LoadGLSLProgram(const char *name)
 {
-    const shaderProgram_t *shader;
     shaderHandle_t handle;
 
     handle = shaderManager->GetHandle(name);

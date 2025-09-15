@@ -130,7 +130,7 @@ bool idDeclTable::Parse(const char *text, const int textLength)
 	src.SkipUntilString("{");
 #ifdef _RAVEN
 	minValue = idMath::INFINITY;
-	maxValue = -1.0e30;
+	maxValue = -idMath::INFINITY;
 #endif
 
 	snap = false;

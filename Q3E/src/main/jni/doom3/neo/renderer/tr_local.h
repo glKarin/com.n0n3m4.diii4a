@@ -242,6 +242,11 @@ typedef struct areaReference_s {
 	idRenderEntityLocal 	*entity;					// only one of entity / light will be non-NULL
 	idRenderLightLocal 	*light;					// only one of entity / light will be non-NULL
 	struct portalArea_s		*area;					// so owners can find all the areas they are in
+#ifdef _RAVEN
+#ifdef _RAVEN_BSE
+    rvRenderEffectLocal	*effect;		// head/tail of doubly linked list, may change
+#endif
+#endif
 } areaReference_t;
 
 
@@ -558,6 +563,10 @@ typedef struct viewDef_s {
 	// An array in frame temporary memory that lists if an area can be reached without
 	// crossing a closed door.  This is used to avoid drawing interactions
 	// when the light is behind a closed door.
+
+#ifdef _RAVEN
+    struct viewEffect_s	*viewEffects;			// chain of all viewEffects effecting view
+#endif
 
 #ifdef _SHADOW_MAPPING
 	// RB parallel light split frustums
@@ -1450,7 +1459,10 @@ void R_SetLightProject(idPlane lightProject[4], const idVec3 origin, const idVec
                        const idVec3 rightVector, const idVec3 upVector, const idVec3 start, const idVec3 stop);
 
 #ifdef _RAVEN // particle
+#ifdef _RAVEN_BSE
 void R_AddEffectSurfaces(void);
+viewEffect_s * R_SetEffectDefViewEntity(rvRenderEffectLocal *def);
+#endif
 #endif
 
 void R_AddLightSurfaces(void);
@@ -2254,6 +2266,77 @@ idScreenRect R_CalcIntersectionScissor(const idRenderLightLocal *lightDef,
 #define SUPPRESS_SURFACE_MASK(x) (1 << (x))
 #define SUPPRESS_SURFACE_MASK_CHECK(t, x) ((t) & SUPPRESS_SURFACE_MASK(x))
 #include "../raven/renderer/NewShaderStage.h"
+
+typedef struct viewEffect_s/* : viewEntity_s*/ // 164 bytes in 32bits
+{
+    struct viewEffect_s *next;
+    rvRenderEffectLocal *effectDef;
+#if 1
+	// layout same as viewEntity_s
+    idScreenRect scissorRect;
+	bool				weaponDepthHack;
+    float modelDepthHack;
+    float modelMatrix[16];
+    float modelViewMatrix[16];
+//#ifdef _SHADOW_MAPPING
+//	RenderMatrix		mvp;
+//#endif
+	// extras
+#endif
+    int weaponDepthHackInViewID;
+    float distanceToCamera;
+} viewEffect_t;
+
+#ifdef _RAVEN_BSE
+#include "../raven/bse/BSE.h"
+#endif
+class rvRenderModelBSE;
+class rvRenderEffectLocal : public rvRenderEffect
+{
+public:
+    rvRenderEffectLocal();
+    ~rvRenderEffectLocal();
+
+    renderEffect_s parms;
+    float modelMatrix[16];
+    class idRenderWorldLocal* world;
+    int index;
+    int lastModifiedFrameNum;
+    bool archived;
+    idRenderModel* dynamicModel;
+
+    idBounds referenceBounds;
+    int viewCount;
+    struct viewEffect_s* viewEffect;
+    int visibleCount;
+
+
+    areaReference_s* effectRefs;
+
+
+
+
+
+
+    class rvBSE* effect;
+    int dynamicModelFrameCount;
+    bool writeToDemo;
+    rvRenderModelBSE *model;
+#ifdef _RAVEN_FX
+    int gameTime;
+    int serviceTime;
+    bool newEffect;
+    bool expired;
+    //cullLink_t* cullLinks;
+    bool remove;
+    int updateFramenum;
+    idLinkList<rvRenderEffectLocal> node;
+#endif
+};
+
+#ifdef _RAVEN_BSE
+void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def);
+#endif
 #endif
 
 extern bool GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android

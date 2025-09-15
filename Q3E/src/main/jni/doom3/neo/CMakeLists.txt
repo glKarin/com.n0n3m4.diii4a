@@ -162,7 +162,8 @@ endif()
 # Quake4
 if(BUILD_Q4)
 option(RAVEN								"Build the raven core" 														ON)
-option(RAVEN_BSE_FX							"OpenBSE with Fx in Raven Quake 4" 											ON)
+option(RAVEN_BSE							"Raven BSE onQuake 4" 														ON)
+option(RAVEN_BSE_FX							"OpenBSE with Fx in Raven Quake 4" 											OFF)
 option(QUAKE4								"Build the quake4 game code" 												ON)
 option(Q4_MOD_FULL_BODY_AWARENESS			"Build quake4 full body awareness mod support" 								ON)
 option(Q4_MOD_BOTS							"Build quake4 bots mod support" 											ON)
@@ -782,6 +783,10 @@ endif()
 if(MP3_SUPPORT)
 	set(CORE_DEFINES "${CORE_DEFINES};_SND_MP3")
 	message(STATUS "mp3 sound support")
+endif()
+if(CONSOLE AND WIN32)
+	set(CORE_DEFINES "${CORE_DEFINES};_REDIRECT_OUTPUT")
+	message(STATUS "Redirect output to stdout.txt")
 endif()
 
 if(OPENAL)
@@ -1691,7 +1696,13 @@ if(RAVEN OR QUAKE4 OR BUILD_Q4_MOD)
 	if(NOT MSVC)
 		set_target_properties(idlib_raven PROPERTIES COMPILE_FLAGS "-fPIC")
 	endif()
-	set_target_properties(idlib_raven PROPERTIES COMPILE_DEFINITIONS "_RAVEN")
+	set(bse_compile_definitions "")
+	if(RAVEN_BSE)
+		set(bse_compile_definitions "_RAVEN_BSE")
+	elseif(RAVEN_BSE_FX)
+		set(bse_compile_definitions "_RAVEN_FX")
+	endif()
+	set_target_properties(idlib_raven PROPERTIES COMPILE_DEFINITIONS "_RAVEN;${bse_compile_definitions}")
 	target_include_directories(idlib_raven PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_raven})
@@ -2352,10 +2363,11 @@ if(PHOBOS)
 	endif()
 endif()
 
+
+
 if(RAVEN)
 	# raven engine source
 	set(raven_renderer_src
-			raven/bse/Model_bse.cpp
 			raven/renderer/NewShaderStage.cpp
 			)
 	set(raven_framework_src
@@ -2363,15 +2375,6 @@ if(RAVEN)
 			raven/framework/DeclPlayback.cpp
 			raven/framework/DeclMatType.cpp
 			raven/framework/DeclPlayerModel.cpp
-			)
-	set(raven_fx_bse_src
-			raven/bse/BSE_Fx.cpp
-			raven/bse/BSE_Manager.cpp
-			raven/bse/BSE_Decl.cpp
-			raven/bse/BSE_Particle.cpp
-			)
-	set(raven_null_bse_src
-			raven/bse/BSE_Null.cpp
 			)
 	set(src_core_raven
 			${src_renderer}
@@ -2387,15 +2390,47 @@ if(RAVEN)
 			${src_renderbump}
 			${src_dmap}
 			)
-	if(RAVEN_BSE_FX)
+
+	if(RAVEN_BSE)
+		set(raven_bse_src
+				raven/bse/BSE_Effect.cpp
+				raven/bse/BSE_EffectTemplate.cpp
+				raven/bse/bse_electricity.cpp
+				raven/bse/BSE_Envelopes.cpp
+				raven/bse/BSE_Light.cpp
+				raven/bse/BSE_Manager.cpp
+				raven/bse/BSE_ParseParticle2.cpp
+				raven/bse/BSE_Particle.cpp
+				raven/bse/BSE_Segment.cpp
+				raven/bse/bse_render.cpp
+				raven/bse/BSE_SegmentTemplate.cpp
+				raven/bse/BSE_SpawnDomains.cpp
+				raven/renderer/Model_bse.cpp
+				)
+		list(APPEND src_core_raven ${raven_bse_src})
+		add_globbed_headers(src_core_raven "raven")
+		message(STATUS "Build Raven BSE")
+	elseif(RAVEN_BSE_FX)
+		set(raven_fx_bse_src
+				raven/fx/Model_bse.cpp
+				raven/fx/BSE_Fx.cpp
+				raven/fx/BSE_Manager.cpp
+				raven/fx/BSE_Decl.cpp
+				raven/fx/BSE_Particle.cpp
+				)
 		list(APPEND src_core_raven ${raven_fx_bse_src})
+		add_globbed_headers(raven_fx_bse_src "raven")
+		message(STATUS "Build Open Fx BSE")
 	else()
+		set(raven_null_bse_src
+				raven/fx/BSE_Null.cpp
+				)
 		list(APPEND src_core_raven ${raven_null_bse_src})
+		add_globbed_headers(raven_null_bse_src "raven")
+		message(STATUS "Build Null BSE")
 	endif()
 	add_globbed_headers(raven_renderer_src "raven")
 	add_globbed_headers(raven_framework_src "raven")
-	add_globbed_headers(raven_fx_bse_src "raven")
-	add_globbed_headers(raven_null_bse_src "raven")
 
 	if(ANDROID)
 		set(QUAKE4BINARY "${IDTECH4LIBRARY}_raven")
@@ -2428,12 +2463,7 @@ if(RAVEN)
 	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_raven} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
-
-	set(raven_compile_definitions "_RAVEN")
-	if(RAVEN_BSE_FX)
-		set(raven_compile_definitions "${raven_compile_definitions};_RAVEN_FX")
-	endif()
-	set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "${raven_compile_definitions};${CORE_DEFINES}")
+	set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "_RAVEN;${bse_compile_definitions};${CORE_DEFINES}")
 	set_target_properties(${QUAKE4BINARY} PROPERTIES LINK_FLAGS "${ldflags}")
 	target_include_directories(${QUAKE4BINARY} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
 
@@ -2461,7 +2491,7 @@ if(QUAKE4)
 	add_library(q4game SHARED ${src_quake4})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_quake4})
 	#set_target_properties(quake4 PROPERTIES PREFIX "")
-	set(q4_compile_definitions "GAME_DLL;_RAVEN;_QUAKE4")
+	set(q4_compile_definitions "GAME_DLL;_RAVEN;${bse_compile_definitions};_QUAKE4")
 	if(Q4_MOD_FULL_BODY_AWARENESS)
 		set(q4_compile_definitions "${q4_compile_definitions};_MOD_FULL_BODY_AWARENESS")
 		set(q4_compile_definitions "${q4_compile_definitions};_MOD_VIEW_BODY")
@@ -2499,7 +2529,7 @@ if(HARDQORE)
 	add_library(hardqore SHARED ${src_hardqore})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hardqore})
 	#set_target_properties(hardqore PROPERTIES PREFIX "")
-	set_target_properties(hardqore PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4;_HARDQORE")
+	set_target_properties(hardqore PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;${bse_compile_definitions};_QUAKE4;_HARDQORE")
 	target_include_directories(hardqore PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${QUAKE4_MOD_DIR}/hardqore")
 	set_target_properties(hardqore PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(hardqore PROPERTIES INSTALL_NAME_DIR "@executable_path")

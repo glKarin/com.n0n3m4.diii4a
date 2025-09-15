@@ -1,356 +1,205 @@
-// BSE.h
-//
+﻿#pragma once
 
-#pragma once
+#include "../../idlib/precompiled.h"
 
-#ifndef _RAVEN_BSE_H
-#define _RAVEN_BSE_H
+#include "../../renderer/tr_local.h"
+#include "../../renderer/Model_local.h"
 
-struct viewDef_s;
+#include "BSEInterface.h"
 
-// BSE - Basic System for Effects
+extern const float kEpsilon;
+extern const float kHalf;
 
-// Notes:
-// All times are floats of seconds
-// All tints are floats of 0.0 to 1.0
-// All effects are presumed to be in the "base/effects" folder and have the extension of BSE_EFFECT_EXTENSION
-// All angles are in fractions of a circle - 1 means 1 full circle
-// All effect files are case insensitive
-// Will not have different shaders to be randomly chosen - need to keep the tesses to a minimum (except possibly for decals)
+//karin: for BSE devel
+//#define BSE_DEV 1
 
-/*
- * //karin: OpenBSE: BSE by DOOM3's FX
- * Convert Quake4's BSE to DOOM3's FX/Particle
- *
- * Quake4's fx other decl -> DOOM3's idDeclFX(.fx)
- *   spawner/emitter/trail segment -> idDeclFX::PARTICLE: DOOM3's idRenderModelPrt(.prt)
- *   other segments -> DOOM3's idDeclFX::SOUND/SHAKE/LIGHT/DECAL
- * 
- * class relations(Quake4 -> DOOM3):
- *   rvDeclEffect == idDeclFX: BSE_Decl.cpp, BSE_Parser.cpp
- *   rvDeclParticle == idDeclParticle: BSE_Particle.cpp
- *   rvBSE == idEntityFx: BSE_Fx.cpp
- *   rvRenderModelBse == idRenderModelPrt: Model_bse.cpp
- *
- * Quake4 game library::RunFrame
- * 1. query BSE::BSE_Manager the rvDeclEffect is filtered/has sound/can play rated.
- * 2. call Renderer::idRenderWorld::AddEffectDef/UpdateEffectDef to add/update effect render entity.
- * 3. finally call Renderer::idRenderWorld::StopEffectDef/FreeEffectDef to stop/destroy effect render entity.
- * */
-
-// Defined classes
-class rvDeclEffect;
-class rvBSEManagerLocal;
-
-// Referenced classes
-
-const float WORLD_SIZE = (128.0f * 1024.0f);
-const float BSE_LARGEST = (512.0f);
-const float BSE_TESS_COST = (20.0f);				// The expense of a new tess
-const float BSE_PHYSICS_COST = (80.0f);				// The expense of 1 particle having physics
-
-const float BSE_PARTICLE_TEXCOORDSCALE = (0.01f);
-
-
-
-const unsigned int MEMORY_BLOCK_SIZE = (0x100000);
-const unsigned int BSE_ELEC_MAX_BOLTS = (200);
-
-/*typedef*/ enum eBSEPerfCounter
-{
-	PERF_NUM_BSE,
-	PERF_NUM_TRACES,
-	PERF_NUM_PARTICLES,
-	PERF_NUM_TEXELS,
-	PERF_NUM_SEGMENTS,
-	NUM_PERF_COUNTERS
-};
-
-/*typedef*/ enum eBSESegment
-{
-	SEG_NONE = 0,
-	SEG_EFFECT,						// Spawns another effect inheriting data from owner
-	SEG_EMITTER,					// Spawns particles at a rate
-	SEG_SPAWNER,					// Spawns particles instantly
-	SEG_TRAIL,						// Leaves a trail of particles
-	SEG_SOUND,						// Plays a sound
-	SEG_DECAL,						// Leaves an idDecal
-	SEG_LIGHT,						// Displays a 3D light
-	SEG_DELAY,						// A control segment for looping
-	SEG_SHAKE,						// Triggers a screen shake
-	SEG_TUNNEL,						// Triggers the id tunnel vision effect
-	SEG_COUNT
-};
-enum eBSEParticleType 
-{
-	PTYPE_NONE = 0,									// A non sprite - for sound and vision segments
-	PTYPE_SPRITE,									// Simple 2D alpha blended quad
-	PTYPE_LINE,										// 2D alpha blended line
-	PTYPE_ORIENTED,									// 2D particle oriented in 3D - alpha blended
-	PTYPE_DECAL,									// Hook into id's decal system
-	PTYPE_MODEL,									// Model - must only have 1 surface
-	PTYPE_LIGHT,									// Dynamic light - very expensive
-	PTYPE_ELECTRICITY,								// A bolt of electricity
-	PTYPE_LINKED,									// A series of linked lines
-	PTYPE_ORIENTEDLINKED,
-	PTYPE_DEBRIS,									// A client side moveable entity spawned in the game
-	PTYPE_COUNT
-};
-
-/*typedef*/ enum eBSETrail
-{
-	TRAIL_NONE = 0,
-	TRAIL_BURN,
-	TRAIL_MOTION,
-	TRAIL_PARTICLE,
-	TRAIL_COUNT
-};
-
-enum {
-	SFLAG_EXPIRED = BITT< 0 >::VALUE,
-	SFLAG_SOUNDPLAYING = BITT< 1 >::VALUE,
-	SFLAG_HASMOTIONTRAIL = BITT< 2 >::VALUE,
-};
-
-// ==============================================
-// Effect class
-// ==============================================
-
-enum {
-	STFLAG_ENABLED = BITT< 0 >::VALUE,
-	STFLAG_LOCKED = BITT< 1 >::VALUE,
-	STFLAG_HASPARTICLES = BITT< 2 >::VALUE,
-	STFLAG_HASPHYSICS = BITT< 3 >::VALUE,
-	STFLAG_IGNORE_DURATION = BITT< 4 >::VALUE,
-	STFLAG_INFINITE_DURATION = BITT< 5 >::VALUE,
-	STFLAG_ATTENUATE_EMITTER = BITT< 6 >::VALUE,
-	STFLAG_INVERSE_ATTENUATE = BITT< 7 >::VALUE,
-	STFLAG_TEMPORARY = BITT< 8 >::VALUE,
-	STFLAG_USEMATCOLOR = BITT< 9 >::VALUE,
-	STFLAG_DEPTH_SORT = BITT< 10 >::VALUE,
-	STFLAG_INVERSE_DRAWORDER = BITT< 11 >::VALUE,
-	STFLAG_ORIENTATE_IDENTITY = BITT< 12 >::VALUE,
-	STFLAG_COMPLEX = BITT< 13 >::VALUE,
-	STFLAG_CALCULATE_DURATION = BITT< 14 >::VALUE,
-};
-
-// ==============================================
-// ==============================================
-
-enum {
-	ETFLAG_HAS_SOUND = BITT< 0 >::VALUE,
-	ETFLAG_USES_ENDORIGIN = BITT< 1 >::VALUE,
-	ETFLAG_ATTENUATES = BITT< 2 >::VALUE,
-	ETFLAG_EDITOR_MODIFIED = BITT< 3 >::VALUE,
-	ETFLAG_USES_MATERIAL_COLOR = BITT< 4 >::VALUE,
-	ETFLAG_ORIENTATE_IDENTITY = BITT< 5 >::VALUE,
-	ETFLAG_USES_AMBIENT_CUBEMAP = BITT< 6 >::VALUE,
-	ETFLAG_HAS_PHYSICS = BITT< 7 >::VALUE,
-};
-
-#ifdef _RAVEN_FX
-extern idCVar bse_render;
-extern idCVar bse_singleEffect;
-extern idCVar bse_debug;
-#ifdef _K_DEV // my debug macros
-#if !defined(_MSC_VER)
-#define BSE_VERBOSE(fmt, args...) { if(bse_debug.GetInteger() >= 1) { common->Printf(fmt, ##args); } }
-#define BSE_DEBUG(fmt, args...) { if(bse_debug.GetInteger() >= 2) { common->Printf(fmt, ##args); } }
-#define BSE_INFO(fmt, args...) { if(bse_debug.GetInteger() >= 3) { common->Printf(fmt, ##args); } }
-#define BSE_WARNING(fmt, args...) { if(bse_debug.GetInteger() >= 4) { common->Printf(fmt, ##args); } }
-#define BSE_ERROR(fmt, args...) { if(bse_debug.GetInteger() >= 5) { common->Printf(fmt, ##args); } }
+#if BSE_DEV
+extern idCVar bse_log;
+#define BSE_LOGFI(x, ...) do { if(bse_log.GetBool()) LOGFI(x, __VA_ARGS__); } while(0);
 #else
-#define BSE_VERBOSE(fmt, ...) { if(bse_debug.GetInteger() >= 1) { common->Printf(fmt, __VA_ARGS__); } }
-#define BSE_DEBUG(fmt, ...) { if(bse_debug.GetInteger() >= 2) { common->Printf(fmt, __VA_ARGS__); } }
-#define BSE_INFO(fmt, ...) { if(bse_debug.GetInteger() >= 3) { common->Printf(fmt, __VA_ARGS__); } }
-#define BSE_WARNING(fmt, ...) { if(bse_debug.GetInteger() >= 4) { common->Printf(fmt, __VA_ARGS__); } }
-#define BSE_ERROR(fmt, ...) { if(bse_debug.GetInteger() >= 5) { common->Printf(fmt, __VA_ARGS__); } }
+#define BSE_LOGFI(...)
 #endif
 
-#else
+class rvParticleParms
+{
+public:
+    //— SpawnType enumeration mirrors the game ticker values ————————
+    enum SpawnType
+    {
+        SPAWN_NONE = 0x00,
+        SPAWN_CONSTANT_ONE = 0x05,
+        SPAWN_AT_POINT = 0x09,
+        SPAWN_LINEAR = 0x0D,
+        SPAWN_BOX = 0x11,
+        SPAWN_SURFACE_BOX = 0x15,
+        SPAWN_SPHERE = 0x19,
+        SPAWN_SURFACE_SPHERE = 0x1D,
+        SPAWN_CYLINDER = 0x21,
+        SPAWN_SURFACE_CYLINDER = 0x25,
+        SPAWN_SPIRAL = 0x29,
+        SPAWN_MODEL = 0x2D,
 
-#if !defined(_MSC_VER)
-#define BSE_VERBOSE(fmt, args...)
-#define BSE_DEBUG(fmt, args...)
-#define BSE_INFO(fmt, args...)
-#define BSE_WARNING(fmt, args...)
-#define BSE_ERROR(fmt, args...)
-#else
-#define BSE_VERBOSE(fmt, ...)
-#define BSE_DEBUG(fmt, ...)
-#define BSE_INFO(fmt, ...)
-#define BSE_WARNING(fmt, ...)
-#define BSE_ERROR(fmt, ...)
-#endif
-#endif
+        SPAWN_CONSTANT_ONE_2D = 0x06, // SPAWN_CONSTANT_ONE+1,
+        SPAWN_AT_POINT_2D = 0x0A, // SPAWN_AT_POINT+1,
+        SPAWN_LINEAR_2D = 0x0E, // SPAWN_LINEAR+1,
+        SPAWN_BOX_2D = 0x12, // SPAWN_BOX+1,
+        SPAWN_SURFACE_BOX_2D = 0x16, // SPAWN_SURFACE_BOX+1,
+        SPAWN_SPHERE_2D = 0x1A, // SPAWN_SPHERE+1,
+        SPAWN_SURFACE_SPHERE_2D = 0x1E, // SPAWN_SURFACE_SPHERE+1,
+        SPAWN_CYLINDER_2D = 0x22, // SPAWN_CYLINDER+1,
+        SPAWN_SURFACE_CYLINDER_2D = 0x26, // SPAWN_SURFACE_CYLINDER+1,
+        SPAWN_SPIRAL_2D = 0x2A, // SPAWN_SPIRAL+1,
+        SPAWN_MODEL_2D = 0x2E, // SPAWN_MODEL+1,
 
-typedef struct {
-	int						type;
-	int						sibling;
+        SPAWN_CONSTANT_ONE_3D = 0x07, // SPAWN_CONSTANT_ONE+2,
+        SPAWN_AT_POINT_3D = 0x0B, // SPAWN_AT_POINT+2,
+        SPAWN_LINEAR_3D = 0x0F, // SPAWN_LINEAR+2,
+        SPAWN_BOX_3D = 0x13, // SPAWN_BOX+2,
+        SPAWN_SURFACE_BOX_3D = 0x17, // SPAWN_SURFACE_BOX+2,
+        SPAWN_SPHERE_3D = 0x1B, // SPAWN_SPHERE+2,
+        SPAWN_SURFACE_SPHERE_3D = 0x1F, // SPAWN_SURFACE_SPHERE+2,
+        SPAWN_CYLINDER_3D = 0x23, // SPAWN_CYLINDER+2,
+        SPAWN_SURFACE_CYLINDER_3D = 0x27, // SPAWN_SURFACE_CYLINDER+2,
+        SPAWN_SPIRAL_3D = 0x2B, // SPAWN_SPIRAL+2,
+        SPAWN_MODEL_3D = 0x2F, // SPAWN_MODEL+2,
+    };
 
-	idStr					data;
-	idStr					name;
-	idStr					fire;
+    //— Public data kept identical to the Hex-Rays layout ————————
+    uint32_t   mSpawnType;
+    uint32_t   mFlags;           // bit-field (see code)
+    idVec3     mMins;             // local bounding box
+    idVec3     mMaxs;
+    float      mRange;        // spiral radius, etc.
+    void* mMisc;     // model / extra payload
 
-	float					delay;
-	float					duration;
-	float					restart;
-	float					size;
-	float					fadeInTime;
-	float					fadeOutTime;
-	float					shakeTime;
-	float					shakeAmplitude;
-	float					shakeDistance;
-	float					shakeImpulse;
-	float					lightRadius;
-	float					rotate;
-	float					random1;
-	float					random2;
+    bool operator!=(const rvParticleParms& rhs) const
+    {
+        if (mSpawnType != rhs.mSpawnType) return true;
+        if (mFlags != rhs.mFlags)     return true;
+        if (mMisc != rhs.mMisc)      return true;      // pointer identity
 
-	idVec3					lightColor;
-	idVec3					offset;
-	idMat3					axis;
+        // idVec3 already has an epsilon-aware Compare()
+        if (!mMins.Compare(rhs.mMins, kEpsilon))  return true;
+        if (!mMaxs.Compare(rhs.mMaxs, kEpsilon))  return true;
+        if (fabs(mRange - rhs.mRange) > kEpsilon) return true;
 
-	bool					soundStarted;
-	bool					shakeStarted;
-	bool					shakeFalloff;
-	bool					shakeIgnoreMaster;
-	bool					bindParticles;
-	bool					explicitAxis;
-	bool					noshadows;
-	bool					particleTrackVelocity;
-	bool					trackOrigin;
+        return false; // everything matched
+    }
 
+    typedef void (*SpawnFunc)(float*               /*scratch*/,
+        const rvParticleParms& /*template parms*/,
+        idVec3*              /*in-out position*/,
+        const idVec3*        /*reference*/);
 
+    static SpawnFunc spawnFunctions[48];
 
-	int seg;
-	int ptype;
-	idVec3					position;
-	int count;
-	bool useEndOrigin;
-	float length;
-} rvFXSingleAction;
+    //— Small helpers ————————————————————————————————————————————————
+    bool  Compare(const rvParticleParms& rhs) const;
+    void  HandleRelativeParms(float* death, float* init, int count) const;
+    void  GetMinsMaxs(idVec3& mins, idVec3& maxs) const;
 
-#include "BSE_Fx.h"
+    rvParticleParms()
+    : mSpawnType(SPAWN_NONE),
+      mFlags(0),
+      mMins(idVec3(0.0f, 0.0f, 0.0f)),
+      mMaxs(idVec3(0.0f, 0.0f, 0.0f)),
+      mRange(1.0f),
+      mMisc(NULL)
+    {}
+
+    //static const float kEpsilon;
+};
+
+namespace BSE
+{
+    const char * SegmentTypeName(int segType);
+    const char * ParticleTypeName(int pType);
+};
+
+#include "bse_effect.h"
+#include "BSE_Envelope.h"
+#include "bse_parseparticle2.h"
+#include "bse_effecttemplate.h"
+#include "bse_segment.h"
 #include "BSE_Particle.h"
+#include "bse_light.h"
+#include "bse_segmenttemplate.h"
+#include "BSE_SpawnDomains.h"
+#include "bse_electricity.h"
 
-class rvDeclEffectParser;
-#endif
-
-class rvDeclEffect : public idDecl
-{
-public:
-	friend	class			rvBSE;
-	friend  class			rvBSEManagerLocal;
-
-	rvDeclEffect(void): mFlags(0) {  }
-	virtual 						~rvDeclEffect(void) { }
-
-	virtual bool					SetDefaultText(void);
-	virtual const char*             DefaultDefinition(void) const;
-	virtual bool					Parse(const char* text, const int textLength, bool noCaching = false);
-	virtual void					FreeData(void);
-	virtual size_t					Size(void) const;
-#ifdef _RAVEN_FX
-	virtual void			        Print(void) const;
-	virtual void			        List(void) const;
-    rvBSEParticle *                 GetParticle(const char *name);
-    const rvBSEParticle *           GetParticle(const char *name) const;
-    void                            AppendParticle(const char *name, rvBSEParticle *particle);
-
-	idList<rvFXSingleAction>        events;
-	idStr					        joint;
-	idList<idStr>                   particles;
-    idList<rvBSEParticle *>         particle_decl_hash; // index sync with `particles`
-
-	friend class rvDeclEffectParser;
-#endif
-
-	int						mFlags;
-	bool					GetHasSound(void) const { return(!!(mFlags & ETFLAG_HAS_SOUND)); }
-};
-
-enum {
-	EFLAG_LOOPING = BITT< 0 >::VALUE,
-	EFLAG_HASENDORIGIN = BITT< 1 >::VALUE,
-	EFLAG_ENDORIGINCHANGED = BITT< 2 >::VALUE,
-	EFLAG_STOPPED = BITT< 3 >::VALUE,
-	EFLAG_ORIENTATE_IDENTITY = BITT< 4 >::VALUE,
-	EFLAG_AMBIENT = BITT< 5 >::VALUE,
-};
-
-const int LIGHTID_EFFECT_LIGHT = 300;
-
-class rvRenderEffectLocal;
-
-class rvBSEManagerLocal : public rvBSEManager
-{
-public:
-	virtual	bool				Init(void);
-	virtual	bool				Shutdown(void);
-
-	virtual	bool				PlayEffect(class rvRenderEffectLocal* def, float time);
-	virtual	bool				ServiceEffect( class rvRenderEffectLocal *def, float time ) {
-		bool forcePush = false;
-		return ServiceEffect(def, time, forcePush);
-	}
-	virtual	bool				ServiceEffect(class rvRenderEffectLocal* def, float time, bool &forcePush);
-	virtual	void				StopEffect(rvRenderEffectLocal* def);
-	virtual	void					RestartEffect( rvRenderEffectLocal *def );
-	virtual	void				FreeEffect(rvRenderEffectLocal* def);
-	virtual	float				EffectDuration(const rvRenderEffectLocal* def);
-
-	virtual	bool				CheckDefForSound(const renderEffect_t* def);
-
-	virtual	void				BeginLevelLoad(void);
-	virtual	void				EndLevelLoad(void);
-
-	virtual	void				StartFrame(void);
-	virtual	void				EndFrame(void);
-	virtual bool				Filtered(const char* name, effectCategory_t category);
-
-	virtual bool				CanPlayRateLimited(effectCategory_t category);
-	virtual void				UpdateRateTimes(void) {}
-
-	virtual void					SetShakeParms( float time, float scale ) {}
-	virtual void					SetTunnelParms( float time, float scale ) {}
-	
+//──────────────────────────────────────────────────────────────────────────────
+//  Constants & helpers
+//──────────────────────────────────────────────────────────────────────────────
 #if 0
-	void							LoadAll(const idCmdArgs& args) { } ; // jmarshall: No code included in EXE for this function, not called
-	void							Stats( const idCmdArgs &args );
-	void							Pause( const idCmdArgs &args );
+namespace {
+    const float   kDecayPerFrame = 0.1f;      // how fast rate-limit credits decay
+    const size_t  kMaxCategories = 3;         // EC_IGNORE, EC_SMALL, EC_LARGE (example)
+}
 #endif
-	rvBSE*							GetPlayingEffect(int handle, struct renderEntity_s* ent) { return NULL; }  // jmarshall: No code included in EXE for this function, not called
 
-	virtual int							AddTraceModel(idTraceModel* model) { return 0; }
-	virtual idTraceModel*				GetTraceModel(int index) { return NULL; }
-	virtual void						FreeTraceModel(int index) {}
+class rvBSEManagerLocal final : public rvBSEManager {
+public:
+    //──────────────────────────────
+    // Lifetime
+    //──────────────────────────────
+    rvBSEManagerLocal() {}
+    ~rvBSEManagerLocal() {}
 
-	virtual const idVec3&			GetCubeNormals(int index) { return vec3_origin; } // jmarshall: this is wrong
-	virtual const idMat3&			GetModelToBSE() { return mat3_identity; }
+    bool            Init();
+    bool            Shutdown();
 
-	virtual bool					IsTimeLocked() const { return false; }
-	virtual float					GetLockedTime() const { return 0.0; }
+    //──────────────────────────────
+    // Per-frame & level control
+    //──────────────────────────────
+    void            BeginLevelLoad()                      { /* nop */ }
+    void            EndLevelLoad();              // clear rates
+    void            StartFrame();              // reset perf HUD
+    void            EndFrame();              // push perf HUD
+    void            UpdateRateTimes();              // decay credits
 
-	virtual void					MakeEditable( class rvParticleTemplate *particle ) {}
+    //──────────────────────────────
+    // Effect API
+    //──────────────────────────────
+    bool            PlayEffect(rvRenderEffectLocal* def, float now);
+    bool            ServiceEffect(rvRenderEffectLocal* def, float now);
+    void            StopEffect(rvRenderEffectLocal* def);
+    void            FreeEffect(rvRenderEffectLocal* def);
+    float           EffectDuration(const rvRenderEffectLocal* def);
 
-	virtual void					CopySegment( class rvSegmentTemplate *dest, class rvSegmentTemplate *src ) {}
+    bool            CheckDefForSound(const renderEffect_t* def);
 
-#ifdef _RAVEN_FX
-	static idRandom random;
-#endif
-private:
-#ifdef _RAVEN_FX
-	static		idBlockAlloc<rvBSE, 256/*, 0 //k*/>	effects;
-#endif
-#if 0
-	static		idVec3						mCubeNormals[6];
-	static		idMat3						mModelToBSE;
-	static		idList<idTraceModel*>		mTraceModels;
-	static		const char* mSegmentNames[SEG_COUNT];
-	static		int							mPerfCounters[NUM_PERF_COUNTERS];
-	static		float						mEffectRates[EC_MAX];
-	float								pauseTime;	// -1 means pause at the next time update
-#endif
+    // view-kick helpers exposed to script
+    void            SetDoubleVisionParms(float time, float scale);
+    void            SetShakeParms(float time, float scale);
+    void            SetTunnelParms(float time, float scale);
+
+    // rate-limit helpers
+    bool            Filtered(const char* name, effectCategory_t c = EC_MAX);
+    bool            CanPlayRateLimited(effectCategory_t c);
+
+    // trace models
+    int             AddTraceModel(idTraceModel* m);
+    idTraceModel* GetTraceModel(int idx);
+    void            FreeTraceModel(int idx);
+
+    // debug console commands
+    static  void    BSE_Stats_f(const idCmdArgs& args);
+    static  void    BSE_Log_f(const idCmdArgs& args);
+
+public:
+    //──────────────────────────────
+    // Internal helpers / data
+    //──────────────────────────────
+    bool DebugHudActive() const { return com_debugHudActive; }
+
+    idBlockAlloc<rvBSE, 256, 26>          effects_;             // effect pool
+    static idMat3                          mModelToBSE;
+    idList<idTraceModel*>          traceModels;         // loose heap-allocated models
+    static		const char* mSegmentNames[SEG_COUNT];
+	static float mEffectRates[EC_MAX];
+	static float effectCosts[EC_MAX];
+	static unsigned int mPerfCounters[5];
+    static idCVar *g_decals;
 };
-#endif
+
+extern rvBSEManagerLocal bseLocal;

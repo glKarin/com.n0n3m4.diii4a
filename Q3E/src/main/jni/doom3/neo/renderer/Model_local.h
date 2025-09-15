@@ -452,7 +452,11 @@ class idRenderModelSprite : public idRenderModelStatic
 };
 
 #ifdef _RAVEN // bse model
-#include "../raven/bse/Model_bse.h"
+#ifdef _RAVEN_BSE
+#include "../raven/renderer/Model_bse.h"
+#else
+#include "../raven/fx/Model_bse.h"
+#endif
 #endif
 
 #ifdef _HUMANHEAD

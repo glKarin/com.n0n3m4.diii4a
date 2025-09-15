@@ -236,7 +236,7 @@ void R_CreateEntityRefs(idRenderEntityLocal *def)
 	tr.viewCount++;
 
 	// push these points down the BSP tree into areas
-	def->world->PushVolumeIntoTree(def, NULL, 8, transformed);
+    def->world->PushVolumeIntoTree(def, NULL, 8, transformed);
 #ifdef _D3BFG_CULLING
     }
 #endif
@@ -738,7 +738,7 @@ void R_CreateLightRefs(idRenderLightLocal *light)
 		light->world->FlowLightThroughPortals(light);
 	} else {
 		// push these points down the BSP tree into areas
-		light->world->PushVolumeIntoTree(NULL, light, tri->numVerts, points);
+        light->world->PushVolumeIntoTree(NULL, light, tri->numVerts, points);
 	}
 #ifdef _D3BFG_CULLING
     }
@@ -1201,4 +1201,25 @@ void R_DeriveEntityData(idRenderEntityLocal* entity)
 
     // TDM entity->world->entityDefsBoundingSphere[entity->index] = R_BoundingSphereOfLocalBox(entity->referenceBounds, entity->modelMatrix);
 }
+#endif
+
+#ifdef _RAVEN
+#ifdef _RAVEN_BSE
+void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def)
+{
+    areaReference_s *effectRefs; // eax
+    areaReference_s *ownerNext; // edx
+
+    effectRefs = def->effectRefs;
+    while ( effectRefs )
+    {
+        ownerNext = effectRefs->ownerNext;
+        effectRefs->areaNext->areaPrev = effectRefs->areaPrev;
+        effectRefs->areaPrev->areaNext = effectRefs->areaNext;
+        def->world->areaReferenceAllocator.Free(effectRefs);
+        effectRefs = ownerNext;
+    }
+    def->effectRefs = NULL;
+}
+#endif
 #endif

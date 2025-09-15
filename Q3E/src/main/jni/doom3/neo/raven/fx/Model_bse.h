@@ -10,7 +10,6 @@ rvRenderModelBSE
 class rvBSEParticle;
 #endif
 class rvRenderModelBSE : public idRenderModelStatic {
-public:
 #ifdef _RAVEN_FX
 	public:
 		rvRenderModelBSE();
@@ -27,8 +26,10 @@ public:
 		const rvBSEParticle 		*particleSystem;
 		idBounds					bounds;
 #else
-	virtual void				InitFromFile(const char* fileName);
-	virtual void				FinishSurfaces(bool useMikktspace);
+    public:
+		rvRenderModelBSE();
+        virtual void				InitFromFile(const char* fileName);
+        virtual void				FinishSurfaces(bool useMikktspace);
 #endif
 };
 

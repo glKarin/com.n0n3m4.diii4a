@@ -43,7 +43,7 @@ class rvBSE
 		void Init(const rvDeclEffect* declEffect, renderEffect_s* parms, idRenderWorld *world, int time);
 		void Update(renderEffect_s* parms, int time);
 		void Event_Remove(void);
-		ID_INLINE void Destroy(void) {
+		void Destroy(void) {
 			Event_Remove();
 		}
 

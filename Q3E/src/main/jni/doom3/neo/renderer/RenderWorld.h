@@ -209,35 +209,6 @@ public:
 	virtual					~rvRenderEffect(void) {}
 };
 // RAVEN END
-
-class rvRenderEffectLocal : rvRenderEffect
-{
-public:
-	renderEffect_s parms;
-	//renderEffect_s gameParms;
-	int gameTime;
-	int serviceTime;
-	bool newEffect;
-	bool expired;
-	class rvBSE* effect;
-	idBounds referenceBounds;
-	float modelMatrix[16];
-	class idRenderWorldLocal* world;
-	int lastModifiedFrameNum;
-	bool archived;
-	int viewCount;
-	//viewEffect_s* viewEffect;
-	int visibleCount;
-	//areaReference_s* effectRefs;
-	//cullLink_t* cullLinks;
-	bool remove;
-	int updateFramenum;
-	idLinkList<rvRenderEffectLocal> node;
-	int index;
-	idRenderModel* dynamicModel;
-	int dynamicModelFrameCount;
-};
-// RAVEN END
 #endif
 
 typedef struct renderEntity_s {

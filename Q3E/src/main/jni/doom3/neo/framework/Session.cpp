@@ -549,6 +549,10 @@ void idSessionLocal::Shutdown()
 
 	Stop();
 
+#ifdef _RAVEN //karin: shutdown BSE
+	bse->Shutdown();
+#endif
+
 	if (rw) {
 		delete rw;
 		rw = NULL;
@@ -3367,6 +3371,9 @@ void idSessionLocal::Frame()
 			break;
 		}
 	}
+#ifdef _RAVEN
+	com_debugHudActive = game->IsDebugHudActive();
+#endif
 }
 
 /*
@@ -3608,6 +3615,9 @@ void idSessionLocal::Init()
 	sw = soundSystem->AllocSoundWorld(rw);
 
 	menuSoundWorld = soundSystem->AllocSoundWorld(rw);
+#ifdef _RAVEN //karin: init BSE
+	bse->Init();
+#endif
 
 	// we have a single instance of the main menu
 #ifndef ID_DEMO_BUILD
@@ -4246,7 +4256,11 @@ void idSessionLocal::UpdateScreen(byte *data, bool outOfSequence)
 	// draw everything
 	Draw();
 
-	if (com_speeds.GetBool()) {
+	if (com_speeds.GetBool()
+#ifdef _RAVEN
+			|| com_debugHudActive
+#endif
+			) {
 		renderSystem->EndFrame(&time_frontend, &time_backend);
 	} else {
         renderSystem->EndFrame(data, NULL, NULL);
