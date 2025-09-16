@@ -538,8 +538,15 @@ float idRenderModelStatic::DepthHack() const
 idRenderModelStatic::InstantiateDynamicModel
 ================
 */
+#ifdef _RAVEN
+idRenderModel *idRenderModelStatic::InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask)
+#else
 idRenderModel *idRenderModelStatic::InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel)
+#endif
 {
+#ifdef _RAVEN
+    (void)surfMask;
+#endif
 	if (cachedModel) {
 		delete cachedModel;
 		cachedModel = NULL;

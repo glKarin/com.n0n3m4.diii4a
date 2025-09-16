@@ -297,8 +297,15 @@ void idRenderModelMD3::LerpMeshVertexes(srfTriangles_t *tri, const struct md3Sur
 idRenderModelMD3::InstantiateDynamicModel
 =============
 */
+#ifdef _RAVEN
+idRenderModel *idRenderModelMD3::InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask)
+#else
 idRenderModel *idRenderModelMD3::InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel)
+#endif
 {
+#ifdef _RAVEN
+    (void)surfMask;
+#endif
 	int				i, j;
 	float			backlerp;
 	int 			*triangles;

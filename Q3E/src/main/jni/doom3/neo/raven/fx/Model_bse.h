@@ -17,7 +17,11 @@ class rvRenderModelBSE : public idRenderModelStatic {
 		virtual void				InitFromFile(const char *fileName);
 		virtual void				TouchData();
 		virtual dynamicModel_t		IsDynamicModel() const;
+#ifdef _RAVEN
+		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask);
+#else
 		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#endif
 		virtual idBounds			Bounds(const struct renderEntity_s *ent) const;
 		virtual float				DepthHack() const;
 		virtual int					Memory() const;

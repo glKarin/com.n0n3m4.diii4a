@@ -48,8 +48,15 @@ void rvRenderModelBSE::TouchData(void)
 rvRenderModelBSE::InstantiateDynamicModel
 ====================
 */
+#ifdef _RAVEN
+idRenderModel *rvRenderModelBSE::InstantiateDynamicModel(const struct renderEntity_s *renderEntity, const struct viewDef_s *viewDef, idRenderModel *cachedModel, dword surfMask)
+#else
 idRenderModel *rvRenderModelBSE::InstantiateDynamicModel(const struct renderEntity_s *renderEntity, const struct viewDef_s *viewDef, idRenderModel *cachedModel)
+#endif
 {
+#ifdef _RAVEN
+    (void)surfMask;
+#endif
 	idRenderModelStatic	*staticModel;
 
 	if (cachedModel && !r_useCachedDynamicModels.GetBool()) {
