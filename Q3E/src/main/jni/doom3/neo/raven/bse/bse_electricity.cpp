@@ -388,7 +388,7 @@ bool rvElectricityParticle::Render(const rvBSE* effect,
     (this->*mEvalLengthPtr)(evalTime, &work.length);
 
     /* ───── transform to effect-space if requested ───── */
-    if (!(mFlags & 2)) {
+    if (!(mFlags & PF_SEGMENT_LOCKED/* 2 */)) {
         work.length = effect->mCurrentAxis * (mInitAxis * work.length);
     }
 

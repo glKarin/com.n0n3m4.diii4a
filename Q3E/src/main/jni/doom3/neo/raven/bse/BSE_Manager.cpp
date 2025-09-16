@@ -263,7 +263,7 @@ float rvBSEManagerLocal::EffectDuration(const rvRenderEffectLocal* def)
 bool rvBSEManagerLocal::CheckDefForSound(const renderEffect_t* def)
 {
     rvDeclEffect* decl = (rvDeclEffect*)def->declEffect;    
-    return (decl->mFlags & 1u) != 0;
+    return (decl->mFlags & DEF_SOUND/* 1u */) != 0;
 }
 //──────────────────────────────────────────────────────────────────────────────
 void rvBSEManagerLocal::SetDoubleVisionParms(float t, float s)

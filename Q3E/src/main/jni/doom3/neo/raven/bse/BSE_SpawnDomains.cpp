@@ -593,7 +593,7 @@ void SpawnCylinder3(idVec3* outXYZ, const rvParticleParms& p,
     const float rZ = 0.5f * (p.mMaxs.z - p.mMins.z);
 
     // Optional taper flag (bit 2)
-    const bool  doTaper = (p.mFlags & 4) != 0;
+    const bool  doTaper = (p.mFlags & PPF_CONE/* 4 */) != 0;
 
     // Fraction along height
     const float t = rvRandom::flrand(0.0f, halfH * 2.0f);
@@ -627,7 +627,7 @@ void SpawnSurfaceCylinder3(idVec3* outXYZ, const rvParticleParms& p,
     const float rY = 0.5f * (p.mMaxs.y - p.mMins.y);
     const float rZ = 0.5f * (p.mMaxs.z - p.mMins.z);
 
-    const bool  doTaper = (p.mFlags & 4) != 0;
+    const bool  doTaper = (p.mFlags & PPF_CONE/* 4 */) != 0;
     const float t = rvRandom::flrand(0.0f, halfH * 2.0f);
     const float tp = doTaper ? (t / (halfH * 2.0f)) : 1.0f;
 

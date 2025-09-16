@@ -138,7 +138,7 @@ float rvBSE::GetOriginAttenuation(const rvSegmentTemplate* st) const
   ----------------------------------------------------------------------*/
 void rvBSE::UpdateSoundEmitter(const rvSegmentTemplate* st, rvSegment* seg)
 {
-    idSoundEmitter* emitter = soundSystem->EmitterForIndex( /*channel*/1, mReferenceSoundHandle);
+    idSoundEmitter* emitter = soundSystem->EmitterForIndex( /*channel*/SOUNDWORLD_GAME/* 1 */, mReferenceSoundHandle);
     if (!emitter) {
         return;
     }
@@ -545,10 +545,10 @@ rvRenderModelBSE* rvBSE::Render(const renderEffect_s* owner, const viewDef_s* vi
 void rvBSE::Destroy()
 {
     // Stop & free sound emitter
-    if (idSoundEmitter* emitter = soundSystem->EmitterForIndex(1, mReferenceSoundHandle))
+    if (idSoundEmitter* emitter = soundSystem->EmitterForIndex(SOUNDWORLD_GAME/* 1 */, mReferenceSoundHandle))
     {
         emitter->StopSound(0);
-        soundSystem->FreeSoundEmitter(1, emitter->Index(), true);
+        soundSystem->FreeSoundEmitter(SOUNDWORLD_GAME/* 1 */, emitter->Index(), true);
     }
 
     // Destroy all segments & particles, then free the array

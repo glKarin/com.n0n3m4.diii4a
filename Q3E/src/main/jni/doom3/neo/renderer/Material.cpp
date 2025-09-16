@@ -2491,6 +2491,10 @@ void idMaterial::ParseMaterial(idLexer &src)
         {
             src.ReadToken(&token);
             materialType = declManager->FindMaterialType(token, false);
+            if ( !materialType || materialType->IsImplicit() )
+            {
+                common->Warning("UNKNOWN: materialType '%s' in '%s'", token.c_str(), GetName());
+            }
             continue;
         }
 		else if (!token.Icmp("portalDistanceNear")) {

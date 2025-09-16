@@ -233,7 +233,7 @@ bool rvSpriteParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt,
     const float c = cos(angle), s = sin(angle);
     
 #if 1 //k??? TODO Q4D original source code
-	idVec3 left = view[1] * c - view[2] * s;
+	idVec3 left = - view[2] * s + view[1] * c;
 	idVec3 up = view[2] * c + view[1] * s;
 
     idVec3 halfRight = left * (size.x);
@@ -320,7 +320,7 @@ bool rvLineParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt, c
 #endif
     {
         // rotate len by current axis unless fixed flag set
-        if (!(mFlags & 2)) len = mInitAxis * effect->mCurrentAxisTransposed/*//k??? TODO mCurrentAxis */ * len; // simplified – assumes operator*
+        if (!(mFlags & PF_SEGMENT_LOCKED/* 2 */)) len = mInitAxis * effect->mCurrentAxisTransposed/*//k??? TODO mCurrentAxis */ * len; // simplified – assumes operator*
     }
 
     // if velocity‑aligned flag, project onto velocity dir

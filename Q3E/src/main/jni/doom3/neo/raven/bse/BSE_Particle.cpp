@@ -716,7 +716,7 @@ void rvLineParticle::Refresh(const rvBSE* effect,
     // 1.  Re-evaluate INIT / DEST length vectors (exactly like FinishSpawn)
     //----------------------------------------------------------------------
     float* initLen = GetInitLength();
-    if ((effect->mFlags & 2) && (pt->mSpawnLength.mFlags & 2)) {
+    if ((effect->mFlags & EF_USES_END_ORIGIN/* 2 */) && (pt->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */)) {
         SetLengthUsingEndOrigin(effect, &pt->mSpawnLength, initLen);
     }
     else {
@@ -724,7 +724,7 @@ void rvLineParticle::Refresh(const rvBSE* effect,
     }
 
     float* destLen = GetDestLength();
-    if ((effect->mFlags & 2) && (pt->mSpawnLength.mFlags & 2)) {
+    if ((effect->mFlags & EF_USES_END_ORIGIN/* 2 */) && (pt->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */)) {
         SetLengthUsingEndOrigin(effect, &pt->mDeathLength, destLen);
     }
     else {
@@ -920,7 +920,7 @@ void rvParticle::EvaluatePosition(const rvBSE* effect, idVec3& outPos, float tim
     // 4)  transform from *particle local* → *current world* coordinates
     //     (unless the particle was “locked” at spawn)
     // ----------------------------------------------------------------------
-    if (!(mFlags & 0x000002)) {                    // PF_SEGMENT_LOCKED
+    if (!(mFlags & PF_SEGMENT_LOCKED/* 0x000002 */)) {                    // PF_SEGMENT_LOCKED
         // rotate into the emitter’s current orientation
         idVec3 worldPos = effect->mCurrentAxis
             * (mInitAxis.Transpose() * outPos);
@@ -1205,12 +1205,12 @@ void rvLineParticle::FinishSpawn(rvBSE* effect, rvSegment* segment, float birthT
     {
         p_mParticleTemplate = &SegmentTemplate->mParticleTemplate;
         v16 = GetInitLength();
-        if ( (effect->mFlags & 2) != 0 && (p_mParticleTemplate->mSpawnLength.mFlags & 2) != 0 )
+        if ( (effect->mFlags & EF_USES_END_ORIGIN/* 2 */) != 0 && (p_mParticleTemplate->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */) != 0 )
             SetLengthUsingEndOrigin(effect, &p_mParticleTemplate->mSpawnLength, v16);
         else
             rvParticleParms::spawnFunctions[p_mParticleTemplate->mSpawnLength.mSpawnType](v16, p_mParticleTemplate->mSpawnLength, NULL, NULL);
         v17 = GetDestLength();
-        if ( (effect->mFlags & 2) != 0 && (p_mParticleTemplate->mSpawnLength.mFlags & 2) != 0 )
+        if ( (effect->mFlags & EF_USES_END_ORIGIN/* 2 */) != 0 && (p_mParticleTemplate->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */) != 0 )
             SetLengthUsingEndOrigin(effect, &p_mParticleTemplate->mDeathLength, v17);
         else
             rvParticleParms::spawnFunctions[p_mParticleTemplate->mDeathLength.mSpawnType](v17, p_mParticleTemplate->mDeathLength, NULL, NULL);
