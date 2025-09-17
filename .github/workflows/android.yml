@@ -1,6 +1,6 @@
 # Only for building testing version by Github CI workflow
 
-name: Android apk CI(armv8-64 only)
+name: Android apk CI(arm64-v8a 64-bit only)
 
 on:
   push:
@@ -62,9 +62,10 @@ jobs:
         df -h
         du -ch | tail -n -1
         echo "<<< disk usage"
-        barch=-Pabifilters=arm64-v8a
-        # remove 32bit libraries
-        echo "Remove 32bit libraries"
+        arch=arm64-v8a
+        barch=-Pabifilters=${arch}
+        # remove 32-bit libraries
+        echo "Remove 32-bit libraries"
         rm -rf Q3E/libs/armeabi-v7a
         # build Xash3d only
         echo "Build Xash3D libraries"
@@ -75,16 +76,16 @@ jobs:
         du -ch | tail -n -1
         echo "<<< disk usage"
         echo "Copy Xash3D libraries to libs"
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libxash3d*so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libfilesystem_stdio.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libclient_cs.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libmenu_cs.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libserver_cs.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libserver_yapb.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libclient_hl.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libserver_hl.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libmenu_hl.so Q3E/libs/arm64-v8a
-        ls Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libxash3d*so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libfilesystem_stdio.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libclient_cs.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libmenu_cs.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libserver_cs.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libserver_yapb.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libclient_hl.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libserver_hl.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libmenu_hl.so Q3E/libs/${arch}
+        ls Q3E/libs/${arch}
         # build Source only
         echo "Clean builds"
         ./gradlew clean $bargs
@@ -103,8 +104,8 @@ jobs:
         du -ch | tail -n -1
         echo "<<< disk usage"
         echo "Copy Source libraries to libs"
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libsource*so Q3E/libs/arm64-v8a
-        ls Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libsource*so Q3E/libs/${arch}
+        ls Q3E/libs/${arch}
         # build idTech4 only
         echo "Clean builds"
         ./gradlew clean $bargs
@@ -122,27 +123,27 @@ jobs:
         du -ch | tail -n -1
         echo "<<< disk usage"
         echo "Copy idTech4 libraries to libs"
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libidtech4*.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libRBDoom3BFG*.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libgame.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libd3xp.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libcdoom.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libd3le.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libfraggingfree.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libhardcorps.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libhexeneoc.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/liblibrecoop.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/liblibrecoopxp.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/liboverthinked.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libperfected.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libperfected_roe.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/librivensin.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libsabot.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libtfphobos.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libq4game.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libhardqore.so Q3E/libs/arm64-v8a
-        cp -f Q3E/build/intermediates/library_jni/release/jni/arm64-v8a/libpreygame.so Q3E/libs/arm64-v8a
-        ls Q3E/libs/arm64-v8a
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libidtech4*.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libRBDoom3BFG*.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libgame.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libd3xp.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libcdoom.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libd3le.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libfraggingfree.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libhardcorps.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libhexeneoc.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/liblibrecoop.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/liblibrecoopxp.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/liboverthinked.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libperfected.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libperfected_roe.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/librivensin.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libsabot.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libtfphobos.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libq4game.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libhardqore.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libpreygame.so Q3E/libs/${arch}
+        ls Q3E/libs/${arch}
         # build non-idTech4 only
         echo "Clean builds"
         ./gradlew clean $bargs
@@ -166,7 +167,7 @@ jobs:
       id: rename_apk
       run: |
         cd /mnt/diii4a
-        apk_file=idTech4A++-testing-`date "+%Y_%m_%d-%H_%M_%S"`.apk
+        apk_file=idTech4A++-testing_`date "+%Y%m%d.%H%M%S"`_arm64.apk
         cp ./idTech4Amm/build/outputs/apk/release/idTech4Amm-release.apk $apk_file
         apk_file=`pwd`/$apk_file
         echo "disk usage: >>>"
@@ -190,6 +191,6 @@ jobs:
         repo_token: "${{ secrets.TOKEN }}"
         automatic_release_tag: "android_testing"
         prerelease: true
-        title: "Android armv8-64 testing (Non-release. Automatic CI builds)"
+        title: "Android arm64-v8a 64-bit testing (Non-release. Automatic CI builds)"
         files: |
           ${{ steps.rename_apk.outputs.value }}
