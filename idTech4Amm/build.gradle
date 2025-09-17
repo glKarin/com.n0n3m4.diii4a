@@ -60,8 +60,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     packagingOptions {
-		// only pick arm xunwind library
-        pickFirst "lib/arm**/libxunwind.so"
         // remove unused ffmpeg libraries
         // remove all x86/x86-64 libraries
         exclude "lib/x86/**"
@@ -79,12 +77,30 @@ android {
         exclude "lib/*/liblog.so"
 
         // remove arm64 libraries if testing arm32
-        // exclude "lib/arm64-v8a/**"
-        // exclude "lib/armeabi-v7a/**"
+        if(project.properties.abifilters == "arm64-v8a") {
+            println "[idTech4Amm]: Remove arm32 libraries"
+            exclude "lib/armeabi-v7a/**"
+            // only pick arm xunwind library
+            pickFirst "lib/arm64-v8a/libxunwind.so"
+        } else if(project.properties.abifilters == "armeabi-v7a") {
+            println "[idTech4Amm]: Remove arm64 libraries"
+            exclude "lib/arm64-v8a/**"
+            // only pick arm xunwind library
+            pickFirst "lib/armeabi-v7a/libxunwind.so"
+        } else {
+            println "[idTech4Amm]: Remove nothing"
+            // only pick arm xunwind library
+            pickFirst "lib/arm**/libxunwind.so"
+        }
 
 		// keep debug info
-        // doNotStrip "*/armeabi-v7a/*.so"
-        // doNotStrip "*/arm64-v8a/*.so"
+        if(project.properties.debugSymbols == "1") {
+            println "[idTech4Amm]: Keep library debug symbols"
+            doNotStrip "*/armeabi-v7a/*.so"
+            doNotStrip "*/arm64-v8a/*.so"
+        } else {
+            println "[idTech4Amm]: Strip library debug symbols"
+        }
     }
 }
 

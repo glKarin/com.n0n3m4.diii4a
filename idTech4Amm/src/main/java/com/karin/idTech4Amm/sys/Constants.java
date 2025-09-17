@@ -30,6 +30,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
+            "Fix BSE effects on Quake 4.",
             "Optimize PBR shaders with original specular texture on DOOM 3/Quake 4/Prey(2006).",
             "Add mp3 sound file support on DOOM 3/Quake 4/Prey(2006).",
             "Add settings by ImGui on DOOM 3/Quake 4/Prey(2006), command is `idTech4AmmSettings`, default binding to F10.",
