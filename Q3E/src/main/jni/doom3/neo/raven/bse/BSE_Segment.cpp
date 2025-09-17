@@ -988,7 +988,7 @@ bool rvSegment::Check(rvBSE *effect, float time)
 				case SEG_SOUND: // 5:
                     if ( (v8->mFlags & STF_ENABLED/* 1 */) == 0 )
                         break;
-                    ReferenceSound = effect->GetReferenceSound(1);
+                    ReferenceSound = effect->GetReferenceSound(SOUNDWORLD_GAME/* 1 */);
                     if ( ReferenceSound )
                     {
                         mSoundVolume = v8->GetSoundVolume();

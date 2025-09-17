@@ -934,7 +934,11 @@ class idSoundSystemLocal : public idSoundSystem
 		virtual void			FreeSoundEmitter(int worldId, int handle, bool immediate) {
 			idSoundEmitter *emitter = GetSoundWorldFromId(worldId)->EmitterForIndex(handle);
 			if(emitter)
+			{
+				Sys_EnterCriticalSection(); //karin: Q4D lock it
 				emitter->Free(immediate);
+				Sys_LeaveCriticalSection(); //karin: Q4D lock it
+			}
 		}
 		virtual void            StopAllSounds(int worldId) {
 			GetSoundWorldFromId(worldId)->StopAllSounds();

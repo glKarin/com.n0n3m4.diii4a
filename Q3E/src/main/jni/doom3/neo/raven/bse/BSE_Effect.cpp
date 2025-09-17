@@ -547,8 +547,8 @@ void rvBSE::Destroy()
     // Stop & free sound emitter
     if (idSoundEmitter* emitter = soundSystem->EmitterForIndex(SOUNDWORLD_GAME/* 1 */, mReferenceSoundHandle))
     {
-        emitter->StopSound(0);
-        soundSystem->FreeSoundEmitter(SOUNDWORLD_GAME/* 1 */, emitter->Index(), true);
+        emitter->StopSound(SCHANNEL_ANY/* 0 */);
+        soundSystem->FreeSoundEmitter(SOUNDWORLD_GAME/* 1 */, emitter->Index(), false/* true */); //karin: TODO mark removed only, sound broken sometime
     }
 
     // Destroy all segments & particles, then free the array

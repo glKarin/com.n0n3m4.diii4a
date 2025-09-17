@@ -33,7 +33,7 @@ public:
       mOriginDistanceToCamera(0.0f),
       mShortestDistanceToCamera(0.0f),
       mBrightness(0.0f),
-      mReferenceSoundHandle(0), // -1
+      mReferenceSoundHandle(-1), // 0
       mShortestDistanceDummy(0.0f)
     {}
 	~rvBSE();                                           //  Destroy()
