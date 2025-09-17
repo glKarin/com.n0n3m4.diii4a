@@ -13,6 +13,8 @@ entityDef player_viewbody { // must setup in player entity with property 'player
     "body_offset"               "-15 0 0" // extras model offset: vector <forward right up>, default = 0 0 0
 	"body_allChannel"			"0" // play animation with all channels, else only play with legs channel: bool, default = 1
 	"body_usePlayerModel"		"0" // use player model and not use 'body_model': bool, default = 0
+	"body_weaponDepthHack"		"0" // override view weapon: bool, default = 0
+	"body_modelDepthHack"		"0.0" // near clip: float, default = 0
 	"body_hidesurfaces" "shader_head,shader_toast" // hide surface names, separate by ',': string
 	// "hidesurface1" "shader_arm" // hide surface name by entity property: string, hidesurfaceXXX
 	// "hidesurface5" "shader_neck"
@@ -139,6 +141,8 @@ private:
 	bool							allChannel;
 	bool							usePlayerModel;
 	int								animChannel;
+	bool							weaponDepthHack;
+	float							modelDepthHack;
 
     friend class idPlayer;
 
