@@ -233,7 +233,7 @@ bool rvSpriteParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt,
     const float c = cos(angle), s = sin(angle);
     
 #if 1 //k??? TODO Q4D original source code
-	idVec3 left = - view[2] * s + view[1] * c;
+	idVec3 left = -view[2] * s + view[1] * c;
 	idVec3 up = view[2] * c + view[1] * s;
 
     idVec3 halfRight = left * (size.x);
@@ -285,8 +285,8 @@ bool rvSpriteParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt,
 	BSE_SETUP_VERT_NORMAL(v[3], pos);
 
     glIndex_t* idx = &tri->indexes[tri->numIndexes];
-    idx[0] = base; idx[1] = base + 2; idx[2] = base + 1; //k??? TODO: CCW, for fix smoke sprite, original is CW 0, 1, 2
-    idx[3] = base; idx[4] = base + 3; idx[5] = base + 2; //k??? TODO: CCW, for fix smoke sprite, original is CW 0, 2, 3
+    idx[0] = base; idx[1] = base + 1; idx[2] = base + 2;
+    idx[3] = base; idx[4] = base + 2; idx[5] = base + 3;
 
     tri->numVerts += 4;
     tri->numIndexes += 6;
