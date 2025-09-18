@@ -24,6 +24,7 @@ enum cvarFlag
     IG_CVAR_GROUP_GUI = BIT(13),
     IG_CVAR_GROUP_GAME = BIT(14),
     IG_CVAR_GROUP_OTHER = BIT(15),
+    //IG_CVAR_GROUP_ABOUT = BIT(16),
 };
 
 typedef struct cvarSettingItem_s
@@ -66,12 +67,22 @@ protected:
     void RenderButtonCVar(const cvarSettingItem_t &item);
 
     void RenderToolTips(const idCVar *cvar);
+    void RenderAbout(void) const;
 
     static void UpdateCVar(idCVar *cvar, int v);
     static void UpdateCVar(idCVar *cvar, float v);
     static void UpdateCVar(idCVar *cvar, bool v);
     static void UpdateCVar(idCVar *cvar, const char *v);
     static void ExecCommand(const char *cmd);
+
+private:
+    void RenderChangeLogs(void) const;
+    void RenderNewCvars(void) const;
+    void RenderUpdateCvars(void) const;
+    void RenderRemoveCvars(void) const;
+    void RenderNewCommands(void) const;
+    void RenderUpdateCommands(void) const;
+    void RenderRemoveCommands(void) const;
 
 private:
     idList<cvarSettingGroup_s> options;
@@ -374,6 +385,248 @@ void idImGuiSettings::RenderComboCVar(const cvarSettingItem_t &item)
     RenderToolTips(item.cvar);
 }
 
+void idImGuiSettings::RenderChangeLogs(void) const
+{
+    const char *ChangeLogs[] = {
+#ifdef _RAVEN
+            "BSE effects update.",
+#elif defined(_HUMANHEAD)
+#else
+#endif
+            "Optimize PBR shaders with original specular texture.",
+            "Add mp3 sound file support.",
+            "Add settings by ImGui.",
+
+            NULL
+    };
+    if(ChangeLogs[0])
+    {
+        ImGui::SeparatorText("Change log");
+        {
+            const char ** ptr;
+            int i = 0;
+            while(*(ptr = &ChangeLogs[i++]))
+            {
+                ImGui::TextWrapped("* %s", *ptr);
+            }
+        }
+        ImGui::Spacing();
+    }
+}
+
+void idImGuiSettings::RenderNewCvars(void) const
+{
+    const char *NewCvars[] = {
+            "harm_r_PBRNormalCorrection",
+            "harm_r_PBRRMAOSpecularMap",
+            "harm_r_PBRRoughnessCorrection",
+            "harm_r_PBRMetallicCorrection",
+#ifdef _RAVEN
+#elif defined(_HUMANHEAD)
+#else
+#endif
+
+            NULL
+    };
+
+    if(NewCvars[0])
+    {
+        ImGui::SeparatorText("New cvars");
+        {
+            const char **ptr = &NewCvars[0];
+            while(*ptr)
+            {
+                const idCVar *cvar = cvarSystem->Find(*ptr);
+                ptr++;
+                if(!cvar)
+                    continue;
+                idStr type;
+                if(cvar->GetFlags() & CVAR_BOOL)
+                    type = "bool";
+                else if(cvar->GetFlags() & CVAR_FLOAT)
+                    type = "float";
+                else if(cvar->GetFlags() & CVAR_INTEGER)
+                    type = "integer";
+                else
+                    type = "string";
+                ImGui::TextWrapped("* %s(%s)\n- %s", cvar->GetName(), type.c_str(), cvar->GetDescription());
+            }
+        }
+        ImGui::Spacing();
+    }
+}
+
+void idImGuiSettings::RenderUpdateCvars(void) const
+{
+    const char *UpdateCvars[] = {
+            //"harm_r_specularExponentPBR", "4.0",
+#ifdef _RAVEN
+#elif defined(_HUMANHEAD)
+#else
+#endif
+
+            NULL
+    };
+
+    if(UpdateCvars[0])
+    {
+        ImGui::SeparatorText("Update cvars");
+        {
+            const char **ptr = &UpdateCvars[0];
+            while(*ptr)
+            {
+                const idCVar *cvar = cvarSystem->Find(*ptr);
+                ptr += 2;
+                if(!cvar)
+                    continue;
+                idStr type;
+                if(cvar->GetFlags() & CVAR_BOOL)
+                    type = "bool";
+                else if(cvar->GetFlags() & CVAR_FLOAT)
+                    type = "float";
+                else if(cvar->GetFlags() & CVAR_INTEGER)
+                    type = "integer";
+                else
+                    type = "string";
+                ImGui::TextWrapped("* %s(%s) -> %s", cvar->GetName(), type.c_str(), *(ptr - 1));
+            }
+        }
+        ImGui::Spacing();
+    }
+}
+
+void idImGuiSettings::RenderRemoveCvars(void) const
+{
+    const char *RemoveCvars[] = {
+            "harm_r_NormalCorrectionPBR",
+#ifdef _RAVEN
+#elif defined(_HUMANHEAD)
+#else
+#endif
+
+            NULL
+    };
+    if(RemoveCvars[0])
+    {
+        ImGui::SeparatorText("Remove cvars");
+        {
+            const char **ptr = &RemoveCvars[0];
+            while(*ptr)
+            {
+                ImGui::TextWrapped("* %s", *ptr);
+                ptr++;
+            }
+        }
+        ImGui::Spacing();
+    }
+}
+
+void idImGuiSettings::RenderNewCommands(void) const
+{
+    const char *NewCommands[] = {
+            "idTech4AmmSettings",
+#ifdef _RAVEN
+#elif defined(_HUMANHEAD)
+#else
+#endif
+
+            NULL
+    };
+    if(NewCommands[0])
+    {
+        ImGui::SeparatorText("New commands");
+        {
+            const char **ptr = &NewCommands[0];
+            while(*ptr)
+            {
+                ImGui::TextWrapped("* %s", *ptr);
+                ptr++;
+            }
+        }
+        ImGui::Spacing();
+    }
+}
+
+void idImGuiSettings::RenderUpdateCommands(void) const
+{
+    const char *UpdateCommands[] = {
+#ifdef _RAVEN
+#elif defined(_HUMANHEAD)
+#else
+#endif
+
+            NULL
+    };
+    if(UpdateCommands[0])
+    {
+        ImGui::SeparatorText("Update commands");
+        {
+            const char **ptr = &UpdateCommands[0];
+            while(*ptr)
+            {
+                ImGui::TextWrapped("* %s", *ptr);
+                ptr++;
+            }
+        }
+        ImGui::Spacing();
+    }
+}
+
+void idImGuiSettings::RenderRemoveCommands(void) const
+{
+    const char *RemoveCommands[] = {
+#ifdef _RAVEN
+#elif defined(_HUMANHEAD)
+#else
+#endif
+
+            NULL
+    };
+    if(RemoveCommands[0])
+    {
+        ImGui::SeparatorText("Remove commands");
+        {
+            const char **ptr = &RemoveCommands[0];
+            while(*ptr)
+            {
+                ImGui::TextWrapped("* %s", *ptr);
+                ptr++;
+            }
+        }
+        ImGui::Spacing();
+    }
+}
+
+void idImGuiSettings::RenderAbout(void) const
+{
+    if (ImGui::BeginTabItem("About"))
+    {
+        ImGui::SeparatorText("Build");
+        {
+            ImGui::LabelText("Version", _IDTECH4AMM_VERSION);
+            ImGui::LabelText("Patch", "%d", _IDTECH4AMM_PATCH);
+            ImGui::LabelText("Build time", _IDTECH4AMM_BUILD);
+        }
+        ImGui::Spacing();
+
+        RenderChangeLogs();
+
+        RenderNewCvars();
+
+        RenderUpdateCvars();
+
+        RenderRemoveCvars();
+
+        RenderNewCommands();
+
+        RenderUpdateCommands();
+
+        RenderRemoveCommands();
+
+        ImGui::EndTabItem();
+    }
+}
+
 void idImGuiSettings::Render(void)
 {
     visible = true;
@@ -463,6 +716,8 @@ void idImGuiSettings::Render(void)
                 ImGui::EndTabItem();
             }
         }
+
+        RenderAbout();
         ImGui::EndTabBar();
     }
     ImGui::End();
@@ -723,6 +978,7 @@ void ImGui_RegisterOptions(void)
 #endif
 
 	// other
+    ImGui_RegisterLabel("ImGui", IG_CVAR_GROUP_OTHER);
     ImGui_RegisterCvar("imgui_scale", "ImGui scale", IG_CVAR_GROUP_OTHER);
     ImGui_RegisterCvar("imgui_fontScale", "ImGui font scale", IG_CVAR_GROUP_OTHER);
     ImGui_RegisterCvar("imgui_cursorScale", "ImGui soft cursor scale", IG_CVAR_GROUP_OTHER);
@@ -730,6 +986,7 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCmd(IG_COMMAND_NAME " reset position", "Reset ImGui position", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_OTHER);
     ImGui_RegisterCmd(IG_COMMAND_NAME " reset size", "Reset ImGui size", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_OTHER);
     ImGui_RegisterCmd(IG_COMMAND_NAME " close", "Close ImGui", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_OTHER);
+    ImGui_RegisterDivide(IG_CVAR_GROUP_OTHER);
 
     imGuiSettings.isInitialized = true;
 }

@@ -185,12 +185,18 @@ jobs:
         repo: glKarin/com.n0n3m4.diii4a
         github_token: ${{ secrets.TOKEN }}
 
+    - name: Get release date time
+      id: release_datetime
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+        format: "YYYYMMDD-HHmmss"
+
     - name: Create release
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.TOKEN }}"
         automatic_release_tag: "android_testing_armv7"
         prerelease: true
-        title: "Android armeabi-v7a 32-bit testing (Non-release. Automatic CI builds)"
+        title: "[${{steps.release_datetime.outputs.time}}] Android armeabi-v7a 32-bit testing (Non-release. Automatic CI builds)"
         files: |
           ${{ steps.rename_apk.outputs.value }}

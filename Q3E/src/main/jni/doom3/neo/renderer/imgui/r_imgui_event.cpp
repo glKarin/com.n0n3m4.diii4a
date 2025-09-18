@@ -162,27 +162,33 @@ void ImGui_InputEvent(char ch)
     }
 }
 
-void ImGui_HandleEvent(const sysEvent_t *ev)
+bool ImGui_HandleEvent(const sysEvent_t *ev)
 {
     if(!R_ImGui_IsInitialized())
-        return;
+        return false;
     ImGuiKey imkey;
+    bool ret;
     IG_LOCK();
     switch (ev->evType) {
         case SE_MOUSE:
             R_ImGui_SyncMousePosition(ev->evValue, ev->evValue2);
             R_ImGui_PushMouseEvent(im_cursorX, im_cursorY);
+            ret = true;
             break;
         case SE_KEY:
             imkey = ImGui_ConvertKeyEvent(ev->evValue);
             if(imkey != ImGuiKey_None)
                 R_ImGui_PushKeyEvent(imkey, ev->evValue2);
+            ret = true;
             break;
         case SE_CHAR:
             R_ImGui_PushInputEvent(ev->evValue);
+            ret = true;
             break;
         default:
+            ret = false;
             break;
     }
     IG_UNLOCK();
+    return ret;
 }

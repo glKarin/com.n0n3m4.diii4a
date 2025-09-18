@@ -161,3 +161,15 @@ If you have questions concerning this license or the applicable additional terms
 #else
 #define GAME_NAME_ID "doom3"
 #endif
+
+#if !defined(_IDTECH4AMM_PATCH)
+#define _IDTECH4AMM_PATCH 1
+#endif
+
+#if !defined(_IDTECH4AMM_VERSION)
+#define _IDTECH4AMM_VERSION "1.1.0harmattan" #_IDTECH4AMM_PATCH
+#endif
+
+#if !defined(_IDTECH4AMM_BUILD)
+#define _IDTECH4AMM_BUILD ""
+#endif

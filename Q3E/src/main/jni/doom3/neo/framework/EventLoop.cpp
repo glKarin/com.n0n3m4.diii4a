@@ -208,8 +208,8 @@ int idEventLoop::RunEventLoop(bool commandExecution)
 #ifdef _IMGUI //karin: process events by ImGui
         if(R_ImGui_IsRunning())
         {
-            ImGui_HandleEvent(&ev);
-            continue;
+            if(ImGui_HandleEvent(&ev))
+            	continue;
         }
 #endif
 

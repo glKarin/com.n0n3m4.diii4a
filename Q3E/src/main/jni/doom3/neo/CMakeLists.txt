@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 
 project(doom3)
 
+set(IDTECH4AMM_ENGINE_PATCH 69)
+set(IDTECH4AMM_ENGINE_VERSION "1.1.0harmattan${IDTECH4AMM_ENGINE_PATCH}")
+string(TIMESTAMP IDTECH4AMM_BUILDTIME "%Y-%m-%d %H:%M:%S")
+#set(IDTECH4AMM_BUILDTIME "2025-09-18 09:05:36")
+message(STATUS "idTech4A++")
+message(STATUS "Build version: ${IDTECH4AMM_ENGINE_VERSION}")
+message(STATUS "Build time: ${IDTECH4AMM_BUILDTIME}")
+
 # -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -17,6 +25,10 @@ option(USE_SYSTEM_CURL        	"use system curl library"      			OFF)
 option(USE_SYSTEM_FREETYPE    	"use system freetype2 library"      	OFF)
 
 set(CORE_DEFINES "__DOOM_DLL__")
+
+add_definitions(-D_IDTECH4AMM_PATCH=${IDTECH4AMM_ENGINE_PATCH})
+add_definitions(-D_IDTECH4AMM_VERSION="${IDTECH4AMM_ENGINE_VERSION}")
+add_definitions(-D_IDTECH4AMM_BUILD="${IDTECH4AMM_BUILDTIME}")
 
 if(ANDROID)
 	add_definitions(-D__ANDROID__)

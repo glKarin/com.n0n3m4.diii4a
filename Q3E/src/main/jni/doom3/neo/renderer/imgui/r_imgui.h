@@ -21,7 +21,7 @@ bool R_ImGui_IsRunning(void);
 bool R_ImGui_IsGrabMouse(void);
 
 void ImGui_MouseWheelEvent(float wx, float wy);
-void ImGui_HandleEvent(const sysEvent_t *ev);
+bool ImGui_HandleEvent(const sysEvent_t *ev);
 void R_ImGui_idTech4AmmSettings_f(const idCmdArgs &args);
 
 #endif

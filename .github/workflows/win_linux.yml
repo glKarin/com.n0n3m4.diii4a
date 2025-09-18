@@ -64,7 +64,7 @@ jobs:
         id: current_datetime
         uses: Kaven-Universe/github-action-current-date-time@v1
         with:
-          format: "YYYY-MM-DD_HH-mm-ss"
+          format: "YYYYMMDD.HHmmss"
 
       - name: Install CMake and Ninja
         if: matrix.os == 'windows-latest'
@@ -136,7 +136,7 @@ jobs:
         uses: vimtor/action-zip@v1.2
         with:
           files: ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
-          dest: idTech4A++-testing_${{ steps.strings.outputs.name }}-${{ steps.current_datetime.outputs.time }}.zip
+          dest: idTech4A++-testing_${{ steps.current_datetime.outputs.time }}_${{ steps.strings.outputs.name }}.zip
           recursive: false
 
       - name: Package to tgz
@@ -148,13 +148,13 @@ jobs:
           cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Doom3 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
           cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Quake4 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
           cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Prey ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
-          tar zcvf idTech4A++-testing_${{ steps.strings.outputs.name }}-${{ steps.current_datetime.outputs.time }}.tar.gz ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          tar zcvf idTech4A++-testing_${{ steps.current_datetime.outputs.time }}_${{ steps.strings.outputs.name }}.tar.gz ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
 
       - uses: actions/upload-artifact@v4
         name: Upload package archive artifacts
         with:
           name: "${{ steps.strings.outputs.name }}-${{ matrix.build_type }}"
-          path: "idTech4A++-testing_${{ steps.strings.outputs.name }}-${{ steps.current_datetime.outputs.time }}.${{ steps.strings.outputs.archive }}"
+          path: "idTech4A++-testing_${{ steps.current_datetime.outputs.time }}_${{ steps.strings.outputs.name }}.${{ steps.strings.outputs.archive }}"
           retention-days: 1
 
   collect:
