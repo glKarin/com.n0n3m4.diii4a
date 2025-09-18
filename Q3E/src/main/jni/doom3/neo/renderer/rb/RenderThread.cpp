@@ -24,7 +24,7 @@ static idCVar r_multithread("r_multithread",
 static void * BackendThread(void *data)
 {
     renderThreadInstance.render_thread_finished = false;
-    Sys_Printf("[Harmattan]: Enter doom3 render thread -> %s\n", Sys_GetThreadName());
+    Sys_Printf("[RenderThread]: Enter " GAME_NAME " render thread -> %s\n", Sys_GetThreadName());
     GLimp_ActivateContext();
     while(true)
     {
@@ -33,7 +33,7 @@ static void * BackendThread(void *data)
             break;
     }
     GLimp_DeactivateContext();
-    Sys_Printf("[Harmattan]: Leave doom3 render thread -> %s\n", RENDER_THREAD_NAME);
+    Sys_Printf("[RenderThread]: Leave " GAME_NAME " render thread -> %s\n", RENDER_THREAD_NAME);
     renderThreadInstance.render_thread_finished = true;
     Sys_TriggerEvent(TRIGGER_EVENT_RENDER_THREAD_FINISHED);
     return NULL;
@@ -66,7 +66,7 @@ void idRenderThread::BackendThreadExecute( void )
     GLimp_DeactivateContext();
     backendThreadShutdown = false;
     Sys_CreateThread(BackendThread, common, THREAD_HIGHEST, render_thread, RENDER_THREAD_NAME, g_threads, &g_thread_count);
-    common->Printf("[Harmattan]: Render thread start -> %lu(%s)\n", render_thread.threadHandle, RENDER_THREAD_NAME);
+    common->Printf("[MainThread]: Render thread start -> %lu(%s)\n", render_thread.threadHandle, RENDER_THREAD_NAME);
 }
 
 void idRenderThread::BackendThreadShutdown( void )
@@ -82,7 +82,7 @@ void idRenderThread::BackendThreadShutdown( void )
     while(!render_thread_finished)
         Sys_WaitForEvent(TRIGGER_EVENT_RENDER_THREAD_FINISHED);
     GLimp_ActivateContext();
-    common->Printf("[Harmattan]: Render thread shutdown -> %s\n", RENDER_THREAD_NAME);
+    common->Printf("[MainThread]: Render thread shutdown -> %s\n", RENDER_THREAD_NAME);
 }
 
 // only render thread is running and main thread is waiting

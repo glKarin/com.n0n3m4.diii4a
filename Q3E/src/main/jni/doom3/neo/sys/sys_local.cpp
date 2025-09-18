@@ -130,7 +130,7 @@ void idSysLocal::ShutdownSymbols(void)
 
 uintptr_t idSysLocal::DLL_Load(const char *dllName)
 {
-	DebugPrintf("[Harmattan]: DLL_Load(%s)\n", dllName);
+	DebugPrintf("idSysLocal::DLL_Load(%s)\n", dllName);
 	return Sys_DLL_Load(dllName);
 }
 
@@ -241,4 +241,3 @@ const char *Sys_TimeStampToStr(ID_TIME_T timeStamp)
 
 	return timeString;
 }
-

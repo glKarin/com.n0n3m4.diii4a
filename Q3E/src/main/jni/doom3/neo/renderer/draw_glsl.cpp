@@ -108,35 +108,35 @@ static void R_InitGLSLCvars(void)
 				break;
 		}
 #ifdef GL_ES_VERSION_3_0
-		common->Printf("[Harmattan]: Shadow mapping in OpenGLES2.0: \n");
+		common->Printf("Shadow mapping in OpenGLES2.0: \n");
 		if(r_useCubeDepthTexture)
         {
-            common->Printf("[Harmattan]: Using depth cubemap texture on point light.\n");
+            common->Printf("Using depth cubemap texture on point light.\n");
             depthShader_cube = &depthShader;
             depthPerforatedShader_cube = &depthPerforatedShader;
         }
 		else
         {
-            common->Printf("[Harmattan]: Using color cubemap texture on point light.\n");
+            common->Printf("Using color cubemap texture on point light.\n");
             depthShader_cube = &depthShader_color;
             depthPerforatedShader_cube = &depthPerforatedShader_color;
         }
 		if(r_useDepthTexture)
         {
-            common->Printf("[Harmattan]: Using depth texture on non-point light.\n");
+            common->Printf("Using depth texture on non-point light.\n");
             depthShader_2d = &depthShader;
             depthPerforatedShader_2d = &depthPerforatedShader;
         }
 		else
         {
-            common->Printf("[Harmattan]: Using color texture on non-point light.\n");
+            common->Printf("Using color texture on non-point light.\n");
             depthShader_2d = &depthShader_color;
             depthPerforatedShader_2d = &depthPerforatedShader_color;
         }
 		if(r_usePackColorAsDepth)
-			common->Printf("[Harmattan]: Store depth value with pack to RGBA if not using depth texture.\n");
+			common->Printf("Store depth value with pack to RGBA if not using depth texture.\n");
 		else
-			common->Printf("[Harmattan]: Store depth value with RED component if not using depth texture.\n");
+			common->Printf("Store depth value with RED component if not using depth texture.\n");
 	}
 #endif
 #endif
@@ -233,9 +233,9 @@ void R_CheckBackEndCvars(void)
 			r_stencilShadowSoftCopyStencilBuffer = harm_r_stencilShadowSoftCopyStencilBuffer.GetBool();
 			harm_r_stencilShadowSoftCopyStencilBuffer.ClearModified();
 			if(r_stencilShadowSoftCopyStencilBuffer)
-				common->Printf("[Harmattan]: Copy stencil buffer directly for soft stencil shadow.\n");
+				common->Printf("Copy stencil buffer directly for soft stencil shadow.\n");
 			else
-				common->Printf("[Harmattan]: Copy depth buffer and render stencil buffer for soft stencil shadow.\n");
+				common->Printf("Copy depth buffer and render stencil buffer for soft stencil shadow.\n");
 		}
 		if(harm_r_stencilShadowSoftBias.IsModified())
 		{

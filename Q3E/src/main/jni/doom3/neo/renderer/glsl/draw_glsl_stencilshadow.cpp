@@ -150,7 +150,7 @@ ID_INLINE static float RB_StencilShadowSoft_calcBIAS(void)
 		f = f > STENCIL_SHADOW_SOFT_MIN_BIAS ? f : STENCIL_SHADOW_SOFT_MIN_BIAS;
 #endif
     }
-	common->Printf("[Harmattan]: Soft stencil shadow sampler BIAS: %f\n", f);
+	common->Printf("Soft stencil shadow sampler BIAS: %f\n", f);
         return f;
 #undef STENCIL_SHADOW_SOFT_MIN_BIAS
 }

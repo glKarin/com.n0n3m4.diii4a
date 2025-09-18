@@ -88,9 +88,9 @@ static void GLimp_HandleError(const char *func, bool exit = true)
 		return;
 
 	if(exit)
-		common->Error("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
+		common->Error("EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 	else
-		common->Printf("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
+		common->Printf("EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 }
 
 bool GLimp_CheckGLInitialized(void)
@@ -252,7 +252,7 @@ void GLimp_Shutdown()
 	dpy = NULL;
 	win = 0;
 
-	Sys_Printf("[Harmattan]: EGL destroyed.\n");
+	Sys_Printf("EGL destroyed.\n");
 }
 
 void GLimp_SwapBuffers()
@@ -420,7 +420,7 @@ static bool GLES_Init_prefer(const glimpParms_t &ap)
 			EGL_NONE,
 		};
 
-		common->Printf( "[Harmattan]: Request EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
+		common->Printf( "Request EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
 				channelcolorbits, channelcolorbits,
 				channelcolorbits, talphabits,
 				tdepthbits,
@@ -607,7 +607,7 @@ int GLES_Init(glimpParms_t ap)
 	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_SAMPLE_BUFFERS, &sample_buffers);
 	int tcolorbits = red_bits + green_bits + blue_bits;
 
-	common->Printf( "[Harmattan]: EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
+	common->Printf( "EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
 			red_bits, green_bits,
 			blue_bits, alpha_bits,
 			depth_bits,
@@ -720,9 +720,9 @@ void GLimp_Startup(void)
 #if !defined(__ANDROID__) //karin: enable multithreading-rendering from command cvar
     multithreadActive = cvarSystem->GetCVarBool("r_multithread");
     if(multithreadActive)
-        Sys_Printf("[Harmattan]: Enable multi-threading rendering\n");
+        Sys_Printf("Enable multi-threading rendering\n");
     else
-        Sys_Printf("[Harmattan]: Disable multi-threading rendering\n");
+        Sys_Printf("Disable multi-threading rendering\n");
 #endif
 #endif
 #ifdef _OPENGLES3
@@ -730,34 +730,34 @@ void GLimp_Startup(void)
     const char *openglVersion = cvarSystem->GetCVarString("harm_r_openglVersion");
     if(openglVersion && openglVersion[0])
     {
-        Sys_Printf("[Harmattan]: harm_r_openglVersion = %s\n", openglVersion);
+        Sys_Printf("harm_r_openglVersion = %s\n", openglVersion);
         if(!idStr::Icmp(GL_VERSION_NAME_GL_ES2, openglVersion))
         {
             gl_version = GL_VERSION_GL_ES2;
             USING_GLES3 = false;
             USING_GL = false;
-            Sys_Printf("[Harmattan]: Using OpenGL ES2\n");
+            Sys_Printf("Using OpenGL ES2\n");
         }
         else if(!idStr::Icmp(GL_VERSION_NAME_GL_CORE, openglVersion))
         {
             gl_version = GL_VERSION_GL_CORE;
             USING_GLES3 = true;
             USING_GL = true;
-            Sys_Printf("[Harmattan]: Using OpenGL Core\n");
+            Sys_Printf("Using OpenGL Core\n");
         }
         else if(!idStr::Icmp(GL_VERSION_NAME_GL_COMPATIBILITY, openglVersion))
         {
             gl_version = GL_VERSION_GL_COMPATIBILITY;
             USING_GLES3 = true;
             USING_GL = true;
-            Sys_Printf("[Harmattan]: Using OpenGL Compatibility\n");
+            Sys_Printf("Using OpenGL Compatibility\n");
         }
         else // GL_VERSION_NAME_GL_ES3
         {
             gl_version = GL_VERSION_GL_ES3;
             USING_GLES3 = true;
             USING_GL = false;
-            Sys_Printf("[Harmattan]: Using OpenGL ES3\n");
+            Sys_Printf("Using OpenGL ES3\n");
         }
     }
 #endif

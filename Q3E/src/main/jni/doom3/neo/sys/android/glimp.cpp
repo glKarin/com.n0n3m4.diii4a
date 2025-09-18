@@ -113,9 +113,9 @@ static void GLimp_HandleError(const char *func, bool exit = true)
 		return;
 
 	if(exit)
-		common->Error("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
+		common->Error("EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 	else
-		common->Printf("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
+		common->Printf("EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 }
 
 typedef struct EGLConfigInfo_s
@@ -320,7 +320,7 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 		return;
 	}
 	//has_gl_context = true;
-	Sys_Printf("[Harmattan]: EGL surface created and using EGL context.\n");
+	Sys_Printf("EGL surface created and using EGL context.\n");
 }
 
 void GLimp_AndroidQuit(void)
@@ -337,7 +337,7 @@ void GLimp_AndroidQuit(void)
 	}
 	ANativeWindow_release((ANativeWindow *)win);
 	win = NULL;
-	Sys_Printf("[Harmattan]: EGL surface destroyed and no EGL context.\n");
+	Sys_Printf("EGL surface destroyed and no EGL context.\n");
 }
 
 void GLimp_WakeBackEnd(void *a)
@@ -485,7 +485,7 @@ void GLimp_Shutdown()
 	}
 	GLimp_dlclose();
 
-	Sys_Printf("[Harmattan]: EGL destroyed.\n");
+	Sys_Printf("EGL destroyed.\n");
 }
 
 static void GLimp_UpdateSwapInterval( void )
@@ -579,7 +579,7 @@ static bool GLES_Init_special(const glimpParms_t &ap)
 			EGL_NONE,
 	};
 
-	common->Printf( "[Harmattan]: Request special EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
+	common->Printf( "Request special EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
 					red_bits, green_bits,
 					blue_bits, alpha_bits,
 					depth_bits,
@@ -608,7 +608,7 @@ static bool GLES_Init_special(const glimpParms_t &ap)
 		}
 		else
 		{
-			common->Printf( "[Harmattan]: Get EGL context num -> %d.\n", config_count);
+			common->Printf( "Get EGL context num -> %d.\n", config_count);
 			for(int i = 0; i < config_count; i++)
 			{
 				EGLConfigInfo_t cinfo = GLimp_GetConfigInfo(eglConfigs[i]);
@@ -724,7 +724,7 @@ static bool GLES_Init_prefer(const glimpParms_t &ap)
 				EGL_NONE,
 		};
 
-		common->Printf( "[Harmattan]: Request EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
+		common->Printf( "Request EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
 						channelcolorbits, channelcolorbits,
 						channelcolorbits, talphabits,
 						tdepthbits,
@@ -872,11 +872,11 @@ int GLES_Init(glimpParms_t &ap)
 	if(USING_GLES3)
 	{
 		GLES3_VERSION = gles3_version;
-		common->Printf("[Harmattan]: Create OpenGL ES3.%d context.\n", GLES3_VERSION);
+		common->Printf("Create OpenGL ES3.%d context.\n", GLES3_VERSION);
 	}
 	else
 #endif
-	common->Printf("[Harmattan]: Create OpenGL ES2.0 context.\n");
+	common->Printf("Create OpenGL ES2.0 context.\n");
 
 	if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext))
 	{
@@ -891,7 +891,7 @@ int GLES_Init(glimpParms_t &ap)
 	depth_bits = info.depth;
 	stencil_bits = info.stencil;
 
-	common->Printf( "[Harmattan]: EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
+	common->Printf( "EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
 					info.red, info.green,
 					info.blue, info.alpha,
 					info.depth,
@@ -928,7 +928,7 @@ bool GLimp_ExtensionSupported(const char *name)
 	new_exts.Append(" ");
 	bool has = new_exts.Find(name) >= 0;
 
-	common->Printf("[Harmattan]: OpenGL extension '%s' -> %s\n", name, has ? "support" : "missing");
+	common->Printf("OpenGL extension '%s' -> %s\n", name, has ? "support" : "missing");
 	return has;
 }
 

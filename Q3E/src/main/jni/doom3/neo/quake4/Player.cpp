@@ -1943,7 +1943,7 @@ void idPlayer::Spawn( void ) {
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 		fullBodyAwarenessOffset = offset;
 	else
-		gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
+		gameLocal.Warning("Unable read harm_pm_fullBodyAwarenessOffset.\n");
 
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
@@ -2717,7 +2717,7 @@ void idPlayer::Restore( idRestoreGame *savefile ) {
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 		fullBodyAwarenessOffset = offset;
 	else
-		gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
+		gameLocal.Warning("Unable read harm_pm_fullBodyAwarenessOffset.\n");
 #endif
 }
 
@@ -9466,7 +9466,7 @@ void idPlayer::Think( void ) {
 			if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 				fullBodyAwarenessOffset = offset;
 			else
-				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.");
+				gameLocal.Warning("Unable read harm_pm_fullBodyAwarenessOffset.");
 		}
 	}
 #endif

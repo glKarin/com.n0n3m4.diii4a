@@ -176,14 +176,14 @@ class idAudioHardwareOpenSLES : public idAudioHardware
 				m_buffer->WaitReadFinished();
 				m_playing = false;
 				(*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PAUSED);
-				common->Printf("[Harmattan]: OpenSLES paused.\n");
+				Sys_Printf("OpenSLES paused.\n");
 			}
 			else if(!paused && !m_playing)
 			{
 				m_buffer->WaitReadFinished();
 				m_playing = true;
 				(*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PLAYING);
-				common->Printf("[Harmattan]: OpenSLES playing.\n");
+				Sys_Printf("OpenSLES playing.\n");
 			}
 			return true;
 		}

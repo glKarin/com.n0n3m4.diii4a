@@ -1667,7 +1667,7 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 	int numGamePortals = 0;
 	idList<gamePortalSource_t> sources;
 
-    common->Printf("[Harmattan]: Add game portal from map file\n");
+    Sys_Printf("Add game portal from map file\n");
 
 	ClearGamePortalInfos();
 	numEntities = mapFile->GetNumEntities();
@@ -1784,12 +1784,12 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 
         idStr point0 = gps.srcPosition.ToString(6);
         idStr point1 = gps.dstPosition.ToString(6);
-        common->Printf("[Harmattan]: Read %d game portal: entity '%s', source area %d(%s) -> target area %d(%s).\n", numGamePortals, name, gps.srcArea, point0.c_str(), gps.dstArea, point1.c_str());
+        Sys_Printf("Read %d game portal: entity '%s', source area %d(%s) -> target area %d(%s).\n", numGamePortals, name, gps.srcArea, point0.c_str(), gps.dstArea, point1.c_str());
 
 		numGamePortals++;
 	}
 
-	common->Printf("[Harmattan]: %d game portals found.\n", numGamePortals);
+	Sys_Printf("%d game portals found.\n", numGamePortals);
 
 	// if no game portals
 	if(numGamePortals == 0)
@@ -1878,9 +1878,9 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
         idStr point1 = gps.points[1].ToString(6);
         idStr point2 = gps.points[2].ToString(6);
         idStr point3 = gps.points[3].ToString(6);
-		common->Printf("[Harmattan]: Add game portal: /* iap %d */ %d %d %d ( %s ) ( %s ) ( %s ) ( %s ) \n", i + numMapInterAreaPortals, 4, a1, a2, point0.c_str(), point1.c_str(), point2.c_str(), point3.c_str());
+		Sys_Printf("Add game portal: /* iap %d */ %d %d %d ( %s ) ( %s ) ( %s ) ( %s ) \n", i + numMapInterAreaPortals, 4, a1, a2, point0.c_str(), point1.c_str(), point2.c_str(), point3.c_str());
 	}
-    common->Printf("[Harmattan]: Add game portal finish\n");
+    Sys_Printf("Add game portal finish\n");
 }
 
 void idRenderWorldLocal::DrawGamePortals(int mode, const idMat3 &viewAxis)

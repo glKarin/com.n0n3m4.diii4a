@@ -79,14 +79,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #define D3_snprintfC99 SDL_snprintf
 
-#ifdef _RAVEN //karin: win log file name
-#define GAME_NAME_ID "quake4"
-#elif defined(_HUMANHEAD)
-#define GAME_NAME_ID "prey"
-#else
-#define GAME_NAME_ID "doom3"
-#endif
-
 static char path_argv[PATH_MAX];
 static char path_exe[PATH_MAX];
 static char save_path[PATH_MAX];

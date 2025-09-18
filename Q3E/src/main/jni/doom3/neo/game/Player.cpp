@@ -1627,7 +1627,7 @@ void idPlayer::Spawn(void)
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 		fullBodyAwarenessOffset = offset;
 	else
-		gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
+		gameLocal.Warning("Unable read harm_pm_fullBodyAwarenessOffset.\n");
 
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
@@ -2260,7 +2260,7 @@ void idPlayer::Restore(idRestoreGame *savefile)
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 		fullBodyAwarenessOffset = offset;
 	else
-		gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
+		gameLocal.Warning("Unable read harm_pm_fullBodyAwarenessOffset.\n");
 #endif
 #ifdef _MOD_VIEW_LIGHT
     SetupViewLight();
@@ -6972,7 +6972,7 @@ void idPlayer::Think(void)
 			if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 				fullBodyAwarenessOffset = offset;
 			else
-				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.");
+				gameLocal.Warning("Unable read harm_pm_fullBodyAwarenessOffset.");
 		}
 	}
 #endif
@@ -9833,10 +9833,10 @@ void idPlayer::SetupViewLight( void ) {
             if(sscanf(harm_ui_viewLightOffset.GetString(), "%f %f %f", &v.x, &v.y, &v.z) == 3)
                 args.Set("view_offset", harm_ui_viewLightOffset.GetString());
             else
-                gameLocal.Warning("[Harmattan]: unable read harm_ui_viewLightOffset.");
+                gameLocal.Warning("Unable read harm_ui_viewLightOffset.");
             if(sscanf(harm_ui_viewLightRadius.GetString(), "%f %f %f", &v.x, &v.y, &v.z) != 3)
             {
-				gameLocal.Warning("[Harmattan]: unable read harm_ui_viewLightRadius.");
+				gameLocal.Warning("Unable read harm_ui_viewLightRadius.");
 				v.Set(1280.0f, 640.0f, 640.0f);
 			}
 			args.SetVector("light_radius", v);
@@ -9890,7 +9890,7 @@ void idPlayer::UpdateViewLight( void ) {
             return;
         }
         if(!viewLight->SetLight(harm_ui_viewLightShader.GetString()))
-            gameLocal.Warning("[Harmattan]: unable read harm_ui_viewLightShader.");
+            gameLocal.Warning("Unable read harm_ui_viewLightShader.");
     }
     if(harm_ui_viewLightRadius.IsModified())
     {
@@ -9898,7 +9898,7 @@ void idPlayer::UpdateViewLight( void ) {
         if(sscanf(harm_ui_viewLightRadius.GetString(), "%f %f %f", &v.x, &v.y, &v.z) == 3)
             viewLight->SetRadius(v);
         else
-            gameLocal.Warning("[Harmattan]: unable read harm_ui_viewLightRadius.");
+            gameLocal.Warning("Unable read harm_ui_viewLightRadius.");
     }
     if(harm_ui_viewLightOffset.IsModified())
     {
@@ -9906,7 +9906,7 @@ void idPlayer::UpdateViewLight( void ) {
         if(sscanf(harm_ui_viewLightOffset.GetString(), "%f %f %f", &v.x, &v.y, &v.z) == 3)
             viewLight->SetOffset(v);
         else
-            gameLocal.Warning("[Harmattan]: unable read harm_ui_viewLightOffset.");
+            gameLocal.Warning("Unable read harm_ui_viewLightOffset.");
     }
     if(harm_ui_viewLightType.IsModified())
     {
