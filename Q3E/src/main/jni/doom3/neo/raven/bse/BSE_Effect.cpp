@@ -244,12 +244,17 @@ void rvBSE::UpdateFromOwner(renderEffect_s* parms,
     //    · (optionally) current end-origin
     //--------------------------------------------------------------------
     const float halfSize = mDeclEffect->mSize;
+    idVec3 halfCorner(halfSize, halfSize, halfSize);
+#if 0 //k??? TODO not be cleared in Q4D, but must re-calc full bounds with useEndOrigin if cleared
+    idBounds newWorldBounds = mCurrentWorldBounds;
+#else
     idBounds newWorldBounds;
     newWorldBounds.Clear();
+#endif
     newWorldBounds.AddPoint(mCurrentOrigin +
-        idVec3(halfSize, halfSize, halfSize));
-    newWorldBounds.AddPoint(mCurrentOrigin +
-        idVec3(-halfSize, -halfSize, -halfSize));
+                                    halfCorner);
+    newWorldBounds.AddPoint(mCurrentOrigin -
+                                    halfCorner);
 
     if ((mFlags & EF_USES_END_ORIGIN/* 0x0002 */) &&                       // effect uses end-origin
         (mDeclEffect->mFlags & DEF_USES_END_ORIGIN/* 0x0002 */))
@@ -261,12 +266,23 @@ void rvBSE::UpdateFromOwner(renderEffect_s* parms,
             mCurrentEndOrigin = parms->endOrigin;
 
             newWorldBounds.AddPoint(mCurrentEndOrigin +
-                idVec3(halfSize, halfSize, halfSize));
-            newWorldBounds.AddPoint(mCurrentEndOrigin +
-                idVec3(-halfSize, -halfSize, -halfSize));
+                                            halfCorner);
+            newWorldBounds.AddPoint(mCurrentEndOrigin -
+                                            halfCorner);
 
             mFlags |= EF_MARK_BOUNDS_DIRTY; // 0x0004;                        // mark “world bounds dirty”
         }
+#if 1 //k??? TODO not be cleared in Q4D, but must re-calc full bounds with useEndOrigin if cleared. Because cleared now, so re-calc it, but not setup EF_MARK_BOUNDS_DIRTY flag
+        else
+        {
+            newWorldBounds.AddPoint(mCurrentEndOrigin +
+                                    halfCorner);
+            newWorldBounds.AddPoint(mCurrentEndOrigin -
+                                    halfCorner);
+
+            // mFlags |= EF_MARK_BOUNDS_DIRTY; // 0x0004;                        // mark “world bounds dirty”
+        }
+#endif
     }
     mCurrentWorldBounds = newWorldBounds;
 
@@ -274,6 +290,16 @@ void rvBSE::UpdateFromOwner(renderEffect_s* parms,
     // 6) Local-space bounds (world → object)
     //--------------------------------------------------------------------
     mCurrentLocalBounds.Clear();
+#if 0
+    idVec3 points[8];
+    mCurrentWorldBounds.ToPoints(points);
+    for(int i = 0; i < 8; i++)
+    {
+        idVec3 p = points[i] - mCurrentOrigin;
+        p = mCurrentAxisTransposed * p;
+        mCurrentLocalBounds.AddPoint(p);
+    }
+#else
     for (int ix = 0; ix < 2; ++ix)
         for (int iy = 0; iy < 2; ++iy)
             for (int iz = 0; iz < 2; ++iz)
@@ -285,6 +311,7 @@ void rvBSE::UpdateFromOwner(renderEffect_s* parms,
                 idVec3 local = mCurrentAxisTransposed * (corner - mCurrentOrigin);
                 mCurrentLocalBounds.AddPoint(local);
             }
+#endif
 
     //--------------------------------------------------------------------
     // 7) Copy shader parameters
@@ -496,6 +523,40 @@ void rvBSE::DisplayDebugInfo(const renderEffect_s* parms,
     if (!bse_showBounds.GetInteger())
         return;
 
+#if 1
+    // World-space *effect* bounds (blue), differs once oriented
+    idBox worldBox(bounds, parms->origin, parms->axis);
+    rw->DebugBox(colorBlue, worldBox);
+
+    // World-space model bounds (green)
+    float modelMatrix[16];
+	idVec3 points[8];
+    idVec3 boundsPoints[8];
+    idBounds globalBounds;
+    idBounds modelBounds;
+
+    globalBounds.Clear();
+    modelBounds.Clear();
+	mCurrentLocalBounds.ToPoints(points);
+	bounds.ToPoints(boundsPoints);
+    R_AxisToModelMatrix(parms->axis, parms->origin, modelMatrix);
+	for(int i = 0; i < 8; i++)
+	{
+		idVec3 transformed;
+		const idVec3 &v = points[i];
+		R_LocalPointToGlobal(modelMatrix, v, transformed);
+		globalBounds.AddPoint(transformed);
+		const idVec3 &v2 = boundsPoints[i];
+		R_LocalPointToGlobal(modelMatrix, v2, transformed);
+		modelBounds.AddPoint(transformed);
+		
+	}
+    rw->DebugBounds(colorGreen, globalBounds, vec3_origin);
+
+    // If mesh bounds exceed world bounds draw them in red
+    if (!BSE::ContainsBounds(globalBounds, modelBounds)) //k??? TODO BSE::ContainsBounds(modelBounds, globalBounds)
+        rw->DebugBounds(colorRed, modelBounds, vec3_origin);
+#else
     // World-space model bounds (green)
     rw->DebugBounds(colorGreen, bounds, vec3_origin);
 
@@ -506,6 +567,7 @@ void rvBSE::DisplayDebugInfo(const renderEffect_s* parms,
     // If mesh bounds exceed world bounds draw them in red
     if (!BSE::ContainsBounds(mCurrentWorldBounds, bounds))
         rw->DebugBounds(colorRed, bounds, vec3_origin);
+#endif
 }
 
 /*------------------------------------------------------------------------

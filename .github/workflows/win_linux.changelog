@@ -1,2 +1,3 @@
-Quake 4 BSE effects update work 8: 2025-09-17
-fix smoke sprite effect, e.g. gun shot
+Quake 4 BSE effects update work 9: 2025-09-19
+fix beam line of use end origin effect bounds clip, e.g. level game/process2 red beams
+fix bse_showBounds debug

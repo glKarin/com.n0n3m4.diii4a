@@ -477,10 +477,21 @@ float rvParticleTemplate::GetFurthestDistance() const {
 
     // 4) Apply gravity offset to acceleration bounds
     minAccel.x -= gravVec.x;  minAccel.y -= gravVec.y;  minAccel.z -= gravVec.z;
+#if 0 //k??? TODO Q4D is it
+	gravVec.x *= mGravity.y;
+	gravVec.y *= mGravity.y;
+	gravVec.z *= mGravity.y;
+    maxAccel.x += gravVec.x;  maxAccel.y += gravVec.y;  maxAccel.z += gravVec.z;
+#else
     maxAccel.x -= gravVec.x;  maxAccel.y -= gravVec.y;  maxAccel.z -= gravVec.z;
+#endif
 
     // 5) Prepare overall min/max trackers
+#if 1 //k??? TODO using inf
+#define ID_FLT_MAX idMath::INFINITY
+#else
 #define ID_FLT_MAX          3.402823466e+38F        // max value
+#endif
     idVec3 overallMin(ID_FLT_MAX, ID_FLT_MAX, ID_FLT_MAX);
     idVec3 overallMax(-ID_FLT_MAX, -ID_FLT_MAX, -ID_FLT_MAX);
 #undef ID_FLT_MAX

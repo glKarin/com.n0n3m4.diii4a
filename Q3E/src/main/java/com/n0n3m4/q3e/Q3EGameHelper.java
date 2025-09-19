@@ -673,6 +673,11 @@ public class Q3EGameHelper
             {
                 DumpExtractResourceVersion(versionFile, version, name);
             }
+            // CS1.6
+            resource = Q3EGameConstants.PatchResource.XASH3D_CS16_EXTRAS;
+            name = Q3ELang.tr(m_context, R.string.cs16_xash3d_extras);
+            if(manager.Fetch(resource, overwrite) == null)
+                ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
         }
         else
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
