@@ -1,3 +1,4 @@
 Quake 4 BSE effects update work 9: 2025-09-19
 fix beam line of use end origin effect bounds clip, e.g. level game/process2 red beams
 fix bse_showBounds debug
+optmize OpenGL fixed pipeline compat layer for debug render tools

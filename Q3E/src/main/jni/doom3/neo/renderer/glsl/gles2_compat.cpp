@@ -4,7 +4,7 @@
 
 #define countof(x) (sizeof(x) / sizeof(x[0]))
 #define SIZEOF_MATRIX (sizeof(GLfloat) * 16)
-#define MATCPY(d, s) { if(d != s) memcpy((d), (s), SIZEOF_MATRIX); }
+#define MATCPY(d, s) { if((d) != (s)) memcpy((d), (s), SIZEOF_MATRIX); }
 
 #define BACKEND_MODELVIEW_MATRIX (backEnd.viewDef->worldSpace.modelViewMatrix)
 #define BACKEND_PROJECTION_MATRIX (backEnd.viewDef->projectionMatrix)
@@ -13,24 +13,44 @@
 #define CLIENT_STATE_TEXCOORD (1 << 1)
 #define CLIENT_STATE_COLOR (1 << 2)
 
-static GLenum gl_RenderType;
-static GLfloat gl_TexCoord[2];
-static GLfloat gl_Color[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-static idList<idDrawVert> gl_VertexList;
-static idList<glIndex_t> gl_IndexList;
-static GLenum gl_MatrixMode = GL_MODELVIEW;
-static GLuint gl_ClientState = CLIENT_STATE_VERTEX | 0 | CLIENT_STATE_COLOR;
+#define GLRB_API // static
+#define GLRB_PRIV static
+
+#define COLOR_F2B(x) (GLubyte)((x) * 255.0f)
+#define COLOR_B2F(x) (float)(x) / 255.0f
+
+//#pragma pack(push, 1)
+// Draw vertex
+struct GLvert
+{
+    GLfloat			xyz[3];
+    GLfloat			st[2];
+    //float			normal;
+    GLubyte			color[4];
+};
+//#pragma pack(pop)
+// strip size of glXxxxxxPointer/glVertexAttribPointer
+#define GLVERT_STRIP sizeof(GLvert) // 0
+
+static GLenum gl_RenderType; // glBegin() param
+static GLfloat gl_TexCoord[2]; // glTexCoord2f() param
+static GLfloat gl_Color[4] = {0.0f, 0.0f, 0.0f, 1.0f}; // glColor4f() param
+static idList<GLvert> gl_VertexList; // glVertex3f() param, will fill texcoord/color automatic
+static idList<glIndex_t> gl_IndexList; // glArrayElement() param
+static GLenum gl_MatrixMode = GL_MODELVIEW; // glMatrixModel() param
+static GLuint gl_ClientState = CLIENT_STATE_VERTEX | 0 | CLIENT_STATE_COLOR; // glEnableClientState)/glDisableClientState() param
 static const float	GL_IDENTITY_MATRIX[16] = {
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f,
 };
-static GLuint gl_drawPixelsImage = 0;
-static GLboolean gl_useTexture = GL_FALSE;
+static GLuint gl_drawPixelsImage = 0; // glDrawPixels texture handle
+static GLboolean gl_useTexture = GL_FALSE; // set true if call glDrawPixels
 
 extern int MakePowerOfTwo(int num);
 
+// OpenGL pipeline state
 struct GLstate
 {
 	GLboolean TEXTURE_2D;
@@ -183,15 +203,18 @@ public:
 	GLfloat stack[16][SIZE];
 	int num;
 };
+// Projection matrix stack for glPushMatrix()/glPopMatrix()/glXxxxMatrix
 static GLmatrix_stack<2> gl_ProjectionMatrixStack;
+// Modelview matrix stack for glPushMatrix()/glPopMatrix()/glXxxxMatrix
 static GLmatrix_stack<8> gl_ModelviewMatrixStack; // 64
 
 #define gl_ModelviewMatrix (gl_ModelviewMatrixStack.Top(BACKEND_MODELVIEW_MATRIX))
 #define gl_ProjectionMatrix (gl_ProjectionMatrixStack.Top(BACKEND_PROJECTION_MATRIX))
 
+// Pipeline state stack for glPushAttrib()/glPopAttrib()
 static GLstate_stack<2> gl_StateStack; // 16
 
-static void glPushAttrib(GLint mask)
+GLRB_API void glPushAttrib(GLint mask)
 {
 	(void)mask;
 
@@ -210,7 +233,7 @@ static void glPushAttrib(GLint mask)
 #undef _GETBS
 }
 
-static void glPopAttrib(void)
+GLRB_API void glPopAttrib(void)
 {
 	GLstate *state = gl_StateStack.Pop();
 	if(!state)
@@ -225,7 +248,7 @@ static void glPopAttrib(void)
 	qglDepthMask(state->DEPTH_WRITEMASK);
 }
 
-static void glPushMatrix(void)
+GLRB_API void glPushMatrix(void)
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
@@ -237,7 +260,7 @@ static void glPushMatrix(void)
 	}
 }
 
-static void glPopMatrix(void)
+GLRB_API void glPopMatrix(void)
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
@@ -249,12 +272,12 @@ static void glPopMatrix(void)
 	}
 }
 
-static void glMatrixMode(GLenum mode)
+GLRB_API void glMatrixMode(GLenum mode)
 {
 	gl_MatrixMode = mode;
 }
 
-static void glLoadIdentity(void)
+GLRB_API void glLoadIdentity(void)
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
@@ -272,7 +295,7 @@ static void glLoadIdentity(void)
 	}
 }
 
-static void glOrtho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat nearZ, GLfloat farZ)
+GLRB_API void glOrtho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat nearZ, GLfloat farZ)
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
@@ -298,46 +321,49 @@ static void glOrtho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GL
 	}
 }
 
-static void glrbFillVertex(idDrawVert &drawVert)
+GLRB_PRIV void glrbFillVertex(GLvert &drawVert)
 {
-	drawVert.color[0] = (byte)(gl_Color[0] * 255.0f);
-	drawVert.color[1] = (byte)(gl_Color[1] * 255.0f);
-	drawVert.color[2] = (byte)(gl_Color[2] * 255.0f);
-	drawVert.color[3] = (byte)(gl_Color[3] * 255.0f);
-	drawVert.st.Set(gl_TexCoord[0], gl_TexCoord[1]);
+	drawVert.color[0] = COLOR_F2B(gl_Color[0]);
+	drawVert.color[1] = COLOR_F2B(gl_Color[1]);
+	drawVert.color[2] = COLOR_F2B(gl_Color[2]);
+	drawVert.color[3] = COLOR_F2B(gl_Color[3]);
+	drawVert.st[0] = gl_TexCoord[0];
+    drawVert.st[1] = gl_TexCoord[1];
 }
 
-void glVertex3f(GLfloat x, GLfloat y, GLfloat z)
+GLRB_API void glVertex3f(GLfloat x, GLfloat y, GLfloat z)
 {
-	idDrawVert drawVert;
-	drawVert.xyz.Set(x, y, z);
+	GLvert drawVert;
+	drawVert.xyz[0] = x;
+    drawVert.xyz[1] = y;
+    drawVert.xyz[2] = z;
 	glrbFillVertex(drawVert);
 	gl_VertexList.Append(drawVert);
 }
 
-static void glVertex2f(GLfloat x, GLfloat y)
+ID_INLINE GLRB_API void glVertex2f(GLfloat x, GLfloat y)
 {
 	glVertex3f(x, y, 0.0f);
 }
 
-static void glVertex3fv(const GLfloat v[3])
+ID_INLINE GLRB_API void glVertex3fv(const GLfloat v[3])
 {
 	glVertex3f(v[0], v[1], v[2]);
 }
 
-static void glTexCoord2f(GLfloat s, GLfloat t)
+ID_INLINE GLRB_API void glTexCoord2f(GLfloat s, GLfloat t)
 {
 	gl_TexCoord[0] = s;
 	gl_TexCoord[1] = t;
 }
 
-static void glTexCoord2fv(const GLfloat st[2])
+ID_INLINE GLRB_API void glTexCoord2fv(const GLfloat st[2])
 {
 	gl_TexCoord[0] = st[0];
 	gl_TexCoord[1] = st[1];
 }
 
-void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
+GLRB_API void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 {
 	gl_Color[0] = r;
 	gl_Color[1] = g;
@@ -345,32 +371,32 @@ void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 	gl_Color[3] = a;
 }
 
-static void glColor3f(GLfloat r, GLfloat g, GLfloat b)
+ID_INLINE GLRB_API void glColor3f(GLfloat r, GLfloat g, GLfloat b)
 {
 	glColor4f(r, g, b, 1.0f);
 }
 
-static void glColor3fv(const GLfloat v[3])
+ID_INLINE GLRB_API void glColor3fv(const GLfloat v[3])
 {
 	glColor3f(v[0], v[1], v[2]);
 }
 
-static void glColor4fv(const GLfloat v[4])
+ID_INLINE GLRB_API void glColor4fv(const GLfloat v[4])
 {
 	glColor4f(v[0], v[1], v[2], v[3]);
 }
 
-static void glColor4ubv(const GLubyte v[4])
+ID_INLINE GLRB_API void glColor4ubv(const GLubyte v[4])
 {
-	glColor4f((float)v[0] / 255.0f, (float)v[1] / 255.0f, (float)v[2] / 255.0f, (float)v[3] / 255.0f);
+	glColor4f(COLOR_B2F(v[0]), COLOR_B2F(v[1]), COLOR_B2F(v[2]), COLOR_B2F(v[3]));
 }
 
-static void glArrayElement(glIndex_t index)
+ID_INLINE GLRB_API void glArrayElement(glIndex_t index)
 {
 	gl_IndexList.Append(index);
 }
 
-void glDisableClientState(GLenum e)
+GLRB_API void glDisableClientState(GLenum e)
 {
 	// `default` glsl shader must attr_Color is all [255, 255, 255, 255]
 	if(e == GL_TEXTURE_COORD_ARRAY)
@@ -379,7 +405,7 @@ void glDisableClientState(GLenum e)
 		gl_ClientState &= ~CLIENT_STATE_COLOR;
 }
 
-static void glEnableClientState(GLenum e)
+GLRB_API void glEnableClientState(GLenum e)
 {
 	// `default` glsl shader must attr_Color is all [255, 255, 255, 255]
 	if(e == GL_TEXTURE_COORD_ARRAY)
@@ -388,7 +414,7 @@ static void glEnableClientState(GLenum e)
 		gl_ClientState |= CLIENT_STATE_COLOR;
 }
 
-static GLboolean glrbClientStateIsEnabled(GLenum e)
+GLRB_PRIV GLboolean glrbClientStateIsEnabled(GLenum e)
 {
 	// `default` glsl shader must attr_Color is all [255, 255, 255, 255]
 	if(e == GL_TEXTURE_COORD_ARRAY)
@@ -399,7 +425,7 @@ static GLboolean glrbClientStateIsEnabled(GLenum e)
 		return GL_TRUE;
 }
 
-void glLoadMatrixf(const GLfloat matrix[16])
+GLRB_API void glLoadMatrixf(const GLfloat matrix[16])
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
@@ -417,7 +443,7 @@ void glLoadMatrixf(const GLfloat matrix[16])
 	}
 }
 
-static void glMultMatrixf(const GLfloat matrix[16])
+GLRB_API void glMultMatrixf(const GLfloat matrix[16])
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
@@ -436,29 +462,29 @@ static void glMultMatrixf(const GLfloat matrix[16])
 }
 
 // must call glrbStartRender first
-static void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
+ID_INLINE GLRB_API void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
 {
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), size, type, false, stride, pointer);
 }
 
-void glBegin(GLenum t)
+GLRB_API void glBegin(GLenum t)
 {
 	gl_RenderType = t;
 }
 
-static void glrbStartRender(void)
+GLRB_PRIV void glrbStartRender(void)
 {
 	GL_UseProgram(&defaultShader);
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+	GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 
-	GL_Uniform4fv(offsetof(shaderProgram_t, glColor), gl_Color);
-	GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), zero);
-	GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), oneModulate);
+	GL_Uniform4fv(SHADER_PARM_ADDR(glColor), gl_Color);
+	GL_Uniform1fv(SHADER_PARM_ADDR(colorAdd), zero);
+	GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), oneModulate);
 
 	GLfloat	gl_MVPMatrix[16];
 	myGlMultMatrix(gl_ModelviewMatrix, gl_ProjectionMatrix, gl_MVPMatrix);
 
-	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), gl_MVPMatrix);
+	GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), gl_MVPMatrix);
 	float textureMatrix[16];
 	esMatrixLoadIdentity((ESMatrix *)textureMatrix);
     GL_UniformMatrix4fv(SHADER_PARM_ADDR(textureMatrix), textureMatrix);
@@ -466,76 +492,60 @@ static void glrbStartRender(void)
 	//Sys_Printf("Current shader program: %p\n", backEnd.glState.currentProgram);
 }
 
-static void glrbEndRender(void)
+GLRB_PRIV void glrbEndRender(void)
 {
 	//Sys_Printf("glrbEndRender shader program: %p\n", backEnd.glState.currentProgram);
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+	GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 	GL_UseProgram(NULL);
 	gl_useTexture = GL_FALSE;
 }
 
-// draw func
-void glEnd(void)
+// Immediate mode draw func
+GLRB_API void glEnd(void)
 {
 	if(gl_RenderType)
 	{
-		GLboolean usingTexCoord = glrbClientStateIsEnabled(GL_TEXTURE_COORD_ARRAY) || gl_useTexture;
-		int num = gl_VertexList.Num();
-		int numIndex = gl_IndexList.Num();
+        const GLboolean usingTexCoord = glrbClientStateIsEnabled(GL_TEXTURE_COORD_ARRAY) || gl_useTexture;
+		const int num = gl_VertexList.Num();
+        const int numIndex = gl_IndexList.Num();
 
-		if(num > 0)
+		if(num > 0) // call glBegin/glEnd
 		{
 			glrbStartRender();
 
 			qglBindBuffer(GL_ARRAY_BUFFER, 0);
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
 			if(usingTexCoord)
-				GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+				GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
 
 			GL_SelectTexture(0);
 			if(!usingTexCoord)
 				globalImages->whiteImage->Bind();
 
-			GLfloat *vertex = (GLfloat *)malloc(sizeof(GLfloat) * num * 3);
-			GLubyte *color = (GLubyte *)malloc(sizeof(GLubyte) * num * 4);
-			//memset(color, 0xFF, sizeof(GLubyte) * num * 4);
-			GLfloat *texcoord = NULL;
+			const GLfloat *vertex = (GLfloat *)&gl_VertexList[0].xyz[0];
+            const GLubyte *color = (GLubyte *)&gl_VertexList[0].color[0];
+            const GLfloat *texcoord = NULL;
 			if(usingTexCoord)
-				texcoord = (GLfloat *)malloc(sizeof(GLfloat) * num * 2);
-			for(int i = 0; i < num; i++)
-			{
-				const idDrawVert &drawVert = gl_VertexList[i];
-				vertex[i * 3] = drawVert.xyz[0];
-				vertex[i * 3 + 1] = drawVert.xyz[1];
-				vertex[i * 3 + 2] = drawVert.xyz[2];
-				color[i * 4] = drawVert.color[0];
-				color[i * 4 + 1] = drawVert.color[1];
-				color[i * 4 + 2] = drawVert.color[2];
-				color[i * 4 + 3] = drawVert.color[3];
-				if(usingTexCoord)
-				{
-					texcoord[i * 2] = drawVert.st[0];
-					texcoord[i * 2 + 1] = drawVert.st[1];
-				}
-			}
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, 0, vertex);
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, 0, color);
+				texcoord = (GLfloat *)&gl_VertexList[0].st[0];
+
+			GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Vertex), 3, GL_FLOAT, false, GLVERT_STRIP, vertex);
+			GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, false, GLVERT_STRIP, color);
 			if(usingTexCoord)
-				GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, 0, texcoord);
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_TexCoord), 2, GL_FLOAT, false, GLVERT_STRIP, texcoord);
+
+            GL_Uniform1fv(SHADER_PARM_ADDR(colorAdd), zero);
+            GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), oneModulate);
+            GL_Uniform4f(SHADER_PARM_ADDR(glColor), 1.0f, 1.0f, 1.0f, 1.0f);
 
 			qglDrawArrays(gl_RenderType, 0, num);
 
-			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
 			if(usingTexCoord)
-				GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-
-			free(vertex);
-			free(color);
-			free(texcoord);
+				GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
 
 			glrbEndRender();
 		}
-		else if(numIndex > 0)
+		else if(numIndex > 0) // call glArrayElement
 		{
 			GLboolean usingColor = glrbClientStateIsEnabled(GL_COLOR_ARRAY);
 
@@ -544,40 +554,22 @@ void glEnd(void)
 			if(!usingTexCoord)
 				globalImages->whiteImage->Bind();
 
-			glIndex_t *index = (glIndex_t *)malloc(sizeof(glIndex_t) * numIndex);
-			for(int i = 0; i < numIndex; i++)
-			{
-				index[i] = gl_IndexList[i];
-			}
+            const glIndex_t *index = (glIndex_t *)&gl_IndexList[0];
 
-			GLubyte *color = NULL;
-			if(!usingColor)
+			if(usingColor) // use color array
 			{
-				GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
-				color = (GLubyte *)malloc(sizeof(GLubyte) * num * 4);
-				GLubyte glColor[] = {
-					(GLubyte)(gl_Color[0] * 255),
-					(GLubyte)(gl_Color[1] * 255),
-					(GLubyte)(gl_Color[2] * 255),
-					(GLubyte)(gl_Color[3] * 255),
-				};
-				for(int i = 0; i < numIndex; i++)
-				{
-					index[i] = gl_IndexList[i];
-					color[i * 4] = glColor[0];
-					color[i * 4 + 1] = glColor[1];
-					color[i * 4 + 2] = glColor[2];
-					color[i * 4 + 3] = glColor[3];
-				}
-				GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, 0, color);
+                GL_Uniform1fv(SHADER_PARM_ADDR(colorAdd), zero);
+                GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), oneModulate);
+                GL_Uniform4f(SHADER_PARM_ADDR(glColor), 1.0f, 1.0f, 1.0f, 1.0f);
 			}
+            else // not use color array
+            {
+                GL_Uniform1fv(SHADER_PARM_ADDR(colorAdd), oneModulate);
+                GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), zero);
+                GL_Uniform4fv(SHADER_PARM_ADDR(glColor), gl_Color);
+            }
 
 			qglDrawElements(gl_RenderType, numIndex, GL_INDEX_TYPE, index);
-
-			free(index);
-			free(color);
-			if(!usingColor)
-				GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 		}
 	}
 
@@ -586,7 +578,7 @@ void glEnd(void)
 	gl_RenderType = 0;
 }
 
-static void glrbDebugRenderCompat(void)
+GLRB_PRIV void glrbDebugRenderCompat(void)
 {
 	Sys_Printf("----- glrbDebugRenderCompat -----\n");
 	Sys_Printf("Projection matrix stack: %d\n", gl_ProjectionMatrixStack.Num());
@@ -690,12 +682,12 @@ void RB_ShowImages_compat(void)
 	common->Printf("%i msec to draw all images\n", end - start);
 }
 
-void glRasterPos2f(GLfloat x, GLfloat y)
+ID_INLINE GLRB_API void glRasterPos2f(GLfloat x, GLfloat y)
 {
 
 }
 
-static void glrbCreateDrawPixelsImage(GLint width, GLint height, const GLubyte *data, GLfloat *x, GLfloat *y)
+GLRB_PRIV void glrbCreateDrawPixelsImage(GLint width, GLint height, const GLubyte *data, GLfloat *x, GLfloat *y)
 {
     if(gl_drawPixelsImage == 0)
     {
@@ -720,7 +712,7 @@ static void glrbCreateDrawPixelsImage(GLint width, GLint height, const GLubyte *
     }
     else
     {
-        GLubyte *d = (GLubyte *)calloc(scaled_width * scaled_height * 4, 1);
+        GLubyte *d = (GLubyte *)malloc(scaled_width * scaled_height * 4);
         for(int h = 0; h < height; h++)
         {
             for(int w = 0; w < width; w++)
@@ -740,7 +732,7 @@ static void glrbCreateDrawPixelsImage(GLint width, GLint height, const GLubyte *
 	//qglGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void glDrawPixels(GLint width, GLint height, GLenum format, GLenum dataType, const void *data)
+GLRB_API void glDrawPixels(GLint width, GLint height, GLenum format, GLenum dataType, const void *data)
 {
     if(format != GL_RGBA)
 	{
@@ -790,4 +782,15 @@ void glDrawPixels(GLint width, GLint height, GLenum format, GLenum dataType, con
     glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
     glPopAttrib();
+}
+
+void glrbShutdown(void)
+{
+    Sys_Printf("GL compat layer shutdown.\n");
+    if(gl_drawPixelsImage != 0)
+    {
+        if(qglIsTexture(gl_drawPixelsImage))
+            qglDeleteTextures(1, &gl_drawPixelsImage);
+        gl_drawPixelsImage = 0;
+    }
 }

@@ -2977,6 +2977,8 @@ void RB_ShutdownDebugTools(void)
 		rb_debugPolygons[i].winding.Clear();
 	}
 //#endif
+
+    glrbShutdown();
 }
 
 #ifdef _MULTITHREAD

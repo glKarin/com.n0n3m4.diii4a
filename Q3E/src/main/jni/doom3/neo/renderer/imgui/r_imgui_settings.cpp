@@ -388,14 +388,15 @@ void idImGuiSettings::RenderComboCVar(const cvarSettingItem_t &item)
 void idImGuiSettings::RenderChangeLogs(void) const
 {
     const char *ChangeLogs[] = {
-#ifdef _RAVEN
-            "BSE effects update.",
-#elif defined(_HUMANHEAD)
-#else
-#endif
             "Optimize PBR shaders with original specular texture.",
             "Add mp3 sound file support.",
             "Add settings by ImGui.",
+#ifdef _RAVEN
+            "BSE effects update.",
+#elif defined(_HUMANHEAD)
+ #else
+            "Fix low frequency on HeXen-Edge of Chaos mod."
+#endif
 
             NULL
     };
