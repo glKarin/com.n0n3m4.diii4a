@@ -395,7 +395,7 @@ void idImGuiSettings::RenderChangeLogs(void) const
             "BSE effects update.",
 #elif defined(_HUMANHEAD)
  #else
-            "Fix low frequency on HeXen-Edge of Chaos mod."
+            "Fix low frequency on HeXen-Edge of Chaos mod.",
 #endif
 
             NULL
