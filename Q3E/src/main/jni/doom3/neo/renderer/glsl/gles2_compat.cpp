@@ -472,6 +472,32 @@ GLRB_API void glBegin(GLenum t)
 	gl_RenderType = t;
 }
 
+GLRB_API void glrbDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices)
+{
+	GLint usingColor;
+	qglGetVertexAttribiv(SHADER_PARM_HANDLE(SHADER_PARM_ADDR(attr_Color)), GL_VERTEX_ATTRIB_ARRAY_ENABLED, &usingColor);
+	GLint usingTexCoord;
+	qglGetVertexAttribiv(SHADER_PARM_HANDLE(SHADER_PARM_ADDR(attr_TexCoord)), GL_VERTEX_ATTRIB_ARRAY_ENABLED, &usingTexCoord);
+
+	GL_SelectTexture(0);
+	if(!usingTexCoord)
+		globalImages->whiteImage->Bind();
+
+	if(usingColor) // use color array
+	{
+		GL_Uniform1fv(SHADER_PARM_ADDR(colorAdd), zero);
+		GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), oneModulate);
+		GL_Uniform4f(SHADER_PARM_ADDR(glColor), 1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	else // not use color array
+	{
+		GL_Uniform1fv(SHADER_PARM_ADDR(colorAdd), one);
+		GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), zero);
+		GL_Uniform4fv(SHADER_PARM_ADDR(glColor), gl_Color);
+	}
+	qglDrawElements(mode, count, type, indices);
+}
+
 GLRB_PRIV void glrbStartRender(void)
 {
 	GL_UseProgram(&defaultShader);
@@ -564,7 +590,7 @@ GLRB_API void glEnd(void)
 			}
             else // not use color array
             {
-                GL_Uniform1fv(SHADER_PARM_ADDR(colorAdd), oneModulate);
+                GL_Uniform1fv(SHADER_PARM_ADDR(colorAdd), one);
                 GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), zero);
                 GL_Uniform4fv(SHADER_PARM_ADDR(glColor), gl_Color);
             }

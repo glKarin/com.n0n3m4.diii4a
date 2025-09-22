@@ -775,7 +775,6 @@ int idMaterial::ParseTerm(idLexer &src)
 
 #ifdef _HUMANHEAD
 	if (!token.Icmp("distance")) {
-		// return GetExpressionConstant(0);
 		pd->registersAreConstant = false;
 		return EXP_REG_DISTANCE;
 	}

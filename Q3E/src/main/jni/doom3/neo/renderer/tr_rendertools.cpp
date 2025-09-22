@@ -42,9 +42,15 @@ typedef struct debugLine_s {
 	int			lifeTime;
 } debugLine_t;
 
+#ifdef _MULTITHREAD //karin: always using original variants in RB_ShowDebug[Text|Lines|Polygons] without multi-threading
+debugLine_t		rb_debugLiness[NUM_FRAME_DATA][ MAX_DEBUG_LINES ];
+int				rb_numDebugLiness[NUM_FRAME_DATA] = {0};
+int				rb_debugLineTimes[NUM_FRAME_DATA] = {0};
+#else
 debugLine_t		rb_debugLines[ MAX_DEBUG_LINES ];
 int				rb_numDebugLines = 0;
 int				rb_debugLineTime = 0;
+#endif
 
 #define MAX_DEBUG_TEXT			512
 
@@ -59,9 +65,15 @@ typedef struct debugText_s {
 	bool		depthTest;
 } debugText_t;
 
+#ifdef _MULTITHREAD //karin: always using original variants in RB_ShowDebug[Text|Lines|Polygons] without multi-threading
+debugText_t		rb_debugTexts[NUM_FRAME_DATA][ MAX_DEBUG_TEXT ];
+int				rb_numDebugTexts[NUM_FRAME_DATA] = {0};
+int				rb_debugTextTimes[NUM_FRAME_DATA] = {0};
+#else
 debugText_t		rb_debugText[ MAX_DEBUG_TEXT ];
 int				rb_numDebugText = 0;
 int				rb_debugTextTime = 0;
+#endif
 
 #define MAX_DEBUG_POLYGONS		8192
 
@@ -72,72 +84,66 @@ typedef struct debugPolygon_s {
 	int			lifeTime;
 } debugPolygon_t;
 
+#ifdef _MULTITHREAD //karin: always using original variants in RB_ShowDebug[Text|Lines|Polygons] without multi-threading
+debugPolygon_t	rb_debugPolygonss[NUM_FRAME_DATA][ MAX_DEBUG_POLYGONS ];
+int				rb_numDebugPolygonss[NUM_FRAME_DATA] = {0};
+int				rb_debugPolygonTimes[NUM_FRAME_DATA] = {0};
+#else
 debugPolygon_t	rb_debugPolygons[ MAX_DEBUG_POLYGONS ];
 int				rb_numDebugPolygons = 0;
 int				rb_debugPolygonTime = 0;
+#endif
 
-#ifdef _MULTITHREAD
-//karin: always using original variants in RB_ShowDebug[Text|Lines|Polygons] without multi-threading
-static debugLine_t		mt_rb_debugLines[ MAX_DEBUG_LINES ];
-static int				mt_rb_numDebugLines = 0;
-static int				mt_rb_debugLineTime = 0;
+#ifdef _MULTITHREAD //karin: always using original variants in RB_ShowDebug[Text|Lines|Polygons] without multi-threading
+static volatile int backEndFrameIndex = 0;
+#define frontEndFrameIndex ((backEndFrameIndex + 1) % NUM_FRAME_DATA)
 
-static debugText_t		mt_rb_debugText[ MAX_DEBUG_TEXT ];
-static int				mt_rb_numDebugText = 0;
-static int				mt_rb_debugTextTime = {0};
+#define RB_DEBUG_LINES \
+	const int _frameIndex = multithreadActive ? backEndFrameIndex : 0; \
+debugLine_t *rb_debugLines = rb_debugLiness[ _frameIndex ]; \
+int &rb_numDebugLines = rb_numDebugLiness[_frameIndex]; \
+int &rb_debugLineTime = rb_debugLineTimes[_frameIndex];
 
-static debugPolygon_t	mt_rb_debugPolygons[ MAX_DEBUG_POLYGONS ];
-static int				mt_rb_numDebugPolygons = 0;
-static int				mt_rb_debugPolygonTime = 0;
+#define RB_DEBUG_TEXTS \
+	const int _frameIndex = multithreadActive ? backEndFrameIndex : 0; \
+debugText_t *rb_debugText = rb_debugTexts[ _frameIndex ]; \
+int &rb_numDebugText = rb_numDebugTexts[_frameIndex]; \
+int &rb_debugTextTime = rb_debugTextTimes[_frameIndex];
 
-#define __debugLines (multithreadActive ? mt_rb_debugLines : ::rb_debugLines)
-#define __numDebugLines (multithreadActive ? mt_rb_numDebugLines : ::rb_numDebugLines)
-#define __debugLineTime (multithreadActive ? mt_rb_debugLineTime : ::rb_debugLineTime)
+#define RB_DEBUG_POLYGONS \
+	const int _frameIndex = multithreadActive ? backEndFrameIndex : 0; \
+debugPolygon_t *rb_debugPolygons = rb_debugPolygonss[ _frameIndex ]; \
+int &rb_numDebugPolygons = rb_numDebugPolygonss[_frameIndex]; \
+int &rb_debugPolygonTime = rb_debugPolygonTimes[_frameIndex];
 
-#define __debugText (multithreadActive ? mt_rb_debugText : ::rb_debugText)
-#define __numDebugText (multithreadActive ? mt_rb_numDebugText : ::rb_numDebugText)
-#define __debugTextTime (multithreadActive ? mt_rb_debugTextTime : ::rb_debugTextTime)
 
-#define __debugPolygons (multithreadActive ? mt_rb_debugPolygons : ::rb_debugPolygons)
-#define __numDebugPolygons (multithreadActive ? mt_rb_numDebugPolygons : ::rb_numDebugPolygons)
-#define __debugPolygonTime (multithreadActive ? mt_rb_debugPolygonTime : ::rb_debugPolygonTime)
+#define TR_DEBUG_LINES \
+	const int _frameIndex = multithreadActive ? frontEndFrameIndex : 0; \
+debugLine_t *rb_debugLines = rb_debugLiness[ _frameIndex ]; \
+int &rb_numDebugLines = rb_numDebugLiness[_frameIndex]; \
+int &rb_debugLineTime = rb_debugLineTimes[_frameIndex];
+
+#define TR_DEBUG_TEXTS \
+	const int _frameIndex = multithreadActive ? frontEndFrameIndex : 0; \
+debugText_t *rb_debugText = rb_debugTexts[ _frameIndex ]; \
+int &rb_numDebugText = rb_numDebugTexts[_frameIndex]; \
+int &rb_debugTextTime = rb_debugTextTimes[_frameIndex];
+
+#define TR_DEBUG_POLYGONS \
+	const int _frameIndex = multithreadActive ? frontEndFrameIndex : 0; \
+debugPolygon_t *rb_debugPolygons = rb_debugPolygonss[ _frameIndex ]; \
+int &rb_numDebugPolygons = rb_numDebugPolygonss[_frameIndex]; \
+int &rb_debugPolygonTime = rb_debugPolygonTimes[_frameIndex];
+
 
 idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Enable render tools debug with GLES in multi-threading.");
 
 void RB_SetupRenderTools(void)
 {
-#define U_NORMALIZE_CLAMP(x, max) { \
-		if(x < 0 || x > max) \
-			x = 0; \
-	}
-/*#define U_NORMALIZE_CLAMP(x, max) { \
-		if(x < 0) \
-			x = 0; \
-		else if(x > max) \
-			x = max; \
-	}*/
-
-	if(multithreadActive && harm_r_renderToolsMultithread.GetBool())
+	if(multithreadActive/* && harm_r_renderToolsMultithread.GetBool()*/)
 	{
-		mt_rb_debugLineTime = rb_debugLineTime;
-		mt_rb_numDebugLines = rb_numDebugLines;
-		U_NORMALIZE_CLAMP(mt_rb_numDebugLines, MAX_DEBUG_LINES)
-		if(mt_rb_numDebugLines > 0)
-			memcpy(mt_rb_debugLines, rb_debugLines, sizeof(rb_debugLines[0]) * mt_rb_numDebugLines);
-
-		mt_rb_debugTextTime = rb_debugTextTime;
-		mt_rb_numDebugText = rb_numDebugText;
-		U_NORMALIZE_CLAMP(mt_rb_numDebugText, MAX_DEBUG_TEXT)
-		if(mt_rb_numDebugText > 0)
-			memcpy(mt_rb_debugText, rb_debugText, sizeof(rb_debugText[0]) * mt_rb_numDebugText);
-
-		mt_rb_debugPolygonTime = rb_debugPolygonTime;
-		mt_rb_numDebugPolygons = rb_numDebugPolygons;
-		U_NORMALIZE_CLAMP(mt_rb_numDebugPolygons, MAX_DEBUG_POLYGONS)
-		if(mt_rb_numDebugPolygons > 0)
-			memcpy(mt_rb_debugPolygons, rb_debugPolygons, sizeof(rb_debugPolygons[0]) * mt_rb_numDebugPolygons);
+		backEndFrameIndex = frontEndFrameIndex;
 	}
-#undef U_NORMALIZE_CLAMP
 }
 #endif
 
@@ -170,7 +176,7 @@ static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 		for(int i = 0; i < numIndexes; i += 3)
 		{
 			if (tri->indexCache) {
-				qglDrawElements(GL_LINES,
+				glrbDrawElements(GL_LINES,
 						3,
 						GL_INDEX_TYPE,
 						(glIndex_t *)vertexCache.Position(tri->indexCache) + i);
@@ -178,7 +184,7 @@ static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 			} else {
 				vertexCache.UnbindIndex();
 
-				qglDrawElements(GL_LINES,
+				glrbDrawElements(GL_LINES,
 						3,
 						GL_INDEX_TYPE,
 						tri->indexes + i);
@@ -188,7 +194,7 @@ static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 	else
 	{
 		if (tri->indexCache) {
-			qglDrawElements(GL_TRIANGLES,
+			glrbDrawElements(GL_TRIANGLES,
 					numIndexes,
 					GL_INDEX_TYPE,
 					(int *)vertexCache.Position(tri->indexCache));
@@ -196,7 +202,7 @@ static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 		} else {
 			vertexCache.UnbindIndex();
 
-			qglDrawElements(GL_TRIANGLES,
+			glrbDrawElements(GL_TRIANGLES,
 					numIndexes,
 					GL_INDEX_TYPE,
 					tri->indexes);
@@ -2115,6 +2121,9 @@ void RB_ClearDebugText(int time)
 	int			i;
 	int			num;
 	debugText_t	*text;
+#ifdef _MULTITHREAD
+	TR_DEBUG_TEXTS
+#endif
 
 	rb_debugTextTime = time;
 
@@ -2157,6 +2166,9 @@ void RB_AddDebugText(const char *text, const idVec3 &origin, float scale, const 
 {
 //#if !defined(GL_ES_VERSION_2_0)
 	debugText_t *debugText;
+#ifdef _MULTITHREAD
+	TR_DEBUG_TEXTS
+#endif
 
 	if (rb_numDebugText < MAX_DEBUG_TEXT) {
 		debugText = &rb_debugText[ rb_numDebugText++ ];
@@ -2320,15 +2332,13 @@ RB_ShowDebugText
 */
 void RB_ShowDebugText(void)
 {
-#ifdef _MULTITHREAD
-	debugText_t *rb_debugText = __debugText;
-	const int rb_numDebugText = __numDebugText;
-	const int rb_debugTextTime = __debugTextTime;
-#endif
 //#if !defined(GL_ES_VERSION_2_0)
 	int			i;
 	int			width;
 	debugText_t	*text;
+#ifdef _MULTITHREAD
+	RB_DEBUG_TEXTS
+#endif
 
 	if (!rb_numDebugText) {
 		return;
@@ -2391,6 +2401,9 @@ void RB_ClearDebugLines(int time)
 	int			i;
 	int			num;
 	debugLine_t	*line;
+#ifdef _MULTITHREAD
+	TR_DEBUG_LINES
+#endif
 
 	rb_debugLineTime = time;
 
@@ -2426,6 +2439,9 @@ void RB_AddDebugLine(const idVec4 &color, const idVec3 &start, const idVec3 &end
 {
 //#if !defined(GL_ES_VERSION_2_0)
 	debugLine_t *line;
+#ifdef _MULTITHREAD
+	TR_DEBUG_LINES
+#endif
 
 	if (rb_numDebugLines < MAX_DEBUG_LINES) {
 		line = &rb_debugLines[ rb_numDebugLines++ ];
@@ -2445,15 +2461,13 @@ RB_ShowDebugLines
 */
 void RB_ShowDebugLines(void)
 {
-#ifdef _MULTITHREAD
-	debugLine_t *rb_debugLines = __debugLines;
-	const int rb_numDebugLines = __numDebugLines;
-	const int rb_debugLineTime = __debugLineTime;
-#endif
 //#if !defined(GL_ES_VERSION_2_0)
 	int			i;
 	int			width;
 	debugLine_t	*line;
+#ifdef _MULTITHREAD
+	RB_DEBUG_LINES
+#endif
 
 	if (!rb_numDebugLines) {
 		return;
@@ -2528,6 +2542,9 @@ void RB_ClearDebugPolygons(int time)
 	int				i;
 	int				num;
 	debugPolygon_t	*poly;
+#ifdef _MULTITHREAD
+	TR_DEBUG_POLYGONS
+#endif
 
 	rb_debugPolygonTime = time;
 
@@ -2564,6 +2581,9 @@ void RB_AddDebugPolygon(const idVec4 &color, const idWinding &winding, const int
 {
 //#if !defined(GL_ES_VERSION_2_0)
 	debugPolygon_t *poly;
+#ifdef _MULTITHREAD
+	TR_DEBUG_POLYGONS
+#endif
 
 	if (rb_numDebugPolygons < MAX_DEBUG_POLYGONS) {
 		poly = &rb_debugPolygons[ rb_numDebugPolygons++ ];
@@ -2582,14 +2602,12 @@ RB_ShowDebugPolygons
 */
 void RB_ShowDebugPolygons(void)
 {
-#ifdef _MULTITHREAD
-	debugPolygon_t *rb_debugPolygons = __debugPolygons;
-	const int rb_numDebugPolygons = __numDebugPolygons;
-	const int rb_debugPolygonTime = __debugPolygonTime;
-#endif
 //#if !defined(GL_ES_VERSION_2_0)
 	int				i, j;
 	debugPolygon_t	*poly;
+#ifdef _MULTITHREAD
+	RB_DEBUG_POLYGONS
+#endif
 
 	if (!rb_numDebugPolygons) {
 		return;
@@ -2867,9 +2885,9 @@ void RB_TestImage(void)
 
 #ifdef GL_ES_VERSION_2_0
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	GLboolean t2d = qglIsEnabled(GL_TEXTURE_2D);
+/*	GLboolean t2d = qglIsEnabled(GL_TEXTURE_2D);
 	if(!t2d)
-		qglEnable(GL_TEXTURE_2D);
+		qglEnable(GL_TEXTURE_2D);*/
 	GLboolean cf = qglIsEnabled(GL_CULL_FACE);
 	if(cf)
 		qglDisable(GL_CULL_FACE);
@@ -2892,8 +2910,8 @@ void RB_TestImage(void)
 	glEnd();
 #ifdef GL_ES_VERSION_2_0
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	if(!t2d)
-		qglDisable(GL_TEXTURE_2D);
+/*	if(!t2d)
+		qglDisable(GL_TEXTURE_2D);*/
 	if(cf)
 		qglEnable(GL_CULL_FACE);
 #endif
@@ -2973,9 +2991,18 @@ RB_ShutdownDebugTools
 void RB_ShutdownDebugTools(void)
 {
 //#if !defined(GL_ES_VERSION_2_0)
+#ifdef _MULTITHREAD
+	const int num = multithreadActive ? NUM_FRAME_DATA : 1;
+	for(int i = 0; i < num; i++)
+	{
+		debugPolygon_t *rb_debugPolygons = rb_debugPolygonss[i];
+#endif
 	for (int i = 0; i < MAX_DEBUG_POLYGONS; i++) {
 		rb_debugPolygons[i].winding.Clear();
 	}
+#ifdef _MULTITHREAD
+	}
+#endif
 //#endif
 
     glrbShutdown();
