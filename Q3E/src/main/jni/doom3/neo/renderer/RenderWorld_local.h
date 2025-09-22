@@ -182,7 +182,11 @@ class idRenderWorldLocal : public idRenderWorld
         virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot, float nearDist, float alpha, int lifetime) { (void)color; (void)origin; (void)dir; (void)farDot; (void)farDist; (void)nearDot; (void)nearDist; (void)alpha; (void)lifetime; }
 
         virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas );
+#if 1
+        void					FindVisibleAreas_r(const idVec3 &origin, int areaNum, bool *visibleAreas);
+#else
         void					FindVisibleAreas_r(const idVec3 &origin, int areaNum, const struct portalStack_s *ps, bool *visibleAreas);
+#endif
 
 // jscott: handling of effects
         virtual qhandle_t		AddEffectDef(const renderEffect_t* reffect, int time);
@@ -195,7 +199,7 @@ class idRenderWorldLocal : public idRenderWorld
 #ifdef _RAVEN_BSE
         void                    MarkEffectDef(int effectHandle);
         void                    PushEffectDef(int effectHandle);
-        void                    AddAreaEffectRefs(int areaNum, const portalStack_s *ps);
+        void                    AddAreaEffectRefs(int areaNum, const struct portalStack_s *ps);
         void                    AddEffectRefToArea(rvRenderEffectLocal *reffect, portalArea_t *area);
         void					PushPolytopeIntoTree_r(idRenderEntityLocal *def, idRenderLightLocal *light, rvRenderEffectLocal *reffect, const idBox *box, const idVec3 *points, int numPoints, int nodeNum);
 

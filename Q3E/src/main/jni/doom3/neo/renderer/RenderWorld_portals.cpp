@@ -1439,9 +1439,19 @@ void idRenderWorldLocal::ShowPortals()
 #ifdef _RAVEN
 void idRenderWorldLocal::FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas )
 {
-	portalStack_t	ps;
 	int				i;
 
+#if 1
+	if ( areaNum >= 0 && areaNum < numPortalAreas )
+	{
+		FindVisibleAreas_r(origin, areaNum, visibleAreas);
+	}
+	else if(areaNum < 0)
+	{
+		for ( i = 0; i < this->numPortalAreas; ++i )
+			visibleAreas[i] = true;
+	}
+#else
 	assert(areaNum >= 0 && areaNum < numPortalAreas);
 
 #if 0
@@ -1468,6 +1478,7 @@ void idRenderWorldLocal::FindVisibleAreas( idVec3 origin, int areaNum, bool *vis
 
 	// flood out through portals, setting area viewCount
 	FindVisibleAreas_r(origin, areaNum, &ps, visibleAreas);
+#endif
 #if 0
 	int num = 0;
 	int numSky = 0;
@@ -1476,16 +1487,51 @@ void idRenderWorldLocal::FindVisibleAreas( idVec3 origin, int areaNum, bool *vis
 		if(visibleAreas[i])
 		{
 			bool b = HasSkybox(i);
-			LOGI("visible area: %d %d", i, b);
 			num++;
 			if(b)
+			{
+				LOGI("visible area: %d %d", i, b);
 				numSky++;
+			}
 		}
 	}
+	if(numSky > 0)
 	LOGI("Total visible: %d %d, skys: %d\n", areaNum, num, numSky);
 #endif
 }
 
+#if 1
+void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, bool *visibleAreas)
+{
+	portal_t		*p;
+	float			d;
+	portalArea_t 	*area;
+
+	area = &portalAreas[ areaNum ];
+	visibleAreas[areaNum] = true;
+
+	for (p = area->portals; p; p = p->next) {
+		// make sure the portal isn't in our stack trace,
+		// which would cause an infinite loop
+		if(visibleAreas[p->intoArea])
+			continue;
+
+		// an enclosing door may have sealed the portal off
+		if (p->doublePortal->blockingBits & PS_BLOCK_VIEW) {
+			continue;
+		}
+
+		// make sure this portal is facing away from the view
+		d = p->plane.Distance(origin);
+
+		if (d < -0.1f) {
+			continue;
+		}
+
+		FindVisibleAreas_r(origin, p->intoArea, visibleAreas);
+	}
+}
+#else
 void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, const struct portalStack_s *ps, bool *visibleAreas)
 {
 	portal_t		*p;
@@ -1590,6 +1636,7 @@ void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, c
 		FindVisibleAreas_r(origin, p->intoArea, &newStack, visibleAreas);
 	}
 }
+#endif
 
 #ifdef _RAVEN_BSE
 void idRenderWorldLocal::AddAreaEffectRefs(int areaNum, const portalStack_s *ps) {

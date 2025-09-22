@@ -173,7 +173,7 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
     if (!src->PeekTokenString("{") && !src->PeekTokenString("}"))
     {
         int hasSky = src->ParseInt();
-		(static_cast<idRenderModelStatic *>(model))->SetHasSky(hasSky ? true : false);
+		model->SetHasSky(hasSky ? true : false);
     }
 // jmarshall end
 #endif
@@ -1087,6 +1087,6 @@ bool idRenderWorldLocal::HasSkybox(int areaNum)
 		return false;
 
 	const idRenderModel *model = renderModelManager->CheckModel(va("_area%i", areaNum));
-	return model ? static_cast<const idRenderModelStatic *>(model)->GetHasSky() : false;
+	return model ? model->GetHasSky() : false;
 }
 #endif
