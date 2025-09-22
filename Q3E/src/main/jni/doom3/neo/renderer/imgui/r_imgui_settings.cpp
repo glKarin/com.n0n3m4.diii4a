@@ -391,10 +391,13 @@ void idImGuiSettings::RenderChangeLogs(void) const
             "Optimize PBR shaders with original specular texture.",
             "Add mp3 sound file support.",
             "Add settings by ImGui.",
+            "Optimize debug render tools in GLSL.",
 #ifdef _RAVEN
             "BSE effects update.",
+            "Fix GUI.",
+            "Fix credits after end of game.",
 #elif defined(_HUMANHEAD)
- #else
+#else
             "Fix low frequency on HeXen-Edge of Chaos mod.",
 #endif
 

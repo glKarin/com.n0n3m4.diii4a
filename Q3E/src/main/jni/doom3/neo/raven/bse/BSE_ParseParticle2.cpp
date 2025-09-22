@@ -573,6 +573,7 @@ bool rvParticleTemplate::ParseMotionParms(idLexer* src,
     if (!src->ExpectTokenString("{"))
         return false;
 
+	idStr tableName; //karin: record last parsed table name
     idToken tok;
     while (src->ReadToken(&tok)) {
         if (!idStr::Cmp(tok, "}"))
@@ -585,6 +586,8 @@ bool rvParticleTemplate::ParseMotionParms(idLexer* src,
                 declManager->FindType(DECL_TABLE,
                     tok,
                     false));
+            if(!env.mTable)
+				tableName = tok.c_str(); //karin: read table name token        
 
         }
         else if (!idStr::Icmp(tok, "rate")) {
@@ -592,7 +595,8 @@ bool rvParticleTemplate::ParseMotionParms(idLexer* src,
             if (!GetVector(src, vecCount, env.mRate))
                 return false;
             env.mIsCount = false;
-
+            
+            tableName.Clear(); //karin: not read envelope any more
         }
         else if (!idStr::Icmp(tok, "count")) {
 
@@ -600,18 +604,33 @@ bool rvParticleTemplate::ParseMotionParms(idLexer* src,
                 return false;
             env.mIsCount = true;
 
+            tableName.Clear(); //karin: not read envelope any more
         }
         else if (!idStr::Icmp(tok, "offset")) {
 
             if (!GetVector(src, vecCount, env.mEnvOffset))
                 return false;
 
+            tableName.Clear(); //karin: not read envelope any more
         }
         else {
-            common->Warning("^4BSE:^1 Invalid motion parameter '%s' "
-                "(file: %s, line: %d)",
-                tok.c_str(), src->GetFileName(), src->GetLineNum());
-            src->SkipBracedSection(true);
+			if(!env.mTable && !tableName.IsEmpty()) //karin: only if table is invalid and envelope token readed
+			{
+				tableName.Append(tok); // append unexpected token as table name and refind it
+				env.mTable = static_cast<const idDeclTable*>(
+						declManager->FindType(DECL_TABLE,
+							tableName,
+							false));
+	            if(env.mTable)
+					tableName.Clear(); //karin: read table name token
+			}
+			else
+			{
+				common->Warning("^4BSE:^1 Invalid motion parameter '%s' "
+						"(file: %s, line: %d)",
+						tok.c_str(), src->GetFileName(), src->GetLineNum());
+				src->SkipBracedSection(true);
+			}
         }
     }
 
