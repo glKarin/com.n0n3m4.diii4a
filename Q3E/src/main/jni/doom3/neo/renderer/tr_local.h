@@ -1245,6 +1245,7 @@ void	GL_TexEnv(int env);
 void	GL_Cull(int cullType);
 bool    GL_CheckErrors(const char *name);
 void	GL_SelectTextureForce(int unit);
+bool    GL_ClearErrors(void);
 
 const int GLS_SRCBLEND_ZERO						= 0x00000001;
 const int GLS_SRCBLEND_ONE						= 0x0;

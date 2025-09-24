@@ -255,7 +255,7 @@ void hhPlayer::Spawn( void ) {
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 		fullBodyAwarenessOffset = offset;
 	else
-		gameLocal.Warning("Unable read harm_pm_fullBodyAwarenessOffset.\n");
+		gameLocal.Warning("Unable read harm_pm_fullBodyAwarenessOffset.");
 
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 		renderEntity.suppressSurfaceInViewID = entityNumber+1;
@@ -7280,7 +7280,7 @@ void hhPlayer::Restore( idRestoreGame *savefile ) {
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 		fullBodyAwarenessOffset = offset;
 	else
-		gameLocal.Warning("Unable read harm_pm_fullBodyAwarenessOffset.\n");
+		gameLocal.Warning("Unable read harm_pm_fullBodyAwarenessOffset.");
 #endif
 }
 

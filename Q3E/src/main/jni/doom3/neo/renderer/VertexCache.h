@@ -28,6 +28,13 @@ If you have questions concerning this license or the applicable additional terms
 
 // vertex cache calls should only be made by the front end
 
+#define SEPARATE_INDEX_BUFFER 1
+enum {
+    VBO_VERTEX = 0,
+    VBO_INDEX = 1,
+    VBO_TOTAL = 2,
+};
+
 const int NUM_VERTEX_FRAMES = 2;
 
 typedef enum {
@@ -50,7 +57,7 @@ typedef struct vertCache_s {
 	struct vertCache_s *next, *prev;	// may be on the static list or one of the frame lists
 	int				frameUsed;			// it can't be purged if near the current frame
 #ifdef _MULTITHREAD
-	bool            virtMemDirty;
+	bool            virtMemDirty; // frontend, virtMem also is frontend
 #endif
 } vertCache_t;
 
@@ -146,15 +153,22 @@ class idVertexCache
 
 		idBlockAlloc<vertCache_t,1024>	headerAllocator;
 
+#ifdef SEPARATE_INDEX_BUFFER
+		vertCache_t		freeStaticHeaderss[VBO_TOTAL];		// head of doubly linked list
+#else
+        vertCache_t		freeStaticHeaders;		// head of doubly linked list
+#endif
 #ifdef _MULTITHREAD
-		vertCache_t		freeStaticHeaderss[2];		// head of doubly linked list
 		vertCache_t		dynamicHeaderss[NUM_VERTEX_FRAMES];			// head of doubly linked list
 		vertCache_t		deferredFreeLists[NUM_VERTEX_FRAMES];		// head of doubly linked list
-		vertCache_t		staticHeaderss[2];			// head of doubly linked list in MRU order,
 #else
-		vertCache_t		freeStaticHeaders;		// head of doubly linked list
 		vertCache_t		dynamicHeaders;			// head of doubly linked list
 		vertCache_t		deferredFreeList;		// head of doubly linked list
+#endiflinked list
+#endif
+#ifdef SEPARATE_INDEX_BUFFER
+		vertCache_t		staticHeaderss[VBO_TOTAL];			// head of doubly linked list in MRU order,
+#else
 		vertCache_t		staticHeaders;			// head of doubly linked list in MRU order,
 #endif
 		vertCache_t		freeDynamicHeaders;		// head of doubly linked list
@@ -163,12 +177,15 @@ class idVertexCache
 		int				frameBytes;				// for each of NUM_VERTEX_FRAMES frames
 
 #if 0
-	int currentBoundVBO;
+	    int currentBoundVBO;
 #endif
 #ifdef _MULTITHREAD
         volatile int    usingFrame; // current_frame: always 0 if without multi-threading, else same as ::listNum
     public:
-        idVertexCache(void) : usingFrame(0) {}
+        idVertexCache(void) :
+            allocatingTempBuffer(false),
+            usingFrame(0)
+        {}
 #endif
 };
 

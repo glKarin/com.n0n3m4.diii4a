@@ -66,7 +66,7 @@ void idRenderThread::BackendThreadExecute( void )
     GLimp_DeactivateContext();
     backendThreadShutdown = false;
     Sys_CreateThread(BackendThread, common, THREAD_HIGHEST, render_thread, RENDER_THREAD_NAME, g_threads, &g_thread_count);
-    common->Printf("[MainThread]: Render thread start -> %lu(%s)\n", render_thread.threadHandle, RENDER_THREAD_NAME);
+    common->Printf("[MainThread]: Render thread start -> %zd(%s)\n", render_thread.threadHandle, RENDER_THREAD_NAME);
 }
 
 void idRenderThread::BackendThreadShutdown( void )

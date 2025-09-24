@@ -396,6 +396,7 @@ void idImGuiSettings::RenderChangeLogs(void) const
             "BSE effects update.",
             "Fix GUI.",
             "Fix credits after end of game.",
+            "Fix map static mesh vertex color.",
 #elif defined(_HUMANHEAD)
 #else
             "Fix low frequency on HeXen-Edge of Chaos mod.",

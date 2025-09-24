@@ -1252,11 +1252,11 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 #ifdef _MULTITHREAD
     extern intptr_t Sys_GetMainThread(void);
     common->Printf("Multi-Thread: %s\n", multithreadActive ? "enabled" : "disabled");
-    common->Printf(" - Main thread handle: %lu\n", Sys_GetMainThread());
+    common->Printf(" - Main thread handle: %zd\n", Sys_GetMainThread());
     //if(multithreadActive)
     {
         const xthreadInfo *thread = &renderThread->render_thread;
-        common->Printf(" - Render thread(%s) handle: %lu\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
+        common->Printf(" - Render thread(%s) handle: %zd\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
     }
 #endif
 
@@ -2647,6 +2647,16 @@ idRenderSystemLocal::GetScreenHeight
 int idRenderSystemLocal::GetScreenHeight(void) const
 {
 	return glConfig.vidHeight;
+}
+
+bool GL_ClearErrors(void)
+{
+    int i = 0;
+
+    while (qglGetError() != GL_NO_ERROR) {
+        i++;
+    }
+    return i > 0;
 }
 
 bool GL_CheckErrors(const char *name)

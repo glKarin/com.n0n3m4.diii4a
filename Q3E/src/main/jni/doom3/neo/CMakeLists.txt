@@ -4,8 +4,11 @@ project(doom3)
 
 set(IDTECH4AMM_ENGINE_PATCH 69)
 set(IDTECH4AMM_ENGINE_VERSION "1.1.0harmattan${IDTECH4AMM_ENGINE_PATCH}")
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
 string(TIMESTAMP IDTECH4AMM_BUILDTIME "%Y-%m-%d %H:%M:%S")
+else()
 #set(IDTECH4AMM_BUILDTIME "2025-09-18 09:05:36")
+endif()
 message(STATUS "idTech4A++")
 message(STATUS "Build version: ${IDTECH4AMM_ENGINE_VERSION}")
 message(STATUS "Build time: ${IDTECH4AMM_BUILDTIME}")
@@ -90,8 +93,6 @@ if(LINUX_RELEASE_BINS)
 else()
 	set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
 endif()
-
-set(IDTECH4LIBRARY "idtech4")
 
 include(CheckCXXCompilerFlag)
 include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
@@ -1825,8 +1826,8 @@ message(STATUS "=================================")
 
 if(CORE)
 	if(ANDROID)
-		set(DOOM3BINARY ${IDTECH4LIBRARY})
-		add_library(${IDTECH4LIBRARY} SHARED
+		set(DOOM3BINARY doom3)
+		add_library(${DOOM3BINARY} SHARED
 				${src_core}
 				${src_sys_base}
 				${src_sys_core}
@@ -2445,7 +2446,7 @@ if(RAVEN)
 	add_globbed_headers(raven_framework_src "raven")
 
 	if(ANDROID)
-		set(QUAKE4BINARY "${IDTECH4LIBRARY}_raven")
+		set(QUAKE4BINARY "quake4")
 		add_library(${QUAKE4BINARY} SHARED
 				${src_core_raven}
 				${src_sys_base}
@@ -2594,7 +2595,7 @@ if(HUMANHEAD)
 	add_globbed_headers(humanhead_framework_src "humanhead")
 
 	if(ANDROID)
-		set(PREYBINARY "${IDTECH4LIBRARY}_humanhead")
+		set(PREYBINARY "prey")
 		add_library(${PREYBINARY} SHARED
 				${src_core_humanhead}
 				${src_sys_base}

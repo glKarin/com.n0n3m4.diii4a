@@ -20,7 +20,7 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_clearVertexBuffer", "integer", "2", "Clear vertex buffer on every frame", KCVar.FLAG_LAUNCHER,
                                 "0", "Not clear(original)",
                                 "1", "Only free memory",
-                                "2", "Free memory and delete VBO handle(only without multi-threading, else same as 1)"
+                                "2", "Free memory and delete VBO handle"
                         ),
                         KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "262144", "Control allocate temporary memory when load model data. 0 = Always heap; Negative = Always stack; Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)", 0),
                         KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external OpenGLES2.0 GLSL shader program directory path", 0),
@@ -37,7 +37,7 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "5.0", "Specular exponent in PBR interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_PBRNormalCorrection", "float", "0.25", "Vertex normal correction(Surface smoothness) in PBR interaction lighting model(1 = pure using bump texture(Lower smoothness); 0 = pure using vertex normal(High smoothness); 0.0 - 1.0 = bump texture * harm_r_PBRNormalCorrection + vertex normal * (1 - harm_r_PBRNormalCorrection))", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_PBRNormalCorrection", "float", "0.25", "Vertex normal correction(surface smoothness) in PBR interaction lighting model(1 = pure using bump texture(lower smoothness); 0 = pure using vertex normal(high smoothness); 0.0 - 1.0 = bump texture * harm_r_PBRNormalCorrection + vertex normal * (1 - harm_r_PBRNormalCorrection))", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_PBRRoughnessCorrection", "float", "0.55", "max roughness for old specular texture. 0 = disable; else = roughness = harm_r_PBRRoughnessCorrection - texture(specularTexture, st).r", 0),
                         KCVar.CreateCVar("harm_r_PBRMetallicCorrection", "float", "0", "min metallic for old specular texture. 0 = disable; else = metallic = texture(specularTexture, st).r + harm_r_PBRMetallicCorrection", 0),
                         KCVar.CreateCVar("harm_r_PBRRMAOSpecularMap", "bool", "0", "Specular map is standard PBR RAMO texture or old non-PBR texture", 0),
