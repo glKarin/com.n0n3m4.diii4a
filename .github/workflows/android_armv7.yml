@@ -123,7 +123,9 @@ jobs:
         du -ch | tail -n -1
         echo "<<< disk usage"
         echo "Copy idTech4 libraries to libs"
-        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libidtech4*.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libdoom3.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libquake4.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libprey.so Q3E/libs/${arch}
         cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libRBDoom3BFG*.so Q3E/libs/${arch}
         cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libgame.so Q3E/libs/${arch}
         cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libd3xp.so Q3E/libs/${arch}
