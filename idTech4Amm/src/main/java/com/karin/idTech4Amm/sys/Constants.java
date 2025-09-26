@@ -9,8 +9,8 @@ import com.karin.idTech4Amm.misc.TextHelper;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 68;
-    public static final String CONST_RELEASE = "2025-08-09"; // 02-12; 05-08
+    public static final int    CONST_UPDATE_RELEASE = 69;
+    public static final String CONST_RELEASE = "2025-10-01"; // 02-12; 05-08
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -26,16 +26,18 @@ public final class Constants
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
     public static final String CONST_TESTING_URL = "https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/android_testing";
-    public static final String CONST_CODE_ALIAS = "Lu Yiping"; // Natasha; Verena; Caitlyn; Lin Daiyu
+    public static final String CONST_CODE_ALIAS = "Lin Daiyu"; // Natasha; Verena; Caitlyn; Lin Daiyu; Lu Yiping
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
             "Fix BSE effects on Quake 4.",
             "Optimize PBR shaders with original specular texture on DOOM 3/Quake 4/Prey(2006).",
-            "Add mp3 sound file support on DOOM 3/Quake 4/Prey(2006).",
             "Add settings by ImGui on DOOM 3/Quake 4/Prey(2006), command is `idTech4AmmSettings`, default binding to F10.",
+            "Add mp3 sound file support on DOOM 3/Quake 4/Prey(2006).",
+            "Fix GUI, credits after end of game, map static mesh vertex color on Quake 4.",
+            "Fix low frequency on HeXen-Edge of Chaos(DOOM 3 mod).",
             "Add `Urban Terror`(ver 4.3.4) support, game standalone directory named `urt`, game data directory named `q3ut4`. More view in `" + TextHelper.GenLinkText("https://www.urbanterror.info", "Urban Terror") + "`.",
-            "Update Quake 2(yquake2) version to 8.51, update vulkan renderer.",
+            "Update Quake 2(yquake2) version to 8.51, update Vulkan renderer.",
             "Update GZDOOM version to 4.14.2.",
             "Rename Xash3D game standalone folder to `xash`.",
             "Rename Source Engine game standalone folder to `srceng`.",
