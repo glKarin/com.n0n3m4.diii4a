@@ -233,8 +233,11 @@ void rvParticleTemplate::FixupParms(rvParticleParms& p) {
     const bool equalX = (maxs.x == mins.x);
     const bool equalY = (axisBits < 2) || (maxs.y == mins.x);
     const bool equalZ = (axisBits != 3) || (maxs.z == mins.x);
+	//karin: TODO Q4D
+    const bool equalY_min = (axisBits < 2) || (mins.y == mins.x);
+    const bool equalZ_min = (axisBits != 3) || (mins.z == mins.x);
 
-    if (shapeBits == 8 && equalX && equalY && equalZ) {      // a “box”
+    if (equalY_min && equalZ_min && (shapeBits == 8 && equalX && equalY && equalZ)) {      // a “box”
         if (mins.x == 0.0f) {
             p.mSpawnType = axisBits;           // true POINT
         }
