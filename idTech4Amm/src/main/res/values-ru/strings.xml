@@ -550,5 +550,8 @@
     <string name="joystick_center_dot_visible">Hide joystick center dot</string>
     <string name="download_testing">Download testing</string>
     <string name="disable_motion_when_virtual_mouse_button_hold">Disable mouse motion when virtual mouse button hold</string>
+    <string name="fixed_ratio">Fixed ratio</string>
+    <string name="ratio">Ratio</string>
+    <string name="use_custom_resolution_as_fullscreen_size">Use custom resolution as fullscreen size</string>
 
 </resources>

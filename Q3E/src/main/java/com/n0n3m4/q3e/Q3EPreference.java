@@ -266,6 +266,9 @@ public final class Q3EPreference
     public static final String pref_harm_r_renderToolsMultithread     = "q3e_harm_r_renderToolsMultithread"; //k
     public static final String pref_scrres_scheme                     = "harm_q3e_scrres";
     public static final String pref_scrres_scale                      = "harm_q3e_scrres_scale";
+    public static final String pref_ratiox = "harm_q3e_ratiox";
+    public static final String pref_ratioy = "harm_q3e_ratioy";
+    public static final String pref_ratio_use_custom_resolution                            = "harm_q3e_ratio_use_custom_resolution";
     public static final String pref_harm_r_shadowMapPerforatedShadow  = "q3e_harm_r_shadowMapPerforatedShadow"; //k
     public static final String pref_harm_gzdoom_load_lights_pk3       = "harm_gzdoom_load_lights_pk3";
     public static final String pref_harm_gzdoom_load_brightmaps_pk3   = "harm_gzdoom_load_brightmaps_pk3";

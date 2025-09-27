@@ -6,6 +6,7 @@ import android.os.Build;
 
 import com.n0n3m4.q3e.event.Q3EExitEvent;
 import com.n0n3m4.q3e.event.Q3EQuitEvent;
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KOnceRunnable;
 import com.n0n3m4.q3e.karin.KStr;
 
@@ -65,8 +66,15 @@ public final class Q3E
 
     public synchronized static void CalcRatio()
     {
-        Q3E.widthRatio = (float) Q3E.GAME_VIEW_WIDTH / (float) Q3E.surfaceWidth;
-        Q3E.heightRatio = (float) Q3E.GAME_VIEW_HEIGHT / (float) Q3E.surfaceHeight;
+        if(Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth)
+            Q3E.widthRatio = 1.0f;
+        else
+            Q3E.widthRatio = (float) Q3E.GAME_VIEW_WIDTH / (float) Q3E.surfaceWidth;
+        if(Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight)
+            Q3E.heightRatio = 1.0f;
+        else
+            Q3E.heightRatio = (float) Q3E.GAME_VIEW_HEIGHT / (float) Q3E.surfaceHeight;
+        KLog.i("Q3EView", "Surface: view physical size=%d x %d, game logical size=%d x %d, ratio=%f, %f", Q3E.GAME_VIEW_WIDTH, Q3E.GAME_VIEW_HEIGHT, Q3E.surfaceWidth, Q3E.surfaceHeight, Q3E.widthRatio, Q3E.heightRatio);
     }
 
     public static void Finish()

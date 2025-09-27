@@ -15,6 +15,7 @@
 * Update GZDOOM version to 4.14.2.
 * Rename Xash3D game standalone folder to `xash`.
 * Rename Source Engine game standalone folder to `srceng`.
+* Add fixed ratio resolution support on launcher `Graphics` tab.
 
 ----------------------------------------------------------------------------------
 

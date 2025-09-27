@@ -825,7 +825,7 @@ public class Q3EGameHelper
     private int[] GetFrameSize(int w, int h)
     {
         int[] size = Q3EUtils.GetSurfaceViewSize(m_context, w, h);
-        Log.i("Q3EView", "FrameSize: (" + size[0] + ", " + size[1] + ")");
+        KLog.i("Q3EView", "Game surface view size: %d x %d", size[0], size[1]);
         return size;
     }
 
@@ -1228,7 +1228,7 @@ public class Q3EGameHelper
 
         Q3E.surfaceWidth = width;
         Q3E.surfaceHeight = height;
-        Q3E.CalcRatio();
+        //Q3E.CalcRatio();
 
         String envPreferenceKey = Q3EUtils.q3ei.GetGameEnvPreferenceKey();
         Set<String> envs = preferences.getStringSet(envPreferenceKey, null);

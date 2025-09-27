@@ -491,6 +491,13 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_g_botEnableBuiltinAssets, isChecked)
 						.commit();
 			}
+			else if (id == R.id.use_custom_resolution)
+			{
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_ratio_use_custom_resolution, isChecked)
+						.commit();
+				UpdateResolutionText();
+			}
 
 			// Doom 3 BFG
 			else if (id == R.id.doom3bfg_useCompressionCache)
@@ -1853,7 +1860,7 @@ public class GameLauncher extends Activity
 
 		SelectRadioGroup(V.rg_curpos, mPrefs.getInt(Q3EPreference.pref_mousepos, 3));
 		V.rg_scrres.setOnCheckedChangeListener(m_groupCheckChangeListener);
-		SelectRadioGroup(V.rg_scrres, mPrefs.getInt(Q3EPreference.pref_scrres_scheme, 0));
+		SelectRadioGroup(V.rg_scrres, mPrefs.getInt(Q3EPreference.pref_scrres_scheme, Q3EGlobals.SCREEN_FULL));
 		int scrresScheme = Utility.Step(mPrefs.getInt(Q3EPreference.pref_scrres_scale, 100), 10);
 		V.res_scale.setProgress(scrresScheme);
 		V.tv_scale_current.setText(V.res_scale.getProgress() + "%");
@@ -2023,10 +2030,17 @@ public class GameLauncher extends Activity
 		V.res_y.setText(mPrefs.getString(Q3EPreference.pref_resy, "" + Q3EGlobals.SCREEN_HEIGHT));
 		V.res_x.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resx, "" + Q3EGlobals.SCREEN_WIDTH, customResChanged));
 		V.res_y.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resy, "" + Q3EGlobals.SCREEN_HEIGHT, customResChanged));
+
+		V.ratio_x.setText(mPrefs.getString(Q3EPreference.pref_ratiox, "" + Q3EGlobals.RATIO_WIDTH));
+		V.ratio_y.setText(mPrefs.getString(Q3EPreference.pref_ratioy, "" + Q3EGlobals.RATIO_HEIGHT));
+		V.ratio_x.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_ratiox, "" + Q3EGlobals.RATIO_WIDTH, customResChanged));
+		V.ratio_y.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_ratioy, "" + Q3EGlobals.RATIO_HEIGHT, customResChanged));
 		V.launcher_tab1_game_data_chooser_button.setOnClickListener(m_buttonClickListener);
 		V.onscreen_button_setting.setOnClickListener(m_buttonClickListener);
 		V.setup_onscreen_button_theme.setOnClickListener(m_buttonClickListener);
 		V.setup_controller.setOnClickListener(m_buttonClickListener);
+		V.use_custom_resolution.setChecked(mPrefs.getBoolean(Q3EPreference.pref_ratio_use_custom_resolution, false));
+		V.use_custom_resolution.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		// SDL
 		SetupUI_SDL();
@@ -3086,6 +3100,9 @@ public class GameLauncher extends Activity
         mEdtr.putInt(Q3EPreference.pref_msaa, GetRadioGroupSelectIndex(V.rg_msaa));
         mEdtr.putString(Q3EPreference.pref_resx, V.res_x.getText().toString());
         mEdtr.putString(Q3EPreference.pref_resy, V.res_y.getText().toString());
+		mEdtr.putString(Q3EPreference.pref_ratiox, V.ratio_x.getText().toString());
+		mEdtr.putString(Q3EPreference.pref_ratioy, V.ratio_y.getText().toString());
+		mEdtr.putBoolean(Q3EPreference.pref_ratio_use_custom_resolution, V.use_custom_resolution.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_useetc1cache, V.useetc1cache.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_useetc1, V.useetc1.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_usedxt, V.usedxt.isChecked());
@@ -3365,23 +3382,37 @@ public class GameLauncher extends Activity
 		int type;
 
 		if(rgid == R.id.rg_scrres_scheme_custom)
-			type = 3;
+			type = Q3EGlobals.SCREEN_CUSTOM;
 		else if(rgid == R.id.rg_scrres_scheme_scale_area)
-			type = 2;
+			type = Q3EGlobals.SCREEN_SCALE_BY_AREA;
 		else if(rgid == R.id.rg_scrres_scheme_scale_length)
-			type = 1;
+			type = Q3EGlobals.SCREEN_SCALE_BY_LENGTH;
+		else if(rgid == R.id.rg_scrres_scheme_ratio)
+			type = Q3EGlobals.SCREEN_FIXED_RATIO;
 		else
-			type = 0;
+			type = Q3EGlobals.SCREEN_FULL;
 
-		UpdateCustomerResolution(type == 3);
-		UpdateResolutionScaleSchemeBar(type == 1 || type == 2);
+		UpdateCustomerResolution(type == Q3EGlobals.SCREEN_CUSTOM || type == Q3EGlobals.SCREEN_FIXED_RATIO);
+		UpdateResolutionScaleSchemeBar(type == Q3EGlobals.SCREEN_SCALE_BY_LENGTH || type == Q3EGlobals.SCREEN_SCALE_BY_AREA);
+		UpdateCustomerRatio(type == Q3EGlobals.SCREEN_FIXED_RATIO);
 		UpdateResolutionText();
 	}
 
 	private void UpdateResolutionText()
 	{
 		int[] size = Q3EUtils.GetFullScreenSize(this);
-		size = Q3EUtils.GetSurfaceViewSize(this, size[0], size[1]);
+		int width, height;
+		if(Q3EUtils.ActiveIsLandscape(this))
+		{
+			width = size[0];
+			height = size[1];
+		}
+		else
+		{
+			width = size[1];
+			height = size[0];
+		}
+		size = Q3EUtils.GetSurfaceViewSize(this, width, height);
 		V.tv_scrres_size.setText(size[0] + " x " + size[1]);
 	}
 
@@ -3392,6 +3423,14 @@ public class GameLauncher extends Activity
 		V.res_customlayout.setEnabled(on);
 		V.res_customlayout.setVisibility(on ? View.VISIBLE : View.GONE);
     }
+
+	private void UpdateCustomerRatio(boolean on)
+	{
+		V.ratio_x.setEnabled(on);
+		V.ratio_y.setEnabled(on);
+		V.res_ratiolayout.setEnabled(on);
+		V.res_ratiolayout.setVisibility(on ? View.VISIBLE : View.GONE);
+	}
 
     private void SetGameInternalMod(String val)
     {
@@ -4735,6 +4774,10 @@ public class GameLauncher extends Activity
 		public EditText edt_harm_r_PBRNormalCorrection;
 		public CheckBox tab2_hide_joystick_center;
 		public CheckBox tab2_disable_mouse_button_motion;
+		public EditText ratio_x;
+		public EditText ratio_y;
+		public LinearLayout res_ratiolayout;
+		public CheckBox use_custom_resolution;
 
 		private RadioGroup CreateGameRadioGroup(int[] id)
 		{
@@ -4934,6 +4977,10 @@ public class GameLauncher extends Activity
 			edt_harm_r_PBRNormalCorrection = findViewById(R.id.edt_harm_r_PBRNormalCorrection);
 			tab2_hide_joystick_center = findViewById(R.id.tab2_hide_joystick_center);
 			tab2_disable_mouse_button_motion = findViewById(R.id.tab2_disable_mouse_button_motion);
+			ratio_x = findViewById(R.id.ratio_x);
+			ratio_y = findViewById(R.id.ratio_y);
+			res_ratiolayout = findViewById(R.id.res_ratiolayout);
+			use_custom_resolution = findViewById(R.id.use_custom_resolution);
         }
     }
 }

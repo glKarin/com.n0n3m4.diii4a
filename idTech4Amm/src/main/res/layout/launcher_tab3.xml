@@ -61,6 +61,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/custom" />
 
+            <RadioButton
+                android:id="@+id/rg_scrres_scheme_ratio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fixed_ratio" />
+
 <!--            <RadioButton
                 android:id="@+id/res_1080"
                 android:layout_width="wrap_content"
@@ -106,11 +112,14 @@
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:minWidth="64dp"
+                    android:gravity="center_vertical|right"
                     android:text="640" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
                     android:text=" x " />
 
                 <EditText
@@ -126,8 +135,57 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="50dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="@string/_0_auto_using_screen_aspect_ratio" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/res_ratiolayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="5dp"
+                    android:text="@string/ratio" />
+
+                <EditText
+                    android:id="@+id/ratio_x"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:minWidth="64dp"
+                    android:gravity="center_vertical|right"
+                    android:text="4" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text=" : " />
+
+                <EditText
+                    android:id="@+id/ratio_y"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:minWidth="64dp"
+                    android:text="3" />
+            </LinearLayout>
+            <CheckBox
+                android:id="@+id/use_custom_resolution"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/use_custom_resolution_as_fullscreen_size" />
         </LinearLayout>
 
         <LinearLayout

@@ -1022,7 +1022,7 @@ public class Q3EUtils
     public static int[] GetSurfaceViewSize(Context context, int screenWidth, int screenHeight)
     {
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int scheme = mPrefs.getInt(Q3EPreference.pref_scrres_scheme, 0);
+        int scheme = mPrefs.getInt(Q3EPreference.pref_scrres_scheme, Q3EGlobals.SCREEN_FULL);
         int scale = mPrefs.getInt(Q3EPreference.pref_scrres_scale, 100);
         BigDecimal scalef = new BigDecimal(scale).divide(new BigDecimal("100"), 2, RoundingMode.UP);
         if(scalef.compareTo(BigDecimal.ZERO) <= 0)
@@ -1030,41 +1030,21 @@ public class Q3EUtils
         int width, height;
         switch (scheme)
         {
-            case 1: {
+            case Q3EGlobals.SCREEN_SCALE_BY_LENGTH: {
                 int[] size = CalcSizeByScaleWidthHeight(screenWidth, screenHeight, scalef);
                 width = size[0];
                 height = size[1];
             }
                 break;
-            case 2: {
+            case Q3EGlobals.SCREEN_SCALE_BY_AREA: {
                 int[] size = CalcSizeByScaleScreenArea(screenWidth, screenHeight, scalef);
                 width = size[0];
                 height = size[1];
             }
                 break;
-            case 3: {
-                try
-                {
-                    String str = mPrefs.getString(Q3EPreference.pref_resx, "0");
-                    if(null == str)
-                        str = "0";
-                    width = Integer.parseInt(str);
-                }
-                catch (Exception e)
-                {
-                    width = 0;
-                }
-                try
-                {
-                    String str = mPrefs.getString(Q3EPreference.pref_resy, "0");
-                    if(null == str)
-                        str = "0";
-                    height = Integer.parseInt(str);
-                }
-                catch (Exception e)
-                {
-                    height = 0;
-                }
+            case Q3EGlobals.SCREEN_CUSTOM: {
+                width = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_resx, "0"));
+                height = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_resy, "0"));
                 if (width <= 0 && height <= 0)
                 {
                     width = screenWidth;
@@ -1080,7 +1060,31 @@ public class Q3EUtils
                 }
             }
                 break;
-            case 0:
+            case Q3EGlobals.SCREEN_FIXED_RATIO: {
+                int ratiox = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_ratiox, "0"));
+                int ratioy = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_ratioy, "0"));
+                boolean useCustom = mPrefs.getBoolean(Q3EPreference.pref_ratio_use_custom_resolution, false);
+                width = screenWidth;
+                height = screenHeight;
+                if(useCustom)
+                {
+                    width = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_resx, "0"));
+                    height = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_resy, "0"));
+                    if (width <= 0 && height > 0)
+                    {
+                        width = (int)((float)height * (float)screenWidth / (float)screenHeight);
+                    }
+                    else if (height <= 0 && width > 0)
+                    {
+                        height = (int)((float)width * (float)screenHeight / (float)screenWidth);
+                    }
+                }
+                int[] sizes = CalcSizeByRatio(width, height, ratiox, ratioy);
+                width = sizes[2];
+                height = sizes[3];
+            }
+            break;
+            case Q3EGlobals.SCREEN_FULL:
             default:
                 width = screenWidth;
                 height = screenHeight;
@@ -1563,5 +1567,43 @@ public class Q3EUtils
             }
         }
         return -1;
+    }
+
+    public static int[] CalcSizeByRatio(int screenWidth, int screenHeight, int ratioWidth, int ratioHeight)
+    {
+        int w, h;
+        int x = 0, y = 0;
+        int mask = 0;
+        if (ratioWidth <= 0 || ratioHeight <= 0)
+        {
+            w = screenWidth;
+            h = screenHeight;
+        }
+        else
+        {
+            BigDecimal targetRatio = new BigDecimal(ratioWidth).divide(new BigDecimal(ratioHeight), 6, RoundingMode.DOWN);
+            BigDecimal screenRatio = new BigDecimal(screenWidth).divide(new BigDecimal(screenHeight), 6, RoundingMode.DOWN);
+            int cmp = targetRatio.compareTo(screenRatio);
+            if(cmp > 0)
+            {
+                h = (int) ((float) screenWidth * ((float)ratioHeight / (float)ratioWidth));
+                mask |= 2;
+                w = screenWidth;
+                y = (screenHeight - h) / 2;
+            }
+            else if(cmp < 0)
+            {
+                w = (int) ((float) screenHeight * ((float)ratioWidth / (float)ratioHeight));
+                mask |= 1;
+                h = screenHeight;
+                x = (screenWidth - w) / 2;
+            }
+            else
+            {
+                w = screenWidth;
+                h = screenHeight;
+            }
+        }
+        return new int[]{x, y, w, h, mask};
     }
 }

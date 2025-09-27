@@ -31,7 +31,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
-import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -48,8 +47,6 @@ import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTechCommand;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class Q3EMain extends Activity
 {
     private       Q3ECallbackObj mAudio;
@@ -65,6 +62,7 @@ public class Q3EMain extends Activity
     private       boolean        m_coverEdges      = true;
     private       boolean        m_portrait        = false;
     private       int            m_offsetY         = 0;
+    private       int            m_offsetX         = 0;
     @SuppressLint("StaticFieldLeak")
     public static Q3EGameHelper  gameHelper;
 
@@ -351,10 +349,44 @@ public class Q3EMain extends Activity
     {
         RelativeLayout.LayoutParams params;
 
-        params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int scheme = mPrefs.getInt(Q3EPreference.pref_scrres_scheme, Q3EGlobals.SCREEN_FULL);
 
+        int[] size = Q3EUtils.GetGeometry(this, true, m_hideNav, m_coverEdges);
+        if(scheme == Q3EGlobals.SCREEN_FIXED_RATIO)
+        {
+            int ratioX = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_ratiox, "0"));
+            int ratioY = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_ratioy, "0"));
+
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+            int[] sizes = Q3EUtils.CalcSizeByRatio(size[2], size[3], ratioX, ratioY);
+            if((sizes[4] & 1) != 0)
+            {
+                width = sizes[2];
+                m_offsetX = sizes[0];
+                KLog.i("Q3EView", "Landscape view width-stretch size= %d x %d, X offset=%d", width, size[3], m_offsetX);
+            }
+            else if((sizes[4] & 2) != 0)
+            {
+                height = sizes[3];
+                m_offsetY = sizes[1];
+                KLog.i("Q3EView", "Landscape view height-stretch size= %d x %d, Y offset=%d", size[2], height, m_offsetY);
+            }
+            else
+                KLog.i("Q3EView", "Landscape view stretch size= %d x %d", size[2], size[3]);
+
+            params = new RelativeLayout.LayoutParams(width, height);
+            params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        }
+        else
+        {
+            params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            KLog.i("Q3EView", "Landscape view full size: %d x %d", size[2], size[3]);
+        }
         mainLayout.addView(mGLSurfaceView, params);
 
+        params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         //mControlGLSurfaceView.setZOrderOnTop();
         mControlGLSurfaceView.setZOrderMediaOverlay(true);
         mainLayout.addView(mControlGLSurfaceView, params);
@@ -390,14 +422,49 @@ public class Q3EMain extends Activity
         int[] size = Q3EUtils.GetGeometry(this, true, true, true);
 
         float ratio = (float) size[3] / (float) size[2];
-        int height = (int) ((float) size[3] * ratio);
+        int avaHeight = (int) ((float) size[3] * ratio);
+        int avaWidth = size[3];
 
         RelativeLayout.LayoutParams params;
 
-        params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
-        params.topMargin = size[0];
-        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int scheme = mPrefs.getInt(Q3EPreference.pref_scrres_scheme, Q3EGlobals.SCREEN_FULL);
+        if(scheme == Q3EGlobals.SCREEN_FIXED_RATIO)
+        {
+            int ratioX = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_ratiox, "0"));
+            int ratioY = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_ratioy, "0"));
+
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = avaHeight;
+            int[] sizes = Q3EUtils.CalcSizeByRatio(avaWidth, avaHeight, ratioX, ratioY);
+            if((sizes[4] & 1) != 0)
+            {
+                width = sizes[2];
+                m_offsetX = sizes[0];
+                KLog.i("Q3EView", "Portrait view width-stretch size= %d x %d, X offset=%d", width, avaHeight, m_offsetX);
+            }
+            else if((sizes[4] & 2) != 0)
+            {
+                height = sizes[3];
+                m_offsetY = sizes[1];
+                KLog.i("Q3EView", "Portrait view height-stretch size= %d x %d, Y offset=%d", avaWidth, height, m_offsetY);
+            }
+            else
+                KLog.i("Q3EView", "Portrait view stretch size= %d x %d", size[2], size[3]);
+
+            params = new RelativeLayout.LayoutParams(width, height);
+            params.topMargin = size[0] + m_offsetY;
+            params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+        }
+        else
+        {
+            params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, avaHeight);
+
+            params.topMargin = size[0];
+            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+            KLog.i("Q3EView", "Portrait view full size: %d x %d", avaWidth, avaHeight);
+        }
 
         m_offsetY = params.topMargin;
 
@@ -508,7 +575,7 @@ public class Q3EMain extends Activity
 
     public synchronized void SetupGameViewSize(int width, int height, boolean portrait)
     {
-        if(m_portrait == portrait)
+        //if(m_portrait == portrait)
         {
             Q3E.GAME_VIEW_WIDTH = width;
             Q3E.GAME_VIEW_HEIGHT = height;
@@ -547,10 +614,10 @@ public class Q3EMain extends Activity
             return;
         MakeMouseCursor();
         if(Q3E.IsOriginalSize())
-            mouseCursor.SetPosition(x, y + m_offsetY);
+            mouseCursor.SetPosition(x + m_offsetX, y + m_offsetY);
         else
         {
-            mouseCursor.SetPosition(Q3E.LogicalToPhysicsX(x), Q3E.LogicalToPhysicsY(y) + m_offsetY);
+            mouseCursor.SetPosition(Q3E.LogicalToPhysicsX(x) + m_offsetX, Q3E.LogicalToPhysicsY(y) + m_offsetY);
         }
     }
 
@@ -569,7 +636,7 @@ public class Q3EMain extends Activity
         return m_coverEdges;
     }
 
-    public boolean IsPortraint()
+    public boolean IsPortrait()
     {
         return m_portrait;
     }
