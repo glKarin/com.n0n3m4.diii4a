@@ -496,6 +496,9 @@ public class GameLauncher extends Activity
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_ratio_use_custom_resolution, isChecked)
 						.commit();
+
+				if(V.rg_scrres.getCheckedRadioButtonId() == R.id.rg_scrres_scheme_ratio)
+					UpdateCustomResolution(isChecked);
 				UpdateResolutionText();
 			}
 
@@ -1859,8 +1862,9 @@ public class GameLauncher extends Activity
 		UpdateMouseManualMenu(!V.detectmouse.isChecked());
 
 		SelectRadioGroup(V.rg_curpos, mPrefs.getInt(Q3EPreference.pref_mousepos, 3));
+		int scrres = mPrefs.getInt(Q3EPreference.pref_scrres_scheme, Q3EGlobals.SCREEN_FULL);
+		SelectRadioGroup(V.rg_scrres, scrres);
 		V.rg_scrres.setOnCheckedChangeListener(m_groupCheckChangeListener);
-		SelectRadioGroup(V.rg_scrres, mPrefs.getInt(Q3EPreference.pref_scrres_scheme, Q3EGlobals.SCREEN_FULL));
 		int scrresScheme = Utility.Step(mPrefs.getInt(Q3EPreference.pref_scrres_scale, 100), 10);
 		V.res_scale.setProgress(scrresScheme);
 		V.tv_scale_current.setText(V.res_scale.getProgress() + "%");
@@ -2020,6 +2024,8 @@ public class GameLauncher extends Activity
 		V.edt_harm_r_ambientLightingBrightness.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_ambientLightingBrightness, 1.0f));
 		V.edt_harm_r_maxFps.setText(Q3EPreference.GetStringFromInt(mPrefs, Q3EPreference.pref_harm_r_maxFps, 0));
 
+		V.use_custom_resolution.setChecked(mPrefs.getBoolean(Q3EPreference.pref_ratio_use_custom_resolution, false));
+		V.use_custom_resolution.setOnCheckedChangeListener(m_checkboxChangeListener);
 		Runnable customResChanged = new Runnable() {
 			@Override
 			public void run() {
@@ -2039,8 +2045,7 @@ public class GameLauncher extends Activity
 		V.onscreen_button_setting.setOnClickListener(m_buttonClickListener);
 		V.setup_onscreen_button_theme.setOnClickListener(m_buttonClickListener);
 		V.setup_controller.setOnClickListener(m_buttonClickListener);
-		V.use_custom_resolution.setChecked(mPrefs.getBoolean(Q3EPreference.pref_ratio_use_custom_resolution, false));
-		V.use_custom_resolution.setOnCheckedChangeListener(m_checkboxChangeListener);
+		UpdateResolutionByType(scrres);
 
 		// SDL
 		SetupUI_SDL();
@@ -3392,9 +3397,14 @@ public class GameLauncher extends Activity
 		else
 			type = Q3EGlobals.SCREEN_FULL;
 
-		UpdateCustomerResolution(type == Q3EGlobals.SCREEN_CUSTOM || type == Q3EGlobals.SCREEN_FIXED_RATIO);
+		UpdateResolutionByType(type);
+	}
+
+	private void UpdateResolutionByType(int type)
+	{
+		UpdateCustomResolution(type == Q3EGlobals.SCREEN_CUSTOM || (type == Q3EGlobals.SCREEN_FIXED_RATIO && V.use_custom_resolution.isChecked()));
 		UpdateResolutionScaleSchemeBar(type == Q3EGlobals.SCREEN_SCALE_BY_LENGTH || type == Q3EGlobals.SCREEN_SCALE_BY_AREA);
-		UpdateCustomerRatio(type == Q3EGlobals.SCREEN_FIXED_RATIO);
+		UpdateCustomRatio(type == Q3EGlobals.SCREEN_FIXED_RATIO);
 		UpdateResolutionText();
 	}
 
@@ -3416,7 +3426,7 @@ public class GameLauncher extends Activity
 		V.tv_scrres_size.setText(size[0] + " x " + size[1]);
 	}
 
-    private void UpdateCustomerResolution(boolean on)
+    private void UpdateCustomResolution(boolean on)
     {
 		V.res_x.setEnabled(on);
 		V.res_y.setEnabled(on);
@@ -3424,7 +3434,7 @@ public class GameLauncher extends Activity
 		V.res_customlayout.setVisibility(on ? View.VISIBLE : View.GONE);
     }
 
-	private void UpdateCustomerRatio(boolean on)
+	private void UpdateCustomRatio(boolean on)
 	{
 		V.ratio_x.setEnabled(on);
 		V.ratio_y.setEnabled(on);
