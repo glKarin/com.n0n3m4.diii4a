@@ -363,7 +363,7 @@ jobs:
           repo_token: "${{ secrets.TOKEN }}"
           automatic_release_tag: "android_release"
           prerelease: true
-          title: "[${{steps.release_datetime.outputs.time}}] Android release build (Non-release. Automatic CI builds)"
+          title: "[${{steps.release_datetime.outputs.time}}] Android release build test (Non-release. Automatic CI builds)"
           files: |
             ${{ steps.arm64.outputs.apk }}
             ${{ steps.arm32.outputs.apk }}
