@@ -236,7 +236,7 @@ idCVar harm_r_useHighPrecision("harm_r_useHighPrecision",
 #endif
                                , CVAR_RENDERER | CVAR_INTEGER | CVAR_INIT, "Use high precision float on GLSL shader");
 
-idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG, 4 = DDS", 0, 4, idCmdSystem::ArgCompletion_Integer<0, 4>);
+idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG, 4 = DDS, 5 = EXR, 6 = HDR", 0, LAST_SCREENSHOT_FORMAT, idCmdSystem::ArgCompletion_Integer<SSFE_TGA, LAST_SCREENSHOT_FORMAT>); // screenshotFormat_t
 idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (0-100)", 0, 100, idCmdSystem::ArgCompletion_Integer<0, 100>);
 idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9)", 0, 9, idCmdSystem::ArgCompletion_Integer<0, 9>);
 
@@ -1252,11 +1252,11 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 #ifdef _MULTITHREAD
     extern intptr_t Sys_GetMainThread(void);
     common->Printf("Multi-Thread: %s\n", multithreadActive ? "enabled" : "disabled");
-    common->Printf(" - Main thread handle: %lu\n", Sys_GetMainThread());
+    common->Printf(" - Main thread handle: %zd\n", Sys_GetMainThread());
     //if(multithreadActive)
     {
         const xthreadInfo *thread = &renderThread->render_thread;
-        common->Printf(" - Render thread(%s) handle: %lu\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
+        common->Printf(" - Render thread(%s) handle: %zd\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
     }
 #endif
 
@@ -1425,35 +1425,49 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 
 	switch(r_screenshotFormat.GetInteger())
 	{
-		case 1: {// bmp
+		case SSFE_BMP: {
 			idStr fn(fileName);
 			fn.SetFileExtension("bmp");
 			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
 			R_WriteBMP(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
 		}
 			break;
-		case 2: {// png
+		case SSFE_PNG: {
 			idStr fn(fileName);
 			fn.SetFileExtension("png");
 			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
 			R_WritePNG(fn.c_str(), buffer + 18, width, height, 4, true, idMath::ClampInt(0, 9, r_screenshotPngCompression.GetInteger()), basePath);
 		}
 			break;
-		case 3: {// jpg
+		case SSFE_JPG: {
 			idStr fn(fileName);
 			fn.SetFileExtension("jpg");
 			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
 			R_WriteJPG(fn.c_str(), buffer + 18, width, height, 4, true, idMath::ClampInt(0, 9, idMath::ClampInt(1, 100, r_screenshotJpgQuality.GetInteger())), basePath);
 		}
 			break;
-		case 4: {// dds
+		case SSFE_DDS: {
 			idStr fn(fileName);
 			fn.SetFileExtension("dds");
 			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
 			R_WriteDDS(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
 		}
 			break;
-		case 0: // tga
+        case SSFE_EXR: {
+            idStr fn(fileName);
+            fn.SetFileExtension("exr");
+            const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+            R_WriteEXR(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
+        }
+            break;
+        case SSFE_HDR: {
+            idStr fn(fileName);
+            fn.SetFileExtension("hdr");
+            const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+            R_WriteHDR(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
+        }
+            break;
+		case SSFE_TGA:
 		default:
 
 			// fill in the header (this is vertically flipped, which glReadPixels emits)
@@ -1527,17 +1541,23 @@ void R_ScreenshotFilename(int &lastNumber, const char *base, idStr &fileName)
 
         switch (cvarSystem->GetCVarInteger("r_screenshotFormat"))
         {
-            case 1:
+            case SSFE_BMP:
                 sprintf(fileName, "%s%i%i%i%i%i.bmp", base, a, b, c, d, e);
                 break;
-            case 2:
+            case SSFE_PNG:
                 sprintf(fileName, "%s%i%i%i%i%i.png", base, a, b, c, d, e);
                 break;
-            case 3:
+            case SSFE_JPG:
                 sprintf(fileName, "%s%i%i%i%i%i.jpg", base, a, b, c, d, e);
                 break;
-            case 4:
+            case SSFE_DDS:
                 sprintf(fileName, "%s%i%i%i%i%i.dds", base, a, b, c, d, e);
+                break;
+            case SSFE_EXR:
+                sprintf(fileName, "%s%i%i%i%i%i.exr", base, a, b, c, d, e);
+                break;
+            case SSFE_HDR:
+                sprintf(fileName, "%s%i%i%i%i%i.hdr", base, a, b, c, d, e);
                 break;
             default:
                 sprintf(fileName, "%s%i%i%i%i%i.tga", base, a, b, c, d, e);
@@ -2468,11 +2488,13 @@ void idRenderSystemLocal::Shutdown(void)
 {
 
 	common->Printf("idRenderSystem::Shutdown()\n");
+
+	common->SetRefreshOnPrint( false ); // without a renderer there's nothing to refresh
 #ifdef _MULTITHREAD
 	if(multithreadActive)
 	{
 		renderThread->BackendThreadShutdown();
-		common->SetRefreshOnPrint( false ); // without a renderer there's nothing to refresh
+		//common->SetRefreshOnPrint( false ); // without a renderer there's nothing to refresh
 	}
 #endif
 
@@ -2625,6 +2647,16 @@ idRenderSystemLocal::GetScreenHeight
 int idRenderSystemLocal::GetScreenHeight(void) const
 {
 	return glConfig.vidHeight;
+}
+
+bool GL_ClearErrors(void)
+{
+    int i = 0;
+
+    while (qglGetError() != GL_NO_ERROR) {
+        i++;
+    }
+    return i > 0;
 }
 
 bool GL_CheckErrors(const char *name)

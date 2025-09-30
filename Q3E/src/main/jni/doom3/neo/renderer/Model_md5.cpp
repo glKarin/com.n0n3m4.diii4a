@@ -794,8 +794,15 @@ void idRenderModelMD5::DrawJoints(const renderEntity_t *ent, const struct viewDe
 idRenderModelMD5::InstantiateDynamicModel
 ====================
 */
+#ifdef _RAVEN
+idRenderModel *idRenderModelMD5::InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask)
+#else
 idRenderModel *idRenderModelMD5::InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel)
+#endif
 {
+#ifdef _RAVEN
+    (void)surfMask;
+#endif
 	int					i, surfaceNum;
 	idMD5Mesh			*mesh;
 	idRenderModelStatic	*staticModel;

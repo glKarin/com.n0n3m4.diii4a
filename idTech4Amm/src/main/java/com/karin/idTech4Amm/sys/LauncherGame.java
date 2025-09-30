@@ -5,6 +5,8 @@ import com.n0n3m4.q3e.Q3EGameConstants;
 
 public enum LauncherGame
 {
+    // KARIN_NEW_GAME_BOOKMARK
+
     DOOM3(Q3EGameConstants.GAME_ID_DOOM3, Q3EGameConstants.GAME_DOOM3, R.drawable.d3_icon, R.string.doom_iii, R.color.theme_doom3_main_color, R.string.doom_3),
     QUAKE4(Q3EGameConstants.GAME_ID_QUAKE4, Q3EGameConstants.GAME_QUAKE4, R.drawable.q4_icon, R.string.quake_iv_q4base, R.color.theme_quake4_main_color, R.string.quake_4),
     PREY(Q3EGameConstants.GAME_ID_PREY, Q3EGameConstants.GAME_PREY, R.drawable.prey_icon, R.string.prey_preybase, R.color.theme_prey_main_color, R.string.prey_2006),
@@ -39,6 +41,8 @@ public enum LauncherGame
     XASH3D(Q3EGameConstants.GAME_ID_XASH3D, Q3EGameConstants.GAME_XASH3D, R.drawable.xash3d_icon, R.string.xash3d_base, R.color.theme_xash3d_main_color, R.string.xash3d),
 
     SOURCE(Q3EGameConstants.GAME_ID_SOURCE, Q3EGameConstants.GAME_SOURCE, R.drawable.source_icon, R.string.sourceengine_base, R.color.theme_source_main_color, R.string.sourceengine),
+
+    URT(Q3EGameConstants.GAME_ID_URT, Q3EGameConstants.GAME_URT, R.drawable.urbanterror_icon, R.string.urbanterror_base, R.color.theme_urt_main_color, R.string.urbanterror),
     ;
 
     public final int    GAME_ID;

@@ -242,6 +242,11 @@ typedef struct areaReference_s {
 	idRenderEntityLocal 	*entity;					// only one of entity / light will be non-NULL
 	idRenderLightLocal 	*light;					// only one of entity / light will be non-NULL
 	struct portalArea_s		*area;					// so owners can find all the areas they are in
+#ifdef _RAVEN
+#ifdef _RAVEN_BSE
+    rvRenderEffectLocal	*effect;		// head/tail of doubly linked list, may change
+#endif
+#endif
 } areaReference_t;
 
 
@@ -558,6 +563,10 @@ typedef struct viewDef_s {
 	// An array in frame temporary memory that lists if an area can be reached without
 	// crossing a closed door.  This is used to avoid drawing interactions
 	// when the light is behind a closed door.
+
+#ifdef _RAVEN
+    struct viewEffect_s	*viewEffects;			// chain of all viewEffects effecting view
+#endif
 
 #ifdef _SHADOW_MAPPING
 	// RB parallel light split frustums
@@ -1236,6 +1245,7 @@ void	GL_TexEnv(int env);
 void	GL_Cull(int cullType);
 bool    GL_CheckErrors(const char *name);
 void	GL_SelectTextureForce(int unit);
+bool    GL_ClearErrors(void);
 
 const int GLS_SRCBLEND_ZERO						= 0x00000001;
 const int GLS_SRCBLEND_ONE						= 0x0;
@@ -1247,9 +1257,9 @@ const int GLS_SRCBLEND_DST_ALPHA				= 0x00000007;
 const int GLS_SRCBLEND_ONE_MINUS_DST_ALPHA		= 0x00000008;
 const int GLS_SRCBLEND_ALPHA_SATURATE			= 0x00000009;
 const int GLS_SRCBLEND_BITS						= 0x0000000f;
-
-#ifdef _RAVEN //k: quake4 blend
-const int GLS_SRCBLEND_SRC_COLOR				= 0x00000002;
+#ifdef _RAVEN //k: quake4 src blend
+const int GLS_SRCBLEND_SRC_COLOR				= 0x0000000a;
+const int GLS_SRCBLEND_ONE_MINUS_SRC_COLOR		= 0x0000000b;
 #endif
 
 const int GLS_DSTBLEND_ZERO						= 0x0;
@@ -1261,6 +1271,10 @@ const int GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA		= 0x00000060;
 const int GLS_DSTBLEND_DST_ALPHA				= 0x00000070;
 const int GLS_DSTBLEND_ONE_MINUS_DST_ALPHA		= 0x00000080;
 const int GLS_DSTBLEND_BITS						= 0x000000f0;
+#ifdef _RAVEN //k: quake4 dst blend
+const int GLS_DSTBLEND_DST_COLOR				= 0x00000090;
+const int GLS_DSTBLEND_ONE_MINUS_DST_COLOR		= 0x000000a0;
+#endif
 
 
 // these masks are the inverse, meaning when set the qglColorMask value will be 0,
@@ -1446,7 +1460,10 @@ void R_SetLightProject(idPlane lightProject[4], const idVec3 origin, const idVec
                        const idVec3 rightVector, const idVec3 upVector, const idVec3 start, const idVec3 stop);
 
 #ifdef _RAVEN // particle
+#ifdef _RAVEN_BSE
 void R_AddEffectSurfaces(void);
+viewEffect_s * R_SetEffectDefViewEntity(rvRenderEffectLocal *def);
+#endif
 #endif
 
 void R_AddLightSurfaces(void);
@@ -1814,6 +1831,7 @@ typedef struct shaderProgram_s {
 #define SHADER_PARM_ADDR(prop) offsetof(shaderProgram_t, prop)
 #define SHADER_PARM_LOCATION(location) (*(GLint *)((char *)backEnd.glState.currentProgram + location))
 #define SHADER_PARMS_ADDR(prop, i) ((GLint)(offsetof(shaderProgram_t, prop)) + i * (GLint)sizeof(GLuint))
+#define SHADER_PARM_HANDLE(index) (*(GLint *)((char *)backEnd.glState.currentProgram + index))
 
 struct GLSLShaderProp
 {
@@ -2152,15 +2170,30 @@ void RB_ShowImages(void);
 
 void RB_ExecuteBackEndCommands(const emptyCommand_t *cmds);
 
+typedef enum screenshotFormat_e {
+    SSFE_TGA = 0,
+    SSFE_BMP,
+    SSFE_PNG,
+    SSFE_JPG,
+    SSFE_DDS,
+    SSFE_EXR,
+    SSFE_HDR,
+} screenshotFormat_t;
+#define LAST_SCREENSHOT_FORMAT SSFE_HDR
+
 void LoadJPG_stb(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadBimage(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
+void LoadEXR(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
+void LoadHDR(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 
 void R_WritePNG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, int quality = 100, const char *basePath = NULL);
 void R_WriteJPG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, int compression = 0, const char *basePath = NULL);
 void R_WriteBMP(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
 void R_WriteDDS(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath = NULL);
+void R_WriteEXR( const char* filename, const byte* data, int width, int height, int comp, bool flipVertical, const char* basePath = NULL );
+void R_WriteHDR(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath = NULL);
 
 void R_WriteScreenshotImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
 
@@ -2235,6 +2268,77 @@ idScreenRect R_CalcIntersectionScissor(const idRenderLightLocal *lightDef,
 #define SUPPRESS_SURFACE_MASK(x) (1 << (x))
 #define SUPPRESS_SURFACE_MASK_CHECK(t, x) ((t) & SUPPRESS_SURFACE_MASK(x))
 #include "../raven/renderer/NewShaderStage.h"
+
+typedef struct viewEffect_s/* : viewEntity_s*/ // 164 bytes in 32bits
+{
+    struct viewEffect_s *next;
+    rvRenderEffectLocal *effectDef;
+#if 1
+	// layout same as viewEntity_s
+    idScreenRect scissorRect;
+	bool				weaponDepthHack;
+    float modelDepthHack;
+    float modelMatrix[16];
+    float modelViewMatrix[16];
+//#ifdef _SHADOW_MAPPING
+//	RenderMatrix		mvp;
+//#endif
+	// extras
+#endif
+    int weaponDepthHackInViewID;
+    float distanceToCamera;
+} viewEffect_t;
+
+#ifdef _RAVEN_BSE
+#include "../raven/bse/BSE.h"
+#endif
+class rvRenderModelBSE;
+class rvRenderEffectLocal : public rvRenderEffect
+{
+public:
+    rvRenderEffectLocal();
+    ~rvRenderEffectLocal();
+
+    renderEffect_s parms;
+    float modelMatrix[16];
+    class idRenderWorldLocal* world;
+    int index;
+    int lastModifiedFrameNum;
+    bool archived;
+    idRenderModel* dynamicModel;
+
+    idBounds referenceBounds;
+    int viewCount;
+    struct viewEffect_s* viewEffect;
+    int visibleCount;
+
+
+    areaReference_s* effectRefs;
+
+
+
+
+
+
+    class rvBSE* effect;
+    int dynamicModelFrameCount;
+    bool writeToDemo;
+    rvRenderModelBSE *model;
+#ifdef _RAVEN_FX
+    int gameTime;
+    int serviceTime;
+    bool newEffect;
+    bool expired;
+    //cullLink_t* cullLinks;
+    bool remove;
+    int updateFramenum;
+    idLinkList<rvRenderEffectLocal> node;
+#endif
+};
+
+#ifdef _RAVEN_BSE
+void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def);
+#endif
 #endif
 
 extern bool GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android

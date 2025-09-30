@@ -681,14 +681,8 @@ SDL_Spatialize(channel_t *ch)
 void
 SDL_AddLoopSounds(void)
 {
-	int i, j;
+	int i;
 	int sounds[MAX_EDICTS];
-	int left, right, left_total, right_total;
-	channel_t *ch;
-	sfx_t *sfx;
-	sfxcache_t *sc;
-	int num;
-	entity_state_t *ent;
 
 	if ((cls.state != ca_active) || (cl_paused->value && cl_audiopaused->value) ||
 	    !cl.sound_prepped || !s_ambient->value)
@@ -701,6 +695,14 @@ SDL_AddLoopSounds(void)
 
 	for (i = 0; i < cl.frame.num_entities; i++)
 	{
+		int left, right, left_total, right_total;
+		channel_t *ch;
+		sfx_t *sfx;
+		sfxcache_t *sc;
+		int num;
+		entity_state_t *ent;
+		int j;
+
 		if (!sounds[i])
 		{
 			continue;
@@ -1007,7 +1009,7 @@ SDL_Cache(sfx_t *sfx, wavinfo_t *info, byte *data, short volume,
  * and cinematic playback.
  */
 void
-SDL_RawSamples(int samples, int rate, int width, int channels, byte *data, float volume)
+SDL_RawSamples(int samples, int rate, int width, int channels, const byte *data, float volume)
 {
 	float scale;
 	int dst;
@@ -1344,33 +1346,32 @@ SDL_BackendInit(void)
 	   but this is Quake 2 ... */
 	if (snd_inited)
 	{
-		return 1;
+		return true;
 	}
 
 	int sndbits = (Cvar_Get("sndbits", "16", CVAR_ARCHIVE))->value;
 	int sndfreq = (Cvar_Get("s_khz", "44", CVAR_ARCHIVE))->value;
 	int sndchans = (Cvar_Get("sndchannels", "2", CVAR_ARCHIVE))->value;
-
-#if _WIN32
-	cvar_t *s_sdldriver = (Cvar_Get("s_sdldriver", "directsound", CVAR_ARCHIVE));
-#else
 	cvar_t *s_sdldriver = (Cvar_Get("s_sdldriver", "auto", CVAR_ARCHIVE));
-#endif
 
 	if (strcmp(s_sdldriver->string, "auto") != 0)
 	{
-	snprintf(reqdriver, sizeof(reqdriver), "%s=%s", "SDL_AUDIODRIVER", s_sdldriver->string);
-	putenv(reqdriver);
+		snprintf(reqdriver, sizeof(reqdriver), "%s=%s", "SDL_AUDIODRIVER", s_sdldriver->string);
+		putenv(reqdriver);
 	}
 
 	Com_Printf("Starting SDL audio callback.\n");
 
 	if (!SDL_WasInit(SDL_INIT_AUDIO))
 	{
+#ifdef USE_SDL3
+		if (!SDL_Init(SDL_INIT_AUDIO))
+#else
 		if (SDL_Init(SDL_INIT_AUDIO) == -1)
+#endif
 		{
 			Com_Printf ("Couldn't init SDL audio: %s.\n", SDL_GetError ());
-			return 0;
+			return false;
 		}
 	}
 	const char* drivername = SDL_GetCurrentAudioDriver();
@@ -1428,12 +1429,12 @@ SDL_BackendInit(void)
 	spec.channels = sndchans;
 
 	/* Okay, let's try our luck */
-	stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_OUTPUT, &spec, SDL_SDL3Callback, NULL);
+	stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, SDL_SDL3Callback, NULL);
 	if (stream == NULL)
 	{
 		Com_Printf("SDL_OpenAudio() failed: %s\n", SDL_GetError());
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);
-		return 0;
+		return false;
 	}
 
 	/* This points to the frontend */
@@ -1474,7 +1475,7 @@ SDL_BackendInit(void)
 	soundtime = 0;
 	snd_inited = 1;
 
-	return 1;
+	return true;
 }
 
 /*
@@ -1502,31 +1503,25 @@ qboolean
 SDL_BackendInit(void)
 {
 	char reqdriver[128];
-	SDL_AudioSpec desired;
-	SDL_AudioSpec obtained;
+	SDL_AudioSpec spec;
 	int tmp, val;
 
 	/* This should never happen,
 	   but this is Quake 2 ... */
 	if (snd_inited)
 	{
-		return 1;
+		return true;
 	}
 
 	int sndbits = (Cvar_Get("sndbits", "16", CVAR_ARCHIVE))->value;
 	int sndfreq = (Cvar_Get("s_khz", "44", CVAR_ARCHIVE))->value;
 	int sndchans = (Cvar_Get("sndchannels", "2", CVAR_ARCHIVE))->value;
-
-#if _WIN32
-	cvar_t *s_sdldriver = (Cvar_Get("s_sdldriver", "directsound", CVAR_ARCHIVE));
-#else
 	cvar_t *s_sdldriver = (Cvar_Get("s_sdldriver", "auto", CVAR_ARCHIVE));
-#endif
 
 	if (strcmp(s_sdldriver->string, "auto") != 0)
 	{
-	snprintf(reqdriver, sizeof(reqdriver), "%s=%s", "SDL_AUDIODRIVER", s_sdldriver->string);
-	putenv(reqdriver);
+		snprintf(reqdriver, sizeof(reqdriver), "%s=%s", "SDL_AUDIODRIVER", s_sdldriver->string);
+		putenv(reqdriver);
 	}
 
 	Com_Printf("Starting SDL audio callback.\n");
@@ -1536,7 +1531,7 @@ SDL_BackendInit(void)
 		if (SDL_Init(SDL_INIT_AUDIO) == -1)
 		{
 			Com_Printf ("Couldn't init SDL audio: %s.\n", SDL_GetError ());
-			return 0;
+			return false;
 		}
 	}
 	const char* drivername = SDL_GetCurrentAudioDriver();
@@ -1547,8 +1542,7 @@ SDL_BackendInit(void)
 
 	Com_Printf("SDL audio driver is \"%s\".\n", drivername);
 
-	memset(&desired, '\0', sizeof(desired));
-	memset(&obtained, '\0', sizeof(obtained));
+	memset(&spec, '\0', sizeof(spec));
 
 	/* Users are stupid */
 	if ((sndbits != 16) && (sndbits != 8))
@@ -1558,59 +1552,59 @@ SDL_BackendInit(void)
 
 	if (sndfreq == 48)
 	{
-		desired.freq = 48000;
+		spec.freq = 48000;
 	}
 	else if (sndfreq == 44)
 	{
-		desired.freq = 44100;
+		spec.freq = 44100;
 	}
 	else if (sndfreq == 22)
 	{
-		desired.freq = 22050;
+		spec.freq = 22050;
 	}
 	else if (sndfreq == 11)
 	{
-		desired.freq = 11025;
+		spec.freq = 11025;
 	}
 
-	desired.format = ((sndbits == 16) ? AUDIO_S16SYS : AUDIO_U8);
+	spec.format = ((sndbits == 16) ? AUDIO_S16SYS : AUDIO_U8);
 
-	if (desired.freq <= 11025)
+	if (spec.freq <= 11025)
 	{
-		desired.samples = 256;
+		spec.samples = 256;
 	}
-	else if (desired.freq <= 22050)
+	else if (spec.freq <= 22050)
 	{
-		desired.samples = 512;
+		spec.samples = 512;
 	}
-	else if (desired.freq <= 44100)
+	else if (spec.freq <= 44100)
 	{
-		desired.samples = 1024;
+		spec.samples = 1024;
 	}
 	else
 	{
-		desired.samples = 2048;
+		spec.samples = 2048;
 	}
 
-	desired.channels = sndchans;
-	desired.callback = SDL_Callback;
+	spec.channels = sndchans;
+	spec.callback = SDL_Callback;
 
 	/* Okay, let's try our luck */
-	if (SDL_OpenAudio(&desired, &obtained) == -1)
+	if (SDL_OpenAudio(&spec, NULL) == -1)
 	{
 		Com_Printf("SDL_OpenAudio() failed: %s\n", SDL_GetError());
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);
-		return 0;
+		return false;
 	}
 
 	/* This points to the frontend */
 	backend = &sound;
 
 	playpos = 0;
-	backend->samplebits = obtained.format & 0xFF;
-	backend->channels = obtained.channels;
+	backend->samplebits = spec.format & 0xFF;
+	backend->channels = spec.channels;
 
-	tmp = (obtained.samples * obtained.channels) * 10;
+	tmp = (spec.samples * spec.channels) * 10;
 
 	if (tmp & (tmp - 1))
 	{	/* make it a power of two */
@@ -1624,7 +1618,7 @@ SDL_BackendInit(void)
 	backend->samples = tmp;
 
 	backend->submission_chunk = 1;
-	backend->speed = obtained.freq;
+	backend->speed = spec.freq;
 	samplesize = (backend->samples * (backend->samplebits / 8));
 	backend->buffer = calloc(1, samplesize);
 	s_numchannels = MAX_CHANNELS;
@@ -1641,7 +1635,7 @@ SDL_BackendInit(void)
 	soundtime = 0;
 	snd_inited = 1;
 
-	return 1;
+	return true;
 }
 
 /*

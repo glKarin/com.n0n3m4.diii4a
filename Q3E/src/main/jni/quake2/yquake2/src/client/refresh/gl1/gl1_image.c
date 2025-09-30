@@ -44,19 +44,19 @@ qboolean R_Upload8(byte *data, int width, int height,
 		qboolean mipmap, qboolean is_sky);
 qboolean R_Upload32(unsigned *data, int width, int height, qboolean mipmap);
 
-#ifdef _GLES //karin: force GL_RGBA for non-alpha texture on GLES 1.1
-int gl_solid_format = GL_RGBA;
-#else
 int gl_solid_format = GL_RGB;
-#endif
 int gl_alpha_format = GL_RGBA;
 
-#ifdef _GLES //karin: force GL_RGBA for non-alpha texture on GLES 1.1
-int gl_tex_solid_format = GL_RGBA;
+#ifdef YQ2_GL1_GLES
+#define DEFAULT_SOLID_FORMAT GL_RGBA
 #else
-int gl_tex_solid_format = GL_RGB;
+#define DEFAULT_SOLID_FORMAT GL_RGB
 #endif
+
+int gl_tex_solid_format = DEFAULT_SOLID_FORMAT;
 int gl_tex_alpha_format = GL_RGBA;
+
+#undef DEFAULT_SOLID_FORMAT
 
 int gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
 int gl_filter_max = GL_LINEAR;
@@ -84,42 +84,41 @@ typedef struct
 	int mode;
 } gltmode_t;
 
+#ifdef YQ2_GL1_GLES
+
 gltmode_t gl_alpha_modes[] = {
 	{"default", GL_RGBA},
 	{"GL_RGBA", GL_RGBA},
-#ifdef _GLES //karin: not support non-GL_RGBA on GLES 1.1
-	{"GL_RGBA8", GL_RGBA},
-	{"GL_RGB5_A1", GL_RGBA},
-	{"GL_RGBA4", GL_RGBA},
-	{"GL_RGBA2", GL_RGBA},
+};
+
+gltmode_t gl_solid_modes[] = {
+	{"default", GL_RGBA},
+	{"GL_RGBA", GL_RGBA},
+};
+
 #else
+
+gltmode_t gl_alpha_modes[] = {
+	{"default", GL_RGBA},
+	{"GL_RGBA", GL_RGBA},
 	{"GL_RGBA8", GL_RGBA8},
 	{"GL_RGB5_A1", GL_RGB5_A1},
 	{"GL_RGBA4", GL_RGBA4},
 	{"GL_RGBA2", GL_RGBA2},
-#endif
 };
 
-#define NUM_GL_ALPHA_MODES (sizeof(gl_alpha_modes) / sizeof(gltmode_t))
-
 gltmode_t gl_solid_modes[] = {
-#ifdef _GLES //karin: not support non-GL_RGB on GLES 1.1
-	{"default", GL_RGBA},
-	{"GL_RGB", GL_RGBA},
-	{"GL_RGB8", GL_RGBA},
-	{"GL_RGB5", GL_RGBA},
-	{"GL_RGB4", GL_RGBA},
-	{"GL_R3_G3_B2", GL_RGBA},
-#else
-		{"default", GL_RGB},
+	{"default", GL_RGB},
 	{"GL_RGB", GL_RGB},
 	{"GL_RGB8", GL_RGB8},
 	{"GL_RGB5", GL_RGB5},
 	{"GL_RGB4", GL_RGB4},
 	{"GL_R3_G3_B2", GL_R3_G3_B2},
-#endif
 };
 
+#endif
+
+#define NUM_GL_ALPHA_MODES (sizeof(gl_alpha_modes) / sizeof(gltmode_t))
 #define NUM_GL_SOLID_MODES (sizeof(gl_solid_modes) / sizeof(gltmode_t))
 
 typedef struct
@@ -149,13 +148,13 @@ int upload_width, upload_height;
 qboolean uploaded_paletted;
 
 void
-R_SetTexturePalette(unsigned palette[256])
+R_SetTexturePalette(const unsigned palette[256])
 {
-	int i;
-	unsigned char temptable[768];
-
 	if (gl_config.palettedtexture)
 	{
+		unsigned char temptable[768];
+		int i;
+
 		for (i = 0; i < 256; i++)
 		{
 			temptable[i * 3 + 0] = (palette[i] >> 0) & 0xff;
@@ -270,7 +269,7 @@ R_EnableMultitexture(qboolean enable)
 }
 
 void
-R_TextureMode(char *string)
+R_TextureMode(const char *string)
 {
 	int i;
 	image_t *glt;
@@ -361,7 +360,7 @@ R_TextureMode(char *string)
 }
 
 void
-R_TextureAlphaMode(char *string)
+R_TextureAlphaMode(const char *string)
 {
 	int i;
 
@@ -383,7 +382,7 @@ R_TextureAlphaMode(char *string)
 }
 
 void
-R_TextureSolidMode(char *string)
+R_TextureSolidMode(const char *string)
 {
 	int i;
 
@@ -471,7 +470,7 @@ R_ImageList_f(void)
 /*
  * Fill background pixels so mipmapping doesn't have haloes
  */
-void
+static void
 R_FloodFillSkin(byte *skin, int skinwidth, int skinheight)
 {
 	byte fillcolor = *skin; /* assume this is the pixel to fill */
@@ -537,7 +536,7 @@ R_FloodFillSkin(byte *skin, int skinwidth, int skinheight)
  * texture to increase the
  * lighting range
  */
-void
+static void
 R_LightScaleTexture(unsigned *in, int inwidth,
 		int inheight, qboolean only_gamma)
 {
@@ -578,7 +577,7 @@ R_LightScaleTexture(unsigned *in, int inwidth,
 /*
  * Operates in place, quartering the size of the texture
  */
-void
+static void
 R_MipMap(byte *in, int width, int height)
 {
 	int i, j;
@@ -603,7 +602,7 @@ R_MipMap(byte *in, int width, int height)
 /*
  * Returns has_alpha
  */
-void
+static void
 R_BuildPalettedTexture(unsigned char *paletted_texture, unsigned char *scaled,
 		int scaled_width, int scaled_height)
 {
@@ -625,7 +624,7 @@ R_BuildPalettedTexture(unsigned char *paletted_texture, unsigned char *scaled,
 	}
 }
 
-qboolean
+static qboolean
 R_Upload32Native(unsigned *data, int width, int height, qboolean mipmap)
 {
 	// This is for GL 2.x so no palettes, no scaling, no messing around with the data here. :)
@@ -661,7 +660,7 @@ R_Upload32Native(unsigned *data, int width, int height, qboolean mipmap)
 }
 
 
-qboolean
+static qboolean
 R_Upload32Soft(unsigned *data, int width, int height, qboolean mipmap)
 {
 	int samples;
@@ -1016,7 +1015,7 @@ R_LoadPic(const char *name, byte *pic, int width, int realwidth,
 		(image->width < 64) && (image->height < 64))
 	{
 		int x, y;
-		int i, j, k;
+		int i, k;
 		int texnum;
 
 		texnum = Scrap_AllocBlock(image->width, image->height, &x, &y);
@@ -1033,6 +1032,8 @@ R_LoadPic(const char *name, byte *pic, int width, int realwidth,
 
 		for (i = 0; i < image->height; i++)
 		{
+			int j;
+
 			for (j = 0; j < image->width; j++, k++)
 			{
 				scrap_texels[texnum][(y + i) * gl_state.scrap_width + x + j] = pic[k];
@@ -1135,7 +1136,8 @@ image_t *
 R_FindImage(const char *name, imagetype_t type)
 {
 	image_t *image;
-	int i, len;
+	size_t len;
+	int i;
 	char *ptr;
 	char namewe[256];
 	const char* ext;
@@ -1152,16 +1154,15 @@ R_FindImage(const char *name, imagetype_t type)
 		return NULL;
 	}
 
-	len = strlen(name);
-
 	/* Remove the extension */
-	memset(namewe, 0, 256);
-	memcpy(namewe, name, len - (strlen(ext) + 1));
-
-	if (len < 5)
+	len = (ext - name) - 1;
+	if ((len < 1) || (len > sizeof(namewe) - 1))
 	{
 		return NULL;
 	}
+
+	memcpy(namewe, name, len);
+	namewe[len] = 0;
 
 	/* fix backslashes */
 	while ((ptr = strchr(name, '\\')))
@@ -1194,7 +1195,7 @@ R_FindImage(const char *name, imagetype_t type)
 }
 
 struct image_s *
-RI_RegisterSkin(char *name)
+RI_RegisterSkin(const char *name)
 {
 	return R_FindImage(name, it_skin);
 }
@@ -1268,7 +1269,7 @@ void
 R_InitImages(void)
 {
 	byte *colormap;
-	int i, j;
+	int i;
 
 	registration_sequence = 1;
 	image_max = 0;
@@ -1305,6 +1306,8 @@ R_InitImages(void)
 
 	for (i = 0; i < 256; i++)
 	{
+		int j;
+
 		j = i * intensity->value;
 
 		if (j > 255)

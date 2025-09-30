@@ -1515,6 +1515,7 @@ void RB_ShowImages( void ) {
 			h *= image->uploadHeight / 512.0f;
 		}
 
+		GL_Bind( image );
 #ifdef USE_OPENGLES
 		GLfloat tex[] = {
 		 0, 0, 
@@ -1540,7 +1541,6 @@ void RB_ShowImages( void ) {
 		if (!text)
 			qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
 #else
-		GL_Bind( image );
 		qglBegin( GL_QUADS );
 		qglTexCoord2f( 0, 0 );
 		qglVertex2f( x, y );

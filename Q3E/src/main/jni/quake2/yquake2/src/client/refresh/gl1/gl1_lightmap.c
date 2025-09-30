@@ -66,7 +66,7 @@ LM_AllocLightmapBuffer(int buffer, qboolean clean)
 			buffer);
 	}
 	if (clean)
-{
+	{
 		memset (gl_lms.lightmap_buffer[buffer], 0, lightmap_size);
 	}
 }
@@ -80,14 +80,14 @@ LM_InitBlock(void)
 	{
 		LM_AllocLightmapBuffer(gl_lms.current_lightmap_texture, false);
 	}
-	}
+}
 
 void
 LM_UploadBlock(qboolean dynamic)
-	{
+{
 	const int texture = (dynamic)? 0 : gl_lms.current_lightmap_texture;
 	const int buffer = (gl_config.multitexture)? gl_lms.current_lightmap_texture : 0;
-	int height = 0;
+	int height = 0, i;
 
 	R_Bind(gl_state.lightmap_textures + texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -95,8 +95,6 @@ LM_UploadBlock(qboolean dynamic)
 
 	if (dynamic)
 	{
-		int i;
-
 		for (i = 0; i < gl_state.block_width; i++)
 		{
 			if (gl_lms.allocated[i] > height)
@@ -111,11 +109,25 @@ LM_UploadBlock(qboolean dynamic)
 	}
 	else
 	{
-		gl_lms.internal_format = GL_LIGHTMAP_FORMAT;
-		glTexImage2D(GL_TEXTURE_2D, 0, gl_lms.internal_format,
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_LIGHTMAP_FORMAT,
 				gl_state.block_width, gl_state.block_height,
 				0, GL_LIGHTMAP_FORMAT, GL_UNSIGNED_BYTE,
 				gl_lms.lightmap_buffer[buffer]);
+
+		if (gl_config.lightmapcopies && buffer != 0)
+		{
+			// Upload to all lightmap copies
+			for (i = 1; i < MAX_LIGHTMAP_COPIES; i++)
+			{
+				R_Bind(gl_state.lightmap_textures + (gl_state.max_lightmaps * i) + texture);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_LIGHTMAP_FORMAT,
+					gl_state.block_width, gl_state.block_height,
+					0, GL_LIGHTMAP_FORMAT, GL_UNSIGNED_BYTE,
+					gl_lms.lightmap_buffer[buffer]);
+			}
+		}
 
 		if (++gl_lms.current_lightmap_texture == gl_state.max_lightmaps)
 		{
@@ -313,7 +325,6 @@ LM_BeginBuildingLightmaps(model_t *m)
 	}
 
 	gl_lms.current_lightmap_texture = 1;
-	gl_lms.internal_format = GL_LIGHTMAP_FORMAT;
 
 	if (gl_config.multitexture)
 	{
@@ -328,7 +339,7 @@ LM_BeginBuildingLightmaps(model_t *m)
 	R_Bind(gl_state.lightmap_textures + 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, gl_lms.internal_format,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_LIGHTMAP_FORMAT,
 			gl_state.block_width, gl_state.block_height,
 			0, GL_LIGHTMAP_FORMAT, GL_UNSIGNED_BYTE,
 			gl_lms.lightmap_buffer[0]);

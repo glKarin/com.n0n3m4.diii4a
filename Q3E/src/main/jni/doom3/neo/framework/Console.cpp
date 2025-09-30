@@ -1365,14 +1365,14 @@ void idConsoleLocal::DumpHistory(void)
 
 void idConsoleLocal::SaveHistory() {
 	DumpHistory();
-	common->Printf("[Harmattan]: Console history saved -> %s\n", CONSOLE_HISTORY_FILE);
+	common->Printf("Console history saved -> %s\n", CONSOLE_HISTORY_FILE);
 }
 
 void idConsoleLocal::LoadHistory() {
 	idFile *f = fileSystem->OpenFileRead( CONSOLE_HISTORY_FILE );
 	if ( f == NULL ) // file doesn't exist
 	{
-		common->Printf("[Harmattan]: Console history not exists -> %s\n", CONSOLE_HISTORY_FILE);
+		common->Printf("Console history not exists -> %s\n", CONSOLE_HISTORY_FILE);
 		return;
 	}
 
@@ -1388,6 +1388,6 @@ void idConsoleLocal::LoadHistory() {
 	}
 	nextHistoryLine = historyLine;
 	fileSystem->CloseFile(f);
-	common->Printf("[Harmattan]: Console history loaded -> %s\n", CONSOLE_HISTORY_FILE);
+	common->Printf("Console history loaded -> %s\n", CONSOLE_HISTORY_FILE);
 }
 

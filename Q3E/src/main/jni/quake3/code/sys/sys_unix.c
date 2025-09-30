@@ -65,20 +65,7 @@ char *Sys_DefaultHomePath(void)
 
 	if( !*homePath && com_homepath != NULL )
 	{
-#ifdef __ANDROID__ //karin: HOME env to cwd
-		if( ( p = getenv( "HOME" ) ) != NULL || (p = Sys_Cwd()) != NULL )
-		{
-			Com_sprintf(homePath, sizeof(homePath), "%s%c", p, PATH_SEP);
-
-			Q_strcat(homePath, sizeof(homePath),
-				"Library/Application Support/");
-
-			if(com_homepath->string[0])
-				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
-			else
-				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_MACOSX);
-		}
-#elif defined(__APPLE__)
+#ifdef __APPLE__
 		if( ( p = getenv( "HOME" ) ) != NULL )
 		{
 			Com_sprintf(homePath, sizeof(homePath), "%s%c", p, PATH_SEP);
@@ -90,6 +77,16 @@ char *Sys_DefaultHomePath(void)
 				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
 			else
 				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_MACOSX);
+		}
+#elif defined(__ANDROID__) //karin: HOME env to cwd
+		if( ( p = getenv( "HOME" ) ) != NULL || ( p = Sys_Cwd()) != NULL )
+		{
+			Com_sprintf(homePath, sizeof(homePath), "%s%c", p, PATH_SEP);
+
+			if(com_homepath->string[0])
+				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
+			else
+				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_UNIX);
 		}
 #else
 		if( ( p = getenv( "FLATPAK_ID" ) ) != NULL && *p != '\0' )

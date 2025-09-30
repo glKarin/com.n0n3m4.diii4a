@@ -74,7 +74,11 @@ class idRenderModelStatic : public idRenderModel
 		virtual dynamicModel_t		IsDynamicModel() const;
 		virtual bool				IsDefaultModel() const;
 		virtual bool				IsReloadable() const;
+#ifdef _RAVEN
+        virtual idRenderModel *		InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask);
+#else
 		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#endif
 		virtual int					NumJoints(void) const;
 		virtual const idMD5Joint 	*GetJoints(void) const;
 		virtual jointHandle_t		GetJointHandle(const char *name) const;
@@ -113,10 +117,6 @@ class idRenderModelStatic : public idRenderModel
 		bool						FindSurfaceWithId(int id, int &surfaceNum);
 #ifdef _RAVEN //k: for ShowSurface/HideSurface, static model using surfaces index as mask: 1 << index, name is shader material name
 		virtual int                 GetSurfaceMask(const char *name) const;
-		virtual idRenderModel *		InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask/* = ~SURF_COLLISION */ ) {
-			(void)surfMask;
-			return InstantiateDynamicModel(ent, view, cachedModel);
-		}
 
 		virtual void                SetHasSky( bool on ) {
 			hasSky = on;
@@ -217,7 +217,11 @@ class idRenderModelMD5 : public idRenderModelStatic
 		virtual void				PurgeModel();
 		virtual void				LoadModel();
 		virtual int					Memory() const;
-		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#ifdef _RAVEN
+		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask);
+#else
+        virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#endif
 		virtual int					NumJoints(void) const;
 		virtual const idMD5Joint 	*GetJoints(void) const;
 		virtual jointHandle_t		GetJointHandle(const char *name) const;
@@ -268,7 +272,11 @@ class idRenderModelMD3 : public idRenderModelStatic
 
 		virtual void				InitFromFile(const char *fileName);
 		virtual dynamicModel_t		IsDynamicModel() const;
+#ifdef _RAVEN
+        virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask);
+#else
 		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#endif
 		virtual idBounds			Bounds(const struct renderEntity_s *ent) const;
 
 	private:
@@ -296,7 +304,11 @@ class idRenderModelLiquid : public idRenderModelStatic
 
 		virtual void				InitFromFile(const char *fileName);
 		virtual dynamicModel_t		IsDynamicModel() const;
+#ifdef _RAVEN
+        virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask);
+#else
 		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#endif
 		virtual idBounds			Bounds(const struct renderEntity_s *ent) const;
 
 		virtual void				Reset();
@@ -356,7 +368,11 @@ class idRenderModelPrt : public idRenderModelStatic
 		virtual void				InitFromFile(const char *fileName);
 		virtual void				TouchData();
 		virtual dynamicModel_t		IsDynamicModel() const;
+#ifdef _RAVEN
+        virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask);
+#else
 		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#endif
 		virtual idBounds			Bounds(const struct renderEntity_s *ent) const;
 		virtual float				DepthHack() const;
 		virtual int					Memory() const;
@@ -378,7 +394,11 @@ class idRenderModelBeam : public idRenderModelStatic
 	public:
 		virtual dynamicModel_t		IsDynamicModel() const;
 		virtual bool				IsLoaded() const;
+#ifdef _RAVEN
+        virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask);
+#else
 		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#endif
 		virtual idBounds			Bounds(const struct renderEntity_s *ent) const;
 };
 
@@ -410,7 +430,11 @@ class idRenderModelTrail : public idRenderModelStatic
 
 		virtual dynamicModel_t		IsDynamicModel() const;
 		virtual bool				IsLoaded() const;
+#ifdef _RAVEN
+        virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask);
+#else
 		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#endif
 		virtual idBounds			Bounds(const struct renderEntity_s *ent) const;
 
 		int							NewTrail(idVec3 pt, int duration);
@@ -431,7 +455,11 @@ class idRenderModelLightning : public idRenderModelStatic
 	public:
 		virtual dynamicModel_t		IsDynamicModel() const;
 		virtual bool				IsLoaded() const;
+#ifdef _RAVEN
+        virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask);
+#else
 		virtual idRenderModel 		*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#endif
 		virtual idBounds			Bounds(const struct renderEntity_s *ent) const;
 };
 
@@ -447,12 +475,20 @@ class idRenderModelSprite : public idRenderModelStatic
 	public:
 		virtual	dynamicModel_t	IsDynamicModel() const;
 		virtual	bool			IsLoaded() const;
+#ifdef _RAVEN
+        virtual	idRenderModel 	*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask);
+#else
 		virtual	idRenderModel 	*InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel);
+#endif
 		virtual	idBounds		Bounds(const struct renderEntity_s *ent) const;
 };
 
 #ifdef _RAVEN // bse model
-#include "../raven/bse/Model_bse.h"
+#ifdef _RAVEN_BSE
+#include "../raven/renderer/Model_bse.h"
+#else
+#include "../raven/fx/Model_bse.h"
+#endif
 #endif
 
 #ifdef _HUMANHEAD

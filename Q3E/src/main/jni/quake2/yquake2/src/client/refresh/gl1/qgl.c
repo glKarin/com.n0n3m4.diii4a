@@ -44,6 +44,8 @@ void (APIENTRY *qglColorTableEXT)(GLenum, GLenum, GLsizei, GLenum, GLenum,
 		const GLvoid *);
 void (APIENTRY *qglActiveTexture) (GLenum texture);
 void (APIENTRY *qglClientActiveTexture) (GLenum texture);
+void (APIENTRY *qglDiscardFramebufferEXT) (GLenum target,
+		GLsizei numAttachments, const GLenum *attachments);
 
 /* ========================================================================= */
 
@@ -51,9 +53,10 @@ void QGL_EXT_Reset ( void )
 {
 	qglPointParameterf     = NULL;
 	qglPointParameterfv    = NULL;
-	qglColorTableEXT          = NULL;
+	qglColorTableEXT       = NULL;
 	qglActiveTexture       = NULL;
 	qglClientActiveTexture = NULL;
+	qglDiscardFramebufferEXT = NULL;
 }
 
 /* ========================================================================= */

@@ -35,6 +35,7 @@
  */
 
 #include <SDL2/SDL.h>
+#include <limits.h>
 
 #include "header/input.h"
 #include "../header/keyboard.h"
@@ -78,7 +79,7 @@ typedef enum
 // IN_Update() called at the beginning of a frame to the
 // actual movement functions called at a later time.
 static float mouse_x, mouse_y;
-static unsigned char sdl_back_button = SDL_CONTROLLER_BUTTON_BACK;
+static unsigned char joy_escbutton = SDL_CONTROLLER_BUTTON_START;
 static int joystick_left_x, joystick_left_y, joystick_right_x, joystick_right_y;
 static float gyro_yaw, gyro_pitch;
 static qboolean mlooking;
@@ -90,6 +91,12 @@ int sys_frame_time;
 // the joystick altselector that turns K_BTN_X into K_BTN_X_ALT
 // is pressed
 qboolean joy_altselector_pressed = false;
+
+// Gamepad labels' style (Xbox, Playstation, etc.) in use, normally set after detection
+gamepad_labels_t joy_current_lbls = LBL_SDL;
+
+// Using japanese style for confirm & cancel buttons on gamepad
+qboolean japanese_confirm = false;
 
 // Console Variables
 cvar_t *freelook;
@@ -134,6 +141,12 @@ static int last_haptic_effect_size = HAPTIC_EFFECT_LIST_SIZE;
 static int last_haptic_effect_pos = 0;
 static haptic_effects_cache_t last_haptic_effect[HAPTIC_EFFECT_LIST_SIZE];
 
+// Gamepad labels' style (Xbox, Playstation, etc.) requested by user
+static cvar_t *joy_labels;
+
+// Gamepad style for confirm and cancel buttons (traditional or japanese)
+static cvar_t *joy_confirm;
+
 // Joystick sensitivity
 static cvar_t *joy_yawsensitivity;
 static cvar_t *joy_pitchsensitivity;
@@ -173,19 +186,20 @@ static cvar_t *gyro_calibration_x;
 static cvar_t *gyro_calibration_y;
 static cvar_t *gyro_calibration_z;
 
-#if SDL_VERSION_ATLEAST(2, 0, 14)	// support for controller sensors (gyro, accelerometer)
+// If the used SDL version doesn't support gamepad sensors...
+#if !SDL_VERSION_ATLEAST(2, 0, 14)
+// ...disable support for reading them.
+#define NO_SDL_GYRO
+#endif
 
+#ifndef NO_SDL_GYRO	// use SDL_CONTROLLERSENSORUPDATE to read gyro
 static unsigned int num_samples;
-#define NATIVE_SDL_GYRO	// uses SDL_CONTROLLERSENSORUPDATE to read gyro
-
-#else	// for SDL < 2.0.14, gyro can be read as a "secondary joystick" exposed by dkms-hid-nintendo
-
+#else	// gyro can be read as a "secondary joystick" exposed by dkms-hid-nintendo
 static unsigned int num_samples[3];
 static SDL_Joystick *imu_joystick = NULL;	// gyro "joystick"
 #define IMU_JOY_AXIS_GYRO_ROLL 3
 #define IMU_JOY_AXIS_GYRO_PITCH 4
 #define IMU_JOY_AXIS_GYRO_YAW 5
-
 #endif
 
 // To ignore SDL_JOYDEVICEADDED at game init. Allows for hot plugging of game controller afterwards.
@@ -198,9 +212,10 @@ static unsigned short int updates_countdown = 30;
 static updates_countdown_reasons countdown_reason = REASON_CONTROLLERINIT;
 
 // Flick Stick
-#define FLICK_TIME 6		// number of frames it takes for a flick to execute
+#define FLICK_TIME 100		// time it takes for a flick to execute, in ms
 static float target_angle;	// angle to end up facing at the end of a flick
-static unsigned short int flick_progress = FLICK_TIME;
+static float flick_progress = 1.0f;	// from 0.0 to 1.0
+static int started_flick;	// time of flick start
 
 // Flick Stick's rotation input samples to smooth out
 #define MAX_SMOOTH_SAMPLES 8
@@ -235,10 +250,17 @@ IN_TranslateSDLtoQ2Key(unsigned int keysym)
 		case SDLK_BACKSPACE:
 			key = K_BACKSPACE;
 			break;
-		case SDLK_LGUI:
+#ifdef __APPLE__
 		case SDLK_RGUI:
-			key = K_COMMAND; // Win key
+		case SDLK_LGUI:
+			key = K_COMMAND;
 			break;
+#else
+		case SDLK_RGUI:
+		case SDLK_LGUI:
+			key = K_SUPER;
+			break;
+#endif
 		case SDLK_CAPSLOCK:
 			key = K_CAPSLOCK;
 			break;
@@ -394,8 +416,6 @@ IN_TranslateSDLtoQ2Key(unsigned int keysym)
 			key = K_KP_EQUALS;
 			break;
 
-		// TODO: K_SUPER ? Win Key is already K_COMMAND
-
 		case SDLK_APPLICATION:
 			key = K_COMPOSE;
 			break;
@@ -499,6 +519,110 @@ IN_TranslateScancodeToQ2Key(SDL_Scancode sc)
 static void IN_Controller_Init(qboolean notify_user);
 static void IN_Controller_Shutdown(qboolean notify_user);
 
+/*
+ * Sets the gamepad buttons' style of labels (SDL, Xbox, PS, Switch).
+ * They are only visible in the gamepad binding options.
+ * Traditional binding uses SDL style, no matter the gamepad.
+ */
+static void
+IN_GamepadLabels_Changed(void)
+{
+	const int requested = (int)joy_labels->value;
+	joy_labels->modified = false;
+	joy_current_lbls = LBL_SDL;
+
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+	if (requested < 0 && controller) // try to autodetect...
+	{
+		switch (SDL_GameControllerGetType(controller))
+		{
+			case SDL_CONTROLLER_TYPE_XBOX360:
+			case SDL_CONTROLLER_TYPE_XBOXONE:
+				joy_current_lbls = LBL_XBOX;
+				return;
+
+			case SDL_CONTROLLER_TYPE_PS3:
+			case SDL_CONTROLLER_TYPE_PS4:
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+			case SDL_CONTROLLER_TYPE_PS5:
+#endif // SDL_VERSION_ATLEAST(2, 0, 14)
+				joy_current_lbls = LBL_PLAYSTATION;
+				return;
+
+			case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO:
+#if SDL_VERSION_ATLEAST(2, 24, 0)
+			case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:
+#endif // SDL_VERSION_ATLEAST(2, 24, 0)
+				joy_current_lbls = LBL_SWITCH;
+			default:
+				return;
+		}
+	}
+	else
+#endif // SDL_VERSION_ATLEAST(2, 0, 12)
+	if (requested >= LBL_SDL && requested < LBL_MAX_COUNT)
+	{
+		joy_current_lbls = (gamepad_labels_t)requested;
+	}
+}
+
+/*
+ * Sets which gamepad button works as "confirm", and which
+ * works as "cancel", in menus.
+ */
+static void
+IN_GamepadConfirm_Changed(void)
+{
+	const int requested = (int)joy_confirm->value;
+	japanese_confirm = false;
+	joy_confirm->modified = false;
+
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+	if (requested < 0 && controller) // try to autodetect...
+	{
+		switch (SDL_GameControllerGetType(controller))
+		{
+			case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO:
+#if SDL_VERSION_ATLEAST(2, 24, 0)
+			case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:
+#endif // SDL_VERSION_ATLEAST(2, 24, 0)
+				japanese_confirm = true;
+			default:
+				return;
+		}
+	}
+	else
+#endif // SDL_VERSION_ATLEAST(2, 0, 12)
+	if (requested == 1)
+	{
+		japanese_confirm = true;
+	}
+}
+
+static void
+IN_GyroMode_Changed(void)
+{
+	if (gyro_mode->value < 2)
+	{
+		gyro_active = false;
+	}
+	else
+	{
+		gyro_active = true;
+	}
+	gyro_mode->modified = false;
+}
+
+static void
+IN_VirtualKeyEvent(int keynum, qboolean *state_store, qboolean new_state)
+{
+	if (new_state != *state_store)
+	{
+		*state_store = new_state;
+		Key_Event(keynum, *state_store, true);
+	}
+}
+
 qboolean IN_NumpadIsOn()
 {
     SDL_Keymod mod = SDL_GetModState();
@@ -527,6 +651,7 @@ IN_Update(void)
 
 	static qboolean left_trigger = false;
 	static qboolean right_trigger = false;
+	static qboolean left_stick[4] = {false, false, false, false};   // left, right, up, down virtual keys
 
 	static int consoleKeyCode = 0;
 
@@ -662,7 +787,7 @@ IN_Update(void)
 					event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
 				{
 					Key_MarkAllUp();
-					
+
 					if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
 					{
 						S_Activate(false);
@@ -727,8 +852,8 @@ IN_Update(void)
 				qboolean down = (event.type == SDL_CONTROLLERBUTTONDOWN);
 				unsigned char btn = event.cbutton.button;
 
-				// Handle Back Button, to override its original key
-				Key_Event( (btn == sdl_back_button)? K_JOY_BACK : K_BTN_A + btn,
+				// Handle Esc button first, to override its original key
+				Key_Event( (btn == joy_escbutton)? K_ESCAPE : K_JOY_FIRST_BTN + btn,
 					down, true );
 				break;
 			}
@@ -740,26 +865,12 @@ IN_Update(void)
 				switch (event.caxis.axis)
 				{
 					case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
-					{
-						qboolean new_left_trigger = axis_value > 8192;
-						if (new_left_trigger != left_trigger)
-						{
-							left_trigger = new_left_trigger;
-							Key_Event(K_TRIG_LEFT, left_trigger, true);
-						}
+						IN_VirtualKeyEvent(K_TRIG_LEFT, &left_trigger, axis_value > 8192);
 						break;
-					}
 
 					case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
-					{
-						qboolean new_right_trigger = axis_value > 8192;
-						if (new_right_trigger != right_trigger)
-						{
-							right_trigger = new_right_trigger;
-							Key_Event(K_TRIG_RIGHT, right_trigger, true);
-						}
+						IN_VirtualKeyEvent(K_TRIG_RIGHT, &right_trigger, axis_value > 8192);
 						break;
-					}
 				}
 
 				if (!cl_paused->value && cls.key_dest == key_game)
@@ -779,11 +890,29 @@ IN_Update(void)
 							joystick_right_y = axis_value;
 							break;
 					}
+					break;
+				}
+
+				// Virtual keys to navigate menus with left stick
+				if (cls.key_dest == key_menu)
+				{
+					switch (event.caxis.axis)
+					{
+						case SDL_CONTROLLER_AXIS_LEFTX:
+							IN_VirtualKeyEvent(K_LEFTARROW, &left_stick[0], axis_value < -16896);
+							IN_VirtualKeyEvent(K_RIGHTARROW, &left_stick[1], axis_value > 16896);
+							break;
+
+						case SDL_CONTROLLER_AXIS_LEFTY:
+							IN_VirtualKeyEvent(K_UPARROW, &left_stick[2], axis_value < -16896);
+							IN_VirtualKeyEvent(K_DOWNARROW, &left_stick[3], axis_value > 16896);
+							break;
+					}
 				}
 				break;
 			}
 
-#ifdef NATIVE_SDL_GYRO	// controller sensors' reading supported (gyro, accelerometer)
+#ifndef NO_SDL_GYRO	// gamepad sensors' reading is supported (gyro, accelerometer)
 			case SDL_CONTROLLERSENSORUPDATE:
 				if (event.csensor.sensor != SDL_SENSOR_GYRO)
 				{
@@ -798,7 +927,7 @@ IN_Update(void)
 					break;
 				}
 
-#else	// gyro read as "secondary joystick"
+#else	// gyro read from a "secondary joystick" (usually with name ending in "IMU")
 			case SDL_JOYAXISMOTION:
 				if ( !imu_joystick || event.cdevice.which != SDL_JoystickInstanceID(imu_joystick) )
 				{
@@ -825,12 +954,11 @@ IN_Update(void)
 					break;
 				}
 
-#endif	// NATIVE_SDL_GYRO
+#endif	// !NO_SDL_GYRO
 
-				if (gyro_active && gyro_mode->value &&
-					!cl_paused->value && cls.key_dest == key_game)
+				if (gyro_active && !cl_paused->value && cls.key_dest == key_game)
 				{
-#ifdef NATIVE_SDL_GYRO
+#ifndef NO_SDL_GYRO
 					if (!gyro_turning_axis->value)
 					{
 						gyro_yaw = event.csensor.data[1] - gyro_calibration_y->value;		// yaw
@@ -858,7 +986,7 @@ IN_Update(void)
 								gyro_yaw = axis_value - gyro_calibration_z->value;
 							}
 					}
-#endif	// NATIVE_SDL_GYRO
+#endif	// !NO_SDL_GYRO
 				}
 				else
 				{
@@ -867,11 +995,7 @@ IN_Update(void)
 				break;
 
 			case SDL_CONTROLLERDEVICEREMOVED:
-				if (!controller)
-				{
-					break;
-				}
-				if (event.cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller))) {
+				if (controller && event.cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller))) {
 					Cvar_SetValue("paused", 1);
 					IN_Controller_Shutdown(true);
 					IN_Controller_Init(false);
@@ -954,7 +1078,7 @@ IN_Update(void)
 
 				case REASON_GYROCALIBRATION:	// finish and save calibration
 					{
-#ifdef NATIVE_SDL_GYRO
+#ifndef NO_SDL_GYRO
 						const float inverseSamples = 1.f / num_samples;
 						Cvar_SetValue("gyro_calibration_x", gyro_accum[0] * inverseSamples);
 						Cvar_SetValue("gyro_calibration_y", gyro_accum[1] * inverseSamples);
@@ -982,6 +1106,19 @@ IN_Update(void)
 			}
 			countdown_reason = REASON_NONE;
 		}
+	}
+
+	if (joy_labels->modified)
+	{
+		IN_GamepadLabels_Changed();
+	}
+	if (joy_confirm->modified)
+	{
+		IN_GamepadConfirm_Changed();
+	}
+	if (gyro_mode->modified)
+	{
+		IN_GyroMode_Changed();
 	}
 }
 
@@ -1079,7 +1216,7 @@ IN_TightenInput(float yaw, float pitch)
 {
 	thumbstick_t input = { yaw, pitch };
 	const float magnitude = IN_StickMagnitude(input);
-#ifdef NATIVE_SDL_GYRO
+#ifndef NO_SDL_GYRO
 	const float threshold = (M_PI / 180.0f) * gyro_tightening->value;
 #else
 	const float threshold = (2560.0f / 180.0f) * gyro_tightening->value;
@@ -1163,7 +1300,7 @@ IN_FlickStick(thumbstick_t stick, float axial_deadzone)
 	if (IN_StickMagnitude(stick) > Q_min(joy_flick_threshold->value, 1.0f))	// flick!
 	{
 		// Make snap-to-axis only if player wasn't already flicking
-		if (!is_flicking || flick_progress < FLICK_TIME)
+		if (!is_flicking || flick_progress < 1.0f)
 		{
 			processed = IN_SlopedAxialDeadzone(stick, axial_deadzone);
 		}
@@ -1174,7 +1311,8 @@ IN_FlickStick(thumbstick_t stick, float axial_deadzone)
 		{
 			// Flicking begins now, with a new target
 			is_flicking = true;
-			flick_progress = 0;
+			flick_progress = 0.0f;
+			started_flick = sys_frame_time;
 			target_angle = stick_angle;
 			IN_ResetSmoothSamples();
 		}
@@ -1211,12 +1349,6 @@ IN_Move(usercmd_t *cmd)
 {
 	// Factor used to transform from SDL joystick input ([-32768, 32767])  to [-1, 1] range
 	static const float normalize_sdl_axis = 1.0f / 32768.0f;
-
-	// Flick Stick's factors to change to the target angle with a feeling of "ease out"
-	static const float rotation_factor[FLICK_TIME] =
-	{
-		0.305555556f, 0.249999999f, 0.194444445f, 0.138888889f, 0.083333333f, 0.027777778f
-	};
 
 	static float old_mouse_x;
 	static float old_mouse_y;
@@ -1372,7 +1504,7 @@ IN_Move(usercmd_t *cmd)
 	//
 	// For movement this is not needed, as those are absolute values independent of framerate
 	float joyViewFactor = cls.rframetime/0.01666f;
-#ifdef NATIVE_SDL_GYRO
+#ifndef NO_SDL_GYRO
 	float gyroViewFactor = (1.0f / M_PI) * joyViewFactor;
 #else
 	float gyroViewFactor = (1.0f / 2560.0f) * joyViewFactor;	// normalized for Switch gyro
@@ -1422,10 +1554,25 @@ IN_Move(usercmd_t *cmd)
 	}
 
 	// Flick Stick: flick in progress, changing the yaw angle to the target progressively
-	if (flick_progress < FLICK_TIME)
+	if (flick_progress < 1.0f)
 	{
-		cl.viewangles[YAW] += target_angle * rotation_factor[flick_progress];
-		flick_progress++;
+		float cur_progress = (float)(sys_frame_time - started_flick) / FLICK_TIME;
+
+		if (cur_progress > 1.0f)
+		{
+			cur_progress = 1.0f;
+		}
+		else
+		{
+			// "Ease out" warp processing: f(x)=1-(1-x)^2 , 0 <= x <= 1
+			// http://gyrowiki.jibbsmart.com/blog:good-gyro-controls-part-2:the-flick-stick#toc0
+			cur_progress = 1.0f - cur_progress;
+			cur_progress *= cur_progress;
+			cur_progress = 1.0f - cur_progress;
+		}
+
+		cl.viewangles[YAW] += (cur_progress - flick_progress) * target_angle;
+		flick_progress = cur_progress;
 	}
 }
 
@@ -2027,7 +2174,7 @@ Controller_Rumble(const char *name, vec3_t source, qboolean from_player,
 void
 StartCalibration(void)
 {
-#ifdef NATIVE_SDL_GYRO
+#ifndef NO_SDL_GYRO
 	num_samples = 0;
 #else
 	num_samples[0] = num_samples[1] = num_samples[2] = 0;
@@ -2057,19 +2204,19 @@ IN_Controller_Init(qboolean notify_user)
 	SDL_Joystick *joystick = NULL;
 	SDL_bool is_controller = SDL_FALSE;
 
-	cvar = Cvar_Get("in_sdlbackbutton", "0", CVAR_ARCHIVE);
+	cvar = Cvar_Get("joy_escbutton", "0", CVAR_ARCHIVE);
 	if (cvar)
 	{
 		switch ((int)cvar->value)
 		{
 			case 1:
-				sdl_back_button = SDL_CONTROLLER_BUTTON_START;
+				joy_escbutton = SDL_CONTROLLER_BUTTON_BACK;
 				break;
 			case 2:
-				sdl_back_button = SDL_CONTROLLER_BUTTON_GUIDE;
+				joy_escbutton = SDL_CONTROLLER_BUTTON_GUIDE;
 				break;
 			default:
-				sdl_back_button = SDL_CONTROLLER_BUTTON_BACK;
+				joy_escbutton = SDL_CONTROLLER_BUTTON_START;
 		}
 	}
 
@@ -2092,6 +2239,9 @@ IN_Controller_Init(qboolean notify_user)
 #endif
 #ifdef SDL_HINT_JOYSTICK_HIDAPI_PS5_RUMBLE
 		SDL_SetHint( SDL_HINT_JOYSTICK_HIDAPI_PS5_RUMBLE, "1" );
+#endif
+#ifdef SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS	// use button positions instead of labels, like SDL3
+		SDL_SetHint( SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS, "0" );
 #endif
 
 		if (SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC) == -1)
@@ -2134,6 +2284,9 @@ IN_Controller_Init(qboolean notify_user)
 
 	for (int i = 0; i < SDL_NumJoysticks(); i++)
 	{
+		const char* joystick_name;
+		size_t name_len;
+
 		joystick = SDL_JoystickOpen(i);
 		if (!joystick)
 		{
@@ -2141,32 +2294,41 @@ IN_Controller_Init(qboolean notify_user)
 			continue;	// try next joystick
 		}
 
-		const char* joystick_name = SDL_JoystickName(joystick);
-		const int name_len = strlen(joystick_name);
+		joystick_name = SDL_JoystickName(joystick);
+		name_len = strlen(joystick_name);
 
 		Com_Printf ("Trying joystick %d, '%s'\n", i+1, joystick_name);
 
 		// Ugly hack to detect IMU-only devices - works for Switch controllers at least
-		if (name_len > 4 && !strncmp(joystick_name + name_len - 4, " IMU", 4))
+		if ( name_len > 6 && strstr(joystick_name + name_len - 6, "IMU") )
 		{
+#ifndef NO_SDL_GYRO
 			SDL_JoystickClose(joystick);
 			joystick = NULL;
-#ifdef NATIVE_SDL_GYRO
 			Com_Printf ("Skipping IMU device.\n");
+
 #else	// if it's not a Left JoyCon, use it as Gyro
-			Com_Printf ("IMU device found.\n");
-			if ( !imu_joystick && name_len > 16 && strncmp(joystick_name + name_len - 16, "Left Joy-Con IMU", 16) != 0 )
+			qboolean using_imu = !imu_joystick && !( strstr(joystick_name, "Joy-Con") && strstr(joystick_name, "L") );
+			Com_Printf ("IMU device found... ");
+			SDL_JoystickClose(joystick);
+			joystick = NULL;
+
+			if (using_imu)
 			{
 				imu_joystick = SDL_JoystickOpen(i);
 				if (imu_joystick)
 				{
 					show_gyro = true;
-					Com_Printf ("Using this device as Gyro sensor.\n");
+					Com_Printf ("using it as Gyro sensor.\n");
 				}
 				else
 				{
-					Com_Printf ("Couldn't open IMU: %s.\n", SDL_GetError());
+					Com_Printf ("\nCouldn't open IMU: %s.\n", SDL_GetError());
 				}
+			}
+			else
+			{
+				Com_Printf ("skipping.\n");
 			}
 #endif
 			continue;
@@ -2204,7 +2366,7 @@ IN_Controller_Init(qboolean notify_user)
 			show_gamepad = true;
 			Com_Printf("Enabled as Game Controller, settings:\n%s\n", SDL_GameControllerMapping(controller));
 
-#ifdef NATIVE_SDL_GYRO
+#ifndef NO_SDL_GYRO
 
 			if ( SDL_GameControllerHasSensor(controller, SDL_SENSOR_GYRO)
 				&& !SDL_GameControllerSetSensorEnabled(controller, SDL_SENSOR_GYRO, SDL_TRUE) )
@@ -2227,7 +2389,7 @@ IN_Controller_Init(qboolean notify_user)
 				SDL_GameControllerSetLED(controller, 0, 80, 0);	// green light
 			}
 
-#endif	// NATIVE_SDL_GYRO
+#endif	// !NO_SDL_GYRO
 
 			joystick_haptic = SDL_HapticOpenFromJoystick(SDL_GameControllerGetJoystick(controller));
 
@@ -2261,11 +2423,15 @@ IN_Controller_Init(qboolean notify_user)
 				Com_Printf("Controller doesn't support rumble.\n");
 			}
 
-#ifdef NATIVE_SDL_GYRO	// "native" exits when finding a single working controller
+#ifndef NO_SDL_GYRO	// "native SDL gyro" exits when finding a single working gamepad
 			break;
 #endif
 		}
 	}
+
+	IN_GamepadLabels_Changed();
+	IN_GamepadConfirm_Changed();
+	IN_GyroMode_Changed();
 }
 
 /*
@@ -2296,11 +2462,13 @@ IN_Init(void)
 	joy_haptic_distance = Cvar_Get("joy_haptic_distance", "100.0", CVAR_ARCHIVE);
 	haptic_feedback_filter = Cvar_Get("joy_haptic_filter", default_haptic_filter, CVAR_ARCHIVE);
 
-	joy_yawsensitivity = Cvar_Get("joy_yawsensitivity", "1.0", CVAR_ARCHIVE);
-	joy_pitchsensitivity = Cvar_Get("joy_pitchsensitivity", "1.0", CVAR_ARCHIVE);
+	joy_yawsensitivity = Cvar_Get("joy_yawsensitivity", "2.5", CVAR_ARCHIVE);
+	joy_pitchsensitivity = Cvar_Get("joy_pitchsensitivity", "2.5", CVAR_ARCHIVE);
 	joy_forwardsensitivity = Cvar_Get("joy_forwardsensitivity", "1.0", CVAR_ARCHIVE);
 	joy_sidesensitivity = Cvar_Get("joy_sidesensitivity", "1.0", CVAR_ARCHIVE);
 
+	joy_labels = Cvar_Get("joy_labels", "-1", CVAR_ARCHIVE);
+	joy_confirm = Cvar_Get("joy_confirm", "-1", CVAR_ARCHIVE);
 	joy_layout = Cvar_Get("joy_layout", "0", CVAR_ARCHIVE);
 	joy_left_expo = Cvar_Get("joy_left_expo", "2.0", CVAR_ARCHIVE);
 	joy_left_snapaxis = Cvar_Get("joy_left_snapaxis", "0.15", CVAR_ARCHIVE);
@@ -2315,16 +2483,11 @@ IN_Init(void)
 	gyro_calibration_y = Cvar_Get("gyro_calibration_y", "0.0", CVAR_ARCHIVE);
 	gyro_calibration_z = Cvar_Get("gyro_calibration_z", "0.0", CVAR_ARCHIVE);
 
-	gyro_yawsensitivity = Cvar_Get("gyro_yawsensitivity", "1.0", CVAR_ARCHIVE);
-	gyro_pitchsensitivity = Cvar_Get("gyro_pitchsensitivity", "1.0", CVAR_ARCHIVE);
+	gyro_yawsensitivity = Cvar_Get("gyro_yawsensitivity", "2.5", CVAR_ARCHIVE);
+	gyro_pitchsensitivity = Cvar_Get("gyro_pitchsensitivity", "2.5", CVAR_ARCHIVE);
 	gyro_tightening = Cvar_Get("gyro_tightening", "3.5", CVAR_ARCHIVE);
 	gyro_turning_axis = Cvar_Get("gyro_turning_axis", "0", CVAR_ARCHIVE);
-
 	gyro_mode = Cvar_Get("gyro_mode", "2", CVAR_ARCHIVE);
-	if ((int)gyro_mode->value == 2)
-	{
-		gyro_active = true;
-	}
 
 	windowed_pauseonfocuslost = Cvar_Get("vid_pauseonfocuslost", "0", CVAR_USERINFO | CVAR_ARCHIVE);
 	windowed_mouse = Cvar_Get("windowed_mouse", "1", CVAR_USERINFO | CVAR_ARCHIVE);
@@ -2378,7 +2541,7 @@ IN_Controller_Shutdown(qboolean notify_user)
 	joystick_left_x = joystick_left_y = joystick_right_x = joystick_right_y = 0;
 	gyro_yaw = gyro_pitch = 0;
 
-#ifndef NATIVE_SDL_GYRO
+#ifdef NO_SDL_GYRO
 	if (imu_joystick)
 	{
 		SDL_JoystickClose(imu_joystick);
@@ -2412,3 +2575,28 @@ IN_Shutdown(void)
 }
 
 /* ------------------------------------------------------------------ */
+
+void
+IN_GetClipboardText(char *out, size_t n)
+{
+	char *s = SDL_GetClipboardText();
+
+	if (!s || *s == '\0')
+	{
+		*out = '\0';
+		return;
+	}
+
+	Q_strlcpy(out, s, n - 1);
+
+	SDL_free(s);
+}
+
+/* Copy string s to the clipboard.
+   Returns 0 on success, 1 otherwise.
+*/
+int
+IN_SetClipboardText(const char *s)
+{
+	return SDL_SetClipboardText(s) != 0;
+}

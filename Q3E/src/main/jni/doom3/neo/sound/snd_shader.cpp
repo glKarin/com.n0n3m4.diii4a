@@ -468,7 +468,11 @@ bool idSoundShader::ParseShader(idLexer &src)
 			// add to the wav list
 			if (soundSystemLocal.soundCache && numEntries < maxSamples) {
 				//k: if no extension, default set .wav
-				const bool hasExt = token.Find(".wav", false) != -1 || token.Find(".ogg", false) != -1;
+				const bool hasExt = token.Find(".wav", false) != -1 || token.Find(".ogg", false) != -1
+#ifdef _SND_MP3
+					|| token.Find(".mp3", false) != -1
+#endif
+					;
 
 				token.BackSlashesToSlashes();
 				idStr lang = cvarSystem->GetCVarString("sys_lang");
@@ -494,6 +498,18 @@ bool idSoundShader::ParseShader(idLexer &src)
 							token = work;
 							parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
 						}
+#ifdef _SND_MP3
+						else
+						{
+							// also try to find it with the .mp3 extension
+							work.SetFileExtension(".mp3");
+
+							if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+								token = work;
+								parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
+							}
+						}
+#endif
 					}
 				}
 				else // other sound
@@ -515,12 +531,28 @@ bool idSoundShader::ParseShader(idLexer &src)
 							token = work;
 							parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
 						}
+#ifdef _SND_MP3
+						else
+						{
+							// also try to find it with the .mp3 extension
+							work.SetFileExtension(".mp3");
+
+							if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+								token = work;
+								parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
+							}
+						}
+#endif
 					}
 				}
 				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound(token.c_str(), onDemand);
 				numEntries++;
 			}
-		} else if (token.Find(".wav", false) != -1 || token.Find(".ogg", false) != -1) {
+		} else if (token.Find(".wav", false) != -1 || token.Find(".ogg", false) != -1
+#ifdef _SND_MP3
+				|| token.Find(".mp3", false) != -1
+#endif
+				) {
 			// add to the wav list
 			if (soundSystemLocal.soundCache && numEntries < maxSamples) {
 				token.BackSlashesToSlashes();
@@ -537,13 +569,28 @@ bool idSoundShader::ParseShader(idLexer &src)
 					if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
 						token = work;
 					}
+#ifdef _SND_MP3
+					else
+					{
+						// also try to find it with the .mp3 extension
+						work.SetFileExtension(".mp3");
+
+						if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+							token = work;
+						}
+					}
+#endif
 				}
 
 				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound(token.c_str(), onDemand);
 				numEntries++;
 			}
 #else
-		} else if (token.Find(".wav", false) != -1 || token.Find(".ogg", false) != -1) {
+		} else if (token.Find(".wav", false) != -1 || token.Find(".ogg", false) != -1
+#ifdef _SND_MP3
+				|| token.Find(".mp3", false) != -1
+#endif
+				) {
 			// add to the wav list
 			if (soundSystemLocal.soundCache && numEntries < maxSamples) {
 				token.BackSlashesToSlashes();
@@ -564,6 +611,17 @@ bool idSoundShader::ParseShader(idLexer &src)
 						if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
 							token = work;
 						}
+#ifdef _SND_MP3
+						else
+						{
+							// also try to find it with the .mp3 extension
+							work.SetFileExtension(".mp3");
+
+							if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+								token = work;
+							}
+						}
+#endif
 					}
 				}
 
@@ -600,6 +658,13 @@ bool idSoundShader::CheckShakesAndOgg(void) const
 			                GetName(), leadins[ i ]->name.c_str());
 			ret = true;
 		}
+#ifdef _SND_MP3
+		if (leadins[ i ]->objectInfo.wFormatTag == WAVE_FORMAT_TAG_MP3) {
+			common->Warning("sound shader '%s' has shakes and uses MP3 file '%s'",
+			                GetName(), leadins[ i ]->name.c_str());
+			ret = true;
+		}
+#endif
 	}
 
 	for (i = 0; i < numEntries; i++) {
@@ -608,6 +673,13 @@ bool idSoundShader::CheckShakesAndOgg(void) const
 			                GetName(), entries[ i ]->name.c_str());
 			ret = true;
 		}
+#ifdef _SND_MP3
+		if (entries[ i ]->objectInfo.wFormatTag == WAVE_FORMAT_TAG_MP3) {
+			common->Warning("sound shader '%s' has shakes and uses MP3 file '%s'",
+			                GetName(), entries[ i ]->name.c_str());
+			ret = true;
+		}
+#endif
 	}
 
 	return ret;
@@ -744,3 +816,33 @@ const char *idSoundShader::GetSound(int index) const
 
 	return "";
 }
+
+#ifdef _RAVEN
+ID_INLINE int GetDurationMS(const idSoundSample* sample)
+{
+  int samples = sample->LengthIn44kHzSamples();
+  return soundSystemLocal.SamplesToMilliseconds(samples);
+}
+
+float idSoundShader::GetTimeLength(void) const
+{
+	int v2; // esi
+	const idSoundSample *entry; // edi
+	float v4; // st7
+	float longest; // [esp+8h] [ebp-4h]
+
+	longest = 0.0;
+	for ( v2 = 0; v2 < numEntries; v2++ )
+	{
+		entry = entries[v2];
+		if ( entry )
+		{
+			v4 = GetDurationMS(entry) * 0.001f;
+			if ( v4 > longest )
+				longest = v4;
+		}
+	}
+	return longest;
+}
+
+#endif

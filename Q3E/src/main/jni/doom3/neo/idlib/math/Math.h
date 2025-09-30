@@ -238,35 +238,38 @@ class idMath
 
 		static int					FloatHash(const float *array, const int numFloats);
 #ifdef _RAVEN
-	static idVec3				CreateVector(float x, float y, float z);
-	static float				AngleMod(float a);
-	static float				Distance(const idVec3 &p1, const idVec3 &p2);
-	static int					Rand()
-	{
-		return rand();
-	}
-	static float				FRand()
-	{
-		return Rand() / (float)RAND_MAX;
-	}
-	static float				FRandRange(float min, float max)
-	{
-		return min + (max - min) * FRand();
-	}
+        static idVec3				CreateVector(float x, float y, float z);
+        static float				AngleMod(float a);
+        static float				Distance(const idVec3 &p1, const idVec3 &p2);
+        static int					Rand()
+        {
+            return rand();
+        }
+        static float				FRand()
+        {
+            return Rand() / (float)RAND_MAX;
+        }
+        static float				FRandRange(float min, float max)
+        {
+            return min + (max - min) * FRand();
+        }
 #endif
 
 #ifdef _RAVEN
-// abahr
-	static float				Lerp( const idVec2& range, float frac );
-	static float				Lerp( float start, float end, float frac );
-	static float				MidPointLerp( float start, float mid, float end, float frac );
+    // abahr
+        static float				Lerp( const idVec2& range, float frac );
+        static float				Lerp( float start, float end, float frac );
+        static float				MidPointLerp( float start, float mid, float end, float frac );
 
- // jscott: for sound system
-	static float                dBToScale( float db );
-	static float				ScaleToDb( float scale );
+     // jscott: for sound system
+        static float                dBToScale( float db );
+        static float				ScaleToDb( float scale );
 
-// jscott: renamed to prevent name clash
-	static const float			FLOAT_EPSILON;				// smallest positive number such that 1.0+FLT_EPSILON != 1.0
+    // jscott: renamed to prevent name clash
+        static const float			FLOAT_EPSILON;				// smallest positive number such that 1.0+FLT_EPSILON != 1.0
+    // RAVEN BEGIN
+        static const float			THREEFOURTHS_PI;			// 3 * pi / 4
+    // RAVEN END
 #endif
 
 		static const float			PI;							// pi
@@ -1161,6 +1164,10 @@ public:
 
 	// Returns an integer min <= x <= max (ie inclusive)
 	static	int				irand( int min, int max );
+
+    static unsigned int     Seed(void) {
+        return mSeed;
+    }
 };
 
 // RAVEN END

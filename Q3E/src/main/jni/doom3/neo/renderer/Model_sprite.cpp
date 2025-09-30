@@ -66,8 +66,15 @@ bool idRenderModelSprite::IsLoaded() const
 idRenderModelSprite::InstantiateDynamicModel
 ===============
 */
+#ifdef _RAVEN
+idRenderModel 	*idRenderModelSprite::InstantiateDynamicModel(const struct renderEntity_s *renderEntity, const struct viewDef_s *viewDef, idRenderModel *cachedModel, dword surfMask)
+#else
 idRenderModel 	*idRenderModelSprite::InstantiateDynamicModel(const struct renderEntity_s *renderEntity, const struct viewDef_s *viewDef, idRenderModel *cachedModel)
+#endif
 {
+#ifdef _RAVEN
+    (void)surfMask;
+#endif
 	idRenderModelStatic *staticModel;
 	srfTriangles_t *tri;
 	modelSurface_t surf;

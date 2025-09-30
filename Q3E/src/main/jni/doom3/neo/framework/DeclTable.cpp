@@ -128,6 +128,10 @@ bool idDeclTable::Parse(const char *text, const int textLength)
 	src.LoadMemory(text, textLength, GetFileName(), GetLineNum());
 	src.SetFlags(DECL_LEXER_FLAGS);
 	src.SkipUntilString("{");
+#ifdef _RAVEN
+	minValue = idMath::INFINITY;
+	maxValue = -idMath::INFINITY;
+#endif
 
 	snap = false;
 	clamp = false;
@@ -160,6 +164,12 @@ bool idDeclTable::Parse(const char *text, const int textLength)
 				}
 
 				values.Append(v);
+#ifdef _RAVEN
+				if ( v < minValue )
+					minValue = v;
+				if ( v > maxValue )
+					maxValue = v;
+#endif
 
 				src.ReadToken(&token);
 

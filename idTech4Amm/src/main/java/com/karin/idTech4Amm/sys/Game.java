@@ -13,6 +13,8 @@ import com.n0n3m4.q3e.Q3ELang;
  */
 public enum Game
 {
+    // KARIN_NEW_GAME_BOOKMARK
+
     // DOOM 3
     DOOM3_BASE(Q3EGameConstants.GAME_DOOM3, "base", "", "game", "", "base", false, R.string.doom_iii),
     DOOM3_D3XP(Q3EGameConstants.GAME_DOOM3, "d3xp", "d3xp", "d3xp", "", "d3xp", true, R.string.doom3_resurrection_of_evil_d3xp),
@@ -108,6 +110,9 @@ public enum Game
     SOURCE_HL2MP(Q3EGameConstants.GAME_SOURCE, "hl2mp", "hl2mp", "source", "", "hl2mp", false, R.string.halflife_2_mp_base),
     SOURCE_HL1(Q3EGameConstants.GAME_SOURCE, "hl1", "hl1", "source", "", "hl1", false, R.string.halflife_1_source_base),
     SOURCE_HL1MP(Q3EGameConstants.GAME_SOURCE, "hl1mp", "hl1mp", "source", "", "hl1mp", false, R.string.halflife_1_mp_source_base),
+
+    // Urban Terror
+    URT_BASE(Q3EGameConstants.GAME_URT, "q3ut4", "", "", "", "q3ut4", false, R.string.urbanterror_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

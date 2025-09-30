@@ -205,11 +205,11 @@ int idEventLoop::RunEventLoop(bool commandExecution)
 		if (ev.evType == SE_NONE) {
 			return 0;
 		}
-#ifdef _IMGUI
+#ifdef _IMGUI //karin: process events by ImGui
         if(R_ImGui_IsRunning())
         {
-            ImGui_HandleEvent(&ev);
-            continue;
+            if(ImGui_HandleEvent(&ev))
+            	continue;
         }
 #endif
 

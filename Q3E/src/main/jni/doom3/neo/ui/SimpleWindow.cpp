@@ -67,6 +67,30 @@ idSimpleWindow::idSimpleWindow(idWindow *win)
 	shear = win->shear;
 	backGroundName = win->backGroundName;
 
+#ifdef _RAVEN // quake4 gui var
+    textspacing = win->textspacing;
+    textstyle = win->textstyle;
+
+    // jmarshall - gui crash
+    backColor_r.Bind(backColor, 0);
+    backColor_g.Bind(backColor, 1);
+    backColor_b.Bind(backColor, 2);
+    backColor_w.Bind(backColor, 3);
+    matColor_r.Bind(matColor, 0);
+    matColor_g.Bind(matColor, 1);
+    matColor_b.Bind(matColor, 2);
+    matColor_w.Bind(matColor, 3);
+    foreColor_r.Bind(foreColor, 0);
+    foreColor_g.Bind(foreColor, 1);
+    foreColor_b.Bind(foreColor, 2);
+    foreColor_w.Bind(foreColor, 3);
+    borderColor_r.Bind(borderColor, 0);
+    borderColor_g.Bind(borderColor, 1);
+    borderColor_b.Bind(borderColor, 2);
+    borderColor_w.Bind(borderColor, 3);
+// jmarshall end
+#endif
+
 #ifdef _HUMANHEAD
 	translateFontNum = -1;
 #endif
@@ -359,17 +383,101 @@ idWinVar *idSimpleWindow::GetWinVarByName(const char *_name)
 		retVar = &backColor;
 	}
 
+#ifdef _RAVEN // quake4 gui var
+    // jmarshall
+    if (idStr::Icmp(_name, "backColor_r") == 0)
+    {
+        retVar = &backColor_r;
+    }
+    if (idStr::Icmp(_name, "backColor_g") == 0)
+    {
+        retVar = &backColor_g;
+    }
+    if (idStr::Icmp(_name, "backColor_b") == 0)
+    {
+        retVar = &backColor_b;
+    }
+    if (idStr::Icmp(_name, "backColor_w") == 0)
+    {
+        retVar = &backColor_w;
+    }
+// jmarshall end
+#endif
+
 	if (idStr::Icmp(_name, "matColor") == 0) {
 		retVar = &matColor;
 	}
+
+#ifdef _RAVEN // quake4 gui var
+    // jmarshall
+    if (idStr::Icmp(_name, "matColor_r") == 0)
+    {
+        retVar = &matColor_r;
+    }
+    if (idStr::Icmp(_name, "matColor_g") == 0)
+    {
+        retVar = &matColor_g;
+    }
+    if (idStr::Icmp(_name, "matColor_b") == 0)
+    {
+        retVar = &matColor_b;
+    }
+    if (idStr::Icmp(_name, "matColor_w") == 0)
+    {
+        retVar = &matColor_w;
+    }
+// jmarshall end
+#endif
 
 	if (idStr::Icmp(_name, "foreColor") == 0) {
 		retVar = &foreColor;
 	}
 
+#ifdef _RAVEN // quake4 gui var
+    // jmarshall
+    if (idStr::Icmp(_name, "foreColor_r") == 0)
+    {
+        retVar = &foreColor_r;
+    }
+    if (idStr::Icmp(_name, "foreColor_g") == 0)
+    {
+        retVar = &foreColor_g;
+    }
+    if (idStr::Icmp(_name, "foreColor_b") == 0)
+    {
+        retVar = &foreColor_b;
+    }
+    if (idStr::Icmp(_name, "foreColor_w") == 0)
+    {
+        retVar = &foreColor_w;
+    }
+// jmarshall end
+#endif
+
 	if (idStr::Icmp(_name, "borderColor") == 0) {
 		retVar = &borderColor;
 	}
+
+#ifdef _RAVEN // quake4 gui var
+    // jmarshall
+    if (idStr::Icmp(_name, "borderColor_r") == 0)
+    {
+        retVar = &borderColor_r;
+    }
+    if (idStr::Icmp(_name, "borderColor_g") == 0)
+    {
+        retVar = &borderColor_g;
+    }
+    if (idStr::Icmp(_name, "borderColor_b") == 0)
+    {
+        retVar = &borderColor_b;
+    }
+    if (idStr::Icmp(_name, "borderColor_w") == 0)
+    {
+        retVar = &borderColor_w;
+    }
+// jmarshall end
+#endif
 
 	if (idStr::Icmp(_name, "textScale") == 0) {
 		retVar = &textScale;

@@ -2,15 +2,6 @@
 #define _KARIN_IDLIBHEXEN_H
 #ifdef _HEXENEOC
 
-#define BUTTON_ATTACK2 BUTTON_5
-
-// Zeroth
-const int IMPULSE_41			= 41;			// hec Inventory Scroll Right
-const int IMPULSE_42			= 42;			// hec Inventory Scroll Left
-const int IMPULSE_43			= 43;			// hec use selected item
-const int IMPULSE_44			= 44;			// hec drop selected item
-const int IMPULSE_45			= 45;			// toggle automap
-
 namespace hxBounds
 {
 /*

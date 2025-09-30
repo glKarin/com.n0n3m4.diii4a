@@ -33,6 +33,7 @@
 
 cvar_t *cl_http_downloads;
 cvar_t *cl_http_filelists;
+cvar_t *cl_http_verifypeer;
 cvar_t *cl_http_proxy;
 cvar_t *cl_http_max_connections;
 cvar_t *cl_http_show_dw_progress;
@@ -81,7 +82,7 @@ static size_t CL_HTTP_Recv(void *ptr, size_t size, size_t nmemb, void *stream)
 
 	if (!dl->fileSize)
 	{
-		double length = 0;
+		curl_off_t length = 0;
 
 		qcurl_easy_getinfo(dl->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &length);
 
@@ -264,6 +265,9 @@ static void CL_StartHTTPDownload (dlqueue_t *entry, dlhandle_t *dl)
 	}
 
 	// Make sure that the download handle is in empty state.
+	if (dl->tempBuffer) {
+		free(dl->tempBuffer);
+	}
 	dl->tempBuffer = NULL;
 	dl->fileSize = 0;
 	dl->position = 0;
@@ -290,6 +294,8 @@ static void CL_StartHTTPDownload (dlqueue_t *entry, dlhandle_t *dl)
 		qcurl_easy_setopt(dl->curl, CURLOPT_WRITEFUNCTION, CL_HTTP_Recv);
 	}
 
+	qcurl_easy_setopt(dl->curl, CURLOPT_SSL_VERIFYPEER, (long)cl_http_verifypeer->value);
+	qcurl_easy_setopt(dl->curl, CURLOPT_PROXY_SSL_VERIFYPEER, (long)cl_http_verifypeer->value);
 	qcurl_easy_setopt(dl->curl, CURLOPT_PROXY, cl_http_proxy->string);
 	qcurl_easy_setopt(dl->curl, CURLOPT_LOW_SPEED_TIME, (long)cl_http_bw_limit_tmout->value);
 	qcurl_easy_setopt(dl->curl, CURLOPT_LOW_SPEED_LIMIT, (long)cl_http_bw_limit_rate->value);
@@ -474,6 +480,10 @@ static void CL_ParseFileList(dlhandle_t *dl)
 {
 	if (!cl_http_filelists->value)
 	{
+		return;
+	}
+
+	if (!dl->tempBuffer) {
 		return;
 	}
 
@@ -1169,7 +1179,7 @@ qboolean CL_PendingHTTPDownloads(void)
 		return false;
 	}
 
-	return pendingCount + handleCount;
+	return ((pendingCount + handleCount) > 0);
 }
 
 /*

@@ -338,6 +338,10 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 	} else if (extension.Icmp("bse") == 0) {
 		model = new rvRenderModelBSE;
 		model->InitFromFile(modelName);
+#elif defined(_RAVEN_BSE)
+    } else if (extension.Icmp("bse") == 0) {
+        model = new rvRenderModelBSE;
+        model->InitFromFile(modelName);
 #endif
 #endif
 #ifdef _HUMANHEAD //k: beam model

@@ -60,7 +60,7 @@ static bool parse_beam(idLexer &src, hhDeclBeam *self, int i)
 
 	if(i >= MAX_BEAMS)
 	{
-		common->Error("[Harmattan]: beam decl '%s' over(%d)", self->GetName(), MAX_BEAMS);
+		src.Error("beam decl '%s' over(%d)", self->GetName(), MAX_BEAMS);
 		return false;
 	}
 

@@ -45,6 +45,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "GameBearShootWindow.h"
 #include "GameBustOutWindow.h"
 
+#ifdef _RAVEN
+#include "../framework/Session_local.h"
+#endif
+
 #ifdef _HUMANHEAD
 #include "../humanhead/ui/TabWindow.h"
 #include "../humanhead/ui/TabContainerWindow.h"
@@ -427,12 +431,6 @@ void idWindow::CleanUp()
     // (if it is not fixed, orphane register references are possible)
     ops.Clear();
     updateVars.Clear();
-
-#if 0 //def _RAVEN
-// jmarshall
-    updateVars.Clear();
-// jmarshall end
-#endif
 
 	for (i = 0; i < SCRIPT_COUNT; i++) {
 		delete scripts[i];
@@ -1421,7 +1419,7 @@ idWindow::DrawBackground
 */
 void idWindow::DrawBackground(const idRectangle &drawRect)
 {
-#ifdef _RAVEN //k: don't draw background color for main menu black screen.
+#ifdef _RAVENxxx //k: don't draw background color for main menu black screen.
 	if(parent && parent->parent) //k: only non-root directly children. for draw brackets
 #endif
 	if (backColor.w()) {
@@ -4859,7 +4857,7 @@ idWindow::IsSimple
 */
 bool idWindow::IsSimple()
 {
-#ifdef _RAVEN
+#ifdef _RAVENxxx
 // jmarshall - quake 4 guis
     return false;
 // jmarshall end
@@ -5252,6 +5250,20 @@ void idWindow::ClearTransitions(void)
     flags &= ~WIN_INTRANSITION;
 }
 // jmarshall end
+
+void idWindow::Init(void)
+{
+	int num;
+	int i;
+
+	if ( !((idSessionLocal *)session)->GetLoadingSaveGame() )
+		RunScript(ON_INIT);
+	num = children.Num();
+	for ( i = 0; i < num; ++i )
+	{
+		children[i]->Init();
+	}
+}
 #endif
 
 #ifdef _HUMANHEAD

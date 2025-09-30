@@ -308,7 +308,7 @@ static char findpattern[MAX_OSPATH];
 static DIR *fdir;
 
 char *
-Sys_FindFirst(char *path, unsigned musthave, unsigned canhave)
+Sys_FindFirst(const char *path, unsigned musthave, unsigned canhave)
 {
 	struct dirent *d;
 	char *p;
@@ -407,7 +407,8 @@ Sys_UnloadGame(void)
 void *
 Sys_GetGameAPI(void *parms)
 {
-	void *(*GetGameAPI)(void *);
+	typedef void *(*fnAPI)(void *);
+	fnAPI GetGameAPI; 
 
 	char name[MAX_OSPATH];
 	char *path;
@@ -515,7 +516,7 @@ Sys_GetGameAPI(void *parms)
 		}
 	}
 
-	GetGameAPI = (void *)dlsym(game_library, "GetGameAPI");
+	GetGameAPI = (fnAPI)dlsym(game_library, "GetGameAPI");
 
 	if (!GetGameAPI)
 	{
@@ -572,12 +573,12 @@ Sys_IsFile(const char *path)
 	return false;
 }
 
-extern const char * Sys_GameDataDefaultPath(void);
 char *
 Sys_GetHomeDir(void)
 {
+	extern const char * Sys_GameDataDefaultPath();
 	static char gdir[MAX_OSPATH];
-	char *home;
+	const char *home;
 
 	home = (char *)Sys_GameDataDefaultPath();
 

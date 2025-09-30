@@ -176,4 +176,30 @@ void Sys_SyncState(void)
 	}
 }
 
+/* ------------------------------------------------------------------ */
 
+void
+IN_GetClipboardText(char *out, size_t n)
+{
+	char *s = Android_GetClipboardData();
+
+	if (!s || *s == '\0')
+	{
+		*out = '\0';
+		return;
+	}
+
+	Q_strlcpy(out, s, n - 1);
+
+	free(s);
+}
+
+/* Copy string s to the clipboard.
+   Returns 0 on success, 1 otherwise.
+*/
+int
+IN_SetClipboardText(const char *s)
+{
+	Android_SetClipboardData(s);
+	return 1;
+}

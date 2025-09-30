@@ -12,9 +12,9 @@
 ##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部/FTEQW/星球大战:绝地武士/英雄萨姆 安卓移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan68(luyiping)  
+1.1.0harmattan69(lindaiyu)  
 **Latest update:**
-2025-08-09  
+2025-10-01  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -52,7 +52,7 @@ GPLv3
 | Shadow mapping for pure soft shadow | Yes | - |
 | Soft/Translucent stencil shadow | Yes<br/>(Soft stencil shadow only support on OpenGLES3.1+) | - |
 | No lighting | Yes<br/>(And support switch in gaming by set harm_r_lightingModel to 0) | Yes |
-| PBR lighting model | Yes<br/>(using [idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr). But specular textures are not RMAO format in idTech4 game data) | - |
+| PBR lighting model | Yes<br/>(using [idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr). | - |
 | Wide-character language and DOOM3-BFG new font | Yes | - |
 | DOOM3-BFG occlusion culling | Yes | - |
 | Global illumination rendering | Yes | - |
@@ -119,14 +119,20 @@ Tag with `-free` only for F-Droid update.
 
 > ### Update
 
-> 1.1.0harmattan68 (2025-08-09)
+> 1.1.0harmattan69 (2025-10-01)
 
-* Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.2, fix Omni-bot initialization.
-* Fix game controller, and add game controller configure on launcher `CONTROLS` tab.
-* Add more alphabet on-screen buttons, and add `cs16-client` and `source-engine` on-screen button theme.
-* Add load external game library support on Xash3D.
-* Add built-in soft keyboard support.
-* Update RealRTCW version to 5.2, version 5.1 will be removed on next release.
+* Fix BSE effects on Quake 4.
+* Optimize PBR shaders with original specular texture on DOOM 3/Quake 4/Prey(2006).
+* Add settings by ImGui on DOOM 3/Quake 4/Prey(2006), command is `idTech4AmmSettings`, default binding to F10.
+* Add mp3 sound file support on DOOM 3/Quake 4/Prey(2006).
+* Fix GUI, credits after end of game, map static mesh vertex color on Quake 4.
+* Fix low frequency on HeXen-Edge of Chaos(DOOM 3 mod).
+* Add `Urban Terror`(ver 4.3.4) support, game standalone directory named `urt`, game data directory named `q3ut4`. More view in [Urban Terror](https://www.urbanterror.info).
+* Update Quake 2(yquake2) version to 8.51, update Vulkan renderer.
+* Update GZDOOM version to 4.14.2.
+* Rename Xash3D game standalone folder to `xash`.
+* Rename Source Engine game standalone folder to `srceng`.
+* Add fixed ratio resolution support on launcher `Graphics` tab.
 
 ----------------------------------------------------------------------------------
 
@@ -155,7 +161,7 @@ Tag with `-free` only for F-Droid update.
 * **FTEQW**: fteqw/
 * **Serious Sam Classic - The First Encounter**: serioussamtfe/
 * **Serious Sam Classic - The Second Encounter**: serioussamtse/
-* **Xash3D**: xash3d/
+* **Xash3D**: xash/
 
 ----------------------------------------------------------------------------------
 
@@ -173,7 +179,7 @@ Tag with `-free` only for F-Droid update.
 |:---|:---:|:--:|:---|:---:|:---:|:---|:---|:---:|
 | harm_r_openglVersion | String | GLES3.0 | OpenGL version | INIT | GLES2, GLES3.0, OpenGL_core, OpenGL_compatibility | Engine/Renderer | OpenGL_core, OpenGL_compatibility will use OpenGL desktop version, setup with launcher on Android | Windows, Linux |
 | r_multithread | Bool | 1 | Multithread backend | INIT |  | Engine/Renderer | setup with launcher on Android | Windows, Linux |
-| harm_r_clearVertexBuffer | Integer | 2 | Clear vertex buffer on every frame | ARCHIVE, FIXED | 0, 1, 2 | Engine/Renderer | 0 = not clear(original);<br/> 1 = only free VBO memory;<br/> 2 = free VBO memory and delete VBO handle(only without multi-threading, else same as 1) | All |
+| harm_r_clearVertexBuffer | Integer | 2 | Clear vertex buffer on every frame | ARCHIVE, FIXED | 0, 1, 2 | Engine/Renderer | 0 = not clear(original);<br/> 1 = only free VBO memory;<br/> 2 = free VBO memory and delete VBO handle | All |
 | harm_r_maxAllocStackMemory | Integer | 262144 | Control allocate temporary memory when load model data | ARCHIVE |  | Engine/Renderer | For load large model, because stack memory is limited on OS.<br/> 0 = Always heap;<br/> Negative = Always stack;<br/> Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory) | All |
 | harm_r_shadowCarmackInverse | Bool | 0 | Stencil shadow using Carmack-Inverse | ARCHIVE |  | Engine/Renderer |  | All |
 | harm_r_globalIllumination | Bool | 0 | Render global illumination before draw interactions | ARCHIVE |  | Engine/Renderer |  | All |
@@ -182,7 +188,10 @@ Tag with `-free` only for F-Droid update.
 | harm_r_specularExponent | Float | 3.0 | Specular exponent in Phong interaction lighting model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
 | harm_r_specularExponentBlinnPhong | Float | 12.0 | Specular exponent in Blinn-Phong interaction lighting model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
 | harm_r_specularExponentPBR | Float | 5.0 | Specular exponent in PBR interaction lighting model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
-| harm_r_normalCorrectionPBR | Float | 1.0 | Vertex normal correction in PBR interaction lighting model | ARCHIVE | [0.0 - 1.0] | Engine/Renderer | 1 = pure using bump texture;<br/> 0 = pure using vertex normal;<br/> 0.0 - 1.0 = bump texture * harm_r_normalCorrectionPBR + vertex normal * (1 - harm_r_normalCorrectionPBR) | All |
+| harm_r_PBRNormalCorrection | Float | 0.25 | Vertex normal correction(surface smoothness) in PBR interaction lighting model | ARCHIVE | [0.0 - 1.0] | Engine/Renderer | 1 = pure using bump texture(lower smoothness); 0 = pure using vertex normal(high smoothness); 0.0 - 1.0 = bump texture * harm_r_PBRNormalCorrection + vertex normal * (1 - harm_r_PBRNormalCorrection) | All |
+| harm_r_PBRRoughnessCorrection | Float | 0.55 | max roughness for old specular texture | ARCHIVE | &gt;= 0.0 | Engine/Renderer | 0 = disable; else = roughness = harm_r_PBRRoughnessCorrection - texture(specularTexture, st).r | All |
+| harm_r_PBRMetallicCorrection | Float | 0 | min metallic for old specular texture | ARCHIVE | &gt;= 0.0 | Engine/Renderer | 0 = disable; else = metallic = texture(specularTexture, st).r + harm_r_PBRMetallicCorrection | All |
+| harm_r_PBRRMAOSpecularMap | Bool | 0 | pecular map is standard PBR RAMO texture or old non-PBR texture | ARCHIVE |  | Engine/Renderer |  | All |
 | r_maxFps | Integer | 0 | Limit maximum FPS. | ARCHIVE | &gt;= 0 | Engine/Renderer | 0 = unlimited | All |
 | r_screenshotFormat | Integer | 0 | Screenshot format | ARCHIVE | 0, 1, 2, 3, 4 | Engine/Renderer | 0 = TGA (default),<br/> 1 = BMP,<br/> 2 = PNG,<br/> 3 = JPG,<br/> 4 = DDS | All |
 | r_screenshotJpgQuality | Integer | 75 | Screenshot quality for JPG images | ARCHIVE | [0 - 100] | Engine/Renderer |  | All |
@@ -289,6 +298,7 @@ Tag with `-free` only for F-Droid update.
 | glConfig | print OpenGL config |  | Engine/Renderer | print glConfig variable | All |
 | exportFont | Convert ttf/ttc font file to DOOM3 wide character font file |  | Engine/Renderer | require freetype2 | All |
 | extractBimage | extract DOOM3-BFG's bimage image |  | Engine/Renderer | extract to TGA RGBA image files | All |
+| idTech4AmmSettings | Show idTech4A++ new cvars and commands |  | Engine/Framework |  | All |
 | botRunAAS | compiles an AAS file for a map for DOOM 3 multiplayer-game |  | Game/DOOM3 | Only for generate bot aas file if map has not aas file | All |
 | addBot | adds a new bot |  | Game/DOOM3 | need SABotA7 files | All |
 | removeBot | removes bot specified by id (0,15) |  | Game/DOOM3 | need SABotA7 files | All |
@@ -325,7 +335,7 @@ Tag with `-free` only for F-Droid update.
 > ### About Quake IV
 ##### For playing Quake 4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). Now can play all levels, but some levels has bugs.  
 1. Putting PC Quake 4 game data file to `q4base` folder and START directly.
-2. *Particle system*: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), but it not work yet. Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.
+2. *Effect system*: Quake4 new advanced `BSE` particle system is working now! Also see [Quake4BSE](https://github.com/jmarshall23/Quake4BSE), [Quake4Decompiled](https://github.com/jmarshall23/Quake4Decompiled), and OpenBSE with DOOM3 original FX/Particle system has been removed.
 
 ----------------------------------------------------------------------------------
 
@@ -402,6 +412,9 @@ bind "Your key of drop" "_impulse25"
 19. **_POSTPROCESS**: Add retro postprocess rendering support.
 19. **_GLSL_PROGRAM**: Add GLSL program on new material stage support.
 20. **_IMGUI**: Add imGUI support.
+21. **_SND_MP3**: Add mp3 sound file support.
+22. **_RAVEN_BSE**: Build BSE as effect system on Quake 4.
+22. **_RAVEN_FX**: Build Fx as effect system on Quake 4.
 
 #### * DOOM 3
 ##### About `BOT` mod
@@ -457,7 +470,7 @@ Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support
 ----------------------------------------------------------------------------------
 
 > ### Run idTech4A++ on other Android application with Android intent
-1. Setup game type with `game` key: also see Q3E/com.n0n3m4.q3e.Q3EGameConstants.java GAME_XXX constants. Valid value: `doom3` `quake4` `prey2006` `quake2` `quake3` `rtcw` `tdm` `quake1` `doom3bfg` `gzdoom` `etw` `realrtcw` `fteqw` `openja` `openjo` `samtfe` `samtse` `xash3d`
+1. Setup game type with `game` key: also see Q3E/com.n0n3m4.q3e.Q3EGameConstants.java GAME_XXX constants. Valid value: `doom3` `quake4` `prey2006` `quake2` `quake3` `rtcw` `tdm` `quake1` `doom3bfg` `gzdoom` `etw` `realrtcw` `fteqw` `openja` `openjo` `samtfe` `samtse` `xash3d`, `source`
 2. Setup game command arguments with `command` key. Starts with `game.arm`
 
 ##### e.g. Run CS1.6 with Xash3D engine
@@ -572,6 +585,8 @@ entityDef player_viewbody { // default name is player_viewbody, or setup in play
     "body_offset"               "-15 0 0" // extras model offset: vector <forward right up>, default = 0 0 0
     "body_allChannel"			"0" // play animation with all channels, else only play with legs channel: bool, default = 1
     "body_usePlayerModel"		"0" // use player model and not use 'body_model': bool, default = 0
+	"body_weaponDepthHack"		"0" // override view weapon: bool, default = 0
+	"body_modelDepthHack"		"0.0" // near clip: float, default = 0
     // "anim run_forward" 		"walk_forward" // override model animation name: string, "anim <model animation name>" "<replace animation name>"
 	
 	// Hide surface only for Quake4
@@ -739,6 +754,9 @@ harm_ui_showViewBody 1
 * stb
 * bzip2
 * SDL2
+* minimp3
+* imgui
+* freetype2
 ##### Library(Binary)
 * ffmpeg-kit
 ----------------------------------------------------------------------------------

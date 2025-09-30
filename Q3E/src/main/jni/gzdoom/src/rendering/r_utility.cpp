@@ -550,8 +550,12 @@ void R_InterpolateView(FRenderViewpoint& viewPoint, const player_t* const player
 			const int prevPortalGroup = viewLvl->PointInRenderSubsector(iView->Old.Pos)->sector->PortalGroup;
 			const int curPortalGroup = viewLvl->PointInRenderSubsector(iView->New.Pos)->sector->PortalGroup;
 
-			const DVector2 portalOffset = viewLvl->Displacements.getOffset(prevPortalGroup, curPortalGroup);
-			viewPoint.Pos = iView->Old.Pos * inverseTicFrac + (iView->New.Pos - portalOffset) * ticFrac;
+			if (viewPoint.IsAllowedOoB() && prevPortalGroup != curPortalGroup) viewPoint.Pos = iView->New.Pos;
+			else
+			{
+				const DVector2 portalOffset = viewLvl->Displacements.getOffset(prevPortalGroup, curPortalGroup);
+				viewPoint.Pos = iView->Old.Pos * inverseTicFrac + (iView->New.Pos - portalOffset) * ticFrac;
+			}
 			viewPoint.Path[0] = viewPoint.Path[1] = iView->New.Pos;
 		}
 	}
@@ -565,40 +569,40 @@ void R_InterpolateView(FRenderViewpoint& viewPoint, const player_t* const player
 	viewPoint.sector = viewLvl->PointInRenderSubsector(viewPoint.Pos)->sector;
 	if (!viewPoint.IsAllowedOoB() || !V_IsHardwareRenderer())
 	{
-	bool moved = false;
-	while (!viewPoint.sector->PortalBlocksMovement(sector_t::ceiling))
-	{
-		if (viewPoint.Pos.Z > viewPoint.sector->GetPortalPlaneZ(sector_t::ceiling))
+		bool moved = false;
+		while (!viewPoint.sector->PortalBlocksMovement(sector_t::ceiling))
 		{
-			const DVector2 offset = viewPoint.sector->GetPortalDisplacement(sector_t::ceiling);
-			viewPoint.Pos += offset;
-			viewPoint.ActorPos += offset;
-			viewPoint.sector = viewPoint.sector->GetPortal(sector_t::ceiling)->mDestination;
-			moved = true;
-		}
-		else
-		{
-			break;
-		}
-	}
-
-	if (!moved)
-	{
-		while (!viewPoint.sector->PortalBlocksMovement(sector_t::floor))
-		{
-			if (viewPoint.Pos.Z < viewPoint.sector->GetPortalPlaneZ(sector_t::floor))
+			if (viewPoint.Pos.Z > viewPoint.sector->GetPortalPlaneZ(sector_t::ceiling))
 			{
-				const DVector2 offset = viewPoint.sector->GetPortalDisplacement(sector_t::floor);
+				const DVector2 offset = viewPoint.sector->GetPortalDisplacement(sector_t::ceiling);
 				viewPoint.Pos += offset;
 				viewPoint.ActorPos += offset;
-				viewPoint.sector = viewPoint.sector->GetPortal(sector_t::floor)->mDestination;
+				viewPoint.sector = viewPoint.sector->GetPortal(sector_t::ceiling)->mDestination;
+				moved = true;
 			}
 			else
 			{
 				break;
 			}
 		}
-	}
+
+		if (!moved)
+		{
+			while (!viewPoint.sector->PortalBlocksMovement(sector_t::floor))
+			{
+				if (viewPoint.Pos.Z < viewPoint.sector->GetPortalPlaneZ(sector_t::floor))
+				{
+					const DVector2 offset = viewPoint.sector->GetPortalDisplacement(sector_t::floor);
+					viewPoint.Pos += offset;
+					viewPoint.ActorPos += offset;
+					viewPoint.sector = viewPoint.sector->GetPortal(sector_t::floor)->mDestination;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
 	}
 
 	if (P_NoInterpolation(player, viewPoint.camera))
@@ -704,6 +708,21 @@ void FRenderViewpoint::SetViewAngle(const FViewWindow& viewWindow)
 	ViewVector.X = v.X;
 	ViewVector.Y = v.Y;
 	HWAngles.Yaw = FAngle::fromDeg(270.0 - Angles.Yaw.Degrees());
+	ViewVector3D.X = v.X * PitchCos;
+	ViewVector3D.Y = v.Y * PitchCos;
+	ViewVector3D.Z = -PitchSin;
+
+	if (IsOrtho() || IsAllowedOoB()) // These auto-ensure that camera and camera->ViewPos exist
+	{
+		if (camera->tracer != NULL)
+		{
+			OffPos = camera->tracer->Pos();
+		}
+		else
+		{
+			OffPos = Pos + ViewVector3D * camera->ViewPos->Offset.Length();
+		}
+	}
 
 	if (IsOrtho() && (camera->ViewPos->Offset.XY().Length() > 0.0))
 	{

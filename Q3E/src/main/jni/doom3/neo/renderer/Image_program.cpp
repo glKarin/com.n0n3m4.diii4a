@@ -642,7 +642,9 @@ static bool R_ParseImageProgram_r(idLexer &src, byte **pic, int *width, int *hei
 
 	// load it as an image
 	R_LoadImage(token.c_str(), pic, width, height, &timestamp, true
+#ifdef _D3BFG_FONT
 			, token.Find("newfonts/") == 0 //karin: DOOM3-BFG new font NPOT texture not allow round down
+#endif
 			);
 
 	if (timestamp == -1) {

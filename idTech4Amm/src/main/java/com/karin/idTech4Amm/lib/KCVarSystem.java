@@ -20,7 +20,7 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_clearVertexBuffer", "integer", "2", "Clear vertex buffer on every frame", KCVar.FLAG_LAUNCHER,
                                 "0", "Not clear(original)",
                                 "1", "Only free memory",
-                                "2", "Free memory and delete VBO handle(only without multi-threading, else same as 1)"
+                                "2", "Free memory and delete VBO handle"
                         ),
                         KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "262144", "Control allocate temporary memory when load model data. 0 = Always heap; Negative = Always stack; Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)", 0),
                         KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external OpenGLES2.0 GLSL shader program directory path", 0),
@@ -37,7 +37,10 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "5.0", "Specular exponent in PBR interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_normalCorrectionPBR", "float", "1.0", "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_PBRNormalCorrection", "float", "0.25", "Vertex normal correction(surface smoothness) in PBR interaction lighting model(1 = pure using bump texture(lower smoothness); 0 = pure using vertex normal(high smoothness); 0.0 - 1.0 = bump texture * harm_r_PBRNormalCorrection + vertex normal * (1 - harm_r_PBRNormalCorrection))", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_PBRRoughnessCorrection", "float", "0.55", "max roughness for old specular texture. 0 = disable; else = roughness = harm_r_PBRRoughnessCorrection - texture(specularTexture, st).r", 0),
+                        KCVar.CreateCVar("harm_r_PBRMetallicCorrection", "float", "0", "min metallic for old specular texture. 0 = disable; else = metallic = texture(specularTexture, st).r + harm_r_PBRMetallicCorrection", 0),
+                        KCVar.CreateCVar("harm_r_PBRRMAOSpecularMap", "bool", "0", "Specular map is standard PBR RAMO texture or old non-PBR texture", 0),
                         KCVar.CreateCVar("harm_r_ambientLightingBrightness", "float", "1.0", "Lighting brightness in ambient lighting", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("r_maxFps", "integer", "0", "Limit maximum FPS. 0 = unlimited", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
 
@@ -46,7 +49,9 @@ public final class KCVarSystem
                                 "1", "BMP",
                                 "2", "PNG",
                                 "3", "JPG",
-                                "4", "DDS"
+                                "4", "DDS",
+                                "5", "EXR",
+                                "6", "HDR"
                                 ),
                         KCVar.CreateCVar("r_screenshotJpgQuality", "integer", "75", "Screenshot quality for JPG images (0-100)", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("r_screenshotPngCompression", "integer", "3", "Compression level when using PNG screenshots (0-9)", KCVar.FLAG_POSITIVE),
@@ -319,6 +324,37 @@ public final class KCVarSystem
                         )
                 );
 
+        KCVar.Group URT_CVARS = new KCVar.Group("UrT", true)
+                .AddCVar(
+                        KCVar.CreateCVar("harm_bot_autoAdd", "integer", "0", "Add bots automatic(0 = disable; -1 = maximum; Positive number = bots num)", KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_bot_level", "integer", "0", "Bot difficulty level(0 = random; 1 - 5 = bot difficulty level)", KCVar.FLAG_LAUNCHER | KCVar.FLAG_POSITIVE)
+                );
+
+        KCVar.Group XASH3D_CVARS = new KCVar.Group("Xash3D", true)
+                .AddCVar(
+                        KCVar.CreateParam("sv_cl", "string", "", "Server/Client", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
+                                "\"\"", "Half-Life",
+                                "hlsdk", "Half-Life",
+                                "cs16", "Counter-Strike 1.6",
+                                "cs16_yapb", "Counter-Strike 1.6(yapb)"
+                                )
+                );
+
+        KCVar.Group SOURCE_CVARS = new KCVar.Group("Source", true)
+                .AddCVar(
+                        KCVar.CreateParam("sv_cl", "string", "", "Server/Client", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
+                                "\"\"", "Half-Life 2",
+                                "hl2", "Half-Life 2",
+                                "cstrike", "Counter-Strike: Source",
+                                "portal", "Portal",
+                                "dod", "Day of Defeat: Source",
+                                "episodic", "Half-Life 2: Episodic 1 & 2",
+                                "hl2mp", "Half-Life 2: Deathmatch",
+                                "hl1", "Half-Life 1: Source",
+                                "hl1mp", "Half-Life 1 Deathmatch: Source"
+                        )
+                );
+
         _cvars.put("RENDERER", RENDERER_CVARS);
         _cvars.put("FRAMEWORK", FRAMEWORK_CVARS);
         _cvars.put("base", GAME_CVARS);
@@ -330,6 +366,9 @@ public final class KCVarSystem
         _cvars.put("ETW", ETW_CVARS);
         _cvars.put("TDM", TDM_CVARS);
         _cvars.put("GZDOOM", GZDOOM_CVARS);
+        _cvars.put("UrT", URT_CVARS);
+        _cvars.put("Xash3D", XASH3D_CVARS);
+        _cvars.put("Source", SOURCE_CVARS);
 
         return _cvars;
     }
@@ -358,6 +397,12 @@ public final class KCVarSystem
             res.add(_cvars.get("ETW"));
         else if(Q3EUtils.q3ei.isRealRTCW)
             res.add(_cvars.get("RealRTCW"));
+        else if(Q3EUtils.q3ei.isXash3D)
+            res.add(_cvars.get("Xash3D"));
+        else if(Q3EUtils.q3ei.isUrT)
+            res.add(_cvars.get("UrT"));
+        else if(Q3EUtils.q3ei.isSource)
+            res.add(_cvars.get("Source"));
         else if(Q3EUtils.q3ei.isD3)
         {
             res.add(_cvars.get("RENDERER"));
@@ -379,52 +424,5 @@ public final class KCVarSystem
                 res.add(_cvars.get(game));
         }
         return res;
-    }
-
-    public static String GenCVarString(KCVar cvar, String endl)
-    {
-        StringBuilder sb = new StringBuilder();
-        if(cvar.category == KCVar.CATEGORY_COMMAND)
-        {
-            sb.append(TextHelper.FormatDialogMessageSpace("  *[Command] ")).append(cvar.name);
-            sb.append(endl);
-            if(!KCVar.TYPE_NONE.equals(cvar.type))
-                sb.append(TextHelper.FormatDialogMessageSpace("    (")).append(cvar.type).append(")");
-        }
-        else
-        {
-            sb.append(TextHelper.FormatDialogMessageSpace("  *[CVar] ")).append(cvar.name);
-            sb.append(endl);
-            sb.append(TextHelper.FormatDialogMessageSpace("    - ")).append(KStr.ucfirst(cvar.type)).append(TextHelper.FormatDialogMessageSpace("  default: ")).append(cvar.defaultValue);
-            if(cvar.HasFlags(Integer.MAX_VALUE & ~(Integer.MAX_VALUE & KCVar.FLAG_LAUNCHER)))
-            {
-                sb.append(TextHelper.FormatDialogMessageSpace("  ("));
-                if(cvar.HasFlag(KCVar.FLAG_POSITIVE))
-                    sb.append(" Positive");
-                if(cvar.HasFlag(KCVar.FLAG_INIT))
-                    sb.append(" CommandLine-Only");
-                if(cvar.HasFlag(KCVar.FLAG_AUTO))
-                    sb.append(" Auto-Setup");
-                if(cvar.HasFlag(KCVar.FLAG_READONLY))
-                    sb.append(" Readonly");
-                if(cvar.HasFlag(KCVar.FLAG_DISABLED))
-                    sb.append(" Disabled");
-                sb.append(" )");
-            }
-        }
-        sb.append(endl);
-        sb.append(TextHelper.FormatDialogMessageSpace("    ")).append(cvar.description);
-        sb.append(endl);
-        if(null != cvar.values)
-        {
-            for(KCVar.Value str : cvar.values)
-            {
-                sb.append(TextHelper.FormatDialogMessageSpace("      "));
-                sb.append(str.value).append(" - ").append(str.desc);
-                sb.append(endl);
-            }
-        }
-        sb.append(endl);
-        return sb.toString();
     }
 }

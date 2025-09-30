@@ -1083,6 +1083,11 @@ void idRenderWorldLocal::AddAreaRefs(int areaNum, const portalStack_t *ps)
 	// add the models and lights, using more precise culling to the planes
 	AddAreaEntityRefs(areaNum, ps);
 	AddAreaLightRefs(areaNum, ps);
+#ifdef _RAVEN
+#ifdef _RAVEN_BSE
+    AddAreaEffectRefs(areaNum, ps);
+#endif
+#endif
 }
 
 /*
@@ -1161,6 +1166,11 @@ void idRenderWorldLocal::FindViewLightsAndEntities(void)
 	// clear the visible lightDef and entityDef lists
 	tr.viewDef->viewLights = NULL;
 	tr.viewDef->viewEntitys = NULL;
+#ifdef _RAVEN // particle
+#ifdef _RAVEN_BSE
+    tr.viewDef->viewEffects = NULL;
+#endif
+#endif
 
 	// find the area to start the portal flooding in
 	if (!r_usePortals.GetBool()) {
@@ -1429,9 +1439,19 @@ void idRenderWorldLocal::ShowPortals()
 #ifdef _RAVEN
 void idRenderWorldLocal::FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas )
 {
-	portalStack_t	ps;
 	int				i;
 
+#if 1
+	if ( areaNum >= 0 && areaNum < numPortalAreas )
+	{
+		FindVisibleAreas_r(origin, areaNum, visibleAreas);
+	}
+	else if(areaNum < 0)
+	{
+		for ( i = 0; i < this->numPortalAreas; ++i )
+			visibleAreas[i] = true;
+	}
+#else
 	assert(areaNum >= 0 && areaNum < numPortalAreas);
 
 #if 0
@@ -1458,6 +1478,7 @@ void idRenderWorldLocal::FindVisibleAreas( idVec3 origin, int areaNum, bool *vis
 
 	// flood out through portals, setting area viewCount
 	FindVisibleAreas_r(origin, areaNum, &ps, visibleAreas);
+#endif
 #if 0
 	int num = 0;
 	int numSky = 0;
@@ -1466,16 +1487,51 @@ void idRenderWorldLocal::FindVisibleAreas( idVec3 origin, int areaNum, bool *vis
 		if(visibleAreas[i])
 		{
 			bool b = HasSkybox(i);
-			LOGI("visible area: %d %d", i, b);
 			num++;
 			if(b)
+			{
+				LOGI("visible area: %d %d", i, b);
 				numSky++;
+			}
 		}
 	}
+	if(numSky > 0)
 	LOGI("Total visible: %d %d, skys: %d\n", areaNum, num, numSky);
 #endif
 }
 
+#if 1
+void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, bool *visibleAreas)
+{
+	portal_t		*p;
+	float			d;
+	portalArea_t 	*area;
+
+	area = &portalAreas[ areaNum ];
+	visibleAreas[areaNum] = true;
+
+	for (p = area->portals; p; p = p->next) {
+		// make sure the portal isn't in our stack trace,
+		// which would cause an infinite loop
+		if(visibleAreas[p->intoArea])
+			continue;
+
+		// an enclosing door may have sealed the portal off
+		if (p->doublePortal->blockingBits & PS_BLOCK_VIEW) {
+			continue;
+		}
+
+		// make sure this portal is facing away from the view
+		d = p->plane.Distance(origin);
+
+		if (d < -0.1f) {
+			continue;
+		}
+
+		FindVisibleAreas_r(origin, p->intoArea, visibleAreas);
+	}
+}
+#else
 void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, const struct portalStack_s *ps, bool *visibleAreas)
 {
 	portal_t		*p;
@@ -1483,7 +1539,6 @@ void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, c
 	portalArea_t 	*area;
 	const portalStack_t	*check;
 	portalStack_t	newStack;
-	int				i, j;
 	idVec3			v1, v2;
 	int				addPlanes;
 	idFixedWinding	w;		// we won't overflow because MAX_PORTAL_PLANES = 20
@@ -1583,6 +1638,40 @@ void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, c
 }
 #endif
 
+#ifdef _RAVEN_BSE
+void idRenderWorldLocal::AddAreaEffectRefs(int areaNum, const portalStack_s *ps) {
+    areaReference_s *p_effectRefs; // ebp
+    areaReference_s *i; // edi
+    rvRenderEffectLocal *effect; // esi
+    int suppressSurfaceInViewID; // eax
+    int allowSurfaceInViewID; // eax
+    viewEffect_s *v8; // eax
+
+    p_effectRefs = &portalAreas[areaNum].effectRefs;
+    for (i = p_effectRefs->areaNext; i != p_effectRefs; i = i->areaNext) {
+        effect = i->effect;
+        if (!r_skipSuppress.GetBool()) {
+            suppressSurfaceInViewID = effect->parms.suppressSurfaceInViewID;
+            if (suppressSurfaceInViewID) {
+                if (suppressSurfaceInViewID == tr.viewDef->renderView.viewID)
+                    continue;
+            }
+            allowSurfaceInViewID = effect->parms.allowSurfaceInViewID;
+            if (allowSurfaceInViewID) {
+                if (allowSurfaceInViewID != tr.viewDef->renderView.viewID)
+                    continue;
+            }
+        }
+        if (!r_useEntityCulling.GetBool()
+            || !R_CullLocalBox(effect->referenceBounds, effect->modelMatrix, ps->numPortalPlanes, ps->portalPlanes)) {
+            v8 = R_SetEffectDefViewEntity(effect);
+            v8->scissorRect.Union(ps->rect);
+        }
+    }
+}
+#endif
+#endif
+
 #ifdef _HUMANHEAD
 #if GAMEPORTAL_PVS
 qhandle_t idRenderWorldLocal::FindGamePortal(const char *name)
@@ -1625,7 +1714,7 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 	int numGamePortals = 0;
 	idList<gamePortalSource_t> sources;
 
-    common->Printf("[Harmattan]: Add game portal from map file\n");
+    Sys_Printf("Add game portal from map file\n");
 
 	ClearGamePortalInfos();
 	numEntities = mapFile->GetNumEntities();
@@ -1742,12 +1831,12 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
 
         idStr point0 = gps.srcPosition.ToString(6);
         idStr point1 = gps.dstPosition.ToString(6);
-        common->Printf("[Harmattan]: Read %d game portal: entity '%s', source area %d(%s) -> target area %d(%s).\n", numGamePortals, name, gps.srcArea, point0.c_str(), gps.dstArea, point1.c_str());
+        Sys_Printf("Read %d game portal: entity '%s', source area %d(%s) -> target area %d(%s).\n", numGamePortals, name, gps.srcArea, point0.c_str(), gps.dstArea, point1.c_str());
 
 		numGamePortals++;
 	}
 
-	common->Printf("[Harmattan]: %d game portals found.\n", numGamePortals);
+	Sys_Printf("%d game portals found.\n", numGamePortals);
 
 	// if no game portals
 	if(numGamePortals == 0)
@@ -1836,9 +1925,9 @@ void idRenderWorldLocal::RegisterGamePortals(idMapFile *mapFile)
         idStr point1 = gps.points[1].ToString(6);
         idStr point2 = gps.points[2].ToString(6);
         idStr point3 = gps.points[3].ToString(6);
-		common->Printf("[Harmattan]: Add game portal: /* iap %d */ %d %d %d ( %s ) ( %s ) ( %s ) ( %s ) \n", i + numMapInterAreaPortals, 4, a1, a2, point0.c_str(), point1.c_str(), point2.c_str(), point3.c_str());
+		Sys_Printf("Add game portal: /* iap %d */ %d %d %d ( %s ) ( %s ) ( %s ) ( %s ) \n", i + numMapInterAreaPortals, 4, a1, a2, point0.c_str(), point1.c_str(), point2.c_str(), point3.c_str());
 	}
-    common->Printf("[Harmattan]: Add game portal finish\n");
+    Sys_Printf("Add game portal finish\n");
 }
 
 void idRenderWorldLocal::DrawGamePortals(int mode, const idMat3 &viewAxis)

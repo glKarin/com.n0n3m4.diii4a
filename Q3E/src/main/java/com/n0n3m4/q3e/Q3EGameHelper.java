@@ -125,6 +125,27 @@ public class Q3EGameHelper
         }
     }
 
+    private String GetOpenALDriverNames(String openalAudioDriverName)
+    {
+        if(KStr.IsEmpty(openalAudioDriverName))
+            return null;
+        int res = Q3EUtils.ArrayIndexOf(Q3EGameConstants.OPENAL_DRIVER, openalAudioDriverName, false);
+        if(res <= 0)
+            return null;
+        String[] drivers = new String[2];
+        if(res == 2)
+        {
+            drivers[0] = Q3EGameConstants.OPENAL_DRIVER[2];
+            drivers[1] = Q3EGameConstants.OPENAL_DRIVER[1];
+        }
+        else
+        {
+            drivers[0] = Q3EGameConstants.OPENAL_DRIVER[1];
+            drivers[1] = Q3EGameConstants.OPENAL_DRIVER[2];
+        }
+        return String.join(",", drivers);
+    }
+
     public void InitGlobalEnv(String gameTypeName, String gameCommand)
     {
         KLog.I("Game initial: " + gameTypeName + " -> " + gameCommand);
@@ -157,8 +178,6 @@ public class Q3EGameHelper
 
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Run " + Q3EUtils.q3ei.game_name);
 
-        Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
-        Q3EUtils.q3ei.joystick_inner_dead_zone = preferences.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
         Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
         Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false);
         Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, false);
@@ -571,7 +590,6 @@ public class Q3EGameHelper
         final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_TDM, "glslprogs/idtech4amm.version");
         String version = Q3EGameConstants.TDM_GLSL_SHADER_VERSION;
         String name = Q3ELang.tr(m_context, R.string.the_dark_mod_glsl_shader);
-        String versionKey = Q3EInterface.GetGameVersionPreferenceKey(Q3EGameConstants.GAME_TDM);
         Q3EGameConstants.PatchResource patchResource = Q3EGameConstants.PatchResource.TDM_GLSL_SHADER;
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
@@ -655,6 +673,11 @@ public class Q3EGameHelper
             {
                 DumpExtractResourceVersion(versionFile, version, name);
             }
+            // CS1.6
+            resource = Q3EGameConstants.PatchResource.XASH3D_CS16_EXTRAS;
+            name = Q3ELang.tr(m_context, R.string.cs16_xash3d_extras);
+            if(manager.Fetch(resource, overwrite) == null)
+                ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
         }
         else
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
@@ -802,7 +825,7 @@ public class Q3EGameHelper
     private int[] GetFrameSize(int w, int h)
     {
         int[] size = Q3EUtils.GetSurfaceViewSize(m_context, w, h);
-        Log.i("Q3EView", "FrameSize: (" + size[0] + ", " + size[1] + ")");
+        KLog.i("Q3EView", "Game surface view size: %d x %d", size[0], size[1]);
         return size;
     }
 
@@ -1164,6 +1187,7 @@ public class Q3EGameHelper
         boolean useExternalLibPath = preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false);
         int consoleMaxHeightFrac = preferences.getInt(Q3EPreference.pref_harm_max_console_height_frac, 0);
         int sdlAudioDriver = GetSDLAudioDriverID(preferences.getString(Q3EPreference.pref_harm_sdl_audio_driver, Q3EGameConstants.SDL_AUDIO_DRIVER[0]));
+        String openalDriver = GetOpenALDriverNames(preferences.getString(Q3EPreference.pref_harm_openal_driver, Q3EGameConstants.OPENAL_DRIVER[0]));
 
         String subdatadir = Q3EUtils.q3ei.subdatadir;
 
@@ -1204,7 +1228,24 @@ public class Q3EGameHelper
 
         Q3E.surfaceWidth = width;
         Q3E.surfaceHeight = height;
-        Q3E.CalcRatio();
+        //Q3E.CalcRatio();
+
+        String envPreferenceKey = Q3EUtils.q3ei.GetGameEnvPreferenceKey();
+        Set<String> envs = preferences.getStringSet(envPreferenceKey, null);
+        if(null != envs)
+        {
+            for(String env : envs)
+            {
+                String[] e = KStr.ParseEnv(env);
+                if(null != e)
+                    Q3EJNI.Setenv(e[0], e[1], 1);
+            }
+        }
+
+        //Q3EJNI.Setenv("ALSOFT_LOGFILE", "/sdcard/diii4a/openal.log");
+        //Q3EJNI.Setenv("ALSOFT_LOGLEVEL", "3");
+        if(null != openalDriver)
+            Q3EJNI.Setenv("ALSOFT_DRIVERS", openalDriver, 1);
 
         boolean res = Q3EJNI.init(
                 engineLib,

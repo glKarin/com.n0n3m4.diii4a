@@ -1,1655 +1,1323 @@
-// copy from framework/DeclParticle
+﻿/*
+===========================================================================
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+QUAKE 4 BSE CODE RECREATION EFFORT - (c) 2025 by Justin Marshall(IceColdDuke).
+
+QUAKE 4 BSE CODE RECREATION EFFORT is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+QUAKE 4 BSE CODE RECREATION EFFORT is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with QUAKE 4 BSE CODE RECREATION EFFORT.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the QUAKE 4 BSE CODE RECREATION EFFORT is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
 
 #include "BSE.h"
-#include "../../renderer/Model.h"
-struct ParticleParmDesc {
-	const char *name;
-	int count;
-	const char *desc;
-};
 
-const ParticleParmDesc ParticleDistributionDesc[] = {
-	{ "rect", 3, "" },
-	{ "cylinder", 4, "" },
-	{ "sphere", 3, "" }
-};
+#include "BSE_Compat.h"
 
-const ParticleParmDesc ParticleDirectionDesc[] = {
-	{ "cone", 1, "" },
-	{ "outward", 1, "" },
-};
+// ---------------------------------------------------------------------------
+//  helper constants / macros
+// ---------------------------------------------------------------------------
+static const float LOG2E = 1.4426950408889634f;   // 1 / ln(2)
 
-const ParticleParmDesc ParticleOrientationDesc[] = {
-	{ "view", 0, "" },
-	{ "aimed", 2, "" },
-	{ "x", 0, "" },
-	{ "y", 0, "" },
-	{ "z", 0, "" }
-};
-
-const ParticleParmDesc ParticleCustomDesc[] = {
-	{ "standard", 0, "Standard" },
-	{ "helix", 5, "sizeX Y Z radialSpeed axialSpeed" },
-	{ "flies", 3, "radialSpeed axialSpeed size" },
-	{ "orbit", 2, "radius speed"},
-	{ "drip", 2, "something something" }
-};
-
-const int CustomParticleCount = sizeof(ParticleCustomDesc) / sizeof(const ParticleParmDesc);
-
-/*
-=================
-rvBSEParticle::Size
-=================
-*/
-size_t rvBSEParticle::Size(void) const
+// ---------------------------------------------------------------------------
+//  rvParticle :: Attenuate  (vec2 envelope)
+// ---------------------------------------------------------------------------
+void rvParticle::Attenuate(float               atten,
+    const rvParticleParms& parms,
+    rvEnvParms1& env)
 {
-	return sizeof(rvBSEParticle);
+    if (!(parms.mFlags & PF_ATTENUATE)) {
+        return;
+    }
+
+    const float s = (parms.mFlags & PF_INVERT_ATTEN) ? (1.0f - atten) : atten;
+
+    env.mStart *= s;
+    env.mEnd *= s;
+    // Note: original code did not touch env.mRate
 }
 
-/*
-=====================
-rvBSEParticle::GetStageBounds
-=====================
-*/
-void rvBSEParticle::GetStageBounds(rvBSEParticleStage *stage)
+// ---------------------------------------------------------------------------
+//  rvParticle :: Attenuate  (vec2 envelope, no rate)
+// ---------------------------------------------------------------------------
+void rvParticle::Attenuate(float               atten,
+    const rvParticleParms& parms,
+    rvEnvParms2& env)
 {
+    if (!(parms.mFlags & PF_ATTENUATE)) {
+        return;
+    }
 
-	stage->bounds.Clear();
+    const float s = (parms.mFlags & PF_INVERT_ATTEN) ? (1.0f - atten) : atten;
 
-	// this isn't absolutely guaranteed, but it should be close
-
-	rvBSE_particleGen_t g;
-
-	renderEntity_t	renderEntity;
-	memset(&renderEntity, 0, sizeof(renderEntity));
-	renderEntity.axis = mat3_identity;
-
-	renderView_t	renderView;
-	memset(&renderView, 0, sizeof(renderView));
-	renderView.viewaxis = mat3_identity;
-
-	g.renderEnt = &renderEntity;
-	g.renderView = &renderView;
-	g.origin.Zero();
-	g.axis = mat3_identity;
-
-	idRandom	steppingRandom;
-	steppingRandom.SetSeed(0);
-
-	// just step through a lot of possible particles as a representative sampling
-	for (int i = 0 ; i < 1000 ; i++) {
-		g.random = g.originalRandom = steppingRandom;
-
-		int	maxMsec = stage->particleLife * 1000;
-
-		for (int inCycleTime = 0 ; inCycleTime < maxMsec ; inCycleTime += 16) {
-
-			// make sure we get the very last tic, which may make up an extreme edge
-			if (inCycleTime + 16 > maxMsec) {
-				inCycleTime = maxMsec - 1;
-			}
-
-			g.frac = (float)inCycleTime / (stage->particleLife * 1000);
-			g.age = inCycleTime * 0.001f;
-
-			// if the particle doesn't get drawn because it is faded out or beyond a kill region,
-			// don't increment the verts
-
-			idVec3	origin;
-			stage->ParticleOrigin(&g, origin);
-			stage->bounds.AddPoint(origin);
-		}
-	}
-
-	// find the max size
-	float	maxSize = 0;
-
-	for (float f = 0; f <= 1.0f; f += 1.0f / 64) {
-		float size = stage->size.Eval(f, steppingRandom);
-		float aspect = stage->aspect.Eval(f, steppingRandom);
-
-		if (aspect > 1) {
-			size *= aspect;
-		}
-
-		if (size > maxSize) {
-			maxSize = size;
-		}
-	}
-
-	maxSize += 8;	// just for good measure
-	// users can specify a per-stage bounds expansion to handle odd cases
-	stage->bounds.ExpandSelf(maxSize + stage->boundsExpansion);
+    env.mStart *= s;
+    env.mEnd *= s;
 }
 
-/*
-================
-rvBSEParticle::ParseParms
-
-Parses a variable length list of parms on one line
-================
-*/
-void rvBSEParticle::ParseParms(idLexer &src, float *parms, int maxParms)
+// ---------------------------------------------------------------------------
+//  rvParticle :: Attenuate  (vec3 envelope)
+// ---------------------------------------------------------------------------
+void rvParticle::Attenuate(float               atten,
+    const rvParticleParms& parms,
+    rvEnvParms3& env)
 {
-	idToken token;
-	bool neg = false;
+    if (!(parms.mFlags & PF_ATTENUATE)) {
+        return;
+    }
 
-	memset(parms, 0, maxParms * sizeof(*parms));
-	int	count = 0;
+    const float s = (parms.mFlags & PF_INVERT_ATTEN) ? (1.0f - atten) : atten;
 
-	while (1) {
-		if (!src.ReadTokenOnLine(&token)) {
-			return;
-		}
-
-		if(!idStr::Cmp(token, "-"))
-		{
-			neg = !neg;
-			continue;
-		}
-		if (count == maxParms) {
-			src.Error("too many parms on line");
-			return;
-		}
-
-		token.StripQuotes();
-		parms[count] = atof(token);
-		if(neg)
-			parms[count] = -parms[count];
-		neg = false;
-		count++;
-	}
+    env.mStart *= s;
+    env.mEnd *= s;
 }
 
-/*
-================
-rvBSEParticle::ParseParametric
-================
-*/
-void rvBSEParticle::ParseParametric(idLexer &src, rvBSEParticleParm *parm)
+// ---------------------------------------------------------------------------
+//  rvLineParticle :: HandleTiling
+// ---------------------------------------------------------------------------
+void rvLineParticle::HandleTiling(const rvParticleTemplate* pt)
 {
-	idToken token;
+    if (!(mFlags & PF_TILING_LENGTH)) {
+        return;
+    }
 
-	parm->table = NULL;
-	parm->from = parm->to = 0.0f;
-
-	if (!src.ReadToken(&token)) {
-		src.Error("not enough parameters");
-		return;
-	}
-
-	if (token.IsNumeric()) {
-		// can have a to + 2nd parm
-		parm->from = parm->to = atof(token);
-
-		if (src.ReadToken(&token)) {
-			if (!token.Icmp("to")) {
-				if (!src.ReadToken(&token)) {
-					src.Error("missing second parameter");
-					return;
-				}
-
-				parm->to = atof(token);
-			} else {
-				src.UnreadToken(&token);
-			}
-		}
-	} else {
-		// table
-		parm->table = static_cast<const idDeclTable *>(declManager->FindType(DECL_TABLE, token, false));
-	}
-
+    const idVec3 len(GetInitLength()[0], GetInitLength()[1], GetInitLength()[2]);
+    mTextureScale = len.LengthFast() / pt->mTiling;
 }
 
-/*
-================
-rvBSEParticle::ParseParticleStage
-================
-*/
-rvBSEParticleStage *rvBSEParticle::ParseParticleStage(idLexer &src)
+// ---------------------------------------------------------------------------
+//  rvLinkedParticle :: HandleTiling
+// ---------------------------------------------------------------------------
+void rvLinkedParticle::HandleTiling(const rvParticleTemplate* pt)
 {
-	idToken token;
-
-	rvBSEParticleStage *stage = new rvBSEParticleStage;
-	stage->Default();
-
-	while (1) {
-		if (src.HadError()) {
-			break;
-		}
-
-		if (!src.ReadToken(&token)) {
-			break;
-		}
-
-		if (!token.Icmp("}")) {
-			break;
-		}
-
-		if (!token.Icmp("material")) {
-			src.ReadToken(&token);
-			stage->material = declManager->FindMaterial(token.c_str());
-			continue;
-		}
-
-		if (!token.Icmp("count")) {
-			stage->totalParticles = src.ParseInt();
-			continue;
-		}
-
-		if (!token.Icmp("time")) {
-			stage->particleLife = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("cycles")) {
-			stage->cycles = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("timeOffset")) {
-			stage->timeOffset = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("deadTime")) {
-			stage->deadTime = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("randomDistribution")) {
-			stage->randomDistribution = src.ParseBool();
-			continue;
-		}
-
-		if (!token.Icmp("bunching")) {
-			stage->spawnBunching = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("distribution")) {
-			src.ReadToken(&token);
-
-			if (!token.Icmp("rect")) {
-				stage->distributionType = PDIST_RECT;
-			} else if (!token.Icmp("cylinder")) {
-				stage->distributionType = PDIST_CYLINDER;
-			} else if (!token.Icmp("sphere")) {
-				stage->distributionType = PDIST_SPHERE;
-			} else {
-				src.Error("bad distribution type: %s\n", token.c_str());
-			}
-
-			ParseParms(src, stage->distributionParms, sizeof(stage->distributionParms) / sizeof(stage->distributionParms[0]));
-			continue;
-		}
-
-		if (!token.Icmp("direction")) {
-			src.ReadToken(&token);
-
-			if (!token.Icmp("cone")) {
-				stage->directionType = PDIR_CONE;
-			} else if (!token.Icmp("outward")) {
-				stage->directionType = PDIR_OUTWARD;
-			} else {
-				src.Error("bad direction type: %s\n", token.c_str());
-			}
-
-			ParseParms(src, stage->directionParms, sizeof(stage->directionParms) / sizeof(stage->directionParms[0]));
-			continue;
-		}
-
-		if (!token.Icmp("orientation")) {
-			src.ReadToken(&token);
-
-			if (!token.Icmp("view")) {
-				stage->orientation = POR_VIEW;
-			} else if (!token.Icmp("aimed")) {
-				stage->orientation = POR_AIMED;
-			} else if (!token.Icmp("x")) {
-				stage->orientation = POR_X;
-			} else if (!token.Icmp("y")) {
-				stage->orientation = POR_Y;
-			} else if (!token.Icmp("z")) {
-				stage->orientation = POR_Z;
-			} else {
-				src.Error("bad orientation type: %s\n", token.c_str());
-			}
-
-			ParseParms(src, stage->orientationParms, sizeof(stage->orientationParms) / sizeof(stage->orientationParms[0]));
-			continue;
-		}
-
-		if (!token.Icmp("customPath")) {
-			src.ReadToken(&token);
-
-			if (!token.Icmp("standard")) {
-				stage->customPathType = PPATH_STANDARD;
-			} else if (!token.Icmp("helix")) {
-				stage->customPathType = PPATH_HELIX;
-			} else if (!token.Icmp("flies")) {
-				stage->customPathType = PPATH_FLIES;
-			} else if (!token.Icmp("spherical")) {
-				stage->customPathType = PPATH_ORBIT;
-			} else {
-				src.Error("bad path type: %s\n", token.c_str());
-			}
-
-			ParseParms(src, stage->customPathParms, sizeof(stage->customPathParms) / sizeof(stage->customPathParms[0]));
-			continue;
-		}
-
-		if (!token.Icmp("speed")) {
-			ParseParametric(src, &stage->speed);
-			continue;
-		}
-
-		if (!token.Icmp("rotation")) {
-			ParseParametric(src, &stage->rotationSpeed);
-			continue;
-		}
-
-		if (!token.Icmp("angle")) {
-			stage->initialAngle = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("entityColor")) {
-			stage->entityColor = src.ParseBool();
-			continue;
-		}
-
-		if (!token.Icmp("size")) {
-			ParseParametric(src, &stage->size);
-			continue;
-		}
-
-		if (!token.Icmp("aspect")) {
-			ParseParametric(src, &stage->aspect);
-			continue;
-		}
-
-		if (!token.Icmp("fadeIn")) {
-			stage->fadeInFraction = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("fadeOut")) {
-			stage->fadeOutFraction = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("fadeIndex")) {
-			stage->fadeIndexFraction = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("color")) {
-			stage->color[0] = src.ParseFloat();
-			stage->color[1] = src.ParseFloat();
-			stage->color[2] = src.ParseFloat();
-			stage->color[3] = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("fadeColor")) {
-			stage->fadeColor[0] = src.ParseFloat();
-			stage->fadeColor[1] = src.ParseFloat();
-			stage->fadeColor[2] = src.ParseFloat();
-			stage->fadeColor[3] = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("offset")) {
-			stage->offset[0] = src.ParseFloat();
-			stage->offset[1] = src.ParseFloat();
-			stage->offset[2] = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("animationFrames")) {
-			stage->animationFrames = src.ParseInt();
-			continue;
-		}
-
-		if (!token.Icmp("animationRate")) {
-			stage->animationRate = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("boundsExpansion")) {
-			stage->boundsExpansion = src.ParseFloat();
-			continue;
-		}
-
-		if (!token.Icmp("gravity")) {
-			src.ReadToken(&token);
-
-			if (!token.Icmp("world")) {
-				stage->worldGravity = true;
-			} else {
-				src.UnreadToken(&token);
-			}
-
-			stage->gravity = src.ParseFloat();
-			continue;
-		}
-
-		src.Error("unknown token %s\n", token.c_str());
-	}
-
-	// derive values
-	stage->cycleMsec = (stage->particleLife + stage->deadTime) * 1000;
-
-	return stage;
+    if (mFlags & PF_TILING_LENGTH) {
+        mTextureScale = pt->mTiling;
+    }
 }
 
-/*
-================
-rvBSEParticle::Parse
-================
-*/
-bool rvBSEParticle::Parse(const char *text, const int textLength, bool noCaching)
+// ---------------------------------------------------------------------------
+//  GetArrayEntry helpers – trivial contiguous-pool accessors
+// ---------------------------------------------------------------------------
+#define DEFINE_ARRAY_ENTRY( TYPE )                              \
+    TYPE* TYPE::GetArrayEntry( int i ) const {                  \
+        return ( i < 0 ) ? NULL : const_cast<TYPE*>( this ) + i; \
+    }
+
+#define DEFINE_ARRAY_INDEX( TYPE )                              \
+    int TYPE::GetArrayIndex( rvParticle* p ) const {            \
+        if ( !p )                                               \
+            return -1;                                          \
+        ptrdiff_t diff = reinterpret_cast< const uint8_t* >( p ) \
+                       - reinterpret_cast< const uint8_t* >( this ); \
+        return static_cast<int>( diff / sizeof( TYPE ) );       \
+    }
+
+DEFINE_ARRAY_ENTRY(rvLineParticle)
+DEFINE_ARRAY_INDEX(rvLineParticle)
+
+DEFINE_ARRAY_ENTRY(rvOrientedParticle)
+DEFINE_ARRAY_INDEX(rvOrientedParticle)
+
+DEFINE_ARRAY_ENTRY(rvElectricityParticle)
+DEFINE_ARRAY_INDEX(rvElectricityParticle)
+
+DEFINE_ARRAY_ENTRY(rvDecalParticle)
+DEFINE_ARRAY_INDEX(rvDecalParticle)
+
+DEFINE_ARRAY_ENTRY(rvLightParticle)
+DEFINE_ARRAY_INDEX(rvLightParticle)
+
+DEFINE_ARRAY_ENTRY(rvLinkedParticle)
+DEFINE_ARRAY_INDEX(rvLinkedParticle)
+
+DEFINE_ARRAY_ENTRY(rvDebrisParticle)
+DEFINE_ARRAY_INDEX(rvDebrisParticle)
+
+// ---------------------------------------------------------------------------
+//  rvParticle :: EvaluateVelocity
+// ---------------------------------------------------------------------------
+void rvParticle::EvaluateVelocity(const rvBSE* /*effect*/, idVec3& out, float time) const
 {
-	idLexer src;
-	idToken	token;
+    // simple “constant direction” flag
+    if (mFlags & PF_DIRECTIONAL) {
+        out.Set(1.0f, 0.0f, 0.0f);
+        return;
+    }
 
-	src.LoadMemory(text, textLength, GetFileName(), GetLineNum());
-	src.SetFlags(DECL_LEXER_FLAGS);
-	src.SkipUntilString("{");
+    // base linear components
+    out = mVelocity + mAcceleration * time;
 
-	depthHack = 0.0f;
+    // lifespan-scaled friction term
+    const float life = mEndTime - mStartTime;
+    if (life <= 0.0f) {
+        return;
+    }
 
-	while (1) {
-		if (!src.ReadToken(&token)) {
-			break;
-		}
+    const float expArg = ((life - time) / life) * LOG2E;
+    const float expTerm = idMath::Pow(2.0f, expArg);       // 2^(expArg)
+    const float frictionScalar = (expTerm * (1.0f - time * 0.33333334f) + 1.0f)
+        * 0.5f * time * time;
 
-		if (!token.Icmp("}")) {
-			break;
-		}
-
-		if (!token.Icmp("{")) {
-			rvBSEParticleStage *stage = ParseParticleStage(src);
-
-			if (!stage) {
-				src.Warning("Particle stage parse failed");
-				MakeDefault();
-				return false;
-			}
-
-			stages.Append(stage);
-			continue;
-		}
-
-		if (!token.Icmp("depthHack")) {
-			depthHack = src.ParseFloat();
-			continue;
-		}
-
-
-		src.Warning("bad token %s", token.c_str());
-		MakeDefault();
-		return false;
-	}
-
-	//
-	// calculate the bounds
-	//
-	bounds.Clear();
-
-	for (int i = 0; i < stages.Num(); i++) {
-		GetStageBounds(stages[i]);
-		bounds.AddBounds(stages[i]->bounds);
-	}
-
-	if (bounds.GetVolume() <= 0.1f) {
-		bounds = idBounds(vec3_origin).Expand(8.0f);
-	}
-
-	return true;
+    out += mFriction * frictionScalar;
 }
 
-/*
-================
-rvBSEParticle::FreeData
-================
-*/
-void rvBSEParticle::FreeData(void)
+// ===========================================================================
+//  Spawn-position helpers
+// ===========================================================================
+
+
+
+// ---------------------------------------------------------------------------
+//  rvParticle :: SetOriginUsingEndOrigin   (internal helper)
+// ---------------------------------------------------------------------------
+void rvParticle::SetOriginUsingEndOrigin(rvBSE* effect,const rvParticleTemplate* pt, idVec3* normal, const idVec3* centre)
 {
-	stages.DeleteContents(true);
-}
-
-/*
-================
-rvBSEParticle::DefaultDefinition
-================
-*/
-const char *rvBSEParticle::DefaultDefinition(void) const
-{
-	return
-	        "{\n"
-	        "\t"	"{\n"
-	        "\t\t"		"material\t_default\n"
-	        "\t\t"		"count\t20\n"
-	        "\t\t"		"time\t\t1.0\n"
-	        "\t"	"}\n"
-	        "}";
-}
-
-/*
-================
-rvBSEParticle::WriteParticleParm
-================
-*/
-void rvBSEParticle::WriteParticleParm(idFile *f, rvBSEParticleParm *parm, const char *name)
-{
-
-	f->WriteFloatString("\t\t%s\t\t\t\t ", name);
-
-	if (parm->table) {
-		f->WriteFloatString("%s\n", parm->table->GetName());
-	} else {
-		f->WriteFloatString("\"%.3f\" ", parm->from);
-
-		if (parm->from == parm->to) {
-			f->WriteFloatString("\n");
-		} else {
-			f->WriteFloatString(" to \"%.3f\"\n", parm->to);
-		}
-	}
-}
-
-/*
-================
-rvBSEParticle::WriteStage
-================
-*/
-void rvBSEParticle::WriteStage(idFile *f, rvBSEParticleStage *stage)
-{
-
-	int i;
-
-	f->WriteFloatString("\t{\n");
-	f->WriteFloatString("\t\tcount\t\t\t\t%i\n", stage->totalParticles);
-	f->WriteFloatString("\t\tmaterial\t\t\t%s\n", stage->material->GetName());
-
-	if (stage->animationFrames) {
-		f->WriteFloatString("\t\tanimationFrames \t%i\n", stage->animationFrames);
-	}
-
-	if (stage->animationRate) {
-		f->WriteFloatString("\t\tanimationRate \t\t%.3f\n", stage->animationRate);
-	}
-
-	f->WriteFloatString("\t\ttime\t\t\t\t%.3f\n", stage->particleLife);
-	f->WriteFloatString("\t\tcycles\t\t\t\t%.3f\n", stage->cycles);
-
-	if (stage->timeOffset) {
-		f->WriteFloatString("\t\ttimeOffset\t\t\t%.3f\n", stage->timeOffset);
-	}
-
-	if (stage->deadTime) {
-		f->WriteFloatString("\t\tdeadTime\t\t\t%.3f\n", stage->deadTime);
-	}
-
-	f->WriteFloatString("\t\tbunching\t\t\t%.3f\n", stage->spawnBunching);
-
-	f->WriteFloatString("\t\tdistribution\t\t%s ", ParticleDistributionDesc[stage->distributionType].name);
-
-	for (i = 0; i < ParticleDistributionDesc[stage->distributionType].count; i++) {
-		f->WriteFloatString("%.3f ", stage->distributionParms[i]);
-	}
-
-	f->WriteFloatString("\n");
-
-	f->WriteFloatString("\t\tdirection\t\t\t%s ", ParticleDirectionDesc[stage->directionType].name);
-
-	for (i = 0; i < ParticleDirectionDesc[stage->directionType].count; i++) {
-		f->WriteFloatString("\"%.3f\" ", stage->directionParms[i]);
-	}
-
-	f->WriteFloatString("\n");
-
-	f->WriteFloatString("\t\torientation\t\t\t%s ", ParticleOrientationDesc[stage->orientation].name);
-
-	for (i = 0; i < ParticleOrientationDesc[stage->orientation].count; i++) {
-		f->WriteFloatString("%.3f ", stage->orientationParms[i]);
-	}
-
-	f->WriteFloatString("\n");
-
-	if (stage->customPathType != PPATH_STANDARD) {
-		f->WriteFloatString("\t\tcustomPath %s ", ParticleCustomDesc[stage->customPathType].name);
-
-		for (i = 0; i < ParticleCustomDesc[stage->customPathType].count; i++) {
-			f->WriteFloatString("%.3f ", stage->customPathParms[i]);
-		}
-
-		f->WriteFloatString("\n");
-	}
-
-	if (stage->entityColor) {
-		f->WriteFloatString("\t\tentityColor\t\t\t1\n");
-	}
-
-	WriteParticleParm(f, &stage->speed, "speed");
-	WriteParticleParm(f, &stage->size, "size");
-	WriteParticleParm(f, &stage->aspect, "aspect");
-
-	if (stage->rotationSpeed.from) {
-		WriteParticleParm(f, &stage->rotationSpeed, "rotation");
-	}
-
-	if (stage->initialAngle) {
-		f->WriteFloatString("\t\tangle\t\t\t\t%.3f\n", stage->initialAngle);
-	}
-
-	f->WriteFloatString("\t\trandomDistribution\t\t\t\t%i\n", static_cast<int>(stage->randomDistribution));
-	f->WriteFloatString("\t\tboundsExpansion\t\t\t\t%.3f\n", stage->boundsExpansion);
-
-
-	f->WriteFloatString("\t\tfadeIn\t\t\t\t%.3f\n", stage->fadeInFraction);
-	f->WriteFloatString("\t\tfadeOut\t\t\t\t%.3f\n", stage->fadeOutFraction);
-	f->WriteFloatString("\t\tfadeIndex\t\t\t\t%.3f\n", stage->fadeIndexFraction);
-
-	f->WriteFloatString("\t\tcolor \t\t\t\t%.3f %.3f %.3f %.3f\n", stage->color.x, stage->color.y, stage->color.z, stage->color.w);
-	f->WriteFloatString("\t\tfadeColor \t\t\t%.3f %.3f %.3f %.3f\n", stage->fadeColor.x, stage->fadeColor.y, stage->fadeColor.z, stage->fadeColor.w);
-
-	f->WriteFloatString("\t\toffset \t\t\t\t%.3f %.3f %.3f\n", stage->offset.x, stage->offset.y, stage->offset.z);
-	f->WriteFloatString("\t\tgravity \t\t\t");
-
-	if (stage->worldGravity) {
-		f->WriteFloatString("world ");
-	}
-
-	f->WriteFloatString("%.3f\n", stage->gravity);
-	f->WriteFloatString("\t}\n");
-}
-
-/*
-================
-rvBSEParticle::RebuildTextSource
-================
-*/
-bool rvBSEParticle::RebuildTextSource(void)
-{
-	idFile_Memory f;
-
-	f.WriteFloatString("\n\n/*\n"
-	                   "\tGenerated by the Particle Editor.\n"
-	                   "\tTo use the particle editor, launch the game and type 'editParticles' on the console.\n"
-	                   "*/\n");
-
-	f.WriteFloatString("particle %s {\n", GetName());
-
-	if (depthHack) {
-		f.WriteFloatString("\tdepthHack\t%f\n", depthHack);
-	}
-
-	for (int i = 0; i < stages.Num(); i++) {
-		WriteStage(&f, stages[i]);
-	}
-
-	f.WriteFloatString("}");
-
-	SetText(f.GetDataPtr());
-
-	return true;
-}
-
-/*
-================
-rvBSEParticle::Save
-================
-*/
-bool rvBSEParticle::Save(const char *fileName)
-{
-	RebuildTextSource();
-
-	if (fileName) {
-		declManager->CreateNewDecl(DECL_PARTICLE, GetName(), fileName);
-	}
-
-	ReplaceSourceFileText();
-	return true;
-}
-
-/*
-====================================================================================
-
-rvBSEParticleParm
-
-====================================================================================
-*/
-
-float rvBSEParticleParm::Eval(float frac, idRandom &rand) const
-{
-	if (table) {
-		return table->TableLookup(frac);
-	}
-
-	return from + frac * (to - from);
-}
-
-float rvBSEParticleParm::Integrate(float frac, idRandom &rand) const
-{
-	if (table) {
-		common->Printf("rvBSEParticleParm::Integrate: can't integrate tables\n");
-		return 0;
-	}
-
-	return (from + frac * (to - from) * 0.5f) * frac;
-}
-
-/*
-====================================================================================
-
-rvBSEParticleStage
-
-====================================================================================
-*/
-
-/*
-================
-rvBSEParticleStage::rvBSEParticleStage
-================
-*/
-rvBSEParticleStage::rvBSEParticleStage(void)
-{
-	material = NULL;
-	totalParticles = 0;
-	cycles = 0.0f;
-	cycleMsec = 0;
-	spawnBunching = 0.0f;
-	particleLife = 0.0f;
-	timeOffset = 0.0f;
-	deadTime = 0.0f;
-	distributionType = PDIST_RECT;
-	distributionParms[0] = distributionParms[1] = distributionParms[2] = distributionParms[3] = 0.0f;
-	directionType = PDIR_CONE;
-	directionParms[0] = directionParms[1] = directionParms[2] = directionParms[3] = 0.0f;
-	// rvBSEParticleParm		speed;
-	gravity = 0.0f;
-	worldGravity = false;
-	customPathType = PPATH_STANDARD;
-	customPathParms[0] = customPathParms[1] = customPathParms[2] = customPathParms[3] = 0.0f;
-	customPathParms[4] = customPathParms[5] = customPathParms[6] = customPathParms[7] = 0.0f;
-	offset.Zero();
-	animationFrames = 0;
-	animationRate = 0.0f;
-	randomDistribution = true;
-	entityColor = false;
-	initialAngle = 0.0f;
-	// rvBSEParticleParm		rotationSpeed;
-	orientation = POR_VIEW;
-	orientationParms[0] = orientationParms[1] = orientationParms[2] = orientationParms[3] = 0.0f;
-	// rvBSEParticleParm		size
-	// rvBSEParticleParm		aspect
-	color.Zero();
-	fadeColor.Zero();
-	fadeInFraction = 0.0f;
-	fadeOutFraction = 0.0f;
-	fadeIndexFraction = 0.0f;
-	hidden = false;
-	boundsExpansion = 0.0f;
-	bounds.Clear();
-}
-
-/*
-================
-rvBSEParticleStage::Default
-
-Sets the stage to a default state
-================
-*/
-void rvBSEParticleStage::Default()
-{
-	material = declManager->FindMaterial("_default");
-	totalParticles = 100;
-	spawnBunching = 1.0f;
-	particleLife = 1.5f;
-	timeOffset = 0.0f;
-	deadTime = 0.0f;
-	distributionType = PDIST_RECT;
-	distributionParms[0] = 8.0f;
-	distributionParms[1] = 8.0f;
-	distributionParms[2] = 8.0f;
-	distributionParms[3] = 0.0f;
-	directionType = PDIR_CONE;
-	directionParms[0] = 90.0f;
-	directionParms[1] = 0.0f;
-	directionParms[2] = 0.0f;
-	directionParms[3] = 0.0f;
-	orientation = POR_VIEW;
-	orientationParms[0] = 0.0f;
-	orientationParms[1] = 0.0f;
-	orientationParms[2] = 0.0f;
-	orientationParms[3] = 0.0f;
-	speed.from = 150.0f;
-	speed.to = 150.0f;
-	speed.table = NULL;
-	gravity = 1.0f;
-	worldGravity = false;
-	customPathType = PPATH_STANDARD;
-	customPathParms[0] = 0.0f;
-	customPathParms[1] = 0.0f;
-	customPathParms[2] = 0.0f;
-	customPathParms[3] = 0.0f;
-	customPathParms[4] = 0.0f;
-	customPathParms[5] = 0.0f;
-	customPathParms[6] = 0.0f;
-	customPathParms[7] = 0.0f;
-	offset.Zero();
-	animationFrames = 0;
-	animationRate = 0.0f;
-	initialAngle = 0.0f;
-	rotationSpeed.from = 0.0f;
-	rotationSpeed.to = 0.0f;
-	rotationSpeed.table = NULL;
-	size.from = 4.0f;
-	size.to = 4.0f;
-	size.table = NULL;
-	aspect.from = 1.0f;
-	aspect.to = 1.0f;
-	aspect.table = NULL;
-	color.x = 1.0f;
-	color.y = 1.0f;
-	color.z = 1.0f;
-	color.w = 1.0f;
-    fadeColor.x = 0.0f;
-    fadeColor.y = 0.0f;
-    fadeColor.z = 0.0f;
-    fadeColor.w = 0.0f;
-#if 1
-    fadeInFraction = 0.0f;
-    fadeOutFraction = 0.0f;
+#if 1 //karin: position hasEndOrigin, I think is it //k??? TODO add
+    // reset position max range
+    rvParticleParms copy = pt->mSpawnPosition;
+    if(mFlags & PTF_SEGMENT_LOCKED)
+    {
+        idVec3 dis = effect->mCurrentEndOrigin - effect->mCurrentOrigin; // world
+        copy.mMaxs += effect->mCurrentAxisTransposed * dis; // local
+    }
+    else
+    {
+        idVec3 dis = effect->mOriginalEndOrigin - effect->mOriginalOrigin; // world
+        copy.mMaxs += effect->mOriginalAxis.Transpose() * dis; // local
+    }
+    idVec3 mInitPos2 = mInitPos;
+    rvParticleParms::spawnFunctions[pt->mSpawnPosition.mSpawnType](&mInitPos.x, copy, NULL, NULL);
+	copy.mMins.y = pt->mSpawnPosition.mMins.y;
+	copy.mMins.z = pt->mSpawnPosition.mMins.z;
+	copy.mMaxs.y = pt->mSpawnPosition.mMaxs.y;
+	copy.mMaxs.z = pt->mSpawnPosition.mMaxs.z;
+    rvParticleParms::spawnFunctions[pt->mSpawnPosition.mSpawnType](&mInitPos2.x, copy, normal, centre);
+    mInitPos.y = mInitPos2.y;
+    mInitPos.z = mInitPos2.z;
 #else
-	fadeInFraction = 0.1f;
-	fadeOutFraction = 0.25f;
+    // jmarshall: hex rays hates this so might be wrong
+    rvParticleParms::spawnFunctions[pt->mSpawnPosition.mSpawnType](&mInitPos.x, pt->mSpawnPosition, NULL, NULL);
+    idVec3 mInitPos2 = mInitPos;
+    mInitPos2.x = mInitPos.x;
+    rvParticleParms::spawnFunctions[pt->mSpawnPosition.mSpawnType](&mInitPos2.x, pt->mSpawnPosition, normal, centre);
 #endif
-	fadeIndexFraction = 0.0f;
-	boundsExpansion = 0.0f;
-	randomDistribution = true;
-	entityColor = false;
-	cycleMsec = (particleLife + deadTime) * 1000;
-
-    fade = false;
 }
 
-/*
-================
-rvBSEParticleStage::NumQuadsPerParticle
 
-includes trails and cross faded animations
-================
-*/
-int rvBSEParticleStage::NumQuadsPerParticle() const
+// ---------------------------------------------------------------------------
+//  local helper
+// ---------------------------------------------------------------------------
+#if 0 //k??? TODO unuse this
+static ID_INLINE void CallSpawnFunc(int index, const void* blob)
 {
-	int	count = 1;
-
-	if (orientation == POR_AIMED) {
-		int	trails = idMath::Ftoi(orientationParms[0]);
-		// each trail stage will add an extra quad
-		count *= (1 + trails);
-	}
-
-	// if we are doing strip-animation, we need to double the number and cross fade them
-	if (animationFrames > 1) {
-		count *= 2;
-	}
-
-	return count;
+    typedef void (*Fn)(const idCmdArgs*);
+    ((Fn)(*rvParticleParms::spawnFunctions[index]))(reinterpret_cast<const idCmdArgs*>(blob));
 }
-
-/*
-===============
-rvBSEParticleStage::ParticleOrigin
-===============
-*/
-void rvBSEParticleStage::ParticleOrigin(rvBSE_particleGen_t *g, idVec3 &origin) const
-{
-	origin.Zero();
-
-	if (customPathType == PPATH_STANDARD) {
-		//
-		// find intial origin distribution
-		//
-		float radiusSqr, angle1, angle2;
-
-		switch (distributionType) {
-			case PDIST_RECT: {	// ( sizeX sizeY sizeZ )
-				origin[0] = ((randomDistribution) ? g->random.CRandomFloat() : 1.0f) * distributionParms[0];
-				origin[1] = ((randomDistribution) ? g->random.CRandomFloat() : 1.0f) * distributionParms[1];
-				origin[2] = ((randomDistribution) ? g->random.CRandomFloat() : 1.0f) * distributionParms[2];
-				break;
-			}
-			case PDIST_CYLINDER: {	// ( sizeX sizeY sizeZ ringFraction )
-				angle1 = ((randomDistribution) ? g->random.CRandomFloat() : 1.0f) * idMath::TWO_PI;
-
-				idMath::SinCos16(angle1, origin[0], origin[1]);
-				origin[2] = ((randomDistribution) ? g->random.CRandomFloat() : 1.0f);
-
-				// reproject points that are inside the ringFraction to the outer band
-				if (distributionParms[3] > 0.0f) {
-					radiusSqr = origin[0] * origin[0] + origin[1] * origin[1];
-
-					if (radiusSqr < distributionParms[3] * distributionParms[3]) {
-						// if we are inside the inner reject zone, rescale to put it out into the good zone
-						float f = sqrt(radiusSqr) / distributionParms[3];
-						float invf = 1.0f / f;
-						float newRadius = distributionParms[3] + f * (1.0f - distributionParms[3]);
-						float rescale = invf * newRadius;
-
-						origin[0] *= rescale;
-						origin[1] *= rescale;
-					}
-				}
-
-				origin[0] *= distributionParms[0];
-				origin[1] *= distributionParms[1];
-				origin[2] *= distributionParms[2];
-				break;
-			}
-			case PDIST_SPHERE: {	// ( sizeX sizeY sizeZ ringFraction )
-				// iterating with rejection is the only way to get an even distribution over a sphere
-				if (randomDistribution) {
-					do {
-						origin[0] = g->random.CRandomFloat();
-						origin[1] = g->random.CRandomFloat();
-						origin[2] = g->random.CRandomFloat();
-						radiusSqr = origin[0] * origin[0] + origin[1] * origin[1] + origin[2] * origin[2];
-					} while (radiusSqr > 1.0f);
-				} else {
-					origin.Set(1.0f, 1.0f, 1.0f);
-					radiusSqr = 3.0f;
-				}
-
-				if (distributionParms[3] > 0.0f) {
-					// we could iterate until we got something that also satisfied ringFraction,
-					// but for narrow rings that could be a lot of work, so reproject inside points instead
-					if (radiusSqr < distributionParms[3] * distributionParms[3]) {
-						// if we are inside the inner reject zone, rescale to put it out into the good zone
-						float f = sqrt(radiusSqr) / distributionParms[3];
-						float invf = 1.0f / f;
-						float newRadius = distributionParms[3] + f * (1.0f - distributionParms[3]);
-						float rescale = invf * newRadius;
-
-						origin[0] *= rescale;
-						origin[1] *= rescale;
-						origin[2] *= rescale;
-					}
-				}
-
-				origin[0] *= distributionParms[0];
-				origin[1] *= distributionParms[1];
-				origin[2] *= distributionParms[2];
-				break;
-			}
-		}
-
-		// offset will effect all particle origin types
-		// add this before the velocity and gravity additions
-		origin += offset;
-
-		//
-		// add the velocity over time
-		//
-		idVec3	dir;
-
-		switch (directionType) {
-			case PDIR_CONE: {
-				// angle is the full angle, so 360 degrees is any spherical direction
-				angle1 = g->random.CRandomFloat() * directionParms[0] * idMath::M_DEG2RAD;
-				angle2 = g->random.CRandomFloat() * idMath::PI;
-
-				float s1, c1, s2, c2;
-				idMath::SinCos16(angle1, s1, c1);
-				idMath::SinCos16(angle2, s2, c2);
-
-				dir[0] = s1 * c2;
-				dir[1] = s1 * s2;
-				dir[2] = c1;
-				break;
-			}
-			case PDIR_OUTWARD: {
-				dir = origin;
-				dir.Normalize();
-				dir[2] += directionParms[0];
-				break;
-			}
-		}
-
-		// add speed
-		float iSpeed = speed.Integrate(g->frac, g->random);
-		origin += dir * iSpeed * particleLife;
-
-	} else {
-		//
-		// custom paths completely override both the origin and velocity calculations, but still
-		// use the standard gravity
-		//
-		float angle1, angle2, speed1, speed2;
-
-		switch (customPathType) {
-			case PPATH_HELIX: {		// ( sizeX sizeY sizeZ radialSpeed axialSpeed )
-				speed1 = g->random.CRandomFloat();
-				speed2 = g->random.CRandomFloat();
-				angle1 = g->random.RandomFloat() * idMath::TWO_PI + customPathParms[3] * speed1 * g->age;
-
-				float s1, c1;
-				idMath::SinCos16(angle1, s1, c1);
-
-				origin[0] = c1 * customPathParms[0];
-				origin[1] = s1 * customPathParms[1];
-				origin[2] = g->random.RandomFloat() * customPathParms[2] + customPathParms[4] * speed2 * g->age;
-				break;
-			}
-			case PPATH_FLIES: {		// ( radialSpeed axialSpeed size )
-				speed1 = idMath::ClampFloat(0.4f, 1.0f, g->random.CRandomFloat());
-				speed2 = idMath::ClampFloat(0.4f, 1.0f, g->random.CRandomFloat());
-				angle1 = g->random.RandomFloat() * idMath::PI * 2 + customPathParms[0] * speed1 * g->age;
-				angle2 = g->random.RandomFloat() * idMath::PI * 2 + customPathParms[1] * speed1 * g->age;
-
-				float s1, c1, s2, c2;
-				idMath::SinCos16(angle1, s1, c1);
-				idMath::SinCos16(angle2, s2, c2);
-
-				origin[0] = c1 * c2;
-				origin[1] = s1 * c2;
-				origin[2] = -s2;
-				origin *= customPathParms[2];
-				break;
-			}
-			case PPATH_ORBIT: {		// ( radius speed axis )
-				angle1 = g->random.RandomFloat() * idMath::TWO_PI + customPathParms[1] * g->age;
-
-				float s1, c1;
-				idMath::SinCos16(angle1, s1, c1);
-
-				origin[0] = c1 * customPathParms[0];
-				origin[1] = s1 * customPathParms[0];
-				origin.ProjectSelfOntoSphere(customPathParms[0]);
-				break;
-			}
-			case PPATH_DRIP: {		// ( speed )
-				origin[0] = 0.0f;
-				origin[1] = 0.0f;
-				origin[2] = -(g->age * customPathParms[0]);
-				break;
-			}
-			default: {
-				common->Error("rvBSEParticleStage::ParticleOrigin: bad customPathType");
-			}
-		}
-
-		origin += offset;
-	}
-
-	// adjust for the per-particle smoke offset
-	origin *= g->axis;
-	origin += g->origin;
-
-	// add gravity after adjusting for axis
-	if (worldGravity) {
-		idVec3 gra(0, 0, -gravity);
-		gra *= g->renderEnt->axis.Transpose();
-		origin += gra * g->age * g->age;
-	} else {
-		origin[2] -= gravity * g->age * g->age;
-	}
-}
-
-/*
-==================
-rvBSEParticleStage::ParticleVerts
-==================
-*/
-extern void R_AxisToModelMatrix(const idMat3 &axis, const idVec3 &origin, float modelMatrix[16]);
-extern void R_GlobalPointToLocal(const float modelMatrix[16], const idVec3 &in, idVec3 &out);
-void R_LocalPointToGlobal(const float modelMatrix[16], const idVec3 &in, idVec3 &out);
-
-static int ParticleVerts_line(const rvBSEParticleStage *stage, rvBSE_particleGen_t *g, idVec3 origin, idDrawVert *verts)
-{
-	bool useEndOrigin = stage->customPathParms[6] < 1.0f;
-
-	float	modelMatrix[16];
-
-	if(useEndOrigin)
-	{
-		idVec3	localView, localTarget;
-		R_AxisToModelMatrix(g->renderEnt->axis, g->renderEnt->origin, modelMatrix);
-		idVec3 target = idVec3(g->renderEnt->shaderParms[SHADERPARM_BEAM_WIDTH], g->renderEnt->shaderParms[SHADERPARM_BEAM_END_Y], g->renderEnt->shaderParms[SHADERPARM_BEAM_END_Z]);
-		R_GlobalPointToLocal(modelMatrix, g->renderView->vieworg, localView);
-		R_GlobalPointToLocal(modelMatrix, target, localTarget);
-
-		idVec3	major = localTarget;
-		idVec3	minor;
-
-		idVec3	mid = 0.5f * localTarget;
-		idVec3	dir = mid - localView;
-		minor.Cross(major, dir);
-		minor.Normalize();
-
-		if (stage->customPathParms[5] != 0.0f) {
-			minor *= stage->customPathParms[5] * 0.5f;
-		}
-
-		verts[0].xyz = minor;
-		verts[1].xyz = localTarget + minor;
-		verts[2].xyz = -minor;
-		verts[3].xyz = localTarget - minor;
-	}
-	else
-	{
-		idVec3	localView, localTarget;
-		idVec3 target = origin + g->renderEnt->axis[0] * stage->customPathParms[7];
-		R_AxisToModelMatrix(g->renderEnt->axis, origin, modelMatrix);
-		R_GlobalPointToLocal(modelMatrix, g->renderView->vieworg, localView);
-		R_GlobalPointToLocal(modelMatrix, target, localTarget);
-
-		idVec3	major = localTarget;
-		idVec3	minor;
-
-		idVec3	mid = 0.5f * localTarget;
-		idVec3	dir = mid - localView;
-		minor.Cross(major, dir);
-		minor.Normalize();
-
-		if (stage->customPathParms[5] != 0.0f) {
-			minor *= stage->customPathParms[5] * 0.5f;
-		}
-
-		verts[0].xyz = origin + minor;
-		verts[1].xyz = origin + localTarget + minor;
-		verts[2].xyz = origin - minor;
-		verts[3].xyz = origin + localTarget - minor;
-	}
-
-	return 4;
-}
-
-static int ParticleVerts_model(const rvBSEParticleStage *stage, rvBSE_particleGen_t *g, idVec3 origin, idDrawVert *verts)
-{
-	idRenderModel *model = stage->model;
-	if(!model)
-		return 0;
-	if(!model->NumSurfaces())
-		return 0;
-	const modelSurface_t *msurf = model->Surface(0);
-	if(!msurf)
-		return 0;
-
-	for(int i = 0; i < msurf->geometry->numVerts; i++)
-	{
-		idDrawVert *p = verts + i;
-		p->xyz = msurf->geometry->verts[i].xyz + origin;
-		p->st = msurf->geometry->verts[i].st;
-		p->color[0] = 255;
-		p->color[1] = 255;
-		p->color[2] = 255;
-		p->color[3] = 255;
-	}
-
-	return msurf->geometry->numVerts;
-}
-
-int	rvBSEParticleStage::ParticleVerts(rvBSE_particleGen_t *g, idVec3 origin, idDrawVert *verts) const
-{
-	if (rvptype == PTYPE_LINE)
-	{
-		return ParticleVerts_line(this, g, origin, verts);
-	}
-	else if (rvptype == PTYPE_MODEL)
-	{
-		return ParticleVerts_model(this, g, origin, verts);
-	}
-	float	psize = size.Eval(g->frac, g->random);
-	float	paspect = aspect.Eval(g->frac, g->random);
-
-	float	width = psize;
-	float	height = psize * paspect;
-
-	idVec3	left, up;
-
-	if (orientation == POR_AIMED) {
-		// reset the values to an earlier time to get a previous origin
-		idRandom	currentRandom = g->random;
-		float		currentAge = g->age;
-		float		currentFrac = g->frac;
-		idDrawVert *verts_p = verts;
-		idVec3		stepOrigin = origin;
-		idVec3		stepLeft;
-		int			numTrails = idMath::Ftoi(orientationParms[0]);
-		float		trailTime = orientationParms[1];
-
-		if (trailTime == 0) {
-			trailTime = 0.5f;
-		}
-
-		float height = 1.0f / (1 + numTrails);
-		float t = 0;
-
-		//LOGI("TTTTTTTT %d %f", numTrails, trailTime)
-		for (int i = 0 ; i <= numTrails ; i++) {
-			g->random = g->originalRandom;
-			g->age = currentAge - (i + 1) * trailTime / (numTrails + 1);	// time to back up
-			g->frac = g->age / particleLife;
-
-			idVec3	oldOrigin;
-			ParticleOrigin(g, oldOrigin);
-
-			up = stepOrigin - oldOrigin;	// along the direction of travel
-
-			idVec3	forwardDir;
-			g->renderEnt->axis.ProjectVector(g->renderView->viewaxis[0], forwardDir);
-
-			up -= (up * forwardDir) * forwardDir;
-
-			up.Normalize();
-
-
-			left = up.Cross(forwardDir);
-			left *= psize;
-
-			verts_p[0] = verts[0];
-			verts_p[1] = verts[1];
-			verts_p[2] = verts[2];
-			verts_p[3] = verts[3];
-
-			if (i == 0) {
-				verts_p[0].xyz = stepOrigin - left;
-				verts_p[1].xyz = stepOrigin + left;
-			} else {
-				verts_p[0].xyz = stepOrigin - stepLeft;
-				verts_p[1].xyz = stepOrigin + stepLeft;
-			}
-
-			verts_p[2].xyz = oldOrigin - left;
-			verts_p[3].xyz = oldOrigin + left;
-
-			// modify texcoords
-			verts_p[0].st[0] = verts[0].st[0];
-			verts_p[0].st[1] = t;
-
-			verts_p[1].st[0] = verts[1].st[0];
-			verts_p[1].st[1] = t;
-
-			verts_p[2].st[0] = verts[2].st[0];
-			verts_p[2].st[1] = t+height;
-
-			verts_p[3].st[0] = verts[3].st[0];
-			verts_p[3].st[1] = t+height;
-
-			//LOGI("TTTTT %f %f, %s | %s | %s | %s", speed.from, speed.to, verts_p[0].xyz.ToString(), verts_p[1].xyz.ToString(), verts_p[2].xyz.ToString(), verts_p[3].xyz.ToString())
-			t += height;
-
-			verts_p += 4;
-
-			stepOrigin = oldOrigin;
-			stepLeft = left;
-		}
-
-		g->random = currentRandom;
-		g->age = currentAge;
-		g->frac = currentFrac;
-
-		return 4 * (numTrails+1);
-	}
-
-	//
-	// constant rotation
-	//
-	float	angle;
-
-	angle = (initialAngle) ? initialAngle : 360 * g->random.RandomFloat();
-
-	float	angleMove = rotationSpeed.Integrate(g->frac, g->random) * particleLife;
-
-	// have hald the particles rotate each way
-	if (g->index & 1) {
-		angle += angleMove;
-	} else {
-		angle -= angleMove;
-	}
-
-	angle = angle / 180 * idMath::PI;
-	float c = idMath::Cos16(angle);
-	float s = idMath::Sin16(angle);
-
-	if (orientation  == POR_Z) {
-		// oriented in entity space
-		left[0] = s;
-		left[1] = c;
-		left[2] = 0;
-		up[0] = c;
-		up[1] = -s;
-		up[2] = 0;
-	} else if (orientation == POR_X) {
-		// oriented in entity space
-		left[0] = 0;
-		left[1] = c;
-		left[2] = s;
-		up[0] = 0;
-		up[1] = -s;
-		up[2] = c;
-	} else if (orientation == POR_Y) {
-		// oriented in entity space
-		left[0] = c;
-		left[1] = 0;
-		left[2] = s;
-		up[0] = -s;
-		up[1] = 0;
-		up[2] = c;
-	} else if (orientation == POR_DIR) {
-		// oriented in entity space
-		left[0] = orientationParms[2];
-		left[1] = c * orientationParms[0];
-		left[2] = s * orientationParms[1];
-		up[0] = orientationParms[2];
-		up[1] = -s * orientationParms[1];
-		up[2] = c * orientationParms[0];
-	} else {
-		// oriented in viewer space
-		idVec3	entityLeft, entityUp;
-
-		g->renderEnt->axis.ProjectVector(g->renderView->viewaxis[1], entityLeft);
-		g->renderEnt->axis.ProjectVector(g->renderView->viewaxis[2], entityUp);
-
-		left = entityLeft * c + entityUp * s;
-		up = entityUp * c - entityLeft * s;
-	}
-
-	left *= width;
-	up *= height;
-
-	verts[0].xyz = origin - left + up;
-	verts[1].xyz = origin + left + up;
-	verts[2].xyz = origin - left - up;
-	verts[3].xyz = origin + left - up;
-
-	return 4;
-}
-
-/*
-==================
-rvBSEParticleStage::ParticleTexCoords
-==================
-*/
-void rvBSEParticleStage::ParticleTexCoords(rvBSE_particleGen_t *g, idDrawVert *verts) const
-{
-	float	s, width;
-	float	t, height;
-
-	if (animationFrames > 1) {
-		width = 1.0f / animationFrames;
-		float	floatFrame;
-
-		if (animationRate) {
-			// explicit, cycling animation
-			floatFrame = g->age * animationRate;
-		} else {
-			// single animation cycle over the life of the particle
-			floatFrame = g->frac * animationFrames;
-		}
-
-		int	intFrame = (int)floatFrame;
-		g->animationFrameFrac = floatFrame - intFrame;
-		s = width * intFrame;
-	} else {
-		s = 0.0f;
-		width = 1.0f;
-	}
-
-	if(rvptype == PTYPE_MODEL)
-		return;
-	t = 0.0f;
-	height = 1.0f;
-
-	verts[0].st[0] = s;
-	verts[0].st[1] = t;
-
-	verts[1].st[0] = s+width;
-	verts[1].st[1] = t;
-
-	verts[2].st[0] = s;
-	verts[2].st[1] = t+height;
-
-	verts[3].st[0] = s+width;
-	verts[3].st[1] = t+height;
-}
-
-/*
-==================
-rvBSEParticleStage::ParticleColors
-==================
-*/
-void rvBSEParticleStage::ParticleColors(rvBSE_particleGen_t *g, idDrawVert *verts) const
-{
-	float	fadeFraction = fade ? g->frac : 1.0f;
-
-	// most particles fade in at the beginning and fade out at the end
-	if (g->frac < fadeInFraction) {
-		fadeFraction *= (g->frac / fadeInFraction);
-	}
-
-	if (1.0f - g->frac < fadeOutFraction) {
-		fadeFraction *= ((1.0f - g->frac) / fadeOutFraction);
-	}
-
-	// individual gun smoke particles get more and more faded as the
-	// cycle goes on (note that totalParticles won't be correct for a surface-particle deform)
-	if (fadeIndexFraction) {
-		float	indexFrac = (totalParticles - g->index) / (float)totalParticles;
-
-		if (indexFrac < fadeIndexFraction) {
-			fadeFraction *= indexFrac / fadeIndexFraction;
-		}
-	}
-
-	for (int i = 0 ; i < 4 ; i++) {
-#if 0
-		float	fcolor = ((entityColor) ? g->renderEnt->shaderParms[i] : color[i]) * fadeFraction + fadeColor[i] * (1.0f - fadeFraction);
-#else
-		float fcolor = (g->renderEnt->shaderParms[i] * color[i]) * fadeFraction + fadeColor[i] * (1.0f - fadeFraction);
 #endif
-		int		icolor = idMath::FtoiFast(fcolor * 255.0f);
 
-		if (icolor < 0) {
-			icolor = 0;
-		} else if (icolor > 255) {
-			icolor = 255;
-		}
-
-		verts[0].color[i] =
-		        verts[1].color[i] =
-		                verts[2].color[i] =
-		                        verts[3].color[i] = icolor;
-	}
+static ID_INLINE void CallSpawnFunc(int index, float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL)
+{
+    (*rvParticleParms::spawnFunctions[index])(out, p, n, c);
 }
 
-/*
-================
-rvBSEParticleStage::CreateParticle
-
-Returns 0 if no particle is created because it is completely faded out
-Returns 4 if a normal quad is created
-Returns 8 if two cross faded quads are created
-
-Vertex order is:
-
-0 1
-2 3
-================
-*/
-int rvBSEParticleStage::CreateParticle(rvBSE_particleGen_t *g, idDrawVert *verts) const
+static ID_INLINE void CallSpawnFunc(int index, idVec3* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL)
 {
-	idVec3	origin;
+    CallSpawnFunc(index, out->ToFloatPtr(), p, n, c);
+}
 
-	if(rvptype != PTYPE_MODEL)
-	{
-        verts[0].Clear();
-        verts[1].Clear();
-        verts[2].Clear();
-        verts[3].Clear();
+// ---------------------------------------------------------------------------
+//  rvParticle :: HandleEndOrigin
+// ---------------------------------------------------------------------------
+void rvParticle::HandleEndOrigin(rvBSE* effect,
+    const rvParticleTemplate* pt,
+    idVec3* normal,
+    const idVec3* centre)
+{
+    // preserve fraction in x (matches original semantics)
+    mInitPos.x = mFraction;
 
-        ParticleColors(g, verts);
+    const bool effectWants = (effect->mFlags & EF_USES_END_ORIGIN/* 2 */) != 0;
+    const bool spawnWants = (pt->mSpawnPosition.mFlags & PPF_USE_END_ORIGIN/* 2 */) != 0;
 
-        // if we are completely faded out, kill the particle
-        if (verts[0].color[0] == 0 && verts[0].color[1] == 0 && verts[0].color[2] == 0 && verts[0].color[3] == 0) {
-            return 0;
+    if (effectWants && spawnWants) {
+        SetOriginUsingEndOrigin(effect, pt, normal, centre);
+    }
+    else {
+        CallSpawnFunc(pt->mSpawnPosition.mSpawnType, &mInitPos, pt->mSpawnPosition, normal, centre);
+    }
+}
+
+// ===========================================================================
+//  rvParticle :: FinishSpawn
+// ===========================================================================
+void rvParticle::FinishSpawn(rvBSE* effect,
+    rvSegment* segment,
+    float              birthTime,
+    float              fraction,
+    const idVec3& initOffset,
+    const idMat3& initAxis)
+{
+    // ----------------------------------------------------------------------
+    //  1)  fetch the template that drives this segment / particle
+    // ----------------------------------------------------------------------
+    const rvSegmentTemplate* st = segment->GetSegmentTemplate();
+    if (!st) {
+        return;
+    }
+
+    const rvParticleTemplate& pt = st->mParticleTemplate;
+
+    // ----------------------------------------------------------------------
+    //  2)  copy template-level particle flags, add the “segment locked” bit
+    // ----------------------------------------------------------------------
+    mFlags = pt.mFlags;
+    if (segment->GetLocked()) {
+        mFlags |= PF_SEGMENT_LOCKED;
+    }
+    else {
+        mFlags &= ~PF_SEGMENT_LOCKED;
+    }
+
+    // ----------------------------------------------------------------------
+    //  3)  spawn initial kinematic parameters
+    // ----------------------------------------------------------------------
+    CallSpawnFunc(pt.mSpawnVelocity.mSpawnType, &mVelocity, pt.mSpawnVelocity); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mSpawnAcceleration.mSpawnType, &mAcceleration, pt.mSpawnAcceleration); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mSpawnFriction.mSpawnType, &mFriction, pt.mSpawnFriction); //k??? TODO should add particle template to parameter?
+
+    // misc bookkeeping
+    mFraction = fraction;
+    mTextureScale = 1.0f;
+
+    // ----------------------------------------------------------------------
+    //  4)  decide which “end-origin helpers” we need
+    // ----------------------------------------------------------------------
+    const bool wantsAlignNormal = (pt.mFlags & PTF_RELATIVE_NORMAL) != 0;
+    const bool wantsCentre = (pt.mFlags & PTF_ALIGN_TO_NORMAL) != 0;
+
+    const idVec3* centrePtr = NULL;
+    idVec3* normalPtr = NULL;
+
+    if (wantsAlignNormal) {
+        // normal is generated later – centre unused
+        normalPtr = &mNormal;
+    }
+    else if (wantsCentre) {
+        // centre provided by template, normal generated later
+        centrePtr = &pt.mCentre;
+        normalPtr = &mNormal;
+    }
+    else {
+        // optional explicit direction spawn
+        if (pt.mFlags & PTF_SPAWN_DIRECTION) {
+            CallSpawnFunc(pt.mSpawnDirection.mSpawnType, &mNormal, pt.mSpawnDirection);
         }
+        else {
+            mNormal.Set(1.0f, 0.0f, 0.0f);
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    //  5)  initial position handling (may depend on end-origin flags)
+    // ----------------------------------------------------------------------
+    HandleEndOrigin(effect, &pt, normalPtr, centrePtr);
+
+    // ----------------------------------------------------------------------
+    //  6)  optionally rotate velocity into the emitter’s local axis
+    // ----------------------------------------------------------------------
+    if (pt.mFlags & PTF_TRANSFORM_PARENT) {
+        mVelocity = initAxis * mVelocity;
+    }
+
+    rvAngles faceAngles = mNormal.ToRadians(); //k??? TODO calc here in Q4D // fix orient effect
+    // ----------------------------------------------------------------------
+    //  7)  if requested, align velocity / acceleration / friction so that
+    //      the template “forward” points along mNormal
+    // ----------------------------------------------------------------------
+    if (wantsAlignNormal || wantsCentre) {
+
+        //
+        // – ensure mNormal is unit-length
+        //
+        if (!mNormal.Compare(vec3_zero)) {
+            mNormal.Normalize(); //k??? TODO NormalizeFast
+        }
+
+        //
+        // – build an orientation matrix whose X-axis == mNormal and transform
+        //   the various vectors into that local space
+        //
+        idMat3 toLocal = mNormal.ToMat3();
+        mVelocity = toLocal * mVelocity;
+#if 1
+        TransformLength(mNormal);
+#else
+        TransformLength(*reinterpret_cast<int*>(&mNormal.x),
+            *reinterpret_cast<int*>(&mNormal.y),
+            *reinterpret_cast<int*>(&mNormal.z));
+#endif
+    }
+
+    // ----------------------------------------------------------------------
+    //  8)  “invert” flag  –  flip velocity & length
+    // ----------------------------------------------------------------------
+    if (pt.mFlags & PTF_INVERT_VELOCITY) {
+        mVelocity = -mVelocity;
+        ScaleLength(-1.0f);
+    }
+
+    // ----------------------------------------------------------------------
+    //  9)  choose a reasonable default facing direction
+    // ----------------------------------------------------------------------
+    if (!wantsAlignNormal && !wantsCentre) {
+        mNormal = mVelocity;
+        if (!mNormal.Compare(vec3_zero)) {
+            mNormal.Normalize(); //k??? TODO NormalizeFast
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // 10) transform acceleration / friction into the same local space
+    // ----------------------------------------------------------------------
+    {
+        idMat3 toLocal = mNormal.ToMat3();
+        mAcceleration = toLocal * mAcceleration;
+    }
+
+    if (!wantsAlignNormal && !wantsCentre) {
+        mNormal = mAcceleration;
+        if (!mNormal.Compare(vec3_zero)) {
+            mNormal.Normalize(); //k??? TODO NormalizeFast
+        }
+    }
+
+    {
+        idMat3 toLocal = mNormal.ToMat3();
+        mFriction = toLocal * mFriction;
+    }
+
+    // ----------------------------------------------------------------------
+    // 11)  copy current effect transform into the particle (unless locked)
+    // ----------------------------------------------------------------------
+    if (!(mFlags & PF_SEGMENT_LOCKED)) {
+        mInitAxis = effect->mCurrentAxis;
+        mInitEffectPos = effect->mCurrentOrigin;
+
+        // subtract the emitter’s current offset so particles keep cooking
+        idVec3 result;
+        const idVec3 offset = effect->GetInterpolatedOffset(&result/*//k??? TODO don't write mInitPos */, birthTime);
+        mInitPos -= mInitAxis * offset;
+    }
+
+    // ----------------------------------------------------------------------
+    // 12)  optionally add caller-supplied offset
+    // ----------------------------------------------------------------------
+    if (pt.mFlags & PTF_TRANSFORM_PARENT) {
+        mInitPos += initOffset;
+    }
+
+    // ----------------------------------------------------------------------
+    // 13)  spawn start / end envelopes
+    // ----------------------------------------------------------------------
+    CallSpawnFunc(pt.mSpawnTint.mSpawnType, &mTintEnv.mStart, pt.mSpawnTint); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mSpawnFade.mSpawnType, &mFadeEnv.mStart, pt.mSpawnFade); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mSpawnSize.mSpawnType, GetInitSize(), pt.mSpawnSize); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mSpawnRotate.mSpawnType, GetInitRotation(), pt.mSpawnRotate); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mSpawnAngle.mSpawnType, &mAngleEnv.mStart, pt.mSpawnAngle); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mSpawnOffset.mSpawnType, &mOffsetEnv.mStart, pt.mSpawnOffset); //k??? TODO should add particle template to parameter?
+
+    CallSpawnFunc(pt.mDeathTint.mSpawnType, &mTintEnv.mEnd, pt.mDeathTint); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mDeathFade.mSpawnType, &mFadeEnv.mEnd, pt.mDeathFade); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mDeathSize.mSpawnType, GetDestSize(), pt.mDeathSize); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mDeathRotate.mSpawnType, GetDestRotation(), pt.mDeathRotate); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mDeathAngle.mSpawnType, &mAngleEnv.mEnd, pt.mDeathAngle); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mDeathOffset.mSpawnType, &mOffsetEnv.mEnd, pt.mDeathOffset); //k??? TODO should add particle template to parameter?
+
+    //  Offsets that don’t stay in local space -> flag for update during run
+    if (pt.mSpawnOffset.mSpawnType != 3 || pt.mDeathOffset.mSpawnType != 3) {
+        mFlags |= 0x000004;      // “needs offset update” (original bit-3)
+    }
+
+    //  Handle “relative” death-vs-spawn parameter conversions
+    pt.mDeathTint.HandleRelativeParms(&mTintEnv.mEnd.x,
+        &mTintEnv.mStart.x, 3);
+    pt.mDeathFade.HandleRelativeParms(&mFadeEnv.mEnd,
+        &mFadeEnv.mStart, 1);
+
+    pt.mDeathSize.HandleRelativeParms(
+        GetDestSize(),
+        GetInitSize(),
+        pt.mNumSizeParms);
+
+    pt.mDeathRotate.HandleRelativeParms(
+        GetDestRotation(),
+        GetInitRotation(),
+        pt.mNumRotateParms);
+
+    pt.mDeathAngle.HandleRelativeParms(
+        &mAngleEnv.mEnd.x,
+        &mAngleEnv.mStart.x,
+        3);
+
+    pt.mDeathOffset.HandleRelativeParms(
+        &mOffsetEnv.mEnd.x,
+        &mOffsetEnv.mStart.x,
+        3);
+
+    // ----------------------------------------------------------------------
+    // 14)  scale rotation / angle from [0-1] to [0-2π]
+    // ----------------------------------------------------------------------
+    ScaleRotation(idMath::TWO_PI);
+    ScaleAngle(idMath::TWO_PI);
+
+    // ----------------------------------------------------------------------
+    // 15)  final orientation handling (templates can override)
+    // ----------------------------------------------------------------------
+    //k??? TODO Q4D not is rvAngles faceAngles = RvAngles(mNormal.ToAngles()); // fix orient effect
+    HandleOrientation(&faceAngles);
+
+    // ----------------------------------------------------------------------
+    // 16)  trail & model / electricity extras
+    // ----------------------------------------------------------------------
+    mTrailTime = rvRandom::flrand(pt.mTrailTime.x, pt.mTrailTime.y);
+    mTrailCount = pt.GetTrailCount();
+
+    SetModel(pt.mModelName.c_str());
+    SetupElectricity(&pt);
+
+    // ----------------------------------------------------------------------
+    // 17)  global attenuation & size scaling
+    // ----------------------------------------------------------------------
+    const float atten = effect->GetAttenuation(st);
+    AttenuateFade(atten, &pt.mSpawnFade);
+    AttenuateSize(atten, &pt.mSpawnSize);
+
+    // ----------------------------------------------------------------------
+    // 18)  lifespan  –  pick random duration inside range
+    // ----------------------------------------------------------------------
+    const float life = rvRandom::flrand(pt.mDuration.x, pt.mDuration.y);
+    mStartTime = birthTime;
+    mEndTime = birthTime + life;
+    mMotionStartTime = birthTime;
+    mLastTrailTime = birthTime;
+
+    // ----------------------------------------------------------------------
+    // 19)  initialise all per-particle envelopes
+    // ----------------------------------------------------------------------
+    mTintEnv.Init(pt.mTintEnvelope, life);
+    mFadeEnv.Init(pt.mFadeEnvelope, life);
+    InitSizeEnv(pt.mSizeEnvelope, life);
+    InitRotationEnv(pt.mRotateEnvelope, life);
+    mAngleEnv.Init(pt.mAngleEnvelope, life);
+    mOffsetEnv.Init(pt.mOffsetEnvelope, life);
+
+    // ----------------------------------------------------------------------
+    // 20)  gravity – template value scaled by emitter gravity vector
+    // ----------------------------------------------------------------------
+    const float gScale = rvRandom::flrand(pt.mGravity.x, pt.mGravity.y);
+    const idVec3 gWorld = effect->mGravity * gScale;          // local-space
+    const idVec3 gAccel = effect->mCurrentAxisTransposed * gWorld;
+    mAcceleration += gAccel;
+}
+
+// ============================================================================
+// rvDebrisParticle :: FinishSpawn
+// ----------------------------------------------------------------------------
+//  This override is simpler than the “general” particle path because debris
+//  particles are converted to *client-side moveable entities* as soon as
+//  they are spawned.  They never run an envelope update on the CPU side after
+//  the first frame, so a lot of usual book-keeping (size/fade/tint/offset)
+//  is skipped.
+//
+//  Steps
+//  -----
+//   1)  Early-out if the **bse_debris** switch is OFF or we are replaying a
+//       demo (because the server recorded the moveables already).
+//   2)  Spawn velocity, origin, normal – respecting the same “end-origin” and
+//       “align” flags used by regular particles.
+//   3)  Convert velocity / length into *local debris space* when required.
+//   4)  Add emitter-space gravity → local space acceleration.
+//   5)  Convert everything to absolute world coordinates.
+//   6)  Call **game->SpawnClientMoveable** with the template’s entityDef.
+// ----------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+void rvDebrisParticle::FinishSpawn(rvBSE* effect,
+    rvSegment* segment,
+    float              birthTime,
+    float              fraction,
+    const idVec3& initOffset,
+    const idMat3& initAxis)
+{
+    //--------------------------------------------------------------------------
+    // 0.  Debris system disabled? ( cvar + demo playback guard )
+    //--------------------------------------------------------------------------
+    if (!bse_debris.GetBool() || session->readDemo) {
+        return;
+    }
+
+    //--------------------------------------------------------------------------
+    // 1.  Fetch segment template and basic per-particle flags / velocity
+    //--------------------------------------------------------------------------
+    rvSegmentTemplate* st = (rvSegmentTemplate * )segment->GetSegmentTemplate();
+    if (!st) {
+        return;
+    }
+    rvParticleTemplate& pt = st->mParticleTemplate;
+
+    mFlags = pt.mFlags;
+    CallSpawnFunc(pt.mSpawnVelocity.mSpawnType, &mVelocity, pt.mSpawnVelocity); //k??? TODO should add particle template to parameter?
+
+    mFraction = fraction;
+    mTextureScale = 1.0f;
+
+    //--------------------------------------------------------------------------
+    // 2.  Spawn origin / normal  (honours ALIGN / RELATIVE flags)
+    //--------------------------------------------------------------------------
+    if (pt.mFlags & PTF_RELATIVE_NORMAL) {
+        HandleEndOrigin(effect, &pt, &mNormal, NULL);
+    }
+    else if (pt.mFlags & PTF_ALIGN_TO_NORMAL) {
+        HandleEndOrigin(effect, &pt, &mNormal, &pt.mCentre);
+    }
+    else {
+        HandleEndOrigin(effect, &pt, NULL, NULL);
+        mNormal.Set(1.f, 0.f, 0.f);          // default facing
+    }
+
+    //--------------------------------------------------------------------------
+    // 3.  When aligning to a normal, rotate velocity into that local frame
+    //--------------------------------------------------------------------------
+    const bool needLocal = (pt.mFlags & (PTF_ALIGN_TO_NORMAL | PTF_RELATIVE_NORMAL)) != 0;
+    if (needLocal) {
+        if (!mNormal.Compare(vec3_zero)) {
+            mNormal.Normalize(); //k??? TODO NormalizeFast
+        }
+        idMat3 toLocal = mNormal.ToMat3();
+        mVelocity = toLocal * mVelocity;
+
+        // length helpers are still used internally by the renderer
+#if 1
+        TransformLength(mNormal);
+#else
+        TransformLength(*reinterpret_cast<int*>(&mNormal.x),
+            *reinterpret_cast<int*>(&mNormal.y),
+            *reinterpret_cast<int*>(&mNormal.z));
+#endif
+    }
+
+    //--------------------------------------------------------------------------
+    // 4.  Optional “invert” – flip velocity + length
+    //--------------------------------------------------------------------------
+    if (pt.mFlags & PTF_INVERT_VELOCITY) {
+        mVelocity = -mVelocity;
+        ScaleLength(-1.0f);
+    }
+
+    //--------------------------------------------------------------------------
+    // 5.  Make sure mNormal is non-zero (fall back to velocity dir)
+    //--------------------------------------------------------------------------
+    if (mNormal.Compare(vec3_zero)) {
+        mNormal = mVelocity;
+        if (!mNormal.Compare(vec3_zero)) {
+            mNormal.Normalize(); //k??? NormalizeFast
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    // 6.  Debris never uses velocity-dependent friction
+    //--------------------------------------------------------------------------
+    mFriction.Zero();
+
+    //--------------------------------------------------------------------------
+    // 7.  Copy emitter transform into “init” members and subtract current
+    //     emitter offset so the world-space calculation below is correct.
+    //--------------------------------------------------------------------------
+    mInitAxis = effect->mCurrentAxis;
+    mInitEffectPos = effect->mCurrentOrigin;
+
+    idVec3 result;
+    idVec3 emitterOffset = effect->GetInterpolatedOffset(&result/* mInitPos */, birthTime);
+    mInitPos -= mInitAxis * emitterOffset;          // localise
+
+    //--------------------------------------------------------------------------
+    // 8.  Spawn initial / dest rotation, scale them to ±π
+    //--------------------------------------------------------------------------
+    CallSpawnFunc(pt.mSpawnRotate.mSpawnType, GetInitRotation(), pt.mSpawnRotate); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mSpawnAngle.mSpawnType, &mAngleEnv.mStart, pt.mSpawnAngle); //k??? TODO should add particle template to parameter?
+    CallSpawnFunc(pt.mDeathRotate.mSpawnType, GetDestRotation(), pt.mDeathRotate); //k??? TODO should add particle template to parameter?
+
+    ScaleRotation(idMath::TWO_PI);
+    ScaleAngle(idMath::TWO_PI);
+
+    // debris uses a 1-second rotation/angle envelope (arbitrary but cheap)
+    InitRotationEnv(pt.mRotateEnvelope, 1.0f);
+    mAngleEnv.Init(pt.mAngleEnvelope, 1.0f);
+
+    //--------------------------------------------------------------------------
+    // 9.  Time stamps – lifetime is zero because the moveable takes over
+    //--------------------------------------------------------------------------
+    mStartTime = birthTime;
+    mMotionStartTime = birthTime;
+    mEndTime = birthTime;       // no CPU-side lifespan
+    mLastTrailTime = birthTime;
+    mTrailTime = 0.f;
+    mTrailCount = 0;
+
+    //--------------------------------------------------------------------------
+    // 10.  Add gravity from the template  (scaled random in range)
+    //--------------------------------------------------------------------------
+    const float gRand = rvRandom::flrand(pt.mGravity.x, pt.mGravity.y);
+    const idVec3 gWorld = effect->mGravity * gRand;
+    const idVec3 gLocal = effect->mCurrentAxisTransposed * gWorld;
+    mAcceleration += gLocal;
+
+    //--------------------------------------------------------------------------
+    // 11.  Convert origin / velocity / angular velocity into *world* space
+    //--------------------------------------------------------------------------
+    idVec3 worldPos = effect->mOriginalOrigin + effect->mOriginalAxis * mInitPos;
+    idVec3 worldVel = effect->mCurrentAxis * mVelocity;
+    idVec3 angularVel(mRotationEnv.mEnd.x,
+        mRotationEnv.mEnd.y,
+        mRotationEnv.mEnd.z);
+
+    //--------------------------------------------------------------------------
+    // 12.  Finally spawn the client-side moveable (life == 0 → remove by FX)
+    //--------------------------------------------------------------------------
+    const int lifeMS = int((mEndTime - mStartTime) * 1000.0f); //k??? TODO 0;   // handled entirely by the moveable itself
+    game->SpawnClientMoveable(pt.mEntityDefName.c_str(),
+        lifeMS,
+        worldPos,
+        effect->mCurrentAxis,
+        worldVel,
+        angularVel);
+}
+
+// ============================================================================
+// rvLineParticle :: Refresh
+// ============================================================================
+void rvLineParticle::Refresh(const rvBSE* effect,
+    const rvSegmentTemplate* st,
+                             const rvParticleTemplate* pt)
+{
+    //----------------------------------------------------------------------
+    // 1.  Re-evaluate INIT / DEST length vectors (exactly like FinishSpawn)
+    //----------------------------------------------------------------------
+    float* initLen = GetInitLength();
+    if ((effect->mFlags & EF_USES_END_ORIGIN/* 2 */) && (pt->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */)) {
+        SetLengthUsingEndOrigin(effect, &pt->mSpawnLength, initLen);
+    }
+    else {
+        CallSpawnFunc(pt->mSpawnLength.mSpawnType, initLen, pt->mSpawnLength); //k??? TODO should add particle template to parameter?
+    }
+
+    float* destLen = GetDestLength();
+    if ((effect->mFlags & EF_USES_END_ORIGIN/* 2 */) && (pt->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */)) {
+        SetLengthUsingEndOrigin(effect, &pt->mDeathLength, destLen);
+    }
+    else {
+        CallSpawnFunc(pt->mDeathLength.mSpawnType, destLen, pt->mDeathLength); //k??? TODO should add particle template to parameter?
+    }
+
+    //----------------------------------------------------------------------
+    // 2.  Propagate “relative” death-vs-spawn conversions
+    //----------------------------------------------------------------------
+    pt->mDeathLength.HandleRelativeParms(destLen,initLen,/*parmCount =*/ 3);
+
+    //----------------------------------------------------------------------
+    // 3.  Refresh tiling and attenuation in case template was edited
+    //----------------------------------------------------------------------
+    HandleTiling(pt);
+
+#if 1 //k??? TODO not in Q4D
+    const float atten = effect->GetAttenuation(st);
+    AttenuateLength(atten, &pt->mSpawnLength);
+#endif
+
+    //----------------------------------------------------------------------
+    // 4.  Re-initialise the length envelope with the current lifetime
+    //----------------------------------------------------------------------
+    const float duration = mEndTime - mStartTime;
+    mLengthEnv.Init(pt->mLengthEnvelope, duration);
+}
+
+// ============================================================================
+//  Spawn-info helpers
+// ----------------------------------------------------------------------------
+//  These are used by the renderer when the particle first becomes visible.
+// ============================================================================
+
+// ----------------------------  rvSpriteParticle  ----------------------------
+void rvSpriteParticle::GetSpawnInfo(idVec4& tint, idVec3& size, idVec3& rotate)
+{
+    tint.Set(mTintEnv.mStart.x,
+        mTintEnv.mStart.y,
+        mTintEnv.mStart.z,
+        mTintEnv.mRate.x);
+
+    size.Set(mSizeEnv.mStart.x,
+        mSizeEnv.mStart.y,
+        0.0f);
+
+    rotate.Set(mRotationEnv.mStart.x, 0.0f, 0.0f);
+}
+
+// ----------------------------  rvLineParticle  ------------------------------
+void rvLineParticle::GetSpawnInfo(idVec4& tint, idVec3& size, idVec3& rotate)
+{
+    tint.Set(mTintEnv.mStart.x,
+        mTintEnv.mStart.y,
+        mTintEnv.mStart.z,
+        mTintEnv.mRate.x);
+
+    size.Set(mSizeEnv.mStart.x, 0.0f, 0.0f); //k??? TODO rvLineParticle's size is 1D
+    rotate.Zero();
+}
+
+// ---------------------------  rvOrientedParticle  ---------------------------
+void rvOrientedParticle::GetSpawnInfo(idVec4& tint, idVec3& size, idVec3& rotate)
+{
+    tint.Set(mTintEnv.mStart.x,
+        mTintEnv.mStart.y,
+        mTintEnv.mStart.z,
+        mTintEnv.mRate.x);
+
+    size.Set(mSizeEnv.mStart.x,
+        mSizeEnv.mStart.y,
+        0.0f);
+
+    rotate = mRotationEnv.mStart;    // full XYZ
+}
+
+// ----------------------------  rvModelParticle  -----------------------------
+void rvModelParticle::GetSpawnInfo(idVec4& tint, idVec3& size, idVec3& rotate)
+{
+    tint.Set(mTintEnv.mStart.x,
+        mTintEnv.mStart.y,
+        mTintEnv.mStart.z,
+        mTintEnv.mRate.x);
+
+    size = mSizeEnv.mStart;
+    rotate = mRotationEnv.mStart;
+}
+
+// ----------------------------  rvLightParticle  -----------------------------
+void rvLightParticle::GetSpawnInfo(idVec4& tint, idVec3& size, idVec3& rotate)
+{
+    tint.Set(mTintEnv.mStart.x,
+        mTintEnv.mStart.y,
+        mTintEnv.mStart.z,
+        mTintEnv.mRate.x);
+
+    size = mSizeEnv.mStart;
+    rotate.Zero();
+}
+
+
+// ---------------------------------------------------------------------------
+//  small helpers
+// ---------------------------------------------------------------------------
+
+// ===========================================================================
+//  rvParticle :: Bounce
+// ===========================================================================
+void rvParticle::Bounce(rvBSE* effect, const rvParticleTemplate* pt, idVec3 endPos, idVec3 normal, float time)
+{
+    // ----------------------------------------------------------------------
+    // 1)  old velocity at the impact moment
+    // ----------------------------------------------------------------------
+    const float dt = time - mMotionStartTime;
+
+    idVec3 oldVel;
+    EvaluateVelocity(effect, oldVel, dt);
+
+    // convert to **world space**
+    idVec3 worldOldVel = effect->mCurrentAxis * (mInitAxis.Transpose() * oldVel);
+
+    // ----------------------------------------------------------------------
+    // 2)  reflect and scale by bounce coefficient
+    // ----------------------------------------------------------------------
+    const float proj = BSE::Dot(worldOldVel, normal);                 // component toward plane
+    idVec3 worldNewVel = worldOldVel - (2.0f * proj) * normal;  // reflection
+    worldNewVel *= pt->mBounce;                                   // restitution
+
+    // optional “stick” if we hit from below at a steep angle
+    if (proj < -0.70710678f) {                                  // cos(45°)
+        mFlags |= 0x000001;                                   // PF_DIRECTIONAL (“stuck”)
+        worldNewVel = vec3_zero;
+    }
+
+    // ----------------------------------------------------------------------
+    // 3)  convert everything back to *particle local space*
+    // ----------------------------------------------------------------------
+    idMat3 mCurrentAxisTransposed = BSE::Transposed(effect->mCurrentAxis);
+    mVelocity = mInitAxis * (mCurrentAxisTransposed * worldNewVel);
+    mMotionStartTime = time;
+
+    // translate new start position from world → local
+    idVec3 worldPos = endPos;
+    idVec3 localPos = mCurrentAxisTransposed
+        * (worldPos - effect->mCurrentOrigin);
+    mInitPos = mInitAxis * localPos;            // into original local frame
+}
+
+// ===========================================================================
+//  rvParticle :: EvaluatePosition
+// ===========================================================================
+void rvParticle::EvaluatePosition(const rvBSE* effect, idVec3& outPos, float time)
+{
+    // ----------------------------------------------------------------------
+    // 1)  if flagged “stuck”, particle never moves again
+    // ----------------------------------------------------------------------
+    if (mFlags & 0x000001) {                         // PF_DIRECTIONAL used as “stuck”
+        outPos = mInitPos;
+        return;
+    }
+
+    // ----------------------------------------------------------------------
+    // 2)  local-space integration  (V + A + optional angle/offset envelope)
+    // ----------------------------------------------------------------------
+    outPos = mInitPos + mVelocity * time
+        + 0.5f * mAcceleration * (time * time);
+
+    if (mFlags & 0x000004) {                         // needs offset update
+        rvAngles angle;
+        idVec3   offset;
+        mAngleEnv.Evaluate(time, &angle.pitch);
+        mOffsetEnv.Evaluate(time, &offset.x);
+
+        idMat3 rot;
+        angle.ToMat3(rot);
+        outPos += rot * offset;
+    }
+
+    // ----------------------------------------------------------------------
+    // 3)  quadratic drag / friction  (matches original exponential form)
+    // ----------------------------------------------------------------------
+    if (!mFriction.Compare(vec3_zero)) {
+        const float life = mEndTime - mStartTime;
+        const float t_2 = 0.5f * time * time;
+        const float expoExp = ((life - t_2) / life) * LOG2E;     // ln→log2 conversion
+        const float expoTerm = idMath::Pow(2.0f, expoExp);          // 2^(x)
+        const float dispK = t_2 * ((expoTerm - 1.0f) * t_2) * (1.0f / 3.0f);
+
+        outPos += mFriction * dispK;
+    }
+
+    // ----------------------------------------------------------------------
+    // 4)  transform from *particle local* → *current world* coordinates
+    //     (unless the particle was “locked” at spawn)
+    // ----------------------------------------------------------------------
+    if (!(mFlags & PF_SEGMENT_LOCKED/* 0x000002 */)) {                    // PF_SEGMENT_LOCKED
+        // rotate into the emitter’s current orientation
+        idVec3 worldPos = effect->mCurrentAxis
+            * (mInitAxis.Transpose() * outPos);
+
+        // offset for emitter translation since spawn
+        idVec3 delta = mInitEffectPos - effect->mCurrentOrigin;
+        worldPos += effect->mCurrentAxisTransposed * delta;
+
+        outPos = worldPos;
+    }
+}
+
+
+// ----------------------------------------------------------------------------
+// 1.  CheckTimeoutEffect – plays a one-shot effect when the particle times out
+// ----------------------------------------------------------------------------
+void rvParticle::CheckTimeoutEffect(rvBSE* effect,
+                                    const rvSegmentTemplate* st,
+    float              time)
+{
+    if (!(st->mFlags & 0x0001)) {                     // segment wants timeout FX?
+        return;
+    }
+
+    const int numFx = st->mParticleTemplate.mNumTimeoutEffects;
+    if (numFx == 0) {
+        return;
+    }
+
+    // ----------------------------------------------------------------------
+    // evaluate current world-space position / velocity
+    // ----------------------------------------------------------------------
+    const float dt = time - mMotionStartTime;
+
+    idVec3 posLocal;
+    EvaluatePosition(effect, posLocal, dt);
+
+    idVec3 velLocal;
+    EvaluateVelocity(effect, velLocal, dt);
+
+    // normalise direction for orientation matrix
+    if (!velLocal.Compare(vec3_zero)) {
+        velLocal.NormalizeFast();
+    }
+
+    idVec3 velWorld = effect->mCurrentAxis * (mInitAxis.Transpose() * velLocal);
+    idMat3 axis = velWorld.ToMat3();
+
+    idVec3 posWorld = effect->mCurrentOrigin
+        + effect->mCurrentAxis * (mInitAxis.Transpose() * posLocal);
+
+    // ----------------------------------------------------------------------
+    // trigger the effect
+    // ----------------------------------------------------------------------
+    const idDecl* fxName = st->mParticleTemplate.mTimeoutEffects[BSE::RandIndex(numFx)];
+    game->PlayEffect(fxName,
+        posWorld,
+        axis,
+        /*joint=*/ NULL,
+        vec3_origin,   // dir
+        /*surfId=*/ NULL,
+        /* predictBit = */false,
+        EC_IGNORE,
+        vec4_one);
+}
+
+// ----------------------------------------------------------------------------
+// 2.  CalcImpactPoint – nudges hit-position so the smoke appears just outside
+//                       the collision surface (works for oriented bboxes)
+// ----------------------------------------------------------------------------
+void rvParticle::CalcImpactPoint(idVec3& out,
+    const idVec3& origin,
+    const idVec3& motion,
+    const idBounds& bounds,
+    const idVec3& normal)
+{
+    out = origin;                                         // default
+
+    // guard against degenerate motion or bounds
+    if (motion.Compare(vec3_zero) || bounds.IsCleared()) {
+        return;
+    }
+
+    // convert motion into *unit cube* space so we can pick the
+    // dominant axis (largest normalised component)
+    idVec3 size = BSE::GetSize(bounds);
+    idVec3 work(motion.x / size.x,
+        motion.y / size.y,
+        motion.z / size.z);
+
+    work.Normalize(); //k??? NormalizeFast
+
+    const idVec3 absWork(fabsf(work.x), fabsf(work.y), fabsf(work.z));
+    int axis = 0;
+    if (absWork.y >= absWork.x && absWork.y >= absWork.z) axis = 1;
+    if (absWork.z >= absWork.x && absWork.z >= absWork.y) axis = 2;
+
+    // distance to move:   half-extent along *chosen* axis
+    const float halfX = size.x * 0.5f;
+    const float halfY = size.y * 0.5f;
+    const float halfZ = size.z * 0.5f;
+
+    const float invLen = 0.5f / fabsf(work[axis]);
+    const idVec3 push = BSE::Mult(idVec3(halfX, halfY, halfZ) * invLen, work); //k??? TODO dot not dot
+
+    // offset the hit position by “normal + push”
+    out += 2.0f * normal + push;
+}
+
+// ----------------------------------------------------------------------------
+// 3.  EmitSmokeParticles – leaves a smoke trail behind moving particles
+// ----------------------------------------------------------------------------
+void rvParticle::EmitSmokeParticles(rvBSE* effect,rvSegment* child, float      time)
+{
+    static const float kUpdate = 0.016f;              // ~60 Hz
+
+	const rvSegmentTemplate* st = child->GetSegmentTemplate();
+	if (!st) {
+		return;
 	}
+    const float timeEnd = time + kUpdate;
+    while (mLastTrailTime < timeEnd) {
 
-	ParticleOrigin(g, origin);
+        // stay within particle lifetime
+        if (mLastTrailTime >= mStartTime && mLastTrailTime < mEndTime) {
 
-	ParticleTexCoords(g, verts);
+            // position / dir at this timestamp
+            const float t = mLastTrailTime - mStartTime;
 
-	int	numVerts = ParticleVerts(g, origin, verts);
+            idVec3 posLocal;
+            EvaluatePosition(effect, posLocal, t);
 
-	if (animationFrames <= 1) {
-		return numVerts;
-	}
+            idVec3 velLocal;
+            EvaluateVelocity(effect, velLocal, t);
+            velLocal.Normalize(); //k??? TODO NormalizeFast
 
-	// if we are doing strip-animation, we need to double the quad and cross fade it
-	float	width = 1.0f / animationFrames;
-	float	frac = g->animationFrameFrac;
-	float	iFrac = 1.0f - frac;
+            idMat3 axis = velLocal.ToMat3();
 
-	for (int i = 0 ; i < numVerts ; i++) {
-		verts[numVerts + i] = verts[i];
+            // hand off to child segment
+            child->SpawnParticle(effect,st,mLastTrailTime,&posLocal,&axis);
+        }
 
-		verts[numVerts + i].st[0] += width;
-
-		verts[numVerts + i].color[0] *= frac;
-		verts[numVerts + i].color[1] *= frac;
-		verts[numVerts + i].color[2] *= frac;
-		verts[numVerts + i].color[3] *= frac;
-
-		verts[i].color[0] *= iFrac;
-		verts[i].color[1] *= iFrac;
-		verts[i].color[2] *= iFrac;
-		verts[i].color[3] *= iFrac;
-	}
-
-	return numVerts * 2;
+        mLastTrailTime += child->AttenuateInterval(effect, st);
+    }
 }
 
-/*
-==================
-rvBSEParticleStage::GetCustomPathName
-==================
-*/
-const char *rvBSEParticleStage::GetCustomPathName()
+// ----------------------------------------------------------------------------
+// 4.  RunPhysics – optional collision + bounce for individual particles
+// ----------------------------------------------------------------------------
+bool rvParticle::RunPhysics(rvBSE* effect,
+    const rvSegmentTemplate* st,
+    float              time)
 {
-	int index = (customPathType < CustomParticleCount) ? customPathType : 0;
-	return ParticleCustomDesc[index].name;
+    // -------------------------------------------------- early outs
+    if (!bse_physics.GetBool() ||
+        session->readDemo ||
+        (mFlags & 0x000001) ||          // stuck
+        !(st->mFlags & 0x0001))           // segment wants physics
+    {
+        return false;
+    }
+
+    const rvParticleTemplate& pt = st->mParticleTemplate;
+
+    // require “physics” flag and at least 100 ms of motion
+    if (!(pt.mFlags & 0x0200) || time - mMotionStartTime < 0.1f) {
+        return false;
+    }
+
+	if ( bseLocal.DebugHudActive() )
+		++bseLocal.mPerfCounters[1]; // dword_1137DDAC;
+    //--------------------------------------------------- build world ray
+    const idVec3 worldOrigin = effect->mCurrentOrigin;
+    const idMat3& worldAxis = effect->mCurrentAxis;
+
+    const float dtStart = time - mMotionStartTime - 0.1f;
+    const float dtEnd = time - mMotionStartTime;
+
+    idVec3 fromLocal; EvaluatePosition(effect, fromLocal, dtStart);
+    idVec3 toLocal;   EvaluatePosition(effect, toLocal, dtEnd);
+
+    idVec3 fromWorld = worldOrigin + worldAxis * (mInitAxis.Transpose() * fromLocal);
+    idVec3 toWorld = worldOrigin + worldAxis * (mInitAxis.Transpose() * toLocal);
+
+    //---------------------------------------------------- trace
+    idTraceModel* trm = pt.GetTraceModel();
+
+    trace_t tr;
+    game->Translation(tr, fromWorld, toWorld, trm, CONTENTS_SOLID | CONTENTS_OPAQUE);
+
+    if (tr.fraction >= 1.0f) {                         // no hit
+        return false;
+    }
+
+    //---------------------------------------------------- play impact FX
+    if (pt.mNumImpactEffects && bse->CanPlayRateLimited(EC_IMPACT_PARTICLES)) {
+
+        idVec3 impactPos = tr.endpos;
+
+        if (trm) {                                     // nudge inside oriented bbox
+            idVec3 motion = (toWorld - fromWorld) * tr.fraction;
+            CalcImpactPoint(impactPos, tr.endpos, motion, trm->bounds, tr.c.normal);
+        }
+
+        const rvDeclEffect *fxName = pt.mImpactEffects[BSE::RandIndex(pt.mNumImpactEffects)];
+        idMat3 axis = tr.c.normal.ToMat3();
+
+        game->PlayEffect(fxName,impactPos,axis,NULL,vec3_origin,NULL,EC_IGNORE);
+    }
+
+    //---------------------------------------------------- bounce?
+    if (pt.mBounce > 0.0f) {
+        Bounce(effect, &pt, tr.endpos, tr.c.normal, time);
+    }
+
+    // if template has “killOnImpact” flag (bit-10 in original),
+    // return true to remove the particle
+    return (pt.mFlags & 0x0400) != 0;
 }
 
-/*
-==================
-rvBSEParticleStage::GetCustomPathDesc
-==================
-*/
-const char *rvBSEParticleStage::GetCustomPathDesc()
+void rvParticle::AttenuateFade(float atten, const rvParticleParms *parms)
 {
-	int index = (customPathType < CustomParticleCount) ? customPathType : 0;
-	return ParticleCustomDesc[index].desc;
+    int flags; // eax
+    float v4; // st7
+
+    flags = parms->mFlags;
+    if ((flags & PTF_ATTENUATE/* 0x20 */) != 0) {
+        if ((flags & PTF_INVERT_ATTEN/* 0x40 */) != 0) {
+            v4 = 1.0f - atten;
+            mFadeEnv.mStart = v4 * mFadeEnv.mStart;
+            mFadeEnv.mEnd = v4 * mFadeEnv.mEnd;
+        } else {
+            mFadeEnv.mStart = atten * mFadeEnv.mStart;
+            mFadeEnv.mEnd = atten * mFadeEnv.mEnd;
+        }
+    }
 }
 
-/*
-==================
-rvBSEParticleStage::NumCustomPathParms
-==================
-*/
-int rvBSEParticleStage::NumCustomPathParms()
+int rvParticleTemplate::GetMaxTrailCount() const
 {
-	int index = (customPathType < CustomParticleCount) ? customPathType : 0;
-	return ParticleCustomDesc[index].count;
+    return (int)ceil(mTrailCount.y) + 1;
 }
 
-/*
-==================
-rvBSEParticleStage::SetCustomPathType
-==================
-*/
-void rvBSEParticleStage::SetCustomPathType(const char *p)
+void rvParticle::ScaleAngle(float constant)
 {
-	customPathType = PPATH_STANDARD;
-
-	for (int i = 0; i < CustomParticleCount; i ++) {
-		if (idStr::Icmp(p, ParticleCustomDesc[i].name) == 0) {
-			customPathType = static_cast<prtCustomPth_t>(i);
-			break;
-		}
-	}
+    mAngleEnv.mStart.x = constant * mAngleEnv.mStart.x;
+    mAngleEnv.mStart.y = constant * mAngleEnv.mStart.y;
+    mAngleEnv.mStart.z = constant * mAngleEnv.mStart.z;
+    mAngleEnv.mEnd.x = constant * mAngleEnv.mEnd.x;
+    mAngleEnv.mEnd.y = constant * mAngleEnv.mEnd.y;
+    mAngleEnv.mEnd.z = constant * mAngleEnv.mEnd.z;
 }
 
-/*
-==================
-rvBSEParticleStage::operator=
-==================
-*/
-void rvBSEParticleStage::operator=(const rvBSEParticleStage &src)
+void rvParticle::ScaleRotation(float constant)
 {
-	material = src.material;
-	totalParticles = src.totalParticles;
-	cycles = src.cycles;
-	cycleMsec = src.cycleMsec;
-	spawnBunching = src.spawnBunching;
-	particleLife = src.particleLife;
-	timeOffset = src.timeOffset;
-	deadTime = src.deadTime;
-	distributionType = src.distributionType;
-	distributionParms[0] = src.distributionParms[0];
-	distributionParms[1] = src.distributionParms[1];
-	distributionParms[2] = src.distributionParms[2];
-	distributionParms[3] = src.distributionParms[3];
-	directionType = src.directionType;
-	directionParms[0] = src.directionParms[0];
-	directionParms[1] = src.directionParms[1];
-	directionParms[2] = src.directionParms[2];
-	directionParms[3] = src.directionParms[3];
-	speed = src.speed;
-	gravity = src.gravity;
-	worldGravity = src.worldGravity;
-	randomDistribution = src.randomDistribution;
-	entityColor = src.entityColor;
-	customPathType = src.customPathType;
-	customPathParms[0] = src.customPathParms[0];
-	customPathParms[1] = src.customPathParms[1];
-	customPathParms[2] = src.customPathParms[2];
-	customPathParms[3] = src.customPathParms[3];
-	customPathParms[4] = src.customPathParms[4];
-	customPathParms[5] = src.customPathParms[5];
-	customPathParms[6] = src.customPathParms[6];
-	customPathParms[7] = src.customPathParms[7];
-	offset = src.offset;
-	animationFrames = src.animationFrames;
-	animationRate = src.animationRate;
-	initialAngle = src.initialAngle;
-	rotationSpeed = src.rotationSpeed;
-	orientation = src.orientation;
-	orientationParms[0] = src.orientationParms[0];
-	orientationParms[1] = src.orientationParms[1];
-	orientationParms[2] = src.orientationParms[2];
-	orientationParms[3] = src.orientationParms[3];
-	size = src.size;
-	aspect = src.aspect;
-	color = src.color;
-	fadeColor = src.fadeColor;
-	fadeInFraction = src.fadeInFraction;
-	fadeOutFraction = src.fadeOutFraction;
-	fadeIndexFraction = src.fadeIndexFraction;
-	hidden = src.hidden;
-	boundsExpansion = src.boundsExpansion;
-	bounds = src.bounds;
-
-	rvptype = src.rvptype;
-	model = src.model;
+    mRotationEnv.mStart.x = constant * mRotationEnv.mStart.x;
+    mRotationEnv.mStart.y = constant * mRotationEnv.mStart.y;
+    mRotationEnv.mStart.z = constant * mRotationEnv.mStart.z;
+    mRotationEnv.mEnd.x = constant * mRotationEnv.mEnd.x;
+    mRotationEnv.mEnd.y = constant * mRotationEnv.mEnd.y;
+    mRotationEnv.mEnd.z = constant * mRotationEnv.mEnd.z;
 }
 
+void rvParticle::AttenuateSize(float atten, const rvParticleParms *parms)
+{
+    Attenuate(atten, *parms, mSizeEnv);
+}
+
+void rvLineParticle::FinishSpawn(rvBSE* effect, rvSegment* segment, float birthTime, float a11, const idVec3& initOffset, const idMat3& initAxis)
+{
+    const rvSegmentTemplate *SegmentTemplate; // eax
+    const rvParticleTemplate *p_mParticleTemplate; // edi
+    float *v16; // eax
+    float *v17; // eax
+    float *v18; // eax
+    float duration; // [esp+Ch] [ebp-18h]
+    float *v21; // [esp+14h] [ebp-10h]
+    float fractiona; // [esp+34h] [ebp+10h]
+
+    SegmentTemplate = segment->GetSegmentTemplate();
+    if ( SegmentTemplate )
+    {
+        p_mParticleTemplate = &SegmentTemplate->mParticleTemplate;
+        v16 = GetInitLength();
+        if ( (effect->mFlags & EF_USES_END_ORIGIN/* 2 */) != 0 && (p_mParticleTemplate->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */) != 0 )
+            SetLengthUsingEndOrigin(effect, &p_mParticleTemplate->mSpawnLength, v16);
+        else
+            rvParticleParms::spawnFunctions[p_mParticleTemplate->mSpawnLength.mSpawnType](v16, p_mParticleTemplate->mSpawnLength, NULL, NULL);
+        v17 = GetDestLength();
+        if ( (effect->mFlags & EF_USES_END_ORIGIN/* 2 */) != 0 && (p_mParticleTemplate->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */) != 0 )
+            SetLengthUsingEndOrigin(effect, &p_mParticleTemplate->mDeathLength, v17);
+        else
+            rvParticleParms::spawnFunctions[p_mParticleTemplate->mDeathLength.mSpawnType](v17, p_mParticleTemplate->mDeathLength, NULL, NULL);
+        rvParticle::FinishSpawn(effect, segment, birthTime, a11, initOffset, initAxis);
+        v21 = GetInitLength();
+        v18 = GetDestLength();
+        p_mParticleTemplate->mDeathLength.HandleRelativeParms(v18, v21, 3);
+        HandleTiling(p_mParticleTemplate);
+        fractiona = effect->GetAttenuation(SegmentTemplate);
+        AttenuateLength(fractiona,
+                &p_mParticleTemplate->mSpawnLength);
+        duration = mEndTime - mStartTime;
+        mLengthEnv.Init(p_mParticleTemplate->mLengthEnvelope, duration);
+    }
+}
+
+void rvLinkedParticle::FinishSpawn(rvBSE* effect, rvSegment* segment, float birthTime, float fraction, const idVec3& initOffset, const idMat3& initAxis)
+{
+    const rvSegmentTemplate *SegmentTemplate; // edi
+
+    SegmentTemplate = segment->GetSegmentTemplate();
+    if ( SegmentTemplate )
+    {
+        rvParticle::FinishSpawn(effect, segment, birthTime, fraction, initOffset, initAxis);
+        HandleTiling(&SegmentTemplate->mParticleTemplate);
+    }
+}
+
+void rvParticle::DoRenderBurnTrail(rvBSE *effect, const idMat3 *view, srfTriangles_s *tri, float time) {
+    int trailCount; // ecx
+    int v7; // edi
+    float v9; // st7
+    float v10; // [esp+0h] [ebp-1Ch]
+    int i; // [esp+14h] [ebp-8h]
+    float delta; // [esp+18h] [ebp-4h]
+    float tria; // [esp+28h] [ebp+Ch]
+
+    trailCount = mTrailCount;
+    if (trailCount) {
+        if (mTrailTime != 0.0) {
+            v7 = 1;
+            i = 1;
+            delta = mTrailTime / (float) trailCount;
+            if (trailCount + 1 > 1) {
+                do {
+                    v9 = time - (float) i * delta;
+                    tria = v9;
+                    if (v9 >= mStartTime && tria < mEndTime) {
+                        v10 = (float) (mTrailCount - v7) / (float) mTrailCount;
+                        Render(
+                                effect,
+                                NULL, //k??? TODO should setup particle template?
+                                *view,
+                                tri,
+                                tria,
+                                v10);
+                    }
+                    i = ++v7;
+                } while (v7 < mTrailCount + 1);
+            }
+        }
+    }
+}
+
+void rvParticle::HandleOrientation(const rvAngles *angles)
+{
+	mRotationEnv.Rotate(BSE::IdAngles(*angles));
+}
+
+// ---------------------------------------------------------------------------
+//  rvParticle :: SetLengthUsingEndOrigin
+// ---------------------------------------------------------------------------
+void rvParticle::SetLengthUsingEndOrigin(
+        const rvBSE* effect,
+        const rvParticleParms* parms,
+        float* length)
+{
+#if 1 //karin: length useEndOrigin //k??? TODO add
+    //if(parms->mFlags & PPF_USE_END_ORIGIN)
+    {
+        if(mFlags & PTF_SEGMENT_LOCKED) // if follow
+        {
+            idVec3 dis = effect->mCurrentEndOrigin - effect->mCurrentOrigin; // world
+            dis = effect->mCurrentAxisTransposed * dis; // local
+            //dis = mInitAxis * dis;
+            length[0] = dis[0];
+            length[1] = dis[1];
+            length[2] = dis[2];
+        }
+        else
+        {
+            idVec3 dis = effect->mOriginalEndOrigin - effect->mOriginalOrigin; // world
+            dis = effect->mOriginalAxis.Transpose() * dis; // local
+            //dis = mInitAxis * dis;
+            length[0] = dis[0];
+            length[1] = dis[1];
+            length[2] = dis[2];
+        }
+    }
+#else
+    rvParticleParms::spawnFunctions[parms->mSpawnType](length, *parms, NULL, NULL); // jmarshall <-- no idea hex rays HATTES this call
+#endif
+}
+
+#if 0
+void rvOrientedParticle::HandleOrientation(const rvAngles *angles)
+{
+    mRotationEnv.Rotate(IdAngles(*angles));
+}
+#endif

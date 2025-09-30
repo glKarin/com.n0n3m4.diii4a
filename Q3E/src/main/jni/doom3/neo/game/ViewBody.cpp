@@ -89,6 +89,8 @@ idViewBody::idViewBody() {
     bodyOffset.Zero();
 	allChannel			= true;
 	animChannel			= ANIMCHANNEL_ALL;
+	weaponDepthHack		= false;
+	modelDepthHack		= 0.0f;
     Clear();
 
     memset ( &animDoneTime, 0, sizeof(animDoneTime) );
@@ -128,6 +130,11 @@ void idViewBody::Spawn( void ) {
     spawnArgs.GetVector("body_offset", "0 0 0", bodyOffset);
     allChannel = spawnArgs.GetBool("body_allChannel", "1");
 	animChannel = allChannel ? ANIMCHANNEL_ALL : ANIMCHANNEL_LEGS;
+
+	weaponDepthHack = spawnArgs.GetBool("body_weaponDepthHack", "0");
+	modelDepthHack = spawnArgs.GetFloat("body_modelDepthHack", "0");
+	if(modelDepthHack < 0.0f)
+		modelDepthHack = 0.0f;
 }
 
 /*
@@ -174,6 +181,9 @@ void idViewBody::Save( idSaveGame *savefile ) const {
 
 	savefile->WriteVec3	    ( bodyOffset );
 	savefile->WriteBool	    ( allChannel );
+
+	savefile->WriteBool	    ( weaponDepthHack );
+	savefile->WriteFloat    ( modelDepthHack );
 }
 
 /*
@@ -211,6 +221,9 @@ void idViewBody::Restore( idRestoreGame *savefile ) {
 	savefile->ReadBool( allChannel );
 
 	animChannel = allChannel ? ANIMCHANNEL_ALL : ANIMCHANNEL_LEGS;
+
+	savefile->ReadBool( weaponDepthHack );
+	savefile->ReadFloat( modelDepthHack );
 
     //2025: make visible when load game
     UpdateBody();
@@ -376,7 +389,8 @@ void idViewBody::PresentBody( bool showViewModel ) {
     renderEntity.allowSurfaceInViewID = owner->entityNumber + 1;
 
     // crunch the depth range so it never pokes into walls this breaks the machine gun gui
-	renderEntity.weaponDepthHack = true;
+	renderEntity.weaponDepthHack = weaponDepthHack;
+	renderEntity.modelDepthHack = modelDepthHack;
 
     //weapon->Think();
     UpdateVisuals();

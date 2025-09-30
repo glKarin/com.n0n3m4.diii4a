@@ -296,9 +296,12 @@ void GL_State(int stateBits)
 			case GLS_SRCBLEND_ALPHA_SATURATE:
 				srcFactor = GL_SRC_ALPHA_SATURATE;
 				break;
-#ifdef _RAVEN //k: quake4 blend
+#ifdef _RAVEN //k: quake4 src blend
 			case GLS_SRCBLEND_SRC_COLOR:
 				srcFactor = GL_SRC_COLOR;
+				break;
+			case GLS_SRCBLEND_ONE_MINUS_SRC_COLOR:
+				srcFactor = GL_ONE_MINUS_SRC_COLOR;
 				break;
 #endif
 			default:
@@ -332,6 +335,14 @@ void GL_State(int stateBits)
 			case GLS_DSTBLEND_ONE_MINUS_DST_ALPHA:
 				dstFactor = GL_ONE_MINUS_DST_ALPHA;
 				break;
+#ifdef _RAVEN //k: quake4 dst blend
+            case GLS_DSTBLEND_DST_COLOR:
+				dstFactor = GL_DST_COLOR;
+				break;
+			case GLS_DSTBLEND_ONE_MINUS_DST_COLOR:
+				dstFactor = GL_ONE_MINUS_DST_COLOR;
+				break;
+#endif
 			default:
 				dstFactor = GL_ONE;		// to get warning to shut up
 				common->Error("GL_State: invalid dst blend state bits\n");

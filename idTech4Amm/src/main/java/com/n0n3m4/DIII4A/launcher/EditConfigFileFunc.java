@@ -63,6 +63,14 @@ public final class EditConfigFileFunc extends GameLauncherFunc
             if(!list.contains(str))
                 list.add(str);
         }
+        if(KStr.NotEmpty(m_home) && !list.isEmpty())
+        {
+            List<String> tmpList = new ArrayList<>(list);
+            for(String s : tmpList)
+            {
+                list.add(KStr.AppendPath(m_home, s));
+            }
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(R.string.edit_config_file);
@@ -70,7 +78,7 @@ public final class EditConfigFileFunc extends GameLauncherFunc
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
-                m_file = KStr.AppendPath(m_path, m_home, list.get(which));
+                m_file = KStr.AppendPath(m_path, list.get(which));
                 dialog.dismiss();
                 StartEdit();
             }

@@ -80,9 +80,9 @@ typedef struct
     const char *(*key)(int k);
 } menulayer_t;
 
-menulayer_t m_layers[MAX_MENU_DEPTH];
-menulayer_t m_active;		/* active menu layer */
-int m_menudepth;
+static menulayer_t m_layers[MAX_MENU_DEPTH];
+static menulayer_t m_active;		/* active menu layer */
+static int m_menudepth;
 
 static qboolean
 M_IsGame(const char *gamename)
@@ -99,7 +99,7 @@ M_IsGame(const char *gamename)
 }
 
 static void
-M_Banner(char *name)
+M_Banner(const char *name)
 {
     int w, h;
 	float scale = SCR_GetMenuScale();
@@ -126,7 +126,7 @@ M_PopMenu(void)
 
     if (m_menudepth < 1)
     {
-        Com_Error(ERR_FATAL, "M_PopMenu: depth < 1");
+        Com_Error(ERR_FATAL, "%s: depth < 1", __func__);
     }
 
     m_menudepth--;
@@ -240,6 +240,8 @@ M_PushMenu(menuframework_s* menu)
     cls.key_dest = key_menu;
 }
 
+extern qboolean japanese_confirm;
+
 int
 Key_GetMenuKey(int key)
 {
@@ -280,24 +282,27 @@ Key_GetMenuKey(int key)
 
 		case K_KP_ENTER:
 		case K_ENTER:
-		case K_BTN_A:
 		    return K_ENTER;
 
-		case K_ESCAPE:
-		case K_JOY_BACK:
-		case K_BTN_B:
-		    return K_ESCAPE;
-
-		case K_BACKSPACE:
-		case K_DEL:
 		case K_KP_DEL:
 		    if (IN_NumpadIsOn() == true) { break; }
-		case K_BTN_Y:
+		case K_BACKSPACE:
+		case K_DEL:
+		case K_BTN_NORTH:
 		    return K_BACKSPACE;
+
 		case K_KP_INS:
 		    if (IN_NumpadIsOn() == true) { break; }
 		case K_INS:
 		    return K_INS;
+
+		case K_BTN_SOUTH:
+		    if (japanese_confirm) return K_ESCAPE;
+		    else return K_ENTER;
+
+		case K_BTN_EAST:
+		    if (japanese_confirm) return K_ENTER;
+		    else return K_ESCAPE;
 	}
 
 	return key;
@@ -311,11 +316,9 @@ Default_MenuKey(menuframework_s *m, int key)
 
     if (m)
     {
-        menucommon_s *item;
+        menucommon_s *item = Menu_ItemAtCursor(m);
 
-        if ((item = Menu_ItemAtCursor(m)) != 0)
-        {
-            if (item->type == MTYPE_FIELD)
+        if (item && item->type == MTYPE_FIELD)
             {
                 if (Field_Key((menufield_s *)item, key))
                 {
@@ -323,17 +326,23 @@ Default_MenuKey(menuframework_s *m, int key)
                 }
             }
         }
-    }
 
     switch (menu_key)
     {
     case K_ESCAPE:
+        if (m)
+        {
+            Field_ResetCursor(m);
+        }
+
         M_PopMenu();
         return menu_out_sound;
 
     case K_UPARROW:
         if (m)
         {
+            Field_ResetCursor(m);
+
             m->cursor--;
             Menu_AdjustCursor(m, -1);
             sound = menu_move_sound;
@@ -343,6 +352,8 @@ Default_MenuKey(menuframework_s *m, int key)
     case K_DOWNARROW:
         if (m)
         {
+            Field_ResetCursor(m);
+
             m->cursor++;
             Menu_AdjustCursor(m, 1);
             sound = menu_move_sound;
@@ -730,7 +741,7 @@ InitMainMenu(void)
 static void
 M_Main_Draw(void)
 {
-    menucommon_s * item = NULL;
+    const menucommon_s * item = NULL;
     int x = 0;
     int y = 0;
 
@@ -747,7 +758,7 @@ M_Main_Draw(void)
         ( int )(cls.realtime / 100) % NUM_CURSOR_FRAMES);
 }
 
-const char *
+static const char *
 M_Main_Key(int key)
 {
     return Default_MenuKey(&s_main, key);
@@ -756,13 +767,13 @@ M_Main_Key(int key)
 void
 M_Menu_Main_f(void)
 {
-    menucommon_s * item = NULL;
-
     InitMainMenu();
 
     // force first available item to have focus
     while (s_main.cursor >= 0 && s_main.cursor < s_main.nitems)
     {
+        const menucommon_s * item = NULL;
+
         item = ( menucommon_s * )s_main.items[s_main.cursor];
 
         if ((item->flags & (QMF_INACTIVE)))
@@ -934,19 +945,19 @@ M_UnbindCommand(char *command, int scope)
     switch (scope)
     {
         case KEYS_KEYBOARD_MOUSE:
-             end = K_JOY_FIRST_REGULAR;
+             end = K_JOY_FIRST_BTN;
              break;
         case KEYS_CONTROLLER:
-             begin = K_JOY_FIRST_REGULAR;
-             end = K_JOY_LAST_REGULAR + 1;
+             begin = K_JOY_FIRST_BTN;
+             end = K_JOY_FIRST_BTN_ALT;
              break;
         case KEYS_CONTROLLER_ALT:
-             begin = K_JOY_FIRST_REGULAR_ALT;
+             begin = K_JOY_FIRST_BTN_ALT;
     }
 
     for (j = begin; j < end; j++)
     {
-        char *b;
+        const char *b;
         b = keybindings[j];
 
         if (!b)
@@ -970,14 +981,14 @@ M_FindKeysForCommand(char *command, int *twokeys, int scope)
     switch (scope)
     {
         case KEYS_KEYBOARD_MOUSE:
-             end = K_JOY_FIRST_REGULAR;
+             end = K_JOY_FIRST_BTN;
              break;
         case KEYS_CONTROLLER:
-             begin = K_JOY_FIRST_REGULAR;
-             end = K_JOY_LAST_REGULAR + 1;
+             begin = K_JOY_FIRST_BTN;
+             end = K_JOY_FIRST_BTN_ALT;
              break;
         case KEYS_CONTROLLER_ALT:
-             begin = K_JOY_FIRST_REGULAR_ALT;
+             begin = K_JOY_FIRST_BTN_ALT;
     }
 
     twokeys[0] = twokeys[1] = -1;
@@ -985,7 +996,7 @@ M_FindKeysForCommand(char *command, int *twokeys, int scope)
 
     for (j = begin; j < end; j++)
     {
-        char *b;
+        const char *b;
         b = keybindings[j];
 
         if (!b)
@@ -1118,7 +1129,7 @@ Keys_MenuKey(int key)
     if (menukeyitem_bind)
     {
         // Any key/button except from the game controller and escape keys
-        if ((key != K_ESCAPE) && (key != '`') && (key < K_JOY_FIRST_REGULAR))
+        if ((key != K_ESCAPE) && (key != '`') && (key < K_JOY_FIRST_BTN))
         {
             char cmd[1024];
 
@@ -1271,7 +1282,7 @@ MultiplayerKeys_MenuKey(int key)
     if (menukeyitem_bind)
     {
         // Any key/button but the escape ones
-        if ((key != K_ESCAPE) && (key != '`') && (key != K_JOY_BACK))
+        if ((key != K_ESCAPE) && (key != '`'))
         {
             char cmd[1024];
 
@@ -1313,6 +1324,30 @@ M_Menu_Multiplayer_Keys_f(void)
  * GAME CONTROLLER ( GAMEPAD / JOYSTICK ) BUTTONS MENU
  */
 
+static void
+GamepadMenu_StatusPrompt(menuframework_s *m)
+{
+	static char m_gamepadbind_statusbar[64];
+	int btn_confirm, btn_cancel;
+
+	if (japanese_confirm)
+	{
+		btn_confirm = K_BTN_EAST;
+		btn_cancel = K_BTN_SOUTH;
+	}
+	else
+	{
+		btn_confirm = K_BTN_SOUTH;
+		btn_cancel = K_BTN_EAST;
+	}
+
+	snprintf(m_gamepadbind_statusbar, 64, "%s assigns, %s clears, %s exits",
+		Key_KeynumToString_Joy(btn_confirm), Key_KeynumToString_Joy(K_BTN_NORTH),
+		Key_KeynumToString_Joy(btn_cancel));
+
+	Menu_SetStatusBar(m, m_gamepadbind_statusbar);
+}
+
 char *controller_bindnames[][2] =
 {
 	{"+attack", "attack"},
@@ -1320,12 +1355,20 @@ char *controller_bindnames[][2] =
 	{"+movedown", "down / crouch"},
 	{"weapnext", "next weapon"},
 	{"weapprev", "previous weapon"},
-	{"cycleweap weapon_chaingun weapon_machinegun weapon_blaster", "long range: quickswitch 1"},
-	{"cycleweap weapon_supershotgun weapon_shotgun", "close range: quickswitch 2"},
-	{"cycleweap weapon_rocketlauncher weapon_grenadelauncher ammo_grenades", "explosives: quickswitch 3"},
-	{"cycleweap weapon_bfg weapon_railgun weapon_hyperblaster", "special: quickswitch 4"},
-	{"prefweap weapon_railgun weapon_hyperblaster weapon_chaingun weapon_supershotgun weapon_machinegun weapon_shotgun weapon_blaster", "best safe weapon"},
-	{"prefweap weapon_bfg weapon_railgun weapon_rocketlauncher weapon_hyperblaster weapon_grenadelauncher weapon_chaingun ammo_grenades weapon_supershotgun", "best unsafe weapon"},
+	{"cycleweap weapon_plasmabeam weapon_boomer weapon_chaingun weapon_etf_rifle"
+	 " weapon_machinegun weapon_blaster", "long range: quickswitch 1"},
+	{"cycleweap weapon_supershotgun weapon_shotgun weapon_chainfist",
+	 "close range: quickswitch 2"},
+	{"cycleweap weapon_phalanx weapon_rocketlauncher weapon_proxlauncher"
+	 " weapon_grenadelauncher ammo_grenades", "explosives: quickswitch 3"},
+	{"cycleweap weapon_bfg weapon_disintegrator weapon_railgun weapon_hyperblaster"
+	 " ammo_tesla ammo_trap", "special: quickswitch 4"},
+	{"prefweap weapon_railgun weapon_plasmabeam weapon_boomer weapon_hyperblaster weapon_chaingun"
+	 " weapon_supershotgun weapon_etf_rifle weapon_machinegun weapon_shotgun weapon_blaster",
+	 "best safe weapon"},
+	{"prefweap weapon_bfg weapon_disintegrator weapon_phalanx weapon_railgun weapon_rocketlauncher"
+	 " weapon_plasmabeam weapon_boomer weapon_hyperblaster weapon_grenadelauncher weapon_chaingun"
+	 " weapon_proxlauncher ammo_grenades weapon_supershotgun", "best unsafe weapon"},
 	{"centerview", "center view"},
 	{"inven", "inventory"},
 	{"invuse", "use item"},
@@ -1360,7 +1403,7 @@ DrawControllerButtonBindingFunc(void *self)
 		int x;
 		const char *name;
 
-		name = Key_KeynumToString(keys[0]);
+		name = Key_KeynumToString_Joy(keys[0]);
 
 		Menu_DrawString(a->generic.x + a->generic.parent->x + RCOLUMN_OFFSET * scale,
 			a->generic.y + a->generic.parent->y, name);
@@ -1373,7 +1416,7 @@ DrawControllerButtonBindingFunc(void *self)
 					a->generic.y + a->generic.parent->y, "or");
 			Menu_DrawString(a->generic.x + a->generic.parent->x + 48 * scale + (x * scale),
 					a->generic.y + a->generic.parent->y,
-					Key_KeynumToString(keys[1]));
+					Key_KeynumToString_Joy(keys[1]));
 		}
 	}
 }
@@ -1418,7 +1461,7 @@ ControllerButtons_MenuInit(void)
 		Menu_AddItem(&s_controller_buttons_menu, (void *)&s_controller_buttons_actions[i]);
 	}
 
-	Menu_SetStatusBar(&s_controller_buttons_menu, "BTN_A assigns, BTN_Y clears, BTN_B exits");
+	GamepadMenu_StatusPrompt(&s_controller_buttons_menu);
 	Menu_Center(&s_controller_buttons_menu);
 }
 
@@ -1437,7 +1480,7 @@ ControllerButtons_MenuKey(int key)
 	if (menukeyitem_bind)
 	{
 		// Only controller buttons allowed
-		if (key >= K_JOY_FIRST_REGULAR && key != K_JOY_BACK)
+		if (key >= K_JOY_FIRST_BTN)
 		{
 			char cmd[1024];
 
@@ -1446,7 +1489,7 @@ ControllerButtons_MenuKey(int key)
 			Cbuf_InsertText(cmd);
 		}
 
-		Menu_SetStatusBar(&s_controller_buttons_menu, "BTN_A assigns, BTN_Y clears, BTN_B exits");
+		GamepadMenu_StatusPrompt(&s_controller_buttons_menu);
 		menukeyitem_bind = false;
 		return menu_out_sound;
 	}
@@ -1483,12 +1526,20 @@ char *controller_alt_bindnames[][2] =
 {
 	{"weapnext", "next weapon"},
 	{"weapprev", "previous weapon"},
-	{"cycleweap weapon_chaingun weapon_machinegun weapon_blaster", "long range: quickswitch 1"},
-	{"cycleweap weapon_supershotgun weapon_shotgun", "close range: quickswitch 2"},
-	{"cycleweap weapon_rocketlauncher weapon_grenadelauncher ammo_grenades", "explosives: quickswitch 3"},
-	{"cycleweap weapon_bfg weapon_railgun weapon_hyperblaster", "special: quickswitch 4"},
-	{"prefweap weapon_railgun weapon_hyperblaster weapon_chaingun weapon_supershotgun weapon_machinegun weapon_shotgun weapon_blaster", "best safe weapon"},
-	{"prefweap weapon_bfg weapon_railgun weapon_rocketlauncher weapon_hyperblaster weapon_grenadelauncher weapon_chaingun ammo_grenades weapon_supershotgun", "best unsafe weapon"},
+	{"cycleweap weapon_plasmabeam weapon_boomer weapon_chaingun weapon_etf_rifle"
+	 " weapon_machinegun weapon_blaster", "long range: quickswitch 1"},
+	{"cycleweap weapon_supershotgun weapon_shotgun weapon_chainfist",
+	 "close range: quickswitch 2"},
+	{"cycleweap weapon_phalanx weapon_rocketlauncher weapon_proxlauncher"
+	 " weapon_grenadelauncher ammo_grenades", "explosives: quickswitch 3"},
+	{"cycleweap weapon_bfg weapon_disintegrator weapon_railgun weapon_hyperblaster"
+	 " ammo_tesla ammo_trap", "special: quickswitch 4"},
+	{"prefweap weapon_railgun weapon_plasmabeam weapon_boomer weapon_hyperblaster weapon_chaingun"
+	 " weapon_supershotgun weapon_etf_rifle weapon_machinegun weapon_shotgun weapon_blaster",
+	 "best safe weapon"},
+	{"prefweap weapon_bfg weapon_disintegrator weapon_phalanx weapon_railgun weapon_rocketlauncher"
+	 " weapon_plasmabeam weapon_boomer weapon_hyperblaster weapon_grenadelauncher weapon_chaingun"
+	 " weapon_proxlauncher ammo_grenades weapon_supershotgun", "best unsafe weapon"},
 	{"centerview", "center view"},
 	{"inven", "inventory"},
 	{"invuse", "use item"},
@@ -1523,10 +1574,10 @@ DrawControllerAltButtonBindingFunc(void *self)
 	}
 	else
 	{
-		int x;
+		size_t x;
 		const char *name;
 
-		name = Key_KeynumToString(keys[0]);
+		name = Key_KeynumToString_Joy(keys[0]);
 
 		Menu_DrawString(a->generic.x + a->generic.parent->x + RCOLUMN_OFFSET * scale,
 				a->generic.y + a->generic.parent->y, name);
@@ -1539,7 +1590,7 @@ DrawControllerAltButtonBindingFunc(void *self)
 					a->generic.y + a->generic.parent->y, "or");
 			Menu_DrawString(a->generic.x + a->generic.parent->x + 48 * scale + (x * scale),
 					a->generic.y + a->generic.parent->y,
-					Key_KeynumToString(keys[1]));
+					Key_KeynumToString_Joy(keys[1]));
 		}
 	}
 }
@@ -1584,7 +1635,7 @@ ControllerAltButtons_MenuInit(void)
 		Menu_AddItem(&s_controller_alt_buttons_menu, (void *)&s_controller_alt_buttons_actions[i]);
 	}
 
-	Menu_SetStatusBar(&s_controller_alt_buttons_menu, "BTN_A assigns, BTN_Y clears, BTN_B exits");
+	GamepadMenu_StatusPrompt(&s_controller_alt_buttons_menu);
 	Menu_Center(&s_controller_alt_buttons_menu);
 }
 
@@ -1603,17 +1654,17 @@ ControllerAltButtons_MenuKey(int key)
 	if (menukeyitem_bind)
 	{
 		// Only controller buttons allowed, different from the alt buttons modifier
-		if (key >= K_JOY_FIRST_REGULAR && key != K_JOY_BACK && (keybindings[key] == NULL || strcmp(keybindings[key], "+joyaltselector") != 0))
+		if (key >= K_JOY_FIRST_BTN && (keybindings[key] == NULL || strcmp(keybindings[key], "+joyaltselector") != 0))
 		{
 			char cmd[1024];
-			key = key + (K_JOY_FIRST_REGULAR_ALT - K_JOY_FIRST_REGULAR);   // change input to its ALT mode
+			key = key + (K_JOY_FIRST_BTN_ALT - K_JOY_FIRST_BTN);   // change input to its ALT mode
 
 			Com_sprintf(cmd, sizeof(cmd), "bind \"%s\" \"%s\"\n",
 					Key_KeynumToString(key), controller_alt_bindnames[item->generic.localdata[0]][0]);
 			Cbuf_InsertText(cmd);
 		}
 
-		Menu_SetStatusBar(&s_controller_alt_buttons_menu, "BTN_A assigns, BTN_Y clears, BTN_B exits");
+		GamepadMenu_StatusPrompt(&s_controller_alt_buttons_menu);
 		menukeyitem_bind = false;
 		return menu_out_sound;
 	}
@@ -1955,7 +2006,7 @@ Gyro_MenuInit(void)
 	s_calibrating_text[0].generic.type = MTYPE_SEPARATOR;
 	s_calibrating_text[0].generic.x = 48 * scale + 32;
 	s_calibrating_text[0].generic.y = (y += 20);
-	s_calibrating_text[0].generic.name = "place the controller on a flat,";
+	s_calibrating_text[0].generic.name = "place the gamepad on a flat,";
 
 	s_calibrating_text[1].generic.type = MTYPE_SEPARATOR;
 	s_calibrating_text[1].generic.x = 48 * scale + 32;
@@ -2214,7 +2265,7 @@ CrosshairFunc(void *unused)
 }
 
 static void
-PauseFocusFunc()
+PauseFocusFunc(void *unused)
 {
     Cvar_SetValue("vid_pauseonfocuslost", (float)s_options_pauseonfocus_box.curvalue);
 }
@@ -2248,7 +2299,7 @@ ControlsSetMenuItemValues(void)
 {
     s_options_oggshuffle_box.curvalue = Cvar_VariableValue("ogg_shuffle");
     s_options_oggenable_box.curvalue = (Cvar_VariableValue("ogg_enable") != 0);
-    s_options_quality_list.curvalue = (Cvar_VariableValue("s_loadas8bit") == 0);
+    s_options_quality_list.curvalue = (Cvar_VariableValue("s_openal") == 0);
     s_options_alwaysrun_box.curvalue = (cl_run->value != 0);
     s_options_invertmouse_box.curvalue = (m_pitch->value < 0);
     s_options_lookstrafe_box.curvalue = (lookstrafe->value != 0);
@@ -2299,8 +2350,7 @@ EnableOGGMusic(void *unused)
 
 		if (cls.state == ca_active)
 		{
-	        int track = (int)strtol(cl.configstrings[CS_CDTRACK], (char **)NULL, 10);
-	        OGG_PlayTrack(track, true, true);
+			OGG_PlayTrack(cl.configstrings[CS_CDTRACK], true, true);
 		}
     }
     else
@@ -2336,18 +2386,9 @@ ConsoleFunc(void *unused)
 }
 
 static void
-UpdateSoundQualityFunc(void *unused)
-{
-    if (s_options_quality_list.curvalue == 0)
+UpdateSoundBackendFunc(void *unused)
     {
-        Cvar_SetValue("s_khz", 22);
-        Cvar_SetValue("s_loadas8bit", false);
-    }
-    else
-    {
-        Cvar_SetValue("s_khz", 44);
-        Cvar_SetValue("s_loadas8bit", false);
-    }
+    Cvar_Set("s_openal", (s_options_quality_list.curvalue == 0)? "1":"0" );
 
     m_popup_string = "Restarting the sound system. This\n"
                      "could take up to a minute, so\n"
@@ -2372,6 +2413,7 @@ Options_MenuInit(void)
         "play once",
         "sequential",
         "random",
+        "truly random",
         0
     };
 
@@ -2382,9 +2424,9 @@ Options_MenuInit(void)
         0
     };
 
-    static const char *quality_items[] =
+    static const char *sound_items[] =
     {
-        "normal", "high", 0
+        "openal", "sdl", 0
     };
 
     static const char *yesno_names[] =
@@ -2452,9 +2494,9 @@ Options_MenuInit(void)
     s_options_quality_list.generic.type = MTYPE_SPINCONTROL;
     s_options_quality_list.generic.x = 0;
     s_options_quality_list.generic.y = (y += 10);
-    s_options_quality_list.generic.name = "sound quality";
-    s_options_quality_list.generic.callback = UpdateSoundQualityFunc;
-    s_options_quality_list.itemnames = quality_items;
+    s_options_quality_list.generic.name = "sound backend";
+    s_options_quality_list.generic.callback = UpdateSoundBackendFunc;
+    s_options_quality_list.itemnames = sound_items;
 
     s_options_sensitivity_slider.generic.type = MTYPE_SLIDER;
     s_options_sensitivity_slider.generic.x = 0;
@@ -3120,10 +3162,27 @@ static char mods_statusbar[64];
 static char **modnames = NULL;
 static int nummods;
 
+void
+Mods_NamesFinish(void)
+{
+    if (modnames)
+    {
+        int i;
+
+        for (i = 0; i < nummods; i ++)
+        {
+            free(modnames[i]);
+        }
+
+        free(modnames);
+        modnames = NULL;
+    }
+}
+
 static void
 Mods_NamesInit(void)
 {
-    /* initialize list of mods once, reuse it afterwards (=> it isn't freed) */
+    /* initialize list of mods once, reuse it afterwards */
     if (modnames == NULL)
     {
         modnames = FS_ListMods(&nummods);
@@ -3505,7 +3564,7 @@ static qboolean menukeyitem_delete = false;
 static void
 PromptDeleteSaveFunc(menuframework_s *m)
 {
-	menucommon_s *item = Menu_ItemAtCursor(m);
+	const menucommon_s *item = Menu_ItemAtCursor(m);
 	if (item == NULL || item->type != MTYPE_ACTION)
 	{
 		return;
@@ -3566,8 +3625,6 @@ Create_Savestrings(void)
 {
 	int i;
 	fileHandle_t f;
-	char name[MAX_OSPATH];
-	char tmp[32]; // Same length as m_quicksavestring-
 
 	// The quicksave slot...
 	FS_FOpenFile("save/quick/server.ssv", &f, true);
@@ -3579,6 +3636,8 @@ Create_Savestrings(void)
 	}
 	else
 	{
+		char tmp[32]; // Same length as m_quicksavestring-
+
 		FS_Read(tmp, sizeof(tmp), f);
 		FS_FCloseFile(f);
 
@@ -3601,6 +3660,8 @@ Create_Savestrings(void)
 	// ... and everything else.
 	for (i = 0; i < MAX_SAVESLOTS; i++)
 	{
+		char name[MAX_OSPATH];
+
 		Com_sprintf(name, sizeof(name), "save/save%i/server.ssv", m_loadsave_page * MAX_SAVESLOTS + i);
 		FS_FOpenFile(name, &f, true);
 
@@ -3984,7 +4045,7 @@ static char local_server_netadr_strings[MAX_LOCAL_SERVERS][80];
 void
 M_AddToServerList(netadr_t adr, char *info)
 {
-	char *s;
+	const char *s;
 	int i;
 
 	if (m_num_servers == MAX_LOCAL_SERVERS)
@@ -4214,7 +4275,6 @@ StartServerActionFunc(void *self)
     char startmap[1024];
     float timelimit;
     float fraglimit;
-    float capturelimit;
     float maxclients;
     char *spot;
 
@@ -4226,6 +4286,8 @@ StartServerActionFunc(void *self)
 
     if (M_IsGame("ctf"))
     {
+        float capturelimit;
+
         capturelimit = (float)strtod(s_capturelimit_field.buffer, (char **)NULL);
         Cvar_SetValue("capturelimit", ClampCvar(0, capturelimit, capturelimit));
     }
@@ -4596,7 +4658,7 @@ static menulist_s s_no_spheres_box;
 static void
 DMFlagCallback(void *self)
 {
-    menulist_s *f = (menulist_s *)self;
+    const menulist_s *f = (menulist_s *)self;
     int flags;
     int bit = 0;
 
@@ -5070,7 +5132,7 @@ static menulist_s s_allow_download_sounds_box;
 static void
 DownloadCallback(void *self)
 {
-    menulist_s *f = (menulist_s *)self;
+    const menulist_s *f = (menulist_s *)self;
 
     if (f == &s_allow_download_box)
     {
@@ -5238,30 +5300,34 @@ AddressBook_MenuInit(void)
 
     for (i = 0; i < NUM_ADDRESSBOOK_ENTRIES; i++)
     {
-        cvar_t *adr;
+		menufield_s *f;
+        const cvar_t *adr;
         char buffer[20];
 
         Com_sprintf(buffer, sizeof(buffer), "adr%d", i);
 
         adr = Cvar_Get(buffer, "", CVAR_ARCHIVE);
 
-        s_addressbook_fields[i].generic.type = MTYPE_FIELD;
-        s_addressbook_fields[i].generic.name = 0;
-        s_addressbook_fields[i].generic.callback = 0;
-        s_addressbook_fields[i].generic.x = 0;
-        s_addressbook_fields[i].generic.y = i * 18 + 0;
-        s_addressbook_fields[i].generic.localdata[0] = i;
-        s_addressbook_fields[i].cursor = 0;
-        s_addressbook_fields[i].length = 60;
-        s_addressbook_fields[i].visible_length = 30;
+		f = &s_addressbook_fields[i];
 
-        strcpy(s_addressbook_fields[i].buffer, adr->string);
+        f->generic.type = MTYPE_FIELD;
+        f->generic.name = 0;
+        f->generic.callback = 0;
+        f->generic.x = 0;
+        f->generic.y = i * 18 + 0;
+        f->generic.localdata[0] = i;
 
-        Menu_AddItem(&s_addressbook_menu, &s_addressbook_fields[i]);
+        f->length = 60;
+        f->visible_length = 30;
+
+        Q_strlcpy(f->buffer, adr->string, f->length);
+        f->cursor = strlen(f->buffer);
+
+        Menu_AddItem(&s_addressbook_menu, f);
     }
 }
 
-const char *
+static const char *
 AddressBook_MenuKey(int key)
 {
     if (key == K_ESCAPE)
@@ -5359,14 +5425,17 @@ ModelCallback(void *unused)
 }
 
 // returns true if icon .pcx exists for skin .pcx
-static qboolean IconOfSkinExists(char* skin, char** pcxfiles, int npcxfiles)
+static qboolean
+IconOfSkinExists(const char* skin, char** pcxfiles, int npcxfiles,
+	const char *ext)
 {
     int i;
     char scratch[1024];
 
     strcpy(scratch, skin);
     *strrchr(scratch, '.') = 0;
-    strcat(scratch, "_i.pcx");
+	strcat(scratch, "_i.");
+	strcat(scratch, ext);
 
     for (i = 0; i < npcxfiles; i++)
     {
@@ -5407,13 +5476,14 @@ StripExtension(char* path)
 static qboolean
 ContainsFile(char* path, char* file)
 {
-    char pathname[MAX_QPATH];
     int handle = 0;
-    int length = 0;
     qboolean result = false;
 
     if (path != 0 && file != 0)
     {
+        char pathname[MAX_QPATH];
+        int length = 0;
+
         Com_sprintf(pathname, MAX_QPATH, "%s/%s", path, file);
 
         length = FS_FOpenFile(pathname, &handle, false);
@@ -5495,19 +5565,19 @@ PlayerModelFree()
             while (s_skinnames[s_modelname.num].num-- > 0)
             {
                 s = s_skinnames[s_modelname.num].data[s_skinnames[s_modelname.num].num];
-                if (s != 0)
+                if (s != NULL)
                 {
                     free(s);
-                    s = 0;
+                    s = NULL;
                 }
             }
 
             s = (char*)s_skinnames[s_modelname.num].data;
 
-            if (s != 0)
+            if (s != NULL)
             {
                 free(s);
-                s = 0;
+                s = NULL;
             }
 
             s_skinnames[s_modelname.num].data = 0;
@@ -5515,19 +5585,19 @@ PlayerModelFree()
 
             // models
             s = s_modelname.data[s_modelname.num];
-            if (s != 0)
+            if (s != NULL)
             {
                 free(s);
-                s = 0;
+                s = NULL;
             }
         }
     }
 
     s = (char*)s_modelname.data;
-    if (s != 0)
+    if (s != NULL)
     {
         free(s);
-        s = 0;
+        s = NULL;
     }
 
     s_modelname.data = 0;
@@ -5537,18 +5607,17 @@ PlayerModelFree()
     while (s_directory.num-- > 0)
     {
         s = s_directory.data[s_directory.num];
-        if (s != 0)
+        if (s != NULL)
         {
             free(s);
-            s = 0;
+            s = NULL;
         }
     }
 
     s = (char*)s_directory.data;
-    if (s != 0)
+    if (s != NULL)
     {
         free(s);
-        s = 0;
     }
 
     s_directory.data = 0;
@@ -5561,11 +5630,12 @@ PlayerModelFree()
 static qboolean
 PlayerDirectoryList(void)
 {
-    char* findname = "players/*";
+	const char* findname = "players/*";
     char** list = NULL;
-    int num = 0;
+	int num = 0, dirnum = 0;
+	size_t listoff = strlen(findname);
 
-    // get a list of "players" subdirectories
+	/* get a list of "players" subdirectories or files */
     if ((list = FS_ListFiles2(findname, &num, 0, 0)) == NULL)
     {
         return false;
@@ -5582,10 +5652,13 @@ PlayerDirectoryList(void)
     YQ2_COM_CHECK_OOM(data, "calloc()", num * sizeof(char*))
 
     s_directory.data = data;
-    s_directory.num = num;
 
     for (int i = 0; i < num; ++i)
     {
+		char dirname[MAX_QPATH];
+		const char *dirsize;
+		int j;
+
         // last element of FS_FileList maybe null
         if (list[i] == 0)
         {
@@ -5594,15 +5667,47 @@ PlayerDirectoryList(void)
 
         ReplaceCharacters(list[i], '\\', '/');
 
+		/*
+		 * search slash after "players/" and use only directory name
+		 * pak search does not return directory names, only files in
+		 * directories
+		 */
+		dirsize = strchr(list[i] + listoff, '/');
+		if (dirsize)
+		{
+			int dirnamelen = 0;
+
+			dirnamelen = dirsize - list[i];
+			memcpy(dirname, list[i], dirnamelen);
+			dirname[dirnamelen] = 0;
+		}
+		else
+		{
+			strcpy(dirname, list[i]);
+		}
+
+		for (j = 0; j < dirnum; j++)
+		{
+			if (!strcmp(dirname, data[j]))
+			{
+				break;
+			}
+		}
+
+		if (j == dirnum)
+		{
         char* s = (char*)malloc(MAX_QPATH);
-        char* t = list[i];
 
         YQ2_COM_CHECK_OOM(s, "malloc()", MAX_QPATH * sizeof(char))
         
-        Q_strlcpy(s, t, MAX_QPATH);
-        data[i] = s;
+			Q_strlcpy(s, dirname, MAX_QPATH);
+			data[dirnum] = s;
+			dirnum ++;
+		}
     }
     
+	s_directory.num = dirnum;
+
     // free file list
     FS_FreeList(list, num);
 
@@ -5612,15 +5717,114 @@ PlayerDirectoryList(void)
     return true;
 }
 
-// list all valid player models.
-// call PlayerDirectoryList first.
-// model names is always allocated MAX_PLAYERMODELS
+static char**
+HasSkinInDir(const char *dirname, const char *ext, int *num)
+{
+	char findname[MAX_QPATH];
+
+	strcpy(findname, dirname);
+	strcat(findname, "/*.");
+	strcat(findname, ext);
+
+	return FS_ListFiles2(findname, num, 0, 0);
+}
+
+static char**
+HasSkinsInDir(const char *dirname, int *num)
+{
+	char **list_png, **list_pcx;
+	char **curr = NULL, **list = NULL;
+	int num_png, num_pcx;
+	size_t dirname_size;
+
+	*num = 0;
+	/* dir name size plus one for skip slash */
+	dirname_size = strlen(dirname) + 1;
+
+	list_png = HasSkinInDir(dirname, "png", &num_png);
+	if (list_png)
+	{
+		*num += num_png - 1;
+	}
+
+	list_pcx = HasSkinInDir(dirname, "pcx", &num_pcx);
+	if (list_pcx)
+	{
+		*num += num_pcx - 1;
+	}
+
+	if (num)
+	{
+		curr = list = malloc(sizeof(char *) * (*num + 1));
+		YQ2_COM_CHECK_OOM(list, "realloc()", (size_t)sizeof(char *) * (*num + 1))
+
+		if (list_png)
+		{
+			int j;
+
+			for (j = 0; j < num_png; j ++)
+			{
+				if (list_png[j])
+				{
+					if (!strchr(list_png[j] + dirname_size, '/'))
+					{
+						*curr = list_png[j];
+						curr++;
+					}
+					else
+					{
+						/* unused in final response */
+						free(list_png[j]);
+					}
+				}
+			}
+
+			free(list_png);
+		}
+
+		if (list_pcx)
+		{
+			int j;
+
+			for (j = 0; j < num_pcx; j ++)
+			{
+				if (list_pcx[j])
+				{
+					if (!strchr(list_pcx[j] + dirname_size, '/'))
+					{
+						*curr = list_pcx[j];
+						curr++;
+					}
+					else
+					{
+						/* unused in final response */
+						free(list_pcx[j]);
+					}
+				}
+			}
+
+			free(list_pcx);
+		}
+
+		*curr = NULL;
+		curr++;
+		*num = curr - list;
+	}
+
+	return list;
+}
+
+/*
+ * list all valid player models.
+ * call PlayerDirectoryList first.
+ * model names is always allocated MAX_PLAYERMODELS
+ */
 static qboolean
 PlayerModelList(void)
 {
-    char findname[MAX_QPATH];
     char** list = NULL;
     char** data = NULL;
+	int i;
     int num = 0;
     int mdl = 0;
     qboolean result = true;
@@ -5632,8 +5836,8 @@ PlayerModelList(void)
     s_modelname.data = data;
     s_modelname.num = 0;
 
-    // verify the existence of at least one pcx skin
-    for (int i = 0; i < s_directory.num; ++i)
+	/* verify the existence of at least one pcx skin */
+	for (i = 0; i < s_directory.num; ++i)
     {
         char* s = NULL;
         char* t = NULL;
@@ -5644,37 +5848,38 @@ PlayerModelList(void)
             continue;
         }
 
-        strcpy(findname, s_directory.data[i]);
-        strcat(findname, "/*.pcx");
+		/* contains triangle .md2 model */
+		s = s_directory.data[i];
 
-        // get a list of pcx files
-        if ((list = FS_ListFiles2(findname, &num, 0, 0)) == NULL)
+		if (ContainsFile(s, "tris.md2") == false)
         {
+			/* invalid player model */
             continue;
         }
 
-        // contains triangle .md2 model
-        s = s_directory.data[i];
-        
-        if (ContainsFile(s, "tris.md2") == false)
+		list = HasSkinsInDir(s_directory.data[i], &num);
+		/* get a list of pcx files */
+		if (!num || !list)
         {
-            continue;            // invalid player model
+			continue;
         }
 
-        // count valid skins, which consist of a skin with a matching "_i" icon
+		/* count valid skins, which consist of a skin with a matching "_i" icon */
         s_skinnames[mdl].num = 0;
 
         for (int j = 0; j < num; j++)
         {
-            // last element of FS_FileList maybe null
+			/* last element of FS_FileList maybe null */
             if (list[j] == 0)
             {
                 break;
             }
 
-            if (!strstr(list[j], "_i.pcx"))
+			if (!strstr(list[j], "_i.png") ||
+				!strstr(list[j], "_i.pcx"))
             {
-                if (IconOfSkinExists(list[j], list, num - 1))
+				if (IconOfSkinExists(list[j], list, num - 1, "png") ||
+					IconOfSkinExists(list[j], list, num - 1, "pcx"))
                 {
                     s_skinnames[mdl].num++;
                 }
@@ -5688,7 +5893,7 @@ PlayerModelList(void)
             continue;
         }
 
-        // malloc skinnames
+		/* malloc skinnames */
         data = (char**)malloc((s_skinnames[mdl].num + 1) * sizeof(char*));
         YQ2_COM_CHECK_OOM(data, "malloc()", (s_skinnames[mdl].num + 1) * sizeof(char*))
         memset(data, 0, (s_skinnames[mdl].num + 1) * sizeof(char*));
@@ -5696,18 +5901,20 @@ PlayerModelList(void)
         s_skinnames[mdl].data = data;
         s_skinnames[mdl].num = 0;
 
-        // duplicate strings
+		/* duplicate strings */
         for (int k = 0; k < num; ++k)
         {
-            // last element of FS_FileList maybe null
+			/* last element of FS_FileList maybe null */
             if (list[k] == 0)
             {
                 break;
             }
 
-            if (!strstr(list[k], "_i.pcx"))
+			if (!strstr(list[k], "_i.png") ||
+				!strstr(list[k], "_i.pcx"))
             {
-                if (IconOfSkinExists(list[k], list, num - 1))
+				if (IconOfSkinExists(list[k], list, num - 1, "png") ||
+					IconOfSkinExists(list[k], list, num - 1, "pcx"))
                 {
                     ReplaceCharacters(list[k], '\\', '/');
 
@@ -5715,6 +5922,7 @@ PlayerModelList(void)
 
                     l = strlen(t) + 1;
                     s = (char*)malloc(l);
+
                     YQ2_COM_CHECK_OOM(s, "malloc()", l * sizeof(char))
 
                     StripExtension(t);
@@ -5725,10 +5933,10 @@ PlayerModelList(void)
             }
         }
 
-        // sort skin names alphabetically
+		/* sort skin names alphabetically */
         qsort(s_skinnames[mdl].data, s_skinnames[mdl].num, sizeof(char**), Q_sort_stricmp);
 
-        // at this point we have a valid player model
+		/* at this point we have a valid player model */
         t = strrchr(s_directory.data[i], '/');
         l = strlen(t) + 1;
         s = (char*)malloc(l);
@@ -5740,7 +5948,7 @@ PlayerModelList(void)
         s_modelname.data[s_modelname.num++] = s;
         mdl = s_modelname.num;
 
-        // free file list
+		/* free file list */
         FS_FreeList(list, num);
     }
 
@@ -5777,7 +5985,8 @@ PlayerConfig_ScanDirectories(void)
     return result;
 }
 
-void ListModels_f(void)
+static void
+ListModels_f(void)
 {
     PlayerConfig_ScanDirectories();
 
@@ -5796,7 +6005,7 @@ static qboolean
 PlayerConfig_MenuInit(void)
 {
     extern cvar_t *name;
-    extern cvar_t *skin;
+    const extern cvar_t *skin;
     cvar_t *hand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
     static const char *handedness[] = { "right", "left", "center", 0 };
     char mdlname[MAX_QPATH];
@@ -5836,7 +6045,7 @@ PlayerConfig_MenuInit(void)
 
     for (i = 0; i < s_skinnames[mdlindex].num; i++)
     {
-        char* names = s_skinnames[mdlindex].data[i];
+        const char* names = s_skinnames[mdlindex].data[i];
         if (Q_stricmp(names, imgname) == 0)
         {
             imgindex = i;
@@ -6098,8 +6307,8 @@ PlayerConfig_MenuKey(int key)
     key = Key_GetMenuKey(key);
     if (key == K_ESCAPE)
     {
+        const char* name = NULL;
         char skin[MAX_QPATH];
-        char* name = NULL;
         char* mdl = NULL;
         char* img = NULL;
 
@@ -6219,6 +6428,7 @@ M_Init(void)
     Cmd_AddCommand("menu_gyro", M_Menu_Gyro_f);
     Cmd_AddCommand("menu_buttons", M_Menu_ControllerButtons_f);
     Cmd_AddCommand("menu_altbuttons", M_Menu_ControllerAltButtons_f);
+    Cmd_AddCommand("menu_sticks", M_Menu_Stick_f);
     Cmd_AddCommand("menu_quit", M_Menu_Quit_f);
 
     /* initialize the server address book cvars (adr0, adr1, ...)

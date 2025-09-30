@@ -862,9 +862,9 @@ void GLimp_Startup(void)
 #if !defined(__ANDROID__) //karin: enable multithreading-rendering from command cvar
     multithreadActive = cvarSystem->GetCVarBool("r_multithread");
     if(multithreadActive)
-        Sys_Printf("[Harmattan]: Enable multi-threading rendering\n");
+        Sys_Printf("Enable multi-threading rendering\n");
     else
-        Sys_Printf("[Harmattan]: Disable multi-threading rendering\n");
+        Sys_Printf("Disable multi-threading rendering\n");
 #endif
 #endif
 #ifdef _OPENGLES3
@@ -872,36 +872,34 @@ void GLimp_Startup(void)
     const char *openglVersion = cvarSystem->GetCVarString("harm_r_openglVersion");
     if(openglVersion && openglVersion[0])
     {
-//        extern int gl_version;
-//        extern bool USING_GLES3;
-        Sys_Printf("[Harmattan]: harm_r_openglVersion = %s\n", openglVersion);
+        Sys_Printf("harm_r_openglVersion = %s\n", openglVersion);
         if(!idStr::Icmp(GL_VERSION_NAME_GL_ES2, openglVersion))
         {
             gl_version = GL_VERSION_GL_ES2;
             USING_GLES3 = false;
             USING_GL = false;
-            Sys_Printf("[Harmattan]: Using OpenGL ES2\n");
+            Sys_Printf("Using OpenGL ES2\n");
         }
         else if(!idStr::Icmp(GL_VERSION_NAME_GL_CORE, openglVersion))
         {
             gl_version = GL_VERSION_GL_CORE;
             USING_GLES3 = true;
             USING_GL = true;
-            Sys_Printf("[Harmattan]: Using OpenGL Core\n");
+            Sys_Printf("Using OpenGL Core\n");
         }
         else if(!idStr::Icmp(GL_VERSION_NAME_GL_COMPATIBILITY, openglVersion))
         {
             gl_version = GL_VERSION_GL_COMPATIBILITY;
             USING_GLES3 = true;
             USING_GL = true;
-            Sys_Printf("[Harmattan]: Using OpenGL Compatibility\n");
+            Sys_Printf("Using OpenGL Compatibility\n");
         }
         else // GL_VERSION_NAME_GL_ES3
         {
             gl_version = GL_VERSION_GL_ES3;
             USING_GLES3 = true;
             USING_GL = false;
-            Sys_Printf("[Harmattan]: Using OpenGL ES3\n");
+            Sys_Printf("Using OpenGL ES3\n");
         }
     }
 #endif

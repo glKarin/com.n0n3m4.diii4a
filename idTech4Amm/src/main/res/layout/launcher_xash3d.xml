@@ -24,11 +24,16 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
         <RadioButton
-                android:id="@+id/xash3d_sv_cl_hlsdk"
+                android:id="@+id/xash3d_sv_cl_auto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="HLSDK" />
+                android:text="@string/automatic" />
+        <RadioButton
+                android:id="@+id/xash3d_sv_cl_hl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HL" />
         <RadioButton
                 android:id="@+id/xash3d_sv_cl_cs16"
                 android:layout_width="wrap_content"

@@ -68,6 +68,13 @@ void idRenderWorldLocal::FreeWorld()
 		if (area->entityRefs.areaNext != &area->entityRefs) {
 			common->Error("FreeWorld: unexpected remaining entityRefs");
 		}
+#ifdef _RAVEN
+#ifdef _RAVEN_BSE
+        if (area->effectRefs.areaNext != &area->effectRefs) {
+            common->Error("FreeWorld: unexpected remaining effectRefs");
+        }
+#endif
+#endif
 	}
 
 	if (portalAreas) {
@@ -166,7 +173,7 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
     if (!src->PeekTokenString("{") && !src->PeekTokenString("}"))
     {
         int hasSky = src->ParseInt();
-		(static_cast<idRenderModelStatic *>(model))->SetHasSky(hasSky ? true : false);
+		model->SetHasSky(hasSky ? true : false);
     }
 // jmarshall end
 #endif
@@ -190,9 +197,10 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 
 		for (j = 0 ; j < tri->numVerts ; j++) {
 #ifdef _RAVEN // quake4 proc file
-#if 1
-            float	vec[12] = { 255.0f };
+            float	vec[12];
             int numFloat = src->Parse1DMatrixOpenEnded( 12, vec );
+			if ( numFloat != 8 && numFloat != 12 )
+				src->Error("R_ParseModel: bad vertex read");
 
 			tri->verts[j].xyz[0] = vec[0];
 			tri->verts[j].xyz[1] = vec[1];
@@ -202,42 +210,21 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 			tri->verts[j].normal[0] = vec[5];
 			tri->verts[j].normal[1] = vec[6];
 			tri->verts[j].normal[2] = vec[7];
-			if(numFloat == 12) //karin: color???
+			if(numFloat == 12) //karin: color
 			{
-				tri->verts[j].color[0] = (byte)vec[8];
-				tri->verts[j].color[1] = (byte)vec[9];
-				tri->verts[j].color[2] = (byte)vec[10];
-				tri->verts[j].color[3] = (byte)vec[11];
-			}
-#else
-// jmarshall - quake 4 proc format
-
-            src->ExpectTokenString("(");
-
-            tri->verts[j].xyz[0] = src->ParseFloat();
-            tri->verts[j].xyz[1] = src->ParseFloat();
-            tri->verts[j].xyz[2] = src->ParseFloat();
-            tri->verts[j].st[0] = src->ParseFloat();
-            tri->verts[j].st[1] = src->ParseFloat();
-            tri->verts[j].normal[0] = src->ParseFloat();
-            tri->verts[j].normal[1] = src->ParseFloat();
-            tri->verts[j].normal[2] = src->ParseFloat();
-
-            if (src->PeekTokenString(")"))
-            {
-                src->ExpectTokenString(")");
+				tri->verts[j].color[0] = (byte)(vec[8]);
+				tri->verts[j].color[1] = (byte)(vec[9]);
+				tri->verts[j].color[2] = (byte)(vec[10]);
+				tri->verts[j].color[3] = (byte)(vec[11]);
             }
             else
             {
-                while (!src->PeekTokenString(")"))
-                {
-                    src->ParseFloat(); // jmarshall: not sure what the extra values here are for.
-                }
-
-                src->ExpectTokenString(")");
+				// *(int *)tri->verts[j].color = -16777216;
+				tri->verts[j].color[0] = 0;
+				tri->verts[j].color[1] = 0;
+				tri->verts[j].color[2] = 0;
+				tri->verts[j].color[3] = 255;
             }
-// jmarshall end
-#endif
 #else
 			float	vec[8];
 
@@ -359,6 +346,13 @@ void idRenderWorldLocal::SetupAreaRefs()
 		portalAreas[i].entityRefs.areaNext =
 		        portalAreas[i].entityRefs.areaPrev =
 		                &portalAreas[i].entityRefs;
+#ifdef _RAVEN
+#ifdef _RAVEN_BSE
+        portalAreas[i].effectRefs.areaNext =
+                portalAreas[i].effectRefs.areaPrev =
+                        &portalAreas[i].effectRefs;
+#endif
+#endif
 	}
 }
 
@@ -611,6 +605,22 @@ void idRenderWorldLocal::FreeDefs()
 			entityDefs[i] = NULL;
 		}
 	}
+
+#ifdef _RAVEN
+#ifdef _RAVEN_BSE
+    // free all effectDefs
+    for ( i = 0; i < effectDefs.Num(); ++i )
+    {
+        rvRenderEffectLocal	*effect;
+        effect = effectDefs[i];
+        if ( effect && effect->world == this )
+        {
+            FreeEffectDef(i);
+            effectDefs[i] = NULL;
+        }
+    }
+#endif
+#endif
 }
 
 /*
@@ -704,9 +714,9 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 	bool bAppending = dwMapName && dwMapName[0] && session->ShouldAppendLevel() && idStr::Icmp(name, dwMapName);
 	numAppendPortalAreas = bAppending ? 1 : 0;
 	if(bAppending)
-		common->Printf("[Harmattan]: Appending deathwalk proc: %s of %s\n", dwMapName, name);
+		Sys_Printf("Appending deathwalk proc: %s of %s\n", dwMapName, name);
 	else
-		common->Printf("[Harmattan]: no deathwalk map in %s\n", name);
+		Sys_Printf("No deathwalk map in %s\n", name);
 #endif
 #endif
 
@@ -766,12 +776,12 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 	{
 		filename = dwMapName;
 		filename.SetFileExtension(PROC_FILE_EXT);
-		common->Printf("[Harmattan]: Appending deathwalk proc: %s\n", filename.c_str());
+		Sys_Printf("Appending deathwalk proc: %s\n", filename.c_str());
 		src = new idLexer(filename, LEXFL_NOSTRINGCONCAT | LEXFL_NODOLLARPRECOMPILE);
 
 		if (!src->IsLoaded()) {
 			numAppendPortalAreas = 0;
-			common->Warning("[Harmattan]: Appending deathwalk proc -> idRenderWorldLocal::InitFromMap: %s not found\n", filename.c_str());
+			Sys_Printf("Appending deathwalk proc -> idRenderWorldLocal::InitFromMap: %s not found\n", filename.c_str());
 			break;
 		}
 
@@ -784,7 +794,7 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 
 		if (!src->ReadToken(&token) || token.Icmp(PROC_FILE_ID)) {
 			numAppendPortalAreas = 0;
-			common->Warning("[Harmattan]: Appending deathwalk proc -> idRenderWorldLocal::InitFromMap: bad id '%s' instead of '%s'\n", token.c_str(), PROC_FILE_ID);
+			Sys_Printf("Appending deathwalk proc -> idRenderWorldLocal::InitFromMap: bad id '%s' instead of '%s'\n", token.c_str(), PROC_FILE_ID);
 			break;
 		}
 
@@ -801,7 +811,7 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 				src->ExpectAnyToken(&tmp);
 				if(!idStr::Icmpn(tmp, "_area", 5))
 				{
-					common->Printf("[Harmattan]: Appending deathwalk proc: parse area(%s) to portal area(%d)\n", tmp.c_str(), numPortalAreas - 1);
+					Sys_Printf("Appending deathwalk proc: parse area(%s) to portal area(%d)\n", tmp.c_str(), numPortalAreas - 1);
 					int areaNo = atoi(tmp.c_str() + 5);
 					tmp = va("_area%d", numPortalAreas - 1);
 				}
@@ -840,22 +850,22 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 				continue;
 			}
 
-			src->Error("[Harmattan]: Appending deathwalk proc -> idRenderWorldLocal::InitFromMap: bad token \"%s\"", token.c_str());
+			src->Error("Appending deathwalk proc -> idRenderWorldLocal::InitFromMap: bad token \"%s\"", token.c_str());
 		}
 
 		//k: realloc nodes, add 6 nodes of deathwalk map to front, 6 nodes using deathwalk map bounds min/max points
 		idRenderModel *model = renderModelManager->CheckModel(va("_area%i", numPortalAreas - 1));
-		common->Printf("[Harmattan]: Appending deathwalk proc: find area model(%d %s)\n", numPortalAreas - 1, model ? model->Name() : "null");
+		Sys_Printf("Appending deathwalk proc: find area model(%d %s)\n", numPortalAreas - 1, model ? model->Name() : "null");
 		if(model)
 		{
 			int numAreaNodes_orig = numAreaNodes;
 			numAreaNodes += 6;
-			common->Printf("[Harmattan]: Appending deathwalk proc: push 6 nodes to list front(%d -> %d)\n", numAreaNodes_orig, numAreaNodes);
+			Sys_Printf("Appending deathwalk proc: push 6 nodes to list front(%d -> %d)\n", numAreaNodes_orig, numAreaNodes);
 
 			areaNode_t *areaNodes_orig = areaNodes;
 			areaNodes = (areaNode_t *)R_ClearedStaticAlloc(numAreaNodes * sizeof(areaNodes[0]));
 
-			common->Printf("[Harmattan]: Appending deathwalk proc: copying area nodes(%d)\n", numAreaNodes_orig);
+			Sys_Printf("Appending deathwalk proc: copying area nodes(%d)\n", numAreaNodes_orig);
 			for (int i = 0 ; i < numAreaNodes_orig ; i++) {
 				areaNode_t	*node, *node_orig;
 
@@ -879,7 +889,7 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 			areaNode_t	*node;
 			idVec3 dir;
 
-			common->Printf("[Harmattan]: Appending deathwalk proc: area bounds(%s, %s)\n", bounds[0].ToString(), bounds[1].ToString());
+			Sys_Printf("Appending deathwalk proc: area bounds(%s, %s)\n", bounds[0].ToString(), bounds[1].ToString());
 
 			// 0: positive X direction, bounds min-X = next node(1), origin first node(now index is 6)
 			node = &areaNodes[0];
@@ -887,7 +897,7 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 			node->plane = idPlane(dir, bounds[0][0]);
 			node->children[0] = 1;
 			node->children[1] = 6;
-			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 0, node->plane.ToString(), node->children[0], node->children[1]);
+			Sys_Printf("Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 0, node->plane.ToString(), node->children[0], node->children[1]);
 
 			// 1: positive Y direction, bounds min-Y = next node(2), origin first node(now index is 6)
 			node = &areaNodes[1];
@@ -895,7 +905,7 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 			node->plane = idPlane(dir, bounds[0][1]);
 			node->children[0] = 2;
 			node->children[1] = 6;
-			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 1, node->plane.ToString(), node->children[0], node->children[1]);
+			Sys_Printf("Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 1, node->plane.ToString(), node->children[0], node->children[1]);
 
 			// 2: positive Z direction, bounds min-Z = next node(3), origin first node(now index is 6)
 			node = &areaNodes[2];
@@ -903,7 +913,7 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 			node->plane = idPlane(dir, bounds[0][2]);
 			node->children[0] = 3;
 			node->children[1] = 6;
-			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 2, node->plane.ToString(), node->children[0], node->children[1]);
+			Sys_Printf("Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 2, node->plane.ToString(), node->children[0], node->children[1]);
 
 			// 3: negative X direction, bounds max-X = next node(4), origin first node(now index is 6)
 			node = &areaNodes[3];
@@ -911,7 +921,7 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 			node->plane = idPlane(dir, -bounds[1][0]);
 			node->children[0] = 4;
 			node->children[1] = 6;
-			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 3, node->plane.ToString(), node->children[0], node->children[1]);
+			Sys_Printf("Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 3, node->plane.ToString(), node->children[0], node->children[1]);
 
 			// 4: negative Y direction, bounds max-Y = next node(5), origin first node(now index is 6)
 			node = &areaNodes[4];
@@ -919,7 +929,7 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 			node->plane = idPlane(dir, -bounds[1][1]);
 			node->children[0] = 5;
 			node->children[1] = 6;
-			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 4, node->plane.ToString(), node->children[0], node->children[1]);
+			Sys_Printf("Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 4, node->plane.ToString(), node->children[0], node->children[1]);
 
 			// 5: negative Z direction, bounds max-Z = deathwalk portal area index, origin first node(now index is 6)
 			node = &areaNodes[5];
@@ -927,10 +937,10 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 			node->plane = idPlane(dir, -bounds[1][2]);
 			node->children[0] = -1 - (numPortalAreas - 1);
 			node->children[1] = 6;
-			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 5, node->plane.ToString(), node->children[0], node->children[1]);
+			Sys_Printf("Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 5, node->plane.ToString(), node->children[0], node->children[1]);
 		}
 
-		common->Printf("[Harmattan]: Appending deathwalk proc finish\n");
+		Sys_Printf("Appending deathwalk proc finish\n");
 		break;
 	}
 	delete src;
@@ -1077,6 +1087,6 @@ bool idRenderWorldLocal::HasSkybox(int areaNum)
 		return false;
 
 	const idRenderModel *model = renderModelManager->CheckModel(va("_area%i", areaNum));
-	return model ? static_cast<const idRenderModelStatic *>(model)->GetHasSky() : false;
+	return model ? model->GetHasSky() : false;
 }
 #endif

@@ -684,6 +684,11 @@ Note: Usually grabbing is handled in idCommonLocal::Frame() -> Sys_GenerateEvent
 */
 void Sys_GrabMouseCursor(bool grabIt) {
 	int flags = grabIt ? (GRAB_GRABMOUSE | GRAB_HIDECURSOR | GRAB_RELATIVEMOUSE) : 0;
+#ifdef _IMGUI
+    if ( R_ImGui_IsRunning() && R_ImGui_IsGrabMouse() ) {
+        flags = 0;
+    }
+#endif
 
 	GLimp_GrabInput(flags);
 }
@@ -877,6 +882,9 @@ sysEvent_t Sys_GetEvent() {
 			res.evValue = key;
 			res.evValue2 = ev.key.state == SDL_PRESSED ? 1 : 0;
 
+#ifdef _IMGUI
+            if(!R_ImGui_IsRunning())
+#endif
 			kbd_polls.Append(kbd_poll_t(key, ev.key.state == SDL_PRESSED));
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
@@ -928,8 +936,14 @@ sysEvent_t Sys_GetEvent() {
 				res.evValue = ev.motion.xrel;
 				res.evValue2 = ev.motion.yrel;
 
+#ifdef _IMGUI
+                if(!R_ImGui_IsRunning()) {
+#endif
 				mouse_polls.Append(mouse_poll_t(M_DELTAX, ev.motion.xrel));
 				mouse_polls.Append(mouse_poll_t(M_DELTAY, ev.motion.yrel));
+#ifdef _IMGUI
+                }
+#endif
 #if 0 //k
 			} else {
 				res.evType = SE_MOUSE_ABS;
@@ -946,18 +960,20 @@ sysEvent_t Sys_GetEvent() {
 
 			if (ev.wheel.y > 0) {
 				res.evValue = K_MWHEELUP;
-				mouse_polls.Append(mouse_poll_t(M_DELTAZ, 1));
 #ifdef _IMGUI
                 if(R_ImGui_IsRunning())
                     ImGui_MouseWheelEvent(0, ev.wheel.y);
+                else
 #endif
+				mouse_polls.Append(mouse_poll_t(M_DELTAZ, 1));
 			} else if (ev.wheel.y < 0) {
 				res.evValue = K_MWHEELDOWN;
-				mouse_polls.Append(mouse_poll_t(M_DELTAZ, -1));
 #ifdef _IMGUI
                 if(R_ImGui_IsRunning())
                     ImGui_MouseWheelEvent(0, ev.wheel.y);
+                else
 #endif
+				mouse_polls.Append(mouse_poll_t(M_DELTAZ, -1));
 			}
 
 			res.evValue2 = 1;
@@ -972,14 +988,23 @@ sysEvent_t Sys_GetEvent() {
 			switch (ev.button.button) {
 			case SDL_BUTTON_LEFT:
 				res.evValue = K_MOUSE1;
+#ifdef _IMGUI
+                if(!R_ImGui_IsRunning())
+#endif
 				mouse_polls.Append(mouse_poll_t(M_ACTION1, ev.button.state == SDL_PRESSED ? 1 : 0));
 				break;
 			case SDL_BUTTON_MIDDLE:
 				res.evValue = K_MOUSE3;
+#ifdef _IMGUI
+                if(!R_ImGui_IsRunning())
+#endif
 				mouse_polls.Append(mouse_poll_t(M_ACTION3, ev.button.state == SDL_PRESSED ? 1 : 0));
 				break;
 			case SDL_BUTTON_RIGHT:
 				res.evValue = K_MOUSE2;
+#ifdef _IMGUI
+                if(!R_ImGui_IsRunning())
+#endif
 				mouse_polls.Append(mouse_poll_t(M_ACTION2, ev.button.state == SDL_PRESSED ? 1 : 0));
 				break;
 
@@ -987,11 +1012,17 @@ sysEvent_t Sys_GetEvent() {
 			case SDL_BUTTON_WHEELUP:
 				res.evValue = K_MWHEELUP;
 				if (ev.button.state == SDL_PRESSED)
+#ifdef _IMGUI
+                if(!R_ImGui_IsRunning())
+#endif
 					mouse_polls.Append(mouse_poll_t(M_DELTAZ, 1));
 				break;
 			case SDL_BUTTON_WHEELDOWN:
 				res.evValue = K_MWHEELDOWN;
 				if (ev.button.state == SDL_PRESSED)
+#ifdef _IMGUI
+                if(!R_ImGui_IsRunning())
+#endif
 					mouse_polls.Append(mouse_poll_t(M_DELTAZ, -1));
 				break;
 #endif
@@ -1002,6 +1033,9 @@ sysEvent_t Sys_GetEvent() {
 				{
 					int buttonIndex = ev.button.button - SDL_BUTTON_LEFT;
 					res.evValue = K_MOUSE1 + buttonIndex;
+#ifdef _IMGUI
+                    if(!R_ImGui_IsRunning())
+#endif
 					mouse_polls.Append( mouse_poll_t( M_ACTION1 + buttonIndex, ev.button.state == SDL_PRESSED ? 1 : 0 ) );
 				}
 				else
@@ -1085,12 +1119,6 @@ static void handleMouseGrab() {
 			showCursor = false;
 			grabMouse = relativeMouse = true;
 		}
-#ifdef _IMGUI
-        if ( R_ImGui_IsRunning() && R_ImGui_IsGrabMouse() ) {
-            showCursor = true;
-            relativeMouse = grabMouse = false;
-        }
-#endif
 
 		in_relativeMouseMode = relativeMouse;
 
@@ -1103,6 +1131,12 @@ static void handleMouseGrab() {
 	} else {
 		in_relativeMouseMode = false;
 	}
+#ifdef _IMGUI
+    if ( R_ImGui_IsRunning() && R_ImGui_IsGrabMouse() ) {
+        showCursor = true;
+        grabMouse = relativeMouse = false;
+    }
+#endif
 
 	int flags = 0;
 	if ( !showCursor )

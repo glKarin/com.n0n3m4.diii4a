@@ -307,16 +307,17 @@ void Script_NamedEvent(idWindow* window, idList<idGSWinVar>* src)
     int p = idStr::FindText(parm->c_str(), "::");
     if (p <= 0)
     {
-        window->RunNamedEvent(parm->c_str());
+        // window->RunNamedEvent(parm->c_str()); (version 1)
+		window->GetGui()->HandleNamedEvent(parm->c_str()); //k: Q4D 2025
     }
     else
     {
-        idStr windowName = parmStr.Mid(0, p);
-        idStr varName = parmStr.Mid(p + 2, parmStr.Length() - (p + 2));
+        idStr windowName = parmStr.Left(p);
+        idStr varName = parmStr.Right(parmStr.Length() - (p + 2));
 
         //k drawWin_t* childWindow = window->FindChildByName(windowName);
         drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(windowName);
-        if (childWindow)
+        if (childWindow && childWindow->win/* support idSimpleWindow now */)
         {
             childWindow->win->RunNamedEvent(varName);
         }
@@ -339,7 +340,7 @@ void Script_StopTransitions(idWindow* window, idList<idGSWinVar>* src)
 
     //k drawWin_t* childWindow = window->FindChildByName(parmStr);
     drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(parmStr);
-    if (childWindow)
+    if (childWindow && childWindow->win/* support idSimpleWindow now */)
     {
         childWindow->win->ClearTransitions();
     }
@@ -376,7 +377,7 @@ void Script_ResetVideo(idWindow* window, idList<idGSWinVar>* src)
             childWindow->win->ResetCinematics();
             childWindow->win->EvalRegs(-1, true);
         }
-        else
+        else // if(childWindow->simp)
         {
             childWindow->simp->ResetCinematics();
         }
@@ -408,11 +409,37 @@ void Script_NonInteractive(idWindow* window, idList<idGSWinVar>* src)
 Script_SetLightColor
 =========================
 */
-//k TODO
 void Script_SetLightColor(idWindow* window, idList<idGSWinVar>* src)
 {
-	(void)window;
-	(void)src;
+    idWinVar* parm = (*src)[0].var;
+	if(dynamic_cast<idWinStr*>(parm))
+	{
+		idStr parmStr = parm->c_str();
+		int p = idStr::FindText(parmStr.c_str(), "::");
+		if (p <= 0)
+		{
+			parm = window->GetWinVarByName(parmStr.c_str(), false);
+		}
+		else
+		{
+			idStr windowName = parmStr.Left(p);
+			idStr varName = parmStr.Right(parmStr.Length() - (p + 2));
+
+			//k drawWin_t* childWindow = window->FindChildByName(windowName);
+			drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(windowName);
+			if(childWindow)
+			{
+				if(childWindow->win)
+					parm = childWindow->win->GetWinVarByName(varName, false);
+				else if(childWindow->simp)
+					parm = childWindow->win->GetWinVarByName(varName);
+			}
+		}
+	}
+
+    idWinVec4* parmV4 = dynamic_cast<idWinVec4*>(parm);
+	if(parmV4)
+		window->GetGui()->SetLightColor((idVec4)*parmV4);
 }
 
 #endif
@@ -440,7 +467,7 @@ void Script_NamedEvent(idWindow* window, idList<idGSWinVar>* src)
 
         //k drawWin_t* childWindow = window->FindChildByName(windowName);
         drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(windowName);
-        if (childWindow)
+        if (childWindow && childWindow->win/* support idSimpleWindow now */)
         {
             childWindow->win->RunNamedEvent(varName);
         }

@@ -2,6 +2,21 @@
 
 This is the vkQuake2 vulkan renderer library ported to Yamagi Quake II.
 
+[![Top Language](https://img.shields.io/github/languages/top/yquake2/ref_vk.svg)](https://github.com/yquake2/ref_vk)
+[![Code Size](https://img.shields.io/github/languages/code-size/yquake2/ref_vk.svg)](https://github.com/yquake2/ref_vk)
+[![Release](https://img.shields.io/github/release/yquake2/ref_vk.svg)](https://github.com/yquake2/ref_vk/releases/latest)
+[![Release Date](https://img.shields.io/github/release-date/yquake2/ref_vk.svg)](https://github.com/yquake2/ref_vk/releases/latest)
+[![Downloads (total)](https://img.shields.io/github/downloads/yquake2/ref_vk/total)](https://github.com/yquake2/ref_vk/releases/latest)
+[![Downloads (latest)](https://img.shields.io/github/downloads/yquake2/ref_vk/latest/total.svg)](https://github.com/yquake2/ref_vk/releases/latest)
+[![Commits](https://img.shields.io/github/commits-since/yquake2/ref_vk/latest.svg)](https://github.com/yquake2/ref_vk/commits/master)
+[![Last Commit](https://img.shields.io/github/last-commit/yquake2/ref_vk.svg)](https://github.com/yquake2/ref_vk/commits/master)
+[![AUR Version](https://img.shields.io/aur/version/yamagi-quake2-ref_vk)](https://aur.archlinux.org/packages/yamagi-quake2-ref_vk)
+[![Build Status](https://github.com/yquake2/ref_vk/actions/workflows/linux_aarch64.yml/badge.svg)](https://github.com/yquake2/ref_vk/actions/workflows/linux_aarch64.yml)
+[![Build Status](https://github.com/yquake2/ref_vk/actions/workflows/linux_x86_64.yml/badge.svg)](https://github.com/yquake2/ref_vk/actions/workflows/linux_x86_64.yml)
+[![Build Status](https://github.com/yquake2/ref_vk/actions/workflows/macos.yml/badge.svg)](https://github.com/yquake2/ref_vk/actions/workflows/macos.yml)
+[![Build Status](https://github.com/yquake2/ref_vk/actions/workflows/win32.yml/badge.svg)](https://github.com/yquake2/ref_vk/actions/workflows/win32.yml)
+[![Build Status](https://github.com/yquake2/ref_vk/actions/workflows/win64.yml/badge.svg)](https://github.com/yquake2/ref_vk/actions/workflows/win64.yml)
+
 ## Compilation
 
 You'll need:
@@ -136,6 +151,13 @@ are provided without any warranty of support. The simplest way to check
 is renaming the mdl/dkm/fm format file to md2 and place instead the original
 tris.md2 file. FM is rendered with all meshes without support of
 filtering/selecting the exact part of the model.
+
+## Releases
+
+Our CI builds **unsupported** Linux, MacOS and Windows binaries at every
+commit. The artifacts can be found here:
+
+* [Github Actions](https://github.com/yquake2/ref_vk/actions)
 
 ### ReRelease Support
 

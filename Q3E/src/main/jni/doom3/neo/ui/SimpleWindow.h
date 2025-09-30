@@ -91,13 +91,41 @@ class idSimpleWindow
 		idWinBool		visible;
 		idWinRectangle	rect;				// overall rect
 		idWinVec4		backColor;
+#ifdef _RAVEN // quake4 gui var
+        idWinFloatPtr	backColor_r;
+        idWinFloatPtr	backColor_g;
+        idWinFloatPtr	backColor_b;
+        idWinFloatPtr	backColor_w;
+#endif
 		idWinVec4		matColor;
+#ifdef _RAVEN // quake4 gui var
+        idWinFloatPtr	matColor_r;
+        idWinFloatPtr	matColor_g;
+        idWinFloatPtr	matColor_b;
+        idWinFloatPtr	matColor_w;
+#endif
 		idWinVec4		foreColor;
+#ifdef _RAVEN // quake4 gui var
+        idWinFloatPtr	foreColor_r;
+        idWinFloatPtr	foreColor_g;
+        idWinFloatPtr	foreColor_b;
+        idWinFloatPtr	foreColor_w;
+#endif
 		idWinVec4		borderColor;
+#ifdef _RAVEN // quake4 gui var
+        idWinFloatPtr	borderColor_r;
+        idWinFloatPtr	borderColor_g;
+        idWinFloatPtr	borderColor_b;
+        idWinFloatPtr	borderColor_w;
+#endif
 		idWinFloat		textScale;
 		idWinFloat		rotate;
 		idWinVec2		shear;
 		idWinBackground	backGroundName;
+#ifdef _RAVEN // quake4 gui var
+        idWinFloat textspacing;
+        idWinFloat textstyle;
+#endif
 
 		const idMaterial *background;
 

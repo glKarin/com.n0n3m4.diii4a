@@ -69,12 +69,19 @@ typedef enum {
 	// set AFTER image format selection
 } textureRepeat_t;
 
+#ifdef _RAVENxxx //karin: TODO decal in Quake4
+typedef struct {
+    int		stayTime;		// msec for no change
+    float	maxAngle;		// maximum dot product to reject projection angles
+} decalInfo_t;
+#else
 typedef struct {
 	int		stayTime;		// msec for no change
 	int		fadeTime;		// msec to fade vertex colors over
 	float	start[4];		// vertex color at spawn (possibly out of 0.0 - 1.0 range, will clamp after calc)
 	float	end[4];			// vertex color at fade-out (possibly out of 0.0 - 1.0 range, will clamp after calc)
 } decalInfo_t;
+#endif
 
 typedef enum {
 	DFRM_NONE,
@@ -100,6 +107,13 @@ typedef enum {
 	DI_CUBE_RENDER,
 	DI_MIRROR_RENDER,
 	DI_XRAY_RENDER,
+#ifdef _RAVEN
+    // RAVEN BEGIN
+// AReis: Used for water reflection/refraction.
+    DI_REFLECTION_RENDER,
+    DI_REFRACTION_RENDER,
+// RAVEN END
+#endif
 #ifdef _HUMANHEAD
 	DI_PORTAL_RENDER, // HUMANHEAD
 	DI_SKYBOX_RENDER, // HUMANHEAD tmj
@@ -163,6 +177,12 @@ typedef enum {
 	EXP_REG_GLOBAL6,
 	EXP_REG_GLOBAL7,
 
+#ifdef _RAVEN
+    // RAVEN BEGIN
+// rjohnson: added vertex randomizing
+	EXP_REG_VERTEX_RANDOMIZER,
+// RAVEN END
+#endif
 #ifdef _HUMANHEAD
 	EXP_REG_DISTANCE, // HUMANHEAD: CJR
 #endif

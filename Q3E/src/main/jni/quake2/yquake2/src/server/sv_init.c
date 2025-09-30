@@ -33,7 +33,7 @@
 server_static_t svs; /* persistant server info */
 server_t sv; /* local server */
 
-int
+static int
 SV_FindIndex(char *name, int start, int max, qboolean create)
 {
 	int i;
@@ -98,7 +98,7 @@ SV_ImageIndex(char *name)
  * to the clients -- only the fields that differ from the
  * baseline will be transmitted
  */
-void
+static void
 SV_CreateBaseline(void)
 {
 	edict_t *svent;
@@ -122,11 +122,16 @@ SV_CreateBaseline(void)
 
 		/* take current state as baseline */
 		VectorCopy(svent->s.origin, svent->s.old_origin);
+		if (entnum >= MAX_EDICTS)
+		{
+			Com_Error(ERR_DROP, "%s: bad entity %d >= %d\n",
+				__func__, entnum, MAX_EDICTS);
+		}
 		sv.baselines[entnum] = svent->s;
 	}
 }
 
-void
+static void
 SV_CheckForSavegame(qboolean isautosave)
 {
 	char name[MAX_OSPATH];
@@ -181,7 +186,7 @@ SV_CheckForSavegame(qboolean isautosave)
  * Change the server to a new map, taking all connected
  * clients along with it.
  */
-void
+static void
 SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstate,
 		qboolean attractloop, qboolean loadgame, qboolean isautosave)
 {
@@ -487,7 +492,7 @@ SV_Map(qboolean attractloop, char *levelstring, qboolean loadgame, qboolean isau
 {
 	char level[MAX_QPATH];
 	char *ch;
-	int l;
+	size_t l;
 	char spawnpoint[MAX_QPATH];
 
 	sv.loadgame = loadgame;
@@ -560,7 +565,10 @@ SV_Map(qboolean attractloop, char *levelstring, qboolean loadgame, qboolean isau
 		SV_BroadcastCommand("changing\n");
 		SV_SpawnServer(level, spawnpoint, ss_demo, attractloop, loadgame, isautosave);
 	}
-	else if ((l > 4) && !strcmp(level + l - 4, ".pcx"))
+	else if ((l > 4) && (!strcmp(level + l - 4, ".pcx") ||
+						!strcmp(level + l - 4, ".tga") ||
+						!strcmp(level + l - 4, ".jpg") ||
+						!strcmp(level + l - 4, ".png")))
 	{
 #ifndef DEDICATED_ONLY
 		SCR_BeginLoadingPlaque(); /* for local system */

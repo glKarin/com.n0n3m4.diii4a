@@ -44,8 +44,11 @@ If you have questions concerning this license or the applicable additional terms
 idCVar harm_r_lightingModel("harm_r_lightingModel", "1", CVAR_RENDERER|CVAR_ARCHIVE|CVAR_INTEGER, "Lighting model when draw interactions(1 = Phong(default); 2 = Blinn-Phong; 3 = PBR; 4 = Ambient; 0 = No lighting.)", HARM_INTERACTION_SHADER_NOLIGHTING, HARM_INTERACTION_SHADER_AMBIENT, idCmdSystem::ArgCompletion_Integer<HARM_INTERACTION_SHADER_NOLIGHTING, HARM_INTERACTION_SHADER_AMBIENT>);
 static idCVar harm_r_specularExponent("harm_r_specularExponent", "3.0"/* "4.0"*/, CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in Phong interaction lighting model");
 static idCVar harm_r_specularExponentBlinnPhong("harm_r_specularExponentBlinnPhong", "12.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in Blinn-Phong interaction lighting model");
-static idCVar harm_r_specularExponentPBR("harm_r_specularExponentPBR", "5.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in PBR interaction lighting model");
-static idCVar harm_r_normalCorrectionPBR("harm_r_normalCorrectionPBR", "1.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_normalCorrectionPBR + vertex normal * (1 - harm_r_normalCorrectionPBR))", 0, 1);
+static idCVar harm_r_specularExponentPBR("harm_r_specularExponentPBR", "5.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in PBR interaction lighting model"); // 3.0
+static idCVar harm_r_PBRNormalCorrection("harm_r_PBRNormalCorrection", "0.25", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_normalCorrectionPBR + vertex normal * (1 - harm_r_normalCorrectionPBR))", 0, 1); // 0.2
+static idCVar harm_r_PBRRMAOSpecularMap("harm_r_PBRRMAOSpecularMap", "0", CVAR_BOOL|CVAR_RENDERER|CVAR_ARCHIVE, "Specular map is standard PBR RAMO texture or old non-PBR texture");
+static idCVar harm_r_PBRRoughnessCorrection("harm_r_PBRRoughnessCorrection", "0.55", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "max roughness for old specular texture in PBR. 0 = disable; else = roughness = harm_r_PBRRoughnessCorrection - texture(specularTexture, st).r", -1, 1); // 0.6 0.5
+static idCVar harm_r_PBRMetallicCorrection("harm_r_PBRMetallicCorrection", "0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "min metallic for old specular texture in PBR. 0 = disable; else = metallic = texture(specularTexture, st).r + harm_r_PBRMetallicCorrection", -1, 1);
 static idCVar harm_r_ambientLightingBrightness("harm_r_ambientLightingBrightness", "1.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Lighting brightness in ambient lighting");
 
 #include "glsl/draw_glsl_backend.cpp"
@@ -105,35 +108,35 @@ static void R_InitGLSLCvars(void)
 				break;
 		}
 #ifdef GL_ES_VERSION_3_0
-		common->Printf("[Harmattan]: Shadow mapping in OpenGLES2.0: \n");
+		common->Printf("Shadow mapping in OpenGLES2.0: \n");
 		if(r_useCubeDepthTexture)
         {
-            common->Printf("[Harmattan]: Using depth cubemap texture on point light.\n");
+            common->Printf("Using depth cubemap texture on point light.\n");
             depthShader_cube = &depthShader;
             depthPerforatedShader_cube = &depthPerforatedShader;
         }
 		else
         {
-            common->Printf("[Harmattan]: Using color cubemap texture on point light.\n");
+            common->Printf("Using color cubemap texture on point light.\n");
             depthShader_cube = &depthShader_color;
             depthPerforatedShader_cube = &depthPerforatedShader_color;
         }
 		if(r_useDepthTexture)
         {
-            common->Printf("[Harmattan]: Using depth texture on non-point light.\n");
+            common->Printf("Using depth texture on non-point light.\n");
             depthShader_2d = &depthShader;
             depthPerforatedShader_2d = &depthPerforatedShader;
         }
 		else
         {
-            common->Printf("[Harmattan]: Using color texture on non-point light.\n");
+            common->Printf("Using color texture on non-point light.\n");
             depthShader_2d = &depthShader_color;
             depthPerforatedShader_2d = &depthPerforatedShader_color;
         }
 		if(r_usePackColorAsDepth)
-			common->Printf("[Harmattan]: Store depth value with pack to RGBA if not using depth texture.\n");
+			common->Printf("Store depth value with pack to RGBA if not using depth texture.\n");
 		else
-			common->Printf("[Harmattan]: Store depth value with RED component if not using depth texture.\n");
+			common->Printf("Store depth value with RED component if not using depth texture.\n");
 	}
 #endif
 #endif
@@ -230,9 +233,9 @@ void R_CheckBackEndCvars(void)
 			r_stencilShadowSoftCopyStencilBuffer = harm_r_stencilShadowSoftCopyStencilBuffer.GetBool();
 			harm_r_stencilShadowSoftCopyStencilBuffer.ClearModified();
 			if(r_stencilShadowSoftCopyStencilBuffer)
-				common->Printf("[Harmattan]: Copy stencil buffer directly for soft stencil shadow.\n");
+				common->Printf("Copy stencil buffer directly for soft stencil shadow.\n");
 			else
-				common->Printf("[Harmattan]: Copy depth buffer and render stencil buffer for soft stencil shadow.\n");
+				common->Printf("Copy depth buffer and render stencil buffer for soft stencil shadow.\n");
 		}
 		if(harm_r_stencilShadowSoftBias.IsModified())
 		{

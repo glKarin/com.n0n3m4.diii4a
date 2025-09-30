@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 # Print a message that using the Makefiles is recommended.
 message(NOTICE: " The CMakeLists.txt is unmaintained. Use the Makefile if possible.")
@@ -24,6 +24,7 @@ if(YQUAKE2LIBS)
 	endif()
 
 	set(ENV{OPENALDIR} ${YQUAKE2LIBS})
+	set(ENV{SDL2DIR} ${YQUAKE2LIBS})
 endif()
 
 # Add extended path for FreeBSD and Homebrew on OS X.
@@ -63,6 +64,16 @@ endif()
 option(CURL_SUPPORT "cURL support" ON)
 option(OPENAL_SUPPORT "OpenAL support" ON)
 option(SYSTEMWIDE_SUPPORT "Enable systemwide installation of game assets" OFF)
+option(SDL3_SUPPORT "Build against SDL 3 instead of SDL2" OFF)
+option(GL1_RENDERER "Build the GL1 renderer" ON)
+option(GL3_RENDERER "Build the GL3 renderer" ON)
+if(ANDROID) #k: gles
+option(GLES1_RENDERER "Build the GLES1 renderer" ON)
+else()
+option(GLES1_RENDERER "Build the GLES1 renderer" OFF)
+endif()
+option(GLES3_RENDERER "Build the GLES3 renderer" ON)
+option(SOFT_RENDERER "Build the software renderer" ON)
 
 set(SYSTEMDIR "" CACHE STRING "Override the system default directory")
 
@@ -389,6 +400,7 @@ set(Client-Source
 	${CLIENT_SRC_DIR}/cl_effects.c
 	${CLIENT_SRC_DIR}/cl_entities.c
 	${CLIENT_SRC_DIR}/cl_input.c
+	${CLIENT_SRC_DIR}/cl_image.c
 	${CLIENT_SRC_DIR}/cl_inventory.c
 	${CLIENT_SRC_DIR}/cl_keyboard.c
 	${CLIENT_SRC_DIR}/cl_lights.c
@@ -537,7 +549,6 @@ set(Server-Header
 
 set(GL1-Source
 	${REF_SRC_DIR}/gl1/qgl.c
-	${REF_SRC_DIR}/gl1/gl1_buffer.c
 	${REF_SRC_DIR}/gl1/gl1_draw.c
 	${REF_SRC_DIR}/gl1/gl1_image.c
 	${REF_SRC_DIR}/gl1/gl1_light.c
@@ -550,6 +561,7 @@ set(GL1-Source
 	${REF_SRC_DIR}/gl1/gl1_surf.c
 	${REF_SRC_DIR}/gl1/gl1_warp.c
 	${BACKENDS_SRC_DIR}/android/gles.c
+	${REF_SRC_DIR}/gl1/gl1_buffer.c
 	${REF_SRC_DIR}/files/models.c
 	${REF_SRC_DIR}/files/pcx.c
 	${REF_SRC_DIR}/files/stb.c
@@ -559,6 +571,8 @@ set(GL1-Source
 	${COMMON_SRC_DIR}/shared/shared.c
 	${COMMON_SRC_DIR}/md4.c
 	)
+
+set(Glad-GLES1-Source ${REF_SRC_DIR}/gl1/glad-gles1/src/glad.c)
 
 set(GL1-Header
 	${REF_SRC_DIR}/ref_shared.h
@@ -573,6 +587,11 @@ set(GL1-Header
 	${COMMON_SRC_DIR}/header/shared.h
 	)
 
+set(Glad-GLES1-Header
+	${REF_SRC_DIR}/gl1/glad-gles1/include/glad/glad.h
+	${REF_SRC_DIR}/gl1/glad-gles1/include/KHR/khrplatform.h
+	)
+
 set(GL3-Source
 		${REF_SRC_DIR}/gl3/gl3_draw.c
 		${REF_SRC_DIR}/gl3/gl3_image.c
@@ -582,6 +601,7 @@ set(GL3-Source
 		${REF_SRC_DIR}/gl3/gl3_mesh.c
 		${REF_SRC_DIR}/gl3/gl3_misc.c
 		${REF_SRC_DIR}/gl3/gl3_model.c
+		${BACKENDS_SRC_DIR}/android/gles3.c
 		${REF_SRC_DIR}/gl3/gl3_surf.c
 		${REF_SRC_DIR}/gl3/gl3_warp.c
 		${REF_SRC_DIR}/gl3/gl3_shaders.c
@@ -593,7 +613,6 @@ set(GL3-Source
 		${REF_SRC_DIR}/files/pvs.c
 		${COMMON_SRC_DIR}/shared/shared.c
 		${COMMON_SRC_DIR}/md4.c
-		${BACKENDS_SRC_DIR}/android/gles3.c
 		)
 
 set(Glad-GL3-Source ${REF_SRC_DIR}/gl3/glad/src/glad.c)
@@ -622,10 +641,6 @@ set(Glad-GLES3-Header
 		${REF_SRC_DIR}/gl3/glad-gles3/include/KHR/khrplatform.h
 		)
 
-set(Glad-GLES3-Header
-	${REF_SRC_DIR}/gl3/glad-gles3/include/glad/glad.h
-	${REF_SRC_DIR}/gl3/glad-gles3/include/KHR/khrplatform.h
-	)
 
 # Main Quake 2 executable
 set(QUAKE2LIBRARY yquake2)
@@ -659,15 +674,16 @@ endif()
 target_link_libraries(q2game ${yquake2LinkerFlags})
 
 # Build the GL1 dynamic library
-add_library(ref_gl1 MODULE ${GL1-Source} ${GL1-Header} ${REF-Platform-Specific-Source})
-#[[set_target_properties(ref_gl1 PROPERTIES
+add_library(ref_gles1 MODULE ${GL1-Source} ${Glad-GLES1-Source} ${GL1-Header} ${Glad-GLES1-Header} ${REF-Platform-Specific-Source})
+#[[set_target_properties(ref_gles1 PROPERTIES
 		PREFIX ""
 		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
 		SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX}
 		)]]
-target_compile_definitions(ref_gl1 PRIVATE _GLES)
-target_link_libraries(ref_gl1 ${yquake2LinkerFlags} ${yquake2OpenGLLinkerFlags} GLESv1_CM
+target_include_directories(ref_gles1 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/client/refresh/gl1/glad-gles1/include)
+target_compile_definitions(ref_gles1 PRIVATE _GLES YQ2_GL1_GLES=1)
+target_link_libraries(ref_gles1 ${yquake2LinkerFlags} ${yquake2OpenGLLinkerFlags} GLESv1_CM
 		${yquake2SDLLinkerFlags})
 
 # Build the GLES3 dynamic library
@@ -685,14 +701,3 @@ target_include_directories(ref_gles3 PRIVATE src/client/refresh/gl3/glad-gles3/i
 target_compile_definitions(ref_gles3 PRIVATE YQ2_GL3_GLES3=1 YQ2_GL3_GLES=1)
 target_link_libraries(ref_gles3 ${yquake2LinkerFlags} ${yquake2OpenGLLinkerFlags} ${yquake2SDLLinkerFlags}) # GLESv3
 
-# Build the soft renderer dynamic library
-if(NOT ANDROID)
-add_library(ref_soft MODULE ${SOFT-Source} ${SOFT-Header} ${REF-Platform-Specific-Source})
-set_target_properties(ref_soft PROPERTIES
-		PREFIX ""
-		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
-		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
-		SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX}
-		)
-target_link_libraries(ref_soft ${yquake2LinkerFlags} ${yquake2SDLLinkerFlags})
-endif()

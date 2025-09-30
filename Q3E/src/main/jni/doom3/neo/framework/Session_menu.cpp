@@ -560,11 +560,8 @@ void idSessionLocal::HandleRestartMenuCommands(const char *menuCommand)
 #ifdef _RAVEN //k: disconnect [menu_name [named_event]]
 		if (!idStr::Icmp(cmd, "disconnect")) {
 			idStr disconnectCmdStr("stoprecording ; disconnect");
-			for(int i = 1; i < args.Argc(); i++)
-			{
-				disconnectCmdStr += " ";
-				disconnectCmdStr += args.Argv(i);
-			}
+			disconnectCmdStr += " ";
+			disconnectCmdStr += args.Args(1);
 			cmdSystem->BufferCommandText(CMD_EXEC_INSERT, disconnectCmdStr);
 			continue;
 		}
@@ -1352,6 +1349,16 @@ void idSessionLocal::HandleInGameCommands(const char *menuCommand)
 			guiActive = NULL;
 		}
 	}
+#ifdef _RAVEN //karin: gui cmd
+	else if ( !idStr::Icmp(cmd, "exec") )
+	{
+		if(args.Argc() > 1)
+		{
+			idStr str = args.Args(1);
+			cmdSystem->BufferCommandText(CMD_EXEC_APPEND, str.c_str());
+		}
+	}
+#endif
 }
 
 /*
@@ -2057,7 +2064,7 @@ void idSessionLocal::HandleLoadingCommands(const char *menuCommand)
 			mapSpawned = true;
 			Sys_ClearEvents();
 
-			const char *mapName = mapSpawnData.serverInfo.GetString("si_map", mapName);
+			const char *mapName = mapSpawnData.serverInfo.GetString("si_map");
 			if (!mapSpawnData.serverInfo.GetBool("devmap")) {
 				// Autosave at the beginning of the level
 				SaveGame(GetAutoSaveName(mapName), true);

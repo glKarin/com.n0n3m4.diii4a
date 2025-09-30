@@ -4676,7 +4676,7 @@ cmHandle_t idCollisionModelManagerLocal::ModelFromTrm(const char* mapName, const
 	if(handle)
 	{
 		model = static_cast<cm_model_t *>(handle);
-		//if(!model->isTraceModel) { common->Error("[harmattan]: Collision model is not trace model from `ModelFromTrm`"); return NULL; }
+		//if(!model->isTraceModel) { common->Error("Collision model is not trace model from `ModelFromTrm`"); return NULL; }
 		model->refCount++;
 		if(!model->markRemove)
 		{

@@ -287,6 +287,9 @@ class idSessionLocal : public idSession
 		bool				FinishedLoading(void) const {
 			return !com_skipLevelLoadPause.GetBool() && finishedLoading;
 		}
+		bool 				GetLoadingSaveGame(void) const {
+			return loadingSaveGame;
+		}
 #endif
 
 #if ID_CONSOLE_LOCK

@@ -451,6 +451,23 @@ void idMaterial::ParseDecalInfo(idLexer &src)
 	idToken token;
 
 	decalInfo.stayTime = src.ParseFloat() * 1000;
+#ifdef _RAVEN //karin: Q4 is decalinfo	10, 0.5
+    if ( src.ReadToken(&token) )
+    {
+        if ( idStr::Cmp(token, ",") )
+            src.UnreadToken(&token);
+        else
+        {
+            //TODO Quake4 decal
+            float maxAngle = src.ParseFloat();
+            decalInfo.fadeTime = maxAngle * 1000;
+            for (int i = 0 ; i < 4 ; i++) {
+                decalInfo.start[i] = 1.0f;
+                decalInfo.end[i] = 0.0f;
+            }
+        }
+    }
+#else
 	decalInfo.fadeTime = src.ParseFloat() * 1000;
 	float	start[4], end[4];
 	src.Parse1DMatrix(4, start);
@@ -460,6 +477,7 @@ void idMaterial::ParseDecalInfo(idLexer &src)
 		decalInfo.start[i] = start[i];
 		decalInfo.end[i] = end[i];
 	}
+#endif
 }
 
 /*
@@ -721,17 +739,24 @@ int idMaterial::ParseTerm(idLexer &src)
 	if (!token.Icmp("glslPrograms")) {
 		pd->registersAreConstant = false;
 		return EmitOp(0, 0, OP_TYPE_GLSL_ENABLED);
-		// return GetExpressionConstant(0.0f);
 	}
 	if (!token.Icmp("POTCorrectionX")) {
+#if 1 //k: Q4D 2025 static
+        float potx = (float)glConfig.vidWidth / (float)MakePowerOfTwo(glConfig.vidWidth);
+        return GetExpressionConstant(potx);
+#else // dynamic
 		pd->registersAreConstant = false;
 		return EmitOp(0, 0, OP_TYPE_POT_X);
-		// return GetExpressionConstant(1.0f);
+#endif
 	}
 	if (!token.Icmp("POTCorrectionY")) {
+#if 1 //k: Q4D 2025 static
+        float poty = (float)glConfig.vidHeight / (float)MakePowerOfTwo(glConfig.vidHeight);
+        return GetExpressionConstant(poty);
+#else // dynamic
 		pd->registersAreConstant = false;
 		return EmitOp(0, 0, OP_TYPE_POT_Y);
-		// return GetExpressionConstant(1.0f);
+#endif
 	}
 	if (!token.Icmp("DecalLife")) {
 		return GetExpressionConstant(0.0f);
@@ -742,15 +767,14 @@ int idMaterial::ParseTerm(idLexer &src)
 	if (!token.Icmp("VertexRandomizer")) {
 		return GetExpressionConstant(0.0f);
 	}
-    if (!token.Icmp("viewOrigin")) {
+/*    if (!token.Icmp("viewOrigin")) {
         pd->registersAreConstant = false;
         return GetExpressionConstant(0.0f);
-    }
+    }*/
 #endif
 
 #ifdef _HUMANHEAD
 	if (!token.Icmp("distance")) {
-		// return GetExpressionConstant(0);
 		pd->registersAreConstant = false;
 		return EXP_REG_DISTANCE;
 	}
@@ -956,9 +980,11 @@ int idMaterial::NameToSrcBlendMode(const idStr &name)
 	} else if (!name.Icmp("GL_SRC_ALPHA_SATURATE")) {
 		return GLS_SRCBLEND_ALPHA_SATURATE;
 	}
-#ifdef _RAVEN //k: quake4 blend
+#ifdef _RAVEN //k: quake4 src blend
 	else if (!name.Icmp("GL_SRC_COLOR")) {
 		return GLS_SRCBLEND_SRC_COLOR;
+	} else if (!name.Icmp("GL_ONE_MINUS_SRC_COLOR")) {
+		return GLS_SRCBLEND_ONE_MINUS_SRC_COLOR;
 	}
 #endif
 #ifdef _HUMANHEAD
@@ -967,7 +993,7 @@ int idMaterial::NameToSrcBlendMode(const idStr &name)
 	}
 #endif
 
-	common->Warning("unknown blend mode '%s' in material '%s' at '%s'", name.c_str(), GetName(), GetFileName());
+	common->Warning("unknown src blend mode '%s' in material '%s' at '%s'", name.c_str(), GetName(), GetFileName());
 	SetMaterialFlag(MF_DEFAULTED);
 
 	return GLS_SRCBLEND_ONE;
@@ -997,8 +1023,15 @@ int idMaterial::NameToDstBlendMode(const idStr &name)
 	} else if (!name.Icmp("GL_ONE_MINUS_SRC_COLOR")) {
 		return GLS_DSTBLEND_ONE_MINUS_SRC_COLOR;
 	}
+#ifdef _RAVEN //k: quake4 dst blend
+    else if (!name.Icmp("GL_DST_COLOR")) {
+		return GLS_DSTBLEND_DST_COLOR;
+	} else if (!name.Icmp("GL_ONE_MINUS_DST_COLOR")) {
+		return GLS_DSTBLEND_ONE_MINUS_DST_COLOR;
+	}
+#endif
 
-	common->Warning("unknown blend mode '%s' in material '%s' at '%s'", name.c_str(), GetName(), GetFileName());
+	common->Warning("unknown dst blend mode '%s' in material '%s' at '%s'", name.c_str(), GetName(), GetFileName());
 	SetMaterialFlag(MF_DEFAULTED);
 
 	return GLS_DSTBLEND_ONE;
@@ -1396,8 +1429,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		}
 
 #ifdef _RAVEN // quake4 material property
-        if (!token.Icmp("nomips"))
-        {
+        if (!token.Icmp("nomips")) {
             continue;
         }
 #endif
@@ -2458,6 +2490,10 @@ void idMaterial::ParseMaterial(idLexer &src)
         {
             src.ReadToken(&token);
             materialType = declManager->FindMaterialType(token, false);
+            if ( !materialType || materialType->IsImplicit() )
+            {
+                common->Warning("UNKNOWN: materialType '%s' in '%s'", token.c_str(), GetName());
+            }
             continue;
         }
 		else if (!token.Icmp("portalDistanceNear")) {
@@ -3362,14 +3398,24 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 				}
 				break;
 			case OP_TYPE_POT_X: { //karin: screen width and power of two width
-					int w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
+#if 1
+					int w = glConfig.vidWidth;
+					int potw = globalImages->currentRenderImage->uploadWidth; // MakePowerOfTwo(glConfig.vidWidth)
+#else
+					int w = tr.viewDef->viewport.x2 - tr.viewDef->viewport.x1 + 1;
 					int potw = globalImages->currentRenderImage->uploadWidth;
+#endif
 					registers[op->c] = (float) w / (float) potw;
 				}
 				break;
 			case OP_TYPE_POT_Y: { //karin: screen height and power of two height
-					int h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
+#if 1
+					int h = glConfig.vidHeight;
+					int poth = globalImages->currentRenderImage->uploadHeight; // MakePowerOfTwo(glConfig.vidHeight)
+#else
+					int h = tr.viewDef->viewport.y2 - tr.viewDef->viewport.y1 + 1;
 					int poth = globalImages->currentRenderImage->uploadHeight;
+#endif
 					registers[op->c] = (float) h / (float) poth;
 				}
 				break;

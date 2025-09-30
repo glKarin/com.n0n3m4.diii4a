@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:myapp="http://schemas.android.com/apk/res/com.karin.idTech4Amm"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:paddingLeft="2dp"
+	android:paddingRight="2dp"
+	android:orientation="vertical">
+
+	<com.karin.idTech4Amm.widget.Divider
+		android:id="@+id/pathtips_delegate_label"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingTop="10dp"
+		android:paddingBottom="5dp"
+		myapp:typeface="monospace"
+		myapp:textStyle="bold"
+		myapp:lineColor="@color/launcher_divider_color"/>
+
+	<TextView
+		android:id="@+id/pathtips_delegate_content"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="5dp"
+		android:layout_marginRight="5dp"
+		android:textColor="#FF000000"
+		android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+</LinearLayout>
+

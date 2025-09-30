@@ -81,6 +81,18 @@
 		</LinearLayout>
 
 		<CheckBox
+			android:id="@+id/tab2_hide_joystick_center"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/joystick_center_dot_visible"/>
+
+		<CheckBox
+			android:id="@+id/tab2_disable_mouse_button_motion"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/disable_motion_when_virtual_mouse_button_hold"/>
+
+		<CheckBox
 			android:id="@+id/mapvol"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"

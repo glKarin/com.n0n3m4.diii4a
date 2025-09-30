@@ -2264,7 +2264,9 @@ VkResult QVk_EndFrame(qboolean force)
 {
 	// continue only if QVk_BeginFrame() had been previously issued
 	if (!vk_frameStarted)
+	{
 		return VK_SUCCESS;
+	}
 
 	// this may happen if Sys_Error is issued mid-frame, so we need to properly advance the draw pipeline
 	if (force)
@@ -2608,7 +2610,7 @@ uint8_t *QVk_GetStagingBuffer(VkDeviceSize size, int alignment, VkCommandBuffer 
 	stagingBuffer = &vk_stagingBuffers[vk_activeStagingBuffer];
 	if (size > stagingBuffer->resource.size)
 	{
-		R_Printf(PRINT_ALL, "%s: %d: Resize stanging buffer %" YQ2_COM_PRIu64 "-> %" YQ2_COM_PRIu64 "\n",
+		R_Printf(PRINT_ALL, "%s: %d: Resize stanging buffer " YQ2_COM_PRIdS "-> " YQ2_COM_PRIdS "\n",
 			__func__, vk_activeStagingBuffer, stagingBuffer->resource.size, size);
 
 		DestroyStagingBuffer(stagingBuffer);

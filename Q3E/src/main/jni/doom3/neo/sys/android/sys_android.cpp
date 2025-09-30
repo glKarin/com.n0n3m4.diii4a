@@ -5,6 +5,10 @@
 
 #include "../../framework/Session_local.h"
 
+#ifdef _IMGUI
+#include "../../renderer/imgui/r_imgui.h"
+#endif
+
 #ifdef _MULTITHREAD
 extern bool multithreadActive;
 extern bool Sys_ShutdownRenderThread(void);
@@ -249,7 +253,7 @@ void Q3E_SetGLContext(ANativeWindow *w)
     // if engine has started, w is null, means Surfece destroyed, w not null, means Surface has changed.
     if(common->IsInitialized())
     {
-        Sys_Printf("[Harmattan]: ANativeWindow changed: %p\n", w);
+        Sys_Printf("ANativeWindow changed: %p\n", w);
         if(w) // set new window, notify doom3 main thread active OpenGL render context
         {
             Q3E_WindowChanged(w, WINDOW_CHANGE_THREAD_SURFACE_VIEW);
@@ -286,12 +290,12 @@ void Q3E_RequestThreadQuit(void)
 // start/end in main function
 static void game_exit(void)
 {
-    printf("[Harmattan]: idTech4 exit.\n");
+    printf(GAME_NAME " exit.\n");
 }
 
 void Q3E_Start(void)
 {
-    Sys_Printf("[Harmattan]: Enter idTech4 main thread.\n");
+    Sys_Printf("Enter " GAME_NAME " main thread.\n");
     atexit(game_exit);
     main_thread = pthread_self();
     q3e_running = true;
@@ -305,7 +309,7 @@ void Q3E_End(void)
     GLimp_AndroidQuit();
     window = NULL;
     main_thread = 0;
-    Sys_Printf("[Harmattan]: Leave idTech4 main thread.\n");
+    Sys_Printf("Leave " GAME_NAME " main thread.\n");
 }
 
 
@@ -491,14 +495,24 @@ void Q3E_KeyEvent(int state,int key,int character)
         if(!ctrl_state || character == '\b')
         Posix_QueEvent(SE_CHAR, character, 0, 0, NULL);
     }
+#ifdef _IMGUI
+    if(!R_ImGui_IsRunning())
+#endif
     Posix_AddKeyboardPollEvent(key, state);
 }
 
 void Q3E_MotionEvent(float dx, float dy)
 {
     Posix_QueEvent(SE_MOUSE, dx, dy, 0, NULL);
+#ifdef _IMGUI
+    if(!R_ImGui_IsRunning())
+    {
+#endif
     Posix_AddMousePollEvent(M_DELTAX, dx);
     Posix_AddMousePollEvent(M_DELTAY, dy);
+#ifdef _IMGUI
+    }
+#endif
 }
 
 void Q3E_Analog(int enable,float x,float y)
@@ -530,7 +544,7 @@ void Q3E_exit(void)
     if(window)
         window = NULL;
     GLimp_AndroidQuit();
-    printf("[Harmattan]: idTech4 exit......\n");
+    printf(GAME_NAME " exit......\n");
     //Android_ExitFinish();
 }
 

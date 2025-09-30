@@ -160,7 +160,7 @@ typedef struct
 
 	// called by GLimp_InitGraphics() *after* creating render
 	// context. Returns the actual drawable size in the width
-	// and height variables. This may be differend from the
+	// and height variables. This may be different from the
 	// window size due to high dpi awareness.
 	void	(EXPORT *GetDrawableSize)(int* width, int* height);
 
@@ -185,20 +185,20 @@ typedef struct
 	// slash will not use the "pics/" prefix or the ".pcx" postfix)
 	void	(EXPORT *BeginRegistration) (char *map);
 	struct model_s * (EXPORT *RegisterModel) (char *name);
-	struct image_s * (EXPORT *RegisterSkin) (char *name);
+	struct image_s * (EXPORT *RegisterSkin) (const char *name);
 
-	void	(EXPORT *SetSky) (char *name, float rotate, vec3_t axis);
+	void	(EXPORT *SetSky) (const char *name, float rotate, vec3_t axis);
 	void	(EXPORT *EndRegistration) (void);
 
 	void	(EXPORT *RenderFrame) (refdef_t *fd);
 
-	struct image_s * (EXPORT *DrawFindPic)(char *name);
+	struct image_s * (EXPORT *DrawFindPic)(const char *name);
 
-	void	(EXPORT *DrawGetPicSize) (int *w, int *h, char *name);	// will return 0 0 if not found
-	void 	(EXPORT *DrawPicScaled) (int x, int y, char *pic, float factor);
-	void	(EXPORT *DrawStretchPic) (int x, int y, int w, int h, char *name);
+	void	(EXPORT *DrawGetPicSize) (int *w, int *h, const char *name);	// will return 0 0 if not found
+	void 	(EXPORT *DrawPicScaled) (int x, int y, const char *pic, float factor);
+	void	(EXPORT *DrawStretchPic) (int x, int y, int w, int h, const char *name);
 	void	(EXPORT *DrawCharScaled)(int x, int y, int num, float scale);
-	void	(EXPORT *DrawTileClear) (int x, int y, int w, int h, char *name);
+	void	(EXPORT *DrawTileClear) (int x, int y, int w, int h, const char *name);
 	void	(EXPORT *DrawFill) (int x, int y, int w, int h, int c);
 	void	(EXPORT *DrawFadeScreen) (void);
 
@@ -221,7 +221,7 @@ typedef struct
 
 typedef struct
 {
-	YQ2_ATTR_NORETURN_FUNCPTR void	(IMPORT *Sys_Error) (int err_level, char *str, ...) PRINTF_ATTR(2, 3);
+	YQ2_ATTR_NORETURN_FUNCPTR void	(IMPORT *Sys_Error) (int err_level, const char *str, ...) PRINTF_ATTR(2, 3);
 
 	void	(IMPORT *Cmd_AddCommand) (char *name, void(*cmd)(void));
 	void	(IMPORT *Cmd_RemoveCommand) (char *name);
@@ -236,16 +236,16 @@ typedef struct
 	// or a discrete file from anywhere in the quake search path
 	// a -1 return means the file does not exist
 	// NULL can be passed for buf to just determine existance
-	int		(IMPORT *FS_LoadFile) (char *name, void **buf);
+	int		(IMPORT *FS_LoadFile) (const char *name, void **buf);
 	void	(IMPORT *FS_FreeFile) (void *buf);
 
 	// gamedir will be the current directory that generated
 	// files should be stored to, ie: "f:\quake\id1"
 	char	*(IMPORT *FS_Gamedir) (void);
 
-	cvar_t	*(IMPORT *Cvar_Get) (char *name, char *value, int flags);
-	cvar_t	*(IMPORT *Cvar_Set) (char *name, char *value);
-	void	 (IMPORT *Cvar_SetValue) (char *name, float value);
+	cvar_t	*(IMPORT *Cvar_Get) (const char *name, const char *value, int flags);
+	cvar_t	*(IMPORT *Cvar_Set) (const char *name, const char *value);
+	void	 (IMPORT *Cvar_SetValue) (const char *name, float value);
 
 	qboolean	(IMPORT *Vid_GetModeInfo)(int *width, int *height, int mode);
 	void		(IMPORT *Vid_MenuInit)( void );
@@ -272,18 +272,18 @@ extern refimport_t ri;
 void R_BeginRegistration(char *map);
 void R_Clear(void);
 struct model_s *R_RegisterModel(char *name);
-struct image_s *R_RegisterSkin(char *name);
-void R_SetSky(char *name, float rotate, vec3_t axis);
+struct image_s *R_RegisterSkin(const char *name);
+void R_SetSky(const char *name, float rotate, vec3_t axis);
 void R_EndRegistration(void);
-struct image_s *Draw_FindPic(char *name);
+struct image_s *Draw_FindPic(const char *name);
 void R_RenderFrame(refdef_t *fd);
-void Draw_GetPicSize(int *w, int *h, char *name);
+void Draw_GetPicSize(int *w, int *h, const char *name);
 
-void Draw_StretchPic(int x, int y, int w, int h, char *name);
-void Draw_PicScaled(int x, int y, char *pic, float factor);
+void Draw_StretchPic(int x, int y, int w, int h, const char *name);
+void Draw_PicScaled(int x, int y, const char *pic, float factor);
 
 void Draw_CharScaled(int x, int y, int num, float scale);
-void Draw_TileClear(int x, int y, int w, int h, char *name);
+void Draw_TileClear(int x, int y, int w, int h, const char *name);
 void Draw_Fill(int x, int y, int w, int h, int c);
 void Draw_FadeScreen(void);
 void Draw_StretchRaw(int x, int y, int w, int h, int cols, int rows, const byte *data, int bits);

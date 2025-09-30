@@ -82,6 +82,10 @@ public final class Q3EGlobals
     public static final int SCREEN_WIDTH  = 640;
     public static final int SCREEN_HEIGHT = 480;
 
+    // default ratio
+    public static final int RATIO_WIDTH  = 4;
+    public static final int RATIO_HEIGHT = 3;
+
     // on-screen button type
     public static final int ONSCREEN_BUTTON_TYPE_FULL         = 0;
     public static final int ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM = 1;
@@ -131,6 +135,13 @@ public final class Q3EGlobals
     public static final int SIGNALS_HANDLER_GAME      = 0;
     public static final int SIGNALS_HANDLER_NO_HANDLE = 1;
     public static final int SIGNALS_HANDLER_BACKTRACE = 2;
+
+    // screen resolution
+    public static final int SCREEN_FULL = 0;
+    public static final int SCREEN_SCALE_BY_LENGTH = 1;
+    public static final int SCREEN_SCALE_BY_AREA = 2;
+    public static final int SCREEN_CUSTOM = 3;
+    public static final int SCREEN_FIXED_RATIO = 4;
 
     public static final String[] CONTROLS_NAMES = {
             "Joystick",

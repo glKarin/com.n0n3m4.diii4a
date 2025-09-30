@@ -367,7 +367,7 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 #ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 	int size, i = 0;
 	glIndex_t *indicies;
-	size = (maxs[1] - mins[1]) * (maxs[0] - mins[0] + 1);
+	size = (maxs[1] - mins[1]) * (maxs[0] - mins[0] + 1) * 2; //karin: should be 2x
 	indicies = ri.Hunk_AllocateTempMemory(sizeof(glIndex_t) * size);
 #endif
 

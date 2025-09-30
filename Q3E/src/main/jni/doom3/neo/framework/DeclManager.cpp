@@ -30,7 +30,11 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #ifdef _RAVEN // quake4 guide
+#ifdef _RAVEN_BSE
 #include "../raven/bse/BSE.h"
+#else
+#include "../raven/fx/BSE.h"
+#endif
 
 // jmarshall: Quake 4 Guide(template) support
 struct rvGuideTemplate

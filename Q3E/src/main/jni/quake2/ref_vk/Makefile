@@ -56,7 +56,7 @@ endif # windows but MINGW_CHOST not defined
 else
 ifneq ($(YQ2_OSTYPE), Darwin)
 # Normalize some abiguous YQ2_ARCH strings
-YQ2_ARCH ?= $(shell uname -m | sed -e 's/i.86/i386/' -e 's/amd64/x86_64/' -e 's/^arm.*/arm/')
+YQ2_ARCH ?= $(shell uname -m | sed -e 's/i.86/i386/' -e 's/amd64/x86_64/' -e 's/arm64/aarch64/' -e 's/^arm.*/arm/')
 else
 YQ2_ARCH ?= $(shell uname -m)
 endif
@@ -94,7 +94,7 @@ endif
 # Highest supported optimizations are -O2, higher levels
 # will likely break this crappy code.
 ifdef DEBUG
-CFLAGS ?= -O0 -g -Wall -pipe
+CFLAGS ?= -O0 -g -Wall -pipe -DDEBUG
 ifdef ASAN
 override CFLAGS += -fsanitize=address -DUSE_SANITIZER
 endif
@@ -113,7 +113,7 @@ endif
 #   and the game code requires it.
 #  -fvisibility=hidden to keep symbols hidden. This is
 #   mostly best practice and not really necessary.
-override CFLAGS += -std=gnu99 -fno-strict-aliasing -fwrapv -fvisibility=hidden
+override CFLAGS += -fno-strict-aliasing -fwrapv -fvisibility=hidden
 
 # -MMD to generate header dependencies. Unsupported by
 #  the Clang shipped with OS X.
@@ -145,7 +145,7 @@ endif
 ifeq ($(COMPILER), clang)
 	# -Wno-missing-braces because otherwise clang complains
 	#  about totally valid 'vec3_t bla = {0}' constructs.
-	override CFLAGS += -Wno-missing-braces -Wno-typedef-redefinition
+	override CFLAGS += -Wno-missing-braces
 else ifeq ($(COMPILER), gcc)
 	# GCC 8.0 or higher.
 	ifeq ($(shell test $(COMPILERVER) -ge 80000; echo $$?),0)
@@ -182,6 +182,13 @@ endif
 # anyway, just to protect us from broken Linux distros.
 ifeq ($(YQ2_ARCH), x86_64)
 override CFLAGS += -mfpmath=sse
+endif
+
+# Disable floating-point expression contraction. While this shouldn't be
+# a problem for C (only for C++) better be safe than sorry. See
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839 for details.
+ifeq ($(COMPILER), gcc)
+override CFLAGS += -ffp-contract=off
 endif
 
 # ----------
@@ -287,9 +294,17 @@ else
 SDLLDFLAGS := $(shell sdl2-config --libs)
 endif
 endif
+
+ifeq ($(WITH_SDL3),yes)
+# The renderer libs don't need libSDL3main, libmingw32 or -mwindows.
+ifeq ($(YQ2_OSTYPE), Windows)
+DLL_SDLLDFLAGS = $(subst -mwindows,,$(subst -lmingw32,,$(subst -lSDL3main,,$(SDLLDFLAGS))))
+endif
+else
 # The renderer libs don't need libSDL2main, libmingw32 or -mwindows.
 ifeq ($(YQ2_OSTYPE), Windows)
 DLL_SDLLDFLAGS = $(subst -mwindows,,$(subst -lmingw32,,$(subst -lSDL2main,,$(SDLLDFLAGS))))
+endif
 endif
 
 # ----------
@@ -334,14 +349,16 @@ ref_vk:
 release/ref_vk.dll : LDFLAGS += -shared
 
 else ifeq ($(YQ2_OSTYPE), Darwin)
+
 ref_vk:
-	@echo "===> Building ref_vk.dlylib"
+	@echo "===> Building ref_vk.dylib"
 	${Q}mkdir -p release
 	$(MAKE) release/ref_vk.dylib
 
 release/ref_vk.dylib : LDFLAGS += -shared
 
-else
+else # not Windows or Darwin
+
 ref_vk:
 	@echo "===> Building ref_vk.so"
 	${Q}mkdir -p release

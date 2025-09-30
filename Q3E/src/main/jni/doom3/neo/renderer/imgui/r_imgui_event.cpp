@@ -6,7 +6,7 @@ static float im_cursorY = 0;
 #define IMGUI_WINDOW_WIDTH glConfig.vidWidth
 #define IMGUI_WINDOW_HEIGHT glConfig.vidHeight
 
-void ImGui_MouseMotionEvent(float dx, float dy)
+void R_ImGui_SyncMousePosition(float dx, float dy)
 {
     im_cursorX += dx;
     im_cursorY += dy;
@@ -18,7 +18,10 @@ void ImGui_MouseMotionEvent(float dx, float dy)
         im_cursorY = 0;
     else if(im_cursorY >= IMGUI_WINDOW_HEIGHT)
         im_cursorY = IMGUI_WINDOW_HEIGHT - 1;
+}
 
+void ImGui_MouseMotionEvent(float dx, float dy)
+{
 #ifdef _MULTITHREAD
     if(multithreadActive)
     {
@@ -32,7 +35,7 @@ void ImGui_MouseMotionEvent(float dx, float dy)
     }
 }
 
-void ImGui_KeyEvent(int key, bool state)
+ImGuiKey ImGui_ConvertKeyEvent(int key)
 {
 #define D3_TO_IMGUI_KEY(dk, ik) case K_##dk: imkey = ImGuiKey_##ik; break;
     ImGuiKey imkey;
@@ -104,22 +107,28 @@ void ImGui_KeyEvent(int key, bool state)
                 imkey = (ImGuiKey)(key - '0' + ImGuiKey_0);
             }
             else
-                return;
+                imkey = ImGuiKey_None;
             break;
     }
+
+    return imkey;
+}
+
+void ImGui_KeyEvent(ImGuiKey key, bool state)
+{
 #ifdef _MULTITHREAD
     if(multithreadActive)
     {
-        R_ImGui_PushKeyEvent(imkey, state);
+        R_ImGui_PushKeyEvent(key, state);
     }
     else
 #endif
     {
         ImGuiIO& io = ImGui::GetIO();
-        if(key >= K_MOUSE1 && key <= K_MOUSE5)
-            io.AddMouseButtonEvent(imkey - ImGuiKey_MouseLeft, state);
+        if(key >= ImGuiKey_MouseLeft && key <= ImGuiKey_MouseX2)
+            io.AddMouseButtonEvent(key - ImGuiKey_MouseLeft, state);
         else
-            io.AddKeyEvent(imkey, state);
+            io.AddKeyEvent(key, state);
     }
 }
 
@@ -153,19 +162,33 @@ void ImGui_InputEvent(char ch)
     }
 }
 
-void ImGui_HandleEvent(const sysEvent_t *ev)
+bool ImGui_HandleEvent(const sysEvent_t *ev)
 {
+    if(!R_ImGui_IsInitialized())
+        return false;
+    ImGuiKey imkey;
+    bool ret;
+    IG_LOCK();
     switch (ev->evType) {
         case SE_MOUSE:
-            ImGui_MouseMotionEvent(ev->evValue, ev->evValue2);
-            return;
+            R_ImGui_SyncMousePosition(ev->evValue, ev->evValue2);
+            R_ImGui_PushMouseEvent(im_cursorX, im_cursorY);
+            ret = true;
+            break;
         case SE_KEY:
-            ImGui_KeyEvent(ev->evValue, ev->evValue2);
-            return;
+            imkey = ImGui_ConvertKeyEvent(ev->evValue);
+            if(imkey != ImGuiKey_None)
+                R_ImGui_PushKeyEvent(imkey, ev->evValue2);
+            ret = true;
+            break;
         case SE_CHAR:
-            ImGui_InputEvent(ev->evValue);
-            return;
+            R_ImGui_PushInputEvent(ev->evValue);
+            ret = true;
+            break;
         default:
-            return;
+            ret = false;
+            break;
     }
+    IG_UNLOCK();
+    return ret;
 }

@@ -2,9 +2,22 @@
 
 #include "imgui.h"
 
-#define IMGUI_CALLBACK_EXIT 1
-#define IMGUI_CALLBACK_UPDATE_CVAR 2
-#define IMGUI_CALLBACK_COMMAND 3
+#ifdef _MULTITHREAD //karin: imgui in multithreading
+#define IG_LOCK() { if(multithreadActive) { Sys_EnterCriticalSection(CRITICAL_SECTION_IMGUI); } }
+#define IG_UNLOCK() { if(multithreadActive) { Sys_LeaveCriticalSection(CRITICAL_SECTION_IMGUI); } }
+#else
+#define IG_LOCK()
+#define IG_UNLOCK()
+#endif
+
+enum {
+    IG_CALLBACK_EXIT = 1,
+    IG_CALLBACK_UPDATE_CVAR,
+    IG_CALLBACK_COMMAND,
+};
+
+#define IG_USER_EVENT_DATA_LENGTH 64
+#define IG_COMMAND_NAME "imgui_command"
 
 #if 0
 #if !defined(_MSC_VER)
@@ -15,6 +28,21 @@
 #else
 #define IMGUI_DEBUG(fmt, ...)
 #endif
+
+enum {
+    IG_SE_USER = SE_CONSOLE + 1,
+};
+
+enum {
+    IG_USER_EVENT_RESET = 1,
+    IG_USER_EVENT_START,
+    IG_USER_EVENT_EXIT,
+};
+
+typedef struct imGuiUserEvent_s {
+    int type;
+    char str[IG_USER_EVENT_DATA_LENGTH];
+} imGuiUserEvent_t;
 
 typedef struct imGuiEvent_s
 {
@@ -35,15 +63,16 @@ typedef struct imGuiEvent_s
             float dx;
             float dy;
         } wheel;
+        imGuiUserEvent_t user;
     } data;
-} imGuiEvent_t;
+} igEvent_t;
 
 typedef struct imGuiCallback_s
 {
     int type;
     idStr key;
     idStr value;
-} imGuiCallback_t;
+} igCallback_t;
 
 class idImGui
 {
@@ -61,9 +90,6 @@ public:
     bool IsRunning(void) const {
         return running;
     }
-    bool IsReady(void) const {
-        return ready;
-    }
     bool IsEventRunning(void) const {
         return eventRunning;
     }
@@ -75,25 +101,30 @@ public:
     }
     void RegisterRenderer(GLimp_ImGui_Render_f func, GLimp_ImGui_Render_f begin, GLimp_ImGui_Render_f end, void *data = NULL); // frontend
     void Ready(bool grabMouse); // frontend
-    void StartEvent(void); // frontend
-    void ExitEvent(void); // backend
-    void PushEvent(const imGuiEvent_t &ev) { // frontend write
+    void Exit(void); // backend
+    void PushEvent(const igEvent_t &ev) { // frontend write
         IMGUI_DEBUG("Frontend::Push event -> %d\n", ev.type);
         events.Append(ev);
     }
-    void HandleEvent(const imGuiEvent_t &ev); // backend read
+    void HandleEvent(const igEvent_t &ev); // backend read
     void PullEvent(void); // backend read
-    void PushCallback(const imGuiCallback_t &cb) { // backend write
+    void PushCallback(const igCallback_t &cb) { // backend write
         IMGUI_DEBUG("Backend::Push callback -> %d\n", cb.type);
         callbacks.Append(cb);
     }
-    void HandleCallback(const imGuiCallback_t &cb); // frontend read
+    void HandleCallback(const igCallback_t &cb); // frontend read
     void PullCallback(void); // frontend read
 
 protected:
+    enum {
+        IG_FLAG_RESET_POSITION = BIT(0),
+        IG_FLAG_RESET_SIZE = BIT(1),
+    };
     void NewFrame(void); // backend
     void EndFrame(void); // backend
     static void Demo(void *);
+    void HandleUserEvent(const imGuiUserEvent_t &ev); // backend read
+    bool CheckFlag(int what, bool reset);
 
 private:
     bool isInitialized; // backend write
@@ -103,10 +134,10 @@ private:
     GLimp_ImGui_Render_f end; // backend read; frontend write
     void *data; // backend read; frontend write
     bool grabMouse; // frontend write
-    bool ready; // frontend write
     bool eventRunning; // frontend write
-    idList<imGuiEvent_t> events; // backend read; frontend write
-    idList<imGuiCallback_t> callbacks; // frontend read; backend write
+    idList<igEvent_t> events; // backend read; frontend write
+    idList<igCallback_t> callbacks; // frontend read; backend write
+    int flags; // internal flags
 };
 
 idImGui::idImGui(void)
@@ -117,8 +148,8 @@ idImGui::idImGui(void)
   end(NULL),
   data(NULL),
   grabMouse(false),
-  ready(false),
-  eventRunning(false)
+  eventRunning(false),
+  flags(0)
 {
     draw = &idImGui::Demo;
     events.SetGranularity(1);
@@ -137,13 +168,12 @@ void idImGui::Init(void)
 
     GLimp_ImGui_Init();
 
-    ImFontConfig font_cfg;
-    font_cfg.SizePixels = imgui_fontScale.GetFloat() > 0.0f ? imgui_fontScale.GetFloat() : 22.0f;
-    io.Fonts->AddFontDefault(&font_cfg);
-
-    // Arbitrary scale-up
-    // FIXME: Put some effort into DPI awareness
-    ImGui::GetStyle().ScaleAllSizes(imgui_scale.GetFloat() > 0.0f ? imgui_scale.GetFloat() : 1.0f);
+#ifdef __ANDROID__ //karin: make scrollbar more large
+    ImGuiStyle &style = ImGui::GetStyle();
+	style.ScrollbarSize = 20.0f; // 14.0f
+	style.MouseCursorScale = 1.5f; // 1.0f
+    io.MouseDrawCursor = true; // default
+#endif
 
     running = false;
     isInitialized = true;
@@ -155,21 +185,18 @@ void idImGui::NewFrame(void)
 {
     ImGuiIO& io = ImGui::GetIO();
 
-    if(imgui_scale.IsModified())
-    {
-        ImGui::GetStyle().ScaleAllSizes(1.0f);
-        imgui_scale.ClearModified();
-    }
-
-    if(imgui_fontScale.IsModified())
-    {
-        io.Fonts->ConfigData[0].SizePixels = imgui_fontScale.GetFloat() > 0.0f ? imgui_fontScale.GetFloat() : 22.0f;
-        imgui_fontScale.ClearModified();
-    }
-
     // Start the Dear ImGui frame
     GLimp_ImGui_NewFrame();
     ImGui::NewFrame();
+
+    if(CheckFlag(IG_FLAG_RESET_POSITION, true))
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    else
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    if(CheckFlag(IG_FLAG_RESET_SIZE, true))
+        ImGui::SetNextWindowSize(ImVec2(glConfig.vidWidth, glConfig.vidHeight), ImGuiCond_Always);
+    else
+        ImGui::SetNextWindowSize(ImVec2(glConfig.vidWidth, glConfig.vidHeight), ImGuiCond_FirstUseEver);
 }
 
 void idImGui::EndFrame(void)
@@ -191,6 +218,11 @@ void idImGui::Render(void)
 
         // Rendering
         ImGui::Render();
+
+        if(ImGui::IsKeyReleased(ImGuiKey_Escape))
+        {
+            RB_ImGui_Stop();
+        }
     }
     EndFrame();
 
@@ -232,24 +264,17 @@ void idImGui::RegisterRenderer(GLimp_ImGui_Render_f d, GLimp_ImGui_Render_f b, G
     IMGUI_DEBUG("Frontend::Register renderer\n");
 }
 
-void idImGui::StartEvent(void)
-{
-    if(running)
-        return;
-    if(eventRunning)
-        return;
-    callbacks.Clear();
-    eventRunning = true;
-    IMGUI_DEBUG("Frontend::Start event\n");
-}
-
 void idImGui::Start(void)
 {
     if(!isInitialized)
         return;
+    if(!eventRunning)
+        return;
     if(running)
         return;
+#if 1
     events.Clear();
+#endif
     running = true;
     IMGUI_DEBUG("Backend::Start\n");
 }
@@ -259,49 +284,110 @@ void idImGui::Stop(void)
     if(!running)
         return;
     running = false;
+#if 1
+    events.Clear();
+#endif
     IMGUI_DEBUG("Backend::Stop\n");
 }
 
 void idImGui::Ready(bool m)
 {
+    if(eventRunning)
+        return;
     if(running)
         return;
-    if(ready)
-        return;
     grabMouse = m;
-    ready = true;
+    callbacks.Clear();
+    eventRunning = true;
     IMGUI_DEBUG("Frontend::Ready\n");
 }
 
-void idImGui::ExitEvent(void)
+void idImGui::Exit(void)
 {
     if(!eventRunning)
+    {
         return;
+    }
     eventRunning = false;
-    ready = false;
     grabMouse = false;
     IMGUI_DEBUG("Frontend::Exit event\n");
 }
 
-void idImGui::HandleEvent(const imGuiEvent_t &ev)
+void idImGui::HandleEvent(const igEvent_t &ev)
 {
     IMGUI_DEBUG("Backend::Handle event -> %d\n", ev.type);
-    ImGuiIO& io = ImGui::GetIO();
     switch (ev.type) {
         case SE_MOUSE:
-            io.AddMousePosEvent((float)ev.data.mouse.x, (float)ev.data.mouse.y);
+            if(isInitialized)
+                ImGui::GetIO().AddMousePosEvent((float)ev.data.mouse.x, (float)ev.data.mouse.y);
             return;
         case SE_JOYSTICK_AXIS:
-            io.AddMouseWheelEvent(ev.data.wheel.dx, ev.data.wheel.dy);
+            if(isInitialized)
+                ImGui::GetIO().AddMouseWheelEvent(ev.data.wheel.dx, ev.data.wheel.dy);
             return;
         case SE_KEY:
-            if(ev.data.key.key >= ImGuiKey_MouseLeft && ev.data.key.key <= ImGuiKey_MouseX2)
-                io.AddMouseButtonEvent(ev.data.key.key - ImGuiKey_MouseLeft, ev.data.key.state);
-            else
-                io.AddKeyEvent(ev.data.key.key, ev.data.key.state);
+            if(isInitialized)
+            {
+                if(ev.data.key.key >= ImGuiKey_MouseLeft && ev.data.key.key <= ImGuiKey_MouseX2)
+                    ImGui::GetIO().AddMouseButtonEvent(ev.data.key.key - ImGuiKey_MouseLeft, ev.data.key.state);
+                else
+                    ImGui::GetIO().AddKeyEvent(ev.data.key.key, ev.data.key.state);
+            }
             return;
         case SE_CHAR:
-            io.AddInputCharacter(ev.data.input.ch);
+            if(isInitialized)
+                ImGui::GetIO().AddInputCharacter(ev.data.input.ch);
+            return;
+        case IG_SE_USER:
+            HandleUserEvent(ev.data.user);
+            return;
+        default:
+            return;
+    }
+}
+
+bool idImGui::CheckFlag(int what, bool reset)
+{
+    int res = flags & what;
+    if(reset)
+        flags &= ~res;
+    return res ? true : false;
+}
+
+void idImGui::HandleUserEvent(const imGuiUserEvent_t &ev)
+{
+    switch (ev.type) {
+        case IG_USER_EVENT_RESET: {
+            if(!idStr::Icmp("position", ev.str))
+            {
+                flags |= IG_FLAG_RESET_POSITION;
+            }
+            else if(!idStr::Icmp("size", ev.str))
+            {
+                flags |= IG_FLAG_RESET_SIZE;
+            }
+        }
+            break;
+        case IG_USER_EVENT_START: {
+            if(IsEventRunning())
+            {
+                Init();
+                Start();
+            }
+        }
+            break;
+        case IG_USER_EVENT_EXIT: {
+            if(IsRunning())
+            {
+                Stop();
+            }
+            if(IsEventRunning())
+            {
+                Exit();
+            }
+        }
+            break;
+        default:
             return;
     }
 }
@@ -317,18 +403,20 @@ void idImGui::PullEvent(void)
     events.Clear();
 }
 
-void idImGui::HandleCallback(const imGuiCallback_t &cb)
+void idImGui::HandleCallback(const igCallback_t &cb)
 {
     IMGUI_DEBUG("Frontend::Handle callback -> %d\n", cb.type);
     switch (cb.type) {
-        case IMGUI_CALLBACK_UPDATE_CVAR:
+        case IG_CALLBACK_UPDATE_CVAR:
+			common->Printf("]%s %s\n", cb.key.c_str(), cb.value.c_str());
             cvarSystem->SetCVarString(cb.key, cb.value);
             return;
-        case IMGUI_CALLBACK_COMMAND:
+        case IG_CALLBACK_COMMAND:
+			common->Printf("]%s\n", cb.key.c_str());
 			cmdSystem->BufferCommandText(CMD_EXEC_APPEND, cb.key);
             return;
-        case IMGUI_CALLBACK_EXIT:
-            ExitEvent();
+        case IG_CALLBACK_EXIT:
+            Exit();
             return;
     }
 }
@@ -394,90 +482,9 @@ void idImGui::Demo(void *)
 static idImGui imGuiBackend;
 
 // backend
-void RB_ImGui_Render(void)
-{
-    if(!imGuiBackend.IsRunning())
-        return;
-    imGuiBackend.Render();
-}
-
-// backend
-bool RB_ImGui_IsRunning(void)
-{
-    return imGuiBackend.IsRunning();
-}
-
-// backend
-void RB_ImGui_Start(void)
-{
-    if(imGuiBackend.IsRunning())
-    {
-        imGuiBackend.PullEvent();
-        if(!imGuiBackend.IsEventRunning())
-            RB_ImGui_Stop();
-        return;
-    }
-    if(!imGuiBackend.IsEventRunning())
-        return;
-    if(!imGuiBackend.IsInitialized())
-        imGuiBackend.Init();
-    imgui_scale.SetModified();
-    imgui_fontScale.SetModified();
-    imGuiBackend.Start();
-}
-
-// backend
-void RB_ImGui_PushExitCallback(void)
-{
-    imGuiCallback_t cb;
-    cb.type = IMGUI_CALLBACK_EXIT;
-    imGuiBackend.PushCallback(cb);
-}
-
-// backend
-void RB_ImGui_Stop(void)
-{
-    if(!imGuiBackend.IsRunning())
-        return;
-    imGuiBackend.Stop();
-#ifdef _MULTITHREAD
-	if(multithreadActive)
-		RB_ImGui_PushExitCallback();
-	else
-#endif
-	imGuiBackend.ExitEvent();
-}
-
-// backend
 void RB_ImGui_Shutdown(void)
 {
     imGuiBackend.Shutdown();
-}
-
-// frontend
-void R_ImGui_SetRenderer(GLimp_ImGui_Render_f draw, GLimp_ImGui_Render_f begin, GLimp_ImGui_Render_f end, void *data)
-{
-    if(imGuiBackend.IsRunning())
-        return;
-    imGuiBackend.RegisterRenderer(draw, begin, end, data);
-}
-
-// frontend
-void R_ImGui_Ready(bool grabMouse)
-{
-    if(!imGuiBackend.HasRenderer())
-        return;
-    if(imGuiBackend.IsEventRunning())
-        return;
-    imGuiBackend.Ready(grabMouse);
-
-#ifdef _MULTITHREAD
-	if(!multithreadActive)
-#endif
-	{
-		R_ImGui_Render();
-		RB_ImGui_Start();
-	}
 }
 
 // frontend
@@ -487,26 +494,9 @@ bool R_ImGui_IsRunning(void)
 }
 
 // frontend
-void R_ImGui_Render(void)
+bool R_ImGui_IsInitialized(void)
 {
-    if(imGuiBackend.IsReady() && !imGuiBackend.IsEventRunning())
-    {
-        imGuiBackend.StartEvent();
-    }
-    else if(imGuiBackend.IsEventRunning())
-    {
-        imGuiBackend.PullCallback();
-    }
-}
-
-// frontend
-void R_ImGui_Stop(void)
-{
-    imGuiBackend.ExitEvent();
-#ifdef _MULTITHREAD
-    if(!multithreadActive)
-#endif
-        RB_ImGui_Stop();
+    return imGuiBackend.IsInitialized();
 }
 
 // frontend
@@ -515,65 +505,98 @@ bool R_ImGui_IsGrabMouse(void)
     return imGuiBackend.IsGrabMouse();
 }
 
+ID_INLINE static void R_ImGui_PushEvent(const igEvent_t &ev)
+{
+#ifdef _MULTITHREAD
+    if(multithreadActive)
+        imGuiBackend.PushEvent(ev);
+    else
+#endif
+    imGuiBackend.HandleEvent(ev);
+}
+
+ID_INLINE static void R_ImGui_PushCallback(const igCallback_t &cb)
+{
+#ifdef _MULTITHREAD
+    if(multithreadActive)
+        imGuiBackend.PushCallback(cb);
+    else
+#endif
+    imGuiBackend.HandleCallback(cb);
+}
+
 // frontend
 void R_ImGui_PushKeyEvent(ImGuiKey key, bool state)
 {
-    imGuiEvent_t ev;
+    igEvent_t ev;
     ev.type = SE_KEY;
     ev.data.key.key = key;
     ev.data.key.state = state;
-    imGuiBackend.PushEvent(ev);
+    R_ImGui_PushEvent(ev);
 }
 
 // frontend
 void R_ImGui_PushMouseEvent(int x, int y)
 {
-    imGuiEvent_t ev;
+    igEvent_t ev;
     ev.type = SE_MOUSE;
     ev.data.mouse.x = x;
     ev.data.mouse.y = y;
-    imGuiBackend.PushEvent(ev);
+    R_ImGui_PushEvent(ev);
 }
 
 // frontend
 void R_ImGui_PushWheelEvent(float dx, float dy)
 {
-    imGuiEvent_t ev;
+    igEvent_t ev;
     ev.type = SE_JOYSTICK_AXIS;
     ev.data.wheel.dx = dx;
     ev.data.wheel.dy = dy;
-    imGuiBackend.PushEvent(ev);
+    R_ImGui_PushEvent(ev);
 }
 
 // frontend
 void R_ImGui_PushInputEvent(char ch)
 {
-    imGuiEvent_t ev;
+    igEvent_t ev;
     ev.type = SE_CHAR;
     ev.data.input.ch = ch;
-    imGuiBackend.PushEvent(ev);
+    R_ImGui_PushEvent(ev);
+}
+
+// frontend
+void R_ImGui_PushImGuiEvent(int subType, const char data[IG_USER_EVENT_DATA_LENGTH] = NULL)
+{
+    igEvent_t ev;
+    ev.type = IG_SE_USER;
+    ev.data.user.type = subType;
+    if(data)
+        idStr::snPrintf(ev.data.user.str, sizeof(ev.data.user.str), "%s", data);
+    else
+        memset(ev.data.user.str, 0, sizeof(ev.data.user.str));
+    R_ImGui_PushEvent(ev);
 }
 
 // backend
 void RB_ImGui_PushCVarCallback(const char *name, const char *value)
 {
-    imGuiCallback_t cb;
-    cb.type = IMGUI_CALLBACK_UPDATE_CVAR;
+    igCallback_t cb;
+    cb.type = IG_CALLBACK_UPDATE_CVAR;
     cb.key = name;
     cb.value = value;
-    imGuiBackend.PushCallback(cb);
+    R_ImGui_PushCallback(cb);
 }
 
 void RB_ImGui_PushCVarCallback(const char *name, int value)
 {
-    char str[1024];
+    char str[64];
     idStr::snPrintf(str, sizeof(str), "%d", value);
     RB_ImGui_PushCVarCallback(name, str);
 }
 
 void RB_ImGui_PushCVarCallback(const char *name, float value)
 {
-    char str[1024];
+    char str[64];
     idStr::snPrintf(str, sizeof(str), "%f", value);
     RB_ImGui_PushCVarCallback(name, str);
 }
@@ -584,10 +607,110 @@ void RB_ImGui_PushCVarCallback(const char *name, bool value)
 }
 
 // backend
+void RB_ImGui_PushExitCallback(void)
+{
+    igCallback_t cb;
+    cb.type = IG_CALLBACK_EXIT;
+    R_ImGui_PushCallback(cb);
+}
+
+// backend
 void RB_ImGui_PushCmdCallback(const char *cmd)
 {
-    imGuiCallback_t cb;
-    cb.type = IMGUI_CALLBACK_COMMAND;
+    igCallback_t cb;
+    cb.type = IG_CALLBACK_COMMAND;
     cb.key = cmd;
-    imGuiBackend.PushCallback(cb);
+    R_ImGui_PushCallback(cb);
+}
+
+void R_ImGui_Command_f(const idCmdArgs &args)
+{
+#if 0
+    if(!R_ImGui_IsRunning())
+    {
+        common->Warning("ImGui not running");
+        return;
+    }
+#endif
+    if(args.Argc() < 2)
+    {
+        common->Printf("Usage: %s reset|quit|exit|close [reset=position|size]\n", args.Argv(0));
+        return;
+    }
+    const char *cmd = args.Argv(1);
+    if(!idStr::Icmp("reset", cmd))
+    {
+        IG_LOCK();
+        R_ImGui_PushImGuiEvent(IG_USER_EVENT_RESET, args.Argv(2));
+        IG_UNLOCK();
+    }
+    else if(!idStr::Icmp("quit", cmd) || !idStr::Icmp("exit", cmd) || !idStr::Icmp("close", cmd))
+    {
+        IG_LOCK();
+        R_ImGui_PushImGuiEvent(IG_USER_EVENT_EXIT);
+        IG_UNLOCK();
+    }
+    else
+    {
+        common->Warning("Unknown ImGui command: %s", cmd);
+        return;
+    }
+
+#if 1
+    if(!R_ImGui_IsRunning())
+    {
+        IG_LOCK();
+        imGuiBackend.PullEvent();
+        IG_UNLOCK();
+    }
+#endif
+}
+
+// frontend
+void R_ImGui_Ready(GLimp_ImGui_Render_f draw, GLimp_ImGui_Render_f begin, GLimp_ImGui_Render_f end, void *data, bool grabMouse)
+{
+    if(imGuiBackend.IsEventRunning())
+        return;
+    IG_LOCK();
+    imGuiBackend.RegisterRenderer(draw, begin, end, data);
+    imGuiBackend.Ready(grabMouse);
+    R_ImGui_PushImGuiEvent(IG_USER_EVENT_START);
+    IG_UNLOCK();
+}
+
+// backend
+void RB_ImGui_Render(void)
+{
+    if(imGuiBackend.IsEventRunning())
+    {
+        IG_LOCK();
+        imGuiBackend.PullEvent();
+        IG_UNLOCK();
+    }
+    if(imGuiBackend.IsRunning())
+    {
+        imGuiBackend.Render();
+    }
+}
+
+// backend
+void RB_ImGui_Stop(void)
+{
+    if(!imGuiBackend.IsRunning())
+        return;
+    IG_LOCK();
+    imGuiBackend.Stop();
+    imGuiBackend.Exit();
+    IG_UNLOCK();
+}
+
+// frontend
+void R_ImGui_HandleCallback(void)
+{
+    if(imGuiBackend.IsEventRunning())
+    {
+        IG_LOCK();
+        imGuiBackend.PullCallback();
+        IG_UNLOCK();
+    }
 }

@@ -80,6 +80,10 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_StopThread
 (JNIEnv *, jclass);
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_NotifyExit(JNIEnv *, jclass);
 
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Setenv(
+        JNIEnv *env, jclass cls,
+        jstring name, jstring value);
+
 #ifdef __cplusplus
 }
 #endif

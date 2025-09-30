@@ -312,7 +312,7 @@
     <string name="scroll_to_bottom">底部</string>
     <string name="scroll">滚动</string>
     <string name="pause">暂停</string>
-    <string name="joystick_visible">摇杆显示:</string>
+    <string name="joystick_visible">显示摇杆:</string>
     <string name="suggest_game_woring_directory_tips">Android11/11+建议在`%1$s`下创建文件夹作为游戏数据文件夹以加快加载速度!</string>
     <string name="sub_directory">独立目录: </string>
     <string name="app_is_rebooting">应用重启中......</string>
@@ -530,4 +530,26 @@
     <string name="description_">详情: </string>
     <string name="expand_all">全部展开</string>
     <string name="collapse_all">全部折叠</string>
+    <string name="openal_driver">OpenAL驱动</string>
+    <string name="edit_env">编辑环境变量</string>
+    <string name="value_">值: </string>
+    <string name="input_value">输入值</string>
+    <string name="input_name">输入名称</string>
+    <string name="env">环境变量</string>
+    <string name="must_choose_a_env">必须只选择一个环境变量</string>
+    <string name="name_must_not_empty">名称不能为空!</string>
+    <string name="urbanterror">UrT</string>
+    <string name="urbanterror_base">Urban Terror</string>
+    <string name="add_bots_automatic_harm_bot_autoadd">自动添加Bot(harm_bot_autoAdd)</string>
+    <string name="number_of_bots">Bot数量</string>
+    <string name="bot_difficulty_level_harm_bot_botlevel">Bot难度(harm_bot_botLevel)</string>
+    <string name="_0_random_n1_5_bot_difficulty_level">0 = 随机\n1 - 5 = Bot难度等级</string>
+    <string name="_0_disable_n_1_maximum_npositive_number_bots_num">0 = 禁用\n-1 = 最大\n正数 = Bot数量</string>
+    <string name="pbr_normal_correction_surface_smoothness">PBR法线修正(表面光滑度)\n(harm_r_PBRNormalCorrection):</string>
+    <string name="joystick_center_dot_visible">隐藏摇杆中心圆点</string>
+    <string name="download_testing">下载测试版</string>
+    <string name="disable_motion_when_virtual_mouse_button_hold">当虚拟鼠标按键按下时禁止鼠标移动事件</string>
+    <string name="fixed_ratio">固定比例</string>
+    <string name="ratio">比例</string>
+    <string name="use_custom_resolution_as_fullscreen_size">使用自定义分辨率大小作为屏幕总大小</string>
 </resources>

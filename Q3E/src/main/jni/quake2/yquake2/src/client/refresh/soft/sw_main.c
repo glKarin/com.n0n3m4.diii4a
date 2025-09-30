@@ -1726,7 +1726,7 @@ static const int	r_skysideimage[6] = {5, 2, 4, 1, 0, 3};
 extern mtexinfo_t		r_skytexinfo[6];
 
 static void
-RE_SetSky (char *name, float rotate, vec3_t axis)
+RE_SetSky (const char *name, float rotate, vec3_t axis)
 {
 	char	skyname[MAX_QPATH];
 	int		i;
@@ -1758,7 +1758,7 @@ RE_RegisterSkin
 ===============
 */
 static struct image_s *
-RE_RegisterSkin (char *name)
+RE_RegisterSkin (const char *name)
 {
 	return R_FindImage (name, it_skin);
 }
@@ -1786,8 +1786,7 @@ RE_IsVsyncActive(void)
 
 static int RE_PrepareForWindow(void)
 {
-	int flags = SDL_SWSURFACE;
-	return flags;
+	return 0;
 }
 
 /*
@@ -1815,17 +1814,18 @@ GetRefAPI(refimport_t imp)
 
 	// Need to communicate the SDL major version to the client.
 #ifdef USE_SDL3
-	SDL_Version ver;
+	int version = SDL_VERSIONNUM_MAJOR(SDL_GetVersion());
 #else
 	SDL_version ver;
-#endif
 	SDL_VERSION(&ver);
+	int version = ver.major;
+#endif
 
 	memset(&refexport, 0, sizeof(refexport_t));
 	ri = imp;
 
 	refexport.api_version = API_VERSION;
-	refexport.framework_version = ver.major;
+	refexport.framework_version = version;
 
 	refexport.BeginRegistration = RE_BeginRegistration;
 	refexport.RegisterModel = RE_RegisterModel;
@@ -1910,18 +1910,31 @@ RE_InitContext(void *win)
 	if (r_vsync->value)
 	{
 #ifdef USE_SDL3
-		renderer = SDL_CreateRenderer(window, NULL, SDL_RENDERER_PRESENTVSYNC);
+		renderer = SDL_CreateRenderer(window, NULL);
+		SDL_SetRenderVSync(renderer, 1);
 #else
 		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+                if(!renderer)
+                {
+                	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE | SDL_RENDERER_PRESENTVSYNC);
+                }
 #endif
 	}
 	else
 	{
 #ifdef USE_SDL3
-		renderer = SDL_CreateRenderer(window, NULL, 0);
+		renderer = SDL_CreateRenderer(window, NULL);
 #else
 		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+                if(!renderer)
+                {
+                	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+                }
 #endif
+	}
+	if(!renderer) {
+		Com_Printf("Can't create renderer: %s\n", SDL_GetError());
+		return false;
 	}
 
 	/* Select the color for drawing. It is set to black here. */
@@ -1965,7 +1978,10 @@ RE_InitContext(void *win)
 #endif
 				    SDL_TEXTUREACCESS_STREAMING,
 				    vid_buffer_width, vid_buffer_height);
-
+	if(!texture) {
+		Com_Printf("Can't create texture: %s\n", SDL_GetError());
+		return false;
+	}
 	R_InitGraphics(vid_buffer_width, vid_buffer_height);
 	SWimp_CreateRender(vid_buffer_width, vid_buffer_height);
 
@@ -2167,7 +2183,7 @@ RE_BufferDifferenceStart(int vmin, int vmax)
 	return (pixel_t*)back_buffer - swap_frames[0];
 }
 
-static int
+static size_t
 RE_BufferDifferenceEnd(int vmin, int vmax)
 {
 	int *front_buffer, *back_buffer, *back_min;
@@ -2193,7 +2209,11 @@ RE_CleanFrame(void)
 	memset(swap_buffers, 0,
 		vid_buffer_height * vid_buffer_width * sizeof(pixel_t) * 2);
 
+#ifdef USE_SDL3
+	if (!SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch))
+#else
 	if (SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch))
+#endif
 	{
 		Com_Printf("Can't lock texture: %s\n", SDL_GetError());
 		return;
@@ -2213,7 +2233,11 @@ RE_FlushFrame(int vmin, int vmax)
 	int pitch;
 	Uint32 *pixels;
 
+#ifdef USE_SDL3
+	if (!SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch))
+#else
 	if (SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch))
+#endif
 	{
 		Com_Printf("Can't lock texture: %s\n", SDL_GetError());
 		return;

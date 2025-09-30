@@ -26,6 +26,10 @@
 
 #include <ctype.h>
 
+#ifndef _MSC_VER
+#include <strings.h>
+#endif
+
 #include "header/shared_safe.h"
 
 #define DEG2RAD(a) (a * M_PI) / 180.0F
@@ -93,7 +97,7 @@ RotatePointAroundVector(vec3_t dst, const vec3_t dir,
 }
 
 void
-AngleVectors(vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
+AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
 	float angle;
 	static float sr, sp, sy, cr, cp, cy;
@@ -131,9 +135,8 @@ AngleVectors(vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 }
 
 void
-AngleVectors2(vec3_t value1, vec3_t angles)
+AngleVectors2(const vec3_t value1, vec3_t angles)
 {
-	float forward;
 	float yaw, pitch;
 
 	if ((value1[1] == 0) && (value1[0] == 0))
@@ -152,6 +155,8 @@ AngleVectors2(vec3_t value1, vec3_t angles)
 	}
 	else
 	{
+		float forward;
+
 		if (value1[0])
 		{
 			yaw = ((float)atan2(value1[1], value1[0]) * 180 / M_PI);
@@ -484,6 +489,28 @@ AddPointToBounds(vec3_t v, vec3_t mins, vec3_t maxs)
 		if (val > maxs[i])
 		{
 			maxs[i] = val;
+		}
+	}
+}
+
+void
+ClosestPointOnBounds(const vec3_t p, const vec3_t amin, const vec3_t amax, vec3_t out)
+{
+	int i;
+
+	for (i = 0; i < 3; i++)
+	{
+		if (amin[i] > p[i])
+		{
+			out[i] = amin[i];
+		}
+		else if (amax[i] < p[i])
+		{
+			out[i] = amax[i];
+		}
+		else
+		{
+			out[i] = p[i];
 		}
 	}
 }
@@ -1142,6 +1169,66 @@ Q_strlcat(char *dst, const char *src, int size)
 	}
 
 	return (d - dst) + Q_strlcpy(d, src, size);
+}
+
+void
+Q_strdel(char *s, size_t i, size_t n)
+{
+	size_t len;
+
+	if (!n)
+	{
+		return;
+	}
+
+	len = strlen(s);
+
+	if (i >= len || n > (len - i))
+	{
+		return;
+	}
+
+	memmove(s + i, s + i + n, len - i);
+	s[len - n] = '\0';
+}
+
+size_t
+Q_strins(char *dest, const char *src, size_t i, size_t n)
+{
+	size_t dlen;
+	size_t slen;
+
+	if (!src || *src == '\0')
+	{
+		return 0;
+	}
+
+	slen = strlen(src);
+	dlen = strlen(dest);
+
+	if (i > dlen || (dlen + slen + 1) > n)
+	{
+		return 0;
+	}
+
+	memmove(dest + i + slen, dest + i, dlen - i + 1);
+	memcpy(dest + i, src, slen);
+
+	return slen;
+}
+
+qboolean
+Q_strisnum(const char *s)
+{
+	for (; *s != '\0'; s++)
+	{
+		if (!isdigit(*s))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /*

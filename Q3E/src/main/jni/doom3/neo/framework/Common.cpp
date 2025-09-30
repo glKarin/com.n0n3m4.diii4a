@@ -30,6 +30,9 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "../renderer/Image.h"
+#ifdef _IMGUI
+#include "../renderer/imgui/r_imgui.h"
+#endif
 
 #define	MAX_PRINT_MSG_SIZE	4096
 #define MAX_WARNING_LIST	256
@@ -128,6 +131,10 @@ unsigned int	com_msgID = -1;
 #ifdef __DOOM_DLL__
 idGame 		*game = NULL;
 idGameEdit 	*gameEdit = NULL;
+#endif
+
+#ifdef _RAVEN
+bool com_debugHudActive = false;
 #endif
 
 // writes si_version to the config file - in a kinda obfuscated way
@@ -2628,8 +2635,8 @@ void idCommonLocal::InitCommands(void)
 #endif
 
 #ifdef _IMGUI
-    extern void R_ImGui_idTech4AmmSettings_f(const idCmdArgs &args);
-    cmdSystem->AddCommand("idTech4AmmSettings", R_ImGui_idTech4AmmSettings_f, CMD_FL_SYSTEM, "Show idTech4A++ new cvars and commands");
+    extern void R_ImGui_Startup(void);
+    R_ImGui_Startup();
 #endif
 }
 
@@ -2710,7 +2717,20 @@ void idCommonLocal::Frame(void)
 
 		eventLoop->RunEventLoop();
 
+#ifdef _IMGUI
+        R_ImGui_HandleCallback();
+#endif
+
 		com_frameTime = com_ticNumber * USERCMD_MSEC;
+#ifdef _RAVEN //karin: Q4D 2025 clear debug
+		if(session->rw)
+		{
+			if (!idAsyncNetwork::IsActive()) // if (com_editors & EDITOR_REVERB) // 0x2000
+				session->rw->DebugClear(0);
+			else if (!idAsyncNetwork::client.IsActive())
+				session->rw->DebugClear(0/* com_frameTime */);
+		}
+#endif
 
 		idAsyncNetwork::RunFrame();
 
@@ -2940,7 +2960,7 @@ void idCommonLocal::LoadGameDLL(void)
 #define LOAD_RESULT(dll) ((dll) ? "done" : "fail")
 
 #ifdef __ANDROID__
-	common->Printf("[Harmattan]: fpu = "
+	common->Printf("Android fpu = "
 #ifdef __aarch64__
 			"hard"
 #else
@@ -2957,12 +2977,12 @@ void idCommonLocal::LoadGameDLL(void)
 	idStr fsgame = cvarSystem->GetCVarString("harm_fs_gameLibPath");
 	if(fsgame.Length())
 	{
-		common->Printf("[Harmattan]: Load game `%s` from cvar `harm_fs_gameLibPath`......\n", fsgame.c_str());
+		common->Printf("Load game `%s` from cvar `harm_fs_gameLibPath`......\n", fsgame.c_str());
 		gameDLL = sys->DLL_Load(fsgame);
-		common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", fsgame.c_str(), LOAD_RESULT(gameDLL));
+		common->Printf("Load dynamic library `%s` %s!\n", fsgame.c_str(), LOAD_RESULT(gameDLL));
 	}
 	else
-		common->Printf("[Harmattan]: cvar `harm_fs_gameLibPath` is unset.\n");
+		common->Printf("cvar `harm_fs_gameLibPath` is unset.\n");
 
 	// Second check `fs_game` cvar.
 	if(!gameDLL)
@@ -2971,24 +2991,24 @@ void idCommonLocal::LoadGameDLL(void)
 		// Check special dll path for other apk.
 		idStr dir = cvarSystem->GetCVarString("harm_fs_gameLibDir");
 		if(dir.Length())
-			common->Printf("[Harmattan]: Find game dynamic library directory in `%s` from cvar `harm_fs_gameLibDir`.\n", dir.c_str());
+			common->Printf("Find game dynamic library directory in `%s` from cvar `harm_fs_gameLibDir`.\n", dir.c_str());
 		else
 		{
 			const char *dir_str = Sys_DLLDefaultPath();
-			common->Printf("[Harmattan]: cvar `harm_fs_gameLibDir` is unset. Find game dynamic library directory in default path `%s`.\n", dir_str);
+			common->Printf("cvar `harm_fs_gameLibDir` is unset. Find game dynamic library directory in default path `%s`.\n", dir_str);
 			dir = dir_str;
 		}
 
-			common->Printf("[Harmattan]: Load game `%s` from cvar `fs_game`.\n", fsgame.c_str());
+			common->Printf("Load game `%s` from cvar `fs_game`.\n", fsgame.c_str());
 
 #ifdef _RAVEN // quake4 base game dll
 			if(!fsgame.Icmp("q4base") || fsgame.IsEmpty()) // load Quake4 game so.
 			{
-				common->Printf("[Harmattan]: Load Quake4 game......\n");
+				common->Printf("Load Quake4 game......\n");
 				idStr dllFile(dir);
             dllFile.AppendPath(DLL_NAME("q4game"));
 				gameDLL = sys->DLL_Load(dllFile);
-				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
+				common->Printf("Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
 #elif defined(_HUMANHEAD) // prey2006 base game dll
 			if(!fsgame.Icmp("preybase") 
@@ -2997,41 +3017,41 @@ void idCommonLocal::LoadGameDLL(void)
 #endif
 					|| fsgame.IsEmpty()) // load Prey game so.
 			{
-				common->Printf("[Harmattan]: Load Prey2006 game......\n");
+				common->Printf("Load Prey2006 game......\n");
 				idStr dllFile(dir);
 				dllFile.AppendPath(DLL_NAME("preygame"));
 				gameDLL = sys->DLL_Load(dllFile);
-				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
+				common->Printf("Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
 #else // doom3 base game dll
 			if(!fsgame.Icmp("base") || fsgame.IsEmpty()) // doom3 base game dll
 			{
-				common->Printf("[Harmattan]: Load DOOM3 game......\n");
+				common->Printf("Load DOOM3 game......\n");
 				idStr dllFile(dir);
 				dllFile.AppendPath(DLL_NAME("game"));
 				gameDLL = sys->DLL_Load(dllFile);
-				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
+				common->Printf("Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
 #endif
 			else if(!fsgame.IsEmpty())
 			{
-				common->Printf("[Harmattan]: Load `%s` game......\n", fsgame.c_str());
+				common->Printf("Load `%s` game......\n", fsgame.c_str());
 				idStr dllFile(dir);
             dllFile.AppendPath(va(DLL_NAME("%s"), fsgame.c_str()));
 				gameDLL = sys->DLL_Load(dllFile);
-				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
+				common->Printf("Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
 			else // else find in fs_game cvar path.
 			{
 				fileSystem->FindDLL(_HARM_BASE_GAME_DLL, dllPath, true);
 				if (!dllPath[ 0 ]) {
-					common->Printf("[Harmattan]: couldn't find game dynamic library\n");
+					common->Printf("Couldn't find game dynamic library\n");
 				}
 				else
 				{
-					common->Printf("[Harmattan]: Loading found game DLL: '%s'......\n", dllPath);
+					common->Printf("Loading found game DLL: '%s'......\n", dllPath);
 					gameDLL = sys->DLL_Load(dllPath);
-					common->Printf("[Harmattan]: Load found dynamic library %s!\n", LOAD_RESULT(gameDLL));
+					common->Printf("Load found dynamic library %s!\n", LOAD_RESULT(gameDLL));
 				}
 			}
 #if !defined(__ANDROID__)
@@ -3041,21 +3061,21 @@ void idCommonLocal::LoadGameDLL(void)
             const char *fs_game = cvarSystem->GetCVarString("fs_game");
             if(!fs_game || !fs_game[0])
                 fs_game = BASE_GAMEDIR;
-            common->Printf("[Harmattan]: Load game from %s......\n", fs_game);
+            common->Printf("Load game from %s......\n", fs_game);
             dllFile.AppendPath(fs_game);
             dllFile.AppendPath(DLL_NAME("game"));
             gameDLL = sys->DLL_Load(dllFile);
-            common->Printf("[Harmattan]: Load game dynamic library `%s` %p!\n", dllFile.c_str(), gameDLL);
+            common->Printf("Load game dynamic library `%s` %p!\n", dllFile.c_str(), gameDLL);
 		}
 #endif
 		// last load base game library if all failed.
 		if(!gameDLL)
 		{
-			common->Printf("[Harmattan]: Load BASE game......\n");
+			common->Printf("Load BASE game......\n");
 			idStr dllFile(dir);
 			dllFile.AppendPath(DLL_NAME(_HARM_BASE_GAME_DLL));
 			gameDLL = sys->DLL_Load(dllFile);
-			common->Printf("[Harmattan]: Load BASE dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
+			common->Printf("Load BASE dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 		}
 	}
 #else
@@ -3527,7 +3547,12 @@ void idCommonLocal::InitGame(void)
 		cmdSystem->ExecuteCommandBuffer();
 	}
 #ifdef _IMGUI
+    const char *binding = idKeyInput::GetBinding(K_F10);
+    if(!binding || !binding[0])
+    {
+        common->Printf("Bind F10 to command 'idTech4AmmSettings'\n");
     idKeyInput::SetBinding(K_F10, "idTech4AmmSettings");
+    }
 #endif
 }
 
@@ -3639,12 +3664,7 @@ void idCommonLocal::MaterialKeyForBinding(const char *binding, char *keyMaterial
 
 //k: temp memory allocate in stack / heap control on Android
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-#ifdef __ANDROID__
-#define _DYNAMIC_ALLOC_MAX_STACK "262144" // 256k
-#else
-#define _DYNAMIC_ALLOC_MAX_STACK "524288" // 512k
-#endif
 // #warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
-/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", _DYNAMIC_ALLOC_MAX_STACK, CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `" _DYNAMIC_ALLOC_MAX_STACK "` bytes(Because stack memory is limited by OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).");
+/*static */ _DYNAMIC_ALLOC_CVAR_DECL;
 #endif
 

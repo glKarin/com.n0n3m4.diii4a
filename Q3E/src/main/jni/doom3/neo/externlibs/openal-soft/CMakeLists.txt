@@ -111,7 +111,7 @@ option(ALSOFT_NO_CONFIG_UTIL "Disable building the alsoft-config utility" OFF)
 
 option(ALSOFT_EXAMPLES  "Build example programs"  OFF) #k ON
 
-option(ALSOFT_INSTALL "Install main library" ON)
+option(ALSOFT_INSTALL "Install main library" OFF) #k ON
 option(ALSOFT_INSTALL_CONFIG "Install alsoft.conf sample configuration file" OFF) #k ON
 option(ALSOFT_INSTALL_HRTF_DATA "Install HRTF data files" OFF) #k ON
 option(ALSOFT_INSTALL_AMBDEC_PRESETS "Install AmbDec preset files" OFF) #k ON
@@ -1103,8 +1103,8 @@ if(ALSOFT_REQUIRE_COREAUDIO AND NOT HAVE_COREAUDIO)
 endif()
 
 # Check for Oboe (Android) backend
-option(ALSOFT_BACKEND_OBOE "Enable Oboe backend" OFF) #k: ON
-option(ALSOFT_REQUIRE_OBOE "Require Oboe backend" OFF) #k: OFF
+option(ALSOFT_BACKEND_OBOE "Enable Oboe backend" ON) #k: ON
+option(ALSOFT_REQUIRE_OBOE "Require Oboe backend" ON) #k: OFF
 if(ALSOFT_BACKEND_OBOE)
     set(OBOE_TARGET )
     if(ANDROID)
@@ -1121,9 +1121,9 @@ if(ALSOFT_BACKEND_OBOE)
                 set(OBOE_TARGET "oboe::oboe")
             endif()
 
-#[[            if(NOT TARGET OBOE_TARGET)
+            if(NOT TARGET OBOE_TARGET AND TARGET "oboe")
                 set(OBOE_TARGET "oboe")
-            endif()]]
+            endif()
         endif()
     endif()
 

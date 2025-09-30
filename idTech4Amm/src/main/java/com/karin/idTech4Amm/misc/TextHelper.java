@@ -111,8 +111,11 @@ public final class TextHelper
                 null,
                 "Folder name of games/mods can view by `Game path tips` on launcher",
                 null,
-            "For playing Prey(2006)(Based on `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
-            " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
+            "Quake 4(Based on `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/Quake4Doom", "Quake4Doom") + "`): ",
+            " *. Effect system: Quake4 new advanced `BSE` particle system is working now! Also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "Quake4BSE") + "`, `" + GenLinkText("https://github.com/jmarshall23/Quake4Decompiled", "Quake4Decompiled") + "`), and OpenBSE with DOOM3 original FX/Particle system has been removed.",
+            null,
+            "Prey(2006)(Based on `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
+            " *. Game data folder named `preybase` on Android.",
             " *. Some problems solution: e.g. using cvar `harm_ui_translateAlienFont` to translate Alien text on GUI.",
             " *. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).",
             " *. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.",
@@ -121,13 +124,9 @@ public final class TextHelper
             "  bind \"Your key of toggle lighter\" \"_impulse16\"",
             "  bind \"Your key of drop\" \"_impulse25\"",
             null,
-			"For playing Quake 4(Based on `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/Quake4Doom", "Quake4Doom") + "`): ",
-			" 1. Putting PC Quake 4 game data file to `q4base` folder and START directly.",
-            " *. If running crash on arm32 or low-memory device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.",
-            " *. Effect system: Quake4 using new advanced `BSE` particle system, it not open-source(`jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`, but it not work yet.). Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.",
-            " 2. Bot mod in Multi-Player game: ",
-            " *. Extract `q4base/sabot_a9.pk4` file in apk to Quake4 game data folder, it includes some defs, scripts and MP game map AAS file.",
-            " *. Set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(botaas32).",
+            "Bot mod in Multi-Player game on DOOM 3/Quake 4: ",
+            " *. Extract `doom3/d3_sabot_a7.pk4` or `q4base/sabot_a9.pk4` file in apk to DOOM 3/Quake4 game data folder, it includes some defs, scripts and MP game map AAS file.",
+            " *. Set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(botaas48/botaas32).",
             " *. Set `harm_si_autoFillBots` to 1 for automatic fill bots when start MP game.",
             " *. Execute `addbots` for add multiplayer bot.",
             " *. Execute `fillbots` for auto fill multiplayer bots.",
@@ -200,7 +199,7 @@ public final class TextHelper
             null,
             "Special thanks: ",
             GenLinkText("https://4pda.ru/forum/index.php?showuser=7653620", "Sir Cat") + "@" + GenLinkText("https://4pda.ru/forum/index.php?showtopic=929753", "4PDA forum"),
-            GenLinkText("https://4pda.ru/forum/index.php?showuser=5043340", "ALord7") + "@" + GenLinkText("https://4pda.to/forum/index.php?showtopic=330329", "4PDA forum"),
+            GenLinkText("https://4pda.to/forum/index.php?showuser=5043340", "ALord7") + "@" + GenLinkText("https://4pda.to/forum/index.php?showtopic=330329", "4PDA forum"),
             GenLinkText("https://github.com/lvonasek", "Luboš Vonásek") + "@" + GenLinkText("https://github.com/lvonasek/PreyVR", "PreyVR"),
         };
         final String endl = GetDialogMessageEndl();
@@ -212,36 +211,6 @@ public final class TextHelper
         }
 		return GetDialogMessage(sb.toString());
 	}
-
-    public static CharSequence GetChangesText()
-    {
-        final ChangeLog[] CHANGES = ChangeLog.GetChangeLogs();
-        StringBuilder sb = new StringBuilder();
-        final String endl = GetDialogMessageEndl();
-        for(ChangeLog changeLog : CHANGES)
-        {
-            if(null != changeLog)
-                sb.append(changeLog.GenString(endl));
-            sb.append(endl);
-        }
-        return GetDialogMessage(sb.toString());
-    }
-    
-    public static CharSequence GetCvarText()
-    {
-        StringBuilder sb = new StringBuilder();
-        final String endl = GetDialogMessageEndl();
-        for(Map.Entry<String, KCVar.Group> item : KCVarSystem.CVars().entrySet())
-        {
-            KCVar.Group value = item.getValue();
-            sb.append("------- ").append(value.name).append(" -------");
-            sb.append(endl);
-            for(KCVar cvar : value.list)
-                sb.append(KCVarSystem.GenCVarString(cvar, endl));
-            sb.append(endl);
-        }
-        return GetDialogMessage(sb.toString());
-    }
     
 	private TextHelper() {}
 }

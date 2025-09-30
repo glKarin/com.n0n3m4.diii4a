@@ -169,7 +169,6 @@ R_Strings(void)
 void
 R_SetDefaultState(void)
 {
-	glClearColor(1, 0, 0.5, 0.5);
 	glDisable(GL_MULTISAMPLE);
 	glCullFace(GL_FRONT);
 	glEnable(GL_TEXTURE_2D);
@@ -183,9 +182,7 @@ R_SetDefaultState(void)
 
 	glColor4f(1, 1, 1, 1);
 
-#if !defined(_GLES) //karin: not support glPolygonMode on GLES1.1
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-#endif
 	glShadeModel(GL_FLAT);
 
 	R_TextureMode(gl_texturemode->string);

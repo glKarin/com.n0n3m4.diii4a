@@ -63,7 +63,8 @@ It can be clipped to the top of the screen to allow the console to be
 smoothly scrolled off.
 ================
 */
-void RE_Draw_CharScaled (int x, int y, int num, float scale)
+void
+RE_Draw_CharScaled(int x, int y, int num, float scale)
 {
 	int	row, col;
 	float	frow, fcol, size;
@@ -97,7 +98,7 @@ void RE_Draw_CharScaled (int x, int y, int num, float scale)
 RE_Draw_FindPic
 =============
 */
-image_t	*RE_Draw_FindPic (char *name)
+image_t	*RE_Draw_FindPic(const char *name)
 {
 	return R_FindPic(name, (findimage_t)Vk_FindImage);
 }
@@ -107,7 +108,8 @@ image_t	*RE_Draw_FindPic (char *name)
 RE_Draw_GetPicSize
 =============
 */
-void RE_Draw_GetPicSize (int *w, int *h, char *name)
+void
+RE_Draw_GetPicSize(int *w, int *h, const char *name)
 {
 	image_t *image;
 
@@ -127,7 +129,8 @@ void RE_Draw_GetPicSize (int *w, int *h, char *name)
 RE_Draw_StretchPic
 =============
 */
-void RE_Draw_StretchPic (int x, int y, int w, int h, char *name)
+void
+RE_Draw_StretchPic (int x, int y, int w, int h, const char *name)
 {
 	image_t *vk;
 
@@ -153,7 +156,8 @@ void RE_Draw_StretchPic (int x, int y, int w, int h, char *name)
 RE_Draw_PicScaled
 =============
 */
-void RE_Draw_PicScaled (int x, int y, char *name, float scale)
+void
+RE_Draw_PicScaled(int x, int y, const char *name, float scale)
 {
 	image_t *vk;
 
@@ -175,7 +179,8 @@ This repeats a 64*64 tile graphic to fill the screen around a sized down
 refresh window.
 =============
 */
-void RE_Draw_TileClear (int x, int y, int w, int h, char *name)
+void
+RE_Draw_TileClear(int x, int y, int w, int h, const char *name)
 {
 	image_t	*image;
 

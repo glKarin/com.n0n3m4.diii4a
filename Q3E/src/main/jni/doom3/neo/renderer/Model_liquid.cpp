@@ -502,8 +502,15 @@ void idRenderModelLiquid::InitFromFile(const char *fileName)
 idRenderModelLiquid::InstantiateDynamicModel
 ====================
 */
+#ifdef _RAVEN
+idRenderModel *idRenderModelLiquid::InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask)
+#else
 idRenderModel *idRenderModelLiquid::InstantiateDynamicModel(const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel)
+#endif
 {
+#ifdef _RAVEN
+	(void)surfMask;
+#endif
 	idRenderModelStatic	*staticModel;
 	int		frames;
 	int		t;

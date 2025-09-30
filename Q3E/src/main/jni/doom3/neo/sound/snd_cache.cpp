@@ -467,6 +467,13 @@ ID_TIME_T idSoundSample::GetNewTimeStamp(void) const
 		oggName.SetFileExtension(".ogg");
 		fileSystem->ReadFile(oggName, NULL, &timestamp);
 	}
+#ifdef _SND_MP3
+	if (timestamp == FILE_NOT_FOUND_TIMESTAMP) {
+		idStr mp3Name = name;
+		mp3Name.SetFileExtension(".mp3");
+		fileSystem->ReadFile(mp3Name, NULL, &timestamp);
+	}
+#endif
 
 	return timestamp;
 }
@@ -592,7 +599,11 @@ void idSoundSample::Load(void)
 		}
 
 		// OGG decompressed at load time (when smaller than s_decompressionLimit seconds, 6 seconds by default)
-		if (objectInfo.wFormatTag == WAVE_FORMAT_TAG_OGG) {
+		if (objectInfo.wFormatTag == WAVE_FORMAT_TAG_OGG
+#ifdef _SND_MP3
+			|| objectInfo.wFormatTag == WAVE_FORMAT_TAG_MP3
+#endif
+				) {
 #if defined(_OPENAL_SOFT)
 
 			if ((objectSize < ((int) objectInfo.nSamplesPerSec * idSoundSystemLocal::s_decompressionLimit.GetInteger())))

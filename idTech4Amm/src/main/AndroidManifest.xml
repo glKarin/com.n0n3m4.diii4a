@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11068"
-    android:versionName="1.1.0harmattan68"
+    android:versionCode="11069"
+    android:versionName="1.1.0harmattan69"
     android:installLocation="auto"
     > <!--android:installLocation="preferExternal"-->
 
@@ -71,6 +71,7 @@
         android:preserveLegacyExternalStorage="true"
         android:hasFragileUserData="true"
         android:hardwareAccelerated="true"
+        android:usesCleartextTraffic="true"
         tools:ignore="HardcodedDebugMode,UnusedAttribute">
         <activity            
             android:name="com.n0n3m4.DIII4A.GameLauncher"

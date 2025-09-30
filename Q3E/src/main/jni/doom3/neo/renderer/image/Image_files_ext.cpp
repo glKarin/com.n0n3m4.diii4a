@@ -1,15 +1,10 @@
-// basic defines and includes
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_NO_HDR
-#define STBI_NO_LINEAR
-#define STBI_ONLY_JPEG // at least for now, only use it for JPEG
-#define STBI_NO_STDIO  // images are passed as buffers
-#define STBI_ONLY_PNG
 
-#include "../../externlibs/stb/stb_image.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../../externlibs/stb/stb_image_write.h"
+
+#include "../../externlibs/soil/image_dxt.h"
+#include "../../externlibs/soil/soil_dds_image.h"
 
 // Load functions
 void LoadJPG_stb(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp)
@@ -127,7 +122,6 @@ void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_
     stbi_image_free( decodedImageData );
 }
 
-#include "../../externlibs/soil/soil_dds_image.h"
 void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp)
 {
 
@@ -221,6 +215,21 @@ static void R_ImageRGBA8888ToRGB888(const byte *data, int width, int height, byt
 	}
 }
 #endif
+static void R_ImageColorByteToFloat(const byte *data, int width, int height, int comp, float *to)
+{
+    int		i, j, m;
+    const byte		*temp;
+    float *target;
+
+    for (i = 0 ; i < width ; i++) {
+        for (j = 0 ; j < height ; j++) {
+            temp = data + j * comp * width + i * comp;
+            target = to + j * comp * width + i * comp;
+            for(m = 0; m < comp; m++)
+                target[m] = (float)temp[m] / 255.0f;
+        }
+    }
+}
 
 // Save functions
 static void R_StbWriteImageFile(void *context, void *data, int size)
@@ -246,11 +255,11 @@ void R_WritePNG(const char *filename, const byte *data, int width, int height, i
     if(f)
     {
         int r = stbi_write_png_to_func(R_StbWriteImageFile, (void *)f, width, height, comp, data, width * comp);
-        free(ndata);
         if(!r)
             common->Warning("R_WritePNG fail: %d", r);
         fileSystem->CloseFile(f);
     }
+    free(ndata);
 }
 
 void R_WriteJPG(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, int compression, const char *basePath)
@@ -269,11 +278,11 @@ void R_WriteJPG(const char *filename, const byte *data, int width, int height, i
     if(f)
     {
         int r = stbi_write_jpg_to_func(R_StbWriteImageFile, (void *)f, width, height, comp, data, idMath::ClampInt(1, 100, compression));
-        free(ndata);
         if(!r)
             common->Warning("R_WriteJPG fail: %d", r);
         fileSystem->CloseFile(f);
     }
+    free(ndata);
 }
 
 void R_WriteBMP(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
@@ -292,14 +301,487 @@ void R_WriteBMP(const char *filename, const byte *data, int width, int height, i
     if(f)
     {
         int r = stbi_write_bmp_to_func(R_StbWriteImageFile, (void *)f, width, height, comp, data);
-        free(ndata);
         if(!r)
             common->Warning("R_WriteBMP fail: %d", r);
         fileSystem->CloseFile(f);
     }
+    free(ndata);
 }
 
-#include "../../externlibs/soil/image_dxt.h"
+/*
+=========================================================
+
+EXR LOADING
+
+Interfaces with tinyexr
+=========================================================
+*/
+
+/*
+=======================
+LoadEXR
+=======================
+*/
+void LoadEXR(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp)
+{
+	if( !pic )
+	{
+		fileSystem->ReadFile( filename, NULL, timestamp );
+		return;	// just getting timestamp
+	}
+
+	*pic = NULL;
+
+	// load the file
+	const byte* fbuffer = NULL;
+	int fileSize = fileSystem->ReadFile( filename, ( void** )&fbuffer, timestamp );
+	if( !fbuffer )
+	{
+		return;
+	}
+
+	float* rgba;
+	const char* err;
+
+	{
+		int ret = LoadEXRFromMemory( &rgba, width, height, fbuffer, fileSize, &err );
+		if( ret != 0 )
+		{
+			common->Error( "LoadEXR( %s ): %s\n", filename, err );
+			return;
+		}
+	}
+
+#if 0
+	// dump file as .hdr for testing - this works
+	{
+		idStrStatic< MAX_OSPATH > hdrFileName = "test";
+		//hdrFileName.AppendPath( filename );
+		hdrFileName.SetFileExtension( ".hdr" );
+
+		int ret = stbi_write_hdr( hdrFileName.c_str(), *width, *height, 4, rgba );
+
+		if( ret == 0 )
+		{
+			return; // fail
+		}
+	}
+#endif
+
+	if( rgba )
+	{
+		int32 pixelCount = *width * *height;
+		byte* out = ( byte* )R_StaticAlloc( pixelCount * 4 );
+
+		*pic = out;
+
+		// convert to packed R11G11B10F as uint32 for each pixel
+
+		const float* src = rgba;
+		byte* dst = out;
+		for( int i = 0; i < pixelCount; i++ )
+		{
+#if 0 //karin: R11G11B10F
+			// read 3 floats and ignore the alpha channel
+			float p[3];
+
+			p[0] = src[0];
+			p[1] = src[1];
+			p[2] = src[2];
+
+			// convert
+			uint32_t value = float3_to_r11g11b10f( p );
+			value = (((byte)(src[0] * 255.0f))) 
+				| (((byte)(src[1] * 255.0f)) << 8) 
+				| (((byte)(src[2] * 255.0f)) << 16)
+				| (((byte)(src[3] * 255.0f)) << 24)
+				;
+			*( uint32_t* )dst = value;
+#else // RGBA8888
+			dst[0] = (byte)(src[0] * 255.0f);
+			dst[1] = (byte)(src[1] * 255.0f);
+			dst[2] = (byte)(src[2] * 255.0f);
+			dst[3] = (byte)(src[3] * 255.0f);
+#endif
+
+			src += 4;
+			dst += 4;
+		}
+
+		free( rgba );
+	}
+
+	// RB: EXR needs to be flipped to match the .tga behavior
+	//R_VerticalFlip( *pic, *width, *height );
+
+	Mem_Free( ( void* )fbuffer );
+}
+
+/*
+================
+R_WriteEXR
+================
+*/
+void R_WriteEXR( const char* filename, const byte* rgba, int width, int height, int channelsPerPixel, bool flipVertical, const char* basePath )
+{
+#if 0
+	// miniexr.cpp - v0.2 - public domain - 2013 Aras Pranckevicius / Unity Technologies
+	//
+	// Writes OpenEXR RGB files out of half-precision RGBA or RGB data.
+	//
+	// Only tested on Windows (VS2008) and Mac (clang 3.3), little endian.
+	// Testing status: "works for me".
+	//
+	// History:
+	// 0.2 Source data can be RGB or RGBA now.
+	// 0.1 Initial release.
+
+	const unsigned ww = width - 1;
+	const unsigned hh = height - 1;
+	const unsigned char kHeader[] =
+	{
+		0x76, 0x2f, 0x31, 0x01, // magic
+		2, 0, 0, 0, // version, scanline
+		// channels
+		'c', 'h', 'a', 'n', 'n', 'e', 'l', 's', 0,
+		'c', 'h', 'l', 'i', 's', 't', 0,
+		55, 0, 0, 0,
+		'B', 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, // B, half
+		'G', 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, // G, half
+		'R', 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, // R, half
+		0,
+		// compression
+		'c', 'o', 'm', 'p', 'r', 'e', 's', 's', 'i', 'o', 'n', 0,
+		'c', 'o', 'm', 'p', 'r', 'e', 's', 's', 'i', 'o', 'n', 0,
+		1, 0, 0, 0,
+		0, // no compression
+		// dataWindow
+		'd', 'a', 't', 'a', 'W', 'i', 'n', 'd', 'o', 'w', 0,
+		'b', 'o', 'x', '2', 'i', 0,
+		16, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		uint8( ww & 0xFF ), uint8( ( ww >> 8 ) & 0xFF ), uint8( ( ww >> 16 ) & 0xFF ), uint8( ( ww >> 24 ) & 0xFF ),
+		uint8( hh & 0xFF ), uint8( ( hh >> 8 ) & 0xFF ), uint8( ( hh >> 16 ) & 0xFF ), uint8( ( hh >> 24 ) & 0xFF ),
+		// displayWindow
+		'd', 'i', 's', 'p', 'l', 'a', 'y', 'W', 'i', 'n', 'd', 'o', 'w', 0,
+		'b', 'o', 'x', '2', 'i', 0,
+		16, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		uint8( ww & 0xFF ), uint8( ( ww >> 8 ) & 0xFF ), uint8( ( ww >> 16 ) & 0xFF ), uint8( ( ww >> 24 ) & 0xFF ),
+		uint8( hh & 0xFF ), uint8( ( hh >> 8 ) & 0xFF ), uint8( ( hh >> 16 ) & 0xFF ), uint8( ( hh >> 24 ) & 0xFF ),
+		// lineOrder
+		'l', 'i', 'n', 'e', 'O', 'r', 'd', 'e', 'r', 0,
+		'l', 'i', 'n', 'e', 'O', 'r', 'd', 'e', 'r', 0,
+		1, 0, 0, 0,
+		0, // increasing Y
+		// pixelAspectRatio
+		'p', 'i', 'x', 'e', 'l', 'A', 's', 'p', 'e', 'c', 't', 'R', 'a', 't', 'i', 'o', 0,
+		'f', 'l', 'o', 'a', 't', 0,
+		4, 0, 0, 0,
+		0, 0, 0x80, 0x3f, // 1.0f
+		// screenWindowCenter
+		's', 'c', 'r', 'e', 'e', 'n', 'W', 'i', 'n', 'd', 'o', 'w', 'C', 'e', 'n', 't', 'e', 'r', 0,
+		'v', '2', 'f', 0,
+		8, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		// screenWindowWidth
+		's', 'c', 'r', 'e', 'e', 'n', 'W', 'i', 'n', 'd', 'o', 'w', 'W', 'i', 'd', 't', 'h', 0,
+		'f', 'l', 'o', 'a', 't', 0,
+		4, 0, 0, 0,
+		0, 0, 0x80, 0x3f, // 1.0f
+		// end of header
+		0,
+	};
+	const int kHeaderSize = sizeof( kHeader );
+
+	const int kScanlineTableSize = 8 * height;
+	const unsigned pixelRowSize = width * 3 * 2;
+	const unsigned fullRowSize = pixelRowSize + 8;
+
+	unsigned bufSize = kHeaderSize + kScanlineTableSize + height * fullRowSize;
+	unsigned char* buf = ( unsigned char* )Mem_Alloc( bufSize, TAG_TEMP );
+	if( !buf )
+	{
+		return;
+	}
+
+	// copy in header
+	memcpy( buf, kHeader, kHeaderSize );
+
+	// line offset table
+	unsigned ofs = kHeaderSize + kScanlineTableSize;
+	unsigned char* ptr = buf + kHeaderSize;
+	for( int y = 0; y < height; ++y )
+	{
+		*ptr++ = ofs & 0xFF;
+		*ptr++ = ( ofs >> 8 ) & 0xFF;
+		*ptr++ = ( ofs >> 16 ) & 0xFF;
+		*ptr++ = ( ofs >> 24 ) & 0xFF;
+		*ptr++ = 0;
+		*ptr++ = 0;
+		*ptr++ = 0;
+		*ptr++ = 0;
+		ofs += fullRowSize;
+	}
+
+	// scanline data
+	const unsigned char* src = ( const unsigned char* )rgba16f;
+	const int stride = channelsPerPixel * 2;
+	for( int y = 0; y < height; ++y )
+	{
+		// coordinate
+		*ptr++ = y & 0xFF;
+		*ptr++ = ( y >> 8 ) & 0xFF;
+		*ptr++ = ( y >> 16 ) & 0xFF;
+		*ptr++ = ( y >> 24 ) & 0xFF;
+		// data size
+		*ptr++ = pixelRowSize & 0xFF;
+		*ptr++ = ( pixelRowSize >> 8 ) & 0xFF;
+		*ptr++ = ( pixelRowSize >> 16 ) & 0xFF;
+		*ptr++ = ( pixelRowSize >> 24 ) & 0xFF;
+		// B, G, R
+		const unsigned char* chsrc;
+		chsrc = src + 4;
+		for( int x = 0; x < width; ++x )
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			chsrc += stride;
+		}
+		chsrc = src + 2;
+		for( int x = 0; x < width; ++x )
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			chsrc += stride;
+		}
+		chsrc = src + 0;
+		for( int x = 0; x < width; ++x )
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			chsrc += stride;
+		}
+
+		src += width * stride;
+	}
+
+	assert( ptr - buf == bufSize );
+
+	fileSystem->WriteFile( filename, buf, bufSize, basePath );
+
+	Mem_Free( buf );
+
+#else
+
+	// TinyEXR version with compression to save disc size
+
+	if( channelsPerPixel != 3 && channelsPerPixel != 4 )
+	{
+		common->Error( "R_WriteEXR( %s ): channelsPerPixel = %i not supported", filename, channelsPerPixel );
+	}
+
+    byte *ndata = NULL;
+    if(flipVertical)
+    {
+        ndata = (byte *) malloc(width * height * channelsPerPixel);
+        memcpy(ndata, rgba, width * height * channelsPerPixel);
+        R_ImageFlipVertical(ndata, width, height, channelsPerPixel);
+        rgba = ndata;
+    }
+
+    const bool HasAlpha = channelsPerPixel == 4;
+
+	EXRHeader header;
+	InitEXRHeader( &header );
+
+	EXRImage image;
+	InitEXRImage( &image );
+
+	image.num_channels = channelsPerPixel;
+
+	idList<float> images[4];
+    for (int i = 0; i < channelsPerPixel; i++)
+	    images[i].Resize( width * height );
+
+	for( int i = 0; i < width * height; i++ )
+	{
+        for (int m = 0; m < channelsPerPixel; m++)
+            images[m][i] = ( float(rgba[channelsPerPixel * i + m]) / 255.0f );
+	}
+
+	float* image_ptr[4];
+	image_ptr[0] = &( images[2].operator[]( 0 ) ); // B
+	image_ptr[1] = &( images[1].operator[]( 0 ) ); // G
+	image_ptr[2] = &( images[0].operator[]( 0 ) ); // R
+    if(HasAlpha)
+        image_ptr[3] = &( images[3].operator[]( 0 ) ); // A
+
+	image.images = ( unsigned char** )image_ptr;
+	image.width = width;
+	image.height = height;
+
+	header.num_channels = channelsPerPixel;
+	header.channels = ( EXRChannelInfo* )malloc( sizeof( EXRChannelInfo ) * header.num_channels );
+
+	// Must be BGR(A) order, since most of EXR viewers expect this channel order.
+	strncpy( header.channels[0].name, "B", 255 );
+	header.channels[0].name[strlen( "B" )] = '\0';
+	strncpy( header.channels[1].name, "G", 255 );
+	header.channels[1].name[strlen( "G" )] = '\0';
+	strncpy( header.channels[2].name, "R", 255 );
+	header.channels[2].name[strlen( "R" )] = '\0';
+    if(HasAlpha)
+    {
+        strncpy(header.channels[3].name, "A", 255);
+        header.channels[3].name[strlen("A")] = '\0';
+    }
+
+	header.pixel_types = ( int* )malloc( sizeof( int ) * header.num_channels );
+	header.requested_pixel_types = ( int* )malloc( sizeof( int ) * header.num_channels );
+	for( int i = 0; i < header.num_channels; i++ )
+	{
+		header.pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT; // pixel type of input image
+		header.requested_pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT; // TINYEXR_PIXELTYPE_HALF; // pixel type of output image to be stored in .EXR
+	}
+
+	header.compression_type = TINYEXR_COMPRESSIONTYPE_ZIP;
+
+	byte* buffer = NULL;
+	const char* err;
+	size_t size = SaveEXRImageToMemory( &image, &header, &buffer, &err );
+	if( size == 0 )
+	{
+		common->Error( "R_WriteEXR( %s ): Save EXR err: %s\n", filename, err );
+
+		goto cleanup;
+	}
+
+    if(!basePath)
+        basePath = "fs_savepath";
+	fileSystem->WriteFile( filename, buffer, size, basePath );
+
+cleanup:
+	free( header.channels );
+	free( header.pixel_types );
+	free( header.requested_pixel_types );
+    free(ndata);
+
+#endif
+}
+
+/*
+=======================
+LoadHDR
+
+RB: load floating point data from memory and convert it into packed R11G11B10F data
+=======================
+*/
+void LoadHDR( const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp )
+{
+    if( !pic )
+    {
+        fileSystem->ReadFile( filename, NULL, timestamp );
+        return;	// just getting timestamp
+    }
+
+    *pic = NULL;
+
+    // load the file
+    const byte* fbuffer = NULL;
+    int fileSize = fileSystem->ReadFile( filename, ( void** )&fbuffer, timestamp );
+    if( !fbuffer )
+    {
+        return;
+    }
+
+    int32 numChannels;
+
+    byte* rgba = stbi_load_from_memory( ( stbi_uc const* ) fbuffer, fileSize, width, height, &numChannels, STBI_rgb_alpha );
+
+    if( numChannels != 3 && numChannels != 4 )
+    {
+        common->Error( "LoadHDR( %s ): HDR has not 3/4 channels\n", filename );
+    }
+
+#if 0
+    if( rgba )
+    {
+        int32 pixelCount = *width * *height;
+        byte* out = ( byte* )R_StaticAlloc( pixelCount * 4 );
+
+        *pic = out;
+
+        // convert to packed R11G11B10F as uint32 for each pixel
+
+        const float* src = rgba;
+        byte* dst = out;
+        for( int i = 0; i < pixelCount; i++ )
+        {
+            // read 3 floats and ignore the alpha channel
+            float p[3];
+
+            p[0] = src[0];
+            p[1] = src[1];
+            p[2] = src[2];
+
+            // convert
+            uint32_t value = float3_to_r11g11b10f( p );
+            *( uint32_t* )dst = value;
+
+            src += 4;
+            dst += 4;
+        }
+
+        free( rgba );
+    }
+#else
+    if ( rgba == NULL ) {
+        common->Warning( "stb_image was unable to load HDR %s : %s\n",
+                         filename, stbi_failure_reason());
+        return;
+    }
+
+    // *pic must be allocated with R_StaticAlloc(), but stb_image allocates with malloc()
+    // (and as there is no R_StaticRealloc(), #define STBI_MALLOC etc won't help)
+    // so the decoded data must be copied once
+    int size = *width * *height * 4;
+    *pic = (byte *)R_StaticAlloc( size );
+    memcpy( *pic, rgba, size );
+    // now that decodedImageData has been copied into *pic, it's not needed anymore
+    stbi_image_free( rgba );
+#endif
+
+    Mem_Free( ( void* )fbuffer );
+}
+// RB end
+
+void R_WriteHDR(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
+{
+    byte *ndata = NULL;
+    if(flipVertical)
+    {
+        ndata = (byte *) malloc(width * height * comp);
+        memcpy(ndata, data, width * height * comp);
+        R_ImageFlipVertical(ndata, width, height, comp);
+        data = ndata;
+    }
+    if(!basePath)
+        basePath = "fs_savepath";
+    idFile *f = fileSystem->OpenFileWrite(filename, basePath);
+    if(f)
+    {
+        float *fdata = (float *)malloc(width * height * comp * sizeof(float));
+        R_ImageColorByteToFloat(data, width, height, comp, fdata);
+        int r = stbi_write_hdr_to_func(R_StbWriteImageFile, (void *)f, width, height, comp, fdata);
+        if(!r)
+            common->Warning("R_WriteHDR fail: %d", r);
+        free(fdata);
+        fileSystem->CloseFile(f);
+    }
+    free(ndata);
+}
+
 void R_WriteDDS(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
 {
     byte *ndata = NULL;
@@ -316,11 +798,11 @@ void R_WriteDDS(const char *filename, const byte *data, int width, int height, i
     if(f)
     {
         int r = soil_save_image_as_func(R_StbWriteImageFile, (void *)f, width, height, comp, data);
-        free(ndata);
         if(!r)
             common->Warning("R_WriteDDS fail: %d", r);
         fileSystem->CloseFile(f);
     }
+    free(ndata);
 }
 
 void R_WriteScreenshotImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
@@ -328,27 +810,37 @@ void R_WriteScreenshotImage(const char *filename, const byte *data, int width, i
     idStr fn(filename);
     switch(r_screenshotFormat.GetInteger())
     {
-        case 1: {// bmp
+        case SSFE_BMP: {// bmp
             fn.SetFileExtension("bmp");
             R_WriteBMP(fn.c_str(), data, width, height, comp, flipVertical,  basePath);
         }
             break;
-        case 2: {// png
+        case SSFE_PNG: {
             fn.SetFileExtension("png");
             R_WritePNG(fn.c_str(), data, width, height, comp, flipVertical, idMath::ClampInt(0, 9, r_screenshotPngCompression.GetInteger()), basePath);
         }
             break;
-        case 3: {// jpg
+        case SSFE_JPG: {
             fn.SetFileExtension("jpg");
             R_WriteJPG(fn.c_str(), data, width, height, comp, flipVertical, idMath::ClampInt(1, 100, r_screenshotJpgQuality.GetInteger()), basePath);
         }
             break;
-        case 4: {// dds
+        case SSFE_DDS: {
             fn.SetFileExtension("dds");
             R_WriteDDS(fn.c_str(), data, width, height, comp, flipVertical, basePath);
         }
             break;
-        case 0: // tga
+        case SSFE_EXR: {
+            fn.SetFileExtension("exr");
+            R_WriteEXR(fn.c_str(), data, width, height, comp, flipVertical, basePath);
+        }
+            break;
+        case SSFE_HDR: {
+            fn.SetFileExtension("hdr");
+            R_WriteHDR(fn.c_str(), data, width, height, comp, flipVertical, basePath);
+        }
+            break;
+        case SSFE_TGA:
         default:
             fn.SetFileExtension("tga");
             R_WriteTGA(fn.c_str(), data, width, height, flipVertical); //TODO: 4 comp
@@ -408,6 +900,10 @@ bool R_ConvertImage(const char *filename, const char *toFormat, idStr &ret, int 
     else if(!idStr::Icmp(srcExt, "bmp"))
     {
         LoadBMP(filename, &pic, &width, &height, &timestamp);
+    }
+    else if(!idStr::Icmp(srcExt, "exr"))
+    {
+        LoadEXR(filename, &pic, &width, &height, &timestamp);
     }
     else
     {
@@ -507,6 +1003,16 @@ bool R_ConvertImage(const char *filename, const char *toFormat, idStr &ret, int 
     else if(!idStr::Icmp(toFormat, "bmp"))
     {
         R_WriteBMP(targetPath.c_str(), pic, width, height, comp, flipVertical);
+        res = true;
+    }
+    else if(!idStr::Icmp(toFormat, "exr"))
+    {
+        R_WriteEXR(targetPath.c_str(), pic, width, height, comp, flipVertical);
+        res = true;
+    }
+    else if(!idStr::Icmp(toFormat, "hdr"))
+    {
+        R_WriteHDR(targetPath.c_str(), pic, width, height, comp, flipVertical);
         res = true;
     }
     else

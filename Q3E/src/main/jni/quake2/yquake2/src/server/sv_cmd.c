@@ -317,7 +317,7 @@ void SV_ListMaps_f(void)
 	char **userMapNames;
 	int nUserMaps = 0;
 	int i;
-	char* mapName;
+	char* mapName, *lastsep;
 
 	Com_Printf("\n");
 
@@ -325,9 +325,9 @@ void SV_ListMaps_f(void)
 	{
 		for (i = 0; i < nUserMaps - 1; i++)
 		{
-			if (strrchr(userMapNames[i], '/'))
+			if ((lastsep = strrchr(userMapNames[i], '/')))
 			{
-				mapName = strrchr(userMapNames[i], '/') + 1;
+				mapName = lastsep + 1;
 			}
 			else
 			{
@@ -371,7 +371,7 @@ SV_Kick_f(void)
 		SV_BroadcastPrintf(PRINT_HIGH, "%s was kicked\n", sv_client->name);
 	}
 
-	/* print directly, because the dropped client 
+	/* print directly, because the dropped client
 	   won't get the SV_BroadcastPrintf message */
 	SV_ClientPrintf(sv_client, PRINT_HIGH, "You were kicked from the game\n");
 	SV_DropClient(sv_client);
@@ -381,7 +381,8 @@ SV_Kick_f(void)
 void
 SV_Status_f(void)
 {
-	int i, j, l;
+	int i, j;
+	size_t l;
 	client_t *cl;
 	char *s;
 	int ping;
@@ -519,7 +520,7 @@ SV_DumpUser_f(void)
 
 	if (Cmd_Argc() != 2)
 	{
-		Com_Printf("Usage: info <userid>\n");
+		Com_Printf("Usage: dumpuser <userid>\n");
 		return;
 	}
 
@@ -564,8 +565,8 @@ SV_ServerRecord_f(void)
 		return;
 	}
 
-	if (strstr(Cmd_Argv(1), "..") || 
-		strstr(Cmd_Argv(1), "/") || 
+	if (strstr(Cmd_Argv(1), "..") ||
+		strstr(Cmd_Argv(1), "/") ||
 		strstr(Cmd_Argv(1), "\\"))
 	{
 		Com_Printf("Illegal filename.\n");

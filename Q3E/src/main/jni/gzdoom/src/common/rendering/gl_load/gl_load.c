@@ -134,7 +134,7 @@ static PROC WinGetProcAddress(const char *name)
 	#if defined(__APPLE__)
 		#define IntGetProcAddress(name) AppleGLGetProcAddress(name)
 	#else
-		#if defined(__sgi) || defined(__sun) || defined(__unix__)
+		#if defined(__sgi) || defined(__sun) || defined(__unix__) || defined(__HAIKU__)
 #ifdef __ANDROID__ //karin: using EGL on Android
 			#include <EGL/egl.h>
 static intptr_t glesFunctionStub()

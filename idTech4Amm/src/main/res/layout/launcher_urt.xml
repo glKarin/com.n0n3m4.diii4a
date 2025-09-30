@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res/com.karin.idTech4Amm"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+
+    <com.karin.idTech4Amm.widget.Divider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        myapp:label="@string/urbanterror"
+        myapp:lineColor="@color/launcher_divider_color" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:text="@string/add_bots_automatic_harm_bot_autoadd" />
+
+        <EditText
+            android:id="@+id/urt_bot_autoAdd"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/number_of_bots"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="numberSigned|textNoSuggestions"
+            android:text="0" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp"
+        android:text="@string/_0_disable_n_1_maximum_npositive_number_bots_num"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="12sp" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:text="@string/bot_difficulty_level_harm_bot_botlevel" />
+
+        <EditText
+            android:id="@+id/urt_bot_level"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="0 - 5"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="numberSigned|textNoSuggestions"
+            android:text="0" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp"
+        android:text="@string/_0_random_n1_5_bot_difficulty_level"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="12sp" />
+
+
+</LinearLayout>

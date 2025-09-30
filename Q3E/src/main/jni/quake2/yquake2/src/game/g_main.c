@@ -144,11 +144,9 @@ SpawnEntities_f(char *mapname, char *entities, char *spawnpoint)
  * with all entry points and global
  * variables
  */
-#pragma GCC visibility push(default) //karin: export function
 Q2_DLL_EXPORTED game_export_t *
 GetGameAPI(game_import_t *import)
 {
-#pragma GCC visibility pop
 	gi = *import;
 
 	globals.apiversion = GAME_API_VERSION;

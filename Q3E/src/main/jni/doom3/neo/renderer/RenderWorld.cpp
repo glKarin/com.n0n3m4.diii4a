@@ -1763,7 +1763,7 @@ We might alternatively choose to do this with an area flow.
 ==================
 */
 void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRenderLightLocal *light, const idSphere *sphere, int numPoints, const idVec3(*points),
-                int nodeNum)
+                                              int nodeNum)
 {
 	int			i;
 	areaNode_t	*node;
@@ -1815,7 +1815,7 @@ void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRender
 		nodeNum = node->children[0];
 
 		if (nodeNum) {	// 0 = solid
-			PushVolumeIntoTree_r(def, light, sphere, numPoints, points, nodeNum);
+            PushVolumeIntoTree_r(def, light, sphere, numPoints, points, nodeNum);
 		}
 
 		return;
@@ -1825,7 +1825,7 @@ void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRender
 		nodeNum = node->children[1];
 
 		if (nodeNum) {	// 0 = solid
-			PushVolumeIntoTree_r(def, light, sphere, numPoints, points, nodeNum);
+            PushVolumeIntoTree_r(def, light, sphere, numPoints, points, nodeNum);
 		}
 
 		return;
@@ -1927,7 +1927,7 @@ void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRender
 		nodeNum = node->children[0];
 
 		if (nodeNum) {	// 0 = solid
-			PushVolumeIntoTree_r(def, light, sphere, numPoints, points, nodeNum);
+            PushVolumeIntoTree_r(def, light, sphere, numPoints, points, nodeNum);
 		}
 	}
 
@@ -1935,7 +1935,7 @@ void idRenderWorldLocal::PushVolumeIntoTree_r(idRenderEntityLocal *def, idRender
 		nodeNum = node->children[1];
 
 		if (nodeNum) {	// 0 = solid
-			PushVolumeIntoTree_r(def, light, sphere, numPoints, points, nodeNum);
+            PushVolumeIntoTree_r(def, light, sphere, numPoints, points, nodeNum);
 		}
 	}
 }
@@ -1977,7 +1977,7 @@ void idRenderWorldLocal::PushVolumeIntoTree(idRenderEntityLocal *def, idRenderLi
 
 	idSphere sphere(mid, sqrt(radSquared));
 
-	PushVolumeIntoTree_r(def, light, &sphere, numPoints, points, 0);
+    PushVolumeIntoTree_r(def, light, &sphere, numPoints, points, 0);
 }
 
 //===================================================================
@@ -2445,33 +2445,815 @@ const idMaterial *R_RemapShaderBySkin(const idMaterial *shader, const idDeclSkin
 #ifdef _RAVEN // particle
 
 #ifdef _RAVEN_FX
-static void rvRenderEffectLocal_Init(rvRenderEffectLocal *a)
+#define ASSERT_EFFECT_HANDLE(effectHandle) \
+	if (effectHandle < 0 || effectHandle > LUDICROUS_INDEX) { \
+		common->Error("idRenderWorld::%s: index = %i in [0, %d)", __func__, effectHandle, LUDICROUS_INDEX); \
+	}
+#include "../raven/fx/BSE.h"
+#endif
+
+rvRenderEffectLocal::rvRenderEffectLocal()
 {
-	a->gameTime = 0;
-	a->serviceTime = 0;
-	a->newEffect = false;
-	a->expired = false;
-	a->effect = NULL;
-	a->world = NULL;
-	a->lastModifiedFrameNum = 0;
-	a->archived = false;
-	a->viewCount = 0;
-	a->visibleCount = 0;
-	a->remove = false;
-	a->updateFramenum = 0;
-	a->index = -1;
-	a->dynamicModel = NULL;
-	a->dynamicModelFrameCount = 0;
-	memset(&a->parms, 0, sizeof(a->parms));
-	a->referenceBounds.Clear();
-	esMatrixLoadIdentity((ESMatrix *)a->modelMatrix);
+    memset(&parms, 0, sizeof(parms));
+    memcpy(modelMatrix, &mat4_identity, sizeof(modelMatrix)); //k??? TODO memset in Q4D
+    model = (rvRenderModelBSE *)renderModelManager->FindModel("bse.bse");
+    effect = NULL;
+    world = NULL;
+    lastModifiedFrameNum = 0;
+    writeToDemo = false;
+    archived = false;
+    dynamicModel = NULL;
+    dynamicModelFrameCount = 0;
+    viewCount = 0;
+    viewEffect = NULL;
+    visibleCount = 0;
+    effectRefs = NULL;
+    index = -1;
+    referenceBounds.Zero();
+
+#ifdef _RAVEN_FX
+    gameTime = 0;
+    serviceTime = 0;
+    newEffect = false;
+    expired = false;
+    remove = false;
+    updateFramenum = 0;
+    //referenceBounds.Clear();
+#endif
 }
+
+rvRenderEffectLocal::~rvRenderEffectLocal()
+{
+    if ( dynamicModel )
+        delete dynamicModel;
+}
+
+#ifdef _RAVEN_BSE
 
 #define ASSERT_EFFECT_HANDLE(effectHandle) \
 	if (effectHandle < 0 || effectHandle > LUDICROUS_INDEX) { \
 		common->Error("idRenderWorld::%s: index = %i in [0, %d)", __func__, effectHandle, LUDICROUS_INDEX); \
 	}
-#include "../raven/bse/BSE.h"
+
+void idRenderWorldLocal::MarkEffectDef(int effectHandle) {
+#if 0
+    int num; // edi
+    int v4; // eax
+    int *v5; // edx
+    int v6; // ebx
+    int v7; // ecx
+    int v8; // ecx
+    int *v9; // ecx
+    int v10; // edx
+    int *v11; // ecx
+    int granularity; // eax
+    bool v13; // cc
+    int i; // eax
+    int v15; // ebx
+    int size; // ecx
+    int v17; // ecx
+    int *list; // edi
+    int j; // eax
+
+    if (r_suppressMultipleUpdates.internalVar->integerValue) {
+        num = this->markedEffectDefs.num;
+        v4 = 0;
+        if (num <= 0) {
+            v6 = effectHandle;
+            LABEL_15:
+            if (v6 >= 0) {
+                if (!this->markedEffectDefs.list) {
+                    granularity = this->markedEffectDefs.granularity;
+                    if (granularity > 0) {
+                        if (granularity != this->markedEffectDefs.size) {
+                            v13 = granularity < this->markedEffectDefs.num;
+                            this->markedEffectDefs.size = granularity;
+                            if (v13)
+                                this->markedEffectDefs.num = granularity;
+                            this->markedEffectDefs.list = (int *) Memory::Allocate(4 * granularity);
+                            for (i = 0; i < this->markedEffectDefs.num; ++i)
+                                this->markedEffectDefs.list[i] = *(_DWORD * )(4 * i);
+                        }
+                    } else {
+                        this->markedEffectDefs.list = 0;
+                        this->markedEffectDefs.num = 0;
+                        this->markedEffectDefs.size = 0;
+                    }
+                }
+                v15 = this->markedEffectDefs.num;
+                size = this->markedEffectDefs.size;
+                if (v15 == size) {
+                    if (!this->markedEffectDefs.granularity)
+                        this->markedEffectDefs.granularity = 16;
+                    v17 = this->markedEffectDefs.granularity
+                          + size
+                          - (this->markedEffectDefs.granularity + size) % this->markedEffectDefs.granularity;
+                    if (v17 > 0) {
+                        if (v17 != this->markedEffectDefs.size) {
+                            list = this->markedEffectDefs.list;
+                            this->markedEffectDefs.size = v17;
+                            if (v17 < v15)
+                                this->markedEffectDefs.num = v17;
+                            this->markedEffectDefs.list = (int *) Memory::Allocate(4 * v17);
+                            for (j = 0; j < this->markedEffectDefs.num; ++j)
+                                this->markedEffectDefs.list[j] = list[j];
+                            if (list)
+                                Memory::Free(list);
+                        }
+                    } else {
+                        if (this->markedEffectDefs.list)
+                            Memory::Free(this->markedEffectDefs.list);
+                        this->markedEffectDefs.list = 0;
+                        this->markedEffectDefs.num = 0;
+                        this->markedEffectDefs.size = 0;
+                    }
+                }
+                this->markedEffectDefs.list[this->markedEffectDefs.num++] = effectHandle;
+            }
+        } else {
+            v5 = this->markedEffectDefs.list;
+            while (1) {
+                v6 = effectHandle;
+                if (*v5 == effectHandle)
+                    break;
+                if (*v5 == -1 - effectHandle) {
+                    if (v4 >= 0) {
+                        v7 = this->markedEffectDefs.num;
+                        if (v4 < v7) {
+                            v8 = v7 - 1;
+                            for (this->markedEffectDefs.num = v8; v4 < this->markedEffectDefs.num; *v11 = v10) {
+                                v9 = this->markedEffectDefs.list;
+                                v10 = v9[v4 + 1];
+                                v11 = &v9[v4++];
+                            }
+                        }
+                    }
+                    break;
+                }
+                ++v4;
+                ++v5;
+                if (v4 >= num)
+                    goto LABEL_15;
+            }
+            ++tr.pc.c_effectPushesSuppressed;
+        }
+    } else if (effectHandle >= 0) {
+#else
+    if (effectHandle >= 0) {
+#endif
+        PushEffectDef(effectHandle);
+    }
+}
+
+void idRenderWorldLocal::PushEffectDef(int effectHandle) {
+    int num; // edx
+    rvRenderEffectLocal *v3; // edi
+
+    num = effectDefs.Num();
+    if (effectHandle < 0 || effectHandle >= num) {
+        common->Error(
+                "idRenderWorld::PushEffectDef: invalid handle %i >= %i\n",
+                effectHandle,
+                num);
+    } else {
+        v3 = effectDefs[effectHandle];
+        if (v3) {
+            R_AxisToModelMatrix(v3->parms.axis, v3->parms.origin, v3->modelMatrix);
+            v3->lastModifiedFrameNum = tr.frameCount;
+            ++tr.viewCount;
+            if (v3->world->areaNodes) {
+                idBox box(v3->referenceBounds, v3->parms.origin, v3->parms.axis);
+                PushPolytopeIntoTree_r(NULL, NULL, v3, &box, NULL, 0, 0);
+                //++tr.pc.c_numVolumePushes;
+            }
+        } else {
+            common->Error(
+                    "idRenderWorld::PushEffectDef: handle %i [0, %i] is NULL\n",
+                    effectHandle,
+                    num);
+        }
+    }
+}
+
+#if 1
+void idRenderWorldLocal::PushPolytopeIntoTree_r(
+		idRenderEntityLocal *def,
+		idRenderLightLocal *light,
+		rvRenderEffectLocal *reffect,
+		const idBox *box,
+		const idVec3 *points,
+		int numPoints,
+		int nodeNum)
+{
+    int i;
+    areaNode_t	*node;
+    bool	front, back;
+
+    if( nodeNum < 0 )
+    {
+		portalArea_t	*area;
+		int		areaNum = -1 - nodeNum;
+
+		area = &portalAreas[ areaNum ];
+
+		if (area->viewCount == tr.viewCount) {
+			return;	// already added a reference here
+		}
+
+		area->viewCount = tr.viewCount;
+
+		if (def) {
+			AddEntityRefToArea(def, area);
+		}
+
+		if (light) {
+			AddLightRefToArea(light, area);
+		}
+
+        if (reffect) {
+            AddEffectRefToArea(reffect, area);
+        }
+
+        return;
+	}
+
+	node = areaNodes + nodeNum;
+
+	// if we know that all possible children nodes only touch an area
+	// we have already marked, we can early out
+	if (r_useNodeCommonChildren.GetBool() &&
+	    node->commonChildrenArea != CHILDREN_HAVE_MULTIPLE_AREAS) {
+		// note that we do NOT try to set a reference in this area
+		// yet, because the test volume may yet wind up being in the
+		// solid part, which would cause bounds slightly poked into
+		// a wall to show up in the next room
+		if (portalAreas[ node->commonChildrenArea ].viewCount == tr.viewCount) {
+			return;
+		}
+	}
+
+	// if the bounding sphere is completely on one side, don't
+	// bother checking the individual points
+    float sd = box->PlaneDistance(node->plane);
+
+    if (sd > 0.0f) {
+        nodeNum = node->children[0];
+
+        if (nodeNum) {	// 0 = solid
+            PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, nodeNum);
+        }
+
+        return;
+    }
+
+    if (sd < 0.0f) {
+        nodeNum = node->children[1];
+
+        if (nodeNum) {	// 0 = solid
+            PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, nodeNum);
+        }
+
+        return;
+    }
+
+    if (numPoints == 0) { //karin: if sd == 0.0 and no points goto LABEL_60
+        nodeNum = node->children[0];
+
+        if (nodeNum) {	// 0 = solid
+            PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, nodeNum);
+        }
+
+        nodeNum = node->children[1];
+
+        if (nodeNum) {	// 0 = solid
+            PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, nodeNum);
+        }
+
+        return;
+    }
+
+#if 1 //karin: from PushVolumeIntoTree_r
+    front = back = false;
+
+#ifdef MACOS_X	//loop unrolling & pre-fetching for performance
+    const idVec3 norm = node->plane.Normal();
+    const float plane3 = node->plane[3];
+    float D0, D1, D2, D3;
+
+    for (i = 0 ; i < numPoints - 4; i+=4) {
+        D0 = points[i+0] * norm + plane3;
+        D1 = points[i+1] * norm + plane3;
+
+        if (!front && D0 >= 0.0f) {
+            front = true;
+        } else if (!back && D0 <= 0.0f) {
+            back = true;
+        }
+
+        D2 = points[i+1] * norm + plane3;
+
+        if (!front && D1 >= 0.0f) {
+            front = true;
+        } else if (!back && D1 <= 0.0f) {
+            back = true;
+        }
+
+        D3 = points[i+1] * norm + plane3;
+
+        if (!front && D2 >= 0.0f) {
+            front = true;
+        } else if (!back && D2 <= 0.0f) {
+            back = true;
+        }
+
+        if (!front && D3 >= 0.0f) {
+            front = true;
+        } else if (!back && D3 <= 0.0f) {
+            back = true;
+        }
+
+        if (back && front) {
+            break;
+        }
+    }
+
+    if (!(back && front)) {
+        for (; i < numPoints ; i++) {
+            float d;
+            d = points[i] * node->plane.Normal() + node->plane[3];
+
+            if (d >= 0.0f) {
+                front = true;
+            } else if (d <= 0.0f) {
+                back = true;
+            }
+
+            if (back && front) {
+                break;
+            }
+        }
+    }
+#else
+    for (i = 0 ; i < numPoints ; i++) {
+        float d;
+
+        d = points[i] * node->plane.Normal() + node->plane[3];
+
+        if (d >= 0.0f) {
+            front = true;
+        } else if (d <= 0.0f) {
+            back = true;
+        }
+
+        if (back && front) {
+            break;
+        }
+    }
+#endif
+
+    if (front) {
+        nodeNum = node->children[0];
+
+        if (nodeNum) {	// 0 = solid
+            PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, nodeNum);
+        }
+    }
+
+    if (back) {
+        nodeNum = node->children[1];
+
+        if (nodeNum) {	// 0 = solid
+            PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, nodeNum);
+        }
+    }
+#else
+    int v10; // esi
+	idRenderWorldLocal *v11; // edi
+	bool v12; // sf
+	idPlane *v13; // esi
+	int v14; // eax
+	float v15; // st7
+	float v16; // st6
+	int v17; // eax
+	char v18; // cl
+	char v19; // dl
+	float *p_y; // edi
+	float v21; // st7
+	bool v22; // zf
+	float v23; // st7
+	bool v24; // zf
+	float v25; // st7
+	bool v26; // zf
+	float v27; // st7
+	bool v28; // zf
+	float *v29; // edi
+	float v30; // st7
+	bool v31; // zf
+	portalArea_s *v32; // esi
+	areaReference_s *v33; // eax
+	areaReference_s *v34; // eax
+	areaReference_s *areaNext; // edx
+	areaReference_s *p_effectRefs; // esi
+	float v37; // [esp+10h] [ebp-8h]
+	float boxa; // [esp+28h] [ebp+10h]
+	int numPointsa; // [esp+30h] [ebp+18h]
+	int i; // [esp+34h] [ebp+1Ch]
+    areaNode_t	*node;
+
+    v17 = 0;
+    v18 = false;
+    v19 = false;
+
+    // v19 back v21 d
+    for(numPointsa = 0; numPointsa < numPoints - 4; numPointsa+=4)
+    {
+        v21 = v13->Distance(points[numPointsa]);
+        if ( v21 <= 0.0f )
+        {
+            if ( v21 < 0.0f )
+            {
+                v19 = true;
+                v22 = v18 == false;
+            }
+        }
+        else
+        {
+            v18 = true;
+            v22 = v19 == false;
+        }
+        if ( !v22 )
+            break; // goto LABEL_42;
+
+        v23 = v13->Distance(points[numPointsa + 1]);
+        if ( v23 <= 0.0f )
+        {
+            if ( v23 < 0.0f )
+            {
+                v19 = true;
+                v24 = v18 == false;
+            }
+        }
+        else
+        {
+            v18 = true;
+            v24 = v19 == false;
+        }
+        if ( !v24 )
+            break; //goto LABEL_42;
+
+        v25 = v13->Distance(points[numPointsa + 2]);
+        if ( v25 <= 0.0f )
+        {
+            if ( v25 < 0.0f )
+            {
+                v19 = true;
+                v26 = v18 == false;
+            }
+        }
+        else
+        {
+            v18 = true;
+            v26 = v19 == false;
+        }
+        if ( !v26 )
+            break; // goto LABEL_42;
+
+        v27 = v13->Distance(points[numPointsa + 3]);
+        if ( v27 > 0.0 )
+        {
+            v18 = true;
+            v28 = v19 == false;
+            if ( !v28 )
+                break; // goto LABEL_42;
+        }
+        else if ( v27 < 0.0 )
+        {
+            v19 = true;
+            v28 = v18 == false;
+        }
+        if ( !v28 )
+            break; // goto LABEL_42;
+    }
+
+// LABEL_34
+    for (; numPointsa < numPoints ; numPointsa++)
+    {
+        v30 = v13->Distance(points[numPointsa]);
+        if ( v30 > 0.0 )
+            break;
+        if ( v30 < 0.0 )
+        {
+            v19 = true;
+            v31 = v18 == false;
+            if ( !v31 )
+                break; // goto LABEL_42;
+        }
+    }
+    if(v31)
+    {
+        v18 = true;
+        v31 = v19 == false;
+    }
+
+    if ( v18 && v19 )
+    {
+        nodeNum = node->children[0]; // v13 + 16
+        if(nodeNum)
+            PushPolytopeIntoTree_r(
+                    def,
+                    light,
+                    reffect,
+                    box,
+                    points,
+                    numPoints,
+                    nodeNum);
+
+        return;
+    }
+    else if ( v18 )
+    {
+        nodeNum = node->children[1]; // *(_DWORD *)(v13 + 16);
+
+        if(nodeNum)
+            PushPolytopeIntoTree_r(
+                    def,
+                    light,
+                    reffect,
+                    box,
+                    points,
+                    numPoints,
+                    nodeNum);
+
+        return;
+    }
+#endif
+}
+
+void idRenderWorldLocal::PushPolytopeIntoTree(
+        idRenderEntityLocal *def,
+        idRenderLightLocal *light,
+        rvRenderEffectLocal *reffect,
+        const idBox *box,
+        const idVec3 *points,
+        int numPoints) {
+
+    if (areaNodes == NULL) {
+        return;
+    }
+
+    //c_lightReferences = tr.pc.c_lightReferences;
+    PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, 0);
+/*    if (light)
+        light->numPortalsCrossed = tr.pc.c_lightReferences - c_lightReferences;*/
+    //++tr.pc.c_numVolumePushes;
+}
+
+#else
+void idRenderWorldLocal::PushPolytopeIntoTree_r(idRenderEntityLocal *def, idRenderLightLocal *light, rvRenderEffectLocal *reffect, const idBox *box, const idVec3 *points, int numPoints, int nodeNum)
+{
+    int			i;
+    areaNode_t	*node;
+    bool	front, back;
+    idSphere *sphere;
+    idSphere sphereObj;
+
+    if(box)
+    {
+        sphereObj = box->ToSphere();
+        sphere = &sphereObj;
+    }
+    else
+        sphere = NULL;
+
+    if (nodeNum < 0) {
+        portalArea_t	*area;
+        int		areaNum = -1 - nodeNum;
+
+        area = &portalAreas[ areaNum ];
+
+        if (area->viewCount == tr.viewCount) {
+            return;	// already added a reference here
+        }
+
+        area->viewCount = tr.viewCount;
+
+        if (def) {
+            AddEntityRefToArea(def, area);
+        }
+
+        if (light) {
+            AddLightRefToArea(light, area);
+        }
+
+        if (reffect) {
+            AddEffectRefToArea(reffect, area);
+        }
+
+        return;
+    }
+
+    node = areaNodes + nodeNum;
+
+    // if we know that all possible children nodes only touch an area
+    // we have already marked, we can early out
+    if (r_useNodeCommonChildren.GetBool() &&
+        node->commonChildrenArea != CHILDREN_HAVE_MULTIPLE_AREAS) {
+        // note that we do NOT try to set a reference in this area
+        // yet, because the test volume may yet wind up being in the
+        // solid part, which would cause bounds slightly poked into
+        // a wall to show up in the next room
+        if (portalAreas[ node->commonChildrenArea ].viewCount == tr.viewCount) {
+            return;
+        }
+    }
+
+    // if the bounding sphere is completely on one side, don't
+    // bother checking the individual points
+    float sd = node->plane.Distance(sphere->GetOrigin());
+
+    if (sd >= sphere->GetRadius()) {
+        nodeNum = node->children[0];
+
+        if (nodeNum) {	// 0 = solid
+            PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, nodeNum);
+        }
+
+        return;
+    }
+
+    if (sd <= -sphere->GetRadius()) {
+        nodeNum = node->children[1];
+
+        if (nodeNum) {	// 0 = solid
+            PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, nodeNum);
+        }
+
+        return;
+    }
+
+    // exact check all the points against the node plane
+    front = back = false;
+#ifdef MACOS_X	//loop unrolling & pre-fetching for performance
+    const idVec3 norm = node->plane.Normal();
+	const float plane3 = node->plane[3];
+	float D0, D1, D2, D3;
+
+	for (i = 0 ; i < numPoints - 4; i+=4) {
+		D0 = points[i+0] * norm + plane3;
+		D1 = points[i+1] * norm + plane3;
+
+		if (!front && D0 >= 0.0f) {
+			front = true;
+		} else if (!back && D0 <= 0.0f) {
+			back = true;
+		}
+
+		D2 = points[i+1] * norm + plane3;
+
+		if (!front && D1 >= 0.0f) {
+			front = true;
+		} else if (!back && D1 <= 0.0f) {
+			back = true;
+		}
+
+		D3 = points[i+1] * norm + plane3;
+
+		if (!front && D2 >= 0.0f) {
+			front = true;
+		} else if (!back && D2 <= 0.0f) {
+			back = true;
+		}
+
+		if (!front && D3 >= 0.0f) {
+			front = true;
+		} else if (!back && D3 <= 0.0f) {
+			back = true;
+		}
+
+		if (back && front) {
+			break;
+		}
+	}
+
+	if (!(back && front)) {
+		for (; i < numPoints ; i++) {
+			float d;
+			d = points[i] * node->plane.Normal() + node->plane[3];
+
+			if (d >= 0.0f) {
+				front = true;
+			} else if (d <= 0.0f) {
+				back = true;
+			}
+
+			if (back && front) {
+				break;
+			}
+		}
+	}
+
+#else
+
+#ifdef _RAVEN //karin: restore points num on plane. fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+    int pointsInPlane = 0;
+#endif
+    for (i = 0 ; i < numPoints ; i++) {
+        float d;
+
+        d = points[i] * node->plane.Normal() + node->plane[3];
+
+        if (d >= 0.0f) {
+            front = true;
+        } else if (d <= 0.0f) {
+            back = true;
+        }
+#ifdef _RAVEN //karin: fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+        if(d == 0.0f)
+            pointsInPlane++;
+#endif
+
+        if (back && front) {
+            break;
+        }
+    }
+
+#endif
+
+#ifdef _RAVEN //karin: if all points on plane, find front and back. fix some 0-volume models rendering, e.g. in map airdefense1, some lights on ceil.
+    if(/*(front || back) && */front != back && pointsInPlane == numPoints)
+        front = back = true;
+#endif
+    if (front) {
+        nodeNum = node->children[0];
+
+        if (nodeNum) {	// 0 = solid
+            PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, nodeNum);
+        }
+    }
+
+    if (back) {
+        nodeNum = node->children[1];
+
+        if (nodeNum) {	// 0 = solid
+            PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, nodeNum);
+        }
+    }
+}
+
+void idRenderWorldLocal::PushPolytopeIntoTree(idRenderEntityLocal *def, idRenderLightLocal *light, rvRenderEffectLocal *reffect, const idBox *box, const idVec3 *points, int numPoints)
+{
+    int i;
+    float radSquared, lr;
+    idVec3 mid, dir;
+
+    if (areaNodes == NULL) {
+        return;
+    }
+
+    // calculate a bounding sphere for the points
+    mid.Zero();
+
+    for (i = 0; i < numPoints; i++) {
+        mid += points[i];
+    }
+
+    mid *= (1.0f / numPoints);
+
+    radSquared = 0;
+
+    for (i = 0; i < numPoints; i++) {
+        dir = points[i] - mid;
+        lr = dir * dir;
+
+        if (lr > radSquared) {
+            radSquared = lr;
+        }
+    }
+
+    idSphere sphere(mid, sqrt(radSquared));
+
+    PushPolytopeIntoTree_r(def, light, reffect, box, points, numPoints, 0);
+}
+#endif
+
+void idRenderWorldLocal::AddEffectRefToArea(rvRenderEffectLocal *reffect, portalArea_t *area)
+{
+    areaReference_t	*elef;
+
+    // add a reffect to this area
+    elef = areaReferenceAllocator.Alloc();
+    elef->effect = reffect;
+    elef->area = area;
+    elef->ownerNext = reffect->effectRefs;
+    reffect->effectRefs = elef;
+    //++tr.pc.c_effectReferences;
+
+    // doubly linked list so we can free them easily later
+    area->effectRefs.areaNext->areaPrev = elef;
+    elef->areaNext = area->effectRefs.areaNext;
+    elef->areaPrev = &area->effectRefs;
+    area->effectRefs.areaNext = elef;
+}
 #endif
 
 /*
@@ -2482,17 +3264,17 @@ AddEffectDef
 qhandle_t idRenderWorldLocal::AddEffectDef(const renderEffect_t* reffect, int time) { 
 #ifdef _RAVEN_FX
 	BSE_VERBOSE("AddEffectDef %p %d %f %f\n", reffect, time, reffect->startTime, tr.frameShaderTime);
-	int effectHandle = effectsDef.FindNull();
+	int effectHandle = effectDefs.FindNull();
 	if (effectHandle == -1) {
-		effectHandle = effectsDef.Append(NULL);
+		effectHandle = effectDefs.Append(NULL);
 	}
 
-	if (effectsDef[effectHandle] == NULL) {
-		effectsDef[effectHandle] = new rvRenderEffectLocal();
+	if (effectDefs[effectHandle] == NULL) {
+		effectDefs[effectHandle] = new rvRenderEffectLocal();
 	}
 
-	rvRenderEffectLocal *effect = effectsDef[effectHandle];
-	rvRenderEffectLocal_Init(effect);
+	rvRenderEffectLocal *effect = effectDefs[effectHandle];
+	//rvRenderEffectLocal_Init(effect);
 	effect->parms = *reffect;
 	effect->gameTime = time;
 	effect->world = this;
@@ -2501,13 +3283,32 @@ qhandle_t idRenderWorldLocal::AddEffectDef(const renderEffect_t* reffect, int ti
 	float sec = MS2SEC(time);
 	if(!bse->PlayEffect(effect, reffect->startTime)) // last renderView->time
 	{
-		delete effectsDef[effectHandle];
-		effectsDef[effectHandle] = NULL;
+		delete effectDefs[effectHandle];
+		effectDefs[effectHandle] = NULL;
 		return -1;
 	}
 	bse->ServiceEffect(effect, sec);
 
 	return effectHandle;
+#elif defined(_RAVEN_BSE)
+    int v8; // edi
+
+    if ( !bse_enabled.GetBool() )
+        return -1;
+    // find empty slot index
+    v8 = effectDefs.FindNull();
+    // append new item if empty slot not found
+    if ( v8 == -1 )
+    {
+        v8 = effectDefs.Append(NULL);
+    }
+    // update or free
+    if ( !UpdateEffectDef(v8, reffect, time) )
+    {
+        return v8;
+    }
+    FreeEffectDef(v8);
+    return -1;
 #else
 	return -1; // if < 0, will remove rvClientEffect
 #endif
@@ -2516,6 +3317,7 @@ qhandle_t idRenderWorldLocal::AddEffectDef(const renderEffect_t* reffect, int ti
 /*
 ===================
 UpdateEffectDef
+remove if return true
 ===================
 */
 bool idRenderWorldLocal::UpdateEffectDef(qhandle_t effectHandle, const renderEffect_t* reffect, int time) {
@@ -2524,10 +3326,73 @@ bool idRenderWorldLocal::UpdateEffectDef(qhandle_t effectHandle, const renderEff
 	BSE_VERBOSE("UpdateEffectDef %d %p %d %f\n", effectHandle, reffect, time, tr.frameShaderTime);
 	ASSERT_EFFECT_HANDLE(effectHandle);
 
-	effectsDef[effectHandle]->parms = *reffect;
-	effectsDef[effectHandle]->gameTime = time;
+	effectDefs[effectHandle]->parms = *reffect;
+	effectDefs[effectHandle]->gameTime = time;
 	float sec = MS2SEC(time);
-	return bse->ServiceEffect(effectsDef[effectHandle], sec);
+	return bse->ServiceEffect(effectDefs[effectHandle], sec);
+#elif defined(_RAVEN_BSE)
+    int v6; // esi
+    rvRenderEffectLocal *v15; // ebx
+    float v19; // [esp+0h] [ebp-28h]
+    float v20; // [esp+0h] [ebp-28h]
+    bool push; // [esp+17h] [ebp-11h]
+
+    if ( r_skipUpdates.GetBool() )
+        return false;
+    if ( !bse_enabled.GetBool() )
+        return true;
+    //++tr.pc.c_effectUpdates;
+    v6 = effectHandle;
+    if ( effectHandle >= 0x2711 )
+        common->Error(
+                "idRenderWorld::UpdateEffectDef: index = %i [0, %i]",
+                effectHandle,
+                effectDefs.Num());
+    while(effectHandle >= effectDefs.Num())
+    {
+        effectDefs.Append(NULL);
+    }
+    v15 = effectDefs[v6];
+    if ( v15 )
+    {
+        push = false;
+        if ( memcmp(reffect, &v15->parms, sizeof(v15->parms)) )
+        {
+            R_FreeEffectDefDerivedData(v15);
+            push = true;
+        }
+		v15->parms = *reffect;
+    }
+    else
+    {
+        push = true;
+        v15 = new rvRenderEffectLocal;
+        effectDefs[effectHandle] = v15;
+        v15->index = effectHandle;
+        v15->world = this;
+		v15->parms = *reffect;
+        v20 = (float)time * 0.001f;
+		v15->parms.startTime = v20;
+        if ( !bse->PlayEffect(v15, v20) )
+        {
+            return true;
+        }
+    }
+#if 0
+    if ( session->writeDemo )
+    {
+        idRenderWorldLocal::WriteUpdateEffectDef(this, effectHandle);
+        v15->writeToDemo = true;
+    }
+#endif
+    v19 = (float)time * 0.001f;
+    if ( bse->ServiceEffect(v15, v19) )
+    {
+        return true;
+    }
+    if ( push )
+        idRenderWorldLocal::MarkEffectDef(effectHandle);
+    return false;
 #else
 	return true;
 #endif
@@ -2538,12 +3403,55 @@ void idRenderWorldLocal::FreeEffectDef(qhandle_t effectHandle) {
 	BSE_VERBOSE("FreeEffectDef %d\n", effectHandle);
 	ASSERT_EFFECT_HANDLE(effectHandle);
 
-	bse->FreeEffect(effectsDef[effectHandle]);
+	bse->FreeEffect(effectDefs[effectHandle]);
 
-	if (effectsDef[effectHandle] != NULL)
-		delete effectsDef[effectHandle];
+	if (effectDefs[effectHandle] != NULL)
+		delete effectDefs[effectHandle];
 	
-	effectsDef[effectHandle] = NULL;
+	effectDefs[effectHandle] = NULL;
+#elif defined(_RAVEN_BSE)
+    int num = effectDefs.Num(); // eax
+    rvRenderEffectLocal *v5; // esi
+
+    if ( effectHandle < 0 || (effectHandle >= num))
+    {
+        common->Error(
+                "idRenderWorld::FreeEffectDef: invalid handle %i >= %i\n",
+                effectHandle,
+                num);
+    }
+    else
+    {
+        v5 = effectDefs[effectHandle];
+        if ( v5 )
+        {
+            bse->FreeEffect(v5);
+            R_FreeEffectDefDerivedData(v5);
+#if 0
+            if ( session->writeDemo )
+            {
+                if ( v5->archived )
+                {
+                    idRenderWorldLocal::WriteFreeEffectDef(this, effectHandle);
+                    v5->
+                            writeToDemo = false;
+                    v5->
+                            archived = false;
+                }
+            }
+#endif
+            delete effectDefs[effectHandle];
+            effectDefs[effectHandle] = NULL;
+            MarkEffectDef(-1 - effectHandle);
+        }
+        else
+        {
+            common->Error(
+                    "idRenderWorld::FreeEffectDef: handle %i [0, %i] is NULL\n",
+                    effectHandle,
+                    num);
+        }
+    }
 #endif
 }
 
@@ -2552,10 +3460,35 @@ void idRenderWorldLocal::StopEffectDef(qhandle_t effectHandle) {
 	BSE_VERBOSE("StopEffectDef %d\n", effectHandle);
 	ASSERT_EFFECT_HANDLE(effectHandle);
 
-	if (effectsDef[effectHandle] == NULL)
+	if (effectDefs[effectHandle] == NULL)
 		return;
 
-	bse->StopEffect(effectsDef[effectHandle]);
+	bse->StopEffect(effectDefs[effectHandle]);
+#elif defined(_RAVEN_BSE)
+    rvRenderEffectLocal *v2; // esi
+
+    if ( effectHandle < 0 || effectHandle >= effectDefs.Num() )
+    {
+        common->Error(
+                "idRenderWorld::StopEffectDef: invalid handle %i >= %i\n",
+                effectHandle,
+                effectDefs.Num());
+    }
+    else
+    {
+        v2 = effectDefs[effectHandle];
+        if ( v2 )
+        {
+#if 0
+            if ( session->writeDemo )
+            {
+                idRenderWorldLocal::WriteStopEffectDef(this, effectHandle);
+                v2->writeToDemo = true;
+            }
+#endif
+            bse->StopEffect(v2);
+        }
+    }
 #endif
 }
 
@@ -2563,14 +3496,46 @@ const class rvRenderEffectLocal* idRenderWorldLocal::GetEffectDef(qhandle_t effe
 #ifdef _RAVEN_FX
 	ASSERT_EFFECT_HANDLE(effectHandle);
 
-	return effectsDef[effectHandle]; 
+	return effectDefs[effectHandle];
+#elif defined(_RAVEN_BSE)
+    int num; // esi
+    const rvRenderEffectLocal *result; // eax
+
+    num = effectDefs.Num();
+    if ( effectHandle < 0 || effectHandle >= num )
+    {
+        common->Error(
+                "idRenderWorld::GetEffectDef: invalid handle %i >= %i\n",
+                effectHandle,
+                num);
+        return NULL;
+    }
+    else
+    {
+        result = effectDefs[effectHandle];
+        if ( !result )
+        {
+            common->Error(
+                    "idRenderWorld::GetEffectDef: handle %i [0, %i] is NULL\n",
+                    effectHandle,
+                    num);
+            return NULL;
+        }
+    }
+    return result;
 #else
 	return NULL;
 #endif
 }
 
-bool idRenderWorldLocal::EffectDefHasSound(const renderEffect_s* reffect) { 
-	return bse->CheckDefForSound(reffect); 
+bool idRenderWorldLocal::EffectDefHasSound(const renderEffect_s* reffect) {
+#ifdef _RAVEN_FX
+    return bse->CheckDefForSound(reffect);
+#elif defined(_RAVEN_BSE)
+	return reffect && bse->CheckDefForSound(reffect);
+#else
+    return false;
+#endif
 }
 
 #endif

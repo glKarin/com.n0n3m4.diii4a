@@ -534,5 +534,27 @@
     <string name="description_">Description: </string>
     <string name="expand_all">Expand all</string>
     <string name="collapse_all">Collapse all</string>
+    <string name="openal_driver">OpenAL driver</string>
+    <string name="edit_env">Edit env</string>
+    <string name="value_">Value:</string>
+    <string name="input_value">Input value</string>
+    <string name="input_name">Input name</string>
+    <string name="env">Env</string>
+    <string name="must_choose_a_env">Must choose a env</string>
+    <string name="name_must_not_empty">Name must not empty!</string>
+    <string name="urbanterror">Q3-UT4</string>
+    <string name="urbanterror_base">Urban Terror</string>
+    <string name="add_bots_automatic_harm_bot_autoadd">Add bots automatic(harm_bot_autoAdd)</string>
+    <string name="number_of_bots">Number of bots</string>
+    <string name="bot_difficulty_level_harm_bot_botlevel">Bot difficulty level(harm_bot_botLevel)</string>
+    <string name="_0_random_n1_5_bot_difficulty_level">0 = random\n1 - 5 = bot difficulty level</string>
+    <string name="_0_disable_n_1_maximum_npositive_number_bots_num">0 = disable\n-1 = maximum\nPositive number = bots num</string>
+    <string name="pbr_normal_correction_surface_smoothness">PBR normal correction(Surface smoothness)\n(harm_r_PBRNormalCorrection):</string>
+    <string name="joystick_center_dot_visible">Hide joystick center dot</string>
+    <string name="download_testing">Download testing</string>
+    <string name="disable_motion_when_virtual_mouse_button_hold">Disable mouse motion when virtual mouse button hold</string>
+    <string name="fixed_ratio">Fixed ratio</string>
+    <string name="ratio">Ratio</string>
+    <string name="use_custom_resolution_as_fullscreen_size">Use custom resolution as fullscreen size</string>
 
 </resources>

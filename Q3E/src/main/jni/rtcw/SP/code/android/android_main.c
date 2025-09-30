@@ -720,9 +720,20 @@ Sys_GetClipboardData
 */
 char *Sys_GetClipboardData(void)
 {
-#ifdef DEDICATED
-    return NULL;
-#else
-	return Android_GetClipboardData();
-#endif
+	char *data = NULL;
+	char *cliptext;
+
+	if ( ( cliptext = Android_GetClipboardData() ) != NULL ) {
+		if ( cliptext[0] != '\0' ) {
+			size_t bufsize = strlen( cliptext ) + 1;
+
+			data = Z_Malloc( bufsize );
+			Q_strncpyz( data, cliptext, bufsize );
+
+			// find first listed char and set to '\0'
+			strtok( data, "\n\r\b" );
+		}
+		free( cliptext );
+	}
+	return data;
 }

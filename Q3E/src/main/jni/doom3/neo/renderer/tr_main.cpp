@@ -1264,10 +1264,6 @@ void R_RenderView(viewDef_t *parms)
     R_SetupFrontEndFrustums();
 #endif
 
-#ifdef _RAVENxxx // particle
-    R_AddEffectSurfaces();
-#endif
-
 	// identify all the visible portalAreas, and the entityDefs and
 	// lightDefs that are in them and pass culling.
 	static_cast<idRenderWorldLocal *>(parms->renderWorld)->FindViewLightsAndEntities();
@@ -1283,6 +1279,12 @@ void R_RenderView(viewDef_t *parms)
 	// adds ambient surfaces and create any necessary interaction surfaces to add to the light
 	// lists
 	R_AddModelSurfaces();
+
+#ifdef _RAVEN
+#ifdef _RAVEN_BSE
+    R_AddEffectSurfaces();
+#endif
+#endif
 
 	// any viewLight that didn't have visible surfaces can have it's shadows removed
 	R_RemoveUnecessaryViewLights();

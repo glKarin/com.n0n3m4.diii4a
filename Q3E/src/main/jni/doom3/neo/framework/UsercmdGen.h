@@ -85,6 +85,9 @@ const int BUTTON_5				= BIT(5);
 const int BUTTON_6				= BIT(6);
 const int BUTTON_7				= BIT(7);
 #endif
+#ifdef _HEXENEOC
+const int BUTTON_ATTACK2			= BIT(5); // Zeroth404
+#endif
 
 // usercmd_t->impulse commands
 const int IMPULSE_0				= 0;			// weap 0
@@ -121,6 +124,14 @@ const int IMPULSE_29			= 29;			// vote no
 const int IMPULSE_30			= 30;			// SnoopJeDi - Toggle Stats Debug
 #endif
 const int IMPULSE_40			= 40;			// use vehicle
+#ifdef _HEXENEOC
+// Zeroth
+const int IMPULSE_41			= 41;			// hec Inventory Scroll Right
+const int IMPULSE_42			= 42;			// hec Inventory Scroll Left
+const int IMPULSE_43			= 43;			// hec use selected item
+const int IMPULSE_44			= 44;			// hec drop selected item
+const int IMPULSE_45			= 45;			// toggle automap
+#endif
 
 #ifdef _RAVEN // quake4 user cmd
 // RAVEN BEGIN

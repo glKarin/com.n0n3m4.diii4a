@@ -131,6 +131,9 @@ class idCmdSystem
         static void			ArgCompletion_ForceModelStrogg( const idCmdArgs &args, void(*callback)( const char *s ) );
         static void			ArgCompletion_ForceModelMarine( const idCmdArgs &args, void(*callback)( const char *s ) );
 #endif
+#if defined(_RAVEN) || 1
+		static void			ArgCompletion_GuiName( const idCmdArgs &args, void(*callback)(const char *s) );
+#endif
 };
 
 extern idCmdSystem 	*cmdSystem;
@@ -185,14 +188,18 @@ ID_INLINE void idCmdSystem::ArgCompletion_ModelName(const idCmdArgs &args, void(
 
 ID_INLINE void idCmdSystem::ArgCompletion_SoundName(const idCmdArgs &args, void(*callback)(const char *s))
 {
-	cmdSystem->ArgCompletion_FolderExtension(args, callback, "sound/", false, ".wav", ".ogg", NULL);
+	cmdSystem->ArgCompletion_FolderExtension(args, callback, "sound/", false, ".wav", ".ogg", 
+#ifdef _SND_MP3
+			".mp3", 
+#endif
+			NULL);
 }
 
 ID_INLINE void idCmdSystem::ArgCompletion_ImageName(const idCmdArgs &args, void(*callback)(const char *s))
 {
 	cmdSystem->ArgCompletion_FolderExtension(args, callback, "/", false, ".tga", ".dds", ".jpg", ".pcx"
 #ifdef _USING_STB
-											 , ".jpeg", ".png", "dds", "bmp"
+											 , ".jpeg", ".png", ".dds", ".bmp", ".exr", ".hdr"
 #endif
 											 , NULL);
 }
@@ -230,4 +237,12 @@ ID_INLINE void idCmdSystem::ArgCompletion_ForceModelMarine( const idCmdArgs &arg
 	cmdSystem->ArgCompletion_Models( args, callback, false, true );
 }
 #endif
+
+#if defined(_RAVEN) || 1
+ID_INLINE void idCmdSystem::ArgCompletion_GuiName( const idCmdArgs &args, void(*callback)( const char *s ) )
+{
+	cmdSystem->ArgCompletion_FolderExtension( args, callback, "guis/", false, ".gui", false );
+}
+#endif
+
 #endif /* !__CMDSYSTEM_H__ */

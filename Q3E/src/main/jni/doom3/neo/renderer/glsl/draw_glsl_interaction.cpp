@@ -63,8 +63,18 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
             GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
         else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
         {
-	        float se[2] = { harm_r_specularExponentPBR.GetFloat(), harm_r_normalCorrectionPBR.GetFloat() };
-	        GL_Uniform2fv(offsetof(shaderProgram_t, specularExponent), se);
+			// comat RMAO if u_specularExponent.z == 0 and u_specularExponent.w == 0
+			// use RMAO if black specular
+			if(harm_r_PBRRMAOSpecularMap.GetBool() || r_skipSpecular.GetBool() || din->specularImage == globalImages->blackImage)
+			{
+				float se[] = { harm_r_specularExponentPBR.GetFloat(), harm_r_PBRNormalCorrection.GetFloat(), 0.0f, 0.0f };
+				GL_Uniform4fv(offsetof(shaderProgram_t, specularExponent), se);
+			}
+			else
+			{
+				float se[] = { harm_r_specularExponentPBR.GetFloat(), harm_r_PBRNormalCorrection.GetFloat(), harm_r_PBRRoughnessCorrection.GetFloat(), harm_r_PBRMetallicCorrection.GetFloat() };
+				GL_Uniform4fv(offsetof(shaderProgram_t, specularExponent), se);
+			}
         }
         else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
             GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_ambientLightingBrightness.GetFloat());

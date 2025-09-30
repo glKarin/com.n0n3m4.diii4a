@@ -29,6 +29,7 @@ extern void GLES_PostInit(void);
 
 qboolean IsHighDPIaware = false;
 static qboolean vsyncActive = false;
+extern cvar_t *gl1_discardfb;
 
 void GLimp_ActivateContext()
 {
@@ -113,6 +114,26 @@ void
 RI_EndFrame(void)
 {
 	R_ApplyGLBuffer();	// to draw buffered 2D text
+
+#ifdef YQ2_GL1_GLES
+	static const GLenum attachments[3] = {GL_COLOR_EXT, GL_DEPTH_EXT, GL_STENCIL_EXT};
+
+	if (qglDiscardFramebufferEXT)
+	{
+		switch ((int)gl1_discardfb->value)
+		{
+			case 1:
+				qglDiscardFramebufferEXT(GL_FRAMEBUFFER_OES, 3, &attachments[0]);
+				break;
+			case 2:
+				qglDiscardFramebufferEXT(GL_FRAMEBUFFER_OES, 2, &attachments[1]);
+				break;
+			default:
+				break;
+		}
+	}
+#endif
+
 	Q3E_SwapBuffers();
 }
 
@@ -205,6 +226,21 @@ int RI_InitContext(void* _win)
 
 	// Initialize gamma.
 	vid_gamma->modified = true;
+
+#ifdef YQ2_GL1_GLES
+
+	// Load GL pointers through GLAD and check context.
+	if( !gladLoadGLES1Loader( (void * (*)(const char *)) Q3E_GET_PROC_ADDRESS ) )
+	{
+		R_Printf(PRINT_ALL, "RI_InitContext(): ERROR: loading OpenGL ES function pointers failed!\n");
+		return false;
+	}
+
+	gl_config.major_version = GLVersion.major;
+	gl_config.minor_version = GLVersion.minor;
+	R_Printf(PRINT_ALL, "Initialized OpenGL ES version %d.%d context\n", gl_config.major_version, gl_config.minor_version);
+
+#endif
 
 	return true;
 }

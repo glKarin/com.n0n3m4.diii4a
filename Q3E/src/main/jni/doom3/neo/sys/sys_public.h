@@ -572,10 +572,20 @@ void				Sys_DestroyThread(xthreadInfo &info);   // sets threadHandle back to 0
 // if index != NULL, set the index in g_threads array (use -1 for "main" thread)
 const char 		*Sys_GetThreadName(int *index = 0);
 
+const int MAX_CRITICAL_SECTIONS		= 4
+//#ifdef _HUMANHEAD //karin: for subtitle in snd system
+//+ 1
+//#endif
+#if defined(_MULTITHREAD) && defined(_IMGUI) //karin: for imgui in multithreading
++ 1
+#endif
 #if 1 //def _SDL
-const int MAX_CRITICAL_SECTIONS		= 5;
-#else
-const int MAX_CRITICAL_SECTIONS		= 4;
++ 1
+#endif
+;
+
+#ifdef _HUMANHEAD //karin: for subtitle in snd system
+#define CRITICAL_SECTION_SUBTITLE CRITICAL_SECTION_THREE
 #endif
 
 enum {
@@ -583,6 +593,12 @@ enum {
 	CRITICAL_SECTION_ONE,
 	CRITICAL_SECTION_TWO,
 	CRITICAL_SECTION_THREE
+//#ifdef _HUMANHEAD //karin: for subtitle in snd system
+//    , CRITICAL_SECTION_SUBTITLE
+//#endif
+#if defined(_MULTITHREAD) && defined(_IMGUI) //karin: for imgui in multithreading
+    , CRITICAL_SECTION_IMGUI
+#endif
 #if 1 //def _SDL
     , CRITICAL_SECTION_SYS
 #endif
@@ -590,6 +606,20 @@ enum {
 
 void				Sys_EnterCriticalSection(int index = CRITICAL_SECTION_ZERO);
 void				Sys_LeaveCriticalSection(int index = CRITICAL_SECTION_ZERO);
+
+class idCriticalSectionLockGuard
+{
+public:
+    explicit idCriticalSectionLockGuard(int index = CRITICAL_SECTION_ZERO)
+            : _index(index) {
+        Sys_EnterCriticalSection(_index);
+    }
+    ~idCriticalSectionLockGuard() {
+        Sys_LeaveCriticalSection(_index);
+    }
+private:
+    int _index;
+};
 
 const int MAX_TRIGGER_EVENTS		= (
         4

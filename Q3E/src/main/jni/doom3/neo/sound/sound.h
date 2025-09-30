@@ -281,6 +281,7 @@ class idSoundShader : public idDecl
 
 		virtual bool			CheckShakesAndOgg(void) const;
 #ifdef _RAVEN
+		float                   GetTimeLength( void ) const;
 // RAVEN BEGIN
 // jscott: required access functions
         bool			        IsPrivateSound( void ) const { return( !!( parms.soundShaderFlags & SSF_PRIVATE_SOUND ) ); }

@@ -498,8 +498,10 @@ Mod_LoadFaces(model_t *loadmodel, const byte *mod_base, const lump_t *l, const b
 	loadmodel->numsurfaces = count;
 
 	lminfos = Mod_LoadBSPXFindLump(bspx_header, "DECOUPLED_LM", &lminfosize, mod_base);
-	if (lminfos != NULL && lminfosize / sizeof(dlminfo_t) != loadmodel->numsurfaces) {
-		R_Printf(PRINT_ALL, "%s: [%s] decoupled_lm size %ld does not match surface count %d\n",
+	if ((lminfos != NULL) &&
+		(lminfosize / sizeof(dlminfo_t) != loadmodel->numsurfaces))
+	{
+		R_Printf(PRINT_ALL, "%s: [%s] decoupled_lm size " YQ2_COM_PRIdS " does not match surface count %d\n",
 			__func__, loadmodel->name, lminfosize / sizeof(dlminfo_t), loadmodel->numsurfaces);
 		lminfos = NULL;
 	}
@@ -508,7 +510,8 @@ Mod_LoadFaces(model_t *loadmodel, const byte *mod_base, const lump_t *l, const b
 
 	for (surfnum = 0; surfnum < count; surfnum++, in++, out++)
 	{
-		int side, ti, planenum;
+		unsigned int planenum;
+		int	ti, side;
 
 		out->firstedge = LittleLong(in->firstedge);
 		out->numedges = LittleShort(in->numedges);
@@ -595,11 +598,6 @@ Mod_LoadFaces(model_t *loadmodel, const byte *mod_base, const lump_t *l, const b
 	Vk_EndBuildingLightmaps();
 }
 
-/*
-=================
-Mod_LoadLeafs
-=================
-*/
 static void
 Mod_LoadLeafs(model_t *loadmodel, const byte *mod_base, const lump_t *l)
 {
@@ -950,15 +948,12 @@ Mod_LoadBrushModel (model_t *mod, const void *buffer, int modfilelen)
 
 //=============================================================================
 
-/*
-==================
-Mod_ForName
 
-Loads in a model for the given name
-==================
-*/
+/*
+ * Loads in a model for the given name
+ */
 static model_t *
-Mod_ForName (const char *name, model_t *parent_model, qboolean crash)
+Mod_ForName(const char *name, model_t *parent_model, qboolean crash)
 {
 	model_t *mod;
 	void *buf;
@@ -1016,10 +1011,11 @@ Mod_ForName (const char *name, model_t *parent_model, qboolean crash)
 		mod_numknown++;
 	}
 
-	strcpy (mod->name, name);
+	strcpy(mod->name, name);
 
 	/* load the file */
 	modfilelen = Mod_LoadFile(mod->name, &buf);
+
 	if (!buf)
 	{
 		if (crash)
@@ -1049,47 +1045,47 @@ Mod_ForName (const char *name, model_t *parent_model, qboolean crash)
 	/* call the apropriate loader */
 	switch (LittleLong(*(unsigned *)buf))
 	{
-	case DKMHEADER:
-		/* fall through */
-	case RAVENFMHEADER:
-		/* fall through */
-	case IDALIASHEADER:
-		/* fall through */
-	case IDMDLHEADER:
-		{
-			mod->extradata = Mod_LoadAliasModel(mod->name, buf, modfilelen,
-				mod->mins, mod->maxs,
-				(struct image_s **)mod->skins, (findimage_t)Vk_FindImage,
-				&(mod->type));
-			if (!mod->extradata)
+		case DKMHEADER:
+			/* fall through */
+		case RAVENFMHEADER:
+			/* fall through */
+		case IDALIASHEADER:
+			/* fall through */
+		case IDMDLHEADER:
 			{
-				ri.Sys_Error(ERR_DROP, "%s: Failed to load %s",
-					__func__, mod->name);
-			}
-		};
-		break;
+				mod->extradata = Mod_LoadAliasModel(mod->name, buf, modfilelen,
+					mod->mins, mod->maxs,
+					(struct image_s **)mod->skins, (findimage_t)Vk_FindImage,
+					&(mod->type));
+				if (!mod->extradata)
+				{
+					ri.Sys_Error(ERR_DROP, "%s: Failed to load %s",
+						__func__, mod->name);
+				}
+			};
+			break;
 
-	case IDSPRITEHEADER:
-		{
-			mod->extradata = Mod_LoadSP2(mod->name, buf, modfilelen,
-				(struct image_s **)mod->skins, (findimage_t)Vk_FindImage,
-				&(mod->type));
-			if (!mod->extradata)
+		case IDSPRITEHEADER:
 			{
-				ri.Sys_Error(ERR_DROP, "%s: Failed to load %s",
-					__func__, mod->name);
+				mod->extradata = Mod_LoadSP2(mod->name, buf, modfilelen,
+					(struct image_s **)mod->skins, (findimage_t)Vk_FindImage,
+					&(mod->type));
+				if (!mod->extradata)
+				{
+					ri.Sys_Error(ERR_DROP, "%s: Failed to load %s",
+						__func__, mod->name);
+				}
 			}
-		}
-		break;
+			break;
 
-	case IDBSPHEADER:
-		Mod_LoadBrushModel(mod, buf, modfilelen);
-		break;
+		case IDBSPHEADER:
+			Mod_LoadBrushModel(mod, buf, modfilelen);
+			break;
 
-	default:
-		ri.Sys_Error(ERR_DROP, "%s: unknown fileid for %s",
-				__func__, mod->name);
-		break;
+		default:
+			ri.Sys_Error(ERR_DROP, "%s: unknown fileid for %s",
+					__func__, mod->name);
+			break;
 	}
 
 	if (mod->extradata)

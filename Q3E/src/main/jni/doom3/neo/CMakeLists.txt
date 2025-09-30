@@ -2,6 +2,17 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 
 project(doom3)
 
+set(IDTECH4AMM_ENGINE_PATCH 69)
+set(IDTECH4AMM_ENGINE_VERSION "1.1.0harmattan${IDTECH4AMM_ENGINE_PATCH}")
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+string(TIMESTAMP IDTECH4AMM_BUILDTIME "%Y-%m-%d %H:%M:%S")
+else()
+file(TIMESTAMP ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt IDTECH4AMM_BUILDTIME "%Y-%m-%d %H:%M:%S")
+endif()
+message(STATUS "idTech4A++")
+message(STATUS "Build version: ${IDTECH4AMM_ENGINE_VERSION}")
+message(STATUS "Build time: ${IDTECH4AMM_BUILDTIME}")
+
 # -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -17,6 +28,10 @@ option(USE_SYSTEM_CURL        	"use system curl library"      			OFF)
 option(USE_SYSTEM_FREETYPE    	"use system freetype2 library"      	OFF)
 
 set(CORE_DEFINES "__DOOM_DLL__")
+
+add_definitions(-D_IDTECH4AMM_PATCH=${IDTECH4AMM_ENGINE_PATCH})
+add_definitions(-D_IDTECH4AMM_VERSION="${IDTECH4AMM_ENGINE_VERSION}")
+add_definitions(-D_IDTECH4AMM_BUILD="${IDTECH4AMM_BUILDTIME}")
 
 if(ANDROID)
 	add_definitions(-D__ANDROID__)
@@ -79,8 +94,6 @@ else()
 	set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
 endif()
 
-set(IDTECH4LIBRARY "idtech4")
-
 include(CheckCXXCompilerFlag)
 include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
 
@@ -125,8 +138,9 @@ option(D3BFG_NEW_FONT						"DOOM3-BFG new font support"												ON)
 option(GLSL_PROGRAM							"GLSL program on new material stage support"								ON)
 option(GLOBAL_ILLUMINATION					"Render global illumination before draw interactions"						ON)
 option(RETRO_POSTPROCESS					"Add retro postprocess rendering support"								   	ON)
-option(IMGUI								"Add imGUI support"								   							OFF)
+option(IMGUI								"Add imGUI support"								   							ON)
 option(GL_INT_INDEX							"Use 4 bytes index on OpenGL"								   				ON)
+option(MP3_SUPPORT							"Add mp3 sound support"								   						ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -161,7 +175,8 @@ endif()
 # Quake4
 if(BUILD_Q4)
 option(RAVEN								"Build the raven core" 														ON)
-option(RAVEN_BSE_FX							"OpenBSE with Fx in Raven Quake 4" 											ON)
+option(RAVEN_BSE							"Raven BSE onQuake 4" 														ON)
+option(RAVEN_BSE_FX							"OpenBSE with Fx in Raven Quake 4" 											OFF)
 option(QUAKE4								"Build the quake4 game code" 												ON)
 option(Q4_MOD_FULL_BODY_AWARENESS			"Build quake4 full body awareness mod support" 								ON)
 option(Q4_MOD_BOTS							"Build quake4 bots mod support" 											ON)
@@ -206,7 +221,7 @@ endif()
 # ETC2 support: but using C++11, so build a static library
 if(CORE OR RAVEN OR HUMANHEAD)
 add_subdirectory(renderer/etc/EtcLib)
-set(local_libs "static_EtcLib")
+set(local_libs "idtech4_EtcLib")
 endif()
 
 # Using traditional C++98
@@ -616,12 +631,14 @@ else() #TODO linux
 	set(sys_libs ${sys_libs} dl pthread)
 	if(USE_X11)
 		set(LINUX_SDL FALSE)
+		set(LINUX_X11 TRUE)
 		message(STATUS "use X11 + EGL")
 		set(sys_libs ${sys_libs} X11 EGL)
 	else() # SDL2
 	    if(USE_LOCAL_SDL)
 	        add_subdirectory(externlibs/SDL2)
             set(LINUX_SDL TRUE)
+			set(LINUX_X11 FALSE)
             message(STATUS "use local SDL2")
             include_directories(externlibs/SDL2/include)
             set(SDLx_LIBRARY "SDL2::SDL2")
@@ -631,6 +648,7 @@ else() #TODO linux
 		find_package(SDL2)
 		if(SDL2_FOUND)
 			set(LINUX_SDL TRUE)
+			set(LINUX_X11 FALSE)
                 message(STATUS "use system SDL2")
                 include_directories(${SDL2_INCLUDE_DIRS})
 			set(SDLx_LIBRARY ${SDL2_LIBRARIES})
@@ -638,6 +656,7 @@ else() #TODO linux
 			set(sys_libs ${sys_libs} ${SDLx_LIBRARY})
 		else()
 			set(LINUX_SDL FALSE)
+			set(LINUX_X11 TRUE)
 			message(STATUS "SDL2 not found, using X11 + EGL")
 			set(sys_libs ${sys_libs} X11 EGL)
 		endif()
@@ -763,16 +782,24 @@ if(RETRO_POSTPROCESS)
 	add_definitions(-D_POSTPROCESS)
 	message(STATUS "Add retro postprocess rendering support")
 endif()
-if(IMGUI AND NOT LINUX_SDL)
+if(IMGUI AND NOT LINUX_X11)
 	add_definitions(-D_IMGUI)
 	message(STATUS "Add imGUI support")
 	add_subdirectory(externlibs/imgui)
 	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs/imgui")
-	set(local_libs ${local_libs} static_imgui)
+	set(local_libs ${local_libs} idtech4_imgui)
 endif()
 if(GL_INT_INDEX)
 	add_definitions(-D_GL_INT_INDEX)
 	message(STATUS "Use 4 bytes index on OpenGL for large model")
+endif()
+if(MP3_SUPPORT)
+	set(CORE_DEFINES "${CORE_DEFINES};_SND_MP3")
+	message(STATUS "mp3 sound support")
+endif()
+if(CONSOLE AND WIN32)
+	set(CORE_DEFINES "${CORE_DEFINES};_REDIRECT_OUTPUT")
+	message(STATUS "Redirect output to stdout.txt")
 endif()
 
 if(OPENAL)
@@ -835,8 +862,8 @@ set(src_jpeg
 		)
 add_globbed_headers(src_jpeg "externlibs/jpeg-8d")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs/jpeg-8d")
-add_library(static_jpeg STATIC ${src_jpeg})
-set(local_libs ${local_libs} static_jpeg)
+add_library(idtech4_jpeg STATIC ${src_jpeg})
+set(local_libs ${local_libs} idtech4_jpeg)
 endif() # jpeg
 
 set(src_renderer
@@ -1295,14 +1322,14 @@ if(USE_SYSTEM_CURL)
 			message(STATUS "using system curl")
 		else()
 			message(WARNING "libcurl not found, server downloads won't be available (apart from that doom3 will work)")
-			set(curl_inc "externlibs/curl/include" "externlibs/curl/lib")
-			set(curl_lib "static_curl")
+			set(curl_inc "externlibs/curl/include")
+			set(curl_lib "idtech4_curl")
 			set(COMPILE_CURL TRUE)
 			message(STATUS "using internal curl")
 		endif()
 	else()
-		set(curl_inc "externlibs/curl/include" "externlibs/curl/lib")
-		set(curl_lib "static_curl")
+		set(curl_inc "externlibs/curl/include")
+		set(curl_lib "idtech4_curl")
 		set(COMPILE_CURL TRUE)
 		message(STATUS "using internal curl")
 endif()
@@ -1364,7 +1391,7 @@ if(COMPILE_CURL #[[STREQUAL "1"]])
     )
 
     add_globbed_headers(src_curl "externlibs/curl/lib")
-    add_library(static_curl STATIC ${src_curl})
+    add_library(idtech4_curl STATIC ${src_curl})
     set(CURL_DEFINES "HAVE_CONFIG_H") # without autoconf
     INCLUDE(CheckFunctionExists)
     check_function_exists(strlcat HAVE_STRLCAT)
@@ -1374,15 +1401,16 @@ if(COMPILE_CURL #[[STREQUAL "1"]])
     else()
         message(STATUS "Have strlcat for cURL")
     endif()
-    set_target_properties(static_curl PROPERTIES COMPILE_DEFINITIONS "${CURL_DEFINES}")
+    set_target_properties(idtech4_curl PROPERTIES COMPILE_DEFINITIONS "${CURL_DEFINES}")
     if(D3_COMPILER_IS_GCC_OR_CLANG)
-        target_compile_options(static_curl PRIVATE -Wno-deprecated-non-prototype)
+        target_compile_options(idtech4_curl PRIVATE -Wno-deprecated-non-prototype)
 	endif()
-	target_include_directories(static_curl PRIVATE ${ZLIB_INCLUDE_DIRS})
+	target_include_directories(idtech4_curl PRIVATE ${ZLIB_INCLUDE_DIRS})
+	target_include_directories(idtech4_curl PRIVATE externlibs/curl/lib)
 	if(WIN32)
-		target_link_libraries(static_curl PRIVATE ws2_32 ZLIB::ZLIB)
+		target_link_libraries(idtech4_curl PRIVATE ws2_32 ZLIB::ZLIB)
 	else()
-    	target_link_libraries(static_curl PRIVATE z)
+    	target_link_libraries(idtech4_curl PRIVATE z)
 	endif()
 endif()
 
@@ -1402,13 +1430,13 @@ if(REQUIRE_OGGVORBIS)
 			message(STATUS "using system ogg/vorbis")
 		else()
 			set(oggvorbis_inc "externlibs/libogg/include" "externlibs/libvorbis/include")
-			set(oggvorbis_lib "static_oggvorbis")
+			set(oggvorbis_lib "idtech4_oggvorbis")
 			set(COMPILE_OGGVORBIS TRUE)
 			message(STATUS "using internal ogg/vorbis")
 		endif()
 	else()
 		set(oggvorbis_inc "externlibs/libogg/include" "externlibs/libvorbis/include")
-		set(oggvorbis_lib "static_oggvorbis")
+		set(oggvorbis_lib "idtech4_oggvorbis")
 		set(COMPILE_OGGVORBIS TRUE)
 		message(STATUS "using internal ogg/vorbis")
 	endif()
@@ -1457,10 +1485,10 @@ if(COMPILE_OGGVORBIS #[[STREQUAL "1"]])
 
 	add_globbed_headers(src_oggvorbis "externlibs/libogg")
 	add_globbed_headers(src_oggvorbis "externlibs/libvorbis")
-	add_library(static_oggvorbis STATIC ${src_oggvorbis})
-	target_include_directories(static_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libogg/include/ogg")
-	target_include_directories(static_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/include/vorbis")
-	target_include_directories(static_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/lib")
+	add_library(idtech4_oggvorbis STATIC ${src_oggvorbis})
+	target_include_directories(idtech4_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libogg/include/ogg")
+	target_include_directories(idtech4_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/include/vorbis")
+	target_include_directories(idtech4_oggvorbis PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/lib")
 endif() # ogg
 
 if(REQUIRE_FREETYPE)
@@ -1474,13 +1502,13 @@ if(REQUIRE_FREETYPE)
 		else()
 			message(WARNING "libfreetype not found, wide character language font won't be available (apart from that doom3 will work)")
 			set(freetype_inc "externlibs/freetype/include")
-			set(freetype_lib "static_freetype")
+			set(freetype_lib "idtech4_freetype")
 			set(COMPILE_FREETYPE TRUE)
 			message(STATUS "using internal freetype")
 		endif()
 	else()
 		set(freetype_inc "externlibs/freetype/include")
-		set(freetype_lib "static_freetype")
+		set(freetype_lib "idtech4_freetype")
 		set(COMPILE_FREETYPE TRUE)
 		message(STATUS "using internal freetype")
 	endif()
@@ -1542,7 +1570,7 @@ if(COMPILE_FREETYPE)
 
 	add_globbed_headers(src_freetype "externlibs/freetype/include")
 	add_definitions(-DFT2_BUILD_LIBRARY)
-	add_library(static_freetype STATIC ${src_freetype})
+	add_library(idtech4_freetype STATIC ${src_freetype})
 endif()
 
 endif() # build engine
@@ -1681,7 +1709,13 @@ if(RAVEN OR QUAKE4 OR BUILD_Q4_MOD)
 	if(NOT MSVC)
 		set_target_properties(idlib_raven PROPERTIES COMPILE_FLAGS "-fPIC")
 	endif()
-	set_target_properties(idlib_raven PROPERTIES COMPILE_DEFINITIONS "_RAVEN")
+	set(bse_compile_definitions "")
+	if(RAVEN_BSE)
+		set(bse_compile_definitions "_RAVEN_BSE")
+	elseif(RAVEN_BSE_FX)
+		set(bse_compile_definitions "_RAVEN_FX")
+	endif()
+	set_target_properties(idlib_raven PROPERTIES COMPILE_DEFINITIONS "_RAVEN;${bse_compile_definitions}")
 	target_include_directories(idlib_raven PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_raven})
@@ -1792,8 +1826,8 @@ message(STATUS "=================================")
 
 if(CORE)
 	if(ANDROID)
-		set(DOOM3BINARY ${IDTECH4LIBRARY})
-		add_library(${IDTECH4LIBRARY} SHARED
+		set(DOOM3BINARY doom3)
+		add_library(${DOOM3BINARY} SHARED
 				${src_core}
 				${src_sys_base}
 				${src_sys_core}
@@ -2140,7 +2174,7 @@ if(HEXENEOC)
 	set_target_properties(hexeneoc PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(hexeneoc idlib)
 	if(NOT MSVC)
-		target_compile_options(hexeneoc PRIVATE -Wno-format-security)
+		target_compile_options(hexeneoc PRIVATE -Wno-format-security -ffinite-math-only) # -ffp-model=fast
 	endif()
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
@@ -2342,10 +2376,11 @@ if(PHOBOS)
 	endif()
 endif()
 
+
+
 if(RAVEN)
 	# raven engine source
 	set(raven_renderer_src
-			raven/bse/Model_bse.cpp
 			raven/renderer/NewShaderStage.cpp
 			)
 	set(raven_framework_src
@@ -2353,15 +2388,6 @@ if(RAVEN)
 			raven/framework/DeclPlayback.cpp
 			raven/framework/DeclMatType.cpp
 			raven/framework/DeclPlayerModel.cpp
-			)
-	set(raven_fx_bse_src
-			raven/bse/BSE_Fx.cpp
-			raven/bse/BSE_Manager.cpp
-			raven/bse/BSE_Decl.cpp
-			raven/bse/BSE_Particle.cpp
-			)
-	set(raven_null_bse_src
-			raven/bse/BSE_Null.cpp
 			)
 	set(src_core_raven
 			${src_renderer}
@@ -2377,18 +2403,50 @@ if(RAVEN)
 			${src_renderbump}
 			${src_dmap}
 			)
-	if(RAVEN_BSE_FX)
+
+	if(RAVEN_BSE)
+		set(raven_bse_src
+				raven/bse/BSE_Effect.cpp
+				raven/bse/BSE_EffectTemplate.cpp
+				raven/bse/bse_electricity.cpp
+				raven/bse/BSE_Envelopes.cpp
+				raven/bse/BSE_Light.cpp
+				raven/bse/BSE_Manager.cpp
+				raven/bse/BSE_ParseParticle2.cpp
+				raven/bse/BSE_Particle.cpp
+				raven/bse/BSE_Segment.cpp
+				raven/bse/bse_render.cpp
+				raven/bse/BSE_SegmentTemplate.cpp
+				raven/bse/BSE_SpawnDomains.cpp
+				raven/renderer/Model_bse.cpp
+				)
+		list(APPEND src_core_raven ${raven_bse_src})
+		add_globbed_headers(src_core_raven "raven")
+		message(STATUS "Build Raven BSE")
+	elseif(RAVEN_BSE_FX)
+		set(raven_fx_bse_src
+				raven/fx/Model_bse.cpp
+				raven/fx/BSE_Fx.cpp
+				raven/fx/BSE_Manager.cpp
+				raven/fx/BSE_Decl.cpp
+				raven/fx/BSE_Particle.cpp
+				)
 		list(APPEND src_core_raven ${raven_fx_bse_src})
+		add_globbed_headers(raven_fx_bse_src "raven")
+		message(STATUS "Build Open Fx BSE")
 	else()
+		set(raven_null_bse_src
+				raven/fx/BSE_Null.cpp
+				)
 		list(APPEND src_core_raven ${raven_null_bse_src})
+		add_globbed_headers(raven_null_bse_src "raven")
+		message(STATUS "Build Null BSE")
 	endif()
 	add_globbed_headers(raven_renderer_src "raven")
 	add_globbed_headers(raven_framework_src "raven")
-	add_globbed_headers(raven_fx_bse_src "raven")
-	add_globbed_headers(raven_null_bse_src "raven")
 
 	if(ANDROID)
-		set(QUAKE4BINARY "${IDTECH4LIBRARY}_raven")
+		set(QUAKE4BINARY "quake4")
 		add_library(${QUAKE4BINARY} SHARED
 				${src_core_raven}
 				${src_sys_base}
@@ -2418,12 +2476,7 @@ if(RAVEN)
 	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_raven} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
-
-	set(raven_compile_definitions "_RAVEN")
-	if(RAVEN_BSE_FX)
-		set(raven_compile_definitions "${raven_compile_definitions};_RAVEN_FX")
-	endif()
-	set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "${raven_compile_definitions};${CORE_DEFINES}")
+	set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "_RAVEN;${bse_compile_definitions};${CORE_DEFINES}")
 	set_target_properties(${QUAKE4BINARY} PROPERTIES LINK_FLAGS "${ldflags}")
 	target_include_directories(${QUAKE4BINARY} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
 
@@ -2451,7 +2504,7 @@ if(QUAKE4)
 	add_library(q4game SHARED ${src_quake4})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_quake4})
 	#set_target_properties(quake4 PROPERTIES PREFIX "")
-	set(q4_compile_definitions "GAME_DLL;_RAVEN;_QUAKE4")
+	set(q4_compile_definitions "GAME_DLL;_RAVEN;${bse_compile_definitions};_QUAKE4")
 	if(Q4_MOD_FULL_BODY_AWARENESS)
 		set(q4_compile_definitions "${q4_compile_definitions};_MOD_FULL_BODY_AWARENESS")
 		set(q4_compile_definitions "${q4_compile_definitions};_MOD_VIEW_BODY")
@@ -2489,7 +2542,7 @@ if(HARDQORE)
 	add_library(hardqore SHARED ${src_hardqore})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hardqore})
 	#set_target_properties(hardqore PROPERTIES PREFIX "")
-	set_target_properties(hardqore PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4;_HARDQORE")
+	set_target_properties(hardqore PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;${bse_compile_definitions};_QUAKE4;_HARDQORE")
 	target_include_directories(hardqore PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${QUAKE4_MOD_DIR}/hardqore")
 	set_target_properties(hardqore PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(hardqore PROPERTIES INSTALL_NAME_DIR "@executable_path")
@@ -2542,7 +2595,7 @@ if(HUMANHEAD)
 	add_globbed_headers(humanhead_framework_src "humanhead")
 
 	if(ANDROID)
-		set(PREYBINARY "${IDTECH4LIBRARY}_humanhead")
+		set(PREYBINARY "prey")
 		add_library(${PREYBINARY} SHARED
 				${src_core_humanhead}
 				${src_sys_base}

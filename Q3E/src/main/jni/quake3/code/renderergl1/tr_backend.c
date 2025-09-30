@@ -1036,6 +1036,7 @@ void RB_ShowImages( void ) {
 			h *= image->uploadHeight / 512.0f;
 		}
 
+		GL_Bind( image );
 #ifdef USE_OPENGLES //karin: use glDrawElements
 		verts[0][0] = x;  verts[0][1] = y;
 		verts[1][0] = x+w;  verts[1][1] = y;
@@ -1046,7 +1047,6 @@ void RB_ShowImages( void ) {
 		qglVertexPointer  ( 2, GL_FLOAT, 0, verts );
 		qglDrawElements( GL_TRIANGLE_STRIP, 6, GL_INDEX_TYPE, indicies );
 #else
-		GL_Bind( image );
 		qglBegin (GL_QUADS);
 		qglTexCoord2f( 0, 0 );
 		qglVertex2f( x, y );
