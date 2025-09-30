@@ -1,6 +1,6 @@
 #include "q3e/q3e_android.h"
 
-#define Q3E_GAME_NAME "Quake3"
+#define Q3E_GAME_NAME "Urban Terror"
 #define Q3E_IS_INITIALIZED (com_fullyInitialized)
 #define Q3E_PRINTF Com_Printf
 #define Q3E_SHUTDOWN_GAME ShutdownGame()
