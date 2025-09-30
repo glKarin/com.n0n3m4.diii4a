@@ -1,0 +1,14 @@
+build
+baseq3r/cgamex86_64.dll
+baseq3r/qagamex86_64.dll
+baseq3r/uix86_64.dll
+baseq3r/vm/cgame.qvm
+baseq3r/vm/qagame.qvm
+baseq3r/vm/ui.qvm
+q3rally-server.x86_64.exe
+q3rally.x86_64.exe
+renderer_opengl1_x86_64.dll
+renderer_opengl2_x86_64.dll
+SDL264.dll
+engine/Commands for cygwin compile.txt
+Cygwin64 Terminal.lnk

@@ -1,0 +1,7 @@
+language: c
+compiler:
+  - gcc
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y libsdl1.2-dev libxxf86vm-dev libxrandr-dev
+script: make

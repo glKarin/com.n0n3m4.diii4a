@@ -639,7 +639,7 @@ public:
 						// get sort order
 	const float			GetSort( void ) const { return sort; }
 						// this is only used by the gui system to force sorting order
-						// on images referenced from tga's instead of materials. 
+						// on images referenced from tga's instead of materials.
 						// this is done this way as there are 2000 tgas the guis use
 	void				SetSort( float s ) const { sort = s; };
 
@@ -708,7 +708,7 @@ public:
 // RAVEN BEGIN
 // rjohnson: added vertex randomizing
 						// regs should point to a float array large enough to hold GetNumRegisters() floats
-	void				EvaluateRegisters( float *regs, const float entityParms[MAX_ENTITY_SHADER_PARMS], 
+	void				EvaluateRegisters( float *regs, const float entityParms[MAX_ENTITY_SHADER_PARMS],
 											const struct viewDef_s *view, int soundEmitter = 0, idVec3 *randomizer = NULL ) const;
 // RAVEN END
 

@@ -1,0 +1,8 @@
+code/tools/*
+build/*
+.cproject
+.project
+.settings/org.eclipse.cdt.codan.core.prefs
+.settings/org.eclipse.cdt.managedbuilder.core.prefs
+.idea
+CMakeLists.txt

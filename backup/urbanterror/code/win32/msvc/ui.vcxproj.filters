@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{977cb199-b7a8-459a-835d-d6f3808cff21}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{60bdb20e-5fae-425f-ad97-1a402f0c5407}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{c70bb9a1-418d-4af1-901e-79ad75f82942}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\game\bg_lib.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\game\bg_misc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\qcommon\q_math.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\qcommon\q_shared.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ui\ui_atoms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ui\ui_gameinfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ui\ui_main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ui\ui_players.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ui\ui_shared.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ui\ui_syscalls.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuildStep Include="..\..\ui\ui.def">
+      <Filter>Source Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\game\bg_public.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\ui\keycodes.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\..\ui\menudef.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\game\q_shared.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\game\surfaceflags.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\cgame\tr_types.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\ui\ui_local.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\ui\ui_public.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\ui\ui_shared.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+  </ItemGroup>
+</Project>

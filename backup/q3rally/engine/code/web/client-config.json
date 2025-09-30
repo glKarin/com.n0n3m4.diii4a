@@ -1,0 +1,11 @@
+{
+    "baseq3r": {
+        "files": [
+            {"src": "baseq3r/pak0.pk3", "dst": "/baseq3r"},
+            {"src": "baseq3r/default.cfg", "dst": "/baseq3r"},
+            {"src": "baseq3r/vm/cgame.qvm", "dst": "/baseq3r/vm"},
+            {"src": "baseq3r/vm/qagame.qvm", "dst": "/baseq3r/vm"},
+            {"src": "baseq3r/vm/ui.qvm", "dst": "/baseq3r/vm"}
+        ]
+    }
+}

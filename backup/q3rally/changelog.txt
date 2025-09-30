@@ -1,0 +1,117 @@
+!!! --- Q3Rally Changelog --- !!!
+
+new in v0.5
+
+Fixed:
+
+- Telefrag Gun doesn't work correctly
+- Flattened numbers & "Wrong way" is not on center
+- Gone is the Machinegun as a starting weapon
+- "info_player_intermission" camera angle bug
+- Unable to join a match back in Derby & Last Car Standing
+- If you die quickly, you win the race.
+- Fix gametype: Time Trial
+- Empty square in Racing / Team Racing
+- Wrong hud position of power-ups & flag in various screen aspect ratio
+- cg_autodrop in not working
+- minimap fits better in UI
+
+Added:
+
+- codebase synced with ioq3
+- individual car horns for all cars
+- Usable server map rotation configs
+- New intro
+- Make unique logos for 4 teams (Like UT99)
+- finished the flag status hud for domination
+- finished 4 Teams Domination
+- main menu music rotation
+
+new since v0.3b
+
+Fixed:
+
+- A bug in racing mode was fixed where it could be that after the race you lost your position
+  in the ranking to a player who crossed the finish line after you
+- The power of the homing rockets has been reduced and the amount of ammunition
+  used has been increased from 1 to 3
+- fixed Viper icons
+- 1 car moved from AddOn to Official - Gravelord
+- replaced some q3 textures with their remakes
+- Removed unnecessary icons
+- CTF textures and icons updated
+- q3r_david5 preview fixed
+- Added the new Sigils and Icons for Domination
+- New strings in map info
+- New map - Battle Canyon
+- updated .arena files
+- updated dirtyfun.jpg reflect file
+- fixed plasmagun alt fire
+- fixed q3r_babel map
+
+new since v0.3
+
+Added:
+
+- 2 Racing Maps moved from AddOn to Official
+- 1 Deathmatch Map moved from AddOn to Official
+- added the ability to play Domination with 4 Teams
+- codebase synced with latest ioq3
+
+new since v0.0.1.2
+
+Added:
+
+– new Domination game type
+– new car model
+– added new skins from Bloody Rally (thx insellium)
+– changed gauntlet to chainsaw
+– new unknownmap image
+– new icon for q3rally.exe files
+– different icons for client and server
+– widescreen preview in offline and online mode
+– new widesreen map images
+– new ammoboxes and ammosprites
+– new shotgun sound
+– new console background
+– minimap can now switched on/off in the q3roptions menu
+– start/stop demo recording key binding via menu
+– added more skins (PS2)
+– new skins for the camaro
+– two new domination maps
+– added discord button to main menu
+– added alt fire mode for railgun (telefrag gun)
+
+Fixed:
+
+– sync the code with ioquake3
+– some tweaks on Domination
+– change console background to something more readable
+– revised all shaders
+– minor changes on q3r_david4
+– get surfaceparms to work
+– fix bug where the game freeze at 161 mph
+– bug fixed where blue cannot win a ctf game (thx zturtleman)
+– fixed bug where q3rally crashed by selecting eu_greatbritain plate
+– fixed splash screen overlay in HUD
+– tweaked the overpowered railgun
+– fixed the menu transitions, now they are a bit faster
+– fixed serverinfo menu from q3a style to q3rally style
+– tweaked flags from insellium
+– code changes for chainsaw
+– fixed q3r_david4 map
+– tweaked flag models again
+– removed useless files
+– changed sounds from .wav to .ogg
+– fixed startserver screen (on and offline)
+– fixed torch shader
+– updated q3r_banner texture
+– tweaked/merged scripts
+– fixed tree shader
+– updated file headers
+– polished the speedometer
+– polished menu buttons, etc…
+– q3r_ctf_01 updated
+– shotgun bullet bug fixed
+– fixed bug in bot path creation system
+– reworked readme files
