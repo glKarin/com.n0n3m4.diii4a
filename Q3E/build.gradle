@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 
-String[] ABIFILTERS = [       
+String[] ABIFILTERS = [
 	"arm64-v8a",
         "armeabi-v7a",
         /*, "armeabi", "x86", "x86_64"*/
@@ -9,7 +9,7 @@ String[] ABIFILTERS = [
 String PRODUCT_FLAVOR = "github" // github fdroid
 
 String[] CMAKE_ARGUMENTS = [
-        "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21", "-DDIII4A_PRODUCT_FLAVOR=" + PRODUCT_FLAVOR, "-DANDROID_STL=c++_shared"
+        "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21", "-DDIII4A_PRODUCT_FLAVOR=" + PRODUCT_FLAVOR/*, "-DANDROID_STL=c++_shared"*/
 ]
 
 // filter ABI

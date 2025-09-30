@@ -74,7 +74,8 @@ public class Q3EInterface
 	public boolean isSamTSE = false;
 	public boolean isXash3D = false;
 	public boolean isSource = false;
-	public boolean isUrT=false;
+	public boolean isUrT = false;
+	public boolean isMOHAA = false;
 
 	public String default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
@@ -214,6 +215,8 @@ public class Q3EInterface
 			return Q3EGameConstants.GAME_ID_SOURCE;
 		else if(isUrT)
 			return Q3EGameConstants.GAME_ID_URT;
+		else if(isMOHAA)
+			return Q3EGameConstants.GAME_ID_MOHAA;
 		else
 			return Q3EGameConstants.GAME_ID_DOOM3;
 	}
@@ -281,6 +284,8 @@ public class Q3EInterface
 			SetupSource();
 		else if(Q3EGameConstants.GAME_URT.equalsIgnoreCase(name))
 			SetupUT();
+		else if(Q3EGameConstants.GAME_MOHAA.equalsIgnoreCase(name))
+			SetupMOHAA();
 		else
 			SetupDOOM3();
 	}
@@ -307,6 +312,7 @@ public class Q3EInterface
 		isXash3D = false;
 		isSource = false;
 		isUrT = false;
+		isMOHAA = false;
 	}
 
 	public void SetupDOOM3()
@@ -451,6 +457,13 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public void SetupMOHAA()
+	{
+		ResetGameState();
+		isMOHAA = true;
+		SetupGameConfig();
+	}
+
 	public void SetupGameConfig()
 	{
 		game_id = GameID();
@@ -495,7 +508,7 @@ public class Q3EInterface
 
 	public boolean IsIdTech3()
 	{
-		return isQ3 || isRTCW || isETW || isRealRTCW || isJA || isJO || isUrT;
+		return isQ3 || isRTCW || isETW || isRealRTCW || isJA || isJO || isUrT || isMOHAA;
 	}
 
 	public boolean IsIdTech2()
@@ -527,7 +540,7 @@ public class Q3EInterface
 	{
 		return isD3 || isQ4 || isPrey
 				|| isD3BFG || isTDM
-				|| isQ3 || isRTCW || isETW || isRealRTCW || isJA || isJO || isUrT || isFTEQW
+				|| isQ3 || isRTCW || isETW || isRealRTCW || isJA || isJO || isUrT || isMOHAA || isFTEQW
 				|| isDOOM || isQ2 || isQ1
 				|| isSamTFE || isSamTSE
 				;
@@ -552,7 +565,7 @@ public class Q3EInterface
 	{
 		return isD3 || isQ4 || isPrey
 				|| isD3BFG || isTDM
-				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT
+				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
 				|| isQ2 || isQ1 || isDOOM
 				|| isXash3D || isSource
 				;
@@ -703,6 +716,10 @@ public class Q3EInterface
 			list.add("<mod>/autoexec.cfg");
 			list.add("<base>/autoexec.cfg");
 		}
+		else if(isMOHAA)
+		{
+			list.add("<base>/" + Q3EGameConstants.CONFIG_FILE_MOHAA);
+		}
 		else
 		{
 			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_DOOM3);
@@ -818,7 +835,7 @@ public class Q3EInterface
 	{
 		return isD3 || isQ4 || isPrey
 				|| isD3BFG || isTDM
-				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT
+				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
 				|| isQ2 || isQ1 || isDOOM
 				|| isSamTFE || isSamTSE
 				|| isXash3D || isSource

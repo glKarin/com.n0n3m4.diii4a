@@ -43,6 +43,8 @@ public enum LauncherGame
     SOURCE(Q3EGameConstants.GAME_ID_SOURCE, Q3EGameConstants.GAME_SOURCE, R.drawable.source_icon, R.string.sourceengine_base, R.color.theme_source_main_color, R.string.sourceengine),
 
     URT(Q3EGameConstants.GAME_ID_URT, Q3EGameConstants.GAME_URT, R.drawable.urbanterror_icon, R.string.urbanterror_base, R.color.theme_urt_main_color, R.string.urbanterror),
+
+    MOHAA(Q3EGameConstants.GAME_ID_MOHAA, Q3EGameConstants.GAME_MOHAA, R.drawable.mohaa_icon, R.string.openmohaa_base, R.color.theme_mohaa_main_color, R.string.openmohaa),
     ;
 
     public final int    GAME_ID;

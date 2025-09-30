@@ -30,17 +30,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Fix BSE effects on Quake 4.",
-            "Optimize PBR shaders with original specular texture on DOOM 3/Quake 4/Prey(2006).",
-            "Add settings by ImGui on DOOM 3/Quake 4/Prey(2006), command is `idTech4AmmSettings`, default binding to F10.",
-            "Add mp3 sound file support on DOOM 3/Quake 4/Prey(2006).",
-            "Fix GUI, credits after end of game, map static mesh vertex color on Quake 4.",
-            "Fix low frequency on HeXen-Edge of Chaos(DOOM 3 mod).",
-            "Add `Urban Terror`(ver 4.3.4) support, game standalone directory named `urt`, game data directory named `q3ut4`. More view in `" + TextHelper.GenLinkText("https://www.urbanterror.info", "Urban Terror") + "`.",
-            "Update Quake 2(yquake2) version to 8.51, update Vulkan renderer.",
-            "Update GZDOOM version to 4.14.2.",
-            "Rename Xash3D game standalone folder to `xash`.",
-            "Rename Source Engine game standalone folder to `srceng`.",
+            "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
             "Add fixed ratio resolution support on launcher `Graphics` tab.",
         };
 	};

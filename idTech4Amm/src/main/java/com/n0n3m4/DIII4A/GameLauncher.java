@@ -2705,6 +2705,7 @@ public class GameLauncher extends Activity
 		menuGames.put(R.id.main_menu_game_xash3d, Q3EGameConstants.GAME_XASH3D);
 		menuGames.put(R.id.main_menu_game_source, Q3EGameConstants.GAME_SOURCE);
 		menuGames.put(R.id.main_menu_game_urt, Q3EGameConstants.GAME_URT);
+		menuGames.put(R.id.main_menu_game_mohaa, Q3EGameConstants.GAME_MOHAA);
 
 		return res;
     }
@@ -4697,6 +4698,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_xash3dgame;
 		public RadioGroup rg_fs_sourcegame;
 		public RadioGroup rg_fs_urtgame;
+		public RadioGroup rg_fs_mohaagame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -4829,6 +4831,7 @@ public class GameLauncher extends Activity
 			rg_fs_xash3dgame = CreateGameRadioGroup(gameId);
 			rg_fs_sourcegame = CreateGameRadioGroup(gameId);
 			rg_fs_urtgame = CreateGameRadioGroup(gameId);
+			rg_fs_mohaagame = CreateGameRadioGroup(gameId);
 
             edt_cmdline = findViewById(R.id.edt_cmdline);
             res_customlayout = findViewById(R.id.res_customlayout);

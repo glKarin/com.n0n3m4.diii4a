@@ -556,5 +556,7 @@
     <string name="fixed_ratio">Fixed ratio</string>
     <string name="ratio">Ratio</string>
     <string name="use_custom_resolution_as_fullscreen_size">Use custom resolution as fullscreen size</string>
+    <string name="openmohaa">OpenMOHAA</string>
+    <string name="openmohaa_base">Medal of Honor: Allied Assault</string>
 
 </resources>

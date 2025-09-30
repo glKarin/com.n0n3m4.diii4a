@@ -40,6 +40,7 @@ OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
 OPTION(GAME_URT "Build Urbant Error"                    ON)
+OPTION(GAME_OPENMOHAA "Build Medal of Honor: Allied Assault"                    ON)
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
 OPTION(GAME_SOURCE      "Build Source"                          ON)
@@ -77,6 +78,9 @@ set(Q3E_SDL TRUE)
 if(Q3E_SDL)
     set(Q3E_SDL2_INCLUDE_PATH "${DIII4A_DEPEND_LIBRARY_PATH}/SDL2/include")
     add_subdirectory(deplibs/SDL2)
+    set(SDL2_FOUND True)
+    set(SDL2_LIBRARIES "SDL2")
+    set(SDL2_INCLUDE_DIRS "${Q3E_SDL2_INCLUDE_PATH}")
     #add_subdirectory(deplibs/SDL2/q3e_test)
 endif()
 
@@ -85,7 +89,7 @@ add_subdirectory( q3e )
 
 
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_SERIOUSSAM)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SERIOUSSAM)
     set(DIII4A_BUILD_COMMON True)
 endif()
 
@@ -113,7 +117,7 @@ if(NOT GAME_DOOM3 AND DIII4A_BUILD_OPENAL)
     add_subdirectory(doom3/neo/externlibs/openal-soft)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_SOURCE)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SOURCE)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory ( deplibs ) # common depend libraries
 endif()
@@ -216,6 +220,11 @@ endif()
 if(GAME_URT) # 4.3.4 | May 26, 2018 | https://github.com/FrozenSand/ioq3-for-UrbanTerror-4/commit/53fdee781c263168965f48cb87cc9187705f5ca3 | Removed dmflags from the serverinfo string, it's an unused leftover from Quake 2
     message(STATUS "Build Urban Terror")
     add_subdirectory ( urt ) # Urban Terror
+endif()
+
+if(GAME_OPENMOHAA) # 0.82.1 | Aug 3, 2025 | https://github.com/openmoh/openmohaa/commit/a72bc153db1e6ced6e30431b5217e1a53576712c | Fix configstring replacement causing the model to be referenced twice on base MOHAA clients
+    message(STATUS "Build Medal of Honor: Allied Assault")
+    add_subdirectory ( openmohaa ) # Medal of Honor: Allied Assault
 endif()
 
 

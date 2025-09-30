@@ -20,6 +20,8 @@
     <color name="theme_xash3d_main_color">#FFF97C79</color>
     <color name="theme_source_main_color">#FFFCDFB2</color>
     <color name="theme_urt_main_color">#FFC5C6C8</color>
+    <color name="theme_mohaa_main_color">#FFEFBA85</color>
+
     <color name="launcher_divider_color">#FFCCCCCC</color>
     <color name="pie_color">#FF4585E1</color>
 </resources>

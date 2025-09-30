@@ -113,6 +113,9 @@ public enum Game
 
     // Urban Terror
     URT_BASE(Q3EGameConstants.GAME_URT, "q3ut4", "", "", "", "q3ut4", false, R.string.urbanterror_base),
+
+    // OpenMOHAA
+    MOHAA_BASE(Q3EGameConstants.GAME_MOHAA, "main", "", "", "", "main", false, R.string.openmohaa_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......
