@@ -24,6 +24,71 @@
 #include <math.h>       //  fabs, sqrt
 //#include <float.h>       //  FLT_MAX
 
+// ETQW SDK
+enum
+{
+    SPF_NONE_0 = 0,
+    SPF_NONE_1,
+    SPF_NONE_2,
+    SPF_NONE_3,
+
+    SPF_ONE_0,
+    SPF_ONE_1,
+    SPF_ONE_2,
+    SPF_ONE_3,
+
+    SPF_POINT_0,
+    SPF_POINT_1,
+    SPF_POINT_2,
+    SPF_POINT_3,
+
+    SPF_LINEAR_0,
+    SPF_LINEAR_1,
+    SPF_LINEAR_2,
+    SPF_LINEAR_3,
+
+    SPF_BOX_0,
+    SPF_BOX_1,
+    SPF_BOX_2,
+    SPF_BOX_3,
+
+    SPF_SURFACE_BOX_0,
+    SPF_SURFACE_BOX_1,
+    SPF_SURFACE_BOX_2,
+    SPF_SURFACE_BOX_3,
+
+    SPF_SPHERE_0,
+    SPF_SPHERE_1,
+    SPF_SPHERE_2,
+    SPF_SPHERE_3,
+
+    SPF_SURFACE_SPHERE_0,
+    SPF_SURFACE_SPHERE_1,
+    SPF_SURFACE_SPHERE_2,
+    SPF_SURFACE_SPHERE_3,
+
+    SPF_CYLINDER_0,
+    SPF_CYLINDER_1,
+    SPF_CYLINDER_2,
+    SPF_CYLINDER_3,
+
+    SPF_SURFACE_CYLINDER_0,
+    SPF_SURFACE_CYLINDER_1,
+    SPF_SURFACE_CYLINDER_2,
+    SPF_SURFACE_CYLINDER_3,
+
+    SPF_SPIRAL_0,
+    SPF_SPIRAL_1,
+    SPF_SPIRAL_2,
+    SPF_SPIRAL_3,
+
+    SPF_MODEL_0,
+    SPF_MODEL_1,
+    SPF_MODEL_2,
+    SPF_MODEL_3,
+
+    SPF_COUNT
+};
 
 // Forward declarations to avoid pulling heavy headers into every unit
 class idVec3;

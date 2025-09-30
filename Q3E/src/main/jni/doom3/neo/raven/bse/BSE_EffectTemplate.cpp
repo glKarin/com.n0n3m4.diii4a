@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 namespace {
 
-    //karin: define in bse_segmenttemplate.h::enum rvSegTemplateType
+    //karin: define in bse_segmenttemplate.h::enum eBSESegment
     typedef int eSegType;
 
     // convert “emitter”, “sound”, … token → enum
@@ -259,7 +259,7 @@ float rvDeclEffect::CalculateBounds() const {
 
 void rvDeclEffect::Finish() {
     // clear flags first
-    mFlags &= ~(DEF_SOUND | DEF_USES_END_ORIGIN | DEF_ATTENUATION); // (1|2|4)
+    mFlags &= ~(ETFLAG_HAS_SOUND | ETFLAG_USES_ENDORIGIN | ETFLAG_ATTENUATES); // (1|2|4)
     mMinDuration = 0.0f;
     mMaxDuration = 0.0f;
 
@@ -271,11 +271,11 @@ void rvDeclEffect::Finish() {
 
         // track aggregate flags
         if (seg.GetType() == SEG_SOUND)
-            mFlags |= DEF_SOUND; // 1;
+            mFlags |= ETFLAG_HAS_SOUND; // 1;
         if (seg.mParticleTemplate.UsesEndOrigin())
-            mFlags |= DEF_USES_END_ORIGIN; // 2;
-        if ((seg.mFlags & STF_EMITTER_ATTEN/* 0x40 */) != 0)
-            mFlags |= DEF_ATTENUATION; // 4;
+            mFlags |= ETFLAG_USES_ENDORIGIN; // 2;
+        if ((seg.mFlags & STFLAG_ATTENUATE_EMITTER/* 0x40 */) != 0)
+            mFlags |= ETFLAG_ATTENUATES; // 4;
 
         // min/ max duration across all segments
         seg.SetMinDuration(this);

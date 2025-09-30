@@ -59,7 +59,7 @@ int rvParticle::HandleTint(const rvBSE* effect, const idVec4& colour, float alph
     idVec4 tint = effect->mTint;
 
     // Optional premultiplied tint path (matches flag 0x8000 in original code)
-    if (mFlags & 0x8000)
+    if (mFlags & PTFLAG_ADDITIVE/* 0x8000 */)
     {
 		float f = colour.w * alpha;
 		tint.x *= colour.x * f;
@@ -314,17 +314,17 @@ bool rvLineParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt, c
 
 #if 1 //karin: don't transform if useEndOrigin
     if( ! (
-            (pt && pt->mSpawnLength.mFlags & PPF_USE_END_ORIGIN)
-			|| (!pt && effect->mDeclEffect->mFlags & DEF_USES_END_ORIGIN)
+            (pt && pt->mSpawnLength.mFlags & PPFLAG_USEENDORIGIN)
+			|| (!pt && effect->mDeclEffect->mFlags & ETFLAG_USES_ENDORIGIN)
     ) ) //karin: useEndOrigin
 #endif
     {
         // rotate len by current axis unless fixed flag set
-        if (!(mFlags & PF_SEGMENT_LOCKED/* 2 */)) len = mInitAxis * effect->mCurrentAxisTransposed/*//k??? TODO mCurrentAxis */ * len; // simplified – assumes operator*
+        if (!(mFlags & PTFLAG_LOCKED/* 2 */)) len = mInitAxis * effect->mCurrentAxisTransposed/*//k??? TODO mCurrentAxis */ * len; // simplified – assumes operator*
     }
 
     // if velocity‑aligned flag, project onto velocity dir
-    if (mFlags & 0x10000)
+    if (mFlags & PTFLAG_GENERATED_LINE/* 0x10000 */)
     {
         idVec3 vel; EvaluateVelocity(effect, vel, time - mMotionStartTime);
         float speedSq = vel.LengthSqr();

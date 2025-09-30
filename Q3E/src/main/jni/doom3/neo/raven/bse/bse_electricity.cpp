@@ -388,12 +388,12 @@ bool rvElectricityParticle::Render(const rvBSE* effect,
     (this->*mEvalLengthPtr)(evalTime, &work.length);
 
     /* ───── transform to effect-space if requested ───── */
-    if (!(mFlags & PF_SEGMENT_LOCKED/* 2 */)) {
+    if (!(mFlags & PTFLAG_LOCKED/* 2 */)) {
         work.length = effect->mCurrentAxis * (mInitAxis * work.length);
     }
 
     /* ───── velocity-driven length (optional) ───── */
-    if (mFlags & 0x10000) {
+    if (mFlags & PTFLAG_GENERATED_LINE/* 0x10000 */) {
         idVec3 vel;
         rvParticle::EvaluateVelocity(effect,
             vel, time - mMotionStartTime);

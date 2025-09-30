@@ -115,7 +115,7 @@ if(USE_INTERNAL_ZLIB)
 	target_link_libraries(${OPENMOHAA_TARGET_PREFIX}qcommon_standalone INTERFACE ${OPENMOHAA_TARGET_PREFIX}zlib)
 else()
 	find_package(ZLIB REQUIRED)
-	target_include_directories(qcommon INTERFACE ${ZLIB_INCLUDE_DIRS})
+	target_include_directories(${OPENMOHAA_TARGET_PREFIX}qcommon INTERFACE ${ZLIB_INCLUDE_DIRS})
 	target_link_libraries(${OPENMOHAA_TARGET_PREFIX}qcommon_standalone INTERFACE ${ZLIB_LIBRARIES})
 endif()
 

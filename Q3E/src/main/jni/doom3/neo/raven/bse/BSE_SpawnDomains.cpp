@@ -102,7 +102,7 @@ bool rvParticleParms::Compare(const rvParticleParms& rhs) const
 //───────────────────────────────────────────────────────────────────────────────
 void rvParticleParms::HandleRelativeParms(float* death, float* init, int count) const
 {
-    if ((mFlags & PPF_RELATIVE/* 8u */) == 0)        // “RELATIVE” flag?
+    if ((mFlags & PPFLAG_RELATIVE/* 8u */) == 0)        // “RELATIVE” flag?
         return;
 
     //  Quick vectorised walk – identical arithmetic, nicer to read
@@ -298,7 +298,7 @@ void SpawnLinear1(float* out, const rvParticleParms& p,
 void SpawnLinear2(float* out, const rvParticleParms& p,
     idVec3*, const idVec3*)
 {
-    const float f = (p.mFlags & PPF_LINEAR_SPACING/* 0x10 */) ? out[0] : rvRandom::flrand(0.f, 1.f);
+    const float f = (p.mFlags & PPFLAG_LINEARSPACING/* 0x10 */) ? out[0] : rvRandom::flrand(0.f, 1.f);
     out[0] = f * (p.mMaxs.x - p.mMins.x) + p.mMins.x;
     out[1] = f * (p.mMaxs.y - p.mMins.y) + p.mMins.y;
 }
@@ -306,7 +306,7 @@ void SpawnLinear2(float* out, const rvParticleParms& p,
 void SpawnLinear3(idVec3* out, const rvParticleParms& p,
     idVec3* n, const idVec3* c)
 {
-    const float f = (p.mFlags & PPF_LINEAR_SPACING/* 0x10 */) ? out->x : rvRandom::flrand(0.f, 1.f);
+    const float f = (p.mFlags & PPFLAG_LINEARSPACING/* 0x10 */) ? out->x : rvRandom::flrand(0.f, 1.f);
     out->x = f * (p.mMaxs.x - p.mMins.x) + p.mMins.x;
     out->y = f * (p.mMaxs.y - p.mMins.y) + p.mMins.y;
     out->z = f * (p.mMaxs.z - p.mMins.z) + p.mMins.z;
@@ -593,7 +593,7 @@ void SpawnCylinder3(idVec3* outXYZ, const rvParticleParms& p,
     const float rZ = 0.5f * (p.mMaxs.z - p.mMins.z);
 
     // Optional taper flag (bit 2)
-    const bool  doTaper = (p.mFlags & PPF_CONE/* 4 */) != 0;
+    const bool  doTaper = (p.mFlags & PPFLAG_CONE/* 4 */) != 0;
 
     // Fraction along height
     const float t = rvRandom::flrand(0.0f, halfH * 2.0f);
@@ -627,7 +627,7 @@ void SpawnSurfaceCylinder3(idVec3* outXYZ, const rvParticleParms& p,
     const float rY = 0.5f * (p.mMaxs.y - p.mMins.y);
     const float rZ = 0.5f * (p.mMaxs.z - p.mMins.z);
 
-    const bool  doTaper = (p.mFlags & PPF_CONE/* 4 */) != 0;
+    const bool  doTaper = (p.mFlags & PPFLAG_CONE/* 4 */) != 0;
     const float t = rvRandom::flrand(0.0f, halfH * 2.0f);
     const float tp = doTaper ? (t / (halfH * 2.0f)) : 1.0f;
 
@@ -688,7 +688,7 @@ void SpawnSurfaceCylinder3(float* outXYZ, const rvParticleParms& p,
 void SpawnSpiral2(float* outXY, const rvParticleParms& p)
 {
     // X == distance along spiral axis
-    if (p.mFlags & PPF_LINEAR_SPACING/* 0x10 */)
+    if (p.mFlags & PPFLAG_LINEARSPACING/* 0x10 */)
         outXY[0] = (p.mMaxs.x - p.mMins.x) * outXY[0] + p.mMins.x;
     else
         outXY[0] = rvRandom::flrand(p.mMins.x, p.mMaxs.x);
@@ -712,7 +712,7 @@ void SpawnSpiral3(idVec3* outXYZ, const rvParticleParms& p,
     idVec3* normal, const idVec3* centre)
 {
     // X coordinate: either pre-initialised (flags & 0x10) or random
-    if (p.mFlags & PPF_LINEAR_SPACING/* 0x10 */)
+    if (p.mFlags & PPFLAG_LINEARSPACING/* 0x10 */)
         outXYZ->x = (p.mMaxs.x - p.mMins.x) * outXYZ->x + p.mMins.x;
     else
         outXYZ->x = rvRandom::flrand(p.mMins.x, p.mMaxs.x);

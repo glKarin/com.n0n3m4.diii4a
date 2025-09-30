@@ -12,10 +12,17 @@
 ===============================================================================
 */
 
+// rvDeclEffect::mFlags
+// ETQW SDK
 enum {
-	DEF_SOUND = 1, // 0x1
-	DEF_USES_END_ORIGIN = 1 << 1, // 0x2
-	DEF_ATTENUATION = 1 << 2, // 0x4 ?
+    ETFLAG_HAS_SOUND				= BITT< 0 >::VALUE,
+    ETFLAG_USES_ENDORIGIN			= BITT< 1 >::VALUE,
+    ETFLAG_ATTENUATES				= BITT< 2 >::VALUE,
+    ETFLAG_EDITOR_MODIFIED			= BITT< 3 >::VALUE,
+    ETFLAG_USES_MATERIAL_COLOR		= BITT< 4 >::VALUE,
+    ETFLAG_ORIENTATE_IDENTITY		= BITT< 5 >::VALUE,
+    ETFLAG_USES_AMBIENT_CUBEMAP		= BITT< 6 >::VALUE,
+    ETFLAG_HAS_PHYSICS				= BITT< 7 >::VALUE,
 };
 
 class rvDeclEffect final : public idDecl {

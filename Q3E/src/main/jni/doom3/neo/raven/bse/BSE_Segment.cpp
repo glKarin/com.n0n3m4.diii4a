@@ -119,7 +119,7 @@ void rvSegment::InitTime(rvBSE* effect,
     const rvSegmentTemplate* st,
     float timeNow)
 {
-    mFlags &= ~1;   // clear “done” bit
+    mFlags &= ~SFLAG_EXPIRED/* 1 */;   // clear “done” bit
     mSegStartTime = rvRandom::flrand(st->mLocalStartTime.x,
         st->mLocalStartTime.y)
         + timeNow;
@@ -130,8 +130,8 @@ void rvSegment::InitTime(rvBSE* effect,
 
     /* if this segment dictates BSE duration --------------------------- */
     const bool segDefinesDuration =
-        (st->mFlags & STF_INGORE_DURATION/* 0x10 */) == 0 ||
-        ((effect->mFlags & EF_LOOP/* 1 */) == 0 &&
+        (st->mFlags & STFLAG_IGNORE_DURATION/* 0x10 */) == 0 ||
+        ((effect->mFlags & EFLAG_LOOPING/* 1 */) == 0 &&
             !st->GetSoundLooping());
 
     if (segDefinesDuration) {
@@ -173,7 +173,7 @@ void rvSegment::Init(rvBSE* effect,
 void rvSegment::InsertParticle(rvParticle* p,
                                const rvSegmentTemplate* st)
 {
-    if (st->mFlags & STF_TEMPORARY/* 0x100 */)                 // invisible?
+    if (st->mFlags & STFLAG_TEMPORARY/* 0x100 */)                 // invisible?
         return;
 
     ++mActiveCount;
@@ -206,7 +206,7 @@ rvParticle* rvSegment::SpawnParticle(rvBSE* effect,
 {
     rvParticle* p = NULL;
 
-    if (st->mFlags & STF_TEMPORARY/* 0x100 */) {           // re-use internal array slot
+    if (st->mFlags & STFLAG_TEMPORARY/* 0x100 */) {           // re-use internal array slot
         p = mParticles;
     }
     else {
@@ -240,11 +240,11 @@ float rvSegment::AttenuateInterval(rvBSE* effect,
     float rate = idMath::Lerp(maxRate, minRate, bse_scale.GetFloat());
     rate = Clamp(rate, maxRate, minRate);
 
-    if (!(st->mFlags & STF_EMITTER_ATTEN/* 0x40 */))
+    if (!(st->mFlags & STFLAG_ATTENUATE_EMITTER/* 0x40 */))
         return rate;                                 // no attenuation flag
 
     float att = effect->GetAttenuation(st);
-    if (st->mFlags & STF_EMITTER_INV_ATTEN/* 0x80 */)
+    if (st->mFlags & STFLAG_INVERSE_ATTENUATE/* 0x80 */)
         att = 1.0f - att;                            // invert?
 
     return (att >= kMinSpawnRate) ? rate / att     // avoid div-0
@@ -264,11 +264,11 @@ float rvSegment::AttenuateCount(rvBSE* effect,
     float count = rvRandom::flrand(min, scaledMax);
     count = Clamp(count, min, max);
 
-    if (!(st->mFlags & STF_EMITTER_ATTEN/* 0x40 */))
+    if (!(st->mFlags & STFLAG_ATTENUATE_EMITTER/* 0x40 */))
         return count;
 
     float att = effect->GetAttenuation(st);
-    if (st->mFlags & STF_EMITTER_INV_ATTEN/* 0x80 */)
+    if (st->mFlags & STFLAG_INVERSE_ATTENUATE/* 0x80 */)
         att = 1.0f - att;
 
     return att * count;
@@ -320,7 +320,7 @@ void rvSegment::UpdateGenericParticles(rvBSE* effect,
     float timeNow)
 {
     const bool smoker = st->GetSmoker();
-    const bool looping = (st->mFlags & STF_CONSTANT/* 0x20 */) != 0;
+    const bool looping = (st->mFlags & STFLAG_INFINITE_DURATION/* 0x20 */) != 0;
 
     rvParticle* prev = NULL;
     rvParticle* cur = mUsedHead;
@@ -331,7 +331,7 @@ void rvSegment::UpdateGenericParticles(rvBSE* effect,
 
         if (looping) {
             cur->RunPhysics(effect, st, timeNow);
-            if (effect->mFlags & 8)
+            if (effect->mFlags & EFLAG_STOPPED/* 8 */)
                 kill = true;
         }
         else {
@@ -344,7 +344,7 @@ void rvSegment::UpdateGenericParticles(rvBSE* effect,
             }
         }
 
-        if ((effect->mFlags & 8) && !(cur->mFlags & 0x200000))
+        if ((effect->mFlags & EFLAG_STOPPED/* 8 */) && !(cur->mFlags & PTF_PERSIST/* 0x200000 */))
             kill = true;
 
         if (smoker && st->mTrailSegmentIndex >= 0)
@@ -397,7 +397,7 @@ void rvSegment::Handle(rvBSE* effect,
     switch (st->mSegType) {
 	case SEG_EMITTER: // 2:      // continous
 	case SEG_SPAWNER: // 3:      // burst
-        if (effect->mFlags & EF_MARK_BOUNDS_DIRTY/* 4 */)
+        if (effect->mFlags & EFLAG_ENDORIGINCHANGED/* 4 */)
             RefreshParticles(effect, st);
         break;
 
@@ -406,7 +406,7 @@ void rvSegment::Handle(rvBSE* effect,
         break;
 
 	case SEG_LIGHT: // 7:      // light
-        if (st->mFlags & STF_ENABLED/* 1 */)
+        if (st->mFlags & STFLAG_ENABLED/* 1 */)
             HandleLight(effect, st, timeNow);   // existing engine fn
         break;
 
@@ -436,7 +436,7 @@ bool rvSegment::UpdateParticles(rvBSE* effect, float timeNow)
     Handle(effect, timeNow);
 
     const bool forceGeneric =
-        (effect->mFlags & EF_SOUND/* 8 */) || (st->mFlags & 0x200);
+        (effect->mFlags & EFLAG_STOPPED/* 8 */) || (st->mFlags & 0x200);
 
     if (forceGeneric)
         UpdateGenericParticles(effect, st, timeNow);
@@ -448,9 +448,9 @@ bool rvSegment::UpdateParticles(rvBSE* effect, float timeNow)
 
     /* debug HUD stats -------------------------------------------------- */
     if (bseLocal.DebugHudActive()) {
-        bseLocal.mPerfCounters[2]/* dword_1137DDB0 */ += mActiveCount;
+        bseLocal.mPerfCounters[PERF_NUM_PARTICLES]/* dword_1137DDB0 */ += mActiveCount;
         if (mUsedHead)
-            bseLocal.mPerfCounters[3]/* dword_1137DDB4 */ +=
+            bseLocal.mPerfCounters[PERF_NUM_TEXELS]/* dword_1137DDB4 */ +=
             st->GetTexelCount();
     }
     return mUsedHead != NULL;
@@ -540,7 +540,7 @@ void rvSegment::Render(rvBSE* effect,
 
     /* draw each particle --------------------------------------------- */
     for (rvParticle* p = mUsedHead; p; p = p->mNext) {
-        if (st->mFlags & STF_CONSTANT/* 0x20 */)
+        if (st->mFlags & STFLAG_INFINITE_DURATION/* 0x20 */)
             p->mEndTime = timeNow + 1.0f;
 
         BSE_LOGFI(rvSegment::Render Particle, "%s: decl=%s, template=%s, type=%s", typeid(*p).name(), mEffectDecl->GetName(), st->GetName().c_str(), st->mParticleTemplate.PTypeName());
@@ -562,7 +562,7 @@ float rvSegment::EvaluateCost() const
 {
     const rvSegmentTemplate* st =
             mEffectDecl->GetSegmentTemplate(mSegmentTemplateHandle);
-    if (!st || !(st->mFlags & 1))
+    if (!st || !(st->mFlags & STFLAG_ENABLED/* 1 */))
         return 0.0f;
 
     const int  segType = st->mSegType;
@@ -581,14 +581,14 @@ bool rvSegment::Active() const
     const rvSegmentTemplate* st =
             mEffectDecl->GetSegmentTemplate(mSegmentTemplateHandle);
 
-    return st && (st->mFlags & STF_HAS_PARTICLE/* 4 */) && mActiveCount;
+    return st && (st->mFlags & STFLAG_HASPARTICLES/* 4 */) && mActiveCount;
 }
 
 bool rvSegment::GetLocked() const
 {
     const rvSegmentTemplate* st =
             mEffectDecl->GetSegmentTemplate(mSegmentTemplateHandle);
-    return st ? (st->mFlags & STF_LOCKED /* 2 */) != 0 : false;
+    return st ? (st->mFlags & STFLAG_LOCKED /* 2 */) != 0 : false;
 }
 
 /* ---------------------------------------------------------------------------
@@ -602,7 +602,7 @@ rvParticle* rvSegment::InitParticleArray(rvBSE* effect)
     if (!st) return NULL;
 
     const int requested =
-        (effect->mFlags & EF_LOOP/* 1 */) ? mLoopParticleCount : mParticleCount;
+        (effect->mFlags & EFLAG_LOOPING/* 1 */) ? mLoopParticleCount : mParticleCount;
 
     const int maxAllowed = bse_maxParticles.GetInteger();
     int count = idMath::ClampInt(0, maxAllowed, requested);
@@ -613,7 +613,7 @@ rvParticle* rvSegment::InitParticleArray(rvBSE* effect)
             maxAllowed, requested);
     }
 
-    BSE_LOGFI(rvSegment::InitParticleArray, "%s: count -> %d ? %d : %d = %d", st->GetName().c_str(), effect->mFlags & EF_LOOP, mLoopParticleCount, mParticleCount, count);
+    BSE_LOGFI(rvSegment::InitParticleArray, "%s: count -> %d ? %d : %d = %d", st->GetName().c_str(), effect->mFlags & EFLAG_LOOPING, mLoopParticleCount, mParticleCount, count);
     if (count == 0) return NULL;
 
 #if 1
@@ -738,7 +738,7 @@ void rvSegment::CreateDecal(rvBSE* effect, float timeNow)
     if (!st) return;
 
     /* only once ------------------------------------------------------- */
-    if (mFlags & 1)
+    if (mFlags & SFLAG_EXPIRED/* 1 */)
         return;
 
     /* -------------------------------------------------------------- dbg */
@@ -875,8 +875,8 @@ void rvSegment::CreateDecal(rvBSE* effect, float timeNow)
 
     /* ---------------------------------------- mark done so it won’t
        repeat; also tick effect duration if this segment dictates it. */
-    mFlags |= 1;
-    if (!(st->mFlags & STF_CONSTANT/* 0x20 */))
+    mFlags |= SFLAG_EXPIRED/* 1 */;
+    if (!(st->mFlags & STFLAG_INFINITE_DURATION/* 0x20 */))
         effect->SetDuration((mSegEndTime - timeNow) + st->mParticleTemplate.mDuration.y);
 }
 
@@ -886,7 +886,7 @@ void rvSegment::ResetTime(rvBSE *effect, float time) {
 
     SegmentTemplate = mEffectDecl->GetSegmentTemplate(mSegmentTemplateHandle);
     if (SegmentTemplate) {
-        if ((SegmentTemplate->mFlags & STF_CONSTANT/* 0x20 */) == 0)
+        if ((SegmentTemplate->mFlags & STFLAG_INFINITE_DURATION/* 0x20 */) == 0)
             InitTime(effect, SegmentTemplate, time);
     }
 }
@@ -928,10 +928,10 @@ bool rvSegment::Check(rvBSE *effect, float time)
 
     v11 = v12 = false; //k??? TODO not initialized in Q4D
 
-    v4 = (mFlags & 1) == 0;
+    v4 = (mFlags & SFLAG_EXPIRED/* 1 */) == 0;
     spawnTime = mLastTime;
     mLastTime = time;
-    if ( !v4 || (effect->mFlags & EF_SOUND/* 8 */) != 0 )
+    if ( !v4 || (effect->mFlags & EFLAG_STOPPED/* 8 */) != 0 )
     {
         flags = 1;
     }
@@ -948,14 +948,14 @@ bool rvSegment::Check(rvBSE *effect, float time)
             switch ( v8->mSegType )
             {
 				case SEG_EFFECT: // 1:
-                    if ( (v8->mFlags & STF_ENABLED/* 1 */) == 0 )
+                    if ( (v8->mFlags & STFLAG_ENABLED/* 1 */) == 0 )
                         break;
                     PlayEffect(effect, v8);
-                    mFlags |= 1u;
-                    return mFlags & 1;
+                    mFlags |= SFLAG_EXPIRED/* 1u */;
+                    return mFlags & SFLAG_EXPIRED/* 1 */;
 				case SEG_EMITTER: // 2:
                     if ( !effect->CanInterpolate() )
-                        return mFlags & 1;
+                        return mFlags & SFLAG_EXPIRED/* 1 */;
                     count = time + 0.016000001f;
                     if ( mSegEndTime - 0.0020000001f <= count )
                         count = mSegEndTime;
@@ -972,21 +972,21 @@ bool rvSegment::Check(rvBSE *effect, float time)
                         while ( v11 | v12 );
                     }
                     if ( mSegEndTime - 0.0020000001f <= count )
-                        mFlags |= 1u;
+                        mFlags |= SFLAG_EXPIRED/* 1u */;
                     flags = mFlags;
                     mLastTime = v9;
-                    flags = flags & 1;
+                    flags = flags & SFLAG_EXPIRED/* 1 */;
                     return flags;
 				case SEG_SPAWNER: // 3:
                     effecta = (int)AttenuateCount(effect, v8, mCount.x, mCount.y);
                     SpawnParticles(effect, v8, mSegStartTime, effecta);
-                    mFlags |= 1u;
-                    return mFlags & 1;
+                    mFlags |= SFLAG_EXPIRED/* 1u */;
+                    return mFlags & SFLAG_EXPIRED/* 1 */;
 				case SEG_TRAIL: // 4:
 				case SEG_DELAY: // 8:
                     break;
 				case SEG_SOUND: // 5:
-                    if ( (v8->mFlags & STF_ENABLED/* 1 */) == 0 )
+                    if ( (v8->mFlags & STFLAG_ENABLED/* 1 */) == 0 )
                         break;
                     ReferenceSound = effect->GetReferenceSound(SOUNDWORLD_GAME/* 1 */);
                     if ( ReferenceSound )
@@ -997,9 +997,9 @@ bool rvSegment::Check(rvBSE *effect, float time)
                         if ( v8->GetSoundLooping() )
                         {
                             v14 = mFlags;
-                            if ( (v14 & 2) == 0 )
+                            if ( (v14 & SFLAG_SOUNDPLAYING/* 2 */) == 0 )
                             {
-                                v14 = v14 | 2;
+                                v14 = v14 | SFLAG_SOUNDPLAYING/* 2 */;
                                 mFlags = v14;
                                 v15 = ReferenceSound;
                                 counta = mSegmentTemplateHandle + 1;
@@ -1009,8 +1009,8 @@ bool rvSegment::Check(rvBSE *effect, float time)
                                         counta,
                                         v18,
                                         SSF_LOOPING/* 32 */);
-                                mFlags |= 1u;
-                                return mFlags & 1;
+                                mFlags |= SFLAG_EXPIRED/* 1u */;
+                                return mFlags & SFLAG_EXPIRED/* 1 */;
                             }
                         }
                         else
@@ -1025,53 +1025,53 @@ bool rvSegment::Check(rvBSE *effect, float time)
                                     0);
                         }
                     }
-                    mFlags |= 1u;
-                    flags = mFlags & 1;
+                    mFlags |= SFLAG_EXPIRED/* 1u */;
+                    flags = mFlags & SFLAG_EXPIRED/* 1 */;
                     break;
 				case SEG_DECAL: // 6:
-                    if ( (v8->mFlags & STF_ENABLED/* 1 */) == 0 || !rvBSEManagerLocal::g_decals->GetBool() )
+                    if ( (v8->mFlags & STFLAG_ENABLED/* 1 */) == 0 || !rvBSEManagerLocal::g_decals->GetBool() )
                         break;
                     CreateDecal(effect, mSegStartTime);
-                    mFlags |= 1u;
-                    return mFlags & 1;
+                    mFlags |= SFLAG_EXPIRED/* 1u */;
+                    return mFlags & SFLAG_EXPIRED/* 1 */;
 				case SEG_LIGHT: // 7:
-                    if ( (v8->mFlags & STF_ENABLED/* 1 */) == 0 )
+                    if ( (v8->mFlags & STFLAG_ENABLED/* 1 */) == 0 )
                         break;
                     InitLight(effect, v8, mSegStartTime);
-                    mFlags |= 1u;
-                    return mFlags & 1;
+                    mFlags |= SFLAG_EXPIRED/* 1u */;
+                    return mFlags & SFLAG_EXPIRED/* 1 */;
 				case SEG_DV: // 9:
-                    if ( (v8->mFlags & STF_ENABLED/* 1 */) == 0 )
+                    if ( (v8->mFlags & STFLAG_ENABLED/* 1 */) == 0 )
                         break;
                     scale = effect->GetOriginAttenuation(v8);
                     timea = AttenuateDuration(effect, v8) + mSegStartTime;
                     bseLocal.SetDoubleVisionParms(timea, scale);
-                    mFlags |= 1u;
-                    return mFlags & 1;
+                    mFlags |= SFLAG_EXPIRED/* 1u */;
+                    return mFlags & SFLAG_EXPIRED/* 1 */;
 				case SEG_SHAKE: // 0xA:
-                    if ( (v8->mFlags & STF_ENABLED/* 1 */) == 0 )
+                    if ( (v8->mFlags & STFLAG_ENABLED/* 1 */) == 0 )
                         break;
                     scalea = effect->GetOriginAttenuation(v8);
                     timeb = AttenuateDuration(effect, v8) + mSegStartTime;
                     bseLocal.SetShakeParms(timeb, scalea);
-                    mFlags |= 1u;
-                    return mFlags & 1;
+                    mFlags |= SFLAG_EXPIRED/* 1u */;
+                    return mFlags & SFLAG_EXPIRED/* 1 */;
 				case SEG_TUNNEL: // 0xB:
-                    if ( (v8->mFlags & STF_ENABLED/* 1 */) != 0 )
+                    if ( (v8->mFlags & STFLAG_ENABLED/* 1 */) != 0 )
                     {
                         scaleb = effect->GetOriginAttenuation(v8);
                         timec = AttenuateDuration(effect, v8) + mSegStartTime;
                         bseLocal.SetTunnelParms(timec, scaleb);
                     }
-                    mFlags |= 1u;
-                    return mFlags & 1;
+                    mFlags |= SFLAG_EXPIRED/* 1u */;
+                    return mFlags & SFLAG_EXPIRED/* 1 */;
                 default:
-                    return mFlags & 1;
+                    return mFlags & SFLAG_EXPIRED/* 1 */;
             }
 
             // $L119003:
-            mFlags |= 1u;
-            return mFlags & 1;
+            mFlags |= SFLAG_EXPIRED/* 1u */;
+            return mFlags & SFLAG_EXPIRED/* 1 */;
         }
     }
     else
@@ -1145,7 +1145,7 @@ void rvSegment::CalcCounts(rvBSE *effect, float time) {
                             v9 = (int) ceilf(v3->mCount.y);
                             v8 = v9;
                             if (effectMinDuration != 0.0
-                                && (v5->mFlags & STF_CONSTANT/* 0x20 */) == 0
+                                && (v5->mFlags & STFLAG_INFINITE_DURATION/* 0x20 */) == 0
                                 && effectMinDuration < particleMaxDuration) {
                                 _Xb = particleMaxDuration / effectMinDuration;
                                 v8 = v9 * ((int) ceilf(_Xb) + 1) + 1;
@@ -1167,7 +1167,7 @@ void rvSegment::CalcCounts(rvBSE *effect, float time) {
                 if (v5->mSegType != SEG_TRAIL/* 4 */) {
                     v3->mParticleCount = v9;
                     v3->mLoopParticleCount = v8;
-                    if ((v5->mFlags & STF_HAS_PARTICLE/* 4 */) != 0) {
+                    if ((v5->mFlags & STFLAG_HASPARTICLES/* 4 */) != 0) {
                         if (!v9 || !v8) {
                             v13 = effectDecl->GetName();
                             common->Warning(
@@ -1180,7 +1180,7 @@ void rvSegment::CalcCounts(rvBSE *effect, float time) {
                             v3->CalcTrailCounts(effect, v5, &v5->mParticleTemplate, duration);
                     }
                 }
-                if ((effect->mFlags & EF_LOOP/* 1 */) == 0) {
+                if ((effect->mFlags & EFLAG_LOOPING/* 1 */) == 0) {
                     _Xc = v3->mSegEndTime - time + v5->mParticleTemplate.mDuration.y;
                     effect->SetDuration(_Xc);
                 }
@@ -1243,7 +1243,7 @@ void rvSegment::SpawnParticles(rvBSE *effect, const rvSegmentTemplate *st, float
     for (i = 0; i < count; ++i) {
         SegmentTemplate = mEffectDecl->GetSegmentTemplate(mSegmentTemplateHandle);
         if (SegmentTemplate) {
-            if ((SegmentTemplate->mFlags & STF_TEMPORARY/* 0x100 */) != 0) {
+            if ((SegmentTemplate->mFlags & STFLAG_TEMPORARY/* 0x100 */) != 0) {
                 particles = mParticles;
             }
             else
