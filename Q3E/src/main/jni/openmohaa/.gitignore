@@ -48,4 +48,4 @@ profile
 .vs
 code_unfinished/*
 thirdparties/
-code/parser/generated/*
+#code/parser/generated/*
