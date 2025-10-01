@@ -218,8 +218,8 @@ public:
     // ── impact / timeout effect hooks ─────────────────────────────────────
     int                 mNumImpactEffects;
     int                 mNumTimeoutEffects;
-    const rvDeclEffect* mImpactEffects[4];
-    const rvDeclEffect* mTimeoutEffects[4];
+    const rvDeclEffect* mImpactEffects[BSE_NUM_SPAWNABLE/* 4 */];
+    const rvDeclEffect* mTimeoutEffects[BSE_NUM_SPAWNABLE/* 4 */];
 
     // ── optional entityDef attachment (for spawned rigid-bodys etc.) ──────
     idStr       mEntityDefName;

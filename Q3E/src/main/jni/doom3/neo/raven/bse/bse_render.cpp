@@ -36,9 +36,9 @@ bool rvParticle::GetEvaluationTime(float time, float& outEvalTime, bool  infinit
     outEvalTime = time - mStartTime;
 
     // Clamp to end of life minus a small epsilon, matching original logic
-    if (time >= mEndTime - 0.0020000001f)
+    if (time >= mEndTime - BSE_TIME_EPSILON/* 0.0020000001f */)
     {
-        outEvalTime = (mEndTime - mStartTime) - 0.0020000001f;
+        outEvalTime = (mEndTime - mStartTime) - BSE_TIME_EPSILON/* 0.0020000001f */;
     }
 
     if (infinite)
@@ -47,7 +47,7 @@ bool rvParticle::GetEvaluationTime(float time, float& outEvalTime, bool  infinit
     }
 
     // Valid while strictly inside [mStartTime − ε, mEndTime)
-    return (time > mStartTime - 0.0020000001f) &&
+    return (time > mStartTime - BSE_TIME_EPSILON/* 0.0020000001f */) &&
         (time < mEndTime);
 }
 
@@ -396,15 +396,6 @@ bool rvOrientedParticle::Render(const rvBSE* effect, const rvParticleTemplate* p
     idVec3 pos;   EvaluatePosition(effect, pos, time - mMotionStartTime);
 
     idMat3 orient; rvAngles(rot).ToMat3(orient);
-#if 0
-    int ii = 1; int jj = 2;
-	static idCVar a("aaa","0",0,"");
-	if(a.GetInteger()==1){ii=1;jj=0;}
-	if(a.GetInteger()==2){ii=0;jj=1;}
-	if(a.GetInteger()==3){ii=2;jj=1;}
-	if(a.GetInteger()==4){ii=0;jj=2;}
-	if(a.GetInteger()==5){ii=2;jj=0;}
-#endif
 #if 1 //k??? TODO Q4D original source code, and it's correct
     idVec3 right = size * -orient[1];
     idVec3 up = size * orient[2];

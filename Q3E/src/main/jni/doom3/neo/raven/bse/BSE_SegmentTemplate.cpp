@@ -416,7 +416,7 @@ bool rvSegmentTemplate::Parse(rvDeclEffect* effect,
         else if (token.Icmp("effect") == 0)
         {
             lexer->ReadToken(&token);
-            if (mNumEffects >= 4) {
+            if (mNumEffects >= BSE_NUM_SPAWNABLE/* 4 */) {
                 common->Warning("^4BSE:^1 Too many sub-effects in segment '%s'",
                     mSegmentName.c_str());
             }

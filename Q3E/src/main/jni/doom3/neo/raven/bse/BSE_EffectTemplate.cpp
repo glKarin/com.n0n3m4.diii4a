@@ -61,7 +61,7 @@ rvDeclEffect::rvDeclEffect()
           mFlags(0),
           mMinDuration(0.0f),
           mMaxDuration(0.0f),
-          mSize(512.0f),
+          mSize(BSE_LARGEST/* 512.0f */),
           mPlayCount(0),
           mLoopCount(0)
 {
@@ -128,7 +128,7 @@ void rvDeclEffect::Init() {
     mFlags = 0;
     mMinDuration = 0.0f;
     mMaxDuration = 0.0f;
-    mSize = 512.0f;
+    mSize = BSE_LARGEST/* 512.0f */;
     mPlayCount = 0;
     mLoopCount = 0;
 

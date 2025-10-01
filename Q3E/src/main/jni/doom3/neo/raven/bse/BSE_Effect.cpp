@@ -172,7 +172,7 @@ idVec3 rvBSE::GetInterpolatedOffset(idVec3 *result, float time) const
     //offset.Zero();
 
     const float dt = mCurrentTime - mLastTime;
-    if (dt >= 0.002f)                     // ignore tiny steps (< 2 ms)
+    if (dt >= BSE_TIME_EPSILON/* 0.002f */)                     // ignore tiny steps (< 2 ms)
     {
         const float lerp = 1.0f - (time - mLastTime) / dt;
         offset = (mCurrentOrigin - mLastOrigin) * lerp;
@@ -221,7 +221,7 @@ void rvBSE::UpdateFromOwner(renderEffect_s* parms,
     // 3) Velocity (ignore very small Δt to avoid div-by-0 & jitter)
     //--------------------------------------------------------------------
     const float dt = mCurrentTime - mLastTime;
-    if (dt > 0.002f) {
+    if (dt > BSE_TIME_EPSILON/* 0.002f */) {
         mCurrentVelocity = (mCurrentOrigin - mLastOrigin) * (1.0f / dt);
     }
     else {
@@ -360,7 +360,7 @@ void rvBSE::UpdateAttenuation()
     game->GetPlayerView(camOrg, camAxis);
 
     mOriginDistanceToCamera =
-        idMath::ClampFloat(1.0f, 131072.0f,
+        idMath::ClampFloat(1.0f, WORLD_SIZE/* 131072.0f */,
             (mCurrentOrigin - camOrg).Length());
 
     // ------------------------------------------------------------------
@@ -371,7 +371,7 @@ void rvBSE::UpdateAttenuation()
 
     //   • Query AABB distance, then clamp
     mShortestDistanceToCamera =
-        idMath::ClampFloat(1.0f, 131072.0f,
+        idMath::ClampFloat(1.0f, WORLD_SIZE/* 131072.0f */,
             mCurrentLocalBounds.ShortestDistance(localCam));
 }
 
@@ -731,7 +731,7 @@ void rvBSE::Init(rvDeclEffect* decl,
 
 bool rvBSE::CanInterpolate() const
 {
-    return mCurrentTime - mLastTime > 0.0020000001f;
+    return mCurrentTime - mLastTime > BSE_TIME_EPSILON/* 0.0020000001f */;
 }
 
 idSoundEmitter * rvBSE::GetReferenceSound(int worldId)

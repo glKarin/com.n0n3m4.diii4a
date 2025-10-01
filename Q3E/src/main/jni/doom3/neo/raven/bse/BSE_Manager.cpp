@@ -230,14 +230,10 @@ void rvBSEManagerLocal::EndFrame()
 		game->DebugSetInt("fx_num_active", mPerfCounters[PERF_NUM_BSE]);
 		game->DebugSetInt("fx_num_particles", mPerfCounters[PERF_NUM_PARTICLES]/* dword_1137DDB0 */);
 		game->DebugSetInt("fx_num_traces", mPerfCounters[PERF_NUM_TRACES]/* dword_1137DDAC */);
-		float v1 = mPerfCounters[PERF_NUM_TEXELS]/* dword_1137DDB4 */ / (float)(1 << 20)/*k??? TODO Q4D * 0.00000095367432 */;
+		float v1 = mPerfCounters[PERF_NUM_TEXELS]/* dword_1137DDB4 */ / (float)(MEMORY_BLOCK_SIZE/* 1 << 20 */)/*k??? TODO Q4D * 0.00000095367432 */; // 2^20 == 1 048 576
 		game->DebugSetFloat("fx_num_texels", v1);
 		game->DebugSetInt("fx_num_segments", mPerfCounters[PERF_NUM_SEGMENTS]/* dword_1137DDB8 */);
 	}
-
-    //game->DebugSetFloat("fx_num_texels",
-    //    static_cast<float>(perfCounters_[3]) / (1 << 20)); // 2^20 == 1 048 576
-    //game->DebugSetInt("fx_num_segments", perfCounters_[4]);
 }
 //──────────────────────────────────────────────────────────────────────────────
 void rvBSEManagerLocal::UpdateRateTimes()

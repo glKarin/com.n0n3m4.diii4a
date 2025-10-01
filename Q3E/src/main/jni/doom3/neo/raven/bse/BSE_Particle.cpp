@@ -1027,7 +1027,7 @@ void rvParticle::CalcImpactPoint(idVec3& out,
     const idVec3 push = BSE::Mult(idVec3(halfX, halfY, halfZ) * invLen, work); //k??? TODO dot not dot
 
     // offset the hit position by “normal + push”
-    out += 2.0f * normal + push;
+    out += BSE_SURFACE_OFFSET/* 2.0f */ * normal + push;
 }
 
 // ----------------------------------------------------------------------------
@@ -1035,13 +1035,11 @@ void rvParticle::CalcImpactPoint(idVec3& out,
 // ----------------------------------------------------------------------------
 void rvParticle::EmitSmokeParticles(rvBSE* effect,rvSegment* child, float      time)
 {
-    static const float kUpdate = 0.016f;              // ~60 Hz
-
 	const rvSegmentTemplate* st = child->GetSegmentTemplate();
 	if (!st) {
 		return;
 	}
-    const float timeEnd = time + kUpdate;
+    const float timeEnd = time + BSE_FUTURE;
     while (mLastTrailTime < timeEnd) {
 
         // stay within particle lifetime
@@ -1086,7 +1084,7 @@ bool rvParticle::RunPhysics(rvBSE* effect,
     const rvParticleTemplate& pt = st->mParticleTemplate;
 
     // require “physics” flag and at least 100 ms of motion
-    if (!(pt.mFlags & PTFLAG_HAS_PHYSICS/* 0x0200 */) || time - mMotionStartTime < 0.1f) {
+    if (!(pt.mFlags & PTFLAG_HAS_PHYSICS/* 0x0200 */) || time - mMotionStartTime < BSE_PHYSICS_TIME_SAMPLE/* 0.1f */) {
         return false;
     }
 
@@ -1096,7 +1094,7 @@ bool rvParticle::RunPhysics(rvBSE* effect,
     const idVec3 worldOrigin = effect->mCurrentOrigin;
     const idMat3& worldAxis = effect->mCurrentAxis;
 
-    const float dtStart = time - mMotionStartTime - 0.1f;
+    const float dtStart = time - mMotionStartTime - BSE_PHYSICS_TIME_SAMPLE/* 0.1f */;
     const float dtEnd = time - mMotionStartTime;
 
     idVec3 fromLocal; EvaluatePosition(effect, fromLocal, dtStart);

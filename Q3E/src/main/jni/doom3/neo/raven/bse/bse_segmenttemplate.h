@@ -142,7 +142,7 @@ public:
     int32_t                mTrailSegmentIndex;
 
     int32_t                mNumEffects;
-    const rvDeclEffect* mEffects[4];
+    const rvDeclEffect* mEffects[BSE_NUM_SPAWNABLE/* 4 */];
 
     const idSoundShader* mSoundShader;
     idVec2                 mSoundVolume;

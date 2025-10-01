@@ -11,7 +11,7 @@ struct SElecWork
     idVec3 forward;
     idVec3 viewPos;
     srfTriangles_s* tri;
-    idVec3 coords[200];
+    idVec3 coords[BSE_ELEC_MAX_BOLTS/* 200 */];
 };
 
 class rvElectricityParticle : public rvLineParticle

@@ -20,6 +20,18 @@ extern idCVar bse_log;
 #define BSE_LOGFI(...)
 #endif
 
+const float WORLD_SIZE			= ( 128.0f * 1024.0f );
+const float BSE_LARGEST			= ( 512.0f );
+const float BSE_TESS_COST		= ( 20.0f );				// The expense of a new tess
+const float BSE_PHYSICS_COST	= ( 80.0f );				// The expense of 1 particle having physics
+
+const float BSE_PARTICLE_TEXCOORDSCALE = ( 0.01f );
+
+
+
+const unsigned int MEMORY_BLOCK_SIZE = ( 0x100000 );
+const unsigned int BSE_ELEC_MAX_BOLTS = ( 200 );
+
 /*typedef */enum eBSEPerfCounter
 {
     PERF_NUM_BSE,
@@ -163,10 +175,10 @@ namespace BSE
 
 #include "bse_effect.h"
 #include "BSE_Envelope.h"
+#include "BSE_Particle.h"
 #include "bse_parseparticle2.h"
 #include "bse_effecttemplate.h"
 #include "bse_segment.h"
-#include "BSE_Particle.h"
 #include "bse_light.h"
 #include "bse_segmenttemplate.h"
 #include "BSE_SpawnDomains.h"

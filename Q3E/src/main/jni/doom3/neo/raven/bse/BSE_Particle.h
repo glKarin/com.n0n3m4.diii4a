@@ -1,5 +1,21 @@
 ﻿#pragma once
 
+#define BSE_FUTURE				( 0.016f )			// How far into the future to check for particle spawning
+#define BSE_TIME_EPSILON		( 0.002f )			// Edge condition checks
+#define BSE_PHYSICS_TIME_SAMPLE	( 0.1f )			// Number of seconds to check the position delta for physics
+#define BSE_MINIMUM_TRACE_DIST	( 16.0f )			// The square of the distance below which physics will not check
+#define BSE_SURFACE_OFFSET		( 2.0f )			// Amount a collision is pushed back along the normal
+#define BSE_BOUNCE_LIMIT		( 2500.0f )			// Square of velocity below which a particle stops bouncing
+#define BSE_TRACE_OFFSET		( 0.02f )			// How much the bounce should move back from the endpos
+#define MAX_PARTICLES			( 2048 )			// Max number of particles attached to an effect (arbitrary sanity check)
+#define BSE_DENSITY_FACTOR		( 50.0f )
+
+#define BSE_MAX_FORKS			( 16 )
+
+#define BSE_MAX_DURATION		( 60.0f * 5.0f )	// 5 Minutes
+
+#define BSE_NUM_SPAWNABLE		( 4 )				// Number of random effects to choose from
+
 class rvSegment;
 
 //‑‑‑ Base particle --------------------------------------------------------------------

@@ -150,7 +150,7 @@ bool rvSegment::HandleLight(rvBSE *effect, const rvSegmentTemplate *st, float ti
     if ((st->mFlags & STFLAG_INFINITE_DURATION/* 0x20 */) != 0)
         return false;
     v7 = mUsedHead;
-    if (v7->mEndTime - 0.0020000001f > time)
+    if (v7->mEndTime - BSE_TIME_EPSILON/* 0.0020000001f */ > time)
         return false;
     v7->Destroy();
     mFreeHead = mUsedHead;

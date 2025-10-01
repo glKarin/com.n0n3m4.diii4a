@@ -28,8 +28,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "BSE_Compat.h"
 
 /* clamp constants */
-static const float kMinSpawnRate = 0.002f;
-static const float kMaxSpawnRate = 300.0f;
+static const float kMinSpawnRate = BSE_TIME_EPSILON/* 0.002f */;
+static const float kMaxSpawnRate = BSE_MAX_DURATION/* 300.0f */;
 
 /* ------------------------------------------------------------ helpers --- */
 namespace {
@@ -570,8 +570,8 @@ float rvSegment::EvaluateCost() const
 
     if (st->mParticleTemplate.mType) {
         cost += st->mParticleTemplate.CostTrail(static_cast<float>(mActiveCount));
-        if (st->mParticleTemplate.mFlags & 0x200)
-            cost += (float)mActiveCount * 80.0f;
+        if (st->mParticleTemplate.mFlags & PTFLAG_HAS_PHYSICS/* 0x200 */)
+            cost += (float)mActiveCount * BSE_PHYSICS_COST;
     }
     return cost;
 }
@@ -956,8 +956,8 @@ bool rvSegment::Check(rvBSE *effect, float time)
 				case SEG_EMITTER: // 2:
                     if ( !effect->CanInterpolate() )
                         return mFlags & SFLAG_EXPIRED/* 1 */;
-                    count = time + 0.016000001f;
-                    if ( mSegEndTime - 0.0020000001f <= count )
+                    count = time + BSE_FUTURE; // 0.016000001f;
+                    if ( mSegEndTime - BSE_TIME_EPSILON/* 0.0020000001f */ <= count )
                         count = mSegEndTime;
                     v9 = spawnTime;
                     if ( spawnTime < count )
@@ -971,7 +971,7 @@ bool rvSegment::Check(rvBSE *effect, float time)
                         }
                         while ( v11 | v12 );
                     }
-                    if ( mSegEndTime - 0.0020000001f <= count )
+                    if ( mSegEndTime - BSE_TIME_EPSILON/* 0.0020000001f */ <= count )
                         mFlags |= SFLAG_EXPIRED/* 1u */;
                     flags = mFlags;
                     mLastTime = v9;
@@ -1113,7 +1113,7 @@ void rvSegment::CalcCounts(rvBSE *effect, float time) {
             mType = v5->mParticleTemplate.mType;
             if (mType) {
                 v8 = 0;
-                particleMaxDuration = v5->mParticleTemplate.mDuration.y + 0.016000001f;
+                particleMaxDuration = v5->mParticleTemplate.mDuration.y + BSE_FUTURE; // 0.016000001f;
                 v9 = 0;
                 duration = 0.0f;
                 effectMinDuration = effectDecl->mMinDuration;
@@ -1126,7 +1126,7 @@ void rvSegment::CalcCounts(rvBSE *effect, float time) {
                             y = particleMaxDuration;
                             if (particleMaxDuration > v5->mLocalDuration.y)
                                 y = v5->mLocalDuration.y;
-                            v11 = y + 0.016000001f;
+                            v11 = y + BSE_FUTURE; // 0.016000001f;
                             duration = v11;
                             _X = v11 / v3->mSecondsPerParticle.y;
                             v9 = (int) ceilf(_X) + 1;
@@ -1203,7 +1203,7 @@ void rvSegment::AddToParticleCount(rvBSE *effect, int count, int loopCount, floa
     if (SegmentTemplate) {
         if (SegmentTemplate->mParticleTemplate.mDuration.y > duration)
             duration = SegmentTemplate->mParticleTemplate.mDuration.y;
-        v7 = (int) ceil((duration + 0.016000001f) / mSecondsPerParticle.y);
+        v7 = (int) ceil((duration + BSE_FUTURE/* 0.016000001f */) / mSecondsPerParticle.y);
         mParticleCount += count * (v7 + 1);
         mLoopParticleCount += loopCount * (v7 + 1);
     }

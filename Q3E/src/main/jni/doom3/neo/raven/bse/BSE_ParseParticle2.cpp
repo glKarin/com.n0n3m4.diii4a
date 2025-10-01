@@ -197,7 +197,7 @@ float rvParticleTemplate::CostTrail(float baseCost) const {
         return baseCost * mTrailCount.y * 2.0f;
 
 	case TRAIL_MOTION: // 2: // motion blur
-        return baseCost * mTrailCount.y * 1.5f + 20.0f;
+        return baseCost * mTrailCount.y * 1.5f + BSE_TESS_COST/* 20.0f */;
 
     default:
         return baseCost;
@@ -1017,7 +1017,7 @@ bool rvParticleTemplate::ParseImpact(rvDeclEffect* effect,
         if (!idStr::Icmp(tok, "effect"))            // ----- effect list
         {
             src->ReadToken(&tok);                     // grab effect name
-            if (mNumImpactEffects >= 4) {
+            if (mNumImpactEffects >= BSE_NUM_SPAWNABLE/* 4 */) {
                 common->Warning("^4BSE:^1 Too many impact effects '%s' in '%s' "
                     "(file: %s, line: %d)",
                     tok.c_str(), effect->GetName(),
@@ -1075,7 +1075,7 @@ bool rvParticleTemplate::ParseTimeout(rvDeclEffect* effect,
         }
 
         src->ReadToken(&tok);                   // effect name
-        if (mNumTimeoutEffects >= 4) {
+        if (mNumTimeoutEffects >= BSE_NUM_SPAWNABLE/* 4 */) {
             common->Warning("^4BSE:^1 Too many timeout effects '%s' in '%s' "
                 "(file: %s, line: %d)",
                 tok.c_str(), effect->GetName(),
@@ -1422,7 +1422,7 @@ bool rvParticleTemplate::Parse(rvDeclEffect* effect, idLexer* src)
             }
         }
         else if (!idStr::Icmp(tok, "fork")) {
-            mNumForks = idMath::ClampInt(0, 16, src->ParseInt());
+            mNumForks = idMath::ClampInt(0, BSE_MAX_FORKS/* 16 */, src->ParseInt());
         }
         else if (!idStr::Icmp(tok, "forkMins")) GetVector(src, 3, mForkSizeMins);
         else if (!idStr::Icmp(tok, "forkMaxs")) GetVector(src, 3, mForkSizeMaxs);
