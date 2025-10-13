@@ -1,9 +1,0 @@
-../csprogs.dat
-
-csqc/system.qc
-csqc/stdbuiltins.qc
-csqc/builtins.qc
-csqc/stdconstants.qc
-csqc/constants.qc
-csqc/invent.qc
-csqc/main.qc
