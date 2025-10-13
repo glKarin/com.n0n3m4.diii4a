@@ -475,7 +475,6 @@ void Framebuffer::Init()
 	
 #ifdef _SHADOW_MAPPING
 	int width, height;
-	width = height = r_shadowMapImageSize.GetInteger();
 	
 	for( int i = 0; i < MAX_SHADOWMAP_RESOLUTIONS; i++ )
 	{
@@ -518,6 +517,8 @@ void Framebuffer::Init()
         printf("Stencil texture creating: %d x %d\n", glConfig.vidWidth, glConfig.vidHeight);
         stencilTexture.Init(glConfig.vidWidth, glConfig.vidHeight);
     }
+
+    BindNull();
 }
 
 void Framebuffer::Shutdown()

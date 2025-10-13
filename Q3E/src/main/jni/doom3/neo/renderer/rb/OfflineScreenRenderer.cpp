@@ -14,10 +14,6 @@ idOfflineScreenRenderer::idOfflineScreenRenderer()
 {
 }
 
-idOfflineScreenRenderer::~idOfflineScreenRenderer()
-{
-}
-
 bool idOfflineScreenRenderer::Init(int w, int h)
 {
 	if(fb)

@@ -152,6 +152,7 @@ static idCVar harm_con_float("harm_con_float", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_A
 static idCVar harm_con_alwaysShow("harm_con_alwaysShow", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_ARCHIVE, "text always show when console closed");
 static idCVar harm_con_floatGeometry("harm_con_floatGeometry", "100 50 300 200", CVAR_SYSTEM|CVAR_ARCHIVE, "float console geometry. format is '<left> <top> <width> <height>'");
 static idCVar harm_con_floatZoomStep("harm_con_floatZoomStep", "10", CVAR_INTEGER|CVAR_SYSTEM|CVAR_ARCHIVE, "zoom step of float console");
+static idCVar harm_con_noBackground("harm_con_noBackground", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_ARCHIVE, "do not draw background");
 
 
 
@@ -1274,7 +1275,7 @@ void idConsoleLocal::DrawSolidConsole(float frac)
 	if (y < 1.0f) {
 		y = 0.0f;
 	} else {
-		if(!harm_con_alwaysShow.GetBool() || keyCatching)
+		if((!harm_con_alwaysShow.GetBool() || keyCatching) && !harm_con_noBackground.GetBool())
 		renderSystem->DrawStretchPic(0, 0, SCREEN_WIDTH, y, 0, 1.0f - displayFrac, 1, 1, consoleShader);
 	}
 
@@ -1540,11 +1541,11 @@ void idConsoleLocal::DrawFloatConsole(void)
 	if (y < 1.0f) {
 		y = 0.0f;
 	} else {
-		if(!harm_con_alwaysShow.GetBool() || (keyCatching && !drag))
+		if((!harm_con_alwaysShow.GetBool() || keyCatching) && !drag && !harm_con_noBackground.GetBool())
 			renderSystem->DrawStretchPic(consoleX, consoleY, consoleW, y, 0, 1.0f - displayFrac, 1, 1, consoleShader);
 	}
 
-	if(!harm_con_alwaysShow.GetBool() || (keyCatching && !drag))
+	if((!harm_con_alwaysShow.GetBool() || keyCatching) && !drag)
 	{
 		renderSystem->SetColor(colorCyan);
 		renderSystem->DrawStretchPic(consoleX, y + consoleY, consoleW, 2, 0, 0, 0, 0, whiteShader);

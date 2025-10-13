@@ -9,7 +9,6 @@ class idStencilTexture
 {
 	public:
 		idStencilTexture();
-		virtual ~idStencilTexture();
 
 		void Begin(void);
 		void End(void);

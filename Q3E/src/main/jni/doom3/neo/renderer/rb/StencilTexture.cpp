@@ -24,10 +24,6 @@ idStencilTexture::idStencilTexture()
 {
 }
 
-idStencilTexture::~idStencilTexture()
-{
-}
-
 bool idStencilTexture::Init(int w, int h)
 {
 	if(fb)

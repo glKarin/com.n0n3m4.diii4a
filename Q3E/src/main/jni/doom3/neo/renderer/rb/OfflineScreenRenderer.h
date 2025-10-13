@@ -8,7 +8,6 @@ class idOfflineScreenRenderer
 {
 	public:
 		idOfflineScreenRenderer();
-		virtual ~idOfflineScreenRenderer();
 
 		void Bind(void);
 		void Unbind(void);

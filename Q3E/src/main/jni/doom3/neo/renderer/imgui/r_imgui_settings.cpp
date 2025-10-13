@@ -455,9 +455,10 @@ void idImGuiSettings::RenderNewCvars(void) const
 {
     const char *NewCvars[] = {
             "harm_con_float",
-            "harm_con_alwaysShow",
             "harm_con_floatGeometry",
             "harm_con_floatZoomStep",
+            "harm_con_alwaysShow",
+            "harm_con_noBackground",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -824,10 +825,11 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterLabel("Console", IG_CVAR_GROUP_FRAMEWORK);
     ImGui_RegisterCvar("harm_com_consoleHistory", "Record console history", IG_CVAR_COMPONENT_COMBO, "0=Don't save;1=Save on exit;2=Save on every command");
     ImGui_RegisterCvar("harm_con_float", "Float console");
-    ImGui_RegisterCvar("harm_con_alwaysShow", "Always show console");
     ImGui_RegisterCvar("harm_con_floatGeometry", "Float console geometry", IG_CVAR_COMPONENT_INPUT_INT4);
     ImGui_RegisterCvar("harm_con_floatZoomStep", "Zoom step of float console");
     ImGui_RegisterDivide(IG_CVAR_GROUP_FRAMEWORK);
+    ImGui_RegisterCvar("harm_con_alwaysShow", "Always show console");
+    ImGui_RegisterCvar("harm_con_noBackground", "Don't draw console background");
     // filesystem
     ImGui_RegisterLabel("File System", IG_CVAR_GROUP_FRAMEWORK);
     ImGui_RegisterCvar("harm_fs_basepath_extras", "Extras search paths last(split by ',')");
