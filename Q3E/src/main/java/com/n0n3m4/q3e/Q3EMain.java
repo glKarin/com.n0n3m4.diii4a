@@ -527,8 +527,14 @@ public class Q3EMain extends Activity
 
     private boolean CheckStart()
     {
-        // arm32 not support GZDOOM
-        if(Q3EUtils.q3ei.isDOOM)
+        if(Q3EUtils.q3ei.IsDisabled()) // disabled or removed games
+        {
+            Toast.makeText(this, Q3EUtils.q3ei.game_name + " is disabled or removed!", Toast.LENGTH_LONG).show();
+            finish();
+            Q3EUtils.RunLauncher(this);
+            return false;
+        }
+        else if(Q3EUtils.q3ei.isDOOM) // arm32 not support GZDOOM
         {
             if(!Q3EJNI.Is64())
             {

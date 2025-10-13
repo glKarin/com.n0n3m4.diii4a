@@ -31,6 +31,7 @@ public final class Constants
     {
         return new String[] {
             "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
+            "FTEQW is removed in this release.",
             "Add fixed ratio resolution support on launcher `Graphics` tab.",
         };
 	};

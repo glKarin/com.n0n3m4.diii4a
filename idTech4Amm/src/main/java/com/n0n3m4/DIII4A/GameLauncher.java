@@ -3844,7 +3844,12 @@ public class GameLauncher extends Activity
             }
             if (i >= Games.length)
                 i = Games.length - 1;
-            newGame = Games[(i + 1) % Games.length];
+			for (i = (i + 1) % Games.length; i < Games.length; i++)
+			{
+				if (!Q3EInterface.IsDisabled(Games[i]))
+					break;
+			}
+            newGame = Games[i];
         }
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         preference.edit().putString(Q3EPreference.pref_harm_game, newGame).commit();

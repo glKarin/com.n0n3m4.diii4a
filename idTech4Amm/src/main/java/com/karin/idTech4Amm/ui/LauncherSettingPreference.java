@@ -55,6 +55,9 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
             final String endl = TextHelper.GetDialogMessageEndl();
             for (String game : GameManager.Games())
             {
+                if(Q3EInterface.IsDisabled(game))
+                    continue;
+
                 String gameName = Q3ELang.tr(context, GameManager.GetGameNameTs(game));
                 String path = Q3EInterface.GetGameStandaloneDirectory(game);
                 String pathText = TextHelper.GenLinkText("file://" + path, path);

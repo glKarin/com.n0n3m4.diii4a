@@ -93,6 +93,9 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
         Game[] values = Game.values();
         for (String game : GameManager.Games())
         {
+            if(Q3EInterface.IsDisabled(game))
+                continue;
+
             String gameName = Tr(GameManager.GetGameNameTs(game));
             List<PathTipsListView.ModPathTips> mods = new ArrayList<>();
 
