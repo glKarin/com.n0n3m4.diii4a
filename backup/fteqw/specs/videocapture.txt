@@ -1,0 +1,64 @@
+Video Capturing with FTE
+
+Overview:
+FTE supports screen capture, outputting to either a series of screenshots or (on windows) AVI output. See the description of capturecodec for how output is chosen.
+Capturing will work anywhere, in game, in menus, at the console, etc, with one exception. If a demo is currently being played, both the capturing and demo playback will pause whenever the game is not shown fullscreen - that is, if the console is shown, the menu is loaded, etc.
+This allows you to visit the console and issue commands without breaks and pauses.
+Also, when a demo is playing, the demo will be slowed to keep exactly in sync with the capturing. This is important with slow codecs, cpus, framerates, or hard disks.
+
+To capture part of a demo, issue the command:
+capture demo.mvd;demo_jump 30:30;capturepause
+This will begin capturing demo.mvd at a specific point, and will be paused.
+You can then change the spectator to the correct point
+
+
+
+
+Relevent commands:
+
+capture [outfilename]
+ This command tells FTE to begin capturing.
+
+capturedemo
+ This command tells FTE to begin capturing, and to play a demo at the same time.
+ This has only one advantage over capture and playdemo in that the result is fully synced to the demo. No loading screens and no stuff on the end.
+ This has limited use to making frag videos.
+
+capturestop
+ Terminates capturing immediatly.
+
+capturepause
+ Pauses capturing. Video displayed during this time will not be in the result.
+
+demo_jump [+][mins:]seconds
+ If the + is present, will jump relative to the current position.
+ Does not truly support rewinding, but will restart and jump the demo if you try.
+
+
+
+Relevent cvars:
+
+cl_demospeed
+ Can be used to slow down or accelerate a demo for one reason or annother. Set to 0 to freeze, and 1 for normal speed.
+
+capturemessage
+ Specifies a message to be placed on the screen, visible only in the output.
+ This can be changed at any point during capturing.
+
+capturesound
+ Specifies weather sound should be captured. This is only supported for AVI output.
+ Audio will be captured at the current snd_khz speed. Use snd_restart while not capturing to apply a new snd_khz setting.
+ Changes will not take effect until capturing is restarted.
+
+capturerate
+ Specifies the video frames per second to capture
+ Changes will not take effect until capturing is restarted.
+
+capturecodec
+ Specifies the type of output you want.
+ If left empty, the output will be uncompressed AVI.
+ If one of tga, jpg, png, or pcx are specified, output will be a series of screenshots, one image per file.
+ If it's a four-character-code, then it specifies what sort of video compression to use. Some codecs force splashscreens, so it might be a good idea to try new ones when running windowed.
+ Common four-character-codes are:
+ divx
+ xvid

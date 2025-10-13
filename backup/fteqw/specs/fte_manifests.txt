@@ -1,0 +1,144 @@
+Manifest files are small files that describe various attributes of the game, primarily branding and filesystem configuration for mods or standalone games.
+Manifest files are useful for standalone games that need to distance themselves from other games using the same engine. They are also useful for auto-updating mods or for mod compilations where mods should not be downloaded up-front.
+
+FTE Manifest Files (.fmf) can either be invoked by opening them with FTE (set up a file association), or automatically via a default.fmf file in the path specified by the -basedir argument, or in the working directory (settable via shortcuts). A default.fmf file will override the engine's game determination routines completely.
+These files are also supported by the Android port, where opening one will give an option to open with FTEDroid automatically (much like on a desktop OS), or in the webgl port with the url specified after a # in the url.
+The gamedir command (eg: 'gamedir foo', or '-game foo' on the commandline) will attempt to load an fmf file with the specified name (ie: foo.fmf) from the current basedir. If the new manifest has a different 'game' value, the engine may ignore.
+
+Each line of a manifest file forms a single command. New lines denote new commands. Comments are C++-style // double forward slashes.
+
+
+Example:
+
+//example manifest file for Sock's 'In The Shadows' stealth mod. Because why not?
+FTEMANIFEST 1
+GAME quake
+NAME "In The Shadows"
+PROTOCOLNAME ITShadows
+RTCBROKER "tls://master.frag-net.com:27950"
+DEFAULTEXEC ""
+//UPDATEURL "http://example.com/mods/its.fmf"
+BASEGAME id1
+BASEGAME qw
+BASEGAME *fte
+GAMEDIR shadows
+//it would be nice if we could specify pak0.pak and pak1.pak here, alas doing so would violate id's various copyrights. instead, hope the user has a copy already installed.
+//this is a major pain for systems where there is no official installer (read: fte's webgl port, or android... or win64).
+//its pak0 can be downloaded from sock's public server
+ARCHIVEDPACKAGE shadows/pak0.pak "0xb1768147" "shadows/pak0.pak" "http://simonoc.com/files/maps/sp/its_demo_v1_1.zip"
+-seta cl_forwardspeed 400
++bind w +forward
+
+
+
+Commands:
+
+FTEMANIFEST 1
+Specifies the actual version of the manifest file, and what the file actually is. Only valid as the first line. The version number is included for potential future use. Version 1 is the current version.
+
+GAME quake
+This specifies the code-name of the game upon which your mod is based (and MAY be used to generate homedir paths, so must not contain weird chars).
+Standalone games should pick their own string to use here.
+Mods for one of the games that FTE intrinsically understands may be automatically located via the system registry for an existing installation. This is useful when the fmf file has been downloaded and opened via a web browser.
+Known game name (namely: quake, quake2, quake3, hexen2) may imply other settings if they were not otherwise specified.
+It is NOT recommended to omit this, but if you do, 'quake' will be assumed.
+
+NAME "Example Quake Mod"
+This specifies what the game should be referred to by various console prints etc. This should be the formal name of your mod.
+
+PROTOCOLNAME "foo"
+This is how the game/mod should be identified to master servers. A unique value here helps prevent servers from other games being listed, as well as preventing other games from seeing this game/mod.
+This should be reasonably human readable - master servers might show it publically. This actually gets written into the com_protocolname cvar. You should use the com_protocolversion cvar in your default.cfg if you want to exclude older versions, avoiding annoying numbers etc.
+
+RTCBROKER "url"
+This should be a tls:// or tcp:// address that tells the engine where it can find a running instance of an 'ftemaster' program.
+The broker program is used to allow client and target server to exchange address and port information in order to punch holes through NATs and Firewalls, allowing users to play without having to configure any of those monstrosities.
+
+DEFAULTEXEC ""
+If specified, this is inserted before the game's normal default.cfg file, and can be used to override the engine's default cvar settings for mods where the default.cfg was originally written for a different engine (and thus omits certain settings). This should only be used for games where the default.cfg itself is not replacable. Standalone mods should not need to specify this, and should instead just put everything in the mod's default.cfg file.
+For recognised games, the engine will automatically assume usable defaults, but its possible that a mod depends upon a setting that I overlooked.
+This is obsolete, other than to disable the built-in overrides for known games. See the following - and + prefixes for easier usage.
+
+-set foo bar
+The text following a leading minus are commands that are included before the mod's default.cfg, allowing to override engine behaviour without breaking mods that require a specific value. This mechanism is quite handy for mimicing other engines.
+Any commands may be used, but its best to limit yourself to set/seta/setfl, alias, and bind.
+
++set foo bar
+The text following a leading plus are commands that are included AFTER the mod's default.cfg, allowing you to stomp all over defaults that were stupid and flawed (or just outdated). This is useful for making quake's default settings and binds usable, but its generally better to just provide a new default.cfg instead.
+Any commands may be used, but its best to limit yourself to set/seta/setfl, alias, and bind.
+
+BASEGAME "id1"
+Multiple basegame lines can be specified. These are the core subdirectories that should always be loaded, even if the gamedir command was used to load a different mod.
+Standadlone games will typically specify only a single value.
+Each additional basegame will be favoured in preference to the prior ones.
+(note: 'basedir' refers to the path from which all game subdirs are found in, thus manifests use basegame to avoid ambiguity at the cost of consistancy)
+A basedir with a leading * is a private directory that will not be reported to clients nor appear in server browsers. This is typically used on fte-specific game directories, so that other-engine clients will not get confused.
+
+GAMEDIR "mymod"
+These act almost exactly like basegame, except they flushed and replaced if the gamedir command is used. Additionally these are never implied by the 'game' command.
+These will always have a higher preference than any BASEGAME subdir.
+There are arguments both for and against a mod specifying its subdir as a basegame or as just a gamedir.
+
+DISABLEHOMEDIR 1
+If non-zero, the game/mod will not attempt to use any directory within the user's homedir by default. This may cause issues if the base game was installed in some read-only system location like C:\Program Files\, and so should only be used for manually installed games (ones that contain just the exe+fmf file).
+
+UPDATEURL "http://example.com/foo.fmf"
+This command gives the url from which to update the manifest file from. The updated manifest *MUST* contain the same url for the update to be accepted. Because of this, you should ensure that it is has a url that will be valid for as long as your mod will be relevent.
+This replaces just the manifest, but because the manifest file specifies a list of packages that should be used, a new set of packages can be downloaded automatically, and this is the true power of the update url.
+
+DOWNLOADSURL "https://updates.triptohell.info/downloadables.php?game=Q1"
+This command tells the engine where it can obtain a list of available packages. The user is able to enable/disable as they desire.
+
+INSTALL "package1;package2"
+This command tells the engine which packages should be 'strongly encouraged' onto the user (ie: the user will be prompted to install them if they're missing). Naturally this should not be abused, however the user is better able to see what is happening (they must still accept installation).
+
+PACKAGE "id1/pak0.pak" 0x4f069cac "http://mirror1.example.com/qsw106_pak0.pak" "http://mirror2.example.com/qsw106_pak0.pak"
+WARNING: be sure to respect third-party copyrights.
+This command, of which multiple can be specified, lists the packages which should automatically be downloaded.
+The first name (in this case 'id1/pak0.pak') is the logical name of the package, including the gamedir in which it is to be found. The second argument is the CRC of the package's table of contents, and any additional arguments are alternative mirrors from which to download updated versions. The engine will randomize the order on load (for load balancing) and will try other mirrors if the any fails to provide a file.
+Multiple versions of the same package may be installed. This is handled via the crc. If a mirror provides a file who's crc does not match, the download will be ignored and another mirror will be tried.
+A CRC of '-' can be used if you really do not want to provide crcs. This suppresses all crc checks, and so is not recommended (if you instead use a different filename for each version, this is not always an issue). The CRC can be determined by using the wrong crc and fixing it up to the correct value that the engine claims that it should be.
+If the user already has an actual id1/pak0.pak installed (ie: a prior install of quake), then an updated version will not be downloaded even if their crc does not match. Otherwise the downloaded file will be placed inside a 'dlcache' directory, with a crc postfix, allowing multiple versions.
+If you are directly serving pk3 files, it is recommended to just compress the pk3.
+If you are directly serving pak files, you will likely wish to ensure that gzip transfer compression is enabled on your mirrors for the files in question.
+Its recommended to place pk3 files directly on your mirrors as they are already compressed, which keeps things consistant and avoids stalls. However, if you use a single installation zip that you wish to reuse with manifest files, you can use ARCHIVEDPACKAGE instead.
+
+ARCHIVEDPACKAGE "id1/pak0.pak" 0x4f069cac "id1/pak0.pak" "http://mirror1.example.com/qsw106.zip" "http://mirror2.example.com/qsw106.zip"
+Mostly identical to the PACKAGE command, but with an extra argument before the mirror list.
+The difference is that if the file is downloaded, it is assumed to be a zip archive from which to extract the package. The extra/third argument is the filename that is read from the zip.
+This command is provided for compatibility with existing installation media from third parties who do not themselves support manifest files.
+
+MINVER FTE 4778
+The manifest should not be used if the engine parsing it is a lower version than this. There is no default limit.
+The first arg (ie: 'fte' in this case) specifies that the limit is specific to a specific fork or reimplementation of the file format.
+The second arg should be an svn revision number (visible from the 'version' console command).
+When updating a manifest, the engine will ignore the new manifest if its minver is too high. This can be used to avoid breaking installations if the user tries running the mod with too old an engine.
+
+MAXVER FTE 4778
+The manifest should not be used if the engine parsing it is a higher version than this. See minver for argument info.
+I'm not sure how useful this will actually be, but it is included for completeness.
+
+MAINCONFIG "fte.cfg"
+Isolates fte's config files from those of other engines that might be running this mod. Set to "config.cfg" to annoy users with endless conflicts.
+
+
+Console Commands:
+/gamedir foo
+This console command will read foo.fmf from the current basedir and load that instead. The basedir will not be changed to match the installation path of the specified game.
+If there was no fmf file with that name, it will load the default.fmf file from that basedir instead, or try to guess which game is installed in the current basedir instead. From this default.fmf file, the gamedir attributes will be stripped and 'GAMEDIR foo' will be inserted internally.
+/fs_showmanifest
+This console command displays the effective/active manifest file that is currently in effect.
+/fs_changegame
+This command recognises various game names and will switch the basedir in order to try loading it (the game may be found via a prompt for the game's basedir, via a cached result of that prompt, or via known registry keys from that game's installer).
+If the specified game is not recognised, the argument will be assumed to be a manifest named via a url or a system path.
+
+Possible Future Direction:
+ARCHIVEDPACKAGE should support multiple files without redownloading.
+ARCHIVEDPACKAGE needs some way to not care about crcs/filenames, and extract+use all included files. May be better to just decompress the zip and directly use it with a path prefix.
+Uninstallation/auto-pruning.
+Extra polish.
+Multiple mods specified within a single fmf.
+Individual files (ie: maps) that can be downloaded on demand?
+Other stuff.
+Scan for a new manifest instead of merely switching gamedirs.
+Readme/license/credits info is needed.

@@ -1,0 +1,1 @@
+#define UINT64_C(n) n##ull

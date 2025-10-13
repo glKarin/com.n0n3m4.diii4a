@@ -1,0 +1,64 @@
+
+<!-- embedding example 
+Note the two separate objects. This is to cope with IE and Firefox incompatibilities.
+
+dataDownload specifies a zip file to download and extract pak and pk3 files. If the prefixed pak/pk3 file already exists, the download will be skipped (the contents are presumed to already be available). The zip must contain at least a "[foo/]id1/pak0.pak" file in this example, but you could also include a pak1.pak (ignoring copyright issues) if you wished.
+
+game specifies which game you are trying to target. Explicitly supported values are: q1, q2, q3, h2. Unrecognised values load that mod directory _only_, which is useful for total conversions.
+-->
+
+<object name="axfte"
+ type="text/x-quaketvident"
+ classid="clsid:7d676c9f-fb84-40b6-b3ff-e10831557eeb"
+ width=100%
+ height=100%
+>
+	<param name="splash" value="http://www.fteqw.com/images/phocagallery/fteqw/new_bloom_stuff/fte00076.jpg">
+	<param name="availver" value="10000">
+	<param name="game" value="q1">
+	<param name="dataDownload" value='id1/pak0.pak:http://example.com/examplequake1demo.zip'>
+
+	<object name="npfte"
+	 type="text/x-quaketvident"
+	 width=100%
+	 height=100%
+	>
+		<param name="splash" value="http://www.fteqw.com/images/phocagallery/fteqw/new_bloom_stuff/fte00076.jpg">
+		<param name="availver" value="10000">
+		<param name="game" value="q1">
+		<param name="dataDownload" value='id1/pak0.pak:http://example.com/examplequake1demo.zip'>
+
+		This text is displayed if the plugin isn't installed or is disabled.
+
+	</object>
+</object>
+
+
+<!-- scripting example follows -->
+
+
+<script>
+	/*cover the fact that firefox won't load a plugin if it has a classid, and IE won't load a plugin if it does not. Other browsers may follow other behaviours and 	may load the npapi using the object intended for iefte, but the params are all the same.*/
+	var fte;
+	if (axfte.plugver == null)
+		fte = npfte;
+	else
+		fte = axfte;
+
+	/*set the image for when the plugin isn't loaded (also used when it isn't maximized). The url is already specified above, so this is totally redundant, but this is 	an example after all.*/
+	fte.splash = "http://www.fteqw.com/images/phocagallery/fteqw/new_bloom_stuff/fte00076.jpg";
+
+	/*set it to some qtv stream*/
+	fte.stream = "file:foo@192.168.0.1";
+	/*set it to some server*/
+	fte.server = "192.168.0.1:27500";
+	/*explicitly activate it without requiring the user to click on it. only one plugin instance can be active at once. use with caution, or at least not on more than 	one plugin object on page site.*/
+//	fte.running = 1;
+	document.write(fte.plugver);
+</script>
+
+<br/>
+<a onclick="script:fte.running=1;">run</a><br/>
+<a onclick="script:fte.width=640;fte.height=480;">640*480</a><br/>
+<a onclick="script:fte.width=800;fte.height=600;">800*600</a><br/>
+<a onclick="script:fte.width=1024;fte.height=768;">1024*768</a><br/>

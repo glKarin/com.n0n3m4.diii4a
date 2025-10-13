@@ -1,0 +1,67 @@
+Autocompletion:
+	FTE will not randomly complete commands. The ctrl+space key combo is directly equivelent to tab in vanilla engines.
+	Some commands/cvars have descriptions. These will be shown if the command is entered.
+
+Chat:
+	Lines typed in may be interpreted as either chat or commands, depending on the value of cl_chatmode.
+	Lines starting with a / are always commands.
+	Lines where the first word is automatically coloured yellow will be executed as commands.
+	Lines where the first word is automatically coloured white will be broadcast to other players as chat.
+	Tab completion will always insert a leading / to designate the line as a command rather than chat.
+
+	cl_chatmode 0 - Acts like NQ where the console ONLY accepts commands.
+	cl_chatmode 1 - Acts like Q3 where the input is assumed to be chat. Commands require a leading / (which is also inserted by tab, by the way).
+	cl_chatmode 2 - Acts like QW where the input is assumed to be chat if its not a valid command.
+
+Keys:
+	tab: attempt to complete the command. If there's multiple, will complete only as far as the commonality goes.
+	ctrl+space: completes the current line using the highlighted suggestion
+	ctrl+tab: cycles consoles.
+	mouse1+drag: scroll console up/down.
+	mouse1+click: 'use' link underneath the cursor.
+	shift+mouse1: insert word/link/ip under the cursor to the input line.
+	mouse2: select+copy text to the clipboard.
+	ctrl+c/ctrl+ins: copy the entire input line to the clipboard.
+	ctrl+v/shift+ins: insert the clipboard contents onto the input line. newlines are replaced with semi-colons.
+	left/right: move cursor left/right.
+	del: remove input-line character under the cursor. if at the end of line removes just before the cursor.
+	backspace: removes char to the left of the cursor.
+	up/down: scroll through command history.
+	pgup/pgdn/mwheel: scroll console up/down.
+	home: go to top of console (oldest).
+	end: go to bottom of console (most recent).
+	alt: make text red
+	ctrl+: 0123456789[]gryb(=)a<->,.BC ctrl with one of the prior chars give various special chars. yellow numbers, LEDs, separators.
+
+Links:
+	Basic format:
+		^[^2VISIBLE TEXT\key1\value1\key2\value2^]
+		Colour markup for the link must be contained within, and will be reset at the end of it.
+
+	CSQC:
+		If CSQC is running at the time, clicking on a link will result in this call:
+			float(string linktext, string linkinfo) CSQC_ConsoleLink;
+		If the CSQC returns false, the engine will examine the link for default fields, so if you handle it yourself you must return true to prevent both csqc and engine trying to do the same thing.
+		The 'linktext' field is the visible text from the link (ie: what the user saw). However, any colour modifiers may have been converted/mangled.
+		The 'linkinfo' is the first \ and everything up to the closing ^]. Again, colours should be avoided.
+		For easy parsing/generation of the linkinfo field, you can use the infoget/infoadd builtins from the FTE_STRINGS extension.
+		Note that links can be sent from other players also. The behaviour of the link is also hidden from the user.
+		Thus you should either require the user to confirm the action, or provide links that are merely informative.
+		The builtin field names are somewhat generic. You can use them as a fallback for if the player disconnects.
+		
+	Built in link fields:
+		player: the link is associated with a player slot. The value should be entnum(playerentity)-1.
+			action: if this field is also set, then when clicked the engine shall carry out the action named in the value upon that player slot.
+				kick: kicks the player (requires rcon).
+				ban: bans the player's ip (requires rcon). 
+				mute: mutes the player's voicechat feature.
+				ignore: any 'say' commands received from the player are ignored. also mutes.
+		desc: displays the value as text. The use of this field is somewhat limited by length.
+		connect: the client will attempt to 'connect $value', so the value must be an acceptable hostname or ip:port. You should probably always include the port.
+		qtv: the client will attempt to 'qtvplay $value', so the value must be an acceptable qtv stream identifier.
+		demo: the client will attempt to 'playdemo $value', so this value must include any subdirectory for the named demo.
+		cmd: the client will attempt to 'cmd $value'. A mod can see the results of this using KRIMZON_SV_PARSECLIENTCOMMAND.
+		impulse: the client will attempt to 'impulse $value'. A mod can thus snoop on this by checking self.impulse on the player. Must naturally be between 0 and 255.
+		leading forward-slash: Links with no info and a leading forward slash will be inserted into the input line when clicked. The user must still press enter to issue the given command. Use semi-colons if you wish to include multiple cvars/commands in a single link.
+		This list is subject to change.
+		

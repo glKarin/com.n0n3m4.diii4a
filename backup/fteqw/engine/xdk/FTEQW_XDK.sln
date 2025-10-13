@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FTEQW_XDK", "FTEQW_XDK.vcproj", "{BF8776BA-CCAB-4B5F-AE88-784B2215C589}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Profile = Profile
+		Profile_FastCap = Profile_FastCap
+		Release = Release
+		Release_LTCG = Release_LTCG
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{BF8776BA-CCAB-4B5F-AE88-784B2215C589}.Debug.ActiveCfg = Debug|Xbox
+		{BF8776BA-CCAB-4B5F-AE88-784B2215C589}.Debug.Build.0 = Debug|Xbox
+		{BF8776BA-CCAB-4B5F-AE88-784B2215C589}.Profile.ActiveCfg = Profile|Xbox
+		{BF8776BA-CCAB-4B5F-AE88-784B2215C589}.Profile.Build.0 = Profile|Xbox
+		{BF8776BA-CCAB-4B5F-AE88-784B2215C589}.Profile_FastCap.ActiveCfg = Profile_FastCap|Xbox
+		{BF8776BA-CCAB-4B5F-AE88-784B2215C589}.Profile_FastCap.Build.0 = Profile_FastCap|Xbox
+		{BF8776BA-CCAB-4B5F-AE88-784B2215C589}.Release.ActiveCfg = Release|Xbox
+		{BF8776BA-CCAB-4B5F-AE88-784B2215C589}.Release.Build.0 = Release|Xbox
+		{BF8776BA-CCAB-4B5F-AE88-784B2215C589}.Release_LTCG.ActiveCfg = Release_LTCG|Xbox
+		{BF8776BA-CCAB-4B5F-AE88-784B2215C589}.Release_LTCG.Build.0 = Release_LTCG|Xbox
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
