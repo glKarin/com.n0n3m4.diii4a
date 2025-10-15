@@ -188,6 +188,15 @@ bool idSoundShader::ParseShader(idLexer &src)
 	parms.shakes = 0;
 	parms.soundShaderFlags = 0;
 	parms.soundClass = 0;
+#ifdef _RAVEN
+    parms.minDistance = 40.0f;
+    parms.maxDistance = 400.0f;
+    parms.frequencyShift = 1.0f;
+    parms.wetLevel = 0.0f;
+    parms.dryLevel = 0.0f;
+    minFrequencyShift = 1.0f;
+    maxFrequencyShift = 1.0f;
+#endif
 #ifdef _HUMANHEAD
 	parms.subIndex = -1;
 #endif
@@ -229,7 +238,7 @@ bool idSoundShader::ParseShader(idLexer &src)
 		// mindistance
 		else if (!token.Icmp("mindistance")) {
 			parms.minDistance = src.ParseFloat();
-#ifdef _RAVEN // scale
+#ifdef _RAVENxxx // scale
 			// jmarshall: scale to doom 3 distance
 			parms.minDistance /= 100.0f;
 #endif
@@ -237,7 +246,7 @@ bool idSoundShader::ParseShader(idLexer &src)
 		// maxdistance
 		else if (!token.Icmp("maxdistance")) {
 			parms.maxDistance = src.ParseFloat();
-#ifdef _RAVEN // scale
+#ifdef _RAVENxxx // scale
 			// jmarshall: scale to doom 3 distance
 			parms.maxDistance /= 100.0f;
 #endif
@@ -250,6 +259,11 @@ bool idSoundShader::ParseShader(idLexer &src)
 		}
 		else if (!token.Icmp("volumeDb")) {
 			float db = src.ParseFloat();
+            if ( db > 10.0f )
+            {
+                common->Printf("Clamping volume of '%s' to +10dB (3 times louder)", GetName());
+                db = 10.0f;
+            }
 			parms.volume = idMath::dBToScale(db);
 		}
 		else if (!token.Icmp("useDoppler")) {

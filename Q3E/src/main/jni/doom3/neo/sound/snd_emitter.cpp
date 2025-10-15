@@ -628,8 +628,12 @@ void idSoundEmitterLocal::Spatialize(idVec3 listenerPos, int listenerArea, idRen
 	//
 	// work out where the sound comes from
 	//
+#ifdef _RAVEN //karin: don't convert to meter
+	idVec3 len = listenerPos - origin;
+#else
 	idVec3 realOrigin = origin * DOOM_TO_METERS;
 	idVec3 len = listenerPos - realOrigin;
+#endif
 	realDistance = len.LengthFast();
 
 	if (realDistance >= maxDistance) {
@@ -641,7 +645,11 @@ void idSoundEmitterLocal::Spatialize(idVec3 listenerPos, int listenerArea, idRen
 	//
 	// work out virtual origin and distance, which may be from a portal instead of the actual origin
 	//
+#ifdef _RAVEN //karin: don't convert to meter
+	distance = maxDistance;
+#else
 	distance = maxDistance * METERS_TO_DOOM;
+#endif
 
 	if (listenerArea == -1) {		// listener is outside the world
 		return;
@@ -670,7 +678,9 @@ void idSoundEmitterLocal::Spatialize(idVec3 listenerPos, int listenerArea, idRen
 		}
 
 		soundWorld->ResolveOrigin(0, NULL, soundInArea, 0.0f, origin, this);
+#if !defined(_RAVEN) //karin: don't convert to meter
 		distance /= METERS_TO_DOOM;
+#endif
 	} else {
 		// no portals available
 		distance = realDistance;

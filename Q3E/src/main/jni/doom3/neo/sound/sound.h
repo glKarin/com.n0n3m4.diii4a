@@ -83,8 +83,10 @@ public:
 
 // unfortunately, our minDistance / maxDistance is specified in meters, and
 // we have far too many of them to change at this time.
+#if !defined(_RAVEN) //karin: don't convert to meter
 const float DOOM_TO_METERS = 0.0254f;					// doom to meters
 const float METERS_TO_DOOM = (1.0f/DOOM_TO_METERS);	// meters to doom
+#endif
 
 class idSoundSample;
 

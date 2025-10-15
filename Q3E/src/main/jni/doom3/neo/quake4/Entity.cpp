@@ -381,11 +381,11 @@ void idGameEdit::ParseSpawnArgsToRefSound( const idDict *args, refSound_t *refSo
 
 // RAVEN BEGIN
 	refSound->parms.minDistance = args->GetFloat( "s_mindistance" );
-#ifdef _QUAKE4 //k: scale
+#ifdef _QUAKE4xxx //k: scale
 	refSound->parms.minDistance /= 100.0f; //k: scale to doom 3 distance
 #endif
 	refSound->parms.maxDistance = args->GetFloat( "s_maxdistance" );
-#ifdef _QUAKE4 //k: scale
+#ifdef _QUAKE4xxx //k: scale
 	refSound->parms.maxDistance /= 100.0f; //k: scale to doom 3 distance
 #endif
 	// WARNING: This overrides the volume; it does not modify it
