@@ -1398,12 +1398,12 @@ int Sys_Stat( const char *path ) {
     struct stat s;
     if (stat(path, &s) == 0) {
         if (S_ISDIR(s.st_mode)) {
-            return 2;
+            return FST_DIRECTORY;
         } else if (S_ISREG(s.st_mode)) {
-            return 1;
+            return FST_FILE;
         } else {
-            return 3;
+            return FST_OTHER;
         }
     }
-    return 0;
+    return FST_NONE;
 }

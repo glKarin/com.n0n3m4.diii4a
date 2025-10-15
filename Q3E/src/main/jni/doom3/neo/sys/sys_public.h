@@ -448,6 +448,12 @@ void			Sys_SetFatalError(const char *error);
 void			Sys_DoPreferences(void);
 
 void			Sys_Rmdir(const char *path);
+enum {
+    FST_NONE = 0,
+    FST_FILE,
+    FST_DIRECTORY,
+    FST_OTHER,
+};
 int 			Sys_Stat(const char *path);
 
 /*
