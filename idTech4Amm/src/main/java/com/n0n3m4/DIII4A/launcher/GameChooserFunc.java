@@ -65,10 +65,8 @@ public final class GameChooserFunc extends GameLauncherFunc
         {
             super(context, R.layout.game_list_delegate);
 
-            for(String game : GameManager.Games())
+            for(String game : GameManager.Games(false))
             {
-                if(Q3EInterface.IsDisabled(game))
-                    continue;
                 GameItem item = new GameItem();
                 item.game = game;
                 item.icon = GameManager.GetGameIcon(game);

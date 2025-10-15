@@ -2,6 +2,10 @@ package com.karin.idTech4Amm.sys;
 
 import com.karin.idTech4Amm.R;
 import com.n0n3m4.q3e.Q3EGameConstants;
+import com.n0n3m4.q3e.Q3EInterface;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public enum LauncherGame
 {
@@ -84,14 +88,16 @@ public enum LauncherGame
         return values[Q3EGameConstants.GAME_ID_DOOM3]; // DOOM3
     }
 
-    public static String[] GameTypes()
+    public static String[] GameTypes(boolean all)
     {
         LauncherGame[] values = values();
-        String[] res = new String[values.length];
-        for(int i = 0; i < values.length; i++)
+        List<String> list = new ArrayList<>();
+        for(LauncherGame value : values)
         {
-            res[i] = values[i].TYPE;
+            if(!all && Q3EInterface.IsDisabled(value.TYPE))
+                continue;
+            list.add(value.TYPE);
         }
-        return res;
+        return list.toArray(new String[0]);
     }
 }

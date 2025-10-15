@@ -3836,20 +3836,13 @@ public class GameLauncher extends Activity
         if (null == newGame || newGame.isEmpty())
         {
             int i;
-			String[] Games = GameManager.Games();
+			String[] Games = GameManager.Games(false);
 			for (i = 0; i < Games.length; i++)
             {
                 if (Games[i].equalsIgnoreCase(Q3EUtils.q3ei.game))
                     break;
             }
-            if (i >= Games.length)
-                i = Games.length - 1;
-			for (i = (i + 1) % Games.length; i < Games.length; i++)
-			{
-				if (!Q3EInterface.IsDisabled(Games[i]))
-					break;
-			}
-            newGame = Games[i];
+            newGame = Games[(i + 1) % Games.length];
         }
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         preference.edit().putString(Q3EPreference.pref_harm_game, newGame).commit();
@@ -4274,7 +4267,7 @@ public class GameLauncher extends Activity
 		versionGroupRadios.put(Q3EGameConstants.GAME_REALRTCW, V.rg_version_realrtcw);
 		versionGroupRadios.put(Q3EGameConstants.GAME_TDM, V.rg_version_tdm);
 
-		for (String type : GameManager.Games())
+		for (String type : GameManager.Games(false))
 		{
 			group = versionGroupRadios.get(type);
 			if(null == group)

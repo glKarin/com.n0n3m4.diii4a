@@ -75,7 +75,7 @@ public final class CreateGameFolderFunc extends GameLauncherFunc
         final boolean Standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
         Game[] values = Game.values();
         int i = 0;
-        for (String game : GameManager.Games())
+        for (String game : GameManager.Games(false))
         {
             for (Game value : values)
             {

@@ -15,6 +15,7 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EMain;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public final class CreateShortcutFunc extends GameLauncherFunc
 
     public void run()
     {
-        String[] Games = GameManager.Games();
+        String[] Games = GameManager.Games(false);
         final CharSequence[] items = new CharSequence[Games.length];
         final String[] values = new String[Games.length];
         // Map<String, Integer> pinnedShortcuts = GetPinnedShortcuts();
@@ -65,6 +66,7 @@ public final class CreateShortcutFunc extends GameLauncherFunc
         for(int i = 0; i < Games.length; i++)
         {
             String game = Games[i];
+
             items[i] = Tr(GameManager.GetGameNameRS(game));
             values[i] = game;
             if(game.equals(m_game))
