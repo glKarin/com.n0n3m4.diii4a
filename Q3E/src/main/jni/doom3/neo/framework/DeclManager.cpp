@@ -1139,6 +1139,10 @@ void idDeclManagerLocal::Shutdown(void)
 #ifdef USE_COMPRESSED_DECLS
 	ShutdownHuffman();
 #endif
+
+    // clean generated folder
+    Sys_Printf("Clean generated directory\n");
+    fileSystem->RemoveDir(DECL_PROGRAM_GENERATED_DIRECTORY);
 }
 
 /*
@@ -2629,7 +2633,7 @@ const idDecl * idDeclManagerLocal::AddDeclDef(const char *defname, declType_t ty
         return NULL;
     }
 
-    idStr fileName = va(DECL_PROGRAM_GENERATED_DIRECTORY "%s/%s", declFolderFound->folder.c_str(), defname);
+    idStr fileName = va(DECL_PROGRAM_GENERATED_DIRECTORY "/%s/%s", declFolderFound->folder.c_str(), defname);
     fileName.SetFileExtension(declFolderFound->extension.c_str());
 
     idStr text;

@@ -305,6 +305,9 @@ class idFileSystem
 
 		// ignore case and seperator char distinctions
 		virtual bool			FilenameCompare(const char *s1, const char *s2) const = 0;
+
+        // Removes the given directory.
+        virtual void			RemoveDir(const char *relativePath) = 0;
 #ifdef _RAVEN
 	// mekberg: is file loading allowed?
 	virtual void			SetIsFileLoadingAllowed(bool mode) = 0;

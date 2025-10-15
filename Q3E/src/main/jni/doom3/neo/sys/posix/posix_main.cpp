@@ -1378,3 +1378,32 @@ void Sys_CPUCount( int& numLogicalCPUCores, int& numPhysicalCPUCores, int& numCP
 }
 // RB end
 #endif
+
+
+/*
+==============
+Sys_Rmdir
+==============
+*/
+void Sys_Rmdir( const char *path ) {
+    rmdir (path);
+}
+
+/*
+==============
+Sys_Stat
+==============
+*/
+int Sys_Stat( const char *path ) {
+    struct stat s;
+    if (stat(path, &s) == 0) {
+        if (S_ISDIR(s.st_mode)) {
+            return 2;
+        } else if (S_ISREG(s.st_mode)) {
+            return 1;
+        } else {
+            return 3;
+        }
+    }
+    return 0;
+}

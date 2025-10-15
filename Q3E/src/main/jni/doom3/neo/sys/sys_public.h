@@ -447,6 +447,9 @@ void			Sys_SetFatalError(const char *error);
 // display perference dialog
 void			Sys_DoPreferences(void);
 
+void			Sys_Rmdir(const char *path);
+int 			Sys_Stat(const char *path);
+
 /*
 ==============================================================
 
