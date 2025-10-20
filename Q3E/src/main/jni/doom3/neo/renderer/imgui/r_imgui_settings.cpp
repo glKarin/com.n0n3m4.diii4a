@@ -561,6 +561,12 @@ void idImGuiSettings::RenderRemoveCvars(void) const
 void idImGuiSettings::RenderNewCommands(void) const
 {
     const char *NewCommands[] = {
+            "pskToMd5mesh",
+            "psaToMd5anim",
+            "pskPsaToMd5",
+            "pskToObj",
+            "convertMd5Def",
+            "cleanConvertedMd5",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -575,7 +581,8 @@ void idImGuiSettings::RenderNewCommands(void) const
             const char **ptr = &NewCommands[0];
             while(*ptr)
             {
-                ImGui::TextWrapped("* %s", *ptr);
+                const char *desc = Com_GetCommandDescription(*ptr);
+                ImGui::TextWrapped("* %s\n- %s", *ptr, desc);
                 ptr++;
             }
         }

@@ -853,6 +853,19 @@ bool idCmdSystemLocal::PostReloadEngine(void)
 	return true;
 }
 
+const char * Com_GetCommandDescription(const char *name)
+{
+    const commandDef_t *cmd;
+
+    for (cmd = cmdSystemLocal.GetCommands(); cmd; cmd = cmd->next) {
+        if(!idStr::Icmp(name, cmd->name))
+        {
+            return cmd->description;
+        }
+    }
+    return NULL;
+}
+
 #ifdef _RAVEN
 void idCmdSystemLocal::ArgCompletion_Models( const idCmdArgs &args, void(*callback)( const char *s ), bool strogg, bool marine )
 {

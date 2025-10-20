@@ -123,27 +123,45 @@ namespace md5model
         R_Model_ConvertToMd5(args.Argv(1));
     }
 
-    static void R_CleanConvertedMd5_f(const idCmdArgs &)
+    static void R_CleanConvertedMd5(const idDecl *decl)
     {
-        const int num = declManager->GetNumDecls(DECL_ENTITYDEF);
-        for(int i = 0; i < num; i++)
+        const idDeclEntityDef *def = static_cast<const idDeclEntityDef *>(decl);
+        if(def->dict.GetBool(MD5_CONVERT, "0")) // only clean has md5convert key
         {
-            const idDecl *decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, false);
-            if(decl->GetState() != DS_PARSED && idStr::Icmpn(decl->GetName(), MD5_CONVERT_PATH, strlen(MD5_CONVERT_PATH))) // only clean entityDef name starts with md5convert
-                continue;
-            if(decl->GetState() != DS_PARSED)
-            	decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, true); // parse it
-            const idDeclEntityDef *def = static_cast<const idDeclEntityDef *>(decl);
-            if(def->dict.GetBool(MD5_CONVERT, "0")) // only clean has md5convert key
+            idStr meshPath;
+            if(def->dict.GetString("mesh", "", meshPath))
             {
-                idStr meshPath;
-                if(def->dict.GetString("mesh", "", meshPath))
-                {
-                    meshPath.SetFileExtension("." MD5_MESH_EXT);
-                    common->Printf("Remove converted md5mesh '%s' from '%s'\n", meshPath.c_str(), decl->GetName());
-                    while(fileSystem->ReadFile(meshPath, NULL, NULL) > 0)
-                        fileSystem->RemoveFile(meshPath);
-                }
+                meshPath.SetFileExtension("." MD5_MESH_EXT);
+                common->Printf("Remove converted md5mesh '%s' from '%s'\n", meshPath.c_str(), decl->GetName());
+                while(fileSystem->ReadFile(meshPath, NULL, NULL) > 0)
+                    fileSystem->RemoveFile(meshPath);
+            }
+        }
+    }
+
+    static void R_CleanConvertedMd5_f(const idCmdArgs &args)
+    {
+        if(args.Argc() == 1)
+        {
+            const int num = declManager->GetNumDecls(DECL_ENTITYDEF);
+            for(int i = 0; i < num; i++)
+            {
+                const idDecl *decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, false);
+                if(decl->GetState() != DS_PARSED && idStr::Icmpn(decl->GetName(), MD5_CONVERT_PATH, strlen(MD5_CONVERT_PATH))) // only clean entityDef name starts with md5convert
+                    continue;
+                if(decl->GetState() != DS_PARSED)
+                    decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, true); // parse it
+                R_CleanConvertedMd5(decl);
+            }
+        }
+        else
+        {
+            for(int i = 1; i < args.Argc(); i++)
+            {
+                const idDecl *decl = declManager->FindType(DECL_ENTITYDEF, args.Argv(i), false);
+                if(!decl)
+                    continue;
+                R_CleanConvertedMd5(decl);
             }
         }
     }
@@ -154,5 +172,5 @@ void Md5Model_AddCommand(void)
     using namespace md5model;
 
     cmdSystem->AddCommand("convertMd5Def", R_ConvertMd5Def_f, CMD_FL_RENDERER, "Convert other animation model entityDef to md5mesh/md5anim", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
-    cmdSystem->AddCommand("cleanConvertedMd5", R_CleanConvertedMd5_f, CMD_FL_RENDERER, "Clean all converted md5mesh");
+    cmdSystem->AddCommand("cleanConvertedMd5", R_CleanConvertedMd5_f, CMD_FL_RENDERER, "Clean converted md5mesh", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
 }

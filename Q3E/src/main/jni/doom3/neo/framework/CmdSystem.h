@@ -137,6 +137,7 @@ class idCmdSystem
 };
 
 extern idCmdSystem 	*cmdSystem;
+const char * Com_GetCommandDescription(const char *name);
 
 
 ID_INLINE void idCmdSystem::ArgCompletion_Boolean(const idCmdArgs &args, void(*callback)(const char *s))
