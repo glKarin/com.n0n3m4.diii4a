@@ -2802,7 +2802,7 @@ bool idRenderModelStatic::ConvertOBJToModelSurfaces( const objModel_t* model )
 
 				if( index < 0 || index >= mesh->vertexes.Num() )
 				{
-					common->Error( "ConvertOBJToModelSurfaces: bad vertex index in ASE file %s", name.c_str() );
+					common->Error( "ConvertOBJToModelSurfaces: bad vertex index in OBJ file %s", name.c_str() );
 				}
 
 				// collapse the position if it was slightly offset
@@ -2816,7 +2816,7 @@ bool idRenderModelStatic::ConvertOBJToModelSurfaces( const objModel_t* model )
 
 					if( tv < 0 || tv >= mesh->texcoords.Num() )
 					{
-						common->Error( "ConvertOBJToModelSurfaces: bad tex coord index in ASE file %s", name.c_str() );
+						common->Error( "ConvertOBJToModelSurfaces: bad tex coord index in OBJ file %s", name.c_str() );
 					}
 					// collapse the tex coord if it was slightly offset
 					tv = tvRemap[tv];
