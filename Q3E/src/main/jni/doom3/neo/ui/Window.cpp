@@ -4886,7 +4886,6 @@ bool idWindow::IsSimple()
 	}
 
 	return true;
-#endif
 }
 
 /*
