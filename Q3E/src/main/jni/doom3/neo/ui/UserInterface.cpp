@@ -382,10 +382,6 @@ bool idUserInterfaceLocal::InitFromFile(const char *qpath, bool rebuild, bool ca
 		common->Warning("Couldn't load gui: '%s'", qpath);
 	}
 
-#ifdef _RAVENxxx //k: GUI initilized event, not here(version 1)
-	desktop->RunScript(idWindow::ON_INIT);
-#endif
-
 	interactive = desktop->Interactive();
 #ifdef _RAVEN //k: maybe not need
 	SetStateBool("noninteractive", !interactive);
@@ -568,22 +564,10 @@ float idUserInterfaceLocal::GetStateFloat(const char *varName, const char *defau
 
 void idUserInterfaceLocal::StateChanged(int _time, bool redraw)
 {
-#ifdef _RAVENxxx //k: run onInit gui script(version 2)
-	const bool IsInit = time == 0;
-#endif
-
 	time = _time;
 
 	if (desktop) {
 		desktop->StateChanged(redraw);
-#ifdef _RAVENxxx //k: GUI initilized event here now(version 2)
-		if(IsInit)
-		{
-			//LOGI("GUI Initing -> %s::%s", GetStateString("name"), (const char *)desktop->GetName())
-			desktop->RunScript(idWindow::ON_INIT);
-		}
-#endif
-
 	}
 
 	if (state.GetBool("noninteractive")) {

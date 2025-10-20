@@ -238,18 +238,10 @@ bool idSoundShader::ParseShader(idLexer &src)
 		// mindistance
 		else if (!token.Icmp("mindistance")) {
 			parms.minDistance = src.ParseFloat();
-#ifdef _RAVENxxx // scale
-			// jmarshall: scale to doom 3 distance
-			parms.minDistance /= 100.0f;
-#endif
 		}
 		// maxdistance
 		else if (!token.Icmp("maxdistance")) {
 			parms.maxDistance = src.ParseFloat();
-#ifdef _RAVENxxx // scale
-			// jmarshall: scale to doom 3 distance
-			parms.maxDistance /= 100.0f;
-#endif
 		}
 #ifdef _RAVEN // quake4 snd file
 		else if (!token.Icmp("frequencyshift")) {

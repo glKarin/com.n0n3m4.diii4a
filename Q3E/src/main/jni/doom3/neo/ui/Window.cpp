@@ -1419,9 +1419,6 @@ idWindow::DrawBackground
 */
 void idWindow::DrawBackground(const idRectangle &drawRect)
 {
-#ifdef _RAVENxxx //k: don't draw background color for main menu black screen.
-	if(parent && parent->parent) //k: only non-root directly children. for draw brackets
-#endif
 	if (backColor.w()) {
 		dc->DrawFilledRect(drawRect.x, drawRect.y, drawRect.w, drawRect.h, backColor);
 	}
@@ -4857,12 +4854,6 @@ idWindow::IsSimple
 */
 bool idWindow::IsSimple()
 {
-#ifdef _RAVENxxx
-// jmarshall - quake 4 guis
-    return false;
-// jmarshall end
-#else
-
 	// dont do simple windows when in gui editor
 	if (com_editors & EDITOR_GUI) {
 		return false;

@@ -4575,7 +4575,7 @@ void idCollisionModelManagerLocal::BuildModels(const idMapFile *mapFile, bool fo
 				numModels++;
 			}
 
-#ifdef _RAVENxxx
+#ifdef _RAVENxxx //???
 			if (numInlinedProcClipModels && numModels == PROC_CLIPMODEL_INDEX_START) {
 				numModels += numInlinedProcClipModels;
 			}
