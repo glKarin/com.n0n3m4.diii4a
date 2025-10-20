@@ -94,61 +94,6 @@ int				rb_numDebugPolygons = 0;
 int				rb_debugPolygonTime = 0;
 #endif
 
-#ifdef _MULTITHREAD //karin: always using original variants in RB_ShowDebug[Text|Lines|Polygons] without multi-threading
-static volatile int backEndFrameIndex = 0;
-#define frontEndFrameIndex ((backEndFrameIndex + 1) % NUM_FRAME_DATA)
-
-#define RB_DEBUG_LINES \
-	const int _frameIndex = multithreadActive ? backEndFrameIndex : 0; \
-debugLine_t *rb_debugLines = rb_debugLiness[ _frameIndex ]; \
-int &rb_numDebugLines = rb_numDebugLiness[_frameIndex]; \
-int &rb_debugLineTime = rb_debugLineTimes[_frameIndex];
-
-#define RB_DEBUG_TEXTS \
-	const int _frameIndex = multithreadActive ? backEndFrameIndex : 0; \
-debugText_t *rb_debugText = rb_debugTexts[ _frameIndex ]; \
-int &rb_numDebugText = rb_numDebugTexts[_frameIndex]; \
-int &rb_debugTextTime = rb_debugTextTimes[_frameIndex];
-
-#define RB_DEBUG_POLYGONS \
-	const int _frameIndex = multithreadActive ? backEndFrameIndex : 0; \
-debugPolygon_t *rb_debugPolygons = rb_debugPolygonss[ _frameIndex ]; \
-int &rb_numDebugPolygons = rb_numDebugPolygonss[_frameIndex]; \
-int &rb_debugPolygonTime = rb_debugPolygonTimes[_frameIndex];
-
-
-#define TR_DEBUG_LINES \
-	const int _frameIndex = multithreadActive ? frontEndFrameIndex : 0; \
-debugLine_t *rb_debugLines = rb_debugLiness[ _frameIndex ]; \
-int &rb_numDebugLines = rb_numDebugLiness[_frameIndex]; \
-int &rb_debugLineTime = rb_debugLineTimes[_frameIndex];
-
-#define TR_DEBUG_TEXTS \
-	const int _frameIndex = multithreadActive ? frontEndFrameIndex : 0; \
-debugText_t *rb_debugText = rb_debugTexts[ _frameIndex ]; \
-int &rb_numDebugText = rb_numDebugTexts[_frameIndex]; \
-int &rb_debugTextTime = rb_debugTextTimes[_frameIndex];
-
-#define TR_DEBUG_POLYGONS \
-	const int _frameIndex = multithreadActive ? frontEndFrameIndex : 0; \
-debugPolygon_t *rb_debugPolygons = rb_debugPolygonss[ _frameIndex ]; \
-int &rb_numDebugPolygons = rb_numDebugPolygonss[_frameIndex]; \
-int &rb_debugPolygonTime = rb_debugPolygonTimes[_frameIndex];
-
-
-idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Enable render tools debug with GLES in multi-threading.");
-
-void RB_SetupRenderTools(void)
-{
-	if(multithreadActive/* && harm_r_renderToolsMultithread.GetBool()*/)
-	{
-		backEndFrameIndex = frontEndFrameIndex;
-	}
-}
-#endif
-
-static void RB_DrawText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align);
-
 #ifdef GL_ES_VERSION_2_0
 #include "glsl/gles2_compat.cpp"
 
@@ -225,6 +170,188 @@ static void RB_T_RenderTriangleSurface_polygon(const drawSurf_t *surf)
 	RB_DrawElementsWithCounters_polygon(tri);
 }
 #endif
+
+
+#ifdef _MULTITHREAD //karin: always using original variants in RB_ShowDebug[Text|Lines|Polygons] without multi-threading
+static volatile int backEndFrameIndex = 0;
+#define frontEndFrameIndex ((backEndFrameIndex + 1) % NUM_FRAME_DATA)
+
+#define RB_DEBUG_LINES \
+	const int _frameIndex = multithreadActive ? backEndFrameIndex : 0; \
+debugLine_t *rb_debugLines = rb_debugLiness[ _frameIndex ]; \
+int &rb_numDebugLines = rb_numDebugLiness[_frameIndex]; \
+int &rb_debugLineTime = rb_debugLineTimes[_frameIndex];
+
+#define RB_DEBUG_TEXTS \
+	const int _frameIndex = multithreadActive ? backEndFrameIndex : 0; \
+debugText_t *rb_debugText = rb_debugTexts[ _frameIndex ]; \
+int &rb_numDebugText = rb_numDebugTexts[_frameIndex]; \
+int &rb_debugTextTime = rb_debugTextTimes[_frameIndex];
+
+#define RB_DEBUG_POLYGONS \
+	const int _frameIndex = multithreadActive ? backEndFrameIndex : 0; \
+debugPolygon_t *rb_debugPolygons = rb_debugPolygonss[ _frameIndex ]; \
+int &rb_numDebugPolygons = rb_numDebugPolygonss[_frameIndex]; \
+int &rb_debugPolygonTime = rb_debugPolygonTimes[_frameIndex];
+
+
+#define TR_DEBUG_LINES \
+	const int _frameIndex = multithreadActive ? frontEndFrameIndex : 0; \
+debugLine_t *rb_debugLines = rb_debugLiness[ _frameIndex ]; \
+int &rb_numDebugLines = rb_numDebugLiness[_frameIndex]; \
+int &rb_debugLineTime = rb_debugLineTimes[_frameIndex];
+
+#define TR_DEBUG_TEXTS \
+	const int _frameIndex = multithreadActive ? frontEndFrameIndex : 0; \
+debugText_t *rb_debugText = rb_debugTexts[ _frameIndex ]; \
+int &rb_numDebugText = rb_numDebugTexts[_frameIndex]; \
+int &rb_debugTextTime = rb_debugTextTimes[_frameIndex];
+
+#define TR_DEBUG_POLYGONS \
+	const int _frameIndex = multithreadActive ? frontEndFrameIndex : 0; \
+debugPolygon_t *rb_debugPolygons = rb_debugPolygonss[ _frameIndex ]; \
+int &rb_numDebugPolygons = rb_numDebugPolygonss[_frameIndex]; \
+int &rb_debugPolygonTime = rb_debugPolygonTimes[_frameIndex];
+
+
+idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Enable render tools debug with GLES in multi-threading.");
+
+#include "rb/QueueList.h"
+typedef struct showViewEntityBounds_s {
+	float modelViewMatrix[16];
+	idBounds referenceBounds;
+	idBounds modelBounds;
+} showViewEntityBounds_t;
+typedef idList<showViewEntityBounds_t> showViewEntityBoundsList_t;
+static idQueueList<showViewEntityBoundsList_t> showViewEntityList[2];
+
+/*
+=====================
+R_ShowViewEntitys
+
+Debugging tool
+=====================
+*/
+void R_ShowViewEntitys(const viewEntity_t *vModels)
+{
+	if(!multithreadActive)
+		return;
+
+	if (!r_showViewEntitys.GetBool()) {
+		return;
+	}
+
+	if (r_showViewEntitys.GetInteger() == 2) {
+		common->Printf("view entities: ");
+
+		for (; vModels ; vModels = vModels->next) {
+			common->Printf("%i ", vModels->entityDef->index);
+		}
+
+		common->Printf("\n");
+		return;
+	}
+
+	idQueueList<showViewEntityBoundsList_t> &list = showViewEntityList[frontEndFrameIndex];
+	list.Append(showViewEntityBoundsList_t());
+	showViewEntityBoundsList_t &viewEntitys = list.Last();
+
+	for (; vModels ; vModels = vModels->next) {
+		if (!vModels->entityDef) {
+			continue;
+		}
+
+		// draw the model bounds in white
+		const idRenderEntityLocal *def = vModels->entityDef;
+		const idRenderModel *model = def->parms.hModel;
+		if (model->IsDynamicModel() != DM_STATIC) {
+			model = def->dynamicModel;
+		}
+
+		if (!model) {
+			continue;	// particles won't instantiate without a current view
+		}
+
+		showViewEntityBounds_t item;
+		memcpy(item.modelViewMatrix, vModels->modelViewMatrix, sizeof(item.modelViewMatrix));
+
+		// draw the reference bounds in yellow
+		item.referenceBounds = vModels->entityDef->referenceBounds;
+
+		item.modelBounds = model->Bounds(&vModels->entityDef->parms);
+
+		viewEntitys.Append(item);
+	}
+}
+
+static void RB_ShowViewEntityList(void)
+{
+	if (!r_showViewEntitys.GetBool()) {
+		return;
+	}
+
+	if (r_showViewEntitys.GetInteger() == 2) {
+		return;
+	}
+
+	idQueueList<showViewEntityBoundsList_t> &list = showViewEntityList[backEndFrameIndex];
+	if(list.IsEmpty())
+		return;
+	showViewEntityBoundsList_t &viewEntitys = list.Get();
+	if(viewEntitys.Num() == 0)
+		return;
+
+//#if !defined(GL_ES_VERSION_2_0)
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	globalImages->BindNull();
+	qglDisable(GL_TEXTURE_2D);
+	qglDisable(GL_STENCIL_TEST);
+
+	glColor3f(1, 1, 1);
+
+	GL_State(GLS_POLYMODE_LINE);
+
+	GL_Cull(CT_TWO_SIDED);
+	qglDisable(GL_DEPTH_TEST);
+	qglDisable(GL_SCISSOR_TEST);
+
+	for (int i = 0; i < viewEntitys.Num(); i++) {
+		const showViewEntityBounds_t &b = viewEntitys[i];
+
+		glLoadMatrixf(b.modelViewMatrix);
+
+		// draw the reference bounds in yellow
+		glColor3f(1, 1, 0);
+		RB_DrawBounds(b.referenceBounds);
+
+		// draw the model bounds in white
+		glColor3f(1, 1, 1);
+		RB_DrawBounds(b.modelBounds);
+	}
+
+	qglEnable(GL_DEPTH_TEST);
+#if !defined(GL_ES_VERSION_2_0)
+	qglDisable(GL_POLYGON_OFFSET_LINE);
+#endif
+
+	glDepthRange(0, 1);
+	GL_State(GLS_DEFAULT);
+	GL_Cull(CT_FRONT_SIDED);
+//#endif
+
+	list.Remove();
+}
+
+void RB_SetupRenderTools(void)
+{
+	if(multithreadActive/* && harm_r_renderToolsMultithread.GetBool()*/)
+	{
+		backEndFrameIndex = frontEndFrameIndex;
+	}
+}
+#endif
+
+static void RB_DrawText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align);
 
 /*
 ================
@@ -1145,6 +1272,13 @@ Debugging tool
 */
 static void RB_ShowViewEntitys(viewEntity_t *vModels)
 {
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		RB_ShowViewEntityList();
+		return;
+	}
+#endif
 	if (!r_showViewEntitys.GetBool()) {
 		return;
 	}

@@ -841,6 +841,7 @@ static const int	MAX_RENDER_CROPS = 8;
 #include "rb/RenderThread.h"
 void RB_SetupRenderTools(void);
 void R_ShowSurfaceInfo(void); // run on frontend instead of RB_ShowSurfaceInfo
+void R_ShowViewEntitys(const viewEntity_t *vModels);
 extern idCVar harm_r_renderToolsMultithread;
 #endif
 
