@@ -396,3 +396,75 @@ void OBJ_Free( objModel_t* model )
 
 	delete model;
 }
+
+/*
+=================
+OBJ_Write
+=================
+*/
+static void OBJ_WriteObject( idFile *file, const objObject_t* obj )
+{
+    file->Printf("usemtl %s", obj->material.c_str());
+    file->Write("\n\n", 2);
+
+    file->Printf("# vertex num %d", obj->vertexes.Num());
+    file->Write("\n", 1);
+    for(int i = 0; i < obj->vertexes.Num(); i++)
+    {
+        file->Printf("v %f %f %f", obj->vertexes[i].x, obj->vertexes[i].y, obj->vertexes[i].z);
+        file->Write("\n", 1);
+    }
+    file->Write("\n", 1);
+
+    file->Printf("# texcoord num %d", obj->texcoords.Num());
+    file->Write("\n", 1);
+    for(int i = 0; i < obj->texcoords.Num(); i++)
+    {
+        file->Printf("vt %f %f", obj->texcoords[i].x, 1.0f - obj->texcoords[i].y);
+        file->Write("\n", 1);
+    }
+    file->Write("\n", 1);
+
+    file->Printf("# normal num %d", obj->normals.Num());
+    file->Write("\n", 1);
+    for(int i = 0; i < obj->normals.Num(); i++)
+    {
+        file->Printf("vn %f %f %f", obj->normals[i].x, obj->normals[i].y, obj->normals[i].z);
+        file->Write("\n", 1);
+    }
+    file->Write("\n", 1);
+
+    file->Printf("# face num %d", obj->indexes.Num());
+    file->Write("\n", 1);
+    for(int i = 0; i < obj->indexes.Num(); i += 3)
+    {
+        int index1 = obj->indexes[i] + 1;
+        int index2 = obj->indexes[i + 1] + 1;
+        int index3 = obj->indexes[i + 2] + 1;
+        file->Printf("f %d/%d/%d %d/%d/%d %d/%d/%d"
+                     , index1, index1, index1
+                     , index2, index2, index2
+                     , index3, index3, index3
+                     );
+        file->Write("\n", 1);
+    }
+    file->Write("\n", 1);
+}
+
+void OBJ_Write( const objModel_t* obj, const char* fileName )
+{
+    idFile *file = fileSystem->OpenFileWrite(fileName);
+
+    file->Printf("# object num %d", obj->objects.Num());
+    file->Write("\n", 1);
+
+    for(int i = 0; i < obj->objects.Num(); i++)
+    {
+        file->Printf("o object_%d", i);
+        file->Write("\n", 1);
+        OBJ_WriteObject(file, obj->objects[i]);
+        file->Write("\n", 1);
+    }
+
+    fileSystem->CloseFile(file);
+}

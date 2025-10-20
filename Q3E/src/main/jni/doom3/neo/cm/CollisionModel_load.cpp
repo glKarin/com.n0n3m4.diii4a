@@ -3608,6 +3608,9 @@ cm_model_t *idCollisionModelManagerLocal::LoadRenderModel(const char *fileName)
 #ifdef _MODEL_DAE
 		&& (extension.Icmp("dae") != 0)
 #endif
+#ifdef _MODEL_PSK
+		&& (extension.Icmp("psk") != 0)
+#endif
 	)
 	{
 		return NULL;

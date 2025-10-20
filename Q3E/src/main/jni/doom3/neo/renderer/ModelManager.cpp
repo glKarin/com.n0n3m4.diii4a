@@ -313,6 +313,18 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 		model->InitFromFile(modelName);
 	} else if (extension.Icmp(MD5_MESH_EXT) == 0) {
 		model = new idRenderModelMD5;
+#ifdef _MODEL_MD5_EXT
+		if(fileSystem->ReadFile(modelName, NULL, NULL) < 0)
+		{
+			idStr str(modelName);
+			str.StripFileExtension();
+			if(R_Model_ConvertToMd5(str.c_str()))
+				model->InitFromFile(modelName);
+			else
+				model->InitFromFile(modelName);
+		}
+		else
+#endif
 		model->InitFromFile(modelName);
 	} else if (extension.Icmp("md3") == 0) {
 		model = new idRenderModelMD3;
@@ -330,6 +342,11 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 #endif
 #ifdef _MODEL_DAE
 	} else if (extension.Icmp("dae") == 0) {
+		model = new idRenderModelStatic;
+		model->InitFromFile(modelName);
+#endif
+#ifdef _MODEL_PSK
+	} else if (extension.Icmp("psk") == 0) {
 		model = new idRenderModelStatic;
 		model->InitFromFile(modelName);
 #endif

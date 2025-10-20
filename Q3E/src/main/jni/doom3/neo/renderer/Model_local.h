@@ -111,6 +111,10 @@ class idRenderModelStatic : public idRenderModel
         bool						LoadDAE( const char* fileName );
         bool						ConvertDAEToModelSurfaces( const struct ColladaParser* obj );
 #endif
+#ifdef _MODEL_PSK
+        bool						LoadPSK( const char* fileName );
+        bool						ConvertPSKToModelSurfaces( const class idModelPsk* obj );
+#endif
 
 		bool						DeleteSurfaceWithId(int id);
 		void						DeleteSurfacesWithNegativeId(void);

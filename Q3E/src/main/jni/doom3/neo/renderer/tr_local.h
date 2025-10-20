@@ -2342,6 +2342,11 @@ void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def);
 #endif
 #endif
 
+void GLSL_AddCommand(void);
+void R_Image_AddCommand(void);
+void Font_AddCommand(void);
+#include "model/Model_ext.h"
+
 extern bool GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android
 //extern volatile bool has_gl_context;
 extern unsigned int lastRenderTime;

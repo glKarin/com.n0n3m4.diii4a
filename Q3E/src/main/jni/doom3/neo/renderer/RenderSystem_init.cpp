@@ -2353,23 +2353,24 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("harm_dumpShadowMap", R_DumpShadowMap_f, CMD_FL_RENDERER, "dump shadow map to file in next frame");
 #endif
 
-	extern void R_Image_AddCommand(void);
 	R_Image_AddCommand();
 
-	extern void GLSL_AddCommand(void);
 	GLSL_AddCommand();
-#ifdef _EXTRAS_TOOLS
-    extern void MD5Anim_AddCommand(void);
-	MD5Anim_AddCommand();
 
-    extern void ModelTest_AddCommand(void);
-    extern void ModelLight_AddCommand(void);
+#ifdef _EXTRAS_TOOLS
+    MD5Edit_AddCommand();
+
     ModelTest_AddCommand();
     ModelLight_AddCommand();
 #endif
 #ifdef _NEW_FONT_TOOLS
-    extern void Font_AddCommand(void);
     Font_AddCommand();
+#endif
+#ifdef _MODEL_PSK
+    Unreal_AddCommand();
+#endif
+#ifdef _MODEL_MD5_EXT
+    Md5Model_AddCommand();
 #endif
 }
 

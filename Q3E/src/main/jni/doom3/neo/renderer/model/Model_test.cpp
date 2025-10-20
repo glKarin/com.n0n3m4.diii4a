@@ -675,6 +675,9 @@ namespace modeltest
 #ifdef _MODEL_DAE
 				|| (extension.Icmp("dae") == 0)
 #endif
+#ifdef _MODEL_PSK
+                || (extension.Icmp("psk") == 0)
+#endif
 		   )
 			CreateModel(model, "func_static", skin, dict);
 		else
@@ -706,6 +709,9 @@ namespace modeltest
 #endif
 #ifdef _MODEL_DAE
 				|| (extension.Icmp("dae") == 0)
+#endif
+#ifdef _MODEL_PSK
+                || (extension.Icmp("psk") == 0)
 #endif
 		   )
 			isAnimated = false;
@@ -1320,7 +1326,10 @@ namespace modeltest
 #ifdef _MODEL_DAE
                                          "dae",
 #endif
-                                                 NULL);
+#ifdef _MODEL_PSK
+                                         "psk",
+#endif
+                                         NULL);
     }
 
     void ArgCompletion_testAnim(const idCmdArgs &args, void(*callback)(const char *s))

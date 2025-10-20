@@ -183,6 +183,9 @@ ID_INLINE void idCmdSystem::ArgCompletion_ModelName(const idCmdArgs &args, void(
 #ifdef _MODEL_DAE
 											 , ".dae"
 #endif
+#ifdef _MODEL_PSK
+                                             , ".psk"
+#endif
 											 , NULL);
 }
 
