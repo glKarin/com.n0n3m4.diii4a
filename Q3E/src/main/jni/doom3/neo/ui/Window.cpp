@@ -4884,6 +4884,10 @@ bool idWindow::IsSimple()
 	if (namedEvents.Num()) {
 		return false;
 	}
+#ifdef _RAVEN //karin: not simple when force size not equals full size
+	if(forceAspectWidth != 640.0f || forceAspectHeight != 480.0f)
+		return false;
+#endif
 
 	return true;
 }
