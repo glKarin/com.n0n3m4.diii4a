@@ -297,7 +297,8 @@ bool idModelPsa::ToMD5Anim(idMD5AnimFile &md5anim, idMD5MeshFile &md5mesh, float
     for(i = 0, base = 0; i < animInfo->num_raw_frames; i++, base += animInfo->total_bones)
     {
         md5animFrames_t &frames = md5Frames[i];
-        frames.SetNum(numBones);
+        frames.index = i;
+        frames.joints.SetNum(numBones);
 
         idHashTable<int> boneMap;
 
@@ -391,10 +392,9 @@ bool idModelPsa::ToMD5Anim(idMD5AnimFile &md5anim, idMD5MeshFile &md5mesh, float
         // calc frame bounds
         md5mesh.CalcBounds(frameTransforms, md5Bounds[i]);
 
-        md5Frame = &frames[0];
+        md5Frame = &frames.joints[0];
         for(int m = 0; m < numBones; m++, md5Frame++)
         {
-            //jointTransform = &jointTransforms[m];
             frameTransform = &frameTransforms[m];
             idVec3 t;
             idCQuat q;

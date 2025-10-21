@@ -148,12 +148,140 @@ namespace md5model
         fileSystem->CloseFile(file);
     }
 
+    bool idMD5MeshFile::Parse(const char *path)
+    {
+        idToken		token;
+        idLexer		parser(LEXFL_ALLOWPATHNAMES | LEXFL_NOSTRINGESCAPECHARS);
+        int			num;
+        int			count;
+        md5meshJoint_t *joint;
+        md5meshMesh_t *mesh;
+        int			i, j;
+        md5meshVert_t *vert;
+        md5meshTri_t *tri;
+        md5meshWeight_t *weight;
+
+        if (!parser.LoadFile(path)) {
+            return false;
+        }
+
+        parser.ExpectTokenString(MD5_VERSION_STRING);
+        version = parser.ParseInt();
+
+        // skip commandline
+        parser.ExpectTokenString("commandline");
+        parser.ReadToken(&token);
+        commandline = token;
+
+        // parse num joints
+        parser.ExpectTokenString("numJoints");
+        num  = parser.ParseInt();
+        joints.SetGranularity(1);
+        joints.SetNum(num);
+
+        // parse num meshes
+        parser.ExpectTokenString("numMeshes");
+        num = parser.ParseInt();
+        meshes.SetGranularity(1);
+        meshes.SetNum(num);
+
+        // parse joints
+        parser.ExpectTokenString("joints");
+        parser.ExpectTokenString("{");
+        joint = joints.Ptr();
+
+        for (i = 0; i < joints.Num(); i++, joint++) {
+            // parse name
+            parser.ReadToken(&token);
+            joint->boneName = token;
+
+            // parse parent
+            joint->parentIndex = parser.ParseInt();
+
+            // parse default pose
+            parser.Parse1DMatrix(3, joint->pos.ToFloatPtr());
+            parser.Parse1DMatrix(3, joint->orient.ToFloatPtr());
+            joint->orient.w = joint->orient.CalcW();
+        }
+
+        parser.ExpectTokenString("}");
+
+        for (j = 0, mesh = &meshes[0]; j < meshes.Num(); j++, mesh++) {
+            parser.ExpectTokenString("mesh");
+            parser.ExpectTokenString("{");
+
+            // parse name
+            if (parser.CheckTokenString("name")) {
+                parser.ReadToken(&token);
+                mesh->name = token;
+            }
+
+            // parse shader
+            parser.ExpectTokenString("shader");
+
+            parser.ReadToken(&token);
+            mesh->shader = token;
+
+            // parse texture coordinates
+            parser.ExpectTokenString("numverts");
+            count = parser.ParseInt();
+
+            mesh->verts.SetNum(count);
+
+            for (i = 0, vert = &mesh->verts[0]; i < mesh->verts.Num(); i++, vert++) {
+                parser.ExpectTokenString("vert");
+                parser.ParseInt();
+
+                parser.Parse1DMatrix(2, vert->uv.ToFloatPtr());
+
+                vert->weightIndex	= parser.ParseInt();
+                vert->weightElem	= parser.ParseInt();
+            }
+
+            // parse tris
+            parser.ExpectTokenString("numtris");
+            count = parser.ParseInt();
+
+            mesh->tris.SetNum(count);
+
+            for (i = 0, tri = &mesh->tris[0]; i < count; i++, tri++) {
+                parser.ExpectTokenString("tri");
+                parser.ParseInt();
+
+                tri->vertIndex1 = parser.ParseInt();
+                tri->vertIndex2 = parser.ParseInt();
+                tri->vertIndex3 = parser.ParseInt();
+            }
+
+            // parse weights
+            parser.ExpectTokenString("numweights");
+            count = parser.ParseInt();
+
+            mesh->weights.SetNum(count);
+
+            for (i = 0, weight = &mesh->weights[0]; i < count; i++, weight++) {
+                parser.ExpectTokenString("weight");
+                parser.ParseInt();
+
+                weight->jointIndex = parser.ParseInt();
+
+                weight->weightValue	= parser.ParseFloat();
+
+                parser.Parse1DMatrix(3, weight->pos.ToFloatPtr());
+            }
+
+            parser.ExpectTokenString("}");
+        }
+
+        return true;
+    }
+
     void idMD5MeshFile::ConvertJointTransforms(idList<md5meshJointTransform_t> &jointTransforms) const
     {
         ConvertJointTransforms(joints, jointTransforms);
     }
 
-	void idMD5MeshFile::ConvertJointTransforms(const idList<md5meshJoint_t> joints, idList<md5meshJointTransform_t> &jointTransforms)
+	void idMD5MeshFile::ConvertJointTransforms(const idList<md5meshJoint_t> &joints, idList<md5meshJointTransform_t> &jointTransforms)
 	{
         jointTransforms.SetNum(joints.Num());
         md5meshJointTransform_t *jointTransform;

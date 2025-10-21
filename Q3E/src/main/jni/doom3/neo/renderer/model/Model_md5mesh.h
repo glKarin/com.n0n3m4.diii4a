@@ -34,6 +34,7 @@ namespace md5model
 
     typedef struct md5meshMesh_s
     {
+        idStr name;
         idStr shader;
         idList<md5meshVert_t> verts;
         idList<md5meshTri_t> tris;
@@ -63,6 +64,7 @@ namespace md5model
     public:
         idMD5MeshFile(void);
         void Write(const char *path) const;
+        bool Parse(const char *path);
         idList<md5meshJoint_t> & Joints(void);
         idList<md5meshMesh_t> & Meshes(void);
         idStr & Commandline(void);
@@ -70,7 +72,7 @@ namespace md5model
         void ConvertJointTransforms(idList<md5meshJointTransform_t> &list) const;
         void CalcBounds(const idList<md5meshJointTransform_t> &list, idBounds &bounds) const;
 
-        static void ConvertJointTransforms(const idList<md5meshJoint_t> joints, idList<md5meshJointTransform_t> &list);
+        static void ConvertJointTransforms(const idList<md5meshJoint_t> &joints, idList<md5meshJointTransform_t> &list);
 
     private:
         void CalcMeshBounds(const md5meshMesh_t &mesh, const idList<md5meshJointTransform_t> &list, idBounds &bounds) const;

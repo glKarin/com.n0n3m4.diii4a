@@ -1,3 +1,6 @@
+#include "Model_md5anim.h"
+#include "Model_md5mesh.h"
+
 namespace md5edit
 {
     typedef struct baseframe_s
@@ -31,6 +34,7 @@ namespace md5edit
 
         idStr ToString(void) const;
         bool Parse(idLexer &parser, int numFrames);
+        void Set(int i, const idBounds &bounds);
     } bounds_t;
 
     class idMD5AnimSourceFile
@@ -58,6 +62,7 @@ namespace md5edit
         int NumFrames() const {
             return numFrames;
         }
+        void CalcBounds(const md5model::idMD5MeshFile &md5mesh, const md5model::idMD5AnimFile &md5anim);
     
     private:
         bool Check(void) const;
@@ -440,6 +445,17 @@ namespace md5edit
         return str;
     }
 
+    void idMD5AnimSourceFile::CalcBounds(const md5model::idMD5MeshFile &md5mesh, const md5model::idMD5AnimFile &md5anim)
+    {
+        md5model::idMD5AnimFile &anim = const_cast<md5model::idMD5AnimFile &>(md5anim);
+        for(int i = 0; i < anim.Frames().Num(); i++)
+        {
+            idBounds bound;
+            md5model::idMD5AnimFile::CalcFrameBounds(md5mesh, md5anim, i, bound);
+            bounds.Set(i, bound);
+        }
+    }
+
     bool baseframe_s::Parse(idLexer &parser, int numJoints)
     {
         idStr str;
@@ -590,6 +606,11 @@ namespace md5edit
         str.Append("}\n");
 
         return str;
+    }
+
+    void bounds_s::Set(int i, const idBounds &bounds)
+    {
+        frames[i] = va("( %.10f %.10f %.10f ) ( %.10f %.10f %.10f )", bounds[0][0], bounds[0][1], bounds[0][2], bounds[1][0], bounds[1][1], bounds[1][2]);
     }
 
     typedef struct editAnim_s
@@ -1132,7 +1153,7 @@ namespace md5edit
     {
         if(args.Argc() < 5)
         {
-            common->Printf("[Usage]: %s <output animation file path> <input animation file> <start frame> <end frame>", args.Argv(0));
+            common->Printf("[Usage]: %s <output animation file path> <input animation file> <start frame> <end frame>\n", args.Argv(0));
             return;
         }
         idStr cmd;
@@ -1156,7 +1177,7 @@ namespace md5edit
     {
         if(args.Argc() < 3)
         {
-            common->Printf("[Usage]: %s <output animation file path> <input animation file> [<start frame> [<end frame>]]", args.Argv(0));
+            common->Printf("[Usage]: %s <output animation file path> <input animation file> [<start frame> [<end frame>]]\n", args.Argv(0));
             return;
         }
         idStr cmd;
@@ -1180,7 +1201,7 @@ namespace md5edit
     {
         if(args.Argc() < 3)
         {
-            common->Printf("[Usage]: %s <output animation file path> <input animation file> [<start frame> [<end frame>]]", args.Argv(0));
+            common->Printf("[Usage]: %s <output animation file path> <input animation file> [<start frame> [<end frame>]]\n", args.Argv(0));
             return;
         }
         idStr cmd;
@@ -1204,7 +1225,7 @@ namespace md5edit
     {
         if(args.Argc() < 4)
         {
-            common->Printf("[Usage]: %s <output animation file path> <input animation file> <append animation file> [<start frame> [<end frame>]]", args.Argv(0));
+            common->Printf("[Usage]: %s <output animation file path> <input animation file> <append animation file> [<start frame> [<end frame>]]\n", args.Argv(0));
             return;
         }
         idStr cmd;
@@ -1223,6 +1244,50 @@ namespace md5edit
         common->Printf("linkAnim -> %s\n", cmd.c_str());
         cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
     }
+
+    static void R_CalcBounds_f(const idCmdArgs &args)
+    {
+        using namespace md5model;
+
+        if(args.Argc() < 4)
+        {
+            common->Printf("[Usage]: %s <output animation file path> <md5mesh file> <md5anim file> ...\n", args.Argv(0));
+            return;
+        }
+        idMD5MeshFile md5mesh;
+        const char *meshFile = args.Argv(2);
+        if(!md5mesh.Parse(meshFile))
+        {
+            common->Warning("Load md5mesh '%s' fail", meshFile);
+            return;
+        }
+
+        const char *outRoot = args.Argv(1);
+        for(int i = 3; i < args.Argc(); i++)
+        {
+            const char *animFile = args.Argv(i);
+            idMD5AnimFile md5anim;
+            if(!md5anim.Parse(animFile))
+            {
+                common->Warning("Load md5anim '%s' fail", animFile);
+                continue;
+            }
+            idMD5AnimSourceFile md5animSource;
+            if(!md5animSource.LoadAnim(animFile))
+            {
+                common->Warning("Load md5anim source '%s' fail", animFile);
+                continue;
+            }
+            md5animSource.CalcBounds(md5mesh, md5anim);
+            idStr outPath = outRoot;
+            outPath.AppendPath(animFile);
+            idStr text = md5animSource.ToString();
+            idFile *f = fileSystem->OpenFileWrite(outPath.c_str(), "fs_savepath");
+            md5edit::WriteText(text, f);
+            fileSystem->CloseFile(f);
+            common->Printf("Calc md5anim bounds '%s' success\n", animFile);
+        }
+    }
 }
 
 void MD5Edit_AddCommand(void)
@@ -1233,4 +1298,5 @@ void MD5Edit_AddCommand(void)
     cmdSystem->AddCommand("reverseAnim", R_ReverseAnim_f, CMD_FL_RENDERER, "reverse md5 anim", ArgCompletion_AnimName);
     cmdSystem->AddCommand("linkAnim", R_LinkAnim_f, CMD_FL_RENDERER, "link md5 anim", ArgCompletion_AnimName);
     cmdSystem->AddCommand("loopAnim", R_LoopAnim_f, CMD_FL_RENDERER, "loop md5 anim", ArgCompletion_AnimName);
+    cmdSystem->AddCommand("calcAnimBounds", R_CalcBounds_f, CMD_FL_RENDERER, "calc md5anim bounds", ArgCompletion_AnimName);
 }
