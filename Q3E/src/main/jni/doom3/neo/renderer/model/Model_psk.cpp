@@ -473,7 +473,7 @@ bool idModelPsk::ToMD5Mesh(idMD5MeshFile &md5mesh, float scale, bool addOrigin) 
 
         if (i == 0)
         {
-            md5Bone->parentIndex = refBone->vertex_index - 1;
+            md5Bone->parentIndex = -1; // refBone->vertex_index - 1; // some is -1 not 0, so always force to -1
         }
         else
         {
