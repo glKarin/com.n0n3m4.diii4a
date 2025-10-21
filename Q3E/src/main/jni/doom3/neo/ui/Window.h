@@ -492,7 +492,7 @@ class idWindow
 		idWinBackground	backGroundName;			//
 #ifdef _RAVEN // quake4 gui var
         idWinFloat textspacing;
-        idWinFloat textstyle;
+        idWinInt textstyle;
         idWinInt itemheight;
         idWinInt scrollbar;
         idWinStr backgroundHover;

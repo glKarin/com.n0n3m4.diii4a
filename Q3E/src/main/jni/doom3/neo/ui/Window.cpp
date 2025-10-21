@@ -2619,7 +2619,7 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 // jmarshall - quake 4
     if (idStr::Icmp(_name, "textSpacing") == 0)
     {
-        src->ParseFloat(); //k: jmarshall is ParseInt
+        textspacing = src->ParseFloat(); //k: jmarshall is ParseInt
         return true;
     }
 // jmarshall end
@@ -2694,7 +2694,7 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 // jmarshall - quake 4
     if (idStr::Icmp(_name, "textStyle") == 0)
     {
-        src->ParseInt();
+        textstyle = src->ParseInt();
         return true;
     }
 // jmarshall end
