@@ -26,30 +26,30 @@ OPTION(BUILD_BACKPORT        "Build backport version"    OFF)
 
 
 # Supported
-OPTION(GAME_DOOM3       "Build DOOM 3/Quake 4/Prey(2006)"       ON)
-OPTION(GAME_RTCW        "Build Return to Castle Wolfenstein"    ON)
-OPTION(GAME_QUAKE3      "Build Quake 3"                         ON)
-OPTION(GAME_QUAKE2      "Build Quake 2"                         ON)
-OPTION(GAME_QUAKE1      "Build Quake 1"                         ON)
-OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
-OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
-OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
-OPTION(GAME_ETW         "Build Wolfenstein: Enemy Territory"    ON)
-OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
-OPTION(GAME_FTEQW       "Build FTEQW"                           OFF)
-OPTION(GAME_JK          "Build Jedi Knight"                     ON)
-OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
-OPTION(GAME_URT "Build Urbant Error"                    ON)
-OPTION(GAME_OPENMOHAA "Build Medal of Honor: Allied Assault"                    ON)
+OPTION(GAME_DOOM3                   "Build DOOM 3/Quake 4/Prey(2006)"               ON)
+OPTION(GAME_RTCW                    "Build Return to Castle Wolfenstein"            ON)
+OPTION(GAME_QUAKE3                  "Build Quake 3"                                 ON)
+OPTION(GAME_QUAKE2                  "Build Quake 2"                                 ON)
+OPTION(GAME_QUAKE1                  "Build Quake 1"                                 ON)
+OPTION(GAME_TDM                     "Build The Dark Mod"                            ON)
+OPTION(GAME_DOOM3BFG                "Build DOOM 3 BFG"                              ON)
+OPTION(GAME_DOOM                    "Build GZDOOM"                                  ON)
+OPTION(GAME_ETW                     "Build Wolfenstein: Enemy Territory"            ON)
+OPTION(GAME_REALRTCW                "Build RealRTCW"                                ON)
+OPTION(GAME_FTEQW                   "Build FTEQW"                                   ON)
+OPTION(GAME_JK                      "Build Jedi Knight"                             ON)
+OPTION(GAME_SERIOUSSAM              "Build Serious Sam"                             ON)
+OPTION(GAME_URT                     "Build Urbant Error"                            ON)
+OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"          ON)
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
-OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
-OPTION(GAME_SOURCE      "Build Source"                          ON)
+OPTION(GAME_XASH3D                  "Build Xash3D"                                  ON)
+OPTION(GAME_SOURCE                  "Build Source"                                  ON)
 endif()
 
 # Experimental
-OPTION(GAME_Q3RALLY "Build Quake 3 Rally"                    OFF)
-OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
-OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
+OPTION(GAME_Q3RALLY                 "Build Quake 3 Rally"                           OFF)
+OPTION(GAME_QUAKES                  "Build Quake SandBox"                           OFF)
+OPTION(GAME_DNF                     "Build Duke Nukem Forever"                      OFF)
 
 
 
@@ -129,7 +129,7 @@ if(GAME_RTCW) # 438e7d413b5f7277187c35b032eb0ef9093ae778 | May 27, 2024 | All: F
     add_subdirectory ( rtcw ) # RTCW
 endif()
 
-if(GAME_QUAKE3) # https://github.com/ioquake/ioq3/commit/0ebf1df74238e91a514e5fd99d7d98672e4f80ec
+if(GAME_QUAKE3) # https://github.com/ioquake/ioq3/commit/3fb9006e6461b877b67781cd0f0d94032804a475
     message(STATUS "Build Quake 3")
     add_subdirectory ( quake3 ) # Quake 3 Arena | Team Arena
 endif()
@@ -139,7 +139,7 @@ if(GAME_QUAKE2) # 8.51 | dc473a9830fd705430d2aef1f78f23d6777216a3 | May 11, 2025
     add_subdirectory ( quake2 ) # Quake 2
 endif()
 
-if(GAME_QUAKE1) # https://github.com/DarkPlacesEngine/DarkPlaces/commit/a5e5b88557e795fbb6bf65b58c4d0436ac58abe6
+if(GAME_QUAKE1) # https://github.com/DarkPlacesEngine/DarkPlaces/commit/dbebfea96dae5c8c75a2f8680768edc7851801c2
     message(STATUS "Build Quake 1")
     add_subdirectory ( quake1 ) # Quake 1
 endif()
@@ -188,7 +188,7 @@ if(GAME_FTEQW) # 5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 | engine/common/fs.c: 
     add_subdirectory ( fteqw ) # FTEQW
 endif()
 
-if(GAME_JK) # 199ddc7642d0ed0e2bf007fe63d0dce3a4bb4908 | Nov 13, 2024 | Merge pull request #1246 from taysta/ojk-macos
+if(GAME_JK) # d1cb662f07dfa4c1999edfb5c1a86fd1c6285372 | 2 weeks ago | byBlank can be allocated on autosave and it can still fail to read the levelshot image.
     message(STATUS "Build OpenJK")
     add_subdirectory ( jk ) # Jedi Knight
 endif()

@@ -592,7 +592,7 @@ if(BuildMPEngine)
 		install(CODE "
 			include(BundleUtilities)
 			set(BU_CHMOD_BUNDLE_ITEMS ON)
-			fixup_bundle(\"${CMAKE_BINARY_DIR}/${MPEngine}.app\" \"\" \"\")
+			fixup_bundle(\"${PROG_BINARY_DIR}/${MPEngine}.app\" \"\" \"\")
 			"
 			COMPONENT Runtime)
 		install(TARGETS ${MPEngine}

@@ -205,7 +205,7 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 		"${SPDir}/qcommon/z_memman_pc.cpp"
 		"${SPDir}/qcommon/qfiles.h"
 		"${SPDir}/qcommon/qcommon.h"
-		"${SPDir}/qcommon/stv_version.h"
+		"${SPDir}/qcommon/game_version.h"
 		"${SPDir}/qcommon/timing.h"
 		"${SPDir}/qcommon/MiniHeap.h"
 
@@ -460,7 +460,7 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 			install(CODE "
 				include(BundleUtilities)
 				set(BU_CHMOD_BUNDLE_ITEMS ON)
-				fixup_bundle(\"${CMAKE_BINARY_DIR}/${ProjectName}.app\" \"\" \"\")
+				fixup_bundle(\"${PROG_BINARY_DIR}/${ProjectName}.app\" \"\" \"\")
 				"
 				COMPONENT Runtime)
 			install(TARGETS ${ProjectName}

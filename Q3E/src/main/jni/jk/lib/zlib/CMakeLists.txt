@@ -54,7 +54,7 @@ add_library(bundled_zlib STATIC adler32.c
 # variables are not set in the cache, but instead shadow the variables in the
 # cache.  These are the same variables exported by the built-in FindZLIB module.
 set(ZLIB_LIBRARIES bundled_zlib PARENT_SCOPE)
-set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/zlib/include/ PARENT_SCOPE)
+set(ZLIB_INCLUDE_DIR ${PROG_SOURCE_DIR}/lib/zlib/include/ PARENT_SCOPE)
 
 mark_as_advanced(ZLIB_LIBRARIES ZLIB_INCLUDE_DIR)
 
