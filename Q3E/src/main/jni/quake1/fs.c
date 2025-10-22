@@ -2618,6 +2618,7 @@ static qfile_t *FS_OpenPackedFile (pack_t* pack, int pack_ind)
 		{
 			Con_Printf ("FS_OpenPackedFile: inflate init error (file: %s)\n", pfile->name);
 			FILEDESC_CLOSE(dup_handle);
+			Mem_Free(ztk);
 			Mem_Free(file);
 			return NULL;
 		}

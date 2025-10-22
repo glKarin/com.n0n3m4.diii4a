@@ -49,12 +49,16 @@ typedef int64_t prvm_int_t;
 typedef uint64_t prvm_uint_t;
 #define PRVM_PRIi PRIi64
 #define PRVM_PRIu PRIu64
+#define PRVM_INT_MIN INT64_MIN
+#define PRVM_INT_MAX INT64_MAX
 #else
 typedef float prvm_vec_t;
 typedef int32_t prvm_int_t;
 typedef uint32_t prvm_uint_t;
 #define PRVM_PRIi PRIi32
 #define PRVM_PRIu PRIu32
+#define PRVM_INT_MIN INT32_MIN
+#define PRVM_INT_MAX INT32_MAX
 #endif
 typedef prvm_vec_t prvm_vec3_t[3];
 

@@ -139,7 +139,7 @@ if(GAME_QUAKE2) # 8.51 | dc473a9830fd705430d2aef1f78f23d6777216a3 | May 11, 2025
     add_subdirectory ( quake2 ) # Quake 2
 endif()
 
-if(GAME_QUAKE1) # https://github.com/DarkPlacesEngine/DarkPlaces/commit/dbebfea96dae5c8c75a2f8680768edc7851801c2
+if(GAME_QUAKE1) # https://github.com/DarkPlacesEngine/DarkPlaces/commit/a5e5b88557e795fbb6bf65b58c4d0436ac58abe6
     message(STATUS "Build Quake 1")
     add_subdirectory ( quake1 ) # Quake 1
 endif()

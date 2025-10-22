@@ -103,11 +103,7 @@ void Host_Error (const char *error, ...)
 
 	Con_Printf(CON_ERROR "Host_Error: %s\n", hosterrorstring1);
 
-	// LadyHavoc: if crashing very early, or currently shutting down, do
-	// Sys_Error instead
-	if (host.framecount < 1 || host.state != host_active)
-		Sys_Error ("Host_Error during %s: %s", host_state_str[host.state], hosterrorstring1);
-
+	// "double fault": redirect to Sys_Error.
 	if (hosterror)
 		Sys_Error ("Host_Error: recursively entered (original error was: %s    new error is: %s)", hosterrorstring2, hosterrorstring1);
 	hosterror = true;
@@ -122,6 +118,11 @@ void Host_Error (const char *error, ...)
 
 	if(host.hook.SV_Shutdown)
 		host.hook.SV_Shutdown();
+
+	// LadyHavoc: if crashing very early, or currently shutting down, do
+	// Sys_Error instead and exit the engine fully
+	if (host.framecount < 1 || host.state != host_active)
+		Sys_Error ("Host_Error during %s: %s", host_state_str[host.state], hosterrorstring1);
 
 	if (cls.state == ca_dedicated)
 		Sys_Error("Host_Error: %s", hosterrorstring1);        // dedicated servers exit

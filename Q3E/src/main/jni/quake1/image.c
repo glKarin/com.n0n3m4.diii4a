@@ -980,21 +980,6 @@ imageformat_t imageformats_tenebrae[] =
 	{NULL, NULL}
 };
 
-imageformat_t imageformats_nopath[] =
-{
-	{"override/%s.tga", LoadTGA_BGRA},
-	{"override/%s.png", PNG_LoadImage_BGRA},
-	{"override/%s.jpg", JPEG_LoadImage_BGRA},
-	{"textures/%s.tga", LoadTGA_BGRA},
-	{"textures/%s.png", PNG_LoadImage_BGRA},
-	{"textures/%s.jpg", JPEG_LoadImage_BGRA},
-	{"%s.tga", LoadTGA_BGRA},
-	{"%s.png", PNG_LoadImage_BGRA},
-	{"%s.jpg", JPEG_LoadImage_BGRA},
-	{"%s.pcx", LoadPCX_BGRA},
-	{NULL, NULL}
-};
-
 // GAME_DELUXEQUAKE only
 // VorteX: the point why i use such messy texture paths is
 // that GtkRadiant can't detect normal/gloss textures
@@ -1031,6 +1016,12 @@ imageformat_t imageformats_gfx[] =
 
 imageformat_t imageformats_other[] =
 {
+	{"override/%s.tga", LoadTGA_BGRA},
+	{"override/%s.png", PNG_LoadImage_BGRA},
+	{"override/%s.jpg", JPEG_LoadImage_BGRA},
+	{"textures/%s.tga", LoadTGA_BGRA},
+	{"textures/%s.png", PNG_LoadImage_BGRA},
+	{"textures/%s.jpg", JPEG_LoadImage_BGRA},
 	{"%s.tga", LoadTGA_BGRA},
 	{"%s.png", PNG_LoadImage_BGRA},
 	{"%s.jpg", JPEG_LoadImage_BGRA},
@@ -1076,8 +1067,6 @@ unsigned char *loadimagepixelsbgra (const char *filename, qbool complain, qbool 
 		firstformat = imageformats_textures;
 	else if (!strcasecmp(path, "gfx") || !strcasecmp(path, "locale")) // locale/ is used in GAME_BLOODOMNICIDE
 		firstformat = imageformats_gfx;
-	else if (!path[0])
-		firstformat = imageformats_nopath;
 	else
 		firstformat = imageformats_other;
 	// now try all the formats in the selected list

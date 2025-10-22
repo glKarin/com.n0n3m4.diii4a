@@ -54,6 +54,7 @@ cvar_t prvm_garbagecollection_scan_limit = {CF_CLIENT | CF_SERVER, "prvm_garbage
 cvar_t prvm_garbagecollection_strings = {CF_CLIENT | CF_SERVER, "prvm_garbagecollection_strings", "1", "automatically call strunzone() on strings that are not referenced"};
 cvar_t prvm_stringdebug = {CF_CLIENT | CF_SERVER, "prvm_stringdebug", "0", "Print debug and warning messages related to strings"};
 cvar_t sv_entfields_noescapes = {CF_SERVER, "sv_entfields_noescapes", "wad", "Space-separated list of fields in which backslashes won't be parsed as escapes when loading entities from .bsp or .ent files. This is a workaround for buggy maps with unescaped backslashes used as path separators (only forward slashes are allowed in Quake VFS paths)."};
+cvar_t prvm_gameplayfix_div0is0 = {CF_SERVER, "prvm_gameplayfix_div0is0", "0", "When set to 1, floating point division by 0 will return zero instead of returning the IEEE standardized result (likely nan or inf). Other ways of getting non-finite values are not affected, and the warning will still print."};
 
 static double prvm_reuseedicts_always_allow = 0;
 qbool prvm_runawaycheck = true;
@@ -1251,7 +1252,13 @@ static void PRVM_ED_EdictSet_f(cmd_state_t *cmd)
 	prvm_edict_t *ed;
 	mdef_t *key;
 
-	if(Cmd_Argc(cmd) != 5)
+	if (Cmd_Argc(cmd) == 4) {
+		// Baker: Turn into prvm_edictget when no value(s) provided
+		PRVM_ED_EdictGet_f(cmd);
+		return;
+	}
+
+	if (Cmd_Argc(cmd) != 5)
 	{
 		Con_Print("prvm_edictset <program name> <edict number> <field> <value>\n");
 		return;
@@ -2053,6 +2060,7 @@ void PRVM_Prog_Load(prvm_prog_t *prog, const char *filename, unsigned char *data
 	cvar_t *cvar;
 	int structtype = 0;
 	int max_safe_edicts;
+	bool gaddress_warned = false;
 
 	if (prog->loaded)
 		prog->error_cmd("%s: there is already a %s program loaded!", __func__, prog->name);
@@ -2243,6 +2251,7 @@ void PRVM_Prog_Load(prvm_prog_t *prog, const char *filename, unsigned char *data
 
 	// LadyHavoc: TODO: reorder globals to match engine struct
 	// LadyHavoc: TODO: reorder fields to match engine struct
+	// divVerent: note that when ever doing any remapping, globaldefs with pre-initialized global pointers need to also be identified and remapped
 #define remapglobal(index) (index)
 #define remapfield(index) (index)
 
@@ -2443,6 +2452,12 @@ void PRVM_Prog_Load(prvm_prog_t *prog, const char *filename, unsigned char *data
 		case OP_STOREP_FNC:
 		case OP_STOREP_V:
 		case OP_STOREP_I:
+		case OP_RSHIFT_I:
+		case OP_LSHIFT_I:
+		case OP_LE_U:
+		case OP_LT_U:
+		case OP_DIV_U:
+		case OP_RSHIFT_U:
 			if (a >= prog->progs_numglobals || b >= prog->progs_numglobals || c >= prog->progs_numglobals)
 				prog->error_cmd("%s: out of bounds global index (statement %d)", __func__, i);
 			prog->statements[i].op = op;
@@ -2509,6 +2524,33 @@ void PRVM_Prog_Load(prvm_prog_t *prog, const char *filename, unsigned char *data
 			prog->statements[i].operand[0] = remapglobal(a);
 			prog->statements[i].operand[1] = -1;
 			prog->statements[i].operand[2] = -1;
+			break;
+		}
+
+		// Warn about deprecated instructions.
+		switch (op)
+		{
+		case OP_GSTOREP_I:
+		case OP_GSTOREP_F:
+		case OP_GSTOREP_ENT:
+		case OP_GSTOREP_FLD:
+		case OP_GSTOREP_S:
+		case OP_GSTOREP_FNC:
+		case OP_GSTOREP_V:
+		//case OP_GADDRESS:
+		case OP_GLOAD_I:
+		case OP_GLOAD_F:
+		case OP_GLOAD_FLD:
+		case OP_GLOAD_ENT:
+		case OP_GLOAD_S:
+		case OP_GLOAD_FNC:
+		case OP_GLOAD_V:
+			if (!gaddress_warned) {
+				Con_Printf(CON_WARN "WARNING: %s: %s uses deprecated OP_G* instructions, which are unlikely to be used correctly. Proceed at your own risk.\n", prog->name, filename);
+				gaddress_warned = true;
+			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -3232,6 +3274,7 @@ void PRVM_Init (void)
 	Cvar_RegisterVariable (&prvm_garbagecollection_strings);
 	Cvar_RegisterVariable (&prvm_stringdebug);
 	Cvar_RegisterVariable (&sv_entfields_noescapes);
+	Cvar_RegisterVariable (&prvm_gameplayfix_div0is0);
 
 	// COMMANDLINEOPTION: PRVM: -norunaway disables the runaway loop check (it might be impossible to exit DarkPlaces if used!)
 	prvm_runawaycheck = !Sys_CheckParm("-norunaway");
