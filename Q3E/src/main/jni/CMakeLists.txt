@@ -17,12 +17,12 @@ else()
     set(PRODUCT_FLAVOR_IS_FDROID False)
 endif()
 
-#[[OPTION(BUILD_D3        "Build DOOM 3"    OFF)
-OPTION(BUILD_Q4        "Build Quake 4"    OFF)
-OPTION(BUILD_PREY      "Build Prey"    OFF)
-OPTION(BUILD_D3_MOD		"Build all DOOM3 mods" OFF)
-OPTION(BUILD_Q4_MOD		"Build all Quake4 mods" OFF)]]
-OPTION(BUILD_BACKPORT        "Build backport version"    OFF)
+#[[OPTION(BUILD_D3      "Build DOOM 3"                          OFF)
+OPTION(BUILD_Q4         "Build Quake 4"                         OFF)
+OPTION(BUILD_PREY       "Build Prey"                            OFF)
+OPTION(BUILD_D3_MOD		"Build all DOOM3 mods"                  OFF)
+OPTION(BUILD_Q4_MOD	    "Build all Quake4 mods"                 OFF)]]
+OPTION(BUILD_BACKPORT   "Build backport version"                OFF)
 
 
 # Supported
@@ -39,15 +39,15 @@ OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 OPTION(GAME_FTEQW       "Build FTEQW"                           OFF)
 OPTION(GAME_JK          "Build Jedi Knight"                     ON)
 OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
-OPTION(GAME_URT "Build Urbant Error"                    ON)
-OPTION(GAME_OPENMOHAA "Build Medal of Honor: Allied Assault"                    ON)
+OPTION(GAME_URT         "Build Urban Terror"                    ON)
+OPTION(GAME_OPENMOHAA   "Build Medal of Honor: Allied Assault"  ON)
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
 OPTION(GAME_SOURCE      "Build Source"                          ON)
 endif()
 
 # Experimental
-OPTION(GAME_Q3RALLY "Build Quake 3 Rally"                    OFF)
+OPTION(GAME_Q3RALLY     "Build Quake 3 Rally"                   OFF)
 OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
