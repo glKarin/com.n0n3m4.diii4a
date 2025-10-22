@@ -192,3 +192,58 @@ void SNDDMA_BeginPainting (void)
 	Q3E_Oboe_Lock();
 }
 
+#ifdef USE_VOIP
+void SNDDMA_StartCapture(void)
+{
+#ifdef USE_SDL_AUDIO_CAPTURE
+	if (sdlCaptureDevice)
+	{
+		SDL_ClearQueuedAudio(sdlCaptureDevice);
+		SDL_PauseAudioDevice(sdlCaptureDevice, 0);
+	}
+#endif
+}
+
+int SNDDMA_AvailableCaptureSamples(void)
+{
+#ifdef USE_SDL_AUDIO_CAPTURE
+	// divided by 2 to convert from bytes to (mono16) samples.
+	return sdlCaptureDevice ? (SDL_GetQueuedAudioSize(sdlCaptureDevice) / 2) : 0;
+#else
+	return 0;
+#endif
+}
+
+void SNDDMA_Capture(int samples, byte *data)
+{
+#ifdef USE_SDL_AUDIO_CAPTURE
+	// multiplied by 2 to convert from (mono16) samples to bytes.
+	if (sdlCaptureDevice)
+	{
+		SDL_DequeueAudio(sdlCaptureDevice, data, samples * 2);
+	}
+	else
+#endif
+	{
+		memset(data, '\0', samples * 2);
+	}
+}
+
+void SNDDMA_StopCapture(void)
+{
+#ifdef USE_SDL_AUDIO_CAPTURE
+	if (sdlCaptureDevice)
+	{
+		SDL_PauseAudioDevice(sdlCaptureDevice, 1);
+	}
+#endif
+}
+
+void SNDDMA_MasterGain( float val )
+{
+#ifdef USE_SDL_AUDIO_CAPTURE
+	sdlMasterGain = val;
+#endif
+}
+#endif
+

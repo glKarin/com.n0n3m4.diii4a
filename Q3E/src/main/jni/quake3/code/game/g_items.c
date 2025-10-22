@@ -690,8 +690,8 @@ void FinishSpawningItem( gentity_t *ent ) {
 		G_SetOrigin( ent, tr.endpos );
 	}
 
-	// team slaves and targeted items aren't present at start
-	if ( ( ent->flags & FL_TEAMSLAVE ) || ent->targetname ) {
+	// team members and targeted items aren't present at start
+	if ( ( ent->flags & FL_TEAMMEMBER ) || ent->targetname ) {
 		ent->s.eFlags |= EF_NODRAW;
 		ent->r.contents = 0;
 		return;

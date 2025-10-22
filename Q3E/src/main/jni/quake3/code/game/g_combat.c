@@ -618,9 +618,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		GibEntity( self, killer );
 	} else {
 		// normal death
-		static int i;
+		static int lastDeath;
 
-		switch ( i ) {
+		switch ( lastDeath ) {
 		case 0:
 			anim = BOTH_DEATH1;
 			break;
@@ -644,13 +644,13 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		self->client->ps.torsoAnim = 
 			( ( self->client->ps.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
 
-		G_AddEvent( self, EV_DEATH1 + i, killer );
+		G_AddEvent( self, EV_DEATH1 + lastDeath, killer );
 
 		// the body can still be gibbed
 		self->die = body_die;
 
 		// globally cycle through the different death animations
-		i = ( i + 1 ) % 3;
+		lastDeath = ( lastDeath + 1 ) % 3;
 
 #ifdef MISSIONPACK
 		if (self->s.eFlags & EF_KAMIKAZE) {

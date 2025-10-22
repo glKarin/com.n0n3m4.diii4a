@@ -42,3 +42,4 @@ profile
 *.sdf
 *.opensdf
 *.suo
+/.vs

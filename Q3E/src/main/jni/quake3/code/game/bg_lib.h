@@ -26,13 +26,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #if !defined( BG_LIB_H ) && defined( Q3_VM )
 #define BG_LIB_H
 
-//Ignore __attribute__ on non-gcc platforms
-#ifndef __GNUC__
-#ifndef __attribute__
-#define __attribute__(x)
-#endif
-#endif
-
 #ifndef NULL
 #define NULL ((void *)0)
 #endif
@@ -101,9 +94,9 @@ int atoi( const char *string );
 int _atoi( const char **stringPtr );
 long strtol( const char *nptr, char **endptr, int base );
 
-int Q_vsnprintf( char *buffer, size_t length, const char *fmt, va_list argptr );
+int Q_vsnprintf( char *buffer, size_t length, const char *fmt, va_list argptr ) Q_PRINTF_FUNC(3, 0);
 
-int sscanf( const char *buffer, const char *fmt, ... ) __attribute__ ((format (scanf, 2, 3)));
+int sscanf( const char *buffer, const char *fmt, ... ) Q_SCANF_FUNC(2, 3);
 
 // Memory functions
 void *memmove( void *dest, const void *src, size_t count );

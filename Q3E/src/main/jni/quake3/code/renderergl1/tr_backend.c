@@ -535,12 +535,12 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	backEnd.pc.c_surfaces += numDrawSurfs;
 
 	for (i = 0, drawSurf = drawSurfs ; i < numDrawSurfs ; i++, drawSurf++) {
-		if ( drawSurf->sort == oldSort ) {
+		if ( drawSurf->sort == (unsigned)oldSort ) {
 			// fast path, same as previous sort
 			rb_surfaceTable[ *drawSurf->surface ]( drawSurf->surface );
 			continue;
 		}
-		oldSort = drawSurf->sort;
+		oldSort = (int)drawSurf->sort;
 		R_DecomposeSort( drawSurf->sort, &entityNum, &shader, &fogNum, &dlighted );
 
 		//
@@ -674,7 +674,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	}
 
 	if (r_drawSun->integer) {
-		RB_DrawSun(0.1, tr.sunShader);
+		RB_DrawSun(0.1f, tr.sunShader);
 	}
 
 	// darken down any stencil shadows

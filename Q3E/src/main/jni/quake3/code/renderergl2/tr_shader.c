@@ -2686,7 +2686,7 @@ static void FixRenderCommandList( int newShader ) {
 				{
 				int i;
 				drawSurf_t	*drawSurf;
-				shader_t	*shader;
+				shader_t	*pShader;
 				int			fogNum;
 				int			entityNum;
 				int			dlightMap;
@@ -2695,7 +2695,7 @@ static void FixRenderCommandList( int newShader ) {
 				const drawSurfsCommand_t *ds_cmd =  (const drawSurfsCommand_t *)curCmd;
 
 				for( i = 0, drawSurf = ds_cmd->drawSurfs; i < ds_cmd->numDrawSurfs; i++, drawSurf++ ) {
-					R_DecomposeSort( drawSurf->sort, &entityNum, &shader, &fogNum, &dlightMap, &pshadowMap );
+					R_DecomposeSort( drawSurf->sort, &entityNum, &pShader, &fogNum, &dlightMap, &pshadowMap );
                     sortedIndex = (( drawSurf->sort >> QSORT_SHADERNUM_SHIFT ) & (MAX_SHADERS-1));
 					if( sortedIndex >= newShader ) {
 						sortedIndex++;
@@ -3730,43 +3730,43 @@ A second parameter will cause it to print in sorted order
 void	R_ShaderList_f (void) {
 	int			i;
 	int			count;
-	shader_t	*shader;
+	shader_t	*pShader;
 
 	ri.Printf (PRINT_ALL, "-----------------------\n");
 
 	count = 0;
 	for ( i = 0 ; i < tr.numShaders ; i++ ) {
 		if ( ri.Cmd_Argc() > 1 ) {
-			shader = tr.sortedShaders[i];
+			pShader = tr.sortedShaders[i];
 		} else {
-			shader = tr.shaders[i];
+			pShader = tr.shaders[i];
 		}
 
-		ri.Printf( PRINT_ALL, "%i ", shader->numUnfoggedPasses );
+		ri.Printf( PRINT_ALL, "%i ", pShader->numUnfoggedPasses );
 
-		if (shader->lightmapIndex >= 0 ) {
+		if (pShader->lightmapIndex >= 0 ) {
 			ri.Printf (PRINT_ALL, "L ");
 		} else {
 			ri.Printf (PRINT_ALL, "  ");
 		}
-		if ( shader->explicitlyDefined ) {
+		if ( pShader->explicitlyDefined ) {
 			ri.Printf( PRINT_ALL, "E " );
 		} else {
 			ri.Printf( PRINT_ALL, "  " );
 		}
 
-		if ( shader->optimalStageIteratorFunc == RB_StageIteratorGeneric ) {
+		if ( pShader->optimalStageIteratorFunc == RB_StageIteratorGeneric ) {
 			ri.Printf( PRINT_ALL, "gen " );
-		} else if ( shader->optimalStageIteratorFunc == RB_StageIteratorSky ) {
+		} else if ( pShader->optimalStageIteratorFunc == RB_StageIteratorSky ) {
 			ri.Printf( PRINT_ALL, "sky " );
 		} else {
 			ri.Printf( PRINT_ALL, "    " );
 		}
 
-		if ( shader->defaultShader ) {
-			ri.Printf (PRINT_ALL,  ": %s (DEFAULTED)\n", shader->name);
+		if ( pShader->defaultShader ) {
+			ri.Printf (PRINT_ALL,  ": %s (DEFAULTED)\n", pShader->name);
 		} else {
-			ri.Printf (PRINT_ALL,  ": %s\n", shader->name);
+			ri.Printf (PRINT_ALL,  ": %s\n", pShader->name);
 		}
 		count++;
 	}

@@ -31,33 +31,27 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define BASEGAME					"foobar"
   #define CLIENT_WINDOW_TITLE		"changeme"
   #define CLIENT_WINDOW_MIN_TITLE	"changeme2"
-  #define HOMEPATH_NAME_UNIX		".foo"
-  #define HOMEPATH_NAME_WIN			"FooBar"
-  #define HOMEPATH_NAME_MACOSX		HOMEPATH_NAME_WIN
-//  #define STEAMPATH_NAME			"Foo Bar"
-//  #define STEAMPATH_APPID         ""
+  #define HOMEPATH_NAME_UNIX_LEGACY	".foo"
+  #define HOMEPATH_NAME				"FooBar"
   #define GAMENAME_FOR_MASTER		"foobar"	// must NOT contain whitespace
   #define CINEMATICS_LOGO		"foologo.roq"
   #define CINEMATICS_INTRO		"intro.roq"
 //  #define LEGACY_PROTOCOL	// You probably don't need this for your standalone game
 //  #define PROTOCOL_HANDLER		"foobar"
+  #define CONFIG_PREFIX			"fooconfig"
 #else
   #define PRODUCT_NAME				"ioq3"
   #define BASEGAME					"baseq3"
   #define CLIENT_WINDOW_TITLE		"ioquake3"
   #define CLIENT_WINDOW_MIN_TITLE	"ioq3"
-  #define HOMEPATH_NAME_UNIX		".q3a"
-  #define HOMEPATH_NAME_WIN			"Quake3"
-  #define HOMEPATH_NAME_MACOSX		HOMEPATH_NAME_WIN
-  #define STEAMPATH_NAME			"Quake 3 Arena"
-  #define STEAMPATH_APPID			"2200"
-  #define GOGPATH_ID				"1441704920"
-  #define MSSTORE_PATH				"Quake 3"
+  #define HOMEPATH_NAME_UNIX_LEGACY	".q3a"
+  #define HOMEPATH_NAME				"Quake3"
   #define GAMENAME_FOR_MASTER		"Quake3Arena"
   #define CINEMATICS_LOGO		"idlogo.RoQ"
   #define CINEMATICS_INTRO		"intro.RoQ"
   #define LEGACY_PROTOCOL
   #define PROTOCOL_HANDLER		"quake3"
+  #define CONFIG_PREFIX			"q3config"
 #endif
 
 // Heartbeat for dpmaster protocol. You shouldn't change this unless you know what you're doing
@@ -111,17 +105,27 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //#pragma intrinsic( memset, memcpy )
 #endif
 
-//Ignore __attribute__ on non-gcc platforms
-#ifndef __GNUC__
-#ifndef __attribute__
-#define __attribute__(x)
-#endif
+#ifdef __GNUC__
+#define Q_UNUSED_VAR __attribute__((unused))
+#define Q_NO_RETURN __attribute__((noreturn))
+
+#ifdef __MINGW32__
+// For some reason MinGW wants both gnu_printf and ms_printf
+#define Q_PRINTF_FUNC(fmt, va) \
+	__attribute__((format(gnu_printf, fmt, va))) \
+	__attribute__((format(ms_printf, fmt, va)))
+#else
+#define Q_PRINTF_FUNC(fmt, va) __attribute__((format(printf, fmt, va)))
 #endif
 
-#ifdef __GNUC__
-#define UNUSED_VAR __attribute__((unused))
+#define Q_SCANF_FUNC(fmt, va) __attribute__((format(scanf, fmt, va)))
+#define Q_ALIGN(x) __attribute__((aligned(x)))
 #else
-#define UNUSED_VAR
+#define Q_UNUSED_VAR
+#define Q_NO_RETURN
+#define Q_PRINTF_FUNC(fmt, va)
+#define Q_SCANF_FUNC(fmt, va)
+#define Q_ALIGN(x)
 #endif
 
 #if (defined _MSC_VER)
@@ -168,26 +172,12 @@ typedef int intptr_t;
 #include <time.h>
 #include <ctype.h>
 #include <limits.h>
-
-#ifdef _MSC_VER
-  #include <io.h>
-
-  typedef __int64 int64_t;
-  typedef __int32 int32_t;
-  typedef __int16 int16_t;
-  typedef __int8 int8_t;
-  typedef unsigned __int64 uint64_t;
-  typedef unsigned __int32 uint32_t;
-  typedef unsigned __int16 uint16_t;
-  typedef unsigned __int8 uint8_t;
-#else
-  #include <stdint.h>
-#endif
+#include <stdint.h>
 
 #ifdef _WIN32
   // vsnprintf is ISO/IEC 9899:1999
   // abstracting this to make it portable
-  int Q_vsnprintf(char *str, size_t size, const char *format, va_list ap);
+  int Q_vsnprintf(char *str, size_t size, const char *format, va_list ap) Q_PRINTF_FUNC(3, 0);
 #else
   #define Q_vsnprintf vsnprintf
 #endif
@@ -218,12 +208,6 @@ typedef int		clipHandle_t;
 #define PADLEN(base, alignment)	(PAD((base), (alignment)) - (base))
 
 #define PADP(base, alignment)	((void *) PAD((intptr_t) (base), (alignment)))
-
-#ifdef __GNUC__
-#define QALIGN(x) __attribute__((aligned(x)))
-#else
-#define QALIGN(x)
-#endif
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -267,6 +251,7 @@ typedef int		clipHandle_t;
 #endif
 
 #define	MAX_NAME_LENGTH		32		// max length of a client name
+#define	MAX_HOSTNAME_LENGTH	80		// max length of a host name
 
 #define	MAX_SAY_TEXT	150
 
@@ -753,8 +738,8 @@ int		COM_GetCurrentParseLine( void );
 char	*COM_Parse( char **data_p );
 char	*COM_ParseExt( char **data_p, qboolean allowLineBreak );
 int		COM_Compress( char *data_p );
-void	COM_ParseError( char *format, ... ) __attribute__ ((format (printf, 1, 2)));
-void	COM_ParseWarning( char *format, ... ) __attribute__ ((format (printf, 1, 2)));
+void	COM_ParseError( char *format, ... ) Q_PRINTF_FUNC(1, 2);
+void	COM_ParseWarning( char *format, ... ) Q_PRINTF_FUNC(1, 2);
 //int		COM_ParseInfos( char *buf, int max, char infos[][MAX_INFO_STRING] );
 
 #define MAX_TOKENLENGTH		1024
@@ -789,7 +774,7 @@ void Parse2DMatrix (char **buf_p, int y, int x, float *m);
 void Parse3DMatrix (char **buf_p, int z, int y, int x, float *m);
 int Com_HexStrToInt( const char *str );
 
-int QDECL Com_sprintf (char *dest, int size, const char *fmt, ...) __attribute__ ((format (printf, 3, 4)));
+int QDECL Com_sprintf (char *dest, int size, const char *fmt, ...) Q_PRINTF_FUNC(3, 4);
 
 char *Com_SkipTokens( char *s, int numTokens, char *sep );
 char *Com_SkipCharset( char *s, char *sep );
@@ -867,7 +852,7 @@ float	LittleFloat (const float *l);
 
 void	Swap_Init (void);
 */
-char	* QDECL va(char *format, ...) __attribute__ ((format (printf, 1, 2)));
+char	* QDECL va(char *format, ...) Q_PRINTF_FUNC(1, 2);
 
 #define TRUNCATE_LENGTH	64
 void Com_TruncateLongString( char *buffer, const char *s );
@@ -886,8 +871,8 @@ qboolean Info_Validate( const char *s );
 void Info_NextPair( const char **s, char *key, char *value );
 
 // this is only here so the functions in q_shared.c and bg_*.c can link
-void	QDECL Com_Error( int level, const char *error, ... ) __attribute__ ((noreturn, format(printf, 2, 3)));
-void	QDECL Com_Printf( const char *msg, ... ) __attribute__ ((format (printf, 1, 2)));
+void	QDECL Com_Error( int level, const char *error, ... ) Q_NO_RETURN Q_PRINTF_FUNC(2, 3);
+void	QDECL Com_Printf( const char *msg, ... ) Q_PRINTF_FUNC(1, 2);
 
 
 /*

@@ -99,8 +99,10 @@ void CG_CheckOrderPending(void) {
 		}
 
 		if (cg_currentSelectedPlayer.integer == numSortedTeamPlayers) {
-			// to everyone
-			trap_SendConsoleCommand(va("cmd vsay_team %s\n", p2));
+			if (p2) {
+				// to everyone
+				trap_SendConsoleCommand(va("cmd vsay_team %s\n", p2));
+			}
 		} else {
 			// for the player self
 			if (sortedTeamPlayers[cg_currentSelectedPlayer.integer] == cg.snap->ps.clientNum && p1) {

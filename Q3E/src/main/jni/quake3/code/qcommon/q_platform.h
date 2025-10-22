@@ -69,8 +69,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #endif
 
-#ifndef __ASM_I386__ // don't include the C bits if included from qasm.h
-
 // for windows fastcall option
 #define QDECL
 #define QCALL
@@ -78,9 +76,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //================================================================= WIN64/32 ===
 
 #if defined(_WIN64) || defined(__WIN64__)
-
-#undef idx64
-#define idx64 1
 
 #undef QDECL
 #define QDECL __cdecl
@@ -97,10 +92,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ID_INLINE __inline
 #define PATH_SEP '\\'
 
-#if defined( __WIN64__ ) 
+#if defined(__x86_64__) || defined(_M_X64)
+#undef idx64
+#define idx64 1
 #define ARCH_STRING "x86_64"
-#elif defined _M_ALPHA
-#define ARCH_STRING "AXP"
+#define HAVE_VM_COMPILED
+#elif defined(__aarch64__) || defined(__ARM64__) || defined (_M_ARM64)
+#define ARCH_STRING "arm64"
 #endif
 
 #define Q3_LITTLE_ENDIAN
@@ -126,8 +124,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #if defined( _M_IX86 ) || defined( __i386__ )
 #define ARCH_STRING "x86"
-#elif defined _M_ALPHA
-#define ARCH_STRING "AXP"
+#define HAVE_VM_COMPILED
+#elif defined(__arm__) || defined(_M_ARM)
+#define ARCH_STRING "arm"
 #endif
 
 #define Q3_LITTLE_ENDIAN
@@ -137,7 +136,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 
-//============================================================== MAC OS X ===
+//================================================================ MAC OS ===
 
 #if defined(__APPLE__) || defined(__APPLE_CC__)
 
@@ -148,19 +147,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef __ppc__
 #define ARCH_STRING "ppc"
 #define Q3_BIG_ENDIAN
+#define HAVE_VM_COMPILED
 #elif defined __i386__
 #define ARCH_STRING "x86"
 #define Q3_LITTLE_ENDIAN
+#define HAVE_VM_COMPILED
 #elif defined __x86_64__
 #undef idx64
 #define idx64 1
 #define ARCH_STRING "x86_64"
 #define Q3_LITTLE_ENDIAN
+#define HAVE_VM_COMPILED
 #elif defined __aarch64__
 #define ARCH_STRING "arm64"
 #define Q3_LITTLE_ENDIAN
-#ifndef NO_VM_COMPILED
-#define NO_VM_COMPILED
+//karin: not support on arm64
+#ifdef NO_VM_COMPILED
+#undef HAVE_VM_COMPILED
 #endif
 #endif
 
@@ -186,8 +189,25 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define PATH_SEP '/'
 
-#if !defined(ARCH_STRING)
-# error ARCH_STRING should be defined by the Makefile
+#if defined(__x86_64__) || defined(__amd64__)
+# define ARCH_STRING "x86_64"
+# define HAVE_VM_COMPILED
+#elif defined(__i386__)
+# define ARCH_STRING "x86"
+# define HAVE_VM_COMPILED
+#elif defined(__aarch64__)
+# define ARCH_STRING "arm64"
+#elif defined(__arm__)
+# define ARCH_STRING "arm"
+# define HAVE_VM_COMPILED
+#elif defined(__powerpc64__) || defined(__ppc64__)
+# define ARCH_STRING "ppc64"
+# define HAVE_VM_COMPILED
+#elif defined(__powerpc__) || defined(__ppc__)
+# define ARCH_STRING "ppc"
+# define HAVE_VM_COMPILED
+#elif defined(__alpha__)
+# define ARCH_STRING "alpha"
 #endif
 
 #if defined __x86_64__
@@ -229,10 +249,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef __i386__
 #define ARCH_STRING "x86"
+#define HAVE_VM_COMPILED
 #elif defined __amd64__
 #undef idx64
 #define idx64 1
 #define ARCH_STRING "x86_64"
+#define HAVE_VM_COMPILED
 #elif defined __axp__
 #define ARCH_STRING "alpha"
 #endif
@@ -260,8 +282,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef __i386__
 #define ARCH_STRING "x86"
+#define HAVE_VM_COMPILED
 #elif defined __sparc
 #define ARCH_STRING "sparc"
+#define HAVE_VM_COMPILED
 #endif
 
 #if defined( _BIG_ENDIAN )
@@ -290,7 +314,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #endif
 
-//================================================================== EMSCRIPTEN ===
+//============================================================ EMSCRIPTEN ===
 
 #ifdef __EMSCRIPTEN__
 
@@ -322,13 +346,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //===========================================================================
 
-//catch missing defines in above blocks
-#if !defined( OS_STRING )
+// Catch missing defines in above blocks
+
+#ifndef OS_STRING
 #error "Operating system not supported"
 #endif
 
-#if !defined( ARCH_STRING )
-#error "Architecture not supported"
+#ifndef ARCH_STRING
+// ARCH_STRING is (mostly) only used for informational purposes, so we allow
+// it to be undefined so that more diverse architectures may be compiled
+#define ARCH_STRING "unknown"
 #endif
 
 #ifndef ID_INLINE
@@ -394,8 +421,6 @@ float FloatSwap (const float *f);
 #define PLATFORM_STRING OS_STRING "-" ARCH_STRING
 #else
 #define PLATFORM_STRING OS_STRING "-" ARCH_STRING "-debug"
-#endif
-
 #endif
 
 #endif

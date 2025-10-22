@@ -424,7 +424,7 @@ void G_MoverTeam( gentity_t *ent ) {
 
 	obstacle = NULL;
 
-	// make sure all team slaves can move before committing
+	// make sure all team members can move before committing
 	// any moves or calling any think functions
 	// if the move is blocked, all moved objects will be backed out
 	pushed_p = pushed;
@@ -478,7 +478,7 @@ G_RunMover
 void G_RunMover( gentity_t *ent ) {
 	// if not a team captain, don't do anything, because
 	// the captain will handle everything
-	if ( ent->flags & FL_TEAMSLAVE ) {
+	if ( ent->flags & FL_TEAMMEMBER ) {
 		return;
 	}
 
@@ -550,10 +550,10 @@ in the same amount of time
 ================
 */
 void MatchTeam( gentity_t *teamLeader, int moverState, int time ) {
-	gentity_t		*slave;
+	gentity_t		*member;
 
-	for ( slave = teamLeader ; slave ; slave = slave->teamchain ) {
-		SetMoverState( slave, moverState, time );
+	for ( member = teamLeader ; member ; member = member->teamchain ) {
+		SetMoverState( member, moverState, time );
 	}
 }
 
@@ -634,7 +634,7 @@ void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	int		partial;
 
 	// only the master should be used
-	if ( ent->flags & FL_TEAMSLAVE ) {
+	if ( ent->flags & FL_TEAMMEMBER ) {
 		Use_BinaryMover( ent->teammaster, other, activator );
 		return;
 	}
@@ -885,7 +885,7 @@ void Think_SpawnNewDoorTrigger( gentity_t *ent ) {
 		return;
 	}
 
-	// set all of the slaves as shootable
+	// set all of the members as shootable
 	for ( other = ent ; other ; other = other->teamchain ) {
 		other->takedamage = qtrue;
 	}
@@ -997,7 +997,7 @@ void SP_func_door (gentity_t *ent) {
 
 	ent->nextthink = level.time + FRAMETIME;
 
-	if ( ! (ent->flags & FL_TEAMSLAVE ) ) {
+	if ( ! (ent->flags & FL_TEAMMEMBER ) ) {
 		int health;
 
 		G_SpawnInt( "health", "0", &health );

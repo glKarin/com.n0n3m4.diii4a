@@ -33,9 +33,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALC_NO_PROTOTYPES
 #endif
 
-#ifdef USE_LOCAL_HEADERS
-#include "../AL/al.h"
-#include "../AL/alc.h"
+#ifdef USE_INTERNAL_OPENAL_HEADERS
+#include "AL/al.h"
+#include "AL/alc.h"
 #else
 #if defined(_MSC_VER) || defined(__APPLE__)
   // MSVC users must install the OpenAL SDK which doesn't use the AL/*.h scheme.

@@ -266,7 +266,7 @@ G_FindTeams
 Chain together all entities with a matching team field.
 Entity teams are used for item groups and multi-entity mover groups.
 
-All but the first will have the FL_TEAMSLAVE flag set and teammaster field set
+All but the first will have the FL_TEAMMEMBER flag set and teammaster field set
 All but the last will have the teamchain field set to the next one
 ================
 */
@@ -282,7 +282,7 @@ void G_FindTeams( void ) {
 			continue;
 		if (!e->team)
 			continue;
-		if (e->flags & FL_TEAMSLAVE)
+		if (e->flags & FL_TEAMMEMBER)
 			continue;
 		e->teammaster = e;
 		c++;
@@ -293,7 +293,7 @@ void G_FindTeams( void ) {
 				continue;
 			if (!e2->team)
 				continue;
-			if (e2->flags & FL_TEAMSLAVE)
+			if (e2->flags & FL_TEAMMEMBER)
 				continue;
 			if (!strcmp(e->team, e2->team))
 			{
@@ -301,7 +301,7 @@ void G_FindTeams( void ) {
 				e2->teamchain = e->teamchain;
 				e->teamchain = e2;
 				e2->teammaster = e;
-				e2->flags |= FL_TEAMSLAVE;
+				e2->flags |= FL_TEAMMEMBER;
 
 				// make sure that targets only point at the master
 				if ( e2->targetname ) {
@@ -540,7 +540,7 @@ void G_ShutdownGame( int restart ) {
 
 //===================================================================
 
-void QDECL Com_Error ( int level, const char *error, ... ) {
+void QDECL Com_Error ( int logLevel, const char *error, ... ) {
 	va_list		argptr;
 	char		text[1024];
 

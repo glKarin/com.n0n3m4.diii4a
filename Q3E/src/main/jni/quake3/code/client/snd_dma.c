@@ -620,7 +620,7 @@ static void S_Base_StartSoundEx( vec3_t origin, int entityNum, int entchannel, s
 					}
 				}
 				if (chosen == -1) {
-					Com_Printf("dropping sound\n");
+					Com_DPrintf("dropping sound\n");
 					return;
 				}
 			}
@@ -951,7 +951,7 @@ If raw data has been loaded in little endien binary form, this must be done.
 If raw data was calculated, as with ADPCM, this should not be called.
 =================
 */
-void S_ByteSwapRawSamples( int samples, int width, int s_channels, const byte *data ) {
+void S_ByteSwapRawSamples( int samples, int width, int numChannels, const byte *data ) {
 	int		i;
 
 	if ( width != 2 ) {
@@ -961,7 +961,7 @@ void S_ByteSwapRawSamples( int samples, int width, int s_channels, const byte *d
 		return;
 	}
 
-	if ( s_channels == 2 ) {
+	if ( numChannels == 2 ) {
 		samples <<= 1;
 	}
 	for ( i = 0 ; i < samples ; i++ ) {
@@ -976,7 +976,7 @@ S_Base_RawSamples
 Music streaming
 ============
 */
-void S_Base_RawSamples( int stream, int samples, int rate, int width, int s_channels, const byte *data, float volume, int entityNum)
+void S_Base_RawSamples( int stream, int samples, int rate, int width, int numChannels, const byte *data, float volume, int entityNum)
 {
 	int		i;
 	int		src, dst;
@@ -1018,7 +1018,7 @@ void S_Base_RawSamples( int stream, int samples, int rate, int width, int s_chan
 	scale = (float)rate / dma.speed;
 
 //Com_Printf ("%i < %i < %i\n", s_soundtime, s_paintedtime, s_rawend[stream]);
-	if (s_channels == 2 && width == 2)
+	if (numChannels == 2 && width == 2)
 	{
 		if (scale == 1.0)
 		{	// optimized case
@@ -1044,7 +1044,7 @@ void S_Base_RawSamples( int stream, int samples, int rate, int width, int s_chan
 			}
 		}
 	}
-	else if (s_channels == 1 && width == 2)
+	else if (numChannels == 1 && width == 2)
 	{
 		for (i=0 ; ; i++)
 		{
@@ -1057,7 +1057,7 @@ void S_Base_RawSamples( int stream, int samples, int rate, int width, int s_chan
 			rawsamples[dst].right = ((short *)data)[src] * intVolumeRight;
 		}
 	}
-	else if (s_channels == 2 && width == 1)
+	else if (numChannels == 2 && width == 1)
 	{
 		intVolumeLeft *= 256;
 		intVolumeRight *= 256;
@@ -1073,7 +1073,7 @@ void S_Base_RawSamples( int stream, int samples, int rate, int width, int s_chan
 			rawsamples[dst].right = ((char *)data)[src*2+1] * intVolumeRight;
 		}
 	}
-	else if (s_channels == 1 && width == 1)
+	else if (numChannels == 1 && width == 1)
 	{
 		intVolumeLeft *= 256;
 		intVolumeRight *= 256;

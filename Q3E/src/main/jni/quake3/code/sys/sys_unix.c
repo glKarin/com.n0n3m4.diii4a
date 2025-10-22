@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/stat.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -42,87 +43,246 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 qboolean stdinIsATTY;
 
-// Used to determine where to store user-specific files
-static char homePath[ MAX_OSPATH ] = { 0 };
+static char execBuffer[ 1024 ];
+static char *execBufferPointer;
+static char *execArgv[ 16 ];
+static int execArgc;
 
-// Used to store the Steam Quake 3 installation path
-static char steamPath[ MAX_OSPATH ] = { 0 };
+/*
+==============
+Sys_ClearExecBuffer
+==============
+*/
+static void Sys_ClearExecBuffer( void )
+{
+	execBufferPointer = execBuffer;
+	Com_Memset( execArgv, 0, sizeof( execArgv ) );
+	execArgc = 0;
+}
 
-// Used to store the GOG Quake 3 installation path
-static char gogPath[ MAX_OSPATH ] = { 0 };
+/*
+==============
+Sys_AppendToExecBuffer
+==============
+*/
+static void Sys_AppendToExecBuffer( const char *text )
+{
+	size_t size = sizeof( execBuffer ) - ( execBufferPointer - execBuffer );
+	int length = strlen( text ) + 1;
 
-// Used to store the Microsoft Store Quake 3 installation path
-static char microsoftStorePath[MAX_OSPATH] = { 0 };
+	if( length > size || execArgc >= ARRAY_LEN( execArgv ) )
+		return;
+
+	Q_strncpyz( execBufferPointer, text, size );
+	execArgv[ execArgc++ ] = execBufferPointer;
+
+	execBufferPointer += length;
+}
+
+/*
+==============
+Sys_Exec
+==============
+*/
+static int Sys_Exec( void )
+{
+	pid_t pid = fork( );
+
+	if( pid < 0 )
+		return -1;
+
+	if( pid )
+	{
+		// Parent
+		int exitCode;
+
+		wait( &exitCode );
+
+		return WEXITSTATUS( exitCode );
+	}
+	else
+	{
+		// Child
+		execvp( execArgv[ 0 ], execArgv );
+
+		// Failed to execute
+		exit( -1 );
+
+		return -1;
+	}
+}
+
+#ifdef __APPLE__
 
 /*
 ==================
 Sys_DefaultHomePath
 ==================
 */
-char *Sys_DefaultHomePath(void)
+static char *Sys_DefaultHomePath(void)
 {
+	static char homePath[ MAX_OSPATH ] = { 0 };
 	char *p;
 
-	if( !*homePath && com_homepath != NULL )
+	if( !*homePath )
 	{
-#ifdef __APPLE__
 		if( ( p = getenv( "HOME" ) ) != NULL )
 		{
-			Com_sprintf(homePath, sizeof(homePath), "%s%c", p, PATH_SEP);
+			Com_sprintf( homePath, sizeof(homePath), "%s%c%s",
+				p, PATH_SEP, "Library/Application Support/" );
 
-			Q_strcat(homePath, sizeof(homePath),
-				"Library/Application Support/");
-
-			if(com_homepath->string[0])
+			if( com_homepath && com_homepath->string[0] )
 				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
 			else
-				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_MACOSX);
+				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME);
 		}
-#elif defined(__ANDROID__) //karin: HOME env to cwd
+	}
+
+	return homePath;
+}
+
+char *Sys_DefaultHomeConfigPath(void) { return Sys_DefaultHomePath(); }
+char *Sys_DefaultHomeDataPath(void)   { return Sys_DefaultHomePath(); }
+char *Sys_DefaultHomeStatePath(void)  { return Sys_DefaultHomePath(); }
+
+#else // __APPLE__
+
+/*
+==================
+Sys_HomeConfigPath
+==================
+*/
+char *Sys_HomeConfigPath(void)
+{
+	static char homeConfigPath[ MAX_OSPATH ] = { 0 };
+	char *p;
+
+	if( !*homeConfigPath )
+	{
+#ifdef __ANDROID__ //karin: HOME env to cwd
 		if( ( p = getenv( "HOME" ) ) != NULL || ( p = Sys_Cwd()) != NULL )
 		{
-			Com_sprintf(homePath, sizeof(homePath), "%s%c", p, PATH_SEP);
-
-			if(com_homepath->string[0])
-				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
-			else
-				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_UNIX);
+			Com_sprintf(homeConfigPath, sizeof(homeConfigPath), "%s%c.config%c", p, PATH_SEP, PATH_SEP);
 		}
 #else
-		if( ( p = getenv( "FLATPAK_ID" ) ) != NULL && *p != '\0' )
+		if( ( p = getenv( "XDG_CONFIG_HOME" ) ) != NULL && *p != '\0' )
+			Com_sprintf(homeConfigPath, sizeof(homeConfigPath), "%s%c", p, PATH_SEP);
+		else if( ( p = getenv( "HOME" ) ) != NULL && *p != '\0' )
+			Com_sprintf(homeConfigPath, sizeof(homeConfigPath), "%s%c.config%c", p, PATH_SEP, PATH_SEP);
+#endif
+
+		if( *homeConfigPath )
 		{
-			if( ( p = getenv( "XDG_DATA_HOME" ) ) != NULL && *p != '\0' )
-			{
-				Com_sprintf(homePath, sizeof(homePath), "%s%c", p, PATH_SEP);
-			}
-			else if( ( p = getenv( "HOME" ) ) != NULL && *p != '\0' )
-			{
-				Com_sprintf(homePath, sizeof(homePath), "%s%c.local%cshare%c", p, PATH_SEP, PATH_SEP, PATH_SEP);
-			}
-
-			if( *homePath )
-			{
-				char *dir;
-
-				if(com_homepath->string[0])
-					dir = com_homepath->string;
-				else
-					dir = HOMEPATH_NAME_UNIX;
-
-				if(dir[0] == '.' && dir[1] != '\0')
-					dir++;
-
-				Q_strcat(homePath, sizeof(homePath), dir);
-			}
-		}
-		else if( ( p = getenv( "HOME" ) ) != NULL )
-		{
-			Com_sprintf(homePath, sizeof(homePath), "%s%c", p, PATH_SEP);
-
-			if(com_homepath->string[0])
-				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
+			if( com_homepath && com_homepath->string[0] )
+				Q_strcat(homeConfigPath, sizeof(homeConfigPath), com_homepath->string);
 			else
-				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_UNIX);
+				Q_strcat(homeConfigPath, sizeof(homeConfigPath), HOMEPATH_NAME);
+		}
+	}
+
+	return homeConfigPath;
+}
+
+/*
+==================
+Sys_HomeDataPath
+==================
+*/
+char *Sys_HomeDataPath(void)
+{
+	static char homeDataPath[ MAX_OSPATH ] = { 0 };
+	char *p;
+
+	if( !*homeDataPath )
+	{
+#ifdef __ANDROID__ //karin: HOME env to cwd
+		if( ( p = getenv( "HOME" ) ) != NULL || ( p = Sys_Cwd()) != NULL )
+		{
+			Com_sprintf(homeDataPath, sizeof(homeDataPath), "%s%c.local%cshare%c", p, PATH_SEP, PATH_SEP, PATH_SEP);
+		}
+#else
+		if( ( p = getenv( "XDG_DATA_HOME" ) ) != NULL && *p != '\0' )
+			Com_sprintf(homeDataPath, sizeof(homeDataPath), "%s%c", p, PATH_SEP);
+		else if( ( p = getenv( "HOME" ) ) != NULL && *p != '\0' )
+			Com_sprintf(homeDataPath, sizeof(homeDataPath), "%s%c.local%cshare%c", p, PATH_SEP, PATH_SEP, PATH_SEP);
+#endif
+
+		if( *homeDataPath )
+		{
+			if( com_homepath && com_homepath->string[0] )
+				Q_strcat(homeDataPath, sizeof(homeDataPath), com_homepath->string);
+			else
+				Q_strcat(homeDataPath, sizeof(homeDataPath), HOMEPATH_NAME);
+		}
+	}
+
+	return homeDataPath;
+}
+
+/*
+==================
+Sys_HomeStatePath
+==================
+*/
+char *Sys_HomeStatePath(void)
+{
+	static char homeStatePath[ MAX_OSPATH ] = { 0 };
+	char *p;
+
+	if( !*homeStatePath )
+	{
+#ifdef __ANDROID__ //karin: HOME env to cwd
+		if( ( p = getenv( "HOME" ) ) != NULL || ( p = Sys_Cwd()) != NULL )
+		{
+			Com_sprintf(homeStatePath, sizeof(homeStatePath), "%s%c.local%cstate%c", p, PATH_SEP, PATH_SEP, PATH_SEP);
+		}
+#else
+		if( ( p = getenv( "XDG_STATE_HOME" ) ) != NULL && *p != '\0' )
+			Com_sprintf(homeStatePath, sizeof(homeStatePath), "%s%c", p, PATH_SEP);
+		else if( ( p = getenv( "HOME" ) ) != NULL && *p != '\0' )
+			Com_sprintf(homeStatePath, sizeof(homeStatePath), "%s%c.local%cstate%c", p, PATH_SEP, PATH_SEP, PATH_SEP);
+#endif
+
+		if( *homeStatePath )
+		{
+			if( com_homepath && com_homepath->string[0] )
+				Q_strcat(homeStatePath, sizeof(homeStatePath), com_homepath->string);
+			else
+				Q_strcat(homeStatePath, sizeof(homeStatePath), HOMEPATH_NAME);
+		}
+	}
+
+	return homeStatePath;
+}
+
+/*
+==================
+Sys_LegacyHomePath
+==================
+*/
+static char *Sys_LegacyHomePath(void)
+{
+	static char homePath[ MAX_OSPATH ] = { 0 };
+	char *p;
+
+	if( ( p = getenv( "FLATPAK_ID" ) ) != NULL && *p != '\0' )
+	{
+		// Flatpaks always use XDG
+		return "";
+	}
+
+	if( !*homePath )
+	{
+		if( ( p = getenv( "HOME" ) ) != NULL && *p != '\0' )
+		{
+			Com_sprintf(homePath, sizeof(homePath), "%s%c%s",
+				p, PATH_SEP, HOMEPATH_NAME_UNIX_LEGACY);
+		}
+#ifdef __ANDROID__ //karin: HOME env to cwd
+		else if( ( p = Sys_Cwd()) != NULL )
+		{
+			Com_sprintf(homePath, sizeof(homePath), "%s%c%s",
+				p, PATH_SEP, HOMEPATH_NAME_UNIX_LEGACY);
 		}
 #endif
 	}
@@ -131,28 +291,233 @@ char *Sys_DefaultHomePath(void)
 }
 
 /*
+==================
+Sys_MigrateToXDG
+==================
+*/
+qboolean Sys_MigrateToXDG(void)
+{
+	const char *scriptTemplate =
+		"#!/bin/sh\n"
+
+		"set -eu\n"
+
+		"legacy_home=\"%s\"\n"
+		"xdg_config_home=\"%s\"\n"
+		"xdg_data_home=\"%s\"\n"
+		"xdg_state_home=\"%s\"\n"
+
+		"xdg_config_pattern=\"*.cfg\"\n"
+		"xdg_data_pattern=\"demos/*.dm_* *.log *.pk3 *.txt \\\n"
+		"    screenshots/*.jpg screenshots/*.tga videos/*.avi\"\n"
+		"xdg_state_pattern=\"*.dat q3history q3key\"\n"
+
+		"glob_copy() {\n"
+		"    game_dir=${1:+$1/}\n"
+		"    dst=\"$2\"\n"
+		"    shift 2\n"
+		"    for pattern in \"$@\"; do\n"
+		"        subdir=$(dirname \"$pattern\")\n"
+		"        [ \"$subdir\" = \".\" ] && subdir=\"\"\n"
+		"        find \"$legacy_home/$game_dir\" \\\n"
+		"            -path \"$legacy_home/$game_dir$pattern\" -type f \\\n"
+		"            -exec mkdir -p \"$dst/$game_dir$subdir\" \\; \\\n"
+		"            -exec cp -av {} \"$dst/$game_dir$subdir\" \\;\n"
+		"    done\n"
+		"}\n"
+
+		"unmatched_copy() {\n"
+		"    game_dir=${1:+$1/}\n"
+		"    shift\n"
+		"    find_args=\"\"\n"
+		"    for pattern in \"$@\"; do\n"
+		"        find_args=\"$find_args \\\n"
+		"            -not -path \\\"$legacy_home/$game_dir$pattern\\\"\"\n"
+		"    done\n"
+		"    eval \"find '$legacy_home/$game_dir' -type f $find_args\" | \\\n"
+		"    while IFS= read -r file; do\n"
+		"        dst=\"$xdg_data_home${file#$legacy_home}\"\n"
+		"        dst_dir=$(dirname \"$dst\")\n"
+		"        mkdir -p \"$dst_dir\"\n"
+		"        cp -av \"$file\" \"$dst\"\n"
+		"    done\n"
+		"}\n"
+
+		"echo \"Starting XDG migration...\"\n"
+
+		"glob_copy \"\" \"$xdg_state_home\" \"qkey\"\n"
+
+		"for game_dir in \"$legacy_home\"/*; do\n"
+		"    [ -d \"$game_dir\" ] || continue\n"
+		"    game=$(basename \"$game_dir\")\n"
+		"    glob_copy \"$game\" \"$xdg_config_home\" $xdg_config_pattern\n"
+		"    glob_copy \"$game\" \"$xdg_data_home\" $xdg_data_pattern\n"
+		"    glob_copy \"$game\" \"$xdg_state_home\" $xdg_state_pattern\n"
+		"    unmatched_copy \"$game\" \\\n"
+		"        $xdg_config_pattern \\\n"
+		"        $xdg_data_pattern \\\n"
+		"        $xdg_state_pattern\n"
+		"done\n"
+
+		"echo \"XDG migration complete!\"\n";
+
+	char scriptBuffer[2048];
+	int len = Com_sprintf( scriptBuffer, sizeof( scriptBuffer ), scriptTemplate,
+		Sys_LegacyHomePath( ), Sys_HomeConfigPath( ),
+		Sys_HomeDataPath( ), Sys_HomeStatePath( ) );
+
+	if( len < 0 || len >= (int)sizeof( scriptBuffer ) )
+	{
+		Com_Printf( "XDG migration error: substitution failed.\n" );
+		return qfalse;
+	}
+
+	char scriptPath[] = "/tmp/xdgmigrationXXXXXX";
+	int fd = mkstemp( scriptPath );
+	if( fd == -1 )
+	{
+		Com_Printf( "XDG migration error: script creation failed.\n" );
+		return qfalse;
+	}
+
+	if( write( fd, scriptBuffer, len ) != len )
+	{
+		close( fd );
+		unlink( scriptPath );
+		Com_Printf( "XDG migration error: script write failed.\n" );
+		return qfalse;
+	}
+	close( fd );
+
+	if( chmod( scriptPath, 0700 ) == -1 )
+	{
+		unlink( scriptPath );
+		Com_Printf( "XDG migration error: script chmod failed.\n" );
+		return qfalse;
+	}
+
+	Sys_ClearExecBuffer( );
+	Sys_AppendToExecBuffer( scriptPath );
+	int result = Sys_Exec( );
+	unlink( scriptPath );
+
+	return result == 0;
+}
+
+/*
+==================
+Sys_ShouldUseLegacyHomePath
+==================
+*/
+static qboolean Sys_ShouldUseLegacyHomePath(void)
+{
+#ifdef __ANDROID__ //karin: using old .q3a directory
+	return qtrue;
+#else
+	if( access( Sys_HomeConfigPath( ), F_OK ) == 0 )
+	{
+		// If the XDG config directory exists, prefer XDG layout, regardless
+		return qfalse;
+	}
+
+	if( ( com_homepath && com_homepath->string[0] ) ||
+		Cvar_VariableString( "fs_homepath" )[0] )
+	{
+		// If a custom homepath has been explicity set then
+		// that strongly implies that migration isn't desired
+		return qfalse;
+	}
+
+	const char *legacyHomePath = Sys_LegacyHomePath();
+
+	if( !*legacyHomePath || access( legacyHomePath, F_OK ) != 0 )
+	{
+		// The legacy home path doesn't exist
+		return qfalse;
+	}
+
+	char migrationRefusedPath[ MAX_OSPATH ];
+	Com_sprintf( migrationRefusedPath, sizeof( migrationRefusedPath ),
+		"%s/.xdgMigrationRefused", legacyHomePath );
+
+	// If the user hasn't already refused, ask if they want to migrate
+	if( access( migrationRefusedPath, F_OK ) != 0 )
+	{
+		dialogResult_t result = Sys_Dialog( DT_YES_NO, va(
+			"Modern games and applications store files in "
+			"directories according to the Free Desktop standard. "
+			"Here's what that would look like for %s:\n\n"
+			"Configuration files:\n  %s\n\n"
+			"Data files; pk3s, screenshots, logs, demos, etc.:\n  %s\n\n"
+			"Internal runtime files:\n  %s\n\n"
+			"At the moment all of these files are found here:\n  %s\n\n"
+			"Do you want to copy your files to these new directories?",
+			PRODUCT_NAME,
+			Sys_HomeConfigPath( ), Sys_HomeDataPath( ), Sys_HomeStatePath( ),
+			legacyHomePath ),
+			"Home Directory Files Upgrade" );
+
+		if( result == DR_YES )
+			return !Sys_MigrateToXDG( );
+
+		// Guard against asking again in future
+		fclose( fopen( migrationRefusedPath, "w" ) );
+	}
+
+	return qtrue;
+#endif
+}
+
+/*
+==================
+Sys_DefaultHomeConfigPath
+==================
+*/
+char *Sys_DefaultHomeConfigPath(void)
+{
+	if( Sys_ShouldUseLegacyHomePath( ) )
+		return Sys_LegacyHomePath( );
+
+	return Sys_HomeConfigPath( );
+}
+
+/*
+==================
+Sys_DefaultHomeDataPath
+==================
+*/
+char *Sys_DefaultHomeDataPath(void)
+{
+	if( Sys_ShouldUseLegacyHomePath( ) )
+		return Sys_LegacyHomePath( );
+
+	return Sys_HomeDataPath( );
+}
+
+/*
+==================
+Sys_DefaultHomeStatePath
+==================
+*/
+char *Sys_DefaultHomeStatePath(void)
+{
+	if( Sys_ShouldUseLegacyHomePath( ) )
+		return Sys_LegacyHomePath( );
+
+	return Sys_HomeStatePath( );
+}
+
+#endif
+
+/*
 ================
 Sys_SteamPath
 ================
 */
 char *Sys_SteamPath( void )
 {
-	// Disabled since Steam doesn't let you install Quake 3 on Mac/Linux
-#if 0 //#ifdef STEAMPATH_NAME
-	char *p;
-
-	if( ( p = getenv( "HOME" ) ) != NULL )
-	{
-#ifdef __APPLE__
-		char *steamPathEnd = "/Library/Application Support/Steam/SteamApps/common/" STEAMPATH_NAME;
-#else
-		char *steamPathEnd = "/.steam/steam/SteamApps/common/" STEAMPATH_NAME;
-#endif
-		Com_sprintf(steamPath, sizeof(steamPath), "%s%s", p, steamPathEnd);
-	}
-#endif
-
-	return steamPath;
+	// Steam doesn't let you install Quake 3 on Mac/Linux
+	return "";
 }
 
 /*
@@ -162,8 +527,8 @@ Sys_GogPath
 */
 char *Sys_GogPath( void )
 {
-	// GOG also doesn't let you install Quake 3 on Mac/Linux
-	return gogPath;
+	// GOG doesn't let you install Quake 3 on Mac/Linux
+	return "";
 }
 
 /*
@@ -174,7 +539,7 @@ Sys_MicrosoftStorePath
 char* Sys_MicrosoftStorePath(void)
 {
 	// Microsoft Store doesn't exist on Mac/Linux
-	return microsoftStorePath;
+	return "";
 }
 
 
@@ -360,6 +725,24 @@ char *Sys_Cwd( void )
 	cwd[MAX_OSPATH-1] = 0;
 
 	return cwd;
+}
+
+/*
+==================
+Sys_BinaryPathRelative
+==================
+*/
+char *Sys_BinaryPathRelative(const char *relative)
+{
+	static char resolved[MAX_OSPATH];
+	char combined[MAX_OSPATH];
+
+	snprintf(combined, sizeof(combined), "%s/%s", Sys_BinaryPath(), relative);
+
+	if (!realpath(combined, resolved))
+		return NULL;
+
+	return resolved;
 }
 
 /*
@@ -615,11 +998,10 @@ void Sys_ErrorDialog( const char *error )
 	char buffer[ 1024 ];
 	unsigned int size;
 	int f = -1;
-	const char *homepath = Cvar_VariableString( "fs_homepath" );
+	const char *homedatapath = Cvar_VariableString( "fs_homedatapath" );
 	const char *gamedir = Cvar_VariableString( "fs_game" );
 	const char *fileName = "crashlog.txt";
-	char *dirpath = FS_BuildOSPath( homepath, gamedir, "");
-	char *ospath = FS_BuildOSPath( homepath, gamedir, fileName );
+	char *ospath = FS_BuildOSPath( homedatapath, gamedir, fileName );
 
 	Sys_Print( va( "%s\n", error ) );
 
@@ -628,16 +1010,9 @@ void Sys_ErrorDialog( const char *error )
 #endif
 
 	// Make sure the write path for the crashlog exists...
-
-	if(!Sys_Mkdir(homepath))
+	if( FS_CreatePath( homedatapath ) )
 	{
-		Com_Printf("ERROR: couldn't create path '%s' for crash log.\n", homepath);
-		return;
-	}
-
-	if(!Sys_Mkdir(dirpath))
-	{
-		Com_Printf("ERROR: couldn't create path '%s' for crash log.\n", dirpath);
+		Com_Printf("ERROR: couldn't create path '%s' for crash log.\n", ospath);
 		return;
 	}
 
@@ -663,75 +1038,6 @@ void Sys_ErrorDialog( const char *error )
 }
 
 #ifndef __APPLE__
-static char execBuffer[ 1024 ];
-static char *execBufferPointer;
-static char *execArgv[ 16 ];
-static int execArgc;
-
-/*
-==============
-Sys_ClearExecBuffer
-==============
-*/
-static void Sys_ClearExecBuffer( void )
-{
-	execBufferPointer = execBuffer;
-	Com_Memset( execArgv, 0, sizeof( execArgv ) );
-	execArgc = 0;
-}
-
-/*
-==============
-Sys_AppendToExecBuffer
-==============
-*/
-static void Sys_AppendToExecBuffer( const char *text )
-{
-	size_t size = sizeof( execBuffer ) - ( execBufferPointer - execBuffer );
-	int length = strlen( text ) + 1;
-
-	if( length > size || execArgc >= ARRAY_LEN( execArgv ) )
-		return;
-
-	Q_strncpyz( execBufferPointer, text, size );
-	execArgv[ execArgc++ ] = execBufferPointer;
-
-	execBufferPointer += length;
-}
-
-/*
-==============
-Sys_Exec
-==============
-*/
-static int Sys_Exec( void )
-{
-	pid_t pid = fork( );
-
-	if( pid < 0 )
-		return -1;
-
-	if( pid )
-	{
-		// Parent
-		int exitCode;
-
-		wait( &exitCode );
-
-		return WEXITSTATUS( exitCode );
-	}
-	else
-	{
-		// Child
-		execvp( execArgv[ 0 ], execArgv );
-
-		// Failed to execute
-		exit( -1 );
-
-		return -1;
-	}
-}
-
 /*
 ==============
 Sys_ZenityCommand
@@ -1087,4 +1393,24 @@ qboolean Sys_DllExtension( const char *name ) {
 	}
 
 	return qfalse;
+}
+
+/*
+==============
+Sys_OpenFolderInPlatformFileManager
+==============
+*/
+qboolean Sys_OpenFolderInPlatformFileManager( const char *path )
+{
+	Sys_ClearExecBuffer( );
+
+#ifdef __APPLE__
+	Sys_AppendToExecBuffer( "open" );
+#else
+	Sys_AppendToExecBuffer( "xdg-open" );
+#endif
+
+	Sys_AppendToExecBuffer( path );
+
+	return Sys_Exec( ) == 0;
 }

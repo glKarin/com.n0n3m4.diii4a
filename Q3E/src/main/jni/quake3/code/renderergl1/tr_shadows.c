@@ -57,7 +57,7 @@ static glIndex_t indexes[6*MAX_EDGE_DEFS*SHADER_MAX_VERTEXES];
 static int idx = 0;
 #endif
 
-void R_AddEdgeDef( int i1, int i2, int facing ) {
+void R_AddEdgeDef( int i1, int i2, int localFacing ) {
 	int		c;
 
 	c = numEdgeDefs[ i1 ];
@@ -65,7 +65,7 @@ void R_AddEdgeDef( int i1, int i2, int facing ) {
 		return;		// overflow
 	}
 	edgeDefs[ i1 ][ c ].i2 = i2;
-	edgeDefs[ i1 ][ c ].facing = facing;
+	edgeDefs[ i1 ][ c ].facing = localFacing;
 
 	numEdgeDefs[ i1 ]++;
 }
@@ -105,7 +105,6 @@ void R_RenderShadowEdges( void ) {
 	int		c, c2;
 	int		j, k;
 	int		i2;
-	int		c_edges, c_rejected;
 	int		hit[2];
 #ifdef USE_OPENGLES //karin: use glDrawElements on GLES 1.1
 	idx = 0;
@@ -115,8 +114,6 @@ void R_RenderShadowEdges( void ) {
 	// or if it has a reverse paired edge that also faces the light.
 	// A well behaved polyhedron would have exactly two faces for each edge,
 	// but lots of models have dangling edges or overfanned edges
-	c_edges = 0;
-	c_rejected = 0;
 
 	for ( i = 0 ; i < tess.numVertexes ; i++ ) {
 		c = numEdgeDefs[ i ];
@@ -156,9 +153,6 @@ void R_RenderShadowEdges( void ) {
 				qglVertex3fv( shadowXyz[ i2 ] );
 				qglEnd();
 #endif
-				c_edges++;
-			} else {
-				c_rejected++;
 			}
 		}
 	}

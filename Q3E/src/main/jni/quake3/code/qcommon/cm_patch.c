@@ -1260,7 +1260,7 @@ void CM_TracePointThroughPatchCollide( traceWork_t *tw, const struct patchCollid
 	qboolean	frontFacing[MAX_PATCH_PLANES];
 	float		intersection[MAX_PATCH_PLANES];
 	float		intersect;
-	const patchPlane_t	*planes;
+	const patchPlane_t	*pcPlanes;
 	const facet_t	*facet;
 	int			i, j, k;
 	float		offset;
@@ -1276,11 +1276,11 @@ void CM_TracePointThroughPatchCollide( traceWork_t *tw, const struct patchCollid
 #endif
 
 	// determine the trace's relationship to all planes
-	planes = pc->planes;
-	for ( i = 0 ; i < pc->numPlanes ; i++, planes++ ) {
-		offset = DotProduct( tw->offsets[ planes->signbits ], planes->plane );
-		d1 = DotProduct( tw->start, planes->plane ) - planes->plane[3] + offset;
-		d2 = DotProduct( tw->end, planes->plane ) - planes->plane[3] + offset;
+	pcPlanes = pc->planes;
+	for ( i = 0 ; i < pc->numPlanes ; i++, pcPlanes++ ) {
+		offset = DotProduct( tw->offsets[ pcPlanes->signbits ], pcPlanes->plane );
+		d1 = DotProduct( tw->start, pcPlanes->plane ) - pcPlanes->plane[3] + offset;
+		d2 = DotProduct( tw->end, pcPlanes->plane ) - pcPlanes->plane[3] + offset;
 		if ( d1 <= 0 ) {
 			frontFacing[i] = qfalse;
 		} else {
@@ -1333,20 +1333,20 @@ void CM_TracePointThroughPatchCollide( traceWork_t *tw, const struct patchCollid
 				debugFacet = facet;
 			}
 #endif //BSPC
-			planes = &pc->planes[facet->surfacePlane];
+			pcPlanes = &pc->planes[facet->surfacePlane];
 
 			// calculate intersection with a slight pushoff
-			offset = DotProduct( tw->offsets[ planes->signbits ], planes->plane );
-			d1 = DotProduct( tw->start, planes->plane ) - planes->plane[3] + offset;
-			d2 = DotProduct( tw->end, planes->plane ) - planes->plane[3] + offset;
+			offset = DotProduct( tw->offsets[ pcPlanes->signbits ], pcPlanes->plane );
+			d1 = DotProduct( tw->start, pcPlanes->plane ) - pcPlanes->plane[3] + offset;
+			d2 = DotProduct( tw->end, pcPlanes->plane ) - pcPlanes->plane[3] + offset;
 			tw->trace.fraction = ( d1 - SURFACE_CLIP_EPSILON ) / ( d1 - d2 );
 
 			if ( tw->trace.fraction < 0 ) {
 				tw->trace.fraction = 0;
 			}
 
-			VectorCopy( planes->plane,  tw->trace.plane.normal );
-			tw->trace.plane.dist = planes->plane[3];
+			VectorCopy( pcPlanes->plane,  tw->trace.plane.normal );
+			tw->trace.plane.dist = pcPlanes->plane[3];
 		}
 	}
 }
@@ -1405,7 +1405,7 @@ CM_TraceThroughPatchCollide
 void CM_TraceThroughPatchCollide( traceWork_t *tw, const struct patchCollide_s *pc ) {
 	int i, j, hit, hitnum;
 	float offset, enterFrac, leaveFrac, t;
-	patchPlane_t *planes;
+	patchPlane_t *pcPlanes;
 	facet_t	*facet;
 	float plane[4] = {0, 0, 0, 0}, bestplane[4] = {0, 0, 0, 0};
 	vec3_t startp, endp;
@@ -1429,9 +1429,9 @@ void CM_TraceThroughPatchCollide( traceWork_t *tw, const struct patchCollide_s *
 		leaveFrac = 1.0;
 		hitnum = -1;
 		//
-		planes = &pc->planes[ facet->surfacePlane ];
-		VectorCopy(planes->plane, plane);
-		plane[3] = planes->plane[3];
+		pcPlanes = &pc->planes[ facet->surfacePlane ];
+		VectorCopy(pcPlanes->plane, plane);
+		plane[3] = pcPlanes->plane[3];
 		if ( tw->sphere.use ) {
 			// adjust the plane distance appropriately for radius
 			plane[3] += tw->sphere.radius;
@@ -1448,7 +1448,7 @@ void CM_TraceThroughPatchCollide( traceWork_t *tw, const struct patchCollide_s *
 			}
 		}
 		else {
-			offset = DotProduct( tw->offsets[ planes->signbits ], plane);
+			offset = DotProduct( tw->offsets[ pcPlanes->signbits ], plane);
 			plane[3] -= offset;
 			VectorCopy( tw->start, startp );
 			VectorCopy( tw->end, endp );
@@ -1462,14 +1462,14 @@ void CM_TraceThroughPatchCollide( traceWork_t *tw, const struct patchCollide_s *
 		}
 
 		for ( j = 0; j < facet->numBorders; j++ ) {
-			planes = &pc->planes[ facet->borderPlanes[j] ];
+			pcPlanes = &pc->planes[ facet->borderPlanes[j] ];
 			if (facet->borderInward[j]) {
-				VectorNegate(planes->plane, plane);
-				plane[3] = -planes->plane[3];
+				VectorNegate(pcPlanes->plane, plane);
+				plane[3] = -pcPlanes->plane[3];
 			}
 			else {
-				VectorCopy(planes->plane, plane);
-				plane[3] = planes->plane[3];
+				VectorCopy(pcPlanes->plane, plane);
+				plane[3] = pcPlanes->plane[3];
 			}
 			if ( tw->sphere.use ) {
 				// adjust the plane distance appropriately for radius
@@ -1488,7 +1488,7 @@ void CM_TraceThroughPatchCollide( traceWork_t *tw, const struct patchCollide_s *
 			}
 			else {
 				// NOTE: this works even though the plane might be flipped because the bbox is centered
-				offset = DotProduct( tw->offsets[ planes->signbits ], plane);
+				offset = DotProduct( tw->offsets[ pcPlanes->signbits ], plane);
 				plane[3] += fabs(offset);
 				VectorCopy( tw->start, startp );
 				VectorCopy( tw->end, endp );
@@ -1546,7 +1546,7 @@ CM_PositionTestInPatchCollide
 qboolean CM_PositionTestInPatchCollide( traceWork_t *tw, const struct patchCollide_s *pc ) {
 	int i, j;
 	float offset, t;
-	patchPlane_t *planes;
+	patchPlane_t *pcPlanes;
 	facet_t	*facet;
 	float plane[4];
 	vec3_t startp;
@@ -1557,9 +1557,9 @@ qboolean CM_PositionTestInPatchCollide( traceWork_t *tw, const struct patchColli
 	//
 	facet = pc->facets;
 	for ( i = 0 ; i < pc->numFacets ; i++, facet++ ) {
-		planes = &pc->planes[ facet->surfacePlane ];
-		VectorCopy(planes->plane, plane);
-		plane[3] = planes->plane[3];
+		pcPlanes = &pc->planes[ facet->surfacePlane ];
+		VectorCopy(pcPlanes->plane, plane);
+		plane[3] = pcPlanes->plane[3];
 		if ( tw->sphere.use ) {
 			// adjust the plane distance appropriately for radius
 			plane[3] += tw->sphere.radius;
@@ -1574,7 +1574,7 @@ qboolean CM_PositionTestInPatchCollide( traceWork_t *tw, const struct patchColli
 			}
 		}
 		else {
-			offset = DotProduct( tw->offsets[ planes->signbits ], plane);
+			offset = DotProduct( tw->offsets[ pcPlanes->signbits ], plane);
 			plane[3] -= offset;
 			VectorCopy( tw->start, startp );
 		}
@@ -1584,14 +1584,14 @@ qboolean CM_PositionTestInPatchCollide( traceWork_t *tw, const struct patchColli
 		}
 
 		for ( j = 0; j < facet->numBorders; j++ ) {
-			planes = &pc->planes[ facet->borderPlanes[j] ];
+			pcPlanes = &pc->planes[ facet->borderPlanes[j] ];
 			if (facet->borderInward[j]) {
-				VectorNegate(planes->plane, plane);
-				plane[3] = -planes->plane[3];
+				VectorNegate(pcPlanes->plane, plane);
+				plane[3] = -pcPlanes->plane[3];
 			}
 			else {
-				VectorCopy(planes->plane, plane);
-				plane[3] = planes->plane[3];
+				VectorCopy(pcPlanes->plane, plane);
+				plane[3] = pcPlanes->plane[3];
 			}
 			if ( tw->sphere.use ) {
 				// adjust the plane distance appropriately for radius
@@ -1608,7 +1608,7 @@ qboolean CM_PositionTestInPatchCollide( traceWork_t *tw, const struct patchColli
 			}
 			else {
 				// NOTE: this works even though the plane might be flipped because the bbox is centered
-				offset = DotProduct( tw->offsets[ planes->signbits ], plane);
+				offset = DotProduct( tw->offsets[ pcPlanes->signbits ], plane);
 				plane[3] += fabs(offset);
 				VectorCopy( tw->start, startp );
 			}

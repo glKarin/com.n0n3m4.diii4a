@@ -855,7 +855,6 @@ static qboolean SurfIsOffscreen( const drawSurf_t *drawSurf, vec4_t clipDest[128
 	int dlighted;
 	vec4_t clip, eye;
 	int i;
-	unsigned int pointOr = 0;
 	unsigned int pointAnd = (unsigned int)~0;
 
 	R_RotateForViewer();
@@ -885,7 +884,6 @@ static qboolean SurfIsOffscreen( const drawSurf_t *drawSurf, vec4_t clipDest[128
 			}
 		}
 		pointAnd &= pointFlags;
-		pointOr |= pointFlags;
 	}
 
 	// trivially reject
@@ -1046,7 +1044,7 @@ DRAWSURF SORTING
 R_Radix
 ===============
 */
-static ID_INLINE void R_Radix( int byte, int size, drawSurf_t *source, drawSurf_t *dest )
+static ID_INLINE void R_Radix( int offset, int size, drawSurf_t *source, drawSurf_t *dest )
 {
   int           count[ 256 ] = { 0 };
   int           index[ 256 ];
@@ -1054,7 +1052,7 @@ static ID_INLINE void R_Radix( int byte, int size, drawSurf_t *source, drawSurf_
   unsigned char *sortKey = NULL;
   unsigned char *end = NULL;
 
-  sortKey = ( (unsigned char *)&source[ 0 ].sort ) + byte;
+  sortKey = ( (unsigned char *)&source[ 0 ].sort ) + offset;
   end = sortKey + ( size * sizeof( drawSurf_t ) );
   for( ; sortKey < end; sortKey += sizeof( drawSurf_t ) )
     ++count[ *sortKey ];
@@ -1064,7 +1062,7 @@ static ID_INLINE void R_Radix( int byte, int size, drawSurf_t *source, drawSurf_
   for( i = 1; i < 256; ++i )
     index[ i ] = index[ i - 1 ] + count[ i - 1 ];
 
-  sortKey = ( (unsigned char *)&source[ 0 ].sort ) + byte;
+  sortKey = ( (unsigned char *)&source[ 0 ].sort ) + offset;
   for( i = 0; i < size; ++i, sortKey += sizeof( drawSurf_t ) )
     dest[ index[ *sortKey ]++ ] = source[ i ];
 }

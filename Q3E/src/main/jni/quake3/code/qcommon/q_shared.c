@@ -753,7 +753,7 @@ int Q_isalpha( int c )
 qboolean Q_isanumber( const char *s )
 {
 	char *p;
-	double UNUSED_VAR d;
+	double Q_UNUSED_VAR d;
 
 	if( *s == '\0' )
 		return qfalse;
@@ -1301,12 +1301,22 @@ can mess up the server's parsing
 ==================
 */
 qboolean Info_Validate( const char *s ) {
-	if ( strchr( s, '\"' ) ) {
-		return qfalse;
+	const char* ch = s;
+
+	while ( *ch != '\0' )
+	{
+		if( !Q_isprint( *ch ) )
+			return qfalse;
+
+		if( *ch == '\"' )
+			return qfalse;
+
+		if( *ch == ';' )
+			return qfalse;
+
+		++ch;
 	}
-	if ( strchr( s, ';' ) ) {
-		return qfalse;
-	}
+
 	return qtrue;
 }
 

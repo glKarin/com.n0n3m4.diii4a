@@ -63,6 +63,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define STAT_MINUS			10	// num frame for '-' stats digit
 
 #define	ICON_SIZE			48
+#undef	CHAR_WIDTH				// ignore define from libc
 #define	CHAR_WIDTH			32
 #define	CHAR_HEIGHT			48
 #define	TEXT_ICON_SPACE		4
@@ -1197,8 +1198,8 @@ extern	vmCvar_t		cg_obeliskRespawnDelay;
 const char *CG_ConfigString( int index );
 const char *CG_Argv( int arg );
 
-void QDECL CG_Printf( const char *msg, ... ) __attribute__ ((format (printf, 1, 2)));
-void QDECL CG_Error( const char *msg, ... ) __attribute__ ((noreturn, format (printf, 1, 2)));
+void QDECL CG_Printf( const char *msg, ... ) Q_PRINTF_FUNC(1, 2);
+void QDECL CG_Error( const char *msg, ... ) Q_NO_RETURN Q_PRINTF_FUNC(1, 2);
 
 void CG_StartMusic( void );
 
@@ -1482,7 +1483,7 @@ void CG_CheckChangedPredictableEvents( playerState_t *ps );
 void		trap_Print( const char *fmt );
 
 // abort the game
-void		trap_Error(const char *fmt) __attribute__((noreturn));
+void		trap_Error(const char *fmt) Q_NO_RETURN;
 
 // milliseconds should only be used for performance tuning, never
 // for anything game related.  Get time from the CG_DrawActiveFrame parameter

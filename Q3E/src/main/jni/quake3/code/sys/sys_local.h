@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #	include <EGL/egl.h>
 #	include <GLES/gl.h>
 #else
-#ifdef USE_LOCAL_HEADERS
+#ifdef USE_INTERNAL_SDL_HEADERS
 #	include "SDL_version.h"
 #else
 #	include <SDL_version.h>
@@ -55,6 +55,9 @@ unsigned int CON_LogSize( void );
 unsigned int CON_LogWrite( const char *in );
 unsigned int CON_LogRead( char *out, unsigned int outSize );
 
+char *Sys_BinaryPath( void );
+char *Sys_BinaryPathRelative( const char *relative );
+
 #ifdef __APPLE__
 char *Sys_StripAppBundle( char *pwd );
 #endif
@@ -63,12 +66,14 @@ void Sys_GLimpSafeInit( void );
 void Sys_GLimpInit( void );
 void Sys_PlatformInit( void );
 void Sys_PlatformExit( void );
-void Sys_SigHandler( int signal ) __attribute__ ((noreturn));
+void Sys_SigHandler( int signal ) Q_NO_RETURN;
 void Sys_ErrorDialog( const char *error );
 void Sys_AnsiColorPrint( const char *msg );
 
 int Sys_PID( void );
 qboolean Sys_PIDIsRunning( int pid );
+
+qboolean Sys_OpenFolderInPlatformFileManager( const char *path );
 
 #ifdef PROTOCOL_HANDLER
 char *Sys_ParseProtocolUri( const char *uri );

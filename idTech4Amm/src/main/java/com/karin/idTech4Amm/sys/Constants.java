@@ -30,9 +30,13 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
+            "Fix font offset in GUIs on Quake 4.",
+            "Add Unreal engine psk/psa animation model support on DOOM3/Quake 4/Prey",
+            "Fix a sound distance volume bug on Quake 4.",
             "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
-            "FTEQW is removed in this release.",
             "Add fixed ratio resolution support on launcher `Graphics` tab.",
+            "Update ioquake3(Quake 3), Darkplace(Quake 1).",
+            "FTEQW is removed in this release.",
         };
 	};
 

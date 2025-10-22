@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef USE_LOCAL_HEADERS
-#include "../zlib/zlib.h"
+#ifdef USE_INTERNAL_ZLIB
+#include "zlib.h"
 #else
 #include <zlib.h>
 #endif

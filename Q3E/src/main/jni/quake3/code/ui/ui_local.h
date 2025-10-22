@@ -611,7 +611,7 @@ typedef struct {
 #define MAX_HEADNAME  32
 #define MAX_TEAMS 64
 #define MAX_GAMETYPES 16
-#define MAX_MAPS 128
+#define MAX_MAPS MAX_ARENAS
 #define MAX_SPMAPS 16
 #define PLAYERS_PER_TEAM 5
 #define MAX_PINGREQUESTS		32
@@ -918,7 +918,7 @@ void UI_SPSkillMenu_Cache( void );
 // ui_syscalls.c
 //
 void			trap_Print( const char *string );
-void			trap_Error(const char *string) __attribute__((noreturn));
+void			trap_Error(const char *string) Q_NO_RETURN;
 int				trap_Milliseconds( void );
 void			trap_Cvar_Register( vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags );
 void			trap_Cvar_Update( vmCvar_t *vmCvar );
