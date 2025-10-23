@@ -17,12 +17,10 @@ else()
     set(PRODUCT_FLAVOR_IS_FDROID False)
 endif()
 
-#[[OPTION(BUILD_D3        "Build DOOM 3"    OFF)
-OPTION(BUILD_Q4        "Build Quake 4"    OFF)
-OPTION(BUILD_PREY      "Build Prey"    OFF)
-OPTION(BUILD_D3_MOD		"Build all DOOM3 mods" OFF)
-OPTION(BUILD_Q4_MOD		"Build all Quake4 mods" OFF)]]
-OPTION(BUILD_BACKPORT        "Build backport version"    OFF)
+
+
+# Backport
+OPTION(BUILD_BACKPORT               "Build backport version"                        OFF)
 
 
 # Supported
@@ -36,15 +34,20 @@ OPTION(GAME_DOOM3BFG                "Build DOOM 3 BFG"                          
 OPTION(GAME_DOOM                    "Build GZDOOM"                                  ON)
 OPTION(GAME_ETW                     "Build Wolfenstein: Enemy Territory"            ON)
 OPTION(GAME_REALRTCW                "Build RealRTCW"                                ON)
-OPTION(GAME_FTEQW                   "Build FTEQW"                                   ON)
 OPTION(GAME_JK                      "Build Jedi Knight"                             ON)
 OPTION(GAME_SERIOUSSAM              "Build Serious Sam"                             ON)
 OPTION(GAME_URT                     "Build Urbant Error"                            ON)
 OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"          ON)
+# Not in F-Droid
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_XASH3D                  "Build Xash3D"                                  ON)
 OPTION(GAME_SOURCE                  "Build Source"                                  ON)
 endif()
+
+
+# Disabled
+OPTION(GAME_FTEQW                   "Build FTEQW"                                   OFF)
+
 
 # Experimental
 OPTION(GAME_Q3RALLY                 "Build Quake 3 Rally"                           OFF)

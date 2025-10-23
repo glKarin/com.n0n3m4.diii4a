@@ -86,6 +86,9 @@ idCVar idSoundSystemLocal::s_useEAXReverb("s_useEAXReverb", "0", CVAR_SOUND | CV
 #endif
 idCVar idSoundSystemLocal::s_muteEAXReverb("s_muteEAXReverb", "0", CVAR_SOUND | CVAR_BOOL, "mute eax reverb");
 idCVar idSoundSystemLocal::s_decompressionLimit("s_decompressionLimit", "6", CVAR_SOUND | CVAR_INTEGER | CVAR_ARCHIVE, "specifies maximum uncompressed sample length in seconds");
+idCVar s_deviceName("s_deviceName", "", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL device name"); // Quake4/Prey
+idCVar harm_s_openALDriver("harm_s_openALDriver", "", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL soft driver name(ALSOFT_DRIVERS)");
+idCVar harm_s_openALLogLevel("harm_s_openALLogLevel", "-1", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "OpenAL soft log level(ALSOFT_LOGLEVEL)", -1, 3, idCmdSystem::ArgCompletion_Integer<-1, 3>);
 #else
 idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "openal32.dll", CVAR_SOUND | CVAR_ROM, "OpenAL is not supported in this build");
 idCVar idSoundSystemLocal::s_useOpenAL("s_useOpenAL", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ROM, "OpenAL is not supported in this build");
@@ -95,6 +98,21 @@ idCVar idSoundSystemLocal::s_decompressionLimit("s_decompressionLimit", "6", CVA
 #endif
 #ifdef _OPENAL_EFX
 idCVar idSoundSystemLocal::s_alReverbGain( "s_alReverbGain", "0.5", CVAR_SOUND | CVAR_FLOAT | CVAR_ARCHIVE, "reduce reverb strength (0.0 to 1.0)", 0.0f, 1.0f );
+#endif
+
+#ifdef _RAVEN //k: for main menu gui
+idCVar s_volume("s_volume", "0.5", CVAR_SOUND | CVAR_ARCHIVE | CVAR_FLOAT, "volume 0 to 1");
+idCVar s_musicVolume("s_musicVolume", "0.5", CVAR_SOUND | CVAR_ARCHIVE | CVAR_FLOAT, "volume of music");
+idCVar s_speakerFraction("s_speakerFraction", "0.65", CVAR_SOUND | CVAR_ARCHIVE | CVAR_FLOAT, "volume adjust, from 0 to 1, applied to every sound not playing on a voice channel");
+idCVar s_voiceVolume("s_voiceVolume", "1.0", CVAR_SOUND | CVAR_ARCHIVE | CVAR_FLOAT, "volume of voice chat");
+
+idCVar s_voiceChatEcho("s_voiceChatEcho", "0", CVAR_SOUND | CVAR_ARCHIVE | CVAR_BOOL, "voice echo on or off");
+idCVar s_voiceChatSend("s_voiceChatSend", "1", CVAR_SOUND | CVAR_ARCHIVE | CVAR_BOOL, "voice chat send on or off");
+idCVar s_voiceChatReceive("s_voiceChatReceive", "1", CVAR_SOUND | CVAR_ARCHIVE | CVAR_BOOL, "voice receive on or off");
+idCVar s_micInputLevel("s_micInputLevel", "6", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "alerts the mic input level");
+#endif
+#ifdef _HUMANHEAD //k: for main menu gui
+idCVar s_musicvolume_dB("s_musicvolume_dB", "0", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "music volume in dB");
 #endif
 
 bool idSoundSystemLocal::useOpenAL = false;
@@ -323,6 +341,78 @@ void SoundSystemRestart_f(const idCmdArgs &args)
 	soundSystem->SetMute(false);
 }
 
+#ifdef _OPENAL
+static int S_SplitOpenALString(idStrList &list, const char *text)
+{
+    const char *p = text;
+    const char *lastP = p;
+    int i = 0;
+    while(true)
+    {
+        if(!*p) // \0
+        {
+            if(!*lastP) // \0\0
+                break;
+            list.Append(lastP);
+            i++;
+            lastP = p + 1;
+        }
+        p++;
+    }
+    return i;
+}
+
+/*
+===============
+ListOpenALDevices_f
+===============
+*/
+void ListOpenALDevices_f(const idCmdArgs &args)
+{
+	if (!idSoundSystemLocal::useOpenAL) {
+		common->Printf("OpenAL not initialized.\n");
+		return;
+	}
+
+    if (!alcIsExtensionPresent) {
+        common->Printf("OpenAL library not loaded.\n");
+        return;
+    }
+
+    if ( alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") == 1 )
+    {
+        common->Printf("OpenAL devices by ALC_ENUMERATION_EXT extension:\n");
+        const char *deviceNames = (const char *)alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+        idStrList list;
+        S_SplitOpenALString(list, deviceNames);
+        for(int i = 0; i < list.Num(); i++)
+        {
+            common->Printf("%d: %s\n", i + 1, list[i].c_str());
+        }
+    }
+    else
+    {
+        common->Printf("OpenAL not support ALC_ENUMERATION_EXT extension\n");
+    }
+
+    if ( alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") == 1 )
+    {
+        common->Printf("OpenAL devices by ALC_ENUMERATE_ALL_EXT extension:\n");
+        const char *deviceNames = (const char *)alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+        idStrList list;
+        S_SplitOpenALString(list, deviceNames);
+        for(int i = 0; i < list.Num(); i++)
+        {
+            common->Printf("%d: %s\n", i + 1, list[i].c_str());
+        }
+    }
+    else
+    {
+        common->Printf("OpenAL not support ALC_ENUMERATE_ALL_EXT extension\n");
+    }
+}
+#endif
+
 #ifdef _HUMANHEAD
 /*
 ===============
@@ -429,94 +519,145 @@ void idSoundSystemLocal::Init()
 			EAXAvailable = 0;
 #endif
 		} else {
-			common->Printf("Setup OpenAL device and context... ");
-			openalDevice = alcOpenDevice(NULL);
-			openalContext = alcCreateContext(openalDevice, NULL);
-			alcMakeContextCurrent(openalContext);
-			common->Printf("Done.\n");
+            bool notDefault = false;
+            const char *deviceName = s_deviceName.GetString();
+            common->Printf("Open OpenAL device: %s\n", deviceName);
+            // OpenAL soft env
+            const char *driverName = harm_s_openALDriver.GetString();
+            if(driverName && driverName[0])
+            {
+                common->Printf("OpenAL soft driver: %s\n", driverName);
+                Sys_SetEnv("ALSOFT_DRIVERS", driverName);
+                notDefault = true;
+            }
+            int logLevel = harm_s_openALLogLevel.GetInteger();
+            if(logLevel >= 0)
+            {
+                common->Printf("OpenAL soft log level: %d\n", logLevel);
+                Sys_SetEnv("ALSOFT_LOGLEVEL", harm_s_openALLogLevel.GetString());
+            }
 
-			// log openal info
-			common->Printf( "OpenAL vendor: %s\n", alGetString(AL_VENDOR) );
-			common->Printf( "OpenAL renderer: %s\n", alGetString(AL_RENDERER) );
-			common->Printf( "OpenAL version: %s\n", alGetString(AL_VERSION) );
+            common->Printf("Setup OpenAL device and context... ");
+            ALubyte *device = NULL;
+            if(deviceName && deviceName[0])
+            {
+                device = (ALubyte *)deviceName;
+                notDefault = true;
+            }
+            openalDevice = alcOpenDevice(device);
+            if(!openalDevice && notDefault)
+			{
+				if(deviceName && deviceName[0])
+				{
+					s_deviceName.SetString("");
+					s_deviceName.ClearModified();
+				}
+                if(driverName && driverName[0])
+                {
+                    Sys_UnsetEnv("ALSOFT_DRIVERS");
+                    harm_s_openALDriver.SetString("");
+                    harm_s_openALDriver.ClearModified();
+                }
+                common->Printf("Fail. Using default... ");
+                openalDevice = alcOpenDevice(NULL);
+			}
+            if(openalDevice)
+            {
+                openalContext = alcCreateContext(openalDevice, NULL);
+                alcMakeContextCurrent(openalContext);
+                common->Printf("Done.\n");
+
+                // log openal info
+                common->Printf( "OpenAL vendor: %s\n", alGetString(AL_VENDOR) );
+                common->Printf( "OpenAL renderer: %s\n", alGetString(AL_RENDERER) );
+                common->Printf( "OpenAL version: %s\n", alGetString(AL_VERSION) );
+
+                ListOpenALDevices();
 
 #ifdef _OPENAL_EFX
-			// try to obtain EFX extensions
-			if(idSoundSystemLocal::s_useEAXReverb.GetBool())
-			{
-				if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
-					common->Printf( "OpenAL: found EFX extension\n" );
-					EAXAvailable = 1;
-					idSoundSystemLocal::s_useEAXReverb.SetBool( true );
+                // try to obtain EFX extensions
+                if(idSoundSystemLocal::s_useEAXReverb.GetBool())
+                {
+                    if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
+                        common->Printf( "OpenAL: found EFX extension\n" );
+                        EAXAvailable = 1;
+                        idSoundSystemLocal::s_useEAXReverb.SetBool( true );
 
-					alGenEffects = (LPALGENEFFECTS)alGetProcAddress(ID_ALCHAR "alGenEffects");
-					alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress(ID_ALCHAR "alDeleteEffects");
-					alIsEffect = (LPALISEFFECT)alGetProcAddress(ID_ALCHAR "alIsEffect");
-					alEffecti = (LPALEFFECTI)alGetProcAddress(ID_ALCHAR "alEffecti");
-					alEffectf = (LPALEFFECTF)alGetProcAddress(ID_ALCHAR "alEffectf");
-					alEffectfv = (LPALEFFECTFV)alGetProcAddress(ID_ALCHAR "alEffectfv");
-					alGenFilters = (LPALGENFILTERS)alGetProcAddress(ID_ALCHAR "alGenFilters");
-					alDeleteFilters = (LPALDELETEFILTERS)alGetProcAddress(ID_ALCHAR "alDeleteFilters");
-					alIsFilter = (LPALISFILTER)alGetProcAddress(ID_ALCHAR "alIsFilter");
-					alFilteri = (LPALFILTERI)alGetProcAddress(ID_ALCHAR "alFilteri");
-					alFilterf = (LPALFILTERF)alGetProcAddress(ID_ALCHAR "alFilterf");
-					alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress(ID_ALCHAR "alGenAuxiliaryEffectSlots");
-					alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress(ID_ALCHAR "alDeleteAuxiliaryEffectSlots");
-					alIsAuxiliaryEffectSlot = (LPALISAUXILIARYEFFECTSLOT)alGetProcAddress(ID_ALCHAR "alIsAuxiliaryEffectSlot");;
-					alAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)alGetProcAddress(ID_ALCHAR "alAuxiliaryEffectSloti");
-					alAuxiliaryEffectSlotf = (LPALAUXILIARYEFFECTSLOTF)alGetProcAddress(ID_ALCHAR "alAuxiliaryEffectSlotf");
-				} else {
-					common->Printf( "OpenAL: EFX extension not found\n" );
-					EAXAvailable = 0;
-					idSoundSystemLocal::s_useEAXReverb.SetBool( false );
+                        alGenEffects = (LPALGENEFFECTS)alGetProcAddress(ID_ALCHAR "alGenEffects");
+                        alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress(ID_ALCHAR "alDeleteEffects");
+                        alIsEffect = (LPALISEFFECT)alGetProcAddress(ID_ALCHAR "alIsEffect");
+                        alEffecti = (LPALEFFECTI)alGetProcAddress(ID_ALCHAR "alEffecti");
+                        alEffectf = (LPALEFFECTF)alGetProcAddress(ID_ALCHAR "alEffectf");
+                        alEffectfv = (LPALEFFECTFV)alGetProcAddress(ID_ALCHAR "alEffectfv");
+                        alGenFilters = (LPALGENFILTERS)alGetProcAddress(ID_ALCHAR "alGenFilters");
+                        alDeleteFilters = (LPALDELETEFILTERS)alGetProcAddress(ID_ALCHAR "alDeleteFilters");
+                        alIsFilter = (LPALISFILTER)alGetProcAddress(ID_ALCHAR "alIsFilter");
+                        alFilteri = (LPALFILTERI)alGetProcAddress(ID_ALCHAR "alFilteri");
+                        alFilterf = (LPALFILTERF)alGetProcAddress(ID_ALCHAR "alFilterf");
+                        alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress(ID_ALCHAR "alGenAuxiliaryEffectSlots");
+                        alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress(ID_ALCHAR "alDeleteAuxiliaryEffectSlots");
+                        alIsAuxiliaryEffectSlot = (LPALISAUXILIARYEFFECTSLOT)alGetProcAddress(ID_ALCHAR "alIsAuxiliaryEffectSlot");;
+                        alAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)alGetProcAddress(ID_ALCHAR "alAuxiliaryEffectSloti");
+                        alAuxiliaryEffectSlotf = (LPALAUXILIARYEFFECTSLOTF)alGetProcAddress(ID_ALCHAR "alAuxiliaryEffectSlotf");
+                    } else {
+                        common->Printf( "OpenAL: EFX extension not found\n" );
+                        EAXAvailable = 0;
+                        idSoundSystemLocal::s_useEAXReverb.SetBool( false );
 
-					alGenEffects = NULL;
-					alDeleteEffects = NULL;
-					alIsEffect = NULL;
-					alEffecti = NULL;
-					alEffectf = NULL;
-					alEffectfv = NULL;
-					alGenFilters = NULL;
-					alDeleteFilters = NULL;
-					alIsFilter = NULL;
-					alFilteri = NULL;
-					alFilterf = NULL;
-					alGenAuxiliaryEffectSlots = NULL;
-					alDeleteAuxiliaryEffectSlots = NULL;
-					alIsAuxiliaryEffectSlot = NULL;
-					alAuxiliaryEffectSloti = NULL;
-					alAuxiliaryEffectSlotf = NULL;
-				}
-			}
-			else
-			{
-				EAXAvailable = 0;
-			}
+                        alGenEffects = NULL;
+                        alDeleteEffects = NULL;
+                        alIsEffect = NULL;
+                        alEffecti = NULL;
+                        alEffectf = NULL;
+                        alEffectfv = NULL;
+                        alGenFilters = NULL;
+                        alDeleteFilters = NULL;
+                        alIsFilter = NULL;
+                        alFilteri = NULL;
+                        alFilterf = NULL;
+                        alGenAuxiliaryEffectSlots = NULL;
+                        alDeleteAuxiliaryEffectSlots = NULL;
+                        alIsAuxiliaryEffectSlot = NULL;
+                        alAuxiliaryEffectSloti = NULL;
+                        alAuxiliaryEffectSlotf = NULL;
+                    }
+                }
+                else
+                {
+                    EAXAvailable = 0;
+                }
 #else
-			// try to obtain EAX extensions
-			if (idSoundSystemLocal::s_useEAXReverb.GetBool() && alIsExtensionPresent(ID_ALCHAR "EAX4.0")) {
-				idSoundSystemLocal::s_useOpenAL.SetBool(true);	// EAX presence causes AL enable
-				alEAXSet = (EAXSet)alGetProcAddress(ID_ALCHAR "EAXSet");
-				alEAXGet = (EAXGet)alGetProcAddress(ID_ALCHAR "EAXGet");
-				common->Printf("OpenAL: found EAX 4.0 extension\n");
-			} else {
-				common->Printf("OpenAL: EAX 4.0 extension not found\n");
-				idSoundSystemLocal::s_useEAXReverb.SetBool(false);
-				alEAXSet = (EAXSet)NULL;
-				alEAXGet = (EAXGet)NULL;
-			}
+                // try to obtain EAX extensions
+                if (idSoundSystemLocal::s_useEAXReverb.GetBool() && alIsExtensionPresent(ID_ALCHAR "EAX4.0")) {
+                    idSoundSystemLocal::s_useOpenAL.SetBool(true);	// EAX presence causes AL enable
+                    alEAXSet = (EAXSet)alGetProcAddress(ID_ALCHAR "EAXSet");
+                    alEAXGet = (EAXGet)alGetProcAddress(ID_ALCHAR "EAXGet");
+                    common->Printf("OpenAL: found EAX 4.0 extension\n");
+                } else {
+                    common->Printf("OpenAL: EAX 4.0 extension not found\n");
+                    idSoundSystemLocal::s_useEAXReverb.SetBool(false);
+                    alEAXSet = (EAXSet)NULL;
+                    alEAXGet = (EAXGet)NULL;
+                }
 
-			// try to obtain EAX-RAM extension - not required for operation
-			if (alIsExtensionPresent(ID_ALCHAR "EAX-RAM") == AL_TRUE) {
-				alEAXSetBufferMode = (EAXSetBufferMode)alGetProcAddress(ID_ALCHAR "EAXSetBufferMode");
-				alEAXGetBufferMode = (EAXGetBufferMode)alGetProcAddress(ID_ALCHAR "EAXGetBufferMode");
-				common->Printf("OpenAL: found EAX-RAM extension, %dkB\\%dkB\n", alGetInteger(alGetEnumValue(ID_ALCHAR "AL_EAX_RAM_FREE")) / 1024, alGetInteger(alGetEnumValue(ID_ALCHAR "AL_EAX_RAM_SIZE")) / 1024);
-			} else {
-				alEAXSetBufferMode = (EAXSetBufferMode)NULL;
-				alEAXGetBufferMode = (EAXGetBufferMode)NULL;
-				common->Printf("OpenAL: no EAX-RAM extension\n");
-			}
+                // try to obtain EAX-RAM extension - not required for operation
+                if (alIsExtensionPresent(ID_ALCHAR "EAX-RAM") == AL_TRUE) {
+                    alEAXSetBufferMode = (EAXSetBufferMode)alGetProcAddress(ID_ALCHAR "EAXSetBufferMode");
+                    alEAXGetBufferMode = (EAXGetBufferMode)alGetProcAddress(ID_ALCHAR "EAXGetBufferMode");
+                    common->Printf("OpenAL: found EAX-RAM extension, %dkB\\%dkB\n", alGetInteger(alGetEnumValue(ID_ALCHAR "AL_EAX_RAM_FREE")) / 1024, alGetInteger(alGetEnumValue(ID_ALCHAR "AL_EAX_RAM_SIZE")) / 1024);
+                } else {
+                    alEAXSetBufferMode = (EAXSetBufferMode)NULL;
+                    alEAXGetBufferMode = (EAXGetBufferMode)NULL;
+                    common->Printf("OpenAL: no EAX-RAM extension\n");
+                }
 #endif
+            }
+            else
+            {
+                common->Printf("Fail.\n");
+                idSoundSystemLocal::s_useOpenAL.SetBool(false);
+                idSoundSystemLocal::s_useEAXReverb.SetBool(false);
+            }
 
 			if (!idSoundSystemLocal::s_useOpenAL.GetBool()) {
 				common->Printf("OpenAL: disabling ( no EAX ). Using legacy mixer.\n");
@@ -578,6 +719,9 @@ void idSoundSystemLocal::Init()
 	cmdSystem->AddCommand("reloadSounds", SoundReloadSounds_f, CMD_FL_SOUND|CMD_FL_CHEAT, "reloads all sounds");
 	cmdSystem->AddCommand("testSound", TestSound_f, CMD_FL_SOUND | CMD_FL_CHEAT, "tests a sound", idCmdSystem::ArgCompletion_SoundName);
 	cmdSystem->AddCommand("s_restart", SoundSystemRestart_f, CMD_FL_SOUND, "restarts the sound system");
+#ifdef _OPENAL
+	cmdSystem->AddCommand("listALDevices", ListOpenALDevices_f, CMD_FL_SOUND, "lists OpenAL devices");
+#endif
 
 #ifdef _HUMANHEAD
 	sb_subtitleQueue.Clear();
@@ -648,6 +792,8 @@ void idSoundSystemLocal::Shutdown()
 
 		alcCloseDevice(openalDevice);
 		openalDevice = NULL;
+
+		alDrivers.SetNum(0);
 	}
 
 	Sys_FreeOpenAL();
@@ -1774,12 +1920,24 @@ int idSoundSystemLocal::IsEAXAvailable(void)
 #endif
 }
 
-#ifdef _RAVEN
-rvMapReverb::rvMapReverb(void)
+void idSoundSystemLocal::ListOpenALDevices(void)
 {
+	alDrivers.Clear();
+
+    if ( alcIsExtensionPresent && alcIsExtensionPresent(openalDevice, "ALC_ENUMERATION_EXT") == 1 )
+    {
+        const char *deviceNames = (const char *)alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+        S_SplitOpenALString(alDrivers, deviceNames);
+    }
+    else
+    {
+        common->Printf("OpenAL not support ALC_ENUMERATION_EXT extension\n");
+    }
+	alDrivers.SetNum(alDrivers.Num(), true);
 }
 
-rvMapReverb::~rvMapReverb(void)
+#ifdef _RAVEN
+rvMapReverb::rvMapReverb(void)
 {
 }
 
