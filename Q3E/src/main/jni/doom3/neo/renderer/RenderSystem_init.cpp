@@ -247,10 +247,20 @@ idCVar r_useLightAreaCulling( "r_useLightAreaCulling", "1", CVAR_RENDERER | CVAR
 idCVar r_useEntityPortalCulling( "r_useEntityPortalCulling", "1", CVAR_RENDERER | CVAR_INTEGER, "0 = none, 1 = cull frustum corners to plane, 2 = exact clip the frustum faces", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 #endif
 
-
 #ifdef _RAVEN
 idCVar r_skipSky("r_skipSky", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Dark sky");
 idCVar r_aspectRatio("r_aspectRatio",			"-1",			CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "aspect ratio of view:\n0 = 4:3\n1 = 16:9\n2 = 16:10\n-1 = auto (guess from resolution)", -1, 2);
+//k: for main menu gui
+idCVar r_forceAmbient("r_forceAmbient", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "Force a single ambient light throughout the level if > 0 (intensity 0..1)", -1, 1);
+idCVar r_useSmp("r_useSMP", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Turn SMP on and off");
+#endif
+#ifdef _HUMANHEAD //k: for main menu gui
+idCVar r_shaderlevel("r_shaderlevel", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "level of shadersto use");
+idCVar r_correctspecular("r_correctspecular", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "per pixel half angle calculation");
+idCVar r_normalizebumpmap("r_normalizebumpmap", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "per pixel renormalization of bumpmaps");
+idCVar r_skipGlowOverlay("r_skipGlowOverlay", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "if true, skip drawing the glow overlay");
+idCVar r_lowParticleDetail("r_lowParticleDetail", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "less detailed particles");
+idCVar r_useFastSkinning("r_useFastSkinning", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "0 = normal, 1 = faster with tangents transformed, 2 = use single weight simple skinning");
 #endif
 
 /*

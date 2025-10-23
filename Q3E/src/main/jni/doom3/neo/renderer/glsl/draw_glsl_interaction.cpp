@@ -56,9 +56,14 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 	GL_Uniform4fv(offsetof(shaderProgram_t, diffuseColor), din->diffuseColor.ToFloatPtr());
 	GL_Uniform4fv(offsetof(shaderProgram_t, specularColor), din->specularColor.ToFloatPtr());
 
-    if ( backEnd.vLight->lightShader->IsAmbientLight() && r_interactionLightingModel != HARM_INTERACTION_SHADER_AMBIENT ) {
+    if ( backEnd.vLight->lightShader->IsAmbientLight() && INTERACTION_NOT_AMBIENT() ) {
         GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), 1.0f);
     } else {
+#ifdef _RAVEN //karin: r_forceAmbient
+        if(r_forceAmbient.GetFloat() > 0.0f)
+            GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), r_forceAmbient.GetFloat());
+		else 
+#endif
         if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
             GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
         else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
@@ -102,7 +107,7 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 
 	// texture 4 is the per-surface specular map
 	GL_SelectTextureNoClient(4);
-    if ( backEnd.vLight->lightShader->IsAmbientLight() || r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT ) {
+    if ( backEnd.vLight->lightShader->IsAmbientLight() || INTERACTION_IS_AMBIENT() ) {
         globalImages->ambientNormalMap->Bind();
     } else {
         din->specularImage->Bind();
@@ -161,12 +166,12 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
         GL_UseProgram(&ambientLightingShader);
     else
     {
-        if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+        if (INTERACTION_IS_AMBIENT())
+            GL_UseProgram(&ambientLightingShader);
+        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
             GL_UseProgram(&interactionBlinnPhongShader);
         else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
             GL_UseProgram(&interactionPBRShader);
-        else if (r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT )
-            GL_UseProgram(&ambientLightingShader);
         else
             GL_UseProgram(&interactionShader);
     }

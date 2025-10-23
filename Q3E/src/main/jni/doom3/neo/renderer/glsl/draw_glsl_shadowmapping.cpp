@@ -365,7 +365,22 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
     }
     else
     {
-        if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+        if(INTERACTION_IS_AMBIENT())
+        {
+            if( vLight->parallel )
+            {
+                shadowInteractionShader = &ambientLightingShadowMappingShader_parallelLight;
+            }
+            else if( vLight->pointLight )
+            {
+                shadowInteractionShader = &ambientLightingShadowMappingShader_pointLight;
+            }
+            else
+            {
+                shadowInteractionShader = &ambientLightingShadowMappingShader_spotLight;
+            }
+        }
+        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
         {
             if( vLight->parallel )
             {
@@ -393,21 +408,6 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
             else
             {
                 shadowInteractionShader = &interactionShadowMappingPBRShader_spotLight;
-            }
-        }
-        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
-        {
-            if( vLight->parallel )
-            {
-                shadowInteractionShader = &ambientLightingShadowMappingShader_parallelLight;
-            }
-            else if( vLight->pointLight )
-            {
-                shadowInteractionShader = &ambientLightingShadowMappingShader_pointLight;
-            }
-            else
-            {
-                shadowInteractionShader = &ambientLightingShadowMappingShader_spotLight;
             }
         }
         else

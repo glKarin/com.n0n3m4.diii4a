@@ -1215,6 +1215,7 @@ extern idCVar r_useEntityPortalCulling;		// 0 = none, 1 = box
 
 #ifdef _RAVEN
 extern idCVar r_skipSky;
+extern idCVar r_forceAmbient;
 #endif
 
 /*
@@ -2470,6 +2471,13 @@ extern idCVar harm_r_lightingModel;
 #define HARM_INTERACTION_SHADER_BLINNPHONG 2
 #define HARM_INTERACTION_SHADER_PBR 3
 #define HARM_INTERACTION_SHADER_AMBIENT 4
+#ifdef _RAVEN //karin: r_forceAmbient
+#define INTERACTION_IS_AMBIENT() (r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT || r_forceAmbient.GetFloat() > 0.0f)
+#define INTERACTION_NOT_AMBIENT() (r_interactionLightingModel != HARM_INTERACTION_SHADER_AMBIENT && r_forceAmbient.GetFloat() <= 0.0f)
+#else
+#define INTERACTION_IS_AMBIENT() (r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
+#define INTERACTION_NOT_AMBIENT() (r_interactionLightingModel != HARM_INTERACTION_SHADER_AMBIENT)
+#endif
 
 extern idCVar harm_r_useHighPrecision;
 
