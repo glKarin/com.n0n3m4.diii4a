@@ -35,7 +35,7 @@ public final class Constants
             "Fix a sound distance volume bug on Quake 4.",
             "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
             "Add fixed ratio resolution support on launcher `Graphics` tab.",
-            "Update ioquake3(Quake 3), Darkplace(Quake 1).",
+            "Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK.",
             "FTEQW is removed in this release.",
         };
 	};

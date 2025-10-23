@@ -117,6 +117,7 @@ import com.n0n3m4.q3e.Q3EGame;
 import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EInterface;
+import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
@@ -4088,7 +4089,10 @@ public class GameLauncher extends Activity
 
 	private void OpenDownloadTestingDialog()
 	{
-		ContextUtility.OpenUrlExternally(this, Constants.CONST_TESTING_URL);
+		String url = Constants.CONST_TESTING_URL;
+		if(!Q3EJNI.Is64())
+			url += "_armv7";
+		ContextUtility.OpenUrlExternally(this, url);
 	}
 
     private RadioGroup GetGameModRadioGroup()
