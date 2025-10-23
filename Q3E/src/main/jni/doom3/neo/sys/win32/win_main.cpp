@@ -1405,3 +1405,31 @@ int Sys_Stat( const char *path ) {
     }
     return FST_NONE;
 }
+
+/*
+==============
+Sys_SetEnv
+==============
+*/
+int Sys_SetEnv(const char *name, const char *value, bool override)
+{
+    if(!override)
+    {
+        const char *old = getenv(name);
+        if(old && old[0])
+            return -1;
+    }
+    const char *str = va("%s=%s", name, value);
+    return _putenv(str);
+}
+
+/*
+==============
+Sys_UnsetEnv
+==============
+*/
+int Sys_UnsetEnv(const char *name)
+{
+    const char *str = va("%s=", name);
+    return _putenv(str);
+}
