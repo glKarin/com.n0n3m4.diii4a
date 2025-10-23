@@ -982,7 +982,7 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				continue;
 			} else {
 				float yadj = useScale * glyph->top;
-#ifdef _RAVEN //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
+#ifdef _RAVENxxx //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
                 yadj = yadj + 1.0f;
 #endif
 				PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
@@ -1038,7 +1038,7 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
                     continue;
                 } else {
                     float yadj = useScale * glyph->top;
-#ifdef _RAVEN //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
+#ifdef _RAVENxxx //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
                     yadj = yadj + 1.0f;
 #endif
                     PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
@@ -1332,7 +1332,7 @@ void idDeviceContext::DrawEditCursor(float x, float y, float scale)
 	float useScale = scale * useFont->glyphScale;
 	const glyphInfo_t *glyph2 = &useFont->glyphs[(overStrikeMode) ? '_' : '|'];
 	float	yadj = useScale * glyph2->top;
-#ifdef _RAVEN //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
+#ifdef _RAVENxxx //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
     yadj = yadj + 1.0f;
 #endif
 	PaintChar(x, y - yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
