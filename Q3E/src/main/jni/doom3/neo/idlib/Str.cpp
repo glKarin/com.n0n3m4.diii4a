@@ -2405,23 +2405,23 @@ void idStr::StripDoubleQuotes(void)
 }
 #endif
 
-idList<idStr> idStr::SplitUnique(const char *macros, char ch)
+int idStr::SplitUnique(idList<idStr> &ret, const char *macros, char ch)
 {
-	idStrList ret;
-
 	if(!macros || !macros[0])
-		return ret;
+		return 0;
 
 	int start = 0;
 	int index;
 	idStr str(macros);
 	str.Strip(ch);
+    int num = 0;
 	while((index = str.Find(ch, start)) != -1)
 	{
 		if(index - start > 0)
 		{
 			idStr s = str.Mid(start, index - start);
 			ret.AddUnique(s);
+            num++;
 		}
 		start = index + 1;
 		if(index == str.Length() - 1)
@@ -2431,20 +2431,20 @@ idList<idStr> idStr::SplitUnique(const char *macros, char ch)
 	{
 		idStr s = str.Mid(start, str.Length() - start);
 		ret.AddUnique(s);
+        num++;
 	}
 
-	return ret;
+	return num;
 }
 
-idList<idStr> idStr::Split(const char *macros, char ch)
+int idStr::Split(idList<idStr> &ret, const char *macros, char ch)
 {
-	idStrList ret;
-
 	if(!macros || !macros[0])
-		return ret;
+		return 0;
 
 	int start = 0;
 	int index;
+    int num = 0;
 	idStr str(macros);
 	str.Strip(ch);
 	while((index = str.Find(ch, start)) != -1)
@@ -2453,6 +2453,7 @@ idList<idStr> idStr::Split(const char *macros, char ch)
 		{
 			idStr s = str.Mid(start, index - start);
 			ret.Append(s);
+            num++;
 		}
 		start = index + 1;
 		if(index == str.Length() - 1)
@@ -2462,9 +2463,43 @@ idList<idStr> idStr::Split(const char *macros, char ch)
 	{
 		idStr s = str.Mid(start, str.Length() - start);
 		ret.Append(s);
+        num++;
 	}
 
-	return ret;
+	return num;
+}
+
+int idStr::Joint(idStr &ret, const idList<idStr> &list, char ch)
+{
+    if(!list.Num())
+        return 0;
+
+    int len = 0;
+    for(int i = 0; i < list.Num(); i++)
+    {
+        ret.Append(list[i]);
+        len += list[i].Length();
+        if(i < list.Num() - 1)
+        {
+            ret.Append(ch);
+            len++;
+        }
+    }
+    return len;
+}
+
+int idStr::JointUnique(idStr &ret, const idList<idStr> &list, char ch)
+{
+    if(!list.Num())
+        return 0;
+
+    idStrList added;
+    for(int i = 0; i < list.Num(); i++)
+    {
+        added.AddUnique(list[i]);
+    }
+
+    return Joint(ret, added, ch);
 }
 
 void idStr::StripWhitespace(idStr &str)

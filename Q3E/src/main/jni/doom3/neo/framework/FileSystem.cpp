@@ -4859,7 +4859,8 @@ void idFileSystemLocal::AddExtraGameDirectory(const char *path, const char *game
 {
     if(path && path[0])
     {
-        idStrList paths = idStr::SplitUnique(path, ',');
+        idStrList paths;
+        idStr::SplitUnique(paths, path, ',');
         for(int i = 0; i < paths.Num(); i++)
         {
             common->Printf("Add extra game path: %s/%s\n", paths[i].c_str(), gameName);
@@ -4872,7 +4873,8 @@ void idFileSystemLocal::AddExtraGameResource(const char *path)
 {
     if(path && path[0])
     {
-        idStrList paths = idStr::SplitUnique(path, ',');
+        idStrList paths;
+        idStr::SplitUnique(paths, path, ',');
         for(int i = 0; i < paths.Num(); i++)
         {
             paths[i].StripTrailing('/');
@@ -4893,7 +4895,8 @@ void idFileSystemLocal::AddExtraGame(const char *gameNames)
 {
     if(gameNames && gameNames[0])
     {
-        idStrList games = idStr::SplitUnique(gameNames, ',');
+        idStrList games;
+        idStr::SplitUnique(games, gameNames, ',');
         for(int i = 0; i < games.Num(); i++)
         {
             if(!idStr::Icmp(games[i], BASE_GAMEDIR)

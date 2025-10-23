@@ -198,7 +198,8 @@ void idImGuiSettings::AddOption(const char *name, const char *displayName, int f
     if(str && str[0])
     {
         bool isInt = cvar->GetFlags() & CVAR_INTEGER;
-        idStrList ops = idStr::Split(str, ';');
+        idStrList ops;
+        idStr::Split(ops, str, ';');
         for(int i = 0; i < ops.Num(); i++)
         {
             idStr &op = ops[i];
