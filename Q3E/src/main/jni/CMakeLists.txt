@@ -50,9 +50,9 @@ OPTION(GAME_FTEQW                   "Build FTEQW"                               
 
 
 # Experimental
-OPTION(GAME_Q3RALLY                 "Build Quake 3 Rally"                           OFF)
-OPTION(GAME_QUAKES                  "Build Quake SandBox"                           OFF)
-OPTION(GAME_DNF                     "Build Duke Nukem Forever"                      OFF)
+OPTION(GAME_Q3RALLY     			"Build Quake 3 Rally"                   		OFF)
+OPTION(GAME_QUAKES      			"Build Quake SandBox"                   		OFF)
+OPTION(GAME_DNF         			"Build Duke Nukem Forever"              		OFF)
 
 
 
