@@ -66,34 +66,10 @@ idCVar idWindow::gui_debug("gui_debug", "0", CVAR_GUI | CVAR_BOOL, "");
 idCVar idWindow::gui_edit("gui_edit", "0", CVAR_GUI | CVAR_BOOL, "");
 
 #ifdef _RAVEN //k: for main menu gui
-idCVar net_menulanserver("net_menuLANServer", "0", CVAR_SYSTEM | CVAR_ARCHIVE, "menu cvar for config of lan servers");
-idCVar net_serverMenuDedicated("net_serverMenuDedicated", "0", CVAR_SYSTEM | CVAR_ARCHIVE, "");
-idCVar r_forceAmbient("r_forceAmbient", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "Force a single ambient light throughout the level if > 0 (intensity 0..1)");
-idCVar r_useSmp("r_useSMP", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Turn SMP on and off");
-idCVar s_deviceName("s_deviceName", "", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL device name");
-idCVar s_volume("s_volume", "0.5", CVAR_SOUND | CVAR_ARCHIVE | CVAR_FLOAT, "volume 0 to 1");
-idCVar s_musicVolume("s_musicVolume", "0.5", CVAR_SOUND | CVAR_ARCHIVE | CVAR_FLOAT, "volume of music");
-idCVar s_speakerFraction("s_speakerFraction", "0.65", CVAR_SOUND | CVAR_ARCHIVE | CVAR_FLOAT, "volume adjust, from 0 to 1, applied to every sound not playing on a voice channel");
-idCVar s_voiceVolume("s_voiceVolume", "1.0", CVAR_SOUND | CVAR_ARCHIVE | CVAR_FLOAT, "volume of voice chat");
-
-idCVar s_voiceChatEcho("s_voiceChatEcho", "0", CVAR_SOUND | CVAR_ARCHIVE | CVAR_BOOL, "voice echo on or off");
-idCVar s_voiceChatSend("s_voiceChatSend", "1", CVAR_SOUND | CVAR_ARCHIVE | CVAR_BOOL, "voice chat send on or off");
-idCVar s_voiceChatReceive("s_voiceChatReceive", "1", CVAR_SOUND | CVAR_ARCHIVE | CVAR_BOOL, "voice receive on or off");
-idCVar s_micInputLevel("s_micInputLevel", "6", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "alerts the mic input level");
 idCVar ui_handicap("ui_handicap", "100", CVAR_GUI | CVAR_ARCHIVE | CVAR_INTEGER, "player damage output handicap");
 #endif
-#ifdef _HUMANHEAD
+#ifdef _HUMANHEAD //k: for main menu gui
 idCVar gui_filter_pb("gui_filter_pb", "0", CVAR_GUI | CVAR_ARCHIVE | CVAR_INTEGER, "Punkbuster filter");
-idCVar g_subtitles("g_subtitles", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "Display subtitles");
-idCVar com_profanity("com_profanity", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "if off, blocks profanity");
-idCVar r_shaderlevel("r_shaderlevel", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "level of shadersto use");
-idCVar r_correctspecular("r_correctspecular", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "per pixel half angle calculation");
-idCVar r_normalizebumpmap("r_normalizebumpmap", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "per pixel renormalization of bumpmaps");
-idCVar r_skipGlowOverlay("r_skipGlowOverlay", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "if true, skip drawing the glow overlay");
-idCVar r_lowParticleDetail("r_lowParticleDetail", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "less detailed particles");
-idCVar r_useFastSkinning("r_useFastSkinning", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "0 = normal, 1 = faster with tangents transformed, 2 = use single weight simple skinning");
-idCVar s_musicvolume_dB("s_musicvolume_dB", "0", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "music volume in dB");
-idCVar s_deviceName("s_deviceName", "", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "OpenAL device name");
 #endif
 
 extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surfaces

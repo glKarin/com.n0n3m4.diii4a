@@ -67,6 +67,11 @@ idCVar				idAsyncNetwork::serverAllowServerMod("net_serverAllowServerMod", "0", 
 idCVar				idAsyncNetwork::idleServer("si_idleServer", "0", CVAR_SYSTEM | CVAR_BOOL | CVAR_INIT | CVAR_SERVERINFO, "game clients are idle");
 idCVar				idAsyncNetwork::clientDownload("net_clientDownload", "1", CVAR_SYSTEM | CVAR_INTEGER | CVAR_ARCHIVE, "client pk4 downloads policy: 0 - never, 1 - ask, 2 - always (will still prompt for binary code)");
 
+#ifdef _RAVEN //k: for main menu gui
+idCVar net_menulanserver("net_menuLANServer", "0", CVAR_SYSTEM | CVAR_ARCHIVE, "menu cvar for config of lan servers");
+idCVar net_serverMenuDedicated("net_serverMenuDedicated", "0", CVAR_SYSTEM | CVAR_ARCHIVE, "");
+#endif
+
 int					idAsyncNetwork::realTime;
 master_t			idAsyncNetwork::masters[ MAX_MASTER_SERVERS ];
 
