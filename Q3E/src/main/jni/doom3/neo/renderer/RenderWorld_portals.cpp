@@ -989,7 +989,7 @@ void idRenderWorldLocal::AddAreaLightRefs(int areaNum, const portalStack_t *ps)
 	viewLight_t			*vLight;
 	renderLight_t tmp;
 
-	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_NOLIGHTING
+	if(r_lightingModel == LM_NOLIGHTING
 #ifdef _NO_LIGHT
 			|| r_noLight.GetBool()
 #endif

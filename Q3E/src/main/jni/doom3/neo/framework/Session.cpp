@@ -117,7 +117,7 @@ static idCVar harm_g_skipHitEffect("harm_g_skipHitEffect", "0", CVAR_GAME | CVAR
 
 #ifdef _HUMANHEAD //k: play level music when map loading
 static idCVar g_levelloadmusic("g_levelloadmusic", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "play music during level loads");
-static idCVar g_subtitles("g_subtitles", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "Display subtitles");
+idCVar g_subtitles("g_subtitles", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "Display subtitles");
 #include "../sound/snd_local.h"
 
 //k: for main menu gui

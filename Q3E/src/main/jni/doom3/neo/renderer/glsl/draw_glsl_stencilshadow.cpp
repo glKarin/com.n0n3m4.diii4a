@@ -28,18 +28,29 @@ void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *s
 			 backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-    if(backEnd.vLight->lightShader->IsAmbientLight())
+    if(backEnd.vLight->lightShader->IsAmbientLight()
+#ifdef _RAVEN //karin: r_forceAmbient
+       || r_forceAmbient.GetFloat() > 0.0f
+#endif
+    )
         GL_UseProgram(&ambientLightingTranslucentShader);
     else
     {
-        if(INTERACTION_IS_AMBIENT())
-            GL_UseProgram(&ambientLightingTranslucentShader);
-        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-            GL_UseProgram(&interactionBlinnPhongTranslucentShader);
-        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-            GL_UseProgram(&interactionPBRTranslucentShader);
-        else
-            GL_UseProgram(&interactionTranslucentShader);
+        switch(r_lightingModel)
+        {
+            case LM_BLINNPHONG:
+                GL_UseProgram(&interactionBlinnPhongTranslucentShader);
+                break;
+            case LM_PBR:
+                GL_UseProgram(&interactionPBRTranslucentShader);
+                break;
+            case LM_AMBIENT:
+                GL_UseProgram(&ambientLightingTranslucentShader);
+                break;
+            default:
+                GL_UseProgram(&interactionTranslucentShader);
+                break;
+        }
     }
 
 
@@ -216,18 +227,29 @@ void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, in
 			 backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-    if(backEnd.vLight->lightShader->IsAmbientLight())
+    if(backEnd.vLight->lightShader->IsAmbientLight()
+#ifdef _RAVEN //karin: r_forceAmbient
+       || r_forceAmbient.GetFloat() > 0.0f
+#endif
+    )
         GL_UseProgram(&ambientLightingSoftShader);
     else
     {
-        if(INTERACTION_IS_AMBIENT())
-            GL_UseProgram(&ambientLightingSoftShader);
-        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-            GL_UseProgram(&interactionBlinnPhongSoftShader);
-        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-            GL_UseProgram(&interactionPBRSoftShader);
-        else
-            GL_UseProgram(&interactionSoftShader);
+        switch(r_lightingModel)
+        {
+            case LM_BLINNPHONG:
+                GL_UseProgram(&interactionBlinnPhongSoftShader);
+                break;
+            case LM_PBR:
+                GL_UseProgram(&interactionPBRSoftShader);
+                break;
+            case LM_AMBIENT:
+                GL_UseProgram(&ambientLightingSoftShader);
+                break;
+            default:
+                GL_UseProgram(&interactionSoftShader);
+                break;
+        }
     }
 
 	// enable the vertex arrays
