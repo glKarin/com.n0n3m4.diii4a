@@ -119,10 +119,16 @@ void ESUTIL_API esOrtho(ESMatrix *result, float left, float right, float bottom,
 void ESUTIL_API esMatrixMultiply(ESMatrix *result, ESMatrix *srcA, ESMatrix *srcB);
 
 //
-//// \brief return an indentity matrix 
+//// \brief return an identity matrix
 //// \param result returns identity matrix
 //
 void ESUTIL_API esMatrixLoadIdentity(ESMatrix *result);
+
+//
+//// \brief return an transposed matrix
+//// \param result returns transposed matrix
+//
+void ESUTIL_API esMatrixTranspose(ESMatrix *result);
 
 #ifdef __cplusplus
 }

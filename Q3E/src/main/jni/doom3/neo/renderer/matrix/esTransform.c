@@ -211,3 +211,37 @@ esMatrixLoadIdentity(ESMatrix *result)
     result->m[3][3] = 1.0f;
 }
 
+
+void ESUTIL_API
+esMatrixTranspose(ESMatrix *result)
+{
+    float temp;
+
+    // row 1
+    temp = result->m[0][1];
+    result->m[0][1] = result->m[1][0];
+    result->m[1][0] = temp;
+
+    temp = result->m[0][2];
+    result->m[0][2] = result->m[2][0];
+    result->m[2][0] = temp;
+
+    temp = result->m[0][3];
+    result->m[0][3] = result->m[3][0];
+    result->m[3][0] = temp;
+
+    // row 2
+    temp = result->m[1][2];
+    result->m[1][2] = result->m[2][1];
+    result->m[2][1] = temp;
+
+    temp = result->m[1][3];
+    result->m[1][3] = result->m[3][1];
+    result->m[3][1] = temp;
+
+    // row 3
+    temp = result->m[2][3];
+    result->m[2][3] = result->m[3][2];
+    result->m[3][2] = temp;
+}
+
