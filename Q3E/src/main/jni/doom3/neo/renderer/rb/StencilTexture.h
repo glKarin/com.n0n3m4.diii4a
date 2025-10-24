@@ -39,7 +39,7 @@ class idStencilTexture
 		idStencilTexture(const idStencilTexture &);
 		idStencilTexture & operator=(const idStencilTexture &);
 
-		friend void R_CreateOfflineScreenDepthStencilTexture(idImage *image);
+		friend void R_CreateStencilTextureDepthStencilTexture(idImage *image);
 };
 
 extern idStencilTexture stencilTexture;

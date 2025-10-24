@@ -7,7 +7,7 @@ extern int MakePowerOfTwo(int num);
 
 idStencilTexture stencilTexture;
 
-void R_CreateOfflineScreenDepthStencilTexture(idImage *image)
+void R_CreateStencilTextureDepthStencilTexture(idImage *image)
 {
 	int w = stencilTexture.width;
 	int h = stencilTexture.height;
@@ -41,10 +41,10 @@ bool idStencilTexture::Init(int w, int h)
 	width = w;
 	height = h;
 	fb = new idFramebuffer("idStencilTexture", width, height);
-	//depthStencilTexture = globalImages->ImageFromFunction("idStencilTexture_depthStencil", R_CreateOfflineScreenDepthStencilTexture);
+	//depthStencilTexture = globalImages->ImageFromFunction("idStencilTexture_depthStencil", R_CreateStencilTextureDepthStencilTexture);
 	depthStencilTexture = new idImage;
 	depthStencilTexture->imgName = "idStencilTexture_depthStencil";
-	R_CreateOfflineScreenDepthStencilTexture(depthStencilTexture);
+	R_CreateStencilTextureDepthStencilTexture(depthStencilTexture);
 	//depthStencilTexture->Reload(false, false);
 	fb->Bind();
     GLenum drawbuf = GL_NONE;

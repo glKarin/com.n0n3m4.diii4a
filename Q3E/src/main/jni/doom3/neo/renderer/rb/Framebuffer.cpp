@@ -475,7 +475,7 @@ void Framebuffer::Init()
 	
 #ifdef _SHADOW_MAPPING
 	int width, height;
-	
+
 	for( int i = 0; i < MAX_SHADOWMAP_RESOLUTIONS; i++ )
 	{
 		width = height = shadowMapResolutions[i];
@@ -517,6 +517,11 @@ void Framebuffer::Init()
         printf("Stencil texture creating: %d x %d\n", glConfig.vidWidth, glConfig.vidHeight);
         stencilTexture.Init(glConfig.vidWidth, glConfig.vidHeight);
     }
+    if(idDepthStencilRenderer::IsAvailable())
+    {
+        printf("Depth/Stencil to color framebuffer creating: %d x %d\n", glConfig.vidWidth, glConfig.vidHeight);
+        depthStencilRenderer.Init(glConfig.vidWidth, glConfig.vidHeight);
+    }
 
     BindNull();
 }
@@ -543,6 +548,11 @@ void Framebuffer::Shutdown()
     {
         printf("Stencil texture purged\n");
         stencilTexture.Shutdown();
+    }
+    if(idDepthStencilRenderer::IsAvailable())
+    {
+        printf("Depth/Stencil to color framebuffer purged\n");
+        depthStencilRenderer.Shutdown();
     }
 }
 

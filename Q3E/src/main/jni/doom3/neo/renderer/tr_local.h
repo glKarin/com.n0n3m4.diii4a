@@ -101,7 +101,7 @@ typedef idPlane frustum_t[FRUSTUM_PLANES];
 #endif
 
 #include "rb/Framebuffer.h"
-#include "rb/OfflineScreenRenderer.h"
+#include "rb/DepthStencilRenderer.h"
 #include "rb/StencilTexture.h"
 #include "Image.h"
 
