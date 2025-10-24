@@ -787,16 +787,16 @@ GLRB_API void glDrawPixels(GLint width, GLint height, GLenum format, GLenum data
     glrbCreateDrawPixelsImage(width, height, (const GLubyte *)data, &tcw, &tch);
 	gl_useTexture = GL_TRUE;
 
-    glBegin(GL_TRIANGLE_STRIP);
+    glBegin(GL_TRIANGLE_STRIP); // CW
 	{
 		glTexCoord2f(0.0f, 0.0f);
 		glVertex2f(0.0f, 0.0f);
 
-		glTexCoord2f(tcw, 0.0f);
-		glVertex2f(width, 0.0f);
+        glTexCoord2f(0.0f, tch);
+        glVertex2f(0.0f, height);
 
-		glTexCoord2f(0.0f, tch);
-		glVertex2f(0.0f, height);
+        glTexCoord2f(tcw, 0.0f);
+        glVertex2f(width, 0.0f);
 
 		glTexCoord2f(tcw, tch);
 		glVertex2f(width, height);
@@ -819,4 +819,20 @@ void glrbShutdown(void)
             qglDeleteTextures(1, &gl_drawPixelsImage);
         gl_drawPixelsImage = 0;
     }
+}
+
+void glrbReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void * data, GLsizei align)
+{
+    GLint packAlign = align;
+    qglGetIntegerv(GL_PACK_ALIGNMENT, &packAlign);
+    bool changed = packAlign != align;
+    if(changed)
+        qglPixelStorei(GL_PACK_ALIGNMENT, align);	// otherwise small rows get padded to 32 bits
+
+    qglReadPixels(x, y, width, height, format, type, data);
+
+    // restore
+    if(changed)
+        qglPixelStorei(GL_PACK_ALIGNMENT, packAlign);	// otherwise small rows get padded to 32 bits
+}
 }

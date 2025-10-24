@@ -194,7 +194,7 @@ idCVar r_showNormals("r_showNormals", "0", CVAR_RENDERER | CVAR_FLOAT, "draws wi
 idCVar r_showMemory("r_showMemory", "0", CVAR_RENDERER | CVAR_BOOL, "print frame memory utilization");
 idCVar r_showCull("r_showCull", "0", CVAR_RENDERER | CVAR_BOOL, "report sphere and box culling stats");
 idCVar r_showInteractions("r_showInteractions", "0", CVAR_RENDERER | CVAR_BOOL, "report interaction generation activity");
-idCVar r_showDepth("r_showDepth", "0", CVAR_RENDERER | CVAR_BOOL, "display the contents of the depth buffer and the depth range");
+idCVar r_showDepth("r_showDepth", "0", CVAR_RENDERER | CVAR_INTEGER, "display the contents of the depth buffer and the depth range");
 idCVar r_showSurfaces("r_showSurfaces", "0", CVAR_RENDERER | CVAR_BOOL, "report surface/light/shadow counts");
 idCVar r_showPrimitives("r_showPrimitives", "0", CVAR_RENDERER | CVAR_INTEGER, "report drawsurf/index/vertex counts");
 idCVar r_showEdges("r_showEdges", "0", CVAR_RENDERER | CVAR_BOOL, "draw the sil edges");

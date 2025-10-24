@@ -36,6 +36,7 @@ void glLoadMatrixf(const GLfloat matrix[16]);
 void glBegin(GLenum t);
 void glEnd(void);
 void glVertex3f(GLfloat x, GLfloat y, GLfloat z);
+void glrbReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void * data, GLsizei align = 1);
 
 void glrbShutdown(void);
 

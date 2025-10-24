@@ -97,6 +97,8 @@ int				rb_debugPolygonTime = 0;
 #ifdef GL_ES_VERSION_2_0
 #include "glsl/gles2_compat.cpp"
 
+#define qglReadPixels_1(x, y, w, h, f, t, d) glrbReadPixels((x), (y), (w), (h), (f), (t), (d), 1)
+
 static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 {
 	HARM_CHECK_SHADER("RB_DrawElementsWithCounters_polygon");
@@ -169,6 +171,8 @@ static void RB_T_RenderTriangleSurface_polygon(const drawSurf_t *surf)
 
 	RB_DrawElementsWithCounters_polygon(tri);
 }
+#else
+#define qglReadPixels_1 qglReadPixels
 #endif
 
 
@@ -504,7 +508,7 @@ void RB_ScanStencilBuffer(void)
 	memset(counts, 0, sizeof(counts));
 
 	stencilReadback = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight);
-	qglReadPixels(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback);
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback);
 
 	for (i = 0; i < glConfig.vidWidth * glConfig.vidHeight; i++) {
 		counts[ stencilReadback[i] ]++;
@@ -544,7 +548,7 @@ void RB_CountStencilBuffer(void)
 
 
 	stencilReadback = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight);
-	qglReadPixels(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback);
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback);
 
 	count = 0;
 
@@ -708,7 +712,7 @@ void RB_ShowIntensity(void)
 	}
 
 	colorReadback = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight * 4);
-	qglReadPixels(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGBA, GL_UNSIGNED_BYTE, colorReadback);
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGBA, GL_UNSIGNED_BYTE, colorReadback);
 
 	c = glConfig.vidWidth * glConfig.vidHeight * 4;
 
@@ -773,7 +777,9 @@ void RB_ShowDepthBuffer(void)
 		return;
 	}
 
+#if !defined(GL_ES_VERSION_2_0)
 	glPushMatrix();
+#endif
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -782,7 +788,9 @@ void RB_ShowDepthBuffer(void)
 	glRasterPos2f(0, 0);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+#if !defined(GL_ES_VERSION_2_0)
 	glPopMatrix();
+#endif
 
 	GL_State(GLS_DEPTHFUNC_ALWAYS);
 	glColor3f(1, 1, 1);
@@ -791,16 +799,19 @@ void RB_ShowDepthBuffer(void)
 	depthReadback = R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight*4);
 	memset(depthReadback, 0, glConfig.vidWidth * glConfig.vidHeight*4);
 
-	qglReadPixels(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_DEPTH_COMPONENT , GL_FLOAT, depthReadback);
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_DEPTH_COMPONENT , GL_FLOAT, depthReadback);
 
-#if 0
+#if 1
 
+    if(r_showDepth.GetInteger() == 2)
+    {
 	for (int i = 0 ; i < glConfig.vidWidth * glConfig.vidHeight ; i++) {
 		((byte *)depthReadback)[i*4] =
 		        ((byte *)depthReadback)[i*4+1] =
-		                ((byte *)depthReadback)[i*4+2] = 255 * ((float *)depthReadback)[i];
-		((byte *)depthReadback)[i*4+3] = 1;
+		                ((byte *)depthReadback)[i*4+2] = 255.0f * ((float *)depthReadback)[i];
+		((byte *)depthReadback)[i*4+3] = 255;
 	}
+    }
 
 #endif
 
