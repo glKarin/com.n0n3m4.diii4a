@@ -1248,6 +1248,7 @@ void	GL_Cull(int cullType);
 bool    GL_CheckErrors(const char *name);
 void	GL_SelectTextureForce(int unit);
 bool    GL_ClearErrors(void);
+void 	GL_SelectTextureNoClient(int unit);
 
 const int GLS_SRCBLEND_ZERO						= 0x00000001;
 const int GLS_SRCBLEND_ONE						= 0x0;
@@ -1663,6 +1664,11 @@ typedef enum {
     SHADER_RETRO_GENESIS,
     SHADER_RETRO_PSX,
 #endif
+    // debug
+    SHADER_DEPTH_TO_COLOR,
+#ifdef GL_ES_VERSION_3_0
+    SHADER_STENCIL_TO_COLOR,
+#endif
     // costum
 	SHADER_CUSTOM,
 } glsl_program_t;
@@ -1691,6 +1697,13 @@ typedef enum {
 #ifdef _POSTPROCESS
 #define SHADER_POSTPROCESS_BEGIN SHADER_RETRO_2BIT
 #define SHADER_POSTPROCESS_END SHADER_RETRO_PSX
+#endif
+
+#define SHADER_DEBUG_BEGIN SHADER_DEPTH_TO_COLOR
+#ifdef GL_ES_VERSION_3_0
+#define SHADER_DEBUG_END SHADER_STENCIL_TO_COLOR
+#else
+#define SHADER_DEBUG_END SHADER_DEPTH_TO_COLOR
 #endif
 
 /*
@@ -1834,6 +1847,7 @@ typedef struct shaderProgram_s {
 #define SHADER_PARM_LOCATION(location) (*(GLint *)((char *)backEnd.glState.currentProgram + location))
 #define SHADER_PARMS_ADDR(prop, i) ((GLint)(offsetof(shaderProgram_t, prop)) + i * (GLint)sizeof(GLuint))
 #define SHADER_PARM_HANDLE(index) (*(GLint *)((char *)backEnd.glState.currentProgram + index))
+#define SHADER_NOT_VALID(shader) (shader.program == 0)
 
 struct GLSLShaderProp
 {

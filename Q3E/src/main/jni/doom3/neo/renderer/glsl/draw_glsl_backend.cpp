@@ -250,7 +250,7 @@ void RB_ComputeMVP( const drawSurf_t * const surf, float mvp[16] ) {
 GL_SelectTextureNoClient
 ====================
 */
-ID_INLINE static void GL_SelectTextureNoClient(int unit)
+void GL_SelectTextureNoClient(int unit)
 {
     backEnd.glState.currenttmu = unit;
     qglActiveTexture(GL_TEXTURE0 + unit);

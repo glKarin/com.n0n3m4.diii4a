@@ -59,6 +59,7 @@ struct GLstate
 	GLboolean SCISSOR_TEST;
 	GLboolean DEPTH_WRITEMASK;
 	GLboolean BLEND;
+    GLboolean STENCIL_TEST;
 };
 
 template <int SIZE>
@@ -227,6 +228,7 @@ GLRB_API void glPushAttrib(GLint mask)
 	_GETBS(CULL_FACE);
 	_GETBS(SCISSOR_TEST);
 	_GETBS(BLEND);
+    _GETBS(STENCIL_TEST);
 #undef _GETBS
 #define _GETBS(x) qglGetBooleanv(GL_##x, &state->x);
 	_GETBS(DEPTH_WRITEMASK);
@@ -244,6 +246,7 @@ GLRB_API void glPopAttrib(void)
 	_SETBS(CULL_FACE);
 	_SETBS(SCISSOR_TEST);
 	_SETBS(BLEND);
+    _SETBS(STENCIL_TEST);
 #undef _SETBS
 	qglDepthMask(state->DEPTH_WRITEMASK);
 }
@@ -835,4 +838,137 @@ void glrbReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum form
     if(changed)
         qglPixelStorei(GL_PACK_ALIGNMENT, packAlign);	// otherwise small rows get padded to 32 bits
 }
+
+void RB_RenderDepthToColor(bool notPack = false)
+{
+    depthStencilRenderer.Blit(GL_DEPTH_BUFFER_BIT);
+
+    depthStencilRenderer.BeginRender();
+    qglClear(GL_COLOR_BUFFER_BIT);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    qglDisable(GL_STENCIL_TEST);
+    qglDisable(GL_DEPTH_TEST);
+    qglDepthMask(GL_FALSE);
+    qglDisable(GL_BLEND);
+
+    GL_UseProgram(&depthToColorShader);
+
+    GL_SelectTextureNoClient(0);
+    depthStencilRenderer.BindDepth();
+
+    float tcw, tch;
+    if(depthStencilRenderer.Width() == depthStencilRenderer.UploadWidth())
+        tcw = 1.0f;
+    else
+        tcw = (float)depthStencilRenderer.Width() / (float)depthStencilRenderer.UploadWidth();
+    if(depthStencilRenderer.Height() == depthStencilRenderer.UploadHeight())
+        tch = 1.0f;
+    else
+        tch = (float)depthStencilRenderer.Height() / (float)depthStencilRenderer.UploadHeight();
+
+    float width = 1.0f;
+    float height = 1.0f;
+    GLfloat vertexes[] = {
+        0.0f, 0.0f,
+        0.0f, 0.0f,
+        0.0f, tch,
+        0.0f, height,
+        tcw, 0.0f,
+        width, 0.0f,
+        tcw, tch,
+        width, height,
+    };
+
+    qglBindBuffer(GL_ARRAY_BUFFER, 0);
+    GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+    GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+
+    GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(GLfloat) * 4, &vertexes[0]);
+    GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 2, GL_FLOAT, false, sizeof(GLfloat) * 4, &vertexes[2]);
+
+    GLfloat	mvp[16];
+    esMatrixLoadIdentity((ESMatrix *)mvp);
+    esOrtho((ESMatrix *)mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+    esMatrixTranspose((ESMatrix *)mvp);
+    GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mvp);
+
+    GL_Uniform1i(SHADER_PARMS_ADDR(u_uniformParm, 0), int(notPack));
+
+    qglDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+    GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+
+    GL_UseProgram(NULL);
+
+    glPopAttrib();
+
+    depthStencilRenderer.End();
+}
+
+void RB_RenderStencilToColor(int comp = 0)
+{
+    depthStencilRenderer.Blit(GL_STENCIL_BUFFER_BIT);
+
+    depthStencilRenderer.BeginRender();
+    qglClear(GL_COLOR_BUFFER_BIT);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    qglDisable(GL_STENCIL_TEST);
+    qglDisable(GL_DEPTH_TEST);
+    qglDepthMask(GL_FALSE);
+    qglDisable(GL_BLEND);
+
+    GL_UseProgram(&stencilToColorShader);
+
+    GL_SelectTextureNoClient(0);
+    depthStencilRenderer.BindStencil();
+
+    float tcw, tch;
+    if(depthStencilRenderer.Width() == depthStencilRenderer.UploadWidth())
+        tcw = 1.0f;
+    else
+        tcw = (float)depthStencilRenderer.Width() / (float)depthStencilRenderer.UploadWidth();
+    if(depthStencilRenderer.Height() == depthStencilRenderer.UploadHeight())
+        tch = 1.0f;
+    else
+        tch = (float)depthStencilRenderer.Height() / (float)depthStencilRenderer.UploadHeight();
+
+    float width = 1.0f;
+    float height = 1.0f;
+    GLfloat vertexes[] = {
+            0.0f, 0.0f,
+            0.0f, 0.0f,
+            0.0f, tch,
+            0.0f, height,
+            tcw, 0.0f,
+            width, 0.0f,
+            tcw, tch,
+            width, height,
+    };
+
+    qglBindBuffer(GL_ARRAY_BUFFER, 0);
+    GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+    GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+
+    GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(GLfloat) * 4, &vertexes[0]);
+    GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 2, GL_FLOAT, false, sizeof(GLfloat) * 4, &vertexes[2]);
+
+    GLfloat	mvp[16];
+    esMatrixLoadIdentity((ESMatrix *)mvp);
+    esOrtho((ESMatrix *)mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+    esMatrixTranspose((ESMatrix *)mvp);
+    GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mvp);
+
+    GL_Uniform1i(SHADER_PARMS_ADDR(u_uniformParm, 0), comp);
+
+    qglDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+    GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+
+    GL_UseProgram(NULL);
+
+    glPopAttrib();
+
+    depthStencilRenderer.End();
 }

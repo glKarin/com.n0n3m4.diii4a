@@ -31,6 +31,8 @@
 #include "postprocess_glsl_shader_100.h"
 #endif
 
+#include "debug_glsl_shader_100.h"
+
 #ifdef _HUMANHEAD
 #include "prey_glsl_shader_100.h"
 #endif
@@ -58,6 +60,8 @@
 #ifdef _POSTPROCESS
 #include "postprocess_glsl_shader_300.h"
 #endif
+
+#include "debug_glsl_shader_300.h"
 
 #ifdef _HUMANHEAD
 #include "prey_glsl_shader_300.h"

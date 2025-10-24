@@ -456,6 +456,16 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 #endif
 	ret.Append(GLSL_SHADER_SOURCE("diffuseCubemap", SHADER_DIFFUSECUBEMAP, &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
 	// ret.Append(GLSL_SHADER_SOURCE("glasswarp", SHADER_GLASSWARP, &glasswarpShader, GLASSWARP_VERT, GLASSWARP_FRAG, "", ""));
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3 || glConfig.depthTextureAvailable)
+#else
+    if(glConfig.depthTextureAvailable)
+#endif
+    ret.Append(GLSL_SHADER_SOURCE("depthToColor", SHADER_DEPTH_TO_COLOR, &depthToColorShader, SIMPLE_VERTEX_TEXCOORD_VERT, DEPTH_TO_COLOR_FRAG, "", ""));
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3)
+    ret.Append(GLSL_SHADER_SOURCE("stencilToColor", SHADER_STENCIL_TO_COLOR, &stencilToColorShader, SIMPLE_VERTEX_TEXCOORD_VERT, STENCIL_TO_COLOR_FRAG, "", ""));
+#endif
 	ret.Append(GLSL_SHADER_SOURCE("texgen", SHADER_TEXGEN, &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "", ""));
 
     // newStage
@@ -951,8 +961,25 @@ static const GLSLShaderProp * RB_GLSL_FindShaderProp(const idList<GLSLShaderProp
 		if(prop.type == type)
 			return &prop;
 	}
+	
+    if(type == SHADER_DEPTH_TO_COLOR)
+    {
+#ifdef GL_ES_VERSION_3_0
+        if(USING_GLES3 || glConfig.depthTextureAvailable)
+#else
+        if(glConfig.depthTextureAvailable)
+#endif
+            common->Error("Shader prop '%d' not found!\n", type);
+    }
+#ifdef GL_ES_VERSION_3_0
+    else if(type == SHADER_STENCIL_TO_COLOR)
+    {
+        if(USING_GLES3)
+            common->Error("Shader prop '%d' not found!\n", type);
+    }
+#endif
 #ifdef _SHADOW_MAPPING
-    if(type == SHADER_DEPTH_COLOR || type == SHADER_DEPTH_PERFORATED_COLOR)
+    else if(type == SHADER_DEPTH_COLOR || type == SHADER_DEPTH_PERFORATED_COLOR)
     {
 #ifdef GL_ES_VERSION_3_0
         if(!USING_GLES3 && (!r_useDepthTexture || !r_useCubeDepthTexture))
@@ -961,8 +988,8 @@ static const GLSLShaderProp * RB_GLSL_FindShaderProp(const idList<GLSLShaderProp
 #endif
             common->Error("Shader prop '%d' not found!\n", type);
     }
-    else
 #endif
+    else
     common->Error("Shader prop '%d' not found!\n", type);
 	return NULL;
 }
@@ -1070,6 +1097,21 @@ static bool RB_GLSL_InitShaders(void)
     }
     REQUIRE_SHADER;
 #endif
+
+    UNNECESSARY_SHADER;
+    for(int i = SHADER_DEBUG_BEGIN; i <= SHADER_DEBUG_END; i++)
+    {
+        const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
+        if(!prop)
+            continue;
+        if(!RB_GLSL_LoadShaderProgramFromProp(prop))
+        {
+            common->Printf("Not support debug in GLSL shader!\n");
+            break;
+        }
+        shaderManager->Add(prop->program);
+    }
+    REQUIRE_SHADER;
 
 	return true;
 }
@@ -1640,13 +1682,15 @@ void RB_GLSL_PrintShaderSource(const char *filename, const char *source)
 
 static void RB_GLSL_ExportDevGLSLShaderSource(const char *source, const char *name, const char *dir)
 {
+    if(!source || !source[0])
+        return;
+
 	idStr path = dir;
 
 	if(!path.IsEmpty() && path[path.Length() - 1] != '/')
 		path += "/";
 
 	common->Printf("Save base GLSL shader source '%s' to '%s'\n", name, path.c_str());
-
 
 	idStr p(path);
 	p.Append(name);
@@ -1692,6 +1736,16 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 	EXPORT_SHADER_PAIR_SOURCE(COLORPROCESS, "colorProcess"); \
     EXPORT_SHADER_PAIR_SOURCE(MEGATEXTURE, "megaTexture");
 
+#define EXPORT_DEBUG_SHADER() \
+	EXPORT_SHADER_SOURCE(SIMPLE_VERTEX_TEXCOORD_VERT, "simpleVertexTexcoord", "vert"); \
+	EXPORT_SHADER_SOURCE(DEPTH_TO_COLOR_FRAG, "depthToColor", "frag"); \
+	EXPORT_SHADER_SOURCE(STENCIL_TO_COLOR_FRAG, "stencilToColor", "frag");
+
+#ifdef _GLOBAL_ILLUMINATION
+#define EXPORT_GI_SHADER() \
+    EXPORT_SHADER_PAIR_SOURCE(GLOBAL_ILLUMINATION, "globalIllumination");
+#endif
+
 #define EXPORT_D3XP_SHADER() \
     EXPORT_SHADER_PAIR_SOURCE(ENVIROSUIT, "enviroSuit");
 
@@ -1732,6 +1786,10 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 	glprogs = "dev/glslprogs";
 	EXPORT_BASE_SHADER()
     EXPORT_D3XP_SHADER()
+    EXPORT_DEBUG_SHADER()
+#ifdef _GLOBAL_ILLUMINATION
+    EXPORT_GI_SHADER()
+#endif
 #ifdef _SHADOW_MAPPING
 	EXPORT_SHADOW_MAPPING_SHADER()
 #endif
@@ -1751,6 +1809,10 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 
 	EXPORT_BASE_SHADER()
     EXPORT_D3XP_SHADER()
+    EXPORT_DEBUG_SHADER()
+#ifdef _GLOBAL_ILLUMINATION
+    EXPORT_GI_SHADER()
+#endif
 #ifdef _SHADOW_MAPPING
 	EXPORT_SHADOW_MAPPING_SHADER()
 #endif
