@@ -460,6 +460,7 @@ void idImGuiSettings::RenderNewCvars(void) const
             "harm_con_floatZoomStep",
             "harm_con_alwaysShow",
             "harm_con_noBackground",
+            "r_showStencil",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else

@@ -817,6 +817,61 @@ void RB_ShowDepthBuffer(void)
 
 	glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, depthReadback);
 	R_StaticFree(depthReadback);
+/*
+===================
+RB_ShowStencilBuffer
+
+Draw the stencil buffer as colors
+===================
+*/
+void RB_ShowStencilBuffer(void)
+{
+//#if !defined(GL_ES_VERSION_2_0) // qglReadPixels(GL_STENCIL_INDEX)
+#if !defined(__ANDROID__)
+    if (!r_showStencil.GetBool()) {
+        return;
+    }
+
+    if(USING_GL)
+    {
+    byte	*stencilReadback;
+    byte	*stencilColor;
+
+#if !defined(GL_ES_VERSION_2_0)
+    glPushMatrix();
+#endif
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, 1, 0, 1, -1, 1);
+    glRasterPos2f(0, 0);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+#if !defined(GL_ES_VERSION_2_0)
+    glPopMatrix();
+#endif
+
+    GL_State(GLS_DEPTHFUNC_ALWAYS);
+    glColor3f(1, 1, 1);
+    globalImages->BindNull();
+
+    stencilReadback = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight);
+    memset(stencilReadback, 0, glConfig.vidWidth * glConfig.vidHeight);
+
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback);
+    stencilColor = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight * 4);
+    for (int i = 0 ; i < glConfig.vidWidth * glConfig.vidHeight ; i++) {
+        stencilColor[i*4] = r_showStencil.GetInteger() == 1 || (r_showStencil.GetInteger() & 2) ? stencilReadback[i] : 0;
+        stencilColor[i*4+1] = r_showStencil.GetInteger() == 1 || (r_showStencil.GetInteger() & 4) ? stencilReadback[i] : 0;
+        stencilColor[i*4+2] = r_showStencil.GetInteger() == 1 || (r_showStencil.GetInteger() & 8) ? stencilReadback[i] : 0;
+        stencilColor[i*4+3] = 255;
+	}
+
+    glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, stencilColor);
+    R_StaticFree(stencilReadback);
+    R_StaticFree(stencilColor);
+    }
 #endif
 //#endif
 }
@@ -3118,6 +3173,7 @@ void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 	RB_ShowPortals();
 	RB_ShowSilhouette();
 	RB_ShowDepthBuffer();
+    RB_ShowStencilBuffer();
 	RB_ShowIntensity();
 	RB_ShowDebugLines();
 	RB_ShowDebugText();
