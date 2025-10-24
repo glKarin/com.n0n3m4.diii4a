@@ -46,11 +46,11 @@ zOrient - The Z component of this bone’s XYZ orentation quaternion.
         idList<md5animFrame_t> joints;
     } md5animFrames_t;
 
-    class idMD5MeshFile;
-    class idMD5AnimFile
+    class idMd5MeshFile;
+    class idMd5AnimFile
     {
     public:
-        idMD5AnimFile(void);
+        idMd5AnimFile(void);
         void Write(const char *path) const;
         bool Parse(const char *path);
         idList<md5animHierarchy_t> & Hierarchies(void);
@@ -62,9 +62,9 @@ zOrient - The Z component of this bone’s XYZ orentation quaternion.
         int & FrameRate(void);
         int & NumAnimatedComponents(void);
         void Clear(void);
-        void CalcBounds(const idMD5MeshFile &mesh);
+        void CalcBounds(const idMd5MeshFile &mesh);
 
-        static void CalcFrameBounds(const idMD5MeshFile &mesh, const idMD5AnimFile &anim, int frame, idBounds &bounds);
+        static void CalcFrameBounds(const idMd5MeshFile &mesh, const idMd5AnimFile &anim, int frame, idBounds &bounds);
 
     private:
         int version;
@@ -76,7 +76,7 @@ zOrient - The Z component of this bone’s XYZ orentation quaternion.
         idList<md5animBaseframe_t> baseframe;
         idList<md5animFrames_t> frames;
 
-        friend class idMD5MeshFile;
+        friend class idMd5MeshFile;
     };
 
 };

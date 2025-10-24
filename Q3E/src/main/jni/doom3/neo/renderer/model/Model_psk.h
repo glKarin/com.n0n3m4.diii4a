@@ -7,7 +7,7 @@
 
 namespace md5model
 {
-	class idMD5MeshFile;
+	class idMd5MeshFile;
 };
 
 #pragma pack( push, 1 )
@@ -116,8 +116,8 @@ class idModelPsk
         ~idModelPsk(void);
         bool Parse(const char *pskPath);
         bool Check(void) const;
-        void Print(void);
-        bool ToMD5Mesh(md5model::idMD5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
+        void Print(void) const;
+        bool ToMd5Mesh(md5model::idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
 #ifdef _MODEL_OBJ
         bool ToObj(objModel_t &objModel, bool keepDup = false) const;
 #endif

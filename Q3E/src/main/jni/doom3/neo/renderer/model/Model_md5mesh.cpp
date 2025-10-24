@@ -36,26 +36,26 @@ ID_INLINE void Writefln(idFile *file, const char *fmt, ...)
 /* md5mesh */
 namespace md5model
 {
-    idMD5MeshFile::idMD5MeshFile(void)
+    idMd5MeshFile::idMd5MeshFile(void)
             : version(MD5_VERSION)
     {}
 
-    ID_INLINE idList<md5meshJoint_t> & idMD5MeshFile::Joints()
+    ID_INLINE idList<md5meshJoint_t> & idMd5MeshFile::Joints()
     {
         return joints;
     }
 
-    ID_INLINE idList<md5meshMesh_t> & idMD5MeshFile::Meshes()
+    ID_INLINE idList<md5meshMesh_t> & idMd5MeshFile::Meshes()
     {
         return meshes;
     }
 
-    ID_INLINE idStr & idMD5MeshFile::Commandline()
+    ID_INLINE idStr & idMd5MeshFile::Commandline()
     {
         return commandline;
     }
 
-    void idMD5MeshFile::Clear(void)
+    void idMd5MeshFile::Clear(void)
     {
         version = MD5_VERSION;
         commandline.Clear();
@@ -63,7 +63,7 @@ namespace md5model
         meshes.SetNum(0);
     }
 
-    void idMD5MeshFile::Write(const char *path) const
+    void idMd5MeshFile::Write(const char *path) const
     {
         idFile *file = fileSystem->OpenFileWrite(path);
 
@@ -148,7 +148,7 @@ namespace md5model
         fileSystem->CloseFile(file);
     }
 
-    bool idMD5MeshFile::Parse(const char *path)
+    bool idMd5MeshFile::Parse(const char *path)
     {
         idToken		token;
         idLexer		parser(LEXFL_ALLOWPATHNAMES | LEXFL_NOSTRINGESCAPECHARS);
@@ -276,12 +276,12 @@ namespace md5model
         return true;
     }
 
-    void idMD5MeshFile::ConvertJointTransforms(idList<md5meshJointTransform_t> &jointTransforms) const
+    void idMd5MeshFile::ConvertJointTransforms(idList<md5meshJointTransform_t> &jointTransforms) const
     {
         ConvertJointTransforms(joints, jointTransforms);
     }
 
-	void idMD5MeshFile::ConvertJointTransforms(const idList<md5meshJoint_t> &joints, idList<md5meshJointTransform_t> &jointTransforms)
+	void idMd5MeshFile::ConvertJointTransforms(const idList<md5meshJoint_t> &joints, idList<md5meshJointTransform_t> &jointTransforms)
 	{
         jointTransforms.SetNum(joints.Num());
         md5meshJointTransform_t *jointTransform;
@@ -334,7 +334,7 @@ namespace md5model
         }
 	}
 
-    void idMD5MeshFile::CalcBounds(const idList<md5meshJointTransform_t> &list, idBounds &bounds) const
+    void idMd5MeshFile::CalcBounds(const idList<md5meshJointTransform_t> &list, idBounds &bounds) const
     {
         bounds.Clear();
 
@@ -345,7 +345,7 @@ namespace md5model
         }
     }
 
-    void idMD5MeshFile::CalcMeshBounds(const md5meshMesh_t &mesh, const idList<md5meshJointTransform_t> &list, idBounds &bounds) const
+    void idMd5MeshFile::CalcMeshBounds(const md5meshMesh_t &mesh, const idList<md5meshJointTransform_t> &list, idBounds &bounds) const
     {
         int						i;
         int						j;

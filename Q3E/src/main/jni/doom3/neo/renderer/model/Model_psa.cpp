@@ -2,8 +2,8 @@
 
 #include "Model_md5convert.h"
 
-using md5model::idMD5MeshFile;
-using md5model::idMD5AnimFile;
+using md5model::idMd5MeshFile;
+using md5model::idMd5AnimFile;
 
 idModelPsa::idModelPsa(void)
 : file(NULL),
@@ -218,7 +218,7 @@ bool idModelPsa::Check(void) const
     return true;
 }
 
-bool idModelPsa::ToMD5Anim(idMD5AnimFile &md5anim, idMD5MeshFile &md5mesh, float scale) const
+bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale) const
 {
     using namespace md5model;
 
@@ -319,40 +319,90 @@ bool idModelPsa::ToMD5Anim(idMD5AnimFile &md5anim, idMD5MeshFile &md5mesh, float
             meshJoint = &joints[j];
 
             int index = 0;
-            int *rindex = &index;
-            if(!boneMap.Get(meshJoint->boneName, &rindex))
-                continue;
-
-            md5Bone = &md5Joints[j];
-            key = &animKeys[*rindex];
             idVec3 boneOrigin;
             idQuat boneQuat;
+            md5Bone = &md5Joints[j];
+            int *rindex = &index;
 
             md5Bone->boneName = meshJoint->boneName;
             md5Bone->parentIndex = meshJoint->parentIndex;
 
-            boneOrigin[0] = key->posx;
-            boneOrigin[1] = key->posy;
-            boneOrigin[2] = key->posz;
+            if(boneMap.Get(meshJoint->boneName, &rindex)) // anim key bone in psk mesh
+			{
+				key = &animKeys[*rindex];
+                boneOrigin[0] = key->posx;
+                boneOrigin[1] = key->posy;
+                boneOrigin[2] = key->posz;
+
+                // I have really no idea why the .psk format stores the first quaternion with inverted quats.
+                // Furthermore only the X and Z components of the first quat are inverted ?!?!
+                if (md5Bone->parentIndex == -1)
+                {
+                    boneQuat[0] = key->quatx;
+                    boneQuat[1] = -key->quaty;
+                    boneQuat[2] = key->quatz;
+                    boneQuat[3] = key->quatw;
+                }
+                else
+                {
+                    boneQuat[0] = -key->quatx;
+                    boneQuat[1] = -key->quaty;
+                    boneQuat[2] = -key->quatz;
+                    boneQuat[3] = key->quatw;
+                }
+			}
+			else // anim key bone not in psk mesh
+			{
+#if 0
+				if (md5Bone->parentIndex >= 0)
+				{
+					idVec3 rotated;
+					idQuat quat;
+
+					const md5meshJoint_t *parent = &joints[md5Bone->parentIndex];
+
+					idMat3 m = parent->orient.ToMat3();
+#if ETW_PSK
+					rotated = m.TransposeSelf() * (meshJoint->pos - parent->pos);
+
+					quat = (m * meshJoint->orient.ToMat3()).ToQuat();
+#else
+					rotated = m * (meshJoint->pos - parent->pos);
+
+					quat = (meshJoint->orient.Inverse().ToMat3() * m).ToQuat();
+#endif
+					boneQuat = quat.Normalize();
+					boneOrigin = rotated;
+				}
+				else
+				{
+					boneQuat = meshJoint->orient.Inverse();
+					boneOrigin = meshJoint->pos;
+				}
+#else
+                const pskBone_t *refBone = &psk.bones[j];
+                boneOrigin[0] = refBone->localx;
+                boneOrigin[1] = refBone->localy;
+                boneOrigin[2] = refBone->localz;
+                if (md5Bone->parentIndex < 0)
+                {
+                    boneQuat[0] = refBone->qx;
+                    boneQuat[1] = -refBone->qy;
+                    boneQuat[2] = refBone->qz;
+                    boneQuat[3] = refBone->qw;
+                }
+                else
+                {
+                    boneQuat[0] = -refBone->qx;
+                    boneQuat[1] = -refBone->qy;
+                    boneQuat[2] = -refBone->qz;
+                    boneQuat[3] = refBone->qw;
+                }
+#endif
+			}
+
 			if(scale > 0.0f)
 				boneOrigin *= scale;
-
-            // I have really no idea why the .psk format stores the first quaternion with inverted quats.
-            // Furthermore only the X and Z components of the first quat are inverted ?!?!
-            if (md5Bone->parentIndex == -1)
-            {
-                boneQuat[0] = key->quatx;
-                boneQuat[1] = -key->quaty;
-                boneQuat[2] = key->quatz;
-                boneQuat[3] = key->quatw;
-            }
-            else
-            {
-                boneQuat[0] = -key->quatx;
-                boneQuat[1] = -key->quaty;
-                boneQuat[2] = -key->quatz;
-                boneQuat[3] = key->quatw;
-            }
 
             md5Bone->pos = boneOrigin;
 
@@ -387,7 +437,7 @@ bool idModelPsa::ToMD5Anim(idMD5AnimFile &md5anim, idMD5MeshFile &md5mesh, float
         }
 
         idList<md5meshJointTransform_t> frameTransforms;
-        idMD5MeshFile::ConvertJointTransforms(md5Joints, frameTransforms);
+        idMd5MeshFile::ConvertJointTransforms(md5Joints, frameTransforms);
 
         // calc frame bounds
         md5mesh.CalcBounds(frameTransforms, md5Bounds[i]);
@@ -414,15 +464,15 @@ bool idModelPsa::ToMD5Anim(idMD5AnimFile &md5anim, idMD5MeshFile &md5mesh, float
     return true;
 }
 
-void idModelPsa::Print(void)
+void idModelPsa::Print(void) const
 {
 #define PSK_PART_PRINT(name, list, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
     for(int i = 0; i < list.Num(); i++) {    \
-         Sys_Printf(fmt, __VA_ARGS__);                                \
+         Sys_Printf(fmt "\n", __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
-    //PSK_PART_PRINT(bone, bones, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].vertex_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
+    PSK_PART_PRINT(bone, bones, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].vertex_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
     PSK_PART_PRINT(animinfo, animInfos, "action=%s group=%s bones=%d root_include=%d key_compression_style=%d key_quotum=%d key_reduction=%f track_time=%f anim_rate=%f start_bone=%d first_raw_frame=%d num_raw_frames=%d  ", animInfos[i].action_name, animInfos[i].group_name, animInfos[i].total_bones, animInfos[i].root_include, animInfos[i].key_compression_style, animInfos[i].key_quotum, animInfos[i].key_reduction, animInfos[i].track_time, animInfos[i].anim_rate, animInfos[i].start_bone, animInfos[i].first_raw_frame, animInfos[i].num_raw_frames)
     //PSK_PART_PRINT(animkey, animKeys, "pos=(%f, %f, %f) quat=(%f, %f, %f, %f) time=%f   ", animKeys[i].posx, animKeys[i].posy, animKeys[i].posz, animKeys[i].quatx, animKeys[i].quaty, animKeys[i].quatz, animKeys[i].quatw, animKeys[i].time)
 
@@ -443,14 +493,14 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
 	int ret = 0;
 
     idModelPsk psk;
-    idMD5MeshFile md5MeshFile;
+    idMd5MeshFile md5MeshFile;
     bool pskRes = false;
     if(psk.Parse(pskPath))
     {
         //psk.Print();
         if(psk.Check())
         {
-            if(psk.ToMD5Mesh(md5MeshFile, scale, addOrigin))
+            if(psk.ToMd5Mesh(md5MeshFile, scale, addOrigin))
             {
 				if(doPsk)
 				{
@@ -491,8 +541,8 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
 			//psa.Print();
 			if(psa.Check())
 			{
-				idMD5AnimFile md5AnimFile;
-				if(psa.ToMD5Anim(md5AnimFile, md5MeshFile, scale))
+				idMd5AnimFile md5AnimFile;
+				if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale))
 				{
 					md5MeshFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", psaPath, scale > 0.0f ? scale : 1.0, addOrigin));
 					idStr md5meshPath = psaPath;

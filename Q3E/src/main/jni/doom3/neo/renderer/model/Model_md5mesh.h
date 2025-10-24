@@ -58,11 +58,11 @@ namespace md5model
         idQuat orient; // world
     } md5meshJointTransform_t;
 
-    class idMD5AnimFile;
-    class idMD5MeshFile
+    class idMd5AnimFile;
+    class idMd5MeshFile
     {
     public:
-        idMD5MeshFile(void);
+        idMd5MeshFile(void);
         void Write(const char *path) const;
         bool Parse(const char *path);
         idList<md5meshJoint_t> & Joints(void);
@@ -83,7 +83,7 @@ namespace md5model
         idList<md5meshJoint_t> joints;
         idList<md5meshMesh_t> meshes;
 
-        friend class idMD5AnimFile;
+        friend class idMd5AnimFile;
     };
 
 };

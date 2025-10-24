@@ -3,7 +3,7 @@
 #endif
 #include "Model_psk.h"
 
-using md5model::idMD5MeshFile;
+using md5model::idMd5MeshFile;
 
 static bool PSK_CheckId(const char chunk_id[PSK_CHUNK_ID_TOTAL_LENGTH], const char *target)
 {
@@ -438,7 +438,7 @@ int idModelPsk::GroupFace(idList<idList<const pskFace_t *> > &faceGroup, idStrLi
     return matList.Num();
 }
 
-bool idModelPsk::ToMD5Mesh(idMD5MeshFile &md5mesh, float scale, bool addOrigin) const
+bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) const
 {
     using namespace md5model;
 
@@ -786,12 +786,12 @@ bool idModelPsk::Check(void) const
     return true;
 }
 
-void idModelPsk::Print(void)
+void idModelPsk::Print(void) const
 {
 #define PSK_PART_PRINT(name, list, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
     for(int i = 0; i < list.Num(); i++) {  \
-         Sys_Printf(fmt, __VA_ARGS__);                                \
+         Sys_Printf(fmt "\n", __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
     PSK_PART_PRINT(vertex, vertexes, "(%f, %f, %f)   ", vertexes[i][0], vertexes[i][1], vertexes[i][2])

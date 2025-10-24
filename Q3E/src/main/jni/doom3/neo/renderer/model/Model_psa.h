@@ -8,8 +8,8 @@
 
 namespace md5model
 {
-	class idMD5MeshFile;
-    class idMD5AnimFile;
+	class idMd5MeshFile;
+    class idMd5AnimFile;
 };
 
 #pragma pack( push, 1 )
@@ -70,8 +70,8 @@ public:
     idModelPsa(void);
     ~idModelPsa(void);
     bool Parse(const char *psaPath);
-    bool ToMD5Anim(md5model::idMD5AnimFile &md5anim, md5model::idMD5MeshFile &md5mesh, float scale = -1.0f) const;
-    void Print(void);
+    bool ToMd5Anim(const idModelPsk &psk, md5model::idMd5AnimFile &md5anim, md5model::idMd5MeshFile &md5mesh, float scale = -1.0f) const;
+    void Print(void) const;
     bool Check(void) const;
 
 private:
