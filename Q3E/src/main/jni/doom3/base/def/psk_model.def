@@ -14,7 +14,7 @@ model test_psk_animation_model {
 }
 
 // 2-a. define psk/psa to md5mesh/md5anim conversion config
-entityDef models/psk/test_static_mesh {
+entityDef models/psk/test_static_mesh { // name must be same as model's mesh field
     "md5convert" "1" // mark this entityDef is md5 conversion define for clean manually later by command `cleanConvertedMd5`
 
     "type" "psk" // animation model type, if not set, will using mesh's extension
@@ -32,7 +32,7 @@ entityDef models/psk/test_static_mesh {
 }
 
 // 2-b define psk/psa to md5mesh/md5anim secondary conversion config, it will be used if entityDef 'models/psk/test_static_mesh' not found
-entityDef md5convert/models/psk/test_static_mesh {
+entityDef md5convert/models/psk/test_static_mesh { // name must be same as 'md5convert/' + model's mesh field
     "md5convert" "1" // mark this entityDef is md5 conversion define for clean manually later by command `cleanConvertedMd5`
     "type" "psk" // animation model type, if not set, will using mesh's extension
 
