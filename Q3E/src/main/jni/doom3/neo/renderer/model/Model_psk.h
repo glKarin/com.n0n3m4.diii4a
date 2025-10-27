@@ -81,12 +81,31 @@ typedef struct pskBone_s {
     char name[64];
     int flags;
     int num_children;
-    int vertex_index;
+    int parent_index;
     float qw, qx, qy, qz;
     float localx, localy, localz;
     float length;
     float xsize, ysize, zsize;
 } pskBone_t;
+
+// MorphInfo
+// 64si
+typedef struct pskMorphInfo_s {
+    char name[64];
+    int vertex_count;
+} pskMorphInfo_t;
+
+// MorphData
+// 6fi
+typedef struct pskMorphData_s {
+	float position_deltax;
+	float position_deltay;
+	float position_deltaz;
+	float tangent_z_deltax;
+	float tangent_z_deltay;
+	float tangent_z_deltaz;
+	int point_index;
+} pskMorphData_t;
 #pragma pack( pop )
 
 typedef enum pskHeaderType_e
@@ -105,6 +124,8 @@ typedef enum pskHeaderType_e
     VERTEXCO, // vertex colors
     EXTRAUVS, // extra uvs
     VTXNORMS, // normals
+	MRPHINFO, // shape
+	MRPHDATA, // shape
     PSKHT_TOTAL,
 } pskHeaderType_t;
 
@@ -136,6 +157,8 @@ class idModelPsk
         int ReadNormals(void);
         int ReadColors(void);
         int ReadExtraUvs(void);
+        int ReadMorphInfos(void);
+        int ReadMorphDatas(void);
         int Skip(void);
         int GroupFace(idList<idList<const pskFace_t *> > &faceGroup, idStrList &names) const;
 
@@ -149,6 +172,8 @@ class idModelPsk
         idList<pskNormal_t> normals;
         idList<pskUv_t> uvs;
         idList<pskColor_t> colors;
+        idList<pskMorphInfo_t> morphInfos;
+        idList<pskMorphData_t> morphDatas;
         idFile *file;
         int types;
         pskHeader_t header;

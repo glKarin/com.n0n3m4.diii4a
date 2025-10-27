@@ -73,7 +73,7 @@ int idModelPsa::ReadBones(void)
         file->Read(item.name, 64);
         file->ReadInt(item.flags);
         file->ReadInt(item.num_children);
-        file->ReadInt(item.vertex_index);
+        file->ReadInt(item.parent_index);
         file->ReadFloat(item.qx);
         file->ReadFloat(item.qy);
         file->ReadFloat(item.qz);
@@ -353,6 +353,8 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
 			}
 			else // anim key bone not in psk mesh
 			{
+				if(i == 0)
+					common->Warning("Bone not found in psa: %s", meshJoint->boneName.c_str());
 #if 0
 				if (md5Bone->parentIndex >= 0)
 				{
@@ -469,10 +471,10 @@ void idModelPsa::Print(void) const
 #define PSK_PART_PRINT(name, list, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
     for(int i = 0; i < list.Num(); i++) {    \
-         Sys_Printf(fmt "\n", __VA_ARGS__);                                \
+         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
-    PSK_PART_PRINT(bone, bones, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].vertex_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
+    PSK_PART_PRINT(bone, bones, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
     PSK_PART_PRINT(animinfo, animInfos, "action=%s group=%s bones=%d root_include=%d key_compression_style=%d key_quotum=%d key_reduction=%f track_time=%f anim_rate=%f start_bone=%d first_raw_frame=%d num_raw_frames=%d  ", animInfos[i].action_name, animInfos[i].group_name, animInfos[i].total_bones, animInfos[i].root_include, animInfos[i].key_compression_style, animInfos[i].key_quotum, animInfos[i].key_reduction, animInfos[i].track_time, animInfos[i].anim_rate, animInfos[i].start_bone, animInfos[i].first_raw_frame, animInfos[i].num_raw_frames)
     //PSK_PART_PRINT(animkey, animKeys, "pos=(%f, %f, %f) quat=(%f, %f, %f, %f) time=%f   ", animKeys[i].posx, animKeys[i].posy, animKeys[i].posz, animKeys[i].quatx, animKeys[i].quaty, animKeys[i].quatz, animKeys[i].quatw, animKeys[i].time)
 

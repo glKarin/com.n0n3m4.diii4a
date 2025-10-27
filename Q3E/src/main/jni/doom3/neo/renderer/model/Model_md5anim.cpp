@@ -81,11 +81,13 @@ namespace md5model
             WriteIndent(file);
             const md5animHierarchy_t &joint = hierarchies[i];
             Writef(file, "\"%s\" %d %d %d", joint.boneName.c_str(), joint.parentIndex, joint.numComp, joint.frameIndex);
-            if(joint.parentIndex != -1 && 0)
+#if MD5_APPEND_COMMENT
+            if(joint.parentIndex != -1)
             {
                 const md5animHierarchy_t &parent = hierarchies[joint.parentIndex];
                 Writef(file, " // %d %s", i, parent.boneName.c_str());
             }
+#endif
             Writeln(file);
         }
         Writefln(file, "}");
@@ -98,6 +100,9 @@ namespace md5model
             WriteIndent(file);
             const md5animBounds_t &bound = bounds[i];
             Writef(file, "( %.10f %.10f %.10f ) ( %.10f %.10f %.10f )", bound[0].x, bound[0].y, bound[0].z, bound[1].x, bound[1].y, bound[1].z);
+#if MD5_APPEND_COMMENT
+			Writef(file, " // %d", i);
+#endif
             Writeln(file);
         }
         Writefln(file, "}");
@@ -110,11 +115,10 @@ namespace md5model
             WriteIndent(file);
             const md5animBaseframe_t &frame = baseframe[i];
             Writef(file, "( %.10f %.10f %.10f ) ( %.10f %.10f %.10f )", frame.xPos, frame.yPos, frame.zPos, frame.xOrient, frame.yOrient, frame.zOrient);
-            if(0)
-            {
+#if MD5_APPEND_COMMENT
                 const md5animHierarchy_t &bone = hierarchies[i];
                 Writef(file, " // %d %s", i, bone.boneName.c_str());
-            }
+#endif
             Writeln(file);
         }
         Writefln(file, "}");
@@ -130,11 +134,10 @@ namespace md5model
                 WriteIndent(file);
                 const md5animFrame_t &frame = frameTrans.joints[i];
                 Writef(file, "%.10f %.10f %.10f %.10f %.10f %.10f", frame.xPos, frame.yPos, frame.zPos, frame.xOrient, frame.yOrient, frame.zOrient);
-                if(0)
-                {
+#if MD5_APPEND_COMMENT
                     const md5animHierarchy_t &bone = hierarchies[i];
                     Writef(file, " // %d %s", i, bone.boneName.c_str());
-                }
+#endif
                 Writeln(file);
             }
             Writefln(file, "}");

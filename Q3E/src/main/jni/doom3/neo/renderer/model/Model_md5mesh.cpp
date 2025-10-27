@@ -87,11 +87,13 @@ namespace md5model
 #else
             Writef(file, "\"%s\" %d ( %.10f %.10f %.10f ) ( %.10f %.10f %.10f )", joint.boneName.c_str(), joint.parentIndex, joint.pos[0], joint.pos[1], joint.pos[2], rotation[0], rotation[1], rotation[2]);
 #endif
-            if(joint.parentIndex != -1 && 0)
+#if MD5_APPEND_COMMENT
+            if(joint.parentIndex != -1)
             {
                 const md5meshJoint_t &parent = joints[joint.parentIndex];
                 Writef(file, " // %d %s", i, parent.boneName.c_str());
             }
+#endif
             Writeln(file);
         }
         Writefln(file, "}");

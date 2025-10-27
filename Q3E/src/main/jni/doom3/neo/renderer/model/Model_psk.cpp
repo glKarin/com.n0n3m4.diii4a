@@ -42,6 +42,8 @@ void idModelPsk::Clear(void)
     normals.SetNum(0);
     uvs.SetNum(0);
     colors.SetNum(0);
+    morphInfos.SetNum(0);
+    morphDatas.SetNum(0);
     if(file)
     {
         fileSystem->CloseFile(file);
@@ -168,7 +170,7 @@ int idModelPsk::ReadBones(void)
         file->Read(item.name, sizeof(item.name));
         file->ReadInt(item.flags);
         file->ReadInt(item.num_children);
-        file->ReadInt(item.vertex_index);
+        file->ReadInt(item.parent_index);
         file->ReadFloat(item.qx);
         file->ReadFloat(item.qy);
         file->ReadFloat(item.qz);
@@ -221,6 +223,36 @@ int idModelPsk::ReadColors(void)
         file->ReadUnsignedChar(item.a);
     }
     return colors.Num();
+}
+
+int idModelPsk::ReadMorphInfos(void)
+{
+    morphInfos.SetNum(header.chunk_datacount);
+    for(int i = 0; i < header.chunk_datacount; i++)
+    {
+        pskMorphInfo_t &item = morphInfos[i];
+        memset(&item.name, 0, sizeof(item.name));
+        file->Read(item.name, sizeof(item.name));
+        file->ReadInt(item.vertex_count);
+    }
+    return morphInfos.Num();
+}
+
+int idModelPsk::ReadMorphDatas(void)
+{
+    morphDatas.SetNum(header.chunk_datacount);
+    for(int i = 0; i < header.chunk_datacount; i++)
+    {
+        pskMorphData_t &item = morphDatas[i];
+        file->ReadFloat(item.position_deltax);
+        file->ReadFloat(item.position_deltay);
+        file->ReadFloat(item.position_deltaz);
+        file->ReadFloat(item.tangent_z_deltax);
+        file->ReadFloat(item.tangent_z_deltay);
+        file->ReadFloat(item.tangent_z_deltaz);
+        file->ReadInt(item.point_index);
+    }
+    return morphDatas.Num();
 }
 
 int idModelPsk::Skip(void)
@@ -384,6 +416,24 @@ bool idModelPsk::Parse(const char *pskPath)
                 break;
             }
         }
+        else if(PSK_CheckId(header.chunk_id, "MRPHINFO"))
+        {
+            MarkType(MRPHINFO);
+            if(ReadMorphInfos() < 0)
+            {
+                err = true;
+                break;
+            }
+        }
+        else if(PSK_CheckId(header.chunk_id, "MRPHDATA"))
+        {
+            MarkType(MRPHDATA);
+            if(ReadMorphDatas() < 0)
+            {
+                err = true;
+                break;
+            }
+        }
         else
         {
             idStr errStr(header.chunk_id, 0, PSK_CHUNK_ID_LENGTH);
@@ -477,7 +527,7 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
         }
         else
         {
-            md5Bone->parentIndex = refBone->vertex_index;
+            md5Bone->parentIndex = refBone->parent_index;
         }
 
         //Ren_Print("R_LoadPSK: '%s' has bone '%s' with parent index %i\n", modName, md5Bone->name, md5Bone->parentIndex);
@@ -643,7 +693,11 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
 						md5Weight.jointIndex += 1;
                     jointTransform = &jointTransforms[md5Weight.jointIndex];
                     if(vertWeights.Num() == 1)
+					{
+						if(weight->weight != 1.0f)
+							common->Warning("wedge '%d' only 1 bone '%s' but weight is not 1 '%f'", wedgeIndex, bones[weight->bone_index].name, weight->weight);
                         md5Weight.weightValue = 1.0f;
+					}
                     else
                         md5Weight.weightValue = weight->weight;
 
@@ -657,7 +711,7 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
                 }
                 if(w < 1.0f)
                 {
-                    common->Warning("wedge '%d' weight sum is less than 1,0", wedgeIndex);
+                    common->Warning("wedge '%d' weight sum is less than 1.0", wedgeIndex);
                 }
             }
             md5meshTri_t md5Tri;
@@ -791,7 +845,7 @@ void idModelPsk::Print(void) const
 #define PSK_PART_PRINT(name, list, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
     for(int i = 0; i < list.Num(); i++) {  \
-         Sys_Printf(fmt "\n", __VA_ARGS__);                                \
+         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
     PSK_PART_PRINT(vertex, vertexes, "(%f, %f, %f)   ", vertexes[i][0], vertexes[i][1], vertexes[i][2])
@@ -799,10 +853,12 @@ void idModelPsk::Print(void) const
     PSK_PART_PRINT(face, faces, "wedge=(%u, %u, %u) mat=(%d, %d) sg=%u   ", faces[i].wedge_index1, faces[i].wedge_index2, faces[i].wedge_index3, faces[i].material_index, faces[i].aux_material_index, faces[i].smooth_group)
     PSK_PART_PRINT(material, materials, "%s   ", materials[i].name)
     PSK_PART_PRINT(weight, weights, "weight=%f parent=%d bone=%d   ", weights[i].weight, weights[i].vertex_index, weights[i].bone_index)
-    PSK_PART_PRINT(bone, bones, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].vertex_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
+    PSK_PART_PRINT(bone, bones, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
     PSK_PART_PRINT(normal, normals, "(%f, %f, %f)   ", normals[i][0], normals[i][1], normals[i][2])
     PSK_PART_PRINT(color, colors, "(%u, %u, %u, %u)   ", colors[i].r, colors[i].g, colors[i].b, colors[i].a)
     PSK_PART_PRINT(extra uv, uvs, "(%f, %f)   ", uvs[i][0], uvs[i][1])
+    PSK_PART_PRINT(morphInfo, morphInfos, "%s vertex count=%d   ", morphInfos[i].name, morphInfos[i].vertex_count)
+    PSK_PART_PRINT(morphData, morphDatas, "position_delta=(%f, %f, %f) tangent_z_delta=(%f, %f, %f) point index=%d   ", morphDatas[i].position_deltax, morphDatas[i].position_deltay, morphDatas[i].position_deltaz, morphDatas[i].tangent_z_deltax, morphDatas[i].tangent_z_deltay, morphDatas[i].tangent_z_deltaz, morphDatas[i].point_index)
 
 #undef PSK_PART_PRINT
 }
