@@ -31,7 +31,8 @@ public final class Constants
     {
         return new String[] {
             "Fix font offset in GUIs on Quake 4.",
-            "Add Unreal engine psk/psa animation model support on DOOM3/Quake 4/Prey",
+            "Add Unreal engine psk/psa animation/static model support on DOOM3/Quake 4/Prey",
+            "Add iqm animation/static model support on DOOM3/Quake 4/Prey",
             "Fix a sound distance volume bug on Quake 4.",
             "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
             "Add fixed ratio resolution support on launcher `Graphics` tab.",

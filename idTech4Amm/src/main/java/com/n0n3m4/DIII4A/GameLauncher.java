@@ -103,6 +103,7 @@ import com.n0n3m4.DIII4A.launcher.EditEnvFunc;
 import com.n0n3m4.DIII4A.launcher.EditExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractPatchResourceFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractSourceFunc;
+import com.n0n3m4.DIII4A.launcher.GameAd;
 import com.n0n3m4.DIII4A.launcher.GameChooserFunc;
 import com.n0n3m4.DIII4A.launcher.OpenSourceLicenseFunc;
 import com.n0n3m4.DIII4A.launcher.RestorePreferenceFunc;
@@ -178,6 +179,7 @@ public class GameLauncher extends Activity
 	private CreateCommandShortcutFunc m_createCommandShortcutFunc;
 	private ChooseExtrasFileFunc      m_chooseExtrasFileFunc;
 	private CreateGameFolderFunc      m_createGameFolderFunc;
+	private GameAd                    m_adFunc;
 
     public static String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
@@ -1164,11 +1166,11 @@ public class GameLauncher extends Activity
     @Override
     public void onConfigurationChanged(Configuration newConfig)
     {
-        Q3EAd.LoadAds(this);
+        LoadAds();
         super.onConfigurationChanged(newConfig);
     }
 
-    public void support(View vw)
+	public void support(View vw)
     {
         new SupportDeveloperFunc(this).Start(new Bundle());
     }
@@ -2511,11 +2513,29 @@ public class GameLauncher extends Activity
 		});
 	}
 
+	private void LoadAds()
+	{
+		//Q3EAd.LoadAds(this);
+		if(null != m_adFunc)
+			return;
+		m_adFunc = new GameAd(this);
+		m_adFunc.SetCallback(new Runnable() {
+			@Override
+			public void run()
+			{
+				ChangeGame((String)m_adFunc.GetResult());
+			}
+		});
+		Bundle data = new Bundle();
+		data.putString("game", Q3EUtils.q3ei.game);
+		m_adFunc.Start(data);
+	}
+
 	private void AfterCreated()
 	{
 		try
 		{
-			Q3EAd.LoadAds(this);
+			LoadAds();
 
 			OpenUpdate();
 
@@ -2852,7 +2872,7 @@ public class GameLauncher extends Activity
 		}
 		else if (itemId == android.R.id.home)
 		{
-			ChangeGame();
+			ChangeGame(null);
 			return true;
 		}
 		// Change game
@@ -3829,11 +3849,10 @@ public class GameLauncher extends Activity
 		SelectRadioGroup(radioGroup, index);
 	}
 
-    private void ChangeGame(String... games)
+    private void ChangeGame(String newGame)
     {
 		LockCmdUpdate();
 		SetupCommandTextWatcher(false);
-        String newGame = games.length > 0 ? games[0] : null;
         if (null == newGame || newGame.isEmpty())
         {
             int i;

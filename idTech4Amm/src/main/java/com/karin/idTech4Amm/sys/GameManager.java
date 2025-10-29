@@ -161,6 +161,11 @@ public final class GameManager
         return LauncherGame.Find(Q3EUtils.q3ei.game_id).COLOR_ID;
     }
 
+    public static int GetGameThemeColor(String game)
+    {
+        return LauncherGame.Find(game).COLOR_ID;
+    }
+
     public static int GetGameNameTs(String game)
     {
         return LauncherGame.Find(game).TYPE_ID;
