@@ -1,4 +1,5 @@
 #include "Model_psa.h"
+#include "Model_md5anim.h"
 
 #include "Model_md5convert.h"
 
@@ -16,12 +17,12 @@ idModelPsa::~idModelPsa(void)
         fileSystem->CloseFile(file);
 }
 
-ID_INLINE void idModelPsa::MarkType(int type)
+void idModelPsa::MarkType(int type)
 {
     types |= (1 << type);
 }
 
-ID_INLINE bool idModelPsa::IsTypeMarked(int type) const
+bool idModelPsa::IsTypeMarked(int type) const
 {
     return types & (1 << type);
 }
@@ -40,7 +41,7 @@ void idModelPsa::Clear(void)
     memset(&header, 0, sizeof(header));
 }
 
-int idModelPsa::ReadHeader(pskHeader_t &header)
+int idModelPsa::ReadHeader(psaHeader_t &header)
 {
     char buffer[32];
     int curPos = file->Tell();
@@ -50,7 +51,7 @@ int idModelPsa::ReadHeader(pskHeader_t &header)
     file->Seek(curPos, FS_SEEK_SET);
     if(num < 32)
     {
-        common->Warning("Unexpected end of file.(%d/32 bytes)", num);
+        common->Warning("Unexpected end of file(%d/32 bytes).", num);
         return -1;
     }
 
@@ -211,11 +212,6 @@ bool idModelPsa::Parse(const char *psaPath)
     }
 
     return !err;
-}
-
-bool idModelPsa::Check(void) const
-{
-    return true;
 }
 
 bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale) const
@@ -506,30 +502,25 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
     if(psk.Parse(pskPath))
     {
         //psk.Print();
-        if(psk.Check())
+        if(psk.ToMd5Mesh(md5MeshFile, scale, addOrigin))
         {
-            if(psk.ToMd5Mesh(md5MeshFile, scale, addOrigin))
-            {
-				if(doPsk)
-				{
-					md5MeshFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", pskPath, scale > 0.0f ? scale : 1.0, addOrigin));
-					idStr md5meshPath = pskPath;
-					md5meshPath.SetFileExtension(".md5mesh");
-					md5MeshFile.Write(md5meshPath.c_str());
-					common->Printf("Convert md5mesh successful: %s -> %s\n", pskPath, md5meshPath.c_str());
-					ret++;
-				}
-				else
-				{
-					common->Printf("Convert md5mesh successful: %s\n", pskPath);
-				}
-                pskRes = true;
-            }
-            else
-                common->Warning("Convert md5mesh fail: %s", pskPath);
+			if(doPsk)
+			{
+				md5MeshFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", pskPath, scale > 0.0f ? scale : 1.0, addOrigin));
+				idStr md5meshPath = pskPath;
+				md5meshPath.SetFileExtension(".md5mesh");
+				md5MeshFile.Write(md5meshPath.c_str());
+				common->Printf("Convert md5mesh successful: %s -> %s\n", pskPath, md5meshPath.c_str());
+				ret++;
+			}
+			else
+			{
+				common->Printf("Convert md5mesh successful: %s\n", pskPath);
+			}
+            pskRes = true;
         }
         else
-            common->Warning("Check psk error: %s", pskPath);
+            common->Warning("Convert md5mesh fail: %s", pskPath);
     }
     else
         common->Warning("Parse psk fail: %s", pskPath);
@@ -547,23 +538,18 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
 		if(psa.Parse(psaPath))
 		{
 			//psa.Print();
-			if(psa.Check())
+			idMd5AnimFile md5AnimFile;
+			if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale))
 			{
-				idMd5AnimFile md5AnimFile;
-				if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale))
-				{
-					md5MeshFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", psaPath, scale > 0.0f ? scale : 1.0, addOrigin));
-					idStr md5meshPath = psaPath;
-					md5meshPath.SetFileExtension(".md5anim");
-					md5AnimFile.Write(md5meshPath.c_str());
-					common->Printf("Convert md5anim successful: %s -> %s\n", psaPath, md5meshPath.c_str());
-					ret++;
-				}
-				else
-					common->Warning("Convert md5anim fail: %s", psaPath);
+				md5MeshFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", psaPath, scale > 0.0f ? scale : 1.0, addOrigin));
+				idStr md5meshPath = psaPath;
+				md5meshPath.SetFileExtension(".md5anim");
+				md5AnimFile.Write(md5meshPath.c_str());
+				common->Printf("Convert md5anim successful: %s -> %s\n", psaPath, md5meshPath.c_str());
+				ret++;
 			}
 			else
-				common->Warning("Check psa error: %s", psaPath);
+				common->Warning("Convert md5anim fail: %s", psaPath);
 		}
 		else
 			common->Warning("Parse psa fail: %s", psaPath);

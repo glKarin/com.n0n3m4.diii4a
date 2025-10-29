@@ -136,7 +136,6 @@ class idModelPsk
         idModelPsk(void);
         ~idModelPsk(void);
         bool Parse(const char *pskPath);
-        bool Check(void) const;
         void Print(void) const;
         bool ToMd5Mesh(md5model::idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
 #ifdef _MODEL_OBJ

@@ -2,6 +2,7 @@
 #include "Model_obj.h"
 #endif
 #include "Model_psk.h"
+#include "Model_md5mesh.h"
 
 using md5model::idMd5MeshFile;
 
@@ -21,12 +22,12 @@ idModelPsk::~idModelPsk(void)
         fileSystem->CloseFile(file);
 }
 
-ID_INLINE void idModelPsk::MarkType(int type)
+void idModelPsk::MarkType(int type)
 {
     types |= (1 << type);
 }
 
-ID_INLINE bool idModelPsk::IsTypeMarked(int type) const
+bool idModelPsk::IsTypeMarked(int type) const
 {
     return types & (1 << type);
 }
@@ -63,7 +64,7 @@ int idModelPsk::ReadHeader(pskHeader_t &header)
     file->Seek(curPos, FS_SEEK_SET);
     if(num < 32)
     {
-        common->Warning("Unexpected end of file.(%d/32 bytes)", num);
+        common->Warning("Unexpected end of file(%d/32 bytes).", num);
         return -1;
     }
 
@@ -619,11 +620,11 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
     idStrList matList;
 
     int num = GroupFace(faceGroup, matList);
+    md5Meshes.SetNum(num);
 
     for(j = 0; j < num; j++)
     {
         const idList<const pskFace_t *> &faceList = faceGroup[j];
-        md5Meshes.Append(md5meshMesh_t());
         md5meshMesh_t &mesh = md5Meshes[j];
         mesh.shader = matList[j];
 
@@ -735,18 +736,18 @@ bool idModelPsk::ToObj(objModel_t &objModel, bool keepDup) const
 
     int num = GroupFace(faceGroup, matList);
 
-    for(j = 0; j < num; j++)
+    for(i = 0; i < num; i++)
     {
         objModel.objects.Append(new objObject_t);
-        objObject_t *objObject = objModel.objects[j];
-        objObject->material = matList[j];
+        objObject_t *objObject = objModel.objects[i];
+        objObject->material = matList[i];
 
-        const idList<const pskFace_t *> &faceList = faceGroup[j];
+        const idList<const pskFace_t *> &faceList = faceGroup[i];
         idList<unsigned int> objVertexes; // cache saved vert for remove dup vert
 
-        for(i = 0; i < faceList.Num(); i++)
+        for(j = 0; j < faceList.Num(); j++)
         {
-            const pskFace_t *face = faceList[i];
+            const pskFace_t *face = faceList[j];
 
             unsigned int wedgeIndexes[3] = {
                 face->wedge_index1,
@@ -792,54 +793,6 @@ bool idModelPsk::ToObj(objModel_t &objModel, bool keepDup) const
 }
 #endif
 
-bool idModelPsk::Check(void) const
-{
-    int i;
-
-    for(i = 0; i < faces.Num(); i++)
-    {
-        const pskFace_t *face = &faces[i];
-        const pskMaterial_t *material = &materials[face->material_index];
-
-        if(face->wedge_index1 >= (unsigned int)wedges.Num())
-        {
-            common->Warning("wedge index 1 '%d' is overflow in face '%d'", face->wedge_index1, i);
-            return false;
-        }
-        if(face->wedge_index2 >= (unsigned int)wedges.Num())
-        {
-            common->Warning("wedge index 2 '%d' is overflow in face '%d'", face->wedge_index2, i);
-            return false;
-        }
-        if(face->wedge_index3 >= (unsigned int)wedges.Num())
-        {
-            common->Warning("wedge index 3 '%d' is overflow in face '%d'", face->wedge_index3, i);
-            return false;
-        }
-
-        const pskWedge_t *wedge1 = &wedges[face->wedge_index1];
-        const pskWedge_t *wedge2 = &wedges[face->wedge_index2];
-        const pskWedge_t *wedge3 = &wedges[face->wedge_index3];
-        if(wedge1->vertex_index >= (unsigned int)vertexes.Num())
-        {
-            common->Warning("vertex index '%d' is overflow in wedge 1 '%d'", wedge1->vertex_index, face->wedge_index1);
-            return false;
-        }
-        if(wedge2->vertex_index >= (unsigned int)vertexes.Num())
-        {
-            common->Warning("vertex index '%d' is overflow in wedge 2 '%d'", wedge2->vertex_index, face->wedge_index2);
-            return false;
-        }
-        if(wedge3->vertex_index >= (unsigned int)vertexes.Num())
-        {
-            common->Warning("vertex index '%d' is overflow in wedge 3 '%d'", wedge3->vertex_index, face->wedge_index3);
-            return false;
-        }
-    }
-
-    return true;
-}
-
 void idModelPsk::Print(void) const
 {
 #define PSK_PART_PRINT(name, list, fmt, ...) \
@@ -871,21 +824,16 @@ static void R_ConvertPskToObj_f(const idCmdArgs &args)
     if(psk.Parse(pskPath))
     {
         //psk.Print();
-        if(psk.Check())
-        {
-            objModel_t objModel;
-            if(psk.ToObj(objModel, true))
-            {
-                idStr objPath = pskPath;
-                objPath.SetFileExtension(".obj");
-                OBJ_Write(&objModel, objPath.c_str());
-                common->Printf("Convert obj successful: %s -> %s\n", pskPath, objPath.c_str());
-            }
-            else
-                common->Warning("Convert obj fail: %s", pskPath);
-        }
-        else
-            common->Warning("Check psk error: %s", pskPath);
+		objModel_t objModel;
+		if(psk.ToObj(objModel, true))
+		{
+			idStr objPath = pskPath;
+			objPath.SetFileExtension(".obj");
+			OBJ_Write(&objModel, objPath.c_str());
+			common->Printf("Convert obj successful: %s -> %s\n", pskPath, objPath.c_str());
+		}
+		else
+			common->Warning("Convert obj fail: %s", pskPath);
     }
     else
         common->Warning("Parse psk fail: %s", pskPath);

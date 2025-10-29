@@ -3460,8 +3460,6 @@ bool idRenderModelStatic::LoadPSK( const char* fileName)
 	idModelPsk psk;
 	if(!psk.Parse(fileName))
 		return false;
-	if(!psk.Check())
-		return false;
 
     bool ret = ConvertPSKToModelSurfaces( &psk );
 	if(ret)

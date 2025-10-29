@@ -16,6 +16,7 @@ namespace md5model
 // Bones (VBone .. VJointPos ) Name|Flgs|NumChld|PrntIdx|Qw|Qx|Qy|Qz|LocX|LocY|LocZ|Lngth|XSize|YSize|ZSize
 // 64s3i11f
 // 64s56x
+typedef pskHeader_t psaHeader_t;
 typedef pskBone_t psaBone_t;
 
 // AniminfoBinary
@@ -72,13 +73,12 @@ public:
     bool Parse(const char *psaPath);
     bool ToMd5Anim(const idModelPsk &psk, md5model::idMd5AnimFile &md5anim, md5model::idMd5MeshFile &md5mesh, float scale = -1.0f) const;
     void Print(void) const;
-    bool Check(void) const;
 
 private:
     void Clear(void);
     void MarkType(int type);
     bool IsTypeMarked(int type) const;
-    int ReadHeader(pskHeader_t &header);
+    int ReadHeader(psaHeader_t &header);
     int ReadBones(void);
     int ReadAnimInfos(void);
     int ReadAnimKeys(void);
