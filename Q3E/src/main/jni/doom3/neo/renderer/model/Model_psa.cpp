@@ -541,11 +541,11 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
 			idMd5AnimFile md5AnimFile;
 			if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale))
 			{
-				md5MeshFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", psaPath, scale > 0.0f ? scale : 1.0, addOrigin));
-				idStr md5meshPath = psaPath;
-				md5meshPath.SetFileExtension(".md5anim");
-				md5AnimFile.Write(md5meshPath.c_str());
-				common->Printf("Convert md5anim successful: %s -> %s\n", psaPath, md5meshPath.c_str());
+                md5AnimFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", psaPath, scale > 0.0f ? scale : 1.0, addOrigin));
+				idStr md5animPath = psaPath;
+                md5animPath.SetFileExtension(".md5anim");
+				md5AnimFile.Write(md5animPath.c_str());
+				common->Printf("Convert md5anim successful: %s -> %s\n", psaPath, md5animPath.c_str());
 				ret++;
 			}
 			else

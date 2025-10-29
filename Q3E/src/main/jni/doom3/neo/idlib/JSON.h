@@ -9,7 +9,7 @@
  * bool ok = JSON_Parse("path.json"); // parse
  * if(ok) {
  *     // auto &array = json["array_a"]; // operate JSON object
- *     // auto &res = object[0]; // operate JSON array
+ *     // auto &res = array[0]; // operate JSON array
  *     // auto &i = (int)json["int_a"]; // operate JSON integer
  *     // auto &f = (float)json["float_a"]; // operate JSON float
  *     // auto &b = (bool)json["bool_a"]; // operate JSON bool
