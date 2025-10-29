@@ -6,12 +6,15 @@ namespace md5model
     typedef struct md5ConvertDef_s
     {
         const idDeclEntityDef *def;
+        idStr type;
         float scale;
         bool addOrigin;
         idStr mesh;
         idStrList anims;
     } md5ConvertDef_t;
 };
+
+typedef bool (* md5ConvertDef_f)(const md5model::md5ConvertDef_t &def);
 
 bool R_Model_ConvertToMd5(const char *fileName);
 
