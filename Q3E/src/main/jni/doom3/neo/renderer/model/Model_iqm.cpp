@@ -1477,7 +1477,7 @@ bool R_Model_HandleIqm(const md5ConvertDef_t &convert)
     return true;
 }
 
-void IQM_AddCommand(void)
+void R_IQM_AddCommand(void)
 {
     cmdSystem->AddCommand("iqmToMd5mesh", R_ConvertIqmToMd5mesh_f, CMD_FL_RENDERER, "Convert iqm to md5mesh", ArgCompletion_iqm);
     cmdSystem->AddCommand("iqmToMd5anim", R_ConvertIqmToMd5anim_f, CMD_FL_RENDERER, "Convert iqm to md5anim", ArgCompletion_iqm);

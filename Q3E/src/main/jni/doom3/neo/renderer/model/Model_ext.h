@@ -2,18 +2,18 @@
 #define _MODEL_MD5EXT_H
 
 #ifdef _EXTRAS_TOOLS
-void MD5Edit_AddCommand(void);
+void R_MD5Edit_AddCommand(void);
 
-void ModelTest_AddCommand(void);
-void ModelLight_AddCommand(void);
+void R_ModelTest_AddCommand(void);
+void R_ModelLight_AddCommand(void);
 #endif
 
 #ifdef _MODEL_PSK
-void Unreal_AddCommand(void);
+void R_ActorX_AddCommand(void);
 #endif
 
 #ifdef _MODEL_IQM
-void IQM_AddCommand(void);
+void R_IQM_AddCommand(void);
 #endif
 
 #if defined(_MODEL_PSK) || defined(_MODEL_IQM)
@@ -23,7 +23,7 @@ void IQM_AddCommand(void);
 #ifdef _MODEL_MD5_EXT
 bool R_Model_ConvertToMd5(const char *fileName);
 
-void Md5Model_AddCommand(void);
+void R_Md5Convert_AddCommand(void);
 #endif
 
 #endif /* !_MODEL_MD5EXT_H */

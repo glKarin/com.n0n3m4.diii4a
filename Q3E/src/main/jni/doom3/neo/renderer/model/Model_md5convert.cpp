@@ -339,7 +339,7 @@ void R_TestJSON_f(const idCmdArgs &args)
 }
 #endif
 
-void Md5Model_AddCommand(void)
+void R_Md5Convert_AddCommand(void)
 {
     cmdSystem->AddCommand("convertMd5Def", R_ConvertMd5Def_f, CMD_FL_RENDERER, "Convert other type animation model entityDef to md5mesh/md5anim", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
     cmdSystem->AddCommand("cleanConvertedMd5", R_CleanConvertedMd5_f, CMD_FL_RENDERER, "Clean converted md5mesh", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);

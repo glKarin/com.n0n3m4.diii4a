@@ -1911,9 +1911,9 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	bool	reloadingSameMap;
 
 #ifdef _EXTRAS_TOOLS
-    extern void ModelTest_CleanModel(void);
+    extern void R_ModelTest_CleanModel(void);
     //extern void ModelLight_CleanLight(void);
-    ModelTest_CleanModel();
+    R_ModelTest_CleanModel();
     //ModelLight_CleanLight();
 #endif
 	// close console and remove any prints from the notify lines

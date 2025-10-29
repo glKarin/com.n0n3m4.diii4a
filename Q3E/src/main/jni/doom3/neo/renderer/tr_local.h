@@ -2359,7 +2359,7 @@ void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def);
 
 void GLSL_AddCommand(void);
 void R_Image_AddCommand(void);
-void Font_AddCommand(void);
+void R_Font_AddCommand(void);
 #include "model/Model_ext.h"
 
 extern bool GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android
@@ -2474,8 +2474,8 @@ extern float RB_overbright;
 #endif
 
 #ifdef _EXTRAS_TOOLS
-void ModelTest_RenderFrame(int time);
-void ModelLight_RenderFrame(int time);
+void R_ModelTest_RenderFrame(int time);
+void R_ModelLight_RenderFrame(int time);
 #endif
 
 extern idCVar harm_r_lightingModel;

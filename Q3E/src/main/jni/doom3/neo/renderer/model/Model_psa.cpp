@@ -645,7 +645,7 @@ bool R_Model_HandlePskPsa(const md5ConvertDef_t &convert)
 	return true;
 }
 
-void Unreal_AddCommand(void)
+void R_ActorX_AddCommand(void)
 {
     cmdSystem->AddCommand("pskToMd5mesh", R_ConvertPskToMd5mesh_f, CMD_FL_RENDERER, "Convert psk to md5mesh", ArgCompletion_Psk);
     cmdSystem->AddCommand("psaToMd5anim", R_ConvertPsaToMd5anim_f, CMD_FL_RENDERER, "Convert psa to md5anim", ArgCompletion_PskPsa);

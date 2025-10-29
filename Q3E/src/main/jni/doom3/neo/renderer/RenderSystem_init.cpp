@@ -2368,22 +2368,22 @@ void R_InitCommands(void)
 	GLSL_AddCommand();
 
 #ifdef _EXTRAS_TOOLS
-    MD5Edit_AddCommand();
+    R_MD5Edit_AddCommand();
 
-    ModelTest_AddCommand();
-    ModelLight_AddCommand();
+    R_ModelTest_AddCommand();
+    R_ModelLight_AddCommand();
 #endif
 #ifdef _NEW_FONT_TOOLS
-    Font_AddCommand();
+    R_Font_AddCommand();
 #endif
 #ifdef _MODEL_PSK
-    Unreal_AddCommand();
+    R_ActorX_AddCommand();
 #endif
 #ifdef _MODEL_IQM
-    IQM_AddCommand();
+    R_IQM_AddCommand();
 #endif
 #ifdef _MODEL_MD5_EXT
-    Md5Model_AddCommand();
+    R_Md5Convert_AddCommand();
 #endif
 }
 
