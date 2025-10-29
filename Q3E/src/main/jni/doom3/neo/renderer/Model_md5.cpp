@@ -1110,14 +1110,18 @@ int idRenderModelMD5::GetSurfaceMask(const char *name) const
 
 #ifdef _MODEL_PSK
 //#define ETW_PSK 1
-#define MD5_APPEND_COMMENT 1
-
-#include "model/Model_md5mesh.cpp"
-#include "model/Model_md5anim.cpp"
 #include "model/Model_psk.cpp"
 #include "model/Model_psa.cpp"
 #endif
 
+#ifdef _MODEL_IQM
+#include "model/Model_iqm.cpp"
+#endif
+
 #ifdef _MODEL_MD5_EXT
+#define MD5_APPEND_COMMENT 1
+#include "model/Model_md5mesh.cpp"
+#include "model/Model_md5anim.cpp"
+
 #include "model/Model_md5convert.cpp"
 #endif

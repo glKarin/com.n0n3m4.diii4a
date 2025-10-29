@@ -115,6 +115,10 @@ class idRenderModelStatic : public idRenderModel
         bool						LoadPSK( const char* fileName );
         bool						ConvertPSKToModelSurfaces( const class idModelPsk* obj );
 #endif
+#ifdef _MODEL_IQM
+        bool						LoadIQM( const char* fileName );
+        bool						ConvertIQMToModelSurfaces( const class idModelIqm* obj );
+#endif
 
 		bool						DeleteSurfaceWithId(int id);
 		void						DeleteSurfacesWithNegativeId(void);

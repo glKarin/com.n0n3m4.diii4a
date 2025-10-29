@@ -2379,6 +2379,9 @@ void R_InitCommands(void)
 #ifdef _MODEL_PSK
     Unreal_AddCommand();
 #endif
+#ifdef _MODEL_IQM
+    IQM_AddCommand();
+#endif
 #ifdef _MODEL_MD5_EXT
     Md5Model_AddCommand();
 #endif

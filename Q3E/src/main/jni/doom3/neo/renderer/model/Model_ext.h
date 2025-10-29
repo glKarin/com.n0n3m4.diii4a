@@ -12,7 +12,11 @@ void ModelLight_AddCommand(void);
 void Unreal_AddCommand(void);
 #endif
 
-#if defined(_MODEL_PSK)
+#ifdef _MODEL_IQM
+void IQM_AddCommand(void);
+#endif
+
+#if defined(_MODEL_PSK) || defined(_MODEL_IQM)
 #define _MODEL_MD5_EXT 1
 #endif
 

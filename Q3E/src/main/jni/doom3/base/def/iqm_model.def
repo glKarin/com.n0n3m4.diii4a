@@ -1,0 +1,50 @@
+// iqm static model
+entityDef test_iqm_static_model {
+	"inherit" "func_static"
+	"model" "models/iqm/test_static_mesh.iqm"
+}
+
+// iqm animation model
+// 1. md5 animation model
+model test_iqm_animation_model {
+	mesh "models/iqm/test_animation_mesh.md5mesh"
+
+	anim idle "models/iqm/anims/test_anim_idle.md5anim"
+	anim stand "models/iqm/anims/test_anim_stand.md5anim"
+}
+
+// 2-a. define iqm to md5mesh/md5anim conversion config
+entityDef models/iqm/test_animation_mesh { // name must be same as model's mesh field
+    "md5convert" "1" // mark this entityDef is md5 conversion define for clean manually later by command `cleanConvertedMd5`
+
+    "type" "iqm" // animation model type, if not set, will using mesh's extension
+
+    // mesh. file path and name is same as md5 model, but extension is iqm
+	"mesh" "models/iqm/test_animation_mesh.iqm" // required
+
+	"scale" "0.3" // scale vertexes, float, default -1.0. It will not scale if less or equals than 0
+	"addOrigin" "0" // prepend 'origin' bone to front, bool, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
+
+    // animations. file path and name is same as md5 model, only use file name and find it in iqm animations
+	"anim idle" "models/iqm/anims/test_anim_idle"
+	"anim run" "models/iqm/anims/test_anim_stand"
+    // more animations
+}
+
+// 2-b define iqm to md5mesh/md5anim secondary conversion config, it will be used if entityDef 'models/iqm/test_animation_mesh' not found
+entityDef md5convert/models/iqm/test_animation_mesh { // name must be same as 'md5convert/' + model's mesh field
+    "md5convert" "1" // mark this entityDef is md5 conversion define for clean manually later by command `cleanConvertedMd5`
+    "type" "iqm" // animation model type, if not set, will using mesh's extension
+
+    // mesh. file path and name is same as md5 model, but extension is iqm
+	"mesh" "models/iqm/test_animation_mesh.iqm" // required
+
+	"scale" "0.5" // scale vertexes, float, default -1.0. It will not scale if less or equals than 0
+	"addOrigin" "1" // prepend 'origin' bone to front, bool, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
+
+    // animations. file path and name is same as md5 model, only use file name and find it in iqm animations
+	"anim idle" "models/iqm/anims/test_anim_idle"
+	"anim run" "models/iqm/anims/test_anim_stand"
+    // more animations
+}
+

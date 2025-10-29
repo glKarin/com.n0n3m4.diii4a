@@ -10,6 +10,7 @@ namespace md5model
         float scale;
         bool addOrigin;
         idStr mesh;
+        idStrList animNames;
         idStrList anims;
     } md5ConvertDef_t;
 };
@@ -20,6 +21,9 @@ bool R_Model_ConvertToMd5(const char *fileName);
 
 #ifdef _MODEL_PSK
 bool R_Model_HandlePskPsa(const md5model::md5ConvertDef_t &convert);
+#endif
+#ifdef _MODEL_IQM
+bool R_Model_HandleIqm(const md5model::md5ConvertDef_t &convert);
 #endif
 
 #endif

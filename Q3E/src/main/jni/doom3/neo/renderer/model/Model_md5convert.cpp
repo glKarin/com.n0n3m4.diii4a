@@ -47,17 +47,27 @@ e.g. using psk/psa as md5mesh/md5anim
  4. clean converted md5mesh
  exec `cleanConvertedMd5`
  */
-bool R_Model_ConvertToMd5(const idDecl *decl)
+static bool R_Model_ParseMd5ConvertDef(md5model::md5ConvertDef_t &convert, const idDecl *decl, bool strict)
 {
     const idDeclEntityDef *def = static_cast<const idDeclEntityDef *>(decl);
+
+    if(!strict)
+    {
+        if(!def->dict.GetBool(MD5_CONVERT, "0")) // only clean has md5convert key
+            return false;
+    }
+
     const char *fileName = decl->GetName();
-	common->Printf("Converting md5 model from '%s'\n", fileName);
+    common->Printf("Parse md5convert from '%s'\n", fileName);
 
     idStr meshPath;
     if(!def->dict.GetString("mesh", "", meshPath))
     {
-        common->Warning("Missing mesh in entityDef '%s'", fileName);
-        return false;
+        if(strict)
+        {
+            common->Warning("Missing mesh in entityDef '%s'", fileName);
+            return false;
+        }
     }
 
     idStr type;
@@ -68,13 +78,15 @@ bool R_Model_ConvertToMd5(const idDecl *decl)
 
         if(type.IsEmpty())
         {
-            common->Warning("Unable to get animation model type by mesh '%s' in entityDef '%s'", meshPath.c_str(), fileName);
-            return false;
+            if(strict)
+            {
+                common->Warning("Unable to get animation model type by mesh '%s' in entityDef '%s'", meshPath.c_str(), fileName);
+                return false;
+            }
         }
         common->Printf("Found type '%s' from mesh in entityDef '%s'\n", type.c_str(), fileName);
     }
 
-    md5model::md5ConvertDef_t convert;
     convert.type = type;
     convert.def = def;
     convert.mesh = meshPath;
@@ -85,6 +97,11 @@ bool R_Model_ConvertToMd5(const idDecl *decl)
 
     while (kv != NULL) {
         convert.anims.Append(kv->GetValue());
+        idStr name = kv->GetKey();
+        name = name.Mid(4, name.Length());
+        name.StripTrailingWhitespace();
+        name.StripLeading(' ');
+        convert.animNames.Append(name);
         kv = def->dict.MatchPrefix("anim", kv);
     }
     if(!convert.anims.Num())
@@ -92,22 +109,34 @@ bool R_Model_ConvertToMd5(const idDecl *decl)
         common->Warning("Missing animation in entityDef '%s'", fileName);
     }
 
+    return true;
+}
+
+static bool R_Model_ConvertToMd5(const idDecl *decl)
+{
+    md5model::md5ConvertDef_t convert;
+    if(!R_Model_ParseMd5ConvertDef(convert, decl, true))
+        return false;
+
     const md5ConvertConf_t SupportConverters[] = {
 #ifdef _MODEL_PSK
             {"psk", R_Model_HandlePskPsa, },
+#endif
+#ifdef _MODEL_IQM
+            {"iqm", R_Model_HandleIqm, },
 #endif
     };
 
     for(int i = 0; i < sizeof(SupportConverters) / sizeof(SupportConverters[0]); i++)
     {
         const md5ConvertConf_t *conv = SupportConverters + i;
-        if(!idStr::Icmp(type, conv->type))
+        if(!idStr::Icmp(convert.type, conv->type))
         {
             return conv->converter(convert);
         }
     }
 
-    common->Warning("Unsupported animation model type '%s' in entityDef '%s'", type.c_str(), fileName);
+    common->Warning("Unsupported animation model type '%s' in entityDef '%s'", convert.type.c_str(), decl->GetName());
     return false;
 }
 
@@ -128,6 +157,46 @@ bool R_Model_ConvertToMd5(const char *fileName)
     }
 
 	return R_Model_ConvertToMd5(decl);
+}
+
+static bool R_CleanConvertedMd5(const md5model::md5ConvertDef_t &convert, bool onlyMesh = false)
+{
+    if(!convert.def->dict.GetBool(MD5_CONVERT, "0")) // only clean has md5convert key
+        return false;
+
+    common->Printf("Cleaning converted md5 model from '%s'\n", convert.def->GetName());
+
+    if(!convert.mesh.IsEmpty())
+    {
+        idStr meshPath = convert.mesh;
+        meshPath.SetFileExtension("." MD5_MESH_EXT);
+        common->Printf("Remove md5mesh '%s'\n", meshPath.c_str());
+        while(fileSystem->ReadFile(meshPath, NULL, NULL) > 0)
+            fileSystem->RemoveFile(meshPath);
+    }
+
+    if(onlyMesh)
+        return true;
+
+    for(int i = 0; i < convert.anims.Num(); i++)
+    {
+        idStr animPath = convert.anims[i];
+        animPath.SetFileExtension("." MD5_ANIM_EXT);
+        common->Printf("Remove md5anim '%s'\n", animPath.c_str());
+        while(fileSystem->ReadFile(animPath, NULL, NULL) > 0)
+            fileSystem->RemoveFile(animPath);
+    }
+
+    return true;
+}
+
+static void R_CleanConvertedMd5(const idDecl *decl, bool onlyMesh = false)
+{
+    md5model::md5ConvertDef_t convert;
+    if(!R_Model_ParseMd5ConvertDef(convert, decl, false))
+        return;
+
+    R_CleanConvertedMd5(convert, onlyMesh);
 }
 
 namespace md5model
@@ -159,37 +228,6 @@ namespace md5model
 		}
     }
 
-    static void R_CleanConvertedMd5(const idDecl *decl, bool onlyMesh = false)
-    {
-        const idDeclEntityDef *def = static_cast<const idDeclEntityDef *>(decl);
-        if(def->dict.GetBool(MD5_CONVERT, "0")) // only clean has md5convert key
-        {
-			common->Printf("Cleaning converted md5 model from '%s'\n", decl->GetName());
-
-            idStr meshPath;
-            if(def->dict.GetString("mesh", "", meshPath))
-            {
-                meshPath.SetFileExtension("." MD5_MESH_EXT);
-                common->Printf("Remove md5mesh '%s'\n", meshPath.c_str());
-                while(fileSystem->ReadFile(meshPath, NULL, NULL) > 0)
-                    fileSystem->RemoveFile(meshPath);
-
-			}
-			if(!onlyMesh)
-			{
-				const idKeyValue *kv = def->dict.MatchPrefix("anim");
-				while (kv != NULL) {
-					idStr animPath = kv->GetValue();
-					animPath.SetFileExtension("." MD5_ANIM_EXT);
-					common->Printf("Remove md5anim '%s'\n", animPath.c_str());
-					while(fileSystem->ReadFile(animPath, NULL, NULL) > 0)
-						fileSystem->RemoveFile(animPath);
-					kv = def->dict.MatchPrefix("anim", kv);
-				}
-			}
-		}
-	}
-
     static void R_CleanConvertedMd5_f(const idCmdArgs &args)
     {
         if(args.Argc() == 1)
@@ -217,6 +255,44 @@ namespace md5model
         }
     }
 };
+
+void R_Model_NormalizeWeights(float *arr, int num)
+{
+	int i;
+
+	// no weights
+	if(num == 0)
+		return;
+
+	// only a bone, force to 1.0
+	if(num == 1)
+	{
+		if(arr[0] != 1.0f)
+			arr[0] = 1.0f;
+		return;
+	}
+
+	// check all bone weights sum is 1.0
+	float total = 0.0f;
+	for(i = 0; i < num; i++)
+	{
+		total += arr[i];
+	}
+	if(total == 1.0f)
+		return;
+
+	// scale
+	float p = 1.0f / total;
+	total = 0.0f;
+	for(i = 0; i < num - 1; i++)
+	{
+		arr[i] *= p;
+		total += arr[i];
+	}
+
+	// remain to last
+	arr[i] = 1.0f - total;
+}
 
 #if 0
 #include "../../idlib/JSON.h"

@@ -429,6 +429,8 @@ void idImGuiSettings::RenderChangeLogs(void) const
 {
     const char *ChangeLogs[] = {
             "Add float console support.",
+            "Add Unreal engine psk/psa animation/static model support.",
+            "Add iqm animation/static model support.",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -567,7 +569,12 @@ void idImGuiSettings::RenderNewCommands(void) const
             "psaToMd5anim",
             "pskPsaToMd5",
             "pskToObj",
+            "iqmToMd5mesh",
+            "iqmToMd5anim",
+            "iqmToMd5",
+            "iqmToObj",
             "convertMd5Def",
+            "convertMd5AllDefs",
             "cleanConvertedMd5",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)

@@ -148,6 +148,12 @@ void AssertFailed(const char *file, int line, const char *expression);
 #define assert( X )		if ( X ) { } else AssertFailed( __FILE__, __LINE__, #X )
 #endif
 
+#if __cplusplus < 201103L
+#define ID_STATIC_ASSERT(exp) do { char _static_assert_exp_var_[(exp) ? 1 : -1]; (void)_static_assert_exp_var_; } while(0)
+#else
+#define ID_STATIC_ASSERT(exp) static_assert(exp, "")
+#endif
+
 class idException
 {
 	public:

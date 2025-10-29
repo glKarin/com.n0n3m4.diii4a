@@ -678,6 +678,9 @@ namespace modeltest
 #ifdef _MODEL_PSK
                 || (extension.Icmp("psk") == 0)
 #endif
+#ifdef _MODEL_IQM
+                || (extension.Icmp("iqm") == 0)
+#endif
 		   )
 			CreateModel(model, "func_static", skin, dict);
 		else
@@ -712,6 +715,9 @@ namespace modeltest
 #endif
 #ifdef _MODEL_PSK
                 || (extension.Icmp("psk") == 0)
+#endif
+#ifdef _MODEL_IQM
+                || (extension.Icmp("iqm") == 0)
 #endif
 		   )
 			isAnimated = false;
@@ -1328,6 +1334,9 @@ namespace modeltest
 #endif
 #ifdef _MODEL_PSK
                                          "psk",
+#endif
+#ifdef _MODEL_IQM
+                                         "iqm",
 #endif
                                          NULL);
     }
