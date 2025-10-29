@@ -21,8 +21,6 @@ offsets.framedata \
 ); \
 } while(0);
 
-using md5model::idMd5MeshFile;
-
 idModelIqm::idModelIqm(void)
 : file(NULL),
 types(0)
@@ -757,8 +755,6 @@ bool idModelIqm::Parse(const char *iqmPath, int type)
 
 bool idModelIqm::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) const
 {
-    using namespace md5model;
-
     int i, j;
     md5meshJoint_t *md5Bone;
     const iqmJoint_t *refBone;
@@ -937,13 +933,13 @@ bool idModelIqm::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
     return true;
 }
 
-int idModelIqm::ToMd5Anim(idList<md5model::idMd5AnimFile> &md5anims, md5model::idMd5MeshFile &md5mesh, float scale) const
+int idModelIqm::ToMd5Anim(idList<idMd5AnimFile> &md5anims, idMd5MeshFile &md5mesh, float scale) const
 {
 	int num = 0;
 
 	for(int i = 0; i < anims.Num(); i++)
 	{
-		int index = md5anims.Append(md5model::idMd5AnimFile());
+		int index = md5anims.Append(idMd5AnimFile());
 		if(!ToMd5Anim(md5anims[index], md5mesh, i, scale))
 		{
 			md5anims.RemoveIndex(index);
@@ -955,7 +951,7 @@ int idModelIqm::ToMd5Anim(idList<md5model::idMd5AnimFile> &md5anims, md5model::i
 	return num;
 }
 
-bool idModelIqm::ToMd5Anim(md5model::idMd5AnimFile &md5anim, md5model::idMd5MeshFile &md5mesh, const char *animName, float scale) const
+bool idModelIqm::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, float scale) const
 {
 	for(int i = 0; i < anims.Num(); i++)
 	{
@@ -968,12 +964,10 @@ bool idModelIqm::ToMd5Anim(md5model::idMd5AnimFile &md5anim, md5model::idMd5Mesh
 	return false;
 }
 
-bool idModelIqm::ToMd5Anim(md5model::idMd5AnimFile &md5anim, md5model::idMd5MeshFile &md5mesh, int animIndex, float scale) const
+bool idModelIqm::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, float scale) const
 {
 	if((unsigned int)animIndex >= header.num_anims)
 		return false;
-
-    using namespace md5model;
 
     int i, j;
     md5animHierarchy_t *md5Hierarchy;
@@ -1473,7 +1467,7 @@ static void R_ConvertIqmToMd5_f(const idCmdArgs &args)
     R_ConvertIqm(iqmMesh, animList);
 }
 
-bool R_Model_HandleIqm(const md5model::md5ConvertDef_t &convert)
+bool R_Model_HandleIqm(const md5ConvertDef_t &convert)
 {
     if(R_ConvertIqm(convert.mesh, convert.anims, convert.scale, convert.addOrigin) != 1 + convert.anims.Num())
     {

@@ -62,7 +62,7 @@ namespace md5edit
         int NumFrames() const {
             return numFrames;
         }
-        void CalcBounds(const md5model::idMd5MeshFile &md5mesh, const md5model::idMd5AnimFile &md5anim);
+        void CalcBounds(const idMd5MeshFile &md5mesh, const idMd5AnimFile &md5anim);
     
     private:
         bool Check(void) const;
@@ -445,13 +445,13 @@ namespace md5edit
         return str;
     }
 
-    void idMD5AnimSourceFile::CalcBounds(const md5model::idMd5MeshFile &md5mesh, const md5model::idMd5AnimFile &md5anim)
+    void idMD5AnimSourceFile::CalcBounds(const idMd5MeshFile &md5mesh, const idMd5AnimFile &md5anim)
     {
-        md5model::idMd5AnimFile &anim = const_cast<md5model::idMd5AnimFile &>(md5anim);
+        idMd5AnimFile &anim = const_cast<idMd5AnimFile &>(md5anim);
         for(int i = 0; i < anim.Frames().Num(); i++)
         {
             idBounds bound;
-            md5model::idMd5AnimFile::CalcFrameBounds(md5mesh, md5anim, i, bound);
+            idMd5AnimFile::CalcFrameBounds(md5mesh, md5anim, i, bound);
             bounds.Set(i, bound);
         }
     }
@@ -1247,8 +1247,6 @@ namespace md5edit
 
     static void R_CalcBounds_f(const idCmdArgs &args)
     {
-        using namespace md5model;
-
         if(args.Argc() < 4)
         {
             common->Printf("[Usage]: %s <output animation file path> <md5mesh file> <md5anim file> ...\n", args.Argv(0));

@@ -9,76 +9,72 @@
 #define	MD5ANIM_QZ			BIT( 5 )
 #define	MD5ANIM_ALL			63
 
-namespace md5model
+typedef struct md5animHierarchy_s
 {
-    typedef struct md5animHierarchy_s
-    {
-        idStr boneName; // The name of this bone.
-        int parentIndex; // The index of this bone’s parent.
-        int numComp; // a flag that defines what components are keyframed.
-        int frameIndex; // index into the frame data, pointing to the first animated component of this bone
-    } md5animHierarchy_t;
+    idStr boneName; // The name of this bone.
+    int parentIndex; // The index of this bone’s parent.
+    int numComp; // a flag that defines what components are keyframed.
+    int frameIndex; // index into the frame data, pointing to the first animated component of this bone
+} md5animHierarchy_t;
 
-    typedef idBounds md5animBounds_t;
+typedef idBounds md5animBounds_t;
 
-    typedef struct md5animFrame_s
-    {
-        float xPos; // The X component of this bone’s XYZ position in relation to the baseframe.
-        float yPos; // The Y component of this bone’s XYZ position in relation to the baseframe.
-        float zPos; // The Z component of this bone’s XYZ position in relation to the baseframe.
-        float xOrient; // The X component of this bone’s XYZ orentation quaternion in relation to the baseframe.
-        float yOrient; // The Y component of this bone’s XYZ orentation quaternion in relation to the baseframe.
-        float zOrient; // The Z component of this bone’s XYZ orentation quaternion in relation to the baseframe.
-    } md5animFrame_t;
+typedef struct md5animFrame_s
+{
+    float xPos; // The X component of this bone’s XYZ position in relation to the baseframe.
+    float yPos; // The Y component of this bone’s XYZ position in relation to the baseframe.
+    float zPos; // The Z component of this bone’s XYZ position in relation to the baseframe.
+    float xOrient; // The X component of this bone’s XYZ orentation quaternion in relation to the baseframe.
+    float yOrient; // The Y component of this bone’s XYZ orentation quaternion in relation to the baseframe.
+    float zOrient; // The Z component of this bone’s XYZ orentation quaternion in relation to the baseframe.
+} md5animFrame_t;
 
-    /*
+/*
 xPos - The X component of this bone’s XYZ position relative to parent bone’s position.
 yPos - The Y component of this bone’s XYZ position relative to parent bone’s position.
 zPos - The Z component of this bone’s XYZ position relative to parent bone’s position.
 xOrient - The X component of this bone’s XYZ orentation quaternion.
 yOrient - The Y component of this bone’s XYZ orentation quaternion.
 zOrient - The Z component of this bone’s XYZ orentation quaternion.
-     */
-    typedef md5animFrame_t md5animBaseframe_t;
-    typedef struct md5animFrames_s
-    {
-        int index; // frame index.
-        idList<md5animFrame_t> joints;
-    } md5animFrames_t;
+ */
+typedef md5animFrame_t md5animBaseframe_t;
+typedef struct md5animFrames_s
+{
+    int index; // frame index.
+    idList<md5animFrame_t> joints;
+} md5animFrames_t;
 
-    class idMd5MeshFile;
-    class idMd5AnimFile
-    {
-    public:
-        idMd5AnimFile(void);
-        void Write(const char *path) const;
-        bool Parse(const char *path);
-        idList<md5animHierarchy_t> & Hierarchies(void);
-        idList<md5animBounds_t> & Bounds(void);
-        idList<md5animBaseframe_t> & Baseframe(void);
-        idList<md5animFrames_t> & Frames(void);
-        md5animFrames_t & Frame(int index);
-        idStr & Commandline(void);
-        int & FrameRate(void);
-        int & NumAnimatedComponents(void);
-        void Clear(void);
-        void CalcBounds(const idMd5MeshFile &mesh);
+class idMd5MeshFile;
+class idMd5AnimFile
+{
+public:
+    idMd5AnimFile(void);
+    void Write(const char *path) const;
+    bool Parse(const char *path);
+    idList<md5animHierarchy_t> & Hierarchies(void);
+    idList<md5animBounds_t> & Bounds(void);
+    idList<md5animBaseframe_t> & Baseframe(void);
+    idList<md5animFrames_t> & Frames(void);
+    md5animFrames_t & Frame(int index);
+    idStr & Commandline(void);
+    int & FrameRate(void);
+    int & NumAnimatedComponents(void);
+    void Clear(void);
+    void CalcBounds(const idMd5MeshFile &mesh);
 
-        static void CalcFrameBounds(const idMd5MeshFile &mesh, const idMd5AnimFile &anim, int frame, idBounds &bounds);
+    static void CalcFrameBounds(const idMd5MeshFile &mesh, const idMd5AnimFile &anim, int frame, idBounds &bounds);
 
-    private:
-        int version;
-        idStr commandline;
-        int frameRate;
-        int numAnimatedComponents;
-        idList<md5animHierarchy_t> hierarchies;
-        idList<md5animBounds_t> bounds;
-        idList<md5animBaseframe_t> baseframe;
-        idList<md5animFrames_t> frames;
+private:
+    int version;
+    idStr commandline;
+    int frameRate;
+    int numAnimatedComponents;
+    idList<md5animHierarchy_t> hierarchies;
+    idList<md5animBounds_t> bounds;
+    idList<md5animBaseframe_t> baseframe;
+    idList<md5animFrames_t> frames;
 
-        friend class idMd5MeshFile;
-    };
-
+    friend class idMd5MeshFile;
 };
 
 #endif

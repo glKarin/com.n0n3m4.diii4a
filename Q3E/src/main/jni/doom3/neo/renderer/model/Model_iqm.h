@@ -7,11 +7,8 @@
 #define IQM_VERSION1 1
 #define IQM_VERSION2 IQM_VERSION
 
-namespace md5model
-{
-    class idMd5MeshFile;
-    class idMd5AnimFile;
-};
+class idMd5MeshFile;
+class idMd5AnimFile;
 
 #pragma pack( push, 1 )
 struct iqmheader
@@ -236,10 +233,10 @@ class idModelIqm
         const char * GetText(unsigned int offset) const;
         const char * GetAnim(unsigned int index) const;
         int GetAnimCount(void) const;
-        bool ToMd5Mesh(md5model::idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
-        bool ToMd5Anim(md5model::idMd5AnimFile &md5anim, md5model::idMd5MeshFile &md5mesh, int animIndex, float scale = -1.0f) const;
-        bool ToMd5Anim(md5model::idMd5AnimFile &md5anim, md5model::idMd5MeshFile &md5mesh, const char *animName, float scale = -1.0f) const;
-        int ToMd5Anim(idList<md5model::idMd5AnimFile> &md5anim, md5model::idMd5MeshFile &md5mesh, float scale = -1.0f) const;
+        bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
+        bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, float scale = -1.0f) const;
+        bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, float scale = -1.0f) const;
+        int ToMd5Anim(idList<idMd5AnimFile> &md5anim, idMd5MeshFile &md5mesh, float scale = -1.0f) const;
 #ifdef _MODEL_OBJ
         bool ToObj(objModel_t &objModel) const;
 #endif

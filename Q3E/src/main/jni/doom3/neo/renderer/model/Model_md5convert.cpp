@@ -47,7 +47,7 @@ e.g. using psk/psa as md5mesh/md5anim
  4. clean converted md5mesh
  exec `cleanConvertedMd5`
  */
-static bool R_Model_ParseMd5ConvertDef(md5model::md5ConvertDef_t &convert, const idDecl *decl, bool strict)
+static bool R_Model_ParseMd5ConvertDef(md5ConvertDef_t &convert, const idDecl *decl, bool strict)
 {
     const idDeclEntityDef *def = static_cast<const idDeclEntityDef *>(decl);
 
@@ -114,7 +114,7 @@ static bool R_Model_ParseMd5ConvertDef(md5model::md5ConvertDef_t &convert, const
 
 static bool R_Model_ConvertToMd5(const idDecl *decl)
 {
-    md5model::md5ConvertDef_t convert;
+    md5ConvertDef_t convert;
     if(!R_Model_ParseMd5ConvertDef(convert, decl, true))
         return false;
 
@@ -159,7 +159,7 @@ bool R_Model_ConvertToMd5(const char *fileName)
 	return R_Model_ConvertToMd5(decl);
 }
 
-static bool R_CleanConvertedMd5(const md5model::md5ConvertDef_t &convert, bool onlyMesh = false)
+static bool R_CleanConvertedMd5(const md5ConvertDef_t &convert, bool onlyMesh = false)
 {
     if(!convert.def->dict.GetBool(MD5_CONVERT, "0")) // only clean has md5convert key
         return false;
@@ -192,69 +192,66 @@ static bool R_CleanConvertedMd5(const md5model::md5ConvertDef_t &convert, bool o
 
 static void R_CleanConvertedMd5(const idDecl *decl, bool onlyMesh = false)
 {
-    md5model::md5ConvertDef_t convert;
+    md5ConvertDef_t convert;
     if(!R_Model_ParseMd5ConvertDef(convert, decl, false))
         return;
 
     R_CleanConvertedMd5(convert, onlyMesh);
 }
 
-namespace md5model
+static void R_ConvertMd5Def_f(const idCmdArgs &args)
 {
-    static void R_ConvertMd5Def_f(const idCmdArgs &args)
+    if(args.Argc() < 2)
     {
-        if(args.Argc() < 2)
-        {
-            common->Printf("Usage: %s <entityDef>\n", args.Argv(0));
-            return;
-        }
-
-        R_Model_ConvertToMd5(args.Argv(1));
+        common->Printf("Usage: %s <entityDef>\n", args.Argv(0));
+        return;
     }
 
-    static void R_ConvertMd5AllDefs_f(const idCmdArgs &)
-    {
-		const int num = declManager->GetNumDecls(DECL_ENTITYDEF);
-		for(int i = 0; i < num; i++)
-		{
-			const idDecl *decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, false);
-			if(decl->GetState() != DS_PARSED && idStr::Icmpn(decl->GetName(), MD5_CONVERT_PATH, strlen(MD5_CONVERT_PATH))) // only clean entityDef name starts with md5convert
-				continue;
-			if(decl->GetState() != DS_PARSED)
-				decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, true); // parse it
-			const idDeclEntityDef *def = static_cast<const idDeclEntityDef *>(decl);
-			if(def->dict.GetBool(MD5_CONVERT, "0")) // only handle has md5convert key
-				R_Model_ConvertToMd5(decl);
-		}
-    }
+    R_Model_ConvertToMd5(args.Argv(1));
+}
 
-    static void R_CleanConvertedMd5_f(const idCmdArgs &args)
+static void R_ConvertMd5AllDefs_f(const idCmdArgs &)
+{
+    const int num = declManager->GetNumDecls(DECL_ENTITYDEF);
+    for(int i = 0; i < num; i++)
     {
-        if(args.Argc() == 1)
+        const idDecl *decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, false);
+        if(decl->GetState() != DS_PARSED && idStr::Icmpn(decl->GetName(), MD5_CONVERT_PATH, strlen(MD5_CONVERT_PATH))) // only clean entityDef name starts with md5convert
+            continue;
+        if(decl->GetState() != DS_PARSED)
+            decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, true); // parse it
+        const idDeclEntityDef *def = static_cast<const idDeclEntityDef *>(decl);
+        if(def->dict.GetBool(MD5_CONVERT, "0")) // only handle has md5convert key
+            R_Model_ConvertToMd5(decl);
+    }
+}
+
+static void R_CleanConvertedMd5_f(const idCmdArgs &args)
+{
+    if(args.Argc() == 1)
+    {
+        const int num = declManager->GetNumDecls(DECL_ENTITYDEF);
+        for(int i = 0; i < num; i++)
         {
-            const int num = declManager->GetNumDecls(DECL_ENTITYDEF);
-            for(int i = 0; i < num; i++)
-            {
-                const idDecl *decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, false);
-                if(decl->GetState() != DS_PARSED && idStr::Icmpn(decl->GetName(), MD5_CONVERT_PATH, strlen(MD5_CONVERT_PATH))) // only clean entityDef name starts with md5convert
-                    continue;
-                if(decl->GetState() != DS_PARSED)
-                    decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, true); // parse it
-                R_CleanConvertedMd5(decl);
-            }
-        }
-        else
-        {
-            for(int i = 1; i < args.Argc(); i++)
-            {
-                const idDecl *decl = declManager->FindType(DECL_ENTITYDEF, args.Argv(i), false);
-                if(!decl)
-                    continue;
-                R_CleanConvertedMd5(decl);
-            }
+            const idDecl *decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, false);
+            if(decl->GetState() != DS_PARSED && idStr::Icmpn(decl->GetName(), MD5_CONVERT_PATH, strlen(MD5_CONVERT_PATH))) // only clean entityDef name starts with md5convert
+                continue;
+            if(decl->GetState() != DS_PARSED)
+                decl = declManager->DeclByIndex(DECL_ENTITYDEF, i, true); // parse it
+            R_CleanConvertedMd5(decl);
         }
     }
-};
+    else
+    {
+        for(int i = 1; i < args.Argc(); i++)
+        {
+            const idDecl *decl = declManager->FindType(DECL_ENTITYDEF, args.Argv(i), false);
+            if(!decl)
+                continue;
+            R_CleanConvertedMd5(decl);
+        }
+    }
+}
 
 void R_Model_NormalizeWeights(float *arr, int num)
 {
@@ -344,8 +341,6 @@ void R_TestJSON_f(const idCmdArgs &args)
 
 void Md5Model_AddCommand(void)
 {
-    using namespace md5model;
-
     cmdSystem->AddCommand("convertMd5Def", R_ConvertMd5Def_f, CMD_FL_RENDERER, "Convert other type animation model entityDef to md5mesh/md5anim", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
     cmdSystem->AddCommand("cleanConvertedMd5", R_CleanConvertedMd5_f, CMD_FL_RENDERER, "Clean converted md5mesh", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
     cmdSystem->AddCommand("convertMd5AllDefs", R_ConvertMd5AllDefs_f, CMD_FL_RENDERER, "Convert all other type animation models entityDef to md5mesh/md5anim");

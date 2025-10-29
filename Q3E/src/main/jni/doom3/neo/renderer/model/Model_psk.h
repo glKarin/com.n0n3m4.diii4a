@@ -5,10 +5,7 @@
 #define PSK_CHUNK_ID_LENGTH 8
 #define PSK_CHUNK_HEADER_TYPE 20100422
 
-namespace md5model
-{
-	class idMd5MeshFile;
-};
+class idMd5MeshFile;
 
 #pragma pack( push, 1 )
 /*
@@ -137,7 +134,7 @@ class idModelPsk
         ~idModelPsk(void);
         bool Parse(const char *pskPath);
         void Print(void) const;
-        bool ToMd5Mesh(md5model::idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
+        bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
 #ifdef _MODEL_OBJ
         bool ToObj(objModel_t &objModel, bool keepDup = false) const;
 #endif

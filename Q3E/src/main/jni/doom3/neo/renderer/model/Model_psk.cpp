@@ -4,8 +4,6 @@
 #include "Model_psk.h"
 #include "Model_md5mesh.h"
 
-using md5model::idMd5MeshFile;
-
 static bool PSK_CheckId(const char chunk_id[PSK_CHUNK_ID_TOTAL_LENGTH], const char *target)
 {
     return !idStr::Icmpn(chunk_id, target, PSK_CHUNK_ID_LENGTH);
@@ -491,8 +489,6 @@ int idModelPsk::GroupFace(idList<idList<const pskFace_t *> > &faceGroup, idStrLi
 
 bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) const
 {
-    using namespace md5model;
-
     int i, j;
     md5meshJoint_t *md5Bone;
     const pskBone_t *refBone;

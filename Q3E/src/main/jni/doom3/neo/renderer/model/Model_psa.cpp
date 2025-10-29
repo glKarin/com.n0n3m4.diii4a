@@ -3,9 +3,6 @@
 
 #include "Model_md5convert.h"
 
-using md5model::idMd5MeshFile;
-using md5model::idMd5AnimFile;
-
 idModelPsa::idModelPsa(void)
 : file(NULL),
   types(0)
@@ -216,8 +213,6 @@ bool idModelPsa::Parse(const char *psaPath)
 
 bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale) const
 {
-    using namespace md5model;
-
     int i, j;
     md5animHierarchy_t *md5Hierarchy;
     const md5meshJoint_t *meshJoint;
@@ -346,6 +341,11 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
                     boneQuat[2] = -key->quatz;
                     boneQuat[3] = key->quatw;
                 }
+//                if(md5Bone->boneName == "Bone_knee_L_03" || md5Bone->boneName == "Bone_knee_R_03") {
+//                    boneOrigin[0] = 0;
+//                    boneOrigin[1] = 0;
+//                    boneOrigin[2] = 0;
+//                }
 			}
 			else // anim key bone not in psk mesh
 			{
@@ -502,8 +502,8 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
     if(psk.Parse(pskPath))
     {
         //psk.Print();
-        if(psk.ToMd5Mesh(md5MeshFile, scale, addOrigin))
-        {
+		if(psk.ToMd5Mesh(md5MeshFile, scale, addOrigin))
+		{
 			if(doPsk)
 			{
 				md5MeshFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", pskPath, scale > 0.0f ? scale : 1.0, addOrigin));
@@ -517,10 +517,10 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
 			{
 				common->Printf("Convert md5mesh successful: %s\n", pskPath);
 			}
-            pskRes = true;
-        }
-        else
-            common->Warning("Convert md5mesh fail: %s", pskPath);
+			pskRes = true;
+		}
+		else
+			common->Warning("Convert md5mesh fail: %s", pskPath);
     }
     else
         common->Warning("Parse psk fail: %s", pskPath);
@@ -538,18 +538,18 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
 		if(psa.Parse(psaPath))
 		{
 			//psa.Print();
-			idMd5AnimFile md5AnimFile;
-			if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale))
-			{
-                md5AnimFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", psaPath, scale > 0.0f ? scale : 1.0, addOrigin));
-				idStr md5animPath = psaPath;
-                md5animPath.SetFileExtension(".md5anim");
-				md5AnimFile.Write(md5animPath.c_str());
-				common->Printf("Convert md5anim successful: %s -> %s\n", psaPath, md5animPath.c_str());
-				ret++;
-			}
-			else
-				common->Warning("Convert md5anim fail: %s", psaPath);
+				idMd5AnimFile md5AnimFile;
+				if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale))
+				{
+                    md5AnimFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", psaPath, scale > 0.0f ? scale : 1.0, addOrigin));
+					idStr md5animPath = psaPath;
+                    md5animPath.SetFileExtension(".md5anim");
+					md5AnimFile.Write(md5animPath.c_str());
+					common->Printf("Convert md5anim successful: %s -> %s\n", psaPath, md5animPath.c_str());
+					ret++;
+				}
+				else
+					common->Warning("Convert md5anim fail: %s", psaPath);
 		}
 		else
 			common->Warning("Parse psa fail: %s", psaPath);
@@ -635,7 +635,7 @@ static void ArgCompletion_PskPsa(const idCmdArgs &args, void(*callback)(const ch
 											 , NULL);
 }
 
-bool R_Model_HandlePskPsa(const md5model::md5ConvertDef_t &convert)
+bool R_Model_HandlePskPsa(const md5ConvertDef_t &convert)
 {
 	if(R_ConvertPskPsa(convert.mesh, convert.anims, convert.scale, convert.addOrigin) != 1 + convert.anims.Num())
 	{
