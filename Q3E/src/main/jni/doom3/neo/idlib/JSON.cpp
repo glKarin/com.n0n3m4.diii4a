@@ -48,7 +48,7 @@ bool JSON_ParseObject(json_t &json, idLexer &lexer)
 			break;
 		}
 
-		//printf("Obj: %s|%d|%d\n", token.c_str(), token.type, token.subtype);
+		//Sys_Printf("Obj: %s|%d|%d\n", token.c_str(), token.type, token.subtype);
 		if(token.type == TT_STRING)
 		{
 			if(st == JR_NAME)
@@ -192,7 +192,7 @@ bool JSON_ParseArray(json_t &json, idLexer &lexer)
 			error = true;
 			break;
 		}
-		//printf("Arr: %s|%d|%d\n", token.c_str(), token.type, token.subtype);
+		//Sys_Printf("Arr: %s|%d|%d\n", token.c_str(), token.type, token.subtype);
 		if(token.type == TT_PUNCTUATION)
 		{
 			if(token == ",")
@@ -210,7 +210,7 @@ bool JSON_ParseArray(json_t &json, idLexer &lexer)
 			{
 				break;
 			}
-			else if(token == "{" || token == "[")
+			else if(token == "{" || token == "[" || token == "-"/* if negative number */)
 			{
 				if(st != JR_NONE)
 				{
@@ -290,7 +290,7 @@ bool JSON_ParseNumber(json_t &json, idLexer &lexer)
 			break;
 		}
 
-		//printf("Num: %s|%d|%d\n", token.c_str(), token.type, token.subtype);
+		//Sys_Printf("Num: %s|%d|%d\n", token.c_str(), token.type, token.subtype);
 		if(token.type == TT_NUMBER)
 		{
 			if(e)
@@ -504,7 +504,7 @@ bool JSON_ParseValue(json_t &json, idLexer &lexer)
 		return false;
 	}
 
-	//printf("Val: %s|%d|%d\n", token.c_str(), token.type, token.subtype);
+	//Sys_Printf("Val: %s|%d|%d\n", token.c_str(), token.type, token.subtype);
 	switch(token.type)
 	{
 		case TT_NUMBER:
