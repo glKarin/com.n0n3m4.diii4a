@@ -103,6 +103,8 @@ class idRenderModelStatic : public idRenderModel
 
 		struct aseModel_s 			*ConvertLWOToASE(const struct st_lwObject *obj, const char *fileName);
 
+        bool						LoadMD5Mesh( const char* fileName );
+        bool						ConvertMD5MeshToModelSurfaces( const class idMd5MeshFile* obj );
 #ifdef _MODEL_OBJ
         bool						LoadOBJ( const char* fileName );
         bool						ConvertOBJToModelSurfaces( const struct objModel_t* obj );

@@ -3602,6 +3602,7 @@ cm_model_t *idCollisionModelManagerLocal::LoadRenderModel(const char *fileName)
 	idStr(fileName).ExtractFileExtension(extension);
 
 	if ((extension.Icmp("ase") != 0) && (extension.Icmp("lwo") != 0) && (extension.Icmp("ma") != 0)
+        && (extension.Icmp(MD5_STATIC_MESH_EXT) != 0)
 #ifdef _MODEL_OBJ
 		&& (extension.Icmp("obj") != 0)
 #endif

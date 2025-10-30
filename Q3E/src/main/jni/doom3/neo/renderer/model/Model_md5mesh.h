@@ -71,11 +71,13 @@ public:
     void Clear(void);
     void ConvertJointTransforms(idList<md5meshJointTransform_t> &list) const;
     void CalcBounds(const idList<md5meshJointTransform_t> &list, idBounds &bounds) const;
+    void CalcVertexes(idList<idList<idDrawVert> > &vertexList) const;
 
     static void ConvertJointTransforms(const idList<md5meshJoint_t> &joints, idList<md5meshJointTransform_t> &list);
 
 private:
     void CalcMeshBounds(const md5meshMesh_t &mesh, const idList<md5meshJointTransform_t> &list, idBounds &bounds) const;
+    void CalcMeshVertexes(int meshIndex, idList<md5meshJointTransform_t> &list, idList<idDrawVert> &vertexes) const;
 
 private:
     int version;

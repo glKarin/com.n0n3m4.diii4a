@@ -355,3 +355,106 @@ void idMd5MeshFile::CalcMeshBounds(const md5meshMesh_t &mesh, const idList<md5me
         bounds.AddPoint(pos);
     }
 }
+
+void idMd5MeshFile::CalcVertexes(idList<idList<idDrawVert> > &vertexList) const
+{
+    vertexList.SetNum(meshes.Num());
+
+    idList<md5meshJointTransform_t> jointTransforms;
+    ConvertJointTransforms(jointTransforms);
+
+    for(int i = 0; i < meshes.Num(); i++)
+    {
+        CalcMeshVertexes(i, jointTransforms, vertexList[i]);
+    }
+}
+
+void idMd5MeshFile::CalcMeshVertexes(int meshIndex, idList<md5meshJointTransform_t> &list, idList<idDrawVert> &vertexes) const
+{
+    int i, j;
+    const md5meshTri_t *tri;
+    const md5meshVert_t *vert;
+    idDrawVert *a, *b, *c;
+    const md5meshMesh_t &mesh = meshes[meshIndex];
+    idVec3 pos;
+    const md5meshWeight_t 	*weight;
+    const md5meshJointTransform_t *joint;
+    idDrawVert *drawVert;
+
+    vertexes.SetNum(mesh.verts.Num());
+    for (i = 0, vert = mesh.verts.Ptr(), drawVert = &vertexes[0]; i < mesh.verts.Num(); i++, vert++, drawVert++) {
+        pos.Zero();
+        weight = &mesh.weights[ vert->weightIndex ];
+
+        for (j = 0; j < vert->weightElem; j++, weight++) {
+            joint = &list[weight->jointIndex];
+            pos += weight->weightValue * (joint->idwm * weight->pos + joint->idt);
+        }
+        drawVert->xyz = pos;
+        drawVert->st = vert->uv;
+        drawVert->normal.Zero();
+    }
+
+    // smooth normals
+    idList<bool> usedList;
+    usedList.SetNum(vertexes.Num());
+    bool *used = usedList.Ptr();
+    memset(used, 0, vertexes.Num() * sizeof(*used));
+    drawVert = &vertexes[0];
+    for (i = 0, tri = mesh.tris.Ptr(); i < mesh.tris.Num(); i++, tri++) {
+        glIndex_t v0 = tri->vertIndex1;
+        glIndex_t v1 = tri->vertIndex2;
+        glIndex_t v2 = tri->vertIndex3;
+
+        a = &drawVert[v0];
+        b = &drawVert[v1];
+        c = &drawVert[v2];
+
+        float d0[5], d1[5], f;
+        idVec3 n;
+
+        d0[0] = b->xyz[0] - a->xyz[0];
+        d0[1] = b->xyz[1] - a->xyz[1];
+        d0[2] = b->xyz[2] - a->xyz[2];
+        d0[3] = b->st[0] - a->st[0];
+        d0[4] = b->st[1] - a->st[1];
+
+        d1[0] = c->xyz[0] - a->xyz[0];
+        d1[1] = c->xyz[1] - a->xyz[1];
+        d1[2] = c->xyz[2] - a->xyz[2];
+        d1[3] = c->st[0] - a->st[0];
+        d1[4] = c->st[1] - a->st[1];
+
+        // normal
+        n[0] = d1[1] * d0[2] - d1[2] * d0[1];
+        n[1] = d1[2] * d0[0] - d1[0] * d0[2];
+        n[2] = d1[0] * d0[1] - d1[1] * d0[0];
+
+        f = idMath::RSqrt(n.x * n.x + n.y * n.y + n.z * n.z);
+
+        n.x *= f;
+        n.y *= f;
+        n.z *= f;
+
+        if (used[v0]) {
+            a->normal += n;
+        } else {
+            a->normal = n;
+            used[v0] = true;
+        }
+
+        if (used[v1]) {
+            b->normal += n;
+        } else {
+            b->normal = n;
+            used[v1] = true;
+        }
+
+        if (used[v2]) {
+            c->normal += n;
+        } else {
+            c->normal = n;
+            used[v2] = true;
+        }
+    }
+}

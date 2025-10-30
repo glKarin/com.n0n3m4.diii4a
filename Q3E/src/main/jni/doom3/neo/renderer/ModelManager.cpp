@@ -335,6 +335,9 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 	} else if (extension.Icmp("liquid") == 0) {
 		model = new idRenderModelLiquid;
 		model->InitFromFile(modelName);
+    } else if (extension.Icmp(MD5_STATIC_MESH_EXT) == 0) {
+        model = new idRenderModelStatic;
+        model->InitFromFile(modelName);
 #ifdef _MODEL_OBJ
 	} else if (extension.Icmp("obj") == 0) {
 		model = new idRenderModelStatic;
