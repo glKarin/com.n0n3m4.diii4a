@@ -65,6 +65,8 @@ public:
     bool Parse(const char *path);
     idList<md5meshJoint_t> & Joints(void);
     idList<md5meshMesh_t> & Meshes(void);
+    const idList<md5meshJoint_t> & Joints(void) const;
+    const idList<md5meshMesh_t> & Meshes(void) const;
     idStr & Commandline(void);
     void Clear(void);
     void ConvertJointTransforms(idList<md5meshJointTransform_t> &list) const;
@@ -83,5 +85,30 @@ private:
 
     friend class idMd5AnimFile;
 };
+
+ID_INLINE idList<md5meshJoint_t> & idMd5MeshFile::Joints()
+{
+    return joints;
+}
+
+ID_INLINE idList<md5meshMesh_t> & idMd5MeshFile::Meshes()
+{
+    return meshes;
+}
+
+ID_INLINE const idList<md5meshJoint_t> & idMd5MeshFile::Joints() const
+{
+    return joints;
+}
+
+ID_INLINE const idList<md5meshMesh_t> & idMd5MeshFile::Meshes() const
+{
+    return meshes;
+}
+
+ID_INLINE idStr & idMd5MeshFile::Commandline()
+{
+    return commandline;
+}
 
 #endif

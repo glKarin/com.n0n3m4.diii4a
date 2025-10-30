@@ -7,46 +7,6 @@ idMd5AnimFile::idMd5AnimFile(void)
         : version(MD5_VERSION)
 {}
 
-ID_INLINE idList<md5animHierarchy_t> & idMd5AnimFile::Hierarchies()
-{
-    return hierarchies;
-}
-
-ID_INLINE idList<md5animBounds_t> & idMd5AnimFile::Bounds()
-{
-    return bounds;
-}
-
-ID_INLINE idList<md5animBaseframe_t> & idMd5AnimFile::Baseframe()
-{
-    return baseframe;
-}
-
-ID_INLINE idList<md5animFrames_t> & idMd5AnimFile::Frames()
-{
-    return frames;
-}
-
-ID_INLINE md5animFrames_t & idMd5AnimFile::Frame(int index)
-{
-    return frames[index];
-}
-
-ID_INLINE idStr & idMd5AnimFile::Commandline()
-{
-    return commandline;
-}
-
-ID_INLINE int & idMd5AnimFile::FrameRate(void)
-{
-    return frameRate;
-}
-
-ID_INLINE int & idMd5AnimFile::NumAnimatedComponents(void)
-{
-    return numAnimatedComponents;
-}
-
 void idMd5AnimFile::Clear(void)
 {
     version = MD5_VERSION;

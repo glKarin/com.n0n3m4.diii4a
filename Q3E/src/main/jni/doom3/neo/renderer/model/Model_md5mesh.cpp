@@ -38,21 +38,6 @@ idMd5MeshFile::idMd5MeshFile(void)
         : version(MD5_VERSION)
 {}
 
-ID_INLINE idList<md5meshJoint_t> & idMd5MeshFile::Joints()
-{
-    return joints;
-}
-
-ID_INLINE idList<md5meshMesh_t> & idMd5MeshFile::Meshes()
-{
-    return meshes;
-}
-
-ID_INLINE idStr & idMd5MeshFile::Commandline()
-{
-    return commandline;
-}
-
 void idMd5MeshFile::Clear(void)
 {
     version = MD5_VERSION;
@@ -362,8 +347,8 @@ void idMd5MeshFile::CalcMeshBounds(const md5meshMesh_t &mesh, const idList<md5me
         pos.Zero();
         weight = &mesh.weights[ vert->weightIndex ];
 
-        joint = &list[weight->jointIndex];
         for (j = 0; j < vert->weightElem; j++, weight++) {
+            joint = &list[weight->jointIndex];
             pos += weight->weightValue * (joint->idwm * weight->pos + joint->idt);
         }
 
