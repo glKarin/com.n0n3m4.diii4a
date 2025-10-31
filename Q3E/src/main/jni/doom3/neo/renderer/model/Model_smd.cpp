@@ -55,19 +55,23 @@ bool idModelSmd::Parse(const char *smdPath)
 
         if(!idStr::Icmp("nodes", token))
         {
-            if(ReadNodes())
-                MarkType(SMD_NODE);
-            else
+            MarkType(SMD_NODE);
+            if(ReadNodes() < 0)
+            {
                 err = true;
+                break;
+            }
         }
         else if(!idStr::Icmp("skeleton", token))
         {
+            MarkType(SMD_SKELETON);
 			if(nodes.Num() > 0)
 			{
-				if(ReadFrames())
-					MarkType(SMD_SKELETON);
-				else
-					err = true;
+				if(ReadFrames() < 0)
+                {
+                    err = true;
+                    break;
+                }
 			}
 			else
 			{
@@ -77,10 +81,12 @@ bool idModelSmd::Parse(const char *smdPath)
         }
         else if(!idStr::Icmp("triangles", token))
         {
-            if(ReadTriangles())
-                MarkType(SMD_TRIANGLE);
-            else
+            MarkType(SMD_TRIANGLE);
+            if(ReadTriangles() < 0)
+            {
                 err = true;
+                break;
+            }
         }
         else if(!idStr::Icmp("vertexanimation", token))
         {
@@ -91,9 +97,6 @@ bool idModelSmd::Parse(const char *smdPath)
             parser.Warning("Unexpect token '%s'", token.c_str());
             Skip();
         }
-
-        if(err)
-            break;
     }
 
     if(err)
@@ -115,7 +118,7 @@ int idModelSmd::ReadNodes(void)
         if(!lexer->ReadToken(&token))
         {
             lexer->Error("Read EOF when parsing nodes\n");
-            return 0;
+            return -1;
         }
 
         if(!idStr::Icmp("end", token))
@@ -166,7 +169,7 @@ int idModelSmd::ReadFrames(void)
         if(!lexer->ReadToken(&token))
         {
             lexer->Error("Read EOF when parsing frames\n");
-            return 0;
+            return -1;
         }
 
         if(!idStr::Icmp("end", token))
@@ -175,7 +178,7 @@ int idModelSmd::ReadFrames(void)
 		if(idStr::Icmp("time", token))
 		{
             lexer->Error("Expect token 'time', but found '%s'\n", token.c_str());
-            return 0;
+            return -1;
 		}
 
         int i = frames.Append(smdFrame_t());
@@ -198,7 +201,7 @@ int idModelSmd::ReadTriangles(void)
         if(!lexer->ReadToken(&token))
         {
             lexer->Error("Read EOF when parsing triangles\n");
-            return 0;
+            return -1;
         }
 
         if(!idStr::Icmp("end", token))
@@ -310,6 +313,16 @@ const idList<smdSkeleton_t> & idModelSmd::Bones(void) const
 	return frames[0].skeletons;
 }
 
+bool idModelSmd::HasSkeleton(void) const
+{
+    return frames.Num() > 0 && frames[0].skeletons.Num() > 0;
+}
+
+bool idModelSmd::IsMeshFile(void) const
+{
+    return triangles.Num() > 0;
+}
+
 static idQuat fromangles(const idVec3 &rot)
 {
 	double cx = cos(rot.x/2), sx = sin(rot.x/2),
@@ -345,12 +358,12 @@ static bool smdVertex_Equals(const smdVertex_t&a, const smdVertex_t &b)
 
 bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) const
 {
-	if(frames.Num() != 1)
+	if(!HasSkeleton())
     {
         common->Warning("Invalid skeleton in smd");
         return false;
     }
-    if(!triangles.Num())
+    if(!IsMeshFile())
     {
         common->Warning("No triangles in smd");
         return false;
@@ -553,7 +566,7 @@ bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
 
 bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale, bool addOrigin) const
 {
-    if(!frames.Num())
+    if(!HasSkeleton())
     {
         common->Warning("No frames in smd");
         return false;
@@ -760,7 +773,7 @@ bool idModelSmd::ToObj(objModel_t &objModel) const
 {
     int i, j;
 
-    if(!triangles.Num())
+    if(!IsMeshFile())
     {
         common->Warning("No triangles in smd");
         return false;

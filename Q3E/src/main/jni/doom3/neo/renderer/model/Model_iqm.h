@@ -228,7 +228,7 @@ class idModelIqm
 		};
         idModelIqm(void);
         ~idModelIqm(void);
-        bool Parse(const char *iqmPath, int type = PARSE_DEF);
+        bool Parse(const char *iqmPath, int parseType = PARSE_DEF);
         void Print(void) const;
         const char * GetText(unsigned int offset) const;
         const char * GetAnim(unsigned int index) const;

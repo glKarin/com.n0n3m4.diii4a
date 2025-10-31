@@ -27,7 +27,7 @@ typedef struct smdLink_s
 	float weight;
 } smdLink_t;
 
-// triangle       5 -0.769983 -1.575950 59.517052 -0.407964 -0.899339 -0.157339 0.646484 0.027344
+// triangle       5 -0.769983 -1.575950 59.517052 -0.407964 -0.899339 -0.157339 0.646484 0.027344 1 5 1.000000
 typedef struct smdVertex_s {
     int parent;
     float pos[3];
@@ -57,18 +57,13 @@ typedef enum smdDataType_e {
 class idModelSmd
 {
     public:
-		enum {
-			PARSE_DEF = 0,
-			PARSE_MESH,
-			PARSE_JOINT,
-			PARSE_FRAME,
-			PARSE_ALL,
-		};
         idModelSmd(void);
         bool Parse(const char *smdPath);
         void Print(void) const;
         bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
 		bool ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
+        bool IsMeshFile(void) const;
+        bool HasSkeleton(void) const;
 #ifdef _MODEL_OBJ
         bool ToObj(objModel_t &objModel) const;
 #endif

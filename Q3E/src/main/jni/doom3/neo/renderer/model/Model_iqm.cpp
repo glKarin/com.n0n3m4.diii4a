@@ -615,7 +615,7 @@ int idModelIqm::ReadFramedatas(void)
     return framedatas.Num();
 }
 
-bool idModelIqm::Parse(const char *iqmPath, int type)
+bool idModelIqm::Parse(const char *iqmPath, int parseType)
 {
     Clear();
 
@@ -626,8 +626,8 @@ bool idModelIqm::Parse(const char *iqmPath, int type)
     if(ReadHeader(header) <= 0)
         return false;
 
-	if(type == PARSE_DEF)
-		type = PARSE_FRAME;
+	if(parseType == PARSE_DEF)
+        parseType = PARSE_FRAME;
 
     const unsigned int pend = file->Length();
 
@@ -667,7 +667,7 @@ bool idModelIqm::Parse(const char *iqmPath, int type)
     if(!ReadOffsets(offsets))
         return false;
 
-	if(type != PARSE_ANIM)
+	if(parseType != PARSE_ANIM)
 	{
 		if(ReadVertexes(offsets.vposition))
 			MarkType(IQM_POSITION);
@@ -687,13 +687,13 @@ bool idModelIqm::Parse(const char *iqmPath, int type)
 			MarkType(IQM_TRIANGLE);
 	}
 
-	if(type >= PARSE_ALL)
+	if(parseType >= PARSE_ALL)
 	{
 		if(ReadTangents(offsets.vtangent))
 			MarkType(IQM_TANGENT);
 	}
 
-	if(type >= PARSE_JOINT)
+	if(parseType >= PARSE_JOINT)
 	{
 		if(ReadBlendIndexes(offsets.vblendindexes))
 			MarkType(IQM_BLENDINDEXES);
@@ -707,12 +707,12 @@ bool idModelIqm::Parse(const char *iqmPath, int type)
     if(ReadTexts())
         MarkType(IQM_TEXT);
 
-	if(type >= PARSE_ANIM)
+	if(parseType >= PARSE_ANIM)
 	{
 		if(ReadAnims())
 			MarkType(IQM_ANIM);
 	}
-	if(type >= PARSE_FRAME)
+	if(parseType >= PARSE_FRAME)
 	{
 		if(ReadBounds())
 			MarkType(IQM_BOUNDS);
@@ -723,19 +723,19 @@ bool idModelIqm::Parse(const char *iqmPath, int type)
 	}
 
 	bool err = false;
-	if(type != PARSE_ANIM)
+	if(parseType != PARSE_ANIM)
 	{
 		err = !IsTypeMarked(IQM_POSITION) || !IsTypeMarked(IQM_MESH || !IsTypeMarked(IQM_TRIANGLE));
 	}
-	if(type >= PARSE_JOINT)
+	if(parseType >= PARSE_JOINT)
 	{
 		err = !IsTypeMarked(IQM_JOINT) || !IsTypeMarked(IQM_BLENDINDEXES || !IsTypeMarked(IQM_BLENDWEIGHTS));
 	}
-	if(type >= PARSE_ANIM)
+	if(parseType >= PARSE_ANIM)
 	{
 		err = !IsTypeMarked(IQM_ANIM);
 	}
-	if(type >= PARSE_FRAME)
+	if(parseType >= PARSE_FRAME)
 	{
 		err = !IsTypeMarked(IQM_BOUNDS) || !IsTypeMarked(IQM_POSE)/* || !IsTypeMarked(IQM_FRAMEDATA)*/;
 	}
