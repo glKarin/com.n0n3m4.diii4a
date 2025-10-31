@@ -1118,6 +1118,10 @@ int idRenderModelMD5::GetSurfaceMask(const char *name) const
 #include "model/Model_iqm.cpp"
 #endif
 
+#ifdef _MODEL_SMD
+#include "model/Model_smd.cpp"
+#endif
+
 #include "model/Model_md5mesh.cpp"
 #include "model/Model_md5anim.cpp"
 #ifdef _MODEL_MD5_EXT

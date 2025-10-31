@@ -358,6 +358,12 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
         model = new idRenderModelStatic;
         model->InitFromFile(modelName);
 #endif
+#ifdef _MODEL_SMD
+    } else if (extension.Icmp("smd") == 0) {
+        model = new idRenderModelStatic;
+        model->InitFromFile(modelName);
+#endif
+
 #ifdef _RAVEN
 #ifdef _RAVEN_FX
 	} else if (extension.Icmp("bse") == 0) {

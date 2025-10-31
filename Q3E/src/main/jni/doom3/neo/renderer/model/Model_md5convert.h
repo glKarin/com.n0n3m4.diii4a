@@ -22,5 +22,8 @@ bool R_Model_HandlePskPsa(const md5ConvertDef_t &convert);
 #ifdef _MODEL_IQM
 bool R_Model_HandleIqm(const md5ConvertDef_t &convert);
 #endif
+#ifdef _MODEL_SMD
+bool R_Model_HandleSmd(const md5ConvertDef_t &convert);
+#endif
 
 #endif

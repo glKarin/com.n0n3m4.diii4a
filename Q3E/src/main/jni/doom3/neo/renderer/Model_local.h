@@ -121,6 +121,10 @@ class idRenderModelStatic : public idRenderModel
         bool						LoadIQM( const char* fileName );
         bool						ConvertIQMToModelSurfaces( const class idModelIqm* obj );
 #endif
+#ifdef _MODEL_SMD
+        bool						LoadSMD( const char* fileName );
+        bool						ConvertSMDToModelSurfaces( const class idModelSmd* obj );
+#endif
 
 		bool						DeleteSurfaceWithId(int id);
 		void						DeleteSurfacesWithNegativeId(void);

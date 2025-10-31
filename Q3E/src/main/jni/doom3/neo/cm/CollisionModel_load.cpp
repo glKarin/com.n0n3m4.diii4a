@@ -3615,6 +3615,9 @@ cm_model_t *idCollisionModelManagerLocal::LoadRenderModel(const char *fileName)
 #ifdef _MODEL_IQM
         && (extension.Icmp("iqm") != 0)
 #endif
+#ifdef _MODEL_SMD
+        && (extension.Icmp("smd") != 0)
+#endif
 	)
 	{
 		return NULL;

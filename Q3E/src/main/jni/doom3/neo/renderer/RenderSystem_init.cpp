@@ -2382,6 +2382,9 @@ void R_InitCommands(void)
 #ifdef _MODEL_IQM
     R_IQM_AddCommand();
 #endif
+#ifdef _MODEL_SMD
+    R_SMD_AddCommand();
+#endif
 #ifdef _MODEL_MD5_EXT
     R_Md5Convert_AddCommand();
 #endif

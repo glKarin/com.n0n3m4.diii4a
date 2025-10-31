@@ -190,6 +190,9 @@ ID_INLINE void idCmdSystem::ArgCompletion_ModelName(const idCmdArgs &args, void(
 #ifdef _MODEL_IQM
                                              , ".iqm"
 #endif
+#ifdef _MODEL_SMD
+                                             , ".smd"
+#endif
 											 , NULL);
 }
 

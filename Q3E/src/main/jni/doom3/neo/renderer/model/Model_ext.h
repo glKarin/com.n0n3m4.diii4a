@@ -16,6 +16,10 @@ void R_ActorX_AddCommand(void);
 void R_IQM_AddCommand(void);
 #endif
 
+#ifdef _MODEL_SMD
+void R_SMD_AddCommand(void);
+#endif
+
 #if defined(_MODEL_PSK) || defined(_MODEL_IQM)
 #define _MODEL_MD5_EXT 1
 #endif

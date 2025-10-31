@@ -431,6 +431,8 @@ void idImGuiSettings::RenderChangeLogs(void) const
             "Add float console support.",
             "Add Unreal engine psk/psa animation/static model support.",
             "Add iqm animation/static model support.",
+            "Add Source engine smd animation/static model support.",
+            "Add md5mesh static model support.",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -573,6 +575,10 @@ void idImGuiSettings::RenderNewCommands(void) const
             "iqmToMd5anim",
             "iqmToMd5",
             "iqmToObj",
+            "smdToMd5mesh",
+            "smdToMd5anim",
+            "smdToMd5",
+            "smdToObj",
             "convertMd5Def",
             "convertMd5AllDefs",
             "cleanConvertedMd5",

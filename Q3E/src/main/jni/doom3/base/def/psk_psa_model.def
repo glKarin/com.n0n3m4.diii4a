@@ -1,5 +1,5 @@
 // psk static model
-entityDef test_pskx_model {
+entityDef test_psk_static_model {
 	"inherit" "func_static"
 	"model" "models/psk/test_static_mesh.psk"
 }
@@ -22,7 +22,7 @@ entityDef models/psk/test_animation_mesh { // name must be same as model's mesh 
     // mesh. file path and name is same as md5 model, but extension is psk
 	"mesh" "models/psk/test_animation_mesh.psk" // required
 
-	"scale" "0.3" // scale vertexes, float, default -1.0. It will not scale if less or equals than 0
+	"scale" "0.45" // scale vertexes, float, default -1.0. It will not scale if less or equals than 0
 	"addOrigin" "0" // prepend 'origin' bone to front, bool, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
 
     // animations. file path and name is same as md5 model, but extension is psa
@@ -39,7 +39,7 @@ entityDef md5convert/models/psk/test_animation_mesh { // name must be same as 'm
     // mesh. file path and name is same as md5 model, but extension is psk
 	"mesh" "models/psk/test_animation_mesh.psk" // required
 
-	"scale" "0.5" // scale vertexes, float, default -1.0. It will not scale if less or equals than 0
+	"scale" "0.45" // scale vertexes, float, default -1.0. It will not scale if less or equals than 0
 	"addOrigin" "1" // prepend 'origin' bone to front, bool, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
 
     // animations. file path and name is same as md5 model, but extension is psa

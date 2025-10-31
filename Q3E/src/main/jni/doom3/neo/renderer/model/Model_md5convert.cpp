@@ -125,6 +125,9 @@ static bool R_Model_ConvertToMd5(const idDecl *decl)
 #ifdef _MODEL_IQM
             {"iqm", R_Model_HandleIqm, },
 #endif
+#ifdef _MODEL_SMD
+            {"smd", R_Model_HandleSmd, },
+#endif
     };
 
     for(int i = 0; i < sizeof(SupportConverters) / sizeof(SupportConverters[0]); i++)
