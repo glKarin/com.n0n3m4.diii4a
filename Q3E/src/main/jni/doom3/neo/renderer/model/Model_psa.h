@@ -68,7 +68,7 @@ public:
     idModelPsa(void);
     ~idModelPsa(void);
     bool Parse(const char *psaPath);
-    bool ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale = -1.0f) const;
+    bool ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
     void Print(void) const;
 
 private:

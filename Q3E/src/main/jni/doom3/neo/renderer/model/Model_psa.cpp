@@ -211,7 +211,7 @@ bool idModelPsa::Parse(const char *psaPath)
     return !err;
 }
 
-bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale) const
+bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale, bool addOrigin) const
 {
     int i, j;
     md5animHierarchy_t *md5Hierarchy;
@@ -231,7 +231,7 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
     md5anim.FrameRate() = (int)animInfo->anim_rate;
     md5anim.NumAnimatedComponents() = numBones * 6;
 
-    md5anim.Commandline() = "Convert from unreal psa file";
+    md5anim.Commandline() = va("Convert from unreal psa file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
 
     // convert md5 joints
     idList<md5animHierarchy_t> &md5Bones = md5anim.Hierarchies();
@@ -272,16 +272,9 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
         md5BaseFrame->xOrient = q.x;
         md5BaseFrame->yOrient = q.y;
         md5BaseFrame->zOrient = q.z;
-
-//        md5BaseFrame->xPos =
-//        md5BaseFrame->yPos =
-//        md5BaseFrame->zPos =
-//        md5BaseFrame->xOrient =
-//        md5BaseFrame->yOrient =
-//        md5BaseFrame->zOrient = 0.0f;
     }
 
-    // convert md5 baseframe
+    // convert md5 frames
     idList<md5animFrames_t> &md5Frames = md5anim.Frames();
     md5Frames.SetNum(animInfo->num_raw_frames);
     int base;
@@ -291,9 +284,9 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
         frames.index = i;
         frames.joints.SetNum(numBones);
 
-        idHashTable<int> boneMap;
-
         idList<md5meshJoint_t> md5Joints = joints;
+
+        idHashTable<int> boneMap;
 
         for(j = 0; j < animInfo->total_bones; j++)
         {
@@ -307,6 +300,9 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
 
         for(j = 0; j < numBones; j++)
         {
+            if(j == 0 && addOrigin)
+                continue;
+
             meshJoint = &joints[j];
 
             int index = 0;
@@ -378,7 +374,11 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
 					boneOrigin = meshJoint->pos;
 				}
 #else
-                const pskBone_t *refBone = &psk.bones[j];
+                index = j;
+                if(addOrigin)
+                    index--;
+
+                const pskBone_t *refBone = &psk.bones[index];
                 boneOrigin[0] = refBone->localx;
                 boneOrigin[1] = refBone->localy;
                 boneOrigin[2] = refBone->localz;
@@ -506,7 +506,7 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
 		{
 			if(doPsk)
 			{
-				md5MeshFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", pskPath, scale > 0.0f ? scale : 1.0, addOrigin));
+				md5MeshFile.Commandline().Append(va(" - %s", pskPath));
 				idStr md5meshPath = pskPath;
 				md5meshPath.SetFileExtension(".md5mesh");
 				md5MeshFile.Write(md5meshPath.c_str());
@@ -538,18 +538,18 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
 		if(psa.Parse(psaPath))
 		{
 			//psa.Print();
-				idMd5AnimFile md5AnimFile;
-				if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale))
-				{
-                    md5AnimFile.Commandline().Append(va(" '%s': scale=%f, addOrigin=%d", psaPath, scale > 0.0f ? scale : 1.0, addOrigin));
-					idStr md5animPath = psaPath;
-                    md5animPath.SetFileExtension(".md5anim");
-					md5AnimFile.Write(md5animPath.c_str());
-					common->Printf("Convert md5anim successful: %s -> %s\n", psaPath, md5animPath.c_str());
-					ret++;
-				}
-				else
-					common->Warning("Convert md5anim fail: %s", psaPath);
+            idMd5AnimFile md5AnimFile;
+            if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale, addOrigin))
+            {
+                md5AnimFile.Commandline().Append(va(" - %s", psaPath));
+                idStr md5animPath = psaPath;
+                md5animPath.SetFileExtension(".md5anim");
+                md5AnimFile.Write(md5animPath.c_str());
+                common->Printf("Convert md5anim successful: %s -> %s\n", psaPath, md5animPath.c_str());
+                ret++;
+            }
+            else
+                common->Warning("Convert md5anim fail: %s", psaPath);
 		}
 		else
 			common->Warning("Parse psa fail: %s", psaPath);

@@ -497,7 +497,7 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
     const md5meshJointTransform_t *jointTransform;
 	int numBones = bones.Num();
 
-    md5mesh.Commandline() = "Convert from unreal psk file";
+    md5mesh.Commandline() = va("Convert from unreal psk file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
 	if(addOrigin)
 		numBones++;
 
@@ -708,7 +708,7 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
                 }
                 if(w < 1.0f)
                 {
-                    common->Warning("wedge '%d' weight sum is less than 1.0", wedgeIndex);
+                    common->Warning("wedge '%d' weight sum is less than 1.0: %f", wedgeIndex, w);
                 }
             }
             md5meshTri_t md5Tri;
