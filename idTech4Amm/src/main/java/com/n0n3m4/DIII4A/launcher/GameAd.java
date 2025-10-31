@@ -79,15 +79,16 @@ public class GameAd extends GameLauncherFunc
         p.setTextSize(p.getTextSize() - 1);
         p.getTextBounds(name, 0, name.length(), bnd);
 
-        p.setStyle(Paint.Style.STROKE);
-        c.drawARGB(255, 255, 255, 255);
-        p.setStrokeWidth(border);
-        c.drawRect(new Rect(0, 0, WIDTH, HEIGHT), p);
+//        p.setStyle(Paint.Style.STROKE);
+//        c.drawARGB(255, 255, 255, 255);
+//        p.setStrokeWidth(border);
+//        c.drawRect(new Rect(0, 0, WIDTH, HEIGHT), p);
 
-        p.setARGB(196, r, g, b);
+        p.setARGB(255, r, g, b);
         p.setStyle(Paint.Style.FILL);
         p.setStrokeWidth(1);
-        c.drawRect(new Rect(border, border, WIDTH - border, HEIGHT - border), p);
+        c.drawRect(new Rect(0, 0, WIDTH, HEIGHT), p);
+        //c.drawRect(new Rect(border, border, WIDTH - border, HEIGHT - border), p);
         p.setARGB(255, 255, 255, 255);
 
         c.drawBitmap(orig, srcImgRect, dstImgRect, p);
