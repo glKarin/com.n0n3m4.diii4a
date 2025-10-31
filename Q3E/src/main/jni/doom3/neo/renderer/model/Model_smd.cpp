@@ -656,7 +656,7 @@ bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5M
             }
         }
 
-        for(j = 1; j < numBones; j++)
+        for(j = 0; j < numBones; j++)
         {
             if(j == 0 && addOrigin)
                 continue;
