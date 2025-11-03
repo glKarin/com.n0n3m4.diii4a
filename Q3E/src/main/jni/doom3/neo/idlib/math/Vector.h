@@ -616,6 +616,8 @@ class idVec3
 
 // RAVEN END
 	    bool			IsZero( void ) const;
+#else
+        bool			IsZero( void ) const;
 #endif
 
 #ifdef _HUMANHEAD
@@ -2584,7 +2586,11 @@ ID_INLINE idVec3 idVec3::Random( const idVec3& range, idRandom& random ) const {
 
 ID_INLINE bool idVec3::IsZero( void ) const {
     return ( ( ( *( const unsigned int * ) &( x ) ) | ( *( const unsigned int * ) &( y ) ) | ( *( const unsigned int * ) &( z ) ) ) & ~( 1<<31 ) ) == 0;
-} //k 64long???
+}
+#else
+ID_INLINE bool idVec3::IsZero( void ) const {
+    return ( ( ( *( const unsigned int * ) &( x ) ) | ( *( const unsigned int * ) &( y ) ) | ( *( const unsigned int * ) &( z ) ) ) & ~( 1<<31 ) ) == 0;
+}
 #endif
 
 /*
