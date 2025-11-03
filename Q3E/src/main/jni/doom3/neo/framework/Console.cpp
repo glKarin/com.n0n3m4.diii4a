@@ -1253,7 +1253,7 @@ void idConsoleLocal::DrawSolidConsole(float frac)
 	int				lines;
 	int				currentColor;
 
-	if(harm_con_float.GetBool())
+	if(frac < 1.0f && harm_con_float.GetBool())
 	{
 		DrawFloatConsole();
 		return;
