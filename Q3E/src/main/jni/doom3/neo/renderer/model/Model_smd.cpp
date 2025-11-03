@@ -356,7 +356,7 @@ static bool smdVertex_Equals(const smdVertex_t&a, const smdVertex_t &b)
     return true;
 }
 
-bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) const
+bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *meshOffset, const idMat3 *meshRotation) const
 {
 	if(!HasSkeleton())
     {
@@ -380,6 +380,14 @@ bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
 	int numBones = bones.Num();
 
     md5mesh.Commandline() = va("Convert from source smd file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
+	if(meshOffset)
+		md5mesh.Commandline().Append(va(", offset=%g %g %g", meshOffset->x, meshOffset->y, meshOffset->z));
+	if(meshRotation)
+	{
+		idAngles angle = meshRotation->ToAngles();
+		md5mesh.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
+	}
+
 	if(addOrigin)
 		numBones++;
 
@@ -414,6 +422,17 @@ bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
 		rot[2] = refBone->rot[2];
 		boneQuat = fromangles(rot);
 
+		int rootIndex = addOrigin ? 0 : -1;
+		if (md5Bone->parentIndex == rootIndex)
+		{
+			if(meshRotation && !meshRotation->IsIdentity())
+			{
+				boneOrigin *= *meshRotation;
+				boneQuat = (meshRotation->Transpose() * boneQuat.ToMat3()).ToQuat();
+			}
+			if(meshOffset && !meshOffset->IsZero())
+				boneOrigin += *meshOffset;
+		}
 		if(scale > 0.0f)
 			boneOrigin *= scale;
 
@@ -491,6 +510,14 @@ bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
                     continue;
                 }
 
+				idVec3 pos(vertex->pos[0], vertex->pos[1], vertex->pos[2]);
+				if(meshRotation && !meshRotation->IsIdentity())
+					pos *= *meshRotation;
+				if(meshOffset && !meshOffset->IsZero())
+					pos += *meshOffset;
+				if(scale > 0.0f)
+					pos *= scale;
+
                 md5meshVert_t md5Vert;
                 md5Vert.uv.Set(vertex->tc[0], vertex->tc[1]);
                 md5Vert.weightIndex = mesh.weights.Num();
@@ -508,9 +535,6 @@ bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
                     jointTransform = &jointTransforms[md5Weight.jointIndex];
 					md5Weight.weightValue = 1.0f;
 
-					idVec3 pos(vertex->pos[0], vertex->pos[1], vertex->pos[2]);
-					if(scale > 0.0f)
-						pos *= scale;
                     jointTransform->bindmat.ProjectVector(pos - jointTransform->bindpos, md5Weight.pos);
 
                     mesh.weights.Append(md5Weight); // Add weight
@@ -538,9 +562,6 @@ bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
 							md5Weight.weightValue = weight->weight;
 
 						w += md5Weight.weightValue;
-						idVec3 pos(vertex->pos[0], vertex->pos[1], vertex->pos[2]);
-						if(scale > 0.0f)
-							pos *= scale;
 						jointTransform->bindmat.ProjectVector(pos - jointTransform->bindpos, md5Weight.pos);
 
 						mesh.weights.Append(md5Weight); // Add weight
@@ -564,7 +585,7 @@ bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
     return true;
 }
 
-bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale, bool addOrigin) const
+bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *animOffset, const idMat3 *animRotation) const
 {
     if(!HasSkeleton())
     {
@@ -590,6 +611,13 @@ bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5M
     md5anim.NumAnimatedComponents() = numBones * 6;
 
     md5anim.Commandline() = va("Convert from source smd file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
+	if(animOffset)
+		md5anim.Commandline().Append(va(", offset=%g,%g,%g", animOffset->x, animOffset->y, animOffset->z));
+	if(animRotation)
+	{
+		idAngles angle = animRotation->ToAngles();
+		md5anim.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
+	}
 
     // convert md5 joints
     idList<md5animHierarchy_t> &md5Bones = md5anim.Hierarchies();
@@ -705,6 +733,17 @@ bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5M
 				boneQuat = fromangles(rot);
 			}
 
+			int rootIndex = addOrigin ? 0 : -1;
+			if (md5Bone->parentIndex == rootIndex)
+			{
+				if(animRotation && !animRotation->IsIdentity())
+				{
+					boneOrigin *= *animRotation;
+					boneQuat = (animRotation->Transpose() * boneQuat.ToMat3()).ToQuat();
+				}
+				if(animOffset && !animOffset->IsZero())
+					boneOrigin += *animOffset;
+			}
 			if(scale > 0.0f)
 				boneOrigin *= scale;
 
@@ -836,7 +875,7 @@ void idModelSmd::Print(void) const
 #undef SMD_PART_PRINT
 }
 
-static int R_ConvertSmdToMd5(const char *smdPath, bool doMesh = true, const idStrList *animSmdPaths = NULL, float scale = -1.0f, bool addOrigin = false)
+static int R_ConvertSmdToMd5(const char *smdPath, bool doMesh = true, const idStrList *animSmdPaths = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
 	int ret = 0;
 
@@ -846,7 +885,7 @@ static int R_ConvertSmdToMd5(const char *smdPath, bool doMesh = true, const idSt
     if(smd.Parse(smdPath))
     {
         //smd.Print();
-		if(smd.ToMd5Mesh(md5MeshFile, scale, addOrigin))
+		if(smd.ToMd5Mesh(md5MeshFile, scale, addOrigin, offset, rotation))
 		{
 			if(doMesh)
 			{
@@ -883,7 +922,7 @@ static int R_ConvertSmdToMd5(const char *smdPath, bool doMesh = true, const idSt
 		{
 			//animSmd.Print();
 			idMd5AnimFile md5AnimFile;
-			if(animSmd.ToMd5Anim(smd, md5AnimFile, md5MeshFile, scale, addOrigin))
+			if(animSmd.ToMd5Anim(smd, md5AnimFile, md5MeshFile, scale, addOrigin, offset, rotation))
 			{
 				md5AnimFile.Commandline().Append(va(" - %s", animSmdPath));
 				idStr md5animPath = animSmdPath;
@@ -902,19 +941,19 @@ static int R_ConvertSmdToMd5(const char *smdPath, bool doMesh = true, const idSt
 	return ret;
 }
 
-ID_INLINE static int R_ConvertSmdMesh(const char *smdPath, float scale = -1.0f, bool addOrigin = false)
+ID_INLINE static int R_ConvertSmdMesh(const char *smdPath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-	return R_ConvertSmdToMd5(smdPath, true, NULL, scale, addOrigin);
+	return R_ConvertSmdToMd5(smdPath, true, NULL, scale, addOrigin, offset, rotation);
 }
 
-ID_INLINE static int R_ConvertSmdAnim(const char *smdPath, const idStrList &animSmdPaths, float scale = -1.0f, bool addOrigin = false)
+ID_INLINE static int R_ConvertSmdAnim(const char *smdPath, const idStrList &animSmdPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-	return R_ConvertSmdToMd5(smdPath, false, &animSmdPaths, scale, addOrigin);
+	return R_ConvertSmdToMd5(smdPath, false, &animSmdPaths, scale, addOrigin, offset, rotation);
 }
 
-ID_INLINE static int R_ConvertSmd(const char *smdPath, const idStrList &animSmdPaths, float scale = -1.0f, bool addOrigin = false)
+ID_INLINE static int R_ConvertSmd(const char *smdPath, const idStrList &animSmdPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-	return R_ConvertSmdToMd5(smdPath, true, &animSmdPaths, scale, addOrigin);
+	return R_ConvertSmdToMd5(smdPath, true, &animSmdPaths, scale, addOrigin, offset, rotation);
 }
 
 static void R_ConvertSmdToMd5mesh_f(const idCmdArgs &args)
@@ -993,7 +1032,13 @@ static void R_ConvertSmdToObj_f(const idCmdArgs &args)
 
 bool R_Model_HandleSmd(const md5ConvertDef_t &convert)
 {
-    if(R_ConvertSmd(convert.mesh, convert.anims, convert.scale, convert.addOrigin) != 1 + convert.anims.Num())
+    if(R_ConvertSmd(convert.mesh, convert.anims, 
+				convert.scale, 
+				convert.addOrigin, 
+				convert.offset.IsZero() ? NULL : &convert.offset, 
+				convert.rotation.IsIdentity() ? NULL : &convert.rotation
+				) != 1 + convert.anims.Num()
+		)
     {
         common->Warning("Convert source smd to md5mesh/md5anim fail in entityDef '%s'", convert.def->GetName());
         return false;

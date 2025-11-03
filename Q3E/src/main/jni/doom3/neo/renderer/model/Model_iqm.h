@@ -233,10 +233,10 @@ class idModelIqm
         const char * GetText(unsigned int offset) const;
         const char * GetAnim(unsigned int index) const;
         int GetAnimCount(void) const;
-        bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
-        bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, float scale = -1.0f, bool addOrigin = false) const;
-        bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, float scale = -1.0f, bool addOrigin = false) const;
-        int ToMd5AnimList(idList<idMd5AnimFile> &md5anim, idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false) const;
+        bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
+        bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
+        bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
+        int ToMd5AnimList(idList<idMd5AnimFile> &md5anim, idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
 #ifdef _MODEL_OBJ
         bool ToObj(objModel_t &objModel) const;
 #endif

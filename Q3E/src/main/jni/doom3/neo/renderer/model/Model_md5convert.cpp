@@ -34,6 +34,8 @@ e.g. using psk/psa as md5mesh/md5anim
     // convert config
     "scale" "-1.0" // scale vertexes, float, default -1.0. will not scale if less or equals than 0
     "addOrigin" "0" // prepend 'origin' bone to front, bool, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
+    "offset" "0 0 0" // root bone origin offset, vector, default '0 0 0'
+    "rotation" "0 0 0" // root bone orient rotation, vector, default '0 0 0'. value is angle degree(-360 - 360)
 
     "anim idle" "other/from_other_type_animation_idle.md5anim" // psa extension
     "anim stand" "other/from_other_type_animation_stand.md5anim" // psa extension
@@ -92,17 +94,24 @@ static bool R_Model_ParseMd5ConvertDef(md5ConvertDef_t &convert, const idDecl *d
     convert.mesh = meshPath;
     convert.scale = def->dict.GetFloat("scale", "-1.0");
     convert.addOrigin = def->dict.GetBool("addOrigin", "0");
+    convert.offset = def->dict.GetVector("offset", "0 0 0");
+	idAngles angle;
+	if(def->dict.GetAngles("rotation", "0 0 0", angle))
+		convert.rotation = angle.ToMat3();
+	else
+		convert.rotation.Identity();
 
-    const idKeyValue *kv = def->dict.MatchPrefix("anim");
+	const char prefix[] = "anim ";
+    const idKeyValue *kv = def->dict.MatchPrefix(prefix);
 
     while (kv != NULL) {
         convert.anims.Append(kv->GetValue());
         idStr name = kv->GetKey();
-        name = name.Mid(4, name.Length());
+        name = name.Mid(strlen(prefix), name.Length());
         name.StripTrailingWhitespace();
         name.StripLeading(' ');
         convert.animNames.Append(name);
-        kv = def->dict.MatchPrefix("anim", kv);
+        kv = def->dict.MatchPrefix(prefix, kv);
     }
     if(!convert.anims.Num())
     {
@@ -294,7 +303,7 @@ void R_Model_NormalizeWeights(float *arr, int num)
 	arr[i] = 1.0f - total;
 }
 
-#if 0
+#if 1
 #include "../../idlib/JSON.h"
 static void ArgCompletion_JSON(const idCmdArgs &args, void(*callback)(const char *s))
 {
@@ -348,5 +357,5 @@ void R_Md5Convert_AddCommand(void)
     cmdSystem->AddCommand("cleanConvertedMd5", R_CleanConvertedMd5_f, CMD_FL_RENDERER, "Clean converted md5mesh", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
     cmdSystem->AddCommand("convertMd5AllDefs", R_ConvertMd5AllDefs_f, CMD_FL_RENDERER, "Convert all other type animation models entityDef to md5mesh/md5anim");
 
-    //cmdSystem->AddCommand("json", R_TestJSON_f, CMD_FL_RENDERER, "test json", ArgCompletion_JSON);
+    cmdSystem->AddCommand("json", R_TestJSON_f, CMD_FL_RENDERER, "test json", ArgCompletion_JSON);
 }

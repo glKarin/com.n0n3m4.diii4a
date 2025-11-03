@@ -6,6 +6,8 @@ typedef struct md5ConvertDef_s
     const idDeclEntityDef *def;
     idStr type;
     float scale;
+	idVec3 offset;
+	idMat3 rotation;
     bool addOrigin;
     idStr mesh;
     idStrList animNames;

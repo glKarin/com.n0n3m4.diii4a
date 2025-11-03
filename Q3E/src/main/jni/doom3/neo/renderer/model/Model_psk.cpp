@@ -487,7 +487,7 @@ int idModelPsk::GroupFace(idList<idList<const pskFace_t *> > &faceGroup, idStrLi
     return matList.Num();
 }
 
-bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) const
+bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *meshOffset, const idMat3 *meshRotation) const
 {
     int i, j;
     md5meshJoint_t *md5Bone;
@@ -498,6 +498,14 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
 	int numBones = bones.Num();
 
     md5mesh.Commandline() = va("Convert from unreal psk file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
+	if(meshOffset)
+		md5mesh.Commandline().Append(va(", offset=%g %g %g", meshOffset->x, meshOffset->y, meshOffset->z));
+	if(meshRotation)
+	{
+		idAngles angle = meshRotation->ToAngles();
+		md5mesh.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
+	}
+
 	if(addOrigin)
 		numBones++;
 
@@ -542,8 +550,6 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
         boneOrigin[0] = refBone->localx;
         boneOrigin[1] = refBone->localy;
         boneOrigin[2] = refBone->localz;
-		if(scale > 0.0f)
-			boneOrigin *= scale;
 
         // I have really no idea why the .psk format stores the first quaternion with inverted quats.
         // Furthermore only the X and Z components of the first quat are inverted ?!?!
@@ -561,6 +567,20 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
             boneQuat[2] = -refBone->qz;
             boneQuat[3] = refBone->qw;
         }
+
+		int rootIndex = addOrigin ? 0 : -1;
+		if (md5Bone->parentIndex == rootIndex)
+		{
+			if(meshRotation && !meshRotation->IsIdentity())
+			{
+				boneOrigin *= *meshRotation;
+				boneQuat = (meshRotation->Transpose() * boneQuat.ToMat3()).ToQuat();
+			}
+			if(meshOffset && !meshOffset->IsZero())
+				boneOrigin += *meshOffset;
+		}
+		if(scale > 0.0f)
+			boneOrigin *= scale;
 
         md5Bone->pos = boneOrigin;
         //MatrixTransformPoint(unrealToQuake, boneOrigin, md5Bone->origin);
@@ -680,6 +700,14 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
                 md5VertIndexes[k] = mesh.verts.Append(md5Vert); // Add vert
                 md5Vertexes.Append(wedgeIndex); // cache vert
 
+				idVec3 pos = *vertex;
+				if(meshRotation && !meshRotation->IsIdentity())
+					pos *= *meshRotation;
+				if(meshOffset && !meshOffset->IsZero())
+					pos += *meshOffset;
+				if(scale > 0.0f)
+					pos *= scale;
+
                 float w = 0.0f;
                 for(int m = 0; m < vertWeights.Num(); m++)
                 {
@@ -699,9 +727,6 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin) 
                         md5Weight.weightValue = weight->weight;
 
                     w += md5Weight.weightValue;
-					idVec3 pos = *vertex;
-					if(scale > 0.0f)
-						pos *= scale;
                     jointTransform->bindmat.ProjectVector(pos - jointTransform->bindpos, md5Weight.pos);
 
                     mesh.weights.Append(md5Weight); // Add weight
@@ -791,23 +816,24 @@ bool idModelPsk::ToObj(objModel_t &objModel, bool keepDup) const
 
 void idModelPsk::Print(void) const
 {
-#define PSK_PART_PRINT(name, list, fmt, ...) \
+#define PSK_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
+	if(all) \
     for(int i = 0; i < list.Num(); i++) {  \
          Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
-    //PSK_PART_PRINT(vertex, vertexes, "(%f, %f, %f)   ", vertexes[i][0], vertexes[i][1], vertexes[i][2])
-    //PSK_PART_PRINT(wedge, wedges, "vertex=%u uv=(%f, %f) mat=%d   ", wedges[i].vertex_index, wedges[i].u, wedges[i].v, wedges[i].material_index)
-    PSK_PART_PRINT(face, faces, "wedge=(%u, %u, %u) mat=(%d, %d) sg=%u   ", faces[i].wedge_index1, faces[i].wedge_index2, faces[i].wedge_index3, faces[i].material_index, faces[i].aux_material_index, faces[i].smooth_group)
-    PSK_PART_PRINT(material, materials, "%s   ", materials[i].name)
-    PSK_PART_PRINT(weight, weights, "weight=%f parent=%d bone=%d   ", weights[i].weight, weights[i].vertex_index, weights[i].bone_index)
-    PSK_PART_PRINT(bone, bones, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
-    //PSK_PART_PRINT(normal, normals, "(%f, %f, %f)   ", normals[i][0], normals[i][1], normals[i][2])
-    //PSK_PART_PRINT(color, colors, "(%u, %u, %u, %u)   ", colors[i].r, colors[i].g, colors[i].b, colors[i].a)
-    //PSK_PART_PRINT(extra uv, uvs, "(%f, %f)   ", uvs[i][0], uvs[i][1])
-    //PSK_PART_PRINT(morph info, morphInfos, "%s vertex count=%d   ", morphInfos[i].name, morphInfos[i].vertex_count)
-    //PSK_PART_PRINT(morph data, morphDatas, "position_delta=(%f, %f, %f) tangent_z_delta=(%f, %f, %f) point index=%d   ", morphDatas[i].position_deltax, morphDatas[i].position_deltay, morphDatas[i].position_deltaz, morphDatas[i].tangent_z_deltax, morphDatas[i].tangent_z_deltay, morphDatas[i].tangent_z_deltaz, morphDatas[i].point_index)
+    PSK_PART_PRINT(vertex, vertexes, false, "(%f, %f, %f)   ", vertexes[i][0], vertexes[i][1], vertexes[i][2])
+    PSK_PART_PRINT(wedge, wedges, false, "vertex=%u uv=(%f, %f) mat=%d   ", wedges[i].vertex_index, wedges[i].u, wedges[i].v, wedges[i].material_index)
+    PSK_PART_PRINT(face, faces, false, "wedge=(%u, %u, %u) mat=(%d, %d) sg=%u   ", faces[i].wedge_index1, faces[i].wedge_index2, faces[i].wedge_index3, faces[i].material_index, faces[i].aux_material_index, faces[i].smooth_group)
+    PSK_PART_PRINT(material, materials, true, "%s   ", materials[i].name)
+    PSK_PART_PRINT(weight, weights, false, "weight=%f parent=%d bone=%d   ", weights[i].weight, weights[i].vertex_index, weights[i].bone_index)
+    PSK_PART_PRINT(bone, bones, true, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
+    PSK_PART_PRINT(normal, normals, false, "(%f, %f, %f)   ", normals[i][0], normals[i][1], normals[i][2])
+    PSK_PART_PRINT(color, colors, false, "(%u, %u, %u, %u)   ", colors[i].r, colors[i].g, colors[i].b, colors[i].a)
+    PSK_PART_PRINT(extra uv, uvs, false, "(%f, %f)   ", uvs[i][0], uvs[i][1])
+    PSK_PART_PRINT(morph info, morphInfos, false, "%s vertex count=%d   ", morphInfos[i].name, morphInfos[i].vertex_count)
+    PSK_PART_PRINT(morph data, morphDatas, false, "position_delta=(%f, %f, %f) tangent_z_delta=(%f, %f, %f) point index=%d   ", morphDatas[i].position_deltax, morphDatas[i].position_deltay, morphDatas[i].position_deltaz, morphDatas[i].tangent_z_deltax, morphDatas[i].tangent_z_deltay, morphDatas[i].tangent_z_deltaz, morphDatas[i].point_index)
 
 #undef PSK_PART_PRINT
 }

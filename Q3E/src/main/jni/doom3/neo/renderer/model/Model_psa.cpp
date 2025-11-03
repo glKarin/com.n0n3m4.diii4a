@@ -211,7 +211,7 @@ bool idModelPsa::Parse(const char *psaPath)
     return !err;
 }
 
-bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale, bool addOrigin) const
+bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *animOffset, const idMat3 *animRotation) const
 {
     int i, j;
     md5animHierarchy_t *md5Hierarchy;
@@ -232,6 +232,13 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
     md5anim.NumAnimatedComponents() = numBones * 6;
 
     md5anim.Commandline() = va("Convert from unreal psa file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
+	if(animOffset)
+		md5anim.Commandline().Append(va(", offset=%g,%g,%g", animOffset->x, animOffset->y, animOffset->z));
+	if(animRotation)
+	{
+		idAngles angle = animRotation->ToAngles();
+		md5anim.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
+	}
 
     // convert md5 joints
     idList<md5animHierarchy_t> &md5Bones = md5anim.Hierarchies();
@@ -399,6 +406,17 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
 #endif
 			}
 
+			int rootIndex = addOrigin ? 0 : -1;
+			if (md5Bone->parentIndex == rootIndex)
+			{
+				if(animRotation && !animRotation->IsIdentity())
+				{
+					boneOrigin *= *animRotation;
+					boneQuat = (animRotation->Transpose() * boneQuat.ToMat3()).ToQuat();
+				}
+				if(animOffset && !animOffset->IsZero())
+					boneOrigin += *animOffset;
+			}
 			if(scale > 0.0f)
 				boneOrigin *= scale;
 
@@ -464,14 +482,15 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
 
 void idModelPsa::Print(void) const
 {
-#define PSK_PART_PRINT(name, list, fmt, ...) \
+#define PSK_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
+	if(all) \
     for(int i = 0; i < list.Num(); i++) {    \
          Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
-    PSK_PART_PRINT(bone, bones, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
-    PSK_PART_PRINT(animinfo, animInfos, "action=%s group=%s bones=%d root_include=%d key_compression_style=%d key_quotum=%d key_reduction=%f track_time=%f anim_rate=%f start_bone=%d first_raw_frame=%d num_raw_frames=%d  ", animInfos[i].action_name, animInfos[i].group_name, animInfos[i].total_bones, animInfos[i].root_include, animInfos[i].key_compression_style, animInfos[i].key_quotum, animInfos[i].key_reduction, animInfos[i].track_time, animInfos[i].anim_rate, animInfos[i].start_bone, animInfos[i].first_raw_frame, animInfos[i].num_raw_frames)
+    PSK_PART_PRINT(bone, bones, true, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
+    PSK_PART_PRINT(animinfo, animInfos, true, "action=%s group=%s bones=%d root_include=%d key_compression_style=%d key_quotum=%d key_reduction=%f track_time=%f anim_rate=%f start_bone=%d first_raw_frame=%d num_raw_frames=%d  ", animInfos[i].action_name, animInfos[i].group_name, animInfos[i].total_bones, animInfos[i].root_include, animInfos[i].key_compression_style, animInfos[i].key_quotum, animInfos[i].key_reduction, animInfos[i].track_time, animInfos[i].anim_rate, animInfos[i].start_bone, animInfos[i].first_raw_frame, animInfos[i].num_raw_frames)
 //#undef PSK_PART_PRINT
 //#define PSK_PART_PRINT(name, list, fmt, ...) \
 //    Sys_Printf(#name " num: %d\n", list.Num()); \
@@ -492,7 +511,7 @@ action=girl015_04_wp06a_base_idle01 group=None bones=243 root_include=0 key_comp
 #undef PSK_PART_PRINT
 }
 
-static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const idStrList *psaPaths = NULL, float scale = -1.0f, bool addOrigin = false)
+static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const idStrList *psaPaths = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
 	int ret = 0;
 
@@ -502,7 +521,7 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
     if(psk.Parse(pskPath))
     {
         //psk.Print();
-		if(psk.ToMd5Mesh(md5MeshFile, scale, addOrigin))
+		if(psk.ToMd5Mesh(md5MeshFile, scale, addOrigin, offset, rotation))
 		{
 			if(doPsk)
 			{
@@ -539,7 +558,7 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
 		{
 			//psa.Print();
             idMd5AnimFile md5AnimFile;
-            if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale, addOrigin))
+            if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale, addOrigin, offset, rotation))
             {
                 md5AnimFile.Commandline().Append(va(" - %s", psaPath));
                 idStr md5animPath = psaPath;
@@ -558,19 +577,19 @@ static int R_ConvertPskPsaToMd5(const char *pskPath, bool doPsk = true, const id
 	return ret;
 }
 
-ID_INLINE static int R_ConvertPsk(const char *pskPath, float scale = -1.0f, bool addOrigin = false)
+ID_INLINE static int R_ConvertPsk(const char *pskPath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-	return R_ConvertPskPsaToMd5(pskPath, true, NULL, scale, addOrigin);
+	return R_ConvertPskPsaToMd5(pskPath, true, NULL, scale, addOrigin, offset, rotation);
 }
 
-ID_INLINE static int R_ConvertPsa(const char *pskPath, const idStrList &psaPaths, float scale = -1.0f, bool addOrigin = false)
+ID_INLINE static int R_ConvertPsa(const char *pskPath, const idStrList &psaPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-	return R_ConvertPskPsaToMd5(pskPath, false, &psaPaths, scale, addOrigin);
+	return R_ConvertPskPsaToMd5(pskPath, false, &psaPaths, scale, addOrigin, offset, rotation);
 }
 
-ID_INLINE static int R_ConvertPskPsa(const char *pskPath, const idStrList &psaPaths, float scale = -1.0f, bool addOrigin = false)
+ID_INLINE static int R_ConvertPskPsa(const char *pskPath, const idStrList &psaPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-	return R_ConvertPskPsaToMd5(pskPath, true, &psaPaths, scale, addOrigin);
+	return R_ConvertPskPsaToMd5(pskPath, true, &psaPaths, scale, addOrigin, offset, rotation);
 }
 
 static void R_ConvertPskToMd5mesh_f(const idCmdArgs &args)
@@ -637,7 +656,12 @@ static void ArgCompletion_PskPsa(const idCmdArgs &args, void(*callback)(const ch
 
 bool R_Model_HandlePskPsa(const md5ConvertDef_t &convert)
 {
-	if(R_ConvertPskPsa(convert.mesh, convert.anims, convert.scale, convert.addOrigin) != 1 + convert.anims.Num())
+	if(R_ConvertPskPsa(convert.mesh, convert.anims, 
+				convert.scale, 
+				convert.addOrigin,
+				convert.offset.IsZero() ? NULL : &convert.offset, 
+				convert.rotation.IsIdentity() ? NULL : &convert.rotation
+				) != 1 + convert.anims.Num())
 	{
 		common->Warning("Convert psk/psa to md5mesh/md5anim fail in entityDef '%s'", convert.def->GetName());
 		return false;
