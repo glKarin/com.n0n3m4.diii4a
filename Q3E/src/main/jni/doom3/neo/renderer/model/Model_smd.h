@@ -60,7 +60,7 @@ class idModelSmd
         idModelSmd(void);
         bool Parse(const char *smdPath);
         void Print(void) const;
-        bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 offset = NULL, const idMat3 *rotation = NULL) const;
+        bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
 		bool ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
         bool IsMeshFile(void) const;
         bool HasSkeleton(void) const;
