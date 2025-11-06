@@ -1,5 +1,254 @@
 #include "JSON.h"
 
+static json_u def; // thread_local
+
+ID_INLINE static void JSON_ToArray(json_t &json)
+{
+    if(json.type != JSON_ARRAY)
+    {
+        JSON_Free(json);
+        json.type = JSON_ARRAY;
+        json.a.value = new jsonArray_t;
+    }
+}
+
+ID_INLINE static void JSON_ToObject(json_t &json)
+{
+    if(json.type != JSON_OBJECT)
+    {
+        JSON_Free(json);
+        json.type = JSON_OBJECT;
+        json.o.value = new jsonObject_t;
+    }
+}
+
+ID_INLINE static void JSON_ToString(json_t &json)
+{
+    if(json.type != JSON_STRING)
+    {
+        JSON_Free(json);
+        json.type = JSON_STRING;
+        json.s.value = new jsonString_t;
+    }
+}
+
+ID_INLINE static void JSON_ToBool(json_t &json)
+{
+    if(json.type != JSON_BOOL)
+    {
+        JSON_Free(json);
+        json.type = JSON_BOOL;
+        json.b.value = false;
+    }
+}
+
+ID_INLINE static void JSON_ToNumber(json_t &json, bool isFloat = false)
+{
+    if(json.type != JSON_NUMBER)
+    {
+        JSON_Free(json);
+        json.type = JSON_NUMBER;
+        json.n.value = 0.0f;
+        json.n.ivalue = 0;
+        json.n.numberType = isFloat ? JSONNUMBER_FLOAT : JSONNUMBER_INT;
+    }
+}
+
+int json_u::Length(void) const {
+    switch(type)
+    {
+        case JSON_ARRAY:
+            return a.value->Num();
+        case JSON_OBJECT:
+            return o.value->Num();
+        case JSON_STRING:
+            return s.value->Length();
+        default:
+            return 0;
+    }
+}
+
+idStrList json_u::Keys(void) const {
+    switch(type)
+    {
+        case JSON_OBJECT:
+            return o.value->Keys();
+        case JSON_ARRAY: {
+            idStrList list;
+            for(int i = 0; i < a.value->Num(); i++)
+                list.Append(va("%d", i));
+            return list;
+        }
+        case JSON_STRING: {
+            idStrList list;
+            for(int i = 0; i < s.value->Length(); i++)
+                list.Append(va("%d", i));
+            return list;
+        }
+        default:
+            return idStrList();
+    }
+}
+idList<int> json_u::IndexKeys(void) const {
+    int num = Length();
+    idList<int> list;
+    for(int i = 0; i < num; i++)
+        list.Append(i);
+    return list;
+}
+
+json_t & json_u::operator[](int index) {
+    JSON_ToArray(*this);
+    index = index < 0 ? a.value->Num() + index : index;
+    if(index < 0)
+        index = 0;
+    if(index >= a.value->Num())
+        a.value->Resize(index + 1);
+    return (*a.value)[index];
+}
+
+const union json_u & json_u::operator[](int index) const {
+    index = index < 0 ? a.value->Num() + index : index;
+    if(type != JSON_ARRAY || index < 0 || index >= a.value->Num())
+    {
+        JSON_Init(def);
+        return def;
+    }
+    return (*a.value)[index];
+}
+
+union json_u & json_u::operator[](const char *name) {
+    JSON_ToObject(*this);
+    return (*o.value)[name];
+}
+
+const union json_u & json_u::operator[](const char *name) const {
+    if(type != JSON_OBJECT || o.value->FindIndex(name) < 0)
+    {
+        JSON_Init(def);
+        return def;
+    }
+    return (*o.value)[name];
+}
+
+char & json_u::operator()(int index) {
+    JSON_ToString(*this);
+    index = index < 0 ? s.value->Length() + index : index;
+    if(index < 0)
+        index = 0;
+    while(index >= s.value->Length())
+        s.value->Append('\0');
+    return (*s.value)[index];
+}
+
+char json_u::operator()(int index) const {
+    index = index < 0 ? s.value->Length() + index : index;
+    if(type != JSON_STRING || index < 0 || index >= s.value->Length())
+    {
+        return '\0';
+    }
+    return (*s.value)[index];
+}
+
+json_u::operator const char *(void) const {
+    return type == JSON_STRING ? s.value->c_str() : NULL;
+}
+
+json_u::operator jsonString_t &(void) {
+    JSON_ToString(*this);
+    return *s.value;
+}
+
+json_u::operator jsonBool_t(void) const {
+    switch(type)
+    {
+        case JSON_OBJECT:
+            return NULL != o.value;
+        case JSON_ARRAY:
+            return NULL != a.value;
+        case JSON_STRING:
+            return NULL != s.value && !s.value->IsEmpty();
+        case JSON_NUMBER:
+            return n.value != 0.0f;
+        case JSON_BOOL:
+            return b.value;
+        default:
+            return false;
+    }
+}
+
+json_u::operator jsonBool_t &(void) {
+    JSON_ToBool(*this);
+    return b.value;
+}
+
+json_u::operator jsonInteger_t(void) const {
+    return type == JSON_NUMBER ? n.ivalue : 0;
+}
+
+json_u::operator jsonInteger_t &(void) {
+    JSON_ToNumber(*this, false);
+    return n.ivalue;
+}
+
+json_u::operator jsonFloat_t(void) const {
+    return type == JSON_NUMBER ? n.value : 0.0f;
+}
+
+json_u::operator jsonFloat_t &(void) {
+    JSON_ToNumber(*this, true);
+    return n.value;
+}
+
+json_u::operator const idList<union json_u> &(void) const {
+    if(type != JSON_ARRAY)
+    {
+        JSON_ToArray(def);
+        return def;
+    }
+    return *a.value;
+}
+
+json_u::operator idList<union json_u> &(void) {
+    JSON_ToArray(*this);
+    return *a.value;
+}
+
+json_u::operator const jsonMap_t<union json_u> &(void) const {
+    if(type != JSON_OBJECT)
+    {
+        JSON_ToObject(def);
+        return def;
+    }
+    return *o.value;
+}
+
+json_u::operator jsonMap_t<union json_u> &(void) {
+    JSON_ToObject(*this);
+    return *o.value;
+}
+
+#if 0
+json_u::~json_u(void) {
+        switch(type)
+        {
+            case JSON_OBJECT:
+                delete o.value;
+                break;
+            case JSON_ARRAY:
+                delete a.value;
+                break;
+            case JSON_STRING:
+                delete s.value;
+                break;
+            case JSON_BOOL:
+            case JSON_NUMBER:
+            default:
+                break;
+        }
+    }
+#endif
+
 enum {
 	JR_NONE,
 	JR_NAME,
@@ -712,9 +961,9 @@ void JSON_ValueToString(idStr &text, const json_t &json, int indent)
 void JSON_ObjectToString(idStr &text, const json_t &json, int indent)
 {
 	text.Append("{");
-	if(indent >= 0 && json.o.Num() > 0)
+	if(indent >= 0 && json.o.value->Num() > 0)
 		text.Append("\n");
-	for(int i = 0; i < json.o.Num(); i++)
+	for(int i = 0; i < json.o.value->Num(); i++)
 	{
 		int m = indent < 0 ? -1 : (indent + 1);
 		JSON_AppendIndent(text, m);
@@ -722,15 +971,15 @@ void JSON_ObjectToString(idStr &text, const json_t &json, int indent)
 		text.Append("\"");
 		text.Append(key);
 		text.Append("\":");
-		JSON_ValueToString(text, json.o[key], m);
-		if(i < json.o.Num() - 1)
+		JSON_ValueToString(text, (*json.o.value)[key], m);
+		if(i < json.o.value->Num() - 1)
 		{
 			text.Append(",");
 			if(indent >= 0)
 				text.Append("\n");
 		}
 	}
-	if(indent >= 0 && json.o.Num() > 0)
+	if(indent >= 0 && json.o.value->Num() > 0)
 	{
 		text.Append("\n");
 		JSON_AppendIndent(text, indent);
@@ -741,21 +990,21 @@ void JSON_ObjectToString(idStr &text, const json_t &json, int indent)
 void JSON_ArrayToString(idStr &text, const json_t &json, int indent)
 {
 	text.Append("[");
-	if(indent >= 0 && json.a.Num() > 0)
+	if(indent >= 0 && json.a.value->Num() > 0)
 		text.Append("\n");
-	for(int i = 0; i < json.a.Num(); i++)
+	for(int i = 0; i < json.a.value->Num(); i++)
 	{
 		int m = indent < 0 ? -1 : (indent + 1);
 		JSON_AppendIndent(text, m);
-		JSON_ValueToString(text, json.a[i], m);
-		if(i < json.a.Num() - 1)
+		JSON_ValueToString(text, (*json.a.value)[i], m);
+		if(i < json.a.value->Num() - 1)
 		{
 			text.Append(",");
 			if(indent >= 0)
 				text.Append("\n");
 		}
 	}
-	if(indent >= 0 && json.a.Num() > 0)
+	if(indent >= 0 && json.a.value->Num() > 0)
 	{
 		text.Append("\n");
 		JSON_AppendIndent(text, indent);
@@ -787,17 +1036,17 @@ void JSON_FreeValue(json_t &json)
 
 void JSON_FreeObject(json_t &json)
 {
-	for(int i = 0; i < json.o.Num(); i++)
+	for(int i = 0; i < json.o.value->Num(); i++)
 	{
-		JSON_FreeValue(json.o[i]);
+		JSON_FreeValue((*json.o.value)[i]);
 	}
 }
 
 void JSON_FreeArray(json_t &json)
 {
-	for(int i = 0; i < json.a.Num(); i++)
+	for(int i = 0; i < json.a.value->Num(); i++)
 	{
-		JSON_FreeValue(json.a[i]);
+		JSON_FreeValue((*json.a.value)[i]);
 	}
 }
 
@@ -807,3 +1056,203 @@ void JSON_Free(json_t &json)
     JSON_Init(json);
 }
 
+bool JSON_IsNull(const json_t &json)
+{
+    return json.type == JSON_NULL;
+}
+
+static bool JSON_FindValue(const json_t *&cur, const char *token)
+{
+    int len = strlen(token);
+    bool isNum = true;
+    for(int i = 0; i < len; i++)
+    {
+        if(token[i] < '0' || token[i] > '9')
+        {
+            isNum = false;
+            break;
+        }
+    }
+
+    if(cur->type == JSON_OBJECT)
+    {
+        int index = cur->o.value->FindIndex(token);
+        if(index != -1)
+            cur = cur->o.value->GetIndex(index);
+        else
+        {
+            printf("[JSON]: not found key '%s' in object\n", token);
+            cur = NULL;
+            return false;
+        }
+    }
+    else if(cur->type == JSON_ARRAY)
+    {
+        if(isNum)
+        {
+            int index;
+            sscanf(token, "%d", &index);
+            if(sscanf(token, "%d", &index) == 1)
+            {
+                if(index < cur->a.value->Num())
+                    cur = &cur->a.value->operator[](index);
+                else
+                {
+                    printf("[JSON]: not found index '%s' in array\n", token);
+                    cur = NULL;
+                    return false;
+                }
+            }
+            else
+            {
+                printf("[JSON]: not array index '%s'\n", token);
+                cur = NULL;
+                return false;
+            }
+        }
+        else
+        {
+            printf("[JSON]: index '%s' not number in array\n", token);
+            cur = NULL;
+            return false;
+        }
+    }
+    else
+    {
+        printf("[JSON]: not object or array\n");
+        cur = NULL;
+        return false;
+    }
+    return true;
+}
+
+const json_t * JSON_Find(const json_t &json, const char *path, char sep)
+{
+    enum {
+        JSON_FIND_KEY,
+        JSON_FIND_SEP,
+        JSON_FIND_BRACE,
+    };
+
+    const char *ptr = path;
+    idStr token;
+    const json_t *cur = &json;
+    int st = JSON_FIND_KEY;
+
+    while(true)
+    {
+        if(!cur)
+        {
+            printf("[JSON]: current root value is null\n");
+            break;
+        }
+
+        if(*ptr == '\0')
+        {
+            if(st == JSON_FIND_SEP)
+            {
+                printf("[JSON]: require key, but read EOL\n");
+                cur = NULL;
+                break;
+            }
+
+            if(!token.IsEmpty())
+            {
+                JSON_FindValue(cur, token.c_str());
+            }
+
+            break;
+        }
+        else if(*ptr == sep)
+        {
+            if(st == JSON_FIND_SEP)
+            {
+                printf("[JSON]: require key, but found separator '%c'\n", sep);
+                cur = NULL;
+                break;
+            }
+
+            if(st == JSON_FIND_KEY)
+            {
+                if(token.IsEmpty())
+                {
+                    printf("[JSON]: current key is empty when find '%c'\n", sep);
+                    cur = NULL;
+                    break;
+                }
+
+                if(!JSON_FindValue(cur, token.c_str()))
+                {
+                    break;
+                }
+            }
+
+            token.Clear();
+            st = JSON_FIND_SEP;
+        }
+        else if(*ptr == '[')
+        {
+            if(st == JSON_FIND_SEP)
+            {
+                printf("[JSON]: require key, but found '['\n");
+                cur = NULL;
+                break;
+            }
+
+            if(!token.IsEmpty())
+            {
+                if(!JSON_FindValue(cur, token.c_str()))
+                {
+                    break;
+                }
+
+                token.Clear();
+            }
+            ptr++;
+
+            while(*ptr)
+            {
+                if(*ptr == ']')
+                    break;
+                token.Append(*ptr);
+                ptr++;
+            }
+
+            if(*ptr != ']')
+            {
+                printf("[JSON]: missing ']'\n");
+                cur = NULL;
+                break;
+            }
+
+            if(token.IsEmpty())
+            {
+                printf("[JSON]: index is empty in []\n");
+                cur = NULL;
+                break;
+            }
+
+            if(!JSON_FindValue(cur, token.c_str()))
+            {
+                break;
+            }
+            token.Clear();
+            st = JSON_FIND_BRACE;
+        }
+        else
+        {
+            if(st == JSON_FIND_BRACE)
+            {
+                printf("[JSON]: require . or [, but found '%c'\n", *ptr);
+                cur = NULL;
+                break;
+            }
+            token.Append(*ptr);
+            st = JSON_FIND_KEY;
+        }
+
+        ptr++;
+    }
+
+    return cur;
+}

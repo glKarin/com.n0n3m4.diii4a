@@ -8,6 +8,10 @@
  * JSON_Init(json); // json is null type
  * bool ok = JSON_Parse("path.json"); // parse
  * if(ok) {
+ *     // auto &res = array[0]["prop1"]["value"]; // chain access(RW)
+ *     // auto &res = array / 0 / "prop1" / "value"; // chain access(readonly)
+ *     // auto &res = JSON_Find(json, "array[0].prop1[value].1); // find by link
+ *     // auto &res = JSON_Find(json, "array[0]/prop1[value]/1); // find by path
  *     // auto &array = json["array_a"]; // operate JSON object
  *     // auto &res = array[0]; // operate JSON array
  *     // auto &i = (int)json["int_a"]; // operate JSON integer
@@ -80,6 +84,7 @@ class jsonMap_t
 			table.Clear();
 		}
 		void			DeleteContents(void) {
+            keys.Clear();
 			table.DeleteContents();
 		}
 
@@ -87,11 +92,19 @@ class jsonMap_t
 			return keys.Num();
 		}
 		Type 			*GetIndex(int index) const {
-			return table.GetIndex(index);
+            if(index >= keys.Num())
+                return NULL;
+            Type *val;
+            if(table.Get(keys[index], &val))
+                return val;
+			return NULL;
 		}
 		const char *	GetKeyIndex(int index) const {
 			return keys[index].c_str();
 		}
+        int             FindIndex(const char *key) const {
+            return keys.FindIndex(key);
+        }
 		jsonMapEntry_t 	GetKeyVal(int index) const {
 			jsonMapEntry_t entry;
 			entry.key = keys[index].c_str();
@@ -107,7 +120,12 @@ class jsonMap_t
 		}
 		Type &			operator[](const char *key) {
 			Type *val;
-			table.Get(key, &val);
+			if(!table.Get(key, &val))
+			{
+				Type val;
+                Set(key, val);
+			}
+            table.Get(key, &val);
 			return *val;
 		}
 		const Type &			operator[](int index) const {
@@ -145,22 +163,6 @@ struct jsonNumberValueWrapper_t
     jsonNumberType_t numberType;
     FT value;
     IT ivalue;
-
-    operator jsonBool_t(void) const {
-        return ivalue != 0;
-    }
-    operator jsonInteger_t(void) const {
-        return ivalue;
-    }
-    operator jsonInteger_t &(void) {
-        return ivalue;
-    }
-    operator jsonFloat_t(void) const {
-        return value;
-    }
-    operator jsonFloat_t &(void) {
-        return value;
-    }
 };
 
 template <class T>
@@ -168,75 +170,6 @@ struct jsonValueWrapper_t
 {
     jsonType_t type;
 	T value;
-
-	// Array
-	union json_u & operator[](int index) {
-		return value->operator[](index);
-	}
-	const union json_u & operator[](int index) const {
-		return value->operator[](index);
-	}
-	// Object
-	union json_u & operator[](const char *name) {
-		return value->operator[](name);
-	}
-	const union json_u & operator[](const char *name) const {
-		return value->operator[](name);
-	}
-	// String
-	char & operator()(int index) {
-		return value->operator[](index);
-	}
-	const char & operator()(int index) const {
-		return value->operator[](index);
-	}
-	// Array/Object
-	int Num(void) const {
-		return value->Num();
-	}
-	// String
-	int Length(void) const {
-		return value->Length();
-	}
-	operator const char *(void) const {
-		return value->c_str();
-	}
-	operator jsonString_t &(void) {
-		return *value;
-	}
-	operator jsonBool_t(void) const {
-		return value;
-	}
-	operator jsonBool_t &(void) {
-		return value;
-	}
-	operator jsonInteger_t(void) const {
-		return value;
-	}
-	operator jsonInteger_t &(void) {
-		return value;
-	}
-	operator jsonFloat_t(void) const {
-		return value;
-	}
-	operator jsonFloat_t &(void) {
-		return value;
-	}
-	operator jsonNull_t(void) const {
-		return NULL;
-	}
-	operator idList<union json_u> &(void) const {
-		return *value;
-	}
-	operator idList<union json_u> &(void) {
-		return *value;
-	}
-	operator jsonMap_t<union json_u> &(void) const {
-		return *value;
-	}
-	operator jsonMap_t<union json_u> &(void) {
-		return *value;
-	}
 };
 
 typedef union json_u
@@ -244,150 +177,51 @@ typedef union json_u
 	jsonType_t type;
 	jsonValueWrapper_t<jsonString_t *> s;
 	jsonValueWrapper_t<jsonBool_t> b;
-	jsonNumberValueWrapper_t<jsonFloat_t , jsonInteger_t> n;
+	jsonNumberValueWrapper_t<jsonFloat_t, jsonInteger_t> n;
 	jsonValueWrapper_t<jsonMap_t<union json_u> *> o;
 	jsonValueWrapper_t<idList<union json_u> *> a;
 
 #if 0
-    ~json_u(void) {
-        switch(type)
-        {
-            case JSON_OBJECT:
-                delete o.value;
-                break;
-            case JSON_ARRAY:
-                delete a.value;
-                break;
-            case JSON_STRING:
-                delete s.value;
-                break;
-            case JSON_BOOL:
-            case JSON_NUMBER:
-            default:
-                break;
-        }
-    }
+    ~json_u(void);
 #endif
 
 	// Array
-	union json_u & operator[](int index) {
-		return a[index];
-	}
-	const union json_u & operator[](int index) const {
-		return a[index];
+	union json_u & operator[](int index);
+	const union json_u & operator[](int index) const;
+	const union json_u & operator/(int index) const {
+		return operator[](index);
 	}
 	// Object
-	union json_u & operator[](const char *name) {
-		return o[name];
-	}
-	const union json_u & operator[](const char *name) const {
-		return o[name];
+	union json_u & operator[](const char *name);
+	const union json_u & operator[](const char *name) const;
+	const union json_u & operator/(const char *name) const{
+		return operator[](name);
 	}
 	// String
-	char & operator()(int index) {
-		return s(index);
-	}
-	const char & operator()(int index) const {
-		return s(index);
-	}
+	char & operator()(int index);
+	char operator()(int index) const;
 	int Num(void) const {
 		return Length();
 	}
-	int Length(void) const {
-		switch(type)
-		{
-			case JSON_ARRAY:
-				return a.Num();
-			case JSON_OBJECT:
-				return o.Num();
-			case JSON_STRING:
-				return s.Length();
-			default:
-				return 0;
-		}
-	}
-    idStrList Keys(void) const {
-        switch(type)
-        {
-            case JSON_OBJECT:
-                return o.value->Keys();
-            case JSON_ARRAY: {
-                idStrList list;
-                for(int i = 0; i < a.value->Num(); i++)
-                    list.Append(va("%d", i));
-                return list;
-            }
-            case JSON_STRING: {
-                idStrList list;
-                for(int i = 0; i < s.value->Length(); i++)
-                    list.Append(va("%d", i));
-                return list;
-            }
-            default:
-                return idStrList();
-        }
-    }
-    idList<int> IndexKeys(void) const {
-        int num;
-        switch(type)
-        {
-            case JSON_OBJECT:
-                num = o.Num();
-                break;
-            case JSON_ARRAY:
-                num = a.Num();
-                break;
-            case JSON_STRING:
-                num = s.Length();
-                break;
-            default:
-                num = 0;
-                break;
-        }
-        idList<int> list;
-        for(int i = 0; i < num; i++)
-            list.Append(i);
-        return list;
-    }
-	operator const char *(void) const {
-		return s.value->c_str();
-	}
-	operator jsonString_t &(void) {
-		return *s.value;
-	}
-	operator jsonBool_t(void) const {
-		return b.value;
-	}
-	operator jsonBool_t &(void) {
-		return b.value;
-	}
-	operator jsonInteger_t(void) const {
-		return n.ivalue;
-	}
-	operator jsonInteger_t &(void) {
-        return n.ivalue;
-	}
-	operator jsonFloat_t(void) const {
-		return n.value;
-	}
-	operator jsonFloat_t &(void) {
-		return n.value;
-	}
-	operator jsonNull_t(void) const {
-		return NULL;
-	}
-	operator idList<union json_u> &(void) const {
-		return *a.value;
-	}
-	operator idList<union json_u> &(void) {
-		return *a.value;
-	}
-	operator jsonMap_t<union json_u> &(void) const {
-		return *o.value;
-	}
-	operator jsonMap_t<union json_u> &(void) {
-		return *o.value;
-	}
+	int Length(void) const;
+    idStrList Keys(void) const;
+    idList<int> IndexKeys(void) const;
+
+	operator const char *(void) const;
+	operator jsonString_t &(void);
+	operator jsonBool_t(void) const;
+	operator jsonBool_t &(void);
+	operator jsonInteger_t(void) const;
+	operator jsonInteger_t &(void);
+	operator jsonFloat_t(void) const;
+	operator jsonFloat_t &(void);
+//	operator jsonNull_t(void) const {
+//		return NULL;
+//	}
+	operator const idList<union json_u> &(void) const;
+	operator idList<union json_u> &(void);
+	operator const jsonMap_t<union json_u> &(void) const;
+	operator jsonMap_t<union json_u> &(void);
 } json_t;
 
 typedef idList<union json_u> jsonArray_t;
@@ -397,5 +231,9 @@ void JSON_Init(json_t &json);
 bool JSON_Parse(json_t &json, const char *path);
 void JSON_ToString(idStr &text, const json_t &json, int indent = 0);
 void JSON_Free(json_t &json);
+bool JSON_IsNull(const json_t &json);
+
+// obj.field[key1].0.array[1]
+const json_t * JSON_Find(const json_t &json, const char *path, char sep = '.');
 
 #endif
