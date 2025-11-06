@@ -383,7 +383,7 @@ void idGLSLShaderManager::ActuallyLoad(void)
 		// create shader on heap
 		shaderProgram_t *shader = (shaderProgram_t *)malloc(sizeof(*shader));
 		memset(shader, 0, sizeof(*shader));
-		strncpy(shader->name, prop.name.c_str(), sizeof(shader->name));
+        idStr::Copynz(shader->name, prop.name.c_str(), sizeof(shader->name));
 		shader->type = SHADER_CUSTOM;
 		prop.program = shader;
 
@@ -1036,7 +1036,10 @@ void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProg
 		qglDeleteShader(shaderProgram->fragmentShader);
 	}
 
+    // keep name
+    idStr name = shaderProgram->name;
 	memset(shaderProgram, 0, sizeof(shaderProgram_t));
+    idStr::Copynz(shaderProgram->name, name.c_str(), sizeof(shaderProgram->name));
 
 	if(!deleteProgram)
 	    shaderProgram->program = program;
@@ -1156,7 +1159,7 @@ bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *ver
 	}
 
 	RB_GLSL_GetUniformLocations(shaderProgram);
-	strncpy(shaderProgram->name, name, sizeof(shaderProgram->name));
+    idStr::Copynz(shaderProgram->name, name, sizeof(shaderProgram->name));
     shaderProgram->type = type;
 
 	return true;
@@ -1219,7 +1222,7 @@ int RB_GLSL_LoadShaderProgram(
             RB_GLSL_ValidateProgram(program);
             RB_GLSL_GetUniformLocations(program);
             common->Printf("    Load external shader program success!\n");
-            strncpy(program->name, name, sizeof(program->name));
+            idStr::Copynz(program->name, name, sizeof(program->name));
             program->type = type;
 
 #ifdef GL_ES_VERSION_3_0
@@ -1282,6 +1285,9 @@ void idGLSLShaderManager::ReloadShaders(void)
 	shaderProgram_t *originShader = backEnd.glState.currentProgram;
 	GL_UseProgram(NULL);
 
+    int startMs = Sys_Milliseconds();
+    common->Printf("----- Compiling GLSL shaders -----\n");
+
     for(int i = 0; i < shaders.Num(); i++)
     {
         shaderProgram_t *shader = shaders[i];
@@ -1326,6 +1332,9 @@ void idGLSLShaderManager::ReloadShaders(void)
             }
         }
     }
+
+    int endMs = Sys_Milliseconds();
+    common->Printf("----- Compile GLSL shaders finish(%d ms) -----\n", endMs - startMs);
 
 	GL_UseProgram(originShader);
 }

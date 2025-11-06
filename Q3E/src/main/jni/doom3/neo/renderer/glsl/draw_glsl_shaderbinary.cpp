@@ -17,15 +17,15 @@ typedef struct glslShaderBinaryHeader_s // sizeof = 193
 {
     uint32_t magic;
     uint32_t version;
-    char name[32];
+    char name[64];
     uint8_t type; // built-in/custom
     uint16_t shader_type; // glsl_program_t
     uint16_t glsl_version; // GLSL source version
     // GPU info
-    char gl_vendor[32];
-    char gl_renderer[32];
-    char gl_version[32];
-    char gl_shading_language_version[32];
+    char gl_vendor[64];
+    char gl_renderer[64];
+    char gl_version[64];
+    char gl_shading_language_version[64];
     // checksum CRC32
     uint32_t vertex_shader_digest;
     uint32_t fragment_shader_digest;
@@ -429,7 +429,7 @@ static bool RB_GLSL_LoadShaderBinary(shaderProgram_t *shaderProgram, const char 
     }
 
     RB_GLSL_GetUniformLocations(shaderProgram);
-    strncpy(shaderProgram->name, name, sizeof(shaderProgram->name));
+    idStr::Copynz(shaderProgram->name, name, sizeof(shaderProgram->name));
     shaderProgram->type = type;
 
     RB_GLSL_FreeShaderBinaryCache(&cache);
