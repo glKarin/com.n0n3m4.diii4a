@@ -111,7 +111,7 @@ class idRenderModelStatic : public idRenderModel
 #endif
 #ifdef _MODEL_DAE
         bool						LoadDAE( const char* fileName );
-        bool						ConvertDAEToModelSurfaces( const struct ColladaParser* obj );
+        bool						ConvertDAEToModelSurfaces( const class ColladaParser* obj );
 #endif
 #ifdef _MODEL_PSK
         bool						LoadPSK( const char* fileName );

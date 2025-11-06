@@ -45,6 +45,7 @@ typedef struct glconfig_s {
 	const char			*vendor_string;
 	const char			*version_string;
 	const char			*extensions_string;
+    const char			*shading_language_version_string;
 
 	float				glVersion;				// atof( version_string )
 

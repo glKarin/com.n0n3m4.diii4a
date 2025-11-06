@@ -646,6 +646,7 @@ void R_InitOpenGL(void)
 	glConfig.renderer_string = (const char *)qglGetString(GL_RENDERER);
 	glConfig.version_string = (const char *)qglGetString(GL_VERSION);
 	glConfig.extensions_string = (const char *)qglGetString(GL_EXTENSIONS);
+    glConfig.shading_language_version_string = (const char *)qglGetString(GL_SHADING_LANGUAGE_VERSION);
 
 	// OpenGL driver constants
 	qglGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
@@ -1198,6 +1199,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("Renderer: %s\n", glConfig.renderer_string);
 	common->Printf("Version: %s\n", glConfig.version_string);
 	common->Printf("Vendor: %s\n", glConfig.version_string);
+    common->Printf("Shading language version: %s\n", glConfig.shading_language_version_string);
 	common->Printf("Extensions: %s\n", glConfig.extensions_string);
 
 	common->Printf("glVersion: %f\n", glConfig.glVersion);
@@ -2087,6 +2089,7 @@ static void GfxInfo_f(const idCmdArgs &args)
 	common->Printf("\nGL_VENDOR: %s\n", glConfig.vendor_string);
 	common->Printf("GL_RENDERER: %s\n", glConfig.renderer_string);
 	common->Printf("GL_VERSION: %s\n", glConfig.version_string);
+    common->Printf("GL_SHADING_LANGUAGE_VERSION: %s\n", glConfig.shading_language_version_string);
 	common->Printf("GL_EXTENSIONS: %s\n", glConfig.extensions_string);
 	common->Printf("GL_MAX_TEXTURE_SIZE: %d\n", glConfig.maxTextureSize);
 	common->Printf("GL_MAX_TEXTURE_UNITS_ARB: %d\n", glConfig.maxTextureUnits);

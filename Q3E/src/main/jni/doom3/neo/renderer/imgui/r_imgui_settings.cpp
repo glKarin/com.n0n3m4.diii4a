@@ -464,6 +464,9 @@ void idImGuiSettings::RenderNewCvars(void) const
             "harm_con_floatZoomStep",
             "harm_con_alwaysShow",
             "harm_con_noBackground",
+            "harm_r_useGLSLShaderBinaryCache",
+            "harm_r_shaderProgramBinaryDir",
+            "harm_r_shaderProgramBinaryES3Dir",
             "r_showStencil",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
@@ -930,6 +933,9 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCvar("harm_r_shaderProgramDir", "External OpenGLES2 GLSL shader path");
 #ifdef GL_ES_VERSION_3_0
     ImGui_RegisterCvar("harm_r_shaderProgramES3Dir", "External OpenGLES3 GLSL shader path");
+    ImGui_RegisterCvar("harm_r_shaderProgramBinaryDir", "External OpenGLES2 GLSL shader binary path");
+    ImGui_RegisterCvar("harm_r_shaderProgramBinaryES3Dir", "External OpenGLES3 GLSL shader binary path");
+    ImGui_RegisterCvar("harm_r_useGLSLShaderBinaryCache", "Use GLSL shader compiled binary cache");
 #endif
     ImGui_RegisterCvar("reloadGLSLprograms", "Reload loaded GLSL shaders", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
     ImGui_RegisterCmd("exportGLSLShaderSource", "Export built-in GLSL shaders", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
