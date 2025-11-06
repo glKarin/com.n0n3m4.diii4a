@@ -173,7 +173,7 @@ static int RB_GLSL_ReadExternalShaderSource(idStr &fullPath, idStr &buffer)
 
 
 
-void R_ExportGLSLShaderSource_f(const idCmdArgs &args)
+static void R_ExportGLSLShaderSource_f(const idCmdArgs &args)
 {
     const char *vs;
     const char *fs;
@@ -234,7 +234,7 @@ static void R_PrintGLSLShaderSource(const idStr &source)
     }
 }
 
-void R_PrintGLSLShaderSource_f(const idCmdArgs &args)
+static void R_PrintGLSLShaderSource_f(const idCmdArgs &args)
 {
     const char *vs;
     const char *fs;
@@ -455,7 +455,7 @@ static void RB_GLSL_ExportDevGLSLShaderSource(const char *source, const char *na
     fileSystem->WriteFile(p.c_str(), source, strlen(source), "fs_basepath");
 }
 
-void R_ExportDevShaderSource_f(const idCmdArgs &args)
+static void R_ExportDevShaderSource_f(const idCmdArgs &args)
 {
 #undef _KARIN_GLSL_SHADER_H
 #include "glsl_shader.h"
@@ -661,6 +661,13 @@ bool RB_GLSL_FindGLSLShaderSource(const char *name, int type, idStr *source, idS
     {
         return false;
     }
+}
+
+static void R_CleanGLSLShaderSource_f(const idCmdArgs &)
+{
+    idStr path = RB_GLSL_GetExternalShaderSourcePath();
+    common->Printf("Remove external GLSL shader source directory '%s'\n", path.c_str());
+    fileSystem->RemoveFolder(path);
 }
 
 #include "glsl_arb_shader.cpp"

@@ -1650,12 +1650,12 @@ idStr idARBProgram::TextureFunc(const char *td, const char *d)
     }
 }
 
-void GLSL_ArgCompletion_glprogs(const idCmdArgs &args, void(*callback)(const char *s))
+static void GLSL_ArgCompletion_glprogs(const idCmdArgs &args, void(*callback)(const char *s))
 {
 	cmdSystem->ArgCompletion_FolderExtension(args, callback, "glprogs/", false, "vfp", "fp", "vp", "txt", NULL);
 }
 
-void GLSL_ConvertARBShader_f(const idCmdArgs &args)
+static void GLSL_ConvertARBShader_f(const idCmdArgs &args)
 {
     if (args.Argc() < 2) {
         common->Printf("Usage: %s <ARB shader source file> [<version=100,300> <save path>].\n", args.Argv(0));

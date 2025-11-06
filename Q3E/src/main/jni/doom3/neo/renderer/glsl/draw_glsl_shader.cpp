@@ -1207,7 +1207,7 @@ int RB_GLSL_LoadShaderProgram(
         if(USING_GLES3 && harm_r_useGLSLShaderBinaryCache.GetBool())
         {
             common->Printf("    Load external shader binary: Vertex(%s), Fragment(%s)\n", vertex_shader_source_file, fragment_shader_source_file);
-            if(RB_GLSL_LoadShaderBinary(program, name, vertexShaderStr, fragmentShaderStr, type, true))
+            if(RB_GLSL_LoadShaderBinaryCache(program, name, vertexShaderStr, fragmentShaderStr, type, true))
             {
                 common->Printf("    Load external shader binary success!\n");
                 return GLSL_LOAD_EXTERNAL_BINARY;
@@ -1248,7 +1248,7 @@ int RB_GLSL_LoadShaderProgram(
     if(USING_GLES3 && harm_r_useGLSLShaderBinaryCache.GetBool())
     {
         common->Printf("    Load built-in shader binary\n", vertex_shader_source_file, fragment_shader_source_file);
-        if(RB_GLSL_LoadShaderBinary(program, name, vs, fs, type, false))
+        if(RB_GLSL_LoadShaderBinaryCache(program, name, vs, fs, type, false))
         {
             common->Printf("    Load built-in shader binary success!\n");
             return GLSL_LOAD_BUILT_IN_BINARY;
@@ -1342,7 +1342,11 @@ void idGLSLShaderManager::ReloadShaders(void)
 void GLSL_AddCommand(void)
 {
 	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export built-in GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
+    cmdSystem->AddCommand("cleanExternalGLSLShaderSource", R_CleanGLSLShaderSource_f, CMD_FL_RENDERER, "remove external GLSL shader source directory");
 	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print built-in GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
 	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export built-in original C-String GLSL shader source for developer");
+#ifdef GL_ES_VERSION_3_0
+    cmdSystem->AddCommand("cleanGLSLShaderBinary", R_CleanGLSLShaderBinary_f, CMD_FL_RENDERER, "remove GLSL shader binary directory");
+#endif
     cmdSystem->AddCommand("convertARB", GLSL_ConvertARBShader_f, CMD_FL_RENDERER, "convert ARB shader to GLSL shader", GLSL_ArgCompletion_glprogs);
 }

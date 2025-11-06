@@ -585,6 +585,10 @@ void idImGuiSettings::RenderNewCommands(void) const
             "convertMd5Def",
             "convertMd5AllDefs",
             "cleanConvertedMd5",
+            "cleanExternalGLSLShaderSource",
+#ifdef GL_ES_VERSION_3_0
+            "cleanGLSLShaderBinary",
+#endif
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -941,6 +945,10 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCmd("exportGLSLShaderSource", "Export built-in GLSL shaders", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
     ImGui_RegisterCmd("printGLSLShaderSource", "Print built-in GLSL shaders", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
     ImGui_RegisterCmd("exportDevShaderSource", "Export built-in GLSL shaders for developer", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
+    ImGui_RegisterCmd("cleanExternalGLSLShaderSource", "Remove external GLSL shaders directory", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
+#ifdef GL_ES_VERSION_3_0
+    ImGui_RegisterCmd("cleanGLSLShaderBinary", "Remove GLSL shader binaries directory", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
+#endif
     ImGui_RegisterDivide(IG_CVAR_GROUP_RENDERER);
 
     ImGui_RegisterLabel("System", IG_CVAR_GROUP_RENDERER);

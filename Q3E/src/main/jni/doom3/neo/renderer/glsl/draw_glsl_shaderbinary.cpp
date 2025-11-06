@@ -8,6 +8,11 @@
 #define GLSL_SHADER_BINARY_DATA_EXT "glslbin"
 
 enum {
+    GLSL_VERSION_ES2 = 0x0100,
+    GLSL_VERSION_ES3 = 0x0300,
+};
+
+enum {
     GLSL_BUILT_IN = 0,
     GLSL_CUSTOM = 1,
 };
@@ -75,6 +80,38 @@ static idStr RB_GLSL_GetExternalShaderBinaryPath(bool external)
     return fullPath;
 }
 
+static void RB_GLSL_RemoveShaderBinaryCache(const char *path)
+{
+    idStr fullPath = path;
+    bool p = false;
+
+    const char *exts[] = {
+            "." GLSL_SHADER_BINARY_HEADER_EXT,
+            "." GLSL_SHADER_BINARY_DATA_EXT,
+    };
+
+    for(int i = 0; i < sizeof(exts) / sizeof(exts[0]); i++)
+    {
+        fullPath.SetFileExtension(exts[i]);
+        if(fileSystem->ReadFile(fullPath, NULL, NULL) >= 0)
+        {
+            fileSystem->RemoveFile(fullPath);
+            p = true;
+        }
+    }
+
+    if(p)
+        common->Printf("    Remove GLSL shader binary cache file: %s" "/" GLSL_SHADER_BINARY_DATA_EXT "\n", fullPath.c_str());
+}
+
+static void RB_GLSL_RemoveShaderBinaryCache(const char *name, bool external)
+{
+    idStr fullPath = RB_GLSL_GetExternalShaderBinaryPath(external);
+
+    fullPath.AppendPath(name);
+    RB_GLSL_RemoveShaderBinaryCache(fullPath.c_str());
+}
+
 static void RB_GLSL_WriteShaderBinaryCache(const glslShaderBinaryCache_t *cache)
 {
     idStr fullPath = RB_GLSL_GetExternalShaderBinaryPath(cache->header.type == GLSL_CUSTOM);
@@ -115,7 +152,7 @@ static void RB_GLSL_GenShaderBinaryHeader(glslShaderBinaryHeader_t *header, cons
     header->version = GLSL_SHADER_BINARY_VERSION;
     header->type = external ? GLSL_CUSTOM : GLSL_BUILT_IN;
     header->shader_type = type;
-    header->glsl_version = USING_GLES3 ? 0x300 : 0x100;
+    header->glsl_version = USING_GLES3 ? GLSL_VERSION_ES3 : GLSL_VERSION_ES2;
     idStr::Copynz(header->name, name, sizeof(header->name));
     idStr::Copynz(header->gl_vendor, glConfig.vendor_string, sizeof(header->gl_vendor));
     idStr::Copynz(header->gl_renderer, glConfig.renderer_string, sizeof(header->gl_vendor));
@@ -127,6 +164,8 @@ static void RB_GLSL_GenShaderBinaryHeader(glslShaderBinaryHeader_t *header, cons
 
 static bool RB_GLSL_CacheShaderBinary(GLuint program, const char *name, const idStr &vertexSource, const idStr &fragmentSource, int type, bool external)
 {
+    RB_GLSL_RemoveShaderBinaryCache(name, external);
+
     if(program == 0)
         return false;
 
@@ -262,13 +301,13 @@ static bool RB_GLSL_ReadShaderBinaryData(const char *path, glslShaderBinaryCache
     idFile *file = fileSystem->OpenFileRead(path, false);
     if(!file)
     {
-        common->Warning("Can not load GLSL shader binary file: %s",path);
+        common->Printf("    Can not load GLSL shader binary file: %s\n",path);
         return false;
     }
 
     if(file->Length() != cache->header.length)
     {
-        common->Warning("GLSL shader binary length not match: %d != %u", file->Length(), cache->header.length);
+        common->Printf("    GLSL shader binary length not match: %d != %u\n", file->Length(), cache->header.length);
         return false;
     }
 
@@ -289,45 +328,45 @@ static bool RB_GLSL_CheckShaderBinaryHeader(const glslShaderBinaryHeader_t *head
 {
     if(header->magic != GLSL_SHADER_BINARY_MAGIC)
     {
-        common->Warning("GLSL shader binary header magic invalid: %u != %u", header->magic, GLSL_SHADER_BINARY_MAGIC);
+        common->Printf("    GLSL shader binary header magic invalid: %u != %u\n", header->magic, GLSL_SHADER_BINARY_MAGIC);
         return false;
     }
     if(header->version != GLSL_SHADER_BINARY_VERSION)
     {
-        common->Warning("GLSL shader binary header version not match: %u != %u", header->version, GLSL_SHADER_BINARY_VERSION);
+        common->Printf("    GLSL shader binary header version not match: %u != %u\n", header->version, GLSL_SHADER_BINARY_VERSION);
         return false;
     }
-    uint16_t glsl_version = USING_GLES3 ? 0x300 : 0x100;
+    uint16_t glsl_version = USING_GLES3 ? GLSL_VERSION_ES3 : GLSL_VERSION_ES2;
     if(header->glsl_version != glsl_version)
     {
-        common->Warning("GLSL shader binary header glsl version not match: %u != %u", header->glsl_version, glsl_version);
+        common->Printf("    GLSL shader binary header glsl version not match: %u != %u\n", header->glsl_version, glsl_version);
         return false;
     }
 
     if(idStr::Cmp(header->gl_vendor, glConfig.vendor_string))
     {
-        common->Warning("GLSL shader binary header gl vendor not match: %s != %s", header->gl_vendor, glConfig.vendor_string);
+        common->Printf("    GLSL shader binary header gl vendor not match: %s != %s\n", header->gl_vendor, glConfig.vendor_string);
         return false;
     }
     if(idStr::Cmp(header->gl_renderer, glConfig.renderer_string))
     {
-        common->Warning("GLSL shader binary header gl renderer not match: %s != %s", header->gl_renderer, glConfig.renderer_string);
+        common->Printf("    GLSL shader binary header gl renderer not match: %s != %s\n", header->gl_renderer, glConfig.renderer_string);
         return false;
     }
     if(idStr::Cmp(header->gl_version, glConfig.version_string))
     {
-        common->Warning("GLSL shader binary header gl version not match: %s != %s", header->gl_version, glConfig.version_string);
+        common->Printf("    GLSL shader binary header gl version not match: %s != %s\n", header->gl_version, glConfig.version_string);
         return false;
     }
     if(idStr::Cmp(header->gl_shading_language_version, glConfig.shading_language_version_string))
     {
-        common->Warning("GLSL shader binary header gl shading language version not match: %s != %s", header->gl_shading_language_version, glConfig.shading_language_version_string);
+        common->Printf("    GLSL shader binary header gl shading language version not match: %s != %s\n", header->gl_shading_language_version, glConfig.shading_language_version_string);
         return false;
     }
 
     if(header->length == 0)
     {
-        common->Warning("GLSL shader binary header binary length invalid");
+        common->Printf("    GLSL shader binary header binary length invalid\n");
         return false;
     }
 
@@ -340,19 +379,15 @@ static bool RB_GLSL_CheckShaderBinaryData(const glslShaderBinaryCache_t *cache)
 
     if(cache->header.binary_digest != crc)
     {
-        common->Warning("GLSL shader binary header binary CRC not match: %u != %u", cache->header.binary_digest, crc);
+        common->Printf("    GLSL shader binary header binary CRC not match: %u != %u\n", cache->header.binary_digest, crc);
         return false;
     }
 
     return true;
 }
 
-static bool RB_GLSL_LoadShaderBinary(shaderProgram_t *shaderProgram, const char *name, const idStr &vertexSource, const idStr &fragmentSource, int type, bool external)
+static bool RB_GLSL_LoadShaderBinaryCache(shaderProgram_t *shaderProgram, const char *name, const idStr &vertexSource, const idStr &fragmentSource, int type, bool external)
 {
-    if (!glConfig.isInitialized) {
-        return false;
-    }
-
     idStr fullPath = RB_GLSL_GetExternalShaderBinaryPath(external);
 
     fullPath.AppendPath(name);
@@ -360,49 +395,62 @@ static bool RB_GLSL_LoadShaderBinary(shaderProgram_t *shaderProgram, const char 
 
     glslShaderBinaryCache_t cache;
     memset(&cache, 0, sizeof(cache));
+
     if(!RB_GLSL_ReadShaderBinaryHeader(fullPath, &cache.header))
     {
         common->Printf("    Can not load GLSL shader binary cache header file: %s\n", fullPath.c_str());
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
         return false;
     }
 
     if(!RB_GLSL_CheckShaderBinaryHeader(&cache.header))
+    {
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
         return false;
+    }
 
     uint8_t from = external ? GLSL_CUSTOM : GLSL_BUILT_IN;
     if(cache.header.type != (external ? GLSL_CUSTOM : GLSL_BUILT_IN) )
     {
-        common->Warning("GLSL shader binary header type not match: %u != %u", cache.header.type, from);
+        common->Printf("    GLSL shader binary header type not match: %u != %u\n", cache.header.type, from);
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
         return false;
     }
 
     if(idStr::Cmp(cache.header.name, name))
     {
-        common->Warning("GLSL shader binary header name not match: %s != %s", cache.header.name, name);
+        common->Printf("    GLSL shader binary header name not match: %s != %s\n", cache.header.name, name);
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
         return false;
     }
 
     unsigned int vertexCRC = CRC32_BlockChecksum(vertexSource, vertexSource.Length());
     if(cache.header.vertex_shader_digest != vertexCRC)
     {
-        common->Warning("GLSL shader binary header vertex shader digest not match: %u != %u", cache.header.vertex_shader_digest, vertexCRC);
+        common->Printf("    GLSL shader binary header vertex shader digest not match: %u != %u\n", cache.header.vertex_shader_digest, vertexCRC);
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
         return false;
     }
 
     unsigned int fragmentCRC = CRC32_BlockChecksum(fragmentSource, fragmentSource.Length());
     if(cache.header.fragment_shader_digest != fragmentCRC)
     {
-        common->Warning("GLSL shader binary header fragment shader digest not match: %u != %u", cache.header.fragment_shader_digest, fragmentCRC);
+        common->Printf("    GLSL shader binary header fragment shader digest not match: %u != %u\n", cache.header.fragment_shader_digest, fragmentCRC);
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
         return false;
     }
 
     fullPath.SetFileExtension("." GLSL_SHADER_BINARY_DATA_EXT);
     if(!RB_GLSL_ReadShaderBinaryData(fullPath, &cache))
+    {
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
         return false;
+    }
 
     if(!RB_GLSL_CheckShaderBinaryData(&cache))
     {
         RB_GLSL_FreeShaderBinaryCache(&cache);
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
         return false;
     }
 
@@ -412,8 +460,9 @@ static bool RB_GLSL_LoadShaderBinary(shaderProgram_t *shaderProgram, const char 
         shaderProgram->program = qglCreateProgram();
     if(shaderProgram->program == 0)
     {
-        RB_GLSL_FreeShaderBinaryCache(&cache);
         SHADER_ERROR("%s::glCreateProgram() error!\n", __func__);
+        RB_GLSL_FreeShaderBinaryCache(&cache);
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
         return false;
     }
 
@@ -423,8 +472,9 @@ static bool RB_GLSL_LoadShaderBinary(shaderProgram_t *shaderProgram, const char 
     GLenum err = qglGetError();
     if(err != GL_NO_ERROR)
     {
+        common->Printf("    %s::glProgramBinary() error!\n", __func__);
         RB_GLSL_FreeShaderBinaryCache(&cache);
-        common->Warning("%s::glProgramBinary() error!", __func__);
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
         return false;
     }
 
@@ -435,5 +485,12 @@ static bool RB_GLSL_LoadShaderBinary(shaderProgram_t *shaderProgram, const char 
     RB_GLSL_FreeShaderBinaryCache(&cache);
 
     return true;
+}
+
+static void R_CleanGLSLShaderBinary_f(const idCmdArgs &)
+{
+    idStr path = RB_GLSL_GetExternalShaderBinaryPath(false);
+    common->Printf("Remove GLSL shader binary cache directory '%s'\n", path.c_str());
+    fileSystem->RemoveFolder(path);
 }
 #endif
