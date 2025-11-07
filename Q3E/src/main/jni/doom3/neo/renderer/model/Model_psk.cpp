@@ -731,7 +731,7 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
 
                     mesh.weights.Append(md5Weight); // Add weight
                 }
-                if(w < 1.0f)
+				if(w < (1.0f - idMath::FLT_EPSILON))
                 {
                     common->Warning("wedge '%d' weight sum is less than 1.0: %f", wedgeIndex, w);
                 }

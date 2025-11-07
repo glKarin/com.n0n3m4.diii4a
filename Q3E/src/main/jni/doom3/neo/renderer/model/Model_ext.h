@@ -20,7 +20,11 @@ void R_IQM_AddCommand(void);
 void R_SMD_AddCommand(void);
 #endif
 
-#if defined(_MODEL_PSK) || defined(_MODEL_IQM)
+#ifdef _MODEL_GLTF
+void R_GLTF_AddCommand(void);
+#endif
+
+#if defined(_MODEL_PSK) || defined(_MODEL_IQM) || defined(_MODEL_GLTF)
 #define _MODEL_MD5_EXT 1
 #endif
 

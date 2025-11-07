@@ -3618,6 +3618,10 @@ cm_model_t *idCollisionModelManagerLocal::LoadRenderModel(const char *fileName)
 #ifdef _MODEL_SMD
         && (extension.Icmp("smd") != 0)
 #endif
+#ifdef _MODEL_GLTF
+        && (extension.Icmp("gltf") != 0)
+        && (extension.Icmp("glb") != 0)
+#endif
 	)
 	{
 		return NULL;

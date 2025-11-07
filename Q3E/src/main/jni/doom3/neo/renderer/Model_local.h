@@ -125,6 +125,10 @@ class idRenderModelStatic : public idRenderModel
         bool						LoadSMD( const char* fileName );
         bool						ConvertSMDToModelSurfaces( const class idModelSmd* obj );
 #endif
+#ifdef _MODEL_GLTF
+        bool						LoadGLTF( const char* fileName );
+        bool						ConvertGLTFToModelSurfaces( const class idModelGLTF* obj );
+#endif
 
 		bool						DeleteSurfaceWithId(int id);
 		void						DeleteSurfacesWithNegativeId(void);

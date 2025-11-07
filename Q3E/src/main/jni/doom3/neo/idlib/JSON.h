@@ -222,6 +222,10 @@ typedef union json_u
 	operator idList<union json_u> &(void);
 	operator const jsonMap_t<union json_u> &(void) const;
 	operator jsonMap_t<union json_u> &(void);
+
+    bool IsNull(void) const {
+        return type == JSON_NULL;
+    }
 } json_t;
 
 typedef idList<union json_u> jsonArray_t;

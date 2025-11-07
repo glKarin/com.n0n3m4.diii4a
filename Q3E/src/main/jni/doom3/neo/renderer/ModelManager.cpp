@@ -359,6 +359,11 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
         model = new idRenderModelStatic;
         model->InitFromFile(modelName);
 #endif
+#ifdef _MODEL_GLTF
+    } else if (extension.Icmp("gltf") == 0 || extension.Icmp("glb") == 0) {
+        model = new idRenderModelStatic;
+        model->InitFromFile(modelName);
+#endif
 
 #ifdef _RAVEN
 #ifdef _RAVEN_FX

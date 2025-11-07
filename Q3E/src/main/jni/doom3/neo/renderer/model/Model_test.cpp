@@ -667,6 +667,10 @@ void idModelTest::TestModel(const char *model, const char *classname, const char
 #ifdef _MODEL_SMD
             || (extension.Icmp("smd") == 0)
 #endif
+#ifdef _MODEL_GLTF
+            || (extension.Icmp("gltf") == 0)
+            || (extension.Icmp("glb") == 0)
+#endif
        )
         CreateModel(model, "func_static", skin, dict);
     else
@@ -708,6 +712,10 @@ void idModelTest::CreateModel(const char *model, const char *classname, const ch
 #endif
 #ifdef _MODEL_SMD
             || (extension.Icmp("smd") == 0)
+#endif
+#ifdef _MODEL_GLTF
+            || (extension.Icmp("gltf") == 0)
+            || (extension.Icmp("glb") == 0)
 #endif
        )
         isAnimated = false;
@@ -1313,6 +1321,9 @@ void ArgCompletion_modelTest(const idCmdArgs &args, void(*callback)(const char *
 #endif
 #ifdef _MODEL_SMD
                                      ".smd",
+#endif
+#ifdef _MODEL_GLTF
+                                     ".gltf", ".glb",
 #endif
                                      NULL);
 }

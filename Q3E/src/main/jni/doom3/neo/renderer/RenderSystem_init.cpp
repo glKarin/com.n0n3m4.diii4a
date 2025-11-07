@@ -2388,6 +2388,9 @@ void R_InitCommands(void)
 #ifdef _MODEL_SMD
     R_SMD_AddCommand();
 #endif
+#ifdef _MODEL_GLTF
+    R_GLTF_AddCommand();
+#endif
 #ifdef _MODEL_MD5_EXT
     R_Md5Convert_AddCommand();
 #endif

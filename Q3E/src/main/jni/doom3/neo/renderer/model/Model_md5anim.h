@@ -9,6 +9,8 @@
 #define	MD5ANIM_QZ			BIT( 5 )
 #define	MD5ANIM_ALL			63
 
+#define MD5ANIM_DEFAULT_FRAMERATE 24
+
 typedef struct md5animHierarchy_s
 {
     idStr boneName; // The name of this bone.

@@ -137,6 +137,10 @@ static bool R_Model_ConvertToMd5(const idDecl *decl)
 #ifdef _MODEL_SMD
             {"smd", R_Model_HandleSmd, },
 #endif
+#ifdef _MODEL_GLTF
+            {"gltf", R_Model_HandleGLTF, },
+            {"glb", R_Model_HandleGLTF, },
+#endif
     };
 
     for(int i = 0; i < sizeof(SupportConverters) / sizeof(SupportConverters[0]); i++)
@@ -318,6 +322,7 @@ void R_TestJSON_f(const idCmdArgs &args)
         common->Warning("Usage: %s <json file>", args.Argv(0));
         return;
     }
+
 	common->Printf("Test JSON\n");
 	fileSystem->RemoveFile("test.json");
 	fileSystem->RemoveFile("test2.json");
@@ -326,9 +331,29 @@ void R_TestJSON_f(const idCmdArgs &args)
 	json_t json;
     JSON_Init(json);
 	bool ok = JSON_Parse(json, jsonFile);
-	printf("JSON parse: %d\n", ok);
+	common->Printf("JSON parse: %d\n", ok);
 	if(!ok)
 		return;
+
+    if(args.Argc() > 2)
+    {
+        idStr path;
+        for(int i = 2; i < args.Argc(); i++)
+        {
+            path.Append(args.Argv(i));
+        }
+
+        const json_t *res = JSON_Find(json, path);
+        common->Printf("Find path in json: %s -> %p\n", path.c_str(), res);
+        if(res)
+        {
+            idStr text;
+            JSON_ToString(text, *res);
+            common->Printf("%s\n", text.c_str());
+        }
+
+        return;
+    }
 
     common->Printf("Save to test.json\n");
 	idStr text;
