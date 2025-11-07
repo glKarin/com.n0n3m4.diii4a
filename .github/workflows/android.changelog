@@ -1,1 +1,1 @@
-idTech4: support GLSL shader program binary cache with cvar harm_r_useGLSLShaderBinaryCache 3
+idTech4: support GLSL shader program binary cache with cvar harm_r_useGLSLShaderBinaryCache crc

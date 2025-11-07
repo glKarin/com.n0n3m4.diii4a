@@ -7,30 +7,40 @@
 #define GLSL_SHADER_BINARY_HEADER_EXT "glslbinh"
 #define GLSL_SHADER_BINARY_DATA_EXT "glslbin"
 
+#define GLSL_BIN_DIGESTS_CMP(src, text) ( (src) == CRC32_BlockChecksum((text), strlen(text)) )
+#define GLSL_BIN_DIGEST(target, data, len) target = CRC32_BlockChecksum((data), (len))
+#define GLSL_BIN_DIGESTS_STR(target, str) GLSL_BIN_DIGEST(target, (str).c_str(), (str).Length())
+#define GLSL_BIN_DIGESTS_CSTR(target, str) GLSL_BIN_DIGEST(target, (str), strlen(str))
+
 enum {
     GLSL_VERSION_ES2 = 0x0100,
     GLSL_VERSION_ES3 = 0x0300,
 };
 
 enum {
-    GLSL_BUILT_IN = 0,
-    GLSL_CUSTOM = 1,
+    GLSL_BUILT_IN = 1,
+    GLSL_EXTERNAL = 2,
+};
+
+enum {
+    GLSL_DIGEST_CRC32 = 1,
 };
 
 #pragma pack( push, 1 )
-typedef struct glslShaderBinaryHeader_s // sizeof = 193
+typedef struct glslShaderBinaryHeader_s
 {
     uint32_t magic;
     uint32_t version;
     char name[64];
     uint8_t type; // built-in/custom
+    uint8_t digest_method; // crc32
     uint16_t shader_type; // glsl_program_t
     uint16_t glsl_version; // GLSL source version
     // GPU info
-    char gl_vendor[64];
-    char gl_renderer[64];
-    char gl_version[64];
-    char gl_shading_language_version[64];
+    uint32_t gl_vendor;
+    uint32_t gl_renderer;
+    uint32_t gl_version;
+    uint32_t gl_shading_language_version;
     // checksum CRC32
     uint32_t vertex_shader_digest;
     uint32_t fragment_shader_digest;
@@ -114,7 +124,7 @@ static void RB_GLSL_RemoveShaderBinaryCache(const char *name, bool external)
 
 static void RB_GLSL_WriteShaderBinaryCache(const glslShaderBinaryCache_t *cache)
 {
-    idStr fullPath = RB_GLSL_GetExternalShaderBinaryPath(cache->header.type == GLSL_CUSTOM);
+    idStr fullPath = RB_GLSL_GetExternalShaderBinaryPath(cache->header.type == GLSL_EXTERNAL);
     fullPath.AppendPath(cache->header.name);
     fullPath.SetFileExtension("." GLSL_SHADER_BINARY_HEADER_EXT);
     common->Printf("    Write GLSL shader binary header: %s\n", fullPath.c_str());
@@ -124,13 +134,14 @@ static void RB_GLSL_WriteShaderBinaryCache(const glslShaderBinaryCache_t *cache)
     file->WriteUnsignedInt(cache->header.version);
     file->Write(&cache->header.name[0], sizeof(cache->header.name));
     file->WriteUnsignedChar(cache->header.type);
+    file->WriteUnsignedChar(cache->header.digest_method);
     file->WriteUnsignedShort(cache->header.shader_type);
     file->WriteUnsignedShort(cache->header.glsl_version);
 
-    file->Write(&cache->header.gl_vendor[0], sizeof(cache->header.gl_vendor));
-    file->Write(&cache->header.gl_renderer[0], sizeof(cache->header.gl_renderer));
-    file->Write(&cache->header.gl_version[0], sizeof(cache->header.gl_version));
-    file->Write(&cache->header.gl_shading_language_version[0], sizeof(cache->header.gl_shading_language_version));
+    file->WriteUnsignedInt(cache->header.gl_vendor);
+    file->WriteUnsignedInt(cache->header.gl_renderer);
+    file->WriteUnsignedInt(cache->header.gl_version);
+    file->WriteUnsignedInt(cache->header.gl_shading_language_version);
 
     file->WriteUnsignedInt(cache->header.vertex_shader_digest);
     file->WriteUnsignedInt(cache->header.fragment_shader_digest);
@@ -150,16 +161,18 @@ static void RB_GLSL_GenShaderBinaryHeader(glslShaderBinaryHeader_t *header, cons
 {
     header->magic = GLSL_SHADER_BINARY_MAGIC;
     header->version = GLSL_SHADER_BINARY_VERSION;
-    header->type = external ? GLSL_CUSTOM : GLSL_BUILT_IN;
+    header->type = external ? GLSL_EXTERNAL : GLSL_BUILT_IN;
+    header->digest_method = GLSL_DIGEST_CRC32;
     header->shader_type = type;
     header->glsl_version = USING_GLES3 ? GLSL_VERSION_ES3 : GLSL_VERSION_ES2;
     idStr::Copynz(header->name, name, sizeof(header->name));
-    idStr::Copynz(header->gl_vendor, glConfig.vendor_string, sizeof(header->gl_vendor));
-    idStr::Copynz(header->gl_renderer, glConfig.renderer_string, sizeof(header->gl_vendor));
-    idStr::Copynz(header->gl_version, glConfig.version_string, sizeof(header->gl_vendor));
-    idStr::Copynz(header->gl_shading_language_version, glConfig.shading_language_version_string, sizeof(header->gl_vendor));
-    header->vertex_shader_digest = CRC32_BlockChecksum(vertexSource.c_str(), vertexSource.Length());
-    header->fragment_shader_digest = CRC32_BlockChecksum(fragmentSource.c_str(), fragmentSource.Length());
+    GLSL_BIN_DIGESTS_CSTR(header->gl_vendor, glConfig.vendor_string);
+    GLSL_BIN_DIGESTS_CSTR(header->gl_version, glConfig.version_string);
+    GLSL_BIN_DIGESTS_CSTR(header->gl_renderer, glConfig.renderer_string);
+    GLSL_BIN_DIGESTS_CSTR(header->gl_shading_language_version, glConfig.shading_language_version_string);
+
+    GLSL_BIN_DIGESTS_STR(header->vertex_shader_digest, vertexSource);
+    GLSL_BIN_DIGESTS_STR(header->fragment_shader_digest, fragmentSource);
 }
 
 static bool RB_GLSL_CacheShaderBinary(GLuint program, const char *name, const idStr &vertexSource, const idStr &fragmentSource, int type, bool external)
@@ -198,7 +211,7 @@ static bool RB_GLSL_CacheShaderBinary(GLuint program, const char *name, const id
     cache.binary = data;
     cache.header.binaryFormat = binaryFormat;
     cache.header.length = length;
-    cache.header.binary_digest = CRC32_BlockChecksum(data, length);
+    GLSL_BIN_DIGEST(cache.header.binary_digest, data, length);
 
     RB_GLSL_WriteShaderBinaryCache(&cache);
 
@@ -233,6 +246,11 @@ static bool RB_GLSL_ReadShaderBinaryHeader(const char *path, glslShaderBinaryHea
         fileSystem->CloseFile(file);
         return false;
     }
+    if(file->ReadUnsignedChar(header->digest_method) != 1)
+    {
+        fileSystem->CloseFile(file);
+        return false;
+    }
     if(file->ReadUnsignedShort(header->shader_type) != 2)
     {
         fileSystem->CloseFile(file);
@@ -244,22 +262,22 @@ static bool RB_GLSL_ReadShaderBinaryHeader(const char *path, glslShaderBinaryHea
         return false;
     }
 
-    if(file->Read(&header->gl_vendor[0], sizeof(header->gl_vendor)) != sizeof(header->gl_vendor))
+    if(file->ReadUnsignedInt(header->gl_vendor) != 4)
     {
         fileSystem->CloseFile(file);
         return false;
     }
-    if(file->Read(&header->gl_renderer[0], sizeof(header->gl_renderer)) != sizeof(header->gl_renderer))
+    if(file->ReadUnsignedInt(header->gl_renderer) != 4)
     {
         fileSystem->CloseFile(file);
         return false;
     }
-    if(file->Read(&header->gl_version[0], sizeof(header->gl_version)) != sizeof(header->gl_version))
+    if(file->ReadUnsignedInt(header->gl_version) != 4)
     {
         fileSystem->CloseFile(file);
         return false;
     }
-    if(file->Read(&header->gl_shading_language_version[0], sizeof(header->gl_shading_language_version)) != sizeof(header->gl_shading_language_version))
+    if(file->ReadUnsignedInt(header->gl_shading_language_version) != 4)
     {
         fileSystem->CloseFile(file);
         return false;
@@ -336,6 +354,11 @@ static bool RB_GLSL_CheckShaderBinaryHeader(const glslShaderBinaryHeader_t *head
         common->Printf("    GLSL shader binary header version not match: %u != %u\n", header->version, GLSL_SHADER_BINARY_VERSION);
         return false;
     }
+    if(header->digest_method != GLSL_DIGEST_CRC32)
+    {
+        common->Printf("    GLSL shader binary header digest method not match: %d != %d\n", header->digest_method, GLSL_DIGEST_CRC32);
+        return false;
+    }
     uint16_t glsl_version = USING_GLES3 ? GLSL_VERSION_ES3 : GLSL_VERSION_ES2;
     if(header->glsl_version != glsl_version)
     {
@@ -343,24 +366,24 @@ static bool RB_GLSL_CheckShaderBinaryHeader(const glslShaderBinaryHeader_t *head
         return false;
     }
 
-    if(idStr::Cmp(header->gl_vendor, glConfig.vendor_string))
+    if(!GLSL_BIN_DIGESTS_CMP(header->gl_vendor, glConfig.vendor_string))
     {
-        common->Printf("    GLSL shader binary header gl vendor not match: %s != %s\n", header->gl_vendor, glConfig.vendor_string);
+        common->Printf("    GLSL shader binary header gl vendor not match: %u != %s\n", header->gl_vendor, glConfig.vendor_string);
         return false;
     }
-    if(idStr::Cmp(header->gl_renderer, glConfig.renderer_string))
+    if(!GLSL_BIN_DIGESTS_CMP(header->gl_renderer, glConfig.renderer_string))
     {
-        common->Printf("    GLSL shader binary header gl renderer not match: %s != %s\n", header->gl_renderer, glConfig.renderer_string);
+        common->Printf("    GLSL shader binary header gl renderer not match: %u != %s\n", header->gl_renderer, glConfig.renderer_string);
         return false;
     }
-    if(idStr::Cmp(header->gl_version, glConfig.version_string))
+    if(!GLSL_BIN_DIGESTS_CMP(header->gl_version, glConfig.version_string))
     {
-        common->Printf("    GLSL shader binary header gl version not match: %s != %s\n", header->gl_version, glConfig.version_string);
+        common->Printf("    GLSL shader binary header gl version not match: %u != %s\n", header->gl_version, glConfig.version_string);
         return false;
     }
-    if(idStr::Cmp(header->gl_shading_language_version, glConfig.shading_language_version_string))
+    if(!GLSL_BIN_DIGESTS_CMP(header->gl_shading_language_version, glConfig.shading_language_version_string))
     {
-        common->Printf("    GLSL shader binary header gl shading language version not match: %s != %s\n", header->gl_shading_language_version, glConfig.shading_language_version_string);
+        common->Printf("    GLSL shader binary header gl shading language version not match: %u != %s\n", header->gl_shading_language_version, glConfig.shading_language_version_string);
         return false;
     }
 
@@ -375,7 +398,8 @@ static bool RB_GLSL_CheckShaderBinaryHeader(const glslShaderBinaryHeader_t *head
 
 static bool RB_GLSL_CheckShaderBinaryData(const glslShaderBinaryCache_t *cache)
 {
-    unsigned int crc = CRC32_BlockChecksum(cache->binary, cache->header.length);
+    unsigned int crc;
+    GLSL_BIN_DIGEST(crc, cache->binary, cache->header.length);
 
     if(cache->header.binary_digest != crc)
     {
@@ -409,8 +433,8 @@ static bool RB_GLSL_LoadShaderBinaryCache(shaderProgram_t *shaderProgram, const 
         return false;
     }
 
-    uint8_t from = external ? GLSL_CUSTOM : GLSL_BUILT_IN;
-    if(cache.header.type != (external ? GLSL_CUSTOM : GLSL_BUILT_IN) )
+    uint8_t from = external ? GLSL_EXTERNAL : GLSL_BUILT_IN;
+    if(cache.header.type != (external ? GLSL_EXTERNAL : GLSL_BUILT_IN) )
     {
         common->Printf("    GLSL shader binary header type not match: %u != %u\n", cache.header.type, from);
         RB_GLSL_RemoveShaderBinaryCache(fullPath);
@@ -424,7 +448,8 @@ static bool RB_GLSL_LoadShaderBinaryCache(shaderProgram_t *shaderProgram, const 
         return false;
     }
 
-    unsigned int vertexCRC = CRC32_BlockChecksum(vertexSource, vertexSource.Length());
+    unsigned int vertexCRC;
+    GLSL_BIN_DIGESTS_STR(vertexCRC, vertexSource);
     if(cache.header.vertex_shader_digest != vertexCRC)
     {
         common->Printf("    GLSL shader binary header vertex shader digest not match: %u != %u\n", cache.header.vertex_shader_digest, vertexCRC);
@@ -432,7 +457,8 @@ static bool RB_GLSL_LoadShaderBinaryCache(shaderProgram_t *shaderProgram, const 
         return false;
     }
 
-    unsigned int fragmentCRC = CRC32_BlockChecksum(fragmentSource, fragmentSource.Length());
+    unsigned int fragmentCRC;
+    GLSL_BIN_DIGESTS_STR(fragmentCRC, fragmentSource);
     if(cache.header.fragment_shader_digest != fragmentCRC)
     {
         common->Printf("    GLSL shader binary header fragment shader digest not match: %u != %u\n", cache.header.fragment_shader_digest, fragmentCRC);

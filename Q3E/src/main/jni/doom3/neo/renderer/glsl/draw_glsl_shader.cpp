@@ -1247,7 +1247,7 @@ int RB_GLSL_LoadShaderProgram(
     // Create built-in GLSL shader with binary
     if(USING_GLES3 && harm_r_useGLSLShaderBinaryCache.GetBool())
     {
-        common->Printf("    Load built-in shader binary\n", vertex_shader_source_file, fragment_shader_source_file);
+        common->Printf("    Load built-in shader binary\n");
         if(RB_GLSL_LoadShaderBinaryCache(program, name, vs, fs, type, false))
         {
             common->Printf("    Load built-in shader binary success!\n");
