@@ -231,6 +231,7 @@ public:
     bool Parse(const char *filePath);
     bool ParseGLTF(const char *filePath);
     bool ParseGLB(const char *filePath);
+	bool ParseMemory(idLexer &lexer, const char *filePath = NULL);
     void Print(void) const;
     bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
     bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, float scale, bool addOrigin, const idVec3 *animOffset, const idMat3 *animRotation) const;
@@ -262,6 +263,8 @@ private:
 	void ReadPrimitives(const union json_u &object, gltfPrimitive_t &primitive);
     int DecodeBase64Str(const char *base64, const char *mime, idList<byte> &bytes);
     int FileToBytes(const char *path, idList<byte> &bytes);
+	int ReadHeader(glbHeader_t &header);
+	int ReadChunk(glbChunk_t &chunk, int mask = 0);
     int GroupTriangle(idList<idList<idDrawVert> > &verts, idList<idList<int> > &faces, idStrList &mats, bool keepDup = false) const;
     int GetMeshNode(void) const;
     const char * FindParentNode(int index) const;
@@ -279,6 +282,7 @@ private:
     idList<gltfSkin_t> skins;
     idList<gltfAnimation_t> animations;
     union json_u *json;
+	idFile *file;
     int types;
 
 	friend class idRenderModelStatic;

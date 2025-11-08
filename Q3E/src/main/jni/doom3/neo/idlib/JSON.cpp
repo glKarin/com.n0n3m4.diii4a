@@ -256,7 +256,6 @@ enum {
 	JR_VALUE,
 };
 
-static bool JSON_Parse(json_t &json, idLexer &lexer);
 static bool JSON_ParseValue(json_t &json, idLexer &lexer);
 static bool JSON_ParseObject(json_t &json, idLexer &lexer);
 static bool JSON_ParseArray(json_t &json, idLexer &lexer);
@@ -815,6 +814,16 @@ bool JSON_ParseValue(json_t &json, idLexer &lexer)
 	}
 
 	return true;
+}
+
+bool JSON_Parse(json_t &json, const char *data, int length)
+{
+	idLexer lexer;
+
+	if(!lexer.LoadMemory(data, length, "<implicit json file>"))
+		return false;
+
+	return JSON_Parse(json, lexer);
 }
 
 bool JSON_Parse(json_t &json, idLexer &lexer)

@@ -1,5 +1,5 @@
-#ifndef _MODEL_GLTF_H
-#define _MODEL_GLTF_H
+#ifndef _MODEL_GLB_H
+#define _MODEL_GLB_H
 
 #define GLB_MAGIC 0x46546C67
 

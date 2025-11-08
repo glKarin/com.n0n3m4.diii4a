@@ -90,6 +90,7 @@ int idModelGLTF::AccessorHelper::GetComponentNum(void) const
 
 idModelGLTF::idModelGLTF(void)
 : json(NULL),
+	file(NULL),
   types(0)
 {}
 
@@ -97,6 +98,8 @@ idModelGLTF::~idModelGLTF(void)
 {
     if(json)
         JSON_Free(*json);
+    if(file)
+        fileSystem->CloseFile(file);
 }
 
 void idModelGLTF::MarkType(int type)
@@ -128,6 +131,11 @@ void idModelGLTF::Clear(void)
     {
         JSON_Free(*json);
         json = NULL;
+    }
+    if(file)
+    {
+        fileSystem->CloseFile(file);
+        file = NULL;
     }
     types = 0;
 }
@@ -321,37 +329,42 @@ int idModelGLTF::ReadBuffers(const char *filePath)
         item.name = object["name"];
         item.byteLength = object["byteLength"];
         const char *uri = object["uri"];
-        const char * base64Heads[] = {
-                "application/octet-stream",
-                "application/gltf-buffer",
-        };
-        int m;
-        // 1. load built-in base64 data
-        for(m = 0; m < sizeof(base64Heads) / sizeof(base64Heads[0]); m++)
-        {
-            if(DecodeBase64Str(uri, base64Heads[m], item.uri) > 0)
-                break;
-        }
-        // 2. load absolute path bin
-        if(m >= sizeof(base64Heads) / sizeof(base64Heads[0]))
-        {
-            if(FileToBytes(uri, item.uri) <= 0)
-            {
-                // 3. load absolute path bin
-                if(filePath)
-                {
-                    idStr path(filePath);
-                    path.StripFilename();
-                    path.AppendPath(uri);
-                    common->Warning("Load GLTF buffer absolute uri file fail: '%s', try relative path: '%s'", uri, path.c_str());
-                    if(FileToBytes(path.c_str(), item.uri) <= 0)
-                        common->Warning("Load GLTF buffer relative uri file fail: %s", path.c_str());
-                }
-                else
-                    common->Warning("Load GLTF buffer absolute uri file fail: %s", uri);
-            }
-        }
-    }
+		if(uri)
+		{
+			const char * base64Heads[] = {
+				"application/octet-stream",
+				"application/gltf-buffer",
+			};
+			int m;
+			// 1. load built-in base64 data
+			for(m = 0; m < sizeof(base64Heads) / sizeof(base64Heads[0]); m++)
+			{
+				if(DecodeBase64Str(uri, base64Heads[m], item.uri) > 0)
+					break;
+			}
+			// 2. load absolute path bin
+			if(m >= sizeof(base64Heads) / sizeof(base64Heads[0]))
+			{
+				if(FileToBytes(uri, item.uri) <= 0)
+				{
+					// 3. load absolute path bin
+					if(filePath)
+					{
+						idStr path(filePath);
+						path.StripFilename();
+						path.AppendPath(uri);
+						common->Warning("Load GLTF buffer absolute uri file fail: '%s', try relative path: '%s'", uri, path.c_str());
+						if(FileToBytes(path.c_str(), item.uri) <= 0)
+							common->Warning("Load GLTF buffer relative uri file fail: %s", path.c_str());
+					}
+					else
+						common->Warning("Load GLTF buffer absolute uri file fail: %s", uri);
+				}
+			}
+		}
+		//else
+			item.uri.SetNum(item.byteLength);
+	}
     return buffers.Num();
 }
 
@@ -552,13 +565,58 @@ int idModelGLTF::ReadAnimations(void)
     return animations.Num();
 }
 
-bool idModelGLTF::ParseGLTF(const char *filePath)
+int idModelGLTF::ReadHeader(glbHeader_t &header)
 {
-    Clear();
+    char buffer[12];
+    int curPos = file->Tell();
+    int num = file->Read(buffer, sizeof(buffer));
+    if(num == 0)
+        return 0;
+    file->Seek(curPos, FS_SEEK_SET);
+    if(num < 12)
+    {
+        common->Warning("Unexpected end of file(%d/12 bytes).", num);
+        return -1;
+    }
+
+    memset(&header, 0, sizeof(header));
+    file->ReadUnsignedInt(header.magic);
+    file->ReadUnsignedInt(header.version);
+    file->ReadUnsignedInt(header.length);
+
+    return 12;
+}
+
+int idModelGLTF::ReadChunk(glbChunk_t &chunk, int mask)
+{
+	if(mask <= 0)
+		mask = 0xFF;
+
+	int res = 0;
+	if(mask & 1)
+	{
+		file->ReadUnsignedInt(chunk.chunkLength);
+		file->ReadUnsignedInt(chunk.chunkType);
+		res += 8;
+	}
+	if(mask & 2)
+	{
+		chunk.chunkData.SetNum(chunk.chunkLength);
+		res += file->Read(chunk.chunkData.Ptr(), chunk.chunkLength);
+	}
+	return res;
+}
+
+bool idModelGLTF::ParseMemory(idLexer &lexer, const char *filePath)
+{
+	if(!filePath)
+		filePath = "<implicit GLTF file>";
+
+	bool err = false;
 
     json_t gltf;
     JSON_Init(gltf);
-    if(!JSON_Parse(gltf, filePath))
+    if(!JSON_Parse(gltf, lexer))
     {
         common->Warning("Parse GLTF json file error: %s", filePath);
         return false;
@@ -566,43 +624,239 @@ bool idModelGLTF::ParseGLTF(const char *filePath)
 
     json = &gltf;
 
-    if(ReadAsset() > 0)
-        MarkType(GLTF_ASSET);
-    if(ReadScenes() > 0)
-        MarkType(GLTF_SCENES);
-    if(ReadScene() > 0)
-        MarkType(GLTF_SCENE);
-    if(ReadNodes() > 0)
-        MarkType(GLTF_NODE);
-    if(ReadBufferViews() > 0)
-        MarkType(GLTF_BUFFERVIEW);
-    if(ReadBuffers(filePath) > 0)
-        MarkType(GLTF_BUFFER);
-    if(ReadAccessors() > 0)
-        MarkType(GLTF_ACCESSOR);
-    if(ReadMaterials() > 0)
-        MarkType(GLTF_MATERIAL);
-    if(ReadMeshes() > 0)
-        MarkType(GLTF_MESH);
-    if(ReadSkins() > 0)
-        MarkType(GLTF_SKIN);
-    if(ReadAnimations() > 0)
-        MarkType(GLTF_ANIMATION);
+	do
+	{
+		if(ReadAsset() > 0)
+			MarkType(GLTF_ASSET);
+		else
+		{
+			common->Warning("Read GLTF assets error in '%s'", filePath);
+			err = true;
+			break;
+		}
 
-    bool err = !IsTypeMarked(GLTF_MESH) || !IsTypeMarked(GLTF_BUFFER) || !IsTypeMarked(GLTF_ACCESSOR) || !IsTypeMarked(GLTF_MESH) || !IsTypeMarked(GLTF_MATERIAL);
+		if(ReadScenes() > 0)
+			MarkType(GLTF_SCENES);
+		else
+		{
+			common->Warning("Read GLTF scenes error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		if(ReadScene() > 0)
+			MarkType(GLTF_SCENE);
+		else
+		{
+			common->Warning("Read GLTF scene error in '%s'", filePath);
+			scene = 0;
+		}
+
+		if(ReadNodes() > 0)
+			MarkType(GLTF_NODE);
+		else
+		{
+			common->Warning("Read GLTF nodes error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		if(ReadBufferViews() > 0)
+			MarkType(GLTF_BUFFERVIEW);
+		else
+		{
+			common->Warning("Read GLTF bufferViews error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		if(ReadBuffers(filePath) > 0)
+			MarkType(GLTF_BUFFER);
+		else
+		{
+			common->Warning("Read GLTF buffers error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		if(ReadAccessors() > 0)
+			MarkType(GLTF_ACCESSOR);
+		else
+		{
+			common->Warning("Read GLTF accessors error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		if(ReadMaterials() > 0)
+			MarkType(GLTF_MATERIAL);
+		else
+		{
+			common->Warning("Read GLTF materials error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		if(ReadMeshes() > 0)
+			MarkType(GLTF_MESH);
+		else
+		{
+			common->Warning("Read GLTF meshes error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		// joints/animations
+		if(ReadSkins() > 0)
+			MarkType(GLTF_SKIN);
+
+		if(ReadAnimations() > 0)
+			MarkType(GLTF_ANIMATION);
+	}
+	while(false);
 
     JSON_Free(gltf);
     json = NULL;
 
-    if(err)
-        Clear();
-
     return !err;
+}
+
+bool idModelGLTF::ParseGLTF(const char *filePath)
+{
+    Clear();
+
+	idLexer lexer;
+
+	if(!lexer.LoadFile(filePath))
+	{
+		common->Warning("Load GLTF json fail: %s", filePath);
+		return false;
+	}
+
+	bool ok = ParseMemory(lexer, filePath);
+	if(!ok)
+		Clear();
+
+	return ok;
 }
 
 bool idModelGLTF::ParseGLB(const char *filePath)
 {
-    return false;
+	Clear();
+
+    file = fileSystem->OpenFileRead(filePath);
+    if(!file)
+	{
+		common->Warning("Load GLB file fail: %s", filePath);
+        return false;
+	}
+
+	bool err = false;
+
+	do
+	{
+		// header
+		glbHeader_t header;
+		if(ReadHeader(header) <= 0)
+		{
+			common->Warning("Read GLB header error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		if(header.magic != GLB_MAGIC)
+		{
+			common->Warning("GLB header magic not match in '%s': 0x%X != 0x%X", filePath, header.magic, GLB_MAGIC);
+			err = true;
+			break;
+		}
+		if(header.length != file->Length())
+		{
+			common->Warning("GLB header length not match in '%s': %d != %d", filePath, header.length, file->Length());
+			err = true;
+			break;
+		}
+		
+		// json chunk
+		glbChunk_t chunk;
+		if(ReadChunk(chunk, 1) <= 0)
+		{
+			common->Warning("Read GLB json chunk error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		if(chunk.chunkType != GLB_CHUNK_TYPE_JSON)
+		{
+			common->Warning("GLB first chunk is not json in '%s': 0x%X != 0x%X", filePath, chunk.chunkType, GLB_CHUNK_TYPE_JSON);
+			err = true;
+			break;
+		}
+
+		if(ReadChunk(chunk, 2) <= 0)
+		{
+			common->Warning("Read GLB json chunk data error in '%s'", filePath);
+			err = true;
+			break;
+		}
+		int length = chunk.chunkLength;
+		while(length > 0)
+		{
+			if(chunk.chunkData[length - 1] != 0x20)
+				length--;
+			else
+				break;
+		}
+
+		idLexer lexer;
+		if(!lexer.LoadMemory((const char *)chunk.chunkData.Ptr(), length, filePath))
+		{
+			common->Warning("Load GLB json chunk data error in '%s'", filePath);
+			err = true;
+			break;
+		}
+		if(!ParseMemory(lexer, filePath))
+		{
+			err = true;
+			break;
+		}
+
+		// bin
+		if(ReadChunk(chunk, 1) <= 0)
+		{
+			common->Warning("Read GLB bin chunk error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		if(chunk.chunkType != GLB_CHUNK_TYPE_BIN)
+		{
+			common->Warning("GLB second chunk is not bin in '%s': 0x%X != 0x%X", filePath, chunk.chunkType, GLB_CHUNK_TYPE_BIN);
+			err = true;
+			break;
+		}
+
+		if(ReadChunk(chunk, 2) <= 0)
+		{
+			common->Warning("Read GLB bin chunk data error in '%s'", filePath);
+			err = true;
+			break;
+		}
+
+		gltfBuffer_t &buffer0 = buffers[0];
+		buffer0.uri = chunk.chunkData;
+		buffer0.uri.SetNum(buffer0.byteLength);
+	} while(false);
+
+    if(err)
+        Clear();
+	else
+	{
+		fileSystem->CloseFile(file);
+		file = NULL;
+	}
+
+    return !err;
 }
 
 bool idModelGLTF::Parse(const char *filePath)

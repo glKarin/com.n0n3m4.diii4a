@@ -817,7 +817,7 @@ if(SUPPORT_GLTF)
 	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_GLTF")
 	message(STATUS "Support Khronos gltf/glb animation/static model")
 endif()
-endif()
+
 if(CONSOLE AND WIN32)
 	set(CORE_DEFINES "${CORE_DEFINES};_REDIRECT_OUTPUT")
 	message(STATUS "Redirect output to stdout.txt")

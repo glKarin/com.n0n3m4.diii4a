@@ -311,8 +311,9 @@ void R_Model_NormalizeWeights(float *arr, int num)
 #include "../../idlib/JSON.h"
 static void ArgCompletion_JSON(const idCmdArgs &args, void(*callback)(const char *s))
 {
-    cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, ".json", ".json5"
-            , NULL);
+    cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, 
+			".json", ".json5", ".gltf",
+            NULL);
 }
 
 void R_TestJSON_f(const idCmdArgs &args)
