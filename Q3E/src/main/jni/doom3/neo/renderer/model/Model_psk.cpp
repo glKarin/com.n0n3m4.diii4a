@@ -518,7 +518,7 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
 		md5Bone->boneName = "origin";
 		md5Bone->parentIndex = -1;
 		md5Bone->pos.Zero();
-		md5Bone->orient.Set(0.0, 0.0, 0.0, 1.0);
+		md5Bone->orient.Set(0.0f, 0.0f, 0.0f, 1.0f);
 		md5Bone++;
 	}
 

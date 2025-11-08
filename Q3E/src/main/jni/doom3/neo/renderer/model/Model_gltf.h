@@ -266,7 +266,8 @@ private:
 	int ReadHeader(glbHeader_t &header);
 	int ReadChunk(glbChunk_t &chunk, int mask = 0);
     int GroupTriangle(idList<idList<idDrawVert> > &verts, idList<idList<int> > &faces, idStrList &mats, bool keepDup = false) const;
-    int GetMeshNode(void) const;
+    int FindMeshNode(void) const;
+    int FindMeshNode(const idList<int> &nodeIds) const;
     const char * FindParentNode(int index) const;
 
 private:

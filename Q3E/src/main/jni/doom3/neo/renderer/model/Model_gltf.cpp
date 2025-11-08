@@ -808,6 +808,16 @@ bool idModelGLTF::ParseGLB(const char *filePath)
 				break;
 		}
 
+#if 0 // output gltf
+		idStr out = filePath;
+		out.SetFileExtension(".gltf");
+		json_t j;
+		JSON_Parse(j, (const char *)chunk.chunkData.Ptr(), length);
+		idList<char> src;
+		JSON_ToArray(src, j);
+		fileSystem->WriteFile(out, src.Ptr(), src.Num());
+#endif
+
 		idLexer lexer;
 		if(!lexer.LoadMemory((const char *)chunk.chunkData.Ptr(), length, filePath))
 		{
@@ -871,18 +881,28 @@ bool idModelGLTF::Parse(const char *filePath)
     }
 }
 
-int idModelGLTF::GetMeshNode(void) const
+int idModelGLTF::FindMeshNode(const idList<int> &nodeIds) const
+{
+    for(int m = 0; m < nodeIds.Num(); m++)
+    {
+        const gltfNode_t &node = nodes[nodeIds[m]];
+        if(node.mesh >= 0)
+			return nodeIds[m];
+		if(node.children.Num() > 0)
+		{
+			int nodeIndex = FindMeshNode(node.children);
+			if(nodeIndex >= 0)
+				return nodeIndex;
+		}
+    }
+    return -1;
+}
+
+int idModelGLTF::FindMeshNode(void) const
 {
     const gltfScene_t &curScene = scenes[scene];
 
-    for(int m = 0; m < curScene.nodes.Num(); m++)
-    {
-        const gltfNode_t &node = nodes[curScene.nodes[m] - 1];
-        if(node.mesh < 0)
-            continue;
-        return curScene.nodes[m] - 1;
-    }
-    return -1;
+    return FindMeshNode(curScene.nodes);
 }
 
 const char * idModelGLTF::FindParentNode(int index) const
@@ -910,11 +930,19 @@ bool idModelGLTF::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin,
     const md5meshJointTransform_t *jointTransform;
     const gltfPrimitive_t *primitive;
 
-    int nodeIndex = GetMeshNode();
-    if(!nodeIndex)
+	int meshNodeIndex = FindMeshNode();
+    if(meshNodeIndex < 0)
+	{
+		common->Warning("Can't find mesh node in scene %d", scene);
         return false;
+	}
+    const gltfNode_t &meshNode = nodes[meshNodeIndex];
+	if(meshNode.skin < 0)
+	{
+		common->Warning("Mesh node '%d' no skin", meshNodeIndex);
+        return false;
+	}
 
-    const gltfNode_t &meshNode = nodes[nodeIndex];
     const gltfSkin_t &skin = skins[meshNode.skin];
 
 	int numBones = skin.joints.Num();
@@ -940,7 +968,7 @@ bool idModelGLTF::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin,
 		md5Bone->boneName = "origin";
 		md5Bone->parentIndex = -1;
 		md5Bone->pos.Zero();
-		md5Bone->orient.Set(0.0, 0.0, 0.0, 1.0);
+		md5Bone->orient.Set(0.0f, 0.0f, 0.0f, 1.0f);
 		md5Bone++;
 	}
 
@@ -966,9 +994,11 @@ bool idModelGLTF::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin,
         {
             int index = 0;
             int *rindex = &index;
-            jointMap.Get(FindParentNode(boneIndex), &rindex);
-            md5Bone->parentIndex = *rindex;
-        }
+			if(jointMap.Get(FindParentNode(boneIndex), &rindex))
+				md5Bone->parentIndex = *rindex;
+			else
+				md5Bone->parentIndex = -1;
+		}
 
 		if(addOrigin)
 			md5Bone->parentIndex += 1;
@@ -1038,176 +1068,169 @@ bool idModelGLTF::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin,
 
     const gltfScene_t &curScene = scenes[scene];
 
-    for(m = 0; m < curScene.nodes.Num(); m++)
-    {
-        const gltfNode_t &node = nodes[curScene.nodes[m] - 1];
-        if(node.mesh < 0)
-            continue;
+	const gltfMesh_t &mesh = meshes[meshNode.mesh];
 
-        const gltfMesh_t &mesh = meshes[node.mesh];
+	for(i = 0, primitive = &mesh.primitives[0]; i < mesh.primitives.Num(); i++, primitive++)
+	{
+		if(primitive->mode != GLTF_TRIANGLES) // only handle triangles
+			continue;
+		if(primitive->attributes.POSITION < 0) // no vertex
+		{
+			common->Warning("Mesh primitive '%d' no vertex", i);
+			continue;
+		}
+		if(primitive->indices < 0) // no index
+		{
+			common->Warning("Mesh primitive '%d' no index", i);
+			continue;
+		}
 
-        for(i = 0, primitive = &mesh.primitives[0]; i < mesh.primitives.Num(); i++, primitive++)
-        {
-            if(primitive->mode != GLTF_TRIANGLES) // only handle triangles
-                continue;
-            if(primitive->attributes.POSITION < 0) // no vertex
-            {
-                common->Warning("Mesh primitive '%d' no vertex", i);
-                continue;
-            }
-            if(primitive->indices < 0) // no index
-            {
-                common->Warning("Mesh primitive '%d' no index", i);
-                continue;
-            }
+		AccessorHelper indexAccessor(this, primitive->indices);
+		if(!indexAccessor.ptr)
+		{
+			common->Warning("Index buffer'%d' is empty", indexAccessor.bufferView->buffer);
+			continue;
+		}
 
-            AccessorHelper indexAccessor(this, primitive->indices);
-            if(!indexAccessor.ptr)
-            {
-                common->Warning("Index buffer'%d' is empty", indexAccessor.bufferView->buffer);
-                continue;
-            }
+		AccessorHelper vertexAccessor(this, primitive->attributes.POSITION);
+		if(!vertexAccessor.ptr)
+		{
+			common->Warning("Vertex buffer'%d' is empty", vertexAccessor.bufferView->buffer);
+			continue;
+		}
 
-            AccessorHelper vertexAccessor(this, primitive->attributes.POSITION);
-            if(!vertexAccessor.ptr)
-            {
-                common->Warning("Vertex buffer'%d' is empty", vertexAccessor.bufferView->buffer);
-                continue;
-            }
+		AccessorHelper jointAccessor(this, primitive->attributes.JOINTS_);
+		if(!jointAccessor.ptr)
+		{
+			common->Warning("Joint buffer'%d' is empty", jointAccessor.bufferView->buffer);
+			continue;
+		}
 
-            AccessorHelper jointAccessor(this, primitive->attributes.JOINTS_);
-            if(!jointAccessor.ptr)
-            {
-                common->Warning("Joint buffer'%d' is empty", jointAccessor.bufferView->buffer);
-                continue;
-            }
+		AccessorHelper texcoordAccessor(this, primitive->attributes.TEXCOORD_);
+		if(primitive->attributes.TEXCOORD_.Num() > 0 && primitive->attributes.TEXCOORD_0 >= 0 && !texcoordAccessor.ptr)
+		{
+			common->Warning("Texcoord0 buffer'%d' is empty", texcoordAccessor.bufferView->buffer);
+		}
 
-            AccessorHelper texcoordAccessor(this, primitive->attributes.TEXCOORD_);
-            if(primitive->attributes.TEXCOORD_.Num() > 0 && primitive->attributes.TEXCOORD_0 >= 0 && !texcoordAccessor.ptr)
-            {
-                common->Warning("Texcoord0 buffer'%d' is empty", texcoordAccessor.bufferView->buffer);
-            }
+		AccessorHelper weightAccessor(this, primitive->attributes.WEIGHTS_0);
+		if(primitive->attributes.WEIGHTS_.Num() > 0 && primitive->attributes.WEIGHTS_0 >= 0 && !weightAccessor.ptr)
+		{
+			common->Warning("Weight buffer'%d' is empty", weightAccessor.bufferView->buffer);
+		}
 
-            AccessorHelper weightAccessor(this, primitive->attributes.WEIGHTS_0);
-            if(primitive->attributes.WEIGHTS_.Num() > 0 && primitive->attributes.WEIGHTS_0 >= 0 && !weightAccessor.ptr)
-            {
-                common->Warning("Weight buffer'%d' is empty", weightAccessor.bufferView->buffer);
-            }
+		int index = md5Meshes.Append(md5meshMesh_t());
+		md5meshMesh_t &mesh = md5Meshes[index];
+		mesh.shader = materials[primitive->material].name;
 
-            int index = md5Meshes.Append(md5meshMesh_t());
-            md5meshMesh_t &mesh = md5Meshes[index];
-            mesh.shader = materials[primitive->material].name;
+		idList<unsigned int> md5Vertexes; // cache saved vert for remove dup vert
+		for(j = 0; j < indexAccessor.Count(); j+=3)
+		{
+			unsigned int vertexIndexes[3];
+			indexAccessor.ToArray<unsigned int>(j, vertexIndexes, 3);
 
-            idList<unsigned int> md5Vertexes; // cache saved vert for remove dup vert
-            for(j = 0; j < indexAccessor.Count(); j+=3)
-            {
-                unsigned int vertexIndexes[3];
-                indexAccessor.ToArray<unsigned int>(j, vertexIndexes, 3);
+			int md5VertIndexes[3];
+			for(int k = 0; k < 3; k++)
+			{
+				const unsigned int vertexIndex = vertexIndexes[k];
 
-                int md5VertIndexes[3];
-                for(int k = 0; k < 3; k++)
-                {
-                    const unsigned int vertexIndex = vertexIndexes[k];
+				// find vert is cached
+				int n;
+				for(n = 0; n < md5Vertexes.Num(); n++)
+				{
+					if(vertexIndex == md5Vertexes[n])
+						break;
+				}
+				if(n < md5Vertexes.Num())
+				{
+					md5VertIndexes[k] = n;
+					continue;
+				}
 
-                    // find vert is cached
-                    int n;
-                    for(n = 0; n < md5Vertexes.Num(); n++)
-                    {
-                        if(vertexIndex == md5Vertexes[n])
-                            break;
-                    }
-                    if(n < md5Vertexes.Num())
-                    {
-                        md5VertIndexes[k] = n;
-                        continue;
-                    }
+				const float *vf = vertexAccessor.Offset<float>(vertexIndex);
+				idVec3 pos(vf[0], vf[1], vf[2]);
 
-                    const float *vf = vertexAccessor.Offset<float>(vertexIndex);
-                    idVec3 pos(vf[0], vf[1], vf[2]);
+				idVec2 st;
+				if(texcoordAccessor.ptr)
+				{
+					const float *tf = texcoordAccessor.Offset<float>(vertexIndex);
+					st.Set(tf[0], tf[1]);
+				}
+				else
+				{
+					st.Set(0.0f, 0.0f);
+				}
 
-                    idVec2 st;
-                    if(texcoordAccessor.ptr)
-                    {
-                        const float *tf = texcoordAccessor.Offset<float>(vertexIndex);
-                        st.Set(tf[0], tf[1]);
-                    }
-                    else
-                    {
-                        st.Set(0.0f, 0.0f);
-                    }
+				idList<int> jointIndexes;
+				jointAccessor.ToList(vertexIndex, jointIndexes);
 
-                    idList<int> jointIndexes;
-                    jointAccessor.ToList(vertexIndex, jointIndexes);
+				int numLink = 0;
+				idList<float> jointWeights;
+				jointWeights.SetNum(jointIndexes.Num());
+				const float *wf = weightAccessor.Offset<float>(vertexIndex);
+				for(int o = 0; o < jointWeights.Num(); o++)
+				{
+					if(wf)
+					{
+						if(wf[o] == 0.0f)
+							break;
+						jointWeights[o] = wf[o];
+					}
+					else
+					{
+						jointWeights[o] = 1.0f / (float)jointWeights.Num();
+					}
+					numLink++;
+				}
 
-                    int numLink = 0;
-                    idList<float> jointWeights;
-                    jointWeights.SetNum(jointIndexes.Num());
-                    const float *wf = weightAccessor.Offset<float>(vertexIndex);
-                    for(int o = 0; o < jointWeights.Num(); o++)
-                    {
-                        if(wf)
-                        {
-                            if(wf[o] == 0.0f)
-                                break;
-                            jointWeights[o] = wf[o];
-                        }
-                        else
-                        {
-                            jointWeights[o] = 1.0f / (float)jointWeights.Num();
-                        }
-                        numLink++;
-                    }
+				md5meshVert_t md5Vert;
+				md5Vert.uv = st;
+				md5Vert.weightIndex = mesh.weights.Num();
+				md5Vert.weightElem = numLink;
+				md5VertIndexes[k] = mesh.verts.Append(md5Vert); // Add vert
+				md5Vertexes.Append(vertexIndex); // cache vert
 
-                    md5meshVert_t md5Vert;
-                    md5Vert.uv = st;
-                    md5Vert.weightIndex = mesh.weights.Num();
-                    md5Vert.weightElem = numLink;
-                    md5VertIndexes[k] = mesh.verts.Append(md5Vert); // Add vert
-                    md5Vertexes.Append(vertexIndex); // cache vert
+				if(meshRotation && !meshRotation->IsIdentity())
+					pos *= *meshRotation;
+				if(meshOffset && !meshOffset->IsZero())
+					pos += *meshOffset;
+				if(scale > 0.0f)
+					pos *= scale;
 
-                    if(meshRotation && !meshRotation->IsIdentity())
-                        pos *= *meshRotation;
-                    if(meshOffset && !meshOffset->IsZero())
-                        pos += *meshOffset;
-                    if(scale > 0.0f)
-                        pos *= scale;
+				float w = 0.0f;
+				for(int o = 0; o < numLink; o++)
+				{
+					md5meshWeight_t md5Weight;
+					md5Weight.jointIndex = jointIndexes[o];
+					if(addOrigin)
+						md5Weight.jointIndex += 1;
+					jointTransform = &jointTransforms[md5Weight.jointIndex];
+					if(numLink == 1)
+					{
+						if(jointWeights[o] != 1.0f)
+							common->Warning("wedge '%d' only 1 bone '%s' but weight is not 1 '%f'", vertexIndex, nodes[jointIndexes[0]].name.c_str(), jointWeights[o]);
+						md5Weight.weightValue = 1.0f;
+					}
+					else
+						md5Weight.weightValue = jointWeights[o];
 
-                    float w = 0.0f;
-                    for(int o = 0; o < numLink; o++)
-                    {
-                        md5meshWeight_t md5Weight;
-                        md5Weight.jointIndex = jointIndexes[o];
-                        if(addOrigin)
-                            md5Weight.jointIndex += 1;
-                        jointTransform = &jointTransforms[md5Weight.jointIndex];
-						if(numLink == 1)
-						{
-							if(jointWeights[o] != 1.0f)
-								common->Warning("wedge '%d' only 1 bone '%s' but weight is not 1 '%f'", vertexIndex, nodes[jointIndexes[0]].name.c_str(), jointWeights[o]);
-							md5Weight.weightValue = 1.0f;
-						}
-						else
-							md5Weight.weightValue = jointWeights[o];
+					w += md5Weight.weightValue;
+					jointTransform->bindmat.ProjectVector(pos - jointTransform->bindpos, md5Weight.pos);
 
-                        w += md5Weight.weightValue;
-                        jointTransform->bindmat.ProjectVector(pos - jointTransform->bindpos, md5Weight.pos);
+					mesh.weights.Append(md5Weight); // Add weight
+				}
+				if(w < (1.0f - idMath::FLT_EPSILON))
+				{
+					common->Warning("Vertex '%d' weight sum is less than 1.0: %f", vertexIndex, w);
+				}
+			}
 
-                        mesh.weights.Append(md5Weight); // Add weight
-                    }
-                    if(w < (1.0f - idMath::FLT_EPSILON))
-                    {
-                        common->Warning("Vertex '%d' weight sum is less than 1.0: %f", vertexIndex, w);
-                    }
-                }
-
-                md5meshTri_t md5Tri;
-                md5Tri.vertIndex1 = md5VertIndexes[0];
-                md5Tri.vertIndex2 = md5VertIndexes[2];
-                md5Tri.vertIndex3 = md5VertIndexes[1];
-                mesh.tris.Append(md5Tri); // Add tri
-            }
-        }
-    }
+			md5meshTri_t md5Tri;
+			md5Tri.vertIndex1 = md5VertIndexes[0];
+			md5Tri.vertIndex2 = md5VertIndexes[2];
+			md5Tri.vertIndex3 = md5VertIndexes[1];
+			mesh.tris.Append(md5Tri); // Add tri
+		}
+	}
 
     return true;
 }
@@ -1511,139 +1534,140 @@ int idModelGLTF::GroupTriangle(idList<idList<idDrawVert> > &verts, idList<idList
 {
     int i, j, m;
     const gltfPrimitive_t *primitive;
-    int num = 0;
+    int num;
 
-    const gltfScene_t &curScene = scenes[scene];
+	int meshNodeIndex = FindMeshNode();
+    if(meshNodeIndex < 0)
+	{
+		common->Warning("Can't find mesh node in scene %d", scene);
+        return 0;
+	}
 
-    for(m = 0; m < curScene.nodes.Num(); m++)
-    {
-        const gltfNode_t &node = nodes[curScene.nodes[m] - 1];
-        if(node.mesh < 0)
-            continue;
+	num = 0;
 
-        const gltfMesh_t &mesh = meshes[node.mesh];
+    const gltfNode_t &meshNode = nodes[meshNodeIndex];
+	const gltfMesh_t &mesh = meshes[meshNode.mesh];
 
-        for(i = 0, primitive = &mesh.primitives[0]; i < mesh.primitives.Num(); i++, primitive++)
-        {
-            if(primitive->mode != GLTF_TRIANGLES) // only handle triangles
-                continue;
-            if(primitive->attributes.POSITION < 0) // no vertex
-            {
-                common->Warning("Mesh primitive '%d' no vertex", i);
-                continue;
-            }
-            if(primitive->indices < 0) // no index
-            {
-                common->Warning("Mesh primitive '%d' no index", i);
-                continue;
-            }
+	for(i = 0, primitive = &mesh.primitives[0]; i < mesh.primitives.Num(); i++, primitive++)
+	{
+		if(primitive->mode != GLTF_TRIANGLES) // only handle triangles
+			continue;
+		if(primitive->attributes.POSITION < 0) // no vertex
+		{
+			common->Warning("Mesh primitive '%d' no vertex", i);
+			continue;
+		}
+		if(primitive->indices < 0) // no index
+		{
+			common->Warning("Mesh primitive '%d' no index", i);
+			continue;
+		}
 
-            AccessorHelper indexAccessor(this, primitive->indices);
-            if(!indexAccessor.ptr)
-            {
-                common->Warning("Index buffer'%d' is empty", indexAccessor.bufferView->buffer);
-                continue;
-            }
+		AccessorHelper indexAccessor(this, primitive->indices);
+		if(!indexAccessor.ptr)
+		{
+			common->Warning("Index buffer'%d' is empty", indexAccessor.bufferView->buffer);
+			continue;
+		}
 
-            AccessorHelper vertexAccessor(this, primitive->attributes.POSITION);
-            if(!vertexAccessor.ptr)
-            {
-                common->Warning("Vertex buffer'%d' is empty", vertexAccessor.bufferView->buffer);
-                continue;
-            }
+		AccessorHelper vertexAccessor(this, primitive->attributes.POSITION);
+		if(!vertexAccessor.ptr)
+		{
+			common->Warning("Vertex buffer'%d' is empty", vertexAccessor.bufferView->buffer);
+			continue;
+		}
 
-            AccessorHelper normalAccessor(this, primitive->attributes.NORMAL);
-            if(primitive->attributes.NORMAL >= 0 && !normalAccessor.ptr)
-            {
-                common->Warning("Normal buffer'%d' is empty", normalAccessor.bufferView->buffer);
-            }
+		AccessorHelper normalAccessor(this, primitive->attributes.NORMAL);
+		if(primitive->attributes.NORMAL >= 0 && !normalAccessor.ptr)
+		{
+			common->Warning("Normal buffer'%d' is empty", normalAccessor.bufferView->buffer);
+		}
 
-            AccessorHelper texcoordAccessor(this, primitive->attributes.TEXCOORD_);
-            if(primitive->attributes.TEXCOORD_.Num() > 0 && primitive->attributes.TEXCOORD_0 >= 0 && !texcoordAccessor.ptr)
-            {
-                common->Warning("Texcoord0 buffer'%d' is empty", texcoordAccessor.bufferView->buffer);
-            }
+		AccessorHelper texcoordAccessor(this, primitive->attributes.TEXCOORD_);
+		if(primitive->attributes.TEXCOORD_.Num() > 0 && primitive->attributes.TEXCOORD_0 >= 0 && !texcoordAccessor.ptr)
+		{
+			common->Warning("Texcoord0 buffer'%d' is empty", texcoordAccessor.bufferView->buffer);
+		}
 
-            int index = verts.Append(idList<idDrawVert>());
-            faces.Append(idList<int>());
-            mats.Append(materials[primitive->material].name);
-            idList<idDrawVert> &list = verts[index];
-            idList<int> &face = faces[index];
-            num++;
+		int index = verts.Append(idList<idDrawVert>());
+		faces.Append(idList<int>());
+		mats.Append(materials[primitive->material].name);
+		idList<idDrawVert> &list = verts[index];
+		idList<int> &face = faces[index];
+		num++;
 
-            idList<unsigned int> objVertexes; // cache saved vert for remove dup vert
+		idList<unsigned int> objVertexes; // cache saved vert for remove dup vert
 
-            for(j = 0; j < indexAccessor.Count(); j+=3)
-            {
-                unsigned int vertexIndexes[3];
-                indexAccessor.ToArray<unsigned int>(j, vertexIndexes, 3);
+		for(j = 0; j < indexAccessor.Count(); j+=3)
+		{
+			unsigned int vertexIndexes[3];
+			indexAccessor.ToArray<unsigned int>(j, vertexIndexes, 3);
 
-                int objVertIndexes[3];
-                for(int k = 0; k < 3; k++)
-                {
-                    const unsigned int vertexIndex = vertexIndexes[k];
+			int objVertIndexes[3];
+			for(int k = 0; k < 3; k++)
+			{
+				const unsigned int vertexIndex = vertexIndexes[k];
 
-                    // find vert is cached
-                    if(!keepDup)
-                    {
-                        int n;
-                        for(n = 0; n < objVertexes.Num(); n++)
-                        {
-                            if(vertexIndex == objVertexes[n])
-                                break;
-                        }
-                        if(n < objVertexes.Num())
-                        {
-                            objVertIndexes[k] = n;
-                            continue;
-                        }
-                        objVertexes.Append(vertexIndex); // cache vert
-                    }
+				// find vert is cached
+				if(!keepDup)
+				{
+					int n;
+					for(n = 0; n < objVertexes.Num(); n++)
+					{
+						if(vertexIndex == objVertexes[n])
+							break;
+					}
+					if(n < objVertexes.Num())
+					{
+						objVertIndexes[k] = n;
+						continue;
+					}
+					objVertexes.Append(vertexIndex); // cache vert
+				}
 
-                    objVertIndexes[k] = list.Append(idDrawVert());
-                    idDrawVert &vert = list[objVertIndexes[k]];
+				objVertIndexes[k] = list.Append(idDrawVert());
+				idDrawVert &vert = list[objVertIndexes[k]];
 
-                    const float *vf = vertexAccessor.Offset<float>(vertexIndex);
-                    vert.xyz.Set(
-                            vf[0],
-                            vf[1],
-                            vf[2]
-                    );
+				const float *vf = vertexAccessor.Offset<float>(vertexIndex);
+				vert.xyz.Set(
+						vf[0],
+						vf[1],
+						vf[2]
+				);
 
-                    if(texcoordAccessor.ptr)
-                    {
-                        const float *tf = texcoordAccessor.Offset<float>(vertexIndex);
-                        vert.st.Set(
-                                tf[0],
-                                tf[1]
-                        );
-                    }
-                    else
-                    {
-                        vert.st.Set(0.0f, 0.0f);
-                    }
+				if(texcoordAccessor.ptr)
+				{
+					const float *tf = texcoordAccessor.Offset<float>(vertexIndex);
+					vert.st.Set(
+							tf[0],
+							tf[1]
+					);
+				}
+				else
+				{
+					vert.st.Set(0.0f, 0.0f);
+				}
 
-                    if(normalAccessor.ptr)
-                    {
-                        const float *nf = normalAccessor.Offset<float>(vertexIndex);
-                        vert.normal.Set(
-                                nf[0],
-                                nf[1],
-                                nf[2]
-                        );
-                    }
-                    else
-                    {
-                        vert.normal.Set(0.0f, 0.0f, 0.0f);
-                    }
-                }
+				if(normalAccessor.ptr)
+				{
+					const float *nf = normalAccessor.Offset<float>(vertexIndex);
+					vert.normal.Set(
+							nf[0],
+							nf[1],
+							nf[2]
+					);
+				}
+				else
+				{
+					vert.normal.Set(0.0f, 0.0f, 0.0f);
+				}
+			}
 
-                face.Append(objVertIndexes[0]);
-                face.Append(objVertIndexes[1]);
-                face.Append(objVertIndexes[2]);
-            }
-        }
-    }
+			face.Append(objVertIndexes[0]);
+			face.Append(objVertIndexes[1]);
+			face.Append(objVertIndexes[2]);
+		}
+	}
 
     return num;
 }
@@ -1654,134 +1678,133 @@ bool idModelGLTF::ToObj(objModel_t &objModel, bool keepDup) const
     int i, j, m;
     const gltfPrimitive_t *primitive;
 
-    const gltfScene_t &curScene = scenes[scene];
+	int meshNodeIndex = FindMeshNode();
+    if(meshNodeIndex < 0)
+	{
+		common->Warning("Can't find mesh node in scene %d", scene);
+        return false;
+	}
 
-    for(m = 0; m < curScene.nodes.Num(); m++)
-    {
-        const gltfNode_t &node = nodes[curScene.nodes[m] - 1];
-        if(node.mesh < 0)
-            continue;
+    const gltfNode_t &meshNode = nodes[meshNodeIndex];
+	const gltfMesh_t &mesh = meshes[meshNode.mesh];
 
-        const gltfMesh_t &mesh = meshes[node.mesh];
+	for(i = 0, primitive = &mesh.primitives[0]; i < mesh.primitives.Num(); i++, primitive++)
+	{
+		if(primitive->mode != GLTF_TRIANGLES) // only handle triangles
+			continue;
+		if(primitive->attributes.POSITION < 0) // no vertex
+		{
+			common->Warning("Mesh primitive '%d' no vertex", i);
+			continue;
+		}
+		if(primitive->indices < 0) // no index
+		{
+			common->Warning("Mesh primitive '%d' no index", i);
+			continue;
+		}
 
-        for(i = 0, primitive = &mesh.primitives[0]; i < mesh.primitives.Num(); i++, primitive++)
-        {
-            if(primitive->mode != GLTF_TRIANGLES) // only handle triangles
-                continue;
-            if(primitive->attributes.POSITION < 0) // no vertex
-            {
-                common->Warning("Mesh primitive '%d' no vertex", i);
-                continue;
-            }
-            if(primitive->indices < 0) // no index
-            {
-                common->Warning("Mesh primitive '%d' no index", i);
-                continue;
-            }
+		AccessorHelper indexAccessor(this, primitive->indices);
+		if(!indexAccessor.ptr)
+		{
+			common->Warning("Index buffer'%d' is empty", indexAccessor.bufferView->buffer);
+			continue;
+		}
 
-            AccessorHelper indexAccessor(this, primitive->indices);
-            if(!indexAccessor.ptr)
-            {
-                common->Warning("Index buffer'%d' is empty", indexAccessor.bufferView->buffer);
-                continue;
-            }
+		AccessorHelper vertexAccessor(this, primitive->attributes.POSITION);
+		if(!vertexAccessor.ptr)
+		{
+			common->Warning("Vertex buffer'%d' is empty", vertexAccessor.bufferView->buffer);
+			continue;
+		}
 
-            AccessorHelper vertexAccessor(this, primitive->attributes.POSITION);
-            if(!vertexAccessor.ptr)
-            {
-                common->Warning("Vertex buffer'%d' is empty", vertexAccessor.bufferView->buffer);
-                continue;
-            }
+		AccessorHelper normalAccessor(this, primitive->attributes.NORMAL);
+		if(primitive->attributes.NORMAL >= 0 && !normalAccessor.ptr)
+		{
+			common->Warning("Normal buffer'%d' is empty", normalAccessor.bufferView->buffer);
+		}
 
-            AccessorHelper normalAccessor(this, primitive->attributes.NORMAL);
-            if(primitive->attributes.NORMAL >= 0 && !normalAccessor.ptr)
-            {
-                common->Warning("Normal buffer'%d' is empty", normalAccessor.bufferView->buffer);
-            }
+		AccessorHelper texcoordAccessor(this, primitive->attributes.TEXCOORD_);
+		if(primitive->attributes.TEXCOORD_.Num() > 0 && primitive->attributes.TEXCOORD_0 >= 0 && !texcoordAccessor.ptr)
+		{
+			common->Warning("Texcoord0 buffer'%d' is empty", texcoordAccessor.bufferView->buffer);
+		}
 
-            AccessorHelper texcoordAccessor(this, primitive->attributes.TEXCOORD_);
-            if(primitive->attributes.TEXCOORD_.Num() > 0 && primitive->attributes.TEXCOORD_0 >= 0 && !texcoordAccessor.ptr)
-            {
-                common->Warning("Texcoord0 buffer'%d' is empty", texcoordAccessor.bufferView->buffer);
-            }
+		int index = objModel.objects.Append(new objObject_t);
+		objObject_t *objObject = objModel.objects[index];
+		objObject->material = materials[primitive->material].name;
 
-            int index = objModel.objects.Append(new objObject_t);
-            objObject_t *objObject = objModel.objects[index];
-            objObject->material = materials[primitive->material].name;
+		idList<unsigned int> objVertexes; // cache saved vert for remove dup vert
 
-            idList<unsigned int> objVertexes; // cache saved vert for remove dup vert
+		for(j = 0; j < indexAccessor.Count(); j+=3)
+		{
+			unsigned int vertexIndexes[3];
+			indexAccessor.ToArray<unsigned int>(j, vertexIndexes, 3);
 
-            for(j = 0; j < indexAccessor.Count(); j+=3)
-            {
-                unsigned int vertexIndexes[3];
-                indexAccessor.ToArray<unsigned int>(j, vertexIndexes, 3);
+			int objVertIndexes[3];
+			for(int k = 0; k < 3; k++)
+			{
+				const unsigned int vertexIndex = vertexIndexes[k];
 
-                int objVertIndexes[3];
-                for(int k = 0; k < 3; k++)
-                {
-                    const unsigned int vertexIndex = vertexIndexes[k];
+				// find vert is cached
+				if(!keepDup)
+				{
+					int n;
+					for(n = 0; n < objVertexes.Num(); n++)
+					{
+						if(vertexIndex == objVertexes[n])
+							break;
+					}
+					if(n < objVertexes.Num())
+					{
+						objVertIndexes[k] = n;
+						continue;
+					}
+					objVertexes.Append(vertexIndex); // cache vert
+				}
 
-                    // find vert is cached
-                    if(!keepDup)
-                    {
-                        int n;
-                        for(n = 0; n < objVertexes.Num(); n++)
-                        {
-                            if(vertexIndex == objVertexes[n])
-                                break;
-                        }
-                        if(n < objVertexes.Num())
-                        {
-                            objVertIndexes[k] = n;
-                            continue;
-                        }
-                        objVertexes.Append(vertexIndex); // cache vert
-                    }
+				const float *vf = vertexAccessor.Offset<float>(vertexIndex);
+				idVec3 pos(
+						vf[0],
+						vf[1],
+						vf[2]
+						);
+				objVertIndexes[k] = objObject->vertexes.Append(pos);
 
-                    const float *vf = vertexAccessor.Offset<float>(vertexIndex);
-                    idVec3 pos(
-                            vf[0],
-                            vf[1],
-                            vf[2]
-                            );
-                    objVertIndexes[k] = objObject->vertexes.Append(pos);
+				if(texcoordAccessor.ptr)
+				{
+					const float *tf = texcoordAccessor.Offset<float>(vertexIndex);
+					idVec2 texcoord(
+							tf[0],
+							tf[1]
+					);
+					objObject->texcoords.Append(texcoord);
+				}
+				else
+				{
+					objObject->texcoords.Append(idVec2(0.0f, 0.0f));
+				}
 
-                    if(texcoordAccessor.ptr)
-                    {
-                        const float *tf = texcoordAccessor.Offset<float>(vertexIndex);
-                        idVec2 texcoord(
-                                tf[0],
-                                tf[1]
-                        );
-                        objObject->texcoords.Append(texcoord);
-                    }
-                    else
-                    {
-                        objObject->texcoords.Append(idVec2(0.0f, 0.0f));
-                    }
+				if(normalAccessor.ptr)
+				{
+					const float *nf = normalAccessor.Offset<float>(vertexIndex);
+					idVec3 normal(
+							nf[0],
+							nf[1],
+							nf[2]
+					);
+					objObject->normals.Append(normal);
+				}
+				else
+				{
+					objObject->normals.Append(idVec3(0.0f, 0.0f, 0.0f));
+				}
+			}
 
-                    if(normalAccessor.ptr)
-                    {
-                        const float *nf = normalAccessor.Offset<float>(vertexIndex);
-                        idVec3 normal(
-                                nf[0],
-                                nf[1],
-                                nf[2]
-                        );
-                        objObject->normals.Append(normal);
-                    }
-                    else
-                    {
-                        objObject->normals.Append(idVec3(0.0f, 0.0f, 0.0f));
-                    }
-                }
-
-                objObject->indexes.Append(objVertIndexes[0]);
-                objObject->indexes.Append(objVertIndexes[1]);
-                objObject->indexes.Append(objVertIndexes[2]);
-            }
-        }
-    }
+			objObject->indexes.Append(objVertIndexes[0]);
+			objObject->indexes.Append(objVertIndexes[1]);
+			objObject->indexes.Append(objVertIndexes[2]);
+		}
+	}
 
     return true;
 }

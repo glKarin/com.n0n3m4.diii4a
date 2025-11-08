@@ -357,10 +357,10 @@ void R_TestJSON_f(const idCmdArgs &args)
     }
 
     common->Printf("Save to test.json\n");
-	idStr text;
-	JSON_ToString(text, json);
+	idList<char> text(1024*1024);
+	JSON_ToArray(text, json);
 	//printf("JJJ\n%s\n", text.c_str());
-	fileSystem->WriteFile("test.json", text.c_str(), text.Length());
+	fileSystem->WriteFile("test.json", text.Ptr(), text.Num());
 	JSON_Free(json);
 
 	text.Clear();
@@ -370,9 +370,9 @@ void R_TestJSON_f(const idCmdArgs &args)
 		return;
 
     common->Printf("Save to test2.json\n");
-	JSON_ToString(text, json, -1);
+	JSON_ToArray(text, json, -1);
 	//printf("JJJ\n%s\n", text.c_str());
-	fileSystem->WriteFile("test2.json", text.c_str(), text.Length());
+	fileSystem->WriteFile("test2.json", text.Ptr(), text.Num());
 	JSON_Free(json);
 }
 #endif
