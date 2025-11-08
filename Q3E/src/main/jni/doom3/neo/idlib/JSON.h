@@ -76,7 +76,7 @@ class jsonMap_t
 		}
 		bool			Remove(const char *key) {
 			keys.Remove(key);
-			table.Remove(key);
+			return table.Remove(key);
 		}
 
 		void			Clear(void) {
@@ -236,6 +236,7 @@ bool JSON_Parse(json_t &json, const char *path);
 bool JSON_Parse(json_t &json, const char *data, int length);
 bool JSON_Parse(json_t &json, idLexer &lexer);
 void JSON_ToString(idStr &text, const json_t &json, int indent = 0);
+void JSON_ToArray(idList<char> &array, const json_t &json, int indent = 0);
 void JSON_Free(json_t &json);
 bool JSON_IsNull(const json_t &json);
 
