@@ -1240,8 +1240,10 @@ int RB_GLSL_LoadShaderProgram(
     common->Printf(" 2. Load built-in shader source\n");
     if(harm_r_useHighPrecision.GetBool())
         common->Printf("    '%s' use high precision float\n", name);
-    idStr vs = RB_GLSL_ExpandMacros(default_vertex_shader_source, macros, harm_r_useHighPrecision.GetInteger());
-    idStr fs = RB_GLSL_ExpandMacros(default_fragment_shader_source, macros, harm_r_useHighPrecision.GetInteger());
+    idStr vs;
+    RB_GLSL_ExpandMacros(vs, default_vertex_shader_source, macros, harm_r_useHighPrecision.GetInteger());
+    idStr fs;
+    RB_GLSL_ExpandMacros(fs, default_fragment_shader_source, macros, harm_r_useHighPrecision.GetInteger());
 
 #ifdef GL_ES_VERSION_3_0
     // Create built-in GLSL shader with binary

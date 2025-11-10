@@ -69,9 +69,9 @@ static void RB_GLSL_InsertGlobalDefines(idStr &res, const char *text)
     res.Insert(str, index);
 }
 
-static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros, int highp = 0)
+static void RB_GLSL_ExpandMacros(idStr &res, const char *source, const char *macros, int highp = 0)
 {
-    idStr res(source);
+    res = source;
 
     if(highp > 0)
     {
@@ -101,13 +101,13 @@ static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros, int hi
     if(!macros || !macros[0])
     {
         // printf("|%s|\n", res.c_str());
-        return res;
+        return;
     }
 
     idStrList list;
     int n = RB_GLSL_ParseMacros(macros, list);
     if(0 == n)
-        return res;
+        return;
 
     idStr m;
     for(int i = 0; i < list.Num(); i++)
@@ -118,7 +118,6 @@ static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros, int hi
     RB_GLSL_InsertGlobalDefines(res, m);
 
     // printf("%d|%s|\n%s\n", n, macros, res.c_str());
-    return res;
 }
 
 static idStr RB_GLSL_GetExternalShaderSourcePath(void)
@@ -209,13 +208,15 @@ static void R_ExportGLSLShaderSource_f(const idCmdArgs &args)
         fs = prop.default_fragment_shader_source.c_str();
         macros = prop.macros.c_str();
 
-        idStr vsSrc = RB_GLSL_ExpandMacros(vs, macros, harm_r_useHighPrecision.GetInteger());
+        idStr vsSrc;
+        RB_GLSL_ExpandMacros(vsSrc, vs, macros, harm_r_useHighPrecision.GetInteger());
         idStr p(path);
         p.Append(prop.vertex_shader_source_file);
         fileSystem->WriteFile(p.c_str(), vsSrc.c_str(), vsSrc.Length(), "fs_basepath");
         common->Printf("GLSL vertex shader: '%s'\n", p.c_str());
 
-        idStr fsSrc = RB_GLSL_ExpandMacros(fs, macros, harm_r_useHighPrecision.GetInteger());
+        idStr fsSrc;
+        RB_GLSL_ExpandMacros(fsSrc, fs, macros, harm_r_useHighPrecision.GetInteger());
         p = path;
         p.Append(prop.fragment_shader_source_file);
         fileSystem->WriteFile(p.c_str(), fsSrc.c_str(), fsSrc.Length(), "fs_basepath");
@@ -260,12 +261,14 @@ static void R_PrintGLSLShaderSource_f(const idCmdArgs &args)
         macros = prop.macros.c_str();
         common->Printf("GLSL shader: %s\n\n", prop.name.c_str());
 
-        idStr vsSrc = RB_GLSL_ExpandMacros(vs, macros, harm_r_useHighPrecision.GetInteger());
+        idStr vsSrc;
+        RB_GLSL_ExpandMacros(vsSrc, vs, macros, harm_r_useHighPrecision.GetInteger());
         common->Printf("  Vertex shader: \n");
         R_PrintGLSLShaderSource(vsSrc);
         common->Printf("\n");
 
-        idStr fsSrc = RB_GLSL_ExpandMacros(fs, macros, harm_r_useHighPrecision.GetInteger());
+        idStr fsSrc;
+        RB_GLSL_ExpandMacros(fsSrc, fs, macros, harm_r_useHighPrecision.GetInteger());
         common->Printf("  Fragment shader: \n");
         R_PrintGLSLShaderSource(fsSrc);
         common->Printf("\n");
@@ -307,7 +310,7 @@ static void R_PrintGLSLShaderSource_f(const idCmdArgs &args)
  * 	gl_Color -> u_glColor // * (attr_Color / 255.0)
  * 	gl_Normal -> attr_Normal
  */
-idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
+void RB_GLSL_ConvertGL2ESVertexShader(idStr &ret, const char *text, int version)
 {
     idStr source = text;
 
@@ -334,7 +337,6 @@ idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
     source.Replace("gl_Color", "u_glColor");
     source.Replace("gl_Normal", "attr_Normal");
 
-    idStr ret;
     ret += "#version ";
     ret += ver;
     ret += "\n";
@@ -354,8 +356,6 @@ idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
     ret += "\n";
 
     ret += source;
-
-    return ret;
 }
 
 /**
@@ -375,7 +375,7 @@ idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
  * 	texture2DProj -> textureProj
  * 	textureCubeProj -> textureProj
  */
-idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version)
+void RB_GLSL_ConvertGL2ESFragmentShader(idStr &ret, const char *text, int version)
 {
     idStr source = text;
 
@@ -398,8 +398,6 @@ idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version)
         source.Replace("textureCubeProj", "textureProj");
     }
 
-
-    idStr ret;
     ret += "#version ";
     ret += ver;
     ret += "\n";
@@ -411,8 +409,6 @@ idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version)
     ret += out;
 
     ret += source;
-
-    return ret;
 }
 
 void RB_GLSL_PrintShaderSource(const char *filename, const char *source)
