@@ -263,13 +263,16 @@ int idModelPsk::Skip(void)
     return num;
 }
 
-bool idModelPsk::Parse(const char *pskPath)
+bool idModelPsk::Parse(const char *filePath)
 {
     Clear();
 
-    file = fileSystem->OpenFileRead(pskPath);
+    file = fileSystem->OpenFileRead(filePath);
     if(!file)
+    {
+        common->Warning("Load psk file fail: %s", filePath);
         return false;
+    }
 
     int headerRes;
     bool err = false;
@@ -532,7 +535,13 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
         }
         else
         {
-            md5Bone->parentIndex = refBone->parent_index;
+			if(refBone->parent_index < 0)
+			{
+				common->Warning("Has more root bone: %d", i);
+				md5Bone->parentIndex = addOrigin ? -1 : 0;
+			}
+			else
+				md5Bone->parentIndex = refBone->parent_index;
         }
 
         //Ren_Print("R_LoadPSK: '%s' has bone '%s' with parent index %i\n", modName, md5Bone->name, md5Bone->parentIndex);
@@ -568,8 +577,7 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
             boneQuat[3] = refBone->qw;
         }
 
-		int rootIndex = addOrigin ? 0 : -1;
-		if (md5Bone->parentIndex == rootIndex)
+		if(i == 0 || refBone->parent_index < 0)
 		{
 			if(meshRotation && !meshRotation->IsIdentity())
 			{
@@ -731,7 +739,7 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
 
                     mesh.weights.Append(md5Weight); // Add weight
                 }
-				if(w < (1.0f - idMath::FLT_EPSILON))
+                if(WEIGHTS_SUM_NOT_EQUALS_ONE(w))
                 {
                     common->Warning("wedge '%d' weight sum is less than 1.0: %f", wedgeIndex, w);
                 }
@@ -841,24 +849,24 @@ void idModelPsk::Print(void) const
 #ifdef _MODEL_OBJ
 static void R_ConvertPskToObj_f(const idCmdArgs &args)
 {
-    const char *pskPath = args.Argv(1);
+    const char *filePath = args.Argv(1);
     idModelPsk psk;
-    if(psk.Parse(pskPath))
+    if(psk.Parse(filePath))
     {
         //psk.Print();
 		objModel_t objModel;
 		if(psk.ToObj(objModel, true))
 		{
-			idStr objPath = pskPath;
+			idStr objPath = filePath;
 			objPath.SetFileExtension(".obj");
 			OBJ_Write(&objModel, objPath.c_str());
-			common->Printf("Convert obj successful: %s -> %s\n", pskPath, objPath.c_str());
+			common->Printf("Convert obj successful: %s -> %s\n", filePath, objPath.c_str());
 		}
 		else
-			common->Warning("Convert obj fail: %s", pskPath);
+			common->Warning("Convert obj fail: %s", filePath);
     }
     else
-        common->Warning("Parse psk fail: %s", pskPath);
+        common->Warning("Parse psk fail: %s", filePath);
 }
 #endif
 

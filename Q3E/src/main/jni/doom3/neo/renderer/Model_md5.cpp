@@ -1108,8 +1108,6 @@ int idRenderModelMD5::GetSurfaceMask(const char *name) const
 #include "model/Model_light.cpp"
 #endif
 
-//#define ETW_PSK 1
-
 #ifdef _MODEL_PSK
 #include "model/Model_psk.cpp"
 #include "model/Model_psa.cpp"

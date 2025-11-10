@@ -615,130 +615,149 @@ int idModelIqm::ReadFramedatas(void)
     return framedatas.Num();
 }
 
-bool idModelIqm::Parse(const char *iqmPath, int parseType)
+bool idModelIqm::Parse(const char *filePath, int parseType)
 {
     Clear();
 
-    file = fileSystem->OpenFileRead(iqmPath);
+    file = fileSystem->OpenFileRead(filePath);
     if(!file)
-        return false;
-
-    if(ReadHeader(header) <= 0)
-        return false;
-
-	if(parseType == PARSE_DEF)
-        parseType = PARSE_FRAME;
-
-    const unsigned int pend = file->Length();
-
-    if (header.version == 1)
     {
-        if (header.ofs_joints + header.num_joints*sizeof(iqmjoint1_t) > pend ||
-            header.ofs_poses + header.num_poses*sizeof(iqmpose1_t) > pend)
+        common->Warning("Load iqm file fail: %s", filePath);
+        return false;
+    }
+
+    bool err = false;
+    do {
+        if(ReadHeader(header) <= 0)
         {
-            common->Warning("%s has invalid size or offset joints/poses information in version 1", iqmPath);
-            return false;
+            common->Warning("Read iqm header fail: %s", filePath);
+            err = true;
+            break;
+        }
+
+        if(parseType == PARSE_DEF)
+            parseType = PARSE_FRAME;
+
+        const unsigned int pend = file->Length();
+
+        if (header.version == 1)
+        {
+            if (header.ofs_joints + header.num_joints*sizeof(iqmjoint1_t) > pend ||
+                header.ofs_poses + header.num_poses*sizeof(iqmpose1_t) > pend)
+            {
+                common->Warning("%s has invalid size or offset joints/poses information in version 1", filePath);
+                err = true;
+                break;
+            }
+        }
+        else
+        {
+            if (header.ofs_joints + header.num_joints*sizeof(iqmjoint_t) > pend ||
+                header.ofs_poses + header.num_poses*sizeof(iqmpose_t) > pend)
+            {
+                common->Warning("%s has invalid size or offset joints/poses information", filePath);
+                err = true;
+                break;
+            }
+        }
+        if (header.ofs_text + header.num_text > pend ||
+            header.ofs_meshes + header.num_meshes*sizeof(iqmmesh_t) > pend ||
+            header.ofs_vertexarrays + header.num_vertexarrays*sizeof(iqmvertexarray_t) > pend ||
+            header.ofs_triangles + header.num_triangles*sizeof(int[3]) > pend ||
+            (header.ofs_neighbors && header.ofs_neighbors + header.num_triangles*sizeof(int[3]) > pend) ||
+            header.ofs_anims + header.num_anims*sizeof(iqmanim_t) > pend ||
+            header.ofs_frames + header.num_frames*header.num_framechannels*sizeof(unsigned short) > pend ||
+            (header.ofs_bounds && header.ofs_bounds + header.num_frames*sizeof(iqmbounds_t) > pend) ||
+            header.ofs_comment + header.num_comment > pend)
+        {
+            common->Warning("%s has invalid size or offset mesh information", filePath);
+            err = true;
+            break;
+        }
+
+        iqmVertexOffset_t offsets;
+        if(!ReadOffsets(offsets))
+        {
+            common->Warning("Read data offset table fail in '%s'", filePath);
+            err = true;
+            break;
+        }
+
+        if(parseType != PARSE_ANIM)
+        {
+            if(ReadVertexes(offsets.vposition))
+                MarkType(IQM_POSITION);
+            if(ReadTexcoords(offsets.vtexcoord))
+                MarkType(IQM_TEXCOORD);
+            if(ReadNormals(offsets.vnormal))
+                MarkType(IQM_NORMAL);
+
+            if(!ReadColorsf(offsets.vcolor4f))
+                ReadColorsub(offsets.vcolor4ub);
+            if(colors.Num())
+                MarkType(IQM_COLOR);
+
+            if(ReadMeshes())
+                MarkType(IQM_MESH);
+            if(ReadTriangles())
+                MarkType(IQM_TRIANGLE);
+        }
+
+        if(parseType >= PARSE_ALL)
+        {
+            if(ReadTangents(offsets.vtangent))
+                MarkType(IQM_TANGENT);
+        }
+
+        if(parseType >= PARSE_JOINT)
+        {
+            if(ReadBlendIndexes(offsets.vblendindexes))
+                MarkType(IQM_BLENDINDEXES);
+            if(ReadBlendWeights(offsets.vblendweights))
+                MarkType(IQM_BLENDWEIGHTS);
+
+            if(ReadJoints())
+                MarkType(IQM_JOINT);
+        }
+
+        if(ReadTexts())
+            MarkType(IQM_TEXT);
+
+        if(parseType >= PARSE_ANIM)
+        {
+            if(ReadAnims())
+                MarkType(IQM_ANIM);
+        }
+        if(parseType >= PARSE_FRAME)
+        {
+            if(ReadBounds())
+                MarkType(IQM_BOUNDS);
+            if(ReadPoses())
+                MarkType(IQM_POSE);
+            if(ReadFramedatas())
+                MarkType(IQM_FRAMEDATA);
+        }
+    } while(false);
+
+    if(!err)
+    {
+        if(parseType != PARSE_ANIM)
+        {
+            err = !IsTypeMarked(IQM_POSITION) || !IsTypeMarked(IQM_MESH || !IsTypeMarked(IQM_TRIANGLE));
+        }
+        if(parseType >= PARSE_JOINT)
+        {
+            err = !IsTypeMarked(IQM_JOINT) || !IsTypeMarked(IQM_BLENDINDEXES || !IsTypeMarked(IQM_BLENDWEIGHTS));
+        }
+        if(parseType >= PARSE_ANIM)
+        {
+            err = !IsTypeMarked(IQM_ANIM);
+        }
+        if(parseType >= PARSE_FRAME)
+        {
+            err = !IsTypeMarked(IQM_BOUNDS) || !IsTypeMarked(IQM_POSE)/* || !IsTypeMarked(IQM_FRAMEDATA)*/;
         }
     }
-    else
-    {
-        if (header.ofs_joints + header.num_joints*sizeof(iqmjoint_t) > pend ||
-            header.ofs_poses + header.num_poses*sizeof(iqmpose_t) > pend)
-        {
-            common->Warning("%s has invalid size or offset joints/poses information", iqmPath);
-            return false;
-        }
-    }
-    if (header.ofs_text + header.num_text > pend ||
-        header.ofs_meshes + header.num_meshes*sizeof(iqmmesh_t) > pend ||
-        header.ofs_vertexarrays + header.num_vertexarrays*sizeof(iqmvertexarray_t) > pend ||
-        header.ofs_triangles + header.num_triangles*sizeof(int[3]) > pend ||
-        (header.ofs_neighbors && header.ofs_neighbors + header.num_triangles*sizeof(int[3]) > pend) ||
-        header.ofs_anims + header.num_anims*sizeof(iqmanim_t) > pend ||
-        header.ofs_frames + header.num_frames*header.num_framechannels*sizeof(unsigned short) > pend ||
-        (header.ofs_bounds && header.ofs_bounds + header.num_frames*sizeof(iqmbounds_t) > pend) ||
-        header.ofs_comment + header.num_comment > pend)
-    {
-        common->Warning("%s has invalid size or offset mesh information", iqmPath);
-        return false;
-    }
-
-    iqmVertexOffset_t offsets;
-    if(!ReadOffsets(offsets))
-        return false;
-
-	if(parseType != PARSE_ANIM)
-	{
-		if(ReadVertexes(offsets.vposition))
-			MarkType(IQM_POSITION);
-		if(ReadTexcoords(offsets.vtexcoord))
-			MarkType(IQM_TEXCOORD);
-		if(ReadNormals(offsets.vnormal))
-			MarkType(IQM_NORMAL);
-
-		if(!ReadColorsf(offsets.vcolor4f))
-			ReadColorsub(offsets.vcolor4ub);
-		if(colors.Num())
-			MarkType(IQM_COLOR);
-
-		if(ReadMeshes())
-			MarkType(IQM_MESH);
-		if(ReadTriangles())
-			MarkType(IQM_TRIANGLE);
-	}
-
-	if(parseType >= PARSE_ALL)
-	{
-		if(ReadTangents(offsets.vtangent))
-			MarkType(IQM_TANGENT);
-	}
-
-	if(parseType >= PARSE_JOINT)
-	{
-		if(ReadBlendIndexes(offsets.vblendindexes))
-			MarkType(IQM_BLENDINDEXES);
-		if(ReadBlendWeights(offsets.vblendweights))
-			MarkType(IQM_BLENDWEIGHTS);
-
-		if(ReadJoints())
-			MarkType(IQM_JOINT);
-	}
-
-    if(ReadTexts())
-        MarkType(IQM_TEXT);
-
-	if(parseType >= PARSE_ANIM)
-	{
-		if(ReadAnims())
-			MarkType(IQM_ANIM);
-	}
-	if(parseType >= PARSE_FRAME)
-	{
-		if(ReadBounds())
-			MarkType(IQM_BOUNDS);
-		if(ReadPoses())
-			MarkType(IQM_POSE);
-		if(ReadFramedatas())
-			MarkType(IQM_FRAMEDATA);
-	}
-
-	bool err = false;
-	if(parseType != PARSE_ANIM)
-	{
-		err = !IsTypeMarked(IQM_POSITION) || !IsTypeMarked(IQM_MESH || !IsTypeMarked(IQM_TRIANGLE));
-	}
-	if(parseType >= PARSE_JOINT)
-	{
-		err = !IsTypeMarked(IQM_JOINT) || !IsTypeMarked(IQM_BLENDINDEXES || !IsTypeMarked(IQM_BLENDWEIGHTS));
-	}
-	if(parseType >= PARSE_ANIM)
-	{
-		err = !IsTypeMarked(IQM_ANIM);
-	}
-	if(parseType >= PARSE_FRAME)
-	{
-		err = !IsTypeMarked(IQM_BOUNDS) || !IsTypeMarked(IQM_POSE)/* || !IsTypeMarked(IQM_FRAMEDATA)*/;
-	}
 
 	if(err)
 	{
@@ -788,10 +807,27 @@ bool idModelIqm::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
 		md5Bone++;
 	}
 
+	bool hasOrigin = false;
     for (i = 0, refBone = &joints[0]; i < joints.Num(); i++, md5Bone++, refBone++)
     {
         md5Bone->boneName = GetText(refBone->name);
-        md5Bone->parentIndex = refBone->parent;
+		if(refBone->parent == -1 && !addOrigin)
+		{
+			if(hasOrigin)
+			{
+				common->Warning("Has more root bone: %d", i);
+				md5Bone->parentIndex = 0;
+			}
+			else
+			{
+				md5Bone->parentIndex = -1;
+				hasOrigin = true;
+			}
+		}
+		else
+		{
+			md5Bone->parentIndex = refBone->parent;
+		}
 
 		if(addOrigin)
 			md5Bone->parentIndex += 1;
@@ -805,8 +841,7 @@ bool idModelIqm::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
         boneQuat[2] = refBone->rotate[2];
         boneQuat[3] = refBone->rotate[3];
 
-		int rootIndex = addOrigin ? 0 : -1;
-		if (md5Bone->parentIndex == rootIndex)
+		if (refBone->parent < 0)
 		{
 			if(meshRotation && !meshRotation->IsIdentity())
 			{
@@ -942,7 +977,7 @@ bool idModelIqm::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
 
                     mesh.weights.Append(md5Weight); // Add weight
                 }
-				if(w < (1.0f - idMath::FLT_EPSILON))
+                if(WEIGHTS_SUM_NOT_EQUALS_ONE(w))
                 {
                     common->Warning("Vertex '%d' weight sum is less than 1.0: %f", vertexIndex, w);
                 }
@@ -1312,24 +1347,24 @@ int idModelIqm::GetAnimCount(void) const
 #ifdef _MODEL_OBJ
 static void R_ConvertIqmToObj_f(const idCmdArgs &args)
 {
-    const char *iqmPath = args.Argv(1);
+    const char *filePath = args.Argv(1);
     idModelIqm iqm;
-    if(iqm.Parse(iqmPath, idModelIqm::PARSE_MESH))
+    if(iqm.Parse(filePath, idModelIqm::PARSE_MESH))
     {
         //iqm.Print();
 		objModel_t objModel;
 		if(iqm.ToObj(objModel))
 		{
-			idStr objPath = iqmPath;
+			idStr objPath = filePath;
 			objPath.SetFileExtension(".obj");
 			OBJ_Write(&objModel, objPath.c_str());
-			common->Printf("Convert obj successful: %s -> %s\n", iqmPath, objPath.c_str());
+			common->Printf("Convert obj successful: %s -> %s\n", filePath, objPath.c_str());
 		}
 		else
-			common->Warning("Convert obj fail: %s", iqmPath);
+			common->Warning("Convert obj fail: %s", filePath);
     }
     else
-        common->Warning("Parse iqm fail: %s", iqmPath);
+        common->Warning("Parse iqm fail: %s", filePath);
 }
 #endif
 
@@ -1339,38 +1374,38 @@ static void ArgCompletion_iqm(const idCmdArgs &args, void(*callback)(const char 
             , NULL);
 }
 
-static int R_ConvertIqmToMd5(const char *iqmMesh, bool doMesh = true, const idStrList *animList = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idStrList *animList = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
     int ret = 0;
 
     idModelIqm iqm;
     idMd5MeshFile md5MeshFile;
     bool iqmRes = false;
-    if(iqm.Parse(iqmMesh, animList ? idModelIqm::PARSE_FRAME : idModelIqm::PARSE_JOINT))
+    if(iqm.Parse(filePath, animList ? idModelIqm::PARSE_FRAME : idModelIqm::PARSE_JOINT))
     {
         //iqm.Print();
 		if(iqm.ToMd5Mesh(md5MeshFile, scale, addOrigin, offset, rotation))
 		{
 			if(doMesh)
 			{
-				md5MeshFile.Commandline().Append(va(" - %s", iqmMesh));
-				idStr md5meshPath = iqmMesh;
+				md5MeshFile.Commandline().Append(va(" - %s", filePath));
+				idStr md5meshPath = filePath;
 				md5meshPath.SetFileExtension(".md5mesh");
 				md5MeshFile.Write(md5meshPath.c_str());
-				common->Printf("Convert md5mesh successful: %s -> %s\n", iqmMesh, md5meshPath.c_str());
+				common->Printf("Convert md5mesh successful: %s -> %s\n", filePath, md5meshPath.c_str());
 				ret++;
 			}
 			else
 			{
-				common->Printf("Convert md5mesh successful: %s\n", iqmMesh);
+				common->Printf("Convert md5mesh successful: %s\n", filePath);
 			}
 			iqmRes = true;
 		}
 		else
-			common->Warning("Convert md5mesh fail: %s", iqmMesh);
+			common->Warning("Convert md5mesh fail: %s", filePath);
     }
     else
-        common->Warning("Parse iqm fail: %s", iqmMesh);
+        common->Warning("Parse iqm fail: %s", filePath);
 
     if(!iqmRes)
         return ret;
@@ -1414,7 +1449,7 @@ static int R_ConvertIqmToMd5(const char *iqmMesh, bool doMesh = true, const idSt
             }
             common->Printf("Convert iqm animation to md5anim: %d -> %s\n", index, animName);
 			ok = iqm.ToMd5Anim(md5AnimFile, md5MeshFile, index, scale, addOrigin, offset, rotation);
-            md5animPath = iqmMesh;
+            md5animPath = filePath;
             md5animPath.StripFilename();
             md5animPath.AppendPath(animName);
             md5animPath.SetFileExtension(".md5anim");
@@ -1444,69 +1479,88 @@ static int R_ConvertIqmToMd5(const char *iqmMesh, bool doMesh = true, const idSt
     return ret;
 }
 
-ID_INLINE static int R_ConvertIqmMesh(const char *iqmMesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertIqmMesh(const char *filePath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-    return R_ConvertIqmToMd5(iqmMesh, true, NULL, scale, addOrigin, offset, rotation);
+    return R_ConvertIqmToMd5(filePath, true, NULL, scale, addOrigin, offset, rotation);
 }
 
-ID_INLINE static int R_ConvertIqmAnim(const char *iqmMesh, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertIqmAnim(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-    return R_ConvertIqmToMd5(iqmMesh, false, &animList, scale, addOrigin, offset, rotation);
+    return R_ConvertIqmToMd5(filePath, false, &animList, scale, addOrigin, offset, rotation);
 }
 
-ID_INLINE static int R_ConvertIqm(const char *iqmMesh, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertIqm(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-    return R_ConvertIqmToMd5(iqmMesh, true, &animList, scale, addOrigin, offset, rotation);
+    return R_ConvertIqmToMd5(filePath, true, &animList, scale, addOrigin, offset, rotation);
 }
 
 static void R_ConvertIqmToMd5mesh_f(const idCmdArgs &args)
 {
     if(args.Argc() < 2)
     {
-        common->Printf("Usage: %s <iqm file>\n", args.Argv(0));
+        common->Printf(CONVERT_TO_MD5MESH_USAGE(iqm), args.Argv(0));
         return;
     }
 
-    const char *iqmMesh = args.Argv(1);
-    R_ConvertIqmMesh(iqmMesh);
+    idStr mesh;
+    float scale = -1.0f;
+    bool addOrigin = false;
+    idVec3 offset(0.0f, 0.0f, 0.0f);
+    idMat3 rotation = mat3_identity;
+    idStrList anims;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL);
+    if(mesh.IsEmpty())
+    {
+        common->Printf(CONVERT_TO_MD5MESH_USAGE(iqm), args.Argv(0));
+        return;
+    }
+    R_ConvertIqmMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
 }
 
 static void R_ConvertIqmToMd5anim_f(const idCmdArgs &args)
 {
     if(args.Argc() < 2)
     {
-        common->Printf("Usage: %s <iqm file> <animation name or index>...\n", args.Argv(0));
+        common->Printf(CONVERT_TO_MD5ANIM_ALL_USAGE(iqm), args.Argv(0));
         return;
     }
 
-    const char *iqmMesh = args.Argv(1);
-    idStrList animList;
-
-    for(int i = 2; i < args.Argc(); i++)
+    idStr mesh;
+    float scale = -1.0f;
+    bool addOrigin = false;
+    idVec3 offset(0.0f, 0.0f, 0.0f);
+    idMat3 rotation = mat3_identity;
+    idStrList anims;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    if(mesh.IsEmpty())
     {
-        animList.Append(args.Argv(i));
+        common->Printf(CONVERT_TO_MD5ANIM_ALL_USAGE(iqm), args.Argv(0));
+        return;
     }
-
-    R_ConvertIqmAnim(iqmMesh, animList);
+    R_ConvertIqmAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
 }
 
 static void R_ConvertIqmToMd5_f(const idCmdArgs &args)
 {
     if(args.Argc() < 2)
     {
-        common->Printf("Usage: %s <iqm file> <animation name or index>...\n", args.Argv(0));
+        common->Printf(CONVERT_TO_MD5_ALL_USAGE(iqm), args.Argv(0));
         return;
     }
 
-    const char *iqmMesh = args.Argv(1);
-    idStrList animList;
-
-    for(int i = 2; i < args.Argc(); i++)
+    idStr mesh;
+    float scale = -1.0f;
+    bool addOrigin = false;
+    idVec3 offset(0.0f, 0.0f, 0.0f);
+    idMat3 rotation = mat3_identity;
+    idStrList anims;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    if(mesh.IsEmpty())
     {
-        animList.Append(args.Argv(i));
+        common->Printf(CONVERT_TO_MD5_ALL_USAGE(iqm), args.Argv(0));
+        return;
     }
-
-    R_ConvertIqm(iqmMesh, animList);
+    R_ConvertIqm(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
 }
 
 bool R_Model_HandleIqm(const md5ConvertDef_t &convert)

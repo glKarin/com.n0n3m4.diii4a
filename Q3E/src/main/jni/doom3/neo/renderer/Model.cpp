@@ -4986,7 +4986,7 @@ idRenderModelStatic::LoadGLTF
 bool idRenderModelStatic::LoadGLTF( const char* fileName)
 {
     idModelGLTF gltf;
-    if(!gltf.Parse(fileName))
+    if(!gltf.Parse(fileName, idModelGLTF::PARSE_MESH))
         return false;
 
     bool ret = ConvertGLTFToModelSurfaces( &gltf );

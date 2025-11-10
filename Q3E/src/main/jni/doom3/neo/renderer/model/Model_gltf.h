@@ -226,12 +226,19 @@ union json_u;
 class idModelGLTF
 {
 public:
+    enum {
+        PARSE_DEF = 0,
+        PARSE_MESH = 1,
+        PARSE_JOINT = 2,
+        PARSE_FRAME = 3,
+        PARSE_ALL = 4,
+    };
     idModelGLTF(void);
     ~idModelGLTF(void);
-    bool Parse(const char *filePath);
-    bool ParseGLTF(const char *filePath);
-    bool ParseGLB(const char *filePath);
-	bool ParseMemory(idLexer &lexer, const char *filePath = NULL);
+    bool Parse(const char *filePath, int parseType = PARSE_DEF);
+    bool ParseGLTF(const char *filePath, int parseType = PARSE_DEF);
+    bool ParseGLB(const char *filePath, int parseType = PARSE_DEF);
+	bool ParseMemory(idLexer &lexer, int parseType = PARSE_DEF, const char *filePath = NULL);
     void Print(void) const;
     bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
     bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, float scale, bool addOrigin, const idVec3 *animOffset, const idMat3 *animRotation) const;
@@ -336,6 +343,11 @@ private:
         const gltfBuffer_t *buffer;
         const byte *ptr;
         int size; // accessor->componentType * accessor->type
+    };
+
+    struct BoneAccessor {
+        AccessorHelper translation;
+        AccessorHelper rotation;
     };
 };
 

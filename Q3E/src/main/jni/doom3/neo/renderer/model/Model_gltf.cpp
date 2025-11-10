@@ -607,7 +607,7 @@ int idModelGLTF::ReadChunk(glbChunk_t &chunk, int mask)
 	return res;
 }
 
-bool idModelGLTF::ParseMemory(idLexer &lexer, const char *filePath)
+bool idModelGLTF::ParseMemory(idLexer &lexer, int parseType, const char *filePath)
 {
 	if(!filePath)
 		filePath = "<implicit GLTF file>";
@@ -621,6 +621,9 @@ bool idModelGLTF::ParseMemory(idLexer &lexer, const char *filePath)
         common->Warning("Parse GLTF json file error: %s", filePath);
         return false;
     }
+
+    if(parseType == PARSE_DEF)
+        parseType = PARSE_FRAME;
 
     json = &gltf;
 
@@ -707,11 +710,17 @@ bool idModelGLTF::ParseMemory(idLexer &lexer, const char *filePath)
 		}
 
 		// joints/animations
-		if(ReadSkins() > 0)
-			MarkType(GLTF_SKIN);
+        if(parseType >= PARSE_JOINT)
+        {
+            if(ReadSkins() > 0)
+                MarkType(GLTF_SKIN);
+        }
 
-		if(ReadAnimations() > 0)
-			MarkType(GLTF_ANIMATION);
+        if(parseType >= PARSE_FRAME)
+        {
+            if(ReadAnimations() > 0)
+                MarkType(GLTF_ANIMATION);
+        }
 	}
 	while(false);
 
@@ -721,7 +730,7 @@ bool idModelGLTF::ParseMemory(idLexer &lexer, const char *filePath)
     return !err;
 }
 
-bool idModelGLTF::ParseGLTF(const char *filePath)
+bool idModelGLTF::ParseGLTF(const char *filePath, int parseType)
 {
     Clear();
 
@@ -733,14 +742,14 @@ bool idModelGLTF::ParseGLTF(const char *filePath)
 		return false;
 	}
 
-	bool ok = ParseMemory(lexer, filePath);
+	bool ok = ParseMemory(lexer, parseType, filePath);
 	if(!ok)
 		Clear();
 
 	return ok;
 }
 
-bool idModelGLTF::ParseGLB(const char *filePath)
+bool idModelGLTF::ParseGLB(const char *filePath, int parseType)
 {
 	Clear();
 
@@ -825,7 +834,7 @@ bool idModelGLTF::ParseGLB(const char *filePath)
 			err = true;
 			break;
 		}
-		if(!ParseMemory(lexer, filePath))
+		if(!ParseMemory(lexer, parseType, filePath))
 		{
 			err = true;
 			break;
@@ -869,15 +878,15 @@ bool idModelGLTF::ParseGLB(const char *filePath)
     return !err;
 }
 
-bool idModelGLTF::Parse(const char *filePath)
+bool idModelGLTF::Parse(const char *filePath, int parseType)
 {
     idStr extension;
     idStr(filePath).ExtractFileExtension(extension);
 
     if (extension.Icmp("glb") == 0) {
-        return ParseGLB(filePath);
+        return ParseGLB(filePath, parseType);
     } else {
-        return ParseGLTF(filePath);
+        return ParseGLTF(filePath, parseType);
     }
 }
 
@@ -922,7 +931,7 @@ const char * idModelGLTF::FindParentNode(int index) const
 
 bool idModelGLTF::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *meshOffset, const idMat3 *meshRotation) const
 {
-    int i, j, m;
+    int i, j;
     md5meshJoint_t *md5Bone;
     const gltfNode_t *refBone;
     idVec3 boneOrigin;
@@ -985,10 +994,12 @@ bool idModelGLTF::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin,
         int boneIndex = skin.joints[i];
         refBone = &nodes[boneIndex];
         md5Bone->boneName = refBone->name;
+		bool isRoot = false;
 
         if (i == 0)
         {
             md5Bone->parentIndex = -1;
+			isRoot = true;
         }
         else
         {
@@ -997,7 +1008,11 @@ bool idModelGLTF::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin,
 			if(jointMap.Get(FindParentNode(boneIndex), &rindex))
 				md5Bone->parentIndex = *rindex;
 			else
-				md5Bone->parentIndex = -1;
+			{
+				common->Warning("Has more root bone: %d", boneIndex);
+				md5Bone->parentIndex = addOrigin ? -1 : 0;
+				isRoot = true;
+			}
 		}
 
 		if(addOrigin)
@@ -1012,8 +1027,7 @@ bool idModelGLTF::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin,
         boneQuat[2] = refBone->rotation[2];
         boneQuat[3] = refBone->rotation[3];
 
-		int rootIndex = addOrigin ? 0 : -1;
-		if (md5Bone->parentIndex == rootIndex)
+		if (isRoot)
 		{
 			if(meshRotation && !meshRotation->IsIdentity())
 			{
@@ -1218,7 +1232,7 @@ bool idModelGLTF::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin,
 
 					mesh.weights.Append(md5Weight); // Add weight
 				}
-				if(w < (1.0f - idMath::FLT_EPSILON))
+				if(WEIGHTS_SUM_NOT_EQUALS_ONE(w))
 				{
 					common->Warning("Vertex '%d' weight sum is less than 1.0: %f", vertexIndex, w);
 				}
@@ -1325,10 +1339,6 @@ bool idModelGLTF::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int 
     idList<md5animFrames_t> &md5Frames = md5anim.Frames();
     md5Frames.SetNum(numFrames);
 
-	struct BoneAccessor {
-		AccessorHelper translation;
-		AccessorHelper rotation;
-	};
 	idHashTable<BoneAccessor> keys;
 
 	for(i = 0, channel = &channels[0]; i < channels.Num(); i++, channel++)
@@ -1532,7 +1542,7 @@ int idModelGLTF::ToMd5AnimList(idList<idMd5AnimFile> &md5anims, idMd5MeshFile &m
 
 int idModelGLTF::GroupTriangle(idList<idList<idDrawVert> > &verts, idList<idList<int> > &faces, idStrList &mats, bool keepDup) const
 {
-    int i, j, m;
+    int i, j;
     const gltfPrimitive_t *primitive;
     int num;
 
@@ -1629,19 +1639,12 @@ int idModelGLTF::GroupTriangle(idList<idList<idDrawVert> > &verts, idList<idList
 				idDrawVert &vert = list[objVertIndexes[k]];
 
 				const float *vf = vertexAccessor.Offset<float>(vertexIndex);
-				vert.xyz.Set(
-						vf[0],
-						vf[1],
-						vf[2]
-				);
+				vert.xyz.Set(vf[0], vf[1], vf[2]);
 
 				if(texcoordAccessor.ptr)
 				{
 					const float *tf = texcoordAccessor.Offset<float>(vertexIndex);
-					vert.st.Set(
-							tf[0],
-							tf[1]
-					);
+					vert.st.Set(tf[0], tf[1]);
 				}
 				else
 				{
@@ -1651,11 +1654,7 @@ int idModelGLTF::GroupTriangle(idList<idList<idDrawVert> > &verts, idList<idList
 				if(normalAccessor.ptr)
 				{
 					const float *nf = normalAccessor.Offset<float>(vertexIndex);
-					vert.normal.Set(
-							nf[0],
-							nf[1],
-							nf[2]
-					);
+					vert.normal.Set(nf[0], nf[1], nf[2]);
 				}
 				else
 				{
@@ -1675,7 +1674,7 @@ int idModelGLTF::GroupTriangle(idList<idList<idDrawVert> > &verts, idList<idList
 #ifdef _MODEL_OBJ
 bool idModelGLTF::ToObj(objModel_t &objModel, bool keepDup) const
 {
-    int i, j, m;
+    int i, j;
     const gltfPrimitive_t *primitive;
 
 	int meshNodeIndex = FindMeshNode();
@@ -1763,20 +1762,13 @@ bool idModelGLTF::ToObj(objModel_t &objModel, bool keepDup) const
 				}
 
 				const float *vf = vertexAccessor.Offset<float>(vertexIndex);
-				idVec3 pos(
-						vf[0],
-						vf[1],
-						vf[2]
-						);
+				idVec3 pos(vf[0], vf[1], vf[2]);
 				objVertIndexes[k] = objObject->vertexes.Append(pos);
 
 				if(texcoordAccessor.ptr)
 				{
 					const float *tf = texcoordAccessor.Offset<float>(vertexIndex);
-					idVec2 texcoord(
-							tf[0],
-							tf[1]
-					);
+					idVec2 texcoord(tf[0], tf[1]);
 					objObject->texcoords.Append(texcoord);
 				}
 				else
@@ -1787,11 +1779,7 @@ bool idModelGLTF::ToObj(objModel_t &objModel, bool keepDup) const
 				if(normalAccessor.ptr)
 				{
 					const float *nf = normalAccessor.Offset<float>(vertexIndex);
-					idVec3 normal(
-							nf[0],
-							nf[1],
-							nf[2]
-					);
+					idVec3 normal(nf[0], nf[1], nf[2]);
 					objObject->normals.Append(normal);
 				}
 				else
@@ -1849,7 +1837,7 @@ static void R_ConvertGLTFToObj_f(const idCmdArgs &args)
 {
     const char *gltfPath = args.Argv(1);
     idModelGLTF gltf;
-    if(gltf.Parse(gltfPath))
+    if(gltf.Parse(gltfPath, idModelGLTF::PARSE_MESH))
     {
         //gltf.Print();
         objModel_t objModel;
@@ -1868,38 +1856,38 @@ static void R_ConvertGLTFToObj_f(const idCmdArgs &args)
 }
 #endif
 
-static int R_ConvertGLTFToMd5(const char *gltfMesh, bool doMesh = true, const idStrList *animList = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+static int R_ConvertGLTFToMd5(const char *filePath, bool doMesh = true, const idStrList *animList = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
     int ret = 0;
 
     idModelGLTF gltf;
     idMd5MeshFile md5MeshFile;
     bool gltfRes = false;
-    if(gltf.Parse(gltfMesh))
+    if(gltf.Parse(filePath, animList ? idModelIqm::PARSE_FRAME : idModelIqm::PARSE_JOINT))
     {
         //gltf.Print();
         if(gltf.ToMd5Mesh(md5MeshFile, scale, addOrigin, offset, rotation))
         {
             if(doMesh)
             {
-                md5MeshFile.Commandline().Append(va(" - %s", gltfMesh));
-                idStr md5meshPath = gltfMesh;
+                md5MeshFile.Commandline().Append(va(" - %s", filePath));
+                idStr md5meshPath = filePath;
                 md5meshPath.SetFileExtension(".md5mesh");
                 md5MeshFile.Write(md5meshPath.c_str());
-                common->Printf("Convert md5mesh successful: %s -> %s\n", gltfMesh, md5meshPath.c_str());
+                common->Printf("Convert md5mesh successful: %s -> %s\n", filePath, md5meshPath.c_str());
                 ret++;
             }
             else
             {
-                common->Printf("Convert md5mesh successful: %s\n", gltfMesh);
+                common->Printf("Convert md5mesh successful: %s\n", filePath);
             }
             gltfRes = true;
         }
         else
-            common->Warning("Convert md5mesh fail: %s", gltfMesh);
+            common->Warning("Convert md5mesh fail: %s", filePath);
     }
     else
-        common->Warning("Parse gltf fail: %s", gltfMesh);
+        common->Warning("Parse gltf fail: %s", filePath);
 
     if(!gltfRes)
         return ret;
@@ -1943,7 +1931,7 @@ static int R_ConvertGLTFToMd5(const char *gltfMesh, bool doMesh = true, const id
             }
             common->Printf("Convert gltf/glb animation to md5anim: %d -> %s\n", index, animName);
             ok = gltf.ToMd5Anim(md5AnimFile, md5MeshFile, index, scale, addOrigin, offset, rotation);
-            md5animPath = gltfMesh;
+            md5animPath = filePath;
             md5animPath.StripFilename();
             md5animPath.AppendPath(animName);
             md5animPath.SetFileExtension(".md5anim");
@@ -1973,19 +1961,19 @@ static int R_ConvertGLTFToMd5(const char *gltfMesh, bool doMesh = true, const id
     return ret;
 }
 
-ID_INLINE static int R_ConvertGLTFMesh(const char *gltfMesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertGLTFMesh(const char *filePath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-    return R_ConvertGLTFToMd5(gltfMesh, true, NULL, scale, addOrigin, offset, rotation);
+    return R_ConvertGLTFToMd5(filePath, true, NULL, scale, addOrigin, offset, rotation);
 }
 
-ID_INLINE static int R_ConvertGLTFAnim(const char *gltfMesh, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertGLTFAnim(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-    return R_ConvertGLTFToMd5(gltfMesh, false, &animList, scale, addOrigin, offset, rotation);
+    return R_ConvertGLTFToMd5(filePath, false, &animList, scale, addOrigin, offset, rotation);
 }
 
-ID_INLINE static int R_ConvertGLTF(const char *gltfMesh, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertGLTF(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
 {
-    return R_ConvertGLTFToMd5(gltfMesh, true, &animList, scale, addOrigin, offset, rotation);
+    return R_ConvertGLTFToMd5(filePath, true, &animList, scale, addOrigin, offset, rotation);
 }
 
 static void ArgCompletion_gltf(const idCmdArgs &args, void(*callback)(const char *s))
@@ -1998,50 +1986,68 @@ static void R_ConvertGLTFToMd5mesh_f(const idCmdArgs &args)
 {
     if(args.Argc() < 2)
     {
-        common->Printf("Usage: %s <gltf/glb file>\n", args.Argv(0));
+        common->Printf(CONVERT_TO_MD5MESH_USAGE(gltf/glb), args.Argv(0));
         return;
     }
 
-    const char *gltfMesh = args.Argv(1);
-    R_ConvertGLTFMesh(gltfMesh);
+    idStr mesh;
+    float scale = -1.0f;
+    bool addOrigin = false;
+    idVec3 offset(0.0f, 0.0f, 0.0f);
+    idMat3 rotation = mat3_identity;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL);
+    if(mesh.IsEmpty())
+    {
+        common->Printf(CONVERT_TO_MD5MESH_USAGE(gltf/glb), args.Argv(0));
+        return;
+    }
+    R_ConvertGLTFMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
 }
 
 static void R_ConvertGLTFToMd5anim_f(const idCmdArgs &args)
 {
     if(args.Argc() < 2)
     {
-        common->Printf("Usage: %s <gltf/glb file> <animation name or index>...\n", args.Argv(0));
+        common->Printf(CONVERT_TO_MD5ANIM_ALL_USAGE(gltf/glb), args.Argv(0));
         return;
     }
 
-    const char *gltfMesh = args.Argv(1);
-    idStrList animList;
-
-    for(int i = 2; i < args.Argc(); i++)
+    idStr mesh;
+    float scale = -1.0f;
+    bool addOrigin = false;
+    idVec3 offset(0.0f, 0.0f, 0.0f);
+    idMat3 rotation = mat3_identity;
+    idStrList anims;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    if(mesh.IsEmpty())
     {
-        animList.Append(args.Argv(i));
+        common->Printf(CONVERT_TO_MD5ANIM_ALL_USAGE(gltf/glb), args.Argv(0));
+        return;
     }
-
-    R_ConvertGLTFAnim(gltfMesh, animList);
+    R_ConvertGLTFAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
 }
 
 static void R_ConvertGLTFToMd5_f(const idCmdArgs &args)
 {
     if(args.Argc() < 2)
     {
-        common->Printf("Usage: %s <gltf/glb file> <animation name or index>...\n", args.Argv(0));
+        common->Printf(CONVERT_TO_MD5_ALL_USAGE(gltf/glb), args.Argv(0));
         return;
     }
 
-    const char *gltfMesh = args.Argv(1);
-    idStrList animList;
-
-    for(int i = 2; i < args.Argc(); i++)
+    idStr mesh;
+    float scale = -1.0f;
+    bool addOrigin = false;
+    idVec3 offset(0.0f, 0.0f, 0.0f);
+    idMat3 rotation = mat3_identity;
+    idStrList anims;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    if(mesh.IsEmpty())
     {
-        animList.Append(args.Argv(i));
+        common->Printf(CONVERT_TO_MD5_ALL_USAGE(gltf/glb), args.Argv(0));
+        return;
     }
-
-    R_ConvertGLTF(gltfMesh, animList);
+    R_ConvertGLTF(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
 }
 
 bool R_Model_HandleGLTF(const md5ConvertDef_t &convert)

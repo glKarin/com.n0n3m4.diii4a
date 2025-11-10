@@ -307,6 +307,165 @@ void R_Model_NormalizeWeights(float *arr, int num)
 	arr[i] = 1.0f - total;
 }
 
+void R_Model_ClearMd5Convert(md5ConvertDef_t &convert)
+{
+    convert.type.Clear();
+    convert.def = NULL;
+    convert.mesh.Clear();
+    convert.scale = -1.0f;
+    convert.addOrigin = false;
+    convert.offset.Zero();
+    convert.rotation.Identity();
+    convert.anims.Clear();
+    convert.animNames.Clear();
+}
+
+void R_Model_PrintMd5Convert(md5ConvertDef_t &convert)
+{
+    common->Printf("entityDef: %s\n", convert.def ? convert.def->GetName() : "<none>");
+    common->Printf("Type: %s\n", convert.type.c_str());
+    common->Printf("Mesh: %s\n", convert.mesh.c_str());
+    common->Printf("Scale: %f\n", convert.scale);
+    common->Printf("Add origin bone: %d\n", convert.addOrigin);
+    common->Printf("Offset: %f, %f, %f\n", convert.offset[0], convert.offset[1], convert.offset[2]);
+    idAngles angles = convert.rotation.ToAngles();
+    common->Printf("Rotation angle: %f, %f, %f\n", angles[0], angles[1], angles[2]);
+    common->Printf("Animations %d\n", convert.anims.Num());
+    for(int i = 0; i < convert.anims.Num(); i++)
+        common->Printf("  %d: %s\n", i, convert.anims[i].c_str());
+}
+
+int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, md5ConvertDef_t &convert)
+{
+    const char *arg;
+    bool readParm = false;
+    int parm = 0;
+    int res = CCP_NONE;
+
+    for(int i = 1; i < args.Argc(); i++)
+    {
+        arg = args.Argv(i);
+        if(!idStr::Icmp(arg, "-"))
+        {
+            if(readParm)
+                common->Warning("Expect param name, but read '-'");
+            else
+                readParm = true;
+            parm = CCP_NONE;
+            continue;
+        }
+
+        if(readParm && (parm == CCP_NONE || parm == CCP_ANIMATIONS))
+        {
+            if(!idStr::Icmp("scale", arg))
+                parm = CCP_SCALE;
+            else if(!idStr::Icmp("addOrigin", arg))
+            {
+                parm = CCP_ADD_ORIGIN;
+                convert.addOrigin = true;
+                parm = CCP_NONE;
+                readParm = false;
+                res |= CCP_ADD_ORIGIN;
+            }
+            else if(!idStr::Icmp("offset", arg))
+                parm = CCP_OFFSET;
+            else if(!idStr::Icmp("rotation", arg))
+                parm = CCP_ROTATION;
+            else if(!idStr::Icmp("animation", arg))
+                parm = CCP_ANIMATIONS;
+            else
+                common->Warning("Unknown param name '%s'", arg);
+
+            continue;
+        }
+
+        if(parm != CCP_NONE)
+        {
+            switch (parm) {
+                case CCP_SCALE:
+                    if(sscanf(arg, "%f", &convert.scale) != 1)
+                        common->Warning("Parse scale value '%s' fail", arg);
+                    else
+                        res |= CCP_SCALE;
+                    break;
+                case CCP_OFFSET: {
+                    float v[3];
+                    if(sscanf(arg, "%f %f %f", &v[0], &v[1], &v[2]) != 3)
+                        common->Warning("Parse offset value '%s' fail", arg);
+                    else
+                    {
+                        convert.offset.Set(v[0], v[1], v[2]);
+                        res |= CCP_OFFSET;
+                    }
+                }
+                    break;
+                case CCP_ROTATION: {
+                    float v[3];
+                    if(sscanf(arg, "%f %f %f", &v[0], &v[1], &v[2]) != 3)
+                        common->Warning("Parse rotation value '%s' fail", arg);
+                    else
+                    {
+                        idAngles angles(v[0], v[1], v[2]);
+                        convert.rotation = angles.ToMat3();
+                        res |= CCP_ROTATION;
+                    }
+                }
+                    break;
+                case CCP_ANIMATIONS:
+                    convert.anims.AddUnique(arg);
+                    res |= CCP_ANIMATIONS;
+                    break;
+                default:
+                    common->Warning("Unknown param type '%d'", parm);
+                    break;
+            }
+
+            if(parm != CCP_ANIMATIONS)
+            {
+                parm = CCP_NONE;
+                readParm = false;
+            }
+            continue;
+        }
+
+        if(convert.mesh.IsEmpty())
+        {
+            res |= CCP_MESH;
+            convert.mesh = arg;
+            convert.mesh.ExtractFileExtension(convert.type);
+            continue;
+        }
+
+        convert.anims.AddUnique(arg);
+        res |= CCP_ANIMATIONS;
+    }
+
+    return res;
+}
+
+int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, float *scale, bool *addOrigin, idVec3 *offset, idMat3 *rotation, idStrList *anims)
+{
+    md5ConvertDef_t convert;
+    R_Model_ClearMd5Convert(convert);
+    int res = R_Model_ParseMd5ConvertCmdLine(args, convert);
+    R_Model_PrintMd5Convert(convert);
+
+    if(mesh && (res & CCP_MESH))
+        *mesh = convert.mesh;
+    if(scale && (res & CCP_SCALE))
+        *scale = convert.scale;
+    if(addOrigin && (res & CCP_ADD_ORIGIN))
+        *addOrigin = convert.addOrigin;
+    if(offset && (res & CCP_OFFSET))
+        *offset = convert.offset;
+    if(rotation && (res & CCP_ROTATION))
+        *rotation = convert.rotation;
+    if(anims && (res & CCP_ANIMATIONS))
+        *anims = convert.anims;
+
+    return res;
+}
+
 #if 1
 #include "../../idlib/JSON.h"
 static void ArgCompletion_JSON(const idCmdArgs &args, void(*callback)(const char *s))
