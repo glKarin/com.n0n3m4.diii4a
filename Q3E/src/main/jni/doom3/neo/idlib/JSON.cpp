@@ -266,10 +266,15 @@ static void JSON_ObjectToString(idStr &text, const json_t &json, int indent = 0)
 static void JSON_ArrayToString(idStr &text, const json_t &json, int indent = 0);
 static void JSON_NumberToString(idStr &text, const json_t &json);
 
-static void JSON_ValueToString(idList<char> &text, const json_t &json, int indent = 0);
-static void JSON_ObjectToString(idList<char> &text, const json_t &json, int indent = 0);
-static void JSON_ArrayToString(idList<char> &text, const json_t &json, int indent = 0);
-static void JSON_NumberToString(idList<char> &text, const json_t &json);
+static void JSON_ValueToArray(idList<char> &array, const json_t &json, int indent = 0);
+static void JSON_ObjectToArray(idList<char> &array, const json_t &json, int indent = 0);
+static void JSON_ArrayToArray(idList<char> &array, const json_t &json, int indent = 0);
+static void JSON_NumberToArray(idList<char> &array, const json_t &json);
+
+static void JSON_ValueToFile(JSON_Write_f func, void *userData, const json_t &json, int indent = 0);
+static void JSON_ObjectToFile(JSON_Write_f func, void *userData, const json_t &json, int indent = 0);
+static void JSON_ArrayToFile(JSON_Write_f func, void *userData, const json_t &json, int indent = 0);
+static void JSON_NumberToFile(JSON_Write_f func, void *userData, const json_t &json);
 
 static void JSON_FreeValue(json_t &json);
 static void JSON_FreeObject(json_t &json);
@@ -867,7 +872,7 @@ bool JSON_Parse(json_t &json, const char *path)
 	return JSON_Parse(json, lexer);
 }
 
-static void JSON_AppendIndent(idStr &text, int indent)
+ID_INLINE static void JSON_AppendIndent(idStr &text, int indent)
 {
 	for(int i = 0; i < indent; i++)
 		text.Append("  ");
@@ -1075,7 +1080,7 @@ bool JSON_IsNull(const json_t &json)
     return json.type == JSON_NULL;
 }
 
-static void JSON_AppendString(idList<char> &text, const char *str)
+ID_INLINE static void JSON_AddString(idList<char> &text, const char *str)
 {
 	int len = strlen(str);
 	for(int i = 0; i < len; i++)
@@ -1084,7 +1089,7 @@ static void JSON_AppendString(idList<char> &text, const char *str)
 	}
 }
 
-static void JSON_AppendString(idList<char> &text, const idStr &str)
+ID_INLINE static void JSON_AddString(idList<char> &text, const idStr &str)
 {
 	for(int i = 0; i < str.Length(); i++)
 	{
@@ -1092,29 +1097,29 @@ static void JSON_AppendString(idList<char> &text, const idStr &str)
 	}
 }
 
-static void JSON_AppendIndent(idList<char> &text, int indent)
+ID_INLINE static void JSON_AddIndent(idList<char> &text, int indent)
 {
 	for(int i = 0; i < indent; i++)
 	{
-		JSON_AppendString(text, "  ");
+		JSON_AddString(text, "  ");
 	}
 }
 
 void JSON_ToArray(idList<char> &text, const json_t &json, int indent)
 {
 	if(json.type == JSON_OBJECT)
-		JSON_ObjectToString(text, json, indent);
+		JSON_ObjectToArray(text, json, indent);
 	else if(json.type == JSON_ARRAY)
-		JSON_ArrayToString(text, json, indent);
+		JSON_ArrayToArray(text, json, indent);
 	else
-		JSON_ValueToString(text, json, indent);
+		JSON_ValueToArray(text, json, indent);
 }
 
-void JSON_NumberToString(idList<char> &text, const json_t &json)
+void JSON_NumberToArray(idList<char> &text, const json_t &json)
 {
     switch (json.n.numberType) {
         case JSONNUMBER_INT:
-            JSON_AppendString(text, va("%d", json.n.ivalue));
+            JSON_AddString(text, va("%d", json.n.ivalue));
             break;
         case JSONNUMBER_POINT: {
             idStr str = va("%f", json.n.value);
@@ -1125,7 +1130,7 @@ void JSON_NumberToString(idList<char> &text, const json_t &json)
                 if(str[str.Length() - 1] == '.')
                     str.Append('0');
             }
-            JSON_AppendString(text, str);
+            JSON_AddString(text, str);
         }
             break;
         case JSONNUMBER_SCIENTIFIC: {
@@ -1162,95 +1167,266 @@ void JSON_NumberToString(idList<char> &text, const json_t &json)
                 nstr = str;
                 nstr.StripTrailing('0');
             }
-            JSON_AppendString(text, nstr);
+            JSON_AddString(text, nstr);
         }
             break;
         default:
-            JSON_AppendString(text, va("%G", json.n.value));
+            JSON_AddString(text, va("%G", json.n.value));
             break;
     }
 }
 
-void JSON_ValueToString(idList<char> &text, const json_t &json, int indent)
+void JSON_ValueToArray(idList<char> &text, const json_t &json, int indent)
 {
 	switch(json.type)
 	{
 		case JSON_OBJECT:
-			JSON_ObjectToString(text, json, indent);
+			JSON_ObjectToArray(text, json, indent);
 			break;
 		case JSON_ARRAY:
-			JSON_ArrayToString(text, json, indent);
+			JSON_ArrayToArray(text, json, indent);
 			break;
 		case JSON_BOOL:
-			JSON_AppendString(text, json.b.value ? "true" : "false");
+			JSON_AddString(text, json.b.value ? "true" : "false");
 			break;
 		case JSON_NUMBER:
-            JSON_NumberToString(text, json);
+            JSON_NumberToArray(text, json);
 			break;
 		case JSON_STRING:
-			JSON_AppendString(text, "\"");
-			JSON_AppendString(text, *json.s.value);
-			JSON_AppendString(text, "\"");
+			JSON_AddString(text, "\"");
+			JSON_AddString(text, *json.s.value);
+			JSON_AddString(text, "\"");
 			break;
 		case JSON_NULL:
 		default:
-			JSON_AppendString(text, "null");
+			JSON_AddString(text, "null");
 			break;
 	}
 }
 
-void JSON_ObjectToString(idList<char> &text, const json_t &json, int indent)
+void JSON_ObjectToArray(idList<char> &text, const json_t &json, int indent)
 {
-	JSON_AppendString(text, "{");
+	JSON_AddString(text, "{");
 	if(indent >= 0 && json.o.value->Num() > 0)
-		JSON_AppendString(text, "\n");
+		JSON_AddString(text, "\n");
 	for(int i = 0; i < json.o.value->Num(); i++)
 	{
 		int m = indent < 0 ? -1 : (indent + 1);
-		JSON_AppendIndent(text, m);
+		JSON_AddIndent(text, m);
 		const char *key = json.o.value->GetKeyIndex(i);
-		JSON_AppendString(text, "\"");
-		JSON_AppendString(text, key);
-		JSON_AppendString(text, "\":");
-		JSON_ValueToString(text, (*json.o.value)[key], m);
+		JSON_AddString(text, "\"");
+		JSON_AddString(text, key);
+		JSON_AddString(text, "\":");
+		JSON_ValueToArray(text, (*json.o.value)[key], m);
 		if(i < json.o.value->Num() - 1)
 		{
-			JSON_AppendString(text, ",");
+			JSON_AddString(text, ",");
 			if(indent >= 0)
-				JSON_AppendString(text, "\n");
+				JSON_AddString(text, "\n");
 		}
 	}
 	if(indent >= 0 && json.o.value->Num() > 0)
 	{
-		JSON_AppendString(text, "\n");
-		JSON_AppendIndent(text, indent);
+		JSON_AddString(text, "\n");
+		JSON_AddIndent(text, indent);
 	}
-	JSON_AppendString(text, "}");
+	JSON_AddString(text, "}");
 }
 
-void JSON_ArrayToString(idList<char> &text, const json_t &json, int indent)
+void JSON_ArrayToArray(idList<char> &text, const json_t &json, int indent)
 {
-	JSON_AppendString(text, "[");
+	JSON_AddString(text, "[");
 	if(indent >= 0 && json.a.value->Num() > 0)
-		JSON_AppendString(text, "\n");
+		JSON_AddString(text, "\n");
 	for(int i = 0; i < json.a.value->Num(); i++)
 	{
 		int m = indent < 0 ? -1 : (indent + 1);
-		JSON_AppendIndent(text, m);
-		JSON_ValueToString(text, (*json.a.value)[i], m);
+		JSON_AddIndent(text, m);
+		JSON_ValueToArray(text, (*json.a.value)[i], m);
 		if(i < json.a.value->Num() - 1)
 		{
-			JSON_AppendString(text, ",");
+			JSON_AddString(text, ",");
 			if(indent >= 0)
-				JSON_AppendString(text, "\n");
+				JSON_AddString(text, "\n");
 		}
 	}
 	if(indent >= 0 && json.a.value->Num() > 0)
 	{
-		JSON_AppendString(text, "\n");
-		JSON_AppendIndent(text, indent);
+		JSON_AddString(text, "\n");
+		JSON_AddIndent(text, indent);
 	}
-	JSON_AppendString(text, "]");
+	JSON_AddString(text, "]");
+}
+
+static void JSON_WriteString(JSON_Write_f text, void *userData, const char *str)
+{
+    text(userData, str, strlen(str));
+}
+
+static void JSON_WriteString(JSON_Write_f text, void *userData, const idStr &str)
+{
+    text(userData, str.c_str(), str.Length());
+}
+
+static void JSON_WriteIndent(JSON_Write_f text, void *userData, int indent)
+{
+    for(int i = 0; i < indent; i++)
+    {
+        JSON_WriteString(text, userData, "  ");
+    }
+}
+
+void JSON_ToFile(JSON_Write_f text, void *userData, const json_t &json, int indent)
+{
+    if(json.type == JSON_OBJECT)
+        JSON_ObjectToFile(text, userData, json, indent);
+    else if(json.type == JSON_ARRAY)
+        JSON_ArrayToFile(text, userData, json, indent);
+    else
+        JSON_ValueToFile(text, userData, json, indent);
+}
+
+void JSON_NumberToFile(JSON_Write_f text, void *userData, const json_t &json)
+{
+    switch (json.n.numberType) {
+        case JSONNUMBER_INT:
+            JSON_WriteString(text, userData, va("%d", json.n.ivalue));
+            break;
+        case JSONNUMBER_POINT: {
+            idStr str = va("%f", json.n.value);
+            int index = str.Find('.');
+            if(index > 0)
+            {
+                str.StripTrailing('0');
+                if(str[str.Length() - 1] == '.')
+                    str.Append('0');
+            }
+            JSON_WriteString(text, userData, str);
+        }
+            break;
+        case JSONNUMBER_SCIENTIFIC: {
+            idStr str = va("%E", json.n.value);
+            int index = str.Find('.');
+            idStr nstr;
+            if(index > 0)
+            {
+                int eindex = str.Find('E');
+                if(eindex > index)
+                {
+                    nstr.Append(str.Left(index + 1));
+                    int i;
+                    for(i = eindex - 1; i > index; i--)
+                    {
+                        if(str[i] != '0')
+                            break;
+                    }
+                    if(i > index)
+                        nstr.Append(str.Mid(index + 1, i - index));
+                    nstr.Append(str.Right(str.Length() - eindex));
+                    nstr.StripTrailing('0');
+                }
+                else
+                {
+                    nstr = str;
+                    nstr.StripTrailing('0');
+                    if(nstr[nstr.Length() - 1] == '.')
+                        nstr.Append('0');
+                }
+            }
+            else
+            {
+                nstr = str;
+                nstr.StripTrailing('0');
+            }
+            JSON_WriteString(text, userData, nstr);
+        }
+            break;
+        default:
+            JSON_WriteString(text, userData, va("%G", json.n.value));
+            break;
+    }
+}
+
+void JSON_ValueToFile(JSON_Write_f text, void *userData, const json_t &json, int indent)
+{
+    switch(json.type)
+    {
+        case JSON_OBJECT:
+            JSON_ObjectToFile(text, userData, json, indent);
+            break;
+        case JSON_ARRAY:
+            JSON_ArrayToFile(text, userData, json, indent);
+            break;
+        case JSON_BOOL:
+            JSON_WriteString(text, userData, json.b.value ? "true" : "false");
+            break;
+        case JSON_NUMBER:
+            JSON_NumberToFile(text, userData, json);
+            break;
+        case JSON_STRING:
+            JSON_WriteString(text, userData, "\"");
+            JSON_WriteString(text, userData, *json.s.value);
+            JSON_WriteString(text, userData, "\"");
+            break;
+        case JSON_NULL:
+        default:
+            JSON_WriteString(text, userData, "null");
+            break;
+    }
+}
+
+void JSON_ObjectToFile(JSON_Write_f text, void *userData, const json_t &json, int indent)
+{
+    JSON_WriteString(text, userData, "{");
+    if(indent >= 0 && json.o.value->Num() > 0)
+        JSON_WriteString(text, userData, "\n");
+    for(int i = 0; i < json.o.value->Num(); i++)
+    {
+        int m = indent < 0 ? -1 : (indent + 1);
+        JSON_WriteIndent(text, userData, m);
+        const char *key = json.o.value->GetKeyIndex(i);
+        JSON_WriteString(text, userData, "\"");
+        JSON_WriteString(text, userData, key);
+        JSON_WriteString(text, userData, "\":");
+        JSON_ValueToFile(text, userData, (*json.o.value)[key], m);
+        if(i < json.o.value->Num() - 1)
+        {
+            JSON_WriteString(text, userData, ",");
+            if(indent >= 0)
+                JSON_WriteString(text, userData, "\n");
+        }
+    }
+    if(indent >= 0 && json.o.value->Num() > 0)
+    {
+        JSON_WriteString(text, userData, "\n");
+        JSON_WriteIndent(text, userData, indent);
+    }
+    JSON_WriteString(text, userData, "}");
+}
+
+void JSON_ArrayToFile(JSON_Write_f text, void *userData, const json_t &json, int indent)
+{
+    JSON_WriteString(text, userData, "[");
+    if(indent >= 0 && json.a.value->Num() > 0)
+        JSON_WriteString(text, userData, "\n");
+    for(int i = 0; i < json.a.value->Num(); i++)
+    {
+        int m = indent < 0 ? -1 : (indent + 1);
+        JSON_WriteIndent(text, userData, m);
+        JSON_ValueToFile(text, userData, (*json.a.value)[i], m);
+        if(i < json.a.value->Num() - 1)
+        {
+            JSON_WriteString(text, userData, ",");
+            if(indent >= 0)
+                JSON_WriteString(text, userData, "\n");
+        }
+    }
+    if(indent >= 0 && json.a.value->Num() > 0)
+    {
+        JSON_WriteString(text, userData, "\n");
+        JSON_WriteIndent(text, userData, indent);
+    }
+    JSON_WriteString(text, userData, "]");
 }
 
 static bool JSON_FindValue(const json_t *&cur, const char *token)

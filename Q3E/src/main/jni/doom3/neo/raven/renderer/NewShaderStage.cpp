@@ -20,8 +20,8 @@ void rvNewShaderStageParm__Init(rvNewShaderStage::rvNewShaderStageParm<T> *p) {
     p->numValue = 0;
 }
 
-extern idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version);
-extern idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version);
+extern void RB_GLSL_ConvertGL2ESVertexShader(idStr &ret, const char *text, int version);
+extern void RB_GLSL_ConvertGL2ESFragmentShader(idStr &ret, const char *text, int version);
 
 rvNewShaderStage::rvNewShaderStage()
         : shaderProgram(idGLSLShaderManager::INVALID_SHADER_HANDLE),
@@ -367,14 +367,14 @@ bool rvNewShaderStage::LoadGLSLProgram(const char *name)
         return true;
     }
 
-    idStr vertexSource;
-    if(!LoadSource(name, "glslvp", vertexSource))
+    idStr vertexSourceOrig;
+    if(!LoadSource(name, "glslvp", vertexSourceOrig))
     {
         common->Warning("Load GLSL vertex shader source fail: %s.", name);
         return false;
     }
-    idStr fragmentSource;
-    if(!LoadSource(name, "glslfp", fragmentSource))
+    idStr fragmentSourceOrig;
+    if(!LoadSource(name, "glslfp", fragmentSourceOrig))
     {
         common->Warning("Load GLSL fragment shader source fail: %s.", name);
         return false;
@@ -383,8 +383,10 @@ bool rvNewShaderStage::LoadGLSLProgram(const char *name)
     common->Printf("Convert GLSL shader %s:\n\n", name);
     const int Version = USING_GLES3 ? 300 : 100;
     GLSLShaderProp prop(name);
-    vertexSource = RB_GLSL_ConvertGL2ESVertexShader(vertexSource.c_str(), Version);
-    fragmentSource = RB_GLSL_ConvertGL2ESFragmentShader(fragmentSource.c_str(), Version);
+    idStr vertexSource;
+    RB_GLSL_ConvertGL2ESVertexShader(vertexSource, vertexSourceOrig.c_str(), Version);
+    idStr fragmentSource;
+    RB_GLSL_ConvertGL2ESFragmentShader(fragmentSource, fragmentSourceOrig.c_str(), Version);
     prop.default_vertex_shader_source = vertexSource;
     prop.default_fragment_shader_source = fragmentSource;
     common->Printf("Vertex shader:\n%s\n\n", vertexSource.c_str());

@@ -516,22 +516,56 @@ void R_TestJSON_f(const idCmdArgs &args)
     }
 
     common->Printf("Save to test.json\n");
-	idList<char> text(1024*1024);
-	JSON_ToArray(text, json);
-	//printf("JJJ\n%s\n", text.c_str());
-	fileSystem->WriteFile("test.json", text.Ptr(), text.Num());
+#if 1
+    idList<char> text(1024*1024);
+    JSON_ToArray(text, json);
+    fileSystem->WriteFile("test.json", text.Ptr(), text.Num());
+    text.Clear();
+#elif 1
+    idFile *file = fileSystem->OpenFileWrite("test.json");
+    auto text = [](void *userData, const char *data, int length) -> int {
+        idFile *file = (idFile *)userData;
+        return file->Write(data, length);
+    };
+    JSON_ToFile(text, file, json);
+    fileSystem->CloseFile(file);
+#elif 1
+    FILE *file = fopen("test.json", "wb");
+    auto text = [](void *userData, const char *data, int length) -> int {
+        FILE *file = (FILE *)userData;
+        return fwrite(data, 1, length, file);
+    };
+    JSON_ToFile(text, file, json);
+    fclose(file);
+#else
+    idStr text;
+    JSON_ToString(text, json);
+    fileSystem->WriteFile("test.json", text.c_str(), text.Length());
+    text.Clear();
+#endif
 	JSON_Free(json);
 
-	text.Clear();
 	ok = JSON_Parse(json, "test.json");
     printf("JSON parse test: %d\n", ok);
 	if(!ok)
 		return;
 
     common->Printf("Save to test2.json\n");
-	JSON_ToArray(text, json, -1);
-	//printf("JJJ\n%s\n", text.c_str());
-	fileSystem->WriteFile("test2.json", text.Ptr(), text.Num());
+#if 1
+    JSON_ToArray(text, json, -1);
+    fileSystem->WriteFile("test2.json", text.Ptr(), text.Num());
+#elif 1
+    file = fileSystem->OpenFileWrite("test2.json");
+    JSON_ToFile(text, file, json, -1);
+    fileSystem->CloseFile(file);
+#elif 1
+    file = fopen("test2.json", "wb");
+    JSON_ToFile(text, file, json);
+    fclose(file);
+#else
+    JSON_ToString(text, json, -1);
+    fileSystem->WriteFile("test.json", text.c_str(), text.Length());
+#endif
 	JSON_Free(json);
 }
 #endif

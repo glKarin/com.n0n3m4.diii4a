@@ -231,12 +231,15 @@ typedef union json_u
 typedef idList<union json_u> jsonArray_t;
 typedef jsonMap_t<union json_u> jsonObject_t;
 
+typedef int (* JSON_Write_f)(void *userData, const char *buf, int length);
+
 void JSON_Init(json_t &json);
 bool JSON_Parse(json_t &json, const char *path);
 bool JSON_Parse(json_t &json, const char *data, int length);
 bool JSON_Parse(json_t &json, idLexer &lexer);
 void JSON_ToString(idStr &text, const json_t &json, int indent = 0);
 void JSON_ToArray(idList<char> &array, const json_t &json, int indent = 0);
+void JSON_ToFile(JSON_Write_f func, void *userData, const json_t &json, int indent = 0);
 void JSON_Free(json_t &json);
 bool JSON_IsNull(const json_t &json);
 
