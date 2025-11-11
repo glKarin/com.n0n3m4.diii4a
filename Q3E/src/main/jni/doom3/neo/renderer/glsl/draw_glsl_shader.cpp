@@ -48,18 +48,15 @@ GLint GL_GetUniformLocation(GLuint program, const char *name)
 static idCVar harm_r_useGLSLShaderBinaryCache("harm_r_useGLSLShaderBinaryCache", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Use/cache GLSL shader compiled binary(OpenGL ES2.0 not support)");
 #endif
 
+// change CVAR_INIT to CVAR_ARCHIVE
 #define _GLPROGS "glslprogs" // "gl2progs"
-static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_RENDERER | CVAR_INIT, "Setup external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
+static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", _GLPROGS, CVAR_RENDERER | CVAR_ARCHIVE, "Setup external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
 
 #ifdef GL_ES_VERSION_3_0
-#define _GLBINPROGS "glslbinprogs"
-static idCVar	harm_r_shaderProgramBinaryDir("harm_r_shaderProgramBinaryDir", "", CVAR_RENDERER | CVAR_INIT, "Setup external OpenGLES2 GLSL shader program binary directory path(default is empty, means using `" _GLBINPROGS "`).");
-
 #define _GL3PROGS "glsl3progs"
-static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", "", CVAR_RENDERER | CVAR_INIT, "Setup external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
+static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", _GL3PROGS, CVAR_RENDERER | CVAR_ARCHIVE, "Setup external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
 
-#define _GL3BINPROGS "glsl3binprogs"
-static idCVar	harm_r_shaderProgramBinaryES3Dir("harm_r_shaderProgramBinaryES3Dir", "", CVAR_RENDERER | CVAR_INIT, "Setup external OpenGLES3 GLSL shader program binary directory path(default is empty, means using `" _GL3BINPROGS "`).");
+#define _GLPROGSBIN "bin"
 #endif
 
 static bool glslInitialized = false;
@@ -73,6 +70,8 @@ extern bool r_useDepthTexture;
 extern bool r_useCubeDepthTexture;
 extern bool r_usePackColorAsDepth;
 #endif
+
+static idStr RB_GLSL_GetExternalShaderSourcePath(void);
 
 #ifdef _MULTITHREAD
 void RB_GLSL_HandleShaders(void)

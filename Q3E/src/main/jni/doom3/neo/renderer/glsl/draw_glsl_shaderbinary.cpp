@@ -68,21 +68,11 @@ static void RB_GLSL_FreeShaderBinaryCache(glslShaderBinaryCache_t *cache)
 
 static idStr RB_GLSL_GetExternalShaderBinaryPath(bool external)
 {
-    idStr	fullPath;
-#ifdef GL_ES_VERSION_3_0
-    if(USING_GLES3)
-    {
-        fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramBinaryES3Dir");
-        if(fullPath.IsEmpty())
-            fullPath = _GL3BINPROGS;
-    }
-    else
-#endif
-    {
-        fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramBinaryDir");
-        if(fullPath.IsEmpty())
-            fullPath = _GLBINPROGS;
-    }
+    idStr	fullPath = RB_GLSL_GetExternalShaderSourcePath();
+
+    fullPath.StripTrailing('/');
+    fullPath.StripTrailing('\\');
+    fullPath. Append(_GLPROGSBIN);
 
     if(external)
         fullPath.AppendPath("external");

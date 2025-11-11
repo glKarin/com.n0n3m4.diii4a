@@ -120,20 +120,20 @@ static void RB_GLSL_ExpandMacros(idStr &res, const char *source, const char *mac
     // printf("%d|%s|\n%s\n", n, macros, res.c_str());
 }
 
-static idStr RB_GLSL_GetExternalShaderSourcePath(void)
+idStr RB_GLSL_GetExternalShaderSourcePath(void)
 {
     idStr	fullPath;
 #ifdef GL_ES_VERSION_3_0
     if(USING_GLES3)
     {
-        fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramES3Dir");
+        fullPath = harm_r_shaderProgramES3Dir.GetString();
         if(fullPath.IsEmpty())
             fullPath = _GL3PROGS;
     }
     else
 #endif
     {
-        fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramDir");
+        fullPath = harm_r_shaderProgramDir.GetString();
         if(fullPath.IsEmpty())
             fullPath = _GLPROGS;
     }
