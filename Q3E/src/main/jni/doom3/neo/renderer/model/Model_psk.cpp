@@ -824,26 +824,26 @@ bool idModelPsk::ToObj(objModel_t &objModel, bool keepDup) const
 
 void idModelPsk::Print(void) const
 {
-#define PSK_PART_PRINT(name, list, all, fmt, ...) \
+#define MODEL_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
 	if(all) \
     for(int i = 0; i < list.Num(); i++) {  \
          Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
-    PSK_PART_PRINT(vertex, vertexes, false, "(%f, %f, %f)   ", vertexes[i][0], vertexes[i][1], vertexes[i][2])
-    PSK_PART_PRINT(wedge, wedges, false, "vertex=%u uv=(%f, %f) mat=%d   ", wedges[i].vertex_index, wedges[i].u, wedges[i].v, wedges[i].material_index)
-    PSK_PART_PRINT(face, faces, false, "wedge=(%u, %u, %u) mat=(%d, %d) sg=%u   ", faces[i].wedge_index1, faces[i].wedge_index2, faces[i].wedge_index3, faces[i].material_index, faces[i].aux_material_index, faces[i].smooth_group)
-    PSK_PART_PRINT(material, materials, true, "%s   ", materials[i].name)
-    PSK_PART_PRINT(weight, weights, false, "weight=%f parent=%d bone=%d   ", weights[i].weight, weights[i].vertex_index, weights[i].bone_index)
-    PSK_PART_PRINT(bone, bones, true, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
-    PSK_PART_PRINT(normal, normals, false, "(%f, %f, %f)   ", normals[i][0], normals[i][1], normals[i][2])
-    PSK_PART_PRINT(color, colors, false, "(%u, %u, %u, %u)   ", colors[i].r, colors[i].g, colors[i].b, colors[i].a)
-    PSK_PART_PRINT(extra uv, uvs, false, "(%f, %f)   ", uvs[i][0], uvs[i][1])
-    PSK_PART_PRINT(morph info, morphInfos, false, "%s vertex count=%d   ", morphInfos[i].name, morphInfos[i].vertex_count)
-    PSK_PART_PRINT(morph data, morphDatas, false, "position_delta=(%f, %f, %f) tangent_z_delta=(%f, %f, %f) point index=%d   ", morphDatas[i].position_deltax, morphDatas[i].position_deltay, morphDatas[i].position_deltaz, morphDatas[i].tangent_z_deltax, morphDatas[i].tangent_z_deltay, morphDatas[i].tangent_z_deltaz, morphDatas[i].point_index)
+    MODEL_PART_PRINT(vertex, vertexes, false, "(%f, %f, %f)   ", vertexes[i][0], vertexes[i][1], vertexes[i][2])
+    MODEL_PART_PRINT(wedge, wedges, false, "vertex=%u uv=(%f, %f) mat=%d   ", wedges[i].vertex_index, wedges[i].u, wedges[i].v, wedges[i].material_index)
+    MODEL_PART_PRINT(face, faces, false, "wedge=(%u, %u, %u) mat=(%d, %d) sg=%u   ", faces[i].wedge_index1, faces[i].wedge_index2, faces[i].wedge_index3, faces[i].material_index, faces[i].aux_material_index, faces[i].smooth_group)
+    MODEL_PART_PRINT(material, materials, true, "%s   ", materials[i].name)
+    MODEL_PART_PRINT(weight, weights, false, "weight=%f parent=%d bone=%d   ", weights[i].weight, weights[i].vertex_index, weights[i].bone_index)
+    MODEL_PART_PRINT(bone, bones, true, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
+    MODEL_PART_PRINT(normal, normals, false, "(%f, %f, %f)   ", normals[i][0], normals[i][1], normals[i][2])
+    MODEL_PART_PRINT(color, colors, false, "(%u, %u, %u, %u)   ", colors[i].r, colors[i].g, colors[i].b, colors[i].a)
+    MODEL_PART_PRINT(extra uv, uvs, false, "(%f, %f)   ", uvs[i][0], uvs[i][1])
+    MODEL_PART_PRINT(morph info, morphInfos, false, "%s vertex count=%d   ", morphInfos[i].name, morphInfos[i].vertex_count)
+    MODEL_PART_PRINT(morph data, morphDatas, false, "position_delta=(%f, %f, %f) tangent_z_delta=(%f, %f, %f) point index=%d   ", morphDatas[i].position_deltax, morphDatas[i].position_deltay, morphDatas[i].position_deltaz, morphDatas[i].tangent_z_deltax, morphDatas[i].tangent_z_deltay, morphDatas[i].tangent_z_deltaz, morphDatas[i].point_index)
 
-#undef PSK_PART_PRINT
+#undef MODEL_PART_PRINT
 }
 
 #ifdef _MODEL_OBJ

@@ -2379,20 +2379,8 @@ void R_InitCommands(void)
 #ifdef _NEW_FONT_TOOLS
     R_Font_AddCommand();
 #endif
-#ifdef _MODEL_PSK
-    R_ActorX_AddCommand();
-#endif
-#ifdef _MODEL_IQM
-    R_IQM_AddCommand();
-#endif
-#ifdef _MODEL_SMD
-    R_SMD_AddCommand();
-#endif
-#ifdef _MODEL_GLTF
-    R_GLTF_AddCommand();
-#endif
 #ifdef _MODEL_MD5_EXT
-    R_Md5Convert_AddCommand();
+    R_Model_AddCommand();
 #endif
 }
 

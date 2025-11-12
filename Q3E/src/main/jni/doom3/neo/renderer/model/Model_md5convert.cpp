@@ -36,6 +36,7 @@ e.g. using psk/psa as md5mesh/md5anim
     "addOrigin" "0" // prepend 'origin' bone to front, bool, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
     "offset" "0 0 0" // root bone origin offset, vector, default '0 0 0'
     "rotation" "0 0 0" // root bone orient rotation, vector, default '0 0 0'. value is angle degree(-360 - 360)
+    "savePath" "" // output path, string, default is empty, it will be output to same path
 
     "anim idle" "other/from_other_type_animation_idle.md5anim" // psa extension
     "anim stand" "other/from_other_type_animation_stand.md5anim" // psa extension
@@ -100,6 +101,7 @@ static bool R_Model_ParseMd5ConvertDef(md5ConvertDef_t &convert, const idDecl *d
 		convert.rotation = angle.ToMat3();
 	else
 		convert.rotation.Identity();
+    convert.savePath = def->dict.GetString("savePath", "");
 
 	const char prefix[] = "anim ";
     const idKeyValue *kv = def->dict.MatchPrefix(prefix);
@@ -141,6 +143,7 @@ static bool R_Model_ConvertToMd5(const idDecl *decl)
             {"gltf", R_Model_HandleGLTF, },
             {"glb", R_Model_HandleGLTF, },
 #endif
+            {"md5meshv6", R_Model_HandleMd5V6, },
     };
 
     for(int i = 0; i < sizeof(SupportConverters) / sizeof(SupportConverters[0]); i++)
@@ -318,6 +321,7 @@ void R_Model_ClearMd5Convert(md5ConvertDef_t &convert)
     convert.rotation.Identity();
     convert.anims.Clear();
     convert.animNames.Clear();
+    convert.savePath.Clear();
 }
 
 void R_Model_PrintMd5Convert(md5ConvertDef_t &convert)
@@ -330,6 +334,7 @@ void R_Model_PrintMd5Convert(md5ConvertDef_t &convert)
     common->Printf("Offset: %f, %f, %f\n", convert.offset[0], convert.offset[1], convert.offset[2]);
     idAngles angles = convert.rotation.ToAngles();
     common->Printf("Rotation angle: %f, %f, %f\n", angles[0], angles[1], angles[2]);
+    common->Printf("Save path: %s\n", convert.savePath.c_str());
     common->Printf("Animations %d\n", convert.anims.Num());
     for(int i = 0; i < convert.anims.Num(); i++)
         common->Printf("  %d: %s\n", i, convert.anims[i].c_str());
@@ -373,6 +378,8 @@ int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, md5ConvertDef_t &conve
                 parm = CCP_ROTATION;
             else if(!idStr::Icmp("animation", arg))
                 parm = CCP_ANIMATIONS;
+            else if(!idStr::Icmp("savePath", arg))
+                parm = CCP_SAVEPATH;
             else
                 common->Warning("Unknown param name '%s'", arg);
 
@@ -415,6 +422,10 @@ int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, md5ConvertDef_t &conve
                     convert.anims.AddUnique(arg);
                     res |= CCP_ANIMATIONS;
                     break;
+                case CCP_SAVEPATH:
+                    convert.savePath = arg;
+                    res |= CCP_SCALE;
+                    break;
                 default:
                     common->Warning("Unknown param type '%d'", parm);
                     break;
@@ -443,7 +454,7 @@ int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, md5ConvertDef_t &conve
     return res;
 }
 
-int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, float *scale, bool *addOrigin, idVec3 *offset, idMat3 *rotation, idStrList *anims)
+int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, float *scale, bool *addOrigin, idVec3 *offset, idMat3 *rotation, idStrList *anims, idStr *savePath)
 {
     md5ConvertDef_t convert;
     R_Model_ClearMd5Convert(convert);
@@ -460,10 +471,32 @@ int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, float *sc
         *offset = convert.offset;
     if(rotation && (res & CCP_ROTATION))
         *rotation = convert.rotation;
+    if(savePath && (res & CCP_SAVEPATH))
+        *savePath = convert.savePath;
     if(anims && (res & CCP_ANIMATIONS))
         *anims = convert.anims;
 
     return res;
+}
+
+idStr R_Model_MakeOutputPath(const char *originPath, const char *extName, const char *savePath)
+{
+    idStr newPath;
+
+    if(savePath && savePath[0])
+    {
+        newPath = savePath;
+        idStr str = originPath;
+        str.StripPath();
+        newPath.AppendPath(str);
+    }
+    else
+        newPath = originPath;
+
+    if(extName && extName[0])
+        newPath.SetFileExtension(extName);
+
+    return newPath;
 }
 
 #if 1

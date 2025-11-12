@@ -1281,45 +1281,45 @@ void idModelIqm::Print(void) const
             header.num_comment, header.ofs_comment,
             header.num_extensions, header.ofs_extensions
     );
-#define IQM_PART_PRINT(x) if(IsTypeMarked(x)) { Sys_Printf(#x "\n"); }
-    IQM_PART_PRINT(IQM_POSITION)
-    IQM_PART_PRINT(IQM_TEXCOORD)
-    IQM_PART_PRINT(IQM_NORMAL)
-    IQM_PART_PRINT(IQM_TANGENT)
-    IQM_PART_PRINT(IQM_BLENDINDEXES)
-    IQM_PART_PRINT(IQM_BLENDWEIGHTS)
-    IQM_PART_PRINT(IQM_COLOR)
-    IQM_PART_PRINT(IQM_CUSTOM)
-    IQM_PART_PRINT(IQM_TRIANGLE)
-    IQM_PART_PRINT(IQM_MESH)
-    IQM_PART_PRINT(IQM_BOUNDS)
-    IQM_PART_PRINT(IQM_JOINT)
-    IQM_PART_PRINT(IQM_TEXT)
-    IQM_PART_PRINT(IQM_ANIM)
-    IQM_PART_PRINT(IQM_POSE)
-#undef IQM_PART_PRINT
-#define IQM_PART_PRINT(name, list, all, fmt, ...) \
+#define MODEL_PART_PRINT(x) if(IsTypeMarked(x)) { Sys_Printf(#x "\n"); }
+    MODEL_PART_PRINT(IQM_POSITION)
+    MODEL_PART_PRINT(IQM_TEXCOORD)
+    MODEL_PART_PRINT(IQM_NORMAL)
+    MODEL_PART_PRINT(IQM_TANGENT)
+    MODEL_PART_PRINT(IQM_BLENDINDEXES)
+    MODEL_PART_PRINT(IQM_BLENDWEIGHTS)
+    MODEL_PART_PRINT(IQM_COLOR)
+    MODEL_PART_PRINT(IQM_CUSTOM)
+    MODEL_PART_PRINT(IQM_TRIANGLE)
+    MODEL_PART_PRINT(IQM_MESH)
+    MODEL_PART_PRINT(IQM_BOUNDS)
+    MODEL_PART_PRINT(IQM_JOINT)
+    MODEL_PART_PRINT(IQM_TEXT)
+    MODEL_PART_PRINT(IQM_ANIM)
+    MODEL_PART_PRINT(IQM_POSE)
+#undef MODEL_PART_PRINT
+#define MODEL_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num());   \
     if(all)                                              \
     for(int i = 0; i < list.Num(); i++) {  \
          Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
-    IQM_PART_PRINT(text, texts, true, "%s, offset=%u   ", texts[i].text.c_str(), texts[i].offset)
-    IQM_PART_PRINT(vertex, vertexes, false, "(%f, %f, %f)   ", vertexes[i][0], vertexes[i][1], vertexes[i][2])
-    IQM_PART_PRINT(texcoord, texcoords, false, "(%f, %f)   ", texcoords[i][0], texcoords[i][1])
-    IQM_PART_PRINT(normal, normals, false, "(%f, %f, %f)   ", normals[i][0], normals[i][1], normals[i][2])
-    IQM_PART_PRINT(color, colors, false, "(%u, %u, %u, %u)   ", colors[i].color[0], colors[i].color[1], colors[i].color[2], colors[i].color[3])
-    IQM_PART_PRINT(tangent, tangents, false, "(%f, %f, %f)   ", tangents[i][0], tangents[i][1], tangents[i][2])
-    IQM_PART_PRINT(blend index, blendIndexes, false, "(%u, %u, %u, %u)   ", blendIndexes[i].index[0], blendIndexes[i].index[1], blendIndexes[i].index[2], blendIndexes[i].index[3])
-    IQM_PART_PRINT(blend weight, blendWeights, false, "(%u, %u, %u, %u)   ", blendWeights[i].weight[0], blendWeights[i].weight[1], blendWeights[i].weight[2], blendWeights[i].weight[3])
-    IQM_PART_PRINT(triangle, triangles, false, "(%d, %d, %d)   ", triangles[i].elements[0], triangles[i].elements[1], triangles[i].elements[2])
-    IQM_PART_PRINT(mesh, meshes, true, "name=%u, material=%u, vertex=(%u, %u), triangle=(%u, %u)   ", meshes[i].name, meshes[i].material, meshes[i].first_vertex, meshes[i].num_vertexes, meshes[i].first_triangle, meshes[i].num_triangles)
-    IQM_PART_PRINT(bounds, bounds, false, "min=(%f, %f, %f), max=(%f, %f, %f), xyradius=%f, radius=%f   ", bounds[i].bbmin[0], bounds[i].bbmin[1], bounds[i].bbmin[2], bounds[i].bbmax[0], bounds[i].bbmax[1], bounds[i].bbmax[2], bounds[i].xyradius, bounds[i].radius)
-    IQM_PART_PRINT(joint, joints, true, "name=%u, parent=%d, translation=(%f, %f, %f), rotation=(%f, %f, %f, %f), scale=(%f, %f, %f)   ", joints[i].name, joints[i].parent, joints[i].translate[0], joints[i].translate[1], joints[i].translate[2], joints[i].rotate[0], joints[i].rotate[1], joints[i].rotate[2], joints[i].rotate[2], joints[i].scale[0], joints[i].scale[1], joints[i].scale[2])
-    IQM_PART_PRINT(animation, anims, true, "name=%u, frames=(%u, %u), framerate=%f, flags=0x%x   ", anims[i].name, anims[i].first_frame, anims[i].num_frames, anims[i].framerate, anims[i].flags)
+    MODEL_PART_PRINT(text, texts, true, "%s, offset=%u   ", texts[i].text.c_str(), texts[i].offset)
+    MODEL_PART_PRINT(vertex, vertexes, false, "(%f, %f, %f)   ", vertexes[i][0], vertexes[i][1], vertexes[i][2])
+    MODEL_PART_PRINT(texcoord, texcoords, false, "(%f, %f)   ", texcoords[i][0], texcoords[i][1])
+    MODEL_PART_PRINT(normal, normals, false, "(%f, %f, %f)   ", normals[i][0], normals[i][1], normals[i][2])
+    MODEL_PART_PRINT(color, colors, false, "(%u, %u, %u, %u)   ", colors[i].color[0], colors[i].color[1], colors[i].color[2], colors[i].color[3])
+    MODEL_PART_PRINT(tangent, tangents, false, "(%f, %f, %f)   ", tangents[i][0], tangents[i][1], tangents[i][2])
+    MODEL_PART_PRINT(blend index, blendIndexes, false, "(%u, %u, %u, %u)   ", blendIndexes[i].index[0], blendIndexes[i].index[1], blendIndexes[i].index[2], blendIndexes[i].index[3])
+    MODEL_PART_PRINT(blend weight, blendWeights, false, "(%u, %u, %u, %u)   ", blendWeights[i].weight[0], blendWeights[i].weight[1], blendWeights[i].weight[2], blendWeights[i].weight[3])
+    MODEL_PART_PRINT(triangle, triangles, false, "(%d, %d, %d)   ", triangles[i].elements[0], triangles[i].elements[1], triangles[i].elements[2])
+    MODEL_PART_PRINT(mesh, meshes, true, "name=%u, material=%u, vertex=(%u, %u), triangle=(%u, %u)   ", meshes[i].name, meshes[i].material, meshes[i].first_vertex, meshes[i].num_vertexes, meshes[i].first_triangle, meshes[i].num_triangles)
+    MODEL_PART_PRINT(bounds, bounds, false, "min=(%f, %f, %f), max=(%f, %f, %f), xyradius=%f, radius=%f   ", bounds[i].bbmin[0], bounds[i].bbmin[1], bounds[i].bbmin[2], bounds[i].bbmax[0], bounds[i].bbmax[1], bounds[i].bbmax[2], bounds[i].xyradius, bounds[i].radius)
+    MODEL_PART_PRINT(joint, joints, true, "name=%u, parent=%d, translation=(%f, %f, %f), rotation=(%f, %f, %f, %f), scale=(%f, %f, %f)   ", joints[i].name, joints[i].parent, joints[i].translate[0], joints[i].translate[1], joints[i].translate[2], joints[i].rotate[0], joints[i].rotate[1], joints[i].rotate[2], joints[i].rotate[2], joints[i].scale[0], joints[i].scale[1], joints[i].scale[2])
+    MODEL_PART_PRINT(animation, anims, true, "name=%u, frames=(%u, %u), framerate=%f, flags=0x%x   ", anims[i].name, anims[i].first_frame, anims[i].num_frames, anims[i].framerate, anims[i].flags)
 
-#undef IQM_PART_PRINT
+#undef MODEL_PART_PRINT
 }
 
 const char * idModelIqm::GetText(unsigned int offset) const
@@ -1368,19 +1368,13 @@ static void R_ConvertIqmToObj_f(const idCmdArgs &args)
 }
 #endif
 
-static void ArgCompletion_iqm(const idCmdArgs &args, void(*callback)(const char *s))
-{
-    cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, ".iqm"
-            , NULL);
-}
-
-static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idStrList *animList = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idStrList *animList = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
     int ret = 0;
 
     idModelIqm iqm;
     idMd5MeshFile md5MeshFile;
-    bool iqmRes = false;
+    bool meshRes = false;
     if(iqm.Parse(filePath, animList ? idModelIqm::PARSE_FRAME : idModelIqm::PARSE_JOINT))
     {
         //iqm.Print();
@@ -1389,8 +1383,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
 			if(doMesh)
 			{
 				md5MeshFile.Commandline().Append(va(" - %s", filePath));
-				idStr md5meshPath = filePath;
-				md5meshPath.SetFileExtension(".md5mesh");
+                idStr md5meshPath = R_Model_MakeOutputPath(filePath, ".md5mesh", savePath);
 				md5MeshFile.Write(md5meshPath.c_str());
 				common->Printf("Convert md5mesh successful: %s -> %s\n", filePath, md5meshPath.c_str());
 				ret++;
@@ -1399,7 +1392,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
 			{
 				common->Printf("Convert md5mesh successful: %s\n", filePath);
 			}
-			iqmRes = true;
+			meshRes = true;
 		}
 		else
 			common->Warning("Convert md5mesh fail: %s", filePath);
@@ -1407,7 +1400,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
     else
         common->Warning("Parse iqm fail: %s", filePath);
 
-    if(!iqmRes)
+    if(!meshRes)
         return ret;
 
     if(!animList)
@@ -1452,7 +1445,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
             md5animPath = filePath;
             md5animPath.StripFilename();
             md5animPath.AppendPath(animName);
-            md5animPath.SetFileExtension(".md5anim");
+            md5animPath = R_Model_MakeOutputPath(md5animPath, ".md5anim", savePath);
 		}
 		else
 		{
@@ -1463,7 +1456,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
 			ok = iqm.ToMd5Anim(md5AnimFile, md5MeshFile, name.c_str(), scale, addOrigin, offset, rotation);
 			animName = anim;
             md5animPath = anim;
-            md5animPath.SetFileExtension(".md5anim");
+            md5animPath = R_Model_MakeOutputPath(anim, ".md5anim", savePath);
 		}
         if(ok)
         {
@@ -1479,19 +1472,19 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
     return ret;
 }
 
-ID_INLINE static int R_ConvertIqmMesh(const char *filePath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertIqmMesh(const char *filePath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertIqmToMd5(filePath, true, NULL, scale, addOrigin, offset, rotation);
+    return R_ConvertIqmToMd5(filePath, true, NULL, scale, addOrigin, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertIqmAnim(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertIqmAnim(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertIqmToMd5(filePath, false, &animList, scale, addOrigin, offset, rotation);
+    return R_ConvertIqmToMd5(filePath, false, &animList, scale, addOrigin, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertIqm(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertIqm(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertIqmToMd5(filePath, true, &animList, scale, addOrigin, offset, rotation);
+    return R_ConvertIqmToMd5(filePath, true, &animList, scale, addOrigin, offset, rotation, savePath);
 }
 
 static void R_ConvertIqmToMd5mesh_f(const idCmdArgs &args)
@@ -1508,13 +1501,14 @@ static void R_ConvertIqmToMd5mesh_f(const idCmdArgs &args)
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5MESH_USAGE(iqm), args.Argv(0));
         return;
     }
-    R_ConvertIqmMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertIqmMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertIqmToMd5anim_f(const idCmdArgs &args)
@@ -1531,13 +1525,14 @@ static void R_ConvertIqmToMd5anim_f(const idCmdArgs &args)
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5ANIM_ALL_USAGE(iqm), args.Argv(0));
         return;
     }
-    R_ConvertIqmAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertIqmAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertIqmToMd5_f(const idCmdArgs &args)
@@ -1554,13 +1549,14 @@ static void R_ConvertIqmToMd5_f(const idCmdArgs &args)
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5_ALL_USAGE(iqm), args.Argv(0));
         return;
     }
-    R_ConvertIqm(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertIqm(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 bool R_Model_HandleIqm(const md5ConvertDef_t &convert)
@@ -1569,13 +1565,20 @@ bool R_Model_HandleIqm(const md5ConvertDef_t &convert)
 				convert.scale, 
 				convert.addOrigin,
 				convert.offset.IsZero() ? NULL : &convert.offset, 
-				convert.rotation.IsIdentity() ? NULL : &convert.rotation
+				convert.rotation.IsIdentity() ? NULL : &convert.rotation,
+                convert.savePath.IsEmpty() ? NULL : convert.savePath.c_str()
 				) != 1 + convert.anims.Num())
     {
         common->Warning("Convert iqm to md5mesh/md5anim fail in entityDef '%s'", convert.def->GetName());
         return false;
     }
     return true;
+}
+
+static void ArgCompletion_iqm(const idCmdArgs &args, void(*callback)(const char *s))
+{
+    cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, ".iqm"
+            , NULL);
 }
 
 void R_IQM_AddCommand(void)

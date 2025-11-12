@@ -1,8 +1,6 @@
 #include "Model_psa.h"
 #include "Model_md5anim.h"
 
-#include "Model_md5convert.h"
-
 idModelPsa::idModelPsa(void)
 : file(NULL),
   types(0)
@@ -485,22 +483,22 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
 
 void idModelPsa::Print(void) const
 {
-#define PSK_PART_PRINT(name, list, all, fmt, ...) \
+#define MODEL_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
 	if(all) \
     for(int i = 0; i < list.Num(); i++) {    \
          Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
-    PSK_PART_PRINT(bone, bones, true, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
-    PSK_PART_PRINT(animinfo, animInfos, true, "action=%s group=%s bones=%d root_include=%d key_compression_style=%d key_quotum=%d key_reduction=%f track_time=%f anim_rate=%f start_bone=%d first_raw_frame=%d num_raw_frames=%d  ", animInfos[i].action_name, animInfos[i].group_name, animInfos[i].total_bones, animInfos[i].root_include, animInfos[i].key_compression_style, animInfos[i].key_quotum, animInfos[i].key_reduction, animInfos[i].track_time, animInfos[i].anim_rate, animInfos[i].start_bone, animInfos[i].first_raw_frame, animInfos[i].num_raw_frames)
-//#undef PSK_PART_PRINT
-//#define PSK_PART_PRINT(name, list, fmt, ...) \
+    MODEL_PART_PRINT(bone, bones, true, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
+    MODEL_PART_PRINT(animinfo, animInfos, true, "action=%s group=%s bones=%d root_include=%d key_compression_style=%d key_quotum=%d key_reduction=%f track_time=%f anim_rate=%f start_bone=%d first_raw_frame=%d num_raw_frames=%d  ", animInfos[i].action_name, animInfos[i].group_name, animInfos[i].total_bones, animInfos[i].root_include, animInfos[i].key_compression_style, animInfos[i].key_quotum, animInfos[i].key_reduction, animInfos[i].track_time, animInfos[i].anim_rate, animInfos[i].start_bone, animInfos[i].first_raw_frame, animInfos[i].num_raw_frames)
+//#undef MODEL_PART_PRINT
+//#define MODEL_PART_PRINT(name, list, fmt, ...) \
 //    Sys_Printf(#name " num: %d\n", list.Num()); \
 //    for(int i = 0; i < animInfos[0].total_bones; i++) {    \
 //         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
 //    }
-    //PSK_PART_PRINT(animkey, animKeys, "pos=(%f, %f, %f) quat=(%f, %f, %f, %f) time=%f   ", animKeys[i].posx, animKeys[i].posy, animKeys[i].posz, animKeys[i].quatx, animKeys[i].quaty, animKeys[i].quatz, animKeys[i].quatw, animKeys[i].time)
+    //MODEL_PART_PRINT(animkey, animKeys, "pos=(%f, %f, %f) quat=(%f, %f, %f, %f) time=%f   ", animKeys[i].posx, animKeys[i].posy, animKeys[i].posz, animKeys[i].quatx, animKeys[i].quaty, animKeys[i].quatz, animKeys[i].quatw, animKeys[i].time)
 
     /*
 Header ANIMHEAD, type=20100422, size=0, count=0
@@ -511,26 +509,25 @@ Header SCALEKEY, type=0, size=16, count=0
 animinfo num: 1
 action=girl015_04_wp06a_base_idle01 group=None bones=243 root_include=0 key_compression_style=0 key_quotum=39609 key_reduction=0.000000 track_time=163.000000 anim_rate=30.185184 start_bone=0 first_raw_frame=0 num_raw_frames=163  ------------------------------------------------------
      */
-#undef PSK_PART_PRINT
+#undef MODEL_PART_PRINT
 }
 
-static int R_ConvertPskPsaToMd5(const char *meshPath, bool doPsk = true, const idStrList *animPaths = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+static int R_ConvertPskPsaToMd5(const char *meshPath, bool doMesh = true, const idStrList *animPaths = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
 	int ret = 0;
 
     idModelPsk psk;
     idMd5MeshFile md5MeshFile;
-    bool pskRes = false;
+    bool meshRes = false;
     if(psk.Parse(meshPath))
     {
         //psk.Print();
 		if(psk.ToMd5Mesh(md5MeshFile, scale, addOrigin, offset, rotation))
 		{
-			if(doPsk)
+			if(doMesh)
 			{
 				md5MeshFile.Commandline().Append(va(" - %s", meshPath));
-				idStr md5meshPath = meshPath;
-				md5meshPath.SetFileExtension(".md5mesh");
+                idStr md5meshPath = R_Model_MakeOutputPath(meshPath, ".md5mesh", savePath);
 				md5MeshFile.Write(md5meshPath.c_str());
 				common->Printf("Convert md5mesh successful: %s -> %s\n", meshPath, md5meshPath.c_str());
 				ret++;
@@ -539,7 +536,7 @@ static int R_ConvertPskPsaToMd5(const char *meshPath, bool doPsk = true, const i
 			{
 				common->Printf("Convert md5mesh successful: %s\n", meshPath);
 			}
-			pskRes = true;
+			meshRes = true;
 		}
 		else
 			common->Warning("Convert md5mesh fail: %s", meshPath);
@@ -547,7 +544,7 @@ static int R_ConvertPskPsaToMd5(const char *meshPath, bool doPsk = true, const i
     else
         common->Warning("Parse psk fail: %s", meshPath);
 
-    if(!pskRes)
+    if(!meshRes)
         return ret;
 
     if(!animPaths)
@@ -555,44 +552,43 @@ static int R_ConvertPskPsaToMd5(const char *meshPath, bool doPsk = true, const i
 
 	for(int i = 0; i < animPaths->Num(); i++)
 	{
-		const char *psaPath = (*animPaths)[i];
+		const char *animPath = (*animPaths)[i];
 		idModelPsa psa;
-		if(psa.Parse(psaPath))
+		if(psa.Parse(animPath))
 		{
 			//psa.Print();
             idMd5AnimFile md5AnimFile;
             if(psa.ToMd5Anim(psk, md5AnimFile, md5MeshFile, scale, addOrigin, offset, rotation))
             {
-                md5AnimFile.Commandline().Append(va(" - %s", psaPath));
-                idStr md5animPath = psaPath;
-                md5animPath.SetFileExtension(".md5anim");
+                md5AnimFile.Commandline().Append(va(" - %s", animPath));
+                idStr md5animPath = R_Model_MakeOutputPath(animPath, ".md5anim", savePath);
                 md5AnimFile.Write(md5animPath.c_str());
-                common->Printf("Convert md5anim successful: %s -> %s\n", psaPath, md5animPath.c_str());
+                common->Printf("Convert md5anim successful: %s -> %s\n", animPath, md5animPath.c_str());
                 ret++;
             }
             else
-                common->Warning("Convert md5anim fail: %s", psaPath);
+                common->Warning("Convert md5anim fail: %s", animPath);
 		}
 		else
-			common->Warning("Parse psa fail: %s", psaPath);
+			common->Warning("Parse psa fail: %s", animPath);
 	}
 
 	return ret;
 }
 
-ID_INLINE static int R_ConvertPsk(const char *meshPath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertPsk(const char *meshPath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-	return R_ConvertPskPsaToMd5(meshPath, true, NULL, scale, addOrigin, offset, rotation);
+	return R_ConvertPskPsaToMd5(meshPath, true, NULL, scale, addOrigin, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertPsa(const char *meshPath, const idStrList &animPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertPsa(const char *meshPath, const idStrList &animPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-	return R_ConvertPskPsaToMd5(meshPath, false, &animPaths, scale, addOrigin, offset, rotation);
+	return R_ConvertPskPsaToMd5(meshPath, false, &animPaths, scale, addOrigin, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertPskPsa(const char *meshPath, const idStrList &animPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertPskPsa(const char *meshPath, const idStrList &animPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-	return R_ConvertPskPsaToMd5(meshPath, true, &animPaths, scale, addOrigin, offset, rotation);
+	return R_ConvertPskPsaToMd5(meshPath, true, &animPaths, scale, addOrigin, offset, rotation, savePath);
 }
 
 static void R_ConvertPskToMd5mesh_f(const idCmdArgs &args)
@@ -608,13 +604,14 @@ static void R_ConvertPskToMd5mesh_f(const idCmdArgs &args)
     bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5MESH_USAGE(psk), args.Argv(0));
         return;
     }
-    R_ConvertPsk(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertPsk(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertPsaToMd5anim_f(const idCmdArgs &args)
@@ -631,13 +628,14 @@ static void R_ConvertPsaToMd5anim_f(const idCmdArgs &args)
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5ANIM_USAGE(psk, psa), args.Argv(0));
         return;
     }
-    R_ConvertPsa(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertPsa(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertPskPsaToMd5_f(const idCmdArgs &args)
@@ -654,25 +652,14 @@ static void R_ConvertPskPsaToMd5_f(const idCmdArgs &args)
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5_USAGE(psk, psa), args.Argv(0));
         return;
     }
-    R_ConvertPskPsa(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
-}
-
-static void ArgCompletion_Psk(const idCmdArgs &args, void(*callback)(const char *s))
-{
-	cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, ".psk"
-											 , NULL);
-}
-
-static void ArgCompletion_PskPsa(const idCmdArgs &args, void(*callback)(const char *s))
-{
-	cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, ".psk", ".psa"
-											 , NULL);
+    R_ConvertPskPsa(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 bool R_Model_HandlePskPsa(const md5ConvertDef_t &convert)
@@ -681,13 +668,26 @@ bool R_Model_HandlePskPsa(const md5ConvertDef_t &convert)
 				convert.scale, 
 				convert.addOrigin,
 				convert.offset.IsZero() ? NULL : &convert.offset, 
-				convert.rotation.IsIdentity() ? NULL : &convert.rotation
+				convert.rotation.IsIdentity() ? NULL : &convert.rotation,
+               convert.savePath.IsEmpty() ? NULL : convert.savePath.c_str()
 				) != 1 + convert.anims.Num())
 	{
 		common->Warning("Convert psk/psa to md5mesh/md5anim fail in entityDef '%s'", convert.def->GetName());
 		return false;
 	}
 	return true;
+}
+
+static void ArgCompletion_Psk(const idCmdArgs &args, void(*callback)(const char *s))
+{
+    cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, ".psk"
+            , NULL);
+}
+
+static void ArgCompletion_PskPsa(const idCmdArgs &args, void(*callback)(const char *s))
+{
+    cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, ".psk", ".psa"
+            , NULL);
 }
 
 void R_ActorX_AddCommand(void)

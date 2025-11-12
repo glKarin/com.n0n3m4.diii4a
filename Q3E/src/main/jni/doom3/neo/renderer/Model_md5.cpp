@@ -1108,6 +1108,17 @@ int idRenderModelMD5::GetSurfaceMask(const char *name) const
 #include "model/Model_light.cpp"
 #endif
 
+#ifdef _MODEL_MD5_EXT
+#define MD5_APPEND_COMMENT 1
+#include "model/Model_md5mesh.cpp"
+#include "model/Model_md5anim.cpp"
+
+#include "model/Model_md5convert.h"
+#endif
+
+#include "model/Model_md5mesh_v6.cpp"
+#include "model/Model_md5anim_v6.cpp"
+
 #ifdef _MODEL_PSK
 #include "model/Model_psk.cpp"
 #include "model/Model_psa.cpp"
@@ -1126,9 +1137,5 @@ int idRenderModelMD5::GetSurfaceMask(const char *name) const
 #endif
 
 #ifdef _MODEL_MD5_EXT
-#define MD5_APPEND_COMMENT 1
-#include "model/Model_md5mesh.cpp"
-#include "model/Model_md5anim.cpp"
-
 #include "model/Model_md5convert.cpp"
 #endif

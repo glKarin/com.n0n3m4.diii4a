@@ -12,6 +12,7 @@ typedef struct md5ConvertDef_s
     idStr mesh;
     idStrList animNames;
     idStrList anims;
+    idStr savePath;
 } md5ConvertDef_t;
 
 typedef bool (* md5ConvertDef_f)(const md5ConvertDef_t &def);
@@ -30,5 +31,7 @@ bool R_Model_HandleSmd(const md5ConvertDef_t &convert);
 #ifdef _MODEL_GLTF
 bool R_Model_HandleGLTF(const md5ConvertDef_t &convert);
 #endif
+
+bool R_Model_HandleMd5V6(const md5ConvertDef_t &convert);
 
 #endif

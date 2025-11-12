@@ -2,8 +2,6 @@
 #include "Model_md5mesh.h"
 #include "Model_md5anim.h"
 
-#include "Model_md5convert.h"
-
 #define SMD_VERSION_1 1
 
 idModelSmd::idModelSmd(void)
@@ -878,29 +876,53 @@ bool idModelSmd::ToObj(objModel_t &objModel) const
 
 void idModelSmd::Print(void) const
 {
-#define SMD_PART_PRINT(x) if(IsTypeMarked(x)) { Sys_Printf(#x "\n"); }
-#undef SMD_PART_PRINT
-#define SMD_PART_PRINT(name, list, all, fmt, ...) \
+#define MODEL_PART_PRINT(x) if(IsTypeMarked(x)) { Sys_Printf(#x "\n"); }
+#undef MODEL_PART_PRINT
+#define MODEL_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num());   \
     if(all)                                              \
     for(int i = 0; i < list.Num(); i++) {  \
          Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
-    SMD_PART_PRINT(node, nodes, true, "%d, name=%s, parent=%d   ", nodes[i].index, nodes[i].name.c_str(), nodes[i].parent_index)
-    SMD_PART_PRINT(frame, frames, false, "time=%d   ", frames[i].time)
-    SMD_PART_PRINT(triangle, triangles, false, "material=%s   ", triangles[i].material.c_str())
+    MODEL_PART_PRINT(node, nodes, true, "%d, name=%s, parent=%d   ", nodes[i].index, nodes[i].name.c_str(), nodes[i].parent_index)
+    MODEL_PART_PRINT(frame, frames, false, "time=%d   ", frames[i].time)
+    MODEL_PART_PRINT(triangle, triangles, false, "material=%s   ", triangles[i].material.c_str())
 
-#undef SMD_PART_PRINT
+#undef MODEL_PART_PRINT
 }
 
-static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idStrList *animPaths = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+#ifdef _MODEL_OBJ
+static void R_ConvertSmdToObj_f(const idCmdArgs &args)
+{
+    const char *filePath = args.Argv(1);
+    idModelSmd smd;
+    if(smd.Parse(filePath))
+    {
+        //smd.Print();
+        objModel_t objModel;
+        if(smd.ToObj(objModel))
+        {
+            idStr objPath = filePath;
+            objPath.SetFileExtension(".obj");
+            OBJ_Write(&objModel, objPath.c_str());
+            common->Printf("Convert obj successful: %s -> %s\n", filePath, objPath.c_str());
+        }
+        else
+            common->Warning("Convert obj fail: %s", filePath);
+    }
+    else
+        common->Warning("Parse smd fail: %s", filePath);
+}
+#endif
+
+static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idStrList *animPaths = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
 	int ret = 0;
 
     idModelSmd smd;
     idMd5MeshFile md5MeshFile;
-    bool smdRes = false;
+    bool meshRes = false;
     if(smd.Parse(meshPath))
     {
         //smd.Print();
@@ -909,8 +931,7 @@ static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idS
 			if(doMesh)
 			{
 				md5MeshFile.Commandline().Append(va(" - %s", meshPath));
-				idStr md5meshPath = meshPath;
-				md5meshPath.SetFileExtension(".md5mesh");
+                idStr md5meshPath = R_Model_MakeOutputPath(meshPath, ".md5mesh", savePath);
 				md5MeshFile.Write(md5meshPath.c_str());
 				common->Printf("Convert md5mesh successful: %s -> %s\n", meshPath, md5meshPath.c_str());
 				ret++;
@@ -919,7 +940,7 @@ static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idS
 			{
 				common->Printf("Convert md5mesh successful: %s\n", meshPath);
 			}
-			smdRes = true;
+			meshRes = true;
 		}
 		else
 			common->Warning("Convert md5mesh fail: %s", meshPath);
@@ -927,7 +948,7 @@ static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idS
     else
         common->Warning("Parse smd fail: %s", meshPath);
 
-    if(!smdRes)
+    if(!meshRes)
         return ret;
 
     if(!animPaths)
@@ -935,44 +956,43 @@ static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idS
 
 	for(int i = 0; i < animPaths->Num(); i++)
 	{
-		const char *animSmdPath = (*animPaths)[i];
+		const char *animPath = (*animPaths)[i];
 		idModelSmd animSmd;
-		if(animSmd.Parse(animSmdPath))
+		if(animSmd.Parse(animPath))
 		{
 			//animSmd.Print();
 			idMd5AnimFile md5AnimFile;
 			if(animSmd.ToMd5Anim(smd, md5AnimFile, md5MeshFile, scale, addOrigin, offset, rotation))
 			{
-				md5AnimFile.Commandline().Append(va(" - %s", animSmdPath));
-				idStr md5animPath = animSmdPath;
-				md5animPath.SetFileExtension(".md5anim");
+				md5AnimFile.Commandline().Append(va(" - %s", animPath));
+                idStr md5animPath = R_Model_MakeOutputPath(animPath, ".md5anim", savePath);
 				md5AnimFile.Write(md5animPath.c_str());
-				common->Printf("Convert md5anim successful: %s -> %s\n", animSmdPath, md5animPath.c_str());
+				common->Printf("Convert md5anim successful: %s -> %s\n", animPath, md5animPath.c_str());
 				ret++;
 			}
 			else
-				common->Warning("Convert md5anim fail: %s", animSmdPath);
+				common->Warning("Convert md5anim fail: %s", animPath);
 		}
 		else
-			common->Warning("Parse smd animation fail: %s", animSmdPath);
+			common->Warning("Parse smd animation fail: %s", animPath);
 	}
 
 	return ret;
 }
 
-ID_INLINE static int R_ConvertSmdMesh(const char *meshPath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertSmdMesh(const char *meshPath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-	return R_ConvertSmdToMd5(meshPath, true, NULL, scale, addOrigin, offset, rotation);
+	return R_ConvertSmdToMd5(meshPath, true, NULL, scale, addOrigin, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertSmdAnim(const char *meshPath, const idStrList &animPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertSmdAnim(const char *meshPath, const idStrList &animPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-	return R_ConvertSmdToMd5(meshPath, false, &animPaths, scale, addOrigin, offset, rotation);
+	return R_ConvertSmdToMd5(meshPath, false, &animPaths, scale, addOrigin, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertSmd(const char *meshPath, const idStrList &animPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertSmd(const char *meshPath, const idStrList &animPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-	return R_ConvertSmdToMd5(meshPath, true, &animPaths, scale, addOrigin, offset, rotation);
+	return R_ConvertSmdToMd5(meshPath, true, &animPaths, scale, addOrigin, offset, rotation, savePath);
 }
 
 static void R_ConvertSmdToMd5mesh_f(const idCmdArgs &args)
@@ -988,13 +1008,14 @@ static void R_ConvertSmdToMd5mesh_f(const idCmdArgs &args)
     bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5MESH_USAGE(smd), args.Argv(0));
         return;
     }
-    R_ConvertSmdMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertSmdMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertSmdToMd5anim_f(const idCmdArgs &args)
@@ -1011,13 +1032,14 @@ static void R_ConvertSmdToMd5anim_f(const idCmdArgs &args)
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5ANIM_USAGE(smd, smd), args.Argv(0));
         return;
     }
-    R_ConvertSmdAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertSmdAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertSmdToMd5_f(const idCmdArgs &args)
@@ -1034,38 +1056,15 @@ static void R_ConvertSmdToMd5_f(const idCmdArgs &args)
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5_USAGE(smd, smd), args.Argv(0));
         return;
     }
-    R_ConvertSmd(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertSmd(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
-
-#ifdef _MODEL_OBJ
-static void R_ConvertSmdToObj_f(const idCmdArgs &args)
-{
-    const char *filePath = args.Argv(1);
-    idModelSmd smd;
-    if(smd.Parse(filePath))
-    {
-        //smd.Print();
-		objModel_t objModel;
-		if(smd.ToObj(objModel))
-		{
-			idStr objPath = filePath;
-			objPath.SetFileExtension(".obj");
-			OBJ_Write(&objModel, objPath.c_str());
-			common->Printf("Convert obj successful: %s -> %s\n", filePath, objPath.c_str());
-		}
-		else
-			common->Warning("Convert obj fail: %s", filePath);
-    }
-    else
-        common->Warning("Parse smd fail: %s", filePath);
-}
-#endif
 
 bool R_Model_HandleSmd(const md5ConvertDef_t &convert)
 {
@@ -1073,11 +1072,11 @@ bool R_Model_HandleSmd(const md5ConvertDef_t &convert)
 				convert.scale, 
 				convert.addOrigin, 
 				convert.offset.IsZero() ? NULL : &convert.offset, 
-				convert.rotation.IsIdentity() ? NULL : &convert.rotation
-				) != 1 + convert.anims.Num()
-		)
+				convert.rotation.IsIdentity() ? NULL : &convert.rotation,
+                convert.savePath.IsEmpty() ? NULL : convert.savePath.c_str()
+	) != 1 + convert.anims.Num())
     {
-        common->Warning("Convert source smd to md5mesh/md5anim fail in entityDef '%s'", convert.def->GetName());
+        common->Warning("Convert smd to md5mesh/md5anim fail in entityDef '%s'", convert.def->GetName());
         return false;
     }
     return true;

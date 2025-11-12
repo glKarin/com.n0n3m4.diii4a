@@ -26,6 +26,7 @@ entityDef models/psk/test_animation_mesh { // name must be same as model's mesh 
 	"addOrigin" "0" // prepend 'origin' bone to front, bool, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
     "offset" "0 0 0" // root bone origin offset, vector, default '0 0 0'
     "rotation" "0 90 0" // root bone orient rotation, vector, default '0 0 0'. value is angle degree(-360 - 360)
+    "savePath" "" // output path, string, default is empty, it will be output to same path
 
     // animations. file path and name is same as md5 model, but extension is psa
 	"anim idle" "models/psk/anims/test_anim_idle.psa"
@@ -45,6 +46,7 @@ entityDef md5convert/models/psk/test_animation_mesh { // name must be same as 'm
 	"addOrigin" "1" // prepend 'origin' bone to front, bool, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
     "offset" "0 0 0" // root bone origin offset, vector, default '0 0 0'
     "rotation" "0 90 0" // root bone orient rotation, vector, default '0 0 0'. value is angle degree(-360 - 360)
+    "savePath" "" // output path, string, default is empty, it will be output to same path
 
     // animations. file path and name is same as md5 model, but extension is psa
 	"anim idle" "models/psk/anims/test_anim_idle.psa"

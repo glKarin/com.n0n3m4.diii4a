@@ -1802,22 +1802,22 @@ void idModelGLTF::Print(void) const
 {
     Sys_Printf("asset: version=%d.%d\n", asset.major_version, asset.minor_version);
     Sys_Printf("scene: %d\n", scene);
-#define GLTF_PART_PRINT(name, list, all, fmt, ...) \
+#define MODEL_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
 	if(all) \
     for(int i = 0; i < list.Num(); i++) {  \
          Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
     }                                    \
     Sys_Printf("\n------------------------------------------------------\n");
-    GLTF_PART_PRINT(scenes, scenes, true, "name=%s nodes=%d   ", scenes[i].name.c_str(), scenes[i].nodes.Num())
-    GLTF_PART_PRINT(nodes, nodes, true, "name=%s mesh=%d   ", nodes[i].name.c_str(), nodes[i].mesh)
-    GLTF_PART_PRINT(bufferViews, bufferViews, true, "name=%s buffer=%d byteOffset=%d byteLength=%d byteStride=%d target=%d   ", bufferViews[i].name.c_str(), bufferViews[i].buffer, bufferViews[i].byteOffset, bufferViews[i].byteLength, bufferViews[i].byteStride, bufferViews[i].target)
-    GLTF_PART_PRINT(buffers, buffers, true, "name=%s byteLength=%d uri=%d   ", buffers[i].name.c_str(), buffers[i].byteLength, buffers[i].uri.Num())
-    GLTF_PART_PRINT(accessor, accessors, true, "name=%s bufferView=%d byteOffset=%d componentType=%d normalized=%d count=%d type=%s   ", accessors[i].name.c_str(), accessors[i].bufferView, accessors[i].byteOffset, accessors[i].componentType, accessors[i].normalized, accessors[i].count, accessors[i].type.c_str())
-    GLTF_PART_PRINT(material, materials, true, "name=%s   ", materials[i].name.c_str())
-    GLTF_PART_PRINT(meshes, meshes, true, "name=%s primitives=%d weights=%d   ", meshes[i].name.c_str(), meshes[i].primitives.Num(), meshes[i].weights.Num())
+    MODEL_PART_PRINT(scenes, scenes, true, "name=%s nodes=%d   ", scenes[i].name.c_str(), scenes[i].nodes.Num())
+    MODEL_PART_PRINT(nodes, nodes, true, "name=%s mesh=%d   ", nodes[i].name.c_str(), nodes[i].mesh)
+    MODEL_PART_PRINT(bufferViews, bufferViews, true, "name=%s buffer=%d byteOffset=%d byteLength=%d byteStride=%d target=%d   ", bufferViews[i].name.c_str(), bufferViews[i].buffer, bufferViews[i].byteOffset, bufferViews[i].byteLength, bufferViews[i].byteStride, bufferViews[i].target)
+    MODEL_PART_PRINT(buffers, buffers, true, "name=%s byteLength=%d uri=%d   ", buffers[i].name.c_str(), buffers[i].byteLength, buffers[i].uri.Num())
+    MODEL_PART_PRINT(accessor, accessors, true, "name=%s bufferView=%d byteOffset=%d componentType=%d normalized=%d count=%d type=%s   ", accessors[i].name.c_str(), accessors[i].bufferView, accessors[i].byteOffset, accessors[i].componentType, accessors[i].normalized, accessors[i].count, accessors[i].type.c_str())
+    MODEL_PART_PRINT(material, materials, true, "name=%s   ", materials[i].name.c_str())
+    MODEL_PART_PRINT(meshes, meshes, true, "name=%s primitives=%d weights=%d   ", meshes[i].name.c_str(), meshes[i].primitives.Num(), meshes[i].weights.Num())
 
-#undef GLTF_PART_PRINT
+#undef MODEL_PART_PRINT
 }
 
 const char * idModelGLTF::GetAnim(unsigned int index) const
@@ -1856,13 +1856,13 @@ static void R_ConvertGLTFToObj_f(const idCmdArgs &args)
 }
 #endif
 
-static int R_ConvertGLTFToMd5(const char *filePath, bool doMesh = true, const idStrList *animList = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+static int R_ConvertGLTFToMd5(const char *filePath, bool doMesh = true, const idStrList *animList = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
     int ret = 0;
 
     idModelGLTF gltf;
     idMd5MeshFile md5MeshFile;
-    bool gltfRes = false;
+    bool meshRes = false;
     if(gltf.Parse(filePath, animList ? idModelIqm::PARSE_FRAME : idModelIqm::PARSE_JOINT))
     {
         //gltf.Print();
@@ -1871,8 +1871,7 @@ static int R_ConvertGLTFToMd5(const char *filePath, bool doMesh = true, const id
             if(doMesh)
             {
                 md5MeshFile.Commandline().Append(va(" - %s", filePath));
-                idStr md5meshPath = filePath;
-                md5meshPath.SetFileExtension(".md5mesh");
+                idStr md5meshPath = R_Model_MakeOutputPath(filePath, ".md5mesh", savePath);
                 md5MeshFile.Write(md5meshPath.c_str());
                 common->Printf("Convert md5mesh successful: %s -> %s\n", filePath, md5meshPath.c_str());
                 ret++;
@@ -1881,7 +1880,7 @@ static int R_ConvertGLTFToMd5(const char *filePath, bool doMesh = true, const id
             {
                 common->Printf("Convert md5mesh successful: %s\n", filePath);
             }
-            gltfRes = true;
+            meshRes = true;
         }
         else
             common->Warning("Convert md5mesh fail: %s", filePath);
@@ -1889,7 +1888,7 @@ static int R_ConvertGLTFToMd5(const char *filePath, bool doMesh = true, const id
     else
         common->Warning("Parse gltf fail: %s", filePath);
 
-    if(!gltfRes)
+    if(!meshRes)
         return ret;
 
     if(!animList)
@@ -1934,7 +1933,7 @@ static int R_ConvertGLTFToMd5(const char *filePath, bool doMesh = true, const id
             md5animPath = filePath;
             md5animPath.StripFilename();
             md5animPath.AppendPath(animName);
-            md5animPath.SetFileExtension(".md5anim");
+            md5animPath = R_Model_MakeOutputPath(md5animPath, ".md5anim", savePath);
         }
         else
         {
@@ -1944,8 +1943,7 @@ static int R_ConvertGLTFToMd5(const char *filePath, bool doMesh = true, const id
             common->Printf("Convert gltf/glb animation to md5anim: %s -> %s\n", anim, name.c_str());
             ok = gltf.ToMd5Anim(md5AnimFile, md5MeshFile, name.c_str(), scale, addOrigin, offset, rotation);
             animName = anim;
-            md5animPath = anim;
-            md5animPath.SetFileExtension(".md5anim");
+            md5animPath = R_Model_MakeOutputPath(anim, ".md5anim", savePath);
         }
         if(ok)
         {
@@ -1961,25 +1959,19 @@ static int R_ConvertGLTFToMd5(const char *filePath, bool doMesh = true, const id
     return ret;
 }
 
-ID_INLINE static int R_ConvertGLTFMesh(const char *filePath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertGLTFMesh(const char *filePath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertGLTFToMd5(filePath, true, NULL, scale, addOrigin, offset, rotation);
+    return R_ConvertGLTFToMd5(filePath, true, NULL, scale, addOrigin, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertGLTFAnim(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertGLTFAnim(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertGLTFToMd5(filePath, false, &animList, scale, addOrigin, offset, rotation);
+    return R_ConvertGLTFToMd5(filePath, false, &animList, scale, addOrigin, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertGLTF(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL)
+ID_INLINE static int R_ConvertGLTF(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertGLTFToMd5(filePath, true, &animList, scale, addOrigin, offset, rotation);
-}
-
-static void ArgCompletion_gltf(const idCmdArgs &args, void(*callback)(const char *s))
-{
-    cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, ".gltf", ".glb"
-            , NULL);
+    return R_ConvertGLTFToMd5(filePath, true, &animList, scale, addOrigin, offset, rotation, savePath);
 }
 
 static void R_ConvertGLTFToMd5mesh_f(const idCmdArgs &args)
@@ -1995,13 +1987,14 @@ static void R_ConvertGLTFToMd5mesh_f(const idCmdArgs &args)
     bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5MESH_USAGE(gltf/glb), args.Argv(0));
         return;
     }
-    R_ConvertGLTFMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertGLTFMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertGLTFToMd5anim_f(const idCmdArgs &args)
@@ -2018,13 +2011,14 @@ static void R_ConvertGLTFToMd5anim_f(const idCmdArgs &args)
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5ANIM_ALL_USAGE(gltf/glb), args.Argv(0));
         return;
     }
-    R_ConvertGLTFAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertGLTFAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertGLTFToMd5_f(const idCmdArgs &args)
@@ -2041,13 +2035,14 @@ static void R_ConvertGLTFToMd5_f(const idCmdArgs &args)
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims);
+    idStr savePath;
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5_ALL_USAGE(gltf/glb), args.Argv(0));
         return;
     }
-    R_ConvertGLTF(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL);
+    R_ConvertGLTF(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 bool R_Model_HandleGLTF(const md5ConvertDef_t &convert)
@@ -2056,13 +2051,20 @@ bool R_Model_HandleGLTF(const md5ConvertDef_t &convert)
                     convert.scale,
                     convert.addOrigin,
                     convert.offset.IsZero() ? NULL : &convert.offset,
-                    convert.rotation.IsIdentity() ? NULL : &convert.rotation
+                    convert.rotation.IsIdentity() ? NULL : &convert.rotation,
+                     convert.savePath.IsEmpty() ? NULL : convert.savePath.c_str()
     ) != 1 + convert.anims.Num())
     {
         common->Warning("Convert gltf/glb to md5mesh/md5anim fail in entityDef '%s'", convert.def->GetName());
         return false;
     }
     return true;
+}
+
+static void ArgCompletion_gltf(const idCmdArgs &args, void(*callback)(const char *s))
+{
+    cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, ".gltf", ".glb"
+            , NULL);
 }
 
 void R_GLTF_AddCommand(void)
