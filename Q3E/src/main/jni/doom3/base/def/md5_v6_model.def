@@ -1,0 +1,37 @@
+// 1. define md5mesh/md5anim v6 to md5mesh/md5anim v10 conversion config
+entityDef models/md5/meshes/player { // name must be same as model's mesh field
+    "md5convert" "1" // mark this entityDef is md5 conversion define for clean manually later by command `cleanConvertedMd5`
+	"type" "md5meshv6" // must setup type is `md5meshv6`
+
+    // mesh. file path and name is same as md5 model, but extension is psk
+	"mesh" "models/md5/meshes/player.md5mesh" // required
+
+	"scale" "-1" // scale vertexes, float, default -1.0. It will not scale if less or equals than 0
+	"addOrigin" "0" // prepend 'origin' bone to front, bool, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
+    "offset" "0 0 0" // root bone origin offset, vector, default '0 0 0'
+    "rotation" "0 0 0" // root bone orient rotation, vector, default '0 0 0'. value is angle degree(-360 - 360)
+    "savePath" "models/md5v6" // output path, string, default is empty, it will be output to same path
+
+    // animations. file path and name is same as md5 model
+	"anim idle"					"models/md5/anims/chars/player/idle.md5anim"
+	"anim upidle"				"models/md5/anims/chars/player/idle_up.md5anim"
+	"anim downidle"				"models/md5/anims/chars/player/idle_down.md5anim"
+	"anim walk1"				"models/md5/anims/chars/player/pistol_walk1.md5anim"
+	"anim walk_backwards"		"models/md5/anims/chars/player/walk_backwards.md5anim"
+	"anim strafe_left"			"models/md5/anims/chars/player/pistol_walk1_strafe_left.md5anim"
+	"anim strafe_right"			"models/md5/anims/chars/player/pistol_walk1_strafe_right.md5anim"
+	//"anim walk2"				"models/md5/anims/chars/player/pistol_walk2.md5anim"
+	"anim crouch"				"models/md5/anims/chars/player/crouch_idle.md5anim"
+	//"anim crouch_down"		"models/md5/anims/chars/player/crouch.md5anim"
+	//"anim crouch_up"			"models/md5/anims/chars/player/crouch.md5anim"
+	"anim crouch_walk"			"models/md5/anims/chars/player/crouch_walk.md5anim"
+	"anim jump"					"models/md5/anims/chars/player/jump.md5anim"
+	"anim hard_land"			"models/md5/anims/chars/player/hard_land.md5anim"
+	"anim soft_land"			"models/md5/anims/chars/player/soft_land.md5anim"
+	"anim range_attack1"		"models/md5/anims/chars/player/pistol_fire1.md5anim"
+	//"anim range_attack2"		"models/md5/anims/chars/player/pistol_fire2.md5anim"
+	"anim run"					"models/md5/anims/chars/player/run.md5anim"
+	"anim turns"				"models/md5/anims/chars/player/turns.md5anim"
+	"anim pain"					"models/md5/anims/chars/player/pain1.md5anim"
+}
+
