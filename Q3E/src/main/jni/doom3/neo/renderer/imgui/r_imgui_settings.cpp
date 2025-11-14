@@ -938,7 +938,7 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCvar("harm_r_shaderProgramDir", "External OpenGLES2 GLSL shader path");
 #ifdef GL_ES_VERSION_3_0
     ImGui_RegisterCvar("harm_r_shaderProgramES3Dir", "External OpenGLES3 GLSL shader path");
-    ImGui_RegisterCvar("harm_r_useGLSLShaderBinaryCache", "Use GLSL shader compiled binary cache");
+    ImGui_RegisterCvar("harm_r_useGLSLShaderBinaryCache", "Use GLSL shader compiled binary cache", IG_CVAR_COMPONENT_COMBO, "0=Disable;1=Enable and check;2=Enable and uncheck");
 #endif
     ImGui_RegisterCvar("reloadGLSLprograms", "Reload loaded GLSL shaders", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
     ImGui_RegisterCmd("exportGLSLShaderSource", "Export built-in GLSL shaders", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);

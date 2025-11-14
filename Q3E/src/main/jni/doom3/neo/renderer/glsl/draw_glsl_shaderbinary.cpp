@@ -400,6 +400,93 @@ static bool RB_GLSL_CheckShaderBinaryData(const glslShaderBinaryCache_t *cache)
     return true;
 }
 
+static GLuint RB_GLSL_CreateProgramFromBinary(GLuint &program, const void *binary, int length, GLenum binaryFormat)
+{
+    if(!binary || length <= 0)
+        return false;
+
+    if(!qglIsProgram(program))
+        program = qglCreateProgram();
+
+    if(program == 0)
+    {
+        SHADER_ERROR("%s::glCreateProgram() error!\n", __func__);
+        return 0;
+    }
+
+    GL_ClearErrors();
+    qglProgramBinary(program, binaryFormat, binary, length);
+
+    GLenum err = qglGetError();
+    if(err != GL_NO_ERROR)
+    {
+        common->Printf("    %s::glProgramBinary() error!\n", __func__);
+        qglDeleteProgram(program);
+        program = 0;
+        return 0;
+    }
+
+    return program;
+}
+
+static bool RB_GLSL_CreateShaderProgramFromBinary(shaderProgram_t *shaderProgram, const char *name, const void *binary, int length, GLenum binaryFormat, int type)
+{
+    RB_GLSL_DeleteShaderProgram(shaderProgram);
+
+    shaderProgram->program = RB_GLSL_CreateProgramFromBinary(shaderProgram->program, binary, length, binaryFormat);
+    if(shaderProgram->program == 0)
+        return false;
+
+    RB_GLSL_GetUniformLocations(shaderProgram);
+    idStr::Copynz(shaderProgram->name, name, sizeof(shaderProgram->name));
+    shaderProgram->type = type;
+
+    return true;
+}
+
+static bool RB_GLSL_LoadShaderBinaryCacheUncheck(shaderProgram_t *shaderProgram, const char *name, int type, bool external)
+{
+    idStr fullPath = RB_GLSL_GetExternalShaderBinaryPath(external);
+
+    fullPath.AppendPath(name);
+    fullPath.SetFileExtension("." GLSL_SHADER_BINARY_HEADER_EXT);
+
+    GLenum binaryFormat;
+    {
+        glslShaderBinaryHeader_t header;
+        memset(&header, 0, sizeof(header));
+        if(!RB_GLSL_ReadShaderBinaryHeader(fullPath, &header))
+        {
+            common->Printf("    Can not load GLSL shader binary cache header file: %s\n", fullPath.c_str());
+            RB_GLSL_RemoveShaderBinaryCache(fullPath);
+            return false;
+        }
+        binaryFormat = header.binaryFormat;
+    }
+
+    fullPath.SetFileExtension("." GLSL_SHADER_BINARY_DATA_EXT);
+    void *binary = NULL;
+    int length = fileSystem->ReadFile(fullPath, &binary, NULL);
+    if(length <= 0)
+    {
+        common->Printf("    Can not load GLSL shader binary cache data file: %s\n", fullPath.c_str());
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
+        return false;
+    }
+
+    bool res = RB_GLSL_CreateShaderProgramFromBinary(shaderProgram, name, binary, length, binaryFormat, type);
+
+    Mem_Free(binary);
+
+    if(!res)
+    {
+        RB_GLSL_RemoveShaderBinaryCache(fullPath);
+        return false;
+    }
+
+    return res;
+}
+
 static bool RB_GLSL_LoadShaderBinaryCache(shaderProgram_t *shaderProgram, const char *name, const idStr &vertexSource, const idStr &fragmentSource, int type, bool external)
 {
     idStr fullPath = RB_GLSL_GetExternalShaderBinaryPath(external);
@@ -470,37 +557,11 @@ static bool RB_GLSL_LoadShaderBinaryCache(shaderProgram_t *shaderProgram, const 
         return false;
     }
 
-    RB_GLSL_DeleteShaderProgram(shaderProgram);
-
-    if(!qglIsProgram(shaderProgram->program))
-        shaderProgram->program = qglCreateProgram();
-    if(shaderProgram->program == 0)
-    {
-        SHADER_ERROR("%s::glCreateProgram() error!\n", __func__);
-        RB_GLSL_FreeShaderBinaryCache(&cache);
-        RB_GLSL_RemoveShaderBinaryCache(fullPath);
-        return false;
-    }
-
-    GL_ClearErrors();
-    qglProgramBinary(shaderProgram->program, cache.header.binaryFormat, cache.binary, cache.header.length);
-
-    GLenum err = qglGetError();
-    if(err != GL_NO_ERROR)
-    {
-        common->Printf("    %s::glProgramBinary() error!\n", __func__);
-        RB_GLSL_FreeShaderBinaryCache(&cache);
-        RB_GLSL_RemoveShaderBinaryCache(fullPath);
-        return false;
-    }
-
-    RB_GLSL_GetUniformLocations(shaderProgram);
-    idStr::Copynz(shaderProgram->name, name, sizeof(shaderProgram->name));
-    shaderProgram->type = type;
+    bool res = RB_GLSL_CreateShaderProgramFromBinary(shaderProgram, name, cache.binary, cache.header.length, cache.header.binaryFormat, type);
 
     RB_GLSL_FreeShaderBinaryCache(&cache);
 
-    return true;
+    return res;
 }
 
 static void R_CleanGLSLShaderBinary_f(const idCmdArgs &)

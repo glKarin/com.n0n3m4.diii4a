@@ -45,7 +45,7 @@ GLint GL_GetUniformLocation(GLuint program, const char *name)
 #endif
 
 #ifdef GL_ES_VERSION_3_0
-static idCVar harm_r_useGLSLShaderBinaryCache("harm_r_useGLSLShaderBinaryCache", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Use/cache GLSL shader compiled binary(OpenGL ES2.0 not support)");
+static idCVar harm_r_useGLSLShaderBinaryCache("harm_r_useGLSLShaderBinaryCache", "0", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, "Use/cache GLSL shader compiled binary(OpenGL ES2.0 not support)", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2>);
 #endif
 
 // change CVAR_INIT to CVAR_ARCHIVE
@@ -62,8 +62,8 @@ static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", _GL3PROGS
 static bool glslInitialized = false;
 static bool reloadGLSLShaders = false;
 static bool shaderRequired = true;
-#define REQUIRE_SHADER shaderRequired = true;
-#define UNNECESSARY_SHADER shaderRequired = false;
+#define REQUIRE_SHADER() shaderRequired = true;
+#define UNNECESSARY_SHADER() shaderRequired = false;
 
 #ifdef _SHADOW_MAPPING
 extern bool r_useDepthTexture;
@@ -347,7 +347,7 @@ void idGLSLShaderManager::ActuallyLoad(void)
 		return;
 
 	const bool B = shaderRequired;
-	UNNECESSARY_SHADER;
+	UNNECESSARY_SHADER();
 
 	while(
 			index < num
@@ -843,7 +843,7 @@ static bool RB_GLSL_InitShaders(void)
 	RB_GLSL_GetShaderSources(Props);
 
 	// base shader
-	REQUIRE_SHADER;
+	REQUIRE_SHADER();
 	for(int i = SHADER_BASE_BEGIN; i <= SHADER_BASE_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -855,7 +855,7 @@ static bool RB_GLSL_InitShaders(void)
 	}
 
 	// newStage shader
-	UNNECESSARY_SHADER;
+	UNNECESSARY_SHADER();
 	for(int i = SHADER_NEW_STAGE_BEGIN; i <= SHADER_NEW_STAGE_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -868,10 +868,10 @@ static bool RB_GLSL_InitShaders(void)
 		}
 		shaderManager->Add(prop->program);
 	}
-	REQUIRE_SHADER;
+	REQUIRE_SHADER();
 
 #ifdef _SHADOW_MAPPING
-	UNNECESSARY_SHADER;
+	UNNECESSARY_SHADER();
 	for(int i = SHADER_SHADOW_MAPPING_BEGIN; i <= SHADER_SHADOW_MAPPING_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -889,11 +889,11 @@ static bool RB_GLSL_InitShaders(void)
 		}
 		shaderManager->Add(prop->program);
 	}
-	REQUIRE_SHADER;
+	REQUIRE_SHADER();
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE
-	UNNECESSARY_SHADER;
+	UNNECESSARY_SHADER();
 	for(int i = SHADER_STENCIL_SHADOW_BEGIN; i <= SHADER_STENCIL_SHADOW_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -916,11 +916,11 @@ static bool RB_GLSL_InitShaders(void)
 		}
 		shaderManager->Add(prop->program);
 	}
-	REQUIRE_SHADER;
+	REQUIRE_SHADER();
 #endif
 
 #ifdef _POSTPROCESS
-    UNNECESSARY_SHADER;
+    UNNECESSARY_SHADER();
     for(int i = SHADER_POSTPROCESS_BEGIN; i <= SHADER_POSTPROCESS_END; i++)
     {
         const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -938,10 +938,10 @@ static bool RB_GLSL_InitShaders(void)
         }
         shaderManager->Add(prop->program);
     }
-    REQUIRE_SHADER;
+    REQUIRE_SHADER();
 #endif
 
-    UNNECESSARY_SHADER;
+    UNNECESSARY_SHADER();
     for(int i = SHADER_DEBUG_BEGIN; i <= SHADER_DEBUG_END; i++)
     {
         const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -954,7 +954,7 @@ static bool RB_GLSL_InitShaders(void)
         }
         shaderManager->Add(prop->program);
     }
-    REQUIRE_SHADER;
+    REQUIRE_SHADER();
 
     int endMs = Sys_Milliseconds();
     common->Printf("----- Compile GLSL shaders finish(%d ms) -----\n", endMs - startMs);
@@ -1186,8 +1186,29 @@ int RB_GLSL_LoadShaderProgram(
 	// memset(program, 0, sizeof(shaderProgram_t));
 
 	common->Printf("\nLoad GLSL shader program: %s -> %d\n", name, type);
+    int step = 1;
+#ifdef GL_ES_VERSION_3_0
+    if(harm_r_useGLSLShaderBinaryCache.GetInteger() == 2)
+    {
+        common->Printf(" %d. Load external shader binary:\n", step);
+        if(RB_GLSL_LoadShaderBinaryCacheUncheck(program, name, type, true))
+        {
+            common->Printf("    Load external shader binary success!\n");
+            return GLSL_LOAD_EXTERNAL_BINARY;
+        }
+        step++;
 
-	common->Printf(" 1. Load external shader source: Vertex(%s), Fragment(%s)\n", vertex_shader_source_file, fragment_shader_source_file);
+        common->Printf(" %d. Load built-in shader binary:\n", step);
+        if(RB_GLSL_LoadShaderBinaryCacheUncheck(program, name, type, false))
+        {
+            common->Printf("    Load built-in shader binary success!\n");
+            return GLSL_LOAD_BUILT_IN_BINARY;
+        }
+        step++;
+    }
+#endif
+
+	common->Printf(" %d. Load external shader source: Vertex(%s), Fragment(%s)\n", step, vertex_shader_source_file, fragment_shader_source_file);
 
     // Load external GLSL shader source
     idStr vertexShaderStr;
@@ -1205,10 +1226,10 @@ int RB_GLSL_LoadShaderProgram(
         // Create external GLSL shader with binary
         if(USING_GLES3 && harm_r_useGLSLShaderBinaryCache.GetBool())
         {
-            common->Printf("    Load external shader binary: Vertex(%s), Fragment(%s)\n", vertex_shader_source_file, fragment_shader_source_file);
+            common->Printf("    Load and check external shader binary: Vertex(%s), Fragment(%s)\n", vertex_shader_source_file, fragment_shader_source_file);
             if(RB_GLSL_LoadShaderBinaryCache(program, name, vertexShaderStr, fragmentShaderStr, type, true))
             {
-                common->Printf("    Load external shader binary success!\n");
+                common->Printf("    Load and check external shader binary success!\n");
                 return GLSL_LOAD_EXTERNAL_BINARY;
             }
         }
@@ -1235,8 +1256,9 @@ int RB_GLSL_LoadShaderProgram(
         }
     }
 
+    step++;
     // Load built-in GLSL shader source
-    common->Printf(" 2. Load built-in shader source\n");
+    common->Printf(" %d. Load built-in shader source\n", step);
     if(harm_r_useHighPrecision.GetBool())
         common->Printf("    '%s' use high precision float\n", name);
     idStr vs;
@@ -1248,10 +1270,10 @@ int RB_GLSL_LoadShaderProgram(
     // Create built-in GLSL shader with binary
     if(USING_GLES3 && harm_r_useGLSLShaderBinaryCache.GetBool())
     {
-        common->Printf("    Load built-in shader binary\n");
+        common->Printf("    Load and check built-in shader binary\n");
         if(RB_GLSL_LoadShaderBinaryCache(program, name, vs, fs, type, false))
         {
-            common->Printf("    Load built-in shader binary success!\n");
+            common->Printf("    Load and check built-in shader binary success!\n");
             return GLSL_LOAD_BUILT_IN_BINARY;
         }
     }
@@ -1297,11 +1319,11 @@ void idGLSLShaderManager::ReloadShaders(void)
         int type = shader->type;
         if(type >= SHADER_BASE_BEGIN && type <= SHADER_BASE_END)
         {
-            REQUIRE_SHADER;
+            REQUIRE_SHADER();
         }
         else
         {
-	        UNNECESSARY_SHADER;
+	        UNNECESSARY_SHADER();
         }
         RB_GLSL_DeleteShaderProgram(shader, false);
 	    if(type < SHADER_CUSTOM)
