@@ -279,7 +279,7 @@ bool idModelPsk::Parse(const char *filePath)
     while((headerRes = ReadHeader(header)) > 0)
     {
         idStr str(header.chunk_id, 0, 8);
-        common->Printf("PSK header: %s, type=%d, size=%d, count=%d\n", str.c_str(), header.chunk_type, header.chunk_datasize, header.chunk_datacount);
+        //common->Printf("PSK header: %s, type=%d, size=%d, count=%d\n", str.c_str(), header.chunk_type, header.chunk_datasize, header.chunk_datacount);
         if(PSK_CheckId(header.chunk_id, "ACTRHEAD"))
         {
             MarkType(ACTRHEAD);

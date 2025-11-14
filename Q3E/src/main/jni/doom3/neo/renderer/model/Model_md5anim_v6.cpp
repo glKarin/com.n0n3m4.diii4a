@@ -392,7 +392,7 @@ static int R_ConvertMd5V6ToV10(const char *meshPath, bool doMesh = true, const i
             if(doMesh)
             {
                 md5MeshFile.Commandline().Append(va(" - %s", meshPath));
-                idStr md5meshPath = R_Model_MakeOutputPath(meshPath, ".md5mesh", savePath);
+                idStr md5meshPath = R_Model_MakeOutputPath(meshPath, "." MD5_MESH_EXT, savePath);
                 md5MeshFile.Write(md5meshPath.c_str());
                 common->Printf("Convert md5mesh successful: %s -> %s\n", meshPath, md5meshPath.c_str());
                 ret++;
@@ -426,7 +426,7 @@ static int R_ConvertMd5V6ToV10(const char *meshPath, bool doMesh = true, const i
             if(md5animv6.ToMd5Anim(md5meshv6, md5AnimFile, md5MeshFile, scale, addOrigin, offset, rotation))
             {
                 md5AnimFile.Commandline().Append(va(" - %s", animPath));
-                idStr md5animPath = R_Model_MakeOutputPath(animPath, ".md5anim", savePath);
+                idStr md5animPath = R_Model_MakeOutputPath(animPath, "." MD5_ANIM_EXT, savePath);
                 md5AnimFile.Write(md5animPath.c_str());
                 common->Printf("Convert md5anim successful: %s -> %s\n", animPath, md5animPath.c_str());
                 ret++;

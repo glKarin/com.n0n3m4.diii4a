@@ -178,6 +178,26 @@ bool R_Model_ConvertToMd5(const char *fileName)
 	return R_Model_ConvertToMd5(decl);
 }
 
+idStr R_Model_MakeOutputPath(const char *originPath, const char *extName, const char *savePath)
+{
+    idStr newPath;
+
+    if(savePath && savePath[0])
+    {
+        newPath = savePath;
+        idStr str = originPath;
+        str.StripPath();
+        newPath.AppendPath(str);
+    }
+    else
+        newPath = originPath;
+
+    if(extName && extName[0])
+        newPath.SetFileExtension(extName);
+
+    return newPath;
+}
+
 static bool R_CleanConvertedMd5(const md5ConvertDef_t &convert, bool onlyMesh = false)
 {
     if(!convert.def->dict.GetBool(MD5_CONVERT, "0")) // only clean has md5convert key
@@ -187,8 +207,7 @@ static bool R_CleanConvertedMd5(const md5ConvertDef_t &convert, bool onlyMesh = 
 
     if(!convert.mesh.IsEmpty())
     {
-        idStr meshPath = convert.mesh;
-        meshPath.SetFileExtension("." MD5_MESH_EXT);
+        idStr meshPath = R_Model_MakeOutputPath(convert.mesh, "." MD5_MESH_EXT, convert.savePath);
         common->Printf("Remove md5mesh '%s'\n", meshPath.c_str());
         while(fileSystem->ReadFile(meshPath, NULL, NULL) > 0)
             fileSystem->RemoveFile(meshPath);
@@ -199,12 +218,13 @@ static bool R_CleanConvertedMd5(const md5ConvertDef_t &convert, bool onlyMesh = 
 
     for(int i = 0; i < convert.anims.Num(); i++)
     {
-        idStr animPath = convert.anims[i];
-        animPath.SetFileExtension("." MD5_ANIM_EXT);
+        idStr animPath = R_Model_MakeOutputPath(convert.anims[i], "." MD5_ANIM_EXT, convert.savePath);
         common->Printf("Remove md5anim '%s'\n", animPath.c_str());
         while(fileSystem->ReadFile(animPath, NULL, NULL) > 0)
             fileSystem->RemoveFile(animPath);
     }
+
+    common->Printf("Clean done\n");
 
     return true;
 }
@@ -479,28 +499,7 @@ int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, float *sc
     return res;
 }
 
-idStr R_Model_MakeOutputPath(const char *originPath, const char *extName, const char *savePath)
-{
-    idStr newPath;
-
-    if(savePath && savePath[0])
-    {
-        newPath = savePath;
-        idStr str = originPath;
-        str.StripPath();
-        newPath.AppendPath(str);
-    }
-    else
-        newPath = originPath;
-
-    if(extName && extName[0])
-        newPath.SetFileExtension(extName);
-
-    return newPath;
-}
-
 #if 1
-#include "../../idlib/JSON.h"
 static void ArgCompletion_JSON(const idCmdArgs &args, void(*callback)(const char *s))
 {
     cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, 
@@ -508,7 +507,7 @@ static void ArgCompletion_JSON(const idCmdArgs &args, void(*callback)(const char
             NULL);
 }
 
-void R_TestJSON_f(const idCmdArgs &args)
+static void R_TestJSON_f(const idCmdArgs &args)
 {
     if(args.Argc() < 2)
     {
@@ -609,5 +608,7 @@ void R_Md5Convert_AddCommand(void)
     cmdSystem->AddCommand("cleanConvertedMd5", R_CleanConvertedMd5_f, CMD_FL_RENDERER, "Clean converted md5mesh", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
     cmdSystem->AddCommand("convertMd5AllDefs", R_ConvertMd5AllDefs_f, CMD_FL_RENDERER, "Convert all other type animation models entityDef to md5mesh/md5anim");
 
+#if 1
     cmdSystem->AddCommand("json", R_TestJSON_f, CMD_FL_RENDERER, "test json", ArgCompletion_JSON);
+#endif
 }

@@ -1383,7 +1383,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
 			if(doMesh)
 			{
 				md5MeshFile.Commandline().Append(va(" - %s", filePath));
-                idStr md5meshPath = R_Model_MakeOutputPath(filePath, ".md5mesh", savePath);
+                idStr md5meshPath = R_Model_MakeOutputPath(filePath, "." MD5_MESH_EXT, savePath);
 				md5MeshFile.Write(md5meshPath.c_str());
 				common->Printf("Convert md5mesh successful: %s -> %s\n", filePath, md5meshPath.c_str());
 				ret++;
@@ -1445,7 +1445,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
             md5animPath = filePath;
             md5animPath.StripFilename();
             md5animPath.AppendPath(animName);
-            md5animPath = R_Model_MakeOutputPath(md5animPath, ".md5anim", savePath);
+            md5animPath = R_Model_MakeOutputPath(md5animPath, "." MD5_ANIM_EXT, savePath);
 		}
 		else
 		{
@@ -1456,7 +1456,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
 			ok = iqm.ToMd5Anim(md5AnimFile, md5MeshFile, name.c_str(), scale, addOrigin, offset, rotation);
 			animName = anim;
             md5animPath = anim;
-            md5animPath = R_Model_MakeOutputPath(anim, ".md5anim", savePath);
+            md5animPath = R_Model_MakeOutputPath(anim, "." MD5_ANIM_EXT, savePath);
 		}
         if(ok)
         {
