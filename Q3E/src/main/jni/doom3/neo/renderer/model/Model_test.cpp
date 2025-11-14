@@ -51,6 +51,7 @@ public:
         return decl && decl->IsValid() ? decl : NULL;
     }
     int                     GetAnimFile(idStrList &list) const;
+    void                    SetSpeed(float f);
 
 private:
     void                    BuildAnimation(int time);
@@ -81,6 +82,8 @@ private:
     bool                    noDynamicInteractions;
     int                     startFrame;
     int                     endFrame;
+    float                   speed;
+    int                     lastTime;
     idRenderModelEntityDef  *decl;
 
     friend void ArgCompletion_modelTestFrameRange(const idCmdArgs &args, void(*callback)(const char *s));
@@ -106,6 +109,8 @@ idModelTest::idModelTest()
   noDynamicInteractions(false),
   startFrame(0),
   endFrame(-1),
+  speed(0.0f),
+  lastTime(0),
   decl(NULL)
 {
     memset(&worldEntity, 0, sizeof(worldEntity));
@@ -225,6 +230,18 @@ int idModelTest::GetAnimFile(idStrList &list) const
         return -3;
     list = decl->GetAnimFile(animIndex);
     return list.Num();
+}
+
+void idModelTest::SetSpeed(float f)
+{
+    if(speed == f)
+        return;
+
+    speed = f;
+    if (worldEntity.hModel && RenderWorld() && modelAnim) {
+        // animEndTime = 0;
+        animEndTime = lastTime + (speed > 0 ? ((float)animLength * 1.0f / ((float)speed)) : animLength);
+    }
 }
 
 int idModelTest::CanTest(void)
@@ -378,20 +395,19 @@ void idModelTest::UpdateAnimTime(int time)
         return;
 
     animLength = gameEdit->ANIM_GetLength(modelAnim);
-    animEndTime = time + animLength;
     animStartTime = 0;
 
     if(startFrame > 0 && startFrame < numFrame)
         animStartTime = (1.0f / (float)numFrame * (float)startFrame) * animLength;
     else
         startFrame = 0;
+
     if(endFrame >= startFrame && endFrame < numFrame)
-    {
         animLength = (1.0f / (float)numFrame * (float)(endFrame + 1 - startFrame)) * animLength;
-        animEndTime = time + animLength;
-    }
     else
         endFrame = -1;
+
+    animEndTime = time + (speed > 0.0f ? ((float)animLength * 1.0f / ((float)speed)) : animLength);
 }
 
 void idModelTest::TestFrame(int *frame)
@@ -802,7 +818,7 @@ void idModelTest::CreateModel(const char *model, const char *classname, const ch
         {
             numAnim = gameEdit->ANIM_GetNumAnimsFromEntityDef(&spawnArgs) - 1;
             common->Printf("animated: true\n");
-            common->Printf("num anim: %d\n", numAnim);
+            common->Printf("num animation: %d\n", numAnim);
             NextAnim();
         }
         else
@@ -822,6 +838,7 @@ void idModelTest::CreateModel(const char *model, const char *classname, const ch
 
 void idModelTest::Render(int time)
 {
+    lastTime = time;
     if (worldEntity.hModel) {
         idRenderWorld *world = RenderWorld();
         if(!world)
@@ -837,7 +854,10 @@ void idModelTest::Render(int time)
 
             if(frameIndex < 0)
             {
-                gameEdit->ANIM_CreateAnimFrame(worldEntity.hModel, modelAnim, worldEntity.numJoints, worldEntity.joints, animLength - (animEndTime - time) + animStartTime, vec3_origin, false);
+                if(speed > 0.0f)
+                    gameEdit->ANIM_CreateAnimFrame(worldEntity.hModel, modelAnim, worldEntity.numJoints, worldEntity.joints, animLength - (float)(animEndTime - time) * speed + animStartTime, vec3_origin, false);
+                else
+                    gameEdit->ANIM_CreateAnimFrame(worldEntity.hModel, modelAnim, worldEntity.numJoints, worldEntity.joints, animLength - (animEndTime - time) + animStartTime, vec3_origin, false);
             }
             else
                 gameEdit->ANIM_CreateAnimFrame(worldEntity.hModel, modelAnim, worldEntity.numJoints, worldEntity.joints, FRAME2MS(frameIndex), vec3_origin, false);
@@ -892,13 +912,13 @@ static idDict R_ModelTest_ParseModelArgs(const idCmdArgs &args, int start)
     return dict;
 }
 
-void R_ModelTest_CleanTestModel_f(const idCmdArgs &args)
+static void R_ModelTest_CleanTestModel_f(const idCmdArgs &args)
 {
     modelTest.Clean();
     common->Printf("TestModel clean.\n");
 }
 
-void R_ModelTest_TestModel_f(const idCmdArgs &args)
+static void R_ModelTest_TestModel_f(const idCmdArgs &args)
 {
     idStr			name;
     idDict			dict;
@@ -922,7 +942,7 @@ void R_ModelTest_TestModel_f(const idCmdArgs &args)
     common->Printf("TestModel active.\n");
 }
 
-void R_ModelTest_TestEntity_f(const idCmdArgs &args)
+static void R_ModelTest_TestEntity_f(const idCmdArgs &args)
 {
     idStr			name;
     idDict			dict;
@@ -945,7 +965,7 @@ void R_ModelTest_TestEntity_f(const idCmdArgs &args)
     common->Printf("TestEntity active.\n");
 }
 
-void R_ModelTest_TestSkin_f(const idCmdArgs &args)
+static void R_ModelTest_TestSkin_f(const idCmdArgs &args)
 {
     idStr			name;
     idDict			dict;
@@ -965,7 +985,7 @@ void R_ModelTest_TestSkin_f(const idCmdArgs &args)
 #else
 #define _TEST_ANIM_TIME tr.primaryView->renderView.time
 #endif
-void R_ModelTest_TestAnim_f(const idCmdArgs &args)
+static void R_ModelTest_TestAnim_f(const idCmdArgs &args)
 {
     if (args.Argc() < 2) {
         common->Printf("Usage: %s <anim_name> [<start_frame> <end_frame>].\n", args.Argv(0));
@@ -986,7 +1006,7 @@ void R_ModelTest_TestAnim_f(const idCmdArgs &args)
     modelTest.TestAnim(args.Argv(1), start, end, _TEST_ANIM_TIME);
 }
 
-void R_ModelTest_PrevAnim_f(const idCmdArgs &args)
+static void R_ModelTest_PrevAnim_f(const idCmdArgs &args)
 {
     if (!R_ModelTest_CanTest()) {
         return;
@@ -1000,7 +1020,7 @@ void R_ModelTest_PrevAnim_f(const idCmdArgs &args)
     modelTest.PrevAnim(_TEST_ANIM_TIME);
 }
 
-void R_ModelTest_NextAnim_f(const idCmdArgs &args)
+static void R_ModelTest_NextAnim_f(const idCmdArgs &args)
 {
     if (!R_ModelTest_CanTest()) {
         return;
@@ -1014,7 +1034,7 @@ void R_ModelTest_NextAnim_f(const idCmdArgs &args)
     modelTest.NextAnim(_TEST_ANIM_TIME);
 }
 
-void R_ModelTest_TestFrameRange_f(const idCmdArgs &args)
+static void R_ModelTest_TestFrameRange_f(const idCmdArgs &args)
 {
     if (!R_ModelTest_CanTest()) {
         return;
@@ -1030,7 +1050,7 @@ void R_ModelTest_TestFrameRange_f(const idCmdArgs &args)
     modelTest.TestFrameRange(start, end, _TEST_ANIM_TIME);
 }
 
-void R_ModelTest_TestAnimFrame_f(const idCmdArgs &args)
+static void R_ModelTest_TestAnimFrame_f(const idCmdArgs &args)
 {
     if (!R_ModelTest_CanTest()) {
         return;
@@ -1045,7 +1065,7 @@ void R_ModelTest_TestAnimFrame_f(const idCmdArgs &args)
     modelTest.TestFrame(args.Argc() > 1 ? &frame : NULL);
 }
 
-void R_ModelTest_PrevAnimFrame_f(const idCmdArgs &args)
+static void R_ModelTest_PrevAnimFrame_f(const idCmdArgs &args)
 {
     if (!R_ModelTest_CanTest()) {
         return;
@@ -1060,7 +1080,7 @@ void R_ModelTest_PrevAnimFrame_f(const idCmdArgs &args)
     modelTest.PrevFrame(count);
 }
 
-void R_ModelTest_NextAnimFrame_f(const idCmdArgs &args)
+static void R_ModelTest_NextAnimFrame_f(const idCmdArgs &args)
 {
     if (!R_ModelTest_CanTest()) {
         return;
@@ -1075,7 +1095,21 @@ void R_ModelTest_NextAnimFrame_f(const idCmdArgs &args)
     modelTest.NextFrame(count);
 }
 
-void R_ModelTest_ListAnim_f(const idCmdArgs &args)
+static void R_ModelTest_AnimSpeed_f(const idCmdArgs &args)
+{
+    if (!R_ModelTest_CanTest()) {
+        return;
+    }
+
+    if (!modelTest.HasModel()) {
+        common->Printf("No testModel active.\n");
+        return;
+    }
+
+    modelTest.SetSpeed(args.Argc() > 1 ? atof(args.Argv(1)) : 0.0f);
+}
+
+static void R_ModelTest_ListAnim_f(const idCmdArgs &args)
 {
     if (!R_ModelTest_CanTest()) {
         return;
@@ -1089,7 +1123,7 @@ void R_ModelTest_ListAnim_f(const idCmdArgs &args)
     modelTest.ListAnim();
 }
 
-void R_ModelTest_ShowModelEntityDef_f(const idCmdArgs &args)
+static void R_ModelTest_ShowModelEntityDef_f(const idCmdArgs &args)
 {
     if (args.Argc() < 2) {
         common->Printf("Usage: %s <model_name>.\n", args.Argv(0));
@@ -1103,7 +1137,7 @@ void R_ModelTest_ShowModelEntityDef_f(const idCmdArgs &args)
         common->Printf("model '%s' entity def not found.\n", args.Argv(1));
 }
 
-void R_ModelTest_TestFrameCut_f(const idCmdArgs &args)
+static void R_ModelTest_TestFrameCut_f(const idCmdArgs &args)
 {
     idStr			name;
     idDict			dict;
@@ -1170,7 +1204,7 @@ void R_ModelTest_TestFrameCut_f(const idCmdArgs &args)
     cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
 }
 
-void R_ModelTest_TestFrameLoop_f(const idCmdArgs &args)
+static void R_ModelTest_TestFrameLoop_f(const idCmdArgs &args)
 {
     idStr			name;
     idDict			dict;
@@ -1232,7 +1266,7 @@ void R_ModelTest_TestFrameLoop_f(const idCmdArgs &args)
     cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
 }
 
-void R_ModelTest_TestFrameReverse_f(const idCmdArgs &args)
+static void R_ModelTest_TestFrameReverse_f(const idCmdArgs &args)
 {
     idStr			name;
     idDict			dict;
@@ -1296,7 +1330,7 @@ void R_ModelTest_TestFrameReverse_f(const idCmdArgs &args)
 
 #undef _TEST_ANIM_TIME
 
-void ArgCompletion_modelTest(const idCmdArgs &args, void(*callback)(const char *s))
+static void ArgCompletion_modelTest(const idCmdArgs &args, void(*callback)(const char *s))
 {
     int i, num;
 
@@ -1328,7 +1362,7 @@ void ArgCompletion_modelTest(const idCmdArgs &args, void(*callback)(const char *
                                      NULL);
 }
 
-void ArgCompletion_modelTestAnim(const idCmdArgs &args, void(*callback)(const char *s))
+static void ArgCompletion_modelTestAnim(const idCmdArgs &args, void(*callback)(const char *s))
 {
     idList<md5animTestInfo_t> list;
     if (modelTest.AnimationList(list) > 0) {
@@ -1338,7 +1372,7 @@ void ArgCompletion_modelTestAnim(const idCmdArgs &args, void(*callback)(const ch
     }
 }
 
-void ArgCompletion_modelTestFrameRange(const idCmdArgs &args, void(*callback)(const char *s))
+static void ArgCompletion_modelTestFrameRange(const idCmdArgs &args, void(*callback)(const char *s))
 {
     callback(va("%s %s", args.Argv(0), "0"));
     idStr str;
@@ -1366,20 +1400,21 @@ void R_ModelTest_AddCommand(void)
     cmdSystem->AddCommand("modelSkin", R_ModelTest_TestSkin_f, CMD_FL_RENDERER, "test skin", idCmdSystem::ArgCompletion_Decl<DECL_SKIN>);
     cmdSystem->AddCommand("modelClean", R_ModelTest_CleanTestModel_f, CMD_FL_RENDERER, "clean test model");
 
-    cmdSystem->AddCommand("modelAnim", R_ModelTest_TestAnim_f, CMD_FL_RENDERER, "test model anim", ArgCompletion_modelTestAnim);
-    cmdSystem->AddCommand("modelPrevAnim", R_ModelTest_PrevAnim_f, CMD_FL_RENDERER, "test model anim");
-    cmdSystem->AddCommand("modelNextAnim", R_ModelTest_NextAnim_f, CMD_FL_RENDERER, "test model anim");
+    cmdSystem->AddCommand("modelAnim", R_ModelTest_TestAnim_f, CMD_FL_RENDERER, "test model animation", ArgCompletion_modelTestAnim);
+    cmdSystem->AddCommand("modelPrevAnim", R_ModelTest_PrevAnim_f, CMD_FL_RENDERER, "test model animation");
+    cmdSystem->AddCommand("modelNextAnim", R_ModelTest_NextAnim_f, CMD_FL_RENDERER, "test model animation");
 
-    cmdSystem->AddCommand("modelFrame", R_ModelTest_TestAnimFrame_f, CMD_FL_RENDERER, "test model anim frame", ArgCompletion_modelTestFrameRange);
-    cmdSystem->AddCommand("modelPrevFrame", R_ModelTest_PrevAnimFrame_f, CMD_FL_RENDERER, "test model anim frame");
-    cmdSystem->AddCommand("modelNextFrame", R_ModelTest_NextAnimFrame_f, CMD_FL_RENDERER, "test model anim frame");
-    cmdSystem->AddCommand("modelFrameRange", R_ModelTest_TestFrameRange_f, CMD_FL_RENDERER, "test model anim frame range", ArgCompletion_modelTestFrameRange);
+    cmdSystem->AddCommand("modelFrame", R_ModelTest_TestAnimFrame_f, CMD_FL_RENDERER, "test model animation frame", ArgCompletion_modelTestFrameRange);
+    cmdSystem->AddCommand("modelPrevFrame", R_ModelTest_PrevAnimFrame_f, CMD_FL_RENDERER, "test model animation frame");
+    cmdSystem->AddCommand("modelNextFrame", R_ModelTest_NextAnimFrame_f, CMD_FL_RENDERER, "test model animation frame");
+    cmdSystem->AddCommand("modelFrameRange", R_ModelTest_TestFrameRange_f, CMD_FL_RENDERER, "test model animation frame range", ArgCompletion_modelTestFrameRange);
+    cmdSystem->AddCommand("modelAnimSpeed", R_ModelTest_AnimSpeed_f, CMD_FL_RENDERER, "test model animation playing speed");
 
     cmdSystem->AddCommand("modelListAnim", R_ModelTest_ListAnim_f, CMD_FL_RENDERER, "list test model animations");
 
-    cmdSystem->AddCommand("modelFrameCut", R_ModelTest_TestFrameCut_f, CMD_FL_RENDERER, "cut current test model anim frame/range");
-    cmdSystem->AddCommand("modelFrameLoop", R_ModelTest_TestFrameLoop_f, CMD_FL_RENDERER, "loop current test model anim frame/range");
-    cmdSystem->AddCommand("modelFrameReverse", R_ModelTest_TestFrameReverse_f, CMD_FL_RENDERER, "reverse current test model anim frame/range");
+    cmdSystem->AddCommand("modelFrameCut", R_ModelTest_TestFrameCut_f, CMD_FL_RENDERER, "cut current test model animation frame/range");
+    cmdSystem->AddCommand("modelFrameLoop", R_ModelTest_TestFrameLoop_f, CMD_FL_RENDERER, "loop current test model animation frame/range");
+    cmdSystem->AddCommand("modelFrameReverse", R_ModelTest_TestFrameReverse_f, CMD_FL_RENDERER, "reverse current test model animation frame/range");
 
     cmdSystem->AddCommand("modelEntityDef", R_ModelTest_ShowModelEntityDef_f, CMD_FL_RENDERER, "print model entity def", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
 }
