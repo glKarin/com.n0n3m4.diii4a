@@ -532,9 +532,9 @@ idCVar	idFileSystemLocal::fs_caseSensitiveOS("fs_caseSensitiveOS", "1", CVAR_SYS
 #endif
 idCVar	idFileSystemLocal::fs_searchAddons("fs_searchAddons", "0", CVAR_SYSTEM | CVAR_BOOL, "search all addon pk4s ( disables addon functionality )");
 
-idCVar	idFileSystemLocal::fs_basepath_extras("harm_fs_basepath_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search paths last, split by ','");
-idCVar	idFileSystemLocal::fs_addon_extras("harm_fs_addon_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search addon files directory path last, split by ','");
-idCVar	idFileSystemLocal::fs_game_base_extras("harm_fs_game_base_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search game mod last, split by ','");
+idCVar	idFileSystemLocal::fs_basepath_extras("harm_fs_basepath_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search paths last(absolute system path), split by ','");
+idCVar	idFileSystemLocal::fs_addon_extras("harm_fs_addon_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search addon files directory path last(extras fs_game), split by ','");
+idCVar	idFileSystemLocal::fs_game_base_extras("harm_fs_game_base_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search game mod last(extras fs_game_base), split by ','");
 
 idFileSystemLocal	fileSystemLocal;
 idFileSystem 		*fileSystem = &fileSystemLocal;

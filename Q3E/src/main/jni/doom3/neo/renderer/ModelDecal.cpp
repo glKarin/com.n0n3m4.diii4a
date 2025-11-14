@@ -313,11 +313,11 @@ void idRenderModelDecal::AddDepthFadedWinding(const idWinding &w, const idMateri
 idRenderModelDecal::CreateDecal
 =================
 */
-void idRenderModelDecal::CreateDecal(const idRenderModel *model, const decalProjectionInfo_t &localInfo
 #ifdef _RAVEN
-		, int suppressSurfaceMask
+void idRenderModelDecal::CreateDecal(const idRenderModel *model, const decalProjectionInfo_t &localInfo, int suppressSurfaceMask)
+#else
+void idRenderModelDecal::CreateDecal(const idRenderModel *model, const decalProjectionInfo_t &localInfo)
 #endif
-		)
 {
 
 	// check all model surfaces

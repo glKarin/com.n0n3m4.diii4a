@@ -74,7 +74,4 @@
 
 // ES_SHADER_SOURCE_PLACEHOLDER(GLASSWARP)
 
-//#ifdef _HUMANHEAD
-//#endif
-
 #endif

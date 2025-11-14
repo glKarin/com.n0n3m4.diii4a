@@ -3290,10 +3290,9 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 		// override cvars from command line
 		StartupVariable(NULL, false);
 
-#if !defined(__ANDROID__) //karin: check OpenGL version from command cvar
+        //karin: check OpenGL version from command cvar
         extern void GLimp_Startup(void);
         GLimp_Startup();
-#endif
 
 		if (!idAsyncNetwork::serverDedicated.GetInteger() && Sys_AlreadyRunning()) {
 			Sys_Quit();
