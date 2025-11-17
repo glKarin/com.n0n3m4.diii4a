@@ -188,7 +188,19 @@ bool idModelPsa::Parse(const char *filePath)
         else if(PSK_CheckId(header.chunk_id, "SCALEKEY"))
         {
             MarkType(SCALEKEY);
+#if 0
             Skip();
+#else
+			for(int i = 0; i < header.chunk_datacount; i++)
+			{
+				float item[4];
+				file->ReadFloat(item[0]);
+				file->ReadFloat(item[1]);
+				file->ReadFloat(item[2]);
+				file->ReadFloat(item[3]);
+				printf("xxx %f %f %f %f\n", item[0], item[1], item[2], item[3]);
+			}
+#endif
         }
         else
         {
@@ -345,11 +357,47 @@ bool idModelPsa::ToMd5Anim(const idModelPsk &psk, idMd5AnimFile &md5anim, idMd5M
                     boneQuat[2] = -key->quatz;
                     boneQuat[3] = key->quatw;
                 }
-//                if(md5Bone->boneName == "Bone_knee_L_03" || md5Bone->boneName == "Bone_knee_R_03") {
-//                    boneOrigin[0] = 0;
-//                    boneOrigin[1] = 0;
-//                    boneOrigin[2] = 0;
-//                }
+#if 0
+				if(
+						0
+						//|| !idStr::Icmpn(md5Bone->boneName, "Bone_knee", 9)
+						//|| !idStr::Icmp(md5Bone->boneName, "Bip001-L-Calf")
+						//|| !idStr::Icmp(md5Bone->boneName, "Bip001-R-Calf")
+						//|| !idStr::Icmp(md5Bone->boneName, "Bone_knee_root_L")
+						//|| !idStr::Icmp(md5Bone->boneName, "Bone_knee_root_R")
+						|| !idStr::Icmp(md5Bone->boneName, "Bone_knee_L_01")
+						|| !idStr::Icmp(md5Bone->boneName, "Bone_knee_R_01")
+							)
+				{
+					const pskBone_t *refBone = &psk.bones[j];
+					boneOrigin[0] = refBone->localx;
+					boneOrigin[1] = refBone->localy;
+					boneOrigin[2] = refBone->localz;
+					if (md5Bone->parentIndex < 0)
+					{
+						boneQuat[0] = refBone->qx;
+						boneQuat[1] = -refBone->qy;
+						boneQuat[2] = refBone->qz;
+						boneQuat[3] = refBone->qw;
+					}
+					else
+					{
+						boneQuat[0] = -refBone->qx;
+						boneQuat[1] = -refBone->qy;
+						boneQuat[2] = -refBone->qz;
+						boneQuat[3] = refBone->qw;
+					}
+					/*
+					boneOrigin[0] = 0;
+					boneOrigin[1] = 0;
+					boneOrigin[2] = 0;
+					boneQuat[0] = 0;
+					boneQuat[1] = 0;
+					boneQuat[2] = 0;
+					boneQuat[3] = 1;
+					*/
+                }
+#endif
 			}
 			else // anim key bone not in psk mesh
 			{
@@ -498,7 +546,7 @@ void idModelPsa::Print(void) const
 //    for(int i = 0; i < animInfos[0].total_bones; i++) {    \
 //         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
 //    }
-    //MODEL_PART_PRINT(animkey, animKeys, "pos=(%f, %f, %f) quat=(%f, %f, %f, %f) time=%f   ", animKeys[i].posx, animKeys[i].posy, animKeys[i].posz, animKeys[i].quatx, animKeys[i].quaty, animKeys[i].quatz, animKeys[i].quatw, animKeys[i].time)
+    MODEL_PART_PRINT(animkey, animKeys, false, "pos=(%f, %f, %f) quat=(%f, %f, %f, %f) time=%f   ", animKeys[i].posx, animKeys[i].posy, animKeys[i].posz, animKeys[i].quatx, animKeys[i].quaty, animKeys[i].quatz, animKeys[i].quatw, animKeys[i].time)
 
     /*
 Header ANIMHEAD, type=20100422, size=0, count=0

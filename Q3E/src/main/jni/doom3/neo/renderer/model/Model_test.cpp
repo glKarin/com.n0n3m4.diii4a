@@ -1137,7 +1137,7 @@ static void R_ModelTest_ShowModelEntityDef_f(const idCmdArgs &args)
         common->Printf("model '%s' entity def not found.\n", args.Argv(1));
 }
 
-static void R_ModelTest_TestFrameCut_f(const idCmdArgs &args)
+void R_ModelTest_TestFrameCut_f(const idCmdArgs &args)
 {
     idStr			name;
     idDict			dict;
@@ -1204,7 +1204,7 @@ static void R_ModelTest_TestFrameCut_f(const idCmdArgs &args)
     cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
 }
 
-static void R_ModelTest_TestFrameLoop_f(const idCmdArgs &args)
+void R_ModelTest_TestFrameLoop_f(const idCmdArgs &args)
 {
     idStr			name;
     idDict			dict;
@@ -1266,7 +1266,7 @@ static void R_ModelTest_TestFrameLoop_f(const idCmdArgs &args)
     cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
 }
 
-static void R_ModelTest_TestFrameReverse_f(const idCmdArgs &args)
+void R_ModelTest_TestFrameReverse_f(const idCmdArgs &args)
 {
     idStr			name;
     idDict			dict;
@@ -1372,7 +1372,7 @@ static void ArgCompletion_modelTestAnim(const idCmdArgs &args, void(*callback)(c
     }
 }
 
-static void ArgCompletion_modelTestFrameRange(const idCmdArgs &args, void(*callback)(const char *s))
+void ArgCompletion_modelTestFrameRange(const idCmdArgs &args, void(*callback)(const char *s))
 {
     callback(va("%s %s", args.Argv(0), "0"));
     idStr str;
