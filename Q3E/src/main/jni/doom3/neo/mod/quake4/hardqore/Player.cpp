@@ -3911,10 +3911,31 @@ void idPlayer::UpdateConditions( void ) {
 		pfl.strafeLeft	= pfl.onGround && ( sidespeed > 20.01f );
 		pfl.strafeRight	= pfl.onGround && ( sidespeed < -20.01f );
  	} else if ( xyspeed > MIN_BOB_SPEED ) {
+#ifdef __ANDROID__ //karin: for in smooth joystick on Android
+		if(harm_g_normalizeMovementDirection.GetBool())
+		{
+			if(pfl.onGround)
+			{
+				GAME_SETUPCMDDIRECTION(usercmd, pfl.forward, pfl.backward, pfl.strafeLeft, pfl.strafeRight);
+			}
+			else
+			{
+				pfl.forward = false;
+				pfl.backward = false;
+				pfl.strafeLeft = false;
+				pfl.strafeRight = false;
+			}
+		}
+		else
+		{
+#endif
 		pfl.forward		= pfl.onGround && ( usercmd.forwardmove > 0 );
 		pfl.backward	= pfl.onGround && ( usercmd.forwardmove < 0 );
 		pfl.strafeLeft	= pfl.onGround && ( usercmd.rightmove < 0 );
 		pfl.strafeRight	= pfl.onGround && ( usercmd.rightmove > 0 );
+#ifdef __ANDROID__ //karin: for in smooth joystick on Android
+		}
+#endif
  	} else {
  		pfl.forward		= false;
  		pfl.backward	= false;
@@ -7833,6 +7854,29 @@ void idPlayer::UpdateViewAngles( void ) {
 */
 // PHIL BEGIN
 
+#ifdef __ANDROID__ //karin: for in smooth joystick on Android
+#define _AVA_DEG_NO_OVERRIDE 45.0f // 60
+	if(harm_g_normalizeMovementDirection.GetBool())
+	{
+		bool _forward, _backward, _left, _right;
+		GAME_SETUPCMDDIRECTION_DEG(usercmd, _AVA_DEG_NO_OVERRIDE, _forward, _backward, _left, _right);
+		if(_forward || _right){
+			viewPos = -20;
+		}else if(_backward || _left){
+			viewPos = 20;
+		}
+
+#if 0
+		if(_right){
+			if(viewPos < 0.5) viewPos += 20;
+		}else if(_left){
+			if(viewPos > -0.5) viewPos -= 20;
+		}
+#endif
+	}
+	else
+	{
+#endif
 	if(usercmd.forwardmove > 0){
 		viewPos = -20;
 	}else if(usercmd.forwardmove < 0){
@@ -7845,6 +7889,9 @@ void idPlayer::UpdateViewAngles( void ) {
     }else if(-usercmd.rightmove){
         if(viewPos > -0.5) viewPos -= 20;
     }
+#ifdef __ANDROID__ //karin: for in smooth joystick on Android
+	}
+#endif
 // PHIL END
 
     if(viewPos < 0.2)
