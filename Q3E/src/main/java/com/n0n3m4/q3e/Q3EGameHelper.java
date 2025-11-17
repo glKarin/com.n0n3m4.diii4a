@@ -963,22 +963,6 @@ public class Q3EGameHelper
     }
     */
 
-    private void MissingExternalLibraries(String extPath, String[] requireLibs)
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(m_context);
-        builder.setTitle("Missing external libraries");
-        builder.setMessage("idTech4A++(F-Droid version) have not built-in Xash3D game libraries because of licence.\n1. You can install github version instead F-Droid version. \n2. You can put these libraries(" + String.join(", ", requireLibs) + ") from github version apk to `" + extPath + "`.");
-        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog)
-            {
-                ((Activity)m_context).finish();
-            }
-        });
-        builder.setPositiveButton(R.string.ok, null);
-        builder.create().show();
-    }
-
     private String GetArchName()
     {
         return Q3EJNI.Is64() ? "arm64" : "arm";
@@ -988,61 +972,6 @@ public class Q3EGameHelper
     {
         String arch = GetArchName();
         return m_context.getFilesDir() + File.separator + "lib" + File.separator + arch;
-    }
-
-    private String CopyExternalLibraries(String[] requireLibs)
-    {
-        String targetPath = GetExternalLibPath();
-
-        String arch = GetArchName();
-        String localPath = Q3EUtils.GetDataPath(File.separator + "lib" + File.separator + arch);
-        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Find external libraries: " + localPath);
-
-        List<File> list = new ArrayList<>();
-        for(String lib : requireLibs)
-        {
-            File f = new File(KStr.AppendPath(localPath, lib));
-            if(!f.isFile() || !f.canRead())
-                continue;
-            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Find local external library: " + (list.size() + 1) + " -> " + f.getAbsolutePath());
-            list.add(f);
-        }
-
-        File dir = new File(targetPath);
-        if(!dir.isDirectory())
-        {
-            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Create external library directory: " + targetPath);
-            if(!Q3EUtils.mkdir(targetPath, true))
-            {
-                Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Create external library directory fail: " + targetPath);
-                return null;
-            }
-        }
-
-        for(File f : list)
-        {
-            String localFilePath = f.getAbsolutePath();
-            String targetFilePath = targetPath + File.separator + f.getName();
-            if(new File(targetFilePath).exists())
-                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Override exists library: " + targetFilePath);
-            if(Q3EUtils.cp(f.getAbsolutePath(), targetFilePath) > 0)
-            {
-                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copy library to external: " + localFilePath + " -> " + targetFilePath);
-            }
-            else
-            {
-                Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copy library to external fail: " + localFilePath + " -> " + targetFilePath);
-            }
-        }
-
-        List<String> missing = Q3EUtils.FilesExistsInDirectory(targetPath, requireLibs);
-        if(!missing.isEmpty())
-        {
-            KLog.E("Missing external libraries: " + String.join(", ", missing.toArray(new String[0])));
-            return null;
-        }
-
-        return targetPath;
     }
 
     private String GetDefaultLibrariesPath()
@@ -1147,7 +1076,7 @@ public class Q3EGameHelper
             }
             else
             {
-                Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload local engine library fail: " + cacheFile);
+                Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload local engine library fail: " + localLibPath);
             }
         }
         else if(preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false))
@@ -1201,24 +1130,11 @@ public class Q3EGameHelper
 
         String libpath;
         String engineLib;
+
         // first: get default engine lib path and libraries path
-        if(Q3EGlobals.IsFDroidVersion() && Q3EUtils.q3ei.IsUsingExternalLibraries())
-        {
-            String[] libs = Q3EGameConstants.XASH3D_LIBS;
-            libpath = CopyExternalLibraries(libs);
-            if(null == libpath)
-            {
-                MissingExternalLibraries(GetExternalLibPath(), libs);
-                return false;
-            }
-            engineLib = KStr.AppendPath(libpath, Q3EUtils.q3ei.GetEngineLibName());
-            useExternalLibPath = true;
-        }
-        else
-        {
-            libpath = GetDefaultLibrariesPath();
-            engineLib = GetDefaultEngineLib();
-        }
+        libpath = GetDefaultLibrariesPath();
+        engineLib = GetDefaultEngineLib();
+
         // second: find from dev env
         libpath = CopyLocalLibraries(libpath);
         engineLib = GetEngineLib(engineLib);

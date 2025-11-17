@@ -581,11 +581,6 @@ public class Q3EInterface
 		return Q3EGame.Find(game_id).MOD_SECONDARY_PARM;
 	}
 
-	public boolean IsUsingExternalLibraries()
-	{
-		return isXash3D;
-	}
-
 	public String GetGameCommandPrefix()
 	{
 		if(isQ1 || isFTEQW || isXash3D || isSource)

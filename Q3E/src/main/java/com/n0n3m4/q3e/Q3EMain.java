@@ -552,12 +552,22 @@ public class Q3EMain extends Activity
                 return false;
             }
         }
-        else if(Q3EUtils.q3ei.isSource && Q3EGlobals.IsFDroidVersion())
+        else if(Q3EGlobals.IsFDroidVersion())
         {
-            Toast.makeText(this, "F-Droid version not support Source-Engine game, you can install Github version!", Toast.LENGTH_LONG).show();
-            finish();
-            Q3EUtils.RunLauncher(this);
-            return false;
+            if(Q3EUtils.q3ei.isXash3D)
+            {
+                Toast.makeText(this, "F-Droid version not support Xash3D, you can install Github version!", Toast.LENGTH_LONG).show();
+                finish();
+                Q3EUtils.RunLauncher(this);
+                return false;
+            }
+            else if(Q3EUtils.q3ei.isSource)
+            {
+                Toast.makeText(this, "F-Droid version not support Source-Engine game, you can install Github version!", Toast.LENGTH_LONG).show();
+                finish();
+                Q3EUtils.RunLauncher(this);
+                return false;
+            }
         }
         return true;
     }
