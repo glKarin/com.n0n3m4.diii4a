@@ -1,6 +1,9 @@
 #include "Model_fbx.h"
 
 #include <float.h>
+#ifdef FLT_EPSILON
+#undef FLT_EPSILON
+#endif
 
 #include "Model_md5mesh.h"
 #include "Model_md5anim.h"
