@@ -1,5 +1,7 @@
 #include "Model_fbx.h"
 
+#include <float.h>
+
 #include "Model_md5mesh.h"
 #include "Model_md5anim.h"
 #include "../../framework/Unzip.h"
@@ -10,7 +12,7 @@ extern int LongSwap(int l); // in idLib/Lib.cpp
 extern int64_t LongLongSwap(int64_t l);
 extern idQuat fromangles(const idVec3 &rot);
 
-static idQuat fromdegrees(const idVec3 &rot) { return fromangles(rot * (M_PI / 180.0f)); }
+static idQuat fromdegrees(const idVec3 &rot) { return fromangles(rot * (idMath::PI / 180.0f)); }
 
 static void SplitMatrixTransform(const idMat4 &mat, idVec3 &origin, idQuat &quat)
 {
@@ -955,7 +957,7 @@ void idModelFbx::fbxModel::Print(void) const
     MODEL_PART_PRINT(fbxAnimationCurve, Objects.AnimationCurve, true, "%s, default=%f, times=%d, keys=%d    ", Objects.AnimationCurve[i].name.c_str(), Objects.AnimationCurve[i].Default, Objects.AnimationCurve[i].KeyTime.Num(), Objects.AnimationCurve[i].KeyValueFloat.Num())
 
     MODEL_PART_PRINT(nodes, nodes, false, "   %s", "")
-    MODEL_PART_PRINT(root, root, true, "id=%lld, name=%s, type=%s   ", root[i].node->id, root[i].node->name.c_str(), fbxBaseNode::TypeName(root[i].node->Type()))
+    MODEL_PART_PRINT(root, root, true, "id=%lld, name=%s, type=%s   ", (long long)root[i].node->id, root[i].node->name.c_str(), fbxBaseNode::TypeName(root[i].node->Type()))
     MODEL_PART_PRINT(Connections, Connections, true, "type=%s, property=%s, from=%lld(%s), to=%lld(%s)   ", Connections[i].type.c_str(), Connections[i].property.c_str(), (long long)Connections[i].from, (a = FindNode(Connections[i].from)) ? va("%s::%s", fbxBaseNode::TypeName(a->Type()), a->name.c_str()) : "<NULL>", (long long)Connections[i].to, (b = FindNode(Connections[i].to)) ? va("%s::%s", fbxBaseNode::TypeName(b->Type()), b->name.c_str()) : "<NULL>")
 #undef MODEL_PART_PRINT
 }
@@ -2166,15 +2168,8 @@ int idModelFbx::GroupTriangle(idList<idList<idDrawVert> > &verts, idList<idList<
 {
 	int num = 0;
 	idList<int> matList;
-	struct vertGroup_s {
-		idList<idDrawVert> *vert;
-		idList<int> *face;
-		idStr *mat;
-		idList<int> origIndex; // original index list
-		idList<int> newIndex; // mapping to new index list
-	};
-	idList<vertGroup_s> objList;
-	vertGroup_s *cur;
+	idList<vertTriGroup_s> objList;
+    vertTriGroup_s *cur;
 
 	const fbxObject &objects = model.Objects;
 	const fbxGeometry &geometry = objects.Geometry;
@@ -2273,7 +2268,7 @@ int idModelFbx::GroupTriangle(idList<idList<idDrawVert> > &verts, idList<idList<
 		if(index < 0)
 		{
 			index = matList.Append(matIndex);
-			objList.Append(vertGroup_s());
+			objList.Append(vertTriGroup_s());
 			verts.Append(idList<idDrawVert>());
 			faces.Append(idList<int>());
 			mats.Append(idStr());
@@ -2548,11 +2543,6 @@ bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
     md5Meshes.SetNum(0);
 
     idList<int> matList;
-    struct vertGroup_s {
-        md5meshMesh_t *vert;
-        idList<int> origIndex; // original index list
-        idList<int> newIndex; // mapping to new index list
-    };
     idList<vertGroup_s> objList;
     vertGroup_s *cur;
 
@@ -2613,12 +2603,7 @@ bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
         indexes = &vertexIndexes;
     }
 
-    struct vertWeight {
-        float weight;
-        const fbxLimbNode *limb;
-        int index;
-    };
-    idList<idList<vertWeight> > vertWeightGroups;
+    idList<idList<vertWeight_s> > vertWeightGroups;
     vertWeightGroups.SetNum(geometry.Vertices.Num());
 
     for(j = 0, cluster = &objects.Cluster[0]; j < objects.Cluster.Num(); j++, cluster++)
@@ -2633,7 +2618,7 @@ bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
                 continue;
             }
             float weight = cluster->Weights[i];
-            vertWeight w;
+            vertWeight_s w;
             w.weight = weight;
             w.limb = refBone;
             w.index = fbxBones.FindIndex(refBone);
@@ -2696,7 +2681,7 @@ bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
             }
 
             // Vertex
-            const idList<vertWeight> &vertWeights = vertWeightGroups[oriIndex];
+            const idList<vertWeight_s> &vertWeights = vertWeightGroups[oriIndex];
             md5meshVert_t md5Vert;
             md5Vert.uv = uv;
             md5Vert.weightIndex = mesh->weights.Num();
@@ -2720,7 +2705,7 @@ bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
             float w = 0.0f;
             for(int m = 0; m < vertWeights.Num(); m++)
             {
-                const vertWeight &weight = vertWeights[m];
+                const vertWeight_s &weight = vertWeights[m];
                 md5meshWeight_t md5Weight;
                 md5Weight.jointIndex = weight.index;
                 if(addOrigin)
@@ -2837,20 +2822,7 @@ bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
 	const fbxAnimationLayer *animLayer = animStack.AnimationLayer();
 	idList<const fbxAnimationCurveNode *> curveNodes;
 	animLayer->AnimationCurveNode(curveNodes);
-	struct xformTransComp {
-		const fbxAnimationCurve *curve;
-		idList<float> keys;
-	};
-	struct xformTrans {
-		const fbxAnimationCurveNode *node;
-		xformTransComp x, y, z;
-	};
-	struct xform {
-		xformTrans T;
-		xformTrans R;
-		//xformTrans S;
-	};
-	idHashTable<xform> xformMap;
+	idHashTable<xform_s> xformMap;
 	for(i = 0; i < curveNodes.Num(); i++)
 	{
 		const fbxAnimationCurveNode *curveNode = curveNodes[i];
@@ -2861,10 +2833,10 @@ bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
         if(curveNode->type != 'T' && curveNode->type != 'R')
 			continue;
 
-		xform *rf = NULL;
+		xform_s *rf = NULL;
 		if(!xformMap.Get(limb->name, &rf))
 		{
-			xform f;
+			xform_s f;
 			f.T.node = f.R.node = NULL;
 			f.T.x.curve = f.T.y.curve = f.T.z.curve = NULL;
 			f.R.x.curve = f.R.y.curve = f.R.z.curve = NULL;
@@ -2872,7 +2844,7 @@ bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
 			xformMap.Get(limb->name, &rf);
 		}
 
-		xformTrans *trans = curveNode->type == 'R' ? &rf->R : &rf->T;
+		xformTrans_s *trans = curveNode->type == 'R' ? &rf->R : &rf->T;
 		trans->node = curveNode;
 
 		idList<const fbxAnimationCurve *> curves;
@@ -2920,7 +2892,7 @@ bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
             md5Bone->boneName = meshJoint->boneName;
             md5Bone->parentIndex = meshJoint->parentIndex;
 
-			xform *rf = NULL;
+			xform_s *rf = NULL;
 			if(xformMap.Get(meshJoint->boneName, &rf))
 			{
 				if(rf->T.node)

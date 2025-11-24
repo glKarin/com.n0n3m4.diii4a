@@ -498,6 +498,38 @@ private: // binary fbx reader
         template <class T>
         static int CopyArrayToArray(T array[], unsigned int length, const fbxProperty_t &prop);
 
+private: // temp struct
+        struct vertTriGroup_s {
+            idList<idDrawVert> *vert;
+            idList<int> *face;
+            idStr *mat;
+            idList<int> origIndex; // original index list
+            idList<int> newIndex; // mapping to new index list
+        };
+        struct vertGroup_s {
+            md5meshMesh_t *vert;
+            idList<int> origIndex; // original index list
+            idList<int> newIndex; // mapping to new index list
+        };
+        struct vertWeight_s {
+            float weight;
+            const fbxLimbNode *limb;
+            int index;
+        };
+        struct xformTransComp_s {
+            const fbxAnimationCurve *curve;
+            idList<float> keys;
+        };
+        struct xformTrans_s {
+            const fbxAnimationCurveNode *node;
+            xformTransComp_s x, y, z;
+        };
+        struct xform_s {
+            xformTrans_s T;
+            xformTrans_s R;
+            //xformTrans S;
+        };
+
     private:
         idFile *file;
 		idLexer *lexer;
