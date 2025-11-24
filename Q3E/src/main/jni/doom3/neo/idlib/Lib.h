@@ -135,6 +135,11 @@ void	LittleRevBytes(void *bp, int elsize, int elcount);
 void	LittleBitField(void *bp, int elsize);
 void	Swap_Init(void);
 
+int64_t	BigLongLong(int64_t l);
+int64_t	LittleLongLong(int64_t l);
+double	BigDouble(double l);
+double	LittleDouble(double l);
+
 bool	Swap_IsBigEndian(void);
 
 // for base64

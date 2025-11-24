@@ -1136,6 +1136,10 @@ int idRenderModelMD5::GetSurfaceMask(const char *name) const
 #include "model/Model_gltf.cpp"
 #endif
 
+#ifdef _MODEL_FBX
+#include "model/Model_fbx.cpp"
+#endif
+
 #ifdef _MODEL_MD5_EXT
 #include "model/Model_md5convert.cpp"
 #endif

@@ -196,6 +196,9 @@ ID_INLINE void idCmdSystem::ArgCompletion_ModelName(const idCmdArgs &args, void(
 #ifdef _MODEL_GLTF
                                              , ".gltf", ".glb"
 #endif
+#ifdef _MODEL_FBX
+                                             , ".fbx"
+#endif
 											 , NULL);
 }
 

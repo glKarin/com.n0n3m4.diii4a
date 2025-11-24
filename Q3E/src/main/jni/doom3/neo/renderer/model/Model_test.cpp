@@ -687,6 +687,9 @@ void idModelTest::TestModel(const char *model, const char *classname, const char
             || (extension.Icmp("gltf") == 0)
             || (extension.Icmp("glb") == 0)
 #endif
+#ifdef _MODEL_FBX
+            || (extension.Icmp("fbx") == 0)
+#endif
        )
         CreateModel(model, "func_static", skin, dict);
     else
@@ -732,6 +735,9 @@ void idModelTest::CreateModel(const char *model, const char *classname, const ch
 #ifdef _MODEL_GLTF
             || (extension.Icmp("gltf") == 0)
             || (extension.Icmp("glb") == 0)
+#endif
+#ifdef _MODEL_FBX
+            || (extension.Icmp("fbx") == 0)
 #endif
        )
         isAnimated = false;
@@ -1358,6 +1364,9 @@ static void ArgCompletion_modelTest(const idCmdArgs &args, void(*callback)(const
 #endif
 #ifdef _MODEL_GLTF
                                      ".gltf", ".glb",
+#endif
+#ifdef _MODEL_FBX
+                                     ".fbx",
 #endif
                                      NULL);
 }

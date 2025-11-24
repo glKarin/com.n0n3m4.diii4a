@@ -338,11 +338,13 @@ void idModelMd5meshV6::Print(void) const
 {
 #define MODEL_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
-	if(all) \
-    for(int i = 0; i < list.Num(); i++) {  \
-         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
-    }                                    \
+    if(all) { \
+        for(int i = 0; i < list.Num(); i++) { \
+             Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__); \
+        } \
+    } \
     Sys_Printf("\n------------------------------------------------------\n");
+
     MODEL_PART_PRINT(bone, bones, true, "%s, parent=%s   ", bones[i].name.c_str(), bones[i].parent.c_str())
     MODEL_PART_PRINT(mesh, meshes, true, "shader=%s, verts=%d, tris=%d, weights=%d   ", meshes[i].shader.c_str(), meshes[i].verts.Num(), meshes[i].tris.Num(), meshes[i].weights.Num())
 

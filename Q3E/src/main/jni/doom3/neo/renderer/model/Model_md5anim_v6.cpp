@@ -367,11 +367,13 @@ void idModelMd5animV6::Print(void) const
 {
 #define MODEL_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
-	if(all) \
-    for(int i = 0; i < list.Num(); i++) {  \
-         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
-    }                                    \
+    if(all) { \
+        for(int i = 0; i < list.Num(); i++) { \
+             Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__); \
+        } \
+    } \
     Sys_Printf("\n------------------------------------------------------\n");
+
     MODEL_PART_PRINT(channel, channels, true, "joint=%s, attribute=%s, keys=%d   ", channels[i].joint.c_str(), channels[i].attribute.c_str(), channels[i].keys.Num())
 
 #undef MODEL_PART_PRINT

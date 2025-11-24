@@ -364,6 +364,11 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
         model = new idRenderModelStatic;
         model->InitFromFile(modelName);
 #endif
+#ifdef _MODEL_FBX
+    } else if (extension.Icmp("fbx") == 0) {
+        model = new idRenderModelStatic;
+        model->InitFromFile(modelName);
+#endif
 
 #ifdef _RAVEN
 #ifdef _RAVEN_FX

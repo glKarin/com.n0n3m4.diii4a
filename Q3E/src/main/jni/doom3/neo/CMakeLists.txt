@@ -145,6 +145,7 @@ option(SUPPORT_PSK							"Support Unreal engine psk/psa animation/static model"	
 option(SUPPORT_IQM							"Support iqm animation/static model"										ON)
 option(SUPPORT_SMD							"Support Source engine smd animation/static model"							ON)
 option(SUPPORT_GLTF							"Support Khronos gltf/glb animation/static model"							ON)
+option(SUPPORT_FBX							"Support Autodesk fbx animation/static model"								ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -817,7 +818,10 @@ if(SUPPORT_GLTF)
 	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_GLTF")
 	message(STATUS "Support Khronos gltf/glb animation/static model")
 endif()
-
+if(SUPPORT_FBX)
+	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_FBX")
+	message(STATUS "Support Autodesk fbx animation/static model")
+endif()
 if(CONSOLE AND WIN32)
 	set(CORE_DEFINES "${CORE_DEFINES};_REDIRECT_OUTPUT")
 	message(STATUS "Redirect output to stdout.txt")
@@ -1708,12 +1712,14 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Build idlib static
 # idSoftware
+if(BUILD_D3 OR BUILD_D3_MOD)
 add_library(idlib STATIC ${src_idlib})
 if(NOT MSVC)
 	set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib})
+endif()
 
 # raven
 if(RAVEN OR QUAKE4 OR BUILD_Q4_MOD)

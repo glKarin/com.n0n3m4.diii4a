@@ -324,7 +324,7 @@ bool idModelSmd::IsMeshFile(void) const
     return triangles.Num() > 0;
 }
 
-static idQuat fromangles(const idVec3 &rot)
+idQuat fromangles(const idVec3 &rot)
 {
 	double cx = cos(rot.x/2), sx = sin(rot.x/2),
 		   cy = cos(rot.y/2), sy = sin(rot.y/2),
@@ -878,13 +878,16 @@ void idModelSmd::Print(void) const
 {
 #define MODEL_PART_PRINT(x) if(IsTypeMarked(x)) { Sys_Printf(#x "\n"); }
 #undef MODEL_PART_PRINT
+
 #define MODEL_PART_PRINT(name, list, all, fmt, ...) \
-    Sys_Printf(#name " num: %d\n", list.Num());   \
-    if(all)                                              \
-    for(int i = 0; i < list.Num(); i++) {  \
-         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
-    }                                    \
+    Sys_Printf(#name " num: %d\n", list.Num()); \
+    if(all) { \
+        for(int i = 0; i < list.Num(); i++) { \
+             Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__); \
+        } \
+    } \
     Sys_Printf("\n------------------------------------------------------\n");
+
     MODEL_PART_PRINT(node, nodes, true, "%d, name=%s, parent=%d   ", nodes[i].index, nodes[i].name.c_str(), nodes[i].parent_index)
     MODEL_PART_PRINT(frame, frames, false, "time=%d   ", frames[i].time)
     MODEL_PART_PRINT(triangle, triangles, false, "material=%s   ", triangles[i].material.c_str())

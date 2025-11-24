@@ -8,7 +8,7 @@ void R_ModelTest_AddCommand(void);
 void R_ModelLight_AddCommand(void);
 #endif
 
-#if defined(_MODEL_PSK) || defined(_MODEL_IQM) || defined(_MODEL_SMD) || defined(_MODEL_GLTF)
+#if defined(_MODEL_PSK) || defined(_MODEL_IQM) || defined(_MODEL_SMD) || defined(_MODEL_GLTF) || defined(_MODEL_FBX)
 #define _MODEL_MD5_EXT 1
 #endif
 
@@ -55,6 +55,10 @@ void R_SMD_AddCommand(void);
 void R_GLTF_AddCommand(void);
 #endif
 
+#ifdef _MODEL_FBX
+void R_Fbx_AddCommand(void);
+#endif
+
 void R_Md5v6_AddCommand(void);
 
 ID_INLINE void R_Model_AddCommand(void)
@@ -70,6 +74,9 @@ ID_INLINE void R_Model_AddCommand(void)
 #endif
 #ifdef _MODEL_GLTF
     R_GLTF_AddCommand();
+#endif
+#ifdef _MODEL_FBX
+    R_Fbx_AddCommand();
 #endif
 #ifdef _MODEL_MD5_EXT
     R_Md5Convert_AddCommand();

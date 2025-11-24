@@ -567,12 +567,7 @@ int idModelGLTF::ReadAnimations(void)
 
 int idModelGLTF::ReadHeader(glbHeader_t &header)
 {
-    char buffer[12];
-    int curPos = file->Tell();
-    int num = file->Read(buffer, sizeof(buffer));
-    if(num == 0)
-        return 0;
-    file->Seek(curPos, FS_SEEK_SET);
+    int num = file->Length() - file->Tell();
     if(num < 12)
     {
         common->Warning("Unexpected end of file(%d/12 bytes).", num);
@@ -1802,13 +1797,16 @@ void idModelGLTF::Print(void) const
 {
     Sys_Printf("asset: version=%d.%d\n", asset.major_version, asset.minor_version);
     Sys_Printf("scene: %d\n", scene);
+
 #define MODEL_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
-	if(all) \
-    for(int i = 0; i < list.Num(); i++) {  \
-         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
-    }                                    \
+    if(all) { \
+        for(int i = 0; i < list.Num(); i++) { \
+             Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__); \
+        } \
+    } \
     Sys_Printf("\n------------------------------------------------------\n");
+
     MODEL_PART_PRINT(scenes, scenes, true, "name=%s nodes=%d   ", scenes[i].name.c_str(), scenes[i].nodes.Num())
     MODEL_PART_PRINT(nodes, nodes, true, "name=%s mesh=%d   ", nodes[i].name.c_str(), nodes[i].mesh)
     MODEL_PART_PRINT(bufferViews, bufferViews, true, "name=%s buffer=%d byteOffset=%d byteLength=%d byteStride=%d target=%d   ", bufferViews[i].name.c_str(), bufferViews[i].buffer, bufferViews[i].byteOffset, bufferViews[i].byteLength, bufferViews[i].byteStride, bufferViews[i].target)

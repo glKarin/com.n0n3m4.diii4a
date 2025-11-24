@@ -355,6 +355,11 @@ void idRenderModelStatic::InitFromFile(const char *fileName)
         loaded		= LoadGLTF(name);
         reloadable	= true;
 #endif
+#ifdef _MODEL_FBX
+    } else if (extension.Icmp("fbx") == 0) {
+        loaded		= LoadFBX(name);
+        reloadable	= true;
+#endif
 	} else {
 		common->Warning("idRenderModelStatic::InitFromFile: unknown type for model: \'%s\'", name.c_str());
 		loaded		= false;
@@ -5358,5 +5363,385 @@ bool idRenderModelStatic::ConvertGLTFToModelSurfaces( const idModelGLTF* gltf )
     }
 
     return true;
+}
+#endif
+
+#ifdef _MODEL_FBX
+#include "model/Model_fbx.h"
+/*
+=================
+idRenderModelStatic::LoadFBX
+=================
+*/
+bool idRenderModelStatic::LoadFBX( const char* fileName)
+{
+	idModelFbx fbx;
+	if(!fbx.Parse(fileName))
+		return false;
+
+    bool ret = ConvertFBXToModelSurfaces( &fbx );
+	if(ret)
+		fileSystem->ReadFile(fileName, NULL, &timeStamp);
+	return ret;
+}
+
+bool idRenderModelStatic::ConvertFBXToModelSurfaces( const idModelFbx* fbx )
+{
+    if(!fbx)
+        return false;
+
+	const idMaterial* im1, *im2;
+	srfTriangles_t* tri;
+	int				objectNum;
+	int				i, j;
+	int				v, tv;
+	int* 			vRemap;
+	int* 			tvRemap;
+	matchVert_t* 	mvTable;	// all of the match verts
+	matchVert_t** 	mvHash;		// points inside mvTable for each xyz index
+	matchVert_t* 	lastmv;
+	matchVert_t* 	mv;
+	idVec3			normal;
+	int* 			mergeTo;
+	byte* 			color;
+	static byte	identityColor[4] = { 255, 255, 255, 255 };
+	modelSurface_t	surf, *modelSurf;
+
+    idList<idList<idDrawVert> > triGroup;
+    idList<idList<int> > indexGroup;
+    idStrList matList;
+
+    int num = fbx->GroupTriangle(triGroup, indexGroup, matList, true);
+
+	if( num < 1 )
+    {
+        return false;
+    }
+
+	// the modeling programs can save out multiple surfaces with a common
+	// material, but we would like to mege them together where possible
+	// meaning that this->NumSurfaces() <= ase->objects.currentElements
+	mergeTo = ( int* )_alloca( num * sizeof( *mergeTo ) );
+	surf.geometry = NULL;
+
+    if( !r_mergeModelSurfaces.GetBool() )
+    {
+        // don't merge any
+        for( i = 0; i < num; i++ )
+        {
+            mergeTo[i] = i;
+
+            surf.shader = declManager->FindMaterial( matList[i] );
+            surf.id = this->NumSurfaces();
+            this->AddSurface( surf );
+        }
+    }
+    else
+    {
+        // search for material matches
+        for( i = 0; i < num; i++ )
+        {
+            im1 = declManager->FindMaterial( matList[i] );
+            if( im1->IsDiscrete() )
+            {
+                // flares, autosprites, etc
+                j = this->NumSurfaces();
+            }
+            else
+            {
+                for( j = 0; j < this->NumSurfaces(); j++ )
+                {
+                    modelSurf = &this->surfaces[j];
+                    im2 = modelSurf->shader;
+                    if( im1 == im2 )
+                    {
+                        // merge this
+                        mergeTo[i] = j;
+                        break;
+                    }
+                }
+            }
+            if( j == this->NumSurfaces() )
+            {
+                // didn't merge
+                mergeTo[i] = j;
+                surf.shader = im1;
+                surf.id = this->NumSurfaces();
+                this->AddSurface( surf );
+            }
+        }
+    }
+
+	idVectorSubset<idVec3, 3> vertexSubset;
+	idVectorSubset<idVec2, 2> texCoordSubset;
+
+	// build the surfaces
+	for( objectNum = 0; objectNum < num; objectNum++ )
+	{
+        const idList<idDrawVert> &vertList = triGroup[objectNum];
+        const idList<int> &triList = indexGroup[objectNum];
+		idList<idVec3> vertexes;
+		idList<idVec2> texcoords;
+		idList<idVec3> normals;
+		idList<glIndex_t> indexes;
+        for(i = 0; i < triList.Num(); i+=3)
+        {
+            int triIndexes[3] = {
+                    triList[i],
+                    triList[i + 2],
+                    triList[i + 1],
+            };
+
+            for(int k = 0; k < 3; k++)
+            {
+                const idDrawVert &vertex = vertList[triIndexes[k]];
+                int vIndex = vertexes.Append(vertex.xyz);
+                texcoords.Append(vertex.st);
+                normals.Append(vertex.normal);
+                indexes.Append(vIndex);
+            }
+		}
+
+		im1 = declManager->FindMaterial( matList[objectNum] );
+
+		bool normalsParsed = normals.Num();
+
+		// completely ignore any explict normals on surfaces with a renderbump command
+		// which will guarantee the best contours and least vertexes.
+		const char* rb = im1->GetRenderBump();
+		if( rb != NULL && rb[0] != '\0' )
+		{
+			normalsParsed = false;
+		}
+
+		// It seems like the tools our artists are using often generate
+		// verts and texcoords slightly separated that should be merged
+		// note that we really should combine the surfaces with common materials
+		// before doing this operation, because we can miss a slop combination
+		// if they are in different surfaces
+
+		vRemap = ( int* )R_StaticAlloc( vertexes.Num() * sizeof( vRemap[0] ) );
+
+		if( fastLoad )
+		{
+			// renderbump doesn't care about vertex count
+			for( j = 0; j < vertexes.Num(); j++ )
+			{
+				vRemap[j] = j;
+			}
+		}
+		else
+		{
+			float vertexEpsilon = r_slopVertex.GetFloat();
+			float expand = 2 * 32 * vertexEpsilon;
+			idVec3 mins, maxs;
+
+			SIMDProcessor->MinMax( mins, maxs, &vertexes[0], vertexes.Num() );
+
+			mins -= idVec3( expand, expand, expand );
+			maxs += idVec3( expand, expand, expand );
+
+			vertexSubset.Init( mins, maxs, 32, 1024 );
+			for( j = 0; j < vertexes.Num(); j++ )
+			{
+				vRemap[j] = vertexSubset.FindVector( &vertexes[0], j, vertexEpsilon );
+			}
+		}
+
+		tvRemap = ( int* )R_StaticAlloc( texcoords.Num() * sizeof( tvRemap[0] ) );
+
+		if( fastLoad )
+		{
+			// renderbump doesn't care about vertex count
+			for( j = 0; j < texcoords.Num(); j++ )
+			{
+				tvRemap[j] = j;
+			}
+		}
+		else
+		{
+			float texCoordEpsilon = r_slopTexCoord.GetFloat();
+			float expand = 2 * 32 * texCoordEpsilon;
+			idVec2 mins, maxs;
+
+			SIMDProcessor->MinMax( mins, maxs, &texcoords[0], texcoords.Num() );
+
+			mins -= idVec2( expand, expand );
+			maxs += idVec2( expand, expand );
+
+			texCoordSubset.Init( mins, maxs, 32, 1024 );
+
+			for( j = 0; j < texcoords.Num(); j++ )
+			{
+				tvRemap[j] = texCoordSubset.FindVector( &texcoords[0], j, texCoordEpsilon );
+			}
+		}
+
+		// we need to find out how many unique vertex / texcoord combinations
+		// there are, because ASE tracks them separately but we need them unified
+
+		// the maximum possible number of combined vertexes is the number of indexes
+		mvTable = ( matchVert_t* )R_ClearedStaticAlloc( indexes.Num() * sizeof( mvTable[0] ) );
+
+		// we will have a hash chain based on the xyz values
+		mvHash = ( matchVert_t** )R_ClearedStaticAlloc( vertexes.Num() * sizeof( mvHash[0] ) );
+
+		// allocate triangle surface
+		tri = R_AllocStaticTriSurf();
+		tri->numVerts = 0;
+		tri->numIndexes = 0;
+		R_AllocStaticTriSurfIndexes( tri, indexes.Num() );
+		tri->generateNormals = !normalsParsed;
+
+		// init default normal, color and tex coord index
+		normal.Zero();
+		color = identityColor;
+		tv = 0;
+
+		// find all the unique combinations
+		float normalEpsilon = 1.0f - r_slopNormal.GetFloat();
+
+		for( j = 0; j < ( indexes.Num() / 3); j++ )
+		{
+			// construct triangles in reverse order
+			for( int k = 0; k <= 2; k++ )
+			{
+				int index = j * 3 + k;
+
+				if( index < 0 || index >= vertexes.Num() )
+				{
+					common->Error( "ConvertFBXToModelSurfaces: bad vertex index in FBX file %s", name.c_str() );
+				}
+
+				// collapse the position if it was slightly offset
+				v = vRemap[index];
+
+				// we may or may not have texcoords to compare
+				if( texcoords.Num() != 0 )
+				{
+					tv = index;
+					//tv = mesh->faces[j].tVertexNum[k];
+
+					if( tv < 0 || tv >= texcoords.Num() )
+					{
+						common->Error( "ConvertFBXToModelSurfaces: bad tex coord index in FBX file %s", name.c_str() );
+					}
+					// collapse the tex coord if it was slightly offset
+					tv = tvRemap[tv];
+				}
+
+				// we may or may not have normals to compare
+				if( normalsParsed )
+				{
+					normal = normals[ index ];
+				}
+
+				// we may or may not have colors to compare
+				/*
+				if( mesh->colorsParsed )
+				{
+					color = mesh->faces[j].vertexColors[k];
+				}
+				*/
+
+				// find a matching vert
+				for( lastmv = NULL, mv = mvHash[v]; mv != NULL; lastmv = mv, mv = mv->next )
+				{
+					if( mv->tv != tv )
+					{
+						continue;
+					}
+					if( *( unsigned* )mv->color != *( unsigned* )color )
+					{
+						continue;
+					}
+					if( !normalsParsed )
+					{
+						// if we are going to create the normals, just
+						// matching texcoords is enough
+						break;
+					}
+					if( mv->normal * normal > normalEpsilon )
+					{
+						break;		// we already have this one
+					}
+				}
+				if( !mv )
+				{
+					// allocate a new match vert and link to hash chain
+					mv = &mvTable[ tri->numVerts ];
+					mv->v = v;
+					mv->tv = tv;
+					mv->normal = normal;
+					*( unsigned* )mv->color = *( unsigned* )color;
+					mv->next = NULL;
+					if( lastmv )
+					{
+						lastmv->next = mv;
+					}
+					else
+					{
+						mvHash[v] = mv;
+					}
+					tri->numVerts++;
+				}
+
+				tri->indexes[tri->numIndexes] = mv - mvTable;
+				tri->numIndexes++;
+			}
+		}
+
+		// allocate space for the indexes and copy them
+		if( tri->numIndexes > indexes.Num() )
+		{
+			common->FatalError( "ConvertFBXToModelSurfaces: index miscount in FBX file %s", name.c_str() );
+		}
+		if( tri->numVerts > indexes.Num() )
+		{
+			common->FatalError( "ConvertFBXToModelSurfaces: vertex miscount in FBX file %s", name.c_str() );
+		}
+
+		// now allocate and generate the combined vertexes
+		R_AllocStaticTriSurfVerts( tri, tri->numVerts );
+
+		for( j = 0; j < tri->numVerts; j++ )
+		{
+			mv = &mvTable[j];
+			tri->verts[ j ].Clear();
+			tri->verts[ j ].xyz = vertexes[ mv->v ];
+			tri->verts[ j ].normal = ( mv->normal );
+
+			*( unsigned* )tri->verts[j].color = *( unsigned* )mv->color;
+
+			if( texcoords.Num() != 0 )
+			{
+				const idVec2& tv = texcoords[ mv->tv ];
+				float u = tv.x;
+				float v = tv.y;
+				tri->verts[j].st = idVec2( u, v );
+			}
+		}
+
+		R_StaticFree( mvTable );
+		R_StaticFree( mvHash );
+		R_StaticFree( tvRemap );
+		R_StaticFree( vRemap );
+
+		// see if we need to merge with a previous surface of the same material
+		modelSurf = &this->surfaces[mergeTo[ objectNum ]];
+		srfTriangles_t*	mergeTri = modelSurf->geometry;
+		if( !mergeTri )
+		{
+			modelSurf->geometry = tri;
+		}
+		else
+		{
+			modelSurf->geometry = R_MergeTriangles( mergeTri, tri );
+			R_FreeStaticTriSurf( tri );
+			R_FreeStaticTriSurf( mergeTri );
+		}
+	}
+
+	return true;
 }
 #endif

@@ -38,12 +38,9 @@ void idModelPsa::Clear(void)
 
 int idModelPsa::ReadHeader(psaHeader_t &header)
 {
-    char buffer[32];
-    int curPos = file->Tell();
-    int num = file->Read(buffer, sizeof(buffer));
+    int num = file->Length() - file->Tell();
     if(num == 0)
         return 0;
-    file->Seek(curPos, FS_SEEK_SET);
     if(num < 32)
     {
         common->Warning("Unexpected end of file(%d/32 bytes).", num);
@@ -188,7 +185,7 @@ bool idModelPsa::Parse(const char *filePath)
         else if(PSK_CheckId(header.chunk_id, "SCALEKEY"))
         {
             MarkType(SCALEKEY);
-#if 0
+#if 1
             Skip();
 #else
 			for(int i = 0; i < header.chunk_datacount; i++)
@@ -533,11 +530,13 @@ void idModelPsa::Print(void) const
 {
 #define MODEL_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
-	if(all) \
-    for(int i = 0; i < list.Num(); i++) {    \
-         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
-    }                                    \
+    if(all) { \
+        for(int i = 0; i < list.Num(); i++) { \
+             Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__); \
+        } \
+    } \
     Sys_Printf("\n------------------------------------------------------\n");
+
     MODEL_PART_PRINT(bone, bones, true, "%s flags=%x children=%d parent=%d quat=(%f, %f, %f, %f) pos=(%f, %f, %f) length=%f size=(%f, %f, %f)   ", bones[i].name, bones[i].flags, bones[i].num_children, bones[i].parent_index, bones[i].qx, bones[i].qy, bones[i].qz, bones[i].qw, bones[i].localx, bones[i].localy, bones[i].localz, bones[i].length, bones[i].xsize, bones[i].ysize, bones[i].zsize)
     MODEL_PART_PRINT(animinfo, animInfos, true, "action=%s group=%s bones=%d root_include=%d key_compression_style=%d key_quotum=%d key_reduction=%f track_time=%f anim_rate=%f start_bone=%d first_raw_frame=%d num_raw_frames=%d  ", animInfos[i].action_name, animInfos[i].group_name, animInfos[i].total_bones, animInfos[i].root_include, animInfos[i].key_compression_style, animInfos[i].key_quotum, animInfos[i].key_reduction, animInfos[i].track_time, animInfos[i].anim_rate, animInfos[i].start_bone, animInfos[i].first_raw_frame, animInfos[i].num_raw_frames)
 //#undef MODEL_PART_PRINT

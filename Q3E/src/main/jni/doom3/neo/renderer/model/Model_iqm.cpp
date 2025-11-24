@@ -1298,13 +1298,16 @@ void idModelIqm::Print(void) const
     MODEL_PART_PRINT(IQM_ANIM)
     MODEL_PART_PRINT(IQM_POSE)
 #undef MODEL_PART_PRINT
+
 #define MODEL_PART_PRINT(name, list, all, fmt, ...) \
-    Sys_Printf(#name " num: %d\n", list.Num());   \
-    if(all)                                              \
-    for(int i = 0; i < list.Num(); i++) {  \
-         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
-    }                                    \
+    Sys_Printf(#name " num: %d\n", list.Num()); \
+    if(all) { \
+        for(int i = 0; i < list.Num(); i++) { \
+             Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__); \
+        } \
+    } \
     Sys_Printf("\n------------------------------------------------------\n");
+
     MODEL_PART_PRINT(text, texts, true, "%s, offset=%u   ", texts[i].text.c_str(), texts[i].offset)
     MODEL_PART_PRINT(vertex, vertexes, false, "(%f, %f, %f)   ", vertexes[i][0], vertexes[i][1], vertexes[i][2])
     MODEL_PART_PRINT(texcoord, texcoords, false, "(%f, %f)   ", texcoords[i][0], texcoords[i][1])

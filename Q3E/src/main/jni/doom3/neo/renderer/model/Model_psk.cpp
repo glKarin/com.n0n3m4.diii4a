@@ -54,12 +54,9 @@ void idModelPsk::Clear(void)
 
 int idModelPsk::ReadHeader(pskHeader_t &header)
 {
-    char buffer[32];
-    int curPos = file->Tell();
-    int num = file->Read(buffer, sizeof(buffer));
+    int num = file->Length() - file->Tell();
     if(num == 0)
         return 0;
-    file->Seek(curPos, FS_SEEK_SET);
     if(num < 32)
     {
         common->Warning("Unexpected end of file(%d/32 bytes).", num);
@@ -826,11 +823,13 @@ void idModelPsk::Print(void) const
 {
 #define MODEL_PART_PRINT(name, list, all, fmt, ...) \
     Sys_Printf(#name " num: %d\n", list.Num()); \
-	if(all) \
-    for(int i = 0; i < list.Num(); i++) {  \
-         Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__);                                \
-    }                                    \
+    if(all) { \
+        for(int i = 0; i < list.Num(); i++) { \
+             Sys_Printf("%d: " fmt "\n", i, __VA_ARGS__); \
+        } \
+    } \
     Sys_Printf("\n------------------------------------------------------\n");
+
     MODEL_PART_PRINT(vertex, vertexes, false, "(%f, %f, %f)   ", vertexes[i][0], vertexes[i][1], vertexes[i][2])
     MODEL_PART_PRINT(wedge, wedges, false, "vertex=%u uv=(%f, %f) mat=%d   ", wedges[i].vertex_index, wedges[i].u, wedges[i].v, wedges[i].material_index)
     MODEL_PART_PRINT(face, faces, false, "wedge=(%u, %u, %u) mat=(%d, %d) sg=%u   ", faces[i].wedge_index1, faces[i].wedge_index2, faces[i].wedge_index3, faces[i].material_index, faces[i].aux_material_index, faces[i].smooth_group)

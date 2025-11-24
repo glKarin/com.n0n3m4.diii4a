@@ -112,13 +112,13 @@ class idFile
 		virtual int				WriteVec6(const idVec6 &vec);
 		virtual int				WriteMat3(const idMat3 &mat);
 #ifdef _RAVEN
-	virtual int				WriteVec5(const idVec5& vec);
-	virtual int				ReadVec5(idVec5& vec);
-	// jscott: for savegame and demo file syncing
-// jmarshall - needs implementation
-	virtual void			WriteSyncId(void) { }
-	virtual void			ReadSyncId(const char* detail = "unspecified", const char* classname = NULL) { }
-// jmarshall end
+        virtual int				WriteVec5(const idVec5& vec);
+        virtual int				ReadVec5(idVec5& vec);
+        // jscott: for savegame and demo file syncing
+        // jmarshall - needs implementation
+        virtual void			WriteSyncId(void) { }
+        virtual void			ReadSyncId(const char* detail = "unspecified", const char* classname = NULL) { }
+        // jmarshall end
 #endif
 };
 
@@ -289,5 +289,24 @@ class idFile_InZip : public idFile
 		int						fileSize;		// size of the file
 		void 					*z;				// unzip info
 };
+
+static int ReadLongLong(idFile *file, int64_t &value) {
+    int result = file->Read(&value, sizeof(value));
+    value = LittleLongLong(value);
+    return result;
+}
+
+static int ReadUnsignedLongLong(idFile *file, uint64_t &value) {
+    int result = file->Read(&value, sizeof(value));
+    value = LittleLongLong(value);
+    return result;
+}
+
+static int ReadDouble(idFile *file, double &value) {
+    int result = file->Read(&value, sizeof(value));
+    value = LittleDouble(value);
+    return result;
+}
+
 
 #endif /* !__FILE_H__ */

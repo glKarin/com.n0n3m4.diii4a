@@ -3622,6 +3622,9 @@ cm_model_t *idCollisionModelManagerLocal::LoadRenderModel(const char *fileName)
         && (extension.Icmp("gltf") != 0)
         && (extension.Icmp("glb") != 0)
 #endif
+#ifdef _MODEL_FBX
+        && (extension.Icmp("fbx") != 0)
+#endif
 	)
 	{
 		return NULL;
