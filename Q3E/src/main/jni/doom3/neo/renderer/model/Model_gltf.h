@@ -241,7 +241,7 @@ public:
 	bool ParseMemory(idLexer &lexer, int parseType = PARSE_DEF, const char *filePath = NULL);
     void Print(void) const;
     bool ToMd5Mesh(idMd5MeshFile &md5mesh, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
-    bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, int flags = 0, float scale = -1.0f, const idVec3 *animOffset, const idMat3 *animRotation) const;
+    bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, int flags = 0, float scale = -1.0f, const idVec3 *animOffset = NULL, const idMat3 *animRotation = NULL) const;
     bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
     int ToMd5AnimList(idList<idMd5AnimFile> &md5anim, idMd5MeshFile &md5mesh, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
     const char * GetAnim(unsigned int index) const;
