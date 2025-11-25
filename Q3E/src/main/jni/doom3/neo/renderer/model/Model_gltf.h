@@ -240,10 +240,10 @@ public:
     bool ParseGLB(const char *filePath, int parseType = PARSE_DEF);
 	bool ParseMemory(idLexer &lexer, int parseType = PARSE_DEF, const char *filePath = NULL);
     void Print(void) const;
-    bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
-    bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, float scale, bool addOrigin, const idVec3 *animOffset, const idMat3 *animRotation) const;
-    bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
-    int ToMd5AnimList(idList<idMd5AnimFile> &md5anim, idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
+    bool ToMd5Mesh(idMd5MeshFile &md5mesh, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
+    bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, int flags = 0, float scale = -1.0f, const idVec3 *animOffset, const idMat3 *animRotation) const;
+    bool ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
+    int ToMd5AnimList(idList<idMd5AnimFile> &md5anim, idMd5MeshFile &md5mesh, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
     const char * GetAnim(unsigned int index) const;
     int GetAnimCount(void) const;
 #ifdef _MODEL_OBJ

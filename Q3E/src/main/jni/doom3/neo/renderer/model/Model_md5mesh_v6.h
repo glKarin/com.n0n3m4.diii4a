@@ -33,7 +33,7 @@ public:
     idModelMd5meshV6(void);
     bool Parse(const char *path);
     void Print(void) const;
-    bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
+    bool ToMd5Mesh(idMd5MeshFile &md5mesh, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
 
 private:
     void Clear(void);
@@ -45,6 +45,7 @@ private:
     idList<md5meshV6Mesh_t> meshes;
 
     friend class idMd5AnimFile;
+    friend class idModelMd5animV6;
 };
 
 #endif

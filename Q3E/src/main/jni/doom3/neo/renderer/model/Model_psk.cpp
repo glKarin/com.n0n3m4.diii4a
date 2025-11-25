@@ -487,7 +487,7 @@ int idModelPsk::GroupFace(idList<idList<const pskFace_t *> > &faceGroup, idStrLi
     return matList.Num();
 }
 
-bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *meshOffset, const idMat3 *meshRotation) const
+bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, int flags, float scale, const idVec3 *meshOffset, const idMat3 *meshRotation) const
 {
     int i, j;
     md5meshJoint_t *md5Bone;
@@ -496,15 +496,26 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
     idQuat boneQuat;
     const md5meshJointTransform_t *jointTransform;
 	int numBones = bones.Num();
+    const bool renameOrigin = flags & MD5CF_RENAME_ORIGIN;
+    const bool addOrigin = flags & MD5CF_ADD_ORIGIN;
+    assert(renameOrigin != addOrigin);
 
-    md5mesh.Commandline() = va("Convert from unreal psk file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
-	if(meshOffset)
-		md5mesh.Commandline().Append(va(", offset=%g %g %g", meshOffset->x, meshOffset->y, meshOffset->z));
-	if(meshRotation)
-	{
-		idAngles angle = meshRotation->ToAngles();
-		md5mesh.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
-	}
+    md5mesh.Commandline() = va("Convert from unreal psk file: ");
+    idStrList comments;
+    if(addOrigin)
+        comments.Append("addOrigin");
+    if(renameOrigin)
+        comments.Append("renameOrigin");
+    if(scale > 0.0f)
+        comments.Append(va("scale=%g", scale));
+    if(meshOffset)
+        comments.Append(va("offset=(%g %g %g)", meshOffset->x, meshOffset->y, meshOffset->z));
+    if(meshRotation)
+    {
+        idAngles angle = meshRotation->ToAngles();
+        comments.Append(va("rotation=(%g %g %g)", angle[0], angle[1], angle[2]));
+    }
+    idStr::Joint(md5mesh.Commandline(), comments, ", ");
 
 	if(addOrigin)
 		numBones++;
@@ -529,6 +540,8 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
         if (i == 0)
         {
             md5Bone->parentIndex = -1; // refBone->vertex_index - 1; // some is -1 not 0, so always force to -1
+            if(renameOrigin)
+                md5Bone->boneName = "origin";
         }
         else
         {
@@ -546,7 +559,7 @@ bool idModelPsk::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
         if (md5Bone->parentIndex >= bones.Num())
         {
             common->Warning("R_LoadPSK: '%d' has bone '%s' with bad parent index %i while numBones is %i", i,
-                            md5Bone->boneName.c_str(), md5Bone->parentIndex, bones.Num());
+                            refBone->name, md5Bone->parentIndex, bones.Num());
             return false;
         }
 

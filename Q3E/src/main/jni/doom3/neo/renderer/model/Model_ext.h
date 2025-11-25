@@ -17,21 +17,21 @@ enum {
     CCP_NONE = 0,
     CCP_MESH = 1,
     CCP_SCALE = 1 << 1,
-    CCP_ADD_ORIGIN = 1 << 2,
+    CCP_FLAGS = 1 << 2,
     CCP_OFFSET = 1 << 3,
     CCP_ROTATION = 1 << 4,
     CCP_ANIMATIONS = 1 << 5,
     CCP_SAVEPATH = 1 << 6,
 };
-#define CONVERT_TO_MD5MESH_USAGE(x) "Usage: %s <" #x " file> [-scale <scale> -addOrigin -offset <\"x-axis y-axis z-axis\"> -rotation <\"pitch yaw roll\"> -savePath <output path>]\n"
-#define CONVERT_TO_MD5_USAGE(x, y) "Usage: %s <" #x " file> [-scale <scale> -addOrigin -offset <\"x-axis y-axis z-axis\"> -rotation <\"pitch yaw roll\"> -savePath <output path> [-animation] <" #y ">......]\n"
+#define CONVERT_TO_MD5MESH_USAGE(x) "Usage: %s <" #x " file> [-scale <scale> -addOrigin -renameOrigin -offset <\"x-axis y-axis z-axis\"> -rotation <\"pitch yaw roll\"> -savePath <output path>]\n"
+#define CONVERT_TO_MD5_USAGE(x, y) "Usage: %s <" #x " file> [-scale <scale> -addOrigin -renameOrigin -offset <\"x-axis y-axis z-axis\"> -rotation <\"pitch yaw roll\"> -savePath <output path> [-animation] <" #y ">......]\n"
 #define CONVERT_TO_MD5ANIM_USAGE(x, y) CONVERT_TO_MD5_USAGE(x, y)
-#define CONVERT_TO_MD5_ALL_USAGE(x) "Usage: %s <" #x " file> [-scale <scale> -addOrigin -offset <\"x-axis y-axis z-axis\"> -rotation <\"pitch yaw roll\"> -savePath <output path> [ [-animation] <animation name or index>......] ]\n"
+#define CONVERT_TO_MD5_ALL_USAGE(x) "Usage: %s <" #x " file> [-scale <scale> -addOrigin -renameOrigin -offset <\"x-axis y-axis z-axis\"> -rotation <\"pitch yaw roll\"> -savePath <output path> [ [-animation] <animation name or index>......] ]\n"
 #define CONVERT_TO_MD5ANIM_ALL_USAGE(x) CONVERT_TO_MD5_ALL_USAGE(x)
 
 //#define ETW_PSK 1
 #define WEIGHTS_SUM_NOT_EQUALS_ONE(w) ((w) < (1.0f - idMath::FLT_EPSILON))
-int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, float *scale, bool *addOrigin, idVec3 *offset, idMat3 *rotation, idStrList *anims, idStr *savePath);
+int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, int *flags, float *scale, idVec3 *offset, idMat3 *rotation, idStrList *anims, idStr *savePath);
 idStr R_Model_MakeOutputPath(const char *originPath, const char *extName = NULL, const char *savePath = NULL);
 
 bool R_Model_ConvertToMd5(const char *fileName);

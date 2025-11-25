@@ -364,7 +364,7 @@ void idSessionLocal::SetMainMenuGuiVars(void)
     if(deviceNames.Num() > 0)
     {
         idStr deviceName("\"\";");
-        idStr::Joint(deviceName, deviceNames, ';');
+        idStr::Joint(deviceName, deviceNames, ";");
         guiMainMenu->SetStateString("device_name", deviceName.c_str());
     }
 #endif

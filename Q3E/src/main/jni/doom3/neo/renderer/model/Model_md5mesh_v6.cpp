@@ -155,7 +155,7 @@ bool idModelMd5meshV6::Parse(const char *path)
     return true;
 }
 
-bool idModelMd5meshV6::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *meshOffset, const idMat3 *meshRotation) const
+bool idModelMd5meshV6::ToMd5Mesh(idMd5MeshFile &md5mesh, int flags, float scale, const idVec3 *meshOffset, const idMat3 *meshRotation) const
 {
     int i, j;
     md5meshJoint_t *md5Bone;
@@ -165,15 +165,26 @@ bool idModelMd5meshV6::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOr
     idQuat boneQuat;
     const md5meshV6Bone_t *refBone;
     int numBones = bones.Num();
+    const bool renameOrigin = flags & MD5CF_RENAME_ORIGIN;
+    const bool addOrigin = flags & MD5CF_ADD_ORIGIN;
+    assert(renameOrigin != addOrigin);
 
-    md5mesh.Commandline() = va("Convert from md5mesh v6(2002 E3 demo) file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
+    md5mesh.Commandline() = va("Convert from md5mesh v6(2002 E3 demo) file: ");
+    idStrList comments;
+    if(addOrigin)
+        comments.Append("addOrigin");
+    if(renameOrigin)
+        comments.Append("renameOrigin");
+    if(scale > 0.0f)
+        comments.Append(va("scale=%g", scale));
     if(meshOffset)
-        md5mesh.Commandline().Append(va(", offset=%g %g %g", meshOffset->x, meshOffset->y, meshOffset->z));
+        comments.Append(va("offset=(%g %g %g)", meshOffset->x, meshOffset->y, meshOffset->z));
     if(meshRotation)
     {
         idAngles angle = meshRotation->ToAngles();
-        md5mesh.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
+        comments.Append(va("rotation=(%g %g %g)", angle[0], angle[1], angle[2]));
     }
+    idStr::Joint(md5mesh.Commandline(), comments, ", ");
 
     if(addOrigin)
         numBones++;
@@ -217,6 +228,8 @@ bool idModelMd5meshV6::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOr
             {
                 md5Bone->parentIndex = -1;
                 hasOrigin = true;
+                if(renameOrigin)
+                    md5Bone->boneName = "origin";
             }
         }
         else

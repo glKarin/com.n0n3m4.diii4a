@@ -2469,7 +2469,7 @@ int idStr::Split(idList<idStr> &ret, const char *macros, char ch)
 	return num;
 }
 
-int idStr::Joint(idStr &ret, const idList<idStr> &list, char ch)
+int idStr::Joint(idStr &ret, const idList<idStr> &list, const char *ch)
 {
     if(!list.Num())
         return 0;
@@ -2488,7 +2488,7 @@ int idStr::Joint(idStr &ret, const idList<idStr> &list, char ch)
     return len;
 }
 
-int idStr::JointUnique(idStr &ret, const idList<idStr> &list, char ch)
+int idStr::JointUnique(idStr &ret, const idList<idStr> &list, const char *ch)
 {
     if(!list.Num())
         return 0;

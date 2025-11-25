@@ -35,6 +35,7 @@ public final class Constants
             "Add iqm animation/static model support on DOOM3/Quake 4/Prey",
             "Add Source engine smd animation/static model support on DOOM3/Quake 4/Prey",
             "Add GLTF/GLB animation/static model support on DOOM3/Quake 4/Prey",
+            "Add Autodesk fbx animation/static model support on DOOM3/Quake 4/Prey",
             "Add md5mesh static model support on DOOM3/Quake 4/Prey",
             "Fix a sound distance volume bug on Quake 4.",
             "Support smooth joystick on DOOM 3 mod `Hardscorps` and Quake 4 mod `Hardqore`.",

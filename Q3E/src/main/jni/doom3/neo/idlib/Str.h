@@ -432,8 +432,8 @@ class idStr
 #endif
 		static int          	Split(idList<idStr> &ret, const char *macros, char ch = ',');
 		static int          	SplitUnique(idList<idStr> &ret, const char *macros, char ch = ',');
-        static int          	Joint(idStr &ret, const idList<idStr> &list, char ch = ',');
-        static int          	JointUnique(idStr &ret, const idList<idStr> &list, char ch = ',');
+        static int          	Joint(idStr &ret, const idList<idStr> &list, const char *ch = ",");
+        static int          	JointUnique(idStr &ret, const idList<idStr> &list, const char *ch = ",");
 		static void 			StripWhitespace(idStr &str);
 
 	protected:

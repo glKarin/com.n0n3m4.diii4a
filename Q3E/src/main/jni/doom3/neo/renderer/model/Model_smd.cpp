@@ -357,7 +357,7 @@ static bool smdVertex_Equals(const smdVertex_t&a, const smdVertex_t &b)
     return true;
 }
 
-bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *meshOffset, const idMat3 *meshRotation) const
+bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, int flags, float scale, const idVec3 *meshOffset, const idMat3 *meshRotation) const
 {
 	if(!HasSkeleton())
     {
@@ -379,15 +379,26 @@ bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
     const md5meshJointTransform_t *jointTransform;
 	const idList<smdSkeleton_t> &bones = Bones();
 	int numBones = bones.Num();
+    const bool renameOrigin = flags & MD5CF_RENAME_ORIGIN;
+    const bool addOrigin = flags & MD5CF_ADD_ORIGIN;
+    assert(renameOrigin != addOrigin);
 
-    md5mesh.Commandline() = va("Convert from source smd file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
-	if(meshOffset)
-		md5mesh.Commandline().Append(va(", offset=%g %g %g", meshOffset->x, meshOffset->y, meshOffset->z));
-	if(meshRotation)
-	{
-		idAngles angle = meshRotation->ToAngles();
-		md5mesh.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
-	}
+    md5mesh.Commandline() = va("Convert from source smd file: ");
+    idStrList comments;
+    if(addOrigin)
+        comments.Append("addOrigin");
+    if(renameOrigin)
+        comments.Append("renameOrigin");
+    if(scale > 0.0f)
+        comments.Append(va("scale=%g", scale));
+    if(meshOffset)
+        comments.Append(va("offset=(%g %g %g)", meshOffset->x, meshOffset->y, meshOffset->z));
+    if(meshRotation)
+    {
+        idAngles angle = meshRotation->ToAngles();
+        comments.Append(va("rotation=(%g %g %g)", angle[0], angle[1], angle[2]));
+    }
+    idStr::Joint(md5mesh.Commandline(), comments, ", ");
 
 	if(addOrigin)
 		numBones++;
@@ -420,6 +431,8 @@ bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
 			{
 				md5Bone->parentIndex = -1;
 				hasOrigin = true;
+                if(renameOrigin)
+                    md5Bone->boneName = "origin";
 			}
 		}
 		else
@@ -602,7 +615,7 @@ bool idModelSmd::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
     return true;
 }
 
-bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *animOffset, const idMat3 *animRotation) const
+bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int flags, float scale, const idVec3 *animOffset, const idMat3 *animRotation) const
 {
     if(!HasSkeleton())
     {
@@ -620,6 +633,9 @@ bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5M
     md5animBaseframe_t *md5BaseFrame;
     md5meshJoint_t *md5Bone;
 	const idList<smdSkeleton_t> &bones = smd.Bones();
+    const bool renameOrigin = flags & MD5CF_RENAME_ORIGIN;
+    const bool addOrigin = flags & MD5CF_ADD_ORIGIN;
+    assert(renameOrigin != addOrigin);
 
     const idList<md5meshJoint_t> joints = md5mesh.Joints();
     const int numBones = joints.Num();
@@ -627,14 +643,22 @@ bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5M
     md5anim.FrameRate() = 24;
     md5anim.NumAnimatedComponents() = numBones * 6;
 
-    md5anim.Commandline() = va("Convert from source smd file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
-	if(animOffset)
-		md5anim.Commandline().Append(va(", offset=%g,%g,%g", animOffset->x, animOffset->y, animOffset->z));
-	if(animRotation)
-	{
-		idAngles angle = animRotation->ToAngles();
-		md5anim.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
-	}
+    md5anim.Commandline() = va("Convert from source smd file: ");
+    idStrList comments;
+    if(addOrigin)
+        comments.Append("addOrigin");
+    if(renameOrigin)
+        comments.Append("renameOrigin");
+    if(scale > 0.0f)
+        comments.Append(va("scale=%g", scale));
+    if(animOffset)
+        comments.Append(va("offset=(%g %g %g)", animOffset->x, animOffset->y, animOffset->z));
+    if(animRotation)
+    {
+        idAngles angle = animRotation->ToAngles();
+        comments.Append(va("rotation=(%g %g %g)", angle[0], angle[1], angle[2]));
+    }
+    idStr::Joint(md5anim.Commandline(), comments, ", ");
 
     // convert md5 joints
     idList<md5animHierarchy_t> &md5Bones = md5anim.Hierarchies();
@@ -716,8 +740,13 @@ bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5M
 
             md5Bone->boneName = meshJoint->boneName;
             md5Bone->parentIndex = meshJoint->parentIndex;
+            idStr meshBoneName = meshJoint->boneName;
+            if(renameOrigin && j == 0)
+            {
+                meshBoneName = nodes[0].name;
+            }
 
-            if(boneMap.Get(meshJoint->boneName, &rindex)) // anim key bone in mesh
+            if(boneMap.Get(meshBoneName, &rindex)) // anim key bone in mesh
 			{
 				key = &animKeys[*rindex];
 
@@ -734,7 +763,7 @@ bool idModelSmd::ToMd5Anim(const idModelSmd &smd, idMd5AnimFile &md5anim, idMd5M
 			else // anim key bone not in mesh
 			{
 				if(i == 0)
-					common->Warning("Bone not found in psa: %s", meshJoint->boneName.c_str());
+					common->Warning("Bone not found in psa: %s", meshBoneName.c_str());
                 index = j;
                 if(addOrigin)
                     index--;
@@ -919,7 +948,7 @@ static void R_ConvertSmdToObj_f(const idCmdArgs &args)
 }
 #endif
 
-static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idStrList *animPaths = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idStrList *animPaths = NULL, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
 	int ret = 0;
 
@@ -929,7 +958,7 @@ static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idS
     if(smd.Parse(meshPath))
     {
         //smd.Print();
-		if(smd.ToMd5Mesh(md5MeshFile, scale, addOrigin, offset, rotation))
+		if(smd.ToMd5Mesh(md5MeshFile, flags, scale, offset, rotation))
 		{
 			if(doMesh)
 			{
@@ -965,7 +994,7 @@ static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idS
 		{
 			//animSmd.Print();
 			idMd5AnimFile md5AnimFile;
-			if(animSmd.ToMd5Anim(smd, md5AnimFile, md5MeshFile, scale, addOrigin, offset, rotation))
+			if(animSmd.ToMd5Anim(smd, md5AnimFile, md5MeshFile, flags, scale, offset, rotation))
 			{
 				md5AnimFile.Commandline().Append(va(" - %s", animPath));
                 idStr md5animPath = R_Model_MakeOutputPath(animPath, "." MD5_ANIM_EXT, savePath);
@@ -983,19 +1012,19 @@ static int R_ConvertSmdToMd5(const char *meshPath, bool doMesh = true, const idS
 	return ret;
 }
 
-ID_INLINE static int R_ConvertSmdMesh(const char *meshPath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+ID_INLINE static int R_ConvertSmdMesh(const char *meshPath, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-	return R_ConvertSmdToMd5(meshPath, true, NULL, scale, addOrigin, offset, rotation, savePath);
+	return R_ConvertSmdToMd5(meshPath, true, NULL, flags, scale, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertSmdAnim(const char *meshPath, const idStrList &animPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+ID_INLINE static int R_ConvertSmdAnim(const char *meshPath, const idStrList &animPaths, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-	return R_ConvertSmdToMd5(meshPath, false, &animPaths, scale, addOrigin, offset, rotation, savePath);
+	return R_ConvertSmdToMd5(meshPath, false, &animPaths, flags, scale, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertSmd(const char *meshPath, const idStrList &animPaths, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+ID_INLINE static int R_ConvertSmd(const char *meshPath, const idStrList &animPaths, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-	return R_ConvertSmdToMd5(meshPath, true, &animPaths, scale, addOrigin, offset, rotation, savePath);
+	return R_ConvertSmdToMd5(meshPath, true, &animPaths, flags, scale, offset, rotation, savePath);
 }
 
 static void R_ConvertSmdToMd5mesh_f(const idCmdArgs &args)
@@ -1007,18 +1036,18 @@ static void R_ConvertSmdToMd5mesh_f(const idCmdArgs &args)
     }
 
     idStr mesh;
+    int flags = 0;
     float scale = -1.0f;
-    bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStr savePath;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL, &savePath);
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &flags, &scale, &offset, &rotation, NULL, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5MESH_USAGE(smd), args.Argv(0));
         return;
     }
-    R_ConvertSmdMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
+    R_ConvertSmdMesh(mesh, flags, scale, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertSmdToMd5anim_f(const idCmdArgs &args)
@@ -1030,19 +1059,19 @@ static void R_ConvertSmdToMd5anim_f(const idCmdArgs &args)
     }
 
     idStr mesh;
+    int flags = 0;
     float scale = -1.0f;
-    bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
     idStr savePath;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &flags, &scale, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5ANIM_USAGE(smd, smd), args.Argv(0));
         return;
     }
-    R_ConvertSmdAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
+    R_ConvertSmdAnim(mesh, anims, flags, scale, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertSmdToMd5_f(const idCmdArgs &args)
@@ -1054,26 +1083,26 @@ static void R_ConvertSmdToMd5_f(const idCmdArgs &args)
     }
 
     idStr mesh;
+    int flags = 0;
     float scale = -1.0f;
-    bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
     idStr savePath;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &flags, &scale, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5_USAGE(smd, smd), args.Argv(0));
         return;
     }
-    R_ConvertSmd(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
+    R_ConvertSmd(mesh, anims, flags, scale, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 bool R_Model_HandleSmd(const md5ConvertDef_t &convert)
 {
-    if(R_ConvertSmd(convert.mesh, convert.anims, 
-				convert.scale, 
-				convert.addOrigin, 
+    if(R_ConvertSmd(convert.mesh, convert.anims,
+                convert.flags,
+                convert.scale,
 				convert.offset.IsZero() ? NULL : &convert.offset, 
 				convert.rotation.IsIdentity() ? NULL : &convert.rotation,
                 convert.savePath.IsEmpty() ? NULL : convert.savePath.c_str()

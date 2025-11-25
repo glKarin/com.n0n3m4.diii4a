@@ -514,7 +514,7 @@ float idModelFbx::fbxAnimationStack::Seconds(void) const
 
 int idModelFbx::fbxAnimationStack::NumFrames(int framerate) const
 {
-	return (float)framerate * Seconds();
+	return (int)((float)framerate * Seconds());
 }
 
 
@@ -549,16 +549,16 @@ bool idModelFbx::fbxAnimationCurveNode::Convert(const fbxNode_t &object)
             if(!n.elem_props.Num())
                 continue;
 
-            const char *type = GetProperty<const char *>(n, 0, "");
-            if (!idStr::Icmp("d|X", type))
+            const char *comp = GetProperty<const char *>(n, 0, "");
+            if (!idStr::Icmp("d|X", comp))
             {
                 x = GetProperty<float>(n, 4, 0.0f);
             }
-            else if (!idStr::Icmp("d|Y", type))
+            else if (!idStr::Icmp("d|Y", comp))
             {
                 y = GetProperty<float>(n, 4, 0.0f);
             }
-            else if (!idStr::Icmp("d|Z", type))
+            else if (!idStr::Icmp("d|Z", comp))
             {
                 z = GetProperty<float>(n, 4, 0.0f);
             }
@@ -2329,7 +2329,7 @@ int idModelFbx::GroupTriangle(idList<idList<idDrawVert> > &verts, idList<idList<
     return num;
 }
 
-bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *meshOffset, const idMat3 *meshRotation) const
+bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, int flags, float scale, const idVec3 *meshOffset, const idMat3 *meshRotation) const
 {
     int i, j;
     md5meshJoint_t *md5Bone;
@@ -2341,6 +2341,9 @@ bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
     const fbxGeometry &geometry = objects.Geometry;
     int numBones = objects.LimbNode.Num();
     const fbxCluster *cluster;
+    const bool renameOrigin = flags & MD5CF_RENAME_ORIGIN;
+    const bool addOrigin = flags & MD5CF_ADD_ORIGIN;
+    assert(renameOrigin != addOrigin);
 
     bool usingBindPose = objects.BindPose.PoseNode.Num() > 0;
     bool usingClusterTransform = false;
@@ -2369,14 +2372,22 @@ bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
 		poseNodeValues[j] = pose;
 	}
 
-    md5mesh.Commandline() = va("Convert from fbx file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
+    md5mesh.Commandline() = va("Convert from fbx file: ");
+    idStrList comments;
+    if(addOrigin)
+        comments.Append("addOrigin");
+    if(renameOrigin)
+        comments.Append("renameOrigin");
+    if(scale > 0.0f)
+        comments.Append(va("scale=%g", scale));
     if(meshOffset)
-        md5mesh.Commandline().Append(va(", offset=%g %g %g", meshOffset->x, meshOffset->y, meshOffset->z));
+        comments.Append(va("offset=(%g %g %g)", meshOffset->x, meshOffset->y, meshOffset->z));
     if(meshRotation)
     {
         idAngles angle = meshRotation->ToAngles();
-        md5mesh.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
+        comments.Append(va("rotation=(%g %g %g)", angle[0], angle[1], angle[2]));
     }
+    idStr::Joint(md5mesh.Commandline(), comments, ", ");
 
     if(addOrigin)
         numBones++;
@@ -2423,6 +2434,8 @@ bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
             {
                 md5Bone->parentIndex = -1;
                 hasOrigin = true;
+                if(renameOrigin)
+                    md5Bone->boneName = "origin";
             }
         }
         else
@@ -2449,7 +2462,7 @@ bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
 				}
 				else
 				{
-					int index = fbxBones.FindIndex(parentLimb);
+					index = fbxBones.FindIndex(parentLimb);
 					parent_matrix = parentMats[index];
 				}
 
@@ -2743,7 +2756,7 @@ bool idModelFbx::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
     return true;
 }
 
-bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, float scale, bool addOrigin, const idVec3 *animOffset, const idMat3 *animRotation) const
+bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, int flags, float scale, const idVec3 *animOffset, const idMat3 *animRotation) const
 {
 	if(animIndex >= GetAnimCount())
 		return false;
@@ -2756,6 +2769,9 @@ bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
     md5meshJointTransform_t *frameTransform;
     md5animBaseframe_t *md5BaseFrame;
     md5meshJoint_t *md5Bone;
+    const bool renameOrigin = flags & MD5CF_RENAME_ORIGIN;
+    const bool addOrigin = flags & MD5CF_ADD_ORIGIN;
+    assert(renameOrigin != addOrigin);
 	const fbxAnimationStack &animStack = model.Objects.AnimationStack[animIndex];
 
 	const int numFrames = animStack.NumFrames();
@@ -2766,14 +2782,22 @@ bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
     md5anim.FrameRate() = (int)24;
     md5anim.NumAnimatedComponents() = numBones * 6;
 
-    md5anim.Commandline() = va("Convert from fbx file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
-	if(animOffset)
-		md5anim.Commandline().Append(va(", offset=%g,%g,%g", animOffset->x, animOffset->y, animOffset->z));
-	if(animRotation)
-	{
-		idAngles angle = animRotation->ToAngles();
-		md5anim.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
-	}
+    md5anim.Commandline() = va("Convert from fbx file: ");
+    idStrList comments;
+    if(addOrigin)
+        comments.Append("addOrigin");
+    if(renameOrigin)
+        comments.Append("renameOrigin");
+    if(scale > 0.0f)
+        comments.Append(va("scale=%g", scale));
+    if(animOffset)
+        comments.Append(va("offset=(%g %g %g)", animOffset->x, animOffset->y, animOffset->z));
+    if(animRotation)
+    {
+        idAngles angle = animRotation->ToAngles();
+        comments.Append(va("rotation=(%g %g %g)", angle[0], angle[1], angle[2]));
+    }
+    idStr::Joint(md5anim.Commandline(), comments, ", ");
 
     // convert md5 joints
     idList<md5animHierarchy_t> &md5Bones = md5anim.Hierarchies();
@@ -2894,9 +2918,14 @@ bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
 
             md5Bone->boneName = meshJoint->boneName;
             md5Bone->parentIndex = meshJoint->parentIndex;
+            idStr meshBoneName = meshJoint->boneName;
+            if(renameOrigin && j == 0)
+            {
+                meshBoneName = model.Objects.LimbNode[0].name;
+            }
 
 			xform_s *rf = NULL;
-			if(xformMap.Get(meshJoint->boneName, &rf))
+			if(xformMap.Get(meshBoneName, &rf))
 			{
 				if(rf->T.node)
 				{
@@ -2999,14 +3028,14 @@ bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
     return true;
 }
 
-int idModelFbx::ToMd5AnimList(idList<idMd5AnimFile> &md5anims, idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *offset, const idMat3 *rotation) const
+int idModelFbx::ToMd5AnimList(idList<idMd5AnimFile> &md5anims, idMd5MeshFile &md5mesh, int flags, float scale, const idVec3 *offset, const idMat3 *rotation) const
 {
 	int num = 0;
 
 	for(int i = 0; i < GetAnimCount(); i++)
 	{
 		int index = md5anims.Append(idMd5AnimFile());
-		if(!ToMd5Anim(md5anims[index], md5mesh, i, scale, addOrigin, offset, rotation))
+		if(!ToMd5Anim(md5anims[index], md5mesh, i, flags, scale, offset, rotation))
 		{
 			md5anims.RemoveIndex(index);
 			common->Warning("Animation '%s' convert fail", GetAnim(index));
@@ -3017,11 +3046,11 @@ int idModelFbx::ToMd5AnimList(idList<idMd5AnimFile> &md5anims, idMd5MeshFile &md
 	return num;
 }
 
-bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, float scale, bool addOrigin, const idVec3 *offset, const idMat3 *rotation) const
+bool idModelFbx::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, int flags, float scale, const idVec3 *offset, const idMat3 *rotation) const
 {
 	int i = GetAnimIndex(animName);
 	if(i >= 0)
-		return ToMd5Anim(md5anim, md5mesh, i, scale, addOrigin, offset, rotation);
+		return ToMd5Anim(md5anim, md5mesh, i, flags, scale, offset, rotation);
 	else
 	{
 		common->Warning("Animation '%s' not found in fbx", animName);
@@ -3217,7 +3246,7 @@ static void R_ConvertFbxToObj_f(const idCmdArgs &args)
 }
 #endif
 
-static int R_ConvertFbxToMd5(const char *filePath, bool doMesh = true, const idStrList *animList = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+static int R_ConvertFbxToMd5(const char *filePath, bool doMesh = true, const idStrList *animList = NULL, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
     int ret = 0;
 
@@ -3227,7 +3256,7 @@ static int R_ConvertFbxToMd5(const char *filePath, bool doMesh = true, const idS
     if(fbx.Parse(filePath))
     {
         //fbx.Print();
-        if(fbx.ToMd5Mesh(md5MeshFile, scale, addOrigin, offset, rotation))
+        if(fbx.ToMd5Mesh(md5MeshFile, flags, scale, offset, rotation))
         {
             if(doMesh)
             {
@@ -3290,7 +3319,7 @@ static int R_ConvertFbxToMd5(const char *filePath, bool doMesh = true, const idS
                 continue;
             }
             common->Printf("Convert fbx animation to md5anim: %d -> %s\n", index, animName);
-            ok = fbx.ToMd5Anim(md5AnimFile, md5MeshFile, index, scale, addOrigin, offset, rotation);
+            ok = fbx.ToMd5Anim(md5AnimFile, md5MeshFile, index, flags, scale, offset, rotation);
             md5animPath = filePath;
             md5animPath.StripFilename();
             md5animPath.AppendPath(animName);
@@ -3302,7 +3331,7 @@ static int R_ConvertFbxToMd5(const char *filePath, bool doMesh = true, const idS
             name.StripPath();
             name.StripFileExtension();
             common->Printf("Convert fbx animation to md5anim: %s -> %s\n", anim, name.c_str());
-            ok = fbx.ToMd5Anim(md5AnimFile, md5MeshFile, name.c_str(), scale, addOrigin, offset, rotation);
+            ok = fbx.ToMd5Anim(md5AnimFile, md5MeshFile, name.c_str(), flags, scale, offset, rotation);
             animName = anim;
             md5animPath = anim;
             md5animPath = R_Model_MakeOutputPath(anim, "." MD5_ANIM_EXT, savePath);
@@ -3321,19 +3350,19 @@ static int R_ConvertFbxToMd5(const char *filePath, bool doMesh = true, const idS
     return ret;
 }
 
-ID_INLINE static int R_ConvertFbxMesh(const char *filePath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+ID_INLINE static int R_ConvertFbxMesh(const char *filePath, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertFbxToMd5(filePath, true, NULL, scale, addOrigin, offset, rotation, savePath);
+    return R_ConvertFbxToMd5(filePath, true, NULL, flags, scale, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertFbxAnim(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+ID_INLINE static int R_ConvertFbxAnim(const char *filePath, const idStrList &animList, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertFbxToMd5(filePath, false, &animList, scale, addOrigin, offset, rotation, savePath);
+    return R_ConvertFbxToMd5(filePath, false, &animList, flags, scale, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertFbx(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+ID_INLINE static int R_ConvertFbx(const char *filePath, const idStrList &animList, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertFbxToMd5(filePath, true, &animList, scale, addOrigin, offset, rotation, savePath);
+    return R_ConvertFbxToMd5(filePath, true, &animList, flags, scale, offset, rotation, savePath);
 }
 
 static void R_ConvertFbxToMd5mesh_f(const idCmdArgs &args)
@@ -3345,19 +3374,19 @@ static void R_ConvertFbxToMd5mesh_f(const idCmdArgs &args)
     }
 
     idStr mesh;
+    int flags = 0;
     float scale = -1.0f;
-    bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
     idStr savePath;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL, &savePath);
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &flags, &scale, &offset, &rotation, NULL, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5MESH_USAGE(fbx), args.Argv(0));
         return;
     }
-    R_ConvertFbxMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
+    R_ConvertFbxMesh(mesh, flags, scale, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertFbxToMd5anim_f(const idCmdArgs &args)
@@ -3369,19 +3398,19 @@ static void R_ConvertFbxToMd5anim_f(const idCmdArgs &args)
     }
 
     idStr mesh;
+    int flags = 0;
     float scale = -1.0f;
-    bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
     idStr savePath;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &flags, &scale, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5ANIM_ALL_USAGE(fbx), args.Argv(0));
         return;
     }
-    R_ConvertFbxAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
+    R_ConvertFbxAnim(mesh, anims, flags, scale, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertFbxToMd5_f(const idCmdArgs &args)
@@ -3393,29 +3422,29 @@ static void R_ConvertFbxToMd5_f(const idCmdArgs &args)
     }
 
     idStr mesh;
+    int flags = 0;
     float scale = -1.0f;
-    bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
     idStr savePath;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &flags, &scale, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5_ALL_USAGE(fbx), args.Argv(0));
         return;
     }
-    R_ConvertFbx(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
+    R_ConvertFbx(mesh, anims, flags, scale, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 bool R_Model_HandleFbx(const md5ConvertDef_t &convert)
 {
     if(R_ConvertFbx(convert.mesh, convert.anims,
-                    convert.scale,
-                    convert.addOrigin,
-                    convert.offset.IsZero() ? NULL : &convert.offset,
-                    convert.rotation.IsIdentity() ? NULL : &convert.rotation,
-                    convert.savePath.IsEmpty() ? NULL : convert.savePath.c_str()
+                convert.flags,
+                convert.scale,
+                convert.offset.IsZero() ? NULL : &convert.offset,
+                convert.rotation.IsIdentity() ? NULL : &convert.rotation,
+                convert.savePath.IsEmpty() ? NULL : convert.savePath.c_str()
     ) != 1 + convert.anims.Num())
     {
         common->Warning("Convert fbx to md5mesh/md5anim fail in entityDef '%s'", convert.def->GetName());

@@ -1,6 +1,11 @@
 #ifndef _MODEL_MD5CONVERT_H
 #define _MODEL_MD5CONVERT_H
 
+enum {
+    MD5CF_ADD_ORIGIN = 1,
+    MD5CF_RENAME_ORIGIN = 1 << 1,
+};
+
 typedef struct md5ConvertDef_s
 {
     const idDeclEntityDef *def;
@@ -8,7 +13,7 @@ typedef struct md5ConvertDef_s
     float scale;
 	idVec3 offset;
 	idMat3 rotation;
-    bool addOrigin;
+    int flags;
     idStr mesh;
     idStrList animNames;
     idStrList anims;

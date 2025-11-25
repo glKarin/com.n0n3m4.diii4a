@@ -9,6 +9,17 @@ typedef struct md5ConvertConf_s
     md5ConvertDef_f converter;
 } md5ConvertConf_t;
 
+static void R_Model_AddFlag(int &flag, const char *name)
+{
+    if(!idStr::Icmp(name, "addOrigin"))
+        flag |= MD5CF_ADD_ORIGIN;
+    else if(!idStr::Icmp(name, "renameOrigin"))
+        flag |= MD5CF_RENAME_ORIGIN;
+
+    if((flag & MD5CF_RENAME_ORIGIN) && (flag & MD5CF_ADD_ORIGIN))
+        flag &= ~MD5CF_ADD_ORIGIN;
+}
+
 /*
  idTech4A++ using conversion to support other animation models like md5mesh/md5anim
  It slower, but porting easier.
@@ -33,7 +44,9 @@ e.g. using psk/psa as md5mesh/md5anim
 
     // convert config
     "scale" "-1.0" // scale vertexes, float, default -1.0. will not scale if less or equals than 0
-    "addOrigin" "0" // prepend 'origin' bone to front, bool, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
+    "allFlags" "addOrigin,renameOrigin" // same as `flag*` parameters, values are `addOrigin`, `renameOrigin`, split by ','. It can be override by `flag*`
+    "flag1" "addOrigin" // prepend 'origin' bone to front, string, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
+    "flag2" "renameOrigin" // rename root bone name to 'origin', string, default false.
     "offset" "0 0 0" // root bone origin offset, vector, default '0 0 0'
     "rotation" "0 0 0" // root bone orient rotation, vector, default '0 0 0'. value is angle degree(-360 - 360)
     "savePath" "" // output path, string, default is empty, it will be output to same path
@@ -94,7 +107,6 @@ static bool R_Model_ParseMd5ConvertDef(md5ConvertDef_t &convert, const idDecl *d
     convert.def = def;
     convert.mesh = meshPath;
     convert.scale = def->dict.GetFloat("scale", "-1.0");
-    convert.addOrigin = def->dict.GetBool("addOrigin", "0");
     convert.offset = def->dict.GetVector("offset", "0 0 0");
 	idAngles angle;
 	if(def->dict.GetAngles("rotation", "0 0 0", angle))
@@ -103,8 +115,27 @@ static bool R_Model_ParseMd5ConvertDef(md5ConvertDef_t &convert, const idDecl *d
 		convert.rotation.Identity();
     convert.savePath = def->dict.GetString("savePath", "");
 
+    int flag = 0;
+    const char *allFlags = def->dict.GetString("allFlags", "");
+    if(allFlags && allFlags[0])
+    {
+        idStrList strs;
+        idStr::SplitUnique(strs, allFlags, ',');
+        for (int i = 0; i < strs.Num(); i++) {
+            R_Model_AddFlag(flag, strs[i]);
+        }
+    }
+
+    const char flagPrefix[] = "flag";
+    const idKeyValue *kv = def->dict.MatchPrefix(flagPrefix);
+    while (kv != NULL) {
+        R_Model_AddFlag(flag, kv->GetValue());
+        kv = def->dict.MatchPrefix(flagPrefix, kv);
+    }
+    convert.flags = flag;
+
 	const char prefix[] = "anim ";
-    const idKeyValue *kv = def->dict.MatchPrefix(prefix);
+    kv = def->dict.MatchPrefix(prefix);
 
     while (kv != NULL) {
         convert.anims.Append(kv->GetValue());
@@ -339,7 +370,7 @@ void R_Model_ClearMd5Convert(md5ConvertDef_t &convert)
     convert.def = NULL;
     convert.mesh.Clear();
     convert.scale = -1.0f;
-    convert.addOrigin = false;
+    convert.flags = 0;
     convert.offset.Zero();
     convert.rotation.Identity();
     convert.anims.Clear();
@@ -353,7 +384,9 @@ void R_Model_PrintMd5Convert(md5ConvertDef_t &convert)
     common->Printf("Type: %s\n", convert.type.c_str());
     common->Printf("Mesh: %s\n", convert.mesh.c_str());
     common->Printf("Scale: %f\n", convert.scale);
-    common->Printf("Add origin bone: %d\n", convert.addOrigin);
+    common->Printf("Flags: 0x%X\n", convert.flags);
+    if(convert.flags & MD5CF_ADD_ORIGIN) common->Printf("  Add origin bone\n");
+    if(convert.flags & MD5CF_RENAME_ORIGIN) common->Printf("  Rename origin bone\n");
     common->Printf("Offset: %f, %f, %f\n", convert.offset[0], convert.offset[1], convert.offset[2]);
     idAngles angles = convert.rotation.ToAngles();
     common->Printf("Rotation angle: %f, %f, %f\n", angles[0], angles[1], angles[2]);
@@ -387,13 +420,13 @@ int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, md5ConvertDef_t &conve
         {
             if(!idStr::Icmp("scale", arg))
                 parm = CCP_SCALE;
-            else if(!idStr::Icmp("addOrigin", arg))
+            else if(!idStr::Icmp("addOrigin", arg) || !idStr::Icmp("renameOrigin", arg))
             {
-                parm = CCP_ADD_ORIGIN;
-                convert.addOrigin = true;
+                parm = CCP_FLAGS;
+                R_Model_AddFlag(convert.flags, arg);
                 parm = CCP_NONE;
                 readParm = false;
-                res |= CCP_ADD_ORIGIN;
+                res |= CCP_FLAGS;
             }
             else if(!idStr::Icmp("offset", arg))
                 parm = CCP_OFFSET;
@@ -477,7 +510,7 @@ int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, md5ConvertDef_t &conve
     return res;
 }
 
-int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, float *scale, bool *addOrigin, idVec3 *offset, idMat3 *rotation, idStrList *anims, idStr *savePath)
+int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, int *flags, float *scale, idVec3 *offset, idMat3 *rotation, idStrList *anims, idStr *savePath)
 {
     md5ConvertDef_t convert;
     R_Model_ClearMd5Convert(convert);
@@ -486,10 +519,10 @@ int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, float *sc
 
     if(mesh && (res & CCP_MESH))
         *mesh = convert.mesh;
+    if(flags && (res & CCP_FLAGS))
+        *flags = convert.flags;
     if(scale && (res & CCP_SCALE))
         *scale = convert.scale;
-    if(addOrigin && (res & CCP_ADD_ORIGIN))
-        *addOrigin = convert.addOrigin;
     if(offset && (res & CCP_OFFSET))
         *offset = convert.offset;
     if(rotation && (res & CCP_ROTATION))

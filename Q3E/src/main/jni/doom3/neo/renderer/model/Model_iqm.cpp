@@ -772,7 +772,7 @@ bool idModelIqm::Parse(const char *filePath, int parseType)
     return !err;
 }
 
-bool idModelIqm::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *meshOffset, const idMat3 *meshRotation) const
+bool idModelIqm::ToMd5Mesh(idMd5MeshFile &md5mesh, int flags, float scale, const idVec3 *meshOffset, const idMat3 *meshRotation) const
 {
     int i, j;
     md5meshJoint_t *md5Bone;
@@ -781,15 +781,26 @@ bool idModelIqm::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
     idQuat boneQuat;
     const md5meshJointTransform_t *jointTransform;
 	int numBones = joints.Num();
+    const bool renameOrigin = flags & MD5CF_RENAME_ORIGIN;
+    const bool addOrigin = flags & MD5CF_ADD_ORIGIN;
+    assert(renameOrigin != addOrigin);
 
-    md5mesh.Commandline() = va("Convert from iqm file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
-	if(meshOffset)
-		md5mesh.Commandline().Append(va(", offset=%g %g %g", meshOffset->x, meshOffset->y, meshOffset->z));
-	if(meshRotation)
-	{
-		idAngles angle = meshRotation->ToAngles();
-		md5mesh.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
-	}
+    md5mesh.Commandline() = va("Convert from iqm file: ");
+    idStrList comments;
+    if(addOrigin)
+        comments.Append("addOrigin");
+    if(renameOrigin)
+        comments.Append("renameOrigin");
+    if(scale > 0.0f)
+        comments.Append(va("scale=%g", scale));
+    if(meshOffset)
+        comments.Append(va("offset=(%g %g %g)", meshOffset->x, meshOffset->y, meshOffset->z));
+    if(meshRotation)
+    {
+        idAngles angle = meshRotation->ToAngles();
+        comments.Append(va("rotation=(%g %g %g)", angle[0], angle[1], angle[2]));
+    }
+    idStr::Joint(md5mesh.Commandline(), comments, ", ");
 
 	if(addOrigin)
 		numBones++;
@@ -822,6 +833,8 @@ bool idModelIqm::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
 			{
 				md5Bone->parentIndex = -1;
 				hasOrigin = true;
+                if(renameOrigin)
+                    md5Bone->boneName = "origin";
 			}
 		}
 		else
@@ -993,14 +1006,14 @@ bool idModelIqm::ToMd5Mesh(idMd5MeshFile &md5mesh, float scale, bool addOrigin, 
     return true;
 }
 
-int idModelIqm::ToMd5AnimList(idList<idMd5AnimFile> &md5anims, idMd5MeshFile &md5mesh, float scale, bool addOrigin, const idVec3 *offset, const idMat3 *rotation) const
+int idModelIqm::ToMd5AnimList(idList<idMd5AnimFile> &md5anims, idMd5MeshFile &md5mesh, int flags, float scale, const idVec3 *offset, const idMat3 *rotation) const
 {
 	int num = 0;
 
 	for(int i = 0; i < anims.Num(); i++)
 	{
 		int index = md5anims.Append(idMd5AnimFile());
-		if(!ToMd5Anim(md5anims[index], md5mesh, i, scale, addOrigin, offset, rotation))
+		if(!ToMd5Anim(md5anims[index], md5mesh, i, flags, scale, offset, rotation))
 		{
 			md5anims.RemoveIndex(index);
 			common->Warning("Animation '%s' convert fail", GetText(anims[i].name));
@@ -1011,20 +1024,20 @@ int idModelIqm::ToMd5AnimList(idList<idMd5AnimFile> &md5anims, idMd5MeshFile &md
 	return num;
 }
 
-bool idModelIqm::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, float scale, bool addOrigin, const idVec3 *offset, const idMat3 *rotation) const
+bool idModelIqm::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, const char *animName, int flags, float scale, const idVec3 *offset, const idMat3 *rotation) const
 {
 	for(int i = 0; i < anims.Num(); i++)
 	{
 		if(!idStr::Icmp(animName, GetText(anims[i].name)))
 		{
-			return ToMd5Anim(md5anim, md5mesh, i, scale, addOrigin, offset, rotation);
+			return ToMd5Anim(md5anim, md5mesh, i, flags, scale, offset, rotation);
 		}
 	}
 	common->Warning("Animation '%s' not found in iqm", animName);
 	return false;
 }
 
-bool idModelIqm::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, float scale, bool addOrigin, const idVec3 *animOffset, const idMat3 *animRotation) const
+bool idModelIqm::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int animIndex, int flags, float scale, const idVec3 *animOffset, const idMat3 *animRotation) const
 {
 	if((unsigned int)animIndex >= header.num_anims)
 		return false;
@@ -1038,6 +1051,9 @@ bool idModelIqm::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
     md5meshJointTransform_t *frameTransform;
     md5animBaseframe_t *md5BaseFrame;
     md5meshJoint_t *md5Bone;
+    const bool renameOrigin = flags & MD5CF_RENAME_ORIGIN;
+    const bool addOrigin = flags & MD5CF_ADD_ORIGIN;
+    assert(renameOrigin != addOrigin);
 
     const iqmAnim_t *animInfo = &anims[animIndex];
 
@@ -1047,14 +1063,22 @@ bool idModelIqm::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
     md5anim.FrameRate() = (int)animInfo->framerate;
     md5anim.NumAnimatedComponents() = numBones * 6;
 
-    md5anim.Commandline() = va("Convert from iqm file: scale=%f, addOrigin=%d", scale > 0.0f ? scale : 1.0, addOrigin);
-	if(animOffset)
-		md5anim.Commandline().Append(va(", offset=%g,%g,%g", animOffset->x, animOffset->y, animOffset->z));
-	if(animRotation)
-	{
-		idAngles angle = animRotation->ToAngles();
-		md5anim.Commandline().Append(va(", rotation=%g %g %g", angle[0], angle[1], angle[2]));
-	}
+    md5anim.Commandline() = va("Convert from iqm file: ");
+    idStrList comments;
+    if(addOrigin)
+        comments.Append("addOrigin");
+    if(renameOrigin)
+        comments.Append("renameOrigin");
+    if(scale > 0.0f)
+        comments.Append(va("scale=%g", scale));
+    if(animOffset)
+        comments.Append(va("offset=(%g %g %g)", animOffset->x, animOffset->y, animOffset->z));
+    if(animRotation)
+    {
+        idAngles angle = animRotation->ToAngles();
+        comments.Append(va("rotation=(%g %g %g)", angle[0], angle[1], angle[2]));
+    }
+    idStr::Joint(md5anim.Commandline(), comments, ", ");
 
     // convert md5 joints
     idList<md5animHierarchy_t> &md5Bones = md5anim.Hierarchies();
@@ -1130,6 +1154,11 @@ bool idModelIqm::ToMd5Anim(idMd5AnimFile &md5anim, idMd5MeshFile &md5mesh, int a
 
             md5Bone->boneName = meshJoint->boneName;
             md5Bone->parentIndex = meshJoint->parentIndex;
+            idStr meshBoneName = meshJoint->boneName;
+            if(renameOrigin && j == 0)
+            {
+                meshBoneName = GetText(joints[0].name);
+            }
 
             boneOrigin[0] = pose.channeloffset[0] + (pose.mask & IQM_CM_TX ? (float)(*key++) * pose.channelscale[0] : 0.0f);
             boneOrigin[1] = pose.channeloffset[1] + (pose.mask & IQM_CM_TY ? (float)(*key++) * pose.channelscale[1] : 0.0f);
@@ -1371,7 +1400,7 @@ static void R_ConvertIqmToObj_f(const idCmdArgs &args)
 }
 #endif
 
-static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idStrList *animList = NULL, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idStrList *animList = NULL, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
     int ret = 0;
 
@@ -1381,7 +1410,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
     if(iqm.Parse(filePath, animList ? idModelIqm::PARSE_FRAME : idModelIqm::PARSE_JOINT))
     {
         //iqm.Print();
-		if(iqm.ToMd5Mesh(md5MeshFile, scale, addOrigin, offset, rotation))
+		if(iqm.ToMd5Mesh(md5MeshFile, flags, scale, offset, rotation))
 		{
 			if(doMesh)
 			{
@@ -1444,7 +1473,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
                 continue;
             }
             common->Printf("Convert iqm animation to md5anim: %d -> %s\n", index, animName);
-			ok = iqm.ToMd5Anim(md5AnimFile, md5MeshFile, index, scale, addOrigin, offset, rotation);
+			ok = iqm.ToMd5Anim(md5AnimFile, md5MeshFile, index, flags, scale, offset, rotation);
             md5animPath = filePath;
             md5animPath.StripFilename();
             md5animPath.AppendPath(animName);
@@ -1456,7 +1485,7 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
             name.StripPath();
             name.StripFileExtension();
             common->Printf("Convert iqm animation to md5anim: %s -> %s\n", anim, name.c_str());
-			ok = iqm.ToMd5Anim(md5AnimFile, md5MeshFile, name.c_str(), scale, addOrigin, offset, rotation);
+			ok = iqm.ToMd5Anim(md5AnimFile, md5MeshFile, name.c_str(), flags, scale, offset, rotation);
 			animName = anim;
             md5animPath = anim;
             md5animPath = R_Model_MakeOutputPath(anim, "." MD5_ANIM_EXT, savePath);
@@ -1475,19 +1504,19 @@ static int R_ConvertIqmToMd5(const char *filePath, bool doMesh = true, const idS
     return ret;
 }
 
-ID_INLINE static int R_ConvertIqmMesh(const char *filePath, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+ID_INLINE static int R_ConvertIqmMesh(const char *filePath, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertIqmToMd5(filePath, true, NULL, scale, addOrigin, offset, rotation, savePath);
+    return R_ConvertIqmToMd5(filePath, true, NULL, flags, scale, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertIqmAnim(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+ID_INLINE static int R_ConvertIqmAnim(const char *filePath, const idStrList &animList, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertIqmToMd5(filePath, false, &animList, scale, addOrigin, offset, rotation, savePath);
+    return R_ConvertIqmToMd5(filePath, false, &animList, flags, scale, offset, rotation, savePath);
 }
 
-ID_INLINE static int R_ConvertIqm(const char *filePath, const idStrList &animList, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
+ID_INLINE static int R_ConvertIqm(const char *filePath, const idStrList &animList, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL, const char *savePath = NULL)
 {
-    return R_ConvertIqmToMd5(filePath, true, &animList, scale, addOrigin, offset, rotation, savePath);
+    return R_ConvertIqmToMd5(filePath, true, &animList, flags, scale, offset, rotation, savePath);
 }
 
 static void R_ConvertIqmToMd5mesh_f(const idCmdArgs &args)
@@ -1499,19 +1528,19 @@ static void R_ConvertIqmToMd5mesh_f(const idCmdArgs &args)
     }
 
     idStr mesh;
+    int flags = 0;
     float scale = -1.0f;
-    bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
     idStr savePath;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, NULL, &savePath);
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &flags, &scale, &offset, &rotation, NULL, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5MESH_USAGE(iqm), args.Argv(0));
         return;
     }
-    R_ConvertIqmMesh(mesh, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
+    R_ConvertIqmMesh(mesh, flags, scale, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertIqmToMd5anim_f(const idCmdArgs &args)
@@ -1523,19 +1552,19 @@ static void R_ConvertIqmToMd5anim_f(const idCmdArgs &args)
     }
 
     idStr mesh;
+    int flags = 0;
     float scale = -1.0f;
-    bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
     idStr savePath;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &flags, &scale, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5ANIM_ALL_USAGE(iqm), args.Argv(0));
         return;
     }
-    R_ConvertIqmAnim(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
+    R_ConvertIqmAnim(mesh, anims, flags, scale, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 static void R_ConvertIqmToMd5_f(const idCmdArgs &args)
@@ -1547,26 +1576,26 @@ static void R_ConvertIqmToMd5_f(const idCmdArgs &args)
     }
 
     idStr mesh;
+    int flags = 0;
     float scale = -1.0f;
-    bool addOrigin = false;
     idVec3 offset(0.0f, 0.0f, 0.0f);
     idMat3 rotation = mat3_identity;
     idStrList anims;
     idStr savePath;
-    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &scale, &addOrigin, &offset, &rotation, &anims, &savePath);
+    int res = R_Model_ParseMd5ConvertCmdLine(args, &mesh, &flags, &scale, &offset, &rotation, &anims, &savePath);
     if(mesh.IsEmpty())
     {
         common->Printf(CONVERT_TO_MD5_ALL_USAGE(iqm), args.Argv(0));
         return;
     }
-    R_ConvertIqm(mesh, anims, scale, addOrigin, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
+    R_ConvertIqm(mesh, anims, flags, scale, res & CCP_OFFSET ? &offset : NULL, res & CCP_ROTATION ? &rotation : NULL, savePath.c_str());
 }
 
 bool R_Model_HandleIqm(const md5ConvertDef_t &convert)
 {
-    if(R_ConvertIqm(convert.mesh, convert.anims, 
-				convert.scale, 
-				convert.addOrigin,
+    if(R_ConvertIqm(convert.mesh, convert.anims,
+                convert.flags,
+                convert.scale,
 				convert.offset.IsZero() ? NULL : &convert.offset, 
 				convert.rotation.IsIdentity() ? NULL : &convert.rotation,
                 convert.savePath.IsEmpty() ? NULL : convert.savePath.c_str()

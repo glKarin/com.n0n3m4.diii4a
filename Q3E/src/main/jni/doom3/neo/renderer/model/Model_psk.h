@@ -134,7 +134,7 @@ class idModelPsk
         ~idModelPsk(void);
         bool Parse(const char *pskPath);
         void Print(void) const;
-        bool ToMd5Mesh(idMd5MeshFile &md5mesh, float scale = -1.0f, bool addOrigin = false, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
+        bool ToMd5Mesh(idMd5MeshFile &md5mesh, int flags = 0, float scale = -1.0f, const idVec3 *offset = NULL, const idMat3 *rotation = NULL) const;
 #ifdef _MODEL_OBJ
         bool ToObj(objModel_t &objModel, bool keepDup = false) const;
 #endif
