@@ -46,6 +46,7 @@ import com.n0n3m4.q3e.karin.KMouseCursor;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTechCommand;
+import com.n0n3m4.q3e.karin.Theme;
 
 public class Q3EMain extends Activity
 {
@@ -138,6 +139,9 @@ public class Q3EMain extends Activity
 
         // setup language environment
         Q3ELang.Locale(this);
+
+        // setup theme
+        Theme.SetTheme(this, false);
 
         // load game
         if(gameHelper.checkGameFiles())

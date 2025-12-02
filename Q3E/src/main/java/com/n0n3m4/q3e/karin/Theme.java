@@ -1,4 +1,4 @@
-package com.karin.idTech4Amm.sys;
+package com.n0n3m4.q3e.karin;
 
 import android.app.Activity;
 import android.content.Context;

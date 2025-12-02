@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.karin.idTech4Amm.misc.FileBrowser;
-import com.karin.idTech4Amm.sys.Theme;
+import com.n0n3m4.q3e.karin.Theme;
 
 public class FileViewAdapter extends ArrayAdapter_base<FileBrowser.FileModel>
 {

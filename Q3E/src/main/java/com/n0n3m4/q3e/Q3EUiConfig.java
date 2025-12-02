@@ -48,6 +48,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.n0n3m4.q3e.karin.Theme;
 import com.n0n3m4.q3e.onscreen.Q3EControls;
 
 public class Q3EUiConfig extends Activity
@@ -88,6 +89,7 @@ public class Q3EUiConfig extends Activity
 
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
+        Theme.SetTheme(this, false);
         m_autoSave = preferences.getBoolean(Q3EPreference.AUTOSAVE_BUTTON_SETTINGS, true);
 
         RelativeLayout mainLayout = new RelativeLayout(this);
