@@ -598,13 +598,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Slider.CalcAspect(tmp.Style());
                     int width = (int) (size * scale);
                     int height = (int) (aspect * width + 0.5f);
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(width, height);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(width, height);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Button)
                 {
@@ -612,37 +607,22 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Button.CalcAspect(tmp.Style());
                     int width = (int) (size * scale);
                     int height = (int) (aspect * width + 0.5f);
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(width, height);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(width, height);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Joystick)
                 {
                     Joystick tmp = (Joystick) p;
                     int radius = (int) (size * scale) * 2;
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(radius / 2);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(radius / 2);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Disc)
                 {
                     Disc tmp = (Disc) p;
                     int radius = (int) (size * scale) * 2;
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(radius / 2);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(radius / 2);
+                    ReloadButton(tmp);
                 }
 
                 m_edited = true;
@@ -675,13 +655,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Slider.CalcAspect(tmp.Style());
                     int width = size;
                     int height = (int) (aspect * width + 0.5f);
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(width, height);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(width, height);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Button)
                 {
@@ -689,37 +664,22 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Button.CalcAspect(tmp.Style());
                     int width = size;
                     int height = (int) (aspect * width + 0.5f);
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(width, height);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(width, height);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Joystick)
                 {
                     Joystick tmp = (Joystick) p;
                     int radius = size * 2;
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(radius / 2);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(radius / 2);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Disc)
                 {
                     Disc tmp = (Disc) p;
                     int radius = size * 2;
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(radius / 2);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(radius / 2);
+                    ReloadButton(tmp);
                 }
 
                 m_edited = true;
