@@ -94,6 +94,11 @@ public final class KCVarSystem
                                 "7", "Sega Genesis",
                                 "8", "Sega Genesis Highres",
                                 "9", "Sony PSX"
+                        ),
+                        KCVar.CreateCVar("harm_r_useGLSLShaderBinaryCache", "integer", "0", "Use/cache GLSL shader compiled binary(OpenGL ES2.0 not support)", KCVar.FLAG_LAUNCHER,
+                                "1", "Disable",
+                                "2", "Enable(check source)",
+                                "3", "Enable(not check source)"
                         )
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
@@ -143,6 +148,14 @@ public final class KCVarSystem
                             + " Sarasori_Rg "
                             ),
                         KCVar.CreateCVar("harm_g_skipHitEffect", "bool", "0", "Skip all hit effect in game", KCVar.FLAG_INIT | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_fs_basepath_extras", "string", "", "Extras search paths last(split by ',')", KCVar.FLAG_INIT),
+                        KCVar.CreateCVar("harm_fs_addon_extras", "string", "", "Extras search addon files directory path last(split by ',')", KCVar.FLAG_INIT),
+                        KCVar.CreateCVar("harm_fs_game_base_extras", "string", "", "Extras search game mod last(split by ',')", KCVar.FLAG_INIT),
+                        KCVar.CreateCVar("harm_con_float", "bool", "0", "Float console", 0),
+                        KCVar.CreateCVar("harm_con_alwaysShow", "bool", "0", "Always show console", 0),
+                        KCVar.CreateCVar("harm_con_noBackground", "bool", "0", "Don't draw console background", 0),
+                        KCVar.CreateCVar("harm_con_floatGeometry", "vector4", "100 50 300 200", "Float console geometry, format is \"'<left> <top> <width> <height>\"", 0),
+                        KCVar.CreateCVar("harm_con_floatZoomStep", "integer", "10", "Zoom step of float console", 0),
                         KCVar.CreateCommand("exportFont", "string", "Convert ttf/ttc font file to DOOM3 wide character font file", 0),
                         KCVar.CreateCommand("extractBimage", "string", "extract DOOM3-BFG's bimage image to rga RGBA image files", 0),
                         KCVar.CreateCommand("skipHitEffect", "bool", "skip all hit effect in game", 0)
