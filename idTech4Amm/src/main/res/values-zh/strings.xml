@@ -289,10 +289,11 @@
     <string name="librecoop">LibreCoop</string>
     <string name="quake_1_base">雷神之锤1</string>
     <string name="quake_2_base">雷神之锤2</string>
-    <string name="quake_2_ctf">雷神之锤2:ctf</string>
-    <string name="quake_2_rogue">雷神之锤2:rogue</string>
-    <string name="quake_2_xatrix">雷神之锤2:xatrix</string>
-    <string name="quake_2_zaero">雷神之锤2:zaero</string>
+    <string name="quake_2_ctf">雷神之锤2: Capture The Flag</string>
+    <string name="quake_2_rogue">雷神之锤2扩展包: Ground Zero</string>
+    <string name="quake_2_xatrix">雷神之锤2扩展包: The Reckoning</string>
+    <string name="quake_2_zaero">雷神之锤2: Team Evolves Zaero</string>
+    <string name="quake_2_3zb2">雷神之锤2: 3rd Zigock Bot II</string>
     <string name="rtcw_base">重返德军总部</string>
     <string name="realrtcw_base">真·重返德军总部</string>
     <string name="fteqw_base">FTEQW</string>

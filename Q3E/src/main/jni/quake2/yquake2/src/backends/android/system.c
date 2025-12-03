@@ -426,6 +426,8 @@ Sys_GetGameAPI(void *parms)
 		gamename = "q2rogue.so";
 	else if (!Q_stricmp(game, "ctf"))
 		gamename = "q2ctf.so";
+	else if (!Q_stricmp(game, "3zb2"))
+		gamename = "q23zb2.so";
 	else
 		gamename = "q2game.so";
 #else

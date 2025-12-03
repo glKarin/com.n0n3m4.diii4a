@@ -41,7 +41,7 @@ public final class Constants
             "Support smooth joystick on DOOM 3 mod `Hardscorps` and Quake 4 mod `Hardqore`.",
             "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
             "Add fixed ratio resolution support on launcher `Graphics` tab.",
-            "Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK.",
+            "Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK, yquake2(Quake 2), and add 3rd Zigock Bot II mod support on Quake 2.",
             "FTEQW is removed in this release.",
         };
 	};

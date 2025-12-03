@@ -284,10 +284,11 @@
     <string name="librecoop">LibreCoop</string>
     <string name="quake_1_base">Quake I</string>
     <string name="quake_2_base">Quake II</string>
-    <string name="quake_2_ctf">Quake II:ctf</string>
-    <string name="quake_2_rogue">Quake II:rogue</string>
-    <string name="quake_2_xatrix">Quake II:xatrix</string>
-    <string name="quake_2_zaero">Quake II:zaero</string>
+    <string name="quake_2_ctf">Quake II: Capture The Flag</string>
+    <string name="quake_2_rogue">Quake II Mission Pack: Ground Zero</string>
+    <string name="quake_2_xatrix">Quake II Mission Pack: The Reckoning</string>
+    <string name="quake_2_zaero">Quake II: Team Evolves Zaero</string>
+    <string name="quake_2_3zb2">Quake II: 3rd Zigock Bot II</string>
     <string name="rtcw_base">Return to Castle Wolfenstein</string>
     <string name="etw_base">Wolfenstein: Enemy Territory</string>
     <string name="tdm_base">The Dark Mod</string>
