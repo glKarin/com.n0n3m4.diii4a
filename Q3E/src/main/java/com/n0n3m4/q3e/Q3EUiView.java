@@ -163,7 +163,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             {
                 if(p instanceof Joystick)
                     ((Joystick)p).UpdateTexture((GL11) gl);
-                p.Paint((GL11) gl);
+                p.PaintInEditor((GL11) gl);
             }
         }
 
