@@ -177,7 +177,9 @@ static bool R_Model_ConvertToMd5(const idDecl *decl)
 #ifdef _MODEL_FBX
             {"fbx", R_Model_HandleFbx, },
 #endif
+#ifdef _MODEL_MD5V6
             {"md5meshv6", R_Model_HandleMd5V6, },
+#endif
     };
 
     for(int i = 0; i < sizeof(SupportConverters) / sizeof(SupportConverters[0]); i++)

@@ -1116,8 +1116,10 @@ int idRenderModelMD5::GetSurfaceMask(const char *name) const
 #include "model/Model_md5convert.h"
 #endif
 
+#ifdef _MODEL_MD5V6
 #include "model/Model_md5mesh_v6.cpp"
 #include "model/Model_md5anim_v6.cpp"
+#endif
 
 #ifdef _MODEL_PSK
 #include "model/Model_psk.cpp"
