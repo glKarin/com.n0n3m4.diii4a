@@ -97,7 +97,7 @@ R_AliasCheckFrameBBox( daliasframe_t *frame, float worldxf[3][4] )
 	for (i=0 ; i<3 ; i++)
 	{
 		mins[i] = frame->translate[i];
-		maxs[i] = mins[i] + frame->scale[i]*255;
+		maxs[i] = mins[i] + frame->scale[i] * 255;
 	}
 
 	/*
@@ -107,9 +107,14 @@ R_AliasCheckFrameBBox( daliasframe_t *frame, float worldxf[3][4] )
 	R_AliasTransformVector( maxs, transformed_max, aliastransform );
 
 	if ( transformed_min[2] >= ALIAS_Z_CLIP_PLANE )
+	{
 		zfullyclipped = false;
+	}
+
 	if ( transformed_max[2] >= ALIAS_Z_CLIP_PLANE )
+	{
 		zfullyclipped = false;
+	}
 
 	if ( zfullyclipped )
 	{
@@ -126,19 +131,31 @@ R_AliasCheckFrameBBox( daliasframe_t *frame, float worldxf[3][4] )
 		unsigned long clipcode = 0;
 
 		if ( i & 1 )
+		{
 			tmp[0] = mins[0];
+		}
 		else
+		{
 			tmp[0] = maxs[0];
+		}
 
 		if ( i & 2 )
+		{
 			tmp[1] = mins[1];
+		}
 		else
+		{
 			tmp[1] = maxs[1];
+		}
 
 		if ( i & 4 )
+		{
 			tmp[2] = mins[2];
+		}
 		else
+		{
 			tmp[2] = maxs[2];
+		}
 
 		R_AliasTransformVector( tmp, transformed, worldxf );
 
@@ -147,7 +164,9 @@ R_AliasCheckFrameBBox( daliasframe_t *frame, float worldxf[3][4] )
 			float dp = DotProduct( transformed, view_clipplanes[j].normal );
 
 			if ( ( dp - view_clipplanes[j].dist ) < 0.0F )
+			{
 				clipcode |= 1 << j;
+			}
 		}
 
 		aggregate_and_clipcode &= clipcode;
@@ -337,8 +356,8 @@ R_AliasSetUpTransform(const entity_t *currententity)
 	for (i=0 ; i<3 ; i++)
 	{
 		aliasoldworldtransform[i][0] = aliasworldtransform[i][0] =  s_alias_forward[i];
-		aliasoldworldtransform[i][0] = aliasworldtransform[i][1] = -s_alias_right[i];
-		aliasoldworldtransform[i][0] = aliasworldtransform[i][2] =  s_alias_up[i];
+		aliasoldworldtransform[i][1] = aliasworldtransform[i][1] = -s_alias_right[i];
+		aliasoldworldtransform[i][2] = aliasworldtransform[i][2] =  s_alias_up[i];
 	}
 
 	aliasworldtransform[0][3] = currententity->origin[0]-r_origin[0];
@@ -514,7 +533,7 @@ R_AliasSetupSkin(const entity_t *currententity, const model_t *currentmodel)
 		skinnum = currententity->skinnum;
 		if ((skinnum >= s_pmdl->num_skins) || (skinnum < 0))
 		{
-			R_Printf(PRINT_ALL, "%s %s: no such skin # %d\n",
+			Com_Printf("%s %s: no such skin # %d\n",
 				__func__, currentmodel->name, skinnum);
 			skinnum = 0;
 		}
@@ -644,13 +663,13 @@ R_AliasSetupFrames(const entity_t *currententity, const model_t *currentmodel, d
 
 	if ( ( thisframe >= pmdl->num_frames ) || ( thisframe < 0 ) )
 	{
-		R_Printf(PRINT_ALL, "%s %s: no such thisframe %d\n",
+		Com_Printf("%s %s: no such thisframe %d\n",
 			__func__, currentmodel->name, thisframe);
 		thisframe = 0;
 	}
 	if ( ( lastframe >= pmdl->num_frames ) || ( lastframe < 0 ) )
 	{
-		R_Printf(PRINT_ALL, "%s %s: no such lastframe %d\n",
+		Com_Printf("%s %s: no such lastframe %d\n",
 			__func__, currentmodel->name, lastframe);
 		lastframe = 0;
 	}
@@ -718,11 +737,11 @@ void R_PolysetDrawSpansConstant8_66(const entity_t *currententity, spanpackage_t
 
 /*
 ================
-R_AliasDrawModel
+R_DrawAliasModel
 ================
 */
 void
-R_AliasDrawModel(entity_t *currententity, const model_t *currentmodel)
+R_DrawAliasModel(entity_t *currententity, const model_t *currentmodel)
 {
 	s_pmdl = (dmdl_t *)currentmodel->extradata;
 
@@ -772,7 +791,7 @@ R_AliasDrawModel(entity_t *currententity, const model_t *currentmodel)
 	// set up the skin and verify it exists
 	if ( !R_AliasSetupSkin(currententity, currentmodel) )
 	{
-		R_Printf(PRINT_ALL, "R_AliasDrawModel %s: NULL skin found\n",
+		Com_Printf("R_DrawAliasModel %s: NULL skin found\n",
 			currentmodel->name);
 		aliasxscale = oldAliasxscale;
 		aliasyscale = oldAliasyscale;

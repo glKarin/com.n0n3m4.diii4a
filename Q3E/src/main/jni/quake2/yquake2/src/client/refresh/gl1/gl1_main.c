@@ -28,7 +28,6 @@
 
 #define NUM_BEAM_SEGS 6
 
-viddef_t vid;
 model_t *r_worldmodel;
 
 float gldepthmin, gldepthmax;
@@ -60,8 +59,6 @@ float r_world_matrix[16];
 float r_base_world_matrix[16];
 
 /* screen size info */
-refdef_t r_newrefdef;
-
 int r_viewcluster, r_viewcluster2, r_oldviewcluster, r_oldviewcluster2;
 unsigned r_rawpalette[256];
 
@@ -100,6 +97,7 @@ cvar_t *gl_shadows;
 cvar_t *gl1_stencilshadow;
 cvar_t *r_mode;
 cvar_t *r_fixsurfsky;
+cvar_t *gl1_minlight;
 
 cvar_t *r_customwidth;
 cvar_t *r_customheight;
@@ -143,12 +141,12 @@ cvar_t *gl1_stereo_separation;
 cvar_t *gl1_stereo_anaglyph_colors;
 cvar_t *gl1_stereo_convergence;
 
+static cvar_t *gl_znear;
 static cvar_t *gl1_waterwarp;
 
 refimport_t ri;
 
 void LM_FreeLightmapBuffers(void);
-void Scrap_Free(void);
 void Scrap_Init(void);
 
 extern void R_SetDefaultState(void);
@@ -361,7 +359,7 @@ R_DrawEntitiesOnList(void)
 					R_DrawSpriteModel(currententity, currentmodel);
 					break;
 				default:
-					ri.Sys_Error(ERR_DROP, "Bad modeltype");
+					Com_Error(ERR_DROP, "Bad modeltype");
 					break;
 			}
 		}
@@ -407,7 +405,7 @@ R_DrawEntitiesOnList(void)
 					R_DrawSpriteModel(currententity, currentmodel);
 					break;
 				default:
-					ri.Sys_Error(ERR_DROP, "Bad modeltype");
+					Com_Error(ERR_DROP, "Bad modeltype");
 					break;
 			}
 		}
@@ -429,7 +427,7 @@ R_DrawParticles2(int num_particles, const particle_t particles[],
 
 	YQ2_VLA(GLfloat, vtx, 3 * num_particles * 3);
 	YQ2_VLA(GLfloat, tex, 2 * num_particles * 3);
-	YQ2_VLA(GLfloat, clr, 4 * num_particles * 3);
+	YQ2_VLA(GLubyte, clr, 4 * num_particles * 3);
 
 	unsigned int index_vtx = 0;
 	unsigned int index_tex = 0;
@@ -464,10 +462,10 @@ R_DrawParticles2(int num_particles, const particle_t particles[],
 
 		for (j=0; j<3; j++) // Copy the color for each point
 		{
-			clr[index_clr++] = color[0]/255.0f;
-			clr[index_clr++] = color[1]/255.0f;
-			clr[index_clr++] = color[2]/255.0f;
-			clr[index_clr++] = p->alpha;
+			clr[index_clr++] = gammatable[color[0]];
+			clr[index_clr++] = gammatable[color[1]];
+			clr[index_clr++] = gammatable[color[2]];
+			clr[index_clr++] = p->alpha * 255;
 		}
 
 		// point 0
@@ -501,7 +499,7 @@ R_DrawParticles2(int num_particles, const particle_t particles[],
 
 	glVertexPointer( 3, GL_FLOAT, 0, vtx );
 	glTexCoordPointer( 2, GL_FLOAT, 0, tex );
-	glColorPointer( 4, GL_FLOAT, 0, clr );
+	glColorPointer( 4, GL_UNSIGNED_BYTE, 0, clr );
 	glDrawArrays( GL_TRIANGLES, 0, num_particles*3 );
 
 	glDisableClientState( GL_VERTEX_ARRAY );
@@ -536,7 +534,7 @@ R_DrawParticles(void)
 		const particle_t *p;
 
 		YQ2_VLA(GLfloat, vtx, 3 * r_newrefdef.num_particles);
-		YQ2_VLA(GLfloat, clr, 4 * r_newrefdef.num_particles);
+		YQ2_VLA(GLubyte, clr, 4 * r_newrefdef.num_particles);
 
 		unsigned int index_vtx = 0;
 		unsigned int index_clr = 0;
@@ -551,10 +549,10 @@ R_DrawParticles(void)
 		for ( i = 0, p = r_newrefdef.particles; i < r_newrefdef.num_particles; i++, p++ )
 		{
 			*(int *) color = d_8to24table [ p->color & 0xFF ];
-			clr[index_clr++] = color[0]/255.0f;
-			clr[index_clr++] = color[1]/255.0f;
-			clr[index_clr++] = color[2]/255.0f;
-			clr[index_clr++] = p->alpha;
+			clr[index_clr++] = gammatable[color[0]];
+			clr[index_clr++] = gammatable[color[1]];
+			clr[index_clr++] = gammatable[color[2]];
+			clr[index_clr++] = p->alpha * 255;
 
 			vtx[index_vtx++] = p->origin[0];
 			vtx[index_vtx++] = p->origin[1];
@@ -565,7 +563,7 @@ R_DrawParticles(void)
 		glEnableClientState( GL_COLOR_ARRAY );
 
 		glVertexPointer( 3, GL_FLOAT, 0, vtx );
-		glColorPointer( 4, GL_FLOAT, 0, clr );
+		glColorPointer( 4, GL_UNSIGNED_BYTE, 0, clr );
 		glDrawArrays( GL_POINTS, 0, r_newrefdef.num_particles );
 
 		glDisableClientState( GL_VERTEX_ARRAY );
@@ -663,7 +661,7 @@ R_SetupFrame(void)
 	{
 		if (!r_worldmodel)
 		{
-			ri.Sys_Error(ERR_DROP, "%s: bad world model", __func__);
+			Com_Error(ERR_DROP, "%s: bad world model", __func__);
 			return;
 		}
 
@@ -705,10 +703,11 @@ R_SetupFrame(void)
 		}
 	}
 
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 3; i++)
 	{
-		v_blend[i] = r_newrefdef.blend[i];
+		v_blend[i] = r_newrefdef.blend[i] * gl_state.sw_gamma;
 	}
+	v_blend[3] = r_newrefdef.blend[3];
 
 	c_brush_polys = 0;
 	c_alias_polys = 0;
@@ -731,7 +730,7 @@ void
 R_SetPerspective(GLdouble fovy)
 {
 	// gluPerspective style parameters
-	static const GLdouble zNear = 4;
+	const GLdouble zNear = Q_max(gl_znear->value, 0.1f);
 	const GLdouble zFar = (r_farsee->value) ? 8192.0f : 4096.0f;
 	const GLdouble aspectratio = (GLdouble)r_newrefdef.width / r_newrefdef.height;
 
@@ -767,11 +766,11 @@ R_SetupGL(void)
 	int x, x2, y2, y, w, h;
 
 	/* set up viewport */
-	x = floor(r_newrefdef.x * vid.width / vid.width);
-	x2 = ceil((r_newrefdef.x + r_newrefdef.width) * vid.width / vid.width);
-	y = floor(vid.height - r_newrefdef.y * vid.height / vid.height);
+	x = floor(r_newrefdef.x * vid.width / (float)vid.width);
+	x2 = ceil((r_newrefdef.x + r_newrefdef.width) * vid.width / (float)vid.width);
+	y = floor(vid.height - r_newrefdef.y * vid.height / (float)vid.height);
 	y2 = ceil(vid.height -
-			  (r_newrefdef.y + r_newrefdef.height) * vid.height / vid.height);
+			  (r_newrefdef.y + r_newrefdef.height) * vid.height / (float)vid.height);
 
 	w = x2 - x;
 	h = y - y2;
@@ -1091,7 +1090,7 @@ R_RenderView(refdef_t *fd)
 
 	if (!r_worldmodel && !(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 	{
-		ri.Sys_Error(ERR_DROP, "%s: NULL worldmodel", __func__);
+		Com_Error(ERR_DROP, "%s: NULL worldmodel", __func__);
 	}
 
 	if (r_speeds->value)
@@ -1130,7 +1129,7 @@ R_RenderView(refdef_t *fd)
 
 	if (r_speeds->value)
 	{
-		R_Printf(PRINT_ALL, "%4i wpoly %4i epoly %i tex %i lmaps\n",
+		Com_Printf("%4i wpoly %4i epoly %i tex %i lmaps\n",
 				c_brush_polys, c_alias_polys, c_visible_textures,
 				c_visible_lightmaps);
 	}
@@ -1267,6 +1266,8 @@ R_Register(void)
 	gl_polyblend = ri.Cvar_Get("gl_polyblend", "1", 0);
 	gl1_flashblend = ri.Cvar_Get("gl1_flashblend", "0", 0);
 	r_fixsurfsky = ri.Cvar_Get("r_fixsurfsky", "0", CVAR_ARCHIVE);
+	gl_znear = ri.Cvar_Get("gl_znear", "4", CVAR_ARCHIVE);
+	gl1_minlight = ri.Cvar_Get("gl1_minlight", "0", CVAR_ARCHIVE);
 
 	gl_texturemode = ri.Cvar_Get("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE);
 	gl1_texturealphamode = ri.Cvar_Get("gl1_texturealphamode", "default", CVAR_ARCHIVE);
@@ -1330,13 +1331,13 @@ R_Register(void)
 static int
 SetMode_impl(int *pwidth, int *pheight, int mode, int fullscreen)
 {
-	R_Printf(PRINT_ALL, "Setting mode %d:", mode);
+	Com_Printf("Setting mode %d:", mode);
 
 	/* mode -1 is not in the vid mode table - so we keep the values in pwidth
 	   and pheight and don't even try to look up the mode info */
 	if ((mode >= 0) && !ri.Vid_GetModeInfo(pwidth, pheight, mode))
 	{
-		R_Printf(PRINT_ALL, " invalid mode\n");
+		Com_Printf(" invalid mode\n");
 		return rserr_invalid_mode;
 	}
 
@@ -1345,12 +1346,12 @@ SetMode_impl(int *pwidth, int *pheight, int mode, int fullscreen)
 	{
 		if(!ri.GLimp_GetDesktopMode(pwidth, pheight))
 		{
-			R_Printf( PRINT_ALL, " can't detect mode\n" );
+			Com_Printf(" can't detect mode\n" );
 			return rserr_invalid_mode;
 		}
 	}
 
-	R_Printf(PRINT_ALL, " %dx%d (vid_fullscreen %i)\n", *pwidth, *pheight, fullscreen);
+	Com_Printf(" %dx%d (vid_fullscreen %i)\n", *pwidth, *pheight, fullscreen);
 
 	if (!ri.GLimp_InitGraphics(fullscreen, pwidth, pheight))
 	{
@@ -1445,10 +1446,10 @@ R_SetMode(void)
 	{
 		if (err == rserr_invalid_mode)
 		{
-			R_Printf(PRINT_ALL, "ref_gl::R_SetMode() - invalid mode\n");
+			Com_Printf("ref_gl::R_SetMode() - invalid mode\n");
 			if (gl_msaa_samples->value != 0.0f)
 			{
-				R_Printf(PRINT_ALL, "gl_msaa_samples was %d - will try again with gl_msaa_samples = 0\n", (int)gl_msaa_samples->value);
+				Com_Printf("gl_msaa_samples was %d - will try again with gl_msaa_samples = 0\n", (int)gl_msaa_samples->value);
 				ri.Cvar_SetValue("r_msaa_samples", 0.0f);
 				gl_msaa_samples->modified = false;
 
@@ -1470,7 +1471,7 @@ R_SetMode(void)
 		/* try setting it back to something safe */
 		if ((err = SetMode_impl(&vid.width, &vid.height, gl_state.prev_mode, 0)) != rserr_ok)
 		{
-			R_Printf(PRINT_ALL, "ref_gl::R_SetMode() - could not revert to safe mode\n");
+			Com_Printf("ref_gl::R_SetMode() - could not revert to safe mode\n");
 			return false;
 		}
 	}
@@ -1507,11 +1508,11 @@ RI_Init(void)
 		r_turbsin[j] *= 0.5;
 	}
 
-	R_Printf(PRINT_ALL, "Refresh: " REF_VERSION "\n");
-	R_Printf(PRINT_ALL, "Client: " YQ2VERSION "\n\n");
+	Com_Printf("Refresh: " REF_VERSION "\n");
+	Com_Printf("Client: " YQ2VERSION "\n\n");
 
 #ifdef DEBUG
-	R_Printf(PRINT_ALL, "ref_gl1::R_Init() - DEBUG mode enabled\n");
+	Com_Printf("ref_gl1::%s - DEBUG mode enabled\n", __func__);
 #endif
 
 	GetPCXPalette (&colormap, d_8to24table);
@@ -1530,7 +1531,7 @@ RI_Init(void)
 	if (!R_SetMode())
 	{
 		QGL_Shutdown();
-		R_Printf(PRINT_ALL, "ref_gl::R_Init() - could not R_SetMode()\n");
+		Com_Printf("ref_gl1::%s - could not R_SetMode()\n", __func__);
 		return false;
 	}
 
@@ -1539,19 +1540,19 @@ RI_Init(void)
 	// --------
 
 	/* get our various GL strings */
-	R_Printf(PRINT_ALL, "\nOpenGL setting:\n");
+	Com_Printf("\nOpenGL setting:\n");
 
 	gl_config.vendor_string = (char *)glGetString(GL_VENDOR);
-	R_Printf(PRINT_ALL, "GL_VENDOR: %s\n", gl_config.vendor_string);
+	Com_Printf("GL_VENDOR: %s\n", gl_config.vendor_string);
 
 	gl_config.renderer_string = (char *)glGetString(GL_RENDERER);
-	R_Printf(PRINT_ALL, "GL_RENDERER: %s\n", gl_config.renderer_string);
+	Com_Printf("GL_RENDERER: %s\n", gl_config.renderer_string);
 
 	gl_config.version_string = (char *)glGetString(GL_VERSION);
-	R_Printf(PRINT_ALL, "GL_VERSION: %s\n", gl_config.version_string);
+	Com_Printf("GL_VERSION: %s\n", gl_config.version_string);
 
 	gl_config.extensions_string = (char *)glGetString(GL_EXTENSIONS);
-	R_Printf(PRINT_ALL, "GL_EXTENSIONS: %s\n", gl_config.extensions_string);
+	Com_Printf("GL_EXTENSIONS: %s\n", gl_config.extensions_string);
 
 	sscanf(gl_config.version_string, "%d.%d", &gl_config.major_version, &gl_config.minor_version);
 
@@ -1560,18 +1561,18 @@ RI_Init(void)
 		if (gl_config.minor_version < 4)
 		{
 			QGL_Shutdown();
-			R_Printf(PRINT_ALL, "Support for OpenGL 1.4 is not available\n");
+			Com_Printf("Support for OpenGL 1.4 is not available\n");
 
 			return false;
 		}
 	}
 
-	R_Printf(PRINT_ALL, "\n\nProbing for OpenGL extensions:\n");
+	Com_Printf("\n\nProbing for OpenGL extensions:\n");
 
 	// ----
 
 	/* Point parameters */
-	R_Printf(PRINT_ALL, " - Point parameters: ");
+	Com_Printf(" - Point parameters: ");
 
 	if ( refresher == rf_opengles10 ||
 		strstr(gl_config.extensions_string, "GL_ARB_point_parameters") ||
@@ -1599,22 +1600,22 @@ RI_Init(void)
 		if (qglPointParameterf && qglPointParameterfv)
 		{
 			gl_config.pointparameters = true;
-			R_Printf(PRINT_ALL, "Okay\n");
+			Com_Printf("Okay\n");
 		}
 		else
 		{
-			R_Printf(PRINT_ALL, "Failed\n");
+			Com_Printf("Failed\n");
 		}
 	}
 	else
 	{
-		R_Printf(PRINT_ALL, "Disabled\n");
+		Com_Printf("Disabled\n");
 	}
 
 	// ----
 
 	/* Paletted texture */
-	R_Printf(PRINT_ALL, " - Paletted texture: ");
+	Com_Printf(" - Paletted texture: ");
 
 	if (strstr(gl_config.extensions_string, "GL_EXT_paletted_texture") &&
 		strstr(gl_config.extensions_string, "GL_EXT_shared_texture_palette"))
@@ -1630,52 +1631,52 @@ RI_Init(void)
 		if (qglColorTableEXT)
 		{
 			gl_config.palettedtexture = true;
-			R_Printf(PRINT_ALL, "Okay\n");
+			Com_Printf("Okay\n");
 		}
 		else
 		{
-			R_Printf(PRINT_ALL, "Failed\n");
+			Com_Printf("Failed\n");
 		}
 	}
 	else
 	{
-		R_Printf(PRINT_ALL, "Disabled\n");
+		Com_Printf("Disabled\n");
 	}
 
 	// --------
 
 	/* Anisotropic */
-	R_Printf(PRINT_ALL, " - Anisotropic: ");
+	Com_Printf(" - Anisotropic: ");
 
 	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic"))
 	{
 		gl_config.anisotropic = true;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &gl_config.max_anisotropy);
 
-		R_Printf(PRINT_ALL, "%ux\n", (int)gl_config.max_anisotropy);
+		Com_Printf("%ux\n", (int)gl_config.max_anisotropy);
 	}
 	else
 	{
 		gl_config.anisotropic = false;
 		gl_config.max_anisotropy = 0.0;
 
-		R_Printf(PRINT_ALL, "Failed\n");
+		Com_Printf("Failed\n");
 	}
 
 	// ----
 
 	/* Non power of two textures */
-	R_Printf(PRINT_ALL, " - Non power of two textures: ");
+	Com_Printf(" - Non power of two textures: ");
 
 	if (strstr(gl_config.extensions_string, GLEXTENSION_NPOT))
 	{
 		gl_config.npottextures = true;
-		R_Printf(PRINT_ALL, "Okay\n");
+		Com_Printf("Okay\n");
 	}
 	else
 	{
 		gl_config.npottextures = false;
-		R_Printf(PRINT_ALL, "Failed\n");
+		Com_Printf("Failed\n");
 	}
 
 #undef GLEXTENSION_NPOT
@@ -1685,7 +1686,7 @@ RI_Init(void)
 	/* Multitexturing */
 	gl_config.multitexture = false;
 
-	R_Printf(PRINT_ALL, " - Multitexturing: ");
+	Com_Printf(" - Multitexturing: ");
 
 	if ( refresher == rf_opengles10 || strstr(gl_config.extensions_string, "GL_ARB_multitexture") )
 	{
@@ -1704,16 +1705,16 @@ RI_Init(void)
 		if (qglActiveTexture && qglClientActiveTexture)
 		{
 			gl_config.multitexture = true;
-			R_Printf(PRINT_ALL, "Okay\n");
+			Com_Printf("Okay\n");
 		}
 		else
 		{
-			R_Printf(PRINT_ALL, "Failed\n");
+			Com_Printf("Failed\n");
 		}
 	}
 	else
 	{
-		R_Printf(PRINT_ALL, "Disabled\n");
+		Com_Printf("Disabled\n");
 	}
 
 	// ----
@@ -1726,16 +1727,16 @@ RI_Init(void)
 	 * Needless to say, GPU memory usage is highly increased, so watch out in low memory situations.
 	 */
 
-	R_Printf(PRINT_ALL, " - Lightmap copies: ");
+	Com_Printf(" - Lightmap copies: ");
 	gl_config.lightmapcopies = false;
 	if (gl_config.multitexture && gl1_lightmapcopies->value)
 	{
 		gl_config.lightmapcopies = true;
-		R_Printf(PRINT_ALL, "Okay\n");
+		Com_Printf("Okay\n");
 	}
 	else
 	{
-		R_Printf(PRINT_ALL, "Disabled\n");
+		Com_Printf("Disabled\n");
 	}
 
 	// ----
@@ -1750,7 +1751,7 @@ RI_Init(void)
 	 */
 
 #ifdef YQ2_GL1_GLES
-	R_Printf(PRINT_ALL, " - Discard framebuffer: ");
+	Com_Printf(" - Discard framebuffer: ");
 
 	if (strstr(gl_config.extensions_string, "GL_EXT_discard_framebuffer"))
 	{
@@ -1762,32 +1763,18 @@ RI_Init(void)
 	{
 		if (qglDiscardFramebufferEXT)	// enough to verify availability
 		{
-			R_Printf(PRINT_ALL, "Okay\n");
+			Com_Printf("Okay\n");
 		}
 		else
 		{
-			R_Printf(PRINT_ALL, "Failed\n");
+			Com_Printf("Failed\n");
 		}
 	}
 	else
 	{
-		R_Printf(PRINT_ALL, "Disabled\n");
+		Com_Printf("Disabled\n");
 	}
 #endif
-
-	// ----
-
-	/* Big lightmaps: this used to be fast, but after the implementation of the "GL Buffer", it
-	 * became too evident that the bigger the texture, the slower the call to glTexSubImage2D() is.
-	 * Original logic remains, but it's preferable not to make it visible to the user.
-	 * Let's see if something changes in the future.
-	 */
-
-	gl_state.block_width = BLOCK_WIDTH;
-	gl_state.block_height = BLOCK_HEIGHT;
-	gl_state.max_lightmaps = MAX_LIGHTMAPS;
-	gl_state.scrap_width = BLOCK_WIDTH * 2;
-	gl_state.scrap_height = BLOCK_HEIGHT * 2;
 
 	// ----
 
@@ -1813,7 +1800,6 @@ RI_Shutdown(void)
 	ri.Cmd_RemoveCommand("gl_strings");
 
 	LM_FreeLightmapBuffers();
-	Scrap_Free();
 	Mod_FreeAll();
 
 	R_ShutdownImages();
@@ -1840,7 +1826,7 @@ RI_BeginFrame(float camera_separation)
 		}
 		else
 		{
-			R_Printf(PRINT_ALL, "stereo supermode changed, restarting video!\n");
+			Com_Printf("stereo supermode changed, restarting video!\n");
 			ri.Cmd_ExecuteText(EXEC_APPEND, "vid_restart\n");
 		}
 	}
@@ -1856,17 +1842,10 @@ RI_BeginFrame(float camera_separation)
 	{
 		int obb_val = (int)gl1_overbrightbits->value;
 
-		if (obb_val < 0)
-		{
-			obb_val = 0;
-		}
-		else if (obb_val == 3)
+		obb_val = Q_clamp(obb_val, 0, 4);
+		if (obb_val == 3)	// allowed values: 0,1,2,4
 		{
 			obb_val = 2;
-		}
-		else if (obb_val > 4)
-		{
-			obb_val = 4;
 		}
 
 		ri.Cvar_SetValue("gl1_overbrightbits", obb_val);
@@ -2003,9 +1982,9 @@ RI_SetPalette(const unsigned char *palette)
 	{
 		for (i = 0; i < 256; i++)
 		{
-			rp[i * 4 + 0] = palette[i * 3 + 0];
-			rp[i * 4 + 1] = palette[i * 3 + 1];
-			rp[i * 4 + 2] = palette[i * 3 + 2];
+			rp[i * 4 + 0] = gammatable[palette[i * 3 + 0]];
+			rp[i * 4 + 1] = gammatable[palette[i * 3 + 1]];
+			rp[i * 4 + 2] = gammatable[palette[i * 3 + 2]];
 			rp[i * 4 + 3] = 0xff;
 		}
 	}
@@ -2031,8 +2010,7 @@ RI_SetPalette(const unsigned char *palette)
 void
 R_DrawBeam(entity_t *e)
 {
-	int i;
-	float r, g, b;
+	int i, clr[4];
 
 	vec3_t perpvec;
 	vec3_t direction, normalized_direction;
@@ -2076,15 +2054,13 @@ R_DrawBeam(entity_t *e)
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 
-	r = (LittleLong(d_8to24table[e->skinnum & 0xFF])) & 0xFF;
-	g = (LittleLong(d_8to24table[e->skinnum & 0xFF]) >> 8) & 0xFF;
-	b = (LittleLong(d_8to24table[e->skinnum & 0xFF]) >> 16) & 0xFF;
+	clr[0] = (LittleLong(d_8to24table[e->skinnum & 0xFF])) & 0xFF;
+	clr[1] = (LittleLong(d_8to24table[e->skinnum & 0xFF]) >> 8) & 0xFF;
+	clr[2] = (LittleLong(d_8to24table[e->skinnum & 0xFF]) >> 16) & 0xFF;
+	clr[3] = e->alpha * 255;
 
-	r *= 1 / 255.0F;
-	g *= 1 / 255.0F;
-	b *= 1 / 255.0F;
-
-	glColor4f(r, g, b, e->alpha);
+	glColor4ub(gammatable[clr[0]], gammatable[clr[1]],
+		gammatable[clr[2]], clr[3]);
 
 	for ( i = 0; i < NUM_BEAM_SEGS; i++ )
 	{
@@ -2197,40 +2173,6 @@ GetRefAPI(refimport_t imp)
 	return re;
 }
 
-void R_Printf(int level, const char* msg, ...)
-{
-	va_list argptr;
-	va_start(argptr, msg);
-	ri.Com_VPrintf(level, msg, argptr);
-	va_end(argptr);
-}
-
-/*
- * this is only here so the functions in shared source files
- * (shared.c, rand.c, flash.c, mem.c/hunk.c) can link
- */
-void
-Sys_Error(const char *error, ...)
-{
-	va_list argptr;
-	char text[4096]; // MAXPRINTMSG == 4096
-
-	va_start(argptr, error);
-	vsnprintf(text, sizeof(text), error, argptr);
-	va_end(argptr);
-
-	ri.Sys_Error(ERR_FATAL, "%s", text);
-}
-
-void
-Com_Printf(const char *msg, ...)
-{
-	va_list argptr;
-	va_start(argptr, msg);
-	ri.Com_VPrintf(PRINT_ALL, msg, argptr);
-	va_end(argptr);
-}
-
 #ifdef DEBUG
 void
 glCheckError_(const char *file, const char *function, int line)
@@ -2252,7 +2194,7 @@ glCheckError_(const char *file, const char *function, int line)
 			MY_ERROR_CASE(GL_OUT_OF_MEMORY);
 			default: msg = "UNKNOWN";
 		}
-		R_Printf(PRINT_ALL, "glError: %s in %s (%s, %d)\n", msg, function, file, line);
+		Com_Printf("glError: %s in %s (%s, %d)\n", msg, function, file, line);
 	}
 
 #undef MY_ERROR_CASE

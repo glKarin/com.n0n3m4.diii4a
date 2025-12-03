@@ -665,7 +665,7 @@ image_destroy(ImageResource_t *img)
 }
 
 VkResult
-buffer_flush(BufferResource_t *buf)
+buffer_flush(const BufferResource_t *buf)
 {
 	VkResult result = VK_SUCCESS;
 
@@ -680,7 +680,7 @@ buffer_flush(BufferResource_t *buf)
 }
 
 VkResult
-buffer_invalidate(BufferResource_t *buf)
+buffer_invalidate(const BufferResource_t *buf)
 {
 	VkResult result = VK_SUCCESS;
 

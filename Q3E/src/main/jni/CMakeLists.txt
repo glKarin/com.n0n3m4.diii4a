@@ -137,7 +137,7 @@ if(GAME_QUAKE3) # https://github.com/ioquake/ioq3/commit/3fb9006e6461b877b67781c
     add_subdirectory ( quake3 ) # Quake 3 Arena | Team Arena
 endif()
 
-if(GAME_QUAKE2) # 8.51 | dc473a9830fd705430d2aef1f78f23d6777216a3 | May 11, 2025 | Bump version number to 8.51.
+if(GAME_QUAKE2) # 8.60 | 6b011734793e8e887cdea1afe2d2032a335fb20b | Sep 14, 2025 | Bump version number to 8.60.
     message(STATUS "Build Quake 2")
     add_subdirectory ( quake2 ) # Quake 2
 endif()

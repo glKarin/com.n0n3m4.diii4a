@@ -29,23 +29,25 @@
 image_t gltextures[MAX_GLTEXTURES];
 int numgltextures;
 static int image_max = 0;
-int base_textureid; /* gltextures[i] = base_textureid+i */
 extern qboolean scrap_dirty;
-extern byte *scrap_texels[MAX_SCRAPS];
+extern byte scrap_texels[MAX_SCRAPS][SCRAP_WIDTH * SCRAP_HEIGHT];
 
 static byte intensitytable[256];
-static unsigned char gammatable[256];
+unsigned char gammatable[256];
 
-cvar_t *intensity;
+static cvar_t *intensity;
 
 unsigned d_8to24table[256];
+
+extern cvar_t *gl1_minlight;
+extern unsigned char minlight[256];
 
 qboolean R_Upload8(byte *data, int width, int height,
 		qboolean mipmap, qboolean is_sky);
 qboolean R_Upload32(unsigned *data, int width, int height, qboolean mipmap);
 
-int gl_solid_format = GL_RGB;
-int gl_alpha_format = GL_RGBA;
+#define Q2_GL_SOLID_FORMAT GL_RGB
+#define Q2_GL_ALPHA_FORMAT GL_RGBA
 
 #ifdef YQ2_GL1_GLES
 #define DEFAULT_SOLID_FORMAT GL_RGBA
@@ -144,8 +146,8 @@ typedef struct
 		} \
 	}
 
-int upload_width, upload_height;
-qboolean uploaded_paletted;
+static int upload_width, upload_height;
+static qboolean uploaded_paletted;
 
 void
 R_SetTexturePalette(const unsigned palette[256])
@@ -284,7 +286,7 @@ R_TextureMode(const char *string)
 
 	if (i == NUM_GL_MODES)
 	{
-		R_Printf(PRINT_ALL, "bad filter name\n");
+		Com_Printf("bad filter name\n");
 		return;
 	}
 
@@ -374,7 +376,7 @@ R_TextureAlphaMode(const char *string)
 
 	if (i == NUM_GL_ALPHA_MODES)
 	{
-		R_Printf(PRINT_ALL, "bad alpha texture mode name\n");
+		Com_Printf("bad alpha texture mode name\n");
 		return;
 	}
 
@@ -396,7 +398,7 @@ R_TextureSolidMode(const char *string)
 
 	if (i == NUM_GL_SOLID_MODES)
 	{
-		R_Printf(PRINT_ALL, "bad solid texture mode name\n");
+		Com_Printf("bad solid texture mode name\n");
 		return;
 	}
 
@@ -414,7 +416,7 @@ R_ImageList_f(void)
 		"PAL"
 	};
 
-	R_Printf(PRINT_ALL, "------------------\n");
+	Com_Printf("------------------\n");
 	texels = 0;
 	used = 0;
 
@@ -438,33 +440,32 @@ R_ImageList_f(void)
 		switch (image->type)
 		{
 			case it_skin:
-				R_Printf(PRINT_ALL, "M");
+				Com_Printf("M");
 				break;
 			case it_sprite:
-				R_Printf(PRINT_ALL, "S");
+				Com_Printf("S");
 				break;
 			case it_wall:
-				R_Printf(PRINT_ALL, "W");
+				Com_Printf("W");
 				break;
 			case it_pic:
-				R_Printf(PRINT_ALL, "P");
+				Com_Printf("P");
 				break;
 			default:
-				R_Printf(PRINT_ALL, " ");
+				Com_Printf(" ");
 				break;
 		}
 
-		R_Printf(PRINT_ALL, " %3i %3i %s: %s (%dx%d) %s\n",
+		Com_Printf(" %3i %3i %s: %s (%dx%d) %s\n",
 				image->upload_width, image->upload_height,
 				palstrings[image->paletted], image->name,
 				image->width, image->height, in_use);
 	}
 
-	R_Printf(PRINT_ALL,
-			"Total texel count (not counting mipmaps): %i\n",
+	Com_Printf("Total texel count (not counting mipmaps): %i\n",
 			texels);
 	freeup = R_ImageHasFreeSpace();
-	R_Printf(PRINT_ALL, "Used %d of %d images%s.\n", used, image_max, freeup ? ", has free space" : "");
+	Com_Printf("Used %d of %d images%s.\n", used, image_max, freeup ? ", has free space" : "");
 }
 
 /*
@@ -635,7 +636,7 @@ R_Upload32Native(unsigned *data, int width, int height, qboolean mipmap)
 
 	c = width * height;
 	scan = ((byte *)data) + 3;
-	samples = gl_solid_format;
+	samples = Q2_GL_SOLID_FORMAT;
 	comp = gl_tex_solid_format;
 	upload_width = width;
 	upload_height = height;
@@ -646,7 +647,7 @@ R_Upload32Native(unsigned *data, int width, int height, qboolean mipmap)
 	{
 		if (*scan != 255)
 		{
-			samples = gl_alpha_format;
+			samples = Q2_GL_ALPHA_FORMAT;
 			comp = gl_tex_alpha_format;
 			break;
 		}
@@ -656,7 +657,7 @@ R_Upload32Native(unsigned *data, int width, int height, qboolean mipmap)
 			height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
 			data);
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, false);
-	return samples == gl_alpha_format;
+	return samples == Q2_GL_ALPHA_FORMAT;
 }
 
 
@@ -725,20 +726,20 @@ R_Upload32Soft(unsigned *data, int width, int height, qboolean mipmap)
 	if (scaled_width * scaled_height > sizeof(scaled) / 4)
 	{
 		// this can't really happen (because they're clamped to 256 above), but whatever
-		ri.Sys_Error(ERR_DROP, "R_Upload32: too big");
+		Com_Error(ERR_DROP, "%s: too big", __func__);
 	}
 
 	/* scan the texture for any non-255 alpha */
 	c = width * height;
 	scan = ((byte *)data) + 3;
-	samples = gl_solid_format;
+	samples = Q2_GL_SOLID_FORMAT;
 	comp = gl_tex_solid_format;
 
 	for (i = 0; i < c; i++, scan += 4)
 	{
 		if (*scan != 255)
 		{
-			samples = gl_alpha_format;
+			samples = Q2_GL_ALPHA_FORMAT;
 			comp = gl_tex_alpha_format;
 			break;
 		}
@@ -750,7 +751,7 @@ R_Upload32Soft(unsigned *data, int width, int height, qboolean mipmap)
 		{
 #if !defined(_GLES) //karin: not support color index on GLES 1.1
 			if (qglColorTableEXT && gl1_palettedtexture->value &&
-				(samples == gl_solid_format))
+				(samples == Q2_GL_SOLID_FORMAT))
 			{
 				uploaded_paletted = true;
 				R_BuildPalettedTexture(paletted_texture, (unsigned char *)data,
@@ -782,7 +783,7 @@ R_Upload32Soft(unsigned *data, int width, int height, qboolean mipmap)
 
 #if !defined(_GLES) //karin: not support color index on GLES 1.1
 	if (qglColorTableEXT && gl1_palettedtexture->value &&
-		(samples == gl_solid_format))
+		(samples == Q2_GL_SOLID_FORMAT))
 	{
 		uploaded_paletted = true;
 		R_BuildPalettedTexture(paletted_texture, (unsigned char *)scaled,
@@ -825,7 +826,7 @@ R_Upload32Soft(unsigned *data, int width, int height, qboolean mipmap)
 
 #if !defined(_GLES) //karin: not support color index on GLES 1.1
 			if (qglColorTableEXT && gl1_palettedtexture->value &&
-				(samples == gl_solid_format))
+				(samples == Q2_GL_SOLID_FORMAT))
 			{
 				uploaded_paletted = true;
 				R_BuildPalettedTexture(paletted_texture, (unsigned char *)scaled,
@@ -845,7 +846,7 @@ R_Upload32Soft(unsigned *data, int width, int height, qboolean mipmap)
 
 done:
 
-	return samples == gl_alpha_format;
+	return samples == Q2_GL_ALPHA_FORMAT;
 }
 
 qboolean
@@ -985,7 +986,7 @@ R_LoadPic(const char *name, byte *pic, int width, int realwidth,
 	{
 		if (numgltextures == MAX_GLTEXTURES)
 		{
-			ri.Sys_Error(ERR_DROP, "MAX_GLTEXTURES");
+			Com_Error(ERR_DROP, "%s: MAX_GLTEXTURES", __func__);
 		}
 
 		numgltextures++;
@@ -995,7 +996,7 @@ R_LoadPic(const char *name, byte *pic, int width, int realwidth,
 
 	if (strlen(name) >= sizeof(image->name))
 	{
-		ri.Sys_Error(ERR_DROP, "%s: \"%s\" is too long", __func__, name);
+		Com_Error(ERR_DROP, "%s: \"%s\" is too long", __func__, name);
 	}
 
 	strcpy(image->name, name);
@@ -1036,17 +1037,17 @@ R_LoadPic(const char *name, byte *pic, int width, int realwidth,
 
 			for (j = 0; j < image->width; j++, k++)
 			{
-				scrap_texels[texnum][(y + i) * gl_state.scrap_width + x + j] = pic[k];
+				scrap_texels[texnum][(y + i) * SCRAP_WIDTH + x + j] = pic[k];
 			}
 		}
 
 		image->texnum = TEXNUM_SCRAPS + texnum;
 		image->scrap = true;
 		image->has_alpha = true;
-		image->sl = (float)x / gl_state.scrap_width;
-		image->sh = (float)(x + image->width) / gl_state.scrap_width;
-		image->tl = (float)y / gl_state.scrap_height;
-		image->th = (float)(y + image->height) / gl_state.scrap_height;
+		image->sl = (float)x / SCRAP_WIDTH;
+		image->sh = (float)(x + image->width) / SCRAP_WIDTH;
+		image->tl = (float)y / SCRAP_HEIGHT;
+		image->th = (float)(y + image->height) / SCRAP_HEIGHT;
 	}
 	else
 	{
@@ -1108,7 +1109,7 @@ R_LoadPic(const char *name, byte *pic, int width, int realwidth,
 			}
 			else
 			{
-				R_Printf(PRINT_DEVELOPER,
+				Com_DPrintf(
 						"Warning, image '%s' has hi-res replacement smaller than the original! (%d x %d) < (%d x %d)\n",
 						name, image->width, image->height, realwidth, realheight);
 			}
@@ -1188,7 +1189,7 @@ R_FindImage(const char *name, imagetype_t type)
 
 	if (!image && r_validation->value)
 	{
-		R_Printf(PRINT_ALL, "%s: can't load %s\n", __func__, name);
+		Com_Printf("%s: can't load %s\n", __func__, name);
 	}
 
 	return image;
@@ -1270,6 +1271,14 @@ R_InitImages(void)
 {
 	byte *colormap;
 	int i;
+	float m;
+
+#ifdef GL1_GAMMATABLE
+	float	g = vid_gamma->value;
+#else
+	float	g = 1;
+#endif
+	g = Q_max(g, 0.1f);
 
 	registration_sequence = 1;
 	image_max = 0;
@@ -1282,7 +1291,8 @@ R_InitImages(void)
 		ri.Cvar_Set("gl1_intensity", "1");
 	}
 
-	gl_state.inverse_intensity = 1 / intensity->value;
+	gl_state.sw_gamma = g;
+	gl_state.inverse_intensity = g / intensity->value;
 
 	// FIXME: I think this is redundant - RI_Init() already calls that!
 	GetPCXPalette (&colormap, d_8to24table);
@@ -1294,14 +1304,31 @@ R_InitImages(void)
 
 		if (!gl_state.d_16to8table)
 		{
-			ri.Sys_Error(ERR_FATAL, "%s: Couldn't load pics/16to8.pcx",
+			Com_Error(ERR_FATAL, "%s: Couldn't load pics/16to8.pcx",
 				__func__);
 		}
 	}
 
-	for (i = 0; i < 256; i++)
+	if (g == 1)
 	{
-		gammatable[i] = i;
+		for (i = 0; i < 256; i++)
+		{
+			gammatable[i] = i;
+		}
+	}
+	else
+	{
+		g = 1.0f / g;
+
+		for (i = 0; i < 256; i++)
+		{
+			float inf;
+
+			inf = pow ( (float)(i + 0.5f) / 255.5f , g ) * 255.0f + 0.5f;
+			inf = Q_clamp(inf, 0, 255);
+
+			gammatable[i] = inf;
+		}
 	}
 
 	for (i = 0; i < 256; i++)
@@ -1309,13 +1336,32 @@ R_InitImages(void)
 		int j;
 
 		j = i * intensity->value;
-
-		if (j > 255)
-		{
-			j = 255;
-		}
+		j = Q_min(j, 255);
 
 		intensitytable[i] = j;
+	}
+
+	// I know, minimum light level's calculation is much simpler than gamma.
+	// But will still need a vid_restart to apply its values to currently loaded
+	// lightmaps. Also, memory is cheaper than CPU.
+	m = Q_clamp(gl1_minlight->value, 0, 255);
+	gl_state.minlight_set = (m != 0);
+
+	if (!gl_state.minlight_set)	// minlight == 0
+	{
+		for (i = 0; i < 256; i++)
+		{
+			minlight[i] = i;
+		}
+	}
+	else
+	{
+		for (i = 0; i < 256; i++)
+		{
+			float inf = (255.0f - m) * (float)i / 255.0f + m;
+			inf = Q_clamp(inf, 0, 255);
+			minlight[i] = inf;
+		}
 	}
 }
 

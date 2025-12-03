@@ -51,7 +51,6 @@ static menuframework_s s_opengl_menu;
 
 static menulist_s s_renderer_list;
 static menulist_s s_mode_list;
-static menulist_s s_display_list;
 static menulist_s s_uiscale_list;
 static menuslider_s s_brightness_slider;
 static menuslider_s s_fov_slider;
@@ -63,6 +62,7 @@ static menuslider_s s_gl1_overbrightbits_slider;
 static menuslider_s s_gl3_overbrightbits_slider;
 static menuslider_s s_gl4_overbrightbits_slider;
 static menuslider_s s_vk_overbrightbits_slider;
+static menuslider_s s_gl1_minlight_slider;
 static menulist_s s_gl3_colorlight_list;
 static menulist_s s_gl4_colorlight_list;
 static menulist_s s_vk_dynamic_list;
@@ -171,6 +171,67 @@ Renderer_GetRenderer(void)
 
 	// Unknown renderer.
 	return numrenderer;
+}
+
+// --------
+
+#define NUMMODES 33
+
+typedef struct
+{
+	int modenum;
+	char *modestr;
+} mode;
+
+// Sorted by string.
+mode modes[] = {
+	{ 0, "[320 240   ]" },
+	{ 1, "[400 300   ]" },
+	{ 2, "[512 384   ]" },
+	{ 3, "[640 400   ]" },
+	{ 4, "[640 480   ]" },
+	{ 5, "[800 500   ]" },
+	{ 6, "[800 600   ]" },
+	{ 7, "[960 720   ]" },
+	{ 8, "[1024 480  ]" },
+	{ 9, "[1024 640  ]" },
+	{ 10, "[1024 768  ]" },
+	{ 11, "[1152 768  ]" },
+	{ 12, "[1152 864  ]" },
+	{ 13, "[1280 800  ]" },
+	{ 14, "[1280 720  ]" },
+	{ 15, "[1280 960  ]" },
+	{ 16, "[1280 1024 ]" },
+	{ 17, "[1366 768  ]" },
+	{ 18, "[1440 900  ]" },
+	{ 32, "[1600 900  ]" },
+	{ 19, "[1600 1200 ]" },
+	{ 20, "[1680 1050 ]" },
+	{ 21, "[1920 1080 ]" },
+	{ 22, "[1920 1200 ]" },
+	{ 23, "[2048 1536 ]" },
+	{ 24, "[2560 1080 ]" },
+	{ 25, "[2560 1440 ]" },
+	{ 26, "[2560 1600 ]" },
+	{ 27, "[3440 1440 ]" },
+	{ 28, "[3840 1600 ]" },
+	{ 29, "[3840 2160 ]" },
+	{ 30, "[4096 2160 ]" },
+	{ 31, "[5120 2880 ]" }
+};
+
+static int
+GetModePos(int modenum)
+{
+	for (int i = 0; i < sizeof(modes) / sizeof(*modes); i++)
+	{
+		if (modes[i].modenum == modenum)
+		{
+			return i;
+		}
+	}
+
+	return 3;
 }
 
 // --------
@@ -285,27 +346,20 @@ ApplyChanges(void *unused)
 	}
 
 	/* auto mode */
-	if (!strcmp(s_mode_list.itemnames[s_mode_list.curvalue],
-		AUTO_MODE_NAME))
+
+	if (strcmp(s_mode_list.itemnames[s_mode_list.curvalue], AUTO_MODE_NAME) == 0)
 	{
 		Cvar_SetValue("r_mode", -2);
 		restart = true;
 	}
-	else if (!strcmp(s_mode_list.itemnames[s_mode_list.curvalue],
-		CUSTOM_MODE_NAME))
+	else if (strcmp(s_mode_list.itemnames[s_mode_list.curvalue], CUSTOM_MODE_NAME) == 0)
 	{
 		Cvar_SetValue("r_mode", -1);
 		restart = true;
 	}
 	else
 	{
-		Cvar_SetValue("r_mode", s_mode_list.curvalue);
-		restart = true;
-	}
-
-	if (s_display_list.curvalue != GLimp_GetWindowDisplayIndex() )
-	{
-		Cvar_SetValue( "vid_displayindex", s_display_list.curvalue );
+		Cvar_SetValue("r_mode", modes[s_mode_list.curvalue].modenum);
 		restart = true;
 	}
 
@@ -394,6 +448,25 @@ ApplyChanges(void *unused)
 	M_ForceMenuOff();
 }
 
+static void
+RestartNeededSDL3Msg(void *unused)
+{
+	if (
+#ifdef USE_SDL3
+		Q_stricmp(vid_renderer->string, "gl1") == 0 ||
+#endif
+		Q_stricmp(vid_renderer->string, "gles1") == 0 )
+	{
+		Menu_SetStatusBar(&s_opengl_menu, "apply required");
+	}
+}
+
+static void
+RestartNeededForAllMsg(void *unused)
+{
+	Menu_SetStatusBar(&s_opengl_menu, "apply required");
+}
+
 void
 VID_MenuInit(void)
 {
@@ -411,45 +484,17 @@ VID_MenuInit(void)
 
 	renderers[numrenderer] = CUSTOM_MODE_NAME;
 
-	// must be kept in sync with vid_modes[] in vid.c
-	static const char *resolutions[] = {
-		"[320 240   ]",
-		"[400 300   ]",
-		"[512 384   ]",
-		"[640 400   ]",
-		"[640 480   ]",
-		"[800 500   ]",
-		"[800 600   ]",
-		"[960 720   ]",
-		"[1024 480  ]",
-		"[1024 640  ]",
-		"[1024 768  ]",
-		"[1152 768  ]",
-		"[1152 864  ]",
-		"[1280 800  ]",
-		"[1280 720  ]",
-		"[1280 960  ]",
-		"[1280 1024 ]",
-		"[1366 768  ]",
-		"[1440 900  ]",
-		"[1600 1200 ]",
-		"[1680 1050 ]",
-		"[1920 1080 ]",
-		"[1920 1200 ]",
-		"[2048 1536 ]",
-		"[2560 1080 ]",
-		"[2560 1440 ]",
-		"[2560 1600 ]",
-		"[3440 1440 ]",
-		"[3840 1600 ]",
-		"[3840 2160 ]",
-		"[4096 2160 ]",
-		"[5120 2880 ]",
-		"[1600 900  ]",
-		AUTO_MODE_NAME,
-		CUSTOM_MODE_NAME,
-		0
-	};
+	// Generate mode list.
+	static const char *resolutions[NUMMODES + 3];
+
+	for (int i = 0; i < NUMMODES; i++)
+	{
+		resolutions[i] = modes[i].modestr;
+	}
+
+	resolutions[NUMMODES] = AUTO_MODE_NAME;
+	resolutions[NUMMODES + 1] = CUSTOM_MODE_NAME;
+	resolutions[NUMMODES + 2] = NULL;
 
 	const renderer_type current_renderer = CurrentRendererByCvar();
 
@@ -470,7 +515,7 @@ VID_MenuInit(void)
 		"on",
 		0
 	};
-	
+
 	static const char *yesno_names[] = {
 		"no",
 		"yes",
@@ -569,7 +614,7 @@ VID_MenuInit(void)
 
 	if (r_mode->value >= 0)
 	{
-		s_mode_list.curvalue = r_mode->value;
+		s_mode_list.curvalue = GetModePos(r_mode->value);
 	}
 	else if (r_mode->value == -2)
 	{
@@ -582,20 +627,11 @@ VID_MenuInit(void)
 		s_mode_list.curvalue = GetCustomValue(&s_mode_list);
 	}
 
-	if (GLimp_GetNumVideoDisplays() > 1)
-	{
-		s_display_list.generic.type = MTYPE_SPINCONTROL;
-		s_display_list.generic.name = "display index";
-		s_display_list.generic.x = 0;
-		s_display_list.generic.y = (y += 10);
-		s_display_list.itemnames = GLimp_GetDisplayIndices();
-		s_display_list.curvalue = GLimp_GetWindowDisplayIndex();
-	}
-
 	s_brightness_slider.generic.type = MTYPE_SLIDER;
 	s_brightness_slider.generic.name = "brightness";
 	s_brightness_slider.generic.x = 0;
 	s_brightness_slider.generic.y = (y += 10);
+	s_brightness_slider.generic.callback = RestartNeededSDL3Msg;
 	s_brightness_slider.cvar = "vid_gamma";
 	s_brightness_slider.minvalue = 0.1f;
 	s_brightness_slider.maxvalue = 2.0f;
@@ -698,6 +734,7 @@ VID_MenuInit(void)
 			s_gl1_intensity_slider.generic.name = "color intensity";
 			s_gl1_intensity_slider.generic.x = 0;
 			s_gl1_intensity_slider.generic.y = (y += 10);
+			s_gl1_intensity_slider.generic.callback = RestartNeededForAllMsg;
 			s_gl1_intensity_slider.cvar = "gl1_intensity";
 			s_gl1_intensity_slider.minvalue = 1.0f;
 			s_gl1_intensity_slider.maxvalue = 10.0f;
@@ -711,6 +748,17 @@ VID_MenuInit(void)
 			s_gl1_overbrightbits_slider.maxvalue = 2;
 			s_gl1_overbrightbits_slider.slidestep = 1;
 			s_gl1_overbrightbits_slider.printformat = "%.0f";
+
+			s_gl1_minlight_slider.generic.type = MTYPE_SLIDER;
+			s_gl1_minlight_slider.generic.name = "min. light level";
+			s_gl1_minlight_slider.generic.x = 0;
+			s_gl1_minlight_slider.generic.y = (y += 10);
+			s_gl1_minlight_slider.generic.callback = RestartNeededForAllMsg;
+			s_gl1_minlight_slider.cvar = "gl1_minlight";
+			s_gl1_minlight_slider.minvalue = 0;
+			s_gl1_minlight_slider.maxvalue = 32;
+			s_gl1_minlight_slider.slidestep = 4;
+			s_gl1_minlight_slider.printformat = "%.0f";
 			break;
 
 		default:
@@ -788,7 +836,7 @@ VID_MenuInit(void)
 				pow(2, s_msaa_list.curvalue) <= gl_msaa_samples->value);
 		s_msaa_list.curvalue--;
 	}
-	
+
 	s_filter_list.generic.type = MTYPE_SPINCONTROL;
 	s_filter_list.generic.name = "texture filter";
 	s_filter_list.curvalue = 0;
@@ -856,12 +904,6 @@ VID_MenuInit(void)
 	Menu_AddItem(&s_opengl_menu, (void *)&s_renderer_list);
 	Menu_AddItem(&s_opengl_menu, (void *)&s_mode_list);
 
-	// only show this option if we have multiple displays
-	if (GLimp_GetNumVideoDisplays() > 1)
-	{
-		Menu_AddItem(&s_opengl_menu, (void *)&s_display_list);
-	}
-
 	Menu_AddItem(&s_opengl_menu, (void *)&s_brightness_slider);
 	Menu_AddItem(&s_opengl_menu, (void *)&s_fov_slider);
 	switch (current_renderer)
@@ -884,6 +926,7 @@ VID_MenuInit(void)
 		case ref_gl1:
 			Menu_AddItem(&s_opengl_menu, (void *)&s_gl1_intensity_slider);
 			Menu_AddItem(&s_opengl_menu, (void *)&s_gl1_overbrightbits_slider);
+			Menu_AddItem(&s_opengl_menu, (void *)&s_gl1_minlight_slider);
 			break;
 		default:
 			break;
@@ -900,6 +943,7 @@ VID_MenuInit(void)
 	Menu_AddItem(&s_opengl_menu, (void *)&s_defaults_action);
 	Menu_AddItem(&s_opengl_menu, (void *)&s_apply_action);
 
+	Menu_SetStatusBar(&s_opengl_menu, NULL);
 	Menu_Center(&s_opengl_menu);
 	s_opengl_menu.x -= 8;
 }
@@ -965,11 +1009,9 @@ VID_MenuKey(int key)
 void
 M_Menu_Video_f(void)
 {
-    VID_MenuInit();
-    s_opengl_menu.draw = VID_MenuDraw;
-    s_opengl_menu.key  = VID_MenuKey;
+	VID_MenuInit();
+	s_opengl_menu.draw = VID_MenuDraw;
+	s_opengl_menu.key  = VID_MenuKey;
 
-    M_PushMenu(&s_opengl_menu);
+	M_PushMenu(&s_opengl_menu);
 }
-
-

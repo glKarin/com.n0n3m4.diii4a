@@ -545,12 +545,11 @@ R_ClipPolyFace (int nump, clipplane_t *pclipplane)
 		dists[i] = DotProduct (instep, pclipnormal) - clipdist;
 	}
 
-	// handle wraparound case
+	/* handle wraparound case */
 	dists[nump] = dists[0];
-	memcpy (instep, in, sizeof (vec5_t));
+	memmove(instep, in, sizeof (vec5_t));
 
-
-	// clip the winding
+	/* clip the winding */
 	instep = in;
 	outcount = 0;
 
@@ -989,7 +988,7 @@ R_ClipAndDrawPoly ( float alpha, int isturbulent, qboolean textured )
 			return;
 		if (nump > MAXWORKINGVERTS)
 		{
-			ri.Sys_Error(ERR_DROP, "%s: too many points: %d", __func__, nump);
+			Com_Error(ERR_DROP, "%s: too many points: %d", __func__, nump);
 		}
 	}
 

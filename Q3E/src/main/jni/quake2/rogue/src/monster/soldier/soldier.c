@@ -724,6 +724,11 @@ soldier_fire(edict_t *self, int in_flash_number)
 
 			if (angle < 0.9)  /* ~25 degree angle */
 			{
+				if (level.time >= self->wait)
+				{
+					self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
+				}
+
 				return;
 			}
 		}
@@ -756,6 +761,11 @@ soldier_fire(edict_t *self, int in_flash_number)
 
 		if ((tr.ent != self->enemy) && (tr.ent != world))
 		{
+			if (level.time >= self->wait)
+			{
+				self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
+			}
+
 			return;
 		}
 	}

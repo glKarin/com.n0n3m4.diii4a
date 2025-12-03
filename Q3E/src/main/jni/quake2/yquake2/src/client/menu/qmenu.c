@@ -217,8 +217,6 @@ Field_ResetCursor(menuframework_s *m)
 	}
 }
 
-extern int keydown[];
-
 qboolean
 Field_Key(menufield_s *f, int key)
 {
@@ -777,7 +775,7 @@ SpinControl_Draw(menulist_s *s)
 	}
 	else
 	{
-		strcpy(buffer, s->itemnames[s->curvalue]);
+		Q_strlcpy(buffer, s->itemnames[s->curvalue], sizeof(buffer));
 		*strchr(buffer, '\n') = 0;
 		Menu_DrawString(x + (RCOLUMN_OFFSET * scale),
 			y, buffer);

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.22 FATAL_ERROR)
 
 # Print a message that using the Makefiles is recommended.
 message(NOTICE: " The CMakeLists.txt is unmaintained. Use the Makefile if possible.")
@@ -414,6 +414,7 @@ set(Client-Source
 	${CLIENT_SRC_DIR}/cl_view.c
 	${CLIENT_SRC_DIR}/curl/download.c
 	${CLIENT_SRC_DIR}/curl/qcurl.c
+	${CLIENT_SRC_DIR}/input/gyro.c
 	${CLIENT_SRC_DIR}/menu/menu.c
 	${CLIENT_SRC_DIR}/menu/qmenu.c
 	${CLIENT_SRC_DIR}/menu/videomenu.c
@@ -471,6 +472,7 @@ set(Client-Header
 	${CLIENT_SRC_DIR}/header/screen.h
 	${CLIENT_SRC_DIR}/curl/header/download.h
 	${CLIENT_SRC_DIR}/curl/header/qcurl.h
+	${CLIENT_SRC_DIR}/input/header/gyro.h
 	${CLIENT_SRC_DIR}/input/header/input.h
 	${CLIENT_SRC_DIR}/menu/header/qmenu.h
 	${CLIENT_SRC_DIR}/sound/header/local.h
@@ -562,6 +564,7 @@ set(GL1-Source
 	${REF_SRC_DIR}/gl1/gl1_warp.c
 	${BACKENDS_SRC_DIR}/android/gles.c
 	${REF_SRC_DIR}/gl1/gl1_buffer.c
+	${REF_SRC_DIR}/files/common.c
 	${REF_SRC_DIR}/files/models.c
 	${REF_SRC_DIR}/files/pcx.c
 	${REF_SRC_DIR}/files/stb.c
@@ -605,6 +608,7 @@ set(GL3-Source
 		${REF_SRC_DIR}/gl3/gl3_surf.c
 		${REF_SRC_DIR}/gl3/gl3_warp.c
 		${REF_SRC_DIR}/gl3/gl3_shaders.c
+		${REF_SRC_DIR}/files/common.c
 		${REF_SRC_DIR}/files/models.c
 		${REF_SRC_DIR}/files/pcx.c
 		${REF_SRC_DIR}/files/stb.c

@@ -1,3 +1,10 @@
+Three Wave Capture The Flag 1.11 to 1.12
+- Fix mod incompatibilities when Yamagi Quake II is complied in C23
+  mode.
+
+Three Wave Capture The Flag 1.10 to 1.11
+- Fix build in C23 mode.
+
 Three Wave Capture The Flag 1.09 to 1.10
 - Fix build on ARM Macs.
 

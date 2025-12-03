@@ -31,7 +31,6 @@
 
 // Not exported by default but not static
 float Q_fabs(float f);
-int BoxOnPlaneSide2(vec3_t emins, vec3_t emaxs, struct cplane_s *p);
 short ShortSwap(short l);
 short ShortNoSwap(short l);
 int LongSwap(int l);

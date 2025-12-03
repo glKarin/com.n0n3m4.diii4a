@@ -47,13 +47,14 @@ void S_StopAllSounds(void);
 void S_Update(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up);
 void S_Activate(qboolean active);
 void S_BeginRegistration(void);
-struct sfx_s *S_RegisterSound(char *name);
+struct sfx_s *S_RegisterSound(const char *name);
 void S_EndRegistration(void);
 
 /* the sound code makes callbacks to the client for
    entitiy position information, so entities can be
    dynamically re-spatialized */
-void CL_GetEntitySoundOrigin(int ent, vec3_t org);
+void GetEntitySoundOrigin(int ent, const vec3_t listener_org, vec3_t org);
+qboolean GetBSPEntitySoundOrigin(int ent, const vec3_t listener_org, vec3_t org);
 void CL_GetEntitySoundVelocity(int ent, vec3_t vel);
 void CL_GetViewVelocity(vec3_t vel);
 

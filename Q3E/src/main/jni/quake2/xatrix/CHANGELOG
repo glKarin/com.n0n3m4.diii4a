@@ -1,3 +1,21 @@
+The Reckoning 2.15 to 2.16:
+- Fix monsters acting confused while following combat points. (by
+  BjossiAlfreds)
+
+The Reckoning 2.14 to 2.15:
+- Fix savegame and mod incompatibilities when Yamagi Quake II is
+  complied in C23 mode. With this fix applied savegames written by
+  unfixed binaries will crash the client. It is advised to complete
+  the current run before upgrading. The official Windows binaries
+  were not affected by this problem. Other platforms mostly if
+  they build the binaries with GCC 15 which enables C23 mode by
+  default.
+
+The Reckoning 2.13 to 2.14:
+- Add weapon preview to the `cycleweap` command (by protocultor)
+- Fix leaking temporary spawnflags into entities spawned mid-level. (by
+  BjossiAlfreds)
+
 The Reckoning 2.12 to 2.13:
 - Implement `g_quick_weap`. If set to 1, both weapprev and weapnext
   commands will count how many times they have been called, making

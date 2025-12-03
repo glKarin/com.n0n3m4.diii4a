@@ -296,7 +296,6 @@ extern	cvar_t	*cl_showclamp;
 extern	cvar_t	*lookstrafe;
 extern	cvar_t	*joy_layout;
 extern	cvar_t	*gyro_mode;
-extern	cvar_t	*gyro_turning_axis;
 extern	cvar_t	*m_pitch;
 extern	cvar_t	*m_yaw;
 extern	cvar_t	*m_forward;
@@ -390,6 +389,7 @@ typedef struct particle_s
 
 void CL_ClearEffects (void);
 void CL_ClearTEnts (void);
+void CL_ClearTEntModels (void);
 void CL_BlasterTrail (vec3_t start, vec3_t end);
 void CL_QuadTrail (vec3_t start, vec3_t end);
 void CL_RailTrail (vec3_t start, vec3_t end);
@@ -437,6 +437,8 @@ void CL_AddEntities (void);
 void CL_AddDLights (void);
 void CL_AddTEnts (void);
 void CL_AddLightStyles (void);
+struct sfx_s *CL_RandomFootstepSfx (void);
+struct model_s *CL_PowerScreenModel (void);
 
 void CL_PrepRefresh (void);
 void CL_RegisterSounds (void);
@@ -499,9 +501,9 @@ float CL_KeyState (kbutton_t *key);
 char *Key_KeynumToString (int keynum);
 char *Key_KeynumToString_Joy (int key);
 
+int CL_MaxClients(void);
 void CL_WriteDemoMessage (void);
 void CL_Stop_f (void);
-void CL_Record_f (void);
 
 void CL_ParseServerMessage (void);
 void CL_LoadClientinfo (clientinfo_t *ci, char *s);
