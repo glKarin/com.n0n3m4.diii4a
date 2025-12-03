@@ -60,7 +60,7 @@ void idRenderModelMD3::InitFromFile(const char *fileName)
 	md3St_t				*st;
 	md3XyzNormal_t		*xyz;
 	md3Tag_t			*tag;
-	void				*buffer;
+	void				*buffer = NULL;
 	int					version;
 	int					size;
 
@@ -70,8 +70,11 @@ void idRenderModelMD3::InitFromFile(const char *fileName)
 	size = fileSystem->ReadFile(fileName, &buffer, NULL);
 
 	//64 if (!size || size<0)
-	if ( size <= sizeof(md3Header_t) )
+	if ( size <= (int)sizeof(md3Header_t) )
 	{
+        if (buffer != NULL)
+            fileSystem->FreeFile( buffer );
+        MakeDefaultModel();
 		return;
 	}
 
@@ -83,6 +86,7 @@ void idRenderModelMD3::InitFromFile(const char *fileName)
 		fileSystem->FreeFile(buffer);
 		common->Warning("InitFromFile: %s has wrong version (%i should be %i)",
 		                fileName, version, MD3_VERSION);
+        MakeDefaultModel();
 		return;
 	}
 
@@ -105,6 +109,7 @@ void idRenderModelMD3::InitFromFile(const char *fileName)
 	if (md3->numFrames < 1) {
 		common->Warning("InitFromFile: %s has no frames", fileName);
 		fileSystem->FreeFile(buffer);
+        MakeDefaultModel();
 		return;
 	}
 
@@ -187,7 +192,7 @@ void idRenderModelMD3::InitFromFile(const char *fileName)
 			sh = declManager->FindMaterial(shader->name);
 			shader->shader = sh;*/
             const idMaterial *sh = declManager->FindMaterial( shader->name );
-            // DG: md3Shadder_t must use an index to the material instead of a pointer,
+            // DG: md3Shader_t must use an index to the material instead of a pointer,
             //     otherwise the sizes are wrong on 64bit and we get data corruption
             shader->shaderIndex = (sh != NULL) ? shaders.AddUnique( sh ) : -1;
 		}
