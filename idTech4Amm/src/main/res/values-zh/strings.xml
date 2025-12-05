@@ -121,7 +121,7 @@
     <string name="toggle_key">切换键</string>
     <string name="touch_type">触摸方式</string>
     <string name="slider_type">滑动方式</string>
-    <string name="key">键码</string>
+    <string name="key_1">键码</string>
     <string name="key_2">键码2</string>
     <string name="key_3">键码3</string>
     <string name="screen">屏幕</string>
@@ -555,4 +555,11 @@
     <string name="use_custom_resolution_as_fullscreen_size">使用自定义分辨率大小作为屏幕总大小</string>
     <string name="openmohaa">OpenMOHAA</string>
     <string name="openmohaa_base">荣誉勋章: 联合袭击</string>
+    <string name="video">图像</string>
+    <string name="virtual_joystick">虚拟摇杆</string>
+    <string name="touch">触控</string>
+    <string name="sensor">传感器</string>
+    <string name="mouse">鼠标</string>
+    <string name="key">按键</string>
+    <string name="configure">配置</string>
 </resources>

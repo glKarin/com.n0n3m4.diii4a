@@ -12,11 +12,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- game data -->
         <LinearLayout
             android:id="@+id/gamedata_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@drawable/layout_border"
+            android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -86,7 +89,6 @@
                 android:visibility="gone"
                 />-->
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -139,7 +141,9 @@
             android:id="@+id/gamemod_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@drawable/layout_border"
+            android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
 
             <com.karin.idTech4Amm.widget.Divider
                 android:layout_width="match_parent"
@@ -255,7 +259,9 @@
             android:id="@+id/gameversion_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@drawable/layout_border"
+            android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
 
             <com.karin.idTech4Amm.widget.Divider
                 android:id="@+id/gameversion_label"
@@ -301,521 +307,561 @@
                 android:orientation="vertical">
 
                 <!-- Lighting -->
-                <com.karin.idTech4Amm.widget.Divider
+                <LinearLayout
+                    android:id="@+id/lighting_section"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    myapp:label="@string/lighting"
-                    myapp:lineColor="@color/launcher_divider_color" />
+                    android:orientation="vertical"
+                    android:background="@drawable/layout_border"
+                    android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:layout_marginBottom="1dp"
-                    android:text="@string/light_model_cvar_harm_r_lightmodel" />
+                    <com.karin.idTech4Amm.widget.Divider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        myapp:label="@string/lighting"
+                        myapp:lineColor="@color/launcher_divider_color" />
 
-                <RadioGroup
-                    android:id="@+id/rg_harm_r_lightingModel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <RadioButton
-                        android:id="@+id/harm_r_lightModel_phong"
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/phong" />
+                        android:layout_marginTop="1dp"
+                        android:layout_marginBottom="1dp"
+                        android:text="@string/light_model_cvar_harm_r_lightmodel" />
 
-                    <RadioButton
-                        android:id="@+id/harm_r_lightModel_blinn_phong"
+                    <RadioGroup
+                        android:id="@+id/rg_harm_r_lightingModel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/blinn_phong" />
+                        android:orientation="vertical">
 
-                    <RadioButton
-                        android:id="@+id/harm_r_lightModel_pbr"
+                        <RadioButton
+                            android:id="@+id/harm_r_lightModel_phong"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/phong" />
+
+                        <RadioButton
+                            android:id="@+id/harm_r_lightModel_blinn_phong"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/blinn_phong" />
+
+                        <RadioButton
+                            android:id="@+id/harm_r_lightModel_pbr"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/pbr" />
+
+                        <RadioButton
+                            android:id="@+id/harm_r_lightModel_ambient"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ambient" />
+
+                        <RadioButton
+                            android:id="@+id/harm_r_lightModel_nolighting"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/nolighting" />
+
+                    </RadioGroup>
+
+                    <LinearLayout
+                        android:id="@+id/launcher_layout_specular_exponent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/specular_exponent_cvar_harm_r_specularexponent" />
+
+                        <EditText
+                            android:id="@+id/edt_harm_r_specularExponent"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/specular_exponent_in_interaction_light_model_default_is_4_0"
+                            android:imeOptions="flagNoExtractUi"
+                            android:inputType="numberDecimal|textNoSuggestions"
+                            android:text="3.0" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/launcher_layout_specular_exponent_blinnphong"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/blinnphong_specular_exponent_cvar_harm_r_specularexponentblinnphong" />
+
+                        <EditText
+                            android:id="@+id/edt_harm_r_specularExponentBlinnPhong"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/blinnphong_specular_exponent"
+                            android:imeOptions="flagNoExtractUi"
+                            android:inputType="numberDecimal|textNoSuggestions"
+                            android:text="12.0" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/launcher_layout_specular_exponent_pbr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/blinnphong_specular_exponent_cvar_harm_r_specularexponentpbr" />
+
+                        <EditText
+                            android:id="@+id/edt_harm_r_specularExponentPBR"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/pbr_specular_exponent"
+                            android:imeOptions="flagNoExtractUi"
+                            android:inputType="numberDecimal|textNoSuggestions"
+                            android:text="1.0" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/launcher_layout_PBRNormalCorrection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/pbr_normal_correction_surface_smoothness" />
+
+                        <EditText
+                            android:id="@+id/edt_harm_r_PBRNormalCorrection"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="0.0 - 1.0"
+                            android:imeOptions="flagNoExtractUi"
+                            android:inputType="numberDecimal|textNoSuggestions"
+                            android:text="0.25" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/launcher_layout_ambient_lighting_brightness"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/ambient_lighting_brightness_harm_r_ambientlightingbrightness" />
+
+                        <EditText
+                            android:id="@+id/edt_harm_r_ambientLightingBrightness"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/ambient_lighting_brightness"
+                            android:imeOptions="flagNoExtractUi"
+                            android:inputType="numberDecimal|textNoSuggestions"
+                            android:text="1.0" />
+                    </LinearLayout>
+
+                    <CheckBox
+                        android:id="@+id/cb_r_globalIllumination"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/pbr" />
+                        android:text="@string/render_global_illumination_harm_r_globalillumination" />
 
-                    <RadioButton
-                        android:id="@+id/harm_r_lightModel_ambient"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/global_illumination_brightness_harm_r_globalIlluminationBrightness" />
+
+                        <EditText
+                            android:id="@+id/edt_r_globalIlluminationBrightness"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/global_illumination_brightness"
+                            android:imeOptions="flagNoExtractUi"
+                            android:inputType="numberDecimal|textNoSuggestions"
+                            android:text="0.5" />
+                    </LinearLayout>
+
+                    <CheckBox
+                        android:id="@+id/nolight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/ambient" />
+                        android:text="@string/disable_lighting" />
 
-                    <RadioButton
-                        android:id="@+id/harm_r_lightModel_nolighting"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/nolighting" />
-
-                </RadioGroup>
-
-                <LinearLayout
-                    android:id="@+id/launcher_layout_specular_exponent"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/specular_exponent_cvar_harm_r_specularexponent" />
-
-                    <EditText
-                        android:id="@+id/edt_harm_r_specularExponent"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="@string/specular_exponent_in_interaction_light_model_default_is_4_0"
-                        android:imeOptions="flagNoExtractUi"
-                        android:inputType="numberDecimal|textNoSuggestions"
-                        android:text="3.0" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/launcher_layout_specular_exponent_blinnphong"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/blinnphong_specular_exponent_cvar_harm_r_specularexponentblinnphong" />
-
-                    <EditText
-                        android:id="@+id/edt_harm_r_specularExponentBlinnPhong"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="@string/blinnphong_specular_exponent"
-                        android:imeOptions="flagNoExtractUi"
-                        android:inputType="numberDecimal|textNoSuggestions"
-                        android:text="12.0" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/launcher_layout_specular_exponent_pbr"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/blinnphong_specular_exponent_cvar_harm_r_specularexponentpbr" />
-
-                    <EditText
-                        android:id="@+id/edt_harm_r_specularExponentPBR"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="@string/pbr_specular_exponent"
-                        android:imeOptions="flagNoExtractUi"
-                        android:inputType="numberDecimal|textNoSuggestions"
-                        android:text="1.0" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/launcher_layout_PBRNormalCorrection"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/pbr_normal_correction_surface_smoothness" />
-
-                    <EditText
-                        android:id="@+id/edt_harm_r_PBRNormalCorrection"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="0.0 - 1.0"
-                        android:imeOptions="flagNoExtractUi"
-                        android:inputType="numberDecimal|textNoSuggestions"
-                        android:text="0.25" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/launcher_layout_ambient_lighting_brightness"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/ambient_lighting_brightness_harm_r_ambientlightingbrightness" />
-
-                    <EditText
-                        android:id="@+id/edt_harm_r_ambientLightingBrightness"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="@string/ambient_lighting_brightness"
-                        android:imeOptions="flagNoExtractUi"
-                        android:inputType="numberDecimal|textNoSuggestions"
-                        android:text="1.0" />
-                </LinearLayout>
-
-                <CheckBox
-                    android:id="@+id/cb_r_globalIllumination"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/render_global_illumination_harm_r_globalillumination" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/global_illumination_brightness_harm_r_globalIlluminationBrightness" />
-
-                    <EditText
-                        android:id="@+id/edt_r_globalIlluminationBrightness"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="@string/global_illumination_brightness"
-                        android:imeOptions="flagNoExtractUi"
-                        android:inputType="numberDecimal|textNoSuggestions"
-                        android:text="0.5" />
-                </LinearLayout>
-
-                <CheckBox
-                    android:id="@+id/nolight"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/disable_lighting" />
+                </LinearLayout> <!-- end idTech4::renderer::lighting section -->
 
                 <!-- Shadow -->
-                <com.karin.idTech4Amm.widget.Divider
+                <LinearLayout
+                    android:id="@+id/shadow_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/layout_border"
+                    android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+
+                    <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     myapp:label="@string/shadow"
                     myapp:lineColor="@color/launcher_divider_color" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:layout_marginBottom="1dp"
-                    android:text="@string/shadow_cvar_r_useShadowMapping" />
-
-                <RadioGroup
-                    android:id="@+id/rg_harm_r_shadow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rg_harm_r_shadow_stencil_volume"
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/stencil_shadow" />
+                        android:layout_marginTop="1dp"
+                        android:layout_marginBottom="1dp"
+                        android:text="@string/shadow_cvar_r_useShadowMapping" />
 
-                    <RadioButton
-                        android:id="@+id/rg_harm_r_shadow_mapping"
+                    <RadioGroup
+                        android:id="@+id/rg_harm_r_shadow"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/shadow_mapping" />
-                </RadioGroup>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/shadow_mapping"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:id="@+id/launcher_layout_shadowMapAlpha"
-                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:text="@string/shadow_mapping_alpha_harm_r_shadowmapalpha" />
-
-                        <EditText
-                            android:id="@+id/edt_harm_r_shadowMapAlpha"
-                            android:layout_width="80dp"
-                            android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:hint="@string/_0_1_default_0_5"
-                            android:imeOptions="flagNoExtractUi"
-                            android:inputType="numberDecimal|textNoSuggestions"
-                            android:text="1.0" />
-                    </LinearLayout>
-
-                    <CheckBox
-                        android:id="@+id/cb_perforatedShadow"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/render_perforated_material_shadow_r_forceshadowmapsonalphatestedsurfaces" />
-
-                    <CheckBox
-                            android:id="@+id/cb_shadowMapCombine"
+                        <RadioButton
+                            android:id="@+id/rg_harm_r_shadow_stencil_volume"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:checked="true"
-                            android:text="@string/combine_shadow_mapping_harm_r_shadowmapcombine" />
-                </LinearLayout>
+                            android:text="@string/stencil_shadow" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/stencil_shadow"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                        <RadioButton
+                            android:id="@+id/rg_harm_r_shadow_mapping"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/shadow_mapping" />
+                    </RadioGroup>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:orientation="vertical">
-
-                    <CheckBox
-                        android:id="@+id/cb_stencilShadowSoft"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft" />
-
-                    <CheckBox
-                        android:id="@+id/cb_stencilShadowTranslucent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/translucent_stencil_shadow" />
-
-                    <LinearLayout
-                        android:id="@+id/launcher_layout_stencilShadowAlpha"
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:text="@string/shadow_mapping"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:text="@string/stencil_shadow_alpha_harm_r_stencilshadowalpha" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:orientation="vertical">
 
-                        <EditText
-                            android:id="@+id/edt_harm_r_stencilShadowAlpha"
-                            android:layout_width="80dp"
+                        <LinearLayout
+                            android:id="@+id/launcher_layout_shadowMapAlpha"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:hint="@string/_0_1_default_0_5"
-                            android:imeOptions="flagNoExtractUi"
-                            android:inputType="numberDecimal|textNoSuggestions"
-                            android:text="1.0" />
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_weight="1"
+                                android:text="@string/shadow_mapping_alpha_harm_r_shadowmapalpha" />
+
+                            <EditText
+                                android:id="@+id/edt_harm_r_shadowMapAlpha"
+                                android:layout_width="80dp"
+                                android:layout_height="wrap_content"
+                                android:ems="10"
+                                android:hint="@string/_0_1_default_0_5"
+                                android:imeOptions="flagNoExtractUi"
+                                android:inputType="numberDecimal|textNoSuggestions"
+                                android:text="1.0" />
+                        </LinearLayout>
+
+                        <CheckBox
+                            android:id="@+id/cb_perforatedShadow"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/render_perforated_material_shadow_r_forceshadowmapsonalphatestedsurfaces" />
+
+                        <CheckBox
+                                android:id="@+id/cb_shadowMapCombine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true"
+                                android:text="@string/combine_shadow_mapping_harm_r_shadowmapcombine" />
                     </LinearLayout>
 
-                    <CheckBox
-                        android:id="@+id/cb_stencilShadowCombine"
-                        android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/combine_stencil_shadow_harm_r_stencilshadowcombine" />
-                </LinearLayout>
+                        android:text="@string/stencil_shadow"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:orientation="vertical">
+
+                        <CheckBox
+                            android:id="@+id/cb_stencilShadowSoft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft" />
+
+                        <CheckBox
+                            android:id="@+id/cb_stencilShadowTranslucent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/translucent_stencil_shadow" />
+
+                        <LinearLayout
+                            android:id="@+id/launcher_layout_stencilShadowAlpha"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_weight="1"
+                                android:text="@string/stencil_shadow_alpha_harm_r_stencilshadowalpha" />
+
+                            <EditText
+                                android:id="@+id/edt_harm_r_stencilShadowAlpha"
+                                android:layout_width="80dp"
+                                android:layout_height="wrap_content"
+                                android:ems="10"
+                                android:hint="@string/_0_1_default_0_5"
+                                android:imeOptions="flagNoExtractUi"
+                                android:inputType="numberDecimal|textNoSuggestions"
+                                android:text="1.0" />
+                        </LinearLayout>
+
+                        <CheckBox
+                            android:id="@+id/cb_stencilShadowCombine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/combine_stencil_shadow_harm_r_stencilshadowcombine" />
+                    </LinearLayout>
+
+                </LinearLayout> <!-- end idTech4::renderer::shadow section -->
 
                 <!-- Render system -->
-                <com.karin.idTech4Amm.widget.Divider
+                <LinearLayout
+                    android:id="@+id/render_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/layout_border"
+                    android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+
+                    <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     myapp:label="@string/renderer"
                     myapp:lineColor="@color/launcher_divider_color" />
 
-                <CheckBox
-                    android:id="@+id/multithreading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/multi_threading" />
-
-                <CheckBox
-                    android:id="@+id/cb_useHighPrecision"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/use_high_precision_float_on_glsl_shader_harm_r_usehighprecision" />
-
-                <LinearLayout
-                    android:id="@+id/launcher_layout_max_fps"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/maximum_fps_limit_0_unlimited" />
-
-                    <EditText
-                        android:id="@+id/edt_harm_r_maxFps"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="@string/limit_maximum_fps_default_is_0"
-                        android:imeOptions="flagNoExtractUi"
-                        android:inputType="number|textNoSuggestions"
-                        android:text="0" />
-                </LinearLayout>
-
-                <CheckBox
-                    android:id="@+id/cb_renderToolsMultithread"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread" />
-
-                <CheckBox
-                    android:id="@+id/cb_r_occlusionCulling"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/enable_doom3bfg_occlusion_culling_harm_r_occlusionCulling" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:orientation="horizontal">
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical"
-                        android:text="@string/retro_postprocess"/>
-                    <Spinner
-                        android:id="@+id/spinner_r_renderMode"
+                    <CheckBox
+                        android:id="@+id/multithreading"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:dropDownWidth="196dp"
-                        android:layout_gravity="right|center_vertical"
-                        android:spinnerMode="dropdown"
-                        android:entries="@array/retro_postprocess_labels"/>
-                </LinearLayout>
+                        android:text="@string/multi_threading" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:layout_marginBottom="1dp"
-                    android:text="@string/clear_vertex_buffer_cvar_harm_r_clearvertexbuffer" />
-
-                <RadioGroup
-                    android:id="@+id/r_harmclearvertexbuffer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <RadioButton
-                        android:id="@+id/r_harmclearvertexbuffer_0"
+                    <CheckBox
+                        android:id="@+id/cb_useHighPrecision"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/don_t_clear_and_do_nothing" />
+                        android:text="@string/use_high_precision_float_on_glsl_shader_harm_r_usehighprecision" />
+
+                    <LinearLayout
+                        android:id="@+id/launcher_layout_max_fps"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="@string/maximum_fps_limit_0_unlimited" />
+
+                        <EditText
+                            android:id="@+id/edt_harm_r_maxFps"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/limit_maximum_fps_default_is_0"
+                            android:imeOptions="flagNoExtractUi"
+                            android:inputType="number|textNoSuggestions"
+                            android:text="0" />
+                    </LinearLayout>
+
+                    <CheckBox
+                        android:id="@+id/cb_renderToolsMultithread"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread" />
+
+                    <CheckBox
+                        android:id="@+id/cb_r_occlusionCulling"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/enable_doom3bfg_occlusion_culling_harm_r_occlusionCulling" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:text="@string/retro_postprocess"/>
+                        <Spinner
+                            android:id="@+id/spinner_r_renderMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:dropDownWidth="196dp"
+                            android:layout_gravity="right|center_vertical"
+                            android:spinnerMode="dropdown"
+                            android:entries="@array/retro_postprocess_labels"/>
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="32dp"
-                        android:layout_marginTop="0dp"
-                        android:layout_marginBottom="0dp"
-                        android:text="@string/it_is_default_original_graphics_maybe_and_out_of_memory_lead_to_crash_with_flash_screen"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textSize="12sp" />
+                        android:layout_marginTop="1dp"
+                        android:layout_marginBottom="1dp"
+                        android:text="@string/clear_vertex_buffer_cvar_harm_r_clearvertexbuffer" />
 
-                    <RadioButton
-                        android:id="@+id/r_harmclearvertexbuffer_1"
+                    <RadioGroup
+                        android:id="@+id/r_harmclearvertexbuffer"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/force_clear_vertex_buffer_on_every_end_frame" />
+                        android:layout_height="wrap_content">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="32dp"
-                        android:layout_marginTop="0dp"
-                        android:layout_marginBottom="0dp"
-                        android:text="@string/if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textSize="12sp" />
+                        <RadioButton
+                            android:id="@+id/r_harmclearvertexbuffer_0"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/don_t_clear_and_do_nothing" />
 
-                    <RadioButton
-                        android:id="@+id/r_harmclearvertexbuffer_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/force_delete_vertex_buffer_on_every_end_frame" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="32dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_marginBottom="0dp"
+                            android:text="@string/it_is_default_original_graphics_maybe_and_out_of_memory_lead_to_crash_with_flash_screen"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textSize="12sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="32dp"
-                        android:layout_marginTop="0dp"
-                        android:layout_marginBottom="0dp"
-                        android:text="@string/also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textSize="12sp" />
-                </RadioGroup>
+                        <RadioButton
+                            android:id="@+id/r_harmclearvertexbuffer_1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/force_clear_vertex_buffer_on_every_end_frame" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="32dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_marginBottom="0dp"
+                            android:text="@string/if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textSize="12sp" />
+
+                        <RadioButton
+                            android:id="@+id/r_harmclearvertexbuffer_2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/force_delete_vertex_buffer_on_every_end_frame" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="32dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_marginBottom="0dp"
+                            android:text="@string/also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textSize="12sp" />
+                    </RadioGroup>
+
+                </LinearLayout> <!-- end idTech4::renderer::render section -->
 
                 <!-- Image -->
-                <com.karin.idTech4Amm.widget.Divider
+                <LinearLayout
+                    android:id="@+id/image_section"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    myapp:label="@string/image"
-                    myapp:lineColor="@color/launcher_divider_color" />
+                    android:orientation="vertical"
+                    android:background="@drawable/layout_border"
+                    android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
 
-                <CheckBox
-                    android:id="@+id/usedxt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/use_dxt_textures_tegra_only_others_no_effect" />
+                    <com.karin.idTech4Amm.widget.Divider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        myapp:label="@string/image"
+                        myapp:lineColor="@color/launcher_divider_color" />
 
-                <CheckBox
-                    android:id="@+id/useetc1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/use_etc1_or_rgba4444_compression" />
+                    <CheckBox
+                        android:id="@+id/usedxt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/use_dxt_textures_tegra_only_others_no_effect" />
 
-                <CheckBox
-                    android:id="@+id/useetc1cache"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/use_etc1_or_rgba4444_cache" />
+                    <CheckBox
+                        android:id="@+id/useetc1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/use_etc1_or_rgba4444_compression" />
 
-                <CheckBox
-                    android:id="@+id/image_useetc2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/use_etc2_compression" />
+                    <CheckBox
+                        android:id="@+id/useetc1cache"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/use_etc1_or_rgba4444_cache" />
+
+                    <CheckBox
+                        android:id="@+id/image_useetc2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/use_etc2_compression" />
+
+                </LinearLayout> <!-- end idTech4::renderer::image section -->
 
             </LinearLayout> <!-- end idTech4::renderer section -->
 
@@ -823,7 +869,9 @@
                 android:id="@+id/sound_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:background="@drawable/layout_border"
+                android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
 
                 <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
@@ -877,7 +925,9 @@
                 android:id="@+id/other_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:background="@drawable/layout_border"
+                android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
 
                 <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
@@ -1026,7 +1076,9 @@
             android:id="@+id/general_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@drawable/layout_border"
+            android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
 
             <com.karin.idTech4Amm.widget.Divider
                 android:layout_width="match_parent"

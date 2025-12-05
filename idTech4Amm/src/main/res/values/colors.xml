@@ -23,5 +23,6 @@
     <color name="theme_mohaa_main_color">#FFEFBA85</color>
 
     <color name="launcher_divider_color">#FFCCCCCC</color>
+    <color name="launcher_box_color">#FFBBBBBB</color>
     <color name="pie_color">#FF4585E1</color>
 </resources>

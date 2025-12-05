@@ -116,7 +116,7 @@
     <string name="toggle_key">Toggle key</string>
     <string name="touch_type">Touch type</string>
     <string name="slider_type">Slider type</string>
-    <string name="key">Key</string>
+    <string name="key_1">Key</string>
     <string name="key_2">Key 2</string>
     <string name="key_3">Key 3</string>
     <string name="screen">Screen</string>
@@ -559,5 +559,12 @@
     <string name="use_custom_resolution_as_fullscreen_size">Use custom resolution as fullscreen size</string>
     <string name="openmohaa">OpenMOHAA</string>
     <string name="openmohaa_base">Medal of Honor: Allied Assault</string>
+    <string name="video">Video</string>
+    <string name="virtual_joystick">Virtual joystick</string>
+    <string name="touch">Touch</string>
+    <string name="sensor">Sensor</string>
+    <string name="mouse">Mouse</string>
+    <string name="key">Key</string>
+    <string name="configure">Configure</string>
 
 </resources>

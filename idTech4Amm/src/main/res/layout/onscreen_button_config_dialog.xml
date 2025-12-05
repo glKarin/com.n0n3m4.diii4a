@@ -112,7 +112,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="@string/key"
+            android:text="@string/key_1"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         <Spinner
             android:id="@+id/onscreen_button_config_dialog_key"
