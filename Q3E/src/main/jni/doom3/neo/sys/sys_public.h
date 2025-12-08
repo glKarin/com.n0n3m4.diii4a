@@ -566,7 +566,7 @@ typedef struct {
 	intptr_t	threadHandle;
 	size_t		threadId;
 #ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
-	bool		threadCancel;
+	volatile bool		threadCancel;
 #endif
 } xthreadInfo;
 
