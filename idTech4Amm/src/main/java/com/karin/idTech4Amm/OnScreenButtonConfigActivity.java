@@ -14,6 +14,7 @@ import android.preference.PreferenceManager;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.Theme;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.q3e.Q3EGlobals;
@@ -58,12 +59,16 @@ public class OnScreenButtonConfigActivity extends Activity
     private Map<Integer, String> m_keyMap;
     private Map<Integer, String> m_discStyleMap;
     private String m_theme = "";
+    private String m_game = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
+
+        m_game = getIntent().getStringExtra("game");
+        KLog.i("Config onscreen button", "Edit %s on-screen button", null != m_game ? m_game : "common");
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean o = preferences.getBoolean(PreferenceKey.LAUNCHER_ORIENTATION, false);
@@ -115,17 +120,19 @@ public class OnScreenButtonConfigActivity extends Activity
     private void LoadConfig()
     {
         Reset();
-        Q3EInterface q3ei = Q3EUtils.q3ei;
+        int[] argTable = new int[Q3EInterface._defaultArgs.length];
+        int[] typeTable = new int[Q3EInterface._defaultType.length];
+        Q3EInterface.LoadTypeAndArgTablePreference(this, m_game, argTable, typeTable, true);
         for(int i = 0; i < Q3EGlobals.UI_SIZE; i++)
         {
-            int type = q3ei.type_table[i];
+            int type = typeTable[i];
             if(type == Q3EGlobals.TYPE_JOYSTICK)
                 continue;
             if(i == Q3EGlobals.UI_KBD || i == Q3EGlobals.UI_CONSOLE)
                 continue;
             int[] arr = new int[4];
-            System.arraycopy(q3ei.arg_table, i * 4, arr, 0, arr.length);
-            m_list.add(new OnScreenButton(i, type, arr, q3ei.texture_table[i], Q3EGlobals.CONTROLS_NAMES[i]));
+            System.arraycopy(argTable, i * 4, arr, 0, arr.length);
+            m_list.add(new OnScreenButton(i, type, arr, Q3EUtils.q3ei.texture_table[i], Q3EGlobals.CONTROLS_NAMES[i]));
         }
         m_adapter.notifyDataSetChanged();
     }
@@ -136,12 +143,10 @@ public class OnScreenButtonConfigActivity extends Activity
                 public void run()
                 {
                     SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this).edit();
-                    preferences.remove(Q3EPreference.ONSCREEN_BUTTON);
                     for(int i = 0; i < Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length; i++)
-                        preferences.remove(Q3EPreference.DISC_PANEL_KEYS_PREFIX + (i + 1));
-                    preferences.remove(Q3EPreference.ONSCREEN_BUTTON);
+                        preferences.remove(Q3EInterface.DiscPanelKeysPreference(m_game, i + 1));
+                    preferences.remove(Q3EInterface.OnscreenKeyPreference(m_game));
                     preferences.commit();
-                    Q3EInterface.RestoreDefaultOnScreenConfig(Q3EUtils.q3ei.arg_table, Q3EUtils.q3ei.type_table);
                     LoadConfig();
                     Toast.makeText(OnScreenButtonConfigActivity.this, R.string.onscreen_button_config_has_reset, Toast.LENGTH_SHORT).show();
                 }
@@ -162,8 +167,9 @@ public class OnScreenButtonConfigActivity extends Activity
 
     private void SaveConfig()
     {
-        int[] args = Q3EUtils.q3ei.arg_table;
-        int[] type = Q3EUtils.q3ei.type_table;
+        int[] args = new int[Q3EInterface._defaultArgs.length];
+        int[] type = new int[Q3EInterface._defaultType.length];
+        Q3EInterface.LoadTypeAndArgTablePreference(this, m_game, args, type, true);
         Set<String> list = new LinkedHashSet<>();
         SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(this).edit();
         for(OnScreenButton btn : m_list)
@@ -186,10 +192,10 @@ public class OnScreenButtonConfigActivity extends Activity
                     if(entry.getValue())
                         keys.add(entry.getKey());
                 }
-                edit.putString(Q3EPreference.DISC_PANEL_KEYS_PREFIX + btn.config[0], KStr.Join(keys, ","));
+                edit.putString(Q3EInterface.DiscPanelKeysPreference(m_game, btn.config[0]), KStr.Join(keys, ","));
             }
         }
-        edit.putStringSet(Q3EPreference.ONSCREEN_BUTTON, list).commit();
+        edit.putStringSet(Q3EInterface.OnscreenKeyPreference(m_game), list).commit();
         m_adapter.notifyDataSetChanged();
     }
 
@@ -263,7 +269,7 @@ public class OnScreenButtonConfigActivity extends Activity
                     this.style = arr[1];
                     this.keysMap = new LinkedHashMap<>();
                     String fullStrs = Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[config[0] - 1];
-                    String keyStr = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this).getString(Q3EPreference.DISC_PANEL_KEYS_PREFIX + config[0], fullStrs);
+                    String keyStr = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this).getString(Q3EInterface.DiscPanelKeysPreference(m_game, config[0]), fullStrs);
 
                     String[] fullKeys = fullStrs.split(",");
                     String[] settingKeys = keyStr.split(",");
@@ -623,7 +629,7 @@ public class OnScreenButtonConfigActivity extends Activity
             public void onClick(DialogInterface dialog, int which)
             {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this);
-                Set<String> saved = preferences.getStringSet(Q3EPreference.ONSCREEN_BUTTON, null);
+                Set<String> saved = preferences.getStringSet(Q3EInterface.OnscreenKeyPreference(m_game), null);
                 if(null == saved || saved.isEmpty())
                 {
                     LoadConfig();

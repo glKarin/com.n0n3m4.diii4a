@@ -566,5 +566,8 @@
     <string name="mouse">Mouse</string>
     <string name="key">Key</string>
     <string name="configure">Configure</string>
+    <string name="common">Common</string>
+    <string name="current_game">Current game</string>
+    <string name="edit_type">Edit type</string>
 
 </resources>

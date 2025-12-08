@@ -16,69 +16,6 @@ public final class Q3EControls
     public static final float CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE = 1.0f;
     public static final boolean CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE = false;
 
-    public static void SetupAllOpacity(Context context, int alpha, boolean save)
-    {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor mEdtr = preferences.edit();
-        for (int i = 0; i < Q3EGlobals.UI_SIZE; i++)
-        {
-            String str = Q3EUtils.q3ei.defaults_table[i];
-            int index = str.lastIndexOf(' ');
-            str = str.substring(0, index) + ' ' + alpha;
-            Q3EUtils.q3ei.defaults_table[i] = str;
-
-            if (save)
-            {
-                String key = Q3EPreference.pref_controlprefix + i;
-                if (!preferences.contains(key))
-                    continue;
-                str = preferences.getString(key, Q3EUtils.q3ei.defaults_table[i]);
-                if (null == str)
-                    str = Q3EUtils.q3ei.defaults_table[i];
-                index = str.lastIndexOf(' ');
-                str = str.substring(0, index) + ' ' + alpha;
-                mEdtr.putString(key, str);
-            }
-        }
-        if (save)
-            mEdtr.commit();
-    }
-
-    public static void SetupAllSize(Activity context, float scale, boolean landscape, boolean save)
-    {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor mEdtr = preferences.edit();
-        int[] defSizes = GetDefaultSize(context, landscape);
-        final boolean needScale = scale > 0.0f && scale != 1.0f;
-
-        for (int i = 0; i < Q3EGlobals.UI_SIZE; i++)
-        {
-            int newSize = needScale ? Math.round((float) defSizes[i] * scale) : defSizes[i];
-
-            String str = Q3EUtils.q3ei.defaults_table[i];
-            String[] arr = str.split(" ");
-            arr[2] = "" + newSize;
-            str = Q3EUtils.Join(" ", arr);
-            Q3EUtils.q3ei.defaults_table[i] = str;
-
-            if (save)
-            {
-                String key = Q3EPreference.pref_controlprefix + i;
-                if (!preferences.contains(key))
-                    continue;
-                str = preferences.getString(key, Q3EUtils.q3ei.defaults_table[i]);
-                if (null == str)
-                    str = Q3EUtils.q3ei.defaults_table[i];
-                arr = str.split(" ");
-                arr[2] = "" + newSize;
-                str = Q3EUtils.Join(" ", arr);
-                mEdtr.putString(key, str);
-            }
-        }
-        if (save)
-            mEdtr.commit();
-    }
-
     public static String[] GetDefaultLayout(Activity context, boolean landscape)
     {
         return GetDefaultLayout(context, CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY, landscape);

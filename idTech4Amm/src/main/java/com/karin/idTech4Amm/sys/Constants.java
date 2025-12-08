@@ -31,17 +31,18 @@ public final class Constants
     {
         return new String[] {
             "Fix font offset in GUIs on Quake 4.",
+            "Fix a sound distance volume bug on Quake 4.",
+            "Support smooth joystick on DOOM 3 mod `Hardscorps` and Quake 4 mod `Hardqore`.",
+            "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
+            "Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK, yquake2(Quake 2), and add 3rd Zigock Bot II mod support on Quake 2.",
+            "On-screen button keymap and layout configures are standalone in each game.",
+            "Add fixed ratio resolution support on launcher `Graphics` tab.",
             "Add Unreal engine psk/psa animation/static model support on DOOM3/Quake 4/Prey",
             "Add iqm animation/static model support on DOOM3/Quake 4/Prey",
             "Add Source engine smd animation/static model support on DOOM3/Quake 4/Prey",
             "Add GLTF/GLB animation/static model support on DOOM3/Quake 4/Prey",
             "Add Autodesk fbx animation/static model support on DOOM3/Quake 4/Prey",
             "Add md5mesh static model support on DOOM3/Quake 4/Prey",
-            "Fix a sound distance volume bug on Quake 4.",
-            "Support smooth joystick on DOOM 3 mod `Hardscorps` and Quake 4 mod `Hardqore`.",
-            "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
-            "Add fixed ratio resolution support on launcher `Graphics` tab.",
-            "Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK, yquake2(Quake 2), and add 3rd Zigock Bot II mod support on Quake 2.",
             "FTEQW is removed in this release.",
         };
 	};

@@ -164,7 +164,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         hideonscr = mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false);
         mapvol = mPrefs.getBoolean(Q3EPreference.pref_mapvol, false);
         m_mapBack = mPrefs.getInt(Q3EPreference.pref_harm_mapBack, Q3EGlobals.ENUM_BACK_ALL); //k
-        m_portrait = mPrefs.getBoolean(Q3EPreference.pref_harm_portrait, false); //k
         // controller
         dpadAsArrowKey = mPrefs.getBoolean(Q3EPreference.pref_harm_dpad_as_arrow_key, false);
         leftJoystickDeadRange = Q3EPreference.GetFloatFromString(mPrefs, Q3EPreference.pref_harm_left_joystick_deadzone, 0.01f);
@@ -258,7 +257,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             Q3E.orig_height = h;
             //Q3E.activity.SetupGameViewSize(w, h, false);
 
-            UiLoader uildr = new UiLoader(this, gl, Q3E.orig_width, Q3E.orig_height, m_portrait);
+            UiLoader uildr = new UiLoader(this, gl, Q3E.orig_width, Q3E.orig_height, Q3EUtils.q3ei.defaults_table);
 
             for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
             {

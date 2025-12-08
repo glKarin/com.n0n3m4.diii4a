@@ -562,4 +562,7 @@
     <string name="mouse">鼠标</string>
     <string name="key">按键</string>
     <string name="configure">配置</string>
+    <string name="common">通用</string>
+    <string name="current_game">当前游戏</string>
+    <string name="edit_type">编辑类型</string>
 </resources>

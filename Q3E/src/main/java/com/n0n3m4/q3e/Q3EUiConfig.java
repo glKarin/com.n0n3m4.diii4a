@@ -48,6 +48,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.Theme;
 import com.n0n3m4.q3e.onscreen.Q3EControls;
 
@@ -60,8 +61,9 @@ public class Q3EUiConfig extends Activity
 
     private Q3EUiView vw;
     //k
-    private boolean m_hideNav = true;
-    private boolean m_autoSave = false;
+    private boolean   m_hideNav  = true;
+    private boolean   m_autoSave = false;
+    private String    m_game     = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -71,6 +73,8 @@ public class Q3EUiConfig extends Activity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        m_game = getIntent().getStringExtra("game");
+        KLog.i("Config button layout", "Edit %s layout", null != m_game ? m_game : "common");
         m_onScreenButtonFriendlyEdge = preferences.getBoolean(Q3EPreference.FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && preferences.getBoolean(Q3EPreference.COVER_EDGES, true))
@@ -86,6 +90,9 @@ public class Q3EUiConfig extends Activity
         //k
         m_hideNav = preferences.getBoolean(Q3EPreference.HIDE_NAVIGATION_BAR, true);
         SetupUIFlags();
+
+        Q3EUtils.q3ei.LoadTypeAndArgTablePreference(this);
+        Q3EUtils.q3ei.LoadLayoutTablePreference(this, m_game, false);
 
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
@@ -290,14 +297,12 @@ public class Q3EUiConfig extends Activity
 
     private void SetupOnScreenButtonSize(float scale)
     {
-        //Q3EControls.SetupAllSize(this, scale, false);
         vw.UpdateOnScreenButtonsSize(scale);
         Toast.makeText(this, R.string.setup_all_on_screen_buttons_size_done, Toast.LENGTH_SHORT).show();
     }
 
     private void SetupOnScreenButtonOpacity(int alpha)
     {
-        //Q3EControls.SetupAllOpacity(this, alpha, false);
         vw.UpdateOnScreenButtonsOpacity((float)alpha / 100.0f);
         Toast.makeText(this, R.string.setup_all_on_screen_buttons_opacity_done, Toast.LENGTH_SHORT).show();
     }
@@ -564,5 +569,10 @@ public class Q3EUiConfig extends Activity
     public boolean FriendlyEdge()
     {
         return m_onScreenButtonFriendlyEdge;
+    }
+
+    public String EditGame()
+    {
+        return m_game;
     }
 }

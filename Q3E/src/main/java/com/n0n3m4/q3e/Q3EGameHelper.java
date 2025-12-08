@@ -170,10 +170,14 @@ public class Q3EGameHelper
 
             Q3EUtils.q3ei.SetupGame(gameTypeName);
 
-            Q3EUtils.q3ei.LoadTypeAndArgTablePreference(m_context);
+            //Q3EUtils.q3ei.LoadTypeAndArgTablePreference(m_context);
 
             Q3EUtils.q3ei.start_temporary_extra_command = Q3EUtils.q3ei.MakeTempBaseCommand(m_context);
         }
+
+        Q3EUtils.q3ei.LoadTypeAndArgTablePreference(m_context);
+        Q3EUtils.q3ei.LoadLayoutTablePreference(m_context, ((Q3EMain)m_context).IsPortrait());
+
         Q3EUtils.q3ei.SetupEngineVersion(m_context);
 
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Run " + Q3EUtils.q3ei.game_name);

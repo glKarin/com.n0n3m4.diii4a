@@ -71,6 +71,7 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.UIUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.ChangeLog;
+import com.karin.idTech4Amm.misc.Function;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.sys.Game;
@@ -1129,15 +1130,13 @@ public class GameLauncher extends Activity
 
         q3ei.SetupDOOM3(); //k armv7-a only support neon now
 
-        // Q3EInterface.DumpDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
-
-		q3ei.LoadTypeAndArgTablePreference(this);
-
 		if(null != game && !game.isEmpty())
 		{
 			q3ei.SetupGame(game);
 			q3ei.SetupEngineVersion(this);
 		}
+
+		//q3ei.LoadTypeAndArgTablePreference(this);
 
         Q3EUtils.q3ei = q3ei;
 
@@ -2583,7 +2582,18 @@ public class GameLauncher extends Activity
 
     public void controls(View vw)
     {
-        startActivity(new Intent(this, Q3EUiConfig.class));
+		ChooseEditOnscreenType(new Function() {
+			@Override
+			public Object Invoke(Object...args)
+			{
+				int which = (Integer)args[0];
+				Intent intent = new Intent(GameLauncher.this, Q3EUiConfig.class);
+				if(which > 0)
+					intent.putExtra("game", Q3EUtils.q3ei.game);
+				startActivity(intent);
+				return null;
+			}
+		});
     }
 
     //k
@@ -3708,10 +3718,38 @@ public class GameLauncher extends Activity
         builder.create().show();
     }
 
+	private void ChooseEditOnscreenType(Function runnable)
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.edit_type);
+		builder.setSingleChoiceItems(new String[] {
+				Q3ELang.tr(this, R.string.common), Q3ELang.tr(this, R.string.current_game)
+		}, -1, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				dialog.dismiss();
+				runnable.Invoke(which);
+			}
+		});
+		builder.setNegativeButton(R.string.cancel, null);
+		builder.create().show();
+	}
+
     private void OpenOnScreenButtonSetting()
     {
-        Intent intent = new Intent(this, OnScreenButtonConfigActivity.class);
-        startActivity(intent);
+		ChooseEditOnscreenType(new Function() {
+			@Override
+			public Object Invoke(Object...args)
+			{
+				int which = (Integer)args[0];
+				Intent intent = new Intent(GameLauncher.this, OnScreenButtonConfigActivity.class);
+				if(which > 0)
+					intent.putExtra("game", Q3EUtils.q3ei.game);
+				startActivity(intent);
+				return null;
+			}
+		});
     }
 
     private void OpenCvarListDetail()
@@ -3866,6 +3904,9 @@ public class GameLauncher extends Activity
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         preference.edit().putString(Q3EPreference.pref_harm_game, newGame).commit();
         SetGame(newGame);
+
+		//Q3EUtils.q3ei.LoadTypeAndArgTablePreference(this);
+
         preference.edit().putString(Q3EPreference.pref_harm_game_lib, "").commit();
 
 		String cmd = preference.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGameConstants.GAME_EXECUABLE);

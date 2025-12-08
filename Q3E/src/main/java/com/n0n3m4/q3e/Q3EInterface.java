@@ -26,11 +26,13 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KidTech4Command;
 import com.n0n3m4.q3e.karin.KidTechCommand;
 import com.n0n3m4.q3e.karin.KidTechQuakeCommand;
 import com.n0n3m4.q3e.onscreen.Q3EControls;
+import com.n0n3m4.q3e.onscreen.UiElement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,10 +49,11 @@ public class Q3EInterface
 
 	public static int[] _defaultArgs;
 	public static int[] _defaultType;
+	public String[] _defaultTable;
+	public String[] _defaultPortraitTable;
 
 	public int UI_SIZE;
 	public String[] defaults_table;
-	public String[] portrait_defaults_table;
 	public String[] texture_table;
 	public int[] type_table;
 	public int[] arg_table; // slider: key,key,key,style | button: key,canbeheld,style,null
@@ -797,17 +800,17 @@ public class Q3EInterface
 
     public void InitDefaultsTable()
     {
-        defaults_table = new String[Q3EGlobals.UI_SIZE];
-        Arrays.fill(defaults_table, "0 0 1 30");
+		_defaultTable = new String[Q3EGlobals.UI_SIZE];
+        Arrays.fill(_defaultTable, "0 0 1 30");
 
-		portrait_defaults_table = new String[Q3EGlobals.UI_SIZE];
-		Arrays.fill(portrait_defaults_table, "0 0 1 30");
+		_defaultPortraitTable = new String[Q3EGlobals.UI_SIZE];
+		Arrays.fill(_defaultPortraitTable, "0 0 1 30");
     }
 
 	public void InitUIDefaultLayout(Activity context)
 	{
-		defaults_table = Q3EControls.GetDefaultLayout(context, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY, false);
-		portrait_defaults_table = Q3EControls.GetPortraitDefaultLayout(context, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY, false);
+		_defaultTable = Q3EControls.GetDefaultLayout(context, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY, false);
+		_defaultPortraitTable = Q3EControls.GetPortraitDefaultLayout(context, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY, false);
 	}
 
     public void InitTable()
@@ -941,6 +944,42 @@ public class Q3EInterface
 	public static int GetGameID(String name)
 	{
 		return Q3EGame.Find(name).ID;
+	}
+
+	public static String OnscreenKeyPreference(String game)
+	{
+		if(null == game)
+			return Q3EPreference.ONSCREEN_BUTTON;
+		else
+			return Q3EPreference.ONSCREEN_BUTTON + "_" + game;
+	}
+
+	public static String DiscPanelKeysPreference(String game, int type)
+	{
+		if(null == game)
+			return Q3EPreference.DISC_PANEL_KEYS_PREFIX + type;
+		else
+			return Q3EPreference.DISC_PANEL_KEYS_PREFIX + type + "_" + game;
+	}
+
+	public static String ControlPreference(String game)
+	{
+		return Q3EPreference.pref_harm_controlprefix + "_" + game;
+	}
+
+	public String OnscreenKeyPreference(boolean generic)
+	{
+		return OnscreenKeyPreference(generic ? null : game);
+	}
+
+	public String DiscPanelKeysPreference(boolean generic, int type)
+	{
+		return DiscPanelKeysPreference(generic ? null : game, type);
+	}
+
+	public String ControlPreference()
+	{
+		return ControlPreference(game);
 	}
 
 	public static String[] GetGameVersions(String game)
@@ -1334,12 +1373,23 @@ public class Q3EInterface
 		_defaultArgs = Arrays.copyOf(arg_table, arg_table.length);
 	}
 
-	public void LoadTypeAndArgTablePreference(Context context)
+	public static void LoadTypeAndArgTablePreference(Context context, String game, int[] argTable, int[] typeTable, boolean makeDefault)
 	{
+		if(makeDefault)
+			RestoreDefaultOnScreenConfig(argTable, typeTable);
+
 		// index:type;23,1,2,0|......
 		try
 		{
-			Set<String> configs = PreferenceManager.getDefaultSharedPreferences(context).getStringSet(Q3EPreference.ONSCREEN_BUTTON, null);
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+			Set<String> configs = null;
+			// load game config
+			if(null != game)
+				configs = preferences.getStringSet(OnscreenKeyPreference(game), null);
+			// load common config
+			if(null == configs)
+				configs = preferences.getStringSet(OnscreenKeyPreference(null), null);
+
 			if (null != configs && !configs.isEmpty())
 			{
 				for (String str : configs)
@@ -1347,12 +1397,12 @@ public class Q3EInterface
 					String[] subArr = str.split(":", 2);
 					int index = Integer.parseInt(subArr[0]);
 					subArr = subArr[1].split(";");
-					type_table[index] = Integer.parseInt(subArr[0]);
+					typeTable[index] = Integer.parseInt(subArr[0]);
 					String[] argArr = subArr[1].split(",");
-					arg_table[index * 4] = Integer.parseInt(argArr[0]);
-					arg_table[index * 4 + 1] = Integer.parseInt(argArr[1]);
-					arg_table[index * 4 + 2] = Integer.parseInt(argArr[2]);
-					arg_table[index * 4 + 3] = Integer.parseInt(argArr[3]);
+					argTable[index * 4] = Integer.parseInt(argArr[0]);
+					argTable[index * 4 + 1] = Integer.parseInt(argArr[1]);
+					argTable[index * 4 + 2] = Integer.parseInt(argArr[2]);
+					argTable[index * 4 + 3] = Integer.parseInt(argArr[3]);
 				}
 			}
 		}
@@ -1360,7 +1410,65 @@ public class Q3EInterface
 		{
 			//UncaughtExceptionHandler.DumpException(this, Thread.currentThread(), e);
 			e.printStackTrace();
-			RestoreDefaultOnScreenConfig(arg_table, type_table);
+			RestoreDefaultOnScreenConfig(argTable, typeTable);
+		}
+	}
+
+	public void LoadTypeAndArgTablePreference(Context context)
+	{
+		LoadTypeAndArgTablePreference(context, game, arg_table, type_table, true);
+	}
+
+	public void LoadLayoutTablePreference(Context context, boolean portrait)
+	{
+		LoadLayoutTablePreference(context, game, portrait);
+	}
+
+	public void LoadLayoutTablePreference(Context context, String game, boolean portrait)
+	{
+		if(portrait)
+			defaults_table = Arrays.copyOf(_defaultTable, _defaultTable.length);
+		else
+			defaults_table = Arrays.copyOf(_defaultPortraitTable, _defaultPortraitTable.length);
+
+		try
+		{
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+			String config = null;
+			// load game config
+			if(null != game)
+				config = preferences.getString(ControlPreference(game), null);
+
+			if (KStr.NotEmpty(config))
+			{
+				String[] configs = config.split(",");
+				for(int i = 0; i < defaults_table.length; i++)
+				{
+					if(i >= configs.length)
+						break;
+					if(KStr.IsEmpty(configs[i]))
+						continue;
+					defaults_table[i] = configs[i];
+				}
+			}
+			else
+			{
+				for(int i = 0; i < defaults_table.length; i++)
+				{
+					String str = preferences.getString(Q3EPreference.pref_controlprefix + i, defaults_table[i]);
+					if(KStr.NotEmpty(str))
+						defaults_table[i] = str;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			//UncaughtExceptionHandler.DumpException(this, Thread.currentThread(), e);
+			e.printStackTrace();
+			if(portrait)
+				System.arraycopy(_defaultTable, 0, defaults_table, 0, _defaultTable.length);
+			else
+				System.arraycopy(_defaultPortraitTable, 0, defaults_table, 0, _defaultPortraitTable.length);
 		}
 	}
 
