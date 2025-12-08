@@ -122,7 +122,7 @@ protected:
     };
     void NewFrame(void); // backend
     void EndFrame(void); // backend
-    static void Demo(void *);
+    //static void Demo(void *);
     void HandleUserEvent(const imGuiUserEvent_t &ev); // backend read
     bool CheckFlag(int what, bool reset);
 
@@ -151,7 +151,6 @@ idImGui::idImGui(void)
   eventRunning(false),
   flags(0)
 {
-    draw = &idImGui::Demo;
     events.SetGranularity(1);
     callbacks.SetGranularity(1);
 }
@@ -432,6 +431,7 @@ void idImGui::PullCallback(void)
     callbacks.Clear();
 }
 
+#if 0
 void idImGui::Demo(void *)
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -478,6 +478,7 @@ void idImGui::Demo(void *)
         ImGui::End();
     }
 }
+#endif
 
 static idImGui imGuiBackend;
 
