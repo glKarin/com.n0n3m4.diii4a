@@ -1035,6 +1035,26 @@ bool R_ConvertImage(const char *filename, const char *toFormat, idStr &ret, int 
     return true;
 }
 
+int R_ConvertImages(const idStrList &list, const char *toFormat, int comp = 4, int compression = -1, bool flipVertical = false, bool makePowerOf2 = false, const char *basePath = NULL)
+{
+	idStr ret;
+	int width, height;
+	int num = 0;
+	for(int i = 0; i < list.Num(); i++)
+	{
+		if(R_ConvertImage(list[i], toFormat, ret, comp, compression, flipVertical, makePowerOf2, basePath, &width, &height))
+		{
+			num++;
+			common->Printf("Target image save to %s(%d x %d)\n", ret.c_str(), width, height);
+		}
+		else
+		{
+			common->Printf("Convert error: %s\n", ret.c_str());
+		}
+	}
+	return num;
+}
+
 // Command functions
 /*
  * convertImage <src_image> <dest_format> [
@@ -1076,9 +1096,7 @@ void R_ConvertImage_f(const idCmdArgs &args)
     int component = 4;
     idStr basePath;
 
-    int width;
-    int height;
-    idStr ret;
+	idStrList list;
 
     for(int i = 3; i < args.Argc(); i++)
     {
@@ -1187,7 +1205,10 @@ void R_ConvertImage_f(const idCmdArgs &args)
         }
         else
         {
-            common->Warning("Unknown argument: %s", arg.c_str());
+			if(list.Num() == 0)
+				list.Append(filename);
+			list.Append(arg);
+            //common->Warning("Unknown argument: %s", arg.c_str());
         }
     }
 
@@ -1214,14 +1235,24 @@ void R_ConvertImage_f(const idCmdArgs &args)
     if(component != 3 && component != 4)
         component = 4;
 
-    if(R_ConvertImage(filename, toFormat, ret, component, compression, flipVertical, makePowerOf2, basePath, &width, &height))
-    {
-        common->Printf("Target image save to %s(%d x %d)\n", ret.c_str(), width, height);
-    }
-    else
-    {
-        common->Printf("Convert error: %s\n", ret.c_str());
-    }
+	if(list.Num())
+	{
+		int num = R_ConvertImages(list, toFormat, component, compression, flipVertical, makePowerOf2, basePath);
+		common->Printf("Converted %d images\n", num);
+	}
+	else
+	{
+		int width, height;
+		idStr ret;
+	    if(R_ConvertImage(filename, toFormat, ret, component, compression, flipVertical, makePowerOf2, basePath, &width, &height))
+	    {
+	        common->Printf("Target image save to %s(%d x %d)\n", ret.c_str(), width, height);
+	    }
+	    else
+	    {
+	        common->Printf("Convert error: %s\n", ret.c_str());
+	    }
+	}
 }
 
 void R_Image_AddCommand(void)
