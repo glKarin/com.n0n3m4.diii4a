@@ -512,9 +512,12 @@ class idFileSystemLocal : public idFileSystem
         void                    AddExtraGameDirectory(const char *path, const char *gameName);
         void                    AddExtraGameResource(const char *path);
         void                    AddExtraGame(const char *gameNames);
+        void                    AddInitPath(const char *configFile);
 
         void                    RemoveDir_r(const char *OSPath, int type = 0);
 };
+
+#define FS_INIT_PATH "initpath.cfg"
 
 idCVar	idFileSystemLocal::fs_restrict("fs_restrict", "", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "");
 idCVar	idFileSystemLocal::fs_debug("fs_debug", "0", CVAR_SYSTEM | CVAR_INTEGER, "", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2>);
@@ -2548,6 +2551,8 @@ void idFileSystemLocal::Startup(void)
 	if (addonChecksums.Num()) {
 		common->Printf("restarting filesystem with %d addon pak file(s) to include\n", addonChecksums.Num());
 	}
+
+    AddInitPath(FS_INIT_PATH);
 
     AddExtraGameResource(fs_addon_extras.GetString());
 
@@ -4908,6 +4913,45 @@ void idFileSystemLocal::AddExtraGame(const char *gameNames)
             SetupGameDirectories(games[i]);
         }
     }
+}
+
+void idFileSystemLocal::AddInitPath(const char *configFile)
+{
+    char path[MAX_OSPATH] = { 0 };
+    if(fs_game.GetString()[0])
+        strcat(path, fs_game.GetString());
+    else
+        strcat(path, BASE_GAMEDIR);
+    if(path[strlen(path) - 1] != '/')
+        strcat(path, "/");
+    strcat(path, configFile);
+
+    FILE *file = fopen(path, "r");
+    if(!file)
+        return;
+
+    fseek(file, 0, SEEK_END);
+    int len = ftell(file);
+    if(len > 0)
+    {
+        fseek(file, 0, SEEK_SET);
+        char *data = (char *)malloc(len);
+        fread(data, 1, len, file);
+        idLexer lexer(LEXFL_NOFATALERRORS | LEXFL_ALLOWPATHNAMES);
+        if(lexer.LoadMemory(data, len, "<init_path>"))
+        {
+            idToken token;
+            while(true)
+            {
+                if(!lexer.ReadToken(&token))
+                    break;
+                common->Printf("Add extra init path: %s\n", token.c_str());
+                AddExtraGameResource(token.c_str());
+            }
+        }
+        free(data);
+    }
+    fclose(file);
 }
 
 /*
