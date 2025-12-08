@@ -3256,6 +3256,12 @@ void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 #endif
 	// don't do anything if this was a 2D rendering
 	if (!backEnd.viewDef->viewEntitys) {
+		// some can render in 2D view
+		GL_State(GLS_DEFAULT);
+		RB_TestImage();
+#ifdef GL_ES_VERSION_2_0
+		DEBUG_RENDER_COMPAT
+#endif
 		return;
 	}
 
