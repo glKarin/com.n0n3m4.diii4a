@@ -1347,6 +1347,7 @@ static void ArgCompletion_modelTest(const idCmdArgs &args, void(*callback)(const
     }
 
     cmdSystem->ArgCompletion_FolderExtension(args, callback, "models/", false, ".lwo", ".ase", ".md5mesh", ".ma", ".mb",
+            ".md5meshs",
 #ifdef _MODEL_OBJ
                                      ".obj",
 #endif

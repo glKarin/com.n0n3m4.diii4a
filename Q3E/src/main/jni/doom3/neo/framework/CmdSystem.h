@@ -178,6 +178,7 @@ ID_INLINE void idCmdSystem::ArgCompletion_MapName(const idCmdArgs &args, void(*c
 ID_INLINE void idCmdSystem::ArgCompletion_ModelName(const idCmdArgs &args, void(*callback)(const char *s))
 {
 	cmdSystem->ArgCompletion_FolderExtension(args, callback, "models/", false, ".lwo", ".ase", ".md5mesh", ".ma"
+            , ".md5meshs"
 #ifdef _MODEL_OBJ
 											 , ".obj"
 #endif
