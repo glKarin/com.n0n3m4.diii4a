@@ -270,7 +270,7 @@ extern idCVar harm_ui_viewLightOffset;
 extern idCVar harm_ui_viewLightType;
 extern idCVar harm_ui_viewLightOnWeapon;
 #endif
-#ifdef MOD_BOTS
+#ifdef _DOOM3 //karin: for use_combat_bbox
 extern idCVar harm_si_useCombatBboxInMPGame;
 #endif
 #ifdef __ANDROID__ //karin: re-normalize player movement direction. only for DIII4A smooth onscreen joystick control

@@ -1561,7 +1561,7 @@ void idPlayer::Spawn(void)
 	physicsObj.SetSelf(this);
 	SetClipModel();
 	physicsObj.SetMass(spawnArgs.GetFloat("mass", "100"));
-#ifdef MOD_BOTS //karin: for use_combat_bbox
+#ifdef _DOOM3 //karin: for use_combat_bbox
 	physicsObj.SetContents(CONTENTS_BODY | (use_combat_bbox?CONTENTS_SOLID:0));
 #else
 	physicsObj.SetContents(CONTENTS_BODY);
@@ -2411,7 +2411,7 @@ void idPlayer::SpawnToPoint(const idVec3 &spawn_origin, const idAngles &spawn_an
 	respawning = true;
 
 	Init();
-#ifdef MOD_BOTS //karin: for use_combat_bbox
+#ifdef _DOOM3 //karin: for use_combat_bbox
 	// Force players to use bounding boxes when in multiplayer
 	if ( gameLocal.isMultiplayer ) {
 		use_combat_bbox = gameLocal.serverInfo.GetBool("harm_si_useCombatBboxInMPGame") || spawnArgs.GetBool("use_combat_bbox");
@@ -6692,14 +6692,14 @@ void idPlayer::Move(void)
 		physicsObj.SetContents(CONTENTS_CORPSE | CONTENTS_MONSTERCLIP);
 		physicsObj.SetMovementType(PM_DEAD);
 	} else if (gameLocal.inCinematic || gameLocal.GetCamera() || privateCameraView || (influenceActive == INFLUENCE_LEVEL2)) {
-#ifdef MOD_BOTS //karin: for use_combat_bbox
+#ifdef _DOOM3 //karin: for use_combat_bbox
 		physicsObj.SetContents(CONTENTS_BODY | (use_combat_bbox?CONTENTS_SOLID:0));
 #else
 		physicsObj.SetContents(CONTENTS_BODY);
 #endif
 		physicsObj.SetMovementType(PM_FREEZE);
 	} else {
-#ifdef MOD_BOTS //karin: for use_combat_bbox
+#ifdef _DOOM3 //karin: for use_combat_bbox
 		physicsObj.SetContents(CONTENTS_BODY | (use_combat_bbox?CONTENTS_SOLID:0));
 #else
 		physicsObj.SetContents(CONTENTS_BODY);
