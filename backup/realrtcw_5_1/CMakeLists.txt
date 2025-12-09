@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
-project(realrtcw)
+project(realrtcw_5_1)
 set(REALRTCW_VERSION "5.1")
 set(REALRTCW_SUFFIX "_5_1")
 set(REALRTCW_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../)
