@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/layout_border"
-            android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+            android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -143,7 +143,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/layout_border"
-            android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+            android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
             <com.karin.idTech4Amm.widget.Divider
                 android:layout_width="match_parent"
@@ -261,7 +261,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/layout_border"
-            android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+            android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
             <com.karin.idTech4Amm.widget.Divider
                 android:id="@+id/gameversion_label"
@@ -313,7 +313,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="@drawable/layout_border"
-                    android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+                    android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
                     <com.karin.idTech4Amm.widget.Divider
                         android:layout_width="match_parent"
@@ -531,7 +531,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="@drawable/layout_border"
-                    android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+                    android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
                     <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
@@ -682,7 +682,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="@drawable/layout_border"
-                    android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+                    android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
                     <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
@@ -829,7 +829,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="@drawable/layout_border"
-                    android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+                    android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
                     <com.karin.idTech4Amm.widget.Divider
                         android:layout_width="match_parent"
@@ -871,7 +871,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@drawable/layout_border"
-                android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+                android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
                 <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
@@ -927,7 +927,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@drawable/layout_border"
-                android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+                android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
                 <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
@@ -1078,7 +1078,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/layout_border"
-            android:layout_marginHorizontal="5dp" android:layout_marginVertical="4dp">
+            android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
             <com.karin.idTech4Amm.widget.Divider
                 android:layout_width="match_parent"
