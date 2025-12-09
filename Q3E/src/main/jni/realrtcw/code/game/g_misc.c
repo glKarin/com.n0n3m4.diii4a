@@ -2296,8 +2296,14 @@ void mg42_spawn( gentity_t *ent ) {
 			base->r.svFlags = SVF_USE_CURRENT_ORIGIN;
 			base->s.eType = ET_GENERAL;
 
-
-			base->s.modelindex = G_ModelIndex( "models/mapobjects/weapons/mg42b.md3" );
+			if (g_vanilla_guns.integer)
+			{
+				base->s.modelindex = G_ModelIndex("models/mapobjects/weapons/mg42b.md3");
+			}
+			else
+			{
+				base->s.modelindex = G_ModelIndex("models/mapobjects/weapons/mg42b_hd.md3");
+			}
 		}
 
 		VectorSet( base->r.mins, -8, -8, -8 );
@@ -2332,7 +2338,14 @@ void mg42_spawn( gentity_t *ent ) {
 	//gun->s.dmgFlags = HINT_MG42;	// identify this for cursorhints
 
 	gun->touch = mg42_touch;
-	gun->s.modelindex = G_ModelIndex( "models/mapobjects/weapons/mg42a.md3" );
+	if (g_vanilla_guns.integer)
+	{
+		gun->s.modelindex = G_ModelIndex("models/mapobjects/weapons/mg42a.md3");
+	}
+	else
+	{
+		gun->s.modelindex = G_ModelIndex("models/mapobjects/weapons/mg42a_hd.md3");
+	}
 	VectorCopy( ent->s.origin, offset );
 	offset[2] += 24;
 	G_SetOrigin( gun, offset );

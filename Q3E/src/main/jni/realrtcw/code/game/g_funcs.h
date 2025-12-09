@@ -1708,6 +1708,7 @@ If you have questions concerning this license or the applicable additional terms
 {"SP_ai_zombie_surv", (byte *)SP_ai_zombie_surv},
 {"SP_ai_zombie_flame", (byte *)SP_ai_zombie_flame},
 {"SP_ai_zombie_ghost", (byte *)SP_ai_zombie_ghost},
+{"SP_ai_loper_special", (byte *)SP_ai_loper_special},
 {"SP_ai_american", (byte *)SP_ai_american},
 {"SP_ai_soldier", (byte *)SP_ai_soldier},
 {"SP_ai_dog", (byte*)SP_ai_dog},

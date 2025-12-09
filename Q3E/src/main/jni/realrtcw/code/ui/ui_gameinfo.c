@@ -178,12 +178,32 @@ UI_LoadArenasIntoMapList
 ===============
 */
 void UI_LoadArenasIntoMapList( void ) {
-	int			n;
-	char		*type;
+	int   n;
+	char  *type;
+	int   enemiesFilter;
 
 	uiInfo.mapCount = 0;
 
+	// ui_sv_enemies:
+	// 0 = all, 1 = human, 2 = undead
+	enemiesFilter = ui_sv_enemies.integer;
+
+	// clamp just in case
+	if ( enemiesFilter < SV_ENEMIES_FILTER_ALL || enemiesFilter > SV_ENEMIES_FILTER_UNDEAD ) {
+		enemiesFilter = SV_ENEMIES_FILTER_ALL;
+	}
+
 	for ( n = 0; n < ui_numArenas; n++ ) {
+		int enemiesType = UI_ParseArenaEnemiesType( ui_arenaInfos[n] );
+
+		// Apply enemies filter ONLY when filter is not "all"
+		// Maps with enemiesType == ALL are visible under any filter.
+		if ( enemiesFilter != SV_ENEMIES_FILTER_ALL &&
+			 enemiesType != SV_ENEMIES_FILTER_ALL &&
+			 enemiesType != enemiesFilter ) {
+			// Doesn't match the selected filter – skip this map
+			continue;
+		}
 		// determine type
 
 		uiInfo.mapList[uiInfo.mapCount].cinematic = -1;
@@ -321,4 +341,25 @@ char *UI_GetBotNameByNumber( int num ) {
 		return Info_ValueForKey( info, "name" );
 	}
 	return "Sarge";
+}
+
+
+int UI_ParseArenaEnemiesType( const char *arenaInfo ) {
+	const char *e = Info_ValueForKey( arenaInfo, "enemies" );
+
+	if ( !e || !*e ) {
+		// No enemies key: treat as "all" (visible under any filter)
+		return SV_ENEMIES_FILTER_ALL;
+	}
+
+	if ( !Q_stricmp( e, "human" ) ) {
+		return SV_ENEMIES_FILTER_HUMAN;
+	}
+
+	if ( !Q_stricmp( e, "undead" ) ) {
+		return SV_ENEMIES_FILTER_UNDEAD;
+	}
+
+	// Unknown value – safest is to treat as "all"
+	return SV_ENEMIES_FILTER_ALL;
 }

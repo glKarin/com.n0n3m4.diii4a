@@ -779,31 +779,73 @@ qboolean G_ScriptAction_PlayAnim( gentity_t *ent, char *params ) {
 G_ScriptAction_AlertEntity
 
   syntax: alertentity <targetname>
+
+  Now NON-FATAL – prints one warning and continues instead of crashing the game/server
 =================
 */
-qboolean G_ScriptAction_AlertEntity( gentity_t *ent, char *params ) {
-	gentity_t   *alertent;
+qboolean G_ScriptAction_AlertEntity( gentity_t *ent, char *params )
+{
+	gentity_t   *alertent = NULL;
 
-	if ( !params || !params[0] ) {
-		G_Error( "G_Scripting: alertentity without targetname\n" );
+	if ( !params || !params[0] )
+	{
+		G_Printf( S_COLOR_YELLOW "G_Scripting: alertentity without targetname (script entity %d)\n", ent->s.number );
+		return qfalse;
 	}
 
-	// find this targetname
+	// find the target entity
 	alertent = G_Find( NULL, FOFS( targetname ), params );
-	if ( !alertent ) {
-		G_Error( "G_Scripting: alertentity cannot find targetname \"%s\"\n", params );
+
+	if ( !alertent )
+	{
+		// Print only once per map to avoid spam
+		static char lastMissing[64] = {0};
+		if ( Q_stricmp( lastMissing, params ) )
+		{
+			Q_strncpyz( lastMissing, params, sizeof(lastMissing) );
+			G_Printf( S_COLOR_YELLOW "G_Scripting: alertentity cannot find target \"%s\"\n", params );
+		}
+		return qfalse;          // don't break the rest of the script
 	}
 
-	if ( alertent->client ) {
-		// call this entity's AlertEntity function
-		if ( !alertent->AIScript_AlertEntity ) {
-			G_Error( "G_Scripting: alertentity \"%s\" (classname = %s) doesn't have an \"AIScript_AlertEntity\" function\n", params, alertent->classname );
+	// ---- AI / scripted character ----
+	if ( alertent->client )
+	{
+		if ( !alertent->AIScript_AlertEntity )
+		{
+			static char lastBadAI[128] = {0};
+			char temp[128];
+			Com_sprintf( temp, sizeof(temp), "%s:%s", params, alertent->classname );
+
+			if ( Q_stricmp( lastBadAI, temp ) )
+			{
+				Q_strncpyz( lastBadAI, temp, sizeof(lastBadAI) );
+				G_Printf( S_COLOR_YELLOW "G_Scripting: alertentity \"%s\" (classname = %s) has no AIScript_AlertEntity function\n",
+				          params, alertent->classname );
+			}
+			return qtrue;       // still continue script execution
 		}
+
 		alertent->AIScript_AlertEntity( alertent );
-	} else {
-		if ( !alertent->use ) {
-			G_Error( "G_Scripting: alertentity \"%s\" (classname = %s) doesn't have a \"use\" function\n", params, alertent->classname );
+	}
+	// ---- Normal trigger / func_ entity ----
+	else
+	{
+		if ( !alertent->use )
+		{
+			static char lastBadUse[128] = {0};
+			char temp[128];
+			Com_sprintf( temp, sizeof(temp), "%s:%s", params, alertent->classname );
+
+			if ( Q_stricmp( lastBadUse, temp ) )
+			{
+				Q_strncpyz( lastBadUse, temp, sizeof(lastBadUse) );
+				G_Printf( S_COLOR_YELLOW "G_Scripting: alertentity \"%s\" (classname = %s) has no use function\n",
+				          params, alertent->classname );
+			}
+			return qtrue;
 		}
+
 		alertent->use( alertent, NULL, NULL );
 	}
 

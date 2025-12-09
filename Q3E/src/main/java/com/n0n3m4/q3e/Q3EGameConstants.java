@@ -25,9 +25,6 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE3_URT      = "liburbanterror.so"; // Q3 Urban Terror
     public static final String LIB_ENGINE3_MOHAA    = "libopenmohaa.so"; // OpenMOHAA Medal of Honor: Allied Assault
 
-    public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
-    //public static final String LIB_ENGINE3_REALRTCW_5_1 = "libRealRTCW_5_1.so"; // RealRTCW(5.1)
-    //public static final String LIB_ENGINE4_TDM_2_12     = "libTheDarkMod_2_12.so"; // TDM(2.12)
 
 
     // game engine version
@@ -35,11 +32,16 @@ public final class Q3EGameConstants
 
     public static final String GAME_VERSION_D3BFG_OPENGL = "OpenGL"; // Doom3-BFG(OpenGL)
     public static final String GAME_VERSION_D3BFG_VULKAN = "Vulkan"; // Doom3-BFG(Vulkan)
+    public static final String LIB_ENGINE4_D3BFG_VULKAN  = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
 
-    //public static final String GAME_VERSION_REALRTCW_5_1     = "5.1"; // RealRTCW 5.1
 
+    public static final String GAME_VERSION_REALRTCW_5_2 = "5.2"; // RealRTCW 5.2
+    public static final String LIB_ENGINE3_REALRTCW_5_2  = "libRealRTCW_5_2.so"; // RealRTCW(5.2)
 
     //public static final String GAME_VERSION_TDM      = "2.13"; // TDM 2.13
+    //public static final String LIB_ENGINE4_TDM_2_12     = "libTheDarkMod_2_12.so"; // TDM(2.12)
+
+
 
     // game config file
     public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg";
@@ -170,7 +172,7 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_DOOM3BFG = "1.4.0";
     public static final String GAME_VERSION_GZDOOM   = "4.14.2";
     public static final String GAME_VERSION_ETW      = "2.83.2";
-    public static final String GAME_VERSION_REALRTCW = "5.2";
+    public static final String GAME_VERSION_REALRTCW = "5.3";
     public static final String GAME_VERSION_FTEQW    = "1.05"; // ???
     public static final String GAME_VERSION_JA       = "1.0.1.1";
     public static final String GAME_VERSION_JO       = "1.0.1.1";

@@ -83,3 +83,5 @@ int AICast_NumAttempts( int entnum );
 //----(SA)	end
 
 void AICast_RegisterPain( int entnum );
+
+

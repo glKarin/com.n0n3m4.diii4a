@@ -98,8 +98,10 @@ Sys_DefaultHomePath
 char *Sys_DefaultHomePath( void )
 {
 	TCHAR szPath[MAX_PATH];
-	FARPROC qSHGetFolderPath;
 	HMODULE shfolder = LoadLibrary("shfolder.dll");
+
+	typedef HRESULT (WINAPI *PSHGETFOLDERPATH)(HWND, int, HANDLE, DWORD, LPTSTR);
+	PSHGETFOLDERPATH qSHGetFolderPath = NULL;
 
 	if(shfolder == NULL)
 	{
@@ -109,7 +111,7 @@ char *Sys_DefaultHomePath( void )
 
 	if(!*homePath && com_homepath)
 	{
-		qSHGetFolderPath = GetProcAddress(shfolder, "SHGetFolderPathA");
+		qSHGetFolderPath = (PSHGETFOLDERPATH)GetProcAddress(shfolder, "SHGetFolderPathA");
 		if(qSHGetFolderPath == NULL)
 		{
 			Com_Printf("Unable to find SHGetFolderPath in SHFolder.dll\n");
@@ -982,7 +984,7 @@ void Sys_OpenURL( char *url, qboolean doexit ) {                // NERVE - SMF
 	wnd = GetForegroundWindow();
 
 	if ( wnd ) {
-		ShowWindow( wnd, SW_MAXIMIZE );
+		ShowWindow( wnd, SW_RESTORE );
 	}
 
 	if ( doexit ) {

@@ -77,6 +77,9 @@ typedef struct svParams_s
     int waveChangeTime;
 	qboolean waveInProgress;
 
+	qboolean specialWaveActive;
+	int lastSpecialWave;
+
 	// loaded from .surv file
 	int initialKillCountRequirement;
 
@@ -92,6 +95,7 @@ typedef struct svParams_s
 	int initialPriestsCount;
 	int initialPartisansCount;
 	int initialFlamersCount;
+	int initialLopersCount;
 
     int   defaultSpawnTime;
 	int   egSpawnTime;
@@ -103,6 +107,7 @@ typedef struct svParams_s
 	int   ghostSpawnTime;
 	int   priestSpawnTime;
 	int   flamerSpawnTime;
+	int   loperSpawnTime;
 
 	int   friendlySpawnTime;
 	int   aliveFriendliestoCallReinforce;
@@ -117,6 +122,7 @@ typedef struct svParams_s
 	int ghostsIncrease;
 	int priestsIncrease;
 	int flamersIncrease;
+	int lopersIncrease;
 
 	int maxSoldiers;
 	int maxEliteGuards;
@@ -129,6 +135,7 @@ typedef struct svParams_s
 	int maxGhosts;
 	int maxPriests;
 	int maxFlamers;
+	int maxLopers;
 
 	int waveEg;
 	int waveBg;
@@ -139,6 +146,7 @@ typedef struct svParams_s
 	int waveGhosts;
 	int wavePriests;
 	int waveFlamers;
+	int waveLopers;
 
 	int powerupDropChance;
 	int powerupDropChanceScavengerIncrease;
@@ -210,6 +218,14 @@ typedef struct svParams_s
 
 	float ltAmmoBonus;
 	float soldierExplosiveDmgBonus;
+
+	int specialWaveMinStart;
+	int specialWaveChance;		
+	int specialLopersInitialCount;		
+	int specialLopersIncrease;
+	int specialLopersMax;
+	int specialMinGap;
+	int specialMaxGap;
 
 } svParams_t;
 

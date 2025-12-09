@@ -1534,10 +1534,7 @@ static qboolean ParseShader( char **text ) {
 			shader.polygonOffset = qtrue;
 			continue;
 		}
-		// entityMergable, allowing sprite surfaces from multiple entities
-		// to be merged into one batch.  This is a savings for smoke
-		// puffs and blood, but can't be used for anything where the
-		// shader calcs (not the surface function) reference the entity color or scroll
+		// entityMergable
 		else if ( !Q_stricmp( token, "entityMergable" ) ) {
 			shader.entityMergable = qtrue;
 			continue;
@@ -1548,22 +1545,57 @@ static qboolean ParseShader( char **text ) {
 				return qfalse;
 			}
 
-			if ( r_greyscale->integer )
+			// --- GOTHIC & GREYSCALE (independent) for fog color ---
 			{
-				float luminance;
+				vec3_t orig = { shader.fogParms.color[0], shader.fogParms.color[1], shader.fogParms.color[2] };
 
-				luminance = LUMA( shader.fogParms.color[0], shader.fogParms.color[1], shader.fogParms.color[2] );
-				VectorSet( shader.fogParms.color, luminance, luminance, luminance );
-			}
-			else if ( r_greyscale->value )
-			{
-				float luminance;
+				const int      gothicMode = ( r_gothic ) ? r_gothic->integer : 0; // 0=off, 1=pure red, 2=original red
+				const qboolean gsInt      = r_greyscale->integer ? qtrue : qfalse;
+				const float    gsValue    = r_greyscale->value;
+				const qboolean gsActive   = ( gsInt || (gsValue > 0.0f) ) ? qtrue : qfalse;
 
-				luminance = LUMA( shader.fogParms.color[0], shader.fogParms.color[1], shader.fogParms.color[2] );
-				shader.fogParms.color[0] = LERP( shader.fogParms.color[0], luminance, r_greyscale->value );
-				shader.fogParms.color[1] = LERP( shader.fogParms.color[1], luminance, r_greyscale->value );
-				shader.fogParms.color[2] = LERP( shader.fogParms.color[2], luminance, r_greyscale->value );
+				if ( gothicMode ) {
+					// If original fog is red-dominant → force red
+					byte srcR = (byte)Com_Clamp( 0, 255, orig[0] * 255.0f );
+					byte srcG = (byte)Com_Clamp( 0, 255, orig[1] * 255.0f );
+					byte srcB = (byte)Com_Clamp( 0, 255, orig[2] * 255.0f );
+
+					if ( IsRedDominant( srcR, srcG, srcB ) ) {
+						if ( gothicMode == 2 ) {
+							shader.fogParms.color[0] = orig[0];  // original red intensity (0..1)
+						} else {
+							shader.fogParms.color[0] = 1.0f;     // pure red
+						}
+						shader.fogParms.color[1] = 0.0f;
+						shader.fogParms.color[2] = 0.0f;
+					} else {
+						// Non-red fog → grayscale baseline
+						float luminance = LUMA( orig[0], orig[1], orig[2] ); // expects 0..1 components
+						if ( gsInt ) {
+							VectorSet( shader.fogParms.color, luminance, luminance, luminance );
+						} else if ( gsValue > 0.0f ) {
+							shader.fogParms.color[0] = LERP( orig[0], luminance, gsValue );
+							shader.fogParms.color[1] = LERP( orig[1], luminance, gsValue );
+							shader.fogParms.color[2] = LERP( orig[2], luminance, gsValue );
+						} else {
+							// gothic alone → full luma
+							VectorSet( shader.fogParms.color, luminance, luminance, luminance );
+						}
+					}
+				} else if ( gsActive ) {
+					// Greyscale only (original behavior)
+					float luminance = LUMA( shader.fogParms.color[0], shader.fogParms.color[1], shader.fogParms.color[2] );
+					if ( gsInt ) {
+						VectorSet( shader.fogParms.color, luminance, luminance, luminance );
+					} else {
+						shader.fogParms.color[0] = LERP( shader.fogParms.color[0], luminance, gsValue );
+						shader.fogParms.color[1] = LERP( shader.fogParms.color[1], luminance, gsValue );
+						shader.fogParms.color[2] = LERP( shader.fogParms.color[2], luminance, gsValue );
+					}
+				}
+				// else: neither gothic nor greyscale → leave fog color as parsed
 			}
+			// --- END GOTHIC & GREYSCALE ---
 
 			token = COM_ParseExt( text, qfalse );
 			if ( !token[0] ) {
@@ -1586,9 +1618,6 @@ static qboolean ParseShader( char **text ) {
 			ParseSkyParms( text );
 			continue;
 		}
-		// This is fixed fog for the skybox/clouds determined solely by the shader
-		// it will not change in a level and will not be necessary
-		// to force clients to use a sky fog the server says to.
 		// skyfogvars <(r,g,b)> <dist>
 		else if ( !Q_stricmp( token, "skyfogvars" ) ) {
 			vec3_t fogColor;
@@ -1616,11 +1645,10 @@ static qboolean ParseShader( char **text ) {
 				ri.Printf( PRINT_WARNING, "WARNING: missing shader name for 'sunshader'\n" );
 				continue;
 			}
-//			tr.sunShaderName = CopyString( token );
 			tr.sunShaderName = "sun";
 		}
-//----(SA)	added
-		else if ( !Q_stricmp( token, "lightgridmulamb" ) ) { // ambient multiplier for lightgrid
+		//----(SA) added
+		else if ( !Q_stricmp( token, "lightgridmulamb" ) ) {
 			token = COM_ParseExt( text, qfalse );
 			if ( !token[0] ) {
 				ri.Printf( PRINT_WARNING, "WARNING: missing value for 'lightgrid ambient multiplier'\n" );
@@ -1629,7 +1657,7 @@ static qboolean ParseShader( char **text ) {
 			if ( atof( token ) > 0 ) {
 				tr.lightGridMulAmbient = atof( token );
 			}
-		} else if ( !Q_stricmp( token, "lightgridmuldir" ) )        { // directional multiplier for lightgrid
+		} else if ( !Q_stricmp( token, "lightgridmuldir" ) ) {
 			token = COM_ParseExt( text, qfalse );
 			if ( !token[0] ) {
 				ri.Printf( PRINT_WARNING, "WARNING: missing value for 'lightgrid directional multiplier'\n" );
@@ -1639,7 +1667,7 @@ static qboolean ParseShader( char **text ) {
 				tr.lightGridMulDirected = atof( token );
 			}
 		}
-//----(SA)	end
+		//----(SA) end
 		else if ( !Q_stricmp( token, "waterfogvars" ) ) {
 			vec3_t watercolor;
 			float fogvar;
@@ -1657,27 +1685,15 @@ static qboolean ParseShader( char **text ) {
 
 			fogvar = atof( token );
 
-			//----(SA)	right now allow one water color per map.  I'm sure this will need
-			//			to change at some point, but I'm not sure how to track fog parameters
-			//			on a "per-water volume" basis yet.
-
-			if ( fogvar == 0 ) {       // '0' specifies "use the map values for everything except the fog color
-				// TODO
-			} else if ( fogvar > 1 )      { // distance "linear" fog
+			if ( fogvar == 0 ) {
+				// TODO: use map values except the fog color
+			} else if ( fogvar > 1 ) {
 				Com_sprintf( fogString, sizeof( fogString ), "0 %d 1.1 %f %f %f 200", (int)fogvar, watercolor[0], watercolor[1], watercolor[2] );
-//				R_SetFog(FOG_WATER, 0, fogvar, watercolor[0], watercolor[1], watercolor[2], 1.1);
-			} else {                      // density "exp" fog
+			} else {
 				Com_sprintf( fogString, sizeof( fogString ), "0 5 %f %f %f %f 200", fogvar, watercolor[0], watercolor[1], watercolor[2] );
-//				R_SetFog(FOG_WATER, 0, 5, watercolor[0], watercolor[1], watercolor[2], fogvar);
 			}
 
-//		near
-//		far
-//		density
-//		r,g,b
-//		time to complete
 			ri.Cvar_Set( "r_waterFogColor", fogString );
-
 			continue;
 		}
 		// fogvars
@@ -1696,30 +1712,21 @@ static qboolean ParseShader( char **text ) {
 				continue;
 			}
 
-
-			//----(SA)	NOTE:	fogFar > 1 means the shader is setting the farclip, < 1 means setting
-			//					density (so old maps or maps that just need softening fog don't have to care about farclip)
-
 			fogDensity = atof( token );
 			if ( fogDensity >= 1 ) { // linear
-				fogFar      = fogDensity;
+				fogFar = fogDensity;
 			} else {
-				fogFar      = 5;
+				fogFar = 5;
 			}
 
-//			R_SetFog(FOG_MAP, 0, fogFar, fogColor[0], fogColor[1], fogColor[2], fogDensity);
 			ri.Cvar_Set( "r_mapFogColor", va( "0 %d %f %f %f %f 0", fogFar, fogDensity, fogColor[0], fogColor[1], fogColor[2] ) );
-//			R_SetFog(FOG_CMD_SWITCHFOG, FOG_MAP, 50, 0, 0, 0, 0);
-
 			continue;
 		}
 		// done.
-		// Ridah, allow disable fog for some shaders
 		else if ( !Q_stricmp( token, "nofog" ) ) {
 			shader.noFog = qtrue;
 			continue;
 		}
-		// done.
 		// RF, allow each shader to permit compression if available
 		else if ( !Q_stricmp( token, "allowcompress" ) ) {
 			tr.allowCompress = qtrue;
@@ -1728,8 +1735,7 @@ static qboolean ParseShader( char **text ) {
 			tr.allowCompress = -1;
 			continue;
 		}
-		// done.
-		// light <value> determines flaring in q3map, not needed here
+		// light <value>
 		else if ( !Q_stricmp( token, "light" ) ) {
 			COM_ParseExt( text, qfalse );
 			continue;
@@ -1744,17 +1750,16 @@ static qboolean ParseShader( char **text ) {
 
 			if ( !Q_stricmp( token, "none" ) || !Q_stricmp( token, "twosided" ) || !Q_stricmp( token, "disable" ) ) {
 				shader.cullType = CT_TWO_SIDED;
-			} else if ( !Q_stricmp( token, "back" ) || !Q_stricmp( token, "backside" ) || !Q_stricmp( token, "backsided" ) )      {
+			} else if ( !Q_stricmp( token, "back" ) || !Q_stricmp( token, "backside" ) || !Q_stricmp( token, "backsided" ) ) {
 				shader.cullType = CT_BACK_SIDED;
-			} else
-			{
+			} else {
 				ri.Printf( PRINT_WARNING, "WARNING: invalid cull parm '%s' in shader '%s'\n", token, shader.name );
 			}
 			continue;
-		} 		// ydnar: distancecull <opaque distance> <transparent distance> <alpha threshold>
+		}
+		// ydnar: distancecull
 		else if ( !Q_stricmp( token, "distancecull" ) ) {
 			int i;
-
 
 			for ( i = 0; i < 3; i++ )
 			{
@@ -1767,14 +1772,9 @@ static qboolean ParseShader( char **text ) {
 			}
 
 			if ( shader.distanceCull[ 1 ] - shader.distanceCull[ 0 ] > 0 ) {
-				// distanceCull[ 3 ] is an optimization
 				shader.distanceCull[ 3 ] = 1.0 / ( shader.distanceCull[ 1 ] - shader.distanceCull[ 0 ] );
-			} else
-			{
-				shader.distanceCull[ 0 ] = 0;
-				shader.distanceCull[ 1 ] = 0;
-				shader.distanceCull[ 2 ] = 0;
-				shader.distanceCull[ 3 ] = 0;
+			} else {
+				shader.distanceCull[ 0 ] = shader.distanceCull[ 1 ] = shader.distanceCull[ 2 ] = shader.distanceCull[ 3 ] = 0;
 			}
 			continue;
 		}
@@ -1782,42 +1782,36 @@ static qboolean ParseShader( char **text ) {
 		else if ( !Q_stricmp( token, "sort" ) ) {
 			ParseSort( text );
 			continue;
-		} 		// ydnar: implicit default mapping to eliminate redundant/incorrect explicit shader stages
-        	else if ( !Q_stricmpn( token, "implicit", 8 ) ) {
-			// set implicit mapping state
+		}
+		// implicit*
+		else if ( !Q_stricmpn( token, "implicit", 8 ) ) {
 			if ( !Q_stricmp( token, "implicitBlend" ) ) {
 				implicitStateBits = GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
 				implicitCullType = CT_TWO_SIDED;
-			} else if ( !Q_stricmp( token, "implicitMask" ) )     {
+			} else if ( !Q_stricmp( token, "implicitMask" ) ) {
 				implicitStateBits = GLS_DEPTHMASK_TRUE | GLS_ATEST_GE_80;
 				implicitCullType = CT_TWO_SIDED;
-			} else    // "implicitMap"
-			{
+			} else {
 				implicitStateBits = GLS_DEPTHMASK_TRUE;
 				implicitCullType = CT_FRONT_SIDED;
 			}
 
-			// get image
 			token = COM_ParseExt( text, qfalse );
 			if ( token[ 0 ] != '\0' ) {
 				Q_strncpyz( implicitMap, token, sizeof( implicitMap ) );
-			} else
-			{
+			} else {
 				implicitMap[ 0 ] = '-';
 				implicitMap[ 1 ] = '\0';
 			}
 
 			continue;
-		} else
-		{
+		} else {
 			ri.Printf( PRINT_WARNING, "WARNING: unknown general shader parameter '%s' in '%s'\n", token, shader.name );
 			return qfalse;
 		}
 	}
 
-	//
-	// ignore shaders that don't have any stages, unless it is a sky or fog
-	//
+	// ignore shaders without stages (unless sky/fog/implicit map)
 	if ( s == 0 && !shader.isSky && !( shader.contentFlags & CONTENTS_FOG ) && implicitMap[ 0 ] == '\0' ) {
 		return qfalse;
 	}
@@ -1826,6 +1820,8 @@ static qboolean ParseShader( char **text ) {
 
 	return qtrue;
 }
+
+
 
 /*
 ========================================================================================

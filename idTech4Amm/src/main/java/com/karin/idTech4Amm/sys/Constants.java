@@ -34,6 +34,7 @@ public final class Constants
             "Fix a sound distance volume bug on Quake 4.",
             "Support smooth joystick on DOOM 3 mod `Hardscorps` and Quake 4 mod `Hardqore`.",
             "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
+            "Update RealRTCW version to 5.3, version 5.2 will be removed on next release.",
             "Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK, yquake2(Quake 2), and add 3rd Zigock Bot II mod support on Quake 2.",
             "On-screen button keymap and layout configures are standalone in each game.",
             "Add fixed ratio resolution support on launcher `Graphics` tab.",
@@ -43,7 +44,7 @@ public final class Constants
             "Add GLTF/GLB animation/static model support on DOOM3/Quake 4/Prey",
             "Add Autodesk fbx animation/static model support on DOOM3/Quake 4/Prey",
             "Add md5mesh static model support on DOOM3/Quake 4/Prey",
-            "FTEQW is removed in this release.",
+            "[Warning]: FTEQW is removed in this release.",
         };
 	};
 

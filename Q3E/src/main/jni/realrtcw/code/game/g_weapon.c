@@ -843,10 +843,20 @@ qboolean Bullet_Fire_Extended( gentity_t *source, gentity_t *attacker, vec3_t st
         return qfalse;
     }
 
-    // perform trace with base values (the trace doesn't care about the damage multiplier)
-    trap_Trace( &tr, start, NULL, NULL, end, source->s.number, MASK_SHOT );
+	// perform trace with base values (the trace doesn't care about the damage multiplier)
+	if (g_gametype.integer == GT_SURVIVAL)
+	{
+		vec3_t mins = {-3, -3, -3};
+		vec3_t maxs = {3, 3, 3};
+		trap_Trace(&tr, start, mins, maxs, end, source->s.number, MASK_SHOT);
+	}
+	else
+	{
 
-    // DHM - Nerve :: only in single player
+		trap_Trace(&tr, start, NULL, NULL, end, source->s.number, MASK_SHOT);
+	}
+
+	// DHM - Nerve :: only in single player
     AICast_ProcessBullet( attacker, start, tr.endpos );
     
     // bullet debugging using Q3A's railtrail

@@ -616,7 +616,7 @@ typedef enum {
 } surfaceType_t;
 
 typedef struct drawSurf_s {
-	unsigned sort;                      // bit combination for fast compares
+    uint64_t     sort;     // was unsigned / uint32_t; now 64-bit
 	surfaceType_t       *surface;       // any of surface*_t
 } drawSurf_t;
 
@@ -991,8 +991,8 @@ void        R_Modellist_f( void );
 //====================================================
 extern refimport_t ri;
 
-#define MAX_DRAWIMAGES          2048
-#define MAX_SKINS               1024
+#define MAX_DRAWIMAGES          4096	// was 2048
+#define MAX_SKINS               2048	// was 1024
 
 
 #define MAX_DRAWSURFS           0x10000
@@ -1033,15 +1033,25 @@ removed	: used to be clipped flag
 
 */
 
+#define DLIGHTMAP_BITS         2
+#define FOG_BITS               5
+
+#define QSORT_DLIGHTMAP_SHIFT      0
 #define	QSORT_FOGNUM_SHIFT	2
+#define QSORT_ATI_TESS_SHIFT       8
 #define	QSORT_REFENTITYNUM_SHIFT	11
 #define	QSORT_SHADERNUM_SHIFT	(QSORT_REFENTITYNUM_SHIFT+REFENTITYNUM_BITS)
+
+// Compile-time guard: total bits must fit in 64
 #if (QSORT_SHADERNUM_SHIFT+SHADERNUM_BITS) > 64
-	#error "Need to update sorting, too many bits."
+#  error "Need to update sorting, too many bits for 64-bit key."
 #endif
 
-// GR - tessellation flag in bit 8
-#define QSORT_ATI_TESS_SHIFT    8
+// Helpful masks (64-bit)
+#define QSORT_DLIGHTMAP_MASK   ((uint64_t)((1u << DLIGHTMAP_BITS) - 1))
+#define QSORT_FOGNUM_MASK      ((uint64_t)((1u << FOG_BITS) - 1))
+#define QSORT_SHADERNUM_MASK   ((uint64_t)((1u << SHADERNUM_BITS) - 1))
+
 // GR - TruForm flags
 #define ATI_TESS_TRUFORM    1
 #define ATI_TESS_NONE       0
@@ -1114,6 +1124,45 @@ typedef struct {
 	trRefEntity_t entity2D;     // currentEntity will point at this when doing 2D rendering
 } backEndState_t;
 
+
+static ID_INLINE qboolean IsRedDominant(byte r, byte g, byte b) {
+    // R must be the dominant channel
+    int maxc = r; if (g > maxc) maxc = g; if (b > maxc) maxc = b;
+    if (r != maxc) return qfalse;
+
+    // Too dark? skip (prevents noisy low-light reds from triggering)
+    //if (maxc < 1) return qfalse; // was 72; higher == stricter
+
+    // Require decent saturation: (max - min) / max >= ~0.55
+    int minc = r; if (g < minc) minc = g; if (b < minc) minc = b;
+    //int chroma = maxc - minc;
+    //if (chroma * 256 < maxc * 140) return qfalse; // 140/256 ≈ 0.55
+
+    // Reject orange/yellow: g/r must be small enough (g/r <= ~0.38)
+    if ((int)g * 100 > (int)r * 38) return qfalse;
+
+    // Reject magenta/pink: b/r must be smallish too (b/r <= ~0.45)
+    //if ((int)b * 100 > (int)r * 45) return qfalse;
+
+    return qtrue;
+}
+
+// gothicMode: 1 = force pure red, 2 = keep original red intensity
+static ID_INLINE void ApplyNoirRed(byte *dstR, byte *dstG, byte *dstB,
+                                   byte srcR, byte srcG, byte srcB,
+                                   int gothicMode) {
+	(void)srcG; (void)srcB; // unused but kept for symmetry
+	if (gothicMode == 2) {
+		*dstR = srcR;
+		*dstG = 0;
+		*dstB = 0;
+	} else {
+		*dstR = 255;
+		*dstG = 0;
+		*dstB = 0;
+	}
+}
+
 /*
 ** trGlobals_t
 **
@@ -1163,7 +1212,7 @@ typedef struct {
 	trRefEntity_t           *currentEntity;
 	trRefEntity_t worldEntity;                  // point currentEntity at this when rendering world
 	int currentEntityNum;
-	int shiftedEntityNum;                       // currentEntityNum << QSORT_REFENTITYNUM_SHIFT
+    uint64_t shiftedEntityNum;                    // currentEntityNum << QSORT_REFENTITYNUM_SHIFT
 	model_t                 *currentModel;
 
 	viewParms_t viewParms;
@@ -1375,6 +1424,7 @@ extern	cvar_t	*r_stereoEnabled;
 extern	cvar_t	*r_anaglyphMode;
 
 extern	cvar_t	*r_greyscale;
+extern  cvar_t  *r_gothic;
 
 extern cvar_t  *r_ignoreGLErrors;
 
@@ -1421,7 +1471,7 @@ void R_TagInfo_f( void );
 void R_AddPolygonSurfaces( void );
 
 // GR - add tessellation flag
-void R_DecomposeSort( unsigned sort, int *entityNum, shader_t **shader,
+void R_DecomposeSort( uint64_t sort, int *entityNum, shader_t **shader,
 					  int *fogNum, int *dlightMap, int *atiTess );
 
 // GR - add tessellation flag

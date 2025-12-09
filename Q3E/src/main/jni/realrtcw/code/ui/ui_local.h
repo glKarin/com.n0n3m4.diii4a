@@ -128,6 +128,7 @@ extern vmCvar_t ui_browserShowFull;
 extern vmCvar_t ui_browserShowEmpty;
 
 extern vmCvar_t ui_serverStatusTimeOut;
+extern vmCvar_t ui_sv_enemies;
 // -NERVE - SMF
 
 //
@@ -714,6 +715,12 @@ typedef struct {
 	int gtEnum;
 } gameTypeInfo;
 
+typedef enum {
+	SV_ENEMIES_FILTER_ALL = 0,
+	SV_ENEMIES_FILTER_HUMAN,
+	SV_ENEMIES_FILTER_UNDEAD
+} svEnemiesFilter_t;
+
 typedef struct {
 	const char *mapName;
 	const char *mapLoadName;
@@ -1171,5 +1178,7 @@ void UI_SPUnlockMedals_f( void );
 void UI_InitGameinfo( void );
 
 void trap_openURL(const char *url);
+
+int UI_ParseArenaEnemiesType( const char *arenaInfo );
 
 #endif

@@ -1155,6 +1155,8 @@ extern vmCvar_t g_midgame;
 extern vmCvar_t g_dlc1;
 extern vmCvar_t g_class;
 extern vmCvar_t g_noobTube;
+extern vmCvar_t g_aiCollision;    
+extern vmCvar_t g_level_was_selected;  
 
 extern vmCvar_t g_playerSurvivalClass;
 
@@ -1251,6 +1253,7 @@ extern vmCvar_t g_realism;
 extern vmCvar_t g_regen;
 extern vmCvar_t	g_flushItems;
 extern vmCvar_t g_vanilla_guns;
+extern vmCvar_t g_specialWaves;
 
 // Safe endgame fix
 extern qboolean g_endgameTriggered;

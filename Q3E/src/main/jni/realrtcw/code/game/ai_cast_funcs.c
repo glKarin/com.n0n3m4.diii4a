@@ -363,6 +363,7 @@ AICast_SpecialFunc
 void AICast_SpecialFunc( cast_state_t *cs ) {
 	gentity_t *ent = &g_entities[cs->entityNum];
 	gentity_t *enemy = NULL;
+	char mapname[MAX_QPATH];
 
 	if ( cs->enemyNum >= 0 ) {
 		enemy = &g_entities[cs->enemyNum];
@@ -370,22 +371,55 @@ void AICast_SpecialFunc( cast_state_t *cs ) {
 
 	switch ( cs->aiCharacter ) {
 	case AICHAR_WARZOMBIE:
-		// disable defense unless we want it
-		ent->flags &= ~FL_DEFENSE_CROUCH;
-		// if we are pursuing the player from a distance, use our "crouch moving defense"
-		if (    ( enemy )
-				&&  ( cs->vislist[cs->enemyNum].real_visible_timestamp > level.time - 5000 )
-				&&  ( Distance( cs->bs->origin, enemy->s.pos.trBase ) > 200 )
-				&&  ( Distance( cs->bs->origin, enemy->s.pos.trBase ) < 600 )
-				&&  ( cs->bs->cur_ps.groundEntityNum != ENTITYNUM_NONE )
-				//&&	(infront( ent, enemy ))
-				&&  ( infront( enemy, ent ) ) ) {
-			// crouch
-			trap_EA_Crouch( cs->entityNum );
-			// enable defense pose
-			ent->flags |= FL_DEFENSE_CROUCH;
-		}
-		break;
+    trap_Cvar_VariableStringBuffer("mapname", mapname, sizeof(mapname));
+
+    if (!Q_strncmp(mapname, "end", 3))
+    {
+        // If below 30% HP → return to normal (non-end) behavior
+        if ((float)ent->health / (float)cs->attributes[STARTING_HEALTH] < 0.30f)
+        {
+            ent->flags &= ~FL_DEFENSE_CROUCH;
+
+            if (enemy &&
+                cs->vislist[cs->enemyNum].real_visible_timestamp > level.time - 5000 &&
+                Distance(cs->bs->origin, enemy->s.pos.trBase) > 200 &&
+                Distance(cs->bs->origin, enemy->s.pos.trBase) < 600 &&
+                cs->bs->cur_ps.groundEntityNum != ENTITYNUM_NONE &&
+                infront(enemy, ent))
+            {
+                trap_EA_Crouch(cs->entityNum);
+                ent->flags |= FL_DEFENSE_CROUCH;
+            }
+        }
+        else
+        {
+            // Aggressive end-map behavior
+            cs->actionFlags &= ~CASTACTION_WALK;
+            ent->flags &= ~FL_DEFENSE_CROUCH;
+
+            if (ent->client->ps.torsoTimer > 0)
+            {
+                cs->actionFlags &= ~CASTACTION_WALK;
+            }
+        }
+    }
+    else
+    {
+        ent->flags &= ~FL_DEFENSE_CROUCH;
+
+        if (enemy &&
+            cs->vislist[cs->enemyNum].real_visible_timestamp > level.time - 5000 &&
+            Distance(cs->bs->origin, enemy->s.pos.trBase) > 200 &&
+            Distance(cs->bs->origin, enemy->s.pos.trBase) < 600 &&
+            cs->bs->cur_ps.groundEntityNum != ENTITYNUM_NONE &&
+            infront(enemy, ent))
+        {
+            trap_EA_Crouch(cs->entityNum);
+            ent->flags |= FL_DEFENSE_CROUCH;
+        }
+    }
+
+    break;
 	case AICHAR_HELGA:
 		// if she has recently finished a spirit attack, go into charge mode
 		if ( ( cs->weaponFireTimes[WP_MONSTER_ATTACK2] && ( cs->weaponFireTimes[WP_MONSTER_ATTACK2] > level.time - 12000 ) ) ||
@@ -406,53 +440,66 @@ void AICast_SpecialFunc( cast_state_t *cs ) {
 			}
 		}
 		break;
-	case AICHAR_HEINRICH:
-		if (    ( ent->health <= 0.25 * cs->attributes[STARTING_HEALTH] )
-				||  ( cs->weaponFireTimes[WP_MONSTER_ATTACK1] > level.time - 6000 ) // walk for period after attack
-				||  ( cs->weaponFireTimes[WP_MONSTER_ATTACK1] % 8000 < 3000 ) ) {   // dont run constantly
-			cs->actionFlags |= CASTACTION_WALK;
-		} else {    // charging
-			cs->actionFlags &= ~CASTACTION_WALK;
+case AICHAR_HEINRICH:
+{
+	const float BERSERK_START_HP    = 0.70f;  
+	const float FINAL_WOUNDED_HP   = 0.05f;  
+	const int   POST_ATTACK_WALK   = 1200; 
+
+	float healthRatio = (float)ent->health / cs->attributes[STARTING_HEALTH];
+
+	if (cs->weaponFireTimes[WP_MONSTER_ATTACK1] > level.time - POST_ATTACK_WALK)
+	{
+		cs->actionFlags |= CASTACTION_WALK;
+	}
+	else if (healthRatio > BERSERK_START_HP)
+	{
+		cs->actionFlags |= CASTACTION_WALK;  
+	}
+	else if (healthRatio > FINAL_WOUNDED_HP)
+	{
+		cs->actionFlags &= ~CASTACTION_WALK;
+	}
+	else
+	{
+		cs->actionFlags |= CASTACTION_WALK; 
+	}
+
+	if (ent->client->ps.torsoTimer > 0)
+	{
+		cs->actionFlags &= ~CASTACTION_WALK;
+	}
+
+	if (ent->health <= 0 && ent->takedamage)
+	{
+		if (ent->client->ps.torsoTimer < 300)
+		{
+			GibEntity(ent, 0);
+			ent->takedamage = qfalse;
+			ent->r.contents = 0;
+			ent->health = GIB_HEALTH - 1;
 		}
-		// allow running while attacking
-		if ( ent->client->ps.torsoTimer && !ent->client->ps.legsTimer ) {
-			cs->actionFlags &= ~CASTACTION_WALK;
-		}
-		//
-		if ( ent->health <= 0 && ent->takedamage ) {
-			if ( ent->client->ps.torsoTimer < 500 ) {
-				// blow up
-				GibEntity( ent, 0 );
-				ent->takedamage = qfalse;
-				ent->r.contents = 0;
-				ent->health = GIB_HEALTH - 1;
-			}
-			// blow up other warriors left around
-			if ( !ent->takedamage || ( ent->count2 < level.time && ent->client->ps.torsoTimer < 4000 ) ) {
-				int i;
-				gentity_t *trav;
-				for ( i = 0, trav = g_entities; i < level.maxclients; i++, trav++ ) {
-					if ( !trav->inuse ) {
-						continue;
-					}
-					if ( trav->aiCharacter != AICHAR_WARZOMBIE ) {
-						continue;
-					}
-					if ( trav->aiInactive ) {
-						continue;
-					}
-					if ( trav->health <= 0 ) {
-						continue;
-					}
-					// blow it up, set some delay
-					G_Damage( trav, ent, ent, NULL, NULL, 99999, 0, MOD_CRUSH );
-					if ( ent->takedamage ) {
-						ent->count2 = level.time + 200 + rand() % 1500;
-					}
+		if (!ent->takedamage || (ent->count2 < level.time && ent->client->ps.torsoTimer < 4000))
+		{
+			int i;
+			gentity_t *trav;
+			for (i = 0, trav = g_entities; i < level.maxclients; i++, trav++)
+			{
+				if (!trav->inuse || trav->aiCharacter != AICHAR_WARZOMBIE ||
+				    trav->aiInactive || trav->health <= 0)
+					continue;
+
+				G_Damage(trav, ent, ent, NULL, NULL, 99999, 0, MOD_CRUSH);
+				if (ent->takedamage)
+				{
+					ent->count2 = level.time + 200 + rand() % 1500;
 				}
+				break;
 			}
 		}
-		break;
+	}
+}
+break;
 	case AICHAR_ZOMBIE:
 	case AICHAR_ZOMBIE_SURV:
 	case AICHAR_ZOMBIE_FLAME:
@@ -2960,7 +3007,7 @@ char *AIFunc_BattleChase( cast_state_t *cs ) {
 				return AIFunc_BattleAmbushStart( cs );
 			}
 			// HACK, help lopers get out of bad spots
-			if ( cs->aiCharacter == AICHAR_LOPER ) {
+			if ( cs->aiCharacter == AICHAR_LOPER || cs->aiCharacter == AICHAR_LOPER_SPECIAL) {
 				cs->weaponFireTimes[WP_MONSTER_ATTACK2] = 0;
 			}
 			// couldn't find a spot, so just stay here?

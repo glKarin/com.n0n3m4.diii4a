@@ -88,25 +88,28 @@ Targets will be fired when someone spawns in on them.
 If the start position is targeting an entity, the players camera will start out facing that ent (like an info_notnull)
 */
 void SP_info_ai_respawn( gentity_t *ent ) {
-	int i;
-	vec3_t dir;
+    int i;
+    vec3_t dir;
+    char *s;  // <-- not const
 
-	G_SpawnInt( "nobots", "0", &i );
-	if ( i ) {
-		ent->flags |= FL_NO_BOTS;
-	}
-	G_SpawnInt( "nohumans", "0", &i );
-	if ( i ) {
-		ent->flags |= FL_NO_HUMANS;
-	}
+    G_SpawnInt( "nobots", "0", &i );    if ( i ) ent->flags |= FL_NO_BOTS;
+    G_SpawnInt( "nohumans", "0", &i );  if ( i ) ent->flags |= FL_NO_HUMANS;
 
-	ent->enemy = G_PickTarget( ent->target );
-	if ( ent->enemy ) {
-		VectorSubtract( ent->enemy->s.origin, ent->s.origin, dir );
-		vectoangles( dir, ent->s.angles );
-	}
+    // Parse optional name filter into existing ent->aiName
+    G_SpawnString( "ainame", "", &s );  // returns qtrue/false, but s is set either way
+    if ( s && s[0] ) {
+        ent->aiName = G_NewString( s );
+    } else {
+        ent->aiName = NULL;             // no restriction
+    }
 
-	ent->AIScript_AlertEntity = info_ai_respawn_toggle;
+    ent->enemy = G_PickTarget( ent->target );
+    if ( ent->enemy ) {
+        VectorSubtract( ent->enemy->s.origin, ent->s.origin, dir );
+        vectoangles( dir, ent->s.angles );
+    }
+
+    ent->AIScript_AlertEntity = info_ai_respawn_toggle;
 }
 
 

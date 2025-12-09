@@ -20,7 +20,7 @@ endif()
 
 
 # Backport
-OPTION(BUILD_BACKPORT               "Build backport version"                        OFF)
+OPTION(BUILD_BACKPORT               "Build backport version"                        ON)
 
 
 # Supported
@@ -178,12 +178,12 @@ if(GAME_ETW) # v2.83.1 | e8d0ec06800630fd458791ccd29ed488e04648d9 | Nov 12, 2024
     add_subdirectory ( etw ) # ETW
 endif()
 
-if(GAME_REALRTCW) # 5.2 | Jul 26, 2025 | ad529d588e4dec717aff0779f9d1555eddc1e2be | Update ai_cast_survival.c
+if(GAME_REALRTCW) # 5.3 | Jul 26, 2025 | 32e574d19bc3d5fa92c3c67cfe168154a26ed217 | Never do special wave if chance is 0
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
-#[[    if(BUILD_BACKPORT)
-        add_subdirectory ( backports/realrtcw_5_1 "realrtcw_5_1" ) # 5.1 | on Feb 14, 2025 | a6e94b82bd11c41f62ffc969e27b0e63f267ef8e | Version is upped to 5.1
-    endif()]]
+    if(BUILD_BACKPORT)
+        add_subdirectory ( backports/realrtcw_5_2 "realrtcw_5_2" )
+    endif()
 endif()
 
 if(GAME_FTEQW) # 5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 | engine/common/fs.c: Update game definitions

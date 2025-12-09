@@ -134,14 +134,14 @@ public class Q3EInterface
 			else
 				return Q3EGameConstants.LIB_ENGINE4_D3BFG;
 		}
-/*		else if(isRealRTCW)
+		else if(isRealRTCW)
 		{
-			if(Q3EGameConstants.GAME_VERSION_REALRTCW_5_1.equalsIgnoreCase(engine_version))
-				return Q3EGameConstants.LIB_ENGINE3_REALRTCW_5_1;
+			if(Q3EGameConstants.GAME_VERSION_REALRTCW_5_2.equalsIgnoreCase(engine_version))
+				return Q3EGameConstants.LIB_ENGINE3_REALRTCW_5_2;
 			else
 				return Q3EGameConstants.LIB_ENGINE3_REALRTCW;
 		}
-		else if(isTDM)
+		/*else if(isTDM)
 		{
 			if(Q3EGameConstants.GAME_VERSION_TDM_2_12.equalsIgnoreCase(engine_version))
 				return Q3EGameConstants.LIB_ENGINE4_TDM_2_12;
@@ -991,11 +991,11 @@ public class Q3EInterface
 						Q3EGameConstants.GAME_VERSION_D3BFG_OPENGL,
 						Q3EGameConstants.GAME_VERSION_D3BFG_VULKAN,
 				};
-/*			case Q3EGameConstants.GAME_REALRTCW:
+			case Q3EGameConstants.GAME_REALRTCW:
 				return new String[]{
 						Q3EGameConstants.GAME_VERSION_REALRTCW,
-						Q3EGameConstants.GAME_VERSION_REALRTCW_5_1,
-				};*/
+						Q3EGameConstants.GAME_VERSION_REALRTCW_5_2,
+				};
 			default:
 				return null;
 		}

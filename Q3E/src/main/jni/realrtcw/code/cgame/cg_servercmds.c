@@ -825,8 +825,29 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-	if ( !strcmp( cmd, "egp" ) ) {
-		CG_EndGamePrint( CG_Argv( 1 ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
+	if (!strcmp(cmd, "egp"))
+	{
+		const char *key = CG_Argv(1);
+		const char *trans = NULL;
+		char formatted[1024];
+		int argc = trap_Argc();
+
+		trans = CG_translateString(key);
+
+		if (argc >= 4)
+		{											  // egp key num1 num2
+			Com_sprintf(formatted, sizeof(formatted), // RealRTCW uses Com_sprintf, NOT Q_snprintf
+						trans,
+						atoi(CG_Argv(2)),
+						atoi(CG_Argv(3)));
+		}
+		else
+		{
+			Q_strncpyz(formatted, trans, sizeof(formatted));
+		}
+
+		// Use the same Y position and width as the original code had before
+		CG_EndGamePrint(formatted, SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.25), SMALLCHAR_WIDTH);
 		return;
 	}
 

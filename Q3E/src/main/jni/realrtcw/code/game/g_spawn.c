@@ -336,6 +336,7 @@ void SP_ai_protosoldier( gentity_t *ent );
 void SP_ai_partisan( gentity_t *ent );
 void SP_ai_russian( gentity_t *ent );
 void SP_ai_civilian( gentity_t *ent );
+void SP_ai_loper_special( gentity_t *ent );
 // done.
 
 // Rafael particles
@@ -614,6 +615,7 @@ spawn_t spawns[] = {
 	{"ai_partisan", SP_ai_partisan},
 	{"ai_russian", SP_ai_russian},
 	{"ai_civilian", SP_ai_civilian},
+	{"ai_loper_special", SP_ai_loper_special},
 
 
 	{"ai_marker", SP_ai_marker},

@@ -1242,7 +1242,7 @@ void CG_AddFlameToScene( flameChunk_t *fHead ) {
 				if ( lightSize < 200 ) {
 					lightSize = 200;
 				}
-				if ( cgs.gametype == GT_GOTHIC ) {
+				if ( cg_gothic.integer ) {
 				   trap_R_AddLightToScene( f->org, lightSize, 0.5 * lightAlpha, 0.0 * lightAlpha, 0.0 * lightAlpha, 0 );
 				} else {
 				   trap_R_AddLightToScene( f->org, lightSize, 1.0 * lightAlpha, 0.7 * lightAlpha, 0.3 * lightAlpha, 0 );
@@ -1277,7 +1277,7 @@ void CG_AddFlameToScene( flameChunk_t *fHead ) {
 		if ( lightSize > 80 ) {
 			lightSize = 80;
 		}
-		if ( cgs.gametype == GT_GOTHIC ) {
+		if ( cg_gothic.integer ) {
 		   trap_R_AddLightToScene( lightOrg, 90 + lightSize, alpha * 0.5, 0, alpha * 0.0, 0 );
 		} else {
 		   trap_R_AddLightToScene( lightOrg, 90 + lightSize, 0, 0, alpha * 0.5, 0 );

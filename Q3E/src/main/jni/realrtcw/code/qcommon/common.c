@@ -2025,8 +2025,12 @@ Expose possibility to change current running mod to the user
 
 void Com_GameRestart_f(void)
 {
-	Cvar_Set("fs_game", Cmd_Argv(1));
+    // If an argument is provided, treat it as the new fs_game
+    if (Cmd_Argc() > 1) {
+		Cvar_Set("fs_game", Cmd_Argv(1));
+    }
 
+    // Always restart the game
 	Com_GameRestart(0, qtrue);
 }
 

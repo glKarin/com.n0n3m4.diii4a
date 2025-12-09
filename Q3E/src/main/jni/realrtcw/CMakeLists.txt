@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(realrtcw)
-set(REALRTCW_VERSION "5.2")
+set(REALRTCW_VERSION "5.3")
 set(REALRTCW_SUFFIX "")
 set(REALRTCW_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -151,6 +151,7 @@ set(realrtcwgame_src
         code/game/ai_cast_fight.c
         code/game/ai_cast_func_attack.c
         code/game/ai_cast_func_boss1.c
+        code/game/ai_cast_func_hein.c
         code/game/ai_cast_funcs.c
         code/game/ai_cast_script_actions.c
         code/game/ai_cast_script.c

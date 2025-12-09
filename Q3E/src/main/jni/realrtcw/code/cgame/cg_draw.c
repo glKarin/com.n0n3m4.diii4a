@@ -3107,6 +3107,7 @@ static void CG_DrawDynamiteStatus( void ) {
 CG_ScanForCrosshairEntity
 =================
 */
+static qboolean doScan = qtrue;
 static void CG_ScanForCrosshairEntity( void ) {
 	trace_t trace;
 	vec3_t start, end;
@@ -3118,8 +3119,11 @@ static void CG_ScanForCrosshairEntity( void ) {
 	CG_Trace( &trace, start, vec3_origin, vec3_origin, end,
 			  cg.snap->ps.clientNum, CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_ITEM );
 
-	if ( trace.entityNum >= MAX_CLIENTS ) {
+	if ( trace.entityNum >= MAX_CLIENTS && doScan != qtrue ) {
+		doScan = qfalse;
 		return;
+	} else {
+		doScan = qtrue;
 	}
 
 	// if the player is in fog, don't show it
