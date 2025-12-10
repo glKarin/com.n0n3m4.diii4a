@@ -433,6 +433,8 @@ void idConsoleLocal::Init(void)
 		consoleH = 200;
 	}
     drag = false;
+    if(harm_con_float.GetBool())
+        consoleField.SetWidthInChars(idMath::FtoiFast((float)consoleW * (float)LINE_WIDTH / (float)SCREEN_WIDTH));
 }
 
 /*
@@ -705,7 +707,10 @@ void idConsoleLocal::KeyDownEvent(int key)
 			DumpHistory();
 
 		consoleField.Clear();
-		consoleField.SetWidthInChars(LINE_WIDTH);
+        if(harm_con_float.GetBool())
+            consoleField.SetWidthInChars(idMath::FtoiFast((float)consoleW * (float)LINE_WIDTH / (float)SCREEN_WIDTH));
+        else
+		    consoleField.SetWidthInChars(LINE_WIDTH);
 
 		session->UpdateScreen();// force an update, because the command
 		// may take some time
@@ -1259,6 +1264,11 @@ void idConsoleLocal::DrawSolidConsole(float frac)
 		return;
 	}
 
+    if(consoleField.widthInChars != LINE_WIDTH)
+    {
+        consoleField.SetWidthInChars(LINE_WIDTH);
+    }
+
 	lines = idMath::FtoiFast(SCREEN_HEIGHT * frac);
 
 	if (lines <= 0) {
@@ -1529,6 +1539,8 @@ void idConsoleLocal::DrawFloatConsole(void)
 	}
 
 	const int lineWidth = idMath::FtoiFast((float)consoleW * (float)LINE_WIDTH / (float)SCREEN_WIDTH);
+    if(consoleField.widthInChars != lineWidth)
+        consoleField.SetWidthInChars(lineWidth);
 	const int totalLines = CON_TEXTSIZE / lineWidth;
 
 	if (lines > SCREEN_HEIGHT) {
@@ -1655,7 +1667,7 @@ void idConsoleLocal::DrawFloatConsole(void)
 	// draw the input prompt, user text, and cursor if desired
 	if(!harm_con_alwaysShow.GetBool() || keyCatching)
 	{
-		int y, autoCompleteLength;
+		int autoCompleteLength;
 
 		y = vislines - (SMALLCHAR_HEIGHT * 2) + consoleY;
 

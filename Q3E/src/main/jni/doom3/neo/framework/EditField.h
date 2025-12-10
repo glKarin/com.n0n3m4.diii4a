@@ -75,6 +75,8 @@ class idEditField
 		int				widthInChars;
 		char			buffer[MAX_EDIT_LINE];
 		autoComplete_t	autoComplete;
+
+        friend class idConsoleLocal;
 };
 
 #endif /* !__EDITFIELD_H__ */
