@@ -82,7 +82,7 @@ public final class KCVarSystem
                         ),
                         KCVar.CreateCVar("harm_r_occlusionCulling", "bool", "0", "Enable DOOM3-BFG occlusion culling", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT),
                         KCVar.CreateCVar("harm_r_globalIllumination", "bool", "0", "render global illumination before draw lighting interactions", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_globalIlluminationBrightness", "float", "0.5", "global illumination brightness", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_globalIlluminationBrightness", "float", "0.3", "global illumination brightness", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("r_renderMode", "integer", "0", "Enable retro postprocess rendering", KCVar.FLAG_LAUNCHER,
                                 "0", "None",
                                 "1", "CGA",

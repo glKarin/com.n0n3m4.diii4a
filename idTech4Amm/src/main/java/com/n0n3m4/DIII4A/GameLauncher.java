@@ -132,10 +132,12 @@ import com.n0n3m4.q3e.karin.KidTechCommand;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @SuppressLint({"ApplySharedPref", "CommitPrefEdits"})
 public class GameLauncher extends Activity
@@ -757,9 +759,9 @@ public class GameLauncher extends Activity
 				if(Q3EUtils.q3ei.isDOOM)
 				{
 					int value2 = GetRadioGroupSelectIndex(radioGroup, id);
-					value2 = value2 >= 0 && value2 < Q3EGameConstants.GZDOOM_GL_VERSIONS.length ? Q3EGameConstants.GZDOOM_GL_VERSIONS[value2] : 0;
+					String value = value2 >= 0 && value2 < Q3EGameConstants.GZDOOM_GL_VERSIONS.length ? Q3EGameConstants.GZDOOM_GL_VERSIONS[value2] : Q3EGameConstants.GZDOOM_GL_VERSIONS[0];
 					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
-					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "harm_gl_version", value2);
+					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "harm_gl_version", value);
 				}
 			}
 
@@ -1259,6 +1261,18 @@ public class GameLauncher extends Activity
 		return null;
 	}
 
+	private int GetRadioGroupNum(RadioGroup rg)
+	{
+		int j = 0;
+		for (int i = 0; i < rg.getChildCount(); i++)
+		{
+			View item = rg.getChildAt(i);
+			if (item instanceof RadioButton)
+				j++;
+		}
+		return j;
+	}
+
     public boolean getProp(String name)
     {
 		Boolean b = Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).GetBoolProp(name, false);
@@ -1276,111 +1290,33 @@ public class GameLauncher extends Activity
     {
     	LockCmdUpdate();
 		String str;
-		int index;
 
 		if(Q3EUtils.q3ei.IsIdTech4()) // only for idTech4 games
 		{
-			//k
-			V.usedxt.setChecked(getProp("r_useDXT", false));
-			V.useetc1.setChecked(getProp("r_useETC1", false));
-			V.useetc1cache.setChecked(getProp("r_useETC1cache", false));
-			V.nolight.setChecked(getProp("r_noLight", false));
+			SyncCmdCheckbox(V.usedxt, "r_useDXT", false);
+			SyncCmdCheckbox(V.useetc1, "r_useETC1", false);
+			SyncCmdCheckbox(V.useetc1cache, "r_useETC1cache", false);
+			SyncCmdCheckbox(V.nolight, "r_noLight", false);
+			SyncCmdCheckbox(V.image_useetc2, "r_useETC2", false);
+			SyncCmdRadioGroup(V.r_harmclearvertexbuffer, "harm_r_clearVertexBuffer", 2, 3);
+			SyncCmdRadioGroup(V.rg_harm_r_lightingModel, "harm_r_lightingModel", 1, 1, V.rg_harm_r_lightingModel.getChildCount());
+			SyncCmdEditText(V.edt_harm_r_specularExponent, "harm_r_specularExponent", "3.0");
+			SyncCmdEditText(V.edt_harm_r_specularExponentBlinnPhong, "harm_r_specularExponentBlinnPhong", "12.0");
+			SyncCmdEditText(V.edt_harm_r_specularExponentPBR, "harm_r_specularExponentPBR", "5.0");
+			SyncCmdEditText(V.edt_harm_r_PBRNormalCorrection, "harm_r_PBRNormalCorrection", "0.25");
+			SyncCmdEditText(V.edt_harm_r_ambientLightingBrightness, "harm_r_ambientLightingBrightness", "1.0");
+			SyncCmdRadioGroupV(V.rg_s_driver, "s_driver", Q3EGameConstants.DOOM3_SOUND_DRIVER);
+			SyncCmdEditText(V.edt_harm_r_maxFps, "r_maxFps", "0");
+			SyncCmdRadioGroup(V.rg_harm_r_shadow, "r_useShadowMapping", 0);
+			SyncCmdEditText(V.edt_harm_r_shadowMapAlpha, "harm_r_shadowMapAlpha", "1.0");
+			SyncCmdCheckbox(V.cb_stencilShadowTranslucent, "harm_r_stencilShadowTranslucent", false);
+			SyncCmdEditText(V.edt_harm_r_stencilShadowAlpha, "harm_r_stencilShadowAlpha", "1.0");
+			SyncCmdCheckbox(V.cb_stencilShadowSoft, "harm_r_stencilShadowSoft", false);
+			SyncCmdCheckbox(V.cb_stencilShadowCombine, "harm_r_stencilShadowCombine", false);
+			SyncCmdCheckbox(V.cb_perforatedShadow, "r_forceShadowMapsOnAlphaTestedSurfaces", false);
+			SyncCmdCheckbox(V.cb_shadowMapCombine, "harm_r_shadowMapCombine", true);
 
-			//k fill commandline
-			if (!IsProp("r_useDXT")) setProp("r_useDXT", false);
-			if (!IsProp("r_useETC1")) setProp("r_useETC1", false);
-			if (!IsProp("r_useETC1cache")) setProp("r_useETC1cache", false);
-			if (!IsProp("r_noLight")) setProp("r_noLight", false);
-
-			V.image_useetc2.setChecked(getProp("r_useETC2", false));
-			if (!IsProp("r_useETC2")) setProp("r_useETC2", false);
-
-			str = GetProp("harm_r_clearVertexBuffer");
-			index = Q3EUtils.parseInt_s(str, 2);
-			SelectRadioGroup(V.r_harmclearvertexbuffer, index);
-			if (!IsProp("harm_r_clearVertexBuffer")) SetProp("harm_r_clearVertexBuffer", 2);
-
-			str = GetProp("harm_r_lightingModel");
-			index = 0;
-			if (str != null)
-			{
-				index = Q3EUtils.parseInt_s(str, 1) - 1;
-				if(index < 0)
-					index = V.rg_harm_r_lightingModel.getChildCount() - 1;
-			}
-			SelectRadioGroup(V.rg_harm_r_lightingModel, index);
-			if (!IsProp("harm_r_lightingModel")) SetProp("harm_r_lightingModel", "1");
-
-			str = GetProp("harm_r_specularExponent");
-			if (null != str)
-				V.edt_harm_r_specularExponent.setText(str);
-			if (!IsProp("harm_r_specularExponent")) SetProp("harm_r_specularExponent", "3.0");
-
-			str = GetProp("harm_r_specularExponentBlinnPhong");
-			if (null != str)
-				V.edt_harm_r_specularExponentBlinnPhong.setText(str);
-			if (!IsProp("harm_r_specularExponentBlinnPhong")) SetProp("harm_r_specularExponentBlinnPhong", "12.0");
-
-			str = GetProp("harm_r_specularExponentPBR");
-			if (null != str)
-				V.edt_harm_r_specularExponentPBR.setText(str);
-			if (!IsProp("harm_r_specularExponentPBR")) SetProp("harm_r_specularExponentPBR", "5.0");
-
-			str = GetProp("harm_r_PBRNormalCorrection");
-			if (null != str)
-				V.edt_harm_r_PBRNormalCorrection.setText(str);
-			if (!IsProp("harm_r_PBRNormalCorrection")) SetProp("harm_r_PBRNormalCorrection", "0.25");
-
-			str = GetProp("harm_r_ambientLightingBrightness");
-			if (null != str)
-				V.edt_harm_r_ambientLightingBrightness.setText(str);
-			if (!IsProp("harm_r_ambientLightingBrightness")) SetProp("harm_r_ambientLightingBrightness", "1.0");
-
-			str = GetProp("s_driver");
-			index = 0;
-			if (str != null)
-			{
-				if ("OpenSLES".equalsIgnoreCase(str))
-					index = 1;
-			}
-			SelectRadioGroup(V.rg_s_driver, index);
-
-			str = GetProp("r_maxFps");
-			if (null != str)
-				V.edt_harm_r_maxFps.setText(str);
-			if (!IsProp("r_maxFps")) SetProp("r_maxFps", "0");
-
-			str = GetProp("r_useShadowMapping");
-			index = 0;
-			if (str != null)
-			{
-				if ("1".equalsIgnoreCase(str))
-					index = 1;
-			}
-			SelectRadioGroup(V.rg_harm_r_shadow, index);
-			if (!IsProp("r_useShadowMapping")) SetProp("r_useShadowMapping", "0");
-			str = GetProp("harm_r_shadowMapAlpha");
-			if (null != str)
-				V.edt_harm_r_shadowMapAlpha.setText(str);
-			if (!IsProp("harm_r_shadowMapAlpha")) SetProp("harm_r_shadowMapAlpha", "1.0");
-
-			V.cb_stencilShadowTranslucent.setChecked(getProp("harm_r_stencilShadowTranslucent", false));
-			if (!IsProp("harm_r_stencilShadowTranslucent")) setProp("harm_r_stencilShadowTranslucent", false);
-			str = GetProp("harm_r_stencilShadowAlpha");
-			if (null != str)
-				V.edt_harm_r_stencilShadowAlpha.setText(str);
-			if (!IsProp("harm_r_stencilShadowAlpha")) SetProp("harm_r_stencilShadowAlpha", "1.0");
-
-			V.cb_stencilShadowSoft.setChecked(getProp("harm_r_stencilShadowSoft", false));
-			if (!IsProp("harm_r_stencilShadowSoft")) setProp("harm_r_stencilShadowSoft", false);
-			V.cb_stencilShadowCombine.setChecked(getProp("harm_r_stencilShadowCombine", false));
-			if (!IsProp("harm_r_stencilShadowCombine")) setProp("harm_r_stencilShadowCombine", false);
-			V.cb_perforatedShadow.setChecked(getProp("r_forceShadowMapsOnAlphaTestedSurfaces", false));
-			if (!IsProp("r_forceShadowMapsOnAlphaTestedSurfaces")) setProp("r_forceShadowMapsOnAlphaTestedSurfaces", false);
-			V.cb_shadowMapCombine.setChecked(getProp("harm_r_shadowMapCombine", true));
-			if (!IsProp("harm_r_shadowMapCombine")) setProp("harm_r_shadowMapCombine", true);
-
-			V.cb_s_useOpenAL.setChecked(getProp("s_useOpenAL", false));
+			V.cb_s_useOpenAL.setChecked(getProp("s_useOpenAL", true));
 			if (!IsProp("s_useOpenAL"))
 			{
 				setProp("s_useOpenAL", false);
@@ -1389,18 +1325,12 @@ public class GameLauncher extends Activity
 			}
 			else
 			{
-				V.cb_s_useEAXReverb.setChecked(getProp("s_useEAXReverb", false));
-				if (!IsProp("s_useEAXReverb")) setProp("s_useEAXReverb", false);
+				SyncCmdCheckbox(V.cb_s_useEAXReverb, "s_useEAXReverb", true);
 			}
 
-			V.cb_useHighPrecision.setChecked(getProp("harm_r_useHighPrecision", false));
-			if (!IsProp("harm_r_useHighPrecision")) setProp("harm_r_useHighPrecision", false);
-
-			V.cb_renderToolsMultithread.setChecked(getProp("harm_r_renderToolsMultithread", false));
-			if (!IsProp("harm_r_renderToolsMultithread")) setProp("harm_r_renderToolsMultithread", false);
-
-			V.cb_r_occlusionCulling.setChecked(getProp("harm_r_occlusionCulling", false));
-			if (!IsProp("harm_r_occlusionCulling")) setProp("harm_r_occlusionCulling", false);
+			SyncCmdCheckbox(V.cb_useHighPrecision, "harm_r_useHighPrecision", false);
+			SyncCmdCheckbox(V.cb_renderToolsMultithread, "harm_r_renderToolsMultithread", false);
+			SyncCmdCheckbox(V.cb_r_occlusionCulling, "harm_r_occlusionCulling", false);
 
 			V.cb_gui_useD3BFGFont.setChecked(getProp("harm_gui_useD3BFGFont", false));
 			if (!IsProp("harm_gui_useD3BFGFont"))
@@ -1413,17 +1343,16 @@ public class GameLauncher extends Activity
 				if (!IsProp("harm_gui_wideCharLang")) setProp("harm_gui_wideCharLang", true);
 			}
 
-			V.cb_r_globalIllumination.setChecked(getProp("harm_r_globalIllumination", false));
-			if (!IsProp("harm_r_globalIllumination")) setProp("harm_r_globalIllumination", false);
-			str = GetProp("harm_r_globalIlluminationBrightness");
-			if (null != str)
-				V.edt_r_globalIlluminationBrightness.setText(str);
-			if (!IsProp("harm_r_globalIlluminationBrightness")) SetProp("harm_r_globalIlluminationBrightness", "0.5");
+			SyncCmdCheckbox(V.cb_r_globalIllumination, "harm_r_globalIllumination", false);
+			SyncCmdEditText(V.edt_r_globalIlluminationBrightness, "harm_r_globalIlluminationBrightness", "0.3");
 
 			str = GetProp("r_renderMode");
 			if (null != str)
 				V.spinner_r_renderMode.setSelection(Q3EUtils.parseInt_s(str, 0));
 			if (!IsProp("r_renderMode")) SetProp("r_renderMode", "0");
+
+			SyncCmdCheckbox(V.cb_g_skipHitEffect, "harm_g_skipHitEffect", false);
+			SyncCmdCheckbox(V.cb_g_botEnableBuiltinAssets, "harm_g_botEnableBuiltinAssets", false);
 		}
 		else if(Q3EUtils.q3ei.isQ2)
 		{
@@ -1519,191 +1448,81 @@ public class GameLauncher extends Activity
 
 	private void Updatehacktings_Quake2()
 	{
-		String str;
-		int index;
-
-		str = GetProp("vid_renderer");
-		index = 0;
-		if (str != null)
-		{
-			index = Utility.ArrayIndexOf(Q3EGameConstants.QUAKE2_RENDERER_BACKENDS, str);
-			if(index < 0)
-				index = 0;
-		}
-		SelectRadioGroup(V.yquake2_vid_renderer, index);
+		SyncCmdRadioGroupV(V.yquake2_vid_renderer, "vid_renderer", Q3EGameConstants.QUAKE2_RENDERER_BACKENDS);
 	}
 
 	private void Updatehacktings_Doom3BFG()
 	{
-		String str;
-		int index;
-
-		str = GetProp("harm_image_useCompression");
-		index = 0;
-		if (str != null)
-		{
-			index = Q3EUtils.parseInt_s(str, 0);
-		}
-		SelectRadioGroup(V.doom3bfg_useCompression, index);
-
-		V.doom3bfg_useCompressionCache.setChecked(getProp("harm_image_useCompressionCache", false));
-		if (!IsProp("harm_image_useCompressionCache")) setProp("harm_image_useCompressionCache", false);
-
-		V.doom3bfg_useMediumPrecision.setChecked(getProp("harm_r_useMediumPrecision", false));
-		if (!IsProp("harm_r_useMediumPrecision")) setProp("harm_r_useMediumPrecision", false);
+		SyncCmdRadioGroup(V.doom3bfg_useCompression, "harm_image_useCompression", 0);
+		SyncCmdCheckbox(V.doom3bfg_useCompressionCache, "harm_image_useCompressionCache", false);
+		SyncCmdCheckbox(V.doom3bfg_useMediumPrecision, "harm_r_useMediumPrecision", false);
 	}
 
 	private void Updatehacktings_TDM()
 	{
-		V.tdm_useMediumPrecision.setChecked(getProp("harm_r_useMediumPrecision", false));
-		if (!IsProp("harm_r_useMediumPrecision")) setProp("harm_r_useMediumPrecision", false);
+		SyncCmdCheckbox(V.tdm_useMediumPrecision, "harm_r_useMediumPrecision", false);
 	}
 
 	private void Updatehacktings_RealRTCW()
 	{
-		String str;
-		int index;
-
-		str = GetProp("cg_shadows");
-		index = 0;
-		if (str != null)
-		{
-			index = Q3EUtils.parseInt_s(str, 1);
-		}
-		SelectRadioGroup(V.realrtcw_shadows, index);
-
-		V.realrtcw_sv_cheats.setChecked(getProp("harm_sv_cheats", false));
-		if (!IsProp("harm_sv_cheats")) setProp("harm_sv_cheats", false);
-
-		V.realrtcw_stencilShadowPersonal.setChecked(getProp("harm_r_stencilShadowPersonal", true));
-		if (!IsProp("harm_r_stencilShadowPersonal")) setProp("harm_r_stencilShadowPersonal", true);
+		SyncCmdRadioGroup(V.realrtcw_shadows, "cg_shadows", 1);
+		SyncCmdCheckbox(V.realrtcw_sv_cheats, "harm_sv_cheats", false);
+		SyncCmdCheckbox(V.realrtcw_stencilShadowPersonal, "harm_r_stencilShadowPersonal", true);
 	}
 
 	private void Updatehacktings_ETW()
 	{
-		String str;
-		int index;
-
-		V.etw_omnibot_enable.setChecked(getProp("omnibot_enable", false));
-		if (!IsProp("omnibot_enable")) setProp("omnibot_enable", false);
-
-		str = GetProp("cg_shadows");
-		index = 0;
-		if (str != null)
-		{
-			index = Q3EUtils.parseInt_s(str, 1);
-		}
-		SelectRadioGroup(V.etw_shadows, index);
-
-		V.etw_stencilShadowPersonal.setChecked(getProp("harm_r_stencilShadowPersonal", true));
-		if (!IsProp("harm_r_stencilShadowPersonal")) setProp("harm_r_stencilShadowPersonal", true);
-
-		V.etw_ui_disableAndroidMacro.setChecked(getProp("harm_ui_disableAndroidMacro", false));
-		if (!IsProp("harm_ui_disableAndroidMacro")) setProp("harm_ui_disableAndroidMacro", false);
+		SyncCmdCheckbox(V.etw_omnibot_enable, "omnibot_enable", false);
+		SyncCmdRadioGroup(V.etw_shadows, "cg_shadows", 1);
+		SyncCmdCheckbox(V.etw_stencilShadowPersonal, "harm_r_stencilShadowPersonal", true);
+		SyncCmdCheckbox(V.etw_ui_disableAndroidMacro, "harm_ui_disableAndroidMacro", false);
 	}
 
 	private void Updatehacktings_GZDOOM()
 	{
 		String str;
-		int index;
 
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend");
-		index = 2;
-		if (str != null)
-		{
-			index = Q3EUtils.parseInt_s(str, 2);
-		}
-		SelectRadioGroup(V.gzdoom_vid_preferbackend, index);
+		SyncCmdRadioGroup2(V.gzdoom_vid_preferbackend, "vid_preferbackend", str, 2);
 
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_es");
-		index = 0;
-		if (str != null)
-		{
-			index = Q3EUtils.parseInt_s(str, 0);
-			if(index > 0)
-				index--;
-		}
-		SelectRadioGroup(V.gzdoom_gl_es, index);
+		SyncCmdRadioGroup2(V.gzdoom_gl_es, "harm_gl_es", str, 1, 1, GetRadioGroupNum(V.gzdoom_gl_es));
 
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
-		index = 0;
-		if (str != null)
-		{
-			index = Q3EUtils.parseInt_s(str, 0);
-			index = Utility.ArrayIndexOf(Q3EGameConstants.GZDOOM_GL_VERSIONS, index);
-			if(index < 0)
-				index = 0;
-		}
-		SelectRadioGroup(V.gzdoom_gl_version, index);
+		SyncCmdRadioGroup2V(V.gzdoom_gl_version, "harm_gl_version", str, Q3EGameConstants.GZDOOM_GL_VERSIONS);
 	}
 
 	private void Updatehacktings_FTEQW()
 	{
 		String str;
-		int index;
 
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_renderer");
-		index = 1;
-		if (str != null)
-		{
-			index = "vk".equalsIgnoreCase(str) ? 0 : 1;
-		}
-		SelectRadioGroup(V.fteqw_vid_renderer, index);
+		SyncCmdRadioGroup2i(V.fteqw_vid_renderer, "vid_renderer", str, 1, Q3EGameConstants.FTEQW_VID_RENDERER);
 	}
 
 	private void Updatehacktings_Xash3D()
 	{
 		String str;
-		int index;
 
 		str = GetParam("ref");
-		index = 0;
-		if (str != null)
-		{
-			index = Utility.ArrayIndexOf(Q3EGameConstants.XASH3D_REFS, str);
-			if(index < 0)
-				index = 0;
-		}
-		SelectRadioGroup(V.xash3d_ref, index);
+		SyncCmdRadioGroup2V(V.xash3d_ref, "ref", str, Q3EGameConstants.XASH3D_REFS);
 
 		str = GetParam("sv_cl");
-		index = 0;
-		if (str != null)
-		{
-			index = Utility.ArrayIndexOf(Q3EGameConstants.XASH3D_SV_CLS, str);
-			if(index < 0)
-				index = 0;
-		}
-		SelectRadioGroup(V.xash3d_sv_cl, index);
+		SyncCmdRadioGroup2V(V.xash3d_sv_cl, "sv_cl", str, Q3EGameConstants.XASH3D_SV_CLS);
 	}
 
 	private void Updatehacktings_Source()
 	{
 		String str;
-		int index;
 
 		str = GetParam("sv_cl");
-		index = 0;
-		if (str != null)
-		{
-			index = Utility.ArrayIndexOf(Q3EGameConstants.SOURCE_ENGINE_SV_CLS, str);
-			if(index < 0)
-				index = 0;
-		}
-		SelectRadioGroup(V.source_sv_cl, index);
+		SyncCmdRadioGroup2V(V.source_sv_cl, "sv_cl", str, Q3EGameConstants.SOURCE_ENGINE_SV_CLS);
 	}
 
 	private void Updatehacktings_UrT()
 	{
-		String str;
-
-		str = GetProp("harm_bot_autoAdd");
-		if (str != null)
-			V.urt_bot_autoAdd.setText(str);
-
-		str = GetProp("harm_bot_level");
-		if (str != null)
-			V.urt_bot_level.setText(str);
+		SyncCmdEditText(V.urt_bot_autoAdd, "harm_bot_autoAdd", "0");
+		SyncCmdEditText(V.urt_bot_level, "harm_bot_level", "0");
 	}
 
     private void ThrowException()
@@ -2206,7 +2025,7 @@ public class GameLauncher extends Activity
 		V.cb_r_globalIllumination.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_globalIllumination, false));
 		V.cb_r_globalIllumination.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.edt_r_globalIlluminationBrightness.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_globalIlluminationBrightness, 0.5f));
-		V.edt_r_globalIlluminationBrightness.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_globalIlluminationBrightness", Q3EPreference.pref_harm_r_globalIlluminationBrightness, 0.5f));
+		V.edt_r_globalIlluminationBrightness.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_globalIlluminationBrightness", Q3EPreference.pref_harm_r_globalIlluminationBrightness, 0.3f));
 		V.spinner_r_renderMode.setSelection(mPrefs.getInt(Q3EPreference.pref_harm_r_renderMode, 0));
 		V.spinner_r_renderMode.setOnItemSelectedListener(m_itemSelectedListener);
 
@@ -2392,8 +2211,7 @@ public class GameLauncher extends Activity
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
 		if (str != null)
 		{
-			index = Q3EUtils.parseInt_s(str, 0);
-			index = Utility.ArrayIndexOf(Q3EGameConstants.GZDOOM_GL_VERSIONS, index);
+			index = Utility.ArrayIndexOf(Q3EGameConstants.GZDOOM_GL_VERSIONS, str);
 			if(index < 0)
 				index = 0;
 		}
@@ -4659,6 +4477,178 @@ public class GameLauncher extends Activity
 			V.cmdline_container.setLayoutParams(layoutParams);
 			V.cmdline_container.setNestedScrollingEnabled(false);
 		}
+	}
+
+	private void SyncCmdCheckbox(CheckBox cb, String prop, boolean def)
+	{
+		cb.setChecked(getProp(prop, def));
+		//k fill commandline
+		if (!IsProp(prop)) setProp(prop, def);
+	}
+
+	private void SyncCmdEditText(EditText ed, String prop, Object def)
+	{
+		String str = GetProp(prop);
+		if (null != str)
+			ed.setText(str);
+		if (!IsProp(prop)) SetProp(prop, Objects.toString(def, ""));
+	}
+
+	private void SyncCmdRadioGroup(RadioGroup rg, String prop, Object def, Function func)
+	{
+		String str = GetProp(prop);
+		String defStr = Objects.toString(def, "");
+		Integer index = null;
+		if(null != str)
+			index = (Integer)func.Invoke(str);
+		if(null == index)
+			index = (Integer)func.Invoke(defStr);
+		if(null == index)
+			index = 0;
+		int max = GetRadioGroupNum(rg);
+		if(index < 0)
+			index = 0;
+		else if(index >= max)
+			index = max - 1;
+		SelectRadioGroup(rg, index);
+		if (!IsProp(prop)) SetProp(prop, defStr);
+	}
+
+	private void SyncCmdRadioGroupV(RadioGroup rg, String prop, String...options)
+	{
+		SyncCmdRadioGroup(rg, prop, options[0], new Function() {
+			@Override
+			public Object Invoke(Object... args) {
+				Object str = args[0];
+				int index = Utility.ArrayIndexOf(options, str);
+				return index < 0 ? null : index;
+			}
+		});
+	}
+
+	private void SyncCmdRadioGroup(RadioGroup rg, String prop, Object def, Object[] options)
+	{
+		SyncCmdRadioGroup(rg, prop, def, new Function() {
+			@Override
+			public Object Invoke(Object... args) {
+				Object str = args[0];
+				int index = Utility.ArrayIndexOf(options, str);
+				return index < 0 ? null : index;
+			}
+		});
+	}
+
+	private void SyncCmdRadioGroup(RadioGroup rg, String prop, int def, int count)
+	{
+		SyncCmdRadioGroup(rg, prop, "" + def, new Function() {
+			@Override
+			public Object Invoke(Object... args) {
+				int str = Q3EUtils.parseInt_s((String)args[0], def);
+				if(str >= 0 && str < count)
+					return str;
+				else
+					return null;
+			}
+		});
+	}
+
+	private void SyncCmdRadioGroup(RadioGroup rg, String prop, int def)
+	{
+		SyncCmdRadioGroup(rg, prop, def, GetRadioGroupNum(rg));
+	}
+
+	private void SyncCmdRadioGroup(RadioGroup rg, String prop, int def, int min, int max)
+	{
+		SyncCmdRadioGroup(rg, prop, "" + def, new Function() {
+			@Override
+			public Object Invoke(Object... args) {
+				int str = Q3EUtils.parseInt_s((String)args[0], def);
+				if(str >= min && str <= max)
+					return str - min;
+				else
+					return null;
+			}
+		});
+	}
+
+	private void SyncCmdRadioGroup2(RadioGroup rg, String prop, String str, Object def, Function func)
+	{
+		String defStr = Objects.toString(def, "");
+		Integer index = null;
+		if(null != str)
+			index = (Integer)func.Invoke(str);
+		if(null == index)
+			index = (Integer)func.Invoke(defStr);
+		if(null == index)
+			index = 0;
+		int max = GetRadioGroupNum(rg);
+		if(index < 0)
+			index = 0;
+		else if(index >= max)
+			index = max - 1;
+		SelectRadioGroup(rg, index);
+	}
+
+	private void SyncCmdRadioGroup2V(RadioGroup rg, String prop, String val, String...options)
+	{
+		SyncCmdRadioGroup2(rg, prop, val, options[0], new Function() {
+			@Override
+			public Object Invoke(Object... args) {
+				Object str = args[0];
+				int index = Utility.ArrayIndexOf(options, str);
+				return index < 0 ? null : index;
+			}
+		});
+	}
+
+	private void SyncCmdRadioGroup2(RadioGroup rg, String prop, String val, Object def, Object[] options)
+	{
+		SyncCmdRadioGroup2(rg, prop, val, def, new Function() {
+			@Override
+			public Object Invoke(Object... args) {
+				Object str = args[0];
+				int index = Utility.ArrayIndexOf(options, str);
+				return index < 0 ? null : index;
+			}
+		});
+	}
+
+	private void SyncCmdRadioGroup2i(RadioGroup rg, String prop, String val, int defIndex, Object[] options)
+	{
+		SyncCmdRadioGroup2(rg, prop, val, options[defIndex], options);
+	}
+
+	private void SyncCmdRadioGroup2(RadioGroup rg, String prop, String val, int def, int count)
+	{
+		SyncCmdRadioGroup2(rg, prop, val, "" + def, new Function() {
+			@Override
+			public Object Invoke(Object... args) {
+				int str = Q3EUtils.parseInt_s((String)args[0], def);
+				if(str >= 0 && str < count)
+					return str;
+				else
+					return null;
+			}
+		});
+	}
+
+	private void SyncCmdRadioGroup2(RadioGroup rg, String prop, String val, int def)
+	{
+		SyncCmdRadioGroup2(rg, prop, val, def, GetRadioGroupNum(rg));
+	}
+
+	private void SyncCmdRadioGroup2(RadioGroup rg, String prop, String val, int def, int min, int max)
+	{
+		SyncCmdRadioGroup2(rg, prop, val, "" + def, new Function() {
+			@Override
+			public Object Invoke(Object... args) {
+				int str = Q3EUtils.parseInt_s((String)args[0], def);
+				if(str >= min && str <= max)
+					return str - min;
+				else
+					return null;
+			}
+		});
 	}
 
 

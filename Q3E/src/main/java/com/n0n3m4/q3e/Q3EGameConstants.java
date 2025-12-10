@@ -294,7 +294,11 @@ public final class Q3EGameConstants
     public static final String SOURCE_ENGINE_VERSION          = GAME_VERSION_SOURCE + ".1"; // 1: init
     public static final String ETW_VERSION                    = GAME_VERSION_ETW + ".1"; // 1: init
 
-    public static final int[]    GZDOOM_GL_VERSIONS       = { 0, 330, 420, 430, 450, };
+    public static final String[] DOOM3_SOUND_DRIVER = { "AudioTrack", "OpenSLES", };
+
+    public static final String[] FTEQW_VID_RENDERER = { "vk", "gl", };
+
+    public static final String[]    GZDOOM_GL_VERSIONS       = { "0", "330", "420", "430", "450", };
     public static final String[] QUAKE2_RENDERER_BACKENDS = { "gles1", "gles3", "vk", };
 
     public static final String[] XASH3D_REFS   = { "gles1", "gl4es", "gles3compat", "soft", };
