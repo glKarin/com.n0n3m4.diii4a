@@ -29,13 +29,15 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../idlib/precompiled.h"
 #pragma hdrstop
 
+#if 0
 #include "../../game/gamesys/Event.h"
 #include "../../game/gamesys/Class.h"
 #include "../../game/script/Script_Program.h"
 #include "../../game/script/Script_Interpreter.h"
 #include "../../game/script/Script_Thread.h"
 #include "../../game/script/Script_Compiler.h"
-#include "../../framework/sync/Msg.h"
+#endif
+//#include "../../framework/sync/Msg.h"
 #include "DebuggerApp.h"
 #include "DebuggerServer.h"
 
@@ -145,7 +147,9 @@ bool rvDebuggerServer::ProcessMessages(void)
 	MSG_Init(&msg, buffer, sizeof(buffer));
 
 	// Check for pending udp packets on the debugger port
-	while (mPort.GetPacket(adrFrom, msg.data, msg.cursize, msg.maxsize)) {
+    int msgSize;
+	while (mPort.GetPacket(adrFrom, /*msg.data*/buffer, /*msg.cursize*/msgSize, /*msg.maxsize*/MAX_MSGLEN)) {
+        MSG_SetR(&msg, buffer, msgSize);
 		unsigned short command;
 
 		// Only accept packets from the debugger server for security reasons
@@ -189,6 +193,7 @@ bool rvDebuggerServer::ProcessMessages(void)
 
 			case DBMSG_STEPOVER:
 				mBreakStepOver = true;
+#if 0
 				mBreakStepOverDepth = mBreakInterpreter->GetCallstackDepth();
 				mBreakStepOverFunc1 = mBreakInterpreter->GetCallstack()[mBreakInterpreter->GetCallstackDepth()].f;
 
@@ -197,6 +202,7 @@ bool rvDebuggerServer::ProcessMessages(void)
 				} else {
 					mBreakStepOverFunc2 = NULL;
 				}
+#endif
 
 				Resume();
 				break;
@@ -235,10 +241,10 @@ void rvDebuggerServer::SendMessage(EDebuggerMessage dbmsg)
 	msg_t	 msg;
 	byte	 buffer[MAX_MSGLEN];
 
-	MSG_Init(&msg, buffer, sizeof(buffer));
-	MSG_WriteShort(&msg, (int)dbmsg);
+	MSG_InitW(&msg, buffer, sizeof(buffer));
+	MSG_WriteShort(&msg, (short)dbmsg);
 
-	SendPacket(msg.data, msg.cursize);
+	SendPacket(/*msg.data*/MSG_data(&msg), /*msg.cursize*/MSG_cursize(&msg));
 }
 
 /*
@@ -313,6 +319,7 @@ Writes a single callstack entry to the given message
 */
 void rvDebuggerServer::MSG_WriteCallstackFunc(msg_t *msg, const prstack_t *stack)
 {
+#if 0
 	const statement_t	*st;
 	const function_t	*func;
 
@@ -342,6 +349,7 @@ void rvDebuggerServer::MSG_WriteCallstackFunc(msg_t *msg, const prstack_t *stack
 		MSG_WriteString(msg, "<UNKNOWN>");
 		MSG_WriteLong(msg, 0);
 	}
+#endif
 }
 
 /*
@@ -354,12 +362,13 @@ back to the client with the callstack data.
 */
 void rvDebuggerServer::HandleInspectCallstack(msg_t *in_msg)
 {
+#if 0
 	msg_t		 msg;
 	byte		 buffer[MAX_MSGLEN];
 	int			 i;
 	prstack_t	 temp;
 
-	MSG_Init(&msg, buffer, sizeof(buffer));
+	MSG_InitW(&msg, buffer, sizeof(buffer));
 	MSG_WriteShort(&msg, (int)DBMSG_INSPECTCALLSTACK);
 
 	MSG_WriteShort(&msg, (int)mBreakInterpreter->GetCallstackDepth());
@@ -375,7 +384,8 @@ void rvDebuggerServer::HandleInspectCallstack(msg_t *in_msg)
 		MSG_WriteCallstackFunc(&msg, mBreakInterpreter->GetCallstack() + i);
 	}
 
-	SendPacket(msg.data, msg.cursize);
+    SendPacket(/*msg.data*/MSG_data(&msg), /*msg.cursize*/MSG_cursize(&msg));
+#endif
 }
 
 /*
@@ -387,12 +397,13 @@ Send the list of the current threads in the interpreter back to the debugger cli
 */
 void rvDebuggerServer::HandleInspectThreads(msg_t *in_msg)
 {
+#if 0
 	msg_t		 msg;
 	byte		 buffer[MAX_MSGLEN];
 	int			 i;
 
 	// Initialize the message
-	MSG_Init(&msg, buffer, sizeof(buffer));
+	MSG_InitW(&msg, buffer, sizeof(buffer));
 	MSG_WriteShort(&msg, (int)DBMSG_INSPECTTHREADS);
 
 	// Write the number of threads to the message
@@ -412,7 +423,8 @@ void rvDebuggerServer::HandleInspectThreads(msg_t *in_msg)
 	}
 
 	// Send off the inspect threads packet to the debugger client
-	SendPacket(msg.data, msg.cursize);
+    SendPacket(/*msg.data*/MSG_data(&msg), /*msg.cursize*/MSG_cursize(&msg));
+#endif
 }
 
 /*
@@ -424,6 +436,7 @@ Respondes to a request from the debugger client to inspect the value of a given 
 */
 void rvDebuggerServer::HandleInspectVariable(msg_t *in_msg)
 {
+#if 0
 	char varname[256];
 	int  scopeDepth;
 
@@ -440,7 +453,7 @@ void rvDebuggerServer::HandleInspectVariable(msg_t *in_msg)
 	byte		 buffer[MAX_MSGLEN];
 
 	// Initialize the message
-	MSG_Init(&msg, buffer, sizeof(buffer));
+	MSG_InitW(&msg, buffer, sizeof(buffer));
 	MSG_WriteShort(&msg, (int)DBMSG_INSPECTVARIABLE);
 
 	if (!mBreakInterpreter->GetRegisterValue(varname, varvalue, scopeDepth)) {
@@ -451,7 +464,8 @@ void rvDebuggerServer::HandleInspectVariable(msg_t *in_msg)
 	MSG_WriteString(&msg, varname);
 	MSG_WriteString(&msg, varvalue);
 
-	SendPacket(msg.data, msg.cursize);
+    SendPacket(/*msg.data*/MSG_data(&msg), /*msg.cursize*/MSG_cursize(&msg));
+#endif
 }
 
 /*
@@ -464,6 +478,7 @@ Check to see if any breakpoints have been hit.  This includes "break next",
 */
 void rvDebuggerServer::CheckBreakpoints(idInterpreter *interpreter, idProgram *program, int instructionPointer)
 {
+#if 0
 	const statement_t	*st;
 	const char			*filename;
 	int					i;
@@ -477,7 +492,7 @@ void rvDebuggerServer::CheckBreakpoints(idInterpreter *interpreter, idProgram *p
 	filename = program->GetFilename(st->file);
 
 	// Operate on lines, not statements
-	if (mLastStatementLine == st->linenumber && mLastStatementFile == st->file) {
+	if (mLastStatementLine == st->linenumber && mLastStatementFile == /*st->file*/filename) {
 		return;
 	}
 
@@ -548,6 +563,7 @@ void rvDebuggerServer::CheckBreakpoints(idInterpreter *interpreter, idProgram *p
 	}
 
 	LeaveCriticalSection(&mCriticalSection);
+#endif
 }
 
 /*
@@ -560,6 +576,7 @@ the game has been halted
 */
 void rvDebuggerServer::Break(idInterpreter *interpreter, idProgram *program, int instructionPointer)
 {
+#if 0
 	msg_t				msg;
 	byte				buffer[MAX_MSGLEN];
 	const statement_t	*st;
@@ -588,11 +605,11 @@ void rvDebuggerServer::Break(idInterpreter *interpreter, idProgram *program, int
 	mBreakInstructionPointer = instructionPointer;
 
 	// Inform the debugger of the breakpoint hit
-	MSG_Init(&msg, buffer, sizeof(buffer));
+	MSG_InitW(&msg, buffer, sizeof(buffer));
 	MSG_WriteShort(&msg, (int)DBMSG_BREAK);
 	MSG_WriteLong(&msg, st->linenumber);
 	MSG_WriteString(&msg, qpath);
-	SendPacket(msg.data, msg.cursize);
+	SendPacket(/*msg.data*/MSG_data(&msg), /*msg.cursize*/MSG_cursize(&msg));
 
 	// Suspend the game thread.  Since this will be called from within the main game thread
 	// execution wont return until after the thread is resumed
@@ -618,6 +635,7 @@ void rvDebuggerServer::Break(idInterpreter *interpreter, idProgram *program, int
 	// Clear all commands that were generated before we went into suspended mode.  This is
 	// to ensure we dont have mouse downs with no ups because the context was changed.
 	idKeyInput::ClearStates();
+#endif
 }
 
 /*
@@ -674,9 +692,9 @@ void rvDebuggerServer::Print(const char *text)
 	msg_t	 msg;
 	byte	 buffer[MAX_MSGLEN];
 
-	MSG_Init(&msg, buffer, sizeof(buffer));
+	MSG_InitW(&msg, buffer, sizeof(buffer));
 	MSG_WriteShort(&msg, (int)DBMSG_PRINT);
 	MSG_WriteString(&msg, text);
 
-	SendPacket(msg.data, msg.cursize);
+	SendPacket(/*msg.data*/MSG_data(&msg), /*msg.cursize*/MSG_cursize(&msg));
 }

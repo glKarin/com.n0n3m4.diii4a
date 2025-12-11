@@ -28,6 +28,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef DEBUGGERCLIENT_H_
 #define DEBUGGERCLIENT_H_
 
+typedef idBitMsg msg_t;
+
 class rvDebuggerCallstack
 {
 	public:

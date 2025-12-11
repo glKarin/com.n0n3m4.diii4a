@@ -74,10 +74,10 @@ bool rvPropertyGrid::Create(HWND parent, int id, int style)
 	mStyle = style;
 
 	// Create the List view
-	mWindow = CreateWindowEx(0, "LISTBOX", "", WS_VSCROLL|WS_CHILD|WS_VISIBLE|LBS_OWNERDRAWFIXED|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY, 0, 0, 0, 0, parent, (HMENU)id, win32.hInstance, 0);
-	mListWndProc = (WNDPROC)GetWindowLong(mWindow, GWL_WNDPROC);
-	SetWindowLong(mWindow, GWL_USERDATA, (LONG)this);
-	SetWindowLong(mWindow, GWL_WNDPROC, (LONG)WndProc);
+	mWindow = CreateWindowEx(0, "LISTBOX", "", WS_VSCROLL|WS_CHILD|WS_VISIBLE|LBS_OWNERDRAWFIXED|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY, 0, 0, 0, 0, parent, (HMENU)(intptr_t)id, win32.hInstance, 0);
+	mListWndProc = (WNDPROC)GetWindowLongPtr(mWindow, GWLP_WNDPROC);
+	SetWindowLongPtr(mWindow, GWLP_USERDATA, (LONG_PTR)this);
+	SetWindowLongPtr(mWindow, GWLP_WNDPROC, (LONG_PTR)WndProc);
 
 	LoadLibrary("Riched20.dll");
 	mEdit = CreateWindowEx(0, "RichEdit20A", "", WS_CHILD, 0, 0, 0, 0, mWindow, (HMENU) 999, win32.hInstance, NULL);
@@ -192,7 +192,7 @@ void rvPropertyGrid::FinishEdit(void)
 		nmpg.mName  = item->mName;
 		nmpg.mValue = value;
 
-		if (!SendMessage(GetParent(mWindow), WM_NOTIFY, 0, (LONG)&nmpg)) {
+		if (!SendMessage(GetParent(mWindow), WM_NOTIFY, 0, (LPARAM)&nmpg)) {
 			mState = STATE_EDIT;
 			SetFocus(mEdit);
 			return;
@@ -269,7 +269,7 @@ int rvPropertyGrid::AddItem(const char *name, const char *value, EItemType type)
 
 	insert = SendMessage(mWindow,LB_GETCOUNT,0,0) - ((mStyle&PGS_ALLOWINSERT)?1:0);
 
-	return SendMessage(mWindow, LB_INSERTSTRING, insert, (LONG)item);
+	return SendMessage(mWindow, LB_INSERTSTRING, insert, (LPARAM)item);
 }
 
 /*
@@ -315,7 +315,7 @@ void rvPropertyGrid::RemoveAllItems(void)
 		item = new rvPropertyGridItem;
 		item->mName = "";
 		item->mValue = "";
-		SendMessage(mWindow, LB_ADDSTRING, 0, (LONG)item);
+		SendMessage(mWindow, LB_ADDSTRING, 0, (LPARAM)item);
 	}
 }
 
@@ -368,7 +368,7 @@ Window procedure for property grid
 */
 LRESULT CALLBACK rvPropertyGrid::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	rvPropertyGrid *grid = (rvPropertyGrid *) GetWindowLong(hWnd, GWL_USERDATA);
+	rvPropertyGrid *grid = (rvPropertyGrid *) GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
 	switch (msg) {
 		case WM_SETFOCUS:
@@ -381,7 +381,7 @@ LRESULT CALLBACK rvPropertyGrid::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPA
 			nmkey.hdr.hwndFrom = grid->mWindow;
 			nmkey.nVKey = wParam;
 			nmkey.uFlags = HIWORD(lParam);
-			nmkey.hdr.idFrom = GetWindowLong(hWnd, GWL_ID);
+			nmkey.hdr.idFrom = GetWindowLongPtr(hWnd, GWL_ID);
 			SendMessage(GetParent(hWnd), WM_NOTIFY, nmkey.hdr.idFrom, (LPARAM)&nmkey);
 			break;
 		}
@@ -442,7 +442,7 @@ LRESULT CALLBACK rvPropertyGrid::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPA
 
 		case WM_COMMAND:
 
-			if (lParam == (long)grid->mEdit) {
+			if (lParam == (LPARAM)grid->mEdit) {
 				if (HIWORD(wParam) == EN_KILLFOCUS) {
 					grid->FinishEdit();
 					return true;
@@ -516,7 +516,7 @@ LRESULT CALLBACK rvPropertyGrid::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPA
 			ScreenToClient(hWnd, &point);
 
 			if (point.x >= grid->mSplitter - 2 && point.x <= grid->mSplitter + 2) {
-				SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZEWE)));
+				SetCursor(LoadCursor(NULL, /*MAKEINTRESOURCE*/(IDC_SIZEWE)));
 				return TRUE;
 			}
 

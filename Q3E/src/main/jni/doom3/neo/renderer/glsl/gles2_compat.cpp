@@ -25,7 +25,7 @@ struct GLvert
 {
     GLfloat			xyz[3];
     GLfloat			st[2];
-    //float			normal;
+    //GLfloat			normal[3];
     GLubyte			color[4];
 };
 //#pragma pack(pop)
@@ -34,6 +34,7 @@ struct GLvert
 
 static GLenum gl_RenderType; // glBegin() param
 static GLfloat gl_TexCoord[2]; // glTexCoord2f() param
+//static GLfloat gl_Normal[3]; // glNormal3f() param
 static GLfloat gl_Color[4] = {0.0f, 0.0f, 0.0f, 1.0f}; // glColor4f() param
 static idList<GLvert> gl_VertexList; // glVertex3f() param, will fill texcoord/color automatic
 static idList<glIndex_t> gl_IndexList; // glArrayElement() param
@@ -47,6 +48,7 @@ static const float	GL_IDENTITY_MATRIX[16] = {
 };
 static GLuint gl_drawPixelsImage = 0; // glDrawPixels texture handle
 static GLboolean gl_useTexture = GL_FALSE; // set true if call glDrawPixels
+static GLenum gl_PolygonMode = GL_FILL;
 
 extern int MakePowerOfTwo(int num);
 
@@ -60,6 +62,8 @@ struct GLstate
 	GLboolean DEPTH_WRITEMASK;
 	GLboolean BLEND;
     GLboolean STENCIL_TEST;
+    GLint SCISSOR_BOX[4];
+    GLfloat COLOR_CLEAR_VALUE[4];
 };
 
 template <int SIZE>
@@ -113,14 +117,14 @@ template <int SIZE>
 struct GLmatrix_stack
 {
 public:
-	GLmatrix_stack()
-	: num(0)
+	GLmatrix_stack(const char *n = "")
+	: num(0), name(n)
 	{}
 
 	void Push(const GLfloat m[16]) {
 		if(num >= SIZE)
 		{
-			Sys_Printf("[GLCompat]: GLmatrix_stack::Push over\n");
+			Sys_Printf("[GLCompat]: GLmatrix_stack(%s)::Push over\n", name.c_str());
 			return;
 		}
 
@@ -140,7 +144,7 @@ public:
 	void Pop(void) {
 		if(num <= 0)
 		{
-			Sys_Printf("[GLCompat]: GLmatrix_stack::Pop under\n");
+			Sys_Printf("[GLCompat]: GLmatrix_stack(%s)::Pop under\n", name.c_str());
 			return;
 		}
 		num--;
@@ -151,7 +155,7 @@ public:
 			return stack[num - 1];
 		else
 		{
-			Sys_Printf("[GLCompat]: GLmatrix_stack::Top under\n");
+			Sys_Printf("[GLCompat]: GLmatrix_stack(%s)::Top under\n", name.c_str());
 			return NULL;
 		}
 	}
@@ -163,7 +167,7 @@ public:
 			MATCPY(t, m);
 		}
 		else
-			Sys_Printf("[GLCompat]: GLmatrix_stack::Set under\n");
+			Sys_Printf("[GLCompat]: GLmatrix_stack(%s)::Set under\n", name.c_str());
 	}
 
 	void Mult(const GLfloat m[16]) {
@@ -175,7 +179,7 @@ public:
 			myGlMultMatrix(m, b, t);
 		}
 		else
-			Sys_Printf("[GLCompat]: GLmatrix_stack::Mult under\n");
+			Sys_Printf("[GLCompat]: GLmatrix_stack(%s)::Mult under\n", name.c_str());
 	}
 
 	void Identity(void) {
@@ -203,11 +207,12 @@ public:
 
 	GLfloat stack[16][SIZE];
 	int num;
+    idStr name;
 };
 // Projection matrix stack for glPushMatrix()/glPopMatrix()/glXxxxMatrix
-static GLmatrix_stack<2> gl_ProjectionMatrixStack;
+static GLmatrix_stack<2> gl_ProjectionMatrixStack("Projection");
 // Modelview matrix stack for glPushMatrix()/glPopMatrix()/glXxxxMatrix
-static GLmatrix_stack<8> gl_ModelviewMatrixStack; // 64
+static GLmatrix_stack<8> gl_ModelviewMatrixStack("Modelview"); // 64
 
 #define gl_ModelviewMatrix (gl_ModelviewMatrixStack.Top(BACKEND_MODELVIEW_MATRIX))
 #define gl_ProjectionMatrix (gl_ProjectionMatrixStack.Top(BACKEND_PROJECTION_MATRIX))
@@ -233,6 +238,12 @@ GLRB_API void glPushAttrib(GLint mask)
 #define _GETBS(x) qglGetBooleanv(GL_##x, &state->x);
 	_GETBS(DEPTH_WRITEMASK);
 #undef _GETBS
+#define _GETBS(x) qglGetIntegerv(GL_##x, &state->x[0]);
+    _GETBS(SCISSOR_BOX);
+#undef _GETBS
+#define _GETBS(x) qglGetFloatv(GL_##x, &state->x[0]);
+    _GETBS(COLOR_CLEAR_VALUE);
+#undef _GETBS
 }
 
 GLRB_API void glPopAttrib(void)
@@ -249,6 +260,8 @@ GLRB_API void glPopAttrib(void)
     _SETBS(STENCIL_TEST);
 #undef _SETBS
 	qglDepthMask(state->DEPTH_WRITEMASK);
+    qglScissor(state->SCISSOR_BOX[0], state->SCISSOR_BOX[1], state->SCISSOR_BOX[2], state->SCISSOR_BOX[3]);
+    qglClearColor(state->COLOR_CLEAR_VALUE[0], state->COLOR_CLEAR_VALUE[1], state->COLOR_CLEAR_VALUE[2], state->COLOR_CLEAR_VALUE[3]);
 }
 
 GLRB_API void glPushMatrix(void)
@@ -298,31 +311,60 @@ GLRB_API void glLoadIdentity(void)
 	}
 }
 
+#define GLCP_MULT_MATRIX(x) \
+if(gl_MatrixMode == GL_PROJECTION) \
+{ \
+    if(gl_ProjectionMatrixStack.Empty()) \
+    { \
+        gl_ProjectionMatrixStack.Push(BACKEND_PROJECTION_MATRIX); \
+    } \
+    GLfloat m[16]; \
+    memcpy(m, gl_ProjectionMatrix, sizeof(GLfloat) * 16); \
+    x; \
+    gl_ProjectionMatrixStack.Set(m); \
+} \
+else \
+{ \
+    if(gl_ModelviewMatrixStack.Empty()) \
+    { \
+        gl_ModelviewMatrixStack.Push(BACKEND_MODELVIEW_MATRIX); \
+    } \
+    GLfloat m[16]; \
+    memcpy(m, gl_ModelviewMatrix, sizeof(GLfloat) * 16); \
+    x; \
+    gl_ModelviewMatrixStack.Set(m); \
+}
+
 GLRB_API void glOrtho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat nearZ, GLfloat farZ)
 {
-	if(gl_MatrixMode == GL_PROJECTION)
-	{
-		if(gl_ProjectionMatrixStack.Empty())
-		{
-			gl_ProjectionMatrixStack.Push(BACKEND_PROJECTION_MATRIX);
-		}
-		GLfloat m[16];
-		memcpy(m, gl_ProjectionMatrix, sizeof(GLfloat) * 16);
-		esOrtho((ESMatrix *)m, left, right, bottom, top, nearZ, farZ);
-		gl_ProjectionMatrixStack.Set(m);
-	}
-	else
-	{
-		if(gl_ModelviewMatrixStack.Empty())
-		{
-			gl_ModelviewMatrixStack.Push(BACKEND_MODELVIEW_MATRIX);
-		}
-		GLfloat m[16];
-		memcpy(m, gl_ModelviewMatrix, sizeof(GLfloat) * 16);
-		esOrtho((ESMatrix *)m, left, right, bottom, top, nearZ, farZ);
-		gl_ModelviewMatrixStack.Set(m);
-	}
+    GLCP_MULT_MATRIX(esOrtho((ESMatrix *)m, left, right, bottom, top, nearZ, farZ))
 }
+
+GLRB_API void glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+{
+    GLCP_MULT_MATRIX(esRotate((ESMatrix *)m, angle, x, y, z))
+}
+
+GLRB_API void glTranslatef(GLfloat x, GLfloat y, GLfloat z)
+{
+    GLCP_MULT_MATRIX(esTranslate((ESMatrix *)m, x, y, z))
+}
+
+GLRB_API void glRectf(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2)
+{
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(x1, y1);
+    glVertex2f(x2, y1);
+    glVertex2f(x2, y2);
+    glVertex2f(x1, y2);
+    glEnd();
+}
+
+GLRB_API void glPolygonMode(GLenum face, GLenum mode)
+{
+    (void)face;
+    gl_PolygonMode = mode;
+};
 
 GLRB_PRIV void glrbFillVertex(GLvert &drawVert)
 {
@@ -344,23 +386,32 @@ GLRB_API void glVertex3f(GLfloat x, GLfloat y, GLfloat z)
 	gl_VertexList.Append(drawVert);
 }
 
-ID_INLINE GLRB_API void glVertex2f(GLfloat x, GLfloat y)
+GLRB_API void glNormal3f(GLfloat x, GLfloat y, GLfloat z)
+{
+#if 0
+    gl_Normal[0] = x;
+    gl_Normal[1] = y;
+    gl_Normal[2] = z;
+#endif
+}
+
+GLRB_API void glVertex2f(GLfloat x, GLfloat y)
 {
 	glVertex3f(x, y, 0.0f);
 }
 
-ID_INLINE GLRB_API void glVertex3fv(const GLfloat v[3])
+GLRB_API void glVertex3fv(const GLfloat v[3])
 {
 	glVertex3f(v[0], v[1], v[2]);
 }
 
-ID_INLINE GLRB_API void glTexCoord2f(GLfloat s, GLfloat t)
+GLRB_API void glTexCoord2f(GLfloat s, GLfloat t)
 {
 	gl_TexCoord[0] = s;
 	gl_TexCoord[1] = t;
 }
 
-ID_INLINE GLRB_API void glTexCoord2fv(const GLfloat st[2])
+GLRB_API void glTexCoord2fv(const GLfloat st[2])
 {
 	gl_TexCoord[0] = st[0];
 	gl_TexCoord[1] = st[1];
@@ -374,17 +425,17 @@ GLRB_API void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 	gl_Color[3] = a;
 }
 
-ID_INLINE GLRB_API void glColor3f(GLfloat r, GLfloat g, GLfloat b)
+GLRB_API void glColor3f(GLfloat r, GLfloat g, GLfloat b)
 {
 	glColor4f(r, g, b, 1.0f);
 }
 
-ID_INLINE GLRB_API void glColor3fv(const GLfloat v[3])
+GLRB_API void glColor3fv(const GLfloat v[3])
 {
 	glColor3f(v[0], v[1], v[2]);
 }
 
-ID_INLINE GLRB_API void glColor4fv(const GLfloat v[4])
+GLRB_API void glColor4fv(const GLfloat v[4])
 {
 	glColor4f(v[0], v[1], v[2], v[3]);
 }
@@ -470,9 +521,27 @@ ID_INLINE GLRB_API void glVertexPointer(GLint size, GLenum type, GLsizei stride,
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), size, type, false, stride, pointer);
 }
 
+GLRB_API void glrbGetFloatv(GLenum pname, GLfloat *data)
+{
+    switch (pname) {
+        case GL_CURRENT_COLOR:
+            memcpy(data, gl_Color, sizeof(GLfloat) * 4);
+            break;
+        case GL_PROJECTION_MATRIX:
+            memcpy(data, gl_ProjectionMatrix, sizeof(GLfloat) * 16);
+            break;
+        default:
+            qglGetFloatv(pname, data);
+            break;
+    }
+}
+
 GLRB_API void glBegin(GLenum t)
 {
-	gl_RenderType = t;
+    if(gl_PolygonMode == GL_LINE)
+        gl_RenderType = GL_LINE_LOOP;
+    else
+	    gl_RenderType = t;
 }
 
 GLRB_API void glrbDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices)
@@ -529,6 +598,99 @@ GLRB_PRIV void glrbEndRender(void)
 	gl_useTexture = GL_FALSE;
 }
 
+// GL_TRIANGLE_STRIP: odd: n-1, n-2, n | even: n-2, n-1, n
+// GL_QUAD_STRIP: 2n-1、2n、2n+2, 2n+1
+static int glrbNormalizeVertexes(idList<glIndex_t> &indexList)
+{
+    if(gl_RenderType == GL_QUADS)
+    {
+        if(gl_VertexList.Num() < 4)
+            return 0; // must >= 4
+        gl_RenderType = GL_TRIANGLE_FAN;
+        // if == 4, using triangle fan
+        if(gl_VertexList.Num() == 4)
+            return 1;
+        // if < 8, remove invalid vertexes
+        if(gl_VertexList.Num() < 8)
+        {
+            gl_VertexList.SetNum(4);
+            return 1;
+        }
+        // if more than 2 quads, using triangles
+        gl_RenderType = GL_TRIANGLES;
+        int numQuads = gl_VertexList.Num() / 4;
+        indexList.Resize(6 * numQuads);
+        for(int i = 0; i < numQuads; i++)
+        {
+            glIndex_t *target = &indexList[i * 6];
+            glIndex_t base = i * 4;
+            target[0] = base;
+            target[1] = base + 1;
+            target[2] = base + 2;
+            target[3] = base;
+            target[4] = base + 2;
+            target[5] = base + 3;
+        }
+        return 1;
+    }
+    else if(gl_RenderType == GL_QUAD_STRIP) // 2n-1、2n、2n+2, 2n+1
+    {
+        if(gl_VertexList.Num() < 4)
+            return 0; // must >= 4
+        gl_RenderType = GL_TRIANGLE_FAN;
+        // if == 4, using triangle fan
+        if(gl_VertexList.Num() == 4)
+            return 1;
+        // if < 8, remove invalid vertexes
+        if(gl_VertexList.Num() < 6)
+        {
+            gl_VertexList.SetNum(4);
+            return 1;
+        }
+        // if more than 2 quads, using triangles
+        gl_RenderType = GL_TRIANGLES;
+        int numQuads = gl_VertexList.Num() / 2 - 1;
+        indexList.Resize(numQuads * 6);
+        for(int i = 1, j = 0; i < numQuads; i++, j += 6)
+        {
+            // 1: 1 2 4 3; 2: 3 4 6 5; 3: 5 6 8 7
+            const GLvert *source = &gl_VertexList[i];
+            glIndex_t *target = &indexList[j];
+            int v1 = 2 * i - 1;
+            int v2 = 2 * i;
+            int v3 = 2 * i + 2;
+            int v4 = 2 * i + 1;
+            target[0] = v1;
+            target[1] = v2;
+            target[2] = v4;
+            target[3] = v1;
+            target[4] = v4;
+            target[5] = v3;
+        }
+        return 1;
+    }
+    else if(gl_RenderType == GL_POLYGON) // using GL_TRIANGLE_FAN
+    {
+        switch (gl_VertexList.Num()) {
+            case 1:
+                gl_RenderType = GL_POINTS;
+                break;
+            case 2:
+                gl_RenderType = GL_LINES;
+                break;
+            case 3:
+                gl_RenderType = GL_TRIANGLES;
+                break;
+            default:
+                gl_RenderType = GL_TRIANGLE_FAN;
+                break;
+        }
+        return 1;
+    }
+    else
+        return 1;
+}
+
 // Immediate mode draw func
 GLRB_API void glEnd(void)
 {
@@ -540,39 +702,49 @@ GLRB_API void glEnd(void)
 
 		if(num > 0) // call glBegin/glEnd
 		{
-			glrbStartRender();
+            idList<glIndex_t> indexList;
+            if(glrbNormalizeVertexes(indexList))
+            {
+                glrbStartRender();
 
-			qglBindBuffer(GL_ARRAY_BUFFER, 0);
-			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
-			if(usingTexCoord)
-				GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
+                qglBindBuffer(GL_ARRAY_BUFFER, 0);
+                GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+                if(usingTexCoord)
+                    GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
 
-			GL_SelectTexture(0);
-			if(!usingTexCoord)
-				globalImages->whiteImage->Bind();
+                GL_SelectTexture(0);
+                if(!usingTexCoord)
+                    globalImages->whiteImage->Bind();
 
-			const GLfloat *vertex = (GLfloat *)&gl_VertexList[0].xyz[0];
-            const GLubyte *color = (GLubyte *)&gl_VertexList[0].color[0];
-            const GLfloat *texcoord = NULL;
-			if(usingTexCoord)
-				texcoord = (GLfloat *)&gl_VertexList[0].st[0];
+                const GLfloat *vertex = (GLfloat *)&gl_VertexList[0].xyz[0];
+                const GLubyte *color = (GLubyte *)&gl_VertexList[0].color[0];
+                const GLfloat *texcoord = NULL;
+                if(usingTexCoord)
+                    texcoord = (GLfloat *)&gl_VertexList[0].st[0];
 
-			GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Vertex), 3, GL_FLOAT, false, GLVERT_STRIP, vertex);
-			GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, false, GLVERT_STRIP, color);
-			if(usingTexCoord)
-				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_TexCoord), 2, GL_FLOAT, false, GLVERT_STRIP, texcoord);
+                GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Vertex), 3, GL_FLOAT, false, GLVERT_STRIP, vertex);
+                GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, false, GLVERT_STRIP, color);
+                if(usingTexCoord)
+                    GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_TexCoord), 2, GL_FLOAT, false, GLVERT_STRIP, texcoord);
 
-            GL_Uniform1fv(SHADER_PARM_ADDR(colorAdd), zero);
-            GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), oneModulate);
-            GL_Uniform4f(SHADER_PARM_ADDR(glColor), 1.0f, 1.0f, 1.0f, 1.0f);
+                GL_Uniform1fv(SHADER_PARM_ADDR(colorAdd), zero);
+                GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), oneModulate);
+                GL_Uniform4f(SHADER_PARM_ADDR(glColor), 1.0f, 1.0f, 1.0f, 1.0f);
 
-			qglDrawArrays(gl_RenderType, 0, num);
+                if(indexList.Num())
+                {
+                    qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+                    qglDrawElements(gl_RenderType, indexList.Num(), GL_INDEX_TYPE, &indexList[0]);
+                }
+                else
+                    qglDrawArrays(gl_RenderType, 0, num);
 
-			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
-			if(usingTexCoord)
-				GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
+                GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+                if(usingTexCoord)
+                    GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
 
-			glrbEndRender();
+                glrbEndRender();
+            }
 		}
 		else if(numIndex > 0) // call glArrayElement
 		{
@@ -971,4 +1143,37 @@ void RB_RenderStencilToColor(int comp = 0)
     glPopAttrib();
 
     depthStencilRenderer.End();
+}
+
+/*
+================
+GLSphere - DG: from SteelStorm2
+================
+*/
+void gluSphere(GLUquadricObj *, float r, int lats, int longs)
+{
+    int i, j;
+    for(i = 0; i <= lats; i++)
+    {
+        float lat0 = idMath::PI  * (-0.5 + (float) (i - 1) / lats);
+        float z0  = idMath::Sin(lat0);
+        float zr0 =  idMath::Cos(lat0);
+        float lat1 = idMath::PI * (-0.5 + (float) i / lats);
+        float z1 = sin(lat1);
+        float zr1 = cos(lat1);
+
+        glBegin(GL_QUAD_STRIP);
+        for(j = 0; j <= longs; j++)
+        {
+            float lng = 2 * idMath::PI * (float) (j - 1) / longs;
+            float x = idMath::Cos(lng);
+            float y = idMath::Sin(lng);
+
+            glNormal3f(x * zr0, y * zr0, z0);
+            glVertex3f(x * zr0, y * zr0, z0);
+            glNormal3f(x * zr1, y * zr1, z1);
+            glVertex3f(x * zr1, y * zr1, z1);
+        }
+        glEnd();
+    }
 }

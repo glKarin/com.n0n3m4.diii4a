@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #define DEBUGGERAPP_H_
 
 #include "../../sys/win32/win_local.h"
-#include "../../framework/sync/Msg.h"
+//#include "../../framework/sync/Msg.h"
 
 #ifndef REGISTRYOPTIONS_H_
 #include "../common/RegistryOptions.h"
@@ -49,13 +49,19 @@ If you have questions concerning this license or the applicable additional terms
 
 // These were changed to static by ID so to make it easy we just throw them
 // in this header
+#if 1
+// we need a lot to be able to list all threads in mars_city1
+const int MAX_MSGLEN = 8600;
+#else
 const int MAX_MSGLEN = 1400;
+#endif
 
 class rvDebuggerApp
 {
 	public:
 
 		rvDebuggerApp();
+        ~rvDebuggerApp();
 
 		bool				Initialize(HINSTANCE hInstance);
 		int					Run(void);
@@ -104,5 +110,36 @@ ID_INLINE rvDebuggerWindow &rvDebuggerApp::GetWindow(void)
 }
 
 extern rvDebuggerApp gDebuggerApp;
+
+// compat
+typedef idBitMsg msg_t;
+
+#define MSG_Init(msg, a, b) (msg)->Init((a), (b))
+#define MSG_InitW(msg, a, b) { MSG_Init(msg, a, b); \
+                           (msg)->BeginWriting(); }
+#define MSG_InitR(msg, a, b) { MSG_Init(msg, a, b); \
+                           (msg)->BeginReading(); }
+#define MSG_ReadShort(msg) (msg)->ReadShort()
+#define MSG_WriteShort(msg, a) (msg)->WriteShort((a))
+#define MSG_ReadString(msg, a, b) (msg)->ReadString((a), (b))
+#define MSG_WriteString(msg, a) (msg)->WriteString((a))
+#define MSG_ReadLong(msg) (msg)->ReadLong()
+#define MSG_WriteLong(msg, a) (msg)->WriteLong((a))
+#define MSG_WriteBits(msg, a, b) (msg)->WriteBits((a), (b))
+#define MSG_ReadBits(msg, a) (msg)->ReadBits((a))
+#define MSG_data(msg) (msg)->GetData()
+#define MSG_cursize(msg) (msg)->GetSize()
+#define MSG_Size(msg, a) { (msg)->SetSize(b); \
+                         (msg)->BeginReading(); }
+#define MSG_Set(msg, a, b) { (msg)->Init(a, sizeof(a)); \
+                           (msg)->SetSize(b); }
+#define MSG_SetR(msg, a, b) { MSG_Set(msg, a, b) \
+                           (msg)->BeginReading(); }
+#define MSG_SetW(msg, a, b) { MSG_Set(msg, a, b) \
+                           (msg)->BeginWriting(); }
+#define MSG_readcount(msg) (msg)->GetReadCount()
+#define MSG_readcount_(msg, a) (msg)->SetReadCount(a)
+#define MSG_bit(msg) (msg)->GetReadBit()
+#define MSG_bit_(msg, a) (msg)->SetReadBit(a)
 
 #endif // DEBUGGERAPP_H_

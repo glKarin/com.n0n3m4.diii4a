@@ -83,10 +83,10 @@ public:
 
 // unfortunately, our minDistance / maxDistance is specified in meters, and
 // we have far too many of them to change at this time.
-#if !defined(_RAVEN) //karin: don't convert to meter
+//#if !defined(_RAVEN) //karin: don't convert to meter
 const float DOOM_TO_METERS = 0.0254f;					// doom to meters
 const float METERS_TO_DOOM = (1.0f/DOOM_TO_METERS);	// meters to doom
-#endif
+//#endif
 
 class idSoundSample;
 
@@ -104,13 +104,13 @@ static const int	SSF_NO_DUPS =			BIT(9);	// try not to play the same sound twice
 
 #ifdef _RAVEN
 // RAVEN BEGIN
-static const int    SSF_USEDOPPLER = BIT(10);       // allow doppler pitch shifting effects
-static const int    SSF_NO_RANDOMSTART = BIT(11);   // don't offset the start position for looping sounds
-static const int    SSF_VO_FOR_PLAYER = BIT(12);    // Notifies a funcRadioChatter that this shader is directed at the player
-static const int    SSF_IS_VO = BIT(13);    // this sound is VO
-static const int    SSF_CAUSE_RUMBLE = BIT(14);     // causes joystick rumble
-static const int    SSF_CENTER = BIT(15);   // sound through center channel only
-static const int    SSF_HILITE = BIT(16);   // display debug info for this emitter
+static const int    SSF_USEDOPPLER =        BIT(10);       // allow doppler pitch shifting effects
+static const int    SSF_NO_RANDOMSTART =    BIT(11);   // don't offset the start position for looping sounds
+static const int    SSF_VO_FOR_PLAYER =     BIT(12);    // Notifies a funcRadioChatter that this shader is directed at the player
+static const int    SSF_IS_VO =             BIT(13);    // this sound is VO
+static const int    SSF_CAUSE_RUMBLE =      BIT(14);     // causes joystick rumble
+static const int    SSF_CENTER =            BIT(15);   // sound through center channel only
+static const int    SSF_HILITE =            BIT(16);   // display debug info for this emitter
 // RAVEN END
 #endif
 #ifdef _HUMANHEAD

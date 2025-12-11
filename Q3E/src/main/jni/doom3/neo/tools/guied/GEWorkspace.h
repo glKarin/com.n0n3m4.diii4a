@@ -263,7 +263,7 @@ ID_INLINE rvGEWorkspace::EZoomLevel rvGEWorkspace::GetZoom(void)
 
 ID_INLINE rvGEWorkspace *rvGEWorkspace::GetWorkspace(HWND wnd)
 {
-	return (rvGEWorkspace *) GetWindowLong(wnd, GWL_USERDATA);
+	return (rvGEWorkspace *) GetWindowLongPtr(wnd, GWLP_USERDATA);
 }
 
 ID_INLINE const char *rvGEWorkspace::GetFilename(void)

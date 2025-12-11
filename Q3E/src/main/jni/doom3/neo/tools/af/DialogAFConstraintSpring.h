@@ -47,7 +47,7 @@ class DialogAFConstraintSpring : public CDialog
 
 	protected:
 		virtual void		DoDataExchange(CDataExchange *pDX);    // DDX/DDV support
-		virtual int			OnToolHitTest(CPoint point, TOOLINFO *pTI) const;
+		virtual INT_PTR		OnToolHitTest(CPoint point, TOOLINFO *pTI) const;
 		afx_msg BOOL		OnToolTipNotify(UINT id, NMHDR *pNMHDR, LRESULT *pResult);
 		afx_msg void		OnBnClickedRadioAnchorJoint();
 		afx_msg void		OnBnClickedRadioAnchorCoordinates();

@@ -92,7 +92,7 @@ LRESULT CALLBACK AlphaSlider_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 
 			if (v > 1.0f) v = 1.0f;
 
-			SetWindowLong(hwnd, GWL_USERDATA, MAKELONG(0x8000,(unsigned short)(255.0f * v)));
+			SetWindowLongPtr(hwnd, GWLP_USERDATA, MAKELONG(0x8000,(unsigned short)(255.0f * v)));
 			InvalidateRect(hwnd, NULL, FALSE);
 
 			SetCapture(hwnd);
@@ -102,7 +102,7 @@ LRESULT CALLBACK AlphaSlider_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 
 		case WM_MOUSEMOVE:
 
-			if (LOWORD(GetWindowLong(hwnd, GWL_USERDATA)) & 0x8000) {
+			if (LOWORD(GetWindowLongPtr(hwnd, GWLP_USERDATA)) & 0x8000) {
 				RECT  rClient;
 				float v;
 
@@ -113,7 +113,7 @@ LRESULT CALLBACK AlphaSlider_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 
 				if (v > 1.0f) v = 1.0f;
 
-				SetWindowLong(hwnd, GWL_USERDATA, MAKELONG(0x8000,(unsigned short)(255.0f * v)));
+				SetWindowLongPtr(hwnd, GWLP_USERDATA, MAKELONG(0x8000,(unsigned short)(255.0f * v)));
 				InvalidateRect(hwnd, NULL, FALSE);
 			}
 
@@ -121,7 +121,7 @@ LRESULT CALLBACK AlphaSlider_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 
 		case WM_LBUTTONUP:
 
-			if (LOWORD(GetWindowLong(hwnd, GWL_USERDATA)) & 0x8000) {
+			if (LOWORD(GetWindowLongPtr(hwnd, GWLP_USERDATA)) & 0x8000) {
 				RECT  rClient;
 				float v;
 
@@ -132,7 +132,7 @@ LRESULT CALLBACK AlphaSlider_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 
 				if (v > 1.0f) v = 1.0f;
 
-				SetWindowLong(hwnd, GWL_USERDATA, MAKELONG(0x8000,(unsigned short)(255.0f * v)));
+				SetWindowLongPtr(hwnd, GWLP_USERDATA, MAKELONG(0x8000,(unsigned short)(255.0f * v)));
 				InvalidateRect(hwnd, NULL, FALSE);
 				ReleaseCapture();
 				SendMessage(GetParent(hwnd), WM_COMMAND, MAKELONG(GetWindowLong(hwnd,GWL_ID),0), 0);
@@ -180,7 +180,7 @@ LRESULT CALLBACK AlphaSlider_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 
 			// Draw the thumb
 			RECT rThumb;
-			short s = HIWORD(GetWindowLong(hwnd, GWL_USERDATA));
+			short s = HIWORD(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 			float thumb = (float)(short)s;
 			thumb /= 255.0f;
 			thumb *= (float)(rDraw.right-rDraw.left);
@@ -245,10 +245,10 @@ INT_PTR CALLBACK AlphaSelectDlg_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
 			color      = GetRValue(ColorButton_GetColor((HWND)lParam));
 
 			// The lParam for the alpha select dialog is the window handle of the button pressed
-			SetWindowLong(hwnd, GWL_USERDATA, lParam);
+			SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
 
 			// Subclass the alpha
-			SetWindowLong(GetDlgItem(hwnd, IDC_GUIED_ALPHASLIDER), GWL_USERDATA, MAKELONG(0,color));
+			SetWindowLongPtr(GetDlgItem(hwnd, IDC_GUIED_ALPHASLIDER), GWLP_USERDATA, MAKELONG(0,color));
 
 			// Numbers only on the edit box and start it with the current alpha value.
 			NumberEdit_Attach(GetDlgItem(hwnd, IDC_GUIED_ALPHA));
@@ -288,14 +288,14 @@ INT_PTR CALLBACK AlphaSelectDlg_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
 					}
 
 					// Set the current alpha value in the slider
-					SetWindowLong(GetDlgItem(hwnd, IDC_GUIED_ALPHASLIDER), GWL_USERDATA, MAKELONG(0,(255.0f * value)));
+					SetWindowLongPtr(GetDlgItem(hwnd, IDC_GUIED_ALPHASLIDER), GWLP_USERDATA, MAKELONG(0,(255.0f * value)));
 					break;
 				}
 
 				case IDC_GUIED_ALPHASLIDER:
 				case IDOK: {
-					int color = (short)HIWORD(GetWindowLong(GetDlgItem(hwnd, IDC_GUIED_ALPHASLIDER), GWL_USERDATA));
-					ColorButton_SetColor((HWND)GetWindowLong(hwnd, GWL_USERDATA), RGB(color,color,color));
+					int color = (short)HIWORD(GetWindowLongPtr(GetDlgItem(hwnd, IDC_GUIED_ALPHASLIDER), GWLP_USERDATA));
+					ColorButton_SetColor((HWND)GetWindowLongPtr(hwnd, GWLP_USERDATA), RGB(color,color,color));
 					EndDialog(hwnd, 0);
 					break;
 				}

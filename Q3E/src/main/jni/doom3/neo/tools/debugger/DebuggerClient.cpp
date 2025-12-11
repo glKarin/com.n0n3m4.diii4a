@@ -72,7 +72,7 @@ bool rvDebuggerClient::Initialize(void)
 	}
 
 	// Server must be running on the local host on port 28980
-	Sys_StringToNetAdr("localhost", &mServerAdrt, true);
+	Sys_StringToNetAdr("localhost", &mServerAdr, true);
 	mServerAdr.port = 27980;
 
 	// Attempt to let the server know we are here.  The server may not be running so this
@@ -111,10 +111,12 @@ bool rvDebuggerClient::ProcessMessages(void)
 	msg_t	 msg;
 	byte	 buffer[MAX_MSGLEN];
 
-	MSG_Init(&msg, buffer, sizeof(buffer));
+	MSG_InitR(&msg, buffer, sizeof(buffer));
 
 	// Check for pending udp packets on the debugger port
-	while (mPort.GetPacket(adrFrom, msg.data, msg.cursize, msg.maxsize)) {
+    int msgSize;
+	while (mPort.GetPacket(adrFrom, /*msg.data*/buffer, /*msg.cursize*/msgSize, /*msg.maxsize*/MAX_MSGLEN)) {
+        MSG_SetR(&msg, buffer, msgSize);
 		unsigned short command;
 
 		// Only accept packets from the debugger server for security reasons
@@ -165,8 +167,8 @@ bool rvDebuggerClient::ProcessMessages(void)
 		}
 
 		// Give the window a chance to process the message
-		msg.readcount = 0;
-		msg.bit = 0;
+		MSG_readcount_(&msg, 0);
+        MSG_bit_(&msg, 0);
 		gDebuggerApp.GetWindow().ProcessNetMessage(&msg);
 	}
 
@@ -219,12 +221,12 @@ void rvDebuggerClient::InspectVariable(const char *name, int callstackDepth)
 	msg_t	 msg;
 	byte	 buffer[MAX_MSGLEN];
 
-	MSG_Init(&msg, buffer, sizeof(buffer));
+	MSG_InitW(&msg, buffer, sizeof(buffer));
 	MSG_WriteShort(&msg, (int)DBMSG_INSPECTVARIABLE);
 	MSG_WriteShort(&msg, (short)(mCallstack.Num()-callstackDepth));
 	MSG_WriteString(&msg, name);
 
-	SendPacket(msg.data, msg.cursize);
+	SendPacket(/*msg.data*/MSG_data(&msg), /*msg.cursize*/MSG_cursize(&msg));
 }
 
 /*
@@ -450,10 +452,10 @@ void rvDebuggerClient::SendMessage(EDebuggerMessage dbmsg)
 	msg_t	 msg;
 	byte	 buffer[MAX_MSGLEN];
 
-	MSG_Init(&msg, buffer, sizeof(buffer));
+	MSG_InitW(&msg, buffer, sizeof(buffer));
 	MSG_WriteShort(&msg, (int)dbmsg);
 
-	SendPacket(msg.data, msg.cursize);
+    SendPacket(/*msg.data*/MSG_data(&msg), /*msg.cursize*/MSG_cursize(&msg));
 }
 
 /*
@@ -493,14 +495,14 @@ void rvDebuggerClient::SendAddBreakpoint(rvDebuggerBreakpoint &bp, bool onceOnly
 		return;
 	}
 
-	MSG_Init(&msg, buffer, sizeof(buffer));
+	MSG_InitW(&msg, buffer, sizeof(buffer));
 	MSG_WriteShort(&msg, (int)DBMSG_ADDBREAKPOINT);
 	MSG_WriteBits(&msg, onceOnly?1:0, 1);
 	MSG_WriteLong(&msg, (unsigned long) bp.GetLineNumber());
 	MSG_WriteLong(&msg, bp.GetID());
 	MSG_WriteString(&msg, bp.GetFilename());
 
-	SendPacket(msg.data, msg.cursize);
+    SendPacket(/*msg.data*/MSG_data(&msg), /*msg.cursize*/MSG_cursize(&msg));
 }
 
 /*
@@ -519,11 +521,11 @@ void rvDebuggerClient::SendRemoveBreakpoint(rvDebuggerBreakpoint &bp)
 		return;
 	}
 
-	MSG_Init(&msg, buffer, sizeof(buffer));
+	MSG_InitW(&msg, buffer, sizeof(buffer));
 	MSG_WriteShort(&msg, (int)DBMSG_REMOVEBREAKPOINT);
 	MSG_WriteLong(&msg, bp.GetID());
 
-	SendPacket(msg.data, msg.cursize);
+    SendPacket(/*msg.data*/MSG_data(&msg), /*msg.cursize*/MSG_cursize(&msg));
 }
 
 /*

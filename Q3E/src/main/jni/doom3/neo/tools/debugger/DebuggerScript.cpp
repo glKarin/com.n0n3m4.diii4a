@@ -31,7 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "DebuggerApp.h"
 #include "DebuggerScript.h"
+#if 0
 #include "../../game/script/Script_Program.h"
+#endif
 #include "../../ui/Window.h"
 #include "../../ui/UserInterfaceLocal.h"
 
@@ -71,7 +73,9 @@ void rvDebuggerScript::Unload(void)
 	if (mInterface) {
 		delete mInterface;
 	} else {
+#if 0
 		delete mProgram;
+#endif
 	}
 
 	mContents  = NULL;
@@ -114,10 +118,11 @@ bool rvDebuggerScript::Load(const char *filename)
 	// Cleanup
 	fileSystem->FreeFile(buffer);
 
+#if 0
 	// Now compile the script so we can tell what a valid line is, etc..  If its
 	// a gui file then we need to parse it using the userinterface system rather
 	// than the normal script compiler.
-	try {
+    try {
 		// Parse the script using the script compiler
 		mProgram = new idProgram;
 		mProgram->BeginCompilation();
@@ -131,13 +136,14 @@ bool rvDebuggerScript::Load(const char *filename)
 			idStr scriptFile = va("script/%s_main.script", gamedir.c_str());
 
 			if (fileSystem->ReadFile(scriptFile.c_str(), NULL) > 0) {
-				mProgram.CompileFile(scriptFile.c_str());
+				mProgram->CompileFile(scriptFile.c_str());
 			}
 
 		}
 
 		// Make sure the file isnt already compiled before trying to compile it again
-		for (int f = mProgram->NumFilenames() - 1; f >= 0; f --) {
+        int f;
+		for (f = mProgram->NumFilenames() - 1; f >= 0; f --) {
 			idStr qpath;
 			qpath = fileSystem->OSPathToRelativePath(mProgram->GetFilename(f));
 			qpath.BackSlashesToSlashes();
@@ -163,6 +169,7 @@ bool rvDebuggerScript::Load(const char *filename)
 
 		return false;
 	}
+#endif
 
 	return true;
 }
@@ -188,6 +195,7 @@ Determines whether or not the given line number within the script is a valid lin
 */
 bool rvDebuggerScript::IsLineCode(int linenumber)
 {
+#if 0
 	int i;
 
 	assert(mProgram);
@@ -199,6 +207,7 @@ bool rvDebuggerScript::IsLineCode(int linenumber)
 			return true;
 		}
 	}
+#endif
 
 	return false;
 }

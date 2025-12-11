@@ -46,7 +46,7 @@ class CMyColorDialog : public CColorDialog
 		// Construction
 	public:
 		CMyColorDialog(COLORREF clrInit = 0, DWORD dwFlags = 0, CWnd *pParentWnd = NULL);
-		virtual int DoModal();
+		virtual INT_PTR DoModal();
 
 	protected:
 		enum { NCUSTCOLORS = 16 };
@@ -127,7 +127,7 @@ CMyColorDialog::CMyColorDialog(COLORREF clrInit, DWORD dwFlags,
 	m_cc.lpCustColors = c_CustColors;
 }
 
-int CMyColorDialog::DoModal()
+INT_PTR CMyColorDialog::DoModal()
 {
 	int code = CColorDialog::DoModal();
 	SaveCustColors();
@@ -1277,7 +1277,7 @@ void CDialogColorPicker::OnSysColorChange()
 	LoadMappedBitmap(m_RgbBitmap,IDB_BITMAP_RGB,size);
 }
 
-void CDialogColorPicker::OnTimer(UINT nIDEvent)
+void CDialogColorPicker::OnTimer(UINT_PTR nIDEvent)
 {
 	if (UpdateParent) {
 		UpdateParent(color.r, color.g, color.b, 1.0f);
