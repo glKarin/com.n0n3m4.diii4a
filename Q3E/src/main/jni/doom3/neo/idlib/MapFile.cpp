@@ -910,12 +910,8 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 		version = token.GetIntValue();
         if(version != CURRENT_MAP_VERSION) //karin: for compat doom3 map
         {
-            if(token.type == TT_STRING) // DOOM3 version number is string
-            {
-                version = atoi(token.c_str());
-                if(version == DOOM3_MAP_VERSION)
-                    common->Printf("idMapFile::Parse: DOOM3 map version '%d' instead of '%d'\n", DOOM3_MAP_VERSION, CURRENT_MAP_VERSION);
-            }
+            if(version == DOOM3_MAP_VERSION)
+                common->Printf("idMapFile::Parse: DOOM3 map version '%d' instead of '%d'\n", DOOM3_MAP_VERSION, CURRENT_MAP_VERSION);
         }
 #else
 		version = token.GetFloatValue();
