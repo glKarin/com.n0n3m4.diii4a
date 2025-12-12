@@ -330,7 +330,12 @@ void idCollisionModelManagerLocal::LoadProcBSP(const char *name)
 		return;
 	}
 
-	if (!src->ReadToken(&token) || token.Icmp(PROC_FILE_ID)) {
+#ifdef _RAVEN //karin: for compat doom3 proc
+    if (!src->ReadToken(&token) || (token.Icmp(PROC_FILE_ID) && token.Icmp(PROC_FILE_DOOM3_ID)) )
+#else
+	if (!src->ReadToken(&token) || token.Icmp(PROC_FILE_ID))
+#endif
+    {
 		common->Warning("idCollisionModelManagerLocal::LoadProcBSP: bad id '%s' instead of '%s'", token.c_str(), PROC_FILE_ID);
 		delete src;
 		return;
@@ -338,15 +343,22 @@ void idCollisionModelManagerLocal::LoadProcBSP(const char *name)
 
 #ifdef _RAVEN // quake4 proc file
 // jmarshall: quake 4 proc format
+    if(!token.Icmp(PROC_FILE_DOOM3_ID)) //karin: for compat doom3 proc
+    {
+        common->Printf("idCollisionModelManagerLocal::LoadProcBSP: DOOM3 proc version '%s' instead of '%s'\n", PROC_FILE_DOOM3_ID, PROC_FILE_ID);
+    }
+    else // Quake4 version proc
+    {
     if (!src->ReadToken(&token) || token.Icmp(PROC_FILEVERSION))
     {
-        common->Printf("idRenderWorldLocal::InitFromMap: bad version '%s' instead of '%s'\n", token.c_str(), PROC_FILEVERSION);
+        common->Printf("idCollisionModelManagerLocal::LoadProcBSP: bad version '%s' instead of '%s'\n", token.c_str(), PROC_FILEVERSION);
         delete src;
         return;
     }
 
     // Map CRC, we aren't going to use it.
     src->ReadToken(&token);
+    }
 // jmarshall end
 #endif
 

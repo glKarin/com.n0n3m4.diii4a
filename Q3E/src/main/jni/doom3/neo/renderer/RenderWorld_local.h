@@ -207,6 +207,7 @@ class idRenderWorldLocal : public idRenderWorld
 #endif
 
 	    idList<rvRenderEffectLocal*>	effectDefs;
+        int                             procVersion; //karin: for compat doom3 proc
 #endif
 
 #ifdef _D3BFG_CULLING
