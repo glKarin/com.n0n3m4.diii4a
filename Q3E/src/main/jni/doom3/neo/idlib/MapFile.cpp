@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
+#ifdef _RAVEN //karin: for compat doom3 map
+#define MAP_IS_QUAKE4_VERSION() (version >= CURRENT_MAP_VERSION)
+#define MAP_NOT_QUAKE4_VERSION() (version < CURRENT_MAP_VERSION)
+#endif
 
 /*
 ===============
@@ -217,9 +221,20 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 	}
 
 #ifdef _RAVEN // quake4 map file
-	if ( !src.ExpectTokenString( ")" ) ||
-			!src.ExpectTokenString( "}" ) ||
-				!src.ExpectTokenString( "}" ) )
+    bool parseErr = false; //karin: for compat doom3 map
+    if(MAP_IS_QUAKE4_VERSION())
+    {
+        if ( !src.ExpectTokenString( ")" ) ||
+                !src.ExpectTokenString( "}" ) ||
+                    !src.ExpectTokenString( "}" ) )
+            parseErr = true;
+    }
+    else
+    {
+        if (!src.ExpectTokenString(")"))
+            parseErr = true;
+    }
+    if(parseErr)
 #else
 	if (!src.ExpectTokenString(")"))
 #endif
@@ -229,7 +244,10 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 		return NULL;
 	}
 
-#if !defined(_RAVEN) // quake4 map file
+//#if !defined(_RAVEN) // quake4 map file
+#ifdef _RAVEN //karin: for compat doom3 map
+    if(MAP_NOT_QUAKE4_VERSION())
+#endif
 	// read any key/value pairs
 	while (src.ReadToken(&token)) {
 		if (token == "}") {
@@ -243,7 +261,7 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 			patch->epairs.Set(key, token);
 		}
 	}
-#endif
+//#endif
 
 	return patch;
 }
@@ -854,11 +872,11 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 // RAVEN END
 #else
 	idLexer src(LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES);
+	int i, j, k;
 #endif
 	idToken token;
 	idStr fullName;
 	idMapEntity *mapEnt;
-	int i, j, k;
 
 	name = filename;
 	name.StripFileExtension();
@@ -890,6 +908,15 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 		src.ReadTokenOnLine(&token);
 #ifdef _RAVEN // quake4 map file
 		version = token.GetIntValue();
+        if(version != CURRENT_MAP_VERSION) //karin: for compat doom3 map
+        {
+            if(token.type == TT_STRING) // DOOM3 version number is string
+            {
+                version = atoi(token.c_str());
+                if(version == DOOM3_MAP_VERSION)
+                    common->Printf("idMapFile::Parse: DOOM3 map version '%d' instead of '%d'\n", DOOM3_MAP_VERSION, CURRENT_MAP_VERSION);
+            }
+        }
 #else
 		version = token.GetFloatValue();
 #endif
@@ -904,6 +931,7 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 
 #ifdef _RAVEN // quake4 map file
 // RAVEN BEGIN
+        if(MAP_IS_QUAKE4_VERSION()) //karin: for compat doom3 map
 // rhummer: Check to see if there are func_groups in the map file.
 		if ( !mHasFuncGroups && !idStr::Icmp( mapEnt->epairs.GetString( "classname" ), "func_group" ) ) {
 			mHasFuncGroups = true;
@@ -915,6 +943,7 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 	}
 
 #ifdef _RAVEN
+    if(MAP_IS_QUAKE4_VERSION()) //karin: for compat doom3 map
     ParseExport(filename, osPath);
 #endif
 
@@ -922,6 +951,10 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 
 #ifdef _RAVEN
 // RAVEN BEGIN
+// rhummer: Trying to debug why func_groups disappear when editing a map when they shouldn't.
+    if ( cvarSystem->GetCVarBool( "developer" ) ) {
+        common->Printf( "^2loaded .map file ^0%s\n", filename );
+    }
     mHasBeenResolved = false;
 // RAVEN END
 #else
