@@ -153,6 +153,12 @@ class idWeapon : public idAnimatedEntity
 		virtual bool			ClientReceiveEvent(int event, int time, const idBitMsg &msg);
 
 		virtual void			ClientPredictionThink(void);
+#ifdef _DOOM3 //karin: for world weapon attach to custom player model
+//#define GAME_TEST_WEAPON_TRANSFORM 1
+#if GAME_TEST_WEAPON_TRANSFORM
+		static void TestWorldWeaponTransform(const idCmdArgs &args);
+#endif
+#endif
 
 	private:
 		// script control

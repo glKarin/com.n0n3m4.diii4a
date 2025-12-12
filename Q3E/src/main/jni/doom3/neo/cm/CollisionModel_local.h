@@ -600,13 +600,11 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		                const idVec3 &viewOrigin, const float radius);
 #ifdef _RAVEN // quake4 cm file
 	private:
-		//k v3 .cm file parse
-		bool			ParseCollisionModel_v3(idLexer *src);
-		void			ParsePolygons_v3(idLexer *src, cm_model_t *model);
-		void			ParseBrushes_v3(idLexer *src, cm_model_t *model);
 		cmHandle_t		FindModelAndIndex(const char *name, int &index);
 
 	    int				numInlinedProcClipModels;
+        idStr           cmVersion;
+        idStr           cmWriteVersion; //karin: for compat doom3 cm
 #endif
 
 	private:			// collision map data

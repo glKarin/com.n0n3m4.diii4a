@@ -113,9 +113,9 @@ public:
 	virtual bool				GetPolygon( int polygonNum, idFixedWinding &winding ) const = 0;
 };
 
-typedef idCollisionModel* cmHandle_t;
+typedef idCollisionModel* cmHandle_t; // NULL is invalid; [0] is worldMap
 #else
-typedef int cmHandle_t;
+typedef int cmHandle_t; // -1 is invalid; 0 is worldMap
 #endif
 
 #define CM_CLIP_EPSILON		0.25f			// always stay this distance away from any model

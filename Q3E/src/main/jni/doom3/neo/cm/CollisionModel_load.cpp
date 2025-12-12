@@ -50,6 +50,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "CollisionModel_local.h"
 
+#ifdef _RAVEN //Quake4: if FindModel() return invalid: It will return 0(worldMap) when FindModel() is invalid in DOOM3
+#define _RETURN_WORLDMAP_MODEL_IF_FINDMODEL_IS_NULL 1
+#endif
+
 
 idCollisionModelManagerLocal	collisionModelManagerLocal;
 idCollisionModelManager 		*collisionModelManager = &collisionModelManagerLocal;
@@ -4299,12 +4303,12 @@ idCollisionModelManagerLocal::GetModelPolygon
 */
 bool idCollisionModelManagerLocal::GetModelPolygon(cmHandle_t model, int polygonNum, idFixedWinding &winding) const
 {
-	int i, edgeNum;
-	cm_polygon_t *poly;
-
 #ifdef _RAVEN
 	return model ? static_cast<cm_model_t *>(model)->GetPolygon(polygonNum, winding) : false;
 #else
+    int i, edgeNum;
+	cm_polygon_t *poly;
+
 	if (model < 0 || model > MAX_SUBMODELS || model >= numModels || !models[model]) {
 		common->Printf("idCollisionModelManagerLocal::GetModelPolygon: invalid model handle\n");
 		return false;
@@ -4348,7 +4352,15 @@ cmHandle_t idCollisionModelManagerLocal::LoadModel(const char *modelName, const 
 
 	if (numModels >= MAX_SUBMODELS) {
 		common->Error("idCollisionModelManagerLocal::LoadModel: no free slots\n");
-		return 0;
+#ifdef _RAVEN //Quake4: if no collision model !!! index 0 is worldMap model in DOOM 3 !!!
+//#if _RETURN_WORLDMAP_MODEL_IF_FINDMODEL_IS_NULL
+//        return models[0]; //karin: 2025-12-12: return index 0 model(worldMap)
+//#else
+        return NULL; //karin: old - return NULL(invalid)
+//#endif
+#else // index 0 is worldMap model in DOOM 3
+        return 0;
+#endif
 	}
 
 	// try to load a .cm file
@@ -4369,7 +4381,18 @@ cmHandle_t idCollisionModelManagerLocal::LoadModel(const char *modelName, const 
 
 	// if only precaching .cm files do not waste memory converting render models
 	if (precache) {
-		return 0;
+#ifdef _RAVEN //Quake4: if no collision model !!! index 0 is worldMap model in DOOM 3 !!!
+#if _RETURN_WORLDMAP_MODEL_IF_FINDMODEL_IS_NULL
+        if(!idStr::Icmp(modelName, WORLD_MODEL_NAME)) {
+            common->Printf("idCollisionModelManagerLocal::LoadModel(precache): Load '" WORLD_MODEL_NAME "' collision model not found, using index 0(%s) collision model as world model.\n", models[0] ? models[0]->GetName() : "NULL");
+            return models[0]; //karin: 2025-12-12: return index 0 model(worldMap)
+        }
+        else
+#endif
+        return NULL; //karin: old - return NULL(invalid)
+#else
+        return 0;
+#endif
 	}
 
 	// try to load a .ASE or .LWO model and convert it to a collision model
@@ -4384,7 +4407,18 @@ cmHandle_t idCollisionModelManagerLocal::LoadModel(const char *modelName, const 
 #endif
 	}
 
-	return 0;
+#ifdef _RAVEN //Quake4: if no collision model !!! index 0 is worldMap model in DOOM 3 !!!
+#if _RETURN_WORLDMAP_MODEL_IF_FINDMODEL_IS_NULL
+    if(!idStr::Icmp(modelName, WORLD_MODEL_NAME)) {
+        common->Printf("idCollisionModelManagerLocal::LoadModel: Load '" WORLD_MODEL_NAME "' collision model not found, using index 0(%s) collision model as world model.\n", models[0] ? models[0]->GetName() : "NULL");
+        return models[0]; //karin: 2025-12-12: return index 0 model(worldMap)
+    }
+    else
+#endif
+    return NULL; //karin: old - return NULL(invalid)
+#else // index 0 is worldMap model in DOOM 3
+    return 0;
+#endif
 }
 
 /*
