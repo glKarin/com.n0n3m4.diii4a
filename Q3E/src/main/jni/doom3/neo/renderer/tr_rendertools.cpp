@@ -120,18 +120,21 @@ static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 	const int numIndexes = r_singleTriangle.GetBool() ? 3 : tri->numIndexes;
 	if(backEnd.glState.glStateBits & GLS_POLYMODE_LINE)
 	{
+		if (tri->indexCache) {
 		for(int i = 0; i < numIndexes; i += 3)
 		{
-			if (tri->indexCache) {
-				glrbDrawElements(GL_LINES,
+				glrbDrawElements(GL_LINE_LOOP,
 						3,
 						GL_INDEX_TYPE,
 						(glIndex_t *)vertexCache.Position(tri->indexCache) + i);
 				backEnd.pc.c_vboIndexes += 3;
+			}
 			} else {
 				vertexCache.UnbindIndex();
 
-				glrbDrawElements(GL_LINES,
+			for(int i = 0; i < numIndexes; i += 3)
+			{
+				glrbDrawElements(GL_LINE_LOOP,
 						3,
 						GL_INDEX_TYPE,
 						tri->indexes + i);
@@ -144,7 +147,7 @@ static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 			glrbDrawElements(GL_TRIANGLES,
 					numIndexes,
 					GL_INDEX_TYPE,
-					(int *)vertexCache.Position(tri->indexCache));
+					(glIndex_t *)vertexCache.Position(tri->indexCache));
 			backEnd.pc.c_vboIndexes += tri->numIndexes;
 		} else {
 			vertexCache.UnbindIndex();
@@ -157,10 +160,8 @@ static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 	}
 }
 
-static void RB_T_RenderTriangleSurface_polygon(const drawSurf_t *surf)
+static void RB_RenderTriangleSurface_polygon(const srfTriangles_t *tri)
 {
-	const srfTriangles_t *tri = surf->geo;
-
 	if (!tri->ambientCache) {
 		return;
 	}
@@ -170,6 +171,11 @@ static void RB_T_RenderTriangleSurface_polygon(const drawSurf_t *surf)
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
 
 	RB_DrawElementsWithCounters_polygon(tri);
+}
+
+static void RB_T_RenderTriangleSurface_polygon(const drawSurf_t *surf)
+{
+	RB_RenderTriangleSurface_polygon(surf->geo);
 }
 #else
 #define qglReadPixels_1 qglReadPixels
