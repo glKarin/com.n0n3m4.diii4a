@@ -54,6 +54,11 @@
 #define GL_FILL				0x1B02
 #endif
 
+/* texture */
+#ifndef GL_TEXTURE_1D
+#define GL_TEXTURE_1D				0x0DE0
+#endif
+
 
 void glDisableClientState(GLenum e);
 void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
@@ -82,10 +87,12 @@ void glPopAttrib(void);
 void glPushAttrib(GLint mask);
 void glPolygonMode(GLenum face, GLenum mode);
 
-void glrbGetFloatv(GLenum pname, GLfloat *data);
-void glrbReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void * data, GLsizei align = 1);
+void glesGetFloatv(GLenum pname, GLfloat *data);
+void glesEnable(GLenum pname);
+void glesDisable(GLenum pname);
+void glesReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void * data, GLsizei align = 1);
 
-void glrbShutdown(void);
+void glesShutdown(void);
 
 typedef void GLUquadricObj;
 void gluSphere(GLUquadricObj *, float r, int lats, int longs);

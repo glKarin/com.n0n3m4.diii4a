@@ -472,6 +472,7 @@ extern BOOL(WINAPI * qwglRealizeLayerPalette)(HDC, int, BOOL);
 extern BOOL(WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 
 #include "glsl/gles2_compat.h"
+
 #define qglBegin glBegin
 #define qglEnd glEnd
 #define qglColor4f glColor4f

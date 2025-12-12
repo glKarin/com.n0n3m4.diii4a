@@ -97,7 +97,7 @@ int				rb_debugPolygonTime = 0;
 #ifdef GL_ES_VERSION_2_0
 #include "glsl/gles2_compat.cpp"
 
-#define qglReadPixels_1(x, y, w, h, f, t, d) glrbReadPixels((x), (y), (w), (h), (f), (t), (d), 1)
+#define qglReadPixels_1(x, y, w, h, f, t, d) glesReadPixels((x), (y), (w), (h), (f), (t), (d), 1)
 
 static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 {
@@ -121,20 +121,20 @@ static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 	if(backEnd.glState.glStateBits & GLS_POLYMODE_LINE)
 	{
 		if (tri->indexCache) {
-		for(int i = 0; i < numIndexes; i += 3)
-		{
-				glrbDrawElements(GL_LINE_LOOP,
+			for(int i = 0; i < numIndexes; i += 3)
+			{
+				glesDrawElements(GL_LINE_LOOP,
 						3,
 						GL_INDEX_TYPE,
 						(glIndex_t *)vertexCache.Position(tri->indexCache) + i);
 				backEnd.pc.c_vboIndexes += 3;
 			}
-			} else {
-				vertexCache.UnbindIndex();
+		} else {
+			vertexCache.UnbindIndex();
 
 			for(int i = 0; i < numIndexes; i += 3)
 			{
-				glrbDrawElements(GL_LINE_LOOP,
+				glesDrawElements(GL_LINE_LOOP,
 						3,
 						GL_INDEX_TYPE,
 						tri->indexes + i);
@@ -144,7 +144,7 @@ static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 	else
 	{
 		if (tri->indexCache) {
-			glrbDrawElements(GL_TRIANGLES,
+			glesDrawElements(GL_TRIANGLES,
 					numIndexes,
 					GL_INDEX_TYPE,
 					(glIndex_t *)vertexCache.Position(tri->indexCache));
@@ -152,7 +152,7 @@ static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
 		} else {
 			vertexCache.UnbindIndex();
 
-			glrbDrawElements(GL_TRIANGLES,
+			glesDrawElements(GL_TRIANGLES,
 					numIndexes,
 					GL_INDEX_TYPE,
 					tri->indexes);
@@ -314,7 +314,7 @@ static void RB_ShowViewEntityList(void)
 //#if !defined(GL_ES_VERSION_2_0)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	glColor3f(1, 1, 1);
@@ -465,7 +465,7 @@ void RB_PolygonClear(void)
 	glPushMatrix();
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	glLoadIdentity();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_DEPTH_TEST);
 	qglDisable(GL_CULL_FACE);
 	qglDisable(GL_SCISSOR_TEST);
@@ -1052,7 +1052,7 @@ void RB_ShowLightCount(void)
 				}
 
 #ifdef GL_ES_VERSION_2_0
-				glrbStartRender();
+				glesStartRender();
 #endif
 				const idDrawVert	*ac = (idDrawVert *)vertexCache.Position(surf->geo->ambientCache);
 
@@ -1060,7 +1060,7 @@ void RB_ShowLightCount(void)
 
 				RB_DrawElementsWithCounters(surf->geo);
 #ifdef GL_ES_VERSION_2_0
-				glrbEndRender();
+				glesEndRender();
 #endif
 			}
 		}
@@ -1100,7 +1100,7 @@ void RB_ShowSilhouette(void)
 	//
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	glColor3f(0, 0, 0);
@@ -1111,12 +1111,12 @@ void RB_ShowSilhouette(void)
 	qglDisable(GL_DEPTH_TEST);
 
 #ifdef GL_ES_VERSION_2_0
-	glrbStartRender();
+	glesStartRender();
 #endif
 	RB_RenderDrawSurfListWithFunction(backEnd.viewDef->drawSurfs, backEnd.viewDef->numDrawSurfs,
 	                                  RB_T_RenderTriangleSurface_polygon);
 #ifdef GL_ES_VERSION_2_0
-	glrbEndRender();
+	glesEndRender();
 #endif
 
 
@@ -1136,7 +1136,7 @@ void RB_ShowSilhouette(void)
 				const srfTriangles_t	*tri = surf->geo;
 
 #ifdef GL_ES_VERSION_2_0
-				glrbStartRender();
+				glesStartRender();
 #endif
 				glVertexPointer(3, GL_FLOAT, sizeof(shadowCache_t), vertexCache.Position(tri->shadowCache));
 				glBegin(GL_LINES);
@@ -1160,7 +1160,7 @@ void RB_ShowSilhouette(void)
 				glEnd();
 
 #ifdef GL_ES_VERSION_2_0
-				glrbEndRender();
+				glesEndRender();
 #endif
 			}
 		}
@@ -1238,12 +1238,12 @@ static void RB_ShowShadowCount(void)
 
 				shadowCache_t *cache = (shadowCache_t *)vertexCache.Position(tri->shadowCache);
 #ifdef GL_ES_VERSION_2_0
-				glrbStartRender();
+				glesStartRender();
 #endif
 				glVertexPointer(4, GL_FLOAT, sizeof(*cache), &cache->xyz);
 				RB_DrawElementsWithCounters(tri);
 #ifdef GL_ES_VERSION_2_0
-				glrbEndRender();
+				glesEndRender();
 #endif
 			}
 		}
@@ -1318,7 +1318,7 @@ static void RB_ShowTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	glColor3f(1, 1, 1);
@@ -1345,11 +1345,11 @@ static void RB_ShowTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 #ifdef GL_ES_VERSION_2_0
-	glrbStartRender();
+	glesStartRender();
 #endif
 	RB_RenderDrawSurfListWithFunction(drawSurfs, numDrawSurfs, RB_T_RenderTriangleSurface_polygon);
 #ifdef GL_ES_VERSION_2_0
-	glrbEndRender();
+	glesEndRender();
 #endif
 
 	qglEnable(GL_DEPTH_TEST);
@@ -1395,7 +1395,7 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 #if 1 //!defined(GL_ES_VERSION_2_0)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	glColor3f(1, 1, 1);
@@ -1491,7 +1491,7 @@ static void RB_ShowViewEntitys(viewEntity_t *vModels)
 //#if !defined(GL_ES_VERSION_2_0)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	glColor3f(1, 1, 1);
@@ -2318,11 +2318,11 @@ void RB_ShowLights(void)
 			glColor4f(0, 0, 1, 0.25);
 			qglEnable(GL_DEPTH_TEST);
 #ifdef GL_ES_VERSION_2_0
-			glrbStartRender();
+			glesStartRender();
 #endif
 			RB_RenderTriangleSurface_polygon(tri);
 #ifdef GL_ES_VERSION_2_0
-			glrbEndRender();
+			glesEndRender();
 #endif
 		}
 
@@ -2332,11 +2332,11 @@ void RB_ShowLights(void)
 			qglDisable(GL_DEPTH_TEST);
 			glColor3f(1, 1, 1);
 #ifdef GL_ES_VERSION_2_0
-			glrbStartRender();
+			glesStartRender();
 #endif
 			RB_RenderTriangleSurface_polygon(tri);
 #ifdef GL_ES_VERSION_2_0
-			glrbEndRender();
+			glesEndRender();
 #endif
 		}
 
@@ -2951,7 +2951,7 @@ void RB_ShowDebugPolygons(void)
 
 	globalImages->BindNull();
 
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	qglEnable(GL_DEPTH_TEST);
@@ -3096,12 +3096,12 @@ void RB_TestGamma(void)
 	glColor3f(1, 1, 1);
 	glPushMatrix();
 	glLoadIdentity();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	glOrtho(0, 1, 0, 1, -1, 1);
 	glRasterPos2f(0.01f, 0.01f);
 	glDrawPixels(G_WIDTH, G_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	glPopMatrix();
-	qglEnable(GL_TEXTURE_2D);
+	glesEnable(GL_TEXTURE_2D);
 	glMatrixMode(GL_MODELVIEW);
 #endif
 }
@@ -3153,12 +3153,12 @@ static void RB_TestGammaBias(void)
 	glColor3f(1, 1, 1);
 	glPushMatrix();
 	glLoadIdentity();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	glOrtho(0, 1, 0, 1, -1, 1);
 	glRasterPos2f(0.01f, 0.01f);
 	glDrawPixels(G_WIDTH, G_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	glPopMatrix();
-	qglEnable(GL_TEXTURE_2D);
+	glesEnable(GL_TEXTURE_2D);
 	glMatrixMode(GL_MODELVIEW);
 #endif
 }
@@ -3340,7 +3340,7 @@ void RB_ShutdownDebugTools(void)
 #endif
 //#endif
 
-    glrbShutdown();
+    glesShutdown();
 }
 
 #ifdef _MULTITHREAD

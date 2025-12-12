@@ -30,6 +30,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef GL_ES_VERSION_2_0
+#include "glsl/gles2_compat.h"
+#if !defined(qglPolygonMode)
+#define qglPolygonMode glPolygonMode
+#endif
+#endif
+
 
 frameData_t		*frameData;
 backEndState_t	backEnd;
@@ -79,9 +86,9 @@ void RB_SetDefaultGLState(void)
 #endif
 	qglDisable(GL_STENCIL_TEST);
 
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
     qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-#endif
+//#endif
 	qglDepthMask(GL_TRUE);
 	qglDepthFunc(GL_ALWAYS);
 
@@ -378,7 +385,7 @@ void GL_State(int stateBits)
 	//
 	// fill/line mode
 	//
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	if (diff & GLS_POLYMODE_LINE) {
 		if (stateBits & GLS_POLYMODE_LINE) {
 			qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -386,7 +393,7 @@ void GL_State(int stateBits)
 			qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 	}
-#endif
+//#endif
 
 	//
 	// alpha test
