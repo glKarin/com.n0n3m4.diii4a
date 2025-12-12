@@ -69,7 +69,7 @@ void RB_DrawElementsWithCounters(const srfTriangles_t *tri)
 		qglDrawElements(GL_TRIANGLES,
 		                r_singleTriangle.GetBool() ? 3 : tri->numIndexes,
 		                GL_INDEX_TYPE,
-		                (int *)vertexCache.Position(tri->indexCache));
+		                (glIndex_t *)vertexCache.Position(tri->indexCache));
 		backEnd.pc.c_vboIndexes += tri->numIndexes;
 	} else {
 		vertexCache.UnbindIndex();
@@ -100,7 +100,7 @@ void RB_DrawShadowElementsWithCounters(const srfTriangles_t *tri, int numIndexes
 		qglDrawElements(GL_TRIANGLES,
 		                r_singleTriangle.GetBool() ? 3 : numIndexes,
 		                GL_INDEX_TYPE,
-		                (int *)vertexCache.Position(tri->indexCache));
+		                (glIndex_t *)vertexCache.Position(tri->indexCache));
 		backEnd.pc.c_vboIndexes += numIndexes;
 	} else {
 		vertexCache.UnbindIndex();

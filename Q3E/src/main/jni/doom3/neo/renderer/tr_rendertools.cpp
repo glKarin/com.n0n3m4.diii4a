@@ -2278,7 +2278,7 @@ void RB_ShowLights(void)
 //#if !defined(GL_ES_VERSION_2_0)
 	const idRenderLightLocal	*light;
 	int					count;
-	srfTriangles_t		*tri;
+	const srfTriangles_t		*tri; //karin: add const
 	viewLight_t			*vLight;
 
 	if (!r_showLights.GetInteger()) {
@@ -2305,6 +2305,11 @@ void RB_ShowLights(void)
 		light = vLight->lightDef;
 		count++;
 
+#ifdef _MULTITHREAD //karin: using backend frame light data
+		if(multithreadActive)
+			tri = vLight->frustumTris;
+		else
+#endif
 		tri = light->frustumTris;
 
 		// depth buffered planes
@@ -2315,7 +2320,7 @@ void RB_ShowLights(void)
 #ifdef GL_ES_VERSION_2_0
 			glrbStartRender();
 #endif
-			RB_RenderTriangleSurface(tri);
+			RB_RenderTriangleSurface_polygon(tri);
 #ifdef GL_ES_VERSION_2_0
 			glrbEndRender();
 #endif
@@ -2329,7 +2334,7 @@ void RB_ShowLights(void)
 #ifdef GL_ES_VERSION_2_0
 			glrbStartRender();
 #endif
-			RB_RenderTriangleSurface(tri);
+			RB_RenderTriangleSurface_polygon(tri);
 #ifdef GL_ES_VERSION_2_0
 			glrbEndRender();
 #endif
@@ -3213,9 +3218,6 @@ void RB_TestImage(void)
 
 #ifdef GL_ES_VERSION_2_0
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-/*	GLboolean t2d = qglIsEnabled(GL_TEXTURE_2D);
-	if(!t2d)
-		qglEnable(GL_TEXTURE_2D);*/
 	GLboolean cf = qglIsEnabled(GL_CULL_FACE);
 	if(cf)
 		qglDisable(GL_CULL_FACE);
@@ -3238,8 +3240,6 @@ void RB_TestImage(void)
 	glEnd();
 #ifdef GL_ES_VERSION_2_0
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-/*	if(!t2d)
-		qglDisable(GL_TEXTURE_2D);*/
 	if(cf)
 		qglEnable(GL_CULL_FACE);
 #endif
