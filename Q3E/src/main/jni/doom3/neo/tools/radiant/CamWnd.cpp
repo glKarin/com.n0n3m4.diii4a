@@ -452,7 +452,7 @@ void CCamWnd::Cam_BuildMatrix() {
 	m_Camera.right[0] = m_Camera.forward[1];
 	m_Camera.right[1] = -m_Camera.forward[0];
 
-    glrbGetFloatv(GL_PROJECTION_MATRIX, &matrix[0][0]);
+    glesGetFloatv(GL_PROJECTION_MATRIX, &matrix[0][0]);
 
 	for (i = 0; i < 3; i++) {
 		m_Camera.vright[i] = matrix[i][0];

@@ -68,7 +68,7 @@ void glBox(idVec4 &color, idVec3 &point, float size) {
 	maxs[1] -= size;
 	maxs[2] += size;
 	idVec4	saveColor;
-    glrbGetFloatv(GL_CURRENT_COLOR, saveColor.ToFloatPtr());
+    glesGetFloatv(GL_CURRENT_COLOR, saveColor.ToFloatPtr());
 	qglColor3fv( color.ToFloatPtr() );
 	qglBegin(GL_LINE_LOOP);
 	qglVertex3f(mins[0],mins[1],mins[2]);

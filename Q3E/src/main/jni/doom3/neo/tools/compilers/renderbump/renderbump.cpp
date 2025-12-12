@@ -1514,7 +1514,7 @@ void RenderBumpFlat_f(const idCmdArgs &args)
 	qglDisable(GL_ALPHA_TEST);
 	qglDisable(GL_BLEND);
 	qglEnable(GL_DEPTH_TEST);
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDepthMask(GL_TRUE);
 	qglDepthFunc(GL_LEQUAL);
 

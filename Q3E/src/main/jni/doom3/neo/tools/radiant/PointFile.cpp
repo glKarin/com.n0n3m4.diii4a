@@ -110,10 +110,8 @@ void WINAPI Pointfile_Check (void)
 	s_num_points = 0;
   qglNewList (g_qeglobals.d_pointfile_display_list,  GL_COMPILE);
 	qglColor3f (1, 0, 0);
-#if !defined(GL_ES_VERSION_2_0)
-	qglDisable(GL_TEXTURE_2D);
-	qglDisable(GL_TEXTURE_1D);
-#endif
+	glesDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_1D);
 	qglLineWidth (2);
 	qglBegin(GL_LINE_STRIP);
 	do
@@ -141,10 +139,8 @@ void Pointfile_Draw( void )
 	int i;
 
 	qglColor3f( 1.0F, 0.0F, 0.0F );
-#if !defined(GL_ES_VERSION_2_0)
-	qglDisable(GL_TEXTURE_2D);
-	qglDisable(GL_TEXTURE_1D);
-#endif
+	glesDisable(GL_TEXTURE_2D);
+    glesDisable(GL_TEXTURE_1D);
 	qglLineWidth (2);
 	qglBegin(GL_LINE_STRIP);
 	for ( i = 0; i < s_num_points; i++ )

@@ -4540,7 +4540,7 @@ void CXYWnd::DrawPrecisionCrosshair( void )
 	
 	/// Set up OpenGL states (for drawing smooth-shaded plain-colored lines)
 	qglEnable( GL_BLEND );
-	qglDisable( GL_TEXTURE_2D );
+    glesDisable( GL_TEXTURE_2D );
 #if !defined(GL_ES_VERSION_2_0)
 	qglShadeModel( GL_SMOOTH );
 #endif

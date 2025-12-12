@@ -4017,7 +4017,7 @@ void Brush_DrawModel( brush_t *b, bool camera, bool bSelected ) {
 		Entity_GetRotationMatrixAngles( b->owner, axis, angles );
 
 		idVec4	colorSave;
-        glrbGetFloatv(GL_CURRENT_COLOR, colorSave.ToFloatPtr());
+        glesGetFloatv(GL_CURRENT_COLOR, colorSave.ToFloatPtr());
 
 		if ( bSelected ) {
 			qglColor3fv( g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].ToFloatPtr() );
@@ -4231,7 +4231,7 @@ Brush_DrawModelInfo
 void Brush_DrawModelInfo(brush_t *b, bool selected) {
 	if (b->modelHandle > 0) {
 		GLfloat color[4];
-        glrbGetFloatv(GL_CURRENT_COLOR, &color[0]);
+        glesGetFloatv(GL_CURRENT_COLOR, &color[0]);
 		if (selected) {
 			qglColor3fv(g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].ToFloatPtr());
 		}
@@ -4301,7 +4301,7 @@ void Brush_DrawEnv( brush_t *b, bool cameraView, bool bSelected ) {
 		}
 
 		idVec4	colorSave;
-        glrbGetFloatv(GL_CURRENT_COLOR, colorSave.ToFloatPtr());
+        glesGetFloatv(GL_CURRENT_COLOR, colorSave.ToFloatPtr());
 
 		if ( bSelected ) {
 			qglColor3fv( g_qeglobals.d_savedinfo.colors[COLOR_SELBRUSHES].ToFloatPtr() );
@@ -4682,7 +4682,7 @@ void Brush_DrawXY(brush_t *b, int nViewType, bool bSelected, bool ignoreViewType
 	}
 
 	idVec4	colorSave;
-    glrbGetFloatv(GL_CURRENT_COLOR, colorSave.ToFloatPtr());
+    glesGetFloatv(GL_CURRENT_COLOR, colorSave.ToFloatPtr());
 
 	if (!(b->owner && (b->owner->eclass->nShowFlags & ECLASS_WORLDSPAWN))) {
 		qglColor4f( 1.0f, 0.0f, 0.0f, 0.8f );
