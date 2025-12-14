@@ -154,7 +154,7 @@ class idWeapon : public idAnimatedEntity
 
 		virtual void			ClientPredictionThink(void);
 #ifdef _DOOM3 //karin: for world weapon attach to custom player model
-//#define GAME_TEST_WEAPON_TRANSFORM 1
+//#define GAME_TEST_WEAPON_TRANSFORM 0
 #if GAME_TEST_WEAPON_TRANSFORM
 		static void TestWorldWeaponTransform(const idCmdArgs &args);
 #endif

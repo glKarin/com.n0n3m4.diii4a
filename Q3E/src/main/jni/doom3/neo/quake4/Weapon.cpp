@@ -15,6 +15,103 @@
 #include "client/ClientEffect.h"
 //#include "../renderer/tr_local.h"
 
+#ifdef _QUAKE4 //karin: for world weapon attach to custom player model
+#if GAME_TEST_WEAPON_TRANSFORM
+static idVec3 harm_g_playerWeaponWorldOffset(0.0f, 0.0f, 0.0f);
+static idAngles harm_g_playerWeaponWorldAngle(0.0f, 0.0f, 0.0f);
+static bool harm_g_playerWeaponWorldTestEnable = false;
+static bool harm_g_playerWeaponWorldTestInit = false;
+void rvWeapon::TestWorldWeaponTransform(const idCmdArgs &args)
+{
+	idPlayer	*player;
+	if(args.Argc() < 2)
+	{
+        harm_g_playerWeaponWorldOffset[0] = harm_g_playerWeaponWorldOffset[1] = harm_g_playerWeaponWorldOffset[2] = 0;
+        harm_g_playerWeaponWorldAngle[0] = harm_g_playerWeaponWorldAngle[1] = harm_g_playerWeaponWorldAngle[2] = 0;
+        harm_g_playerWeaponWorldTestEnable = false;
+		return;
+	}
+
+	player = gameLocal.GetLocalPlayer();
+	if(!player)
+		return;
+
+	idEntity *ent = player->GetWeaponWorldModel();
+	if(!ent)
+		return;
+
+    int sign = 0;
+    int c = 0;
+    int type = 0;
+    int mask = 0;
+    for(int i = 1; i < args.Argc(); i++)
+    {
+        const char *comp = args.Argv(i);
+        int len = strlen(comp);
+        if((comp[0] >= '0' && comp[0] <= '9') || comp[0] == '-')
+        {
+            int val = (type == 1 ? harm_g_playerWeaponWorldAngle[c] : harm_g_playerWeaponWorldOffset[c]);
+            int v = atoi(comp);
+            if(sign > 0)
+                val += v;
+            else if(sign < 0)
+                val -= v;
+            else
+                val = v;
+            if(type == 1)
+                harm_g_playerWeaponWorldAngle[c] = val;
+            else
+                harm_g_playerWeaponWorldOffset[c] = val;
+
+            mask |= (1 << type);
+            sign = 0;
+        }
+        else
+        {
+            for(int m = 0; m < len; m++)
+            {
+                switch (idStr::ToLower(comp[m])) {
+                    case 'x':
+                        c = 0;
+                        break;
+                    case 'y':
+                        c = 1;
+                        break;
+                    case 'z':
+                        c = 2;
+                        break;
+                    case 't':
+                        type = 0;
+                        break;
+                    case 'r':
+                        type = 1;
+                        break;
+                    case 'u':
+                    case 'a':
+                        sign = 1;
+                        break;
+                    case 'd':
+                        sign = -1;
+                        break;
+                }
+            }
+        }
+    }
+
+    if(mask & 1)
+	    ent->GetPhysics()->SetOrigin(harm_g_playerWeaponWorldOffset);
+    if(mask & 2)
+	    ent->GetPhysics()->SetAxis(harm_g_playerWeaponWorldAngle.ToMat3());
+
+    harm_g_playerWeaponWorldTestEnable = mask != 0;
+	gameLocal.Printf("Origin: %d %d %d, Angle: %d %d %d\n",
+                     (int)harm_g_playerWeaponWorldOffset[0], (int)harm_g_playerWeaponWorldOffset[1], (int)harm_g_playerWeaponWorldOffset[2],
+                     (int)harm_g_playerWeaponWorldAngle[0], (int)harm_g_playerWeaponWorldAngle[1], (int)harm_g_playerWeaponWorldAngle[2]
+                     );
+}
+#endif
+#endif
+
 /***********************************************************************
 
   rvViewWeapon  
@@ -1128,10 +1225,15 @@ void rvWeapon::InitWorldModel( void ) {
     const char *wpName = spawnArgs.GetString("inv_weapon");
     if(wpName && wpName[0])
         owner->spawnArgs.GetString(va("%s_joint_attach", wpName), attach, &attach);
-#if 0
+#if GAME_TEST_WEAPON_TRANSFORM
     static idCVar harm_g_playerWeaponJointAttach("harm_g_playerWeaponJointAttach", "", CVAR_GAME, "Test player world weapon joint attach.");
     if(harm_g_playerWeaponJointAttach.GetString() && harm_g_playerWeaponJointAttach.GetString()[0])
         attach = harm_g_playerWeaponJointAttach.GetString();
+    if(!harm_g_playerWeaponWorldTestInit)
+    {
+        cmdSystem->AddCommand("testWeaponWorld", rvWeapon::TestWorldWeaponTransform, CMD_FL_GAME, "");
+        harm_g_playerWeaponWorldTestInit = true;
+    }
 #endif
 #endif
 
@@ -1173,19 +1275,12 @@ void rvWeapon::InitWorldModel( void ) {
                     ent->GetPhysics()->SetAxis(ang.ToMat3());
             }
         }
-#if 0
-		static idCVar harm_g_playerWeaponWorldOffset("harm_g_playerWeaponWorldOffset", "", CVAR_GAME, "Test player weapon world offset(format is '<forward-side> <right-side> <up-side>').");
-		static idCVar harm_g_playerWeaponWorldAngle("harm_g_playerWeaponWorldAngle", "", CVAR_GAME, "Test player weapon world degree angle(format is '<pitch> <yaw> <roll>').");
-		idVec3 ori;
-		idAngles ang;
-		if(sscanf(harm_g_playerWeaponWorldOffset.GetString(), "%f %f %f", &ori.x, &ori.y, &ori.z) == 3)
-		{
-			ent->GetPhysics()->SetOrigin(ori);
-		}
-		if(sscanf(harm_g_playerWeaponWorldAngle.GetString(), "%f %f %f", &ang[0], &ang[1], &ang[2]) == 3)
-		{
-			ent->GetPhysics()->SetAxis(ang.ToMat3());
-		}
+#if GAME_TEST_WEAPON_TRANSFORM
+		if(harm_g_playerWeaponWorldTestEnable)
+        {
+			ent->GetPhysics()->SetOrigin(harm_g_playerWeaponWorldOffset);
+			ent->GetPhysics()->SetAxis(harm_g_playerWeaponWorldAngle.ToMat3());
+        }
 #endif
 #endif
 

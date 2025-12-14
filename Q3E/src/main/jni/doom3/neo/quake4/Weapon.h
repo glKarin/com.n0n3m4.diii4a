@@ -253,6 +253,13 @@ protected:
 
 	void				FindViewModelPositionStyle	( idVec3& viewOffset, idAngles& viewAngles ) const;
 
+#ifdef _QUAKE4 //karin: for world weapon attach to custom player model
+//#define GAME_TEST_WEAPON_TRANSFORM 0
+#if GAME_TEST_WEAPON_TRANSFORM
+	static void TestWorldWeaponTransform(const idCmdArgs &args);
+#endif
+#endif
+
 public:
 
 	void				InitLights					( void );
