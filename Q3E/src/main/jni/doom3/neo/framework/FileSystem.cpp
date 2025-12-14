@@ -509,15 +509,26 @@ class idFileSystemLocal : public idFileSystem
 		// curl_progress_callback in curl.h
 		static int				CurlProgressFunction(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
 
-        void                    AddExtraGameDirectory(const char *path, const char *gameName);
+		// Add game extra addon resource path before add base game paths
         void                    AddExtraGameResource(const char *path);
+		// Add base game path
+        void                    AddExtraGameDirectory(const char *path, const char *gameName);
+		// Add game extra game base name after add base game paths
         void                    AddExtraGame(const char *gameNames);
-        void                    AddInitPath(const char *configFile);
+
+		int						ParseConfigFile(const char *configFile, bool fullpath, idStrList &list);
+		// Add game extra addon resource path from cfg file before add base game paths
+        void                    InitExtraGameResource(const char *configFile);
+		// Add game extra game base name from cfg file after add base game paths
+        void                    InitExtraGame(const char *configFile);
 
         void                    RemoveDir_r(const char *OSPath, int type = 0);
 };
 
-#define FS_INIT_PATH "initpath.cfg"
+// Init game addon resource config file
+#define FS_INIT_ADDONS "initaddons.cfg"
+// Init game base name config file
+#define FS_INIT_GAMEBASE "initgamebase.cfg"
 
 idCVar	idFileSystemLocal::fs_restrict("fs_restrict", "", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "");
 idCVar	idFileSystemLocal::fs_debug("fs_debug", "0", CVAR_SYSTEM | CVAR_INTEGER, "", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2>);
@@ -535,9 +546,9 @@ idCVar	idFileSystemLocal::fs_caseSensitiveOS("fs_caseSensitiveOS", "1", CVAR_SYS
 #endif
 idCVar	idFileSystemLocal::fs_searchAddons("fs_searchAddons", "0", CVAR_SYSTEM | CVAR_BOOL, "search all addon pk4s ( disables addon functionality )");
 
-idCVar	idFileSystemLocal::fs_basepath_extras("harm_fs_basepath_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search paths last(absolute system path), split by ','");
-idCVar	idFileSystemLocal::fs_addon_extras("harm_fs_addon_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search addon files directory path last(extras fs_game), split by ','");
-idCVar	idFileSystemLocal::fs_game_base_extras("harm_fs_game_base_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search game mod last(extras fs_game_base), split by ','");
+idCVar	idFileSystemLocal::fs_addon_extras("harm_fs_addon_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras game addon resource path before add base game paths, split by ','");
+idCVar	idFileSystemLocal::fs_basepath_extras("harm_fs_basepath_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras base game paths(absolute system path), split by ','");
+idCVar	idFileSystemLocal::fs_game_base_extras("harm_fs_game_base_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras game base name(extras fs_game_base), split by ','");
 
 idFileSystemLocal	fileSystemLocal;
 idFileSystem 		*fileSystem = &fileSystemLocal;
@@ -2552,7 +2563,7 @@ void idFileSystemLocal::Startup(void)
 		common->Printf("restarting filesystem with %d addon pak file(s) to include\n", addonChecksums.Num());
 	}
 
-    AddInitPath(FS_INIT_PATH);
+    InitExtraGameResource(FS_INIT_ADDONS);
 
     AddExtraGameResource(fs_addon_extras.GetString());
 
@@ -2563,6 +2574,8 @@ void idFileSystemLocal::Startup(void)
 	    idStr::Icmp(fs_game_base.GetString(), BASE_GAMEDIR)) {
 		SetupGameDirectories(fs_game_base.GetString());
 	}
+
+	InitExtraGame(FS_INIT_GAMEBASE);
 
     AddExtraGame(fs_game_base_extras.GetString());
 
@@ -4915,7 +4928,7 @@ void idFileSystemLocal::AddExtraGame(const char *gameNames)
     }
 }
 
-void idFileSystemLocal::AddInitPath(const char *configFile)
+int idFileSystemLocal::ParseConfigFile(const char *configFile, bool fullpath, idStrList &list)
 {
     char path[MAX_OSPATH] = { 0 };
     if(fs_game.GetString()[0])
@@ -4928,8 +4941,9 @@ void idFileSystemLocal::AddInitPath(const char *configFile)
 
     FILE *file = fopen(path, "r");
     if(!file)
-        return;
+        return -1;
 
+	int res = list.Num();
     fseek(file, 0, SEEK_END);
     int len = ftell(file);
     if(len > 0)
@@ -4937,21 +4951,53 @@ void idFileSystemLocal::AddInitPath(const char *configFile)
         fseek(file, 0, SEEK_SET);
         char *data = (char *)malloc(len);
         fread(data, 1, len, file);
-        idLexer lexer(LEXFL_NOFATALERRORS | LEXFL_ALLOWPATHNAMES);
-        if(lexer.LoadMemory(data, len, "<init_path>"))
+		int flags = LEXFL_NOFATALERRORS;
+		if(fullpath)
+			flags |= LEXFL_ALLOWPATHNAMES;
+        idLexer lexer(flags);
+        if(lexer.LoadMemory(data, len, "<init_fs_path>"))
         {
             idToken token;
             while(true)
             {
                 if(!lexer.ReadToken(&token))
                     break;
-                common->Printf("Add extra init path: %s\n", token.c_str());
-                AddExtraGameResource(token.c_str());
+				list.AddUnique(token.c_str());
             }
         }
         free(data);
     }
     fclose(file);
+
+	return list.Num() - res;
+}
+
+void idFileSystemLocal::InitExtraGameResource(const char *configFile)
+{
+	idStrList list;
+
+	if(ParseConfigFile(configFile, true, list) > 0)
+	{
+		for(int i = 0; i < list.Num(); i++)
+		{
+			common->Printf("Add init addons path: %s\n", list[i].c_str());
+			AddExtraGameResource(list[i].c_str());
+		}
+    }
+}
+
+void idFileSystemLocal::InitExtraGame(const char *configFile)
+{
+	idStrList list;
+
+	if(ParseConfigFile(configFile, false, list) > 0)
+	{
+		for(int i = 0; i < list.Num(); i++)
+		{
+			common->Printf("Add init game base: %s\n", list[i].c_str());
+			AddExtraGame(list[i].c_str());
+		}
+    }
 }
 
 /*

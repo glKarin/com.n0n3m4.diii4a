@@ -150,8 +150,8 @@ idCVar idConsoleLocal::con_noPrint("con_noPrint", "1", CVAR_BOOL|CVAR_SYSTEM|CVA
 extern idCVar harm_com_consoleHistory;
 static idCVar harm_con_float("harm_con_float", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_ARCHIVE, "enable float console");
 static idCVar harm_con_alwaysShow("harm_con_alwaysShow", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_ARCHIVE, "text always show when console closed");
-static idCVar harm_con_floatGeometry("harm_con_floatGeometry", "100 50 300 200", CVAR_SYSTEM|CVAR_ARCHIVE, "float console geometry. format is '<left> <top> <width> <height>'");
-static idCVar harm_con_floatZoomStep("harm_con_floatZoomStep", "10", CVAR_INTEGER|CVAR_SYSTEM|CVAR_ARCHIVE, "zoom step of float console");
+static idCVar harm_con_floatGeometry("harm_con_floatGeometry", "100 50 300 200", CVAR_SYSTEM|CVAR_ARCHIVE, "float console geometry. format is '<left> <top> <width> <height>'. Holding left mouse or CTRL and moving mouse to move float console position. Holding left mouse or CTRL and swiping mouse wheel to resize float console.");
+static idCVar harm_con_floatZoomStep("harm_con_floatZoomStep", "10", CVAR_INTEGER|CVAR_SYSTEM|CVAR_ARCHIVE, "zoom step of float console when holding left mouse or CTRL and swiping mouse wheel for resize float console.");
 static idCVar harm_con_noBackground("harm_con_noBackground", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_ARCHIVE, "do not draw background");
 
 
