@@ -330,6 +330,9 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 	case MENU_RADIOSELECTOR:
 		szCmd = "exec touch/radioselector.cfg";
 		break;
+	case MENU_BUY_CSDM:
+		szCmd = "exec touch/custom/dm_menu.cfg";
+		break;
 	case MENU_NUMERICAL_MENU:
 #ifdef __ANDROID__
 		szCmd = "exec touch/numerical_menu.cfg";

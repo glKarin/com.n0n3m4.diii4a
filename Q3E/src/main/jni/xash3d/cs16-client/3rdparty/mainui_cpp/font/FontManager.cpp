@@ -28,6 +28,7 @@ GNU General Public License for more details.
 #endif
 
 #include "BitmapFont.h"
+#include "utflib.h"
 
 #define DEFAULT_MENUFONT "Trebuchet MS"
 #define DEFAULT_CONFONT  "Tahoma"
@@ -215,8 +216,7 @@ void CFontManager::GetTextSize(HFont fontHandle, const char *text, int *wide, in
 	const char *ch = text;
 	_tall = fontTall;
 	int i = 0;
-
-	EngFuncs::UtfProcessChar( 0 );
+	utfstate_t state;
 
 	while( *ch && ( size < 0 || i < size ) )
 	{
@@ -227,9 +227,8 @@ void CFontManager::GetTextSize(HFont fontHandle, const char *text, int *wide, in
 			continue;
 		}
 
-		int uch;
+		int uch = state.Decode((uint8_t)*ch );
 
-		uch = EngFuncs::UtfProcessChar( (unsigned char)*ch );
 		if( uch )
 		{
 			if( uch == '\n' && *( ch + 1 ) != '\0' )
@@ -249,7 +248,6 @@ void CFontManager::GetTextSize(HFont fontHandle, const char *text, int *wide, in
 		i++;
 		ch++;
 	}
-	EngFuncs::UtfProcessChar( 0 );
 
 	if( tall ) *tall = _tall;
 	if( wide ) *wide = _wide;
@@ -267,12 +265,11 @@ int CFontManager::CutText(HFont fontHandle, const char *text, int height, int vi
 
 	int _wide = 0;
 	const char *ch = text;
+	utfstate_t state;
 
 #ifdef SCALE_FONTS
 	visibleSize  = (float)visibleSize / (float)height * (float)font->GetTall();
 #endif
-
-	EngFuncs::UtfProcessChar( 0 );
 
 	int whiteSpacePos = 0;
 
@@ -286,7 +283,7 @@ int CFontManager::CutText(HFont fontHandle, const char *text, int height, int vi
 			continue;
 		}
 
-		int uch = EngFuncs::UtfProcessChar( (unsigned char)*ch );
+		int uch = state.Decode((uint8_t)*ch );
 		int x = 0;
 		if( uch )
 		{
@@ -313,8 +310,6 @@ int CFontManager::CutText(HFont fontHandle, const char *text, int height, int vi
 		_wide += x;
 	}
 
-	EngFuncs::UtfProcessChar( 0 );
-
 	if( !reverse )
 	{
 		if( *ch && remaining ) *remaining = true;
@@ -336,6 +331,7 @@ int CFontManager::CutText(HFont fontHandle, const char *text, int height, int vi
 	whiteSpacePos = 0;
 
 	// now remove character one by one to fit
+	state.Reset();
 	while( *ch && _wide > visibleSize )
 	{
 		// skip colorcodes
@@ -345,7 +341,7 @@ int CFontManager::CutText(HFont fontHandle, const char *text, int height, int vi
 			continue;
 		}
 
-		int uch = EngFuncs::UtfProcessChar( (unsigned char)*ch );
+		int uch = state.Decode((uint8_t)*ch );
 		if( uch )
 		{
 			// we don't need check for newlines here, it's only done for oneline Field widget
@@ -360,8 +356,6 @@ int CFontManager::CutText(HFont fontHandle, const char *text, int height, int vi
 		}
 		ch++;
 	}
-
-	EngFuncs::UtfProcessChar( 0 );
 
 	if( remaining ) *remaining = true;
 	if( wide ) *wide = _wide;

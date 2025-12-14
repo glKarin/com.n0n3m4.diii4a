@@ -92,7 +92,7 @@ void CMenuMain::QuitDialogCb()
 	else
 		dialog.SetMessage( L( "GameUI_QuitConfirmationText" ) );
 
-	dialog.onPositive.SetCommand( FALSE, "quit\n" );
+	dialog.onPositive.SetCommand( false, "quit\n" );
 	dialog.Show();
 }
 
@@ -161,7 +161,7 @@ void CMenuMain::HazardCourseCb()
 
 	EngFuncs::PlayBackgroundTrack( NULL, NULL );
 
-	EngFuncs::ClientCmd( FALSE, "hazardcourse\n" );
+	EngFuncs::ClientCmd( false, "hazardcourse\n" );
 }
 
 void CMenuMain::_Init( void )
@@ -175,16 +175,13 @@ void CMenuMain::_Init( void )
 	else bCustomGame = false;
 
 	// console
-	if( ui_menu_style->value )
-		console.SetNameAndStatus( L( "GameUI_Console" ), NULL );
-	else
-		console.SetNameAndStatus( L( "GameUI_Console" ), L( "Show console" ) );
+	console.SetNameAndStatus( L( "GameUI_Console" ), NULL );
 	console.iFlags |= QMF_NOTIFY;
 	console.SetPicture( PC_CONSOLE );
 	console.SetVisibility( gpGlobals->developer );
 	SET_EVENT_MULTI( console.onReleased,
 	{
-		UI_SetActiveMenu( FALSE );
+		UI_SetActiveMenu( false );
 		EngFuncs::KEY_SetDest( KEY_CONSOLE );
 	});
 
@@ -249,7 +246,7 @@ void CMenuMain::_Init( void )
 	minimizeBtn.SetPicture( ART_MINIMIZE_N, ART_MINIMIZE_F, ART_MINIMIZE_D );
 	minimizeBtn.iFlags = QMF_MOUSEONLY;
 	minimizeBtn.eFocusAnimation = QM_HIGHLIGHTIFFOCUS;
-	minimizeBtn.onReleased.SetCommand( FALSE, "minimize\n" );
+	minimizeBtn.onReleased.SetCommand( false, "minimize\n" );
 
 	if ( gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY || gMenu.m_gameinfo.startmap[0] == 0 )
 		newGame.SetGrayed( true );
@@ -386,7 +383,7 @@ void CMenuMain::VidInit( bool connected )
 	disconnect.SetVisibility( connected && !single );
 
 	// they exist in the original and can be mistakenly clicked
-	newGame.SetVisibility( !ui_menu_style->value );
+	newGame.SetVisibility( false );
 
 	if( connected && single )
 	{

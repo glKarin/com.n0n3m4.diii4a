@@ -59,7 +59,7 @@ extern cvar_t	*ui_precache;
 extern cvar_t	*ui_showmodels;
 extern cvar_t   *ui_show_window_stack;
 extern cvar_t	*ui_borderclip;
-extern cvar_t	*ui_language;
+extern cvar_t	*ui_prefer_won_background;
 
 enum EUISounds
 {
@@ -296,7 +296,7 @@ void UI_FileDialog_Menu( void );
 void UI_TouchButtons_GetButtonList();
 void UI_GamePad_Menu( void );
 void UI_Zoo_Menu( void );
-void UI_ServerInfo_Menu( netadr_t adr, const char *hostname, bool legacy );
+void UI_ServerInfo_Menu( netadr_t adr, const char *hostname );
 
 bool UI_AdvUserOptions_IsAvailable( void );
 void UI_AdvUserOptions_Menu( void );

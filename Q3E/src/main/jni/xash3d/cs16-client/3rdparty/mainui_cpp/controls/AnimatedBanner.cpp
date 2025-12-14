@@ -19,18 +19,41 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "AnimatedBanner.h"
+#include "BMPUtils.h"
 
 #define ART_LOGO      "resource/logo.tga"
 #define ART_BLIP1     "resource/logo_blip.tga"
 #define ART_BLIP2     "resource/logo_blip2.tga"
-#define ART_BLUR      "resource/logo_big_blurred_%i"
-#define ART_BLUR_BLIP "resource/logo_big_blurred_blip_%i"
+#define ART_BLUR      "resource/logo_big_blurred_%i.tga"
+#define ART_BLUR_BLIP "resource/logo_big_blurred_blip_%i.tga"
+
+static bool UI_GetTargaImageDimensions( const char *path, Size &sz )
+{
+	int len = 0;
+	byte *buf = EngFuncs::COM_LoadFile( path, &len );
+
+	if( !buf || len < sizeof( tga_t ))
+	{
+		EngFuncs::COM_FreeFile( buf );
+		return false; // stupid check but we already loaded the image, so it's probably fine
+	}
+
+	const tga_t *hdr = reinterpret_cast<const tga_t *>( buf );
+	sz.w = LittleShort( hdr->width );
+	sz.h = LittleShort( hdr->height );
+
+	EngFuncs::COM_FreeFile( buf );
+	return true;
+}
 
 bool CMenuAnimatedBanner::TryLoad()
 {
 	logo.Load( ART_LOGO );
 	if( !logo.IsValid( ))
 		return false;
+
+	if( !UI_GetTargaImageDimensions( ART_LOGO, trueLogoSz ))
+		trueLogoSz = EngFuncs::PIC_Size( logo.Handle( ));
 
 	logoBlip[0].Load( ART_BLIP1 );
 	logoBlip[1].Load( ART_BLIP2 );
@@ -48,6 +71,9 @@ bool CMenuAnimatedBanner::TryLoad()
 		if( !logoBlur[i].IsValid( ))
 			return false;
 
+		if( !UI_GetTargaImageDimensions( name, trueLogoBlurSz[i] ))
+			trueLogoBlurSz[i] = EngFuncs::PIC_Size( logoBlur[i] );
+
 		snprintf( name, sizeof( name ), ART_BLUR_BLIP, i );
 		logoBlurBlip[i].Load( name );
 		if( !logoBlurBlip[i].IsValid( ))
@@ -63,9 +89,8 @@ void CMenuAnimatedBanner::VidInit()
 	// in software mode, scale must be 1.0f
 	scale = ScreenWidth / 1024.0f;
 
-	Size logoSz = EngFuncs::PIC_Size(logo.Handle());
+	Size logoSz = trueLogoSz * scale;
 
-	logoSz = logoSz * scale;
 	m_nLogoImageXMin = (ScreenWidth / 2.0f - logoSz.w / 2.0f) - scale * 88.0f;
 	m_nLogoImageXMax = (ScreenWidth / 2.0f - logoSz.w / 2.0f) + scale * 32.0f;
 	m_nLogoImageXGoal = m_nLogoImageXMax;
@@ -144,7 +169,7 @@ void CMenuAnimatedBanner::Draw()
 		return;
 
 	Point logoPt( m_fLogoImageX, m_nLogoImageY );
-	Size logoSz = EngFuncs::PIC_Size( logo.Handle( )) * scale;
+	Size logoSz = trueLogoSz * scale;
 
 	EngFuncs::PIC_Set( logo.Handle(), 255, 255, 255 );
 	EngFuncs::PIC_DrawTrans( logoPt, logoSz );
@@ -175,7 +200,7 @@ void CMenuAnimatedBanner::Draw()
 	const CImage *images = drawBgBlip ? logoBlurBlip : logoBlur;
 	for( int i = 0; i < ART_BLUR_NUM; i++ )
 	{
-		logoSz = EngFuncs::PIC_Size( logoBlur[i].Handle( )) * scale;
+		logoSz = trueLogoBlurSz[i] * scale;
 
 		EngFuncs::PIC_Set( images[i].Handle( ), 255, 255, 255 );
 		EngFuncs::PIC_DrawTrans( logoPt, logoSz );

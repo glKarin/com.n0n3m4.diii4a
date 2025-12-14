@@ -27,9 +27,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define ART_BUTTONS_MAIN		"gfx/shell/btns_main.bmp"	// we support bmp only
 
-static int UI_GetBlockHeight( int button_height, int points[3], int &empty_height )
+static int UI_GetBlockHeight( int button_height, int points[3], int &empty_height, bool npot )
 {
-	empty_height = 1; // don't add pixels in-between
+	empty_height = npot ? 1 : 25; // don't add pixels in-between
 	int height = ( button_height + empty_height ) * 2 + button_height;
 
 	points[0] = 0;
@@ -66,7 +66,19 @@ void UI_LoadBmpButtons()
 
 	// get our cutted bmp sizes
 	int empty_height;
-	const int blockHeight = UI_GetBlockHeight( uiStatic.buttons_height, uiStatic.buttons_points, empty_height );
+	// try to guess if we need to make texture height power of two
+	// 26 * 3 + 1 * 2 is 80, which will get scaled down by engine to 64
+	// we can make the gap is 25 pixels wide, which make total image is 128 pixels tall (26 * 3 + 25 * 2)
+	// TODO: there are other better possible solutions:
+	// * store 2 buttons on same atlas page with 20 pixels gap: 26 * 6 + 20 * 5 = 256
+	// * store 3 buttons on same atlas page: 26 * 9 is 234, pretty close to 256
+	// As for width, we just rely on rescaling for now. Although we could store 3 rows of buttons
+	// which would make it 156 * 3 = 468, which is pretty close to 512
+	bool npot = true;
+	if( !strnicmp( EngFuncs::GetCvarString( "r_refdll_loaded" ), "gl", 2 ))
+		npot = EngFuncs::GetCvarFloat( "gl_texture_npot" ) != 0.0f;
+
+	const int blockHeight = UI_GetBlockHeight( uiStatic.buttons_height, uiStatic.buttons_points, empty_height, npot );
 	const int empty_sz = empty_height * stride;
 
 	// init CBMP and copy data
@@ -115,4 +127,7 @@ void UI_LoadBmpButtons()
 	}
 
 	delete bmp;
+
+	// because all buttons are the same in size, grab the resampled size of the first button
+	uiStatic.buttons_width = EngFuncs::PIC_Width( uiStatic.buttonsPics[0] );
 }

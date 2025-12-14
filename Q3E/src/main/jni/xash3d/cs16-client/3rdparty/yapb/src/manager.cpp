@@ -7,48 +7,48 @@
 
 #include <yapb.h>
 
-ConVar cv_autovacate ("autovacate", "1", "Kick bots to automatically make room for human players.");
-ConVar cv_autovacate_keep_slots ("autovacate_keep_slots", "1", "How many slots autovacate feature should keep for human players.", true, 1.0f, 8.0f);
-ConVar cv_kick_after_player_connect ("kick_after_player_connect", "1", "Kick the bot immediately when a human player joins the server (yb_autovacate must be enabled).");
+ConVar cv_autovacate ("autovacate", "1", "Kicks bots to automatically make room for human players.");
+ConVar cv_autovacate_keep_slots ("autovacate_keep_slots", "1", "How many slots the autovacate feature should keep for human players.", true, 1.0f, 8.0f);
+ConVar cv_kick_after_player_connect ("kick_after_player_connect", "1", "Kicks the bot immediately when a human player joins the server (yb_autovacate must be enabled).");
 
-ConVar cv_quota ("quota", "9", "Specifies the number bots to be added to the game.", true, 0.0f, static_cast <float> (kGameMaxPlayers));
+ConVar cv_quota ("quota", "9", "Specifies the number of bots to be added to the game.", true, 0.0f, static_cast <float> (kGameMaxPlayers));
 ConVar cv_quota_mode ("quota_mode", "normal", "Specifies the type of quota.\nAllowed values: 'normal', 'fill', and 'match'.\nIf 'fill', the server will adjust bots to keep N players in the game, where N is yb_quota.\nIf 'match', the server will maintain a 1:N ratio of humans to bots, where N is yb_quota_match.", false);
-ConVar cv_quota_match ("quota_match", "0", "Number of players to match if yb_quota_mode set to 'match'", true, 0.0f, static_cast <float> (kGameMaxPlayers));
-ConVar cv_think_fps ("think_fps", "30.0", "Specifies how many times per second bot code will run.", true, 24.0f, 90.0f);
+ConVar cv_quota_match ("quota_match", "0", "Number of players to match if yb_quota_mode is set to 'match'.", true, 0.0f, static_cast <float> (kGameMaxPlayers));
+ConVar cv_think_fps ("think_fps", "30.0", "Specifies how many times per second the bot code will run.", true, 24.0f, 90.0f);
 ConVar cv_think_fps_disable ("think_fps_disable", "1", "Allows to completely disable think fps on Xash3D.", true, 0.0f, 1.0f, Var::Xash3D);
 
-ConVar cv_autokill_delay ("autokill_delay", "0.0", "Specifies amount of time in seconds when bots will be killed if no humans left alive.", true, 0.0f, 90.0f);
-ConVar cv_first_human_restart ("first_human_restart", "0.0", "Restart the game if first human player joined the bot game.", true, 0.0f, 1.0f);
+ConVar cv_autokill_delay ("autokill_delay", "0.0", "Specifies the amount of time in seconds after which bots will be killed if no humans are left alive.", true, 0.0f, 90.0f);
+ConVar cv_first_human_restart ("first_human_restart", "0", "Restart the game if the first human player joins a bot game.");
 
-ConVar cv_join_after_player ("join_after_player", "0", "Specifies whether bots should join server, only when at least one human player in game.");
-ConVar cv_join_team ("join_team", "any", "Forces all bots to join team specified here.", false);
+ConVar cv_join_after_player ("join_after_player", "0", "Specifies whether bots should join the server only when at least one human player is in the game.");
+ConVar cv_join_team ("join_team", "any", "Forces all bots to join the team specified here.", false);
 ConVar cv_join_delay ("join_delay", "5.0", "Specifies after how many seconds bots should start to join the game after the changelevel.", true, 0.0f, 30.0f);
-ConVar cv_name_prefix ("name_prefix", "", "All the bot names will be prefixed with string specified with this cvar.", false);
+ConVar cv_name_prefix ("name_prefix", "", "All bot names will be prefixed with the string specified by this cvar.", false);
 
 ConVar cv_difficulty ("difficulty", "3", "All bots difficulty level. Changing at runtime will affect already created bots.", true, 0.0f, 4.0f);
 
-ConVar cv_difficulty_min ("difficulty_min", "-1", "Lower bound of random difficulty on bot creation. Only affects newly created bots. -1 means yb_difficulty only used.", true, -1.0f, 4.0f);
-ConVar cv_difficulty_max ("difficulty_max", "-1", "Upper bound of random difficulty on bot creation. Only affects newly created bots. -1 means yb_difficulty only used.", true, -1.0f, 4.0f);
-ConVar cv_difficulty_auto ("difficulty_auto", "0", "Allows each bot to balance their own difficulty based kd-ratio of team.", true, 0.0f, 1.0f);
-ConVar cv_difficulty_auto_balance_interval ("difficulty_auto_balance_interval", "30", "Interval in which bots will balance their difficulty.", true, 30.0f, 240.0f);
+ConVar cv_difficulty_min ("difficulty_min", "-1", "Lower bound of random difficulty on bot creation. Only affects newly created bots. -1 means only yb_difficulty is used.", true, -1.0f, 4.0f);
+ConVar cv_difficulty_max ("difficulty_max", "-1", "Upper bound of random difficulty on bot creation. Only affects newly created bots. -1 means only yb_difficulty is used.", true, -1.0f, 4.0f);
+ConVar cv_difficulty_auto ("difficulty_auto", "0", "Allows each bot to balance its own difficulty based on the kd-ratio of the team.", true, 0.0f, 1.0f);
+ConVar cv_difficulty_auto_balance_interval ("difficulty_auto_balance_interval", "30", "Interval at which bots will balance their difficulty.", true, 30.0f, 240.0f);
 
-ConVar cv_show_avatars ("show_avatars", "0", "Enables or disables displaying bot avatars in front of their names in scoreboard. Note, that is currently you can see only avatars of your steam friends.");
-ConVar cv_show_latency ("show_latency", "0", "Enables latency display in scoreboard.\nAllowed values: '0', '1', '2'.\nIf '0', there is nothing displayed.\nIf '1', there is a 'BOT' is displayed.\nIf '2' fake ping is displayed.", true, 0.0f, 2.0f);
+ConVar cv_show_avatars ("show_avatars", "0", "Enables or disables displaying bot avatars in front of their names in the scoreboard. Note that currently you can only see avatars of your Steam friends.");
+ConVar cv_show_latency ("show_latency", "0", "Enables latency display in the scoreboard.\nAllowed values: '0', '1', '2'.\nIf '0', there is nothing displayed.\nIf '1', there is a 'BOT' is displayed.\nIf '2' fake ping is displayed.", true, 0.0f, 2.0f);
 
-ConVar cv_save_bots_names ("save_bots_names", "1", "Allows to save bot names upon changelevel, so bot names will be the same after a map change.", true, 0.0f, 1.0f);
+ConVar cv_save_bots_names ("save_bots_names", "1", "Allows saving bot names upon changelevel, so bot names will be the same after a map change.", true, 0.0f, 1.0f);
 
-ConVar cv_botskin_t ("botskin_t", "0", "Specifies the bots wanted skin for Terrorist team.", true, 0.0f, 5.0f);
-ConVar cv_botskin_ct ("botskin_ct", "0", "Specifies the bots wanted skin for CT team.", true, 0.0f, 5.0f);
+ConVar cv_botskin_t ("botskin_t", "0", "Specifies the bot's wanted skin for the Terrorist team.", true, 0.0f, 5.0f);
+ConVar cv_botskin_ct ("botskin_ct", "0", "Specifies the bot's wanted skin for the CT team.", true, 0.0f, 5.0f);
 ConVar cv_preferred_personality ("preferred_personality", "none", "Sets the default personality when creating bots with quota management.\nAllowed values: 'none', 'normal', 'careful', 'rusher'.\nIf 'none' is specified personality chosen randomly.", false);
 
-ConVar cv_quota_adding_interval ("quota_adding_interval", "0.10", "Interval in which bots are added to the game.", true, 0.10f, 1.0f);
-ConVar cv_quota_maintain_interval ("quota_maintain_interval", "0.40", "Interval on which overall bot quota are checked.", true, 0.40f, 2.0f);
+ConVar cv_quota_adding_interval ("quota_adding_interval", "0.10", "Interval at which bots are added to the game.", true, 0.10f, 1.0f);
+ConVar cv_quota_maintain_interval ("quota_maintain_interval", "0.40", "Interval at which the overall bot quota is checked.", true, 0.40f, 2.0f);
 
 ConVar cv_language ("language", "en", "Specifies the language for bot messages and menus.", false);
 
-ConVar cv_rotate_bots ("rotate_bots", "0", "Randomly disconnect and connect bots, simulating players join/quit.");
-ConVar cv_rotate_stay_min ("rotate_stay_min", "360.0", "Specifies minimum amount of seconds bot keep connected, if rotation active.", true, 120.0f, 7200.0f);
-ConVar cv_rotate_stay_max ("rotate_stay_max", "3600.0", "Specifies maximum amount of seconds bot keep connected, if rotation active.", true, 1800.0f, 14400.0f);
+ConVar cv_rotate_bots ("rotate_bots", "0", "Randomly disconnects and connects bots, simulating players joining/quitting.");
+ConVar cv_rotate_stay_min ("rotate_stay_min", "360.0", "Specifies the minimum amount of seconds a bot stays connected, if rotation is active.", true, 120.0f, 7200.0f);
+ConVar cv_rotate_stay_max ("rotate_stay_max", "3600.0", "Specifies the maximum amount of seconds a bot stays connected, if rotation is active.", true, 1800.0f, 14400.0f);
 
 ConVar cv_restricted_weapons ("restricted_weapons", "", "", false);
 
@@ -186,9 +186,9 @@ BotCreateResult BotManager::create (StringRef name, int difficulty, int personal
 
    // try to set proffered personality
    static HashMap <String, Personality> personalityMap {
-      {"normal", Personality::Normal },
-      {"careful", Personality::Careful },
-      {"rusher", Personality::Rusher },
+      { "normal", Personality::Normal },
+      { "careful", Personality::Careful },
+      { "rusher", Personality::Rusher },
    };
 
    // set personality if requested
@@ -332,13 +332,17 @@ void BotManager::addbot (StringRef name, StringRef difficulty, StringRef persona
    // this function is same as the function above, but accept as parameters string instead of integers
 
    BotRequest request {};
-   static StringRef any = "*";
+   constexpr StringRef ANY = "*";
 
-   request.name = (name.empty () || name == any) ? StringRef ("\0") : name;
-   request.difficulty = (difficulty.empty () || difficulty == any) ? -1 : difficulty.as <int> ();
-   request.team = (team.empty () || team == any) ? -1 : team.as <int> ();
-   request.skin = (skin.empty () || skin == any) ? -1 : skin.as <int> ();
-   request.personality = (personality.empty () || personality == any) ? -1 : personality.as <int> ();
+   auto handleParam = [&ANY] (StringRef value) {
+      return value.empty () || value == ANY ? -1 : value.as <int> ();
+   };
+
+   request.name = name.empty () || name == ANY ? StringRef ("\0") : name;
+   request.difficulty = handleParam (difficulty);
+   request.team = handleParam (team);
+   request.skin = handleParam (skin);
+   request.personality = handleParam (personality);
    request.manual = manual;
 
    addbot (request.name, request.difficulty, request.personality, request.team, request.skin, request.manual);
@@ -347,6 +351,10 @@ void BotManager::addbot (StringRef name, StringRef difficulty, StringRef persona
 void BotManager::maintainQuota () {
    // this function keeps number of bots up to date, and don't allow to maintain bot creation
    // while creation process in process.
+
+   if (!m_holdQuotaManagementTimer.elapsed ()) {
+      return;
+   }
 
    if (graph.length () < 1 || graph.hasChanged ()) {
       if (cv_quota.as <int> () > 0) {
@@ -465,7 +473,7 @@ void BotManager::maintainLeaders () {
    }
 
    // select leader each team somewhere in round start
-   if (m_timeRoundStart + rg (1.5f, 3.0f) < game.time ()) {
+   if (gameState.getRoundStartTime () + rg (1.5f, 3.0f) < game.time ()) {
       for (int team = 0; team < kGameTeamNum; ++team) {
          selectLeaders (team, false);
       }
@@ -483,7 +491,7 @@ void BotManager::maintainRoundRestart () {
       && m_numPreviousPlayers == 0
       && totalHumans == 1
       && totalBots > 0
-      && !m_resetHud) {
+      && !gameState.isResetHUD ()) {
 
       static ConVarRef sv_restartround ("sv_restartround");
 
@@ -492,13 +500,13 @@ void BotManager::maintainRoundRestart () {
       }
    }
    m_numPreviousPlayers = totalHumans;
-   m_resetHud = false;
+   gameState.setResetHUD (false);
 }
 
 void BotManager::maintainAutoKill () {
    const float killDelay = cv_autokill_delay.as <float> ();
 
-   if (killDelay < 1.0f || m_roundOver) {
+   if (killDelay < 1.0f || gameState.isRoundOver ()) {
       return;
    }
 
@@ -512,7 +520,7 @@ void BotManager::maintainAutoKill () {
    int aliveBots = 0;
 
    // do not interrupt bomb-defuse scenario
-   if (game.mapIs (MapFlags::Demolition) && isBombPlanted ()) {
+   if (game.mapIs (MapFlags::Demolition) && gameState.isBombPlanted ()) {
       return;
    }
    const int totalHumans = getHumansCount (true); // we're ignore spectators intentionally 
@@ -527,7 +535,7 @@ void BotManager::maintainAutoKill () {
          ++aliveBots;
 
          // do not interrupt assassination scenario, if vip is a bot
-         if (game.is (MapFlags::Assassination) && util.isPlayerVIP (bot->ent ())) {
+         if (game.is (MapFlags::Assassination) && game.isPlayerVIP (bot->ent ())) {
             return;
          }
       }
@@ -541,15 +549,9 @@ void BotManager::maintainAutoKill () {
 }
 
 void BotManager::reset () {
-   m_grenadeUpdateTime = 0.0f;
-   m_entityUpdateTime = 0.0f;
    m_plantSearchUpdateTime = 0.0f;
    m_lastChatTime = 0.0f;
-   m_timeBombPlanted = 0.0f;
    m_bombSayStatus = BombPlantedSay::ChatSay | BombPlantedSay::Chatter;
-
-   m_interestingEntities.clear ();
-   m_activeGrenades.clear ();
 }
 
 void BotManager::initFilters () {
@@ -619,7 +621,7 @@ void BotManager::serverFill (int selection, int personality, int difficulty, int
    }
    const auto maxToAdd = maxClients - (getHumansCount () + getBotCount ());
 
-   constexpr char kTeams[6][12] = { "", {"Terrorists"}, {"CTs"}, "", "", {"Random"}, };
+   constexpr char kTeams[6][12] = { "", { "Terrorists" }, { "CTs" }, "", "", { "Random" }, };
    auto toAdd = numToAdd == -1 ? maxToAdd : numToAdd;
 
    // limit manually added count as well
@@ -677,7 +679,7 @@ void BotManager::kickFromTeam (Team team, bool removeAll) {
    }
 
    for (const auto &bot : m_bots) {
-      if (team == game.getRealTeam (bot->ent ())) {
+      if (team == game.getRealPlayerTeam (bot->ent ())) {
          bot->kick (removeAll);
 
          if (!removeAll) {
@@ -692,7 +694,7 @@ void BotManager::killAllBots (int team, bool silent) {
    // this function kills all bots on server (only this dll controlled bots)
 
    for (const auto &bot : m_bots) {
-      if (team != Team::Invalid && game.getRealTeam (bot->ent ()) != team) {
+      if (team != Team::Invalid && game.getRealPlayerTeam (bot->ent ()) != team) {
          continue;
       }
       bot->kill ();
@@ -707,8 +709,8 @@ void BotManager::kickBot (int index) {
    auto bot = findBotByIndex (index);
 
    if (bot) {
-      decrementQuota ();
       bot->kick ();
+      decrementQuota ();
    }
 }
 
@@ -728,7 +730,7 @@ bool BotManager::kickRandom (bool decQuota, Team fromTeam) {
       if (fromTeam == Team::Unassigned) {
          return true;
       }
-      return game.getRealTeam (bot->ent ()) == fromTeam;
+      return game.getRealPlayerTeam (bot->ent ()) == fromTeam;
    };
 
    // first try to kick the bot that is currently dead
@@ -826,7 +828,7 @@ bool BotManager::hasCustomCSDMSpawnEntities () {
 
 void BotManager::setLastWinner (int winner) {
    m_lastWinner = winner;
-   m_roundOver = true;
+   gameState.setRoundOver (true);
 
    if (cv_radio_mode.as <int> () != 2) {
       return;
@@ -835,7 +837,7 @@ void BotManager::setLastWinner (int winner) {
 
    if (notify) {
       if (notify->m_team == winner) {
-         if (getRoundMidTime () > game.time ()) {
+         if (gameState.getRoundMidTime () > game.time ()) {
             notify->pushChatterMessage (Chatter::QuickWonRound);
          }
          else {
@@ -855,10 +857,15 @@ void BotManager::checkBotModel (edict_t *ent, char *infobuffer) {
 }
 
 void BotManager::checkNeedsToBeKicked () {
+   // this is called to check if bot is leaving server due to pathfinding error
+   // so this will cause to delay quota management stuff from executing for some time
+
    for (const auto &bot : bots) {
       if (bot->m_kickMeFromServer) {
+         m_holdQuotaManagementTimer.start (10.0f);
+         m_addRequests.clear ();
+
          bot->kick (); // kick bot from server if requested
-         break;
       }
    }
 }
@@ -881,25 +888,25 @@ void BotManager::setWeaponMode (int selection) {
    selection--;
 
    constexpr int kStdMaps[7][kNumWeapons] = {
-      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // Knife only
-      {-1, -1, -1, 2, 2, 0, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // Pistols only
-      {-1, -1, -1, -1, -1, -1, -1, 2, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // Shotgun only
-      {-1, -1, -1, -1, -1, -1, -1, -1, -1, 2, 1, 2, 0, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1}, // Machine Guns only
-      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 0, 1, 1, -1, -1, -1, -1, -1, -1}, // Rifles only
-      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, 2, 0, 1, -1, -1}, // Snipers only
-      {-1, -1, -1, 2, 2, 0, 1, 2, 2, 2, 1, 2, 0, 2, 0, 0, 1, 0, 1, 1, 2, 2, 0, 1, 2, 1} // Standard
+      { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, // Knife only
+      { -1, -1, -1, 2, 2, 0, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, // Pistols only
+      { -1, -1, -1, -1, -1, -1, -1, 2, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, // Shotgun only
+      { -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, 1, 2, 0, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1 }, // Machine Guns only
+      { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 0, 1, 1, -1, -1, -1, -1, -1, -1 }, // Rifles only
+      { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, 2, 0, 1, -1, -1 }, // Snipers only
+      { -1, -1, -1, 2, 2, 0, 1, 2, 2, 2, 1, 2, 0, 2, 0, 0, 1, 0, 1, 1, 2, 2, 0, 1, 2, 1 } // Standard
    };
 
    constexpr int kAsMaps[7][kNumWeapons] = {
-      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // Knife only
-      {-1, -1, -1, 2, 2, 0, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // Pistols only
-      {-1, -1, -1, -1, -1, -1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // Shotgun only
-      {-1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 0, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1}, // Machine Guns only
-      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, 1, 0, 1, 1, -1, -1, -1, -1, -1, -1}, // Rifles only
-      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, -1, 1, -1, -1}, // Snipers only
-      {-1, -1, -1, 2, 2, 0, 1, 1, 1, 1, 1, 1, 0, 2, 0, -1, 1, 0, 1, 1, 0, 0, -1, 1, 1, 1} // Standard
+      { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, // Knife only
+      { -1, -1, -1, 2, 2, 0, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, // Pistols only
+      { -1, -1, -1, -1, -1, -1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, // Shotgun only
+      { -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 0, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1 }, // Machine Guns only
+      { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, 1, 0, 1, 1, -1, -1, -1, -1, -1, -1 }, // Rifles only
+      { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, -1, 1, -1, -1 }, // Snipers only
+      { -1, -1, -1, 2, 2, 0, 1, 1, 1, 1, 1, 1, 0, 2, 0, -1, 1, 0, 1, 1, 0, 0, -1, 1, 1, 1 } // Standard
    };
-   constexpr char kModes[7][12] = { {"Knife"}, {"Pistol"}, {"Shotgun"}, {"Machine Gun"}, {"Rifle"}, {"Sniper"}, {"Standard"} };
+   constexpr char kModes[7][12] = { { "Knife" }, { "Pistol" }, { "Shotgun" }, { "Machine Gun" }, { "Rifle" }, { "Sniper" }, { "Standard" } };
 
    // get the raw weapons array
    auto tab = conf.getRawWeapons ();
@@ -920,7 +927,7 @@ void BotManager::listBots () {
    ctrl.msg ("%-3.5s\t%-19.16s\t%-10.12s\t%-3.4s\t%-3.4s\t%-3.4s\t%-3.6s\t%-3.5s\t%-3.8s", "index", "name", "personality", "team", "difficulty", "frags", "deaths", "alive", "timeleft");
 
    auto botTeam = [] (edict_t *ent) -> StringRef {
-      const auto team = game.getRealTeam (ent);
+      const auto team = game.getRealPlayerTeam (ent);
 
       switch (team) {
       case Team::CT:
@@ -958,7 +965,7 @@ void BotManager::listBots () {
    ctrl.msg ("%d bots", m_bots.length ());
 }
 
-float BotManager::getConnectTime (StringRef name, float original) {
+float BotManager::getConnectionTimes (StringRef name, float original) {
    // this function get's fake bot player time.
 
    for (const auto &bot : m_bots) {
@@ -1011,19 +1018,18 @@ Twin <int, int> BotManager::countTeamPlayers () {
 }
 
 Bot *BotManager::findHighestFragBot (int team) {
-   int bestIndex = 0;
-   float bestScore = -1;
+   Twin <int32_t, float> best {};
 
    // search bots in this team
    for (const auto &bot : bots) {
-      if (bot->m_isAlive && game.getRealTeam (bot->ent ()) == team) {
-         if (bot->pev->frags > bestScore) {
-            bestIndex = bot->index ();
-            bestScore = bot->pev->frags;
+      if (bot->m_isAlive && game.getRealPlayerTeam (bot->ent ()) == team) {
+         if (bot->pev->frags > best.second) {
+            best.first = bot->index ();
+            best.second = bot->pev->frags;
          }
       }
    }
-   return findBotByIndex (bestIndex);
+   return findBotByIndex (best.first);
 }
 
 void BotManager::updateTeamEconomics (int team, bool setTrue) {
@@ -1078,7 +1084,7 @@ void BotManager::updateBotDifficulties () {
 
       // sets new difficulty for all bots
       for (const auto &bot : m_bots) {
-         bot->m_difficulty = difficulty;
+         bot->setNewDifficulty (difficulty);
       }
       m_lastDifficulty = difficulty;
    }
@@ -1087,7 +1093,7 @@ void BotManager::updateBotDifficulties () {
 void BotManager::balanceBotDifficulties () {
    // difficulty changing once per round (time)
    auto updateDifficulty = [] (Bot *bot, int32_t offset) {
-      bot->m_difficulty = cr::clamp (static_cast <Difficulty> (bot->m_difficulty + offset), Difficulty::Noob, Difficulty::Expert);
+      bot->setNewDifficulty (cr::clamp (static_cast <Difficulty> (bot->m_difficulty + offset), Difficulty::Noob, Difficulty::Expert));
    };
 
    // with nightmare difficulty, there is no balance
@@ -1117,6 +1123,8 @@ void BotManager::balanceBotDifficulties () {
 
 void BotManager::destroy () {
    // this function free all bots slots (used on server shutdown)
+
+   m_holdQuotaManagementTimer.invalidate (); // restart quota manager
 
    for (auto &bot : m_bots) {
       bot->markStale ();
@@ -1188,7 +1196,7 @@ Bot::Bot (edict_t *bot, int difficulty, int personality, int team, int skin) {
 
    m_isAlive = false;
    m_weaponBurstMode = BurstMode::Off;
-   m_difficulty = cr::clamp (static_cast <Difficulty> (difficulty), Difficulty::Noob, Difficulty::Expert);
+   setNewDifficulty (cr::clamp (static_cast <Difficulty> (difficulty), Difficulty::Noob, Difficulty::Expert));
 
    auto minDifficulty = cv_difficulty_min.as <int> ();
    auto maxDifficulty = cv_difficulty_max.as <int> ();
@@ -1198,7 +1206,7 @@ Bot::Bot (edict_t *bot, int difficulty, int personality, int team, int skin) {
       if (maxDifficulty > minDifficulty) {
          cr::swap (maxDifficulty, minDifficulty);
       }
-      m_difficulty = rg (minDifficulty, maxDifficulty);
+      setNewDifficulty (rg (minDifficulty, maxDifficulty));
    }
    m_pingBase = fakeping.randomBase ();
    m_ping = fakeping.randomBase ();
@@ -1387,8 +1395,8 @@ void BotManager::disconnectBot (Bot *bot) {
 }
 
 void BotManager::handleDeath (edict_t *killer, edict_t *victim) {
-   const auto killerTeam = game.getRealTeam (killer);
-   const auto victimTeam = game.getRealTeam (victim);
+   const auto killerTeam = game.getRealPlayerTeam (killer);
+   const auto victimTeam = game.getRealPlayerTeam (victim);
 
    if (cv_radio_mode.as <int> () == 2) {
       // need to send congrats on well placed shot
@@ -1501,7 +1509,7 @@ void Bot::newRound () {
       node = kInvalidNodeIndex;
    }
    m_navTimeset = game.time ();
-   m_team = game.getTeam (ent ());
+   m_team = game.getPlayerTeam (ent ());
 
    resetPathSearchType ();
 
@@ -1511,14 +1519,13 @@ void Bot::newRound () {
 
    m_isLeader = false;
    m_hasProgressBar = false;
-   m_canChooseAimDirection = true;
+   m_canSetAimDirection = true;
    m_preventFlashing = 0.0f;
 
    m_timeTeamOrder = 0.0f;
    m_askCheckTime = rg (30.0f, 90.0f);
    m_minSpeed = 260.0f;
    m_prevSpeed = 0.0f;
-   m_prevVelocity = 0.0f;
    m_prevOrigin = Vector (kInfiniteDistance, kInfiniteDistance, kInfiniteDistance);
    m_prevTime = game.time ();
    m_lookUpdateTime = game.time ();
@@ -1718,9 +1725,6 @@ void Bot::newRound () {
       m_enemyIgnoreTimer = 0.0f;
    }
 
-   // update refvec for blocked movement
-   updateRightRef ();
-
    // and put buying into its message queue
    pushMsgQueue (BotMsg::Buy);
    startTask (Task::Normal, TaskPri::Normal, kInvalidNodeIndex, 0.0f, true);
@@ -1732,23 +1736,19 @@ void Bot::newRound () {
       pushChatterMessage (Chatter::NewRound);
    }
    auto thinkFps = cr::clamp (cv_think_fps.as <float> (), 30.0f, 90.0f);
-
-   auto updateInterval = 1.0f / thinkFps;
-   auto commandInterval = 1.0f / 60.0f;
+   auto thinkInterval = 1.0f / thinkFps;
 
    if (game.is (GameFlags::Xash3D)) {
       if (thinkFps < 50) {
-         updateInterval = 1.0f / 50.0f; // xash3d works acceptable at 50fps
+         thinkInterval = 1.0f / 50.0f; // xash3d works acceptable at 50fps
       }
    }
 
    // legacy games behaves strange, when this enabled, disable for xash3d as well if requested
    if (bots.isFrameSkipDisabled ()) {
-      updateInterval = 0.0f;
-      commandInterval = 0.0f;
+      thinkInterval = 0.0f;
    }
-   m_thinkDelay.interval = updateInterval;
-   m_commandDelay.interval = commandInterval;
+   m_thinkTimer.interval = thinkInterval;
 }
 
 void Bot::resetPathSearchType () {
@@ -1805,10 +1805,6 @@ void Bot::kick (bool silent) {
 }
 
 void Bot::markStale () {
-   // wait till threads tear down
-   MutexScopedLock lock1 (m_pathFindLock);
-   MutexScopedLock lock2 (m_predictLock);
-
    // switch chatter icon off
    showChatterIcon (false, true);
 
@@ -1817,6 +1813,10 @@ void Bot::markStale () {
 
    // mark bot as leaving
    m_isStale = true;
+
+   // wait till threads tear down
+   MutexScopedLock lock1 (m_pathFindLock);
+   MutexScopedLock lock2 (m_predictLock);
 
    // clear the bot name
    conf.clearUsedName (this);
@@ -1828,13 +1828,23 @@ void Bot::markStale () {
    pev->flags |= FL_DORMANT;
 }
 
+void Bot::setNewDifficulty (int32_t newDifficulty) {
+   if (newDifficulty < Difficulty::Noob || newDifficulty > Difficulty::Expert) {
+      m_difficulty = Difficulty::Hard;
+      m_difficultyData = conf.getDifficultyTweaks (Difficulty::Hard);
+   }
+
+   m_difficulty = newDifficulty;
+   m_difficultyData = conf.getDifficultyTweaks (newDifficulty);
+}
+
 void Bot::updateTeamJoin () {
    // this function handles the selection of teams & class
 
    if (!m_notStarted) {
       return;
    }
-   const auto botTeam = game.getRealTeam (ent ());
+   const auto botTeam = game.getRealPlayerTeam (ent ());
 
    // cs prior beta 7.0 uses hud-based motd, so press fire once
    if (game.is (GameFlags::Legacy)) {
@@ -1941,15 +1951,15 @@ void BotManager::captureChatRadio (StringRef cmd, StringRef arg, edict_t *ent) {
    }
 
    if (cmd.startsWith ("say")) {
-      const bool alive = util.isAlive (ent);
+      const bool alive = game.isAliveEntity (ent);
       int team = -1;
 
       if (cmd.endsWith ("team")) {
-         team = game.getRealTeam (ent);
+         team = game.getRealPlayerTeam (ent);
       }
 
       for (const auto &client : util.getClients ()) {
-         if (!(client.flags & ClientFlags::Used) || (team != -1 && team != client.team2) || alive != util.isAlive (client.ent)) {
+         if (!(client.flags & ClientFlags::Used) || (team != -1 && team != client.team2) || alive != game.isAliveEntity (client.ent)) {
             continue;
          }
          auto target = bots[client.ent];
@@ -1996,7 +2006,7 @@ void BotManager::captureChatRadio (StringRef cmd, StringRef arg, edict_t *ent) {
 void BotManager::notifyBombDefuse () {
    // notify all terrorists that CT is starting bomb defusing
 
-   const auto &bombPos = graph.getBombOrigin ();
+   const auto &bombPos = gameState.getBombOrigin ();
 
    for (const auto &bot : bots) {
       const auto task = bot->getCurrentTaskId ();
@@ -2018,68 +2028,6 @@ void BotManager::notifyBombDefuse () {
          }
       }
    }
-}
-
-void BotManager::updateActiveGrenade () {
-   if (m_grenadeUpdateTime > game.time ()) {
-      return;
-   }
-   m_activeGrenades.clear (); // clear previously stored grenades
-
-   // need to ignore bomb model in active grenades...
-   auto bombModel = conf.getBombModelName ();
-
-   // search the map for any type of grenade
-   game.searchEntities ("classname", "grenade", [&] (edict_t *e) {
-      // do not count c4 as a grenade
-      if (!util.isModel (e, bombModel)) {
-         m_activeGrenades.push (e);
-      }
-      return EntitySearchResult::Continue; // continue iteration
-   });
-   m_grenadeUpdateTime = game.time () + 0.25f;
-}
-
-void BotManager::updateInterestingEntities () {
-   if (m_entityUpdateTime > game.time ()) {
-      return;
-   }
-
-   // clear previously stored entities
-   m_interestingEntities.clear ();
-
-   // search the map for any type of grenade
-   game.searchEntities (nullptr, kInfiniteDistance, [&] (edict_t *e) {
-      auto classname = e->v.classname.str ();
-
-      // search for grenades, weaponboxes, weapons, items and armoury entities
-      if (classname.startsWith ("weaponbox") || classname.startsWith ("grenade") || util.isItem (e) || classname.startsWith ("armoury")) {
-         m_interestingEntities.push (e);
-      }
-
-      // pickup some hostage if on cs_ maps
-      if (game.mapIs (MapFlags::HostageRescue) && util.isHostageEntity (e)) {
-         m_interestingEntities.push (e);
-      }
-
-      // add buttons
-      if (game.mapIs (MapFlags::HasButtons) && classname.startsWith ("func_button")) {
-         m_interestingEntities.push (e);
-      }
-
-      // pickup some csdm stuff if we're running csdm
-      if (game.is (GameFlags::CSDM) && classname.startsWith ("csdm")) {
-         m_interestingEntities.push (e);
-      }
-
-      if (cv_attack_monsters && util.isMonster (e)) {
-         m_interestingEntities.push (e);
-      }
-
-      // continue iteration
-      return EntitySearchResult::Continue;
-   });
-   m_entityUpdateTime = game.time () + 0.5f;
 }
 
 void BotManager::selectLeaders (int team, bool reset) {
@@ -2184,8 +2132,6 @@ void BotManager::selectLeaders (int team, bool reset) {
 void BotManager::initRound () {
    // this is called at the start of each round
 
-   m_roundOver = false;
-
    // check team economics
    for (int team = 0; team < kGameTeamNum; ++team) {
       updateTeamEconomics (team);
@@ -2204,35 +2150,15 @@ void BotManager::initRound () {
    for (auto &client : util.getClients ()) {
       client.radio = 0;
    }
-
-   graph.setBombOrigin (true);
    graph.clearVisited ();
 
    m_bombSayStatus = BombPlantedSay::ChatSay | BombPlantedSay::Chatter;
-   m_timeBombPlanted = 0.0f;
    m_plantSearchUpdateTime = 0.0f;
    m_autoKillCheckTime = 0.0f;
    m_botsCanPause = false;
 
    resetFilters ();
    practice.update (); // update practice data on round start
-
-   // calculate the round mid/end in world time
-   m_timeRoundStart = game.time () + mp_freezetime.as <float> ();
-   m_timeRoundMid = m_timeRoundStart + mp_roundtime.as <float> () * 60.0f * 0.5f;
-   m_timeRoundEnd = m_timeRoundStart + mp_roundtime.as <float> () * 60.0f;
-}
-
-void BotManager::setBombPlanted (bool isPlanted) {
-   if (cv_ignore_objectives) {
-      m_bombPlanted = false;
-      return;
-   }
-
-   if (isPlanted) {
-      m_timeBombPlanted = game.time ();
-   }
-   m_bombPlanted = isPlanted;
 }
 
 void BotThreadWorker::shutdown () {
@@ -2284,121 +2210,6 @@ void BotThreadWorker::startup (int workers) {
 
    // start up the worker
    m_pool->startup (static_cast <size_t> (requestedThreads));
-}
-
-bool BotManager::isLineBlockedBySmoke (const Vector &from, const Vector &to) {
-   if (m_activeGrenades.empty ()) {
-      return false;
-   }
-   constexpr auto kSmokeGrenadeRadius = 115.0f;
-
-   // distance along line of sight covered by smoke
-   float totalSmokedLength = 0.0f;
-
-   Vector sightDir = to - from;
-   const float sightLength = sightDir.normalizeInPlace ();
-
-   for (auto pent : m_activeGrenades) {
-      if (game.isNullEntity (pent)) {
-         continue;
-      }
-
-      // need drawn models
-      if (pent->v.effects & EF_NODRAW) {
-         continue;
-      }
-
-      // smoke must be on a ground
-      if (!(pent->v.flags & FL_ONGROUND)) {
-         continue;
-      }
-
-      // must be a smoke grenade
-      if (!util.isModel (pent, kSmokeModelName)) {
-         continue;
-      }
-
-      const float smokeRadiusSq = cr::sqrf (kSmokeGrenadeRadius);
-      const Vector &smokeOrigin = game.getEntityOrigin (pent);
-
-      Vector toGrenade = smokeOrigin - from;
-      float alongDist = toGrenade | sightDir;
-
-      // compute closest point to grenade along line of sight ray
-      Vector close {};
-
-      // constrain closest point to line segment
-      if (alongDist < 0.0f) {
-         close = from;
-      }
-      else if (alongDist >= sightLength) {
-         close = to;
-      }
-      else {
-         close = from + sightDir * alongDist;
-      }
-
-      // if closest point is within smoke radius, the line overlaps the smoke cloud
-      Vector toClose = close - smokeOrigin;
-      float lengthSq = toClose.lengthSq ();
-
-      if (lengthSq < smokeRadiusSq) {
-         // some portion of the ray intersects the cloud
-
-         const float fromSq = toGrenade.lengthSq ();
-         const float toSq = (smokeOrigin - to).lengthSq ();
-
-         if (fromSq < smokeRadiusSq) {
-            if (toSq < smokeRadiusSq) {
-               // both 'from' and 'to' lie within the cloud
-               // entire length is smoked
-               totalSmokedLength += (to - from).length ();
-            }
-            else {
-               // 'from' is inside the cloud, 'to' is outside
-               // compute half of total smoked length as if ray crosses entire cloud chord
-               float halfSmokedLength = cr::sqrtf (smokeRadiusSq - lengthSq);
-
-               if (alongDist > 0.0f) {
-                  // ray goes thru 'close'
-                  totalSmokedLength += halfSmokedLength + (close - from).length ();
-               }
-               else {
-                  // ray starts after 'close'
-                  totalSmokedLength += halfSmokedLength - (close - from).length ();
-               }
-
-            }
-         }
-         else if (toSq < smokeRadiusSq) {
-            // 'from' is outside the cloud, 'to' is inside
-            // compute half of total smoked length as if ray crosses entire cloud chord
-            const float halfSmokedLength = cr::sqrtf (smokeRadiusSq - lengthSq);
-            Vector v = to - smokeOrigin;
-
-            if ((v | sightDir) > 0.0f) {
-               // ray goes thru 'close'
-               totalSmokedLength += halfSmokedLength + (close - to).length ();
-            }
-            else {
-               // ray ends before 'close'
-               totalSmokedLength += halfSmokedLength - (close - to).length ();
-            }
-         }
-         else {
-            // 'from' and 'to' lie outside of the cloud - the line of sight completely crosses it
-            // determine the length of the chord that crosses the cloud
-            const float smokedLength = 2.0f * cr::sqrtf (smokeRadiusSq - lengthSq);
-            totalSmokedLength += smokedLength;
-         }
-      }
-   }
-
-   // define how much smoke a bot can see thru
-   const float maxSmokedLength = 0.7f * kSmokeGrenadeRadius;
-
-   // return true if the total length of smoke-covered line-of-sight is too much
-   return (totalSmokedLength > maxSmokedLength);
 }
 
 bool BotManager::isFrameSkipDisabled () {

@@ -62,14 +62,6 @@ GNU General Public License for more details.
 #undef bound
 #endif
 
-#ifndef FALSE
-#define FALSE	0
-#endif
-
-#ifndef TRUE
-#define TRUE	(!FALSE)
-#endif
-
 #if !defined(_WIN32) && !defined(__MINGW32__)
 #define stricmp		strcasecmp
 #define strnicmp	strncasecmp
@@ -79,12 +71,8 @@ GNU General Public License for more details.
 #define snprintf	_snprintf
 #endif
 
-typedef int (*cmpfunc)( const void *a, const void *b );
-typedef int BOOL;
-typedef int qboolean;
 typedef unsigned char byte;
 typedef unsigned int uint;
-typedef unsigned int uint32; //!!!
 
 #include "menu_int.h"
 

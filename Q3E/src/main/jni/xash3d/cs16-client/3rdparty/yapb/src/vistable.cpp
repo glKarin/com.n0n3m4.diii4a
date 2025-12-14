@@ -125,7 +125,9 @@ void GraphVistable::rebuild () {
       m_sliceIndex += rg (250, 400);
    }
    auto notifyProgress = [] (int value) {
-      game.print ("Rebuilding vistable... %d%% done.", value);
+      if (value >= 100 || cv_debug) {
+         game.print ("Rebuilding vistable... %d%% done.", value);
+      }
    };
 
    // notify host about rebuilding
@@ -139,6 +141,7 @@ void GraphVistable::rebuild () {
 
       m_rebuild = false;
       m_notifyMsgTimestamp = 0.0f;
+      m_curIndex = 0;
 
       save ();
    }
@@ -149,7 +152,7 @@ void GraphVistable::startRebuild () {
    m_notifyMsgTimestamp = game.time ();
 }
 
-bool GraphVistable::visible (int srcIndex, int destIndex, VisIndex vis) {
+bool GraphVistable::visible (int srcIndex, int destIndex, VisIndex vis) const {
    if (!graph.exists (srcIndex) || !graph.exists (destIndex)) {
       return false;
    }

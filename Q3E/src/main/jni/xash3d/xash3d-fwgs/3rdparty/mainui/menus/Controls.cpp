@@ -99,7 +99,7 @@ private:
 	void ResetKeysList( void );
 	void Cancel( void )
 	{
-		EngFuncs::ClientCmd( TRUE, "exec keyboard\n" );
+		EngFuncs::ClientCmd( true, "exec keyboard\n" );
 		Hide();
 	}
 
@@ -268,7 +268,7 @@ void CMenuControls::ResetKeysList( void )
 		return;
 	}
 	
-	EngFuncs::ClientCmd( TRUE, "unbindall" );
+	EngFuncs::ClientCmd( true, "unbindall" );
 
 	while(( pfile = EngFuncs::COM_ParseFile( pfile, token, sizeof( token ))) != NULL )
 	{
@@ -288,7 +288,7 @@ void CMenuControls::ResetKeysList( void )
 		}
 
 		snprintf( cmd, sizeof( cmd ), "bind \"%s\" \"%s\"\n", key, token );
-		EngFuncs::ClientCmd( TRUE, cmd );
+		EngFuncs::ClientCmd( true, cmd );
 	}
 
 	EngFuncs::COM_FreeFile( afile );
@@ -312,7 +312,7 @@ bool CMenuControls::CGrabKeyMessageBox::KeyUp( int key )
 		const char *bindName = parent->keysListModel.keysBind[parent->keysList.GetCurrentIndex()];
 
 		snprintf( cmd, sizeof( cmd ), "bind \"%s\" \"%s\"\n", EngFuncs::KeynumToString( key ), bindName );
-		EngFuncs::ClientCmd( TRUE, cmd );
+		EngFuncs::ClientCmd( true, cmd );
 
 		sound = SND_LAUNCH;
 	}

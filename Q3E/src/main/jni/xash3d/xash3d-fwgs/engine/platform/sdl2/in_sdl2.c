@@ -45,17 +45,11 @@ void GAME_EXPORT Platform_GetMousePos( int *x, int *y )
 {
 	SDL_GetMouseState( x, y );
 
-	if( x && window_width.value && window_width.value != refState.width )
-	{
-		float factor = refState.width / window_width.value;
-		*x = *x * factor;
-	}
+	if( x )
+		*x *= refState.scale_x;
 
-	if( y && window_height.value && window_height.value != refState.height )
-	{
-		float factor = refState.height / window_height.value;
-		*y = *y * factor;
-	}
+	if( y )
+		*y *= refState.scale_y;
 }
 
 /*
@@ -220,7 +214,7 @@ void Platform_SetCursorType( VGUI_DefaultCursor type )
 		// restore the last mouse position
 		if( in_visible_cursor_pos.pushed )
 		{
-			SDL_WarpMouseInWindow( host.hWnd, in_visible_cursor_pos.x, in_visible_cursor_pos.y );
+			Platform_SetMousePos( in_visible_cursor_pos.x, in_visible_cursor_pos.y );
 			in_visible_cursor_pos.pushed = false;
 		}
 	}
@@ -230,7 +224,7 @@ void Platform_SetCursorType( VGUI_DefaultCursor type )
 		if( !in_visible_cursor_pos.pushed )
 		{
 			SDL_GetMouseState( &in_visible_cursor_pos.x, &in_visible_cursor_pos.y );
-			SDL_WarpMouseInWindow( host.hWnd, host.window_center_x, host.window_center_y );
+			Platform_SetMousePos( host.window_center_x, host.window_center_y );
 			in_visible_cursor_pos.pushed = true;
 		}
 

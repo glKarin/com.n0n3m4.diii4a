@@ -65,7 +65,7 @@ if(GIT_FOUND)
     target_compile_definitions(${PROJECT_NAME} PRIVATE VERSION_GENERATED)
 else()
     execute_process(COMMAND hostname OUTPUT_VARIABLE BUILD_MACHINE OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
-    set(BUILD_HASH "f66f0e621dbcf8e59d01ca5958e59ec4a94bc47f")
+    set(BUILD_HASH "34772be5cadfd1538758a5cc03def63ea6e958fa")
     set(BUILD_COUNT "1")
     set(BUILD_AUTHOR "yapb")
 
@@ -108,7 +108,9 @@ if((CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
 
         if(NOT WIN32 AND BUILD_X86)
             target_compile_options(${PROJECT_NAME} PRIVATE -fdata-sections -ffunction-sections -fcf-protection=none -fno-plt)
+			if(NOT APPLE)
             target_link_options(${PROJECT_NAME} PRIVATE -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/ext/ldscripts/version.lds -Wl,--gc-sections)
+			endif()
 
             if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
                 target_compile_options(${PROJECT_NAME} PRIVATE -fgraphite-identity -floop-nest-optimize)

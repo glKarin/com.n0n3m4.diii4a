@@ -15,6 +15,7 @@ add_definitions(-DXASH_BUILD_COMMIT=\"74b196d2c362ea195967be6f139faeed18795a53\"
 add_subdirectory(public)
 add_subdirectory(filesystem)
 
+add_subdirectory(3rdparty/library_suffix)
 add_subdirectory(3rdparty/nanogl)
 add_subdirectory(3rdparty/gl4es/gl4es)
 add_subdirectory(3rdparty/libogg/libogg)

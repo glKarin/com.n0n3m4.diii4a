@@ -105,6 +105,7 @@ const char *Android_GetAndroidID( void )
 	resultCStr = (*jni.env)->GetStringUTFChars( jni.env, resultJNIStr, NULL );
 	Q_strncpy( id, resultCStr, sizeof( id ) );
 	(*jni.env)->ReleaseStringUTFChars( jni.env, resultJNIStr, resultCStr );
+	(*jni.env)->DeleteLocalRef( jni.env, resultJNIStr );
 
 	return id;
 #endif
@@ -145,6 +146,7 @@ const char *Android_LoadID( void )
 	resultCStr = (*jni.env)->GetStringUTFChars( jni.env, resultJNIStr, NULL );
 	Q_strncpy( id, resultCStr, sizeof( id ) );
 	(*jni.env)->ReleaseStringUTFChars( jni.env, resultJNIStr, resultCStr );
+	(*jni.env)->DeleteLocalRef( jni.env, resultJNIStr );
 
 	return id;
 #endif
@@ -166,7 +168,9 @@ void Android_SaveID( const char *id )
 	fclose(file);
 	printf("Android_SaveID() -> %s to %s\n", id, path);
 #else
-	(*jni.env)->CallVoidMethod( jni.env, jni.activity, jni.saveAndroidID, (*jni.env)->NewStringUTF( jni.env, id ) );
+	jstring JStr = (*jni.env)->NewStringUTF( jni.env, id );
+	(*jni.env)->CallVoidMethod( jni.env, jni.activity, jni.saveAndroidID, JStr );
+	(*jni.env)->DeleteLocalRef( jni.env, JStr );
 #endif
 }
 

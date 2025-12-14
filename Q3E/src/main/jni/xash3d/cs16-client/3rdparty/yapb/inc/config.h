@@ -29,16 +29,6 @@ public:
 
 // mostly config stuff, and some stuff dealing with menus
 class BotConfig final : public Singleton <BotConfig> {
-public:
-   struct DifficultyData {
-      float reaction[2] {};
-      int32_t headshotPct {};
-      int32_t seenThruPct {};
-      int32_t hearThruPct {};
-      int32_t maxRecoil {};
-      Vector aimError {};
-   };
-
 private:
    Array <StringArray> m_chat {};
    Array <Array <ChatterItem>> m_chatter {};
@@ -52,7 +42,7 @@ private:
    StringArray m_avatars {};
 
    HashMap <uint32_t, String, Hash <int32_t>> m_language {};
-   HashMap <int32_t, DifficultyData> m_difficulty {};
+   HashMap <int32_t, BotDifficultyData> m_difficulty {};
    HashMap <String, String> m_custom {};
 
    // default tables for personality weapon preferences, overridden by weapon.cfg
@@ -218,10 +208,7 @@ public:
    }
 
    // get's the difficulty level tweaks
-   DifficultyData *getDifficultyTweaks (int32_t level) {
-      if (level < Difficulty::Noob || level > Difficulty::Expert) {
-         return &m_difficulty[Difficulty::Expert];
-      }
+   BotDifficultyData *getDifficultyTweaks (int32_t level) {
       return &m_difficulty[level];
    }
 

@@ -99,7 +99,7 @@ private:
 	void ResetKeysList( void );
 	void Cancel( void )
 	{
-		EngFuncs::ClientCmd( TRUE, "exec keyboard\n" );
+		EngFuncs::ClientCmd( true, "exec keyboard\n" );
 		Hide();
 	}
 
@@ -268,7 +268,7 @@ void CMenuControls::ResetKeysList( void )
 		return;
 	}
 	
-	EngFuncs::ClientCmd( TRUE, "unbindall" );
+	EngFuncs::ClientCmd( true, "unbindall" );
 
 	while(( pfile = EngFuncs::COM_ParseFile( pfile, token, sizeof( token ))) != NULL )
 	{
@@ -288,7 +288,7 @@ void CMenuControls::ResetKeysList( void )
 		}
 
 		snprintf( cmd, sizeof( cmd ), "bind \"%s\" \"%s\"\n", key, token );
-		EngFuncs::ClientCmd( TRUE, cmd );
+		EngFuncs::ClientCmd( true, cmd );
 	}
 
 	EngFuncs::COM_FreeFile( afile );
@@ -312,7 +312,7 @@ bool CMenuControls::CGrabKeyMessageBox::KeyUp( int key )
 		const char *bindName = parent->keysListModel.keysBind[parent->keysList.GetCurrentIndex()];
 
 		snprintf( cmd, sizeof( cmd ), "bind \"%s\" \"%s\"\n", EngFuncs::KeynumToString( key ), bindName );
-		EngFuncs::ClientCmd( TRUE, cmd );
+		EngFuncs::ClientCmd( true, cmd );
 
 		sound = SND_LAUNCH;
 	}
@@ -394,13 +394,8 @@ void CMenuControls::_Init( void )
 	AddItem( banner );
 	AddButton( L( "GameUI_UseDefaults" ), nullptr, PC_USE_DEFAULTS, msgBox2.MakeOpenEvent( ));
 	AddButton( L( "Adv. Controls" ), nullptr, PC_ADV_CONTROLS, UI_AdvControls_Menu );
-
-	if( ui_menu_style->value )
-	{
-		AddButton( L( "Touch" ), L( "Change touch settings and buttons" ), PC_TOUCH, UI_Touch_Menu );
-		AddButton( L( "GameUI_Joystick" ), L( "Change gamepad axis and button settings" ), PC_GAMEPAD, UI_GamePad_Menu );
-	}
-
+	AddButton( L( "Touch" ), L( "Change touch settings and buttons" ), PC_TOUCH, UI_Touch_Menu );
+	AddButton( L( "GameUI_Joystick" ), L( "Change gamepad axis and button settings" ), PC_GAMEPAD, UI_GamePad_Menu );
 	AddButton( L( "GameUI_OK" ), nullptr, PC_OK, VoidCb( &CMenuControls::SaveAndPopMenu ));
 	AddButton( L( "GameUI_Cancel" ), nullptr, PC_CANCEL, VoidCb( &CMenuControls::Cancel ));
 	AddItem( keysList );

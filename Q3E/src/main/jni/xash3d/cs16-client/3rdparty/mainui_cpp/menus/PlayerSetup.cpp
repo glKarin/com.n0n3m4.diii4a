@@ -273,7 +273,7 @@ void CMenuPlayerSetup::CModelListModel::Update( void )
 
 	// Get file list
 	// search in basedir too, because that's how GoldSrc does this
-	filenames = EngFuncs::GetFilesList(  "models/player/*", &numFiles, FALSE );
+	filenames = EngFuncs::GetFilesList(  "models/player/*", &numFiles, false );
 
 	// build the model list
 	for( i = 0; i < numFiles; i++ )
@@ -305,7 +305,7 @@ void CMenuPlayerSetup::CLogosListModel::Update( )
 	RemoveAll();
 
 	// Get file list
-	filenames = EngFuncs::GetFilesList( "logos/*.*", &numFiles, FALSE );
+	filenames = EngFuncs::GetFilesList( "logos/*.*", &numFiles, false );
 
 	// build the model list
 	for( i = 0; i < numFiles; i++ )

@@ -17,7 +17,7 @@ template <typename U> bool BotStorage::load (SmallArray <U> &data, ExtenHeader *
 
    // graphs can be downloaded...
    const bool isGraph = !!(type.option & StorageOption::Graph);
-   const bool isDebug = cv_debug;
+   const bool isDebug = cv_debug || game.isDeveloperMode ();
 
    MemFile file (filename); // open the file
    data.clear ();
@@ -85,11 +85,7 @@ template <typename U> bool BotStorage::load (SmallArray <U> &data, ExtenHeader *
       if (tryReload ()) {
          return true;
       }
-
-      if (game.isDeveloperMode ()) {
-         return error (isGraph, isDebug, file, "Unable to open %s file for reading (filename: '%s').", type.name, filename);
-      }
-      return false;
+      return error (isGraph, isDebug, file, "Unable to open %s file for reading (filename: '%s').", type.name, filename);
    }
 
    // erase the current graph just in case
@@ -178,7 +174,7 @@ template <typename U> bool BotStorage::load (SmallArray <U> &data, ExtenHeader *
             if (isGraph) {
                resetRetries ();
 
-               ExtenHeader extenHeader;
+               ExtenHeader extenHeader {};
                strings.copy (extenHeader.author, exten->author, cr::bufsize (exten->author));
 
                if (extenSize <= actuallyRead) {
@@ -229,6 +225,9 @@ template <typename U> bool BotStorage::save (const SmallArray <U> &data, ExtenHe
    }
    const auto isGraph = !!(type.option & StorageOption::Graph);
 
+   // hide some messages with debug cvar
+   extern ConVar cv_debug;
+
    // do not allow to save graph with less than 8 nodes
    if (isGraph && graph.length () < kMaxNodeLinks) {
       ctrl.msg ("Can't save graph data with less than %d nodes. Please add some more before saving.", kMaxNodeLinks);
@@ -237,7 +236,9 @@ template <typename U> bool BotStorage::save (const SmallArray <U> &data, ExtenHe
    String filename = buildPath (storageToBotFile (type.option));
 
    if (data.empty ()) {
-      logger.error ("Unable to save %s file. Empty data. (filename: '%s').", type.name, filename);
+      if (isGraph || cv_debug) {
+         logger.error ("Unable to save %s file. Empty data. (filename: '%s').", type.name, filename);
+      }
       return false;
    }
    else if (isGraph) {
@@ -289,7 +290,6 @@ template <typename U> bool BotStorage::save (const SmallArray <U> &data, ExtenHe
       if ((type.option & StorageOption::Exten) && exten != nullptr) {
          file.write (exten, sizeof (ExtenHeader));
       }
-      extern ConVar cv_debug;
 
       // notify only about graph
       if (isGraph || cv_debug) {
@@ -347,8 +347,7 @@ String BotStorage::buildPath (int32_t file, bool isMemoryLoad, bool withoutMapNa
       { BotFile::Pathmatrix, FilePath (folders.train, "pmx")},
       { BotFile::LogFile, FilePath (folders.logs, "txt")},
       { BotFile::Graph, FilePath (folders.graph, "graph")},
-      { BotFile::PodbotPWF, FilePath (folders.podbot, "pwf")},
-      { BotFile::EbotEWP, FilePath (folders.ebot, "ewp")},
+      { BotFile::PodbotPWF, FilePath (folders.podbot, "pwf")}
    };
 
    static StringArray path {};
@@ -447,8 +446,8 @@ StringRef BotStorage::getRunningPath () {
 
    static String path {};
 
-   // we're do not do relative (against bot's library) paths on android 
-   if (!game.is (GameFlags::Metamod)) {
+   // we're do not do relative (against bot's library) paths on specific cases
+   if (m_useNonRelativePaths) {
       if (path.empty ()) {
          path = strings.joinPath (game.getRunningModName (), folders.addons, folders.bot);
       }
@@ -459,7 +458,7 @@ StringRef BotStorage::getRunningPath () {
    if (path.empty ()) {
       path = SharedLibrary::path (&bstor);
 
-      if (path.startsWith ("<unk")) {
+      if (path.empty ()) {
          logger.fatal ("Unable to detect library path. Giving up...");
       }
 
@@ -481,7 +480,7 @@ StringRef BotStorage::getRunningPathVFS () {
    static String path {};
 
    // we're do not do relative (against bot's library) paths on android 
-   if (!game.is (GameFlags::Metamod)) {
+   if (m_useNonRelativePaths) {
       if (path.empty ()) {
          path = strings.joinPath (folders.addons, folders.bot);
       }
@@ -491,10 +490,27 @@ StringRef BotStorage::getRunningPathVFS () {
    if (path.empty ()) {
       path = getRunningPath ();
 
-      path = path.substr (path.find (game.getRunningModName ())); // skip to the game dir
+      path = path.substr (path.rfind (game.getRunningModName ())); // skip to the game dir
       path = path.substr (path.find (kPathSeparator) + 1); // skip the game dir
    }
    return path;
+}
+
+void BotStorage::checkInstallLocation () {
+   if (plat.android || plat.emscripten) {
+      m_useNonRelativePaths = true;
+      return;
+   }
+   String path = SharedLibrary::path (&bstor);
+
+   if (path.empty ()) {
+      m_useNonRelativePaths = true;
+      return;
+   }
+   String dpath = strings.joinPath (folders.addons, folders.bot, folders.bin);
+   path = path.substr (0, path.rfind (kPathSeparator));
+
+   m_useNonRelativePaths = !path.lowercase ().endsWith (dpath.lowercase ());
 }
 
 #endif // BOT_STORAGE_EXPLICIT_INSTANTIATIONS

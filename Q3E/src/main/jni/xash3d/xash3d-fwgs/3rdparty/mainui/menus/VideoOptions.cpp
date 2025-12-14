@@ -264,6 +264,13 @@ void CMenuVidOptions::_Init( void )
 		}
 	});
 
+	SET_EVENT_MULTI( hudscale.onCvarGet,
+	{
+		CMenuCheckBox *cb = (CMenuCheckBox *)pSelf;
+
+		cb->bChecked = EngFuncs::GetCvarFloat( cb->CvarName() ) >= 640.0f;
+	});
+
 	AddItem( banner );
 	AddItem( done );
 #if LEGACY_VIEWSIZE

@@ -134,13 +134,14 @@ class BotRelease(object):
       self.pkg_matrix.append (BotPackage('linux', 'tar.xz', {'linux-x86': 'so'}))
       self.pkg_matrix.append (BotPackage('extras', 'zip', 
                                          {'linux-arm64': 'so', 
-                                          'linux-amd64': 'so', 
-                                          'linux-x86-gcc': 'so', 
-                                          'linux-x86-nosimd': 'so', 
-                                          'windows-x86-gcc': 'dll', 
+                                          'linux-amd64': 'so',
+                                          'linux-riscv64': 'so',
+                                          'linux-x86-gcc': 'so',
+                                          'linux-x86-nosimd': 'so',
+                                          'windows-x86-gcc': 'dll',
                                           'windows-x86-clang': 'dll',
                                           'windows-x86-msvc-xp': 'dll',
-                                          'windows-amd64': 'dll', 
+                                          'windows-amd64': 'dll',
                                           'apple-x86': 'dylib',
                                           'apple-arm64': 'dylib',
                                           }, extra=True))
@@ -263,7 +264,9 @@ class BotRelease(object):
             binary_name = binary_name + '_arm64'
          elif artifact.endswith('amd64'):
             binary_name = binary_name + '_amd64'
-         
+         elif artifact.endswith('riscv64'):
+            binary_name = binary_name + '_riscv64d'
+            
          binary = os.path.join(self.artifacts, artifact, f'{binary_name}.{pkg.artifact[artifact]}')
          binary_base = os.path.basename(binary)
 

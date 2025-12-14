@@ -114,9 +114,9 @@ void CAdvancedControls::ToggleLookCheckboxes( bool write )
 	if( write )
 	{
 		if( mouseLook.bChecked )
-			EngFuncs::ClientCmd( FALSE, "+mlook\nbind _force_write\n" );
+			EngFuncs::ClientCmd( false, "+mlook\nbind _force_write\n" );
 		else
-			EngFuncs::ClientCmd( FALSE, "-mlook\nbind _force_write\n" );
+			EngFuncs::ClientCmd( false, "-mlook\nbind _force_write\n" );
 	}
 }
 

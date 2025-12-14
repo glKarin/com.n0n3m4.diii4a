@@ -76,7 +76,7 @@ void CMenuFileDialog::CFileListModel::Update( void )
 
 	for( k = 0; k < uiFileDialogGlobal.npatterns; k++)
 	{
-		filenames = EngFuncs::GetFilesList( uiFileDialogGlobal.patterns[k], &numFiles, TRUE );
+		filenames = EngFuncs::GetFilesList( uiFileDialogGlobal.patterns[k], &numFiles, true );
 		for ( j = 0; j < numFiles; i++, j++ )
 			AddToTail( filenames[j] );
 	}

@@ -81,7 +81,7 @@ void CMenuNewGame::StartGame( uintptr_t skill )
 
 	if( startDemoChapter.bChecked )
 		EngFuncs::ClientCmdF( false, "newgame \"%s\"\n", gMenu.m_gameinfo.demomap );
-	else EngFuncs::ClientCmd( FALSE, "newgame\n" );
+	else EngFuncs::ClientCmd( false, "newgame\n" );
 }
 
 void CMenuNewGame::StartGameCb( CMenuBaseItem *pSelf, void *pExtra )

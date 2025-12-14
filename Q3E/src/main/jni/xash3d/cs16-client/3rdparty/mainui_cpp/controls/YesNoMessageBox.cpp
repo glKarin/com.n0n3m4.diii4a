@@ -234,7 +234,7 @@ void UI_ShowMessageBox( const char *text )
 	if( !UI_IsVisible() )
 	{
 		UI_Main_Menu();
-		UI_SetActiveMenu( TRUE );
+		UI_SetActiveMenu( true );
 	}
 
 	if( strstr( msg, "m_ignore") || strstr( msg, "touch_enable" ) || strstr( msg, "joy_enable" ) )

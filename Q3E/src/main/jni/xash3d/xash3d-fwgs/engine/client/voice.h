@@ -89,7 +89,6 @@ typedef struct voice_state_s
 	double   start_time;
 
 	voice_status_t    local;
-	voice_status_t    players_status[MAX_CLIENTS]; // do not access this directly, use Voice_GetPlayerStatus instead
 
 	// opus stuff
 	OpusCustomMode    *custom_mode;
@@ -119,6 +118,8 @@ typedef struct voice_state_s
 
 extern voice_state_t voice;
 
+extern convar_t voice_loopback;
+
 void CL_AddVoiceToDatagram( void );
 void Voice_RegisterCvars( void );
 qboolean Voice_Init( const char *pszCodecName, int quality, qboolean preinit );
@@ -128,7 +129,7 @@ void Voice_RecordStop( void );
 void Voice_RecordStart( void );
 void Voice_Disconnect( void );
 void Voice_AddIncomingData( int ent, const byte *data, uint size, uint frames );
-void Voice_StatusAck( voice_status_t *status, int playerIndex );
-void Voice_StartChannel( uint samples, byte *data, int entnum );
+void Voice_StopChannel( int entnum );
+void Voice_LoopbackAck( void ); // sends VOICE_LOOPBACK_INDEX to client, gets disabled on timeout
 
 #endif // VOICE_H

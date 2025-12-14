@@ -842,7 +842,8 @@ void CHudSpectator::HandleButtonsDown( int ButtonPressed )
 			{
 				gEngfuncs.SetViewAngles( vJumpAngles );
 				iJumpSpectator = 1;
-
+				gHUD.m_Health.m_iPlayerLastPointedAt = g_iUser2;
+				g_PlayerExtraInfo[g_iUser2].showhealth = gHUD.m_flTime + 3.0f;
 			}
 			// lease directed mode if player want to see another player
 			m_autoDirector->value = 0.0f;

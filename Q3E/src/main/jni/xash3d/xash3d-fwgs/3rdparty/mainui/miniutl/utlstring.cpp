@@ -6,7 +6,6 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#define _GNU_SOURCE 1 // need for vasprintf
 #include "utlstring.h"
 #include "utlvector.h"
 #include "winlite.h"
@@ -109,51 +108,23 @@ static size_t RemoveWhitespace( char *pszString )
 //-----------------------------------------------------------------------------
 size_t CUtlString::FormatV( const char *pFormat, va_list args )
 {
-	size_t len = 0;
-#if defined _WIN32 || defined __WATCOMC__
-	char buf[4096];
+	int len = 0, len2;
 
-	len = _vsnprintf( buf, sizeof( buf ), pFormat, args );
+	// format into that space, which is certainly enough
+	len = _vsnprintf( NULL, 0, pFormat, args );
 
-	Assert( len >= 0 );
-	Assert( len < sizeof( buf ));
-
-	// get it
 	FreePv( m_pchString );
 	m_pchString = (char *)PvAlloc( len + 1 );
-	strcpy( m_pchString, buf );
-#elif defined ( _PS3 )
 
-	// ignore the PS3 documentation about vsnprintf returning -1 when the string is too small. vsprintf seems to do the right thing (least at time of
-	// implementation) and returns the number of characters needed when you pass in a buffer that is too small
+	len2 = _vsnprintf( m_pchString, len + 1, pFormat, args );
 
-	FreePv( m_pchString );
-	m_pchString = NULL;	
-
-	len = vsnprintf( NULL, 0, pFormat, args );
-	if ( len > 0 )
+	if( len2 < 0 || len2 >= len )
 	{
-		m_pchString = (char*) PvAlloc( len + 1 );
-		len = vsnprintf( m_pchString, len + 1, pFormat, args );
+		Set( "!Out Of Memory!" );
+		return sizeof( "!Out Of Memory!" ) - 1;
 	}
 
-#else
-
-	char *buf = NULL;
-	len = vasprintf( &buf, pFormat, args );
-
-	// Len < 0 represents an overflow
-	if( buf )
-	{
-		// We need to get the string into PvFree-compatible memory, which
-		// we can't assume is directly interoperable with the malloc memory
-		// that vasprintf returned (definitely not compatible with a debug
-		// allocator, for example).
-		Set( buf );
-		free( buf );
-	}
-#endif
-	return len;
+	return len2;
 }
 
 
@@ -162,46 +133,42 @@ size_t CUtlString::FormatV( const char *pFormat, va_list args )
 //-----------------------------------------------------------------------------
 size_t CUtlString::VAppendFormat( const char *pFormat, va_list args )
 {
-	size_t len = 0;
-#if defined _WIN32 || defined __WATCOMC__
+	int len = 0, required_len = 0;
 	char pstrFormatted[4096];
 
 	// format into that space, which is certainly enough
-	len = _vsnprintf( pstrFormatted, sizeof(pstrFormatted), pFormat, args );
+	len = _vsnprintf( pstrFormatted, sizeof( pstrFormatted ), pFormat, args );
 
-	Assert( len >= 0 );
-	Assert( len < sizeof( pstrFormatted ));
+	if( len < 0 )
+		required_len = _vsnprintf( NULL, 0, pFormat, args );
+	else if( len > sizeof( pstrFormatted ))
+		required_len = len;
 
-#elif defined ( _PS3 )
-	char *pstrFormatted = NULL;
-
-	// ignore the PS3 documentation about vsnprintf returning -1 when the string is too small. vsprintf seems to do the right thing (least at time of
-	// implementation) and returns the number of characters needed when you pass in a buffer that is too small
-
-	len = vsnprintf( NULL, 0, pFormat, args );
-	if ( len > 0 )
+	// allocate a string if not fit
+	if( required_len > 0 )
 	{
-		pstrFormatted = (char*) PvAlloc( len + 1 );
-		len = vsnprintf( pstrFormatted, len + 1, pFormat, args );
+		char *large_buf = (char *)PvAlloc( required_len + 1 );
+
+		if( !large_buf )
+		{
+			Append( "!Out Of Memory!", sizeof( "!Out Of Memory!" ) - 1);
+			return sizeof( "!Out Of Memory!" ) - 1;
+		}
+
+		len = _vsnprintf( large_buf, required_len + 1, pFormat, args );
+		if( len < 0 || len >= required_len )
+		{
+			Append( "!Out Of Memory!", sizeof( "!Out Of Memory!" ) - 1);
+			return sizeof( "!Out Of Memory!" ) - 1;
+		}
+
+		Append( large_buf, len );
+		FreePv( large_buf );
+
+		return len;
 	}
 
-#else
-	char *pstrFormatted = NULL;
-	len = vasprintf( &pstrFormatted, pFormat, args );
-#endif
-
-	// if we ended with a formatted string, append and free it
-	if ( pstrFormatted != NULL )
-	{
-		Append( pstrFormatted, len );
-#if defined( _WIN32 ) || defined __WATCOMC__
-		// no need to free a buffer on stack
-#elif defined( _PS3 )
-		FreePv( pstrFormatted );
-#else
-		free( pstrFormatted );
-#endif
-	}
+	Append( pstrFormatted, len );
 
 	return len;
 }

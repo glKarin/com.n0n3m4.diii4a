@@ -40,6 +40,9 @@
 #elif defined(__ANDROID__)
     #define STDIO_FILESYSTEM_LIB "libfilesystem_stdio.so"
     #define STEAM_FILESYSTEM_LIB "libfilesystem_steam.so"
+#elif defined(__APPLE__)
+	#define STDIO_FILESYSTEM_LIB "filesystem_stdio.dylib"
+	#define STEAM_FILESYSTEM_LIB "filesystem_steam.dylib"
 #else
 	#define STDIO_FILESYSTEM_LIB "filesystem_stdio.so"
 	#define STEAM_FILESYSTEM_LIB "filesystem_steam.so"

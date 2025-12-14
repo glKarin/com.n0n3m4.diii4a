@@ -26,7 +26,7 @@ void MessageDispatcher::netMsgTextMsg () {
    // reset bomb position for all the bots
    const auto resetBombPosition = [] () -> void {
       if (game.mapIs (MapFlags::Demolition)) {
-         graph.setBombOrigin (true);
+         gameState.setBombOrigin (true);
       }
    };
 
@@ -53,8 +53,8 @@ void MessageDispatcher::netMsgTextMsg () {
       bots.setLastWinner (Team::Terrorist); // update last winner for economics
       resetBombPosition ();
    }
-   else if ((cached & TextMsgCache::BombPlanted) && !bots.isBombPlanted ()) {
-      bots.setBombPlanted (true);
+   else if ((cached & TextMsgCache::BombPlanted) && !gameState.isBombPlanted ()) {
+      gameState.setBombPlanted (true);
 
       for (const auto &notify : bots) {
          if (notify->m_isAlive) {
@@ -68,7 +68,7 @@ void MessageDispatcher::netMsgTextMsg () {
             }
          }
       }
-      graph.setBombOrigin ();
+      gameState.setBombOrigin ();
    }
 
    // check for burst fire message
@@ -319,7 +319,7 @@ void MessageDispatcher::netMsgHLTV () {
 
    // need to start new round ? (we're tracking FOV reset message)
    if (m_args[players].long_ == 0 && m_args[fov].long_ == 0) {
-      bots.initRound ();
+      gameState.roundStart ();
    }
 }
 
@@ -389,7 +389,7 @@ void MessageDispatcher::netMsgBarTime () {
       m_bot->m_hasProgressBar = true; // the progress bar on a hud
 
       // notify bots about defusing has started
-      if (game.mapIs (MapFlags::Demolition) && bots.isBombPlanted () && m_bot->m_team == Team::CT) {
+      if (game.mapIs (MapFlags::Demolition) && gameState.isBombPlanted () && m_bot->m_team == Team::CT) {
          bots.notifyBombDefuse ();
       }
    }
@@ -435,7 +435,7 @@ void MessageDispatcher::netMsgResetHUD () {
    if (m_bot) {
       m_bot->spawned ();
    }
-   bots.setResetHUD (true);
+   gameState.setResetHUD (true);
 }
 
 MessageDispatcher::MessageDispatcher () {

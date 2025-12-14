@@ -102,7 +102,15 @@ qboolean Image_LoadBMP( const char *name, const byte *buffer, fs_offset_t filesi
 			bhdr.colors = 256;
 			cbPalBytes = ( 1 << bhdr.bitsPerPixel ) * sizeof( rgba_t );
 		}
-		else cbPalBytes = bhdr.colors * sizeof( rgba_t );
+		else
+		{
+			if( bhdr.colors > 256 )
+			{
+				Con_DPrintf( S_WARN "%s: %s palette have too many colors (%u), clamping to 256\n", __func__, name, bhdr.colors );
+				bhdr.colors = 256;
+			}
+			cbPalBytes = bhdr.colors * sizeof( rgba_t );
+		}
 	}
 
 	estimatedSize = ( buf_p - buffer ) + cbPalBytes;
@@ -211,13 +219,13 @@ qboolean Image_LoadBMP( const char *name, const byte *buffer, fs_offset_t filesi
 				column--;	// ingnore main iterations
 				for( c = 0, k = 128; c < 8; c++, k >>= 1 )
 				{
+					if( ++column >= columns )
+						break;
 					red = green = blue = (!!(alpha & k) == 1 ? 0xFF : 0x00);
 					*pixbuf++ = red;
 					*pixbuf++ = green;
 					*pixbuf++ = blue;
 					*pixbuf++ = 0x00;
-					if( ++column == columns )
-						break;
 				}
 				break;
 			case 4:
@@ -351,9 +359,11 @@ qboolean Image_SaveBMP( const char *name, rgbdata_t *pix )
 	case PF_INDEXED_32:
 		pixel_size = 1;
 		break;
+	case PF_BGR_24:
 	case PF_RGB_24:
 		pixel_size = 3;
 		break;
+	case PF_BGRA_32:
 	case PF_RGBA_32:
 		pixel_size = 4;
 		break;
@@ -430,9 +440,11 @@ qboolean Image_SaveBMP( const char *name, rgbdata_t *pix )
 			else
 			{
 				// 24 bit
-				pbBmpBits[i*pixel_size+0] = pb[x*pixel_size+2];
-				pbBmpBits[i*pixel_size+1] = pb[x*pixel_size+1];
-				pbBmpBits[i*pixel_size+2] = pb[x*pixel_size+0];
+				qboolean be = !!( pix->type & (PF_BGR_24|PF_BGRA_32) ); // is it big endian RGB?
+				
+				pbBmpBits[i*pixel_size+(be?2:0)] = pb[x*pixel_size+2];
+				pbBmpBits[i*pixel_size+(be?1:1)] = pb[x*pixel_size+1];
+				pbBmpBits[i*pixel_size+(be?0:2)] = pb[x*pixel_size+0];
 			}
 
 			if( pixel_size == 4 ) // write alpha channel

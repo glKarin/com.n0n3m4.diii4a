@@ -38,23 +38,23 @@ GNU General Public License for more details.
 #define SUPPORTED_SWS_VERSION_MAJOR 8
 
 #if SUPPORTED_AVU_VERSION_MAJOR != LIBAVUTIL_VERSION_MAJOR
-#error
+#error "unsupported libavutil version"
 #endif
 
 #if SUPPORTED_AVF_VERSION_MAJOR != LIBAVFORMAT_VERSION_MAJOR
-#error
+#error "unsupported libavformat version"
 #endif
 
 #if SUPPORTED_AVC_VERSION_MAJOR != LIBAVCODEC_VERSION_MAJOR
-#error
+#error "unsupported libavcodec version"
 #endif
 
 #if SUPPORTED_SWR_VERSION_MAJOR != LIBSWRESAMPLE_VERSION_MAJOR
-#error
+#error "unsupported libswresample version"
 #endif
 
 #if SUPPORTED_SWS_VERSION_MAJOR != LIBSWSCALE_VERSION_MAJOR
-#error
+#error "unsupported libswscale version"
 #endif
 
 // libavutil
@@ -116,8 +116,9 @@ int               (*psws_scale)( struct SwsContext *c, const uint8_t *const srcS
 // libavutil
 #define pavutil_version           avutil_version
 #define pav_frame_alloc           av_frame_alloc
+#define pav_frame_free            av_frame_free
 #define pav_frame_ref             av_frame_ref
-#define pav_frame_unref           av_Frame_unref
+#define pav_frame_unref           av_frame_unref
 #define pav_strerror              av_strerror
 #define pav_free                  av_free
 #define pav_get_bytes_per_sample  av_get_bytes_per_sample

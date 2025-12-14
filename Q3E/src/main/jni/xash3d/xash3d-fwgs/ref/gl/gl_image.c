@@ -44,9 +44,9 @@ R_GetTexture
 acess to array elem
 =================
 */
-gl_texture_t *R_GetTexture( GLenum texnum )
+gl_texture_t *R_GetTexture( unsigned int texnum )
 {
-	ASSERT( texnum >= 0 && texnum < MAX_TEXTURES );
+	Assert( texnum < MAX_TEXTURES );
 	return &gl_textures[texnum];
 }
 
@@ -75,48 +75,6 @@ const char *GL_TargetToString( GLenum target )
 		return "Rect";
 	}
 	return "??";
-}
-
-/*
-=================
-GL_Bind
-=================
-*/
-void GL_Bind( GLint tmu, GLenum texnum )
-{
-	gl_texture_t	*texture;
-	GLuint		glTarget;
-
-	// missed or invalid texture?
-	if( texnum <= 0 || texnum >= MAX_TEXTURES )
-	{
-		if( texnum != 0 )
-			gEngfuncs.Con_DPrintf( S_ERROR "%s: invalid texturenum %d\n", __func__, texnum );
-		texnum = tr.defaultTexture;
-	}
-	if( tmu != GL_KEEP_UNIT )
-		GL_SelectTexture( tmu );
-	else tmu = glState.activeTMU;
-
-	texture = &gl_textures[texnum];
-	glTarget = texture->target;
-
-	if( glTarget == GL_TEXTURE_2D_ARRAY_EXT )
-		glTarget = GL_TEXTURE_2D;
-
-	if( glState.currentTextureTargets[tmu] != glTarget )
-	{
-		GL_EnableTextureUnit( tmu, false );
-		glState.currentTextureTargets[tmu] = glTarget;
-		GL_EnableTextureUnit( tmu, true );
-	}
-
-	if( glState.currentTextures[tmu] == texture->texnum )
-		return;
-
-	pglBindTexture( texture->target, texture->texnum );
-	glState.currentTextures[tmu] = texture->texnum;
-	glState.currentTexturesIndex[tmu] = texnum;
 }
 
 qboolean GL_TextureFilteringEnabled( const gl_texture_t *tex )
@@ -1147,10 +1105,11 @@ static qboolean GL_UploadTexture( gl_texture_t *tex, rgbdata_t *pic )
 {
 	byte		*buf, *data;
 	size_t		texsize, size;
-	uint		width, height;
+	uint		width, height, depth;
 	uint		i, j, numSides;
 	uint		offset = 0;
 	qboolean		normalMap;
+	qboolean		texture3d;
 	const byte	*bufend;
 
 	// dedicated server
@@ -1198,6 +1157,7 @@ static qboolean GL_UploadTexture( gl_texture_t *tex, rgbdata_t *pic )
 	texsize = GL_CalcTextureSize( tex->format, tex->width, tex->height, tex->depth );
 	normalMap = FBitSet( tex->flags, TF_NORMALMAP ) ? true : false;
 	numSides = FBitSet( pic->flags, IMAGE_CUBEMAP ) ? 6 : 1;
+	texture3d = ( tex->target == GL_TEXTURE_3D );
 
 	// uploading texture into video memory, change the binding
 	glState.currentTextures[glState.activeTMU] = tex->texnum;
@@ -1216,9 +1176,10 @@ static qboolean GL_UploadTexture( gl_texture_t *tex, rgbdata_t *pic )
 			{
 				width = Q_max( 1, ( tex->width >> j ));
 				height = Q_max( 1, ( tex->height >> j ));
-				texsize = GL_CalcTextureSize( tex->format, width, height, tex->depth );
-				size = GL_CalcImageSize( pic->type, width, height, tex->depth );
-				GL_TextureImageCompressed( tex, i, j, width, height, tex->depth, size, buf );
+				depth = texture3d ? Q_max( 1, ( tex->depth >> j )) : tex->depth;
+				texsize = GL_CalcTextureSize( tex->format, width, height, depth );
+				size = GL_CalcImageSize( pic->type, width, height, depth );
+				GL_TextureImageCompressed( tex, i, j, width, height, depth, size, buf );
 				tex->size += texsize;
 				buf += size; // move pointer
 				tex->numMips++;
@@ -1232,9 +1193,10 @@ static qboolean GL_UploadTexture( gl_texture_t *tex, rgbdata_t *pic )
 			{
 				width = Q_max( 1, ( tex->width >> j ));
 				height = Q_max( 1, ( tex->height >> j ));
-				texsize = GL_CalcTextureSize( tex->format, width, height, tex->depth );
-				size = GL_CalcImageSize( pic->type, width, height, tex->depth );
-				GL_TextureImageRAW( tex, i, j, width, height, tex->depth, pic->type, buf );
+				depth = texture3d ? Q_max( 1, ( tex->depth >> j )) : tex->depth;
+				texsize = GL_CalcTextureSize( tex->format, width, height, depth );
+				size = GL_CalcImageSize( pic->type, width, height, depth );
+				GL_TextureImageRAW( tex, i, j, width, height, depth, pic->type, buf );
 				tex->size += texsize;
 				buf += size; // move pointer
 				tex->numMips++;
@@ -1458,7 +1420,7 @@ static void GL_DeleteTexture( gl_texture_t *tex )
 	gl_texture_t	**prev;
 	gl_texture_t	*cur;
 
-	ASSERT( tex != NULL );
+	Assert( tex != NULL );
 
 	// already freed?
 	if( !tex->texnum ) return;
@@ -1901,10 +1863,11 @@ int GL_FindTexture( const char *name )
 GL_FreeTexture
 ================
 */
-void GL_FreeTexture( GLenum texnum )
+void GL_FreeTexture( unsigned int texnum )
 {
 	// number 0 it's already freed
-	if( texnum <= 0 ) return;
+	if( texnum == 0 || texnum >= MAX_TEXTURES )
+		return;
 
 	GL_DeleteTexture( &gl_textures[texnum] );
 }

@@ -42,7 +42,9 @@ CVAR_DEFINE_AUTO( sv_maxrate, "50000", FCVAR_SERVER, "max bandwidth rate allowed
 CVAR_DEFINE_AUTO( sv_newunit, "0", 0, "clear level-saves from previous SP game chapter to help keep .sav file size as minimum" );
 CVAR_DEFINE_AUTO( sv_clienttrace, "1", FCVAR_SERVER, "0 = big box(Quake), 0.5 = halfsize, 1 = normal (100%), otherwise it's a scaling factor" );
 static CVAR_DEFINE_AUTO( sv_timeout, "65", 0, "after this many seconds without a message from a client, the client is dropped" );
-static CVAR_DEFINE_AUTO( sv_connect_timeout, "15", 0, "after this many seconds without a message from a client, the client is dropped" );
+static CVAR_DEFINE_AUTO( sv_connect_timeout, "60", 0, "after this many seconds without a message from a client, the client is dropped" );
+static CVAR_DEFINE_AUTO( sv_connect_timeout_ban, "1", 0, "whether automatically ban suspicious players stuck in connect loop" );
+static CVAR_DEFINE_AUTO( sv_connect_timeout_ban_time, "2", 0, "if suspicious player time out, for how long ban them" );
 CVAR_DEFINE_AUTO( sv_failuretime, "0.5", 0, "after this long without a packet from client, don't send any more until client starts sending again" );
 CVAR_DEFINE_AUTO( sv_password, "", FCVAR_SERVER|FCVAR_PROTECTED, "server password for entry into multiplayer games" );
 // TODO: CVAR_DEFINE_AUTO( sv_proxies, "1", FCVAR_SERVER, "maximum count of allowed proxies for HLTV spectating" );
@@ -111,7 +113,7 @@ static CVAR_DEFINE_AUTO( showtriggers, "0", FCVAR_LATCH|FCVAR_TEMPORARY, "debug 
 static CVAR_DEFINE_AUTO( sv_airmove, "1", FCVAR_SERVER, "obsolete, compatibility issues" );
 static CVAR_DEFINE_AUTO( sv_version, "", FCVAR_READ_ONLY, "engine version string" );
 CVAR_DEFINE_AUTO( hostname, "", FCVAR_PRINTABLEONLY, "name of current host" );
-static CVAR_DEFINE_AUTO( sv_fps, "0.0", 0, "server framerate" );
+static CVAR_DEFINE_AUTO( sv_fps, "0.0", 0, "set this cvar to decouple server framerate from client framerate" );
 
 // gore-related cvars
 static CVAR_DEFINE_AUTO( violence_hblood, "1", 0, "draw human blood" );
@@ -465,7 +467,7 @@ static void SV_DropTimedOutClient( sv_client_t *cl, qboolean ban )
 
 	if( ban )
 	{
-		Cbuf_AddTextf( "addip 30 %s\n", NET_BaseAdrToString( cl->netchan.remote_address ));
+		Cbuf_AddTextf( "addip %g %s\n", sv_connect_timeout_ban_time.value, NET_BaseAdrToString( cl->netchan.remote_address ));
 	}
 }
 
@@ -513,7 +515,7 @@ static void SV_CheckTimeouts( void )
 			if( !NET_IsLocalAddress( cl->netchan.remote_address ))
 			{
 				if( cl->connection_started < connected_droppoint )
-					SV_DropTimedOutClient( cl, true );
+					SV_DropTimedOutClient( cl, sv_connect_timeout_ban.value > 0.0f );
 			}
 			break;
 		case cs_spawned:
@@ -761,7 +763,7 @@ void SV_AddToMaster( netadr_t from, sizebuf_t *msg )
 	Info_SetValueForKey( s, "gamedir", GI->gamefolder, len ); // gamedir
 	Info_SetValueForKey( s, "map", sv.name, len ); // current map
 	Info_SetValueForKey( s, "type", (Host_IsDedicated()) ? "d" : "l", len ); // dedicated or local
-	Info_SetValueForKey( s, "password", "0", len ); // is password set
+	Info_SetValueForKey( s, "password", SV_HavePassword() ? "0" : "1", len ); // is password set
 	Info_SetValueForKey( s, "os", "w", len ); // Windows
 	Info_SetValueForKey( s, "secure", "0", len ); // server anti-cheat
 	Info_SetValueForKey( s, "lan", "0", len ); // LAN servers doesn't send info to master
@@ -887,7 +889,9 @@ void SV_Init( void )
 	Cvar_RegisterVariable( &sv_maxrate );
 	Cvar_RegisterVariable( &sv_cheats );
 	Cvar_RegisterVariable( &sv_airmove );
+#if !XASH_DEDICATED
 	Cvar_RegisterVariable( &sv_fps );
+#endif // !XASH_DEDICATED
 	Cvar_RegisterVariable( &showtriggers );
 	Cvar_RegisterVariable( &sv_aim );
 	Cvar_RegisterVariable( &sv_allow_autoaim );
@@ -904,6 +908,8 @@ void SV_Init( void )
 	Cvar_RegisterVariable( &hostname );
 	Cvar_RegisterVariable( &sv_timeout );
 	Cvar_RegisterVariable( &sv_connect_timeout );
+	Cvar_RegisterVariable( &sv_connect_timeout_ban );
+	Cvar_RegisterVariable( &sv_connect_timeout_ban_time );
 	Cvar_RegisterVariable( &sv_pausable );
 	Cvar_RegisterVariable( &sv_validate_changelevel );
 	Cvar_RegisterVariable( &sv_clienttrace );

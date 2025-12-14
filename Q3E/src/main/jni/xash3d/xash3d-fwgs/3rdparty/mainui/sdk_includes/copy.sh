@@ -16,6 +16,7 @@ FILES_LIST=" \
 	common/mathlib.h \
 	common/netadr.h \
 	common/net_api.h \
+	common/port.h \
 	common/ref_params.h \
 	common/weaponinfo.h \
 	common/wrect.h \

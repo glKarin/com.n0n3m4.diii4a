@@ -31,15 +31,8 @@ static void CL_ParseExtraInfo( sizebuf_t *msg )
 	if( COM_CheckStringEmpty( clientfallback ))
 		Con_Reportf( S_ERROR "%s: TODO: add fallback directory %s!\n", __func__, clientfallback );
 
-	if( MSG_ReadByte( msg ))
-	{
-		Cvar_FullSet( "sv_cheats", "1", FCVAR_READ_ONLY | FCVAR_SERVER );
-	}
-	else
-	{
-		Cvar_SetCheatState();
-		Cvar_FullSet( "sv_cheats", "0", FCVAR_READ_ONLY | FCVAR_SERVER );
-	}
+	cls.allow_cheats = MSG_ReadByte( msg ) ? true : false;
+	CL_SetCheatState( cl.maxclients > 1, cls.allow_cheats );
 }
 
 static void CL_ParseNewMovevars( sizebuf_t *msg )
@@ -474,7 +467,7 @@ static void CL_ParseSoundPacketGS( sizebuf_t *msg )
 
 	chan = MSG_ReadUBitLong( msg, 3 );
 	entnum = MSG_ReadUBitLong( msg, MAX_GOLDSRC_ENTITY_BITS );
-	if( FBitSet( flags, SND_LEGACY_LARGE_INDEX ))
+	if( FBitSet( flags, SND_GOLDSRC_LARGE_INDEX ))
 		sound = MSG_ReadWord( msg );
 	else sound = MSG_ReadByte( msg );
 	MSG_ReadGSBitVec3Coord( msg, pos );
@@ -485,7 +478,7 @@ static void CL_ParseSoundPacketGS( sizebuf_t *msg )
 
 	MSG_EndBitWriting( msg );
 
-	ClearBits( flags, SND_LEGACY_LARGE_INDEX );
+	ClearBits( flags, SND_GOLDSRC_LARGE_INDEX );
 
 	if( FBitSet( flags, SND_SENTENCE ))
 	{
@@ -776,7 +769,7 @@ void CL_ParseGoldSrcServerMessage( sizebuf_t *msg )
 			CL_ParseExec( msg );
 			break;
 		default:
-			CL_ParseUserMessage( msg, cmd, PROTO_LEGACY );
+			CL_ParseUserMessage( msg, cmd, PROTO_GOLDSRC );
 			cl.frames[cl.parsecountmod].graphdata.usr += MSG_GetNumBytesRead( msg ) - bufStart;
 			break;
 		}

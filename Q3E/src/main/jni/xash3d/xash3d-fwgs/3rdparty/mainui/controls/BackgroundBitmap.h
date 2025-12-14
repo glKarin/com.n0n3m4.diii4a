@@ -38,30 +38,37 @@ public:
 	static void LoadBackground();
 	static bool ShouldDrawLogoMovie() { return s_bEnableLogoMovie; }
 private:
-	void DrawBackgroundLayout( Point p, int xOffset, int yOffset, float xScale, float yScale );
-	void DrawColor();
-	void DrawInGameBackground();
-
-	static bool LoadBackgroundImage( const bool gamedirOnly ); // Steam background loader
-	static bool CheckBackgroundSplash( const bool gamedirOnly ); // WON background loader
-
-	//==========
-	// WON-style
-	//==========
-	static bool s_bEnableLogoMovie;
-	static Size s_BackgroundImageSize;
-
-	//=============
-	// GameUI-style
-	//=============
-	typedef struct
+	struct bimage_t
 	{
 		HIMAGE hImage;
 		Point coord;
 		Size size;
-	} bimage_t;
+	};
 
-	static CUtlVector<bimage_t> s_Backgrounds;
+	enum bstate_e
+	{
+		DRAW_COLOR,
+		DRAW_WON,
+		DRAW_STEAM,
+	};
+
+	void DrawBackgroundPiece( const bimage_t &image, Point p, int xOffset, int yOffset, float xScale, float yScale );
+	void DrawSteamBackgroundLayout( Point p, int xOffset, int yOffset, float xScale, float yScale );
+	void DrawColor();
+	void DrawInGameBackground();
+
+	static bool LoadSteamBackground( const bool gamedirOnly ); // Steam background loader
+	static bool LoadWONBackground( const bool gamedirOnly ); // WON background loader
+	static void UpdatePreference();
+
+	static bool s_bEnableLogoMovie, s_bGameHasSteamBackground, s_bGameHasWONBackground;
+
+	static bstate_e s_state;
+
+	static bimage_t s_WONBackground;
+
+	static Size s_SteamBackgroundImageSize;
+	static CUtlVector<bimage_t> s_SteamBackground;
 };
 
 #endif // MENU_BACKGROUNDBITMAP_H

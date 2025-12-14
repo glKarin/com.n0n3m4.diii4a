@@ -673,7 +673,7 @@ static void GL_SetDefaults( void )
 R_RenderInfo_f
 =================
 */
-static void R_RenderInfo_f( void )
+static void R_RenderInfo( qboolean startup )
 {
 	gEngfuncs.Con_Printf( "\n" );
 	gEngfuncs.Con_Printf( "GL_VENDOR: %s\n", glConfig.vendor_string );
@@ -723,9 +723,15 @@ static void R_RenderInfo_f( void )
 	gEngfuncs.Con_Printf( "\n" );
 	gEngfuncs.Con_Printf( "MODE: %ix%i\n", gpGlobals->width, gpGlobals->height );
 	gEngfuncs.Con_Printf( "\n" );
-	gEngfuncs.Con_Printf( "VERTICAL SYNC: %s\n", gl_vsync->value ? "enabled" : "disabled" );
+	if( !startup )
+		gEngfuncs.Con_Printf( "VERTICAL SYNC: %s\n", gl_vsync->value ? "enabled" : "disabled" );
 	gEngfuncs.Con_Printf( "Color %d bits, Alpha %d bits, Depth %d bits, Stencil %d bits\n", glConfig.color_bits,
 		glConfig.alpha_bits, glConfig.depth_bits, glConfig.stencil_bits );
+}
+
+static void R_RenderInfo_f( void )
+{
+	R_RenderInfo( false );
 }
 
 #if XASH_GLES
@@ -792,7 +798,12 @@ static void GL_InitExtensionsGLES( void )
 				pglGetFloatv( GL_MAX_TEXTURE_LOD_BIAS_EXT, &glConfig.max_texture_lod_bias );
 			break;
 		case GL_ARB_TEXTURE_NPOT_EXT:
-			GL_CheckExtension( "GL_OES_texture_npot", NULL, 0, "gl_texture_npot", extid, 0 );
+			// according to spec, GLES3.0 made NPOT required
+			// thanks lewa_j for advice
+			if( glConfig.version_major >= 3 )
+				GL_SetExtension( extid, true );
+			else
+				GL_CheckExtension( "GL_OES_texture_npot", NULL, 0, "gl_texture_npot", extid, 0 );
 			break;
 #if !XASH_GL_STATIC
 		case GL_SHADER_OBJECTS_EXT:
@@ -1103,7 +1114,7 @@ void GL_InitExtensions( void )
 		gEngfuncs.Cvar_SetValue( "gl_finish", 1 );
 #endif
 
-	R_RenderInfo_f();
+	R_RenderInfo( true );
 
 	tr.framecount = tr.visframecount = 1;
 	glw_state.initialized = true;

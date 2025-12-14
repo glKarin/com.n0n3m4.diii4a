@@ -121,6 +121,8 @@ public:
 	float m_fAttack[4];
 	void GetPainColor(int &r, int &g, int &b , int &a);
 	float m_fFade;
+
+	int m_iPlayerLastPointedAt;
 private:
 	void DrawPain( float fTime );
 	void DrawDamage( float fTime );

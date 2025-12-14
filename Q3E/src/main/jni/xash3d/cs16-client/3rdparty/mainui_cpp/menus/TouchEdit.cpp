@@ -45,7 +45,7 @@ void CMenuTouchEdit::Show()
 
 	EngFuncs::CvarSetValue( "touch_enable", 1 );
 	EngFuncs::CvarSetValue( "touch_in_menu", 1 );
-	EngFuncs::ClientCmd(FALSE, "touch_enableedit");
+	EngFuncs::ClientCmd(false, "touch_enableedit");
 
 	CMenuFramework::Show();
 }
@@ -54,7 +54,7 @@ void CMenuTouchEdit::Hide()
 {
 	EngFuncs::CvarSetValue( "touch_enable", saveTouchEnable );
 	EngFuncs::CvarSetValue( "touch_in_menu", 0 );
-	EngFuncs::ClientCmd(FALSE, "touch_disableedit");
+	EngFuncs::ClientCmd(false, "touch_disableedit");
 
 	CMenuFramework::Hide();
 }

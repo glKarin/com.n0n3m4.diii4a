@@ -28,6 +28,7 @@
 
 #include "precompiled.h"
 #include <algorithm>
+#include <random>
 
 BotPhraseManager *TheBotPhrases = nullptr;
 CountdownTimer BotChatterInterface::m_encourageTimer;
@@ -375,7 +376,14 @@ void BotPhrase::Randomize()
 {
 	for (size_t i = 0; i < m_voiceBank.size(); i++)
 	{
+#ifdef __APPLE__
+		std::random_device rd {};
+		std::mt19937 mt {rd()};
+
+		std::shuffle(m_voiceBank[i]->begin(), m_voiceBank[i]->end(), mt);
+#else
 		std::random_shuffle(m_voiceBank[i]->begin(), m_voiceBank[i]->end());
+#endif
 	}
 }
 

@@ -112,7 +112,11 @@ static void CL_CreatePlaylist( const char *filename )
 	file_t	*f;
 
 	f = FS_Open( filename, "w", false );
-	if( !f ) return;
+	if( !f )
+	{
+		Con_Printf( S_ERROR "%s: can't open %s for write\n", __func__, filename );
+		return;
+	}
 
 	// make standard cdaudio playlist
 	FS_Print( f, "blank\n" );		// #1
@@ -593,7 +597,7 @@ Template to show hud messages
 void CL_HudMessage( const char *pMessage )
 {
 	if( !COM_CheckString( pMessage )) return;
-	CL_DispatchUserMessage( "HudText", Q_strlen( pMessage ), (void *)pMessage );
+	CL_DispatchUserMessage( "HudText", Q_strlen( pMessage ) + 1, (void *)pMessage );
 }
 
 /*
@@ -1281,8 +1285,8 @@ static qboolean CL_LoadHudSprite( const char *szSpriteName, model_t *m_pSprite, 
 		Mod_LoadMapSprite( m_pSprite, buf, size, &loaded );
 	else
 	{
-		Mod_LoadSpriteModel( m_pSprite, buf, &loaded );
-		ref.dllFuncs.Mod_ProcessRenderData( m_pSprite, true, buf );
+		Mod_LoadSpriteModel( m_pSprite, buf, size, &loaded );
+		ref.dllFuncs.Mod_ProcessRenderData( m_pSprite, true, buf, size );
 	}
 
 	Mem_Free( buf );
@@ -3481,7 +3485,7 @@ static void GAME_EXPORT NetAPI_SendRequest( int context, int request, int flags,
 	nr->flags = flags;
 
 	// local servers request
-	Netchan_OutOfBandPrint( NS_CLIENT, nr->resp.remote_address, A2A_NETINFO" %i %i %i", FBitSet( flags, FNETAPI_LEGACY_PROTOCOL ) ? PROTOCOL_LEGACY_VERSION : PROTOCOL_VERSION, context, request );
+	Netchan_OutOfBandPrint( NS_CLIENT, nr->resp.remote_address, A2A_NETINFO" %i %i %i", PROTOCOL_VERSION, context, request );
 }
 
 /*
@@ -3962,6 +3966,7 @@ qboolean CL_LoadProgs( const char *name )
 	CL_EXPORT_FUNCS	GetClientAPI; // single export
 	qboolean valid_single_export = false;
 	qboolean missed_exports = false;
+	qboolean try_internal_vgui_support = GI->internal_vgui_support;
 	int i;
 
 	if( clgame.hInstance ) CL_UnloadProgs();
@@ -3982,10 +3987,10 @@ qboolean CL_LoadProgs( const char *name )
 
 	// NOTE: important stuff!
 	// vgui must startup BEFORE loading client.dll to avoid get error ERROR_NOACESS during LoadLibrary
-	if( !GI->internal_vgui_support && VGui_LoadProgs( NULL ))
+	if( !try_internal_vgui_support && VGui_LoadProgs( NULL ))
 		VGui_Startup( refState.width, refState.height );
 	else
-		GI->internal_vgui_support = true; // we failed to load vgui_support, but let's probe client.dll for support anyway
+		try_internal_vgui_support = true; // we failed to load vgui_support, but let's probe client.dll for support anyway
 
 	clgame.hInstance = COM_LoadLibrary( name, false, false );
 
@@ -3993,7 +3998,7 @@ qboolean CL_LoadProgs( const char *name )
 		return false;
 
 	// delayed vgui initialization for internal support
-	if( GI->internal_vgui_support && VGui_LoadProgs( clgame.hInstance ))
+	if( try_internal_vgui_support && VGui_LoadProgs( clgame.hInstance ))
 		VGui_Startup( refState.width, refState.height );
 
 	// clear exports

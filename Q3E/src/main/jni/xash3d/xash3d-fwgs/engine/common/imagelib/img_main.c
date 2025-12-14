@@ -142,6 +142,7 @@ void Image_Reset( void )
 	image.fogParams[1] = 0;
 	image.fogParams[2] = 0;
 	image.fogParams[3] = 0;
+	image.black_pixel = 0;
 
 	// pointers will be saved with prevoius picture struct
 	// don't care about it
@@ -596,14 +597,15 @@ FS_CopyImage
 make an image copy
 ================
 */
-rgbdata_t *FS_CopyImage( rgbdata_t *in )
+rgbdata_t *FS_CopyImage( const rgbdata_t *in )
 {
 	rgbdata_t	*out;
 	int	palSize = 0;
 
-	if( !in ) return NULL;
+	if( !in )
+		return NULL;
 
-	out = Mem_Malloc( host.imagepool, sizeof( rgbdata_t ));
+	out = Mem_Malloc( host.imagepool, sizeof( *out ));
 	*out = *in;
 
 	switch( in->type )

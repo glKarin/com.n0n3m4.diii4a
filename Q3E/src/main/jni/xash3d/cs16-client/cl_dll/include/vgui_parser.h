@@ -37,4 +37,6 @@ void Localize_Free( );
 
 const char* Localize( const char* string );
 void StripEndNewlineFromString( char *str );
+
+void Localize_StripIndices( char *s );
 #endif

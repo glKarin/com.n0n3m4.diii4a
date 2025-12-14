@@ -316,7 +316,7 @@ int CHudSpectatorGui::MsgFunc_SpecHealth(const char *pszName, int iSize, void *b
 	int health = reader.ReadByte();
 
 	g_PlayerExtraInfo[g_iUser2].health = health;
-	m_iPlayerLastPointedAt = g_iUser2;
+	gHUD.m_Health.m_iPlayerLastPointedAt = g_iUser2;
 
 	return 1;
 }
@@ -329,7 +329,7 @@ int CHudSpectatorGui::MsgFunc_SpecHealth2(const char *pszName, int iSize, void *
 	int client = reader.ReadByte();
 
 	g_PlayerExtraInfo[client].health = health;
-	m_iPlayerLastPointedAt = g_iUser2;
+	gHUD.m_Health.m_iPlayerLastPointedAt = g_iUser2;
 
 	return 1;
 }

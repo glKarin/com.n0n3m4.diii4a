@@ -21,10 +21,10 @@ CR_DECLARE_SCOPED_ENUM (AStarResult,
    Success = 0,
    Failed,
    InternalError,
-)
+   )
 
-// node added
-using NodeAdderFn = const Lambda <bool (int)> &;
+   // node added
+   using NodeAdderFn = const Lambda <bool (int)> &;
 
 // route twin node
 template <typename HT> struct RouteTwin final {
@@ -58,7 +58,7 @@ public:
    static float gfunctionKillsDist (int team, int currentIndex, int parentIndex);
 
    // least kills and number of nodes to goal for a team (when with hostage)
-   static float gfunctionKillsDistCTWithHostage  (int team, int currentIndex, int parentIndex);
+   static float gfunctionKillsDistCTWithHostage (int team, int currentIndex, int parentIndex);
 
    // least kills to goal for a team
    static float gfunctionKills (int team, int currentIndex, int);
@@ -273,6 +273,10 @@ public:
 public:
    bool isPathsCheckFailed () const {
       return m_pathsCheckFailed;
+   }
+
+   void setPathsCheckFailed (const bool value) {
+      m_pathsCheckFailed = value;
    }
 
 public:

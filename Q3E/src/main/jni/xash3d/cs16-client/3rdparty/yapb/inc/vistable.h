@@ -39,7 +39,7 @@ public:
    ~GraphVistable () = default;
 
 public:
-   bool visible (int srcIndex, int destIndex, VisIndex vis = VisIndex::Any);
+   bool visible (int srcIndex, int destIndex, VisIndex vis = VisIndex::Any) const;
 
    void load ();
    void save () const;
@@ -53,6 +53,11 @@ public:
    // ready to use ?
    bool isReady () const {
       return !m_rebuild;
+   }
+
+   // is visible fromr both points ?
+   bool visibleBothSides (int srcIndex, int destIndex, VisIndex vis = VisIndex::Any) const {
+      return visible (srcIndex, destIndex, vis) && visible (destIndex, srcIndex, vis);
    }
 };
 

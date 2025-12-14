@@ -140,7 +140,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "
 	endif()
 endif()
 
-if (NOT DEBUG AND NOT ANDROID)
+if (NOT DEBUG AND NOT ANDROID AND NOT APPLE)
 	set(LINK_FLAGS "${LINK_FLAGS} \
 		-Wl,-gc-sections -Wl,--version-script=\"${PROJECT_SOURCE_DIR}/../version_script.lds\"")
 endif()
@@ -354,7 +354,7 @@ if (CMAKE_BUILD_TYPE MATCHES Unittests)
 	set(LINK_FLAGS "${LINK_FLAGS} -no-pie -Wl,--no-export-dynamic")
 	add_executable(regamedll ${appversion.sh})
 else()
-	add_library(regamedll MODULE ${appversion.sh})
+	add_library(regamedll SHARED ${appversion.sh})
 endif()
 
 if(NOT DIII4A)

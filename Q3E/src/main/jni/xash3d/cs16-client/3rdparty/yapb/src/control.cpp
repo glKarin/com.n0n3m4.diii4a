@@ -8,9 +8,9 @@
 #include <yapb.h>
 
 ConVar cv_display_menu_text ("display_menu_text", "1", "Enables or disables display menu text, when players asks for menu. Useful only for Android.", true, 0.0f, 1.0f, Var::Xash3D);
-ConVar cv_password ("password", "", "The value (password) for the setinfo key, if user sets correct password, he's gains access to bot commands and menus.", false, 0.0f, 0.0f, Var::Password);
-ConVar cv_password_key ("password_key", "_ybpw", "The name of setinfo key used to store password to bot commands and menus.", false);
-ConVar cv_bots_kill_on_endround ("bots_kill_on_endround", "0", "Allows to use classic bot kill on issuing end-round command in menus, instead of gamedll endround.", false);
+ConVar cv_password ("password", "", "The value (password) for the setinfo key. If the user sets the correct password, he gains access to bot commands and menus.", false, 0.0f, 0.0f, Var::Password);
+ConVar cv_password_key ("password_key", "_ybpw", "The name of the setinfo key used to store the password for bot commands and menus.", false);
+ConVar cv_bots_kill_on_endround ("bots_kill_on_endround", "0", "Allows the use of classic bot kill when issuing the end-round command in menus, instead of the gamedll endround.", false);
 
 int BotControl::cmdAddBot () {
    enum args { alias = 1, difficulty, personality, team, model, name, max };
@@ -183,7 +183,7 @@ int BotControl::cmdMenu () {
    // reset the current menu
    closeMenu ();
 
-   if (arg <StringRef> (cmd) == "cmd" && util.isAlive (m_ent)) {
+   if (arg <StringRef> (cmd) == "cmd" && game.isAliveEntity (m_ent)) {
       showMenu (Menu::Commands);
    }
    else {
@@ -205,7 +205,7 @@ int BotControl::cmdCvars () {
    auto match = arg <StringRef> (pattern);
 
    // stop printing if executed once more
-   flushPrintQueue ();
+   m_printQueue.clear ();
 
    // revert all the cvars to their default values
    if (match == "defaults") {
@@ -244,7 +244,15 @@ int BotControl::cmdCvars () {
          cfgPath = strings.joinPath (bstor.getRunningPath (), folders.config, "maps", strings.format ("%s.%s", game.getMapName (), kConfigExtension));
       }
       cfg.open (cfgPath, "wt");
-      cfg.puts ("// Configuration file for %s\n\n", product.name);
+
+      cfg.puts ("//\n");
+      cfg.puts ("// @package: %s\n", product.name);
+      cfg.puts ("// @version: %s\n", product.version);
+      cfg.puts ("// @author: %s\n", product.author);
+      cfg.puts ("// @filename: %s.cfg\n", isSaveMap ? game.getMapName () : product.nameLower);
+      cfg.puts ("// \n");
+      cfg.puts ("// %s configuration file for %s. Can be executed using the 'exec' command.\n", isSaveMap ? "Map" : "Main", product.name);
+      cfg.puts ("//\n");
    }
    else {
       setRapidOutput (true);
@@ -415,6 +423,7 @@ int BotControl::cmdNode () {
       addGraphCmd ("stats", "stats [noarguments]", "Shows the stats about node types on the map.", &BotControl::cmdNodeShowStats);
       addGraphCmd ("fileinfo", "fileinfo [noarguments]", "Shows basic information about graph file.", &BotControl::cmdNodeFileInfo);
       addGraphCmd ("adjust_height", "adjust_height [height offset]", "Modifies all the graph nodes height (z-component) with specified offset.", &BotControl::cmdNodeAdjustHeight);
+      addGraphCmd ("refresh", "refresh [noarguments]", "Deletes a current graph and downloads one from graph database.", &BotControl::cmdNodeRefresh);
 
       // add path commands
       addGraphCmd ("path_create", "path_create [noarguments]", "Opens and displays path creation menu.", &BotControl::cmdNodePathCreate);
@@ -590,6 +599,13 @@ int BotControl::cmdNodeAddBasic () {
 int BotControl::cmdNodeSave () {
    enum args { graph_cmd = 1, cmd, option };
 
+   // prevent some commands while analyzing graph
+   if (analyzer.isAnalyzing ()) {
+      msg ("This command is unavailable while map analysis is ongoing.");
+
+      return BotCommandResult::Handled;
+   }
+
    // if no check is set save anyway
    if (arg <StringRef> (option) == "nocheck") {
       graph.saveGraphData ();
@@ -621,6 +637,13 @@ int BotControl::cmdNodeSave () {
 int BotControl::cmdNodeLoad () {
    enum args { graph_cmd = 1, cmd };
 
+   // prevent some commands while analyzing graph
+   if (analyzer.isAnalyzing ()) {
+      msg ("This command is unavailable while map analysis is ongoing.");
+
+      return BotCommandResult::Handled;
+   }
+
    // just save graph on request
    if (graph.loadGraphData ()) {
       msg ("Graph successfully loaded.");
@@ -634,12 +657,39 @@ int BotControl::cmdNodeLoad () {
 int BotControl::cmdNodeErase () {
    enum args { graph_cmd = 1, cmd, iamsure };
 
+   // prevent some commands while analyzing graph
+   if (analyzer.isAnalyzing ()) {
+      msg ("This command is unavailable while map analysis is ongoing.");
+
+      return BotCommandResult::Handled;
+   }
+
    // prevent accidents when graph are deleted unintentionally
    if (arg <StringRef> (iamsure) == "iamsure") {
       bstor.unlinkFromDisk (false, false);
    }
    else {
       msg ("Please, append \"iamsure\" as parameter to get graph erased from the disk.");
+   }
+   return BotCommandResult::Handled;
+}
+
+int BotControl::cmdNodeRefresh () {
+   enum args { graph_cmd = 1, cmd, iamsure };
+
+   if (!graph.canDownload ()) {
+      msg ("Can't sync graph with database while graph url is not set.");
+
+      return BotCommandResult::Handled;
+   }
+
+   // prevent accidents when graph are deleted unintentionally
+   if (arg <StringRef> (iamsure) == "iamsure") {
+      bstor.unlinkFromDisk (false, false);
+      graph.loadGraphData ();
+   }
+   else {
+      msg ("Please, append \"iamsure\" as parameter to get graph refreshed from the graph database.");
    }
    return BotCommandResult::Handled;
 }
@@ -1107,7 +1157,7 @@ int BotControl::menuFeatures (int item) {
       break;
 
    case 5:
-      if (util.isAlive (m_ent)) {
+      if (game.isAliveEntity (m_ent)) {
          showMenu (Menu::Commands);
       }
       else {
@@ -1734,7 +1784,7 @@ int BotControl::menuAutoPathDistance (int item) {
    return BotCommandResult::Handled;
 }
 
-int BotControl::menuKickPage1 (int item) {
+int BotControl::menuKickPage (int page, int item) {
    closeMenu (); // reset menu display
 
    switch (item) {
@@ -1746,93 +1796,21 @@ int BotControl::menuKickPage1 (int item) {
    case 6:
    case 7:
    case 8:
-      bots.kickBot (item - 1);
-      kickBotByMenu (1);
+      bots.kickBot (item + (page - 1) * 8 - 1);
+      kickBotByMenu (page);
       break;
 
    case 9:
-      kickBotByMenu (2);
+      kickBotByMenu (page + 1);
       break;
 
    case 10:
-      showMenu (Menu::Control);
-      break;
-   }
-   return BotCommandResult::Handled;
-}
-
-int BotControl::menuKickPage2 (int item) {
-   closeMenu (); // reset menu display
-
-   switch (item) {
-   case 1:
-   case 2:
-   case 3:
-   case 4:
-   case 5:
-   case 6:
-   case 7:
-   case 8:
-      bots.kickBot (item + 8 - 1);
-      kickBotByMenu (2);
-      break;
-
-   case 9:
-      kickBotByMenu (3);
-      break;
-
-   case 10:
-      kickBotByMenu (1);
-      break;
-   }
-   return BotCommandResult::Handled;
-}
-
-int BotControl::menuKickPage3 (int item) {
-   closeMenu (); // reset menu display
-
-   switch (item) {
-   case 1:
-   case 2:
-   case 3:
-   case 4:
-   case 5:
-   case 6:
-   case 7:
-   case 8:
-      bots.kickBot (item + 16 - 1);
-      kickBotByMenu (3);
-      break;
-
-   case 9:
-      kickBotByMenu (4);
-      break;
-
-   case 10:
-      kickBotByMenu (2);
-      break;
-   }
-   return BotCommandResult::Handled;
-}
-
-int BotControl::menuKickPage4 (int item) {
-   closeMenu (); // reset menu display
-
-   switch (item) {
-   case 1:
-   case 2:
-   case 3:
-   case 4:
-   case 5:
-   case 6:
-   case 7:
-   case 8:
-      bots.kickBot (item + 24 - 1);
-      kickBotByMenu (4);
-      break;
-
-   case 10:
-      kickBotByMenu (3);
+      if (page == 1) {
+         showMenu (Menu::Control);
+      }
+      else {
+         kickBotByMenu (page - 1);
+      }
       break;
    }
    return BotCommandResult::Handled;
@@ -1988,7 +1966,7 @@ bool BotControl::executeCommands () {
 }
 
 bool BotControl::executeMenus () {
-   if (!util.isPlayer (m_ent) || game.isBotCmd ()) {
+   if (!game.isPlayerEntity (m_ent) || game.isBotCmd ()) {
       return false;
    }
    const auto &issuer = util.getClient (game.indexOfPlayer (m_ent));
@@ -2030,7 +2008,7 @@ void BotControl::showMenu (int id) {
       menusParsed = true;
    }
 
-   if (!util.isPlayer (m_ent)) {
+   if (!game.isPlayerEntity (m_ent)) {
       return;
    }
    auto &client = util.getClient (game.indexOfPlayer (m_ent));
@@ -2071,7 +2049,7 @@ void BotControl::showMenu (int id) {
 }
 
 void BotControl::closeMenu () {
-   if (!util.isPlayer (m_ent)) {
+   if (!game.isPlayerEntity (m_ent)) {
       return;
    }
    auto &client = util.getClient (game.indexOfPlayer (m_ent));
@@ -2137,7 +2115,7 @@ void BotControl::kickBotByMenu (int page) {
 }
 
 void BotControl::assignAdminRights (edict_t *ent, char *infobuffer) {
-   if (!game.isDedicated () || util.isFakeClient (ent)) {
+   if (!game.isDedicated () || game.isFakeClientEntity (ent)) {
       return;
    }
    StringRef key = cv_password_key.as <StringRef> ();
@@ -2164,7 +2142,7 @@ void BotControl::maintainAdminRights () {
    StringRef password = cv_password.as <StringRef> ();
 
    for (auto &client : util.getClients ()) {
-      if (!(client.flags & ClientFlags::Used) || util.isFakeClient (client.ent)) {
+      if (!(client.flags & ClientFlags::Used) || game.isFakeClientEntity (client.ent)) {
          continue;
       }
       auto ent = client.ent;
@@ -2221,7 +2199,7 @@ BotControl::BotControl () {
    m_cmds.emplace ("kill/killbots/killall/kill_ct/kill_t", "kill [team] [silent]", "Kills the specified team / all the bots.", &BotControl::cmdKillBots);
    m_cmds.emplace ("fill/fillserver", "fill [team] [count] [difficulty] [personality]", "Fill the server (add bots) with specified parameters.", &BotControl::cmdFill);
    m_cmds.emplace ("vote/votemap", "vote [map_id]", "Forces all the bot to vote to specified map.", &BotControl::cmdVote);
-   m_cmds.emplace ("weapons/weaponmode", "weapons [knife|pistol|shotgun|smg|rifle|sniper|standard]", "Sets the bots weapon mode to use", &BotControl::cmdWeaponMode);
+   m_cmds.emplace ("weapons/weaponmode", "weapons [knife|pistol|shotgun|smg|rifle|sniper|standard]", "Sets the bots weapon mode to use.", &BotControl::cmdWeaponMode);
    m_cmds.emplace ("menu/botmenu", "menu [cmd]", "Opens the main bot menu, or command menu if specified.", &BotControl::cmdMenu);
    m_cmds.emplace ("version/ver/about", "version [no arguments]", "Displays version information about bot build.", &BotControl::cmdVersion);
    m_cmds.emplace ("graphmenu/wpmenu/wptmenu", "graphmenu [noarguments]", "Opens and displays bots graph editor.", &BotControl::cmdNodeMenu);

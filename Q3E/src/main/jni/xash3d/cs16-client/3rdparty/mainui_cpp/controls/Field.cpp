@@ -18,7 +18,7 @@ GNU General Public License for more details.
 #include "BaseMenu.h"
 #include "Field.h"
 #include "Utils.h"
-
+#include "utflib.h"
 
 CMenuField::CMenuField() : BaseClass()
 {
@@ -157,8 +157,8 @@ bool CMenuField::KeyDown( int key )
 		}
 		else if( UI::Key::IsLeftArrow( key ))
 		{
-			if( iCursor > 0 ) iCursor = EngFuncs::UtfMoveLeft( szBuffer, iCursor );
-			if( iCursor < iScroll ) iScroll = EngFuncs::UtfMoveLeft( szBuffer, iScroll );
+			if( iCursor > 0 ) iCursor = Con_UtfMoveLeft( szBuffer, iCursor );
+			if( iCursor < iScroll ) iScroll = Con_UtfMoveLeft( szBuffer, iScroll );
 		}
 		else if( UI::Key::IsRightArrow( key ))
 		{
@@ -166,8 +166,8 @@ bool CMenuField::KeyDown( int key )
 
 			int maxIdx = g_FontMgr->CutText( font, szBuffer + iScroll, m_scChSize, iRealWidth, false, false, NULL, &remaining );
 
-			if( iCursor < len ) iCursor = EngFuncs::UtfMoveRight( szBuffer, iCursor, len );
-			if( remaining && iCursor > maxIdx ) iScroll = EngFuncs::UtfMoveRight( szBuffer, iScroll, len );
+			if( iCursor < len ) iCursor = Con_UtfMoveRight( szBuffer, iCursor, len );
+			if( remaining && iCursor > maxIdx ) iScroll = Con_UtfMoveRight( szBuffer, iScroll, len );
 		}
 		else if( UI::Key::IsHome( key ))
 		{
@@ -182,18 +182,18 @@ bool CMenuField::KeyDown( int key )
 		{
 			if( iCursor > 0 )
 			{
-				int pos = EngFuncs::UtfMoveLeft( szBuffer, iCursor );
+				int pos = Con_UtfMoveLeft( szBuffer, iCursor );
 				memmove( szBuffer + pos, szBuffer + iCursor, len - iCursor + 1 );
 				iCursor = pos;
 				if( iScroll )
-					iScroll = EngFuncs::UtfMoveLeft( szBuffer, iScroll );
+					iScroll = Con_UtfMoveLeft( szBuffer, iScroll );
 			}
 		}
 		else if( UI::Key::IsDelete( key, true ))
 		{
 			if( iCursor < len )
 			{
-				int pos = EngFuncs::UtfMoveRight( szBuffer, iCursor, len );
+				int pos = Con_UtfMoveRight( szBuffer, iCursor, len );
 				memmove( szBuffer + iCursor, szBuffer + pos, len - pos + 1 );
 
 				iScroll = g_FontMgr->CutText( font, szBuffer, m_scChSize, iRealWidth, true );
@@ -240,13 +240,13 @@ bool CMenuField::KeyDown( int key )
 				iCursor = charpos + iScroll;
 				if( iCursor > 0 )
 				{
-					iCursor = EngFuncs::UtfMoveLeft( szBuffer, iCursor );
-					iCursor = EngFuncs::UtfMoveRight( szBuffer, iCursor, len );
+					iCursor = Con_UtfMoveLeft( szBuffer, iCursor );
+					iCursor = Con_UtfMoveRight( szBuffer, iCursor, len );
 				}
 				if( charpos == 0 && iScroll )
-					iScroll = EngFuncs::UtfMoveLeft( szBuffer, iScroll );
+					iScroll = Con_UtfMoveLeft( szBuffer, iScroll );
 				if( charpos >= iWidthInChars && remaining )
-					iScroll = EngFuncs::UtfMoveRight( szBuffer, iScroll, len );
+					iScroll = Con_UtfMoveRight( szBuffer, iScroll, len );
 				if( iScroll > len )
 					iScroll = len;
 				if( iCursor > len )
@@ -327,7 +327,7 @@ void CMenuField::Char( int key )
 
 		// in case a character with X bytes replaced by character with Y bytes
 		// where Y < X, e.g. russian replaced by latin
-		int pos = EngFuncs::UtfMoveRight( szBuffer, iCursor, len );
+		int pos = Con_UtfMoveRight( szBuffer, iCursor, len );
 		if( pos != iCursor + 1 )
 			memmove( szBuffer + iCursor + 1, szBuffer + pos, len - pos + 1 );
 
@@ -431,19 +431,15 @@ void CMenuField::Draw( void )
 
 	if( bHideInput )
 	{
-		EngFuncs::UtfProcessChar( 0 );
-
+		utfstate_t state;
 		const char *sz = szBuffer + prestep;
-		int i, j;
-		for( i = 0, j = 0; i < drawLen; i++ )
+		int j = 0;
+		for( int i = 0; i < drawLen; i++ )
 		{
-			int uch = EngFuncs::UtfProcessChar( (unsigned char)sz[i] );
-			if( uch )
+			if( state.Decode((uint8_t)sz[i] ))
 				text[j++] = '*';
 		}
 		text[j] = 0;
-
-		EngFuncs::UtfProcessChar( 0 );
 	}
 	else
 	{

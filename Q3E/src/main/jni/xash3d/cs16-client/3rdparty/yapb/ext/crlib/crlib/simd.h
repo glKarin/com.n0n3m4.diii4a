@@ -10,8 +10,7 @@
 #include <crlib/basic.h>
 
 #if defined(CR_HAS_SIMD_SSE)
-#  include <smmintrin.h>
-# 
+#   include <smmintrin.h>
 #elif defined(CR_HAS_SIMD_NEON)
 #  include <arm_neon.h>
 #endif
@@ -28,6 +27,7 @@ namespace cr::simd {
 #  define SSE2NEON_SUPPRESS_WARNINGS
 #  include <crlib/simd/sse2neon.h>
 #endif
+
 
 CR_NAMESPACE_BEGIN
 

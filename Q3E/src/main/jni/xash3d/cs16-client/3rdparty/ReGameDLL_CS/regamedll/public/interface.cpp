@@ -157,7 +157,7 @@ CSysModule *Sys_LoadModule(const char *pModuleName)
 #if defined(_WIN32)
 		_snprintf(str, sizeof(str), "%s.dll", pModuleName);
 		hDLL = LoadLibrary(str);
-#elif defined(OSX)
+#elif defined(__APPLE__)
 		printf("Error: %s\n", dlerror());
 		_snprintf(str, sizeof(str), "%s.dylib", szAbsoluteModuleName);
 		hDLL = dlopen(str, RTLD_NOW);

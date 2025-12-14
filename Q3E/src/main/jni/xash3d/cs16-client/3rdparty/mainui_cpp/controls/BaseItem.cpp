@@ -315,7 +315,7 @@ bool CMenuBaseItem::KeyValueData(const char *key, const char *data)
 		}
 		else if( !strcmp( data, "engine " ) )
 		{
-			onReleased.SetCommand( FALSE, data + sizeof( "engine " ) );
+			onReleased.SetCommand( false, data + sizeof( "engine " ) );
 		}
 		else
 		{

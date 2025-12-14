@@ -8,36 +8,35 @@
 #include <yapb.h>
 
 ConVar cv_debug ("debug", "0", "Enables or disables useful messages about bot states. Not required for end users.", true, 0.0f, 4.0f);
-ConVar cv_debug_goal ("debug_goal", "-1", "Forces all alive bots to build path and go to the specified here graph node.", true, -1.0f, kMaxNodes);
-ConVar cv_user_follow_percent ("user_follow_percent", "20", "Specifies the percent of bots, that can follow leader on each round start.", true, 0.0f, 100.0f);
+ConVar cv_debug_goal ("debug_goal", "-1", "Forces all alive bots to build a path and go to the graph node specified here.", true, -1.0f, kMaxNodes);
+ConVar cv_user_follow_percent ("user_follow_percent", "20", "Specifies the percent of bots that can follow a leader at each round start.", true, 0.0f, 100.0f);
 ConVar cv_user_max_followers ("user_max_followers", "1", "Specifies how many bots can follow a single user.", true, 0.0f, static_cast <float> (kGameMaxPlayers / 4));
 
-ConVar cv_jasonmode ("jasonmode", "0", "If enabled, all bots will be forced only the knife, skipping weapon buying routines.");
+ConVar cv_jasonmode ("jasonmode", "0", "If enabled, all bots will be forced to use only the knife, skipping weapon buying routines.");
 ConVar cv_radio_mode ("radio_mode", "2", "Allows bots to use radio or chatter.\nAllowed values: '0', '1', '2'.\nIf '0', radio and chatter is disabled.\nIf '1', only radio allowed.\nIf '2' chatter and radio allowed.", true, 0.0f, 2.0f);
 
-ConVar cv_economics_rounds ("economics_rounds", "1", "Specifies whether bots able to use team economics, like do not buy any weapons for whole team to keep money for better guns.");
-ConVar cv_economics_disrespect_percent ("economics_disrespect_percent", "25", "Allows bots to ignore economics and buy weapons with disrespect of economics.", true, 0.0f, 100.0f);
+ConVar cv_economics_rounds ("economics_rounds", "1", "Specifies whether bots are able to use team economics, like not buying any weapons for the whole team to keep money for better guns.");
+ConVar cv_economics_disrespect_percent ("economics_disrespect_percent", "25", "Allows bots to ignore economics and buy weapons with disrespect to economics.", true, 0.0f, 100.0f);
 
-ConVar cv_check_darkness ("check_darkness", "1", "Allows or disallows bot to check environment for darkness, thus allows or not to use flashlights or NVG.");
+ConVar cv_check_darkness ("check_darkness", "1", "Allows or disallows the bot to check the environment for darkness, thus allowing or not allowing the use of flashlights or NVG.");
 ConVar cv_avoid_grenades ("avoid_grenades", "1", "Allows bots to partially avoid grenades.");
 
-ConVar cv_tkpunish ("tkpunish", "1", "Allows or disallows bots to take revenge of teamkillers / team attacks.");
-ConVar cv_freeze_bots ("freeze_bots", "0", "If enabled, the bots think function is disabled, so bots will not move anywhere from their spawn spots.");
+ConVar cv_tkpunish ("tkpunish", "1", "Allows or disallows bots to take revenge on teamkillers/team attacks.");
+ConVar cv_freeze_bots ("freeze_bots", "0", "If enabled, the bot's think function is disabled, so bots will not move anywhere from their spawn spots.");
 ConVar cv_spraypaints ("spraypaints", "1", "Allows or disallows the use of spray paints.");
 ConVar cv_botbuy ("botbuy", "1", "Allows or disallows bots weapon buying routines.");
-ConVar cv_destroy_breakables_around ("destroy_breakables_around", "1", "Allows bots to destroy breakables around them, even without touching with them.");
+ConVar cv_destroy_breakables_around ("destroy_breakables_around", "1", "Allows bots to destroy breakables around them, even without touching them.");
 
-ConVar cv_object_pickup_radius ("object_pickup_radius", "450.0", "The radius on which bot searches world for new objects, items, and weapons.", true, 64.0f, 1024.0f);
-ConVar cv_object_destroy_radius ("object_destroy_radius", "400.0", "The radius on which bot destroy breakables around it, when not touching with them.", true, 64.0f, 1024.0f);
+ConVar cv_object_pickup_radius ("object_pickup_radius", "450.0", "The radius within which the bot searches the world for new objects, items, and weapons.", true, 64.0f, 1024.0f);
+ConVar cv_object_destroy_radius ("object_destroy_radius", "400.0", "The radius within which the bot destroys breakables around it, when not touching them.", true, 64.0f, 1024.0f);
 
-ConVar cv_chatter_path ("chatter_path", "sound/radio/bot", "Specifies the paths for the bot chatter sound files.", false);
+ConVar cv_chatter_path ("chatter_path", "sound/radio/bot", "Specifies the path for the bot chatter sound files.", false);
 ConVar cv_attack_monsters ("attack_monsters", "0", "Allows or disallows bots to attack monsters.");
 
-ConVar cv_pickup_custom_items ("pickup_custom_items", "0", "Allows or disallows bots to pickup custom items.");
-ConVar cv_pickup_ammo_and_kits ("pickup_ammo_and_kits", "0", "Allows bots pickup mod items like ammo, health kits and suits.");
-ConVar cv_pickup_best ("pickup_best", "1", "Allows or disallows bots to pickup best weapons.");
+ConVar cv_pickup_custom_items ("pickup_custom_items", "0", "Allows or disallows bots to pick up custom items.");
+ConVar cv_pickup_ammo_and_kits ("pickup_ammo_and_kits", "0", "Allows bots to pick up mod items like ammo, health kits, and suits.");
+ConVar cv_pickup_best ("pickup_best", "1", "Allows or disallows bots to pick up the best weapons.");
 ConVar cv_ignore_objectives ("ignore_objectives", "0", "Allows or disallows bots to do map objectives, i.e. plant/defuse bombs, and save hostages.");
-ConVar cv_smoke_grenade_checks ("smoke_grenade_checks", "2", "Affect bot's vision by smoke clouds.", true, 0.0f, 2.0f);
 
 // game console variables
 ConVar mp_c4timer ("mp_c4timer", nullptr, Var::GameRef);
@@ -78,10 +77,10 @@ void Bot::avoidGrenades () {
       m_needAvoidGrenade = 0;
    }
 
-   if (!bots.hasActiveGrenades ()) {
+   if (!gameState.hasActiveGrenades ()) {
       return;
    }
-   const auto &activeGrenades = bots.getActiveGrenades ();
+   const auto &activeGrenades = gameState.getActiveGrenades ();
 
    // find all grenades on the map
    for (const auto &pent : activeGrenades) {
@@ -100,12 +99,12 @@ void Bot::avoidGrenades () {
          if (!(m_states & Sense::SeeingEnemy)) {
             m_lookAt.y = cr::wrapAngle ((game.getEntityOrigin (pent) - getEyesPos ()).angles ().y + 180.0f);
 
-            m_canChooseAimDirection = false;
+            m_canSetAimDirection = false;
             m_preventFlashing = game.time () + rg (1.0f, 2.0f);
          }
       }
       else if (game.isNullEntity (m_avoidGrenade) && model == kExplosiveModelName) {
-         if (game.getTeam (pent->v.owner) == m_team || pent->v.owner == ent ()) {
+         if (game.getPlayerTeam (pent->v.owner) == m_team || pent->v.owner == ent ()) {
             continue;
          }
 
@@ -187,6 +186,7 @@ void Bot::checkBreakablesAround () {
       || !game.hasBreakables ()
       || m_seeEnemyTime + 4.0f > game.time ()
       || !game.isNullEntity (m_enemy)
+      || (m_aimFlags & (AimFlags::PredictPath | AimFlags::Danger))
       || !hasPrimaryWeapon ()) {
       return;
    }
@@ -209,7 +209,7 @@ void Bot::checkBreakablesAround () {
          continue;
       }
 
-      if (!util.isBreakableEntity (breakable)) {
+      if (!game.isBreakableEntity (breakable)) {
          continue;
       }
 
@@ -257,7 +257,7 @@ edict_t *Bot::lookupBreakable () {
    // this function checks if bot is blocked by a shoot able breakable in his moving direction
 
    // we're got something already
-   if (util.isBreakableEntity (m_breakableEntity)) {
+   if (game.isBreakableEntity (m_breakableEntity)) {
       return m_breakableEntity;
    }
    const float detectBreakableDistance = (usesKnife () || isOnLadder ()) ? 32.0f : rg (72.0f, 256.0f);
@@ -270,7 +270,7 @@ edict_t *Bot::lookupBreakable () {
          auto hit = tr.pHit;
 
          // check if this isn't a triggered (bomb) breakable and if it takes damage. if true, shoot the crap!
-         if (util.isBreakableEntity (hit)) {
+         if (game.isBreakableEntity (hit)) {
             m_breakableOrigin = game.getEntityOrigin (hit);
             m_breakableEntity = hit;
 
@@ -286,7 +286,7 @@ edict_t *Bot::lookupBreakable () {
       }
 
       // check breakable team, needed for some plugins
-      if (ent->v.team > 0 && ent->v.team != game.getGameTeam (this->ent ())) {
+      if (ent->v.team > 0 && ent->v.team != game.getPlayerTeamGame (this->ent ())) {
          return false;
       }
 
@@ -320,15 +320,14 @@ void Bot::setIdealReactionTimers (bool actual) {
 
       return; // zero out reaction times for extreme mode
    }
-   const auto tweak = conf.getDifficultyTweaks (m_difficulty);
 
    if (actual) {
-      m_idealReactionTime = tweak->reaction[0];
-      m_actualReactionTime = tweak->reaction[0];
+      m_idealReactionTime = m_difficultyData->reaction[0];
+      m_actualReactionTime = m_difficultyData->reaction[0];
 
       return;
    }
-   m_idealReactionTime = rg (tweak->reaction[0], tweak->reaction[1]);
+   m_idealReactionTime = rg (m_difficultyData->reaction[0], m_difficultyData->reaction[1]);
 }
 
 void Bot::updatePickups () {
@@ -362,7 +361,7 @@ void Bot::updatePickups () {
       }
 
       // no interesting entities, how ?
-      else if (!bots.hasInterestingEntities ()) {
+      else if (!gameState.hasInterestingEntities ()) {
          return true;
       }
       return false;
@@ -376,7 +375,7 @@ void Bot::updatePickups () {
       return;
    }
 
-   const auto &interesting = bots.getInterestingEntities ();
+   const auto &interesting = gameState.getInterestingEntities ();
    const float radiusSq = cr::sqrf (cv_object_pickup_radius.as <float> ());
 
    if (!game.isNullEntity (m_pickupItem)) {
@@ -446,7 +445,7 @@ void Bot::updatePickups () {
          const bool isHostageRescueMap = game.mapIs (MapFlags::HostageRescue);
          const bool isCSDM = game.is (GameFlags::CSDM);
 
-         if (isHostageRescueMap && util.isHostageEntity (ent)) {
+         if (isHostageRescueMap && game.isHostageEntity (ent)) {
             allowPickup = true;
             pickupType = Pickup::Hostage;
          }
@@ -551,7 +550,7 @@ void Bot::updatePickups () {
             allowPickup = true;
             pickupType = Pickup::PlantedC4;
          }
-         else if (cv_pickup_custom_items && util.isItem (ent) && !classname.startsWith ("item_thighpack")) {
+         else if (cv_pickup_custom_items && game.isItemEntity (ent) && !classname.startsWith ("item_thighpack")) {
             allowPickup = true;
             pickupType = Pickup::Items;
          }
@@ -632,7 +631,7 @@ void Bot::updatePickups () {
                   const auto &path = graph[index];
 
                   const float bombTimer = mp_c4timer.as <float> ();
-                  const float timeMidBlowup = bots.getTimeBombPlanted () + (bombTimer * 0.5f + bombTimer * 0.25f) - graph.calculateTravelTime (pev->maxspeed, pev->origin, path.origin);
+                  const float timeMidBlowup = gameState.getTimeBombPlanted () + (bombTimer * 0.5f + bombTimer * 0.25f) - graph.calculateTravelTime (pev->maxspeed, pev->origin, path.origin);
 
                   if (timeMidBlowup > game.time ()) {
                      clearTask (Task::MoveToPosition); // remove any move tasks
@@ -683,7 +682,7 @@ void Bot::updatePickups () {
                }
             }
             else if (pickupType == Pickup::PlantedC4) {
-               if (util.isAlive (m_enemy)) {
+               if (game.isAliveEntity (m_enemy)) {
                   return;
                }
 
@@ -706,7 +705,7 @@ void Bot::updatePickups () {
                   const int index = findDefendNode (origin);
                   const auto &path = graph[index];
 
-                  const float timeToExplode = bots.getTimeBombPlanted () + mp_c4timer.as <float> () - graph.calculateTravelTime (pev->maxspeed, pev->origin, path.origin);
+                  const float timeToExplode = gameState.getTimeBombPlanted () + mp_c4timer.as <float> () - graph.calculateTravelTime (pev->maxspeed, pev->origin, path.origin);
 
                   clearTask (Task::MoveToPosition); // remove any move tasks
 
@@ -881,7 +880,9 @@ void Bot::showChatterIcon (bool show, bool disconnect) const {
 
    // do not respect timers while disconnecting bot
    for (auto &client : util.getClients ()) {
-      if (!(client.flags & ClientFlags::Used) || (client.ent->v.flags & FL_FAKECLIENT) || client.team != m_team) {
+      if (!(client.flags & ClientFlags::Used)
+         || (client.ent->v.flags & FL_FAKECLIENT)
+         || (client.team != m_team && !disconnect)) {
          continue;
       }
 
@@ -891,7 +892,7 @@ void Bot::showChatterIcon (bool show, bool disconnect) const {
       }
 
       // do not respect timers while disconnecting bot
-      if (!show && (client.iconFlags[ownIndex] & ClientFlags::Icon) && (disconnect || client.iconTimestamp[ownIndex] < game.time ())) {
+      if (!show && (disconnect || (client.iconFlags[ownIndex] & ClientFlags::Icon)) && (disconnect || client.iconTimestamp[ownIndex] < game.time ())) {
          sendBotVoice (false, client.ent, entindex ());
 
          client.iconTimestamp[ownIndex] = 0.0f;
@@ -1292,7 +1293,7 @@ void Bot::buyStuff () {
    const auto tab = conf.getRawWeapons ();
 
    const bool isPistolMode = tab[25].teamStandard == -1 && tab[3].teamStandard == 2;
-   const bool teamHasGoodEconomics = bots.checkTeamEco (m_team);
+   const bool teamHasGoodEconomics = bots.getTeamEconomics (m_team);
 
    // do this, because xash engine is not capable to run all the features goldsrc, but we have cs 1.6 on it, so buy table must be the same
    const bool isOldGame = game.is (GameFlags::Legacy);
@@ -1642,47 +1643,30 @@ void Bot::buyStuff () {
 }
 
 void Bot::updateEmotions () {
-   // slowly increase/decrease dynamic emotions back to their base level
+   constexpr auto kEmotionUpdateStep = 0.05f;
+
    if (m_nextEmotionUpdate > game.time ()) {
       return;
    }
 
    if (m_seeEnemyTime + 1.0f > game.time ()) {
-      m_agressionLevel += 0.05f;
-
-      if (m_agressionLevel > 1.0f) {
-         m_agressionLevel = 1.0f;
-      }
+      m_agressionLevel = cr::min (m_agressionLevel + kEmotionUpdateStep, 1.0f);
    }
    else if (m_seeEnemyTime + 5.0f < game.time ()) {
+      // smoothly return aggression to base level
       if (m_agressionLevel > m_baseAgressionLevel) {
-         m_agressionLevel -= 0.05f;
+         m_agressionLevel = cr::max (m_agressionLevel - kEmotionUpdateStep, m_baseAgressionLevel);
       }
       else {
-         m_agressionLevel += 0.05f;
+         m_agressionLevel = cr::min (m_agressionLevel + kEmotionUpdateStep, m_baseAgressionLevel);
       }
 
+      // smoothly return fear to base level
       if (m_fearLevel > m_baseFearLevel) {
-         m_fearLevel -= 0.05f;
+         m_fearLevel = cr::max (m_fearLevel - kEmotionUpdateStep, m_baseFearLevel);
       }
       else {
-         m_fearLevel += 0.05f;
-      }
-
-      if (m_agressionLevel > 1.0f) {
-         m_agressionLevel = 1.0f;
-      }
-
-      if (m_fearLevel > 1.0f) {
-         m_fearLevel = 1.0f;
-      }
-
-      if (m_agressionLevel < 0.0f) {
-         m_agressionLevel = 0.0f;
-      }
-
-      if (m_fearLevel < 0.0f) {
-         m_fearLevel = 0.0f;
+         m_fearLevel = cr::min (m_fearLevel + kEmotionUpdateStep, m_baseFearLevel);
       }
    }
    m_nextEmotionUpdate = game.time () + 0.5f;
@@ -1694,7 +1678,7 @@ void Bot::overrideConditions () {
    // check if we need to escape from bomb
    if ((tid == Task::Normal || tid == Task::MoveToPosition)
       && game.mapIs (MapFlags::Demolition)
-      && bots.isBombPlanted ()
+      && gameState.isBombPlanted ()
       && m_isAlive
       && tid != Task::EscapeFromBomb
       && tid != Task::Camp
@@ -1708,7 +1692,7 @@ void Bot::overrideConditions () {
    float reachEnemyKnifeDistanceSq = cr::sqrf (128.0f);
 
    // special handling, if we have a knife in our hands
-   if (isKnifeMode () && (util.isPlayer (m_enemy) || (cv_attack_monsters && util.isMonster (m_enemy)))) {
+   if (isKnifeMode () && (game.isPlayerEntity (m_enemy) || (cv_attack_monsters && game.isMonsterEntity (m_enemy)))) {
       const auto distanceSq2d = pev->origin.distanceSq2d (m_enemy->v.origin);
       const auto nearestToEnemyPoint = graph.getNearest (m_enemy->v.origin);
 
@@ -1758,7 +1742,7 @@ void Bot::overrideConditions () {
    }
 
    // special handling for reloading
-   if (!bots.isRoundOver ()
+   if (!gameState.isRoundOver ()
       && tid == Task::Normal
       && m_reloadState != Reload::None
       && m_isReloading
@@ -1785,7 +1769,7 @@ void Bot::overrideConditions () {
    if (game.is (GameFlags::ZombieMod)
       && !m_isCreature
       && m_infectedEnemyTeam
-      && util.isAlive (m_enemy)
+      && game.isAliveEntity (m_enemy)
       && m_retreatTime < game.time ()
       && pev->origin.distanceSq2d (m_enemy->v.origin) < cr::sqrf (512.0f)) {
 
@@ -1809,7 +1793,7 @@ void Bot::syncUpdatePredictedIndex () {
    const auto &lastEnemyOrigin = m_lastEnemyOrigin;
    const auto currentNodeIndex = m_currentNodeIndex;
 
-   if (lastEnemyOrigin.empty () || !vistab.isReady () || !util.isAlive (m_lastEnemy)) {
+   if (lastEnemyOrigin.empty () || !vistab.isReady () || !game.isAliveEntity (m_lastEnemy)) {
       wipePredict ();
       return;
    }
@@ -1828,7 +1812,9 @@ void Bot::syncUpdatePredictedIndex () {
 
       const float distToBotSq = botOrigin.distanceSq (graph[index].origin);
 
-      if (vistab.visible (currentNodeIndex, index) && distToBotSq < cr::sqrf (2048.0f)) {
+      if (vistab.visible (currentNodeIndex, index)
+         && distToBotSq < cr::sqrf (2048.0f)
+         && distToBotSq > cr::sqrf (128.0f)) {
          bestIndex = index;
          return false;
       }
@@ -1845,7 +1831,7 @@ void Bot::syncUpdatePredictedIndex () {
 }
 
 void Bot::updatePredictedIndex () {
-   if (!m_isAlive || m_lastEnemyOrigin.empty () || !vistab.isReady () || !util.isAlive (m_lastEnemy)) {
+   if (!m_isAlive || m_lastEnemyOrigin.empty () || !vistab.isReady () || !game.isAliveEntity (m_lastEnemy)) {
       return; // do not run task if no last enemy
    }
 
@@ -1900,7 +1886,7 @@ void Bot::setConditions () {
 
    // did bot just kill an enemy?
    if (!game.isNullEntity (m_lastVictim)) {
-      if (game.getTeam (m_lastVictim) != m_team) {
+      if (game.getPlayerTeam (m_lastVictim) != m_team) {
          // add some aggression because we just killed somebody
          m_agressionLevel += 0.1f;
 
@@ -1918,7 +1904,6 @@ void Bot::setConditions () {
          }
          else if (rg.chance (60)) {
             if (m_lastVictim->v.weapons & kSniperWeaponMask) {
-
                pushChatterMessage (Chatter::SniperKilled);
             }
             else {
@@ -1950,7 +1935,7 @@ void Bot::setConditions () {
             }
          }
          else {
-            m_killsInterval = m_lastVictimTime - game.time ();
+            m_killsInterval = game.time () - m_lastVictimTime;
 
             if (m_killsInterval <= 5.0f) {
                ++m_killsCount;
@@ -1965,7 +1950,7 @@ void Bot::setConditions () {
          }
 
          // if no more enemies found AND bomb planted, switch to knife to get to bomb place faster
-         if (m_team == Team::CT && !usesKnife () && m_numEnemiesLeft == 0 && bots.isBombPlanted ()) {
+         if (m_team == Team::CT && !usesKnife () && m_numEnemiesLeft == 0 && gameState.isBombPlanted ()) {
             selectWeaponById (Weapon::Knife);
             m_plantedBombNodeIndex = getNearestToPlantedBomb ();
 
@@ -1986,7 +1971,7 @@ void Bot::setConditions () {
 
    // check if our current enemy is still valid
    if (!game.isNullEntity (m_lastEnemy)) {
-      if (!util.isAlive (m_lastEnemy) && m_shootAtDeadTime < game.time ()) {
+      if (!game.isAliveEntity (m_lastEnemy) && m_shootAtDeadTime < game.time ()) {
          m_lastEnemy = nullptr;
       }
    }
@@ -2085,7 +2070,7 @@ void Bot::filterTasks () {
    float &blindedDesire = filter[Task::Blind].desire;
 
    // calculate desires to seek cover or hunt
-   if (util.isPlayer (m_lastEnemy) && !m_lastEnemyOrigin.empty () && !m_hasC4) {
+   if (game.isPlayerEntity (m_lastEnemy) && !m_lastEnemyOrigin.empty () && !m_hasC4) {
       const float retreatLevel = (100.0f - (m_healthValue > 70.0f ? 100.0f : m_healthValue)) * tempFear; // retreat level depends on bot health
 
       if (m_isCreature ||
@@ -2113,7 +2098,7 @@ void Bot::filterTasks () {
          if (m_isCreature) {
             ratio = 0.0f;
          }
-         if (bots.isBombPlanted () || m_isStuck || usesKnife ()) {
+         if (gameState.isBombPlanted () || m_isStuck || usesKnife ()) {
             ratio /= 3.0f; // reduce the seek cover desire if bomb is planted
          }
          else if (m_isVIP || m_isReloading || (sniping && usesSniper ())) {
@@ -2135,7 +2120,7 @@ void Bot::filterTasks () {
       if (getCurrentTaskId () != Task::EscapeFromBomb
          && game.isNullEntity (m_enemy)
          && !m_isVIP
-         && bots.getRoundMidTime () < game.time ()
+         && gameState.getRoundMidTime () < game.time ()
          && !m_hasHostage
          && !m_isUsingGrenade
          && m_currentNodeIndex != graph.getNearest (m_lastEnemyOrigin)
@@ -2252,10 +2237,11 @@ void Bot::startTask (Task id, float desire, int data, float time, bool resume) {
          }
          return;
       }
+      else {
+         clearSearchNodes ();
+      }
    }
    m_tasks.emplace (filter[id].func, id, desire, data, time, resume);
-
-   clearSearchNodes ();
    ignoreCollision ();
 
    const auto tid = getCurrentTaskId ();
@@ -2434,7 +2420,7 @@ void Bot::handleChatterTaskChange (Task tid) {
    }
 
    if (rg.chance (25) && tid == Task::Camp) {
-      if (game.mapIs (MapFlags::Demolition) && bots.isBombPlanted ()) {
+      if (game.mapIs (MapFlags::Demolition) && gameState.isBombPlanted ()) {
          pushChatterMessage (Chatter::GuardingPlantedC4);
       }
       else {
@@ -2453,6 +2439,49 @@ void Bot::handleChatterTaskChange (Task tid) {
    if (rg.chance (75) && tid == Task::Camp && m_team == Team::Terrorist && m_inVIPZone) {
       pushChatterMessage (Chatter::GoingToGuardVIPSafety);
    }
+}
+
+void Bot::executeChatterFrameEvents () {
+   if (cv_radio_mode.as <int> () != 2) {
+      return;
+   }
+
+   // some stuff required by by chatter engine
+   if ((m_states & Sense::SeeingEnemy) && !game.isNullEntity (m_enemy)) {
+      int hasFriendNearby = numFriendsNear (pev->origin, 512.0f);
+
+      if (!hasFriendNearby && rg.chance (45) && (m_enemy->v.weapons & cr::bit (Weapon::C4))) {
+         pushChatterMessage (Chatter::SpotTheBomber);
+      }
+      else if (!hasFriendNearby && rg.chance (45) && m_team == Team::Terrorist && game.isPlayerVIP (m_enemy)) {
+         pushChatterMessage (Chatter::VIPSpotted);
+      }
+      else if (!hasFriendNearby
+         && rg.chance (50)
+         && game.getPlayerTeam (m_enemy) != m_team
+         && isGroupOfEnemies (m_enemy->v.origin)) {
+
+         pushChatterMessage (Chatter::ScaredEmotion);
+      }
+      else if (!hasFriendNearby
+         && rg.chance (40)
+         && (m_enemy->v.weapons & kSniperWeaponMask)) {
+
+         pushChatterMessage (Chatter::SniperWarning);
+      }
+
+      // if bot is trapped under shield yell for help !
+      if (getCurrentTaskId () == Task::Camp && hasShield () && isShieldDrawn () && hasFriendNearby >= 2) {
+         pushChatterMessage (Chatter::PinnedDown);
+      }
+   }
+
+   // if bomb planted warn players !
+   if (bots.hasBombSay (BombPlantedSay::Chatter) && gameState.isBombPlanted () && m_team == Team::CT) {
+      pushChatterMessage (Chatter::GottaFindC4);
+      bots.clearBombSay (BombPlantedSay::Chatter);
+   }
+
 }
 
 void Bot::checkRadioQueue () {
@@ -2659,7 +2688,7 @@ void Bot::checkRadioQueue () {
       break;
 
    case Radio::ShesGonnaBlow:
-      if (game.isNullEntity (m_enemy) && distanceSq < cr::sqrf (2048.0f) && bots.isBombPlanted () && m_team == Team::Terrorist) {
+      if (game.isNullEntity (m_enemy) && distanceSq < cr::sqrf (2048.0f) && gameState.isBombPlanted () && m_team == Team::Terrorist) {
          pushRadioMessage (Radio::RogerThat);
 
          if (getCurrentTaskId () == Task::Camp) {
@@ -2675,11 +2704,11 @@ void Bot::checkRadioQueue () {
 
    case Radio::RegroupTeam:
       // if no more enemies found AND bomb planted, switch to knife to get to bombplace faster
-      if (m_team == Team::CT && !usesKnife () && m_numEnemiesLeft == 0 && bots.isBombPlanted () && getCurrentTaskId () != Task::DefuseBomb) {
+      if (m_team == Team::CT && !usesKnife () && m_numEnemiesLeft == 0 && gameState.isBombPlanted () && getCurrentTaskId () != Task::DefuseBomb) {
          selectWeaponById (Weapon::Knife);
          clearSearchNodes ();
 
-         m_position = graph.getBombOrigin ();
+         m_position = gameState.getBombOrigin ();
          startTask (Task::MoveToPosition, TaskPri::MoveToPosition, kInvalidNodeIndex, 0.0f, true);
 
          pushRadioMessage (Radio::RogerThat);
@@ -2803,7 +2832,7 @@ void Bot::checkRadioQueue () {
 
       case Task::Camp:
          if (rg.chance (m_radioPercent)) {
-            if (bots.isBombPlanted () && m_team == Team::Terrorist) {
+            if (gameState.isBombPlanted () && m_team == Team::Terrorist) {
                pushChatterMessage (Chatter::GuardingPlantedC4);
             }
             else if (m_inEscapeZone && m_team == Team::CT) {
@@ -2868,14 +2897,14 @@ void Bot::checkRadioQueue () {
 
    case Radio::SectorClear:
       // is bomb planted and it's a ct
-      if (!bots.isBombPlanted ()) {
+      if (!gameState.isBombPlanted ()) {
          break;
       }
 
       // check if it's a ct command
-      if (game.getTeam (m_radioEntity) == Team::CT
+      if (game.getPlayerTeam (m_radioEntity) == Team::CT
          && m_team == Team::CT
-         && util.isFakeClient (m_radioEntity)
+         && game.isFakeClientEntity (m_radioEntity)
          && bots.getPlantedBombSearchTimestamp () < game.time ()) {
 
          float nearestDistanceSq = kInfiniteDistance;
@@ -2968,11 +2997,11 @@ void Bot::checkRadioQueue () {
 void Bot::tryHeadTowardRadioMessage () {
    const auto tid = getCurrentTaskId ();
 
-   if (tid == Task::MoveToPosition || m_headedTime + 15.0f < game.time () || !util.isAlive (m_radioEntity) || m_hasC4) {
+   if (tid == Task::MoveToPosition || m_headedTime + 15.0f < game.time () || !game.isAliveEntity (m_radioEntity) || m_hasC4) {
       return;
    }
 
-   if ((util.isFakeClient (m_radioEntity)
+   if ((game.isFakeClientEntity (m_radioEntity)
       && rg.chance (m_radioPercent)
       && m_personality == Personality::Normal) || !(m_radioEntity->v.flags & FL_FAKECLIENT)) {
 
@@ -3007,29 +3036,18 @@ void Bot::checkParachute () {
 }
 
 void Bot::frame () {
-   pev->flags |= FL_CLIENT | FL_FAKECLIENT; // restore fake client bit, just in case
+   if (m_thinkTimer.time < game.time ()) {
+      m_thinkTimer.time = game.time () + m_thinkTimer.interval;
 
-   const auto timestamp = game.time ();
-
-   if (m_thinkDelay.time <= timestamp) {
       update ();
-
-      // delay next execution for thinking
-      m_thinkDelay.time = timestamp + m_thinkDelay.interval;
    }
 
-   // run bot command on twice speed
-   if (m_commandDelay.time <= timestamp) {
-      runMovement ();
-      m_commandDelay.time = timestamp + m_commandDelay.interval;
-   }
-
-   if (m_slowFrameTimestamp > timestamp) {
+   if (m_slowFrameTimestamp > game.time ()) {
       return;
    }
 
-   if (bots.isBombPlanted () && m_team == Team::CT && m_isAlive) {
-      const auto &bombPosition = graph.getBombOrigin ();
+   if (gameState.isBombPlanted () && m_team == Team::CT && m_isAlive) {
+      const auto &bombPosition = gameState.getBombOrigin ();
 
       if (!m_hasProgressBar
          && getCurrentTaskId () != Task::EscapeFromBomb
@@ -3064,9 +3082,9 @@ void Bot::frame () {
 void Bot::update () {
    const auto tid = getCurrentTaskId ();
 
-   m_canChooseAimDirection = true;
-   m_isAlive = util.isAlive (ent ());
-   m_team = game.getTeam (ent ());
+   m_canSetAimDirection = true;
+   m_isAlive = game.isAliveEntity (ent ());
+   m_team = game.getPlayerTeam (ent ());
    m_healthValue = cr::clamp (pev->health, 0.0f, 99999.9f);
 
    if (m_team == Team::Terrorist && game.mapIs (MapFlags::Demolition)) {
@@ -3088,6 +3106,7 @@ void Bot::update () {
    if (m_lastDamageTimestamp < game.time () && !cr::fzero (m_lastDamageTimestamp)) {
       m_lastDamageTimestamp = 0.0f;
    }
+   pev->flags |= FL_CLIENT | FL_FAKECLIENT; // restore fake client bit, just in case
 
    // is bot movement enabled
    m_botMovement = false;
@@ -3111,7 +3130,7 @@ void Bot::update () {
          m_lastVoteKick = m_voteKickIndex;
 
          // if bot tk punishment is enabled slay the tk
-         if (cv_tkpunish.as <int> () != 2 || util.isFakeClient (game.entityOfIndex (m_voteKickIndex))) {
+         if (cv_tkpunish.as <int> () != 2 || game.isFakeClientEntity (game.entityOfIndex (m_voteKickIndex))) {
             return;
          }
          auto killer = game.entityOfIndex (m_lastVoteKick);
@@ -3144,6 +3163,7 @@ void Bot::update () {
    else if (!m_botMovement) {
       resetMovement ();
    }
+   runMovement ();
 }
 
 void Bot::logicDuringFreezetime () {
@@ -3161,7 +3181,7 @@ void Bot::logicDuringFreezetime () {
 
    if (rg.chance (15) && m_jumpTime < game.time ()) {
       pev->button |= IN_JUMP;
-      m_jumpTime = game.time () + rg (1.0f, 2.0f);
+      m_jumpTime = game.time () + rg (1.0f, 3.0f);
    }
    static Array <edict_t *> players {};
    players.clear ();
@@ -3203,7 +3223,7 @@ void Bot::logicDuringFreezetime () {
       if (ent) {
          m_lookAt = ent->v.origin + ent->v.view_ofs;
 
-         if (m_buyingFinished) {
+         if (m_buyingFinished && game.getPlayerTeam (ent) != m_team) {
             m_enemy = ent;
             m_enemyOrigin = ent->v.origin;
          }
@@ -3215,7 +3235,7 @@ void Bot::logicDuringFreezetime () {
          m_needToSendWelcomeChat = false;
       }
    }
-   m_changeViewTime = game.time () + rg (1.25f, 2.0f);
+   m_changeViewTime = game.time () + rg (1.25f, 3.0f);
 }
 
 void Bot::executeTasks () {
@@ -3249,7 +3269,15 @@ void Bot::checkSpawnConditions () {
             dropCurrentWeapon ();
          }
          else {
-            selectWeaponById (Weapon::Knife);
+            bool switchToKnife = true;
+
+            if (m_currentWeapon == Weapon::Scout) {
+               switchToKnife = rg.chance (25);
+            }
+
+            if (switchToKnife) {
+               selectWeaponById (Weapon::Knife);
+            }
          }
       }
       m_checkKnifeSwitch = false;
@@ -3291,12 +3319,11 @@ void Bot::checkSpawnConditions () {
 void Bot::logic () {
    // this function gets called each frame and is the core of all bot ai. from here all other subroutines are called
 
-   m_movedDistance = kMinMovedDistance; // length of different vector (distance bot moved)
-
    resetMovement ();
 
    // increase reaction time
    m_actualReactionTime += 0.3f;
+   m_movedDistance = kMinMovedDistance + 0.1f; // length of different vector (distance bot moved)
 
    if (m_actualReactionTime > m_idealReactionTime) {
       m_actualReactionTime = m_idealReactionTime;
@@ -3317,13 +3344,11 @@ void Bot::logic () {
    if (m_prevTime <= game.time ()) {
 
       // see how far bot has moved since the previous position...
-      if (m_checkTerrain) {
-         m_movedDistance = m_prevOrigin.distance (pev->origin);
-      }
+      m_movedDistance = m_prevOrigin.distanceSq (pev->origin);
 
       // save current position as previous
       m_prevOrigin = pev->origin;
-      m_prevTime = game.time () + (0.2f - m_frameInterval * 2.0f);
+      m_prevTime = game.time () + 0.2f - m_frameInterval;
    }
 
    // if there's some radio message to respond, check it
@@ -3338,44 +3363,7 @@ void Bot::logic () {
    else if (!game.isNullEntity (m_enemy)) {
       trackEnemies ();
    }
-
-   // some stuff required by by chatter engine
-   if (cv_radio_mode.as <int> () == 2) {
-      if ((m_states & Sense::SeeingEnemy) && !game.isNullEntity (m_enemy)) {
-         int hasFriendNearby = numFriendsNear (pev->origin, 512.0f);
-
-         if (!hasFriendNearby && rg.chance (45) && (m_enemy->v.weapons & cr::bit (Weapon::C4))) {
-            pushChatterMessage (Chatter::SpotTheBomber);
-         }
-         else if (!hasFriendNearby && rg.chance (45) && m_team == Team::Terrorist && util.isPlayerVIP (m_enemy)) {
-            pushChatterMessage (Chatter::VIPSpotted);
-         }
-         else if (!hasFriendNearby
-            && rg.chance (50)
-            && game.getTeam (m_enemy) != m_team
-            && isGroupOfEnemies (m_enemy->v.origin)) {
-
-            pushChatterMessage (Chatter::ScaredEmotion);
-         }
-         else if (!hasFriendNearby
-            && rg.chance (40)
-            && (m_enemy->v.weapons & kSniperWeaponMask)) {
-
-            pushChatterMessage (Chatter::SniperWarning);
-         }
-
-         // if bot is trapped under shield yell for help !
-         if (getCurrentTaskId () == Task::Camp && hasShield () && isShieldDrawn () && hasFriendNearby >= 2) {
-            pushChatterMessage (Chatter::PinnedDown);
-         }
-      }
-
-      // if bomb planted warn players !
-      if (bots.hasBombSay (BombPlantedSay::Chatter) && bots.isBombPlanted () && m_team == Team::CT) {
-         pushChatterMessage (Chatter::GottaFindC4);
-         bots.clearBombSay (BombPlantedSay::Chatter);
-      }
-   }
+   executeChatterFrameEvents ();
 
    m_checkTerrain = true;
    m_moveToGoal = true;
@@ -3390,11 +3378,7 @@ void Bot::logic () {
    executeTasks (); // execute current task
    setAimDirection (); // choose aim direction
    updateLookAngles (); // and turn to chosen aim direction
-
-   // the bots wants to fire at something?
-   if (m_shootAtDeadTime > game.time () || (m_wantsToFire && !m_isUsingGrenade && m_shootTime <= game.time ())) {
-      fireWeapons (); // if bot didn't fire a bullet try again next frame
-   }
+   doFireWeapons (); // fire the weapons
 
    // check for reloading
    if (m_reloadCheckTime <= game.time ()) {
@@ -3457,7 +3441,7 @@ void Bot::logic () {
 
    // ensure we're not stuck picking something
    if (m_moveToGoal && m_moveSpeed > 0.0f
-      && rg (2.5f, 3.5f) + m_navTimeset + m_destOrigin.distanceSq2d (pev->origin) / cr::sqrf (m_moveSpeed) < game.time ()
+      && rg (2.5f, 3.5f) + m_navTimeset + m_destOrigin.distanceSq2d (pev->origin) / cr::sqrf (cr::max (1.0f, m_moveSpeed)) < game.time ()
       && !(m_states & Sense::SeeingEnemy)) {
       ensurePickupEntitiesClear ();
    }
@@ -3472,8 +3456,6 @@ void Bot::logic () {
 
    // save the previous speed (for checking if stuck)
    m_prevSpeed = cr::abs (m_moveSpeed);
-   m_prevVelocity = cr::abs (pev->velocity.length2d ());
-
    m_lastDamageType = -1; // reset damage
 }
 
@@ -3481,6 +3463,8 @@ void Bot::spawned () {
    if (game.is (GameFlags::CSDM | GameFlags::ZombieMod)) {
       newRound ();
       clearTasks ();
+
+      m_buyingFinished = true;
    }
 }
 
@@ -3600,7 +3584,7 @@ void Bot::showDebugOverlay () {
 
       static hudtextparms_t textParams {};
 
-      textParams.channel = 1;
+      textParams.channel = 4;
       textParams.x = -1.0f;
       textParams.y = 0.0f;
       textParams.effect = 0;
@@ -3635,7 +3619,7 @@ void Bot::showDebugOverlay () {
 }
 
 bool Bot::hasHostage () {
-   if (cv_ignore_objectives || game.mapIs (MapFlags::Demolition)) {
+   if (cv_ignore_objectives || !game.mapIs (MapFlags::HostageRescue)) {
       return false;
    }
 
@@ -3662,7 +3646,7 @@ void Bot::takeDamage (edict_t *inflictor, int damage, int armor, int bits) {
    m_lastDamageType = bits;
 
    if (m_isCreature) {
-      if (util.isPlayer (inflictor) && game.isNullEntity (m_enemy)) {
+      if (game.isPlayerEntity (inflictor) && game.isNullEntity (m_enemy)) {
          if (seesEnemy (inflictor)) {
             m_enemy = inflictor;
             m_enemyOrigin = inflictor->v.origin;
@@ -3676,10 +3660,10 @@ void Bot::takeDamage (edict_t *inflictor, int damage, int armor, int bits) {
    }
    m_lastDamageTimestamp = game.time ();
 
-   if (util.isPlayer (inflictor) || (cv_attack_monsters && util.isMonster (inflictor))) {
-      const auto inflictorTeam = game.getTeam (inflictor);
+   if (game.isPlayerEntity (inflictor) || (cv_attack_monsters && game.isMonsterEntity (inflictor))) {
+      const auto inflictorTeam = game.getPlayerTeam (inflictor);
 
-      if (!util.isMonster (inflictor) && cv_tkpunish && inflictorTeam == m_team && !util.isFakeClient (inflictor)) {
+      if (!game.isMonsterEntity (inflictor) && cv_tkpunish && inflictorTeam == m_team && !game.isFakeClientEntity (inflictor)) {
          // alright, die you team killer!!!
          m_actualReactionTime = 0.0f;
          m_seeEnemyTime = game.time ();
@@ -3743,7 +3727,7 @@ void Bot::takeBlind (int alpha) {
    m_viewDistance = rg (10.0f, 20.0f);
 
    // do not take in effect some unique map effects on round start
-   if (bots.getRoundStartTime () + 5.0f < game.time ()) {
+   if (gameState.getRoundStartTime () + 5.0f < game.time ()) {
       m_viewDistance = m_maxViewDistance;
    }
    m_blindTime = game.time () + static_cast <float> (alpha - 200) / 16.0f;
@@ -3805,11 +3789,11 @@ void Bot::updatePracticeValue (int damage) const {
 void Bot::updatePracticeDamage (edict_t *attacker, int damage) {
    // this function gets called each time a bot gets damaged by some enemy. stores the damage (team-specific) done by victim.
 
-   if (!util.isPlayer (attacker)) {
+   if (!game.isPlayerEntity (attacker)) {
       return;
    }
 
-   const int attackerTeam = game.getTeam (attacker);
+   const int attackerTeam = game.getPlayerTeam (attacker);
    const int victimTeam = m_team;
 
    if (attackerTeam == victimTeam) {
@@ -3840,7 +3824,7 @@ void Bot::updatePracticeDamage (edict_t *attacker, int damage) {
          practice.setDamage (victimIndex, victimIndex, victimIndex, cr::clamp (practice.getDamage (victimTeam, victimIndex, victimIndex), 0, kMaxDamageValue));
       }
    }
-   const auto updateDamage = util.isFakeClient (attacker) ? 10 : 7;
+   const auto updateDamage = game.isFakeClientEntity (attacker) ? 10 : 7;
 
    // store away the damage done
    const auto damageValue = cr::clamp (practice.getDamage (m_team, victimIndex, attackerIndex) + damage / updateDamage, 0, kMaxDamageValue);
@@ -3864,7 +3848,7 @@ void Bot::dropWeaponForUser (edict_t *user, bool discardC4) {
    // this function, asks bot to discard his current primary weapon (or c4) to the user that requested it with /drop*
    // command, very useful, when i'm don't have money to buy anything... )
 
-   if (util.isAlive (user) && m_moneyAmount >= 2000 && hasPrimaryWeapon () && user->v.origin.distanceSq (pev->origin) <= cr::sqrf (450.0f)) {
+   if (game.isAliveEntity (user) && m_moneyAmount >= 2000 && hasPrimaryWeapon () && user->v.origin.distanceSq (pev->origin) <= cr::sqrf (450.0f)) {
       m_aimFlags |= AimFlags::Entity;
       m_lookAt = user->v.origin;
 
@@ -3922,9 +3906,6 @@ void Bot::resetDoubleJump () {
 }
 
 void Bot::debugMsgInternal (StringRef str) {
-   if (game.isDedicated ()) {
-      return;
-   }
    const int level = cv_debug.as <int> ();
 
    if (level <= 2) {
@@ -3935,7 +3916,10 @@ void Bot::debugMsgInternal (StringRef str) {
 
    bool playMessage = false;
 
-   if (level == 3 && !game.isNullEntity (game.getLocalEntity ()) && game.getLocalEntity ()->v.iuser2 == entindex ()) {
+   if (level == 3
+      && !game.isNullEntity (game.getLocalEntity ())
+      && game.getLocalEntity ()->v.iuser2 == entindex ()) {
+
       playMessage = true;
    }
    else if (level != 3) {
@@ -3946,7 +3930,7 @@ void Bot::debugMsgInternal (StringRef str) {
       logger.message (printBuf.chars ());
    }
 
-   if (playMessage) {
+   if (playMessage && !game.isDedicated ()) {
       ctrl.msg (printBuf.chars ());
       sendToChat (printBuf, false);
    }
@@ -3955,16 +3939,16 @@ void Bot::debugMsgInternal (StringRef str) {
 Vector Bot::isBombAudible () {
    // this function checks if bomb is can be heard by the bot, calculations done by manual testing.
 
-   if (!bots.isBombPlanted () || getCurrentTaskId () == Task::EscapeFromBomb) {
+   if (!gameState.isBombPlanted () || getCurrentTaskId () == Task::EscapeFromBomb) {
       return nullptr; // reliability check
    }
 
    if (m_difficulty > Difficulty::Hard) {
-      return graph.getBombOrigin ();
+      return gameState.getBombOrigin ();
    }
-   const auto &bombOrigin = graph.getBombOrigin ();
+   const auto &bombOrigin = gameState.getBombOrigin ();
 
-   const float timeElapsed = ((game.time () - bots.getTimeBombPlanted ()) / mp_c4timer.as <float> ()) * 100.0f;
+   const float timeElapsed = ((game.time () - gameState.getTimeBombPlanted ()) / mp_c4timer.as <float> ()) * 100.0f;
    float desiredRadius = 768.0f;
 
    // start the manual calculations
@@ -4045,12 +4029,7 @@ void Bot::runMovement () {
    m_oldButtons = pev->button;
 }
 
-float Bot::getBombTimeleft () const {
-   if (!bots.isBombPlanted ()) {
-      return 0.0f;
-   }
-   return cr::max (bots.getTimeBombPlanted () + mp_c4timer.as <float> () - game.time (), 0.0f);
-}
+
 
 bool Bot::isOutOfBombTimer () {
    if (!game.mapIs (MapFlags::Demolition)) {
@@ -4062,13 +4041,13 @@ bool Bot::isOutOfBombTimer () {
    }
 
    // calculate left time
-   const float timeLeft = getBombTimeleft ();
+   const float timeLeft = gameState.getBombTimeLeft ();
 
    // if time left greater than 13, no need to do other checks
    if (timeLeft > 13.0f) {
       return false;
    }
-   const auto &bombOrigin = graph.getBombOrigin ();
+   const auto &bombOrigin = gameState.getBombOrigin ();
 
    // for terrorist, if timer is lower than 13 seconds, return true
    if (timeLeft < 13.0f && m_team == Team::Terrorist && bombOrigin.distanceSq (pev->origin) < cr::sqrf (964.0f)) {
@@ -4093,7 +4072,7 @@ bool Bot::isOutOfBombTimer () {
       return true;
    }
 
-   if (m_hasProgressBar && isOnFloor () && ((m_hasDefuser ? 10.0f : 15.0f) > getBombTimeleft ())) {
+   if (m_hasProgressBar && isOnFloor () && ((m_hasDefuser ? 10.0f : 15.0f) > gameState.getBombTimeLeft ())) {
       return true;
    }
    return false; // return false otherwise
@@ -4107,7 +4086,7 @@ void Bot::updateHearing () {
    float nearestDistanceSq = kInfiniteDistance;
 
    // do not hear to other enemies if just tracked old one
-   if (m_timeNextTracking < game.time () && m_lastEnemy == m_trackingEdict && util.isAlive (m_lastEnemy)) {
+   if (m_timeNextTracking < game.time () && m_lastEnemy == m_trackingEdict && game.isAliveEntity (m_lastEnemy)) {
       m_hearedEnemy = m_lastEnemy;
       m_lastEnemyOrigin = m_lastEnemy->v.origin;
 
@@ -4122,7 +4101,7 @@ void Bot::updateHearing () {
       if (!(client.flags & ClientFlags::Used)
          || !(client.flags & ClientFlags::Alive)
          || client.ent == ent ()
-         || client.team == m_team
+         || client.team2 == m_team
          || !client.ent
          || client.noise.last < game.time ()) {
 
@@ -4146,7 +4125,7 @@ void Bot::updateHearing () {
    }
 
    // did the bot hear someone ?
-   if (util.isPlayer (m_hearedEnemy)) {
+   if (game.isPlayerEntity (m_hearedEnemy)) {
       // change to best weapon if heard something
       if (m_shootTime < game.time () - 5.0f
          && isOnFloor ()
@@ -4222,7 +4201,7 @@ void Bot::updateHearing () {
       else {
          if (cv_shoots_thru_walls
             && m_lastEnemy == m_hearedEnemy
-            && rg.chance (conf.getDifficultyTweaks (m_difficulty)->hearThruPct)
+            && rg.chance (m_difficultyData->hearThruPct)
             && m_seeEnemyTime + 3.0f > game.time ()
             && isPenetrableObstacle (m_hearedEnemy->v.origin)) {
 
@@ -4241,7 +4220,7 @@ void Bot::updateHearing () {
 void Bot::enteredBuyZone (int buyState) {
    // this function is gets called when bot enters a buyzone, to allow bot to buy some stuff
 
-   if (m_isCreature) {
+   if (m_isCreature || hasHostage ()) {
       return; // creatures can't buy anything
    }
    const int *econLimit = conf.getEconLimit ();
@@ -4250,8 +4229,8 @@ void Bot::enteredBuyZone (int buyState) {
    if (m_seeEnemyTime + 12.0f < game.time ()
       && m_lastEquipTime + 30.0f < game.time ()
       && m_inBuyZone
-      && (bots.getRoundStartTime () + rg (10.0f, 20.0f) + mp_buytime.as <float> () < game.time ())
-      && !bots.isBombPlanted ()
+      && (gameState.getRoundStartTime () + rg (10.0f, 20.0f) + mp_buytime.as <float> () < game.time ())
+      && !gameState.isBombPlanted ()
       && m_moneyAmount > econLimit[EcoLimit::PrimaryGreater]) {
 
       m_ignoreBuyDelay = true;
@@ -4290,7 +4269,7 @@ void Bot::selectCampButtons (int index) {
 bool Bot::isBombDefusing (const Vector &bombOrigin) const {
    // this function finds if somebody currently defusing the bomb.
 
-   if (!bots.isBombPlanted ()) {
+   if (!gameState.isBombPlanted ()) {
       return false;
    }
    bool defusingInProgress = false;
@@ -4363,8 +4342,8 @@ void Bot::refreshCreatureStatus (char *infobuffer) {
       }
 
       // if bot is on infected team, and zombie mode is active, assume bot is a creature/zombie
-      m_isOnInfectedTeam = game.getRealTeam (ent ()) == infectedTeam;
-      m_infectedEnemyTeam = game.getRealTeam (m_enemy) == infectedTeam;
+      m_isOnInfectedTeam = game.getRealPlayerTeam (ent ()) == infectedTeam;
+      m_infectedEnemyTeam = game.getRealPlayerTeam (m_enemy) == infectedTeam;
 
       // do not process next if already infected
       if (m_isOnInfectedTeam || m_infectedEnemyTeam) {
@@ -4444,7 +4423,7 @@ void Bot::donateC4ToHuman () {
 
    // search world for just dropped bomb
    game.searchEntities ("classname", "weaponbox", [&] (edict_t *ent) {
-      if (util.isModel (ent, "backpack.mdl")) {
+      if (game.isEntityModelMatches (ent, "backpack.mdl")) {
          bomb = ent;
 
          if (!game.isNullEntity (bomb)) {

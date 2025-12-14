@@ -93,7 +93,7 @@ void CMenuTouchOptions::CProfiliesListModel::Update( void )
 	int numFiles;
 	const char *curprofile;
 
-	filenames = EngFuncs::GetFilesList( "touch_presets/*.cfg", &numFiles, TRUE );
+	filenames = EngFuncs::GetFilesList( "touch_presets/*.cfg", &numFiles, true );
 
 	if( filenames && numFiles > 0 )
 	{
@@ -107,7 +107,7 @@ void CMenuTouchOptions::CProfiliesListModel::Update( void )
 		}
 	}
 
-	filenames = EngFuncs::GetFilesList( "touch_profiles/*.cfg", &numFiles, TRUE );
+	filenames = EngFuncs::GetFilesList( "touch_profiles/*.cfg", &numFiles, true );
 	curprofile = EngFuncs::GetCvarString("touch_config_file");
 
 	AddToTail( L( "Profiles:" ));
@@ -190,7 +190,7 @@ void CMenuTouchOptions::Apply()
 		snprintf( command, sizeof( command ), "exec \"touch_presets/%s\"\n", model[i].Get());
 		EngFuncs::ClientCmd( 1, command );
 
-		while( EngFuncs::FileExists( curconfig, TRUE ) )
+		while( EngFuncs::FileExists( curconfig, true ) )
 		{
 			char copystring[256];
 			char filebase[256];
@@ -217,7 +217,7 @@ void CMenuTouchOptions::Apply()
 	EngFuncs::ClientCmd( 1, "touch_writeconfig\n" );
 
 	// check if it failed ant reset profile to default if it is
-	if( !EngFuncs::FileExists( EngFuncs::GetCvarString( "touch_config_file" ), TRUE ) )
+	if( !EngFuncs::FileExists( EngFuncs::GetCvarString( "touch_config_file" ), true ) )
 	{
 		EngFuncs::CvarSetString( "touch_config_file", "touch.cfg" );
 		profiles.SetCurrentIndex( model.firstProfile );
@@ -273,23 +273,23 @@ void CMenuTouchOptions::DeleteProfileCb()
 		return;
 
 	snprintf(command, 256, "touch_deleteprofile \"%s\"\n", model[profiles.GetCurrentIndex()].Get() );
-	EngFuncs::ClientCmd( TRUE, command );
+	EngFuncs::ClientCmd( true, command );
 
 	model.Update();
 }
 
 void CMenuTouchOptions::ResetButtonsCb()
 {
-	EngFuncs::ClientCmd( FALSE, "touch_pitch 90\n" );
-	EngFuncs::ClientCmd( FALSE, "touch_yaw 120\n" );
-	EngFuncs::ClientCmd( FALSE, "touch_forwardzone 0.06\n" );
-	EngFuncs::ClientCmd( FALSE, "touch_sidezone 0.06\n" );
-	EngFuncs::ClientCmd( FALSE, "touch_grid 1\n" );
-	EngFuncs::ClientCmd( FALSE, "touch_grid_count 50\n" );
-	EngFuncs::ClientCmd( FALSE, "touch_nonlinear_look 0\n" );
-	EngFuncs::ClientCmd( FALSE, "touch_pow_factor 1.3\n" );
-	EngFuncs::ClientCmd( FALSE, "touch_pow_mult 400\n" );
-	EngFuncs::ClientCmd( TRUE,  "touch_exp_mult 0\n" );
+	EngFuncs::ClientCmd( false, "touch_pitch 90\n" );
+	EngFuncs::ClientCmd( false, "touch_yaw 120\n" );
+	EngFuncs::ClientCmd( false, "touch_forwardzone 0.06\n" );
+	EngFuncs::ClientCmd( false, "touch_sidezone 0.06\n" );
+	EngFuncs::ClientCmd( false, "touch_grid 1\n" );
+	EngFuncs::ClientCmd( false, "touch_grid_count 50\n" );
+	EngFuncs::ClientCmd( false, "touch_nonlinear_look 0\n" );
+	EngFuncs::ClientCmd( false, "touch_pow_factor 1.3\n" );
+	EngFuncs::ClientCmd( false, "touch_pow_mult 400\n" );
+	EngFuncs::ClientCmd( true,  "touch_exp_mult 0\n" );
 
 	GetConfig();
 }

@@ -27,11 +27,15 @@ GNU General Public License for more details.
 #include "library.h"
 #include "platform/platform.h"
 
-CVAR_DEFINE_AUTO( fs_mount_hd, "0", FCVAR_ARCHIVE|FCVAR_PRIVILEGED|FCVAR_LATCH, "mount high definition content folder" );
-CVAR_DEFINE_AUTO( fs_mount_lv, "0", FCVAR_ARCHIVE|FCVAR_PRIVILEGED|FCVAR_LATCH, "mount low violence models content folder" );
-CVAR_DEFINE_AUTO( fs_mount_addon, "0", FCVAR_ARCHIVE|FCVAR_PRIVILEGED|FCVAR_LATCH, "mount addon content folder" );
-CVAR_DEFINE_AUTO( fs_mount_l10n, "0", FCVAR_ARCHIVE|FCVAR_PRIVILEGED|FCVAR_LATCH, "mount localization content folder" );
-CVAR_DEFINE_AUTO( ui_language, "english", FCVAR_ARCHIVE|FCVAR_PRIVILEGED|FCVAR_LATCH, "selected game language" );
+#if XASH_WIN32
+#include <direct.h>
+#endif
+
+static CVAR_DEFINE_AUTO( fs_mount_hd, "0", FCVAR_PRIVILEGED, "mount high definition content folder" );
+static CVAR_DEFINE_AUTO( fs_mount_lv, "0", FCVAR_PRIVILEGED, "mount low violence models content folder" );
+static CVAR_DEFINE_AUTO( fs_mount_addon, "0", FCVAR_PRIVILEGED, "mount addon content folder" );
+static CVAR_DEFINE_AUTO( fs_mount_l10n, "0", FCVAR_PRIVILEGED, "mount localization content folder" );
+static CVAR_DEFINE_AUTO( ui_language, "english", FCVAR_PRIVILEGED, "selected game language" );
 
 fs_api_t g_fsapi;
 fs_globals_t *FI;
@@ -81,7 +85,7 @@ void *FS_GetNativeObject( const char *obj )
 	return NULL;
 }
 
-void FS_Rescan_f( void )
+static uint32_t FS_MountFlags( void )
 {
 	uint32_t flags = 0;
 
@@ -91,13 +95,76 @@ void FS_Rescan_f( void )
 	if( fs_mount_addon.value ) SetBits( flags, FS_MOUNT_ADDON );
 	if( fs_mount_l10n.value ) SetBits( flags, FS_MOUNT_L10N );
 
-	g_fsapi.Rescan( flags, ui_language.string );
+	return flags;
+}
 
-	ClearBits( fs_mount_lv.flags, FCVAR_CHANGED );
+void FS_Rescan_f( void )
+{
+	g_fsapi.Rescan( FS_MountFlags(), ui_language.string );
+}
+
+static void FS_LoadVFSConfig( const char *gamedir )
+{
+	string parm;
+
+	if( Host_IsDedicated( ))
+		return;
+
+	Cbuf_AddTextf( "exec %s/vfs.cfg\n", gamedir );
+	Cbuf_Execute();
+
+	if( Sys_GetParmFromCmdLine( "-language", parm ))
+	{
+		Cvar_DirectSet( &ui_language, parm );
+		Cvar_DirectSet( &fs_mount_l10n, "1" );
+	}
+
 	ClearBits( fs_mount_hd.flags, FCVAR_CHANGED );
-	ClearBits( fs_mount_addon.flags, FCVAR_CHANGED );
+	ClearBits( fs_mount_lv.flags, FCVAR_CHANGED );
 	ClearBits( fs_mount_l10n.flags, FCVAR_CHANGED );
+	ClearBits( fs_mount_addon.flags, FCVAR_CHANGED );
 	ClearBits( ui_language.flags, FCVAR_CHANGED );
+}
+
+void FS_SaveVFSConfig( void )
+{
+	file_t *f;
+
+	if( !FBitSet( fs_mount_hd.flags|fs_mount_lv.flags|fs_mount_l10n.flags|fs_mount_addon.flags|ui_language.flags, FCVAR_CHANGED ))
+	{
+		Con_Reportf( "%s: no need to save vfs.cfg\n", __func__ );
+		return;
+	}
+
+	Con_Printf( "%s()\n", __func__ );
+
+	f = FS_Open( "vfs.cfg.new", "w", true );
+	if( !f )
+	{
+		Con_Printf( S_ERROR "%s: can't open %s for write\n", __func__, "vfs.cfg.new" );
+		return;
+	}
+
+	FS_Printf( f, "%s \"%d\"\n", fs_mount_hd.name, (int)fs_mount_hd.value );
+	FS_Printf( f, "%s \"%d\"\n", fs_mount_lv.name, (int)fs_mount_lv.value );
+	FS_Printf( f, "%s \"%d\"\n", fs_mount_l10n.name, (int)fs_mount_l10n.value );
+	FS_Printf( f, "%s \"%d\"\n", fs_mount_addon.name, (int)fs_mount_addon.value );
+	FS_Printf( f, "%s \"%s\"\n", ui_language.name, ui_language.string );
+
+	Host_FinalizeConfig( f, "vfs.cfg" );
+
+	ClearBits( fs_mount_hd.flags, FCVAR_CHANGED );
+	ClearBits( fs_mount_lv.flags, FCVAR_CHANGED );
+	ClearBits( fs_mount_l10n.flags, FCVAR_CHANGED );
+	ClearBits( fs_mount_addon.flags, FCVAR_CHANGED );
+	ClearBits( ui_language.flags, FCVAR_CHANGED );
+}
+
+void FS_LoadGameInfo( void )
+{
+	FS_LoadVFSConfig( g_fsapi.Gamedir( ));
+
+	g_fsapi.LoadGameInfo( FS_MountFlags(), ui_language.string );
 }
 
 static void FS_ClearPaths_f( void )
@@ -205,21 +272,9 @@ static qboolean FS_DetermineRootDirectory( char *out, size_t size )
 		return true;
 	}
 
-#if XASH_EMSCRIPTEN
-	Q_strncpy( out, "/rwdir", size );
-	return true;
-#elif TARGET_OS_IOS
+#if TARGET_OS_IOS
 	Q_strncpy( out, IOS_GetDocsDir(), size );
 	return true;
-#elif XASH_ANDROID && XASH_SDL
-	path = SDL_AndroidGetExternalStoragePath();
-	if( path != NULL )
-	{
-		Q_strncpy( out, path, size );
-		return true;
-	}
-	Sys_Error( "couldn't determine Android external storage path: %s", SDL_GetError( ));
-	return false;
 #elif XASH_PSVITA
 	if( PSVita_GetBasePath( out, size ))
 		return true;
@@ -283,18 +338,7 @@ static qboolean FS_DetermineReadOnlyRootDirectory( char *out, size_t size )
 		return true;
 	}
 
-#if XASH_EMSCRIPTEN
-	Q_strncpy( out, "/rodir", size );
-	return true;
-#endif
-
 	return false;
-}
-
-void FS_CheckConfig( void )
-{
-	if( fs_mount_lv.value || fs_mount_hd.value || fs_mount_addon.value || fs_mount_l10n.value )
-		FS_Rescan_f();
 }
 
 /*

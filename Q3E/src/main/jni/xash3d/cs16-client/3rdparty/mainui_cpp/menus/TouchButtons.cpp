@@ -156,10 +156,10 @@ void CMenuTouchButtons::CButtonListModel::Update()
 
 	buttons.RemoveAll();
 
-	EngFuncs::ClientCmd( TRUE, "" ); // perform Cbuf_Execute()
+	EngFuncs::ClientCmd( true, "" ); // perform Cbuf_Execute()
 
 	gettingList = true;
-	EngFuncs::ClientCmd( TRUE, "touch_list\n" );
+	EngFuncs::ClientCmd( true, "touch_list\n" );
 	gettingList = false;
 
 	parent->UpdateFields();
@@ -518,8 +518,8 @@ void CMenuTouchButtons::_VidInit()
 	precision.SetCoord( 400, 470 );
 	buttonList.SetRect( 72, 135, 300, 395 );
 
-	save.SetRect( 384 - 42 + 320, 550, 130, 50 );
-	editor.SetRect( 384 - 42 + 320, 600, 130, 50 );
+	save.SetRect( 384 - 42 + 320, 550, 170, 50 );
+	editor.SetRect( 384 - 42 + 320, 600, 170, 50 );
 	select.SetRect( 400 + fields_w - 95, 300, 150,50 );
 
 	name.SetRect( 400, 550, 205, 32 );
@@ -528,8 +528,8 @@ void CMenuTouchButtons::_VidInit()
 	color.SetRect( sliders_x + 120, 360, 70, 50 );
 	preview.SetRect( 400, 300, 70, 70 );
 
-	reset.SetRect( 384 - 72 + 480, 600, 130, 50 );
-	remove.SetRect( 384 - 72 + 480, 550, 130, 50 );
+	reset.SetRect( 384 - 72 + 520, 600, 170, 50 );
+	remove.SetRect( 384 - 72 + 520, 550, 170, 50 );
 }
 
 ADD_MENU3( menu_touchbuttons, CMenuTouchButtons, UI_TouchButtons_Menu );

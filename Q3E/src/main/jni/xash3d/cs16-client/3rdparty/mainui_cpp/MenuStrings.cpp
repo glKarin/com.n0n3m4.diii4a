@@ -132,18 +132,16 @@ static void UI_InitAliasStrings( void )
 		if( MenuStrings[aliasStrings[i].idx][0]) // check if not initialized by strings.lst
 			continue;
 
-		char token[1024];
-		char token2[1024];
+		char token[64];
 		snprintf( token, sizeof( token ), "StringsList_%d", aliasStrings[i].idx );
 
-		const char *fmt = L( token );
-		if( fmt == token )
-		{
-			fmt = aliasStrings[i].defAliasString;
-		}
+		const char *fmt_str = L( token );
+		if( fmt_str == token ) // not found
+			fmt_str = aliasStrings[i].defAliasString;
 
-		snprintf( token2, sizeof( token2 ), fmt, gMenu.m_gameinfo.title );
-		MenuStrings[aliasStrings[i].idx] = StringCopy( token2 );
+		CUtlString fmt( fmt_str );
+		fmt.Replace( "%s", gMenu.m_gameinfo.title );
+		MenuStrings[aliasStrings[i].idx] = fmt.DetachRawPtr();
 
 		Dictionary_Insert( token, MenuStrings[aliasStrings[i].idx] );
 	}
@@ -309,16 +307,22 @@ static uint Localize_ProcessString( char *dst, const char *src )
 	return i;
 }
 
+static void ByteSwapUTF16File( uint16_t *head, size_t len )
+{
+	for( size_t i = 0; i < len; i++ )
+		head[i] = Swap16( head[i] );
+}
+
 static void Localize_AddToDictionary( const char *name, const char *lang )
 {
 	char filename[64], token[4096];
 	char *pfile, *afile = nullptr, *pFileBuf;
-	int i = 0, len;
+	int i = 0, buflen, charlen;
 	bool isUtf16 = false;
 
 	snprintf( filename, sizeof( filename ), "resource/%s_%s.txt", name, lang );
 
-	pFileBuf = reinterpret_cast<char*>( EngFuncs::COM_LoadFile( filename, &len ));
+	pFileBuf = reinterpret_cast<char*>( EngFuncs::COM_LoadFile( filename, &buflen ));
 
 	if( !pFileBuf )
 	{
@@ -326,28 +330,46 @@ static void Localize_AddToDictionary( const char *name, const char *lang )
 		return;
 	}
 
-	// support only utf-16le
 	if( pFileBuf[0] == '\xFF' && pFileBuf[1] == '\xFE' )
 	{
-		if( len > 3 && !pFileBuf[2] && !pFileBuf[3] )
+		if( buflen > 3 && !pFileBuf[2] && !pFileBuf[3] )
 		{
 			Con_Printf( "Localize_AddToDict( %s ): couldn't parse file. UTF-32 little endian isn't supported\n", filename );
 			goto error;
 		}
+
+		charlen = buflen / 2 - 1;
 		isUtf16 = true;
+
+#if XASH_BIG_ENDIAN
+		ByteSwapUTF16File( (uint16_t *)pFileBuf, charlen );
+#endif
 	}
 	else if( pFileBuf[0] == '\xFE' && pFileBuf[1] == '\xFF' )
 	{
-		Con_Printf( "Localize_AddToDict( %s ): couldn't parse file. UTF-16/UTF-32 big endian isn't supported\n", filename );
-		goto error;
+		if( buflen > 3 && !pFileBuf[2] && !pFileBuf[3] )
+		{
+			Con_Printf( "Localize_AddToDict( %s ): couldn't parse file. UTF-32 big endian isn't supported\n", filename );
+			goto error;
+		}
+
+		charlen = buflen / 2 - 1;
+		isUtf16 = true;
+
+#if XASH_LITTLE_ENDIAN
+		ByteSwapUTF16File( (uint16_t *)pFileBuf, charlen );
+#endif
 	}
 
 	if( isUtf16 )
 	{
-		size_t ansiLength = len + 1;
-		afile = new char[ansiLength]; // save original pointer, so we can free it later
+		size_t utf8len = Q_UTF16ToUTF8( NULL, 0, (const uint16_t *)&pFileBuf[2], charlen );
 
-		Q_UTF16ToUTF8( afile, ansiLength, (const uint16_t *)&pFileBuf[2], ( len / 2 ) - 1 );
+		// Con_Printf( "size in utf16: %zu (%zu), size in utf8: %zu\n", buflen, charlen, utf8len );
+
+		afile = new char[utf8len + 1]; // save original pointer, so we can free it later
+
+		Q_UTF16ToUTF8( afile, utf8len + 1, (const uint16_t *)&pFileBuf[2], charlen );
 	}
 	else
 	{
@@ -418,6 +440,7 @@ static void Localize_AddToDictionary( const char *name, const char *lang )
 		{
 			// Con_DPrintf("New token: %s %s\n", token, szLocString );
 			Localize_ProcessString( token, token );
+			Localize_ProcessString( szLocString, szLocString );
 			Dictionary_Insert( token, szLocString );
 			i++;
 		}
@@ -452,7 +475,7 @@ static void Localize_InitLanguage( const char *language )
 
 static void Localize_Init( void )
 {
-	EngFuncs::ClientCmd( TRUE, "exec mainui.cfg\n" );
+	EngFuncs::ClientCmd( true, "exec mainui.cfg\n" );
 
 	hashed_cmds.Purge();
 
@@ -469,9 +492,6 @@ static void Localize_Init( void )
 		Dictionary_Insert( buf, MenuStrings[i] );
 	}
 
-	// strings.lst compatible aliasstrings then
-	UI_InitAliasStrings ();
-
 	// always load default language translation
 	Localize_InitLanguage( "english" );
 
@@ -479,6 +499,9 @@ static void Localize_Init( void )
 
 	if( language[0] && strcmp( language, "english" ))
 		Localize_InitLanguage( language );
+
+	// strings.lst compatible aliasstrings then
+	UI_InitAliasStrings ();
 }
 
 static void Localize_Free( void )

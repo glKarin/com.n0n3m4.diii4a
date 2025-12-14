@@ -72,6 +72,9 @@ void CHudStatusBar :: Reset( void )
 
 	m_iStatusValues[0] = 1;  // 0 is the special index, which always returns true
 
+	for ( i = 0; i < MAX_PLAYERS; i++ )
+		g_PlayerExtraInfo[i].showhealth = 0.0f;
+
 	// reset our colors for the status bar lines (yellow is default)
 	for ( i = 0; i < MAX_STATUSBAR_LINES; i++ )
 		m_pflNameColors[i] = g_ColorYellow;
@@ -148,6 +151,7 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 							if ( g_PlayerInfoList[indexval].name != NULL )
 							{
 								strncpy( szRepString, g_PlayerInfoList[indexval].name, MAX_PLAYER_NAME_LENGTH );
+								gHUD.m_Health.m_iPlayerLastPointedAt = indexval;
 								m_pflNameColors[line_num] = GetClientColor( indexval );
 							}
 							else
@@ -157,6 +161,8 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 
 							break;
 						case 'i':  // number
+							g_PlayerExtraInfo[gHUD.m_Health.m_iPlayerLastPointedAt].health = indexval;
+							g_PlayerExtraInfo[gHUD.m_Health.m_iPlayerLastPointedAt].showhealth = gHUD.m_flTime + 5.0f;
 							sprintf( szRepString, "%d", indexval );
 							break;
 						case 'h':  // health
@@ -213,7 +219,7 @@ int CHudStatusBar :: Draw( float fTime )
 	if( g_iUser1 > 0 )
 	{
 		// this is a spectator, so don't draw any statusbars
-		return 1;
+		return 0;
 	}
 
 	int Y_START = ScreenHeight - YRES(32 + 4);
@@ -232,8 +238,7 @@ int CHudStatusBar :: Draw( float fTime )
 		int y = Y_START - ( 4 + TextHeight * i ); // draw along bottom of screen
 
 		// let user set status ID bar centering
-		if ( i == STATUSBAR_ID_LINE &&
-			 hud_centerid->value != 0.0f )
+		if ( i == STATUSBAR_ID_LINE && hud_centerid->value != 0.0f )
 		{
 			x = max( 0, max(2, (ScreenWidth - TextWidth)) / 2 );
 			y = (ScreenHeight / 2) + (TextHeight * hud_centerid->value );
@@ -241,6 +246,7 @@ int CHudStatusBar :: Draw( float fTime )
 
 		if ( m_pflNameColors[i] )
 			DrawUtils::SetConsoleTextColor( m_pflNameColors[i][0], m_pflNameColors[i][1], m_pflNameColors[i][2] );
+
 		DrawUtils::DrawConsoleString( x, y, m_szStatusBar[i] );
 	}
 

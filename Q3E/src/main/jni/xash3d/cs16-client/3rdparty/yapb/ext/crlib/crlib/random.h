@@ -14,68 +14,69 @@ CR_NAMESPACE_BEGIN
 
 namespace detail {
    class SplitMix32 final {
-   private:
-      uint32_t state_ {};
-
+      uint32_t state_ = 0;
    public:
-      explicit SplitMix32 (const uint32_t state) noexcept : state_ (state) {}
-
-   public:
-      [[nodiscard]] decltype (auto) next () noexcept {
-         auto z = (state_ += 0x9e3779b9);
-         z = (z ^ (z >> 16)) * 0x85ebca6b;
-         z = (z ^ (z >> 13)) * 0xc2b2ae35;
+      explicit SplitMix32 (uint32_t seed) noexcept : state_ (seed) {}
+      uint32_t next () noexcept {
+         uint32_t z = (state_ += 0x9e3779b9u);
+         z = (z ^ (z >> 16)) * 0x85ebca6bu;
+         z = (z ^ (z >> 13)) * 0xc2b2ae35u;
          return z ^ (z >> 16);
       }
    };
 }
 
-// random number generator (xoshiro based)
 class RWrand final : public Singleton <RWrand> {
-private:
-   static constexpr uint64_t kRandMax { static_cast <uint64_t> (1) << 32ull };
+   uint32_t s0_ = 0, s1_ = 0, s2_ = 0;
 
-private:
-   uint32_t states_[3] {};
+    [[nodiscard]] static uint32_t rotl (uint32_t x, int k) noexcept {
+        return (x << (k & 31)) | (x >> ((32 - k) & 31));
+    }
+
+   [[nodiscard]] uint32_t next32 () noexcept {
+      const auto s0 = s0_, s1 = s1_, s2 = s2_;
+
+      s0_ = rotl (s0 + s1 + s2, 16);
+      s1_ = s0;
+      s2_ = s1;
+
+      return s0_;
+   }
 
 public:
-   explicit RWrand () noexcept  {
-      const auto seed = static_cast <uint32_t> (time (nullptr));
-
+   RWrand () noexcept {
+      const uint32_t seed = static_cast <uint32_t> (time (nullptr));
       detail::SplitMix32 smix (seed);
 
-      for (auto &state : states_) {
-         state = smix.next ();
+      s0_ = smix.next ();
+      s1_ = smix.next ();
+      s2_ = smix.next ();
+   }
+
+   [[nodiscard]] int32_t get (int32_t low, int32_t high) noexcept {
+      if (low == high) {
+         return low;
       }
-   }
-   ~RWrand () = default;
-
-
-private:
-   [[nodiscard]] uint32_t rotl (const uint32_t x, const int32_t k) noexcept  {
-      return (x << k) | (x >> (32 - k));
+      const auto range = static_cast <uint32_t> (high - low) + 1u;
+      return low + static_cast <int32_t> (next32 () % range);
    }
 
-   [[nodiscard]] uint32_t next () noexcept {
-      states_[0] = rotl (states_[0] + states_[1] + states_[2], 16);
-      states_[1] = states_[0];
-      states_[2] = states_[1];
+   [[nodiscard]] float get (float low, float high) noexcept {
+      constexpr float scale = 1.0f / 4294967296.0f;
 
-      return states_[0];
+      return low + (high - low) * (next32 () * scale);
    }
 
-public:
-   template <typename U> [[nodiscard]] decltype (auto) operator () (const U low, const U high) noexcept {
-      if constexpr (cr::is_same <U, int32_t>::value) {
-         return static_cast <int32_t> (next () * (static_cast <double> (high) - static_cast <double> (low) + 1.0) / kRandMax + static_cast <double> (low));
-      }
-      else if constexpr (cr::is_same <U, float>::value) {
-         return static_cast <float> (next () * (static_cast <double> (high) - static_cast <double> (low)) / (kRandMax - 1) + static_cast <double> (low));
-      }
+   [[nodiscard]] int32_t operator () (int32_t low, int32_t high) noexcept {
+      return get (low, high);
    }
 
-   template <int32_t Low = 0, int32_t High = 100> [[nodiscard]] decltype (auto) chance (const int32_t limit) noexcept {
-      return operator () <int32_t> (Low, High) <= limit;
+   [[nodiscard]] float operator () (float low, float high) noexcept {
+      return get (low, high);
+   }
+
+   [[nodiscard]] bool chance (int32_t percent) noexcept {
+      return get (0, 99) < percent;
    }
 };
 

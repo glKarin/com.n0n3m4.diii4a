@@ -18,12 +18,9 @@ GNU General Public License for more details.
 #include STDINT_H
 #include <stddef.h>
 
-typedef struct utfstate_s
-{
-	uint32_t uc;
-	uint8_t len;
-	uint8_t k;
-} utfstate_t;
+typedef struct utfstate_s utfstate_t;
+
+extern const uint32_t table_cp1251[64];
 
 // feed utf8 characters one by one
 // if it returns 0, feed more
@@ -36,5 +33,36 @@ size_t Q_UTF8Length( const char *s );
 
 // srcsize in byte pairs
 size_t Q_UTF16ToUTF8( char *dst, size_t dstsize, const uint16_t *src, size_t srcsize );
+
+// function to convert Unicode codepoints into CP1251 or CP1252
+uint32_t Q_UnicodeToCP1251( uint32_t uc );
+uint32_t Q_UnicodeToCP1252( uint32_t uc );
+
+typedef struct utfstate_s
+{
+#ifdef __cplusplus
+	utfstate_s() : uc( 0 ), len( 0 ), k( 0 ) { }
+
+	uint32_t Decode( uint8_t ch )
+	{
+		return Q_DecodeUTF8( this, ch );
+	}
+
+	uint32_t Decode( uint16_t ch )
+	{
+		return Q_DecodeUTF16( this, ch );
+	}
+
+	void Reset()
+	{
+		uc = 0;
+		len = k = 0;
+	}
+#endif // __cplusplus
+
+	uint32_t uc;
+	uint8_t len;
+	uint8_t k;
+} utfstate_t;
 
 #endif // UTFLIB_H

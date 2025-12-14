@@ -58,7 +58,8 @@ GNU General Public License for more details.
 //    Removed R_DrawTileClear and Mod_LoadMapSprite, as they're implemented on engine side
 //    Removed FillRGBABlend. Now FillRGBA accepts rendermode parameter.
 // 10. Added R_GetWindowHandle to retrieve platform-specific window object.
-#define REF_API_VERSION 10
+// 11. Added size argument to Mod_ProcessRenderData
+#define REF_API_VERSION 11
 
 #define TF_SKY		(TF_SKYSIDE|TF_NOMIPMAP|TF_ALLOW_NEAREST)
 #define TF_FONT		(TF_NOMIPMAP|TF_CLAMP|TF_ALLOW_NEAREST)
@@ -104,6 +105,14 @@ typedef enum
 	DEMO_QUAKE1
 } demo_mode;
 
+typedef enum window_mode_e
+{
+	WINDOW_MODE_WINDOWED = 0,
+	WINDOW_MODE_FULLSCREEN,
+	WINDOW_MODE_BORDERLESS,
+	WINDOW_MODE_COUNT,
+} window_mode_t;
+
 typedef enum ref_window_type_e
 {
 	REF_WINDOW_TYPE_NULL = 0,
@@ -124,11 +133,11 @@ typedef struct ref_globals_s
 {
 	qboolean developer;
 
-	// viewport width and height
+	// viewport width and height (physical window size)
 	int      width;
 	int      height;
 
-	qboolean fullScreen;
+	window_mode_t window_mode;
 	qboolean wideScreen;
 
 	vec3_t vieworg;
@@ -143,6 +152,10 @@ typedef struct ref_globals_s
 	size_t		visbytes;		// cluster size
 
 	int desktopBitsPixel;
+
+	// scaling factor of physical window size compared to logical
+	float scale_x;
+	float scale_y;
 } ref_globals_t;
 
 typedef struct ref_client_s
@@ -466,7 +479,7 @@ typedef struct ref_api_s
 	qboolean (*Image_Process)( rgbdata_t **pix, int width, int height, uint flags, float reserved );
 	rgbdata_t *(*FS_LoadImage)( const char *filename, const byte *buffer, size_t size );
 	qboolean (*FS_SaveImage)( const char *filename, rgbdata_t *pix );
-	rgbdata_t *(*FS_CopyImage)( rgbdata_t *in );
+	rgbdata_t *(*FS_CopyImage)( const rgbdata_t *in );
 	void (*FS_FreeImage)( rgbdata_t *pack );
 	void (*Image_SetMDLPointer)( byte *p );
 	const struct bpc_desc_s *(*Image_GetPFDesc)( int idx );
@@ -565,7 +578,7 @@ typedef struct ref_interface_s
 
 	// model management
 	// flags ignored for everything except spritemodels
-	qboolean (*Mod_ProcessRenderData)( model_t *mod, qboolean create, const byte *buffer );
+	qboolean (*Mod_ProcessRenderData)( model_t *mod, qboolean create, const byte *buffer, size_t buffersize );
 	void (*Mod_StudioLoadTextures)( model_t *mod, void *data );
 
 	// efx implementation
@@ -671,7 +684,7 @@ typedef int (*REFAPI)( int version, ref_interface_t *pFunctionTable, ref_api_t* 
 #define ENGINE_SHARED_CVAR( f, x ) ENGINE_SHARED_CVAR_NAME( f, x, x )
 
 // cvars that's logic is shared between renderer and engine
-// actually, they are just created on engine side for convinience
+// actually, they are just created on engine side for convenience
 // and must be retrieved by renderer side
 // sometimes it's done to standartize cvars to make it easier for users
 #define ENGINE_SHARED_CVAR_LIST( f ) \
@@ -701,6 +714,7 @@ typedef int (*REFAPI)( int version, ref_interface_t *pFunctionTable, ref_api_t* 
 	ENGINE_SHARED_CVAR( f, r_drawviewmodel ) \
 	ENGINE_SHARED_CVAR( f, r_glowshellfreq ) \
 	ENGINE_SHARED_CVAR( f, host_allow_materials ) \
+	ENGINE_SHARED_CVAR( f, r_pvs_radius ) \
 
 #define DECLARE_ENGINE_SHARED_CVAR_LIST() \
 	ENGINE_SHARED_CVAR_LIST( DECLARE_ENGINE_SHARED_CVAR )

@@ -156,7 +156,6 @@ int UI_FadeAlpha( int starttime, int endtime );
 const char *Info_ValueForKey( const char *s, const char *key );
 int KEY_GetKey( const char *binding );			// ripped out from engine
 char *StringCopy( const char *input );			// copy string into new memory
-int COM_CompareSaves( const void **a, const void **b );
 void Com_EscapeCommand( char *newCommand, const char *oldCommand, int len );
 void UI_EnableTextInput( bool enable );
 
@@ -185,10 +184,6 @@ inline size_t Q_strncpy( char *dst, const char *src, size_t size )
 #define CS_TIME			16	// size of time string
 
 #define MAX_SCOREBOARDNAME	32 // engine and dlls allows only 32 chars
-
-// color strings
-#define ColorIndex( c )		((( c ) - '0' ) & 7 )
-#define IsColorString( p )		( p && *( p ) == '^' && *(( p ) + 1) && *(( p ) + 1) >= '0' && *(( p ) + 1 ) <= '9' )
 
 // stringize utilites
 #define STR( x ) #x
@@ -262,8 +257,8 @@ inline bool IsEnd( int key )
 {
 	switch( key )
 	{
-	case K_HOME:
-	case K_KP_HOME:
+	case K_END:
+	case K_KP_END:
 		return true;
 	}
 	return false;
@@ -403,8 +398,6 @@ namespace Names
 bool CheckIsNameValid( const char *name );
 }
 }
-extern const int table_cp1251[64];
-int Con_UtfProcessChar(int in );
 int Con_UtfMoveLeft( const char *str, int pos );
 int Con_UtfMoveRight( const char *str, int pos, int length );
 

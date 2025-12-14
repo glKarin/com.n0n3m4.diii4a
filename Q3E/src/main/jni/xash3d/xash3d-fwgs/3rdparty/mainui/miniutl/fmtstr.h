@@ -11,8 +11,8 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <inttypes.h>
-#include <math.h>
+#include <cinttypes>
+#include <cmath>
 #include "strtools.h"
 
 #if defined( _WIN32 )
@@ -87,10 +87,6 @@ public:
 
 	inline const char* SetDouble( double f )
 	{
-#ifndef _MSC_VER
-		if ( f == 0.0  && !signbit( f ) )
-			NUMSTR_FAST_DIGIT( 0 );
-#endif
 		if ( f == 1.0 )
 			NUMSTR_FAST_DIGIT( 1 );
 		m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%.18g", f );
@@ -98,10 +94,6 @@ public:
 	}
 	inline const char* SetFloat( float f )
 	{
-#ifndef _MSC_VER
-		if ( f == 0.0f && !signbit( f ) )
-			NUMSTR_FAST_DIGIT( 0 );
-#endif
 		if ( f == 1.0f )
 			NUMSTR_FAST_DIGIT( 1 );
 		m_nLength = V_snprintf( m_szBuf, sizeof( m_szBuf ), "%.18g", f );

@@ -41,10 +41,12 @@ For additional info, run Xash3D with `-help` command line key.
 1) Copy `valve` directory to a folder named `xash` in the Internal storage.
 2) Run games from within the app.
 
-## Contributing
-* Before sending an issue, check if someone already reported your issue. Make sure you're following "How To Ask Questions The Smart Way" guide by Eric Steven Raymond. Read more: http://www.catb.org/~esr/faqs/smart-questions.html.
+## Reporting issues
 * Issues are accepted in both English and Russian.
-* Before sending a PR, check if you followed our contribution guide in CONTRIBUTING.md file.
+* They are only accepted if you run legally acquired product (e.g. Half-Life in Steam).
+
+## Contributing code
+* Check the CONTRIBUTING.md file.
 
 ## Build instructions
 We are using Waf build system. If you have some Waf-related questions, I recommend you to read [Waf Book](https://waf.io/book/).
@@ -98,6 +100,16 @@ This repository contains our fork of HLSDK and restored source code for Half-Lif
 
 * Clone this repostory: `$ git clone --recursive https://github.com/FWGS/xash3d-fwgs`.
 
+#### iOS/iPadOS
+* Install Xcode from the appstore.
+* Install [Homebrew package manager](https://brew.sh).
+
+* Install build dependencies by running: `brew install python`.
+
+* Clone the SDL2 repo `$ git clone --recursive https://github.com/libsdl-org/SDL.git -b SDL2` and compile the iOS framework by navigating to SDL/Xcode/SDL and opening the Xcode project.
+
+* Clone this repository: `$ git clone --recursive https://github.com/FWGS/xash3d-fwgs`.
+
 ### Building
 #### Windows (Visual Studio)
 0) Open command line.
@@ -116,4 +128,11 @@ If compiling 32-bit on amd64, make sure `PKG_CONFIG_PATH` from the previous step
 3) Install: `./waf install --destdir=/path/to/any/output/directory`.
 
 #### Android (Windows/Linux/macOS)
-You can just open the `android` folder in Android Studio and build from here, or use `gradlew` to build from command line.
+To build you should clone [SDL](https://github.com/libsdl-org/SDL) from `SDL2` branch and [HLSDK-portable](https://github.com/FWGS/hlsdk-portable) `mobile-hacks` branch repositories to 3rdparty folder, after that you should be able to open the project in Android Studio from `android` directory or manually call Gradle to build the APK.
+
+#### iOS/iPadOS (MacOS only)
+0) (optional) Examine which build options are available: `./waf --help`.
+1) Configure build: `./waf configure --ios --enable-bundled-deps --sdl2 (path/to/SDL2.framework)`, set `--ios-simulator` instead of `--ios` if you want to build for simulator.
+2) Compile `./waf build`.
+3) Navigate to `build` and copy your compiled SDL2.framework there, then add your client dylibs to `build/ios/cl_dlls` and any other dylibs to `build/ios/dlls` (You can also run `scripts/ios/buildhlsdk.sh` instead to automatically create an ipa with hlsdk dylibs)
+4) Run `scripts/ios/createipa.sh` to create an installable ipa

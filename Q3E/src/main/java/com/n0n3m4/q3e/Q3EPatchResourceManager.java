@@ -152,7 +152,7 @@ public class Q3EPatchResourceManager
         rsc = new Q3EPatchResource_fileToDir(
                 Q3EGameConstants.PatchResource.XASH3D_CS16_EXTRAS,
                 Q3ELang.tr(context, R.string.cs16_xash3d_extras),
-                "1",
+                Q3EGameConstants.XASH3D_VERSION,
                 Q3EGameConstants.GAME_XASH3D,
                 null,
                 "pak/xash3d/cs16client-extras.pk3",

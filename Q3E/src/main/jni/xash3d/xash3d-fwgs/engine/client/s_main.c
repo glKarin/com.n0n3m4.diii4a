@@ -37,7 +37,7 @@ static CVAR_DEFINE( s_volume, "volume", "0.7", FCVAR_ARCHIVE|FCVAR_FILTERABLE, "
 CVAR_DEFINE( s_musicvolume, "MP3Volume", "1.0", FCVAR_ARCHIVE|FCVAR_FILTERABLE, "background music volume" );
 static CVAR_DEFINE( s_mixahead, "_snd_mixahead", "0.12", FCVAR_FILTERABLE, "how much sound to mix ahead of time" );
 static CVAR_DEFINE_AUTO( s_show, "0", FCVAR_ARCHIVE|FCVAR_FILTERABLE, "show playing sounds" );
-CVAR_DEFINE_AUTO( s_lerping, "0", FCVAR_ARCHIVE|FCVAR_FILTERABLE, "apply interpolation to sound output" );
+CVAR_DEFINE_AUTO( s_lerping, "0", FCVAR_ARCHIVE|FCVAR_FILTERABLE, "apply interpolation to sound output (deprecated)" );
 static CVAR_DEFINE( s_ambient_level, "ambient_level", "0.3", FCVAR_ARCHIVE|FCVAR_FILTERABLE, "volume of environment noises (water and wind)" );
 static CVAR_DEFINE( s_ambient_fade, "ambient_fade", "1000", FCVAR_ARCHIVE|FCVAR_FILTERABLE, "rate of volume fading when client is moving" );
 static CVAR_DEFINE_AUTO( s_combine_sounds, "0", FCVAR_ARCHIVE|FCVAR_FILTERABLE, "combine channels with same sounds" );
@@ -1212,9 +1212,14 @@ static void S_FreeIdleRawChannels( void )
 
 		if( ch->s_rawend >= paintedtime )
 			continue;
-		
-		if ( ch->entnum > 0 )
+
+		if( ch->entnum > 0 )
+		{
 			SND_ForceCloseMouth( ch->entnum );
+
+			if( ch->entnum <= MAX_CLIENTS )
+				Voice_StopChannel( ch->entnum );
+		}
 
 		if(( paintedtime - ch->s_rawend ) / SOUND_DMA_SPEED >= S_RAW_SOUND_IDLE_SEC )
 		{
@@ -1801,7 +1806,7 @@ static void S_VoiceRecordStart_f( void )
 {
 	if( cls.state != ca_active )
 		return;
-	
+
 	Voice_RecordStart();
 }
 
@@ -1814,7 +1819,7 @@ static void S_VoiceRecordStop_f( void )
 {
 	if( cls.state != ca_active || !Voice_IsRecording() )
 		return;
-	
+
 	CL_AddVoiceToDatagram();
 	Voice_RecordStop();
 }

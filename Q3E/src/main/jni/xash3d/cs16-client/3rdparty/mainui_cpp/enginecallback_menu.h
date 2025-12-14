@@ -42,12 +42,12 @@ public:
 		engfuncs.pfnPIC_Free( szPicName );
 	}
 
-	static inline int	PIC_Width( HIMAGE hPic )
+	static inline int PIC_Width( HIMAGE hPic )
 	{
 		return engfuncs.pfnPIC_Width( hPic );
 	}
 
-	static inline int	PIC_Height( HIMAGE hPic )
+	static inline int PIC_Height( HIMAGE hPic )
 	{
 		return engfuncs.pfnPIC_Height( hPic );
 	}
@@ -178,12 +178,12 @@ public:
 	}
 
 	// command handlers
-	static inline int	Cmd_AddCommand( const char *cmd_name, void (*function)(void) )
+	static inline int Cmd_AddCommand( const char *cmd_name, void (*function)(void) )
 	{
 		return engfuncs.pfnAddCommand( cmd_name, function );
 	}
 
-	static inline void ClientCmd( int execute_now, const char *szCmdString )
+	static inline void ClientCmd( bool execute_now, const char *szCmdString )
 	{
 		engfuncs.pfnClientCmd( execute_now, szCmdString );
 	}
@@ -222,12 +222,12 @@ public:
 		engfuncs.pfnDrawLogo( filename, 0, 0, 0, 0 );
 	}
 
-	static inline int	GetLogoWidth( void )
+	static inline int GetLogoWidth( void )
 	{
 		return engfuncs.pfnGetLogoWidth();
 	}
 
-	static inline int	GetLogoHeight( void )
+	static inline int GetLogoHeight( void )
 	{
 		return engfuncs.pfnGetLogoHeight();
 	}
@@ -273,14 +273,14 @@ public:
 	{
 		engfuncs.pfnRenderScene( fd );
 	}
-	static inline int	CL_CreateVisibleEntity( int type, struct cl_entity_s *ent )
+	static inline int CL_CreateVisibleEntity( int type, struct cl_entity_s *ent )
 	{
 		return engfuncs.CL_CreateVisibleEntity( type, ent );
 	}
 
 	// misc handlers
 	// static inline void HostError( const char *szFmt, ... );
-	static inline int	FileExists( const char *filename, int gamedironly = 0 )
+	static inline int FileExists( const char *filename, bool gamedironly = false )
 	{
 		return engfuncs.pfnFileExists( filename, gamedironly );
 	}
@@ -291,12 +291,12 @@ public:
 	}
 
 	// gameinfo handlers
-	static inline int	CreateMapsList( int iRefresh )
+	static inline int CreateMapsList( int iRefresh )
 	{
 		return engfuncs.pfnCreateMapsList( iRefresh );
 	}
 
-	static inline int	ClientInGame( void )
+	static inline int ClientInGame( void )
 	{
 		return engfuncs.pfnClientInGame();
 	}
@@ -349,12 +349,12 @@ public:
 		engfuncs.pfnKeySetBinding( keynum, binding );
 	}
 
-	static inline int	KEY_IsDown( int keynum )
+	static inline int KEY_IsDown( int keynum )
 	{
 		return engfuncs.pfnKeyIsDown( keynum );
 	}
 
-	static inline int	KEY_GetOverstrike( void )
+	static inline int KEY_GetOverstrike( void )
 	{
 		return  engfuncs.pfnKeyGetOverstrikeMode();
 	}
@@ -401,12 +401,12 @@ public:
 		return  engfuncs.pfnGetSaveComment( savename, comment );
 	}
 
-	static inline int	GetDemoComment( const char *demoname, char *comment )
+	static inline int GetDemoComment( const char *demoname, char *comment )
 	{
 		return  engfuncs.pfnGetDemoComment( demoname, comment );
 	}
 
-	static inline int	CheckGameDll( void )	// returns false if hl.dll is missed or invalid
+	static inline int CheckGameDll( void )	// returns false if hl.dll is missed or invalid
 	{
 		return engfuncs.pfnCheckGameDll();
 	}
@@ -417,7 +417,7 @@ public:
 	}
 
 	// engine launcher
-	static inline void ShellExecute( const char *name, const char *args, int closeEngine )
+	static inline void ShellExecute( const char *name, const char *args, bool closeEngine )
 	{
 		engfuncs.pfnShellExecute( name, args, closeEngine );
 	}
@@ -442,14 +442,12 @@ public:
 		engfuncs.pfnHostEndGame( szFinalMessage );
 	}
 
-	// menu interface is freezed at version 0.75
-	// new functions starts here
 	static inline float RandomFloat( float flLow, float flHigh )
 	{
 		return engfuncs.pfnRandomFloat( flLow, flHigh );
 	}
 
-	static inline int	RandomLong( int lLow, int lHigh )
+	static inline int RandomLong( int lLow, int lHigh )
 	{
 		return engfuncs.pfnRandomLong( lLow, lHigh );
 	}
@@ -459,7 +457,7 @@ public:
 		engfuncs.pfnSetCursor( hCursor );
 	}
 
-	static inline int	IsMapValid( const char *filename )
+	static inline int IsMapValid( const char *filename )
 	{
 		return engfuncs.pfnIsMapValid( (char*)filename );
 	}
@@ -469,7 +467,7 @@ public:
 		engfuncs.pfnProcessImage( texnum, gamma, topColor, bottomColor );
 	}
 
-	static inline int	CompareFileTime( char *filename1, char *filename2, int *iCompare )
+	static inline int CompareFileTime( const char *filename1, const char *filename2, int *iCompare )
 	{
 		return engfuncs.pfnCompareFileTime( filename1, filename2, iCompare );
 	}
@@ -497,10 +495,6 @@ public:
 		if( textfuncs.pfnEnableTextInput )
 			textfuncs.pfnEnableTextInput( enable );
 	}
-
-	static int UtfProcessChar( int ch );
-	static int UtfMoveLeft( const char *str, int pos );
-	static int UtfMoveRight( const char *str, int pos, int length );
 
 	static inline bool GetRenderers( int num, char *sz1, size_t s1, char *sz2, size_t s2 )
 	{

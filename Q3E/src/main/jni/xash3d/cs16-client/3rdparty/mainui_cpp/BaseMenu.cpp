@@ -29,12 +29,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "BackgroundBitmap.h"
 #include "FontManager.h"
 #include "cursor_type.h"
+#include "utflib.h"
 
 cvar_t		*ui_showmodels;
 cvar_t		*ui_show_window_stack;
 cvar_t		*ui_borderclip;
-cvar_t		*ui_language;
-cvar_t		*ui_menu_style;
+cvar_t		*ui_prefer_won_background;
 
 uiStatic_t	uiStatic;
 static CMenuEntry	*s_pEntries = NULL;
@@ -323,8 +323,8 @@ int UI_DrawString( HFont font, int x, int y, int w, int h,
 		int pixelWide = 0;
 		int save_pixelWide = 0;
 		int save_j = 0;
+		utfstate_t state;
 
-		EngFuncs::UtfProcessChar( 0 );
 		while( string[j] )
 		{
 			if( string[j] == '\n' )
@@ -338,7 +338,7 @@ int UI_DrawString( HFont font, int x, int y, int w, int h,
 
 			line[len] = string[j];
 
-			int uch = EngFuncs::UtfProcessChar( ( unsigned char )string[j] );
+			uint32_t uch = state.Decode((uint8_t)string[j] );
 
 			if( IsColorString( string + j )) // don't calc wides for colorstrings
 			{
@@ -442,7 +442,7 @@ int UI_DrawString( HFont font, int x, int y, int w, int h,
 
 		// draw it
 		l = line;
-		EngFuncs::UtfProcessChar( 0 );
+		state.Reset();
 		while( *l )
 		{
 			if( IsColorString( l ))
@@ -466,7 +466,7 @@ int UI_DrawString( HFont font, int x, int y, int w, int h,
 			ch &= 255;
 
 // when using custom font render, we use utf-8
-			ch = EngFuncs::UtfProcessChar( (unsigned char) ch );
+			ch = state.Decode((uint8_t)ch );
 			if( !ch )
 				continue;
 
@@ -491,8 +491,6 @@ int UI_DrawString( HFont font, int x, int y, int w, int h,
 		i = j;
 	}
 
-	EngFuncs::UtfProcessChar( 0 );
-
 	return maxX;
 }
 
@@ -505,17 +503,6 @@ void UI_DrawMouseCursor( void )
 {
 	CMenuBaseItem	*item;
 	void *hCursor = (void *)dc_arrow;
-
-#if 0
-	if( !UI_IsXashFWGS( ))
-	{
-#ifdef _WIN32
-		EngFuncs::SetCursor((HICON)LoadCursor( NULL, (LPCTSTR)OCR_NORMAL ));
-#endif // _WIN32
-		return;
-	}
-#endif // 0
-
 	int cursor = uiStatic.menu.Current()->GetCursor();
 	item = uiStatic.menu.Current()->GetItemByIndex( cursor );
 
@@ -557,26 +544,40 @@ UI_StartBackGroundMap
 */
 bool UI_StartBackGroundMap( void )
 {
-	static bool	first = TRUE;
+	static int check_dll;
 
-	if( !first ) return FALSE;
+	// the list is empty
+	if( uiStatic.bgmaps.IsEmpty())
+		return false;
 
-	first = FALSE;
+	// check if server dll available only once, as it might be implemented
+	// very inefficiently
+	if( !check_dll )
+	{
+		if( EngFuncs::CheckGameDll( ))
+			check_dll = 1;
+		else
+			check_dll = -1;
+	}
+
+	if( check_dll < 0 )
+		return false;
 
 	// some map is already running
-	if( uiStatic.bgmaps.IsEmpty() || CL_IsActive() || gpGlobals->demoplayback )
-		return FALSE;
+	if( CL_IsActive() || EngFuncs::GetCvarFloat( "cl_background" ) != 0.0f || gpGlobals->demoplayback )
+		return false;
 
 	int bgmapid = EngFuncs::RandomLong( 0, uiStatic.bgmaps.Count() - 1 );
 
 	char cmd[128];
 	snprintf( cmd, sizeof( cmd ), "maps/%s.bsp", uiStatic.bgmaps[bgmapid].Get( ));
-	if( !EngFuncs::FileExists( cmd, TRUE )) return FALSE;
+	if( !EngFuncs::FileExists( cmd, true ))
+		return false;
 
 	snprintf( cmd, sizeof( cmd ), "map_background %s\n", uiStatic.bgmaps[bgmapid].Get( ));
-	EngFuncs::ClientCmd( FALSE, cmd );
+	EngFuncs::ClientCmd( false, cmd );
 
-	return TRUE;
+	return true;
 }
 
 // =====================================================================
@@ -614,15 +615,14 @@ void UI_UpdateMenu( float flTime )
 	// set from user configs
 	if( loadStuff )
 	{
+		// load background bitmaps
+		CMenuBackgroundBitmap::LoadBackground( );
+
 		// load localized strings
 		UI_LoadCustomStrings();
 
 		// load scr
 		UI_LoadScriptConfig();
-
-		// load background track
-		if( !CL_IsActive( ))
-			EngFuncs::PlayBackgroundTrack( "media/gamestartup", "media/gamestartup" );
 
 		loadStuff = false;
 	}
@@ -654,9 +654,20 @@ void UI_UpdateMenu( float flTime )
 
 	if( uiStatic.firstDraw )
 	{
-		// we loading background so skip SCR_Update
-		if( UI_StartBackGroundMap( ))
-			return;
+		static bool first = true;
+
+		if( first )
+		{
+			first = false;
+
+			// we loading background so skip SCR_Update
+			if( UI_StartBackGroundMap( ))
+				return;
+
+			// load background track
+			if( !CL_IsActive( ))
+				EngFuncs::PlayBackgroundTrack( "media/gamestartup", "media/gamestartup" );
+		}
 
 		uiStatic.firstDraw = false;
 	}
@@ -947,7 +958,7 @@ void UI_ApplyCustomColors( void )
 
 static void UI_LoadBackgroundMapList( void )
 {
-	if( !EngFuncs::FileExists( "scripts/chapterbackgrounds.txt", TRUE ))
+	if( !EngFuncs::FileExists( "scripts/chapterbackgrounds.txt", true ))
 		return;
 
 	char *afile = (char *)EngFuncs::COM_LoadFile( "scripts/chapterbackgrounds.txt", NULL );
@@ -1039,8 +1050,6 @@ int UI_VidInit( void )
 	// trying to load chapterbackgrounds.txt
 	UI_LoadBackgroundMapList ();
 
-	CMenuBackgroundBitmap::LoadBackground( );
-
 	// reload all menu buttons
 	UI_LoadBmpButtons ();
 
@@ -1079,7 +1088,7 @@ void UI_OpenUpdatePage( bool engine, bool preferstore )
 	}
 
 	if( updateUrl )
-		EngFuncs::ShellExecute( updateUrl, NULL, TRUE );
+		EngFuncs::ShellExecute( updateUrl, NULL, true );
 }
 
 void UI_UpdateDialog( int preferStore )
@@ -1128,13 +1137,10 @@ void UI_Init( void )
 	ui_showmodels = EngFuncs::CvarRegister( "ui_showmodels", "0", FCVAR_ARCHIVE );
 	ui_show_window_stack = EngFuncs::CvarRegister( "ui_show_window_stack", "0", FCVAR_ARCHIVE );
 	ui_borderclip = EngFuncs::CvarRegister( "ui_borderclip", "0", FCVAR_ARCHIVE );
-	ui_language = EngFuncs::CvarRegister( "ui_language", "english", FCVAR_ARCHIVE );
+	ui_prefer_won_background = EngFuncs::CvarRegister( "ui_prefer_won_background", "0", FCVAR_ARCHIVE );
 
 	// show cl_predict dialog
 	EngFuncs::CvarRegister( "menu_mp_firsttime2", "1", FCVAR_ARCHIVE );
-
-	// menu style
-	ui_menu_style = EngFuncs::CvarRegister( "ui_menu_style", "1", FCVAR_ARCHIVE );
 
 	for( CMenuEntry *entry = s_pEntries; entry; entry = entry->m_pNext )
 	{

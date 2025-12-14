@@ -123,7 +123,7 @@ void CMenuGameOptions::_Init( void )
 
 	allowConsole.SetNameAndStatus( L( "Enable developer console" ), L( "Turns on console when engine was run without -console or -dev parameter" ));
 	allowConsole.SetCoord( 360, 365 );
-	allowConsole.onReleased.SetCommand( FALSE, "ui_allowconsole\n" );
+	allowConsole.onReleased.SetCommand( false, "ui_allowconsole\n" );
 
 	cmdrate.SetRect( 600, 470, 200, 32 );
 	cmdrate.Setup( 20, 60, 5 );

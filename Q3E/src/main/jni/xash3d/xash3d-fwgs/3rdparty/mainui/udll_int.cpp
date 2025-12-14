@@ -50,7 +50,7 @@ extern "C" EXPORT int GetMenuAPI(UI_FUNCTIONS *pFunctionTable, ui_enginefuncs_t*
 {
 	if( !pFunctionTable || !pEngfuncsFromEngine )
 	{
-		return FALSE;
+		return false;
 	}
 
 	// copy HUD_FUNCTIONS table to engine, copy engfuncs table from engine
@@ -60,7 +60,7 @@ extern "C" EXPORT int GetMenuAPI(UI_FUNCTIONS *pFunctionTable, ui_enginefuncs_t*
 
 	gpGlobals = pGlobals;
 
-	return TRUE;
+	return true;
 }
 
 static UI_EXTENDED_FUNCTIONS gExtendedTable =
@@ -83,17 +83,17 @@ extern "C" EXPORT int GetExtAPI( int version, UI_EXTENDED_FUNCTIONS *pFunctionTa
 {
 	if( !pFunctionTable || !pEngfuncsFromEngine )
 	{
-		return FALSE;
+		return false;
 	}
 
 	if( version != MENU_EXTENDED_API_VERSION )
 	{
 		Con_Printf( "Error: failed to initialize extended menu API. Expected by DLL: %d. Got from engine: %d\n", MENU_EXTENDED_API_VERSION, version );
-		return FALSE;
+		return false;
 	}
 
 	memcpy( &EngFuncs::textfuncs, pEngfuncsFromEngine, sizeof( ui_extendedfuncs_t ) );
 	memcpy( pFunctionTable, &gExtendedTable, sizeof( UI_EXTENDED_FUNCTIONS ));
 
-	return TRUE;
+	return true;
 }

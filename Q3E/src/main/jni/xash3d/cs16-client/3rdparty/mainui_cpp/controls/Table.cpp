@@ -389,7 +389,7 @@ bool CMenuTable::KeyDown( int key )
 	}
 	else if( UI::Key::IsEnd( key ))
 	{
-		int lastItem = Q_min( m_pModel->GetRows() - 1, 0 );
+		int lastItem = Q_max( m_pModel->GetRows() - 1, 0 );
 		sound = iCurItem < lastItem ? uiStatic.sounds[SND_MOVE] : uiStatic.sounds[SND_BUZZ];
 		iCurItem = lastItem;
 	}

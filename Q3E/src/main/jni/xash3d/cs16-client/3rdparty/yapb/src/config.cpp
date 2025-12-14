@@ -7,8 +7,8 @@
 
 #include <yapb.h>
 
-ConVar cv_bind_menu_key ("bind_menu_key", "=", "Binds specified key for opening bots menu.", false);
-ConVar cv_ignore_cvars_on_changelevel ("ignore_cvars_on_changelevel", "yb_quota,yb_autovacate", "Specifies comma separated list of bot cvars, that will not be overwritten by config on changelevel.", false);
+ConVar cv_bind_menu_key ("bind_menu_key", "=", "Binds the specified key for opening the bot menu.", false);
+ConVar cv_ignore_cvars_on_changelevel ("ignore_cvars_on_changelevel", "yb_quota,yb_autovacate", "Specifies a comma separated list of bot cvars that will not be overwritten by the config on changelevel.", false);
 
 BotConfig::BotConfig () {
    m_chat.resize (Chat::Count);
@@ -46,7 +46,7 @@ void BotConfig::loadMainConfig (bool isFirstLoad) {
       return false;
    };
 
-   auto storeVarValue = [] (cvar_t *c,  StringRef value) {
+   auto storeVarValue = [] (cvar_t *c, StringRef value) {
       auto &cvars = game.getCvars ();
 
       for (auto &var : cvars) {
@@ -303,9 +303,9 @@ void BotConfig::loadChatterConfig () {
          { "Chatter_GuardingEscapeZone", Chatter::GuardingEscapeZone, kMaxChatterRepeatInterval },
          { "Chatter_GuardingVipSafety", Chatter::GuardingVIPSafety, kMaxChatterRepeatInterval },
          { "Chatter_PlantingC4", Chatter::PlantingBomb, 10.0f },
-         { "Chatter_InCombat", Chatter::InCombat,  kMaxChatterRepeatInterval },
+         { "Chatter_InCombat", Chatter::InCombat, kMaxChatterRepeatInterval },
          { "Chatter_SeeksEnemy", Chatter::SeekingEnemies, kMaxChatterRepeatInterval },
-         { "Chatter_Nothing", Chatter::Nothing,  kMaxChatterRepeatInterval },
+         { "Chatter_Nothing", Chatter::Nothing, kMaxChatterRepeatInterval },
          { "Chatter_EnemyDown", Chatter::EnemyDown, 10.0f },
          { "Chatter_UseHostage", Chatter::UsingHostages, kMaxChatterRepeatInterval },
          { "Chatter_WonTheRound", Chatter::WonTheRound, kMaxChatterRepeatInterval },
@@ -350,8 +350,9 @@ void BotConfig::loadChatterConfig () {
          { "Chatter_BombSiteSecured", Chatter::BombsiteSecured, 3.5f },
          { "Chatter_GoingToCamp", Chatter::GoingToCamp, 30.0f },
          { "Chatter_Camp", Chatter::Camping, 10.0f },
-         { "Chatter_OnARoll", Chatter::OnARoll, kMaxChatterRepeatInterval},
+         { "Chatter_OnARoll", Chatter::OnARoll, kMaxChatterRepeatInterval },
       };
+      Array <String> missingWaves {};
 
       while (file.getLine (line)) {
          line.trim ();
@@ -393,7 +394,7 @@ void BotConfig::loadChatterConfig () {
                         m_chatter[event.code].emplace (cr::move (sound), event.repeat, duration);
                      }
                      else {
-                        game.print ("Warning: Couldn't get duration of sound '%s.wav.", sound);
+                        missingWaves.push (sound);
                      }
                   }
                   sentences.clear ();
@@ -402,6 +403,18 @@ void BotConfig::loadChatterConfig () {
          }
       }
       file.close ();
+
+      if (!missingWaves.empty ()) {
+         constexpr auto kMaxErroredWaves = 10;
+
+         // too much erros bail out
+         if (missingWaves.length () > kMaxErroredWaves) {
+            cv_radio_mode.set (1);
+
+            missingWaves.resize (kMaxErroredWaves);
+         }
+         game.print ("Warning: Couldn't get duration of next chatter sounds: %s ...", String::join (missingWaves, ","));
+      }
    }
    else {
       cv_radio_mode.set (1);
@@ -619,7 +632,7 @@ void BotConfig::loadDifficultyConfig () {
    };
 
    m_difficulty[Difficulty::Expert] = {
-      {  0.1f, 0.2f }, 100, 90, 90, 21, { 0.0f, 0.0f, 0.0f }
+      { 0.1f, 0.2f }, 100, 90, 90, 21, { 0.0f, 0.0f, 0.0f }
    };
 
    // currently, mindelay, maxdelay, headprob, seenthruprob, heardthruprob, recoil, aim_error {x,y,z}
@@ -708,12 +721,12 @@ void BotConfig::loadCustomConfig () {
 
    auto setDefaults = [&] () {
       m_custom = {
-         { "C4ModelName",  "c4.mdl" },
-         { "AMXParachuteCvar",  "sv_parachute" },
-         { "CustomCSDMSpawnPoint",  "view_spawn" },
+         { "C4ModelName", "c4.mdl" },
+         { "AMXParachuteCvar", "sv_parachute" },
+         { "CustomCSDMSpawnPoint", "view_spawn" },
          { "CSDMDetectCvar", "csdm_active" },
          { "ZMDetectCvar", "zp_delay" },
-         { "ZMDelayCvar",  "zp_delay" },
+         { "ZMDelayCvar", "zp_delay" },
          { "ZMInfectedTeam", "T" },
          { "EnableFakeBotFeatures", "no" },
          { "DisableLogFile", "no" },

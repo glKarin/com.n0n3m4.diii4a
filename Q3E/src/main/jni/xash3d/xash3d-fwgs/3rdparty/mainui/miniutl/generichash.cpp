@@ -50,7 +50,9 @@ uint32_t MurmurHash3_32( const void * key, size_t len, uint32_t seed, bool bCase
 
 	for(ptrdiff_t i = -nblocks; i; i++)
 	{
-		uint32_t k1 = LittleDWord(blocks[i]);
+		uint32_t t1;
+		memcpy(&t1, blocks+i, sizeof(uint32_t));
+		uint32_t k1 = LittleDWord(t1);
 		k1 &= uSourceBitwiseAndMask;
 
 		k1 *= 0xcc9e2d51;

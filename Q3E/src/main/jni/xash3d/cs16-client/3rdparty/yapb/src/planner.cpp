@@ -8,21 +8,21 @@
 #include <yapb.h>
 
 ConVar cv_path_heuristic_mode ("path_heuristic_mode", "0", "Selects the heuristic function mode. For debug purposes only.", true, 0.0f, 4.0f);
-ConVar cv_path_floyd_memory_limit ("path_floyd_memory_limit", "6", "Limit maximum floyd-warshall memory (megabytes). Use Dijkstra if memory exceeds.", true, 0.0, 32.0f);
-ConVar cv_path_dijkstra_simple_distance ("path_dijkstra_simple_distance", "1", "Use simple distance path calculation instead of running full Dijkstra path cycle. Used only when Floyd matrices unavailable due to memory limit.");
-ConVar cv_path_astar_post_smooth ("path_astar_post_smooth", "0", "Enables post-smoothing for A*. Reduces zig-zags on paths at cost of some CPU cycles.");
-ConVar cv_path_randomize_on_round_start ("path_randomize_on_round_start", "1", "Randomize pathfinding on each round start.");
+ConVar cv_path_floyd_memory_limit ("path_floyd_memory_limit", "6", "Limits the maximum Floyd-Warshall memory (megabytes). Uses Dijkstra if memory is exceeded.", true, 0.0, 32.0f);
+ConVar cv_path_dijkstra_simple_distance ("path_dijkstra_simple_distance", "1", "Uses simple distance path calculation instead of running a full Dijkstra path cycle. Used only when Floyd matrices are unavailable due to memory limits.");
+ConVar cv_path_astar_post_smooth ("path_astar_post_smooth", "0", "Enables post-smoothing for A*. Reduces zig-zags on paths at the cost of some CPU cycles.");
+ConVar cv_path_randomize_on_round_start ("path_randomize_on_round_start", "1", "Randomizes pathfinding on each round start.");
 
 float PlannerHeuristic::gfunctionKillsDist (int team, int currentIndex, int parentIndex) {
    if (parentIndex == kInvalidNodeIndex) {
       return 0.0f;
    }
-   auto cost = practice.plannerGetDamage (team, currentIndex, currentIndex, true);
+   auto cost = practice.getDamageEx (team, currentIndex, currentIndex, true);
    const auto &current = graph[currentIndex];
 
    for (const auto &neighbour : current.links) {
       if (neighbour.index != kInvalidNodeIndex) {
-         cost += practice.plannerGetDamage (team, neighbour.index, neighbour.index, false);
+         cost += practice.getDamageEx (team, neighbour.index, neighbour.index, false);
       }
    }
 
@@ -45,12 +45,12 @@ float PlannerHeuristic::gfunctionKillsDistCTWithHostage (int team, int currentIn
 }
 
 float PlannerHeuristic::gfunctionKills (int team, int currentIndex, int) {
-   auto cost = practice.plannerGetDamage (team, currentIndex, currentIndex, false);
+   auto cost = practice.getDamageEx (team, currentIndex, currentIndex, false);
    const auto &current = graph[currentIndex];
 
    for (const auto &neighbour : current.links) {
       if (neighbour.index != kInvalidNodeIndex) {
-         cost += practice.plannerGetDamage (team, neighbour.index, neighbour.index, false);
+         cost += practice.getDamageEx (team, neighbour.index, neighbour.index, false);
       }
    }
 
@@ -184,7 +184,7 @@ bool AStarAlgo::cantSkipNode (const int a, const int b, bool skipVisCheck) {
    }
 
    if (!skipVisCheck) {
-      const bool notVisible = !vistab.visible (ag.number, bg.number) || !vistab.visible (bg.number, ag.number);
+      const bool notVisible = !vistab.visibleBothSides (ag.number, bg.number);
 
       if (notVisible) {
          return true;
@@ -264,7 +264,7 @@ AStarResult AStarAlgo::find (int botTeam, int srcIndex, int destIndex, NodeAdder
    auto rsRandomizer = 1.0f;
 
    // randomize path on round start now and then
-   if (cv_path_randomize_on_round_start && bots.getRoundStartTime () + 2.0f > game.time ()) {
+   if (cv_path_randomize_on_round_start && gameState.getRoundStartTime () + 2.0f > game.time ()) {
       rsRandomizer = rg (0.5f, static_cast <float> (botTeam) * 2.0f);
    }
 
@@ -274,6 +274,11 @@ AStarResult AStarAlgo::find (int botTeam, int srcIndex, int destIndex, NodeAdder
 
       // safes us from bad graph...
       if (m_routeQue.length () >= getMaxLength () - 1) {
+         m_routeQue.clear ();
+
+         // infrom pathfinder to use floyds in that case
+         planner.setPathsCheckFailed (true);
+
          return AStarResult::InternalError;
       }
 
@@ -367,7 +372,7 @@ void FloydWarshallAlgo::syncRebuild () {
    for (int k = 0; k < m_length; ++k) {
       for (int i = 0; i < m_length; ++i) {
          for (int j = 0; j < m_length; ++j) {
-            int distance = (matrix + (i * m_length) + k)->dist + (matrix + (k * m_length) + j)->dist;
+            const auto distance = (matrix + (i * m_length) + k)->dist + (matrix + (k * m_length) + j)->dist;
 
             if (distance < (matrix + (i * m_length) + j)->dist) {
                *(matrix + (i * m_length) + j) = { (matrix + (i * m_length) + k)->index, distance };

@@ -7,7 +7,7 @@
 
 #include <yapb.h>
 
-ConVar cv_max_nodes_for_predict ("max_nodes_for_predict", "22", "Maximum number for path length, to predict the enemy.", true, 15.0f, 256.0f);
+ConVar cv_max_nodes_for_predict ("max_nodes_for_predict", "22", "Maximum number of path nodes to predict the enemy.", true, 15.0f, 256.0f);
 ConVar cv_whose_your_daddy ("whose_your_daddy", "0", "Enables or disables extra hard difficulty for bots.");
 
 // game console variables
@@ -230,7 +230,11 @@ void Bot::updateLookAngles () {
    float angleDiffYaw = cr::anglesDifference (direction.y, m_idealAngles.y);
 
    // prevent reverse facing angles  when navigating normally
-   if (m_moveToGoal && !importantAimFlags && !m_pathOrigin.empty ()) {
+   if (m_moveToGoal
+      && !importantAimFlags
+      && !m_pathOrigin.empty ()
+      && !isOnLadder ()) {
+
       const float forward = (m_lookAt - pev->origin).yaw ();
 
       if (!cr::fzero (forward)) {
@@ -425,19 +429,28 @@ void Bot::setAimDirection () {
    if (!(flags & (AimFlags::Grenade | AimFlags::Enemy | AimFlags::Entity))) {
 
       // check if narrow place and we're duck, do not predict enemies in that situation
-      const bool duckedInNarrowPlace = isInNarrowPlace () && ((m_pathFlags & NodeFlag::Crouch) || (pev->button & IN_DUCK));
+      const bool duckedInNarrowPlace = isInNarrowPlace ()
+         && ((m_pathFlags & NodeFlag::Crouch)
+            || (pev->button & IN_DUCK));
 
-      if (duckedInNarrowPlace || isOnLadder () || isInWater () || (m_pathFlags & NodeFlag::Ladder) || (m_currentTravelFlags & PathFlag::Jump)) {
+      if (duckedInNarrowPlace
+         || isOnLadder ()
+         || isInWater ()
+         || (m_pathFlags & NodeFlag::Ladder)
+         || (m_currentTravelFlags & PathFlag::Jump)) {
+
          flags &= ~(AimFlags::LastEnemy | AimFlags::PredictPath);
-         m_canChooseAimDirection = false;
+         m_canSetAimDirection = false;
       }
 
       // don't switch view right away after loosing focus with current enemy 
-      if ((m_shootTime + rg (1.0f, 1.5f) > game.time () || m_seeEnemyTime + 1.5f > game.time ())
+      if ((m_shootTime + rg (0.75f, 1.25f) > game.time ()
+         || m_seeEnemyTime + rg (1.0f, 1.25f) > game.time ())
+
          && m_forgetLastVictimTimer.elapsed ()
          && !m_lastEnemyOrigin.empty ()
-         && util.isAlive (m_lastEnemy)
-         && game.isNullEntity (m_enemy)) {
+         && game.isPlayerEntity (m_lastEnemy)
+         && !game.isPlayerEntity (m_enemy)) {
 
          flags |= AimFlags::LastEnemy;
       }
@@ -494,7 +507,7 @@ void Bot::setAimDirection () {
    else if (flags & AimFlags::PredictPath) {
       bool changePredictedEnemy = true;
 
-      if (m_timeNextTracking < game.time () && m_trackingEdict == m_lastEnemy && util.isAlive (m_lastEnemy)) {
+      if (m_timeNextTracking < game.time () && m_trackingEdict == m_lastEnemy && game.isAliveEntity (m_lastEnemy)) {
          changePredictedEnemy = false;
       }
 
@@ -523,7 +536,8 @@ void Bot::setAimDirection () {
          }
          const float distToPredictNodeSq = graph[predictNode].origin.distanceSq (pev->origin);
 
-         if (distToPredictNodeSq >= cr::sqrf (2048.0f)) {
+         if (distToPredictNodeSq >= cr::sqrf (2048.0f) ||
+            distToPredictNodeSq <= cr::sqrf (256.0f)) {
             return false;
          }
 
@@ -533,7 +547,8 @@ void Bot::setAimDirection () {
 
             return false;
          }
-         return isNodeValidForPredict (predictNode) && pathLength < cv_max_nodes_for_predict.as <int> ();
+         return isNodeValidForPredict (predictNode) && pathLength < cv_max_nodes_for_predict.as <int> ()
+            && numEnemiesNear (graph[predictNode].origin, 1024.0f) > 0;
       };
 
       if (changePredictedEnemy) {
@@ -564,46 +579,21 @@ void Bot::setAimDirection () {
       const auto &destOrigin = m_destOrigin + pev->view_ofs;
       m_lookAt = destOrigin;
 
-      if (m_moveToGoal && m_seeEnemyTime + 4.0f < game.time ()
-         && !m_isStuck && !(pev->button & IN_DUCK)
-         && m_currentNodeIndex != kInvalidNodeIndex
-         && !(m_pathFlags & (NodeFlag::Ladder | NodeFlag::Crouch))
-         && m_pathWalk.hasNext () && !isOnLadder ()
-         && pev->origin.distanceSq (destOrigin) < cr::sqrf (512.0f)) {
-
-         const auto nextPathIndex = m_pathWalk.next ();
-         const auto nextPathX2 = m_pathWalk.nextX2 ();
-
-         if (vistab.visible (m_currentNodeIndex, nextPathX2)) {
-            const auto &gn = graph[nextPathX2];
-            m_lookAt = gn.origin + pev->view_ofs;
-         }
-         else if (vistab.visible (m_currentNodeIndex, nextPathIndex)) {
-            const auto &gn = graph[nextPathIndex];
-            m_lookAt = gn.origin + pev->view_ofs;
-         }
-         else {
-            m_lookAt = pev->origin + pev->view_ofs + pev->v_angle.forward () * 300.0f;
-         }
-      }
-      else {
-         m_lookAt = destOrigin;
-      }
-      const bool horizontalMovement = (m_pathFlags & NodeFlag::Ladder) || isOnLadder ();
+      const bool verticalMove = (m_pathFlags & NodeFlag::Ladder) || isOnLadder () || isPreviousLadder () || pev->velocity.z > 16.0f;
 
       if (m_numEnemiesLeft > 0
-         && m_canChooseAimDirection
+         && m_canSetAimDirection
          && m_seeEnemyTime + 4.0f < game.time ()
-         && m_currentNodeIndex != kInvalidNodeIndex
-         && !horizontalMovement) {
+         && graph.exists (m_currentNodeIndex)
+         && !(m_aimFlags & AimFlags::PredictPath)) {
 
          const auto dangerIndex = practice.getIndex (m_team, m_currentNodeIndex, m_currentNodeIndex);
 
          if (graph.exists (dangerIndex)
-            && vistab.visible (m_currentNodeIndex, dangerIndex)
+            && vistab.visibleBothSides (m_currentNodeIndex, dangerIndex)
             && !(graph[dangerIndex].flags & NodeFlag::Crouch)) {
 
-            if (pev->origin.distanceSq (graph[dangerIndex].origin) < cr::sqrf (512.0f)) {
+            if (pev->origin.distanceSq (graph[dangerIndex].origin) < cr::sqrf (240.0f)) {
                m_lookAt = destOrigin;
             }
             else {
@@ -614,23 +604,64 @@ void Bot::setAimDirection () {
             }
          }
       }
+      else if (!verticalMove
+         && m_moveToGoal
+         && m_canSetAimDirection
+         && isOnFloor ()
+         && !isDucking ()
+         && graph.exists (m_currentNodeIndex)
+         && m_pathWalk.hasNext ()
+         && pev->origin.distanceSq (destOrigin) < cr::sqrf (384.0f)
+         && m_path->radius >= 16.0f
+         && m_path->flags == 0 && graph[m_pathWalk.next ()].flags == 0) {
+
+         const auto nextPathIndex = m_pathWalk.next ();
+         const auto isNarrowPlace = isInNarrowPlace ();
+
+         if (graph.exists (nextPathIndex)
+            && cr::abs (graph[nextPathIndex].origin.z - m_pathOrigin.z) < 8.0f) {
+
+            if (m_pathWalk.length () > 2 && !isNarrowPlace) {
+               const auto nextPathIndexX2 = m_pathWalk.nextX2 ();
+
+               if (vistab.visibleBothSides (m_currentNodeIndex, nextPathIndexX2)) {
+                  m_lookAt = graph[nextPathIndexX2].origin + pev->view_ofs;
+               }
+            }
+            else if (!isNarrowPlace && vistab.visibleBothSides (m_currentNodeIndex, nextPathIndex)) {
+               m_lookAt = graph[nextPathIndex].origin + pev->view_ofs;
+            }
+            else {
+               m_lookAt = destOrigin;
+            }
+         }
+         else {
+            m_lookAt = destOrigin;
+         }
+      }
 
       // try look at next node if on ladder
-      if (horizontalMovement && m_pathWalk.hasNext ()) {
+      if (verticalMove && m_pathWalk.hasNext ()) {
          const auto &nextPath = graph[m_pathWalk.next ()];
 
-         if ((nextPath.flags & NodeFlag::Ladder) && m_destOrigin.distanceSq (pev->origin) < cr::sqrf (128.0f) && nextPath.origin.z > m_pathOrigin.z + 26.0f) {
+         if ((nextPath.flags & NodeFlag::Ladder)
+            && m_destOrigin.distanceSq (pev->origin) < cr::sqrf (96.0f)
+            && nextPath.origin.z > m_pathOrigin.z + 26.0f) {
+
             m_lookAt = nextPath.origin + pev->view_ofs;
          }
       }
 
       // don't look at bottom of node, if reached it
-      if (m_lookAt == destOrigin && !horizontalMovement) {
+      if (m_lookAt == destOrigin && !verticalMove) {
          m_lookAt.z = getEyesPos ().z;
       }
 
       // try to look at last victim for a little, maybe there's some one else
-      if (game.isNullEntity (m_enemy) && m_difficulty >= Difficulty::Normal && !m_forgetLastVictimTimer.elapsed () && !m_lastVictimOrigin.empty ()) {
+      if (game.isNullEntity (m_enemy) && m_difficulty >= Difficulty::Normal
+         && !m_forgetLastVictimTimer.elapsed ()
+         && !m_lastVictimOrigin.empty ()) {
+
          m_lookAt = m_lastVictimOrigin + pev->view_ofs;
       }
    }

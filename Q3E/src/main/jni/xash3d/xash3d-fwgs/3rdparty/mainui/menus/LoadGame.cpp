@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -48,6 +48,22 @@ private:
 	char comment[256];
 	char elapsed_time[CS_SIZE];
 };
+
+/*
+============
+COM_CompareSaves
+============
+*/
+static int COM_CompareSaves( const void *a, const void *b )
+{
+	const char *file1 = *((const char **)a);
+	const char *file2 = *((const char **)b);
+	int bResult = 0;
+
+	EngFuncs::CompareFileTime( file2, file1, &bResult );
+
+	return bResult;
+}
 
 class CMenuSavePreview : public CMenuBaseItem
 {
@@ -178,10 +194,10 @@ void CMenuSavesListModel::Update( void )
 	int numFiles;
 
 	RemoveAll();
-	filenames = EngFuncs::GetFilesList( "save/*.sav", &numFiles, TRUE );
+	filenames = EngFuncs::GetFilesList( "save/*.sav", &numFiles, true );
 
 	// sort the saves in reverse order (oldest past at the end)
-	qsort( filenames, numFiles, sizeof( *filenames ), (cmpfunc)COM_CompareSaves );
+	qsort( filenames, numFiles, sizeof( *filenames ), COM_CompareSaves );
 
 	if( parent->IsSaveMode( ) && CL_IsActive( ))
 	{
@@ -359,7 +375,7 @@ void CMenuLoadGame::LoadGame()
 
 	snprintf( cmd, sizeof( cmd ), "load \"%s\"\n", name );
 	EngFuncs::StopBackgroundTrack( );
-	EngFuncs::ClientCmd( FALSE, cmd );
+	EngFuncs::ClientCmd( false, cmd );
 	UI_CloseMenu();
 }
 
@@ -375,7 +391,7 @@ void CMenuLoadGame::SaveGame()
 	EngFuncs::PIC_Free( cmd );
 
 	snprintf( cmd, sizeof( cmd ), "save \"%s\"\n", name );
-	EngFuncs::ClientCmd( FALSE, cmd );
+	EngFuncs::ClientCmd( false, cmd );
 	UI_CloseMenu();
 }
 
@@ -403,7 +419,7 @@ void CMenuLoadGame::DeleteGame()
 	const char *name = savesListModel[savesList.GetCurrentIndex( )].name;
 
 	snprintf( cmd, sizeof( cmd ), "killsave \"%s\"\n", name );
-	EngFuncs::ClientCmd( TRUE, cmd );
+	EngFuncs::ClientCmd( true, cmd );
 
 	snprintf( cmd, sizeof( cmd ), "save/%s.bmp", name );
 	EngFuncs::PIC_Free( cmd );

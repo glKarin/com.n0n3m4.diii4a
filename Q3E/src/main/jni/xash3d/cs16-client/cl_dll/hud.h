@@ -409,7 +409,7 @@ protected:
 	enum {
 		MAX_STATUSTEXT_LENGTH = 128,
 		MAX_STATUSBAR_VALUES = 8,
-		MAX_STATUSBAR_LINES = 2,
+		MAX_STATUSBAR_LINES = 1
 	};
 
 	char m_szStatusText[MAX_STATUSBAR_LINES][MAX_STATUSTEXT_LENGTH];  // a text string describing how the status bar is to be drawn
@@ -428,23 +428,31 @@ struct extra_player_info_t
 {
 	short frags;
 	short deaths;
-	short playerclass;
-	short teamnumber;
-	char teamname[MAX_TEAM_NAME];
-	bool has_c4;
-	bool vip;
-	bool dead;
-	bool showhealth;
-	bool nextflash;
-	bool talking;
+	short team_id;
+	qboolean has_c4;
+	qboolean vip;
 	Vector origin;
-	int health;
+
+	// radar stuff...
+	// float radarflash;
+	// qboolean radarflashon;
+	// int radarflashes;
 	int radarflashes;
 	float radarflashtime;
 	float radarflashtimedelta;
+	bool nextflash;
+
+	short playerclass;
+	short teamnumber;
+	char teamname[MAX_TEAM_NAME];
+	bool dead;
+	float showhealth;
+	int health;
+	bool talking;
 	char location[MAX_LOCATION_NAME];
 	int sb_health;
 	int sb_account;
+	qboolean has_defuse_kit;
 };
 
 struct team_info_t 
@@ -897,7 +905,6 @@ public:
 	void CalcAllNeededData( );
 
 	bool m_bBombPlanted;
-	int m_iPlayerLastPointedAt;
 
 private:	
 	// szMapName is 64 bytes only. Removing "maps/" and ".bsp" gived me this result
@@ -1019,6 +1026,7 @@ public:
 	cvar_t *cscl_currentmoney;
 	cvar_t *cscl_currentmap;
 	cvar_t *cscl_mapprefix;
+	cvar_t *cl_viewbob;
 
 	cvar_t* m_pCvarColor;
 	unsigned long m_iDefaultHUDColor;

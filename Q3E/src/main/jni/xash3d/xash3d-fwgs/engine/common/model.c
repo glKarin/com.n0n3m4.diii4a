@@ -29,8 +29,9 @@ static model_t	mod_known[MAX_MODELS];
 static int	mod_numknown = 0;
 poolhandle_t      com_studiocache;		// cache for submodels
 CVAR_DEFINE( mod_studiocache, "r_studiocache", "1", FCVAR_ARCHIVE, "enables studio cache for speedup tracing hitboxes" );
-CVAR_DEFINE_AUTO( r_wadtextures, "0", 0, "completely ignore textures in the bsp-file if enabled" );
+CVAR_DEFINE_AUTO( r_wadtextures, "0", FCVAR_LATCH, "completely ignore textures in the bsp-file if enabled" );
 CVAR_DEFINE_AUTO( r_showhull, "0", 0, "draw collision hulls 1-3" );
+CVAR_DEFINE_AUTO( r_allow_wad3_luma, "0", FCVAR_LATCH|FCVAR_ARCHIVE, "allow usage of luma textures in wad3 (tilde textures)" );
 
 /*
 ===============================================================================
@@ -87,7 +88,7 @@ static void Mod_FreeUserData( model_t *mod )
 #if !XASH_DEDICATED
 	else
 	{
-		ref.dllFuncs.Mod_ProcessRenderData( mod, false, NULL );
+		ref.dllFuncs.Mod_ProcessRenderData( mod, false, NULL, 0 );
 	}
 #endif
 }
@@ -142,6 +143,7 @@ void Mod_Init( void )
 	Cvar_RegisterVariable( &mod_studiocache );
 	Cvar_RegisterVariable( &r_wadtextures );
 	Cvar_RegisterVariable( &r_showhull );
+	Cvar_RegisterVariable( &r_allow_wad3_luma );
 
 	Cmd_AddCommand( "mapstats", Mod_PrintWorldStats_f, "show stats for currently loaded map" );
 	Cmd_AddCommand( "modellist", Mod_Modellist_f, "display loaded models list" );
@@ -296,19 +298,19 @@ model_t *Mod_LoadModel( model_t *mod, qboolean crash )
 	// call the apropriate loader
 	switch( *(uint *)buf )
 	{
-	case IDSTUDIOHEADER:
+	case LittleLong( IDSTUDIOHEADER ):
 		Mod_LoadStudioModel( mod, buf, &loaded );
 		break;
-	case IDSPRITEHEADER:
-		Mod_LoadSpriteModel( mod, buf, &loaded );
+	case LittleLong( IDSPRITEHEADER ):
+		Mod_LoadSpriteModel( mod, buf, length, &loaded );
 		break;
-	case IDALIASHEADER:
+	case LittleLong( IDALIASHEADER ):
 		Mod_LoadAliasModel( mod, buf, &loaded );
 		break;
-	case Q1BSP_VERSION:
-	case HLBSP_VERSION:
-	case QBSP2_VERSION:
-		Mod_LoadBrushModel( mod, buf, &loaded );
+	case LittleLong( Q1BSP_VERSION ):
+	case LittleLong( HLBSP_VERSION ):
+	case LittleLong( QBSP2_VERSION ):
+		Mod_LoadBrushModel( mod, buf, length, &loaded );
 		break;
 	default:
 		Mem_Free( buf );
@@ -334,7 +336,7 @@ model_t *Mod_LoadModel( model_t *mod, qboolean crash )
 #if !XASH_DEDICATED
 		else
 		{
-			loaded2 = ref.dllFuncs.Mod_ProcessRenderData( mod, true, buf );
+			loaded2 = ref.dllFuncs.Mod_ProcessRenderData( mod, true, buf, length );
 		}
 #endif
 	}

@@ -135,7 +135,7 @@ void CMenuCustomGame::ChangeGame( void *pExtra )
 {
 	char cmd[128];
 	snprintf( cmd, sizeof( cmd ), "game %s\n", (const char*)pExtra );
-	EngFuncs::ClientCmd( FALSE, cmd );
+	EngFuncs::ClientCmd( false, cmd );
 }
 
 void CMenuCustomGame::Go2Site( void *pExtra )

@@ -314,6 +314,8 @@ void CHud :: Init( void )
 	cl_charset = gEngfuncs.pfnGetCvarPointer( "cl_charset" );
 	con_charset = gEngfuncs.pfnGetCvarPointer( "con_charset" );
 
+	cl_viewbob = CVAR_CREATE( "cl_viewbob", "1", FCVAR_ARCHIVE );
+
 	m_pShowHealth = CVAR_CREATE( "scoreboard_showhealth", "1", FCVAR_ARCHIVE );
 	m_pShowMoney = CVAR_CREATE( "scoreboard_showmoney", "1", FCVAR_ARCHIVE );
 

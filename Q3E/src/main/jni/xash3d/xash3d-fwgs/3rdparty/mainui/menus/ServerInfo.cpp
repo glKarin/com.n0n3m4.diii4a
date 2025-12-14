@@ -189,10 +189,9 @@ class CMenuServerInfo : public CMenuFramework
 public:
 	CMenuServerInfo() : CMenuFramework( "CMenuServerInfo" ) {}
 
-	void Set( netadr_t adr, const char *hostname, bool legacy )
+	void Set( netadr_t adr, const char *hostname )
 	{
 		m_adr = adr;
-		m_legacy = legacy;
 
 		Q_strncpy( server_hostname_str, hostname, sizeof( server_hostname_str ));
 		server_hostname.szName = server_hostname_str;
@@ -218,7 +217,6 @@ private:
 	void _Init() override;
 
 	netadr_t m_adr;
-	bool m_legacy;
 	CMenuAction server_hostname_hint;
 	CMenuAction server_hostname;
 	CMenuAction server_address_hint;
@@ -245,10 +243,10 @@ private:
 
 ADD_MENU( menu_serverinfo, CMenuServerInfo, UI_ServerInfo_Menu )
 
-void UI_ServerInfo_Menu( netadr_t adr, const char *hostname, bool legacy )
+void UI_ServerInfo_Menu( netadr_t adr, const char *hostname )
 {
 	UI_ServerInfo_Menu();
-	menu_serverinfo->Set( adr, hostname, legacy );
+	menu_serverinfo->Set( adr, hostname );
 	menu_serverinfo->DoNetworkRequests();
 }
 
@@ -274,67 +272,29 @@ void CMenuServerInfo::PlayersResponse( net_response_t *resp )
 
 	char *s = (char *)resp->response;
 
-	if( s[0] != '\\' ) // legacy answer, which isn't an infostring
+	int count = atoi( Info_ValueForKey( s, "players" ));
+	players_model.players.EnsureCapacity( count );
+
+	for( int i = 0; i < count; i++ )
 	{
-		char *p;
+		char temp[64];
+		const char *name;
+		int frags;
+		float time;
 
-		p = strtok( s, "\\" );
+		snprintf( temp, sizeof( temp ), "p%ifrags", i );
+		frags = atoi( Info_ValueForKey( s, temp ));
 
-		do
-		{
-			char name[64];
-			int frags, i;
-			float time;
+		snprintf( temp, sizeof( temp ), "p%itime", i );
+		time = atof( Info_ValueForKey( s, temp ));
 
-			if( p == nullptr )
-				break;
-			i = atoi( p );
+		// keep last so pointer returned by Info_ValueForKey won't be rewritten
+		snprintf( temp, sizeof( temp ), "p%iname", i );
+		name = Info_ValueForKey( s, temp );
 
-			if(( p = strtok( nullptr, "\\" )) == nullptr )
-				break;
-			Q_strncpy( name, p, sizeof( name ));
+		player_entry_t entry( i, name, frags, time );
 
-			if(( p = strtok( nullptr, "\\" )) == nullptr )
-				break;
-			frags = atoi( p );
-
-			if(( p = strtok( nullptr, "\\" )) == nullptr )
-				break;
-			time = atof( p );
-
-			player_entry_t entry( i, name, frags, time );
-			players_model.players.AddToTail( entry );
-
-			p = strtok( nullptr, "\\" );
-		} while( true );
-
-	}
-	else
-	{
-		int count = atoi( Info_ValueForKey( s, "players" ));
-		players_model.players.EnsureCapacity( count );
-
-		for( int i = 0; i < count; i++ )
-		{
-			char temp[64];
-			const char *name;
-			int frags;
-			float time;
-
-			snprintf( temp, sizeof( temp ), "p%ifrags", i );
-			frags = atoi( Info_ValueForKey( s, temp ));
-
-			snprintf( temp, sizeof( temp ), "p%itime", i );
-			time = atof( Info_ValueForKey( s, temp ));
-
-			// keep last so pointer returned by Info_ValueForKey won't be rewritten
-			snprintf( temp, sizeof( temp ), "p%iname", i );
-			name = Info_ValueForKey( s, temp );
-
-			player_entry_t entry( i, name, frags, time );
-
-			players_model.players.AddToTail( entry );
-		}
+		players_model.players.AddToTail( entry );
 	}
 }
 
@@ -346,39 +306,31 @@ void CMenuServerInfo::RulesResponse( net_response_t *resp )
 	if( resp->response == nullptr )
 		return;
 
-	if( m_legacy )
+	char *s = (char *)resp->response;
+	int count = atoi( Info_ValueForKey( s, "rules" ));
+	char *p;
+
+	rules_model.rules.EnsureCapacity( count );
+
+	p = strtok( s, "\\" );
+
+	do
 	{
-		// this call is useless in old engine, it prints serverinfo
-		// which doesn't contain needed information for us
-	}
-	else
-	{
-		char *s = (char *)resp->response;
-		int count = atoi( Info_ValueForKey( s, "rules" ));
-		char *p;
+		server_rule_t rule;
 
-		rules_model.rules.EnsureCapacity( count );
+		if( p == nullptr )
+			break;
+		rule.rule.SetValue( p );
 
-		p = strtok( s, "\\" );
+		if(( p = strtok( nullptr, "\\" )) == nullptr )
+			break;
+		rule.value.SetValue( p );
 
-		do
-		{
-			server_rule_t rule;
+		if( rule.rule != "rules" )
+			rules_model.rules.AddToTail( rule );
 
-			if( p == nullptr )
-				break;
-			rule.rule.SetValue( p );
-
-			if(( p = strtok( nullptr, "\\" )) == nullptr )
-				break;
-			rule.value.SetValue( p );
-
-			if( rule.rule != "rules" )
-				rules_model.rules.AddToTail( rule );
-
-			p = strtok( nullptr, "\\" );
-		} while( true );
-	}
+		p = strtok( nullptr, "\\" );
+	} while( true );
 }
 
 void CMenuServerInfo::PingResponseFunc( net_response_t *resp )
@@ -399,7 +351,7 @@ void CMenuServerInfo::RulesResponseFunc( net_response_t *resp )
 void CMenuServerInfo::DoNetworkRequests()
 {
 	// always generate random context, the engine will verify it for us
-	int flags = m_legacy ? FNETAPI_LEGACY_PROTOCOL : 0;
+	int flags = 0;
 	const double timeout = 10.0;
 
 	ping_context = EngFuncs::RandomLong( 0, 0x7fffffff );

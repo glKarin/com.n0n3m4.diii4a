@@ -30,7 +30,7 @@
 
 bool Plat_IsInDebugSession()
 {
-#if defined(OSX)
+#if defined(__APPLE__)
 	int mib[4];
 	struct kinfo_proc info;
 	size_t size;

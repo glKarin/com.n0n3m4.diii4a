@@ -9,9 +9,10 @@
 
 ConVar cv_csdm_mode ("csdm_mode", "0", "Enables or disables CSDM / FFA mode for bots.\nAllowed values: '0', '1', '2', '3'.\nIf '0', CSDM / FFA mode is auto-detected.\nIf '1', CSDM mode is enabled, but FFA is disabled.\nIf '2', CSDM and FFA mode is enabled.\nIf '3', CSDM and FFA mode is disabled.", true, 0.0f, 3.0f);
 ConVar cv_ignore_map_prefix_game_mode ("ignore_map_prefix_game_mode", "0", "If enabled, bots will not apply game modes based on map name prefix (fy_ and ka_ specifically).");
-ConVar cv_threadpool_workers ("threadpool_workers", "-1", "Maximum number of threads bot will run to process some tasks. -1 means half of CPU cores used.", true, -1.0f, static_cast <float> (plat.hardwareConcurrency ()));
-ConVar cv_grenadier_mode ("grenadier_mode", "0", "If enabled, bots will not apply throwing condition on grenades.");
-ConVar cv_ignore_enemies_after_spawn_time ("ignore_enemies_after_spawn_time", "0", "Make bots ignore enemies for a specified here time in seconds on new round. Useful for Zombie Plague mods.", false);
+ConVar cv_threadpool_workers ("threadpool_workers", "-1", "Maximum number of threads the bot will run to process some tasks. -1 means half of the CPU cores are used.", true, -1.0f, static_cast <float> (plat.hardwareConcurrency ()));
+ConVar cv_grenadier_mode ("grenadier_mode", "0", "If enabled, bots will not apply throwing conditions on grenades.");
+ConVar cv_ignore_enemies_after_spawn_time ("ignore_enemies_after_spawn_time", "0", "Makes bots ignore enemies for a specified time in seconds on a new round. Useful for Zombie Plague mods.", false);
+ConVar cv_breakable_health_limit ("breakable_health_limit", "500.0", "Specifies the maximum health of a breakable object that the bot will consider destroying.", true, 1.0f, 3000.0);
 
 ConVar sv_skycolor_r ("sv_skycolor_r", nullptr, Var::GameRef);
 ConVar sv_skycolor_g ("sv_skycolor_g", nullptr, Var::GameRef);
@@ -60,9 +61,6 @@ void Game::levelInitialize (edict_t *entities, int max) {
    // startup threaded worker
    worker.startup (cv_threadpool_workers.as <int> ());
 
-   m_spawnCount[Team::CT] = 0;
-   m_spawnCount[Team::Terrorist] = 0;
-
    // clear all breakables before initialization
    m_breakables.clear ();
    m_checkedBreakables.clear ();
@@ -77,7 +75,7 @@ void Game::levelInitialize (edict_t *entities, int max) {
    conf.loadMainConfig ();
 
    // ensure the server admin is confident about features he's using
-   game.ensureHealthyGameEnvironment ();
+   ensureHealthyGameEnvironment ();
 
    // load map-specific config
    conf.loadMapSpecificConfig ();
@@ -125,20 +123,16 @@ void Game::levelInitialize (edict_t *entities, int max) {
          ent->v.rendermode = kRenderTransAlpha; // set its render mode to transparency
          ent->v.renderamt = 127; // set its transparency amount
          ent->v.effects |= EF_NODRAW;
-
-         ++m_spawnCount[Team::CT];
       }
       else if (classname == "info_player_deathmatch") {
          ent->v.rendermode = kRenderTransAlpha; // set its render mode to transparency
          ent->v.renderamt = 127; // set its transparency amount
          ent->v.effects |= EF_NODRAW;
-
-         ++m_spawnCount[Team::Terrorist];
       }
       else if (classname == "func_vip_safetyzone" || classname == "info_vip_safetyzone") {
          m_mapFlags |= MapFlags::Assassination; // assassination map
       }
-      else if (util.isHostageEntity (ent)) {
+      else if (isHostageEntity (ent)) {
          m_mapFlags |= MapFlags::HostageRescue; // rescue map
       }
       else if (classname == "func_bomb_target" || classname == "info_bomb_target") {
@@ -152,13 +146,13 @@ void Game::levelInitialize (edict_t *entities, int max) {
             m_mapFlags &= ~MapFlags::HostageRescue;
          }
       }
-      else if (util.isDoorEntity (ent)) {
+      else if (isDoorEntity (ent)) {
          m_mapFlags |= MapFlags::HasDoors;
       }
       else if (classname.startsWith ("func_button")) {
          m_mapFlags |= MapFlags::HasButtons;
       }
-      else if (util.isBreakableEntity (ent, true)) {
+      else if (isBreakableEntity (ent, true)) {
 
          // add breakable for material check
          m_checkedBreakables[indexOfEntity (ent)] = ent->v.impulse <= 0;
@@ -186,6 +180,24 @@ void Game::levelInitialize (edict_t *entities, int max) {
    m_halfSecondFrame = 0.0f;
 }
 
+void Game::onSpawnEntity (edict_t *ent) {
+   constexpr auto kEntityInfoPlayerStart = StringRef::fnv1a32 ("info_player_start");
+   constexpr auto kEntityInfoVIPStart = StringRef::fnv1a32 ("info_vip_start");
+   constexpr auto kEntityInfoPlayerDeathmatch = StringRef::fnv1a32 ("info_player_deathmatch");
+
+   if (game.isNullEntity (ent) || ent->v.classname == 0) {
+      return;
+   }
+   const auto classNameHash = ent->v.classname.str ().hash ();
+
+   if (classNameHash == kEntityInfoPlayerStart || classNameHash == kEntityInfoVIPStart) {
+      ++m_spawnCount[Team::CT];
+   }
+   else if (classNameHash == kEntityInfoPlayerDeathmatch) {
+      ++m_spawnCount[Team::Terrorist];
+   }
+}
+
 void Game::levelShutdown () {
    // save collected practice on shutdown
    practice.save ();
@@ -197,12 +209,12 @@ void Game::levelShutdown () {
    bots.destroyKillerEntity ();
 
    // ensure players are off on xash3d
-   if (game.is (GameFlags::Xash3DLegacy)) {
+   if (is (GameFlags::Xash3DLegacy)) {
       bots.kickEveryone (true, false);
    }
 
    // set state to unprecached
-   game.setUnprecached ();
+   setUnprecached ();
 
    // enable lightstyle animations on level change
    illum.enableAnimation (true);
@@ -211,7 +223,7 @@ void Game::levelShutdown () {
    util.setNeedForWelcome (false);
 
    // clear local entity
-   game.setLocalEntity (nullptr);
+   setLocalEntity (nullptr);
 
    // reset graph state
    graph.reset ();
@@ -222,6 +234,10 @@ void Game::levelShutdown () {
    // disable command handling
    ctrl.setDenyCommands (true);
 
+   // reset spawn counts
+   for (auto &sc : m_spawnCount) {
+      sc = 0;
+   }
 }
 
 void Game::drawLine (edict_t *ent, const Vector &start, const Vector &end, int width, int noise, const Color &color, int brightness, int speed, int life, DrawLine type) const {
@@ -229,7 +245,7 @@ void Game::drawLine (edict_t *ent, const Vector &start, const Vector &end, int w
    // is pointed to by ent, from the vector location start to the vector location end,
    // which is supposed to last life tenths seconds, and having the color defined by RGB.
 
-   if (!util.isPlayer (ent)) {
+   if (!isPlayerEntity (ent)) {
       return; // reliability check
    }
 
@@ -338,7 +354,7 @@ Vector Game::getEntityOrigin (edict_t *ent) {
    }
 
    if (ent->v.origin.empty ()) {
-      return ent->v.absmin + (ent->v.size * 0.5);
+      return ent->v.absmin + ent->v.size * 0.5;
    }
    return ent->v.origin;
 }
@@ -367,13 +383,13 @@ void Game::playSound (edict_t *ent, const char *sound) {
 
 void Game::setPlayerStartDrawModels () {
    static HashMap <String, String> models {
-      {"info_player_start", "models/player/urban/urban.mdl"},
-      {"info_player_deathmatch", "models/player/terror/terror.mdl"},
-      {"info_vip_start", "models/player/vip/vip.mdl"}
+      { "info_player_start", "models/player/urban/urban.mdl" },
+      { "info_player_deathmatch", "models/player/terror/terror.mdl" },
+      { "info_vip_start", "models/player/vip/vip.mdl" }
    };
 
    models.foreach ([&] (const String &key, const String &val) {
-      game.searchEntities ("classname", key, [&] (edict_t *ent) {
+      searchEntities ("classname", key, [&] (edict_t *ent) {
          m_engineWrap.setModel (ent, val.chars ());
          return EntitySearchResult::Continue;
       });
@@ -426,12 +442,12 @@ void Game::sendClientMessage (bool console, edict_t *ent, StringRef message) {
    // helper to sending the client message
 
    // do not send messages to fake clients
-   if (!util.isPlayer (ent) || util.isFakeClient (ent)) {
+   if (!isPlayerEntity (ent) || isFakeClientEntity (ent)) {
       return;
    }
 
    // if console message and destination is listenserver entity, just print via server message instead of through unreliable channel
-   if (console && ent == game.getLocalEntity ()) {
+   if (console && ent == getLocalEntity ()) {
       sendServerMessage (message);
       return;
    }
@@ -482,7 +498,7 @@ void Game::sendServerMessage (StringRef message) {
 void Game::sendHudMessage (edict_t *ent, const hudtextparms_t &htp, StringRef message) {
    constexpr size_t kMaxSendLength = 512;
 
-   if (game.isNullEntity (ent)) {
+   if (isNullEntity (ent)) {
       return;
    }
    MessageWriter msg (MSG_ONE_UNRELIABLE, SVC_TEMPENTITY, nullptr, ent);
@@ -555,7 +571,7 @@ void Game::prepareBotArgs (edict_t *ent, String str) {
       }
       MDLL_ClientCommand (ent);
 
-      // clear space for next cmd 
+      // clear space for next cmd
       m_botArgs.clear ();
    };
 
@@ -791,55 +807,55 @@ void Game::registerCvars (bool gameVars) {
 
 void Game::constructCSBinaryName (StringArray &libs) {
 #ifdef _DIII4A //karin: load cs16 server dll
-   libs.insert (0, { "libserver_cs" });
+    libs.insert (0, { "libserver_cs" });
 #else
-   String libSuffix {}; // construct library suffix
+   String suffix {};
 
    if (plat.android) {
-      libSuffix += "_android";
+      suffix = "_android";
+      if (plat.x64) {
+         suffix += "_arm64";
+      }
+      else if (plat.arm) {
+         suffix += "_armv7l";
+      }
    }
    else if (plat.psvita) {
-      libSuffix += "_psvita";
+      suffix = "_psvita";
    }
-
-   if (plat.x64) {
+   else if (plat.x64) {
       if (plat.arm) {
-         libSuffix += "_arm64";
+         suffix = "_arm64";
       }
       else if (plat.ppc) {
-         libSuffix += "_ppc64le";
+         suffix = "_ppc64le";
+      }
+      else if (plat.riscv) {
+         suffix = "_riscv64d";
       }
       else {
-         libSuffix += "_amd64";
+         suffix = "_amd64";
       }
    }
-   else {
-      if (plat.arm) {
-         // don't want to put whole build.h logic from xash3d, just set whatever is supported by the YaPB
-         if (plat.android) {
-            libSuffix += "_armv7l";
-         }
-         else {
-            libSuffix += "_armv7hf";
-         }
-      }
-      else if (!plat.nix && !plat.win && !plat.macos) {
-         libSuffix += "_i386";
-      }
+   else if (plat.arm) {
+      // non-android arm32
+      suffix = "_armv7hf";
    }
+   else if (!plat.nix && !plat.win && !plat.macos) {
+      // fallback for unknown 32-bit x86 (e.g., legacy linux/bsd)
+      suffix = "_i386";
+   }
+   // else: suffix remains empty (e.g., x86 linux/windows/macos)
 
-   if (libSuffix.empty ())
-      libs.insert (0, { "mp", "cs", "cs_i386" });
+   // build base names
+   if (plat.android) {
+      // only "libcs" with suffix (no "mp", and must have "lib" prefix)
+      libs.push ("libcs" + suffix);
+   }
    else {
-      // on Android, it's important to have `lib` prefix, otherwise package manager won't unpack the libraries
-      if (plat.android)
-         libs.insert (0, { "libcs" });
-      else
-         libs.insert (0, { "mp", "cs" });
-
-      for (auto &lib : libs) {
-         lib += libSuffix;
-      }
+      // Standard: "mp" and "cs" with suffix
+      libs.push ("cs" + suffix);
+      libs.push ("mp" + suffix);
    }
 #endif
 }
@@ -884,10 +900,10 @@ bool Game::loadCSBinary () {
       }
 
       if (plat.emscripten) {
-        path = String(plat.env ("XASH3D_GAMELIBPATH")); // defined by launcher
+         path = String (plat.env ("XASH3D_GAMELIBPATH")); // defined by launcher
       }
 
-      if (path.empty()) {
+      if (path.empty ()) {
          path = strings.joinPath (modname, "dlls", lib) + kLibrarySuffix;
 
          // if we can't read file, skip it
@@ -905,13 +921,13 @@ bool Game::loadCSBinary () {
          }
          m_gameLib.load (path);
 
-         // verify dll is OK 
+         // verify dll is OK
          return libCheck (modname, lib);
       }
       else {
          m_gameLib.load (path);
 
-         // verify dll is OK 
+         // verify dll is OK
          if (!libCheck (modname, lib)) {
             return false;
          }
@@ -939,7 +955,12 @@ bool Game::loadCSBinary () {
          }
 
          if (entity != nullptr) {
-            m_gameFlags |= (GameFlags::Modern | GameFlags::HasBotVoice | GameFlags::HasFakePings);
+            m_gameFlags |= (GameFlags::Modern | GameFlags::HasBotVoice);
+
+            // no fake pings on xash3d
+            if (!(m_gameFlags & (GameFlags::Xash3D | GameFlags::Xash3DLegacy))) {
+               m_gameFlags |= GameFlags::HasFakePings;
+            }
          }
          else {
             m_gameFlags |= GameFlags::Legacy;
@@ -963,6 +984,7 @@ bool Game::loadCSBinary () {
 }
 
 bool Game::postload () {
+   bstor.checkInstallLocation (); // check if installed just as in manual
 
    // register logger
    logger.initialize (bstor.buildPath (BotFile::LogFile), [] (const char *msg) {
@@ -1004,7 +1026,7 @@ bool Game::postload () {
 
    // register fake metamod command handler if we not! under mm
    if (!(is (GameFlags::Metamod))) {
-      game.registerEngineCommand ("meta", [] () {
+      registerEngineCommand ("meta", [] () {
          game.print ("You're launched standalone version of %s. Metamod is not installed or not enabled!", product.name);
       });
    }
@@ -1124,7 +1146,7 @@ void Game::slowFrame () {
    if (m_halfSecondFrame < time ()) {
 
       // refresh bomb origin in case some plugin moved it out
-      graph.setBombOrigin ();
+      gameState.setBombOrigin ();
 
       // ensure the server admin is confident about features he's using
       ensureHealthyGameEnvironment ();
@@ -1207,7 +1229,7 @@ void Game::searchEntities (const Vector &position, float radius, EntitySearch fu
    }
 }
 
-bool Game::hasEntityInGame (StringRef classname) {
+bool Game::hasEntityInGame (StringRef classname) const {
    return !isNullEntity (engfuncs.pfnFindEntityByString (nullptr, "classname", classname.chars ()));
 }
 
@@ -1325,7 +1347,7 @@ void Game::ensureHealthyGameEnvironment () {
       notifyPeacefulRevert (cv_show_avatars);
    }
 
-   // disable fake queries 
+   // disable fake queries
    if (cv_enable_query_hook) {
       cv_enable_query_hook.set (0);
 
@@ -1363,6 +1385,120 @@ bool Game::isDeveloperMode () const {
    static ConVarRef developer { "developer" };
 
    return developer.exists () && developer.value () > 0.0f;
+}
+
+bool Game::isAliveEntity (edict_t *ent) const {
+   if (isNullEntity (ent)) {
+      return false;
+   }
+   return ent->v.deadflag == DEAD_NO && ent->v.health > 0.0f && ent->v.movetype != MOVETYPE_NOCLIP;
+}
+
+bool Game::isPlayerEntity (edict_t *ent) const {
+   if (isNullEntity (ent)) {
+      return false;
+   }
+
+   if (ent->v.flags & FL_PROXY) {
+      return false;
+   }
+
+   if ((ent->v.flags & (FL_CLIENT | FL_FAKECLIENT)) || bots[ent] != nullptr) {
+      return !strings.isEmpty (ent->v.netname.chars ());
+   }
+   return false;
+}
+
+bool Game::isMonsterEntity (edict_t *ent) const {
+   if (isNullEntity (ent)) {
+      return false;
+   }
+
+   if (~ent->v.flags & FL_MONSTER) {
+      return false;
+   }
+
+   if (isHostageEntity (ent)) {
+      return false;
+   }
+   return true;
+}
+
+bool Game::isItemEntity (edict_t *ent) const {
+   return ent && ent->v.classname.str ().contains ("item_");
+}
+
+bool Game::isPlayerVIP (edict_t *ent) const {
+   if (!mapIs (MapFlags::Assassination)) {
+      return false;
+   }
+
+   if (!isPlayerEntity (ent)) {
+      return false;
+   }
+   return *(engfuncs.pfnInfoKeyValue (engfuncs.pfnGetInfoKeyBuffer (ent), "model")) == 'v';
+}
+
+bool Game::isDoorEntity (edict_t *ent) const {
+   if (isNullEntity (ent)) {
+      return false;
+   }
+   const auto classHash = ent->v.classname.str ().hash ();
+
+   constexpr auto kFuncDoor = StringRef::fnv1a32 ("func_door");
+   constexpr auto kFuncDoorRotating = StringRef::fnv1a32 ("func_door_rotating");
+
+   return classHash == kFuncDoor || classHash == kFuncDoorRotating;
+}
+
+bool Game::isHostageEntity (edict_t *ent) const {
+   if (isNullEntity (ent)) {
+      return false;
+   }
+   const auto classHash = ent->v.classname.str ().hash ();
+
+   constexpr auto kHostageEntity = StringRef::fnv1a32 ("hostage_entity");
+   constexpr auto kMonsterScientist = StringRef::fnv1a32 ("monster_scientist");
+
+   return classHash == kHostageEntity || classHash == kMonsterScientist;
+}
+
+bool Game::isBreakableEntity (edict_t *ent, bool initialSeed) const {
+   if (!initialSeed) {
+      if (!hasBreakables ()) {
+         return false;
+      }
+   }
+
+   if (isNullEntity (ent) || ent == getStartEntity () || (!initialSeed && !game.isBreakableValid (ent))) {
+      return false;
+   }
+   const auto limit = cv_breakable_health_limit.as <float> ();
+
+   // not shoot-able
+   if (ent->v.health >= limit) {
+      return false;
+   }
+   constexpr auto kFuncBreakable = StringRef::fnv1a32 ("func_breakable");
+   constexpr auto kFuncPushable = StringRef::fnv1a32 ("func_pushable");
+   constexpr auto kFuncWall = StringRef::fnv1a32 ("func_wall");
+
+   if (ent->v.takedamage > 0.0f && ent->v.impulse <= 0 && !(ent->v.flags & FL_WORLDBRUSH) && !(ent->v.spawnflags & SF_BREAK_TRIGGER_ONLY)) {
+      const auto classHash = ent->v.classname.str ().hash ();
+
+      if (classHash == kFuncBreakable || (classHash == kFuncPushable && (ent->v.spawnflags & SF_PUSH_BREAKABLE)) || classHash == kFuncWall) {
+         return ent->v.movetype == MOVETYPE_PUSH || ent->v.movetype == MOVETYPE_PUSHSTEP;
+      }
+   }
+   return false;
+}
+
+bool Game::isFakeClientEntity (edict_t *ent) const {
+   return bots[ent] != nullptr || (!isNullEntity (ent) && (ent->v.flags & FL_FAKECLIENT));
+}
+
+bool Game::isEntityModelMatches (const edict_t *ent, StringRef model) const {
+   return model.startsWith (ent->v.model.chars (9));
 }
 
 void LightMeasure::initializeLightstyles () {
@@ -1586,7 +1722,7 @@ Vector PlayerHitboxEnumerator::get (edict_t *ent, int part, float updateTimestam
 void PlayerHitboxEnumerator::update (edict_t *ent) {
    constexpr auto kInvalidHitbox = -1;
 
-   if (!util.isAlive (ent)) {
+   if (!game.isAliveEntity (ent)) {
       return;
    }
    // get info about player
@@ -1674,4 +1810,144 @@ void PlayerHitboxEnumerator::reset () {
    for (auto &part : m_parts) {
       part = {};
    }
+}
+
+void GameState::setBombOrigin (bool reset, const Vector &pos) {
+   // this function stores the bomb position as a vector
+
+   if (!game.mapIs (MapFlags::Demolition) || !gameState.isBombPlanted ()) {
+      return;
+   }
+
+   if (reset) {
+      m_bombOrigin.clear ();
+      setBombPlanted (false);
+
+      return;
+   }
+
+   if (!pos.empty ()) {
+      m_bombOrigin = pos;
+      return;
+   }
+   bool wasFound = false;
+   auto bombModel = conf.getBombModelName ();
+
+   game.searchEntities ("classname", "grenade", [&] (edict_t *ent) {
+      if (game.isEntityModelMatches (ent, bombModel)) {
+         m_bombOrigin = game.getEntityOrigin (ent);
+         wasFound = true;
+
+         return EntitySearchResult::Break;
+      }
+      return EntitySearchResult::Continue;
+   });
+
+   if (!wasFound) {
+      m_bombOrigin.clear ();
+      setBombPlanted (false);
+   }
+}
+
+void GameState::roundStart () {
+   m_roundOver = false;
+   m_timeBombPlanted = 0.0f;
+
+   // tell the bots
+   bots.initRound ();
+   setBombOrigin (true);
+
+   // calculate the round mid/end in world time
+   m_timeRoundStart = game.time () + mp_freezetime.as <float> ();
+   m_timeRoundMid = m_timeRoundStart + mp_roundtime.as <float> () * 60.0f * 0.5f;
+   m_timeRoundEnd = m_timeRoundStart + mp_roundtime.as <float> () * 60.0f;
+
+   m_interestingEntities.clear ();
+   m_activeGrenades.clear ();
+
+   m_activeGrenadesUpdateTime.reset ();
+   m_interestingEntitiesUpdateTime.reset ();
+}
+
+float GameState::getBombTimeLeft () const {
+   if (!m_bombPlanted) {
+      return 0.0f;
+   }
+   return cr::max (m_timeBombPlanted + mp_c4timer.as <float> () - game.time (), 0.0f);
+}
+
+void GameState::setBombPlanted (bool isPlanted) {
+   if (cv_ignore_objectives) {
+      m_bombPlanted = false;
+      return;
+   }
+
+   if (isPlanted) {
+      m_timeBombPlanted = game.time ();
+   }
+   m_bombPlanted = isPlanted;
+}
+
+void GameState::updateActiveGrenade () {
+   constexpr auto kUpdateTime = 0.25f;
+
+   if (m_activeGrenadesUpdateTime.lessThen (kUpdateTime)) {
+      return;
+   }
+   m_activeGrenades.clear (); // clear previously stored grenades
+
+   // need to ignore bomb model in active grenades...
+   auto bombModel = conf.getBombModelName ();
+
+   // search the map for any type of grenade
+   game.searchEntities ("classname", "grenade", [&] (edict_t *e) {
+      // do not count c4 as a grenade
+      if (!game.isEntityModelMatches (e, bombModel)) {
+         m_activeGrenades.push (e);
+      }
+      return EntitySearchResult::Continue; // continue iteration
+   });
+   m_activeGrenadesUpdateTime.start ();
+}
+
+void GameState::updateInterestingEntities () {
+   constexpr auto kUpdateTime = 0.5f;
+
+   if (m_interestingEntitiesUpdateTime.lessThen (kUpdateTime)) {
+      return;
+   }
+   m_interestingEntities.clear (); // clear previously stored entities
+
+   // search the map for any type of grenade
+   game.searchEntities (nullptr, kInfiniteDistance, [&] (edict_t *e) {
+      auto classname = e->v.classname.str ();
+
+      // search for grenades, weaponboxes, weapons, items and armoury entities
+      if (classname.startsWith ("weaponbox") || classname.startsWith ("grenade") || game.isItemEntity (e) || classname.startsWith ("armoury")) {
+         m_interestingEntities.push (e);
+      }
+
+      // pickup some hostage if on cs_ maps
+      if (game.mapIs (MapFlags::HostageRescue) && game.isHostageEntity (e)) {
+         m_interestingEntities.push (e);
+      }
+
+      // add buttons
+      if (game.mapIs (MapFlags::HasButtons) && classname.startsWith ("func_button")) {
+         m_interestingEntities.push (e);
+      }
+
+      // pickup some csdm stuff if we're running csdm
+      if (game.is (GameFlags::CSDM) && classname.startsWith ("csdm")) {
+         m_interestingEntities.push (e);
+      }
+
+      if (cv_attack_monsters && game.isMonsterEntity (e)) {
+         m_interestingEntities.push (e);
+      }
+
+      // continue iteration
+      return EntitySearchResult::Continue;
+   });
+   m_interestingEntitiesUpdateTime.start ();
 }

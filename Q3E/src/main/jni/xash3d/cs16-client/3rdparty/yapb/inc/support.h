@@ -31,36 +31,6 @@ public:
    // converts weapon id to alias name
    StringRef weaponIdToAlias (int32_t id);
 
-   // check if origin is visible from the entity side
-   bool isVisible (const Vector &origin, edict_t *ent);
-
-   // check if entity is alive
-   bool isAlive (edict_t *ent);
-
-   // checks if entity is fakeclient
-   bool isFakeClient (edict_t *ent);
-
-   // check if entity is a player
-   bool isPlayer (edict_t *ent);
-
-   // check if entity is a monster
-   bool isMonster (edict_t *ent);
-
-   // check if entity is a item
-   bool isItem (edict_t *ent);
-
-   // check if entity is a vip
-   bool isPlayerVIP (edict_t *ent);
-
-   // check if entity is a hostage entity
-   bool isHostageEntity (edict_t *ent);
-
-   // check if entity is a door entity
-   bool isDoorEntity (edict_t *ent);
-
-   // this function is checking that pointed by ent pointer obstacle, can be destroyed
-   bool isBreakableEntity (edict_t *ent, bool initialSeed = false);
-
    // nearest player search helper
    bool findNearestPlayer (void **holder, edict_t *to, float searchDistance = 4096.0, bool sameTeam = false, bool needBot = false, bool needAlive = false, bool needDrawn = false, bool needBotWithC4 = false);
 
@@ -70,8 +40,8 @@ public:
    // update stats on clients
    void updateClients ();
 
-   // checks if same model omitting the models directory
-   bool isModel (const edict_t *ent, StringRef model);
+   // check if origin is visible from the entity side
+   bool isVisible (const Vector &origin, edict_t *ent);
 
    // get the current date and time as string
    String getCurrentDateTime ();
@@ -84,6 +54,9 @@ public:
 
    // set custom cvar descriptions
    void setCustomCvarDescriptions ();
+
+   // check if line of sight blocked by a smoke
+   bool isLineBlockedBySmoke (const Vector &from, const Vector &to);
 
 public:
 

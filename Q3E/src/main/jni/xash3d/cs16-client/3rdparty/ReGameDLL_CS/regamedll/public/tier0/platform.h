@@ -30,7 +30,9 @@
 
 #include "osconfig.h"
 
+#if !defined(__APPLE__)
 #include <malloc.h> // need this for _alloca
+#endif
 #include <string.h> // need this for memset
 
 #include "archtypes.h"
@@ -73,7 +75,7 @@
 // Can't use extern "C" when DLL exporting a global
 #define DLL_GLOBAL_EXPORT extern __declspec(dllexport)
 #define DLL_GLOBAL_IMPORT extern __declspec(dllimport)
-#elif defined __linux__
+#elif defined __linux__ || defined __APPLE__
 
 // Used for dll exporting and importing
 #define DLL_EXPORT extern "C"
@@ -133,7 +135,7 @@
 // If available use static_assert instead of weird language tricks. This
 // leads to much more readable messages when compile time assert constraints
 // are violated.
-#if !defined(OSX) && (_MSC_VER > 1500 || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+#if !defined(__APPLE__) && (_MSC_VER > 1500 || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
 	#define PLAT_COMPILE_TIME_ASSERT(pred) static_assert(pred, "Compile time assert constraint is not true: " #pred)
 #else
 	#define PLAT_COMPILE_TIME_ASSERT(pred) typedef int UNIQUE_ID[ (pred) ? 1 : -1]

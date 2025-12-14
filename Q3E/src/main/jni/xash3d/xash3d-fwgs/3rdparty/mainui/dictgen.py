@@ -18,7 +18,7 @@ import re
 
 EXTENSIONS = ('.cpp', '.h')
 EXCLUDE_FILES = ('./sdk_includes')
-TRANSLATABLE_PATTERN = re.compile('[^a-zA-Z0-9_]L\s*\(\s*\".*?\"\s*\)')
+TRANSLATABLE_PATTERN = re.compile(r'[^a-zA-Z0-9_]L\s*\(\s*\".*?\"\s*\)')
 STRING_LITERAL_PATTERN = re.compile('\".*?\"')
 
 HEADER = '''// How to work with this file:
@@ -103,6 +103,10 @@ def vgui_translation_parse(name):
 def create_translations_file(name, trans):
 	maxlength = min(72, len(max(trans, key=len)) + 1)
 
+	# Create the directory if it doesn't exist
+	dir_path = os.path.dirname(name)
+	if dir_path and not os.path.exists(dir_path):
+		os.makedirs(dir_path)
 	# we are working in UTF-8, it's easier to handle than UTF-16
 	with open(name, "w", encoding = 'utf-8',newline = '\r\n') as f:
 		f.write(HEADER)

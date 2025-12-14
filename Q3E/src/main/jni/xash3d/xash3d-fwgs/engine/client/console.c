@@ -145,9 +145,6 @@ typedef struct
 
 	notify_t		notify[MAX_DBG_NOTIFY]; // for Con_NXPrintf
 	qboolean		draw_notify;	// true if we have NXPrint message
-
-	// console update
-	double		lastupdate;
 } console_t;
 
 static console_t		con;
@@ -951,13 +948,6 @@ void Con_Print( const char *txt )
 			charpos = 0;
 		}
 
-		// pump messages to avoid window hanging
-		if( con.lastupdate < Sys_DoubleTime( ))
-		{
-			con.lastupdate = Sys_DoubleTime() + 1.0;
-			Host_InputFrame();
-		}
-
 		// FIXME: disable updating screen, because when texture is bound any console print
 		// can re-bound it to console font texture
 #if 0
@@ -1464,6 +1454,12 @@ static void Con_SaveHistory( con_history_t *self )
 		historyStart = 0;
 
 	f = FS_Open( "console_history.txt", "wb", true );
+
+	if( !f )
+	{
+		Con_Printf( S_ERROR "%s: can't open %s for write\n", __func__, "console_history.txt" );
+		return;
+	}
 
 	for( i = historyStart; i < self->next; i++ )
 	{

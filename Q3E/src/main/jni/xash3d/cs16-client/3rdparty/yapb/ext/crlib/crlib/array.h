@@ -272,10 +272,12 @@ public:
    }
 
    void shuffle () {
-      int32_t shuffleLength = length <int32_t> ();
+      const int32_t n = length<int32_t> ();
 
-      for (int32_t i = shuffleLength; i >= 1; --i) {
-         cr::swap (contents_[i - 1], contents_[rg (i, shuffleLength - 2)]);
+      for (int32_t i = n - 1; i > 0; --i) {
+         const int32_t j = RWrand::instance () (0, i);
+
+         cr::swap (contents_[i], contents_[j]);
       }
    }
 

@@ -10,7 +10,7 @@
 #ifndef UTLLINKEDLIST_H
 #define UTLLINKEDLIST_H
 
-#include <inttypes.h>
+#include <cinttypes>
 #include "utlmemory.h"
 
 // This is a useful macro to iterate from head to tail in a CUtlLinkedList.

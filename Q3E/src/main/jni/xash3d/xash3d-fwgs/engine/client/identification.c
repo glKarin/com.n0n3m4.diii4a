@@ -18,6 +18,8 @@ GNU General Public License for more details.
 #include <fcntl.h>
 #if !XASH_WIN32
 #include <dirent.h>
+#else
+#include <io.h>
 #endif
 
 static char id_md5[33];
@@ -405,7 +407,8 @@ static int ID_RunWMIC( char *buffer, const wchar_t *cmdline )
 	DWORD dwRead;
 	BOOL bSuccess = FALSE;
 	wchar_t *cmdline_copy;
-
+	
+	const int cmdline_size = wcslen( cmdline ) * sizeof( *cmdline );
 	PROCESS_INFORMATION pi = { 0 };
 	SECURITY_ATTRIBUTES saAttr =
 	{
@@ -418,9 +421,9 @@ static int ID_RunWMIC( char *buffer, const wchar_t *cmdline )
 	CreatePipe( &g_OUT_Rd, &g_OUT_Wr, &saAttr, 0 );
 	SetHandleInformation( g_IN_Wr, HANDLE_FLAG_INHERIT, 0 );
 
-	STARTUPINFO si =
+	STARTUPINFOW si =
 	{
-		.cb = sizeof( STARTUPINFO ),
+		.cb = sizeof( STARTUPINFOW ),
 		.dwFlags = STARTF_USESTDHANDLES,
 		.hStdInput = g_IN_Rd,
 		.hStdOutput = g_OUT_Wr,
@@ -429,7 +432,11 @@ static int ID_RunWMIC( char *buffer, const wchar_t *cmdline )
 		.dwFlags = STARTF_USESTDHANDLES,
 	};
 
-	cmdline_copy = malloc( wcslen( cmdline ) * sizeof( *cmdline_copy ));
+	cmdline_copy = malloc( cmdline_size );
+	if( !cmdline_copy )
+		goto err;
+
+	memcpy( cmdline_copy, cmdline, cmdline_size );
 
 	if( !CreateProcessW( NULL, cmdline_copy, NULL, NULL, true, CREATE_NO_WINDOW, NULL, NULL, &si, &pi ))
 		goto err;

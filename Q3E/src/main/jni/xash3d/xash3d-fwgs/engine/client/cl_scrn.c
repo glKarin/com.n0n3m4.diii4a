@@ -388,7 +388,11 @@ static void VID_WriteOverviewScript( void )
 	Q_snprintf( filename, sizeof( filename ), "overviews/%s.txt", clgame.mapname );
 
 	f = FS_Open( filename, "w", false );
-	if( !f ) return;
+	if( !f )
+	{
+		Con_Printf( S_ERROR "%s: can't open %s for write\n", __func__, filename );
+		return;
+	}
 
 	FS_Printf( f, "// overview description file for %s.bsp\n\n", clgame.mapname );
 	FS_Print( f, "global\n{\n" );
@@ -814,20 +818,33 @@ INTERNAL RESOURCE
 */
 void SCR_RegisterTextures( void )
 {
-	// register gfx.wad images
-	if( FS_FileExists( "gfx/lambda.lmp", false ))
+	const char *exts[] = { "lmp", "bmp", "png" };
+	const char *names[] = { "gfx/lambda", "gfx/loading" };
+	uint flags = TF_IMAGE|TF_ALLOW_NEAREST;
+
+	if( cl_allow_levelshots.value )
+		SetBits( flags, TF_LUMINANCE );
+
+	for( int i = 0; i < ARRAYSIZE( names ); i++ )
 	{
-		if( cl_allow_levelshots.value )
-			cls.loadingBar = ref.dllFuncs.GL_LoadTexture( "gfx/lambda.lmp", NULL, 0, TF_IMAGE|TF_LUMINANCE|TF_ALLOW_NEAREST );
-		else cls.loadingBar = ref.dllFuncs.GL_LoadTexture( "gfx/lambda.lmp", NULL, 0, TF_IMAGE|TF_ALLOW_NEAREST );
-	}
-	else if( FS_FileExists( "gfx/loading.lmp", false ))
-	{
-		if( cl_allow_levelshots.value )
-			cls.loadingBar = ref.dllFuncs.GL_LoadTexture( "gfx/loading.lmp", NULL, 0, TF_IMAGE|TF_LUMINANCE|TF_ALLOW_NEAREST );
-		else cls.loadingBar = ref.dllFuncs.GL_LoadTexture( "gfx/loading.lmp", NULL, 0, TF_IMAGE|TF_ALLOW_NEAREST );
+		for( int j = 0; j < ARRAYSIZE( exts ); j++ )
+		{
+			string path;
+
+			if( Q_snprintf( path, sizeof( path ), "%s.%s", names[i], exts[j] ) < 0 )
+				continue;
+
+			if( !FS_FileExists( path, false ))
+				continue;
+
+			cls.loadingBar = ref.dllFuncs.GL_LoadTexture( path, NULL, 0, flags );
+
+			if( cls.loadingBar )
+				return;
+		}
 	}
 
+	Con_Printf( S_WARN "%s: failed to load loading image\n", __func__ );
 }
 
 /*

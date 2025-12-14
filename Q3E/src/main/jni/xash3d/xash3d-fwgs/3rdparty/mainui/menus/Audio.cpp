@@ -42,13 +42,10 @@ private:
 	void VibrateChanged();
 	void SaveAndPopMenu() override;
 
-	void LerpingCvarWrite();
-
 	CMenuSlider	soundVolume;
 	CMenuSlider	musicVolume;
 	CMenuSlider	suitVolume;
 	CMenuSlider	vibration;
-	CMenuSpinControl lerping;
 	CMenuCheckBox noDSP;
 	CMenuCheckBox useAlphaDSP;
 	CMenuCheckBox muteFocusLost;
@@ -69,7 +66,6 @@ void CMenuAudio::GetConfig( void )
 	suitVolume.LinkCvar( "suitvolume" );
 	vibration.LinkCvar( "vibration_length" );
 
-	lerping.LinkCvar( "s_lerping", CMenuEditable::CVAR_VALUE );
 	noDSP.LinkCvar( "room_off" );
 	useAlphaDSP.LinkCvar( "dsp_coeff_table" );
 	muteFocusLost.LinkCvar( "snd_mute_losefocus" );
@@ -87,7 +83,7 @@ void CMenuAudio::VibrateChanged()
 	{
 		char cmd[64];
 		snprintf( cmd, 64, "vibrate %f", newVibrate );
-		EngFuncs::ClientCmd( FALSE, cmd );
+		EngFuncs::ClientCmd( false, cmd );
 		vibration.WriteCvar();
 		oldVibrate = newVibrate;
 	}
@@ -104,7 +100,6 @@ void CMenuAudio::SaveAndPopMenu()
 	musicVolume.WriteCvar();
 	suitVolume.WriteCvar();
 	vibration.WriteCvar();
-	lerping.WriteCvar();
 	noDSP.WriteCvar();
 	useAlphaDSP.WriteCvar();
 	muteFocusLost.WriteCvar();
@@ -120,11 +115,6 @@ CMenuAudio::Init
 */
 void CMenuAudio::_Init( void )
 {
-	static const char *lerpingStr[] =
-	{
-		L( "GameUI_Disable" ), L( "Balance" ), L( "Quality" )
-	};
-
 	banner.SetPicture(ART_BANNER);
 
 	soundVolume.szName = L( "GameUI_SoundEffectVolume" );
@@ -145,43 +135,35 @@ void CMenuAudio::_Init( void )
 	suitVolume.SetCoord( 320, 400 );
 	suitVolume.size.w = 300;
 
-	static CStringArrayModel model( lerpingStr, V_ARRAYSIZE( lerpingStr ));
-	lerping.szName = L( "Sound interpolation" );
-	lerping.Setup( &model );
-	lerping.onChanged = CMenuEditable::WriteCvarCb;
-	lerping.font = QM_SMALLFONT;
-	lerping.SetRect( 320, 470, 300, 32 );
-
 	noDSP.szName = L( "Disable DSP effects" );
 	noDSP.onChanged = CMenuEditable::WriteCvarCb;
-	noDSP.SetCoord( 320, 520 );
+	noDSP.SetCoord( 320, 460 );
 
 	useAlphaDSP.szName = L( "Use Alpha DSP effects" );
 	useAlphaDSP.onChanged = CMenuEditable::WriteCvarCb;
-	useAlphaDSP.SetCoord( 320, 570 );
+	useAlphaDSP.SetCoord( 320, 510 );
 
 	muteFocusLost.szName = L( "Mute when inactive" );
 	muteFocusLost.onChanged = CMenuEditable::WriteCvarCb;
-	muteFocusLost.SetCoord( 320, 620 );
+	muteFocusLost.SetCoord( 320, 560 );
 
 	vibrationEnable.szName = L( "Enable vibration" );
 	vibrationEnable.iMask = (QMF_GRAYED|QMF_INACTIVE);
 	vibrationEnable.bInvertMask = true;
 	vibrationEnable.onChanged = CMenuCheckBox::BitMaskCb;
 	vibrationEnable.onChanged.pExtra = &vibration.iFlags;
-	vibrationEnable.SetCoord( 700, 470 );
+	vibrationEnable.SetCoord( 700, 460 );
 
 	vibration.szName = L( "Vibration" );
 	vibration.Setup( 0.0f, 5.0f, 0.05f );
 	vibration.onChanged = VoidCb( &CMenuAudio::VibrateChanged );
-	vibration.SetCoord( 700, 570 );
+	vibration.SetCoord( 700, 560 );
 
 	AddItem( banner );
 	AddButton( L( "Done" ), nullptr, PC_DONE, VoidCb( &CMenuAudio::SaveAndPopMenu ));
 	AddItem( soundVolume );
 	AddItem( musicVolume );
 	AddItem( suitVolume );
-	AddItem( lerping );
 	AddItem( noDSP );
 	AddItem( useAlphaDSP );
 	AddItem( muteFocusLost );

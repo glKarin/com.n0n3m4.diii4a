@@ -1,138 +1,164 @@
 {
-    "version": 3,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 21,
-        "patch": 0
-    },
-    "configurePresets": [
-        {
-            "name": "win32-debug-amd64",
-            "displayName": "Windows Debug - amd64",
-            "generator": "Ninja",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
-            "binaryDir": "${sourceDir}/build",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_C_COMPILER": "cl",
-                "CMAKE_CXX_COMPILER": "cl"
-            },
-            "vendor": {
-                "microsoft.com/VisualStudioSettings/CMake/1.0": {
-                    "hostOS": [
-                        "Windows"
-                    ]
-                }
-            }
-        },
-        {
-            "name": "win32-debug-x86",
-            "inherits": "win32-debug-amd64",
-            "displayName": "Windows Debug - x86",
-            "architecture": {
-                "value": "x86",
-                "strategy": "external"
-            }
-        },
-        {
-            "name": "win32-release-amd64",
-            "inherits": "win32-debug-amd64",
-            "displayName": "Windows Release - amd64",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "win32-release-x86",
-            "inherits": "win32-debug-x86",
-            "displayName": "Windows Release - x86",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "linux-release-amd64",
-            "displayName": "Linux Release - amd64",
-            "generator": "Ninja",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            },
-            "binaryDir": "${sourceDir}/build"
-        },
-        {
-            "name": "linux-release-i386",
-            "inherits": "linux-release-amd64",
-            "displayName": "Linux Release - i386",
-            "architecture": {
-                "value": "x86",
-                "strategy": "external"
-            },
-            "toolchainFile": "${sourceDir}/toolchains/i386-linux-gnu.cmake"
-        },
-        {
-            "name": "psvita-debug",
-            "displayName": "PS Vita - Debug",
-            "generator": "Unix Makefiles",
-            "toolchainFile": "$env{VITASDK}/share/vita.toolchain.cmake",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "BUILD_SERVER": "OFF",
-                "MAINUI_USE_STB": "ON",
-                "CMAKE_PROJECT_cs16-client_INCLUDE": "$env{VITASDK}/share/vrtld_shim.cmake"
-            },
-            "binaryDir": "${sourceDir}/build"
-        },
-        {
-            "name": "psvita-release",
-            "displayName": "PS Vita - Release",
-            "generator": "Unix Makefiles",
-            "toolchainFile": "$env{VITASDK}/share/vita.toolchain.cmake",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "BUILD_SERVER": "OFF",
-                "MAINUI_USE_STB": "ON",
-                "CMAKE_PROJECT_cs16-client_INCLUDE": "$env{VITASDK}/share/vrtld_shim.cmake"
-            },
-            "binaryDir": "${sourceDir}/build"
-        },
-        {
-            "name": "linux-ci-amd64",
-            "inherits": "linux-release-amd64",
-            "displayName": "Linux CI - amd64",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-            }
-        },
-        {
-            "name": "linux-ci-i386",
-            "inherits": "linux-release-i386",
-            "displayName": "Linux CI - i386",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-            }
-        },
-        {
-            "name": "win32-ci-amd64",
-            "inherits": "win32-debug-amd64",
-            "displayName": "Windows CI - amd64",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-            }
-        },
-        {
-            "name": "win32-ci-x86",
-            "inherits": "win32-debug-x86",
-            "displayName": "Windows CI - x86",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-            }
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "win32-debug-amd64",
+      "displayName": "Windows Debug - amd64",
+      "generator": "Ninja",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
         }
-    ]
+      }
+    },
+    {
+      "name": "win32-debug-x86",
+      "inherits": "win32-debug-amd64",
+      "displayName": "Windows Debug - x86",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "win32-release-amd64",
+      "inherits": "win32-debug-amd64",
+      "displayName": "Windows Release - amd64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "win32-release-x86",
+      "inherits": "win32-debug-x86",
+      "displayName": "Windows Release - x86",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "linux-release-amd64",
+      "displayName": "Linux Release - amd64",
+      "generator": "Ninja",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "linux-release-i386",
+      "inherits": "linux-release-amd64",
+      "displayName": "Linux Release - i386",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "toolchainFile": "${sourceDir}/toolchains/i386-linux-gnu.cmake"
+    },
+    {
+      "name": "psvita-debug",
+      "displayName": "PS Vita - Debug",
+      "generator": "Unix Makefiles",
+      "toolchainFile": "$env{VITASDK}/share/vita.toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BUILD_SERVER": "OFF",
+        "MAINUI_USE_STB": "ON",
+        "CMAKE_PROJECT_cs16-client_INCLUDE": "$env{VITASDK}/share/vrtld_shim.cmake"
+      },
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "psvita-release",
+      "displayName": "PS Vita - Release",
+      "generator": "Unix Makefiles",
+      "toolchainFile": "$env{VITASDK}/share/vita.toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_SERVER": "OFF",
+        "MAINUI_USE_STB": "ON",
+        "CMAKE_PROJECT_cs16-client_INCLUDE": "$env{VITASDK}/share/vrtld_shim.cmake"
+      },
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "linux-ci-amd64",
+      "inherits": "linux-release-amd64",
+      "displayName": "Linux CI - amd64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "linux-ci-i386",
+      "inherits": "linux-release-i386",
+      "displayName": "Linux CI - i386",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "win32-ci-amd64",
+      "inherits": "win32-debug-amd64",
+      "displayName": "Windows CI - amd64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "win32-ci-x86",
+      "inherits": "win32-debug-x86",
+      "displayName": "Windows CI - x86",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "macos-ci-x86_64",
+      "displayName": "macOS CI - x86_64",
+      "generator": "Ninja",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_CXX_STANDARD": "11",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+      },
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "macos-ci-arm64",
+      "inherits": "macos-ci-x86_64",
+      "displayName": "macOS CI - arm64",
+      "architecture": {
+        "value": "arm64",
+        "strategy": "external"
+      }
+    }
+  ]
 }

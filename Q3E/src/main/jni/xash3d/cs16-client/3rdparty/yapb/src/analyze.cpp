@@ -7,16 +7,20 @@
 
 #include <yapb.h>
 
-ConVar cv_graph_analyze_auto_start ("graph_analyze_auto_start", "1", "Autostart analyzer if all other cases are failed.");
-ConVar cv_graph_analyze_auto_save ("graph_analyze_auto_save", "1", "Auto save results of analysis to graph file. And re-add bots.");
+ConVar cv_graph_analyze_auto_start ("graph_analyze_auto_start", "1", "Autostart analyzer if all other cases fail.");
+ConVar cv_graph_analyze_auto_save ("graph_analyze_auto_save", "1", "Auto save results of analysis to graph file and re-add bots.");
 ConVar cv_graph_analyze_distance ("graph_analyze_distance", "64", "The minimum distance to keep nodes from each other.", true, 42.0f, 128.0f);
-ConVar cv_graph_analyze_max_jump_height ("graph_analyze_max_jump_height", "44", "Max jump height to test if next node will be unreachable.", true, 44.0f, 64.0f);
-ConVar cv_graph_analyze_fps ("graph_analyze_fps", "30.0", "The FPS at which analyzer process is running. This keeps game from freezing during analyzing.", true, 25.0f, 99.0f);
-ConVar cv_graph_analyze_clean_paths_on_finish ("graph_analyze_clean_paths_on_finish", "1", "Specifies if analyzer should clean the unnecessary paths upon finishing.");
-ConVar cv_graph_analyze_optimize_nodes_on_finish ("graph_analyze_optimize_nodes_on_finish", "1", "Specifies if analyzer should merge some near-placed nodes with much of connections together.");
-ConVar cv_graph_analyze_mark_goals_on_finish ("graph_analyze_mark_goals_on_finish", "1", "Specifies if analyzer should mark nodes as map goals automatically upon finish.");
+ConVar cv_graph_analyze_max_jump_height ("graph_analyze_max_jump_height", "44", "Max jump height to test if the next node will be unreachable.", true, 44.0f, 64.0f);
+ConVar cv_graph_analyze_fps ("graph_analyze_fps", "30.0", "The FPS at which the analyzer process is running. This keeps the game from freezing during analysis.", true, 25.0f, 99.0f);
+ConVar cv_graph_analyze_clean_paths_on_finish ("graph_analyze_clean_paths_on_finish", "1", "Specifies if the analyzer should clean unnecessary paths upon finishing.");
+ConVar cv_graph_analyze_optimize_nodes_on_finish ("graph_analyze_optimize_nodes_on_finish", "1", "Specifies if the analyzer should merge some near-placed nodes with many connections together.");
+ConVar cv_graph_analyze_mark_goals_on_finish ("graph_analyze_mark_goals_on_finish", "1", "Specifies if the analyzer should mark nodes as map goals automatically upon finishing.");
 
 void GraphAnalyze::start () {
+   if (m_isAnalyzing) {
+      return;
+   }
+
    // start analyzer in few seconds after level initialized
    if (cv_graph_analyze_auto_start) {
       m_updateInterval = game.time () + 3.0f;
@@ -126,7 +130,7 @@ void GraphAnalyze::update () {
 }
 
 void GraphAnalyze::suspend () {
-   m_updateInterval = 0.0f;
+   m_updateInterval = kInfiniteDistance;
    m_isAnalyzing = false;
    m_isAnalyzed = false;
    m_basicsCreated = false;
@@ -307,7 +311,7 @@ void GraphAnalyze::flood (const Vector &pos, const Vector &next, float range) {
    game.testHull (pos, { next.x, next.y, next.z + 19.0f }, TraceIgnore::Monsters, head_hull, nullptr, &tr);
 
    // we're can't reach next point
-   if (!cr::fequal (tr.flFraction, 1.0f) && !util.isBreakableEntity (tr.pHit)) {
+   if (!cr::fequal (tr.flFraction, 1.0f) && !game.isBreakableEntity (tr.pHit)) {
       return;
    }
 
@@ -321,7 +325,7 @@ void GraphAnalyze::flood (const Vector &pos, const Vector &next, float range) {
    if (cr::fequal (tr.flFraction, 1.0f)) {
       return;
    }
-   Vector nextPos = { tr.vecEndPos.x, tr.vecEndPos.y, tr.vecEndPos.z + 19.0f };
+   const Vector &nextPos = { tr.vecEndPos.x, tr.vecEndPos.y, tr.vecEndPos.z + 19.0f };
 
    const int endIndex = graph.getForAnalyzer (nextPos, range);
    const int targetIndex = graph.getNearestNoBuckets (nextPos, 250.0f);
@@ -329,7 +333,7 @@ void GraphAnalyze::flood (const Vector &pos, const Vector &next, float range) {
    if (graph.exists (endIndex) || !graph.exists (targetIndex)) {
       return;
    }
-   auto targetPos = graph[targetIndex].origin;
+   const auto &targetPos = graph[targetIndex].origin;
 
    // re-check there's nothing nearby, and add something we're want
    if (!graph.exists (graph.getNearestNoBuckets (nextPos, range))) {
@@ -344,6 +348,7 @@ void GraphAnalyze::flood (const Vector &pos, const Vector &next, float range) {
       if ((graph.isNodeReacheable (targetPos, testPos)
          && graph.isNodeReacheable (testPos, targetPos)) || (graph.isNodeReacheableWithJump (testPos, targetPos)
             && graph.isNodeReacheableWithJump (targetPos, testPos))) {
+
          graph.add (NodeAddFlag::Normal, m_isCrouch ? Vector { nextPos.x, nextPos.y, nextPos.z - 9.0f } : nextPos);
       }
    }

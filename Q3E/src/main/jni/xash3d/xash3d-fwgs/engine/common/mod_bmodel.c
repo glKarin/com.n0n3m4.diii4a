@@ -2583,6 +2583,7 @@ static void Mod_LoadTextureData( model_t *mod, dbspmodel_t *bmod, int textureInd
 	const mip_t *mipTex = Mod_GetMipTexForTexture( bmod, textureIndex );
 	const qboolean usesCustomPalette = Mod_CalcMipTexUsesCustomPalette( mod, bmod, textureIndex );
 	const qboolean iswater = Mod_LooksLikeWaterTexture( mipTex->name );
+	const uint texture_force_flags = r_allow_wad3_luma.value ? IL_ALLOW_WAD3_LUMA : 0;
 
 	// check for multi-layered sky texture (quake1 specific)
 	if( bmod->isworld && Q_strncmp( mipTex->name, "sky", 3 ) == 0 && ( mipTex->width / mipTex->height ) == 2 )
@@ -2633,6 +2634,7 @@ static void Mod_LoadTextureData( model_t *mod, dbspmodel_t *bmod, int textureInd
 #if !XASH_DEDICATED
 			if( !Host_IsDedicated( ) && pic != NULL )
 			{
+				Image_SetForceFlags( texture_force_flags );
 				texture->gl_texturenum = ref.dllFuncs.GL_LoadTextureFromBuffer( texpath, pic, txFlags, false );
 				FS_FreeImage( pic );
 			}
@@ -2652,6 +2654,7 @@ static void Mod_LoadTextureData( model_t *mod, dbspmodel_t *bmod, int textureInd
 		const size_t size = Mod_CalculateMipTexSize( mipTex, usesCustomPalette );
 
 		Q_snprintf( texName, sizeof( texName ), "#%s:%s.mip", loadstat.name, mipTex->name );
+		Image_SetForceFlags( texture_force_flags );
 		texture->gl_texturenum = ref.dllFuncs.GL_LoadTexture( texName, (byte *)mipTex, size, txFlags );
 	}
 
@@ -2683,6 +2686,8 @@ static void Mod_LoadTextureData( model_t *mod, dbspmodel_t *bmod, int textureInd
 		char texName[64];
 
 		Q_snprintf( texName, sizeof( texName ), "#%s:%s_luma.mip", loadstat.name, mipTex->name );
+
+		Image_SetForceFlags( texture_force_flags );
 
 		if( mipTex->offsets[0] > 0 )
 		{
@@ -3669,10 +3674,10 @@ Mod_LoadBmodelLumps
 loading and processing bmodel
 =================
 */
-static qboolean Mod_LoadBmodelLumps( model_t *mod, const byte *mod_base, qboolean isworld )
+static qboolean Mod_LoadBmodelLumps( model_t *mod, byte *mod_base, size_t bufferlen, qboolean isworld )
 {
-	const dheader_t *header = (const dheader_t *)mod_base;
-	const dextrahdr_t	*extrahdr = (const dextrahdr_t *)(mod_base + sizeof( dheader_t ));
+	dheader_t *header = (dheader_t *)mod_base;
+	dextrahdr_t	*extrahdr = (dextrahdr_t *)(mod_base + sizeof( dheader_t ));
 	dbspmodel_t	*bmod = &srcmodel;
 	char		wadvalue[2048];
 	size_t		len = 0;
@@ -3837,10 +3842,10 @@ check for possible errors
 return real entities lump (for bshift swapped lumps)
 =================
 */
-qboolean Mod_TestBmodelLumps( file_t *f, const char *name, const byte *mod_base, qboolean silent, dlump_t *entities )
+qboolean Mod_TestBmodelLumps( file_t *f, const char *name, byte *mod_base, size_t buffersize, qboolean silent, dlump_t *entities )
 {
-	const dheader_t	*header = (const dheader_t *)mod_base;
-	const dextrahdr_t *extrahdr = (const dextrahdr_t *)( mod_base + sizeof( dheader_t ));
+	dheader_t	*header = (dheader_t *)mod_base;
+	dextrahdr_t *extrahdr = (dextrahdr_t *)( mod_base + sizeof( dheader_t ));
 	int	i, flags = LUMP_TESTONLY;
 
 	// always reset the intermediate struct
@@ -3851,10 +3856,13 @@ qboolean Mod_TestBmodelLumps( file_t *f, const char *name, const byte *mod_base,
 	if( silent )
 		SetBits( flags, LUMP_SILENT );
 
+	if( buffersize < sizeof( *header ))
+		return false;
+
 	switch( header->version )
 	{
 	case HLBSP_VERSION:
-		if( extrahdr->id == IDEXTRAHEADER )
+		if( buffersize > sizeof( *header ) + sizeof( *extrahdr ) && extrahdr->id == IDEXTRAHEADER )
 		{
 			SetBits( flags, LUMP_BSP30EXT );
 		}
@@ -3923,7 +3931,7 @@ qboolean Mod_TestBmodelLumps( file_t *f, const char *name, const byte *mod_base,
 Mod_LoadBrushModel
 =================
 */
-void Mod_LoadBrushModel( model_t *mod, const void *buffer, qboolean *loaded )
+void Mod_LoadBrushModel( model_t *mod, void *buffer, size_t buffersize, qboolean *loaded )
 {
 	char poolname[MAX_VA_STRING];
 
@@ -3935,7 +3943,7 @@ void Mod_LoadBrushModel( model_t *mod, const void *buffer, qboolean *loaded )
 	mod->type = mod_brush;
 
 	// loading all the lumps into heap
-	if( !Mod_LoadBmodelLumps( mod, buffer, world.loading ))
+	if( !Mod_LoadBmodelLumps( mod, buffer, buffersize, world.loading ))
 		return; // there were errors
 
 	if( world.loading ) worldmodel = mod;

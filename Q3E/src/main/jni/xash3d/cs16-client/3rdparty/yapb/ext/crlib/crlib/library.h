@@ -76,14 +76,14 @@ public:
 
    static String path (void *address) {
 #if defined(CR_WINDOWS)
-      MEMORY_BASIC_INFORMATION mbi;
+      MEMORY_BASIC_INFORMATION mbi {};
 
       if (!VirtualQuery (address, &mbi, sizeof (mbi))) {
-         return "<unknown>";
+         return "";
       }
 
       if (mbi.State != MEM_COMMIT) {
-         return "<unknown>";
+         return "";
       }
 
       char dllpath[MAX_PATH] = { 0 };
@@ -97,7 +97,7 @@ public:
       if (dladdr (address, &dli)) {
          return dli.dli_fname;
       }
-      return "<unknown>";
+      return "";
 #endif
    }
 

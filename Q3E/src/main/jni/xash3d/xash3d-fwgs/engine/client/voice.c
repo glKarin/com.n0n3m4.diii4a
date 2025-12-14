@@ -24,13 +24,15 @@ GNU General Public License for more details.
 
 voice_state_t voice = { 0 };
 
-CVAR_DEFINE_AUTO( voice_enable, "1", FCVAR_PRIVILEGED | FCVAR_ARCHIVE, "enable voice chat" );
+static CVAR_DEFINE_AUTO( voice_enable, "1", FCVAR_PRIVILEGED | FCVAR_ARCHIVE, "enable voice chat" );
 CVAR_DEFINE_AUTO( voice_loopback, "0", FCVAR_PRIVILEGED, "loopback voice back to the speaker" );
-CVAR_DEFINE_AUTO( voice_scale, "1.0", FCVAR_PRIVILEGED | FCVAR_ARCHIVE, "incoming voice volume scale" );
-CVAR_DEFINE_AUTO( voice_transmit_scale, "1.0", FCVAR_PRIVILEGED | FCVAR_ARCHIVE, "outcoming voice volume scale" );
-CVAR_DEFINE_AUTO( voice_avggain, "0.5", FCVAR_PRIVILEGED | FCVAR_ARCHIVE, "automatic voice gain control (average)" );
-CVAR_DEFINE_AUTO( voice_maxgain, "5.0", FCVAR_PRIVILEGED | FCVAR_ARCHIVE, "automatic voice gain control (maximum)" );
-CVAR_DEFINE_AUTO( voice_inputfromfile, "0", FCVAR_PRIVILEGED, "input voice from voice_input.wav" );
+static CVAR_DEFINE_AUTO( voice_scale, "1.0", FCVAR_PRIVILEGED | FCVAR_ARCHIVE, "incoming voice volume scale" );
+static CVAR_DEFINE_AUTO( voice_transmit_scale, "1.0", FCVAR_PRIVILEGED | FCVAR_ARCHIVE, "outcoming voice volume scale" );
+static CVAR_DEFINE_AUTO( voice_avggain, "0.5", FCVAR_PRIVILEGED | FCVAR_ARCHIVE, "automatic voice gain control (average)" );
+static CVAR_DEFINE_AUTO( voice_maxgain, "5.0", FCVAR_PRIVILEGED | FCVAR_ARCHIVE, "automatic voice gain control (maximum)" );
+static CVAR_DEFINE_AUTO( voice_inputfromfile, "0", FCVAR_PRIVILEGED, "input voice from voice_input.wav" );
+
+static void Voice_StartChannel( uint samples, byte *data, int entnum );
 
 /*
 ===============================================================================
@@ -69,24 +71,6 @@ static qboolean Voice_IsOpusCustomMode( const char *codec )
 	return Q_strcmp( codec, VOICE_OPUS_CUSTOM_CODEC ) == 0;
 }
 
-
-/*
-=========================
-Voice_GetPlayerStatus
-
-Does proper entity index range checking and helps to avoid mess with off-by-one errors
-=========================
-*/
-static voice_status_t *Voice_GetPlayerStatus( int playerent )
-{
-	if ( playerent < 1 || playerent > MAX_CLIENTS )
-	{
-		Con_Printf( S_ERROR "%s: detected out-of-range player entity index\n", __func__ );
-		return NULL;
-	}
-	return &voice.players_status[playerent - 1];
-}
-
 /*
 =========================
 Voice_GetBitrateForQuality
@@ -96,28 +80,14 @@ Get bitrate for given quality level
 */
 static int Voice_GetBitrateForQuality( int quality, qboolean goldsrc )
 {
-	if( goldsrc )
+	switch( quality )
 	{
-		switch( quality )
-		{
-		case 1: return 6000;   // 6 kbps
-		case 2: return 12000;  // 12 kbps
-		case 3: return 24000;  // 24 kbps
-		case 4: return 36000;  // 36 kbps
-		case 5: return 48000;  // 48 kbps
-		default: return 36000; // default
-		}
-	}
-	else
-	{
-		switch( quality )
-		{
-		case 1: return 6000;   // 6 kbps
-		case 2: return 12000;  // 12 kbps
-		case 4: return 64000;  // 64 kbps
-		case 5: return 96000;  // 96 kbps
-		default: return 36000; // default
-		}
+	case 1: return 6000;   // 6 kbps
+	case 2: return 12000;  // 12 kbps
+	case 3: return 24000;  // 24 kbps
+	case 4: return 36000;  // 36 kbps
+	case 5: return 48000;  // 48 kbps
+	default: return 36000; // default
 	}
 }
 
@@ -583,7 +553,8 @@ static uint Voice_GetGSCompressedData( byte *out, uint maxsize, uint *frames )
 		if( bytes > 0 )
 		{
 			*(uint16_t *)( out + size ) = LittleShort( bytes );
-			*(uint16_t *)( out + size + 2 ) = LittleShort( sequence++ );
+			*(uint16_t *)( out + size + 2 ) = LittleShort( sequence );
+			sequence++;
 
 			size += bytes + sizeof( uint32_t );
 			maxsize -= bytes + sizeof( uint32_t );
@@ -623,8 +594,7 @@ static int Voice_ProcessGSData( int ent, const uint8_t *data, uint32_t size )
 	uint32_t    crc_in_packet;
 	uint32_t    crc;
 	size_t      offset;
-	int16_t     pcm[GS_MAX_DECOMPRESSED_SAMPLES];
-	size_t      output_samples;
+	size_t      samples;
 	uint16_t    sample_rate;
 	uint8_t     vpc_type;
 	uint16_t    data_len;
@@ -649,7 +619,7 @@ static int Voice_ProcessGSData( int ent, const uint8_t *data, uint32_t size )
 	}
 
 	offset = sizeof( uint64_t );
-	output_samples = 0;
+	samples = 0;
 
 	if( offset >= size - sizeof( uint32_t ) || data[offset] != GS_VPC_SETSAMPLERATE )
 	{
@@ -668,12 +638,6 @@ static int Voice_ProcessGSData( int ent, const uint8_t *data, uint32_t size )
 	data_len = LittleShort( *(uint16_t *)( data + offset ));
 	offset += sizeof( uint16_t );
 
-	if( offset + data_len > size - sizeof( uint32_t ))
-	{
-		Con_Printf( S_WARN "Voice packet data_len out of bounds\n" );
-		return 0;
-	}
-
 	if( vpc_type == GS_VPC_VDATA_OPUS_PLC )
 	{
 		decoder = voice.gs_decoders[ent - 1];
@@ -690,13 +654,13 @@ static int Voice_ProcessGSData( int ent, const uint8_t *data, uint32_t size )
 			// if frame size is 0, it means silence
 			if( frame_size == 0 )
 			{
-				if( output_samples + VOICE_DEFAULT_SILENCE_FRAME_SIZE > GS_MAX_DECOMPRESSED_SAMPLES )
+				if( samples + VOICE_DEFAULT_SILENCE_FRAME_SIZE > GS_MAX_DECOMPRESSED_SAMPLES )
 				{
 					Con_Printf( S_WARN "Voice buffer overflow\n" );
 					return 0;
 				}
-				memset( pcm + output_samples, 0, VOICE_DEFAULT_SILENCE_FRAME_SIZE * sizeof( int16_t ));
-				output_samples += VOICE_DEFAULT_SILENCE_FRAME_SIZE;
+				memset( ( (int16_t *)voice.decompress_buffer ) + samples, 0, VOICE_DEFAULT_SILENCE_FRAME_SIZE * sizeof( int16_t ));
+				samples += VOICE_DEFAULT_SILENCE_FRAME_SIZE;
 				continue;
 			}
 			if( frame_size == 0xFFFF )
@@ -710,13 +674,13 @@ static int Voice_ProcessGSData( int ent, const uint8_t *data, uint32_t size )
 				return 0;
 			}
 			decoded = opus_decode( decoder, data + offset + opus_offset, frame_size,
-					       pcm + output_samples, voice.frame_size, 0 );
+					       ( (int16_t *)voice.decompress_buffer ) + samples, voice.frame_size, 0 );
 			if( decoded < 0 )
 			{
 				Con_Printf( S_WARN "Opus decode error: %s\n", opus_strerror( decoded ));
 				return 0;
 			}
-			output_samples += decoded;
+			samples += decoded;
 			opus_offset += frame_size;
 		}
 	}
@@ -728,8 +692,8 @@ static int Voice_ProcessGSData( int ent, const uint8_t *data, uint32_t size )
 			Con_Printf( S_WARN "Silence data too large\n" );
 			return 0;
 		}
-		memset( pcm, 0, silence_samples * sizeof( int16_t ));
-		output_samples = silence_samples;
+		memset( voice.decompress_buffer, 0, silence_samples * sizeof( int16_t ));
+		samples = silence_samples;
 	}
 	else
 	{
@@ -737,10 +701,7 @@ static int Voice_ProcessGSData( int ent, const uint8_t *data, uint32_t size )
 		return 0;
 	}
 
-	if( output_samples > 0 )
-		Voice_StartChannel( output_samples, (byte *)pcm, ent );
-
-	return output_samples;
+	return samples;
 }
 
 /*
@@ -846,7 +807,7 @@ Sends notification to user dll and
 zeroes timeouts for this client
 =========================
 */
-void Voice_StatusAck( voice_status_t *status, int playerIndex )
+static void Voice_StatusAck( voice_status_t *status, int playerIndex )
 {
 	if( !status->talking_ack )
 		Voice_Status( playerIndex, true );
@@ -952,14 +913,7 @@ void Voice_Disconnect( void )
 	}
 
 	for( i = 1; i <= MAX_CLIENTS; i++ )
-	{
-		voice_status_t *status = Voice_GetPlayerStatus( i );
-		if( status->talking_ack )
-		{
-			Voice_Status( i, false );
-			status->talking_ack = false;
-		}
-	}
+		Voice_Status( i, false );
 
 	VoiceCapture_Shutdown();
 	voice.device_opened = false;
@@ -975,10 +929,36 @@ Voice_StartChannel
 Feed the decoded data to engine sound subsystem
 =========================
 */
-void Voice_StartChannel( uint samples, byte *data, int entnum )
+static void Voice_StartChannel( uint samples, byte *data, int entnum )
 {
 	SND_ForceInitMouth( entnum );
 	S_RawEntSamples( entnum, samples, voice.samplerate, voice.width, VOICE_PCM_CHANNELS, data, bound( 0, 255 * voice_scale.value, 255 ));
+	Voice_Status( entnum, true );
+}
+
+/*
+=========================
+Voice_StopChannel
+
+Called by mixer when channel idles
+=========================
+*/
+void Voice_StopChannel( int entnum )
+{
+	Voice_Status( entnum, false );
+}
+
+
+/*
+=========================
+Voice_AddIncomingData
+
+Received encoded voice data, decode it
+=========================
+*/
+void Voice_LoopbackAck( void )
+{
+	Voice_StatusAck( &voice.local, VOICE_LOOPBACK_INDEX );
 }
 
 /*
@@ -998,17 +978,9 @@ void Voice_AddIncomingData( int ent, const byte *data, uint size, uint frames )
 	if( !voice.initialized || !voice_enable.value )
 		return;
 
-	// must notify through as both local player and normal client
-	if( ent == cl.playernum )
-		Voice_StatusAck( &voice.local, VOICE_LOOPBACK_INDEX );
-
-	status = Voice_GetPlayerStatus( ent );
-	Voice_StatusAck( status, ent );
-
 	if( voice.goldsrc )
 	{
-		// Voice_ProcessGSData handles Voice_StartChannel internally
-		Voice_ProcessGSData( ent, (const uint8_t *)data, size );
+		samples = Voice_ProcessGSData( ent, (const uint8_t *)data, size );
 	}
 	else
 	{
@@ -1039,10 +1011,10 @@ void Voice_AddIncomingData( int ent, const byte *data, uint size, uint frames )
 			ofs += compressed_size;
 			samples += frame_samples;
 		}
-
-		if( samples > 0 )
-			Voice_StartChannel( samples, voice.decompress_buffer, ent );
 	}
+
+	if( samples > 0 )
+		Voice_StartChannel( samples, voice.decompress_buffer, ent );
 }
 
 /*
@@ -1072,11 +1044,6 @@ void CL_AddVoiceToDatagram( void )
 			MSG_BeginClientCmd( &cls.datagram, clc_voicedata );
 			MSG_WriteShort( &cls.datagram, packet_size );
 			MSG_WriteBytes( &cls.datagram, voice.compress_buffer, packet_size );
-
-			if( voice_loopback.value && packet_size > 0 && frames > 0 )
-			{
-				Voice_AddIncomingData( cl.playernum + 1, voice.compress_buffer, packet_size, frames );
-			}
 		}
 		return;
 	}
@@ -1137,11 +1104,7 @@ static void Voice_Shutdown( void )
 		Voice_Status( VOICE_LOOPBACK_INDEX, false );
 
 	for( i = 1; i <= MAX_CLIENTS; i++ )
-	{
-		voice_status_t *status = Voice_GetPlayerStatus( i );
-		if( status->talking_ack )
-			Voice_Status( i, false );
-	}
+		Voice_Status( i, false );
 
 	voice.initialized = false;
 	voice.is_recording = false;
@@ -1158,7 +1121,6 @@ static void Voice_Shutdown( void )
 	memset( voice.compress_buffer, 0, sizeof( voice.compress_buffer ));
 	memset( voice.decompress_buffer, 0, sizeof( voice.decompress_buffer ));
 	memset( &voice.local, 0, sizeof( voice.local ));
-	memset( voice.players_status, 0, sizeof( voice.players_status ));
 	memset( &voice.autogain, 0, sizeof( voice.autogain ));
 }
 
@@ -1188,12 +1150,6 @@ void Voice_Idle( double frametime )
 
 	// update local player status first
 	Voice_StatusTimeout( &voice.local, VOICE_LOOPBACK_INDEX, frametime );
-
-	for( i = 1; i <= MAX_CLIENTS; i++ )
-	{
-		voice_status_t *status = Voice_GetPlayerStatus( i );
-		Voice_StatusTimeout( status, i, frametime );
-	}
 }
 
 /*

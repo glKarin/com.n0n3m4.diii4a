@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utils.h"
 #include "keydefs.h"
 #include "BtnsBMPTable.h"
+#include "utflib.h"
 
 #if defined _WIN32
 	#undef GetParent
@@ -137,7 +138,7 @@ int ColorStrlen( const char *str )
 
 	int len = 0;
 	p = str;
-	EngFuncs::UtfProcessChar( 0 );
+	utfstate_t state;
 	while( *p )
 	{
 		if( IsColorString( p ))
@@ -147,12 +148,9 @@ int ColorStrlen( const char *str )
 		}
 
 		p++;
-		if( EngFuncs::UtfProcessChar( (unsigned char) *p ) )
+		if( state.Decode( (uint8_t)*p ))
 			len++;
 	}
-
-	EngFuncs::UtfProcessChar( 0 );
-
 	return len;
 }
 
@@ -164,25 +162,6 @@ char *StringCopy( const char *input )
 	strcpy( out, input );
 
 	return out;
-}
-
-/*
-============
-COM_CompareSaves
-============
-*/
-int COM_CompareSaves( const void **a, const void **b )
-{
-	char *file1, *file2;
-
-	file1 = (char *)*a;
-	file2 = (char *)*b;
-
-	int bResult;
-
-	EngFuncs::CompareFileTime( file2, file1, &bResult );
-
-	return bResult;
 }
 
 /*
@@ -379,97 +358,6 @@ CBMP* CBMP::LoadFile( const char *filename )
 	return ret;
 }
 
-const int table_cp1251[64] = {
-	0x0402, 0x0403, 0x201A, 0x0453, 0x201E, 0x2026, 0x2020, 0x2021,
-	0x20AC, 0x2030, 0x0409, 0x2039, 0x040A, 0x040C, 0x040B, 0x040F,
-	0x0452, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
-	0x007F, 0x2122, 0x0459, 0x203A, 0x045A, 0x045C, 0x045B, 0x045F,
-	0x00A0, 0x040E, 0x045E, 0x0408, 0x00A4, 0x0490, 0x00A6, 0x00A7,
-	0x0401, 0x00A9, 0x0404, 0x00AB, 0x00AC, 0x00AD, 0x00AE, 0x0407,
-	0x00B0, 0x00B1, 0x0406, 0x0456, 0x0491, 0x00B5, 0x00B6, 0x00B7,
-	0x0451, 0x2116, 0x0454, 0x00BB, 0x0458, 0x0405, 0x0455, 0x0457
-};
-
-
-/*
-============================
-Con_UtfProcessChar
-
-Ripped from engine.
-
-Xash3D FWGS uses multibyte, converting it to current single-byte encoding
-Converting to single-byte not necessary anymore, as UI uses custom font render which works with 32-bit chars
-============================
-*/
-int Con_UtfProcessChar( int in )
-{
-	static int m = -1, k = 0; //multibyte state
-	static int uc = 0; //unicode char
-
-	if( !in )
-	{
-		m = -1;
-		k = 0;
-		uc = 0;
-		return 0;
-	}
-
-	// Get character length
-	if(m == -1)
-	{
-		uc = 0;
-		if( in >= 0xF8 )
-		{
-			return 0;
-		}
-		else if( in >= 0xF0 )
-		{
-			uc = in & 0x07;
-			m = 3;
-		}
-		else if( in >= 0xE0 )
-		{
-			uc = in & 0x0F;
-			m = 2;
-		}
-		else if( in >= 0xC0 )
-		{
-			uc = in & 0x1F;
-			m = 1;
-		}
-		else if( in <= 0x7F )
-		{
-			return in; // ascii
-		}
-		// return 0 if we need more chars to decode one
-		k = 0;
-		return 0;
-	}
-	// get more chars
-	else if( k <= m )
-	{
-		uc <<= 6;
-		uc += in & 0x3F;
-		k++;
-	}
-	if( in > 0xBF || m < 0 )
-	{
-		m = -1;
-		return 0;
-	}
-
-	if( k == m )
-	{
-		k = m = -1;
-
-		return uc;
-
-		// not implemented yet
-		// return '?';
-	}
-	return 0;
-}
-
 /*
 =================
 Con_UtfMoveLeft
@@ -479,14 +367,18 @@ get position of previous printful char
 */
 int Con_UtfMoveLeft( const char *str, int pos )
 {
-	int i, k = 0;
-	// int j;
-	Con_UtfProcessChar( 0 );
-	if(pos == 1) return 0;
-	for( i = 0; i < pos-1; i++ )
-		if( Con_UtfProcessChar( (unsigned char)str[i] ) )
-			k = i+1;
-	Con_UtfProcessChar( 0 );
+	utfstate_t state;
+	int k = 0;
+
+	if( pos == 1 )
+		return 0;
+
+	for( int i = 0; i < pos - 1; i++ )
+	{
+		if( state.Decode((uint8_t)str[i] ))
+			k = i + 1;
+	}
+
 	return k;
 }
 
@@ -499,14 +391,13 @@ get next of previous printful char
 */
 int Con_UtfMoveRight( const char *str, int pos, int length )
 {
-	int i;
-	Con_UtfProcessChar( 0 );
-	for( i = pos; i <= length; i++ )
+	utfstate_t state;
+
+	for( int i = pos; i <= length; i++ )
 	{
-		if( Con_UtfProcessChar( (unsigned char)str[i] ) )
-			return i+1;
+		if( state.Decode((uint8_t)str[i] ))
+			return i + 1;
 	}
-	Con_UtfProcessChar( 0 );
 
 	return pos + 1;
 }

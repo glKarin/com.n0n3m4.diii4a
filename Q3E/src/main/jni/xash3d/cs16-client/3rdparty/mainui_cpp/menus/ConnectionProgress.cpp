@@ -246,7 +246,7 @@ void CMenuConnectionProgress::_Init( void )
 	title.szName = sTitleString;
 
 	skipButton.szName = L( "Skip" );
-	skipButton.onReleased.SetCommand( TRUE, "http_skip\n" );
+	skipButton.onReleased.SetCommand( true, "http_skip\n" );
 	skipButton.bEnableTransitions = false;
 
 	downloadText.iFlags = commonText.iFlags = QMF_INACTIVE;

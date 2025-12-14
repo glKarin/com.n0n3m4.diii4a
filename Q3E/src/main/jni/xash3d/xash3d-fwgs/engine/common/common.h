@@ -51,6 +51,8 @@ XASH SPECIFIC			- sort of hack that works only in Xash3D not in GoldSrc
 #include <sys/types.h> // off_t
 #endif
 
+#include "library_suffix.h"
+
 // configuration
 
 //
@@ -167,11 +169,6 @@ extern convar_t	cl_filterstuffcmd;
 extern convar_t	rcon_password;
 extern convar_t	hpk_custom_file;
 extern convar_t	con_gamemaps;
-extern convar_t fs_mount_lv;
-extern convar_t fs_mount_hd;
-extern convar_t fs_mount_addon;
-extern convar_t fs_mount_l10n;
-extern convar_t ui_language; // historically used for UI, but now controls mounted localization directory
 
 #define Mod_AllowMaterials() ( host_allow_materials.value != 0.0f && !FBitSet( host.features, ENGINE_DISABLE_HDTEXTURES ))
 
@@ -342,9 +339,6 @@ typedef struct host_parm_s
 	qboolean apply_game_config;   // when true apply only to game cvars and ignore all other commands
 	qboolean apply_opengl_config; // when true apply only to opengl cvars and ignore all other commands
 	qboolean config_executed;     // a bit who indicated was config.cfg already executed e.g. from valve.rc
-#if XASH_DLL_LOADER
-	qboolean enabledll;
-#endif
 	qboolean textmode;
 
 	// some settings were changed and needs to global update
@@ -416,7 +410,8 @@ byte *FS_LoadFile( const char *path, fs_offset_t *filesizeptr, qboolean gamediro
 byte *FS_LoadDirectFile( const char *path, fs_offset_t *filesizeptr )
 	MALLOC_LIKE( _Mem_Free, 1 ) WARN_UNUSED_RESULT;
 void FS_Rescan_f( void );
-void FS_CheckConfig( void );
+void FS_LoadGameInfo( void );
+void FS_SaveVFSConfig( void );
 
 //
 // cmd.c
@@ -497,7 +492,7 @@ void Image_AddCmdFlags( uint flags );
 void FS_FreeImage( rgbdata_t *pack );
 rgbdata_t *FS_LoadImage( const char *filename, const byte *buffer, size_t size ) MALLOC_LIKE( FS_FreeImage, 1 ) WARN_UNUSED_RESULT;
 qboolean FS_SaveImage( const char *filename, rgbdata_t *pix );
-rgbdata_t *FS_CopyImage( rgbdata_t *in ) MALLOC_LIKE( FS_FreeImage, 1 ) WARN_UNUSED_RESULT;
+rgbdata_t *FS_CopyImage( const rgbdata_t *in ) MALLOC_LIKE( FS_FreeImage, 1 ) WARN_UNUSED_RESULT;
 extern const bpc_desc_t PFDesc[];	// image get pixelformat
 qboolean Image_Process( rgbdata_t **pix, int width, int height, uint flags, float reserved );
 void Image_PaletteHueReplace( byte *palSrc, int newHue, int start, int end, int pal_size );
@@ -584,7 +579,7 @@ void Host_Error( const char *error, ... ) FORMAT_CHECK( 1 );
 void Host_ValidateEngineFeatures( uint32_t mask, uint32_t features );
 void Host_Frame( double time );
 void Host_Credits( void );
-void Host_ExitInMain( void );
+void Host_ExitInMain( void ) NORETURN;
 
 //
 // host_state.c
@@ -687,6 +682,8 @@ void pfnResetTutorMessageDecayData( void );
 void Con_CompleteCommand( field_t *field );
 void Cmd_AutoComplete( char *complete_string );
 void Cmd_AutoCompleteClear( void );
+void Host_InitializeConfig( file_t *f, const char *config, const char *description );
+void Host_FinalizeConfig( file_t *f, const char *config );
 
 //
 // custom.c
@@ -729,8 +726,8 @@ void HPAK_FlushHostQueue( void );
 typedef enum connprotocol_e
 {
 	PROTO_CURRENT = 0, // Xash3D 49
-	PROTO_LEGACY, // Xash3D 48
-	PROTO_QUAKE, // Quake 15
+	// RIP Xash3D 48
+	PROTO_QUAKE = 2, // Quake 15
 	PROTO_GOLDSRC, // GoldSrc 48
 } connprotocol_t;
 
@@ -827,7 +824,6 @@ uint LZSS_GetActualSize( const byte *source, size_t input_len );
 byte *LZSS_Compress( byte *pInput, int inputLength, uint *pOutputSize );
 uint LZSS_Decompress( const byte *pInput, byte *pOutput, size_t input_len, size_t output_len );
 void GL_FreeImage( const char *name );
-void VID_InitDefaultResolution( void );
 void VID_Init( void );
 void UI_SetActiveMenu( qboolean fActive );
 void UI_ShowConnectionWarning( void );
@@ -897,12 +893,12 @@ intptr_t V_GetGammaPtr( int parm );
 //
 void NET_InitMasters( void );
 void NET_SaveMasters( void );
-qboolean NET_SendToMasters( netsrc_t sock, size_t len, const void *data );
-qboolean NET_IsMasterAdr( netadr_t adr );
+qboolean NET_IsMasterAdr( netadr_t adr, connprotocol_t *proto );
 void NET_MasterHeartbeat( void );
 void NET_MasterClear( void );
 void NET_MasterShutdown( void );
 qboolean NET_GetMaster( netadr_t from, uint *challenge, double *last_heartbeat );
+qboolean NET_MasterQuery( uint32_t key, qboolean net, const char *filter );
 
 //
 // munge.c

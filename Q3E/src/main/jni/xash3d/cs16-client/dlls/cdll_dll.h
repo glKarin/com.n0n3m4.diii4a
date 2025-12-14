@@ -93,6 +93,7 @@
 #define MENU_RADIOB 36
 #define MENU_RADIOC 37
 #define MENU_RADIOSELECTOR 38
+#define MENU_BUY_CSDM 39
 #define MENU_NUMERICAL_MENU -1
 // -- cs16client extension end -- //
 
@@ -108,6 +109,7 @@
 #define PLAYER_DEAD (1<<0)
 #define PLAYER_HAS_C4 (1<<1)
 #define PLAYER_VIP (1<<2)
+#define PLAYER_HAS_DEFUSER (1<<3)
 
 #define WEAPON_SUIT 31
 #endif

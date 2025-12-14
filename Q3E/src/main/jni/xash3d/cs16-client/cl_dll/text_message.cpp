@@ -206,23 +206,7 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 
 	// Remove numbers after %s.
 	// VALVEWHY?
-	if( strlen(msg_text) >= 3 )
-	{
-		for( size_t i = 0; i < strlen(msg_text) - 2; i++)
-		{
-			if( msg_text[i] == '%' && msg_text[i + 1] == 's' && isdigit(msg_text[i + 2]))
-			{
-				char *first = &msg_text[i + 2];
-				char *second = &msg_text[i + 3];
-
-				size_t len = strlen( second );
-
-				memmove( first, second, strlen( second ));
-				first[len] = '\0'; // one character has been removed and string moved, set null terminator
-			}
-		}
-	}
-
+	Localize_StripIndices( msg_text );
 
 	switch ( msg_dest )
 	{

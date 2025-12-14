@@ -37,6 +37,7 @@ os = host_machine.system()
 cpu = host_machine.cpu_family()
 cxx = compiler.get_id()
 build_type = get_option ('buildtype')
+cpu_non_x86 = cpu == 'arm' or cpu.startswith('ppc') or cpu.startswith('riscv')
 
 opt_64bit = get_option('64bit')
 opt_native = get_option('native')
@@ -111,7 +112,7 @@ if cxx == 'clang' or cxx == 'gcc'
       '-pthread'
    ]
 
-   if not opt_native and cpu != 'arm' and not cpu.startswith('ppc')
+   if not opt_native and not cpu_non_x86
       cxxflags += '-mtune=generic'
    endif
 
@@ -119,7 +120,7 @@ if cxx == 'clang' or cxx == 'gcc'
       cxxflags += [
          '-march=armv8-a+fp+simd', 
       ]
-   elif cpu != 'arm' and not cpu.startswith('ppc')
+   elif not cpu_non_x86
       if not opt_nosimd
          cxxflags += [
             '-msse', '-msse2', '-msse3', '-msse3', '-mfpmath=sse'
@@ -143,18 +144,20 @@ if cxx == 'clang' or cxx == 'gcc'
          '-funroll-loops', '-fomit-frame-pointer', '-fno-stack-protector', '-fvisibility=hidden', '-fvisibility-inlines-hidden', '-fno-math-errno'
       ]
 
-      if os != 'darwin' and os != 'windows' and cpu != 'aarch64' and cpu != 'arm' and not cpu.startswith('ppc')
+      if os != 'darwin' and os != 'windows' and cpu != 'aarch64' and not cpu_non_x86
          if not opt_static_linkent
             cxxflags += [
                '-fdata-sections',
                '-ffunction-sections',
                '-fcf-protection=none',
-               '-fno-plt'
+               '-fno-plt',
+               '-Wa,--noexecstack'
             ]
 
             ldflags += [
                '-Wl,--version-script=' + meson.project_source_root() + '/ext/ldscripts/version.lds',
-               '-Wl,--gc-sections'
+               '-Wl,--gc-sections',
+               '-Wl,-z,noexecstack'
             ]
          else
             cxxflags += ['-DLINKENT_STATIC']
@@ -177,7 +180,7 @@ if cxx == 'clang' or cxx == 'gcc'
          ]
       endif
    else
-      cxxflags += ['-g3', '-ggdb', '-DDEBUG', '-D_FORTIFY_SOURCE=2']
+      cxxflags += ['-g3', '-ggdb', '-DDEBUG']
    endif
 
    # special script for mingw-64 builds
@@ -201,7 +204,7 @@ if cxx == 'clang' or cxx == 'gcc'
    endif
 
    # by default we buid 32bit binaries
-   if not opt_64bit and cpu != 'aarch64' and cpu != 'arm' and not cpu.startswith('ppc')
+   if not opt_64bit and cpu != 'aarch64' and not cpu_non_x86
       cxxflags += '-m32'
       ldflags += '-m32'
 
@@ -317,6 +320,8 @@ target_name = meson.project_name()
 # xash specific postfix for binaries
 if cpu == 'aarch64'
     target_name += '_arm64'
+elif cpu.startswith('riscv')
+    target_name += '_riscv64d'
 elif opt_64bit
     target_name += '_amd64'
 endif

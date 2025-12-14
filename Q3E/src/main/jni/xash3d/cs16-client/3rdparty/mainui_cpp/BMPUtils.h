@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #pragma once
+#ifndef BMPUTILS_H
+#define BMPUTILS_H
 
 #define BI_FILE_HEADER_SIZE 14
 #define BI_SIZE	40 // size of bitmap info header.
@@ -49,6 +51,22 @@ struct rgbquad_t
 	byte g;
 	byte r;
 	byte reserved;
+};
+
+struct tga_t
+{
+	uint8_t  id_length;
+	uint8_t  colormap_type;
+	uint8_t  image_type;
+	uint16_t colormap_index;
+	uint16_t colormap_length;
+	uint8_t  colormap_size;
+	uint16_t x_origin;
+	uint16_t y_origin;
+	uint16_t width;
+	uint16_t height;
+	uint8_t  pixel_size;
+	uint8_t  attributes;
 };
 #pragma pack( pop )
 
@@ -257,3 +275,5 @@ private:
 	bool fileAllocated;
 	byte *data;
 };
+
+#endif // BMPUTILS_H

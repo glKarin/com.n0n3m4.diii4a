@@ -24,32 +24,19 @@ public:
    using UniqueBot = UniquePtr <Bot>;
 
 private:
-   float m_timeRoundStart {}; // time round has started
-   float m_timeRoundEnd {}; // time round ended
-   float m_timeRoundMid {}; // middle point timestamp of a round
-
    float m_difficultyBalanceTime {}; // time to balance difficulties ?
    float m_autoKillCheckTime {}; // time to kill all the bots ?
    float m_maintainTime {}; // time to maintain bot creation
    float m_quotaMaintainTime {}; // time to maintain bot quota
-   float m_grenadeUpdateTime {}; // time to update active grenades
-   float m_entityUpdateTime {}; // time to update interesting entities
    float m_plantSearchUpdateTime {}; // time to update for searching planted bomb
    float m_lastChatTime {}; // global chat time timestamp
-   float m_timeBombPlanted {}; // time the bomb were planted
 
    int m_lastWinner {}; // the team who won previous round
    int m_lastDifficulty {}; // last bots difficulty
    int m_bombSayStatus {}; // some bot is issued whine about bomb
    int m_numPreviousPlayers {}; // number of players in game im previous player check
 
-   bool m_bombPlanted {}; // is bomb planted ?
    bool m_botsCanPause {}; // bots can do a little pause ?
-   bool m_roundOver {}; // well, round is over>
-   bool m_resetHud {}; // reset HUD is called for some one
-
-   Array <edict_t *> m_activeGrenades {}; // holds currently active grenades on the map
-   Array <edict_t *> m_interestingEntities {};  // holds currently interesting entities on the map
 
    Deque <String> m_saveBotNames {}; // bots names that persist upon changelevel
    Deque <BotRequest> m_addRequests {}; // bot creation tab
@@ -58,6 +45,8 @@ private:
 
    edict_t *m_killerEntity {}; // killer entity for bots
    BotTeamData  m_teamData[kGameTeamNum] {}; // teams shared data
+
+   CountdownTimer m_holdQuotaManagementTimer {}; // prevent from running quota management for some time
 
 protected:
    BotCreateResult create (StringRef name, int difficulty, int personality, int team, int skin);
@@ -79,10 +68,9 @@ public:
    int getAliveHumansCount ();
    int getPlayerPriority (edict_t *ent);
 
-   float getConnectTime (StringRef name, float original);
+   float getConnectionTimes (StringRef name, float original);
    float getAverageTeamKPD (bool calcForBots);
 
-   void setBombPlanted (bool isPlanted);
    void frame ();
    void createKillerEntity ();
    void destroyKillerEntity ();
@@ -111,8 +99,6 @@ public:
    void reset ();
    void initFilters ();
    void resetFilters ();
-   void updateActiveGrenade ();
-   void updateInterestingEntities ();
    void captureChatRadio (StringRef cmd, StringRef arg, edict_t *ent);
    void notifyBombDefuse ();
    void execGameEntity (edict_t *ent);
@@ -128,27 +114,10 @@ public:
    bool kickRandom (bool decQuota = true, Team fromTeam = Team::Unassigned);
    bool balancedKickRandom (bool decQuota);
    bool hasCustomCSDMSpawnEntities ();
-   bool isLineBlockedBySmoke (const Vector &from, const Vector &to);
    bool isFrameSkipDisabled ();
 
 public:
-   const Array <edict_t *> &getActiveGrenades () {
-      return m_activeGrenades;
-   }
-
-   const Array <edict_t *> &getInterestingEntities () {
-      return m_interestingEntities;
-   }
-
-   bool hasActiveGrenades () const {
-      return !m_activeGrenades.empty ();
-   }
-
-   bool hasInterestingEntities () const {
-      return !m_interestingEntities.empty ();
-   }
-
-   bool checkTeamEco (int team) const {
+   bool getTeamEconomics (int team) const {
       return m_teamData[team].positiveEco;
    }
 
@@ -167,30 +136,6 @@ public:
 
    void createRandom (bool manual = false) {
       addbot ("", -1, -1, -1, -1, manual);
-   }
-
-   bool isBombPlanted () const {
-      return m_bombPlanted;
-   }
-
-   float getTimeBombPlanted () const {
-      return m_timeBombPlanted;
-   }
-
-   float getRoundStartTime () const {
-      return m_timeRoundStart;
-   }
-
-   float getRoundMidTime () const {
-      return m_timeRoundMid;
-   }
-
-   float getRoundEndTime () const {
-      return m_timeRoundEnd;
-   }
-
-   bool isRoundOver () const {
-      return m_roundOver;
    }
 
    bool canPause () const {
@@ -232,10 +177,6 @@ public:
 
    void setLastRadio (const int team, const int radio) {
       m_teamData[team].lastRadioSlot = radio;
-   }
-
-   void setResetHUD (bool resetHud) {
-      m_resetHud = resetHud;
    }
 
    int getLastRadio (const int team) const {

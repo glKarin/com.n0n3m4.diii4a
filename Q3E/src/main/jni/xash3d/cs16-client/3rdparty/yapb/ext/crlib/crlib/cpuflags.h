@@ -7,7 +7,7 @@
 
 #pragma once
 
-#if (defined(CR_LINUX) || defined(CR_MACOS)) && !defined(CR_ARCH_ARM) && !defined(CR_ARCH_PPC)
+#if (defined(CR_LINUX) || defined(CR_MACOS)) && !defined(CR_ARCH_NON_X86)
 #  include <cpuid.h>
 #elif defined(CR_WINDOWS) && !defined(CR_CXX_MSVC)
 #  include <cpuid.h>
@@ -38,7 +38,7 @@ public:
 
 private:
    void detect () {
-#if !defined(CR_ARCH_ARM) && !defined(CR_ARCH_PPC)
+#if !defined(CR_ARCH_NON_X86)
       enum { eax, ebx, ecx, edx, regs };
 
       uint32_t data[regs] {};
@@ -60,7 +60,7 @@ private:
       __get_cpuid (0x7, &data[eax], &data[ebx], &data[ecx], &data[edx]);
 #endif
       avx2 = !!(data[ebx] & CpuCap::AVX2);
-#else
+#elif defined(CR_ARCH_ARM)
       neon = true;
 #endif
    }

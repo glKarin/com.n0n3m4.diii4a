@@ -18,7 +18,6 @@ void BotPractice::setIndex (int32_t team, int32_t start, int32_t goal, int32_t v
    if (team != Team::Terrorist && team != Team::CT) {
       return;
    }
-   MutexScopedLock lock (m_damageUpdateLock);
 
    // reliability check
    if (!graph.exists (start) || !graph.exists (goal) || !graph.exists (value)) {
@@ -38,7 +37,6 @@ void BotPractice::setValue (int32_t team, int32_t start, int32_t goal, int32_t v
    if (team != Team::Terrorist && team != Team::CT) {
       return;
    }
-   MutexScopedLock lock (m_damageUpdateLock);
 
    // reliability check
    if (!graph.exists (start) || !graph.exists (goal)) {
@@ -58,7 +56,6 @@ void BotPractice::setDamage (int32_t team, int32_t start, int32_t goal, int32_t 
    if (team != Team::Terrorist && team != Team::CT) {
       return;
    }
-   MutexScopedLock lock (m_damageUpdateLock);
 
    // reliability check
    if (!graph.exists (start) || !graph.exists (goal)) {
@@ -67,11 +64,12 @@ void BotPractice::setDamage (int32_t team, int32_t start, int32_t goal, int32_t 
    m_data[{start, goal, team}].damage = static_cast <int16_t> (value);
 }
 
-float BotPractice::plannerGetDamage (int32_t team, int32_t start, int32_t goal, bool addTeamHighestDamage) {
+float BotPractice::getDamageEx (int32_t team, int32_t start, int32_t goal, bool addTeamHighestDamage) {
    if (!m_damageUpdateLock.tryLock ()) {
       return 0.0f;
    }
    ScopedUnlock <Mutex> unlock (m_damageUpdateLock);
+
    auto damage = static_cast <float> (getDamage (team, start, goal));
 
    if (addTeamHighestDamage) {
@@ -96,6 +94,8 @@ void BotPractice::syncUpdate () {
       return; // no action
    }
    auto adjustValues = false;
+
+   MutexScopedLock lock (m_damageUpdateLock);
 
    // get the most dangerous node for this position for both teams
    for (int team = Team::Terrorist; team < kGameTeamNum; ++team) {
@@ -142,7 +142,6 @@ void BotPractice::syncUpdate () {
          }
       }
    }
-   MutexScopedLock lock (m_damageUpdateLock);
 
    for (int team = Team::Terrorist; team < kGameTeamNum; ++team) {
       m_teamHighestDamage[team] = cr::clamp (m_teamHighestDamage[team] - kHalfDamageVal, 1, kFullDamageVal);

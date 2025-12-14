@@ -250,7 +250,7 @@ void CMenuPicButton::Draw( )
 	if( iOldState == BUTTON_NOFOCUS && state != BUTTON_NOFOCUS )
 		iFocusStartTime = uiStatic.realTime;
 
-	if( szStatusText && iFlags & QMF_NOTIFY )
+	if( szStatusText && FBitSet( iFlags, QMF_NOTIFY ) && !FBitSet( gMenu.m_gameinfo.flags, GFL_NOSKILLS ))
 	{
 		Point coord;
 
@@ -275,15 +275,15 @@ void CMenuPicButton::Draw( )
 		wrect_t rects[3];
 		for( int i = 0; i < 3; i++ )
 		{
-			if( button_id > 0 )
+			if( button_id >= 0 )
 			{
 				rects[i].top = uiStatic.buttons_points[i];
 				rects[i].bottom = uiStatic.buttons_points[i] + uiStatic.buttons_height;
 			}
 			else
 			{
-				rects[i].top = 26 * i;
-				rects[i].bottom = 26 * ( i + 1 );
+				rects[i].top = round( EngFuncs::PIC_Height( hPic ) * i / 3.0f );
+				rects[i].bottom = round( EngFuncs::PIC_Height( hPic ) * ( i + 1 ) / 3.0f );
 			}
 			rects[i].left = 0;
 			rects[i].right = uiStatic.buttons_width;

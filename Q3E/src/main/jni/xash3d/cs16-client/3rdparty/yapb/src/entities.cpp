@@ -9,7 +9,7 @@
 
 // on other than win32/linux platforms i.e. arm we're using xash3d engine to run which exposes
 // nice interface to handle with linkents. if ever rehlds or hlds engine will ever run on ARM or
-// other platforms, and you want to run bot on it without metamod, consider enabling LINKENT_STATIC_THUNKS
+// other platforms, and you want to run bot on it without metamod, consider enabling LINKENT_STATIC
 // when compiling the bot, to get it supported.
 #if defined(LINKENT_STATIC)
 void forwardEntity_helper (EntityProto &addr, const char *name, entvars_t *pev) {

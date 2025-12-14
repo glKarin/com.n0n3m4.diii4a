@@ -27,7 +27,7 @@ int32_t ServerQueryHook::sendTo (int socket, const void *message, size_t length,
             buffer.skip <int32_t> (); // score
 
             auto ctime = buffer.read <float> (); // override connection time
-            buffer.write <float> (bots.getConnectTime (name, ctime));
+            buffer.write <float> (bots.getConnectionTimes (name, ctime));
          }
          return send (buffer.data ());
       }

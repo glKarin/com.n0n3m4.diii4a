@@ -19,22 +19,6 @@ GNU General Public License for more details.
 #include "net_encode.h"
 #include "net_api.h"
 
-const char *const clc_strings[clc_lastmsg+1] =
-{
-	"clc_bad",
-	"clc_nop",
-	"clc_move",
-	"clc_stringcmd",
-	"clc_delta",
-	"clc_resourcelist",
-	"clc_legacy_userinfo",
-	"clc_fileconsistency",
-	"clc_voicedata",
-	"clc_cvarvalue/clc_goldsrc_hltv",
-	"clc_cvarvalue2/clc_goldsrc_requestcvarvalue",
-	"clc_goldsrc_requestcvarvalue2",
-};
-
 typedef struct ucmd_s
 {
 	const char	*name;
@@ -124,7 +108,7 @@ static int SV_GetChallenge( netadr_t from, qboolean *error )
 	return digest[0] | digest[1] << 8 | digest[2] << 16 | digest[3] << 24;
 }
 
-static void SV_SendChallenge( netadr_t from )
+static void SV_SendChallenge( netadr_t from, qboolean skip_bandwidth_test )
 {
 	qboolean error = false;
 	int challenge = SV_GetChallenge( from, &error );
@@ -133,7 +117,7 @@ static void SV_SendChallenge( netadr_t from )
 		return;
 
 	// send it back
-	Netchan_OutOfBandPrint( NS_SERVER, from, S2C_CHALLENGE" %i", challenge );
+	Netchan_OutOfBandPrint( NS_SERVER, from, S2C_CHALLENGE" %i %i", challenge, skip_bandwidth_test ? 0 : 1 );
 }
 
 static int SV_GetFragmentSize( void *pcl, fragsize_t mode )
@@ -452,6 +436,7 @@ static void SV_ConnectClient( netadr_t from )
 	// build protinfo answer
 	protinfo[0] = '\0';
 	Info_SetValueForKeyf( protinfo, "ext", sizeof( protinfo ), "%d", newcl->extensions );
+	Info_SetValueForKey( protinfo, "cheats", sv_cheats.value ? "1" : "0", sizeof( protinfo ));
 
 	// send the connect packet to the client
 	Netchan_OutOfBandPrint( NS_SERVER, from, S2C_CONNECTION" %s", protinfo );
@@ -819,13 +804,22 @@ static void SV_TestBandWidth( netadr_t from )
 		return;
 	}
 
-	// quickly reject invalid packets
-	if( !sv_allow_testpacket.value || !svs.testpacket_buf ||
-		( packetsize <= FRAGMENT_MIN_SIZE ) ||
-		( packetsize > FRAGMENT_MAX_SIZE ))
+	// third argument is the challenge, if it's empty, it means this is an
+	// old client that do not have challenge and testbandwidth swapped
+	if( !Q_strlen( Cmd_Argv( 3 )))
 	{
-		// skip the test and just get challenge
-		SV_SendChallenge( from );
+		SV_SendChallenge( from, true );
+		return;
+	}
+
+	// require challenge for testpacket
+	if( !SV_CheckChallenge( from, Q_atoi( Cmd_Argv( 3 ))))
+		return;
+
+	// quickly reject invalid packets
+	if( !sv_allow_testpacket.value || !svs.testpacket_buf || packetsize <= FRAGMENT_MIN_SIZE || packetsize > 1400 )
+	{
+		SV_SendChallenge( from, true );
 		return;
 	}
 
@@ -833,7 +827,7 @@ static void SV_TestBandWidth( netadr_t from )
 	ofs = packetsize - svs.testpacket_filepos - 1;
 	if(( ofs < 0 ) || ( ofs > svs.testpacket_filelen ))
 	{
-		SV_SendChallenge( from );
+		SV_SendChallenge( from, true );
 		return;
 	}
 
@@ -917,7 +911,7 @@ static void SV_ConnectNatClient( netadr_t from )
 {
 	netadr_t to;
 
-	if( !sv_nat.value || !NET_IsMasterAdr( from ))
+	if( !sv_nat.value || !NET_IsMasterAdr( from, NULL ))
 		return;
 
 	if( !NET_StringToAdr( Cmd_Argv( 1 ), &to ))
@@ -3190,7 +3184,7 @@ void SV_ConnectionlessPacket( netadr_t from, sizebuf_t *msg )
 		return;
 	}
 
-	if( NET_IsMasterAdr( from ))
+	if( NET_IsMasterAdr( from, NULL ))
 	{
 		if( !Q_strcmp( pcmd, M2S_CHALLENGE ))
 		{
@@ -3222,7 +3216,7 @@ void SV_ConnectionlessPacket( netadr_t from, sizebuf_t *msg )
 	}
 	else if( !Q_strcmp( pcmd, C2S_GETCHALLENGE ))
 	{
-		SV_SendChallenge( from );
+		SV_SendChallenge( from, !sv_allow_testpacket.value || !svs.testpacket_buf );
 	}
 	else if( !Q_strcmp( pcmd, C2S_CONNECT ))
 	{
@@ -3540,16 +3534,12 @@ SV_ParseVoiceData
 static void SV_ParseVoiceData( sv_client_t *cl, sizebuf_t *msg )
 {
 	char received[4096];
-	sv_client_t	*cur;
-	int i, client;
-	uint length, size, frames;
+	int i;
 
-	cl->m_bLoopback = MSG_ReadByte( msg );
-
-	frames = MSG_ReadByte( msg );
-
-	size = MSG_ReadShort( msg );
-	client = cl - svs.clients;
+	const qboolean loopback = !!MSG_ReadByte( msg );
+	const uint frames = MSG_ReadByte( msg );
+	const uint size = MSG_ReadShort( msg );
+	const int client = cl - svs.clients;
 
 	if( size > sizeof( received ))
 	{
@@ -3563,24 +3553,26 @@ static void SV_ParseVoiceData( sv_client_t *cl, sizebuf_t *msg )
 	if( !sv_voiceenable.value || svs.maxclients <= 1 || cl->state != cs_spawned )
 		return;
 
-	for( i = 0, cur = svs.clients; i < svs.maxclients; i++, cur++ )
+	for( i = 0; i < svs.maxclients; i++ )
 	{
-		if( cl != cur )
+		sv_client_t *cur = &svs.clients[i];
+		const qboolean local = cl == cur;
+		uint length = size;
+
+		if( !local )
 		{
 			if( cur->state < cs_connected )
 				continue;
 
-			if( !FBitSet( cur->listeners, BIT( client )))
+			if( !FBitSet( cl->listeners, BIT( i )))
 				continue;
 		}
-
-		length = size;
 
 		// 6 is a number of bytes for other parts of message
 		if( MSG_GetNumBytesLeft( &cur->datagram ) < length + 6 )
 			continue;
 
-		if( cl == cur && !cur->m_bLoopback )
+		if( cl == cur && !loopback )
 			length = 0;
 
 		MSG_BeginServerCmd( &cur->datagram, svc_voicedata );
@@ -3671,7 +3663,7 @@ void SV_ExecuteClientMessage( sv_client_t *cl, sizebuf_t *msg )
 			SV_ParseCvarValue2( cl, msg );
 			break;
 		default:
-			Con_DPrintf( S_ERROR "%s: clc_bad\n", cl->name );
+			Con_DPrintf( S_ERROR "%s: clc_bad (%d)\n", cl->name, c );
 			SV_DropClient( cl, false );
 			return;
 		}

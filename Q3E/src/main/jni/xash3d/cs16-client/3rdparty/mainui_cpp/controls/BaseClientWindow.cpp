@@ -26,7 +26,7 @@ bool CMenuBaseClientWindow::KeyDown( int key )
 	if( UI::Key::IsEscape( key ))
 	{
 		EngFuncs::KEY_SetDest( KEY_GAME ); // set engine states before "escape"
-		EngFuncs::ClientCmd( FALSE, "escape\n" );
+		EngFuncs::ClientCmd( false, "escape\n" );
 		return true;
 	}
 	else if( UI::Key::IsConsole( key ))

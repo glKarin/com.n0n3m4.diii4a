@@ -211,21 +211,23 @@ public:
    }
 
    constexpr size_t rfind (StringRef pattern) const {
+      if (pattern.empty ()) {
+         return length_;
+      }
+
       if (pattern.length () > length_) {
          return InvalidIndex;
       }
-      bool match = true;
 
-      for (size_t i = length_ - 1; i >= pattern.length (); i--) {
-         match = true;
+      for (size_t i = length_ - pattern.length (); i != InvalidIndex; --i) {
+         bool match = true;
 
-         for (size_t j = pattern.length () - 1; j > 0; j--) {
-            if (chars_[i + i] != pattern[j]) {
+         for (size_t j = 0; j < pattern.length (); ++j) {
+            if (chars_[i + j] != pattern[j]) {
                match = false;
                break;
             }
          }
-
          if (match) {
             return i;
          }

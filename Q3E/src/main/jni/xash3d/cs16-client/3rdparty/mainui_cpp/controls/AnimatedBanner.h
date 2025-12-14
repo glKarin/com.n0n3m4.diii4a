@@ -79,6 +79,9 @@ private:
 	// not referenced
 	bool drawBlip[ART_BLIP_NUM];
 	bool drawBgBlip;
+
+	Size trueLogoSz;
+	Size trueLogoBlurSz[ART_BLUR_NUM];
 };
 
 #endif // ANIMATED_TITLE_H

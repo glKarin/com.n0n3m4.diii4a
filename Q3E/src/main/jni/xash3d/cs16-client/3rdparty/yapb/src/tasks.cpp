@@ -7,13 +7,13 @@
 
 #include <yapb.h>
 
-ConVar cv_walking_allowed ("walking_allowed", "1", "Specifies whether bots able to use 'shift' if they thinks that enemy is near.");
-ConVar cv_camping_allowed ("camping_allowed", "1", "Allows or disallows bots to camp. Doesn't affects bomb/hostage defending tasks.");
+ConVar cv_walking_allowed ("walking_allowed", "1", "Specifies whether bots are able to use 'shift' if they think that an enemy is near.");
+ConVar cv_camping_allowed ("camping_allowed", "1", "Allows or disallows bots to camp. Doesn't affect bomb/hostage defending tasks.");
 
-ConVar cv_camping_time_min ("camping_time_min", "15.0", "Lower bound of time from which time for camping is calculated", true, 5.0f, 90.0f);
-ConVar cv_camping_time_max ("camping_time_max", "45.0", "Upper bound of time until which time for camping is calculated", true, 15.0f, 120.0f);
+ConVar cv_camping_time_min ("camping_time_min", "15.0", "Lower bound of time from which the time for camping is calculated.", true, 5.0f, 90.0f);
+ConVar cv_camping_time_max ("camping_time_max", "45.0", "Upper bound of time until which the time for camping is calculated.", true, 15.0f, 120.0f);
 
-ConVar cv_random_knife_attacks ("random_knife_attacks", "1", "Allows or disallows the ability for random knife attacks when bot is rushing and no enemy is nearby.");
+ConVar cv_random_knife_attacks ("random_knife_attacks", "1", "Allows or disallows the ability for random knife attacks when the bot is rushing and no enemy is nearby.");
 
 void Bot::normal_ () {
    m_aimFlags |= AimFlags::Nav;
@@ -21,19 +21,25 @@ void Bot::normal_ () {
    const int debugGoal = cv_debug_goal.as <int> ();
 
    // user forced a node as a goal?
-   if (debugGoal != kInvalidNodeIndex) {
+   if (graph.exists (debugGoal)) {
       if (getTask ()->data != debugGoal) {
          clearSearchNodes ();
 
          getTask ()->data = debugGoal;
          m_chosenGoalIndex = debugGoal;
       }
+      const auto &debugOrigin = graph[debugGoal].origin;
+      const auto distanceToDebugOriginSq = debugOrigin.distanceSq (pev->origin);
+
+      if (!isDucking () && distanceToDebugOriginSq < cr::sqrf (172.0f)) {
+         m_moveSpeed = pev->maxspeed * 0.4f;
+      }
 
       // stop the bot if precisely reached debug goal
       if (m_currentNodeIndex == debugGoal) {
-         const auto &debugOrigin = graph[debugGoal].origin;
+         if (distanceToDebugOriginSq < cr::sqrf (22.0f)
+            && util.isVisible (debugOrigin, ent ())) {
 
-         if (debugOrigin.distanceSq2d (pev->origin) < cr::sqrf (22.0f) && util.isVisible (debugOrigin, ent ())) {
             m_moveToGoal = false;
             m_checkTerrain = false;
 
@@ -48,7 +54,7 @@ void Bot::normal_ () {
    // bots rushing with knife, when have no enemy (thanks for idea to nicebot project)
    if (cv_random_knife_attacks
       && usesKnife ()
-      && (game.isNullEntity (m_lastEnemy) || !util.isAlive (m_lastEnemy))
+      && (game.isNullEntity (m_lastEnemy) || !game.isAliveEntity (m_lastEnemy))
       && game.isNullEntity (m_enemy)
       && m_knifeAttackTime < game.time ()
       && !m_hasHostage
@@ -71,7 +77,7 @@ void Bot::normal_ () {
 
    // if bomb planted and it's a CT calculate new path to bomb point if he's not already heading for
    if (!m_bombSearchOverridden
-      && bots.isBombPlanted ()
+      && gameState.isBombPlanted ()
       && m_team == Team::CT
       && getTask ()->data != kInvalidNodeIndex
       && !(graph[getTask ()->data].flags & NodeFlag::Goal)
@@ -84,7 +90,7 @@ void Bot::normal_ () {
    // reached the destination (goal) node?
    if (updateNavigation ()) {
       // if we're reached the goal, and there is not enemies, notify the team
-      if (!bots.isBombPlanted ()
+      if (!gameState.isBombPlanted ()
          && m_currentNodeIndex != kInvalidNodeIndex
          && (m_pathFlags & NodeFlag::Goal)
          && rg.chance (15)
@@ -99,14 +105,14 @@ void Bot::normal_ () {
       // spray logo sometimes if allowed to do so
       if (!(m_states & (Sense::SeeingEnemy | Sense::SuspectEnemy))
          && m_seeEnemyTime + 5.0f < game.time ()
-         && m_reloadState ==  Reload::None
+         && m_reloadState == Reload::None
          && m_timeLogoSpray < game.time ()
          && cv_spraypaints
          && pev->groundentity == game.getStartEntity ()
          && m_moveSpeed >= getShiftSpeed ()
          && game.isNullEntity (m_pickupItem)) {
 
-         if (!(game.mapIs (MapFlags::Demolition) && bots.isBombPlanted () && m_team == Team::CT)) {
+         if (!(game.mapIs (MapFlags::Demolition) && gameState.isBombPlanted () && m_team == Team::CT)) {
             startTask (Task::Spraypaint, TaskPri::Spraypaint, kInvalidNodeIndex, game.time () + 1.0f, false);
          }
       }
@@ -134,7 +140,7 @@ void Bot::normal_ () {
             }
 
             // don't allow vip on as_ maps to camp + don't allow terrorist carrying c4 to camp
-            if (m_isVIP || (game.mapIs (MapFlags::Demolition) && m_team == Team::Terrorist && !bots.isBombPlanted () && m_hasC4)) {
+            if (m_isVIP || (game.mapIs (MapFlags::Demolition) && m_team == Team::Terrorist && !gameState.isBombPlanted () && m_hasC4)) {
                campingAllowed = false;
             }
 
@@ -218,7 +224,7 @@ void Bot::normal_ () {
                }
             }
             else if (m_team == Team::CT) {
-               if (!bots.isBombPlanted () && numFriendsNear (pev->origin, 210.0f) < 4) {
+               if (!gameState.isBombPlanted () && numFriendsNear (pev->origin, 210.0f) < 4) {
                   const int index = findDefendNode (m_path->origin);
                   float campTime = rg (25.0f, 40.0f);
 
@@ -258,7 +264,7 @@ void Bot::normal_ () {
       auto pathSearchType = m_pathType;
 
       // override with fast path
-      if (game.mapIs (MapFlags::Demolition) && bots.isBombPlanted ()) {
+      if (game.mapIs (MapFlags::Demolition) && gameState.isBombPlanted ()) {
          pathSearchType = rg.chance (80) ? FindPath::Fast : FindPath::Optimal;
       }
       ensureCurrentNodeIndex ();
@@ -280,7 +286,7 @@ void Bot::normal_ () {
       && (m_heardSoundTime + 6.0f >= game.time () || (m_states & Sense::HearingEnemy))
       && numEnemiesNear (pev->origin, 768.0f) >= 1
       && !isKnifeMode ()
-      && !bots.isBombPlanted ()) {
+      && !gameState.isBombPlanted ()) {
 
       m_moveSpeed = shiftSpeed;
    }
@@ -288,7 +294,7 @@ void Bot::normal_ () {
    // bot hasn't seen anything in a long time and is asking his teammates to report in
    if (cv_radio_mode.as <int> () > 1
       && bots.getLastRadio (m_team) != Radio::ReportInTeam
-      && bots.getRoundStartTime () + 20.0f < game.time ()
+      && gameState.getRoundStartTime () + 20.0f < game.time ()
       && m_askCheckTime < game.time () && rg.chance (15)
       && m_seeEnemyTime + rg (45.0f, 80.0f) < game.time ()
       && numFriendsNear (pev->origin, 1024.0f) == 0) {
@@ -357,7 +363,7 @@ void Bot::huntEnemy_ () {
       clearTask (Task::Hunt);
       m_prevGoalIndex = kInvalidNodeIndex;
    }
-   else if (game.getTeam (m_lastEnemy) == m_team) {
+   else if (game.getPlayerTeam (m_lastEnemy) == m_team) {
 
       // don't hunt down our teammate...
       clearTask (Task::Hunt);
@@ -413,7 +419,7 @@ void Bot::huntEnemy_ () {
 void Bot::seekCover_ () {
    m_aimFlags |= AimFlags::Nav;
 
-   if (!util.isAlive (m_lastEnemy)) {
+   if (!game.isAliveEntity (m_lastEnemy)) {
       completeTask ();
       m_prevGoalIndex = kInvalidNodeIndex;
    }
@@ -565,7 +571,7 @@ void Bot::blind_ () {
    if (rg.chance (50)
       && m_difficulty >= Difficulty::Normal
       && !m_lastEnemyOrigin.empty ()
-      && util.isPlayer (m_lastEnemy)
+      && game.isPlayerEntity (m_lastEnemy)
       && !usesSniper ()) {
 
       auto error = kSprayDistance * m_lastEnemyOrigin.distance (pev->origin) / 2048.0f;
@@ -624,7 +630,7 @@ void Bot::camp_ () {
    m_checkTerrain = false;
    m_moveToGoal = false;
 
-   if (m_team == Team::CT && bots.isBombPlanted () && m_defendedBomb && !isBombDefusing (graph.getBombOrigin ()) && !isOutOfBombTimer ()) {
+   if (m_team == Team::CT && gameState.isBombPlanted () && m_defendedBomb && !isBombDefusing (gameState.getBombOrigin ()) && !isOutOfBombTimer ()) {
       m_defendedBomb = false;
       completeTask ();
    }
@@ -644,18 +650,23 @@ void Bot::camp_ () {
 
    // random camp dir, or prediction
    auto useRandomCampDirOrPredictEnemy = [&] () {
-      if (!m_lastEnemyOrigin.empty () && util.isAlive (m_lastEnemy)) {
+      if (!m_lastEnemyOrigin.empty () && game.isAliveEntity (m_lastEnemy)) {
          auto pathLength = m_lastPredictLength;
          auto predictNode = m_lastPredictIndex;
 
-         if (isNodeValidForPredict (predictNode) && pathLength > 1) {
+         if (isNodeValidForPredict (predictNode)
+            && pathLength > 1
+            && vistab.visible (predictNode, m_currentNodeIndex)) {
+
             m_lookAtSafe = graph[predictNode].origin + pev->view_ofs;
          }
          else {
             pathLength = 0;
             predictNode = findAimingNode (m_lastEnemyOrigin, pathLength);
 
-            if (isNodeValidForPredict (predictNode) && pathLength > 1) {
+            if (isNodeValidForPredict (predictNode) && pathLength > 1
+               && vistab.visible (predictNode, m_currentNodeIndex)) {
+
                m_lookAtSafe = graph[predictNode].origin + pev->view_ofs;
             }
          }
@@ -838,7 +849,7 @@ void Bot::plantBomb_ () {
          selectWeaponById (Weapon::C4);
       }
 
-      if (util.isAlive (m_enemy) || !m_inBombZone) {
+      if (game.isAliveEntity (m_enemy) || !m_inBombZone) {
          completeTask ();
       }
       else {
@@ -881,7 +892,7 @@ void Bot::plantBomb_ () {
 
 void Bot::defuseBomb_ () {
    const float fullDefuseTime = m_hasDefuser ? 7.0f : 12.0f;
-   const float timeToBlowUp = getBombTimeleft ();
+   const float timeToBlowUp = gameState.getBombTimeLeft ();
 
    float defuseRemainingTime = fullDefuseTime;
 
@@ -889,7 +900,7 @@ void Bot::defuseBomb_ () {
       defuseRemainingTime = fullDefuseTime - game.time ();
    }
 
-   const auto &bombPos = graph.getBombOrigin ();
+   const auto &bombPos = gameState.getBombOrigin ();
    bool defuseError = false;
 
    // exception: bomb has been defused
@@ -903,7 +914,7 @@ void Bot::defuseBomb_ () {
             startTask (Task::MoveToPosition, TaskPri::MoveToPosition, defendPoint, game.time () + rg (3.0f, 6.0f), true); // push move command
          }
       }
-      graph.setBombOrigin (true);
+      gameState.setBombOrigin (true);
 
       if (m_numFriendsLeft != 0 && rg.chance (50)) {
          if (timeToBlowUp <= 3.0f) {
@@ -1059,7 +1070,7 @@ void Bot::defuseBomb_ () {
 }
 
 void Bot::followUser_ () {
-   if (game.isNullEntity (m_targetEntity) || !util.isAlive (m_targetEntity)) {
+   if (game.isNullEntity (m_targetEntity) || !game.isAliveEntity (m_targetEntity)) {
       m_targetEntity = nullptr;
       completeTask ();
 
@@ -1070,7 +1081,7 @@ void Bot::followUser_ () {
       TraceResult tr {};
       game.testLine (m_targetEntity->v.origin + m_targetEntity->v.view_ofs, m_targetEntity->v.v_angle.forward () * 500.0f, TraceIgnore::Everything, ent (), &tr);
 
-      if (!game.isNullEntity (tr.pHit) && util.isPlayer (tr.pHit) && game.getTeam (tr.pHit) != m_team) {
+      if (!game.isNullEntity (tr.pHit) && game.isPlayerEntity (tr.pHit) && game.getPlayerTeam (tr.pHit) != m_team) {
          m_targetEntity = nullptr;
          m_lastEnemy = tr.pHit;
          m_lastEnemyOrigin = tr.pHit->v.origin;
@@ -1320,7 +1331,7 @@ void Bot::throwSmoke_ () {
 }
 
 void Bot::doublejump_ () {
-   if (!util.isAlive (m_doubleJumpEntity)
+   if (!game.isAliveEntity (m_doubleJumpEntity)
       || (m_aimFlags & AimFlags::Enemy)
       || (m_travelStartIndex != kInvalidNodeIndex
          && getTask ()->time + (graph.calculateTravelTime (pev->maxspeed, graph[m_travelStartIndex].origin, m_doubleJumpOrigin) + 11.0f) < game.time ())) {
@@ -1394,7 +1405,7 @@ void Bot::doublejump_ () {
 void Bot::escapeFromBomb_ () {
    m_aimFlags |= AimFlags::Nav;
 
-   if (!bots.isBombPlanted ()) {
+   if (!gameState.isBombPlanted ()) {
       completeTask ();
    }
 
@@ -1402,7 +1413,7 @@ void Bot::escapeFromBomb_ () {
       pev->button |= IN_ATTACK2;
    }
 
-   if (!usesKnife () && game.isNullEntity (m_enemy) && !util.isAlive (m_lastEnemy)) {
+   if (!usesKnife () && game.isNullEntity (m_enemy) && !game.isAliveEntity (m_lastEnemy)) {
       selectWeaponById (Weapon::Knife);
    }
 
@@ -1427,7 +1438,7 @@ void Bot::escapeFromBomb_ () {
       float nearestDistanceSq = kInfiniteDistance;
 
       for (const auto &path : graph) {
-         if (path.origin.distanceSq (graph.getBombOrigin ()) < cr::sqrf (safeRadius) || isOccupiedNode (path.number)) {
+         if (path.origin.distanceSq (gameState.getBombOrigin ()) < cr::sqrf (safeRadius) || isOccupiedNode (path.number)) {
             continue;
          }
          const float distanceSq = pev->origin.distanceSq (path.origin);
@@ -1460,13 +1471,13 @@ void Bot::escapeFromBomb_ () {
 void Bot::shootBreakable_ () {
 
    // breakable destroyed?
-   if (!util.isBreakableEntity (m_breakableEntity)) {
+   if (!game.isBreakableEntity (m_breakableEntity)) {
       completeTask ();
       return;
    }
    else {
       TraceResult tr {};
-      game.testLine (pev->origin, m_breakableOrigin, TraceIgnore::Monsters , ent (), &tr);
+      game.testLine (pev->origin, m_breakableOrigin, TraceIgnore::Monsters, ent (), &tr);
 
       if (tr.pHit != m_breakableEntity && !cr::fequal (tr.flFraction, 1.0f)) {
          m_ignoredBreakable.push (tr.pHit);
@@ -1496,7 +1507,7 @@ void Bot::shootBreakable_ () {
       m_shootTime = game.time ();
 
       // enforce shooting
-      if (!usesKnife ()  && !m_isReloading && !(pev->button & IN_RELOAD) && getAmmoInClip () > 0) {
+      if (!usesKnife () && !m_isReloading && !(pev->button & IN_RELOAD) && getAmmoInClip () > 0) {
          if (!(m_oldButtons & IN_ATTACK)) {
             pev->button |= IN_ATTACK;
          }
@@ -1642,7 +1653,7 @@ void Bot::pickupItem_ () {
    case Pickup::Hostage:
       m_aimFlags |= AimFlags::Entity;
 
-      if (!util.isAlive (m_pickupItem)) {
+      if (!game.isAliveEntity (m_pickupItem)) {
          // don't pickup dead hostages
          m_pickupItem = nullptr;
          completeTask ();
@@ -1671,7 +1682,7 @@ void Bot::pickupItem_ () {
 
             // find the nearest 'unused' hostage within the area
             game.searchEntities (pev->origin, 1024.0f, [&] (edict_t *ent) {
-               if (!util.isHostageEntity (ent)) {
+               if (!game.isHostageEntity (ent)) {
                   return EntitySearchResult::Continue;
                }
 

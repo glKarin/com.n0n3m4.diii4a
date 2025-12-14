@@ -149,12 +149,12 @@ private:
 
 	static void CmdExecuteNextFrameCb( CMenuBaseItem *pSelf, void *pExtra )
 	{
-		EngFuncs::ClientCmd( FALSE, (char *)pExtra );
+		EngFuncs::ClientCmd( false, (char *)pExtra );
 	}
 
 	static void CmdExecuteNowCb( CMenuBaseItem *pSelf, void *pExtra )
 	{
-		EngFuncs::ClientCmd( TRUE, (char *)pExtra );
+		EngFuncs::ClientCmd( true, (char *)pExtra );
 	}
 
 	friend class CMenuItemsHolder;

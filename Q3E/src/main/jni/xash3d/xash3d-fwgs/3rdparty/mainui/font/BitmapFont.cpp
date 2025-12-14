@@ -16,6 +16,7 @@ GNU General Public License for more details.
 #include "BaseMenu.h"
 #include "BaseFontBackend.h"
 #include "BitmapFont.h"
+#include "utflib.h"
 
 CBitmapFont::CBitmapFont() : CBaseFont(), hImage( 0 ) { }
 CBitmapFont::~CBitmapFont() { }

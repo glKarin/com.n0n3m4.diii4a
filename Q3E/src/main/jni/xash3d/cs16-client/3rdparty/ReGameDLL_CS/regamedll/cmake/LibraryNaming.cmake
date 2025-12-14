@@ -1,3 +1,4 @@
+include_guard(GLOBAL)
 include(CheckSymbolExists)
 
 macro(check_build_target symbol)

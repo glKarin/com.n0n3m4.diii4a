@@ -173,7 +173,6 @@ private:
 
    Vector m_learnVelocity {};
    Vector m_learnPosition {};
-   Vector m_bombOrigin {};
    Vector m_lastNode {};
 
    IntArray m_terrorPoints {};
@@ -228,6 +227,7 @@ public:
    bool loadGraphData ();
    bool canDownload ();
    bool isAnalyzed () const;
+   bool isConverted () const;
 
    void saveOldFormat ();
    void reset ();
@@ -253,7 +253,6 @@ public:
    void clearVisited ();
 
    void eraseFromBucket (const Vector &pos, int index);
-   void setBombOrigin (bool reset = false, const Vector &pos = nullptr);
    void unassignPath (int from, int to);
    void convertFromPOD (Path &path, const PODPath &pod) const;
    void convertToPOD (const Path &path, PODPath &pod);
@@ -290,10 +289,6 @@ public:
 
    void clearEditFlag (int flag) {
       m_editFlags &= ~flag;
-   }
-
-   const Vector &getBombOrigin () const {
-      return m_bombOrigin;
    }
 
    // access paths

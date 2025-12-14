@@ -69,8 +69,8 @@ CR_DECLARE_SCOPED_ENUM (Menu,
 
 // bomb say string
 CR_DECLARE_SCOPED_ENUM (BombPlantedSay,
-  ChatSay = cr::bit (1),
-  Chatter = cr::bit (2)
+   ChatSay = cr::bit (1),
+   Chatter = cr::bit (2)
 )
 
 // chat types id's
@@ -419,7 +419,13 @@ CR_DECLARE_SCOPED_ENUM (GoalTactic,
    RescueHostage
 )
 
-// some hard-coded desire defines used to override calculated ones
+// ladder move direction
+CR_DECLARE_SCOPED_ENUM (LadderDir,
+   Up = 0,
+   Down,
+)
+
+   // some hard-coded desire defines used to override calculated ones
 namespace TaskPri {
    constexpr auto Normal { 35.0f };
    constexpr auto Pause { 36.0f };
@@ -447,7 +453,7 @@ constexpr auto kSprayDistanceX2 = kSprayDistance * 2;
 constexpr auto kMaxChatterRepeatInterval = 99.0f;
 constexpr auto kViewFrameUpdate = 1.0f / 25.0f;
 constexpr auto kGrenadeDamageRadius = 385.0f;
-constexpr auto kMinMovedDistance = 3.0f;
+constexpr auto kMinMovedDistance = cr::sqrf (2.0f);
 
 constexpr auto kInfiniteDistanceLong = static_cast <int> (kInfiniteDistance);
 constexpr auto kMaxWeapons = 32;
@@ -462,35 +468,35 @@ constexpr auto kConfigExtension = "cfg";
 
 // weapon masks
 constexpr auto kPrimaryWeaponMask = (cr::bit (Weapon::XM1014) |
-                                     cr::bit (Weapon::M3) |
-                                     cr::bit (Weapon::MAC10) |
-                                     cr::bit (Weapon::UMP45) |
-                                     cr::bit (Weapon::MP5) |
-                                     cr::bit (Weapon::TMP) |
-                                     cr::bit (Weapon::P90) |
-                                     cr::bit (Weapon::AUG) |
-                                     cr::bit (Weapon::M4A1) |
-                                     cr::bit (Weapon::SG552) |
-                                     cr::bit (Weapon::AK47) |
-                                     cr::bit (Weapon::Scout) |
-                                     cr::bit (Weapon::SG550) |
-                                     cr::bit (Weapon::AWP) |
-                                     cr::bit (Weapon::G3SG1) |
-                                     cr::bit (Weapon::M249) |
-                                     cr::bit (Weapon::Famas) |
-                                     cr::bit (Weapon::Galil));
+   cr::bit (Weapon::M3) |
+   cr::bit (Weapon::MAC10) |
+   cr::bit (Weapon::UMP45) |
+   cr::bit (Weapon::MP5) |
+   cr::bit (Weapon::TMP) |
+   cr::bit (Weapon::P90) |
+   cr::bit (Weapon::AUG) |
+   cr::bit (Weapon::M4A1) |
+   cr::bit (Weapon::SG552) |
+   cr::bit (Weapon::AK47) |
+   cr::bit (Weapon::Scout) |
+   cr::bit (Weapon::SG550) |
+   cr::bit (Weapon::AWP) |
+   cr::bit (Weapon::G3SG1) |
+   cr::bit (Weapon::M249) |
+   cr::bit (Weapon::Famas) |
+   cr::bit (Weapon::Galil));
 
 constexpr auto kSecondaryWeaponMask = (cr::bit (Weapon::P228)
-                                       | cr::bit (Weapon::Elite)
-                                       | cr::bit (Weapon::USP)
-                                       | cr::bit (Weapon::Glock18)
-                                       | cr::bit (Weapon::Deagle)
-                                       | cr::bit (Weapon::FiveSeven));
+   | cr::bit (Weapon::Elite)
+   | cr::bit (Weapon::USP)
+   | cr::bit (Weapon::Glock18)
+   | cr::bit (Weapon::Deagle)
+   | cr::bit (Weapon::FiveSeven));
 
 constexpr auto kSniperWeaponMask = (cr::bit (Weapon::Scout)
-                                    | cr::bit (Weapon::SG550)
-                                    | cr::bit (Weapon::AWP)
-                                    | cr::bit (Weapon::G3SG1));
+   | cr::bit (Weapon::SG550)
+   | cr::bit (Weapon::AWP)
+   | cr::bit (Weapon::G3SG1));
 
 // weapons < 7 are secondary
 constexpr auto kPrimaryWeaponMinIndex = 7;

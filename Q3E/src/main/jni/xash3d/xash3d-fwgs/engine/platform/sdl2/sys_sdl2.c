@@ -65,22 +65,23 @@ static const char *SDLash_CategoryToString( int category )
 
 static void SDLCALL SDLash_LogOutputFunction( void *userdata, int category, SDL_LogPriority priority, const char *message )
 {
+	const char *str = "";
+
 	switch( priority )
 	{
 	case SDL_LOG_PRIORITY_CRITICAL:
 	case SDL_LOG_PRIORITY_ERROR:
-		Con_Printf( S_ERROR S_BLUE "SDL" S_DEFAULT ": [%s] %s\n", SDLash_CategoryToString( category ), message );
+		str = S_ERROR;
 		break;
 	case SDL_LOG_PRIORITY_WARN:
-		Con_DPrintf( S_WARN S_BLUE "SDL" S_DEFAULT ": [%s] %s\n", SDLash_CategoryToString( category ), message );
+		str = S_WARN;
 		break;
 	case SDL_LOG_PRIORITY_INFO:
-		Con_Reportf( S_NOTE S_BLUE "SDL" S_DEFAULT ": [%s] %s\n", SDLash_CategoryToString( category ), message );
-		break;
-	default:
-		Con_Reportf( S_BLUE "SDL" S_DEFAULT ": [%s] %s\n", SDLash_CategoryToString( category ), message );
+		str = S_NOTE;
 		break;
 	}
+
+	Con_Reportf( "%s" S_BLUE "SDL" S_DEFAULT ": [%s] %s\n", str, SDLash_CategoryToString( category ), message );
 }
 
 void SDLash_Init( const char *basedir )
@@ -105,16 +106,17 @@ void SDLash_Init( const char *basedir )
 	else
 		SDL_LogSetAllPriority( SDL_LOG_PRIORITY_ERROR );
 
-#ifndef SDL_INIT_EVENTS
-#define SDL_INIT_EVENTS 0
-#endif
+#if XASH_WIN32
+	SDL_SetHint( SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2" );
+	SDL_SetHint( SDL_HINT_WINDOWS_DPI_SCALING, "1" );
+#endif // XASH_WIN32
+
 	if( SDL_Init( SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS ) )
 	{
 		Sys_Warn( "SDL_Init failed: %s", SDL_GetError() );
 		host.type = HOST_DEDICATED;
 	}
 
-#if SDL_MAJOR_VERSION >= 2
 	SDL_SetHint( SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0" );
 
 #ifdef SDL_HINT_MOUSE_TOUCH_EVENTS
@@ -122,8 +124,15 @@ void SDLash_Init( const char *basedir )
 #endif // SDL_HINT_MOUSE_TOUCH_EVENTS
 	SDL_SetHint( SDL_HINT_TOUCH_MOUSE_EVENTS, "0" );
 
+	// NOTE: setting this hint makes no sense, as of course
+	// it doesn't make warps magically work in normal, non-relative mode
+	// there is pointer_warp_v1 extension but it's only implemented in SDL3
+	// at the time of writing, so there it should just work if compositor
+	// supports it
+
+	// SDL_SetHint( SDL_HINT_VIDEO_WAYLAND_EMULATE_MOUSE_WARP, "1" );
+
 	SDL_StopTextInput();
-#endif // XASH_SDL == 2
 
 	SDLash_InitCursors();
 }

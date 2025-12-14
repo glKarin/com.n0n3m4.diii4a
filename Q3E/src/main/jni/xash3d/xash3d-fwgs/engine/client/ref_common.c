@@ -6,7 +6,13 @@
 #include "vid_common.h"
 
 struct ref_state_s ref;
-ref_globals_t refState;
+
+ref_globals_t refState =
+{
+	// just have something valid until video subsystem is finished initializing
+	.width = 640,
+	.height = 480,
+};
 
 static const char* r_skyBoxSuffix[SKYBOX_MAX_SIDES] = { "rt", "bk", "lf", "ft", "up", "dn" };
 
@@ -19,6 +25,7 @@ CVAR_DEFINE_AUTO( gl_clear, "0", FCVAR_ARCHIVE, "clearing screen after each fram
 CVAR_DEFINE_AUTO( r_showtree, "0", FCVAR_ARCHIVE, "build the graph of visible BSP tree" );
 static CVAR_DEFINE_AUTO( r_refdll, "", FCVAR_RENDERINFO, "choose renderer implementation, if supported" );
 static CVAR_DEFINE_AUTO( r_refdll_loaded, "", FCVAR_READ_ONLY, "currently loaded renderer" );
+static CVAR_DEFINE_AUTO( r_pvs_radius, "0.1", FCVAR_ARCHIVE, "increase amount of potentially visible leaves by this radius" );
 
 // there is no need to expose whole host and cl structs into the renderer
 // but we still need to update timings accurately as possible
@@ -293,7 +300,7 @@ static screenfade_t *pfnRefGetScreenFade( void )
 static qboolean R_Init_Video_( const int type )
 {
 	host.apply_opengl_config = true;
-	Cbuf_AddTextf( "exec %s.cfg", ref.dllFuncs.R_GetConfigName());
+	Cbuf_AddTextf( "exec %s.cfg\n", ref.dllFuncs.R_GetConfigName());
 	Cbuf_Execute();
 	host.apply_opengl_config = false;
 
@@ -699,6 +706,7 @@ qboolean R_Init( void )
 	Cvar_RegisterVariable( &r_showtree );
 	Cvar_RegisterVariable( &r_refdll );
 	Cvar_RegisterVariable( &r_refdll_loaded );
+	Cvar_RegisterVariable( &r_pvs_radius );
 
 	// cvars that are expected to exist
 	Cvar_Get( "r_speeds", "0", FCVAR_ARCHIVE, "shows renderer speeds" );
@@ -724,7 +732,7 @@ qboolean R_Init( void )
 	Cvar_Get( "cl_himodels", "1", FCVAR_ARCHIVE, "draw high-resolution player models in multiplayer" );
 
 	// cvars are created, execute video config
-	Cbuf_AddText( "exec video.cfg" );
+	Cbuf_AddText( "exec video.cfg\n" );
 	Cbuf_Execute();
 
 	// Set screen resolution and fullscreen mode if passed in on command line.

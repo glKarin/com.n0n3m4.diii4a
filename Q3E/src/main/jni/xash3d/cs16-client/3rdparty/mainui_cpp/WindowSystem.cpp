@@ -309,7 +309,7 @@ void CWindowStack::Remove( CMenuBaseWindow *menu )
 	// hacks for demos and some environments where we can't play them on background
 	if( this == &uiStatic.menu && uiStatic.m_fDemosPlayed && uiStatic.m_iOldMenuDepth == stack.Count() - 1 )
 	{
-		EngFuncs::ClientCmd( FALSE, "demos\n" );
+		EngFuncs::ClientCmd( false, "demos\n" );
 		uiStatic.m_fDemosPlayed = false;
 		uiStatic.m_iOldMenuDepth = 0;
 	}

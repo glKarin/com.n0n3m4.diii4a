@@ -698,27 +698,19 @@ void EXT_FUNC CBasePlayer::__API_HOOK(TraceAttack)(entvars_t *pevAttacker, float
 
 	if (bHitShield)
 	{
+#ifndef REGAMEDLL_FIXES
+		// BUGBUG: zeroing out damage BEFORE altering victim's punchangle
+		// will simply nullify any previous punchangles
 		flDamage = 0;
+#endif
+
 		bShouldBleed = false;
+		HitShield(flDamage, ptr);
 
-		if (RANDOM_LONG(0, 1))
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/ric_metal-1.wav", VOL_NORM, ATTN_NORM);
-		else
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/ric_metal-2.wav", VOL_NORM, ATTN_NORM);
-
-		UTIL_Sparks(ptr->vecEndPos);
-
-		pev->punchangle.x = flDamage * RANDOM_FLOAT(-0.15, 0.15);
-		pev->punchangle.z = flDamage * RANDOM_FLOAT(-0.15, 0.15);
-
-		if (pev->punchangle.x < 4)
-			pev->punchangle.x = -4;
-
-		if (pev->punchangle.z < -5)
-			pev->punchangle.z = -5;
-
-		else if (pev->punchangle.z > 5)
-			pev->punchangle.z = 5;
+#ifdef REGAMEDLL_FIXES
+		// reset damage after messing with victim's punchangle
+		flDamage = 0;
+#endif
 	}
 	else
 	{
@@ -3412,7 +3404,23 @@ void EXT_FUNC CBasePlayer::__API_HOOK(GiveShield)(bool bDeploy)
 		}
 	}
 
-#ifndef REGAMEDLL_FIXES
+#ifdef REGAMEDLL_FIXES
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeaponList, nullptr, pev);
+		WRITE_STRING("weapon_shieldgun");
+		WRITE_BYTE(-1); // PrimaryAmmoID
+		WRITE_BYTE(-1); // PrimaryAmmoMaxAmount
+		WRITE_BYTE(-1); // SecondaryAmmoID
+		WRITE_BYTE(-1); // SecondaryAmmoMaxAmount
+		WRITE_BYTE(0); // SlotID (0...N)
+		WRITE_BYTE(0); // NumberInSlot (1...N)
+		WRITE_BYTE(0); // WeaponID
+		WRITE_BYTE(0); // Flags
+	MESSAGE_END();
+
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, nullptr, pev);
+		WRITE_BYTE(0); // WeaponID
+	MESSAGE_END();
+#else
 	// NOTE: Moved above, because CC4::Deploy can reset hitbox of shield
 	pev->gamestate = HITGROUP_SHIELD_ENABLED;
 #endif

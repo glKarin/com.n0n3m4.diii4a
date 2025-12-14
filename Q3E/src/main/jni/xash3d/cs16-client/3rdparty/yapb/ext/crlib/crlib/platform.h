@@ -50,9 +50,9 @@ CR_NAMESPACE_BEGIN
 // configure macroses
 #define CR_C_LINKAGE extern "C"
 
-#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64__) || defined(__amd64) || defined(__aarch64__) || (defined(_MSC_VER) && defined(_M_X64)) || defined(__powerpc64__)
+#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64__) || defined(__amd64) || defined(__aarch64__) || (defined(_MSC_VER) && defined(_M_X64)) || defined(__powerpc64__) || (__riscv_xlen == 64)
 #  define CR_ARCH_X64
-#elif defined(__i686) || defined(__i686__) || defined(__i386) || defined(__i386__) || defined(i386) || (defined(_MSC_VER) && defined(_M_IX86)) || defined(__powerpc__)
+#elif defined(__i686) || defined(__i686__) || defined(__i386) || defined(__i386__) || defined(i386) || (defined(_MSC_VER) && defined(_M_IX86)) || defined(__powerpc__) || (__riscv_xlen == 32)
 #  define CR_ARCH_X32
 #endif
 
@@ -71,12 +71,21 @@ CR_NAMESPACE_BEGIN
 #  define CR_ARCH_PPC32
 #endif
 
+#if defined(__riscv)
+#  define CR_ARCH_RISCV
+#  define CR_NO_GLIBC_VERSIONING
+#endif
+
 #if defined(CR_ARCH_PPC32) || defined(CR_ARCH_PPC64)
 #   define CR_ARCH_PPC
 #endif
 
+#if defined(CR_ARCH_ARM) || defined(CR_ARCH_PPC) || defined(CR_ARCH_RISCV)
+#  define CR_ARCH_NON_X86
+#endif
+
 #if !defined(CR_DISABLE_SIMD)
-#  if !defined(CR_ARCH_ARM) && !defined(CR_ARCH_PPC)
+#  if !defined(CR_ARCH_NON_X86)
 #     define CR_HAS_SIMD_SSE
 #  elif defined(__ARM_NEON)
 #     define CR_HAS_SIMD_NEON
@@ -125,7 +134,7 @@ CR_NAMESPACE_BEGIN
 #  define __PLACEMENT_NEW_INLINE
 #endif
 
-#if (defined(CR_CXX_MSVC) && !defined(CR_CXX_CLANG)) || defined(CR_ARCH_ARM) || defined(CR_ARCH_PPC)
+#if (defined(CR_CXX_MSVC) && !defined(CR_CXX_CLANG)) || defined(CR_ARCH_NON_X86)
 #  define CR_SIMD_TARGET(dest) CR_FORCE_INLINE
 #  define CR_SIMD_TARGET_AIL(dest) CR_FORCE_INLINE
 #  define CR_SIMD_TARGET_TIL(dest) inline
@@ -279,6 +288,7 @@ struct Platform : public Singleton <Platform> {
    bool simd = false;
    bool psvita = false;
    bool emscripten = false;
+   bool riscv = false;
 
    char appName[64] = {};
 
@@ -307,6 +317,10 @@ struct Platform : public Singleton <Platform> {
       arm = true;
 #endif
 
+#if defined(CR_ARCH_RISCV)
+      riscv = true;
+#endif
+
 #if defined(CR_PSVITA)
       psvita = true;
 #endif
@@ -331,7 +345,7 @@ struct Platform : public Singleton <Platform> {
 
    // running on no-x86 platform ?
    bool isNonX86 () const {
-      return arm || ppc;
+      return arm || ppc || riscv;
    }
 
    // helper platform-dependant functions

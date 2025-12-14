@@ -78,9 +78,6 @@ public:
 // bot fakeping manager
 class BotFakePingManager final : public Singleton <BotFakePingManager> {
 private:
-   mutable Mutex m_cs {};
-
-private:
    CountdownTimer m_recalcTime {};
    PingBitMsg m_pbm {};
 
