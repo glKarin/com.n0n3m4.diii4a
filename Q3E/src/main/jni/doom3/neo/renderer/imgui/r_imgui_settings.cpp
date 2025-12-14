@@ -866,9 +866,9 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCvar("harm_con_noBackground", "Don't draw console background");
     // filesystem
     ImGui_RegisterLabel("File System", IG_CVAR_GROUP_FRAMEWORK);
-    ImGui_RegisterCvar("harm_fs_basepath_extras", "Extras search paths last(split by ',')");
-    ImGui_RegisterCvar("harm_fs_addon_extras", "Extras search addon files directory path last(split by ',')");
-    ImGui_RegisterCvar("harm_fs_game_base_extras", "Extras search game mod last(split by ',')");
+    ImGui_RegisterCvar("harm_fs_addon_extras", "Extras game addon resource path before add base game paths");
+    ImGui_RegisterCvar("harm_fs_basepath_extras", "Extras base game paths(absolute system path)");
+    ImGui_RegisterCvar("harm_fs_game_base_extras", "Extras game base name(extras fs_game_base)");
     ImGui_RegisterDivide(IG_CVAR_GROUP_FRAMEWORK);
 
     // renderer

@@ -54,6 +54,8 @@ extern void Posix_LateInit();
 extern bool Posix_AddMousePollEvent(int action, int value);
 extern void Posix_QueEvent(sysEventType_t type, int value, int value2, int ptrLength, void *ptr);
 
+static bool com_shutdown = false;
+
 /*
 ===========
 Sys_InitScanTable
@@ -234,6 +236,7 @@ void Sys_Shutdown(void)
 {
 	basepath.Clear();
 	savepath.Clear();
+	com_shutdown = true;
 	Posix_Shutdown();
 }
 

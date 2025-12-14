@@ -266,6 +266,11 @@ void Q3E_SetGLContext(ANativeWindow *w)
         }
         else // set window is null, and wait doom3 main thread deactive OpenGL render context.
         {
+			if(com_shutdown)
+			{
+				printf("[Java/JNI]: Game has shutdown.\n");
+				return;
+			}
             Q3E_WindowChanged(NULL, WINDOW_CHANGE_THREAD_SURFACE_VIEW);
             Sys_Printf("[Java/JNI]: Waiting GL context destroy......\n");
             while(window_changed)
