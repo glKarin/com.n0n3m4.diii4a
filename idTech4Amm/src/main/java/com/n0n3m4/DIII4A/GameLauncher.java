@@ -1329,7 +1329,7 @@ public class GameLauncher extends Activity
 			}
 
 			SyncCmdCheckbox(V.cb_useHighPrecision, "harm_r_useHighPrecision", false);
-			SyncCmdCheckbox(V.cb_renderToolsMultithread, "harm_r_renderToolsMultithread", false);
+			SyncCmdCheckbox(V.cb_renderToolsMultithread, "harm_r_renderToolsMultithread", true);
 			SyncCmdCheckbox(V.cb_r_occlusionCulling, "harm_r_occlusionCulling", false);
 
 			V.cb_gui_useD3BFGFont.setChecked(getProp("harm_gui_useD3BFGFont", false));
@@ -2016,7 +2016,7 @@ public class GameLauncher extends Activity
 		V.cb_perforatedShadow.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_useHighPrecision.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_useHighPrecision, false));
 		V.cb_useHighPrecision.setOnCheckedChangeListener(m_checkboxChangeListener);
-		V.cb_renderToolsMultithread.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_renderToolsMultithread, false));
+		V.cb_renderToolsMultithread.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_renderToolsMultithread, true));
 		V.cb_renderToolsMultithread.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_r_occlusionCulling.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_occlusionCulling, false));
 		V.cb_r_occlusionCulling.setOnCheckedChangeListener(m_checkboxChangeListener);

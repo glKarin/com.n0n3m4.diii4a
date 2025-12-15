@@ -74,7 +74,7 @@ public final class KCVarSystem
                                 "1", "Force setup r_aspectRatio to -1 (default)",
                                 "2", "Automatic setup r_aspectRatio to 0,1,2 by screen size"
                         ),
-                        KCVar.CreateCVar("harm_r_renderToolsMultithread", "bool", "0", "Enable render tools debug with GLES in multi-threading", KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_renderToolsMultithread", "bool", "1", "Enable render tools debug with GLES in multi-threading", KCVar.FLAG_LAUNCHER),
                         KCVar.CreateCVar("harm_r_useHighPrecision", "integer", "0", "Use high precision float on GLSL shader", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
                                 "0", "use default precision(interaction/depth shaders use high precision, otherwise use medium precision)",
                                 "1", "all shaders use high precision as default precision exclude special variables",
@@ -151,14 +151,15 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_fs_basepath_extras", "string", "", "Extras search paths last(split by ',')", KCVar.FLAG_INIT),
                         KCVar.CreateCVar("harm_fs_addon_extras", "string", "", "Extras search addon files directory path last(split by ',')", KCVar.FLAG_INIT),
                         KCVar.CreateCVar("harm_fs_game_base_extras", "string", "", "Extras search game mod last(split by ',')", KCVar.FLAG_INIT),
-                        KCVar.CreateCVar("harm_con_float", "bool", "0", "Float console", 0),
+                        KCVar.CreateCVar("harm_con_float", "bool", "0", "Enable float console", 0),
                         KCVar.CreateCVar("harm_con_alwaysShow", "bool", "0", "Always show console", 0),
                         KCVar.CreateCVar("harm_con_noBackground", "bool", "0", "Don't draw console background", 0),
-                        KCVar.CreateCVar("harm_con_floatGeometry", "vector4", "100 50 300 200", "Float console geometry, format is \"'<left> <top> <width> <height>\"", 0),
+                        KCVar.CreateCVar("harm_con_floatGeometry", "vector4", "100 50 300 200", "Float console geometry, format is \"<left> <top> <width> <height>\"", 0),
                         KCVar.CreateCVar("harm_con_floatZoomStep", "integer", "10", "Zoom step of float console", 0),
                         KCVar.CreateCommand("exportFont", "string", "Convert ttf/ttc font file to DOOM3 wide character font file", 0),
                         KCVar.CreateCommand("extractBimage", "string", "extract DOOM3-BFG's bimage image to rga RGBA image files", 0),
-                        KCVar.CreateCommand("skipHitEffect", "bool", "skip all hit effect in game", 0)
+                        KCVar.CreateCommand("skipHitEffect", "bool", "skip all hit effect in game", 0),
+                        KCVar.CreateCommand("idTech4AmmSettings", "string", "Show idTech4A++ new cvars and commands", 0)
                 );
         KCVar.Group GAME_CVARS = new KCVar.Group("DOOM3", false)
                 .AddCVar(

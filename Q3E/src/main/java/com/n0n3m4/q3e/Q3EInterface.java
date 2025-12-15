@@ -1427,9 +1427,9 @@ public class Q3EInterface
 	public void LoadLayoutTablePreference(Context context, String game, boolean portrait)
 	{
 		if(portrait)
-			defaults_table = Arrays.copyOf(_defaultTable, _defaultTable.length);
-		else
 			defaults_table = Arrays.copyOf(_defaultPortraitTable, _defaultPortraitTable.length);
+		else
+			defaults_table = Arrays.copyOf(_defaultTable, _defaultTable.length);
 
 		try
 		{
@@ -1466,9 +1466,9 @@ public class Q3EInterface
 			//UncaughtExceptionHandler.DumpException(this, Thread.currentThread(), e);
 			e.printStackTrace();
 			if(portrait)
-				System.arraycopy(_defaultTable, 0, defaults_table, 0, _defaultTable.length);
-			else
 				System.arraycopy(_defaultPortraitTable, 0, defaults_table, 0, _defaultPortraitTable.length);
+			else
+				System.arraycopy(_defaultTable, 0, defaults_table, 0, _defaultTable.length);
 		}
 	}
 

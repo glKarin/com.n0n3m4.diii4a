@@ -730,6 +730,7 @@
                         android:id="@+id/cb_renderToolsMultithread"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:checked="true"
                         android:text="@string/enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread" />
 
                     <CheckBox
@@ -912,12 +913,14 @@
                     android:id="@+id/cb_s_useOpenAL"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:checked="true"
                     android:text="@string/using_openal" />
 
                 <CheckBox
                     android:id="@+id/cb_s_useEAXReverb"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:checked="true"
                     android:text="@string/using_efx_reverb" />
             </LinearLayout> <!-- end idTech4::sound section -->
 
@@ -939,6 +942,7 @@
                     android:id="@+id/cb_r_autoAspectRatio"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:checked="true"
                     android:text="@string/automatic_setup_aspect_ratio_harm_r_autoaspectratio" />
 
                 <CheckBox
