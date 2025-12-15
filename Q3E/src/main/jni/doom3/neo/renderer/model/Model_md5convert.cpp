@@ -537,7 +537,7 @@ int R_Model_ParseMd5ConvertCmdLine(const idCmdArgs &args, idStr *mesh, int *flag
     return res;
 }
 
-#if 1
+#if 0
 static void ArgCompletion_JSON(const idCmdArgs &args, void(*callback)(const char *s))
 {
     cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, 
@@ -643,10 +643,10 @@ static void R_TestJSON_f(const idCmdArgs &args)
 void R_Md5Convert_AddCommand(void)
 {
     cmdSystem->AddCommand("convertMd5Def", R_ConvertMd5Def_f, CMD_FL_RENDERER, "Convert other type animation model entityDef to md5mesh/md5anim", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
-    cmdSystem->AddCommand("cleanConvertedMd5", R_CleanConvertedMd5_f, CMD_FL_RENDERER, "Clean converted md5mesh", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
+    cmdSystem->AddCommand("cleanConvertedMd5", R_CleanConvertedMd5_f, CMD_FL_RENDERER, "Clean converted md5mesh/md5anim", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF>);
     cmdSystem->AddCommand("convertMd5AllDefs", R_ConvertMd5AllDefs_f, CMD_FL_RENDERER, "Convert all other type animation models entityDef to md5mesh/md5anim");
 
-#if 1
+#if 0
     cmdSystem->AddCommand("json", R_TestJSON_f, CMD_FL_RENDERER, "test json", ArgCompletion_JSON);
 #endif
 }

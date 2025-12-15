@@ -1,4 +1,4 @@
-// player view body animation model
+// 1. player view body animation model
 model player_model_torso_and_lower_body {
     offset (0 0 0)
     model models/md5/player_model_torso_and_lower_body.md5mesh
@@ -27,7 +27,7 @@ model player_model_torso_and_lower_body {
     soft_land models/md5/player_model_torso_and_lower_body/soft_land.md5anim
 }
 
-// default name is player_viewbody, or setup in player entity with property 'player_viewbody'
+// 2. set player player_viewbody spawn arguments
 entityDef player_viewbody {
     "spawnclass"				"idViewBody"
     "body_model"                "player_model_torso_and_lower_body" // body's md5 model: animations's name same as player model: string
@@ -42,9 +42,10 @@ entityDef player_viewbody {
     // "anim run_backwards" 	"walk_backwards"
 }
 
-/*
-// setup player player_viewbody spawn argument in player entityDef
+// 3. setup player player_viewbody spawn argument in player entityDef, default name is player_viewbody.
 entityDef player {
     "player_viewbody"				"player_viewbody" // setup idViewBody's entityDef
 }
-*/
+
+// 4. enable view body by cvar
+// set harm_ui_showViewBody 1

@@ -504,7 +504,7 @@ void idImGuiSettings::RenderNewCvars(void) const
 void idImGuiSettings::RenderUpdateCvars(void) const
 {
     const char *UpdateCvars[] = {
-            //"harm_r_specularExponentPBR", "4.0",
+            "harm_r_renderToolsMultithread", "1",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
