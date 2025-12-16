@@ -1,0 +1,6 @@
+* For disable game
+
+1. Edit 2 Q3EInterface::IsDisabled methods
+2. Edit menu/activity_menu.xml, make game menu invisible
+3. Remove assets if exists
+4. Make build option to OFF on master CMakeLists.txt

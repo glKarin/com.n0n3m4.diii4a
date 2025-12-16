@@ -862,12 +862,21 @@ public class Q3EInterface
 
 	public boolean IsDisabled()
 	{
-		return isFTEQW;
+		return isFTEQW || isXash3D;
 	}
 
 	public static boolean IsDisabled(String game)
 	{
-		return game.equalsIgnoreCase(Q3EGameConstants.GAME_FTEQW);
+		final String[] DisabledGames = {
+				Q3EGameConstants.GAME_FTEQW,
+				Q3EGameConstants.GAME_XASH3D,
+		};
+		for(String disabledGame : DisabledGames)
+		{
+			if(disabledGame.equalsIgnoreCase(game))
+				return true;
+		}
+		return false;
 	}
 
 	public static boolean IsSupportSecondaryDirGame(String game)

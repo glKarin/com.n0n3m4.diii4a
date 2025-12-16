@@ -40,13 +40,15 @@ OPTION(GAME_URT                     "Build Urbant Error"                        
 OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"          ON)
 # Not in F-Droid
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
-OPTION(GAME_XASH3D                  "Build Xash3D"                                  ON)
 OPTION(GAME_SOURCE                  "Build Source"                                  ON)
 endif()
 
 
 # Disabled
 OPTION(GAME_FTEQW                   "Build FTEQW"                                   OFF)
+if(NOT PRODUCT_FLAVOR_IS_FDROID)
+OPTION(GAME_XASH3D                  "Build Xash3D"                                  OFF)
+endif()
 
 
 # Experimental

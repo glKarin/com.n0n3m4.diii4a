@@ -87,7 +87,7 @@ public class ChangeLog
                         "Add `Urban Terror`(ver 4.3.4) support, game standalone directory named `urt`, game data directory named `q3ut4`. More view in `" + TextHelper.GenLinkText("https://www.urbanterror.info", "Urban Terror") + "`.",
                         "Update Quake 2(yquake2) version to 8.51, update Vulkan renderer.",
                         "Update GZDOOM version to 4.14.2.",
-                        "Rename Xash3D game standalone folder to `xash`.",
+                        //"Rename Xash3D game standalone folder to `xash`.",
                         "Rename Source Engine game standalone folder to `srceng`.",
                         "Add fixed ratio resolution support on launcher `Graphics` tab.",
                         "[Warning]: RealRTCW(ver 5.1) have removed on this release!"
@@ -97,14 +97,14 @@ public class ChangeLog
                         "Update Wolfenstein: Enemy Territory(ET: Legacy) version to 2.83.2, fix Omni-bot initialization.",
                         "Fix game controller, and add game controller configure on launcher `CONTROLS` tab.",
                         "Add more alphabet on-screen buttons, and add `cs16-client` and `source-engine` on-screen button theme.",
-                        "Add load external game library support on Xash3D.",
+                        //"Add load external game library support on Xash3D.",
                         "Add built-in soft keyboard support.",
                         "Update RealRTCW version to 5.2, version 5.1 will be removed on next release."
                 ),
 
                 ChangeLog.Create("2025-05-08", 67,
-                        "Add Serious Sam Classic: The First Encounter(game standalone directory named `serioussamtfe`) and Serious Sam Classic: The Second Encounter(game standalone directory named `serioussamtse`) support. More view in `" + TextHelper.GenLinkText("https://github.com/tx00100xt/SeriousSamClassic", "SeriousSamClassic") + "`.",
-                        "Add Xash3D and Counter-Strike 1.6(need extract CS1.6 extras resource on launcher first) support, game standalone directory named `xash`, more view in `" + TextHelper.GenLinkText("https://github.com/FWGS/xash3d-fwgs", "xash3d") + "` and `" + TextHelper.GenLinkText("https://github.com/Velaron/cs16-client", "cs16-client") + "`."
+                        "Add Serious Sam Classic: The First Encounter(game standalone directory named `serioussamtfe`) and Serious Sam Classic: The Second Encounter(game standalone directory named `serioussamtse`) support. More view in `" + TextHelper.GenLinkText("https://github.com/tx00100xt/SeriousSamClassic", "SeriousSamClassic") + "`."
+                        //"Add Xash3D and Counter-Strike 1.6(need extract CS1.6 extras resource on launcher first) support, game standalone directory named `xash`, more view in `" + TextHelper.GenLinkText("https://github.com/FWGS/xash3d-fwgs", "xash3d") + "` and `" + TextHelper.GenLinkText("https://github.com/Velaron/cs16-client", "cs16-client") + "`."
                 ),
 
                 ChangeLog.Create("2025-06-25", 66,
