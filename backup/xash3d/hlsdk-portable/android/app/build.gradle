@@ -1,0 +1,73 @@
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.temporal.ChronoUnit
+
+apply plugin: 'com.android.application'
+
+android {
+    ndkVersion '26.1.10909125'
+    namespace 'com.example.hlsdk'
+
+    defaultConfig {
+        applicationId 'com.example.hlsdk'
+        versionName '1.0'
+        versionCode getBuildNum()
+        minSdkVersion 3
+        targetSdk 34
+        compileSdk 34
+
+        externalNativeBuild {
+            cmake {
+                arguments '-DPOLLY=ON'
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            version '3.22.1'
+            path file('../../CMakeLists.txt')
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            shrinkResources false
+            debuggable true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    lint {
+        abortOnError false
+    }
+
+    androidResources {
+        noCompress += ''
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+}
+
+static def getBuildNum() {
+    LocalDateTime now = LocalDateTime.now()
+    LocalDateTime releaseDate = LocalDateTime.of(2023, Month.DECEMBER, 28, 0, 0, 0)
+    int qBuildNum = releaseDate.until(now, ChronoUnit.DAYS)
+    int minuteOfDay = now.getHour() * 60 + now.getMinute()
+    return qBuildNum * 10000 + minuteOfDay
+}

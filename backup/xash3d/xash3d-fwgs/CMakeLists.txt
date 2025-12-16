@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.9)
+project (xash3d-fwgs)
+
+include(CheckCXXCompilerFlag)
+
+add_compile_options(-Wno-ignored-attributes -Wno-macro-redefined)
+
+add_definitions(-DALLOCA_H=<malloc.h>)
+add_definitions(-DSTDINT_H=<stdint.h>)
+add_definitions(-D_GNU_SOURCE)
+add_definitions(-DHAVE_TGMATH_H)
+add_definitions(-DHAVE_STRNCASECMP -DHAVE_STRCASECMP)
+add_definitions(-DXASH_BUILD_COMMIT=\"74b196d2c362ea195967be6f139faeed18795a53\" -DXASH_BUILD_BRANCH=\"master\" -DXASH_BUILD_COMMIT_DATE=\"2025-8-18\")
+
+add_subdirectory(public)
+add_subdirectory(filesystem)
+
+add_subdirectory(3rdparty/library_suffix)
+add_subdirectory(3rdparty/nanogl)
+add_subdirectory(3rdparty/gl4es/gl4es)
+add_subdirectory(3rdparty/libogg/libogg)
+include_directories(${XASH_OGG_INCLUDE_DIR})
+add_subdirectory(3rdparty/vorbis/vorbis-src)
+add_subdirectory(3rdparty/opus/opus)
+add_subdirectory(3rdparty/opusfile/opusfile)
+add_subdirectory(3rdparty/bzip2/bzip2)
+add_subdirectory(3rdparty/MultiEmulator)
+add_subdirectory(3rdparty/libbacktrace/libbacktrace)
+add_subdirectory(ref/gl)
+add_subdirectory(ref/soft)
+add_subdirectory(3rdparty/mainui)
+add_subdirectory(engine)

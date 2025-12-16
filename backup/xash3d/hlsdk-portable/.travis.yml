@@ -1,0 +1,16 @@
+language: cpp
+compiler: 
+  - gcc
+  - clang
+os:
+  - linux
+  - osx
+sudo: true
+before_script:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install gcc-multilib g++-multilib; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$CC" == "gcc" ]]; then sudo apt-get install mingw-w64-i686-dev binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686; fi
+script:
+  - mkdir -p build && cd build
+  - cmake ../ -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined" -DUSE_VOICEMGR=0 && make -j3 && rm -rf *
+  - cmake ../ -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined" -DUSE_VOICEMGR=1 && make -j3 && rm -rf *
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$CC" == "gcc" ]]; then cd ..; mkdir build-mingw; cd build-mingw; cmake ../ -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=i686-w64-mingw32-g++ && make -j3; fi

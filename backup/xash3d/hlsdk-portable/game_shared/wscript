@@ -1,0 +1,14 @@
+#! /usr/bin/env python
+# encoding: utf-8
+# a1batross, mittorn, 2018
+
+def configure(conf):
+	conf.load('gitversion')
+	if conf.env.GIT_VERSION:
+		conf.define('XASH_BUILD_COMMIT', conf.env.GIT_VERSION)
+	if conf.env.GIT_BRANCH:
+		conf.define('XASH_BUILD_BRANCH', conf.env.GIT_BRANCH)
+
+def build(bld):
+	bld.stlib(source = 'vcs_info.c', target = 'vcs_info', includes = '.')
+

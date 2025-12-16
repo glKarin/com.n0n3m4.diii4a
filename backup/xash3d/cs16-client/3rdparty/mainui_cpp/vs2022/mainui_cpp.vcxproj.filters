@@ -1,0 +1,414 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Исходные файлы">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Файлы заголовков">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Файлы заголовков\controls">
+      <UniqueIdentifier>{57254338-fe8e-4c00-be88-e72784746d44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\menus">
+      <UniqueIdentifier>{f3bd3589-a294-49a5-9ecd-15a6533f7f17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\font">
+      <UniqueIdentifier>{cd1a501a-3885-487c-a2a5-caac598148dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\model">
+      <UniqueIdentifier>{74e13f32-8e48-400f-8a25-5ce9e7654889}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\controls">
+      <UniqueIdentifier>{f9a28e72-d9d1-4617-b1a8-5967bc46edd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\font">
+      <UniqueIdentifier>{7962424b-daef-46b6-80e3-fe56879c6950}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\menus">
+      <UniqueIdentifier>{c57ca751-0cb2-4eda-a0f9-069f30a8dab6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\menus\dynamic">
+      <UniqueIdentifier>{47029e60-dd51-40ce-8e81-d374e4702418}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\miniutl">
+      <UniqueIdentifier>{f6a8cbbd-f8d1-4563-be0e-a2d97ce1a426}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\CFGScript.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BaseMenu.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Btns.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unicode_strtools.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Utils.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\WindowSystem.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EngineCallback.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EventSystem.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MenuStrings.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Scissor.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\udll_int.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\Field.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\Framework.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\ItemsHolder.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\MessageBox.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\PicButton.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\PlayerModelView.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\ProgressBar.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\ScrollView.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\Slider.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\SpinControl.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\Switch.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\Table.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\TabView.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\YesNoMessageBox.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\Action.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\BackgroundBitmap.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\BaseClientWindow.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\BaseItem.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\BaseWindow.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\Bitmap.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\CheckBox.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\controls\Editable.cpp">
+      <Filter>Исходные файлы\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\font\FontManager.cpp">
+      <Filter>Исходные файлы\font</Filter>
+    </ClCompile>
+    <ClCompile Include="..\font\WinAPIFont.cpp">
+      <Filter>Исходные файлы\font</Filter>
+    </ClCompile>
+    <ClCompile Include="..\font\BaseFontBackend.cpp">
+      <Filter>Исходные файлы\font</Filter>
+    </ClCompile>
+    <ClCompile Include="..\font\BitmapFont.cpp">
+      <Filter>Исходные файлы\font</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\dynamic\ScriptMenu.cpp">
+      <Filter>Исходные файлы\menus\dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\Audio.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\Configuration.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\ConnectionProgress.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\ConnectionWarning.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\Controls.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\CreateGame.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\Credits.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\CustomGame.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\FileDialog.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\GameOptions.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\Gamepad.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\InputDevices.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\LoadGame.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\Main.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\Multiplayer.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\NewGame.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\PlayerIntroduceDialog.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\AdvancedControls.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\Touch.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\TouchButtons.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\TouchEdit.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\TouchOptions.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\Video.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\VideoModes.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\VideoOptions.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\Zoo.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\PlayerSetup.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\SaveLoad.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menus\ServerBrowser.cpp">
+      <Filter>Исходные файлы\menus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\miniutl\utlmemory.cpp">
+      <Filter>Исходные файлы\miniutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\miniutl\utlstring.cpp">
+      <Filter>Исходные файлы\miniutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\miniutl\generichash.cpp">
+      <Filter>Исходные файлы\miniutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\miniutl\strtools.cpp">
+      <Filter>Исходные файлы\miniutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\miniutl\bitstring.cpp">
+      <Filter>Исходные файлы\miniutl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\miniutl\utlbuffer.cpp">
+      <Filter>Исходные файлы\miniutl</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\unicode_strtools.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utils.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\WindowSystem.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaseMenu.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BMPUtils.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BtnsBMPTable.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CFGScript.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Color.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Coord.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\enginecallback_menu.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EventSystem.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extdll_menu.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Image.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\menufont.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MenuStrings.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Primitive.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Scissor.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\BaseItem.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\BaseWindow.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\Bitmap.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\CheckBox.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\Editable.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\Field.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\Framework.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\ItemsHolder.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\MessageBox.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\PicButton.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\PlayerModelView.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\ProgressBar.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\ScrollView.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\Slider.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\SpinControl.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\Switch.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\Table.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\TabView.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\YesNoMessageBox.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\Action.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\BackgroundBitmap.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\controls\BaseClientWindow.h">
+      <Filter>Файлы заголовков\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\font\FontManager.h">
+      <Filter>Файлы заголовков\font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\font\FontRenderer.h">
+      <Filter>Файлы заголовков\font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\font\WinAPIFont.h">
+      <Filter>Файлы заголовков\font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\font\BaseFontBackend.h">
+      <Filter>Файлы заголовков\font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\font\BitmapFont.h">
+      <Filter>Файлы заголовков\font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\menus\PlayerIntroduceDialog.h">
+      <Filter>Файлы заголовков\menus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\model\BaseModel.h">
+      <Filter>Файлы заголовков\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\model\StringArrayModel.h">
+      <Filter>Файлы заголовков\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\model\StringVectorModel.h">
+      <Filter>Файлы заголовков\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\model\BaseArrayModel.h">
+      <Filter>Файлы заголовков\model</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

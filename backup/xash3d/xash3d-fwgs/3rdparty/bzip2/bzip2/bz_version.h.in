@@ -1,0 +1,1 @@
+#define BZ_VERSION "@BZ_VERSION@"
