@@ -107,7 +107,7 @@ void glColor3f(GLfloat r, GLfloat g, GLfloat b);
 void glColor3fv(const GLfloat v[3]);
 void glColor4fv(const GLfloat v[4]);
 void glColor4ubv(const GLubyte v[4]);
-void glArrayElement(glIndex_t index);
+void glArrayElement(GLint index);
 
 void glPushAttrib(GLint mask);
 void glPopAttrib(void);

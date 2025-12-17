@@ -279,11 +279,11 @@ GLRB_API void glPushMatrix(void)
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
-		gl_ProjectionMatrixStack.Push(BACKEND_PROJECTION_MATRIX);
+		gl_ProjectionMatrixStack.Push(gl_ProjectionMatrix);
 	}
 	else
 	{
-		gl_ModelviewMatrixStack.Push(BACKEND_MODELVIEW_MATRIX);
+		gl_ModelviewMatrixStack.Push(gl_ModelviewMatrix);
 	}
 }
 
@@ -456,7 +456,7 @@ ID_INLINE GLRB_API void glColor4ubv(const GLubyte v[4])
 	glColor4f(COLOR_B2F(v[0]), COLOR_B2F(v[1]), COLOR_B2F(v[2]), COLOR_B2F(v[3]));
 }
 
-ID_INLINE GLRB_API void glArrayElement(glIndex_t index)
+ID_INLINE GLRB_API void glArrayElement(GLint index)
 {
 	gl_IndexList.Append(index);
 }
@@ -1168,12 +1168,12 @@ GLRB_API void glDrawPixels(GLint width, GLint height, GLenum format, GLenum data
 {
     if(format != GL_RGBA)
 	{
-		Sys_Printf("Only support format = GL_RGBA\n");
+		Sys_Printf("glDrawPixels only support format = GL_RGBA\n");
 		return;
 	}
     if(dataType != GL_UNSIGNED_BYTE)
 	{
-		Sys_Printf("Only support dataType = GL_UNSIGNED_BYTE\n");
+		Sys_Printf("glDrawPixels only support dataType = GL_UNSIGNED_BYTE\n");
 		return;
 	}
 
