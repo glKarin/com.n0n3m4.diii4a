@@ -1,0 +1,149 @@
+Credits
+=======
+* Botrix was created as a thesis for an academic degree. Thanks a lot to my
+  thesis director to give me a chance to make something I like.
+
+* Plugin's grandfather is Botman's bot template (aka HPB_bot). Thanks grandpa!
+
+* HL2MP 20th Anniversary Update is brought to you by armaturo (https://github.com/armaturo)
+  Thanks a lot for your contribution!
+
+* Plugin is working on Team Fortress 2 because of HappoKala345 (aka AcidFish)
+  request. It also works with VSH plugin, for which manual weapon handling was
+  added.
+
+  Many of HappoKala's ideas were used, thanks a lot for waypoints creation, TF2
+  weapons configuration for bots and testing!
+
+  HappoKala created waypoints for next TF2 maps:
+    - arena_granary
+    - arena_lumberyard
+    - arena_offblast_final
+    - arena_pool_day
+    - arena_sawmill
+    - arena_well
+    - koth_deku
+    - vsh_warebloom_b7
+
+* Thanks to Jaidan Escott for dm_runoff waypoints
+
+* Thanks Pokk for waypoints for maps:
+    - aim_arena_reloaded
+    - dm_alcys_big_temple
+    - dm_amplitude
+    - dm_assault
+    - dm_avalon_b1
+    - dm_baghdad
+    - dm_biohazard_cal
+    - dm_bluebox_b2
+    - dm_bounce
+    - dm_box_bs_final
+    - dm_bwo_parking_np
+    - dm_bwo_undercranes_fixed
+    - dm_c17
+    - dm_canals_hd
+    - dm_carousel
+    - dm_castigate
+    - dm_cigsub_ggo_v2
+    - dm_cine_map_3d
+    - dm_concretenight2
+    - dm_corrugated
+    - dm_cottage_beta3
+    - dm_crossfire_final
+    - dm_datacore
+    - dm_domebox
+    - dm_dust2
+    - dm_fortwick
+    - dm_frenzy_v2
+    - dm_hometown_1999_no_nuke
+    - dm_industry_canals_v2
+    - dm_killarena_v1
+    - dm_killbox2
+    - dm_killbox911
+    - dm_killbox_bunker_v2a
+    - dm_killroofz
+    - dm_koteamv8_final
+    - dm_loststation
+    - dm_outside_b2
+    - dm_overwatch_cm
+    - dm_rapidcore
+    - dm_resistance_hurtlocker_v1
+    - dm_riposte
+    - dm_runoff_winter_storm_v1_2
+    - dm_snarkpit
+    - dm_tox_ug
+    - dm_urban_small
+    - pg_crossfire_final
+    - pg_lockdown
+    - fpg_stalkyard
+
+* Thanks darkredspyder (DRS) for halls3 waypoints
+
+* Thanks Yvis for waypoints for maps:
+    - dm_biohazard
+    - dm_lostvillage
+    - dm_traintracks
+    - dm_weaver
+
+* Thanks Sergey Davydow for waypoints for maps:
+    - dm_airfusion_final
+    - dm_crossfire
+    - dm_frenzy_cu
+    - dm_hydro
+    - dm_killbox_kbh
+    - dm_lostarena
+    - dm_nuclearis_rc1
+    - dm_octagon
+    - dm_airfusion_final
+    - dm_biohazard_mod_remixed
+    - dm_caverns_r1
+    - dm_crossfire
+    - dm_drift
+    - dm_frenzy_cu
+    - dm_helix
+    - dm_hydro
+    - dm_lockdown_r6
+    - dm_intensity_cu
+    - dm_lostvillage_r1
+    - dm_killbox_kbh
+    - dm_killbox_ultra
+    - dm_lostarena
+    - dm_megawatt
+    - dm_nuclearis_rc1
+    - dm_octagon
+    - dm_overwatch_cu
+    - dm_rapidfire
+    - dm_resident_cu
+    - dm_tigcrick_r2
+    - dm_torque
+    - junkcity_pro
+    - vsh_block_fort_v2
+
+* Thanks jmcpit for waypoints for maps:
+    - dm_austyn
+    - dm_avalon
+    - dm_backbone
+    - dm_balcony_v3
+    - dm_barrage_midday
+    - dm_biohazard_calmix2
+    - dm_bridge_b2
+    - dm_egypt_story_b2
+    - dm_egypte_final
+    - dm_fragyard
+    - dm_glasshouse_jmc_v1
+    - dm_glasstowers_cll
+    - dm_killbox_2014_rc1
+    - dm_killbox_sanctuary_b3
+    - dm_kin
+    - dm_kingofheavenv01_5
+    - dm_marble
+    - dm_motordrive
+    - dm_mousekitchen_2012_cll
+    - dm_playground_deluxe
+    - dm_rat_cuisine_final
+    - dm_sandland
+    - dm_spookface2
+    - dm_train_loadingdock
+    - dm_zest
+    - jmc_glasstrap_dm2ndfinal
+

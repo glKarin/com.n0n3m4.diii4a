@@ -1,0 +1,202 @@
+Useful definitions 
+==================
+
+Waypoint path defines a connection between 2 waypoints. Current path is a path from current waypoint (nearest one, use 'botrix waypoint reset' command to reset) to waypoint destination (use 'botrix waypoint destination' command to set or just aim at waypoint to set destination).
+
+Items are objects on the map, such as weapons, bullets, health-kits, armor, buttons, doors, boxes, etc. They are defined in the MOD's configuration file.
+
+
+Commands
+========
+
+Every command in Botrix plugin starts with "botrix".
+Type "botrix" to show available commands with help.
+Type "botrix version" to see current plugin version.
+
+Here is the help you get typing "botrix" command:
+[botrix]
+  [bot]
+    [add]: add bot
+      Optional parameters: (intelligence) (team) (bot-name).
+    [ally]: given bot won't attack another given player
+      Parameters: <player-name> <on/off> <bot-name(s)>.
+    [attack]: forces bot to start/stop attacking
+      Parameters: <on/off> <bot-name(s)>.
+    [command]: execute console command by bot
+      Parameters: <command> <bot-name(s)>. Example: 'botrix bot command
+      "jointeam 2" all'.
+    [debug]: show bot debug messages on server
+      Parameters: <on/off> <bot-name(s)>.
+    [drawpath]: defines how to draw bot's path
+      Can be 'none' / 'all' / 'next' or mix of: beam line
+    [kick]: kick bot
+      Parameters: (bot-name) will kick random / given bot(s).
+    [move]: forces bot to start/stop moving
+      Parameters: <on/off> <bot-name(s)>.
+    [pause]: pause/resume given bots
+      Parameters: <on/off> <bot-name(s)>.
+    [protect]: protect given players from bot's attack
+      Parameters: <forever/off/time-in-seconds> <player-name> ...
+    [test]: create bot to test a path
+      Parameters: (waypoint-from) (waypoint-to). Default waypoint-from
+      is 'current', waypoint-to is 'destination'
+    [weapon]: change bot's weapon
+      Parameters: <weapon> <bot-name(s)>. This command will actually
+      add a weapon to the bot, so use carefully.
+  [config]
+    [admins]
+      [access]: set access flags for given admin
+        Parameters: <steam-id> <access-flags>. Can be none / all / mix of:
+        waypoint bot config
+      [show]: show admins currently on server
+    [bot]
+      [intelligence]: set min/max bot intelligence
+        Parameters: <min> (max). Can be one of:
+        random fool stupied normal smart pro
+      [protection]
+        [health]: when the player has at least protection health amount,
+          bots won't attack him
+          Parameters: <off/health-amount>. Off or 0 to disable.
+        [spawn-time]: when the player has at least protection health amount,
+          bots won't attack him
+          Parameters: <off/time-in-seconds>. Off or 0 to disable.
+      [quota]: set bots+players quota.
+        You can use 'n-m' to have m bots per n players. Set to 0 to
+        disable quota.
+      [strategy]
+        [flags]: set bot fight strategy flags
+          Can be mix of: run-away-if-near come-closer-if-far
+        [set]: set bot fight strategy argument
+          Parameters: <near-distance/far-distance> <distance>.
+      [suicide]: when staying far from waypoints for this time
+        (in seconds), suicide
+        Set to 0 to disable.
+      [team]: set default bot team
+        Can be one of: unassigned spectators combines rebels
+      [weapon]
+        [allow]: allow bots to use given weapons
+          Parameters: (on/off) (weapon(s)).
+        [default]: configurate bot weapons after respawn.
+          Parameters: <none/weapon(s)>
+        [remove]: remove all bot weapons on respawn.
+          Parameters: (on/off). You can use it in combination with
+          'default' command.
+        [unknown]: bot assumption about unknown weapons ('melee' or 'ranged')
+          If bot grabs or respawns with unknown weapon, choose it to be
+          marked as melee or ranged
+    [event]: display events on console ('off' - disable, 'on' - enable)
+    [log]: set console log level (none, trace, debug, info, warning, error).
+    [waypoint]
+      [analyze]
+        [amount]: amount of waypoints to analyze per frame
+          Parameter: number of waypoints to analyze per frame. Can be fractional.
+        [distance]: default distance between waypoints when analyzing the map
+        [map-change]: force analyze waypoints on map change
+          Parameter: maximum number of waypoints to start analyze on map change.
+          'off' or -1 to disable.
+      [save]: auto save waypoints on map change
+        Parameter: (on / off). Warning: bots can modify map waypoint
+        (botrix config waypoint unreachable).
+      [unreachable]: bots can erase paths between waypoints
+        Parameter: (off / number of failed tries). If a bot can't reach path's
+        destination waypoint X times, that path will be deleted.
+  [item]
+    [draw]: defines which items to draw
+      Can be 'none' / 'all' / 'next' or mix of:
+      health armor weapon ammo button door ladder object spawn other
+    [drawtype]: defines how to draw items
+      Can be 'none' / 'all' / 'next' or mix of: name box waypoint
+    [mark]: add object flags (object only)
+      Parameters: <object-id-not-index> (flags). 'flags' can be mix of:
+      use respawnable explosive heavy box
+    [reload]: reload all items (will recalculate nearest waypoints)
+  [waypoint]
+    [addtype]: add type to waypoint
+      Can be mix of: stop camper sniper weapon ammo health armor
+      health-charger armor-charger button see-button use elevator ladder
+    [analyze]
+      [toggle]: start / stop analyzing waypoints for current map
+        This is a time consuming operation, so be patient.
+      [create]: create given waypoint during map analyze
+        Parameter: (on / off / clear) (current / destination / waypoint id).
+        'clear' will remove all positions to create waypoints.
+      [debug]: show collision lines for given waypoint during map analyze
+        Parameter: (on / off / clear) (current / destination / waypoint id).
+        'clear' will remove all debug waypoints.
+      [omit]: omit given waypoint next time analyze runs
+        Parameter: (on / off / clear) (current / destination / waypoint id).
+        Sometimes analyze adds waypoints at invalid places. This command
+        will disable analyze for a given waypoint. 'clear' will remove all
+        omited waypoints.
+      [trace]: ray trace moveable entities (such as objects) during map analyze
+        Parameter: (on / off). When 'off', ray tracing won't hit any moveable
+        entities (such as objects), so waypoints will be placed 'inside' those
+        entities. But when it is 'on', there may be troubles with analyze.
+    [area]
+      [remove]: delete waypoint area
+      [rename]: rename waypoint area
+      [set]: set waypoint area
+      [show]: print all waypoint areas
+    [argument]: set waypoint argument
+      Parameters: (waypoint) (key) (value), where key can be:
+      angle1 / angle2 / button / door / elevator.
+    [autocreate]: automatically create new waypoints ('off' - disable,
+      'on' - enable)
+      Waypoint will be added when player goes too far from current one.
+    [clear]: delete all waypoints
+    [create]: create new waypoint at current player's position
+    [destination]: lock / unlock path 'destination'
+      Parameter: (waypoint / unlock). Current waypoint locked as
+      'destination' if omitted.
+    [drawtype]: defines how to draw waypoint
+      Can be 'none' / 'all' / 'next' or mix of: beam line box text
+    [info]: display information for the needed waypoint
+    [load]: load waypoints
+    [move]: moves current or given waypoint to player's position
+      Parameter: (waypoint), current waypoint is used if omitted
+    [remove]: delete waypoints
+      Parameters can be: current / destination / other waypoint id(s)
+    [removetype]: remove all types from current or given waypoint
+    [reset]: reset current waypoint to nearest
+    [save]: save waypoints
+    [visibility]: draw lines to waypoints, that are visible from the
+      'current' one
+      Can be 'none' / 'all' / 'next' or mix of: beam line
+  [path]
+    [autocreate]: enable auto path creation for new waypoints ('off' - disable,
+      'on' - enable)
+      If disabled, only path from 'destination' to new waypoint will be added
+    [addtype]: add path type (from 'current' waypoint to 'destination').
+      Can be mix of: crouch jump break sprint ladder stop damage
+      flashlight door elevator totem
+    [argument]: set path arguments
+      For door/elevator path the parameters are: <door/elevator> <button>
+      (-1 = invalid). Otherwise: <action-time> <action-duration> in deciseconds,
+      i.e. 5 = half second.
+    [create]: create path (from 'current' waypoint to 'destination')
+    [debug]: time to show lines that indicate path creation / problems
+      Parameter: (off / seconds-to-disappear). When not 'off', will show
+      lines / texts showing reachable / unreachable paths when adding new waypoint.
+    [distance]: set distance to add default paths & auto add waypoints
+    [drawtype]: defines how to draw path
+      Can be 'none' / 'all' / 'next' or mix of: beam line
+    [info]: display path info on console (from 'current' waypoint to
+      'destination')
+    [remove]: remove given path (or from 'current' waypoint to 'destination')
+    [removetype]: remove path type (from 'current' waypoint to 'destination')
+  [version]: display plugin version
+  [disable]: disable plugin
+
+
+Useful commands:
+===============
+
+    botrix bot add - add random bot.
+    botrix bot kick - kick random bot.
+    botrix config bot quota 5 - have a max of 5 bots (bots + users = 5) on the server.
+    botrix config bot weapon default weapon_rpg - Bots will start with RPG. Have fun!
+
+    botrix waypoint add - add a waypoint at current player's position.
+    botrix waypoint addtype health - bot will know that he can go to current waypoint to find a medic kit.
+    botrix waypoint save - save waypoints.
+    botrix bot drawpath beam - bots will mark a path to the destination with a beam of light.

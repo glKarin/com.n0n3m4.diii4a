@@ -1,0 +1,113 @@
+Changelog
+=========
+
+1.0.1-update
+-----
+HL2MP 20th Anniversary Update is brought to you by armaturo (https://github.com/armaturo)
+Thanks a lot for your contribution!
+
+1.0.1
+-----
+* New features:
+    - Command that auto generates waypoints. It analyzes the map very neatly, creating waypoints for bots. This command 
+      should be used as first step in creating waypoints for the map.
+      WARNING: for good bots performance you should edit waypoints anyway.
+    - Analyze feature can also be executed automatically on map change (when the waypoints amount is low). Auto save 
+      waypoints is also available.
+    - Bot now can erase unreachable paths between waypoints (which could be added by the analyze command).
+    - Next console commands are added:
+        + botrix waypoint analyze toggle: start / stop analyzing waypoints for current map
+        + botrix waypoint analyze create: create given waypoint during map analyze
+        + botrix waypoint analyze debug: show collision lines for given waypoint during map analyze
+        + botrix waypoint analyze omit: omit given waypoint during map analyze
+        + botrix waypoint analyze trace: ray trace moveable entities (such as objects) during map analyze
+
+        + botrix path debug: time to show lines that indicate path creation / problems
+
+        + botrix item mark: mark object with given flags (such as explosive / heavy, so bot doesn't try to lift it up)
+
+        + botrix config waypoint analyze amount: amount of waypoints to analyze per frame
+        + botrix config waypoint analyze distance: default distance between waypoints when analyzing the map
+        + botrix config waypoint analyze map-change: force analyze waypoints on map change when there are no waypoints
+
+        + botrix config waypoint save: auto save waypoints on map change
+        + botrix config waypoint unreachable: bots can erase path between waypoints after X failed tries
+* Mod vars (such as player's speed / width / height / jump height, etc.) are read from config.ini. This can be helpful
+  for other MODs based on Source engine to adapt Botrix's bots.
+* Some fixes for bot logic.
+* Removed so much console log for bots (now they are using log modes 'trace'/'debug' instead of 'info').
+  This was slowing down significantly the game play.
+
+1.0.0
+-----
+* Fixed crashes:
+    - when respawning bot was killing another bot on the same position (occuring a lot after map change).
+    - while flying on the map & getting far away.
+* Auto-completion for commands is working again (updated & compiled Source SDK 2013). Better auto-completion, also with
+  players / weapons / items names! Obviously it's not for the dedicated server.
+* Bot now can open doors (should be unlocked) and press elevators buttons. Check out waypoints section in my home page.
+* Different player models are working now, but teamplay combines are always using combine_soldier (SDK issue).
+* Fixed "bot add command" for teamplay that wasn't changing bot's team. Now bots are joining the right team, no more
+  auto-balancing.
+* New features:
+    - All commands now accept "help" argument, printing how to use them. Example: botrix bot add help.
+    - Moved commands "bot config" to "config bot", as those are really configuration commands.
+    - Reordered / changed many commands parameters for better usability / auto-completion.
+    - Added new commands:
+        + botrix bot protect <player-name> <forever/off/time-amount-in-seconds> <bot-name(s)>
+        + botrix config bot protection health <off/health-amount>
+        + botrix config bot protection spawn-time <off/time-amount-in-seconds>
+        + botrix config bot weapon remove <on/off>
+        + botrix config bot weapon default <none/weapon(s)>        
+
+0.0.4
+-----
+* Fixed crash autocompleting commands on listen server. No command completion for now.
+* New features:
+    - Added new commands:
+        + botrix bot ally <bot-name> <player-name> <on/off>
+        + botrix bot attack <bot-name> <on/off>
+        + botrix bot move <bot-name> <on/off>
+
+0.0.3
+-----
+* Plugin is working with Team Fortress 2 (arena maps + VSH plugin).
+    - Added new weapons handling in config.ini for TF2.
+    - Escaping TF2 steam ids in config.ini, for example \[U:1:12345678].
+* New features:
+    - Now bots can use melee weapons.
+    - Now bots can use unknown weapons.
+    - Added logic for bot to pursue enemy.
+    - Bots will run randomly near engaged enemy, preferently using visible areas.
+    - Waypoint edition: aim at waypoint to select 'path destination'.
+    - Added new commands:
+        + botrix bot config quota <#number/#player-#bot quota>
+        + botrix bot config intelligence <bot-intelligence>
+        + botrix bot config team <bot-team>
+        + botrix bot config class <bot-class>
+        + botrix bot config change-class <round-limit>
+        + botrix bot config strategy flags
+        + botrix bot config strategy set
+        + botrix bot command <bot-name> <command>
+        + botrix bot weapon add <bot-name> <weapon-name>
+        + botrix bot weapon unknown <melee/ranged>
+        + botrix config log <log-level>
+        + botrix enable/disable
+* Bug fixes:
+    - Correct handling of plugin_pause/plugin_unpause commands.
+    - Sometimes bot wasn't aware it picked up item.
+    - Sometimes bot was shooting at spectator.
+    - When bot was trying to use weapon he actually was creating it.
+    - Waypoints weren't loading for maps with different case (linux).
+    - Fixed command botrix bot kick <bot-name/all>.
+
+0.0.2
+-----
+* Works in Linux.
+* Default base folder location is <MOD DIRECTORY>/addons/botrix.
+* Searching for base folder in 4 different locations.
+* Log with levels (none, trace, debug, info, warning, error).
+* Added command "version".
+* Don't repeat bot names.
+* Fixed several crashes.
+

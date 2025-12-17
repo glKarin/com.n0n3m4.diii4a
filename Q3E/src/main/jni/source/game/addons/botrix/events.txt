@@ -1,0 +1,75 @@
+// From cstrike/resource/modevents.res
+player_death
+player_hurt
+bomb_planted
+bomb_defused
+bomb_exploded
+bomb_dropped
+bomb_pickup
+bomb_begindefuse
+bomb_abortdefuse
+hostage_follows
+hostage_hurt
+hostage_killed
+hostage_rescued
+hostage_rescued_all
+vip_escaped
+vip_killed
+player_radio
+bomb_beep
+weapon_fire
+weapon_fire_on_empty
+weapon_reload
+weapon_zoom
+item_pickup
+grenade_bounce
+hegrenade_detonate
+flashbang_detonate
+smokegrenade_detonate
+bullet_impact
+player_footstep
+player_jump
+player_blind
+player_falldamage
+door_moving
+break_breakable
+break_prop
+round_freeze_end
+nav_blocked
+
+// From hl2/resource/serverevents.res
+// Some events in this file may or may not work with CounterStrike: Source
+server_spawn           // send once a server starts
+server_shutdown        // server shut down	
+server_cvar            // a server console var has changed  (bad for Mattie's EventScripts)
+server_message         // a generic server message
+server_addban
+server_removeban
+player_connect         // a new client connected
+player_info            // a player changed his name
+player_disconnect      // a client was disconnected
+player_activate
+player_say
+
+
+// From hl2/resource/gameevents.res
+// Some events in this file may or may not work with CounterStrike: Source
+
+round_start
+round_end
+team_info              // info about team
+team_score             // team score changed
+player_team            // player change his team
+player_class           // a player changed his class
+player_death           // a game event, name may be 32 charaters long
+player_hurt
+player_chat            // a public player chat
+player_score           // players scores changed
+player_spawn           // player spawned in game
+player_shoot           // player shoot his weapon
+player_use
+player_changename
+game_newmap            // send when new map is completely loaded
+game_start             // a new game starts
+game_end               // a game ended
+game_message           // a message send by game logic to everyone

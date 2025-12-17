@@ -39,6 +39,7 @@ public final class Constants
             "On-screen button keymap and layout configures are standalone in each game.",
             "Add Unreal engine psk/psa, iqm, Source engine smd, GLTF/GLB, Autodesk fbx animation/static model support, add md5mesh static model support on DOOM3/Quake 4/Prey",
             "Add float console support on DOOM3/Quake 4/Prey.",
+            "Add Botrix bot support on HL2MP. More view in `" + TextHelper.GenLinkText("https://github.com/borzh/botrix", "Botrix") + "`.",
             "[Warning]: FTEQW/Xash3D is removed in this release.",
         };
 	};
