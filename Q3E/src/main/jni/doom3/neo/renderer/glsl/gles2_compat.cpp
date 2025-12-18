@@ -225,8 +225,8 @@ static GLmatrix_stack</*2*/8> gl_ProjectionMatrixStack("Projection");
 // Modelview matrix stack for glPushMatrix()/glPopMatrix()/glXxxxMatrix
 static GLmatrix_stack<8> gl_ModelviewMatrixStack("Modelview"); // 64
 
-#define gl_ModelviewMatrix (gl_ModelviewMatrixStack.Top(BACKEND_MODELVIEW_MATRIX))
 #define gl_ProjectionMatrix (gl_ProjectionMatrixStack.Top(BACKEND_PROJECTION_MATRIX))
+#define gl_ModelviewMatrix (gl_ModelviewMatrixStack.Top(BACKEND_MODELVIEW_MATRIX))
 
 // Pipeline state stack for glPushAttrib()/glPopAttrib()
 static GLstate_stack<2> gl_StateStack; // 16
@@ -279,11 +279,11 @@ GLRB_API void glPushMatrix(void)
 {
 	if(gl_MatrixMode == GL_PROJECTION)
 	{
-		gl_ProjectionMatrixStack.Push(gl_ProjectionMatrix);
+		gl_ProjectionMatrixStack.Push(BACKEND_PROJECTION_MATRIX);
 	}
 	else
 	{
-		gl_ModelviewMatrixStack.Push(gl_ModelviewMatrix);
+		gl_ModelviewMatrixStack.Push(BACKEND_MODELVIEW_MATRIX);
 	}
 }
 
