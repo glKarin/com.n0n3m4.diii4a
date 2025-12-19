@@ -52,7 +52,7 @@ set(source_def "WAF_CFLAGS=\"CFLAGS\";WAF_LDFLAGS=\"LDFLAGS\";TIER0_DLL_EXPORT=1
 
 set(source_lib 
 	dl 
-	m 
+	#m 
 	log
 )
 

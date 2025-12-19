@@ -28,7 +28,7 @@ in vec3 var_Normal;
 uniform vec4 u_diffuseColor;
 uniform vec4 u_specularColor;
 #if defined(_PBR)
-uniform vec2 u_specularExponent;
+uniform vec4 u_specularExponent;
 #else
 uniform float u_specularExponent;
 #endif
@@ -154,8 +154,13 @@ void main(void)
     vec3 AN = normalize(mix(normalize(var_Normal), N, u_specularExponent.y));
     vec4 Cd = vec4(diffuseColor.rgb, 1.0);
     vec4 specTex = texture(u_fragmentMap4, var_TexSpecular);
+#ifdef _PBR_RMAO_ONLY
     vec4 roughness = vec4(specTex.r, specTex.r, specTex.r, specTex.r);
     vec4 metallic = vec4(specTex.g, specTex.g, specTex.g, specTex.g);
+#else // compat RMAO if u_specularExponent.z == 0 and u_specularExponent.w == 0
+    vec4 roughness = vec4(clamp(specTex.r * (sign(1.0 - abs(sign(u_specularExponent.z))) * 2.0 - 1.0) /* if max == 0, result = 1; else result = -1 */ + u_specularExponent.z, 0.0, 1.0) * max(sign(specTex.r), 0.0) /* if specularTex.r == 0, result = 0, else result = 1 */); // roughness = max - specularTex.r, but if specularTex.r == 0, roughness = 0
+    vec4 metallic = vec4(clamp(specTex.g + u_specularExponent.w, 0.0, 1.0)) * max(sign(specTex.g), 0.0) /* if specularTex.g == 0, result = 0, else result = 1 */; // metallic = specularTex.r, but if specularTex.r == 0, metallic = 0
+#endif
 
     vec4 Cl = vec4(lightProjection * lightFalloff, 1.0);
     vec3 F0 = vec3(0.04); 

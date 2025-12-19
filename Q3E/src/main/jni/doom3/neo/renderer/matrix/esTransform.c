@@ -117,6 +117,7 @@ esFrustum(ESMatrix *result, float left, float right, float bottom, float top, fl
          (deltaX <= 0.0f) || (deltaY <= 0.0f) || (deltaZ <= 0.0f) )
          return;
 
+    esMatrixLoadIdentity(&frust);
     frust.m[0][0] = 2.0f * nearZ / deltaX;
     frust.m[0][1] = frust.m[0][2] = frust.m[0][3] = 0.0f;
 

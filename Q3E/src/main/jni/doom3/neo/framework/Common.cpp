@@ -1276,6 +1276,13 @@ Com_Editor_f
 */
 static void Com_Editor_f(const idCmdArgs &args)
 {
+#ifdef _MULTITHREAD //karin: not support tools with OpenGL on multithread
+    if(multithreadActive)
+    {
+        common->Printf("Not support editor on multi-threading\n");
+        return;
+    }
+#endif
 	RadiantInit();
 }
 
@@ -1300,6 +1307,13 @@ Com_EditGUIs_f
 */
 static void Com_EditGUIs_f(const idCmdArgs &args)
 {
+#ifdef _MULTITHREAD //karin: not support tools with OpenGL on multithread
+    if(multithreadActive)
+    {
+        common->Printf("Not support GUI editor on multi-threading\n");
+        return;
+    }
+#endif
 	GUIEditorInit();
 }
 
@@ -1310,6 +1324,13 @@ Com_MaterialEditor_f
 */
 static void Com_MaterialEditor_f(const idCmdArgs &args)
 {
+#ifdef _MULTITHREAD //karin: not support tools with OpenGL on multithread
+    if(multithreadActive)
+    {
+        common->Printf("Not support material editor on multi-threading\n");
+        return;
+    }
+#endif
 	// Turn off sounds
 	soundSystem->SetMute(true);
 	MaterialEditorInit();

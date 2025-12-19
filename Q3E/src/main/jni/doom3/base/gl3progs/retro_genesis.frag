@@ -72,7 +72,7 @@ void main(void)
     // + good saturation when colors are really needed
     // - a bit too strong visible dithering pattern
     // https://lospec.com/palette-list/famicube
-    const vec3 palette[NUM_COLORS] = vec3[NUM_COLORS] (// 64
+    /*const*/ vec3 palette[NUM_COLORS] = vec3[NUM_COLORS] (// 64
         RGB( 0, 0, 0 ),
         RGB( 21, 21, 21 ),
         RGB( 35, 23, 18 ),

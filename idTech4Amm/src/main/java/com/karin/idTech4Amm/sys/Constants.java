@@ -9,8 +9,8 @@ import com.karin.idTech4Amm.misc.TextHelper;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 69;
-    public static final String CONST_RELEASE = "2025-10-01"; // 02-12; 05-08
+    public static final int    CONST_UPDATE_RELEASE = 70;
+    public static final String CONST_RELEASE = "2025-12-21"; // 02-12; 05-08
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
