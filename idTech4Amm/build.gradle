@@ -10,8 +10,8 @@ android {
         applicationId "com.karin.idTech4Amm"
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
-        versionCode 11069
-        versionName '1.1.0harmattan69'
+        versionCode 11070
+        versionName '1.1.0harmattan70'
          /*
             natasha: A CSOL CT character, for my Quake II for MeeGo Harmattan port version 5 at 2018
             verena: GC singer, for my first YouKu 3rd client for MeeGo Harmattan at 2015
@@ -75,6 +75,7 @@ android {
         exclude "lib/*/libOpenSLES.so"
         exclude "lib/*/libz.so"
         exclude "lib/*/liblog.so"
+        exclude "lib/*/libm.so"
 
         // remove arm64 libraries if testing arm32
         if(project.properties.abifilters == "arm64-v8a") {
