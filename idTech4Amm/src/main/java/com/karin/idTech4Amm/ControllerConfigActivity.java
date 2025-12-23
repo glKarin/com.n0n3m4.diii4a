@@ -1,6 +1,5 @@
 package com.karin.idTech4Amm;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -11,13 +10,9 @@ import android.widget.Toast;
 
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.PreferenceKey;
-import com.karin.idTech4Amm.sys.Theme;
+import com.n0n3m4.q3e.karin.Theme;
 import com.karin.idTech4Amm.ui.ControllerConfigPreference;
-import com.n0n3m4.q3e.Q3EInterface;
-import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3ELang;
-import com.n0n3m4.q3e.Q3EPreference;
-import com.n0n3m4.q3e.Q3EUtils;
 
 /**
  * controller config page

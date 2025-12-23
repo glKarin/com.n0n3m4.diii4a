@@ -1015,3 +1015,40 @@ int Sys_GetVideoRam(void)
 	run_once = DEFAULT_SYS_VIDEO_MEMORY;
 	return run_once;
 }
+
+void GLimp_Startup(void)
+{
+#if 0
+
+#ifdef _MULTITHREAD
+    multithreadActive = cvarSystem->GetCVarBool("r_multithread");
+    if(multithreadActive)
+        Sys_Printf("Enable multi-threading rendering\n");
+    else
+        Sys_Printf("Disable multi-threading rendering\n");
+#endif
+
+#ifdef _OPENGLES3
+    const char *openglVersion = cvarSystem->GetCVarString("harm_r_openglVersion");
+    if(openglVersion && openglVersion[0])
+    {
+        Sys_Printf("harm_r_openglVersion = %s\n", openglVersion);
+        if(!idStr::Icmp(GL_VERSION_NAME_GL_ES2, openglVersion))
+        {
+            gl_version = GL_VERSION_GL_ES2;
+            USING_GLES3 = false;
+            USING_GL = false;
+            Sys_Printf("Using OpenGL ES2\n");
+        }
+        else // GL_VERSION_NAME_GL_ES3
+        {
+            gl_version = GL_VERSION_GL_ES32;
+            USING_GLES3 = true;
+            USING_GL = false;
+            Sys_Printf("Using OpenGL ES3\n");
+        }
+    }
+#endif
+
+#endif
+}

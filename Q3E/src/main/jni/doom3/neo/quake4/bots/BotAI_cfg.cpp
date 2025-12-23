@@ -452,8 +452,8 @@ int botAi::MakeWeaponMask(const char *wp)
 {
     if(!idStr::Cmp("*", wp))
         return BOT_ALL_MP_WEAPON;
-    idStrList list = idStr::SplitUnique(wp, ',');
-    if(list.Num() == 0)
+    idStrList list;
+    if(idStr::SplitUnique(list, wp, ',') == 0)
         return 0;
     for(int i = 0; i < list.Num(); i++)
         idStr::StripWhitespace(list[i]);

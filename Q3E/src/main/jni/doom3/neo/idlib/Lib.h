@@ -135,6 +135,11 @@ void	LittleRevBytes(void *bp, int elsize, int elcount);
 void	LittleBitField(void *bp, int elsize);
 void	Swap_Init(void);
 
+int64_t	BigLongLong(int64_t l);
+int64_t	LittleLongLong(int64_t l);
+double	BigDouble(double l);
+double	LittleDouble(double l);
+
 bool	Swap_IsBigEndian(void);
 
 // for base64
@@ -146,6 +151,12 @@ int		IntForSixtets(byte *in);
 void AssertFailed(const char *file, int line, const char *expression);
 #undef assert
 #define assert( X )		if ( X ) { } else AssertFailed( __FILE__, __LINE__, #X )
+#endif
+
+#if __cplusplus < 201103L
+#define ID_STATIC_ASSERT(exp) do { char _static_assert_exp_var_[(exp) ? 1 : -1]; (void)_static_assert_exp_var_; } while(0)
+#else
+#define ID_STATIC_ASSERT(exp) static_assert(exp, "")
 #endif
 
 class idException

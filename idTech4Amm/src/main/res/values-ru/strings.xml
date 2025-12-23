@@ -106,7 +106,7 @@
     <string name="toggle_key">Клавиша переключения</string>
     <string name="touch_type">Сенсорный тип</string>
     <string name="slider_type">Тип ползунка</string>
-    <string name="key">Клавиша</string>
+    <string name="key_1">Клавиша</string>
     <string name="key_2">Клавиша 2</string>
     <string name="key_3">Клавиша 3</string>
     <string name="screen">Экран</string>
@@ -272,10 +272,11 @@
     <string name="librecoop">LibreCoop</string>
     <string name="quake_1_base">Quake I</string>
     <string name="quake_2_base">Quake II</string>
-    <string name="quake_2_ctf">Quake II:ctf</string>
-    <string name="quake_2_rogue">Quake II:rogue</string>
-    <string name="quake_2_xatrix">Quake II:xatrix</string>
-    <string name="quake_2_zaero">Quake II:zaero</string>
+    <string name="quake_2_ctf">Quake II: Capture The Flag</string>
+    <string name="quake_2_rogue">Quake II Mission Pack: Ground Zero</string>
+    <string name="quake_2_xatrix">Quake II Mission Pack: The Reckoning</string>
+    <string name="quake_2_zaero">Quake II: Team Evolves Zaero</string>
+    <string name="quake_2_3zb2">Quake II: 3rd Zigock Bot II</string>
     <string name="rtcw_base">Return to Castle Wolfenstein</string>
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">DOOM 3 BFG</string>
@@ -529,29 +530,41 @@
     <string name="path_">Путь: </string>
     <string name="author_">Автор: </string>
     <string name="description_">Описание: </string>
-    <string name="expand_all">Expand all</string>
-    <string name="collapse_all">Collapse all</string>
-    <string name="openal_driver">OpenAL driver</string>
-    <string name="edit_env">Edit env</string>
-    <string name="value_">Value:</string>
-    <string name="input_value">Input value</string>
-    <string name="input_name">Input name</string>
-    <string name="env">Env</string>
-    <string name="must_choose_a_env">Must choose a env</string>
-    <string name="name_must_not_empty">Name must not empty!</string>
+    <string name="expand_all">Развернуть все</string>
+    <string name="collapse_all">Свернуть все</string>
+    <string name="openal_driver">Драйвер OpenAL</string>
+    <string name="edit_env">Изменить окружение</string>
+    <string name="value_">Значение:</string>
+    <string name="input_value">Входное значение</string>
+    <string name="input_name">Входное имя</string>
+    <string name="env">Окружение</string>
+    <string name="must_choose_a_env">Необходимо выбрать окружение</string>
+    <string name="name_must_not_empty">Имя не должно быть пустым!</string>
     <string name="urbanterror">Q3-UT4</string>
     <string name="urbanterror_base">Urban Terror</string>
-    <string name="add_bots_automatic_harm_bot_autoadd">Add bots automatic(harm_bot_autoAdd)</string>
-    <string name="number_of_bots">Number of bots</string>
-    <string name="bot_difficulty_level_harm_bot_botlevel">Bot difficulty level(harm_bot_botLevel)</string>
-    <string name="_0_random_n1_5_bot_difficulty_level">0 = random\n1 - 5 = bot difficulty level</string>
-    <string name="_0_disable_n_1_maximum_npositive_number_bots_num">0 = disable\n-1 = maximum\nPositive number = bots num</string>
-    <string name="pbr_normal_correction_surface_smoothness">PBR normal correction(Surface smoothness)\n(harm_r_PBRNormalCorrection):</string>
-    <string name="joystick_center_dot_visible">Hide joystick center dot</string>
-    <string name="download_testing">Download testing</string>
-    <string name="disable_motion_when_virtual_mouse_button_hold">Disable mouse motion when virtual mouse button hold</string>
-    <string name="fixed_ratio">Fixed ratio</string>
-    <string name="ratio">Ratio</string>
-    <string name="use_custom_resolution_as_fullscreen_size">Use custom resolution as fullscreen size</string>
+    <string name="add_bots_automatic_harm_bot_autoadd">Добавить ботов автоматически(harm_bot_autoAdd)</string>
+    <string name="number_of_bots">Количество ботов</string>
+    <string name="bot_difficulty_level_harm_bot_botlevel">Уровень сложности ботов(harm_bot_botLevel)</string>
+    <string name="_0_random_n1_5_bot_difficulty_level">0 = случайный\n1 - 5 = уровень сложности ботов</string>
+    <string name="_0_disable_n_1_maximum_npositive_number_bots_num">0 = отключить\n-1 = максимум\nПоложительное число = количество ботов</string>
+    <string name="pbr_normal_correction_surface_smoothness">Нормальная коррекция PBR (гладкость поверхности)\n(harm_r_PBRNormalCorrection):</string>
+    <string name="joystick_center_dot_visible">Скрыть центральную точку джойстика</string>
+    <string name="download_testing">Скачать тестирование</string>
+    <string name="disable_motion_when_virtual_mouse_button_hold">Отключить движение мыши при удержании виртуальной кнопки мыши</string>
+    <string name="fixed_ratio">Фиксированное соотношение</string>
+    <string name="ratio">Соотношение</string>
+    <string name="use_custom_resolution_as_fullscreen_size">Использовать пользовательское разрешение в качестве полноэкранного размера</string>
+    <string name="openmohaa">OpenMOHAA</string>
+    <string name="openmohaa_base">Medal of Honor: Allied Assault</string>
+    <string name="video">Video</string>
+    <string name="virtual_joystick">Virtual joystick</string>
+    <string name="touch">Touch</string>
+    <string name="sensor">Sensor</string>
+    <string name="mouse">Mouse</string>
+    <string name="key">Key</string>
+    <string name="configure">Configure</string>
+    <string name="common">Common</string>
+    <string name="current_game">Current game</string>
+    <string name="edit_type">Edit type</string>
 
 </resources>

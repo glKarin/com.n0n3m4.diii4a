@@ -68,6 +68,7 @@ struct Win32Vars_t {
 	HGLRC			hGLRC; // handle to GL rendering context
 	PIXELFORMATDESCRIPTOR pfd; // for ChoosePixelFormat
 	const int* piAttribIList; // for wglChoosePixelFormatARB, if available, set in GLimp_Init()
+    int sysMsgTime;
 
 	// the following are set in GLimp_Init()
 	BOOL(WINAPI *wglChoosePixelFormatARB) (HDC hdc, const int* piAttribIList,

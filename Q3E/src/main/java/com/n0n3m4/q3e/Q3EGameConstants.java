@@ -23,10 +23,8 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE_XASH3D    = "libxash3d.so"; // Xash3D
     public static final String LIB_ENGINE_SOURCE    = "libsource.so"; // Source Engine
     public static final String LIB_ENGINE3_URT      = "liburbanterror.so"; // Q3 Urban Terror
+    public static final String LIB_ENGINE3_MOHAA    = "libopenmohaa.so"; // OpenMOHAA Medal of Honor: Allied Assault
 
-    public static final String LIB_ENGINE4_D3BFG_VULKAN = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
-    //public static final String LIB_ENGINE3_REALRTCW_5_1 = "libRealRTCW_5_1.so"; // RealRTCW(5.1)
-    //public static final String LIB_ENGINE4_TDM_2_12     = "libTheDarkMod_2_12.so"; // TDM(2.12)
 
 
     // game engine version
@@ -34,11 +32,16 @@ public final class Q3EGameConstants
 
     public static final String GAME_VERSION_D3BFG_OPENGL = "OpenGL"; // Doom3-BFG(OpenGL)
     public static final String GAME_VERSION_D3BFG_VULKAN = "Vulkan"; // Doom3-BFG(Vulkan)
+    public static final String LIB_ENGINE4_D3BFG_VULKAN  = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
 
-    //public static final String GAME_VERSION_REALRTCW_5_1     = "5.1"; // RealRTCW 5.1
 
+    public static final String GAME_VERSION_REALRTCW_5_2 = "5.2"; // RealRTCW 5.2
+    public static final String LIB_ENGINE3_REALRTCW_5_2  = "libRealRTCW_5_2.so"; // RealRTCW(5.2)
 
     //public static final String GAME_VERSION_TDM      = "2.13"; // TDM 2.13
+    //public static final String LIB_ENGINE4_TDM_2_12     = "libTheDarkMod_2_12.so"; // TDM(2.12)
+
+
 
     // game config file
     public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg";
@@ -61,6 +64,7 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_XASH3D   = "config.cfg";
     public static final String CONFIG_FILE_SOURCE   = "cfg/config.cfg";
     public static final String CONFIG_FILE_URT      = "q3config.cfg";
+    public static final String CONFIG_FILE_MOHAA    = "configs/omconfig.cfg";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -83,6 +87,7 @@ public final class Q3EGameConstants
     public static final String GAME_XASH3D   = "xash3d";
     public static final String GAME_SOURCE   = "source";
     public static final String GAME_URT      = "urt";
+    public static final String GAME_MOHAA    = "openmohaa";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -105,6 +110,7 @@ public final class Q3EGameConstants
     public static final String GAME_NAME_XASH3D   = "Xash3D";
     public static final String GAME_NAME_SOURCE   = "Source Engine";
     public static final String GAME_NAME_URT      = "Urban Terror";
+    public static final String GAME_NAME_MOHAA    = "MOHAA"; // "Medal of Honor: Allied Assault";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -129,6 +135,7 @@ public final class Q3EGameConstants
     public static final String GAME_BASE_XASH3D     = "valve";
     public static final String GAME_BASE_SOURCE     = "hl2";
     public static final String GAME_BASE_URT        = "q3ut4";
+    public static final String GAME_BASE_MOHAA      = "main";
 
     // game standalone directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
@@ -151,12 +158,13 @@ public final class Q3EGameConstants
     public static final String GAME_SUBDIR_XASH3D   = "xash";
     public static final String GAME_SUBDIR_SOURCE   = "srceng";
     public static final String GAME_SUBDIR_URT      = "urt";
+    public static final String GAME_SUBDIR_MOHAA    = "openmohaa";
 
     // game version
     public static final String GAME_VERSION_DOOM3    = "1.3.1.1304";
     public static final String GAME_VERSION_QUAKE4   = "1.4.2.1283";
     public static final String GAME_VERSION_PREY     = "1.2.116";
-    public static final String GAME_VERSION_QUAKE2   = "8.51";
+    public static final String GAME_VERSION_QUAKE2   = "8.60";
     public static final String GAME_VERSION_QUAKE3   = "1.36";
     public static final String GAME_VERSION_RTCW     = "1.51d";
     public static final String GAME_VERSION_TDM      = "2.13";
@@ -164,7 +172,7 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_DOOM3BFG = "1.4.0";
     public static final String GAME_VERSION_GZDOOM   = "4.14.2";
     public static final String GAME_VERSION_ETW      = "2.83.2";
-    public static final String GAME_VERSION_REALRTCW = "5.2";
+    public static final String GAME_VERSION_REALRTCW = "5.3";
     public static final String GAME_VERSION_FTEQW    = "1.05"; // ???
     public static final String GAME_VERSION_JA       = "1.0.1.1";
     public static final String GAME_VERSION_JO       = "1.0.1.1";
@@ -173,6 +181,7 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_XASH3D   = "0.21";
     public static final String GAME_VERSION_SOURCE   = "1.16";
     public static final String GAME_VERSION_URT      = "4.3.4";
+    public static final String GAME_VERSION_MOHAA    = "0.82.1";
 
     // game type index(ID)
     public static final int GAME_ID_DOOM3    = 0;
@@ -195,9 +204,10 @@ public final class Q3EGameConstants
     public static final int GAME_ID_XASH3D   = 17;
     public static final int GAME_ID_SOURCE   = 18;
     public static final int GAME_ID_URT      = 19;
+    public static final int GAME_ID_MOHAA    = 20;
 
 
-    public static final int NUM_SUPPORT_GAME = 20;
+    public static final int NUM_SUPPORT_GAME = 21;
 
     public enum PatchResource
     {
@@ -280,29 +290,25 @@ public final class Q3EGameConstants
     //public static final String TDM_2_12_GLSL_SHADER_VERSION   = "2.12.6"; // 6: fix a integer to float convert
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = GAME_VERSION_DOOM3BFG + ".1"; // 1: init
     public static final String GZDOOM_VERSION                 = GAME_VERSION_GZDOOM + ".1"; // 1: init
-    public static final String XASH3D_VERSION                 = GAME_VERSION_XASH3D + ".2"; // 1: include cs16 resource
+    public static final String XASH3D_VERSION                 = GAME_VERSION_XASH3D + ".3"; // 1: include cs16 resource
     public static final String SOURCE_ENGINE_VERSION          = GAME_VERSION_SOURCE + ".1"; // 1: init
     public static final String ETW_VERSION                    = GAME_VERSION_ETW + ".1"; // 1: init
 
-    public static final int[]    GZDOOM_GL_VERSIONS       = {0, 330, 420, 430, 450,};
-    public static final String[] QUAKE2_RENDERER_BACKENDS = {"gles1", "gles3", "vk",};
+    public static final String[] DOOM3_SOUND_DRIVER = { "AudioTrack", "OpenSLES", };
 
-    public static final String[] XASH3D_REFS   = {"gles1", "gl4es", "gles3compat", "soft",};
-    public static final String[] XASH3D_SV_CLS = {"", "hl", "cs16", "cs16_yapb",};
-    public static final String[] XASH3D_LIBS   = {
-            "libxash3d.so", "libfilesystem_stdio.so",
-            "libxash3d_ref_gl4es.so", "libxash3d_ref_gles1.so", "libxash3d_ref_gles3compat.so", "libxash3d_ref_soft.so",
-            "libclient_hl.so", "libserver_hl.so", "libmenu_hl.so",
-            "libclient_cs.so", "libmenu_cs.so", "libserver_cs.so", "libserver_yapb.so",
-    };
+    public static final String[] FTEQW_VID_RENDERER = { "vk", "gl", };
 
-    public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod", "episodic", "hl2mp", "hl1", "hl1mp",};
+    public static final String[]    GZDOOM_GL_VERSIONS       = { "0", "330", "420", "430", "450", };
+    public static final String[] QUAKE2_RENDERER_BACKENDS = { "gles1", "gles3", "vk", };
 
-    public static final String[] SDL_AUDIO_DRIVER = {"auto", "opensles", "aaudio",};
+    public static final String[] XASH3D_REFS   = { "gles1", "gl4es", "gles3compat", "soft", };
+    public static final String[] XASH3D_SV_CLS = { "", "hl", "cs16", "cs16_yapb", };
 
-    public static final String[] OPENAL_DRIVER = {"auto", "opensl", "oboe",};
+    public static final String[] SOURCE_ENGINE_SV_CLS = { "hl2", "cstrike", "portal", "dod", "episodic", "hl2mp", "hl1", "hl1mp", };
 
-    private Q3EGameConstants()
-    {
-    }
+    public static final String[] SDL_AUDIO_DRIVER = { "auto", "opensles", "aaudio", };
+
+    public static final String[] OPENAL_DRIVER = { "auto", "opensl", "oboe", };
+
+    private Q3EGameConstants() {}
 }

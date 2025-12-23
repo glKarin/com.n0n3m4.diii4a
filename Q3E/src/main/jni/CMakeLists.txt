@@ -17,38 +17,44 @@ else()
     set(PRODUCT_FLAVOR_IS_FDROID False)
 endif()
 
-#[[OPTION(BUILD_D3        "Build DOOM 3"    OFF)
-OPTION(BUILD_Q4        "Build Quake 4"    OFF)
-OPTION(BUILD_PREY      "Build Prey"    OFF)
-OPTION(BUILD_D3_MOD		"Build all DOOM3 mods" OFF)
-OPTION(BUILD_Q4_MOD		"Build all Quake4 mods" OFF)]]
-OPTION(BUILD_BACKPORT        "Build backport version"    OFF)
+
+
+# Backport
+OPTION(BUILD_BACKPORT               "Build backport version"                        ON)
 
 
 # Supported
-OPTION(GAME_DOOM3       "Build DOOM 3/Quake 4/Prey(2006)"       ON)
-OPTION(GAME_RTCW        "Build Return to Castle Wolfenstein"    ON)
-OPTION(GAME_QUAKE3      "Build Quake 3"                         ON)
-OPTION(GAME_QUAKE2      "Build Quake 2"                         ON)
-OPTION(GAME_QUAKE1      "Build Quake 1"                         ON)
-OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
-OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
-OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
-OPTION(GAME_ETW         "Build Wolfenstein: Enemy Territory"    ON)
-OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
-OPTION(GAME_FTEQW       "Build FTEQW"                           ON)
-OPTION(GAME_JK          "Build Jedi Knight"                     ON)
-OPTION(GAME_SERIOUSSAM  "Build Serious Sam"                     ON)
-OPTION(GAME_URT "Build Urbant Error"                    ON)
+OPTION(GAME_DOOM3                   "Build DOOM 3/Quake 4/Prey(2006)"               ON)
+OPTION(GAME_RTCW                    "Build Return to Castle Wolfenstein"            ON)
+OPTION(GAME_QUAKE3                  "Build Quake 3"                                 ON)
+OPTION(GAME_QUAKE2                  "Build Quake 2"                                 ON)
+OPTION(GAME_QUAKE1                  "Build Quake 1"                                 ON)
+OPTION(GAME_TDM                     "Build The Dark Mod"                            ON)
+OPTION(GAME_DOOM3BFG                "Build DOOM 3 BFG"                              ON)
+OPTION(GAME_DOOM                    "Build GZDOOM"                                  ON)
+OPTION(GAME_ETW                     "Build Wolfenstein: Enemy Territory"            ON)
+OPTION(GAME_REALRTCW                "Build RealRTCW"                                ON)
+OPTION(GAME_JK                      "Build Jedi Knight"                             ON)
+OPTION(GAME_SERIOUSSAM              "Build Serious Sam"                             ON)
+OPTION(GAME_URT                     "Build Urbant Error"                            ON)
+OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"          ON)
+# Not in F-Droid
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
-OPTION(GAME_XASH3D      "Build Xash3D"                          ON)
-OPTION(GAME_SOURCE      "Build Source"                          ON)
+OPTION(GAME_SOURCE                  "Build Source"                                  ON)
 endif()
 
+
+# Disabled
+OPTION(GAME_FTEQW                   "Build FTEQW"                                   OFF)
+if(NOT PRODUCT_FLAVOR_IS_FDROID)
+OPTION(GAME_XASH3D                  "Build Xash3D"                                  OFF)
+endif()
+
+
 # Experimental
-OPTION(GAME_Q3RALLY "Build Quake 3 Rally"                    OFF)
-OPTION(GAME_QUAKES      "Build Quake SandBox"                   OFF)
-OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
+OPTION(GAME_Q3RALLY     			"Build Quake 3 Rally"                   		OFF)
+OPTION(GAME_QUAKES      			"Build Quake SandBox"                   		OFF)
+OPTION(GAME_DNF         			"Build Duke Nukem Forever"              		OFF)
 
 
 
@@ -77,6 +83,9 @@ set(Q3E_SDL TRUE)
 if(Q3E_SDL)
     set(Q3E_SDL2_INCLUDE_PATH "${DIII4A_DEPEND_LIBRARY_PATH}/SDL2/include")
     add_subdirectory(deplibs/SDL2)
+    set(SDL2_FOUND True)
+    set(SDL2_LIBRARIES "SDL2")
+    set(SDL2_INCLUDE_DIRS "${Q3E_SDL2_INCLUDE_PATH}")
     #add_subdirectory(deplibs/SDL2/q3e_test)
 endif()
 
@@ -85,11 +94,11 @@ add_subdirectory( q3e )
 
 
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_SERIOUSSAM)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SERIOUSSAM)
     set(DIII4A_BUILD_COMMON True)
 endif()
 
-if(GAME_DOOM3 OR GAME_DNF OR GAME_TDM OR GAME_DOOM OR DIII4A_BUILD_COMMON)
+if(GAME_DOOM3 OR GAME_DNF OR GAME_TDM OR GAME_DOOM3BFG OR GAME_DOOM OR DIII4A_BUILD_COMMON)
     set(DIII4A_BUILD_OPENAL True)
 endif()
 
@@ -113,7 +122,7 @@ if(NOT GAME_DOOM3 AND DIII4A_BUILD_OPENAL)
     add_subdirectory(doom3/neo/externlibs/openal-soft)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_SOURCE)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SOURCE)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory ( deplibs ) # common depend libraries
 endif()
@@ -130,7 +139,7 @@ if(GAME_QUAKE3) # https://github.com/ioquake/ioq3/commit/3fb9006e6461b877b67781c
     add_subdirectory ( quake3 ) # Quake 3 Arena | Team Arena
 endif()
 
-if(GAME_QUAKE2) # 8.51 | dc473a9830fd705430d2aef1f78f23d6777216a3 | May 11, 2025 | Bump version number to 8.51.
+if(GAME_QUAKE2) # 8.60 | 6b011734793e8e887cdea1afe2d2032a335fb20b | Sep 14, 2025 | Bump version number to 8.60.
     message(STATUS "Build Quake 2")
     add_subdirectory ( quake2 ) # Quake 2
 endif()
@@ -171,12 +180,12 @@ if(GAME_ETW) # v2.83.1 | e8d0ec06800630fd458791ccd29ed488e04648d9 | Nov 12, 2024
     add_subdirectory ( etw ) # ETW
 endif()
 
-if(GAME_REALRTCW) # 5.2 | Jul 26, 2025 | ad529d588e4dec717aff0779f9d1555eddc1e2be | Update ai_cast_survival.c
+if(GAME_REALRTCW) # 5.3 | Jul 26, 2025 | 32e574d19bc3d5fa92c3c67cfe168154a26ed217 | Never do special wave if chance is 0
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
-#[[    if(BUILD_BACKPORT)
-        add_subdirectory ( backports/realrtcw_5_1 "realrtcw_5_1" ) # 5.1 | on Feb 14, 2025 | a6e94b82bd11c41f62ffc969e27b0e63f267ef8e | Version is upped to 5.1
-    endif()]]
+    if(BUILD_BACKPORT)
+        add_subdirectory ( backports/realrtcw_5_2 "realrtcw_5_2" )
+    endif()
 endif()
 
 if(GAME_FTEQW) # 5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 | engine/common/fs.c: Update game definitions
@@ -184,7 +193,7 @@ if(GAME_FTEQW) # 5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 | engine/common/fs.c: 
     add_subdirectory ( fteqw ) # FTEQW
 endif()
 
-if(GAME_JK) # 199ddc7642d0ed0e2bf007fe63d0dce3a4bb4908 | Nov 13, 2024 | Merge pull request #1246 from taysta/ojk-macos
+if(GAME_JK) # d1cb662f07dfa4c1999edfb5c1a86fd1c6285372 | 2 weeks ago | byBlank can be allocated on autosave and it can still fail to read the levelshot image.
     message(STATUS "Build OpenJK")
     add_subdirectory ( jk ) # Jedi Knight
 endif()
@@ -216,6 +225,11 @@ endif()
 if(GAME_URT) # 4.3.4 | May 26, 2018 | https://github.com/FrozenSand/ioq3-for-UrbanTerror-4/commit/53fdee781c263168965f48cb87cc9187705f5ca3 | Removed dmflags from the serverinfo string, it's an unused leftover from Quake 2
     message(STATUS "Build Urban Terror")
     add_subdirectory ( urt ) # Urban Terror
+endif()
+
+if(GAME_OPENMOHAA) # 0.82.1 | Aug 3, 2025 | https://github.com/openmoh/openmohaa/commit/a72bc153db1e6ced6e30431b5217e1a53576712c | Fix configstring replacement causing the model to be referenced twice on base MOHAA clients
+    message(STATUS "Build Medal of Honor: Allied Assault")
+    add_subdirectory ( openmohaa ) # Medal of Honor: Allied Assault
 endif()
 
 

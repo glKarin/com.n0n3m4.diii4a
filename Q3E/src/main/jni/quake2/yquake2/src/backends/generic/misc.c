@@ -146,6 +146,32 @@ static void SetExecutablePath(char* exePath)
 #endif
 }
 
+static qboolean
+Sys_GetCwd(char *buf, size_t size)
+{
+#ifdef _WIN32
+	WCHAR wpath[PATH_MAX];
+	DWORD len;
+
+	if (_wgetcwd(wpath, PATH_MAX) == NULL)
+	{
+		return false;
+	}
+	len = WideCharToMultiByte(CP_UTF8, 0, wpath, -1, buf, size, NULL, NULL);
+	if (len <= 0 || len == size)
+	{
+		return false;
+	}
+#else
+	if (getcwd(buf, size) == NULL)
+	{
+		return false;
+	}
+#endif
+	return Q_strlcat(buf, "/", size) == 1;
+}
+
+
 const char *Sys_GetBinaryDir(void)
 {
 	static char exeDir[PATH_MAX] = {0};

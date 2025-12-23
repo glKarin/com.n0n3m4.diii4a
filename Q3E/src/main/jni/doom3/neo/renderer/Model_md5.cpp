@@ -899,11 +899,12 @@ idRenderModel *idRenderModelMD5::InstantiateDynamicModel(const struct renderEnti
 #endif
 
 #ifdef _RAVEN //k: show/hide surface
-	surfaceShaderList.Clear();
+	if(surfaceShaderList.Num() != staticModel->surfaces.Num())
+		surfaceShaderList.SetNum(staticModel->surfaces.Num());
 	for(i = 0; i < staticModel->surfaces.Num(); i++)
 	{
 		const modelSurface_t *surf = &staticModel->surfaces[i];
-		surfaceShaderList.Append(surf && surf->shader ? surf->shader->GetName() : "");
+		surfaceShaderList[i] = surf && surf->shader ? surf->shader->GetName() : "";
 	}
 #endif
 
@@ -1102,8 +1103,46 @@ int idRenderModelMD5::GetSurfaceMask(const char *name) const
 
 #ifdef _EXTRAS_TOOLS
 #include "model/Model_def.cpp"
-#include "model/Model_md5anim.cpp"
+#include "model/Model_md5edit.cpp"
 
 #include "model/Model_test.cpp"
 #include "model/Model_light.cpp"
+#endif
+
+#ifdef _MODEL_MD5_EXT
+#define MD5_APPEND_COMMENT 1
+#include "model/Model_md5mesh.cpp"
+#include "model/Model_md5anim.cpp"
+
+#include "model/Model_md5convert.h"
+#endif
+
+#ifdef _MODEL_MD5V6
+#include "model/Model_md5mesh_v6.cpp"
+#include "model/Model_md5anim_v6.cpp"
+#endif
+
+#ifdef _MODEL_PSK
+#include "model/Model_psk.cpp"
+#include "model/Model_psa.cpp"
+#endif
+
+#ifdef _MODEL_IQM
+#include "model/Model_iqm.cpp"
+#endif
+
+#ifdef _MODEL_SMD
+#include "model/Model_smd.cpp"
+#endif
+
+#ifdef _MODEL_GLTF
+#include "model/Model_gltf.cpp"
+#endif
+
+#ifdef _MODEL_FBX
+#include "model/Model_fbx.cpp"
+#endif
+
+#ifdef _MODEL_MD5_EXT
+#include "model/Model_md5convert.cpp"
 #endif

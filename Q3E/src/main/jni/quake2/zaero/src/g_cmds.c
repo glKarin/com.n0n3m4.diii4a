@@ -753,10 +753,10 @@ void Cmd_WeapPrev_f (edict_t *ent)
 
 	selected_weapon = ITEM_INDEX(it);
 
-	// scan  for the next valid one
+	// scan for the next valid one
 	for (i=1 ; i<=MAX_ITEMS ; i++)
 	{
-		index = (selected_weapon + MAX_ITEMS - i)%MAX_ITEMS;
+		index = (selected_weapon + MAX_ITEMS - i) % MAX_ITEMS;
 		if (!cl->pers.inventory[index])
 		{
 			continue;
@@ -779,8 +779,8 @@ void Cmd_WeapPrev_f (edict_t *ent)
 				cl->pickup_msg_time = level.time + 0.9f;
 			}
 			return;	// successful
+		}
 	}
-}
 }
 
 /*
@@ -817,10 +817,10 @@ void Cmd_WeapNext_f (edict_t *ent)
 
 	selected_weapon = ITEM_INDEX(it);
 
-	// scan  for the next valid one
+	// scan for the next valid one
 	for (i=1 ; i<=MAX_ITEMS ; i++)
 	{
-		index = (selected_weapon + i)%MAX_ITEMS;
+		index = (selected_weapon + i) % MAX_ITEMS;
 		if (!cl->pers.inventory[index])
 		{
 			continue;
@@ -843,8 +843,8 @@ void Cmd_WeapNext_f (edict_t *ent)
 				cl->pickup_msg_time = level.time + 0.9f;
 			}
 			return;	// successful
+		}
 	}
-}
 }
 
 /*
@@ -1147,6 +1147,56 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	}
 }
 
+static void
+Cmd_Teleport_f(edict_t *ent)
+{
+	if (!ent)
+	{
+		return;
+	}
+
+	if ((deathmatch->value || coop->value) && !sv_cheats->value)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+		return;
+	}
+
+	if (gi.argc() != 4)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Usage: teleport x y z\n");
+		return;
+	}
+
+	/* Unlink it to prevent unwanted interactions with
+	   other entities. This works because linkentity()
+	   uses the first available slot and the player is
+	   always at postion 0. */
+	gi.unlinkentity(ent);
+
+	/* Set new position */
+	ent->s.origin[0] = atof(gi.argv(1));
+	ent->s.origin[1] = atof(gi.argv(2));
+	ent->s.origin[2] = atof(gi.argv(3)) + 10.0;
+
+	/* Remove velocity and keep the entity briefly in place
+	   to give the server and clients time to catch up. */
+	VectorClear(ent->velocity);
+	ent->client->ps.pmove.pm_time = 20;
+	ent->client->ps.pmove.pm_flags |= PMF_TIME_TELEPORT;
+
+	/* Remove viewangles. They'll be recalculated
+	   by the client at the next frame. */
+	VectorClear(ent->s.angles);
+	VectorClear(ent->client->ps.viewangles);
+	VectorClear(ent->client->v_angle);
+
+	/* Telefrag everything that's in the target location. */
+	KillBox(ent);
+
+	/* And link it back in. */
+	gi.linkentity(ent);
+}
+
 /* Yamagi's cycleweap / prefweap */
 
 static gitem_t *
@@ -1292,14 +1342,14 @@ Cmd_CycleWeap_f(edict_t *ent)
 
 	cl = ent->client;
 	if (cl->pers.inventory[ITEM_INDEX(weap)] <= 0)
-		{
-			gi.cprintf(ent, PRINT_HIGH, "Out of item: %s\n", weap->pickup_name);
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Out of item: %s\n", weap->pickup_name);
 		return;
-		}
+	}
 
 	weap->use(ent, weap);
 	if (num_weaps > 3 && cl->newweapon == weap)
-		{
+	{
 		cl->ps.stats[STAT_PICKUP_ICON] = gi.imageindex(weap->icon);
 		cl->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS + ITEM_INDEX(weap);
 		cl->pickup_msg_time = level.time + 0.7f;
@@ -1527,6 +1577,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_PutAway_f (ent);
 	else if (Q_stricmp (cmd, "wave") == 0)
 		Cmd_Wave_f (ent);
+	else if (Q_stricmp(cmd, "teleport") == 0)
+		Cmd_Teleport_f(ent);
 #if defined(_DEBUG) && defined(_Z_TESTMODE)
   else if(Q_stricmp (cmd, "linesize") == 0)
   {

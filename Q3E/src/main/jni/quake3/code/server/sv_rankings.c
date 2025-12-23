@@ -68,7 +68,7 @@ static void		SV_RankEncodeGameID( uint64_t game_id, char* result,
 static uint64_t	SV_RankDecodePlayerID( const char* string );
 static void		SV_RankDecodePlayerKey( const char* string, GR_PLAYER_TOKEN key );
 static char*	SV_RankStatusString( GR_STATUS status );
-static void		SV_RankError( const char* fmt, ... ) __attribute__ ((format (printf, 1, 2)));
+static void		SV_RankError( const char* fmt, ... ) Q_PRINTF_FUNC(1, 2);
 static char     SV_RankGameKey[64];
 
 /*
@@ -138,8 +138,7 @@ void SV_RankBegin( char *gamekey )
 
 	// initialize rankings
 	GRankLogLevel( GRLOG_OFF );
-	memset(SV_RankGameKey,0,sizeof(SV_RankGameKey));
-	strncpy(SV_RankGameKey,gamekey,sizeof(SV_RankGameKey)-1);
+	Q_strncpyz(SV_RankGameKey,gamekey,sizeof(SV_RankGameKey));
 	init = GRankInit( 1, SV_RankGameKey, GR_OPT_POLL, GR_OPT_END );
 	s_server_context = init.context;
 	s_rankings_contexts++;

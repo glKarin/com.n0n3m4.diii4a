@@ -108,6 +108,25 @@ extern cvar_t *allow_download_sounds;
 extern cvar_t *allow_download_maps;
 
 /*
+ * Returns max clients in the current session
+ * Returns 1 if the value is bad (<= 0) or the configstring is blank
+ */
+int
+CL_MaxClients(void)
+{
+	int i = 0;
+
+	sscanf(cl.configstrings[CS_MAXCLIENTS], " %i ", &i);
+
+	if (i > MAX_CLIENTS)
+	{
+		return MAX_CLIENTS;
+	}
+
+	return i <= 0 ? 1 : i;
+}
+
+/*
  * Dumps the current net message, prefixed by the length
  */
 void
@@ -149,7 +168,7 @@ CL_Stop_f(void)
  * record <demoname>
  * Begins recording a demo from the current position
  */
-void
+static void
 CL_Record_f(void)
 {
 	char name[MAX_OSPATH];
@@ -222,9 +241,7 @@ CL_Record_f(void)
 			}
 
 			MSG_WriteByte(&buf, svc_configstring);
-
-			MSG_WriteShort(&buf, i);
-			MSG_WriteString(&buf, cl.configstrings[i]);
+			MSG_WriteConfigString(&buf, i, cl.configstrings[i]);
 		}
 	}
 
@@ -264,7 +281,7 @@ CL_Record_f(void)
 	fwrite(buf.data, buf.cursize, 1, cls.demofile);
 }
 
-void
+static void
 CL_Setenv_f(void)
 {
 	int argc = Cmd_Argc();
@@ -302,7 +319,7 @@ CL_Setenv_f(void)
 	}
 }
 
-void
+static void
 CL_Pause_f(void)
 {
 	/* never pause in multiplayer */
@@ -364,7 +381,7 @@ CL_ParseStatusMessage(void)
 /*
  * Load or download any custom player skins and models
  */
-void
+static void
 CL_Skins_f(void)
 {
 	int i;
@@ -426,7 +443,7 @@ CL_FixUpGender(void)
 	}
 }
 
-void
+static void
 CL_Userinfo_f(void)
 {
 	Com_Printf("User info settings:\n");
@@ -468,7 +485,7 @@ void CL_ResetPrecacheCheck (void)
  * The server will send this command right
  * before allowing the client into the server
  */
-void
+static void
 CL_Precache_f(void)
 {
 	/* Yet another hack to let old demos work */
@@ -491,12 +508,13 @@ CL_Precache_f(void)
 	CL_RequestNextDownload();
 }
 
-void CL_CurrentMap_f(void)
+static void
+CL_CurrentMap_f(void)
 {
 	Com_Printf("%s\n", cl.configstrings[CS_MODELS + 1]);
 }
 
-void
+static void
 CL_InitLocal(void)
 {
 	cls.state = ca_disconnected;
@@ -517,7 +535,7 @@ CL_InitLocal(void)
 	cl_noskins = Cvar_Get("cl_noskins", "0", 0);
 	cl_predict = Cvar_Get("cl_predict", "1", 0);
 	cl_showfps = Cvar_Get("cl_showfps", "0", CVAR_ARCHIVE);
-	cl_showspeed = Cvar_Get("cl_showspeed", "0", CVAR_ARCHIVE);	
+	cl_showspeed = Cvar_Get("cl_showspeed", "0", CVAR_ARCHIVE);
 	cl_laseralpha = Cvar_Get("cl_laseralpha", "0.3", 0);
 	cl_nodownload_list = Cvar_Get("cl_nodownload_list", "", CVAR_ARCHIVE);
 
@@ -699,9 +717,9 @@ cheatvar_t cheatvars[] = {
 	{NULL, NULL}
 };
 
-int numcheatvars;
+static int numcheatvars;
 
-void
+static void
 CL_FixCvarCheats(void)
 {
 	int i;
@@ -734,7 +752,7 @@ CL_FixCvarCheats(void)
 	}
 }
 
-void
+static void
 CL_UpdateWindowedMouse(void)
 {
 	if (cls.disable_screen)

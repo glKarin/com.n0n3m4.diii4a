@@ -90,7 +90,6 @@ static qboolean Menu_OverActiveItem( menuDef_t *menu, float x, float y );
 #define MEM_POOL_SIZE  128 * 1024
 #else
 #define MEM_POOL_SIZE  2048 * 1024
-
 #ifdef __ANDROID__ //karin: why crash with receiving signal 7 using static memory on Android 32bits device, large static memory?
 #if _SIZEOFPTR == 4
 #warning "Using heap memory instead of static memory for UI memory pool on Android armv7 32bits device!"
@@ -180,6 +179,7 @@ translateString_t translateStrings[] = {
 	{"weapon"},
 	{"price"},
 	{"ammo_price"},
+    {"survival_gameover"},   
 };
 
 bonusString_t bonusStrings[] = {
@@ -5939,43 +5939,44 @@ void Item_SetupKeywordHash( void ) {
 typedef struct vidmode_s
 {
 	const char *description;
+	int width, height;
 	int mode;
 } vidmode_t;
 
 vidmode_t r_vidModes[] =
 {
-	{ "320x240 (4:3)",          0 },
-	{ "400x300 (4:3)",          1 },
-	{ "512x384 (4:3)",          2 },
-	{ "640x480 (4:3)",          3 },
-	{ "800x600 (4:3)",          4 },
-	{ "960x720 (4:3)",          5 },
-	{ "1024x768 (4:3)",         6 },
-	{ "1152x864 (4:3)",         7 },
-	{ "1280x1024 (5:4)",        8 },
-	{ "1600x1200 (4:3)",        9 },
-	{ "2048x1536 (4:3)",       10 },
-	{ "856x480 (16:9)",        11 },
-	{ "640x360 (16:9)",        12 },
-	{ "640x400 (16:10)",       13 },
-	{ "800x450 (16:9)",        14 },
-	{ "800x500 (16:10)",       15 },
-	{ "1024x640 (16:10)",      16 },
-	{ "1024x576 (16:9)",       17 },
-	{ "1280x720 (16:9)",       18 },
-	{ "1280x768 (16:10)",      19 },
-	{ "1280x800 (16:10)",      20 },
-	{ "1280x960 (4:3)",        21 },
-	{ "1440x900 (16:10)",      22 },
-	{ "1600x900 (16:9)",       23 },
-	{ "1600x1000 (16:10)",     24 },
-	{ "1680x1050 (16:10)",     25 },
-	{ "1920x1080 (16:9)",      26 },
-	{ "1920x1200 (16:10)",     27 },
-	{ "1920x1440 (4:3)",       28 },
-	{ "2560x1600 (16:10)",     29 },
-	{ "Automatic (Native)",    -2 },
-	{ "Custom",                -1 }
+    { "320x240 (4:3)",		320,	240,		0 },
+    { "400x300 (4:3)",		400,	300,		1 },
+    { "512x384 (4:3)",		512,	384,		2 },
+    { "640x480 (4:3)",		640,	480,		3 },
+    { "800x600 (4:3)",		800,	600,		4 },
+    { "960x720 (4:3)",		960,	720,		5 },
+    { "1024x768 (4:3)",		1024,	768,		6 },
+    { "1152x864 (4:3)",		1152,	864,		7 },
+    { "1280x1024 (5:4)",	1280,	1024,		8 },
+    { "1600x1200 (4:3)",	1600,	1200,		9 },
+    { "2048x1536 (4:3)",	2048,	1536,		10 },
+	{ "856x480 (16:9)",		856,	480,		11 },
+	{ "640x360 (16:9)",		640,	360,		12 },
+	{ "640x400 (16:10)",	640,	400,		13 },
+	{ "800x450 (16:9)",		800,	450,		14 },
+	{ "800x500 (16:10)",	800,	500,		15 },
+	{ "1024x640 (16:10)",	1024,	640,		16 },
+	{ "1024x576 (16:9)",	1024,	576,		17 },
+	{ "1280x720 (16:9)",	1280,	720,		18 },
+	{ "1280x768 (16:10)",	1280,	768,		19 },
+	{ "1280x800 (16:10)",	1280,	800,		20 },
+	{ "1280x960 (4:3)",		1280,	960,		21 },
+	{ "1440x900 (16:10)",	1440,	900,		22 },
+	{ "1600x900 (16:9)",	1600,	900,		23 },
+	{ "1600x1000 (16:10)",	1600,	1000,		24 },
+	{ "1680x1050 (16:10)",	1680,	1050,		25 },
+	{ "1920x1080 (16:9)",	1920,	1080,		26 },
+	{ "1920x1200 (16:10)",	1920,	1200,		27 },
+	{ "1920x1440 (4:3)",	1920,	1440,		28 },
+	{ "2560x1600 (16:10)",	2560,	1600,		29 },
+    { "Automatic (Native)",	0,		0,			-2 },
+    { "Custom",				0,		0,			-1 }
 };
 static int	s_numVidModes = ARRAY_LEN( r_vidModes );
 
@@ -5992,14 +5993,18 @@ static void Item_ApplyHacks( itemDef_t *item ) {
 	if ( item->type == ITEM_TYPE_MULTI && item->cvar && !Q_stricmp( item->cvar, "r_mode" ) ) {
 		int i;
 		multiDef_t *multiPtr = (multiDef_t*)item->typeData;;
+		int maxWidth = (int)DC->getCVarValue("r_maxResolutionWidth");
+		int maxHeight = (int)DC->getCVarValue("r_maxResolutionHeight");
 
 		DC->DPrint( "Found modelist with %d modes, extending list to %d modes\n", multiPtr->count, s_numVidModes );
 
 		multiPtr->count = 0;
 		for ( i = 0; i < s_numVidModes; i++ ) {
-			multiPtr->cvarList[multiPtr->count] = String_Alloc( r_vidModes[i].description );
-			multiPtr->cvarValue[multiPtr->count] = r_vidModes[i].mode;
-			multiPtr->count++;
+			if ( (r_vidModes[i].width <= maxWidth && r_vidModes[i].height <= maxHeight ) || r_vidModes[i].mode < 0 ) {
+				multiPtr->cvarList[multiPtr->count] = String_Alloc( r_vidModes[i].description );
+				multiPtr->cvarValue[multiPtr->count] = r_vidModes[i].mode;
+				multiPtr->count++;
+			}
 
 			if ( multiPtr->count >= MAX_MULTI_CVARS ) {
 				break;

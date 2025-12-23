@@ -79,6 +79,18 @@ void TossClientPowerups(gentity_t *self, gentity_t *attacker) {
     gentity_t *drop = NULL;
     int powerup = 0;
 
+    if (svParams.specialWaveActive && self->aiCharacter == AICHAR_LOPER_SPECIAL) {
+        // Only the very last special Loper drops ammo
+        if (svParams.waveKillCount == svParams.killCountRequirement) {
+            item = BG_FindItemForPowerup(PW_AMMO);
+            if (item) {
+                drop = Drop_Item(self, item, 0, qfalse);
+                if (drop) drop->nextthink = level.time + 30000;
+            }
+        }
+        return; // All other special Lopers drop nothing
+    }
+
     if (!attacker || !attacker->client) return;
     if (attacker->aiTeam == self->aiTeam) return;
 
@@ -109,60 +121,58 @@ void TossClientPowerups(gentity_t *self, gentity_t *attacker) {
 }
 
 gentity_t *SelectNearestDeathmatchSpawnPoint_AI( gentity_t *player, gentity_t *ent ) {
-	gentity_t   *spot;
-	vec3_t delta;
-	float dist, nearestDist;
-	gentity_t   *nearestSpot;
+    gentity_t *spot = NULL, *nearestSpot = NULL;
+    vec3_t delta;
+    float dist, nearestDist = 999999.0f;
 
-	nearestDist = 999999;
-	nearestSpot = NULL;
-	spot = NULL;
+    while ( ( spot = G_Find( spot, FOFS(classname), "info_ai_respawn" ) ) != NULL ) {
 
-	while ( ( spot = G_Find( spot, FOFS( classname ), "info_ai_respawn" ) ) != NULL ) {
+        // disabled?
+        if ( spot->spawnflags & 1 ) continue;
 
-		if ( spot->spawnflags & 1 ) {
-			continue;
-		}
+        if (ent)
+        {
+            // If mapper didn't set aiteam on the spot (0), allow any team
+            if (spot->aiTeam && ent->aiTeam != spot->aiTeam)
+                continue;
+        }
+        else if (player)
+        {
+            if (spot->aiTeam && player->aiTeam != spot->aiTeam)
+                continue;
+        }
 
-		if ( ent ) {
-			switch ( ent->aiCharacter ) {
-			case AICHAR_PROTOSOLDIER:
-			case AICHAR_SUPERSOLDIER:
-			case AICHAR_HELGA:
-			case AICHAR_HEINRICH:
-			case AICHAR_SUPERSOLDIER_LAB:
-				if ( !( spot->spawnflags & 2 ) ) {
-					continue;
-				}
-				break;
-			
-			default:
-				if ( spot->spawnflags & 2 ) {
-					continue;
-				}
-				break;
-			}
+        // class/boss gate
+        if ( ent ) {
+            switch ( ent->aiCharacter ) {
+            case AICHAR_PROTOSOLDIER:
+            case AICHAR_SUPERSOLDIER:
+            case AICHAR_HELGA:
+            case AICHAR_HEINRICH:
+            case AICHAR_SUPERSOLDIER_LAB:
+                if ( !( spot->spawnflags & 2 ) ) continue;
+                break;
+            default:
+                if ( spot->spawnflags & 2 ) continue;
+                break;
+            }
+        }
 
-			if ( ent->aiTeam != spot->aiTeam ) {
-				continue;
-			}
+        // NEW: ainame gate — if spot has aiName set, the AI must have the same aiName
+        if ( spot->aiName && spot->aiName[0] ) {
+            if ( !ent || !ent->aiName || !ent->aiName[0] ) continue;
+            if ( Q_stricmp( spot->aiName, ent->aiName ) != 0 ) continue;
+        }
 
-		} else {
-			// Remove code if the calling SelectSpawnPoint_AI from ClientSpawn (g_client.c) is the misstake
-			if ( player->aiTeam != spot->aiTeam ) {
-				continue;
-			}
-		}
+        VectorSubtract( spot->s.origin, player->r.currentOrigin, delta );
+        dist = VectorLength( delta );
+        if ( dist < nearestDist ) {
+            nearestDist = dist;
+            nearestSpot = spot;
+        }
+    }
 
-		VectorSubtract( spot->s.origin, player->r.currentOrigin, delta );
-		dist = VectorLength( delta );
-		if ( dist < nearestDist ) {
-			nearestDist = dist;
-			nearestSpot = spot;
-		}
-	}
-
-	return nearestSpot;
+    return nearestSpot;
 }
 
 
@@ -176,69 +186,64 @@ go to a random point that doesn't telefrag
 #define MAX_SPAWN_POINTS_AI    128
 #define MAX_SPAWN_POINT_DISTANCE    8196
 gentity_t *SelectRandomDeathmatchSpawnPoint_AI( gentity_t *player, gentity_t *ent ) {
-    gentity_t   *spot;
-    vec3_t delta;
-    float dist;
-    gentity_t   *spots[MAX_SPAWN_POINTS_AI];
+    gentity_t *spot = NULL;
+    gentity_t *spots[MAX_SPAWN_POINTS_AI];
     int numSpots = 0;
 
-    spot = NULL;
+    while ( ( spot = G_Find( spot, FOFS(classname), "info_ai_respawn" ) ) != NULL ) {
 
-    while ( ( spot = G_Find( spot, FOFS( classname ), "info_ai_respawn" ) ) != NULL ) {
+        // disabled?
+        if ( spot->spawnflags & 1 ) continue;
 
-		if ( spot->spawnflags & 1 ) {
-			continue;
-		}
+        if (ent)
+        {
+            // If mapper didn't set aiteam on the spot (0), allow any team
+            if (spot->aiTeam && ent->aiTeam != spot->aiTeam)
+                continue;
+        }
+        else if (player)
+        {
+            if (spot->aiTeam && player->aiTeam != spot->aiTeam)
+                continue;
+        }
 
-		if ( ent ) {
-			switch ( ent->aiCharacter ) {
-			case AICHAR_PROTOSOLDIER:
-			case AICHAR_SUPERSOLDIER:
-			case AICHAR_HELGA:
-			case AICHAR_HEINRICH:
-			case AICHAR_SUPERSOLDIER_LAB:
-				if ( !( spot->spawnflags & 2 ) ) {
-					continue;
-				}
-				break;
-			
-			default:
-				if ( spot->spawnflags & 2 ) {
-					continue;
-				}
-				break;
-			}
+        // class/boss gate
+        if ( ent ) {
+            switch ( ent->aiCharacter ) {
+            case AICHAR_PROTOSOLDIER:
+            case AICHAR_SUPERSOLDIER:
+            case AICHAR_HELGA:
+            case AICHAR_HEINRICH:
+            case AICHAR_SUPERSOLDIER_LAB:
+                if ( !( spot->spawnflags & 2 ) ) continue;
+                break;
+            default:
+                if ( spot->spawnflags & 2 ) continue;
+                break;
+            }
+        }
 
-			if ( ent->aiTeam != spot->aiTeam ) {
-				continue;
-			}
-
-		} else {
-			// Remove me if the calling SelectSpawnPoint_AI from ClientSpawn (g_client.c) is the misstake
-			if ( player->aiTeam != spot->aiTeam ) {
-				continue;
-			}
-		}
+        // NEW: ainame gate — identical to nearest
+        if ( spot->aiName && spot->aiName[0] ) {
+            if ( !ent || !ent->aiName || !ent->aiName[0] ) continue;
+            if ( Q_stricmp( spot->aiName, ent->aiName ) != 0 ) continue;
+        }
 
         if ( player ) {
+            vec3_t delta; float dist;
             VectorSubtract( spot->s.origin, player->r.currentOrigin, delta );
             dist = VectorLength( delta );
-            if ( dist < MAX_SPAWN_POINT_DISTANCE ) {
-                // Check if the spawn point is occupied
-                if ( !SpotWouldTelefrag( spot ) ) {
-                    spots[numSpots++] = spot;
-                }
-            }
-        } else {
+            if ( dist >= MAX_SPAWN_POINT_DISTANCE ) continue;
+            if ( SpotWouldTelefrag( spot ) ) continue;
+        }
+
+        if ( numSpots < MAX_SPAWN_POINTS_AI ) {
             spots[numSpots++] = spot;
         }
     }
 
-    if ( numSpots == 0 ) {
-        return NULL;
-    }
-
-    return spots[rand() % numSpots];
+    if ( numSpots == 0 ) return NULL;
+    return spots[ rand() % numSpots ];
 }
 
 

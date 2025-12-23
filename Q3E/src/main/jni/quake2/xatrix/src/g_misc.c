@@ -677,6 +677,7 @@ point_combat_touch(edict_t *self, edict_t *other, cplane_t *plane /* unused */,
 		csurface_t *surf /* unused */)
 {
 	edict_t *activator;
+	vec3_t v;
 
 	if (!self || !other)
 	{
@@ -693,11 +694,17 @@ point_combat_touch(edict_t *self, edict_t *other, cplane_t *plane /* unused */,
 		other->target = self->target;
 		other->goalentity = other->movetarget = G_PickTarget(other->target);
 
-		if (!other->goalentity)
+		if (other->goalentity)
+		{
+			VectorSubtract(other->goalentity->s.origin, other->s.origin, v);
+			other->ideal_yaw = vectoyaw(v);
+		}
+		else
 		{
 			gi.dprintf("%s at %s target %s does not exist\n",
 					self->classname, vtos(self->s.origin),
 					self->target);
+
 			other->movetarget = self;
 		}
 

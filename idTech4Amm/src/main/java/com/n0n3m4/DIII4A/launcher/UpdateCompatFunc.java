@@ -134,33 +134,13 @@ public final class UpdateCompatFunc extends GameLauncherFunc
                         ;
 
                 AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.enable_game_standalone_directory), TextHelper.GetDialogMessage(message));
-                builder.setPositiveButton(R.string.enable, new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
                         t.checked = 1;
                         writeSet.add(t.ToString());
                         pref.edit().putBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true)
-                                .putStringSet(UPDATE_TIPS, writeSet)
-                                .commit();
-                    }
-                });
-                builder.setNeutralButton(R.string.ignore, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        t.checked = 3;
-                        writeSet.add(t.ToString());
-                        pref.edit().putStringSet(UPDATE_TIPS, writeSet).commit();
-                    }
-                });
-                builder.setNegativeButton(R.string.disable, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        t.checked = 2;
-                        writeSet.add(t.ToString());
-                        pref.edit().putBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false)
                                 .putStringSet(UPDATE_TIPS, writeSet)
                                 .commit();
                     }

@@ -89,7 +89,7 @@ If you have questions concerning this license or the applicable additional terms
 #define LEGACY_HEARTBEAT_FOR_MASTER	"Wolfenstein-1"
 
 #ifndef PRODUCT_VERSION
-  #define PRODUCT_VERSION "5.1" // iortcw 1.51
+  #define PRODUCT_VERSION "5.3" // iortcw 1.51
 #endif
 
 #ifndef PRODUCT_DATE
@@ -104,6 +104,8 @@ If you have questions concerning this license or the applicable additional terms
 #define DEMOEXT	"dm_"			// standard demo extension
 
 #ifdef _MSC_VER
+
+
 
 #pragma warning(disable : 4018) // signed/unsigned mismatch
 #pragma warning(disable : 4032)

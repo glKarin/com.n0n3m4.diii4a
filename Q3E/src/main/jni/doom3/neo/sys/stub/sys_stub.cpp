@@ -268,3 +268,10 @@ int main(int argc, char **argv)
 		frameNum++;
 	}
 }
+
+void Sys_Rmdir( const char *path ) {
+}
+
+int Sys_Stat( const char *path ) {
+    return 0;
+}

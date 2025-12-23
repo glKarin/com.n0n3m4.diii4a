@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #ifndef DEDICATED
-#ifdef USE_LOCAL_HEADERS
+#ifdef USE_INTERNAL_SDL_HEADERS
 #	include "SDL.h"
 #	include "SDL_cpuinfo.h"
 #else
@@ -181,10 +181,10 @@ Sys_PIDFileName
 */
 static char *Sys_PIDFileName( const char *gamedir )
 {
-	const char *homePath = Cvar_VariableString( "fs_homepath" );
+	const char *homeStatePath = Cvar_VariableString( "fs_homestatepath" );
 
-	if( *homePath != '\0' )
-		return va( "%s/%s/%s", homePath, gamedir, PID_FILENAME );
+	if( *homeStatePath != '\0' )
+		return va( "%s/%s/%s", homeStatePath, gamedir, PID_FILENAME );
 
 	return NULL;
 }
@@ -279,12 +279,28 @@ void Sys_InitPIDFile( const char *gamedir ) {
 
 /*
 =================
+Sys_OpenFolderInFileManager
+=================
+*/
+qboolean Sys_OpenFolderInFileManager( const char *path, qboolean create )
+{
+	if( create )
+	{
+		if( FS_CreatePath( path ) )
+			return qfalse;
+	}
+
+	return Sys_OpenFolderInPlatformFileManager( path );
+}
+
+/*
+=================
 Sys_Exit
 
 Single exit point (regular exit or in case of error)
 =================
 */
-static __attribute__ ((noreturn)) void Sys_Exit( int exitCode )
+static Q_NO_RETURN void Sys_Exit( int exitCode )
 {
 	CON_Shutdown( );
 
@@ -361,7 +377,7 @@ void Sys_AnsiColorPrint( const char *msg )
 	int         length = 0;
 	static int  q3ToAnsi[ 8 ] =
 	{
-		30, // COLOR_BLACK
+		7, // COLOR_BLACK
 		31, // COLOR_RED
 		32, // COLOR_GREEN
 		33, // COLOR_YELLOW
@@ -391,8 +407,8 @@ void Sys_AnsiColorPrint( const char *msg )
 			}
 			else
 			{
-				// Print the color code
-				Com_sprintf( buffer, sizeof( buffer ), "\033[%dm",
+				// Print the color code (reset first to clear potential inverse (black))
+				Com_sprintf( buffer, sizeof( buffer ), "\033[0m\033[%dm",
 						q3ToAnsi[ ColorIndex( *( msg + 1 ) ) ] );
 				fputs( buffer, stderr );
 				msg += 2;
@@ -453,7 +469,7 @@ void Sys_Error( const char *error, ... )
 Sys_Warn
 =================
 */
-static __attribute__ ((format (printf, 1, 2))) void Sys_Warn( char *warning, ... )
+static Q_PRINTF_FUNC(1, 2) void Sys_Warn( char *warning, ... )
 {
 	va_list argptr;
 	char    string[1024];
@@ -721,7 +737,9 @@ char *Sys_ParseProtocolUri( const char *uri )
 #endif
 
 #ifndef DEFAULT_BASEDIR
-#	ifdef __APPLE__
+#	if defined(DEFAULT_RELATIVE_BASEDIR)
+#		define DEFAULT_BASEDIR Sys_BinaryPathRelative(DEFAULT_RELATIVE_BASEDIR)
+#	elif defined(__APPLE__)
 #		define DEFAULT_BASEDIR Sys_StripAppBundle(Sys_BinaryPath())
 #	else
 #		define DEFAULT_BASEDIR Sys_BinaryPath()
@@ -797,7 +815,7 @@ int main( int argc, char **argv )
 	{
 		Sys_Dialog( DT_ERROR, va( "SDL version " MINSDL_VERSION " or greater is required, "
 			"but only version %d.%d.%d was found. You may be able to obtain a more recent copy "
-			"from http://www.libsdl.org/.", ver.major, ver.minor, ver.patch ), "SDL Library Too Old" );
+			"from https://www.libsdl.org/.", ver.major, ver.minor, ver.patch ), "SDL Library Too Old" );
 
 		Sys_Exit( 1 );
 	}

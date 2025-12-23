@@ -5,7 +5,7 @@ class idARBProgram;
 class idARBTokenList : public idStrList
 {
 public:
-    idStr ToSource(void);
+    void ToSource(idStr &source);
 
     int AddToken(const char *token) {
         if(token && token[0])
@@ -32,7 +32,7 @@ public:
     explicit idARBShader(void);
     void Write(const char *path, const char *name);
     void Print(void);
-    idStr ToSource(void);
+    void ToSource(idStr &source);
 
     int AddToken(const char *token) {
         return tokenList.AddToken(token);
@@ -746,9 +746,8 @@ void idARBProgram::Print(void)
         fragmentShader.Print();
 }
 
-idStr idARBTokenList::ToSource(void)
+void idARBTokenList::ToSource(idStr &source)
 {
-    idStr source;
     for(int i = 0; i < Num(); i++)
     {
         const idStr &token = operator[](i);
@@ -756,12 +755,10 @@ idStr idARBTokenList::ToSource(void)
         if(token.Cmp("\n") && token.Cmp(";") && (i < Num() - 1 && operator[](i + 1).Cmp(";")))
             source.Append(" ");
     }
-    return source;
 }
 
-idStr idARBShader::ToSource(void)
+void idARBShader::ToSource(idStr &source)
 {
-    idStr source;
     idARBTokenList list;
 
     list.AddToken("#version");
@@ -840,13 +837,12 @@ idStr idARBShader::ToSource(void)
     list.Append(tokenList);
     list.AddToken("}");
     list.AddEOL();
-
-    return list.ToSource();
 }
 
 void idARBShader::Print(void)
 {
-    idStr source = ToSource();
+    idStr source;
+    ToSource(source);
 
     if(type == 1)
 		common->Printf("====== Vertex shader: ======\n");
@@ -864,7 +860,8 @@ void idARBShader::Print(void)
 
 void idARBShader::Write(const char *path, const char *name)
 {
-    idStr source = ToSource();
+    idStr source;
+    ToSource(source);
 
     //common->Printf("|%s|\n", source.c_str());
 
@@ -1058,29 +1055,32 @@ void idARBProgram::ParseVertex(void)
         int index = parser.ParseInt();
 		if(!token.Icmp("attrib"))
 		{
-			if(index == 9)
-			{
-				name = "attr_Tangent";
-				dt = "vec3";
-			}
-			else if(index == 10)
-			{
-				name = "attr_Bitangent";
-				dt = "vec3";
-			}
-			else if(index == 8)
-				name = "attr_TexCoord";
-			else if(index == 11)
-			{
-				name = "attr_Normal";
-				dt = "vec3";
-			}
-			else if(index == 12)
-				name = "attr_Vertex";
-			else if(index == 13)
-				name = "attr_Color";
-			else
-				name.Append(va("%d", index));
+            switch (index) {
+                case 9:
+                    name = "attr_Tangent";
+                    dt = "vec3";
+                    break;
+                case 10:
+                    name = "attr_Bitangent";
+                    dt = "vec3";
+                    break;
+                case 8:
+                    name = "attr_TexCoord";
+                    break;
+                case 11:
+                    name = "attr_Normal";
+                    dt = "vec3";
+                    break;
+                case 12:
+                    name = "attr_Vertex";
+                    break;
+                case 13:
+                    name = "attr_Color";
+                    break;
+                default:
+                    name.Append(va("%d", index));
+                    break;
+            }
 		}
 		else
 			name.Append(va("%d", index));
@@ -1650,12 +1650,12 @@ idStr idARBProgram::TextureFunc(const char *td, const char *d)
     }
 }
 
-void GLSL_ArgCompletion_glprogs(const idCmdArgs &args, void(*callback)(const char *s))
+static void GLSL_ArgCompletion_glprogs(const idCmdArgs &args, void(*callback)(const char *s))
 {
-	cmdSystem->ArgCompletion_FolderExtension(args, callback, "glprogs/", false, "vfp", "fp", "vp", "txt", NULL);
+	cmdSystem->ArgCompletion_FolderExtension(args, callback, "glprogs/", false, ".vfp", ".fp", ".vp", ".txt", NULL);
 }
 
-void GLSL_ConvertARBShader_f(const idCmdArgs &args)
+static void GLSL_ConvertARBShader_f(const idCmdArgs &args)
 {
     if (args.Argc() < 2) {
         common->Printf("Usage: %s <ARB shader source file> [<version=100,300> <save path>].\n", args.Argv(0));

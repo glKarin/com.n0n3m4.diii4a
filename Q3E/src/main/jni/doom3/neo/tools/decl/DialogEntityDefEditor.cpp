@@ -25,6 +25,7 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+#if 0 // TODO: FIX this. - DG: from SteelStorm2
 
 #include "../../idlib/precompiled.h"
 #pragma hdrstop
@@ -911,3 +912,5 @@ void DialogEntityDefEditor::OnBnClickedDelete()
 		MessageBox("Cannot delete an inherited value");
 	}
 }
+
+#endif

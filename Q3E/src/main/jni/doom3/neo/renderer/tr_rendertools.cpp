@@ -94,6 +94,94 @@ int				rb_numDebugPolygons = 0;
 int				rb_debugPolygonTime = 0;
 #endif
 
+#ifdef GL_ES_VERSION_2_0
+#include "glsl/gles2_compat.cpp"
+
+#define qglReadPixels_1(x, y, w, h, f, t, d) glesReadPixels((x), (y), (w), (h), (f), (t), (d), 1)
+
+static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
+{
+	HARM_CHECK_SHADER("RB_DrawElementsWithCounters_polygon");
+
+	backEnd.pc.c_drawElements++;
+	backEnd.pc.c_drawIndexes += tri->numIndexes;
+	backEnd.pc.c_drawVertexes += tri->numVerts;
+
+	if (tri->ambientSurface != NULL) {
+		if (tri->indexes == tri->ambientSurface->indexes) {
+			backEnd.pc.c_drawRefIndexes += tri->numIndexes;
+		}
+
+		if (tri->verts == tri->ambientSurface->verts) {
+			backEnd.pc.c_drawRefVertexes += tri->numVerts;
+		}
+	}
+
+	const int numIndexes = r_singleTriangle.GetBool() ? 3 : tri->numIndexes;
+	if(backEnd.glState.glStateBits & GLS_POLYMODE_LINE)
+	{
+		if (tri->indexCache) {
+			for(int i = 0; i < numIndexes; i += 3)
+			{
+				glesDrawElements(GL_LINE_LOOP,
+						3,
+						GL_INDEX_TYPE,
+						(glIndex_t *)vertexCache.Position(tri->indexCache) + i);
+				backEnd.pc.c_vboIndexes += 3;
+			}
+		} else {
+			vertexCache.UnbindIndex();
+
+			for(int i = 0; i < numIndexes; i += 3)
+			{
+				glesDrawElements(GL_LINE_LOOP,
+						3,
+						GL_INDEX_TYPE,
+						tri->indexes + i);
+			}
+		}
+	}
+	else
+	{
+		if (tri->indexCache) {
+			glesDrawElements(GL_TRIANGLES,
+					numIndexes,
+					GL_INDEX_TYPE,
+					(glIndex_t *)vertexCache.Position(tri->indexCache));
+			backEnd.pc.c_vboIndexes += tri->numIndexes;
+		} else {
+			vertexCache.UnbindIndex();
+
+			glesDrawElements(GL_TRIANGLES,
+					numIndexes,
+					GL_INDEX_TYPE,
+					tri->indexes);
+		}
+	}
+}
+
+static void RB_RenderTriangleSurface_polygon(const srfTriangles_t *tri)
+{
+	if (!tri->ambientCache) {
+		return;
+	}
+
+	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
+	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
+
+	RB_DrawElementsWithCounters_polygon(tri);
+}
+
+static void RB_T_RenderTriangleSurface_polygon(const drawSurf_t *surf)
+{
+	RB_RenderTriangleSurface_polygon(surf->geo);
+}
+#else
+#define qglReadPixels_1 qglReadPixels
+#endif
+
+
 #ifdef _MULTITHREAD //karin: always using original variants in RB_ShowDebug[Text|Lines|Polygons] without multi-threading
 static volatile int backEndFrameIndex = 0;
 #define frontEndFrameIndex ((backEndFrameIndex + 1) % NUM_FRAME_DATA)
@@ -136,7 +224,133 @@ int &rb_numDebugPolygons = rb_numDebugPolygonss[_frameIndex]; \
 int &rb_debugPolygonTime = rb_debugPolygonTimes[_frameIndex];
 
 
-idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Enable render tools debug with GLES in multi-threading.");
+idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Enable render tools debug with GLES in multi-threading.");
+
+#include "rb/QueueList.h"
+typedef struct showViewEntityBounds_s {
+	float modelViewMatrix[16];
+	idBounds referenceBounds;
+	idBounds modelBounds;
+} showViewEntityBounds_t;
+typedef idList<showViewEntityBounds_t> showViewEntityBoundsList_t;
+static idQueueList<showViewEntityBoundsList_t> showViewEntityList[2];
+
+/*
+=====================
+R_ShowViewEntitys
+
+Debugging tool
+=====================
+*/
+void R_ShowViewEntitys(const viewEntity_t *vModels)
+{
+	if(!multithreadActive)
+		return;
+
+	if (!r_showViewEntitys.GetBool()) {
+		return;
+	}
+
+	if (r_showViewEntitys.GetInteger() == 2) {
+		common->Printf("view entities: ");
+
+		for (; vModels ; vModels = vModels->next) {
+			common->Printf("%i ", vModels->entityDef->index);
+		}
+
+		common->Printf("\n");
+		return;
+	}
+
+	idQueueList<showViewEntityBoundsList_t> &list = showViewEntityList[frontEndFrameIndex];
+	list.Append(showViewEntityBoundsList_t());
+	showViewEntityBoundsList_t &viewEntitys = list.Last();
+
+	for (; vModels ; vModels = vModels->next) {
+		if (!vModels->entityDef) {
+			continue;
+		}
+
+		// draw the model bounds in white
+		const idRenderEntityLocal *def = vModels->entityDef;
+		const idRenderModel *model = def->parms.hModel;
+		if (model->IsDynamicModel() != DM_STATIC) {
+			model = def->dynamicModel;
+		}
+
+		if (!model) {
+			continue;	// particles won't instantiate without a current view
+		}
+
+		showViewEntityBounds_t item;
+		memcpy(item.modelViewMatrix, vModels->modelViewMatrix, sizeof(item.modelViewMatrix));
+
+		// draw the reference bounds in yellow
+		item.referenceBounds = vModels->entityDef->referenceBounds;
+
+		item.modelBounds = model->Bounds(&vModels->entityDef->parms);
+
+		viewEntitys.Append(item);
+	}
+}
+
+static void RB_ShowViewEntityList(void)
+{
+	if (!r_showViewEntitys.GetBool()) {
+		return;
+	}
+
+	if (r_showViewEntitys.GetInteger() == 2) {
+		return;
+	}
+
+	idQueueList<showViewEntityBoundsList_t> &list = showViewEntityList[backEndFrameIndex];
+	if(list.IsEmpty())
+		return;
+	showViewEntityBoundsList_t &viewEntitys = list.Get();
+	if(viewEntitys.Num() == 0)
+		return;
+
+//#if !defined(GL_ES_VERSION_2_0)
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	globalImages->BindNull();
+	glesDisable(GL_TEXTURE_2D);
+	qglDisable(GL_STENCIL_TEST);
+
+	glColor3f(1, 1, 1);
+
+	GL_State(GLS_POLYMODE_LINE);
+
+	GL_Cull(CT_TWO_SIDED);
+	qglDisable(GL_DEPTH_TEST);
+	qglDisable(GL_SCISSOR_TEST);
+
+	for (int i = 0; i < viewEntitys.Num(); i++) {
+		const showViewEntityBounds_t &b = viewEntitys[i];
+
+		glLoadMatrixf(b.modelViewMatrix);
+
+		// draw the reference bounds in yellow
+		glColor3f(1, 1, 0);
+		RB_DrawBounds(b.referenceBounds);
+
+		// draw the model bounds in white
+		glColor3f(1, 1, 1);
+		RB_DrawBounds(b.modelBounds);
+	}
+
+	qglEnable(GL_DEPTH_TEST);
+#if !defined(GL_ES_VERSION_2_0)
+	qglDisable(GL_POLYGON_OFFSET_LINE);
+#endif
+
+	glDepthRange(0, 1);
+	GL_State(GLS_DEFAULT);
+	GL_Cull(CT_FRONT_SIDED);
+//#endif
+
+	list.Remove();
+}
 
 void RB_SetupRenderTools(void)
 {
@@ -148,83 +362,6 @@ void RB_SetupRenderTools(void)
 #endif
 
 static void RB_DrawText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align);
-
-#ifdef GL_ES_VERSION_2_0
-#include "glsl/gles2_compat.cpp"
-
-static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
-{
-	HARM_CHECK_SHADER("RB_DrawElementsWithCounters_polygon");
-
-	backEnd.pc.c_drawElements++;
-	backEnd.pc.c_drawIndexes += tri->numIndexes;
-	backEnd.pc.c_drawVertexes += tri->numVerts;
-
-	if (tri->ambientSurface != NULL) {
-		if (tri->indexes == tri->ambientSurface->indexes) {
-			backEnd.pc.c_drawRefIndexes += tri->numIndexes;
-		}
-
-		if (tri->verts == tri->ambientSurface->verts) {
-			backEnd.pc.c_drawRefVertexes += tri->numVerts;
-		}
-	}
-
-	const int numIndexes = r_singleTriangle.GetBool() ? 3 : tri->numIndexes;
-	if(backEnd.glState.glStateBits & GLS_POLYMODE_LINE)
-	{
-		for(int i = 0; i < numIndexes; i += 3)
-		{
-			if (tri->indexCache) {
-				glrbDrawElements(GL_LINES,
-						3,
-						GL_INDEX_TYPE,
-						(glIndex_t *)vertexCache.Position(tri->indexCache) + i);
-				backEnd.pc.c_vboIndexes += 3;
-			} else {
-				vertexCache.UnbindIndex();
-
-				glrbDrawElements(GL_LINES,
-						3,
-						GL_INDEX_TYPE,
-						tri->indexes + i);
-			}
-		}
-	}
-	else
-	{
-		if (tri->indexCache) {
-			glrbDrawElements(GL_TRIANGLES,
-					numIndexes,
-					GL_INDEX_TYPE,
-					(int *)vertexCache.Position(tri->indexCache));
-			backEnd.pc.c_vboIndexes += tri->numIndexes;
-		} else {
-			vertexCache.UnbindIndex();
-
-			glrbDrawElements(GL_TRIANGLES,
-					numIndexes,
-					GL_INDEX_TYPE,
-					tri->indexes);
-		}
-	}
-}
-
-static void RB_T_RenderTriangleSurface_polygon(const drawSurf_t *surf)
-{
-	const srfTriangles_t *tri = surf->geo;
-
-	if (!tri->ambientCache) {
-		return;
-	}
-
-	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
-	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
-	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
-
-	RB_DrawElementsWithCounters_polygon(tri);
-}
-#endif
 
 /*
 ================
@@ -328,7 +465,7 @@ void RB_PolygonClear(void)
 	glPushMatrix();
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	glLoadIdentity();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_DEPTH_TEST);
 	qglDisable(GL_CULL_FACE);
 	qglDisable(GL_SCISSOR_TEST);
@@ -377,7 +514,7 @@ void RB_ScanStencilBuffer(void)
 	memset(counts, 0, sizeof(counts));
 
 	stencilReadback = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight);
-	qglReadPixels(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback);
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback);
 
 	for (i = 0; i < glConfig.vidWidth * glConfig.vidHeight; i++) {
 		counts[ stencilReadback[i] ]++;
@@ -417,7 +554,7 @@ void RB_CountStencilBuffer(void)
 
 
 	stencilReadback = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight);
-	qglReadPixels(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback);
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback);
 
 	count = 0;
 
@@ -581,7 +718,7 @@ void RB_ShowIntensity(void)
 	}
 
 	colorReadback = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight * 4);
-	qglReadPixels(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGBA, GL_UNSIGNED_BYTE, colorReadback);
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGBA, GL_UNSIGNED_BYTE, colorReadback);
 
 	c = glConfig.vidWidth * glConfig.vidHeight * 4;
 
@@ -627,6 +764,59 @@ void RB_ShowIntensity(void)
 }
 
 
+
+static void RB_ShowDepthBuffer_framebuffer(void)
+{
+    // using framebuffer and depth to color shader
+#if !defined(__ANDROID__)
+    if (USING_GL && r_showDepth.GetInteger() < 3) {
+        return;
+    }
+    if (!r_showDepth.GetBool()) {
+        return;
+    }
+    int base = USING_GL ? 2 : 0;
+#else
+    if (!r_showDepth.GetBool()) {
+		return;
+	}
+#endif
+
+    if(SHADER_NOT_VALID(depthToColorShader))
+        return;
+
+    if(!USING_GLES3 && !glConfig.depthTextureAvailable)
+        return;
+
+    byte	*colorReadback;
+
+    bool notPack;
+#if !defined(__ANDROID__) // using shader
+    notPack = r_showDepth.GetInteger() > base + 1;
+#else
+    notPack = r_showDepth.GetInteger() > 1;
+#endif
+    RB_RenderDepthToColor(notPack);
+    depthStencilRenderer.Begin();
+    colorReadback = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight * 4);
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGBA, GL_UNSIGNED_BYTE, colorReadback);
+    depthStencilRenderer.End();
+
+    // draw it back to the screen
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    GL_State(GLS_DEPTHFUNC_ALWAYS);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, 1, 0, 1, -1, 1);
+    glPopMatrix();
+    glColor3f(1, 1, 1);
+    globalImages->BindNull();
+    glMatrixMode(GL_MODELVIEW);
+
+    glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, colorReadback);
+    R_StaticFree(colorReadback);
+}
 /*
 ===================
 RB_ShowDepthBuffer
@@ -638,15 +828,17 @@ void RB_ShowDepthBuffer(void)
 {
 //#if !defined(GL_ES_VERSION_2_0) // qglReadPixels(GL_DEPTH_COMPONENT)
 #if !defined(__ANDROID__)
-    if(!USING_GL)
+    if (!r_showDepth.GetBool()) {
         return;
+    }
+
+    if(USING_GL)
+    {
 	void	*depthReadback;
 
-	if (!r_showDepth.GetBool()) {
-		return;
-	}
-
+#if !defined(GL_ES_VERSION_2_0)
 	glPushMatrix();
+#endif
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -655,7 +847,9 @@ void RB_ShowDepthBuffer(void)
 	glRasterPos2f(0, 0);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+#if !defined(GL_ES_VERSION_2_0)
 	glPopMatrix();
+#endif
 
 	GL_State(GLS_DEPTHFUNC_ALWAYS);
 	glColor3f(1, 1, 1);
@@ -664,23 +858,150 @@ void RB_ShowDepthBuffer(void)
 	depthReadback = R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight*4);
 	memset(depthReadback, 0, glConfig.vidWidth * glConfig.vidHeight*4);
 
-	qglReadPixels(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_DEPTH_COMPONENT , GL_FLOAT, depthReadback);
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_DEPTH_COMPONENT , GL_FLOAT, depthReadback);
 
-#if 0
+#if 1
 
+    if(r_showDepth.GetInteger() == 2)
+    {
 	for (int i = 0 ; i < glConfig.vidWidth * glConfig.vidHeight ; i++) {
 		((byte *)depthReadback)[i*4] =
 		        ((byte *)depthReadback)[i*4+1] =
-		                ((byte *)depthReadback)[i*4+2] = 255 * ((float *)depthReadback)[i];
-		((byte *)depthReadback)[i*4+3] = 1;
+		                ((byte *)depthReadback)[i*4+2] = 255.0f * ((float *)depthReadback)[i];
+		((byte *)depthReadback)[i*4+3] = 255;
 	}
+    }
 
 #endif
 
 	glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, depthReadback);
 	R_StaticFree(depthReadback);
+    }
 #endif
 //#endif
+
+    RB_ShowDepthBuffer_framebuffer();
+}
+
+static idCVar r_showStencil("r_showStencil", "0", CVAR_RENDERER | CVAR_INTEGER, "display the contents of the stencil index buffer");
+
+static void RB_ShowStencilBuffer_framebuffer(void)
+{
+    // using framebuffer and stencil to color shader
+#if !defined(__ANDROID__)
+    if (r_showStencil.GetInteger() < 16) {
+        return;
+    }
+#else
+    if (!r_showStencil.GetBool()) {
+		return;
+	}
+#endif
+
+    if(SHADER_NOT_VALID(stencilToColorShader))
+        return;
+
+    if(!USING_GLES31)
+        return;
+
+    byte	*colorReadback;
+
+    int comp = 0;
+#if !defined(__ANDROID__) // using shader
+    if(r_showStencil.GetInteger() == 16 || (r_showStencil.GetInteger() & 32))
+        comp |= 1;
+    if(r_showStencil.GetInteger() == 16 || (r_showStencil.GetInteger() & 64))
+        comp |= 2;
+    if(r_showStencil.GetInteger() == 16 || (r_showStencil.GetInteger() & 128))
+        comp |= 4;
+#else
+    if(r_showStencil.GetInteger() == 1 || (r_showStencil.GetInteger() & 2))
+        comp |= 1;
+    if(r_showStencil.GetInteger() == 1 || (r_showStencil.GetInteger() & 4))
+        comp |= 2;
+    if(r_showStencil.GetInteger() == 1 || (r_showStencil.GetInteger() & 8))
+        comp |= 4;
+#endif
+    RB_RenderStencilToColor(comp);
+    depthStencilRenderer.Begin();
+    colorReadback = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight * 4);
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_RGBA, GL_UNSIGNED_BYTE, colorReadback);
+    depthStencilRenderer.End();
+
+    // draw it back to the screen
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    GL_State(GLS_DEPTHFUNC_ALWAYS);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, 1, 0, 1, -1, 1);
+    glPopMatrix();
+    glColor3f(1, 1, 1);
+    globalImages->BindNull();
+    glMatrixMode(GL_MODELVIEW);
+
+    glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, colorReadback);
+    R_StaticFree(colorReadback);
+}
+/*
+===================
+RB_ShowStencilBuffer
+
+Draw the stencil buffer as colors
+===================
+*/
+void RB_ShowStencilBuffer(void)
+{
+//#if !defined(GL_ES_VERSION_2_0) // qglReadPixels(GL_STENCIL_INDEX)
+#if !defined(__ANDROID__)
+    if (!r_showStencil.GetBool()) {
+        return;
+    }
+
+    if(USING_GL)
+    {
+    byte	*stencilReadback;
+    byte	*stencilColor;
+
+#if !defined(GL_ES_VERSION_2_0)
+    glPushMatrix();
+#endif
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, 1, 0, 1, -1, 1);
+    glRasterPos2f(0, 0);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+#if !defined(GL_ES_VERSION_2_0)
+    glPopMatrix();
+#endif
+
+    GL_State(GLS_DEPTHFUNC_ALWAYS);
+    glColor3f(1, 1, 1);
+    globalImages->BindNull();
+
+    stencilReadback = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight);
+    memset(stencilReadback, 0, glConfig.vidWidth * glConfig.vidHeight);
+
+    qglReadPixels_1(0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback);
+    stencilColor = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight * 4);
+    for (int i = 0 ; i < glConfig.vidWidth * glConfig.vidHeight ; i++) {
+        stencilColor[i*4] = r_showStencil.GetInteger() == 1 || (r_showStencil.GetInteger() & 2) ? stencilReadback[i] : 0;
+        stencilColor[i*4+1] = r_showStencil.GetInteger() == 1 || (r_showStencil.GetInteger() & 4) ? stencilReadback[i] : 0;
+        stencilColor[i*4+2] = r_showStencil.GetInteger() == 1 || (r_showStencil.GetInteger() & 8) ? stencilReadback[i] : 0;
+        stencilColor[i*4+3] = 255;
+	}
+
+    glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, stencilColor);
+    R_StaticFree(stencilReadback);
+    R_StaticFree(stencilColor);
+    }
+#endif
+//#endif
+
+    RB_ShowStencilBuffer_framebuffer();
 }
 
 /*
@@ -731,7 +1052,7 @@ void RB_ShowLightCount(void)
 				}
 
 #ifdef GL_ES_VERSION_2_0
-				glrbStartRender();
+				glesStartRender();
 #endif
 				const idDrawVert	*ac = (idDrawVert *)vertexCache.Position(surf->geo->ambientCache);
 
@@ -739,7 +1060,7 @@ void RB_ShowLightCount(void)
 
 				RB_DrawElementsWithCounters(surf->geo);
 #ifdef GL_ES_VERSION_2_0
-				glrbEndRender();
+				glesEndRender();
 #endif
 			}
 		}
@@ -779,7 +1100,7 @@ void RB_ShowSilhouette(void)
 	//
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	glColor3f(0, 0, 0);
@@ -790,12 +1111,12 @@ void RB_ShowSilhouette(void)
 	qglDisable(GL_DEPTH_TEST);
 
 #ifdef GL_ES_VERSION_2_0
-	glrbStartRender();
+	glesStartRender();
 #endif
 	RB_RenderDrawSurfListWithFunction(backEnd.viewDef->drawSurfs, backEnd.viewDef->numDrawSurfs,
 	                                  RB_T_RenderTriangleSurface_polygon);
 #ifdef GL_ES_VERSION_2_0
-	glrbEndRender();
+	glesEndRender();
 #endif
 
 
@@ -815,7 +1136,7 @@ void RB_ShowSilhouette(void)
 				const srfTriangles_t	*tri = surf->geo;
 
 #ifdef GL_ES_VERSION_2_0
-				glrbStartRender();
+				glesStartRender();
 #endif
 				glVertexPointer(3, GL_FLOAT, sizeof(shadowCache_t), vertexCache.Position(tri->shadowCache));
 				glBegin(GL_LINES);
@@ -839,7 +1160,7 @@ void RB_ShowSilhouette(void)
 				glEnd();
 
 #ifdef GL_ES_VERSION_2_0
-				glrbEndRender();
+				glesEndRender();
 #endif
 			}
 		}
@@ -917,12 +1238,12 @@ static void RB_ShowShadowCount(void)
 
 				shadowCache_t *cache = (shadowCache_t *)vertexCache.Position(tri->shadowCache);
 #ifdef GL_ES_VERSION_2_0
-				glrbStartRender();
+				glesStartRender();
 #endif
 				glVertexPointer(4, GL_FLOAT, sizeof(*cache), &cache->xyz);
 				RB_DrawElementsWithCounters(tri);
 #ifdef GL_ES_VERSION_2_0
-				glrbEndRender();
+				glesEndRender();
 #endif
 			}
 		}
@@ -997,7 +1318,7 @@ static void RB_ShowTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	glColor3f(1, 1, 1);
@@ -1024,11 +1345,11 @@ static void RB_ShowTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 #ifdef GL_ES_VERSION_2_0
-	glrbStartRender();
+	glesStartRender();
 #endif
 	RB_RenderDrawSurfListWithFunction(drawSurfs, numDrawSurfs, RB_T_RenderTriangleSurface_polygon);
 #ifdef GL_ES_VERSION_2_0
-	glrbEndRender();
+	glesEndRender();
 #endif
 
 	qglEnable(GL_DEPTH_TEST);
@@ -1074,7 +1395,7 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 #if 1 //!defined(GL_ES_VERSION_2_0)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	glColor3f(1, 1, 1);
@@ -1145,6 +1466,13 @@ Debugging tool
 */
 static void RB_ShowViewEntitys(viewEntity_t *vModels)
 {
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		RB_ShowViewEntityList();
+		return;
+	}
+#endif
 	if (!r_showViewEntitys.GetBool()) {
 		return;
 	}
@@ -1163,7 +1491,7 @@ static void RB_ShowViewEntitys(viewEntity_t *vModels)
 //#if !defined(GL_ES_VERSION_2_0)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	glColor3f(1, 1, 1);
@@ -1950,7 +2278,7 @@ void RB_ShowLights(void)
 //#if !defined(GL_ES_VERSION_2_0)
 	const idRenderLightLocal	*light;
 	int					count;
-	srfTriangles_t		*tri;
+	const srfTriangles_t		*tri; //karin: add const
 	viewLight_t			*vLight;
 
 	if (!r_showLights.GetInteger()) {
@@ -1977,6 +2305,11 @@ void RB_ShowLights(void)
 		light = vLight->lightDef;
 		count++;
 
+#ifdef _MULTITHREAD //karin: using backend frame light data
+		if(multithreadActive)
+			tri = vLight->frustumTris;
+		else
+#endif
 		tri = light->frustumTris;
 
 		// depth buffered planes
@@ -1985,11 +2318,11 @@ void RB_ShowLights(void)
 			glColor4f(0, 0, 1, 0.25);
 			qglEnable(GL_DEPTH_TEST);
 #ifdef GL_ES_VERSION_2_0
-			glrbStartRender();
+			glesStartRender();
 #endif
-			RB_RenderTriangleSurface(tri);
+			RB_RenderTriangleSurface_polygon(tri);
 #ifdef GL_ES_VERSION_2_0
-			glrbEndRender();
+			glesEndRender();
 #endif
 		}
 
@@ -1999,11 +2332,11 @@ void RB_ShowLights(void)
 			qglDisable(GL_DEPTH_TEST);
 			glColor3f(1, 1, 1);
 #ifdef GL_ES_VERSION_2_0
-			glrbStartRender();
+			glesStartRender();
 #endif
-			RB_RenderTriangleSurface(tri);
+			RB_RenderTriangleSurface_polygon(tri);
 #ifdef GL_ES_VERSION_2_0
-			glrbEndRender();
+			glesEndRender();
 #endif
 		}
 
@@ -2618,7 +2951,7 @@ void RB_ShowDebugPolygons(void)
 
 	globalImages->BindNull();
 
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	qglDisable(GL_STENCIL_TEST);
 
 	qglEnable(GL_DEPTH_TEST);
@@ -2763,12 +3096,12 @@ void RB_TestGamma(void)
 	glColor3f(1, 1, 1);
 	glPushMatrix();
 	glLoadIdentity();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	glOrtho(0, 1, 0, 1, -1, 1);
 	glRasterPos2f(0.01f, 0.01f);
 	glDrawPixels(G_WIDTH, G_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	glPopMatrix();
-	qglEnable(GL_TEXTURE_2D);
+	glesEnable(GL_TEXTURE_2D);
 	glMatrixMode(GL_MODELVIEW);
 #endif
 }
@@ -2820,12 +3153,12 @@ static void RB_TestGammaBias(void)
 	glColor3f(1, 1, 1);
 	glPushMatrix();
 	glLoadIdentity();
-	qglDisable(GL_TEXTURE_2D);
+	glesDisable(GL_TEXTURE_2D);
 	glOrtho(0, 1, 0, 1, -1, 1);
 	glRasterPos2f(0.01f, 0.01f);
 	glDrawPixels(G_WIDTH, G_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	glPopMatrix();
-	qglEnable(GL_TEXTURE_2D);
+	glesEnable(GL_TEXTURE_2D);
 	glMatrixMode(GL_MODELVIEW);
 #endif
 }
@@ -2885,9 +3218,6 @@ void RB_TestImage(void)
 
 #ifdef GL_ES_VERSION_2_0
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-/*	GLboolean t2d = qglIsEnabled(GL_TEXTURE_2D);
-	if(!t2d)
-		qglEnable(GL_TEXTURE_2D);*/
 	GLboolean cf = qglIsEnabled(GL_CULL_FACE);
 	if(cf)
 		qglDisable(GL_CULL_FACE);
@@ -2910,8 +3240,6 @@ void RB_TestImage(void)
 	glEnd();
 #ifdef GL_ES_VERSION_2_0
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-/*	if(!t2d)
-		qglDisable(GL_TEXTURE_2D);*/
 	if(cf)
 		qglEnable(GL_CULL_FACE);
 #endif
@@ -2934,6 +3262,12 @@ void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 #endif
 	// don't do anything if this was a 2D rendering
 	if (!backEnd.viewDef->viewEntitys) {
+		// some can render in 2D view
+		GL_State(GLS_DEFAULT);
+		RB_TestImage();
+#ifdef GL_ES_VERSION_2_0
+		DEBUG_RENDER_COMPAT
+#endif
 		return;
 	}
 
@@ -2973,6 +3307,7 @@ void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 	RB_ShowPortals();
 	RB_ShowSilhouette();
 	RB_ShowDepthBuffer();
+    RB_ShowStencilBuffer();
 	RB_ShowIntensity();
 	RB_ShowDebugLines();
 	RB_ShowDebugText();
@@ -3005,7 +3340,7 @@ void RB_ShutdownDebugTools(void)
 #endif
 //#endif
 
-    glrbShutdown();
+    glesShutdown();
 }
 
 #ifdef _MULTITHREAD

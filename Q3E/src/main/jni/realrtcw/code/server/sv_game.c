@@ -966,7 +966,6 @@ void SV_ShutdownGameProgs( void ) {
 ==================
 SV_InitGameVM
 
-
 Called for both a full init and a restart
 ==================
 */

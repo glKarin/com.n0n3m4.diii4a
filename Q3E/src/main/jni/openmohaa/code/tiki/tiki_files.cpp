@@ -1,0 +1,1143 @@
+/*
+===========================================================================
+Copyright (C) 2024 the OpenMoHAA team
+
+This file is part of OpenMoHAA source code.
+
+OpenMoHAA source code is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2 of the License,
+or (at your option) any later version.
+
+OpenMoHAA source code is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with OpenMoHAA source code; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+===========================================================================
+*/
+
+// tiki_files.cpp : TIKI File Loader
+
+#include "q_shared.h"
+#include "qcommon.h"
+#include "../skeletor/skeletor.h"
+#include "../skeletor/tokenizer.h"
+#include "../client/client.h"
+#include <tiki.h>
+#include <mem_tempalloc.h>
+
+qboolean tiki_loading;
+cvar_t  *dumploadedanims;
+cvar_t  *low_anim_memory;
+cvar_t  *showLoad;
+cvar_t  *convertAnims;
+
+typedef struct {
+    char                      path[100];
+    skelAnimDataGameHeader_t *data;
+    int                       numusers;
+    int                       lookup;
+} skeletorCacheEntry_t;
+
+static int m_numInCache;
+
+class InitSkelCache
+{
+public:
+    static class InitSkelCache init;
+
+    InitSkelCache();
+};
+
+static int                  m_cachedDataLookup[MAX_TIKI_ALIASES];
+static skeletorCacheEntry_t m_cachedData[MAX_TIKI_ALIASES];
+InitSkelCache               InitSkelCache::init;
+MEM_TempAlloc               TIKI_allocator;
+
+/*
+===============
+InitSkelCache::InitSkelCache
+===============
+*/
+InitSkelCache::InitSkelCache()
+{
+    int i;
+
+    for (i = 0; i < MAX_TIKI_ALIASES; i++) {
+        m_cachedData[i].lookup = -1;
+    }
+}
+
+/*
+===============
+TIKI_FreeStorage
+===============
+*/
+void TIKI_FreeStorage(dloaddef_t *ld)
+{
+    TIKI_allocator.FreeAll();
+    ld->tikiFile.Close();
+}
+
+/*
+===============
+TIKI_AllocateLoadData
+===============
+*/
+void *TIKI_AllocateLoadData(size_t length)
+{
+    return TIKI_allocator.Alloc(length);
+}
+
+/*
+===============
+TIKI_AliasExists
+===============
+*/
+qboolean TIKI_AliasExists(dloaddef_t *ld, const char *name)
+{
+    int i;
+
+    for (i = 0; i < ld->numanims; i++) {
+        if (!Q_stricmp(ld->loadanims[i]->alias, name)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*
+===============
+TIKI_AddDefaultIdleAnim
+===============
+*/
+void TIKI_AddDefaultIdleAnim(dloaddef_t *ld)
+{
+    const char  *ext;
+    dloadanim_t *panim;
+
+    if (ld->numskels != 1) {
+        return;
+    }
+
+    ext = strstr(ld->idleSkel, ".");
+    if (!ext) {
+        return;
+    }
+
+    if (TIKI_AliasExists(ld, "idle")) {
+        return;
+    }
+
+    panim        = TIKI_AllocAnim(ld);
+    panim->alias = TIKI_CopyString("idle");
+    Q_strncpyz(panim->name, ld->idleSkel, ext - ld->idleSkel + 1);
+    panim->name[ext - ld->idleSkel] = 0;
+    Q_strcat(panim->name, sizeof(panim->name), ".skc");
+}
+
+/*
+===============
+TIKI_CopyString
+===============
+*/
+char *TIKI_CopyString(const char *s)
+{
+    char *result = (char *)TIKI_AllocateLoadData(strlen(s) + 1);
+    strcpy(result, s);
+    return result;
+}
+
+/*
+===============
+TIKI_LoadTikiAnim
+===============
+*/
+qboolean loadtikicommands = true;
+
+dtikianim_t *TIKI_LoadTikiAnim(const char *path)
+{
+    dloaddef_t   loaddef;
+    dtikianim_t *tiki = NULL;
+    const char  *token;
+    float        tempVec[3];
+    msg_t        modelBuf;
+    str          s;
+    char         tempName[257];
+    const char  *ext;
+
+    memset(&loaddef, 0, sizeof(dloaddef_t));
+    loaddef.modelBuf = &modelBuf;
+
+    TIKI_InitSetup(&loaddef);
+
+    loaddef.path              = path;
+    loaddef.numanims          = 0;
+    loaddef.numserverinitcmds = 0;
+    loaddef.numclientinitcmds = 0;
+
+    if (loaddef.tikiFile.LoadFile(path, qfalse)) {
+        loaddef.bInIncludesSection = false;
+
+        token = loaddef.tikiFile.GetToken(true);
+        if (strcmp(token, "TIKI")) {
+            TIKI_Error(
+                "TIKI_LoadTIKIfile: def file %s has wrong header (%s should be TIKI)\n",
+                loaddef.tikiFile.Filename(),
+                token
+            );
+            loaddef.tikiFile.Close();
+            return NULL;
+        }
+
+        while (loaddef.tikiFile.TokenAvailable(true)) {
+            token = loaddef.tikiFile.GetToken(true);
+
+            if (!Q_stricmp(token, "setup")) {
+                if (!TIKI_ParseSetup(&loaddef)) {
+                    TIKI_FreeStorage(&loaddef);
+                    return NULL;
+                }
+            } else if (!Q_stricmp(token, "init")) {
+                TIKI_ParseInit(&loaddef);
+            } else if (!Q_stricmp(token, "animations")) {
+                TIKI_ParseAnimations(&loaddef);
+            } else if (!Q_stricmp(token, "includes")) {
+                if (!loaddef.bInIncludesSection) {
+                    loaddef.bInIncludesSection = TIKI_ParseIncludes(&loaddef);
+                } else {
+                    TIKI_Error(
+                        "TIKI_LoadTIKIfile: Nested Includes section in %s on line %d, the animations will be fubar\n",
+                        token,
+                        loaddef.tikiFile.GetLineNumber(),
+                        loaddef.tikiFile.Filename()
+                    );
+                }
+            } else if (!Q_stricmp(token, "}") && loaddef.bInIncludesSection) {
+                loaddef.bInIncludesSection = false;
+            } else {
+                TIKI_Error(
+                    "TIKI_LoadTIKIfile: unknown section %s in %s online %d, skipping line.\n",
+                    token,
+                    loaddef.tikiFile.Filename(),
+                    loaddef.tikiFile.GetLineNumber()
+                );
+
+                // skip the current line
+                while (loaddef.tikiFile.TokenAvailable(false)) {
+                    loaddef.tikiFile.GetToken(false);
+                }
+            }
+        }
+
+        if (loaddef.bInIncludesSection) {
+            TIKI_Error("TIKI_LoadTIKIfile: Include section in %s did not terminate\n", loaddef.tikiFile.Filename());
+        }
+    } else {
+        loaddef.tikiFile.Close();
+
+        ext = strstr(path, ".");
+        if (!ext) {
+            return NULL;
+        }
+
+        Q_strncpyz(tempName, path, ext - path + 1);
+        tempName[ext - path] = 0;
+        Q_strcat(tempName, sizeof(tempName), ".skd");
+        WriteSkelmodel(&loaddef, tempName);
+
+        loaddef.hasSkel = true;
+    }
+
+    TIKI_AddDefaultIdleAnim(&loaddef);
+    if (loaddef.numanims) {
+        Com_sprintf(tempName, sizeof(tempName), "a%s", path);
+        UI_LoadResource(tempName);
+
+        tiki = TIKI_FillTIKIStructureSkel(&loaddef);
+        if (tiki) {
+            Com_sprintf(tempName, sizeof(tempName), "b%s", path);
+            UI_LoadResource(tempName);
+            Com_sprintf(tempName, sizeof(tempName), "c%s", path);
+            UI_LoadResource(tempName);
+
+            VectorSubtract(tiki->maxs, tiki->mins, tempVec);
+            if (VectorLength(tempVec) > 100000.0f) {
+                VectorSet(tiki->mins, -4.0f, -4.0f, -4.0f);
+                VectorSet(tiki->maxs, 4.0f, 4.0f, 4.0f);
+            }
+
+            TIKI_FreeStorage(&loaddef);
+            Com_sprintf(tempName, sizeof(tempName), "d%s", path);
+            UI_LoadResource(tempName);
+        } else {
+            TIKI_FreeStorage(&loaddef);
+        }
+    } else {
+        TIKI_Error("TIKI_LoadTIKIfile: No valid animations found in %s.\n", loaddef.tikiFile.Filename());
+        TIKI_FreeStorage(&loaddef);
+    }
+
+    return tiki;
+}
+
+/*
+===============
+TIKI_LoadTikiModel
+===============
+*/
+dtiki_t *TIKI_LoadTikiModel(dtikianim_t *tikianim, const char *name, con_map<str, str> *keyValues)
+{
+    dtiki_t *tiki;
+    //byte *start_ptr;
+    //byte *ptr;
+    int    i, j, k;
+    char  *strptr;
+    size_t defsize;
+
+    struct {
+        dtiki_t   tiki;
+        short int buffer[32];
+    } temp;
+    dtiki_t* temp_tiki;
+
+    //int skel;
+    dloadsurface_t     loadsurfaces[24];
+    int                numSurfacesSetUp;
+    dtikisurface_t    *tikiSurf;
+    dloadsurface_t    *loadsurf;
+    int                mesh;
+    skelHeaderGame_t  *skelmodel;
+    skelSurfaceGame_t *surf;
+    int                surfOffset;
+    qboolean           found;
+    byte              *start_ptr, *max_ptr, *ptr;
+
+    // Use a pointer directly to avoid compiler wrongly optimizing out loops
+    // as the mesh field of the tiki is an array of 1 element
+    temp_tiki = &temp.tiki;
+
+    TIKI_LoadSetup(
+        temp_tiki,
+        tikianim->name,
+        loadsurfaces,
+        &numSurfacesSetUp,
+        tikianim->modelData,
+        tikianim->modelDataSize,
+        keyValues
+    );
+    if (!temp_tiki->numMeshes) {
+        Com_DPrintf("^~^~^ Model '%s' has no skelmodel\n", tikianim->name);
+        return NULL;
+    }
+
+    defsize = sizeof(dtiki_t) - sizeof(tiki->mesh);
+    defsize += temp_tiki->numMeshes * sizeof(short);
+    defsize += strlen(name) + 1;
+    defsize = PAD(defsize, sizeof(void *));
+    defsize += temp_tiki->num_surfaces * sizeof(dtikisurface_t);
+
+    tiki = (dtiki_t *)TIKI_Alloc(defsize);
+    memset(tiki, 0, defsize);
+
+    start_ptr = (byte *)tiki;
+    max_ptr   = start_ptr + defsize;
+    ptr       = start_ptr + sizeof(dtiki_t) - sizeof(tiki->mesh) + temp_tiki->numMeshes * sizeof(tiki->mesh[0]);
+
+    tiki->a = tikianim;
+    tiki->m_boneList.InitChannels();
+    tiki->skeletor     = NULL;
+    tiki->load_scale   = temp_tiki->load_scale;
+    tiki->lod_scale    = temp_tiki->lod_scale;
+    tiki->lod_bias     = temp_tiki->lod_bias;
+    tiki->num_surfaces = temp_tiki->num_surfaces;
+    tiki->numMeshes    = temp_tiki->numMeshes;
+    tiki->radius       = temp_tiki->radius;
+    tiki->name         = (char *)ptr;
+    strcpy(tiki->name, name);
+    ptr += strlen(tiki->name) + 1;
+    ptr      = (byte *)PADP(ptr, sizeof(void *));
+    tikiSurf = (dtikisurface_t *)ptr;
+    tiki->m_boneList.ZeroChannels();
+
+    assert((byte *)(tikiSurf + temp_tiki->num_surfaces) <= max_ptr);
+
+    for (i = 0; i < temp_tiki->numMeshes; i++) {
+        mesh          = temp_tiki->mesh[i];
+        tiki->mesh[i] = mesh;
+
+        skelmodel = skelcache[mesh].skel;
+        skelcache[mesh].numuses++;
+
+        for (j = 0; j < skelmodel->numBones; j++) {
+            tiki->m_boneList.AddChannel(skelmodel->pBones[j].channel);
+        }
+    }
+
+    tiki->m_boneList.PackChannels();
+    VectorCopy(temp_tiki->light_offset, tiki->light_offset);
+    VectorCopy(temp_tiki->load_origin, tiki->load_origin);
+    tiki->surfaces = tikiSurf;
+
+    for (i = 0; i < numSurfacesSetUp; i++) {
+        loadsurf = &loadsurfaces[i];
+        found    = false;
+        strptr   = strchr(loadsurf->name, '*');
+
+        surfOffset = 0;
+
+        if (strptr || !Q_stricmp(loadsurf->name, "all")) {
+            for (j = 0; j < temp_tiki->numMeshes; j++) {
+                mesh      = temp_tiki->mesh[j];
+                skelmodel = TIKI_GetSkel(mesh);
+                surf      = skelmodel->pSurfaces;
+
+                for (k = 0; k < skelmodel->numSurfaces; k++) {
+                    tikiSurf = &tiki->surfaces[surfOffset + k];
+
+                    if ((strptr && strptr != loadsurf->name
+                         && !strnicmp(loadsurf->name, surf->name, strptr - loadsurf->name))
+                        || !Q_stricmp(loadsurf->name, "all")) {
+                        TIKI_SetupIndividualSurface(tikianim->name, tikiSurf, surf->name, loadsurf);
+                        found = true;
+                    }
+
+                    surf = surf->pNext;
+                }
+
+                surfOffset += skelmodel->numSurfaces;
+            }
+        } else {
+            for (j = 0; j < temp_tiki->numMeshes; j++) {
+                mesh      = temp_tiki->mesh[j];
+                skelmodel = TIKI_GetSkel(mesh);
+                surf      = skelmodel->pSurfaces;
+
+                tikiSurf = &tiki->surfaces[surfOffset];
+
+                for (k = 0; k < skelmodel->numSurfaces; k++) {
+                    if (!Q_stricmp(loadsurf->name, surf->name)) {
+                        TIKI_SetupIndividualSurface(tikianim->name, tikiSurf, surf->name, loadsurf);
+                        if (!tikiSurf->name[0]) {
+                            TIKI_Warning(
+                                "TIKI_InitTiki: Surface %i in %s(referenced in %s) has no name!  Please investigate "
+                                "and fix\n",
+                                k,
+                                skelmodel->name,
+                                name
+                            );
+                        }
+                        found = true;
+                    }
+
+                    surf = surf->pNext;
+                    tikiSurf++;
+                }
+
+                surfOffset += skelmodel->numSurfaces;
+            }
+        }
+
+        if (!found) {
+            TIKI_Warning(
+                "TIKI_InitTiki: could not find surface '%s' in '%s' (check referenced skb/skd files).\n",
+                loadsurf->name,
+                tikianim->name
+            );
+        }
+    }
+
+    // Added in 2.0
+    //  For surfaces without shader
+    //  assign them the shader with the same name
+    surfOffset = 0;
+    for (i = 0; i < temp_tiki->numMeshes; i++, surfOffset += skelmodel->numSurfaces) {
+        skelmodel = TIKI_GetSkel(temp_tiki->mesh[i]);
+
+        surf = skelmodel->pSurfaces;
+
+        for (j = 0; j < skelmodel->numSurfaces; j++, surf = surf->pNext) {
+            tikiSurf = &tiki->surfaces[surfOffset + j];
+
+            if (tikiSurf->numskins) {
+                // Skip surfaces with skins
+                continue;
+            }
+
+            Q_strncpyz(tikiSurf->name, surf->name, sizeof(tikiSurf->name));
+
+            if (strlen(surf->name) != 9 || Q_strncmp(surf->name, "material", 8)) {
+                Q_strncpyz(tikiSurf->shader[0], surf->name, sizeof(tikiSurf->shader[0]));
+            }
+
+            tikiSurf->numskins = 1;
+        }
+    }
+
+    if (!tiki->radius) {
+        TIKI_CalcRadius(tiki);
+    }
+
+    return tiki;
+}
+
+/*
+===============
+TIKI_CalcRadius
+===============
+*/
+void TIKI_CalcRadius(dtiki_t *tiki)
+{
+    int    j;
+    float  radius;
+    float  tmpVec[3];
+    float *bounds[2];
+
+    tiki->radius = 0.0f;
+
+    bounds[0] = &tiki->a->mins[0];
+    bounds[1] = &tiki->a->maxs[0];
+
+    for (j = 0; j < 4; j++) {
+        tmpVec[0] = bounds[j & 1][0];
+        tmpVec[1] = bounds[j & 1][1];
+        tmpVec[2] = bounds[j & 1][2];
+
+        radius = VectorLength(tmpVec);
+        if (radius > tiki->radius) {
+            tiki->radius = radius;
+        }
+    }
+
+    radius       = tiki->radius * 0.7f;
+    tiki->radius = radius * tiki->lod_scale;
+}
+
+/*
+===============
+SkeletorCacheFileCallback
+===============
+*/
+skelAnimDataGameHeader_t *SkeletorCacheFileCallback(const char *path)
+{
+    skelAnimDataFileHeader_t *pHeader;
+    int                       iBuffLength;
+    char                      tempName[100];
+    char                      extension[100];
+    skelAnimDataGameHeader_t *finishedHeader;
+    char                     *buffer;
+    char                      npath[256];
+
+    Skel_ExtractFileExtension(path, extension);
+
+    if (strcmp(extension, "skc")) {
+        Com_DPrintf("Skeletor CacheAnimSkel: %s: File extension unknown.  Attempting to open as skc file\n", path);
+    }
+
+    Q_strncpyz(npath, "newanim/", sizeof(npath));
+    Q_strcat(npath, sizeof(npath), path);
+
+    iBuffLength = TIKI_ReadFileEx(npath, (void **)&buffer, qtrue);
+    if (iBuffLength > 0) {
+        finishedHeader = skeletor_c::LoadProcessedAnim(npath, buffer, iBuffLength, path);
+        TIKI_FreeFile(buffer);
+    } else {
+        iBuffLength = TIKI_ReadFileEx(path, (void **)&pHeader, qtrue);
+        if (iBuffLength <= 0) {
+            Com_DPrintf("Skeletor CacheAnimSkel: Could not open binary file %s\n", path);
+            return NULL;
+        }
+
+        int ident   = LittleLong(pHeader->ident);
+        int version = LittleLong(pHeader->version);
+        if (LittleLong(ident) != TIKI_SKC_HEADER_IDENT
+            || (version != TIKI_SKC_HEADER_OLD_VERSION && version != TIKI_SKC_HEADER_VERSION)) {
+            Com_DPrintf(
+                "Skeletor CacheAnimSkel: anim %s has wrong header ([ident,version] = [%i,%i] should be [%i,%i])\n",
+                path,
+                ident,
+                version,
+                TIKI_SKC_HEADER_IDENT,
+                TIKI_SKC_HEADER_VERSION
+            );
+            TIKI_FreeFile(pHeader);
+            return NULL;
+        }
+
+        if (version == TIKI_SKC_HEADER_OLD_VERSION) {
+            Com_DPrintf("WARNING- DOWNGRADING TO OLD ANIMATION FORMAT FOR FILE: %s\n", path);
+
+            //
+            // Handle the endianness
+            //
+            pHeader->flags = LittleLong(pHeader->flags);
+            pHeader->nBytesUsed = LittleLong(pHeader->nBytesUsed);
+            pHeader->frameTime = LittleFloat(pHeader->frameTime);
+            pHeader->totalDelta.x = LittleFloat(pHeader->totalDelta.x);
+            pHeader->totalDelta.y = LittleFloat(pHeader->totalDelta.y);
+            pHeader->totalDelta.z = LittleFloat(pHeader->totalDelta.z);
+            pHeader->totalAngleDelta = LittleFloat(pHeader->totalAngleDelta);
+            pHeader->numChannels = LittleLong(pHeader->numChannels);
+            pHeader->ofsChannelNames = LittleLong(pHeader->ofsChannelNames);
+            pHeader->numFrames = LittleLong(pHeader->numFrames);
+
+            finishedHeader = skeletor_c::ConvertSkelFileToGame(pHeader, iBuffLength, path);
+            if (convertAnims && convertAnims->integer) {
+                skeletor_c::SaveProcessedAnim(finishedHeader, path, pHeader);
+            }
+        } else {
+            // looks like SKC version 14 and above are processed animations
+
+            // points the buffer to the animation data
+            buffer = (char *)pHeader + sizeof(int) + sizeof(int);
+            iBuffLength -= sizeof(int) + sizeof(int);
+
+            // loads the processed animation
+            finishedHeader = skeletor_c::LoadProcessedAnimEx(path, buffer, iBuffLength, path);
+        }
+
+        TIKI_FreeFile(pHeader);
+    }
+
+    if (dumploadedanims && dumploadedanims->integer) {
+        Com_Printf("+loadanim: %s\n", path);
+    }
+
+    Com_sprintf(tempName, sizeof(tempName), "g%s", path);
+    UI_LoadResource(tempName);
+
+    return finishedHeader;
+}
+
+/*
+===============
+SkeletorCacheGetData
+===============
+*/
+skelAnimDataGameHeader_t *SkeletorCacheGetData(int index)
+{
+    if (index < 0) {
+        return NULL;
+    }
+
+    skelAnimDataGameHeader_t *data = m_cachedData[index].data;
+    if (!data) {
+        data                     = SkeletorCacheFileCallback(m_cachedData[index].path);
+        m_cachedData[index].data = data;
+    }
+
+    return data;
+}
+
+/*
+===============
+SkeletorCacheFindFilename
+===============
+*/
+bool SkeletorCacheFindFilename(const char *path, int *indexPtr)
+{
+    int sortValue;
+    int lowerBound;
+    int upperBound;
+    int index;
+
+    lowerBound = 0;
+    upperBound = m_numInCache - 1;
+    while (lowerBound <= upperBound) {
+        index     = (lowerBound + upperBound) / 2;
+        sortValue = Q_stricmp(path, m_cachedData[m_cachedDataLookup[index]].path);
+        if (!sortValue) {
+            if (indexPtr) {
+                *indexPtr = index;
+            }
+            return true;
+        }
+        if (sortValue < 0) {
+            upperBound = index - 1;
+        } else {
+            lowerBound = index + 1;
+        }
+    }
+
+    if (indexPtr) {
+        *indexPtr = lowerBound;
+    }
+    return false;
+}
+
+/*
+===============
+SkeletorCacheLoadData
+===============
+*/
+bool SkeletorCacheLoadData(const char *path, bool precache, int newIndex)
+{
+    int                       i;
+    skelAnimDataGameHeader_t *data;
+    int                       lookup;
+
+    if (m_numInCache >= MAX_TIKI_ALIASES) {
+        Com_Printf("Skeletor CacheData, Cache full, can't load %s\n", path);
+        return false;
+    }
+
+    if (strlen(path) >= 100) {
+        Com_Printf("^~^~^ SkeletorCache: File name over %i characters will be ignored.\n(%s)\n", 99, path);
+        return false;
+    }
+
+    if (precache) {
+        data = SkeletorCacheFileCallback(path);
+        if (!data) {
+            return false;
+        }
+    } else {
+        data = 0;
+    }
+
+    for (lookup = 0; lookup < MAX_TIKI_ALIASES; lookup++) {
+        if (m_cachedData[lookup].lookup == -1) {
+            break;
+        }
+    }
+
+    for (i = m_numInCache - 1; i >= newIndex; i--) {
+        m_cachedData[m_cachedDataLookup[i]].lookup = i + 1;
+        m_cachedDataLookup[i + 1]                  = m_cachedDataLookup[i];
+    }
+
+    m_cachedDataLookup[newIndex] = lookup;
+    m_cachedData[lookup].lookup  = newIndex;
+    m_cachedData[lookup].data    = data;
+    Q_strncpyz(m_cachedData[lookup].path, path, sizeof(m_cachedData[lookup].path));
+    m_cachedData[lookup].numusers = 0;
+    m_numInCache++;
+
+    return true;
+}
+
+/*
+===============
+SkeletorCacheUnloadData
+===============
+*/
+void SkeletorCacheUnloadData(int index)
+{
+    int i;
+
+    m_numInCache--;
+
+    if (dumploadedanims && dumploadedanims->integer) {
+        Com_Printf("-loadanim: %s\n", m_cachedData[m_cachedDataLookup[index]].path);
+    }
+
+    if (m_cachedData[m_cachedDataLookup[index]].data) {
+        skelAnimDataGameHeader_s::DeallocAnimData(m_cachedData[m_cachedDataLookup[index]].data);
+        m_cachedData[m_cachedDataLookup[index]].data = NULL;
+    }
+
+    m_cachedData[m_cachedDataLookup[index]].lookup = -1;
+
+    for (i = index; i < m_numInCache; i++) {
+        m_cachedDataLookup[i] = m_cachedDataLookup[i + 1];
+        m_cachedData[m_cachedDataLookup[i]].lookup = i;
+    }
+}
+
+/*
+===============
+SkeletorCacheCleanCache
+===============
+*/
+void SkeletorCacheCleanCache()
+{
+    int i;
+
+    // Fixed in OPM
+    //  In original, i starts from 0 up to m_numInCache
+    //  the problem is that m_numInCache can decrement
+    for (i = m_numInCache; i > 0; i--) {
+        if (!m_cachedData[m_cachedDataLookup[i - 1]].numusers) {
+            SkeletorCacheUnloadData(i - 1);
+        }
+    }
+}
+
+/*
+===============
+TikiAddToBounds
+===============
+*/
+void TikiAddToBounds(dtikianim_t *tiki, SkelVec3 *newBounds)
+{
+    int i;
+
+    for (i = 0; i < 3; i++) {
+        if (newBounds[0].val[i] < tiki->mins[i]) {
+            tiki->mins[i] = newBounds[0].val[i];
+        }
+
+        if (newBounds[1].val[i] > tiki->maxs[i]) {
+            tiki->maxs[i] = newBounds[1].val[i];
+        }
+    }
+}
+
+/*
+===============
+TIKI_AnimList_f
+===============
+*/
+void TIKI_AnimList_f()
+{
+    skeletorCacheEntry_t *entry;
+    int                   i;
+
+    Com_Printf("\nanimlist:\n");
+    for (i = 0; i < m_numInCache; i++) {
+        entry = &m_cachedData[m_cachedDataLookup[i]];
+        if (!entry) {
+            Com_Printf("*** NOT CACHED: ");
+        }
+
+        if (m_cachedData[i].path[0]) {
+            Com_Printf("%s\n", m_cachedData[i].path);
+        } else {
+            Com_Printf("*** EMPTY PATH ERROR\n");
+        }
+    }
+
+    for (; i < MAX_TIKI_ALIASES; i++) {
+        if (m_cachedData[m_cachedDataLookup[i]].path[0]) {
+            Com_Printf("*** CORRUPTED ENTRY\n");
+        }
+    }
+}
+
+/*
+===============
+TIKI_FixFrameNum
+===============
+*/
+void TIKI_FixFrameNum(dtikianim_t *ptiki, skelAnimDataGameHeader_t *animData, dtikicmd_t *cmd, const char *alias)
+{
+    if (cmd->frame_num >= TIKI_FRAME_LAST && cmd->frame_num < animData->numFrames) {
+        if (cmd->frame_num <= TIKI_FRAME_END) {
+            cmd->frame_num = animData->numFrames - 1;
+        }
+    } else {
+        TIKI_Error(
+            "TIKI_FixFrameNum: illegal frame number %d (total: %d) in anim '%s' in '%s'\n",
+            cmd->frame_num,
+            animData->numFrames,
+            alias,
+            ptiki->name
+        );
+        cmd->frame_num = 0;
+    }
+}
+
+/*
+===============
+TIKI_LoadAnim
+===============
+*/
+void TIKI_LoadAnim(dtikianim_t *ptiki)
+{
+    int                       i, j;
+    dtikianimdef_t           *panim;
+    skelAnimDataGameHeader_t *animData;
+
+    for (i = 0; i < ptiki->num_anims; i++) {
+        animData = SkeletorCacheGetData(ptiki->m_aliases[i]);
+        if (animData) {
+            panim = ptiki->animdefs[i];
+            for (j = 0; j < panim->num_server_cmds; j++) {
+                TIKI_FixFrameNum(ptiki, animData, &ptiki->animdefs[i]->server_cmds[j], ptiki->animdefs[i]->alias);
+            }
+
+            for (j = 0; j < panim->num_client_cmds; j++) {
+                TIKI_FixFrameNum(ptiki, animData, &ptiki->animdefs[i]->client_cmds[j], ptiki->animdefs[i]->alias);
+            }
+        }
+    }
+}
+
+/*
+===============
+TIKI_InitTiki
+===============
+*/
+dtikianim_t *TIKI_InitTiki(dloaddef_t *ld, size_t defsize)
+{
+    byte       *ptr;
+    byte       *start_ptr;
+    byte       *max_ptr;
+    dtikicmd_t *pcmds;
+    int         i, k;
+    int         numLoadedAnims;
+    size_t      j;
+    size_t      size;
+    //int anim_index;
+    int                       alias_index;
+    dtikianim_t              *panim;
+    dtikianimdef_t           *panimdef;
+    dloadanim_t              *anim;
+    skelAnimDataGameHeader_t *data;
+    qboolean                  bModelBoundsSet = false;
+    bool                      bPrecache;
+    int                       index;
+    char                      tempName[257];
+    int                       order[MAX_TIKI_ALIASES];
+    short                     temp_aliases[MAX_TIKI_ALIASES];
+
+    panim = (dtikianim_t *)TIKI_Alloc(defsize);
+
+    start_ptr = (byte *)panim;
+    max_ptr   = start_ptr + defsize;
+    ptr       = start_ptr;
+
+    memset(panim, 0, defsize);
+    ClearBounds(panim->mins, panim->maxs);
+    panim->num_client_initcmds = ld->numclientinitcmds;
+    panim->num_server_initcmds = ld->numserverinitcmds;
+    panim->bIsCharacter        = ld->bIsCharacter;
+
+    ptr += sizeof(dtikianim_t) - sizeof(dtikianimdef_t *) + sizeof(dtikianimdef_t *) * ld->numanims;
+    panim->name = (char *)ptr;
+    strcpy(panim->name, ld->path);
+
+    ptr += strlen(ld->path) + 1;
+    ptr                    = (byte *)PADP(ptr, sizeof(void *));
+    panim->server_initcmds = (dtikicmd_t *)ptr;
+
+    ptr += sizeof(*panim->server_initcmds) * panim->num_server_initcmds;
+
+    // Process server init commands
+    for (i = 0; i < ld->numserverinitcmds; i++) {
+        pcmds           = &panim->server_initcmds[i];
+        pcmds->num_args = ld->loadserverinitcmds[i]->num_args;
+        pcmds->args     = (char **)ptr;
+
+        ptr += sizeof(*pcmds->args) * pcmds->num_args;
+
+        for (j = 0; j < ld->loadserverinitcmds[i]->num_args; j++) {
+            pcmds->args[j] = (char *)ptr;
+            size           = strlen(ld->loadserverinitcmds[i]->args[j]) + 1;
+            memcpy(pcmds->args[j], ld->loadserverinitcmds[i]->args[j], size);
+
+            ptr += size;
+        }
+
+        ptr = (byte *)PADP(ptr, sizeof(void *));
+    }
+
+    panim->client_initcmds = (dtikicmd_t *)ptr;
+
+    ptr += sizeof(*panim->client_initcmds) * ld->numclientinitcmds;
+
+    // Process client init commands
+    for (i = 0; i < ld->numclientinitcmds; i++) {
+        pcmds           = &panim->client_initcmds[i];
+        pcmds->num_args = ld->loadclientinitcmds[i]->num_args;
+        pcmds->args     = (char **)ptr;
+
+        ptr += sizeof(*pcmds->args) * pcmds->num_args;
+
+        for (j = 0; j < ld->loadclientinitcmds[i]->num_args; j++) {
+            pcmds->args[j] = (char *)ptr;
+            size           = strlen(ld->loadclientinitcmds[i]->args[j]) + 1;
+            memcpy(pcmds->args[j], ld->loadclientinitcmds[i]->args[j], size);
+
+            ptr += size;
+        }
+
+        ptr = (byte *)PADP(ptr, sizeof(void *));
+    }
+
+    TIKI_GetAnimOrder(ld, order);
+    Com_sprintf(tempName, sizeof(tempName), "e%s", ld->path);
+    UI_LoadResource(tempName);
+
+    panim->m_aliases = temp_aliases;
+    assert(ptr <= max_ptr);
+
+    // Process anim commands
+    numLoadedAnims = 0;
+    for (i = 0; i < ld->numanims; i++) {
+        anim = ld->loadanims[order[i]];
+        if (!SkeletorCacheFindFilename(anim->name, &index)) {
+            bPrecache = false;
+
+            if ((!low_anim_memory && ld->numanims <= 49) || !low_anim_memory || !low_anim_memory->integer) {
+                bPrecache = true;
+            }
+
+            if (!SkeletorCacheLoadData(anim->name, bPrecache, index)) {
+                if (ld->hasSkel) {
+                    TIKI_DPrintf("^~^~^ TIKI_InitTiki: Couldn't load %s\n", ld->path);
+                    // Fixed in OPM
+                    //  The original game doesn't free the animation on error
+                    TIKI_Free(panim);
+                    return NULL;
+                }
+
+                TIKI_Error("TIKI_InitTiki: Failed to load animation '%s' at %s\n", anim->name, anim->location);
+                continue;
+            }
+        }
+
+        alias_index = m_cachedDataLookup[index];
+        m_cachedData[alias_index].numusers++;
+        panimdef = (dtikianimdef_t *)ptr;
+        ptr += sizeof(dtikianimdef_t);
+        panim->animdefs[numLoadedAnims]  = panimdef;
+        panim->m_aliases[numLoadedAnims] = alias_index;
+        Q_strncpyz(panimdef->alias, anim->alias, sizeof(panimdef->alias));
+        panimdef->weight = anim->weight;
+        panimdef->flags  = anim->flags;
+
+        if (!Q_stricmp(panimdef->alias, "idle")) {
+            data = SkeletorCacheGetData(alias_index);
+            if (data) {
+                VectorCopy(data->bounds[0].val, panim->mins);
+                VectorCopy(data->bounds[1].val, panim->maxs);
+                bModelBoundsSet = true;
+            }
+        }
+
+        if (anim->flags & TAF_RANDOM) {
+            j = strlen(panimdef->alias);
+            if (isdigit(panimdef->alias[j - 1])) {
+                do {
+                    j--;
+                } while (isdigit(panimdef->alias[j - 1]));
+
+                panimdef->alias[j] = 0;
+            } else {
+                TIKI_DPrintf("TIKI_InitTiki: Random animation name '%s' should end with a number\n", panimdef->alias);
+            }
+        }
+
+        panimdef->blendtime = anim->blendtime;
+        if (loadtikicommands) {
+            panimdef->num_server_cmds = anim->num_server_cmds;
+            panimdef->num_client_cmds = anim->num_client_cmds;
+        } else {
+            panimdef->num_server_cmds = 0;
+            panimdef->num_client_cmds = 0;
+        }
+
+        panimdef->server_cmds = (dtikicmd_t *)ptr;
+        ptr                   = (byte *)(panimdef->server_cmds + anim->num_server_cmds);
+
+        // Process server anim commands
+        for (j = 0; j < anim->num_server_cmds; j++) {
+            pcmds            = &panimdef->server_cmds[j];
+            pcmds->num_args  = anim->loadservercmds[j]->num_args;
+            pcmds->frame_num = anim->loadservercmds[j]->frame_num;
+            pcmds->args      = (char **)ptr;
+
+            ptr += pcmds->num_args * sizeof(*pcmds->args);
+
+            for (k = 0; k < anim->loadservercmds[j]->num_args; k++) {
+                pcmds->args[k] = (char *)ptr;
+                size           = strlen(anim->loadservercmds[j]->args[k]) + 1;
+                memcpy(pcmds->args[k], anim->loadservercmds[j]->args[k], size);
+
+                ptr += size;
+            }
+
+            ptr = (byte *)PADP(ptr, sizeof(void *));
+        }
+
+        panimdef->client_cmds = (dtikicmd_t *)ptr;
+        ptr += anim->num_client_cmds * sizeof(dtikicmd_t);
+
+        // Process client anim commands
+        for (j = 0; j < anim->num_client_cmds; j++) {
+            pcmds            = &panimdef->client_cmds[j];
+            pcmds->num_args  = anim->loadclientcmds[j]->num_args;
+            pcmds->frame_num = anim->loadclientcmds[j]->frame_num;
+            pcmds->args      = (char **)ptr;
+
+            ptr += pcmds->num_args * sizeof(*pcmds->args);
+
+            for (k = 0; k < anim->loadclientcmds[j]->num_args; k++) {
+                pcmds->args[k] = (char *)ptr;
+                size           = strlen(anim->loadclientcmds[j]->args[k]) + 1;
+                memcpy(pcmds->args[k], anim->loadclientcmds[j]->args[k], size);
+
+                ptr += size;
+            }
+
+            ptr = (byte *)PADP(ptr, sizeof(void *));
+        }
+
+        assert(ptr <= max_ptr);
+
+        numLoadedAnims++;
+    }
+
+    panim->m_aliases = NULL;
+    if (numLoadedAnims) {
+        if (!bModelBoundsSet) {
+            TIKI_DPrintf("TIKI_InitTiki: no 'idle' animation found, model bounds not set for %s\n", ld->path);
+        }
+
+        panim->num_anims = numLoadedAnims;
+        panim->m_aliases = (short *)TIKI_Alloc(panim->num_anims * sizeof(short));
+        memcpy(panim->m_aliases, temp_aliases, panim->num_anims * sizeof(short));
+        panim->modelData     = ptr;
+        panim->modelDataSize = ld->modelBuf->cursize;
+        memcpy(panim->modelData, ld->modelData, panim->modelDataSize);
+        ptr += panim->modelDataSize;
+
+        size              = strlen(ld->headmodels) + 1;
+        panim->headmodels = (char *)ptr;
+        memcpy(panim->headmodels, ld->headmodels, size);
+        ptr += size;
+
+        size             = strlen(ld->headskins) + 1;
+        panim->headskins = (char *)ptr;
+        memcpy(panim->headskins, ld->headskins, size);
+        ptr += size;
+
+        Com_sprintf(tempName, sizeof(tempName), "h%s", ld->path);
+        UI_LoadResource(tempName);
+
+        if (low_anim_memory && (!low_anim_memory->integer || !tiki_loading)) {
+            TIKI_LoadAnim(panim);
+        }
+    } else {
+        TIKI_Error("TIKI_InitTiki: No valid animations found in %s.\n", ld->path);
+        // Fixed in OPM
+        //  The original game doesn't free the animation on error
+        TIKI_Free(panim);
+        panim = NULL;
+    }
+
+    assert(ptr <= max_ptr);
+    return panim;
+}
+
+/*
+===============
+TIKI_RemoveTiki
+===============
+*/
+void TIKI_RemoveTiki(dtikianim_t *ptiki)
+{
+    int i;
+    int alias_index;
+
+    for (i = 0; i < ptiki->num_anims; i++) {
+        alias_index = ptiki->m_aliases[i];
+        m_cachedData[alias_index].numusers--;
+    }
+}

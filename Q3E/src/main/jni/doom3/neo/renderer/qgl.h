@@ -430,6 +430,8 @@ typedef void (GL_APIENTRY  *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLe
 #define glDrawBuffers qglDrawBuffers
 #define glFramebufferTextureLayer qglFramebufferTextureLayer
 #define glBlitFramebuffer qglBlitFramebuffer
+#define glProgramBinary qglProgramBinary
+#define glGetProgramBinary qglGetProgramBinary
 
 // GLES3.1
 #define glDebugMessageControl qglDebugMessageControl
@@ -440,3 +442,76 @@ typedef void (GL_APIENTRY  *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLe
 #endif
 
 #endif
+
+#if defined( _WIN32 ) && defined(ID_ALLOW_TOOLS)
+
+extern  BOOL(WINAPI * qwglSwapBuffers)(HDC);
+extern int Win_ChoosePixelFormat(HDC hdc);
+
+extern BOOL(WINAPI * qwglCopyContext)(HGLRC, HGLRC, UINT);
+extern HGLRC(WINAPI * qwglCreateContext)(HDC);
+extern HGLRC(WINAPI * qwglCreateLayerContext)(HDC, int);
+extern BOOL(WINAPI * qwglDeleteContext)(HGLRC);
+extern HGLRC(WINAPI * qwglGetCurrentContext)(VOID);
+extern HDC(WINAPI * qwglGetCurrentDC)(VOID);
+extern PROC(WINAPI * qwglGetProcAddress)(LPCSTR);
+extern BOOL(WINAPI * qwglMakeCurrent)(HDC, HGLRC);
+extern BOOL(WINAPI * qwglShareLists)(HGLRC, HGLRC);
+extern BOOL(WINAPI * qwglUseFontBitmaps)(HDC, DWORD, DWORD, DWORD);
+
+extern BOOL(WINAPI * qwglUseFontOutlines)(HDC, DWORD, DWORD, DWORD, FLOAT,
+                                          FLOAT, int, LPGLYPHMETRICSFLOAT);
+
+extern BOOL(WINAPI * qwglDescribeLayerPlane)(HDC, int, int, UINT,
+                                             LPLAYERPLANEDESCRIPTOR);
+extern int  (WINAPI * qwglSetLayerPaletteEntries)(HDC, int, int, int,
+                                                  CONST COLORREF *);
+extern int  (WINAPI * qwglGetLayerPaletteEntries)(HDC, int, int, int,
+                                                  COLORREF *);
+extern BOOL(WINAPI * qwglRealizeLayerPalette)(HDC, int, BOOL);
+extern BOOL(WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
+
+#include "glsl/gles2_compat.h"
+
+#define qglBegin glBegin
+#define qglEnd glEnd
+#define qglColor4f glColor4f
+#define qglColor3f glColor3f
+#define qglVertex2f glVertex2f
+#define qglVertex3f glVertex3f
+#define qglVertex3fv glVertex3fv
+#define qglMatrixMode glMatrixMode
+#define qglLoadIdentity glLoadIdentity
+#define qglOrtho glOrtho
+#define qglPushMatrix glPushMatrix
+#define qglPopMatrix glPopMatrix
+#define qglColor3fv glColor3fv
+#define qglColor4fv glColor4fv
+#define qglRotatef glRotatef
+#define qglTranslatef glTranslatef
+#define qglRectf glRectf
+#define qglTexCoord2f glTexCoord2f
+#define qglTexCoord2fv glTexCoord2fv
+#define qglEnableClientState glEnableClientState
+#define qglPushAttrib glPushAttrib
+#define qglPopAttrib glPopAttrib
+#define qglLoadMatrixf glLoadMatrixf
+#define qglPolygonMode glPolygonMode
+
+#define GL_COMPILE_AND_EXECUTE 0x1301
+#define qglPointSize(x)
+#define qglRasterPos2f(x, y)
+#define qglRasterPos3f(x, y, z)
+#define qglRasterPos3fv(x)
+#define qglCallLists(x, y, z)
+#define qglCallList(x)
+#define qglEndList()
+#define qglNewList(x, y)
+#define qglGenLists(x) 0
+#define qglListBase(x)
+#define qglDeleteLists(x, y)
+#define qgluNewQuadric() NULL
+#define qgluDeleteQuadric()
+#define qgluSphere gluSphere
+
+#endif	// _WIN32 && ID_ALLOW_TOOLS

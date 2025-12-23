@@ -364,7 +364,7 @@ void CDIB::Expand(int nXDest,int nYDest,int xRatio,int yRatio,CDIB &dibSrc,int x
 	yErr = nDHeight%yRatio;
 
 	unsigned char *buffer,*srcPtr,*destPtr,*ptr;
-	int i,j,k;
+	int i,j,k = 0;
 
 	buffer = (unsigned char *)malloc(nDWidth+20);
 
@@ -827,7 +827,7 @@ BOOL CDIB::SwitchPalette(CDIB &dib)
 
 int CDIB::ClosestColor(RGBQUAD *pRgb)
 {
-	unsigned int dist=BIG_DISTANCE,i,d,c;
+	unsigned int dist=BIG_DISTANCE,i,d,c = 0;
 	RGBQUAD *pQuad=m_pRGB;
 	unsigned int pSize=GetPaletteSize();
 

@@ -490,15 +490,15 @@ static void ProjectDlightTexture_scalar( void ) {
 	byte	*colorArray;
 	glIndex_t	*hitIndexes;
 #else
-	byte	clipBits[SHADER_MAX_VERTEXES];
-	float	texCoordsArray[SHADER_MAX_VERTEXES][2];
-	byte	colorArray[SHADER_MAX_VERTEXES][4];
-	glIndex_t	hitIndexes[SHADER_MAX_INDEXES];
+	static  byte	clipBits[SHADER_MAX_VERTEXES];
+	static  float	texCoordsArray[SHADER_MAX_VERTEXES][2];
+	static  byte	colorArray[SHADER_MAX_VERTEXES][4];
+	static  glIndex_t	hitIndexes[SHADER_MAX_INDEXES];
 #endif
 	int		numIndexes;
 	float	scale;
 	float	radius;
-	vec3_t	floatColor;
+	vec3_t	floatColor; // RGB in 0..255 space
 	float	modulate = 0.0f;
 
 	if ( !backEnd.refdef.num_dlights ) {
@@ -519,7 +519,7 @@ static void ProjectDlightTexture_scalar( void ) {
 		dlight_t	*dl;
 
 		if ( !( tess.dlightBits & ( 1 << l ) ) ) {
-			continue;	// this surface definately doesn't have any of this light
+			continue;	// this surface definitely doesn't have any of this light
 		}
 #ifdef __ANDROID__ //karin: heap pointer, not 2d array
 		texCoords = texCoordsArray;
@@ -534,28 +534,69 @@ static void ProjectDlightTexture_scalar( void ) {
 		radius = dl->radius;
 		scale = 1.0f / radius;
 
-		if(r_greyscale->integer)
+		// --- GOTHIC & GREYSCALE (independent) ---
 		{
-			float luminance;
+			const int      gothicMode = ( r_gothic ) ? r_gothic->integer : 0; // 0=off, 1=pure red, 2=original red
+			const qboolean gsInt      = r_greyscale->integer ? qtrue : qfalse;
+			const float    gsValue    = r_greyscale->value;
+			const qboolean gsActive   = ( gsInt || (gsValue > 0.0f) ) ? qtrue : qfalse;
 
-			luminance = LUMA(dl->color[0], dl->color[1], dl->color[2]) * 255.0f;
-			floatColor[0] = floatColor[1] = floatColor[2] = luminance;
+			// Original dlight color in bytes for dominance test / luma
+			byte srcR = (byte)Com_Clamp( 0, 255, dl->color[0] * 255.0f );
+			byte srcG = (byte)Com_Clamp( 0, 255, dl->color[1] * 255.0f );
+			byte srcB = (byte)Com_Clamp( 0, 255, dl->color[2] * 255.0f );
+
+			if ( gothicMode ) {
+				// Red override if original light is red-dominant
+				if ( IsRedDominant( srcR, srcG, srcB ) ) {
+					if ( gothicMode == 2 ) {
+						floatColor[0] = (float)srcR;   // original red intensity
+					} else {
+						floatColor[0] = 255.0f;        // pure red
+					}
+					floatColor[1] = 0.0f;
+					floatColor[2] = 0.0f;
+				} else {
+					// Non-red light: grayscale baseline
+					float luma = (float)LUMA( srcR, srcG, srcB );
+					if ( gsInt ) {
+						floatColor[0] = luma;
+						floatColor[1] = luma;
+						floatColor[2] = luma;
+					} else if ( gsValue > 0.0f ) {
+						// partial desat if r_greyscale has a value
+						float rIn = (float)srcR, gIn = (float)srcG, bIn = (float)srcB;
+						floatColor[0] = LERP( rIn, luma, gsValue );
+						floatColor[1] = LERP( gIn, luma, gsValue );
+						floatColor[2] = LERP( bIn, luma, gsValue );
+					} else {
+						// gothic alone → full luma baseline
+						floatColor[0] = luma;
+						floatColor[1] = luma;
+						floatColor[2] = luma;
+					}
 		}
-		else if(r_greyscale->value)
-		{
-			float luminance;
-			
-			luminance = LUMA(dl->color[0], dl->color[1], dl->color[2]) * 255.0f;
-			floatColor[0] = LERP(dl->color[0] * 255.0f, luminance, r_greyscale->value);
-			floatColor[1] = LERP(dl->color[1] * 255.0f, luminance, r_greyscale->value);
-			floatColor[2] = LERP(dl->color[2] * 255.0f, luminance, r_greyscale->value);
+			} else if ( gsActive ) {
+				// Greyscale only (original behavior)
+				float luma = (float)LUMA( srcR, srcG, srcB );
+				if ( gsInt ) {
+					floatColor[0] = luma;
+					floatColor[1] = luma;
+					floatColor[2] = luma;
+				} else {
+					float rIn = (float)srcR, gIn = (float)srcG, bIn = (float)srcB;
+					floatColor[0] = LERP( rIn, luma, gsValue );
+					floatColor[1] = LERP( gIn, luma, gsValue );
+					floatColor[2] = LERP( bIn, luma, gsValue );
 		}
-		else
-		{
+			} else {
+				// Neither gothic nor greyscale → original dlight color
 			floatColor[0] = dl->color[0] * 255.0f;
 			floatColor[1] = dl->color[1] * 255.0f;
 			floatColor[2] = dl->color[2] * 255.0f;
 		}
+		}
+		// --- END GOTHIC & GREYSCALE ---
 
 		for ( i = 0 ; i < tess.numVertexes ; i++, texCoords += 2, colors += 4 ) {
 			int		clip = 0;
@@ -585,8 +626,6 @@ static void ProjectDlightTexture_scalar( void ) {
 				} else if ( texCoords[1] > 1.0f ) {
 					clip |= 8;
 				}
-				texCoords[0] = texCoords[0];
-				texCoords[1] = texCoords[1];
 
 				// modulate the strength based on the height and color
 				if ( dist[2] > radius ) {
@@ -605,6 +644,7 @@ static void ProjectDlightTexture_scalar( void ) {
 				}
 			}
 			clipBits[i] = clip;
+
 			colors[0] = ri.ftol(floatColor[0] * modulate);
 			colors[1] = ri.ftol(floatColor[1] * modulate);
 			colors[2] = ri.ftol(floatColor[2] * modulate);
@@ -646,8 +686,7 @@ static void ProjectDlightTexture_scalar( void ) {
 		{
 			shader_t *dls = dl->dlshader;
 			if ( dls ) {
-				for ( i = 0; i < dls->numUnfoggedPasses; i++ )
-				{
+				for ( i = 0; i < dls->numUnfoggedPasses; i++ ) {
 					shaderStage_t *stage = dls->stages[i];
 					R_BindAnimatedImage( &dls->stages[i]->bundle[0] );
 					GL_State( stage->stateBits | GLS_DEPTHFUNC_EQUAL );
@@ -655,9 +694,7 @@ static void ProjectDlightTexture_scalar( void ) {
 					backEnd.pc.c_totalIndexes += numIndexes;
 					backEnd.pc.c_dlightIndexes += numIndexes;
 				}
-
-			} else
-			{
+			} else {
 				R_FogOff();
 
 				GL_Bind( tr.dlightImage );
@@ -668,8 +705,7 @@ static void ProjectDlightTexture_scalar( void ) {
 				backEnd.pc.c_totalIndexes += numIndexes;
 				backEnd.pc.c_dlightIndexes += numIndexes;
 
-				// Ridah, overdraw lights several times, rather than sending
-				//	multiple lights through
+				// Ridah, overdraw lights several times, rather than sending multiple lights through
 				for ( i = 0; i < dl->overdraw; i++ ) {
 					R_DrawElements( numIndexes, hitIndexes );
 					backEnd.pc.c_totalIndexes += numIndexes;
@@ -687,6 +723,7 @@ static void ProjectDlightTexture_scalar( void ) {
 	free(hitIndexes);
 #endif
 }
+
 
 static void ProjectDlightTexture( void ) {
 #if idppc_altivec
@@ -861,7 +898,6 @@ static void ComputeColors( shaderStage_t *pStage ) {
 	case AGEN_ONE_MINUS_ENTITY:
 		RB_CalcAlphaFromOneMinusEntity( ( unsigned char * ) tess.svars.colors );
 		break;
-		// Ridah
 	case AGEN_NORMALZFADE:
 	{
 		float alpha, range, lowest, highest, dot;
@@ -933,7 +969,6 @@ static void ComputeColors( shaderStage_t *pStage ) {
 		}
 	}
 	break;
-		// done.
 	case AGEN_VERTEX:
 		if ( pStage->rgbGen != CGEN_VERTEX ) {
 			for ( i = 0; i < tess.numVertexes; i++ ) {
@@ -996,29 +1031,46 @@ static void ComputeColors( shaderStage_t *pStage ) {
 		}
 	}
 
-	// if in greyscale rendering mode turn all color values into greyscale.
-	if(r_greyscale->integer)
+	// --- NOIR + RED pass (post-fog), independent controls ---
 	{
-		int scale;
-		for(i = 0; i < tess.numVertexes; i++)
-		{
-			scale = LUMA(tess.svars.colors[i][0], tess.svars.colors[i][1], tess.svars.colors[i][2]);
-			tess.svars.colors[i][0] = tess.svars.colors[i][1] = tess.svars.colors[i][2] = scale;
+		const qboolean gsInt    = r_greyscale->integer ? qtrue : qfalse;
+		const float    gsValue  = r_greyscale->value;
+		const qboolean gsActive = ( gsInt || (gsValue > 0.0f) ) ? qtrue : qfalse;
+		const int      gothicMode = ( r_gothic ) ? r_gothic->integer : 0; // 0=off, 1=pure, 2=original
+
+		if ( gothicMode || gsActive ) {
+			for ( i = 0; i < tess.numVertexes; i++ ) {
+				byte r0 = tess.svars.colors[i][0];
+				byte g0 = tess.svars.colors[i][1];
+				byte b0 = tess.svars.colors[i][2];
+
+				if ( gothicMode && IsRedDominant( r0, g0, b0 ) ) {
+					// Red survives (pure/original)
+					ApplyNoirRed( &tess.svars.colors[i][0], &tess.svars.colors[i][1], &tess.svars.colors[i][2],
+					              r0, g0, b0, gothicMode );
+				} else {
+					// Non-red path: grayscale baseline
+					int luma = LUMA( r0, g0, b0 );
+
+					if ( gsActive ) {
+						if ( gsInt ) {
+							tess.svars.colors[i][0] = tess.svars.colors[i][1] = tess.svars.colors[i][2] = (byte)luma;
+						} else {
+							tess.svars.colors[i][0] = LERP( r0, luma, gsValue );
+							tess.svars.colors[i][1] = LERP( g0, luma, gsValue );
+							tess.svars.colors[i][2] = LERP( b0, luma, gsValue );
+						}
+					} else if ( gothicMode ) {
+						// Gothic alone → full luma baseline
+						tess.svars.colors[i][0] = tess.svars.colors[i][1] = tess.svars.colors[i][2] = (byte)luma;
+					}
+					// else: neither gothic nor greyscale → leave color as computed above
 		}
 	}
-	else if(r_greyscale->value)
-	{
-		float scale;
-		
-		for(i = 0; i < tess.numVertexes; i++)
-		{
-			scale = LUMA(tess.svars.colors[i][0], tess.svars.colors[i][1], tess.svars.colors[i][2]);
-			tess.svars.colors[i][0] = LERP(tess.svars.colors[i][0], scale, r_greyscale->value);
-			tess.svars.colors[i][1] = LERP(tess.svars.colors[i][1], scale, r_greyscale->value);
-			tess.svars.colors[i][2] = LERP(tess.svars.colors[i][2], scale, r_greyscale->value);
 		}
 	}
 }
+
 
 /*
 ===============

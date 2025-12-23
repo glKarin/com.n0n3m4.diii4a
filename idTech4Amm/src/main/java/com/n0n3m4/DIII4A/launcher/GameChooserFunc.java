@@ -17,6 +17,7 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3EInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,7 @@ public final class GameChooserFunc extends GameLauncherFunc
         {
             super(context, R.layout.game_list_delegate);
 
-            for(String game : GameManager.Games())
+            for(String game : GameManager.Games(false))
             {
                 GameItem item = new GameItem();
                 item.game = game;

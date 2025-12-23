@@ -447,6 +447,15 @@ void			Sys_SetFatalError(const char *error);
 // display perference dialog
 void			Sys_DoPreferences(void);
 
+void			Sys_Rmdir(const char *path);
+enum {
+    FST_NONE = 0,
+    FST_FILE,
+    FST_DIRECTORY,
+    FST_OTHER,
+};
+int 			Sys_Stat(const char *path);
+
 /*
 ==============================================================
 
@@ -557,7 +566,7 @@ typedef struct {
 	intptr_t	threadHandle;
 	size_t		threadId;
 #ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
-	bool		threadCancel;
+	volatile bool		threadCancel;
 #endif
 } xthreadInfo;
 
@@ -752,5 +761,7 @@ void			Sys_Usleep(int usec);
 void			Sys_Msleep(int msec);
 const char *	Sys_DLLDefaultPath(void);
 uint64_t		Sys_Microseconds(void);
+int             Sys_SetEnv(const char *name, const char *value, bool override = false);
+int             Sys_UnsetEnv(const char *name);
 
 #endif /* !__SYS_PUBLIC__ */

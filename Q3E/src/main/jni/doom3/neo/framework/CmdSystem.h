@@ -137,6 +137,7 @@ class idCmdSystem
 };
 
 extern idCmdSystem 	*cmdSystem;
+const char * Com_GetCommandDescription(const char *name);
 
 
 ID_INLINE void idCmdSystem::ArgCompletion_Boolean(const idCmdArgs &args, void(*callback)(const char *s))
@@ -177,11 +178,27 @@ ID_INLINE void idCmdSystem::ArgCompletion_MapName(const idCmdArgs &args, void(*c
 ID_INLINE void idCmdSystem::ArgCompletion_ModelName(const idCmdArgs &args, void(*callback)(const char *s))
 {
 	cmdSystem->ArgCompletion_FolderExtension(args, callback, "models/", false, ".lwo", ".ase", ".md5mesh", ".ma"
+            , ".md5meshs"
 #ifdef _MODEL_OBJ
 											 , ".obj"
 #endif
 #ifdef _MODEL_DAE
 											 , ".dae"
+#endif
+#ifdef _MODEL_PSK
+                                             , ".psk"
+#endif
+#ifdef _MODEL_IQM
+                                             , ".iqm"
+#endif
+#ifdef _MODEL_SMD
+                                             , ".smd"
+#endif
+#ifdef _MODEL_GLTF
+                                             , ".gltf", ".glb"
+#endif
+#ifdef _MODEL_FBX
+                                             , ".fbx"
 #endif
 											 , NULL);
 }

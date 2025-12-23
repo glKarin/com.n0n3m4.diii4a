@@ -602,7 +602,7 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
         outFont->glyphsTable = NULL;
         if(fdOffset + HARM_NEW_FONT_REQUIRE_BYTES < len)
         {
-            common->Printf("Font '%s (%d)' is new format.\n", fontName, pointSize);
+            common->DPrintf("Font '%s (%d)' is new format.\n", fontName, pointSize);
             if(R_Font_ParseWideFont(outFont))
             {
 #ifdef _RAVEN //k: fix old ascii glyph font texture file name
@@ -619,7 +619,7 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
             }
         }
         else
-            common->Printf("Font '%s (%d)' is old format.\n", fontName, pointSize);
+            common->DPrintf("Font '%s (%d)' is old format.\n", fontName, pointSize);
 
         if(outFont->numIndexes > 0)
         {

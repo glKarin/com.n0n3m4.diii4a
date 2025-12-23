@@ -21,6 +21,8 @@ GLSL_PROGRAM_PROC shaderProgram_t globalIlluminationShader; //k: Global illumina
 #endif
 GLSL_PROGRAM_PROC shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
 // GLSL_PROGRAM_PROC shaderProgram_t glasswarpShader; //k: glasswarp shader
+GLSL_PROGRAM_PROC shaderProgram_t depthToColorShader; //k: depth to color shader
+GLSL_PROGRAM_PROC shaderProgram_t stencilToColorShader; //k: stencil index to color shader
 GLSL_PROGRAM_PROC shaderProgram_t texgenShader; //k: texgen shader
 #ifdef _POSTPROCESS
 GLSL_PROGRAM_PROC shaderProgram_t retro2BitShader; //k: 2Bit postprocess shader

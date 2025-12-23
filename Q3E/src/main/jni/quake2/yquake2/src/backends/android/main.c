@@ -86,7 +86,7 @@ main(int argc, char **argv)
 					if (!S_ISDIR(sb.st_mode))
 					{
 						printf("-datadir %s is not a directory\n", argv[i + 1]);
-						return (void *)(intptr_t)1;
+						return 1;
 					}
 
 					if(realpath(argv[i + 1], datadir) == NULL)
@@ -98,13 +98,13 @@ main(int argc, char **argv)
 				else
 				{
 					printf("-datadir %s could not be found\n", argv[i + 1]);
-					return (void *)(intptr_t)1;
+					return 1;
 				}
 			}
 			else
 			{
 				printf("-datadir needs an argument\n");
-				return (void *)(intptr_t)1;
+				return 1;
 			}
 		}
 
@@ -119,7 +119,7 @@ main(int argc, char **argv)
 			else
 			{
 				printf("-cfgdir needs an argument\n");
-				return (void *)(intptr_t)1;
+				return 1;
 			}
 
 		}
@@ -133,7 +133,7 @@ main(int argc, char **argv)
 		printf("what you're doing edit src/unix/main.c and remove this check. Don't\n");
 		printf("complain if Quake II eats your dog afterwards!\n");
 
-		return (void *)(intptr_t)1;
+		return 1;
 	}
 
 	// enforce C locale

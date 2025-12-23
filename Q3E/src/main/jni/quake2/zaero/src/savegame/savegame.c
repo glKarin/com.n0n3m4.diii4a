@@ -190,6 +190,35 @@ field_t clientfields[] = {
 
 /* ========================================================= */
 
+static void
+InitAllocations(void)
+{
+	int num_c = maxclients->value;
+	int num_e = maxentities->value;
+
+	if (num_c < 1)
+	{
+		num_c = 1;
+		gi.cvar_forceset("maxclients", "1");
+	}
+
+	if (num_e < (num_c + 1))
+	{
+		num_e = num_c + 1;
+		gi.cvar_forceset("maxentities", va("%d", num_c + 1));
+	}
+
+	g_edicts = gi.TagMalloc (num_e * sizeof(g_edicts[0]), TAG_GAME);
+	game.maxentities = num_e;
+
+	globals.edicts = g_edicts;
+	globals.num_edicts = num_c + 1;
+	globals.max_edicts = num_e;
+
+	game.clients = gi.TagMalloc (num_c * sizeof(game.clients[0]), TAG_GAME);
+	game.maxclients = num_c;
+}
+
 /*
  * This will be called when the dll is first loaded,
  * which only happens when a new game is started or 
@@ -240,22 +269,12 @@ InitGame(void)
 	g_quick_weap = gi.cvar("g_quick_weap", "1", CVAR_ARCHIVE);
 	g_swap_speed = gi.cvar("g_swap_speed", "1", CVAR_ARCHIVE);
 
-	/* items */
+	memset(&game, 0, sizeof(game));
+
 	InitItems ();
 
-	Com_sprintf (game.helpmessage1, sizeof(game.helpmessage1), "");
-	Com_sprintf (game.helpmessage2, sizeof(game.helpmessage2), "");
-
-	/* initialize all entities for this game */
-	game.maxentities = maxentities->value;
-	g_edicts =  gi.TagMalloc (game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
-	globals.edicts = g_edicts;
-	globals.max_edicts = game.maxentities;
-
-	/* initialize all clients for this game */
-	game.maxclients = maxclients->value;
-	game.clients = gi.TagMalloc (game.maxclients * sizeof(game.clients[0]), TAG_GAME);
-	globals.num_edicts = game.maxclients+1;
+	/* initialize entities and clients arrays */
+	InitAllocations();
 }
 
 /* ========================================================= */
@@ -896,12 +915,20 @@ ReadGame(const char *filename)
 		}
 	}
 
-	g_edicts = gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
-	globals.edicts = g_edicts;
+	/* we should not trust this value from savegames */
+	int num_items = game.num_items;
 
-	fread(&game, sizeof(game), 1, f);
-	game.clients = gi.TagMalloc(game.maxclients * sizeof(game.clients[0]),
-			TAG_GAME);
+	if (fread(&game, sizeof(game), 1, f) != 1)
+	{
+		fclose(f);
+		gi.error("%s: can't read game", __func__);
+		return;
+	}
+
+	/* initialize entities and clients arrays */
+	InitAllocations();
+
+	game.num_items = num_items;
 
 	for (i = 0; i < game.maxclients; i++)
 	{
@@ -1109,6 +1136,12 @@ ReadLevel(const char *filename)
 		{
 			fclose(f);
 			gi.error("ReadLevel: failed to read entnum");
+		}
+
+		if ((entnum < -1) || (entnum >= game.maxentities))
+		{
+			fclose(f);
+			gi.error("%s: entnum out of bounds: %d", __func__, entnum);
 		}
 
 		if (entnum == -1)

@@ -222,7 +222,7 @@ bot_character_t *BotLoadCharacterFromFile(char *charfile, int skill)
 	source = LoadSourceFile(charfile);
 	if (!source)
 	{
-		botimport.Print(PRT_ERROR, "counldn't load %s\n", charfile);
+		botimport.Print(PRT_ERROR, "couldn't load %s\n", charfile);
 		return NULL;
 	} //end if
 	ch = (bot_character_t *) GetClearedMemory(sizeof(bot_character_t) +
@@ -247,7 +247,7 @@ bot_character_t *BotLoadCharacterFromFile(char *charfile, int skill)
 				return NULL;
 			} //end if
 			//if it's the correct skill
-			if (skill < 0 || token.intvalue == skill)
+			if (skill < 0 || (int)token.intvalue == skill)
 			{
 				foundcharacter = qtrue;
 				ch->skill = token.intvalue;
@@ -758,8 +758,7 @@ void Characteristic_String(int character, int index, char *buf, int size)
 	//an integer will be converted to a float
 	if (ch->c[index].type == CT_STRING)
 	{
-		strncpy(buf, ch->c[index].value.string, size-1);
-		buf[size-1] = '\0';
+		Q_strncpyz(buf, ch->c[index].value.string, size);
 	} //end if
 	else
 	{

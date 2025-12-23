@@ -6,7 +6,7 @@ precision mediump float;
 #define RESOLUTION_DIVISOR 4.0
 #define NUM_COLORS 31 // original 27
 
-uniform sampler2D u_fragmentMap0; // currentRendert
+uniform sampler2D u_fragmentMap0; // currentRender
 
 uniform highp vec4 u_windowCoords;
 uniform highp vec4 u_nonPowerOfTwo;

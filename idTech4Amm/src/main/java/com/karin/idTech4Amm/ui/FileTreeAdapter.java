@@ -1,11 +1,8 @@
 package com.karin.idTech4Amm.ui;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -14,7 +11,7 @@ import android.widget.TextView;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.FileBrowser;
-import com.karin.idTech4Amm.sys.Theme;
+import com.n0n3m4.q3e.karin.Theme;
 
 import java.util.ArrayList;
 import java.util.List;

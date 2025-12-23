@@ -1,11 +1,11 @@
 idTech4A++ is idTech game runtime environment for Android.
-Support DOOM III/Quake 4/Prey(2006)/DOOM3 BFG/Quake 1/Quake 2/Quake 3/Return to Castle Wolfenstein/The Dark Mod/GZDOOM/Wolfenstein: Enemy Territory/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic
+Support DOOM III/Quake 4/Prey(2006)/DOOM3 BFG/Quake 1/Quake 2/Quake 3/Return to Castle Wolfenstein/The Dark Mod/GZDOOM/Wolfenstein: Enemy Territory/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic/Urban Terror/Medal of Honor: Allied Assault
 
   1. Putting your PC game data(external folder) to launcher setting `Game working directory`(default `/sdcard/diii4a`).
   2. Click left icon or right game name text of launcher status bar for choosing game, and select game mod in tab `GENERAL`'s `Game`.
   3. Finally `START GAME`.
 
-Feature:
+Support DOOM III/Quake 4/Prey(2006) feature:
   multi-threading renderer
   pure soft shadow with shadow-mapping
   wide-character language translation support
@@ -14,84 +14,3 @@ Feature:
   Phong/Blinn-phong/PBR/no-lighting rendering
   OpenGLES2.0/OpenGLES3.0
   OpenAL(soft) and EFX Reverb
-  
-Standalone game directory:
-  Because more support games, it cause all game mods data directory put on a shared folder, them maybe have same name, and diffcult to view/manage. So application default enable `Standalone game directory` since version 1.1.0harmattan57, and you can also disable it on launcher settings.
-  
-  If enable `Standalone game directory`, game data directory should put on `Standalone game directory` itself(e.g.).
-  
-  Games of `Standalone game directory` and folder name:
-  DOOM III: doom3/
-  Quake 4: quake4/
-  Prey(2006): prey/
-  Quake I: quake1/
-  Quake II: quake2/
-  Quake III: quake3/
-  Return to Castle Wolfenstein: rtcw/
-  DOOM 3 BFG: doom3bfg/
-  Wolfenstein - Enemy Territory: etw/
-  RealRTCW: realrtcw/
-  STAR WARS™ Jedi Knight - Jedi Academy™: openja/
-  STAR WARS™ Jedi Knight II - Jedi Outcast™: openjo/
-  
-  Games of always force `Standalone game directory`:
-  The Dark Mod: darkmod/
-  GZDOOM: gzdoom/
-  FTEQW: fteqw/
-  Serious Sam Classic - The First Encounter: serioussamtfe/
-  Serious Sam Classic - The Second Encounter: serioussamtse/
-
-Folder name of games/mods:
-  DOOM III: base/
-  DOOM3 - Resurrection of Evil: d3xp/
-  DOOM3 - The lost mission: d3le/
-  Classic DOOM3: cdoom/
-  Rivensin: rivensin/
-  Hardcorps: hardcorps/
-  Stupid Angry Bot(a7x): sabot/
-  Overthinked DooM^3: overthinked/
-  Fragging Free: fraggingfree/
-  HeXen - Edge of Chaos: hexeneoc/
-  LibreCoop: librecoop/
-  LibreCoop - D3XP: librecoopxp/
-  Perfected Doom 3: perfected/
-  Perfected Doom 3 - RoE: perfected_roe/
-  Doom 3 - Phobos: tfphobos/
-
-  Quake IV: q4base/
-  Hardqore: hardqore/
-
-  Prey(2006): preybase/
-
-  Quake I: darkplaces/id1/
-
-  Quake II: baseq2/
-
-  Quake III Arena: baseq3/
-  Quake III Team Arena: missionpack/
-
-  Return to Castle Wolfenstein: main/
-
-  The Dark Mod: darkmod/
-
-  DOOM 3 BFG: base/
-
-  GZDOOM: gzdoom/
-  
-  Wolfenstein - Enemy Territory: etmain/
-  
-  RealRTCW: Main/
-  
-  FTEQW-Quake I: id1/
-  FTEQW-Quake II: baseq2/
-  FTEQW-Quake III: baseq3/
-  FTEQW-HeXen II: data1/
-  FTEQW-FreeHL: valve/
-  FTEQW-FreeCS: cstrike/
-  
-  STAR WARS™ Jedi Knight - Jedi Academy™: base/
-  STAR WARS™ Jedi Knight II - Jedi Outcast™: base/
-  
-  Serious Sam Classic - The First Encounter: serioussamtfe/
-  
-  Serious Sam Classic - The Second Encounter: serioussamtse/

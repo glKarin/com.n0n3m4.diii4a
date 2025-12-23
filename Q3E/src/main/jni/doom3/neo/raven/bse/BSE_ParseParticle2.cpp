@@ -83,8 +83,8 @@ ID_INLINE static bool DeathNeeds(const rvEnvParms& e) { return e.GetType() > 0; 
 */
 bool rvParticleTemplate::UsesEndOrigin(void) const {
     // Uses the line segment “origin -> endOrigin” for spawn / length domains?
-    return (mSpawnPosition.mFlags & PPF_USE_END_ORIGIN) != 0 || // & 2
-        (mSpawnLength.mFlags & PPF_USE_END_ORIGIN) != 0; // & 2
+    return (mSpawnPosition.mFlags & PPFLAG_USEENDORIGIN/* 2 */) != 0 ||
+        (mSpawnLength.mFlags & PPFLAG_USEENDORIGIN/* 2 */) != 0;
 }
 
 /*
@@ -174,7 +174,7 @@ float rvParticleTemplate::GetSpawnVolume(rvBSE* fx) const {
     // Compute the effective diagonal extents ( ≈ bounding-box diagonal ).
     float xExtent;
 
-    if (mSpawnPosition.mFlags & PPF_USE_END_ORIGIN /*END_ORIGIN*/) { // & 2
+    if (mSpawnPosition.mFlags & PPFLAG_USEENDORIGIN /* 2 END_ORIGIN */) {
         idVec3 delta = fx->mOriginalEndOrigin - fx->mOriginalOrigin;
         xExtent = delta.Length() - mSpawnPosition.mMins.x;
     }
@@ -197,7 +197,7 @@ float rvParticleTemplate::CostTrail(float baseCost) const {
         return baseCost * mTrailCount.y * 2.0f;
 
 	case TRAIL_MOTION: // 2: // motion blur
-        return baseCost * mTrailCount.y * 1.5f + 20.0f;
+        return baseCost * mTrailCount.y * 1.5f + BSE_TESS_COST/* 20.0f */;
 
     default:
         return baseCost;
@@ -277,7 +277,7 @@ void rvParticleTemplate::FixupParms(rvParticleParms& p) {
 
     // If this parameter references endOrigin, upgrade it to the
     // corresponding “vector” (12-15) shape so the renderer knows it varies.
-    if ((p.mFlags & PPF_USE_END_ORIGIN) && p.mSpawnType <= 12) { // & 2
+    if ((p.mFlags & PPFLAG_USEENDORIGIN/* 2 */) && p.mSpawnType <= 12) {
         p.mSpawnType = axisBits + 12;
     }
 }
@@ -733,13 +733,13 @@ bool rvParticleTemplate::CheckCommonParms(idLexer* src,
         if (!idStr::Cmp(tok, "}"))
             break;
 
-        if (!idStr::Icmp(tok, "surface")) p.mFlags |= PPF_SURFACE; // 0x01;
-        else if (!idStr::Icmp(tok, "useEndOrigin")) p.mFlags |= PPF_USE_END_ORIGIN; // 0x02;
-        else if (!idStr::Icmp(tok, "cone")) p.mFlags |= PPF_CONE; // 0x04;
-        else if (!idStr::Icmp(tok, "relative")) p.mFlags |= PPF_RELATIVE; // 0x08;
-        else if (!idStr::Icmp(tok, "linearSpacing")) p.mFlags |= PPF_LINEAR_SPACING; // 0x10;
-        else if (!idStr::Icmp(tok, "attenuate")) p.mFlags |= PPF_ATTENUATE; // 0x20;
-        else if (!idStr::Icmp(tok, "inverseAttenuate")) p.mFlags |= PPF_INVERSE_ATTENUATE; // 0x40;
+        if (!idStr::Icmp(tok, "surface")) p.mFlags |= PPFLAG_SURFACE; // 0x01;
+        else if (!idStr::Icmp(tok, "useEndOrigin")) p.mFlags |= PPFLAG_USEENDORIGIN; // 0x02;
+        else if (!idStr::Icmp(tok, "cone")) p.mFlags |= PPFLAG_CONE; // 0x04;
+        else if (!idStr::Icmp(tok, "relative")) p.mFlags |= PPFLAG_RELATIVE; // 0x08;
+        else if (!idStr::Icmp(tok, "linearSpacing")) p.mFlags |= PPFLAG_LINEARSPACING; // 0x10;
+        else if (!idStr::Icmp(tok, "attenuate")) p.mFlags |= PPFLAG_ATTENUATE; // 0x20;
+        else if (!idStr::Icmp(tok, "inverseAttenuate")) p.mFlags |= PPFLAG_INV_ATTENUATE; // 0x40;
         else {
             common->Warning("^4BSE:^1 Unknown spawn flag '%s' "
                 "(file: %s, line: %d)",
@@ -808,7 +808,7 @@ bool rvParticleTemplate::ParseSpawnParms(rvDeclEffect* effect,
             WarnBad(effect, src, "box");
 
         // If “surface” flag set – upgrade to “hollow box”
-        if (p.mFlags & PPF_SURFACE) { // & 0x01
+        if (p.mFlags & PPFLAG_SURFACE/* 0x01 */) {
             p.mSpawnType = vecCount + 20;
             FixupParms(p);
         }
@@ -827,7 +827,7 @@ bool rvParticleTemplate::ParseSpawnParms(rvDeclEffect* effect,
         if (!CheckCommonParms(src, p))
             WarnBad(effect, src, "sphere");
 
-        if (p.mFlags & PPF_SURFACE) { // & 0x01          // surface == “shell”
+        if (p.mFlags & PPFLAG_SURFACE/* 0x01 */) {          // surface == “shell”
             p.mSpawnType = vecCount + 28;
             FixupParms(p);
         }
@@ -846,7 +846,7 @@ bool rvParticleTemplate::ParseSpawnParms(rvDeclEffect* effect,
         if (!CheckCommonParms(src, p))
             WarnBad(effect, src, "cylinder");
 
-        if (p.mFlags & PPF_SURFACE) { // & 0x01          // surface only
+        if (p.mFlags & PPFLAG_SURFACE/* 0x01 */) {          // surface only
             p.mSpawnType = vecCount + 36;
             FixupParms(p);
         }
@@ -939,7 +939,7 @@ bool rvParticleTemplate::ParseSpawnDomains(rvDeclEffect* effect,
         if (!idStr::Icmp(tok, "position")) ParseSpawnParms(effect, src, mSpawnPosition, 3);
         else if (!idStr::Icmp(tok, "direction")) {
             ParseSpawnParms(effect, src, mSpawnDirection, 3);
-            mFlags |= PTF_SPAWN_DIRECTION; // 0x4000 //k??? TODO Q4BSE is 0x00000040;      /* marks “hasDir” */ BYTE1(this->mFlags) |= 0x40u;
+            mFlags |= PTFLAG_CALCED_NORMAL; // 0x4000 //k??? TODO Q4BSE is 0x00000040;      /* marks “hasDir” */ BYTE1(this->mFlags) |= 0x40u;
         }
         else if (!idStr::Icmp(tok, "velocity")) ParseSpawnParms(effect, src, mSpawnVelocity, 3);
         else if (!idStr::Icmp(tok, "acceleration")) ParseSpawnParms(effect, src, mSpawnAcceleration, 3);
@@ -1006,7 +1006,7 @@ bool rvParticleTemplate::ParseImpact(rvDeclEffect* effect,
     if (!src->ExpectTokenString("{"))
         return false;
 
-    mFlags |= PTF_GENERATED_ORIGIN_NORMAL; // 0x200 //k??? TODO Q4BSE is 0x00000002;     // “hasImpact” bit if ( idLexer::ExpectTokenString(lexer, "{") && (BYTE1(this->mFlags) |= 2u
+    mFlags |= PTFLAG_HAS_PHYSICS; // 0x200 //k??? TODO Q4BSE is 0x00000002;     // “hasImpact” bit if ( idLexer::ExpectTokenString(lexer, "{") && (BYTE1(this->mFlags) |= 2u
 
     idToken tok;
     while (src->ReadToken(&tok)) {
@@ -1017,7 +1017,7 @@ bool rvParticleTemplate::ParseImpact(rvDeclEffect* effect,
         if (!idStr::Icmp(tok, "effect"))            // ----- effect list
         {
             src->ReadToken(&tok);                     // grab effect name
-            if (mNumImpactEffects >= 4) {
+            if (mNumImpactEffects >= BSE_NUM_SPAWNABLE/* 4 */) {
                 common->Warning("^4BSE:^1 Too many impact effects '%s' in '%s' "
                     "(file: %s, line: %d)",
                     tok.c_str(), effect->GetName(),
@@ -1031,7 +1031,7 @@ bool rvParticleTemplate::ParseImpact(rvDeclEffect* effect,
         else if (!idStr::Icmp(tok, "remove"))       // ----- remove flag
         {
             const bool remove = src->ParseInt() != 0;
-            if (remove) mFlags |= PTF_FLIP_NORMAL; else mFlags &= ~PTF_FLIP_NORMAL; // 0x400 //k??? TODO Q4BSE is 0x00000004; BYTE1(this->mFlags) |= 4u;
+            if (remove) mFlags |= PTFLAG_DELETE_ON_IMPACT; else mFlags &= ~PTFLAG_DELETE_ON_IMPACT; // 0x400 //k??? TODO Q4BSE is 0x00000004; BYTE1(this->mFlags) |= 4u;
         }
         else if (!idStr::Icmp(tok, "bounce"))       // ----- elasticity
         {
@@ -1075,7 +1075,7 @@ bool rvParticleTemplate::ParseTimeout(rvDeclEffect* effect,
         }
 
         src->ReadToken(&tok);                   // effect name
-        if (mNumTimeoutEffects >= 4) {
+        if (mNumTimeoutEffects >= BSE_NUM_SPAWNABLE/* 4 */) {
             common->Warning("^4BSE:^1 Too many timeout effects '%s' in '%s' "
                 "(file: %s, line: %d)",
                 tok.c_str(), effect->GetName(),
@@ -1101,7 +1101,7 @@ bool rvParticleTemplate::ParseBlendParms(rvDeclEffect* effect,
         return false;
 
     if (!idStr::Icmp(tok, "add")) {
-        mFlags |= PTF_ADD; // 0x8000 //k??? TODO Q4BSE is 0x00000080;       // additive flag BYTE1(this->mFlags) |= 0x80u;
+        mFlags |= PTFLAG_ADDITIVE; // 0x8000 //k??? TODO Q4BSE is 0x00000080;       // additive flag BYTE1(this->mFlags) |= 0x80u;
     }
     else {
         common->Warning("^4BSE:^1 Invalid blend type '%s' in '%s' "
@@ -1216,7 +1216,7 @@ bool rvParticleTemplate::Compare(const rvParticleTemplate& rhs) const {
    ======================================================================== */
 void rvParticleTemplate::Finish(void)
 {
-    mFlags |= PTF_PARSED; // 0x100 //k??? TODO Q4BSE is 0x0001;                     // “parsed” bit BYTE1(this->mFlags) |= 1u;
+    mFlags |= PTFLAG_PARSED; // 0x100 //k??? TODO Q4BSE is 0x0001;                     // “parsed” bit BYTE1(this->mFlags) |= 1u;
 
     /* --------------------------------------------------------------------
        2-A  trail sanitiser
@@ -1314,7 +1314,7 @@ void rvParticleTemplate::Finish(void)
     /* --------------------------------------------------------------------
        2-D  pre-compute the spawn-centre for helpers that need it
        -------------------------------------------------------------------- */
-    if (!(mFlags & PTF_RELATIVE_NORMAL)) { // & 0x1000
+    if (!(mFlags & PTFLAG_GENERATED_ORG_NORMAL/* 0x1000 */)) {
         switch (mSpawnPosition.mSpawnType)
         {
         case 0x0B:                               // explicit point
@@ -1356,16 +1356,16 @@ bool rvParticleTemplate::Parse(rvDeclEffect* effect, idLexer* src)
         else if (!idStr::Icmp(tok, "motion"))      ParseMotionDomains(effect, src);
 
         /*  generated* flags ------------------------------------------------*/
-        else if (!idStr::Icmp(tok, "generatedNormal")) mFlags |= PTF_ALIGN_TO_NORMAL; // 0x800 //k??? TODO Q4BSE is 0x0100; BYTE1(this->mFlags) |= 8u;
-        else if (!idStr::Icmp(tok, "generatedOriginNormal")) mFlags |= PTF_RELATIVE_NORMAL; // 0x1000 //k??? TODO Q4BSE is 0x0200; BYTE1(this->mFlags) |= 0x10u;
-        else if (!idStr::Icmp(tok, "flipNormal")) mFlags |= PTF_INVERT_VELOCITY; // 0x2000 //k??? TODO Q4BSE is 0x0400; BYTE1(this->mFlags) |= 0x20u;
-        else if (!idStr::Icmp(tok, "generatedLine")) mFlags |= PTF_GENERATED_LINE; // 0x10000; BYTE2(this->mFlags) |= 1u;
+        else if (!idStr::Icmp(tok, "generatedNormal")) mFlags |= PTFLAG_GENERATED_NORMAL; // 0x800 //k??? TODO Q4BSE is 0x0100; BYTE1(this->mFlags) |= 8u;
+        else if (!idStr::Icmp(tok, "generatedOriginNormal")) mFlags |= PTFLAG_GENERATED_ORG_NORMAL; // 0x1000 //k??? TODO Q4BSE is 0x0200; BYTE1(this->mFlags) |= 0x10u;
+        else if (!idStr::Icmp(tok, "flipNormal")) mFlags |= PTFLAG_FLIPPED_NORMAL; // 0x2000 //k??? TODO Q4BSE is 0x0400; BYTE1(this->mFlags) |= 0x20u;
+        else if (!idStr::Icmp(tok, "generatedLine")) mFlags |= PTFLAG_GENERATED_LINE; // 0x10000; BYTE2(this->mFlags) |= 1u;
 
         /*  persist / tiling / duration / gravity -------------------------- */
-        else if (!idStr::Icmp(tok, "persist"))  mFlags |= PTF_PERSIST; // 0x200000; BYTE2(this->mFlags) |= 0x20u;
+        else if (!idStr::Icmp(tok, "persist"))  mFlags |= PTFLAG_PERSIST; // 0x200000; BYTE2(this->mFlags) |= 0x20u;
 
         else if (!idStr::Icmp(tok, "tiling")) {
-            mFlags |= PTF_TILING; // 0x100000; BYTE2(this->mFlags) |= 0x10u;
+            mFlags |= PTFLAG_TILED; // 0x100000; BYTE2(this->mFlags) |= 0x10u;
             mTiling = idMath::ClampFloat(0.002f, 1024.f, src->ParseFloat());
         }
         else if (!idStr::Icmp(tok, "duration")) {
@@ -1422,7 +1422,7 @@ bool rvParticleTemplate::Parse(rvDeclEffect* effect, idLexer* src)
             }
         }
         else if (!idStr::Icmp(tok, "fork")) {
-            mNumForks = idMath::ClampInt(0, 16, src->ParseInt());
+            mNumForks = idMath::ClampInt(0, BSE_MAX_FORKS/* 16 */, src->ParseInt());
         }
         else if (!idStr::Icmp(tok, "forkMins")) GetVector(src, 3, mForkSizeMins);
         else if (!idStr::Icmp(tok, "forkMaxs")) GetVector(src, 3, mForkSizeMaxs);
@@ -1436,8 +1436,8 @@ bool rvParticleTemplate::Parse(rvDeclEffect* effect, idLexer* src)
 
         /*  blend / shadow / specular flags -------------------------------- */
         else if (!idStr::Icmp(tok, "blend")) ParseBlendParms(effect, src);
-        else if (!idStr::Icmp(tok, "shadows")) mFlags |= PTF_SHADOWS; // 0x020000;
-        else if (!idStr::Icmp(tok, "specular")) mFlags |= PTF_SPECULAR; // 0x040000;
+        else if (!idStr::Icmp(tok, "shadows")) mFlags |= PTFLAG_SHADOWS; // 0x020000;
+        else if (!idStr::Icmp(tok, "specular")) mFlags |= PTFLAG_SPECULAR; // 0x040000;
 
         /*  model-specific (ribbon-extrude) -------------------------------- */
         else if (!idStr::Icmp(tok, "model")) {

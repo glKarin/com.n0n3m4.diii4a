@@ -57,7 +57,7 @@ static ID_INLINE void  rvEP_BuildQuad(idDrawVert* v,
 int rvElectricityParticle::GetBoltCount(float length)
 {
     const int bolts = static_cast<int>(ceil(length * 0.0625f));
-    return idMath::ClampInt(3, 200, bolts);
+    return idMath::ClampInt(3, BSE_ELEC_MAX_BOLTS/* 200 */, bolts);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────*\
@@ -388,12 +388,12 @@ bool rvElectricityParticle::Render(const rvBSE* effect,
     (this->*mEvalLengthPtr)(evalTime, &work.length);
 
     /* ───── transform to effect-space if requested ───── */
-    if (!(mFlags & PF_SEGMENT_LOCKED/* 2 */)) {
+    if (!(mFlags & PTFLAG_LOCKED/* 2 */)) {
         work.length = effect->mCurrentAxis * (mInitAxis * work.length);
     }
 
     /* ───── velocity-driven length (optional) ───── */
-    if (mFlags & 0x10000) {
+    if (mFlags & PTFLAG_GENERATED_LINE/* 0x10000 */) {
         idVec3 vel;
         rvParticle::EvaluateVelocity(effect,
             vel, time - mMotionStartTime);
@@ -441,7 +441,7 @@ bool rvElectricityParticle::Render(const rvBSE* effect,
     RenderBranch(effect, &work, position, endPos);
 
     /* ───── build list of fork start points ───── */
-    idVec3 forkBases[16];
+    idVec3 forkBases[BSE_MAX_FORKS/* 16 */];
     for (int i = 0; i < mNumForks; ++i) {
         const int idx = rvRandom::irand(1, mNumBolts - 1);
         forkBases[i] = work.coords[idx];

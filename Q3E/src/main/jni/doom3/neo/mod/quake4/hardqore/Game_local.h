@@ -1411,9 +1411,9 @@ ID_INLINE idEntityPtr<type>::operator type * ( void ) const {
 
 #ifdef __ANDROID__ //karin: for in smooth joystick on Android
 #define _AVA_DEG 67.5f // 60
-#define _INCR_AVA_DEG(x) ((x) + _AVA_DEG)
-#define _DECR_AVA_DEG(x) ((x) - _AVA_DEG)
-#define GAME_SETUPCMDDIRECTION(_cmd, _forward, _backward, _left, _right) \
+#define _INCR_AVA_DEG(x, y) ((x) + (y))
+#define _DECR_AVA_DEG(x, y) ((x) - (y))
+#define GAME_SETUPCMDDIRECTION_DEG(_cmd, _deg, _forward, _backward, _left, _right) \
 { \
 	if(_cmd.forwardmove != 0 || _cmd.rightmove != 0) { \
 		float a = (float)atan2(_cmd.rightmove, _cmd.forwardmove); \
@@ -1427,10 +1427,10 @@ ID_INLINE idEntityPtr<type>::operator type * ( void ) const {
 				a += 360.0f; \
 			} \
 		} \
-		_forward = ((a >= 0 && a <= _INCR_AVA_DEG(0)) || (a >= _DECR_AVA_DEG(360) && a <= 360)); \
-		_backward = (a >= _DECR_AVA_DEG(180) && a <= _INCR_AVA_DEG(180)); \
-		_left = (a > _DECR_AVA_DEG(270) && a < _INCR_AVA_DEG(270)); \
-		_right = (a > _DECR_AVA_DEG(90) && a < _INCR_AVA_DEG(90)); \
+		_forward = ((a >= 0 && a <= _INCR_AVA_DEG(0, _deg)) || (a >= _DECR_AVA_DEG(360, _deg) && a <= 360)); \
+		_backward = (a >= _DECR_AVA_DEG(180, _deg) && a <= _INCR_AVA_DEG(180, _deg)); \
+		_left = (a > _DECR_AVA_DEG(270, _deg) && a < _INCR_AVA_DEG(270, _deg)); \
+		_right = (a > _DECR_AVA_DEG(90, _deg) && a < _INCR_AVA_DEG(90, _deg)); \
 	} else { \
 		_forward = false; \
 		_backward = false; \
@@ -1438,6 +1438,8 @@ ID_INLINE idEntityPtr<type>::operator type * ( void ) const {
 		_right = false; \
 	} \
 }
+
+#define GAME_SETUPCMDDIRECTION(_cmd, _forward, _backward, _left, _right) GAME_SETUPCMDDIRECTION_DEG(_cmd, _AVA_DEG, _forward, _backward, _left, _right)
 #endif
 
 #endif	/* !__GAME_LOCAL_H__ */

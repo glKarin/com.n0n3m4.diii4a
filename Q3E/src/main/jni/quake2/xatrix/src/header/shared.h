@@ -17,9 +17,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdbool.h>
 
+typedef int qboolean;
 typedef unsigned char byte;
-typedef enum {false, true} qboolean;
 
 #ifndef NULL
  #define NULL ((void *)0)

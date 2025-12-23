@@ -37,6 +37,9 @@ If you have questions concerning this license or the applicable additional terms
 #define NS_DEBUG(x)
 #endif
 
+// jmarshall - calling ParsePastImageProgram twice is a perf hit on load, and causes parsing problems during the stage parse.
+//#define MATERIAL_MAP_SHORTCUT_PARSE 1 // but error if has newline
+
 /*
 
 Any errors during parsing just set MF_DEFAULTED and return, rather than throwing
@@ -2674,12 +2677,10 @@ void idMaterial::ParseMaterial(idLexer &src)
 		}
 		// diffusemap for stage shortcut
 		else if (!token.Icmp("diffusemap")) {
-#if defined(_RAVENxxx)
-// jmarshall - calling ParsePastImageProgram twice is a perf hit on load, and causes parsing problems during the stage parse.
+#if MATERIAL_MAP_SHORTCUT_PARSE
 			idStr nstr;
             src.ReadRestOfLine(nstr);
 			idStr::snPrintf(buffer, sizeof(buffer), "blend diffusemap\nmap %s\n}\n", nstr.c_str());
-// jmarshall end
 #else
 			str = R_ParsePastImageProgram(src);
 			idStr::snPrintf(buffer, sizeof(buffer), "blend diffusemap\nmap %s\n}\n", str);
@@ -2692,12 +2693,10 @@ void idMaterial::ParseMaterial(idLexer &src)
 		}
 		// specularmap for stage shortcut
 		else if (!token.Icmp("specularmap")) {
-#if defined(_RAVENxxx)
-// jmarshall - calling ParsePastImageProgram twice is a perf hit on load, and causes parsing problems during the stage parse.
+#if MATERIAL_MAP_SHORTCUT_PARSE
 			idStr nstr;
             src.ReadRestOfLine(nstr);
 			idStr::snPrintf(buffer, sizeof(buffer), "blend specularmap\nmap %s\n}\n", nstr.c_str());
-// jmarshall end
 #else
 			str = R_ParsePastImageProgram(src);
 			idStr::snPrintf(buffer, sizeof(buffer), "blend specularmap\nmap %s\n}\n", str);
@@ -2710,12 +2709,10 @@ void idMaterial::ParseMaterial(idLexer &src)
 		}
 		// normalmap for stage shortcut
 		else if (!token.Icmp("bumpmap")) {
-#if defined(_RAVENxxx)
-// jmarshall - calling ParsePastImageProgram twice is a perf hit on load, and causes parsing problems during the stage parse.
+#if MATERIAL_MAP_SHORTCUT_PARSE
 			idStr nstr;
             src.ReadRestOfLine(nstr);
 			idStr::snPrintf(buffer, sizeof(buffer), "blend bumpmap\nmap %s\n}\n", nstr.c_str());
-// jmarshall end
 #else
 			str = R_ParsePastImageProgram(src);
 			idStr::snPrintf(buffer, sizeof(buffer), "blend bumpmap\nmap %s\n}\n", str);

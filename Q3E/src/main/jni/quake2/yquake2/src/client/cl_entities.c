@@ -27,8 +27,6 @@
 #include <math.h>
 #include "header/client.h"
 
-extern struct model_s *cl_mod_powerscreen;
-
 void
 CL_AddPacketEntities(frame_t *frame)
 {
@@ -440,7 +438,7 @@ CL_AddPacketEntities(frame_t *frame)
 
 		if (effects & EF_POWERSCREEN)
 		{
-			ent.model = cl_mod_powerscreen;
+			ent.model = CL_PowerScreenModel();
 			ent.oldframe = 0;
 			ent.frame = 0;
 			ent.flags |= (RF_TRANSLUCENT | RF_SHELL_GREEN);
@@ -852,24 +850,6 @@ CL_AddEntities(void)
 	CL_AddParticles();
 	CL_AddDLights();
 	CL_AddLightStyles();
-}
-
-/*
- * Called to get the sound spatialization origin
- */
-void
-CL_GetEntitySoundOrigin(int ent, vec3_t org)
-{
-	centity_t *old;
-
-	if ((ent < 0) || (ent >= MAX_EDICTS))
-	{
-		Com_Error(ERR_DROP, "%s: bad entity %d >= %d\n",
-			__func__, ent, MAX_EDICTS);
-	}
-
-	old = &cl_entities[ent];
-	VectorCopy(old->lerp_origin, org);
 }
 
 /*

@@ -517,57 +517,193 @@ void idEditField::KeyDownEvent(int key)
 	}
 
 	//karin: begin
-	// ctrl-v = paste
-	if (tolower(key) == 'v' && idKeyInput::IsDown(K_CTRL)) {
-		ClearAutoComplete();
-		Paste();
-		return;
-	}
+    if(idKeyInput::IsDown(K_CTRL))
+    {
+        int lkey = tolower(key);
+        len = strlen(buffer);
 
-	// ctrl-c = copy
-	if (tolower(key) == 'c' && idKeyInput::IsDown(K_CTRL)) {
-		if(buffer[0])
-			Sys_SetClipboardData(buffer);
-		return;
-	}
+        // ctrl-v = paste
+        if (lkey == 'v') {
+            ClearAutoComplete();
+            Paste();
+            return;
+        }
 
-	// ctrl-u = clear line
-	if (tolower(key) == 'u' && idKeyInput::IsDown(K_CTRL)) {
-		ClearAutoComplete();
-		Clear();
-		return;
-	}
+        // ctrl-c = copy
+        if (lkey == 'c') {
+            if(buffer[0])
+                Sys_SetClipboardData(buffer);
+            return;
+        }
 
-	// ctrl-w = clear a word
-	if (tolower(key) == 'w' && idKeyInput::IsDown(K_CTRL)) {
-		if(cursor > 0)
-		{
-			int lastCursor = cursor;
-			// skip to previous word
-			while ((cursor > 0) && (buffer[ cursor - 1 ] == ' ')) {
-				cursor--;
-			}
+        // ctrl-x = cut
+        if (lkey == 'x') {
+            if(buffer[0])
+            {
+                Sys_SetClipboardData(buffer);
+                ClearAutoComplete();
+                Clear();
+            }
+            return;
+        }
 
-			while ((cursor > 0) && (buffer[ cursor - 1 ] != ' ')) {
-				cursor--;
-			}
+        // ctrl-x = clear line
+        if (lkey == 'z') {
+            if(buffer[0])
+            {
+                ClearAutoComplete();
+                Clear();
+            }
+            return;
+        }
 
-			if (cursor < 0) {
-				cursor = 0;
-			}
+        // ctrl-u = clear before cursor
+        if (lkey == 'u') {
+            if(cursor > 0)
+            {
+                int lastCursor = cursor;
 
-			if (cursor < scroll) {
-				scroll = cursor;
-			}
+                cursor = 0;
 
-			if (autoComplete.length) {
-				autoComplete.length = cursor;
-			}
-			buffer[cursor] = '\0';
-			strcat(buffer, buffer + lastCursor);
-		}
-		return;
-	}
+                if (cursor < scroll) {
+                    scroll = cursor;
+                }
+
+                if (autoComplete.length) {
+                    autoComplete.length = cursor;
+                    autoComplete.valid = false;
+                }
+
+                idStr str(buffer, 0, lastCursor);
+                if(!str.IsEmpty())
+                    Sys_SetClipboardData(str.c_str());
+
+                sprintf(buffer, "%s", buffer + lastCursor);
+            }
+            return;
+        }
+
+        // ctrl-k = clear after cursor
+        if (lkey == 'k') {
+            if(cursor < len)
+            {
+                idStr str(buffer + cursor);
+                if(!str.IsEmpty())
+                    Sys_SetClipboardData(str.c_str());
+
+                buffer[cursor] = '\0';
+
+                if (autoComplete.length) {
+                    autoComplete.length = cursor;
+                    autoComplete.valid = false;
+                }
+            }
+            return;
+        }
+
+        // ctrl-w = clear a word before cursor
+        if (lkey == 'w') {
+            if(cursor > 0)
+            {
+                int lastCursor = cursor;
+                // skip to previous word
+                while ((cursor > 0) && (buffer[ cursor - 1 ] == ' ')) {
+                    cursor--;
+                }
+
+                while ((cursor > 0) && (buffer[ cursor - 1 ] != ' ')) {
+                    cursor--;
+                }
+
+                if (cursor < 0) {
+                    cursor = 0;
+                }
+
+                if (cursor < scroll) {
+                    scroll = cursor;
+                }
+
+                if (autoComplete.length) {
+                    autoComplete.length = cursor;
+                    autoComplete.valid = false;
+                }
+
+                idStr str(buffer, cursor, lastCursor);
+                if(!str.IsEmpty())
+                    Sys_SetClipboardData(str.c_str());
+
+                buffer[cursor] = '\0';
+                strcat(buffer, buffer + lastCursor);
+            }
+            return;
+        }
+
+        // ctrl-d = clear a word after cursor
+        if (lkey == 'd') {
+            if(cursor < len)
+            {
+                int lastCursor = cursor;
+                // skip to next word
+                while ((lastCursor < len) && (buffer[ lastCursor ] != ' ')) {
+                    lastCursor++;
+                }
+
+                while ((lastCursor < len) && (buffer[ lastCursor ] == ' ')) {
+                    lastCursor++;
+                }
+
+                if (lastCursor > len) {
+                    lastCursor = len;
+                }
+
+                if (lastCursor >= lastCursor + widthInChars) {
+                    lastCursor = lastCursor - widthInChars + 1;
+                }
+
+                if (autoComplete.length > 0) {
+                    autoComplete.length = lastCursor;
+                    autoComplete.valid = false;
+                }
+
+                idStr str(buffer, cursor, lastCursor);
+                if(!str.IsEmpty())
+                    Sys_SetClipboardData(str.c_str());
+
+                buffer[cursor] = '\0';
+                strcat(buffer, buffer + lastCursor);
+            }
+            return;
+        }
+
+        // ctrl-t = swap before cursor and move cursor
+        if (lkey == 't') {
+            if(cursor > 0 && cursor < len)
+            {
+                int lastCursor = cursor;
+
+                cursor++;
+
+                if (cursor > len) {
+                    cursor = len;
+                }
+
+                if (cursor >= cursor + widthInChars) {
+                    cursor = cursor - widthInChars + 1;
+                }
+
+                autoComplete.length = 0;
+                autoComplete.valid = false;
+
+                char ch = buffer[lastCursor];
+                buffer[lastCursor] = buffer[lastCursor - 1];
+                buffer[lastCursor - 1] = ch;
+
+                ClearAutoComplete();
+            }
+            return;
+        }
+
+    }
 	//karin: end
 }
 

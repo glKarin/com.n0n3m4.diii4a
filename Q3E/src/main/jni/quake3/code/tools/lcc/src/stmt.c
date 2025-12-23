@@ -119,7 +119,7 @@ void statement(int loop, Swtch swp, int lev) {
 		       		static char stop[] = { IF, ID, 0 };
 		       		Tree p;
 		       		t = gettok();
-		       		p = constexpr(0);
+		       		p = constantexpr(0);
 		       		if (generic(p->op) == CNST && isint(p->type)) {
 		       			if (swp) {
 		       				needconst++;
@@ -184,8 +184,9 @@ void statement(int loop, Swtch swp, int lev) {
 		       	branch(p->u.l.label);
 		       	t = gettok();
 		       } else
-		       	error("missing label in goto\n"); expect(';');
-					  break;
+				error("missing label in goto\n");
+			   expect(';');
+			   break;
 
 	case ID:       if (getchr() == ':') {
 		       	stmtlabel();

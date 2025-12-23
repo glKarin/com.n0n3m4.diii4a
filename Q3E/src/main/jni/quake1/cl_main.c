@@ -463,7 +463,7 @@ void CL_DisconnectEx(qbool kicked, const char *fmt, ... )
 	cls.state = ca_disconnected;
 	cl.islocalgame = false;
 	cls.signon = 0;
-	cls.demoplayback = cls.timedemo = host.restless = false;
+	cls.demoplayback = cls.timedemo = host.restless = cls.demopaused = false;
 	Cvar_Callback(&vid_vsync); // might need to re-enable vsync
 
 	Cvar_Callback(&cl_netport);

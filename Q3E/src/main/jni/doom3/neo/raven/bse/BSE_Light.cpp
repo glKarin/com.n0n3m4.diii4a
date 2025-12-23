@@ -88,8 +88,8 @@ bool rvLightParticle::InitLight(rvBSE* effect,
     mLight.shaderParms[3] = tint.w;
 
     mLight.pointLight = true;
-    mLight.noShadows = (st->mFlags & SEGMENT_NO_SHADOWS) == 0; 
-    mLight.noSpecular = (st->mFlags & SEGMENT_NO_SPECULAR) == 0;
+    mLight.noShadows = (st->mFlags & PTFLAG_SHADOWS) == 0;
+    mLight.noSpecular = (st->mFlags & PTFLAG_SPECULAR) == 0;
     mLight.detailLevel = 10.f;
     mLight.shader = st->mParticleTemplate.mMaterial; //k??? TODO set particle material for light // assumption jmarshall - fix me
 
@@ -140,17 +140,17 @@ bool rvSegment::HandleLight(rvBSE *effect, const rvSegmentTemplate *st, float ti
     if (!usedHead)
         return false;
     v6 = (unsigned int) st->mFlags >> 5;
-    bool infinite = (st->mFlags & STF_CONSTANT/* 0x20 */) != 0;
+    bool infinite = (st->mFlags & STFLAG_INFINITE_DURATION/* 0x20 */) != 0;
     usedHead->PresentLight(
             effect,
             &st->mParticleTemplate,
             time,
             infinite
             );
-    if ((st->mFlags & STF_CONSTANT/* 0x20 */) != 0)
+    if ((st->mFlags & STFLAG_INFINITE_DURATION/* 0x20 */) != 0)
         return false;
     v7 = mUsedHead;
-    if (v7->mEndTime - 0.0020000001f > time)
+    if (v7->mEndTime - BSE_TIME_EPSILON/* 0.0020000001f */ > time)
         return false;
     v7->Destroy();
     mFreeHead = mUsedHead;

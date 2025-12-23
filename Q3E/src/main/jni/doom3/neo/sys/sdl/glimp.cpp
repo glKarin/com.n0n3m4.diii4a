@@ -896,7 +896,7 @@ void GLimp_Startup(void)
         }
         else // GL_VERSION_NAME_GL_ES3
         {
-            gl_version = GL_VERSION_GL_ES3;
+            gl_version = GL_VERSION_GL_ES32;
             USING_GLES3 = true;
             USING_GL = false;
             Sys_Printf("Using OpenGL ES3\n");

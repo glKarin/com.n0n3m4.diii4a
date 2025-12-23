@@ -842,7 +842,6 @@ class rvMapReverb
 {
 public:
 	rvMapReverb(void);
-	virtual					~rvMapReverb(void);
 
 	rvReverbItem_t & operator[](int index) {
 		return items[index];
@@ -1099,6 +1098,9 @@ public:
 	LPALAUXILIARYEFFECTSLOTF		alAuxiliaryEffectSlotf;
 
 	static idCVar s_alReverbGain;
+
+	idStrList				alDrivers;
+    void		            ListOpenALDevices(void);
 #else
 	EAXSet					alEAXSet;
 	EAXGet					alEAXGet;

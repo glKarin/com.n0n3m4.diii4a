@@ -39,11 +39,11 @@ void rvParticle::Attenuate(float               atten,
     const rvParticleParms& parms,
     rvEnvParms1& env)
 {
-    if (!(parms.mFlags & PF_ATTENUATE)) {
+    if (!(parms.mFlags & PTF_ATTENUATE)) {
         return;
     }
 
-    const float s = (parms.mFlags & PF_INVERT_ATTEN) ? (1.0f - atten) : atten;
+    const float s = (parms.mFlags & PTF_INVERT_ATTEN) ? (1.0f - atten) : atten;
 
     env.mStart *= s;
     env.mEnd *= s;
@@ -57,11 +57,11 @@ void rvParticle::Attenuate(float               atten,
     const rvParticleParms& parms,
     rvEnvParms2& env)
 {
-    if (!(parms.mFlags & PF_ATTENUATE)) {
+    if (!(parms.mFlags & PTF_ATTENUATE)) {
         return;
     }
 
-    const float s = (parms.mFlags & PF_INVERT_ATTEN) ? (1.0f - atten) : atten;
+    const float s = (parms.mFlags & PTF_INVERT_ATTEN) ? (1.0f - atten) : atten;
 
     env.mStart *= s;
     env.mEnd *= s;
@@ -74,11 +74,11 @@ void rvParticle::Attenuate(float               atten,
     const rvParticleParms& parms,
     rvEnvParms3& env)
 {
-    if (!(parms.mFlags & PF_ATTENUATE)) {
+    if (!(parms.mFlags & PTF_ATTENUATE)) {
         return;
     }
 
-    const float s = (parms.mFlags & PF_INVERT_ATTEN) ? (1.0f - atten) : atten;
+    const float s = (parms.mFlags & PTF_INVERT_ATTEN) ? (1.0f - atten) : atten;
 
     env.mStart *= s;
     env.mEnd *= s;
@@ -89,7 +89,7 @@ void rvParticle::Attenuate(float               atten,
 // ---------------------------------------------------------------------------
 void rvLineParticle::HandleTiling(const rvParticleTemplate* pt)
 {
-    if (!(mFlags & PF_TILING_LENGTH)) {
+    if (!(mFlags & PTFLAG_TILED)) {
         return;
     }
 
@@ -102,7 +102,7 @@ void rvLineParticle::HandleTiling(const rvParticleTemplate* pt)
 // ---------------------------------------------------------------------------
 void rvLinkedParticle::HandleTiling(const rvParticleTemplate* pt)
 {
-    if (mFlags & PF_TILING_LENGTH) {
+    if (mFlags & PTFLAG_TILED) {
         mTextureScale = pt->mTiling;
     }
 }
@@ -151,7 +151,7 @@ DEFINE_ARRAY_INDEX(rvDebrisParticle)
 void rvParticle::EvaluateVelocity(const rvBSE* /*effect*/, idVec3& out, float time) const
 {
     // simple “constant direction” flag
-    if (mFlags & PF_DIRECTIONAL) {
+    if (mFlags & PTFLAG_STATIONARY) {
         out.Set(1.0f, 0.0f, 0.0f);
         return;
     }
@@ -187,7 +187,7 @@ void rvParticle::SetOriginUsingEndOrigin(rvBSE* effect,const rvParticleTemplate*
 #if 1 //karin: position hasEndOrigin, I think is it //k??? TODO add
     // reset position max range
     rvParticleParms copy = pt->mSpawnPosition;
-    if(mFlags & PTF_SEGMENT_LOCKED)
+    if(mFlags & PTFLAG_LOCKED)
     {
         idVec3 dis = effect->mCurrentEndOrigin - effect->mCurrentOrigin; // world
         copy.mMaxs += effect->mCurrentAxisTransposed * dis; // local
@@ -248,8 +248,8 @@ void rvParticle::HandleEndOrigin(rvBSE* effect,
     // preserve fraction in x (matches original semantics)
     mInitPos.x = mFraction;
 
-    const bool effectWants = (effect->mFlags & EF_USES_END_ORIGIN/* 2 */) != 0;
-    const bool spawnWants = (pt->mSpawnPosition.mFlags & PPF_USE_END_ORIGIN/* 2 */) != 0;
+    const bool effectWants = (effect->mFlags & EFLAG_HASENDORIGIN/* 2 */) != 0;
+    const bool spawnWants = (pt->mSpawnPosition.mFlags & PPFLAG_USEENDORIGIN/* 2 */) != 0;
 
     if (effectWants && spawnWants) {
         SetOriginUsingEndOrigin(effect, pt, normal, centre);
@@ -284,10 +284,10 @@ void rvParticle::FinishSpawn(rvBSE* effect,
     // ----------------------------------------------------------------------
     mFlags = pt.mFlags;
     if (segment->GetLocked()) {
-        mFlags |= PF_SEGMENT_LOCKED;
+        mFlags |= PTFLAG_LOCKED;
     }
     else {
-        mFlags &= ~PF_SEGMENT_LOCKED;
+        mFlags &= ~PTFLAG_LOCKED;
     }
 
     // ----------------------------------------------------------------------
@@ -304,8 +304,8 @@ void rvParticle::FinishSpawn(rvBSE* effect,
     // ----------------------------------------------------------------------
     //  4)  decide which “end-origin helpers” we need
     // ----------------------------------------------------------------------
-    const bool wantsAlignNormal = (pt.mFlags & PTF_RELATIVE_NORMAL) != 0;
-    const bool wantsCentre = (pt.mFlags & PTF_ALIGN_TO_NORMAL) != 0;
+    const bool wantsAlignNormal = (pt.mFlags & PTFLAG_GENERATED_ORG_NORMAL) != 0;
+    const bool wantsCentre = (pt.mFlags & PTFLAG_GENERATED_NORMAL) != 0;
 
     const idVec3* centrePtr = NULL;
     idVec3* normalPtr = NULL;
@@ -321,7 +321,7 @@ void rvParticle::FinishSpawn(rvBSE* effect,
     }
     else {
         // optional explicit direction spawn
-        if (pt.mFlags & PTF_SPAWN_DIRECTION) {
+        if (pt.mFlags & PTFLAG_CALCED_NORMAL) {
             CallSpawnFunc(pt.mSpawnDirection.mSpawnType, &mNormal, pt.mSpawnDirection);
         }
         else {
@@ -337,7 +337,7 @@ void rvParticle::FinishSpawn(rvBSE* effect,
     // ----------------------------------------------------------------------
     //  6)  optionally rotate velocity into the emitter’s local axis
     // ----------------------------------------------------------------------
-    if (pt.mFlags & PTF_TRANSFORM_PARENT) {
+    if (pt.mFlags & PTFLAG_LINKED) {
         mVelocity = initAxis * mVelocity;
     }
 
@@ -373,7 +373,7 @@ void rvParticle::FinishSpawn(rvBSE* effect,
     // ----------------------------------------------------------------------
     //  8)  “invert” flag  –  flip velocity & length
     // ----------------------------------------------------------------------
-    if (pt.mFlags & PTF_INVERT_VELOCITY) {
+    if (pt.mFlags & PTFLAG_FLIPPED_NORMAL) {
         mVelocity = -mVelocity;
         ScaleLength(-1.0f);
     }
@@ -411,7 +411,7 @@ void rvParticle::FinishSpawn(rvBSE* effect,
     // ----------------------------------------------------------------------
     // 11)  copy current effect transform into the particle (unless locked)
     // ----------------------------------------------------------------------
-    if (!(mFlags & PF_SEGMENT_LOCKED)) {
+    if (!(mFlags & PTFLAG_LOCKED)) {
         mInitAxis = effect->mCurrentAxis;
         mInitEffectPos = effect->mCurrentOrigin;
 
@@ -424,7 +424,7 @@ void rvParticle::FinishSpawn(rvBSE* effect,
     // ----------------------------------------------------------------------
     // 12)  optionally add caller-supplied offset
     // ----------------------------------------------------------------------
-    if (pt.mFlags & PTF_TRANSFORM_PARENT) {
+    if (pt.mFlags & PTFLAG_LINKED) {
         mInitPos += initOffset;
     }
 
@@ -447,7 +447,7 @@ void rvParticle::FinishSpawn(rvBSE* effect,
 
     //  Offsets that don’t stay in local space -> flag for update during run
     if (pt.mSpawnOffset.mSpawnType != 3 || pt.mDeathOffset.mSpawnType != 3) {
-        mFlags |= 0x000004;      // “needs offset update” (original bit-3)
+        mFlags |= PTFLAG_HAS_OFFSET/* 0x000004 */;      // “needs offset update” (original bit-3)
     }
 
     //  Handle “relative” death-vs-spawn parameter conversions
@@ -586,10 +586,10 @@ void rvDebrisParticle::FinishSpawn(rvBSE* effect,
     //--------------------------------------------------------------------------
     // 2.  Spawn origin / normal  (honours ALIGN / RELATIVE flags)
     //--------------------------------------------------------------------------
-    if (pt.mFlags & PTF_RELATIVE_NORMAL) {
+    if (pt.mFlags & PTFLAG_GENERATED_ORG_NORMAL) {
         HandleEndOrigin(effect, &pt, &mNormal, NULL);
     }
-    else if (pt.mFlags & PTF_ALIGN_TO_NORMAL) {
+    else if (pt.mFlags & PTFLAG_GENERATED_NORMAL) {
         HandleEndOrigin(effect, &pt, &mNormal, &pt.mCentre);
     }
     else {
@@ -600,7 +600,7 @@ void rvDebrisParticle::FinishSpawn(rvBSE* effect,
     //--------------------------------------------------------------------------
     // 3.  When aligning to a normal, rotate velocity into that local frame
     //--------------------------------------------------------------------------
-    const bool needLocal = (pt.mFlags & (PTF_ALIGN_TO_NORMAL | PTF_RELATIVE_NORMAL)) != 0;
+    const bool needLocal = (pt.mFlags & (PTFLAG_GENERATED_NORMAL | PTFLAG_GENERATED_ORG_NORMAL)) != 0;
     if (needLocal) {
         if (!mNormal.Compare(vec3_zero)) {
             mNormal.Normalize(); //k??? TODO NormalizeFast
@@ -621,7 +621,7 @@ void rvDebrisParticle::FinishSpawn(rvBSE* effect,
     //--------------------------------------------------------------------------
     // 4.  Optional “invert” – flip velocity + length
     //--------------------------------------------------------------------------
-    if (pt.mFlags & PTF_INVERT_VELOCITY) {
+    if (pt.mFlags & PTFLAG_FLIPPED_NORMAL) {
         mVelocity = -mVelocity;
         ScaleLength(-1.0f);
     }
@@ -716,7 +716,7 @@ void rvLineParticle::Refresh(const rvBSE* effect,
     // 1.  Re-evaluate INIT / DEST length vectors (exactly like FinishSpawn)
     //----------------------------------------------------------------------
     float* initLen = GetInitLength();
-    if ((effect->mFlags & EF_USES_END_ORIGIN/* 2 */) && (pt->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */)) {
+    if ((effect->mFlags & EFLAG_HASENDORIGIN/* 2 */) && (pt->mSpawnLength.mFlags & PPFLAG_USEENDORIGIN/* 2 */)) {
         SetLengthUsingEndOrigin(effect, &pt->mSpawnLength, initLen);
     }
     else {
@@ -724,7 +724,7 @@ void rvLineParticle::Refresh(const rvBSE* effect,
     }
 
     float* destLen = GetDestLength();
-    if ((effect->mFlags & EF_USES_END_ORIGIN/* 2 */) && (pt->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */)) {
+    if ((effect->mFlags & EFLAG_HASENDORIGIN/* 2 */) && (pt->mSpawnLength.mFlags & PPFLAG_USEENDORIGIN/* 2 */)) {
         SetLengthUsingEndOrigin(effect, &pt->mDeathLength, destLen);
     }
     else {
@@ -855,7 +855,7 @@ void rvParticle::Bounce(rvBSE* effect, const rvParticleTemplate* pt, idVec3 endP
 
     // optional “stick” if we hit from below at a steep angle
     if (proj < -0.70710678f) {                                  // cos(45°)
-        mFlags |= 0x000001;                                   // PF_DIRECTIONAL (“stuck”)
+        mFlags |= PTFLAG_STATIONARY/* 0x000001 */;                                   // PF_DIRECTIONAL (“stuck”)
         worldNewVel = vec3_zero;
     }
 
@@ -881,7 +881,7 @@ void rvParticle::EvaluatePosition(const rvBSE* effect, idVec3& outPos, float tim
     // ----------------------------------------------------------------------
     // 1)  if flagged “stuck”, particle never moves again
     // ----------------------------------------------------------------------
-    if (mFlags & 0x000001) {                         // PF_DIRECTIONAL used as “stuck”
+    if (mFlags & PTFLAG_STATIONARY/* 0x000001 */) {                         // PF_DIRECTIONAL used as “stuck”
         outPos = mInitPos;
         return;
     }
@@ -892,7 +892,7 @@ void rvParticle::EvaluatePosition(const rvBSE* effect, idVec3& outPos, float tim
     outPos = mInitPos + mVelocity * time
         + 0.5f * mAcceleration * (time * time);
 
-    if (mFlags & 0x000004) {                         // needs offset update
+    if (mFlags & PTFLAG_HAS_OFFSET/* 0x000004 */) {                         // needs offset update
         rvAngles angle;
         idVec3   offset;
         mAngleEnv.Evaluate(time, &angle.pitch);
@@ -920,7 +920,7 @@ void rvParticle::EvaluatePosition(const rvBSE* effect, idVec3& outPos, float tim
     // 4)  transform from *particle local* → *current world* coordinates
     //     (unless the particle was “locked” at spawn)
     // ----------------------------------------------------------------------
-    if (!(mFlags & PF_SEGMENT_LOCKED/* 0x000002 */)) {                    // PF_SEGMENT_LOCKED
+    if (!(mFlags & PTFLAG_LOCKED/* 0x000002 */)) {                    // PF_SEGMENT_LOCKED
         // rotate into the emitter’s current orientation
         idVec3 worldPos = effect->mCurrentAxis
             * (mInitAxis.Transpose() * outPos);
@@ -941,7 +941,7 @@ void rvParticle::CheckTimeoutEffect(rvBSE* effect,
                                     const rvSegmentTemplate* st,
     float              time)
 {
-    if (!(st->mFlags & 0x0001)) {                     // segment wants timeout FX?
+    if (!(st->mFlags & STFLAG_ENABLED/* 0x0001 */)) {                     // segment wants timeout FX?
         return;
     }
 
@@ -1027,7 +1027,7 @@ void rvParticle::CalcImpactPoint(idVec3& out,
     const idVec3 push = BSE::Mult(idVec3(halfX, halfY, halfZ) * invLen, work); //k??? TODO dot not dot
 
     // offset the hit position by “normal + push”
-    out += 2.0f * normal + push;
+    out += BSE_SURFACE_OFFSET/* 2.0f */ * normal + push;
 }
 
 // ----------------------------------------------------------------------------
@@ -1035,13 +1035,11 @@ void rvParticle::CalcImpactPoint(idVec3& out,
 // ----------------------------------------------------------------------------
 void rvParticle::EmitSmokeParticles(rvBSE* effect,rvSegment* child, float      time)
 {
-    static const float kUpdate = 0.016f;              // ~60 Hz
-
 	const rvSegmentTemplate* st = child->GetSegmentTemplate();
 	if (!st) {
 		return;
 	}
-    const float timeEnd = time + kUpdate;
+    const float timeEnd = time + BSE_FUTURE;
     while (mLastTrailTime < timeEnd) {
 
         // stay within particle lifetime
@@ -1077,8 +1075,8 @@ bool rvParticle::RunPhysics(rvBSE* effect,
     // -------------------------------------------------- early outs
     if (!bse_physics.GetBool() ||
         session->readDemo ||
-        (mFlags & 0x000001) ||          // stuck
-        !(st->mFlags & 0x0001))           // segment wants physics
+        (mFlags & PTFLAG_STATIONARY/* 0x000001 */) ||          // stuck
+        !(st->mFlags & STFLAG_ENABLED/* 0x0001 */))           // segment wants physics
     {
         return false;
     }
@@ -1086,17 +1084,17 @@ bool rvParticle::RunPhysics(rvBSE* effect,
     const rvParticleTemplate& pt = st->mParticleTemplate;
 
     // require “physics” flag and at least 100 ms of motion
-    if (!(pt.mFlags & 0x0200) || time - mMotionStartTime < 0.1f) {
+    if (!(pt.mFlags & PTFLAG_HAS_PHYSICS/* 0x0200 */) || time - mMotionStartTime < BSE_PHYSICS_TIME_SAMPLE/* 0.1f */) {
         return false;
     }
 
 	if ( bseLocal.DebugHudActive() )
-		++bseLocal.mPerfCounters[1]; // dword_1137DDAC;
+		++bseLocal.mPerfCounters[PERF_NUM_TRACES]; // dword_1137DDAC;
     //--------------------------------------------------- build world ray
     const idVec3 worldOrigin = effect->mCurrentOrigin;
     const idMat3& worldAxis = effect->mCurrentAxis;
 
-    const float dtStart = time - mMotionStartTime - 0.1f;
+    const float dtStart = time - mMotionStartTime - BSE_PHYSICS_TIME_SAMPLE/* 0.1f */;
     const float dtEnd = time - mMotionStartTime;
 
     idVec3 fromLocal; EvaluatePosition(effect, fromLocal, dtStart);
@@ -1138,7 +1136,7 @@ bool rvParticle::RunPhysics(rvBSE* effect,
 
     // if template has “killOnImpact” flag (bit-10 in original),
     // return true to remove the particle
-    return (pt.mFlags & 0x0400) != 0;
+    return (pt.mFlags & PTFLAG_DELETE_ON_IMPACT/* 0x0400 */) != 0;
 }
 
 void rvParticle::AttenuateFade(float atten, const rvParticleParms *parms)
@@ -1205,12 +1203,12 @@ void rvLineParticle::FinishSpawn(rvBSE* effect, rvSegment* segment, float birthT
     {
         p_mParticleTemplate = &SegmentTemplate->mParticleTemplate;
         v16 = GetInitLength();
-        if ( (effect->mFlags & EF_USES_END_ORIGIN/* 2 */) != 0 && (p_mParticleTemplate->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */) != 0 )
+        if ( (effect->mFlags & EFLAG_HASENDORIGIN/* 2 */) != 0 && (p_mParticleTemplate->mSpawnLength.mFlags & PPFLAG_USEENDORIGIN/* 2 */) != 0 )
             SetLengthUsingEndOrigin(effect, &p_mParticleTemplate->mSpawnLength, v16);
         else
             rvParticleParms::spawnFunctions[p_mParticleTemplate->mSpawnLength.mSpawnType](v16, p_mParticleTemplate->mSpawnLength, NULL, NULL);
         v17 = GetDestLength();
-        if ( (effect->mFlags & EF_USES_END_ORIGIN/* 2 */) != 0 && (p_mParticleTemplate->mSpawnLength.mFlags & PPF_USE_END_ORIGIN/* 2 */) != 0 )
+        if ( (effect->mFlags & EFLAG_HASENDORIGIN/* 2 */) != 0 && (p_mParticleTemplate->mSpawnLength.mFlags & PPFLAG_USEENDORIGIN/* 2 */) != 0 )
             SetLengthUsingEndOrigin(effect, &p_mParticleTemplate->mDeathLength, v17);
         else
             rvParticleParms::spawnFunctions[p_mParticleTemplate->mDeathLength.mSpawnType](v17, p_mParticleTemplate->mDeathLength, NULL, NULL);
@@ -1289,9 +1287,9 @@ void rvParticle::SetLengthUsingEndOrigin(
         float* length)
 {
 #if 1 //karin: length useEndOrigin //k??? TODO add
-    //if(parms->mFlags & PPF_USE_END_ORIGIN)
+    //if(parms->mFlags & PPFLAG_USEENDORIGIN)
     {
-        if(mFlags & PTF_SEGMENT_LOCKED) // if follow
+        if(mFlags & PTFLAG_LOCKED) // if follow
         {
             idVec3 dis = effect->mCurrentEndOrigin - effect->mCurrentOrigin; // world
             dis = effect->mCurrentAxisTransposed * dis; // local

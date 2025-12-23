@@ -44,6 +44,9 @@ R_ResetGLBuffer(void)
 	GLBUFFER_RESET
 }
 
+/*
+ * Draws what's stored in the buffer and clears it up
+ */
 void
 R_ApplyGLBuffer(void)
 {
@@ -183,7 +186,7 @@ R_ApplyGLBuffer(void)
 			if (gl_config.lightmapcopies)
 			{
 				// Bind appropiate lightmap copy for this frame
-				lmtexture += gl_state.max_lightmaps * cur_lm_copy;
+				lmtexture += MAX_LIGHTMAPS * cur_lm_copy;
 			}
 			R_MBind(GL_TEXTURE1, lmtexture);
 
@@ -211,7 +214,7 @@ R_ApplyGLBuffer(void)
 	if (color)
 	{
 		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_FLOAT, 0, gl_buf.clr);
+		glColorPointer(4, GL_UNSIGNED_BYTE, 0, gl_buf.clr);
 	}
 
 	// All set, we can finally draw
@@ -271,6 +274,9 @@ R_ApplyGLBuffer(void)
 	GLBUFFER_RESET
 }
 
+/*
+ * Sets current state of the buffer. Any change means "draw its contents now".
+ */
 void
 R_UpdateGLBuffer(buffered_draw_t type, int colortex, int lighttex, int flags, float alpha)
 {
@@ -289,6 +295,11 @@ R_UpdateGLBuffer(buffered_draw_t type, int colortex, int lighttex, int flags, fl
 	}
 }
 
+/*
+ * Stores a 2D drawing in the buffer.
+ * ul = up-left corner, dr = down-right corner
+ * v = vertex, t = texture, x/y = coordinates
+ */
 void
 R_Buffer2DQuad(GLfloat ul_vx, GLfloat ul_vy, GLfloat dr_vx, GLfloat dr_vy,
 	GLfloat ul_tx, GLfloat ul_ty, GLfloat dr_tx, GLfloat dr_ty)
@@ -338,10 +349,11 @@ R_Buffer2DQuad(GLfloat ul_vx, GLfloat ul_vy, GLfloat dr_vx, GLfloat dr_vy,
 }
 
 /*
- * Set up indices with the proper shape for the next buffered vertices
+ * Set up indices with the proper shape for the next buffered vertices.
+ * After calling this, GLBUFFER_VERTEX() must be called 'vertices_num' times.
  */
 void
-R_SetBufferIndices(GLenum type, GLuint vertices_num)
+R_SetBufferIndices(GLenum primitive, GLuint vertices_num)
 {
 	int i;
 
@@ -351,7 +363,7 @@ R_SetBufferIndices(GLenum type, GLuint vertices_num)
 		R_ApplyGLBuffer();
 	}
 
-	switch (type)
+	switch (primitive)
 	{
 		case GL_TRIANGLE_FAN:
 			for (i = 0; i < vertices_num-2; i++)
@@ -381,7 +393,7 @@ R_SetBufferIndices(GLenum type, GLuint vertices_num)
 			}
 			break;
 		default:
-			R_Printf(PRINT_DEVELOPER, "R_SetBufferIndices: no such type %d\n", type);
+			Com_DPrintf("%s: no such primitive %d\n", __func__, primitive);
 			return;
 	}
 

@@ -43,6 +43,9 @@ If you have questions concerning this license or the applicable additional terms
 class idInterpreter;
 class idProgram;
 
+class function_t;
+typedef struct prstack_s prstack_t;
+
 class rvDebuggerServer
 {
 	public:

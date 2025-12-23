@@ -179,6 +179,8 @@ QGLPROC(glReadBuffer, void, (GLenum src));
 QGLPROC(glDrawBuffers, void, (GLsizei n, const GLenum *bufs));
 QGLPROC(glFramebufferTextureLayer, void, (GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer));
 QGLPROC(glBlitFramebuffer, void, (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter))
+QGLPROC(glProgramBinary, void, (GLuint program, GLenum binaryFormat, const void *binary, GLsizei length))
+QGLPROC(glGetProgramBinary, void, (GLuint program, GLsizei bufsize, GLsizei *length, GLenum *binaryFormat, void *binary))
 
 // GLES3.1
 QGLPROC(glDebugMessageControl, void, (GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled))

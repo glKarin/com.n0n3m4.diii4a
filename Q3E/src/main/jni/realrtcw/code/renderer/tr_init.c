@@ -72,6 +72,7 @@ cvar_t	*r_stereoEnabled;
 cvar_t	*r_anaglyphMode;
 
 cvar_t	*r_greyscale;
+cvar_t  *r_gothic;
 
 cvar_t  *r_ignorehwgamma;
 cvar_t  *r_measureOverdraw;
@@ -1270,6 +1271,8 @@ void R_Register( void ) {
 
 	r_greyscale = ri.Cvar_Get("r_greyscale", "0", CVAR_ARCHIVE | CVAR_LATCH);
 	ri.Cvar_CheckRange(r_greyscale, 0, 1, qfalse);
+
+	r_gothic = ri.Cvar_Get("r_gothic", "0", CVAR_ARCHIVE | CVAR_LATCH);
 
 	//
 	// temporary latched variables that can only change over a restart

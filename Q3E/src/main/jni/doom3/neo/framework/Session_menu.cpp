@@ -31,6 +31,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Session_local.h"
 
+#if defined(_RAVEN) || defined(_HUHAMHEAD)
+#include "../sound/snd_local.h"
+#endif
+
 idCVar	idSessionLocal::gui_configServerRate("gui_configServerRate", "0", CVAR_GUI | CVAR_ARCHIVE | CVAR_ROM | CVAR_INTEGER, "");
 
 // implements the setup for, and commands from, the main menu
@@ -353,6 +357,16 @@ void idSessionLocal::SetMainMenuGuiVars(void)
 #endif
 #ifdef _HUMANHEAD
 	guiMainMenu->SetStateInt("roadhouseCompleted", cvarSystem->GetCVarInteger("g_roadhouseCompleted"));
+#endif
+
+#if defined(_RAVEN) || defined(_HUHAMHEAD) //karin: s_deviceName in menu GUI
+    const idStrList &deviceNames = ((idSoundSystemLocal *)soundSystem)->alDrivers;
+    if(deviceNames.Num() > 0)
+    {
+        idStr deviceName("\"\";");
+        idStr::Joint(deviceName, deviceNames, ";");
+        guiMainMenu->SetStateString("device_name", deviceName.c_str());
+    }
 #endif
 
 	SetPbMenuGuiVars();

@@ -46,6 +46,7 @@ If you have questions concerning this license or the applicable additional terms
 const int OLD_MAP_VERSION					= 1;
 #ifdef _RAVEN // quake4 map file version
 const int CURRENT_MAP_VERSION				= 3;
+const int DOOM3_MAP_VERSION					= 2;
 #else
 const int CURRENT_MAP_VERSION				= 2;
 #endif
@@ -214,10 +215,10 @@ class idMapPatch : public idMapPrimitive, public idSurface_Patch
 		unsigned int			GetGeometryCRC(void) const;
 
 #ifdef _RAVEN
-// RAVEN BEGIN
-// rjohnson: added resolve for handling func_groups and other aspects.  Before, radiant would do this processing on a map destroying the original data
-    virtual void			AdjustOrigin( idVec3 &delta );
-// RAVEN END
+        // RAVEN BEGIN
+        // rjohnson: added resolve for handling func_groups and other aspects.  Before, radiant would do this processing on a map destroying the original data
+        virtual void			AdjustOrigin( idVec3 &delta );
+        // RAVEN END
 #endif
 
 	protected:
@@ -265,10 +266,10 @@ class idMapEntity
 			primitives.DeleteContents(true);
 		}
 #ifdef _RAVEN
-// RAVEN BEGIN
-// jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
-	static idMapEntity *	Parse( Lexer &src, bool worldSpawn = false, int version = CURRENT_MAP_VERSION );
-// RAVEN END
+        // RAVEN BEGIN
+        // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
+	    static idMapEntity *	Parse( Lexer &src, bool worldSpawn = false, int version = CURRENT_MAP_VERSION );
+        // RAVEN END
 #else
 		static idMapEntity 	*Parse(idLexer &src, bool worldSpawn = false, float version = CURRENT_MAP_VERSION);
 #endif
@@ -338,21 +339,21 @@ class idMapFile
 			return hasPrimitiveData;
 		}
 #ifdef _RAVEN
-		// RAVEN BEGIN
+// RAVEN BEGIN
 // rjohnson: added resolve
-        void                                    Resolve( void );
+        void                    Resolve( void );
 // rhummer: added boolean to dictate if the Resolve function has been run on this map.
-        bool                                    HasBeenResloved() { return mHasBeenResolved; }
+        bool                    HasBeenResloved() { return mHasBeenResolved; }
 // rjohnson: added export
-        bool                                    Write( const char *fileName, const char *ext, bool fromBasePath, bool exportOnly );
+        bool                    Write( const char *fileName, const char *ext, bool fromBasePath, bool exportOnly );
 // RAVEN END
 
-		// RAVEN BEGIN
+// RAVEN BEGIN
 // rjohnson: added export
-        bool                                    WriteExport( const char *fileName, bool fromBasePath = true );
-        bool                                    ParseExport( const char *filename, bool osPath = false );
+        bool                    WriteExport( const char *fileName, bool fromBasePath = true );
+        bool                    ParseExport( const char *filename, bool osPath = false );
 
-        bool                                    HasExportEntities(void) { return mHasExportEntities; }
+        bool                    HasExportEntities(void) { return mHasExportEntities; }
 // RAVEN END
 #endif
 
@@ -367,11 +368,11 @@ class idMapFile
 // RAVEN BEGIN
 // rjohnson: added export
         idList<idMapEntity *>   mExportEntities;
-        bool                                    mHasExportEntities;
+        bool                    mHasExportEntities;
 // rhummer: Added to inform if func_groups some how disappeared between the loading and saving of the map file.
-        bool                                    mHasFuncGroups;
+        bool                    mHasFuncGroups;
 // rhummer: Added to notify that this map has been resloved, so func_groups have been removed.
-        bool                                    mHasBeenResolved;
+        bool                    mHasBeenResolved;
 // RAVEN END
 #endif
 

@@ -503,14 +503,14 @@ CullAliasModel(vec3_t bbox[8], entity_t *e)
 
 	if ((e->frame >= paliashdr->num_frames) || (e->frame < 0))
 	{
-		R_Printf(PRINT_DEVELOPER, "R_CullAliasModel %s: no such frame %d\n",
+		Com_DPrintf("R_CullAliasModel %s: no such frame %d\n",
 				model->name, e->frame);
 		e->frame = 0;
 	}
 
 	if ((e->oldframe >= paliashdr->num_frames) || (e->oldframe < 0))
 	{
-		R_Printf(PRINT_DEVELOPER, "R_CullAliasModel %s: no such oldframe %d\n",
+		Com_DPrintf("R_CullAliasModel %s: no such oldframe %d\n",
 				model->name, e->oldframe);
 		e->oldframe = 0;
 	}
@@ -773,7 +773,7 @@ GL3_DrawAliasModel(entity_t *entity)
 		float scale;
 		float min;
 
-		scale = 0.1 * sin(gl3_newrefdef.time * 7);
+		scale = 0.1 * sin(r_newrefdef.time * 7);
 
 		for (i = 0; i < 3; i++)
 		{
@@ -790,7 +790,7 @@ GL3_DrawAliasModel(entity_t *entity)
 	// Note: gl_overbrightbits are now applied in shader.
 
 	/* ir goggles color override */
-	if ((gl3_newrefdef.rdflags & RDF_IRGOGGLES) && (entity->flags & RF_IR_VISIBLE))
+	if ((r_newrefdef.rdflags & RDF_IRGOGGLES) && (entity->flags & RF_IR_VISIBLE))
 	{
 		shadelight[0] = 1.0;
 		shadelight[1] = 0.0;
@@ -815,23 +815,13 @@ GL3_DrawAliasModel(entity_t *entity)
 
 	if (entity->flags & RF_WEAPONMODEL)
 	{
-		extern hmm_mat4 GL3_MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
+		extern hmm_mat4 GL3_SetPerspective(GLdouble fovy);
 
 		origProjViewMat = gl3state.uni3DData.transProjViewMat4;
 
 		// render weapon with a different FOV (r_gunfov) so it's not distorted at high view FOV
-		float screenaspect = (float)gl3_newrefdef.width / gl3_newrefdef.height;
-		float dist = (r_farsee->value == 0) ? 4096.0f : 8192.0f;
-
-		hmm_mat4 projMat;
-		if (r_gunfov->value < 0)
-		{
-			projMat = GL3_MYgluPerspective(gl3_newrefdef.fov_y, screenaspect, 4, dist);
-		}
-		else
-		{
-			projMat = GL3_MYgluPerspective(r_gunfov->value, screenaspect, 4, dist);
-		}
+		hmm_mat4 projMat = GL3_SetPerspective( (r_gunfov->value < 0)?
+				r_newrefdef.fov_y : r_gunfov->value );
 
 		if(gl_lefthand->value == 1.0F)
 		{
@@ -895,7 +885,7 @@ GL3_DrawAliasModel(entity_t *entity)
 	if ((entity->frame >= paliashdr->num_frames) ||
 		(entity->frame < 0))
 	{
-		R_Printf(PRINT_DEVELOPER, "R_DrawAliasModel %s: no such frame %d\n",
+		Com_DPrintf("R_DrawAliasModel %s: no such frame %d\n",
 				model->name, entity->frame);
 		entity->frame = 0;
 		entity->oldframe = 0;
@@ -904,7 +894,7 @@ GL3_DrawAliasModel(entity_t *entity)
 	if ((entity->oldframe >= paliashdr->num_frames) ||
 		(entity->oldframe < 0))
 	{
-		R_Printf(PRINT_DEVELOPER, "R_DrawAliasModel %s: no such oldframe %d\n",
+		Com_DPrintf("R_DrawAliasModel %s: no such oldframe %d\n",
 				model->name, entity->oldframe);
 		entity->frame = 0;
 		entity->oldframe = 0;

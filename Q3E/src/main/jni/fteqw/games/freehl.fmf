@@ -1,4 +1,0 @@
-//Mostly just defers to the engine's `-halflife` rules.
-FTEMANIFEST 1
-GAME halflife
-NAME "Half-Life (FreeHL)"

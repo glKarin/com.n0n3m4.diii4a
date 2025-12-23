@@ -51,36 +51,12 @@ extern void Sys_SyncState(void);
 
 // ----
 
-enum {
-	LAYOUT_DEFAULT			= 0,
-	LAYOUT_SOUTHPAW,
-	LAYOUT_LEGACY,
-	LAYOUT_LEGACY_SOUTHPAW,
-	LAYOUT_FLICK_STICK,
-	LAYOUT_FLICK_STICK_SOUTHPAW
-};
-
-typedef struct
-{
-	float x;
-	float y;
-} thumbstick_t;
-
-typedef enum
-{
-	REASON_NONE,
-	REASON_CONTROLLERINIT,
-	REASON_GYROCALIBRATION
-} updates_countdown_reasons;
-
 // ----
 
 // These are used to communicate the events collected by
 // IN_Update() called at the beginning of a frame to the
 // actual movement functions called at a later time.
 float mouse_x, mouse_y;
-static int joystick_left_x, joystick_left_y, joystick_right_x, joystick_right_y;
-static float gyro_yaw, gyro_pitch;
 static qboolean mlooking;
 
 // The last time input events were processed.
@@ -103,16 +79,22 @@ static cvar_t *sensitivity;
 
 static cvar_t *exponential_speedup;
 static cvar_t *in_grab;
-static cvar_t *m_filter;
 static cvar_t *windowed_pauseonfocuslost;
+static cvar_t *m_filter;
 static cvar_t *windowed_mouse;
-static cvar_t *haptic_feedback_filter;
+
+cvar_t *joy_layout;
+
+// Gyro mode (0=off, 3=on, 1-2=uses button to enable/disable)
+cvar_t *gyro_mode;
+
+// Gamepad labels' style (Xbox, Playstation, etc.) in use, normally set after detection
+gamepad_labels_t joy_current_lbls = LBL_SDL;
 
 // Using japanese style for confirm & cancel buttons on gamepad
 qboolean japanese_confirm = false;
 
-// Gamepad labels' style (Xbox, Playstation, etc.) in use, normally set after detection
-gamepad_labels_t joy_current_lbls = LBL_SDL;
+qboolean show_gamepad = false, show_haptic = false, show_gyro = false;
 
 // ----
 
@@ -128,71 +110,11 @@ typedef struct haptic_effects_cache {
 	int effect_z;
 } haptic_effects_cache_t;
 
-qboolean show_gamepad = false, show_haptic = false, show_gyro = false;
-
 #define HAPTIC_EFFECT_LIST_SIZE 16
 
-static int last_haptic_volume = 0;
 static int last_haptic_effect_size = HAPTIC_EFFECT_LIST_SIZE;
 static int last_haptic_effect_pos = 0;
 static haptic_effects_cache_t last_haptic_effect[HAPTIC_EFFECT_LIST_SIZE];
-
-// Joystick sensitivity
-static cvar_t *joy_yawsensitivity;
-static cvar_t *joy_pitchsensitivity;
-static cvar_t *joy_forwardsensitivity;
-static cvar_t *joy_sidesensitivity;
-
-// Joystick's analog sticks configuration
-cvar_t *joy_layout;
-static cvar_t *joy_left_expo;
-static cvar_t *joy_left_snapaxis;
-static cvar_t *joy_left_deadzone;
-static cvar_t *joy_right_expo;
-static cvar_t *joy_right_snapaxis;
-static cvar_t *joy_right_deadzone;
-static cvar_t *joy_flick_threshold;
-static cvar_t *joy_flick_smoothed;
-
-// Joystick haptic
-static cvar_t *joy_haptic_magnitude;
-static cvar_t *joy_haptic_distance;
-
-// Gyro mode (0=off, 3=on, 1-2=uses button to enable/disable)
-cvar_t *gyro_mode;
-cvar_t *gyro_turning_axis;	// yaw or roll
-
-// Gyro sensitivity
-static cvar_t *gyro_yawsensitivity;
-static cvar_t *gyro_pitchsensitivity;
-
-// Gyro is being used in this very moment
-static qboolean gyro_active = false;
-
-// Gyro calibration
-static float gyro_accum[3];
-static cvar_t *gyro_calibration_x;
-static cvar_t *gyro_calibration_y;
-static cvar_t *gyro_calibration_z;
-
-// To ignore SDL_JOYDEVICEADDED at game init. Allows for hot plugging of game controller afterwards.
-static qboolean first_init = true;
-
-// Countdown of calls to IN_Update(), needed for controller init and gyro calibration
-static unsigned short int updates_countdown = 30;
-
-// Reason for the countdown
-static updates_countdown_reasons countdown_reason = REASON_CONTROLLERINIT;
-
-// Flick Stick
-#define FLICK_TIME 6		// number of frames it takes for a flick to execute
-static float target_angle;	// angle to end up facing at the end of a flick
-static unsigned short int flick_progress = FLICK_TIME;
-
-// Flick Stick's rotation input samples to smooth out
-#define MAX_SMOOTH_SAMPLES 8
-static float flick_samples[MAX_SMOOTH_SAMPLES];
-static unsigned short int front_sample = 0;
 
 extern void CalibrationFinishedCallback(void);
 
@@ -252,15 +174,6 @@ IN_Update(void)
 void
 IN_Move(usercmd_t *cmd)
 {
-	// Factor used to transform from SDL joystick input ([-32768, 32767])  to [-1, 1] range
-	static const float normalize_sdl_axis = 1.0f / 32768.0f;
-
-	// Flick Stick's factors to change to the target angle with a feeling of "ease out"
-	static const float rotation_factor[FLICK_TIME] =
-	{
-		0.305555556f, 0.249999999f, 0.194444445f, 0.138888889f, 0.083333333f, 0.027777778f
-	};
-
 	static float old_mouse_x;
 	static float old_mouse_y;
 
@@ -374,27 +287,11 @@ IN_JoyAltSelectorUp(void)
 static void
 IN_GyroActionDown(void)
 {
-	switch ((int)gyro_mode->value)
-	{
-		case 1:
-			gyro_active = true;
-			return;
-		case 2:
-			gyro_active = false;
-	}
 }
 
 static void
 IN_GyroActionUp(void)
 {
-	switch ((int)gyro_mode->value)
-	{
-		case 1:
-			gyro_active = false;
-			return;
-		case 2:
-			gyro_active = true;
-	}
 }
 
 /*
@@ -443,19 +340,6 @@ IN_Haptic_Effect_Shutdown(int * effect_id)
 static void
 IN_Haptic_Effects_Shutdown(void)
 {
-	for (int i=0; i<HAPTIC_EFFECT_LIST_SIZE; i++)
-	{
-		last_haptic_effect[i].effect_volume = 0;
-		last_haptic_effect[i].effect_duration = 0;
-		last_haptic_effect[i].effect_delay = 0;
-		last_haptic_effect[i].effect_attack = 0;
-		last_haptic_effect[i].effect_fade = 0;
-		last_haptic_effect[i].effect_x = 0;
-		last_haptic_effect[i].effect_y = 0;
-		last_haptic_effect[i].effect_z = 0;
-
-		IN_Haptic_Effect_Shutdown(&last_haptic_effect[i].effect_id);
-	}
 }
 
 static int
@@ -463,7 +347,7 @@ IN_Haptic_GetEffectId(int effect_volume, int effect_duration,
 				int effect_delay, int effect_attack, int effect_fade,
 				int effect_x, int effect_y, int effect_z)
 {
-	int i, haptic_volume;
+	int i, haptic_volume = 0;
 
 	// check effects for reuse
 	for (i=0; i < last_haptic_effect_size; i++)
@@ -485,7 +369,6 @@ IN_Haptic_GetEffectId(int effect_volume, int effect_duration,
 	}
 
 	/* create new effect */
-	haptic_volume = joy_haptic_magnitude->value * effect_volume; // 32767 max strength;
 
 	/*
 	Com_Printf("%d: volume %d: %d ms %d:%d:%d ms speed: %.2f\n",
@@ -683,6 +566,7 @@ void
 Controller_Rumble(const char *name, vec3_t source, qboolean from_player,
 		unsigned int duration, unsigned short int volume)
 {
+#if 0
 	vec_t intens = 0.0f, low_freq = 1.0f, hi_freq = 1.0f, dist_prop;
 	unsigned short int max_distance = 4;
 	unsigned int effect_volume;
@@ -818,6 +702,7 @@ Controller_Rumble(const char *name, vec3_t source, qboolean from_player,
 
 	// Com_Printf("%-29s: vol %5u - %4u ms - dp %.3f l %5.0f h %5.0f\n",
 	//	name, effect_volume, duration, dist_prop, low_freq, hi_freq);
+#endif
 }
 
 /*
@@ -826,17 +711,17 @@ Controller_Rumble(const char *name, vec3_t source, qboolean from_player,
 void
 StartCalibration(void)
 {
-	gyro_accum[0] = 0.0;
-	gyro_accum[1] = 0.0;
-	gyro_accum[2] = 0.0;
-	updates_countdown = 300;
-	countdown_reason = REASON_GYROCALIBRATION;
 }
 
 qboolean
 IsCalibrationZero(void)
 {
-	return (!gyro_calibration_x->value && !gyro_calibration_y->value && !gyro_calibration_z->value);
+    return false;
+}
+
+static void
+IN_InitGyro(void)
+{
 }
 
 /*
@@ -847,6 +732,19 @@ IN_Controller_Init(qboolean notify_user)
 {
 }
 
+void
+IN_ApplyJoyPreset(void)
+{
+}
+
+#define EQF(a, b) (fabsf((a) - (b)) < 1.0e-6f)
+qboolean
+IN_MatchJoyPreset(void)
+{
+    return false;
+}
+#undef EQF
+
 /*
  * Initializes the backend
  */
@@ -856,8 +754,6 @@ IN_Init(void)
 	Com_Printf("------- input initialization -------\n");
 
 	mouse_x = mouse_y = 0;
-	joystick_left_x = joystick_left_y = joystick_right_x = joystick_right_y = 0;
-	gyro_yaw = gyro_pitch = 0;
 
 	exponential_speedup = Cvar_Get("exponential_speedup", "0", CVAR_ARCHIVE);
 	freelook = Cvar_Get("freelook", "1", CVAR_ARCHIVE);
@@ -871,38 +767,8 @@ IN_Init(void)
 	m_yaw = Cvar_Get("m_yaw", "0.022", CVAR_ARCHIVE);
 	sensitivity = Cvar_Get("sensitivity", "3", CVAR_ARCHIVE);
 
-	joy_haptic_magnitude = Cvar_Get("joy_haptic_magnitude", "0.0", CVAR_ARCHIVE);
-	joy_haptic_distance = Cvar_Get("joy_haptic_distance", "100.0", CVAR_ARCHIVE);
-	haptic_feedback_filter = Cvar_Get("joy_haptic_filter", default_haptic_filter, CVAR_ARCHIVE);
-
-	joy_yawsensitivity = Cvar_Get("joy_yawsensitivity", "1.0", CVAR_ARCHIVE);
-	joy_pitchsensitivity = Cvar_Get("joy_pitchsensitivity", "1.0", CVAR_ARCHIVE);
-	joy_forwardsensitivity = Cvar_Get("joy_forwardsensitivity", "1.0", CVAR_ARCHIVE);
-	joy_sidesensitivity = Cvar_Get("joy_sidesensitivity", "1.0", CVAR_ARCHIVE);
-
 	joy_layout = Cvar_Get("joy_layout", "0", CVAR_ARCHIVE);
-	joy_left_expo = Cvar_Get("joy_left_expo", "2.0", CVAR_ARCHIVE);
-	joy_left_snapaxis = Cvar_Get("joy_left_snapaxis", "0.15", CVAR_ARCHIVE);
-	joy_left_deadzone = Cvar_Get("joy_left_deadzone", "0.16", CVAR_ARCHIVE);
-	joy_right_expo = Cvar_Get("joy_right_expo", "2.0", CVAR_ARCHIVE);
-	joy_right_snapaxis = Cvar_Get("joy_right_snapaxis", "0.15", CVAR_ARCHIVE);
-	joy_right_deadzone = Cvar_Get("joy_right_deadzone", "0.16", CVAR_ARCHIVE);
-	joy_flick_threshold = Cvar_Get("joy_flick_threshold", "0.65", CVAR_ARCHIVE);
-	joy_flick_smoothed = Cvar_Get("joy_flick_smoothed", "8.0", CVAR_ARCHIVE);
-
-	gyro_calibration_x = Cvar_Get("gyro_calibration_x", "0.0", CVAR_ARCHIVE);
-	gyro_calibration_y = Cvar_Get("gyro_calibration_y", "0.0", CVAR_ARCHIVE);
-	gyro_calibration_z = Cvar_Get("gyro_calibration_z", "0.0", CVAR_ARCHIVE);
-
-	gyro_yawsensitivity = Cvar_Get("gyro_yawsensitivity", "1.0", CVAR_ARCHIVE);
-	gyro_pitchsensitivity = Cvar_Get("gyro_pitchsensitivity", "1.0", CVAR_ARCHIVE);
-	gyro_turning_axis = Cvar_Get("gyro_turning_axis", "0", CVAR_ARCHIVE);
-
-	gyro_mode = Cvar_Get("gyro_mode", "2", CVAR_ARCHIVE);
-	if ((int)gyro_mode->value == 2)
-	{
-		gyro_active = true;
-	}
+	gyro_mode = Cvar_Get("gyro_mode", "0", CVAR_ARCHIVE);
 
 	windowed_pauseonfocuslost = Cvar_Get("vid_pauseonfocuslost", "0", CVAR_USERINFO | CVAR_ARCHIVE);
 	windowed_mouse = Cvar_Get("windowed_mouse", "1", CVAR_USERINFO | CVAR_ARCHIVE);
@@ -938,10 +804,6 @@ IN_Controller_Shutdown(qboolean notify_user)
 	}
 
 	IN_Haptic_Shutdown();
-
-	show_gamepad = show_gyro = show_haptic = false;
-	joystick_left_x = joystick_left_y = joystick_right_x = joystick_right_y = 0;
-	gyro_yaw = gyro_pitch = 0;
 }
 
 /*

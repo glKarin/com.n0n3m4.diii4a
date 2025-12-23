@@ -18,6 +18,8 @@ enum cvarFlag
     IG_CVAR_COMPONENT_INPUT_VECTOR = BIT(6),
     IG_CVAR_COMPONENT_INPUT = BIT(7),
     IG_CVAR_COMPONENT_BUTTON = BIT(8),
+    IG_CVAR_COMPONENT_INPUT_VECTOR4 = BIT(9),
+    IG_CVAR_COMPONENT_INPUT_INT4 = BIT(10),
 
     IG_CVAR_GROUP_RENDERER = BIT(11),
     IG_CVAR_GROUP_FRAMEWORK = BIT(12),
@@ -62,6 +64,8 @@ protected:
     void RenderIntCVar(const cvarSettingItem_t &item);
 	void RenderIntRangeCVar(const cvarSettingItem_t &item);
     void RenderVectorCVar(const cvarSettingItem_t &item);
+    void RenderVector4CVar(const cvarSettingItem_t &item);
+    void RenderInt4CVar(const cvarSettingItem_t &item);
     void RenderNullCVar(const cvarSettingItem_t &item);
     void RenderInputCVar(const cvarSettingItem_t &item);
     void RenderButtonCVar(const cvarSettingItem_t &item);
@@ -194,7 +198,8 @@ void idImGuiSettings::AddOption(const char *name, const char *displayName, int f
     if(str && str[0])
     {
         bool isInt = cvar->GetFlags() & CVAR_INTEGER;
-        idStrList ops = idStr::Split(str, ';');
+        idStrList ops;
+        idStr::Split(ops, str, ';');
         for(int i = 0; i < ops.Num(); i++)
         {
             idStr &op = ops[i];
@@ -239,6 +244,10 @@ void idImGuiSettings::AddOption(const char *name, const char *displayName, int f
             comp = IG_CVAR_COMPONENT_INPUT_INT;
         else if(item.flag & IG_CVAR_COMPONENT_INPUT_VECTOR)
             comp = IG_CVAR_COMPONENT_INPUT_VECTOR;
+        else if(item.flag & IG_CVAR_COMPONENT_INPUT_VECTOR4)
+            comp = IG_CVAR_COMPONENT_INPUT_VECTOR4;
+        else if(item.flag & IG_CVAR_COMPONENT_INPUT_INT4)
+            comp = IG_CVAR_COMPONENT_INPUT_INT4;
         else if(item.flag & IG_CVAR_COMPONENT_INPUT)
             comp = IG_CVAR_COMPONENT_INPUT;
         else
@@ -338,11 +347,42 @@ void idImGuiSettings::RenderIntCVar(const cvarSettingItem_t &item)
 void idImGuiSettings::RenderVectorCVar(const cvarSettingItem_t &item)
 {
     const char *val = item.cvar->GetString();
-    float v[3] = { 0.0f };
+    float v[3] = { 0.0f, 0.0f, 0.0f };
     sscanf(val, "%f %f %f", &v[0], &v[1], &v[2]);
     if(ImGui::InputFloat3(item.name.c_str(), v, "%.2f"))
     {
         idStr str = va("%f %f %f", v[0], v[1], v[2]);
+        UpdateCVar(item.cvar, str.c_str());
+    }
+    RenderToolTips(item.cvar);
+}
+
+void idImGuiSettings::RenderVector4CVar(const cvarSettingItem_t &item)
+{
+    const char *val = item.cvar->GetString();
+    float v[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    sscanf(val, "%f %f %f %f", &v[0], &v[1], &v[2], &v[3]);
+    if(ImGui::InputFloat4(item.name.c_str(), v, "%.2f"))
+    {
+        idStr str = va("%f %f %f %f", v[0], v[1], v[2], v[3]);
+        UpdateCVar(item.cvar, str.c_str());
+    }
+    RenderToolTips(item.cvar);
+}
+
+void idImGuiSettings::RenderInt4CVar(const cvarSettingItem_t &item)
+{
+    const char *val = item.cvar->GetString();
+    int v[4] = { 0 };
+    float fv[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    sscanf(val, "%f %f %f %f", &fv[0], &fv[1], &fv[2], &fv[3]);
+    v[0] = (int)fv[0];
+    v[1] = (int)fv[1];
+    v[2] = (int)fv[2];
+    v[3] = (int)fv[3];
+    if(ImGui::InputInt4(item.name.c_str(), v))
+    {
+        idStr str = va("%d %d %d %d", v[0], v[1], v[2], v[3]);
         UpdateCVar(item.cvar, str.c_str());
     }
     RenderToolTips(item.cvar);
@@ -388,15 +428,12 @@ void idImGuiSettings::RenderComboCVar(const cvarSettingItem_t &item)
 void idImGuiSettings::RenderChangeLogs(void) const
 {
     const char *ChangeLogs[] = {
-            "Optimize PBR shaders with original specular texture.",
-            "Add mp3 sound file support.",
-            "Add settings by ImGui.",
-            "Optimize debug render tools in GLSL.",
+            "Add float console support.",
+            "Add Unreal engine psk/psa animation/static model support.",
+            "Add iqm animation/static model support.",
+            "Add Source engine smd animation/static model support.",
+            "Add md5mesh static model support.",
 #ifdef _RAVEN
-            "BSE effects update.",
-            "Fix GUI.",
-            "Fix credits after end of game.",
-            "Fix map static mesh vertex color.",
 #elif defined(_HUMANHEAD)
 #else
             "Fix low frequency on HeXen-Edge of Chaos mod.",
@@ -422,10 +459,13 @@ void idImGuiSettings::RenderChangeLogs(void) const
 void idImGuiSettings::RenderNewCvars(void) const
 {
     const char *NewCvars[] = {
-            "harm_r_PBRNormalCorrection",
-            "harm_r_PBRRMAOSpecularMap",
-            "harm_r_PBRRoughnessCorrection",
-            "harm_r_PBRMetallicCorrection",
+            "harm_con_float",
+            "harm_con_floatGeometry",
+            "harm_con_floatZoomStep",
+            "harm_con_alwaysShow",
+            "harm_con_noBackground",
+            "harm_r_useGLSLShaderBinaryCache",
+            "r_showStencil",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -464,7 +504,7 @@ void idImGuiSettings::RenderNewCvars(void) const
 void idImGuiSettings::RenderUpdateCvars(void) const
 {
     const char *UpdateCvars[] = {
-            //"harm_r_specularExponentPBR", "4.0",
+            "harm_r_renderToolsMultithread", "1",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -503,7 +543,6 @@ void idImGuiSettings::RenderUpdateCvars(void) const
 void idImGuiSettings::RenderRemoveCvars(void) const
 {
     const char *RemoveCvars[] = {
-            "harm_r_NormalCorrectionPBR",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -529,7 +568,32 @@ void idImGuiSettings::RenderRemoveCvars(void) const
 void idImGuiSettings::RenderNewCommands(void) const
 {
     const char *NewCommands[] = {
-            "idTech4AmmSettings",
+            "pskToMd5mesh",
+            "psaToMd5anim",
+            "pskPsaToMd5",
+            "pskToObj",
+            "iqmToMd5mesh",
+            "iqmToMd5anim",
+            "iqmToMd5",
+            "iqmToObj",
+            "smdToMd5mesh",
+            "smdToMd5anim",
+            "smdToMd5",
+            "smdToObj",
+            "fbxToMd5mesh",
+            "fbxToMd5anim",
+            "fbxToMd5",
+            "fbxToObj",
+            "md5meshV6ToV10",
+            "md5animV6ToV10",
+            "md5V6ToV10",
+            "convertMd5Def",
+            "convertMd5AllDefs",
+            "cleanConvertedMd5",
+            "cleanExternalGLSLShaderSource",
+#ifdef GL_ES_VERSION_3_0
+            "cleanGLSLShaderBinary",
+#endif
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -544,7 +608,8 @@ void idImGuiSettings::RenderNewCommands(void) const
             const char **ptr = &NewCommands[0];
             while(*ptr)
             {
-                ImGui::TextWrapped("* %s", *ptr);
+                const char *desc = Com_GetCommandDescription(*ptr);
+                ImGui::TextWrapped("* %s\n- %s", *ptr, desc);
                 ptr++;
             }
         }
@@ -704,6 +769,12 @@ void idImGuiSettings::Render(void)
                         case IG_CVAR_COMPONENT_INPUT_VECTOR:
                             RenderVectorCVar(item);
                             break;
+                        case IG_CVAR_COMPONENT_INPUT_VECTOR4:
+                            RenderVector4CVar(item);
+                            break;
+                        case IG_CVAR_COMPONENT_INPUT_INT4:
+                            RenderInt4CVar(item);
+                            break;
                         case IG_CVAR_COMPONENT_INPUT:
                             RenderInputCVar(item);
                             break;
@@ -781,15 +852,23 @@ void ImGui_RegisterOptions(void)
 
     // framework
     ImGui_RegisterLabel("Generic", IG_CVAR_GROUP_FRAMEWORK);
-    ImGui_RegisterCvar("harm_com_consoleHistory", NULL, IG_CVAR_COMPONENT_COMBO, "0=Don't save;1=Save on exit;2=Save on every command");
     ImGui_RegisterCvar("harm_r_maxAllocStackMemory", "Control memory allocation on heap or stack", IG_CVAR_GROUP_FRAMEWORK);
     ImGui_RegisterCvar("com_disableAutoSaves", "Don't create Autosaves on new map");
     ImGui_RegisterDivide(IG_CVAR_GROUP_FRAMEWORK);
+    // console
+    ImGui_RegisterLabel("Console", IG_CVAR_GROUP_FRAMEWORK);
+    ImGui_RegisterCvar("harm_com_consoleHistory", "Record console history", IG_CVAR_COMPONENT_COMBO, "0=Don't save;1=Save on exit;2=Save on every command");
+    ImGui_RegisterCvar("harm_con_float", "Float console");
+    ImGui_RegisterCvar("harm_con_floatGeometry", "Float console geometry", IG_CVAR_COMPONENT_INPUT_INT4);
+    ImGui_RegisterCvar("harm_con_floatZoomStep", "Zoom step of float console");
+    ImGui_RegisterDivide(IG_CVAR_GROUP_FRAMEWORK);
+    ImGui_RegisterCvar("harm_con_alwaysShow", "Always show console");
+    ImGui_RegisterCvar("harm_con_noBackground", "Don't draw console background");
     // filesystem
     ImGui_RegisterLabel("File System", IG_CVAR_GROUP_FRAMEWORK);
-    ImGui_RegisterCvar("harm_fs_basepath_extras", "Extras search paths last(split by ',')");
-    ImGui_RegisterCvar("harm_fs_addon_extras", "Extras search addon files directory path last(split by ',')");
-    ImGui_RegisterCvar("harm_fs_game_base_extras", "Extras search game mod last(split by ',')");
+    ImGui_RegisterCvar("harm_fs_addon_extras", "Extras game addon resource path before add base game paths");
+    ImGui_RegisterCvar("harm_fs_basepath_extras", "Extras base game paths(absolute system path)");
+    ImGui_RegisterCvar("harm_fs_game_base_extras", "Extras game base name(extras fs_game_base)");
     ImGui_RegisterDivide(IG_CVAR_GROUP_FRAMEWORK);
 
     // renderer
@@ -863,11 +942,16 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCvar("harm_r_shaderProgramDir", "External OpenGLES2 GLSL shader path");
 #ifdef GL_ES_VERSION_3_0
     ImGui_RegisterCvar("harm_r_shaderProgramES3Dir", "External OpenGLES3 GLSL shader path");
+    ImGui_RegisterCvar("harm_r_useGLSLShaderBinaryCache", "Use GLSL shader compiled binary cache", IG_CVAR_COMPONENT_COMBO, "0=Disable;1=Enable and check;2=Enable and uncheck");
 #endif
     ImGui_RegisterCvar("reloadGLSLprograms", "Reload loaded GLSL shaders", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
     ImGui_RegisterCmd("exportGLSLShaderSource", "Export built-in GLSL shaders", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
     ImGui_RegisterCmd("printGLSLShaderSource", "Print built-in GLSL shaders", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
     ImGui_RegisterCmd("exportDevShaderSource", "Export built-in GLSL shaders for developer", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
+    ImGui_RegisterCmd("cleanExternalGLSLShaderSource", "Remove external GLSL shaders directory", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
+#ifdef GL_ES_VERSION_3_0
+    ImGui_RegisterCmd("cleanGLSLShaderBinary", "Remove GLSL shader binaries directory", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
+#endif
     ImGui_RegisterDivide(IG_CVAR_GROUP_RENDERER);
 
     ImGui_RegisterLabel("System", IG_CVAR_GROUP_RENDERER);

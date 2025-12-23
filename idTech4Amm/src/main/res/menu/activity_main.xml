@@ -74,6 +74,7 @@
                 android:id="@+id/main_menu_game_fteqw"
                 android:title="@string/fteqw"
                 android:icon="@drawable/fteqw_icon"
+                android:visible="false"
                 android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_ja"
@@ -99,6 +100,7 @@
                 android:id="@+id/main_menu_game_xash3d"
                 android:title="@string/xash3d"
                 android:icon="@drawable/xash3d_icon"
+                android:visible="false"
                 android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_source"
@@ -109,6 +111,11 @@
                 android:id="@+id/main_menu_game_urt"
                 android:title="@string/urbanterror"
                 android:icon="@drawable/urbanterror_icon"
+                android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_mohaa"
+                android:title="@string/openmohaa"
+                android:icon="@drawable/mohaa_icon"
                 android:showAsAction="never|withText"/>
         </menu>
     </item>

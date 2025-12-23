@@ -1726,7 +1726,10 @@ static void S_AL_MainStartSound( vec3_t origin, int entnum, int entchannel, sfxH
   srcHandle_t src;
   src_t *curSource;
 
-  s_entityTalkAmplitude[entnum] = 0;
+  if ( entnum >= 0 && entnum < MAX_GENTITIES ) 
+  {
+  	s_entityTalkAmplitude[entnum] = 0;
+  }
 
   if(origin)
   {
@@ -2728,11 +2731,9 @@ static void S_AL_StartBackgroundTrack(const char *intro, const char *loop)
     return;
   }
 
-  // Generate the musicBuffers
   if (!S_AL_GenBuffers(NUM_MUSIC_BUFFERS, musicBuffers, "music"))
     return;
 
-  // Queue the musicBuffers up
   for(i = 0; i < NUM_MUSIC_BUFFERS; i++)
   {
     S_AL_MusicProcess(musicBuffers[i]);
@@ -2740,10 +2741,8 @@ static void S_AL_StartBackgroundTrack(const char *intro, const char *loop)
 
   qalSourceQueueBuffers(musicSource, NUM_MUSIC_BUFFERS, musicBuffers);
 
-  // Set the initial gain property
   S_AL_Gain(musicSource, s_alGain->value * s_musicVolume->value);
 
-  // Start playing
   qalSourcePlay(musicSource);
 
   musicPlaying = qtrue;
@@ -3415,6 +3414,5 @@ qboolean S_AL_Init( soundInterface_t *si )
       return qfalse;
 #endif
     }
-
 
 #endif

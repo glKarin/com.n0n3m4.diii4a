@@ -163,24 +163,24 @@ void rvGESelectionMgr::Render(void)
 		return;
 	}
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglEnable(GL_BLEND);
+	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	UpdateRectangle();
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	idVec4	&color = gApp.GetOptions().GetSelectionColor();
-	glColor4f(color[0],color[1],color[2], 1.0f);
+	qglColor4f(color[0],color[1],color[2], 1.0f);
 
-	glBegin(GL_LINE_LOOP);
-	glVertex2f(mRect.x, mRect.y);
-	glVertex2f(mRect.x + mRect.w, mRect.y);
-	glVertex2f(mRect.x + mRect.w, mRect.y + mRect.h);
-	glVertex2f(mRect.x, mRect.y + mRect.h);
-	glEnd();
+	qglBegin(GL_LINE_LOOP);
+	qglVertex2f(mRect.x, mRect.y);
+	qglVertex2f(mRect.x + mRect.w, mRect.y);
+	qglVertex2f(mRect.x + mRect.w, mRect.y + mRect.h);
+	qglVertex2f(mRect.x, mRect.y + mRect.h);
+	qglEnd();
 
-	glColor4f(color[0],color[1],color[2], 0.75f);
+	qglColor4f(color[0],color[1],color[2], 0.75f);
 
 	int i;
 
@@ -195,91 +195,91 @@ void rvGESelectionMgr::Render(void)
 		mWorkspace->WorkspaceToWindow(rect);
 
 		if (i == 0) {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			glBegin(GL_TRIANGLES);
-			glVertex2f(rect.x, rect.y);
-			glVertex2f(rect.x + GUIED_GRABSIZE, rect.y);
-			glVertex2f(rect.x, rect.y + GUIED_GRABSIZE);
-			glEnd();
+			qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			qglBegin(GL_TRIANGLES);
+            qglVertex2f(rect.x, rect.y);
+            qglVertex2f(rect.x + GUIED_GRABSIZE, rect.y);
+            qglVertex2f(rect.x, rect.y + GUIED_GRABSIZE);
+            qglEnd();
 		}
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glBegin(GL_LINE_LOOP);
-		glVertex2f(rect.x, rect.y);
-		glVertex2f(rect.x + rect.w, rect.y);
-		glVertex2f(rect.x + rect.w, rect.y + rect.h);
-		glVertex2f(rect.x, rect.y + rect.h);
-		glEnd();
+		qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		qglBegin(GL_LINE_LOOP);
+		qglVertex2f(rect.x, rect.y);
+		qglVertex2f(rect.x + rect.w, rect.y);
+		qglVertex2f(rect.x + rect.w, rect.y + rect.h);
+		qglVertex2f(rect.x, rect.y + rect.h);
+		qglEnd();
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glBegin(GL_QUADS);
-		glVertex2f(rect.x + (rect.w - GUIED_CENTERSIZE) / 2, rect.y + (rect.h - GUIED_CENTERSIZE) / 2);
-		glVertex2f(rect.x + (rect.w + GUIED_CENTERSIZE) / 2, rect.y + (rect.h - GUIED_CENTERSIZE) / 2);
-		glVertex2f(rect.x + (rect.w + GUIED_CENTERSIZE) / 2, rect.y + (rect.h + GUIED_CENTERSIZE) / 2);
-		glVertex2f(rect.x + (rect.w - GUIED_CENTERSIZE) / 2, rect.y + (rect.h + GUIED_CENTERSIZE) / 2);
-		glEnd();
+		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		qglBegin(GL_QUADS);
+		qglVertex2f(rect.x + (rect.w - GUIED_CENTERSIZE) / 2, rect.y + (rect.h - GUIED_CENTERSIZE) / 2);
+		qglVertex2f(rect.x + (rect.w + GUIED_CENTERSIZE) / 2, rect.y + (rect.h - GUIED_CENTERSIZE) / 2);
+		qglVertex2f(rect.x + (rect.w + GUIED_CENTERSIZE) / 2, rect.y + (rect.h + GUIED_CENTERSIZE) / 2);
+		qglVertex2f(rect.x + (rect.w - GUIED_CENTERSIZE) / 2, rect.y + (rect.h + GUIED_CENTERSIZE) / 2);
+		qglEnd();
 	}
 
 	if (mExpression) {
 		return;
 	}
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	glColor4f(color[0],color[1],color[2], 1.0f);
-	glBegin(GL_QUADS);
+	qglColor4f(color[0],color[1],color[2], 1.0f);
+	qglBegin(GL_QUADS);
 
 	// Top Left
-	glVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y - GUIED_GRABSIZE);
-	glVertex2f(mRect.x - 1, mRect.y - GUIED_GRABSIZE);
-	glVertex2f(mRect.x - 1, mRect.y - 1);
-	glVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y - 1);
+	qglVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y - GUIED_GRABSIZE);
+	qglVertex2f(mRect.x - 1, mRect.y - GUIED_GRABSIZE);
+	qglVertex2f(mRect.x - 1, mRect.y - 1);
+	qglVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y - 1);
 
 	// Left
-	glVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y + mRect.h / 2 - GUIED_GRABSIZE / 2);
-	glVertex2f(mRect.x - 1, mRect.y + mRect.h / 2 - GUIED_GRABSIZE / 2);
-	glVertex2f(mRect.x - 1, mRect.y + mRect.h / 2 + GUIED_GRABSIZE / 2);
-	glVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y + mRect.h / 2 + GUIED_GRABSIZE / 2);
+	qglVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y + mRect.h / 2 - GUIED_GRABSIZE / 2);
+	qglVertex2f(mRect.x - 1, mRect.y + mRect.h / 2 - GUIED_GRABSIZE / 2);
+	qglVertex2f(mRect.x - 1, mRect.y + mRect.h / 2 + GUIED_GRABSIZE / 2);
+	qglVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y + mRect.h / 2 + GUIED_GRABSIZE / 2);
 
 	// Bototm Left
-	glVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y + mRect.h + 1);
-	glVertex2f(mRect.x - 1, mRect.y + mRect.h + 1);
-	glVertex2f(mRect.x - 1, mRect.y + mRect.h + GUIED_GRABSIZE);
-	glVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y + mRect.h + GUIED_GRABSIZE);
+	qglVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y + mRect.h + 1);
+	qglVertex2f(mRect.x - 1, mRect.y + mRect.h + 1);
+	qglVertex2f(mRect.x - 1, mRect.y + mRect.h + GUIED_GRABSIZE);
+	qglVertex2f(mRect.x - GUIED_GRABSIZE, mRect.y + mRect.h + GUIED_GRABSIZE);
 
 	// Bottom
-	glVertex2f(mRect.x - GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y + mRect.h + 1);
-	glVertex2f(mRect.x + GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y + mRect.h + 1);
-	glVertex2f(mRect.x + GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y + mRect.h + GUIED_GRABSIZE);
-	glVertex2f(mRect.x - GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y + mRect.h + GUIED_GRABSIZE);
+	qglVertex2f(mRect.x - GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y + mRect.h + 1);
+	qglVertex2f(mRect.x + GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y + mRect.h + 1);
+	qglVertex2f(mRect.x + GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y + mRect.h + GUIED_GRABSIZE);
+	qglVertex2f(mRect.x - GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y + mRect.h + GUIED_GRABSIZE);
 
 	// Bottom Right
-	glVertex2f(mRect.x + mRect.w + 1, mRect.y + mRect.h + 1);
-	glVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y + mRect.h + 1);
-	glVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y + mRect.h + GUIED_GRABSIZE);
-	glVertex2f(mRect.x + mRect.w + 1, mRect.y + mRect.h + GUIED_GRABSIZE);
+	qglVertex2f(mRect.x + mRect.w + 1, mRect.y + mRect.h + 1);
+	qglVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y + mRect.h + 1);
+	qglVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y + mRect.h + GUIED_GRABSIZE);
+	qglVertex2f(mRect.x + mRect.w + 1, mRect.y + mRect.h + GUIED_GRABSIZE);
 
 	// Right
-	glVertex2f(mRect.x + mRect.w + 1, mRect.y + mRect.h / 2 - GUIED_GRABSIZE / 2);
-	glVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y + mRect.h / 2 - GUIED_GRABSIZE / 2);
-	glVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y + mRect.h / 2 + GUIED_GRABSIZE / 2);
-	glVertex2f(mRect.x + mRect.w + 1, mRect.y + mRect.h / 2 + GUIED_GRABSIZE / 2);
+	qglVertex2f(mRect.x + mRect.w + 1, mRect.y + mRect.h / 2 - GUIED_GRABSIZE / 2);
+	qglVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y + mRect.h / 2 - GUIED_GRABSIZE / 2);
+	qglVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y + mRect.h / 2 + GUIED_GRABSIZE / 2);
+	qglVertex2f(mRect.x + mRect.w + 1, mRect.y + mRect.h / 2 + GUIED_GRABSIZE / 2);
 
 	// Top Right
-	glVertex2f(mRect.x + mRect.w + 1, mRect.y - GUIED_GRABSIZE);
-	glVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y - GUIED_GRABSIZE);
-	glVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y - 1);
-	glVertex2f(mRect.x + mRect.w + 1, mRect.y - 1);
+    qglVertex2f(mRect.x + mRect.w + 1, mRect.y - GUIED_GRABSIZE);
+    qglVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y - GUIED_GRABSIZE);
+    qglVertex2f(mRect.x + mRect.w + GUIED_GRABSIZE, mRect.y - 1);
+    qglVertex2f(mRect.x + mRect.w + 1, mRect.y - 1);
 
 	// Top
-	glVertex2f(mRect.x - GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y - GUIED_GRABSIZE);
-	glVertex2f(mRect.x + GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y - GUIED_GRABSIZE);
-	glVertex2f(mRect.x + GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y - 1);
-	glVertex2f(mRect.x - GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y - 1);
+    qglVertex2f(mRect.x - GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y - GUIED_GRABSIZE);
+    qglVertex2f(mRect.x + GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y - GUIED_GRABSIZE);
+    qglVertex2f(mRect.x + GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y - 1);
+	qglVertex2f(mRect.x - GUIED_GRABSIZE / 2 + mRect.w / 2, mRect.y - 1);
 
-	glEnd();
+	qglEnd();
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 /*

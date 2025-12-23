@@ -859,6 +859,14 @@ void idClip::Init( void ) {
 
 	// get world map bounds
 	world = collisionModelManager->LoadModel( gameLocal.GetMapName(), WORLD_MODEL_NAME );
+#ifdef _QUAKE4 //karin: if no worldMap collisionModel
+    if(!world)
+    {
+        common->Warning(WORLD_MODEL_NAME " collision model not found");
+        worldBounds.Zero();
+    }
+    else
+#endif
 	world->GetBounds( worldBounds );
 
 	// create world sectors

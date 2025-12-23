@@ -1,0 +1,56 @@
+// 1. player view body animation model
+model player_model_torso_and_lower_body {
+    offset (0 0 0)
+    model models/md5/player_model_torso_and_lower_body.md5mesh
+
+// loop anims:
+    idle models/md5/player_model_torso_and_lower_body/idle.md5anim
+    run_forward models/md5/player_model_torso_and_lower_body/run_forward.md5anim
+    run_backwards models/md5/player_model_torso_and_lower_body/run_backwards.md5anim
+    run_strafe_left models/md5/player_model_torso_and_lower_body/run_strafe_left.md5anim
+    run_strafe_right models/md5/player_model_torso_and_lower_body/run_strafe_right.md5anim
+    walk_forward models/md5/player_model_torso_and_lower_body/walk_forward.md5anim
+    walk_backwards models/md5/player_model_torso_and_lower_body/walk_backwards.md5anim
+    walk_left models/md5/player_model_torso_and_lower_body/walk_left.md5anim
+    walk_right models/md5/player_model_torso_and_lower_body/walk_right.md5anim
+    crouch models/md5/player_model_torso_and_lower_body/crouch.md5anim
+    crouch_walk models/md5/player_model_torso_and_lower_body/crouch_walk.md5anim
+    crouch_walk_backward models/md5/player_model_torso_and_lower_body/crouch_walk_backward.md5anim
+    fall models/md5/player_model_torso_and_lower_body/fall.md5anim
+
+// single anims:
+    crouch_down models/md5/player_model_torso_and_lower_body/crouch_down.md5anim
+    crouch_up models/md5/player_model_torso_and_lower_body/crouch_up.md5anim
+    run_jump models/md5/player_model_torso_and_lower_body/run_jump.md5anim
+    jump models/md5/player_model_torso_and_lower_body/jump.md5anim
+    hard_land models/md5/player_model_torso_and_lower_body/hard_land.md5anim
+    soft_land models/md5/player_model_torso_and_lower_body/soft_land.md5anim
+}
+
+// 2. set player player_viewbody spawn arguments
+entityDef player_viewbody {
+    "spawnclass"				"idViewBody"
+    "body_model"                "player_model_torso_and_lower_body" // body's md5 model: animations's name same as player model: string
+    "body_offset"               "-15 0 0" // extras model offset: vector <forward right up>, default = 0 0 0
+    "body_allChannel"			"0" // play animation with all channels, else only play with legs channel: bool, default = 1
+    "body_usePlayerModel"		"0" // use player model and not use 'body_model': bool, default = 0
+	"body_weaponDepthHack"		"0" // override view weapon: bool, default = 0
+	"body_modelDepthHack"		"0.0" // near clip: float, default = 0
+
+// Hide surface
+    //"body_hidesurfaces" 		"shader_head,shader_toast" // 1. hide surface names, separate by ',': string
+    //"hidesurface1" 			"shader_arm" // 2. hide surface name by entity property: string, hidesurfaceXXX
+    //"hidesurface5" 			"shader_neck"
+
+// override model animation name: string, "anim <model animation name>" "<replace animation name>"
+    // "anim run_forward" 		"walk_forward"
+    // "anim run_backwards" 	"walk_backwards"
+}
+
+// 3. setup player player_viewbody spawn argument in player entityDef, default name is player_viewbody.
+entityDef player {
+    "player_viewbody"				"player_viewbody" // setup idViewBody's entityDef
+}
+
+// 4. enable view body by cvar
+// set harm_ui_showViewBody 1

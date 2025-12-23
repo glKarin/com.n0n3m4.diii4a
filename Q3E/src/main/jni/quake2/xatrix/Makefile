@@ -88,7 +88,7 @@ endif
 #   to get it there...
 #  -fwrapv for defined integer wrapping. MSVC6 did this
 #   and the game code requires it.
-override CFLAGS += -std=gnu99 -fno-strict-aliasing -fwrapv
+override CFLAGS += -fno-strict-aliasing -fwrapv
 
 # -MMD to generate header dependencies. Unsupported by
 #  the Clang shipped with OS X.

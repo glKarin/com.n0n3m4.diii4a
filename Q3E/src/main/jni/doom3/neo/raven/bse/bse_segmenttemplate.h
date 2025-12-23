@@ -2,69 +2,60 @@
 //
 
 /* -------------------------------------------------  flags & enums  ------ */
+// rvSegmentTemplate::mFlags
 enum rvSegTemplateFlags
 {
 	STF_ENABLED = 1, //karin: 0x1 from old Quake4BSE
     STF_LOCKED = 1 << 1, //karin: 0x2 k??? TODO Q4BSE is 1 << 0,   // *locked*   * stays fixed to owner
-						 
-	STF_HAS_PARTICLE = 1 << 2, // 0x4 // acitve
-	STF_INGORE_DURATION = 1 << 4, // 0x10
 
-    STF_CONSTANT = 1 << 5, // 0x20 //k??? TODO Q4BSE is 1 << 1,   // *constant* * used for linked segs
-    STF_EMITTER_ATTEN = 1 << 6,   // 0x40 *attenuateEmitter*
-    STF_EMITTER_INV_ATTEN = 1 << 7,   // *inverseAttenuateEmitter*
+	STF_HASPARTICLES = 1 << 2, // 0x4 // acitve
+	STF_IGNORE_DURATION = 1 << 4, // 0x10
+
+    STF_INFINITE_DURATION = 1 << 5, // 0x20 //k??? TODO Q4BSE is 1 << 1,   // *constant* * used for linked segs
+    STF_ATTENUATE_EMITTER = 1 << 6,   // 0x40 *attenuateEmitter*
+    STF_INVERSE_ATTENUATE = 1 << 7,   // *inverseAttenuateEmitter*
     STF_TEMPORARY = 1 << 8,   //karin: 0x100 from old Quake4BSE
-    STF_HAS_SOUND = 1 << 14, //karin: //k??? TODO Q4BSE is 1 << 8,   // runtime * SoundShader assigned
-    STF_IS_TRAIL = 1 << 9,   // runtime * seg spawns trail seg
-    STF_IS_PARTICLE = 1 << 10,  // runtime * seg owns particles
-    STF_IS_LIGHT = 1 << 11,  // runtime * seg owns light
-    STF_DETAIL_CULL = 1 << 12,  // runtime * culled by detail thresh
-    STF_MAX_DURATION = 1 << 13   // *channel*-only seg * use snd len
+//    STF_IS_TRAIL = 1 << 9,   // runtime * seg spawns trail seg
+//    STF_IS_PARTICLE = 1 << 10,  // runtime * seg owns particles
+//    STF_IS_LIGHT = 1 << 11,  // runtime * seg owns light
+//    STF_DETAIL_CULL = 1 << 12,  // runtime * culled by detail thresh
+    STF_COMPLEX = 1 << 13,   // MAX_DURATION *channel*-only seg * use snd len
+    STF_CALCULATE_DURATION = 1 << 14, //karin: soundShader HAS_SOUND //k??? TODO Q4BSE is 1 << 8,   // runtime * SoundShader assigned
 };
-
-// rvSegmentTemplate::mSegType //karin: move enum from class rvSegmentTemplate to globals
-enum rvSegTemplateType
-{
-    SEG_NONE = 0x0,
-    SEG_EFFECT = 0x1,
-    SEG_EMITTER = 0x2,
-    SEG_SPAWNER = 0x3,
-    SEG_TRAIL = 0x4,
-    SEG_SOUND = 0x5,
-    SEG_DECAL = 0x6,
-    SEG_LIGHT = 0x7,
-    SEG_DELAY = 0x8,
-    SEG_DOUBLEVISION = 0x9, // SEG_DV
-    SEG_SHAKE = 0xA, // 10
-    SEG_TUNNEL = 0xB, // 11
-    SEG_COUNT = 0xC, // =12
+enum { // ETQW SDK
+    STFLAG_ENABLED				= BITT< 0 >::VALUE,
+    STFLAG_LOCKED				= BITT< 1 >::VALUE,
+    STFLAG_HASPARTICLES			= BITT< 2 >::VALUE,
+    STFLAG_HASPHYSICS			= BITT< 3 >::VALUE,
+    STFLAG_IGNORE_DURATION		= BITT< 4 >::VALUE,
+    STFLAG_INFINITE_DURATION	= BITT< 5 >::VALUE,
+    STFLAG_ATTENUATE_EMITTER	= BITT< 6 >::VALUE,
+    STFLAG_INVERSE_ATTENUATE	= BITT< 7 >::VALUE,
+    STFLAG_TEMPORARY			= BITT< 8 >::VALUE,
+    STFLAG_USEMATCOLOR			= BITT< 9 >::VALUE,
+    STFLAG_DEPTH_SORT			= BITT< 10 >::VALUE,
+    STFLAG_INVERSE_DRAWORDER	= BITT< 11 >::VALUE,
+    STFLAG_ORIENTATE_IDENTITY	= BITT< 12 >::VALUE,
+    STFLAG_COMPLEX				= BITT< 13 >::VALUE,
+    STFLAG_CALCULATE_DURATION	= BITT< 14 >::VALUE,
 };
-#define SEG_DV SEG_DOUBLEVISION
 
 // rvParticleTemplate::mType //karin: change prefix to PTYPE_ from SEG, because DECAL, LIGHT, SOUND are ambiguous with same name, and rename enum name to rvParticleTemplateType
 enum rvParticleTemplateType
 {
-    PTYPE_PARTICLE = 0,
-    PTYPE_SPRITE = 1,
-    PTYPE_LINE = 2,
-    PTYPE_ORIENTED = 3,
-    PTYPE_DECAL = 4,
-    PTYPE_MODEL = 5,
-    PTYPE_LIGHT = 6,
-    PTYPE_ELECTRIC = 7,
-    PTYPE_LINKED = 8,
-    PTYPE_DEBRIS = 9,
-    PTYPE_SOUND = 10,   // *channel*-only segment
+    PTYPE_NONE = 0,									// A non sprite - for sound and vision segments
+    PTYPE_SPRITE = 1,									// Simple 2D alpha blended quad
+    PTYPE_LINE = 2,										// 2D alpha blended line
+    PTYPE_ORIENTED = 3,									// 2D particle oriented in 3D - alpha blended
+    PTYPE_DECAL = 4,									// Hook into id's decal system
+    PTYPE_MODEL = 5,									// Model - must only have 1 surface
+    PTYPE_LIGHT = 6,									// Dynamic light - very expensive
+    PTYPE_ELECTRIC = 7,								// A bolt of electricity
+    PTYPE_LINKED = 8,									// A series of linked lines
+    // PTYPE_ORIENTEDLINKED, // only in ETQW SDK
+    PTYPE_DEBRIS = 9,									// A client side moveable entity spawned in the game
+    PTYPE_SOUND = 10,   // *channel*-only segment // not in ETQW SDK
     PTYPE_COUNT = 11,
-    PTYPE_INVALID = 255
-};
-
-// rvParticleTemplate::mTrailType
-enum {
-	TRAIL_NONE = 0,
-	TRAIL_BURN = 1,
-	TRAIL_MOTION = 2,
-	TRAIL_PARTICLE = 3, // custom
 };
 
 class rvSegmentTemplate
@@ -120,7 +111,7 @@ public:
 
     /* shorthand access ---------------------------------------------------- */
     ID_INLINE const  idStr& GetName()      const { return mSegmentName; }
-    ID_INLINE        rvSegTemplateType  GetType()   const { return static_cast<rvSegTemplateType>(mSegType); }
+    ID_INLINE        eBSESegment  GetType()   const { return static_cast<eBSESegment>(mSegType); }
 
     float               CalculateBounds() const;
     float GetSoundVolume() const;
@@ -151,7 +142,7 @@ public:
     int32_t                mTrailSegmentIndex;
 
     int32_t                mNumEffects;
-    const rvDeclEffect* mEffects[4];
+    const rvDeclEffect* mEffects[BSE_NUM_SPAWNABLE/* 4 */];
 
     const idSoundShader* mSoundShader;
     idVec2                 mSoundVolume;

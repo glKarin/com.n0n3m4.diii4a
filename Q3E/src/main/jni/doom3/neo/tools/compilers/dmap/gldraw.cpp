@@ -33,9 +33,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #if defined(_WIN32) && defined(ID_ALLOW_TOOLS)
 #include <windows.h>
+#if !defined(GL_ES_VERSION_2_0)
 #include <GL/gl.h>
 #include <GL/glu.h>
 //#include <GL/glaux.h>
+#endif
 
 #define	WIN_SIZE	1024
 
@@ -46,12 +48,14 @@ void Draw_ClearWindow(void)
 		return;
 	}
 
-	glDrawBuffer(GL_FRONT);
+#if !defined(GL_ES_VERSION_2_0)
+	qglDrawBuffer(GL_FRONT);
+#endif
 
 	RB_SetGL2D();
 
-	glClearColor(0.5, 0.5, 0.5, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	qglClearColor(0.5, 0.5, 0.5, 0);
+	qglClear(GL_COLOR_BUFFER_BIT);
 
 #if 0
 	int		w, h, g;
@@ -65,39 +69,39 @@ void Draw_ClearWindow(void)
 
 	g = w > h ? w : h;
 
-	glLoadIdentity();
+	qglLoadIdentity();
 	gluPerspective(90,  1,  2,  16384);
 	gluLookAt(mx, my, draw_maxs[2] + g/2, mx , my, draw_maxs[2], 0, 1, 0);
 #else
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(dmapGlobals.drawBounds[0][0], dmapGlobals.drawBounds[1][0],
+	qglMatrixMode(GL_PROJECTION);
+    qglLoadIdentity();
+    qglOrtho(dmapGlobals.drawBounds[0][0], dmapGlobals.drawBounds[1][0],
 	        dmapGlobals.drawBounds[0][1], dmapGlobals.drawBounds[1][1],
 	        -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+    qglMatrixMode(GL_MODELVIEW);
+    qglLoadIdentity();
 #endif
-	glColor3f(0,0,0);
-//	glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDisable(GL_DEPTH_TEST);
-//	glEnable (GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    qglColor3f(0,0,0);
+//	qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+    qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    qglDisable(GL_DEPTH_TEST);
+//	qglEnable (GL_BLEND);
+    qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 #if 0
-//glColor4f (1,0,0,0.5);
-//	glBegin( GL_LINE_LOOP );
-	glBegin(GL_QUADS);
+//qglColor4f (1,0,0,0.5);
+//	qglBegin( GL_LINE_LOOP );
+	qglBegin(GL_QUADS);
 
-	glVertex2f(dmapGlobals.drawBounds.b[0][0] + 20, dmapGlobals.drawBounds.b[0][1] + 20);
-	glVertex2f(dmapGlobals.drawBounds.b[1][0] - 20, dmapGlobals.drawBounds.b[0][1] + 20);
-	glVertex2f(dmapGlobals.drawBounds.b[1][0] - 20, dmapGlobals.drawBounds.b[1][1] - 20);
-	glVertex2f(dmapGlobals.drawBounds.b[0][0] + 20, dmapGlobals.drawBounds.b[1][1] - 20);
+	qglVertex2f(dmapGlobals.drawBounds.b[0][0] + 20, dmapGlobals.drawBounds.b[0][1] + 20);
+	qglVertex2f(dmapGlobals.drawBounds.b[1][0] - 20, dmapGlobals.drawBounds.b[0][1] + 20);
+	qglVertex2f(dmapGlobals.drawBounds.b[1][0] - 20, dmapGlobals.drawBounds.b[1][1] - 20);
+	qglVertex2f(dmapGlobals.drawBounds.b[0][0] + 20, dmapGlobals.drawBounds.b[1][1] - 20);
 
-	glEnd();
+	qglEnd();
 #endif
 
-	glFlush();
+	qglFlush();
 
 }
 
@@ -106,7 +110,7 @@ void Draw_SetRed(void)
 	if (!dmapGlobals.drawflag)
 		return;
 
-	glColor3f(1,0,0);
+	qglColor3f(1,0,0);
 }
 
 void Draw_SetGrey(void)
@@ -114,7 +118,7 @@ void Draw_SetGrey(void)
 	if (!dmapGlobals.drawflag)
 		return;
 
-	glColor3f(0.5f, 0.5f, 0.5f);
+	qglColor3f(0.5f, 0.5f, 0.5f);
 }
 
 void Draw_SetBlack(void)
@@ -122,7 +126,7 @@ void Draw_SetBlack(void)
 	if (!dmapGlobals.drawflag)
 		return;
 
-	glColor3f(0.0f, 0.0f, 0.0f);
+	qglColor3f(0.0f, 0.0f, 0.0f);
 }
 
 void DrawWinding(const idWinding *w)
@@ -132,23 +136,23 @@ void DrawWinding(const idWinding *w)
 	if (!dmapGlobals.drawflag)
 		return;
 
-	glColor3f(0.3f, 0.0f, 0.0f);
-	glBegin(GL_POLYGON);
+	qglColor3f(0.3f, 0.0f, 0.0f);
+	qglBegin(GL_POLYGON);
 
 	for (i = 0; i < w->GetNumPoints(); i++)
-		glVertex3f((*w)[i][0], (*w)[i][1], (*w)[i][2]);
+		qglVertex3f((*w)[i][0], (*w)[i][1], (*w)[i][2]);
 
-	glEnd();
+	qglEnd();
 
-	glColor3f(1, 0, 0);
-	glBegin(GL_LINE_LOOP);
+	qglColor3f(1, 0, 0);
+	qglBegin(GL_LINE_LOOP);
 
 	for (i = 0; i < w->GetNumPoints(); i++)
-		glVertex3f((*w)[i][0], (*w)[i][1], (*w)[i][2]);
+		qglVertex3f((*w)[i][0], (*w)[i][1], (*w)[i][2]);
 
-	glEnd();
+	qglEnd();
 
-	glFlush();
+	qglFlush();
 }
 
 void DrawAuxWinding(const idWinding *w)
@@ -158,23 +162,23 @@ void DrawAuxWinding(const idWinding *w)
 	if (!dmapGlobals.drawflag)
 		return;
 
-	glColor3f(0.0f, 0.3f, 0.0f);
-	glBegin(GL_POLYGON);
+    qglColor3f(0.0f, 0.3f, 0.0f);
+    qglBegin(GL_POLYGON);
 
 	for (i = 0; i < w->GetNumPoints(); i++)
-		glVertex3f((*w)[i][0], (*w)[i][1], (*w)[i][2]);
+        qglVertex3f((*w)[i][0], (*w)[i][1], (*w)[i][2]);
 
-	glEnd();
+    qglEnd();
 
-	glColor3f(0.0f, 1.0f, 0.0f);
-	glBegin(GL_LINE_LOOP);
+    qglColor3f(0.0f, 1.0f, 0.0f);
+    qglBegin(GL_LINE_LOOP);
 
 	for (i = 0; i < w->GetNumPoints(); i++)
-		glVertex3f((*w)[i][0], (*w)[i][1], (*w)[i][2]);
+        qglVertex3f((*w)[i][0], (*w)[i][1], (*w)[i][2]);
 
-	glEnd();
+    qglEnd();
 
-	glFlush();
+    qglFlush();
 }
 
 void DrawLine(idVec3 v1, idVec3 v2, int color)
@@ -184,39 +188,39 @@ void DrawLine(idVec3 v1, idVec3 v2, int color)
 
 	switch (color) {
 		case 0:
-			glColor3f(0, 0, 0);
+			qglColor3f(0, 0, 0);
 			break;
 		case 1:
-			glColor3f(0, 0, 1);
+            qglColor3f(0, 0, 1);
 			break;
 		case 2:
-			glColor3f(0, 1, 0);
+            qglColor3f(0, 1, 0);
 			break;
 		case 3:
-			glColor3f(0, 1, 1);
+            qglColor3f(0, 1, 1);
 			break;
 		case 4:
-			glColor3f(1, 0, 0);
+            qglColor3f(1, 0, 0);
 			break;
 		case 5:
-			glColor3f(1, 0, 1);
+            qglColor3f(1, 0, 1);
 			break;
 		case 6:
-			glColor3f(1, 1, 0);
+            qglColor3f(1, 1, 0);
 			break;
 		case 7:
-			glColor3f(1, 1, 1);
+            qglColor3f(1, 1, 1);
 			break;
 	}
 
 
-	glBegin(GL_LINES);
+	qglBegin(GL_LINES);
 
-	glVertex3fv(v1.ToFloatPtr());
-	glVertex3fv(v2.ToFloatPtr());
+	qglVertex3fv(v1.ToFloatPtr());
+	qglVertex3fv(v2.ToFloatPtr());
 
-	glEnd();
-	glFlush();
+	qglEnd();
+	qglFlush();
 }
 
 //============================================================

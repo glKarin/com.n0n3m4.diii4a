@@ -143,7 +143,7 @@ bool rvGEWorkspace::Attach(HWND wnd)
 
 	// Jam the workspace pointer into the userdata window long so
 	// we can retrieve the workspace from the window later
-	SetWindowLong(mWnd, GWL_USERDATA, (LONG) this);
+	SetWindowLongPtr(mWnd, GWLP_USERDATA, (LONG_PTR) this);
 
 	UpdateTitle();
 
@@ -161,7 +161,7 @@ void rvGEWorkspace::Detach(void)
 {
 	assert(mWnd);
 
-	SetWindowLong(mWnd, GWL_USERDATA, 0);
+	SetWindowLongPtr(mWnd, GWLP_USERDATA, 0);
 	mWnd = NULL;
 }
 
@@ -211,47 +211,47 @@ void rvGEWorkspace::RenderGrid(void)
 		return;
 	}
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglEnable(GL_BLEND);
+	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glColor4f(color[0], color[1], color[2], 0.5f);
+	qglColor4f(color[0], color[1], color[2], 0.5f);
 
-	glBegin(GL_LINES);
+	qglBegin(GL_LINES);
 	step = mApplication->GetOptions().GetGridWidth() * g_ZoomScales[mZoom];
 
 	for (x = mRect.x + mRect.w; x >= mRect.x ; x -= step) {
-		glVertex2f(x, mRect.y);
-		glVertex2f(x, mRect.y + mRect.h);
+		qglVertex2f(x, mRect.y);
+		qglVertex2f(x, mRect.y + mRect.h);
 	}
 
 	step = mApplication->GetOptions().GetGridHeight() * g_ZoomScales[mZoom];
 
 	for (y = mRect.y + mRect.h; y >= mRect.y ; y -= step) {
-		glVertex2f(mRect.x, y);
-		glVertex2f(mRect.x + mRect.w, y);
+		qglVertex2f(mRect.x, y);
+		qglVertex2f(mRect.x + mRect.w, y);
 	}
 
-	glEnd();
+	qglEnd();
 
-	glDisable(GL_BLEND);
-	glColor3f(color[0], color[1], color[2]);
+	qglDisable(GL_BLEND);
+	qglColor3f(color[0], color[1], color[2]);
 
-	glBegin(GL_LINES);
+	qglBegin(GL_LINES);
 	step = mApplication->GetOptions().GetGridWidth() * g_ZoomScales[mZoom];
 
 	for (x = mRect.x + mRect.w; x >= mRect.x ; x -= step * 4) {
-		glVertex2f(x, mRect.y);
-		glVertex2f(x, mRect.y + mRect.h);
+		qglVertex2f(x, mRect.y);
+		qglVertex2f(x, mRect.y + mRect.h);
 	}
 
 	step = mApplication->GetOptions().GetGridHeight() * g_ZoomScales[mZoom];
 
 	for (y = mRect.y + mRect.h; y >= mRect.y ; y -= step * 4) {
-		glVertex2f(mRect.x, y);
-		glVertex2f(mRect.x + mRect.w, y);
+		qglVertex2f(mRect.x, y);
+		qglVertex2f(mRect.x + mRect.w, y);
 	}
 
-	glEnd();
+	qglEnd();
 }
 
 /*
@@ -271,35 +271,35 @@ void rvGEWorkspace::Render(HDC hdc)
 
 	// Switch GL contexts to our dc
 	if (!qwglMakeCurrent(hdc, win32.hGLRC)) {
-		common->Printf("ERROR: wglMakeCurrent failed.. Error:%i\n", glGetError());
+		common->Printf("ERROR: wglMakeCurrent failed.. Error:%i\n", qglGetError());
 		common->Printf("Please restart Q3Radiant if the Map view is not working\n");
 		return;
 	}
 
 	// Prepare the view and clear it
 	GL_State(GLS_DEFAULT);
-	glViewport(0, 0, mWindowWidth, mWindowHeight);
-	glScissor(0, 0, mWindowWidth, mWindowHeight);
-	glClearColor(0.75f, 0.75f, 0.75f, 0);
+	qglViewport(0, 0, mWindowWidth, mWindowHeight);
+	qglScissor(0, 0, mWindowWidth, mWindowHeight);
+	qglClearColor(0.75f, 0.75f, 0.75f, 0);
 
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	qglDisable(GL_DEPTH_TEST);
+	qglDisable(GL_CULL_FACE);
+	qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Render the workspace below
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0,mWindowWidth, mWindowHeight, 0, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
+	qglOrtho(0,mWindowWidth, mWindowHeight, 0, -1, 1);
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
 
-	glColor3f(mApplication->GetOptions().GetWorkspaceColor()[0], mApplication->GetOptions().GetWorkspaceColor()[1], mApplication->GetOptions().GetWorkspaceColor()[2]);
-	glBegin(GL_QUADS);
-	glVertex2f(mRect.x, mRect.y);
-	glVertex2f(mRect.x + mRect.w, mRect.y);
-	glVertex2f(mRect.x + mRect.w, mRect.y + mRect.h);
-	glVertex2f(mRect.x, mRect.y + mRect.h);
-	glEnd();
+	qglColor3f(mApplication->GetOptions().GetWorkspaceColor()[0], mApplication->GetOptions().GetWorkspaceColor()[1], mApplication->GetOptions().GetWorkspaceColor()[2]);
+	qglBegin(GL_QUADS);
+	qglVertex2f(mRect.x, mRect.y);
+	qglVertex2f(mRect.x + mRect.w, mRect.y);
+	qglVertex2f(mRect.x + mRect.w, mRect.y + mRect.h);
+	qglVertex2f(mRect.x, mRect.y + mRect.h);
+	qglEnd();
 
 	// Prepare the renderSystem view to draw the GUI in
 	viewDef_t viewDef;
@@ -328,27 +328,27 @@ void rvGEWorkspace::Render(HDC hdc)
 
 	// Prepare the viewport for drawing selections, etc.
 	GL_State(GLS_DEFAULT);
-	glDisable(GL_TEXTURE_CUBE_MAP_EXT);
-//	glDisable(GL_BLEND);
-	glDisable(GL_CULL_FACE);
+    glesDisable(GL_TEXTURE_CUBE_MAP);
+//	qglDisable(GL_BLEND);
+	qglDisable(GL_CULL_FACE);
 
-	glViewport(0, 0, mWindowWidth, mWindowHeight);
-	glScissor(0, 0, mWindowWidth, mWindowHeight);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0,mWindowWidth, mWindowHeight, 0, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	qglViewport(0, 0, mWindowWidth, mWindowHeight);
+	qglScissor(0, 0, mWindowWidth, mWindowHeight);
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
+	qglOrtho(0,mWindowWidth, mWindowHeight, 0, -1, 1);
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
 
 	RenderGrid();
 
 	mSelections.Render();
 
-	glFinish();
+	qglFinish();
 	qwglSwapBuffers(hdc);
 
-	glEnable(GL_TEXTURE_CUBE_MAP_EXT);
-	glEnable(GL_CULL_FACE);
+	glesEnable(GL_TEXTURE_CUBE_MAP);
+	qglEnable(GL_CULL_FACE);
 }
 
 /*
@@ -568,31 +568,31 @@ void rvGEWorkspace::UpdateCursor(rvGESelectionMgr::EHitTest type)
 {
 	switch (type) {
 		case rvGESelectionMgr::HT_SELECT:
-			SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(IDC_ARROW)));
+			SetCursor(LoadCursor(NULL, /*MAKEINTRESOURCE*/(IDC_ARROW)));
 			break;
 
 		case rvGESelectionMgr::HT_MOVE:
-			SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZEALL)));
+			SetCursor(LoadCursor(NULL, /*MAKEINTRESOURCE*/(IDC_SIZEALL)));
 			break;
 
 		case rvGESelectionMgr::HT_SIZE_LEFT:
 		case rvGESelectionMgr::HT_SIZE_RIGHT:
-			SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZEWE)));
+			SetCursor(LoadCursor(NULL, /*MAKEINTRESOURCE*/(IDC_SIZEWE)));
 			break;
 
 		case rvGESelectionMgr::HT_SIZE_TOP:
 		case rvGESelectionMgr::HT_SIZE_BOTTOM:
-			SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZENS)));
+			SetCursor(LoadCursor(NULL, /*MAKEINTRESOURCE*/(IDC_SIZENS)));
 			break;
 
 		case rvGESelectionMgr::HT_SIZE_TOPRIGHT:
 		case rvGESelectionMgr::HT_SIZE_BOTTOMLEFT:
-			SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZENESW)));
+			SetCursor(LoadCursor(NULL, /*MAKEINTRESOURCE*/(IDC_SIZENESW)));
 			break;
 
 		case rvGESelectionMgr::HT_SIZE_BOTTOMRIGHT:
 		case rvGESelectionMgr::HT_SIZE_TOPLEFT:
-			SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZENWSE)));
+			SetCursor(LoadCursor(NULL, /*MAKEINTRESOURCE*/(IDC_SIZENWSE)));
 			break;
 	}
 }
@@ -612,7 +612,7 @@ void rvGEWorkspace::UpdateCursor(float x, float y)
 	if (rvGESelectionMgr::HT_NONE != type) {
 		UpdateCursor(type);
 	} else {
-		SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(IDC_ARROW)));
+		SetCursor(LoadCursor(NULL, /*MAKEINTRESOURCE*/(IDC_ARROW)));
 	}
 }
 
@@ -854,7 +854,7 @@ int	rvGEWorkspace::HandleRButtonDown(WPARAM wParam, LPARAM lParam)
 		AppendMenu(popup, MF_STRING|MF_ENABLED|(wrapper->IsSelected()?MF_CHECKED:0), ID_GUIED_SELECT_FIRST + i, mSelectMenu[i]->GetName());
 	}
 
-	InsertMenu(menu, 1, MF_POPUP|MF_BYPOSITION, (LONG) popup, "Select");
+	InsertMenu(menu, 1, MF_POPUP|MF_BYPOSITION, (UINT_PTR) popup, "Select");
 
 	// Bring up the popup menu
 	ClientToScreen(mWnd, &point);

@@ -48,10 +48,6 @@ gl3state_t gl3state;
 
 unsigned gl3_rawpalette[256];
 
-/* screen size info */
-refdef_t gl3_newrefdef;
-
-viddef_t vid;
 gl3model_t *gl3_worldmodel;
 
 float gl3depthmin=0.0f, gl3depthmax=1.0f;
@@ -134,6 +130,8 @@ cvar_t *r_palettedtexture;
 cvar_t *r_validation;
 cvar_t *gl3_usefbo;
 
+static cvar_t *gl_znear;
+
 // Yaw-Pitch-Roll
 // equivalent to R_z * R_y * R_x where R_x is the trans matrix for rotating around X axis for aroundXdeg
 static hmm_mat4 rotAroundAxisZYX(float aroundZdeg, float aroundYdeg, float aroundXdeg)
@@ -184,19 +182,19 @@ static void
 GL3_Strings(void)
 {
 	GLint i, numExtensions;
-	R_Printf(PRINT_ALL, "GL_VENDOR: %s\n", gl3config.vendor_string);
-	R_Printf(PRINT_ALL, "GL_RENDERER: %s\n", gl3config.renderer_string);
-	R_Printf(PRINT_ALL, "GL_VERSION: %s\n", gl3config.version_string);
-	R_Printf(PRINT_ALL, "GL_SHADING_LANGUAGE_VERSION: %s\n", gl3config.glsl_version_string);
+	Com_Printf("GL_VENDOR: %s\n", gl3config.vendor_string);
+	Com_Printf("GL_RENDERER: %s\n", gl3config.renderer_string);
+	Com_Printf("GL_VERSION: %s\n", gl3config.version_string);
+	Com_Printf("GL_SHADING_LANGUAGE_VERSION: %s\n", gl3config.glsl_version_string);
 
 	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
 
-	R_Printf(PRINT_ALL, "GL_EXTENSIONS:");
+	Com_Printf("GL_EXTENSIONS:");
 	for(i = 0; i < numExtensions; i++)
 	{
-		R_Printf(PRINT_ALL, " %s", (const char*)glGetStringi(GL_EXTENSIONS, i));
+		Com_Printf(" %s", (const char*)glGetStringi(GL_EXTENSIONS, i));
 	}
-	R_Printf(PRINT_ALL, "\n");
+	Com_Printf("\n");
 }
 
 static void
@@ -267,6 +265,7 @@ GL3_Register(void)
 	r_novis = ri.Cvar_Get("r_novis", "0", 0);
 	r_speeds = ri.Cvar_Get("r_speeds", "0", 0);
 	gl_finish = ri.Cvar_Get("gl_finish", "0", CVAR_ARCHIVE);
+	gl_znear = ri.Cvar_Get("gl_znear", "4", CVAR_ARCHIVE);
 
 	gl3_usefbo = ri.Cvar_Get("gl3_usefbo", "1", CVAR_ARCHIVE); // use framebuffer object for postprocess effects (water)
 
@@ -357,13 +356,13 @@ enum
 static int
 SetMode_impl(int *pwidth, int *pheight, int mode, int fullscreen)
 {
-	R_Printf(PRINT_ALL, "Setting mode %d:", mode);
+	Com_Printf("Setting mode %d:", mode);
 
 	/* mode -1 is not in the vid mode table - so we keep the values in pwidth
 	   and pheight and don't even try to look up the mode info */
 	if ((mode >= 0) && !ri.Vid_GetModeInfo(pwidth, pheight, mode))
 	{
-		R_Printf(PRINT_ALL, " invalid mode\n");
+		Com_Printf(" invalid mode\n");
 		return rserr_invalid_mode;
 	}
 
@@ -372,12 +371,12 @@ SetMode_impl(int *pwidth, int *pheight, int mode, int fullscreen)
 	{
 		if(!ri.GLimp_GetDesktopMode(pwidth, pheight))
 		{
-			R_Printf( PRINT_ALL, " can't detect mode\n" );
+			Com_Printf(" can't detect mode\n" );
 			return rserr_invalid_mode;
 		}
 	}
 
-	R_Printf(PRINT_ALL, " %dx%d (vid_fullscreen %i)\n", *pwidth, *pheight, fullscreen);
+	Com_Printf(" %dx%d (vid_fullscreen %i)\n", *pwidth, *pheight, fullscreen);
 
 	if (!ri.GLimp_InitGraphics(fullscreen, pwidth, pheight))
 	{
@@ -391,14 +390,14 @@ SetMode_impl(int *pwidth, int *pheight, int mode, int fullscreen)
 
 	/* This is totaly obscure: For some strange reasons the renderer
 	   maintains two(!) repesentations of the resolution. One comes
-	   from the client and is saved in gl3_newrefdef. The other one
+	   from the client and is saved in r_newrefdef. The other one
 	   is determined here and saved in vid. Several calculations take
 	   both representations into account.
 
 	   The values will always be the same. The GLimp_InitGraphics()
 	   call above communicates the requested resolution to the client
 	   where it ends up in the vid subsystem and the vid system writes
-	   it into gl3_newrefdef.
+	   it into r_newrefdef.
 
 	   We can't avoid the client roundtrip, because we can get the
 	   real size of the drawable (which can differ from the resolution
@@ -476,11 +475,11 @@ GL3_SetMode(void)
 	{
 		if (err == rserr_invalid_mode)
 		{
-			R_Printf(PRINT_ALL, "ref_gl3::GL3_SetMode() - invalid mode\n");
+			Com_Printf("ref_gl3::GL3_SetMode() - invalid mode\n");
 
 			if (gl_msaa_samples->value != 0.0f)
 			{
-				R_Printf(PRINT_ALL, "gl_msaa_samples was %d - will try again with gl_msaa_samples = 0\n", (int)gl_msaa_samples->value);
+				Com_Printf("gl_msaa_samples was %d - will try again with gl_msaa_samples = 0\n", (int)gl_msaa_samples->value);
 				ri.Cvar_SetValue("r_msaa_samples", 0.0f);
 				gl_msaa_samples->modified = false;
 
@@ -503,7 +502,7 @@ GL3_SetMode(void)
 		/* try setting it back to something safe */
 		if ((err = SetMode_impl(&vid.width, &vid.height, gl3state.prev_mode, 0)) != rserr_ok)
 		{
-			R_Printf(PRINT_ALL, "ref_gl3::GL3_SetMode() - could not revert to safe mode\n");
+			Com_Printf("ref_gl3::GL3_SetMode() - could not revert to safe mode\n");
 			return false;
 		}
 	}
@@ -521,15 +520,15 @@ GL3_Init(void)
 
 	Swap_Init(); // FIXME: for fucks sake, this doesn't have to be done at runtime!
 
-	R_Printf(PRINT_ALL, "Refresh: " REF_VERSION "\n");
-	R_Printf(PRINT_ALL, "Client: " YQ2VERSION "\n\n");
+	Com_Printf("Refresh: " REF_VERSION "\n");
+	Com_Printf("Client: " YQ2VERSION "\n\n");
 
 	if(sizeof(float) != sizeof(GLfloat))
 	{
 		// if this ever happens, things would explode because we feed vertex arrays and UBO data
 		// using floats to OpenGL, which expects GLfloat (can't easily change, those floats are from HMM etc)
 		// (but to be honest I very much doubt this will ever happen.)
-		R_Printf(PRINT_ALL, "ref_gl3: sizeof(float) != sizeof(GLfloat) - we're in real trouble here.\n");
+		Com_Printf("ref_gl3: sizeof(float) != sizeof(GLfloat) - we're in real trouble here.\n");
 		return false;
 	}
 
@@ -545,7 +544,7 @@ GL3_Init(void)
 	/* create the window and set up the context */
 	if (!GL3_SetMode())
 	{
-		R_Printf(PRINT_ALL, "ref_gl3::R_Init() - could not R_SetMode()\n");
+		Com_Printf("ref_gl3::R_Init() - could not R_SetMode()\n");
 		return false;
 	}
 
@@ -557,7 +556,7 @@ GL3_Init(void)
 	gl3config.version_string = (const char*)glGetString(GL_VERSION);
 	gl3config.glsl_version_string = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-	R_Printf(PRINT_ALL, "\nOpenGL setting:\n");
+	Com_Printf("\nOpenGL setting:\n");
 	GL3_Strings();
 
 	/*
@@ -566,53 +565,53 @@ GL3_Init(void)
 		// if (gl_config.major_version == 3 && gl_config.minor_version < 2)
 		{
 			QGL_Shutdown();
-			R_Printf(PRINT_ALL, "Support for OpenGL 3.2 is not available\n");
+			Com_Printf("Support for OpenGL 3.2 is not available\n");
 
 			return false;
 		}
 	}
 	*/
 
-	R_Printf(PRINT_ALL, "\n\nProbing for OpenGL extensions:\n");
+	Com_Printf("\n\nProbing for OpenGL extensions:\n");
 
 
 	/* Anisotropic */
-	R_Printf(PRINT_ALL, " - Anisotropic Filtering: ");
+	Com_Printf(" - Anisotropic Filtering: ");
 
 	if(gl3config.anisotropic)
 	{
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &gl3config.max_anisotropy);
 
-		R_Printf(PRINT_ALL, "Max level: %ux\n", (int)gl3config.max_anisotropy);
+		Com_Printf("Max level: %ux\n", (int)gl3config.max_anisotropy);
 	}
 	else
 	{
 		gl3config.max_anisotropy = 0.0;
 
-		R_Printf(PRINT_ALL, "Not supported\n");
+		Com_Printf("Not supported\n");
 	}
 
 	if(gl3config.debug_output)
 	{
-		R_Printf(PRINT_ALL, " - OpenGL Debug Output: Supported ");
+		Com_Printf(" - OpenGL Debug Output: Supported ");
 		if(gl3_debugcontext->value == 0.0f)
 		{
-			R_Printf(PRINT_ALL, "(but disabled with gl3_debugcontext = 0)\n");
+			Com_Printf("(but disabled with gl3_debugcontext = 0)\n");
 		}
 		else
 		{
-			R_Printf(PRINT_ALL, "and enabled with gl3_debugcontext = %i\n", (int)gl3_debugcontext->value);
+			Com_Printf("and enabled with gl3_debugcontext = %i\n", (int)gl3_debugcontext->value);
 		}
 	}
 	else
 	{
-		R_Printf(PRINT_ALL, " - OpenGL Debug Output: Not Supported\n");
+		Com_Printf(" - OpenGL Debug Output: Not Supported\n");
 	}
 
 	gl3config.useBigVBO = false;
 	if(gl3_usebigvbo->value == 1.0f)
 	{
-		R_Printf(PRINT_ALL, "Enabling useBigVBO workaround because gl3_usebigvbo = 1\n");
+		Com_Printf("Enabling useBigVBO workaround because gl3_usebigvbo = 1\n");
 		gl3config.useBigVBO = true;
 	}
 	else if(gl3_usebigvbo->value == -1.0f)
@@ -636,15 +635,15 @@ GL3_Init(void)
 				//  but AFAIK the number behind that can be used to roughly match the driver version)
 				// => let's try matching for x.y.z with z >= 13431
 				// (no, I don't feel like testing which release since 16.2.1 has introduced the slowdown.)
-				R_Printf(PRINT_ALL, "Detected AMD Windows GPU driver, enabling useBigVBO workaround\n");
+				Com_Printf("Detected AMD Windows GPU driver, enabling useBigVBO workaround\n");
 				gl3config.useBigVBO = true;
 			}
 		}
 #elif defined(__linux__)
 		if(gl3config.vendor_string != NULL && strstr(gl3config.vendor_string, "Advanced Micro Devices, Inc.") != NULL)
 		{
-			R_Printf(PRINT_ALL, "Detected proprietary AMD GPU driver, enabling useBigVBO workaround\n");
-			R_Printf(PRINT_ALL, "(consider using the open source RadeonSI drivers, they tend to work better overall)\n");
+			Com_Printf("Detected proprietary AMD GPU driver, enabling useBigVBO workaround\n");
+			Com_Printf("(consider using the open source RadeonSI drivers, they tend to work better overall)\n");
 			gl3config.useBigVBO = true;
 		}
 #endif
@@ -657,11 +656,11 @@ GL3_Init(void)
 
 	if(GL3_InitShaders())
 	{
-		R_Printf(PRINT_ALL, "Loading shaders succeeded.\n");
+		Com_Printf("Loading shaders succeeded.\n");
 	}
 	else
 	{
-		R_Printf(PRINT_ALL, "Loading shaders failed.\n");
+		Com_Printf("Loading shaders failed.\n");
 		return false;
 	}
 
@@ -680,7 +679,7 @@ GL3_Init(void)
 	// take the viewsize into account (enforce that by setting invalid size)
 	gl3state.ppFBtexWidth = gl3state.ppFBtexHeight = -1;
 
-	R_Printf(PRINT_ALL, "\n");
+	Com_Printf("\n");
 	return true;
 }
 
@@ -1017,11 +1016,11 @@ GL3_DrawParticles(void)
 	//if (!(stereo_split_tb || stereo_split_lr))
 	{
 		int i;
-		int numParticles = gl3_newrefdef.num_particles;
+		int numParticles = r_newrefdef.num_particles;
 		YQ2_ALIGNAS_TYPE(unsigned) byte color[4];
 		const particle_t *p;
 		// assume the size looks good with window height 480px and scale according to real resolution
-		float pointSize = gl3_particle_size->value * (float)gl3_newrefdef.height/480.0f;
+		float pointSize = gl3_particle_size->value * (float)r_newrefdef.height/480.0f;
 
 		typedef struct part_vtx {
 			GLfloat pos[3];
@@ -1041,7 +1040,7 @@ GL3_DrawParticles(void)
 
 		// TODO: viewOrg could be in UBO
 		vec3_t viewOrg;
-		VectorCopy(gl3_newrefdef.vieworg, viewOrg);
+		VectorCopy(r_newrefdef.vieworg, viewOrg);
 
 		glDepthMask(GL_FALSE);
 		glEnable(GL_BLEND);
@@ -1058,7 +1057,7 @@ GL3_DrawParticles(void)
 
 		GL3_UseProgram(gl3state.siParticle.shaderProgram);
 
-		for ( i = 0, p = gl3_newrefdef.particles; i < numParticles; i++, p++ )
+		for ( i = 0, p = r_newrefdef.particles; i < numParticles; i++, p++ )
 		{
 			*(int *) color = d_8to24table [ p->color & 0xFF ];
 			part_vtx* cur = &buf[i];
@@ -1105,9 +1104,9 @@ GL3_DrawEntitiesOnList(void)
 	GL3_ResetShadowAliasModels();
 
 	/* draw non-transparent first */
-	for (i = 0; i < gl3_newrefdef.num_entities; i++)
+	for (i = 0; i < r_newrefdef.num_entities; i++)
 	{
-		entity_t *currententity = &gl3_newrefdef.entities[i];
+		entity_t *currententity = &r_newrefdef.entities[i];
 
 		if (currententity->flags & RF_TRANSLUCENT)
 		{
@@ -1140,7 +1139,7 @@ GL3_DrawEntitiesOnList(void)
 					GL3_DrawSpriteModel(currententity, currentmodel);
 					break;
 				default:
-					ri.Sys_Error(ERR_DROP, "Bad modeltype");
+					Com_Error(ERR_DROP, "Bad modeltype");
 					break;
 			}
 		}
@@ -1151,9 +1150,9 @@ GL3_DrawEntitiesOnList(void)
 	   becomes a problem... */
 	glDepthMask(GL_FALSE);
 
-	for (i = 0; i < gl3_newrefdef.num_entities; i++)
+	for (i = 0; i < r_newrefdef.num_entities; i++)
 	{
-		entity_t *currententity = &gl3_newrefdef.entities[i];
+		entity_t *currententity = &r_newrefdef.entities[i];
 
 		if (!(currententity->flags & RF_TRANSLUCENT))
 		{
@@ -1186,7 +1185,7 @@ GL3_DrawEntitiesOnList(void)
 					GL3_DrawSpriteModel(currententity, currentmodel);
 					break;
 				default:
-					ri.Sys_Error(ERR_DROP, "Bad modeltype");
+					Com_Error(ERR_DROP, "Bad modeltype");
 					break;
 			}
 		}
@@ -1207,16 +1206,16 @@ SetupFrame(void)
 	gl3_framecount++;
 
 	/* build the transformation matrix for the given view angles */
-	VectorCopy(gl3_newrefdef.vieworg, gl3_origin);
+	VectorCopy(r_newrefdef.vieworg, gl3_origin);
 
-	AngleVectors(gl3_newrefdef.viewangles, vpn, vright, vup);
+	AngleVectors(r_newrefdef.viewangles, vpn, vright, vup);
 
 	/* current viewcluster */
-	if (!(gl3_newrefdef.rdflags & RDF_NOWORLDMODEL))
+	if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 	{
 		if (!gl3_worldmodel)
 		{
-			ri.Sys_Error(ERR_DROP, "%s: bad world model", __func__);
+			Com_Error(ERR_DROP, "%s: bad world model", __func__);
 			return;
 		}
 
@@ -1260,20 +1259,20 @@ SetupFrame(void)
 
 	for (i = 0; i < 4; i++)
 	{
-		v_blend[i] = gl3_newrefdef.blend[i];
+		v_blend[i] = r_newrefdef.blend[i];
 	}
 
 	c_brush_polys = 0;
 	c_alias_polys = 0;
 
 	/* clear out the portion of the screen that the NOWORLDMODEL defines */
-	if (gl3_newrefdef.rdflags & RDF_NOWORLDMODEL)
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 	{
 		glEnable(GL_SCISSOR_TEST);
 		glClearColor(0.3, 0.3, 0.3, 1);
-		glScissor(gl3_newrefdef.x,
-				vid.height - gl3_newrefdef.height - gl3_newrefdef.y,
-				gl3_newrefdef.width, gl3_newrefdef.height);
+		glScissor(r_newrefdef.x,
+				vid.height - r_newrefdef.height - r_newrefdef.y,
+				r_newrefdef.width, r_newrefdef.height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(1, 0, 0.5, 0.5);
 		glDisable(GL_SCISSOR_TEST);
@@ -1342,10 +1341,15 @@ static hmm_mat4 rotAroundAxisXYZ(float aroundXdeg, float aroundYdeg, float aroun
 	return ret;
 }
 
-// equivalent to R_MYgluPerspective() but returning a matrix instead of setting internal OpenGL state
+// equivalent to R_SetPerspective() but returning a matrix instead of setting internal OpenGL state
 hmm_mat4
-GL3_MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
+GL3_SetPerspective(GLdouble fovy)
 {
+	// gluPerspective() / R_MYgluPerspective() style parameters
+	const GLdouble zNear = Q_max(gl_znear->value, 0.1f);
+	const GLdouble zFar = (r_farsee->value) ? 8192.0f : 4096.0f;
+	const GLdouble aspect = (GLdouble)r_newrefdef.width / r_newrefdef.height;
+
 	// calculation of left, right, bottom, top is from R_MYgluPerspective() of old gl backend
 	// which seems to be slightly different from the real gluPerspective()
 	// and thus also from HMM_Perspective()
@@ -1353,10 +1357,10 @@ GL3_MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zF
 	float A, B, C, D;
 
 	top = zNear * tan(fovy * M_PI / 360.0);
-	bottom = -top;
-
-	left = bottom * aspect;
 	right = top * aspect;
+
+	bottom = -top;
+	left = -right;
 
 	// TODO:  stereo stuff
 	// left += - gl1_stereo_convergence->value * (2 * gl_state.camera_separation) / zNear;
@@ -1388,10 +1392,10 @@ SetupGL(void)
 	int x, x2, y2, y, w, h;
 
 	/* set up viewport */
-	x = floor(gl3_newrefdef.x * vid.width / vid.width);
-	x2 = ceil((gl3_newrefdef.x + gl3_newrefdef.width) * vid.width / vid.width);
-	y = floor(vid.height - gl3_newrefdef.y * vid.height / vid.height);
-	y2 = ceil(vid.height - (gl3_newrefdef.y + gl3_newrefdef.height) * vid.height / vid.height);
+	x = floor(r_newrefdef.x * vid.width / (float)vid.width);
+	x2 = ceil((r_newrefdef.x + r_newrefdef.width) * vid.width / (float)vid.width);
+	y = floor(vid.height - r_newrefdef.y * vid.height / (float)vid.height);
+	y2 = ceil(vid.height - (r_newrefdef.y + r_newrefdef.height) * vid.height / (float)vid.height);
 
 	w = x2 - x;
 	h = y - y2;
@@ -1416,7 +1420,7 @@ SetupGL(void)
 	// (=> don't use FBO when rendering the playermodel in the player menu)
 	// also, only do this when under water, because this has a noticeable overhead on some systems
 	if (gl3_usefbo->value && gl3state.ppFBO != 0
-		&& (gl3_newrefdef.rdflags & (RDF_NOWORLDMODEL|RDF_UNDERWATER)) == RDF_UNDERWATER)
+		&& (r_newrefdef.rdflags & (RDF_NOWORLDMODEL|RDF_UNDERWATER)) == RDF_UNDERWATER)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, gl3state.ppFBO);
 		gl3state.ppFBObound = true;
@@ -1458,7 +1462,7 @@ SetupGL(void)
 			GLenum fbState = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if(fbState != GL_FRAMEBUFFER_COMPLETE)
 			{
-				R_Printf(PRINT_ALL, "GL3 SetupGL(): WARNING: FBO is not complete, status = 0x%x\n", fbState);
+				Com_Printf("GL3 SetupGL(): WARNING: FBO is not complete, status = 0x%x\n", fbState);
 				gl3state.ppFBtexWidth = -1; // to try again next frame; TODO: maybe give up?
 				gl3state.ppFBObound = false;
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1475,11 +1479,7 @@ SetupGL(void)
 	}
 
 	/* set up projection matrix (eye coordinates -> clip coordinates) */
-	{
-		float screenaspect = (float)gl3_newrefdef.width / gl3_newrefdef.height;
-		float dist = (r_farsee->value == 0) ? 4096.0f : 8192.0f;
-		gl3state.projMat3D = GL3_MYgluPerspective(gl3_newrefdef.fov_y, screenaspect, 4, dist);
-	}
+	gl3state.projMat3D = GL3_SetPerspective(r_newrefdef.fov_y);
 
 	glCullFace(GL_FRONT);
 
@@ -1494,12 +1494,12 @@ SetupGL(void)
 		}};
 
 		// now rotate by view angles
-		hmm_mat4 rotMat = rotAroundAxisXYZ(-gl3_newrefdef.viewangles[2], -gl3_newrefdef.viewangles[0], -gl3_newrefdef.viewangles[1]);
+		hmm_mat4 rotMat = rotAroundAxisXYZ(-r_newrefdef.viewangles[2], -r_newrefdef.viewangles[0], -r_newrefdef.viewangles[1]);
 
 		viewMat = HMM_MultiplyMat4( viewMat, rotMat );
 
 		// .. and apply translation for current position
-		hmm_vec3 trans = HMM_Vec3(-gl3_newrefdef.vieworg[0], -gl3_newrefdef.vieworg[1], -gl3_newrefdef.vieworg[2]);
+		hmm_vec3 trans = HMM_Vec3(-r_newrefdef.vieworg[0], -r_newrefdef.vieworg[1], -r_newrefdef.vieworg[2]);
 		viewMat = HMM_MultiplyMat4( viewMat, HMM_Translate(trans) );
 
 		gl3state.viewMat3D = viewMat;
@@ -1511,7 +1511,7 @@ SetupGL(void)
 
 	gl3state.uni3DData.transModelMat4 = gl3_identityMat4;
 
-	gl3state.uni3DData.time = gl3_newrefdef.time;
+	gl3state.uni3DData.time = r_newrefdef.time;
 
 	GL3_UpdateUBO3D();
 
@@ -1531,7 +1531,7 @@ SetupGL(void)
 extern int c_visible_lightmaps, c_visible_textures;
 
 /*
- * gl3_newrefdef must be set before the first call
+ * r_newrefdef must be set before the first call
  */
 static void
 GL3_RenderView(refdef_t *fd)
@@ -1651,11 +1651,11 @@ GL3_RenderView(refdef_t *fd)
 		return;
 	}
 
-	gl3_newrefdef = *fd;
+	r_newrefdef = *fd;
 
-	if (!gl3_worldmodel && !(gl3_newrefdef.rdflags & RDF_NOWORLDMODEL))
+	if (!gl3_worldmodel && !(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 	{
-		ri.Sys_Error(ERR_DROP, "R_RenderView: NULL worldmodel");
+		Com_Error(ERR_DROP, "R_RenderView: NULL worldmodel");
 	}
 
 	if (r_speeds->value)
@@ -1674,7 +1674,7 @@ GL3_RenderView(refdef_t *fd)
 	SetupFrame();
 
 	R_SetFrustum(vup, vpn, vright, gl3_origin,
-		gl3_newrefdef.fov_x, gl3_newrefdef.fov_y, frustum);
+		r_newrefdef.fov_x, r_newrefdef.fov_y, frustum);
 
 	SetupGL();
 
@@ -1695,7 +1695,7 @@ GL3_RenderView(refdef_t *fd)
 
 	if (r_speeds->value)
 	{
-		R_Printf(PRINT_ALL, "%4i wpoly %4i epoly %i tex %i lmaps\n",
+		Com_Printf("%4i wpoly %4i epoly %i tex %i lmaps\n",
 				c_brush_polys, c_alias_polys, c_visible_textures,
 				c_visible_lightmaps);
 	}
@@ -1743,13 +1743,13 @@ GL3_SetLightLevel(entity_t *currententity)
 {
 	vec3_t shadelight = {0};
 
-	if (gl3_newrefdef.rdflags & RDF_NOWORLDMODEL)
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 	{
 		return;
 	}
 
 	/* save off light value for server to look at */
-	GL3_LightPoint(currententity, gl3_newrefdef.vieworg, shadelight);
+	GL3_LightPoint(currententity, r_newrefdef.vieworg, shadelight);
 
 	/* pick the greatest component, which should be the
 	 * same as the mono value returned by software */
@@ -1790,16 +1790,16 @@ GL3_RenderFrame(refdef_t *fd)
 	}
 	GL3_SetGL2D();
 
-	int x = (vid.width - gl3_newrefdef.width)/2;
-	int y = (vid.height - gl3_newrefdef.height)/2;
+	int x = (vid.width - r_newrefdef.width)/2;
+	int y = (vid.height - r_newrefdef.height)/2;
 	if (usedFBO)
 	{
 		// if we're actually drawing the world and using an FBO, render the FBO's texture
-		GL3_DrawFrameBufferObject(x, y, gl3_newrefdef.width, gl3_newrefdef.height, gl3state.ppFBtex, v_blend);
+		GL3_DrawFrameBufferObject(x, y, r_newrefdef.width, r_newrefdef.height, gl3state.ppFBtex, v_blend);
 	}
 	else if(v_blend[3] != 0.0f)
 	{
-		GL3_Draw_Flash(v_blend, x, y, gl3_newrefdef.width, gl3_newrefdef.height);
+		GL3_Draw_Flash(v_blend, x, y, r_newrefdef.width, r_newrefdef.height);
 	}
 }
 
@@ -1865,7 +1865,7 @@ GL3_BeginFrame(float camera_separation)
 		}
 		else
 		{
-			R_Printf(PRINT_ALL, "stereo supermode changed, restarting video!\n");
+			Com_Printf("stereo supermode changed, restarting video!\n");
 			vid_fullscreen->modified = true;
 		}
 	}
@@ -1925,7 +1925,7 @@ GL3_BeginFrame(float camera_separation)
 #ifdef YQ2_GL3_GLES
 		// OpenGL ES3 only supports GL_NONE, GL_BACK and GL_COLOR_ATTACHMENT*
 		// so this doesn't make sense here, see https://docs.gl/es3/glDrawBuffers
-		R_Printf(PRINT_ALL, "NOTE: gl_drawbuffer not supported by OpenGL ES!\n");
+		Com_Printf("NOTE: gl_drawbuffer not supported by OpenGL ES!\n");
 #else // Desktop GL
 		// TODO: stereo stuff
 		//if ((gl3state.camera_separation == 0) || gl3state.stereo_mode != STEREO_MODE_OPENGL)
@@ -2057,38 +2057,4 @@ GetRefAPI(refimport_t imp)
     ri.Vid_RequestRestart(RESTART_NO);
 
 	return re;
-}
-
-void R_Printf(int level, const char* msg, ...)
-{
-	va_list argptr;
-	va_start(argptr, msg);
-	ri.Com_VPrintf(level, msg, argptr);
-	va_end(argptr);
-}
-
-/*
- * this is only here so the functions in shared source files
- * (shared.c, rand.c, flash.c, mem.c/hunk.c) can link
- */
-void
-Sys_Error(const char *error, ...)
-{
-	va_list argptr;
-	char text[4096]; // MAXPRINTMSG == 4096
-
-	va_start(argptr, error);
-	vsnprintf(text, sizeof(text), error, argptr);
-	va_end(argptr);
-
-	ri.Sys_Error(ERR_FATAL, "%s", text);
-}
-
-void
-Com_Printf(const char *msg, ...)
-{
-	va_list argptr;
-	va_start(argptr, msg);
-	ri.Com_VPrintf(PRINT_ALL, msg, argptr);
-	va_end(argptr);
 }

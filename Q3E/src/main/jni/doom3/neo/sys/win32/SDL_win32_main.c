@@ -30,19 +30,13 @@
 #include "SDL.h"
 #include "SDL_main.h"
 
+#include "../../framework/BuildDefines.h"
+
 #ifdef main
 # ifndef _WIN32_WCE_EMULATION
 #  undef main
 # endif /* _WIN32_WCE_EMULATION */
 #endif /* main */
-
-#ifdef _RAVEN //karin: win log file name
-#define GAME_NAME_ID "quake4"
-#elif defined(_HUMANHEAD)
-#define GAME_NAME_ID "prey"
-#else
-#define GAME_NAME_ID "doom3"
-#endif
 
 /* The standard output files */
 #define STDOUT_FILE	TEXT(GAME_NAME_ID "_log.txt") /* DG: renamed this */

@@ -358,7 +358,7 @@ void audioSetThreadPriority(int iscapture, int device_id)
 
 _Exit:
     thread_id = (*env)->CallLongMethod(env, thread, getId);
-    LOGW("Q3E SDL audioSetThreadPriority(%d, %d): thread name=%s(%ld), priority=%d -> %d", iscapture, device_id, name, thread_id, THREAD_PRIORITY_AUDIO, res);
+    LOGW("Q3E SDL audioSetThreadPriority(%d, %d): thread name=%s(%lld), priority=%d -> %d", iscapture, device_id, name, (long long)thread_id, THREAD_PRIORITY_AUDIO, res);
 }
 
 void pollInputDevices()

@@ -164,7 +164,7 @@ objModel_t* OBJ_Parse( const char* fileName, const char* objFileBuffer, int leng
 			idStr line;
 			src.ReadRestOfLine( line );
 		}
-		else if( token == "o" || token == "g" )
+		else if( token == "o" ) // new object
 		{
 			idStr line;
 			src.ReadRestOfLine( line );
@@ -188,7 +188,36 @@ objModel_t* OBJ_Parse( const char* fileName, const char* objFileBuffer, int leng
 
 				model->objects.Append( obj );
 			}
+            // remove read vertexes/texcoords/normals
+            vertexes.Clear();
+            texCoords.Clear();
+            normals.Clear();
 		}
+        else if( token == "g" ) // new face group
+        {
+            idStr line;
+            src.ReadRestOfLine( line );
+
+            if( objVertexes.Num() )
+            {
+                objObject_t* obj = new objObject_t;
+
+                obj->material = material;
+                obj->vertexes = objVertexes;
+                obj->texcoords = objTexCoords;
+                obj->normals = objNormals;
+                obj->indexes = objIndices;
+
+                numCollectedVerts += objVertexes.Num();
+
+                objVertexes.Clear();
+                objTexCoords.Clear();
+                objNormals.Clear();
+                objIndices.Clear();
+
+                model->objects.Append( obj );
+            }
+        }
 		else if( token == "usemtl" )
 		{
 			idStr line;
@@ -213,31 +242,88 @@ objModel_t* OBJ_Parse( const char* fileName, const char* objFileBuffer, int leng
 
 			src.ReadRestOfLine( line );
 
-			int matches = sscanf( line.c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2] );
-			if( matches != 9 )
+			if( sscanf( line.c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2] ) == 9 )
+            {
+                for( int i = 0; i < 3; i++ )
+                {
+                    idDrawVert drawVert;
+
+                    int vertidx = vertexIndex[i] - 1;
+                    int texidx = uvIndex[i] - 1;
+                    int normalidx = normalIndex[i] - 1;
+
+                    //drawVert.xyz = vertexes[vertidx];
+                    //drawVert.SetTexCoord( texCoords[texidx] );
+                    //drawVert.SetNormal( normals[normalidx] );
+
+                    objVertexes.Append( vertexes[vertidx] );
+                    objTexCoords.Append( texCoords[texidx] );
+                    objNormals.Append( normals[normalidx] );
+
+                    //objIndices.Append( vertidx - numCollectedVerts );
+                    objIndices.Append( objIndices.Num() );
+                }
+            }
+            else if(sscanf( line.c_str(), "%d/%d %d/%d %d/%d", &vertexIndex[0], &uvIndex[0], &vertexIndex[1], &uvIndex[1], &vertexIndex[2], &uvIndex[2] ) == 6)
 			{
-				common->FatalError( "Failed to parse face line in line %d", src.GetLineNum() );
+                for( int i = 0; i < 3; i++ )
+                {
+                    idDrawVert drawVert;
+
+                    int vertidx = vertexIndex[i] - 1;
+                    int texidx = uvIndex[i] - 1;
+
+                    //drawVert.xyz = vertexes[vertidx];
+                    //drawVert.SetTexCoord( texCoords[texidx] );
+
+                    objVertexes.Append( vertexes[vertidx] );
+                    objTexCoords.Append( texCoords[texidx] );
+                    objNormals.Append( idVec3(0.0f, 0.0f, 0.0f) );
+
+                    //objIndices.Append( vertidx - numCollectedVerts );
+                    objIndices.Append( objIndices.Num() );
+                }
+            }
+            else if(sscanf( line.c_str(), "%d//%d %d//%d %d//%d", &vertexIndex[0], &normalIndex[0], &vertexIndex[1], &normalIndex[1], &vertexIndex[2], &normalIndex[2] ) == 6)
+            {
+                for( int i = 0; i < 3; i++ )
+                {
+                    idDrawVert drawVert;
+
+                    int vertidx = vertexIndex[i] - 1;
+                    int normalidx = normalIndex[i] - 1;
+
+                    //drawVert.xyz = vertexes[vertidx];
+                    //drawVert.SetNormal( normals[normalidx] );
+
+                    objVertexes.Append( vertexes[vertidx] );
+                    objTexCoords.Append( idVec2(0.0f, 0.0f) );
+                    objNormals.Append( normals[normalidx] );
+
+                    //objIndices.Append( vertidx - numCollectedVerts );
+                    objIndices.Append( objIndices.Num() );
+                }
+            }
+            else if(sscanf( line.c_str(), "%d %d %d", &vertexIndex[0], &vertexIndex[1], &vertexIndex[2] ) == 3)
+            {
+                for( int i = 0; i < 3; i++ )
+                {
+                    idDrawVert drawVert;
+
+                    int vertidx = vertexIndex[i] - 1;
+
+                    //drawVert.xyz = vertexes[vertidx];
+
+                    objVertexes.Append( vertexes[vertidx] );
+                    objTexCoords.Append( idVec2(0.0f, 0.0f) );
+                    objNormals.Append( idVec3(0.0f, 0.0f, 0.0f) );
+
+                    //objIndices.Append( vertidx - numCollectedVerts );
+                    objIndices.Append( objIndices.Num() );
+                }
 			}
-
-			for( int i = 0; i < 3; i++ )
-			{
-				idDrawVert drawVert;
-
-				int vertidx = vertexIndex[i] - 1;
-				int texidx = uvIndex[i] - 1;
-				int normalidx = normalIndex[i] - 1;
-
-				//drawVert.xyz = vertexes[vertidx];
-				//drawVert.SetTexCoord( texCoords[texidx] );
-				//drawVert.SetNormal( normals[normalidx] );
-
-				objVertexes.Append( vertexes[vertidx] );
-				objTexCoords.Append( texCoords[texidx] );
-				objNormals.Append( normals[normalidx] );
-
-				//objIndices.Append( vertidx - numCollectedVerts );
-				objIndices.Append( objIndices.Num() );
-			}
+            else
+                common->FatalError( "Failed to parse face line in line %d", src.GetLineNum() );
 		}
 		else
 		{
@@ -309,4 +395,76 @@ void OBJ_Free( objModel_t* model )
 	model->objects.Clear();
 
 	delete model;
+}
+
+/*
+=================
+OBJ_Write
+=================
+*/
+static void OBJ_WriteObject( idFile *file, const objObject_t* obj )
+{
+    file->Printf("usemtl %s", obj->material.c_str());
+    file->Write("\n\n", 2);
+
+    file->Printf("# vertex num %d", obj->vertexes.Num());
+    file->Write("\n", 1);
+    for(int i = 0; i < obj->vertexes.Num(); i++)
+    {
+        file->Printf("v %f %f %f", obj->vertexes[i].x, obj->vertexes[i].y, obj->vertexes[i].z);
+        file->Write("\n", 1);
+    }
+    file->Write("\n", 1);
+
+    file->Printf("# texcoord num %d", obj->texcoords.Num());
+    file->Write("\n", 1);
+    for(int i = 0; i < obj->texcoords.Num(); i++)
+    {
+        file->Printf("vt %f %f", obj->texcoords[i].x, 1.0f - obj->texcoords[i].y);
+        file->Write("\n", 1);
+    }
+    file->Write("\n", 1);
+
+    file->Printf("# normal num %d", obj->normals.Num());
+    file->Write("\n", 1);
+    for(int i = 0; i < obj->normals.Num(); i++)
+    {
+        file->Printf("vn %f %f %f", obj->normals[i].x, obj->normals[i].y, obj->normals[i].z);
+        file->Write("\n", 1);
+    }
+    file->Write("\n", 1);
+
+    file->Printf("# face num %d", obj->indexes.Num());
+    file->Write("\n", 1);
+    for(int i = 0; i < obj->indexes.Num(); i += 3)
+    {
+        int index1 = obj->indexes[i] + 1;
+        int index2 = obj->indexes[i + 1] + 1;
+        int index3 = obj->indexes[i + 2] + 1;
+        file->Printf("f %d/%d/%d %d/%d/%d %d/%d/%d"
+                     , index1, index1, index1
+                     , index2, index2, index2
+                     , index3, index3, index3
+                     );
+        file->Write("\n", 1);
+    }
+    file->Write("\n", 1);
+}
+
+void OBJ_Write( const objModel_t* obj, const char* fileName )
+{
+    idFile *file = fileSystem->OpenFileWrite(fileName);
+
+    file->Printf("# object num %d", obj->objects.Num());
+    file->Write("\n", 1);
+
+    for(int i = 0; i < obj->objects.Num(); i++)
+    {
+        file->Printf("o object_%d", i);
+        file->Write("\n", 1);
+        OBJ_WriteObject(file, obj->objects[i]);
+        file->Write("\n", 1);
+    }
+
+    fileSystem->CloseFile(file);
 }

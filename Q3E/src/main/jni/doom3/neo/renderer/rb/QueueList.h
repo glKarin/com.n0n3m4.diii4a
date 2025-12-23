@@ -34,6 +34,7 @@ public:
 	void				Clear( void );
     // raw
     idQueueListNode *   Head( void );
+    idQueueListNode *   Tail( void );
     idQueueListNode *   Take( void );
     // safe
     bool                Get( T &ret );
@@ -41,6 +42,8 @@ public:
     // unsafe
     T &                 Get( void );
     const T &           Get( void ) const;
+    T &                 Last( void );
+    const T &           Last( void ) const;
 #ifdef _QUEUE_LIST_RECYCLE
 	void				SetRecycle( bool recycle );
 #endif
@@ -257,9 +260,28 @@ ID_INLINE const T & idQueueList<T>::Get( void ) const
 }
 
 template< class T >
+ID_INLINE T & idQueueList<T>::Last( void )
+{
+    _QUEUE_LIST_DEBUG(Last);
+    return tail->data;
+}
+
+template< class T >
+ID_INLINE const T & idQueueList<T>::Last( void ) const
+{
+    return tail->data;
+}
+
+template< class T >
 typename idQueueList<T>::idQueueListNode * idQueueList<T>::Head( void )
 {
     return head;
+}
+
+template< class T >
+typename idQueueList<T>::idQueueListNode * idQueueList<T>::Tail( void )
+{
+    return tail;
 }
 
 template< class T >

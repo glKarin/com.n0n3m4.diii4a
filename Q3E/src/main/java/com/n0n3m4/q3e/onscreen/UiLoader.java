@@ -20,29 +20,24 @@ public class UiLoader
     int height;
     int width;
     //String filename;
-    boolean portrait = false;
 
-    public static String[] defaults_table;
+    public String[] defaultsTable;
 
-    public UiLoader(View cnt, GL10 gl10, int w, int h, boolean portrait)//, String fname)
+    public UiLoader(View cnt, GL10 gl10, int w, int h, String[] table)//, String fname)
     {
         ctx = cnt;
         gl = gl10;
         width = w;
         height = h;
-        this.portrait = portrait;
         //filename=fname;
-        defaults_table = portrait ? Q3EUtils.q3ei.portrait_defaults_table : Q3EUtils.q3ei.defaults_table;
+        defaultsTable = table;
 
         //Set defaults table
     }
 
     public Object LoadElement(int id, boolean editMode)
     {
-        String prefix = portrait ? Q3EPreference.pref_controlportraitprefix : Q3EPreference.pref_controlprefix;
-        SharedPreferences shp = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
-        String tmp = shp.getString(prefix + id, null);
-        if (tmp == null) tmp = defaults_table[id];
+        String tmp = defaultsTable[id];
         UiElement el = new UiElement(tmp, width, height);
         return LoadUiElement(id, el.cx, el.cy, el.size, el.alpha, editMode);
     }
@@ -84,7 +79,9 @@ public class UiLoader
                     discKey = 1;
                 else if(discKey > Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length)
                     discKey = 2;
-                String keysStr = preferences.getString(Q3EPreference.DISC_PANEL_KEYS_PREFIX + discKey, Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[discKey - 1]);
+                String keysStr = preferences.getString(Q3EUtils.q3ei.DiscPanelKeysPreference(false, discKey), null);
+                if(KStr.IsEmpty(keysStr))
+                    keysStr = preferences.getString(Q3EUtils.q3ei.DiscPanelKeysPreference(true, discKey), Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[discKey - 1]);
                 final int[] keycodes = Q3EKeyCodes.ONSCRREN_DISC_KEYS_KEYCODES[discKey - 1];
                 final String[] labels = Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[discKey - 1].split(",");
                 char[] keys = null;
@@ -143,10 +140,7 @@ public class UiLoader
 
     public boolean CheckVisible(int id)
     {
-        String prefix = portrait ? Q3EPreference.pref_controlportraitprefix : Q3EPreference.pref_controlprefix;
-        SharedPreferences shp = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
-        String tmp = shp.getString(prefix + id, null);
-        if (tmp == null) tmp = defaults_table[id];
+        String tmp = defaultsTable[id];
         UiElement el = new UiElement(tmp, width, height);
         final Rect ScreenRect = new Rect(0, 0, width, height);
         Rect btnRect;

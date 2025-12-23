@@ -419,6 +419,8 @@ class idFileSystemLocal : public idFileSystem
 		static void				Path_f(const idCmdArgs &args);
 		static void				TouchFile_f(const idCmdArgs &args);
 		static void				TouchFileList_f(const idCmdArgs &args);
+        virtual void			RemoveDir(const char *relativePath);
+        virtual void			RemoveFolder(const char *relativePath);
 #ifdef _RAVEN
 		virtual void			SetIsFileLoadingAllowed(bool mode) { (void)mode; }
 		virtual idFile *		GetNewFileMemory( void );
@@ -507,10 +509,26 @@ class idFileSystemLocal : public idFileSystem
 		// curl_progress_callback in curl.h
 		static int				CurlProgressFunction(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
 
-        void                    AddExtraGameDirectory(const char *path, const char *gameName);
+		// Add game extra addon resource path before add base game paths
         void                    AddExtraGameResource(const char *path);
+		// Add base game path
+        void                    AddExtraGameDirectory(const char *path, const char *gameName);
+		// Add game extra game base name after add base game paths
         void                    AddExtraGame(const char *gameNames);
+
+		int						ParseConfigFile(const char *configFile, bool fullpath, idStrList &list);
+		// Add game extra addon resource path from cfg file before add base game paths
+        void                    InitExtraGameResource(const char *configFile);
+		// Add game extra game base name from cfg file after add base game paths
+        void                    InitExtraGame(const char *configFile);
+
+        void                    RemoveDir_r(const char *OSPath, int type = 0);
 };
+
+// Init game addon resource config file
+#define FS_INIT_ADDONS "initaddons.cfg"
+// Init game base name config file
+#define FS_INIT_GAMEBASE "initgamebase.cfg"
 
 idCVar	idFileSystemLocal::fs_restrict("fs_restrict", "", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "");
 idCVar	idFileSystemLocal::fs_debug("fs_debug", "0", CVAR_SYSTEM | CVAR_INTEGER, "", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2>);
@@ -528,9 +546,9 @@ idCVar	idFileSystemLocal::fs_caseSensitiveOS("fs_caseSensitiveOS", "1", CVAR_SYS
 #endif
 idCVar	idFileSystemLocal::fs_searchAddons("fs_searchAddons", "0", CVAR_SYSTEM | CVAR_BOOL, "search all addon pk4s ( disables addon functionality )");
 
-idCVar	idFileSystemLocal::fs_basepath_extras("harm_fs_basepath_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search paths last, split by ','");
-idCVar	idFileSystemLocal::fs_addon_extras("harm_fs_addon_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search addon files directory path last, split by ','");
-idCVar	idFileSystemLocal::fs_game_base_extras("harm_fs_game_base_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras search game mod last, split by ','");
+idCVar	idFileSystemLocal::fs_addon_extras("harm_fs_addon_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras game addon resource path before add base game paths, split by ','");
+idCVar	idFileSystemLocal::fs_basepath_extras("harm_fs_basepath_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras base game paths(absolute system path), split by ','");
+idCVar	idFileSystemLocal::fs_game_base_extras("harm_fs_game_base_extras", "", CVAR_SYSTEM | CVAR_INIT, "extras game base name(extras fs_game_base), split by ','");
 
 idFileSystemLocal	fileSystemLocal;
 idFileSystem 		*fileSystem = &fileSystemLocal;
@@ -2545,6 +2563,8 @@ void idFileSystemLocal::Startup(void)
 		common->Printf("restarting filesystem with %d addon pak file(s) to include\n", addonChecksums.Num());
 	}
 
+    InitExtraGameResource(FS_INIT_ADDONS);
+
     AddExtraGameResource(fs_addon_extras.GetString());
 
 	SetupGameDirectories(BASE_GAMEDIR);
@@ -2554,6 +2574,8 @@ void idFileSystemLocal::Startup(void)
 	    idStr::Icmp(fs_game_base.GetString(), BASE_GAMEDIR)) {
 		SetupGameDirectories(fs_game_base.GetString());
 	}
+
+	InitExtraGame(FS_INIT_GAMEBASE);
 
     AddExtraGame(fs_game_base_extras.GetString());
 
@@ -4855,7 +4877,8 @@ void idFileSystemLocal::AddExtraGameDirectory(const char *path, const char *game
 {
     if(path && path[0])
     {
-        idStrList paths = idStr::SplitUnique(path, ',');
+        idStrList paths;
+        idStr::SplitUnique(paths, path, ',');
         for(int i = 0; i < paths.Num(); i++)
         {
             common->Printf("Add extra game path: %s/%s\n", paths[i].c_str(), gameName);
@@ -4868,7 +4891,8 @@ void idFileSystemLocal::AddExtraGameResource(const char *path)
 {
     if(path && path[0])
     {
-        idStrList paths = idStr::SplitUnique(path, ',');
+        idStrList paths;
+        idStr::SplitUnique(paths, path, ',');
         for(int i = 0; i < paths.Num(); i++)
         {
             paths[i].StripTrailing('/');
@@ -4889,7 +4913,8 @@ void idFileSystemLocal::AddExtraGame(const char *gameNames)
 {
     if(gameNames && gameNames[0])
     {
-        idStrList games = idStr::SplitUnique(gameNames, ',');
+        idStrList games;
+        idStr::SplitUnique(games, gameNames, ',');
         for(int i = 0; i < games.Num(); i++)
         {
             if(!idStr::Icmp(games[i], BASE_GAMEDIR)
@@ -4901,6 +4926,180 @@ void idFileSystemLocal::AddExtraGame(const char *gameNames)
             SetupGameDirectories(games[i]);
         }
     }
+}
+
+int idFileSystemLocal::ParseConfigFile(const char *configFile, bool fullpath, idStrList &list)
+{
+    char path[MAX_OSPATH] = { 0 };
+    if(fs_game.GetString()[0])
+        strcat(path, fs_game.GetString());
+    else
+        strcat(path, BASE_GAMEDIR);
+    if(path[strlen(path) - 1] != '/')
+        strcat(path, "/");
+    strcat(path, configFile);
+
+    FILE *file = fopen(path, "r");
+    if(!file)
+        return -1;
+
+	int res = list.Num();
+    fseek(file, 0, SEEK_END);
+    int len = ftell(file);
+    if(len > 0)
+    {
+        fseek(file, 0, SEEK_SET);
+        char *data = (char *)malloc(len);
+        fread(data, 1, len, file);
+		int flags = LEXFL_NOFATALERRORS;
+		if(fullpath)
+			flags |= LEXFL_ALLOWPATHNAMES;
+        idLexer lexer(flags);
+        if(lexer.LoadMemory(data, len, "<init_fs_path>"))
+        {
+            idToken token;
+            while(true)
+            {
+                if(!lexer.ReadToken(&token))
+                    break;
+				list.AddUnique(token.c_str());
+            }
+        }
+        free(data);
+    }
+    fclose(file);
+
+	return list.Num() - res;
+}
+
+void idFileSystemLocal::InitExtraGameResource(const char *configFile)
+{
+	idStrList list;
+
+	if(ParseConfigFile(configFile, true, list) > 0)
+	{
+		for(int i = 0; i < list.Num(); i++)
+		{
+			common->Printf("Add init addons path: %s\n", list[i].c_str());
+			AddExtraGameResource(list[i].c_str());
+		}
+    }
+}
+
+void idFileSystemLocal::InitExtraGame(const char *configFile)
+{
+	idStrList list;
+
+	if(ParseConfigFile(configFile, false, list) > 0)
+	{
+		for(int i = 0; i < list.Num(); i++)
+		{
+			common->Printf("Add init game base: %s\n", list[i].c_str());
+			AddExtraGame(list[i].c_str());
+		}
+    }
+}
+
+/*
+=================
+idFileSystemLocal::RemoveDir_r
+=================
+*/
+void idFileSystemLocal::RemoveDir_r(const char *OSPath, int type)
+{
+    int st = Sys_Stat(OSPath);
+    if(st == FST_NONE)
+        return;
+
+    int mask;
+    if(type == 0)
+        mask = BIT(FST_FILE) | BIT(FST_DIRECTORY);
+    else
+        mask = 1 << type;
+
+    if(st == FST_DIRECTORY)
+    {
+        idStrList files;
+        int num = Sys_ListFiles(OSPath, "/", files);
+        for(int i = 0; i < num; i++)
+        {
+            if(files[i] == "." || files[i] == "..")
+                continue;
+            idStr strBase = OSPath;
+            strBase.StripTrailing('/');
+            strBase.StripTrailing('\\');
+            idStr newPath;
+            newPath.ReAllocate(MAX_OSPATH, false);
+            sprintf(newPath, "%s/%s", strBase.c_str(), files[i].c_str());
+            ReplaceSeparators(newPath);
+
+            RemoveDir_r(newPath, type);
+        }
+
+        if(mask & BIT(FST_FILE))
+        {
+            files.Clear();
+            num = Sys_ListFiles(OSPath, NULL, files);
+            for(int i = 0; i < num; i++)
+            {
+                idStr strBase = OSPath;
+                strBase.StripTrailing('/');
+                strBase.StripTrailing('\\');
+                idStr newPath;
+                newPath.ReAllocate(MAX_OSPATH, false);
+                sprintf(newPath, "%s/%s", strBase.c_str(), files[i].c_str());
+                ReplaceSeparators(newPath);
+
+                Sys_Printf("Remove file: %s\n", newPath.c_str());
+                remove(newPath);
+            }
+        }
+
+        if(mask & BIT(FST_DIRECTORY))
+        {
+            Sys_Printf("Remove dir: %s\n", OSPath);
+            Sys_Rmdir(OSPath);
+        }
+    }
+    else if(st == FST_FILE && (mask & BIT(FST_FILE)))
+    {
+        Sys_Printf("Remove file: %s\n", OSPath);
+        remove(OSPath);
+    }
+}
+
+void idFileSystemLocal::RemoveFolder(const char *relativePath)
+{
+    if(!relativePath || !relativePath[0] || !idStr::Cmp("/", relativePath))
+        return;
+
+    idStr OSPath;
+
+    if (fs_devpath.GetString()[0])
+        OSPath = BuildOSPath(fs_devpath.GetString(), gameFolder, relativePath);
+    else
+        OSPath = BuildOSPath(fs_savepath.GetString(), gameFolder, relativePath);
+
+    RemoveDir_r(OSPath);
+
+    ClearDirCache();
+}
+
+void idFileSystemLocal::RemoveDir(const char *relativePath)
+{
+    if(!relativePath || !relativePath[0] || !idStr::Cmp("/", relativePath))
+        return;
+
+    idStr OSPath;
+
+    if (fs_devpath.GetString()[0])
+        OSPath = BuildOSPath(fs_devpath.GetString(), gameFolder, relativePath);
+    else
+        OSPath = BuildOSPath(fs_savepath.GetString(), gameFolder, relativePath);
+
+    RemoveDir_r(OSPath, FST_DIRECTORY);
+
+    ClearDirCache();
 }
 
 #ifdef _RAVEN

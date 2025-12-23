@@ -313,6 +313,14 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 		model->InitFromFile(modelName);
 	} else if (extension.Icmp(MD5_MESH_EXT) == 0) {
 		model = new idRenderModelMD5;
+#ifdef _MODEL_MD5_EXT
+		if(fileSystem->ReadFile(modelName, NULL, NULL) < 0) // if md5mesh not exists, try convert from other supported animation model types
+		{
+			idStr str(modelName);
+			str.StripFileExtension();
+            R_Model_ConvertToMd5(str.c_str());
+		}
+#endif
 		model->InitFromFile(modelName);
 	} else if (extension.Icmp("md3") == 0) {
 		model = new idRenderModelMD3;
@@ -323,6 +331,9 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 	} else if (extension.Icmp("liquid") == 0) {
 		model = new idRenderModelLiquid;
 		model->InitFromFile(modelName);
+    } else if (extension.Icmp(MD5_STATIC_MESH_EXT) == 0) {
+        model = new idRenderModelStatic;
+        model->InitFromFile(modelName);
 #ifdef _MODEL_OBJ
 	} else if (extension.Icmp("obj") == 0) {
 		model = new idRenderModelStatic;
@@ -333,6 +344,32 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 		model = new idRenderModelStatic;
 		model->InitFromFile(modelName);
 #endif
+#ifdef _MODEL_PSK
+	} else if (extension.Icmp("psk") == 0) {
+		model = new idRenderModelStatic;
+		model->InitFromFile(modelName);
+#endif
+#ifdef _MODEL_IQM
+    } else if (extension.Icmp("iqm") == 0) {
+        model = new idRenderModelStatic;
+        model->InitFromFile(modelName);
+#endif
+#ifdef _MODEL_SMD
+    } else if (extension.Icmp("smd") == 0) {
+        model = new idRenderModelStatic;
+        model->InitFromFile(modelName);
+#endif
+#ifdef _MODEL_GLTF
+    } else if (extension.Icmp("gltf") == 0 || extension.Icmp("glb") == 0) {
+        model = new idRenderModelStatic;
+        model->InitFromFile(modelName);
+#endif
+#ifdef _MODEL_FBX
+    } else if (extension.Icmp("fbx") == 0) {
+        model = new idRenderModelStatic;
+        model->InitFromFile(modelName);
+#endif
+
 #ifdef _RAVEN
 #ifdef _RAVEN_FX
 	} else if (extension.Icmp("bse") == 0) {

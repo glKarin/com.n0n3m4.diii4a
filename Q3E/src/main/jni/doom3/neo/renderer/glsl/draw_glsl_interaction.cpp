@@ -56,30 +56,44 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 	GL_Uniform4fv(offsetof(shaderProgram_t, diffuseColor), din->diffuseColor.ToFloatPtr());
 	GL_Uniform4fv(offsetof(shaderProgram_t, specularColor), din->specularColor.ToFloatPtr());
 
-    if ( backEnd.vLight->lightShader->IsAmbientLight() && r_interactionLightingModel != HARM_INTERACTION_SHADER_AMBIENT ) {
+    if ( backEnd.vLight->lightShader->IsAmbientLight() && ( r_lightingModel != LM_AMBIENT
+#ifdef _RAVEN //karin: r_forceAmbient
+            && r_forceAmbient.GetFloat() <= 0.0f
+#endif
+        )
+    ) {
         GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), 1.0f);
+#ifdef _RAVEN //karin: r_forceAmbient
+    } else if(r_forceAmbient.GetFloat() > 0.0f) {
+        GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), r_forceAmbient.GetFloat());
+#endif
     } else {
-        if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-            GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
-        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
+        switch(r_lightingModel)
         {
-			// comat RMAO if u_specularExponent.z == 0 and u_specularExponent.w == 0
-			// use RMAO if black specular
-			if(harm_r_PBRRMAOSpecularMap.GetBool() || r_skipSpecular.GetBool() || din->specularImage == globalImages->blackImage)
-			{
-				float se[] = { harm_r_specularExponentPBR.GetFloat(), harm_r_PBRNormalCorrection.GetFloat(), 0.0f, 0.0f };
-				GL_Uniform4fv(offsetof(shaderProgram_t, specularExponent), se);
-			}
-			else
-			{
-				float se[] = { harm_r_specularExponentPBR.GetFloat(), harm_r_PBRNormalCorrection.GetFloat(), harm_r_PBRRoughnessCorrection.GetFloat(), harm_r_PBRMetallicCorrection.GetFloat() };
-				GL_Uniform4fv(offsetof(shaderProgram_t, specularExponent), se);
-			}
+            case LM_BLINNPHONG:
+                GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
+                break;
+            case LM_PBR:
+                // comat RMAO if u_specularExponent.z == 0 and u_specularExponent.w == 0
+                // use RMAO if black specular
+                if(harm_r_PBRRMAOSpecularMap.GetBool() || r_skipSpecular.GetBool() || din->specularImage == globalImages->blackImage)
+                {
+                    float se[] = { harm_r_specularExponentPBR.GetFloat(), harm_r_PBRNormalCorrection.GetFloat(), 0.0f, 0.0f };
+                    GL_Uniform4fv(offsetof(shaderProgram_t, specularExponent), se);
+                }
+                else
+                {
+                    float se[] = { harm_r_specularExponentPBR.GetFloat(), harm_r_PBRNormalCorrection.GetFloat(), harm_r_PBRRoughnessCorrection.GetFloat(), harm_r_PBRMetallicCorrection.GetFloat() };
+                    GL_Uniform4fv(offsetof(shaderProgram_t, specularExponent), se);
+                }
+                break;
+            case LM_AMBIENT:
+                GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_ambientLightingBrightness.GetFloat());
+                break;
+            default:
+                GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponent.GetFloat());
+                break;
         }
-        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
-            GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_ambientLightingBrightness.GetFloat());
-        else
-            GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponent.GetFloat());
     }
 
 	// set the textures
@@ -102,7 +116,11 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 
 	// texture 4 is the per-surface specular map
 	GL_SelectTextureNoClient(4);
-    if ( backEnd.vLight->lightShader->IsAmbientLight() || r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT ) {
+    if ( backEnd.vLight->lightShader->IsAmbientLight() || r_lightingModel == LM_AMBIENT
+#ifdef _RAVEN //karin: r_forceAmbient
+        || r_forceAmbient.GetFloat() > 0.0f
+#endif
+    ) {
         globalImages->ambientNormalMap->Bind();
     } else {
         din->specularImage->Bind();
@@ -157,18 +175,29 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 			backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-    if(backEnd.vLight->lightShader->IsAmbientLight())
+    if(backEnd.vLight->lightShader->IsAmbientLight()
+#ifdef _RAVEN //karin: r_forceAmbient
+       || r_forceAmbient.GetFloat() > 0.0f
+#endif
+    )
         GL_UseProgram(&ambientLightingShader);
     else
     {
-        if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-            GL_UseProgram(&interactionBlinnPhongShader);
-        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-            GL_UseProgram(&interactionPBRShader);
-        else if (r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT )
-            GL_UseProgram(&ambientLightingShader);
-        else
-            GL_UseProgram(&interactionShader);
+        switch(r_lightingModel)
+        {
+            case LM_BLINNPHONG:
+                GL_UseProgram(&interactionBlinnPhongShader);
+                break;
+            case LM_PBR:
+                GL_UseProgram(&interactionPBRShader);
+                break;
+            case LM_AMBIENT:
+                GL_UseProgram(&ambientLightingShader);
+                break;
+            default:
+                GL_UseProgram(&interactionShader);
+                break;
+        }
     }
 
 	// enable the vertex arrays

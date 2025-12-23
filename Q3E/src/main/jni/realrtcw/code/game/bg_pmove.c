@@ -2215,7 +2215,7 @@ static void PM_BeginWeaponReload( int weapon ) {
 		return;
 	}
 
-	if ( weapon < WP_KNIFE || weapon > WP_HOLYCROSS ) {
+	if ( weapon < WP_KNIFE || weapon > WP_M7) {
 		return;
 	}
 
@@ -4015,20 +4015,33 @@ case WP_POISONGAS:
 	}
 
 	// set weapon recoil (kickback)
-	pm->pmext->lastRecoilDeltaTime = 0;
-	pm->pmext->weapRecoilTime      = GetWeaponTableData(pm->ps->weapon)->weapRecoilDuration ? pm->cmd.serverTime : 0;
-	pm->pmext->weapRecoilDuration  = GetWeaponTableData(pm->ps->weapon)->weapRecoilDuration;
-	pm->pmext->weapRecoilYaw       = GetWeaponTableData(pm->ps->weapon)->weapRecoilYaw[0] * crandom() * GetWeaponTableData(pm->ps->weapon)->weapRecoilYaw[1];
-	pm->pmext->weapRecoilPitch     = GetWeaponTableData(pm->ps->weapon)->weapRecoilPitch[0] * random() * GetWeaponTableData(pm->ps->weapon)->weapRecoilPitch[1];
-
-
-	if ( ammoTable[pm->ps->weapon].weaponClass == WEAPON_CLASS_SMG)
+	// no recoil for AI
+	if (pm->ps->aiChar)
 	{
-		aimSpreadScaleAdd += rand() % 5;
+		pm->pmext->lastRecoilDeltaTime = 0;
+		pm->pmext->weapRecoilTime = 0;
+		pm->pmext->weapRecoilDuration = 0;
+		pm->pmext->weapRecoilYaw = 0;
+		pm->pmext->weapRecoilPitch = 0;
 	}
+	else
+	{
 
-    if ( ( pm->ps->eFlags & EF_CROUCHING ) && ( pm->ps->groundEntityNum != ENTITYNUM_NONE ) ) { 
-		pm->pmext->weapRecoilDuration *= 0.5;
+		pm->pmext->lastRecoilDeltaTime = 0;
+		pm->pmext->weapRecoilTime = GetWeaponTableData(pm->ps->weapon)->weapRecoilDuration ? pm->cmd.serverTime : 0;
+		pm->pmext->weapRecoilDuration = GetWeaponTableData(pm->ps->weapon)->weapRecoilDuration;
+		pm->pmext->weapRecoilYaw = GetWeaponTableData(pm->ps->weapon)->weapRecoilYaw[0] * crandom() * GetWeaponTableData(pm->ps->weapon)->weapRecoilYaw[1];
+		pm->pmext->weapRecoilPitch = GetWeaponTableData(pm->ps->weapon)->weapRecoilPitch[0] * random() * GetWeaponTableData(pm->ps->weapon)->weapRecoilPitch[1];
+
+		if (ammoTable[pm->ps->weapon].weaponClass == WEAPON_CLASS_SMG)
+		{
+			aimSpreadScaleAdd += rand() % 5;
+		}
+
+		if ((pm->ps->eFlags & EF_CROUCHING) && (pm->ps->groundEntityNum != ENTITYNUM_NONE))
+		{
+			pm->pmext->weapRecoilDuration *= 0.5;
+		}
 	}
 
 	// check for overheat
@@ -5073,6 +5086,7 @@ void PM_BeginM97Reload(void) {
 	// Choose which first person animation to play
 	if (pm->ps->ammoclip[BG_FindClipForWeapon(WP_M97)] == 0) {
 		anim = fastReload ? WEAP_ALTSWITCHFROM_FAST : WEAP_ALTSWITCHFROM;
+		PM_AddEvent(EV_M97_PUMP);
 		pm->ps->weaponTime += fastReload ? (ammoTable[WP_M97].shotgunPumpStart / 2) : ammoTable[WP_M97].shotgunPumpStart;
 		pm->ps->holdable[HI_M97] = M97_RELOADING_BEGIN_PUMP;
 	} else {

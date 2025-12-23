@@ -49,6 +49,7 @@ public enum Game
     QUAKE2_ROGUE(Q3EGameConstants.GAME_QUAKE2, "rogue", "rogue", "q2rogue", "", "rogue", true, R.string.quake_2_rogue),
     QUAKE2_XATRIX(Q3EGameConstants.GAME_QUAKE2, "xatrix", "xatrix", "q2xatrix", "", "xatrix", true, R.string.quake_2_xatrix),
     QUAKE2_ZAERO(Q3EGameConstants.GAME_QUAKE2, "zaero", "zaero", "q2zaero", "", "zaero", true, R.string.quake_2_zaero),
+    QUAKE2_3ZB2(Q3EGameConstants.GAME_QUAKE2, "3zb2", "3zb2", "q23zb2", "", "3zb2", true, R.string.quake_2_3zb2),
 
     // Return to Castle Wolfenstein
     RTCW_BASE(Q3EGameConstants.GAME_RTCW, "main", "", "rtcwgame", "", "main", false, R.string.rtcw_base),
@@ -113,6 +114,9 @@ public enum Game
 
     // Urban Terror
     URT_BASE(Q3EGameConstants.GAME_URT, "q3ut4", "", "", "", "q3ut4", false, R.string.urbanterror_base),
+
+    // OpenMOHAA
+    MOHAA_BASE(Q3EGameConstants.GAME_MOHAA, "main", "", "", "", "main", false, R.string.openmohaa_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

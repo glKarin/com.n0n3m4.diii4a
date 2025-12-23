@@ -1579,7 +1579,7 @@ static void CG_Corona( centity_t *cent ) {
 		if ( tr.fraction == 1 ) {
 			flags = 1;
 		}
-        if ( cgs.gametype == GT_GOTHIC ) { // red coronas
+        if ( cg_gothic.integer ) { // red coronas
 		trap_R_AddCoronaToScene( cent->lerpOrigin, (float)r / 255.0f, (float)g / 0.0f, (float)b / 0.0f, (float)cent->currentState.density / 255.0f, cent->currentState.number, flags );
 		} else {
 		trap_R_AddCoronaToScene( cent->lerpOrigin, (float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)cent->currentState.density / 255.0f, cent->currentState.number, flags );

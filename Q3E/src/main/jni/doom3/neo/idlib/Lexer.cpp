@@ -3804,3 +3804,5 @@ idStr const		Lexer::sCompiledFileSuffix("c");
 // RAVEN END
 
 #endif
+
+#include "JSON.cpp"

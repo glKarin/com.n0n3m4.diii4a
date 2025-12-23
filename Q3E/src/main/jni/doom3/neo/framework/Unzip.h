@@ -374,4 +374,7 @@ typedef ZPOS64_T fileInPack_pos_t;
 #define unzGetCurrentFileInfoPosition(uf, pos) (*(pos)) = d3_unzGetOffset(uf)
 
 #endif // _MINIZ
+
+byte* zlib_decompress(const byte* compressed, unsigned int comp_len, int* decomp_len);
+
 #endif /* __UNZIP_H__ */

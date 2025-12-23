@@ -1,5 +1,3 @@
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -12,9 +10,6 @@
 #define _FLOOR(x)  ((x) & -64)
 #define _CEIL(x)   (((x)+63) & -64)
 #define _TRUNC(x)  ((x) >> 6)
-
-namespace font
-{
 
 typedef uint32_t fontChar_t;
 
@@ -678,75 +673,73 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
 }
 
 
-    static void R_ExportFont_f(const idCmdArgs &args)
-    {
+static void R_ExportFont_f(const idCmdArgs &args)
+{
 #ifdef _RAVEN //k: quake4 font: require font type
-        if(args.Argc() < 3)
-        {
-            common->Printf("[Usage]: %s <font file: *.ttf, *.ttc> <output font type name> [<language: default using cvar `sys_lang`> <texture width(power of two): default 256, e.g. 256, 512, 1024, 2048, 4096...>]\n", args.Argv(0));
-            return;
-        }
+    if(args.Argc() < 3)
+    {
+        common->Printf("[Usage]: %s <font file: *.ttf, *.ttc> <output font type name> [<language: default using cvar `sys_lang`> <texture width(power of two): default 256, e.g. 256, 512, 1024, 2048, 4096...>]\n", args.Argv(0));
+        return;
+    }
 #else
-        if(args.Argc() < 2)
-        {
-            common->Printf("[Usage]: %s <font file: *.ttf, *.ttc> [<output font folder name: e.g. XXX will export to 'fonts/XXX/', empty to 'fonts/'> <language: default using cvar `sys_lang`> <texture width(power of two): default 256, e.g. 256, 512, 1024, 2048, 4096...]\n", args.Argv(0));
-            return;
-        }
+    if(args.Argc() < 2)
+    {
+        common->Printf("[Usage]: %s <font file: *.ttf, *.ttc> [<output font folder name: e.g. XXX will export to 'fonts/XXX/', empty to 'fonts/'> <language: default using cvar `sys_lang`> <texture width(power of two): default 256, e.g. 256, 512, 1024, 2048, 4096...]\n", args.Argv(0));
+        return;
+    }
 #endif
 
-        const char *fontPath = args.Argv(1);
-        const char *fontType = args.Argc() > 2 ? args.Argv(2) : NULL;
-        const char *language = args.Argc() > 3 ? args.Argv(3) : cvarSystem->GetCVarString("sys_lang");
-        const char *textureWidth = args.Argc() > 4 ? args.Argv(4) : "256";
+    const char *fontPath = args.Argv(1);
+    const char *fontType = args.Argc() > 2 ? args.Argv(2) : NULL;
+    const char *language = args.Argc() > 3 ? args.Argv(3) : cvarSystem->GetCVarString("sys_lang");
+    const char *textureWidth = args.Argc() > 4 ? args.Argv(4) : "256";
 
-        if(fontType && fontType[0] == '\0')
-            fontType = NULL;
-        if(!language || !language[0])
-            language = "english";
-        if(!textureWidth || !textureWidth[0])
-            textureWidth = "256";
+    if(fontType && fontType[0] == '\0')
+        fontType = NULL;
+    if(!language || !language[0])
+        language = "english";
+    if(!textureWidth || !textureWidth[0])
+        textureWidth = "256";
 
-        common->Printf("Export font file(font=%s, type=%s, language=%s, texture width=%s)......\n", fontPath, fontType ? fontType : "", language, textureWidth);
+    common->Printf("Export font file(font=%s, type=%s, language=%s, texture width=%s)......\n", fontPath, fontType ? fontType : "", language, textureWidth);
 
-		int width = atoi(textureWidth);
-		if(width < 256)
-		{
-			common->Warning("Export font width must >= 256!");
-			return;
-		}
-		for(int i = 0, w = width; w > 1; i++)
-		{
-			int d = w % 2;
-			if(d != 0)
-			{
-				common->Warning("Export font width must power of two!");
-				return;
-			}
-			w >>= 2;
-		}
-
-        ftGlobalVars_t exporter;
-        R_Font_InitExporter(&exporter);
-        if(!R_Font_LoadFont(&exporter, fontPath))
-            return;
-
-        const int pointSizes[] = { 12, 24, 48, };
-
-        for(int i = 0; i < sizeof(pointSizes) / sizeof(pointSizes[0]); i++)
-        {
-            common->Printf("Export point size %d......\n", pointSizes[i]);
-            wfontInfo_t font;
-            R_Font_Export(&exporter, pointSizes[i], &font, language, fontType, width);
-        }
-
-        R_Font_UnloadFont(&exporter);
-
-        common->Printf("Export font file done(font=%s, type=%s, language=%s, texture width=%d).\n", fontPath, fontType ? fontType : "", language, width);
+    int width = atoi(textureWidth);
+    if(width < 256)
+    {
+        common->Warning("Export font width must >= 256!");
+        return;
     }
+    for(int i = 0, w = width; w > 1; i++)
+    {
+        int d = w % 2;
+        if(d != 0)
+        {
+            common->Warning("Export font width must power of two!");
+            return;
+        }
+        w >>= 2;
+    }
+
+    ftGlobalVars_t exporter;
+    R_Font_InitExporter(&exporter);
+    if(!R_Font_LoadFont(&exporter, fontPath))
+        return;
+
+    const int pointSizes[] = { 12, 24, 48, };
+
+    for(int i = 0; i < sizeof(pointSizes) / sizeof(pointSizes[0]); i++)
+    {
+        common->Printf("Export point size %d......\n", pointSizes[i]);
+        wfontInfo_t font;
+        R_Font_Export(&exporter, pointSizes[i], &font, language, fontType, width);
+    }
+
+    R_Font_UnloadFont(&exporter);
+
+    common->Printf("Export font file done(font=%s, type=%s, language=%s, texture width=%d).\n", fontPath, fontType ? fontType : "", language, width);
 }
 
-void Font_AddCommand(void)
+void R_Font_AddCommand(void)
 {
-    using namespace font;
     cmdSystem->AddCommand("exportFont", R_ExportFont_f, CMD_FL_RENDERER, "Convert ttf/ttc font file to DOOM3 wide character font file");
 }

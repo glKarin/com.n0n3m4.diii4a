@@ -348,82 +348,55 @@ ID_INLINE static shaderProgram_t * RB_SelectPerforatedShadowMapShader(const view
 ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const viewLight_t* vLight)
 {
     shaderProgram_t *shadowInteractionShader;
-    if(vLight->lightShader->IsAmbientLight())
+    if(vLight->lightShader->IsAmbientLight()
+#ifdef _RAVEN //karin: r_forceAmbient
+        || r_forceAmbient.GetFloat() > 0.0f
+#endif
+    )
     {
         if( vLight->parallel )
-        {
             shadowInteractionShader = &ambientLightingShadowMappingShader_parallelLight;
-        }
         else if( vLight->pointLight )
-        {
             shadowInteractionShader = &ambientLightingShadowMappingShader_pointLight;
-        }
         else
-        {
             shadowInteractionShader = &ambientLightingShadowMappingShader_spotLight;
-        }
     }
     else
     {
-        if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+        switch(r_lightingModel)
         {
-            if( vLight->parallel )
-            {
-                shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_parallelLight;
-            }
-            else if( vLight->pointLight )
-            {
-                shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
-            }
-            else
-            {
-                shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_spotLight;
-            }
-        }
-        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-        {
-            if( vLight->parallel )
-            {
-                shadowInteractionShader = &interactionShadowMappingPBRShader_parallelLight;
-            }
-            else if( vLight->pointLight )
-            {
-                shadowInteractionShader = &interactionShadowMappingPBRShader_pointLight;
-            }
-            else
-            {
-                shadowInteractionShader = &interactionShadowMappingPBRShader_spotLight;
-            }
-        }
-        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
-        {
-            if( vLight->parallel )
-            {
-                shadowInteractionShader = &ambientLightingShadowMappingShader_parallelLight;
-            }
-            else if( vLight->pointLight )
-            {
-                shadowInteractionShader = &ambientLightingShadowMappingShader_pointLight;
-            }
-            else
-            {
-                shadowInteractionShader = &ambientLightingShadowMappingShader_spotLight;
-            }
-        }
-        else
-        {
-            if( vLight->parallel )
-            {
-                shadowInteractionShader = &interactionShadowMappingShader_parallelLight;
-            }
-            else if( vLight->pointLight )
-            {
-                shadowInteractionShader = &interactionShadowMappingShader_pointLight;
-            }
-            else
-            {
-                shadowInteractionShader = &interactionShadowMappingShader_spotLight;
-            }
+            case LM_BLINNPHONG:
+                if( vLight->parallel )
+                    shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_parallelLight;
+                else if( vLight->pointLight )
+                    shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
+                else
+                    shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_spotLight;
+                break;
+            case LM_PBR:
+                if( vLight->parallel )
+                    shadowInteractionShader = &interactionShadowMappingPBRShader_parallelLight;
+                else if( vLight->pointLight )
+                    shadowInteractionShader = &interactionShadowMappingPBRShader_pointLight;
+                else
+                    shadowInteractionShader = &interactionShadowMappingPBRShader_spotLight;
+                break;
+            case LM_AMBIENT:
+                if( vLight->parallel )
+                    shadowInteractionShader = &ambientLightingShadowMappingShader_parallelLight;
+                else if( vLight->pointLight )
+                    shadowInteractionShader = &ambientLightingShadowMappingShader_pointLight;
+                else
+                    shadowInteractionShader = &ambientLightingShadowMappingShader_spotLight;
+                break;
+            default:
+                if( vLight->parallel )
+                    shadowInteractionShader = &interactionShadowMappingShader_parallelLight;
+                else if( vLight->pointLight )
+                    shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+                else
+                    shadowInteractionShader = &interactionShadowMappingShader_spotLight;
+                break;
         }
     }
     return shadowInteractionShader;

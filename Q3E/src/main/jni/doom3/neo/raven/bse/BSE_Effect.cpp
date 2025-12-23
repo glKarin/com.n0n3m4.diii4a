@@ -144,7 +144,7 @@ void rvBSE::UpdateSoundEmitter(const rvSegmentTemplate* st, rvSegment* seg)
     }
 
     // Global no-sound flag?
-    if (mFlags & EF_SOUND/* 0x0008 */)
+    if (mFlags & EFLAG_STOPPED/* 0x0008 */)
     {
         // Stop the looping sound (but only if this segment actually started it)
         if (st->GetSoundLooping() && (seg->mFlags & 0x0002))
@@ -172,7 +172,7 @@ idVec3 rvBSE::GetInterpolatedOffset(idVec3 *result, float time) const
     //offset.Zero();
 
     const float dt = mCurrentTime - mLastTime;
-    if (dt >= 0.002f)                     // ignore tiny steps (< 2 ms)
+    if (dt >= BSE_TIME_EPSILON/* 0.002f */)                     // ignore tiny steps (< 2 ms)
     {
         const float lerp = 1.0f - (time - mLastTime) / dt;
         offset = (mCurrentOrigin - mLastOrigin) * lerp;
@@ -221,7 +221,7 @@ void rvBSE::UpdateFromOwner(renderEffect_s* parms,
     // 3) Velocity (ignore very small Δt to avoid div-by-0 & jitter)
     //--------------------------------------------------------------------
     const float dt = mCurrentTime - mLastTime;
-    if (dt > 0.002f) {
+    if (dt > BSE_TIME_EPSILON/* 0.002f */) {
         mCurrentVelocity = (mCurrentOrigin - mLastOrigin) * (1.0f / dt);
     }
     else {
@@ -256,8 +256,8 @@ void rvBSE::UpdateFromOwner(renderEffect_s* parms,
     newWorldBounds.AddPoint(mCurrentOrigin -
                                     halfCorner);
 
-    if ((mFlags & EF_USES_END_ORIGIN/* 0x0002 */) &&                       // effect uses end-origin
-        (mDeclEffect->mFlags & DEF_USES_END_ORIGIN/* 0x0002 */))
+    if ((mFlags & EFLAG_HASENDORIGIN/* 0x0002 */) &&                       // effect uses end-origin
+        (mDeclEffect->mFlags & ETFLAG_USES_ENDORIGIN/* 0x0002 */))
     {
         if (init
             || mCurrentEndOrigin != parms->endOrigin
@@ -270,9 +270,9 @@ void rvBSE::UpdateFromOwner(renderEffect_s* parms,
             newWorldBounds.AddPoint(mCurrentEndOrigin -
                                             halfCorner);
 
-            mFlags |= EF_MARK_BOUNDS_DIRTY; // 0x0004;                        // mark “world bounds dirty”
+            mFlags |= EFLAG_ENDORIGINCHANGED; // 0x0004;                        // mark “world bounds dirty”
         }
-#if 1 //k??? TODO not be cleared in Q4D, but must re-calc full bounds with useEndOrigin if cleared. Because cleared now, so re-calc it, but not setup EF_MARK_BOUNDS_DIRTY flag
+#if 1 //k??? TODO not be cleared in Q4D, but must re-calc full bounds with useEndOrigin if cleared. Because cleared now, so re-calc it, but not setup EFLAG_ENDORIGINCHANGED flag
         else
         {
             newWorldBounds.AddPoint(mCurrentEndOrigin +
@@ -280,7 +280,7 @@ void rvBSE::UpdateFromOwner(renderEffect_s* parms,
             newWorldBounds.AddPoint(mCurrentEndOrigin -
                                     halfCorner);
 
-            // mFlags |= EF_MARK_BOUNDS_DIRTY; // 0x0004;                        // mark “world bounds dirty”
+            // mFlags |= EFLAG_ENDORIGINCHANGED; // 0x0004;                        // mark “world bounds dirty”
         }
 #endif
     }
@@ -349,7 +349,7 @@ void rvBSE::UpdateFromOwner(renderEffect_s* parms,
 void rvBSE::UpdateAttenuation()
 {
     // Effect not flagged as distance–attenuated? → nothing to do
-    if (!(mDeclEffect->mFlags & DEF_ATTENUATION/* 0x0004 */))
+    if (!(mDeclEffect->mFlags & ETFLAG_ATTENUATES/* 0x0004 */))
         return;
 
     // ------------------------------------------------------------------
@@ -360,7 +360,7 @@ void rvBSE::UpdateAttenuation()
     game->GetPlayerView(camOrg, camAxis);
 
     mOriginDistanceToCamera =
-        idMath::ClampFloat(1.0f, 131072.0f,
+        idMath::ClampFloat(1.0f, WORLD_SIZE/* 131072.0f */,
             (mCurrentOrigin - camOrg).Length());
 
     // ------------------------------------------------------------------
@@ -371,7 +371,7 @@ void rvBSE::UpdateAttenuation()
 
     //   • Query AABB distance, then clamp
     mShortestDistanceToCamera =
-        idMath::ClampFloat(1.0f, 131072.0f,
+        idMath::ClampFloat(1.0f, WORLD_SIZE/* 131072.0f */,
             mCurrentLocalBounds.ShortestDistance(localCam));
 }
 
@@ -426,7 +426,7 @@ bool rvBSE::Service(renderEffect_s* parms, float time)
     UpdateAttenuation();
 
 	if(bseLocal.DebugHudActive()) //karin: add
-    bseLocal.mPerfCounters[4]/* dword_1137DDB8 */ += mSegments.Num();
+    bseLocal.mPerfCounters[PERF_NUM_SEGMENTS]/* dword_1137DDB8 */ += mSegments.Num();
 
     // ------------------------------------------------------------------
     // b) Segment state / particle life-cycle
@@ -436,7 +436,7 @@ bool rvBSE::Service(renderEffect_s* parms, float time)
 
     // If sound is *not* suppressed, the owner wants looping, and the
     // time line just ran past the end → handle formal “loop” transition
-    if (!(mFlags & EF_SOUND/* 0x0008 */) && parms->loop &&
+    if (!(mFlags & EFLAG_STOPPED/* 0x0008 */) && parms->loop &&
         (mDuration + mStartTime < time))
     {
         LoopLooping(time);
@@ -449,12 +449,12 @@ bool rvBSE::Service(renderEffect_s* parms, float time)
     // ------------------------------------------------------------------
     // c) Clear dirty-bounds bit (segments may set it again this frame)
     // ------------------------------------------------------------------
-    mFlags &= ~EF_MARK_BOUNDS_DIRTY; // 0x0004;
+    mFlags &= ~EFLAG_ENDORIGINCHANGED; // 0x0004;
 
     // ------------------------------------------------------------------
     // d) Decide whether the whole effect is finished
     // ------------------------------------------------------------------
-    if (mFlags & EF_SOUND/* 0x0008 */)                // sound suppressed ⇒ effect ends
+    if (mFlags & EFLAG_STOPPED/* 0x0008 */)                // sound suppressed ⇒ effect ends
         return !anyActive;
 
     if (parms->loop)                    // owner wants infinite looping
@@ -645,7 +645,7 @@ void rvBSE::UpdateSegments(float time)
     // --------------------------------------------------------------
     // “while-true” ambient effects that may have started long ago
     // --------------------------------------------------------------
-    if ((mFlags & EF_LOOP/* 0x0001 */) && (mFlags & EF_AMBIENT/* 0x0010 */) && mDuration != 0.0f)
+    if ((mFlags & EFLAG_LOOPING/* 0x0001 */) && (mFlags & EFLAG_AMBIENT/* 0x0010 */) && mDuration != 0.0f)
     {
         // Advance the timeline so that ‘time’ sits inside the current loop
         while (time - (mDuration * 2.f) > mStartTime)
@@ -677,9 +677,9 @@ void rvBSE::Init(rvDeclEffect* decl,
     // --------------------------------------------------------------
     // Core state
     // --------------------------------------------------------------
-    mFlags = parms->loop ? EF_LOOP/* 0x0001 */ : 0;    // bit-0 = “explicit loop”
-    if (parms->ambient)  mFlags |= EF_AMBIENT; // 0x0010;      // bit-4 = ambient
-	else mFlags &= ~EF_AMBIENT;
+    mFlags = parms->loop ? EFLAG_LOOPING/* 0x0001 */ : 0;    // bit-0 = “explicit loop”
+    if (parms->ambient)  mFlags |= EFLAG_AMBIENT; // 0x0010;      // bit-4 = ambient
+	else mFlags &= ~EFLAG_AMBIENT;
 											   //
 
     mDeclEffect = decl;
@@ -698,7 +698,7 @@ void rvBSE::Init(rvDeclEffect* decl,
     // Optional end-origin
     if (parms->hasEndOrigin)
     {
-        mFlags |= EF_USES_END_ORIGIN; // 0x0002;      // “hasEndOrigin”
+        mFlags |= EFLAG_HASENDORIGIN; // 0x0002;      // “hasEndOrigin”
         mOriginalEndOrigin = parms->endOrigin;
         mCurrentEndOrigin = parms->endOrigin;
     }
@@ -731,7 +731,7 @@ void rvBSE::Init(rvDeclEffect* decl,
 
 bool rvBSE::CanInterpolate() const
 {
-    return mCurrentTime - mLastTime > 0.0020000001f;
+    return mCurrentTime - mLastTime > BSE_TIME_EPSILON/* 0.0020000001f */;
 }
 
 idSoundEmitter * rvBSE::GetReferenceSound(int worldId)

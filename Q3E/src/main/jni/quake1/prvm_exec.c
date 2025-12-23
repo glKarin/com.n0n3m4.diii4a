@@ -205,8 +205,8 @@ NULL,
 "DIV_VF",
 
 NULL,
-NULL,
-NULL,
+"RSHIFT_I",
+"LSHIFT_I",
 
 "GLOBALADDRESS",
 "ADD_PIW",
@@ -294,6 +294,24 @@ NULL,
 NULL,
 
 "GLOAD_V",
+
+NULL,
+NULL,
+
+NULL,
+NULL,
+NULL,
+NULL,
+
+
+NULL,
+NULL,
+
+
+"^2LE_U",
+"^2LT_U",
+"DIV_U",
+"RSHIFT_U",
 };
 
 
@@ -928,6 +946,7 @@ static void PRVM_StatementCoverageEvent(prvm_prog_t *prog, mfunction_t *func, in
 extern cvar_t prvm_traceqc;
 extern cvar_t prvm_statementprofiling;
 extern qbool prvm_runawaycheck;
+extern cvar_t prvm_gameplayfix_div0is0;
 
 #define PRVM_GLOBALSBASE 0x80000000
 

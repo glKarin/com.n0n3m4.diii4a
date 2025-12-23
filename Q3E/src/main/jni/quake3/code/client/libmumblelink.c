@@ -78,6 +78,7 @@ static int32_t GetTickCount(void)
 }
 #endif
 
+#ifdef USE_MUMBLE
 int mumble_link(const char* name)
 {
 #ifdef WIN32
@@ -168,7 +169,7 @@ void mumble_set_description(const char* description)
 	mbstowcs(lm->description, description, len);
 }
 
-void mumble_unlink()
+void mumble_unlink(void)
 {
 	if(!lm)
 		return;
@@ -186,3 +187,4 @@ int mumble_islinked(void)
 {
 	return lm != NULL;
 }
+#endif

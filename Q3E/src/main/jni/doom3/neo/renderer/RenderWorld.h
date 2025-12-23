@@ -42,6 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _RAVEN // quake4 proc file
 #define PROC_FILE_ID					"PROC"
 #define PROC_FILEVERSION				"4" // jmarshall: changed to string. 
+#define	PROC_FILE_DOOM3_ID				"mapProcFile003"
 #else
 #define	PROC_FILE_ID				"mapProcFile003"
 #endif
@@ -548,24 +549,24 @@ class idRenderWorld
 		virtual void			SetRenderView(const renderView_t *renderView) = 0;
 
 #ifdef _RAVEN
-// jscott: for portal skies
-	virtual bool			HasSkybox( int areaNum ) = 0;
-	virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas ) = 0;
+    // jscott: for portal skies
+        virtual bool			HasSkybox( int areaNum ) = 0;
+        virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas ) = 0;
 
-// jscott: handling of effects
-	virtual qhandle_t		AddEffectDef( const renderEffect_t *reffect, int time ) = 0;
-	virtual bool			UpdateEffectDef( qhandle_t effectHandle, const renderEffect_t *reffect, int time ) = 0;
-	virtual void			StopEffectDef( qhandle_t effectHandle ) = 0;
-	virtual const class rvRenderEffectLocal* GetEffectDef( qhandle_t effectHandle ) const = 0;
-	virtual void			FreeEffectDef( qhandle_t effectHandle ) = 0;
-	virtual bool			EffectDefHasSound( const renderEffect_s *reffect ) = 0;
+    // jscott: handling of effects
+        virtual qhandle_t		AddEffectDef( const renderEffect_t *reffect, int time ) = 0;
+        virtual bool			UpdateEffectDef( qhandle_t effectHandle, const renderEffect_t *reffect, int time ) = 0;
+        virtual void			StopEffectDef( qhandle_t effectHandle ) = 0;
+        virtual const class rvRenderEffectLocal* GetEffectDef( qhandle_t effectHandle ) const = 0;
+        virtual void			FreeEffectDef( qhandle_t effectHandle ) = 0;
+        virtual bool			EffectDefHasSound( const renderEffect_s *reffect ) = 0;
 
-	virtual void			DebugClear(int time) = 0;		// a time of 0 will clear all lines and text
-// jscott: want to be able to specify depth test
-	virtual void			DebugBounds(const idVec4& color, const idBounds& bounds, const idVec3& org, const int lifetime, bool depthTest) = 0;
-	virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot = 1.0f, float nearDist = 0.0f, float alpha = 0.3f, int lifetime = 0) = 0;
-		virtual void			RenderScene(const renderView_t *renderView, int renderFlags/* = RF_NORMAL */) = 0;
-// AReis: Modified RenderScene() signature to include renderFlags variable.
+        virtual void			DebugClear(int time) = 0;		// a time of 0 will clear all lines and text
+    // jscott: want to be able to specify depth test
+        virtual void			DebugBounds(const idVec4& color, const idBounds& bounds, const idVec3& org, const int lifetime, bool depthTest) = 0;
+        virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot = 1.0f, float nearDist = 0.0f, float alpha = 0.3f, int lifetime = 0) = 0;
+            virtual void			RenderScene(const renderView_t *renderView, int renderFlags/* = RF_NORMAL */) = 0;
+    // AReis: Modified RenderScene() signature to include renderFlags variable.
 #endif
 		// rendering a scene may actually render multiple subviews for mirrors and portals, and
 		// may render composite textures for gui console screens and light projections

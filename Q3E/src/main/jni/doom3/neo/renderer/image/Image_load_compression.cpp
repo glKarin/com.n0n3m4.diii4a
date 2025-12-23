@@ -25,9 +25,10 @@ enum {
 #endif
 };
 
-#define IMAGE_COMPRESSION_MAGIC ((unsigned int)('d' << 24 | '3' << 16 | 'e' << 8 | 's'))
+#define IMAGE_COMPRESSION_MAGIC ((unsigned int)('i' << 24 | 'd' << 16 | 't' << 8 | 't'))
 #define IMAGE_COMPRESSION_VERSION ((unsigned int)(0x00010001))
 
+#pragma pack( push, 1 )
 typedef struct imageCompressionHeader_s
 {
     uint32_t magic;
@@ -47,6 +48,7 @@ typedef struct imageCompression_s
     imageCompressionHeader_t header;
     const byte *data;
 } imageCompression_t;
+#pragma pack( pop )
 
 static void R_AllocCompression(imageCompression_t *image, int width, int height, int type, int mipmap = 0, int length = 0, byte *data = NULL)
 {

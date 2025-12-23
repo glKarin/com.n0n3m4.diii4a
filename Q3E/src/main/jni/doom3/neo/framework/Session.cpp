@@ -117,8 +117,11 @@ static idCVar harm_g_skipHitEffect("harm_g_skipHitEffect", "0", CVAR_GAME | CVAR
 
 #ifdef _HUMANHEAD //k: play level music when map loading
 static idCVar g_levelloadmusic("g_levelloadmusic", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "play music during level loads");
-
+idCVar g_subtitles("g_subtitles", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "Display subtitles");
 #include "../sound/snd_local.h"
+
+//k: for main menu gui
+idCVar com_profanity("com_profanity", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "if off, blocks profanity");
 #endif
 
 idSessionLocal		sessLocal;
@@ -1908,9 +1911,9 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	bool	reloadingSameMap;
 
 #ifdef _EXTRAS_TOOLS
-    extern void ModelTest_CleanModel(void);
+    extern void R_ModelTest_CleanModel(void);
     //extern void ModelLight_CleanLight(void);
-    ModelTest_CleanModel();
+    R_ModelTest_CleanModel();
     //ModelLight_CleanLight();
 #endif
 	// close console and remove any prints from the notify lines

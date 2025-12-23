@@ -45,6 +45,8 @@ float shadelight[3];
 float *shadedots = r_avertexnormal_dots[0];
 extern vec3_t lightspot;
 
+extern unsigned char minlight[256];
+
 static void
 R_LerpVerts(entity_t *currententity, int nverts, dtrivertx_t *v, dtrivertx_t *ov,
 		dtrivertx_t *verts, float *lerp, float move[3],
@@ -141,66 +143,98 @@ R_DrawAliasFrameLerp(entity_t *currententity, dmdl_t *paliashdr, float backlerp)
 
 	R_LerpVerts(currententity, paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
 
-		while (1)
+	while (1)
+	{
+		int idx[3];
+
+		/* get the vertex count and primitive type */
+		count = *order++;
+
+		if (!count)
 		{
-			/* get the vertex count and primitive type */
-			count = *order++;
+			break; /* done */
+		}
 
-			if (!count)
-			{
-				break; /* done */
-			}
-
-			if (count < 0)
-			{
-				count = -count;
-				R_SetBufferIndices(GL_TRIANGLE_FAN, count);
-			}
-			else
-			{
+		if (count < 0)
+		{
+			count = -count;
+			R_SetBufferIndices(GL_TRIANGLE_FAN, count);
+		}
+		else
+		{
 			R_SetBufferIndices(GL_TRIANGLE_STRIP, count);
-			}
+		}
 
-			if (currententity->flags &
-				(RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE))
+		if (currententity->flags &
+			(RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE))
+		{
+			do
 			{
-				do
-				{
-					index_xyz = order[2];
-					order += 3;
+				index_xyz = order[2];
+				order += 3;
 
 				GLBUFFER_VERTEX(s_lerped[index_xyz][0],
 					s_lerped[index_xyz][1], s_lerped[index_xyz][2])
 
-				GLBUFFER_COLOR(shadelight[0], shadelight[1],
-					shadelight[2], alpha)
-				}
-				while (--count);
-			}
-			else
-			{
-				do
+				for (i = 0; i < 3; i++)
 				{
-					/* texture coordinates come from the draw list */
+					idx[i] = shadelight[i] * 255;
+					idx[i] = Q_clamp(idx[i], 0, 255);
+				}
+
+				if (gl_state.minlight_set)
+				{
+					for (i = 0; i < 3; i++)
+					{
+						idx[i] = minlight[idx[i]];
+					}
+				}
+
+				GLBUFFER_COLOR(gammatable[idx[0]],
+					gammatable[idx[1]],
+					gammatable[idx[2]], alpha * 255)
+			}
+			while (--count);
+		}
+		else
+		{
+			do
+			{
+				/* texture coordinates come from the draw list */
 				tex[0] = ((float *)order)[0];
 				tex[1] = ((float *)order)[1];
 
-					index_xyz = order[2];
-					order += 3;
+				index_xyz = order[2];
+				order += 3;
 
-					/* normals and vertexes come from the frame list */
-					l = shadedots[verts[index_xyz].lightnormalindex];
+				/* normals and vertexes come from the frame list */
+				l = shadedots[verts[index_xyz].lightnormalindex];
 
 				GLBUFFER_VERTEX(s_lerped[index_xyz][0],
 					s_lerped[index_xyz][1], s_lerped[index_xyz][2])
 
 				GLBUFFER_SINGLETEX(tex[0], tex[1])
 
-				GLBUFFER_COLOR(l * shadelight[0], l * shadelight[1],
-					l * shadelight[2], alpha)
+				for (i = 0; i < 3; i++)
+				{
+					idx[i] = l * shadelight[i] * 255;
+					idx[i] = Q_clamp(idx[i], 0, 255);
 				}
-				while (--count);
+
+				if (gl_state.minlight_set)
+				{
+					for (i = 0; i < 3; i++)
+					{
+						idx[i] = minlight[idx[i]];
+					}
+				}
+
+				GLBUFFER_COLOR(gammatable[idx[0]],
+					gammatable[idx[1]],
+					gammatable[idx[2]], alpha * 255)
 			}
+			while (--count);
+		}
 	}
 }
 
@@ -291,14 +325,14 @@ R_CullAliasModel(const model_t *currentmodel, vec3_t bbox[8], entity_t *e)
 
 	if ((e->frame >= paliashdr->num_frames) || (e->frame < 0))
 	{
-		R_Printf(PRINT_DEVELOPER, "R_CullAliasModel %s: no such frame %d\n",
+		Com_DPrintf("%s %s: no such frame %d\n", __func__,
 				currentmodel->name, e->frame);
 		e->frame = 0;
 	}
 
 	if ((e->oldframe >= paliashdr->num_frames) || (e->oldframe < 0))
 	{
-		R_Printf(PRINT_DEVELOPER, "R_CullAliasModel %s: no such oldframe %d\n",
+		Com_DPrintf("%s %s: no such oldframe %d\n", __func__,
 				currentmodel->name, e->oldframe);
 		e->oldframe = 0;
 	}
@@ -580,7 +614,6 @@ R_DrawAliasModel(entity_t *currententity, const model_t *currentmodel)
     }
 
 
-
 	/* ir goggles color override */
 	if (r_newrefdef.rdflags & RDF_IRGOGGLES && currententity->flags &
 		RF_IR_VISIBLE)
@@ -637,7 +670,7 @@ R_DrawAliasModel(entity_t *currententity, const model_t *currentmodel)
 	if ((currententity->frame >= paliashdr->num_frames) ||
 		(currententity->frame < 0))
 	{
-		R_Printf(PRINT_DEVELOPER, "R_DrawAliasModel %s: no such frame %d\n",
+		Com_DPrintf("%s %s: no such frame %d\n", __func__,
 				currentmodel->name, currententity->frame);
 		currententity->frame = 0;
 		currententity->oldframe = 0;
@@ -646,7 +679,7 @@ R_DrawAliasModel(entity_t *currententity, const model_t *currentmodel)
 	if ((currententity->oldframe >= paliashdr->num_frames) ||
 		(currententity->oldframe < 0))
 	{
-		R_Printf(PRINT_DEVELOPER, "R_DrawAliasModel %s: no such oldframe %d\n",
+		Com_DPrintf("%s %s: no such oldframe %d\n", __func__,
 				currentmodel->name, currententity->oldframe);
 		currententity->frame = 0;
 		currententity->oldframe = 0;

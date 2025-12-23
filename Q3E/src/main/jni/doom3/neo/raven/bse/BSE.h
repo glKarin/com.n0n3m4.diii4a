@@ -20,6 +20,63 @@ extern idCVar bse_log;
 #define BSE_LOGFI(...)
 #endif
 
+const float WORLD_SIZE			= ( 128.0f * 1024.0f );
+const float BSE_LARGEST			= ( 512.0f );
+const float BSE_TESS_COST		= ( 20.0f );				// The expense of a new tess
+const float BSE_PHYSICS_COST	= ( 80.0f );				// The expense of 1 particle having physics
+
+const float BSE_PARTICLE_TEXCOORDSCALE = ( 0.01f );
+
+
+
+const unsigned int MEMORY_BLOCK_SIZE = ( 0x100000 );
+const unsigned int BSE_ELEC_MAX_BOLTS = ( 200 );
+
+/*typedef */enum eBSEPerfCounter
+{
+    PERF_NUM_BSE,
+    PERF_NUM_TRACES,
+    PERF_NUM_PARTICLES,
+    PERF_NUM_TEXELS,
+    PERF_NUM_SEGMENTS,
+    NUM_PERF_COUNTERS
+};
+
+// rvSegmentTemplate::mSegType //karin: move enum from class rvSegmentTemplate to globals
+/*typedef */enum eBSESegment
+{
+    SEG_NONE = 0x0,
+    SEG_EFFECT = 0x1,						// Spawns another effect inheriting data from owner
+    SEG_EMITTER = 0x2,					// Spawns particles at a rate
+    SEG_SPAWNER = 0x3,					// Spawns particles instantly
+    SEG_TRAIL = 0x4,						// Leaves a trail of particles
+    SEG_SOUND = 0x5,						// Plays a sound
+    SEG_DECAL = 0x6,						// Leaves an idDecal
+    SEG_LIGHT = 0x7,						// Displays a 3D light
+    SEG_DELAY = 0x8,						// A control segment for looping
+    SEG_DOUBLEVISION = 0x9, // SEG_DV // not in ETQW SDK
+    SEG_SHAKE = 0xA, // 10						// Triggers a screen shake
+    SEG_TUNNEL = 0xB, // 11						// Triggers the id tunnel vision effect
+    SEG_COUNT = 0xC, // =12
+};
+#define SEG_DV SEG_DOUBLEVISION
+
+// rvParticleTemplate::mTrailType
+/*typedef */enum eBSETrail {
+    TRAIL_NONE = 0,
+    TRAIL_BURN = 1,
+    TRAIL_MOTION = 2,
+    TRAIL_PARTICLE = 3, // custom
+    TRAIL_COUNT
+};
+
+// rvSegment::mFlag
+enum {
+    SFLAG_EXPIRED			= BITT< 0 >::VALUE,
+    SFLAG_SOUNDPLAYING		= BITT< 1 >::VALUE,
+    SFLAG_HASMOTIONTRAIL	= BITT< 2 >::VALUE,
+};
+
 class rvParticleParms
 {
 public:
@@ -118,10 +175,10 @@ namespace BSE
 
 #include "bse_effect.h"
 #include "BSE_Envelope.h"
+#include "BSE_Particle.h"
 #include "bse_parseparticle2.h"
 #include "bse_effecttemplate.h"
 #include "bse_segment.h"
-#include "BSE_Particle.h"
 #include "bse_light.h"
 #include "bse_segmenttemplate.h"
 #include "BSE_SpawnDomains.h"
@@ -198,7 +255,7 @@ public:
     static		const char* mSegmentNames[SEG_COUNT];
 	static float mEffectRates[EC_MAX];
 	static float effectCosts[EC_MAX];
-	static unsigned int mPerfCounters[5];
+	static unsigned int mPerfCounters[NUM_PERF_COUNTERS];
     static idCVar *g_decals;
 };
 

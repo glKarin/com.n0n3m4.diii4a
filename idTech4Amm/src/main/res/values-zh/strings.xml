@@ -121,7 +121,7 @@
     <string name="toggle_key">切换键</string>
     <string name="touch_type">触摸方式</string>
     <string name="slider_type">滑动方式</string>
-    <string name="key">键码</string>
+    <string name="key_1">键码</string>
     <string name="key_2">键码2</string>
     <string name="key_3">键码3</string>
     <string name="screen">屏幕</string>
@@ -289,10 +289,11 @@
     <string name="librecoop">LibreCoop</string>
     <string name="quake_1_base">雷神之锤1</string>
     <string name="quake_2_base">雷神之锤2</string>
-    <string name="quake_2_ctf">雷神之锤2:ctf</string>
-    <string name="quake_2_rogue">雷神之锤2:rogue</string>
-    <string name="quake_2_xatrix">雷神之锤2:xatrix</string>
-    <string name="quake_2_zaero">雷神之锤2:zaero</string>
+    <string name="quake_2_ctf">雷神之锤2: Capture The Flag</string>
+    <string name="quake_2_rogue">雷神之锤2扩展包: Ground Zero</string>
+    <string name="quake_2_xatrix">雷神之锤2扩展包: The Reckoning</string>
+    <string name="quake_2_zaero">雷神之锤2: Team Evolves Zaero</string>
+    <string name="quake_2_3zb2">雷神之锤2: 3rd Zigock Bot II</string>
     <string name="rtcw_base">重返德军总部</string>
     <string name="realrtcw_base">真·重返德军总部</string>
     <string name="fteqw_base">FTEQW</string>
@@ -552,4 +553,16 @@
     <string name="fixed_ratio">固定比例</string>
     <string name="ratio">比例</string>
     <string name="use_custom_resolution_as_fullscreen_size">使用自定义分辨率大小作为屏幕总大小</string>
+    <string name="openmohaa">OpenMOHAA</string>
+    <string name="openmohaa_base">荣誉勋章: 联合袭击</string>
+    <string name="video">图像</string>
+    <string name="virtual_joystick">虚拟摇杆</string>
+    <string name="touch">触控</string>
+    <string name="sensor">传感器</string>
+    <string name="mouse">鼠标</string>
+    <string name="key">按键</string>
+    <string name="configure">配置</string>
+    <string name="common">通用</string>
+    <string name="current_game">当前游戏</string>
+    <string name="edit_type">编辑类型</string>
 </resources>

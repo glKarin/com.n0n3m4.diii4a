@@ -148,7 +148,8 @@ typedef enum {
 // RAVEN END
 #endif
 #ifdef _HUMANHEAD
-	, OP_TYPE_FRAGMENTPROGRAMS // HUMANHEAD CJR:  Added so fragment programs support can be toggled
+	,
+    OP_TYPE_FRAGMENTPROGRAMS // HUMANHEAD CJR:  Added so fragment programs support can be toggled
 #endif
 } expOpType_t;
 
@@ -391,10 +392,11 @@ typedef enum {
 // RAVEN END
 #endif
 #ifdef _HUMANHEAD
-	, MF_USESDISTANCE				= BIT(7),	// HUMANHEAD pdm: distance optimization
+	,
+    MF_USESDISTANCE				= BIT(7),	// HUMANHEAD pdm: distance optimization
 	MF_LIGHT_WHOLE_MESH			= BIT(8),	// HUMANHEAD bjk: dont cull tris with light bounds
     //HUMANHEAD PCF rww 05/11/06 - can be used explicitly by surfaces which use alpha coverage but do not want collision anyway
-    MF_SKIPCLIP = BIT(9)
+    MF_SKIPCLIP                 = BIT(9)
 		//HUMANHEAD END
 #endif
 } materialFlags_t;
@@ -445,14 +447,14 @@ typedef enum {
 	
 #ifdef _HUMANHEAD
 	// HUMANHEAD CJR: Content flags.  Note that for simplicity of merging, id's areaportal and nocsg flags were left as is
-	CONTENTS_FORCEFIELD = BIT(16),	// forcefield matter, only passable in spirit mode
-	CONTENTS_SPIRITBRIDGE = BIT(17),	// cjr - Collidable only by spiritwalking players
+	CONTENTS_FORCEFIELD         = BIT(16),	// forcefield matter, only passable in spirit mode
+	CONTENTS_SPIRITBRIDGE       = BIT(17),	// cjr - Collidable only by spiritwalking players
 	// END HUMANHEAD
 
 	// HUMANHEAD CJR: Content flags.  Note that for simplicity of merging, id's areaportal and nocsg flags were left as is
 	CONTENTS_BLOCK_RADIUSDAMAGE = BIT(18/*20*/),	// aob - used by objects like forcefields and chaff
-	CONTENTS_SHOOTABLE = BIT(19/*21*/),	// pdm - bullets collide with but not player or monsters
-	CONTENTS_DEATHVOLUME = BIT(22),	// AOB: used by death zones so the player can do a simple contents check
+	CONTENTS_SHOOTABLE          = BIT(19/*21*/),	// pdm - bullets collide with but not player or monsters
+	CONTENTS_DEATHVOLUME        = BIT(22),	// AOB: used by death zones so the player can do a simple contents check
 	CONTENTS_VEHICLECLIP		= BIT(23),	// PDM: used to clip off vehicle movement
 	CONTENTS_OWNER_TO_OWNER		= BIT(24),	// bjk: used to disable owner to owner rejection for collision
 	CONTENTS_GAME_PORTAL		= BIT(25),  // cjr: used for clipping against game portals (glow portals, etc)

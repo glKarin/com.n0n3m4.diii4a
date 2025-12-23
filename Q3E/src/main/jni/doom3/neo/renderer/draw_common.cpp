@@ -663,7 +663,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 	tri = surf->geo;
 	shader = surf->material;
 
-	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_NOLIGHTING)
+	if(r_lightingModel == LM_NOLIGHTING)
 	{
 		if(!shader->HasAmbient() && !shader->ReceivesLighting())
 			return;
@@ -748,7 +748,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		}
 
 		// skip the stages involved in lighting
-		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_NOLIGHTING)
+		if(r_lightingModel == LM_NOLIGHTING)
 		{
 			if(pStage->lighting != SL_AMBIENT && pStage->lighting != SL_DIFFUSE)
 				continue;
@@ -1097,7 +1097,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
         else
 #endif
         {
-			if(r_interactionLightingModel == HARM_INTERACTION_SHADER_NOLIGHTING)
+			if(r_lightingModel == LM_NOLIGHTING)
 			{
 				if (pStage->lighting == SL_AMBIENT)
 	                GL_State(pStage->drawStateBits);
@@ -2013,7 +2013,7 @@ void	RB_STD_DrawView(void)
 	RB_STD_FillDepthBuffer(drawSurfs, numDrawSurfs);
 
 	// main light renderer
-	if (r_interactionLightingModel != HARM_INTERACTION_SHADER_NOLIGHTING
+	if (r_lightingModel != LM_NOLIGHTING
 #ifdef _NO_LIGHT
 			&& !r_noLight.GetBool()
 #endif

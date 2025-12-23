@@ -95,7 +95,6 @@ typedef enum
 /* 64 light grades available */
 #define LIGHTMASK		0xFF00
 
-extern viddef_t	vid;
 extern pixel_t	*vid_buffer;	// invisible buffer
 extern pixel_t	*vid_colormap;	// 256 * VID_GRADES size
 extern pixel_t	*vid_alphamap;	// 256 * 256 translucency map
@@ -474,7 +473,7 @@ extern msurface_t	*r_alpha_surfaces;
 void R_DrawAlphaSurfaces(const entity_t *currententity);
 
 void R_DrawSprite(entity_t *currententity, const model_t *currentmodel);
-
+void R_ClipAndDrawPoly(float alpha, int isturbulent, qboolean textured);
 void R_RenderFace(entity_t *currententity, const model_t *currentmodel, msurface_t *fa, int clipflags, qboolean insubmodel);
 void R_RenderBmodelFace(entity_t *currententity, bedge_t *pedges, msurface_t *psurf, int r_currentbkey);
 void R_TransformFrustum(void);
@@ -482,9 +481,9 @@ void R_TransformFrustum(void);
 void R_DrawSubmodelPolygons(entity_t *currententity, const model_t *currentmodel, int clipflags, mnode_t *topnode);
 void R_DrawSolidClippedSubmodelPolygons(entity_t *currententity, const model_t *currentmodel, mnode_t *topnode);
 
-void R_AliasDrawModel(entity_t *currententity, const model_t *currentmodel);
+void R_DrawAliasModel(entity_t *currententity, const model_t *currentmodel);
 void R_BeginEdgeFrame(void);
-void R_ScanEdges(entity_t *currententity, surf_t *surface);
+void R_ScanEdges(entity_t *currententity, const surf_t *surface);
 void R_PushDlights(const model_t *model);
 void R_RotateBmodel(const entity_t *currententity);
 
@@ -559,8 +558,6 @@ void R_PrintTimes (void);
 void R_PrintDSpeeds (void);
 void R_LightPoint (const entity_t *currententity, vec3_t p, vec3_t color);
 void R_SetupFrame (void);
-
-extern  refdef_t		r_newrefdef;
 
 extern  surfcache_t	*sc_base;
 

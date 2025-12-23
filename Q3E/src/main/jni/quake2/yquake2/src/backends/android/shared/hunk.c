@@ -79,7 +79,7 @@ Hunk_Begin(int maxsize)
 	prot |= PROT_MAX(prot);
 #endif
 
-	membase = mmap(0, maxhunksize, prot,
+	membase = (byte *)mmap(0, maxhunksize, prot,
 			flags, -1, 0);
 
 	if ((membase == NULL) || (membase == (byte *)-1))
@@ -102,7 +102,8 @@ Hunk_Alloc(int size)
 
 	if (curhunksize + size > maxhunksize)
 	{
-		Sys_Error("Hunk_Alloc overflow");
+		Sys_Error("%s: overflow %d > %d",
+			__func__, curhunksize + size, maxhunksize);
 	}
 
 	buf = membase + sizeof(size_t) + curhunksize;

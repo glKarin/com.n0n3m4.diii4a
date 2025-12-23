@@ -287,6 +287,11 @@ static void (*_LittleBitField)(void *bp, int elsize);
 static void	(*_SixtetsForInt)(byte *out, int src);
 static int	(*_IntForSixtets)(byte *in);
 
+static int64_t	(*_BigLongLong)(int64_t l);
+static int64_t	(*_LittleLongLong)(int64_t l);
+static double   (*_BigDouble)(double l);
+static double   (*_LittleDouble)(double l);
+
 short	BigShort(short l)
 {
 	return _BigShort(l);
@@ -331,6 +336,23 @@ void	SixtetsForInt(byte *out, int src)
 int		IntForSixtets(byte *in)
 {
 	return _IntForSixtets(in);
+}
+
+int64_t		BigLongLong(int64_t l)
+{
+    return _BigLongLong(l);
+}
+int64_t		LittleLongLong(int64_t l)
+{
+    return _LittleLongLong(l);
+}
+double	BigDouble(double l)
+{
+    return _BigDouble(l);
+}
+double	LittleDouble(double l)
+{
+    return _LittleDouble(l);
 }
 
 /*
@@ -414,6 +436,73 @@ FloatNoSwap
 float FloatNoSwap(float f)
 {
 	return f;
+}
+
+/*
+================
+DoubleSwap
+================
+*/
+double DoubleSwap(double f)
+{
+    union {
+        double	f;
+        byte	b[8];
+    } dat1, dat2;
+
+
+    dat1.f = f;
+    dat2.b[0] = dat1.b[7];
+    dat2.b[1] = dat1.b[6];
+    dat2.b[2] = dat1.b[5];
+    dat2.b[3] = dat1.b[4];
+    dat2.b[4] = dat1.b[3];
+    dat2.b[5] = dat1.b[2];
+    dat2.b[6] = dat1.b[1];
+    dat2.b[7] = dat1.b[0];
+    return dat2.f;
+}
+
+/*
+================
+DoubleNoSwap
+================
+*/
+double DoubleNoSwap(double d)
+{
+    return d;
+}
+
+/*
+================
+LongLongSwap
+================
+*/
+int64_t LongLongSwap(int64_t l)
+{
+    byte    b1,b2,b3,b4;
+    byte    b5,b6,b7,b8;
+
+    b1 = l&255;
+    b2 = (l>>8)&255;
+    b3 = (l>>16)&255;
+    b4 = (l>>24)&255;
+    b5 = (l>>32)&255;
+    b6 = (l>>40)&255;
+    b7 = (l>>48)&255;
+    b8 = (l>>56)&255;
+
+    return ((int64_t)b1<<56) + ((int64_t)b2<<48) + ((int64_t)b3<<40) + ((int64_t)b4<<32) + ((int64_t)b5<<24) + ((int64_t)b6<<16) + ((int64_t)b7<<8) + b8;
+}
+
+/*
+================
+LongLongNoSwap
+================
+*/
+int64_t LongLongNoSwap(int64_t l)
+{
+    return l;
 }
 
 /*
@@ -606,6 +695,11 @@ void Swap_Init(void)
 		_LittleBitField = RevBitFieldNoSwap;
 		_SixtetsForInt = SixtetsForIntLittle;
 		_IntForSixtets = IntForSixtetsLittle;
+
+        _BigLongLong = LongLongSwap;
+        _LittleLongLong = LongLongNoSwap;
+        _BigDouble = DoubleSwap;
+        _LittleDouble = DoubleNoSwap;
 	} else {
 		// big endian ex: ppc
 		_BigShort = ShortNoSwap;
@@ -619,6 +713,11 @@ void Swap_Init(void)
 		_LittleBitField = RevBitFieldSwap;
 		_SixtetsForInt = SixtetsForIntBig;
 		_IntForSixtets = IntForSixtetsBig;
+
+        _BigLongLong = LongLongNoSwap;
+        _LittleLongLong = LongLongSwap;
+        _BigDouble = DoubleNoSwap;
+        _LittleDouble = DoubleSwap;
 	}
 }
 

@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef _RAVEN
 #include "Model_local.h"
+//karin: for compat doom3 proc
+#define PROC_IS_QUAKE4_VERSION() (procVersion != 0)
 #endif
 
 /*
@@ -170,6 +172,8 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 
 #ifdef _RAVEN // quake4 proc file
 // jmarshall - quake 4 proc format
+	model->SetHasSky(true); // default
+	if(PROC_IS_QUAKE4_VERSION()) //karin: for compat doom3 proc
     if (!src->PeekTokenString("{") && !src->PeekTokenString("}"))
     {
         int hasSky = src->ParseInt();
@@ -198,9 +202,17 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 		for (j = 0 ; j < tri->numVerts ; j++) {
 #ifdef _RAVEN // quake4 proc file
             float	vec[12];
+
             int numFloat = src->Parse1DMatrixOpenEnded( 12, vec );
+#if 0
 			if ( numFloat != 8 && numFloat != 12 )
 				src->Error("R_ParseModel: bad vertex read");
+#endif
+#else
+			float	vec[8];
+
+			src->Parse1DMatrix(8, vec);
+#endif
 
 			tri->verts[j].xyz[0] = vec[0];
 			tri->verts[j].xyz[1] = vec[1];
@@ -210,6 +222,10 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 			tri->verts[j].normal[0] = vec[5];
 			tri->verts[j].normal[1] = vec[6];
 			tri->verts[j].normal[2] = vec[7];
+
+#ifdef _RAVEN //karin: quake4 proc file
+            if(PROC_IS_QUAKE4_VERSION()) //karin: for compat doom3 proc
+			{
 			if(numFloat == 12) //karin: color
 			{
 				tri->verts[j].color[0] = (byte)(vec[8]);
@@ -225,19 +241,14 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 				tri->verts[j].color[2] = 0;
 				tri->verts[j].color[3] = 255;
             }
-#else
-			float	vec[8];
-
-			src->Parse1DMatrix(8, vec);
-
-			tri->verts[j].xyz[0] = vec[0];
-			tri->verts[j].xyz[1] = vec[1];
-			tri->verts[j].xyz[2] = vec[2];
-			tri->verts[j].st[0] = vec[3];
-			tri->verts[j].st[1] = vec[4];
-			tri->verts[j].normal[0] = vec[5];
-			tri->verts[j].normal[1] = vec[6];
-			tri->verts[j].normal[2] = vec[7];
+			}
+			else
+			{
+				tri->verts[j].color[0] = 0;
+				tri->verts[j].color[1] = 0;
+				tri->verts[j].color[2] = 0;
+				tri->verts[j].color[3] = 255;
+			}
 #endif
 		}
 
@@ -420,7 +431,9 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 			(*w)[j][4] = 0;
 		}
 
-#ifdef _RAVEN //k: quake4 extras
+#ifdef _RAVEN //k: quake4 proc extras
+        if(PROC_IS_QUAKE4_VERSION()) //karin: for compat doom3 proc
+		{
 		idToken nextToken;
 		if(src->ReadTokenOnLine(&nextToken))
 		{
@@ -438,6 +451,7 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 			}
 			else
 				src->UnreadToken(&nextToken);
+		}
 		}
 #endif
 
@@ -638,6 +652,9 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 	idStr			filename;
 	idRenderModel 	*lastModel;
 
+#ifdef _RAVEN //karin: for compat doom3 proc
+    procVersion = 4;
+#endif
 	// if this is an empty world, initialize manually
 	if (!name || !name[0]) {
 		FreeWorld();
@@ -688,7 +705,12 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 		WriteLoadMap();
 	}
 
-	if (!src->ReadToken(&token) || token.Icmp(PROC_FILE_ID)) {
+#ifdef _RAVEN //karin: compat doom3 proc
+	if (!src->ReadToken(&token) || (token.Icmp(PROC_FILE_ID) && token.Icmp(PROC_FILE_DOOM3_ID)) )
+#else
+	if (!src->ReadToken(&token) || token.Icmp(PROC_FILE_ID))
+#endif
+	{
 		common->Printf("idRenderWorldLocal::InitFromMap: bad id '%s' instead of '%s'\n", token.c_str(), PROC_FILE_ID);
 		delete src;
 		return false;
@@ -696,6 +718,13 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 
 #ifdef _RAVEN // quake4 proc file
 // jmarshall: quake 4 proc format
+	if(!token.Icmp(PROC_FILE_DOOM3_ID)) //karin: for compat doom3 proc
+    {
+        procVersion = 0;
+		common->Printf("idRenderWorldLocal::InitFromMap: DOOM3 proc version '%s' instead of '%s'\n", PROC_FILE_DOOM3_ID, PROC_FILE_ID);
+    }
+	else // if(PROC_IS_QUAKE4_VERSION()) //karin: for compat doom3 proc
+    {
 	if (!src->ReadToken(&token) || token.Icmp(PROC_FILEVERSION)) {
 		common->Printf("idRenderWorldLocal::InitFromMap: bad version '%s' instead of '%s'\n", token.c_str(), PROC_FILEVERSION);
 		delete src;
@@ -704,6 +733,7 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 
 	// Map CRC, we aren't going to use it.
 	src->ReadToken(&token);
+	}
 // jmarshall end
 #endif
 

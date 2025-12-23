@@ -101,7 +101,7 @@ typedef idPlane frustum_t[FRUSTUM_PLANES];
 #endif
 
 #include "rb/Framebuffer.h"
-#include "rb/OfflineScreenRenderer.h"
+#include "rb/DepthStencilRenderer.h"
 #include "rb/StencilTexture.h"
 #include "Image.h"
 
@@ -841,6 +841,7 @@ static const int	MAX_RENDER_CROPS = 8;
 #include "rb/RenderThread.h"
 void RB_SetupRenderTools(void);
 void R_ShowSurfaceInfo(void); // run on frontend instead of RB_ShowSurfaceInfo
+void R_ShowViewEntitys(const viewEntity_t *vModels);
 extern idCVar harm_r_renderToolsMultithread;
 #endif
 
@@ -1214,6 +1215,7 @@ extern idCVar r_useEntityPortalCulling;		// 0 = none, 1 = box
 
 #ifdef _RAVEN
 extern idCVar r_skipSky;
+extern idCVar r_forceAmbient;
 #endif
 
 /*
@@ -1246,6 +1248,7 @@ void	GL_Cull(int cullType);
 bool    GL_CheckErrors(const char *name);
 void	GL_SelectTextureForce(int unit);
 bool    GL_ClearErrors(void);
+void 	GL_SelectTextureNoClient(int unit);
 
 const int GLS_SRCBLEND_ZERO						= 0x00000001;
 const int GLS_SRCBLEND_ONE						= 0x0;
@@ -1661,6 +1664,11 @@ typedef enum {
     SHADER_RETRO_GENESIS,
     SHADER_RETRO_PSX,
 #endif
+    // debug
+    SHADER_DEPTH_TO_COLOR,
+#ifdef GL_ES_VERSION_3_0
+    SHADER_STENCIL_TO_COLOR,
+#endif
     // costum
 	SHADER_CUSTOM,
 } glsl_program_t;
@@ -1689,6 +1697,13 @@ typedef enum {
 #ifdef _POSTPROCESS
 #define SHADER_POSTPROCESS_BEGIN SHADER_RETRO_2BIT
 #define SHADER_POSTPROCESS_END SHADER_RETRO_PSX
+#endif
+
+#define SHADER_DEBUG_BEGIN SHADER_DEPTH_TO_COLOR
+#ifdef GL_ES_VERSION_3_0
+#define SHADER_DEBUG_END SHADER_STENCIL_TO_COLOR
+#else
+#define SHADER_DEBUG_END SHADER_DEPTH_TO_COLOR
 #endif
 
 /*
@@ -1832,6 +1847,7 @@ typedef struct shaderProgram_s {
 #define SHADER_PARM_LOCATION(location) (*(GLint *)((char *)backEnd.glState.currentProgram + location))
 #define SHADER_PARMS_ADDR(prop, i) ((GLint)(offsetof(shaderProgram_t, prop)) + i * (GLint)sizeof(GLuint))
 #define SHADER_PARM_HANDLE(index) (*(GLint *)((char *)backEnd.glState.currentProgram + index))
+#define SHADER_NOT_VALID(shader) (shader.program == 0)
 
 struct GLSLShaderProp
 {
@@ -2341,6 +2357,11 @@ void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def);
 #endif
 #endif
 
+void GLSL_AddCommand(void);
+void R_Image_AddCommand(void);
+void R_Font_AddCommand(void);
+#include "model/Model_ext.h"
+
 extern bool GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android
 //extern volatile bool has_gl_context;
 extern unsigned int lastRenderTime;
@@ -2453,17 +2474,20 @@ extern float RB_overbright;
 #endif
 
 #ifdef _EXTRAS_TOOLS
-void ModelTest_RenderFrame(int time);
-void ModelLight_RenderFrame(int time);
+void R_ModelTest_RenderFrame(int time);
+void R_ModelLight_RenderFrame(int time);
 #endif
 
 extern idCVar harm_r_lightingModel;
-#define r_interactionLightingModel harm_r_lightingModel.GetInteger()
-#define HARM_INTERACTION_SHADER_NOLIGHTING 0
-#define HARM_INTERACTION_SHADER_PHONG 1
-#define HARM_INTERACTION_SHADER_BLINNPHONG 2
-#define HARM_INTERACTION_SHADER_PBR 3
-#define HARM_INTERACTION_SHADER_AMBIENT 4
+#define r_lightingModel harm_r_lightingModel.GetInteger()
+typedef enum lightingModel_e
+{
+    LM_NOLIGHTING = 0,
+    LM_PHONG      = 1,
+    LM_BLINNPHONG = 2,
+    LM_PBR        = 3,
+    LM_AMBIENT    = 4,
+} lightingModel_t;
 
 extern idCVar harm_r_useHighPrecision;
 

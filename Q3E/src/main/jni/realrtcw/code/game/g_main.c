@@ -180,6 +180,9 @@ vmCvar_t g_vanilla_guns;
 vmCvar_t g_dlc1;
 vmCvar_t g_class;
 vmCvar_t g_noobTube;
+vmCvar_t g_aiCollision;
+vmCvar_t g_specialWaves;
+vmCvar_t g_level_was_selected;
 
 vmCvar_t g_playerSurvivalClass;
 
@@ -219,8 +222,11 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dlc1, "g_dlc1", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_class, "g_class", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_noobTube, "g_noobTube", "0", CVAR_ARCHIVE, 0, qfalse },
+	{&g_aiCollision, "g_aiCollision", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse},
+	{&g_level_was_selected, "g_level_was_selected", "0", 0, 0, qfalse},
 
 	{ &g_playerSurvivalClass, "g_playersurvivalclass", "0", CVAR_ARCHIVE | CVAR_LATCH , 0, qfalse },
+	{&g_specialWaves, "g_specialwaves", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse},
 
 	{ &g_reloading, "g_reloading", "0", CVAR_ROM },   //----(SA)	added
 
@@ -283,7 +289,6 @@ cvarTable_t gameCvarTable[] = {
 
 	{ &g_headshotMaxDist, "g_headshotMaxDist", "1024", CVAR_CHEAT, 0, qfalse},    //----(SA)	added
 
-
 	{ &g_motd, "g_motd", "", 0, 0, qfalse },
 	{ &g_blood, "com_blood", "1", 0, 0, qfalse },
 
@@ -310,7 +315,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &pmove_fixed, "pmove_fixed", "0", CVAR_SYSTEMINFO, 0, qfalse},
 	{ &pmove_msec, "pmove_msec", "8", CVAR_SYSTEMINFO, 0, qfalse},
 
-
 	{&g_mg42arc, "g_mg42arc", "0", CVAR_TEMP, 0, qfalse},
 
 	{&g_totalPlayTime, "g_totalPlayTime", "0", CVAR_ROM, 0, qfalse},
@@ -326,8 +330,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_bodysink, "g_bodysink", "0", CVAR_ARCHIVE },
 	{ &g_weaponfalloff, "g_weaponfalloff", "0", CVAR_ARCHIVE },
 	{ &g_flushItems,	"g_flushItems",		"1",	0 },
-	{ &g_mapname, "mapname", "", CVAR_ARCHIVE }
-};
+	{&g_mapname, "mapname", "", CVAR_ARCHIVE}};
 
 static int gameCvarTableSize = ARRAY_LEN( gameCvarTable );
 

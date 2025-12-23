@@ -522,7 +522,7 @@ void SV_DirectConnect( netadr_t from ) {
 			}
 		}
 		else {
-			NET_OutOfBandPrint( NS_SERVER, from, "print\nServer is full.\n" );
+			NET_OutOfBandPrint( NS_SERVER, from, "print\nServer is full\n" );
 			Com_DPrintf ("Rejected a connection.\n");
 			return;
 		}
@@ -998,7 +998,7 @@ int SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
 		if ( !(sv_allowDownload->integer & DLF_ENABLE) ||
 			(sv_allowDownload->integer & DLF_NO_UDP) ||
 			idPack || unreferenced ||
-			( cl->downloadSize = FS_SV_FOpenFileRead( cl->downloadName, &cl->download ) ) < 0 ) {
+			( cl->downloadSize = FS_BaseDir_FOpenFileRead( cl->downloadName, &cl->download ) ) < 0 ) {
 			// cannot auto-download file
 			if(unreferenced)
 			{
@@ -1374,7 +1374,10 @@ static void SV_VerifyPaks_f( client_t *cl ) {
 			cl->lastSnapshotTime = 0;
 			cl->state = CS_ACTIVE;
 			SV_SendClientSnapshot( cl );
-			SV_DropClient( cl, "Unpure client detected. Invalid .PK3 files referenced!" );
+			SV_DropClient( cl, "Unpure Client. "
+				"You may need to enable in-game downloads "
+				"to connect to this server (set "
+				"cl_allowDownload 1)" );
 		}
 	}
 }

@@ -674,6 +674,35 @@ AICharacterDefaults_t aiDefaults[NUM_CHARACTERS] = {
 		AISTATE_ALERT
 	},
 
+	//AICHAR_LOPER_SPECIAL
+	{
+		"Loper Special",
+		{ // Default
+			0
+		},
+		{
+			"loperSightPlayer",
+			"loperAttackPlayer",
+			"loperOrders",
+			"loperDeath",
+			"loperSilentDeath",		//----(SA)	added
+			"loperFlameDeath",		//----(SA)	added
+			"loperPain",
+			"loperAttack2Start",	// stay - you're told to stay put
+			"loperAttackStart",		// follow - go with ordering player ("i'm with you" rather than "yes sir!")
+			"loperHit1",			// deny - refuse orders (doing something else)
+			"loperHit2",			// misc1
+		},
+		AITEAM_MONSTER,
+		"loper/default_survival",
+		{ /*WP_MONSTER_ATTACK1,*/ WP_MONSTER_ATTACK2,WP_MONSTER_ATTACK3},
+		BBOX_SMALL, {32,32},		// large is for wide characters
+		AIFL_NO_RELOAD,
+		0 /*AIFunc_LoperAttack1Start*/, AIFunc_LoperAttack2Start, AIFunc_LoperAttack3Start,
+		"sound/world/electloop.wav",
+		AISTATE_ALERT
+	},
+
 };
 //---------------------------------------------------------------------------
 
@@ -1673,6 +1702,18 @@ void SP_ai_zombie_ghost( gentity_t *ent ) {
 	AICast_DelayedSpawnCast( ent, AICHAR_ZOMBIE_GHOST );
 }
 
+/*
+============
+SP_ai_loper_special
+============
+*/
+void SP_ai_loper_special( gentity_t *ent ) {
+	ent->r.svFlags |= SVF_NOFOOTSTEPS;
+	AICast_DelayedSpawnCast( ent, AICHAR_LOPER_SPECIAL );
+	//
+	level.loperZapSound = G_SoundIndex( "loperZap" );
+}
+
 // Load behavior parameters from .aidefaults file
 void AI_LoadBehaviorTable( AICharacters_t characterNum )
 {
@@ -1719,6 +1760,7 @@ char *BG_GetCharacterFilename( AICharacters_t characterNum )
 		case AICHAR_WARZOMBIE:         return "warzombie.aidefaults";
 		case AICHAR_VENOM:             return "venom.aidefaults";
 		case AICHAR_LOPER:             return "loper.aidefaults";
+		case AICHAR_LOPER_SPECIAL:     return "loper_special.aidefaults";
 		case AICHAR_ELITEGUARD:        return "eliteguard.aidefaults";
 		case AICHAR_SUPERSOLDIER:      return "supersoldier.aidefaults";
 		case AICHAR_SUPERSOLDIER_LAB:  return "supersoldier_lab.aidefaults";

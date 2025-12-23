@@ -1957,9 +1957,9 @@ static void S_PaintAndSubmit (void)
 	// (capture doesn't use threaded/callback mode)
 	if (!soundtimehack && snd_blocked
 #ifdef CONFIG_VIDEO_CAPTURE
-	 && !cls.capturevideo.active
+		&& !cls.capturevideo.active
 #endif
-	 )
+	)
 		return;
 
 	if (snd_usethreadedmixing)

@@ -194,7 +194,7 @@ idCVar r_showNormals("r_showNormals", "0", CVAR_RENDERER | CVAR_FLOAT, "draws wi
 idCVar r_showMemory("r_showMemory", "0", CVAR_RENDERER | CVAR_BOOL, "print frame memory utilization");
 idCVar r_showCull("r_showCull", "0", CVAR_RENDERER | CVAR_BOOL, "report sphere and box culling stats");
 idCVar r_showInteractions("r_showInteractions", "0", CVAR_RENDERER | CVAR_BOOL, "report interaction generation activity");
-idCVar r_showDepth("r_showDepth", "0", CVAR_RENDERER | CVAR_BOOL, "display the contents of the depth buffer and the depth range");
+idCVar r_showDepth("r_showDepth", "0", CVAR_RENDERER | CVAR_INTEGER, "display the contents of the depth buffer and the depth range");
 idCVar r_showSurfaces("r_showSurfaces", "0", CVAR_RENDERER | CVAR_BOOL, "report surface/light/shadow counts");
 idCVar r_showPrimitives("r_showPrimitives", "0", CVAR_RENDERER | CVAR_INTEGER, "report drawsurf/index/vertex counts");
 idCVar r_showEdges("r_showEdges", "0", CVAR_RENDERER | CVAR_BOOL, "draw the sil edges");
@@ -247,10 +247,20 @@ idCVar r_useLightAreaCulling( "r_useLightAreaCulling", "1", CVAR_RENDERER | CVAR
 idCVar r_useEntityPortalCulling( "r_useEntityPortalCulling", "1", CVAR_RENDERER | CVAR_INTEGER, "0 = none, 1 = cull frustum corners to plane, 2 = exact clip the frustum faces", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 #endif
 
-
 #ifdef _RAVEN
 idCVar r_skipSky("r_skipSky", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Dark sky");
 idCVar r_aspectRatio("r_aspectRatio",			"-1",			CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "aspect ratio of view:\n0 = 4:3\n1 = 16:9\n2 = 16:10\n-1 = auto (guess from resolution)", -1, 2);
+//k: for main menu gui
+idCVar r_forceAmbient("r_forceAmbient", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "Force a single ambient light throughout the level if > 0 (intensity 0..1)", -1, 1);
+idCVar r_useSmp("r_useSMP", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Turn SMP on and off");
+#endif
+#ifdef _HUMANHEAD //k: for main menu gui
+idCVar r_shaderlevel("r_shaderlevel", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "level of shadersto use");
+idCVar r_correctspecular("r_correctspecular", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "per pixel half angle calculation");
+idCVar r_normalizebumpmap("r_normalizebumpmap", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "per pixel renormalization of bumpmaps");
+idCVar r_skipGlowOverlay("r_skipGlowOverlay", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "if true, skip drawing the glow overlay");
+idCVar r_lowParticleDetail("r_lowParticleDetail", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "less detailed particles");
+idCVar r_useFastSkinning("r_useFastSkinning", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "0 = normal, 1 = faster with tangents transformed, 2 = use single weight simple skinning");
 #endif
 
 /*
@@ -636,6 +646,7 @@ void R_InitOpenGL(void)
 	glConfig.renderer_string = (const char *)qglGetString(GL_RENDERER);
 	glConfig.version_string = (const char *)qglGetString(GL_VERSION);
 	glConfig.extensions_string = (const char *)qglGetString(GL_EXTENSIONS);
+    glConfig.shading_language_version_string = (const char *)qglGetString(GL_SHADING_LANGUAGE_VERSION);
 
 	// OpenGL driver constants
 	qglGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
@@ -1188,6 +1199,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("Renderer: %s\n", glConfig.renderer_string);
 	common->Printf("Version: %s\n", glConfig.version_string);
 	common->Printf("Vendor: %s\n", glConfig.version_string);
+    common->Printf("Shading language version: %s\n", glConfig.shading_language_version_string);
 	common->Printf("Extensions: %s\n", glConfig.extensions_string);
 
 	common->Printf("glVersion: %f\n", glConfig.glVersion);
@@ -2077,6 +2089,7 @@ static void GfxInfo_f(const idCmdArgs &args)
 	common->Printf("\nGL_VENDOR: %s\n", glConfig.vendor_string);
 	common->Printf("GL_RENDERER: %s\n", glConfig.renderer_string);
 	common->Printf("GL_VERSION: %s\n", glConfig.version_string);
+    common->Printf("GL_SHADING_LANGUAGE_VERSION: %s\n", glConfig.shading_language_version_string);
 	common->Printf("GL_EXTENSIONS: %s\n", glConfig.extensions_string);
 	common->Printf("GL_MAX_TEXTURE_SIZE: %d\n", glConfig.maxTextureSize);
 	common->Printf("GL_MAX_TEXTURE_UNITS_ARB: %d\n", glConfig.maxTextureUnits);
@@ -2353,23 +2366,21 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("harm_dumpShadowMap", R_DumpShadowMap_f, CMD_FL_RENDERER, "dump shadow map to file in next frame");
 #endif
 
-	extern void R_Image_AddCommand(void);
 	R_Image_AddCommand();
 
-	extern void GLSL_AddCommand(void);
 	GLSL_AddCommand();
-#ifdef _EXTRAS_TOOLS
-    extern void MD5Anim_AddCommand(void);
-	MD5Anim_AddCommand();
 
-    extern void ModelTest_AddCommand(void);
-    extern void ModelLight_AddCommand(void);
-    ModelTest_AddCommand();
-    ModelLight_AddCommand();
+#ifdef _EXTRAS_TOOLS
+    R_MD5Edit_AddCommand();
+
+    R_ModelTest_AddCommand();
+    R_ModelLight_AddCommand();
 #endif
 #ifdef _NEW_FONT_TOOLS
-    extern void Font_AddCommand(void);
-    Font_AddCommand();
+    R_Font_AddCommand();
+#endif
+#ifdef _MODEL_MD5_EXT
+    R_Model_AddCommand();
 #endif
 }
 
@@ -2704,7 +2715,7 @@ bool GL_CheckErrors(const char *name)
 }
 
 #include "rb/Framebuffer.cpp"
-#include "rb/OfflineScreenRenderer.cpp"
+#include "rb/DepthStencilRenderer.cpp"
 #include "rb/StencilTexture.cpp"
 #include "matrix/RenderMatrix.cpp"
 #include "matrix/GLMatrix.cpp"

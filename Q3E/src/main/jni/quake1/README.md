@@ -9,11 +9,24 @@ Developed by LadyHavoc. See [CREDITS](CREDITS.md) for a list of contributors.
 
 ## Help/support
 
+### [Matrix](https://matrix.org/docs/guides/introduction)
+[![#darkplaces:matrix.org](https://img.shields.io/matrix/darkplaces:matrix.org?color=660000&label=%23darkplaces%3Amatrix.org)](https://matrix.to/#/#darkplaces:matrix.org)
+
+### Discord*
+https://discord.com/invite/ZHT9QeW
+
 ### IRC
 #darkplaces on irc.anynet.org
 
-### [Matrix](https://matrix.org/docs/guides/introduction)
-[![#darkplaces:matrix.org](https://img.shields.io/matrix/darkplaces:matrix.org?color=660000&label=%23darkplaces%3Amatrix.org)](https://matrix.to/#/#darkplaces:matrix.org)
+(* Not currently bridged to IRC or Matrix)
+
+### **NOTE: DarkPlaces does not have a special relationship with Xonotic**.
+
+The Xonotic GitLab mirror is not officially maintained by the DarkPlaces team.
+
+Please use the official [GitHub](https://github.com/DarkPlacesEngine/darkplaces) for reporting issues and submitting pull requests to DarkPlaces.
+
+**Any references to their resources are strictly for user convenience as we may not yet provide official counterparts, such as our own Windows binaries**.
 
 ## Downloading and running
 

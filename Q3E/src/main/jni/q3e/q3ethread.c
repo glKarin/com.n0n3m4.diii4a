@@ -20,18 +20,18 @@ int q3e_pthread_cancel(pthread_t pthread_id)
 {
     int status;
     if ( (status = pthread_kill(pthread_id, Q3E_THREAD_CANCEL_SIG) ) != 0)
-        LOGE("Error cancelling thread %zd, error = %d", pthread_id, status)
+        LOGE("Error cancelling thread %zu, error = %d", PTHREAD_ID_WRAP(pthread_id), status)
     else
-        LOGI("pthread_cancel: thread=%zd", pthread_id)
+        LOGI("pthread_cancel: thread=%zu", PTHREAD_ID_WRAP(pthread_id))
     return status;
 }
 
 static void thread_exit_handler(int sig)
 {
     pthread_t tid = pthread_self();
-    LOGI("pthread_exit: thread=%zd, signal=%d", tid, sig);
+    LOGI("pthread_exit: thread=%zu, signal=%d", PTHREAD_ID_WRAP(tid), sig);
     pthread_exit(NULL);
-    LOGI("Thread exit: %zd", tid);
+    LOGI("Thread exit: %zu", PTHREAD_ID_WRAP(tid));
 }
 
 int q3e_pthread_cancelable(void)
@@ -67,7 +67,7 @@ int Q3E_CreateThread(pthread_t *threadid, void * (*mainf)(void *), void *data)
 
 	pthread_attr_destroy(&attr);
 
-	LOGI("Native thread created: %zd.", *threadid);
+	LOGI("Native thread created: %zu.", PTHREAD_ID_WRAP(*threadid));
 
 	return 0;
 }
@@ -85,7 +85,7 @@ int Q3E_QuitThread(pthread_t *threadid, void **data, int cancel)
 		return -1;
 	}
 
-	LOGI("Native thread quit.");
+	LOGI("Native thread quit: %zu.", PTHREAD_ID_WRAP(*threadid));
 
 	*threadid = 0;
 
@@ -95,12 +95,12 @@ int Q3E_QuitThread(pthread_t *threadid, void **data, int cancel)
 void Q3E_EnterCriticalSection(void)
 {
 #ifdef ID_VERBOSE_PTHREADS
-
+    pthread_t threadid = pthread_self();
 	if (pthread_mutex_trylock(&global_lock) == EBUSY) {
-		LOGE("busy lock in thread '%zd'", index, pthread_self());
+		LOGE("busy lock in thread '%zu'", index, PTHREAD_ID_WRAP(threadid));
 
 		if (pthread_mutex_lock(&global_lock) == EDEADLK) {
-			LOGE("FATAL: DEADLOCK, in thread '%zd'", index, pthread_self());
+			LOGE("FATAL: DEADLOCK, in thread '%zu'", index, PTHREAD_ID_WRAP(threadid));
 		}
 	}
 
@@ -114,7 +114,7 @@ void Q3E_LeaveCriticalSection(void)
 #ifdef ID_VERBOSE_PTHREADS
 
 	if (pthread_mutex_unlock(&global_lock) == EPERM) {
-		LOGE("FATAL: NOT LOCKED, in thread '%zd'", pthread_self());
+		LOGE("FATAL: NOT LOCKED, in thread '%zu'", PTHREAD_ID_WRAP(pthread_self()));
 	}
 
 #else

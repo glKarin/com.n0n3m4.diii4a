@@ -170,7 +170,7 @@ typedef struct bot_entitystate_s
 typedef struct botlib_import_s
 {
 	//print messages from the bot library
-	void		(QDECL *Print)(int type, char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
+	void		(QDECL *Print)(int type, char *fmt, ...) Q_PRINTF_FUNC(2, 3);
 	//trace a bbox through the world
 	void		(*Trace)(bsp_trace_t *trace, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int passent, int contentmask);
 	//trace a bbox against a specific entity
@@ -438,7 +438,6 @@ botlib_export_t *GetBotLibAPI( int apiVersion, botlib_import_t *import );
 name:						default:			module(s):			description:
 
 "basedir"					""					-					base directory
-"homedir"					""					be_interface.c		home directory
 "gamedir"					""					be_interface.c		mod game directory
 "basegame"					""					be_interface.c		base game directory
 

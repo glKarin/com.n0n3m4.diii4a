@@ -1276,6 +1276,13 @@ Com_Editor_f
 */
 static void Com_Editor_f(const idCmdArgs &args)
 {
+#ifdef _MULTITHREAD //karin: not support tools with OpenGL on multithread
+    if(multithreadActive)
+    {
+        common->Printf("Not support editor on multi-threading\n");
+        return;
+    }
+#endif
 	RadiantInit();
 }
 
@@ -1300,6 +1307,13 @@ Com_EditGUIs_f
 */
 static void Com_EditGUIs_f(const idCmdArgs &args)
 {
+#ifdef _MULTITHREAD //karin: not support tools with OpenGL on multithread
+    if(multithreadActive)
+    {
+        common->Printf("Not support GUI editor on multi-threading\n");
+        return;
+    }
+#endif
 	GUIEditorInit();
 }
 
@@ -1310,6 +1324,13 @@ Com_MaterialEditor_f
 */
 static void Com_MaterialEditor_f(const idCmdArgs &args)
 {
+#ifdef _MULTITHREAD //karin: not support tools with OpenGL on multithread
+    if(multithreadActive)
+    {
+        common->Printf("Not support material editor on multi-threading\n");
+        return;
+    }
+#endif
 	// Turn off sounds
 	soundSystem->SetMute(true);
 	MaterialEditorInit();
@@ -3290,10 +3311,9 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 		// override cvars from command line
 		StartupVariable(NULL, false);
 
-#if !defined(__ANDROID__) //karin: check OpenGL version from command cvar
+        //karin: check OpenGL version from command cvar
         extern void GLimp_Startup(void);
         GLimp_Startup();
-#endif
 
 		if (!idAsyncNetwork::serverDedicated.GetInteger() && Sys_AlreadyRunning()) {
 			Sys_Quit();
@@ -3668,3 +3688,59 @@ void idCommonLocal::MaterialKeyForBinding(const char *binding, char *keyMaterial
 /*static */ _DYNAMIC_ALLOC_CVAR_DECL;
 #endif
 
+#include <zlib.h>
+byte* zlib_decompress(const byte* compressed, unsigned int comp_len, int* decomp_len)
+{
+    z_stream strm;
+    int ret;
+    byte out_chunk[32768];
+
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    strm.avail_in = comp_len;
+    strm.next_in = (Bytef *)compressed;
+
+    ret = inflateInit2(&strm, 15 + 32);
+    if (ret != Z_OK) {
+        *decomp_len = ret;
+        return NULL;
+    }
+
+    byte *decompressed_data = NULL;
+    byte **decompressed = &decompressed_data;
+
+    *decompressed = NULL;
+    *decomp_len = 0;
+
+    do {
+        strm.avail_out = sizeof(out_chunk);
+        strm.next_out = out_chunk;
+
+        ret = inflate(&strm, Z_NO_FLUSH);
+
+        if (ret != Z_STREAM_END && ret != Z_OK && ret != Z_BUF_ERROR) {
+            *decomp_len = ret;
+            free(*decompressed);
+            inflateEnd(&strm);
+            return NULL;
+        }
+
+        int have = sizeof(out_chunk) - strm.avail_out;
+
+        byte *new_buf = (byte *)realloc(*decompressed, *decomp_len + have);
+        if (new_buf == NULL) {
+            *decomp_len = -99;
+            free(*decompressed);
+            inflateEnd(&strm);
+            return NULL;
+        }
+        *decompressed = new_buf;
+        memcpy(*decompressed + *decomp_len, out_chunk, have);
+        *decomp_len += have;
+
+    } while (ret != Z_STREAM_END);
+
+    inflateEnd(&strm);
+    return *decompressed;
+}

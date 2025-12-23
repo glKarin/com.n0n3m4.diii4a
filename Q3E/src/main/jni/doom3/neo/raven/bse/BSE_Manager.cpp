@@ -32,7 +32,7 @@ static idCVar _g_decals(              "g_decals",                               
 idMat3  rvBSEManagerLocal::mModelToBSE;
 float rvBSEManagerLocal::mEffectRates[EC_MAX];
 float rvBSEManagerLocal::effectCosts[EC_MAX];
-unsigned int rvBSEManagerLocal::mPerfCounters[5];
+unsigned int rvBSEManagerLocal::mPerfCounters[NUM_PERF_COUNTERS];
 idCVar * rvBSEManagerLocal::g_decals = &_g_decals;
 
 const char* rvBSEManagerLocal::mSegmentNames[SEG_COUNT] = {
@@ -227,17 +227,13 @@ void rvBSEManagerLocal::EndFrame()
 {
 	if ( DebugHudActive() )
 	{
-		game->DebugSetInt("fx_num_active", mPerfCounters[0]);
-		game->DebugSetInt("fx_num_particles", mPerfCounters[2]/* dword_1137DDB0 */);
-		game->DebugSetInt("fx_num_traces", mPerfCounters[1]/* dword_1137DDAC */);
-		float v1 = mPerfCounters[3]/* dword_1137DDB4 */ / (float)(1 << 20)/*k??? TODO Q4D * 0.00000095367432 */;
+		game->DebugSetInt("fx_num_active", mPerfCounters[PERF_NUM_BSE]);
+		game->DebugSetInt("fx_num_particles", mPerfCounters[PERF_NUM_PARTICLES]/* dword_1137DDB0 */);
+		game->DebugSetInt("fx_num_traces", mPerfCounters[PERF_NUM_TRACES]/* dword_1137DDAC */);
+		float v1 = mPerfCounters[PERF_NUM_TEXELS]/* dword_1137DDB4 */ / (float)(MEMORY_BLOCK_SIZE/* 1 << 20 */)/*k??? TODO Q4D * 0.00000095367432 */; // 2^20 == 1 048 576
 		game->DebugSetFloat("fx_num_texels", v1);
-		game->DebugSetInt("fx_num_segments", mPerfCounters[4]/* dword_1137DDB8 */);
+		game->DebugSetInt("fx_num_segments", mPerfCounters[PERF_NUM_SEGMENTS]/* dword_1137DDB8 */);
 	}
-
-    //game->DebugSetFloat("fx_num_texels",
-    //    static_cast<float>(perfCounters_[3]) / (1 << 20)); // 2^20 == 1 048 576
-    //game->DebugSetInt("fx_num_segments", perfCounters_[4]);
 }
 //──────────────────────────────────────────────────────────────────────────────
 void rvBSEManagerLocal::UpdateRateTimes()
@@ -263,7 +259,7 @@ float rvBSEManagerLocal::EffectDuration(const rvRenderEffectLocal* def)
 bool rvBSEManagerLocal::CheckDefForSound(const renderEffect_t* def)
 {
     rvDeclEffect* decl = (rvDeclEffect*)def->declEffect;    
-    return (decl->mFlags & DEF_SOUND/* 1u */) != 0;
+    return (decl->mFlags & ETFLAG_HAS_SOUND/* 1u */) != 0;
 }
 //──────────────────────────────────────────────────────────────────────────────
 void rvBSEManagerLocal::SetDoubleVisionParms(float t, float s)
@@ -352,7 +348,7 @@ bool rvBSEManagerLocal::ServiceEffect(rvRenderEffectLocal* def, float now)
     def->referenceBounds = def->effect->mCurrentLocalBounds;
 
     if (DebugHudActive())
-        ++mPerfCounters[0];
+        ++mPerfCounters[PERF_NUM_BSE];
 
     if (/*common->IsMultiplayer() || */bse_debug.GetBool())
         def->effect->EvaluateCost(-1);
@@ -437,7 +433,7 @@ void rvBSEManagerLocal::BSE_Stats_f(const idCmdArgs& args)
 		   for (int s = 0; s < segCount; ++s)
 		   {
 			   const rvSegmentTemplate* seg = effect->GetSegmentTemplate(s);
-			   const bool hasParticles = seg->mFlags & STF_HAS_PARTICLE; //4
+			   const bool hasParticles = seg->mFlags & STFLAG_HASPARTICLES; //4
 			   if (hasParticles)
 			   {
 				   ++segmentsWithParticles;

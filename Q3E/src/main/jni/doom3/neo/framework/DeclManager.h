@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DECLMANAGER_H__
 #define __DECLMANAGER_H__
 
-#define DECL_PROGRAM_GENERATED_DIRECTORY "_program_generated/"
+#define DECL_PROGRAM_GENERATED_DIRECTORY "_program_generated"
 
 #ifdef _RAVEN // quake4 new decl
 class rvDeclEffect;

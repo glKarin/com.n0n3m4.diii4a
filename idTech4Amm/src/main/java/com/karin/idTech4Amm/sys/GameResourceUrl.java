@@ -89,6 +89,8 @@ public enum GameResourceUrl
     SOURCE_ENGINE(Q3EGameConstants.GAME_SOURCE, "", "", "https://github.com/nillerusr/source-engine", 1),
 
     URT_BASE(Q3EGameConstants.GAME_URT, "", "", "https://www.urbanterror.info", 1),
+
+    MOHAA_BASE(Q3EGameConstants.GAME_MOHAA, "", "", "https://github.com/openmoh/openmohaa", 1),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

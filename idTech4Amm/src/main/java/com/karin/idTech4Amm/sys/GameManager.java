@@ -12,9 +12,9 @@ public final class GameManager
 {
     private final Map<String, List<GameProp>> GameProps = new LinkedHashMap<>();
 
-    public static String[] Games()
+    public static String[] Games(boolean all)
     {
-        return LauncherGame.GameTypes();
+        return LauncherGame.GameTypes(all);
     }
 
     public GameManager()
@@ -68,7 +68,7 @@ public final class GameManager
         List<GameProp> props;
         GameProp prop;
 
-        for(String game : Games())
+        for(String game : Games(true))
             GameProps.put(game, new ArrayList<>());
         Game[] values = Game.values();
 
@@ -159,6 +159,11 @@ public final class GameManager
     public static int GetGameThemeColor()
     {
         return LauncherGame.Find(Q3EUtils.q3ei.game_id).COLOR_ID;
+    }
+
+    public static int GetGameThemeColor(String game)
+    {
+        return LauncherGame.Find(game).COLOR_ID;
     }
 
     public static int GetGameNameTs(String game)

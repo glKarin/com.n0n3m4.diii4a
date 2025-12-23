@@ -2398,6 +2398,7 @@ qboolean CG_DrawRealWeapons( centity_t *cent ) {
 
 	switch ( cent->currentState.aiChar ) {
 	case AICHAR_LOPER:
+	case AICHAR_LOPER_SPECIAL:
 	case AICHAR_SUPERSOLDIER:       //----(SA)	added
 	case AICHAR_SUPERSOLDIER_LAB:   
 	case AICHAR_PROTOSOLDIER:
@@ -2981,7 +2982,7 @@ void CG_PlayerTeslaCoilFire( centity_t *cent, vec3_t flashorigin ) {
 
 	if ( ( cg.time / 50 ) % ( 4 + ( cg.time % 4 ) ) == 0 ) {
 		// alt light
-		if ( cgs.gametype == GT_GOTHIC ) {
+		if ( cg_gothic.integer ) {
 		trap_R_AddLightToScene( tr.endpos, 256 + 600 * tr.fraction, 0.2, 0, 0, 1 );
 		} else {
 		trap_R_AddLightToScene( tr.endpos, 256 + 600 * tr.fraction, 0.2, 0.6, 1, 1 );
@@ -2991,7 +2992,7 @@ void CG_PlayerTeslaCoilFire( centity_t *cent, vec3_t flashorigin ) {
 		//trap_R_AddLightToScene( tr.endpos, 128 + 500*tr.fraction, 1, 1, 1, 10 );
 	} else {
 		// blue light
-		if ( cgs.gametype == GT_GOTHIC ) {
+		if ( cg_gothic.integer ) {
 		trap_R_AddLightToScene( tr.endpos, 256 + 600 * tr.fraction, 0.2, 0, 0, 1 );
 		} else {
 		trap_R_AddLightToScene( tr.endpos, 256 + 600 * tr.fraction, 0.2, 0.6, 1, 0 );
@@ -5515,7 +5516,7 @@ void CG_FireWeapon( centity_t *cent, int event ) {
 				if ( gdist > SOUND_FAR_ECHO_DISTANCE && gdist < SOUND_MAX_WEAPON_DISTANCE ) {   // temp dist.  TODO: use numbers that are weapon specific // RealRTCW was 4096
 					// use gorg as the new sound origin
 					VectorMA( cg.refdef.vieworg, 64, norm, gorg );    // sound-on-a-stick
-					trap_S_StartSound( gorg, ent->number, CHAN_WEAPON, fireEchosound[c] );
+					trap_S_StartSoundEx( gorg, ent->number, CHAN_WEAPON, fireEchosound[c], SND_NOCUT );
 				}
 			}
 		}

@@ -731,7 +731,7 @@ static void Q3E_StartGameMainThread(void)
 		return;
 
 	int res = Q3E_CreateThread(&main_thread, Q3E_MainLoop, NULL);
-	if(main_thread < 0)
+	if(res < 0 || !main_thread)
 	{
 	    exit(res);
 	}

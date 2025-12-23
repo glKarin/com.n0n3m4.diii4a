@@ -314,6 +314,66 @@ void R_ImageList_f( void ) {
 
 //=======================================================================
 
+
+/*
+================
+ResampleTexture
+
+Bilinear Interpolation
+================
+*/
+#define USE_ANOTHER_RESAMPLE	1
+#if USE_ANOTHER_RESAMPLE
+static void ResampleTexture(unsigned *in, int inwidth, int inheight, unsigned *out, int outwidth, int outheight) {
+    if (inwidth == outwidth && inheight == outheight) {
+        memcpy(out, in, inwidth * inheight * sizeof(unsigned));
+        return;
+    }
+
+    // fixed point calculation
+    int x_scale = (inwidth << 16) / outwidth;
+    int y_scale = (inheight << 16) / outheight;
+
+    for (int y = 0; y < outheight; y++) {
+        int y_fp = y * y_scale;
+        int y_int = y_fp >> 16;
+        int y_frac = (y_fp & 0xFFFF) >> 8;	// for weighted calculation
+        
+        int y0 = y_int;
+        int y1 = (y_int < inheight - 1) ? y_int + 1 : y_int;
+
+        for (int x = 0; x < outwidth; x++) {
+            int x_fp = x * x_scale;
+            int x_int = x_fp >> 16;
+            int x_frac = (x_fp & 0xFFFF) >> 8;
+            
+            int x0 = x_int;
+            int x1 = (x_int < inwidth - 1) ? x_int + 1 : x_int;
+
+            unsigned p00 = in[y0 * inwidth + x0];
+            unsigned p01 = in[y0 * inwidth + x1];
+            unsigned p10 = in[y1 * inwidth + x0];
+            unsigned p11 = in[y1 * inwidth + x1];
+
+            byte *c00 = (byte*) &p00;
+            byte *c01 = (byte*) &p01;
+            byte *c10 = (byte*) &p10;
+            byte *c11 = (byte*) &p11;
+            
+            byte result[4];
+            for (int i = 0; i < 4; i++) {
+                int p0_weighted = c00[i] * (256 - x_frac) + c01[i] * x_frac;
+                int p1_weighted = c10[i] * (256 - x_frac) + c11[i] * x_frac;
+                result[i] = (p0_weighted * (256 - y_frac) + p1_weighted * y_frac) >> 16;
+            }
+            
+            out[y * outwidth + x] = *(unsigned*) result;
+        }
+    }
+}
+
+#else
+
 /*
 ================
 ResampleTexture
@@ -363,6 +423,7 @@ static void ResampleTexture( unsigned *in, int inwidth, int inheight, unsigned *
 		}
 	}
 }
+#endif
 
 /*
 ================
@@ -720,439 +781,440 @@ byte * gles_convertLuminanceAlpha(byte * data, int width, int height)
 /*
 ===============
 Upload32
-
 ===============
 */
 static void Upload32(   unsigned *data,
-						int width, int height,
-						qboolean mipmap,
-						qboolean picmip,
-						qboolean characterMip,  //----(SA)	added
-						qboolean lightMap,
-						int *format,
-						int *pUploadWidth, int *pUploadHeight,
-						qboolean noCompress, image_t *image ) {
-	int samples;
-	int scaled_width, scaled_height;
-	unsigned    *scaledBuffer = NULL;
-	unsigned    *resampledBuffer = NULL;
-	int i, c;
-	byte        *scan;
-	GLenum internalFormat = GL_RGB;
-	float rMax = 0, gMax = 0, bMax = 0;
-	static int rmse_saved = 0;
+                        int width, int height,
+                        qboolean mipmap,
+                        qboolean picmip,
+                        qboolean characterMip,  //----(SA) added
+                        qboolean lightMap,
+                        int *format,
+                        int *pUploadWidth, int *pUploadHeight,
+                        qboolean noCompress, image_t *image ) {
+    int samples;
+    int scaled_width, scaled_height;
+    unsigned    *scaledBuffer = NULL;
+    unsigned    *resampledBuffer = NULL;
+    int i, c;
+    byte        *scan;
+    GLenum internalFormat = GL_RGB;
+    float rMax = 0, gMax = 0, bMax = 0;
+    static int rmse_saved = 0;
 #ifndef USE_BLOOM
-	float rmse;
+    float rmse;
 #endif
 
-	// do the root mean square error stuff first
-	if ( r_rmse->value ) {
-		while ( R_RMSE( (byte *)data, width, height ) < r_rmse->value ) {
-			rmse_saved += ( height * width * 4 ) - ( ( width >> 1 ) * ( height >> 1 ) * 4 );
-			resampledBuffer = ri.Hunk_AllocateTempMemory( ( width >> 1 ) * ( height >> 1 ) * 4 );
-			ResampleTexture( data, width, height, resampledBuffer, width >> 1, height >> 1 );
-			data = resampledBuffer;
-			width = width >> 1;
-			height = height >> 1;
-			ri.Printf( PRINT_ALL, "r_rmse of %f has saved %dkb\n", r_rmse->value, ( rmse_saved / 1024 ) );
-		}
-	}
+    // do the root mean square error stuff first
+    if ( r_rmse->value ) {
+        while ( R_RMSE( (byte *)data, width, height ) < r_rmse->value ) {
+            rmse_saved += ( height * width * 4 ) - ( ( width >> 1 ) * ( height >> 1 ) * 4 );
+            resampledBuffer = ri.Hunk_AllocateTempMemory( ( width >> 1 ) * ( height >> 1 ) * 4 );
+            ResampleTexture( data, width, height, resampledBuffer, width >> 1, height >> 1 );
+            data = resampledBuffer;
+            width = width >> 1;
+            height = height >> 1;
+            ri.Printf( PRINT_ALL, "r_rmse of %f has saved %dkb\n", r_rmse->value, ( rmse_saved / 1024 ) );
+        }
+    }
 #ifndef USE_BLOOM
-	else
-	{
-		// just do the RMSE of 1 (reduce perfect)
-		while ( R_RMSE( (byte *)data, width, height ) < 1.0 ) {
-			rmse_saved += ( height * width * 4 ) - ( ( width >> 1 ) * ( height >> 1 ) * 4 );
-			resampledBuffer = ri.Hunk_AllocateTempMemory( ( width >> 1 ) * ( height >> 1 ) * 4 );
-			ResampleTexture( data, width, height, resampledBuffer, width >> 1, height >> 1 );
-			data = resampledBuffer;
-			width = width >> 1;
-			height = height >> 1;
-			ri.Printf( PRINT_ALL, "r_rmse of %f has saved %dkb\n", r_rmse->value, ( rmse_saved / 1024 ) );
-		}
-	}
+    else
+    {
+        // just do the RMSE of 1 (reduce perfect)
+        while ( R_RMSE( (byte *)data, width, height ) < 1.0 ) {
+            rmse_saved += ( height * width * 4 ) - ( ( width >> 1 ) * ( height >> 1 ) * 4 );
+            resampledBuffer = ri.Hunk_AllocateTempMemory( ( width >> 1 ) * ( height >> 1 ) * 4 );
+            ResampleTexture( data, width, height, resampledBuffer, width >> 1, height >> 1 );
+            data = resampledBuffer;
+            width = width >> 1;
+            height = height >> 1;
+            ri.Printf( PRINT_ALL, "r_rmse of %f has saved %dkb\n", r_rmse->value, ( rmse_saved / 1024 ) );
+        }
+    }
 #endif
 
-	if ( image->flags & IMGFLAG_NOSCALE ) {
-		//
-		// keep original dimensions
-		//
-		scaled_width = width;
-		scaled_height = height;
-	} else {
-	//
-	// convert to exact power of 2 sizes
-	//
-	for ( scaled_width = 1 ; scaled_width < width ; scaled_width <<= 1 )
-		;
-	for ( scaled_height = 1 ; scaled_height < height ; scaled_height <<= 1 )
-		;
-	if ( r_roundImagesDown->integer && scaled_width > width )
-		scaled_width >>= 1;
-	if ( r_roundImagesDown->integer && scaled_height > height )
-		scaled_height >>= 1;
-	}
+    if ( image->flags & IMGFLAG_NOSCALE ) {
+        //
+        // keep original dimensions
+        //
+        scaled_width = width;
+        scaled_height = height;
+    } else {
+        //
+        // convert to exact power of 2 sizes
+        //
+        for ( scaled_width = 1 ; scaled_width < width ; scaled_width <<= 1 ) ;
+        for ( scaled_height = 1 ; scaled_height < height ; scaled_height <<= 1 ) ;
+        if ( r_roundImagesDown->integer && scaled_width > width )
+            scaled_width >>= 1;
+        if ( r_roundImagesDown->integer && scaled_height > height )
+            scaled_height >>= 1;
+    }
 
-	if ( scaled_width != width || scaled_height != height ) {
-		resampledBuffer = ri.Hunk_AllocateTempMemory( scaled_width * scaled_height * 4 );
-		ResampleTexture( data, width, height, resampledBuffer, scaled_width, scaled_height );
-		data = resampledBuffer;
-		width = scaled_width;
-		height = scaled_height;
-	}
+    if ( scaled_width != width || scaled_height != height ) {
+        resampledBuffer = ri.Hunk_AllocateTempMemory( scaled_width * scaled_height * 4 );
+        ResampleTexture( data, width, height, resampledBuffer, scaled_width, scaled_height );
+        data = resampledBuffer;
+        width = scaled_width;
+        height = scaled_height;
+    }
 
-	//
-	// perform optional picmip operation
-	//
-	if ( picmip ) {
-		if ( characterMip ) {
-			scaled_width >>= r_picmip2->integer;
-			scaled_height >>= r_picmip2->integer;
-		} else {
-			scaled_width >>= r_picmip->integer;
-			scaled_height >>= r_picmip->integer;
-		}
-	}
+    //
+    // perform optional picmip operation
+    //
+    if ( picmip ) {
+        if ( characterMip ) {
+            scaled_width >>= r_picmip2->integer;
+            scaled_height >>= r_picmip2->integer;
+        } else {
+            scaled_width >>= r_picmip->integer;
+            scaled_height >>= r_picmip->integer;
+        }
+    }
 
-	//
-	// clamp to the current upper OpenGL limit
-	// scale both axis down equally so we don't have to
-	// deal with a half mip resampling
-	//
-	while ( scaled_width > glConfig.maxTextureSize
-		|| scaled_height > glConfig.maxTextureSize ) {
-		scaled_width >>= 1;
-		scaled_height >>= 1;
-	}
+    //
+    // clamp to the current upper OpenGL limit
+    //
+    while ( scaled_width > glConfig.maxTextureSize
+        || scaled_height > glConfig.maxTextureSize ) {
+        scaled_width >>= 1;
+        scaled_height >>= 1;
+    }
 
 #ifndef USE_BLOOM
-	rmse = R_RMSE( (byte *)data, width, height );
+    rmse = R_RMSE( (byte *)data, width, height );
 
-	if ( r_lowMemTextureSize->integer && ( scaled_width > r_lowMemTextureSize->integer || scaled_height > r_lowMemTextureSize->integer ) && rmse < r_lowMemTextureThreshold->value ) {
-		int scale;
+    if ( r_lowMemTextureSize->integer && ( scaled_width > r_lowMemTextureSize->integer || scaled_height > r_lowMemTextureSize->integer ) && rmse < r_lowMemTextureThreshold->value ) {
+        int scale;
 
-		for ( scale = 1 ; scale < r_lowMemTextureSize->integer; scale <<= 1 ) {
-			;
-		}
+        for ( scale = 1 ; scale < r_lowMemTextureSize->integer; scale <<= 1 ) { ; }
 
-		while ( scaled_width > scale || scaled_height > scale ) {
-			scaled_width >>= 1;
-			scaled_height >>= 1;
-		}
+        while ( scaled_width > scale || scaled_height > scale ) {
+            scaled_width >>= 1;
+            scaled_height >>= 1;
+        }
 
-		ri.Printf( PRINT_ALL, "r_lowMemTextureSize forcing reduction from %i x %i to %i x %i\n", width, height, scaled_width, scaled_height );
+        ri.Printf( PRINT_ALL, "r_lowMemTextureSize forcing reduction from %i x %i to %i x %i\n", width, height, scaled_width, scaled_height );
 
-		resampledBuffer = ri.Hunk_AllocateTempMemory( scaled_width * scaled_height * 4 );
-		ResampleTexture( data, width, height, resampledBuffer, scaled_width, scaled_height );
-		data = resampledBuffer;
-		width = scaled_width;
-		height = scaled_height;
-
-	}
+        resampledBuffer = ri.Hunk_AllocateTempMemory( scaled_width * scaled_height * 4 );
+        ResampleTexture( data, width, height, resampledBuffer, scaled_width, scaled_height );
+        data = resampledBuffer;
+        width = scaled_width;
+        height = scaled_height;
+    }
 #endif
 
-	//
-	// clamp to minimum size
-	//
-	if ( scaled_width < 1 ) {
-		scaled_width = 1;
-	}
-	if ( scaled_height < 1 ) {
-		scaled_height = 1;
-	}
+    //
+    // clamp to minimum size
+    //
+    if ( scaled_width < 1 )  scaled_width = 1;
+    if ( scaled_height < 1 ) scaled_height = 1;
 
-	scaledBuffer = ri.Hunk_AllocateTempMemory( sizeof( unsigned ) * scaled_width * scaled_height );
+    scaledBuffer = ri.Hunk_AllocateTempMemory( sizeof( unsigned ) * scaled_width * scaled_height );
 
-	//
-	// scan the texture for each channel's max values
-	// and verify if the alpha channel is being used or not
-	//
-	c = width * height;
-	scan = ( (byte *)data );
-	samples = 3;
+    //
+    // scan the texture for each channel's max values
+    // and verify if the alpha channel is being used or not
+    //
+    c = width * height;
+    scan = ( (byte *)data );
+    samples = 3;
 
-	if( r_greyscale->integer )
-	{
-		for ( i = 0; i < c; i++ )
-		{
-			byte luma = LUMA(scan[i*4], scan[i*4 + 1], scan[i*4 + 2]);
-			scan[i*4] = luma;
-			scan[i*4 + 1] = luma;
-			scan[i*4 + 2] = luma;
-		}
-	}
-	else if( r_greyscale->value )
-	{
-		for ( i = 0; i < c; i++ )
-		{
-			float luma = LUMA(scan[i*4], scan[i*4 + 1], scan[i*4 + 2]);
-			scan[i*4] = LERP(scan[i*4], luma, r_greyscale->value);
-			scan[i*4 + 1] = LERP(scan[i*4 + 1], luma, r_greyscale->value);
-			scan[i*4 + 2] = LERP(scan[i*4 + 2], luma, r_greyscale->value);
-		}
-	}
+    // --- GOTHIC & GREYSCALE (independent) -----------------------------------
+    {
+        const int  gothicMode = ( r_gothic ) ? r_gothic->integer : 0; // 0=off, 1=pure red, 2=original red
+        const qboolean gsInt  = r_greyscale->integer ? qtrue : qfalse;
+        const float gsVal     = r_greyscale->value;
+        const qboolean gsActive = ( gsInt || (gsVal > 0.0f) ) ? qtrue : qfalse;
 
-	if(lightMap)
-	{
-		if(r_greyscale->integer)
-			internalFormat = GL_LUMINANCE;
-		else
-			internalFormat = GL_RGB;
-	}
-	else
-	{
-		for ( i = 0; i < c; i++ )
-		{
-			if ( scan[i * 4 + 0] > rMax ) {
-				rMax = scan[i * 4 + 0];
-			}
-			if ( scan[i * 4 + 1] > gMax ) {
-				gMax = scan[i * 4 + 1];
-			}
-			if ( scan[i * 4 + 2] > bMax ) {
-				bMax = scan[i * 4 + 2];
-			}
-			if ( scan[i * 4 + 3] != 255 ) {
-				samples = 4;
-				break;
-			}
-		}
-		// select proper internal format
-		if ( samples == 3 )
-		{
+        if ( gothicMode ) {
+            // Noir baseline regardless of r_greyscale: make non-red pixels grayscale.
+            // If r_greyscale is set partially, use its amount for non-red pixels; otherwise full luma.
+            for ( i = 0; i < c; i++ ) {
+                byte *px = &scan[i*4];
+                byte r0 = px[0], g0 = px[1], b0 = px[2];
 
-			if(r_greyscale->integer)
-			{
+                if ( IsRedDominant( r0, g0, b0 ) ) {
+                    ApplyNoirRed( &px[0], &px[1], &px[2], r0, g0, b0, gothicMode );
+                } else {
+                    byte luma = (byte)LUMA( r0, g0, b0 );
+                    if ( gsInt ) {
+                        px[0] = luma; px[1] = luma; px[2] = luma;
+                    } else if ( gsVal > 0.0f ) {
+                        px[0] = LERP( r0, luma, gsVal );
+                        px[1] = LERP( g0, luma, gsVal );
+                        px[2] = LERP( b0, luma, gsVal );
+                    } else {
+                        // r_gothic alone: full grayscale baseline
+                        px[0] = luma; px[1] = luma; px[2] = luma;
+                    }
+                }
+            }
+        } else if ( gsActive ) {
+            // Greyscale only (original behavior)
+            if ( gsInt ) {
+                for ( i = 0; i < c; i++ ) {
+                    byte *px = &scan[i*4];
+                    byte luma = (byte)LUMA( px[0], px[1], px[2] );
+                    px[0] = luma; px[1] = luma; px[2] = luma;
+                }
+            } else {
+                for ( i = 0; i < c; i++ ) {
+                    byte *px = &scan[i*4];
+                    byte luma = (byte)LUMA( px[0], px[1], px[2] );
+                    px[0] = LERP( px[0], luma, gsVal );
+                    px[1] = LERP( px[1], luma, gsVal );
+                    px[2] = LERP( px[2], luma, gsVal );
+                }
+            }
+        }
+        // else: neither gothic nor greyscale → leave colors as-is
+    }
+    // --- END GOTHIC & GREYSCALE ---------------------------------------------
+
+    if ( lightMap )
+    {
+        // If gothic is active, we need RGB even if grayscale is integer
+        const qboolean greyscaleInt = r_greyscale->integer ? qtrue : qfalse;
+        const int gothicMode = ( r_gothic ) ? r_gothic->integer : 0;
+        if ( greyscaleInt && !gothicMode )
+            internalFormat = GL_LUMINANCE;
+        else
+            internalFormat = GL_RGB;
+    }
+    else
+    {
+        for ( i = 0; i < c; i++ )
+        {
+            if ( scan[i * 4 + 0] > rMax ) { rMax = scan[i * 4 + 0]; }
+            if ( scan[i * 4 + 1] > gMax ) { gMax = scan[i * 4 + 1]; }
+            if ( scan[i * 4 + 2] > bMax ) { bMax = scan[i * 4 + 2]; }
+            if ( scan[i * 4 + 3] != 255 ) {
+                samples = 4;
+                break;
+            }
+        }
+
+        // select proper internal format
+        {
+            const qboolean greyscaleInt = r_greyscale->integer ? qtrue : qfalse;
+            const int gothicMode = ( r_gothic ) ? r_gothic->integer : 0;
+
+            if ( samples == 3 )
+            {
+                if ( greyscaleInt && !gothicMode )
+                {
 #ifndef USE_OPENGLES
-				if(r_texturebits->integer == 16 || r_texturebits->integer == 32)
-					internalFormat = GL_LUMINANCE8;
-				else
+                    if ( r_texturebits->integer == 16 || r_texturebits->integer == 32 )
+                        internalFormat = GL_LUMINANCE8;
+                    else
 #endif
-					internalFormat = GL_LUMINANCE;
-			}
-			else
-			{
+                        internalFormat = GL_LUMINANCE;
+                }
+                else
+                {
 #ifndef USE_OPENGLES
-				if ( !noCompress && glConfig.textureCompression == TC_EXT_COMP_S3TC )
-				{
-					// TODO: which format is best for which textures?
-					internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-				}
-				else if ( !noCompress && glConfig.textureCompression == TC_S3TC )
-				{
-					internalFormat = GL_RGB4_S3TC;
-				}
-				else
+                    if ( !noCompress && glConfig.textureCompression == TC_EXT_COMP_S3TC )
+                    {
+                        internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+                    }
+                    else if ( !noCompress && glConfig.textureCompression == TC_S3TC )
+                    {
+                        internalFormat = GL_RGB4_S3TC;
+                    }
+                    else
 #endif
-				if ( r_texturebits->integer == 16 )
-				{
-					internalFormat = GL_RGB5;
-				}
+                    if ( r_texturebits->integer == 16 )
+                    {
+                        internalFormat = GL_RGB5;
+                    }
 #ifndef USE_OPENGLES
-				else if ( r_texturebits->integer == 32 )
-				{
-					internalFormat = GL_RGB8;
-				}
+                    else if ( r_texturebits->integer == 32 )
+                    {
+                        internalFormat = GL_RGB8;
+                    }
 #endif
-				else
-				{
-					internalFormat = GL_RGB;
-				}
-			}
-		}
-		else if ( samples == 4 )
-		{
+                    else
+                    {
+                        internalFormat = GL_RGB;
+                    }
+                }
+            }
+            else if ( samples == 4 )
+            {
+                if ( greyscaleInt && !gothicMode )
+                {
+#ifndef USE_OPENGLES
+                    if ( r_texturebits->integer == 16 || r_texturebits->integer == 32 )
+                        internalFormat = GL_LUMINANCE8_ALPHA8;
+                    else
+#endif
+                        internalFormat = GL_LUMINANCE_ALPHA;
+                }
+                else
+                {
+#ifndef USE_OPENGLES
+                    if ( !noCompress && glConfig.textureCompression == TC_EXT_COMP_S3TC )
+                    {
+                        internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+                    }
+                    else
+#endif
+                    if ( r_texturebits->integer == 16 )
+                    {
+                        internalFormat = GL_RGBA4;
+                    }
+#ifndef USE_OPENGLES
+                    else if ( r_texturebits->integer == 32 )
+                    {
+                        internalFormat = GL_RGBA8;
+                    }
+#endif
+                    else
+                    {
+                        internalFormat = GL_RGBA;
+                    }
+                }
+            }
+        }
+    }
 
-			if(r_greyscale->integer)
-			{
-#ifndef USE_OPENGLES
-				if(r_texturebits->integer == 16 || r_texturebits->integer == 32)
-					internalFormat = GL_LUMINANCE8_ALPHA8;
-				else
-#endif
-					internalFormat = GL_LUMINANCE_ALPHA;
-			}
-			else
-			{
-#ifndef USE_OPENGLES
-				if ( !noCompress && glConfig.textureCompression == TC_EXT_COMP_S3TC )
-				{
-					// TODO: which format is best for which textures?
-					internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-				}
-				else
-#endif
-				if ( r_texturebits->integer == 16 )
-				{
-					internalFormat = GL_RGBA4;
-				}
-#ifndef USE_OPENGLES
-				else if ( r_texturebits->integer == 32 )
-				{
-					internalFormat = GL_RGBA8;
-				}
-#endif
-				else
-				{
-					internalFormat = GL_RGBA;
-				}
-			}
-		}
-	}
-
-	// copy or resample data as appropriate for first MIP level
+    // copy or resample data as appropriate for first MIP level
 #ifdef USE_OPENGLES
-		if ( ( scaled_width == width ) && 
-			( scaled_height == height ) ) {
-			Com_Memcpy (scaledBuffer, data, width*height*4);
-		}
-		else
-		{
-			// use the normal mip-mapping function to go down from here
-			while ( width > scaled_width || height > scaled_height ) {
-				R_MipMap( (byte *)data, width, height );
-				width >>= 1;
-				height >>= 1;
-				if ( width < 1 ) {
-					width = 1;
-				}
-				if ( height < 1 ) {
-					height = 1;
-				}
-			}
-			Com_Memcpy( scaledBuffer, data, width * height * 4 );
-		}
-		R_LightScaleTexture (scaledBuffer, scaled_width, scaled_height, !mipmap );
+        if ( ( scaled_width == width ) && 
+            ( scaled_height == height ) ) {
+            Com_Memcpy (scaledBuffer, data, width*height*4);
+        }
+        else
+        {
+            // use the normal mip-mapping function to go down from here
+            while ( width > scaled_width || height > scaled_height ) {
+                R_MipMap( (byte *)data, width, height );
+                width >>= 1;
+                height >>= 1;
+                if ( width < 1 )  width = 1;
+                if ( height < 1 ) height = 1;
+            }
+            Com_Memcpy( scaledBuffer, data, width * height * 4 );
+        }
+        R_LightScaleTexture (scaledBuffer, scaled_width, scaled_height, !mipmap );
 
-		qglTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, (mipmap)?GL_TRUE:GL_FALSE );
+        qglTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, (mipmap)?GL_TRUE:GL_FALSE );
 
-		// and now, convert if needed and upload
-		// GLES doesn't do convertion itself, so we have to handle that
-		byte *temp;
-		switch ( internalFormat ) {
-		 case GL_RGB5:
-			temp = gles_convertRGB5((byte*)scaledBuffer, scaled_width, scaled_height);
-			qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, scaled_width, scaled_height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, temp);
-			ri.Free(temp);
-			break;
-		 case GL_RGBA4:
-			temp = gles_convertRGBA4((byte*)scaledBuffer, width, height);
-			qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, temp);
-			ri.Free(temp);
-			break;
-		 case GL_RGB:
-			temp = gles_convertRGB((byte*)scaledBuffer, width, height);
-			qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, scaled_width, scaled_height, 0, GL_RGB, GL_UNSIGNED_BYTE, temp);
-			ri.Free(temp);
-			break;
-		 case GL_LUMINANCE:
-			temp = gles_convertLuminance((byte*)scaledBuffer, width, height);
-			qglTexImage2D (GL_TEXTURE_2D, 0, GL_LUMINANCE, scaled_width, scaled_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, temp);
-			ri.Free(temp);
-			break;
-		 case GL_LUMINANCE_ALPHA:
-			temp = gles_convertLuminanceAlpha((byte*)scaledBuffer, width, height);
-			qglTexImage2D (GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, scaled_width, scaled_height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, temp);
-			ri.Free(temp);
-			break;
-		 default:
-			internalFormat = GL_RGBA;
-			qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
-		}
+        // and now, convert if needed and upload
+        // GLES doesn't do convertion itself, so we have to handle that
+        byte *temp;
+        switch ( internalFormat ) {
+         case GL_RGB5:
+            temp = gles_convertRGB5((byte*)scaledBuffer, scaled_width, scaled_height);
+            qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, scaled_width, scaled_height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, temp);
+            ri.Free(temp);
+            break;
+         case GL_RGBA4:
+            temp = gles_convertRGBA4((byte*)scaledBuffer, width, height);
+            qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, temp);
+            ri.Free(temp);
+            break;
+         case GL_RGB:
+            temp = gles_convertRGB((byte*)scaledBuffer, width, height);
+            qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, scaled_width, scaled_height, 0, GL_RGB, GL_UNSIGNED_BYTE, temp);
+            ri.Free(temp);
+            break;
+         case GL_LUMINANCE:
+            temp = gles_convertLuminance((byte*)scaledBuffer, width, height);
+            qglTexImage2D (GL_TEXTURE_2D, 0, GL_LUMINANCE, scaled_width, scaled_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, temp);
+            ri.Free(temp);
+            break;
+         case GL_LUMINANCE_ALPHA:
+            temp = gles_convertLuminanceAlpha((byte*)scaledBuffer, width, height);
+            qglTexImage2D (GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, scaled_width, scaled_height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, temp);
+            ri.Free(temp);
+            break;
+         default:
+            internalFormat = GL_RGBA;
+            qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
+        }
 
-	*pUploadWidth = scaled_width;
-	*pUploadHeight = scaled_height;
-	*format = internalFormat;
-		
-	//	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	//	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    *pUploadWidth = scaled_width;
+    *pUploadHeight = scaled_height;
+    *format = internalFormat;
 #else
-	if ( ( scaled_width == width ) &&
-		 ( scaled_height == height ) ) {
-		if ( !mipmap ) {
-			qglTexImage2D( GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
-			*pUploadWidth = scaled_width;
-			*pUploadHeight = scaled_height;
-			*format = internalFormat;
+    if ( ( scaled_width == width ) && ( scaled_height == height ) ) {
+        if ( !mipmap ) {
+            qglTexImage2D( GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+            *pUploadWidth = scaled_width;
+            *pUploadHeight = scaled_height;
+            *format = internalFormat;
+            goto done;
+        }
+        memcpy( scaledBuffer, data, width * height * 4 );
+    }
+    else
+    {
+        // use the normal mip-mapping function to go down from here
+        while ( width > scaled_width || height > scaled_height ) {
+            R_MipMap( (byte *)data, width, height );
+            width >>= 1;
+            height >>= 1;
+            if ( width < 1 )  width = 1;
+            if ( height < 1 ) height = 1;
+        }
+        memcpy( scaledBuffer, data, width * height * 4 );
+    }
 
-			goto done;
-		}
-		memcpy( scaledBuffer, data, width * height * 4 );
-	}
-	else
-	{
-		// use the normal mip-mapping function to go down from here
-		while ( width > scaled_width || height > scaled_height ) {
-			R_MipMap( (byte *)data, width, height );
-			width >>= 1;
-			height >>= 1;
-			if ( width < 1 ) {
-				width = 1;
-			}
-			if ( height < 1 ) {
-				height = 1;
-			}
-		}
-		memcpy( scaledBuffer, data, width * height * 4 );
-	}
+    R_LightScaleTexture( scaledBuffer, scaled_width, scaled_height, !mipmap );
 
-	R_LightScaleTexture( scaledBuffer, scaled_width, scaled_height, !mipmap );
+    *pUploadWidth = scaled_width;
+    *pUploadHeight = scaled_height;
+    *format = internalFormat;
 
-	*pUploadWidth = scaled_width;
-	*pUploadHeight = scaled_height;
-	*format = internalFormat;
+    qglTexImage2D( GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer );
 
-	qglTexImage2D( GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer );
+    if ( mipmap ) {
+        int miplevel = 0;
 
-	if ( mipmap ) {
-		int miplevel;
+        while ( scaled_width > 1 || scaled_height > 1 )
+        {
+            R_MipMap( (byte *)scaledBuffer, scaled_width, scaled_height );
+            scaled_width >>= 1;
+            scaled_height >>= 1;
+            if ( scaled_width < 1 )  scaled_width = 1;
+            if ( scaled_height < 1 ) scaled_height = 1;
+            miplevel++;
 
-		miplevel = 0;
-		while ( scaled_width > 1 || scaled_height > 1 )
-		{
-			R_MipMap( (byte *)scaledBuffer, scaled_width, scaled_height );
-			scaled_width >>= 1;
-			scaled_height >>= 1;
-			if ( scaled_width < 1 ) {
-				scaled_width = 1;
-			}
-			if ( scaled_height < 1 ) {
-				scaled_height = 1;
-			}
-			miplevel++;
+            if ( r_colorMipLevels->integer ) {
+                R_BlendOverTexture( (byte *)scaledBuffer, scaled_width * scaled_height, mipBlendColors[miplevel] );
+            }
 
-			if ( r_colorMipLevels->integer ) {
-				R_BlendOverTexture( (byte *)scaledBuffer, scaled_width * scaled_height, mipBlendColors[miplevel] );
-			}
-
-			qglTexImage2D( GL_TEXTURE_2D, miplevel, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer );
-		}
-	}
+            qglTexImage2D( GL_TEXTURE_2D, miplevel, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer );
+        }
+    }
 done:
 #endif
 
-	if ( mipmap ) {
-		if ( textureFilterAnisotropic )
-			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
-					(GLint)Com_Clamp( 1, maxAnisotropy, r_ext_max_anisotropy->integer ) );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max );
-	}
-	else
-	{
-		if ( textureFilterAnisotropic )
-			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1 );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	}
+    if ( mipmap ) {
+        if ( textureFilterAnisotropic )
+            qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
+                    (GLint)Com_Clamp( 1, maxAnisotropy, r_ext_max_anisotropy->integer ) );
+        qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min );
+        qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max );
+    }
+    else
+    {
+        if ( textureFilterAnisotropic )
+            qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1 );
+        qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+        qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    }
 
-	GL_CheckErrors();
+    GL_CheckErrors();
 
-	if ( scaledBuffer != 0 )
-		ri.Hunk_FreeTempMemory( scaledBuffer );
-	if ( resampledBuffer != 0 )
-		ri.Hunk_FreeTempMemory( resampledBuffer );
+    if ( scaledBuffer != 0 )
+        ri.Hunk_FreeTempMemory( scaledBuffer );
+    if ( resampledBuffer != 0 )
+        ri.Hunk_FreeTempMemory( resampledBuffer );
 }
+
 
 
 

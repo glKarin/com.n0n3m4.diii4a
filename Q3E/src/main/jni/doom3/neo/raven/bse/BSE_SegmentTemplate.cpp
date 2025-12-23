@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 void rvSegmentTemplate::Init(rvDeclEffect* decl)
 {
     mDeclEffect = decl;
-    mFlags = STF_ENABLED; // 1 //k??? TODO Q4BSE is STF_CONSTANT;          // default “locked” bit off
+    mFlags = STFLAG_ENABLED; // 1 //k??? TODO Q4BSE is STFLAG_INFINITE_DURATION;          // default “locked” bit off
     mSegType = SEG_NONE; // 0 //k??? TODO Q4BSE is SEG_INVALID;
 
     mLocalStartTime.Zero();
@@ -150,7 +150,7 @@ float rvSegmentTemplate::CalculateBounds() const
 /* --------------------------------------------------------------------- */
 void rvSegmentTemplate::SetMaxDuration(rvDeclEffect* effect)
 {
-    if (!(mFlags & STF_MAX_DURATION)) {
+    if (!(mFlags & STFLAG_COMPLEX)) {
         effect->SetMaxDuration(mLocalStartTime.x + mLocalDuration.x);
 
         if (mParticleTemplate.mType != 0) {
@@ -162,7 +162,7 @@ void rvSegmentTemplate::SetMaxDuration(rvDeclEffect* effect)
 /* --------------------------------------------------------------------- */
 void rvSegmentTemplate::SetMinDuration(rvDeclEffect* effect)
 {
-    if ((mFlags & STF_MAX_DURATION) != 0)
+    if ((mFlags & STFLAG_COMPLEX) != 0)
         return;
 
     if (!mSoundShader || !(mSoundShader->GetParms()->soundShaderFlags & SSF_LOOPING)) {
@@ -177,7 +177,7 @@ bool rvSegmentTemplate::Compare(const rvSegmentTemplate& a) const
     if (mSegmentName.Icmp(a.mSegmentName) != 0)
         return false;
 
-    if (((mFlags ^ a.mFlags) & ~STF_LOCKED) != 0)
+    if (((mFlags ^ a.mFlags) & ~STFLAG_LOCKED) != 0)
         return false;
 
     if (mSegType != a.mSegType)
@@ -269,18 +269,18 @@ bool rvSegmentTemplate::Finish(rvDeclEffect* effect)
     // 3) Segment‐type‐specific setup
     switch (mSegType) {
 	case SEG_EMITTER: // 2: // single‐shot
-        mFlags |= STF_HAS_PARTICLE; // 0x04;
+        mFlags |= STFLAG_HASPARTICLES; // 0x04;
         if (!mParticleTemplate.mType) return false;
-        if (mFlags & STF_CONSTANT/* 0x20 */) return false;
+        if (mFlags & STFLAG_INFINITE_DURATION/* 0x20 */) return false;
         break;
 
 	case SEG_SPAWNER: // 3: // conditional
-        mFlags |= STF_HAS_PARTICLE; // 0x04;
+        mFlags |= STFLAG_HASPARTICLES; // 0x04;
         if (!mParticleTemplate.mType) return false;
         break;
 
 	case SEG_TRAIL: // 4: // burst
-        mFlags |= STF_HAS_PARTICLE; // 0x04;
+        mFlags |= STFLAG_HASPARTICLES; // 0x04;
         // reset any local time/duration
         mLocalStartTime.x = mLocalStartTime.y = 0.0f;
         mLocalDuration.x = mLocalDuration.y = 0.0f;
@@ -290,41 +290,41 @@ bool rvSegmentTemplate::Finish(rvDeclEffect* effect)
         break;
 
 	case SEG_SOUND: // 5: // continuous
-        mFlags |= STF_INGORE_DURATION; // 0x10;
+        mFlags |= STFLAG_IGNORE_DURATION; // 0x10;
         break;
 
 	case SEG_DECAL: // 6: // delayed
-        mFlags &= ~STF_HAS_PARTICLE; // ~0x04;    // clear active
-        mFlags |= STF_TEMPORARY; // 0x0100;  // set byte1 bit0
+        mFlags &= ~STFLAG_HASPARTICLES; // ~0x04;    // clear active
+        mFlags |= STFLAG_TEMPORARY; // 0x0100;  // set byte1 bit0
         break;
 
 	case SEG_DV: // 9:  // attenuation-only
 	case SEG_SHAKE: // 10:
 	case SEG_TUNNEL: // 11:
         if (mAttenuation.y > 0.0f) {
-            mFlags |= STF_EMITTER_ATTEN; // 0x40;
+            mFlags |= STFLAG_ATTENUATE_EMITTER; // 0x40;
         }
         // fall through to default
     default:
-        mFlags &= ~STF_HAS_PARTICLE; // ~0x04;
+        mFlags &= ~STFLAG_HASPARTICLES; // ~0x04;
         break;
     }
 
     // 4) Common post-setup logic
     if (mParticleTemplate.mType == PTYPE_DEBRIS/* 9 */) {
-        mFlags &= ~STF_HAS_PARTICLE; // ~0x04;
-        mFlags |= STF_TEMPORARY; // 0x0100;
+        mFlags &= ~STFLAG_HASPARTICLES; // ~0x04;
+        mFlags |= STFLAG_TEMPORARY; // 0x0100;
     }
 
-    if ((mFlags & STF_CONSTANT/* 0x20 */) ||
+    if ((mFlags & STFLAG_INFINITE_DURATION/* 0x20 */) ||
         mParticleTemplate.mTrailType == TRAIL_PARTICLE/* 3 */ ||
-        (mParticleTemplate.mFlags & 0x0200) ||
+        (mParticleTemplate.mFlags & 0x0200 ) ||
         mParticleTemplate.mNumTimeoutEffects) {
         mFlags |= 0x0200;  // set byte1 bit1
     }
 
     if (mParticleTemplate.mType == PTYPE_LIGHT/* 6 */ || mParticleTemplate.mType == PTYPE_ELECTRIC/* 7 */) {
-        mFlags |= 0x0200;
+        mFlags |= 0x0200; // BYTE1
     }
 
     return true;
@@ -397,10 +397,10 @@ bool rvSegmentTemplate::Parse(rvDeclEffect* effect,
         else if (token.Icmp("detail") == 0) { mDetail = lexer->ParseFloat(); }
         else if (token.Icmp("scale") == 0) { mScale = lexer->ParseFloat(); }
         else if (token.Icmp("attenuation") == 0) { READ_VEC2(mAttenuation); }
-        else if (token.Icmp("attenuateEmitter") == 0) { mFlags |= STF_EMITTER_ATTEN; }
-        else if (token.Icmp("inverseAttenuateEmitter") == 0) { mFlags |= STF_EMITTER_INV_ATTEN; }
-        else if (token.Icmp("locked") == 0) { mFlags |= STF_LOCKED; }
-        else if (token.Icmp("constant") == 0) { mFlags |= STF_CONSTANT; }
+        else if (token.Icmp("attenuateEmitter") == 0) { mFlags |= STFLAG_ATTENUATE_EMITTER; }
+        else if (token.Icmp("inverseAttenuateEmitter") == 0) { mFlags |= STFLAG_INVERSE_ATTENUATE; }
+        else if (token.Icmp("locked") == 0) { mFlags |= STFLAG_LOCKED; }
+        else if (token.Icmp("constant") == 0) { mFlags |= STFLAG_INFINITE_DURATION; }
         /* --- sound ---------------------------------------------------- */
         else if (token.Icmp("soundShader") == 0)
         {
@@ -408,7 +408,7 @@ bool rvSegmentTemplate::Parse(rvDeclEffect* effect,
             mSoundShader = declManager->FindSound(token, true);
             const float len = mSoundShader->GetTimeLength();
             mLocalDuration.x = mLocalDuration.y = len;
-            mFlags |= STF_HAS_SOUND;
+            mFlags |= STFLAG_CALCULATE_DURATION;
         }
         else if (token.Icmp("volume") == 0) { READ_VEC2(mSoundVolume); }
         else if (token.Icmp("freqShift") == 0) { READ_VEC2(mFreqShift); }
@@ -416,7 +416,7 @@ bool rvSegmentTemplate::Parse(rvDeclEffect* effect,
         else if (token.Icmp("effect") == 0)
         {
             lexer->ReadToken(&token);
-            if (mNumEffects >= 4) {
+            if (mNumEffects >= BSE_NUM_SPAWNABLE/* 4 */) {
                 common->Warning("^4BSE:^1 Too many sub-effects in segment '%s'",
                     mSegmentName.c_str());
             }

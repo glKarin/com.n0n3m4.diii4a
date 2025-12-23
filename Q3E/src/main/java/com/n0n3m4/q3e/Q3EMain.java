@@ -46,6 +46,7 @@ import com.n0n3m4.q3e.karin.KMouseCursor;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTechCommand;
+import com.n0n3m4.q3e.karin.Theme;
 
 public class Q3EMain extends Activity
 {
@@ -138,6 +139,9 @@ public class Q3EMain extends Activity
 
         // setup language environment
         Q3ELang.Locale(this);
+
+        // setup theme
+        Theme.SetTheme(this, false);
 
         // load game
         if(gameHelper.checkGameFiles())
@@ -527,8 +531,14 @@ public class Q3EMain extends Activity
 
     private boolean CheckStart()
     {
-        // arm32 not support GZDOOM
-        if(Q3EUtils.q3ei.isDOOM)
+        if(Q3EUtils.q3ei.IsDisabled()) // disabled or removed games
+        {
+            Toast.makeText(this, Q3EUtils.q3ei.game_name + " is disabled or removed!", Toast.LENGTH_LONG).show();
+            finish();
+            Q3EUtils.RunLauncher(this);
+            return false;
+        }
+        else if(Q3EUtils.q3ei.isDOOM) // arm32 not support GZDOOM
         {
             if(!Q3EJNI.Is64())
             {
@@ -546,12 +556,22 @@ public class Q3EMain extends Activity
                 return false;
             }
         }
-        else if(Q3EUtils.q3ei.isSource && Q3EGlobals.IsFDroidVersion())
+        else if(Q3EGlobals.IsFDroidVersion())
         {
-            Toast.makeText(this, "F-Droid version not support Source-Engine game, you can install Github version!", Toast.LENGTH_LONG).show();
-            finish();
-            Q3EUtils.RunLauncher(this);
-            return false;
+            if(Q3EUtils.q3ei.isXash3D)
+            {
+                Toast.makeText(this, "F-Droid version not support Xash3D, you can install Github version!", Toast.LENGTH_LONG).show();
+                finish();
+                Q3EUtils.RunLauncher(this);
+                return false;
+            }
+            else if(Q3EUtils.q3ei.isSource)
+            {
+                Toast.makeText(this, "F-Droid version not support Source-Engine game, you can install Github version!", Toast.LENGTH_LONG).show();
+                finish();
+                Q3EUtils.RunLauncher(this);
+                return false;
+            }
         }
         return true;
     }

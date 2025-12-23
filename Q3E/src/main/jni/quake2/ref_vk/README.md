@@ -16,6 +16,7 @@ This is the vkQuake2 vulkan renderer library ported to Yamagi Quake II.
 [![Build Status](https://github.com/yquake2/ref_vk/actions/workflows/macos.yml/badge.svg)](https://github.com/yquake2/ref_vk/actions/workflows/macos.yml)
 [![Build Status](https://github.com/yquake2/ref_vk/actions/workflows/win32.yml/badge.svg)](https://github.com/yquake2/ref_vk/actions/workflows/win32.yml)
 [![Build Status](https://github.com/yquake2/ref_vk/actions/workflows/win64.yml/badge.svg)](https://github.com/yquake2/ref_vk/actions/workflows/win64.yml)
+[![Build Status](https://github.com/yquake2/ref_vk/actions/workflows/codeql.yml/badge.svg)](https://github.com/yquake2/ref_vk/actions/workflows/codeql.yml)
 
 ## Compilation
 

@@ -61,16 +61,16 @@ import javax.microedition.khronos.opengles.GL11;
 
 public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 {
-    private       int          m_unit              = 0;
-    public  int          step                = 10;
-    private       FloatBuffer  m_gridBuffer        = null;
-    private       int          m_numGridLineVertex = 0;
-    private final Object       m_gridLock          = new Object();
-    private       boolean      m_edited            = false;
-    private final int[]        drawerTextureId     = {0, 0};
-    private       ViewGroup    layout;
-    private  int          m_drawerHeight                = 200;
-    private final List<Paintable> reloadList = new ArrayList<>();
+    private       int             m_unit              = 0;
+    public        int             step                = 10;
+    private       FloatBuffer     m_gridBuffer        = null;
+    private       int             m_numGridLineVertex = 0;
+    private final Object          m_gridLock          = new Object();
+    private       boolean         m_edited            = false;
+    private final int[]           drawerTextureId     = {0, 0};
+    private       ViewGroup       layout;
+    private       int             m_drawerHeight      = 200;
+    private final List<Paintable> reloadList          = new ArrayList<>();
 
     public Q3EUiView(Context context)
     {
@@ -163,7 +163,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             {
                 if(p instanceof Joystick)
                     ((Joystick)p).UpdateTexture((GL11) gl);
-                p.Paint((GL11) gl);
+                p.PaintInEditor((GL11) gl);
             }
         }
 
@@ -319,30 +319,44 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
     public void SaveAll()
     {
         Editor mEdtr = PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
+        String[] list = new String[Q3EGlobals.UI_SIZE];
         for (int i = 0; i < touch_elements.size(); i++)
         {
             TouchListener touchListener = touch_elements.get(i);
             if (touchListener instanceof Button)
             {
                 Button tmp = (Button) touchListener;
-                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString(width, height));
+                list[i] = new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString(width, height);
             }
             else if (touchListener instanceof Slider)
             {
                 Slider tmp = (Slider) touchListener;
-                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString(width, height));
+                list[i] = new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString(width, height);
             }
             else if (touchListener instanceof Joystick)
             {
                 Joystick tmp = (Joystick) touchListener;
-                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString(width, height));
+                list[i] = new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString(width, height);
             }
             //k
             else if (touchListener instanceof Disc)
             {
                 Disc tmp = (Disc) touchListener;
-                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString(width, height));
+                list[i] = new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString(width, height);
             }
+        }
+        Q3EUiConfig uiConfig = (Q3EUiConfig) getContext();
+        String game = uiConfig.EditGame();
+        if(null == game)
+        {
+            for(int i = 0; i < list.length; i++)
+            {
+                mEdtr.putString(Q3EPreference.pref_controlprefix + i, list[i]);
+            }
+        }
+        else
+        {
+            mEdtr.putString(Q3EInterface.ControlPreference(game), Q3EUtils.Join(",", list));
         }
         mEdtr.commit();
         m_edited = false;
@@ -388,7 +402,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             notifyTexCoordBuffer.put(notifyquadTexCoord);
             notifyTexCoordBuffer.position(0);
 
-            uildr = new UiLoader(this, gl, width, height, false);
+            uildr = new UiLoader(this, gl, width, height, Q3EUtils.q3ei.defaults_table);
 
             final int moverWidth = Math.min(width / 4, 360);
             final int moverHeight = Math.min(width / 6, 320);
@@ -598,13 +612,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Slider.CalcAspect(tmp.Style());
                     int width = (int) (size * scale);
                     int height = (int) (aspect * width + 0.5f);
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(width, height);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(width, height);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Button)
                 {
@@ -612,37 +621,22 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Button.CalcAspect(tmp.Style());
                     int width = (int) (size * scale);
                     int height = (int) (aspect * width + 0.5f);
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(width, height);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(width, height);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Joystick)
                 {
                     Joystick tmp = (Joystick) p;
                     int radius = (int) (size * scale) * 2;
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(radius / 2);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(radius / 2);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Disc)
                 {
                     Disc tmp = (Disc) p;
                     int radius = (int) (size * scale) * 2;
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(radius / 2);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(radius / 2);
+                    ReloadButton(tmp);
                 }
 
                 m_edited = true;
@@ -675,13 +669,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Slider.CalcAspect(tmp.Style());
                     int width = size;
                     int height = (int) (aspect * width + 0.5f);
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(width, height);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(width, height);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Button)
                 {
@@ -689,37 +678,22 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     float aspect = Button.CalcAspect(tmp.Style());
                     int width = size;
                     int height = (int) (aspect * width + 0.5f);
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(width, height);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(width, height);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Joystick)
                 {
                     Joystick tmp = (Joystick) p;
                     int radius = size * 2;
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(radius / 2);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(radius / 2);
+                    ReloadButton(tmp);
                 }
                 else if (p instanceof Disc)
                 {
                     Disc tmp = (Disc) p;
                     int radius = size * 2;
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tmp.Resize(radius / 2);
-                            reloadList.add(tmp);
-                        }
-                    });
+                    tmp.Resize(radius / 2);
+                    ReloadButton(tmp);
                 }
 
                 m_edited = true;

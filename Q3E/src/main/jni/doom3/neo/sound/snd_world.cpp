@@ -1119,7 +1119,11 @@ void idSoundWorldLocal::PlaceListener(const idVec3 &origin, const idMat3 &axis,
 	listenerPrivateId = listenerId;
 
 	listenerQU = origin;							// Doom units
+#ifdef _RAVEN //karin: don't convert to meter
+	listenerPos = origin;
+#else
 	listenerPos = origin * DOOM_TO_METERS;			// meters
+#endif
 	listenerAxis = axis;
 	listenerAreaName = areaName;
 	listenerAreaName.ToLower();
@@ -1898,11 +1902,19 @@ void idSoundWorldLocal::AddChannelContribution(idSoundEmitterLocal *sound, idSou
 
 		if (noOcclusion) {
 			// use the real origin and distance
+#ifdef _RAVEN //karin: don't convert to meter
+			spatializedOriginInMeters = sound->origin;
+#else
 			spatializedOriginInMeters = sound->origin * DOOM_TO_METERS;
+#endif
 			dlen = sound->realDistance;
 		} else {
 			// use the possibly portal-occluded origin and distance
+#ifdef _RAVEN //karin: don't convert to meter
+			spatializedOriginInMeters = sound->spatializedOrigin;
+#else
 			spatializedOriginInMeters = sound->spatializedOrigin * DOOM_TO_METERS;
+#endif
 			dlen = sound->distance;
 		}
 
@@ -2211,7 +2223,9 @@ float idSoundWorldLocal::FindAmplitude(idSoundEmitterLocal *sound, const int loc
 		// this doesn't do the portal spatialization
 		idVec3 dist = sound->origin - *listenerPosition;
 		dlen = dist.Length();
+#if !defined(_RAVEN) //karin: don't convert to meter
 		dlen *= DOOM_TO_METERS;
+#endif
 	} else {
 		dlen = 1;
 	}

@@ -1942,6 +1942,7 @@ extern vmCvar_t cg_hudStyle;
 extern vmCvar_t	cg_weaponBounceSound;
 
 extern vmCvar_t cg_showSocials;
+extern vmCvar_t cg_gothic;
 
 //
 // cg_main.c

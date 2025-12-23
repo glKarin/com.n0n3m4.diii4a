@@ -65,8 +65,7 @@ public:
 	
 	// check for OpenGL errors
 	void					Check();
-	uint32_t				GetFramebuffer() const
-	{
+	uint32_t				GetFramebuffer() const {
 		return frameBuffer;
 	}
 	const char *			GetName() const {

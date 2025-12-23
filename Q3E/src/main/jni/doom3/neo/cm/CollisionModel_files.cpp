@@ -41,10 +41,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #define CM_FILE_EXT			"cm"
 #define CM_FILEID			"CM"
+#ifdef _RAVEN // Quake4 cm file version
+#define CM_FILEVERSION		"3"
+#define CM_DOOM3_FILEVERSION		"1.00"
+#define CM_IS_QUAKE4_VERSION() (cmVersion == CM_FILEVERSION)
+#define CM_WRITE_IS_QUAKE4_VERSION() (cmVersion == CM_FILEVERSION)
+#else
 #define CM_FILEVERSION		"1.00"
-
-#ifdef _RAVEN // quake4 cm file version
-#define CM_FILEVERSION_RAVEN		"3"
 #endif
 
 /*
@@ -135,6 +138,17 @@ void idCollisionModelManagerLocal::WritePolygons(idFile *fp, cm_node_t *node)
 		fp->WriteFloatString(" ) ( %f %f %f ) %f", p->plane.Normal()[0], p->plane.Normal()[1], p->plane.Normal()[2], p->plane.Dist());
 		fp->WriteFloatString(" ( %f %f %f )", p->bounds[0][0], p->bounds[0][1], p->bounds[0][2]);
 		fp->WriteFloatString(" ( %f %f %f )", p->bounds[1][0], p->bounds[1][1], p->bounds[1][2]);
+#ifdef _RAVEN // Quake4 cm write
+        if(CM_WRITE_IS_QUAKE4_VERSION())
+        {
+        fp->WriteFloatString(" \"%s\"", p->material->GetName());
+        fp->WriteFloatString(" ( %f %f )", 0.0f, 0.0f); // TODO: export cm v3 file
+        fp->WriteFloatString(" ( %f %f )", 0.0f, 0.0f); // TODO: export cm v3 file
+        fp->WriteFloatString(" ( %f %f )", 0.0f, 0.0f); // TODO: export cm v3 file
+        fp->WriteFloatString(" %d\n", 0); // TODO: export cm v3 file
+        }
+        else
+#endif
 		fp->WriteFloatString(" \"%s\"\n", p->material->GetName());
 	}
 
@@ -203,6 +217,13 @@ void idCollisionModelManagerLocal::WriteBrushes(idFile *fp, cm_node_t *node)
 		}
 
 		fp->WriteFloatString("\t} ( %f %f %f )", b->bounds[0][0], b->bounds[0][1], b->bounds[0][2]);
+#ifdef _RAVEN // Quake4 cm write
+        if(CM_WRITE_IS_QUAKE4_VERSION())
+        {
+        fp->WriteFloatString(" ( %f %f %f ) \"%s\" %d\n", b->bounds[1][0], b->bounds[1][1], b->bounds[1][2], StringFromContents(b->contents), 0); // TODO: export cm v3 file
+        }
+        else
+#endif
 		fp->WriteFloatString(" ( %f %f %f ) \"%s\"\n", b->bounds[1][0], b->bounds[1][1], b->bounds[1][2], StringFromContents(b->contents));
 	}
 
@@ -221,6 +242,11 @@ void idCollisionModelManagerLocal::WriteCollisionModel(idFile *fp, cm_model_t *m
 {
 	int i, polygonMemory, brushMemory;
 
+#ifdef _RAVEN // Quake4 cm write
+    if(CM_WRITE_IS_QUAKE4_VERSION()) //karin: for compat doom3 cm
+    fp->WriteFloatString("collisionModel \"%s\" %d {\n", model->name.c_str(), 0); // TODO: export cm v3 file
+    else
+#endif
 	fp->WriteFloatString("collisionModel \"%s\" {\n", model->name.c_str());
 	// vertices
 	fp->WriteFloatString("\tvertices { /* numVertices = */ %d\n", model->numVertices);
@@ -245,6 +271,11 @@ void idCollisionModelManagerLocal::WriteCollisionModel(idFile *fp, cm_model_t *m
 	// polygons
 	checkCount++;
 	polygonMemory = CountPolygonMemory(model->node);
+#ifdef _RAVEN // Quake4 cm write
+    if(CM_WRITE_IS_QUAKE4_VERSION())
+    fp->WriteFloatString("\tpolygons /* polygonMemory = */ %d /* numPolygonEdges = */ %d {\n", polygonMemory, 0); // TODO: export cm v3 file
+    else
+#endif
 	fp->WriteFloatString("\tpolygons /* polygonMemory = */ %d {\n", polygonMemory);
 	checkCount++;
 	WritePolygons(fp, model->node);
@@ -252,6 +283,11 @@ void idCollisionModelManagerLocal::WriteCollisionModel(idFile *fp, cm_model_t *m
 	// brushes
 	checkCount++;
 	brushMemory = CountBrushMemory(model->node);
+#ifdef _RAVEN // Quake4 cm write
+    if(CM_WRITE_IS_QUAKE4_VERSION())
+    fp->WriteFloatString("\tbrushes /* brushMemory = */ %d /* numBrushPlanes = */ %d {\n", brushMemory, 0); // TODO: export cm v3 file
+    else
+#endif
 	fp->WriteFloatString("\tbrushes /* brushMemory = */ %d {\n", brushMemory);
 	checkCount++;
 	WriteBrushes(fp, model->node);
@@ -283,6 +319,9 @@ void idCollisionModelManagerLocal::WriteCollisionModelsToFile(const char *filena
 		return;
 	}
 
+#ifdef _RAVEN // Quake4: using newer cm version
+    cmWriteVersion = CM_FILEVERSION;
+#endif
 	// write file id and version
 	fp->WriteFloatString("%s \"%s\"\n\n", CM_FILEID, CM_FILEVERSION);
 	// write the map file crc
@@ -327,6 +366,9 @@ bool idCollisionModelManagerLocal::WriteCollisionModelForMapEntity(const idMapEn
 		return false;
 	}
 
+#ifdef _RAVEN // Quake4: using newer cm version
+    cmWriteVersion = CM_FILEVERSION;
+#endif
 	// write file id and version
 	fp->WriteFloatString("%s \"%s\"\n\n", CM_FILEID, CM_FILEVERSION);
 	// write the map file crc
@@ -460,6 +502,14 @@ void idCollisionModelManagerLocal::ParsePolygons(idLexer *src, cm_model_t *model
 		model->polygonBlock->next = ((byte *) model->polygonBlock) + sizeof(cm_polygonBlock_t);
 	}
 
+#ifdef _RAVEN // Quake4 cm file
+    // numPolygonEdges
+    if(CM_IS_QUAKE4_VERSION())
+    if (!src->CheckTokenType(TT_NUMBER, 0, &token)) {
+        common->Warning("%s: Expect integer number of numPolygonEdges, but read %s", __FUNCTION__, token.c_str());
+    }
+#endif
+
 	src->ExpectTokenString("{");
 
 	while (!src->CheckTokenString("}")) {
@@ -486,6 +536,18 @@ void idCollisionModelManagerLocal::ParsePolygons(idLexer *src, cm_model_t *model
 		p->checkcount = 0;
 		// filter polygon into tree
 		R_FilterPolygonIntoTree(model, model->node, NULL, p);
+
+#ifdef _RAVEN // Quake4 cm file
+        if(CM_IS_QUAKE4_VERSION())
+        {
+        // other unknown (float, float) (float, float) (float, float) integer
+        float unknownData[2];
+        src->Parse1DMatrix(2, unknownData);
+        src->Parse1DMatrix(2, unknownData);
+        src->Parse1DMatrix(2, unknownData);
+        src->ParseInt();
+        }
+#endif
 	}
 }
 
@@ -507,7 +569,15 @@ void idCollisionModelManagerLocal::ParseBrushes(idLexer *src, cm_model_t *model)
 		model->brushBlock->next = ((byte *) model->brushBlock) + sizeof(cm_brushBlock_t);
 	}
 
-	src->ExpectTokenString("{");
+#ifdef _RAVEN // Quake4 cm file
+    // numBrushPlanes
+    if(CM_IS_QUAKE4_VERSION())
+    if (!src->CheckTokenType(TT_NUMBER, 0, &token)) {
+        common->Warning("%s: Expect integer number of numBrushPlanes, but read %s", __FUNCTION__, token.c_str());
+    }
+#endif
+
+    src->ExpectTokenString("{");
 
 	while (!src->CheckTokenString("}")) {
 		// parse brush
@@ -537,6 +607,14 @@ void idCollisionModelManagerLocal::ParseBrushes(idLexer *src, cm_model_t *model)
 		b->primitiveNum = 0;
 		// filter brush into tree
 		R_FilterBrushIntoTree(model, model->node, NULL, b);
+
+#ifdef _RAVEN // Quake4 cm file
+        if(CM_IS_QUAKE4_VERSION())
+        {
+        // other unknown integer
+        src->ParseInt();
+        }
+#endif
 	}
 }
 
@@ -563,9 +641,18 @@ bool idCollisionModelManagerLocal::ParseCollisionModel(idLexer *src)
 	model->name = token;
 
 #ifdef _RAVEN // quake4 cm file
+    if(CM_IS_QUAKE4_VERSION()) //karin: for compat doom3 cm
+    {
 	if (token.Cmpn(PROC_CLIPMODEL_STRING_PRFX, strlen(PROC_CLIPMODEL_STRING_PRFX)) == 0) {
 		numInlinedProcClipModels++;
 	}
+
+    if (!src->ExpectTokenType(TT_NUMBER, TT_INTEGER, &token))
+    {
+        common->Warning("%s: Expect integer number, but read %s", __FUNCTION__, token.c_str());
+        return false;
+    }
+    }
 #endif
 #ifdef _HUMANHEAD
 	//HUMANHEAD rww
@@ -646,6 +733,9 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile(const char *name, unsi
 	idLexer *src;
 	unsigned int crc;
 
+#ifdef _RAVEN
+    cmVersion = CM_FILEVERSION;
+#endif
 	// load it
 	fileName = name;
 	fileName.SetFileExtension(CM_FILE_EXT);
@@ -666,7 +756,7 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile(const char *name, unsi
 #ifdef _RAVEN // quake4 cm file
 	if (!src->ReadToken(&token) || (token != CM_FILEVERSION
 #if 1
-				 && token != CM_FILEVERSION_RAVEN
+				 && token != CM_DOOM3_FILEVERSION
 #endif
 				))
 #else
@@ -679,7 +769,7 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile(const char *name, unsi
 	}
 
 #ifdef _RAVEN
-	const idStr version = token;
+    cmVersion = token.c_str();
 #endif
 
 	if (!src->ExpectTokenType(TT_NUMBER, TT_INTEGER, &token)) {
@@ -703,16 +793,6 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile(const char *name, unsi
 		}
 
 		if (token == "collisionModel") {
-#ifdef _RAVEN // quake4 cm file
-			if(!version.Cmp(CM_FILEVERSION_RAVEN))
-			{
-				if (!ParseCollisionModel_v3(src)) {
-					delete src;
-					return false;
-				}
-			}
-			else
-#endif
 			if (!ParseCollisionModel(src)) {
 				delete src;
 				return false;
@@ -728,214 +808,3 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile(const char *name, unsi
 
 	return true;
 }
-
-#ifdef _RAVEN // quake4 cm file
-/*
-================
-idCollisionModelManagerLocal::ParseCollisionModel_v3
-================
-*/
-bool idCollisionModelManagerLocal::ParseCollisionModel_v3(idLexer *src)
-{
-	cm_model_t *model;
-	idToken token;
-
-	if (numModels >= MAX_SUBMODELS) {
-		common->Error("LoadModel: no free slots");
-		return false;
-	}
-
-	model = AllocModel();
-	models[numModels ] = model;
-	numModels++;
-	// parse the file
-	src->ExpectTokenType(TT_STRING, 0, &token);
-	model->name = token;
-
-#ifdef _RAVEN
-	if (token.Cmpn(PROC_CLIPMODEL_STRING_PRFX, strlen(PROC_CLIPMODEL_STRING_PRFX)) == 0) {
-		numInlinedProcClipModels++;
-	}
-#endif
-
-	if (!src->ExpectTokenType(TT_NUMBER, TT_INTEGER, &token))
-	{
-		common->Warning("%s: Expect integer number, but read %s", __FUNCTION__, token.c_str());
-		return false;
-	}
-
-	src->ExpectTokenString("{");
-
-	while (!src->CheckTokenString("}")) {
-
-		src->ReadToken(&token);
-
-		if (token == "vertices") {
-			ParseVertices(src, model);
-			continue;
-		}
-
-		if (token == "edges") {
-			ParseEdges(src, model);
-			continue;
-		}
-
-		if (token == "nodes") {
-			src->ExpectTokenString("{");
-			model->node = ParseNodes(src, model, NULL);
-			src->ExpectTokenString("}");
-			continue;
-		}
-
-		if (token == "polygons") {
-			ParsePolygons_v3(src, model);
-			continue;
-		}
-
-		if (token == "brushes") {
-			ParseBrushes_v3(src, model);
-			continue;
-		}
-
-		src->Error("ParseCollisionModel_v3: bad token \"%s\"", token.c_str());
-	}
-
-	// calculate edge normals
-	checkCount++;
-	CalculateEdgeNormals(model, model->node);
-	// get model bounds from brush and polygon bounds
-	CM_GetNodeBounds(&model->bounds, model->node);
-	// get model contents
-	model->contents = CM_GetNodeContents(model->node);
-	// total memory used by this model
-	model->usedMemory = model->numVertices * sizeof(cm_vertex_t) +
-	                    model->numEdges * sizeof(cm_edge_t) +
-	                    model->polygonMemory +
-	                    model->brushMemory +
-	                    model->numNodes * sizeof(cm_node_t) +
-	                    model->numPolygonRefs * sizeof(cm_polygonRef_t) +
-	                    model->numBrushRefs * sizeof(cm_brushRef_t);
-
-	return true;
-}
-
-/*
-================
-idCollisionModelManagerLocal::ParsePolygons_v3
-================
-*/
-void idCollisionModelManagerLocal::ParsePolygons_v3(idLexer *src, cm_model_t *model)
-{
-	cm_polygon_t *p;
-	int i, numEdges;
-	idVec3 normal;
-	idToken token;
-
-	if (src->CheckTokenType(TT_NUMBER, 0, &token)) {
-		model->polygonBlock = (cm_polygonBlock_t *) Mem_Alloc(sizeof(cm_polygonBlock_t) + token.GetIntValue());
-		model->polygonBlock->bytesRemaining = token.GetIntValue();
-		model->polygonBlock->next = ((byte *) model->polygonBlock) + sizeof(cm_polygonBlock_t);
-	}
-
-	// numPolygonEdges
-	if (!src->CheckTokenType(TT_NUMBER, 0, &token)) {
-		common->Warning("%s: Expect integer number of numPolygonEdges, but read %s", __FUNCTION__, token.c_str());
-	}
-
-	src->ExpectTokenString("{");
-
-	while (!src->CheckTokenString("}")) {
-		// parse polygon
-		numEdges = src->ParseInt();
-		p = AllocPolygon(model, numEdges);
-		p->numEdges = numEdges;
-		src->ExpectTokenString("(");
-
-		for (i = 0; i < p->numEdges; i++) {
-			p->edges[i] = src->ParseInt();
-		}
-
-		src->ExpectTokenString(")");
-		src->Parse1DMatrix(3, normal.ToFloatPtr());
-		p->plane.SetNormal(normal);
-		p->plane.SetDist(src->ParseFloat());
-		src->Parse1DMatrix(3, p->bounds[0].ToFloatPtr());
-		src->Parse1DMatrix(3, p->bounds[1].ToFloatPtr());
-		src->ExpectTokenType(TT_STRING, 0, &token);
-		// get material
-		p->material = declManager->FindMaterial(token);
-		p->contents = p->material->GetContentFlags();
-		p->checkcount = 0;
-		// filter polygon into tree
-		R_FilterPolygonIntoTree(model, model->node, NULL, p);
-
-		// other unknown (float, float) (float, float) (float, float) integer
-		float unknownData[2];
-		src->Parse1DMatrix(2, unknownData);
-		src->Parse1DMatrix(2, unknownData);
-		src->Parse1DMatrix(2, unknownData);
-		src->ParseInt();
-	}
-}
-
-/*
-================
-idCollisionModelManagerLocal::ParseBrushes_v3
-================
-*/
-void idCollisionModelManagerLocal::ParseBrushes_v3(idLexer *src, cm_model_t *model)
-{
-	cm_brush_t *b;
-	int i, numPlanes;
-	idVec3 normal;
-	idToken token;
-
-	if (src->CheckTokenType(TT_NUMBER, 0, &token)) {
-		model->brushBlock = (cm_brushBlock_t *) Mem_Alloc(sizeof(cm_brushBlock_t) + token.GetIntValue());
-		model->brushBlock->bytesRemaining = token.GetIntValue();
-		model->brushBlock->next = ((byte *) model->brushBlock) + sizeof(cm_brushBlock_t);
-	}
-
-	// numBrushPlanes
-	if (!src->CheckTokenType(TT_NUMBER, 0, &token)) {
-		common->Warning("%s: Expect integer number of numBrushPlanes, but read %s", __FUNCTION__, token.c_str());
-	}
-
-	src->ExpectTokenString("{");
-
-	while (!src->CheckTokenString("}")) {
-		// parse brush
-		numPlanes = src->ParseInt();
-		b = AllocBrush(model, numPlanes);
-		b->numPlanes = numPlanes;
-		src->ExpectTokenString("{");
-
-		for (i = 0; i < b->numPlanes; i++) {
-			src->Parse1DMatrix(3, normal.ToFloatPtr());
-			b->planes[i].SetNormal(normal);
-			b->planes[i].SetDist(src->ParseFloat());
-		}
-
-		src->ExpectTokenString("}");
-		src->Parse1DMatrix(3, b->bounds[0].ToFloatPtr());
-		src->Parse1DMatrix(3, b->bounds[1].ToFloatPtr());
-		src->ReadToken(&token);
-
-		if (token.type == TT_NUMBER) {
-			b->contents = token.GetIntValue();		// old .cm files use a single integer
-		} else {
-			b->contents = ContentsFromString(token);
-		}
-
-		b->checkcount = 0;
-		b->primitiveNum = 0;
-		// filter brush into tree
-		R_FilterBrushIntoTree(model, model->node, NULL, b);
-
-		// other unknown integer
-		src->ParseInt();
-	}
-}
-
-#endif
-

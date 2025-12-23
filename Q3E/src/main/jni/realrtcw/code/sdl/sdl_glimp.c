@@ -167,6 +167,8 @@ static void GLimp_DetectAvailableModes(void)
 	int numModes = 0;
 
 	SDL_DisplayMode windowMode;
+	int maxWidth = 0, maxHeight = 0;
+
 	int display = SDL_GetWindowDisplayIndex( SDL_window );
 	if( display < 0 )
 	{
@@ -215,6 +217,9 @@ static void GLimp_DetectAvailableModes(void)
 		if( j != numModes )
 			continue;
 
+		if ( maxWidth < mode.w ) maxWidth = mode.w;
+		if ( maxHeight < mode.h ) maxHeight = mode.h;
+
 		modes[ numModes ].w = mode.w;
 		modes[ numModes ].h = mode.h;
 		numModes++;
@@ -238,6 +243,8 @@ static void GLimp_DetectAvailableModes(void)
 		buf[ strlen( buf ) - 1 ] = 0;
 		ri.Printf( PRINT_ALL, "Available modes: '%s'\n", buf );
 		ri.Cvar_Set( "r_availableModes", buf );
+		ri.Cvar_SetValue( "r_maxResolutionWidth", (float)maxWidth );
+		ri.Cvar_SetValue( "r_maxResolutionHeight", (float)maxHeight );
 	}
 	SDL_free( modes );
 }
@@ -1200,6 +1207,8 @@ success:
 	GLimp_InitExtensions( fixedFunction );
 
 	ri.Cvar_Get( "r_availableModes", "", CVAR_ROM );
+	ri.Cvar_Get( "r_maxResolutionWidth", "", CVAR_ROM );
+	ri.Cvar_Get( "r_maxResolutionHeight", "", CVAR_ROM );
 
 	// This depends on SDL_INIT_VIDEO, hence having it here
 	ri.IN_Init( SDL_window );

@@ -55,14 +55,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <SDL_main.h>
 
-#ifdef _RAVEN //karin: win log file name
-#define GAME_NAME_ID "quake4"
-#elif defined(_HUMANHEAD)
-#define GAME_NAME_ID "prey"
-#else
-#define GAME_NAME_ID "doom3"
-#endif
-
 idCVar Win32Vars_t::win_outputDebugString( "win_outputDebugString", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_outputEditString( "win_outputEditString", "1", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_viewlog( "win_viewlog", "0", CVAR_SYSTEM | CVAR_INTEGER, "" );
@@ -124,6 +116,35 @@ PWGLSWAPLAYERBUFFERS		qwglSwapLayerBuffers;
 static bool hadError = false;
 static char errorText[4096];
 
+#ifdef _REDIRECT_OUTPUT
+static FILE *logFile = NULL;
+static void Sys_CloseRedirectLogFile(void)
+{
+    if(logFile)
+    {
+        fflush(logFile);
+        fclose(logFile);
+    }
+}
+static ID_INLINE void Sys_RedirectLog(int type, const char *msg)
+{
+    if(!logFile)
+    {
+        logFile = fopen("stdout.txt", "w");
+        atexit(Sys_CloseRedirectLogFile);
+    }
+#define SYS_WRITE_LOG_TAG(t, x) case t: fwrite(x, 1, sizeof(x), logFile); break;
+    switch(type)
+    {
+        SYS_WRITE_LOG_TAG(1, "[DEBUG]: ")
+        //SYS_WRITE_LOG_TAG(2, "[INFO ]: ")
+        SYS_WRITE_LOG_TAG(3, "[WARN ]: ")
+        SYS_WRITE_LOG_TAG(4, "[ERROR]: ")
+    }
+    fwrite(msg, 1, strlen(msg), logFile);
+    fflush(logFile);
+}
+#endif
 /*
 =============
 Sys_Error
@@ -144,6 +165,9 @@ void Sys_Error( const char *error, ... ) {
 
 		printf("%s", errorText);
 		OutputDebugString( errorText );
+#ifdef _REDIRECT_OUTPUT
+        Sys_RedirectLog(4, errorText);
+#endif
 
 		hadError = true;
 		return;
@@ -157,6 +181,9 @@ void Sys_Error( const char *error, ... ) {
 		// if we had an error in another thread, printf() and OutputDebugString() has already been called for this
 		printf( "%s", text );
 		OutputDebugString( text );
+#ifdef _REDIRECT_OUTPUT
+        Sys_RedirectLog(4, errorText);
+#endif
 	}
 
 	Conbuf_AppendText( text );
@@ -257,6 +284,9 @@ void Sys_Printf( const char *fmt, ... ) {
 			LeaveCriticalSection( &printfCritSect );
 		}
 	}
+#ifdef _REDIRECT_OUTPUT
+    Sys_RedirectLog(2, msg);
+#endif
 }
 
 /*
@@ -277,6 +307,9 @@ void Sys_DebugPrintf( const char *fmt, ... ) {
 	printf("%s", msg);
 
 	OutputDebugString( msg );
+#ifdef _REDIRECT_OUTPUT
+    Sys_RedirectLog(1, msg);
+#endif
 }
 
 /*
@@ -293,6 +326,9 @@ void Sys_DebugVPrintf( const char *fmt, va_list arg ) {
 	printf("%s", msg);
 
 	OutputDebugString( msg );
+#ifdef _REDIRECT_OUTPUT
+    Sys_RedirectLog(1, msg);
+#endif
 }
 
 /*
@@ -1340,4 +1376,60 @@ void Sys_Msleep(int msec)
 const char * Sys_DLLDefaultPath(void)
 {
 	return "./";
+}
+
+/*
+==============
+Sys_Rmdir
+==============
+*/
+void Sys_Rmdir( const char *path ) {
+    _rmdir (path);
+}
+
+/*
+==============
+Sys_Stat
+==============
+*/
+int Sys_Stat( const char *path ) {
+    struct _stat s;
+    if (_stat(path, &s) == 0) {
+        if (s.st_mode & _S_IFDIR) {
+            return FST_DIRECTORY;
+        } else if (s.st_mode & _S_IFREG) {
+            return FST_FILE;
+        } else {
+            return FST_OTHER;
+        }
+    }
+    return FST_NONE;
+}
+
+/*
+==============
+Sys_SetEnv
+==============
+*/
+int Sys_SetEnv(const char *name, const char *value, bool override)
+{
+    if(!override)
+    {
+        const char *old = getenv(name);
+        if(old && old[0])
+            return -1;
+    }
+    const char *str = va("%s=%s", name, value);
+    return _putenv(str);
+}
+
+/*
+==============
+Sys_UnsetEnv
+==============
+*/
+int Sys_UnsetEnv(const char *name)
+{
+    const char *str = va("%s=", name);
+    return _putenv(str);
 }

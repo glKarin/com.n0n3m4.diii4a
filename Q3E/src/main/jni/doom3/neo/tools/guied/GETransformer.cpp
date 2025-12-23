@@ -90,7 +90,7 @@ bool rvGETransformer::Create(HWND parent, bool visible)
 
 LRESULT CALLBACK rvGETransformer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	rvGETransformer *trans = (rvGETransformer *) GetWindowLong(hWnd, GWL_USERDATA);
+	rvGETransformer *trans = (rvGETransformer *) GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
 	switch (msg) {
 		case WM_NCACTIVATE:
@@ -113,7 +113,7 @@ LRESULT CALLBACK rvGETransformer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 			// Attach the class to the window first
 			cs = (LPCREATESTRUCT) lParam;
 			trans = (rvGETransformer *) cs->lpCreateParams;
-			SetWindowLong(hWnd, GWL_USERDATA, (LONG)trans);
+            SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)trans);
 
 			trans->mWnd = hWnd;
 			trans->mDlg = CreateDialogParam(gApp.GetInstance(), MAKEINTRESOURCE(IDD_GUIED_TRANSFORMER),
@@ -144,7 +144,7 @@ LRESULT CALLBACK rvGETransformer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 
 INT_PTR CALLBACK rvGETransformer::DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	rvGETransformer *trans = (rvGETransformer *) GetWindowLong(hWnd, GWL_USERDATA);
+	rvGETransformer *trans = (rvGETransformer *) GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
 	switch (msg) {
 		case WM_DESTROY:
@@ -159,7 +159,7 @@ INT_PTR CALLBACK rvGETransformer::DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 		case WM_INITDIALOG:
 			trans = (rvGETransformer *) lParam;
 			trans->mDlg = hWnd;
-			SetWindowLong(hWnd, GWL_USERDATA, lParam);
+            SetWindowLongPtr(hWnd, GWLP_USERDATA, lParam);
 			NumberEdit_Attach(GetDlgItem(hWnd, IDC_GUIED_ITEMRECTX));
 			NumberEdit_Attach(GetDlgItem(hWnd, IDC_GUIED_ITEMRECTY));
 			NumberEdit_Attach(GetDlgItem(hWnd, IDC_GUIED_ITEMRECTW));

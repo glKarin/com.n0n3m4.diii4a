@@ -31,8 +31,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef WIN32
 #include <windows.h>
+#if !defined(GL_ES_VERSION_2_0)
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #include "../../../sys/win32/win_local.h"
 #endif
 
@@ -985,23 +987,23 @@ static void RenderBumpTriangles(srfTriangles_t *lowMesh, renderBump_t *rb)
 
 	RB_SetGL2D();
 
-	glDisable(GL_CULL_FACE);
+	qglDisable(GL_CULL_FACE);
 
-	glColor3f(1, 1, 1);
+	qglColor3f(1, 1, 1);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, 1, 1, 0, -1, 1);
-	glDisable(GL_BLEND);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
+	qglOrtho(0, 1, 1, 0, -1, 1);
+	qglDisable(GL_BLEND);
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
 
-	glDisable(GL_DEPTH_TEST);
+	qglDisable(GL_DEPTH_TEST);
 
-	glClearColor(1,0,0,1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	qglClearColor(1,0,0,1);
+	qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glColor3f(1, 1, 1);
+	qglColor3f(1, 1, 1);
 
 	// create smoothed normals for the surface, which might be
 	// different than the normals at the vertexes if the
@@ -1037,13 +1039,13 @@ static void RenderBumpTriangles(srfTriangles_t *lowMesh, renderBump_t *rb)
 
 		RasterizeTriangle(lowMesh, lowMeshNormals, j/3, rb);
 
-		glClearColor(1,0,0,1);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glRasterPos2f(0, 1);
-		glPixelZoom(glConfig.vidWidth / (float)rb->width, glConfig.vidHeight / (float)rb->height);
-		glDrawPixels(rb->width, rb->height, GL_RGBA, GL_UNSIGNED_BYTE, rb->localPic);
-		glPixelZoom(1, 1);
-		glFlush();
+		qglClearColor(1,0,0,1);
+		qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		qglRasterPos2f(0, 1);
+		qglPixelZoom(glConfig.vidWidth / (float)rb->width, glConfig.vidHeight / (float)rb->height);
+		qglDrawPixels(rb->width, rb->height, GL_RGBA, GL_UNSIGNED_BYTE, rb->localPic);
+		qglPixelZoom(1, 1);
+		qglFlush();
 		GLimp_SwapBuffers();
 	}
 
@@ -1503,28 +1505,28 @@ void RenderBumpFlat_f(const idCmdArgs &args)
 	ResizeWindow(width, height);
 
 	// for small images, the viewport may be less than the minimum window
-	glViewport(0, 0, width, height);
+	qglViewport(0, 0, width, height);
 
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-	glDisable(GL_STENCIL_TEST);
-	glDisable(GL_SCISSOR_TEST);
-	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_TEXTURE_2D);
-	glDepthMask(GL_TRUE);
-	glDepthFunc(GL_LEQUAL);
+	qglEnable(GL_CULL_FACE);
+	qglCullFace(GL_FRONT);
+	qglDisable(GL_STENCIL_TEST);
+	qglDisable(GL_SCISSOR_TEST);
+	qglDisable(GL_ALPHA_TEST);
+	qglDisable(GL_BLEND);
+	qglEnable(GL_DEPTH_TEST);
+	glesDisable(GL_TEXTURE_2D);
+	qglDepthMask(GL_TRUE);
+	qglDepthFunc(GL_LEQUAL);
 
-	glColor3f(1, 1, 1);
+	qglColor3f(1, 1, 1);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(bounds[0][0], bounds[1][0], bounds[0][2],
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
+	qglOrtho(bounds[0][0], bounds[1][0], bounds[0][2],
 	         bounds[1][2], -(bounds[0][1] - 1), -(bounds[1][1] + 1));
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
 
 	// flat maps are automatically anti-aliased
 
@@ -1552,10 +1554,10 @@ void RenderBumpFlat_f(const idCmdArgs &args)
 		yOff = ((sample / 4) / 4.0) * (bounds[1][2] - bounds[0][2]) / height;
 
 		for (int colorPass = 0 ; colorPass < 2 ; colorPass++) {
-			glClearColor(0.5,0.5,0.5,0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			qglClearColor(0.5,0.5,0.5,0);
+			qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			glBegin(GL_TRIANGLES);
+			qglBegin(GL_TRIANGLES);
 
 			for (i = 0 ; i < highPolyModel->NumSurfaces() ; i++) {
 				const modelSurface_t *surf = highPolyModel->Surface(i);
@@ -1570,9 +1572,9 @@ void RenderBumpFlat_f(const idCmdArgs &args)
 							float	*a;
 
 							v = mesh->indexes[j+k];
-							glColor3ubv(mesh->verts[v].color);
+							qglColor3ubv(mesh->verts[v].color);
 							a = mesh->verts[v].xyz.ToFloatPtr();
-							glVertex3f(a[0] + xOff, a[2] + yOff, a[1]);
+							qglVertex3f(a[0] + xOff, a[2] + yOff, a[1]);
 						}
 					}
 				} else {
@@ -1598,14 +1600,14 @@ void RenderBumpFlat_f(const idCmdArgs &args)
 							// NULLNORMAL is used by the artists to force an area to reflect no
 							// light at all
 							if (surf->shader->GetSurfaceFlags() & SURF_NULLNORMAL) {
-								glColor3f(0.5, 0.5, 0.5);
+								qglColor3f(0.5, 0.5, 0.5);
 							} else {
-								glColor3f(0.5 + 0.5*plane[0], 0.5 - 0.5*plane[2], 0.5 - 0.5*plane[1]);
+								qglColor3f(0.5 + 0.5*plane[0], 0.5 - 0.5*plane[2], 0.5 - 0.5*plane[1]);
 							}
 
-							glVertex3f((*a)[0] + xOff, (*a)[2] + yOff, (*a)[1]);
-							glVertex3f((*b)[0] + xOff, (*b)[2] + yOff, (*b)[1]);
-							glVertex3f((*c)[0] + xOff, (*c)[2] + yOff, (*c)[1]);
+							qglVertex3f((*a)[0] + xOff, (*a)[2] + yOff, (*a)[1]);
+							qglVertex3f((*b)[0] + xOff, (*b)[2] + yOff, (*b)[1]);
+							qglVertex3f((*c)[0] + xOff, (*c)[2] + yOff, (*c)[1]);
 						} else {
 							for (k = 0 ; k < 3 ; k++) {
 								int		v;
@@ -1618,24 +1620,24 @@ void RenderBumpFlat_f(const idCmdArgs &args)
 								// NULLNORMAL is used by the artists to force an area to reflect no
 								// light at all
 								if (surf->shader->GetSurfaceFlags() & SURF_NULLNORMAL) {
-									glColor3f(0.5, 0.5, 0.5);
+									qglColor3f(0.5, 0.5, 0.5);
 								} else {
 									// we are going to flip the normal Z direction
-									glColor3f(0.5 + 0.5*n[0], 0.5 - 0.5*n[2], 0.5 - 0.5*n[1]);
+									qglColor3f(0.5 + 0.5*n[0], 0.5 - 0.5*n[2], 0.5 - 0.5*n[1]);
 								}
 
 								a = mesh->verts[v].xyz.ToFloatPtr();
-								glVertex3f(a[0] + xOff, a[2] + yOff, a[1]);
+								qglVertex3f(a[0] + xOff, a[2] + yOff, a[1]);
 							}
 						}
 					}
 				}
 			}
 
-			glEnd();
-			glFlush();
+			qglEnd();
+			qglFlush();
 			GLimp_SwapBuffers();
-			glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+			qglReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
             c = width * height;
 

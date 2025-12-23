@@ -44,17 +44,34 @@ GLint GL_GetUniformLocation(GLuint program, const char *name)
 }
 #endif
 
+#ifdef GL_ES_VERSION_3_0
+static idCVar harm_r_useGLSLShaderBinaryCache("harm_r_useGLSLShaderBinaryCache", "0", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, "Use/cache GLSL shader compiled binary(OpenGL ES2.0 not support)", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2>);
+#endif
+
+// change CVAR_INIT to CVAR_ARCHIVE
+#define _GLPROGS "glslprogs" // "gl2progs"
+static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", _GLPROGS, CVAR_RENDERER | CVAR_ARCHIVE, "Setup external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
+
+#ifdef GL_ES_VERSION_3_0
+#define _GL3PROGS "glsl3progs"
+static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", _GL3PROGS, CVAR_RENDERER | CVAR_ARCHIVE, "Setup external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
+
+#define _GLPROGSBIN "bin"
+#endif
+
 static bool glslInitialized = false;
 static bool reloadGLSLShaders = false;
 static bool shaderRequired = true;
-#define REQUIRE_SHADER shaderRequired = true;
-#define UNNECESSARY_SHADER shaderRequired = false;
+#define REQUIRE_SHADER() shaderRequired = true;
+#define UNNECESSARY_SHADER() shaderRequired = false;
 
 #ifdef _SHADOW_MAPPING
 extern bool r_useDepthTexture;
 extern bool r_useCubeDepthTexture;
 extern bool r_usePackColorAsDepth;
 #endif
+
+static idStr RB_GLSL_GetExternalShaderSourcePath(void);
 
 #ifdef _MULTITHREAD
 void RB_GLSL_HandleShaders(void)
@@ -85,7 +102,11 @@ static void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool del
 
 static bool RB_GLSL_LoadShaderProgramFromProp(const GLSLShaderProp *prop)
 {
-	const char *vs;
+    if (!glConfig.isInitialized) {
+        return false;
+    }
+
+    const char *vs;
 	const char *fs;
 	const char *macros;
 
@@ -326,7 +347,7 @@ void idGLSLShaderManager::ActuallyLoad(void)
 		return;
 
 	const bool B = shaderRequired;
-	UNNECESSARY_SHADER;
+	UNNECESSARY_SHADER();
 
 	while(
 			index < num
@@ -361,7 +382,7 @@ void idGLSLShaderManager::ActuallyLoad(void)
 		// create shader on heap
 		shaderProgram_t *shader = (shaderProgram_t *)malloc(sizeof(*shader));
 		memset(shader, 0, sizeof(*shader));
-		strncpy(shader->name, prop.name.c_str(), sizeof(shader->name));
+        idStr::Copynz(shader->name, prop.name.c_str(), sizeof(shader->name));
 		shader->type = SHADER_CUSTOM;
 		prop.program = shader;
 
@@ -418,14 +439,6 @@ idGLSLShaderManager idGLSLShaderManager::_shaderManager;
 
 idGLSLShaderManager *shaderManager = &idGLSLShaderManager::_shaderManager;
 
-#define _GLPROGS "glslprogs" // "gl2progs"
-static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_RENDERER | CVAR_INIT, "Setup external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
-
-#ifdef GL_ES_VERSION_3_0
-#define _GL3PROGS "glsl3progs"
-static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", "", CVAR_RENDERER | CVAR_INIT, "Setup external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
-#endif
-
 static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 {
 #include "glsl_shader.h"
@@ -456,6 +469,16 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 #endif
 	ret.Append(GLSL_SHADER_SOURCE("diffuseCubemap", SHADER_DIFFUSECUBEMAP, &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
 	// ret.Append(GLSL_SHADER_SOURCE("glasswarp", SHADER_GLASSWARP, &glasswarpShader, GLASSWARP_VERT, GLASSWARP_FRAG, "", ""));
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3 || glConfig.depthTextureAvailable)
+#else
+    if(glConfig.depthTextureAvailable)
+#endif
+    ret.Append(GLSL_SHADER_SOURCE("depthToColor", SHADER_DEPTH_TO_COLOR, &depthToColorShader, SIMPLE_VERTEX_TEXCOORD_VERT, DEPTH_TO_COLOR_FRAG, "", ""));
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3)
+    ret.Append(GLSL_SHADER_SOURCE("stencilToColor", SHADER_STENCIL_TO_COLOR, &stencilToColorShader, SIMPLE_VERTEX_TEXCOORD_VERT, STENCIL_TO_COLOR_FRAG, "", ""));
+#endif
 	ret.Append(GLSL_SHADER_SOURCE("texgen", SHADER_TEXGEN, &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "", ""));
 
     // newStage
@@ -535,146 +558,8 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 #endif
 }
 
-static int RB_GLSL_ParseMacros(const char *macros, idStrList &ret)
-{
-	if(!macros || !macros[0])
-		return 0;
+#include "draw_glsl_shadersource.cpp"
 
-	int start = 0;
-	int index;
-	int counter = 0;
-	idStr str(macros);
-	str.Strip(',');
-	while((index = str.Find(',', start)) != -1)
-	{
-		if(index - start > 0)
-		{
-			idStr s = str.Mid(start, index - start);
-			ret.AddUnique(s);
-			counter++;
-		}
-		start = index + 1;
-		if(index == str.Length() - 1)
-			break;
-	}
-	if(start <= str.Length() - 1)
-	{
-		idStr s = str.Mid(start, str.Length() - start);
-		ret.AddUnique(s);
-		counter++;
-	}
-
-	return counter;
-}
-
-static int RB_GLSL_FindNextLinePositionOfVersion(const idStr &res)
-{
-	int index = res.Find("#version");
-	if(index == -1)
-		SHADER_ERROR("GLSL shader source can not find '#version'\n.");
-	index = res.Find('\n', index);
-	if(index == -1 || index + 1 == res.Length())
-		SHADER_ERROR("GLSL shader source '#version' not completed\n.");
-	return index + 1;
-}
-
-static idStr RB_GLSL_GetGLSLSourceVersion(const idStr &res)
-{
-    int start = res.Find("#version");
-    if(start == -1)
-    SHADER_ERROR("GLSL shader source can not find '#version'\n.");
-    start += strlen("#version");
-    int end = res.Find('\n', start);
-    if(end == -1)
-    SHADER_ERROR("GLSL shader source '#version' not completed\n.");
-    idStr str = res.Mid(start, end - start);
-    str.StripTrailingWhitespace();
-    str.StripLeading(' ');
-	//common->Printf("GLSL source version: %s\n", str.c_str());
-    return str;
-}
-
-static void RB_GLSL_InsertGlobalDefines(idStr &res, const char *text)
-{
-	int index = RB_GLSL_FindNextLinePositionOfVersion(res);
-	idStr str("\n");
-	str.Append(text);
-	str.Append("\n");
-
-	res.Insert(str, index);
-}
-
-static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros, int highp = 0)
-{
-    idStr res(source);
-
-    if(highp > 0)
-    {
-        res.Replace("precision mediump float;", "precision highp float;");
-        res.Replace("precision lowp float;", "precision highp float;");
-        idStr samplerPrecision = "precision highp sampler2D;\n"
-                                 "precision highp samplerCube;\n";
-        if(USING_GLES3)
-        {
-            idStr ver = RB_GLSL_GetGLSLSourceVersion(res);
-            if(ver.Cmp("120") > 0)
-            {
-                samplerPrecision.Append("precision highp sampler2DArrayShadow;\n"
-                                        "precision highp sampler2DArray;\n"
-                );
-            }
-        }
-		RB_GLSL_InsertGlobalDefines(res, samplerPrecision.c_str());
-
-		if(highp > 1)
-		{
-			res.Replace("mediump ", "highp ");
-			res.Replace("lowp ", "highp ");
-		}
-    }
-
-	if(!macros || !macros[0])
-	{
-		// printf("|%s|\n", res.c_str());
-		return res;
-	}
-
-	idStrList list;
-	int n = RB_GLSL_ParseMacros(macros, list);
-	if(0 == n)
-		return res;
-
-	idStr m;
-	for(int i = 0; i < list.Num(); i++)
-	{
-		m.Append("#define " + list[i] + "\n");
-	}
-
-	RB_GLSL_InsertGlobalDefines(res, m);
-
-	// printf("%d|%s|\n%s\n", n, macros, res.c_str());
-	return res;
-}
-
-static idStr RB_GLSL_GetExternalShaderSourcePath(void)
-{
-	idStr	fullPath;
-#ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
-	{
-		fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramES3Dir");
-		if(fullPath.IsEmpty())
-			fullPath = _GL3PROGS;
-	}
-	else
-#endif
-	{
-		fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramDir");
-		if(fullPath.IsEmpty())
-			fullPath = _GLPROGS;
-	}
-	return fullPath;
-}
 /*
 =================
 RB_GLSL_LoadShader
@@ -682,47 +567,12 @@ RB_GLSL_LoadShader
 loads GLSL vertex or fragment shaders
 =================
 */
-static void RB_GLSL_LoadShader(const char *name, shaderProgram_t *shaderProgram, GLenum type)
+static void RB_GLSL_LoadShader(const char *buffer, shaderProgram_t *shaderProgram, GLenum type, const char *fullPath)
 {
-	idStr	fullPath;
-#ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
-	{
-		fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramES3Dir");
-		if(fullPath.IsEmpty())
-			fullPath = _GL3PROGS;
-	}
-	else
-#endif
-	{
-		fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramDir");
-		if(fullPath.IsEmpty())
-			fullPath = _GLPROGS;
-	}
-
-	fullPath.AppendPath(name);
-
-	char	*fileBuffer;
-	char	*buffer;
-
-	if (!glConfig.isInitialized) {
+	if (!buffer) {
 		return;
 	}
 
-	// load the program even if we don't support it, so
-	// fs_copyfiles can generate cross-platform data dumps
-	fileSystem->ReadFile(fullPath.c_str(), (void **)&fileBuffer, NULL);
-
-	common->Printf("Load GLSL shader file: %s -> %s\n", fullPath.c_str(), fileBuffer ? "success" : "fail");
-
-	if (!fileBuffer) {
-		return;
-	}
-
-	// copy to stack memory and free
-	buffer = (char *)_alloca(strlen(fileBuffer) + 1);
-	strcpy(buffer, fileBuffer);
-	fileSystem->FreeFile(fileBuffer);
 	GLuint shader = 0;
 
 	switch (type) {
@@ -749,7 +599,7 @@ static void RB_GLSL_LoadShader(const char *name, shaderProgram_t *shaderProgram,
 	qglGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 	if(!status)
 	{
-		RB_GLSL_PrintShaderSource(fullPath.c_str(), buffer);
+		RB_GLSL_PrintShaderSource(fullPath, buffer);
 		GLchar log[LOG_LEN];
 		qglGetShaderInfoLog(shader, sizeof(GLchar) * LOG_LEN, NULL, log);
 		common->Warning("%s::glCompileShader(%s) -> \n%s", __func__, type == GL_VERTEX_SHADER ? "GL_VERTEX_SHADER" : "GL_FRAGMENT_SHADER", log);
@@ -951,8 +801,25 @@ static const GLSLShaderProp * RB_GLSL_FindShaderProp(const idList<GLSLShaderProp
 		if(prop.type == type)
 			return &prop;
 	}
+	
+    if(type == SHADER_DEPTH_TO_COLOR)
+    {
+#ifdef GL_ES_VERSION_3_0
+        if(USING_GLES3 || glConfig.depthTextureAvailable)
+#else
+        if(glConfig.depthTextureAvailable)
+#endif
+            common->Error("Shader prop '%d' not found!\n", type);
+    }
+#ifdef GL_ES_VERSION_3_0
+    else if(type == SHADER_STENCIL_TO_COLOR)
+    {
+        if(USING_GLES3)
+            common->Error("Shader prop '%d' not found!\n", type);
+    }
+#endif
 #ifdef _SHADOW_MAPPING
-    if(type == SHADER_DEPTH_COLOR || type == SHADER_DEPTH_PERFORATED_COLOR)
+    else if(type == SHADER_DEPTH_COLOR || type == SHADER_DEPTH_PERFORATED_COLOR)
     {
 #ifdef GL_ES_VERSION_3_0
         if(!USING_GLES3 && (!r_useDepthTexture || !r_useCubeDepthTexture))
@@ -961,19 +828,22 @@ static const GLSLShaderProp * RB_GLSL_FindShaderProp(const idList<GLSLShaderProp
 #endif
             common->Error("Shader prop '%d' not found!\n", type);
     }
-    else
 #endif
+    else
     common->Error("Shader prop '%d' not found!\n", type);
 	return NULL;
 }
 
 static bool RB_GLSL_InitShaders(void)
 {
+    int startMs = Sys_Milliseconds();
+    common->Printf("----- Compiling GLSL shaders -----\n");
+
 	idList<GLSLShaderProp> Props;
 	RB_GLSL_GetShaderSources(Props);
 
 	// base shader
-	REQUIRE_SHADER;
+	REQUIRE_SHADER();
 	for(int i = SHADER_BASE_BEGIN; i <= SHADER_BASE_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -985,7 +855,7 @@ static bool RB_GLSL_InitShaders(void)
 	}
 
 	// newStage shader
-	UNNECESSARY_SHADER;
+	UNNECESSARY_SHADER();
 	for(int i = SHADER_NEW_STAGE_BEGIN; i <= SHADER_NEW_STAGE_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -998,10 +868,10 @@ static bool RB_GLSL_InitShaders(void)
 		}
 		shaderManager->Add(prop->program);
 	}
-	REQUIRE_SHADER;
+	REQUIRE_SHADER();
 
 #ifdef _SHADOW_MAPPING
-	UNNECESSARY_SHADER;
+	UNNECESSARY_SHADER();
 	for(int i = SHADER_SHADOW_MAPPING_BEGIN; i <= SHADER_SHADOW_MAPPING_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -1019,11 +889,11 @@ static bool RB_GLSL_InitShaders(void)
 		}
 		shaderManager->Add(prop->program);
 	}
-	REQUIRE_SHADER;
+	REQUIRE_SHADER();
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE
-	UNNECESSARY_SHADER;
+	UNNECESSARY_SHADER();
 	for(int i = SHADER_STENCIL_SHADOW_BEGIN; i <= SHADER_STENCIL_SHADOW_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -1046,11 +916,11 @@ static bool RB_GLSL_InitShaders(void)
 		}
 		shaderManager->Add(prop->program);
 	}
-	REQUIRE_SHADER;
+	REQUIRE_SHADER();
 #endif
 
 #ifdef _POSTPROCESS
-    UNNECESSARY_SHADER;
+    UNNECESSARY_SHADER();
     for(int i = SHADER_POSTPROCESS_BEGIN; i <= SHADER_POSTPROCESS_END; i++)
     {
         const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -1068,8 +938,26 @@ static bool RB_GLSL_InitShaders(void)
         }
         shaderManager->Add(prop->program);
     }
-    REQUIRE_SHADER;
+    REQUIRE_SHADER();
 #endif
+
+    UNNECESSARY_SHADER();
+    for(int i = SHADER_DEBUG_BEGIN; i <= SHADER_DEBUG_END; i++)
+    {
+        const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
+        if(!prop)
+            continue;
+        if(!RB_GLSL_LoadShaderProgramFromProp(prop))
+        {
+            common->Printf("Not support debug in GLSL shader!\n");
+            break;
+        }
+        shaderManager->Add(prop->program);
+    }
+    REQUIRE_SHADER();
+
+    int endMs = Sys_Milliseconds();
+    common->Printf("----- Compile GLSL shaders finish(%d ms) -----\n", endMs - startMs);
 
 	return true;
 }
@@ -1147,7 +1035,10 @@ void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProg
 		qglDeleteShader(shaderProgram->fragmentShader);
 	}
 
+    // keep name
+    idStr name = shaderProgram->name;
 	memset(shaderProgram, 0, sizeof(shaderProgram_t));
+    idStr::Copynz(shaderProgram->name, name.c_str(), sizeof(shaderProgram->name));
 
 	if(!deleteProgram)
 	    shaderProgram->program = program;
@@ -1231,7 +1122,7 @@ static GLuint RB_GLSL_CreateProgram(GLuint &program, GLuint vertShader, GLuint f
 	return program;
 }
 
-bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag , const char *name, int type)
+bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag, const char *name, int type)
 {
 #ifdef _DEBUG_VERT_SHADER_SOURCE
 	{
@@ -1267,11 +1158,13 @@ bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *ver
 	}
 
 	RB_GLSL_GetUniformLocations(shaderProgram);
-	strncpy(shaderProgram->name, name, sizeof(shaderProgram->name));
+    idStr::Copynz(shaderProgram->name, name, sizeof(shaderProgram->name));
     shaderProgram->type = type;
 
 	return true;
 }
+
+#include "draw_glsl_shaderbinary.cpp"
 
 int RB_GLSL_LoadShaderProgram(
 		const char *name,
@@ -1284,280 +1177,128 @@ int RB_GLSL_LoadShaderProgram(
 		const char *macros
 		)
 {
+    enum {
+        GLSL_LOAD_EXTERNAL_SOURCE = 1,
+        GLSL_LOAD_BUILT_IN_SOURCE = 2,
+        GLSL_LOAD_EXTERNAL_BINARY = 3,
+        GLSL_LOAD_BUILT_IN_BINARY = 4,
+    };
 	// memset(program, 0, sizeof(shaderProgram_t));
 
-	common->Printf("Load GLSL shader program: %s\n", name);
-
-	common->Printf("1. Load external shader source: Vertex(%s), Fragment(%s)\n", vertex_shader_source_file, fragment_shader_source_file);
-	RB_GLSL_LoadShader(vertex_shader_source_file, program, GL_VERTEX_SHADER);
-	RB_GLSL_LoadShader(fragment_shader_source_file, program, GL_FRAGMENT_SHADER);
-
-	if (!RB_GLSL_LinkShader(program, true)/* && !RB_GLSL_ValidateProgram(program)*/) {
-		common->Printf("2. Load built-in shader source\n");
-		if(harm_r_useHighPrecision.GetBool())
-			common->Printf("'%s' use high precision float\n", name);
-		idStr vs = RB_GLSL_ExpandMacros(default_vertex_shader_source, macros, harm_r_useHighPrecision.GetInteger());
-		idStr fs = RB_GLSL_ExpandMacros(default_fragment_shader_source, macros, harm_r_useHighPrecision.GetInteger());
-		if(!RB_GLSL_CreateShaderProgram(program, vs.c_str(), fs.c_str(), name, type))
-		{
-			SHADER_ERROR("Load built-in shader program fail!\n");
-			return -1;
-		}
-		else
-		{
-			common->Printf("Load built-in shader program success!\n\n");
-			return 2;
-		}
-	} else {
-		RB_GLSL_ValidateProgram(program);
-		RB_GLSL_GetUniformLocations(program);
-		common->Printf("Load external shader program success!\n\n");
-		strncpy(program->name, name, sizeof(program->name));
-        program->type = type;
-		return 1;
-	}
-}
-
-void R_ExportGLSLShaderSource_f(const idCmdArgs &args)
-{
-	const char *vs;
-	const char *fs;
-	const char *macros;
-	idList<GLSLShaderProp> Props;
-	idStr path = NULL;
-	idStrList target;
-
-	RB_GLSL_GetShaderSources(Props);
-	if(args.Argc() > 1)
-		path = args.Argv(args.Argc() - 1);
-
-	for(int i = 1; i < args.Argc() - 1; i++)
-	{
-		target.Append(args.Argv(i));
-	}
-
-	if(path.IsEmpty())
-		path = RB_GLSL_GetExternalShaderSourcePath();
-
-	if(!path.IsEmpty() && path[path.Length() - 1] != '/')
-		path += "/";
-
-	common->Printf("Save GLSL shader source to '%s'\n", path.c_str());
-
-	for(int i = 0; i < Props.Num(); i++)
-	{
-		const GLSLShaderProp &prop = Props[i];
-		if(target.Num() > 0 && target.FindIndex(prop.name) < 0)
-			continue;
-
-		vs = prop.default_vertex_shader_source.c_str();
-		fs = prop.default_fragment_shader_source.c_str();
-		macros = prop.macros.c_str();
-
-		idStr vsSrc = RB_GLSL_ExpandMacros(vs, macros, harm_r_useHighPrecision.GetInteger());
-		idStr p(path);
-		p.Append(prop.vertex_shader_source_file);
-		fileSystem->WriteFile(p.c_str(), vsSrc.c_str(), vsSrc.Length(), "fs_basepath");
-		common->Printf("GLSL vertex shader: '%s'\n", p.c_str());
-
-		idStr fsSrc = RB_GLSL_ExpandMacros(fs, macros, harm_r_useHighPrecision.GetInteger());
-		p = path;
-		p.Append(prop.fragment_shader_source_file);
-		fileSystem->WriteFile(p.c_str(), fsSrc.c_str(), fsSrc.Length(), "fs_basepath");
-		common->Printf("GLSL fragment shader: '%s'\n", p.c_str());
-	}
-}
-
-static void R_PrintGLSLShaderSource(const idStr &source)
-{
-    int i = 0;
-    while(i < source.Length())
+	common->Printf("\nLoad GLSL shader program: %s -> %d\n", name, type);
+    int step = 1;
+#ifdef GL_ES_VERSION_3_0
+    if(harm_r_useGLSLShaderBinaryCache.GetInteger() == 2)
     {
-        idStr str = source.Mid(i, 1024);
-	    common->Printf("%s", str.c_str());
-	    i += str.Length();
-	}
-}
+        common->Printf(" %d. Load external shader binary:\n", step);
+        if(RB_GLSL_LoadShaderBinaryCacheUncheck(program, name, type, true))
+        {
+            common->Printf("    Load external shader binary success!\n");
+            return GLSL_LOAD_EXTERNAL_BINARY;
+        }
+        step++;
 
-void R_PrintGLSLShaderSource_f(const idCmdArgs &args)
-{
-	const char *vs;
-	const char *fs;
-	const char *macros;
-	idList<GLSLShaderProp> Props;
-	idStrList target;
+        common->Printf(" %d. Load built-in shader binary:\n", step);
+        if(RB_GLSL_LoadShaderBinaryCacheUncheck(program, name, type, false))
+        {
+            common->Printf("    Load built-in shader binary success!\n");
+            return GLSL_LOAD_BUILT_IN_BINARY;
+        }
+        step++;
+    }
+#endif
 
-	RB_GLSL_GetShaderSources(Props);
+	common->Printf(" %d. Load external shader source: Vertex(%s), Fragment(%s)\n", step, vertex_shader_source_file, fragment_shader_source_file);
 
-	for(int i = 1; i < args.Argc(); i++)
-	{
-		target.Append(args.Argv(i));
-	}
+    // Load external GLSL shader source
+    idStr vertexShaderStr;
+    idStr vertexFullPath = vertex_shader_source_file;
+    int vertexFileBuffer = RB_GLSL_ReadExternalShaderSource(vertexFullPath, vertexShaderStr);
+    common->Printf("    Load GLSL shader file: %s -> %s\n", vertexFullPath.c_str(), vertexFileBuffer ? "success" : "fail");
+    idStr fragmentShaderStr;
+    idStr fragmentFullPath = fragment_shader_source_file;
+    int fragmentFileBuffer = RB_GLSL_ReadExternalShaderSource(fragmentFullPath, fragmentShaderStr);
+    common->Printf("    Load GLSL shader file: %s -> %s\n", fragmentFullPath.c_str(), fragmentFileBuffer ? "success" : "fail");
 
-	for(int i = 0; i < Props.Num(); i++)
-	{
-		const GLSLShaderProp &prop = Props[i];
-		if(target.Num() > 0 && target.FindIndex(prop.name) < 0)
-			continue;
+    if(vertexFileBuffer && fragmentFileBuffer)
+    {
+#ifdef GL_ES_VERSION_3_0
+        // Create external GLSL shader with binary
+        if(USING_GLES3 && harm_r_useGLSLShaderBinaryCache.GetBool())
+        {
+            common->Printf("    Load and check external shader binary: Vertex(%s), Fragment(%s)\n", vertex_shader_source_file, fragment_shader_source_file);
+            if(RB_GLSL_LoadShaderBinaryCache(program, name, vertexShaderStr, fragmentShaderStr, type, true))
+            {
+                common->Printf("    Load and check external shader binary success!\n");
+                return GLSL_LOAD_EXTERNAL_BINARY;
+            }
+        }
+#endif
+        // Create external GLSL shader with source
+        RB_GLSL_LoadShader(vertexShaderStr.c_str(), program, GL_VERTEX_SHADER, vertexFullPath.c_str());
+        RB_GLSL_LoadShader(fragmentShaderStr.c_str(), program, GL_FRAGMENT_SHADER, fragmentFullPath.c_str());
 
-		vs = prop.default_vertex_shader_source.c_str();
-		fs = prop.default_fragment_shader_source.c_str();
-		macros = prop.macros.c_str();
-		common->Printf("GLSL shader: %s\n\n", prop.name.c_str());
+        if (RB_GLSL_LinkShader(program, true)/* && RB_GLSL_ValidateProgram(program)*/) {
+            RB_GLSL_ValidateProgram(program);
+            RB_GLSL_GetUniformLocations(program);
+            common->Printf("    Load external shader program success!\n");
+            idStr::Copynz(program->name, name, sizeof(program->name));
+            program->type = type;
 
-		idStr vsSrc = RB_GLSL_ExpandMacros(vs, macros, harm_r_useHighPrecision.GetInteger());
-		common->Printf("  Vertex shader: \n");
-		R_PrintGLSLShaderSource(vsSrc);
-		common->Printf("\n");
+#ifdef GL_ES_VERSION_3_0
+            // Cache external GLSL shader binary
+            if(USING_GLES3 && harm_r_useGLSLShaderBinaryCache.GetBool())
+            {
+                RB_GLSL_CacheShaderBinary(program->program, name, vertexShaderStr, fragmentShaderStr, type, true);
+            }
+#endif
+            return GLSL_LOAD_EXTERNAL_SOURCE;
+        }
+    }
 
-		idStr fsSrc = RB_GLSL_ExpandMacros(fs, macros, harm_r_useHighPrecision.GetInteger());
-		common->Printf("  Fragment shader: \n");
-		R_PrintGLSLShaderSource(fsSrc);
-		common->Printf("\n");
-	}
-}
+    step++;
+    // Load built-in GLSL shader source
+    common->Printf(" %d. Load built-in shader source\n", step);
+    if(harm_r_useHighPrecision.GetBool())
+        common->Printf("    '%s' use high precision float\n", name);
+    idStr vs;
+    RB_GLSL_ExpandMacros(vs, default_vertex_shader_source, macros, harm_r_useHighPrecision.GetInteger());
+    idStr fs;
+    RB_GLSL_ExpandMacros(fs, default_fragment_shader_source, macros, harm_r_useHighPrecision.GetInteger());
 
-// Convert OpenGL2.0(GLSL 120) shader to GLES2.0(GLSL 100es) or GLES3.x(GLSL 3xx es) for Quake 4 GLSL progs
-/**
- * Vertex shader
- * ES2.0
- * 	+ #version 100
- * 	+ precision mediump float;
- * 	+ attribute highp vec4 attr_Vertex;
- * 	+ attribute highp vec4 attr_TexCoord;
- * 	+ attribute lowp vec4 attr_Color;
- * 	+ attribute vec3 attr_Normal;
- * 	+ uniform vec4 u_glColor;
- * 	+ uniform mat4 u_modelViewProjectionMatrix;
- * 	ftransform() -> u_modelViewProjectionMatrix * attr_Vertex
- * 	gl_Vertex -> attr_Vertex
- * 	gl_MultiTexCoord0 -> attr_TexCoord
- * 	gl_Color -> u_glColor // * (attr_Color / 255.0)
- * 	gl_Normal -> attr_Normal
- *
- * ES3.0
- * 	+ #version <version> es
- * 	+ precision mediump float;
- * 	+ in highp vec4 attr_Vertex;
- * 	+ in highp vec4 attr_TexCoord;
- * 	+ in lowp vec4 attr_Color;
- * 	+ in vec3 attr_Normal;
- * 	+ uniform vec4 u_glColor;
- * 	+ uniform mat4 u_modelViewProjectionMatrix;
- *	attribute -> in
- *	varying -> out
- * 	ftransform() -> u_modelViewProjectionMatrix * attr_Vertex
- * 	gl_Vertex -> attr_Vertex
- * 	gl_MultiTexCoord0 -> attr_TexCoord
- * 	gl_Color -> u_glColor // * (attr_Color / 255.0)
- * 	gl_Normal -> attr_Normal
- */
-idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
-{
-	idStr source = text;
+#ifdef GL_ES_VERSION_3_0
+    // Create built-in GLSL shader with binary
+    if(USING_GLES3 && harm_r_useGLSLShaderBinaryCache.GetBool())
+    {
+        common->Printf("    Load and check built-in shader binary\n");
+        if(RB_GLSL_LoadShaderBinaryCache(program, name, vs, fs, type, false))
+        {
+            common->Printf("    Load and check built-in shader binary success!\n");
+            return GLSL_LOAD_BUILT_IN_BINARY;
+        }
+    }
+#endif
 
-	idStr ver;
-	idStr attribute;
-	if(version == 100)
-	{
-		ver = "100";
-		attribute = "attribute";
-	}
-	else
-	{
-		ver += version;
-		ver += " es";
-		attribute = "in";
-		source.Replace("varying", "out");
-	}
+    // Create built-in GLSL shader with source
+    if(RB_GLSL_CreateShaderProgram(program, vs.c_str(), fs.c_str(), name, type))
+    {
+        common->Printf("    Load built-in shader program success!\n");
 
-	source.Replace("ftransform()", "u_modelViewProjectionMatrix * attr_Vertex");
-	source.Replace("gl_Vertex", "attr_Vertex");
-	source.Replace("gl_MultiTexCoord0", "attr_TexCoord");
-	//source.Replace("gl_Color", "(attr_Color / 255.0)");
-    //source.Replace("gl_Color", "(u_glColor * attr_Color / 255.0)");
-    source.Replace("gl_Color", "u_glColor");
-	source.Replace("gl_Normal", "attr_Normal");
+#ifdef GL_ES_VERSION_3_0
+        // Cache external GLSL shader binary
+        if(USING_GLES3 && harm_r_useGLSLShaderBinaryCache.GetBool())
+        {
+            RB_GLSL_CacheShaderBinary(program->program, name, vs, fs, type, false);
+        }
+#endif
 
-	idStr ret;
-	ret += "#version ";
-	ret += ver;
-	ret += "\n";
-	ret += "//#pragma optimize(off)\n";
-	ret += "\n";
-	ret += "precision highp float;\n";
-	ret += "\n";
-
-	ret += attribute + " highp vec4 attr_Vertex;\n";
-	ret += attribute + " highp vec4 attr_TexCoord;\n";
-	ret += attribute + " lowp vec4 attr_Color;\n";
-	ret += attribute + " vec3 attr_Normal;\n";
-	ret += "\n";
-
-    ret += "uniform lowp vec4 u_glColor;\n";
-	ret += "uniform highp mat4 u_modelViewProjectionMatrix;\n";
-	ret += "\n";
-
-	ret += source;
-
-	return ret;
-}
-
-/**
- * Fragment shader
- * ES2.0
- * 	+ #version 100
- * 	+ precision mediump float;
- *
- * ES3.0
- * 	+ #version <version> es
- * 	+ precision mediump float;
- *	varying -> in
- * 	+ out vec4 _gl_FragColor;
- * 	gl_FragColor -> _gl_FragColor
- * 	texture2D -> texture
- * 	textureCube -> texture
- * 	texture2DProj -> textureProj
- * 	textureCubeProj -> textureProj
- */
-idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version)
-{
-	idStr source = text;
-
-	idStr ver;
-	idStr out;
-	if(version == 100)
-	{
-		ver = "100";
-	}
-	else
-	{
-		ver += version;
-		ver += " es";
-		source.Replace("varying", "in");
-		out = "out vec4 _gl_FragColor;\n";
-		source.Replace("gl_FragColor", "_gl_FragColor");
-		source.Replace("texture2D", "texture");
-		source.Replace("texture2DProj", "textureProj");
-		source.Replace("textureCube", "texture");
-		source.Replace("textureCubeProj", "textureProj");
-	}
-
-
-	idStr ret;
-	ret += "#version ";
-	ret += ver;
-	ret += "\n";
-	ret += "//#pragma optimize(off)\n";
-	ret += "\n";
-	ret += "precision highp float;\n";
-	ret += "\n";
-
-	ret += out;
-
-	ret += source;
-
-	return ret;
+        return GLSL_LOAD_BUILT_IN_SOURCE;
+    }
+    else
+    {
+        SHADER_ERROR("    Load built-in shader program fail!\n");
+        return -1;
+    }
 }
 
 void idGLSLShaderManager::ReloadShaders(void)
@@ -1567,6 +1308,9 @@ void idGLSLShaderManager::ReloadShaders(void)
 	shaderProgram_t *originShader = backEnd.glState.currentProgram;
 	GL_UseProgram(NULL);
 
+    int startMs = Sys_Milliseconds();
+    common->Printf("----- Compiling GLSL shaders -----\n");
+
     for(int i = 0; i < shaders.Num(); i++)
     {
         shaderProgram_t *shader = shaders[i];
@@ -1575,11 +1319,11 @@ void idGLSLShaderManager::ReloadShaders(void)
         int type = shader->type;
         if(type >= SHADER_BASE_BEGIN && type <= SHADER_BASE_END)
         {
-            REQUIRE_SHADER;
+            REQUIRE_SHADER();
         }
         else
         {
-	        UNNECESSARY_SHADER;
+	        UNNECESSARY_SHADER();
         }
         RB_GLSL_DeleteShaderProgram(shader, false);
 	    if(type < SHADER_CUSTOM)
@@ -1612,243 +1356,20 @@ void idGLSLShaderManager::ReloadShaders(void)
         }
     }
 
+    int endMs = Sys_Milliseconds();
+    common->Printf("----- Compile GLSL shaders finish(%d ms) -----\n", endMs - startMs);
+
 	GL_UseProgram(originShader);
 }
-
-void RB_GLSL_PrintShaderSource(const char *filename, const char *source)
-{
-	idStr str(source);
-	int line = 1;
-	int index;
-	int start = 0;
-
-	common->Printf("---------- GLSL shader: %s ----------\n", filename ? filename : "<implicit file>");
-	while((index = str.Find('\n', start)) != -1)
-	{
-		idStr sub = str.Mid(start, index - start);
-		common->Printf("%4d: %s\n", line, sub.c_str());
-		start = index + 1;
-		line++;
-	}
-    if(start < str.Length() - 1)
-	{
-		idStr sub = str.Right(str.Length() - start);
-		common->Printf("%4d: %s\n", line, sub.c_str());
-	}
-	common->Printf("--------------------------------------------------\n");
-}
-
-static void RB_GLSL_ExportDevGLSLShaderSource(const char *source, const char *name, const char *dir)
-{
-	idStr path = dir;
-
-	if(!path.IsEmpty() && path[path.Length() - 1] != '/')
-		path += "/";
-
-	common->Printf("Save base GLSL shader source '%s' to '%s'\n", name, path.c_str());
-
-
-	idStr p(path);
-	p.Append(name);
-	fileSystem->WriteFile(p.c_str(), source, strlen(source), "fs_basepath");
-}
-
-void R_ExportDevShaderSource_f(const idCmdArgs &args)
-{
-#undef _KARIN_GLSL_SHADER_H
-#include "glsl_shader.h"
-
-#ifdef GL_ES_VERSION_3_0
-#define EXPORT_SHADER_SOURCE(source, name, type) \
-	{ \
-	if(gl2) \
-		RB_GLSL_ExportDevGLSLShaderSource(source, name "." type, SHADER_ES_PATH); \
-	else \
-		RB_GLSL_ExportDevGLSLShaderSource(ES3_##source, name "." type, SHADER_ES_PATH); \
-	}
-#else
-#define EXPORT_SHADER_SOURCE(source, name, type) RB_GLSL_ExportBaseGLSLShaderSource(source, name "." type, SHADER_ES_PATH);
-#endif
-#define EXPORT_SHADER_PAIR_SOURCE(source, name) \
-            EXPORT_SHADER_SOURCE(source##_VERT, name, "vert") \
-            EXPORT_SHADER_SOURCE(source##_FRAG, name, "frag")
-
-#define EXPORT_BASE_SHADER() \
-	EXPORT_SHADER_PAIR_SOURCE(INTERACTION, "interaction"); \
-	EXPORT_SHADER_PAIR_SOURCE(SHADOW, "shadow"); \
-	EXPORT_SHADER_PAIR_SOURCE(DEFAULT, "default"); \
-	EXPORT_SHADER_PAIR_SOURCE(ZFILL, "zfill"); \
-	EXPORT_SHADER_PAIR_SOURCE(ZFILLCLIP, "zfillClip"); \
-	EXPORT_SHADER_PAIR_SOURCE(CUBEMAP, "cubemap"); \
-	EXPORT_SHADER_PAIR_SOURCE(ENVIRONMENT, "environment"); \
-	EXPORT_SHADER_PAIR_SOURCE(BUMPY_ENVIRONMENT, "bumpyEnvironment"); \
-	EXPORT_SHADER_PAIR_SOURCE(FOG, "fog"); \
-	EXPORT_SHADER_SOURCE(BLENDLIGHT_VERT, "blendLight", "vert"); \
-	EXPORT_SHADER_SOURCE(DIFFUSE_CUBEMAP_VERT, "diffuseCubemap", "vert"); \
-	EXPORT_SHADER_PAIR_SOURCE(TEXGEN, "texgen"); \
-	EXPORT_SHADER_PAIR_SOURCE(HEATHAZE, "heatHaze"); \
-	EXPORT_SHADER_PAIR_SOURCE(HEATHAZEWITHMASK, "heatHazeWithMask"); \
-	EXPORT_SHADER_PAIR_SOURCE(HEATHAZEWITHMASKANDVERTEX, "heatHazeWithMaskAndVertex"); \
-	EXPORT_SHADER_PAIR_SOURCE(COLORPROCESS, "colorProcess"); \
-    EXPORT_SHADER_PAIR_SOURCE(MEGATEXTURE, "megaTexture");
-
-#define EXPORT_D3XP_SHADER() \
-    EXPORT_SHADER_PAIR_SOURCE(ENVIROSUIT, "enviroSuit");
-
-#ifdef _HUMANHEAD
-#define EXPORT_PREY_SHADER() \
-    EXPORT_SHADER_PAIR_SOURCE(SCREENEFFECT, "screeneffect"); \
-    EXPORT_SHADER_PAIR_SOURCE(RADIALBLUR, "radialblur"); \
-    EXPORT_SHADER_PAIR_SOURCE(LIQUID, "liquid"); \
-    EXPORT_SHADER_PAIR_SOURCE(SCREENPROCESS, "screenprocess");
-#endif
-	 
-#ifdef _SHADOW_MAPPING
-#define EXPORT_SHADOW_MAPPING_SHADER() \
-	EXPORT_SHADER_PAIR_SOURCE(DEPTH, "depthShadowMapping"); \
-	EXPORT_SHADER_PAIR_SOURCE(DEPTH_PERFORATED, "depthPerforated"); \
-	EXPORT_SHADER_PAIR_SOURCE(INTERACTION_SHADOW_MAPPING, "interactionShadowMapping");
-#endif
-
-#ifdef _STENCIL_SHADOW_IMPROVE
-#define EXPORT_STENCIL_SHADOW_SHADER() \
-	EXPORT_SHADER_PAIR_SOURCE(INTERACTION_STENCIL_SHADOW, "interactionStencilShadow");
-#endif
-
-#ifdef _POSTPROCESS
-#define EXPORT_POSTPROCESS_SHADER() \
-    EXPORT_SHADER_SOURCE(RETRO_POSTPROCESS_2D_VERT, "retro_postprocess_2d", "vert"); \
-	EXPORT_SHADER_SOURCE(RETRO_2BIT_FRAG, "retro_2bit", "frag"); \
-	EXPORT_SHADER_SOURCE(RETRO_C64_FRAG, "retro_c64", "frag"); \
-	EXPORT_SHADER_SOURCE(RETRO_CPC_FRAG, "retro_cpc", "frag"); \
-	EXPORT_SHADER_SOURCE(RETRO_GENESIS_FRAG, "retro_genesis", "frag"); \
-	EXPORT_SHADER_SOURCE(RETRO_PS1_FRAG, "retro_ps1", "frag");
-#endif
-
-#define SHADER_ES_PATH glprogs.c_str()
-	bool gl2 = true;
-	idStr glprogs;
-
-	glprogs = "dev/glslprogs";
-	EXPORT_BASE_SHADER()
-    EXPORT_D3XP_SHADER()
-#ifdef _SHADOW_MAPPING
-	EXPORT_SHADOW_MAPPING_SHADER()
-#endif
-#ifdef _STENCIL_SHADOW_IMPROVE
-	EXPORT_STENCIL_SHADOW_SHADER()
-#endif
-#ifdef _POSTPROCESS
-    EXPORT_POSTPROCESS_SHADER()
-#endif
-#ifdef _HUMANHEAD
-    EXPORT_PREY_SHADER()
-#endif
-
-#ifdef GL_ES_VERSION_3_0
-	gl2 = false;
-	glprogs = "dev/glsl3progs";
-
-	EXPORT_BASE_SHADER()
-    EXPORT_D3XP_SHADER()
-#ifdef _SHADOW_MAPPING
-	EXPORT_SHADOW_MAPPING_SHADER()
-#endif
-#ifdef _STENCIL_SHADOW_IMPROVE
-	EXPORT_STENCIL_SHADOW_SHADER()
-#endif
-#ifdef _POSTPROCESS
-    EXPORT_POSTPROCESS_SHADER()
-#endif
-#ifdef _HUMANHEAD
-    EXPORT_PREY_SHADER()
-#endif
-
-#endif
-}
-
-bool RB_GLSL_FindGLSLShaderSource(const char *name, int type, idStr *source, idStr *realPath)
-{
-    idStr path;
-    void *data = NULL;
-    int length = 0;
-
-    idStrList exts;
-    if(type == 2) // fragment
-    {
-        exts.Append(".frag");
-        exts.Append(".fp");
-    }
-    else // == 1 vertex
-    {
-        exts.Append(".vert");
-        exts.Append(".vp");
-    }
-
-#if 0
-    // 1. find in glslprogs or glsl3progs
-    idStr glesDir = RB_GLSL_GetExternalShaderSourcePath();
-    path = glesDir;
-    path.AppendPath(name);
-    if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) <= 0)
-    {
-        path.StripFileExtension();
-        for(int i = 0; i < exts.Num(); i++)
-        {
-            path.SetFileExtension(exts[i]);
-            if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) > 0)
-            {
-                break;
-            }
-        }
-    }
-#endif
-
-    // 2. find in glprogs
-    if(length <= 0)
-    {
-        path = "glprogs";
-        path.AppendPath(name);
-        if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) <= 0)
-        {
-            path.StripFileExtension();
-            for(int i = 0; i < exts.Num(); i++)
-            {
-                path.SetFileExtension(exts[i]);
-                if((length = fileSystem->ReadFile(path.c_str(), &data, NULL)) > 0)
-                {
-                    break;
-                }
-            }
-        }
-    }
-
-    if(length > 0)
-    {
-        if(realPath)
-            *realPath = path;
-        if(source)
-        {
-            idStr str;
-            str.Append((char *)data, length);
-            *source = str;
-        }
-
-        fileSystem->FreeFile(data);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-#include "glsl_arb_shader.cpp"
 
 void GLSL_AddCommand(void)
 {
 	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export built-in GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
+    cmdSystem->AddCommand("cleanExternalGLSLShaderSource", R_CleanGLSLShaderSource_f, CMD_FL_RENDERER, "remove external GLSL shader source directory");
 	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print built-in GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
 	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export built-in original C-String GLSL shader source for developer");
+#ifdef GL_ES_VERSION_3_0
+    cmdSystem->AddCommand("cleanGLSLShaderBinary", R_CleanGLSLShaderBinary_f, CMD_FL_RENDERER, "remove GLSL shader binary directory");
+#endif
     cmdSystem->AddCommand("convertARB", GLSL_ConvertARBShader_f, CMD_FL_RENDERER, "convert ARB shader to GLSL shader", GLSL_ArgCompletion_glprogs);
 }

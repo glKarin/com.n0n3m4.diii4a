@@ -546,7 +546,7 @@ static void DefineSymbol( char *sym, int value ) {
 
 	// add the file prefix to local symbols to guarantee unique
 	if ( sym[0] == '$' ) {
-		sprintf( expanded, "%s_%i", sym, currentFileIndex );
+		snprintf( expanded, sizeof(expanded), "%s_%i", sym, currentFileIndex );
 		sym = expanded;
 	}
 
@@ -592,7 +592,7 @@ Symbols can only be evaluated on pass 1
 */
 static int LookupSymbol( char *sym ) {
 	symbol_t	*s;
-	char		expanded[MAX_LINE_LENGTH];
+	char		expanded[MAX_LINE_LENGTH * 2];
 	int			hash;
 	hashchain_t *hc;
 
@@ -602,7 +602,7 @@ static int LookupSymbol( char *sym ) {
 
 	// add the file prefix to local symbols to guarantee unique
 	if ( sym[0] == '$' ) {
-		sprintf( expanded, "%s_%i", sym, currentFileIndex );
+		snprintf( expanded, sizeof(expanded), "%s_%i", sym, currentFileIndex );
 		sym = expanded;
 	}
 

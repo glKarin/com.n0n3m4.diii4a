@@ -1,361 +1,465 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
 	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:myapp="http://schemas.android.com/apk/res/com.karin.idTech4Amm"
 	android:id="@+id/launcher_tab2"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+	android:layout_height="match_parent"
+	android:fillViewport="true">
 
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical">
 
-		<TextView
-			android:id="@+id/tv_notification"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textSize="16sp"
-			android:text="@string/note_gamepads_keyboards_must_be_configured_in_game_like_on_pc_not_here"/>
-
-		<Button
-			android:id="@+id/configure_onscreen_controls_btn"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:onClick="controls"
-			android:textAllCaps="false"
-			android:text="@string/configure_on_screen_controls"/>
-
-		<Button
-			android:id="@+id/onscreen_button_setting"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textAllCaps="false"
-			android:text="@string/on_screen_button_setting"/>
-
-		<Button
-			android:id="@+id/setup_onscreen_button_theme"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textAllCaps="false"
-			android:text="@string/setup_on_screen_button_theme"/>
-
-		<Button
-			android:id="@+id/setup_controller"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textAllCaps="false"
-			android:text="@string/configure_controller"/>
-
-		<CheckBox
-			android:id="@+id/smoothjoy"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/smooth_joystick"/>
-
-		<CheckBox
-			android:id="@+id/launcher_tab2_joystick_unfixed"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/unfixed_joystick"/>
-
+		<!-- Configure -->
 		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:orientation="horizontal">
-
-			<TextView
-				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:layout_weight="1"
-				android:gravity="center_vertical"
-				android:text="@string/joystick_visible"
-				android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-			<Spinner
-				android:id="@+id/launcher_tab2_joystick_visible"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="right|center_vertical"
-				android:spinnerMode="dropdown"
-				android:entries="@array/joystick_visible_mode_names"/>
-		</LinearLayout>
-
-		<CheckBox
-			android:id="@+id/tab2_hide_joystick_center"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/joystick_center_dot_visible"/>
-
-		<CheckBox
-			android:id="@+id/tab2_disable_mouse_button_motion"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/disable_motion_when_virtual_mouse_button_hold"/>
-
-		<CheckBox
-			android:id="@+id/mapvol"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/map_volume_keys"/>
-
-		<LinearLayout
-			android:id="@+id/launcher_tab2_volume_map_config_layout"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-			android:orientation="vertical">
-
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-				android:layout_gravity="center_vertical"
-				android:orientation="horizontal">
-
-				<TextView
-					android:layout_width="0dp"
-					android:layout_height="match_parent"
-					android:layout_weight="1"
-					android:gravity="center_vertical"
-					android:text="@string/volume_up"
-					android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-				<Spinner
-					android:id="@+id/launcher_tab2_volume_up_map_config_keys"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="right|center_vertical"
-					android:spinnerMode="dialog"
-					android:entries="@array/key_map_names"/>
-
-			</LinearLayout>
-
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="36dp"
-				android:layout_gravity="center_vertical"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-				android:orientation="horizontal">
-
-				<TextView
-					android:layout_width="0dp"
-					android:layout_height="match_parent"
-					android:layout_weight="1"
-					android:gravity="center_vertical"
-					android:text="@string/volume_down"
-					android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-				<Spinner
-					android:id="@+id/launcher_tab2_volume_down_map_config_keys"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="right|center_vertical"
-					android:spinnerMode="dialog"
-					android:entries="@array/key_map_names"/>
-			</LinearLayout>
-
-		</LinearLayout>
-
-		<CheckBox
-			android:id="@+id/secfinglmb"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/multitouch_shoot_left_mouse_button_click_on_a_second_touch"/>
-
-        <CheckBox
-            android:id="@+id/launcher_tab2_enable_gyro"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/enable_gyroscope"/>
-
-        <LinearLayout
-            android:id="@+id/launcher_tab2_enable_gyro_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-			android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:text="@string/x_axis_sensitivity"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                <EditText
-                    android:id="@+id/launcher_tab2_gyro_x_axis_sens"
-                    android:inputType="numberDecimal|textNoSuggestions"
-                    android:ems="10"
-                    android:hint="@string/x_axis_sensitivity_of_gyroscope"
-                    android:imeOptions="flagNoExtractUi"
-                    android:text="18.0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right|center_vertical"
-					android:autofillHints="" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:text="@string/y_axis_sensitivity"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                <EditText
-                    android:id="@+id/launcher_tab2_gyro_y_axis_sens"
-                    android:inputType="numberDecimal|textNoSuggestions"
-                    android:ems="10"
-                    android:hint="@string/y_axis_sensitivity_of_gyroscope"
-                    android:imeOptions="flagNoExtractUi"
-                    android:text="18.0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right|center_vertical"
-					android:autofillHints="" />
-            </LinearLayout>
-        </LinearLayout>
-
-
-		<LinearLayout
-			android:id="@+id/launcher_tab2_release_delay_layout"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_vertical"
-			android:orientation="horizontal">
-
-			<TextView
-				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:layout_weight="1"
-				android:gravity="center_vertical"
-				android:text="@string/button_swipe_release_delay_ms"
-				android:textAppearance="?android:attr/textAppearanceSmall"/>
-			<EditText
-				android:id="@+id/button_swipe_release_delay"
-				android:inputType="numberSigned|textNoSuggestions"
-				android:ems="10"
-				android:hint="@string/ms"
-				android:imeOptions="flagNoExtractUi"
-				android:text="-1"
-				android:layout_width="100dp"
-				android:layout_height="wrap_content"
-				android:layout_gravity="right|center_vertical"
-				android:autofillHints="" />
-		</LinearLayout>
-
-		<CheckBox
-			android:id="@+id/hideonscr"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/hide_onscreen_buttons"
-			/>
-
-		<CheckBox
-			android:id="@+id/using_mouse"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/using_mouse"
-			/>
-
-		<LinearLayout
-			android:id="@+id/layout_mouseconfig"
+			android:id="@+id/configure_section"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:orientation="vertical"
-			>
+			android:background="@drawable/layout_border"
+			android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
 
+			<com.karin.idTech4Amm.widget.Divider
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				myapp:label="@string/configure"
+				myapp:lineColor="@color/launcher_divider_color" />
+
+			<!--android:textSize="16sp"-->
 			<TextView
-				android:id="@+id/tv_mprefs"
+				android:id="@+id/tv_notification"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="@string/mouse_settings"/>
+				android:textAppearance="?android:attr/textAppearanceSmall"
+				android:text="@string/note_gamepads_keyboards_must_be_configured_in_game_like_on_pc_not_here"/>
+
+			<Button
+				android:id="@+id/configure_onscreen_controls_btn"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:onClick="controls"
+				android:textAllCaps="false"
+				android:text="@string/configure_on_screen_controls"/>
+
+			<Button
+				android:id="@+id/onscreen_button_setting"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:textAllCaps="false"
+				android:text="@string/on_screen_button_setting"/>
+
+			<Button
+				android:id="@+id/setup_onscreen_button_theme"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:textAllCaps="false"
+				android:text="@string/setup_on_screen_button_theme"/>
+
+			<Button
+				android:id="@+id/setup_controller"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:textAllCaps="false"
+				android:text="@string/configure_controller"/>
+
+		</LinearLayout> <!-- end Configure section -->
+
+		<!-- Joystick -->
+		<LinearLayout
+			android:id="@+id/joystick_section"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:background="@drawable/layout_border"
+			android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
+
+			<com.karin.idTech4Amm.widget.Divider
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				myapp:label="@string/virtual_joystick"
+				myapp:lineColor="@color/launcher_divider_color" />
+
+			<CheckBox
+				android:id="@+id/smoothjoy"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/smooth_joystick"/>
+
+			<CheckBox
+				android:id="@+id/launcher_tab2_joystick_unfixed"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/unfixed_joystick"/>
 
 			<LinearLayout
-				android:id="@+id/layout_mouse_device"
 				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:orientation="vertical">
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
 
-				<CheckBox
-					android:id="@+id/detectmouse"
+				<TextView
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:gravity="center_vertical"
+					android:text="@string/joystick_visible"
+					android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+				<Spinner
+					android:id="@+id/launcher_tab2_joystick_visible"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="@string/autodetect_mouse"/>
+					android:layout_gravity="right|center_vertical"
+					android:spinnerMode="dropdown"
+					android:entries="@array/joystick_visible_mode_names"/>
+			</LinearLayout>
+
+			<CheckBox
+				android:id="@+id/tab2_hide_joystick_center"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/joystick_center_dot_visible"/>
+
+		</LinearLayout> <!-- end Joystick section -->
+
+		<!-- Touch -->
+		<LinearLayout
+			android:id="@+id/touch_section"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:background="@drawable/layout_border"
+			android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
+
+			<com.karin.idTech4Amm.widget.Divider
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				myapp:label="@string/touch"
+				myapp:lineColor="@color/launcher_divider_color" />
+
+			<CheckBox
+				android:id="@+id/hideonscr"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/hide_onscreen_buttons"
+				/>
+
+			<CheckBox
+				android:id="@+id/secfinglmb"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/multitouch_shoot_left_mouse_button_click_on_a_second_touch"/>
+
+			<CheckBox
+				android:id="@+id/tab2_disable_mouse_button_motion"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/disable_motion_when_virtual_mouse_button_hold"/>
+
+			<LinearLayout
+				android:id="@+id/launcher_tab2_release_delay_layout"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical"
+				android:orientation="horizontal">
+
+				<TextView
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:gravity="center_vertical"
+					android:text="@string/button_swipe_release_delay_ms"
+					android:textAppearance="?android:attr/textAppearanceSmall"/>
+				<EditText
+					android:id="@+id/button_swipe_release_delay"
+					android:inputType="numberSigned|textNoSuggestions"
+					android:ems="10"
+					android:hint="@string/ms"
+					android:imeOptions="flagNoExtractUi"
+					android:text="-1"
+					android:layout_width="100dp"
+					android:layout_height="wrap_content"
+					android:layout_gravity="right|center_vertical"
+					android:autofillHints="" />
+			</LinearLayout>
+
+		</LinearLayout> <!-- end Touch section -->
+
+		<!-- Key -->
+		<LinearLayout
+			android:id="@+id/key_section"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:background="@drawable/layout_border"
+			android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
+
+			<com.karin.idTech4Amm.widget.Divider
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				myapp:label="@string/key"
+				myapp:lineColor="@color/launcher_divider_color" />
+
+			<CheckBox
+				android:id="@+id/mapvol"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/map_volume_keys"/>
+
+			<LinearLayout
+				android:id="@+id/launcher_tab2_volume_map_config_layout"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingLeft="10dp"
+				android:paddingRight="10dp"
+				android:orientation="vertical">
 
 				<LinearLayout
-					android:id="@+id/layout_manualmouseconfig"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="2dp"
+					android:layout_marginBottom="2dp"
+					android:layout_gravity="center_vertical"
+					android:orientation="horizontal">
+
+					<TextView
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:gravity="center_vertical"
+						android:text="@string/volume_up"
+						android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+					<Spinner
+						android:id="@+id/launcher_tab2_volume_up_map_config_keys"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_gravity="right|center_vertical"
+						android:spinnerMode="dialog"
+						android:entries="@array/key_map_names"/>
+
+				</LinearLayout>
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="36dp"
+					android:layout_gravity="center_vertical"
+					android:layout_marginTop="2dp"
+					android:layout_marginBottom="2dp"
+					android:orientation="horizontal">
+
+					<TextView
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:gravity="center_vertical"
+						android:text="@string/volume_down"
+						android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+					<Spinner
+						android:id="@+id/launcher_tab2_volume_down_map_config_keys"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_gravity="right|center_vertical"
+						android:spinnerMode="dialog"
+						android:entries="@array/key_map_names"/>
+				</LinearLayout>
+
+			</LinearLayout>
+
+		</LinearLayout> <!-- end Key section -->
+
+		<!-- Gyro -->
+		<LinearLayout
+			android:id="@+id/gyro_section"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:background="@drawable/layout_border"
+			android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
+
+			<com.karin.idTech4Amm.widget.Divider
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				myapp:label="@string/sensor"
+				myapp:lineColor="@color/launcher_divider_color" />
+
+			<CheckBox
+				android:id="@+id/launcher_tab2_enable_gyro"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/enable_gyroscope"/>
+
+			<LinearLayout
+				android:id="@+id/launcher_tab2_enable_gyro_layout"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingLeft="10dp"
+				android:paddingRight="10dp"
+				android:orientation="vertical">
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:gravity="center_vertical"
+						android:text="@string/x_axis_sensitivity"
+						android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+					<EditText
+						android:id="@+id/launcher_tab2_gyro_x_axis_sens"
+						android:inputType="numberDecimal|textNoSuggestions"
+						android:ems="10"
+						android:hint="@string/x_axis_sensitivity_of_gyroscope"
+						android:imeOptions="flagNoExtractUi"
+						android:text="18.0"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_gravity="right|center_vertical"
+						android:autofillHints="" />
+				</LinearLayout>
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:gravity="center_vertical"
+						android:text="@string/y_axis_sensitivity"
+						android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+					<EditText
+						android:id="@+id/launcher_tab2_gyro_y_axis_sens"
+						android:inputType="numberDecimal|textNoSuggestions"
+						android:ems="10"
+						android:hint="@string/y_axis_sensitivity_of_gyroscope"
+						android:imeOptions="flagNoExtractUi"
+						android:text="18.0"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_gravity="right|center_vertical"
+						android:autofillHints="" />
+				</LinearLayout>
+			</LinearLayout>
+
+		</LinearLayout> <!-- end Gyro section -->
+
+		<!-- Mouse -->
+		<LinearLayout
+			android:id="@+id/mouse_section"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:background="@drawable/layout_border"
+			android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
+
+			<com.karin.idTech4Amm.widget.Divider
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				myapp:label="@string/mouse"
+				myapp:lineColor="@color/launcher_divider_color" />
+
+			<CheckBox
+				android:id="@+id/using_mouse"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/using_mouse"
+				/>
+
+			<LinearLayout
+				android:id="@+id/layout_mouseconfig"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				>
+
+				<TextView
+					android:id="@+id/tv_mprefs"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/mouse_settings"/>
+
+				<LinearLayout
+					android:id="@+id/layout_mouse_device"
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"
 					android:orientation="vertical">
 
-					<TextView
-						android:id="@+id/tv_evnt"
+					<CheckBox
+						android:id="@+id/detectmouse"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="@string/mouse_event_device"/>
+						android:text="@string/autodetect_mouse"/>
 
-					<EditText
-						android:id="@+id/edt_mouse"
+					<LinearLayout
+						android:id="@+id/layout_manualmouseconfig"
 						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:orientation="vertical">
+
+						<TextView
+							android:id="@+id/tv_evnt"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/mouse_event_device"/>
+
+						<EditText
+							android:id="@+id/edt_mouse"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:ems="10"
+							android:imeOptions="flagNoExtractUi"
+							android:inputType="textNoSuggestions"/>
+					</LinearLayout>
+
+					<TextView
+						android:id="@+id/tv_curpos"
+						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:ems="10"
-						android:imeOptions="flagNoExtractUi"
-						android:inputType="textNoSuggestions"/>
+						android:text="@string/mouse_cursor_position"/>
+
+					<RadioGroup
+						android:id="@+id/rg_curpos"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content">
+
+						<RadioButton
+							android:id="@+id/cur_tl"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/top_left_corner"/>
+
+						<RadioButton
+							android:id="@+id/cur_tr"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/top_right_corner"/>
+
+						<RadioButton
+							android:id="@+id/cur_bl"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/bottom_left_corner"/>
+
+						<RadioButton
+							android:id="@+id/cur_br"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:checked="true"
+							android:text="@string/bottom_right_corner"/>
+					</RadioGroup>
+
 				</LinearLayout>
-
-				<TextView
-					android:id="@+id/tv_curpos"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/mouse_cursor_position"/>
-
-				<RadioGroup
-					android:id="@+id/rg_curpos"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content">
-
-					<RadioButton
-						android:id="@+id/cur_tl"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="@string/top_left_corner"/>
-
-					<RadioButton
-						android:id="@+id/cur_tr"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="@string/top_right_corner"/>
-
-					<RadioButton
-						android:id="@+id/cur_bl"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="@string/bottom_left_corner"/>
-
-					<RadioButton
-						android:id="@+id/cur_br"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:checked="true"
-						android:text="@string/bottom_right_corner"/>
-				</RadioGroup>
 
 			</LinearLayout>
 

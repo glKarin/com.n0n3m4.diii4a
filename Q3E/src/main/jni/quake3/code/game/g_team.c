@@ -92,7 +92,7 @@ const char *TeamColorString(int team) {
 }
 
 // NULL for everyone
-static __attribute__ ((format (printf, 2, 3))) void QDECL PrintMsg( gentity_t *ent, const char *fmt, ... ) {
+static Q_PRINTF_FUNC(2, 3) void QDECL PrintMsg( gentity_t *ent, const char *fmt, ... ) {
 	char		msg[1024];
 	va_list		argptr;
 	char		*p;

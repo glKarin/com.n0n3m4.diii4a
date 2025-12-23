@@ -1309,6 +1309,10 @@ void R_RenderView(viewDef_t *parms)
 	// add the rendering commands for this viewDef
 	R_AddDrawViewCmd(parms);
 
+#ifdef _MULTITHREAD
+	R_ShowViewEntitys(tr.viewDef->viewEntitys);
+#endif
+
 	// restore view in case we are a subview
 	tr.viewDef = oldView;
 }

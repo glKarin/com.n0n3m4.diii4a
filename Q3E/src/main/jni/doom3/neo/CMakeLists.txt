@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 
 project(doom3)
 
-set(IDTECH4AMM_ENGINE_PATCH 69)
+set(IDTECH4AMM_ENGINE_PATCH 70)
 set(IDTECH4AMM_ENGINE_VERSION "1.1.0harmattan${IDTECH4AMM_ENGINE_PATCH}")
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
 string(TIMESTAMP IDTECH4AMM_BUILDTIME "%Y-%m-%d %H:%M:%S")
@@ -141,6 +141,12 @@ option(RETRO_POSTPROCESS					"Add retro postprocess rendering support"								  
 option(IMGUI								"Add imGUI support"								   							ON)
 option(GL_INT_INDEX							"Use 4 bytes index on OpenGL"								   				ON)
 option(MP3_SUPPORT							"Add mp3 sound support"								   						ON)
+option(SUPPORT_MD5V6						"Add 2002 E3 demo md5mesh/md5anim v6 version animation model converter"		ON)
+option(SUPPORT_PSK							"Support Unreal engine psk/psa animation/static model"						ON)
+option(SUPPORT_IQM							"Support iqm animation/static model"										ON)
+option(SUPPORT_SMD							"Support Source engine smd animation/static model"							ON)
+option(SUPPORT_GLTF							"Support Khronos gltf/glb animation/static model"							ON)
+option(SUPPORT_FBX							"Support Autodesk fbx animation/static model"								ON)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -416,14 +422,15 @@ else()
 endif()]]
 
 if(MSVC)
-	# This is required for tools on windows.
-	find_package(MFC)
-
-	if(TOOLS AND NOT MFC_FOUND)
-		message(SEND_ERROR "MFC ('Microsoft Foundation Classes for C++') couldn't be found, but is needed for TOOLS!")
-		message(FATAL_ERROR "If you're using VS2013, you'll also need the 'Multibyte MFC Library for Visual Studio 2013': https://www.microsoft.com/en-us/download/details.aspx?id=40770 (VS2015 and 2017 include that in the default MFC package)")
+	if(TOOLS)
+		# This is required for tools on windows.
+		find_package(MFC)
+	
+		if(TOOLS AND NOT MFC_FOUND)
+			message(SEND_ERROR "MFC ('Microsoft Foundation Classes for C++') couldn't be found, but is needed for TOOLS!")
+			message(FATAL_ERROR "If you're using VS2013, you'll also need the 'Multibyte MFC Library for Visual Studio 2013': https://www.microsoft.com/en-us/download/details.aspx?id=40770 (VS2015 and 2017 include that in the default MFC package)")
+		endif()
 	endif()
-
 else() # not MSVC
 
 	if(NOT WIN32 AND NOT ANDROID)
@@ -625,7 +632,7 @@ if(WIN32)
 elseif(ANDROID)
 	set(sys_libs ${sys_libs} android dl EGL)
 	if(NOT USE_MINIZ)
-		set(sys_libs ${sys_libs} z)
+	    set(LINK_Z True)
 	endif()
 else() #TODO linux
 	set(sys_libs ${sys_libs} dl pthread)
@@ -663,7 +670,7 @@ else() #TODO linux
 	endif()
 	endif()
 	if(NOT USE_MINIZ)
-		set(sys_libs ${sys_libs} z)
+	    set(LINK_Z True)
 	endif()
 endif()
 
@@ -797,6 +804,31 @@ if(MP3_SUPPORT)
 	set(CORE_DEFINES "${CORE_DEFINES};_SND_MP3")
 	message(STATUS "mp3 sound support")
 endif()
+if(SUPPORT_MD5V6)
+	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_MD5V6")
+	message(STATUS "Add 2002 E3 demo md5mesh/md5anim v6 version animation model converter")
+endif()
+if(SUPPORT_PSK)
+	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_PSK")
+	message(STATUS "Support Unreal engine psk/psa animation/static model")
+endif()
+if(SUPPORT_IQM)
+	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_IQM")
+	message(STATUS "Support iqm animation/static model")
+endif()
+if(SUPPORT_SMD)
+	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_SMD")
+	message(STATUS "Support Source engine smd animation/static model")
+endif()
+if(SUPPORT_GLTF)
+	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_GLTF")
+	message(STATUS "Support Khronos gltf/glb animation/static model")
+endif()
+if(SUPPORT_FBX)
+	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_FBX")
+	message(STATUS "Support Autodesk fbx animation/static model")
+    set(LINK_Z True)
+endif()
 if(CONSOLE AND WIN32)
 	set(CORE_DEFINES "${CORE_DEFINES};_REDIRECT_OUTPUT")
 	message(STATUS "Redirect output to stdout.txt")
@@ -860,6 +892,7 @@ set(src_jpeg
 		externlibs/jpeg-8d/jquant2.c
 		externlibs/jpeg-8d/jutils.c
 		)
+
 add_globbed_headers(src_jpeg "externlibs/jpeg-8d")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs/jpeg-8d")
 add_library(idtech4_jpeg STATIC ${src_jpeg})
@@ -1337,13 +1370,22 @@ include_directories(${curl_inc})
 
 if(COMPILE_CURL #[[STREQUAL "1"]])
 	set(local_libs ${local_libs} ${curl_lib})
+	set(LINK_Z True)
 else()
 	set(sys_libs ${sys_libs} ${curl_lib})
 endif()
 
+if(LINK_Z)
+	if(WIN32)
+        find_package(ZLIB REQUIRED)
+        set(sys_libs ${sys_libs} ZLIB::ZLIB)
+    else()
+        set(sys_libs ${sys_libs} z)
+    endif()
+endif()
+
 if(COMPILE_CURL #[[STREQUAL "1"]])
 	message(STATUS "Build cURL")
-	find_package(ZLIB REQUIRED)
     #//k curl
     set(src_curl
         externlibs/curl/lib/base64.c
@@ -1592,6 +1634,17 @@ set(src_stub_openal		sys/stub/openal_stub.cpp)
 set(src_stub_gl			sys/stub/stub_gl.cpp)
 
 
+set(src_debuggerServer
+		tools/debugger/DebuggerBreakpoint.h
+		tools/debugger/DebuggerBreakpoint.cpp
+		tools/debugger/DebuggerServer.h
+		tools/debugger/DebuggerServer.cpp
+		tools/debugger/DebuggerScript.h
+		tools/debugger/DebuggerScript.cpp
+		tools/debugger/DebuggerMessages.h
+		tools/debugger/debugger.cpp
+		)
+
 set(src_tools
 	tools/guied/GEWindowWrapper_stub.cpp
 )
@@ -1599,6 +1652,94 @@ set(src_tools
 # TODO: add_globbed_headers(src_tools "tools/guied")
 
 # Begin normal tools code
+if(TOOLS)
+if (MFC_FOUND AND MSVC)
+	set(ALLOWRESOURCES ON)
+	# Common files.
+	file(GLOB src_comafx "tools/comafx/*.cpp")
+	add_globbed_headers(src_comafx "tools/comafx")
+	file(GLOB_RECURSE src_tools_common "tools/common/*.cpp")
+	add_globbed_headers(src_tools_common "tools/common")
+
+	#Compilers.
+	# DG: this is always added, why add it again? file(GLOB src_compiler_renderbump "neo/tools/compilers/renderbump/*.cpp")
+	file(GLOB src_compiler_roqvq	  "tools/compilers/roqvq/*.cpp") # FIXME: some of those were added before
+	add_globbed_headers(src_compiler_roqvq "tools/compilers/roqvq")
+	#tools
+	# Articulated Frame editor.
+	file(GLOB src_afeditor "tools/af/*.cpp")
+	add_globbed_headers(src_afeditor "tools/af")
+	# Declaration editor
+	file(GLOB src_decleditor "tools/decl/*.cpp")
+	add_globbed_headers(src_decleditor "tools/decl")
+	# GUI Editor.
+	file(GLOB src_gui_editor "tools/guied/*.cpp")
+	add_globbed_headers(src_gui_editor "tools/guied")
+	# Material editor
+	file(GLOB src_materialeditor "tools/materialeditor/*.cpp")
+	add_globbed_headers(src_materialeditor "tools/materialeditor")
+	# Particle Editor
+	file(GLOB src_particleeditor "tools/particle/*.cpp")
+	add_globbed_headers(src_particleeditor "tools/particle")
+	# PDA editor
+	file(GLOB src_pdaeditor "tools/pda/*.cpp")
+	add_globbed_headers(src_pdaeditor "tools/pda")
+	# Radiant ( Map editor )
+	file(GLOB src_map_editor "tools/radiant/*.cpp")
+	add_globbed_headers(src_map_editor "tools/radiant")
+	# Script editor
+	file(GLOB src_script_editor "tools/script/*.cpp")
+	add_globbed_headers(src_script_editor "tools/script")
+	# Script Debugger
+	set(src_debuggerClient
+			tools/debugger/DebuggerClient.h
+			tools/debugger/DebuggerClient.cpp
+			tools/debugger/DebuggerApp.h
+			tools/debugger/DebuggerApp.cpp
+			tools/debugger/DebuggerQuickWatchDlg.h
+			tools/debugger/DebuggerQuickWatchDlg.cpp
+			tools/debugger/DebuggerWindow.h
+			tools/debugger/DebuggerWindow.cpp
+			tools/debugger/DebuggerFindDlg.h
+			tools/debugger/DebuggerFindDlg.cpp
+			)
+	set(src_script_debugger
+			${src_debuggerServer}
+			${src_debuggerClient}
+			)
+	# sound editor?
+	file(GLOB src_sound_editor "tools/sound/*.cpp")
+	add_globbed_headers(src_sound_editor "tools/sound")
+
+
+	# The numerous tools in a nice list.
+	list(APPEND src_editor_tools
+			${src_comafx}
+			${src_tools_common}
+			${src_compiler_renderbump}
+			${src_afeditor}
+			${src_decleditor}
+			${src_gui_editor}
+			${src_materialeditor}
+			${src_particleeditor}
+			${src_pdaeditor}
+			${src_map_editor}
+			${src_script_editor}
+			${src_sound_editor}
+			${src_script_debugger}
+			"tools/edit_public.h"
+			#"tools/edit_gui_common.h"
+			)
+	SET(CMAKE_MFC_FLAG 2)
+	set(TOOLS_DEFINES "ID_ALLOW_TOOLS;_AFXDLL")
+	set(CORE_DEFINES "${CORE_DEFINES};${TOOLS_DEFINES}")
+else()
+	set(src_editor_tools "tools/edit_stub.cpp" "tools/edit_public.h" "tools/debugger/debugger_common.h")
+	list(APPEND src_editor_tools
+			${src_debuggerServer}
+			)
+endif()
+endif()
 
 set(src_sys_base
 	sys/linux/stack.cpp
@@ -1645,6 +1786,13 @@ elseif(WIN32)
 	set(src_sys_core
 			sys/sdl/glimp.cpp
 			)
+	if(ALLOWRESOURCES)
+		set(src_sys_core ${src_sys_core} "sys/win32/rc/doom.rc")
+	else()
+		# adding both .rc files breaks the build, but I think it only contains the icon
+		# and doom.rc also contains that (+icons for editor etc, AFAIK), so this is fine
+		#set(src_sys_core ${src_sys_core} "${CMAKE_SOURCE_DIR}/sys/win32/rc/dhewm3.rc" )
+	endif()
 else()
 	if(LINUX_SDL)
 		set(src_sys_base
@@ -1687,12 +1835,14 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Build idlib static
 # idSoftware
+if(BUILD_D3 OR BUILD_D3_MOD)
 add_library(idlib STATIC ${src_idlib})
 if(NOT MSVC)
 	set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib})
+endif()
 
 # raven
 if(RAVEN OR QUAKE4 OR BUILD_Q4_MOD)

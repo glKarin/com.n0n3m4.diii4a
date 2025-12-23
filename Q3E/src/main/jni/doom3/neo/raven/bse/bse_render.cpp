@@ -36,9 +36,9 @@ bool rvParticle::GetEvaluationTime(float time, float& outEvalTime, bool  infinit
     outEvalTime = time - mStartTime;
 
     // Clamp to end of life minus a small epsilon, matching original logic
-    if (time >= mEndTime - 0.0020000001f)
+    if (time >= mEndTime - BSE_TIME_EPSILON/* 0.0020000001f */)
     {
-        outEvalTime = (mEndTime - mStartTime) - 0.0020000001f;
+        outEvalTime = (mEndTime - mStartTime) - BSE_TIME_EPSILON/* 0.0020000001f */;
     }
 
     if (infinite)
@@ -47,7 +47,7 @@ bool rvParticle::GetEvaluationTime(float time, float& outEvalTime, bool  infinit
     }
 
     // Valid while strictly inside [mStartTime − ε, mEndTime)
-    return (time > mStartTime - 0.0020000001f) &&
+    return (time > mStartTime - BSE_TIME_EPSILON/* 0.0020000001f */) &&
         (time < mEndTime);
 }
 
@@ -59,7 +59,7 @@ int rvParticle::HandleTint(const rvBSE* effect, const idVec4& colour, float alph
     idVec4 tint = effect->mTint;
 
     // Optional premultiplied tint path (matches flag 0x8000 in original code)
-    if (mFlags & 0x8000)
+    if (mFlags & PTFLAG_ADDITIVE/* 0x8000 */)
     {
 		float f = colour.w * alpha;
 		tint.x *= colour.x * f;
@@ -314,17 +314,17 @@ bool rvLineParticle::Render(const rvBSE* effect, const rvParticleTemplate* pt, c
 
 #if 1 //karin: don't transform if useEndOrigin
     if( ! (
-            (pt && pt->mSpawnLength.mFlags & PPF_USE_END_ORIGIN)
-			|| (!pt && effect->mDeclEffect->mFlags & DEF_USES_END_ORIGIN)
+            (pt && pt->mSpawnLength.mFlags & PPFLAG_USEENDORIGIN)
+			|| (!pt && effect->mDeclEffect->mFlags & ETFLAG_USES_ENDORIGIN)
     ) ) //karin: useEndOrigin
 #endif
     {
         // rotate len by current axis unless fixed flag set
-        if (!(mFlags & PF_SEGMENT_LOCKED/* 2 */)) len = mInitAxis * effect->mCurrentAxisTransposed/*//k??? TODO mCurrentAxis */ * len; // simplified – assumes operator*
+        if (!(mFlags & PTFLAG_LOCKED/* 2 */)) len = mInitAxis * effect->mCurrentAxisTransposed/*//k??? TODO mCurrentAxis */ * len; // simplified – assumes operator*
     }
 
     // if velocity‑aligned flag, project onto velocity dir
-    if (mFlags & 0x10000)
+    if (mFlags & PTFLAG_GENERATED_LINE/* 0x10000 */)
     {
         idVec3 vel; EvaluateVelocity(effect, vel, time - mMotionStartTime);
         float speedSq = vel.LengthSqr();
@@ -396,15 +396,6 @@ bool rvOrientedParticle::Render(const rvBSE* effect, const rvParticleTemplate* p
     idVec3 pos;   EvaluatePosition(effect, pos, time - mMotionStartTime);
 
     idMat3 orient; rvAngles(rot).ToMat3(orient);
-#if 0
-    int ii = 1; int jj = 2;
-	static idCVar a("aaa","0",0,"");
-	if(a.GetInteger()==1){ii=1;jj=0;}
-	if(a.GetInteger()==2){ii=0;jj=1;}
-	if(a.GetInteger()==3){ii=2;jj=1;}
-	if(a.GetInteger()==4){ii=0;jj=2;}
-	if(a.GetInteger()==5){ii=2;jj=0;}
-#endif
 #if 1 //k??? TODO Q4D original source code, and it's correct
     idVec3 right = size * -orient[1];
     idVec3 up = size * orient[2];

@@ -220,10 +220,10 @@ public class Disc extends Paintable implements TouchListener
                 //DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red,green,blue,p.pressed ? (float)Math.max(alpha, 0.9) : (float)(Math.min(alpha, 0.1)));
                 if (p.pressed)
 //                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, cx, cy, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
-                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, vertexBuffer, indexBuffer, 4, 0, cx, cy, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
+                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, vertexBuffer, indexBuffer, 4, 0, cx, cy, red, green, blue, Math.min(alpha + (alpha * 0.5f), 1.0f));
                 else
 //                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, cx, cy, red, green, blue, alpha - (alpha * 0.5f));
-                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, vertexBuffer, indexBuffer, 4, 0, cx, cy, red, green, blue, alpha - (alpha * 0.5f));
+                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, vertexBuffer, indexBuffer, 4, 0, cx, cy, red, green, blue, Math.max(alpha - (alpha * 0.5f), 0.0f));
             }
         }
     }

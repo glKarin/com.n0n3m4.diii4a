@@ -3,11 +3,12 @@ class rvSegment;
 
 // rvBSE::mFlags
 enum {
-	EF_LOOP = 1, // 0x1 explicit loop
-	EF_USES_END_ORIGIN = 1 << 1, // 0x2 effect uses end-origin
-	EF_MARK_BOUNDS_DIRTY = 1 << 2, // 0x4 mark “world bounds dirty”
-	EF_SOUND = 1 << 3, // 0x8 Global no-sound flag?
-	EF_AMBIENT = 1 << 4, // 0x10 ambient
+    EFLAG_LOOPING				= BITT< 0 >::VALUE, // 0x1 explicit loop
+    EFLAG_HASENDORIGIN			= BITT< 1 >::VALUE, // 0x2 effect uses end-origin
+    EFLAG_ENDORIGINCHANGED		= BITT< 2 >::VALUE, // 0x4 mark “world bounds dirty”
+    EFLAG_STOPPED				= BITT< 3 >::VALUE, // 0x8 Global no-sound flag? // SOUND
+    // EFLAG_ORIENTATE_IDENTITY	= BITT< 4 >::VALUE, // 0x10 ambient, only in ETQW SDK
+    EFLAG_AMBIENT			    = BITT< 4 >::VALUE, // 0x10 ambient, 1<<5 in ETQW SDK
 };
 
 #define F_STOP_REQUESTED 8

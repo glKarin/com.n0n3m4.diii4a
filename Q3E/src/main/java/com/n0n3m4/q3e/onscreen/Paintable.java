@@ -31,4 +31,9 @@ public class Paintable
     {
         //Empty by default
     }
+
+    public void PaintInEditor(GL11 gl)
+    {
+        Paint(gl);
+    }
 }

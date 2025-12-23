@@ -103,13 +103,35 @@ class idRenderModelStatic : public idRenderModel
 
 		struct aseModel_s 			*ConvertLWOToASE(const struct st_lwObject *obj, const char *fileName);
 
+        bool						LoadMD5Mesh( const char* fileName );
+        bool						ConvertMD5MeshToModelSurfaces( const class idMd5MeshFile* obj );
 #ifdef _MODEL_OBJ
         bool						LoadOBJ( const char* fileName );
         bool						ConvertOBJToModelSurfaces( const struct objModel_t* obj );
 #endif
 #ifdef _MODEL_DAE
         bool						LoadDAE( const char* fileName );
-        bool						ConvertDAEToModelSurfaces( const struct ColladaParser* obj );
+        bool						ConvertDAEToModelSurfaces( const class ColladaParser* obj );
+#endif
+#ifdef _MODEL_PSK
+        bool						LoadPSK( const char* fileName );
+        bool						ConvertPSKToModelSurfaces( const class idModelPsk* obj );
+#endif
+#ifdef _MODEL_IQM
+        bool						LoadIQM( const char* fileName );
+        bool						ConvertIQMToModelSurfaces( const class idModelIqm* obj );
+#endif
+#ifdef _MODEL_SMD
+        bool						LoadSMD( const char* fileName );
+        bool						ConvertSMDToModelSurfaces( const class idModelSmd* obj );
+#endif
+#ifdef _MODEL_GLTF
+        bool						LoadGLTF( const char* fileName );
+        bool						ConvertGLTFToModelSurfaces( const class idModelGLTF* obj );
+#endif
+#ifdef _MODEL_FBX
+        bool						LoadFBX( const char* fileName );
+        bool						ConvertFBXToModelSurfaces( const class idModelFbx* fbx );
 #endif
 
 		bool						DeleteSurfaceWithId(int id);

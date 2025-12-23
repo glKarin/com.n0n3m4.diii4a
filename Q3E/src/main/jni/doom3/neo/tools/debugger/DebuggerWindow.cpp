@@ -237,7 +237,7 @@ LRESULT CALLBACK rvDebuggerWindow::ScriptWndProc(HWND wnd, UINT msg, WPARAM wpar
 {
 	static int		  lastStart = -1;
 	static int		  lastEnd   = -1;
-	rvDebuggerWindow *window    = (rvDebuggerWindow *)GetWindowLong(wnd, GWL_USERDATA);
+	rvDebuggerWindow *window    = (rvDebuggerWindow *)GetWindowLongPtr(wnd, GWLP_USERDATA);
 	WNDPROC			  wndproc   = window->mOldScriptProc;
 
 	switch (msg) {
@@ -337,7 +337,7 @@ LRESULT CALLBACK rvDebuggerWindow::ScriptWndProc(HWND wnd, UINT msg, WPARAM wpar
 
 LRESULT CALLBACK rvDebuggerWindow::MarginWndProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-	rvDebuggerWindow *window = (rvDebuggerWindow *) GetWindowLong(wnd, GWL_USERDATA);
+	rvDebuggerWindow *window = (rvDebuggerWindow *) GetWindowLongPtr(wnd, GWLP_USERDATA);
 
 	switch (msg) {
 		case WM_RBUTTONDOWN:
@@ -707,9 +707,9 @@ int rvDebuggerWindow::HandleCreate(WPARAM wparam, LPARAM lparam)
 	mWndScript = CreateWindow("RichEdit20A", "", WS_CHILD|WS_BORDER|ES_NOHIDESEL|ES_READONLY|ES_MULTILINE|ES_WANTRETURN|ES_AUTOVSCROLL|ES_AUTOHSCROLL|WS_VSCROLL|WS_HSCROLL, 0, 0, 100, 100, mWnd, (HMENU) IDC_DBG_SCRIPT, mInstance, 0);
 	SendMessage(mWndScript, EM_SETEVENTMASK, 0, ENM_SCROLL|ENM_CHANGE);
 	SendMessage(mWndScript, EM_SETWORDBREAKPROC, 0, (LPARAM) ScriptWordBreakProc);
-	mOldScriptProc = (WNDPROC)GetWindowLong(mWndScript, GWL_WNDPROC);
-	SetWindowLong(mWndScript, GWL_USERDATA, (LONG)this);
-	SetWindowLong(mWndScript, GWL_WNDPROC, (LONG)ScriptWndProc);
+	mOldScriptProc = (WNDPROC)GetWindowLongPtr(mWndScript, GWLP_WNDPROC);
+	SetWindowLongPtr(mWndScript, GWLP_USERDATA, (LONG_PTR)this);
+	SetWindowLongPtr(mWndScript, GWLP_WNDPROC, (LONG_PTR)ScriptWndProc);
 
 	SendMessage(mWndScript, EM_SETTABSTOPS, 1, (LPARAM)&tabsize);
 
@@ -734,8 +734,8 @@ int rvDebuggerWindow::HandleCreate(WPARAM wparam, LPARAM lparam)
 	SendMessage(mWndConsole, EM_SETBKGNDCOLOR, 0, GetSysColor(COLOR_3DFACE));
 
 	mWndMargin = CreateWindow("STATIC", "", WS_VISIBLE|WS_CHILD, 0, 0, 0, 0, mWndScript, (HMENU)IDC_DBG_SPLITTER, mInstance, NULL);
-	SetWindowLong(mWndMargin, GWL_USERDATA, (LONG)this);
-	SetWindowLong(mWndMargin, GWL_WNDPROC, (LONG)MarginWndProc);
+	SetWindowLongPtr(mWndMargin, GWLP_USERDATA, (LONG_PTR)this);
+    SetWindowLongPtr(mWndMargin, GWLP_WNDPROC, (LONG_PTR)MarginWndProc);
 
 	mWndBorder = CreateWindow("STATIC", "", WS_VISIBLE|WS_CHILD|SS_GRAYFRAME, 0, 0, 0, 0, mWnd, (HMENU)IDC_DBG_BORDER, mInstance, NULL);
 
@@ -985,7 +985,7 @@ int rvDebuggerWindow::HandleCommand(WPARAM wparam, LPARAM lparam)
 			LONG	num;
 			LONG	dem;
 
-			SendMessage(mWndScript, EM_GETZOOM, (LONG)&num, (LONG)&dem);
+			SendMessage(mWndScript, EM_GETZOOM, (WPARAM)&num, (LPARAM)&dem);
 
 			if (num != mZoomScaleNum || dem != mZoomScaleDem) {
 				mZoomScaleNum = num;
@@ -1089,7 +1089,7 @@ Window procedure for the deubgger window
 */
 LRESULT CALLBACK rvDebuggerWindow::WndProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-	rvDebuggerWindow *window = (rvDebuggerWindow *) GetWindowLong(wnd, GWL_USERDATA);
+	rvDebuggerWindow *window = (rvDebuggerWindow *) GetWindowLongPtr(wnd, GWLP_USERDATA);
 
 	switch (msg) {
 		case WM_INITMENUPOPUP:
@@ -1111,7 +1111,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc(HWND wnd, UINT msg, WPARAM wparam, LP
 			gDebuggerApp.GetOptions().SetString(va("watch%d", i), "");
 
 			window->mWnd = NULL;
-			SetWindowLong(wnd, GWL_USERDATA, 0);
+			SetWindowLongPtr(wnd, GWLP_USERDATA, 0);
 			break;
 		}
 
@@ -1249,7 +1249,7 @@ LRESULT CALLBACK rvDebuggerWindow::WndProc(HWND wnd, UINT msg, WPARAM wparam, LP
 		case WM_CREATE: {
 			CREATESTRUCT *cs = (CREATESTRUCT *) lparam;
 			window = (rvDebuggerWindow *) cs->lpCreateParams;
-			SetWindowLong(wnd, GWL_USERDATA, (LONG)cs->lpCreateParams);
+			SetWindowLongPtr(wnd, GWLP_USERDATA, (LONG_PTR)cs->lpCreateParams);
 
 			window->mWnd = wnd;
 			window->HandleCreate(wparam, lparam);
@@ -1542,7 +1542,7 @@ void rvDebuggerWindow::ProcessNetMessage(msg_t *msg)
 
 		case DBMSG_PRINT:
 			SendMessage(mWndConsole, EM_SETSEL, -1, -1);
-			SendMessage(mWndConsole, EM_REPLACESEL, 0, (LPARAM)(const char *)(msg->data) + msg->readcount);
+			SendMessage(mWndConsole, EM_REPLACESEL, 0, (LPARAM)(const char *)(MSG_data(msg)) + MSG_readcount(msg));
 			SendMessage(mWndConsole, EM_SCROLLCARET, 0, 0);
 			break;
 
@@ -1789,6 +1789,7 @@ void rvDebuggerWindow::CreateToolbar(void)
 	SendMessage(mWndToolbar, TB_ADDBITMAP, (WPARAM)4, (LPARAM) &tbab);
 
 	// Add the buttons to the toolbar
+    // FIXME:  warning C4838: conversion from 'int' to 'BYTE' requires a narrowing conversion
 	TBBUTTON tbb[] = { { 0, 0,					TBSTATE_ENABLED, BTNS_SEP,    0, 0, -1 },
 		{ 8, ID_DBG_FILE_OPEN,	TBSTATE_ENABLED, BTNS_BUTTON, 0, 0, -1 },
 		{ 0, 0,					TBSTATE_ENABLED, BTNS_SEP,    0, 0, -1 },
@@ -2071,7 +2072,7 @@ then the last text used will be searched for.
 */
 bool rvDebuggerWindow::FindNext(const char *text)
 {
-	int		 start;
+	long		 start;
 	FINDTEXT ft;
 
 	if (text) {
@@ -2104,7 +2105,7 @@ bool rvDebuggerWindow::FindNext(const char *text)
 		}
 	}
 
-	SendMessage(mWndScript, EM_SETSEL, start, start + mFind.Length());
+	SendMessage(mWndScript, EM_SETSEL, start, start + (long)mFind.Length());
 	SendMessage(mWndScript, EM_SCROLLCARET, 0, 0);
 
 	return true;
@@ -2121,7 +2122,7 @@ then the last text used will be searched for.
 */
 bool rvDebuggerWindow::FindPrev(const char *text)
 {
-	int		 start;
+	long		 start;
 	FINDTEXT ft;
 
 	if (text) {
@@ -2157,7 +2158,7 @@ bool rvDebuggerWindow::FindPrev(const char *text)
 		}
 	}
 
-	SendMessage(mWndScript, EM_SETSEL, start, start + mFind.Length());
+	SendMessage(mWndScript, EM_SETSEL, start, start + (long)mFind.Length());
 	SendMessage(mWndScript, EM_SCROLLCARET, 0, 0);
 
 	return true;

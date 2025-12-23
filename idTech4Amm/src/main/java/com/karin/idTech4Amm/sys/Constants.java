@@ -9,8 +9,8 @@ import com.karin.idTech4Amm.misc.TextHelper;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 69;
-    public static final String CONST_RELEASE = "2025-10-01"; // 02-12; 05-08
+    public static final int    CONST_UPDATE_RELEASE = 70;
+    public static final String CONST_RELEASE = "2025-12-21"; // 02-12; 05-08
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -30,18 +30,17 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Fix BSE effects on Quake 4.",
-            "Optimize PBR shaders with original specular texture on DOOM 3/Quake 4/Prey(2006).",
-            "Add settings by ImGui on DOOM 3/Quake 4/Prey(2006), command is `idTech4AmmSettings`, default binding to F10.",
-            "Add mp3 sound file support on DOOM 3/Quake 4/Prey(2006).",
-            "Fix GUI, credits after end of game, map static mesh vertex color on Quake 4.",
-            "Fix low frequency on HeXen-Edge of Chaos(DOOM 3 mod).",
-            "Add `Urban Terror`(ver 4.3.4) support, game standalone directory named `urt`, game data directory named `q3ut4`. More view in `" + TextHelper.GenLinkText("https://www.urbanterror.info", "Urban Terror") + "`.",
-            "Update Quake 2(yquake2) version to 8.51, update Vulkan renderer.",
-            "Update GZDOOM version to 4.14.2.",
-            "Rename Xash3D game standalone folder to `xash`.",
-            "Rename Source Engine game standalone folder to `srceng`.",
-            "Add fixed ratio resolution support on launcher `Graphics` tab.",
+            "Fix font offset in GUIs on Quake 4.",
+            "Fix a sound distance volume bug on Quake 4.",
+            "Support smooth joystick on DOOM 3 mod `Hardscorps` and Quake 4 mod `Hardqore`.",
+            "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
+            "Update RealRTCW version to 5.3, version 5.2 will be removed on next release.",
+            "Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK, yquake2(Quake 2), and add 3rd Zigock Bot II mod support on Quake 2.",
+            "On-screen button keymap and layout configures are standalone in each game.",
+            "Add Unreal engine psk/psa, iqm, Source engine smd, GLTF/GLB, Autodesk fbx animation/static model support, add md5mesh static model support on DOOM3/Quake 4/Prey",
+            "Add float console support on DOOM3/Quake 4/Prey.",
+            "Add Botrix bot support on HL2MP. More view in `" + TextHelper.GenLinkText("https://github.com/borzh/botrix", "Botrix") + "`.",
+            "[Warning]: FTEQW/Xash3D is removed in this release.",
         };
 	};
 

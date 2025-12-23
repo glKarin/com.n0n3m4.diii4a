@@ -59,5 +59,6 @@ struct objModel_t
 
 objModel_t* OBJ_Load( const char* fileName );
 void		OBJ_Free( objModel_t* obj );
+void        OBJ_Write( const objModel_t* obj, const char* fileName );
 
 #endif /* !__MODEL_OBJ_H__ */

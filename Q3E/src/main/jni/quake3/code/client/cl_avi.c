@@ -79,9 +79,9 @@ static int  bufIndex;
 SafeFS_Write
 ===============
 */
-static ID_INLINE void SafeFS_Write( const void *buffer, int len, fileHandle_t f )
+static ID_INLINE void SafeFS_Write( const void *buf, int len, fileHandle_t f )
 {
-  if( FS_Write( buffer, len, f ) < len )
+  if( FS_Write( buf, len, f ) < len )
     Com_Error( ERR_DROP, "Failed to write avi file" );
 }
 
@@ -335,10 +335,10 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
     return qfalse;
   }
 
-  if( ( afd.f = FS_FOpenFileWrite( fileName ) ) <= 0 )
+  if( ( afd.f = FS_FOpenFileWrite_HomeData( fileName ) ) <= 0 )
     return qfalse;
 
-  if( ( afd.idxF = FS_FOpenFileWrite(
+  if( ( afd.idxF = FS_FOpenFileWrite_HomeData(
           va( "%s" INDEX_FILE_EXTENSION, fileName ) ) ) <= 0 )
   {
     FS_FCloseFile( afd.f );
@@ -635,7 +635,7 @@ qboolean CL_CloseAVI( void )
   FS_FCloseFile( afd.idxF );
 
   // Remove temp index file
-  FS_HomeRemove( idxFileName );
+  FS_Remove_HomeData( idxFileName );
 
   // Write the real header
   FS_Seek( afd.f, 0, FS_SEEK_SET );

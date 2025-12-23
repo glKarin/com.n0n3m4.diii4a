@@ -65,6 +65,7 @@ typedef union prvm_eval_s
 	prvm_int_t		function;
 	prvm_int_t		ivector[3];
 	prvm_int_t		_int;
+	prvm_uint_t		_uint;
 	prvm_int_t		edict;
 } prvm_eval_t;
 

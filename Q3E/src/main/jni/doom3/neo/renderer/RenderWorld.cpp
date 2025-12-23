@@ -750,8 +750,8 @@ void idRenderWorldLocal::RenderScene(const renderView_t *renderView)
 		return;
 	}
 #ifdef _EXTRAS_TOOLS
-	ModelTest_RenderFrame(renderView->time);
-    ModelLight_RenderFrame(renderView->time);
+    R_ModelTest_RenderFrame(renderView->time);
+    R_ModelLight_RenderFrame(renderView->time);
 #endif
 
 	copy = *renderView;

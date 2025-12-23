@@ -346,6 +346,8 @@ static void prepHttpLib(void)
 {
     #ifdef __APPLE__
     const char *libname = "libcurl.4.dylib";
+    #elif defined(__ANDROID__) //karin: libcurl.so
+    const char *libname = "libcurl.so";
     #else
     const char *libname = "libcurl.so.4";
     #endif

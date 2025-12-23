@@ -223,7 +223,7 @@ static int MapKey(int key)
 
 LRESULT CALLBACK rvGEViewer::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	rvGEViewer *viewer = (rvGEViewer *) GetWindowLong(hwnd, GWL_USERDATA);
+	rvGEViewer *viewer = (rvGEViewer *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	switch (msg) {
 
@@ -361,7 +361,7 @@ LRESULT CALLBACK rvGEViewer::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 
 		case WM_CREATE: {
 			CREATESTRUCT *cs = (CREATESTRUCT *) lParam;
-			SetWindowLong(hwnd, GWL_USERDATA, (LONG)cs->lpCreateParams);
+            SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)cs->lpCreateParams);
 
 			viewer = (rvGEViewer *)cs->lpCreateParams;
 			viewer->mWnd = hwnd;
@@ -471,7 +471,7 @@ void rvGEViewer::Render(HDC dc)
 
 	// Switch GL contexts to our dc
 	if (!qwglMakeCurrent(dc, win32.hGLRC)) {
-		common->Printf("ERROR: wglMakeCurrent failed.. Error:%i\n", glGetError());
+		common->Printf("ERROR: wglMakeCurrent failed.. Error:%i\n", qglGetError());
 		common->Printf("Please restart Q3Radiant if the Map view is not working\n");
 		return;
 	}
@@ -488,20 +488,20 @@ void rvGEViewer::Render(HDC dc)
 	mWindowWidth = rClient.right - rClient.left;
 	mWindowHeight = rClient.bottom - rClient.top;
 
-	glViewport(0, 0, mWindowWidth, mWindowHeight);
-	glScissor(0, 0, mWindowWidth, mWindowHeight);
-	glClearColor(0, 0, 0, 0);
+	qglViewport(0, 0, mWindowWidth, mWindowHeight);
+	qglScissor(0, 0, mWindowWidth, mWindowHeight);
+	qglClearColor(0, 0, 0, 0);
 
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	qglDisable(GL_DEPTH_TEST);
+	qglDisable(GL_CULL_FACE);
+	qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Render the workspace below
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0,mWindowWidth, mWindowHeight, 0, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
+	qglOrtho(0,mWindowWidth, mWindowHeight, 0, -1, 1);
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
 
 	if (mInterface) {
 		viewDef_t viewDef;
@@ -527,7 +527,7 @@ void rvGEViewer::Render(HDC dc)
 		renderSystem->EndFrame(&frontEnd, &backEnd);
 	}
 
-	glFinish();
+	qglFinish();
 	qwglSwapBuffers(dc);
 }
 

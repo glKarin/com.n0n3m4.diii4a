@@ -1450,7 +1450,7 @@ FS_FreeList(char **list, int nfiles)
 static int
 Q_sort_modcmp(const void *p1, const void *p2)
 {
-	static const char *first_mods[] = {BASEDIRNAME, "xatrix", "rogue", "ctf"};
+	static const char *first_mods[] = {BASEDIRNAME, "xatrix", "rogue", "ctf", "zaero", "3zb2"};
 	static const unsigned short int first_mods_qty = 4;
 
 	const char * s1 = * (char * const *)p1;
@@ -1625,7 +1625,7 @@ FS_Dir_f(void)
 
 /*
  * This function returns true if a real file (e.g. not something
- * in a pak, somthing in the file system itself) exists in the
+ * in a pak, something in the file system itself) exists in the
  * current gamedir.
  */
 qboolean

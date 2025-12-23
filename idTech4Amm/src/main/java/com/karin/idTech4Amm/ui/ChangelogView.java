@@ -1,25 +1,16 @@
 package com.karin.idTech4Amm.ui;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.ChangeLog;
-import com.karin.idTech4Amm.misc.FileBrowser;
 import com.karin.idTech4Amm.misc.TextHelper;
-import com.karin.idTech4Amm.sys.Theme;
 import com.karin.idTech4Amm.widget.Divider;
 
 import java.util.ArrayList;

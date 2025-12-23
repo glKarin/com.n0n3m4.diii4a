@@ -1,3 +1,31 @@
+/*
+ * Copyright (C) 1997-2001 Id Software, Inc.
+ * Copyright (C) 2016-2017 Daniel Gibson
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+ * 02111-1307, USA.
+ *
+ * =======================================================================
+ *
+ * SDL backend for the GL3 renderer. Everything that needs to be on the
+ * renderer side of thing. Also all glad (or whatever OpenGL loader I
+ * end up using) specific things.
+ *
+ * =======================================================================
+ */
 // ref_gl3
 
 #include <sys/types.h>
@@ -15,7 +43,7 @@ int screen_width = 640;
 int screen_height = 480;
 int refresh_rate = 60;
 
-#define Q3E_PRINTF(...) R_Printf(PRINT_ALL, __VA_ARGS__)
+#define Q3E_PRINTF Com_Printf
 #define Q3E_ERRORF(...) ri.Sys_Error(ERR_FATAL, __VA_ARGS__)
 #define Q3E_DEBUGF printf
 #define Q3Ebool qboolean
@@ -172,7 +200,7 @@ DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei le
 	}
 
 	// use PRINT_ALL - this is only called with gl3_debugcontext != 0 anyway.
-	R_Printf(PRINT_ALL, "GLDBG %s %s %s: %s\n", sourceStr, typeStr, severityStr, message);
+	Com_Printf("GLDBG %s %s %s: %s\n", sourceStr, typeStr, severityStr, message);
 }
 
 // ---------
@@ -227,7 +255,7 @@ void GL3_SetVsync(void)
 			vsync = 1;
 			// Not every system supports adaptive
 			// vsync, fallback to normal vsync.
-			R_Printf(PRINT_ALL, "Failed to set adaptive vsync, reverting to normal vsync.\n");
+			Com_Printf("Failed to set adaptive vsync, reverting to normal vsync.\n");
 			Q3E_SwapInterval(1);
 		}
 	}
@@ -267,7 +295,7 @@ int GL3_InitContext(void* _win)
 	// Load GL pointers through GLAD and check context.
 	if( !gladLoadGLES2Loader((void *)Q3E_GET_PROC_ADDRESS))
 	{
-		R_Printf(PRINT_ALL, "GL3_InitContext(): ERROR: loading OpenGL function pointers failed!\n");
+		Com_Printf("GL3_InitContext(): ERROR: loading OpenGL function pointers failed!\n");
 
 		return false;
 	}

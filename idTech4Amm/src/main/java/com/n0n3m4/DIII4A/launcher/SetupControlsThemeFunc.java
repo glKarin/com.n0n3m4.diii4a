@@ -56,6 +56,8 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
 
     public void run()
     {
+        Q3EUtils.q3ei.LoadTypeAndArgTablePreference(m_gameLauncher);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(R.string.controls_theme);
         View widget = m_gameLauncher.getLayoutInflater().inflate(R.layout.controls_theme_dialog, null, false);
@@ -182,29 +184,10 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
         {
             super(context, R.layout.controls_theme_list_delegate);
 
-            Q3EInterface q3ei = Q3EUtils.q3ei;
-            // joystick
-            String str = Q3EUtils.q3ei.texture_table[Q3EGlobals.UI_JOYSTICK];
-            if(null != str && !str.isEmpty())
-            {
-                String[] split = str.split(";");
-                String name = split[0];
-                ControlsTheme theme = new ControlsTheme();
-                theme.name = Q3ELang.tr(getContext(), R.string.joystick_background);
-                theme.path = name;
-                m_list.add(theme);
-                name = split[1];
-                theme = new ControlsTheme();
-                theme.name = Q3ELang.tr(getContext(), R.string.joystick_center);
-                theme.path = name;
-                m_list.add(theme);
-            }
-
             for(int i = 0; i < Q3EGlobals.UI_SIZE; i++)
             {
-                int type = q3ei.type_table[i];
-                if(type == Q3EGlobals.TYPE_JOYSTICK || type == Q3EGlobals.TYPE_DISC)
-                    continue;
+                int type = Q3EUtils.q3ei.type_table[i];
+
                 String name = Q3EUtils.q3ei.texture_table[i];
                 if(type == Q3EGlobals.TYPE_SLIDER)
                 {
@@ -229,6 +212,32 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
                     else
                         m_list.add(theme);
                 }
+                else if(type == Q3EGlobals.TYPE_JOYSTICK)
+                {
+                    if(null != name && !name.isEmpty())
+                    {
+                        String[] split = name.split(";");
+                        ControlsTheme theme = new ControlsTheme();
+                        theme.name = Q3ELang.tr(getContext(), R.string.joystick_background);
+                        theme.path = split[0];
+                        m_list.add(theme);
+                        theme = new ControlsTheme();
+                        theme.name = Q3ELang.tr(getContext(), R.string.joystick_center);
+                        theme.path = split[1];
+                        m_list.add(theme);
+                    }
+                }
+                else if(type == Q3EGlobals.TYPE_DISC)
+                {
+                    ControlsTheme theme = new ControlsTheme();
+                    theme.name = Q3EGlobals.CONTROLS_NAMES[i]; // Q3ELang.tr(getContext(), R.string.weapon_panel);
+                    if(null != name && !name.isEmpty())
+                    {
+                        String[] split = name.split(";");
+                        theme.path = split[0];
+                    }
+                    m_list.add(theme);
+                }
                 else
                 {
                     ControlsTheme theme = new ControlsTheme();
@@ -236,24 +245,6 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
                     theme.path = name;
                     m_list.add(theme);
                 }
-            }
-
-            // disc panel
-
-            for(int i = 0; i < Q3EUtils.q3ei.type_table.length; i++)
-            {
-                if(Q3EUtils.q3ei.type_table[i] != Q3EGlobals.TYPE_DISC)
-                    continue;
-
-                str = Q3EUtils.q3ei.texture_table[i];
-                ControlsTheme theme = new ControlsTheme();
-                theme.name = Q3EGlobals.CONTROLS_NAMES[i]; // Q3ELang.tr(getContext(), R.string.weapon_panel);
-                if(null != str && !str.isEmpty())
-                {
-                    String[] split = str.split(";");
-                    theme.path = split[0];
-                }
-                m_list.add(theme);
             }
 
             SetData(m_list);

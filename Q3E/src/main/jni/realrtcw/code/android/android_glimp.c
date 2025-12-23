@@ -398,10 +398,13 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
 	glConfig.isFullscreen = qtrue;
     ri.Cvar_Set( "r_fullscreen", "1" );
     glConfig.displayFrequency = refresh_rate;
-    Cvar_SetValue( "r_customwidth", screen_width );
-    Cvar_SetValue( "r_customheight", screen_height );
-    Cvar_Set( "r_mode", "-1" );
-    Cvar_SetValue( "r_customPixelAspect", glConfig.windowAspect );
+    ri.Cvar_SetValue( "r_customwidth", screen_width );
+    ri.Cvar_SetValue( "r_customheight", screen_height );
+    ri.Cvar_Set( "r_mode", "-1" );
+    ri.Cvar_SetValue( "r_customPixelAspect", glConfig.windowAspect );
+    ri.Cvar_Set( "r_availableModes", "1" );
+    ri.Cvar_SetValue( "r_maxResolutionWidth", (float)screen_width );
+    ri.Cvar_SetValue( "r_maxResolutionHeight", (float)screen_height );
 
 	GLimp_GetProcAddresses( fixedFunction );
 
@@ -788,6 +791,8 @@ success:
 	GLimp_InitExtensions( fixedFunction );
 
 	ri.Cvar_Get( "r_availableModes", "", CVAR_ROM );
+	ri.Cvar_Get( "r_maxResolutionWidth", "", CVAR_ROM );
+	ri.Cvar_Get( "r_maxResolutionHeight", "", CVAR_ROM );
 
 	ri.IN_Init( NULL );
 }

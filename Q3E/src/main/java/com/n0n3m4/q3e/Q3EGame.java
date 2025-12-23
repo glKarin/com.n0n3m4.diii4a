@@ -138,6 +138,13 @@ public enum Q3EGame
             Q3EPreference.pref_harm_urt_fs_game, Q3EPreference.pref_harm_urt_user_mod, Q3EPreference.pref_harm_urt_game_mod, Q3EPreference.pref_harm_urt_game_lib, Q3EPreference.pref_params_urt, Q3EPreference.pref_harm_urt_command_record, null, Q3EPreference.pref_harm_urt_env,
             Q3EKeyCodes.KeyCodesQ3.class
     ),
+
+    OPENMOHAA(Q3EGameConstants.GAME_ID_MOHAA, Q3EGameConstants.GAME_MOHAA, Q3EGameConstants.LIB_ENGINE3_MOHAA, Q3EGameConstants.GAME_NAME_MOHAA, Q3EGameConstants.GAME_BASE_MOHAA,
+            Q3EGameConstants.GAME_VERSION_MOHAA, Q3EGameConstants.GAME_SUBDIR_MOHAA, false, Q3EGameConstants.CONFIG_FILE_MOHAA,
+            "fs_game", null, null, ".openmohaa",
+            Q3EPreference.pref_harm_openmohaa_fs_game, Q3EPreference.pref_harm_openmohaa_user_mod, Q3EPreference.pref_harm_openmohaa_game_mod, Q3EPreference.pref_harm_openmohaa_game_lib, Q3EPreference.pref_params_openmohaa, Q3EPreference.pref_harm_openmohaa_command_record, null, Q3EPreference.pref_harm_openmohaa_env,
+            Q3EKeyCodes.KeyCodesQ3.class
+    ),
     ;
 
     public final int    ID;

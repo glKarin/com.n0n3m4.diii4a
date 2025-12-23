@@ -50,6 +50,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "CollisionModel_local.h"
 
+#ifdef _RAVEN //Quake4: if FindModel() return invalid: It will return 0(worldMap) when FindModel() is invalid in DOOM3
+#define _RETURN_WORLDMAP_MODEL_IF_FINDMODEL_IS_NULL 1
+#endif
+
 
 idCollisionModelManagerLocal	collisionModelManagerLocal;
 idCollisionModelManager 		*collisionModelManager = &collisionModelManagerLocal;
@@ -330,7 +334,12 @@ void idCollisionModelManagerLocal::LoadProcBSP(const char *name)
 		return;
 	}
 
-	if (!src->ReadToken(&token) || token.Icmp(PROC_FILE_ID)) {
+#ifdef _RAVEN //karin: for compat doom3 proc
+    if (!src->ReadToken(&token) || (token.Icmp(PROC_FILE_ID) && token.Icmp(PROC_FILE_DOOM3_ID)) )
+#else
+	if (!src->ReadToken(&token) || token.Icmp(PROC_FILE_ID))
+#endif
+    {
 		common->Warning("idCollisionModelManagerLocal::LoadProcBSP: bad id '%s' instead of '%s'", token.c_str(), PROC_FILE_ID);
 		delete src;
 		return;
@@ -338,15 +347,22 @@ void idCollisionModelManagerLocal::LoadProcBSP(const char *name)
 
 #ifdef _RAVEN // quake4 proc file
 // jmarshall: quake 4 proc format
+    if(!token.Icmp(PROC_FILE_DOOM3_ID)) //karin: for compat doom3 proc
+    {
+        common->Printf("idCollisionModelManagerLocal::LoadProcBSP: DOOM3 proc version '%s' instead of '%s'\n", PROC_FILE_DOOM3_ID, PROC_FILE_ID);
+    }
+    else // Quake4 version proc
+    {
     if (!src->ReadToken(&token) || token.Icmp(PROC_FILEVERSION))
     {
-        common->Printf("idRenderWorldLocal::InitFromMap: bad version '%s' instead of '%s'\n", token.c_str(), PROC_FILEVERSION);
+        common->Printf("idCollisionModelManagerLocal::LoadProcBSP: bad version '%s' instead of '%s'\n", token.c_str(), PROC_FILEVERSION);
         delete src;
         return;
     }
 
     // Map CRC, we aren't going to use it.
     src->ReadToken(&token);
+    }
 // jmarshall end
 #endif
 
@@ -3602,11 +3618,28 @@ cm_model_t *idCollisionModelManagerLocal::LoadRenderModel(const char *fileName)
 	idStr(fileName).ExtractFileExtension(extension);
 
 	if ((extension.Icmp("ase") != 0) && (extension.Icmp("lwo") != 0) && (extension.Icmp("ma") != 0)
+        && (extension.Icmp(MD5_STATIC_MESH_EXT) != 0)
 #ifdef _MODEL_OBJ
 		&& (extension.Icmp("obj") != 0)
 #endif
 #ifdef _MODEL_DAE
 		&& (extension.Icmp("dae") != 0)
+#endif
+#ifdef _MODEL_PSK
+		&& (extension.Icmp("psk") != 0)
+#endif
+#ifdef _MODEL_IQM
+        && (extension.Icmp("iqm") != 0)
+#endif
+#ifdef _MODEL_SMD
+        && (extension.Icmp("smd") != 0)
+#endif
+#ifdef _MODEL_GLTF
+        && (extension.Icmp("gltf") != 0)
+        && (extension.Icmp("glb") != 0)
+#endif
+#ifdef _MODEL_FBX
+        && (extension.Icmp("fbx") != 0)
 #endif
 	)
 	{
@@ -4270,12 +4303,12 @@ idCollisionModelManagerLocal::GetModelPolygon
 */
 bool idCollisionModelManagerLocal::GetModelPolygon(cmHandle_t model, int polygonNum, idFixedWinding &winding) const
 {
-	int i, edgeNum;
-	cm_polygon_t *poly;
-
 #ifdef _RAVEN
 	return model ? static_cast<cm_model_t *>(model)->GetPolygon(polygonNum, winding) : false;
 #else
+    int i, edgeNum;
+	cm_polygon_t *poly;
+
 	if (model < 0 || model > MAX_SUBMODELS || model >= numModels || !models[model]) {
 		common->Printf("idCollisionModelManagerLocal::GetModelPolygon: invalid model handle\n");
 		return false;
@@ -4319,7 +4352,15 @@ cmHandle_t idCollisionModelManagerLocal::LoadModel(const char *modelName, const 
 
 	if (numModels >= MAX_SUBMODELS) {
 		common->Error("idCollisionModelManagerLocal::LoadModel: no free slots\n");
-		return 0;
+#ifdef _RAVEN //Quake4: if no collision model !!! index 0 is worldMap model in DOOM 3 !!!
+//#if _RETURN_WORLDMAP_MODEL_IF_FINDMODEL_IS_NULL
+//        return models[0]; //karin: 2025-12-12: return index 0 model(worldMap)
+//#else
+        return NULL; //karin: old - return NULL(invalid)
+//#endif
+#else // index 0 is worldMap model in DOOM 3
+        return 0;
+#endif
 	}
 
 	// try to load a .cm file
@@ -4340,7 +4381,18 @@ cmHandle_t idCollisionModelManagerLocal::LoadModel(const char *modelName, const 
 
 	// if only precaching .cm files do not waste memory converting render models
 	if (precache) {
-		return 0;
+#ifdef _RAVEN //Quake4: if no collision model !!! index 0 is worldMap model in DOOM 3 !!!
+#if _RETURN_WORLDMAP_MODEL_IF_FINDMODEL_IS_NULL
+        if(!idStr::Icmp(modelName, WORLD_MODEL_NAME)) {
+            common->Printf("idCollisionModelManagerLocal::LoadModel(precache): Load '" WORLD_MODEL_NAME "' collision model not found, using index 0(%s) collision model as world model.\n", models[0] ? models[0]->GetName() : "NULL");
+            return models[0]; //karin: 2025-12-12: return index 0 model(worldMap)
+        }
+        else
+#endif
+        return NULL; //karin: old - return NULL(invalid)
+#else
+        return 0;
+#endif
 	}
 
 	// try to load a .ASE or .LWO model and convert it to a collision model
@@ -4355,7 +4407,18 @@ cmHandle_t idCollisionModelManagerLocal::LoadModel(const char *modelName, const 
 #endif
 	}
 
-	return 0;
+#ifdef _RAVEN //Quake4: if no collision model !!! index 0 is worldMap model in DOOM 3 !!!
+#if _RETURN_WORLDMAP_MODEL_IF_FINDMODEL_IS_NULL
+    if(!idStr::Icmp(modelName, WORLD_MODEL_NAME)) {
+        common->Printf("idCollisionModelManagerLocal::LoadModel: Load '" WORLD_MODEL_NAME "' collision model not found, using index 0(%s) collision model as world model.\n", models[0] ? models[0]->GetName() : "NULL");
+        return models[0]; //karin: 2025-12-12: return index 0 model(worldMap)
+    }
+    else
+#endif
+    return NULL; //karin: old - return NULL(invalid)
+#else // index 0 is worldMap model in DOOM 3
+    return 0;
+#endif
 }
 
 /*
@@ -4572,7 +4635,7 @@ void idCollisionModelManagerLocal::BuildModels(const idMapFile *mapFile, bool fo
 				numModels++;
 			}
 
-#ifdef _RAVENxxx
+#ifdef _RAVENxxx //???
 			if (numInlinedProcClipModels && numModels == PROC_CLIPMODEL_INDEX_START) {
 				numModels += numInlinedProcClipModels;
 			}

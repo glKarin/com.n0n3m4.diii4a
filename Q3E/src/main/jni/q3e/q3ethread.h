@@ -5,6 +5,8 @@
 
 #define Q3E_THREAD_CANCEL_SIG SIGUSR1
 
+#define PTHREAD_ID_WRAP(x) (uintptr_t)(x)
+
 #ifdef __cplusplus
 extern "C" {
 #endif

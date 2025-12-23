@@ -987,7 +987,7 @@ static void R_CreateShadowMapImage_##name##_Res##res( idImage* image ) \
 { \
 	int size = shadowMapResolutions[res]; \
 	image->func parms;                                              \
-    printf("CreateShadowMapImage: %s(%s) -> %d x %d\n", #name, #func, size, size);  \
+    printf("Create shadow map: %s(%s) -> %d x %d\n", #name, #func, size, size);  \
 }
 
 #define CREATE_SHADOW_MAP_IMAGE_DECL(name, func, parms) \

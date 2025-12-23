@@ -91,7 +91,7 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
 
         List<PathTipsListView.PathTips> list = new ArrayList<>();
         Game[] values = Game.values();
-        for (String game : GameManager.Games())
+        for (String game : GameManager.Games(false))
         {
             String gameName = Tr(GameManager.GetGameNameTs(game));
             List<PathTipsListView.ModPathTips> mods = new ArrayList<>();

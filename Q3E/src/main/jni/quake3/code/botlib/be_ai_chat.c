@@ -629,7 +629,7 @@ bot_synonymlist_t *BotLoadSynonyms(char *filename)
 		source = LoadSourceFile(filename);
 		if (!source)
 		{
-			botimport.Print(PRT_ERROR, "counldn't load %s\n", filename);
+			botimport.Print(PRT_ERROR, "couldn't load %s\n", filename);
 			return NULL;
 		} //end if
 		//
@@ -984,7 +984,7 @@ bot_randomlist_t *BotLoadRandomStrings(char *filename)
 		source = LoadSourceFile(filename);
 		if (!source)
 		{
-			botimport.Print(PRT_ERROR, "counldn't load %s\n", filename);
+			botimport.Print(PRT_ERROR, "couldn't load %s\n", filename);
 			return NULL;
 		} //end if
 		//
@@ -1286,7 +1286,7 @@ bot_matchtemplate_t *BotLoadMatchTemplates(char *matchfile)
 	source = LoadSourceFile(matchfile);
 	if (!source)
 	{
-		botimport.Print(PRT_ERROR, "counldn't load %s\n", matchfile);
+		botimport.Print(PRT_ERROR, "couldn't load %s\n", matchfile);
 		return NULL;
 	} //end if
 	//
@@ -1499,8 +1499,7 @@ void BotMatchVariable(bot_match_t *match, int variable, char *buf, int size)
 		if (match->variables[variable].length < size)
 			size = match->variables[variable].length+1;
 		assert( match->variables[variable].offset >= 0 );
-		strncpy(buf, &match->string[ (int) match->variables[variable].offset], size-1);
-		buf[size-1] = '\0';
+		Q_strncpyz(buf, &match->string[ (int) match->variables[variable].offset], size);
 	} //end if
 	else
 	{
@@ -1858,7 +1857,7 @@ bot_replychat_t *BotLoadReplyChat(char *filename)
 	source = LoadSourceFile(filename);
 	if (!source)
 	{
-		botimport.Print(PRT_ERROR, "counldn't load %s\n", filename);
+		botimport.Print(PRT_ERROR, "couldn't load %s\n", filename);
 		return NULL;
 	} //end if
 	//
@@ -2057,7 +2056,7 @@ bot_chat_t *BotLoadInitialChat(char *chatfile, char *chatname)
 		source = LoadSourceFile(chatfile);
 		if (!source)
 		{
-			botimport.Print(PRT_ERROR, "counldn't load %s\n", chatfile);
+			botimport.Print(PRT_ERROR, "couldn't load %s\n", chatfile);
 			return NULL;
 		} //end if
 		//chat structure
@@ -2846,8 +2845,7 @@ void BotGetChatMessage(int chatstate, char *buf, int size)
 	if (!cs) return;
 
 	BotRemoveTildes(cs->chatmessage);
-	strncpy(buf, cs->chatmessage, size-1);
-	buf[size-1] = '\0';
+	Q_strncpyz(buf, cs->chatmessage, size);
 	//clear the chat message from the state
 	strcpy(cs->chatmessage, "");
 } //end of the function BotGetChatMessage
@@ -2883,9 +2881,7 @@ void BotSetChatName(int chatstate, char *name, int client)
 	cs = BotChatStateFromHandle(chatstate);
 	if (!cs) return;
 	cs->client = client;
-	Com_Memset(cs->name, 0, sizeof(cs->name));
-	strncpy(cs->name, name, sizeof(cs->name)-1);
-	cs->name[sizeof(cs->name)-1] = '\0';
+	Q_strncpyz(cs->name, name, sizeof(cs->name));
 } //end of the function BotSetChatName
 //===========================================================================
 //
