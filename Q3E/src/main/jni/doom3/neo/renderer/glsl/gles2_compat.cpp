@@ -4,7 +4,7 @@
 
 #define countof(x) (sizeof(x) / sizeof(x[0]))
 #define SIZEOF_MATRIX (sizeof(GLfloat) * 16)
-#define MATCPY(d, s) { if((d) != (s)) memcpy((d), (s), SIZEOF_MATRIX); }
+#define MATCPY(dx, sx) { GLfloat *d = (dx); const GLfloat *s = (sx); if(d != s) memcpy(d, s, SIZEOF_MATRIX); }
 
 #define BACKEND_MODELVIEW_MATRIX (backEnd.viewDef->worldSpace.modelViewMatrix)
 #define BACKEND_PROJECTION_MATRIX (backEnd.viewDef->projectionMatrix)
@@ -23,6 +23,8 @@
 #define TEXTURE_STATE_2D (1 << 1)
 #define TEXTURE_STATE_CUBE (1 << 2)
 #define TEXTURE_STATE_3D (1 << 3)
+
+#define GL_MATRIX_TO_STRING(x) ((idMat4 *)(x))->ToString(6)
 
 //#pragma pack(push, 1)
 // Draw vertex
@@ -55,6 +57,7 @@ static const float	GL_IDENTITY_MATRIX[16] = {
 static GLuint gl_drawPixelsImage = 0; // glDrawPixels texture handle
 static GLuint gl_UseTexture = TEXTURE_STATE_2D;
 static GLenum gl_PolygonMode = GL_FILL;
+static GLfloat gl_RasterPos[3]; // glRasterPos*f() param
 
 extern int MakePowerOfTwo(int num);
 
@@ -125,7 +128,10 @@ struct GLmatrix_stack
 public:
 	GLmatrix_stack(const char *n = "")
 	: num(0), name(n), counter(0)
-	{}
+	{
+//        GLfloat *t = stack[num++];
+//        MATCPY(t, GL_IDENTITY_MATRIX);
+    }
 
 	void Push(const GLfloat m[16]) {
         counter++;
@@ -139,14 +145,14 @@ public:
 		const GLfloat *mi;
 		if(num > 0)
 		{
-			mi = Top();
+			mi = stack[num - 1];
 		}
 		else
 		{
 			mi = m;
 		}
-        GLfloat *t = stack[num++];
-		MATCPY(t, mi);
+        num++;
+        SetTop(mi);
 	}
 
 	void Pop(void) {
@@ -162,7 +168,10 @@ public:
 
 	GLfloat * Top(void) {
 		if(num > 0)
-			return stack[num - 1];
+        {
+            //Sys_Printf("Top %s %d -> %s\n", name.c_str(), num, GL_MATRIX_TO_STRING(stack[num - 1]));
+            return stack[num - 1];
+        }
 		else
 		{
 			Sys_Printf("[GLCompat]: GLmatrix_stack(%s)::Top under\n", name.c_str());
@@ -172,10 +181,7 @@ public:
 
 	void Set(const GLfloat m[16]) {
 		if(num > 0)
-		{
-			GLfloat *t = Top();
-			MATCPY(t, m);
-		}
+            SetTop(m);
 		else
 			Sys_Printf("[GLCompat]: GLmatrix_stack(%s)::Set under\n", name.c_str());
 	}
@@ -183,17 +189,19 @@ public:
 	void Mult(const GLfloat m[16]) {
 		if(num > 0)
 		{
-			GLfloat *t = Top();
 			GLfloat b[16];
-			memcpy(b, t, sizeof(b));
-			myGlMultMatrix(m, b, t);
+			myGlMultMatrix(m, stack[num - 1], b);
+            SetTop(b);
 		}
 		else
 			Sys_Printf("[GLCompat]: GLmatrix_stack(%s)::Mult under\n", name.c_str());
 	}
 
 	void Identity(void) {
-		Set(GL_IDENTITY_MATRIX);
+        if(num > 0)
+            SetTop(GL_IDENTITY_MATRIX);
+        else
+            Sys_Printf("[GLCompat]: GLmatrix_stack(%s)::Mult under\n", name.c_str());
 	}
 
 	bool Empty(void) const {
@@ -206,7 +214,10 @@ public:
 
 	const GLfloat * Top(const GLfloat *m) const {
 		if(num > 0)
-			return stack[num - 1];
+        {
+            //Sys_Printf("CCC %s %d -> %s\n", name.c_str(), num, GL_MATRIX_TO_STRING(stack[num - 1]));
+            return stack[num - 1];
+        }
 		else
 			return m;
 	}
@@ -219,6 +230,13 @@ public:
 	int num;
     idStr name;
     int counter;
+
+private:
+    void SetTop(const GLfloat m[16]) {
+        GLfloat *t = stack[num - 1];
+        //Sys_Printf("Set %s %d -> %s\n", name.c_str(), num, GL_MATRIX_TO_STRING(m));
+        MATCPY(t, m);
+    }
 };
 // Projection matrix stack for glPushMatrix()/glPopMatrix()/glXxxxMatrix
 static GLmatrix_stack</*2*/8> gl_ProjectionMatrixStack("Projection");
@@ -330,7 +348,7 @@ if(gl_MatrixMode == GL_PROJECTION) \
         gl_ProjectionMatrixStack.Push(BACKEND_PROJECTION_MATRIX); \
     } \
     GLfloat m[16]; \
-    memcpy(m, gl_ProjectionMatrix, sizeof(GLfloat) * 16); \
+    MATCPY(m, gl_ProjectionMatrix); \
     x; \
     gl_ProjectionMatrixStack.Set(m); \
 } \
@@ -341,7 +359,7 @@ else \
         gl_ModelviewMatrixStack.Push(BACKEND_MODELVIEW_MATRIX); \
     } \
     GLfloat m[16]; \
-    memcpy(m, gl_ModelviewMatrix, sizeof(GLfloat) * 16); \
+    MATCPY(m, gl_ModelviewMatrix); \
     x; \
     gl_ModelviewMatrixStack.Set(m); \
 }
@@ -359,6 +377,11 @@ GLRB_API void glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 GLRB_API void glTranslatef(GLfloat x, GLfloat y, GLfloat z)
 {
     GLCP_MULT_MATRIX(esTranslate((ESMatrix *)m, x, y, z))
+}
+
+GLRB_API void glScalef(GLfloat x, GLfloat y, GLfloat z)
+{
+    GLCP_MULT_MATRIX(esScale((ESMatrix *)m, x, y, z))
 }
 
 GLRB_API void glRectf(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2)
@@ -409,6 +432,11 @@ GLRB_API void glNormal3f(GLfloat x, GLfloat y, GLfloat z)
 GLRB_API void glVertex2f(GLfloat x, GLfloat y)
 {
 	glVertex3f(x, y, 0.0f);
+}
+
+GLRB_API void glVertex2fv(const GLfloat v[2])
+{
+    glVertex2f(v[0], v[1]);
 }
 
 GLRB_API void glVertex3fv(const GLfloat v[3])
@@ -560,10 +588,25 @@ GLRB_API void glesGetFloatv(GLenum pname, GLfloat *data)
             memcpy(data, gl_Color, sizeof(GLfloat) * 4);
             break;
         case GL_PROJECTION_MATRIX:
-            memcpy(data, gl_ProjectionMatrix, sizeof(GLfloat) * 16);
+            MATCPY(data, gl_ProjectionMatrix);
+            break;
+        case GL_MODELVIEW_MATRIX:
+            MATCPY(data, gl_ModelviewMatrix);
             break;
         default:
             qglGetFloatv(pname, data);
+            break;
+    }
+}
+
+GLRB_API void glesGetIntegerv(GLenum pname, GLint *data)
+{
+    switch (pname) {
+        case GL_MATRIX_MODE:
+            *data = gl_MatrixMode;
+            break;
+        default:
+            qglGetIntegerv(pname, data);
             break;
     }
 }
@@ -1114,9 +1157,181 @@ void RB_ShowImages_compat(void)
 	common->Printf("%i msec to draw all images\n", end - start);
 }
 
-ID_INLINE GLRB_API void glRasterPos2f(GLfloat x, GLfloat y)
+GLRB_API void glRasterPos2f(GLfloat x, GLfloat y)
 {
+    glRasterPos3f(x, y, 0.0f);
+}
 
+GLRB_API void glRasterPos3f(GLfloat x, GLfloat y, GLfloat z)
+{
+    gl_RasterPos[0] = x;
+    gl_RasterPos[1] = y;
+    gl_RasterPos[2] = z;
+}
+
+GLRB_API void glRasterPos3fv(GLfloat p[3])
+{
+    glRasterPos3f(p[0], p[1], p[2]);
+}
+
+static void glesTransformPoint(const GLfloat mvp[16], int screenWidth, int screenHeight, const GLfloat pos[3], GLfloat ret[2]) {
+    const GLfloat v[4] = {pos[0], pos[1], pos[2], 1.0f};
+    GLfloat clip[4];
+
+    clip[0] = mvp[0]*v[0] + mvp[1]*v[1] + mvp[2]*v[2] + mvp[3]*v[3];
+    clip[1] = mvp[4]*v[0] + mvp[5]*v[1] + mvp[6]*v[2] + mvp[7]*v[3];
+    clip[2] = mvp[8]*v[0] + mvp[9]*v[1] + mvp[10]*v[2] + mvp[11]*v[3];
+    clip[3] = mvp[12]*v[0] + mvp[13]*v[1] + mvp[14]*v[2] + mvp[15]*v[3];
+//    for (int i = 0; i < 4; i++) {
+//        clip[i] = mvp[i*4+0]*v[0] + mvp[i*4+1]*v[1] + mvp[i*4+2]*v[2] + mvp[i*4+3]*v[3];
+//    }
+
+    GLfloat ndcX = clip[0] / clip[3];
+    GLfloat ndcY = clip[1] / clip[3];
+
+    ret[0] = (ndcX + 1.0f) * 0.5f * screenWidth;
+    ret[1] = (1.0f - ndcY) * 0.5f * screenHeight;
+}
+
+static void glesTransformPoint(const GLfloat pos[3], GLfloat ret[2]) {
+    const GLfloat *mv = gl_ModelviewMatrix;
+    const GLfloat *p = gl_ProjectionMatrix;
+
+    GLint viewport[4];
+    qglGetIntegerv(GL_MAX_VIEWPORT_DIMS, viewport);
+
+    GLfloat mvp[16];
+    myGlMultMatrix(mv, p, mvp);
+
+    glesTransformPoint(mvp, viewport[2], viewport[3], pos, ret);
+}
+
+static GLfloat glesGetPixelsScaler(void)
+{
+    idVec2 v1;
+    idVec2 v2;
+    glesTransformPoint(idVec3(0.0f, 0.0f, 0.0f).ToFloatPtr(), v1.ToFloatPtr());
+    glesTransformPoint(idVec3(1.0f, 0.0f, 0.0f).ToFloatPtr(), v2.ToFloatPtr());
+    idVec2 v3 = v2 - v1;
+    return v3.Length();
+}
+
+// only for render ASCII char
+GLRB_API void glCallLists( GLsizei n, GLenum type, const GLvoid *lists )
+{
+    if(type != GL_UNSIGNED_BYTE)
+    {
+        Sys_Printf("glCallLists only support type = GL_UNSIGNED_BYTE\n");
+        return;
+    }
+    if(n <= 0 || !lists)
+        return;
+
+    const char *text = (const char *)lists;
+    int i, num, index, charIndex;
+    float spacing;
+    idVec3 org, p1, p2;
+    const idMat3 &viewAxis = mat3_identity;
+
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    qglDisable(GL_DEPTH_TEST);
+    qglDepthMask(GL_FALSE);
+    qglDisable(GL_BLEND);
+
+    GLuint old = gl_UseTexture;
+    if(old != 0)
+        gl_UseTexture = 0;
+
+    org.Zero();
+
+    GLenum mode = gl_MatrixMode;
+
+    //GLfloat scaler = 1.0f / glesGetPixelsScaler();
+    const float scale = /*1.0f / scaler **/ 0.12f;
+
+    if(mode != GL_MODELVIEW)
+        glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glTranslatef(gl_RasterPos[0], gl_RasterPos[1], gl_RasterPos[2]);
+    //glScalef(scaler, scaler, scaler);
+
+/*    const GLfloat *mv = gl_ModelviewMatrix;
+    const GLfloat *p = gl_ProjectionMatrix;
+
+    GLint viewport[4];
+    qglGetIntegerv(GL_MAX_VIEWPORT_DIMS, viewport);
+    GLint screenWidth = viewport[2];
+    GLint screenHeight = viewport[3];
+
+    GLfloat mvp[16];
+    myGlMultMatrix(mv, p, mvp);
+
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, screenWidth, screenHeight, 0, -1, 1);*/
+
+    glBegin(GL_LINES);
+    {
+        for (i = 0; i < n; i++)
+        {
+            charIndex = text[i] - 32;
+
+            if (charIndex < 0 || charIndex > NUM_SIMPLEX_CHARS) {
+                continue;
+            }
+
+            num = simplex[charIndex][0] * 2;
+            spacing = simplex[charIndex][1];
+            index = 2;
+
+            while (index - 2 < num) {
+                if (simplex[charIndex][index] < 0) {
+                    index++;
+                    continue;
+                }
+
+                //p1 = org + scale * simplex[charIndex][index] * -viewAxis[1] + scale * simplex[charIndex][index+1] * viewAxis[2];
+                p1 = org + scale * idVec3(simplex[charIndex][index], simplex[charIndex][index+1], 0);
+                index += 2;
+
+                if (simplex[charIndex][index] < 0) {
+                    index++;
+                    continue;
+                }
+
+                //p2 = org + scale * simplex[charIndex][index] * -viewAxis[1] + scale * simplex[charIndex][index+1] * viewAxis[2];
+                p2 = org + scale * idVec3(simplex[charIndex][index], simplex[charIndex][index+1], 0);
+
+/*                idVec2 c1, c2;
+                glesTransformPoint(mvp, screenWidth, screenHeight, p1.ToFloatPtr(), c1.ToFloatPtr());
+                glesTransformPoint(mvp, screenWidth, screenHeight, p2.ToFloatPtr(), c2.ToFloatPtr());
+                glVertex2fv(c1.ToFloatPtr());
+                glVertex2fv(c2.ToFloatPtr());*/
+
+                glVertex3fv(p1.ToFloatPtr());
+                glVertex3fv(p2.ToFloatPtr());
+            }
+
+            //org -= viewAxis[1] * (spacing * scale);
+            org += idVec3((spacing * scale), 0, 0);
+        }
+    }
+    glEnd();
+
+    glPopAttrib();
+
+    if(old != gl_UseTexture)
+        gl_UseTexture = old;
+
+//    glPopMatrix();
+//    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    if(mode != GL_MODELVIEW)
+        glMatrixMode(mode);
 }
 
 GLRB_PRIV void glesCreateDrawPixelsImage(GLint width, GLint height, const GLubyte *data, GLfloat *x, GLfloat *y)
@@ -1412,4 +1627,27 @@ void gluSphere(GLUquadricObj *, float r, int lats, int longs)
         }
         glEnd();
     }
+}
+
+GLenum glesPushIdentityMatrix(void)
+{
+    GLenum m = gl_MatrixMode;
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    return m;
+}
+
+void glesPopIdentityMatrix(GLenum m)
+{
+    if(!m)
+        return;
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(m);
 }

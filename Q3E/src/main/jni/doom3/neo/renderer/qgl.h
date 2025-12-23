@@ -478,32 +478,43 @@ extern BOOL(WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 #define qglColor4f glColor4f
 #define qglColor3f glColor3f
 #define qglVertex2f glVertex2f
+#define qglVertex2fv glVertex2fv
 #define qglVertex3f glVertex3f
 #define qglVertex3fv glVertex3fv
 #define qglMatrixMode glMatrixMode
-#define qglLoadIdentity glLoadIdentity
-#define qglOrtho glOrtho
+#if 1
 #define qglPushMatrix glPushMatrix
 #define qglPopMatrix glPopMatrix
-#define qglColor3fv glColor3fv
-#define qglColor4fv glColor4fv
 #define qglRotatef glRotatef
 #define qglTranslatef glTranslatef
+#define qglLoadMatrixf glLoadMatrixf
+#define qglLoadIdentity glLoadIdentity
+#define qglOrtho glOrtho
+#else
+#define qglPushMatrix() { Sys_Printf("glPushMatrix %s(%d)::%s\n", __FILE__, __LINE__, __func__); glPushMatrix(); }
+#define qglPopMatrix()  { Sys_Printf("glPopMatrix %s(%d)::%s\n", __FILE__, __LINE__, __func__); glPopMatrix(); }
+#define qglRotatef(...) { Sys_Printf("glRotatef %s(%d)::%s\n", __FILE__, __LINE__, __func__); glRotatef(__VA_ARGS__); }
+#define qglTranslatef(...)  { Sys_Printf("glTranslatef %s(%d)::%s\n", __FILE__, __LINE__, __func__); glTranslatef(__VA_ARGS__); }
+#define qglLoadMatrixf(...) { Sys_Printf("glLoadMatrixf %s(%d)::%s\n", __FILE__, __LINE__, __func__); glLoadMatrixf(__VA_ARGS__); }
+#define qglLoadIdentity()  { Sys_Printf("glLoadIdentity %s(%d)::%s\n", __FILE__, __LINE__, __func__); glLoadIdentity(); }
+#define qglOrtho(...) { Sys_Printf("glOrtho %s(%d)::%s\n", __FILE__, __LINE__, __func__); glOrtho(__VA_ARGS__); }
+#endif
+#define qglColor3fv glColor3fv
+#define qglColor4fv glColor4fv
 #define qglRectf glRectf
 #define qglTexCoord2f glTexCoord2f
 #define qglTexCoord2fv glTexCoord2fv
 #define qglEnableClientState glEnableClientState
 #define qglPushAttrib glPushAttrib
 #define qglPopAttrib glPopAttrib
-#define qglLoadMatrixf glLoadMatrixf
 #define qglPolygonMode glPolygonMode
+#define qglRasterPos2f glRasterPos2f
+#define qglRasterPos3f glRasterPos3f
+#define qglRasterPos3fv glRasterPos3fv
 
 #define GL_COMPILE_AND_EXECUTE 0x1301
 #define qglPointSize(x)
-#define qglRasterPos2f(x, y)
-#define qglRasterPos3f(x, y, z)
-#define qglRasterPos3fv(x)
-#define qglCallLists(x, y, z)
+#define qglCallLists glCallLists
 #define qglCallList(x)
 #define qglEndList()
 #define qglNewList(x, y)
