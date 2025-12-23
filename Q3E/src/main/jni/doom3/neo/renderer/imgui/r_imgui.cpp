@@ -399,7 +399,7 @@ void idImGui::PullEvent(void)
     {
         HandleEvent(events[i]);
     }
-    events.Clear();
+    events.SetNum(0);
 }
 
 void idImGui::HandleCallback(const igCallback_t &cb)
@@ -428,7 +428,7 @@ void idImGui::PullCallback(void)
     {
         HandleCallback(callbacks[i]);
     }
-    callbacks.Clear();
+    callbacks.SetNum(0);
 }
 
 #if 0

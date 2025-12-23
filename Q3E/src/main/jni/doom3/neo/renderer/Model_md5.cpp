@@ -899,11 +899,12 @@ idRenderModel *idRenderModelMD5::InstantiateDynamicModel(const struct renderEnti
 #endif
 
 #ifdef _RAVEN //k: show/hide surface
-	surfaceShaderList.Clear();
+	if(surfaceShaderList.Num() != staticModel->surfaces.Num())
+		surfaceShaderList.SetNum(staticModel->surfaces.Num());
 	for(i = 0; i < staticModel->surfaces.Num(); i++)
 	{
 		const modelSurface_t *surf = &staticModel->surfaces[i];
-		surfaceShaderList.Append(surf && surf->shader ? surf->shader->GetName() : "");
+		surfaceShaderList[i] = surf && surf->shader ? surf->shader->GetName() : "";
 	}
 #endif
 
