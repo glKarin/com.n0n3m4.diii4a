@@ -66,7 +66,7 @@ void idRenderThread::BackendThreadExecute( void )
     GLimp_DeactivateContext();
     backendThreadShutdown = false;
     Sys_CreateThread(BackendThread, common, THREAD_HIGHEST, render_thread, RENDER_THREAD_NAME, g_threads, &g_thread_count);
-    common->Printf("[MainThread]: Render thread start -> %zd(%s)\n", render_thread.threadHandle, RENDER_THREAD_NAME);
+    common->Printf("[MainThread]: Render thread start -> %zu(%s)\n", XTHREAD_ID(render_thread), RENDER_THREAD_NAME);
 }
 
 void idRenderThread::BackendThreadShutdown( void )
@@ -78,11 +78,13 @@ void idRenderThread::BackendThreadShutdown( void )
     BackendThreadWait();
     backendThreadShutdown = true;
     Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
+	xthreadHandle_t threadId = XTHREAD_ID(render_thread);
     Sys_DestroyThread(render_thread);
+	render_thread.name = "";
     while(!render_thread_finished)
         Sys_WaitForEvent(TRIGGER_EVENT_RENDER_THREAD_FINISHED);
     GLimp_ActivateContext();
-    common->Printf("[MainThread]: Render thread shutdown -> %s\n", RENDER_THREAD_NAME);
+    common->Printf("[MainThread]: Render thread shutdown -> %zu(%s)\n", threadId, RENDER_THREAD_NAME);
 }
 
 // only render thread is running and main thread is waiting

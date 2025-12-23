@@ -242,8 +242,8 @@ void Sys_CreateThread(xthread_t function, void *parms, xthreadInfo& info, const 
 	}
 
 	info.name = name;
-	info.threadHandle = (intptr_t)t;
-	info.threadId = SDL_GetThreadID(t);
+	info.threadHandle = XTHREAD_HANDLE_WRAP(t);
+	info.threadId = XTHREAD_ID_WRAP(SDL_GetThreadID(t)); // min is 0
 
 	if (thread_count < MAX_THREADS)
 		thread[thread_count++] = &info;
@@ -274,7 +274,7 @@ Sys_DestroyThread
 void Sys_DestroyThread(xthreadInfo& info) {
 	assert(info.threadHandle);
 
-	SDL_WaitThread((SDL_Thread *)info.threadHandle, NULL);
+	SDL_WaitThread(XTHREAD_HANDLE_UNWRAP(info.threadHandle), NULL);
 
 	info.name = NULL;
 	info.threadHandle = NULL;
@@ -311,10 +311,10 @@ const char *Sys_GetThreadName(int *index) {
 
 	Sys_EnterCriticalSection();
 
-	unsigned int id = SDL_ThreadID();
+	SDL_threadID id = SDL_ThreadID();
 
 	for (int i = 0; i < thread_count; i++) {
-		if (id == thread[i]->threadId) {
+		if (id == XTHREAD_ID_UNWRAP(thread[i]->threadId)) {
 			if (index)
 				*index = i;
 
@@ -351,7 +351,7 @@ bool Sys_IsMainThread() {
 
 bool Sys_InThread(const xthreadInfo *thread)
 {
-    return SDL_ThreadID() == thread->threadId;
+    return SDL_ThreadID() == XTHREAD_ID_UNWRAP(thread->threadId);
 }
 
 bool Sys_ThreadIsRunning(const xthreadInfo *thread)
@@ -359,10 +359,10 @@ bool Sys_ThreadIsRunning(const xthreadInfo *thread)
     return (thread->threadHandle);
 }
 
-intptr_t Sys_GetMainThread(void)
+xthreadId_t Sys_GetMainThread(void)
 {
     if ( mainThreadIDset )
-        return mainThreadID;
+        return XTHREAD_ID_WRAP(mainThreadID);
     // if this is called before mainThreadID is set, we haven't created
     // any threads yet so it should be the main thread
     return 0;

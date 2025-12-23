@@ -1262,13 +1262,13 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 #endif
 
 #ifdef _MULTITHREAD
-    extern intptr_t Sys_GetMainThread(void);
-    common->Printf("Multi-Thread: %s\n", multithreadActive ? "enabled" : "disabled");
-    common->Printf(" - Main thread handle: %zd\n", Sys_GetMainThread());
+    extern xthreadId_t Sys_GetMainThread(void);
+    common->Printf("Multi-Thread: %s\n", multithreadActive ? "actived" : "inactived");
+    common->Printf(" - Main thread handle: %zu\n", Sys_GetMainThread());
     //if(multithreadActive)
     {
         const xthreadInfo *thread = &renderThread->render_thread;
-        common->Printf(" - Render thread(%s) handle: %zd\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
+        common->Printf(" - Render thread(%s) handle: %zu\n", thread->name, XTHREAD_ID(*thread));
     }
 #endif
 

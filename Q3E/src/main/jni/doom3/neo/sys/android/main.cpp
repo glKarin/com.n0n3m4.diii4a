@@ -733,7 +733,7 @@ void ShutdownGame(void)
     }
 }
 
-intptr_t Sys_GetMainThread(void)
+xthreadId_t Sys_GetMainThread(void)
 {
-	return main_thread;
+	return XTHREAD_ID_WRAP(main_thread);
 }

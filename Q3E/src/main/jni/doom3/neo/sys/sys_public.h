@@ -561,10 +561,23 @@ typedef enum {
 	THREAD_HIGHEST
 } xthreadPriority;
 
+#define XTHREAD_ID(thread) (thread).threadId
+#define XTHREAD_HANDLE_WRAP(x) (xthreadHandle_t)(x)
+#define XTHREAD_ID_WRAP(x) (xthreadId_t)(x)
+#ifdef _SDL
+#define XTHREAD_HANDLE_UNWRAP(x) (SDL_Thread *)(x)
+#define XTHREAD_ID_UNWRAP(x) x // (SDL_threadID)(x)
+#else
+//#define XTHREAD_ID(thread) THREAD_HANDLE_WRAP((thread).threadHandle)
+#define XTHREAD_HANDLE_UNWRAP(x) (pthread_t)(x)
+#define XTHREAD_ID_UNWRAP(x) (pthread_t)(x)
+#endif
+typedef uintptr_t xthreadHandle_t;
+typedef size_t xthreadId_t;
 typedef struct {
 	const char 	*name;
-	intptr_t	threadHandle;
-	size_t		threadId;
+	xthreadHandle_t/*intptr_t*/	threadHandle;
+	xthreadId_t		threadId;
 #ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
 	volatile bool		threadCancel;
 #endif

@@ -190,6 +190,7 @@ void Sys_CreateThread(xthread_t function, void *parms, xthreadPriority priority,
 
 	pthread_attr_destroy(&attr);
 	info.name = name;
+	info.threadId = XTHREAD_HANDLE_WRAP(info.threadHandle);
 
 	if (*thread_count < MAX_THREADS) {
 		threads[(*thread_count)++ ] = &info;
@@ -216,16 +217,17 @@ void Sys_DestroyThread(xthreadInfo &info)
 #ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
 	info.threadCancel = true;
 #else
-	if (pthread_cancel((pthread_t)info.threadHandle) != 0) {
+	if (pthread_cancel(XTHREAD_HANDLE_UNWRAP(info.threadHandle)) != 0) {
 		common->Error("ERROR: pthread_cancel %s failed\n", info.name);
 	}
 #endif
 
-	if (pthread_join((pthread_t)info.threadHandle, NULL) != 0) {
+	if (pthread_join(XTHREAD_HANDLE_UNWRAP(info.threadHandle), NULL) != 0) {
 		common->Error("ERROR: pthread_join %s failed\n", info.name);
 	}
 
 	info.threadHandle = 0;
+	info.threadId = 0;
 	Sys_EnterCriticalSection();
 
 	for (int i = 0 ; i < g_thread_count ; i++) {
@@ -258,7 +260,7 @@ const char *Sys_GetThreadName(int *index)
 	pthread_t thread = pthread_self();
 
 	for (int i = 0 ; i < g_thread_count ; i++) {
-		if (thread == (pthread_t)g_threads[ i ]->threadHandle) {
+		if (thread == XTHREAD_HANDLE_UNWRAP(g_threads[ i ]->threadHandle)) {
 			if (index) {
 				*index = i;
 			}
@@ -342,7 +344,7 @@ bool Sys_InThread(const xthreadInfo *thread)
 #if 0
 	return (!idStr::Icmp(thread->name, Sys_GetThreadName()));
 #else
-	return thread->threadHandle && pthread_equal(thread->threadHandle, pthread_self()) != 0;
+	return thread->threadHandle && pthread_equal(XTHREAD_HANDLE_UNWRAP(thread->threadHandle), pthread_self()) != 0;
 #endif
 }
 
