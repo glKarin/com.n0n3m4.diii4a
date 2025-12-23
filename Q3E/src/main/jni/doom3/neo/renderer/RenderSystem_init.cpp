@@ -699,6 +699,9 @@ void R_InitOpenGL(void)
 		vertexCache.BeginBackEnd(vertexCacheFrame);
 		vertexCache.EndBackEnd(vertexCacheFrame);
 		vertexCache.EndFrame();
+
+		cmdSystem->AddCommand("multithread", /*idRenderThread::*/R_EnableRenderThread_f, CMD_FL_RENDERER, "enable/disable multi-threading rendering");
+		multithreadEnable = true; // enable default
 	}
 #endif
 	// Reset our gamma
@@ -1264,6 +1267,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 #ifdef _MULTITHREAD
     extern xthreadId_t Sys_GetMainThread(void);
     common->Printf("Multi-Thread: %s\n", multithreadActive ? "actived" : "inactived");
+    common->Printf("Multi-Thread state: %s\n", multithreadEnable ? "enabled" : "disabled");
     common->Printf(" - Main thread handle: %zu\n", Sys_GetMainThread());
     //if(multithreadActive)
     {

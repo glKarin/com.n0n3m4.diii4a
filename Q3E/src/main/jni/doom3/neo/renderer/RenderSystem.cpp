@@ -194,16 +194,25 @@ static void RenderCommands(renderCrop_t *pc = NULL, byte *pix = NULL)
 	if(GLimp_CheckGLInitialized()) // check/wait EGL context
 	//if(has_gl_context)
     {
-        renderThread->BackendThreadExecute();
+		renderThread->SyncState();
 
-        Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
+		if(multithreadEnable)
+		{
+			renderThread->BackendThreadExecute();
 
-        Sys_WaitForEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
+			Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
 
-        if(pix)
-        {
-            renderThread->BackendThreadWait();
-        }
+			Sys_WaitForEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
+
+			if(pix)
+			{
+				renderThread->BackendThreadWait();
+			}
+		}
+		else
+		{
+			renderThread->BackendThreadDoTask();
+		}
     }
 /*	else
     {

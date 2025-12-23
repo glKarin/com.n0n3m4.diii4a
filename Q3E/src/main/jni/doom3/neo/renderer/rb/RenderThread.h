@@ -8,6 +8,7 @@
 #define RENDER_THREAD_NAME "render_thread"
 
 extern bool multithreadActive;
+extern bool multithreadEnable;
 
 typedef struct ActuallyLoadImage_data_s
 {
@@ -26,7 +27,8 @@ typedef struct ActuallyLoadImage_data_s
     {}
 } ActuallyLoadImage_data_t;
 
-class idRenderThread {
+class idRenderThread
+{
 public:
     idRenderThread();
     volatile bool           backendThreadShutdown;
@@ -54,10 +56,20 @@ public:
     idImage *			    GetNextPurgeImage();
     void                    HandlePendingImage( void );
     void                    ClearImages( void );
+    void                    Request( bool on );
+    void                    SyncState( void );
+    void                    BackendThreadDoTask( void );
 
 private:
     idQueueList<ActuallyLoadImage_data_t>	imagesAlloc; //List for the backend thread
     idQueueList<idImage *>	imagesPurge; //List for the backend thread
+	int						requestState;
+
+	enum {
+		REQ_NONE,
+		REQ_ENABLE,
+		REQ_DISABLE,
+	};
 
 private:
     idRenderThread(const idRenderThread &);
@@ -67,6 +79,7 @@ private:
     void                    operator delete(void *);
     void                    operator delete[](void *);
 };
+	void				R_EnableRenderThread_f(const idCmdArgs &args);
 
 extern idRenderThread *renderThread;
 

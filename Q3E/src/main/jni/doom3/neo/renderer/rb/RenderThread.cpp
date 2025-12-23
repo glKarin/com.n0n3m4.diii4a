@@ -5,6 +5,7 @@
 #define RENDER_THREAD_STARTED() (Sys_ThreadIsRunning(&render_thread))
 
 bool multithreadActive = false;
+bool multithreadEnable = false;
 
 static idRenderThread renderThreadInstance;
 idRenderThread *renderThread = &renderThreadInstance;
@@ -15,11 +16,11 @@ extern void RB_GLSL_HandleShaders(void);
 
 static idCVar r_multithread("r_multithread",
 #ifdef __ANDROID__
-                                 "0"
+        "0"
 #else
         "1"
 #endif
-                                 , CVAR_ARCHIVE | CVAR_INIT | CVAR_BOOL | CVAR_RENDERER, "Multithread backend");
+        , CVAR_ARCHIVE | CVAR_INIT | CVAR_BOOL | CVAR_RENDERER, "Multithread backend. Allow using command `multithread` to enable or disable if `r_multithread` is 1");
 
 static void * BackendThread(void *data)
 {
@@ -46,7 +47,8 @@ idRenderThread::idRenderThread()
   fdToRender(NULL),
   vertListToRender(0),
   pixelsCrop(NULL),
-  pixels(NULL)
+  pixels(NULL),
+  requestState(REQ_NONE)
 {
     memset(&render_thread, 0, sizeof(render_thread));
 //    imagesAlloc.Resize( 1024, 1024 );
@@ -131,6 +133,29 @@ void idRenderThread::BackendThreadTask( void ) // BackendThread ->
     Sys_TriggerEvent(TRIGGER_EVENT_BACKEND_FINISHED);
 }
 
+void idRenderThread::BackendThreadDoTask( void ) // SingleThread ->
+{
+    // Purge all images,  Load all images
+    this->HandlePendingImage();
+
+    // main thread is waiting render thread, only render thread is running
+    RB_OnlyRenderThreadRunningAndMainThreadWaiting();
+
+    int backendVertexCache = vertListToRender;
+    vertexCache.BeginBackEnd(backendVertexCache);
+    R_IssueRenderCommands(fdToRender);
+
+    // Take screen shot
+    if(pixels) // if block backend rendering, do not exit backend render function, because it will be swap buffers in GLSurfaceView
+    {
+        qglReadPixels( pixelsCrop->x, pixelsCrop->y, pixelsCrop->width, pixelsCrop->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels );
+        pixels = NULL;
+        pixelsCrop = NULL;
+    }
+
+    vertexCache.EndBackEnd(backendVertexCache);
+    backendFinished = true;
+}
 
 // waiting backend render finished
 void idRenderThread::BackendThreadWait( void )
@@ -255,6 +280,57 @@ void idRenderThread::ClearImages( void )
 #endif
 }
 
+void idRenderThread::Request( bool on )
+{
+    if(!multithreadActive)
+        return;
+	if(multithreadEnable == on)
+		return;
+	if(requestState != REQ_NONE)
+	{
+		common->Printf("Render thread has been request change to %s.\n", requestState == REQ_ENABLE ? "enable" : "disable");
+		return;
+	}
+	if(on)
+	{
+		requestState = REQ_ENABLE;
+		common->Printf("Render thread will be change to enable.\n");
+	}
+	else
+	{
+		requestState = REQ_DISABLE;
+		common->Printf("Render thread will be change to disable.\n");
+	}
+}
+
+void idRenderThread::SyncState( void )
+{
+    if(!multithreadActive)
+        return;
+	if(requestState == REQ_NONE)
+		return;
+	bool on = requestState == REQ_ENABLE;
+	if(multithreadEnable == on)
+		return;
+
+	requestState = REQ_NONE;
+	multithreadEnable = on;
+	common->Printf("Render thread request change to %s.\n", on ? "enable" : "disable");
+	if(on)
+	{
+		BackendThreadExecute();
+		common->Printf("Render thread change to enable.\n");
+	}
+	else
+	{
+		backendFinished = true;
+        Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
+		BackendThreadShutdown();
+		backendFinished = false;
+		common->Printf("Render thread change to disable.\n");
+	}
+}
+
 bool Sys_InRenderThread(void)
 {
     return Sys_InThread(&renderThreadInstance.render_thread);
@@ -267,4 +343,23 @@ void Sys_ShutdownRenderThread(void)
         Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
         renderThreadInstance.BackendThreadShutdown();
     }
+}
+
+void R_EnableRenderThread_f(const idCmdArgs &args)
+{
+	if(!multithreadActive)
+	{
+		common->Printf("Multi-threading is not active\n");
+		return;
+	}
+	if(args.Argc() > 1)
+	{
+		const char *st = args.Argv(1);
+		bool on = st && st[0] && idStr::Cmp("0", st);
+		renderThreadInstance.Request(on);
+	}
+	else
+	{
+		renderThreadInstance.Request(!multithreadEnable);
+	}
 }

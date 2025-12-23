@@ -567,31 +567,8 @@ void idImGuiSettings::RenderRemoveCvars(void) const
 void idImGuiSettings::RenderNewCommands(void) const
 {
     const char *NewCommands[] = {
-            "pskToMd5mesh",
-            "psaToMd5anim",
-            "pskPsaToMd5",
-            "pskToObj",
-            "iqmToMd5mesh",
-            "iqmToMd5anim",
-            "iqmToMd5",
-            "iqmToObj",
-            "smdToMd5mesh",
-            "smdToMd5anim",
-            "smdToMd5",
-            "smdToObj",
-            "fbxToMd5mesh",
-            "fbxToMd5anim",
-            "fbxToMd5",
-            "fbxToObj",
-            "md5meshV6ToV10",
-            "md5animV6ToV10",
-            "md5V6ToV10",
-            "convertMd5Def",
-            "convertMd5AllDefs",
-            "cleanConvertedMd5",
-            "cleanExternalGLSLShaderSource",
-#ifdef GL_ES_VERSION_3_0
-            "cleanGLSLShaderBinary",
+#ifdef _MULTITHREAD
+            "multithread",
 #endif
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
@@ -964,6 +941,7 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterCvar("harm_r_openglVersion", "OpenGL version", IG_CVAR_COMPONENT_COMBO | IG_CVAR_GROUP_RENDERER, "GLES2=GLES 2.0;GLES3.0=GLES 3.0+;OpenGL_core=OpenGL desktop core;OpenGL_compatibility=OpenGL desktop compatibility");
 #ifdef _MULTITHREAD
     ImGui_RegisterCvar("r_multithread", "Enable multi-threading rendering");
+    ImGui_RegisterCmd("multithread", "Enable/disable multi-threading rendering", IG_CVAR_COMPONENT_BUTTON | IG_CVAR_GROUP_RENDERER);
 #endif
 #endif
     ImGui_RegisterCvar("harm_r_clearVertexBuffer", "Clear vertex buffer on every frame", IG_CVAR_COMPONENT_COMBO, "0=No clear(original);1=Only free memory;2=Free memory and delete VBO(same as 1 if multi-threading)");
