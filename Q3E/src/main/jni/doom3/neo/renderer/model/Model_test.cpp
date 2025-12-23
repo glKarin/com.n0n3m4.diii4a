@@ -138,7 +138,6 @@ int idModelTest::GetAnimIndex(const char *animName) const
     if(numAnim <= 0)
         return -1;
     idDict spawnArgs;
-    spawnArgs.Clear();
     spawnArgs.Set("model", modelName.c_str());
     for(int i = 0; i < numAnim; i++)
     {
@@ -160,7 +159,6 @@ const char * idModelTest::GetAnimName(int index, int *realIndex) const
     if(index < 0 || index >= numAnim)
         return "";
     idDict spawnArgs;
-    spawnArgs.Clear();
     spawnArgs.Set("model", modelName.c_str());
     if(realIndex)
         *realIndex = index;
@@ -181,7 +179,6 @@ int idModelTest::ListAnim(void) const
     }
     common->Printf("num animation: %d\n", numAnim);
     idDict spawnArgs;
-    spawnArgs.Clear();
     spawnArgs.Set("model", modelName.c_str());
     for(int i = 0; i < numAnim; i++)
     {
@@ -202,7 +199,6 @@ int idModelTest::AnimationList(idList<md5animTestInfo_t> &list) const
     if(!IsAnimatedModel())
         return -1;
     idDict spawnArgs;
-    spawnArgs.Clear();
     spawnArgs.Set("model", modelName.c_str());
     for(int i = 0; i < numAnim; i++)
     {
@@ -604,7 +600,6 @@ void idModelTest::TestSkin(const char *skin)
     int frameIndex = this->frameIndex;
 
     idDict dict;
-    dict.Clear();
     dict.SetBool("noshadows", noshadows);
     dict.SetBool("noselfshadows", noselfshadows);
     dict.SetBool("noDynamicInteractions", noDynamicInteractions);
@@ -795,7 +790,6 @@ void idModelTest::CreateModel(const char *model, const char *classname, const ch
 
     idDict spawnArgs;
     memset(&worldEntity, 0, sizeof(worldEntity));
-    spawnArgs.Clear();
     spawnArgs.Set("classname", animClass.c_str());
     spawnArgs.Set("model", modelName.c_str());
     spawnArgs.SetVector("origin", pos);
@@ -886,7 +880,6 @@ static bool R_ModelTest_CanTest(void)
 static idDict R_ModelTest_ParseModelArgs(const idCmdArgs &args, int start)
 {
     idDict dict;
-    dict.Clear();
 
     idStr skin;
     bool noshadows = false;

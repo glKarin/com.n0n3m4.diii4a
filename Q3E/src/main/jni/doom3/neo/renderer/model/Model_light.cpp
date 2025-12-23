@@ -154,7 +154,6 @@ void idModelLight::CreateLight(const char *material, const idDict *dict)
 
     idDict spawnArgs;
     memset(&viewLight, 0, sizeof(viewLight));
-    spawnArgs.Clear();
     spawnArgs.Set("classname", "light");
     spawnArgs.Set("texture", materialName.c_str());
     spawnArgs.Set("origin", lightOrigin.c_str());
@@ -205,7 +204,6 @@ static bool R_ModelLight_CanTest(void)
 static idDict R_ModelLight_ParseLightArgs(const idCmdArgs &args, int start)
 {
     idDict dict;
-    dict.Clear();
 
     bool noshadows = false;
     bool nospecular = false;
