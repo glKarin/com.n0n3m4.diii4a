@@ -144,13 +144,41 @@ void RB_T_RenderTriangleSurface(const drawSurf_t *surf)
 	RB_RenderTriangleSurface(surf->geo);
 }
 
+static float rb_projectionMatrix[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
+float rb_MVP[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
+static bool bNeedRestoreDepthRange = false;
+
+void RB_LoadProjectionMatrix( void )
+{
+    memcpy(rb_projectionMatrix, backEnd.viewDef->projectionMatrix, sizeof(rb_projectionMatrix));
+    bNeedRestoreDepthRange = false;
+}
+
+void RB_ComputeDrawSurfMVP( const drawSurf_t * const surf )
+{
+	if(bNeedRestoreDepthRange)
+		qglDepthRangef(0, 0.5);
+
+	myGlMultMatrix(surf->space->modelViewMatrix, rb_projectionMatrix, rb_MVP);
+}
+
+ID_INLINE void RB_SetupDrawSurfMVP( const drawSurf_t * const surf )
+{
+	RB_ComputeDrawSurfMVP(surf);
+	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), rb_MVP);
+}
+
 /*
 ===============
 RB_EnterWeaponDepthHack
 ===============
 */
-void RB_EnterWeaponDepthHack(const drawSurf_t *surf)
+void RB_EnterWeaponDepthHack(/*const drawSurf_t *surf*/)
 {
+#if defined(GL_ES_VERSION_2_0)
+	rb_projectionMatrix[14] = backEnd.viewDef->projectionMatrix[14] * 0.25;
+	bNeedRestoreDepthRange = true;
+#else
 	qglDepthRangef(0, 0.5);
 
 	float	matrix[16];
@@ -162,6 +190,7 @@ void RB_EnterWeaponDepthHack(const drawSurf_t *surf)
 	float	mat[16];
 	myGlMultMatrix(surf->space->modelViewMatrix, matrix, mat);
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+#endif
 }
 
 /*
@@ -171,6 +200,10 @@ RB_EnterModelDepthHack
 */
 void RB_EnterModelDepthHack(const drawSurf_t *surf)
 {
+#if defined(GL_ES_VERSION_2_0)
+	rb_projectionMatrix[14] = backEnd.viewDef->projectionMatrix[14] - surf->space->modelDepthHack;
+	bNeedRestoreDepthRange = false;
+#else
 	qglDepthRangef(0.0f, 1.0f);
 
 	float	matrix[16];
@@ -182,6 +215,7 @@ void RB_EnterModelDepthHack(const drawSurf_t *surf)
 	float	mat[16];
 	myGlMultMatrix(surf->space->modelViewMatrix, matrix, mat);
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+#endif
 }
 
 /*
@@ -189,13 +223,21 @@ void RB_EnterModelDepthHack(const drawSurf_t *surf)
 RB_LeaveDepthHack
 ===============
 */
-void RB_LeaveDepthHack(const drawSurf_t *surf)
+void RB_LeaveDepthHack(/*const drawSurf_t *surf*/)
 {
+#if defined(GL_ES_VERSION_2_0)
+	if(bNeedRestoreDepthRange)
+	{
+		qglDepthRangef(0, 1);
+		bNeedRestoreDepthRange = false;
+	}
+#else
 	qglDepthRangef(0, 1);
 
 	float	mat[16];
 	myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+#endif
 }
 
 /*
@@ -221,9 +263,7 @@ void RB_RenderDrawSurfListWithFunction(drawSurf_t **drawSurfs, int numDrawSurfs,
 
 		// change the matrix if needed
 		if (drawSurf->space != backEnd.currentSpace) {
-			float	mat[16];
-			myGlMultMatrix(drawSurf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
-			GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+			RB_LoadProjectionMatrix();
 
 			// we need the model matrix without it being combined with the view matrix
 			// so we can transform local vectors to global coordinates
@@ -231,12 +271,13 @@ void RB_RenderDrawSurfListWithFunction(drawSurf_t **drawSurfs, int numDrawSurfs,
 		}
 
 		if (drawSurf->space->weaponDepthHack) {
-			RB_EnterWeaponDepthHack(drawSurf);
+			RB_EnterWeaponDepthHack(/*drawSurf*/);
 		}
 
 		if (drawSurf->space->modelDepthHack != 0.0f) {
 			RB_EnterModelDepthHack(drawSurf);
 		}
+		RB_SetupDrawSurfMVP(drawSurf);
 
 		// change the scissor if needed
 		if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(drawSurf->scissorRect)) {
@@ -251,7 +292,7 @@ void RB_RenderDrawSurfListWithFunction(drawSurf_t **drawSurfs, int numDrawSurfs,
 		triFunc_(drawSurf);
 
 		if (drawSurf->space->weaponDepthHack || drawSurf->space->modelDepthHack != 0.0f) {
-			RB_LeaveDepthHack(drawSurf);
+			RB_LeaveDepthHack(/*drawSurf*/);
 		}
 
 		backEnd.currentSpace = drawSurf->space;
@@ -275,9 +316,7 @@ void RB_RenderDrawSurfChainWithFunction(const drawSurf_t *drawSurfs,
 	for (drawSurf = drawSurfs ; drawSurf ; drawSurf = drawSurf->nextOnLight) {
 		// change the matrix if needed
 		if (drawSurf->space != backEnd.currentSpace) {
-			float	mat[16];
-			myGlMultMatrix(drawSurf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
-			GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+			RB_LoadProjectionMatrix();
 
 			// we need the model matrix without it being combined with the view matrix
 			// so we can transform local vectors to global coordinates
@@ -285,12 +324,13 @@ void RB_RenderDrawSurfChainWithFunction(const drawSurf_t *drawSurfs,
 		}
 
 		if (drawSurf->space->weaponDepthHack) {
-			RB_EnterWeaponDepthHack(drawSurf);
+			RB_EnterWeaponDepthHack(/*drawSurf*/);
 		}
 
 		if (drawSurf->space->modelDepthHack) {
 			RB_EnterModelDepthHack(drawSurf);
 		}
+		RB_SetupDrawSurfMVP(drawSurf);
 
 		// change the scissor if needed
 		if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(drawSurf->scissorRect)) {
@@ -305,7 +345,7 @@ void RB_RenderDrawSurfChainWithFunction(const drawSurf_t *drawSurfs,
 		triFunc_(drawSurf);
 
 		if (drawSurf->space->weaponDepthHack || drawSurf->space->modelDepthHack != 0.0f) {
-			RB_LeaveDepthHack(drawSurf);
+			RB_LeaveDepthHack(/*drawSurf*/);
 		}
 
 		backEnd.currentSpace = drawSurf->space;
@@ -705,9 +745,7 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 	// change the matrix and light projection vectors if needed
 	if (surf->space != backEnd.currentSpace) {
 
-		float	mat[16];
-		myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
-		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+		RB_LoadProjectionMatrix();
 
 		// we need the model matrix without it being combined with the view matrix
 		// so we can transform local vectors to global coordinates
@@ -727,12 +765,13 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 
 	// hack depth range if needed
 	if (surf->space->weaponDepthHack) {
-		RB_EnterWeaponDepthHack(surf);
+		RB_EnterWeaponDepthHack(/*surf*/);
 	}
 
 	if (surf->space->modelDepthHack) {
 		RB_EnterModelDepthHack(surf);
 	}
+	RB_SetupDrawSurfMVP(surf);
 
 	inter.surf = surf;
 	inter.lightFalloffImage = vLight->falloffImage;
@@ -852,7 +891,7 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 
 	// unhack depth range if needed
 	if (surf->space->weaponDepthHack || surf->space->modelDepthHack != 0.0f) {
-		RB_LeaveDepthHack(surf);
+		RB_LeaveDepthHack(/*surf*/);
 	}
 
 	backEnd.currentSpace = surf->space; //k2023
@@ -951,9 +990,7 @@ void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*Dr
     // change the matrix if needed
     if( drawSurf->space != backEnd.currentSpace )
     {
-        float	mat[16];
-        myGlMultMatrix(drawSurf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
-        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+		RB_LoadProjectionMatrix();
 
         // we need the model matrix without it being combined with the view matrix
         // so we can transform local vectors to global coordinates
@@ -973,12 +1010,13 @@ void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*Dr
 
     // hack depth range if needed
     if (drawSurf->space->weaponDepthHack) {
-        RB_EnterWeaponDepthHack(drawSurf);
+        RB_EnterWeaponDepthHack(/*drawSurf*/);
     }
 
     if (drawSurf->space->modelDepthHack) {
         RB_EnterModelDepthHack(drawSurf);
     }
+	RB_SetupDrawSurfMVP(drawSurf);
 
     drawInteraction_t inter;
     memset(&inter, 0, sizeof(inter));
@@ -1116,7 +1154,7 @@ void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*Dr
 
     // unhack depth range if needed
     if (drawSurf->space->weaponDepthHack || drawSurf->space->modelDepthHack != 0.0f) {
-        RB_LeaveDepthHack(drawSurf);
+        RB_LeaveDepthHack(/*drawSurf*/);
     }
 
     backEnd.currentSpace = drawSurf->space; //k2023

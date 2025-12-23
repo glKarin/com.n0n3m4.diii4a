@@ -635,7 +635,7 @@ RB_STD_T_RenderShaderPasses
 This is also called for the generated 2D rendering
 ==================
 */
-void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
+void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 {
 	int			stage;
 	const idMaterial	*shader;
@@ -798,7 +798,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
             GL_Uniform4fv(SHADER_PARM_ADDR(glColor), color);
 
 			// set standard transformations
-            GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mat);
+            GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), rb_MVP);
 
 			GL_State( pStage->drawStateBits );
 
@@ -857,7 +857,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 
                 if(!newStageUniformIsSet[index])
                 {
-                    RB_STD_T_SetNewShaderPassesUniforms(surf, mat);
+                    RB_STD_T_SetNewShaderPassesUniforms(surf, rb_MVP);
                     newStageUniformIsSet[index] = true;
                 }
             }
@@ -874,7 +874,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 
                if(customNewStageUniformIsSet.FindIndex(index) < 0)
                 {
-                    RB_STD_T_SetNewShaderPassesUniforms(surf, mat);
+                    RB_STD_T_SetNewShaderPassesUniforms(surf, rb_MVP);
                     customNewStageUniformIsSet.Append(index);
                 }
             }
@@ -1046,7 +1046,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 */ //k2023 not used
             RB_SetProgramEnvironmentSpace(surf->space);
 
-			GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+			GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), rb_MVP);
 			uniformIsSet[texgen] = true;
 		}
 
@@ -1186,21 +1186,22 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 	// because we want to defer the matrix load because many
 	// surfaces won't draw any ambient passes
 	backEnd.currentSpace = NULL;
+	drawSurf_t *surf;
 
-	float	mat[16];
 	for (i = 0  ; i < numDrawSurfs ; i++) {
-		if (drawSurfs[i]->material->SuppressInSubview()) {
+		surf = drawSurfs[i];
+		if (surf->material->SuppressInSubview()) {
 			continue;
 		}
 
-		if (backEnd.viewDef->isXraySubview && drawSurfs[i]->space->entityDef) {
-			if (drawSurfs[i]->space->entityDef->parms.xrayIndex != 2) {
+		if (backEnd.viewDef->isXraySubview && surf->space->entityDef) {
+			if (surf->space->entityDef->parms.xrayIndex != 2) {
 				continue;
 			}
 		}
 
 		// we need to draw the post process shaders after we have drawn the fog lights
-		if (drawSurfs[i]->material->GetSort() >= SS_POST_PROCESS
+		if (surf->material->GetSort() >= SS_POST_PROCESS
 		    && !backEnd.currentRenderCopied) {
 			break;
 		}
@@ -1211,27 +1212,28 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 		GL_SelectTexture(0);*/
 
 		// Change the MVP matrix if needed
-		if (drawSurfs[i]->space != backEnd.currentSpace) {
-			RB_ComputeMVP(drawSurfs[i], mat);
+		if (surf->space != backEnd.currentSpace) {
+			RB_LoadProjectionMatrix();
 			// We can't set the uniform now, as we still don't know which shader to use
 		}
 
 		// Hack Depth Range if necessary
-		bool bNeedRestoreDepthRange = false;
-		if (drawSurfs[i]->space->weaponDepthHack && drawSurfs[i]->space->modelDepthHack == 0.0f) {
-			qglDepthRangef(0.0f, 0.5f);
-			bNeedRestoreDepthRange = true;
+		if ( surf->space->weaponDepthHack ) {
+			RB_EnterWeaponDepthHack();
 		}
 
-		{
-			RB_STD_T_RenderShaderPasses(drawSurfs[i], mat);
+		if ( surf->space->modelDepthHack != 0.0f ) {
+			RB_EnterModelDepthHack( surf );
+		}
+		RB_ComputeDrawSurfMVP(surf);
+
+        RB_STD_T_RenderShaderPasses(surf);
+
+		if ( surf->space->weaponDepthHack || surf->space->modelDepthHack != 0.0f ) {
+			RB_LeaveDepthHack();
 		}
 
-		if (bNeedRestoreDepthRange) {
-			qglDepthRangef(0.0f, 1.0f);
-		}
-
-		backEnd.currentSpace = drawSurfs[i]->space;
+		backEnd.currentSpace = surf->space;
 	}
 
 	backEnd.currentSpace = NULL; //k2023

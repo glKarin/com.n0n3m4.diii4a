@@ -839,6 +839,7 @@ static const int	MAX_RENDER_CROPS = 8;
 
 #ifdef _MULTITHREAD
 #include "rb/RenderThread.h"
+
 void RB_SetupRenderTools(void);
 void R_ShowSurfaceInfo(void); // run on frontend instead of RB_ShowSurfaceInfo
 void R_ShowViewEntitys(const viewEntity_t *vModels);
@@ -1419,6 +1420,10 @@ void R_SetViewMatrix(viewDef_t *viewDef);
 
 void myGlMultMatrix(const float *a, const float *b, float *out);
 void RB_ComputeMVP( const drawSurf_t * const surf, float mvp[16] );
+#define DRAWSURF_HAS_DEPTHHACK(surf) ((surf)->space->weaponDepthHack && (surf)->space->modelDepthHack == 0.0f)
+void RB_LoadProjectionMatrix( void );
+void RB_ComputeDrawSurfMVP( const drawSurf_t * const surf );
+extern float rb_MVP[16];
 
 /*
 ============================================================
@@ -1513,9 +1518,9 @@ RENDER
 ============================================================
 */
 
-void RB_EnterWeaponDepthHack(const drawSurf_t *surf);
+void RB_EnterWeaponDepthHack(/*const drawSurf_t *surf*/);
 void RB_EnterModelDepthHack(const drawSurf_t *surf);
-void RB_LeaveDepthHack(const drawSurf_t *surf);
+void RB_LeaveDepthHack(/*const drawSurf_t *surf*/);
 void RB_DrawElementsImmediate(const srfTriangles_t *tri);
 void RB_RenderTriangleSurface(const srfTriangles_t *tri);
 void RB_T_RenderTriangleSurface(const drawSurf_t *surf);
