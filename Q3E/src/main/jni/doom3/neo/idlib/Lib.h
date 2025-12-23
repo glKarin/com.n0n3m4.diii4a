@@ -153,10 +153,17 @@ void AssertFailed(const char *file, int line, const char *expression);
 #define assert( X )		if ( X ) { } else AssertFailed( __FILE__, __LINE__, #X )
 #endif
 
+#ifdef _DEBUG
 #if __cplusplus < 201103L
 #define ID_STATIC_ASSERT(exp) do { char _static_assert_exp_var_[(exp) ? 1 : -1]; (void)_static_assert_exp_var_; } while(0)
+#define ID_STATIC_ASSERT2(exp, msg) do { if(exp) {} else { printf(msg); } char _static_assert_exp_var_[(exp) ? 1 : -1]; (void)_static_assert_exp_var_; } while(0)
 #else
 #define ID_STATIC_ASSERT(exp) static_assert(exp, "")
+#define ID_STATIC_ASSERT2(exp, msg) static_assert(exp, msg)
+#endif
+#else
+#define ID_STATIC_ASSERT(exp)
+#define ID_STATIC_ASSERT2(exp, msg)
 #endif
 
 class idException

@@ -2637,6 +2637,8 @@ void idCommonLocal::InitCommands(void)
 	cmdSystem->AddCommand("listDictKeys", idDict::ListKeys_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "lists all keys used by dictionaries");
 	cmdSystem->AddCommand("listDictValues", idDict::ListValues_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "lists all values used by dictionaries");
 	cmdSystem->AddCommand("testSIMD", idSIMD::Test_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "test SIMD code");
+    extern void ShowCurrentSIMD_f(const idCmdArgs &);
+    cmdSystem->AddCommand("currentSIMD", ShowCurrentSIMD_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "show current SIMD processor");
 
 	// localization
 	cmdSystem->AddCommand("localizeGuis", Com_LocalizeGuis_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "localize guis");

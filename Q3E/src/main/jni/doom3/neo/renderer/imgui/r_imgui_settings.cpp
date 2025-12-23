@@ -459,13 +459,12 @@ void idImGuiSettings::RenderChangeLogs(void) const
 void idImGuiSettings::RenderNewCvars(void) const
 {
     const char *NewCvars[] = {
-            "harm_con_float",
-            "harm_con_floatGeometry",
-            "harm_con_floatZoomStep",
-            "harm_con_alwaysShow",
-            "harm_con_noBackground",
-            "harm_r_useGLSLShaderBinaryCache",
-            "r_showStencil",
+#ifdef _USE_SSE
+            "harm_sys_useSSE",
+#endif
+#ifdef _ARM_SIMD_SSE2NEON
+            "harm_sys_sse2neon",
+#endif
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -504,7 +503,7 @@ void idImGuiSettings::RenderNewCvars(void) const
 void idImGuiSettings::RenderUpdateCvars(void) const
 {
     const char *UpdateCvars[] = {
-            "harm_r_renderToolsMultithread", "1",
+            //"harm_r_renderToolsMultithread", "1",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -854,6 +853,12 @@ void ImGui_RegisterOptions(void)
     ImGui_RegisterLabel("Generic", IG_CVAR_GROUP_FRAMEWORK);
     ImGui_RegisterCvar("harm_r_maxAllocStackMemory", "Control memory allocation on heap or stack", IG_CVAR_GROUP_FRAMEWORK);
     ImGui_RegisterCvar("com_disableAutoSaves", "Don't create Autosaves on new map");
+#ifdef _USE_SSE
+    ImGui_RegisterCvar("harm_sys_useSSE", "Use MMX/SSE/SSE2 SIMD on 64-bits device");
+#endif
+#ifdef _ARM_SIMD_SSE2NEON
+    ImGui_RegisterCvar("harm_sys_sse2neon", "Emulate MMX/SSE/SSE2 SIMD by sse2neon on arm32/arm64 device");
+#endif
     ImGui_RegisterDivide(IG_CVAR_GROUP_FRAMEWORK);
     // console
     ImGui_RegisterLabel("Console", IG_CVAR_GROUP_FRAMEWORK);

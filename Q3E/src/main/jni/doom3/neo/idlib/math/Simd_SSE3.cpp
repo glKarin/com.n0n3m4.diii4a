@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 //
 //===============================================================
 
-#if defined(__GNUC__) && defined(__SSE3__)
+#if defined(__GNUC__) && defined(__SSE3__) || ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) ) || ( ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON) )
 
 /*
 ============

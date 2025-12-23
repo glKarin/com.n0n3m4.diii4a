@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 class idSIMD_SSE : public idSIMD_MMX
 {
 	public:
-#if defined(__GNUC__) && defined(__SSE__)
+#if defined(__GNUC__) && defined(__SSE__) || ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) ) || ( ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON) )
 
 		virtual const char *VPCALL GetName(void) const;
 		virtual void VPCALL Dot(float *dst,			const idPlane &constant,const idDrawVert *src,	const int count);

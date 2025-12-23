@@ -757,7 +757,7 @@ void RB_ShowIntensity(void)
 	globalImages->BindNull();
 	glMatrixMode(GL_MODELVIEW);
 
-	glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, colorReadback);
+	glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA, GL_UNSIGNED_BYTE, colorReadback);
 
 	R_StaticFree(colorReadback);
 //#endif
@@ -3328,9 +3328,9 @@ void RB_ShutdownDebugTools(void)
 //#if !defined(GL_ES_VERSION_2_0)
 #ifdef _MULTITHREAD
 	const int num = multithreadActive ? NUM_FRAME_DATA : 1;
-	for(int i = 0; i < num; i++)
+	for(int m = 0; m < num; m++)
 	{
-		debugPolygon_t *rb_debugPolygons = rb_debugPolygonss[i];
+		debugPolygon_t *rb_debugPolygons = rb_debugPolygonss[m];
 #endif
 	for (int i = 0; i < MAX_DEBUG_POLYGONS; i++) {
 		rb_debugPolygons[i].winding.Clear();

@@ -35,6 +35,10 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 #if defined(MACOS_X) && defined(__i386__)
 #include <xmmintrin.h>
+#elif ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) )
+#include <xmmintrin.h>
+#elif ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON)
+#include "sse2neon/sse2neon.h"
 #endif
 
 //====================================================================
@@ -549,7 +553,14 @@ void R_AxisToModelMatrix(const idMat3 &axis, const idVec3 &origin, float modelMa
 
 void R_LocalPointToGlobal(const float modelMatrix[16], const idVec3 &in, idVec3 &out)
 {
-#if defined(MACOS_X) && defined(__i386__)
+#if defined(MACOS_X) && defined(__i386__) || ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) ) || ( ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON) )
+#if defined(_MSC_VER)
+#define __m128_to_m128i(x) _mm_castps_si128(x)
+#define __m128i_to_m128(x) _mm_castsi128_ps(x)
+#else
+#define __m128_to_m128i(x) (__m128i) (x)
+#define __m128i_to_m128(x) (__m128) (x)
+#endif
 	__m128 m0, m1, m2, m3;
 	__m128 in0, in1, in2;
 	float i0,i1,i2;
@@ -575,7 +586,8 @@ void R_LocalPointToGlobal(const float modelMatrix[16], const idVec3 &in, idVec3 
 	m0 = _mm_add_ps(m0, m3);
 
 	_mm_store_ss(&out[0], m0);
-	m1 = (__m128) _mm_shuffle_epi32((__m128i)m0, 0x55);
+	// m1 = (__m128) _mm_shuffle_epi32((__m128i)m0, 0x55);
+    m1 = __m128i_to_m128(_mm_shuffle_epi32(__m128_to_m128i(m0), 0x55));
 	_mm_store_ss(&out[1], m1);
 	m2 = _mm_movehl_ps(m2, m0);
 	_mm_store_ss(&out[2], m2);

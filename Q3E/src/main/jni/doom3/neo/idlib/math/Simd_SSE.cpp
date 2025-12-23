@@ -48,9 +48,13 @@ If you have questions concerning this license or the applicable additional terms
 #define DRAWVERT_TANGENT1_OFFSET	(11*4)
 #define DRAWVERT_COLOR_OFFSET		(14*4)
 
-#if defined(__GNUC__) && defined(__SSE__)
+#if defined(__GNUC__) && defined(__SSE__) || ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) ) || ( ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON) )
 
+#if ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON)
+#include "sse2neon/sse2neon.h"
+#else
 #include <xmmintrin.h>
+#endif
 
 #define SHUFFLEPS( x, y, z, w )		(( (x) & 3 ) << 6 | ( (y) & 3 ) << 4 | ( (z) & 3 ) << 2 | ( (w) & 3 ))
 #define R_SHUFFLEPS( x, y, z, w )	(( (w) & 3 ) << 6 | ( (z) & 3 ) << 4 | ( (y) & 3 ) << 2 | ( (x) & 3 ))

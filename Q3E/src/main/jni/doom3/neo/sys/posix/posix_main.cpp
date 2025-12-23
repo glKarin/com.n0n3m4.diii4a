@@ -1251,6 +1251,20 @@ uint64_t Sys_Microseconds( void )
 	return curtime;
 }
 
+#if 0
+/*
+================
+Sys_Nanoseconds
+================
+*/
+uint64_t Sys_Nanoseconds(void)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &_ts);
+    return ts.tv_sec * 1000000000LL + ts.tv_nsec;
+}
+#endif
+
 #if !defined(_SDL) // in sdl/cpu.cpp
 /*
 ========================

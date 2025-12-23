@@ -38,6 +38,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "sys/sys_public.h"
 
+#ifdef _USE_SSE // x86-64
+static idCVar harm_sys_useSSE("harm_sys_useSSE", "1", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "Use MMX/SSE/SSE2 SIMD on 64-bits device");
+#endif
+#ifdef _ARM_SIMD_SSE2NEON // arm/arm64
+static idCVar harm_sys_sse2neon("harm_sys_sse2neon", "0", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "Emulate MMX/SSE/SSE2 SIMD by sse2neon on arm32/arm64 device");
+#endif
+
 #ifdef NO_CPUID
 #undef NO_CPUID
 #endif
@@ -198,9 +205,22 @@ Sys_GetProcessorId
 ================
 */
 int Sys_GetProcessorId( void ) {
-#if 0 //k: force generic
+#if ( defined(_M_X64) || defined(__x86_64__) ) // x86-64
+#if defined(_USE_SSE)
+    if(harm_sys_useSSE.GetBool())
+    return CPUID_GENERIC | CPUID_MMX | CPUID_SSE | CPUID_SSE2 | CPUID_SSE3;
+    else
+#endif
     return CPUID_GENERIC;
-#else
+#elif ( defined(__arm__) || defined(__aarch64__) ) // arm/aarch64
+#if defined(_ARM_SIMD_SSE2NEON)
+    if(harm_sys_sse2neon.GetBool())
+    return CPUID_GENERIC | CPUID_MMX | CPUID_SSE | CPUID_SSE2 | CPUID_SSE3;
+    else
+#endif
+    return CPUID_GENERIC;
+
+#else // x86
 	int flags = CPUID_GENERIC;
 
 	if (SDL_HasMMX())

@@ -4550,3 +4550,8 @@ void idSIMD::Test_f(const idCmdArgs &args)
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
 #endif /* _WIN32 */
 }
+
+void ShowCurrentSIMD_f(const idCmdArgs &)
+{
+    common->Printf("%s\n", SIMDProcessor->GetName());
+}

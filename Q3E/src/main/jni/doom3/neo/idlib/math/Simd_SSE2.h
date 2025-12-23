@@ -40,10 +40,27 @@ If you have questions concerning this license or the applicable additional terms
 class idSIMD_SSE2 : public idSIMD_SSE
 {
 	public:
-#if defined(__GNUC__) && defined(__SSE2__)
+#if defined(__GNUC__) && defined(__SSE2__) || ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) ) || ( ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON) )
 
 		virtual const char *VPCALL GetName(void) const;
 		virtual void VPCALL CmpLT(byte *dst,			const byte bitNum,		const float *src0,		const float constant,	const int count);
+
+		// DOOM3-BFG
+		virtual void VPCALL BlendJoints( idJointQuat* joints, const idJointQuat* blendJoints, const float lerp, const int* index, const int numJoints );
+		virtual void VPCALL ConvertJointQuatsToJointMats( idJointMat* jointMats, const idJointQuat* jointQuats, const int numJoints );
+		virtual void VPCALL ConvertJointMatsToJointQuats( idJointQuat* jointQuats, const idJointMat* jointMats, const int numJoints );
+		virtual void VPCALL TransformJoints( idJointMat* jointMats, const int* parents, const int firstJoint, const int lastJoint );
+		virtual void VPCALL UntransformJoints( idJointMat* jointMats, const int* parents, const int firstJoint, const int lastJoint );
+
+		// The Dark Mod
+		virtual	void MinMax( idVec3 &min, idVec3 &max, const idDrawVert *src, const int count );
+#if 0 // slower
+		virtual void NormalizeTangents( idDrawVert *verts, const int numVerts );
+		virtual void TransformVerts( idDrawVert *verts, const int numVerts, const idJointMat *joints, const idVec4 *weights, const int *index, const int numWeights );
+#endif
+		virtual void DeriveTangents( idPlane *planes, idDrawVert *verts, const int numVerts, const int *indexes, const int numIndexes );
+		virtual int  CreateVertexProgramShadowCache( idVec4 *vertexCache, const idDrawVert *verts, const int numVerts );
+		virtual void TracePointCull( byte *cullBits, byte &totalOr, const float radius, const idPlane *planes, const idDrawVert *verts, const int numVerts );
 
 #elif defined(_MSC_VER) && defined(_M_IX86)
 		virtual const char *VPCALL GetName(void) const;

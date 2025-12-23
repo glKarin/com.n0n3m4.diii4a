@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 class idSIMD_MMX : public idSIMD_Generic
 {
 	public:
-#if defined(__GNUC__) && defined(__MMX__)
+#if defined(__GNUC__) && defined(__MMX__) || ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) ) || ( ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON) )
 		virtual const char *VPCALL GetName(void) const;
 
 #elif defined(_MSC_VER) && defined(_M_IX86)

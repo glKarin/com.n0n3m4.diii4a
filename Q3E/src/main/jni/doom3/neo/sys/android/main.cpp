@@ -46,6 +46,10 @@ If you have questions concerning this license or the applicable additional terms
 #define DEFAULT_SYS_RANDOM_MEMORY 1024 // 512
 #define DEFAULT_SYS_CPU_FREQ 2950000000 // 2.75 / 0.000000001
 
+#ifdef _ARM_SIMD_SSE2NEON
+static idCVar harm_sys_sse2neon("harm_sys_sse2neon", "0", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "Emulate MMX/SSE/SSE2 SIMD by sse2neon");
+#endif
+
 static idStr	basepath;
 static idStr	savepath;
 
@@ -247,6 +251,11 @@ Sys_GetProcessorId
 */
 int Sys_GetProcessorId(void)
 {
+#if ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON)
+	if(harm_sys_sse2neon.GetBool())
+	return CPUID_GENERIC | CPUID_MMX | CPUID_SSE | CPUID_SSE2 | CPUID_SSE3;
+	else
+#endif
 	return CPUID_GENERIC;
 }
 
