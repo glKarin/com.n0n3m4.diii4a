@@ -2737,6 +2737,8 @@ if(HUMANHEAD)
 	set(humanhead_ui_src
 			humanhead/ui/TabWindow.cpp
 			humanhead/ui/TabContainerWindow.cpp
+            humanhead/ui/BackgroundImage.cpp
+			humanhead/ui/ButtonWindow.cpp
 			)
 
 	set(src_core_humanhead

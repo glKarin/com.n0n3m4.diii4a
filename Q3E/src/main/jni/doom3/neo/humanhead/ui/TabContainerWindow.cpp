@@ -17,6 +17,8 @@ static const int tabBorder = 4;
 
 void hhTabContainerWindow::CommonInit()
 {
+    idWindow::CommonInit();
+
 	activeTab = 0;
 	// horizontal = false;
 	vertical = false;
@@ -25,6 +27,7 @@ void hhTabContainerWindow::CommonInit()
 	currentTab = -1;
 	offsets.x = 0;
 	offsets.y = 0;
+    sepColor.Zero();
 }
 
 hhTabContainerWindow::hhTabContainerWindow(idDeviceContext *d, idUserInterfaceLocal *g) : idWindow(d, g)
@@ -56,10 +59,8 @@ const char *hhTabContainerWindow::HandleEvent(const sysEvent_t *event, bool *upd
 		if (key == K_MOUSE1) {
 			for(int i = 0; i < tabs.Num(); i++)
 			{
-				const hhTabRect &t = tabs[i];
-				idRectangle r(textRect.x + t.x, textRect.y + t.y, t.w, t.h);
-				//common->Printf("OOO %d  %f %f in %f %f %f %f -> %d\n" ,i,gui->CursorX(), gui->CursorY(), r.x, r.h, r.w, r.h, Contains(r, gui->CursorX(), gui->CursorY()));
-				if(Contains(r, gui->CursorX(), gui->CursorY()))
+				hhTabWindow *t = tabs[i];
+				if(ButtonContains(t))
 				{
 					SetActiveTab(i);
 					break;
@@ -74,7 +75,6 @@ const char *hhTabContainerWindow::HandleEvent(const sysEvent_t *event, bool *upd
 
 	return ret;
 }
-
 
 bool hhTabContainerWindow::ParseInternalVar(const char *_name, idParser *src)
 {
@@ -94,7 +94,6 @@ bool hhTabContainerWindow::ParseInternalVar(const char *_name, idParser *src)
 void hhTabContainerWindow::PostParse()
 {
 	idWindow::PostParse();
-	idList<hhTabWindow *> list;
 
     tabs.Clear();
 	for(int i = 0; i < children.Num(); i++)
@@ -103,7 +102,7 @@ void hhTabContainerWindow::PostParse()
 		hhTabWindow *tab = dynamic_cast<hhTabWindow *>(child);
 		if(tab)
 		{
-			list.Append(tab);
+            tabs.Append(tab);
 		}
 		else
 		{
@@ -111,77 +110,16 @@ void hhTabContainerWindow::PostParse()
 		}
 	}
 
-	const float lineHeight = GetTabHeight();
-    const float lineWidth = GetTabWidth();
-	for(int i = 0; i < list.Num(); i++)
-	{
-        hhTabWindow *tab = list[i];
-		hhTabRect r;
-		if (vertical) {
-			r.x = 0;
-			r.y = i * lineHeight;
-			r.w = lineWidth;
-			r.h = lineHeight;
-		} else {
-			r.x = lineWidth * i + offsets.x + tabMargins.x();
-			r.y = 0;
-			r.w = lineWidth;
-			r.h = lineHeight;
-		}
-		r.tab = tab;
-		tabs.Append(r);
-	}
+    currentTab = activeTab;
 
-	for(int i = 0; i < tabs.Num(); i++)
-	{
-		tabs[i].tab->SetOffsets(tabMargins.x(), tabMargins.y());
-	}
-
-	currentTab = activeTab;
-    for(int i = 0; i < tabs.Num(); i++)
-    {
-		tabs[i].tab->SetActive(i == activeTab);
-    }
+	UpdateTab();
 }
 
 void hhTabContainerWindow::Draw(int time, float x, float y)
 {
-	idVec4 color;
-	idStr work;
-	int count = tabs.Num();
-	idRectangle rect;
-	const float lineHeight = GetMaxCharHeight();
-
-	for (int i = 0; i < count; i++) {
-		const hhTabRect &item = tabs[i];
-		const hhTabWindow *tab = item.tab;
-
-        rect.x = textRect.x + item.x;
-        rect.y = textRect.y + item.y;
-        rect.w = item.w;
-        rect.h = item.h;
-
-		if(i == currentTab)
-		{
-			color = tab->activeColor;
-		}
-		else
-		{
-			if (Contains(rect, gui->CursorX(), gui->CursorY())) {
-				color = tab->hoverColor;
-			} else {
-				color = tab->foreColor;
-			}
-		}
-
-		rect.y += item.h / 2 - lineHeight / 2;
-		rect.h = lineHeight + item.h / 2 - lineHeight / 2;
-
-		//dc->DrawRect(textRect.x + item.x, textRect.y + item.y, item.w, item.h, 1, color);
-		dc->DrawText(tab->text, tab->textScale, vertical ? idDeviceContext::ALIGN_LEFT : idDeviceContext::ALIGN_CENTER, color, rect, false, -1);
-
-		/*dc->PushClipRect(rect);
-		dc->PopClipRect();*/
+	for (int i = 0; i < tabs.Num(); i++) {
+		hhTabWindow *tab = tabs[i];
+        tab->DrawButton(textRect.x, textRect.y, ButtonContains(tab), vertical);
 	}
 }
 
@@ -194,26 +132,33 @@ void hhTabContainerWindow::Activate(bool activate, idStr &act)
 	}
 }
 
-void hhTabContainerWindow::UpdateTab()
+void hhTabContainerWindow::UpdateTab(bool onlyOffset)
 {
 	const float lineHeight = GetTabHeight();
     const float lineWidth = GetTabWidth();
 
     for(int i = 0; i < tabs.Num(); i++)
     {
-		hhTabRect &r = tabs[i];
-		r.tab->SetActive(currentTab == i);
-        r.tab->SetOffsets(tabMargins.x(), tabMargins.y());
+		hhTabWindow *tab = tabs[i];
+        if(!onlyOffset)
+        {
+            tab->SetActive(currentTab == i);
+            tab->SetOffsets(tabMargins.x(), tabMargins.y());
+        }
 		if (vertical) {
-			r.x = 0;
-			r.y = i * lineHeight;
-			r.w = lineWidth;
-			r.h = lineHeight;
+            tab->SetButtonRect(
+                0,
+                (float)i * lineHeight,
+                lineWidth,
+                lineHeight
+            );
 		} else {
-			r.x = lineWidth * i + offsets.x + tabMargins.x();
-			r.y = 0;
-			r.w = lineWidth;
-			r.h = lineHeight;
+            tab->SetButtonRect(
+                lineWidth * (float)i + offsets.x + tabMargins.x(),
+                0,
+                lineWidth,
+                lineHeight
+            );
 		}
     }
 }
@@ -229,39 +174,23 @@ void hhTabContainerWindow::SetActiveTab(int index)
         tabs[i].tab->SetActive(false);*/
 	if(currentTab >= 0 && currentTab < tabs.Num())
 	{
-		tabs[currentTab].tab->SetActive(false);
+		tabs[currentTab]->SetActive(false);
 	}
 	currentTab = -1;
 	if(index >= 0 && index < tabs.Num())
 	{
 		currentTab = index;
-		tabs[index].tab->SetActive(true);
+		tabs[index]->SetActive(true);
 	}
 	activeTab.Set(va("%d", currentTab));
 }
 
 void hhTabContainerWindow::SetOffsets(float x, float y)
 {
-	const float lineHeight = GetTabHeight();
-    const float lineWidth = GetTabWidth();
 	offsets.x = x;
 	offsets.y = y;
 
-	for(int i = 0; i < tabs.Num(); i++)
-	{
-		hhTabRect &r = tabs[i];
-		if (vertical) {
-			r.x = 0;
-			r.y = i * lineHeight;
-			r.w = lineWidth;
-			r.h = lineHeight;
-		} else {
-			r.x = lineWidth * i + offsets.x + tabMargins.x();
-			r.y = 0;
-			r.w = lineWidth;
-			r.h = lineHeight;
-		}
-	}
+    UpdateTab(true);
 }
 
 float hhTabContainerWindow::GetTabHeight()
@@ -279,4 +208,30 @@ float hhTabContainerWindow::GetTabWidth()
         return Max(tabHeight, tabMargins.x());
     else
         return (rect.w() - tabMargins.x() - offsets.x) / (float)tabs.Num();
+}
+
+bool hhTabContainerWindow::ButtonContains(const hhTabWindow *tab)
+{
+    idRectangle r;
+    tab->GetButtonOffsetRect(r, textRect.x, textRect.y);
+    //common->Printf("OOO %d  %f %f in %f %f %f %f -> %d\n" ,i,gui->CursorX(), gui->CursorY(), r.x, r.h, r.w, r.h, Contains(r, gui->CursorX(), gui->CursorY()));
+    return Contains(r, gui->CursorX(), gui->CursorY());
+}
+
+idWinVar * hhTabContainerWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **owner)
+{
+    if (idStr::Icmp(_name, "activeTab") == 0)
+    {
+        return &activeTab;
+    }
+    if (idStr::Icmp(_name, "tabMargins") == 0)
+    {
+        return &tabMargins;
+    }
+    if (idStr::Icmp(_name, "sepColor") == 0)
+    {
+        return &sepColor;
+    }
+
+    return idWindow::GetWinVarByName(_name, fixup, owner);
 }

@@ -509,13 +509,9 @@ class idWindow
         idWinVec2 edgeSize;
         idWinVec4 hoverMatColor;
         idWinVec4 focusColor;
-        idWinVec4 activeColor;
         idWinVec4 seperatorLines;
         idWinInt seperatorMargin;
         idWinVec4 hoverBorderColor;
-        idWinInt activeTab;
-        idWinVec4 sepColor;
-        idWinVec2 tabMargins;
         idWinFloat trailOffset;
         idWinInt splineIn;
 

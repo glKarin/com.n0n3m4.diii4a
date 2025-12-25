@@ -52,6 +52,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _HUMANHEAD
 #include "../humanhead/ui/TabWindow.h"
 #include "../humanhead/ui/TabContainerWindow.h"
+#include "../humanhead/ui/ButtonWindow.h"
 #endif
 
 //
@@ -2399,29 +2400,13 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 	{
 		retVar = &seperatorLines;
 	}
-    if (idStr::Icmp(_name, "activeColor") == 0)
-    {
-        retVar = &activeColor;
-    }
     if (idStr::Icmp(_name, "seperatorMargin") == 0)
     {
         retVar = &seperatorMargin;
     }
-    if (idStr::Icmp(_name, "activeTab") == 0)
-    {
-        retVar = &activeTab;
-    }
-    if (idStr::Icmp(_name, "sepColor") == 0)
-    {
-        retVar = &sepColor;
-    }
     if (idStr::Icmp(_name, "hoverBorderColor") == 0)
     {
         retVar = &hoverBorderColor;
-    }
-    if (idStr::Icmp(_name, "tabMargins") == 0)
-    {
-        retVar = &tabMargins;
     }
     if (idStr::Icmp(_name, "trailOffset") == 0)
     {
@@ -2905,10 +2890,8 @@ bool idWindow::Parse(idParser *src, bool rebuild)
 		if (token == "windowDef" || token == "animationDef"
 #ifdef _HUMANHEAD
 				 || token == "superWindowDef"
-				 || token == "buttonDef"
 				 || token == "creditDef"
 				 || token == "splineDef"
-				 // || token == "tabContainerDef" || token == "tabDef" //k: TODO: tab
 #endif
 				) {
 			if (token == "animationDef") {
@@ -3080,6 +3063,17 @@ bool idWindow::Parse(idParser *src, bool rebuild)
 			dwt.win = win;
 			drawWindows.Append(dwt);
 		}
+        else if (token == "buttonDef") {
+            hhButtonWindow *win = new hhButtonWindow(dc, gui);
+            SaveExpressionParseState();
+            win->Parse(src, rebuild);
+            RestoreExpressionParseState();
+            AddChild(win);
+            win->SetParent(this);
+            dwt.simp = NULL;
+            dwt.win = win;
+            drawWindows.Append(dwt);
+        }
 #endif
 //
 //  added new onEvent

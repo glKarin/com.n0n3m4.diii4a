@@ -9,7 +9,14 @@
 
 void hhTabWindow::CommonInit()
 {
+    idWindow::CommonInit();
+
 	active = false;
+    buttonRect.Empty();
+    activeColor = idVec4(1, 1, 1, 1);
+
+    buttonMat.Reset();
+    buttonActiveMat.Reset();
 }
 
 hhTabWindow::hhTabWindow(idDeviceContext *d, idUserInterfaceLocal *g) : idWindow(d, g)
@@ -42,6 +49,9 @@ bool hhTabWindow::ParseInternalVar(const char *_name, idParser *src)
 void hhTabWindow::PostParse()
 {
 	idWindow::PostParse();
+
+    buttonMat.Setup();
+    buttonActiveMat.Setup();
 }
 
 void hhTabWindow::Draw(int time, float x, float y)
@@ -92,4 +102,93 @@ void hhTabWindow::SetOffsets(float x, float y)
 void hhTabWindow::SetVisible(bool on)
 {
 	idWindow::SetVisible(active && on);
+}
+
+void hhTabWindow::SetButtonRect(float x, float y, float w, float h)
+{
+    buttonRect.x = x;
+    buttonRect.y = y;
+    buttonRect.w = w;
+    buttonRect.h = h;
+}
+
+void hhTabWindow::GetButtonOffsetRect(idRectangle &rect, float x, float y) const
+{
+    rect = buttonRect;
+    rect.Offset(x, y);
+}
+
+void hhTabWindow::DrawButton(float x, float y, bool hover, bool vertical)
+{
+    idVec4 color;
+    idStr work;
+    idRectangle rect;
+    const float lineHeight = GetMaxCharHeight();
+
+    GetButtonOffsetRect(rect, x, y);
+
+    if(active)
+    {
+        color = activeColor;
+    }
+    else
+    {
+        if (hover) {
+            color = hoverColor;
+        } else {
+            color = foreColor;
+        }
+    }
+
+    if(active)
+    {
+        buttonActiveMat.Draw(dc, rect, vertical, matScalex, matScaley, flags);
+    }
+    else
+    {
+        buttonMat.Draw(dc, rect, vertical, matScalex, matScaley, flags);
+    }
+
+    rect.y += buttonRect.h / 2 - lineHeight / 2;
+    rect.h = lineHeight + buttonRect.h / 2 - lineHeight / 2;
+
+    //dc->DrawRect(textRect.x + item.x, textRect.y + item.y, item.w, item.h, 1, color);
+    dc->DrawText(text, textScale, /*vertical ? idDeviceContext::ALIGN_LEFT : */idDeviceContext::ALIGN_CENTER, color, rect, false, -1);
+
+    /*dc->PushClipRect(rect);
+    dc->PopClipRect();*/
+}
+
+idWinVar * hhTabWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **owner)
+{
+    if (idStr::Icmp(_name, "activeColor") == 0)
+    {
+        return &activeColor;
+    }
+    if (idStr::Icmp(_name, "buttonLeftMat") == 0)
+    {
+        return &buttonMat.left.name;
+    }
+    if (idStr::Icmp(_name, "buttonMiddleMat") == 0)
+    {
+        return &buttonMat.middle.name;
+    }
+    if (idStr::Icmp(_name, "buttonRightMat") == 0)
+    {
+        return &buttonMat.right.name;
+    }
+    if (idStr::Icmp(_name, "buttonActiveLeftMat") == 0)
+    {
+        return &buttonActiveMat.left.name;
+    }
+    if (idStr::Icmp(_name, "buttonActiveMiddleMat") == 0)
+    {
+        return &buttonActiveMat.middle.name;
+    }
+    if (idStr::Icmp(_name, "buttonActiveRightMat") == 0)
+    {
+        return &buttonActiveMat.right.name;
+    }
+
+    return idWindow::GetWinVarByName(_name, fixup, owner);
 }
