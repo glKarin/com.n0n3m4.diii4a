@@ -492,7 +492,7 @@ startActivity(new Intent().setComponent(new ComponentName("com.karin.idTech4Amm"
 		// 1. Setup game type
 		.putExtra("game", "doom3")
 		// 2. Setup game command
-		.putExtra("command", "game.arm +ser fs_game moddir + harm_fs_gameLibPath /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/com.author.package-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libgame.so")
+		.putExtra("command", "game.arm +set fs_game moddir + harm_fs_gameLibPath /data/app/~~tBiIEpYUhA3P4wkarcd1AA==/com.author.package-p0-kOTTN2iU3ZewCcNXsrA==/lib/arm64/libgame.so")
 		);
 finish();
 ```
