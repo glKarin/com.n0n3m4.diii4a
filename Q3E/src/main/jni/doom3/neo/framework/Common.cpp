@@ -38,8 +38,6 @@ If you have questions concerning this license or the applicable additional terms
 #define MAX_WARNING_LIST	256
 
 #ifdef _MULTITHREAD
-extern bool multithreadActive;
-extern bool Sys_InRenderThread(void);
 #ifdef _K_DEV
 #define _HARM_DEBUG_MULTITHREAD
 #endif
@@ -47,7 +45,10 @@ extern bool Sys_InRenderThread(void);
 #define HARM_ONLY_DETECT_SYS_MEMORY 1
 #ifdef __ANDROID__
 idCVar harm_g_normalizeMovementDirection("harm_g_normalizeMovementDirection", "0", CVAR_GAME | CVAR_BOOL, "Re-normalize player/walker movement direction");
+extern bool smooth_joystick;
 #endif
+
+extern void GLimp_Startup(void);
 
 typedef enum {
 	ERP_NONE,
@@ -1277,7 +1278,7 @@ Com_Editor_f
 static void Com_Editor_f(const idCmdArgs &args)
 {
 #ifdef _MULTITHREAD //karin: not support tools with OpenGL on multithread
-    if(multithreadActive)
+    if(multithreadActive && multithreadEnable)
     {
         common->Printf("Not support editor on multi-threading\n");
         return;
@@ -1308,7 +1309,7 @@ Com_EditGUIs_f
 static void Com_EditGUIs_f(const idCmdArgs &args)
 {
 #ifdef _MULTITHREAD //karin: not support tools with OpenGL on multithread
-    if(multithreadActive)
+    if(multithreadActive && multithreadEnable)
     {
         common->Printf("Not support GUI editor on multi-threading\n");
         return;
@@ -1325,7 +1326,7 @@ Com_MaterialEditor_f
 static void Com_MaterialEditor_f(const idCmdArgs &args)
 {
 #ifdef _MULTITHREAD //karin: not support tools with OpenGL on multithread
-    if(multithreadActive)
+    if(multithreadActive && multithreadEnable)
     {
         common->Printf("Not support material editor on multi-threading\n");
         return;
@@ -3314,7 +3315,6 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 		StartupVariable(NULL, false);
 
         //karin: check OpenGL version from command cvar
-        extern void GLimp_Startup(void);
         GLimp_Startup();
 
 		if (!idAsyncNetwork::serverDedicated.GetInteger() && Sys_AlreadyRunning()) {
@@ -3363,7 +3363,6 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 		if(harm_com_consoleHistory.GetInteger() != 0)
 			console->LoadHistory();
 #ifdef __ANDROID__ //karin: for in smooth joystick on Android.
-		extern bool smooth_joystick;
 		idCVar *in_smoothJoystick = cvarSystem->Find("harm_g_normalizeMovementDirection");
 		if(in_smoothJoystick)
 		{

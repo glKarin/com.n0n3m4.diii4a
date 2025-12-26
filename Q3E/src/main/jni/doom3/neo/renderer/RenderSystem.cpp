@@ -211,7 +211,7 @@ static void RenderCommands(renderCrop_t *pc = NULL, byte *pix = NULL)
 		}
 		else
 		{
-			renderThread->BackendThreadDoTask();
+			renderThread->BackendThreadSingleTask();
 		}
     }
 /*	else

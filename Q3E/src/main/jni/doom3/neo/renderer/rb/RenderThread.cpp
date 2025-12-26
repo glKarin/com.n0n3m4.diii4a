@@ -1,7 +1,5 @@
 #include "RenderThread.h"
 
-#include "../../sys/sys_public.h"
-
 #define RENDER_THREAD_STARTED() (Sys_ThreadIsRunning(&render_thread))
 
 bool multithreadActive = false;
@@ -9,10 +7,6 @@ bool multithreadEnable = false;
 
 static idRenderThread renderThreadInstance;
 idRenderThread *renderThread = &renderThreadInstance;
-
-extern void GLimp_ActivateContext();
-extern void GLimp_DeactivateContext();
-extern void RB_GLSL_HandleShaders(void);
 
 static idCVar r_multithread("r_multithread",
 #ifdef __ANDROID__
@@ -133,7 +127,7 @@ void idRenderThread::BackendThreadTask( void ) // BackendThread ->
     Sys_TriggerEvent(TRIGGER_EVENT_BACKEND_FINISHED);
 }
 
-void idRenderThread::BackendThreadDoTask( void ) // SingleThread ->
+void idRenderThread::BackendThreadSingleTask( void ) // SingleThread ->
 {
     // Purge all images,  Load all images
     this->HandlePendingImage();
@@ -155,6 +149,15 @@ void idRenderThread::BackendThreadDoTask( void ) // SingleThread ->
 
     vertexCache.EndBackEnd(backendVertexCache);
     backendFinished = true;
+}
+
+void idRenderThread::BackendThreadToolsTask( void ) // SingleThread for tools ->
+{
+    // Purge all images,  Load all images
+    this->HandlePendingImage();
+
+    // main thread is waiting render thread, only render thread is running
+    // RB_OnlyRenderThreadRunningAndMainThreadWaiting();
 }
 
 // waiting backend render finished
@@ -362,4 +365,9 @@ void R_EnableRenderThread_f(const idCmdArgs &args)
 	{
 		renderThreadInstance.Request(!multithreadEnable);
 	}
+}
+
+void RB_ToolsRenderTask(void)
+{
+    renderThreadInstance.BackendThreadToolsTask();
 }

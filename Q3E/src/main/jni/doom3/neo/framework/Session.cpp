@@ -31,11 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Session_local.h"
 
-#ifdef _MULTITHREAD
-extern bool multithreadActive;
-extern bool Sys_InRenderThread(void);
-#endif
-
 #if defined(_RAVEN) || defined(_HUMANHEAD)
 #include "../ui/Window.h"
 #endif
@@ -3135,6 +3130,10 @@ void idSessionLocal::Frame()
 
 	// Editors that completely take over the game
 	if (com_editorActive && (com_editors & (EDITOR_RADIANT | EDITOR_GUI))) {
+#ifdef _MULTITHREAD //karin: load images when disable multithread
+        if(multithreadActive && !multithreadEnable)
+            RB_ToolsRenderTask();
+#endif
 		return;
 	}
 

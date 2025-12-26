@@ -46,6 +46,8 @@ public:
     void                    BackendThreadShutdown( void );
     void                    BackendThreadWait(void );
     void                    BackendThreadTask( void );
+    void                    BackendThreadSingleTask( void );
+    void                    BackendThreadToolsTask( void );
     bool                    IsActive( void ) const;
 
 // images queue
@@ -58,7 +60,6 @@ public:
     void                    ClearImages( void );
     void                    Request( bool on );
     void                    SyncState( void );
-    void                    BackendThreadDoTask( void );
 
 private:
     idQueueList<ActuallyLoadImage_data_t>	imagesAlloc; //List for the backend thread
