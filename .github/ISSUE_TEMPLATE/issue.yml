@@ -110,7 +110,7 @@ body:
   - type: textarea
     id: gamesave
     attributes:
-      label: DoomConfig.cfg (If it's DOOM 3/Quake 4/Prey2006 game)
-      placeholder: "Upload `game save` file with a zip file(e.g. `savegames/*.save` in DOOM 3)(Because I don't play every game)"
+      label: Game save file(Because I don't play every game)
+      placeholder: "Upload `game save` file with a zip file(e.g. `savegames/*.save` in DOOM 3)"
     validations:
       required: false
