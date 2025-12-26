@@ -34,6 +34,8 @@ body:
         - FTEQW
         - Jedi Academy
         - Jedi Outcast
+        - Urban Terror
+        - Medal of Honor: Allied Assault
         - Other game
     validations:
       required: true
@@ -45,11 +47,11 @@ body:
       options:
         - Android arm-v8
         - Android arm-v7a
-        - Windows x86-64
-        - Windows x86
-        - Linux x86-64
-        - Linux x86
-        - Linux arm
+        - Windows x86-64(DOOM3/Quake4/Prey only)
+        - Windows x86(DOOM3/Quake4/Prey only)
+        - Linux x86-64(DOOM3/Quake4/Prey only)
+        - Linux x86(DOOM3/Quake4/Prey only)
+        - Linux arm(DOOM3/Quake4/Prey only)
     validations:
       required: true
   - type: input
@@ -99,16 +101,16 @@ body:
     validations:
       required: false
   - type: textarea
-    id: doomconfig_log
+    id: doomconfig
     attributes:
-      label: DoomConfig.cfg (If it's DOOM 3/Quake 4/Prey2006 game)
-      placeholder: "Copy and paste / upload `DoomConfig.cfg` file contents"
+      label: Config files
+      placeholder: "Upload `game config` file with a zip file(e.g. `DoomConfig.cfg` and `autoexec.cfg` in DOOM 3)"
     validations:
       required: false
   - type: textarea
-    id: autoexec_log
+    id: gamesave
     attributes:
-      label: autoexec.cfg (If it's DOOM 3/Quake 4/Prey2006 game)
-      placeholder: "Copy and paste / upload `autoexec.cfg` file contents"
+      label: Game save file(Because I don't play every game)
+      placeholder: "Upload `game save` file with a zip file(e.g. `savegames/*.save` in DOOM 3)"
     validations:
       required: false
