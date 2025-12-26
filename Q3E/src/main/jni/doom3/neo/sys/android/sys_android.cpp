@@ -10,7 +10,6 @@
 #endif
 
 #ifdef _MULTITHREAD
-extern bool multithreadActive;
 extern bool Sys_ShutdownRenderThread(void);
 #endif
 

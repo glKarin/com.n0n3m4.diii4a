@@ -776,5 +776,6 @@ const char *	Sys_DLLDefaultPath(void);
 uint64_t		Sys_Microseconds(void);
 int             Sys_SetEnv(const char *name, const char *value, bool override = false);
 int             Sys_UnsetEnv(const char *name);
+void            Sys_CPUCount( int& logicalNum, int& coreNum, int& packageNum );
 
 #endif /* !__SYS_PUBLIC__ */

@@ -1256,16 +1256,12 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("sizeof(glIndex_t): %zd\n", sizeof(glIndex_t));
 	common->Printf("GL_KHR_debug: %d\n", glConfig.debugOutput);
 #ifdef _SHADOW_MAPPING
-	extern bool r_useDepthTexture;
-	extern bool r_useCubeDepthTexture;
-	extern bool r_usePackColorAsDepth;
 	common->Printf("r_useDepthTexture: %d\n", r_useDepthTexture);
 	common->Printf("r_useCubeDepthTexture: %d\n", r_useCubeDepthTexture);
 	common->Printf("r_usePackColorAsDepth: %d\n", r_usePackColorAsDepth);
 #endif
 
 #ifdef _MULTITHREAD
-    extern xthreadId_t Sys_GetMainThread(void);
     common->Printf("Multi-Thread: %s\n", multithreadActive ? "actived" : "inactived");
     common->Printf("Multi-Thread state: %s\n", multithreadEnable ? "enabled" : "disabled");
     common->Printf(" - Main thread handle: %zu\n", Sys_GetMainThread());

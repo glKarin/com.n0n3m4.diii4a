@@ -11,8 +11,6 @@
 
 #define FBX_BLOCK_SENTINEL_LENGTH() (fbx_version < 7500 ? 13 : 25)
 
-extern int LongSwap(int l); // in idLib/Lib.cpp
-extern int64_t LongLongSwap(int64_t l);
 extern idQuat fromangles(const idVec3 &rot);
 
 static idQuat fromdegrees(const idVec3 &rot) { return fromangles(rot * (idMath::PI / 180.0f)); }

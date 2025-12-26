@@ -139,6 +139,8 @@ int64_t	BigLongLong(int64_t l);
 int64_t	LittleLongLong(int64_t l);
 double	BigDouble(double l);
 double	LittleDouble(double l);
+int     LongSwap(int l); // in idLib/Lib.cpp
+int64_t LongLongSwap(int64_t l);
 
 bool	Swap_IsBigEndian(void);
 

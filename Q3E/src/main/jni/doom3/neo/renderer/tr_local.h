@@ -840,10 +840,13 @@ static const int	MAX_RENDER_CROPS = 8;
 #ifdef _MULTITHREAD
 #include "rb/RenderThread.h"
 
+extern idCVar harm_r_renderToolsMultithread;
+
 void RB_SetupRenderTools(void);
 void R_ShowSurfaceInfo(void); // run on frontend instead of RB_ShowSurfaceInfo
 void R_ShowViewEntitys(const viewEntity_t *vModels);
-extern idCVar harm_r_renderToolsMultithread;
+
+void RB_GLSL_HandleShaders(void);
 #endif
 
 /*
@@ -2188,6 +2191,9 @@ void RB_LogComment(const char *comment, ...) id_attribute((format(printf,1,2)));
 #endif
 
 void RB_ShowImages(void);
+#if defined(GL_ES_VERSION_2_0)
+void RB_ShowImages_compat(void);
+#endif
 
 void RB_ExecuteBackEndCommands(const emptyCommand_t *cmds);
 
@@ -2426,6 +2432,10 @@ extern idCVar harm_r_shadowMapNonParallelLightUltra;
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;
 
+extern bool r_useDepthTexture;
+extern bool r_useCubeDepthTexture;
+extern bool r_usePackColorAsDepth;
+
 void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLight);
 void R_SetupShadowMappingProjectionMatrix(idRenderLightLocal *light);
 #endif
@@ -2540,5 +2550,7 @@ extern int gl_version;
 
 extern idCVar harm_r_debugOpenGL;
 void RB_DebugOpenGL(void);
+
+int MakePowerOfTwo(int num);
 
 #endif /* !__TR_LOCAL_H__ */

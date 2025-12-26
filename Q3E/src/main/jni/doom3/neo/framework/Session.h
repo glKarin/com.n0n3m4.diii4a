@@ -37,6 +37,16 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+// Non-SDK globals
+#ifdef _MULTITHREAD
+extern bool multithreadActive;
+extern bool multithreadEnable;
+
+extern bool Sys_InRenderThread(void);
+extern void RB_ToolsRenderTask(void);
+extern xthreadId_t Sys_GetMainThread(void);
+#endif
+
 // needed by the gui system for the load game menu
 typedef struct {
 	short		health;

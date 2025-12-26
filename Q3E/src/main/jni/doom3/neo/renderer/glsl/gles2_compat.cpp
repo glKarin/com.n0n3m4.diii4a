@@ -59,8 +59,6 @@ static GLuint gl_UseTexture = TEXTURE_STATE_2D;
 static GLenum gl_PolygonMode = GL_FILL;
 static GLfloat gl_RasterPos[3]; // glRasterPos*f() param
 
-extern int MakePowerOfTwo(int num);
-
 // OpenGL pipeline state
 struct GLstate
 {

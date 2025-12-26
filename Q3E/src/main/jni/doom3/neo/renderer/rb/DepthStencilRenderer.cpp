@@ -3,8 +3,6 @@
 
 #include "../tr_local.h"
 
-extern int MakePowerOfTwo(int num);
-
 idDepthStencilRenderer depthStencilRenderer;
 
 void R_CreateOfflineScreenDepthStencilTexture(idImage *image)

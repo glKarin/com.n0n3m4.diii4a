@@ -65,12 +65,6 @@ static bool shaderRequired = true;
 #define REQUIRE_SHADER() shaderRequired = true;
 #define UNNECESSARY_SHADER() shaderRequired = false;
 
-#ifdef _SHADOW_MAPPING
-extern bool r_useDepthTexture;
-extern bool r_useCubeDepthTexture;
-extern bool r_usePackColorAsDepth;
-#endif
-
 static idStr RB_GLSL_GetExternalShaderSourcePath(void);
 
 #ifdef _MULTITHREAD

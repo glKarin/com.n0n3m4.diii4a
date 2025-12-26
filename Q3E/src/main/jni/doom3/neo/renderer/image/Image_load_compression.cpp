@@ -188,7 +188,6 @@ ID_INLINE static bool R_IsETC2Enabled()
     return R_IsETC2Supported() && r_useETC2.GetBool();
 }
 
-extern void Sys_CPUCount( int& logicalNum, int& coreNum, int& packageNum );
 static void etc2_compress_tex_image(const char *cachefname, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels)
 {
     unsigned char *paucEncodingBits;
