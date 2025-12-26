@@ -1496,6 +1496,7 @@ idBrushBSP::FloodThroughPortals_r
 */
 void idBrushBSP::FloodThroughPortals_r(idBrushBSPNode *node, int contents, int depth)
 {
+#if 1
 	idBrushBSPPortal *p;
 	int s;
 
@@ -1530,6 +1531,81 @@ void idBrushBSP::FloodThroughPortals_r(idBrushBSPNode *node, int contents, int d
 		// flood recursively through the current portal
 		FloodThroughPortals_r(p->nodes[!s], contents, depth+1);
 	}
+#else // non-recursive version
+	idList<idBrushBSPNode *> nodes;
+	idBrushBSPPortal *p;
+	int s;
+	idList<idBrushBSPPortal *> portals;
+
+	if (!node) {
+		common->Error("FloodThroughPortals_r: NULL node\n");
+	}
+
+	if (node->occupied) {
+		common->Error("FloodThroughPortals_r: node already occupied\n");
+	}
+
+	node->occupied = depth;
+
+	p = node->portals;
+	nodes.Append(node);
+	while (true) {
+		if(!p)
+		{
+			if(!portals.Num())
+				break;
+			if(!nodes.Num())
+				break;
+			p = portals[portals.Num() - 1];
+			nodes.SetNum(nodes.Num() - 1);
+			node = nodes[nodes.Num() - 1];
+			depth--;
+		}
+		else
+			portals.Append(p);
+
+		s = (p->nodes[1] == node);
+
+		// if the node at the other side of the portal is removed
+		if (!p->nodes[!s]) {
+			p = p->next[s];
+			portals.SetNum(portals.Num() - 1);
+			continue;
+		}
+
+		// if the node at the other side of the portal is occupied already
+		if (p->nodes[!s]->occupied) {
+			p = p->next[s];
+			portals.SetNum(portals.Num() - 1);
+			continue;
+		}
+
+		// can't flood through the portal if it has the seperating contents at the other side
+		if (p->nodes[!s]->contents & contents) {
+			p = p->next[s];
+			portals.SetNum(portals.Num() - 1);
+			continue;
+		}
+
+		// flood recursively through the current portal
+		//FloodThroughPortals_r(p->nodes[!s], contents, depth+1);
+		nodes.Append(p->nodes[!s]);
+		node = p->nodes[!s];
+		depth++;
+
+		if (!node) {
+			common->Error("FloodThroughPortals_r: NULL node\n");
+		}
+
+		if (node->occupied) {
+			common->Error("FloodThroughPortals_r: node already occupied\n");
+		}
+
+		node->occupied = depth;
+
+		p = node->portals;
+	}
+#endif
 }
 
 /*

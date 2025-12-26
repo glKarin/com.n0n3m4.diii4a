@@ -32,6 +32,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "AASFile.h"
 #include "AASFile_local.h"
 
+//karin: only load/write max reach count per area, else raise error in game library
+#define HARM_AAS_SAFETY_RW 0
+#if HARM_AAS_SAFETY_RW
+static idCVar harm_aas_areaReachSafety("harm_aas_areaReachSafety", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_TOOL, "Keep max reach per area under limit. 1=only read AAS; 2=only write AAS; 3=read and write AAS.", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3>);
+#endif
 
 /*
 ===============================================================================
@@ -795,6 +800,15 @@ bool idAASFileLocal::Write(const idStr &fileName, unsigned int mapFileCRC)
 		for (num = 0, reach = areas[i].reach; reach; reach = reach->next) {
 			num++;
 		}
+#if HARM_AAS_SAFETY_RW //karin: only write max reach count per area
+		if(num > MAX_REACH_PER_AREA)
+		{
+			common->Warning("Num reach in area(%d) is overflow(%d > %d) when writing AAS file '%s'", i, num, MAX_REACH_PER_AREA, fileName.c_str());
+			if(harm_aas_areaReachSafety.GetInteger() & 2)
+				num = MAX_REACH_PER_AREA;
+		}
+		int numWrite = 0;
+#endif
 
 #ifdef _RAVEN // quake4 aas file
 // jmarshall: AAS 1.08 - numFeatures/firstFeature
@@ -807,6 +821,22 @@ bool idAASFileLocal::Write(const idStr &fileName, unsigned int mapFileCRC)
 #endif
 
 		for (reach = areas[i].reach; reach; reach = reach->next) {
+#if HARM_AAS_SAFETY_RW //karin: only write max reach count per area
+			if(harm_aas_areaReachSafety.GetInteger() & 2)
+			{
+				if(numWrite < MAX_REACH_PER_AREA)
+					numWrite++;
+				else
+				{
+					if(numWrite == MAX_REACH_PER_AREA)
+					{
+						common->Printf("Writing num reach in area(%d) is overflow(%d) to AAS file '%s', don't write any more in this area.\n", i, MAX_REACH_PER_AREA, fileName.c_str());
+						numWrite += 1;
+					}
+					continue;
+				}
+			}
+#endif
 			Reachability_Write(aasFile, reach);
 
 			switch (reach->travelType) {
@@ -1062,6 +1092,10 @@ bool idAASFileLocal::ParseReachabilities(idLexer &src, int areaNum)
 	area->rev_reach = NULL;
 	area->travelFlags = AreaContentsTravelFlags(areaNum);
 
+#if HARM_AAS_SAFETY_RW //karin: only load max reach count per area, else raise error in game library
+		if(num > MAX_REACH_PER_AREA)
+			common->Warning("Num reach in area(%d) is overflow(%d > %d) when loading AAS file '%s'", areaNum, num, MAX_REACH_PER_AREA, src.GetFileName());
+#endif
 	for (j = 0; j < num; j++) {
 		Reachability_Read(src, &reach);
 
@@ -1097,6 +1131,15 @@ bool idAASFileLocal::ParseReachabilities(idLexer &src, int areaNum)
 		}
 #endif
 
+#if HARM_AAS_SAFETY_RW //karin: only load max reach count per area, else raise error in game library
+		if(j >= MAX_REACH_PER_AREA && (harm_aas_areaReachSafety.GetInteger() & 1))
+		{
+			if(j == MAX_REACH_PER_AREA)
+				common->Printf("Loading num reach in area(%d) is overflow(%d) to AAS file '%s', others will be skipped in this area.\n", areaNum, MAX_REACH_PER_AREA, src.GetFileName());
+			delete newReach;
+			continue;
+		}
+#endif
 		newReach->CopyBase(reach);
 		newReach->fromAreaNum = areaNum;
 		newReach->next = area->reach;
