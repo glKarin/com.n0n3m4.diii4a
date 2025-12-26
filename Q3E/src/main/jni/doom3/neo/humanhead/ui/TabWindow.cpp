@@ -7,13 +7,16 @@
 #include "TabWindow.h"
 #include "TabContainerWindow.h"
 
-void hhTabWindow::CommonInit()
+void hhTabWindow::CommonInit(void)
 {
     idWindow::CommonInit();
 
 	active = false;
     buttonRect.Empty();
-    activeColor = idVec4(1, 1, 1, 1);
+    activeColor = idVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	buttonEdgeWidth = -1.0f;
+    seperatorLines.Zero();
+    seperatorMargin = 0.0f;
 
     buttonMat.Reset();
     buttonActiveMat.Reset();
@@ -40,18 +43,79 @@ const char *hhTabWindow::HandleEvent(const sysEvent_t *event, bool *updateVisual
 	return ret;
 }
 
-
 bool hhTabWindow::ParseInternalVar(const char *_name, idParser *src)
 {
+    if (idStr::Icmp(_name, "buttonEdgeWidth") == 0)
+    {
+        buttonEdgeWidth = src->ParseFloat();
+        return true;
+    }
+    if (idStr::Icmp(_name, "activeColor") == 0)
+    {
+        activeColor[0] = src->ParseFloat();
+        src->ExpectTokenString(",");
+        activeColor[1] = src->ParseFloat();
+        src->ExpectTokenString(",");
+        activeColor[2] = src->ParseFloat();
+        src->ExpectTokenString(",");
+        activeColor[3] = src->ParseFloat();
+        return true;
+    }
+    if (idStr::Icmp(_name, "seperatorLines") == 0)
+    {
+        seperatorLines[0] = src->ParseFloat();
+        src->ExpectTokenString(",");
+        seperatorLines[1] = src->ParseFloat();
+        src->ExpectTokenString(",");
+        seperatorLines[2] = src->ParseFloat();
+        src->ExpectTokenString(",");
+        seperatorLines[3] = src->ParseFloat();
+        return true;
+    }
+    if (idStr::Icmp(_name, "seperatorMargin") == 0)
+    {
+        seperatorMargin = src->ParseFloat();
+        return true;
+    }
 	return idWindow::ParseInternalVar(_name, src);
 }
 
-void hhTabWindow::PostParse()
+idWinVar * hhTabWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **owner)
+{
+    if (idStr::Icmp(_name, "buttonLeftMat") == 0)
+    {
+        return &buttonMat.left.name;
+    }
+    if (idStr::Icmp(_name, "buttonMiddleMat") == 0)
+    {
+        return &buttonMat.middle.name;
+    }
+    if (idStr::Icmp(_name, "buttonRightMat") == 0)
+    {
+        return &buttonMat.right.name;
+    }
+    if (idStr::Icmp(_name, "buttonActiveLeftMat") == 0)
+    {
+        return &buttonActiveMat.left.name;
+    }
+    if (idStr::Icmp(_name, "buttonActiveMiddleMat") == 0)
+    {
+        return &buttonActiveMat.middle.name;
+    }
+    if (idStr::Icmp(_name, "buttonActiveRightMat") == 0)
+    {
+        return &buttonActiveMat.right.name;
+    }
+
+    return idWindow::GetWinVarByName(_name, fixup, owner);
+}
+
+void hhTabWindow::PostParse(void)
 {
 	idWindow::PostParse();
 
-    buttonMat.Setup();
-    buttonActiveMat.Setup();
+    buttonMat.Setup(buttonEdgeWidth);
+    buttonActiveMat.Setup(buttonEdgeWidth);
 }
 
 void hhTabWindow::Draw(int time, float x, float y)
@@ -70,7 +134,7 @@ void hhTabWindow::Activate(bool activate, idStr &act)
 	}
 }
 
-void hhTabWindow::UpdateTab()
+void hhTabWindow::UpdateTab(void)
 {
 	visible = active;
 	SetVisible(active);
@@ -142,53 +206,19 @@ void hhTabWindow::DrawButton(float x, float y, bool hover, bool vertical)
 
     if(active)
     {
-        buttonActiveMat.Draw(dc, rect, vertical, matScalex, matScaley, flags);
+        buttonActiveMat.Draw(dc, rect, vertical, matScalex, matScaley, flags, hover ? hoverMatColor : matColor);
     }
     else
     {
-        buttonMat.Draw(dc, rect, vertical, matScalex, matScaley, flags);
+        buttonMat.Draw(dc, rect, vertical, matScalex, matScaley, flags, hover ? hoverMatColor : matColor);
     }
 
     rect.y += buttonRect.h / 2 - lineHeight / 2;
     rect.h = lineHeight + buttonRect.h / 2 - lineHeight / 2;
 
     //dc->DrawRect(textRect.x + item.x, textRect.y + item.y, item.w, item.h, 1, color);
-    dc->DrawText(text, textScale, /*vertical ? idDeviceContext::ALIGN_LEFT : */idDeviceContext::ALIGN_CENTER, color, rect, false, -1);
+    dc->DrawText(text, textScale, /*textAlign vertical ? idDeviceContext::ALIGN_LEFT :*/ idDeviceContext::ALIGN_CENTER, color, rect, false, -1);
 
     /*dc->PushClipRect(rect);
     dc->PopClipRect();*/
-}
-
-idWinVar * hhTabWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **owner)
-{
-    if (idStr::Icmp(_name, "activeColor") == 0)
-    {
-        return &activeColor;
-    }
-    if (idStr::Icmp(_name, "buttonLeftMat") == 0)
-    {
-        return &buttonMat.left.name;
-    }
-    if (idStr::Icmp(_name, "buttonMiddleMat") == 0)
-    {
-        return &buttonMat.middle.name;
-    }
-    if (idStr::Icmp(_name, "buttonRightMat") == 0)
-    {
-        return &buttonMat.right.name;
-    }
-    if (idStr::Icmp(_name, "buttonActiveLeftMat") == 0)
-    {
-        return &buttonActiveMat.left.name;
-    }
-    if (idStr::Icmp(_name, "buttonActiveMiddleMat") == 0)
-    {
-        return &buttonActiveMat.middle.name;
-    }
-    if (idStr::Icmp(_name, "buttonActiveRightMat") == 0)
-    {
-        return &buttonActiveMat.right.name;
-    }
-
-    return idWindow::GetWinVarByName(_name, fixup, owner);
 }

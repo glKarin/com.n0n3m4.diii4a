@@ -15,15 +15,16 @@ public:
     hhButtonWindow(idDeviceContext *d, idUserInterfaceLocal *gui);
 
     virtual idWinVar *  GetWinVarByName(const char *_name, bool winLookup = false, drawWin_t **owner = NULL);
-	virtual void		PostParse();
+	virtual void		PostParse(void);
 	virtual void		Draw(int time, float x, float y);
 
 private:
     virtual bool		ParseInternalVar(const char *name, idParser *src);
-	void				CommonInit();
+	void				CommonInit(void);
 
-    hhBackgroundGroup   buttonMat;
-    float               edgeWidth;
+    hhBackgroundGroup   buttonMat; // leftMat middleMat rightMat // RO; non-ref; non-script;
+    float               edgeWidth; // RO; non-ref; non-script;
+    idVec4              hoverBorderColor; // RO; non-ref; non-script;
 };
 
 #endif // _KARIN_BUTTONWINDOW_H

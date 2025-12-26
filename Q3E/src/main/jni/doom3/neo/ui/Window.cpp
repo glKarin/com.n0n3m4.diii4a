@@ -53,6 +53,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../humanhead/ui/TabWindow.h"
 #include "../humanhead/ui/TabContainerWindow.h"
 #include "../humanhead/ui/ButtonWindow.h"
+#include "../humanhead/ui/SuperWindow.h"
 #endif
 
 //
@@ -148,20 +149,15 @@ const idRegEntry idWindow::RegisterVars[] = {
 #endif
 
 #ifdef _HUMANHEAD
-	, { "margins", idRegister::VEC4 },
-	{ "cornerSize", idRegister::VEC2 },
-	{ "edgeSize", idRegister::VEC2 },
-	{ "hoverMatColor", idRegister::VEC4 },
+	,
+    { "hoverMatColor", idRegister::VEC4 },
+    // listDef
 	{ "focusColor", idRegister::VEC4 },
-	{ "seperatorLines", idRegister::VEC4 },
-	{ "activeColor", idRegister::VEC4 },
-    { "seperatorMargin", idRegister::INT },
-    { "activeTab", idRegister::INT },
-	{ "sepColor", idRegister::VEC4 },
-	{ "hoverBorderColor", idRegister::VEC4 },
-	{ "tabMargins", idRegister::VEC2 },
+    // creditDef
 	{ "trailOffset", idRegister::FLOAT },
 	{ "splineIn", idRegister::INT },
+    // tabContainerDef
+    { "activeTab", idRegister::INT },
 #endif
 };
 
@@ -2376,18 +2372,6 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 // jmarshall end
 #endif
 #ifdef _HUMANHEAD
-    if (idStr::Icmp(_name, "margins") == 0)
-    {
-        retVar = &margins;
-    }
-    if (idStr::Icmp(_name, "cornerSize") == 0)
-    {
-        retVar = &cornerSize;
-    }
-    if (idStr::Icmp(_name, "edgeSize") == 0)
-    {
-        retVar = &edgeSize;
-    }
     if (idStr::Icmp(_name, "hoverMatColor") == 0)
     {
         retVar = &hoverMatColor;
@@ -2395,18 +2379,6 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
     if (idStr::Icmp(_name, "focusColor") == 0)
     {
         retVar = &focusColor;
-    }
-	if (idStr::Icmp(_name, "seperatorLines") == 0)
-	{
-		retVar = &seperatorLines;
-	}
-    if (idStr::Icmp(_name, "seperatorMargin") == 0)
-    {
-        retVar = &seperatorMargin;
-    }
-    if (idStr::Icmp(_name, "hoverBorderColor") == 0)
-    {
-        retVar = &hoverBorderColor;
     }
     if (idStr::Icmp(_name, "trailOffset") == 0)
     {
@@ -2889,7 +2861,6 @@ bool idWindow::Parse(idParser *src, bool rebuild)
 
 		if (token == "windowDef" || token == "animationDef"
 #ifdef _HUMANHEAD
-				 || token == "superWindowDef"
 				 || token == "creditDef"
 				 || token == "splineDef"
 #endif
@@ -3065,6 +3036,17 @@ bool idWindow::Parse(idParser *src, bool rebuild)
 		}
         else if (token == "buttonDef") {
             hhButtonWindow *win = new hhButtonWindow(dc, gui);
+            SaveExpressionParseState();
+            win->Parse(src, rebuild);
+            RestoreExpressionParseState();
+            AddChild(win);
+            win->SetParent(this);
+            dwt.simp = NULL;
+            dwt.win = win;
+            drawWindows.Append(dwt);
+        }
+        else if (token == "superWindowDef") {
+            hhSuperWindow *win = new hhSuperWindow(dc, gui);
             SaveExpressionParseState();
             win->Parse(src, rebuild);
             RestoreExpressionParseState();

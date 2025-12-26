@@ -24,7 +24,7 @@ void hhBackground::Setup()
     }
 }
 
-void hhBackground::Draw(idDeviceContext *dc, const idRectangle &drawRect, float matScalex, float matScaley, unsigned int flags)
+void hhBackground::Draw(idDeviceContext *dc, const idRectangle &drawRect, float matScalex, float matScaley, unsigned int flags, const idVec4 &color)
 {
     if (material) {
         float scalex, scaley;
@@ -38,7 +38,7 @@ void hhBackground::Draw(idDeviceContext *dc, const idRectangle &drawRect, float 
         }
 
         //dc->DrawRect(drawRect.x, drawRect.y, drawRect.w, drawRect.h, 2, idVec4(1,0,0,1));
-        dc->DrawMaterial(drawRect.x, drawRect.y, drawRect.w, drawRect.h, material, idVec4(1, 1, 1, 1), scalex, scaley);
+        dc->DrawMaterial(drawRect.x, drawRect.y, drawRect.w, drawRect.h, material, color, scalex, scaley);
     }
 }
 
@@ -58,7 +58,7 @@ void hhBackgroundGroup::Setup(float ew) {
     edge = ew;
 }
 
-void hhBackgroundGroup::Draw(idDeviceContext *dc, const idRectangle &total, bool vertical, float matScalex, float matScaley, unsigned int flags)
+void hhBackgroundGroup::Draw(idDeviceContext *dc, const idRectangle &total, bool vertical, float matScalex, float matScaley, unsigned int flags, const idVec4 &color)
 {
     idRectangle rects[3];
     hhBackground *bgs[3] = {
@@ -79,7 +79,7 @@ void hhBackgroundGroup::Draw(idDeviceContext *dc, const idRectangle &total, bool
         for(int i = 0; i < 3; i++)
         {
             if(bgs[i])
-                bgs[i]->Draw(dc, rects[i], matScalex, matScaley, flags);
+                bgs[i]->Draw(dc, rects[i], matScalex, matScaley, flags, color);
         }
     }
 }

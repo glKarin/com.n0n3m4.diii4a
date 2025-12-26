@@ -15,7 +15,7 @@ static const int pixelOffset = 3;
 // number of pixels between columns
 static const int tabBorder = 4;
 
-void hhTabContainerWindow::CommonInit()
+void hhTabContainerWindow::CommonInit(void)
 {
     idWindow::CommonInit();
 
@@ -43,39 +43,6 @@ hhTabContainerWindow::hhTabContainerWindow(idUserInterfaceLocal *g) : idWindow(g
 	CommonInit();
 }
 
-const char *hhTabContainerWindow::HandleEvent(const sysEvent_t *event, bool *updateVisuals)
-{
-	// need to call this to allow proper focus and capturing on embedded children
-	const char *ret = idWindow::HandleEvent(event, updateVisuals);
-
-	int key = event->evValue;
-
-	if (event->evType == SE_KEY) {
-		if (!event->evValue2) {
-			// We only care about key down, not up
-			return ret;
-		}
-
-		if (key == K_MOUSE1) {
-			for(int i = 0; i < tabs.Num(); i++)
-			{
-				hhTabWindow *t = tabs[i];
-				if(ButtonContains(t))
-				{
-					SetActiveTab(i);
-					break;
-				}
-			}
-		} else {
-			return ret;
-		}
-	} else {
-		return ret;
-	}
-
-	return ret;
-}
-
 bool hhTabContainerWindow::ParseInternalVar(const char *_name, idParser *src)
 {
 	if (idStr::Icmp(_name, "horizontal") == 0) {
@@ -83,15 +50,44 @@ bool hhTabContainerWindow::ParseInternalVar(const char *_name, idParser *src)
 		vertical = src->ParseBool();
 		return true;
 	}
-	if (idStr::Icmp(_name, "tabHeight") == 0) {
-		tabHeight = src->ParseFloat();
-		return true;
-	}
+    if (idStr::Icmp(_name, "tabMargins") == 0)
+    {
+        tabMargins[0] = src->ParseFloat();
+        src->ExpectTokenString(",");
+        tabMargins[1] = src->ParseFloat();
+        return true;
+    }
+    if (idStr::Icmp(_name, "sepColor") == 0)
+    {
+        sepColor[0] = src->ParseFloat();
+        src->ExpectTokenString(",");
+        sepColor[1] = src->ParseFloat();
+        src->ExpectTokenString(",");
+        sepColor[2] = src->ParseFloat();
+        src->ExpectTokenString(",");
+        sepColor[3] = src->ParseFloat();
+        return true;
+    }
+    if (idStr::Icmp(_name, "tabHeight") == 0)
+    {
+        tabHeight = src->ParseFloat();
+        return true;
+    }
 
 	return idWindow::ParseInternalVar(_name, src);
 }
 
-void hhTabContainerWindow::PostParse()
+idWinVar * hhTabContainerWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **owner)
+{
+    if (idStr::Icmp(_name, "activeTab") == 0)
+    {
+        return &activeTab;
+    }
+
+    return idWindow::GetWinVarByName(_name, fixup, owner);
+}
+
+void hhTabContainerWindow::PostParse(void)
 {
 	idWindow::PostParse();
 
@@ -119,8 +115,41 @@ void hhTabContainerWindow::Draw(int time, float x, float y)
 {
 	for (int i = 0; i < tabs.Num(); i++) {
 		hhTabWindow *tab = tabs[i];
-        tab->DrawButton(textRect.x, textRect.y, ButtonContains(tab), vertical);
+        tab->DrawButton(drawRect.x, drawRect.y, ButtonContains(tab), vertical);
 	}
+}
+
+const char *hhTabContainerWindow::HandleEvent(const sysEvent_t *event, bool *updateVisuals)
+{
+    // need to call this to allow proper focus and capturing on embedded children
+    const char *ret = idWindow::HandleEvent(event, updateVisuals);
+
+    int key = event->evValue;
+
+    if (event->evType == SE_KEY) {
+        if (!event->evValue2) {
+            // We only care about key down, not up
+            return ret;
+        }
+
+        if (key == K_MOUSE1) {
+            for(int i = 0; i < tabs.Num(); i++)
+            {
+                hhTabWindow *t = tabs[i];
+                if(ButtonContains(t))
+                {
+                    SetActiveTab(i);
+                    break;
+                }
+            }
+        } else {
+            return ret;
+        }
+    } else {
+        return ret;
+    }
+
+    return ret;
 }
 
 void hhTabContainerWindow::Activate(bool activate, idStr &act)
@@ -143,7 +172,7 @@ void hhTabContainerWindow::UpdateTab(bool onlyOffset)
         if(!onlyOffset)
         {
             tab->SetActive(currentTab == i);
-            tab->SetOffsets(tabMargins.x(), tabMargins.y());
+            tab->SetOffsets(tabMargins[0], tabMargins[1]);
         }
 		if (vertical) {
             tab->SetButtonRect(
@@ -154,7 +183,7 @@ void hhTabContainerWindow::UpdateTab(bool onlyOffset)
             );
 		} else {
             tab->SetButtonRect(
-                lineWidth * (float)i + offsets.x + tabMargins.x(),
+                lineWidth * (float)i + offsets.x + tabMargins[0],
                 0,
                 lineWidth,
                 lineHeight
@@ -197,7 +226,7 @@ float hhTabContainerWindow::GetTabHeight()
 {
 	const float lineHeight = GetMaxCharHeight() + tabBorder;
 	if(vertical)
-		return Max(lineHeight + pixelOffset, Min((rect.h() - tabMargins.x()) / (float)tabs.Num(), DEFAULT_HEIGHT_IN_VERTICAL/*tabHeight / 2*/));
+		return Max(lineHeight + pixelOffset, Min((rect.h() - tabMargins[0]) / (float)tabs.Num(), DEFAULT_HEIGHT_IN_VERTICAL/*tabHeight / 2*/));
 	else
 		return lineHeight; // Max(lineHeight, tabHeight / 2);
 }
@@ -205,33 +234,15 @@ float hhTabContainerWindow::GetTabHeight()
 float hhTabContainerWindow::GetTabWidth()
 {
     if(vertical)
-        return Max(tabHeight, tabMargins.x());
+        return Max(tabHeight, tabMargins[0]);
     else
-        return (rect.w() - tabMargins.x() - offsets.x) / (float)tabs.Num();
+        return (rect.w() - tabMargins[0] - offsets.x) / (float)tabs.Num();
 }
 
 bool hhTabContainerWindow::ButtonContains(const hhTabWindow *tab)
 {
     idRectangle r;
-    tab->GetButtonOffsetRect(r, textRect.x, textRect.y);
+    tab->GetButtonOffsetRect(r, drawRect.x, drawRect.y);
     //common->Printf("OOO %d  %f %f in %f %f %f %f -> %d\n" ,i,gui->CursorX(), gui->CursorY(), r.x, r.h, r.w, r.h, Contains(r, gui->CursorX(), gui->CursorY()));
     return Contains(r, gui->CursorX(), gui->CursorY());
-}
-
-idWinVar * hhTabContainerWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **owner)
-{
-    if (idStr::Icmp(_name, "activeTab") == 0)
-    {
-        return &activeTab;
-    }
-    if (idStr::Icmp(_name, "tabMargins") == 0)
-    {
-        return &tabMargins;
-    }
-    if (idStr::Icmp(_name, "sepColor") == 0)
-    {
-        return &sepColor;
-    }
-
-    return idWindow::GetWinVarByName(_name, fixup, owner);
 }

@@ -17,12 +17,12 @@ public:
 	hhTabWindow(idDeviceContext *d, idUserInterfaceLocal *gui);
 
 	virtual const char	*HandleEvent(const sysEvent_t *event, bool *updateVisuals);
-	virtual void		PostParse();
+	virtual void		PostParse(void);
 	virtual void		Draw(int time, float x, float y);
 	virtual void		Activate(bool activate, idStr &act);
 	virtual void		StateChanged(bool redraw = false);
 
-	void				UpdateTab();
+	void				UpdateTab(void);
 	void 				SetActive(bool active);
     void 				SetOffsets(float x, float y);
     void 				DrawButton(float x, float y, bool hover, bool vertical);
@@ -35,13 +35,17 @@ protected:
 
 private:
 	virtual bool		ParseInternalVar(const char *name, idParser *src);
-	void				CommonInit();
+	void				CommonInit(void);
 
 
-    idWinVec4           activeColor;
-    hhBackgroundGroup   buttonMat;
-    hhBackgroundGroup   buttonActiveMat;
-	bool                active;
+    hhBackgroundGroup   buttonMat; // buttonLeftMat buttonMiddleMat buttonRightMat // RO; non-ref; non-script;
+    hhBackgroundGroup   buttonActiveMat; // buttonActiveLeftMat buttonActiveMiddleMat buttonActiveRightMat // RO; non-ref; non-script;
+    idVec4	            activeColor; // RO; non-ref; non-script;
+    float			    buttonEdgeWidth; // RO; non-ref; non-script;
+    idVec4              seperatorLines; // RO; non-ref; non-script;
+    float               seperatorMargin; // RO; non-ref; non-script;
+
+    bool                active;
     idRectangle         buttonRect;
 
     friend class hhTabContainerWindow;

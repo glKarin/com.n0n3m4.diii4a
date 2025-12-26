@@ -2739,6 +2739,7 @@ if(HUMANHEAD)
 			humanhead/ui/TabContainerWindow.cpp
             humanhead/ui/BackgroundImage.cpp
 			humanhead/ui/ButtonWindow.cpp
+			humanhead/ui/SuperWindow.cpp
 			)
 
 	set(src_core_humanhead
