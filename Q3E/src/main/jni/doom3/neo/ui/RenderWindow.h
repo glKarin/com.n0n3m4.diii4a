@@ -76,6 +76,7 @@ class idRenderWindow : public idWindow
 
 #ifdef _RAVEN
 		idStr needUpdate;
+		idWinStr customSkin;
 #endif
 };
 

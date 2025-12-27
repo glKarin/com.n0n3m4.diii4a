@@ -123,8 +123,8 @@ class idSimpleWindow
 		idWinVec2		shear;
 		idWinBackground	backGroundName;
 #ifdef _RAVEN // quake4 gui var
-        idWinFloat textspacing;
-        idWinInt textstyle;
+        float	        textSpacing;
+        int		        textStyle;
 #endif
 
 		const idMaterial *background;

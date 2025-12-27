@@ -55,8 +55,22 @@ void idListWindow::CommonInit()
 	top = 0;
 	sizeBias = 0;
 	horizontal = false;
+#ifdef _RAVEN //karin: listwindow scrollbar
+	scroller = NULL;
+#else
 	scroller = new idSliderWindow(dc, gui);
+#endif
 	multipleSel = false;
+#ifdef _RAVEN //karin: listwindow background
+	itemHeight = 0;
+	backgroundHover = "";
+	backgroundHoverMat = NULL;
+	backgroundFocus = "";
+	backgroundFocusMat = NULL;
+	backgroundLine = "";
+	tabTextScales = "";
+	scrollbar = false;
+#endif
 }
 
 idListWindow::idListWindow(idDeviceContext *d, idUserInterfaceLocal *g) : idWindow(d, g)
@@ -108,6 +122,10 @@ const char *idListWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 	const char *ret = idWindow::HandleEvent(event, updateVisuals);
 
 	float vert = GetMaxCharHeight();
+#ifdef _RAVEN //karin: listwindow item height
+	if(vert < itemHeight)
+		vert = (int)itemHeight;
+#endif
 	int numVisibleLines = textRect.h / vert;
 
 	int key = event->evValue;
@@ -118,6 +136,9 @@ const char *idListWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 			return ret;
 		}
 
+#ifdef _RAVEN //karin: listwindow scrollbar
+		if(scroller)
+#endif
 		if (key == K_MOUSE1 || key == K_MOUSE2) {
 			// If the user clicked in the scroller, then ignore it
 			if (scroller->Contains(gui->CursorX(), gui->CursorY())) {
@@ -212,6 +233,10 @@ const char *idListWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 		SetCurrentSel(listItems.Num() - 1);
 	}
 
+#ifdef _RAVEN //karin: listwindow scrollbar
+	if(scroller)
+	{
+#endif
 	if (scroller->GetHigh() > 0.0f) {
 		if (!idKeyInput::IsDown(K_CTRL)) {
 			if (top > GetCurrentSel() - 1) {
@@ -236,6 +261,11 @@ const char *idListWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 		top = 0;
 		scroller->SetValue(0.0f);
 	}
+#ifdef _RAVEN //karin: listwindow scrollbar
+	}
+	else
+		top = 0;
+#endif
 
 	if (key != K_MOUSE1) {
 		// Send a fake mouse click event so onAction gets run in our parents
@@ -303,6 +333,40 @@ bool idListWindow::ParseInternalVar(const char *_name, idParser *src)
 		ParseString(src, tabIconVOffsetStr);
 		return true;
 	}
+#ifdef _RAVEN //karin: listwindow background
+	if (idStr::Icmp(_name, "itemheight") == 0) {
+		itemHeight = src->ParseInt();
+		return true;
+	}
+	if (idStr::Icmp(_name, "scrollbar") == 0) {
+		scrollbar = src->ParseBool();
+		return true;
+	}
+	if (idStr::Icmp(_name, "backgroundHover") == 0) {
+		idStr str;
+		ParseString(src, str);
+		backgroundHover = str;
+		return true;
+	}
+	if (idStr::Icmp(_name, "backgroundFocus") == 0) {
+		idStr str;
+		ParseString(src, str);
+		backgroundFocus = str;
+		return true;
+	}
+	if (idStr::Icmp(_name, "backgroundLine") == 0) {
+		idStr str;
+		ParseString(src, str);
+		backgroundLine = str;
+		return true;
+	}
+	if (idStr::Icmp(_name, "tabTextScales") == 0) {
+		idStr str;
+		ParseString(src, str);
+		tabTextScales = str;
+		return true;
+	}
+#endif
 
 	idStr strName = _name;
 
@@ -327,6 +391,26 @@ bool idListWindow::ParseInternalVar(const char *_name, idParser *src)
 
 idWinVar *idListWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **owner)
 {
+#ifdef _RAVEN //karin: listwindow background
+	if (idStr::Icmp(_name, "lineheight") == 0) {
+		return &itemHeight;
+	}
+	if (idStr::Icmp(_name, "scrollbar") == 0) {
+		return &scrollbar;
+	}
+	if (idStr::Icmp(_name, "backgroundHover") == 0) {
+		return &backgroundHover;
+	}
+	if (idStr::Icmp(_name, "backgroundFocus") == 0) {
+		return &backgroundFocus;
+	}
+	if (idStr::Icmp(_name, "backgroundLine") == 0) {
+		return &backgroundLine;
+	}
+	if (idStr::Icmp(_name, "tabTextScales") == 0) {
+		return &tabTextScales;
+	}
+#endif
 	return idWindow::GetWinVarByName(_name, fixup, owner);
 }
 
@@ -476,6 +560,14 @@ void idListWindow::PostParse()
 	}
 
 	flags |= WIN_CANFOCUS;
+#ifdef _RAVEN //karin: listwindow background
+	if (backgroundHover.Length()) {
+		backgroundHoverMat = declManager->FindMaterial(backgroundHover);
+	}
+	if (backgroundFocus.Length()) {
+		backgroundFocusMat = declManager->FindMaterial(backgroundFocus);
+	}
+#endif
 }
 
 /*
@@ -488,6 +580,10 @@ This is the same as in idEditWindow
 void idListWindow::InitScroller(bool horizontal)
 {
 #ifdef _RAVEN // quake4 assets
+	if(!scrollbar)
+		return;
+	scroller = new idSliderWindow(dc, gui);
+
 	const char *thumbImage = "gfx/guis/scrollbar_thumb.tga";
 	const char *barImage = "gfx/guis/scrollbarv.tga";
 #else
@@ -539,10 +635,18 @@ void idListWindow::Draw(int time, float x, float y)
 	idRectangle rect = textRect;
 	float scale = textScale;
 	float lineHeight = GetMaxCharHeight();
+#ifdef _RAVEN //karin: listwindow item height
+	float charHeight = lineHeight;
+	if(lineHeight < itemHeight)
+		lineHeight = (int)itemHeight;
+#endif
 
 	float bottom = textRect.Bottom();
 	float width = textRect.w;
 
+#ifdef _RAVEN //karin: listwindow scrollbar
+	if(scroller)
+#endif
 	if (scroller->GetHigh() > 0.0f) {
 		if (horizontal) {
 			bottom -= sizeBias;
@@ -570,6 +674,9 @@ void idListWindow::Draw(int time, float x, float y)
 
 		rect.y ++;
 		rect.h = lineHeight - 1;
+#ifdef _RAVEN //karin: listwindow background
+		bool hovering = ( !noEvents && Contains(rect, gui->CursorX(), gui->CursorY()) );
+#endif
 
 		if (hover && !noEvents && Contains(rect, gui->CursorX(), gui->CursorY())) {
 			color = hoverColor;
@@ -579,6 +686,14 @@ void idListWindow::Draw(int time, float x, float y)
 
 		rect.h = lineHeight + pixelOffset;
 		rect.y --;
+#ifdef _RAVEN //karin: listwindow background
+		if (backgroundFocusMat && IsSelected(i)) {
+			dc->DrawMaterial(rect.x, rect.y, rect.w, rect.h, backgroundFocusMat, idVec4(1.0f,1.0f,1.0f,1.0f), 1.0f, 1.0f);
+		}
+		else if (backgroundHoverMat && hovering ) {
+			dc->DrawMaterial(rect.x, rect.y, rect.w, rect.h, backgroundHoverMat, idVec4(1.0f,1.0f,1.0f,1.0f), 1.0f, 1.0f);
+		}
+#endif
 
 		if (tabInfo.Num() > 0) {
 			int start = 0;
@@ -598,7 +713,13 @@ void idListWindow::Draw(int time, float x, float y)
 				dc->PushClipRect(rect);
 
 				if (tabInfo[tab].type == TAB_TYPE_TEXT) {
+#ifdef _RAVEN //karin: text verticle center
+					idRectangle trect = rect;
+					trect.y = rect.y + rect.h*0.5f - charHeight*0.5f;
+					dc->DrawText(work, scale, tabInfo[tab].align, color, trect, false, -1);
+#else
 					dc->DrawText(work, scale, tabInfo[tab].align, color, rect, false, -1);
+#endif
 				} else if (tabInfo[tab].type == TAB_TYPE_ICON) {
 
 					const idMaterial	**hashMat;
@@ -653,7 +774,13 @@ void idListWindow::Draw(int time, float x, float y)
 			rect.x = textRect.x;
 			rect.w = width;
 		} else {
+#ifdef _RAVEN //karin: text verticle center
+			idRectangle trect = rect;
+			trect.y = rect.y + rect.h*0.5f - charHeight*0.5f;
+			dc->DrawText(listItems[i], scale, 0, color, trect, false, -1);
+#else
 			dc->DrawText(listItems[i], scale, 0, color, rect, false, -1);
+#endif
 		}
 
 		rect.y += lineHeight;
@@ -675,7 +802,11 @@ void idListWindow::Activate(bool activate, idStr &act)
 
 void idListWindow::HandleBuddyUpdate(idWindow *buddy)
 {
+#ifdef _RAVEN //karin: listwindow scrollbar
+	top = scroller ? scroller->GetValue() : 0;
+#else
 	top = scroller->GetValue();
+#endif
 }
 
 void idListWindow::UpdateList()
@@ -694,16 +825,31 @@ void idListWindow::UpdateList()
 	}
 
 	float vert = GetMaxCharHeight();
+#ifdef _RAVEN //karin: listwindow item height
+	if(vert < itemHeight)
+		vert = (int)itemHeight;
+#endif
 	int fit = textRect.h / vert;
 
+#ifdef _RAVEN //karin: listwindow scrollbar
+	if(scroller)
+	{
+#endif
 	if (listItems.Num() < fit) {
 		scroller->SetRange(0.0f, 0.0f, 1.0f);
 	} else {
 		scroller->SetRange(0.0f, (listItems.Num() - fit) + 1.0f, 1.0f);
 	}
+#ifdef _RAVEN //karin: listwindow scrollbar
+	}
+#endif
 
 	SetCurrentSel(gui->State().GetInt(va("%s_sel_0", listName.c_str())));
 
+#ifdef _RAVEN //karin: listwindow scrollbar
+	if(scroller)
+	{
+#endif
 	float value = scroller->GetValue();
 
 	if (value > listItems.Num() - 1) {
@@ -716,6 +862,11 @@ void idListWindow::UpdateList()
 
 	scroller->SetValue(value);
 	top = value;
+#ifdef _RAVEN //karin: listwindow scrollbar
+	}
+	else
+		top = 0;
+#endif
 
 	typedTime = 0;
 	clickTime = 0;

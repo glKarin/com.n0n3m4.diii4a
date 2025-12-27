@@ -94,6 +94,10 @@ class idEditWindow : public idWindow
 
 		idWinBool			liveUpdate;
 		idWinStr			cvarGroup;
+#ifdef _RAVEN //karin: editwindow cvarMin
+		int					cvarMin;
+		bool				cvarMinSet;
+#endif
 };
 
 #endif /* !__EDITWINDOW_H__ */

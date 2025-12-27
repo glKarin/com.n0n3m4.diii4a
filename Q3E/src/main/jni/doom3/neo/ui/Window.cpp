@@ -140,12 +140,10 @@ const idRegEntry idWindow::RegisterVars[] = {
     { "backgroundFocus", idRegister::STRING },
     { "backgroundLine", idRegister::STRING },
     { "itemheight", idRegister::INT },
+    { "scrollbar", idRegister::BOOL },
 	{ "values", idRegister::STRING }, // idChoiceWindow
 	{ "model", idRegister::STRING }, // idRenderWindow
 	{ "skin", idRegister::STRING }, // idRenderWindow
-	{ "model1", idRegister::STRING }, // idRenderWindow
-	{ "skin1", idRegister::STRING }, // idRenderWindow
-	{ "animClass1", idRegister::STRING }, // idRenderWindow
 #endif
 
 #ifdef _HUMANHEAD
@@ -257,6 +255,8 @@ void idWindow::CommonInit()
 
 	hideCursor = false;
 #ifdef _RAVEN // quake4 gui var
+	textSpacing = 0.0f;
+	textStyle = 0;
 // jmarshall - gui crash
     backColor_r.Bind(backColor, 0);
     backColor_g.Bind(backColor, 1);
@@ -2314,63 +2314,6 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 		retVar = &hideCursor;
 	}
 
-#ifdef _RAVEN // quake4 gui var
-// jmarshall
-    if (idStr::Icmp(_name, "textspacing") == 0)
-    {
-        retVar = &textspacing;
-    }
-
-    if (idStr::Icmp(_name, "textstyle") == 0)
-    {
-        retVar = &textstyle;
-    }
-
-    if (idStr::Icmp(_name, "itemheight") == 0)
-    {
-        retVar = &itemheight;
-    }
-    if (idStr::Icmp(_name, "scrollbar") == 0)
-    {
-        retVar = &scrollbar;
-    }
-
-    if (idStr::Icmp(_name, "backgroundHover") == 0)
-    {
-        retVar = &backgroundHover;
-    }
-
-    if (idStr::Icmp(_name, "backgroundFocus") == 0)
-    {
-        retVar = &backgroundFocus;
-    }
-
-    if (idStr::Icmp(_name, "backgroundLine") == 0)
-    {
-        retVar = &backgroundLine;
-    }
-
-    if (idStr::Icmp(_name, "tabTextScales") == 0)
-    {
-        retVar = &tabTextScales;
-    }
-
-    if (idStr::Icmp(_name, "cvarMin") == 0)
-    {
-        retVar = &cvarMin;
-    }
-
-    if (idStr::Icmp(_name, "model1") == 0)
-    {
-        retVar = &model1;
-    }
-
-    if (idStr::Icmp(_name, "skin") == 0)
-    {
-        retVar = &skin;
-    }
-// jmarshall end
-#endif
 #ifdef _HUMANHEAD
     if (idStr::Icmp(_name, "hoverMatColor") == 0)
     {
@@ -2548,16 +2491,6 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 		return true;
 	}
 
-#ifdef _RAVEN // quake4 gui var
-// jmarshall - quake 4
-    if (idStr::Icmp(_name, "textSpacing") == 0)
-    {
-        textspacing = src->ParseFloat(); //k: jmarshall is ParseInt
-        return true;
-    }
-// jmarshall end
-#endif
-
 	if (idStr::Icmp(_name, "shadow") == 0) {
 		textShadow = src->ParseInt();
 		return true;
@@ -2624,13 +2557,16 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 	}
 
 #ifdef _RAVEN // quake4 gui var
-// jmarshall - quake 4
-    if (idStr::Icmp(_name, "textStyle") == 0)
+    if (idStr::Icmp(_name, "textSpacing") == 0)
     {
-        textstyle = src->ParseInt();
+        textSpacing = src->ParseFloat();
         return true;
     }
-// jmarshall end
+    if (idStr::Icmp(_name, "textStyle") == 0)
+    {
+        textStyle = src->ParseInt();
+        return true;
+    }
 #endif
 
 	if (idStr::Icmp(_name, "wantenter") == 0) {

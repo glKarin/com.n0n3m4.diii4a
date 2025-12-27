@@ -96,6 +96,16 @@ class idListWindow : public idWindow
 
 		int					typedTime;
 		idStr				typed;
+#ifdef _RAVEN //karin: listwindow background
+        idWinInt			itemHeight;
+		idWinStr			backgroundHover;
+		const idMaterial	*backgroundHoverMat;
+		idWinStr			backgroundFocus;
+		const idMaterial	*backgroundFocusMat;
+        idWinStr			backgroundLine;
+        idWinStr			tabTextScales;
+        idWinBool			scrollbar;
+#endif
 };
 
 #endif // __LISTWINDOW_H

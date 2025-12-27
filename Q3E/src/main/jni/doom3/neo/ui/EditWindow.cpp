@@ -77,6 +77,13 @@ bool idEditWindow::ParseInternalVar(const char *_name, idParser *src)
 		cvarMax = src->ParseInt();
 		return true;
 	}
+#ifdef _RAVEN //karin: editwindow cvarMin
+	if (idStr::Icmp(_name, "cvarMin") == 0) {
+		cvarMin = src->ParseInt();
+		cvarMinSet = true;
+		return true;
+	}
+#endif
 
 	return idWindow::ParseInternalVar(_name, src);
 }
@@ -120,6 +127,10 @@ void idEditWindow::CommonInit()
 	cvar = NULL;
 	liveUpdate = true;
 	readonly = false;
+#ifdef _RAVEN //karin: editwindow cvarMin
+	cvarMin = 0;
+	cvarMinSet = false;
+#endif
 
 	scroller = new idSliderWindow(dc, gui);
 }
@@ -686,6 +697,11 @@ void idEditWindow::UpdateCvar(bool read, bool force)
 				if (cvarMax && (cvar->GetInteger() > cvarMax)) {
 					cvar->SetInteger(cvarMax);
 				}
+#ifdef _RAVEN //karin: editwindow cvarMin
+				if (cvarMinSet && (cvar->GetInteger() < cvarMin)) {
+					cvar->SetInteger(cvarMin);
+				}
+#endif
 			}
 		}
 	}

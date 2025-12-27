@@ -100,6 +100,7 @@ void idRenderWindow::PreRender()
 		if(b/* != needsRender */)
 		{
 			needsRender = b;
+			updateAnimation = b;
 			//if(b)
 				GetGui()->SetStateBool(nu, false);
 		}
@@ -125,6 +126,10 @@ void idRenderWindow::PreRender()
 		spawnArgs.Set("classname", "func_static");
 		spawnArgs.Set("model", modelName);
 		spawnArgs.Set("origin", modelOrigin.c_str());
+#ifdef _RAVEN //karin: renderwindow skin
+		if(customSkin.Length())
+		spawnArgs.Set("skin", customSkin);
+#endif
 		gameEdit->ParseSpawnArgsToRenderEntity(&spawnArgs, &worldEntity);
 
 		if (worldEntity.hModel) {
@@ -262,6 +267,11 @@ idWinVar *idRenderWindow::GetWinVarByName(const char *_name, bool fixup, drawWin
 		return &needsRender;
 	}
 
+#ifdef _RAVEN //karin: renderwindow skin
+	if (idStr::Icmp(_name, "skin") == 0) {
+		return &customSkin;
+	}
+#endif
 //
 //
 	return idWindow::GetWinVarByName(_name, fixup, owner);
@@ -275,11 +285,41 @@ bool idRenderWindow::ParseInternalVar(const char *_name, idParser *src)
 		return true;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN //karin: renderwindow needupdate skin
 	if (idStr::Icmp(_name, "needUpdate") == 0) {
 		ParseString(src, needUpdate);
 		return true;
 	}
+#define STR_IS_PREFIX_NUM_FORMAT(x) (idStr::Icmpn(_name, x, strlen(x)) == 0 && strlen(_name) > strlen(x) && idStr::IsNumeric(_name + strlen(x)))
+	if(STR_IS_PREFIX_NUM_FORMAT("model"))
+    {
+		idStr str;
+		ParseString(src, str);
+		(void)str;
+		return true;
+    }
+	if(STR_IS_PREFIX_NUM_FORMAT("joint"))
+    {
+		idStr str;
+		ParseString(src, str);
+		(void)str;
+		return true;
+    }
+	if(STR_IS_PREFIX_NUM_FORMAT("animClass"))
+    {
+		idStr str;
+		ParseString(src, str);
+		(void)str;
+		return true;
+    }
+	if(STR_IS_PREFIX_NUM_FORMAT("anim"))
+    {
+		idStr str;
+		ParseString(src, str);
+		(void)str;
+		return true;
+    }
+#undef STR_IS_PREFIX_NUM_FORMAT
 #endif
 
 	return idWindow::ParseInternalVar(_name, src);

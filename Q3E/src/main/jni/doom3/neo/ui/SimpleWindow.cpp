@@ -68,8 +68,8 @@ idSimpleWindow::idSimpleWindow(idWindow *win)
 	backGroundName = win->backGroundName;
 
 #ifdef _RAVEN // quake4 gui var
-    textspacing = win->textspacing;
-    textstyle = win->textstyle;
+    textSpacing = win->textSpacing;
+    textStyle = win->textStyle;
 
     // jmarshall - gui crash
     backColor_r.Bind(backColor, 0);

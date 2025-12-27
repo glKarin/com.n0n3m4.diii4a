@@ -491,17 +491,8 @@ class idWindow
 		idWinStr	text;
 		idWinBackground	backGroundName;			//
 #ifdef _RAVEN // quake4 gui var
-        idWinFloat textspacing;
-        idWinInt textstyle;
-        idWinInt itemheight;
-        idWinInt scrollbar;
-        idWinStr backgroundHover;
-        idWinStr backgroundFocus;
-        idWinStr backgroundLine;
-        idWinStr tabTextScales;
-        idWinInt cvarMin;
-        idWinStr model1;
-        idWinStr skin;
+        float			 textSpacing;
+        int				 textStyle;
 #endif
 #ifdef _HUMANHEAD
         idWinVec4    hoverMatColor; // RW; non-ref; script;
