@@ -94,7 +94,8 @@ public final class Q3E
     public static void Start()
     {
         int gameThread = Q3EPreference.GetIntFromString(activity, Q3EPreference.GAME_THREAD, 0);
-        Q3E.gameThread = gameThread == 1 ? new Q3EGameThreadJava() : new Q3EGameThreadNative();
+        int threadStackSize = Q3EPreference.GetIntFromString(activity, Q3EPreference.GAME_THREAD_STACK_SIZE, 0);
+        Q3E.gameThread = gameThread == 1 ? new Q3EGameThreadJava(threadStackSize > 0 ? Q3EJNI.AlignedStackSize(threadStackSize) : 0) : new Q3EGameThreadNative();
         Q3E.gameThread.Start();
         Q3E.running = true;
     }

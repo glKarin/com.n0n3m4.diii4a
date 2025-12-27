@@ -569,5 +569,8 @@
     <string name="common">Common</string>
     <string name="current_game">Current game</string>
     <string name="edit_type">Edit type</string>
+    <string name="advance">Advance</string>
+    <string name="game_thread_stack_size">Game thread stack memory size(kb)</string>
+    <string name="_0_is_unset">0 = unset</string>
 
 </resources>

@@ -310,6 +310,7 @@ public final class Q3EPreference
     public static final String THEME                         = "harm_theme";
     public static final String EVENT_QUEUE                   = "harm_event_queue"; // 0 = native; 1 = java
     public static final String GAME_THREAD                   = "harm_game_thread"; // 0 = native; 1 = java
+    public static final String GAME_THREAD_STACK_SIZE        = "harm_game_thread_stack_size"; // 0 = unset
     public static final String AUTOSAVE_BUTTON_SETTINGS      = "harm_autosave_button_settings";
     public static final String BUTTON_SWIPE_RELEASE_DELAY    = "harm_button_swipe_release_delay";
     public static final String DISC_PANEL_KEYS_PREFIX        = "harm_disc_panel_keys_";

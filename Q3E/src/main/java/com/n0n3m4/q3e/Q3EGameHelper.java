@@ -1130,7 +1130,8 @@ public class Q3EGameHelper
 
         int eventQueue = Q3EPreference.GetIntFromString(preferences, Q3EPreference.EVENT_QUEUE, 0);
         int gameThread = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD, 0);
-        Q3EJNI.PreInit(eventQueue, gameThread);
+        int threadStackSize = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD_STACK_SIZE, 0);
+        Q3EJNI.PreInit(eventQueue, gameThread, threadStackSize);
 
         String libpath;
         String engineLib;

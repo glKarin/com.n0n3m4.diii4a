@@ -30,6 +30,13 @@ class Q3EGameThreadJava extends Thread implements Q3EGameThread
         setPriority(MAX_PRIORITY);
     }
 
+    public Q3EGameThreadJava(int stackSize)
+    {
+        super(null, null, "Q3EGameThreadJava", stackSize);
+
+        setPriority(MAX_PRIORITY);
+    }
+
     private void Log(String str, Object...args)
     {
         KLog.i("Q3EGameThreadJava", str, args);

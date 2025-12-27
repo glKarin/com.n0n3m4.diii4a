@@ -96,6 +96,7 @@ static void *libdl;
 static ANativeWindow *window = NULL;
 static int usingNativeEventQueue = 1;
 static int usingNativeThread = 1;
+static int threadStackSize = 0;
 
 static int resultCode = -1;
 
@@ -730,7 +731,7 @@ static void Q3E_StartGameMainThread(void)
 	if(main_thread)
 		return;
 
-	int res = Q3E_CreateThread(&main_thread, Q3E_MainLoop, NULL);
+	int res = Q3E_CreateThread(&main_thread, Q3E_MainLoop, NULL, threadStackSize);
 	if(res < 0 || !main_thread)
 	{
 	    exit(res);
@@ -1065,10 +1066,16 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, j
     Q3E_PushAnalogEvent(enable, x, y);
 }
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit(JNIEnv *env, jclass clazz, jint eventQueueType, jint gameThreadType)
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit(JNIEnv *env, jclass clazz, jint eventQueueType, jint gameThreadType, jint stackSize)
 {
 	usingNativeEventQueue = eventQueueType != EVENT_QUEUE_TYPE_JAVA;
 	usingNativeThread = gameThreadType != GAME_THREAD_TYPE_JAVA;
+    threadStackSize = stackSize < 0 ? 0 : stackSize;
+}
+
+JNIEXPORT jint JNICALL Java_com_n0n3m4_q3e_Q3EJNI_AlignedStackSize(JNIEnv *env, jclass clazz, jint kb)
+{
+	return Q3E_AlignedStackSize(kb);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Setenv(

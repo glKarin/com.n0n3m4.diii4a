@@ -173,8 +173,8 @@
                 android:title="@string/extract_resource"
                 android:showAsAction="never"/>
             <item
-                android:id="@+id/main_menu_experimental"
-                android:title="@string/experimental"
+                android:id="@+id/main_menu_advance"
+                android:title="@string/advance"
                 android:showAsAction="never"/>
             <item
                 android:id="@+id/main_menu_check_for_update"

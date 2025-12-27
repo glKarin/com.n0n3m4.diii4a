@@ -565,4 +565,7 @@
     <string name="common">通用</string>
     <string name="current_game">当前游戏</string>
     <string name="edit_type">编辑类型</string>
+    <string name="advance">高级</string>
+    <string name="game_thread_stack_size">游戏线程栈内存大小(kb)</string>
+    <string name="_0_is_unset">0为不设置</string>
 </resources>

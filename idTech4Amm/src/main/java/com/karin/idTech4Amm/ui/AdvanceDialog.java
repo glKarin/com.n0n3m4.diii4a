@@ -10,9 +10,9 @@ import android.app.Dialog;
 import com.karin.idTech4Amm.R;
 
 /**
- * Experimental dialog
+ * Advance dialog
  */
-public class ExperimentalDialog extends DialogFragment
+public class AdvanceDialog extends DialogFragment
 {
 
     @Override
@@ -33,7 +33,7 @@ public class ExperimentalDialog extends DialogFragment
         else
             manager = getFragmentManager();
         manager.beginTransaction()
-            .add(R.id.launcher_settings_dialog_main_layout, new ExperimentalPreference(), "_Experimental_preference")
+            .add(R.id.launcher_settings_dialog_main_layout, new AdvancePreference(), "_Advance_preference")
             .commit()
             ;
         return view;
@@ -43,13 +43,13 @@ public class ExperimentalDialog extends DialogFragment
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.setTitle(R.string.experimental);
+        dialog.setTitle(R.string.advance);
         return dialog;
     }
 
-    public static ExperimentalDialog newInstance()
+    public static AdvanceDialog newInstance()
     {
-        ExperimentalDialog dialog = new ExperimentalDialog();
+        AdvanceDialog dialog = new AdvanceDialog();
         return dialog;
     }
 }

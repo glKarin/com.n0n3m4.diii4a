@@ -4,6 +4,7 @@
 #include <string.h>
 #include <signal.h>
 
+#include <unistd.h>
 #include <android/log.h>
 
 #include "q3estd.h"
@@ -49,7 +50,61 @@ int q3e_pthread_cancelable(void)
     return 0;
 }
 
-int Q3E_CreateThread(pthread_t *threadid, void * (*mainf)(void *), void *data)
+int Q3E_AlignedStackSize(size_t stackSize)
+{
+	if (stackSize == 0)
+		return 0;
+
+	size_t bytes = stackSize * 1024;
+	long pagesize = sysconf(_SC_PAGESIZE);
+	if (pagesize <= 0) {
+		LOGI("Get page size error %ld, using 4096 bytes.", pagesize);
+		pagesize = 4096;
+	}
+	else {
+		LOGI("Get page size %ld bytes.", pagesize);
+	}
+	long stackmin = sysconf(_SC_THREAD_STACK_MIN);
+	if (stackmin <= 0) {
+#ifdef PTHREAD_STACK_MIN
+		LOGI("Get thread stack min error %ld, using PTHREAD_STACK_MIN macro %d. bytes.", stackmin, PTHREAD_STACK_MIN);
+		stackmin = PTHREAD_STACK_MIN;
+#else
+		LOGI("Get thread stack min error %ld, using %d bytes.", pagesize, 16384);
+        stackmin = 16384;
+#endif
+	} else {
+		LOGI("Get thread stack min %ld bytes.", stackmin);
+	}
+	if (bytes < stackmin)
+		bytes = stackmin;
+	size_t alignedsize = (bytes + pagesize - 1) / pagesize * pagesize;
+	LOGI("Require stack size %zu bytes, aligned size %zu bytes.", bytes, alignedsize);
+
+	return alignedsize;
+}
+
+static int Q3E_SetupThreadAttrStackSize(pthread_attr_t *attr, size_t stackSize)
+{
+    if (stackSize == 0)
+        return 0;
+
+    size_t alignedsize = Q3E_AlignedStackSize(stackSize);
+
+    size_t size = 0;
+    pthread_attr_getstacksize(attr, &size);
+    LOGI("Default stack size %zu bytes.", size);
+    if (pthread_attr_setstacksize(attr, alignedsize) == 0) {
+        pthread_attr_getstacksize(attr, &size);
+        LOGI("Setup stack size %zu bytes", size);
+        return alignedsize;
+    } else {
+        LOGI("Setup stack size %zu bytes fail!", alignedsize);
+        return -1;
+    }
+}
+
+int Q3E_CreateThread(pthread_t *threadid, void * (*mainf)(void *), void *data, size_t stackSize)
 {
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -59,6 +114,9 @@ int Q3E_CreateThread(pthread_t *threadid, void * (*mainf)(void *), void *data)
 		LOGE("ERROR: pthread_attr_setdetachstate native thread failed: %d", res);
 		return -1;
 	}
+
+    // setup thread stack size
+    res = Q3E_SetupThreadAttrStackSize(&attr, stackSize);
 
 	if ( (res = pthread_create((pthread_t *)threadid, &attr, mainf, data)) != 0 ) {
 		LOGE("ERROR: pthread_create native thread failed: %d", res);

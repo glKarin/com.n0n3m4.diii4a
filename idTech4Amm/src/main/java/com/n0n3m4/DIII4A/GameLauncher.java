@@ -80,7 +80,7 @@ import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.n0n3m4.q3e.karin.Theme;
 import com.karin.idTech4Amm.ui.ChangelogView;
 import com.karin.idTech4Amm.ui.DebugDialog;
-import com.karin.idTech4Amm.ui.ExperimentalDialog;
+import com.karin.idTech4Amm.ui.AdvanceDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
 import com.karin.idTech4Amm.widget.Divider;
 import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
@@ -132,7 +132,6 @@ import com.n0n3m4.q3e.karin.KidTechCommand;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -2647,9 +2646,9 @@ public class GameLauncher extends Activity
 			OpenDebugDialog();
 			return true;
 		}
-		else if (itemId == R.id.main_menu_experimental)
+		else if (itemId == R.id.main_menu_advance)
 		{
-			OpenExperimentalDialog();
+			OpenAdvanceDialog();
 			return true;
 		}
 		else if (itemId == R.id.main_menu_test)
@@ -3225,10 +3224,10 @@ public class GameLauncher extends Activity
         dialog.show(getFragmentManager(), "DebugDialog");
     }
 
-	private void OpenExperimentalDialog()
+	private void OpenAdvanceDialog()
 	{
-		ExperimentalDialog dialog = ExperimentalDialog.newInstance();
-		dialog.show(getFragmentManager(), "ExperimentalDialog");
+		AdvanceDialog dialog = AdvanceDialog.newInstance();
+		dialog.show(getFragmentManager(), "AdvanceDialog");
 	}
 
 	private void UpdateResolution(int rgid)

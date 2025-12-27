@@ -2,13 +2,27 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:title="@string/experimental"
+    android:title="@string/advance"
 >
 
     <PreferenceCategory
-        android:key="experimental_input"
-        android:title="@string/input"
+        android:key="advance"
+        android:title="@string/advance"
     >
+        <EditTextPreference
+            android:title="@string/game_thread_stack_size"
+            android:key="harm_game_thread_stack_size"
+            android:persistent="true"
+            android:defaultValue="0"
+            android:inputType="number"
+            android:summary="@string/_0_is_unset"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="experimental"
+        android:title="@string/experimental"
+        >
         <ListPreference
             android:title="@string/input_event_queue"
             android:key="harm_event_queue"
@@ -18,12 +32,6 @@
             android:entryValues="@array/event_queue_values"
             android:entries="@array/event_queue_labels"
             />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="experimental_other"
-        android:title="@string/other"
-        >
         <ListPreference
             android:title="@string/game_thread"
             android:key="harm_game_thread"

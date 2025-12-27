@@ -68,12 +68,13 @@ public class Q3EJNI {
 	public static native void PushTextEvent(String text);
 	public static native void PushCharEvent(int ch);
 	public static native void PushWheelEvent(float x, float y);
-	public static native void PreInit(int eventQueueType, int gameThreadType);
+	public static native void PreInit(int eventQueueType, int gameThreadType, int stackSize);
 	public static native int main();
 	public static native long StartThread();
 	public static native void StopThread();
 	public static native void NotifyExit();
 	public static native int Setenv(String name, String value, int override);
+	public static native int AlignedStackSize(int kb);
 
 	static {
 		System.loadLibrary("q3eloader");

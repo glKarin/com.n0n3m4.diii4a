@@ -69,7 +69,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushWheelEvent
         (JNIEnv *, jclass, jfloat, jfloat);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit
-        (JNIEnv *, jclass, jint, jint);
+        (JNIEnv *, jclass, jint, jint, jint);
 
 JNIEXPORT jint JNICALL Java_com_n0n3m4_q3e_Q3EJNI_main
         (JNIEnv *, jclass);
@@ -83,6 +83,10 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_NotifyExit(JNIEnv *, jclass);
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Setenv(
         JNIEnv *env, jclass cls,
         jstring name, jstring value);
+
+JNIEXPORT int JNICALL Java_com_n0n3m4_q3e_Q3EJNI_AlignedStackSize(
+        JNIEnv *env, jclass cls,
+        jint kb);
 
 #ifdef __cplusplus
 }
