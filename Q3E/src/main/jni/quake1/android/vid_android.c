@@ -213,6 +213,11 @@ qbool GL_ExtensionSupported(const char *name)
 static void VID_SetVsync_c(cvar_t *var)
 {
 	int vsyncwanted = cls.timedemo ? 0 : vid_vsync.integer;
+	if(vsyncwanted < 0)
+	{
+		Con_Printf("Don't support swap interval value %d, change to 1\n", vsyncwanted);
+		vsyncwanted = 1;
+	}
 /*
 Can't check first: on Wayland SDL_GL_GetSwapInterval() may initially return 0 when vsync is on.
 On Xorg it returns the correct value.

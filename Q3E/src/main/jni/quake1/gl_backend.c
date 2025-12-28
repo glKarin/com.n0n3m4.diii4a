@@ -970,10 +970,10 @@ int R_Mesh_CreateFramebufferObject(rtexture_t *depthtexture, rtexture_t *colorte
 		CHECKGLERROR
 		qglGenFramebuffers(1, (GLuint*)&temp);CHECKGLERROR
 
-#ifndef USE_GLES2
+//#ifndef USE_GLES2 //karin: must binding framebuffer first
 		R_Mesh_SetRenderTargets(temp);  // This breaks GLES2.
 		// GL_ARB_framebuffer_object (GL3-class hardware) - depth stencil attachment
-#endif
+//#endif
 
 #ifdef USE_GLES2
 		// FIXME: separate stencil attachment on GLES
