@@ -244,6 +244,13 @@ int Q3E_GetCurrentThreadName(char *name)
     }
 }
 
+int Q3E_InThread(pthread_t pid)
+{
+	if(!pid)
+		return 0;
+	return pthread_equal(pthread_self(), pid);
+}
+
 int Q3E_GetStackSize(const pthread_t *pid)
 {
 	pthread_t id = pid ? *pid : pthread_self();
@@ -264,8 +271,20 @@ int Q3E_GetStackSize(const pthread_t *pid)
 	}
 }
 
-int Q3E_QuitThread(pthread_t *threadid, void **data, int cancel)
+int Q3E_QuitThread(volatile pthread_t *threadid, void **data, int cancel)
 {
+    if(*threadid == 0)
+    {
+        LOGW("Thread ID invalid");
+        return -2;
+    }
+
+    if(Q3E_InThread(*threadid))
+    {
+        LOGW("Can't operate in same thread");
+        return -3;
+    }
+
     int res;
 	if(cancel)
 		q3e_pthread_cancel(*threadid);

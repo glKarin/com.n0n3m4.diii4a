@@ -352,7 +352,7 @@ void setState(int state)
 static void q3e_exit(void)
 {
 	LOGI("Q3E JNI exit");
-    if(main_thread)
+    if(main_thread && usingNativeThread)
         Q3E_QuitThread(&main_thread, NULL, 1);
 
 	Q3E_FreeArgs();
@@ -718,6 +718,7 @@ static void Q3E_PrintGameMainThread(void)
     if(!main_thread)
         return;
 
+	//int r = prctl(PR_SET_UNALIGN, PR_UNALIGN_NOPRINT);
     LOGI("Game main thread ID: %zu.", PTHREAD_ID_WRAP(main_thread));
     char name[16+1] = {0};
     if(Q3E_GetThreadName(&main_thread, name, sizeof(name)))
@@ -780,6 +781,7 @@ JNIEXPORT jint JNICALL Java_com_n0n3m4_q3e_Q3EJNI_main(JNIEnv *env, jclass clazz
     main_thread = pthread_self();
     Q3E_PrintGameMainThread();
 	resultCode = qmain(q3e_argc, q3e_argv);
+	main_thread = 0;
 	LOGI("Leave java game main thread: %d.", resultCode);
 	return resultCode;
 }
