@@ -96,7 +96,6 @@ Tag with `-free` only for F-Droid update.
 | Feature                             | Github | F-Droid |
 |:------------------------------------|:------:|:-------:|
 | Android min version(because ffmpeg) |   4.4  |   7.0   |
-| Ouya TV                             |   Yes  |    No   |
 | Khronos Vulkan validation layer     |   Yes  |    No   |
 
 ----------------------------------------------------------------------------------

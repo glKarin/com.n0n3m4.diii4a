@@ -1338,7 +1338,11 @@ void idDeviceContext::DrawEditCursor(float x, float y, float scale)
 	PaintChar(x, y - yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
 }
 
+#ifdef _RAVEN //karin: gui drawtext add spacing and style
+int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, idVec4 color, idRectangle rectDraw, bool wrap, int cursor, bool calcOnly, idList<int> *breaks, int limit, float adjust, int style)
+#else
 int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, idVec4 color, idRectangle rectDraw, bool wrap, int cursor, bool calcOnly, idList<int> *breaks, int limit)
+#endif
 {
 	const char	*p, *textPtr, *newLinePtr;
 	char		buff[1024];
@@ -1443,7 +1447,11 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 			}
 
 			if (!calcOnly) {
+#ifdef _RAVEN //karin: gui drawtext add spacing and style
+				count += DrawText(x, y, textScale, color, buff, adjust, 0, style, cursor);
+#else
 				count += DrawText(x, y, textScale, color, buff, 0, 0, 0, cursor);
+#endif
 			}
 
 			if (cursor < newLine) {
@@ -1568,10 +1576,18 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
                 // Draw what's in the current text buffer.
                 if( !calcOnly ) {
                     if( lastBreak > 0 ) {
+#ifdef _RAVEN //karin: gui drawtext add spacing and style
+                        count += DrawText( x, y, textScale, color, textBuffer.Left( lastBreak ).c_str(), adjust, 0, style, cursor );
+#else
                         count += DrawText( x, y, textScale, color, textBuffer.Left( lastBreak ).c_str(), 0, 0, 0, cursor );
+#endif
                         textBuffer = textBuffer.Right( textBuffer.Length() - lastBreak );
                     } else {
+#ifdef _RAVEN //karin: gui drawtext add spacing and style
+                        count += DrawText( x, y, textScale, color, textBuffer.c_str(), adjust, 0, style, cursor );
+#else
                         count += DrawText( x, y, textScale, color, textBuffer.c_str(), 0, 0, 0, cursor );
+#endif
                         textBuffer.Clear();
                     }
                 }

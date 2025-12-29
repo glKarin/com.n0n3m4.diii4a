@@ -308,10 +308,18 @@ void idSimpleWindow::Redraw(float x, float y)
 		shadowRect.x += textShadow;
 		shadowRect.y += textShadow;
 
+#ifdef _RAVEN //karin: gui drawtext add spacing and style
+		dc->DrawText(shadowText, textScale, textAlign, colorBlack, shadowRect, !(flags & WIN_NOWRAP), -1, false, NULL, 0, textSpacing, textStyle);
+#else
 		dc->DrawText(shadowText, textScale, textAlign, colorBlack, shadowRect, !(flags & WIN_NOWRAP), -1);
+#endif
 	}
 
+#ifdef _RAVEN //karin: gui drawtext add spacing and style
+	dc->DrawText(text, textScale, textAlign, foreColor, textRect, !(flags & WIN_NOWRAP), -1, false, NULL, 0, textSpacing, textStyle);
+#else
 	dc->DrawText(text, textScale, textAlign, foreColor, textRect, !(flags & WIN_NOWRAP), -1);
+#endif
 	dc->SetTransformInfo(vec3_origin, mat3_identity);
 
 	if (flags & WIN_NOCLIP) {
