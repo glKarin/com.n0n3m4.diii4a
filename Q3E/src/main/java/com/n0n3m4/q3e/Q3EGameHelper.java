@@ -1128,8 +1128,8 @@ public class Q3EGameHelper
         String appHome = Q3EUtils.GetAppInternalSearchPath(m_context, null);
 		appHome = KStr.AppendPath(appHome, subdatadir);
 
-        int eventQueue = Q3EPreference.GetIntFromString(preferences, Q3EPreference.EVENT_QUEUE, 0);
-        int gameThread = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD, 0);
+        int eventQueue = Q3EPreference.GetIntFromString(preferences, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
+        int gameThread = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD, Q3EGlobals.GAME_THREAD_TYPE_NATIVE);
         int threadStackSize = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD_STACK_SIZE, 0);
         Q3EJNI.PreInit(eventQueue, gameThread, threadStackSize);
 

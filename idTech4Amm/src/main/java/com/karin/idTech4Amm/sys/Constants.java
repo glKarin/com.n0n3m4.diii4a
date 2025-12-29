@@ -30,17 +30,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Fix font offset in GUIs on Quake 4.",
-            "Fix a sound distance volume bug on Quake 4.",
-            "Support smooth joystick on DOOM 3 mod `Hardscorps` and Quake 4 mod `Hardqore`.",
-            "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
-            "Update RealRTCW version to 5.3, version 5.2 will be removed on next release.",
-            "Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK, yquake2(Quake 2), and add 3rd Zigock Bot II mod support on Quake 2.",
-            "On-screen button keymap and layout configures are standalone in each game.",
-            "Add Unreal engine psk/psa, iqm, Source engine smd, GLTF/GLB, Autodesk fbx animation/static model support, add md5mesh static model support on DOOM3/Quake 4/Prey",
-            "Add float console support on DOOM3/Quake 4/Prey.",
-            "Add Botrix bot support on HL2MP. More view in `" + TextHelper.GenLinkText("https://github.com/borzh/botrix", "Botrix") + "`.",
-            "[Warning]: FTEQW/Xash3D is removed in this release.",
+                "Add game main thread stack size config on Menu > Option > Advance.",
         };
 	};
 

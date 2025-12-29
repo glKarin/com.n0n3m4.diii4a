@@ -25,14 +25,14 @@ class Q3EGameThreadJava extends Thread implements Q3EGameThread
 {
     public Q3EGameThreadJava()
     {
-        super("Q3EGameThreadJava");
+        super("Q3EMainJava");
 
         setPriority(MAX_PRIORITY);
     }
 
     public Q3EGameThreadJava(int stackSize)
     {
-        super(null, null, "Q3EGameThreadJava", stackSize);
+        super(null, null, "Q3EMainJava", stackSize);
 
         setPriority(MAX_PRIORITY);
     }

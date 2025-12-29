@@ -19,7 +19,16 @@
 
 package com.n0n3m4.q3e;
 
+import android.os.Environment;
+import android.util.Log;
 import android.view.Surface;
+
+import com.n0n3m4.q3e.karin.KLog;
+import com.n0n3m4.q3e.karin.KStr;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 
 public class Q3EJNI {	
 	public static native void setCallbackObject(Object obj);
@@ -77,7 +86,55 @@ public class Q3EJNI {
 	public static native int AlignedStackSize(int kb);
 
 	static {
-		System.loadLibrary("q3eloader");
+		/*
+		boolean loaded = false;
+		StringBuilder buf = new StringBuilder();
+		String localPath = "/sdcard";
+		String localLibPath = KStr.AppendPath(localPath, "diii4a", "libq3eloader.so");
+		File file = new File(localLibPath);
+		try
+		{
+			if(file.isFile())
+			{
+				Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Find local q3eloader library at " + localLibPath + "......");
+				String cacheFile = Q3E.CopyDLLToCache(localLibPath,  "lib", null);
+				buf.append("Local q3eloader library file path: ").append(localLibPath).append(" to ").append(cacheFile).append("\n");
+				if(null != cacheFile)
+				{
+					Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load local q3eloader library: " + cacheFile);
+					System.load(cacheFile);
+					loaded = true;
+				}
+				else
+				{
+					Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload local q3eloader library fail: " + localLibPath);
+				}
+			}
+		}
+		catch(Throwable e)
+		{
+		}
+		if(!loaded)
+		{
+		 */
+			System.loadLibrary("q3eloader");
+			/*
+		}
+
+		{
+			try
+			{
+				FileWriter os = new FileWriter(KStr.AppendPath(localPath, "diii4a", "q3eloader.txt"));
+				os.write(buf.toString());
+				os.flush();
+				os.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+
+		}*/
 	}
 }
 

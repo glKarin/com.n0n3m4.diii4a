@@ -299,8 +299,8 @@ public class Q3ECallbackObj
     public void InitGUIInterface(Activity context)
     {
         gui = new Q3EGUI(context);
-        int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, 0);
-        if(eventQueue == 1)
+        int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
+        if(eventQueue == Q3EGlobals.EVENT_QUEUE_TYPE_JAVA)
         {
             Log.i(TAG, "Using java event queue");
             eventEngine = new Q3EEventEngineJava();

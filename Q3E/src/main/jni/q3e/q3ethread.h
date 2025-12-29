@@ -14,9 +14,12 @@ extern "C" {
 int q3e_pthread_cancel(pthread_t pthread_id);
 int q3e_pthread_cancelable(void);
 
-int Q3E_CreateThread(pthread_t *threadid, void * (*mainf)(void *), void *data, size_t stackSize);
+int Q3E_CreateThread(pthread_t *threadid, void * (*mainf)(void *), void *data, const char *name, size_t stackSize);
 int Q3E_QuitThread(pthread_t *threadid, void **data, int cancel);
 int Q3E_AlignedStackSize(size_t stackSize);
+int Q3E_GetStackSize(const pthread_t *pid);
+int Q3E_GetThreadName(const pthread_t *pid, char *name, int len);
+int Q3E_GetCurrentThreadName(char *name);
 
 void Q3E_InitPThreads(void);
 void Q3E_ShutdownPThreads(void);

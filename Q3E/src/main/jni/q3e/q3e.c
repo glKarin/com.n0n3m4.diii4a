@@ -54,6 +54,7 @@
 
 #define JNI_Version JNI_VERSION_1_4
 #define Q3E_MAX_ARGS 512 // 255
+#define GAME_MAIN_THREAD_NAME "Q3EMain"
 
 //#define AUDIOTRACK_BYTEBUFFER 1
 
@@ -239,7 +240,7 @@ static void setup_backtrace(void)
 
 static int loadLib(const char* libpath)
 {
-	LOGI("Load library: %s......", libpath);
+	LOGI("Load library(arm%d): %s......", sizeof(void *) == 8 ? 64 : 32, libpath);
     libdl = dlopen(libpath, RTLD_NOW | RTLD_GLOBAL);
     if(!libdl)
     {
@@ -535,7 +536,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	if(redirectOutputToFile)
 		Q3E_RedirectOutput();
 
-	LOGI("Load library: %s", engineLibPath);
+	LOGI("Load library(arm%d): %s", sizeof(void *) == 8 ? 64 : 32, engineLibPath);
 	(*env)->ReleaseStringUTFChars(env, LibPath, engineLibPath);
 	
 	LOGI("idTech4A++ game data directory: %s", game_data_dir);
@@ -712,9 +713,32 @@ void finish(void)
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_Finish_method);
 }
 
+static void Q3E_PrintGameMainThread(void)
+{
+    if(!main_thread)
+        return;
+
+    LOGI("Game main thread ID: %zu.", PTHREAD_ID_WRAP(main_thread));
+    char name[16+1] = {0};
+    if(Q3E_GetThreadName(&main_thread, name, sizeof(name)))
+    {
+        LOGI("Game main pthread name: %s", name);
+    }
+    else if(Q3E_GetCurrentThreadName(name))
+    {
+        LOGI("Game main thread name: %s", name);
+    }
+    int size = 0;
+    if((size = Q3E_GetStackSize(&main_thread)) > 0)
+        LOGI("Game main thread stack size: %d", size);
+}
+
 static void * Q3E_MainLoop(void *data)
 {
 	LOGI("Enter native game main thread.");
+
+    Q3E_PrintGameMainThread();
+
 	Android_AttachThread();
 	q3e_pthread_cancelable();
 	resultCode = qmain(q3e_argc, q3e_argv);
@@ -731,7 +755,7 @@ static void Q3E_StartGameMainThread(void)
 	if(main_thread)
 		return;
 
-	int res = Q3E_CreateThread(&main_thread, Q3E_MainLoop, NULL, threadStackSize);
+	int res = Q3E_CreateThread(&main_thread, Q3E_MainLoop, NULL, GAME_MAIN_THREAD_NAME, threadStackSize);
 	if(res < 0 || !main_thread)
 	{
 	    exit(res);
@@ -753,6 +777,8 @@ static void Q3E_ShutdownGameMainThread(void)
 JNIEXPORT jint JNICALL Java_com_n0n3m4_q3e_Q3EJNI_main(JNIEnv *env, jclass clazz)
 {
 	LOGI("Enter java game main thread.");
+    main_thread = pthread_self();
+    Q3E_PrintGameMainThread();
 	resultCode = qmain(q3e_argc, q3e_argv);
 	LOGI("Leave java game main thread: %d.", resultCode);
 	return resultCode;

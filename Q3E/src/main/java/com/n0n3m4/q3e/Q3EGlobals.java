@@ -215,6 +215,14 @@ public final class Q3EGlobals
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 
+    // same as JNI
+    // game thread creating
+    public static final int GAME_THREAD_TYPE_NATIVE = 0;
+    public static final int GAME_THREAD_TYPE_JAVA   = 1;
+    // game input event queue
+    public static final int EVENT_QUEUE_TYPE_NATIVE = 0;
+    public static final int EVENT_QUEUE_TYPE_JAVA   = 1;
+
 
 
     public static boolean IsFDroidVersion()
