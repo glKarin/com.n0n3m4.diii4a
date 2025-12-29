@@ -154,7 +154,7 @@ public class KBacktraceHandler
         try
         {
             String fileName = String.format("%s_%s.backtrace.log", Q3EGlobals.CONST_APP_NAME, new SimpleDateFormat("yyyy-MM-dd HH-mm-ss-SSS").format(new Date()));
-            String logPath = KStr.AppendPath(Q3EUtils.q3ei.app_storage_path, "backtrace");
+            String logPath = KStr.AppendPath(Q3EUtils.q3ei.app_storage_path, Q3EGlobals.FOLDER_BACKTRACE_LOG);
             File dir = new File(logPath);
             if(!dir.exists())
                 dir.mkdirs();

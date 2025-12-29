@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 extern "C" {
 #endif
 
-#if !defined(_DIII4A) //karin: no use SDL
+#if !defined(__ANDROID__) //karin: no use SDL
 #ifndef DEDICATED
 #ifdef USE_INTERNAL_SDL_HEADERS
 #	include "SDL_version.h"

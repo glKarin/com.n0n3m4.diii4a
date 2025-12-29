@@ -568,4 +568,10 @@
     <string name="advance">高级</string>
     <string name="game_thread_stack_size">游戏线程栈内存大小(kb)</string>
     <string name="_0_is_unset">0为不设置</string>
+    <string name="are_you_sure_clean_all_log_files">确定清空所有%1$s记录文件?</string>
+    <string name="clean_logcat_files">清空logcat文件</string>
+    <string name="clean_backtrace_log_files">清空回退栈记录文件</string>
+    <string name="clean_dalvik_crash_log_files">清空崩溃记录文件</string>
+    <string name="crash">崩溃</string>
+    <string name="backtrace">回退栈</string>
 </resources>

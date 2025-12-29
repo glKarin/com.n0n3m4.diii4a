@@ -207,7 +207,7 @@ public class KUncaughtExceptionHandler implements Thread.UncaughtExceptionHandle
         try
         {
             String fileName = String.format("%s_%s.crash.log", Q3EGlobals.CONST_APP_NAME, new SimpleDateFormat("yyyy-MM-dd HH-mm-ss-SSS").format(new Date()));
-            String logPath = Q3EUtils.q3ei.app_storage_path + "/logs";
+            String logPath = KStr.AppendPath(Q3EUtils.q3ei.app_storage_path, Q3EGlobals.FOLDER_CRASH_LOG);
             File dir = new File(logPath);
             if(!dir.exists())
                 dir.mkdirs();

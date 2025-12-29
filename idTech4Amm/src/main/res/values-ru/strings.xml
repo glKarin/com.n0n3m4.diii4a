@@ -569,5 +569,11 @@
     <string name="advance">Advance</string>
     <string name="game_thread_stack_size">Game thread stack memory size(kb)</string>
     <string name="_0_is_unset">0 = unset</string>
+    <string name="are_you_sure_clean_all_log_files">Are you sure clean all %s log files?</string>
+    <string name="clean_logcat_files">Clean logcat files</string>
+    <string name="clean_backtrace_log_files">Clean backtrace log files</string>
+    <string name="clean_dalvik_crash_log_files">Clean dalvik crash log files</string>
+    <string name="crash">crash</string>
+    <string name="backtrace">backtrace</string>
 
 </resources>

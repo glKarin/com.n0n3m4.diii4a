@@ -215,6 +215,10 @@ public final class Q3EGlobals
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 
+    public static final String FOLDER_CRASH_LOG     = "logs"; // crash log
+    public static final String FOLDER_BACKTRACE_LOG = "backtrace"; // backtrace
+    public static final String FOLDER_LOGCAT_LOG    = "logcat"; // logcat
+
     // same as JNI
     // game thread creating
     public static final int GAME_THREAD_TYPE_NATIVE = 0;
