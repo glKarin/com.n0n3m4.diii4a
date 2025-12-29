@@ -21,7 +21,7 @@
 "# endif\n",
 "#endif\n",
 "\n",
-"#define sat(x) clamp(x, 0, 1)\n",
+"#define sat(x) clamp(x, 0.0, 1.0)\n", //karin: GLES2
 "#define possat(x) sat(x)\n",//As replacement of max(x, 0) when x<=1, better for gpus that can't do 0-cycle max(x, 0)
 "#define minonesat(x) sat(x)\n",//As replacement of min(x, 1) when x>=0, better for gpus that can't do 0-cycle min(x, 1)
 "#define possatdot(x, y) possat(dot(x, y))\n",
@@ -515,7 +515,7 @@
 "		color += dp_texture2D(Texture_First, tc).rgb;\n",
 "		tc += BloomBlur_Parameters.xy;\n",
 "	}\n",
-"	dp_FragColor = vec4(color * BloomBlur_Parameters.z + vec3(BloomBlur_Parameters.w), 1);\n",
+"	dp_FragColor = vec4(color * BloomBlur_Parameters.z + vec3(BloomBlur_Parameters.w), 1.0);\n", //karin: GLES2
 "}\n",
 "#endif\n",
 "#else // !MODE_BLOOMBLUR\n",
@@ -568,7 +568,7 @@
 "void main(void)\n",
 "{\n",
 "	vec2 ScreenScaleRefractReflectIW = ScreenScaleRefractReflect.xy * (1.0 / ModelViewProjectionPosition.w);\n",
-"	//vec2 ScreenTexCoord = (ModelViewProjectionPosition.xy + normalize(vec3(dp_texture2D(Texture_Normal, TexCoord)) - vec3(0.5)).xy * DistortScaleRefractReflect.xy * 100) * ScreenScaleRefractReflectIW + ScreenCenterRefractReflect.xy;\n",
+"	//vec2 ScreenTexCoord = (ModelViewProjectionPosition.xy + normalize(vec3(dp_texture2D(Texture_Normal, TexCoord)) - vec3(0.5)).xy * DistortScaleRefractReflect.xy * 100.0) * ScreenScaleRefractReflectIW + ScreenCenterRefractReflect.xy;\n", //karin: GLES2
 "	vec2 SafeScreenTexCoord = ModelViewProjectionPosition.xy * ScreenScaleRefractReflectIW + ScreenCenterRefractReflect.xy;\n",
 "#ifdef USEALPHAGENVERTEX\n",
 "	vec2 distort = DistortScaleRefractReflect.xy * VertexColor.a;\n",
@@ -667,7 +667,7 @@
 "void main(void)\n",
 "{\n",
 "	vec4 ScreenScaleRefractReflectIW = ScreenScaleRefractReflect * (1.0 / ModelViewProjectionPosition.w);\n",
-"	//vec4 ScreenTexCoord = (ModelViewProjectionPosition.xyxy + normalize(vec3(dp_texture2D(Texture_Normal, TexCoord)) - vec3(0.5)).xyxy * DistortScaleRefractReflect * 100) * ScreenScaleRefractReflectIW + ScreenCenterRefractReflect;\n",
+"	//vec4 ScreenTexCoord = (ModelViewProjectionPosition.xyxy + normalize(vec3(dp_texture2D(Texture_Normal, TexCoord)) - vec3(0.5)).xyxy * DistortScaleRefractReflect * 100.0) * ScreenScaleRefractReflectIW + ScreenCenterRefractReflect;\n", //karin: GLES2
 "	vec4 SafeScreenTexCoord = ModelViewProjectionPosition.xyxy * ScreenScaleRefractReflectIW + ScreenCenterRefractReflect;\n",
 "	//SafeScreenTexCoord = gl_FragCoord.xyxy * vec4(1.0 / 1920.0, 1.0 / 1200.0, 1.0 / 1920.0, 1.0 / 1200.0);\n",
 "	// slight water animation via 2 layer scrolling (todo: tweak)\n",
@@ -1597,7 +1597,7 @@
 "	#ifdef USEDIFFUSE\n",
 "		myhalf3 lightnormal = cast_myhalf3(normalize(LightVector));\n",
 "	#endif\n",
-"	#define lightcolor 1\n",
+"	#define lightcolor 1.0\n", //karin: GLES2
 "#endif // MODE_LIGHTDIRECTION\n",
 "#ifdef MODE_LIGHTDIRECTIONMAP_MODELSPACE\n",
 "   #define SHADING\n",
@@ -1768,7 +1768,7 @@
 "	// reflection must come last because it already contains exactly the correct fog (the reflection render preserves camera distance from the plane, it only flips the side) and ContrastBoost/SceneBrightness\n",
 "#ifdef USEREFLECTION\n",
 "	vec4 ScreenScaleRefractReflectIW = ScreenScaleRefractReflect * (1.0 / ModelViewProjectionPosition.w);\n",
-"	//vec4 ScreenTexCoord = (ModelViewProjectionPosition.xyxy + normalize(cast_myhalf3(offsetMappedTexture2D(Texture_Normal)) - cast_myhalf3(0.5)).xyxy * DistortScaleRefractReflect * 100) * ScreenScaleRefractReflectIW + ScreenCenterRefractReflect;\n",
+"	//vec4 ScreenTexCoord = (ModelViewProjectionPosition.xyxy + normalize(cast_myhalf3(offsetMappedTexture2D(Texture_Normal)) - cast_myhalf3(0.5)).xyxy * DistortScaleRefractReflect * 100.0) * ScreenScaleRefractReflectIW + ScreenCenterRefractReflect;\n", //karin: GLES2
 "	vec2 SafeScreenTexCoord = ModelViewProjectionPosition.xy * ScreenScaleRefractReflectIW.zw + ScreenCenterRefractReflect.zw;\n",
 "	#ifdef USENORMALMAPSCROLLBLEND\n",
 "# ifdef USEOFFSETMAPPING\n",
