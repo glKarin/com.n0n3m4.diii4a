@@ -10,7 +10,7 @@ void hhBackground::Reset(void) {
     name = "";
 }
 
-void hhBackground::Setup()
+void hhBackground::Setup(void)
 {
     if (name.Length()) {
         material = declManager->FindMaterial(name);

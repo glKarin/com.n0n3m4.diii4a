@@ -28,8 +28,8 @@ class hhTabContainerWindow : public idWindow
 		virtual bool		ParseInternalVar(const char *name, idParser *src);
 		void				CommonInit(void);
         void 				SetActiveTab(int index);
-		float				GetTabHeight();
-        float				GetTabWidth();
+		float				GetTabHeight(void);
+        float				GetTabWidth(void);
         bool 				ButtonContains(const hhTabWindow *tab);
 
         idWinInt            activeTab; // RW; non-ref; script;

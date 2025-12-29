@@ -93,10 +93,10 @@ void hhSuperWindow::Draw(int time, float x, float y)
 	{
 		idRectangle r = rect;
 		r.h = cornerSize[1];
-		r.x += margins[0];
-		r.w -= margins[1] * 2.0f;
-		r.y += margins[2];
-		r.h += margins[3] * 2.0f;
+		//r.x += margins[0];
+		//r.w -= margins[1] * 2.0f;
+		//r.y += margins[2];
+		//r.h += margins[3] * 2.0f;
 		r.Offset(x, y);
 		barMat.Draw(dc, r, false, matScalex, matScaley, flags, matColor);
 	}
@@ -106,10 +106,10 @@ void hhSuperWindow::Draw(int time, float x, float y)
 	r.y = r.y + r.h - cornerSize[1];
 	r.h = -cornerSize[1];
 	//common->Printf("xx %f, %f|%s|%s|%s\n", x,y,rect.ToVec4().ToString(), r.ToVec4().ToString(),((idVec4)margins).ToString());
-	r.x += margins[0];
-	r.w -= margins[1] * 2.0f;
-	r.y -= margins[2];
-	r.h += margins[3] * 2.0f;
+	//r.x += margins[0];
+	//r.w -= margins[1] * 2.0f;
+	//r.y -= margins[2];
+	//r.h += margins[3] * 2.0f;
 	r.Offset(x, y);
     barMat.Draw(dc, r, false, matScalex, matScaley, flags, matColor);
 
