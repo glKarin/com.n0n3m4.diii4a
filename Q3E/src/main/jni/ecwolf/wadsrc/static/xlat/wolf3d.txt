@@ -1,0 +1,800 @@
+tiles
+{
+	trigger 21
+	{
+		action = "Exit_Normal";
+		playeruse = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 90
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 91
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg4 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activateeast = false;
+		activatewest = false;
+	}
+	trigger 92
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 93
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 1;
+		arg4 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activateeast = false;
+		activatewest = false;
+	}
+	trigger 94
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 2;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 95
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 2;
+		arg4 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activateeast = false;
+		activatewest = false;
+	}
+	trigger 96
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 3;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 97
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 3;
+		arg4 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activateeast = false;
+		activatewest = false;
+	}
+	trigger 98
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 4;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 99
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 4;
+		arg4 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activateeast = false;
+		activatewest = false;
+	}
+	trigger 100
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 101
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg4 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activateeast = false;
+		activatewest = false;
+	}
+
+	tile 1
+	{
+		texturenorth = "GSTONEA1";
+		texturesouth = "GSTONEA1";
+		textureeast = "GSTONEA2";
+		texturewest = "GSTONEA2";
+	}
+	tile 2
+	{
+		texturenorth = "GSTONEB1";
+		texturesouth = "GSTONEB1";
+		textureeast = "GSTONEB2";
+		texturewest = "GSTONEB2";
+	}
+	tile 3
+	{
+		texturenorth = "GSTFLAG1";
+		texturesouth = "GSTFLAG1";
+		textureeast = "GSTFLAG2";
+		texturewest = "GSTFLAG2";
+	}
+	tile 4
+	{
+		texturenorth = "GSTHTLR1";
+		texturesouth = "GSTHTLR1";
+		textureeast = "GSTHTLR2";
+		texturewest = "GSTHTLR2";
+	}
+	tile 5
+	{
+		texturenorth = "BSTCELA1";
+		texturesouth = "BSTCELA1";
+		textureeast = "BSTCELA2";
+		texturewest = "BSTCELA2";
+	}
+	tile 6
+	{
+		texturenorth = "GSTEAGL1";
+		texturesouth = "GSTEAGL1";
+		textureeast = "GSTEAGL2";
+		texturewest = "GSTEAGL2";
+	}
+	tile 7
+	{
+		texturenorth = "BSTCELB1";
+		texturesouth = "BSTCELB1";
+		textureeast = "BSTCELB2";
+		texturewest = "BSTCELB2";
+	}
+	tile 8
+	{
+		texturenorth = "BSTONEA1";
+		texturesouth = "BSTONEA1";
+		textureeast = "BSTONEA2";
+		texturewest = "BSTONEA2";
+	}
+	tile 9
+	{
+		texturenorth = "BSTONEB1";
+		texturesouth = "BSTONEB1";
+		textureeast = "BSTONEB2";
+		texturewest = "BSTONEB2";
+	}
+	tile 10
+	{
+		texturenorth = "WODEAGL1";
+		texturesouth = "WODEAGL1";
+		textureeast = "WODEAGL2";
+		texturewest = "WODEAGL2";
+	}
+	tile 11
+	{
+		texturenorth = "WODHTLR1";
+		texturesouth = "WODHTLR1";
+		textureeast = "WODHTLR2";
+		texturewest = "WODHTLR2";
+	}
+	tile 12
+	{
+		texturenorth = "WOOD1";
+		texturesouth = "WOOD1";
+		textureeast = "WOOD2";
+		texturewest = "WOOD2";
+	}
+	tile 13
+	{
+		texturenorth = "FAKEDOR1";
+		texturesouth = "FAKEDOR1";
+		textureeast = "FAKEDOR2";
+		texturewest = "FAKEDOR2";
+	}
+	tile 14
+	{
+		texturenorth = "METLSGN1";
+		texturesouth = "METLSGN1";
+		textureeast = "METLSGN2";
+		texturewest = "METLSGN2";
+	}
+	tile 15
+	{
+		texturenorth = "METAL1";
+		texturesouth = "METAL1";
+		textureeast = "METAL2";
+		texturewest = "METAL2";
+	}
+	tile 16
+	{
+		texturenorth = "SKY1";
+		texturesouth = "SKY1";
+		textureeast = "SKY2";
+		texturewest = "SKY2";
+	}
+	tile 17
+	{
+		texturenorth = "BRICK1";
+		texturesouth = "BRICK1";
+		textureeast = "BRICK2";
+		texturewest = "BRICK2";
+	}
+	tile 18
+	{
+		texturenorth = "BRIKWRT1";
+		texturesouth = "BRIKWRT1";
+		textureeast = "BRIKWRT2";
+		texturewest = "BRIKWRT2";
+	}
+	tile 19
+	{
+		texturenorth = "PURPLE1";
+		texturesouth = "PURPLE1";
+		textureeast = "PURPLE2";
+		texturewest = "PURPLE2";
+	}
+	tile 20
+	{
+		texturenorth = "BRIKEGL1";
+		texturesouth = "BRIKEGL1";
+		textureeast = "BRIKEGL2";
+		texturewest = "BRIKEGL2";
+	}
+	tile 21
+	{
+		texturenorth = "ELEV1_1";
+		texturesouth = "ELEV1_1";
+		textureeast = "ELEV1_2";
+		texturewest = "ELEV1_2";
+	}
+	tile 22
+	{
+		texturenorth = "ELEV2_1";
+		texturesouth = "ELEV2_1";
+		textureeast = "ELEV2_2";
+		texturewest = "ELEV2_2";
+	}
+	tile 23
+	{
+		texturenorth = "WODCROS1";
+		texturesouth = "WODCROS1";
+		textureeast = "WODCROS2";
+		texturewest = "WODCROS2";
+	}
+	tile 24
+	{
+		texturenorth = "GSTSLME1";
+		texturesouth = "GSTSLME1";
+		textureeast = "GSTSLME2";
+		texturewest = "GSTSLME2";
+	}
+	tile 25
+	{
+		texturenorth = "PURPBLD1";
+		texturesouth = "PURPBLD1";
+		textureeast = "PURPBLD2";
+		texturewest = "PURPBLD2";
+	}
+	tile 26
+	{
+		texturenorth = "GSTLSLM1";
+		texturesouth = "GSTLSLM1";
+		textureeast = "GSTLSLM2";
+		texturewest = "GSTLSLM2";
+	}
+	tile 27
+	{
+		texturenorth = "GSTONEC1";
+		texturesouth = "GSTONEC1";
+		textureeast = "GSTONEC2";
+		texturewest = "GSTONEC2";
+	}
+	tile 28
+	{
+		texturenorth = "GSTSIGN1";
+		texturesouth = "GSTSIGN1";
+		textureeast = "GSTSIGN2";
+		texturewest = "GSTSIGN2";
+	}
+	tile 29
+	{
+		texturenorth = "CHIP1";
+		texturesouth = "CHIP1";
+		textureeast = "CHIP2";
+		texturewest = "CHIP2";
+	}
+	tile 30
+	{
+		texturenorth = "CHPBLDA1";
+		texturesouth = "CHPBLDA1";
+		textureeast = "CHPBLDA2";
+		texturewest = "CHPBLDA2";
+	}
+	tile 31
+	{
+		texturenorth = "CHPBLDB1";
+		texturesouth = "CHPBLDB1";
+		textureeast = "CHPBLDB2";
+		texturewest = "CHPBLDB2";
+	}
+	tile 32
+	{
+		texturenorth = "CHPBLDC1";
+		texturesouth = "CHPBLDC1";
+		textureeast = "CHPBLDC2";
+		texturewest = "CHPBLDC2";
+	}
+	tile 33
+	{
+		texturenorth = "GLASS1";
+		texturesouth = "GLASS1";
+		textureeast = "GLASS2";
+		texturewest = "GLASS2";
+	}
+	tile 34
+	{
+		texturenorth = "BLUSKUL1";
+		texturesouth = "BLUSKUL1";
+		textureeast = "BLUSKUL2";
+		texturewest = "BLUSKUL2";
+	}
+	tile 35
+	{
+		texturenorth = "GRYBRIK1";
+		texturesouth = "GRYBRIK1";
+		textureeast = "GRYBRIK2";
+		texturewest = "GRYBRIK2";
+	}
+	tile 36
+	{
+		texturenorth = "BLUSWAS1";
+		texturesouth = "BLUSWAS1";
+		textureeast = "BLUSWAS2";
+		texturewest = "BLUSWAS2";
+	}
+	tile 37
+	{
+		texturenorth = "GRYVENT1";
+		texturesouth = "GRYVENT1";
+		textureeast = "GRYVENT2";
+		texturewest = "GRYVENT2";
+	}
+	tile 38
+	{
+		texturenorth = "BRIKODD1";
+		texturesouth = "BRIKODD1";
+		textureeast = "BRIKODD2";
+		texturewest = "BRIKODD2";
+	}
+	tile 39
+	{
+		texturenorth = "GRYCRAK1";
+		texturesouth = "GRYCRAK1";
+		textureeast = "GRYCRAK2";
+		texturewest = "GRYCRAK2";
+	}
+	tile 40
+	{
+		texturenorth = "BLUWALL1";
+		texturesouth = "BLUWALL1";
+		textureeast = "BLUWALL2";
+		texturewest = "BLUWALL2";
+	}
+	tile 41
+	{
+		texturenorth = "BSTSIGN1";
+		texturesouth = "BSTSIGN1";
+		textureeast = "BSTSIGN2";
+		texturewest = "BSTSIGN2";
+	}
+	tile 42
+	{
+		texturenorth = "MARB1_1";
+		texturesouth = "MARB1_1";
+		textureeast = "MARB1_2";
+		texturewest = "MARB1_2";
+	}
+	tile 43
+	{
+		texturenorth = "GRYMAPS1";
+		texturesouth = "GRYMAPS1";
+		textureeast = "GRYMAPS2";
+		texturewest = "GRYMAPS2";
+	}
+	tile 44
+	{
+		texturenorth = "BRNSTNA1";
+		texturesouth = "BRNSTNA1";
+		textureeast = "BRNSTNA2";
+		texturewest = "BRNSTNA2";
+	}
+	tile 45
+	{
+		texturenorth = "BRNSTNB1";
+		texturesouth = "BRNSTNB1";
+		textureeast = "BRNSTNB2";
+		texturewest = "BRNSTNB2";
+	}
+	tile 46
+	{
+		texturenorth = "MARB2_1";
+		texturesouth = "MARB2_1";
+		textureeast = "MARB2_2";
+		texturewest = "MARB2_2";
+	}
+	tile 47
+	{
+		texturenorth = "MARB3_1";
+		texturesouth = "MARB3_1";
+		textureeast = "MARB3_2";
+		texturewest = "MARB3_2";
+	}
+	tile 48
+	{
+		texturenorth = "PLASTER1";
+		texturesouth = "PLASTER1";
+		textureeast = "PLASTER2";
+		texturewest = "PLASTER2";
+	}
+	tile 49
+	{
+		texturenorth = "GRYHTLR1";
+		texturesouth = "GRYHTLR1";
+		textureeast = "GRYHTLR2";
+		texturewest = "GRYHTLR2";
+	}
+	tile 50
+	{
+		texturenorth = "DOOR1_1";
+		texturesouth = "DOOR1_1";
+		textureeast = "DOOR1_2";
+		texturewest = "DOOR1_2";
+	}
+	tile 51
+	{
+		texturenorth = "SLOT1_1";
+		texturesouth = "SLOT1_1";
+		textureeast = "SLOT1_2";
+		texturewest = "SLOT1_2";
+	}
+	tile 52
+	{
+		texturenorth = "DOOR2_1";
+		texturesouth = "DOOR2_1";
+		textureeast = "DOOR2_2";
+		texturewest = "DOOR2_2";
+	}
+	tile 53
+	{
+		texturenorth = "DOOR3_1";
+		texturesouth = "DOOR3_1";
+		textureeast = "DOOR3_2";
+		texturewest = "DOOR3_2";
+	}
+	tile 85
+	{
+		texturenorth = "ELEV1_1";
+		texturesouth = "ELEV1_1";
+		textureeast = "ELEV1_2";
+		texturewest = "ELEV1_2";
+	}
+	tile 90
+	{
+		texturenorth = "SLOT1_1";
+		texturesouth = "SLOT1_1";
+		textureeast = "DOOR1_2";
+		texturewest = "DOOR1_2";
+		offsetvertical = true;
+	}
+	tile 91
+	{
+		texturenorth = "DOOR1_1";
+		texturesouth = "DOOR1_1";
+		textureeast = "SLOT1_2";
+		texturewest = "SLOT1_2";
+		offsethorizontal = true;
+	}
+	tile 92
+	{
+		texturenorth = "SLOT1_1";
+		texturesouth = "SLOT1_1";
+		textureeast = "DOOR3_2";
+		texturewest = "DOOR3_2";
+		offsetvertical = true;
+	}
+	tile 93
+	{
+		texturenorth = "DOOR3_1";
+		texturesouth = "DOOR3_1";
+		textureeast = "SLOT1_2";
+		texturewest = "SLOT1_2";
+		offsethorizontal = true;
+	}
+	tile 94
+	{
+		texturenorth = "SLOT1_1";
+		texturesouth = "SLOT1_1";
+		textureeast = "DOOR3_2";
+		texturewest = "DOOR3_2";
+		offsetvertical = true;
+	}
+	tile 95
+	{
+		texturenorth = "DOOR3_1";
+		texturesouth = "DOOR3_1";
+		textureeast = "SLOT1_2";
+		texturewest = "SLOT1_2";
+		offsethorizontal = true;
+	}
+	tile 96
+	{
+		texturenorth = "SLOT1_1";
+		texturesouth = "SLOT1_1";
+		textureeast = "DOOR3_2";
+		texturewest = "DOOR3_2";
+		offsetvertical = true;
+	}
+	tile 97
+	{
+		texturenorth = "DOOR3_1";
+		texturesouth = "DOOR3_1";
+		textureeast = "SLOT1_2";
+		texturewest = "SLOT1_2";
+		offsethorizontal = true;
+	}
+	tile 98
+	{
+		texturenorth = "SLOT1_1";
+		texturesouth = "SLOT1_1";
+		textureeast = "DOOR3_2";
+		texturewest = "DOOR3_2";
+		offsetvertical = true;
+	}
+	tile 99
+	{
+		texturenorth = "DOOR3_1";
+		texturesouth = "DOOR3_1";
+		textureeast = "SLOT1_2";
+		texturewest = "SLOT1_2";
+		offsethorizontal = true;
+	}
+	tile 100
+	{
+		texturenorth = "SLOT1_1";
+		texturesouth = "SLOT1_1";
+		textureeast = "DOOR2_2";
+		texturewest = "DOOR2_2";
+		offsetvertical = true;
+	}
+	tile 101
+	{
+		texturenorth = "DOOR2_1";
+		texturesouth = "DOOR2_1";
+		textureeast = "SLOT1_2";
+		texturewest = "SLOT1_2";
+		offsethorizontal = true;
+	}
+
+	modzone 106 fillzone ambush;
+	modzone 107 changetrigger "Exit_Normal"
+	{
+		action = "Exit_Secret";
+		playeruse = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+
+	zone 108 {}
+	zone 109 {}
+	zone 110 {}
+	zone 111 {}
+	zone 112 {}
+	zone 113 {}
+	zone 114 {}
+	zone 115 {}
+	zone 116 {}
+	zone 117 {}
+	zone 118 {}
+	zone 119 {}
+	zone 120 {}
+	zone 121 {}
+	zone 122 {}
+	zone 123 {}
+	zone 124 {}
+	zone 125 {}
+	zone 126 {}
+	zone 127 {}
+	zone 128 {}
+	zone 129 {}
+	zone 130 {}
+	zone 131 {}
+	zone 132 {}
+	zone 133 {}
+	zone 134 {}
+	zone 135 {}
+	zone 136 {}
+	zone 137 {}
+	zone 138 {}
+	zone 139 {}
+	zone 140 {}
+	zone 141 {}
+	zone 142 {}
+	zone 143 {}
+}
+
+things
+{
+	trigger 98
+	{
+		action = "Pushwall_Move";
+		arg1 = 8;
+		arg2 = 2;
+		arg3 = 2;
+		playeruse = true;
+		secret = true;
+	}
+
+	trigger 99
+	{
+		action = "Exit_VictorySpin";
+		playercross = true;
+	}
+
+	// oldnum, class, angles, patrol, minskill
+	{19,  $Player1Start,     4, 0, 0}
+	{23,  Puddle,            0, 0, 0}
+	{24,  GreenBarrel,       0, 0, 0}
+	{25,  TableWithChairs,   0, 0, 0}
+	{26,  FloorLamp,         0, 0, 0}
+	{27,  Chandelier,        0, 0, 0}
+	{28,  HangedMan,         0, 0, 0}
+	{29,  DogFood,           0, 0, 0}
+	{30,  WhitePillar,       0, 0, 0}
+	{31,  GreenPlant,        0, 0, 0}
+	{32,  SkeletonFlat,      0, 0, 0}
+	{33,  Sink,              0, 0, 0}
+	{34,  BrownPlant,        0, 0, 0}
+	{35,  Vase,              0, 0, 0}
+	{36,  BareTable,         0, 0, 0}
+	{37,  CeilingLight,      0, 0, 0}
+	{38,  KitchenStuff,      0, 0, 0}
+	{39,  SuitOfArmor,       0, 0, 0}
+	{40,  HangingCage,       0, 0, 0}
+	{41,  SkeletonCage,      0, 0, 0}
+	{42,  Bones1,            0, 0, 0}
+	{43,  GoldKey,           0, 0, 0}
+	{44,  SilverKey,         0, 0, 0}
+	{45,  BunkBed,           0, 0, 0}
+	{46,  Basket,            0, 0, 0}
+	{47,  Food,              0, 0, 0}
+	{48,  Medikit,           0, 0, 0}
+	{49,  Clip,              0, 0, 0}
+	{50,  MachineGun,        0, 0, 0}
+	{51,  GatlingGunUpgrade, 0, 0, 0}
+	{52,  Cross,             0, 0, 0}
+	{53,  Chalice,           0, 0, 0}
+	{54,  ChestofJewels,     0, 0, 0}
+	{55,  Crown,             0, 0, 0}
+	{56,  OneUp,             0, 0, 0}
+	{57,  Gibs,              0, 0, 0}
+	{58,  Barrel,            0, 0, 0}
+	{59,  Well,              0, 0, 0}
+	{60,  EmptyWell,         0, 0, 0}
+	{61,  Blood,             0, 0, 0}
+	{62,  Flag,              0, 0, 0}
+	{63,  CallApogee,        0, 0, 0}
+	{64,  Bones2,            0, 0, 0}
+	{65,  Bones3,            0, 0, 0}
+	{66,  Bones4,            0, 0, 0}
+	{67,  Pots,              0, 0, 0}
+	{68,  Stove,             0, 0, 0}
+	{69,  Spears,            0, 0, 0}
+	{70,  Vines,             0, 0, 0}
+	{71,  DeadGuard,         0, 0, 0}
+	{72,  Skewer,            0, 0, 0}
+	{73,  TruckRear,         0, 0, 0}
+	{74,  SpearOfDestiny,    0, 0, 0}
+	{90,  PatrolPoint,       8, 0, 0}
+	{106, Spectre,           0, HOLOWALL, 0}
+	{107, AngelOfDeath,      0, HOLOWALL, 0}
+	{108, Guard,             4, HOLOWALL, 1}
+	{112, Guard,             4, PATHING|HOLOWALL, 1}
+	{116, Officer,           4, HOLOWALL, 1}
+	{120, Officer,           4, PATHING|HOLOWALL, 1}
+	{124, DeadGuard,         0, HOLOWALL, 0}
+	{125, Trans,             0, HOLOWALL, 0}
+	{126, WolfensteinSS,     4, HOLOWALL, 1}
+	{130, WolfensteinSS,     4, PATHING|HOLOWALL, 1}
+	{134, Dog,               4, HOLOWALL, 1}
+	{138, Dog,               4, PATHING|HOLOWALL, 1}
+	{142, UberMutant,        0, HOLOWALL, 0}
+	{143, Wilhelm,           0, HOLOWALL, 0}
+	{144, Guard,             4, HOLOWALL, 2}
+	{148, Guard,             4, PATHING|HOLOWALL, 2}
+	{152, Officer,           4, HOLOWALL, 2}
+	{156, Officer,           4, PATHING|HOLOWALL, 2}
+	{160, FakeHitler,        0, HOLOWALL, 0}
+	{161, DeathKnight,       0, HOLOWALL, 0}
+	{162, WolfensteinSS,     4, HOLOWALL, 2}
+	{166, WolfensteinSS,     4, PATHING|HOLOWALL, 2}
+	{170, Dog,               4, HOLOWALL, 2}
+	{174, Dog,               4, PATHING|HOLOWALL, 2}
+	{178, MechaHitler,       0, HOLOWALL, 0}
+	{179, FatFace,           0, HOLOWALL, 0}
+	{180, Guard,             4, HOLOWALL, 3}
+	{184, Guard,             4, PATHING|HOLOWALL, 3}
+	{188, Officer,           4, HOLOWALL, 3}
+	{192, Officer,           4, PATHING|HOLOWALL, 3}
+	{196, Schabbs,           0, HOLOWALL, 0}
+	{197, Gretel,            0, HOLOWALL, 0}
+	{198, WolfensteinSS,     4, HOLOWALL, 3}
+	{202, WolfensteinSS,     4, PATHING|HOLOWALL, 3}
+	{206, Dog,               4, HOLOWALL, 3}
+	{210, Dog,               4, PATHING|HOLOWALL, 3}
+	{214, Hans,              0, HOLOWALL, 0}
+	{215, Gift,              0, HOLOWALL, 0}
+	{216, Mutant,            4, HOLOWALL, 1}
+	{220, Mutant,            4, PATHING|HOLOWALL, 1}
+	{224, Blinky,            0, HOLOWALL, 0}
+	{225, Clyde,             0, HOLOWALL, 0}
+	{226, Pinky,             0, HOLOWALL, 0}
+	{227, Inky,              0, HOLOWALL, 0}
+	{234, Mutant,            4, HOLOWALL, 2}
+	{238, Mutant,            4, PATHING|HOLOWALL, 2}
+	{252, Mutant,            4, HOLOWALL, 3}
+	{256, Mutant,            4, PATHING|HOLOWALL, 3}
+}

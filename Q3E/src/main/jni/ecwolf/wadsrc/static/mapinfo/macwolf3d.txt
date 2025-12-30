@@ -1,0 +1,30 @@
+include "mapinfo/wolfcommon.txt"
+
+gameinfo
+{
+	menufade = "AE 00 00"
+	menucolors = "88 00 00", "D4 00 00", "7D 00 00", "58 00 00", "64 00 00", "00 00 00"
+	titlemusic = "NAZI_NOR"
+	scoresmusic = "ROSTER"
+	gamepalette = "PLAYPAL"
+	titlepage = "TITLEPIC"
+	titlepalette = "TITLEPAL"
+	menufontcolor_disabled = "DarkRed"
+	highscoresfont = "SmallFont"
+	quitmessages = "$ENDSTR01", "$ENDSTR02", "$ENDSTR03", "$ENDSTR04", "$ENDSTR05", "$ENDSTR06", "$ENDSTR07", "$ENDSTR08", "$ENDSTR09"
+	translator = "xlat/macwolf3d.txt"
+	playerclasses = "MacBJPlayer"
+}
+
+adddefaultmap
+{
+	defaultfloor = "#676767"
+	defaultceiling = "#232323"
+}
+
+episode "MAP01"
+{
+	lookup = "WL_EPISODE1"
+	picname = "M_EPIS1"
+	key = "E"
+}

@@ -1,0 +1,16 @@
+actor BlakePlayer : PlayerPawn
+{
+	health 100
+	radius 22
+	player.movebob 0
+	player.viewheight 32
+	player.displayname "Blake Stone"
+	player.startitem "AutoChargePistol"
+	player.startitem "ChargeUnit", 8
+	player.weaponslot 1, "AutoChargePistol"
+	player.weaponslot 2, "SlowFireProtector"
+	player.weaponslot 3, "RapidAssaultWeapon"
+	player.weaponslot 4, "DualNeutronDisruptor"
+	player.weaponslot 5, "PlasmaDischargeUnit"
+	player.weaponslot 6, "AntiPlasmaCannon"
+}

@@ -559,6 +559,8 @@
     <string name="use_custom_resolution_as_fullscreen_size">Use custom resolution as fullscreen size</string>
     <string name="openmohaa">OpenMOHAA</string>
     <string name="openmohaa_base">Medal of Honor: Allied Assault</string>
+    <string name="wolf3d">Wolfenstein</string>
+    <string name="wolf3d_base">Wolfenstein 3D</string>
     <string name="video">Video</string>
     <string name="virtual_joystick">Virtual joystick</string>
     <string name="touch">Touch</string>

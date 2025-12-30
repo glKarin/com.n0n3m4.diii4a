@@ -2,7 +2,7 @@ package com.n0n3m4.q3e;
 
 public enum Q3EGame
 {
-    // KARIN_NEW_GAME_BOOKMARK
+    // KARIN_NEW_GAME_BOOKMARK: add game enum
 
     DOOM3(Q3EGameConstants.GAME_ID_DOOM3, Q3EGameConstants.GAME_DOOM3, Q3EGameConstants.LIB_ENGINE_ID, Q3EGameConstants.GAME_NAME_DOOM3, Q3EGameConstants.GAME_BASE_DOOM3,
             Q3EGameConstants.GAME_VERSION_DOOM3, Q3EGameConstants.GAME_SUBDIR_DOOM3, false, Q3EGameConstants.CONFIG_FILE_DOOM3,
@@ -144,6 +144,13 @@ public enum Q3EGame
             "fs_game", null, null, ".openmohaa",
             Q3EPreference.pref_harm_openmohaa_fs_game, Q3EPreference.pref_harm_openmohaa_user_mod, Q3EPreference.pref_harm_openmohaa_game_mod, Q3EPreference.pref_harm_openmohaa_game_lib, Q3EPreference.pref_params_openmohaa, Q3EPreference.pref_harm_openmohaa_command_record, null, Q3EPreference.pref_harm_openmohaa_env,
             Q3EKeyCodes.KeyCodesQ3.class
+    ),
+
+    WOLF3D(Q3EGameConstants.GAME_ID_WOLF3D, Q3EGameConstants.GAME_WOLF3D, Q3EGameConstants.LIB_ENGINE1_WOLF3D, Q3EGameConstants.GAME_NAME_WOLF3D, Q3EGameConstants.GAME_BASE_WOLF3D,
+            Q3EGameConstants.GAME_VERSION_WOLF3D, Q3EGameConstants.GAME_SUBDIR_WOLF3D, true, Q3EGameConstants.CONFIG_FILE_WOLF3D,
+            "data", null, null, "ecwolf",
+            Q3EPreference.pref_harm_wolf3d_fs_game, Q3EPreference.pref_harm_wolf3d_user_mod, Q3EPreference.pref_harm_wolf3d_game_mod, Q3EPreference.pref_harm_wolf3d_game_lib, Q3EPreference.pref_params_wolf3d, Q3EPreference.pref_harm_wolf3d_command_record, null, Q3EPreference.pref_harm_wolf3d_env,
+            Q3EKeyCodes.KeyCodesAndroid.class
     ),
     ;
 

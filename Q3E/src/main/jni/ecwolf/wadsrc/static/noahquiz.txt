@@ -1,0 +1,3074 @@
+/* Super 3D Noah's Ark Quiz
+ *
+ * In the DOS version, the state of the quiz carried across sessions. It is
+ * easier for us to simply randomize the starting point for each session.
+ */
+
+namespace = "Noah";
+
+conversation
+{
+	actor = 1;
+	randomstart = true;
+	preserve = true;
+	page
+	{
+		name = "Question #1";
+		dialog = "$NOAH_QUIZ_Q01";
+		hint = "$NOAH_QUIZ_H01";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A01A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 2;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A01B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 2;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A01C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 2;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #2";
+		dialog = "$NOAH_QUIZ_Q02";
+		hint = "$NOAH_QUIZ_H02";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A02A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 3;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A02B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 3;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A02C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 3;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #3";
+		dialog = "$NOAH_QUIZ_Q03";
+		hint = "$NOAH_QUIZ_H03";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A03A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 4;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A03B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 4;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A03C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 4;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #4";
+		dialog = "$NOAH_QUIZ_Q04";
+		hint = "$NOAH_QUIZ_H04";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A04A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 5;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A04B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 5;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A04C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 5;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #5";
+		dialog = "$NOAH_QUIZ_Q05";
+		hint = "$NOAH_QUIZ_H05";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A05A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 6;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A05B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 6;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A05C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 6;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #6";
+		dialog = "$NOAH_QUIZ_Q06";
+		hint = "$NOAH_QUIZ_H06";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A06A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 7;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A06B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 7;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A06C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 7;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #7";
+		dialog = "$NOAH_QUIZ_Q07";
+		hint = "$NOAH_QUIZ_H07";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A07A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 8;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A07B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 8;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A07C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 8;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #8";
+		dialog = "$NOAH_QUIZ_Q08";
+		hint = "$NOAH_QUIZ_H08";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A08A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 9;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A08B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 9;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A08C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 9;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #9";
+		dialog = "$NOAH_QUIZ_Q09";
+		hint = "$NOAH_QUIZ_H09";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A09A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 10;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A09B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 10;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A09C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 10;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #10";
+		dialog = "$NOAH_QUIZ_Q10";
+		hint = "$NOAH_QUIZ_H10";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A10A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 11;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A10B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 11;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A10C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 11;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #11";
+		dialog = "$NOAH_QUIZ_Q11";
+		hint = "$NOAH_QUIZ_H11";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A11A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 12;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A11B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 12;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A11C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 12;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #12";
+		dialog = "$NOAH_QUIZ_Q12";
+		hint = "$NOAH_QUIZ_H12";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A12A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 13;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A12B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 13;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A12C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 13;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #13";
+		dialog = "$NOAH_QUIZ_Q13";
+		hint = "$NOAH_QUIZ_H13";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A13A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 14;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A13B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 14;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A13C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 14;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #14";
+		dialog = "$NOAH_QUIZ_Q14";
+		hint = "$NOAH_QUIZ_H14";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A14A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 15;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A14B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 15;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #15";
+		dialog = "$NOAH_QUIZ_Q15";
+		hint = "$NOAH_QUIZ_H15";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A15A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 16;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A15B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 16;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A15C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 16;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #16";
+		dialog = "$NOAH_QUIZ_Q16";
+		hint = "$NOAH_QUIZ_H16";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A16A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 17;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A16B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 17;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #17";
+		dialog = "$NOAH_QUIZ_Q17";
+		hint = "$NOAH_QUIZ_H17";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A17A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 18;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A17B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 18;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A17C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 18;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #18";
+		dialog = "$NOAH_QUIZ_Q18";
+		hint = "$NOAH_QUIZ_H18";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A18A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 19;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A18B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 19;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A18C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 19;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #19";
+		dialog = "$NOAH_QUIZ_Q19";
+		hint = "$NOAH_QUIZ_H19";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A19A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 20;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A19B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 20;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A19C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 20;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #20";
+		dialog = "$NOAH_QUIZ_Q20";
+		hint = "$NOAH_QUIZ_H20";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A20A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 21;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A20B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 21;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A20C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 21;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #21";
+		dialog = "$NOAH_QUIZ_Q21";
+		hint = "$NOAH_QUIZ_H21";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A21A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 22;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A21B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 22;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A21C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 22;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #22";
+		dialog = "$NOAH_QUIZ_Q22";
+		hint = "$NOAH_QUIZ_H22";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A22A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 23;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A22B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 23;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A22C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 23;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #23";
+		dialog = "$NOAH_QUIZ_Q23";
+		hint = "$NOAH_QUIZ_H23";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A23A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 24;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A23B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 24;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A23C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 24;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #24";
+		dialog = "$NOAH_QUIZ_Q24";
+		hint = "$NOAH_QUIZ_H24";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A24A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 25;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A24B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 25;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A24C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 25;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #25";
+		dialog = "$NOAH_QUIZ_Q25";
+		hint = "$NOAH_QUIZ_H25";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A25A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 26;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A25B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 26;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A25C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 26;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #26";
+		dialog = "$NOAH_QUIZ_Q26";
+		hint = "$NOAH_QUIZ_H26";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A26A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 27;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A26B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 27;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A26C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 27;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #27";
+		dialog = "$NOAH_QUIZ_Q27";
+		hint = "$NOAH_QUIZ_H27";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A27A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 28;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A27B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 28;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A27C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 28;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #28";
+		dialog = "$NOAH_QUIZ_Q28";
+		hint = "$NOAH_QUIZ_H28";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A28A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 29;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A28B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 29;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #29";
+		dialog = "$NOAH_QUIZ_Q29";
+		hint = "$NOAH_QUIZ_H29";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A29A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 30;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A29B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 30;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A29C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 30;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #30";
+		dialog = "$NOAH_QUIZ_Q30";
+		hint = "$NOAH_QUIZ_H30";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A30A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 31;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A30B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 31;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A30C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 31;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #31";
+		dialog = "$NOAH_QUIZ_Q31";
+		hint = "$NOAH_QUIZ_H31";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A31A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 32;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A31B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 32;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A31C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 32;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #32";
+		dialog = "$NOAH_QUIZ_Q32";
+		hint = "$NOAH_QUIZ_H32";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A32A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 33;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A32B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 33;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A32C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 33;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #33";
+		dialog = "$NOAH_QUIZ_Q33";
+		hint = "$NOAH_QUIZ_H33";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A33A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 34;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A33B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 34;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A33C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 34;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #34";
+		dialog = "$NOAH_QUIZ_Q34";
+		hint = "$NOAH_QUIZ_H34";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A34A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 35;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A34B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 35;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A34C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 35;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #35";
+		dialog = "$NOAH_QUIZ_Q35";
+		hint = "$NOAH_QUIZ_H35";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A35A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 36;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A35B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 36;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A35C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 36;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #36";
+		dialog = "$NOAH_QUIZ_Q36";
+		hint = "$NOAH_QUIZ_H36";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A36A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 37;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A36B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 37;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A36C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 37;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #37";
+		dialog = "$NOAH_QUIZ_Q37";
+		hint = "$NOAH_QUIZ_H37";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A37A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 38;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A37B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 38;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A37C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 38;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #38";
+		dialog = "$NOAH_QUIZ_Q38";
+		hint = "$NOAH_QUIZ_H38";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A38A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 39;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A38B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 39;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #39";
+		dialog = "$NOAH_QUIZ_Q39";
+		hint = "$NOAH_QUIZ_H39";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A39A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 40;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A39B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 40;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A39C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 40;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #40";
+		dialog = "$NOAH_QUIZ_Q40";
+		hint = "$NOAH_QUIZ_H40";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A40A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 41;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A40B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 41;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A40C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 41;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #41";
+		dialog = "$NOAH_QUIZ_Q41";
+		hint = "$NOAH_QUIZ_H41";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A41A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 42;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A41B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 42;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A41C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 42;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #42";
+		dialog = "$NOAH_QUIZ_Q42";
+		hint = "$NOAH_QUIZ_H42";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A42A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 43;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A42B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 43;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A42C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 43;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #43";
+		dialog = "$NOAH_QUIZ_Q43";
+		hint = "$NOAH_QUIZ_H43";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A43A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 44;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A43B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 44;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A43C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 44;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #44";
+		dialog = "$NOAH_QUIZ_Q44";
+		hint = "$NOAH_QUIZ_H44";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A44A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 45;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A44B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 45;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A44C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 45;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #45";
+		dialog = "$NOAH_QUIZ_Q45";
+		hint = "$NOAH_QUIZ_H45";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A45A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 46;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A45B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 46;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A45C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 46;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #46";
+		dialog = "$NOAH_QUIZ_Q46";
+		hint = "$NOAH_QUIZ_H46";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A46A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 47;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A46B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 47;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #47";
+		dialog = "$NOAH_QUIZ_Q47";
+		hint = "$NOAH_QUIZ_H47";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A47A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 48;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A47B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 48;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A47C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 48;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #48";
+		dialog = "$NOAH_QUIZ_Q48";
+		hint = "$NOAH_QUIZ_H48";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A48A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 49;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A48B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 49;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A48C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 49;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #49";
+		dialog = "$NOAH_QUIZ_Q49";
+		hint = "$NOAH_QUIZ_H49";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A49A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 50;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A49B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 50;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A49C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 50;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #50";
+		dialog = "$NOAH_QUIZ_Q50";
+		hint = "$NOAH_QUIZ_H50";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A50A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 51;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A50B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 51;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A50C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 51;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #51";
+		dialog = "$NOAH_QUIZ_Q51";
+		hint = "$NOAH_QUIZ_H51";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A51A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 52;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A51B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 52;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #52";
+		dialog = "$NOAH_QUIZ_Q52";
+		hint = "$NOAH_QUIZ_H52";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A52A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 53;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A52B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 53;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #53";
+		dialog = "$NOAH_QUIZ_Q53";
+		hint = "$NOAH_QUIZ_H53";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A53A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 54;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A53B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 54;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A53C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 54;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #54";
+		dialog = "$NOAH_QUIZ_Q54";
+		hint = "$NOAH_QUIZ_H54";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A54A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 55;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A54B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 55;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A54C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 55;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #55";
+		dialog = "$NOAH_QUIZ_Q55";
+		hint = "$NOAH_QUIZ_H55";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A55A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 56;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A55B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 56;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A55C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 56;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #56";
+		dialog = "$NOAH_QUIZ_Q56";
+		hint = "$NOAH_QUIZ_H56";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A56A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 57;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A56B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 57;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A56C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 57;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #57";
+		dialog = "$NOAH_QUIZ_Q57";
+		hint = "$NOAH_QUIZ_H57";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A57A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 58;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A57B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 58;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #58";
+		dialog = "$NOAH_QUIZ_Q58";
+		hint = "$NOAH_QUIZ_H58";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A58A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 59;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A58B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 59;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A58C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 59;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #59";
+		dialog = "$NOAH_QUIZ_Q59";
+		hint = "$NOAH_QUIZ_H59";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A59A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 60;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A59B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 60;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A59C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 60;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #60";
+		dialog = "$NOAH_QUIZ_Q60";
+		hint = "$NOAH_QUIZ_H60";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A60A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 61;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A60B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 61;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A60C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 61;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #61";
+		dialog = "$NOAH_QUIZ_Q61";
+		hint = "$NOAH_QUIZ_H61";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A61A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 62;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A61B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 62;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A61C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 62;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #62";
+		dialog = "$NOAH_QUIZ_Q62";
+		hint = "$NOAH_QUIZ_H62";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A62A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 63;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A62B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 63;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A62C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 63;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #63";
+		dialog = "$NOAH_QUIZ_Q63";
+		hint = "$NOAH_QUIZ_H63";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A63A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 64;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A63B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 64;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A63C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 64;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #64";
+		dialog = "$NOAH_QUIZ_Q64";
+		hint = "$NOAH_QUIZ_H64";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A64A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 65;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A64B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 65;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A64C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 65;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #65";
+		dialog = "$NOAH_QUIZ_Q65";
+		hint = "$NOAH_QUIZ_H65";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A65A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 66;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A65B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 66;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A65C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 66;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #66";
+		dialog = "$NOAH_QUIZ_Q66";
+		hint = "$NOAH_QUIZ_H66";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A66A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 67;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A66B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 67;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A66C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 67;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #67";
+		dialog = "$NOAH_QUIZ_Q67";
+		hint = "$NOAH_QUIZ_H67";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A67A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 68;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A67B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 68;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A67C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 68;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #68";
+		dialog = "$NOAH_QUIZ_Q68";
+		hint = "$NOAH_QUIZ_H68";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A68A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 69;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A68B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 69;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #69";
+		dialog = "$NOAH_QUIZ_Q69";
+		hint = "$NOAH_QUIZ_H69";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A69A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 70;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A69B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 70;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #70";
+		dialog = "$NOAH_QUIZ_Q70";
+		hint = "$NOAH_QUIZ_H70";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A70A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 71;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A70B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 71;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #71";
+		dialog = "$NOAH_QUIZ_Q71";
+		hint = "$NOAH_QUIZ_H71";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A71A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 72;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A71B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 72;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A71C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 72;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #72";
+		dialog = "$NOAH_QUIZ_Q72";
+		hint = "$NOAH_QUIZ_H72";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A72A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 73;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A72B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 73;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #73";
+		dialog = "$NOAH_QUIZ_Q73";
+		hint = "$NOAH_QUIZ_H73";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A73A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 74;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A73B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 74;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A73C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 74;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #74";
+		dialog = "$NOAH_QUIZ_Q74";
+		hint = "$NOAH_QUIZ_H74";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A74A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 75;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A74B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 75;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #75";
+		dialog = "$NOAH_QUIZ_Q75";
+		hint = "$NOAH_QUIZ_H75";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A75A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 76;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A75B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 76;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A75C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 76;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #76";
+		dialog = "$NOAH_QUIZ_Q76";
+		hint = "$NOAH_QUIZ_H76";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A76A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 77;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A76B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 77;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #77";
+		dialog = "$NOAH_QUIZ_Q77";
+		hint = "$NOAH_QUIZ_H77";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A77A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 78;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A77B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 78;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #78";
+		dialog = "$NOAH_QUIZ_Q78";
+		hint = "$NOAH_QUIZ_H78";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A78A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 79;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A78B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 79;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A78C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 79;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #79";
+		dialog = "$NOAH_QUIZ_Q79";
+		hint = "$NOAH_QUIZ_H79";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A79A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 80;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A79B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 80;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A79C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 80;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #80";
+		dialog = "$NOAH_QUIZ_Q80";
+		hint = "$NOAH_QUIZ_H80";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A80A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 81;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A80B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 81;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A80C";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 81;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #81";
+		dialog = "$NOAH_QUIZ_Q81";
+		hint = "$NOAH_QUIZ_H81";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A81A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 82;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A81B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 82;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #82";
+		dialog = "$NOAH_QUIZ_Q82";
+		hint = "$NOAH_QUIZ_H82";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A82A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 83;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A82B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 83;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A82C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 83;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #83";
+		dialog = "$NOAH_QUIZ_Q83";
+		hint = "$NOAH_QUIZ_H83";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A83A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 84;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A83B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 84;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A83C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 84;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #84";
+		dialog = "$NOAH_QUIZ_Q84";
+		hint = "$NOAH_QUIZ_H84";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A84A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 85;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A84B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 85;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #85";
+		dialog = "$NOAH_QUIZ_Q85";
+		hint = "$NOAH_QUIZ_H85";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A85A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 86;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A85B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 86;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A85C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 86;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #86";
+		dialog = "$NOAH_QUIZ_Q86";
+		hint = "$NOAH_QUIZ_H86";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A86A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 87;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A86B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 87;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #87";
+		dialog = "$NOAH_QUIZ_Q87";
+		hint = "$NOAH_QUIZ_H87";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A87A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 88;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A87B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 88;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #88";
+		dialog = "$NOAH_QUIZ_Q88";
+		hint = "$NOAH_QUIZ_H88";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A88A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 89;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A88B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 89;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A88C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 89;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #89";
+		dialog = "$NOAH_QUIZ_Q89";
+		hint = "$NOAH_QUIZ_H89";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A89A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 90;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A89B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 90;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #90";
+		dialog = "$NOAH_QUIZ_Q90";
+		hint = "$NOAH_QUIZ_H90";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A90A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 91;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A90B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 91;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A90C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 91;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #91";
+		dialog = "$NOAH_QUIZ_Q91";
+		hint = "$NOAH_QUIZ_H91";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A91A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 92;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A91B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 92;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #92";
+		dialog = "$NOAH_QUIZ_Q92";
+		hint = "$NOAH_QUIZ_H92";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A92A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 93;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A92B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 93;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A92C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 93;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #93";
+		dialog = "$NOAH_QUIZ_Q93";
+		hint = "$NOAH_QUIZ_H93";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A93A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 94;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A93B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 94;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A93C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 94;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #94";
+		dialog = "$NOAH_QUIZ_Q94";
+		hint = "$NOAH_QUIZ_H94";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A94A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 95;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A94B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 95;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A94C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 95;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #95";
+		dialog = "$NOAH_QUIZ_Q95";
+		hint = "$NOAH_QUIZ_H95";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A95A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 96;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A95B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 96;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A95C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 96;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #96";
+		dialog = "$NOAH_QUIZ_Q96";
+		hint = "$NOAH_QUIZ_H96";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A96A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 97;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A96B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 97;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+	}
+	page
+	{
+		name = "Question #97";
+		dialog = "$NOAH_QUIZ_Q97";
+		hint = "$NOAH_QUIZ_H97";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A97A";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 98;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A97B";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 98;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #98";
+		dialog = "$NOAH_QUIZ_Q98";
+		hint = "$NOAH_QUIZ_H98";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A98A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 99;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A98B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 99;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A98C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 99;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+	page
+	{
+		name = "Question #99";
+		dialog = "$NOAH_QUIZ_Q99";
+		hint = "$NOAH_QUIZ_H99";
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A99A";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 1;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A99B";
+			yesmessage = "$NOAH_CORRECT";
+			nextpage = 1;
+			giveitem = 2;
+			selectsound = "quiz/correct";
+		}
+		choice
+		{
+			closedialog = true;
+			text = "$NOAH_QUIZ_A99C";
+			yesmessage = "$NOAH_INCORRECT";
+			nextpage = 1;
+			giveitem = 3;
+			selectsound = "quiz/incorrect";
+		}
+	}
+}

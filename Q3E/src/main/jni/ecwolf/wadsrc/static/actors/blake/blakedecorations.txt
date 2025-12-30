@@ -1,0 +1,1036 @@
+actor SmartAnimation
+{
+	action native A_InitSmartAnim(int delay);
+	action native A_SmartAnimDelay();
+}
+
+actor ContainmentCanister
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			CCAN A -1
+			stop
+	}
+}
+
+actor LunchTable
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			LUNT A -1
+			stop
+	}
+}
+
+actor BlakeFloorLamp
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			FLRL A -1 bright
+			stop
+	}
+}
+
+actor LabTable
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			LABT A -1
+			stop
+	}
+}
+
+actor BlakePillar
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			PILR A -1
+			stop
+	}
+}
+
+actor BlakeBloodPuddle
+{
+	states
+	{
+		Spawn:
+			BPUD A -1
+			stop
+	}
+}
+
+actor PissPuddle
+{
+	states
+	{
+		Spawn:
+			PISS A -1
+			stop
+	}
+}
+
+actor FicusTree
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			FICS A -1
+			stop
+	}
+}
+
+actor HalfEatenCorpse
+{
+	states
+	{
+		Spawn:
+			HFEC A -1
+			stop
+	}
+}
+
+actor WaterFountain
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			WFNT A -1
+			stop
+	}
+}
+
+actor BlakePlant1
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			PLT1 A -1
+			stop
+	}
+}
+
+actor BlakeVase
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			BVSE A -1
+			stop
+	}
+}
+
+actor GeneralTable
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			GENT A -1
+			stop
+	}
+}
+
+actor BlakeCeilingLight1
+{
+	states
+	{
+		Spawn:
+			CLT1 A -1 bright
+			stop
+	}
+}
+
+actor GeneralChair
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			GENC A -1
+			stop
+	}
+}
+
+actor KitchenTrashBin
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			KTRH A -1
+			stop
+	}
+}
+
+actor OfficeTrashBin
+{
+	states
+	{
+		Spawn:
+			OTRH A -1
+			stop
+	}
+}
+
+actor BlakePlant2
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			PLT2 A -1
+			stop
+	}
+}
+
+actor Gurney
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			GURN A -1
+			stop
+	}
+}
+
+actor IndirectHalfSphere
+{
+	states
+	{
+		Spawn:
+			IDHS A -1 bright
+			stop
+	}
+}
+
+actor ExitSign
+{
+	states
+	{
+		Spawn:
+			EXIT A -1 bright
+			stop
+	}
+}
+
+actor Transporter
+{
+	states
+	{
+		Spawn:
+			TNSP A -1
+			stop
+	}
+}
+
+actor BodyCan
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			BDYC A -1
+			stop
+	}
+}
+
+actor MutantStatue
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			MSTT A -1
+			stop
+	}
+}
+
+actor YellowBox
+{
+	states
+	{
+		Spawn:
+			YBOX A -1
+			stop
+	}
+}
+
+actor OfficeDesk
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			ODSK A -1
+			stop
+	}
+}
+
+actor OfficeChair
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			OCHR A -1
+			stop
+	}
+}
+
+actor SecurityDesk
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			SDSK A -1
+			stop
+	}
+}
+
+actor EmptyWaterBowl
+{
+	states
+	{
+		Spawn:
+			EBWL A -1
+			stop
+	}
+}
+
+actor ChickenBone
+{
+	states
+	{
+		Spawn:
+			CKBN A -1
+			stop
+	}
+}
+
+actor HamBone
+{
+	states
+	{
+		Spawn:
+			HAMB A -1
+			stop
+	}
+}
+
+actor IndirectSpotLight
+{
+	states
+	{
+		Spawn:
+			IDSL A -1
+			stop
+	}
+}
+
+actor GurneyMutantStatic
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			MGUR A -1
+			stop
+	}
+}
+
+actor LargeAlienCanisterStatic
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			CNTA A -1
+			stop
+	}
+}
+
+actor SmallAlienCanisterStatic
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			CNSA A -1
+			stop
+	}
+}
+
+actor GurneyMutantEmpty
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			MGUR E -1
+			stop
+	}
+}
+
+actor LargeAlienCanisterEmpty
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			CNTA E -1
+			stop
+	}
+}
+
+actor SmallAlienCanisterEmpty
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			CNSA E -1
+			stop
+	}
+}
+
+actor DeadGenericScientist
+{
+	states
+	{
+		Spawn:
+			GSCI O -1
+			stop
+	}
+}
+
+actor PlainAirVent
+{
+	states
+	{
+		Spawn:
+			AVNT A -1
+			stop
+	}
+}
+
+actor BloodAirVent
+{
+	states
+	{
+		Spawn:
+			AVNT BCDE random(2.5, 7.5)
+			loop
+	}
+}
+
+actor WaterAirVent
+{
+	states
+	{
+		Spawn:
+			AVNT FGHI random(2.5, 7.5)
+			loop
+	}
+}
+
+actor FloorGrate
+{
+	states
+	{
+		Spawn:
+			GRAT A -1
+			stop
+	}
+}
+
+actor SteamPipe
+{
+	states
+	{
+		Spawn:
+			PIPE A -1
+			stop
+	}
+}
+
+actor GreekPost
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			GRPS A -1
+			stop
+	}
+}
+
+actor BluePost
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			BLPS A -1
+			stop
+	}
+}
+
+actor HiTechPost
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			HTPS A -1
+			stop
+	}
+}
+
+actor BlakeCeilingLight2
+{
+	states
+	{
+		Spawn:
+			CLT2 A -1
+			stop
+	}
+}
+
+actor BlakeCeilingLight3
+{
+	states
+	{
+		Spawn:
+			CLT3 A -1
+			stop
+	}
+}
+
+actor BodyParts
+{
+	states
+	{
+		Spawn:
+			BDYP A -1
+			stop
+	}
+}
+
+actor OverheadLamp
+{
+	states
+	{
+		Spawn:
+			ORLP A -1
+			stop
+	}
+}
+
+actor OfficeSink
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			OSNK A -1
+			stop
+	}
+}
+
+actor BlakeCrate1
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			CRT1 A -1
+			stop
+	}
+}
+
+actor BlakeCrate2
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			CRT2 A -1
+			stop
+	}
+}
+
+actor BlakeCrate3
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			CRT3 A -1
+			stop
+	}
+}
+
+actor BlakeTable
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			STBL A -1
+			stop
+	}
+}
+
+actor BlakeChair
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			SCHR A -1
+			stop
+	}
+}
+
+actor BlakeStool
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			SSTL A -1
+			stop
+	}
+}
+
+actor BlakeGore
+{
+	states
+	{
+		Spawn:
+			BDY2 A -1
+			stop
+	}
+}
+
+actor BlueRedPost
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			BRPS A -1
+			stop
+	}
+}
+
+actor GreekPost2
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			GRP2 A -1
+			stop
+	}
+}
+
+actor GeneratorPost
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			GNPS A -1
+			stop
+	}
+}
+
+actor TallDecorativeColumn
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			TDCL A -1
+			stop
+	}
+}
+
+actor ShortDecorativeColumn
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			SDCL A -1
+			stop
+	}
+}
+
+actor BlakeDebris1
+{
+	states
+	{
+		Spawn:
+			DBR1 A -1
+			stop
+	}
+}
+
+actor BlakeDebris2
+{
+	states
+	{
+		Spawn:
+			DBR2 A -1
+			stop
+	}
+}
+
+actor BlakeDebris3
+{
+	states
+	{
+		Spawn:
+			DBR3 A -1
+			stop
+	}
+}
+
+actor BlakeDebris4
+{
+	states
+	{
+		Spawn:
+			DBR4 A -1
+			stop
+	}
+}
+
+actor DeadSectorGuard
+{
+	states
+	{
+		Spawn:
+			SECG N -1
+			stop
+	}
+}
+
+actor DeadTechWarrior
+{
+	states
+	{
+		Spawn:
+			TECW O -1
+			stop
+	}
+}
+
+actor DeadAlienProtector
+{
+	states
+	{
+		Spawn:
+			PROT T -1
+			stop
+	}
+}
+
+actor DeadGroundScout
+{
+	states
+	{
+		Spawn:
+			GSCT M -1
+			stop
+	}
+}
+
+actor DeadFloatingScout
+{
+	states
+	{
+		Spawn:
+			FSCT L -1
+			stop
+	}
+}
+
+actor DeadMechSentinel
+{
+	states
+	{
+		Spawn:
+			MSEN P -1
+			stop
+	}
+}
+
+actor DeadMutantHuman
+{
+	states
+	{
+		Spawn:
+			MHUM P -1
+			stop
+	}
+}
+
+actor DeadContainedAlien
+{
+	states
+	{
+		Spawn:
+			CNTA U -1
+			stop
+	}
+}
+
+actor DeadCanisterAlien
+{
+	states
+	{
+		Spawn:
+			CNSA U -1
+			stop
+	}
+}
+
+actor DeadGurneyMutant
+{
+	states
+	{
+		spawn:
+			MGUR R -1
+			stop
+	}
+}
+
+actor DeadHangingTurret
+{
+	states
+	{
+		Spawn:
+			TURR H -1
+			stop
+	}
+}
+
+actor DeadPODAlien
+{
+	states
+	{
+		Spawn:
+			PODA Q -1
+			stop
+	}
+}
+
+actor BlakeRubble
+{
+	states
+	{
+		Spawn:
+			RUBL A -1
+			stop
+	}
+}
+
+actor BonziTree
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			BONZ A -1
+			stop
+	}
+}
+
+actor YellowPottedPlant
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			POTP A -1
+			stop
+	}
+}
+
+actor TubePlant
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			TUBP A -1
+			stop
+	}
+}
+
+actor HiTechTableAndChairs
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			HTCH A -1
+			stop
+	}
+}
+
+actor DeadSectorPatrol
+{
+	states
+	{
+		Spawn:
+			RENT N -1
+			stop
+	}
+}
+
+actor DeadStarSentinel
+{
+	states
+	{
+		Spawn:
+			PROG O -1
+			stop
+	}
+}
+
+actor DeadStarTrooper
+{
+	states
+	{
+		Spawn:
+			SWAT T -1
+			stop
+	}
+}
+
+actor FlickerLight
+{
+	states
+	{
+		Spawn:
+			ARCL A 0.5 A_SetTics(random(2, 5)*30)
+		Decide:
+			ARCL A 0 A_Jump(240, "Flicker1", "Flicker2")
+			ARCL A 0.5 A_SetTics(random(4, 13)*30)
+			loop
+		Flicker1:
+			ARCL B random(1, 2) bright
+			goto Decide
+		Flicker2:
+			ARCL C random(1, 2) bright
+			goto Decide
+	}
+}
+
+actor SteamGrate
+{
+	states
+	{
+		Spawn:
+			GRAT A 120
+		Release:
+			GRAT B 0.5 A_Scream
+			GRAT CDCD 7
+			GRAT E 8
+			GRAT A 0.5 A_SetTics(random(0, 255)<<2)
+			loop
+	}
+}
+
+actor AlienCeilingLight
+{
+	states
+	{
+		Spawn:
+			ALCL A 120
+		Release:
+			ALCL B 0.5 A_Scream
+			ALCL CDCD 7
+			ALCL E 8
+			ALCL A 0.5 A_SetTics(random(0, 255)<<2)
+			loop
+	}
+}
+
+actor SecurityLight
+{
+	states
+	{
+		Spawn:
+			//TODO: LOF_NOSIGHTCHECK
+			SECL A -1 NOP A_Look(0, 1, 0.1)
+		See:
+			SECL B 10 bright A_AlertMonsters
+			SECL A 10 A_AlertMonsters
+			loop
+	}
+}

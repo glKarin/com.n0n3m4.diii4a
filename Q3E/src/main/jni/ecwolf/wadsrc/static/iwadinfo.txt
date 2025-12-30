@@ -1,0 +1,194 @@
+IWad
+{
+	Name = "Super 3D Noah's Ark"
+	Autoname = "Noah"
+	Mapinfo = "mapinfo/noah.txt"
+	MustContain = "ZZZSA0"
+	Game = "Noah"
+}
+
+IWad
+{
+	Name = "Planet Strike"
+	Mapinfo = "mapinfo/planet.txt"
+	MustContain = "APCPA0"
+	Flags = Preview
+	Game = "Blake"
+}
+
+IWad
+{
+	Name = "Rise of the Triad: The Hunt Begins (Data)"
+	Autoname = "ROTT.HuntBegins"
+	Mapinfo = "mapinfo/rott.txt"
+	MustContain = "VENDOR", "TRITITL"
+	Flags = Preview, Resource
+	Game = "ROTT"
+}
+
+IWad
+{
+	Name = "Rise of the Triad: Dark War (Data)"
+	Autoname = "ROTT.DarkWar"
+	Mapinfo = "mapinfo/rott.txt"
+	MustContain = "LICENSE", "TRITITL", "WHERIZIT"
+	Flags = Preview, Resource
+	Game = "ROTT"
+}
+
+LevelSet "huntbgin.rtl"
+{
+	Name = "Rise of the Triad: The Hunt Begins"
+	Autoname = "ROTT.HuntBegins"
+	Mapinfo = "mapinfo/rott.txt"
+	Flags = Preview
+	Required = "Rise of the Triad: The Hunt Begins (Data)", "Rise of the Triad: Dark War (Data)"
+	Game = "ROTT"
+}
+
+LevelSet "huntbgn2.rtl"
+{
+	Name = "Rise of the Triad: The Hunt Begins Deluxe"
+	Autoname = "ROTT.HuntBegins"
+	Mapinfo = "mapinfo/rott.txt"
+	Flags = Preview
+	Required = "Rise of the Triad: The Hunt Begins (Data)", "Rise of the Triad: Dark War (Data)"
+	Game = "ROTT"
+}
+
+LevelSet "darkwar.rtl"
+{
+	Name = "Rise of the Triad: Dark War"
+	Autoname = "ROTT.DarkWar"
+	Mapinfo = "mapinfo/rott.txt"
+	Flags = Preview
+	Required = "Rise of the Triad: Dark War (Data)"
+	Game = "ROTT"
+}
+
+LevelSet "extreme.rtl"
+{
+	Name = "Extreme Rise of the Triad"
+	Autoname = "ROTT.Extreme"
+	Mapinfo = "mapinfo/rott.txt"
+	Flags = Preview
+	Required = "Rise of the Triad: Dark War (Data)"
+	Game = "ROTT"
+}
+
+IWad
+{
+	Name = "Spear of Destiny"
+	Autoname = "Wolf.Spear.Commercial"
+	Mapinfo = "mapinfo/spear.txt"
+	MustContain = "BACKDROP", "ENDSCR1"
+	Game = "Wolf3D"
+}
+
+IWad
+{
+	Name = "Wolfenstein 3D Shareware"
+	Autoname = "Wolf.Wolf3D.Shareware"
+	Mapinfo = "mapinfo/wolf3d.txt"
+	MustContain = "BJPIC", "VISACARD"
+	Game = "Wolf3D"
+}
+
+IWad
+{
+	Name = "Spear of Destiny Demo"
+	Autoname = "Wolf.Spear.Demo"
+	Mapinfo = "mapinfo/speardemo.txt"
+	MustContain = "BACKDROP"
+	Game = "Wolf3D"
+}
+
+IWad
+{
+	Name = "Wolfenstein 3D"
+	Autoname = "Wolf.Wolf3D.Registered"
+	Mapinfo = "mapinfo/wolf3d.txt"
+	MustContain = "BJPIC"
+	Flags = Registered, HelpHack
+	Game = "Wolf3D"
+}
+
+IWad
+{
+	Name = "Mission 2: Return to Danger"
+	Autoname = "Wolf.Spear.Danger"
+	Required = "Spear of Destiny"
+	Mapinfo = "mapinfo/danger.txt"
+	MustContain = "GHULA0"
+	Game = "Wolf3D"
+}
+
+IWad
+{
+	Name = "Mission 3: Ultimate Challenge"
+	Autoname = "Wolf.Spear.Challenge"
+	Required = "Spear of Destiny"
+	Mapinfo = "mapinfo/challenge.txt"
+	MustContain = "MISTA0"
+	Game = "Wolf3D"
+}
+
+IWad
+{
+	Name = "Wolfenstein 3D: The First Encounter"
+	Autoname = "MacWolf.First"
+	Mapinfo = "mapinfo/macwolf3d.txt"
+	MustContain = "MACPLAY", "MAPLIST"
+	Flags = Preview
+	Game = "MacWolf3D"
+}
+
+IWad
+{
+	Name = "Wolfenstein 3D: The Third Encounter (Data)"
+	Autoname = "MacWolf.Third"
+	Mapinfo = "mapinfo/macwolf3d.txt"
+	MustContain = "MACPLAY", "HTLRA0"
+	Flags = Preview, Resource
+	Game = "MacWolf3D"
+}
+
+IWad
+{
+	Name = "Wolfstone 3D"
+	Autoname = "Wolf.Wolfstone.Wolfstone3D"
+	Mapinfo = "mapinfo/wolf3d.txt"
+	MustContain = "WOLFSTON", "VSWAP", "GAMEMAPS", "VGAGRAPH"
+	Flags = HelpHack
+	Game = "Wolf3D"
+}
+
+IWad
+{
+	Name = "Elite Hans: Die Neue Ordnung"
+	Autoname = "Wolf.Wolfstone.EliteHans"
+	Mapinfo = "mapinfo/wolf3d.txt"
+	MustContain = "ELITEHAN", "VSWAP", "GAMEMAPS", "VGAGRAPH"
+	Flags = HelpHack
+	Game = "Wolf3D"
+}
+
+LevelSet "wolflvls.bin"
+{
+	Name = "Wolfenstein 3D: The Second Encounter"
+	Autoname = "MacWolf.Second"
+	Required = "Wolfenstein 3D: The Third Encounter (Data)"
+	Mapinfo = "mapinfo/macwolf3d.txt"
+	Flags = Preview
+	Game = "MacWolf3D"
+}
+
+Names
+{
+	"darkwar.wad"
+	"huntbgin.wad"
+	"wolfdemo.bin"
+	"wolf3d.bin"
+	"elitehans.pk3"
+	"wolfstone.pk3"
+}

@@ -1,0 +1,19 @@
+actor DeathCam native
+{
+	action native A_FinishDeathCam();
+
+	states
+	{
+		Spawn:
+			// This delays the start of the deathcam sequence. Like vanilla
+			// we have a delay of 10 before calling BossDeath and then we wait
+			// 50 more tics here.
+			TNT1 A 50
+			TNT1 A -1 A_FinishDeathCam
+			stop
+		Ready:
+			DCAM A 16
+			TNT1 A 16
+			loop
+	}
+}

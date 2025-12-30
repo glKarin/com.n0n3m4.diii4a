@@ -65,4 +65,5 @@
     <string name="external">外部的</string>
     <string name="etlegacy_extras">ET: Legacy额外资源</string>
     <string name="extract_files_fail">提取%1$s文件失败!</string>
+    <string name="ecwolf_builtin_resource">ECWolf内置资源</string>
 </resources>

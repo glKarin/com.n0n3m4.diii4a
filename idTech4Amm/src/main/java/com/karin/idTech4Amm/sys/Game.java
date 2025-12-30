@@ -13,7 +13,7 @@ import com.n0n3m4.q3e.Q3ELang;
  */
 public enum Game
 {
-    // KARIN_NEW_GAME_BOOKMARK
+    // KARIN_NEW_GAME_BOOKMARK: add game mod enum
 
     // DOOM 3
     DOOM3_BASE(Q3EGameConstants.GAME_DOOM3, "base", "", "game", "", "base", false, R.string.doom_iii),
@@ -117,6 +117,9 @@ public enum Game
 
     // OpenMOHAA
     MOHAA_BASE(Q3EGameConstants.GAME_MOHAA, "main", "", "", "", "main", false, R.string.openmohaa_base),
+
+    // Wolfenstein 3D
+    GZDOOM_WOLF3D(Q3EGameConstants.GAME_WOLF3D, "", "", "ecwolf", "", "", true, R.string.wolf3d_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

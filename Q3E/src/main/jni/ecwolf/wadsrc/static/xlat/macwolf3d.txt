@@ -1,0 +1,194 @@
+things
+{
+	trigger 90
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 91
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg4 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activateeast = false;
+		activatewest = false;
+	}
+	trigger 92
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 93
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 1;
+		arg4 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activateeast = false;
+		activatewest = false;
+	}
+	trigger 94
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 2;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 95
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg3 = 2;
+		arg4 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activateeast = false;
+		activatewest = false;
+	}
+	trigger 96
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 97
+	{
+		action = "Door_Open";
+		arg1 = 16;
+		arg2 = 300;
+		arg4 = 1;
+		playeruse = true;
+		monsteruse = true;
+		repeatable = true;
+		activateeast = false;
+		activatewest = false;
+	}
+
+	trigger 98
+	{
+		action = "Pushwall_MoveNoStop";
+		arg1 = 8;
+		arg2 = 2;
+		arg3 = 2;
+		playeruse = true;
+		secret = true;
+	}
+
+	// Tile 99 was going to be an outdoors effect
+
+	trigger 100
+	{
+		action = "Exit_Normal";
+		playeruse = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+	trigger 101
+	{
+		action = "Exit_Secret";
+		playeruse = true;
+		activatenorth = false;
+		activatesouth = false;
+	}
+
+	// oldnum, class, angles, patrol, minskill
+	{19,  $Player1Start,     4, 0, 0}
+	{23,  Puddle,            0, 0, 0}
+	{24,  GreenBarrel,       0, 0, 0}
+	{25,  BareTable,         0, 0, 0}
+	{26,  FloorLamp,         0, 0, 0}
+	{27,  Chandelier,        0, 0, 0}
+	{28,  DogFood,           0, 0, 0}
+	{29,  BrownColumn,       0, 0, 0}
+	{30,  GreenPlant,        0, 0, 0}
+	{31,  Flag,              0, 0, 0}
+	{32,  BrownPlant,        0, 0, 0}
+	{33,  Vase,              0, 0, 0}
+	{34,  Bones1,            0, 0, 0}
+	{35,  CeilingLight,      0, 0, 0}
+	{36,  Basket,            0, 0, 0}
+	{37,  SuitOfArmor,       0, 0, 0}
+	{38,  HangingCage,       0, 0, 0}
+	{39,  GoldKey,           0, 0, 0}
+	{40,  SilverKey,         0, 0, 0}
+	{41,  MacBandolier,      0, 0, 0}
+	{42,  ClipBox,           0, 0, 0}
+	{43,  Food,              0, 0, 0}
+	{44,  Medikit,           0, 0, 0}
+	{45,  MacClip,           0, 0, 0}
+	{46,  MacMachineGun,     0, 0, 0}
+	{47,  MacGatlingGun,     0, 0, 0}
+	{48,  MacCross,          0, 0, 0}
+	{49,  MacChalice,        0, 0, 0}
+	{50,  MacChestofJewels,  0, 0, 0}
+	{51,  MacCrown,          0, 0, 0}
+	{52,  OneUp,             0, 0, 0}
+	{53,  Barrel,            0, 0, 0}
+	{54,  Well,              0, 0, 0}
+	{55,  MacFlameThrower,   0, 0, 0}
+	{56,  MacGasTank,        0, 0, 0}
+	{57,  MacRocketLauncher, 0, 0, 0}
+	{58,  MacMissiles,       0, 0, 0}
+	{59,  MacDeadGuard,      0, 0, 0}
+	{108, MacGuard,          0, 0, 0}
+	{109, MacOfficer,        0, 0, 0}
+	{110, MacWolfensteinSS,  0, 0, 0}
+	{111, MacDog,            0, 0, 0}
+	{112, MacMutant,         0, 0, 0}
+	{113, MacHans,           0, 0, 0}
+	{114, MacSchabbs,        0, 0, 0}
+	{115, MacTrans,          0, 0, 0}
+	{116, MacUberMutant,     0, 0, 0}
+	{117, MacDeathKnight,    0, 0, 0}
+	{118, MacMechaHitler,    0, 0, 0}
+	{119, MacMechaHitler,    0, 0, 0}
+	{121, MacFunky,          0, 0, 0}
+	{122, MacInky,           0, 0, 0}
+	{123, MacKinky,          0, 0, 0}
+	{124, MacBlinky,         0, 0, 0}
+	{126, MacGuard,          0, AMBUSH, 0}
+	{127, MacOfficer,        0, AMBUSH, 0}
+	{128, MacWolfensteinSS,  0, AMBUSH, 0}
+	{129, MacDog,            0, AMBUSH, 0}
+	{130, MacMutant,         0, AMBUSH, 0}
+	{131, MacHans,           0, AMBUSH, 0}
+	{132, MacSchabbs,        0, AMBUSH, 0}
+	{133, MacTrans,          0, AMBUSH, 0}
+	{134, MacUberMutant,     0, AMBUSH, 0}
+	{135, MacDeathKnight,    0, AMBUSH, 0}
+	{136, MacMechaHitler,    0, AMBUSH, 0}
+	{137, MacMechaHitler,    0, AMBUSH, 0}
+}

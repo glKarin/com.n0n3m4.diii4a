@@ -1,0 +1,77 @@
+// Wolfenstein 3D & Spear of Destiny Locks
+
+lock 1 Wolf3D
+{
+	GoldKey
+}
+
+lock 2 Wolf3D
+{
+	SilverKey
+}
+
+lock 101 Wolf3D
+{
+	GoldKey
+	SilverKey
+}
+
+// Macintosh Wolfenstein 3D - Same as above
+
+lock 1 MacWolf3D
+{
+	GoldKey
+}
+
+lock 2 MacWolf3D
+{
+	SilverKey
+}
+
+lock 101 MacWolf3D
+{
+	GoldKey
+	SilverKey
+}
+
+// Super 3D Noah's Ark Locks
+
+lock 1 Noah
+{
+	ArkGoldKeyRing
+}
+
+Lock 2 Noah
+{
+	ArkSilverKeyRing
+}
+
+Lock 101 Noah
+{
+	ArkGoldKeyRing
+	ArkSilverKeyRing
+}
+
+// Blake Stone Planet Strike
+
+Lock 1 Blake
+{
+	RedAccessKey
+}
+
+Lock 2 Blake
+{
+	YellowAccessKey
+}
+
+Lock 3 Blake
+{
+	BlueAccessKey
+}
+
+Lock 101 Blake
+{
+	RedAccessKey
+	YellowAccessKey
+	BlueAccessKey
+}

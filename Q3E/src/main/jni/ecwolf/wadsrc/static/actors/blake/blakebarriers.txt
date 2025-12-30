@@ -1,0 +1,151 @@
+// Cycling barriers are just normal barriers not hooked up to a switch depsite
+// the fact that they have separate tile numbers may suggest otherwise.
+
+actor VerticalSpikeStatic
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			VSPK H -1
+			stop
+	}
+}
+
+actor VerticalSpikeActive
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+		Closed:
+			VSPK H 45
+		Open:
+			VSPK GFED 3.5
+			VSPK C 3.5 A_ChangeFlag("SOLID", false)
+			VSPK B 3.5
+		Opened:
+			VSPK A 45
+		Close:
+			VSPK BC 3.5
+			VSPK D 3.5 A_ChangeFlag("SOLID", true)
+			VSPK EFG 3.5
+			goto Spawn
+	}
+}
+
+actor VerticalSpikeInactive : VerticalSpikeActive
+{
+	states
+	{
+		Spawn:
+			goto Opened
+	}
+}
+
+actor VerticalPostStatic
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			VPST H -1
+			stop
+	}
+}
+
+actor VerticalPostActive
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+		Closed:
+			VPST H 45
+		Open:
+			VPST GFED 3.5
+			VPST C 3.5 A_ChangeFlag("SOLID", false)
+			VPST B 3.5
+		Opened:
+			VPST A 45
+		Close:
+			VPST BC 3.5
+			VPST D 3.5 A_ChangeFlag("SOLID", true)
+			VPST EFG 3.5
+			goto Spawn
+	}
+}
+
+actor VerticalPostInactive : VerticalPostActive
+{
+	-SOLID
+	states
+	{
+		Spawn:
+			goto Opened
+	}
+}
+
+actor ElectricArcBarrier : SmartAnimation
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+		Active:
+			ELCK A 0 bright A_InitSmartAnim(random(3, 5))
+			ELCK A 0 bright A_ChangeFlag("SOLID", true)
+			ELCK A 0 bright A_Jump(256, 1, 2, 3)
+		ActiveLoop:
+			ELCK ABC 1.5 bright A_SmartAnimDelay
+			loop
+		Inactive:
+			ELCK D -1 A_ChangeFlag("SOLID", false)
+			stop
+	}
+}
+
+actor ElectricArcBarrierOff : ElectricArcBarrier
+{
+	-SOLID
+	states
+	{
+		Spawn:
+			goto Inactive
+	}
+}
+
+actor ElectricPostBarrier : SmartAnimation
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+		Active:
+			ELCP A 0 bright A_InitSmartAnim(random(3, 5))
+			ELCP A 0 bright A_ChangeFlag("SOLID", true)
+			ELCP A 0 bright A_Jump(256, 1, 2, 3)
+		ActiveLoop:
+			ELCP ABC 1.5 bright A_SmartAnimDelay
+			loop
+		Inactive:
+			ELCP D -1 A_ChangeFlag("SOLID", false)
+			stop
+	}
+}
+
+actor ElectricPostBarrierOff : ElectricPostBarrier
+{
+	-SOLID
+	states
+	{
+		Spawn:
+			goto Inactive
+	}
+}

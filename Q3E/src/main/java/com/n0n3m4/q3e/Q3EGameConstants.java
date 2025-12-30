@@ -2,6 +2,8 @@ package com.n0n3m4.q3e;
 
 public final class Q3EGameConstants
 {
+    // KARIN_NEW_GAME_BOOKMARK: add game library/config file/type/name/base/standalone dir/version/id
+
     // game engine library
     public static final String LIB_ENGINE_ID        = "libdoom3.so"; // DOOM3
     public static final String LIB_ENGINE_RAVEN     = "libquake4.so"; // Quake 4
@@ -24,6 +26,7 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE_SOURCE    = "libsource.so"; // Source Engine
     public static final String LIB_ENGINE3_URT      = "liburbanterror.so"; // Q3 Urban Terror
     public static final String LIB_ENGINE3_MOHAA    = "libopenmohaa.so"; // OpenMOHAA Medal of Honor: Allied Assault
+    public static final String LIB_ENGINE1_WOLF3D    = "libecwolf.so"; // Wolfenstein 3D
 
 
 
@@ -35,7 +38,7 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE4_D3BFG_VULKAN  = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
 
 
-    // KARIN_GAME_VERSION_BOOKMARK
+    // KARIN_GAME_VERSION_BOOKMARK: add/remove other game version/engine library constants
     //public static final String GAME_VERSION_REALRTCW_5_2 = "5.2"; // RealRTCW 5.2
     //public static final String LIB_ENGINE3_REALRTCW_5_2  = "libRealRTCW_5_2.so"; // RealRTCW(5.2)
 
@@ -66,6 +69,7 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_SOURCE   = "cfg/config.cfg";
     public static final String CONFIG_FILE_URT      = "q3config.cfg";
     public static final String CONFIG_FILE_MOHAA    = "configs/omconfig.cfg";
+    public static final String CONFIG_FILE_WOLF3D    = "configs/omconfig.cfg";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -89,6 +93,7 @@ public final class Q3EGameConstants
     public static final String GAME_SOURCE   = "source";
     public static final String GAME_URT      = "urt";
     public static final String GAME_MOHAA    = "openmohaa";
+    public static final String GAME_WOLF3D    = "ecwolf";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -112,6 +117,7 @@ public final class Q3EGameConstants
     public static final String GAME_NAME_SOURCE   = "Source Engine";
     public static final String GAME_NAME_URT      = "Urban Terror";
     public static final String GAME_NAME_MOHAA    = "MOHAA"; // "Medal of Honor: Allied Assault";
+    public static final String GAME_NAME_WOLF3D    = "Wolfenstein 3D";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -137,6 +143,7 @@ public final class Q3EGameConstants
     public static final String GAME_BASE_SOURCE     = "hl2";
     public static final String GAME_BASE_URT        = "q3ut4";
     public static final String GAME_BASE_MOHAA      = "main";
+    public static final String GAME_BASE_WOLF3D      = ""; // ECWolf is standalone
 
     // game standalone directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
@@ -160,6 +167,7 @@ public final class Q3EGameConstants
     public static final String GAME_SUBDIR_SOURCE   = "srceng";
     public static final String GAME_SUBDIR_URT      = "urt";
     public static final String GAME_SUBDIR_MOHAA    = "openmohaa";
+    public static final String GAME_SUBDIR_WOLF3D    = "ecwolf";
 
     // game version
     public static final String GAME_VERSION_DOOM3    = "1.3.1.1304";
@@ -183,6 +191,7 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_SOURCE   = "1.16";
     public static final String GAME_VERSION_URT      = "4.3.4";
     public static final String GAME_VERSION_MOHAA    = "0.82.1";
+    public static final String GAME_VERSION_WOLF3D   = "1.4.2";
 
     // game type index(ID)
     public static final int GAME_ID_DOOM3    = 0;
@@ -206,14 +215,13 @@ public final class Q3EGameConstants
     public static final int GAME_ID_SOURCE   = 18;
     public static final int GAME_ID_URT      = 19;
     public static final int GAME_ID_MOHAA    = 20;
+    public static final int GAME_ID_WOLF3D    = 21;
 
 
-    public static final int NUM_SUPPORT_GAME = 21;
+    // KARIN_NEW_GAME_BOOKMARK: increment
+    public static final int NUM_SUPPORT_GAME = 22;
 
-    public enum PatchResource
-    {
-        QUAKE4_SABOT, DOOM3_SABOT, DOOM3_RIVENSIN_ORIGIANL_LEVELS, DOOM3BFG_HLSL_SHADER, TDM_GLSL_SHADER, GZDOOM_RESOURCE, DOOM3_BFG_CHINESE_TRANSLATION, XASH3D_EXTRAS, XASH3D_CS16_EXTRAS, SOURCE_ENGINE_EXTRAS, ET_LEGACY_EXTRAS
-    }
+    public static final String GAME_EXECUABLE = "game.arm";
 
 /*
     public static final String[] QUAKE4_MAPS = {
@@ -284,7 +292,19 @@ public final class Q3EGameConstants
             "THE NEXUS",
     };*/
 
-    public static final String GAME_EXECUABLE = "game.arm";
+    // KARIN_NEW_GAME_BOOKMARK: add patch resource config/version
+    public enum PatchResource
+    {
+        QUAKE4_SABOT,
+        DOOM3_SABOT, DOOM3_RIVENSIN_ORIGIANL_LEVELS, DOOM3_BFG_CHINESE_TRANSLATION,
+        DOOM3BFG_HLSL_SHADER,
+        TDM_GLSL_SHADER,
+        GZDOOM_RESOURCE,
+        XASH3D_EXTRAS, XASH3D_CS16_EXTRAS,
+        SOURCE_ENGINE_EXTRAS,
+        ET_LEGACY_EXTRAS,
+        ECWOLF_RESOURCE,
+    }
 
     // extra internal game file version: <Game engine version>.<idTech4A++ patch version>
     public static final String TDM_GLSL_SHADER_VERSION        = GAME_VERSION_TDM + ".1"; // 1: init
@@ -294,22 +314,27 @@ public final class Q3EGameConstants
     public static final String XASH3D_VERSION                 = GAME_VERSION_XASH3D + ".3"; // 1: include cs16 resource
     public static final String SOURCE_ENGINE_VERSION          = GAME_VERSION_SOURCE + ".1"; // 1: init
     public static final String ETW_VERSION                    = GAME_VERSION_ETW + ".1"; // 1: init
+    public static final String WOLF3D_VERSION                 = GAME_VERSION_WOLF3D + ".1"; // 1: init
 
-    public static final String[] DOOM3_SOUND_DRIVER = { "AudioTrack", "OpenSLES", };
 
-    public static final String[] FTEQW_VID_RENDERER = { "vk", "gl", };
 
-    public static final String[]    GZDOOM_GL_VERSIONS       = { "0", "330", "420", "430", "450", };
-    public static final String[] QUAKE2_RENDERER_BACKENDS = { "gles1", "gles3", "vk", };
+    // KARIN_NEW_GAME_BOOKMARK: add select options on launcher
+    public static final String[] DOOM3_SOUND_DRIVER = {"AudioTrack", "OpenSLES",};
 
-    public static final String[] XASH3D_REFS   = { "gles1", "gl4es", "gles3compat", "soft", };
-    public static final String[] XASH3D_SV_CLS = { "", "hl", "cs16", "cs16_yapb", };
+    public static final String[] FTEQW_VID_RENDERER = {"vk", "gl",};
 
-    public static final String[] SOURCE_ENGINE_SV_CLS = { "hl2", "cstrike", "portal", "dod", "episodic", "hl2mp", "hl1", "hl1mp", };
+    public static final String[] GZDOOM_GL_VERSIONS       = {"0", "330", "420", "430", "450",};
+    public static final String[] QUAKE2_RENDERER_BACKENDS = {"gles1", "gles3", "vk",};
 
-    public static final String[] SDL_AUDIO_DRIVER = { "auto", "opensles", "aaudio", };
+    public static final String[] XASH3D_REFS   = {"gles1", "gl4es", "gles3compat", "soft",};
+    public static final String[] XASH3D_SV_CLS = {"", "hl", "cs16", "cs16_yapb",};
 
-    public static final String[] OPENAL_DRIVER = { "auto", "opensl", "oboe", };
+    public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod", "episodic", "hl2mp", "hl1", "hl1mp",};
+
+    public static final String[] SDL_AUDIO_DRIVER = {"auto", "opensles", "aaudio",};
+
+    public static final String[] OPENAL_DRIVER = {"auto", "opensl", "oboe",};
+
 
     private Q3EGameConstants() {}
 }

@@ -1,0 +1,79 @@
+/* SPANISH TRANSLATION */
+
+[spa]
+STR_RT = "Ve esto!";
+STR_FLOORCOMPLETED = "piso\ncompletado";
+
+WL_EPISODE1 = "Episodio 1\nFuga desde Wolfenstein";
+WL_EPISODE2 = "Episodio 2\nOperacion Eisenfaust";
+WL_EPISODE3 = "Episodio 3\nMuere, Fuhrer, Muere!";
+WL_EPISODE4 = "Episodio 4\nUn Negro Secreto";
+WL_EPISODE5 = "Episodio 5\nHuellas del Loco";
+WL_EPISODE6 = "Episodio 6\nConfrontacion";
+
+REGNOTICE_TITLE = "Atencion";
+REGNOTICE_MESSAGE = "Este juego NO es gratis y\nNO es Shareware; favor de\nno distribuirlo.\n\n        Id Software\n";
+
+STR_NG = "Comenzar";
+STR_OPTIONS = "Opciones";
+STR_DISPLAY = "Opciones de Video";
+STR_DEPTHFOG = "Niebla de Distancia";
+// STR_FULLSCREEN = "Fullscreen";
+STR_SD = "Opciones de Sonido";
+STR_CL = "Setup de Controles";
+STR_LG = "Restaurar Juego";
+STR_SG = "Registrar Juego";
+STR_CV = "Tamano de Vista";
+STR_VS = "Punctuaciones";
+STR_EG = "Terminar";
+STR_BD = "Ir al Demo";
+STR_BG = "Ir al Juego";
+STR_QT = "Dejar";
+STR_LOADING = "Restaurando...";
+STR_SAVING = "Registrando...";
+STR_NONE = "Nada";
+STR_WINDOWEDMOUSE = "Raton en ventana";
+STR_MOUSEEN = "Raton Encendido";
+STR_JOYEN = "Palanca Encendido";
+STR_PORT2 = "Utilizar Puerta 2";
+STR_GAMEPAD = "Gravis GamePad Encendido";
+STR_SENS = "Sensitividad de Raton";
+STR_DISABLEYAXIS = "Apagar el Eje Y";
+
+STR_CUSTOM = "Personalizar Controles";
+STR_HOWTOUGH = "Eres macho?";
+STR_DADDY = "Puedo jugar, Papa?";
+STR_HURTME = "No dispare!";
+STR_DEATH = "Soy la muerte encarnado!";
+STR_SLOW = "Lento";
+STR_FAST = "Rapido";
+STR_THINK = "Pensando";
+STR_TOTALTIME = "tiempo total";
+STR_AVERAGES = "promedios";
+STR_BONUS = "bonus";
+STR_TIME = "tiempo";
+STR_PAR = "par";
+STR_RATKILL = "matanza";
+STR_RATSECRET = "secreto";
+STR_RATTREASURE = "tesoro";
+STR_RAT2KILL = "Matanzas";
+STR_RAT2SECRET = "Secretos";
+STR_RAT2TREASURE = "Tesoro";
+STR_NOSPACE = "No hay bastante \nespacia en tu \ndisco a registrar!";
+STR_SAVECHT = "Tu juego registrado \nes, por asi decirlo, \n\"corrupto\".\nPero puedes continuar \nel jugar sin \nembargo....";
+STR_SEEAGAIN = "Vamos a ver otra vez!";
+STR_SOUNDCONFIG = "Configuracion de Sonidad";
+STR_DIGITALDEVICE = "Aparato Digital y Fuerte";
+STR_ADLIBDEVICE = "Aparato de OPL y Fuerte";
+STR_MUSICDEVICE = "Aparato de Musico y Fuerte";
+STR_SOFT = "Tranquilo";
+STR_LOUD = "Fuerte";
+STR_ALWAYSRUN = "Correr Siempre";
+STR_CHEATER = "Ahora habes 100% de Salud,\ntodos las municiones, \ny todos las claves!\n\nPero tu punctuacion\nse ha cambiada\na CERO!";
+
+STR_ENDGAME1 = "Estamos en su deuda, Senor Blazkowicz.\n";
+STR_ENDGAME2 = "Se haya servido su patria bien.";
+STR_ENDGAME3 = "Sin la lanza, los Nazis seguramente\n";
+STR_ENDGAME4 = "caeran a los Aliados...";
+
+ROBSJUKEBOX = "Jukebox de Roberto";

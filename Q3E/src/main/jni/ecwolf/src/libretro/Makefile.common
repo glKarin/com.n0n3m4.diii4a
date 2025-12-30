@@ -1,0 +1,247 @@
+ifeq ($(LIBRETRO_COMM_DIR),)
+LIBRETRO_COMM_DIR  = $(CORE_DIR)/libretro-common
+endif
+LZMA_DIR    = $(CORE_DIR)/deps/lzma
+BZIP2_DIR   = $(CORE_DIR)/deps/bzip2
+JPEG_DIR    = $(CORE_DIR)/deps/jpeg-6b
+ZLIB_DIR   = $(CORE_DIR)/deps/zlib
+
+INCFLAGS   := \
+	-I$(CORE_DIR) \
+	-I$(CORE_DIR)/src \
+	-I$(CORE_DIR)/src/g_shared \
+	-I$(CORE_DIR)/src/libretro/libretro-common/include \
+	-I$(JPEG_DIR) \
+	-I$(BZIP2_DIR) \
+	-I$(ZLIB_DIR) \
+	-DUSE_GPL=1 \
+	-DDISABLE_GDTOA=1
+
+ifneq (,$(findstring msvc2003,$(platform)))
+INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
+endif
+
+DEPS_LZMA_C := $(LZMA_DIR)/C/7zArcIn.c \
+					$(LZMA_DIR)/C/7zBuf.c \
+					$(LZMA_DIR)/C/7zCrc.c \
+					$(LZMA_DIR)/C/CpuArch.c \
+					$(LZMA_DIR)/C/LzmaDec.c \
+					$(LZMA_DIR)/C/7zCrcOpt.c \
+					$(LZMA_DIR)/C/7zStream.c \
+					$(LZMA_DIR)/C/7zDec.c \
+					$(LZMA_DIR)/C/Bra.c \
+					$(LZMA_DIR)/C/Bra86.c \
+					$(LZMA_DIR)/C/BraIA64.c \
+					$(LZMA_DIR)/C/Delta.c \
+					$(LZMA_DIR)/C/Lzma2Dec.c \
+					$(LZMA_DIR)/C/Bcj2.c
+LZMA_CXX :=	$(CORE_DIR)/src/resourcefiles/file_7z.cpp
+INCFLAGS +=     -I$(LZMA_DIR)/C
+ifeq ($(STATIC_LINKING),1)
+INCFLAGS += -DSeqInStream_Read2=ecwolf_SeqInStream_Read2 -DSeqInStream_Read=ecwolf_SeqInStream_Read -DSeqInStream_ReadByte=ecwolf_SeqInStream_ReadByte -DLookInStream_SeekTo=ecwolf_LookInStream_SeekTo -DLookInStream_LookRead=ecwolf_LookInStream_LookRead -DLookInStream_Read2=ecwolf_LookInStream_Read2 -DLookInStream_Read=ecwolf_LookInStream_Read -DSecToLook_CreateVTable=ecwolf_SecToLook_CreateVTable -DSecToRead_CreateVTable=ecwolf_SecToRead_CreateVTable -DCrcGenerateTable=ecwolf_CrcGenerateTable -DCrcUpdateT1=ecwolf_CrcUpdateT1 -Dg_CrcUpdate=ecwolf_g_CrcUpdate -Dg_CrcTable=ecwolf_g_CrcTable -DCrcUpdate=ecwolf_CrcUpdate -Dk7zSignature=ecwolf_k7zSignature -DSzArEx_GetFileNameUtf16=ecwolf_SzArEx_GetFileNameUtf16 -DSzAr_DecodeFolder=ecwolf_SzAr_DecodeFolder -DSzArEx_Extract=ecwolf_SzArEx_Extract -DBuf_Free=ecwolf_Buf_Free -DBuf_Init=ecwolf_Buf_Init -DBuf_Create=ecwolf_Buf_Create -DCrcCalc=ecwolf_CrcCalc -DSzArEx_Open=ecwolf_SzArEx_Open -DSzAr_GetFolderUnpackSize=ecwolf_SzAr_GetFolderUnpackSize -DSzGetNextFolderItem=ecwolf_SzGetNextFolderItem -DSzArEx_Free=ecwolf_SzArEx_Free -DSzArEx_Init=ecwolf_SzArEx_Init -DSzBitUi64s_Free=ecwolf_SzBitUi64s_Free -DSzBitUi32s_Free=ecwolf_SzBitUi32s_Free -Dg_CrcUpdateT4=ecwolf_g_CrcUpdateT4 -Dg_CrcUpdateT8=ecwolf_g_CrcUpdateT8 -DCrcUpdateT4=ecwolf_CrcUpdateT4 -DCrcUpdateT8=ecwolf_CrcUpdateT8 -DLzmaDec_InitDicAndState=ecwolf_LzmaDec_InitDicAndState -DLzmaDec_Init=ecwolf_LzmaDec_Init -DLzmaDec_DecodeToDic=ecwolf_LzmaDec_DecodeToDic -DLzmaDec_DecodeToBuf=ecwolf_LzmaDec_DecodeToBuf -DLzmaDec_FreeProbs=ecwolf_LzmaDec_FreeProbs -DLzmaDec_Free=ecwolf_LzmaDec_Free -DLzmaProps_Decode=ecwolf_LzmaProps_Decode -DLzmaDec_AllocateProbs=ecwolf_LzmaDec_AllocateProbs -DLzmaDec_Allocate=ecwolf_LzmaDec_Allocate -DLzmaDecode=ecwolf_LzmaDecode -DLzma2Dec_AllocateProbs=ecwolf_Lzma2Dec_AllocateProbs -DLzma2Dec_Init=ecwolf_Lzma2Dec_Init -DLzma2Dec_DecodeToDic=ecwolf_Lzma2Dec_DecodeToDic -DBcj2Dec_Init=ecwolf_Bcj2Dec_Init -DBcj2Dec_Decode=ecwolf_Bcj2Dec_Decode -DDelta_Init=ecwolf_Delta_Init -DDelta_Encode=ecwolf_Delta_Encode -DDelta_Decode=ecwolf_Delta_Decode -DLzma2Dec_Allocate=ecwolf_Lzma2Dec_Allocate -DLzma2Dec_DecodeToBuf=ecwolf_Lzma2Dec_DecodeToBuf -DLzma2Decode=ecwolf_Lzma2Decode -DIA64_Convert=ecwolf_IA64_Convert -DSPARC_Convert=ecwolf_SPARC_Convert -Dx86_Convert=ecwolf_x86_Convert -DPPC_Convert=ecwolf_PPC_Convert -DARMT_Convert=ecwolf_ARMT_Convert -DARM_Convert=ecwolf_ARM_Convert
+endif
+
+DEPS_BZIP2  := $(BZIP2_DIR)/blocksort.c \
+					$(BZIP2_DIR)/bzlib.c \
+					$(BZIP2_DIR)/compress.c \
+					$(BZIP2_DIR)/crctable.c \
+					$(BZIP2_DIR)/decompress.c \
+					$(BZIP2_DIR)/huffman.c \
+					$(BZIP2_DIR)/randtable.c
+
+DEPS_JPEG   := $(JPEG_DIR)/jcomapi.c \
+					$(JPEG_DIR)/jdapistd.c \
+					$(JPEG_DIR)/jdatasrc.c \
+					$(JPEG_DIR)/jdcoefct.c \
+					$(JPEG_DIR)/jddctmgr.c \
+					$(JPEG_DIR)/jdhuff.c \
+					$(JPEG_DIR)/jdinput.c \
+					$(JPEG_DIR)/jdmainct.c \
+					$(JPEG_DIR)/jdmarker.c \
+					$(JPEG_DIR)/jdmaster.c \
+					$(JPEG_DIR)/jdmerge.c \
+					$(JPEG_DIR)/jdphuff.c \
+					$(JPEG_DIR)/jdpostct.c \
+					$(JPEG_DIR)/jdsample.c \
+					$(JPEG_DIR)/jerror.c \
+					$(JPEG_DIR)/jidctint.c \
+					$(JPEG_DIR)/jmemmgr.c \
+					$(JPEG_DIR)/jutils.c \
+					$(JPEG_DIR)/jdcolor.c \
+					$(JPEG_DIR)/jdapimin.c
+
+DEPS_ZLIB   := $(ZLIB_DIR)/crc32.c \
+	       $(ZLIB_DIR)/deflate.c \
+       	       $(ZLIB_DIR)/inflate.c \
+	       $(ZLIB_DIR)/zutil.c \
+       	       $(ZLIB_DIR)/adler32.c \
+	       $(ZLIB_DIR)/inftrees.c \
+	       $(ZLIB_DIR)/inffast.c \
+	       $(ZLIB_DIR)/trees.c \
+       	       $(ZLIB_DIR)/compress.c \
+	       $(ZLIB_DIR)/uncompr.c
+
+SOURCES_C   := $(DEPS_BZIP2) $(DEPS_JPEG) $(DEPS_ZLIB)
+
+SOURCES_CXX := \
+	$(CORE_DIR)/src/g_blake/a_smartanim.cpp \
+	$(CORE_DIR)/src/g_blake/blake_sbar.cpp \
+	$(CORE_DIR)/src/g_shared/a_deathcam.cpp \
+	$(CORE_DIR)/src/g_shared/a_inventory.cpp \
+	$(CORE_DIR)/src/g_shared/a_keys.cpp \
+	$(CORE_DIR)/src/g_shared/a_patrolpoint.cpp \
+	$(CORE_DIR)/src/g_shared/a_playerpawn.cpp \
+	$(CORE_DIR)/src/g_shared/a_randomspawner.cpp \
+	$(CORE_DIR)/src/g_wolf/a_spearofdestiny.cpp \
+	$(CORE_DIR)/src/g_wolf/wolf_sbar.cpp \
+	$(CORE_DIR)/src/r_2d/r_draw.cpp \
+	$(CORE_DIR)/src/r_2d/r_drawt.cpp \
+	$(CORE_DIR)/src/r_2d/r_main.cpp \
+	$(CORE_DIR)/src/r_2d/r_things.cpp \
+	$(CORE_DIR)/src/r_data/colormaps.cpp \
+	$(CORE_DIR)/src/r_data/r_translate.cpp \
+	$(CORE_DIR)/src/r_data/renderstyle.cpp \
+	$(CORE_DIR)/src/resourcefiles/resourcefile.cpp \
+	$(CORE_DIR)/src/resourcefiles/ancientzip.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_audiot.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_directory.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_gamemaps.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_grp.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_pak.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_rff.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_rtl.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_lump.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_macbin.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_vgagraph.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_vswap.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_wad.cpp \
+	$(CORE_DIR)/src/resourcefiles/file_zip.cpp \
+	$(CORE_DIR)/src/resourcefiles/wolfmapcommon.cpp \
+	$(CORE_DIR)/src/sfmt/SFMT.cpp \
+	$(CORE_DIR)/src/textures/anim_switches.cpp \
+	$(CORE_DIR)/src/textures/animations.cpp \
+	$(CORE_DIR)/src/textures/automaptexture.cpp \
+	$(CORE_DIR)/src/textures/bitmap.cpp \
+	$(CORE_DIR)/src/textures/ddstexture.cpp \
+	$(CORE_DIR)/src/textures/emptytexture.cpp \
+	$(CORE_DIR)/src/textures/flattexture.cpp \
+	$(CORE_DIR)/src/textures/imgztexture.cpp \
+	$(CORE_DIR)/src/textures/jpegtexture.cpp \
+	$(CORE_DIR)/src/textures/machudtexture.cpp \
+	$(CORE_DIR)/src/textures/multipatchtexture.cpp \
+	$(CORE_DIR)/src/textures/patchtexture.cpp \
+	$(CORE_DIR)/src/textures/picttexture.cpp \
+	$(CORE_DIR)/src/textures/pcxtexture.cpp \
+	$(CORE_DIR)/src/textures/pngtexture.cpp \
+	$(CORE_DIR)/src/textures/rawpagetexture.cpp \
+	$(CORE_DIR)/src/textures/rottflattexture.cpp \
+	$(CORE_DIR)/src/textures/solidtexture.cpp \
+	$(CORE_DIR)/src/textures/texture.cpp \
+	$(CORE_DIR)/src/textures/texturemanager.cpp \
+	$(CORE_DIR)/src/textures/tgatexture.cpp \
+	$(CORE_DIR)/src/textures/warptexture.cpp \
+	$(CORE_DIR)/src/textures/wolfrawtexture.cpp \
+	$(CORE_DIR)/src/textures/wolfshapetexture.cpp \
+	$(CORE_DIR)/src/thingdef/thingdef.cpp \
+	$(CORE_DIR)/src/thingdef/thingdef_codeptr.cpp \
+	$(CORE_DIR)/src/thingdef/thingdef_expression.cpp \
+	$(CORE_DIR)/src/thingdef/thingdef_parse.cpp \
+	$(CORE_DIR)/src/thingdef/thingdef_properties.cpp \
+	$(CORE_DIR)/src/thingdef/thingdef_type.cpp \
+	$(CORE_DIR)/src/actor.cpp \
+	$(CORE_DIR)/src/am_map.cpp \
+	$(CORE_DIR)/src/colormatcher.cpp \
+	$(CORE_DIR)/src/config.cpp \
+	$(CORE_DIR)/src/dobject.cpp \
+	$(CORE_DIR)/src/dobjgc.cpp \
+	$(CORE_DIR)/src/farchive.cpp \
+	$(CORE_DIR)/src/files.cpp \
+	$(CORE_DIR)/src/g_conversation.cpp \
+	$(CORE_DIR)/src/g_mapinfo.cpp \
+	$(CORE_DIR)/src/gamemap.cpp \
+	$(CORE_DIR)/src/gamemap_planes.cpp \
+	$(CORE_DIR)/src/gamemap_uwmf.cpp \
+	$(CORE_DIR)/src/id_ca.cpp \
+	$(CORE_DIR)/src/id_vh.cpp \
+	$(CORE_DIR)/src/id_vl.cpp \
+	$(CORE_DIR)/src/language.cpp \
+	$(CORE_DIR)/src/lnspec.cpp \
+	$(CORE_DIR)/src/lumpremap.cpp \
+	$(CORE_DIR)/src/m_alloc.cpp \
+	$(CORE_DIR)/src/m_classes.cpp \
+	$(CORE_DIR)/src/m_random.cpp \
+	$(CORE_DIR)/src/m_png.cpp \
+	$(CORE_DIR)/src/name.cpp \
+	$(CORE_DIR)/src/p_switch.cpp \
+	$(CORE_DIR)/src/r_sprites.cpp \
+	$(CORE_DIR)/src/scanner.cpp \
+	$(CORE_DIR)/src/sndinfo.cpp \
+	$(CORE_DIR)/src/sndseq.cpp \
+	$(CORE_DIR)/src/thinker.cpp \
+	$(CORE_DIR)/src/v_draw.cpp \
+	$(CORE_DIR)/src/v_font.cpp \
+	$(CORE_DIR)/src/v_palette.cpp \
+	$(CORE_DIR)/src/v_pfx.cpp \
+	$(CORE_DIR)/src/v_text.cpp \
+	$(CORE_DIR)/src/v_video.cpp \
+	$(CORE_DIR)/src/w_wad.cpp \
+	$(CORE_DIR)/src/weaponslots.cpp \
+	$(CORE_DIR)/src/wl_act2.cpp \
+	$(CORE_DIR)/src/wl_agent.cpp \
+	$(CORE_DIR)/src/wl_atmos.cpp \
+	$(CORE_DIR)/src/wl_cloudsky.cpp \
+	$(CORE_DIR)/src/wl_dir3dspr.cpp \
+	$(CORE_DIR)/src/wl_draw.cpp \
+	$(CORE_DIR)/src/wl_floorceiling.cpp \
+	$(CORE_DIR)/src/wl_iwad.cpp \
+	$(CORE_DIR)/src/wl_loadsave.cpp \
+	$(CORE_DIR)/src/wl_menu.cpp \
+	$(CORE_DIR)/src/wl_parallax.cpp \
+	$(CORE_DIR)/src/wl_state.cpp \
+	$(CORE_DIR)/src/zstrformat.cpp \
+	$(CORE_DIR)/src/zstring.cpp \
+	$(CORE_DIR)/src/libretro/libretro.cpp \
+	$(CORE_DIR)/src/libretro/libretro-vfs.cpp \
+	$(CORE_DIR)/src/libretro/id_in.cpp \
+	$(CORE_DIR)/src/libretro/id_sd.cpp \
+	$(CORE_DIR)/src/libretro/id_us_1.cpp \
+	$(CORE_DIR)/src/libretro/wl_play.cpp \
+	$(CORE_DIR)/src/libretro/wl_game.cpp \
+	$(CORE_DIR)/src/libretro/wl_inter.cpp \
+	$(CORE_DIR)/src/libretro/wl_main.cpp \
+	$(CORE_DIR)/src/libretro/wl_text.cpp \
+	$(CORE_DIR)/src/libretro/g_conversation.cpp \
+	$(CORE_DIR)/src/libretro/g_intermission.cpp \
+	$(CORE_DIR)/src/libretro/w32_random.cpp
+
+ifneq ($(DISABLE_ADLIB), 1)
+	SOURCES_CXX += $(CORE_DIR)/src/dosbox/dbopl.cpp \
+		$(CORE_DIR)/src/libretro/id_sd_adlib.cpp \
+		$(CORE_DIR)/src/libretro/id_sd_n3dmus.cpp
+else
+        CFLAGS += -DDISABLE_ADLIB
+        CXXFLAGS += -DDISABLE_ADLIB
+endif
+
+SOURCES_C += $(DEPS_LZMA_C)
+SOURCES_CXX += $(LZMA_CXX)
+
+ifneq ($(NO_STORE),1)
+# Don't bother with Steam/GOG FS 
+SOURCES_CXX += $(CORE_DIR)/src/filesys_steam.cpp
+endif
+
+ifneq ($(STATIC_LINKING),1)
+SOURCES_C += \
+	$(CORE_DIR)/src/libretro/libretro-common/compat/compat_posix_string.c \
+	$(CORE_DIR)/src/libretro/libretro-common/compat/compat_snprintf.c \
+	$(CORE_DIR)/src/libretro/libretro-common/compat/compat_strl.c  \
+	$(CORE_DIR)/src/libretro/libretro-common/compat/fopen_utf8.c  \
+	$(CORE_DIR)/src/libretro/libretro-common/encodings/encoding_utf.c \
+	$(CORE_DIR)/src/libretro/libretro-common/file/file_path.c \
+	$(CORE_DIR)/src/libretro/libretro-common/file/retro_dirent.c \
+	$(CORE_DIR)/src/libretro/libretro-common/streams/file_stream.c \
+	$(CORE_DIR)/src/libretro/libretro-common/string/stdstring.c \
+	$(CORE_DIR)/src/libretro/libretro-common/time/rtime.c \
+	$(CORE_DIR)/src/libretro/libretro-common/vfs/vfs_implementation.c
+endif

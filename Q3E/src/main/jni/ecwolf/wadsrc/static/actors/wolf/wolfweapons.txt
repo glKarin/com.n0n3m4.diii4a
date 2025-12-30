@@ -1,0 +1,220 @@
+actor WolfWeapon : Weapon
+{
+	weapon.ammotype1 "Clip"
+	weapon.ammouse1 1
+	weapon.ammogive1 6
+	weapon.yadjust 19
+	+WEAPON.NOGRIN
+	+WEAPON.DONTBOB
+	states
+	{
+		Select:
+			TNT1 A 0 A_Raise
+			loop
+		Deselect:
+			TNT1 A 0 A_Lower
+			loop
+	}
+}
+
+actor Knife : WolfWeapon
+{
+	inventory.icon "KNIFE"
+	weapon.ammouse1 0
+	weapon.selectionorder 3700
+	attacksound "weapon/knife/attack"
+	+WEAPON.NOAUTOFIRE
+	+WEAPON.NOALERT
+	states
+	{
+		Ready:
+			KNIF A 1 A_WeaponReady
+			loop
+		Fire:
+			KNIF BC 3
+			KNIF D 3 A_CustomPunch(random(0,15), true, CPF_ALWAYSPLAYSOUND)
+			KNIF E 3
+			goto Ready
+	}
+}
+
+actor Knife2 : Knife
+{
+	weapon.selectionorder 3690
+	states
+	{
+		Ready:
+			KNF2 A 1 A_WeaponReady
+			loop
+		Fire:
+			KNF2 BC 3
+			KNF2 D 3 A_CustomPunch(random(0,15), true, CPF_ALWAYSPLAYSOUND)
+			KNF2 E 3
+			goto Ready
+	}
+}
+
+actor Pistol : WolfWeapon
+{
+	inventory.icon "PISTOL"
+	weapon.selectionorder 1900
+	attacksound "weapon/pistol/attack"
+	+WEAPON.NOAUTOFIRE
+	states
+	{
+		Ready:
+			PISG A 1 A_WeaponReady
+			loop
+		Fire:
+			PISG B 3
+			PISG C 3 bright
+			PISG D 3 A_GunAttack
+			PISG E 3
+			goto Ready
+	}
+}
+
+actor BluePistol : Pistol
+{
+	attacksound "weapon/bluepistol/attack"
+	weapon.selectionorder 1890
+	states
+	{
+		Ready:
+			BPSG A 1 A_WeaponReady
+			loop
+		Fire:
+			BPSG B 3
+			BPSG C 3 bright
+			BPSG D 3 A_GunAttack
+			BPSG E 3
+			goto Ready
+	}
+}
+
+actor MachineGun : WolfWeapon 60
+{
+	attacksound "weapon/machine/attack"
+	inventory.icon "MACHGUN"
+	inventory.pickupsound "weapon/machine/pickup"
+	weapon.selectionorder 1300
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			MGUN A -1
+			stop
+		Ready:
+			MCHG A 1 A_WeaponReady
+			loop
+		Fire:
+			MCHG B 3
+		Hold:
+			MCHG C 3 bright
+			MCHG D 3 A_GunAttack
+			MCHG E 3 A_ReFire
+			goto Ready
+	}
+}
+
+actor BlueAK47 : MachineGun 141
+{
+	attacksound "weapon/blueak47/attack"
+	inventory.pickupsound "weapon/blueak47/pickup"
+	weapon.selectionorder 1290
+	states
+	{
+		Spawn:
+			BAKP A -1
+			stop
+		Ready:
+			BAKG A 1 A_WeaponReady
+			loop
+		Fire:
+			BAKG B 3
+		Hold:
+			BAKG C 3 bright
+			BAKG D 3 A_GunAttack
+			BAKG E 3 A_ReFire
+			goto Ready
+	}
+}
+
+actor GatlingGun : WolfWeapon
+{
+	attacksound "weapon/gatling/attack"
+	inventory.icon "GATLGUN"
+	inventory.pickupsound "weapon/gatling/pickup"
+	weapon.selectionorder 700
+	-WEAPON.NOGRIN
+	+WEAPON.ALWAYSGRIN
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			CGUN A -1
+			stop
+		Ready:
+			CHGG A 1 A_WeaponReady
+			loop
+		Fire:
+			CHGG B 3
+		Hold:
+			CHGG C 3 bright
+			CHGG D 3 bright A_GunAttack
+			CHGG D 0 bright A_GunAttack
+			CHGG E 3 A_ReFire
+			goto Ready
+	}
+}
+
+actor BlueGatlingGun : GatlingGun
+{
+	attacksound "weapon/bluegatling/attack"
+	inventory.pickupsound "weapon/bluegatling/pickup"
+	weapon.selectionorder 690
+	states
+	{
+		Spawn:
+			BGUN A -1
+			stop
+		Ready:
+			BGTG A 1 A_WeaponReady
+			loop
+		Fire:
+			BGTG B 3
+		Hold:
+			BGTG C 3 bright
+			BGTG D 3 bright A_GunAttack
+			BGTG D 0 bright A_GunAttack
+			BGTG E 3 A_ReFire
+			goto Ready
+	}
+}
+
+actor GatlingGunUpgrade : WeaponGiver 61
+{
+	inventory.pickupsound "weapon/gatling/pickup"
+	weapon.ammogive1 6
+	dropitem "GatlingGun"
+	dropitem "MachineGun"
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			CGUN A -1
+			stop
+	}
+}
+actor BlueGatlingGunUpgrade : GatlingGunUpgrade 156
+{
+	inventory.pickupsound "weapon/bluegatling/pickup"
+	dropitem "BlueGatlingGun"
+	dropitem "BlueAK47"
+	states
+	{
+		Spawn:
+			BGUN A -1
+			stop
+	}
+}

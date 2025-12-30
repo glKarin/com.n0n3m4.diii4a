@@ -28,6 +28,7 @@ public class Q3EPatchResourceManager
         return resourceList;
     }
 
+    // KARIN_NEW_GAME_BOOKMARK: add patch resource config
     private void Init()
     {
         Q3EPatchResource rsc;
@@ -179,6 +180,17 @@ public class Q3EPatchResourceManager
                 null,
                 "pak/etw/legacy_v" + Q3EGameConstants.GAME_VERSION_ETW + ".pk3",
                 "legacy"
+        );
+        resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource_fileToDir(
+                Q3EGameConstants.PatchResource.ECWOLF_RESOURCE,
+                Q3ELang.tr(context, R.string.ecwolf_builtin_resource),
+                Q3EGameConstants.WOLF3D_VERSION,
+                Q3EGameConstants.GAME_WOLF3D,
+                null,
+                "pak/ecwolf/ecwolf.pk3",
+                ""
         );
         resourceList.add(rsc);
     }

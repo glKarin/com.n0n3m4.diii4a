@@ -1,0 +1,46 @@
+actor Clip : Ammo 59
+{
+	inventory.amount 8
+	inventory.maxamount 99
+	ammo.backpackamount 20
+	ammo.backpackboostamount 100
+	ammo.backpackmaxamount 299
+	states
+	{
+		Spawn:
+			CLIP A -1
+			stop
+	}
+}
+
+actor ClipBox : Clip 90
+{
+	inventory.pickupsound "misc/ammobox_pkup"
+	inventory.amount 25
+	states
+	{
+		Spawn:
+			AMMO A -1
+			stop
+	}
+}
+
+actor BlueClip : Clip 139
+{
+	states
+	{
+		Spawn:
+			CLP2 A -1
+			stop
+	}
+}
+
+actor ClipBox2 : ClipBox 140
+{
+	states
+	{
+		Spawn:
+			AMO2 A -1
+			stop
+	}
+}

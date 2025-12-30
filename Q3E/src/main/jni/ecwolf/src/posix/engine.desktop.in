@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=@PRODUCT_NAME@
+Comment=Advanced Wolfenstein 3D source port
+Exec=@ENGINE_BINARY_NAME@
+Icon=@ENGINE_BINARY_NAME@
+Categories=Game

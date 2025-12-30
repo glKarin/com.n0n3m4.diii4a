@@ -1,0 +1,134 @@
+// Display quiz and give 4 points of health if wrong.  If right, give:
+// * 1000 points
+// * Either 25 points of health if under 100 and 10 feed or 25 feed
+// * Grin
+// In vanilla quizes could be disabled which made them act as if the wrong
+// answer was always chosen.
+actor QuizItem : CustomInventory native
+{
+	inventory.amount 0
+}
+
+actor BibleQuiz : QuizItem 163
+{
+	conversationid 1
+	overheadicon "TILE8:80"
+	inventory.pickupsound ""
+	+PLOTONAUTOMAP
+	states
+	{
+		Spawn:
+			QUIZ A -1
+			stop
+		Pickup:
+			TNT1 A 0 A_Succeed
+			TNT1 A 0 A_JumpIf(health >= 100, "FullHealth")
+			stop
+		FullHealth:
+			TNT1 A 0 A_JumpIfInventory("Feed", 0, "FullLoad")
+			stop
+		FullLoad:
+			TNT1 A 0
+			fail
+	}
+}
+
+actor BibleQuizCorrect : CustomInventory
+{
+	conversationid 2
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Pickup:
+			TNT1 A 0 A_WeaponGrin
+			TNT1 A 0 A_GiveInventory("ScoreItem", 1000)
+			TNT1 A 0 A_JumpIf(health >= 100, "ExtraFeed")
+			TNT1 A 0 A_GiveInventory("LargeBandage")
+			TNT1 A 0 A_GiveInventory("Feed", 10)
+			stop
+		ExtraFeed:
+			TNT1 A 0 A_GiveInventory("Feed", 25)
+			stop
+	}
+}
+
+actor BibleQuizWrong : Health
+{
+	conversationid 3
+	inventory.amount 4
+}
+
+actor ArkMap : MapRevealer 194
+{
+	overheadicon "TILE8:7E" // Map does indeed use the sling graphic
+	inventory.pickupsound "misc/map_pkup"
+	+PLOTONAUTOMAP
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			AMAP A -1
+			stop
+	}
+}
+
+actor FeedSack : BackpackItem 176
+{
+	overheadicon "TILE8:7E"
+	+PLOTONAUTOMAP
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			SACK A -1
+			stop
+	}
+}
+
+actor ArkBanana : MacTreasureItem 183
+{
+	overheadicon "TILE8:7F"
+	+PLOTONAUTOMAP
+	states
+	{
+		Spawn:
+			BNNA A -1
+			stop
+	}
+}
+
+actor ArkApple : MacTreasureItem 184
+{
+	overheadicon "TILE8:7F"
+	+PLOTONAUTOMAP
+	states
+	{
+		Spawn:
+			APPL A -1
+			stop
+	}
+}
+
+actor ArkGrapes : MacTreasureItem 185
+{
+	overheadicon "TILE8:7F"
+	+PLOTONAUTOMAP
+	states
+	{
+		Spawn:
+			GRPE A -1
+			stop
+	}
+}
+
+actor ArkPeach : MacTreasureItem 186
+{
+	overheadicon "TILE8:7F"
+	+PLOTONAUTOMAP
+	states
+	{
+		Spawn:
+			PECH A -1
+			stop
+	}
+}

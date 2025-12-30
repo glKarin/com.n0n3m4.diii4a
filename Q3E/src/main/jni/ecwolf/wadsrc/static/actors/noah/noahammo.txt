@@ -1,0 +1,59 @@
+actor Feed : Ammo 180
+{
+	inventory.amount 5
+	inventory.maxamount 99
+	ammo.backpackamount 10
+	ammo.backpackboostamount 100
+	ammo.backpackmaxamount 299
+	overheadicon "TILE8:7E"
+	+PLOTONAUTOMAP
+	states
+	{
+		Spawn:
+			FEED A -1
+			stop
+	}
+}
+
+actor FeedTrough : Feed 177
+{
+	inventory.amount 25
+	states
+	{
+		Spawn:
+			FTRH A -1
+			stop
+	}
+}
+
+actor CantaloupeAmmo : Ammo 191
+{
+	inventory.amount 14
+	inventory.maxamount 99
+	ammo.backpackamount 1
+	ammo.backpackmaxamount 99
+	overheadicon "TILE8:7E"
+	+PLOTONAUTOMAP
+	states
+	{
+		Spawn:
+			CTLS A -1
+			stop
+	}
+}
+
+actor MelonAmmo : Ammo 193
+{
+	inventory.amount 5
+	inventory.maxamount 99
+	ammo.backpackamount 1
+	ammo.backpackmaxamount 99
+	overheadicon "TILE8:7E"
+	+PLOTONAUTOMAP
+	states
+	{
+		Spawn:
+			MLNS A -1
+			stop
+	}
+}

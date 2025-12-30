@@ -1,0 +1,64 @@
+actor ChargeUnit : Ammo
+{
+	inventory.pickupsound "misc/ammo_pickup"
+	inventory.amount 8
+	inventory.maxamount 100
+	states
+	{
+		Spawn:
+			CHRG A -1
+			stop
+	}
+}
+
+actor ChargePack : ChargeUnit
+{
+	states
+	{
+		Spawn:
+			CHGU A -1
+			stop
+	}
+}
+
+// OK, so concession coins aren't really ammo, but for our purposes we need a
+// way to pool two different pickups into one counter. Sounds like ammo to me?
+
+actor ConcessionCoin : Ammo
+{
+	inventory.pickupsound "misc/coin_pickup"
+	inventory.amount 1
+	inventory.maxamount 25
+	states
+	{
+		Spawn:
+			CON1 A -1
+			stop
+	}
+}
+
+actor ConcessionCoin5 : ConcessionCoin
+{
+	inventory.amount 5
+	states
+	{
+		Spawn:
+			CON5 A -1
+			stop
+	}
+}
+
+// While stretching the definition of this file, we might as well include this :P
+
+actor RadarPack : Inventory
+{
+	inventory.pickupsound "misc/radar_pickup"
+	inventory.amount 900
+	inventory.maxamount 14400
+	states
+	{
+		Spawn:
+			AUTO A -1
+			stop
+	}
+}

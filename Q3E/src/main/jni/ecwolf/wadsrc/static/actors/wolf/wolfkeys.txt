@@ -1,0 +1,45 @@
+actor GoldKey : Key 53
+{
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			GKEY A -1
+			stop
+	}
+}
+
+actor YellowKey : KeyGiver 154
+{
+	dropitem "GoldKey"
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			YKEY A -1
+			stop
+	}
+}
+
+actor SilverKey : Key 54
+{
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			SKEY A -1
+			stop
+	}
+}
+
+actor CyanKey : KeyGiver 155
+{
+	dropitem "SilverKey"
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			CKEY A -1
+			stop
+	}
+}

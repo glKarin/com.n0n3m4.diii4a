@@ -36,6 +36,7 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class Q3EKeyCodes
 {
+    // KARIN_NEW_GAME_BOOKMARK: add key code converter
 
     public static final int K_VKBD = 9000;
 

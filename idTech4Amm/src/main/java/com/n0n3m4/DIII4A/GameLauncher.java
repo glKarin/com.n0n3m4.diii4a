@@ -2530,7 +2530,7 @@ public class GameLauncher extends Activity
 
 		boolean res = super.onCreateOptionsMenu(menu);
 
-		// KARIN_NEW_GAME_BOOKMARK
+		// KARIN_NEW_GAME_BOOKMARK: add menu id to game mapping
 		menuGames.clear();
 		menuGames.put(R.id.main_menu_game_doom3, Q3EGameConstants.GAME_DOOM3);
 		menuGames.put(R.id.main_menu_game_quake4, Q3EGameConstants.GAME_QUAKE4);
@@ -2553,6 +2553,7 @@ public class GameLauncher extends Activity
 		menuGames.put(R.id.main_menu_game_source, Q3EGameConstants.GAME_SOURCE);
 		menuGames.put(R.id.main_menu_game_urt, Q3EGameConstants.GAME_URT);
 		menuGames.put(R.id.main_menu_game_mohaa, Q3EGameConstants.GAME_MOHAA);
+		menuGames.put(R.id.main_menu_game_wolf3d, Q3EGameConstants.GAME_WOLF3D);
 
 		return res;
     }
@@ -4731,6 +4732,7 @@ public class GameLauncher extends Activity
 		public LinearLayout mod_section;
 		public LinearLayout gamemod_section;
 		public LinearLayout dll_section;
+		// KARIN_NEW_GAME_BOOKMARK: add game RadioGroup view holder
 		public RadioGroup rg_fs_q1game;
 		public RadioGroup rg_fs_q2game;
 		public RadioGroup rg_fs_q3game;
@@ -4749,6 +4751,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_sourcegame;
 		public RadioGroup rg_fs_urtgame;
 		public RadioGroup rg_fs_mohaagame;
+		public RadioGroup rg_fs_wolf3dgame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -4860,6 +4863,7 @@ public class GameLauncher extends Activity
 			GameGroups = new RadioGroup[Q3EGameConstants.NUM_SUPPORT_GAME];
 			int[] gameId = { Q3EGameConstants.GAME_ID_DOOM3 };
 
+			// KARIN_NEW_GAME_BOOKMARK: create game RadioGroup
 			mods_container_layout = findViewById(R.id.mods_container_layout);
 			rg_fs_game = CreateGameRadioGroup(gameId);
 			rg_fs_q4game = CreateGameRadioGroup(gameId);
@@ -4882,6 +4886,7 @@ public class GameLauncher extends Activity
 			rg_fs_sourcegame = CreateGameRadioGroup(gameId);
 			rg_fs_urtgame = CreateGameRadioGroup(gameId);
 			rg_fs_mohaagame = CreateGameRadioGroup(gameId);
+			rg_fs_wolf3dgame = CreateGameRadioGroup(gameId);
 
             edt_cmdline = findViewById(R.id.edt_cmdline);
             res_customlayout = findViewById(R.id.res_customlayout);

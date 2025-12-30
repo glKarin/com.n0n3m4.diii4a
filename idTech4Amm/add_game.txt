@@ -1,0 +1,28 @@
+* For add game version
+// KARIN_NEW_GAME_BOOKMARK
+
+* Q3E
+1. Add game engine library/config file/game type/game name/game base/standalone dir/game version/game id/NUM_SUPPORT_GAME constants on Q3EGameConstants
+2. Add PatchResource/resource version on Q3EGameConstants if has built-in resource files
+3. Add launcher setting options on Q3EGameConstants if has launcher setting
+3. Add key code converter on Q3EKeyCodes
+4. Add isXXX/SetupXXX/ResetGameState/IsXxxXxx/GetGameConfigFiles on Q3EInterface
+5. Add Instance on Q3EAudioTrack if using audio track
+6. Add preference keys on Q3EPreference
+7. Add patch resource on Q3EPatchResourceManager::Init
+8. Add patch resource extract on Q3EGameHelper::ExtractGameResource
+
+* idTech4Amm
+1. Add drawable/xxx_icon, string/xxx_base(full name), color/theme_xxx_main_color, string/xxx(short name) resource
+2. Add enum on Q3EGame
+3. Add game on LauncherGame
+4. Add game mod enum on Game
+5. Add game resource url GameResourceUrl
+6. Add menu on xml/activity_main.xml
+7. Add layout.xml on layout/launcher_tab1.xml if has setting
+8. Add menu id to game mapping on GameLauncher::onCreateOptionsMenu
+9. Add game RadioGroup on GameLauncher::ViewHolder
+
+* JNI
+1. CMakeLists.txt
+2. Add q3e_running and find q3e_initialized on game main loop

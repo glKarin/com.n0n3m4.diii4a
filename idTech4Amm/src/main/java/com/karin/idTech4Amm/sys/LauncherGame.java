@@ -9,7 +9,7 @@ import java.util.List;
 
 public enum LauncherGame
 {
-    // KARIN_NEW_GAME_BOOKMARK
+    // KARIN_NEW_GAME_BOOKMARK: add launcher game enum
 
     DOOM3(Q3EGameConstants.GAME_ID_DOOM3, Q3EGameConstants.GAME_DOOM3, R.drawable.d3_icon, R.string.doom_iii, R.color.theme_doom3_main_color, R.string.doom_3),
     QUAKE4(Q3EGameConstants.GAME_ID_QUAKE4, Q3EGameConstants.GAME_QUAKE4, R.drawable.q4_icon, R.string.quake_iv_q4base, R.color.theme_quake4_main_color, R.string.quake_4),
@@ -49,6 +49,8 @@ public enum LauncherGame
     URT(Q3EGameConstants.GAME_ID_URT, Q3EGameConstants.GAME_URT, R.drawable.urbanterror_icon, R.string.urbanterror_base, R.color.theme_urt_main_color, R.string.urbanterror),
 
     MOHAA(Q3EGameConstants.GAME_ID_MOHAA, Q3EGameConstants.GAME_MOHAA, R.drawable.mohaa_icon, R.string.openmohaa_base, R.color.theme_mohaa_main_color, R.string.openmohaa),
+
+    WOLF3D(Q3EGameConstants.GAME_ID_WOLF3D, Q3EGameConstants.GAME_WOLF3D, R.drawable.wolf3d_icon, R.string.wolf3d_base, R.color.theme_wolf3d_main_color, R.string.wolf3d),
     ;
 
     public final int    GAME_ID;

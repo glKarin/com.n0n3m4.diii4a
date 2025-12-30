@@ -1,0 +1,878 @@
+/* DEFAULT ENGLISH TRANSLATION */
+
+[enu default]
+
+MNU_NOPICTURE = "No Picture";
+MNU_DIFFVERSION = "Different\nVersion";
+
+QUITSUR = "Are you sure you want\nto quit this great game?";
+CURGAME = "You are currently in\na game. Continuing will\nerase old game. Ok?";
+GAMESVD = "There's already a game\nsaved at this position.\n      Overwrite?";
+ENDGAMESTR = "Are you sure you want\nto end the game you\nare playing? (Y or N)";
+DELETESVDGAME = "Are you sure you want to\ndelete this saved game?\n\"%s\"";
+STR_NG = "New Game";
+STR_OPTIONS = "Options";
+STR_DISPLAY = "Display Options";
+STR_AMOPTIONS = "Automap Options";
+STR_DEPTHFOG = "Use Depth Fog";
+STR_FULLSCREEN = "Fullscreen";
+STR_VSYNC = "Vertical Sync";
+STR_SD = "Sound Options";
+STR_CL = "Control Setup";
+STR_LG = "Load Game";
+STR_SG = "Save Game";
+STR_CV = "Change View";
+STR_VS = "View Scores";
+STR_RT = "Read This!";
+STR_EG = "End Game";
+STR_BD = "Back to Demo";
+STR_BG = "Back to Game";
+STR_QT = "Quit";
+STR_LOADING = "Loading...";
+STR_SAVING = "Saving...";
+STR_LGC = "Load Game called\n";
+STR_SGC = "Save Game called\n";
+STR_NONE = "None";
+STR_PC = "PC Speaker";
+STR_ALSB = "AdLib/Sound Blaster";
+STR_MIDI = "SDL_mixer MIDI Synth";
+STR_DISNEY = "Disney Sound Source";
+STR_SB = "Sound Blaster";
+STR_WINDOWEDMOUSE = "Windowed Mouse";
+STR_MOUSEEN = "Mouse Enabled";
+STR_JOYEN = "Joystick Enabled";
+STR_PORT2 = "Use joystick port 2";
+STR_GAMEPAD = "Gravis GamePad Enabled";
+STR_SENS = "Mouse Sensitivity";
+STR_JOYSENS = "Joystick Sensitivity";
+STR_DISABLEYAXIS = "Disable Y Axis";
+STR_CUSTOM = "Customize controls";
+STR_HOWTOUGH = "How tough are you?";
+STR_DADDY = "Can I play, Daddy?";
+STR_HURTME = "Don't hurt me.";
+STR_BRINGEM = "Bring 'em on!";
+STR_DEATH = "I am Death incarnate!";
+STR_SUPEREASY = "Super Easy";
+STR_EASY = "Easy";
+STR_NORMAL = "Normal";
+STR_HARD = "Hard";
+STR_MOUSEADJ = "Adjust Mouse Sensitivity";
+STR_MOUSEXADJ = "X Sensitivity";
+STR_MOUSEYADJ = "Y Sensitivity";
+STR_PANXADJ = "Pan X Sensitivity";
+STR_PANYADJ = "Pan Y Sensitivity";
+STR_SLOW = "Slow";
+STR_FAST = "Fast";
+STR_THINK = "Thinking";
+STR_YOUWIN = "you win!";
+STR_TOTALTIME = "total time";
+STR_AVERAGES = "averages";
+STR_BONUS = "bonus";
+STR_TIME = "time";
+STR_PAR = "par";
+STR_RATKILL = "kill";
+STR_RATSECRET = "secret";
+STR_RATTREASURE = "treasure";
+STR_RAT2KILL = "kill ratio";
+STR_RAT2SECRET = "secret ratio";
+STR_RAT2TREASURE = "treasure ratio";
+STR_NOSPACE = "There is not enough space\non your disk to Save Game!";
+STR_SAVECHT = "Your Save Game file is,\nshall we say, \"corrupted\".\nBut I'll let you go on and\nplay anyway....";
+STR_SEEAGAIN = "Let's see that again!";
+STR_SOUNDCONFIG = "Sound Configuration";
+STR_DIGITALDEVICE = "Digital Device & Volume";
+STR_ADLIBDEVICE = "Adlib Device & Volume";
+STR_MUSICDEVICE = "Music Device & Volume";
+STR_SOFT = "Soft";
+STR_LOUD = "Loud";
+STR_ALWAYSRUN = "Always Run";
+STR_CHEATER = "You now have 100% Health,\n99 Ammo and both Keys!\n\nNote that you have basically\neliminated your chances of\ngetting a high score!";
+STR_FLOOR = "floor"; // Floor X completed
+STr_COMPLETED = "completed";
+STR_SECRETCOMPLETED = "\nsecret floor\n completed";
+STR_TRANSDEFEATED = "\n trans\n grosse\ndefeated!";
+STR_WILHELMDEFEATED = "\nbarnacle\nwilhelm\ndefeated!";
+STR_UBERDEFEATED = "\nubermutant\ndefeated!";
+STR_SECRETTUNNELCOMPLETED = "\nsecret tunnel\n    area\n  completed!";
+STR_SECRETCASTLECOMPLETED = "\nsecret castle\n    area\n  completed!";
+STR_SELECTRES = "Screen Resolution";
+STR_PLAYERCLASS = "Choose Player";
+STR_ESCQUIT = "Don't Return on Escape";
+STR_FAILWRITE = "Could not write save file.\nCheck file permissions.";
+STR_FAILREAD = "Could not read save file.\nCheck file permissions.";
+STR_AMROTATEOFF = "Rotate: No";
+STR_AMROTATEON = "Rotate: Yes";
+STR_AMROTATEOVERLAY = "Rotate: Overlay Only";
+STR_AMFLOORS = "Draw Floor Textures";
+STR_AMTEXTURES = "Draw Wall Textures";
+STR_AMOVERLAYOFF = "Overlay: Off";
+STR_AMOVERLAYON = "Overlay: On";
+STR_AMOVERLAYBOTH = "Overlay: On + Normal";
+STR_AMTEXTUREDOVERLAY = "Textured Overlay";
+STR_AMPAUSE = "Pause Game";
+STR_AMRATIOS = "Show Level Ratios";
+STR_SCREENSIZE = "Screen Size";
+STR_SMALL = "Small";
+STR_LARGE = "Large";
+
+STR_DEMOCOMPLETED = "This concludes your demo\nof Spear of Destiny! Now,\ngo to your local software\nstore and buy it!";
+
+STR_WHICHEPISODE = "Which episode to play?";
+WL_EPISODE1 = "Episode 1\nEscape from Wolfenstein";
+WL_EPISODE2 = "Episode 2\nOperation: Eisenfaust";
+WL_EPISODE3 = "Episode 3\nDie, Fuhrer, Die!";
+WL_EPISODE4 = "Episode 4\nA Dark Secret";
+WL_EPISODE5 = "Episode 5\nTrail of the Madman";
+WL_EPISODE6 = "Episode 6\nConfrontation";
+
+NA_EPISODE1 = "Carl the Camel\nStart at level 1-1";
+NA_EPISODE2 = "Ginny the Giraffe\nStart at level 2-1";
+NA_EPISODE3 = "Melvin the Monkey\nStart at level 3-1";
+NA_EPISODE4 = "Kerry the Kangaroo\nStart at level 4-1";
+NA_EPISODE5 = "Ernie the Elephant\nStart at level 5-1";
+NA_EPISODE6 = "Burt the Bear\nStart at level 6-1";
+
+SOD_EPISODE1 = "Episode 1\nSpear of Destiny";
+SOD_EPISODE2 = "Episode 2\nReturn to Danger";
+SOD_EPISODE3 = "Episode 3\nThe Ultimate Challenge";
+
+// Wolfenstein 3D
+ENDSTR01 = "Dost thou wish to\nleave with such hasty\nabandon?";
+ENDSTR02 = "Chickening out...\nalready?";
+ENDSTR03 = "Press N for more carnage.\nPress Y to be a weenie.";
+ENDSTR04 = "So, you think you can\nquit this easily, huh?";
+ENDSTR05 = "Press N to save the world.\nPress Y to abandon it in\nits hour of need.";
+ENDSTR06 = "Press N if you are brave.\nPress Y to cower in shame.";
+ENDSTR07 = "Heroes, press N.\nWimps, press Y.";
+ENDSTR08 = "You are at an intersection.\nA sign says, 'Press Y to quit.'\n>";
+ENDSTR09 = "For guns and glory, press N.\nFor work and worry, press Y.";
+// Spear of Destiny
+ENDSTR10 = "Heroes don't quit, but\ngo ahead and press Y\nif you aren't one.";
+ENDSTR11 = "Press Y to quit,\nor press N to enjoy\nmore violent diversion.";
+ENDSTR12 = "Depressing the Y key means\nyou must return to the\nhumdrum workday world.";
+ENDSTR13 = "Hey, quit or play,\nY or N:\nit's your choice.";
+ENDSTR14 = "Sure you don't want to\nwaste a few more\nproductive hours?";
+ENDSTR15 = "I think you had better\nplay some more. Please\npress N...please?";
+ENDSTR16 = "If you are tough, press N.\nIf not, press Y daintily.";
+ENDSTR17 = "I'm thinkin' that\nyou might wanna press N\nto play more. You do it.";
+ENDSTR18 = "Sure. Fine. Quit.\nSee if we care.\nGet it over with.\nPress Y.";
+// Super 3D Noah's Ark
+NOAH_ENDSTR01 = "Are you sure you're\nready to quit?\nPress Y to Quit.";
+NOAH_ENDSTR02 = "What? Quitting already?\nPress Y to Quit.";
+NOAH_ENDSTR03 = "Are a few hungry animals\ntoo tough for you?\nPress Y to Quit.";
+NOAH_ENDSTR04 = "Giving up so soon?\nPress Y to Quit.";
+NOAH_ENDSTR05 = "Be sure to take your\numbrella, it's wet out there.\nPress Y to Quit.";
+NOAH_ENDSTR06 = "You're going to let\nthose animals run free?\nPress Y to Quit.";
+NOAH_ENDSTR07 = "Did the animals wear\nyou out?\nPress Y to Quit.";
+NOAH_ENDSTR08 = "Are you monkeying around or\ndo you really want to quit?\nPress Y to Quit.";
+NOAH_ENDSTR09 = "The animals might get\nhungry if you're gone\ntoo long!\nPress Y to Quit.";
+
+STR_ENDGAME1 = "We owe you a great debt, Mr. Blazkowicz.";
+STR_ENDGAME2 = "You have served your country well.";
+STR_ENDGAME3 = "With the spear gone, the Allies will finally";
+STR_ENDGAME4 = "by able to destroy Hitler...";
+
+ROBSJUKEBOX = "Robert's Jukebox";
+MUS_GETTHEM = "Get Them!";
+MUS_SEARCHN = "Searching";
+MUS_POW = "P.O.W.";
+MUS_SUSPENSE = "Suspense";
+MUS_WARMARCH = "War March";
+MUS_CORNER = "Around The Corner!";
+MUS_NAZI_NOR = "Nazi Anthem (Title)";
+MUS_NAZI_OMI = "Nazi Anthem";
+MUS_PREGNANT = "Lurking...";
+MUS_GOINGAFT = "Going After Hitler";
+MUS_HEADACHE = "Pounding Headache";
+MUS_DUNGEON = "Into the Dungeons";
+MUS_INTROCW3 = "Kill the S.O.B.";
+MUS_NAZI_RAP = "The Nazi Rap";
+MUS_TWELFTH = "Twelfth Hour";
+MUS_ZEROHOUR = "Zero Hour";
+MUS_ULTIMATE = "Ultimate Conquest";
+MUS_PACMAN = "Wolfpack";
+MUS_HITLWLTZ = "Hitler Waltz";
+MUS_SALUTE = "Salute";
+MUS_VICTORS = "Victors";
+MUS_WONDERIN = "Wondering About My...";
+MUS_FUNKYOU = "Funk You";
+MUS_ENDLEVEL = "Intermission";
+MUS_ROSTER = "Roster";
+MUS_URAHERO = "You're a Hero";
+MUS_VICMARCH = "Victory March";
+MUS_XFUNKIE = "Funky Colonel Bill";
+MUS_XDEATH = "Death To The Nazis";
+MUS_XTIPTOE = "Tiptoeing Around";
+MUS_XTHEEND = "Is This THE END?";
+MUS_XEVIL = "Evil Incarnate";
+MUS_XJAZNAZI = "Jazzin' Them Nazis";
+MUS_XPUTIT = "Puttin' It To The Enemy";
+MUS_XGETYOU = "The SS Gonna Get You";
+MUS_XTOWER2 = "Towering Above";
+
+REGNOTICE_TITLE = "Attention";
+REGNOTICE_MESSAGE = "This game is NOT shareware.\nPlease do not distribute it.\nThanks.\n\n        Id Software\n";
+
+SHUSTR_01 = "Entrance to the Tunnels";
+SHUSTR_02 = "Corridors of Confusion";
+SHUSTR_03 = "Cave-In!";
+SHUSTR_04 = "Fortune and Glory";
+SHUSTR_05 = "Guardian of the Dungeon Door";
+SHUSTR_06 = "Dungeon Depths";
+SHUSTR_07 = "Winding Dungeons";
+SHUSTR_08 = "Guard Post";
+SHUSTR_09 = "Main Dungeon";
+SHUSTR_10 = "Barnacle Wil the Jailer";
+SHUSTR_11 = "Entrance to the Castle";
+SHUSTR_12 = "Barreling through the Castle";
+SHUSTR_13 = "Castle Hassle";
+SHUSTR_14 = "Militant Mutants";
+SHUSTR_15 = "Gauntlet Guards";
+SHUSTR_16 = "King of the Mutants";
+SHUSTR_17 = "The Ramparts";
+SHUSTR_18 = "Guardian of the Spear";
+SHUSTR_19 = "Secret Tunnel Floor";
+SHUSTR_20 = "Pushwall Panic!";
+SHUSTR_21 = "Death's Door";
+
+RHUSTR_01 = "Entrance to the Base";
+RHUSTR_02 = "Achtung!";
+RHUSTR_03 = "The Heat is On";
+RHUSTR_04 = "The Secret Path";
+RHUSTR_05 = "Willy--Do It!";
+RHUSTR_06 = "Surprise Pack!";
+RHUSTR_07 = "Let Me Out O' Here!";
+RHUSTR_08 = "Randy's Labyrinth";
+RHUSTR_09 = "Initial Reaction";
+RHUSTR_10 = "Lesson to Learn";
+RHUSTR_11 = "Sign Language";
+RHUSTR_12 = "Pushwall Pandemonium";
+RHUSTR_13 = "Torturous Tunnels";
+RHUSTR_14 = "A Puzzling Place";
+RHUSTR_15 = "Panicky Forfeit";
+RHUSTR_16 = "Getting the Axe";
+RHUSTR_17 = "The Reactor";
+RHUSTR_18 = "Mechanical Nightmare";
+RHUSTR_19 = "Eagle's Gift";
+RHUSTR_20 = "Run Like Hell";
+RHUSTR_21 = "Devil's Advocate";
+
+CHUSTR_01 = "Gateway to Chaos";
+CHUSTR_02 = "Clean Room Confrontation";
+CHUSTR_03 = "Hidden Agenda";
+CHUSTR_04 = "Secret Cave";
+CHUSTR_05 = "Do the Willy Skilly!";
+CHUSTR_06 = "Pushwall Prelude";
+CHUSTR_07 = "Death Spiral";
+CHUSTR_08 = "Meandering Madness";
+CHUSTR_09 = "Right off the Bat!";
+CHUSTR_10 = "School's Out";
+CHUSTR_11 = "Elevator Shake";
+CHUSTR_12 = "Shots from the Shadows";
+CHUSTR_13 = "Edge of Insanity";
+CHUSTR_14 = "Block and Tackle";
+CHUSTR_15 = "Frantic Rantic!";
+CHUSTR_16 = "A Real Bonehead";
+CHUSTR_17 = "Bunker Blitz";
+CHUSTR_18 = "Future Passage";
+CHUSTR_19 = "Annihilation Zone";
+CHUSTR_20 = "Backward Clock";
+CHUSTR_21 = "Future Threat";
+
+NOAH_BRIEF_01 = "You'll be out of the ark in six\ndays, Noah. Unfortunately, the\nanimals are a tad bit restless and\nwant to get out now. Good thing\nyou brought all that food with\nyou. You'll need it to put the\nbusy ones to sleep.\n\nAt the end of the first day, be\nprepared to deal with Carl the\nCamel. He's been real cranky lately\nand is a bit out of control.\n\nGood luck and be careful...\n";
+NOAH_BRIEF_02 = "Wow, Noah! Carl sure was hard to\ncalm down. But remember, you\nwere chosen to guide this ark to\nsafety because you know how to\nget the job done.\n\nThe closing of day two ends with\nirritable Ginny the Giraffe. She\nmay be tall and quick, but give\nher enough food and it's off to\nsleep.\n\nOh, and Noah, remember to keep\nan eye out for hidden rooms...\n";
+NOAH_BRIEF_03 = "ZZZZZ... Great job, Noah!. Ginny is\nsnoring away.\n\nBoy, it seems the animals never\nseem to stay asleep very long.\n\nKeep your eye out for Melvin the\nMonkey. He can be pretty tricky\nand may try distracting you with\ncoconuts, but it's your job to get\nhim settled down for the rest of\nyour time aboard the ark.";
+NOAH_BRIEF_04 = "You're doing a great job, Noah!\nYou took care of that Melvin like\na real pro.\n\nI hope you haven't worn yourself\nout yet, because more challenges\nare ahead.\n\nKerry the Kangaroo awaits you,\nand she doesn't look the least\nbit tired. Are you ready for her?\nShe needs to rest like the other\nanimals.";
+NOAH_BRIEF_05 = "Wow! Kerry was no challenge for\nyou! Can you keep up the pace\nwhen faced with Ernie the\nElephant?\n\nDon't worry. Very soon you will\nbe on dry land, and you won't\nhave to chase the animals around\nthe ark anymore.";
+NOAH_BRIEF_06 = "You are almost there! If you can\nget through one more day, you\nwill be out of here for good!\n\nRumor has it one of the bears\ndoes not want to be found. In\nfact he may try to hide from\nyou. Be on the alert for Burt\nthe Bear.\n\nGet him to sleep and your work\nis done!";
+NOAH_BRIEF_COPYRIGHT = "\nSuper 3-D Noah's Ark\n\n\n(C)1995 Wisdom Tree, Inc.\nAll rights reserved.\n\n\nThis game contains copyrighted\nsoftware code owned by\nId Software, Inc\n(C)1992 Id Software, Inc.\nAll rights reserved.\n";
+
+CC_GOAT = "Goat";
+CC_SHEEP = "Sheep";
+CC_OSTRICH = "Ostrich";
+CC_ANTELOPE = "Antelope";
+CC_OX = "Ox";
+CC_CARL = "Carl the Camel";
+CC_MELVIN = "Melvin the Monkey";
+CC_GINNY = "Ginny the Giraffe";
+CC_KERRY = "Kerry the Kangaroo";
+CC_ERNIE = "Ernie the Elephant";
+CC_BURTHIDING = "Hiding Burt";
+CC_BURT = "Burt the Bear";
+
+/* Super 3D Noah's Ark Quiz */
+
+NOAH_CORRECT = "Correct!";
+NOAH_INCORRECT = "Incorrect!";
+
+NOAH_QUIZ_Q01 = "Who was Noah's father?";
+NOAH_QUIZ_H01 = "Gen 5:30";
+NOAH_QUIZ_A01A = "Methuselah"; // Wrong
+NOAH_QUIZ_A01B = "Lamech"; // Correct
+NOAH_QUIZ_A01C = "Enoch"; // Wrong
+
+NOAH_QUIZ_Q02 = "How old was Noah when he had\nShem, Ham and Japheth?";
+NOAH_QUIZ_H02 = "Gen 5:32";
+NOAH_QUIZ_A02A = "100"; // Wrong
+NOAH_QUIZ_A02B = "500"; // Correct
+NOAH_QUIZ_A02C = "700"; // Wrong
+
+NOAH_QUIZ_Q03 = "How many sons did Noah have?";
+NOAH_QUIZ_H03 = "Gen 6:10";
+NOAH_QUIZ_A03A = "3"; // Correct
+NOAH_QUIZ_A03B = "5"; // Wrong
+NOAH_QUIZ_A03C = "7"; // Wrong
+
+NOAH_QUIZ_Q04 = "What kind of wood was the Ark\nmade of?";
+NOAH_QUIZ_H04 = "Gen 6:14";
+NOAH_QUIZ_A04A = "oak"; // Wrong
+NOAH_QUIZ_A04B = "pine"; // Wrong
+NOAH_QUIZ_A04C = "gopher wood"; // Correct
+
+NOAH_QUIZ_Q05 = "How many cubits long was the\nArk?";
+NOAH_QUIZ_H05 = "Gen 6:15";
+NOAH_QUIZ_A05A = "200"; // Wrong
+NOAH_QUIZ_A05B = "300"; // Correct
+NOAH_QUIZ_A05C = "500"; // Wrong
+
+NOAH_QUIZ_Q06 = "How many windows did the Ark\nhave?";
+NOAH_QUIZ_H06 = "Gen 6:16";
+NOAH_QUIZ_A06A = "1"; // Correct
+NOAH_QUIZ_A06B = "10"; // Wrong
+NOAH_QUIZ_A06C = "20"; // Wrong
+
+NOAH_QUIZ_Q07 = "How many doors did the Ark\nhave?";
+NOAH_QUIZ_H07 = "Gen 6:16";
+NOAH_QUIZ_A07A = "1"; // Correct
+NOAH_QUIZ_A07B = "3"; // Wrong
+NOAH_QUIZ_A07C = "6"; // Wrong
+
+NOAH_QUIZ_Q08 = "How many stories did the Ark\nhave?";
+NOAH_QUIZ_H08 = "Gen 6:16";
+NOAH_QUIZ_A08A = "2"; // Wrong
+NOAH_QUIZ_A08B = "3"; // Correct
+NOAH_QUIZ_A08C = "7"; // Wrong
+
+NOAH_QUIZ_Q09 = "How many of each kind of\nanimal did Noah have on\nthe Ark?";
+NOAH_QUIZ_H09 = "Gen 6:19";
+NOAH_QUIZ_A09A = "2"; // Correct
+NOAH_QUIZ_A09B = "3"; // Wrong
+NOAH_QUIZ_A09C = "5"; // Wrong
+
+NOAH_QUIZ_Q10 = "How many of each clean animal\ndid Noah have on the Ark?";
+NOAH_QUIZ_H10 = "Gen 7:2";
+NOAH_QUIZ_A10A = "2"; // Wrong
+NOAH_QUIZ_A10B = "4"; // Wrong
+NOAH_QUIZ_A10C = "7"; // Correct
+
+NOAH_QUIZ_Q11 = "How many days did it rain?";
+NOAH_QUIZ_H11 = "Gen 7:4";
+NOAH_QUIZ_A11A = "30"; // Wrong
+NOAH_QUIZ_A11B = "40"; // Correct
+NOAH_QUIZ_A11C = "100"; // Wrong
+
+NOAH_QUIZ_Q12 = "How old was Noah when the\nfloods came?";
+NOAH_QUIZ_H12 = "Gen 7:6";
+NOAH_QUIZ_A12A = "500"; // Wrong
+NOAH_QUIZ_A12B = "600"; // Correct
+NOAH_QUIZ_A12C = "650"; // Wrong
+
+NOAH_QUIZ_Q13 = "How many days did Noah wait\nin the Ark for the floods to\ncome?";
+NOAH_QUIZ_H13 = "Gen 7:10";
+NOAH_QUIZ_A13A = "1"; // Wrong
+NOAH_QUIZ_A13B = "4"; // Wrong
+NOAH_QUIZ_A13C = "7"; // Correct
+
+NOAH_QUIZ_Q14 = "The flood waters only came\nfrom the sky.";
+NOAH_QUIZ_H14 = "Gen 7:11";
+NOAH_QUIZ_A14A = "True"; // Wrong
+NOAH_QUIZ_A14B = "False"; // Correct
+
+NOAH_QUIZ_Q15 = "How many people were on the\nArk?";
+NOAH_QUIZ_H15 = "Gen 7:13";
+NOAH_QUIZ_A15A = "4"; // Wrong
+NOAH_QUIZ_A15B = "6"; // Wrong
+NOAH_QUIZ_A15C = "8"; // Correct
+
+NOAH_QUIZ_Q16 = "Noah collected the animals and\nput them in the Ark.";
+NOAH_QUIZ_H16 = "Gen 7:15";
+NOAH_QUIZ_A16A = "True"; // Wrong
+NOAH_QUIZ_A16B = "False"; // Correct
+
+NOAH_QUIZ_Q17 = "Who survived the flood?";
+NOAH_QUIZ_H17 = "Gen 7:23";
+NOAH_QUIZ_A17A = "animals on the earth"; // Wrong
+NOAH_QUIZ_A17B = "animals in the sky"; // Wrong
+NOAH_QUIZ_A17C = "animals in the Ark"; // Correct
+
+NOAH_QUIZ_Q18 = "How long did the flood last?";
+NOAH_QUIZ_H18 = "Gen 7:24, Gen 8:3";
+NOAH_QUIZ_A18A = "40 days"; // Wrong
+NOAH_QUIZ_A18B = "150 days"; // Correct
+NOAH_QUIZ_A18C = "365 days"; // Wrong
+
+NOAH_QUIZ_Q19 = "Which mountain did the Ark\nland on?";
+NOAH_QUIZ_H19 = "Gen 8:4";
+NOAH_QUIZ_A19A = "Ararat"; // Correct
+NOAH_QUIZ_A19B = "St. Helen"; // Wrong
+NOAH_QUIZ_A19C = "Fuji"; // Wrong
+
+NOAH_QUIZ_Q20 = "What was the first animal to\nleave the Ark?";
+NOAH_QUIZ_H20 = "Gen 8:7";
+NOAH_QUIZ_A20A = "dove"; // Wrong
+NOAH_QUIZ_A20B = "raven"; // Correct
+NOAH_QUIZ_A20C = "eagle"; // Wrong
+
+NOAH_QUIZ_Q21 = "What did the dove bring back\nto Noah?";
+NOAH_QUIZ_H21 = "Gen 8:11";
+NOAH_QUIZ_A21A = "an apple"; // Wrong
+NOAH_QUIZ_A21B = "an olive branch"; // Correct
+NOAH_QUIZ_A21C = "a fig leaf"; // Wrong
+
+NOAH_QUIZ_Q22 = "How many days did Noah stay\nin the Ark after the dove\nbrought the branch?";
+NOAH_QUIZ_H22 = "Gen 8:12";
+NOAH_QUIZ_A22A = "3"; // Wrong
+NOAH_QUIZ_A22B = "5"; // Wrong
+NOAH_QUIZ_A22C = "7"; // Correct
+
+NOAH_QUIZ_Q23 = "What was the first thing that\nNoah did after he got out of\nthe Ark?";
+NOAH_QUIZ_H23 = "Gen 8:20";
+NOAH_QUIZ_A23A = "built a house"; // Wrong
+NOAH_QUIZ_A23B = "built an altar"; // Correct
+NOAH_QUIZ_A23C = "went swimming"; // Wrong
+
+NOAH_QUIZ_Q24 = "What is the sign that God\ngave us to show He would\nnever flood the world again?";
+NOAH_QUIZ_H24 = "Gen 9:14-15";
+NOAH_QUIZ_A24A = "the rainbow"; // Correct
+NOAH_QUIZ_A24B = "the blue sky"; // Wrong
+NOAH_QUIZ_A24C = "fire"; // Wrong
+
+NOAH_QUIZ_Q25 = "How old was Noah when he\ndied?";
+NOAH_QUIZ_H25 = "Gen 9:29";
+NOAH_QUIZ_A25A = "750"; // Wrong
+NOAH_QUIZ_A25B = "890"; // Wrong
+NOAH_QUIZ_A25C = "950"; // Correct
+
+NOAH_QUIZ_Q26 = "Who closed the door of the\nArk when the floods came?";
+NOAH_QUIZ_H26 = "Gen 7:16";
+NOAH_QUIZ_A26A = "Noah"; // Wrong
+NOAH_QUIZ_A26B = "Shem"; // Wrong
+NOAH_QUIZ_A26C = "God"; // Correct
+
+NOAH_QUIZ_Q27 = "Why did God have the floods\ncome?";
+NOAH_QUIZ_H27 = "Gen 6:12-13";
+NOAH_QUIZ_A27A = "Man was wicked."; // Correct
+NOAH_QUIZ_A27B = "The earth was dirty."; // Wrong
+NOAH_QUIZ_A27C = "The plants needed water."; // Wrong
+
+NOAH_QUIZ_Q28 = "Noah was the only man to find\ngrace in the eyes of the Lord.";
+NOAH_QUIZ_H28 = "Gen 6:8, Gen 6:11-12";
+NOAH_QUIZ_A28A = "True"; // Correct
+NOAH_QUIZ_A28B = "False"; // Wrong
+
+NOAH_QUIZ_Q29 = "How many years did God say He\nwould strive with man?";
+NOAH_QUIZ_H29 = "Gen 6:3";
+NOAH_QUIZ_A29A = "10"; // Wrong
+NOAH_QUIZ_A29B = "50"; // Wrong
+NOAH_QUIZ_A29C = "120"; // Correct
+
+NOAH_QUIZ_Q30 = "What did Noah do after the\nflood?";
+NOAH_QUIZ_H30 = "Gen 9:20";
+NOAH_QUIZ_A30A = "He planted a vineyard."; // Correct
+NOAH_QUIZ_A30B = "He herded sheep."; // Wrong
+NOAH_QUIZ_A30C = "He ran a caravan. "; // Wrong
+
+NOAH_QUIZ_Q31 = "Who was Noah's oldest son?";
+NOAH_QUIZ_H31 = "Gen 10:21";
+NOAH_QUIZ_A31A = "Ham"; // Wrong
+NOAH_QUIZ_A31B = "Shem"; // Wrong
+NOAH_QUIZ_A31C = "Japheth"; // Correct
+
+NOAH_QUIZ_Q32 = "On which side did God tell\nNoah to pitch the Ark?";
+NOAH_QUIZ_H32 = "Gen 6:14";
+NOAH_QUIZ_A32A = "inside"; // Wrong
+NOAH_QUIZ_A32B = "outside"; // Wrong
+NOAH_QUIZ_A32C = "both"; // Correct
+
+NOAH_QUIZ_Q33 = "How wide was the Ark?";
+NOAH_QUIZ_H33 = "Gen 6:15";
+NOAH_QUIZ_A33A = "30 Cubits"; // Wrong
+NOAH_QUIZ_A33B = "50 Cubits"; // Correct
+NOAH_QUIZ_A33C = "60 Cubits"; // Wrong
+
+NOAH_QUIZ_Q34 = "How tall was the Ark?";
+NOAH_QUIZ_H34 = "Gen 6:15";
+NOAH_QUIZ_A34A = "30 Cubits"; // Correct
+NOAH_QUIZ_A34B = "40 Cubits"; // Wrong
+NOAH_QUIZ_A34C = "50 Cubits"; // Wrong
+
+NOAH_QUIZ_Q35 = "What did God make with Noah,\nso that Noah knew that he\nwould be safe?";
+NOAH_QUIZ_H35 = "Gen 6:18";
+NOAH_QUIZ_A35A = "a lifesaver"; // Wrong
+NOAH_QUIZ_A35B = "a boat"; // Wrong
+NOAH_QUIZ_A35C = "a covenant"; // Correct
+
+NOAH_QUIZ_Q36 = "Besides animals, what other\nthings did God tell Noah to\nhave in the Ark?";
+NOAH_QUIZ_H36 = "Gen 6:18-21";
+NOAH_QUIZ_A36A = "food & his family"; // Correct
+NOAH_QUIZ_A36B = "books & his family"; // Wrong
+NOAH_QUIZ_A36C = "swimsuit & a rubber duck"; // Wrong
+
+NOAH_QUIZ_Q37 = "Why did God choose Noah to be\nin the Ark?";
+NOAH_QUIZ_H37 = "Gen 7:1";
+NOAH_QUIZ_A37A = "Noah was righteous."; // Correct
+NOAH_QUIZ_A37B = "Noah was a good sailor."; // Wrong
+NOAH_QUIZ_A37C = "Noah could swim."; // Wrong
+
+NOAH_QUIZ_Q38 = "Noah entered the Ark early to\nprepare for his family.";
+NOAH_QUIZ_H38 = "Gen 7:13";
+NOAH_QUIZ_A38A = "True"; // Wrong
+NOAH_QUIZ_A38B = "False"; // Correct
+
+NOAH_QUIZ_Q39 = "How did God make the floods\ngo away?";
+NOAH_QUIZ_H39 = "Gen 8:1";
+NOAH_QUIZ_A39A = "with the wind"; // Correct
+NOAH_QUIZ_A39B = "with big drains"; // Wrong
+NOAH_QUIZ_A39C = "with large buckets"; // Wrong
+
+NOAH_QUIZ_Q40 = "How many months did Noah wait\nin the Ark after it came to\nrest on Mt. Ararat?";
+NOAH_QUIZ_H40 = "Gen 8:4-14";
+NOAH_QUIZ_A40A = "1.5 months"; // Wrong
+NOAH_QUIZ_A40B = "4.5 months"; // Wrong
+NOAH_QUIZ_A40C = "7.5 months"; // Correct
+
+NOAH_QUIZ_Q41 = "Who was the first man off of\nthe Ark?";
+NOAH_QUIZ_H41 = "Gen 8:18";
+NOAH_QUIZ_A41A = "Noah"; // Correct
+NOAH_QUIZ_A41B = "Shem"; // Wrong
+NOAH_QUIZ_A41C = "Ham"; // Wrong
+
+NOAH_QUIZ_Q42 = "What did Noah offer to God as\nthanks for keeping him safe?";
+NOAH_QUIZ_H42 = "Gen 8:20";
+NOAH_QUIZ_A42A = "himself"; // Wrong
+NOAH_QUIZ_A42B = "animals"; // Correct
+NOAH_QUIZ_A42C = "food"; // Wrong
+
+NOAH_QUIZ_Q43 = "What did God promise never to\ndo again?";
+NOAH_QUIZ_H43 = "Gen 9:11";
+NOAH_QUIZ_A43A = "flood the earth"; // Correct
+NOAH_QUIZ_A43B = "punish man"; // Wrong
+NOAH_QUIZ_A43C = "turn on his shower"; // Wrong
+
+NOAH_QUIZ_Q44 = "In what book of the Bible\ndo you find the story of\nNoah?";
+NOAH_QUIZ_H44 = "No hint";
+NOAH_QUIZ_A44A = "Genesis"; // Correct
+NOAH_QUIZ_A44B = "Exodus"; // Wrong
+NOAH_QUIZ_A44C = "Deuteronomy"; // Wrong
+
+NOAH_QUIZ_Q45 = "Which of Noah's ancestors lived\nto be 969 years old?";
+NOAH_QUIZ_H45 = "Gen 5:27";
+NOAH_QUIZ_A45A = "Enoch"; // Wrong
+NOAH_QUIZ_A45B = "Adam"; // Wrong
+NOAH_QUIZ_A45C = "Methuselah"; // Correct
+
+NOAH_QUIZ_Q46 = "Noah is mentioned at least 3\ntimes in the New Testament.";
+NOAH_QUIZ_H46 = "Heb 11:7, 1 Pet 3:20,\n2 Pet 2:5";
+NOAH_QUIZ_A46A = "True"; // Correct
+NOAH_QUIZ_A46B = "False"; // Wrong
+
+NOAH_QUIZ_Q47 = "Which of Noah's descendants\nwas called 'mighty upon the\nearth'?";
+NOAH_QUIZ_H47 = "1 Chr 1:10";
+NOAH_QUIZ_A47A = "Cush"; // Wrong
+NOAH_QUIZ_A47B = "Nimrod"; // Correct
+NOAH_QUIZ_A47C = "Elam"; // Wrong
+
+NOAH_QUIZ_Q48 = "Which of Noah's\nancestors never died?";
+NOAH_QUIZ_H48 = "Gen 5:24";
+NOAH_QUIZ_A48A = "Adam"; // Wrong
+NOAH_QUIZ_A48B = "Enoch"; // Correct
+NOAH_QUIZ_A48C = "Jared"; // Wrong
+
+NOAH_QUIZ_Q49 = "Noah is a descendent of\nwhich of Adam's sons?";
+NOAH_QUIZ_H49 = "Gen 5";
+NOAH_QUIZ_A49A = "Cain"; // Wrong
+NOAH_QUIZ_A49B = "Abel"; // Wrong
+NOAH_QUIZ_A49C = "Seth"; // Correct
+
+NOAH_QUIZ_Q50 = "Why is Noah mentioned in\nHebrews 11?";
+NOAH_QUIZ_H50 = "Heb 11:7";
+NOAH_QUIZ_A50A = "for his faith"; // Correct
+NOAH_QUIZ_A50B = "for his carpentry skills"; // Wrong
+NOAH_QUIZ_A50C = "for his sacrifices"; // Wrong
+
+NOAH_QUIZ_Q51 = "Noah took his wife, sons,\nand daughters into the\nArk.";
+NOAH_QUIZ_H51 = "Gen 7:7";
+NOAH_QUIZ_A51A = "True"; // Wrong
+NOAH_QUIZ_A51B = "False"; // Correct
+
+NOAH_QUIZ_Q52 = "The flood waters came from\nthe fountains of the deep\nand windows of heaven.";
+NOAH_QUIZ_H52 = "Gen 7:11, Gen 8:2";
+NOAH_QUIZ_A52A = "True"; // Correct
+NOAH_QUIZ_A52B = "False"; // Wrong
+
+NOAH_QUIZ_Q53 = "What is a covenant?";
+NOAH_QUIZ_H53 = "No hint";
+NOAH_QUIZ_A53A = "a contract"; // Correct
+NOAH_QUIZ_A53B = "a book"; // Wrong
+NOAH_QUIZ_A53C = "an altar"; // Wrong
+
+NOAH_QUIZ_Q54 = "What title is Noah given\nin 2 Peter 2:5?";
+NOAH_QUIZ_H54 = "No hint";
+NOAH_QUIZ_A54A = "man after God's own heart"; // Wrong
+NOAH_QUIZ_A54B = "preacher of righteousness"; // Correct
+NOAH_QUIZ_A54C = "an apostle"; // Wrong
+
+NOAH_QUIZ_Q55 = "The Gospels liken the time\nbefore the flood to the time:\nbefore:";
+NOAH_QUIZ_H55 = "Matt 24:37-38, Luke 17:26-27";
+NOAH_QUIZ_A55A = "the Incarnation"; // Wrong
+NOAH_QUIZ_A55B = "the Second Coming"; // Correct
+NOAH_QUIZ_A55C = "the Cruxifiction"; // Wrong
+
+NOAH_QUIZ_Q56 = "By the time of Noah, how did\nGod feel about having created\nman?";
+NOAH_QUIZ_H56 = "Gen 6:6";
+NOAH_QUIZ_A56A = "It pleased Him."; // Wrong
+NOAH_QUIZ_A56B = "It grieved Him."; // Correct
+NOAH_QUIZ_A56C = "It amused Him."; // Wrong
+
+NOAH_QUIZ_Q57 = "Jesus is a descendant of\nNoah.";
+NOAH_QUIZ_H57 = "Luke 3:36";
+NOAH_QUIZ_A57A = "True"; // Correct
+NOAH_QUIZ_A57B = "False"; // Wrong
+
+NOAH_QUIZ_Q58 = "What kind of creatures were\nNOT mentioned as destroyed\nin the flood?";
+NOAH_QUIZ_H58 = "Gen 7:21-22";
+NOAH_QUIZ_A58A = "birds"; // Wrong
+NOAH_QUIZ_A58B = "sea creatures"; // Correct
+NOAH_QUIZ_A58C = "livestock"; // Wrong
+
+NOAH_QUIZ_Q59 = "By how much did the water\ncover the mountain-tops?";
+NOAH_QUIZ_H59 = "Gen 7:20";
+NOAH_QUIZ_A59A = "7 cubits"; // Wrong
+NOAH_QUIZ_A59B = "15 cubits"; // Correct
+NOAH_QUIZ_A59C = "40 cubits"; // Wrong
+
+NOAH_QUIZ_Q60 = "What day of the seventh\nmonth did the Ark come to\nrest on Ararat?";
+NOAH_QUIZ_H60 = "Gen 8:4";
+NOAH_QUIZ_A60A = "the 7th day"; // Wrong
+NOAH_QUIZ_A60B = "the 17th day"; // Correct
+NOAH_QUIZ_A60C = "the 24th day"; // Wrong
+
+NOAH_QUIZ_Q61 = "What was Noah commanded\nnot to eat?";
+NOAH_QUIZ_H61 = "Gen 9:4";
+NOAH_QUIZ_A61A = "ham"; // Wrong
+NOAH_QUIZ_A61B = "brussel sprouts"; // Wrong
+NOAH_QUIZ_A61C = "blood"; // Correct
+
+NOAH_QUIZ_Q62 = "After the flood, what were\nthe animals supposed to do?";
+NOAH_QUIZ_H62 = "Gen 8:17";
+NOAH_QUIZ_A62A = "exercise and become strong"; // Wrong
+NOAH_QUIZ_A62B = "be fruitful and multiply"; // Correct
+NOAH_QUIZ_A62C = "be sacrificed to God"; // Wrong
+
+NOAH_QUIZ_Q63 = "With whom did God make His\ncovenant?";
+NOAH_QUIZ_H63 = "Gen 9:8-10";
+NOAH_QUIZ_A63A = "Noah"; // Wrong
+NOAH_QUIZ_A63B = "Noah and his sons"; // Wrong
+NOAH_QUIZ_A63C = "Noah, his sons and every\n   living creature"; // Correct
+
+NOAH_QUIZ_Q64 = "Who was the father of the\nCanaanites?";
+NOAH_QUIZ_H64 = "Gen 9:22";
+NOAH_QUIZ_A64A = "Ham"; // Correct
+NOAH_QUIZ_A64B = "Shem"; // Wrong
+NOAH_QUIZ_A64C = "Japheth"; // Wrong
+
+NOAH_QUIZ_Q65 = "Abraham is a descendent of\nwhich son of Noah?";
+NOAH_QUIZ_H65 = "Gen 11:10-27";
+NOAH_QUIZ_A65A = "Ham"; // Wrong
+NOAH_QUIZ_A65B = "Shem"; // Correct
+NOAH_QUIZ_A65C = "Japheth"; // Wrong
+
+NOAH_QUIZ_Q66 = "Which of Noah's descendants\ndid he curse?";
+NOAH_QUIZ_H66 = "Gen 9:25";
+NOAH_QUIZ_A66A = "Canaan"; // Correct
+NOAH_QUIZ_A66B = "Shem"; // Wrong
+NOAH_QUIZ_A66C = "Japheth"; // Wrong
+
+NOAH_QUIZ_Q67 = "Why did Shem and Japheth\ncover up Noah with a\ngarment?";
+NOAH_QUIZ_H67 = "Gen 9:23";
+NOAH_QUIZ_A67A = "Noah was naked"; // Correct
+NOAH_QUIZ_A67B = "Noah was cold"; // Wrong
+NOAH_QUIZ_A67C = "Noah was burning from\n    the sun"; // Wrong
+
+NOAH_QUIZ_Q68 = "The rainbow is a symbol that\nGod will never judge mankind\nagain.";
+NOAH_QUIZ_H68 = "Gen 9:15";
+NOAH_QUIZ_A68A = "True"; // Wrong
+NOAH_QUIZ_A68B = "False"; // Correct
+
+NOAH_QUIZ_Q69 = "God promised that Noah and\nthe animals would get along.";
+NOAH_QUIZ_H69 = "Gen 9:2";
+NOAH_QUIZ_A69A = "True"; // Wrong
+NOAH_QUIZ_A69B = "False"; // Correct
+
+NOAH_QUIZ_Q70 = "Man did not eat meat before\nthe flood.";
+NOAH_QUIZ_H70 = "Gen 9:3";
+NOAH_QUIZ_A70A = "True"; // Correct
+NOAH_QUIZ_A70B = "False"; // Wrong
+
+NOAH_QUIZ_Q71 = "What did God say would\nhappen to the man who\ncommits murder?";
+NOAH_QUIZ_H71 = "Gen 9:6";
+NOAH_QUIZ_A71A = "He will be killed."; // Correct
+NOAH_QUIZ_A71B = "He will be cursed."; // Wrong
+NOAH_QUIZ_A71C = "He will be put in jail for\n   the rest of his life."; // Wrong
+
+NOAH_QUIZ_Q72 = "Everyone on the Ark survived\nthe flood.";
+NOAH_QUIZ_H72 = "Gen 8:18";
+NOAH_QUIZ_A72A = "True"; // Correct
+NOAH_QUIZ_A72B = "False"; // Wrong
+
+NOAH_QUIZ_Q73 = "How long did it take the\nwater to recede so that the\nArk could rest on Mount\nArarat?";
+NOAH_QUIZ_H73 = "Gen 8:3";
+NOAH_QUIZ_A73A = "100 days"; // Wrong
+NOAH_QUIZ_A73B = "150 days"; // Correct
+NOAH_QUIZ_A73C = "300 days"; // Wrong
+
+NOAH_QUIZ_Q74 = "After the flood, God\ndestroyed the Ark.";
+NOAH_QUIZ_H74 = "No hint";
+NOAH_QUIZ_A74A = "True"; // Wrong
+NOAH_QUIZ_A74B = "False"; // Correct
+
+NOAH_QUIZ_Q75 = "Noah had to gather and store\nfood to eat during the flood\nfor:";
+NOAH_QUIZ_H75 = "Gen 6:21"; // Gen 7:20 in DOS version
+NOAH_QUIZ_A75A = "himself and his family"; // Wrong
+NOAH_QUIZ_A75B = "the animals"; // Wrong
+NOAH_QUIZ_A75C = "both"; // Correct
+
+NOAH_QUIZ_Q76 = "The Bible says that Noah's\nwife was named Sarah.";
+NOAH_QUIZ_H76 = "No hint";
+NOAH_QUIZ_A76A = "True"; // Wrong
+NOAH_QUIZ_A76B = "False"; // Correct
+
+NOAH_QUIZ_Q77 = "After the flood, Noah did not\nhave any more sons.";
+NOAH_QUIZ_H77 = "Gen 9:19";
+NOAH_QUIZ_A77A = "True"; // Correct
+NOAH_QUIZ_A77B = "False"; // Wrong
+
+NOAH_QUIZ_Q78 = "How many years did God give\nmankind to repent before the\nflood?";
+NOAH_QUIZ_H78 = "Gen 6:3";
+NOAH_QUIZ_A78A = "70"; // Wrong
+NOAH_QUIZ_A78B = "100"; // Wrong
+NOAH_QUIZ_A78C = "120"; // Correct
+
+NOAH_QUIZ_Q79 = "Which person lived before\nNoah?";
+NOAH_QUIZ_H79 = "Gen 5";
+NOAH_QUIZ_A79A = "Abraham"; // Wrong
+NOAH_QUIZ_A79B = "Adam"; // Correct
+NOAH_QUIZ_A79C = "Solomon"; // Wrong
+
+NOAH_QUIZ_Q80 = "Which person lived after Noah?";
+NOAH_QUIZ_H80 = "No hint";
+NOAH_QUIZ_A80A = "Cain"; // Wrong
+NOAH_QUIZ_A80B = "Methuselah"; // Wrong
+NOAH_QUIZ_A80C = "Joshua"; // Correct
+
+NOAH_QUIZ_Q81 = "Noah did everything that God\ntold him to do.";
+NOAH_QUIZ_H81 = "Gen 6:22";
+NOAH_QUIZ_A81A = "True"; // Correct
+NOAH_QUIZ_A81B = "False"; // Wrong
+
+NOAH_QUIZ_Q82 = "After Noah, with whom did God\nmake His next covenant?";
+NOAH_QUIZ_H82 = "Gen 15";
+NOAH_QUIZ_A82A = "Abraham"; // Correct
+NOAH_QUIZ_A82B = "David"; // Wrong
+NOAH_QUIZ_A82C = "Moses"; // Wrong
+
+NOAH_QUIZ_Q83 = "What kind of covenant did God\nmake with Noah?";
+NOAH_QUIZ_H83 = "Gen 9:8-17";
+NOAH_QUIZ_A83A = "conditional"; // Wrong
+NOAH_QUIZ_A83B = "unconditional"; // Correct
+NOAH_QUIZ_A83C = "temporary"; // Wrong
+
+NOAH_QUIZ_Q84 = "People did not eat vegetables\nbefore the flood.";
+NOAH_QUIZ_H84 = "Gen 9:3";
+NOAH_QUIZ_A84A = "True"; // Wrong
+NOAH_QUIZ_A84B = "False"; // Correct
+
+NOAH_QUIZ_Q85 = "In the covenant, God said that\nseedtime and harvest, cold and\nheat, summer and winter, and\nwhat else would not cease?";
+NOAH_QUIZ_H85 = "Gen 8:22";
+NOAH_QUIZ_A85A = "day and night"; // Correct
+NOAH_QUIZ_A85B = "living and dying"; // Wrong
+NOAH_QUIZ_A85C = "land and seas"; // Wrong
+
+NOAH_QUIZ_Q86 = "God told Noah to make windows\nfor all of the animals.";
+NOAH_QUIZ_H86 = "Gen 6:16";
+NOAH_QUIZ_A86A = "True"; // Wrong
+NOAH_QUIZ_A86B = "False"; // Correct
+
+NOAH_QUIZ_Q87 = "Rainbows existed before the\nflood.";
+NOAH_QUIZ_H87 = "Gen 9:12-17";
+NOAH_QUIZ_A87A = "True"; // Wrong
+NOAH_QUIZ_A87B = "False"; // Correct
+
+NOAH_QUIZ_Q88 = "About how long is a cubit?";
+NOAH_QUIZ_H88 = "No hint";
+NOAH_QUIZ_A88A = "10 inches"; // Wrong
+NOAH_QUIZ_A88B = "18 inches"; // Correct
+NOAH_QUIZ_A88C = "3 feet"; // Wrong
+
+NOAH_QUIZ_Q89 = "It took Noah 40 days to find\ntwo of every animal to put\ninside the Ark.";
+NOAH_QUIZ_H89 = "Gen 7:8-9";
+NOAH_QUIZ_A89A = "True"; // Wrong
+NOAH_QUIZ_A89B = "False"; // Correct
+
+NOAH_QUIZ_Q90 = "On what day of the month did\nNoah look out of the Ark and\nsee dry land?";
+NOAH_QUIZ_H90 = "Gen 8:13";
+NOAH_QUIZ_A90A = "the first day"; // Correct
+NOAH_QUIZ_A90B = "the third day"; // Wrong
+NOAH_QUIZ_A90C = "the last day"; // Wrong
+
+NOAH_QUIZ_Q91 = "In Noah's curse he said\nCanaan would be a slave\nto his brethren?";
+NOAH_QUIZ_H91 = "Gen 9:25";
+NOAH_QUIZ_A91A = "True"; // Correct
+NOAH_QUIZ_A91B = "False"; // Wrong
+
+NOAH_QUIZ_Q92 = "How many years did Noah\nlive after the flood?";
+NOAH_QUIZ_H92 = "Gen 9:28";
+NOAH_QUIZ_A92A = "200"; // Wrong
+NOAH_QUIZ_A92B = "350"; // Correct
+NOAH_QUIZ_A92C = "400"; // Wrong
+
+NOAH_QUIZ_Q93 = "Which of Noah's sons was\na tattle-tale?";
+NOAH_QUIZ_H93 = "Gen 9:22";
+NOAH_QUIZ_A93A = "Ham"; // Correct
+NOAH_QUIZ_A93B = "Shem "; // Wrong
+NOAH_QUIZ_A93C = "Japheth"; // Wrong
+
+NOAH_QUIZ_Q94 = "What did Noah plant after\nthe flood?";
+NOAH_QUIZ_H94 = "Gen 9:20";
+NOAH_QUIZ_A94A = "an orchard"; // Wrong
+NOAH_QUIZ_A94B = "a vineyard"; // Correct
+NOAH_QUIZ_A94C = "tomatoes"; // Wrong
+
+NOAH_QUIZ_Q95 = "How did God communicate\nto Noah?";
+NOAH_QUIZ_H95 = "Gen 6:13";
+NOAH_QUIZ_A95A = "burning bush"; // Wrong
+NOAH_QUIZ_A95B = "spoke directly"; // Correct
+NOAH_QUIZ_A95C = "sent an angel"; // Wrong
+
+NOAH_QUIZ_Q96 = "The Ark was built with\nsails so God could move it.";
+NOAH_QUIZ_H96 = "No hint";
+NOAH_QUIZ_A96A = "True"; // Wrong
+NOAH_QUIZ_A96B = "False"; // Correct
+
+NOAH_QUIZ_Q97 = "A male and female of each\nanimal was brought on to\nthe Ark.";
+NOAH_QUIZ_H97 = "Gen 6:19";
+NOAH_QUIZ_A97A = "True"; // Correct
+NOAH_QUIZ_A97B = "False"; // Wrong
+
+NOAH_QUIZ_Q98 = "How many times did Noah\nsend the dove out of the\nArk?";
+NOAH_QUIZ_H98 = "Gen 8:8-12";
+NOAH_QUIZ_A98A = "2"; // Wrong
+NOAH_QUIZ_A98B = "3"; // Correct
+NOAH_QUIZ_A98C = "4"; // Wrong
+
+NOAH_QUIZ_Q99 = "How old was Lamech when\nhe had Noah?";
+NOAH_QUIZ_H99 = "Gen 5:28";
+NOAH_QUIZ_A99A = "135"; // Wrong
+NOAH_QUIZ_A99B = "182"; // Correct
+NOAH_QUIZ_A99C = "199"; // Wrong
+

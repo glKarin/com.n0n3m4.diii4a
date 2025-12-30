@@ -1,0 +1,131 @@
+actor FakeHitler : WolfensteinMonster 18
+{
+	points 2000
+	health 200, 300, 400, 500
+	speed 1, 3
+	missilefrequency 0.01
+	deathsound "fake/death"
+	seesound "fake/sight"
+	+AMBUSH
+	states
+	{
+		Spawn:
+			FAKE A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			FAKE A 5 NOP A_Chase("*", "*", CHF_BACKOFF)
+			FAKE A 1.5
+			FAKE B 4 NOP A_Chase("*", "*", CHF_BACKOFF)
+			FAKE C 5 NOP A_Chase("*", "*", CHF_BACKOFF)
+			FAKE C 1.5
+			FAKE D 4 NOP A_Chase("*", "*", CHF_BACKOFF)
+			loop
+		Missile:
+			FAKE E 4 bright A_FaceTarget
+			FAKE EEEEEEEE 4 bright A_CustomMissile("FireBall")
+			goto See
+		Death:
+			FAKE F 5 A_Fall
+			FAKE G 5 A_Scream
+			FAKE HIJ 5
+			FAKE K -1
+			stop
+	}
+}
+
+actor FireBall
+{
+	// Due to a bug in the original code, the projectile movement was handled
+	// by the action function instead of the thinker function.  Because of this
+	// the speed of the fireball was framerate dependent.  On fast systems it
+	// would slow down to 1.5.
+	radius 11
+	speed 9
+	damage (random[MissileDamage](0, 31))
+	seesound "fake/attack"
+	PROJECTILE
+	states
+	{
+		Spawn:
+			// When spawning a new projectile Wolf3D set ticcount to 1 for first frame
+			FIRE A .5 bright
+		Loop:
+			FIRE BA 3 bright
+			loop
+	}
+}
+
+actor MechaHitler : WolfensteinMonster 19
+{
+	points 5000
+	health 850, 950, 1050, 1200
+	speed 1, 3
+	attacksound "hitler/attack"
+	deathsound "hitler/mechadeath"
+	seesound "hitler/sight"
+	+AMBUSH
+	states
+	{
+		Spawn:
+			MECH A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			MECH A 5 A_PlaySound("hitler/active") A_Chase
+			MECH A 3
+			MECH B 4 NOP A_Chase
+			MECH C 5 A_PlaySound("hitler/active") A_Chase
+			MECH C 3
+			MECH D 4 NOP A_Chase
+			loop
+		Missile:
+			MECH E 15 A_FaceTarget
+			MECH F 5 bright A_FaceTarget
+			MECH GFGF 5 bright A_WolfAttack
+			MECH F 0 bright A_WolfAttack
+			goto See
+		Death:
+			MECH H 5 A_Fall
+			MECH I 5 A_Scream
+			MECH J 5
+			MECH K -1 A_SpawnItemEx("Hitler", 0, 0, 0, 0, 0, 0, 0, SXF_TRANSFERPOINTERS)
+			stop
+	}
+}
+
+actor Hitler : WolfensteinMonster
+{
+	points 5000
+	health 500, 700, 800, 900
+	speed 1, 5
+	attacksound "hitler/attack"
+	deathsound "hitler/death"
+	seesound "hitler/sight"
+	+AMBUSH
+	states
+	{
+		Spawn:
+		See:
+			HTLR A 3 NOP A_Chase
+			HTLR A 2
+			HTLR B 1 NOP A_Chase
+			HTLR C 3 NOP A_Chase
+			HTLR C 2
+			HTLR D 1 NOP A_Chase
+			loop
+		Missile:
+			HTLR E 15 A_FaceTarget
+			HTLR F 5 bright A_FaceTarget
+			HTLR GFGF 5 bright A_WolfAttack
+			HTLR F 0 bright A_WolfAttack
+			goto See
+		Death:
+			HTLR A .5 A_Fall
+			HTLR A 70 A_Scream
+			HTLR H 5
+			HTLR I 5 A_PlaySound("misc/slurpie") // TODO: Full volume with attenuation
+			HTLR JKLMN 5
+			HTLR O 10
+			HTLR O -1 A_BossDeath
+			stop
+	}
+}

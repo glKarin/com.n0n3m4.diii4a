@@ -1,0 +1,217 @@
+actor ArkPuddle 158
+{
+	states
+	{
+		Spawn:
+			WTR3 A -1
+			stop
+	}
+}
+
+actor WaterBucket 159
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			WTBK A -1
+			stop
+	}
+}
+
+actor TableWithCandle 160
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			CTBL A -1
+			stop
+	}
+}
+
+actor WoodenBarrel 161
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			WBAR A -1
+			stop
+	}
+}
+
+actor ArkScraps 162
+{
+	states
+	{
+		Spawn:
+			SCRP A -1
+			stop
+	}
+}
+
+actor FeedBucket 164
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			FDBK A -1
+			stop
+	}
+}
+
+actor ColumnWithCandles 165
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			CCOL A -1 bright
+			stop
+	}
+}
+
+actor ThinColumn 166
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			NCOL A -1
+			stop
+	}
+}
+
+actor BirdCage 167
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			BCAG A -1
+			stop
+	}
+}
+
+actor WaterPitcher 168
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			WPTC A -1
+			stop
+	}
+}
+
+actor ArkPuddleWithScraps 169
+{
+	states
+	{
+		Spawn:
+			WSCR A -1
+			stop
+	}
+}
+
+actor ArkOverheadPost 170
+{
+	states
+	{
+		Spawn:
+			OVRP A -1
+			stop
+	}
+}
+
+actor ArkChandelier 171
+{
+	states
+	{
+		Spawn:
+			CHN3 A -1 bright
+			stop
+	}
+}
+
+actor ArkWaterTrough 172
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			WTRH A -1
+			stop
+	}
+}
+
+actor CandlePole 173
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			CPOL A -1 bright
+			stop
+	}
+}
+
+actor ArkMetalCage 188
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			MCAG A -1
+			stop
+	}
+}
+
+actor PlainColumn 189
+{
+	radius 32
+	overheadicon "TILE8:7C"
+	+PLOTONAUTOMAP
+	+SOLID
+	states
+	{
+		Spawn:
+			PCOL A -1
+			stop
+	}
+}

@@ -712,6 +712,31 @@ public class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
+    public void ExtractECWolfResource()
+    {
+        Q3EGameConstants.PatchResource resource;
+        String versionCheckFile;
+
+        versionCheckFile = "idtech4amm.version";
+        resource = Q3EGameConstants.PatchResource.ECWOLF_RESOURCE;
+
+        Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
+        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_WOLF3D, versionCheckFile);
+        final String version = Q3EGameConstants.WOLF3D_VERSION;
+        String name = Q3ELang.tr(m_context, R.string.ecwolf_builtin_resource);
+
+        boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
+        if(manager.Fetch(resource, overwrite) != null)
+        {
+            if (overwrite)
+            {
+                DumpExtractResourceVersion(versionFile, version, name);
+            }
+        }
+        else
+            ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
+    }
+
     public void ExtractSourceEngineResource()
     {
         Q3EGameConstants.PatchResource resource;
@@ -737,6 +762,7 @@ public class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
+    // KARIN_NEW_GAME_BOOKMARK: add patch resource extract
     public void ExtractGameResource()
     {
         if(Q3EUtils.q3ei.IsTDMTech()) // if game is TDM, extract glsl shader
@@ -751,6 +777,8 @@ public class Q3EGameHelper
             ExtractSourceEngineResource();
         else if(Q3EUtils.q3ei.isETW)
             ExtractETWResource();
+        else if(Q3EUtils.q3ei.isWolf3D)
+            ExtractECWolfResource();
     }
 
     private int GetMSAA()

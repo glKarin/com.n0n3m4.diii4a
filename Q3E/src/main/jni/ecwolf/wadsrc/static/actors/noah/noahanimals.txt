@@ -1,0 +1,594 @@
+// Noah's ark monsters
+// Yes, only the morphed burt has different health on different skill levels
+
+actor AnimalSleeping
+{
+	/* Fun fact: This is not a separate actor in vanilla. During rendering it
+	 * checked if the actor had 0 health. If so it ensured the objclass was a
+	 * monster as well. Then we used a 8-bit 2.6 counter to determine the
+	 * frame in objtype.
+	 * 
+	 * The upper two bits were the sprite (0 = no sprite), the lower 6 was the
+	 * time the sprite was on screen *3.
+	 */
+	states
+	{
+		Spawn:
+			TNT1 A 10.5
+			ZZZS ABC 10.5
+			loop
+	}
+}
+
+actor ArkSheep : WolfensteinMonster 195
+{
+	points 100
+	health 6
+	speed 1, 3
+	sighttime 1, 4
+	dropitem "Feed", 256, 5
+	attacksound "sheep/attack"
+	deathsound "sheep/death"
+	seesound "sheep/sight"
+	+DONTRIP
+	states
+	{
+		Spawn:
+			SHEP A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		Path:
+			SHEP A 10 NOP A_Chase
+			SHEP A 2.5
+			SHEP B 7.5 NOP A_Chase
+			SHEP C 10 NOP A_Chase
+			SHEP C 2.5
+			SHEP D 7.5 NOP A_Chase
+			loop
+		See:
+			SHEP A 5 NOP A_Chase
+			SHEP A 1.5
+			SHEP B 4 NOP A_Chase
+			SHEP C 5 NOP A_Chase
+			SHEP C 1.5
+			SHEP D 4 NOP A_Chase
+			loop
+		Missile:
+			SHEP EF 10 A_FaceTarget
+			SHEP G 10 A_WolfAttack
+			goto See
+		Pain:
+			SHEP H 5
+			goto See
+		Death:
+			SHEP H 0 A_ChangeFlag("DONTRIP", 0)
+			SHEP H 0 A_Fall
+			SHEP H 7.5 A_SpawnItem("AnimalSleeping")
+			SHEP I 7.5 A_Scream
+			SHEP J 7.5
+		Sleep:
+			SHEP KL 27.5
+			loop
+	}
+}
+
+actor ArkOstrich : WolfensteinMonster 196
+{
+	points 400
+	health 12
+	speed 1, 5
+	sighttime 2
+	dropitem "Feed", 256, 5
+	attacksound "ostrich/attack"
+	deathsound "ostrich/death"
+	seesound "ostrich/sight"
+	+DONTRIP
+	states
+	{
+		Spawn:
+			OSTR A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		Path:
+			OSTR A 10 NOP A_Chase
+			OSTR A 2.5
+			OSTR B 7.5 NOP A_Chase
+			OSTR C 10 NOP A_Chase
+			OSTR C 2.5
+			OSTR D 7.5 NOP A_Chase
+			loop
+		See:
+			OSTR A 5 NOP A_Chase
+			OSTR A 1.5
+			OSTR B 4 NOP A_Chase
+			OSTR C 5 NOP A_Chase
+			OSTR C 1.5
+			OSTR D 4 NOP A_Chase
+			loop
+		Missile:
+			OSTR E 3 A_FaceTarget
+			OSTR F 10 A_FaceTarget
+			OSTR G 5 A_WolfAttack
+			goto See
+		Pain:
+			OSTR H 5
+			goto See
+		Death:
+			OSTR H 0 A_ChangeFlag("DONTRIP", 0)
+			OSTR H 0 A_Fall
+			OSTR H 5.5 A_SpawnItem("AnimalSleeping")
+			OSTR I 5.5 A_Scream
+			OSTR J 5.5
+		Sleep:
+			OSTR KL 27.5
+			loop
+	}
+}
+
+actor ArkAntelope : WolfensteinMonster 197
+{
+	points 500
+	health 25
+	speed 1, 4
+	sighttime 1, 6
+	dropitem "LargeFeedLauncher"
+	dropitem "Feed", 256, 5
+	attacksound "antelope/attack"
+	deathsound "antelope/death"
+	seesound "antelope/sight"
+	+DONTRIP
+	+DROPBASEDONTARGET
+	states
+	{
+		Spawn:
+			ANTL A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		Path:
+			ANTL A 10 NOP A_Chase
+			ANTL A 2.5
+			ANTL B 7.5 NOP A_Chase
+			ANTL C 10 NOP A_Chase
+			ANTL C 2.5
+			ANTL D 7.5 NOP A_Chase
+			loop
+		See:
+			ANTL A 5 NOP A_Chase
+			ANTL A 1.5
+			ANTL B 4 NOP A_Chase
+			ANTL C 5 NOP A_Chase
+			ANTL C 1.5
+			ANTL D 4 NOP A_Chase
+			loop
+		Missile:
+			ANTL EF 10 A_FaceTarget
+			ANTL G 5 A_WolfAttack(0, "*", 0.667)
+			ANTL F 5 A_FaceTarget
+			ANTL G 5 A_WolfAttack(0, "*", 0.667)
+			ANTL F 5 A_FaceTarget
+			ANTL G 5 A_WolfAttack(0, "*", 0.667)
+			ANTL F 5 A_FaceTarget
+			ANTL G 5 A_WolfAttack(0, "*", 0.667)
+			goto See
+		Pain:
+			ANTL H 5
+			goto See
+		Death:
+			ANTL H 0 A_ChangeFlag("DONTRIP", 0)
+			ANTL H 0 A_Fall
+			ANTL H 7.5 A_SpawnItem("AnimalSleeping")
+			ANTL I 7.5 A_Scream
+			ANTL J 7.5
+		Sleep:
+			ANTL KL 27.5
+			loop
+	}
+}
+
+actor ArkGoat : WolfensteinMonster 198
+{
+	points 200
+	health 1
+	speed 2.93, 5.859
+	sighttime 1, 8
+	attacksound "goat/attack"
+	deathsound "goat/death"
+	seesound "goat/sight"
+	-CANUSEWALLS
+	+DONTRIP
+	states
+	{
+		Spawn:
+			GOAT A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		Path:
+			GOAT A 10 NOP A_Chase
+			GOAT A 2.5
+			GOAT B 7.5 NOP A_Chase
+			GOAT C 10 NOP A_Chase
+			GOAT C 2.5
+			GOAT D 7.5 NOP A_Chase
+			loop
+		See:
+			GOAT A 5 NOP A_Chase
+			GOAT A 1.5
+			GOAT B 4 NOP A_Chase
+			GOAT C 5 NOP A_Chase
+			GOAT C 1.5
+			GOAT D 4 NOP A_Chase
+			loop
+		Melee:
+			GOAT EFG 5 A_FaceTarget
+			GOAT H 10 A_MeleeAttack(random(1,15))
+			GOAT H 0 A_MeleeAttack(random(1,15))
+			goto See
+		Death:
+			GOAT I 0 A_ChangeFlag("DONTRIP", 0)
+			GOAT I 0 A_Fall
+			GOAT I 7.5 A_SpawnItem("AnimalSleeping")
+			GOAT J 7.5 A_Scream
+		Sleep:
+			GOAT KL 27.5
+			loop
+	}
+}
+
+actor ArkOx : WolfensteinMonster 199
+{
+	points 700
+	health 18
+	speed 1, 3
+	sighttime 1, 6
+	dropitem "Feed", 256, 5
+	attacksound "oxen/attack"
+	deathsound "oxen/death"
+	seesound "oxen/sight"
+	+DONTRIP
+	states
+	{
+		Spawn:
+			OXEN A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		Path:
+			OXEN A 10 NOP A_Chase
+			OXEN A 2.5
+			OXEN B 7.5 NOP A_Chase
+			OXEN C 10 NOP A_Chase
+			OXEN C 2.5
+			OXEN D 7.5 NOP A_Chase
+			loop
+		See:
+			OXEN A 5 NOP A_Chase
+			OXEN A 1.5
+			OXEN B 4 NOP A_Chase
+			OXEN C 5 NOP A_Chase
+			OXEN C 1.5
+			OXEN D 4 NOP A_Chase
+			loop
+		Missile:
+			OXEN E 3 A_FaceTarget
+			OXEN F 15 A_WolfAttack
+			OXEN G 10 A_WolfAttack
+			goto See
+		Pain:
+			OXEN H 5
+			goto See
+		Death:
+			OXEN H 0 A_ChangeFlag("DONTRIP", 0)
+			OXEN H 0 A_Fall
+			OXEN H 4.5 A_SpawnItem("AnimalSleeping")
+			OXEN I 4.5 A_Scream
+			OXEN J 4.5
+		Sleep:
+			OXEN KL 27.5
+			loop
+	}
+}
+
+actor CarlTheCamel : WolfensteinMonster 200
+{
+	points 5000
+	health 150
+	speed 1, 3
+	sighttime 1
+	dropitem "ArkGoldKeyRing"
+	attacksound "carl/attack"
+	deathsound "carl/death"
+	seesound "carl/sight"
+	+DONTRIP
+	+AMBUSH
+	states
+	{
+		Spawn:
+			CARL A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		See:
+			CARL A 5 NOP A_Chase
+			CARL A 1.5
+			CARL B 4 NOP A_Chase
+			CARL C 5 NOP A_Chase
+			CARL C 1.5
+			CARL D 4 NOP A_Chase
+			loop
+		Missile:
+			CARL E 15 A_FaceTarget
+			CARL FGFGFGE 5 A_WolfAttack(0, "*", 0.667)
+			goto See
+		Death:
+			CARL H 0 A_ChangeFlag("DONTRIP", 0)
+			CARL H 0 A_Fall
+			CARL H 7.5 A_SpawnItem("AnimalSleeping")
+			CARL I 7.5 A_Scream
+		Sleep:
+			CARL JK 27.5
+			loop
+	}
+}
+
+actor Coconut
+{
+	radius 11
+	speed 16
+	damage (random[MissileDamage](30, 61))
+	seesound "coconut/fire"
+	deathsound "coconut/hit"
+	PROJECTILE
+	states
+	{
+		Spawn:
+			CNUT A 8
+			loop
+		Death:
+			CNUT B 9
+			stop
+	}
+}
+actor MelvinCoconut : Coconut
+{
+	damage (random[MissileDamage](20, 51))
+}
+
+actor MelvinTheMonkey : WolfensteinMonster 201
+{
+	points 5000
+	health 350
+	speed 1, 3
+	sighttime 1
+	dropitem "ArkGoldKeyRing"
+	deathsound "melvin/death"
+	seesound "melvin/sight"
+	+DONTRIP
+	+AMBUSH
+	states
+	{
+		Spawn:
+			MLVN A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		See:
+			MLVN A 5 NOP A_Chase("*", "*", CHF_BACKOFF)
+			MLVN A 1.5
+			MLVN B 4 NOP A_Chase("*", "*", CHF_BACKOFF)
+			MLVN C 5 NOP A_Chase("*", "*", CHF_BACKOFF)
+			MLVN C 1.5
+			MLVN D 4 NOP A_Chase("*", "*", CHF_BACKOFF)
+			loop
+		Missile:
+			MLVN EF 10 A_FaceTarget
+			MLVN F 0 A_CustomMissile("MelvinCoconut")
+			goto See
+		Death:
+			MLVN A 0 A_ChangeFlag("DONTRIP", 0)
+			MLVN A 0 A_Fall
+			MLVN A 5 A_SpawnItem("AnimalSleeping")
+			MLVN G 5 A_Scream
+			MLVN H 5
+		Sleep:
+			MLVN IJ 27.5
+			loop
+	}
+}
+
+actor GinnyTheGiraffe : WolfensteinMonster 202
+{
+	points 5000
+	health 300
+	speed 1, 3
+	sighttime 1
+	dropitem "ArkGoldKeyRing"
+	attacksound "ginny/attack"
+	deathsound "ginny/death"
+	seesound "ginny/sight"
+	+DONTRIP
+	+AMBUSH
+	states
+	{
+		Spawn:
+			GINY A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		See:
+			GINY A 5 NOP A_Chase
+			GINY A 1.5
+			GINY B 4 NOP A_Chase
+			GINY C 5 NOP A_Chase
+			GINY C 1.5
+			GINY D 4 NOP A_Chase
+			loop
+		Missile:
+			GINY E 15 A_FaceTarget
+			GINY FGFGFGE 5 A_WolfAttack
+			goto See
+		Death:
+			GINY H 0 A_ChangeFlag("DONTRIP", 0)
+			GINY H 0 A_Fall
+			GINY H 7.5 A_SpawnItem("AnimalSleeping")
+			GINY I 7.5 A_Scream
+		Sleep:
+			GINY JK 27.5
+			loop
+	}
+}
+
+actor KerryTheKangaroo : WolfensteinMonster 203
+{
+	points 5000
+	health 400
+	speed 1, 3
+	sighttime 1
+	dropitem "ArkGoldKeyRing"
+	deathsound "kerry/death"
+	seesound "kerry/sight"
+	+DONTRIP
+	+AMBUSH
+	states
+	{
+		Spawn:
+			KERY A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		See:
+			KERY A 5 NOP A_Chase("*", "*", CHF_BACKOFF)
+			KERY A 1.5
+			KERY B 4 NOP A_Chase("*", "*", CHF_BACKOFF)
+			KERY C 5 NOP A_Chase("*", "*", CHF_BACKOFF)
+			KERY C 1.5
+			KERY D 4 NOP A_Chase("*", "*", CHF_BACKOFF)
+			loop
+		Missile:
+			KERY EFGH 10 A_FaceTarget
+			KERY H 0 A_CustomMissile("Coconut")
+			goto See
+		Death:
+			KERY A 0 A_ChangeFlag("DONTRIP", 0)
+			KERY A 0 A_Fall
+			KERY A 0.5 A_SpawnItem("AnimalSleeping")
+			KERY A 5 A_Scream
+			KERY IJ 5
+		Sleep:
+			KERY KL 27.5
+			loop
+	}
+}
+
+actor ErnieTheElephant : WolfensteinMonster 204
+{
+	points 5000
+	health 450
+	speed 1, 3
+	sighttime 1
+	dropitem "ArkGoldKeyRing"
+	attacksound "ernie/attack"
+	deathsound "ernie/death"
+	seesound "ernie/sight"
+	+DONTRIP
+	+AMBUSH
+	states
+	{
+		Spawn:
+			ERNI A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		See:
+			ERNI A 5 NOP A_Chase("*", "*", CHF_BACKOFF)
+			ERNI A 1.5
+			ERNI B 4 NOP A_Chase("*", "*", CHF_BACKOFF)
+			ERNI C 5 NOP A_Chase("*", "*", CHF_BACKOFF)
+			ERNI C 1.5
+			ERNI D 4 NOP A_Chase("*", "*", CHF_BACKOFF)
+			loop
+		Missile:
+			ERNI E 15 A_FaceTarget
+			ERNI F 5 A_FaceTarget
+			ERNI G 5 A_CustomMissile("Coconut")
+			ERNI HGH 5 A_WolfAttack
+			ERNI H 0 A_WolfAttack
+			goto See
+		Death:
+			ERNI A 0 A_ChangeFlag("DONTRIP", 0)
+			ERNI A 0 A_Fall
+			ERNI A 0.5 A_SpawnItem("AnimalSleeping")
+			ERNI A 5 A_Scream
+			ERNI IJ 5
+		Sleep:
+			ERNI KL 27.5
+			loop
+	}
+}
+
+actor DisguisedBurt : WolfensteinMonster 205
+{
+	points 5000
+	health 500
+	speed 1, 3
+	sighttime 1
+	attacksound "burt/attack"
+	deathsound "burt/death"
+	seesound "burt/sight"
+	+DONTRIP
+	+AMBUSH
+	states
+	{
+		Spawn:
+			BURT A -1 NOP A_Look(0,0,0,0,360)
+			stop
+		See:
+			BURT A 5 A_PlaySound("burt/active") A_Chase
+			BURT A 3
+			BURT B 4 NOP A_Chase
+			BURT C 5 A_PlaySound("burt/active") A_Chase
+			BURT C 3
+			BURT D 4 NOP A_Chase
+			loop
+		Missile:
+			BURT E 15 A_FaceTarget
+			BURT F 5 A_FaceTarget
+			BURT GFGF 5 A_WolfAttack
+			BURT F 0 A_WolfAttack
+			goto See
+		Death:
+			BURT H 0 A_ChangeFlag("DONTRIP", 0)
+			BURT H 0 A_Fall
+			BURT H 5 A_SpawnItem("AnimalSleeping") // Your guess is as good as mine :)
+			BURT I 5 A_Scream
+			BURT J 5
+			BURT K -1 A_SpawnItemEx("BurtTheBear", 0, 0, 0, 0, 0, 0, 0, SXF_TRANSFERPOINTERS)
+			stop
+	}
+}
+
+actor BurtTheBear : WolfensteinMonster
+{
+	points 5000
+	health 500, 700, 800, 900
+	speed 1, 5
+	sighttime 1
+	attacksound "burt/attack"
+	deathsound "burt/death"
+	+DONTRIP
+	+AMBUSH
+	states
+	{
+		Spawn:
+			BURT L -1 NOP A_Look(0,0,0,0,360)
+			stop
+		See:
+			BURT L 3 NOP A_Chase
+			BURT L 2
+			BURT M 1 NOP A_Chase
+			BURT N 3 NOP A_Chase
+			BURT N 2
+			BURT O 1 NOP A_Chase
+			loop
+		Missile:
+			BURT P 15 A_FaceTarget
+			BURT Q 5 A_FaceTarget
+			BURT RQRQ 5 A_WolfAttack
+			BURT Q 0 A_WolfAttack
+			goto See
+		Death:
+			BURT L 0 A_ChangeFlag("DONTRIP", 0)
+			BURT L 0 A_Fall
+			BURT L 0.5 A_SpawnItem("AnimalSleeping")
+			BURT L 7.5 A_Scream
+			BURT ST 7.5
+			BURT U 27.5
+			BURT V 27.5 A_BossDeath
+		Sleep:
+			BURT UV 27.5
+			loop
+	}
+}

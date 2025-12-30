@@ -8,7 +8,7 @@ import java.util.List;
 
 public enum GameResourceUrl
 {
-    // KARIN_NEW_GAME_BOOKMARK
+    // KARIN_NEW_GAME_BOOKMARK: add game resource url
 
     // DOOM 3
     DOOM3_BASE(Q3EGameConstants.GAME_DOOM3, "base", "", "https://store.steampowered.com/app/208200/DOOM_3/", 2),
@@ -91,6 +91,8 @@ public enum GameResourceUrl
     URT_BASE(Q3EGameConstants.GAME_URT, "", "", "https://www.urbanterror.info", 1),
 
     MOHAA_BASE(Q3EGameConstants.GAME_MOHAA, "", "", "https://github.com/openmoh/openmohaa", 1),
+
+    WOLF3D_BASE(Q3EGameConstants.GAME_WOLF3D, "", "", "https://store.steampowered.com/app/2270/Wolfenstein_3D/", 2),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

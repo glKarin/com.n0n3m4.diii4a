@@ -1,0 +1,234 @@
+const int CHF_DONTDODGE = 1;
+const int CHF_BACKOFF = 2;
+const int CHF_NOSIGHTCHECK = 4;
+const int CHF_NOPLAYACTIVE = 8;
+
+const int CMF_AIMOFFSET = 1;
+const int CMF_AIMDIRECTION = 2;
+
+const int CPF_USEAMMO = 1;
+const int CPF_ALWAYSPLAYSOUND = 2;
+
+const int CVF_RELATIVE = 1;
+const int CVF_REPLACE = 2;
+
+const int WAF_NORANDOM = 1;
+
+const int GAF_NORANDOM = 1;
+const int GAF_NOAMMO = 2;
+const int GAF_MACDAMAGE = 4;
+
+const int SXF_TRANSFERPOINTERS = 1;
+
+const int ASP_CHASE = 3;
+
+const int XF_HURTSOURCE = 1;
+
+const int WRF_NOBOB = 1;
+const int WRF_NOPRIMARY = 2;
+const int WRF_NOSECONDARY = 4;
+const int WRF_NOFIRE = WRF_NOPRIMARY|WRF_NOSECONDARY;
+const int WRF_NOSWITCH = 8;
+const int WRF_DISABLESWITCH = 0x10;
+const int WRF_ALLOWRELOAD = 0x20;
+const int WRF_ALLOWZOOM = 0x40;
+
+const int ZOOM_INSTANT = 1;
+const int ZOOM_NOSCALETURNING = 2;
+
+const int DF_REVIVE = 1;
+
+actor Actor native
+{
+	damage 0
+	radius 20
+	height 16
+	health 1000
+	sighttime 1
+	speed 0
+	points 0
+	minmissilechance 200
+	missilefrequency 1.0
+	meleerange 44
+	scale 1.0
+	projectilepassheight -1
+
+	native angle_t angle;
+	native int health;
+
+	action native A_ActiveSound(int chance=256);
+	action native A_AlertMonsters();
+	action native A_BossDeath();
+	action native A_CallSpecial(int special, int arg1=0, int arg2=0, int arg3=0, int arg4=0, int arg5=0);
+	action native A_ChangeFlag(string flag, bool value);
+	action native A_ChangeVelocity(float x, float y, float z, int flags = 0);
+	action native A_Chase(state melee="*", state ranged="*", int flags = 0);
+	action native A_CustomMissile(string missiletype, float spawnheight = 32, int spawnoffset = 0, float angle = 0, int aimflags = 0);
+	action native A_Dormant(state frame = "See", int flags = 0);
+	action native A_Explode(int damage = 128, int radius = 128, int flags = XF_HURTSOURCE, bool alert = false, int fulldamageradius = 0);
+	action native A_FaceTarget(float max_turn = 0, float max_pitch = 270);
+	action native A_Fall();
+	action native A_GiveExtraMan(int amount = 1);
+	action native A_GiveInventory(string type, int amount = 0);
+	action native A_Jump(int chance, state frame, ...);
+	action native A_JumpIf(bool expression, state frame);
+	action native A_JumpIfCloser(float distance, state frame);
+	action native A_JumpIfInventory(string type, int amount, state frame);
+	action native A_Look(int flags = 0, float minseedist = 0, float maxseedist = 0, float maxheardist = 0, float fov = 180, state frame = "*");
+	action native A_LookEx(int flags = 0, float minseedist = 0, float maxseedist = 0, float maxheardist = 0, float fov = 180, state frame = "*"); // Alias
+	action native A_MeleeAttack(int damage, float accuracy = 0.6275, string hitsound = "", string misssound = "*");
+	action native A_MonsterRefire(int chance, state abort);
+	action native A_Pain();
+	action native A_PlaySound(string soundname);
+	action native A_ScaleVelocity(float scale);
+	action native A_Scream();
+	action native A_SetTics(float duration);
+	action native A_SpawnItem(string type, float distance = 0, float zheight = 0);
+	action native A_SpawnItemEx(string type, float xoffset = 0, float yoffset = 0, float zoffset = 0, float xvel = 0, float yvel = 0, float zvel = 0, float angle = 0, int flags = 0, int failchance = 0);
+	action native A_Stop();
+	action native A_TakeInventory(string type, int amount);
+	action native A_Wander();
+	action native A_WolfAttack(int flags = 0, string sound = "*", float snipe = 1.0, int maxdamage = 64, int blocksize = 128, int pointblank = 2, int longrange = 4, float runspeed = 160.0);
+
+	states
+	{
+		Spawn:
+			TNT1 A -1
+			stop
+	}
+}
+
+actor Inventory native
+{
+	inventory.amount 1
+	inventory.maxamount 1
+	inventory.interhubamount 1
+	inventory.pickupsound "misc/i_pkup"
+
+	states
+	{
+		Hide:
+			TNT1 A -1
+			stop
+	}
+}
+
+actor Ammo : Inventory native
+{
+	inventory.pickupsound "misc/ammo_pkup"
+}
+
+actor BackpackItem : Inventory native
+{
+}
+
+actor CustomInventory : Inventory native
+{
+	action native A_Succeed();
+	action native A_WeaponGrin();
+}
+
+actor ExtraLifeItem : Inventory native
+{
+	inventory.amount 1
+	inventory.maxamount 1
+}
+
+actor Health : Inventory native
+{
+	inventory.amount 1
+	inventory.maxamount 0
+	inventory.pickupsound "misc/health_pkup"
+}
+
+actor Key : Inventory native
+{
+	inventory.pickupsound "misc/k_pkup"
+	inventory.interhubamount 0
+}
+
+actor KeyGiver : Inventory native
+{
+	inventory.pickupsound "misc/k_pkup"
+}
+
+actor MapRevealer : Inventory native
+{
+}
+
+actor ScoreItem : Inventory native
+{
+	+COUNTITEM
+	inventory.amount 1
+}
+
+actor Weapon : Inventory native
+{
+	inventory.pickupsound "misc/w_pkup"
+	weapon.ammotype1 "None"
+	weapon.ammogive1 0
+	weapon.ammouse1 0
+	weapon.bobrangex 1.0
+	weapon.bobrangey 1.0
+	weapon.bobspeed 1.0
+	weapon.bobstyle "Normal"
+	weapon.yadjust 0
+
+	action native A_CustomPunch(int damage, bool norandom=false, int flags=0, string pufftype="", float range=0, float lifesteal=0);
+	action native A_FireCustomMissile(string missiletype, float angle=0, bool useammo=true, int spawnoffset=0, int spawnheight=0, bool aim=false, float pitch=0);
+	action native A_GunAttack(int flags = 0, string sound = "*", float snipe = 1.0, int maxdamage = 64, int blocksize = 128, int pointblank = 2, int longrange = 4, int maxrange = 21);
+	action native A_GunFlash(state frame="*");
+	action native A_Light(int level);
+	action native A_Light0();
+	action native A_Light1();
+	action native A_Light2();
+	action native A_Lower();
+	action native A_Raise();
+	action native A_ReFire(state hold="*");
+	action native A_WeaponReady(int flags=0);
+	action native A_ZoomFactor(float zoom, int flags=0);
+}
+
+actor WeaponGiver : Weapon native
+{
+	weapon.ammogive1 -1
+	weapon.ammogive2 -1
+}
+
+actor PlayerPawn native
+{
+	painchance 255
+	sighttime 0
+	speed 1
+	player.viewheight 41
+	player.forwardmove 1, 1
+	player.sidemove 1, 1
+	player.maxhealth 100
+	player.movebob 1.0
+	player.damagescreencolor "FF 00 00"
+	+SOLID
+	+SHOOTABLE
+	+PICKUP
+	states
+	{
+		// ZDoom doesn't do this, but since invisible player classes are likely here, we need this state.
+		Death:
+			TNT1 A -1 A_Fall
+			stop
+	}
+}
+
+actor RandomSpawner native
+{
+}
+
+actor Unknown
+{
+	radius 32
+	states
+	{
+		Spawn:
+			UNKN A -1
+			stop
+	}
+}

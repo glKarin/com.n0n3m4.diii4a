@@ -38,6 +38,7 @@ OPTION(GAME_JK                      "Build Jedi Knight"                         
 OPTION(GAME_SERIOUSSAM              "Build Serious Sam"                             ON)
 OPTION(GAME_URT                     "Build Urbant Error"                            ON)
 OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"          ON)
+OPTION(GAME_WOLF3D                  "Build Wolfenstein 3D"                          ON)
 # Not in F-Droid
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_SOURCE                  "Build Source"                                  ON)
@@ -75,7 +76,7 @@ set(DIII4A_DEPEND_COMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
 add_subdirectory ( common/bt )
 
 # using Q3E_SDL2
-#if(GAME_XASH3D OR GAME_SOURCE)
+#if(GAME_XASH3D OR GAME_SOURCE OR GAME_WOLF3D)
 set(Q3E_SDL TRUE)
 #endif()
 
@@ -122,7 +123,7 @@ if(NOT GAME_DOOM3 AND DIII4A_BUILD_OPENAL)
     add_subdirectory(doom3/neo/externlibs/openal-soft)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SOURCE)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SOURCE OR GAME_WOLF3D)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory ( deplibs ) # common depend libraries
 endif()
@@ -230,6 +231,11 @@ endif()
 if(GAME_OPENMOHAA) # 0.82.1 | Aug 3, 2025 | https://github.com/openmoh/openmohaa/commit/a72bc153db1e6ced6e30431b5217e1a53576712c | Fix configstring replacement causing the model to be referenced twice on base MOHAA clients
     message(STATUS "Build Medal of Honor: Allied Assault")
     add_subdirectory ( openmohaa ) # Medal of Honor: Allied Assault
+endif()
+
+if(GAME_WOLF3D) #  | Apr 16, 2025 | https://github.com/libretro/ecwolf/commit/c57ad894d5942740b4896511e8554c9a776b04a6 | Fix emscripten build
+    message(STATUS "Build Wolfenstein 3D")
+    add_subdirectory ( ecwolf ) # Wolfenstein 3D
 endif()
 
 

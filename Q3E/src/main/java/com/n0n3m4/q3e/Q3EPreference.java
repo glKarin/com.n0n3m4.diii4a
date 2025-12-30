@@ -50,6 +50,7 @@ public final class Q3EPreference
     public static final String pref_harm_mapBack                        = "q3e_harm_map_back"; //k
     public static final String pref_harm_game                           = "q3e_harm_game"; //k
 
+    // KARIN_NEW_GAME_BOOKMARK: add preference keys
     // DOOM 3
     public static final String pref_params                        = "q3e_params";
     public static final String pref_harm_fs_game                  = "q3e_harm_fs_game"; //k
@@ -241,6 +242,15 @@ public final class Q3EPreference
     public static final String pref_harm_openmohaa_command_record = PREF_HARM_MOHAA_PREFIX + "command_record";
     public static final String pref_harm_openmohaa_env            = PREF_HARM_MOHAA_PREFIX + "env";
     public static final String pref_harm_openmohaa_game_mod       = PREF_HARM_MOHAA_PREFIX + "game_mod"; //k
+    // Wolf3D
+    public static final String PREF_HARM_WOLF3D_PREFIX             = "q3e_harm_wolf3d_";
+    public static final String pref_harm_wolf3d_fs_game        = PREF_HARM_WOLF3D_PREFIX + "fs_game"; //k
+    public static final String pref_harm_wolf3d_game_lib       = PREF_HARM_WOLF3D_PREFIX + "game_lib"; //k
+    public static final String pref_harm_wolf3d_user_mod       = PREF_HARM_WOLF3D_PREFIX + "user_mod"; //k
+    public static final String pref_params_wolf3d              = PREF_HARM_WOLF3D_PREFIX + "params"; //k
+    public static final String pref_harm_wolf3d_command_record = PREF_HARM_WOLF3D_PREFIX + "command_record";
+    public static final String pref_harm_wolf3d_env            = PREF_HARM_WOLF3D_PREFIX + "env";
+    public static final String pref_harm_wolf3d_game_mod       = PREF_HARM_WOLF3D_PREFIX + "game_mod"; //k
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k

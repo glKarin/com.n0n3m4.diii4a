@@ -1,0 +1,130 @@
+gameinfo
+{
+	menumusic = "WONDERIN"
+	finalemusic = "CORNER"
+	victorymusic = "URAHERO"
+	finaleflat = "#DCDCDC"
+	intermissionmusic = "ENDLEVEL"
+	titletime = 15
+	menufontcolor_title = "Gold"
+	menufontcolor_label = "DarkGrey"
+	menufontcolor_selection = "Grey"
+	menufontcolor_invalid = "DarkGreen"
+	menufontcolor_invalidselection = "Green"
+	menufontcolor_highlight = "Yellow"
+	menufontcolor_highlightselection = "Gold"
+	highscoresfontcolor = "White"
+	pageindexfontcolor = "DarkYellow"
+	dialogcolor = "White"
+	borderflat = "#004040"
+	advisorycolor = "20 A8 FC"
+	advisorypic = "PG13"
+	playerclasses = "BJPlayer"
+	border = inset, "00 00 00", "00 70 70", "00 84 84"
+	messagecolors = "8C 8C 8C", "D0 D0 D0", "0 0 0"
+	messagefontcolor = "Black"
+	menuwindowcolors = "8C 8C 8C", "D0 D0 D0", "0 0 0", "FC F4 00", "B4 AC 00", "0 0 0"
+	psyched = "FF 00 00", "FF 9D 9D"
+	doorsoundsequence = "DoorNormal"
+	pushwallsoundsequence = "PushwallNormal"
+	gibfactor = 1
+	translator = "xlat/wolf3d.txt"
+	gamecolormap = "COLORMAP"
+	deathtransition = "Fizzle"
+	trackhighscores = true
+}
+
+automap
+{
+	fontcolor = "White"
+	background = "55 55 55"
+	doorcolor = "10 C7 10"
+	floorcolor = "55 55 55"
+	wallcolor = "00 8E 00"
+	yourcolor = "FF 80 00"
+}
+
+skill baby
+{
+	name = "$STR_DADDY"
+	picname = "M_BABY"
+	spawnfilter = 1
+	damagefactor = 0.25
+}
+
+skill easy
+{
+	name = "$STR_HURTME"
+	picname = "M_EASY"
+	spawnfilter = 2
+}
+
+skill normal
+{
+	name = "$STR_BRINGEM"
+	picname = "M_NORMAL"
+	spawnfilter = 3
+}
+
+skill hard
+{
+	name = "$STR_DEATH"
+	picname = "M_HARD"
+	spawnfilter = 4
+}
+
+defaultmap
+{
+	defaultfloor = "#717171"
+	defaultceiling = "#383838"
+	victorynext = "EndTitle"
+}
+
+intermission DemoLoop
+{
+	Fader
+	{
+		Background = TitlePage
+		Time = 15
+		FadeType = FadeIn
+	}
+	Image
+	{
+		Time = TitleTime
+	}
+	Fader
+	{
+		Time = 15
+		FadeType = FadeOut
+	}
+	Fader
+	{
+		Background = "CREDITS", 0, "$GamePalette"
+		Time = 15
+		FadeType = FadeIn
+	}
+	Image
+	{
+		Time = -10
+	}
+	Fader
+	{
+		Time = 15
+		FadeType = FadeOut
+	}
+	Fader
+	{
+		Background = HighScores
+		Time = 15
+		FadeType = FadeIn
+	}
+	Image
+	{
+		Time = -10
+	}
+	Fader
+	{
+		Time = 15
+		FadeType = FadeOut
+	}
+}

@@ -1,0 +1,190 @@
+// Unfortunately it looks like none of the weapons have official names :(
+
+actor HandFeed : WolfWeapon
+{
+	weapon.ammotype1 "Feed"
+	weapon.ammouse1 0
+	weapon.selectionorder 3700
+	attacksound "weapon/handfeed/attack"
+	+WEAPON.NOALERT
+	states
+	{
+		Ready:
+			HNDG A 1 A_WeaponReady
+			loop
+		Fire:
+			HNDG BC 3
+			HNDG D 3 A_CustomPunch(random(0,3), true, CPF_ALWAYSPLAYSOUND) //Damage: US_RndT()&3
+			HNDG E 3
+			// In Noah's Ark weapons automatically refired, but it took at least one tic
+			HNDG A 0.5
+			goto Ready
+	}
+}
+
+actor SmallFeedLauncher : WolfWeapon
+{
+	weapon.ammotype1 "Feed"
+	weapon.selectionorder 1900
+	attacksound "weapon/smallfeedluancher/attack"
+	states
+	{
+		Ready:
+			SFDG A 1 A_WeaponReady
+			loop
+		Fire:
+			SFDG BC 3
+			SFDG D 3 A_GunAttack(GAF_MACDAMAGE|GAF_NORANDOM, "*", 1.0, random(0,0xF))
+			// Oddly S3DNA changes the final frame time to 8 (4 here), but since
+			// the frame is incremented after taking the time it never gets used
+			// except when frames are being dropped.
+			SFDG E 3
+			SFDG A 0.5
+			goto Ready
+	}
+}
+
+actor LargeFeedLauncher : WolfWeapon 181
+{
+	attacksound "weapon/largefeedlauncher/attack"
+	weapon.ammotype1 "Feed"
+	weapon.selectionorder 1300
+	overheadicon "TILE8:7E"
+	+PLOTONAUTOMAP
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			LFDR A -1
+			stop
+		Ready:
+			LFDG A 1 A_WeaponReady
+			loop
+		Fire:
+			LFDG B 3
+		Hold:
+			LFDG C 3
+			LFDG D 3 A_GunAttack(GAF_MACDAMAGE|GAF_NORANDOM, "*", 1.0, random(0,0xF))
+			LFDG E 3 A_ReFire
+			goto Ready
+	}
+}
+
+actor SuperFeeder5000 : WolfWeapon 182
+{
+	attacksound "weapon/superfeeder5000/attack"
+	weapon.ammotype1 "Feed"
+	weapon.selectionorder 700
+	overheadicon "TILE8:7E"
+	+PLOTONAUTOMAP
+	-WEAPON.NOGRIN
+	+WEAPON.ALWAYSGRIN
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			SUPF A -1
+			stop
+		Ready:
+			SPFG A 1 A_WeaponReady
+			loop
+		Fire:
+			SPFG B 3
+		Hold:
+			SPFG C 3
+			SPFG D 3 A_GunAttack(GAF_MACDAMAGE|GAF_NORANDOM, "*", 1.0, random(0,0xF))
+			SPFG D 0 A_GunAttack(GAF_MACDAMAGE|GAF_NORANDOM, "*", 1.0, random(0,0xF))
+			SPFG E 3 A_ReFire
+			goto Ready
+	}
+}
+
+actor Cantaloupe
+{
+	radius 11
+	speed 24
+	damage (random[MissileDamage](1, 16))
+	seesound "cantaloupe/fire"
+	deathsound "cantaloupe/hit"
+	PROJECTILE
+	+RIPPER
+	states
+	{
+		Spawn:
+			CTLP A 1.5
+			loop
+		Death:
+			// The state table has three identical states with a duration of 6
+			// (3 in DECORATE terms), but the code sets the first state to 1
+			// (0.5 in DECORATE terms).
+			CTLP B 6.5
+			stop
+	}
+}
+
+actor CantaloupeFeeder : WolfWeapon 190
+{
+	weapon.ammotype1 "CantaloupeAmmo"
+	weapon.ammogive1 20
+	overheadicon "TILE8:7E"
+	+PLOTONAUTOMAP
+	+INVENTORY.ALWAYSPICKUP
+	+WEAPON.NOAUTOFIRE
+	states
+	{
+		Spawn:
+			CFDR A -1
+			stop
+		Ready:
+			CFDG A 1 A_WeaponReady
+			loop
+		Fire:
+			CFDG BC 3.5
+			CFDG D 3.5 A_FireCustomMissile("Cantaloupe")
+			CFDG E 3.5 A_FireCustomMissile("Cantaloupe")
+			goto Ready
+	}
+}
+
+actor Watermelon
+{
+	radius 11
+	speed 24
+	damage (random[MissileDamage](1, 4)<<4)
+	seesound "watermelon/fire"
+	deathsound "watermelon/hit"
+	PROJECTILE
+	+RIPPER
+	states
+	{
+		Spawn:
+			WMLN A 1.5
+			loop
+		Death:
+			WMLN B 6.5
+			stop
+	}
+}
+
+actor WatermelonFeeder : WolfWeapon 192
+{
+	weapon.ammotype1 "MelonAmmo"
+	weapon.ammogive1 5
+	overheadicon "TILE8:7E"
+	+PLOTONAUTOMAP
+	+INVENTORY.ALWAYSPICKUP
+	+WEAPON.NOAUTOFIRE
+	states
+	{
+		Spawn:
+			MFDR A -1
+			stop
+		Ready:
+			MFDG A 1 A_WeaponReady
+			loop
+		Fire:
+			MFDG BCD 3
+			MFDG E 3 A_FireCustomMissile("Watermelon")
+			goto Ready
+	}
+}

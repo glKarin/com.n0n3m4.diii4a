@@ -1,0 +1,359 @@
+#ifndef FILES_H
+#define FILES_H
+
+#include <stdio.h>
+#include <zlib.h>
+#include "bzlib.h"
+#include "wl_def.h"
+#include "m_swap.h"
+
+class FileReaderBase
+{
+public:
+	virtual ~FileReaderBase() {}
+	virtual long Read (void *buffer, long len) = 0;
+
+	FileReaderBase &operator>> (BYTE &v)
+	{
+		Read (&v, 1);
+		return *this;
+	}
+
+	FileReaderBase &operator>> (SBYTE &v)
+	{
+		Read (&v, 1);
+		return *this;
+	}
+
+	FileReaderBase &operator>> (WORD &v)
+	{
+		Read (&v, 2);
+		v = LittleShort(v);
+		return *this;
+	}
+
+	FileReaderBase &operator>> (SWORD &v)
+	{
+		Read (&v, 2);
+		v = LittleShort(v);
+		return *this;
+	}
+
+	FileReaderBase &operator>> (DWORD &v)
+	{
+		Read (&v, 4);
+		v = LittleLong(v);
+		return *this;
+	}
+
+	FileReaderBase &operator>> (fixed_t &v)
+	{
+		Read (&v, 4);
+		v = LittleLong(v);
+		return *this;
+	}
+
+};
+
+#ifdef LIBRETRO
+struct retro_vfs_wrapped_file_handle;
+#endif
+
+class FileReader : public FileReaderBase
+{
+public:
+	FileReader ();
+	FileReader (const char *filename);
+#ifdef LIBRETRO
+	FileReader (struct retro_vfs_wrapped_file_handle *file);
+	FileReader (struct retro_vfs_wrapped_file_handle *file, long length);
+#else
+	FileReader (FILE *file);
+	FileReader (FILE *file, long length);
+#endif
+	bool Open (const char *filename);
+	virtual ~FileReader ();
+
+	virtual long Tell () const;
+	virtual long Seek (long offset, int origin);
+	virtual long Read (void *buffer, long len);
+	virtual char *Gets(char *strbuf, int len);
+	long GetLength () const { return Length; }
+
+	// If you use the underlying FILE without going through this class,
+	// you must call ResetFilePtr() before using this class again.
+	void ResetFilePtr ();
+
+	static FileReader *SafeOpen(const char*filename);
+
+#ifdef LIBRETRO
+	struct retro_vfs_wrapped_file_handle *GetFile () const { return File; }
+#else
+	FILE *GetFile () const { return File; }
+#endif
+	virtual const char *GetBuffer() const { return NULL; }
+
+	FileReader &operator>> (BYTE &v)
+	{
+		Read (&v, 1);
+		return *this;
+	}
+
+	FileReader &operator>> (SBYTE &v)
+	{
+		Read (&v, 1);
+		return *this;
+	}
+
+	FileReader &operator>> (WORD &v)
+	{
+		Read (&v, 2);
+		v = LittleShort(v);
+		return *this;
+	}
+
+	FileReader &operator>> (SWORD &v)
+	{
+		Read (&v, 2);
+		v = LittleShort(v);
+		return *this;
+	}
+
+	FileReader &operator>> (DWORD &v)
+	{
+		Read (&v, 4);
+		v = LittleLong(v);
+		return *this;
+	}
+
+
+protected:
+	FileReader (const FileReader &other, long length);
+
+	char *GetsFromBuffer(const char * bufptr, char *strbuf, int len);
+
+#ifdef LIBRETRO
+	struct retro_vfs_wrapped_file_handle *File;
+#else
+	FILE *File;
+#endif
+	long Length;
+	long StartPos;
+	long FilePos;
+
+private:
+	long CalcFileLen () const;
+protected:
+	bool CloseOnDestruct;
+};
+
+// Wraps around a FileReader to decompress a zlib stream
+class FileReaderZ : public FileReaderBase
+{
+public:
+	FileReaderZ (FileReader &file, bool zip=false);
+	~FileReaderZ ();
+
+	virtual long Read (void *buffer, long len);
+
+	FileReaderZ &operator>> (BYTE &v)
+	{
+		Read (&v, 1);
+		return *this;
+	}
+
+	FileReaderZ &operator>> (SBYTE &v)
+	{
+		Read (&v, 1);
+		return *this;
+	}
+
+	FileReaderZ &operator>> (WORD &v)
+	{
+		Read (&v, 2);
+		v = LittleShort(v);
+		return *this;
+	}
+
+	FileReaderZ &operator>> (SWORD &v)
+	{
+		Read (&v, 2);
+		v = LittleShort(v);
+		return *this;
+	}
+
+	FileReaderZ &operator>> (DWORD &v)
+	{
+		Read (&v, 4);
+		v = LittleLong(v);
+		return *this;
+	}
+
+	FileReaderZ &operator>> (fixed_t &v)
+	{
+		Read (&v, 4);
+		v = LittleLong(v);
+		return *this;
+	}
+
+private:
+	enum { BUFF_SIZE = 4096 };
+
+	FileReader &File;
+	bool SawEOF;
+	z_stream Stream;
+	BYTE InBuff[BUFF_SIZE];
+
+	void FillBuffer ();
+
+	FileReaderZ &operator= (const FileReaderZ &) { return *this; }
+};
+
+// Wraps around a FileReader to decompress a bzip2 stream
+class FileReaderBZ2 : public FileReaderBase
+{
+public:
+	FileReaderBZ2 (FileReader &file);
+	~FileReaderBZ2 ();
+
+	long Read (void *buffer, long len);
+
+	FileReaderBZ2 &operator>> (BYTE &v)
+	{
+		Read (&v, 1);
+		return *this;
+	}
+
+	FileReaderBZ2 &operator>> (SBYTE &v)
+	{
+		Read (&v, 1);
+		return *this;
+	}
+
+	FileReaderBZ2 &operator>> (WORD &v)
+	{
+		Read (&v, 2);
+		v = LittleShort(v);
+		return *this;
+	}
+
+	FileReaderBZ2 &operator>> (SWORD &v)
+	{
+		Read (&v, 2);
+		v = LittleShort(v);
+		return *this;
+	}
+
+	FileReaderBZ2 &operator>> (DWORD &v)
+	{
+		Read (&v, 4);
+		v = LittleLong(v);
+		return *this;
+	}
+
+	FileReaderBZ2 &operator>> (fixed_t &v)
+	{
+		Read (&v, 4);
+		v = LittleLong(v);
+		return *this;
+	}
+
+private:
+	enum { BUFF_SIZE = 4096 };
+
+	FileReader &File;
+	bool SawEOF;
+	bz_stream Stream;
+	BYTE InBuff[BUFF_SIZE];
+
+	void FillBuffer ();
+
+	FileReaderBZ2 &operator= (const FileReaderBZ2 &) { return *this; }
+};
+
+// Wraps around a FileReader to decompress a lzma stream
+class FileReaderLZMA : public FileReaderBase
+{
+	struct StreamPointer;
+
+public:
+	FileReaderLZMA (FileReader &file, size_t uncompressed_size, bool zip);
+	~FileReaderLZMA ();
+
+	long Read (void *buffer, long len);
+
+	FileReaderLZMA &operator>> (BYTE &v)
+	{
+		Read (&v, 1);
+		return *this;
+	}
+
+	FileReaderLZMA &operator>> (SBYTE &v)
+	{
+		Read (&v, 1);
+		return *this;
+	}
+
+	FileReaderLZMA &operator>> (WORD &v)
+	{
+		Read (&v, 2);
+		v = LittleShort(v);
+		return *this;
+	}
+
+	FileReaderLZMA &operator>> (SWORD &v)
+	{
+		Read (&v, 2);
+		v = LittleShort(v);
+		return *this;
+	}
+
+	FileReaderLZMA &operator>> (DWORD &v)
+	{
+		Read (&v, 4);
+		v = LittleLong(v);
+		return *this;
+	}
+
+	FileReaderLZMA &operator>> (fixed_t &v)
+	{
+		Read (&v, 4);
+		v = LittleLong(v);
+		return *this;
+	}
+
+private:
+	enum { BUFF_SIZE = 4096 };
+
+	FileReader &File;
+	bool SawEOF;
+	StreamPointer *Streamp; // anonymous pointer to LKZA decoder struct - to avoid including the LZMA headers globally
+	size_t Size;
+	size_t InPos, InSize;
+	size_t OutProcessed;
+	BYTE InBuff[BUFF_SIZE];
+
+	void FillBuffer ();
+
+	FileReaderLZMA &operator= (const FileReaderLZMA &) { return *this; }
+};
+
+class MemoryReader : public FileReader
+{
+public:
+	MemoryReader (const char *buffer, long length);
+	~MemoryReader ();
+
+	virtual long Tell () const;
+	virtual long Seek (long offset, int origin);
+	virtual long Read (void *buffer, long len);
+	virtual char *Gets(char *strbuf, int len);
+	virtual const char *GetBuffer() const { return bufptr; }
+
+protected:
+	const char * bufptr;
+};
+
+
+
+#endif

@@ -1,0 +1,44 @@
+actor PlasmaDetonator : Inventory
+{
+	inventory.amount 1
+	inventory.maxamount 100
+	inventory.pickupsound "misc/plasmadetonator/pickup"
+	states
+	{
+		Spawn:
+			DBOM A -1
+			stop
+	}
+}
+
+actor PlasmaDetonatorDrop : SmartAnimation
+{
+	deathsound "misc/plasmadetonator/explosion"
+	states
+	{
+		Spawn:
+			DBOM ABABABABABAB 10
+		Death:
+			PEXP A 0 A_Scream
+			PEXP A random(1.5, 3) A_InitSmartAnim(random(3, 6))
+			PEXP BCDEFGH 1.5 A_SmartAnimDelay
+			stop
+	}
+}
+
+actor SecurityCube
+{
+	health 175
+	+SOLID
+	+DONTRIP
+	states
+	{
+		Spawn:
+			CUBE ABCDEFGHIJ 2.5 bright
+			loop
+		Death:
+			CUBE KLMNOPQR 2.5 bright
+			CUBE S -1 bright
+			stop
+	}
+}

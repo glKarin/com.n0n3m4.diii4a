@@ -1,0 +1,517 @@
+// Helper actor which makes a monster that behaves like one in Wolfenstein
+// If defining monsters wolfenstein style monsters it is recommeneded to
+// inherit from this actor for best forwards compatibility.
+actor WolfensteinMonster
+{
+	missilefrequency 0.08
+	minmissilechance 256
+	height 64
+	radius 42
+	painchance 256
+	meleerange 42
+	MONSTER
+	+ALWAYSFAST
+	+RANDOMIZE
+	+OLDRANDOMCHASE
+}
+
+actor Guard : WolfensteinMonster 11
+{
+	points 100
+	health 25
+	speed 1, 3
+	sighttime 1, 4
+	dropitem "Clip"
+	attacksound "guard/attack"
+	deathsound "guard/death"
+	secretdeathsound "guard/fart"
+	seesound "guard/sight"
+	states
+	{
+		Spawn:
+			GARD A -1 NOP A_Look
+			stop
+		Path:
+			GARD B 10 NOP A_Chase
+			GARD B 2.5
+			GARD C 7.5 NOP A_Chase
+			GARD D 10 NOP A_Chase
+			GARD D 2.5
+			GARD E 7.5 NOP A_Chase
+			loop
+		See:
+			GARD B 5 NOP A_Chase
+			GARD B 1.5
+			GARD C 4 NOP A_Chase
+			GARD D 5 NOP A_Chase
+			GARD D 1.5
+			GARD E 4 NOP A_Chase
+			loop
+		Missile:
+			GARD FG 10 A_FaceTarget
+			GARD H 10 bright A_WolfAttack
+			goto See
+		Pain:
+			GARD I 5 A_JumpIf(health & 1, 1)
+			goto See
+			GARD J 5
+			goto See
+		Death:
+			GARD K 7.5 A_Fall
+			GARD L 7.5 A_Scream
+			GARD M 7.5
+			GARD N -1
+			stop
+	}
+}
+actor GreenGuard : Guard 93
+{
+	attacksound "greenguard/attack"
+	deathsound "greenguard/death"
+	secretdeathsound "greenguard/crash"
+	seesound "greenguard/sight"
+	dropitem "BlueClip"
+	states
+	{
+		Spawn:
+			GGRD A -1 NOP A_Look
+			stop
+		Path:
+			GGRD B 10 NOP A_Chase
+			GGRD B 2.5
+			GGRD C 7.5 NOP A_Chase
+			GGRD D 10 NOP A_Chase
+			GGRD D 2.5
+			GGRD E 7.5 NOP A_Chase
+			loop
+		See:
+			GGRD B 5 NOP A_Chase
+			GGRD B 1.5
+			GGRD C 4 NOP A_Chase
+			GGRD D 5 NOP A_Chase
+			GGRD D 1.5
+			GGRD E 4 NOP A_Chase
+			loop
+		Missile:
+			GGRD FG 10 A_FaceTarget
+			GGRD H 10 bright A_WolfAttack
+			goto See
+		Pain:
+			GGRD I 5 A_JumpIf(health & 1, 1)
+			goto See
+			GGRD J 5
+			goto See
+		Death:
+			GGRD K 7.5 A_Fall
+			GGRD L 7.5 A_Scream
+			GGRD M 7.5
+			GGRD N -1
+			stop
+	}
+}
+
+actor DeadGuard 81
+{
+	+ISMONSTER // Blocks pushwalls
+	states
+	{
+		Spawn:
+			GARD N -1
+			stop
+	}
+}
+actor DeadGreenGuard : DeadGuard 98
+{
+	states
+	{
+		Spawn:
+			GGRD N -1
+			stop
+	}
+}
+
+actor Dog : WolfensteinMonster 14
+{
+	points 200
+	health 1
+	speed 2.93, 5.859
+	sighttime 1, 8
+	attacksound "dog/attack"
+	deathsound "dog/death"
+	secretdeathsound "dog/fart"
+	seesound "dog/sight"
+	-CANUSEWALLS
+	states
+	{
+		Spawn:
+		Path:
+			DOGY A 10 NOP A_Chase
+			DOGY A 2.5
+			DOGY B 7.5 NOP A_Chase
+			DOGY C 10 NOP A_Chase
+			DOGY C 2.5
+			DOGY D 7.5 NOP A_Chase
+			loop
+		Melee:
+			DOGY EF 5 A_FaceTarget
+			DOGY G 5 A_MeleeAttack(random(1,15))
+			DOGY EA 5
+			goto See
+		See:
+			DOGY A 5 NOP A_Chase
+			DOGY A 1.5
+			DOGY B 4 NOP A_Chase
+			DOGY C 5 NOP A_Chase
+			DOGY C 1.5
+			DOGY D 4 NOP A_Chase
+			loop
+		Death:
+			DOGY H 7.5 A_Fall
+			DOGY I 7.5 A_Scream
+			DOGY J 7.5
+			DOGY K -1
+			stop
+	}
+}
+actor Doberman : Dog 95
+{
+	attacksound "doberman/attack"
+	deathsound "doberman/death"
+	secretdeathsound "doberman/crash"
+	seesound "doberman/sight"
+	states
+	{
+		Spawn:
+		Path:
+			DOBR A 10 NOP A_Chase
+			DOBR A 2.5
+			DOBR B 7.5 NOP A_Chase
+			DOBR C 10 NOP A_Chase
+			DOBR C 2.5
+			DOBR D 7.5 NOP A_Chase
+			loop
+		Melee:
+			DOBR EF 5 A_FaceTarget
+			DOBR G 5 A_MeleeAttack(random(1,15))
+			DOBR EA 5
+			goto See
+		See:
+			DOBR A 5 NOP A_Chase
+			DOBR A 1.5
+			DOBR B 4 NOP A_Chase
+			DOBR C 5 NOP A_Chase
+			DOBR C 1.5
+			DOBR D 4 NOP A_Chase
+			loop
+		Death:
+			DOBR H 7.5 A_Fall
+			DOBR I 7.5 A_Scream
+			DOBR J 7.5
+			DOBR K -1
+			stop
+	}
+}
+
+actor Officer : WolfensteinMonster 12
+{
+	points 400
+	health 50
+	speed 1, 5
+	sighttime 2
+	dropitem "Clip"
+	attacksound "officer/attack"
+	deathsound "officer/death"
+	secretdeathsound "officer/fart"
+	seesound "officer/sight"
+	states
+	{
+		Spawn:
+			OFFI A -1 NOP A_Look
+			stop
+		Path:
+			OFFI B 10 NOP A_Chase
+			OFFI B 2.5
+			OFFI C 7.5 NOP A_Chase
+			OFFI D 10 NOP A_Chase
+			OFFI D 2.5
+			OFFI E 7.5 NOP A_Chase
+			loop
+		Pain:
+			OFFI I 5 A_JumpIf(health & 1, 1)
+			goto See
+			OFFI J 5
+			goto See
+		Missile:
+			OFFI F 3 A_FaceTarget
+			OFFI G 10 A_FaceTarget
+			OFFI H 5 bright A_WolfAttack
+			goto See
+		See:
+			OFFI B 5 NOP A_Chase
+			OFFI B 1.5
+			OFFI C 4 NOP A_Chase
+			OFFI D 5 NOP A_Chase
+			OFFI D 1.5
+			OFFI E 4 NOP A_Chase
+			loop
+		Death:
+			OFFI K 5.5 A_Fall
+			OFFI L 5.5 A_Scream
+			OFFI MN 5.5
+			OFFI O -1
+			stop
+	}
+}
+actor LostOfficer : Officer 97
+{
+	dropitem "BlueClip"
+	attacksound "lostofficer/attack"
+	deathsound "lostofficer/death"
+	secretdeathsound "lostofficer/crash"
+	seesound "lostofficer/sight"
+	states
+	{
+		Spawn:
+			LOFF A -1 NOP A_Look
+			stop
+		Path:
+			LOFF B 10 NOP A_Chase
+			LOFF B 2.5
+			LOFF C 7.5 NOP A_Chase
+			LOFF D 10 NOP A_Chase
+			LOFF D 2.5
+			LOFF E 7.5 NOP A_Chase
+			loop
+		Pain:
+			LOFF I 5 A_JumpIf(health & 1, 1)
+			goto See
+			LOFF J 5
+			goto See
+		Missile:
+			LOFF F 3 A_FaceTarget
+			LOFF G 10 A_FaceTarget
+			LOFF H 5 bright A_WolfAttack
+			goto See
+		See:
+			LOFF B 5 NOP A_Chase
+			LOFF B 1.5
+			LOFF C 4 NOP A_Chase
+			LOFF D 5 NOP A_Chase
+			LOFF D 1.5
+			LOFF E 4 NOP A_Chase
+			loop
+		Death:
+			LOFF K 5.5 A_Fall
+			LOFF L 5.5 A_Scream
+			LOFF MN 5.5
+			LOFF O -1
+			stop
+	}
+}
+
+actor Mutant : WolfensteinMonster 15
+{
+	points 700
+	health 45, 55, 55, 65
+	speed 1, 3
+	sighttime 1, 6
+	dropitem "Clip"
+	attacksound "mutant/attack"
+	deathsound "mutant/death"
+	secretdeathsound "mutant/fart"
+	states
+	{
+		Spawn:
+			MTNT A -1 NOP A_Look
+			stop
+		Path:
+			MTNT B 10 NOP A_Chase
+			MTNT B 2.5
+			MTNT C 7.5 NOP A_Chase
+			MTNT D 10 NOP A_Chase
+			MTNT D 2.5
+			MTNT E 7.5 NOP A_Chase
+			loop
+		Pain:
+			MTNT J 5 A_JumpIf(health & 1, 1)
+			goto See
+			MTNT K 5
+			goto See
+		See:
+			MTNT B 5 NOP A_Chase
+			MTNT B 1.5
+			MTNT C 4 NOP A_Chase
+			MTNT D 5 NOP A_Chase
+			MTNT D 1.5
+			MTNT E 4 NOP A_Chase
+			loop
+		Missile:
+			MTNT F 3 A_FaceTarget
+			MTNT G 10 bright A_WolfAttack
+			MTNT H 5 A_FaceTarget
+			MTNT I 10 bright A_WolfAttack
+			goto See
+		Death:
+			MTNT L 3.5 A_Fall
+			MTNT M 3.5 A_Scream
+			MTNT NO 3.5
+			MTNT P -1
+			stop
+	}
+}
+actor GunBat : Mutant 96
+{
+	attacksound "bat/attack"
+	deathsound "bat/death"
+	secretdeathsound "bat/crash"
+	dropitem "BlueClip"
+	states
+	{
+		Spawn:
+			GBAT A -1 NOP A_Look
+			stop
+		Path:
+			GBAT B 10 NOP A_Chase
+			GBAT B 2.5
+			GBAT C 7.5 NOP A_Chase
+			GBAT D 10 NOP A_Chase
+			GBAT D 2.5
+			GBAT E 7.5 NOP A_Chase
+			loop
+		Pain:
+			GBAT J 5 A_JumpIf(health & 1, 1)
+			goto See
+			GBAT K 5
+			goto See
+		See:
+			GBAT B 5 NOP A_Chase
+			GBAT B 1.5
+			GBAT C 4 NOP A_Chase
+			GBAT D 5 NOP A_Chase
+			GBAT D 1.5
+			GBAT E 4 NOP A_Chase
+			loop
+		Missile:
+			GBAT F 3 A_FaceTarget
+			GBAT G 10 bright A_WolfAttack
+			GBAT H 5 A_FaceTarget
+			GBAT I 10 bright A_WolfAttack
+			goto See
+		Death:
+			GBAT L 3.5 A_Fall
+			GBAT M 3.5 A_Scream
+			GBAT NO 3.5
+			GBAT P -1
+			stop
+	}
+}
+
+actor WolfensteinSS : WolfensteinMonster 13 // ZDoom compatible name
+{
+	points 500
+	health 100
+	speed 1, 4
+	sighttime 1, 6
+	dropitem "MachineGun"
+	dropitem "Clip"
+	attacksound "wolfss/attack"
+	deathsound "wolfss/death"
+	secretdeathsound "wolfss/fart"
+	seesound "wolfss/sight"
+	+DROPBASEDONTARGET
+	states
+	{
+		Spawn:
+			SSWV W -1 NOP A_Look
+			stop
+		Path:
+			SSWV A 10 NOP A_Chase
+			SSWV A 2.5
+			SSWV B 7.5 NOP A_Chase
+			SSWV C 10 NOP A_Chase
+			SSWV C 2.5
+			SSWV D 7.5 NOP A_Chase
+			loop
+		See:
+			SSWV A 5 NOP A_Chase
+			SSWV A 1.5
+			SSWV B 4 NOP A_Chase
+			SSWV C 5 NOP A_Chase
+			SSWV C 1.5
+			SSWV D 4 NOP A_Chase
+			loop
+		Pain:
+			SSWV H 5 A_JumpIf(health & 1, 1)
+			goto See
+			SSWV I 5
+			goto See
+		Missile:
+			SSWV EF 10 A_FaceTarget
+			SSWV G 5 bright A_WolfAttack(0, "*", 0.667)
+			SSWV F 5 A_FaceTarget
+			SSWV G 5 bright A_WolfAttack(0, "*", 0.667)
+			SSWV F 5 A_FaceTarget
+			SSWV G 5 bright A_WolfAttack(0, "*", 0.667)
+			SSWV F 5 A_FaceTarget
+			SSWV G 5 bright A_WolfAttack(0, "*", 0.667)
+			goto See
+		Death:
+			SSWV J 7.5 A_Fall
+			SSWV K 7.5 A_Scream
+			SSWV L 7.5
+			SSWV M -1
+			stop
+	}
+}
+actor Schutzstafell : WolfensteinSS 94
+{
+	attacksound "ss/attack"
+	deathsound "ss/death"
+	secretdeathsound "ss/crash"
+	seesound "ss/sight"
+	dropitem "BlueAK47"
+	dropitem "BlueClip"
+	states
+	{
+		Spawn:
+			SSFL W -1 NOP A_Look
+			stop
+		Path:
+			SSFL A 10 NOP A_Chase
+			SSFL A 2.5
+			SSFL B 7.5 NOP A_Chase
+			SSFL C 10 NOP A_Chase
+			SSFL C 2.5
+			SSFL D 7.5 NOP A_Chase
+			loop
+		See:
+			SSFL A 5 NOP A_Chase
+			SSFL A 1.5
+			SSFL B 4 NOP A_Chase
+			SSFL C 5 NOP A_Chase
+			SSFL C 1.5
+			SSFL D 4 NOP A_Chase
+			loop
+		Pain:
+			SSFL H 5 A_JumpIf(health & 1, 1)
+			goto See
+			SSFL I 5
+			goto See
+		Missile:
+			SSFL EF 10 A_FaceTarget
+			SSFL G 5 bright A_WolfAttack(0, "*", 0.667)
+			SSFL F 5 A_FaceTarget
+			SSFL G 5 bright A_WolfAttack(0, "*", 0.667)
+			SSFL F 5 A_FaceTarget
+			SSFL G 5 bright A_WolfAttack(0, "*", 0.667)
+			SSFL F 5 A_FaceTarget
+			SSFL G 5 bright A_WolfAttack(0, "*", 0.667)
+			goto See
+		Death:
+			SSFL J 7.5 A_Fall
+			SSFL K 7.5 A_Scream
+			SSFL L 7.5
+			SSFL M -1
+			stop
+	}
+}

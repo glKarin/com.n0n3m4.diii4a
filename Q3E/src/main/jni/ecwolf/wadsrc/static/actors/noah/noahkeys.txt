@@ -1,0 +1,25 @@
+actor ArkGoldKeyRing : Key 174
+{
+	overheadicon "TILE8:7A"
+	+PLOTONAUTOMAP
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			GKYR A -1
+			stop
+	}
+}
+
+actor ArkSilverKeyRing : Key 175
+{
+	overheadicon "TILE8:7B"
+	+PLOTONAUTOMAP
+	+INVENTORY.ALWAYSPICKUP
+	states
+	{
+		Spawn:
+			SKYR A -1
+			stop
+	}
+}

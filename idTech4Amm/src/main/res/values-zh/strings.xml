@@ -555,6 +555,8 @@
     <string name="use_custom_resolution_as_fullscreen_size">使用自定义分辨率大小作为屏幕总大小</string>
     <string name="openmohaa">OpenMOHAA</string>
     <string name="openmohaa_base">荣誉勋章: 联合袭击</string>
+    <string name="wolf3d">德军总部</string>
+    <string name="wolf3d_base">德军总部3D</string>
     <string name="video">图像</string>
     <string name="virtual_joystick">虚拟摇杆</string>
     <string name="touch">触控</string>

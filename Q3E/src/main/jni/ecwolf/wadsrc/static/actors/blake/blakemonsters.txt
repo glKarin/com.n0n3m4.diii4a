@@ -1,0 +1,1708 @@
+// Sector Patrol / Sector Guard
+
+actor RentACop : WolfensteinMonster
+{
+	points 1025
+	health 4, 9, 25, 38
+	speed 1, 3
+	sighttime 1, 4
+	attacksound "rentacop/attack"
+	seesound "rentacop/sight"
+	deathsound "rentacop/death"
+	dropitem "SlowFireProtector"
+	dropitem "ChargePack"
+	dropitem "ConcessionCoin", 64
+	+DROPBASEDONTARGET
+	states
+	{
+		Spawn:
+			RENT A -1 NOP A_Look
+			stop
+		Path:
+			RENT B 10 NOP A_Chase
+			RENT B 2.5
+			RENT C 7.5 NOP A_Chase
+			RENT D 10 NOP A_Chase
+			RENT D 2.5
+			RENT E 7.5 NOP A_Chase
+			loop
+		See:
+			RENT B 5 NOP A_Chase
+			RENT B 1.5
+			RENT C 4 NOP A_Chase
+			RENT D 5 NOP A_Chase
+			RENT D 1.5
+			RENT E 4 NOP A_Chase
+			loop
+		Missile:
+			RENT FG 10 A_FaceTarget
+			RENT H 10 bright A_WolfAttack
+			goto See
+		Pain:
+			RENT I 7.5
+			goto See
+		Death:
+			RENT J 0 A_Fall
+			RENT J 8.5 A_Scream //T_BlowBack
+			RENT K 10.5 //T_BlowBack
+			RENT L 8 //T_BlowBack
+			RENT M 6.5 //T_BlowBack
+			RENT N -1
+			stop
+	}
+}
+
+actor SectorGuard : RentACop
+{
+	attacksound "sectorguard/attack"
+	seesound "sectorguard/sight"
+	deathsound "sectorguard/death"
+	states
+	{
+		Spawn:
+			SECG A -1 NOP A_Look
+			stop
+		Path:
+			SECG B 10 NOP A_Chase
+			SECG B 2.5
+			SECG C 7.5 NOP A_Chase
+			SECG D 10 NOP A_Chase
+			SECG D 2.5
+			SECG E 7.5 NOP A_Chase
+			loop
+		See:
+			SECG B 5 NOP A_Chase
+			SECG B 1.5
+			SECG C 4 NOP A_Chase
+			SECG D 5 NOP A_Chase
+			SECG D 1.5
+			SECG E 4 NOP A_Chase
+			loop
+		Missile:
+			SECG FG 10 A_FaceTarget
+			SECG H 10 bright A_WolfAttack
+			goto See
+		Pain:
+			SECG I 7.5
+			goto See
+		Death:
+			SECG J 0 A_Fall
+			SECG J 8.5 A_Scream //T_BlowBack
+			SECG K 10.5 //T_BlowBack
+			SECG L 8 //T_BlowBack
+			SECG M 6.5 //T_BlowBack
+			SECG N -1
+			stop
+	}
+}
+
+// STAR Sentinel / Tech Warrior
+
+actor ProGuard : WolfensteinMonster
+{
+	points 5000
+	health 33, 63, 150, 175
+	speed 1, 4
+	sighttime 1, 6
+	attacksound "proguard/attack"
+	seesound "proguard/sight"
+	deathsound "proguard/death"
+	dropitem "RapidAssaultWeapon"
+	dropitem "ChargePack"
+	dropitem "ConcessionCoin", 64
+	+DROPBASEDONTARGET
+	states
+	{
+		Spawn:
+			PROG A -1 NOP A_Look
+			stop
+		Path:
+			PROG B 10 NOP A_Chase
+			PROG B 2.5
+			PROG C 7.5 NOP A_Chase
+			PROG D 10 NOP A_Chase
+			PROG D 2.5
+			PROG E 7.5 NOP A_Chase
+			loop
+		See:
+			PROG B 5 NOP A_Chase
+			PROG B 1.5
+			PROG C 4 NOP A_Chase
+			PROG D 5 NOP A_Chase
+			PROG D 1.5
+			PROG E 4 NOP A_Chase
+			loop
+		Missile:
+			PROG FG 10
+			PROG H 5 bright A_WolfAttack
+			PROG G 5
+			PROG H 5 bright A_WolfAttack
+			PROG G 5
+			PROG H 5 bright A_WolfAttack
+			goto See
+		Pain:
+			PROG I 7.5 A_JumpIf(health & 1, 1)
+			goto See
+			PROG J 7.5
+			goto See
+		Death:
+			PROG K 0 A_Fall
+			PROG K 10 A_Scream //T_BlowBack
+			PROG LMN 10 //T_BlowBack
+			PROG O -1
+			stop
+	}
+}
+
+actor TechWarrior : ProGuard
+{
+	attacksound "techwarrior/attack"
+	seesound "techwarrior/sight"
+	deathsound "techwarrior/death"
+	states
+	{
+		Spawn:
+			TECW A -1 NOP A_Look
+			stop
+		Path:
+			TECW B 10 NOP A_Chase
+			TECW B 2.5
+			TECW C 7.5 NOP A_Chase
+			TECW D 10 NOP A_Chase
+			TECW D 2.5
+			TECW E 7.5 NOP A_Chase
+			loop
+		See:
+			TECW B 5 NOP A_Chase
+			TECW B 1.5
+			TECW C 4 NOP A_Chase
+			TECW D 5 NOP A_Chase
+			TECW D 1.5
+			TECW E 4 NOP A_Chase
+			loop
+		Missile:
+			TECW FG 10
+			TECW H 5 bright A_WolfAttack
+			TECW G 5
+			TECW H 5 bright A_WolfAttack
+			TECW G 5
+			TECW H 5 bright A_WolfAttack
+			goto See
+		Pain:
+			TECW I 7.5 A_JumpIf(health & 1, 1)
+			goto See
+			TECW J 7.5
+			goto See
+		Death:
+			TECW K 0 A_Fall
+			TECW K 10 A_Scream //T_BlowBack
+			TECW LMN 10 //T_BlowBack
+			TECW O -1
+			stop
+	}
+}
+
+// STAR Trooper / Alien Protector
+
+actor STARTrooper : WolfensteinMonster
+{
+	points 7025
+	health 78, 112, 325, 425
+	speed 1, 3
+	sighttime 1, 6
+	attacksound "startrooper/attack"
+	seesound "startrooper/sight"
+	deathsound "startrooper/death"
+	dropitem "RapidAssaultWeapon"
+	dropitem "ChargePack"
+	dropitem "ConcessionCoin", 64
+	+DROPBASEDONTARGET
+	states
+	{
+		Spawn:
+			SWAT A -1 NOP A_Look
+			stop
+		Path:
+			SWAT B 10 NOP A_Chase
+			SWAT B 2.5
+			SWAT C 7.5 NOP A_Chase
+			SWAT D 10 NOP A_Chase
+			SWAT D 2.5
+			SWAT E 7.5 NOP A_Chase
+			loop
+		See:
+			SWAT B 5 NOP A_Chase
+			SWAT B 1.5
+			SWAT C 4 NOP A_Chase
+			SWAT D 5 NOP A_Chase
+			SWAT D 1.5
+			SWAT E 4 NOP A_Chase
+			loop
+		Missile:
+			SWAT F 5
+			SWAT G 10
+			SWAT H 5 bright A_WolfAttack(0, "*", 0.667)
+			SWAT G 5
+			SWAT H 5 bright A_WolfAttack(0, "*", 0.667)
+			SWAT G 5
+			SWAT H 5 bright A_WolfAttack(0, "*", 0.667)
+			goto See
+		Pain:
+			SWAT I 7.5 A_JumpIf(health & 1, 1)
+			goto See
+			SWAT J 7.5
+			goto See
+		Death:
+			SWAT O 0 A_Fall
+			SWAT O 10 A_Scream //T_BlowBack
+			SWAT PQR 10 //T_BlowBack
+			SWAT S -1
+			stop
+		KnockedDown:
+			SWAT KLM 5
+			SWAT N 5 // T_SwatWound
+			wait
+		GetUp:
+			SWAT NML 5
+			SWAT K 5 // T_SwatWound
+			goto See
+	}
+}
+
+actor AlienProtector : STARTrooper
+{
+	attacksound "alienprotector/attack"
+	seesound "alienprotector/sight"
+	deathsound "alienprotector/death"
+	states
+	{
+		Spawn:
+			PROT A -1 NOP A_Look
+			stop
+		Path:
+			PROT B 10 NOP A_Chase
+			PROT B 2.5
+			PROT C 7.5 NOP A_Chase
+			PROT D 10 NOP A_Chase
+			PROT D 2.5
+			PROT E 7.5 NOP A_Chase
+			loop
+		See:
+			PROT B 5 NOP A_Chase
+			PROT B 1.5
+			PROT C 4 NOP A_Chase
+			PROT D 5 NOP A_Chase
+			PROT D 1.5
+			PROT E 4 NOP A_Chase
+			loop
+		Missile:
+			PROT F 5
+			PROT G 10
+			PROT H 5 bright A_WolfAttack(0, "*", 0.667)
+			PROT G 5
+			PROT H 5 bright A_WolfAttack(0, "*", 0.667)
+			PROT G 5
+			PROT H 5 bright A_WolfAttack(0, "*", 0.667)
+			goto See
+		Pain:
+			PROT I 7.5 A_JumpIf(health & 1, 1)
+			goto See
+			PROT J 7.5
+			goto See
+		Death:
+			PROT O 0 A_Fall
+			PROT O 10 A_Scream //T_BlowBack
+			PROT PQR 10 //T_BlowBack
+			PROT S -1
+			stop
+		KnockedDown:
+			PROT KLM 5
+			PROT N 5 // T_SwatWound
+			wait
+		GetUp:
+			PROT NML 5
+			PROT K 5 // T_SwatWound
+			goto See
+	}
+}
+
+// General Scientist/Informant
+
+actor GeneralScientist : WolfensteinMonster
+{
+	points 500
+	health 4, 9, 23, 28
+	speed 1, 3
+	sighttime 2
+	attacksound "scientist/attack"
+	seesound "scientist/sight"
+	deathsound "scientist/death"
+	dropitem "ConcessionCoin", 64
+	dropitem "ChargePack"
+	+DROPBASEDONTARGET
+	states
+	{
+		Spawn:
+			GSCI A -1 NOP A_Look
+			stop
+		Path:
+			GSCI B 10 NOP A_Chase
+			GSCI B 2.5
+			GSCI C 7.5 NOP A_Chase
+			GSCI D 10 NOP A_Chase
+			GSCI D 2.5
+			GSCI E 7.5 NOP A_Chase
+			loop
+		See:
+			GSCI B 5 NOP A_Chase
+			GSCI B 1.5
+			GSCI C 4 NOP A_Chase
+			GSCI D 5 NOP A_Chase
+			GSCI D 1.5
+			GSCI E 4 NOP A_Chase
+			loop
+		Missile:
+			GSCI F 3
+			GSCI G 10
+			GSCI H 5 bright A_WolfAttack
+			goto See
+		Pain:
+			GSCI I 7.5 A_Jump(health & 1, 1)
+			goto See
+			GSCI J 7.5
+			goto See
+		Death:
+			GSCI K 0 A_Fall
+			GSCI K 7.5 A_Scream //T_BlowBack
+			GSCI LMN 7.5 // T_BlowBack
+			GSCI O -1
+			stop
+	}
+}
+
+actor InformantScientist : GeneralScientist
+{
+	points 0
+	deathsound "scientist/inform_death"
+	states
+	{
+		Spawn:
+			GSCI A -1
+			stop
+		Missile:
+			stop
+	}
+}
+
+// Floating Bomb & VolatileTransport
+
+actor FloatingBomb : WolfensteinMonster
+{
+	points 2025
+	health 15, 40, 60, 85
+	speed 1, 3
+	sighttime 1, 4
+	seesound "floatingbomb/sight"
+	deathsound "floatingbomb/death"
+	states
+	{
+		Spawn:
+			FSCT A -1 NOP A_Look
+			stop
+		Path:
+			// TODO: Select from the following based on health
+			FSCT A 7.5 NOP A_Chase
+			wait
+			FSCT B 7.5 NOP A_Chase
+			wait
+			FSCT C 7.5 NOP A_Chase
+			wait
+			FSCT D 7.5 NOP A_Chase
+			wait
+		See:
+			FSCT A 5 NOP A_Chase
+			wait
+			FSCT B 5 NOP A_Chase
+			wait
+			FSCT C 5 NOP A_Chase
+			wait
+			FSCT D 5 NOP A_Chase
+			wait
+		Death:
+			FSCT E 0 bright A_Fall
+			FSCT E 2.5 bright A_Scream
+			FSCT FGHIJKL 2.5 bright
+			FSCT L 10
+			wait
+	}
+}
+
+actor VolatileTransport : WolfensteinMonster
+{
+	points 2025
+	health 17, 25, 63, 75
+	speed 1
+	deathsound "volatiletransport/death"
+	// STATIONARY
+	states
+	{
+		Spawn:
+			GSCT A -1 NOP A_Look
+			stop
+		Path:
+		See:
+			// TODO: Select from the following based on health
+			GSCT A 7.5 NOP A_Chase("*", "*", CHF_NOSIGHTCHECK)
+			wait
+			GSCT B 7.5 NOP A_Chase("*", "*", CHF_NOSIGHTCHECK)
+			wait
+			GSCT C 7.5 NOP A_Chase("*", "*", CHF_NOSIGHTCHECK)
+			wait
+			GSCT D 7.5 NOP A_Chase("*", "*", CHF_NOSIGHTCHECK)
+			wait
+		Death:
+			GSCT E 0 bright A_Fall
+			GSCT E 2.5 bright A_Scream
+			GSCT FGHIJKL 2.5 bright
+			GSCT M 2.5 bright
+			GSCT M 10
+			wait
+	}
+}
+
+// Genetic Guard
+
+actor GeneticGuard : WolfensteinMonster
+{
+	points 10000
+	health 20, 60, 180, 240
+	speed 1, 3
+	sighttime 1
+	seesound "geneticguard/sight"
+	deathsound "geneticguard/death"
+	dropitem "SlowFireProtector"
+	dropitem "ChargePack"
+	+DROPBASEDONTARGET
+	states
+	{
+		Spawn:
+			GENG A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			GENG A 5 NOP A_Chase
+			GENG A 2.5
+			GENG B 4 NOP A_Chase
+			GENG C 5 NOP A_Chase
+			GENG C 2.5
+			GENG D 4 NOP A_Chase
+			loop
+		Melee:
+			GENG EF 10
+			GENG G 15 A_MeleeAttack(random(0, 31)|1, 0.859, "geneticguard/melee")
+			goto See
+		Missile:
+			GENG HI 5
+			GENG J 5 bright A_WolfAttack(0, "geneticguard/attack")
+			goto See
+		Pain:
+			GENG K 7.5
+			goto See
+		Death:
+			GENG K 0 A_Fall
+			GENG K 9 A_Scream //T_BlowBack
+			GENG L 10 //T_BlowBack
+			GENG M 11 //T_BlowBack
+			GENG N 10 //T_BlowBack
+			GENG O 9 //T_BlowBack
+			GENG P -1
+			stop
+	}
+}
+
+// Cyborg Warrior
+
+actor CyborgWarrior : WolfensteinMonster
+{
+	points 7000
+	health 70, 100, 150, 200
+	speed 1, 2
+	sighttime 1
+	attacksound "cyborgwarrior/attack"
+	seesound "cyborgwarrior/sight"
+	deathsound "cyborgwarrior/death"
+	dropitem "ChargePack"
+	states
+	{
+		Spawn:
+			CYBW A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			CYBW A 5 NOP A_Chase
+			CYBW A 2.5
+			CYBW B 4 NOP A_Chase
+			CYBW C 5 NOP A_Chase
+			CYBW C 2.5
+			CYBW D 4 NOP A_Chase
+			loop
+		Missile:
+			CYBW EF 5
+			CYBW G 5 bright A_WolfAttack
+			goto See
+		Pain:
+			CYBW H 7.5
+			goto See
+		Death:
+			CYBW H 0 A_Fall
+			CYBW H 9 A_Scream //T_BlowBack
+			CYBW I 10 //T_BlowBack
+			CYBW J 11 //T_BlowBack
+			CYBW K 10 //T_BlowBack
+			CYBW L 9 //T_BlowBack
+			CYBW M -1
+			stop
+	}
+}
+
+// Spider Mutant
+
+actor SpiderMutantShot : SmartAnimation
+{
+	speed 14
+	radius 10
+	damage (random(0, 31))
+	seesound "spidermutant/attack"
+	PROJECTILE
+	states
+	{
+		Spawn:
+			MSPR A 0.5 A_Jump(170, 1, 2)
+			loop
+			MSPR B 0.5
+			loop
+			MSPR C 0.5
+			loop
+		Death:
+			MSPR D 0 A_InitSmartAnim(5)
+			goto Explode
+		XDeath:
+			MSPR D 0 A_InitSmartAnim(random(5, 12))
+		Explode:
+			MSPR DEF 2.5 A_SmartAnimDelay
+			stop
+	}
+}
+
+actor SpiderMutant : WolfensteinMonster
+{
+	points 5000
+	health 60, 100, 150, 200
+	speed 1, 3
+	sighttime 1
+	seesound "spidermutant/sight"
+	deathsound "spidermutant/death"
+	states
+	{
+		Spawn:
+			MSUP A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			MSUP A 5 NOP A_Chase
+			MSUP A 2.5
+			MSUP B 4 NOP A_Chase
+			MSUP C 5 NOP A_Chase
+			MSUP C 2.5
+			MSUP D 4 NOP A_Chase
+			loop
+		Missile:
+			MSUP EF 5
+			MSUP G 5 bright A_CustomMissile("SpiderMutantShot", 0, 0, random(-1, 1))
+			goto See
+		Pain:
+			MSUP H 7.5
+			goto See
+		Death:
+			MSUP H 0 A_Fall
+			MSUP H 9 A_Scream //T_BlowBack
+			MSUP I 10 //T_BlowBack
+			MSUP J 11 //T_BlowBack
+			MSUP K 10 //T_BlowBack
+			MSUP L 9 //T_BlowBack
+			MSUP M -1
+			stop
+	}
+}
+
+actor SpiderMutantMorphed
+{
+	radius 32
+	health 1
+	+SOLID
+	+SHOOTABLE
+	states
+	{
+		Spawn:
+			MSUP N -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+		Death:
+			MSUP O 2 A_ChangeFlag("SHOOTABLE", false)
+			MSUP PQRSTUV 2
+			MSUP V 0 A_SpawnItemEx("SpiderMutant", 0, 0, 0, 0, 0, 0, 0, SXF_TRANSFERPOINTERS)
+			stop
+	}
+}
+
+// Acid Dragon
+
+actor AcidDragonShot : SmartAnimation
+{
+	speed 14
+	radius 10
+	damage (random(0, 31))
+	seesound "aciddragon/attack"
+	PROJECTILE
+	states
+	{
+		Spawn:
+			ADPR A 0.5 A_Jump(170, 1, 2)
+			loop
+			ADPR B 0.5
+			loop
+			ADPR C 0.5
+			loop
+		Death:
+			ADPR D 0 A_InitSmartAnim(5)
+			goto Explode
+		XDeath:
+			ADPR D 0 A_InitSmartAnim(random(5, 12))
+		Explode:
+			ADPR DEF 2.5 A_SmartAnimDelay
+			stop
+	}
+}
+
+actor AcidDragon : WolfensteinMonster
+{
+	points 9000
+	health 60, 100, 150, 200
+	speed 1, 2
+	sighttime 1
+	seesound "aciddragon/sight"
+	deathsound "aciddragon/death"
+	states
+	{
+		Spawn:
+			ADRG A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			ADRG A 5 NOP A_Chase
+			ADRG A 2.5
+			ADRG B 4 NOP A_Chase
+			ADRG C 5 NOP A_Chase
+			ADRG C 2.5
+			ADRG D 4 NOP A_Chase
+			loop
+		Missile:
+			ADRG EF 5
+			ADRG G 5 bright A_CustomMissile("AcidDragonShot", 0, 0, random(-1, 1))
+			goto See
+		Pain:
+			ADRG H 7.5
+			goto See
+		Death:
+			ADRG H 0 A_Fall
+			ADRG H 9 A_Scream //T_BlowBack
+			ADRG I 10 //T_BlowBack
+			ADRG J 11 //T_BlowBack
+			ADRG K 10 //T_BlowBack
+			ADRG L 9 //T_BlowBack
+			ADRG M -1
+			stop
+	}
+}
+
+// Breather Beast
+
+actor BreatherBeast : WolfensteinMonster
+{
+	points 6000
+	health 65, 115, 165, 225
+	speed 1, 3
+	sighttime 1
+	attacksound "breatherbeast/attack"
+	seesound "breatherbeast/sight"
+	deathsound "breatherbeast/death"
+	states
+	{
+		Spawn:
+			BBST A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			BBST A 5 NOP A_Chase
+			BBST A 2.5
+			BBST B 4 NOP A_Chase
+			BBST C 5 NOP A_Chase
+			BBST C 2.5
+			BBST D 4 NOP A_Chase
+			loop
+		Missile:
+			BBST EF 5
+			BBST G 5 bright A_WolfAttack
+			goto See
+		Pain:
+			BBST H 7.5
+			goto See
+		Death:
+			BBST H 0 A_Fall
+			BBST H 9 A_Scream //T_BlowBack
+			BBST I 10 //T_BlowBack
+			BBST J 11 //T_BlowBack
+			BBST K 10 //T_BlowBack
+			BBST L 9 //T_BlowBack
+			BBST M -1
+			stop
+	}
+}
+
+// Bio-Mech Guardian
+
+actor BioMechGuardian : WolfensteinMonster
+{
+	points 9000
+	health 65, 115, 165, 225
+	speed 1, 2
+	sighttime 1
+	dropitem "ChargePack"
+	attacksound "biomechguardian/attack"
+	seesound "biomechguardian/sight"
+	deathsound "biomechguardian/death"
+	states
+	{
+		Spawn:
+			BIOM A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			BIOM A 5 NOP A_Chase
+			BIOM A 2.5
+			BIOM B 4 NOP A_Chase
+			BIOM C 5 NOP A_Chase
+			BIOM C 2.5
+			BIOM D 4 NOP A_Chase
+			loop
+		Missile:
+			BIOM EF 5
+			BIOM G 5 bright A_WolfAttack
+			goto See
+		Pain:
+			BIOM H 7.5
+			goto See
+		Death:
+			BIOM H 0 A_Fall
+			BIOM H 9 A_Scream //T_BlowBack
+			BIOM I 10 //T_BlowBack
+			BIOM J 11 //T_BlowBack
+			BIOM K 10 //T_BlowBack
+			BIOM L 9 //T_BlowBack
+			BIOM M -1
+			stop
+	}
+}
+
+// Reptilian Warrior
+
+actor ReptilianWarrior : WolfensteinMonster
+{
+	points 8000
+	health 65, 115, 165, 225
+	speed 1, 3
+	sighttime 1
+	dropitem "ChargePack"
+	attacksound "reptilianwarrior/attack"
+	seesound "reptilianwarrior/sight"
+	deathsound "reptilianwarrior/death"
+	states
+	{
+		Spawn:
+			REPW A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			REPW A 5 NOP A_Chase
+			REPW A 2.5
+			REPW B 4 NOP A_Chase
+			REPW C 5 NOP A_Chase
+			REPW C 2.5
+			REPW D 4 NOP A_Chase
+			loop
+		Missile:
+			REPW EF 5
+			REPW G 5 bright A_WolfAttack
+			goto See
+		Pain:
+			REPW H 7.5
+			goto See
+		Death:
+			REPW H 0 A_Fall
+			REPW H 9 A_Scream //T_BlowBack
+			REPW I 10 //T_BlowBack
+			REPW J 11 //T_BlowBack
+			REPW K 10 //T_BlowBack
+			REPW L 9 //T_BlowBack
+			REPW M -1
+			stop
+	}
+}
+
+actor ReptilianWarriorMorphed
+{
+	radius 32
+	health 1
+	+SOLID
+	+SHOOTABLE
+	states
+	{
+		Spawn:
+			REPW N -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+		Death:
+			REPW O 2 A_ChangeFlag("SHOOTABLE", false)
+			REPW PQRSTUV 2
+			REPW V 0 A_SpawnItemEx("ReptilianWarrior", 0, 0, 0, 0, 0, 0, 0, SXF_TRANSFERPOINTERS)
+			stop
+	}
+}
+
+// Mech Sentinel
+
+actor MechSentinel : WolfensteinMonster
+{
+	points 5055
+	health 24, 50, 155, 210
+	speed 1, 2
+	sighttime 1
+	dropitem "ChargePack"
+	attacksound "mechsentinel/attack"
+	seesound "mechsentinel/sight"
+	deathsound "mechsentinel/death"
+	states
+	{
+		Spawn:
+			MSEN A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			MSEN A 5 NOP A_Chase
+			MSEN A 2.5
+			MSEN B 4 NOP A_Chase
+			MSEN C 5 NOP A_Chase
+			MSEN C 2.5
+			MSEN D 4 NOP A_Chase
+			loop
+		Missile:
+			MSEN EF 5
+			MSEN G 5 bright A_WolfAttack
+			goto See
+		Pain:
+			MSEN H 7.5
+			goto See
+		Death:
+			MSEN H 0 A_Fall
+			MSEN H 9 A_Scream //T_BlowBack
+			MSEN I 10 //T_BlowBack
+			MSEN J 11 //T_BlowBack
+			MSEN K 10 //T_BlowBack
+			MSEN L 9 //T_BlowBack
+			MSEN M -1
+			stop
+	}
+}
+
+// Mutant Human
+
+actor MutantHuman : WolfensteinMonster
+{
+	points 6055
+	health 24, 50, 155, 210
+	speed 1, 2
+	sighttime 1
+	seesound "mutanthuman/sight"
+	deathsound "mutanthuman/death"
+	states
+	{
+		Spawn:
+			MHUM A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			MHUM A 5 NOP A_Chase
+			MHUM A 2.5
+			MHUM B 4 NOP A_Chase
+			MHUM C 5 NOP A_Chase
+			MHUM C 2.5
+			MHUM D 4 NOP A_Chase
+			loop
+		Melee:
+			MHUM EF 10
+			MHUM G 15 A_MeleeAttack(random(0, 31)|1, 0.859, "mutanthuman/melee")
+			goto See
+		Missile:
+			MHUM HI 5
+			MHUM J 5 bright A_CustomMissile("ElectroShot", 0, 0, random(-1, 1))
+			goto See
+		Pain:
+			MHUM K 7.5
+			goto See
+		Death:
+			MHUM K 0 A_Fall
+			MHUM K 9 A_Scream //T_BlowBack
+			MHUM L 10 //T_BlowBack
+			MHUM M 11 //T_BlowBack
+			MHUM N 10 //T_BlowBack
+			MHUM O 9 //T_BlowBack
+			MHUM P -1
+			stop
+	}
+}
+
+actor MutantHumanMorphed
+{
+	radius 32
+	health 1
+	+SOLID
+	+SHOOTABLE
+	states
+	{
+		Spawn:
+			MHUM Q -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+		Death:
+			MHUM R 2 A_ChangeFlag("SHOOTABLE", false)
+			MHUM STUVWX 2
+			MHUM Y 0 A_SpawnItemEx("MutantHuman", 0, 0, 0, 0, 0, 0, 0, SXF_TRANSFERPOINTERS)
+			stop
+	}
+}
+
+// Small Canister Alien
+
+actor SmallCanisterShot : SmartAnimation
+{
+	speed 14
+	radius 10
+	damage (random(0, 15))
+	seesound "smallcanisteralien/attack"
+	PROJECTILE
+	states
+	{
+		Spawn:
+			SPT1 A 0 A_ScaleVelocity(frandom(1.0, 1.0498))
+		Loop:
+			SPT1 A 5 A_Jump(170, 1, 2)
+			loop
+			SPT1 B 5
+			loop
+			SPT1 C 5
+			loop
+		Death:
+			SPT1 D 0 A_InitSmartAnim(random(5, 12))
+			SPT1 DEF 2.5 A_SmartAnimDelay
+			stop
+	}
+}
+
+actor SmallCanisterAlien : WolfensteinMonster
+{
+	points 3750
+	health 25, 60, 100, 240
+	speed 1, 3
+	sighttime 1
+	seesound "smallcanisteralien/sight"
+	deathsound "smallcanisteralien/death"
+	states
+	{
+		Spawn:
+			CNSA F -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			CNSA F 5 NOP A_Chase
+			CNSA F 2.5
+			CNSA G 4 NOP A_Chase
+			CNSA H 5 NOP A_Chase
+			CNSA H 2.5
+			CNSA I 4 NOP A_Chase
+			loop
+		Melee:
+			CNSA JK 10
+			CNSA L 15 A_MeleeAttack(random(0, 31)|1, 0.859, "smallcanisteralien/melee")
+			goto See
+		Missile:
+			CNSA MN 5
+			CNSA O 5 bright A_CustomMissile("SmallCanisterShot", 0, 0, random(-2, 2))
+			goto See
+		Pain:
+			CNSA P 7.5
+			goto See
+		Death:
+			CNSA P 0 A_Fall
+			CNSA P 9 A_Scream //T_BlowBack
+			CNSA Q 10 //T_BlowBack
+			CNSA R 11 //T_BlowBack
+			CNSA S 10 //T_BlowBack
+			CNSA T 9 //T_BlowBack
+			CNSA U -1
+			stop
+	}
+}
+
+actor SmallAlienCanister
+{
+	radius 32
+	health 1
+	deathsound "smallcanisteralien/release"
+	+SOLID
+	+SHOOTABLE
+	states
+	{
+		Spawn:
+			CNSA A -1
+			stop
+		Death:
+			CNSA B 0 A_Fall
+			CNSA B 3.5 A_Scream
+			CNSA CD 3.5
+			CNSA E -1 A_SpawnItemEx("SmallCanisterAlien", 0, 0, 0, 0, 0, 0, 0, SXF_TRANSFERPOINTERS)
+			stop
+	}
+}
+
+// Large Canister Alien
+
+actor LargeCanisterShot : SmartAnimation
+{
+	speed 14
+	radius 10
+	damage (random(0, 15))
+	seesound "largecanisteralien/attack"
+	PROJECTILE
+	states
+	{
+		Spawn:
+			SPT3 A 0 A_ScaleVelocity(frandom(1.0, 1.0498))
+		Loop:
+			SPT3 A 5 A_Jump(170, 1, 2)
+			loop
+			SPT3 B 5
+			loop
+			SPT3 C 5
+			loop
+		Death:
+			SPT3 D 0 A_InitSmartAnim(random(5, 8))
+			goto Explode
+		XDeath:
+			SPT3 D 0 A_InitSmartAnim(random(5, 12))
+		Explode:
+			SPT3 DEF 2.5 A_SmartAnimDelay
+			stop
+	}
+}
+
+actor LargeCanisterAlien : WolfensteinMonster
+{
+	points 6050
+	health 34, 75, 225, 300
+	speed 1, 3
+	sighttime 1
+	seesound "largecanisteralien/sight"
+	deathsound "largecanisteralien/death"
+	states
+	{
+		Spawn:
+			CNTA F -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			CNTA F 5 NOP A_Chase
+			CNTA F 2.5
+			CNTA G 4 NOP A_Chase
+			CNTA H 5 NOP A_Chase
+			CNTA H 2.5
+			CNTA I 4 NOP A_Chase
+			loop
+		Melee:
+			CNTA JK 10
+			CNTA L 15 A_MeleeAttack(random(0, 31)|1, 0.859, "largecanisteralien/melee")
+			goto See
+		Missile:
+			CNTA MN 5
+			CNTA O 5 bright A_CustomMissile("LargeCanisterShot", 0, 0, random(-2, 2))
+			goto See
+		Pain:
+			CNTA P 7.5
+			goto See
+		Death:
+			CNTA P 0 A_Fall
+			CNTA P 9 A_Scream //T_BlowBack
+			CNTA Q 10 //T_BlowBack
+			CNTA R 11 //T_BlowBack
+			CNTA S 10 //T_BlowBack
+			CNTA T 9 //T_BlowBack
+			CNTA U -1
+			stop
+	}
+}
+
+actor LargeAlienCanister
+{
+	radius 32
+	health 1
+	deathsound "largecanisteralien/release"
+	+SOLID
+	+SHOOTABLE
+	states
+	{
+		Spawn:
+			CNTA A -1
+			stop
+		Death:
+			CNTA B 0 A_Fall
+			CNTA B 3.5 A_Scream
+			CNTA CD 3.5
+			CNTA E -1 A_SpawnItemEx("LargeCanisterAlien", 0, 0, 0, 0, 0, 0, 0, SXF_TRANSFERPOINTERS)
+			stop
+	}
+}
+
+// Gurney Mutant
+
+actor GurneyMutant : WolfensteinMonster
+{
+	points 3750
+	health 27, 37, 150, 200
+	speed 1, 3
+	sighttime 1
+	dropitem "SlowFireProtector"
+	dropitem "ChargePack"
+	attacksound "gurneymutant/attack"
+	seesound "gurneymutant/sight"
+	deathsound "gurneymutant/death"
+	+DROPBASEDONTARGET
+	states
+	{
+		Spawn:
+			MGUR F -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			MGUR F 5 NOP A_Chase
+			MGUR F 2.5
+			MGUR G 4 NOP A_Chase
+			MGUR H 5 NOP A_Chase
+			MGUR H 2.5
+			MGUR I 4 NOP A_Chase
+			loop
+		Missile:
+			MGUR JK 5
+			MGUR L 5 bright A_WolfAttack
+			goto See
+		Pain:
+			MGUR M 7.5
+			goto See
+		Death:
+			MGUR M 0 A_Fall
+			MGUR M 9 A_Scream //T_BlowBack
+			MGUR N 10 //T_BlowBack
+			MGUR O 11 //T_BlowBack
+			MGUR P 10 //T_BlowBack
+			MGUR Q 9 //T_BlowBack
+			MGUR R -1
+			stop
+	}
+}
+
+actor GurneyMutantSleep
+{
+	radius 32
+	health 1
+	+SOLID
+	+SHOOTABLE
+	states
+	{
+		Spawn:
+			MGUR A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+		Death:
+			MGUR B 3.5 A_ChangeFlag("SHOOTABLE", false)
+			MGUR CD 3.5
+			MGUR E -1 A_SpawnItemEx("GurneyMutant", 0, 0, 0, 0, 0, 0, 0, SXF_TRANSFERPOINTERS)
+			stop
+	}
+}
+
+// P.O.D. Alien
+
+actor PODAlien : WolfensteinMonster
+{
+	points 5075
+	health 22, 60, 160, 210
+	speed 1, 2
+	sighttime 1
+	seesound "podalien/sight"
+	deathsound "podalien/death"
+	states
+	{
+		Spawn:
+			PODA E -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			PODA E 5 NOP A_Chase
+			PODA E 2.5
+			PODA F 4 NOP A_Chase
+			PODA G 5 NOP A_Chase
+			PODA G 2.5
+			PODA H 4 NOP A_Chase
+			loop
+		Melee:
+			PODA IJ 4
+			PODA K 4 A_MeleeAttack(random(0, 31)|1, 0.859, "podalien/melee")
+			goto See
+		Missile:
+			PODA LM 4
+			PODA N 4 bright A_CustomMissile("LargeCanisterShot", 0, 0, random(-2, 2))
+			goto See
+		Pain:
+			PODA O 5.5
+			goto See
+		Death:
+			PODA P 0 A_Fall
+			PODA P 30 A_Scream
+			PODA Q 15
+			PODA R -1
+			stop
+	}
+}
+
+actor PODAlienEgg
+{
+	radius 32
+	health 1
+	+SOLID
+	+SHOOTABLE
+	states
+	{
+		Spawn:
+			PODA A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+		Death:
+			PODA B 3.5 A_ChangeFlag("SHOOTABLE", false)
+			PODA CD 3.5
+			PODA D 0 A_SpawnItemEx("PODAlien", 0, 0, 0, 0, 0, 0, 0, SXF_TRANSFERPOINTERS)
+			stop
+	}
+}
+
+actor PODAlienEggDead
+{
+	radius 32
+	+SOLID
+	states
+	{
+		Spawn:
+			PODA A -1
+			stop
+	}
+}
+
+// Hanging Turret
+
+actor CeilingTurretRotate
+{
+	points 1050
+	health 4, 9, 23, 28
+	sighttime 1, 4
+	attacksound "turret/attack"
+	deathsound "turret/death"
+	+SHOOTABLE
+	states
+	{
+		Spawn:
+			TURR A -1 A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			// TODO: Check if player is in fov and shoot
+			TURR A 15 A_FaceTarget(45)
+			wait
+		Missile:
+			TURR B 5
+			TURR C 10 bright A_WolfAttack
+			TURR B 5
+			TURR C 10 bright A_WolfAttack
+			goto See
+		Death:
+			TURR D 7.5 bright A_Scream
+			TURR EFG 7.5 bright
+			TURR H -1
+			stop
+	}
+}
+
+actor CeilingTurretStatic : CeilingTurretRotate
+{
+	states
+	{
+		See:
+			TURR A -1
+			stop
+	}
+}
+
+// Giant Stalker
+
+actor GiantStalker : WolfensteinMonster
+{
+	points 30000
+	health 1600, 1700, 1800, 1900
+	speed 1, 2
+	sighttime 1
+	attacksound "giantstalker/attack"
+	seesound "giantstalker/sight"
+	deathsound "giantstalker/death"
+	dropitem "SlowFireProtector"
+	dropitem "ChargePack"
+	+DROPBASEDONTARGET
+	states
+	{
+		Spawn:
+			STLK A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			STLK A 5 NOP A_Chase
+			STLK A 2.5
+			STLK B 4 NOP A_Chase
+			STLK C 5 NOP A_Chase
+			STLK C 2.5
+			STLK D 4 NOP A_Chase
+			loop
+		Missile:
+			STLK EF 5
+			STLK G 5 bright A_WolfAttack
+			goto See
+		Pain:
+			STLK H 7.5
+			goto See
+		Death:
+			STLK H 0 A_Fall
+			STLK H 9 A_Scream //T_BlowBack
+			STLK I 10 //T_BlowBack
+			STLK J 11 //T_BlowBack
+			STLK K 10 //T_BlowBack
+			STLK L 9 //T_BlowBack
+			STLK M -1
+			stop
+	}
+}
+
+// Spector Demon
+
+actor GoldfireMonsterShot : SmartAnimation
+{
+	speed 14
+	radius 10
+	damage (random(0, 15))
+	seesound "goldfire/monster/attack"
+	PROJECTILE
+	states
+	{
+		Spawn:
+			MSHT AB 0.5
+			loop
+		Death:
+			MSHT D 0 A_InitSmartAnim(random(5, 8))
+			goto Explode
+		XDeath:
+			MSHT D 0 A_InitSmartAnim(random(5, 12))
+		Explode:
+			MSHT DE 2.5 A_SmartAnimDelay
+			stop
+	}
+}
+
+actor SpectorDemon : WolfensteinMonster
+{
+	points 40000
+	health 1700, 1800, 1900, 2000
+	speed 1, 3
+	sighttime 1
+	seesound "spectordemon/sight"
+	deathsound "spectordemon/death"
+	states
+	{
+		Spawn:
+			SPEC A -1 bright NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			SPEC A 5 bright NOP A_Chase
+			SPEC A 2.5 bright
+			SPEC B 4 bright NOP A_Chase
+			SPEC C 5 bright NOP A_Chase
+			SPEC C 2.5 bright
+			SPEC D 4 bright NOP A_Chase
+			loop
+		Missile:
+			SPEC EF 5 bright
+			SPEC G 5 bright A_CustomMissile("GoldfireMonsterShot", 0, 0, random(-1, 1))
+			goto See
+		Pain:
+			SPEC H 7.5 bright
+			goto See
+		Death:
+			SPEC I 0 bright A_Fall
+			SPEC I 4.5 bright A_Scream
+			SPEC J 12.5 bright
+			SPEC K 12.5 bright
+			SPEC L 12.5 bright
+			SPEC M 12.5 bright
+			stop
+	}
+}
+
+// Armored Stalker
+
+actor ArmoredStalker : WolfensteinMonster
+{
+	points 50000
+	health 1800, 1900, 2000, 2100
+	speed 1, 2
+	sighttime 1
+	attacksound "armoredstalker/attack"
+	seesound "armoredstalker/sight"
+	deathsound "armoredstalker/death"
+	states
+	{
+		Spawn:
+			ARST A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			ARST A 5 NOP A_Chase
+			ARST A 2.5
+			ARST B 4 NOP A_Chase
+			ARST C 5 NOP A_Chase
+			ARST C 2.5
+			ARST D 4 NOP A_Chase
+			loop
+		Missile:
+			ARST EF 5
+			ARST G 5 bright A_WolfAttack
+			goto See
+		Pain:
+			ARST H 7.5
+			goto See
+		Death:
+			ARST H 0 A_Fall
+			ARST H 9 A_Scream //T_BlowBack
+			ARST I 10 //T_BlowBack
+			ARST J 11 //T_BlowBack
+			ARST K 10 //T_BlowBack
+			ARST L 9 //T_BlowBack
+			ARST M -1
+			stop
+	}
+}
+
+// Crawler Beast
+
+actor CrawlerBeastShot : SmartAnimation
+{
+	speed 14
+	radius 10
+	damage (random(0, 31))
+	seesound "crawlerbeast/attack"
+	PROJECTILE
+	states
+	{
+		Spawn:
+			SPT4 A 0.5 A_Jump(170, 1, 2)
+			loop
+			SPT4 B 0.5
+			loop
+			SPT4 C 0.5
+			loop
+		Death:
+			SPT4 D 0 A_InitSmartAnim(random(5, 8))
+			SPT4 DE 2.5 A_SmartAnimDelay
+			stop
+	}
+}
+
+actor CrawlerBeast : WolfensteinMonster
+{
+	points 60000
+	health 1900, 2000, 2100, 2200
+	speed 1, 3
+	sighttime 1
+	seesound "crawlerbeast/sight"
+	deathsound "crawlerbeast/death"
+	states
+	{
+		Spawn:
+			CRWL A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			CRWL A 5 NOP A_Chase
+			CRWL A 2.5
+			CRWL B 4 NOP A_Chase
+			CRWL C 5 NOP A_Chase
+			CRWL C 2.5
+			CRWL D 4 NOP A_Chase
+			loop
+		Missile:
+			CRWL EF 5
+			CRWL G 5 bright A_CustomMissile("CrawlerBeastShot", 0, 0, random(-1, 1))
+			goto See
+		Pain:
+			CRWL H 7.5
+			goto See
+		Death:
+			CRWL H 0 A_Fall
+			CRWL H 9 A_Scream //T_BlowBack
+			CRWL I 10 //T_BlowBack
+			CRWL J 11 //T_BlowBack
+			CRWL K 10 //T_BlowBack
+			CRWL L 9 //T_BlowBack
+			CRWL M -1
+			stop
+	}
+}
+
+// Liquid Alien
+
+actor LiquidAlienShot : SmartAnimation
+{
+	speed 14
+	radius 10
+	damage (random(0, 15))
+	PROJECTILE
+	states
+	{
+		Spawn:
+			LIQS A 0 A_ScaleVelocity(frandom(1.0, 1.0498))
+		Loop:
+			LIQS A 5 A_Jump(170, 1, 2)
+			loop
+			LIQS B 5
+			loop
+			LIQS C 5
+			loop
+		Death:
+			LIQS D 0 A_InitSmartAnim(random(5, 12))
+			LIQS DEF 2.5 A_SmartAnimDelay
+			stop
+	}
+}
+
+actor LiquidAlien : WolfensteinMonster
+{
+	speed 3
+	sighttime 1, 6
+	meleerange 90
+	deathsound "liquidalien/death"
+	-CANUSEWALLS
+	-SHOOTABLE
+	-SOLID
+	states
+	{
+		Spawn:
+			LIQA A -1 NOP A_Look(0, 0, 0, 0, 360)
+			stop
+		See:
+			// This should rise if the player is more than 1 block away in both
+			// directions, but less than 6 in either
+			LIQA A 7 A_Jump(170, 1, 2) A_Chase("*", "Rise")
+			loop
+			LIQA B 7 NOP A_Chase("*", "Rise")
+			loop
+			LIQA C 7 NOP A_Chase("*", "Rise")
+			loop
+		Rise:
+			LIQA D 6 A_ChangeFlag("SOLID", true)
+			LIQA EF 6
+			LIQA F 0 A_ChangeFlag("SHOOTABLE", true)
+		Stand:
+			// Should be 40/255 chance of falling if player is more than 1 block away
+			// OR the player is not looking at the object and more than 1 block away
+			// OR after the fifth attack non-pain induced attack and more than 1 block away
+			// Attack should occur with 80/255 chance, attack counter resets if we don't fall after 5 attacks
+			LIQA G -1 NOP A_Chase("Fall", "Missile")
+			stop
+		Fall:
+			LIQA F 0 A_ChangeFlag("SHOOTABLE", false)
+			LIQA F 7.5 A_ChangeFlag("SOLID", false)
+			LIQA ED 7.5
+			goto See
+		Missile:
+			LIQA HIJ 6
+			LIQA J 0 A_CustomMissile("LiquidAlienShot", 0, 0, random(-2, 2))
+			goto Stand
+		Pain:
+			LIQA K 3.5
+			goto Missile
+		Death:
+			LIQA L 0 A_Fall
+			LIQA L 10 A_Scream
+			LIQA MNOP 10
+			stop
+	}
+}
+
+// Electro Alien
+
+actor ElectroShot : SmartAnimation
+{
+	speed 14
+	radius 10
+	damage (random(0, 7))
+	seesound "electrosphere/attack"
+	PROJECTILE
+	states
+	{
+		Spawn:
+			ELCS AB 0.5 bright
+			loop
+		Death:
+			ELCS C 0 bright A_InitSmartAnim(random(5, 8))
+			goto Explode
+		XDeath:
+			ELCS C 0 bright A_InitSmartAnim(random(5, 12))
+		Explode:
+			ELCS CD 2.5 bright A_SmartAnimDelay
+			stop
+	}
+}
+
+actor ElectroAlien : WolfensteinMonster
+{
+	points 5150
+	health 13, 37, 112, 150
+	speed 1
+	states
+	{
+		Spawn:
+			ELCA ABC 7
+		See:
+			ELCA D 7 NOP A_Chase
+			ELCA E 7
+			ELCA F 7 NOP A_Chase
+			ELCA G 7
+			loop
+		Missile:
+			ELCA HI 7
+			ELCA J 7 A_CustomMissile("ElectroShot", 0, 0, random(-1, 1))
+			goto See
+		Pain:
+			ELCA K 7
+			goto See
+		Death:
+			ELCA L 0 A_Fall
+			ELCA L 7 A_Scream
+			ELCA MN 7
+			stop
+	}
+}

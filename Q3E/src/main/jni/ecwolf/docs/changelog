@@ -1,0 +1,220 @@
+ecwolf (1.3.3) stable; urgency=medium
+
+  * Windows build is now built with Visual Studio 2015 fixing issue with the
+    64-bit builds crashing on some Haswell systems.
+  * 32-bit Windows build is now done with SDL 2.0. Windows 98/Me/NT4/2000
+    support is now relegated to a special build for legacy systems. Until
+    ECWolf 1.5 these will remain first class supported operating systems.
+  * The GOG versions of Wolf3D and Spear are now detected automatically if
+    installed.
+  * Font system updated from ZDoom to support graceful handling of accent
+    marks.
+  * Implemented missing secret god mode cheat (TAB+G+F10 for Spear and JIM for
+    Noah)
+  * Removed console window on Windows since it was blocking Steam broadcasting
+    (use --console to get it back for mod debugging)
+  * Removed F12 to release mouse capture since it got in the way with default
+    Steam binding. Use scroll lock instead.
+  * Elevators force close their doors to prevent them from being jammed by
+    corpses rendering levels unbeatable.
+  * Redefining an intermission sequence (such as the demo loop) now properly
+    replaces the old one instead of appending.
+  * ECWolf now handles the special case of ChaosEdit reusing plane 2 for plane
+    3's data if the map doesn't use plane 3.
+  * Fixed hint on question 62 in S3DNA.
+  * Fixed wrong ceiling color in floor 8 of Spear.
+  * Fixed wrong par time on E6L8 of Wolf3D.
+  * Fixed timing errors in S3DNA hand feeding and small feed launcher.
+  * Fixed missing death sound on some enemies in the Spear of Destiny mission
+    pack secret levels.
+  * Fixed issue with animated textures pausing if menus were entered for a
+    significant amount of time.
+  * Fixed missing sounds at the destination point of an elevator.
+  * Fixed loss of inventory on level transition after loading a saved game.
+  * Fixed dropped data when loading embedded data files in zips.
+  * Fixed crash with saves with active elevators.
+  * Fixed immediate crash on Android.
+  * Fixed various other crashes.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Sat, 1 Oct 2016 00:00:00 -0500
+
+ecwolf (1.3.2) stable; urgency=low
+
+  * Support for SDL2 is working and is used on Windows for 64-bit builds.
+  * Maximum resolution increased to 5K.
+  * Fixed more issues with path finding with non-Latin user names on Windows.
+  * Added joystick sensitivity and dead zone configuration among other joystick
+    support improvements.
+  * Fixed some instances of residual input being carried over between lives.
+  * Music is now properly restored if main menu is entered in a dialog.
+  * Improvements to OS X 10.4/10.5 support.
+  * Enemy projectiles are now blocked by decorations like in vanilla.
+  * Fixed inaccuracies with Super 3D Noah's Ark plus detection for Steam
+    version.
+    * Missing par time on 5-2 and incorrect part for 6-5.
+    * Watermelon damage is corrected.
+    * Antelope drop a large feed launcher if the player doesn't have one.
+  * Added fastmonsters and mustconfirm for skill levels in MAPINFO.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Thu, 18 Jun 2015 00:00:00 -0500
+
+ecwolf (1.3.1) stable; urgency=low
+
+  * Added support for sampled music formats and tracker music (Opus, Vorbis,
+    FLAC, everything supported by Mikmod).
+  * Auto map can now be panned with the mouse.
+  * Improved file system path lookup to be more reliable.
+  * Saves can now be deleted from the menu.
+  * Android support is now merged.
+  * Fixed quick save loading.
+  * Fixed ouch face appearing when picking up health in Spear of Destiny.
+  * Fixed issues with title screen palettes and end games.
+  * Fixed S3DNA MAP19 exit transition.
+  * Fixed regression with text lines in Spear of Destiny ending.
+  * Improved elevator support.
+  * Improved support for quirky AUDIOT files.
+  * Various bugs with WDC map format loading are fixed.
+  * --bits switch works again.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Fri, 9 Jan 2015 00:00:00 -0500
+
+ecwolf (1.3.0) stable; urgency=low
+
+  * Mostly complete support for Super 3D Noah's Ark.
+  * Automap including overlay. Adds property overheadicon and flag
+    PLOTONAUTOMAP.
+  * Improved file system access code to fix issues with non-latin character
+    sets.
+  * Signon screen can now be removed by not providing it in MAPINFO.
+  * Skill levels can be customized in MAPINFO.
+  * DemoLoop is now an intermission sequence in MAPINFO.
+  * Added player.damagescreencolor
+  * Added DefaultLighting, DefaultVisibility, and DefaultMaxLightVis to mapinfo
+    to specify the light diminishing without using ROTT flags.
+  * Added deathtransition, victorymusic, forcetally, and victorypic to mapinfo.
+  * Added BackpackItem along with ammo.backpackamount, ammo.backpackmaxamount,
+    and ammo.backpackboostamount properties.
+  * Added MapRevealer.
+  * Added alternate fire, reload, and zoom states for weapons. (Along with
+    weapon.ammogive2, weapon.ammouse2, weapon.ammo2).
+  * Added flags to A_WeaponReady
+  * Added A_SetTics, A_ZoomFactor, A_ChangeVelocity, A_ScaleVelocity,
+    A_WeaponGrin, and A_Succeed
+  * Added random duration states.
+  * Added Thust weapon.bobstyle to emulate Planet Strike's weapon bob.
+  * Added support for Blake Stone style split doors and doors that slide the
+    opposite direction.
+  * Blake Stone 64-level colormap support.
+  * player.movebob is unlinked from the weapon bob. (The configuration option
+    still affects both.)
+  * Integrated ZDoom's 2D drawing code, but only the SDL back end is available
+    so ECWolf is still limited to the 8-bit palette.
+  * Action pointers in the first frame of the Spawn state are now executed.
+    (Similar to specifying NoDelay in ZDoom.)
+  * The floornumber property in a map is now a string allowing for floors like
+    "1-1".
+  * Font characters can be referenced as normal textures with "FONTNAMNE:XX"
+    where XX is the hex code.
+  * USDF parser although usefulness is limited to new QuizItem. Adds
+    ConversationID.
+  * Experimental support for ROTT elevators.
+  * Ability to load vanilla mods embedded in a zip file if they have a file
+    named ecwolf with the extension of their data files.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Mon, 26 May 2014 00:00:00 -0500
+
+ecwolf (1.2.3) stable; urgency=low
+
+  * Added support for PowerPC Macintoshes.
+  * Added OLDRANDOMCHASE which makes A_Chase use the old random number generator
+    table.
+  * Fixed locale issues.
+  * Fixed sound zone linking was done improperly.
+  * Fixed BlueGatlingGun was missing a call to A_GunAttack and didn't play the
+    proper pickup sound
+  * Fixed difficulty based health properties weren't fully implemented.
+  * Fixed RandomSpawner stopped working.
+  * Fixed reversal of Spear of Destiny and Wolfenstein 3D exit messages.
+  * Fixed crash when inheriting from actors with relative state jumps.
+  * OPL instruments are cleared when changing songs.
+  * Control improvements.
+  * Using include in xlat will now allow you to replace entries in the thing table.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Wed, 24 Dec 2013 00:00:00 -0500
+
+ecwolf (1.2.2) stable; urgency=low
+
+  * Fixed inverted roll off for A_Explode.
+  * Fixed A_MeleeAttack's accuracy argument wasn't read correctly. Also added
+    hitsound and misssound arguments.
+  * Fixed multiple doors could not be opened by a single trigger.
+  * Fixed some more issues with the deathcam.
+  * Fixed random() in DECORATE never obtained the maximum value.
+  * DROPBASEDONTARGET flag will now account for replacements.
+  * Corrected Knife damage range to be accurate with vanilla.
+  * Status bar will display 999 when health or ammo go to or above 1000.
+  * Added PC Speaker emulator.
+  * Added GUI iwad picker for Windows and crash reporter.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Fri, 2 Aug 2012 00:00:00 -0500
+
+ecwolf (1.2.1) stable; urgency=high
+
+  * Fixed crash when saving when no flash state was active.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Wed, 12 Jun 2013 00:00:00 -0500
+
+ecwolf (1.2) stable; urgency=low
+
+  * Improved vanilla accuracy.
+  * ECWolf will attempt to reset Spear of Destiny installations which were set
+    to play the mission packs.
+  * Partial ability to load Rise of the Triad data and Mac Wolfenstein data.
+  * Added support switches and touch plates in the fourth binary map plane. (In
+    the format of Rise of the Triad's third map plane.)
+  * Support for non-64x64 floor/ceiling textures, but still limited to power of
+    twos for speed.
+  * Depth fog darkness can be set per map so the menu setting was removed.
+  * Added A_Explode, A_GunFlash, and A_Light (and variants).
+  * Added scale, xscale, yscale, player.viewheight, player.forwardmove, and
+    player.sidemove.
+  * Added WEAPON.NOALERT, WEAPON.ALWAYSGRIN, INVENTORY.ALWAYSPICKUP, and
+    RANDOMIZE.
+  * Added WeaponGiver.
+  * 1600x1200 and 1920x1200 how are aspect corrected even in the menus since it
+    can be corrected using whole numbers.
+  * Map translators can now include the default translator.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Mon, 10 Jun 2013 00:00:00 -0500
+
+ecwolf (1.1.1) stable; urgency=low
+
+  * Improved vanilla accuracy.
+  * Added user configuration variable to disable movement bobbing.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Sun, 23 Dec 2012 00:00:00 -0500
+
+ecwolf (1.1) stable; urgency=low
+
+  * Fixed numerous bugs. Particularly in Spear of Destiny support.
+  * Improved old format loading code to handle malformed data.
+  * Added WolfensteinMonster helper actor.
+  * Added RandomSpawner
+  * Binding keys to next/previous weapon.
+  * Added A_JumpIfCloser, A_JumpIfInventory, A_TakeInventory, and A_ChangeFlag
+  * Added chance parameter to A_ActiveSound.
+  * Added meleerange, minmissilechance, and missilefrequency
+  * Added weapon and movement bob.
+  * Added ALWAYSFAST.
+  * Added mapinfo properties messagecolors, messagefontcolor, menuwindowcolors,
+    flat, finaleflat, entertext, entertextislump, and entertextismessage.
+  * Removed deprecated properties and flags.
+  * Initial implementation of free look via Y-shearing.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Mon, 17 Dec 2012 00:00:00 -0500
+
+ecwolf (1.0) stable; urgency=low
+
+  * Initial release based of Wolf4SDL and ZDoom.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Tue, 18 Sep 2012 00:00:00 -0500

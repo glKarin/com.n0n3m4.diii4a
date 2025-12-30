@@ -1,0 +1,92 @@
+actor BlakeWaterPuddle : Health
+{
+	inventory.amount 5
+	inventory.maxamount 16
+	states
+	{
+		Spawn:
+			WPUD A -1
+			stop
+	}
+}
+
+actor FirstAidKit : Health
+{
+	inventory.amount 30
+	states
+	{
+		Spawn:
+			FAID A -1
+			stop
+	}
+}
+
+actor HamMeat : Health
+{
+	inventory.amount 20
+	states
+	{
+		Spawn:
+			HAMM A -1
+			stop
+		Hide:
+			HAMM B -1
+			stop
+	}
+}
+
+actor ChickenLeg : Health
+{
+	inventory.amount 15
+	states
+	{
+		Spawn:
+			CKLG A -1
+			stop
+		Hide:
+			CKLG B -1
+			stop
+	}
+}
+
+actor CandyBar : Health
+{
+	inventory.amount 8
+	states
+	{
+		Spawn:
+			CNDY A -1
+			stop
+		Hide:
+			CNDY B -1
+			stop
+	}
+}
+
+actor Sandwich : Health
+{
+	inventory.amount 10
+	states
+	{
+		Spawn:
+			SNDW A -1
+			stop
+		Hide:
+			SNDW B -1
+			stop
+	}
+}
+
+actor FullWaterBowl : Health
+{
+	inventory.amount 5
+	states
+	{
+		Spawn:
+			WBWL A -1
+			stop
+		Hide:
+			WBWL B -1
+			stop
+	}
+}

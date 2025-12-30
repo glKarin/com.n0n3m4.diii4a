@@ -1,0 +1,450 @@
+include "mapinfo/wolfcommon.txt"
+
+intermission SpearEnding
+{
+	Fader
+	{
+		Music = "XTHEEND"
+		Background = "#004545", 1
+		Draw = "BJCOLPS1", 124, 44
+		FadeType = FadeIn
+		Time = 15
+	}
+	Image
+	{
+		Draw = "BJCOLPS1", 124, 44
+		Time = -2
+	}
+	Image
+	{
+		Draw = "BJCOLPS2", 124, 44
+		Time = 52.5
+	}
+	Image
+	{
+		Draw = "BJCOLPS3", 124, 44
+		Time = 52.5
+	}
+	Image
+	{
+		Draw = "BJCOLPS4", 124, 44
+		Time = -3
+	}
+	Fader
+	{
+		Draw = "BJCOLPS4", 124, 44
+		FadeType = FadeOut
+		Time = 2.5
+	}
+	VictoryStats {}
+	Fader
+	{
+		Background = "ENDSCR1", 0, "END1PAL"
+		FadeType = FadeIn
+		Time = 15
+	}
+	Image {}
+	Fader
+	{
+		FadeType = FadeOut
+		Time = 15
+	}
+
+	Fader
+	{
+		Background = "ENDSCR3", 0, "END3PAL"
+		FadeType = FadeIn
+		Time = 15
+	}
+	TextScreen
+	{
+		Position = 160, 180
+		Text = "$STR_ENDGAME1", "$STR_ENDGAME2"
+		TextAlignment = Center
+		TextAnchor = Bottom
+		TextColor = "Cream"
+		TextSpeed = 0
+		TextDelay = 0
+		Time = 350
+	}
+	TextScreen
+	{
+		Position = 160, 180
+		Text = "$STR_ENDGAME3", "$STR_ENDGAME4"
+		TextAlignment = Center
+		TextAnchor = Bottom
+		TextColor = "Cream"
+		TextSpeed = 0
+		TextDelay = 0
+		Time = 350
+	}
+	Fader
+	{
+		FadeType = FadeOut
+		Time = 15
+	}
+
+	Fader
+	{
+		Background = "ENDSCR4", 0, "END4PAL"
+		FadeType = FadeIn
+		Time = 15
+	}
+	Image {}
+	Fader
+	{
+		FadeType = FadeOut
+		Time = 15
+	}
+	Fader
+	{
+		Background = "ENDSCR5", 0, "END5PAL"
+		FadeType = FadeIn
+		Time = 15
+	}
+	Image {}
+	Fader
+	{
+		FadeType = FadeOut
+		Time = 15
+	}
+	Fader
+	{
+		Background = "ENDSCR6", 0, "END6PAL"
+		FadeType = FadeIn
+		Time = 15
+	}
+	Image {}
+	Fader
+	{
+		FadeType = FadeOut
+		Time = 15
+	}
+	Fader
+	{
+		Background = "ENDSCR7", 0, "END7PAL"
+		FadeType = FadeIn
+		Time = 15
+	}
+	Image {}
+	Fader
+	{
+		FadeType = FadeOut
+		Time = 15
+	}
+	Fader
+	{
+		Background = "ENDSCR8", 0, "END8PAL"
+		FadeType = FadeIn
+		Time = 15
+	}
+	Image {}
+	Fader
+	{
+		FadeType = FadeOut
+		Time = 15
+	}
+	Fader
+	{
+		Background = "ENDSCR9", 0, "END9PAL"
+		FadeType = FadeIn
+		Time = 15
+	}
+	Image {}
+	Fader
+	{
+		FadeType = FadeOut
+		Time = 15
+	}
+	Fader
+	{
+		Background = "ENDSCR2", 0, "END2PAL"
+		FadeType = FadeIn
+		Time = 15
+	}
+	Image {}
+	Fader
+	{
+		FadeType = FadeOut
+		Time = 15
+	}
+	GotoTitle {}
+}
+
+gameinfo
+{
+	signon = "SODSGNON"
+	menufade = "00 00 CE"
+	menucolors = "00 00 88", "00 00 D4", "00 00 7D", "00 00 58", "00 00 64", "00 00 00"
+	titlemusic = "XTOWER2"
+	scoresmusic = "XAWARD"
+	drawreadthis = false
+	gamepalette = "SPEARPAL"
+	titlepalette = "TITLEPAL"
+	titlepage = "TITLESOD"
+	menufontcolor_disabled = "DarkBlue"
+	highscoresfont = "BigFont"
+	quitmessages = "$ENDSTR10", "$ENDSTR11", "$ENDSTR12", "$ENDSTR13", "$ENDSTR14", "$ENDSTR15", "$ENDSTR16", "$ENDSTR17", "$ENDSTR18"
+	translator = "xlat/spear.txt"
+}
+
+adddefaultmap
+{
+	victorynext = EndSequence, "SpearEnding"
+	specialaction = "AngelOfDeath", "Exit_Victory"
+	specialaction = "DevilIncarnate", "Exit_Victory"
+}
+
+episode "MAP01"
+{
+	lookup = "SOD_EPISODE1"
+}
+
+// Demo cluster
+cluster 1
+{
+}
+
+// Registered cluster
+cluster 2
+{
+}
+
+// Map definitions
+map "MAP01" lookup "SHUSTR_01"
+{
+	next = "MAP02"
+	secretnext = "MAP02"
+	defaultceiling = "#044000"
+	par = 90
+	music = "XTIPTOE"
+	floornumber = 1
+	cluster = 1
+}
+
+map "MAP02" lookup "SHUSTR_02"
+{
+	next = "MAP03"
+	secretnext = "MAP03"
+	defaultceiling = "#404000"
+	par = 210
+	music = "XFUNKIE"
+	floornumber = 2
+	cluster = 1
+}
+
+map "MAP03" lookup "SHUSTR_03"
+{
+	next = "MAP04"
+	secretnext = "MAP04"
+	par = 225
+	music = "XDEATH"
+	floornumber = 3
+	cluster = 2
+}
+
+map "MAP04" lookup "SHUSTR_04"
+{
+	next = "MAP05"
+	secretnext = "MAP19"
+	defaultceiling = "#382C14"
+	par = 210
+	music = "XGETYOU"
+	floornumber = 4
+	cluster = 2
+}
+
+map "MAP05" lookup "SHUSTR_05"
+{
+	next = "MAP06"
+	secretnext = "MAP06"
+	defaultceiling = "#28200C"
+	music = "ULTIMATE"
+	floornumber = 5
+	cluster = 2
+	completionstring = "$STR_TRANSDEFEATED"
+	levelbonus = 15000
+}
+
+map "MAP06" lookup "SHUSTR_06"
+{
+	next = "MAP07"
+	secretnext = "MAP07"
+	defaultceiling = "#4C0000"
+	par = 270
+	music = "DUNGEON"
+	floornumber = 6
+	cluster = 2
+}
+
+map "MAP07" lookup "SHUSTR_07"
+{
+	next = "MAP08"
+	secretnext = "MAP08"
+	defaultceiling = "#004040"
+	par = 195
+	music = "GOINGAFT"
+	floornumber = 7
+	cluster = 2
+}
+
+map "MAP08" lookup "SHUSTR_08"
+{
+	next = "MAP09"
+	secretnext = "MAP09"
+	defaultceiling = "#00004C"
+	par = 165
+	music = "POW"
+	floornumber = 8
+	cluster = 2
+}
+
+map "MAP09" lookup "SHUSTR_09"
+{
+	next = "MAP10"
+	secretnext = "MAP10"
+	defaultceiling = "#340058"
+	par = 285
+	music = "TWELFTH"
+	floornumber = 9
+	cluster = 2
+}
+
+map "MAP10" lookup "SHUSTR_10"
+{
+	next = "MAP11"
+	secretnext = "MAP11"
+	defaultceiling = "#004040"
+	music = "ULTIMATE"
+	floornumber = 10
+	cluster = 2
+	completionstring = "$STR_WILHELMDEFEATED"
+	levelbonus = 15000
+}
+
+map "MAP11" lookup "SHUSTR_11"
+{
+	next = "MAP12"
+	secretnext = "MAP12"
+	par = 390
+	music = "NAZI_OMI"
+	floornumber = 11
+	cluster = 2
+}
+
+map "MAP12" lookup "SHUSTR_12"
+{
+	next = "MAP13"
+	secretnext = "MAP20"
+	defaultceiling = "#382C14"
+	par = 270
+	music = "GETTHEM"
+	floornumber = 12
+	cluster = 2
+}
+
+map "MAP13" lookup "SHUSTR_13"
+{
+	next = "MAP14"
+	secretnext = "MAP14"
+	defaultceiling = "#28200C"
+	par = 165
+	music = "SUSPENSE"
+	floornumber = 13
+	cluster = 2
+}
+
+map "MAP14" lookup "SHUSTR_14"
+{
+	next = "MAP15"
+	secretnext = "MAP15"
+	defaultceiling = "#382C14"
+	par = 270
+	music = "SEARCHN"
+	floornumber = 14
+	cluster = 2
+}
+
+map "MAP15" lookup "SHUSTR_15"
+{
+	next = "MAP16"
+	secretnext = "MAP16"
+	defaultceiling = "#28200C"
+	par = 360
+	music = "ZEROHOUR"
+	floornumber = 15
+	cluster = 2
+}
+
+map "MAP16" lookup "SHUSTR_16"
+{
+	next = "MAP17"
+	secretnext = "MAP17"
+	defaultceiling = "#382C14"
+	music = "ULTIMATE"
+	floornumber = 16
+	cluster = 2
+	completionstring = "$STR_UBERDEFEATED"
+	levelbonus = 15000
+}
+
+map "MAP17" lookup "SHUSTR_17"
+{
+	next = "MAP18"
+	secretnext = "MAP18"
+	defaultceiling = "#006464"
+	par = 360
+	music = "XPUTIT"
+	floornumber = 17
+	cluster = 2
+}
+
+map "MAP18" lookup "SHUSTR_18"
+{
+	next = "MAP21"
+	secretnext = "MAP21"
+	defaultceiling = "#483818"
+	music = "ULTIMATE"
+	floornumber = 18
+	cluster = 2
+	nointermission
+}
+
+map "MAP19" lookup "SHUSTR_19"
+{
+	next = "MAP05"
+	secretnext = "MAP05"
+	defaultceiling = "#4C0000"
+	music = "XJAZNAZI"
+	floornumber = 19
+	cluster = 2
+	completionstring = "$STR_SECRETTUNNELCOMPLETED"
+	levelbonus = 15000
+	secretdeathsounds = true
+}
+
+map "MAP20" lookup "SHUSTR_20"
+{
+	next = "MAP13"
+	secretnext = "MAP13"
+	music = "XFUNKIE"
+	floornumber = 20
+	cluster = 2
+	completionstring = "$STR_SECRETCASTLECOMPLETED"
+	levelbonus = 15000
+	secretdeathsounds = true
+}
+
+map "MAP21" lookup "SHUSTR_21"
+{
+	next = EndSequence, "SpearEnding"
+	secretnext = EndSequence, "SpearEnding"
+	defaultceiling = "#483818"
+	music = "XEVIL"
+	floornumber = 18
+	cluster = 2
+	ensureinventory = "GoldKey"
+	highscoresgraphic = "M_WONSPR"
+	nointermission
+	exitfade = "00 45 45", 150
+}
